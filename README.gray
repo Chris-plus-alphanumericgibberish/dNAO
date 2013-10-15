@@ -1,0 +1,42 @@
+This copy of the nethack source includes a patch to allow black objects
+(orcish daggers, ravens, pits, etc.) to be represented using a dark shade
+of gray on some terminals.  Normally, nethack shows them as blue to avoid
+printing unreadable black-on-black text, but this confuses them with with
+objects that are actually blue (cornuthaums, sapphires, soldier ants,
+etc.).
+
+The patch works by specifying "black foreground" and "boldface" at the
+same time.  On terminals that simulate bold with brighter colors, this
+produces a distinct color.  Terminal emulators based on PC CGA/EGA/VGA
+textmode generally have this property.
+
+However, on terminals that implement actual bolding -- thickening the
+font without changing the color, it will result in invisible text.  So,
+the feature is not enabled by default.  It must be activated with the new
+option "use_darkgray".
+
+Notes:
+ * This patch is only effective in when TERMINFO is defined in unixconf.h
+
+ * Highlights added by the existing "use_inverse" and/or "hilite_pet"
+options will probably not be visible when applied to black objects.
+
+ * nethack doesn't properly follow the rules for using the tputs()
+function of termcap/curses.  The first argument is supposed to be a string
+obtained from the termcap/terminfo functions.  Nethack assumes it can
+provide a null pointer to do nothing, and can string-concatenate two codes
+(boldface and a color select) and use them as one.
+   My code does not fix this -- although it uses "" instead of a null
+pointer, which is less likely to crash on a less permissive
+termcap/terminfo implementation.
+
+ * I'm aware of a seperate patch to add darkgray support -- but it was
+unconditional at runtime, and had to change the color numbers in
+includes/color.h to work.  My patch makes the TTY code independent of the
+actual value of the CLR_* defines.
+
+ * I personally believe the correct spelling of the color involved is
+"grey", however I have adopted the popular misspelling "gray" throughout
+to be consistent with the rest of nethack. :)
+
+---- Michael Deutschmann <michael@talamasca.ocis.net>
