@@ -46,6 +46,24 @@ static struct trobj Barbarian[] = {
 	{ FOOD_RATION, 0, FOOD_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
+static struct trobj Binder[] = {
+	{ VOULGE, 0, WEAPON_CLASS, 1, 0 },
+	{ KNIFE, 0, WEAPON_CLASS, 1, 0 },
+	{ ROCK, 0, GEM_CLASS, 5, 0 }, 
+	{ FLINT, 0, GEM_CLASS, 1, 0 },
+	{ LEATHER_CLOAK, 0, ARMOR_CLASS, 1, 0 },
+	{ CRAM_RATION, 0, FOOD_CLASS, 1, 0 },
+	{ APPLE, 0, FOOD_CLASS, 2, 0 },
+	{ TRIPE_RATION, 0, FOOD_CLASS, 2, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
+//definition of an extern in you.h
+long sealKey[31] = {SEAL_AHAZU, SEAL_AMON, SEAL_ANDREALPHUS, SEAL_ANDROMALIUS, SEAL_ASTAROTH, SEAL_BALAM, 
+				 SEAL_BERITH, SEAL_BUER, SEAL_CHUPOCLOPS, SEAL_DANTALION, SEAL_DUNSTAN, SEAL_ECHIDNA, SEAL_EDEN,
+				 SEAL_ERIDU, SEAL_EURYNOME, SEAL_EVE, SEAL_FAFNIR, SEAL_HUGINN_MUNINN, SEAL_IRIS, SEAL_JACK,
+				 SEAL_MALPHAS, SEAL_MARIONETTE, SEAL_MOTHER, SEAL_NABERIUS, SEAL_ORTHOS, SEAL_OSE, SEAL_OTIAX,
+				 SEAL_PAIMON, SEAL_SIMURGH, SEAL_TENEBROUS, SEAL_YMIR
+				};
 static struct trobj Cave_man[] = {
 #define C_AMMO	2
 	{ CLUB, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
@@ -55,9 +73,18 @@ static struct trobj Cave_man[] = {
 	{ LEATHER_ARMOR, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ 0, 0, 0, 0, 0 }
 };
+#ifdef CONVICT
+static struct trobj Convict[] = {
+	{ ROCK, 0, GEM_CLASS, 1, 0 },
+	{ STRIPED_SHIRT, 0, ARMOR_CLASS, 1, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
+#endif  /* CONVICT */
 static struct trobj Healer[] = {
-	{ SCALPEL, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
+	{ SCALPEL, 0, WEAPON_CLASS, 1, 1 },
 	{ LEATHER_GLOVES, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+/*	{ LEATHER_GLOVES, 0, ARMOR_CLASS, 1, UNDEF_BLESS }, */
+/*	{ HEALER_UNIFORM, 0, ARMOR_CLASS, 1, 1 },*/
 	{ STETHOSCOPE, 0, TOOL_CLASS, 1, 0 },
 	{ POT_HEALING, 0, POTION_CLASS, 4, UNDEF_BLESS },
 	{ POT_EXTRA_HEALING, 0, POTION_CLASS, 4, UNDEF_BLESS },
@@ -94,6 +121,22 @@ static struct trobj Monk[] = {
 	 * invented by George Jung in Los Angeles, California, USA in 1916.
 	 */
 	{ FORTUNE_COOKIE, 0, FOOD_CLASS, 3, UNDEF_BLESS },
+	{ 0, 0, 0, 0, 0 }
+};
+static struct trobj Pirate[] = {
+#define PIR_KNIVES	1
+#define PIR_SNACK 5
+#define PIR_JEWELRY 7
+#define PIR_TOOL 8
+	{ SCIMITAR, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
+	{ KNIFE, 1, WEAPON_CLASS, 2, 0 },
+	{ LEATHER_JACKET, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ CRAM_RATION, 0, FOOD_CLASS, 2, UNDEF_BLESS },
+	{ BANANA, 0, FOOD_CLASS, 3, 0 },
+	{ POT_BOOZE, 0, POTION_CLASS, 3, UNDEF_BLESS },
+	{ UNDEF_TYP, UNDEF_SPE, RING_CLASS, 1, UNDEF_BLESS },
+	{ OILSKIN_SACK, 0, TOOL_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Priest[] = {
@@ -145,15 +188,17 @@ static struct trobj Tourist[] = {
 	{ POT_EXTRA_HEALING, 0, POTION_CLASS, 2, UNDEF_BLESS },
 	{ SCR_MAGIC_MAPPING, 0, SCROLL_CLASS, 4, UNDEF_BLESS },
 	{ HAWAIIAN_SHIRT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+/*	{ HAWAIIAN_SHORTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },*/
 	{ EXPENSIVE_CAMERA, UNDEF_SPE, TOOL_CLASS, 1, 0 },
 	{ CREDIT_CARD, 0, TOOL_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 #endif
 static struct trobj Valkyrie[] = {
-	{ LONG_SWORD, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
-	{ DAGGER, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
-	{ SMALL_SHIELD, 3, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ SPEAR, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
+	{ DAGGER, 0, WEAPON_CLASS, 5, UNDEF_BLESS },
+	{ SMALL_SHIELD, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ LEATHER_ARMOR, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ FOOD_RATION, 0, FOOD_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
@@ -174,6 +219,16 @@ static struct trobj Wizard[] = {
 /*
  *	Optional extra inventory items.
  */
+
+static struct trobj GnomishHat[] = {
+	{ GNOMISH_POINTY_HAT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ 0, 0, 0, 0, 0 }
+};
+
+static struct trobj TallowCandles[] = {
+	{ TALLOW_CANDLE, 0, TOOL_CLASS, 1, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
 
 static struct trobj Tinopener[] = {
 	{ TIN_OPENER, 0, TOOL_CLASS, 1, 0 },
@@ -229,7 +284,7 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_ELF,	BOW,			ELVEN_BOW	      },
     { PM_ELF,	ARROW,			ELVEN_ARROW	      },
     { PM_ELF,	HELMET,			ELVEN_LEATHER_HELM    },
- /* { PM_ELF,	SMALL_SHIELD,		ELVEN_SHIELD	      }, */
+	{ PM_ELF,	SMALL_SHIELD,		ELVEN_SHIELD	      },
     { PM_ELF,	CLOAK_OF_DISPLACEMENT,	ELVEN_CLOAK	      },
     { PM_ELF,	CRAM_RATION,		LEMBAS_WAFER	      },
     { PM_ORC,	DAGGER,			ORCISH_DAGGER	      },
@@ -244,8 +299,11 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_DWARF, SPEAR,			DWARVISH_SPEAR	      },
     { PM_DWARF, SHORT_SWORD,		DWARVISH_SHORT_SWORD  },
     { PM_DWARF, HELMET,			DWARVISH_IRON_HELM    },
- /* { PM_DWARF, SMALL_SHIELD,		DWARVISH_ROUNDSHIELD  }, */
- /* { PM_DWARF, PICK_AXE,		DWARVISH_MATTOCK      }, */
+	{ PM_DWARF, SMALL_SHIELD,		DWARVISH_ROUNDSHIELD  }, 
+    { PM_DWARF, PICK_AXE,		DWARVISH_MATTOCK      },
+    { PM_GNOME, FEDORA,			GNOMISH_POINTY_HAT    },
+    { PM_GNOME, BULLWHIP,		AKLYS    },
+    { PM_GNOME, CLUB,			AKLYS    },
     { PM_GNOME, BOW,			CROSSBOW	      },
     { PM_GNOME, ARROW,			CROSSBOW_BOLT	      },
     { NON_PM,	STRANGE_OBJECT,		STRANGE_OBJECT	      }
@@ -272,19 +330,23 @@ static const struct def_skill Skill_A[] = {
 static const struct def_skill Skill_B[] = {
     { P_DAGGER, P_BASIC },		{ P_AXE, P_EXPERT },
     { P_PICK_AXE, P_SKILLED },	{ P_SHORT_SWORD, P_EXPERT },
-    { P_BROAD_SWORD, P_SKILLED },	{ P_LONG_SWORD, P_SKILLED },
+    { P_BROAD_SWORD, P_EXPERT },	{ P_LONG_SWORD, P_SKILLED },
     { P_TWO_HANDED_SWORD, P_EXPERT },	{ P_SCIMITAR, P_SKILLED },
     { P_SABER, P_BASIC },		{ P_CLUB, P_SKILLED },
     { P_MACE, P_SKILLED },		{ P_MORNING_STAR, P_SKILLED },
     { P_FLAIL, P_BASIC },		{ P_HAMMER, P_EXPERT },
     { P_QUARTERSTAFF, P_BASIC },	{ P_SPEAR, P_SKILLED },
-    { P_TRIDENT, P_SKILLED },		{ P_BOW, P_BASIC },
+    { P_TRIDENT, P_EXPERT },		{ P_BOW, P_BASIC },
     { P_ATTACK_SPELL, P_SKILLED },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
     { P_TWO_WEAPON_COMBAT, P_BASIC },
     { P_BARE_HANDED_COMBAT, P_MASTER },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_N[] = {
     { P_NONE, 0 }
 };
 
@@ -302,6 +364,20 @@ static const struct def_skill Skill_C[] = {
     { P_BARE_HANDED_COMBAT, P_MASTER },
     { P_NONE, 0 }
 };
+
+#ifdef CONVICT
+static const struct def_skill Skill_Con[] = {
+    { P_DAGGER, P_SKILLED },		{ P_KNIFE,  P_EXPERT },
+    { P_HAMMER, P_SKILLED },		{ P_PICK_AXE, P_EXPERT },
+    { P_CLUB, P_EXPERT },		    { P_MACE, P_BASIC },
+    { P_DART, P_SKILLED },		    { P_FLAIL, P_EXPERT },
+    { P_SHORT_SWORD, P_BASIC },		{ P_SLING, P_SKILLED },
+    { P_ATTACK_SPELL, P_BASIC },	{ P_ESCAPE_SPELL, P_EXPERT },
+    { P_TWO_WEAPON_COMBAT, P_SKILLED },
+    { P_BARE_HANDED_COMBAT, P_SKILLED },
+    { P_NONE, 0 }
+};
+#endif  /* CONVICT */
 
 static const struct def_skill Skill_H[] = {
     { P_DAGGER, P_SKILLED },		{ P_KNIFE, P_EXPERT },
@@ -325,7 +401,7 @@ static const struct def_skill Skill_K[] = {
     { P_SCIMITAR, P_BASIC },		{ P_SABER, P_SKILLED },
     { P_CLUB, P_BASIC },		{ P_MACE, P_SKILLED },
     { P_MORNING_STAR, P_SKILLED },	{ P_FLAIL, P_BASIC },
-    { P_HAMMER, P_BASIC },		{ P_POLEARMS, P_SKILLED },
+    { P_HAMMER, P_BASIC },		{ P_POLEARMS, P_EXPERT },
     { P_SPEAR, P_SKILLED },		{ P_JAVELIN, P_SKILLED },
     { P_TRIDENT, P_BASIC },		{ P_LANCE, P_EXPERT },
     { P_BOW, P_BASIC },			{ P_CROSSBOW, P_SKILLED },
@@ -334,7 +410,7 @@ static const struct def_skill Skill_K[] = {
 #ifdef STEED
     { P_RIDING, P_EXPERT },
 #endif
-    { P_TWO_WEAPON_COMBAT, P_SKILLED },
+    { P_TWO_WEAPON_COMBAT, P_BASIC },
     { P_BARE_HANDED_COMBAT, P_EXPERT },
     { P_NONE, 0 }
 };
@@ -364,6 +440,24 @@ static const struct def_skill Skill_P[] = {
     { P_HEALING_SPELL, P_EXPERT },	{ P_DIVINATION_SPELL, P_EXPERT },
     { P_CLERIC_SPELL, P_EXPERT },
     { P_BARE_HANDED_COMBAT, P_BASIC },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_Pir[] = {
+    { P_DAGGER, P_SKILLED },	{ P_KNIFE,  P_EXPERT },
+    { P_AXE, P_SKILLED },	    { P_SHORT_SWORD, P_BASIC },
+	{ P_BROAD_SWORD, P_EXPERT },{ P_LONG_SWORD, P_BASIC },
+	{ P_SCIMITAR, P_EXPERT },	{ P_SABER, P_EXPERT },
+	{ P_CLUB, P_BASIC },		{ P_MORNING_STAR, P_SKILLED },
+    { P_FLAIL, P_EXPERT },		{ P_SPEAR, P_SKILLED },
+	{ P_JAVELIN, P_SKILLED },	{ P_TRIDENT, P_EXPERT },
+    { P_CROSSBOW, P_EXPERT },   { P_DART, P_SKILLED },
+    { P_WHIP, P_SKILLED },   	{ P_UNICORN_HORN, P_BASIC },
+
+	{ P_ATTACK_SPELL, P_BASIC },{ P_DIVINATION_SPELL, P_BASIC },
+	{ P_ENCHANTMENT_SPELL, P_BASIC },{ P_ESCAPE_SPELL, P_SKILLED },
+    { P_TWO_WEAPON_COMBAT, P_SKILLED },
+    { P_BARE_HANDED_COMBAT, P_EXPERT },
     { P_NONE, 0 }
 };
 
@@ -441,7 +535,8 @@ static const struct def_skill Skill_T[] = {
     { P_BOW, P_BASIC },			{ P_SLING, P_BASIC },
     { P_CROSSBOW, P_BASIC },		{ P_DART, P_EXPERT },
     { P_SHURIKEN, P_BASIC },		{ P_BOOMERANG, P_BASIC },
-    { P_WHIP, P_BASIC },		{ P_UNICORN_HORN, P_SKILLED },
+    { P_WHIP, P_BASIC },		{ P_HARVEST, P_BASIC },
+	{ P_UNICORN_HORN, P_SKILLED },
     { P_DIVINATION_SPELL, P_BASIC },	{ P_ENCHANTMENT_SPELL, P_BASIC },
     { P_ESCAPE_SPELL, P_SKILLED },
 #ifdef STEED
@@ -456,11 +551,11 @@ static const struct def_skill Skill_T[] = {
 static const struct def_skill Skill_V[] = {
     { P_DAGGER, P_EXPERT },		{ P_AXE, P_EXPERT },
     { P_PICK_AXE, P_SKILLED },		{ P_SHORT_SWORD, P_SKILLED },
-    { P_BROAD_SWORD, P_SKILLED },	{ P_LONG_SWORD, P_EXPERT },
+    { P_BROAD_SWORD, P_SKILLED },	{ P_LONG_SWORD, P_SKILLED },
     { P_TWO_HANDED_SWORD, P_EXPERT },	{ P_SCIMITAR, P_BASIC },
     { P_SABER, P_BASIC },		{ P_HAMMER, P_EXPERT },
     { P_QUARTERSTAFF, P_BASIC },	{ P_POLEARMS, P_SKILLED },
-    { P_SPEAR, P_SKILLED },		{ P_JAVELIN, P_BASIC },
+    { P_SPEAR, P_EXPERT },		{ P_JAVELIN, P_BASIC },
     { P_TRIDENT, P_BASIC },		{ P_LANCE, P_SKILLED },
     { P_SLING, P_BASIC },
     { P_ATTACK_SPELL, P_BASIC },	{ P_ESCAPE_SPELL, P_BASIC },
@@ -513,10 +608,141 @@ register char sym;
 			knows_object(ct);
 }
 
+int randMeleeAttackTypes[] = 
+						{AT_CLAW, 
+						 AT_BITE, 
+						 AT_KICK, 
+						 AT_BUTT, 
+						 AT_TUCH, 
+						 AT_STNG, 
+						 AT_TENT, 
+						 AT_WHIP, 
+						 AT_LNCK, 
+						 AT_LRCH, 
+						 AT_WEAP, 
+						 AT_HODS };
+
+int randSpecialAttackTypes[] = 
+						{AT_SPIT, 
+						 AT_HUGS, 
+						 AT_GAZE, 
+						 AT_ENGL, 
+						 AT_ARRW, 
+						 AT_MAGC };
+
+int randMeleeDamageTypes[] = 
+						{AD_PHYS, 
+						 AD_FIRE, 
+						 AD_COLD,
+						 AD_SLEE,
+						 AD_ELEC,
+						 AD_DRST,
+						 AD_ACID,
+						 AD_BLND,
+						 AD_STUN,
+						 AD_SLOW,
+						 AD_PLYS,
+						 AD_DRLI,
+						 AD_DREN,
+						 AD_LEGS,
+						 AD_STON,
+						 AD_STCK,
+						 AD_SGLD,
+						 AD_SITM,
+						 // AD_SEDU,
+						 AD_TLPT,
+						 AD_RUST,
+						 AD_CONF,
+						 // AD_DGST,
+						 // AD_HEAL,
+						 AD_WRAP,
+						 // AD_WERE,
+						 AD_DRDX,
+						 AD_DRCO,
+						 AD_DRIN,
+						 AD_DISE,
+						 // AD_SSEX,
+						 AD_HALU,
+						 // AD_,DETH
+						 // AD_FAMN,
+						 // AD_PEST,
+						 AD_SLIM,
+						 AD_ENCH,
+						 AD_CORR,
+						 AD_POSN,
+						 AD_WISD,
+						 AD_VORP,
+						 AD_SHRD,
+						 AD_TCKL,
+						 AD_WET,
+						 // AD_LETHE,
+						 AD_SUCK,
+						 AD_MALK,
+						 AD_UVUU,
+						 AD_ABDC,
+						 AD_TELE,
+						 AD_HODS,
+						 AD_CHRN,
+						 AD_LVLT,
+						 AD_WEEP };
+
+int randSpitDamageTypes[] = 
+						{AD_BLND, 
+						 AD_ACID, 
+						 AD_DRST };
+
+int randGazeDamageTypes[] = 
+						{AD_STON, 
+						 AD_SITM, 
+						 AD_DEAD, 
+						 AD_CNCL, 
+						 AD_PLYS, 
+						 AD_DRLI, 
+						 AD_ENCH, 
+						 AD_CONF, 
+						 AD_SLOW, 
+						 AD_STUN, 
+						 AD_BLND, 
+						 AD_FIRE, 
+						 AD_COLD, 
+						 AD_ELEC, 
+						 AD_HALU, 
+						 AD_SLEE,
+						 AD_LUCK,
+						 AD_RGAZ,
+						 AD_MIST };
+ // AT_ARRW, 
+ // AT_MAGC }
+int randEngulfDamageTypes[] = 
+						{AD_DISE, 
+						 AD_ACID, 
+						 AD_DGST, 
+						 AD_PHYS, 
+						 AD_BLND, 
+						 AD_COLD, 
+						 AD_ELEC, 
+						 AD_FIRE };
+
+int randArrowDamageTypes[] = 
+						{AD_PHYS, /*Phys uses tracked arrows rather than generated ones*/
+						 AD_LOAD, 
+						 AD_VBLD, 
+						 AD_BALL, 
+						 AD_BLDR, 
+						 AD_BLDR };
+
+ // AT_MAGC }
+int randMagicDamageTypes[] = 
+						{AD_SPEL, 
+						 AD_CLRC };
 void
 u_init()
 {
 	register int i;
+	struct permonst *shambler = &mons[PM_SHAMBLING_HORROR], 
+					*stumbler = &mons[PM_STUMBLING_HORROR], 
+					*wanderer = &mons[PM_WANDERING_HORROR];
+	struct attack* attkptr;
 
 	flags.female = flags.initgend;
 	flags.beginner = 1;
@@ -525,6 +751,17 @@ u_init()
 	 * necessary when aborting from a failed restore */
 	(void) memset((genericptr_t)&u, 0, sizeof(u));
 	u.ustuck = (struct monst *)0;
+
+	u.summonMonster = FALSE;
+	u.uleadamulet = FALSE;
+	u.ZangetsuSafe = 1;
+	u.regifted = 0;
+	u.keter = 0;
+	u.chokhmah = 0;
+	u.gevurah = 0;
+	u.hod = 0;
+	u.wardsknown = 0;
+	//u.wardsknown = ~0; //~0 should be all 1s, and is therefore debug mode.
 
 #if 0	/* documentation of more zero values as desirable */
 	u.usick_cause[0] = 0;
@@ -539,9 +776,11 @@ u_init()
 	u.ublessed = 0;				/* not worthy yet */
 	u.ugangr   = 0;				/* gods not angry */
 	u.ugifts   = 0;				/* no divine gifts bestowed */
-# ifdef ELBERETH
+	u.ucarinc = 0;
+	u.uacinc = 0;
+// ifdef ELBERETH
 	u.uevent.uhand_of_elbereth = 0;
-# endif
+// endif
 	u.uevent.uheard_tune = 0;
 	u.uevent.uopened_dbridge = 0;
 	u.uevent.udemigod = 0;		/* not a demi-god yet... */
@@ -557,7 +796,38 @@ u_init()
 
 	u.umoved = FALSE;
 	u.umortality = 0;
-	u.ugrave_arise = NON_PM;
+	u.ugrave_arise = Role_if(PM_PIRATE) ? PM_SKELETAL_PIRATE : 
+					 Role_if(PM_EXILE) ? PM_SHADE 
+						: NON_PM;
+	
+	u.ukinghill = 0;
+	u.protean = 0;
+	
+	if(Role_if(PM_EXILE)){
+		short i,j,tmp;
+		for(i=0;i<31;i++) u.sealorder[i]=i;
+		for(i=0;i<31;i++){
+			j=rn2(31);
+			tmp = u.sealorder[i];
+			u.sealorder[i] = u.sealorder[j];
+			u.sealorder[j] = tmp;
+		}
+//		for(i=0;i<32;i++) pline("%d", u.sealorder[i]);
+		u.sealsKnown = sealKey[u.sealorder[0]] | sealKey[u.sealorder[1]] | sealKey[u.sealorder[2]];
+	}
+	else 	u.sealsKnown = 0;
+	
+	u.sealCounts = 0;
+	u.sealsActive = 0;
+	u.specialSealsActive = 0;
+
+	u.ahazu = u.amon = u.andrealphus = u.andromalius = u.astaroth = u.balam = u.berith = u.buer = u.chupoclops = u.dantalion = u.dunstan = 0;
+	u.echidna = u.eden = u.eridu = u.eurynome = u.eve = u.fafnir = u.huginn_muninn = u.iris = u.jack = u.malphas = u.marionette = u.mother = 0;
+	u.naberius = u.orthos = u.ose = u.otiax = u.paimon = u.simurgh = u.tenebrous = u.ymir = u.dahlver_nar = u.acererak = 0;
+	
+	
+	u.spirit[1] = u.spirit[2] = u.spirit[3] = u.spirit[4] = u.spirit[5] = u.spiritQuest = u.spiritTineA = u.spiritTineB = 0;
+	u.spiritT[1] = u.spiritT[2] = u.spiritT[3] = u.spiritT[4] = u.spiritT[5] = u.spiritQuestT = u.spiritTineTA = u.spiritTineTB = 0;
 
 	u.umonnum = u.umonster = (flags.female &&
 			urole.femalenum != NON_PM) ? urole.femalenum :
@@ -580,7 +850,7 @@ u_init()
 	for (i = 0; i <= MAXSPELL; i++) spl_book[i].sp_id = NO_SPELL;
 	u.ublesscnt = 300;			/* no prayers just yet */
 	u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] = u.ualign.type =
-			aligns[flags.initalign].value;
+			Role_if(PM_EXILE) ? A_NEUTRAL : aligns[flags.initalign].value;
 	u.ulycn = NON_PM;
 
 #if defined(BSD) && !defined(POSIX_TYPES)
@@ -623,11 +893,32 @@ u_init()
 		knows_class(ARMOR_CLASS);
 		skill_init(Skill_B);
 		break;
+	case PM_EXILE:
+		ini_inv(Binder);
+		skill_init(Skill_N);
+    	u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
+			u.ualign.type = A_NEUTRAL; /* Override racial alignment */
+		break;
 	case PM_CAVEMAN:
 		Cave_man[C_AMMO].trquan = rn1(11, 10);	/* 10..20 */
 		ini_inv(Cave_man);
 		skill_init(Skill_C);
 		break;
+#ifdef CONVICT
+	case PM_CONVICT:
+        ini_inv(Convict);
+        knows_object(SKELETON_KEY);
+        knows_object(GRAPPLING_HOOK);
+        skill_init(Skill_Con);
+		u.hod = 6;
+		u.ualign.sins = 16; /* You have sinned */
+        u.uhunger = 200;  /* On the verge of hungry */
+    	u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
+			u.ualign.type = A_CHAOTIC; /* Override racial alignment */
+        urace.hatemask |= urace.lovemask;   /* Hated by the race's allies */
+        urace.lovemask = 0; /* Convicts are pariahs of their race */
+        break;
+#endif	/* CONVICT */
 	case PM_HEALER:
 #ifndef GOLDOBJ
 		u.ugold = u.ugold0 = rn1(1000, 1001);
@@ -659,6 +950,23 @@ u_init()
 		else if(!rn2(10)) ini_inv(Lamp);
 		knows_class(ARMOR_CLASS);
 		skill_init(Skill_Mon);
+		break;
+	case PM_PIRATE:
+#ifndef GOLDOBJ
+		u.ugold = u.ugold0 = rnd(300);
+#else
+		u.umoney0 = rnd(300);
+#endif
+		Pirate[PIR_KNIVES].trquan = rn1(2, 2);
+		if(!rn2(4)) Pirate[PIR_SNACK].trotyp = KELP_FROND;
+		Pirate[PIR_SNACK].trquan += rn2(4);
+		if(rn2(100)<50)	Pirate[PIR_JEWELRY].trotyp = RIN_ADORNMENT;
+		if(rn2(100)<50)	Pirate[PIR_TOOL].trotyp = GRAPPLING_HOOK;
+		ini_inv(Pirate);
+		knows_object(OILSKIN_SACK);
+		knows_object(OILSKIN_CLOAK);
+		knows_object(GRAPPLING_HOOK);
+		skill_init(Skill_Pir);
 		break;
 	case PM_PRIEST:
 		ini_inv(Priest);
@@ -779,14 +1087,33 @@ u_init()
 	    knows_object(DWARVISH_MITHRIL_COAT);
 	    knows_object(DWARVISH_CLOAK);
 	    knows_object(DWARVISH_ROUNDSHIELD);
+		switch(d(1,4)){
+			case 1: u.wardsknown |= WARD_TOUSTEFNA;break;
+			case 2: u.wardsknown |= WARD_DREPRUN;break;
+			case 3: u.wardsknown |= WARD_VEIOISTAFUR;break;
+			case 4: u.wardsknown |= WARD_THJOFASTAFUR;break;
+		}	
 	    break;
 
 	case PM_GNOME:
+	    /* Gnomes can recognize common dwarvish objects */
+	    if (!Role_if(PM_ARCHEOLOGIST)){
+			ini_inv(GnomishHat);
+		}
+		ini_inv(TallowCandles);
+		knows_object(GNOMISH_POINTY_HAT);
+	    knows_object(AKLYS);
+	    knows_object(DWARVISH_IRON_HELM);
+	    knows_object(DWARVISH_MATTOCK);
+	    knows_object(DWARVISH_CLOAK);
 	    break;
 
 	case PM_ORC:
 	    /* compensate for generally inferior equipment */
 	    if (!Role_if(PM_WIZARD))
+#ifdef CONVICT
+        if (!Role_if(PM_CONVICT))
+#endif /* CONVICT */
 		ini_inv(Xtra_food);
 	    /* Orcs can recognize all orcish objects */
 	    knows_object(ORCISH_SHORT_SWORD);
@@ -822,7 +1149,9 @@ u_init()
 #endif
 
 	find_ac();			/* get initial ac value */
-	init_attr(75);			/* init attribute values */
+	if(Role_if(PM_EXILE)){
+		init_attr(55);
+	} else init_attr(75);			/* init attribute values */
 	max_rank_sz();			/* set max str size for class ranks */
 /*
  *	Do we really need this?
@@ -842,6 +1171,130 @@ u_init()
 		break;
 	}
 
+	/* what a horrible night to have a curse */
+	shambler->mlevel += rnd(7)-4;				/* shuffle level */
+	shambler->mmove = rn2(12)+7;				/* slow to very fast */
+	shambler->ac = rn2(21) + rn2(3) ? -10 : -20;/* any AC */
+	shambler->mr = rn2(11)*10;				/* varying amounts of MR */
+	shambler->maligntyp = rn2(21)-10;			/* any alignment */
+	
+	stumbler->mlevel += rnd(7)-4;				/* shuffle level */
+	stumbler->mmove = rn2(12)+7;				/* slow to very fast */
+	stumbler->ac = rn2(21) + rn2(3) ? -10 : -20;/* any AC */
+	stumbler->mr = rn2(11)*10;				/* varying amounts of MR */
+	stumbler->maligntyp = rn2(21)-10;			/* any alignment */
+	
+	wanderer->mlevel += rnd(7)-4;				/* shuffle level */
+	wanderer->mmove = rn2(12)+7;				/* slow to very fast */
+	wanderer->ac = rn2(21) + rn2(3) ? -10 : -20;/* any AC */
+	wanderer->mr = rn2(11)*10;				/* varying amounts of MR */
+	wanderer->maligntyp = rn2(21)-10;			/* any alignment */
+	
+	/* attacks...? (basic only to start)  */
+	for (i = 0; i < rnd(4); i++) {
+		attkptr = &shambler->mattk[i];
+		/* restrict it to certain types of attacks */
+		attkptr->aatyp = randMeleeAttackTypes[rn2(SIZE(randMeleeAttackTypes))];
+		attkptr->adtyp = randMeleeDamageTypes[rn2(SIZE(randMeleeDamageTypes))];
+		attkptr->damn = d(1,3);			/* we're almost sure to get this wrong first time */
+		attkptr->damd = rn2(4)*2+6;		/* either too high or too low */
+//		pline("shambling horror attack %d: %d %d %d %d",i,attkptr->aatyp,attkptr->adtyp,attkptr->damn,attkptr->damd);
+	}
+	/* attacks...? (basic only to start)  */
+	for (i = 0; i < rnd(4); i++) {
+		attkptr = &stumbler->mattk[i];
+		/* restrict it to certain types of attacks */
+		attkptr->aatyp = randMeleeAttackTypes[rn2(SIZE(randMeleeAttackTypes))];
+		attkptr->adtyp = randMeleeDamageTypes[rn2(SIZE(randMeleeDamageTypes))];
+		attkptr->damn = d(1,3);			/* we're almost sure to get this wrong first time */
+		attkptr->damd = rn2(4)*2+6;		/* either too high or too low */
+//		pline("stumbling horror attack %d: %d %d %d %d",i,attkptr->aatyp,attkptr->adtyp,attkptr->damn,attkptr->damd);
+	}
+	/* attacks...? (basic only to start)  */
+	for (i = 0; i < rnd(4); i++) {
+		attkptr = &wanderer->mattk[i];
+		/* restrict it to certain types of attacks */
+		attkptr->aatyp = randMeleeAttackTypes[rn2(SIZE(randMeleeAttackTypes))];
+		attkptr->adtyp = randMeleeDamageTypes[rn2(SIZE(randMeleeDamageTypes))];
+		attkptr->damn = d(1,3);			/* we're almost sure to get this wrong first time */
+		attkptr->damd = rn2(4)*2+6;		/* either too high or too low */
+//		pline("wandering horror attack %d: %d %d %d %d",i,attkptr->aatyp,attkptr->adtyp,attkptr->damn,attkptr->damd);
+	}
+	shambler->msize = rn2(MZ_GIGANTIC+1);			/* any size */
+	shambler->cwt = 20;					/* fortunately moot as it's flagged NOCORPSE */
+	shambler->cnutrit = 20;					/* see above */
+	shambler->msound = rn2(MS_HUMANOID);			/* any but the specials */
+	shambler->mresists = 0;
+	
+	stumbler->msize = rn2(MZ_GIGANTIC+1);			/* any size */
+	stumbler->cwt = 20;					/* fortunately moot as it's flagged NOCORPSE */
+	stumbler->cnutrit = 20;					/* see above */
+	stumbler->msound = rn2(MS_HUMANOID);			/* any but the specials */
+	stumbler->mresists = 0;
+	
+	wanderer->msize = rn2(MZ_GIGANTIC+1);			/* any size */
+	wanderer->cwt = 20;					/* fortunately moot as it's flagged NOCORPSE */
+	wanderer->cnutrit = 20;					/* see above */
+	wanderer->msound = rn2(MS_HUMANOID);			/* any but the specials */
+	wanderer->mresists = 0;
+	
+	for (i = 0; i < rnd(6); i++) {
+		shambler->mresists |= (1 << rn2(10));		/* physical resistances... */
+		stumbler->mresists |= (1 << rn2(10));		/* physical resistances... */
+		wanderer->mresists |= (1 << rn2(10));		/* physical resistances... */
+	}
+	// for (i = 0; i < rnd(5); i++) {
+		// shambler->mresists |= (0x100 << rn2(7));	/* 'different' resistances, even clumsy */
+	// }
+	shambler->mconveys = 0;					/* flagged NOCORPSE */
+	stumbler->mconveys = 0;
+	wanderer->mconveys = 0;
+	/*
+	 * now time for the random flags.  this will likely produce
+	 * a number of complete trainwreck monsters at first, but
+	 * every so often something will dial up nasty stuff
+	 */
+	shambler->mflags1 = 0;
+	for (i = 0; i < rnd(17); i++) {
+		shambler->mflags1 |= (1 << rn2(33));		/* trainwreck this way :D */
+		stumbler->mflags1 |= (1 << rn2(33));
+		wanderer->mflags1 |= (1 << rn2(33));
+	}
+	shambler->mflags1 &= ~M1_UNSOLID;			/* no ghosts */
+	shambler->mflags1 &= ~M1_WALLWALK;			/* no wall-walkers */
+	stumbler->mflags1 &= ~M1_UNSOLID;			/* no ghosts */
+	stumbler->mflags1 &= ~M1_WALLWALK;			/* no wall-walkers */
+	wanderer->mflags1 &= ~M1_UNSOLID;			/* no ghosts */
+	wanderer->mflags1 &= ~M1_WALLWALK;			/* no wall-walkers */
+
+	shambler->mflags2 = M2_NOPOLY | M2_HOSTILE;		/* Don't let the player be one of these yet. */
+	stumbler->mflags2 = M2_NOPOLY | M2_HOSTILE;		/* Don't let the player be one of these yet. */
+	wanderer->mflags2 = M2_NOPOLY | M2_HOSTILE;		/* Don't let the player be one of these yet. */
+	for (i = 0; i < rnd(17); i++) {
+		shambler->mflags2 |= (1 << rn2(31));
+		stumbler->mflags2 |= (1 << rn2(31));
+		wanderer->mflags2 |= (1 << rn2(31));
+	}
+	shambler->mflags2 &= ~M2_MERC;				/* no guards */
+	shambler->mflags2 &= ~M2_PEACEFUL;			/* no peacefuls */
+	shambler->mflags2 &= ~M2_WERE;				/* no lycanthropes */
+	shambler->mflags2 &= ~M2_PNAME;				/* not a proper name */
+
+	stumbler->mflags2 &= ~M2_MERC;				/* no guards */
+	stumbler->mflags2 &= ~M2_PEACEFUL;			/* no peacefuls */
+	stumbler->mflags2 &= ~M2_WERE;				/* no lycanthropes */
+	stumbler->mflags2 &= ~M2_PNAME;				/* not a proper name */
+
+	wanderer->mflags2 &= ~M2_MERC;				/* no guards */
+	wanderer->mflags2 &= ~M2_PEACEFUL;			/* no peacefuls */
+	wanderer->mflags2 &= ~M2_WERE;				/* no lycanthropes */
+	wanderer->mflags2 &= ~M2_PNAME;				/* not a proper name */
+
+	for (i = 0; i < rnd(17); i++) {
+		shambler->mflags2 |= (0x100 << rn2(7));
+		stumbler->mflags2 |= (0x100 << rn2(7));
+		wanderer->mflags2 |= (0x100 << rn2(7));
+	}
 	return;
 }
 
@@ -856,10 +1309,15 @@ int otyp;
     switch (Role_switch) {
      case PM_ARCHEOLOGIST:	skills = Skill_A; break;
      case PM_BARBARIAN:		skills = Skill_B; break;
+     case PM_EXILE:			skills = Skill_N; break;
      case PM_CAVEMAN:		skills = Skill_C; break;
+#ifdef CONVICT
+     case PM_CONVICT:		skills = Skill_Con; break;
+#endif  /* CONVICT */
      case PM_HEALER:		skills = Skill_H; break;
      case PM_KNIGHT:		skills = Skill_K; break;
      case PM_MONK:		skills = Skill_Mon; break;
+	 case PM_PIRATE:		skills = Skill_Pir; break;
      case PM_PRIEST:		skills = Skill_P; break;
      case PM_RANGER:		skills = Skill_Ran; break;
      case PM_ROGUE:		skills = Skill_R; break;
@@ -899,6 +1357,9 @@ register struct trobj *trop;
 				}
 			}
 			obj = mksobj(otyp, TRUE, FALSE);
+			/* Don't start with +0 or negative rings */
+			if (objects[obj->otyp].oc_charged && obj->spe <= 0)
+				obj->spe = rne(3);
 		} else {	/* UNDEF_TYP */
 			static NEARDATA short nocreate = STRANGE_OBJECT;
 			static NEARDATA short nocreate2 = STRANGE_OBJECT;
@@ -927,6 +1388,7 @@ register struct trobj *trop;
 				/* 'useless' items */
 				|| otyp == POT_HALLUCINATION
 				|| otyp == POT_ACID
+				|| otyp == POT_AMNESIA
 				|| otyp == SCR_AMNESIA
 				|| otyp == SCR_FIRE
 				|| otyp == SCR_BLANK_PAPER
@@ -985,19 +1447,34 @@ register struct trobj *trop;
 			obj->quan = u.umoney0;
 		} else {
 #endif
+			if(Role_if(PM_EXILE)){
+				obj->dknown = obj->rknown = 1;
+				if(obj->oclass == WEAPON_CLASS) obj->oeroded = 1;
+			}else{
 			obj->dknown = obj->bknown = obj->rknown = 1;
 			if (objects[otyp].oc_uses_known) obj->known = 1;
+			}
 			obj->cursed = 0;
 			if (obj->opoisoned && u.ualign.type != A_CHAOTIC)
 			    obj->opoisoned = 0;
+			if (obj->ovar1){
+				if(obj->oclass == WEAPON_CLASS && objects[(obj)->otyp].oc_material == WOOD) u.wardsknown |= obj->ovar1;
+				else if(obj->oclass == RING_CLASS && isEngrRing((obj)->otyp) && !(obj->ohaluengr)) u.wardsknown |= decode_wardID(obj->ovar1);
+			}
 			if (obj->oclass == WEAPON_CLASS ||
 				obj->oclass == TOOL_CLASS) {
 			    obj->quan = (long) trop->trquan;
 			    trop->trquan = 1;
 			} else if (obj->oclass == GEM_CLASS &&
-				is_graystone(obj) && obj->otyp != FLINT) {
+				((is_graystone(obj) && obj->otyp != FLINT) ||
+				  Role_if(PM_EXILE) )) {
 			    obj->quan = 1L;
 			}
+#ifdef CONVICT
+            if (obj->otyp == STRIPED_SHIRT ) {
+                obj->cursed = TRUE;
+            }
+#endif /* CONVICT */
 			if (trop->trspe != UNDEF_SPE)
 			    obj->spe = trop->trspe;
 			if (trop->trbless != UNDEF_BLESS)
@@ -1010,7 +1487,7 @@ register struct trobj *trop;
 		obj = addinv(obj);
 
 		/* Make the type known if necessary */
-		if (OBJ_DESCR(objects[otyp]) && obj->known)
+		if (OBJ_DESCR(objects[otyp]) && obj->known && !Role_if(PM_EXILE))
 			discover_object(otyp, TRUE, FALSE);
 		if (otyp == OIL_LAMP)
 			discover_object(POT_OIL, TRUE, FALSE);
@@ -1043,8 +1520,10 @@ register struct trobj *trop;
 		    else if (!uswapwep) setuswapwep(obj);
 		}
 		if (obj->oclass == SPBOOK_CLASS &&
-				obj->otyp != SPE_BLANK_PAPER)
+				obj->otyp != SPE_BLANK_PAPER){
 		    initialspell(obj);
+			initialward(obj);
+		}
 
 #if !defined(PYRAMID_BUG) && !defined(MAC)
 		if(--trop->trquan) continue;	/* make a similar object */

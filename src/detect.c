@@ -405,7 +405,8 @@ int		class;		/* an object class, 0 for all */
     char stuff[BUFSZ];
     int is_cursed = (detector && detector->cursed);
     int do_dknown = (detector && (detector->oclass == POTION_CLASS ||
-				    detector->oclass == SPBOOK_CLASS) &&
+				    detector->oclass == SPBOOK_CLASS ||
+					detector->oartifact) &&
 			detector->blessed);
     int ct = 0, ctu = 0;
     register struct obj *obj, *otmp = (struct obj *)0;
@@ -574,6 +575,117 @@ int		class;		/* an object class, 0 for all */
 }
 
 /*
+ * Used for artifact effects.  Returns:
+ *
+ *	1 - nothing was detected
+ *	0 - something was detected
+ */
+int
+artifact_detect(detector)
+struct obj	*detector;	/* object doing the detecting */
+{
+    register int x, y;
+    char stuff[BUFSZ];
+    int is_cursed = (detector && detector->cursed);
+    int do_dknown = (detector && (detector->oclass == POTION_CLASS ||
+				    detector->oclass == SPBOOK_CLASS ||
+					detector->oartifact) &&
+			detector->blessed);
+    int ct = 0;
+    register struct obj *obj, *otmp = (struct obj *)0;
+    register struct monst *mtmp;
+    int uw = u.uinwater;
+
+	if (is_cursed){ /* Possible false negative */
+		Role_if(PM_PIRATE) ? strange_feeling(detector, "Ye feel a lack o' something.") : strange_feeling(detector, "You feel a lack of something.");
+	    return 1;
+	}
+	
+    if (Hallucination)
+		Strcpy(stuff, something);
+    else
+    	Strcpy(stuff, "artifacts");
+
+    if (do_dknown) for(obj = invent; obj; obj = obj->nobj) do_dknown_of(obj);
+
+    for (obj = fobj; obj; obj = obj->nobj) {
+	if (obj && obj->oartifact) {
+	    if (obj->ox != u.ux || obj->oy != u.uy) ct++;
+	}
+	if (do_dknown) do_dknown_of(obj);
+    }
+
+    for (obj = level.buriedobjlist; obj; obj = obj->nobj) {
+	if (obj && obj->oartifact) {
+	    if (obj->ox != u.ux || obj->oy != u.uy) ct++;
+	}
+	if (do_dknown) do_dknown_of(obj);
+    }
+
+    for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+	if (DEADMONSTER(mtmp)) continue;
+		for (obj = mtmp->minvent; obj; obj = obj->nobj) {
+			if (obj && obj->oartifact) ct++;
+			if (do_dknown) do_dknown_of(obj);
+		}
+	}
+
+    if (!clear_stale_map(ALL_CLASSES, 0) && !ct) {
+		Role_if(PM_PIRATE) ? strange_feeling(detector, "Ye feel a lack o' something.") : strange_feeling(detector, "You feel a lack of something.");
+	    return 1;
+	}
+
+    cls();
+
+    u.uinwater = 0;
+/*
+ *	Map all buried objects first.
+ */
+    for (obj = level.buriedobjlist; obj; obj = obj->nobj)
+		if (obj && obj->oartifact) {
+			map_object(obj, 1);
+		}
+    /*
+     * If we are mapping all objects, map only the top object of a pile or
+     * the first object in a monster's inventory.  Otherwise, go looking
+     * for a matching object class and display the first one encountered
+     * at each location.
+     *
+     * Objects on the floor override buried objects.
+     */
+    for (x = 1; x < COLNO; x++)
+	for (y = 0; y < ROWNO; y++)
+	    for (obj = level.objects[x][y]; obj; obj = obj->nexthere)
+		if (obj && obj->oartifact) {
+			map_object(obj, 1);
+	break;
+		}
+    /* Objects in the monster's inventory override floor objects. */
+    for (mtmp = fmon ; mtmp ; mtmp = mtmp->nmon) {
+	if (DEADMONSTER(mtmp)) continue;
+	for (obj = mtmp->minvent; obj; obj = obj->nobj)
+	    if (obj && obj->oartifact) {
+			map_object(obj, 1);
+	break;
+	    }
+    }
+
+    newsym(u.ux,u.uy);
+    You("detect the %s o%s %s.", ct ? "presence" : "absence", Role_if(PM_PIRATE) ? "'":"f",stuff);
+    display_nhwindow(WIN_MAP, TRUE);
+    /*
+     * What are we going to do when the hero does an object detect while blind
+     * and the detected object covers a known pool?
+     */
+    docrt();	/* this will correctly reset vision */
+
+    u.uinwater = uw;
+    if (Underwater) under_water(2);
+    if (u.uburied) under_ground(2);
+    return 0;
+}
+
+/*
  * Used by: crystal balls, potions, fountains
  *
  * Returns 1 if nothing was detected.
@@ -633,6 +745,68 @@ int mclass;			/* monster class, 0 for all */
 	You("sense the presence of monsters.");
 	if (woken)
 	    pline("Monsters sense the presence of you.");
+	display_nhwindow(WIN_MAP, TRUE);
+	docrt();
+	if (Underwater) under_water(2);
+	if (u.uburied) under_ground(2);
+    }
+    return 0;
+}
+
+/*
+ * Used by: LEADERSHIP artifacts (Clarent (from Greyknight's patch))
+ *
+ * Returns 1 if nothing was detected.
+ * Returns 0 if something was detected.
+ */
+int
+pet_detect_and_tame(otmp)
+register struct obj *otmp;	/* detecting object (if any) */
+{
+    register struct monst *mtmp;
+    int mcnt = 0;
+
+
+    /* Note: This used to just check fmon for a non-zero value
+     * but in versions since 3.3.0 fmon can test TRUE due to the
+     * presence of dmons, so we have to find at least one
+     * with positive hit-points to know for sure.
+     */
+    for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
+    	if (!DEADMONSTER(mtmp) && mtmp->mtame) {
+		mcnt++;
+		break;
+	}
+
+    if (!mcnt) {
+	boolean savebeginner = flags.beginner;	/* prevent non-delivery of */
+	flags.beginner = FALSE;			/* 	message            */
+	if (otmp)
+	    strange_feeling((struct obj *)0, Hallucination ?
+			    "You suddenly recall the hamster you had as a child." :
+			    "You feel lonely.");
+	flags.beginner = savebeginner;
+	return 1;
+    } else {
+	cls();
+	display_self();
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+	    if (DEADMONSTER(mtmp)) continue;
+	    if (mtmp->mtame && mtmp->mx > 0) {
+		show_glyph(mtmp->mx,mtmp->my,mon_to_glyph(mtmp));
+		/* don't be stingy - display entire worm */
+		if (mtmp->data == &mons[PM_LONG_WORM]) detect_wsegs(mtmp,0);
+		/* increase tameness */
+		if(canseemon(mtmp) && mtmp->mtame < 20) mtmp->mtame++;
+	    }
+	}
+	You(Hallucination ?
+	    "are at one with your comrades." :
+	    "sense the presence of your retinue.");
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+	    if (!DEADMONSTER(mtmp) && (mtmp->mtame && mtmp->mx > 0) && canseemon(mtmp))
+		pline("%s is in awe of %s!", upstart(y_monnam(mtmp)), yname(otmp));
+	}
 	display_nhwindow(WIN_MAP, TRUE);
 	docrt();
 	if (Underwater) under_water(2);
@@ -701,7 +875,8 @@ register struct obj *sobj;
 	}
     }
     for (door = 0; door < doorindex; door++) {
-	cc = doors[door];
+	cc.x = doors[door].x;
+	cc.y = doors[door].y;
 	if (levl[cc.x][cc.y].doormask & D_TRAPPED) {
 	    if (cc.x != u.ux || cc.y != u.uy)
 		goto outtrapmap;
@@ -729,7 +904,8 @@ outtrapmap:
 	sense_trap((struct trap *)0, obj->ox, obj->oy, sobj && sobj->cursed);
 
     for (door = 0; door < doorindex; door++) {
-	cc = doors[door];
+		cc.x = doors[door].x;
+		cc.y = doors[door].y;
 	if (levl[cc.x][cc.y].doormask & D_TRAPPED)
 	sense_trap((struct trap *)0, cc.x, cc.y, sobj && sobj->cursed);
     }
@@ -797,7 +973,7 @@ struct obj *obj;
 	pline("Too bad you can't see %s.", the(xname(obj)));
 	return;
     }
-    oops = (rnd(20) > ACURR(A_INT) || obj->cursed);
+    oops = (rnd(obj->blessed ? 16 : 20) > ACURR(A_INT) || obj->cursed);
     if (oops && (obj->spe > 0)) {
 	switch (rnd(obj->oartifact ? 4 : 5)) {
 	case 1 : pline("%s too much to comprehend!", Tobjnam(obj, "are"));
@@ -861,7 +1037,7 @@ struct obj *obj;
 	return;
     }
     You("peer into %s...", the(xname(obj)));
-    nomul(-rnd(10), "gazing into a crystal ball");
+    nomul(-rnd(obj->blessed ? 6 : 10), "peering into a crystal ball");
     nomovemsg = "";
     if (obj->spe <= 0)
 	pline_The("vision is unclear.");
@@ -958,13 +1134,14 @@ do_mapping()
 }
 
 void
-do_vicinity_map()
+do_vicinity_map(x,y)
+int x, y;
 {
     register int zx, zy;
-    int lo_y = (u.uy-5 < 0 ? 0 : u.uy-5),
-	hi_y = (u.uy+6 > ROWNO ? ROWNO : u.uy+6),
-	lo_x = (u.ux-9 < 1 ? 1 : u.ux-9),	/* avoid column 0 */
-	hi_x = (u.ux+10 > COLNO ? COLNO : u.ux+10);
+	int lo_y = (y-5 < 0 ? 0 : y-5),
+	hi_y = (y+6 > ROWNO ? ROWNO : y+6),
+	lo_x = (x-9 < 1 ? 1 : x-9),	/* avoid column 0 */
+	hi_x = (x+10 > COLNO ? COLNO : x+10);
 
     for (zx = lo_x; zx < hi_x; zx++)
 	for (zy = lo_y; zy < hi_y; zy++)
@@ -1175,9 +1352,9 @@ register int aflag;
 	if(u.uswallow) {
 		if (!aflag)
 			pline("What are you looking for?  The exit?");
-	} else {
+	} else {//note, was SPFX_SEARCH.  SEEK isn't anywhere, I think this was a bug -Chris
 	    int fund = (uwep && uwep->oartifact &&
-		    spec_ability(uwep, SPFX_SEARCH)) ?
+		    spec_ability(uwep, SPFX_SEEK)) ?
 		    uwep->spe : 0;
 	    if (ublindf && ublindf->otyp == LENSES && !Blind)
 		    fund += 2; /* JDS: lenses help searching */

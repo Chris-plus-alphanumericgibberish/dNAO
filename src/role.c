@@ -40,7 +40,7 @@ const struct Role roles[] = {
 	PM_ARCHEOLOGIST, NON_PM, NON_PM,
 	PM_LORD_CARNARVON, PM_STUDENT, PM_MINION_OF_HUHETOTL,
 	NON_PM, PM_HUMAN_MUMMY, S_SNAKE, S_MUMMY,
-	ART_ORB_OF_DETECTION,
+	ART_ITLACHIAYAQUE,
 	MH_HUMAN|MH_DWARF|MH_GNOME | ROLE_MALE|ROLE_FEMALE |
 	  ROLE_LAWFUL|ROLE_NEUTRAL,
 	/* Str Int Wis Dex Con Cha */
@@ -77,6 +77,32 @@ const struct Role roles[] = {
 	{  1, 0,  0, 1,  0, 1 },10,	/* Energy */
 	10, 14, 0, 0,  8, A_INT, SPE_HASTE_SELF,      -4
 },
+//{	{"Binder", 		 0}, {
+//	{"Exile",        0},
+//	{"Heratic",      0},
+//	{"Cultist",      0},
+//	{"Binder",       0},
+//	{"Akousmatikoi", 0},
+//	{"Mathematikoi", 0},
+//	{"Doctor",       0},
+//	{"Unbinder",     0},
+//	{"Gnostikos",    0} },
+//	"Yaldabaoth", "the void", "_Sophia", /* Gnostic */
+//	"Bin", "the lost library", "the Tower of Woe",
+//	PM_EXILE, NON_PM, NON_PM,
+//	PM_STRANGE_CORPSE, NON_PM, PM_ACERERAK,
+//	PM_SKELETON, PM_LICH, S_HUMANOID, S_LICH,
+//	ART_PEN_OF_THE_VOID,
+//	MH_HUMAN|MH_DWARF|MH_GNOME|MH_ELF|MH_ORC | ROLE_MALE|ROLE_FEMALE |
+//	  ROLE_NEUTRAL,
+//	/* Str Int Wis Dex Con Cha */
+//	{  6,  6,  6,  6,  6,  6 },
+//	{  10,  10,  10, 10, 10,  10 },
+//	/* Init   Lower  Higher */
+//	{ 11, 0,  0, 10,  2, 0 },	/* Hit points */
+//	{  5, 0,  1, 0,  1, 0 },15,	/* Energy */
+//	-5, 10, 5, 10,  25, A_INT, SPE_SLEEP,             -4
+//},
 {	{"Caveman", "Cavewoman"}, {
 	{"Troglodyte",  0},
 	{"Aborigine",   0},
@@ -103,6 +129,34 @@ const struct Role roles[] = {
 	{  1, 0,  0, 1,  0, 1 },10,	/* Energy */
 	0, 12, 0, 1,  8, A_INT, SPE_DIG,             -4
 },
+#ifdef CONVICT
+{	{"Convict", 0}, {
+	{"Detainee",     0},
+	{"Inmate",   0},
+	{"Jail-bird",0},
+	{"Prisoner",0},
+	{"Outlaw",    0},
+	{"Crook",   0},
+	{"Desperado",     0},
+	{"Felon",    0},
+	{"Fugitive",  0} },
+	"Ilmater", "Grumbar", "_Tymora",	/* Faerunian */
+	"Con", "Castle Waterdeep Dungeon", "the Warden's Level",
+	PM_CONVICT, NON_PM, PM_SEWER_RAT,
+	PM_ROBERT_THE_LIFER, PM_INMATE, PM_WARDEN_ARIANNA,
+	PM_SOLDIER_ANT, PM_MALKUTH_SEPHIRAH, S_RODENT, S_SPIDER,
+	ART_IRON_BALL_OF_LIBERATION,
+	MH_HUMAN|MH_DWARF|MH_GNOME|MH_ORC | ROLE_MALE|ROLE_FEMALE |
+	  ROLE_CHAOTIC,
+	/* Str Int Wis Dex Con Cha */
+	{  10,  7,  7,  7, 13,  6 },
+	{  20, 20, 10, 20, 20, 10 },
+	/* Init   Lower  Higher */
+	{  8, 0,  0, 8,  0, 0 },	/* Hit points */
+	{  1, 0,  0, 1,  0, 1 },10,	/* Energy */
+	-10, 5, 0, 2, 10, A_INT, SPE_TELEPORT_AWAY,   -4
+},
+#endif	/* CONVICT */
 {	{"Healer", 0}, {
 	{"Rhizotomist",    0},
 	{"Empiric",        0},
@@ -205,6 +259,32 @@ const struct Role roles[] = {
 	{ 12, 0,  0, 8,  1, 0 },	/* Hit points */
 	{  4, 3,  0, 2,  0, 2 },10,	/* Energy */
 	0, 3,-2, 2, 10, A_WIS, SPE_REMOVE_CURSE,    -4
+},
+{	{"Pirate", 0}, {
+	{"Landlubber",    	0},
+	{"Swabbie",        	0},
+	{"Cutthroat",       0},
+	{"Bosun",      		0},
+	{"Second Mate",     0},
+	{"First Mate",      0},
+	{"Captain",			0},
+	{"Pirate Lord",   	0},
+	{"Dread Pirate",  	0} },
+	"the Lord", "_the deep blue sea", "the Devil",	/* Christian, sorta */
+	"Pir", "Tortuga", "Shipwreck Island",
+	PM_PIRATE, NON_PM, NON_PM,
+	PM_MAYOR_CUMMERBUND, PM_PIRATE_BROTHER, PM_BLACKBEARD_S_GHOST,
+	PM_SKELETAL_PIRATE, PM_SOLDIER, S_RODENT, S_ELEMENTAL, /* Ghost pirates, soldiers, rats in the food stores, and the occasional storm*/
+	ART_TREASURY_OF_PROTEUS,
+	MH_HUMAN|MH_ELF | ROLE_MALE|ROLE_FEMALE |
+	  ROLE_CHAOTIC|ROLE_NEUTRAL,
+	/* Str Int Wis Dex Con Cha */
+	{   8,  7, 7,  8,  8,  7 },
+	{  20, 15, 10, 20, 25, 10 },
+	/* Init   Lower  Higher */
+	{ 10, 0,  0, 8,  1, 0 },	/* Hit points */
+	{  1, 0,  0, 1,  0, 1 },12,	/* Energy */
+	10, 8, 0, 2,  9, A_INT, SPE_CAUSE_FEAR,    -4
 },
   /* Note:  Rogue precedes Ranger so that use of `-R' on the command line
      retains its traditional meaning. */
@@ -314,7 +394,8 @@ const struct Role roles[] = {
 	"Tou", "Ankh-Morpork", "the Thieves' Guild Hall",
 	PM_TOURIST, NON_PM, NON_PM,
 	PM_TWOFLOWER, PM_GUIDE, PM_MASTER_OF_THIEVES,
-	PM_GIANT_SPIDER, PM_FOREST_CENTAUR, S_SPIDER, S_CENTAUR,
+//	PM_GIANT_SPIDER, PM_FOREST_CENTAUR, S_SPIDER, S_CENTAUR,
+	PM_DWARF, PM_ROCK_TROLL, S_RODENT, S_HUMANOID,
 	ART_YENDORIAN_EXPRESS_CARD,
 	MH_HUMAN | ROLE_MALE|ROLE_FEMALE | ROLE_NEUTRAL,
 	/* Str Int Wis Dex Con Cha */
@@ -688,15 +769,18 @@ str2gend(str)
 	return ROLE_NONE;
 }
 
-
+/* I TRIED to add forced alignments in a non-hacky manner, but SOMETHING SOMEWHERE nullpointers if the
+	Role struct changes lengths, gdb was no help, and I'm tired of screwing with it.  */
 boolean
 validalign(rolenum, racenum, alignnum)
 	int rolenum, racenum, alignnum;
 {
 	/* Assumes validrole and validrace */
 	return (alignnum >= 0 && alignnum < ROLE_ALIGNS &&
-		(roles[rolenum].allow & races[racenum].allow &
-		 aligns[alignnum].allow & ROLE_ALIGNMASK));
+		(((roles[rolenum].allow & races[racenum].allow &
+		 aligns[alignnum].allow & ROLE_ALIGNMASK)) || 
+		(roles[rolenum].malenum==PM_EXILE && aligns[alignnum].allow == ROLE_NEUTRAL)
+		));
 }
 
 
@@ -708,19 +792,22 @@ randalign(rolenum, racenum)
 
 	/* Count the number of valid alignments */
 	for (i = 0; i < ROLE_ALIGNS; i++)
-	    if (roles[rolenum].allow & races[racenum].allow &
-	    		aligns[i].allow & ROLE_ALIGNMASK)
+	    if ((roles[rolenum].allow & races[racenum].allow &
+	    		aligns[i].allow & ROLE_ALIGNMASK) ||
+			(roles[rolenum].malenum==PM_EXILE && aligns[i].allow == ROLE_NEUTRAL)
+			)
 	    	n++;
 
 	/* Pick a random alignment */
 	if (n) n = rn2(n);
 	for (i = 0; i < ROLE_ALIGNS; i++)
-	    if (roles[rolenum].allow & races[racenum].allow &
-	    		aligns[i].allow & ROLE_ALIGNMASK) {
+	    if ((roles[rolenum].allow & races[racenum].allow &
+	    		aligns[i].allow & ROLE_ALIGNMASK) ||
+			(roles[rolenum].malenum==PM_EXILE && aligns[i].allow == ROLE_NEUTRAL)
+			) {
 	    	if (n) n--;
 	    	else return (i);
 	    }
-
 	/* This role/race has no permitted alignments? */
 	return (rn2(ROLE_ALIGNS));
 }
@@ -1454,6 +1541,8 @@ struct monst *mtmp;
 	case PM_SAMURAI:
 	    return (mtmp && mtmp->data == &mons[PM_SHOPKEEPER] ?
 	    		"Irasshaimase" : "Konnichi wa"); /* Japanese */
+	case PM_PIRATE:
+		return ("Ahoy");
 #ifdef TOURIST
 	case PM_TOURIST:
 	    return ("Aloha");       /* Hawaiian */

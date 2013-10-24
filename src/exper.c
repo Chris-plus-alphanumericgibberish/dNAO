@@ -4,6 +4,8 @@
 
 #include "hack.h"
 
+STATIC_DCL void NDECL(binderdown);
+STATIC_DCL void NDECL(binderup);
 STATIC_DCL long FDECL(newuexp, (int));
 STATIC_DCL int FDECL(enermod, (int));
 
@@ -87,6 +89,9 @@ experience(mtmp, nk)	/* return # of exp points for mtmp after nk killed */
 /*	For higher level monsters, an additional bonus is given */
 	if(mtmp->m_lev > 8) tmp += 50;
 
+/*	Dungeon fern spores give no experience */
+	if(is_fern_spore(mtmp->data)) tmp = 0;
+
 #ifdef MAIL
 	/* Mail daemons put up no fight. */
 	if(mtmp->data == &mons[PM_MAIL_DAEMON]) tmp = 1;
@@ -111,8 +116,11 @@ more_experienced(exp, rexp)
 }
 
 void
-losexp(drainer)		/* e.g., hit by drain life attack */
+losexp(drainer,verbose,force,expdrain)		/* e.g., hit by drain life attack */
 const char *drainer;	/* cause of death, if drain should be fatal */
+boolean verbose; /* attack has custom notification */
+boolean force; /* attack ignores drain resistance */
+boolean expdrain; /* attack drains exp as well */
 {
 	register int num;
 
@@ -123,10 +131,11 @@ const char *drainer;	/* cause of death, if drain should be fatal */
 	    drainer = 0;
 	else
 #endif
-	    if (resists_drli(&youmonst)) return;
+	    if (!force && Drain_resistance) return;
 
 	if (u.ulevel > 1) {
-		pline("%s level %d.", Goodbye(), u.ulevel--);
+		if(verbose) pline("%s level %d.", Goodbye(), u.ulevel);
+		u.ulevel--;
 		/* remove intrinsic abilities */
 		adjabil(u.ulevel + 1, u.ulevel);
 		reset_rndmonst(NON_PM);	/* new monster selection */
@@ -159,8 +168,12 @@ const char *drainer;	/* cause of death, if drain should be fatal */
 	if (u.uen < 0) u.uen = 0;
 	else if (u.uen > u.uenmax) u.uen = u.uenmax;
 
-	if (u.uexp > 0)
-		u.uexp = newuexp(u.ulevel) - 1;
+	if (u.uexp > 0){
+		if(!expdrain) u.uexp = newuexp(u.ulevel) - 1;
+		else if(u.ulevel > 1) u.uexp = (newuexp(u.ulevel) - newuexp(u.ulevel-1))/2 + newuexp(u.ulevel-1);
+		else u.uexp = newuexp(1)/2;
+	}
+	if(Role_if(PM_EXILE)) binderdown();
 	flags.botl = 1;
 }
 
@@ -175,6 +188,88 @@ newexplevel()
 {
 	if (u.ulevel < MAXULEV && u.uexp >= newuexp(u.ulevel))
 	    pluslvl(TRUE);
+}
+
+/* Grant new spirits to binder */
+/* It reaplies all spirts just for kicks */
+void
+binderup(){
+	switch(u.ulevel){
+	default:
+	case 13:
+		u.sealsKnown |= sealKey[u.sealorder[28]] | sealKey[u.sealorder[29]] | sealKey[u.sealorder[30]];
+	case 12:
+		u.sealsKnown |= sealKey[u.sealorder[26]] | sealKey[u.sealorder[27]];
+	case 11:
+		u.sealsKnown |= sealKey[u.sealorder[24]] | sealKey[u.sealorder[25]];
+	case 10:
+		u.sealsKnown |= sealKey[u.sealorder[21]] | sealKey[u.sealorder[22]] | sealKey[u.sealorder[23]];
+	case 9:
+		u.sealsKnown |= sealKey[u.sealorder[19]] | sealKey[u.sealorder[20]];
+	case 8:
+		u.sealsKnown |= sealKey[u.sealorder[17]] | sealKey[u.sealorder[18]];
+	case 7:
+		u.sealsKnown |= sealKey[u.sealorder[14]] | sealKey[u.sealorder[15]] | sealKey[u.sealorder[16]];
+	case 6:
+		u.sealsKnown |= sealKey[u.sealorder[12]] | sealKey[u.sealorder[13]];
+	case 5:
+		u.sealsKnown |= sealKey[u.sealorder[10]] | sealKey[u.sealorder[11]];
+	case 4:
+		u.sealsKnown |= sealKey[u.sealorder[7]] | sealKey[u.sealorder[8]] | sealKey[u.sealorder[9]];
+	case 3:
+		u.sealsKnown |= sealKey[u.sealorder[5]] | sealKey[u.sealorder[6]];
+	case 2:
+		u.sealsKnown |= sealKey[u.sealorder[3]] | sealKey[u.sealorder[4]];
+	case 1:
+		u.sealsKnown |= sealKey[u.sealorder[0]] | sealKey[u.sealorder[1]] | sealKey[u.sealorder[2]];
+	break;
+	}
+}
+
+void
+binderdown(){
+	switch(u.ulevel){
+	default:
+	case 12:
+		u.sealsKnown &= ~(sealKey[u.sealorder[28]] | sealKey[u.sealorder[29]] | sealKey[u.sealorder[30]]);
+	break;
+	case 11:
+		u.sealsKnown &= ~(sealKey[u.sealorder[26]] | sealKey[u.sealorder[27]]);
+	break;
+	case 10:
+		u.sealsKnown &= ~(sealKey[u.sealorder[24]] | sealKey[u.sealorder[25]]);
+	break;
+	case 9:
+		u.sealsKnown &= ~(sealKey[u.sealorder[21]] | sealKey[u.sealorder[22]] | sealKey[u.sealorder[23]]);
+	break;
+	case 8:
+		u.sealsKnown &= ~(sealKey[u.sealorder[19]] | sealKey[u.sealorder[20]]);
+	break;
+	case 7:
+		u.sealsKnown &= ~(sealKey[u.sealorder[17]] | sealKey[u.sealorder[18]]);
+	break;
+	case 6:
+		u.sealsKnown &= ~(sealKey[u.sealorder[14]] | sealKey[u.sealorder[15]] | sealKey[u.sealorder[16]]);
+	break;
+	case 5:
+		u.sealsKnown &= ~(sealKey[u.sealorder[12]] | sealKey[u.sealorder[13]]);
+	break;
+	case 4:
+		u.sealsKnown &= ~(sealKey[u.sealorder[10]] | sealKey[u.sealorder[11]]);
+	break;
+	case 3:
+		u.sealsKnown &= ~(sealKey[u.sealorder[7]] | sealKey[u.sealorder[8]] | sealKey[u.sealorder[9]]);
+	break;
+	case 2:
+		u.sealsKnown &= ~(sealKey[u.sealorder[5]] | sealKey[u.sealorder[6]]);
+	break;
+	case 1:
+		u.sealsKnown &= ~(sealKey[u.sealorder[3]] | sealKey[u.sealorder[4]]);
+	break;
+	case 0:
+		u.sealsKnown &= ~(sealKey[u.sealorder[0]] | sealKey[u.sealorder[1]] | sealKey[u.sealorder[2]]);
+	break;
+	}
 }
 
 void
@@ -214,6 +309,7 @@ boolean incr;	/* true iff via incremental experience growth */
 	    adjabil(u.ulevel - 1, u.ulevel);	/* give new intrinsics */
 	    reset_rndmonst(NON_PM);		/* new monster selection */
 	}
+	if(Role_if(PM_EXILE)) binderup();
 	flags.botl = 1;
 }
 

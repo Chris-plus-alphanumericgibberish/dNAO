@@ -20,9 +20,9 @@ int flag;
     if (flag == -1) return;		/* "don't care" */
 
     if (flag == 1)
-	mon->mintrinsics |= (ptr->mresists & 0x00FF);
+		mon->mintrinsics |= (ptr->mresists & 0x03FF);
     else
-	mon->mintrinsics = (ptr->mresists & 0x00FF);
+		mon->mintrinsics = (ptr->mresists & 0x03FF);
     return;
 }
 
@@ -36,9 +36,15 @@ int atyp, dtyp;
 {
     struct attack *a;
 
-    for (a = &ptr->mattk[0]; a < &ptr->mattk[NATTK]; a++)
-	if (a->aatyp == atyp && (dtyp == AD_ANY || a->adtyp == dtyp))
-	    return a;
+    for (a = &ptr->mattk[0]; a < &ptr->mattk[NATTK]; a++){
+		if (a->aatyp == atyp && ( 
+								  (dtyp == AD_ANY && atyp != AT_GAZE)
+								 /*Some gazes are passive, not attacks. 
+									It was leading monsters like weeping angels to try to stand off with their useless gazes*/
+								||(dtyp == AD_ANY && a->adtyp != AD_BLNK && a->adtyp != AD_WISD && a->adtyp != AD_STON )
+								|| a->adtyp == dtyp)
+		) return a;
+	}
 
     return (struct attack *)0;
 }
@@ -49,6 +55,19 @@ struct permonst *ptr;
 int atyp;
 {
     return attacktype_fordmg(ptr, atyp, AD_ANY) ? TRUE : FALSE;
+}
+
+int
+attackindex(ptr, atyp, dtyp)
+struct permonst *ptr;
+int atyp, dtyp;
+{
+	int i;
+    for (i = 0; i < NATTK; i++)
+	if ((&ptr->mattk[i])->aatyp == atyp && (
+		dtyp == AD_ANY || (&ptr->mattk[i])->adtyp == dtyp))
+	    return i;
+    return -1;
 }
 
 #endif /* OVL0 */
@@ -72,6 +91,7 @@ struct monst *mon;
 
 	return (boolean)(is_undead(ptr) || is_demon(ptr) || is_were(ptr) ||
 			 ptr == &mons[PM_DEATH] ||
+			 mon->mintrinsics & MR_DRAIN ||
 			 (wep && wep->oartifact && defends(AD_DRLI, wep)));
 }
 
@@ -254,6 +274,7 @@ struct permonst *mptr;
 {
     return (boolean) (passes_walls(mptr) || amorphous(mptr) ||
 		      is_whirly(mptr) || verysmall(mptr) ||
+			  dmgtype(mptr, AD_CORR) || (dmgtype(mptr, AD_RUST) && mptr != &mons[PM_NAIAD] ) ||
 		      (slithy(mptr) && !bigmonst(mptr)));
 }
 
@@ -264,8 +285,10 @@ boolean
 can_track(ptr)		/* returns TRUE if monster can track well */
 	register struct permonst *ptr;
 {
-	if (uwep && uwep->oartifact == ART_EXCALIBUR)
-		return TRUE;
+	if (uwep && (
+		uwep->oartifact == ART_EXCALIBUR
+		|| uwep->oartifact == ART_SLAVE_TO_ARMOK
+		) ) return TRUE;
 	else
 		return((boolean)haseyes(ptr));
 }
@@ -567,9 +590,14 @@ static const short grownups[][2] = {
 	{PM_GNOME, PM_GNOME_LORD}, {PM_GNOME_LORD, PM_GNOME_KING},
 	{PM_DWARF, PM_DWARF_LORD}, {PM_DWARF_LORD, PM_DWARF_KING},
 	{PM_MIND_FLAYER, PM_MASTER_MIND_FLAYER},
+	{PM_DEEP_ONE, PM_DEEPER_ONE}, {PM_DEEPER_ONE, PM_DEEPEST_ONE},
 	{PM_ORC, PM_ORC_CAPTAIN}, {PM_HILL_ORC, PM_ORC_CAPTAIN},
 	{PM_MORDOR_ORC, PM_ORC_CAPTAIN}, {PM_URUK_HAI, PM_ORC_CAPTAIN},
 	{PM_SEWER_RAT, PM_GIANT_RAT},
+#ifdef CONVICT
+	{PM_GIANT_RAT, PM_ENORMOUS_RAT},
+	{PM_ENORMOUS_RAT, PM_RODENT_OF_UNUSUAL_SIZE},
+#endif	/* CONVICT */
 	{PM_CAVE_SPIDER, PM_GIANT_SPIDER},
 	{PM_OGRE, PM_OGRE_LORD}, {PM_OGRE_LORD, PM_OGRE_KING},
 	{PM_ELF, PM_ELF_LORD}, {PM_WOODLAND_ELF, PM_ELF_LORD},
@@ -577,12 +605,14 @@ static const short grownups[][2] = {
 	{PM_ELF_LORD, PM_ELVENKING},
 	{PM_LICH, PM_DEMILICH}, {PM_DEMILICH, PM_MASTER_LICH},
 	{PM_MASTER_LICH, PM_ARCH_LICH},
+	{PM_BABY_METROID, PM_METROID},{PM_METROID, PM_ALPHA_METROID}, {PM_ALPHA_METROID, PM_GAMMA_METROID},
+	{PM_GAMMA_METROID, PM_ZETA_METROID}, {PM_ZETA_METROID, PM_OMEGA_METROID}, 
+	{PM_OMEGA_METROID, PM_METROID_QUEEN},
 	{PM_VAMPIRE, PM_VAMPIRE_LORD}, {PM_BAT, PM_GIANT_BAT},
 	{PM_BABY_GRAY_DRAGON, PM_GRAY_DRAGON},
 	{PM_BABY_SILVER_DRAGON, PM_SILVER_DRAGON},
-#if 0	/* DEFERRED */
+	{PM_BABY_DEEP_DRAGON, PM_DEEP_DRAGON},
 	{PM_BABY_SHIMMERING_DRAGON, PM_SHIMMERING_DRAGON},
-#endif
 	{PM_BABY_RED_DRAGON, PM_RED_DRAGON},
 	{PM_BABY_WHITE_DRAGON, PM_WHITE_DRAGON},
 	{PM_BABY_ORANGE_DRAGON, PM_ORANGE_DRAGON},
@@ -608,13 +638,10 @@ static const short grownups[][2] = {
 	{PM_PAGE, PM_KNIGHT},
 	{PM_ACOLYTE, PM_PRIEST},
 	{PM_APPRENTICE, PM_WIZARD},
-	{PM_MANES,PM_LEMURE},
-#ifdef KOPS
-	{PM_KEYSTONE_KOP, PM_KOP_SERGEANT},
-	{PM_KOP_SERGEANT, PM_KOP_LIEUTENANT},
-	{PM_KOP_LIEUTENANT, PM_KOP_KAPTAIN},
-#endif
+	{PM_DUNGEON_FERN_SPROUT, PM_DUNGEON_FERN},
+	{PM_SWAMP_FERN_SPROUT, PM_SWAMP_FERN},
 	{NON_PM,NON_PM}
+
 };
 
 int
@@ -651,7 +678,7 @@ int montype;
 	register int i;
 
 	for (i = 0; grownups[i][0] >= LOW_PM; i++)
-		if(montype == grownups[i][1]) return grownups[i][0];
+		if(montype == grownups[i][1]) return big_to_little(grownups[i][0]);
 	return montype;
 }
 

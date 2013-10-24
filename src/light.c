@@ -159,6 +159,16 @@ do_light_sources(cs_rows)
 		at_hero_range = ls->range;
 	}
 
+        /* Candle ranges need to be recomputed to allow altar
+           effects */
+
+	if (ls->type == LS_OBJECT) {
+            struct obj *otmp = (struct obj *) ls->id;
+            if (Is_candle(otmp)) {
+		ls->range = candle_light_range(otmp);
+            }
+        }
+
 	if (ls->flags & LSF_SHOW) {
 	    /*
 	     * Walk the points in the circle and see if they are
@@ -485,7 +495,10 @@ obj_is_burning(obj)
     struct obj *obj;
 {
     return (obj->lamplit &&
-		(obj->otyp == MAGIC_LAMP || ignitable(obj) || artifact_light(obj)));
+		 (	obj->otyp == MAGIC_LAMP
+		 || ignitable(obj)
+		 ||	is_lightsaber(obj)
+		 ||	artifact_light(obj)));
 }
 
 /* copy the light source(s) attachted to src, and attach it/them to dest */
@@ -569,6 +582,7 @@ struct obj *obj;
 	    radius++;
 	    n /= 7L;
 	} while (n > 0L);
+	radius += candle_on_altar(obj);
     } else {
 	/* we're only called for lit candelabrum or candles */
      /* impossible("candlelight for %d?", obj->otyp); */

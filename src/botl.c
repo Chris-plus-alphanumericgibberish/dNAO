@@ -151,8 +151,6 @@ add_colored_text(text, newbot2)
 
 #endif
 
-
-
 #ifndef OVLB
 STATIC_DCL int mrank_sz;
 #else /* OVLB */
@@ -486,7 +484,6 @@ bot2()
 
 	if(flags.time)
 	    Sprintf(nb = eos(nb), " T:%ld", moves);
-
 #ifdef REALTIME_ON_BOTL
   if(iflags.showrealtime) {
     time_t currenttime = get_realtime();

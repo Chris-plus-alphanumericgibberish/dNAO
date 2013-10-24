@@ -135,28 +135,28 @@ TRAP:random,random
 #
 # West exit
 MONSTER: 'l',"leprechaun",(01,12),hostile
-MONSTER: 'n',"water nymph",(02,12),hostile
+MONSTER: 'n',"naiad",(02,12),hostile
 # North exit
-MONSTER: 'n',"water nymph",(33,01),hostile
+MONSTER: 'n',"naiad",(33,01),hostile
 MONSTER: 'l',"leprechaun",(33,02),hostile
 # East exit
-MONSTER: 'n',"water nymph",(74,05),hostile
+MONSTER: 'n',"naiad",(74,05),hostile
 MONSTER: 'l',"leprechaun",(74,04),hostile
 # South exit
 MONSTER: 'l',"leprechaun",(25,19),hostile
-MONSTER: 'n',"water nymph",(25,18),hostile
+MONSTER: 'n',"naiad",(25,18),hostile
 # Wandering the streets.  What I'd really like for this is a random
 # location, but make sure we're on a given type, e.g. street (if they
 # existed, of course).
-MONSTER: 'n',"water nymph",(07,05),hostile
+MONSTER: 'n',"naiad",(07,05),hostile
 MONSTER: 'l',"leprechaun",(28,06),hostile
-MONSTER: 'n',"water nymph",(38,07),hostile
+MONSTER: 'n',"naiad",(38,07),hostile
 MONSTER: 'l',"leprechaun",(45,01),hostile
-MONSTER: 'n',"water nymph",(59,07),hostile
+MONSTER: 'n',"naiad",(59,07),hostile
 MONSTER: 'l',"leprechaun",(62,14),hostile
-MONSTER: 'n',"water nymph",(71,14),hostile
+MONSTER: 'n',"naiad",(71,14),hostile
 MONSTER: 'l',"leprechaun",(39,13),hostile
-MONSTER: 'n',"water nymph",(18,14),hostile
+MONSTER: 'n',"naiad",(18,14),hostile
 MONSTER: ':',"chameleon",(19,08),hostile
 MONSTER: ':',"chameleon",(22,08),hostile
 MONSTER: ':',"chameleon",(16,08),hostile
@@ -405,7 +405,7 @@ OBJECT: random, random, random
 TRAP: random, random
 TRAP: random, random
 OBJECT: random,random,random
-MONSTER: 'n', "water nymph", random, hostile
+MONSTER: 'n', "naiad", random, hostile
 
 ROOM: "ordinary" , random, random, random, random
 STAIR: random, down
@@ -427,7 +427,7 @@ OBJECT: random, random, random
 TRAP: random, random
 TRAP: random, random
 MONSTER: 'l', "leprechaun", random, hostile
-MONSTER: 'n', "water nymph", random, hostile
+MONSTER: 'n', "naiad", random, hostile
 
 RANDOM_CORRIDORS
 
@@ -452,7 +452,7 @@ OBJECT: random, random, random
 TRAP: random, random
 TRAP: random, random
 OBJECT: random,random,random
-MONSTER: 'n', "water nymph", random, hostile
+MONSTER: 'n', "naiad", random, hostile
 
 ROOM: "ordinary" , random, random, random, random
 STAIR: random, down
@@ -474,6 +474,6 @@ OBJECT: random, random, random
 TRAP: random, random
 TRAP: random, random
 MONSTER: 'l', "leprechaun", random, hostile
-MONSTER: 'n', "water nymph", random, hostile
+MONSTER: 'n', "naiad", random, hostile
 
 RANDOM_CORRIDORS

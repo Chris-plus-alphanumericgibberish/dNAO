@@ -52,7 +52,8 @@ register xchar omx,omy,gx,gy;
 	if (tunnels(mtmp->data)) allowflags |= ALLOW_DIG;
 	if (!nohands(mtmp->data) && !verysmall(mtmp->data)) {
 		allowflags |= OPENDOOR;
-		if (m_carrying(mtmp, SKELETON_KEY)) allowflags |= BUSTDOOR;
+		if (m_carrying(mtmp, SKELETON_KEY)||m_carrying(mtmp, UNIVERSAL_KEY)) 
+			allowflags |= BUSTDOOR;
 	}
 	if (is_giant(mtmp->data)) allowflags |= BUSTDOOR;
 	cnt = mfndpos(mtmp, poss, info, allowflags);
@@ -196,8 +197,9 @@ boolean sanctum;   /* is it the seat of the high priest? */
 
 	if(MON_AT(sx+1, sy))
 		(void) rloc(m_at(sx+1, sy), FALSE); /* insurance */
-
-	priest = makemon(&mons[sanctum ? PM_HIGH_PRIEST : PM_ALIGNED_PRIEST],
+	if(Amask2align(levl[sx][sy].altarmask) == A_NONE && on_level(&sanctum_level, &u.uz)) //make moloch's high priest
+		priest = makemon(&mons[PM_ELDER_PRIEST], sx + 1, sy, NO_MM_FLAGS);
+	else priest = makemon(&mons[sanctum ? PM_HIGH_PRIEST : PM_ALIGNED_PRIEST],
 			 sx + 1, sy, NO_MM_FLAGS);
 	if (priest) {
 		EPRI(priest)->shroom = (sroom - rooms) + ROOMOFFSET;
@@ -257,7 +259,8 @@ char *pname;		/* caller-supplied output buffer */
 		if (mon->mtame && mon->data == &mons[PM_ANGEL])
 			Strcat(pname, "guardian ");
 		if (mon->data != &mons[PM_ALIGNED_PRIEST] &&
-				mon->data != &mons[PM_HIGH_PRIEST]) {
+				mon->data != &mons[PM_HIGH_PRIEST] &&
+				mon->data != &mons[PM_ELDER_PRIEST]) {
 			Strcat(pname, what);
 			Strcat(pname, " ");
 		}
@@ -266,6 +269,8 @@ char *pname;		/* caller-supplied output buffer */
 				Strcat(pname, "renegade ");
 			if (mon->data == &mons[PM_HIGH_PRIEST])
 				Strcat(pname, "high ");
+			if (mon->data == &mons[PM_ELDER_PRIEST])
+				Strcat(pname, "elder ");
 			if (Hallucination)
 				Strcat(pname, "poohbah ");
 			else if (mon->female)
@@ -274,7 +279,14 @@ char *pname;		/* caller-supplied output buffer */
 				Strcat(pname, "priest ");
 		}
 		Strcat(pname, "of ");
+		/* Astral Call bugfix by Patric Muller, tweaked by CM*/
+		if (mon->data == &mons[PM_HIGH_PRIEST] && !Hallucination &&
+		            Is_astralevel(&u.uz) && distu(mon->mx, mon->my) > 2) {
+			Strcat(pname, "a whole faith");
+//			Strcat(pname, "?");
+		} else {
 		Strcat(pname, halu_gname((int)EPRI(mon)->shralign));
+		}
 		return(pname);
 	}
 	/* use emin instead of epri */
@@ -334,7 +346,7 @@ register int roomno;
 	if(!temple_occupied(u.urooms0)) {
 	    if(tended) {
 		shrined = has_shrine(priest);
-		sanctum = (priest->data == &mons[PM_HIGH_PRIEST] &&
+		sanctum = ( (priest->data == &mons[PM_HIGH_PRIEST] || priest->data == &mons[PM_ELDER_PRIEST]) &&
 			   (Is_sanctum(&u.uz) || In_endgame(&u.uz)));
 		can_speak = (priest->mcanmove && !priest->msleeping &&
 			     flags.soundok);
@@ -657,7 +669,7 @@ struct monst *priest;
 	    break;
 	}
 
-	buzz(-10-(AD_ELEC-1), 6, x, y, sgn(tbx), sgn(tby)); /* bolt of lightning */
+	buzz(-10-(AD_ELEC-1), 6, x, y, sgn(tbx), sgn(tby),0); /* bolt of lightning */
 	exercise(A_WIS, FALSE);
 }
 

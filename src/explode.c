@@ -54,11 +54,12 @@ int expltype;
 			default:  break;
 		}
 
-	if (olet == MON_EXPLODE) {
-	    str = killer;
-	    killer = 0;		/* set again later as needed */
-	    adtyp = AD_PHYS;
-	} else
+	// if (olet == MON_EXPLODE) {
+	    // str = killer;
+	    // killer = 0;		/* set again later as needed */
+	    // adtyp = AD_PHYS;
+	// }
+	// else switch (abs(type) % 10) {
 	switch (abs(type) % 10) {
 		case 0: str = "magical blast";
 			adtyp = AD_MAGM;
@@ -83,6 +84,12 @@ int expltype;
 			break;
 		case 7: str = "splash of acid";
 			adtyp = AD_ACID;
+			break;
+		case 8: str = "blast";
+			adtyp = AD_PHYS;
+			break;
+		case 9: str = "cloud of spores";
+			adtyp = AD_DISE;
 			break;
 		default: impossible("explosion base type %d?", type); return;
 	}
@@ -123,6 +130,10 @@ int expltype;
 			case AD_ACID:
 				explmask[i][j] = !!Acid_resistance;
 				break;
+			case AD_DISE: /*assumes only swamp ferns have disease explosions*/
+				explmask[i][j] = !!Sick_resistance;
+				diseasemu(&mons[PM_SWAMP_FERN_SPORE]);
+				break;
 			default:
 				impossible("explosion type %d?", adtyp);
 				break;
@@ -161,6 +172,9 @@ int expltype;
 				break;
 			case AD_ACID:
 				explmask[i][j] |= resists_acid(mtmp);
+				break;
+			case AD_DISE:
+				explmask[i][j] |= resists_sickness(mtmp);
 				break;
 			default:
 				impossible("explosion type %d?", adtyp);
@@ -251,6 +265,7 @@ int expltype;
 				       "irradiated by pure energy" : "perforated") :
 				      (adtyp == AD_ELEC) ? "shocked" :
 				      (adtyp == AD_DRST) ? "poisoned" :
+				      (adtyp == AD_DISE) ? "food poisoning" :
 				      (adtyp == AD_ACID) ? "an upset stomach" :
 				       "fried");
 			else
@@ -262,6 +277,7 @@ int expltype;
 				       "overwhelmed by pure energy" : "perforated") :
 				      (adtyp == AD_ELEC) ? "shocked" :
 				      (adtyp == AD_DRST) ? "intoxicated" :
+				      (adtyp == AD_DISE) ? "quesy" :
 				      (adtyp == AD_ACID) ? "burned" :
 				       "fried");
 		} else if (cansee(i+x-1, j+y-1)) {
@@ -440,7 +456,7 @@ struct obj *obj;			/* only scatter this obj        */
 		    pline("%s apart.", Tobjnam(otmp, "break"));
 		    fracture_rock(otmp);
 		    place_object(otmp, sx, sy);
-		    if ((otmp = sobj_at(BOULDER, sx, sy)) != 0) {
+		    if ((otmp = boulder_at(sx, sy)) != 0) {
 			/* another boulder here, restack it to the top */
 			obj_extract_self(otmp);
 			place_object(otmp, sx, sy);

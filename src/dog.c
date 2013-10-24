@@ -41,6 +41,14 @@ pet_type()
 	    return (PM_KITTEN);
 	else if (preferred_pet == 'd')
 	    return (PM_LITTLE_DOG);
+	else if (Role_if(PM_PIRATE)) {
+		if (preferred_pet == 'B')
+			return (PM_PARROT);
+		else if(preferred_pet == 'Y')
+			return PM_MONKEY;
+		else
+			return (rn2(2) ? PM_PARROT : PM_MONKEY);
+	}
 	else
 	    return (rn2(2) ? PM_KITTEN : PM_LITTLE_DOG);
 }
@@ -142,6 +150,10 @@ makedog()
 		petname = dogname;
 	else if (pettype == PM_PONY)
 		petname = horsename;
+#ifdef CONVICT
+	else if (pettype == PM_SEWER_RAT)
+		petname = ratname;
+#endif /* CONVICT */
 	else
 		petname = catname;
 
@@ -154,6 +166,11 @@ makedog()
 	    if(Role_if(PM_RANGER)) petname = "Sirius";     /* Orion's dog */
 	}
 
+#ifdef CONVICT
+	if (!*petname && pettype == PM_SEWER_RAT) {
+	    if(Role_if(PM_CONVICT)) petname = "Nicodemus"; /* Rats of NIMH */
+    }
+#endif /* CONVICT */
 	mtmp = makemon(&mons[pettype], u.ux, u.uy, MM_EDOG);
 
 	if(!mtmp) return((struct monst *) 0); /* pets were genocided */
@@ -687,13 +704,19 @@ register struct obj *obj;
 			return POISON;
 		    return (carni ? CADAVER : MANFOOD);
 		case CORPSE:
+rock:
 		   if ((peek_at_iced_corpse_age(obj) + 50L <= monstermoves
 					    && obj->corpsenm != PM_LIZARD
 					    && obj->corpsenm != PM_LICHEN
+					    && obj->corpsenm != PM_BEHOLDER
 					    && mon->data->mlet != S_FUNGUS) ||
 			(acidic(&mons[obj->corpsenm]) && !resists_acid(mon)) ||
+			(freezing(&mons[obj->corpsenm]) && !resists_cold(mon)) ||
+			(burning(&mons[obj->corpsenm]) && !resists_fire(mon)) ||
 			(poisonous(&mons[obj->corpsenm]) &&
-						!resists_poison(mon)))
+						!resists_poison(mon))||
+			 (touch_petrifies(&mons[obj->corpsenm]) &&
+			  !resists_ston(mon)))
 			return POISON;
 		    else if (vegan(fptr))
 			return (herbi ? CADAVER : MANFOOD);
@@ -709,6 +732,19 @@ register struct obj *obj;
 		case BANANA:
 		    return ((mon->data->mlet == S_YETI) ? DOGFOOD :
 			    ((herbi || starving) ? ACCFOOD : MANFOOD));
+
+                case K_RATION:
+		case C_RATION:
+                case CRAM_RATION:
+		case LEMBAS_WAFER:
+		case FOOD_RATION:
+		    if (is_human(mon->data) ||
+		        is_elf(mon->data) ||
+			is_dwarf(mon->data) ||
+			is_gnome(mon->data) ||
+			is_orc(mon->data))
+		        return ACCFOOD; 
+
 		default:
 		    if (starving) return ACCFOOD;
 		    return (obj->otyp > SLIME_MOLD ?
@@ -755,11 +791,19 @@ register struct obj *obj;
 
 	/* worst case, at least it'll be peaceful. */
 	mtmp->mpeaceful = 1;
+	mtmp->mtraitor  = 0;	/* No longer a traitor */
 	set_malign(mtmp);
 	if(flags.moonphase == FULL_MOON && night() && rn2(6) && obj
 						&& mtmp->data->mlet == S_DOG)
 		return((struct monst *)0);
 
+#ifdef CONVICT
+    if (Role_if(PM_CONVICT) && (is_domestic(mtmp->data) && obj)) {
+        /* Domestic animals are wary of the Convict */
+        pline("%s still looks wary of you.", Monnam(mtmp));
+        return((struct monst *)0);
+        }
+#endif
 	/* If we cannot tame it, at least it's no longer afraid. */
 	mtmp->mflee = 0;
 	mtmp->mfleetim = 0;
@@ -789,9 +833,22 @@ register struct obj *obj;
 			  !big_corpse ? "." : ", or vice versa!");
 		} else if (cansee(mtmp->mx,mtmp->my))
 		    pline("%s.", Tobjnam(obj, "stop"));
+
+		/* Don't stuff ourselves if we know better */
+		if (is_animal(mtmp->data) || mindless(mtmp->data))
+		{
 		/* dog_eat expects a floor object */
 		place_object(obj, mtmp->mx, mtmp->my);
-		(void) dog_eat(mtmp, obj, mtmp->mx, mtmp->my, FALSE);
+		    if (dog_eat(mtmp, obj, mtmp->mx, mtmp->my, FALSE) == 2
+		        && rn2(4))
+		    {
+		        /* You choked your pet, you cruel, cruel person! */
+		        You_feel("guilty about losing your pet like this.");
+				u.ugangr++;
+				adjalign(-15);
+				u.hod += 5;
+		    }
+		}
 		/* eating might have killed it, but that doesn't matter here;
 		   a non-null result suppresses "miss" message for thrown
 		   food and also implies that the object has been deleted */
@@ -930,6 +987,9 @@ struct monst *mtmp;
 	    if (mtmp->mtame && rn2(mtmp->mtame)) yelp(mtmp);
 	    else growl(mtmp);	/* give them a moment's worry */
 	
+	    if (mtmp->mtame) betrayed(mtmp);
+
+	    /* Give monster a chance to betray you now */
 	    if (!mtmp->mtame) newsym(mtmp->mx, mtmp->my);
 	}
 }

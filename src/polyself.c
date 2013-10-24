@@ -228,6 +228,7 @@ boolean forcecontrol;
 	boolean draconian = (uarm &&
 				uarm->otyp >= GRAY_DRAGON_SCALE_MAIL &&
 				uarm->otyp <= YELLOW_DRAGON_SCALES);
+	boolean leonine = (uarmc && uarmc->otyp == LEO_NEMAEUS_HIDE);
 	boolean iswere = (u.ulycn >= LOW_PM || is_were(youmonst.data));
 	boolean isvamp = (youmonst.data->mlet == S_VAMPIRE || u.umonnum == PM_VAMPIRE_BAT);
 	boolean was_floating = (Levitation || Flying);
@@ -261,7 +262,10 @@ boolean forcecontrol;
 		if (draconian &&
 		    (mntmp == armor_to_dragon(uarm->otyp) || tries == 5))
 		    goto do_merge;
-	} else if (draconian || iswere || isvamp) {
+		if (leonine &&
+		    (mntmp == PM_SON_OF_TYPHON || tries == 5))
+		    goto do_lion_merge;
+	} else if (draconian || leonine || iswere || isvamp) {
 		/* special changes that don't require polyok() */
 		if (draconian) {
 		    do_merge:
@@ -274,7 +278,19 @@ boolean forcecontrol;
 				/* save/restore hack */
 				uskin->owornmask |= I_SPECIAL;
 			}
-		} else if (iswere) {
+		}
+		else if(leonine) {
+			do_lion_merge:
+			mntmp = PM_SON_OF_TYPHON;
+			if (!(mvitals[mntmp].mvflags & G_GENOD)) {
+				/* allow G_EXTINCT */
+				You("merge with lion skin cloak.");
+				uskin = uarmc;
+				uarmc = (struct obj *)0;
+				/* save/restore hack */
+				uskin->owornmask |= I_SPECIAL;
+			}
+		}else if (iswere) {
 			if (is_were(youmonst.data))
 				mntmp = PM_HUMAN; /* Illegal; force newman() */
 			else
@@ -497,6 +513,10 @@ int	mntmp;
 	if (flags.verbose) {
 	    static const char use_thec[] = "Use the command #%s to %s.";
 	    static const char monsterc[] = "monster";
+#ifdef YOUMONST_SPELL
+	    if (attacktype(youmonst.data, AT_MAGC))
+		pline(use_thec,monsterc,"cast monster spells");
+#endif /* YOUMONST_SPELL */
 	    if (can_breathe(youmonst.data))
 		pline(use_thec,monsterc,"use your breath weapon");
 	    if (attacktype(youmonst.data, AT_SPIT))
@@ -734,6 +754,7 @@ rehumanize()
 	flags.botl = 1;
 	vision_full_recalc = 1;
 	(void) encumber_msg();
+	u.gevurah++; //cheated death.
 }
 
 int
@@ -759,7 +780,7 @@ dobreathe()
 	    impossible("bad breath attack?");	/* mouthwash needed... */
 	else
 	    buzz((int) (20 + mattk->adtyp-1), (int)mattk->damn,
-		u.ux, u.uy, u.dx, u.dy);
+		u.ux, u.uy, u.dx, u.dy,0);
 	return(1);
 }
 
@@ -955,6 +976,7 @@ dogaze()
 
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    if (DEADMONSTER(mtmp)) continue;
+		if(ward_at(mtmp->mx,mtmp->my) == HAMSA) continue;
 	    if (canseemon(mtmp) && couldsee(mtmp->mx, mtmp->my)) {
 		looked++;
 		if (Invis && !perceives(mtmp->data))
@@ -1117,8 +1139,12 @@ skinback(silently)
 boolean silently;
 {
 	if (uskin) {
+		struct obj *skin = (struct obj *)0;
 		if (!silently) Your("skin returns to its original form.");
-		uarm = uskin;
+		if(uskin->otyp == LEO_NEMAEUS_HIDE) uarmc = uskin;
+		else uarm = uskin;
+		/* undo save/restore hack */
+		uskin->owornmask &= ~I_SPECIAL;
 		uskin = (struct obj *)0;
 		/* undo save/restore hack */
 		uarm->owornmask &= ~I_SPECIAL;
@@ -1137,47 +1163,58 @@ int part;
 	*humanoid_parts[] = { "arm", "eye", "face", "finger",
 		"fingertip", "foot", "hand", "handed", "head", "leg",
 		"light headed", "neck", "spine", "toe", "hair",
-		"blood", "lung", "nose", "stomach"},
+		"blood", "lung", "nose", "stomach","heart","skin",
+		"flesh","beat","bones","creak","crack"},
 	*jelly_parts[] = { "pseudopod", "dark spot", "front",
 		"pseudopod extension", "pseudopod extremity",
 		"pseudopod root", "grasp", "grasped", "cerebral area",
-		"lower pseudopod", "viscous", "middle", "surface",
+		"lower pseudopod", "viscous", "middle", "centriole",
 		"pseudopod extremity", "ripples", "juices",
-		"surface", "sensor", "stomach" },
+		"tiny cilia", "sensor", "stomach","cytoskeletal structure","membrane",
+		"cortex","shift","cytoskeletal fillaments","creak","crack" },
 	*animal_parts[] = { "forelimb", "eye", "face", "foreclaw", "claw tip",
 		"rear claw", "foreclaw", "clawed", "head", "rear limb",
 		"light headed", "neck", "spine", "rear claw tip",
-		"fur", "blood", "lung", "nose", "stomach" },
+		"fur", "blood", "lung", "nose", "stomach","heart","skin",
+		"flesh","beat","bones","creak","crack" },
 	*bird_parts[] = { "wing", "eye", "face", "wing", "wing tip",
 		"foot", "wing", "winged", "head", "leg",
 		"light headed", "neck", "spine", "toe",
-		"feathers", "blood", "lung", "bill", "stomach" },
+		"feathers", "blood", "lung", "bill", "stomach","heart","skin",
+		"flesh","beat","bones","creak","crack" },
 	*horse_parts[] = { "foreleg", "eye", "face", "forehoof", "hoof tip",
 		"rear hoof", "foreclaw", "hooved", "head", "rear leg",
 		"light headed", "neck", "backbone", "rear hoof tip",
-		"mane", "blood", "lung", "nose", "stomach"},
+		"mane", "blood", "lung", "nose", "stomach","heart","skin",
+		"flesh","beat","bones","creak","crack"},
 	*sphere_parts[] = { "appendage", "optic nerve", "body", "tentacle",
 		"tentacle tip", "lower appendage", "tentacle", "tentacled",
 		"body", "lower tentacle", "rotational", "equator", "body",
-		"lower tentacle tip", "cilia", "life force", "retina",
-		"olfactory nerve", "interior" },
+		"lower tentacle tip", "surface", "life force", "retina",
+		"olfactory nerve","interior","core","surface",
+		"subsurface layers","pulse","auras","flicker","blink out"},
 	*fungus_parts[] = { "mycelium", "visual area", "front", "hypha",
 		"hypha", "root", "strand", "stranded", "cap area",
 		"rhizome", "sporulated", "stalk", "root", "rhizome tip",
-		"spores", "juices", "gill", "gill", "interior" },
+		"spores", "juices", "gill", "gill", "interior","hyphal network","cuticle",
+		"...it doesn't sound like much",
+		"flesh","hyphae","stretch","tear" },
 	*vortex_parts[] = { "region", "eye", "front", "minor current",
 		"minor current", "lower current", "swirl", "swirled",
 		"central core", "lower current", "addled", "center",
 		"currents", "edge", "currents", "life force",
-		"center", "leading edge", "interior" },
+		"center", "leading edge", "interior","core","vaporous currents",
+		"subsurface currents","pulse","currents","weaken","falter" },
 	*snake_parts[] = { "vestigial limb", "eye", "face", "large scale",
 		"large scale tip", "rear region", "scale gap", "scale gapped",
 		"head", "rear region", "light headed", "neck", "length",
-		"rear scale", "scales", "blood", "lung", "forked tongue", "stomach" },
+		"rear scale", "scales", "blood", "lung", "forked tongue", "stomach","heart","scales",
+		"flesh","beat","bones","creak","crack" },
 	*fish_parts[] = { "fin", "eye", "premaxillary", "pelvic axillary",
 		"pelvic fin", "anal fin", "pectoral fin", "finned", "head", "peduncle",
 		"played out", "gills", "dorsal fin", "caudal fin",
-		"scales", "blood", "gill", "nostril", "stomach" };
+		"scales", "blood", "gill", "nostril", "stomach","heart","scales",
+		"flesh","beat","bones","creak","crack" };
 	/* claw attacks are overloaded in mons[]; most humanoids with
 	   such attacks should still reference hands rather than claws */
 	static const char not_claws[] = {
@@ -1212,7 +1249,7 @@ int part;
 		(part == ARM || part == FINGER || part == FINGERTIP ||
 		    part == HAND || part == HANDED))
 	    return humanoid_parts[part];
-	if (mptr == &mons[PM_RAVEN])
+	if (mptr == &mons[PM_RAVEN] || mptr == &mons[PM_CROW])
 	    return bird_parts[part];
 	if (mptr->mlet == S_CENTAUR || mptr->mlet == S_UNICORN ||
 		(mptr == &mons[PM_ROTHE] && part != HAIR))
@@ -1273,13 +1310,13 @@ int damtype, dam;
 	 * have a monster-specific slow/haste so there is no way to
 	 * restore the old velocity once they are back to human.
 	 */
-	if (u.umonnum != PM_FLESH_GOLEM && u.umonnum != PM_IRON_GOLEM)
+	if (u.umonnum != PM_FLESH_GOLEM && u.umonnum != PM_IRON_GOLEM && u.umonnum != PM_ARGENTUM_GOLEM)
 		return;
 	switch (damtype) {
 		case AD_ELEC: if (u.umonnum == PM_FLESH_GOLEM)
 				heal = dam / 6; /* Approx 1 per die */
 			break;
-		case AD_FIRE: if (u.umonnum == PM_IRON_GOLEM)
+		case AD_FIRE: if (u.umonnum == PM_IRON_GOLEM || u.umonnum == PM_ARGENTUM_GOLEM)
 				heal = dam;
 			break;
 	}
@@ -1297,17 +1334,20 @@ armor_to_dragon(atyp)
 int atyp;
 {
 	switch(atyp) {
+	    case LEO_NEMAEUS_HIDE:
+		return PM_SON_OF_TYPHON;
 	    case GRAY_DRAGON_SCALE_MAIL:
 	    case GRAY_DRAGON_SCALES:
 		return PM_GRAY_DRAGON;
 	    case SILVER_DRAGON_SCALE_MAIL:
 	    case SILVER_DRAGON_SCALES:
 		return PM_SILVER_DRAGON;
-#if 0	/* DEFERRED */
 	    case SHIMMERING_DRAGON_SCALE_MAIL:
 	    case SHIMMERING_DRAGON_SCALES:
 		return PM_SHIMMERING_DRAGON;
-#endif
+	    case DEEP_DRAGON_SCALE_MAIL:
+	    case DEEP_DRAGON_SCALES:
+		return PM_DEEP_DRAGON;
 	    case RED_DRAGON_SCALE_MAIL:
 	    case RED_DRAGON_SCALES:
 		return PM_RED_DRAGON;

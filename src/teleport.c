@@ -80,7 +80,7 @@ unsigned gpflags;
 
 	if (closed_door(x, y) && (!mdat || !amorphous(mdat)))
 		return FALSE;
-	if (sobj_at(BOULDER, x, y) && (!mdat || !throws_rocks(mdat)))
+	if (boulder_at(x, y) && (!mdat || !throws_rocks(mdat)))
 		return FALSE;
 	return TRUE;
 }
@@ -778,13 +778,18 @@ level_tele()
 	     * the last level of Gehennom is forbidden.
 	     */
 #ifdef WIZARD
-		if (!wizard)
+		if (!(wizard))
 #endif
-	    if (Inhell && !u.uevent.invoked &&
+	    if (Inhell && !u.uevent.gehennom_entered && /*seal off gehennom untill you formally enter it by descending the valley of the dead staircase.*/
+			newlev >= (dungeons[u.uz.dnum].depth_start)){
+				newlev = dungeons[u.uz.dnum].depth_start;
+				pline("Sorry...");
+		}
+		else if (Inhell && !u.uevent.invoked && /*seal off square level and sanctum untill you perform the invocation.*/
 			newlev >= (dungeons[u.uz.dnum].depth_start +
-					dunlevs_in_dungeon(&u.uz) - 1)) {
+					dunlevs_in_dungeon(&u.uz) - 2)) {
 		newlev = dungeons[u.uz.dnum].depth_start +
-					dunlevs_in_dungeon(&u.uz) - 2;
+					dunlevs_in_dungeon(&u.uz) - 3;
 		pline("Sorry...");
 	    }
 	    /* no teleporting out of quest dungeon */
@@ -1167,7 +1172,7 @@ register struct obj *obj;
 	int try_limit = 4000;
 
 	if (obj->otyp == CORPSE && is_rider(&mons[obj->corpsenm])) {
-	    if (revive_corpse(obj)) return;
+	    if (revive_corpse(obj, REVIVE_MONSTER)) return;
 	}
 
 	obj_extract_self(obj);
@@ -1238,8 +1243,8 @@ random_teleport_level()
 	min_depth = In_quest(&u.uz) ? dungeons[u.uz.dnum].depth_start : 1;
 	max_depth = dunlevs_in_dungeon(&u.uz) +
 			(dungeons[u.uz.dnum].depth_start - 1);
-	/* can't reach the Sanctum if the invocation hasn't been performed */
-	if (Inhell && !u.uevent.invoked) max_depth -= 1;
+	/* can't reach the Sanctum OR square level if the invocation hasn't been performed */
+	if (Inhell && !u.uevent.invoked) max_depth -= 2;
 
 	/* Get a random value relative to the current dungeon */
 	/* Range is 1 to current+3, current not counting */

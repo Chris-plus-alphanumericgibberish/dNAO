@@ -389,6 +389,11 @@ unsigned int *stuckid, *steedid;	/* STEED */
 #ifdef CLIPPING
 	cliparound(u.ux, u.uy);
 #endif
+	/* reload random monster*/
+	mread(fd, (genericptr_t) &mons[PM_SHAMBLING_HORROR], sizeof(struct permonst));
+	mread(fd, (genericptr_t) &mons[PM_STUMBLING_HORROR], sizeof(struct permonst));
+	mread(fd, (genericptr_t) &mons[PM_WANDERING_HORROR], sizeof(struct permonst));
+	
 	if(u.uhp <= 0 && (!Upolyd || u.mh <= 0)) {
 	    u.ux = u.uy = 0;	/* affects pline() [hence You()] */
 	    You("were not healthy enough to survive restoration.");
@@ -409,6 +414,10 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	migrating_mons = restmonchn(fd, FALSE);
 	mread(fd, (genericptr_t) mvitals, sizeof(mvitals));
 
+	/* this comes after inventory has been loaded */
+	for(otmp = invent; otmp; otmp = otmp->nobj)
+		if(otmp->owornmask)
+			setworn(otmp, otmp->owornmask);
 	/* reset weapon so that player will get a reminder about "bashing"
 	   during next fight when bare-handed or wielding an unconventional
 	   item; for pick-axe, we aren't able to distinguish between having
@@ -443,7 +452,6 @@ unsigned int *stuckid, *steedid;	/* STEED */
 
 	restnames(fd);
 	restore_waterlevel(fd);
-
 #ifdef RECORD_ACHIEVE
         mread(fd, (genericptr_t) &achieve, sizeof achieve);
 #endif
@@ -451,7 +459,6 @@ unsigned int *stuckid, *steedid;	/* STEED */
         mread(fd, (genericptr_t) &realtime_data.realtime, 
                   sizeof realtime_data.realtime);
 #endif
-
 	/* must come after all mons & objs are restored */
 	relink_timers(FALSE);
 	relink_light_sources(FALSE);

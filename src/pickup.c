@@ -32,7 +32,6 @@ STATIC_PTR int FDECL(in_container,(struct obj *));
 STATIC_PTR int FDECL(ck_bag,(struct obj *));
 STATIC_PTR int FDECL(out_container,(struct obj *));
 STATIC_DCL long FDECL(mbag_item_gone, (int,struct obj *));
-STATIC_DCL void FDECL(observe_quantum_cat, (struct obj *));
 STATIC_DCL int FDECL(menu_loot, (int, struct obj *, BOOLEAN_P));
 STATIC_DCL int FDECL(in_or_out_menu, (const char *,struct obj *, BOOLEAN_P, BOOLEAN_P));
 STATIC_DCL int FDECL(container_at, (int, int, BOOLEAN_P));
@@ -411,6 +410,12 @@ int what;		/* should be a long */
 			read_engr_at(u.ux, u.uy);
 		    return (0);
 		}
+		/*	Bug fix, it used to be that you could yank statues off traps
+			before they could activate.
+			Now a statue trap aborts the grab attempt, then activates. */
+		if(ttmp && ttmp->ttyp == STATUE_TRAP){
+			return 0;
+		}
 		if (ttmp && ttmp->tseen) {
 		    /* Allow pickup from holes and trap doors that you escaped
 		     * from because that stuff is teetering on the edge just
@@ -787,7 +792,7 @@ boolean FDECL((*allow), (OBJ_P));/* allow function */
 		    if (qflags & INVORDER_SORT && !printed_type_name) {
 			any.a_obj = (struct obj *) 0;
 			add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-				 let_to_name(*pack, FALSE, iflags.show_obj_sym), MENU_UNSELECTED);
+				 Hallucination ? rand_class_name() : let_to_name(*pack, FALSE, iflags.show_obj_sym), MENU_UNSELECTED);
 			printed_type_name = TRUE;
 		    }
 
@@ -795,7 +800,7 @@ boolean FDECL((*allow), (OBJ_P));/* allow function */
 		    add_menu(win, obj_to_glyph(curr), &any,
 			    qflags & USE_INVLET ? curr->invlet : 0,
 			    def_oc_syms[(int)objects[curr->otyp].oc_class],
-			    ATR_NONE, doname_with_price(curr), MENU_UNSELECTED);
+			    ATR_NONE, Hallucination ? an(rndobjnam()) : doname_with_price(curr), MENU_UNSELECTED);
 		}
 	    }
 	    pack++;
@@ -1192,13 +1197,13 @@ boolean telekinesis;
 {
     int result, old_wt, new_wt, prev_encumbr, next_encumbr;
 
-    if (obj->otyp == BOULDER && In_sokoban(&u.uz)) {
+    if (obj->otyp == BOULDER && In_sokoban(&u.uz)) {/*note, sokoban limit is just boulders*/
 	You("cannot get your %s around this %s.",
 			body_part(HAND), xname(obj));
 	return -1;
     }
     if (obj->otyp == LOADSTONE ||
-	    (obj->otyp == BOULDER && throws_rocks(youmonst.data)))
+	    (is_boulder(obj) && throws_rocks(youmonst.data)))
 	return 1;		/* lift regardless of current situation */
 
     *cnt_p = carry_count(obj, container, *cnt_p, telekinesis, &old_wt, &new_wt);
@@ -1306,6 +1311,10 @@ boolean telekinesis;	/* not picking it up directly by hand */
 #endif
 		obj->dknown = 1;
 
+	if(obj->shopOwned && !(obj->unpaid)){ /* shop stock is outside shop */
+		if(obj->sknown && !(obj->ostolen) ) obj->sknown = FALSE; /*don't automatically know that you found a stolen item.*/
+		obj->ostolen = TRUE; /* object was apparently stolen by someone (not necessarily the player) */
+	}
 	if (obj == uchain) {    /* do not pick up attached chain */
 	    return 0;
 	} else if (obj->oartifact && !touch_artifact(obj,&youmonst)) {
@@ -1366,7 +1375,7 @@ boolean telekinesis;	/* not picking it up directly by hand */
 	    } else if (is_rider(&mons[obj->corpsenm])) {
 		pline("At your %s, the corpse suddenly moves...",
 			telekinesis ? "attempted acquisition" : "touch");
-		(void) revive_corpse(obj);
+		(void) revive_corpse(obj, REVIVE_MONSTER);
 		exercise(A_WIS, FALSE);
 		return -1;
 	    }
@@ -1433,6 +1442,10 @@ struct obj *otmp;
 	    Strcpy(u.ushops, fakeshop);
 	    /* sets obj->unpaid if necessary */
 	    addtobill(otmp, TRUE, FALSE, FALSE);
+		if(otmp->shopOwned && !(otmp->unpaid)){ /* shop stock is outside shop */
+			if(otmp->sknown && !(otmp->ostolen) ) otmp->sknown = FALSE; /*don't automatically know that you found a stolen item.*/
+			otmp->ostolen = TRUE; /* object was apparently stolen by someone (not necessarily the player) */
+		}
 	    Strcpy(u.ushops, saveushops);
 	    /* if you're outside the shop, make shk notice */
 	    if (!index(u.ushops, *fakeshop))
@@ -1664,12 +1677,28 @@ lootcont:
 		if (c == 'n') continue;
 		any = TRUE;
 
-		timepassed |= do_loot_cont(cobj, FALSE);
+		if (cobj->olocked) {
+		    pline("Hmmm, it seems to be locked.");
+		    continue;
+		}
+		if (cobj->otyp == BAG_OF_TRICKS) {
+		    int tmp;
+		    You("carefully open the bag...");
+		    pline("It develops a huge set of teeth and bites you!");
+		    tmp = rnd(10);
+		    if (Half_physical_damage) tmp = (tmp+1) / 2;
+		    losehp(tmp, "carnivorous bag", KILLED_BY_AN);
+		    makeknown(BAG_OF_TRICKS);
+		    timepassed = 1;
+		    continue;
+		}
+
+		You("carefully open %s...", the(xname(cobj)));
+		timepassed |= use_container(cobj, 0);
 		if (multi < 0) return 1;		/* chest trap */
 	    }
 	}
 	if (any) c = 'y';
-	}
     } else if (Confusion) {
 #ifndef GOLDOBJ
 	if (u.ugold){
@@ -1938,7 +1967,7 @@ register struct obj *obj;
 	}
 
 	/* boxes, boulders, and big statues can't fit into any container */
-	if (obj->otyp == ICE_BOX || Is_box(obj) || obj->otyp == BOULDER ||
+	if (obj->otyp == ICE_BOX || Is_box(obj) || is_boulder(obj) ||
 		(obj->otyp == STATUE && bigmonst(&mons[obj->corpsenm]))) {
 		/*
 		 *  xname() uses a static result array.  Save obj's name
@@ -1975,6 +2004,7 @@ register struct obj *obj;
 		/* stop any corpse timeouts when frozen */
 		if (obj->otyp == CORPSE && obj->timed) {
 			long rot_alarm = stop_timer(ROT_CORPSE, (genericptr_t)obj);
+			(void) stop_timer(MOLDY_CORPSE, (genericptr_t)obj);
 			(void) stop_timer(REVIVE_MON, (genericptr_t)obj);
 			/* mark a non-reviving corpse as such */
 			if (rot_alarm) obj->norevive = 1;
@@ -2042,7 +2072,12 @@ register struct obj *obj;
 		obj->owt = weight(obj);
 	}
 
+	if(obj->shopOwned && !(obj->unpaid)){ /* shop stock is outside shop */
+		if(obj->sknown && !(obj->ostolen) ) obj->sknown = FALSE; /*don't automatically know that you found a stolen item.*/
+		obj->ostolen = TRUE; /* object was apparently stolen by someone (not necessarily the player) */
+	}
 	if(obj->oartifact && !touch_artifact(obj,&youmonst)) return 0;
+	if(obj->oartifact && obj->oartifact == ART_PEN_OF_THE_VOID && !Role_if(PM_EXILE)) u.sealsKnown |= obj->ovar1;
 
 	if (obj->otyp == CORPSE) {
 	    if ( (touch_petrifies(&mons[obj->corpsenm])) && !uarmg
@@ -2127,9 +2162,10 @@ struct obj *item;
     return loss;
 }
 
-STATIC_OVL void
-observe_quantum_cat(box)
+void
+observe_quantum_cat(box, past)
 struct obj *box;
+boolean past;
 {
     static NEARDATA const char sc[] = "Schroedinger's Cat";
     struct obj *deadcat;
@@ -2144,7 +2180,7 @@ struct obj *box;
        (telepathic or monster/object/food detection) ought to
        force the determination of alive vs dead state; but basing
        it just on opening the box is much simpler to cope with */
-    livecat = rn2(2) ? makemon(&mons[PM_HOUSECAT],
+    livecat = (rn2(2) && !past) ? makemon(&mons[PM_HOUSECAT],
 			       box->ox, box->oy, NO_MINVENT) : 0;
     if (livecat) {
 	livecat->mpeaceful = 1;
@@ -2161,9 +2197,39 @@ struct obj *box;
 	    obj_extract_self(deadcat);
 	    (void) add_to_container(box, deadcat);
 	}
-	pline_The("%s inside the box is dead!",
+	pline_The(past ? "%s that was inside the box is dead!" : "%s inside the box is dead!",
 	    Hallucination ? rndmonnam() : "housecat");
     }
+    box->owt = weight(box);
+    return;
+}
+
+void
+open_coffin(box, past)
+struct obj *box;
+boolean past;
+{
+//    static NEARDATA const char sc[] = "Schroedinger's Cat";
+//		Would be nice to name the vampire and put the name on the coffin. But not today.
+    struct monst *vampire;
+    xchar ox, oy;
+
+	pline(past ? "That wasn't %s, it was a coffin!" : "This isn't %s, it's a coffin!", an(simple_typename(box->otyp)));
+    box->spe = 3;		/* box->owt will be updated below */
+    if (get_obj_location(box, &ox, &oy, 0))
+		box->ox = ox, box->oy = oy;	/* in case it's being carried */
+
+    vampire = makemon(&mons[PM_VAMPIRE], box->ox, box->oy, NO_MM_FLAGS);
+	set_malign(vampire);
+	if (!canspotmon(vampire)){
+	    You("think %s brushed against your %s.", something, body_part(HAND));
+	}
+	else{
+	    if(Hallucination) 
+			pline(past ? "There was a dark knight in the coffin. The dark knight rises!" : "There is a dark knight in the coffin. The dark knight rises!");
+	    else pline(past ? "There was a vampire in the coffin! %s rises." : "There is a vampire in the coffin! %s rises.", Monnam(vampire));
+	}
+//	(void) christen_monst(vampire, sc);
     box->owt = weight(box);
     return;
 }
@@ -2212,9 +2278,13 @@ register int held;
 	current_container = obj;	/* for use by in/out_container */
 
 	if (obj->spe == 1) {
-	    observe_quantum_cat(obj);
+	    observe_quantum_cat(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
 	    used = 1;
 	    quantum_cat = TRUE;	/* for adjusting "it's empty" message */
+	}else if(obj->spe == 4){
+	    open_coffin(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
+	    used = 1;
+		return used;
 	}
 	/* Count the number of contained objects. Sometimes toss objects if */
 	/* a cursed magic bag.						    */

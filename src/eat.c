@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "artifact.h"
 /* #define DEBUG */	/* uncomment to enable new eat code debugging */
 
 #ifdef DEBUG
@@ -28,8 +29,8 @@ STATIC_DCL void NDECL(do_reset_eat);
 STATIC_DCL void FDECL(done_eating, (BOOLEAN_P));
 STATIC_DCL void FDECL(cprefx, (int));
 STATIC_DCL int FDECL(intrinsic_possible, (int,struct permonst *));
-STATIC_DCL void FDECL(givit, (int,struct permonst *));
-STATIC_DCL void FDECL(cpostfx, (int));
+STATIC_DCL void FDECL(givit, (int,struct permonst *, unsigned short));
+STATIC_DCL void FDECL(cpostfx, (int, BOOLEAN_P));
 STATIC_DCL void FDECL(start_tin, (struct obj *));
 STATIC_DCL int FDECL(eatcorpse, (struct obj *));
 STATIC_DCL void FDECL(start_eating, (struct obj *));
@@ -231,7 +232,7 @@ choke(food)	/* To a full belly all food is bad. (It.) */
 		if (!food || food->otyp != AMULET_OF_STRANGULATION)
 			return;
 	} else if (Role_if(PM_KNIGHT) && u.ualign.type == A_LAWFUL) {
-			adjalign(-1);		/* gluttony is unchivalrous */
+			adjalign(-5);		/* gluttony is unchivalrous */ //stiffer penalty
 			You_feel("like a glutton!");
 	}
 
@@ -311,6 +312,7 @@ STATIC_OVL struct obj *
 touchfood(otmp)
 register struct obj *otmp;
 {
+	struct obj *pseudo;
 	if (otmp->quan > 1L) {
 	    if(!carried(otmp))
 		(void) splitobj(otmp, otmp->quan - 1L);
@@ -329,7 +331,39 @@ register struct obj *otmp;
 		verbalize("You bit it, you bought it!");
 		bill_dummy_object(otmp);
 	    }
-	    otmp->oeaten = (otmp->otyp == CORPSE ?
+		if(otmp->otyp == K_RATION || otmp->otyp == C_RATION){
+			You("find that this military ration has a meat serving.");
+			if(yn("Eat the meat?") == 'n'){
+				You("discard the meat.");
+			    otmp->oeaten = objects[otmp->otyp].oc_nutrition / 4;
+			}
+			else{
+				You("eat the meat.");
+			    otmp->oeaten = objects[otmp->otyp].oc_nutrition;
+			    u.uconduct.unvegan++;
+			    violated_vegetarian();
+			}
+		}
+		else if(otmp->otyp == CANDY_BAR){
+			if(!rn2(100)){
+				You("find this candy bar to be of rare quality!");
+			    otmp->oeaten = 10 * objects[otmp->otyp].oc_nutrition;
+				pluslvl(FALSE);/*first bite gives level up, also has a lot of nutriton*/
+
+			    if(((!carried(otmp) && costly_spot(otmp->ox, otmp->oy) &&
+				 !otmp->no_charge)
+				 || otmp->unpaid)) {
+					/* create a dummy duplicate to put on bill */
+					verbalize("Hey, that was really rare!");
+					pseudo = mksobj(POT_GAIN_LEVEL, FALSE, FALSE);
+					pseudo->blessed = pseudo->cursed = 0;
+					bill_dummy_object(pseudo);
+					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
+				}
+			}
+			else otmp->oeaten = objects[otmp->otyp].oc_nutrition;
+		}
+	    else otmp->oeaten = (otmp->otyp == CORPSE ?
 				mons[otmp->corpsenm].cnutrit :
 				objects[otmp->otyp].oc_nutrition);
 	}
@@ -428,7 +462,7 @@ boolean message;
 		You("finish eating %s.", food_xname(victual.piece, TRUE));
 
 	if(victual.piece->otyp == CORPSE)
-		cpostfx(victual.piece->corpsenm);
+		cpostfx(victual.piece->corpsenm, FALSE);
 	else
 		fpostfx(victual.piece);
 
@@ -503,7 +537,7 @@ register int pm;
 		    /* It so happens that since we know these monsters */
 		    /* cannot appear in tins, victual.piece will always */
 		    /* be what we want, which is not generally true. */
-		    if (revive_corpse(victual.piece))
+		    if (revive_corpse(victual.piece, REVIVE_MONSTER))
 			victual.piece = (struct obj *)0;
 		    return;
 		}
@@ -577,6 +611,15 @@ register struct permonst *ptr;
 #else
 		return(ptr->mconveys & MR_COLD);
 #endif
+	    case ACID_RES:
+#ifdef DEBUG
+		if (ptr->mconveys & MR_ACID) {
+			debugpline("can get acid resistance");
+			return(TRUE);
+		} else  return(FALSE);
+#else
+		return(ptr->mconveys & MR_ACID);
+#endif
 	    case DISINT_RES:
 #ifdef DEBUG
 		if (ptr->mconveys & MR_DISINT) {
@@ -613,6 +656,15 @@ register struct permonst *ptr;
 #else
 		return(can_teleport(ptr));
 #endif
+	    case DISPLACED:
+#ifdef DEBUG
+		if (is_displacer(ptr)) {
+			debugpline("can displacement");
+			return(TRUE);
+		} else  return(FALSE);
+#else
+		return(is_displacer(ptr));
+#endif
 	    case TELEPORT_CONTROL:
 #ifdef DEBUG
 		if (control_teleport(ptr)) {
@@ -639,25 +691,39 @@ register struct permonst *ptr;
 
 /* givit() tries to give you an intrinsic based on the monster's level
  * and what type of intrinsic it is trying to give you.
+ * Energy resistence intrinsics time out now - CM
  */
 STATIC_OVL void
-givit(type, ptr)
+givit(type, ptr, nutval)
 int type;
 register struct permonst *ptr;
+unsigned short nutval;
 {
-	register int chance;
+	int chance = 0; //starts at 0. Changing it indicates a non-energy resistence
+	int multiplier = 1;
+	char permanent = 0;
 
 #ifdef DEBUG
 	debugpline("Attempting to give intrinsic %d", type);
 #endif
 	/* some intrinsics are easier to get than others */
 	switch (type) {
+		case FIRE_RES:
+		case SLEEP_RES:
+		case COLD_RES:
+		case SHOCK_RES:
+		case ACID_RES:
+			chance = 0;//skip role, give atribute.
+		break;
 		case POISON_RES:
 			if ((ptr == &mons[PM_KILLER_BEE] ||
 					ptr == &mons[PM_SCORPION]) && !rn2(4))
 				chance = 1;
 			else
 				chance = 15;
+			break;
+		case DISPLACED:
+			chance = ptr == &mons[PM_SHIMMERING_DRAGON] ? 0 : 10;
 			break;
 		case TELEPORT:
 			chance = 10;
@@ -668,22 +734,41 @@ register struct permonst *ptr;
 		case TELEPAT:
 			chance = 1;
 			break;
+		case DISINT_RES:
+			chance = 15;
+			break;
 		default:
 			chance = 15;
 			break;
 	}
 
-	if (ptr->mlevel <= rn2(chance))
+	if (chance && ptr->mlevel <= rn2(chance))
 		return;		/* failed die roll */
 
+	if(ptr->mlevel < 5) multiplier = 2;
+	else if (ptr->mlevel < 10) multiplier = 4;
+	else if (ptr->mlevel < 15) multiplier = 6;
+	else multiplier = 10;
+	if(ptr->geno & G_UNIQ) multiplier = 20;
+	if(ptr->geno & G_UNIQ && ptr->mlevel > 14) permanent = 1;
 	switch (type) {
 	    case FIRE_RES:
 #ifdef DEBUG
 		debugpline("Trying to give fire resistance");
 #endif
-		if(!(HFire_resistance & FROMOUTSIDE)) {
+		if( !(HFire_resistance) ) {
 			You(Hallucination ? "be chillin'." :
 			    "feel a momentary chill.");
+		}
+		if( (HFire_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
+			long timer = max((HFire_resistance & TIMEOUT), (long)(nutval*multiplier));
+			HFire_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+			HFire_resistance |= timer; //set new timer
+		}
+		else{
+			HFire_resistance |= TIMEOUT; //set timer to max value
+		}
+		if(permanent){
 			HFire_resistance |= FROMOUTSIDE;
 		}
 		break;
@@ -691,8 +776,18 @@ register struct permonst *ptr;
 #ifdef DEBUG
 		debugpline("Trying to give sleep resistance");
 #endif
-		if(!(HSleep_resistance & FROMOUTSIDE)) {
+		if( !(HSleep_resistance) ) {
 			You_feel("wide awake.");
+		}
+		if( (HSleep_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
+			long timer = max((HFire_resistance & TIMEOUT), (long)(nutval*multiplier));
+			HSleep_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+			HSleep_resistance |= timer; //set new timer
+		}
+		else{
+			HSleep_resistance |= TIMEOUT; //set timer to max value
+		}
+		if(permanent){
 			HSleep_resistance |= FROMOUTSIDE;
 		}
 		break;
@@ -700,8 +795,18 @@ register struct permonst *ptr;
 #ifdef DEBUG
 		debugpline("Trying to give cold resistance");
 #endif
-		if(!(HCold_resistance & FROMOUTSIDE)) {
+		if( !(HCold_resistance) ) {
 			You_feel("full of hot air.");
+		}
+		if( (HCold_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
+			long timer = max((HFire_resistance & TIMEOUT), (long)(nutval*multiplier));
+			HCold_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+			HCold_resistance |= timer; //set new timer
+		}
+		else{
+			HCold_resistance |= TIMEOUT; //set timer to max value
+		}
+		if(permanent){
 			HCold_resistance |= FROMOUTSIDE;
 		}
 		break;
@@ -720,12 +825,44 @@ register struct permonst *ptr;
 #ifdef DEBUG
 		debugpline("Trying to give shock resistance");
 #endif
-		if(!(HShock_resistance & FROMOUTSIDE)) {
+		if( !(HShock_resistance) ) {
 			if (Hallucination)
-				You_feel("grounded in reality.");
+				rn2(2) ? You_feel("grounded in reality.") : Your("health currently feels amplified!");
 			else
-				Your("health currently feels amplified!");
+				You_feel("well grounded.");
+		}
+		if( (HShock_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
+			long timer = max((HFire_resistance & TIMEOUT), (long)(nutval*multiplier));
+			HShock_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+			HShock_resistance |= timer; //set new timer
+		}
+		else{
+			HShock_resistance |= TIMEOUT; //set timer to max value
+		}
+		if(permanent){
 			HShock_resistance |= FROMOUTSIDE;
+		}
+		break;
+	    case ACID_RES:	/* acid resistance */
+#ifdef DEBUG
+		debugpline("Trying to give acid resistance");
+#endif
+		if( !(HAcid_resistance) ) {
+			if (Hallucination)
+				rn2(2) ? You_feel("like you've really gotten back to basics!") : You_feel("insoluble.");
+			else
+				Your("skin feels leathery.");
+		}
+		if( (HAcid_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
+			long timer = max((HFire_resistance & TIMEOUT), (long)(nutval*multiplier));
+			HAcid_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+			HAcid_resistance |= timer; //set new timer
+		}
+		else{
+			HAcid_resistance |= TIMEOUT; //set timer to max value
+		}
+		if(permanent){
+			HAcid_resistance |= FROMOUTSIDE;
 		}
 		break;
 	    case POISON_RES:
@@ -737,6 +874,29 @@ register struct permonst *ptr;
 				 "especially healthy." : "healthy.");
 			HPoison_resistance |= FROMOUTSIDE;
 		}
+		break;
+	    case DISPLACED:	/* displacement resistance */
+		//Note that intrinsic displacemnt disregards the timeout multiplier and permanence setting.
+#ifdef DEBUG
+		debugpline("Trying to give intrinsic displacement");
+#endif
+		if( !(HDisplaced) ) {
+			if (Hallucination)
+				You_feel("quite beside yourself!");
+			else
+				Your("outline shimmers and shifts.");
+		}
+		if( (HDisplaced & TIMEOUT) + (long)(nutval) < TIMEOUT) {
+			long timer = (HDisplaced & TIMEOUT) + (long)(nutval);
+			HDisplaced &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+			HDisplaced |= timer; //set new timer
+		}
+		else{
+			HDisplaced |= TIMEOUT; //set timer to max value
+		}
+		// if(permanent){
+			// HDisplaced |= FROMOUTSIDE;
+		// }
 		break;
 	    case TELEPORT:
 #ifdef DEBUG
@@ -781,8 +941,9 @@ register struct permonst *ptr;
 }
 
 STATIC_OVL void
-cpostfx(pm)		/* called after completely consuming a corpse */
+cpostfx(pm, tin)		/* called after completely consuming a corpse */
 register int pm;
+BOOLEAN_P tin;
 {
 	register int tmp = 0;
 	boolean catch_lycanthropy = FALSE;
@@ -796,9 +957,9 @@ register int pm;
 		/* MRKR: "eye of newt" may give small magical energy boost */
 		if (rn2(3) || 3 * u.uen <= 2 * u.uenmax) {
 		    int old_uen = u.uen;
-		    u.uen += rnd(3);
+		    u.uen += d(2,10);
 		    if (u.uen > u.uenmax) {
-			if (!rn2(3)) u.uenmax++;
+				u.uenmax++;
 			u.uen = u.uenmax;
 		    }
 		    if (old_uen != u.uen) {
@@ -807,8 +968,41 @@ register int pm;
 		    }
 		}
 		break;
+	    case PM_AOA_DROPLET: //Aoas are drops of pure magic
+		if (rn2(3) || 3 * u.uen <= 2 * u.uenmax) {
+		    int old_uen = u.uen;
+		    u.uen += d(4,10);
+		    if (u.uen > u.uenmax) {
+				u.uenmax+=4;
+				u.uen = u.uenmax;
+		    }
+		    if (old_uen != u.uen) {
+			    You_feel("a strong buzzing sensation.");
+			    flags.botl = 1;
+		    }
+		}
+		break;
+	    case PM_AOA: //Aoas are drops of pure magic
+		if (rn2(3) || 3 * u.uen <= 2 * u.uenmax) {
+		    int old_uen = u.uen;
+			int bonus = d(6,10);
+			u.uen = u.uen + 10 > (u.uenmax - 40) ? u.uen + 10 : (u.uenmax - 40);
+		    u.uen += bonus;
+		    if (u.uen > u.uenmax) {
+				u.uenmax+=10;
+				u.uen = u.uenmax;
+		    }
+		    if (old_uen != u.uen) {
+			    You_feel("a great jolt run through your mind!");
+			    flags.botl = 1;
+		    }
+		}
+		break;
 	    case PM_WRAITH:
 		pluslvl(FALSE);
+		break;
+	    case PM_DEEP_DRAGON:
+			pluslvl(FALSE);
 		break;
 	    case PM_HUMAN_WERERAT:
 		catch_lycanthropy = TRUE;
@@ -822,10 +1016,34 @@ register int pm;
 		catch_lycanthropy = TRUE;
 		u.ulycn = PM_WEREWOLF;
 		break;
+	    case PM_ANUBITE:
+			catch_lycanthropy = TRUE;
+			u.ulycn = PM_WEREJACKAL;
+		break;
 	    case PM_NURSE:
 		if (Upolyd) u.mh = u.mhmax;
 		else u.uhp = u.uhpmax;
 		flags.botl = 1;
+		break;
+		case PM_SEWER_RAT:
+			if(d(1,10) > 9 && !Sick_resistance) make_vomiting(Vomiting+d(10,4), TRUE);
+		break;
+		case PM_RABID_RAT:
+			if(d(1,20) > 19 && Sick_resistance){
+				if (!Sick_resistance) {
+					char buf[BUFSZ];
+					long sick_time;
+	
+					sick_time = (long) d(10, 100)+1000;
+					/* make sure new illness doesn't result in improvement */
+					if (Sick && (sick_time > Sick))
+						sick_time = (Sick > 1L) ? Sick - 1L : 1L;
+						Sprintf(buf, "%s%s diseased corpse",
+							!type_is_pname(&mons[pm]) ? "the " : "",
+							s_suffix(mons[pm].mname));
+						make_sick(sick_time, buf, FALSE, SICK_NONVOMITABLE);
+				}
+			}
 		break;
 	    case PM_STALKER:
 		if(!Invis) {
@@ -889,9 +1107,23 @@ register int pm;
 			You("seem faster.");
 		}
 		break;
+		case PM_GUG:
+			gainstr((struct obj *)0, 0);
+		break;
 	    case PM_LIZARD:
 		if (HStun > 2)  make_stunned(2L,FALSE);
 		if (HConfusion > 2)  make_confused(2L,FALSE);
+		break;
+		case PM_BEHOLDER:
+			You(Hallucination ? "can see your own insides!"
+				: "feel as though you can see the world from a whole new angle!");
+			if (!BClairvoyant)
+			    do_vicinity_map(u.ux,u.uy);
+			/* at present, only one thing blocks clairvoyance */
+			else if (uarmh && uarmh->otyp == CORNUTHAUM)
+			    You("sense a pointy hat on top of your %s.",
+				body_part(HEAD));
+		    incr_itimeout(&HClairvoyant, rn1(500,500));
 		break;
 	    case PM_CHAMELEON:
 	    case PM_DOPPELGANGER:
@@ -951,29 +1183,16 @@ register int pm;
 		 for (i = 1; i <= LAST_PROP; i++) {
 			if (intrinsic_possible(i, ptr)) {
 				count++;
-				/* a 1 in count chance of replacing the old
-				 * one with this one, and a count-1 in count
-				 * chance of keeping the old one.  (note
-				 * that 1 in 1 and 0 in 1 are what we want
-				 * for the first one
-				 */
-				if (!rn2(count)) {
-#ifdef DEBUG
-					debugpline("Intrinsic %d replacing %d",
-								i, tmp);
-#endif
-					tmp = i;
-				}
+					givit(i, ptr, (tin && ptr->cnutrit > 50) ? 50 : ptr->cnutrit);
 			}
 		 }
 
 		 /* if any found try to give them one */
-		 if (count) givit(tmp, ptr);
 	    }
 	    break;
 	}
 
-	if (catch_lycanthropy && defends(AD_WERE, uwep)) {
+	if (catch_lycanthropy && spec_ability2(uwep, SPFX2_NOWERE)) {
 	    if (!touch_artifact(uwep, &youmonst)) {
 		dropx(uwep);
 		uwepgone();
@@ -1046,7 +1265,7 @@ opentin()		/* called during each move whilst opening a tin */
 		    (tin.tin->spe == -1) ? HOMEMADE_TIN :  /* player made it */
 			rn2(TTSZ-1);		/* else take your pick */
 	    if (r == ROTTEN_TIN && (tin.tin->corpsenm == PM_LIZARD ||
-			tin.tin->corpsenm == PM_LICHEN))
+			tin.tin->corpsenm == PM_LICHEN || tin.tin->corpsenm == PM_BEHOLDER))
 		r = HOMEMADE_TIN;		/* lizards don't rot */
 	    else if (tin.tin->spe == -1 && !tin.tin->blessed && !rn2(7))
 		r = ROTTEN_TIN;			/* some homemade tins go bad */
@@ -1081,7 +1300,7 @@ opentin()		/* called during each move whilst opening a tin */
 		violated_vegetarian();
 
 	    tin.tin->dknown = tin.tin->known = TRUE;
-	    cprefx(tin.tin->corpsenm); cpostfx(tin.tin->corpsenm);
+	    cprefx(tin.tin->corpsenm); cpostfx(tin.tin->corpsenm, TRUE);
 
 	    /* charge for one at pre-eating cost */
 	    costly_tin((const char*)0);
@@ -1232,6 +1451,15 @@ struct obj *obj;
 	return(0);
 }
 
+static char *eatrat[] = { 
+	"This tastes delicious!",
+	"This tastes quite good!",
+	"This tastes quite good (could use some ketchup, though).",
+	"This tastes ... good (but really needs some ketchup).",
+	"...You'd pay double for ketchup.",
+	"...What you wouldn't give for some ketchup....",
+};
+
 STATIC_OVL int
 eatcorpse(otmp)		/* called when a corpse is selected as food */
 	register struct obj *otmp;
@@ -1247,7 +1475,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	if (!vegan(&mons[mnum])) u.uconduct.unvegan++;
 	if (!vegetarian(&mons[mnum])) violated_vegetarian();
 
-	if (mnum != PM_LIZARD && mnum != PM_LICHEN) {
+	if (mnum != PM_LIZARD && mnum != PM_LICHEN && mnum != PM_BEHOLDER) {
 		long age = peek_at_iced_corpse_age(otmp);
 
 		rotted = (monstermoves - age)/(10L + rn2(20));
@@ -1282,11 +1510,22 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 		if (carried(otmp)) useup(otmp);
 		else useupf(otmp, 1L);
 		return(2);
-	} else if (acidic(&mons[mnum]) && !Acid_resistance) {
+	} if (acidic(&mons[mnum]) && !Acid_resistance) {
 		tp++;
 		You("have a very bad case of stomach acid."); /* not body_part() */
 		losehp(rnd(15), "acidic corpse", KILLED_BY_AN);
-	} else if (poisonous(&mons[mnum]) && rn2(5)) {
+	} if (freezing(&mons[mnum]) && !Cold_resistance) {
+		tp++;
+		You("feel your stomach freeze!"); /* not body_part() */
+		losehp(rnd(12) + rnd(12), "crionic corpse", KILLED_BY_AN);
+	} if (burning(&mons[mnum]) && !Fire_resistance) {
+		tp++;
+		You("feel your stomach boil!"); /* not body_part() */
+		morehungry(200);
+		nomovemsg = 0;
+		vomit();
+		losehp(rnd(20), "boiling hot corpse", KILLED_BY_AN);
+	} if (poisonous(&mons[mnum]) && rn2(5)) {
 		tp++;
 		pline("Ecch - that must have been poisonous!");
 		if(!Poison_resistance) {
@@ -1294,7 +1533,9 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 			losehp(rnd(15), "poisonous corpse", KILLED_BY_AN);
 		} else	You("seem unaffected by the poison.");
 	/* now any corpse left too long will make you mildly ill */
-	} else if ((rotted > 5L || (rotted > 3L && rn2(5)))
+	} if ( !(poisonous(&mons[mnum]) || burning(&mons[mnum]) ||
+			 freezing(&mons[mnum])  || acidic(&mons[mnum])) &&
+			(rotted > 5L || (rotted > 3L && rn2(5)))
 					&& !Sick_resistance) {
 		tp++;
 		You_feel("%ssick.", (Sick) ? "very " : "");
@@ -1304,7 +1545,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	/* delay is weight dependent */
 	victual.reqtime = 3 + (mons[mnum].cwt >> 6);
 
-	if (!tp && mnum != PM_LIZARD && mnum != PM_LICHEN &&
+	if (!tp && mnum != PM_LIZARD && mnum != PM_LICHEN && mnum != PM_BEHOLDER &&
 			(otmp->orotten || !rn2(7))) {
 	    if (rottenfood(otmp)) {
 		otmp->orotten = TRUE;
@@ -1321,6 +1562,14 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	    }
 		    
 	    if (!retcode) consume_oeaten(otmp, 2);	/* oeaten >>= 2 */
+	} else if(is_rat(&mons[mnum]) && Race_if(PM_DWARF)){
+		if(u.uconduct.ratseaten<SIZE(eatrat)) pline("%s", eatrat[u.uconduct.ratseaten++]);
+		else{
+			u.uconduct.ratseaten++;
+			pline("%s", eatrat[SIZE(eatrat)-1]);
+		}
+	} else if(mnum == PM_LONG_WORM){
+		pline("This tastes spicy!");
 	} else {
 	    pline("%s%s %s!",
 		  !uniq ? "This " : !type_is_pname(&mons[mnum]) ? "The " : "",
@@ -1393,11 +1642,18 @@ struct obj *otmp;
 			  "Mmm, tripe... not bad!");
 		else {
 		    pline("Yak - dog food!");
+#ifdef CONVICT
+		    if (Role_if(PM_CONVICT))
+			pline("At least it's not prison food.");
+#endif /* CONVICT */
 		    more_experienced(1,0);
 		    newexplevel();
 		    /* not cannibalism, but we use similar criteria
 		       for deciding whether to be sickened by this meal */
 		    if (rn2(2) && !CANNIBAL_ALLOWED())
+#ifdef CONVICT
+		    if (!Role_if(PM_CONVICT))
+#endif /* CONVICT */
 			make_vomiting((long)rn1(victual.reqtime, 14), FALSE);
 		}
 		break;
@@ -1441,6 +1697,11 @@ struct obj *otmp;
 #endif
 		if (otmp->otyp == EGG && stale_egg(otmp)) {
 		    pline("Ugh.  Rotten egg.");	/* perhaps others like it */
+#ifdef CONVICT
+		if (Role_if(PM_CONVICT) && (rn2(8) > u.ulevel)) {
+		    You_feel("a slight stomach ache.");	/* prisoners are used to bad food */
+		} else
+#endif /* CONVICT */
 		    make_vomiting(Vomiting+d(10,4), TRUE);
 		} else
  give_feedback:
@@ -1583,6 +1844,23 @@ struct obj *otmp;
 		if (!(HSleeping & FROMOUTSIDE))
 		    accessory_has_effect(otmp);
 		HSleeping = FROMOUTSIDE | rnd(100);
+		break;
+	    case AMULET_OF_DRAIN_RESISTANCE:
+#ifdef DEBUG
+			debugpline("Trying to give drain resistance");
+#endif
+			if( !(HDrain_resistance) ) {
+				You(Hallucination ? "are bouncing off the walls!" :
+					"feel especially energetic.");
+			}
+			if( (HDrain_resistance & TIMEOUT) + 1000 < TIMEOUT) {
+				long timer = (HDrain_resistance & TIMEOUT)+1000;
+				HDrain_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				HDrain_resistance |= timer; //set new timer
+			}
+			else{
+				HDrain_resistance |= TIMEOUT; //set timer to max value
+			}
 		break;
 	    case RIN_SUSTAIN_ABILITY:
 	    case AMULET_OF_LIFE_SAVING:
@@ -1768,7 +2046,7 @@ struct obj *otmp;
 		    stoneorslime = (!Unchanging && !flaming(youmonst.data) &&
 			youmonst.data != &mons[PM_GREEN_SLIME]);
 
-		if (cadaver && mnum != PM_LIZARD && mnum != PM_LICHEN) {
+		if (cadaver && mnum != PM_LIZARD && mnum != PM_LICHEN && mnum != PM_BEHOLDER ) {
 			long age = peek_at_iced_corpse_age(otmp);
 			/* worst case rather than random
 			   in this calculation to force prompt */
@@ -1968,12 +2246,85 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		(void) rottenfood(otmp);
 
 	    if (otmp->oclass == WEAPON_CLASS && otmp->opoisoned) {
+			if(otmp->opoisoned & OPOISON_BASIC){
 		pline("Ecch - that must have been poisonous!");
 		if(!Poison_resistance) {
 		    losestr(rnd(4));
 		    losehp(rnd(15), xname(otmp), KILLED_BY_AN);
 		} else
 		    You("seem unaffected by the poison.");
+			}
+			else if(otmp->opoisoned & OPOISON_FILTH){
+				pline("Ulch - that was tainted with filth!");
+				if (Sick_resistance) {
+					pline("It doesn't seem at all sickening, though...");
+				} else {
+					char buf[BUFSZ];
+					long sick_time;
+
+					sick_time = (long) rn1(10, 10);
+					/* make sure new ill doesn't result in improvement */
+					if (Sick && (sick_time > Sick))
+						sick_time = (Sick > 1L) ? Sick - 1L : 1L;
+					Sprintf(buf, "filth-crusted %s", xname(otmp));
+					make_sick(sick_time, buf, TRUE, SICK_VOMITABLE);
+				}
+			}
+			else if(otmp->opoisoned & OPOISON_SLEEP){
+				pline("Ecch - that must have been drugged!");
+				if(Poison_resistance || Sleep_resistance) {
+					You("suddenly fall asleep!");
+					fall_asleep(-rn1(10, 25 - 12*bcsign(otmp)), TRUE);
+				} else
+					You("seem unaffected by the drugs.");
+			}
+			else if(otmp->opoisoned & OPOISON_BLIND){
+				pline("Ecch - that must have been poisoned!");
+				make_blinded(rn1(200, 250 - 125 * bcsign(otmp)),
+						 (boolean)!Blind);
+			}
+			else if(otmp->opoisoned & OPOISON_PARAL){
+				if (Free_action)
+					You("stiffen momentarily.");
+				else {
+					if (Levitation || Is_airlevel(&u.uz)||Is_waterlevel(&u.uz))
+					You("are motionlessly suspended.");
+#ifdef STEED
+					else if (u.usteed)
+					You("are frozen in place!");
+#endif
+					else
+					Your("%s are frozen to the %s!",
+						 makeplural(body_part(FOOT)), surface(u.ux, u.uy));
+					nomul(-(rn1(10, 25 - 12*bcsign(otmp))), "paralyzed from eating an envenomed weapon");
+					nomovemsg = You_can_move_again;
+					exercise(A_DEX, FALSE);
+				}
+			}
+			else if(otmp->opoisoned & OPOISON_AMNES){
+				forget((!otmp->blessed? ALL_SPELLS : 0) | ALL_MAP);
+				if (Hallucination)
+					pline("Hakuna matata!");
+				else
+					You_feel("your memories dissolve.");
+
+				/* Blessed amnesia makes you forget lycanthropy, sickness */
+				if (otmp->blessed) {
+					if (u.ulycn >= LOW_PM && !Race_if(PM_HUMAN_WEREWOLF)) {
+					You("forget your affinity to %s!",
+							makeplural(mons[u.ulycn].mname));
+					if (youmonst.data == &mons[u.ulycn])
+						you_unwere(FALSE);
+					u.ulycn = NON_PM;	/* cure lycanthropy */
+					}
+					make_sick(0L, (char *) 0, TRUE, SICK_ALL);
+
+					/* You feel refreshed */
+					u.uhunger += 50 + rnd(50);
+					newuhs(FALSE);
+				} else
+					exercise(A_WIS, FALSE);
+			}
 	    } else if (!otmp->cursed)
 		pline("This %s is delicious!",
 		      otmp->oclass == COIN_CLASS ? foodword(otmp) :
@@ -2129,9 +2480,15 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 
 	if ((!u.usleep || !rn2(10))	/* slow metabolic rate while asleep */
 		&& (carnivorous(youmonst.data) || herbivorous(youmonst.data))
+#ifdef CONVICT
+        /* Convicts can last twice as long at hungry and below */
+        && (!Role_if(PM_CONVICT) || (moves % 2) || (u.uhs < HUNGRY))
+#endif /* CONVICT */
 		&& !Slow_digestion)
 	    u.uhunger--;		/* ordinary food consumption */
-
+	if(uwep && (
+			uwep->oartifact == ART_GARNET_ROD || (uwep->oartifact == ART_TENSA_ZANGETSU && !is_undead(youmonst.data)))
+		) u.uhunger -= 9; //time warp massively increases food consumption
 	if (moves % 2) {	/* odd turns */
 	    /* Regeneration uses up food, unless due to an artifact */
 	    if (HRegeneration || ((ERegeneration & (~W_ART)) &&

@@ -347,7 +347,12 @@ makecorridors()
 	    }
 }
 
-void
+
+/* 
+ALI - Artifact doors: Track doors in maze levels as well.  From Slash'em
+*/
+
+int
 add_door(x,y,aroom)
 register int x, y;
 register struct mkroom *aroom;
@@ -355,8 +360,17 @@ register struct mkroom *aroom;
 	register struct mkroom *broom;
 	register int tmp;
 
+	if (doorindex == DOORMAX)
+	    return -1;
+
+	if (aroom) {
 	aroom->doorct++;
 	broom = aroom+1;
+	} else
+	    /* ALI
+	     * Roomless doors must go right at the beginning of the list
+	     */
+	    broom = &rooms[0];
 	if(broom->hx < 0)
 		tmp = doorindex;
 	else
@@ -366,6 +380,8 @@ register struct mkroom *aroom;
 	doors[tmp].x = x;
 	doors[tmp].y = y;
 	for( ; broom->hx >= 0; broom++) broom->fdoor++;
+	doors[tmp].arti_text = 0;
+	return tmp;
 }
 
 STATIC_OVL void
@@ -585,6 +601,12 @@ clear_level_structures()
 	level.flags.arboreal = 0;
 	level.flags.is_maze_lev = 0;
 	level.flags.is_cavernous_lev = 0;
+	level.flags.lethe = 0;
+
+	level.flags.slime = 0;
+	level.flags.fungi = 0;
+	level.flags.dun = 0;
+	level.flags.necro = 0;
 
 	nroom = 0;
 	rooms[0].hx = -1;
@@ -1259,7 +1281,7 @@ coord *tm;
 		else if (!somexy(croom,&m))
 		    return;
 	    } while (occupied(m.x, m.y) ||
-			(avoid_boulder && sobj_at(BOULDER, m.x, m.y)));
+			(avoid_boulder && boulder_at(m.x, m.y)));
 	}
 
 	(void) maketrap(m.x, m.y, kind);
@@ -1497,7 +1519,7 @@ int dist;
 
     /* clear boulders; leave some rocks for non-{moat|trap} locations */
     make_rocks = (dist != 1 && dist != 4 && dist != 5) ? TRUE : FALSE;
-    while ((otmp = sobj_at(BOULDER, x, y)) != 0) {
+    while ((otmp = boulder_at(x, y)) != 0) {
 	if (make_rocks) {
 	    fracture_rock(otmp);
 	    make_rocks = FALSE;		/* don't bother with more rocks */

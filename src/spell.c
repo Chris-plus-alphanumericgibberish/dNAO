@@ -6,12 +6,15 @@
 
 static NEARDATA schar delay;		/* moves left for this spell */
 static NEARDATA struct obj *book;	/* last/current book being xscribed */
+static NEARDATA int RoSbook;		/* Read spell or Study Wards?"
 
 /* spellmenu arguments; 0 thru n-1 used as spl_book[] index when swapping */
 #define SPELLMENU_CAST (-2)
 #define SPELLMENU_VIEW (-1)
 
 #define KEEN 20000
+#define READ_SPELL 1
+#define STUDY_WARD 2
 #define MAX_SPELL_STUDY 3
 #define incrnknow(spell)        spl_book[spell].sp_know = KEEN
 
@@ -34,6 +37,33 @@ STATIC_DCL void FDECL(spell_backfire, (int));
 STATIC_DCL const char *FDECL(spelltypemnemonic, (int));
 STATIC_DCL int FDECL(isqrt, (int));
 
+long FDECL(doreadstudy, (const char *));
+
+//definition of an extern in you.h
+char *wardDecode[26] = {
+	"digit",
+	"heptagram",
+	"Gorgoneion",
+	"circle of Acheron",
+	"pentagram",
+	"hexagram",
+	"hamsa mark",
+	"elder sign",
+	"elder elemental eye",
+	"sign of the Scion Queen Mother",
+	"cartouche of the Cat Lord",
+	"sketch of the wings of Garuda",
+	"sigil of Cthugha",
+	"brand of Ithaqua",
+	"tracery of Krakal",
+	"yellow sign",
+	"toustefna stave",
+	"dreprun stave",
+	"ottastafur stave",
+	"kaupaloki stave",
+	"veioistafur stave",
+	"thjofastafur stave",
+};
 /* The roles[] table lists the role-specific values for tuning
  * percent_success().
  *
@@ -89,6 +119,7 @@ STATIC_DCL int FDECL(isqrt, (int));
 
 /* since the spellbook itself doesn't blow up, don't say just "explodes" */
 static const char explodes[] = "radiates explosive energy";
+static const char where_to_cast[] = "Where do you want to cast the spell?";
 
 /* convert a letter into a number in the range 0..51, or -1 if not a letter */
 STATIC_OVL int
@@ -111,6 +142,8 @@ cursed_book(bp)
 {
 	int lev = objects[bp->otyp].oc_level;
 
+	if(RoSbook == STUDY_WARD) lev -= 1; //The wardings paritally protect you from the magic contained within the book.
+	
 	switch(rn2(lev)) {
 	case 0:
 		You_feel("a wrenching sensation.");
@@ -339,7 +372,83 @@ learn()
 	    deadbook(book);
 	    return(0);
 	}
-
+	if(booktype == SPE_SECRETS){
+		if(book->oartifact) doparticularinvoke(book); //this is a redundant check
+		else{ 
+			if(!(book->ovar1) || 
+				book->ovar1 > 10 ||
+				book->ovar1 < 1) book->ovar1 = d(1,10);
+			switch(book->ovar1){
+				case 1:
+					pline("...these are some surprisingly petty secrets.");
+				break;
+				case 2:
+					pline("...apparently the language is ALSO a secret.");
+				break;
+				case 3:
+					pline("It's blank. You guess the author KEPT his secrets.");
+				    book->otyp = booktype = SPE_BLANK_PAPER;
+				break;
+				case 4:
+					pline("...these metallurgical techniques are 200 years out of date.");
+				break;
+				case 5:{
+					struct obj *otmp;
+					otmp = mksobj(rnd(4) ? ELVEN_DAGGER : SILVER_DAGGER, TRUE, FALSE);
+					otmp->spe = d(1,4)+1;
+					otmp->quan += d(2,3);
+					pline("...it's been hollowed out.  There is a set of throwing daggers inside.");
+					useup(book);
+					otmp = hold_another_object(otmp, "The %s out.",
+				       aobjnam(otmp, "fall"), (const char *)0);
+				}
+				break;
+				case 6:{
+					struct obj *otmp;
+					otmp = mkobj(WAND_CLASS, FALSE);
+					pline("...it's been hollowed out.  There is a wand inside.");
+					useup(book);
+					otmp = hold_another_object(otmp, "The %s out.",
+				       aobjnam(otmp, "fall"), (const char *)0);
+				}
+				break;
+				case 7:
+					pline("...these are some surprisingly mundane secrets.");
+				break;
+				case 8:
+					pline("...it's about YOU.");
+				break;
+				case 9:
+					pline("It details the true location of the fabled Dungeons of Doom.");
+				break;
+				case 10:{
+					struct obj *otmp;
+					otmp = mkobj(SPBOOK_CLASS, FALSE);
+					pline("It's a false cover, a different book is inside.");
+					useup(book);
+					otmp = hold_another_object(otmp, "The %s out.",
+				       aobjnam(otmp, "fall"), (const char *)0);
+				}
+				break;
+			}
+		}
+		book = 0;
+	    return(0);
+	}
+	if(RoSbook == STUDY_WARD){
+	 if((book->ovar1)){
+		pline("The spellbook is warded with a %s", wardDecode[decode_wardID(book->ovar1)]);
+		if( !(u.wardsknown & book->ovar1) ){
+			u.wardsknown |= book->ovar1;
+		}
+		else{
+			You("are already familar with this ward.");
+		}
+	 } else{
+		pline("The spellbook is warded with a thaumaturgical ward, good for spellbooks but not much else.");
+	 }
+	 return(0);
+	}
 	Sprintf(splname, objects[booktype].oc_name_known ?
 			"\"%s\"" : "the \"%s\" spell",
 		OBJ_NAME(objects[booktype]));
@@ -388,11 +497,16 @@ learn()
 
 int
 study_book(spellbook)
-register struct obj *spellbook;
+struct obj *spellbook;
 {
 	register int	 booktype = spellbook->otyp;
 	register boolean confused = (Confusion != 0);
 	boolean too_hard = FALSE;
+
+	if(spellbook->oartifact){ //this is the primary artifact-book check.
+		doparticularinvoke(spellbook);//there is a redundant check in the spell learning code
+		return 1;					//which should never be reached, and only catches books of secrets anyway.
+	}
 
 	if (delay && !confused && spellbook == book &&
 		    /* handle the sequence: start reading, get interrupted,
@@ -429,16 +543,19 @@ register struct obj *spellbook;
 				objects[booktype].oc_level, booktype);
 			return 0;
 		}
-
+		RoSbook = doreadstudy("You open the spellbook.");
+		if(!RoSbook) return 0;
 		/* Books are often wiser than their readers (Rus.) */
 		spellbook->in_use = TRUE;
 		if (!spellbook->blessed &&
+			!spellbook->oartifact && 
 		    spellbook->otyp != SPE_BOOK_OF_THE_DEAD) {
 		    if (spellbook->cursed) {
 			too_hard = TRUE;
 		    } else {
 			/* uncursed - chance to fail */
 			int read_ability = ACURR(A_INT) + 4 + u.ulevel/2
+			    + ((RoSbook == STUDY_WARD) ? 10 : 0)
 			    - 2*objects[booktype].oc_level
 			    + ((ublindf && ublindf->otyp == LENSES) ? 2 : 0);
 			/* only wizards know if a spell is too difficult */
@@ -484,9 +601,11 @@ register struct obj *spellbook;
 		}
 		spellbook->in_use = FALSE;
 
+		RoSbook == READ_SPELL ? 
 		You("begin to %s the runes.",
 		    spellbook->otyp == SPE_BOOK_OF_THE_DEAD ? "recite" :
-		    "memorize");
+				"memorize") 
+			: You("begin to study the ward.");
 	}
 
 	book = spellbook;
@@ -817,6 +936,7 @@ boolean atme;
 	 */
 	skill = spell_skilltype(pseudo->otyp);
 	role_skill = P_SKILL(skill);
+	if(Spellboost) role_skill++;
 
 	switch(pseudo->otyp)  {
 	/*
@@ -827,7 +947,8 @@ boolean atme;
 	 */
 	case SPE_CONE_OF_COLD:
 	case SPE_FIREBALL:
-	    if (role_skill >= P_SKILLED) {
+	    if (role_skill >= P_SKILLED) { //if you're skilled, do meteor storm version of spells
+		  if(yn("Cast advanced spell?") == 'y'){
 	        if (throwspell()) {
 		    cc.x=u.dx;cc.y=u.dy;
 		    n=rnd(8)+1;
@@ -855,6 +976,8 @@ boolean atme;
 		    }
 		}
 		break;
+		  }
+		  else if(pseudo->otyp == SPE_FIREBALL) u.uen += energy/2; //get some energy back for casting basic fireball, cone of cold is a line so maybe it's beter
 	    } /* else fall through... */
 
 	/* these spells are all duplicates of wand effects */
@@ -878,7 +1001,7 @@ boolean atme;
 	case SPE_STONE_TO_FLESH:
 		if (!(objects[pseudo->otyp].oc_dir == NODIR)) {
 			if (atme) u.dx = u.dy = u.dz = 0;
-			else if (!getdir((char *)0)) {
+			else if (!getdir((char *)0)) { //Oh, getdir must set the .d_ variables below.
 			    /* getdir cancelled, re-use previous direction */
 			    pline_The("magical energy is released!");
 			}
@@ -889,7 +1012,9 @@ boolean atme;
 				losehp(damage, buf, NO_KILLER_PREFIX);
 			    }
 			} else weffects(pseudo);
-		} else weffects(pseudo);
+		} else{ 
+			weffects(pseudo);
+		}
 		update_inventory();	/* spell may modify inventory */
 		break;
 
@@ -937,10 +1062,17 @@ boolean atme;
 		(void) make_familiar((struct obj *)0, u.ux, u.uy, FALSE);
 		break;
 	case SPE_CLAIRVOYANCE:
-		if (!BClairvoyant)
-		    do_vicinity_map();
+		if (!BClairvoyant) {
+		    if (role_skill >= P_SKILLED) {
+			coord cc;
+			pline(where_to_cast);
+			cc.x = u.ux;
+			cc.y = u.uy;
+			if (getpos(&cc, TRUE, "the desired position") >= 0)
+		    	    do_vicinity_map(cc.x,cc.y);
+		    } else do_vicinity_map(u.ux,u.uy);
 		/* at present, only one thing blocks clairvoyance */
-		else if (uarmh && uarmh->otyp == CORNUTHAUM)
+		} else if (uarmh && uarmh->otyp == CORNUTHAUM)
 		    You("sense a pointy hat on top of your %s.",
 			body_part(HEAD));
 		break;
@@ -976,7 +1108,7 @@ throwspell()
 	    You("had better wait for the sun to come out."); return 0;
 	}
 
-	pline("Where do you want to cast the spell?");
+	pline(where_to_cast);
 	cc.x = u.ux;
 	cc.y = u.uy;
 	if (getpos(&cc, TRUE, "the desired position") < 0)
@@ -1176,11 +1308,14 @@ int spell;
 	special = urole.spelheal;
 	statused = ACURR(urole.spelstat);
 
-	if (uarm && is_metallic(uarm))
+	if (uarm && (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE) )
 	    splcaster += (uarmc && uarmc->otyp == ROBE) ?
-		urole.spelarmr/2 : urole.spelarmr;
+		uarmc->oartifact ? 0 : urole.spelarmr/2 : urole.spelarmr;
 	else if (uarmc && uarmc->otyp == ROBE)
-	    splcaster -= urole.spelarmr;
+		splcaster -= uarmc->oartifact ? 2*urole.spelarmr : urole.spelarmr;
+
+	if(uarm && uarm->oartifact == ART_DRAGON_PLATE) splcaster += urole.spelarmr;
+
 	if (uarms) splcaster += urole.spelshld;
 
 	if (uarmh && is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE)
@@ -1290,5 +1425,111 @@ struct obj *obj;
 	impossible("Too many spells memorized!");
 	return;
 }
+
+/* Learn a spell during creation of the initial inventory */
+void
+initialward(obj)
+struct obj *obj;
+{
+	// WARD_ACHERON			0x0000008L
+	// WARD_QUEEN			0x0000200L
+	// WARD_GARUDA			0x0000800L
+	
+	// WARD_ELDER_SIGN		0x0000080L
+	// WARD_EYE				0x0000100L
+	// WARD_CAT_LORD		0x0000400L
+	if(obj->ovar1 && !(u.wardsknown & obj->ovar1)){
+		u.wardsknown |= obj->ovar1;
+		return;
+	}
+	
+	switch(rn2(16)){
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+			if(!(u.wardsknown & WARD_ACHERON)){
+				obj->ovar1 = WARD_ACHERON;
+				u.wardsknown |= obj->ovar1;
+		break;
+			}
+		case 6:
+		case 7:
+		case 8:
+			if(!(u.wardsknown & WARD_QUEEN)){
+				obj->ovar1 = WARD_QUEEN;
+				u.wardsknown |= obj->ovar1;
+		break;
+			}
+		case 9:
+		case 10:
+		case 11:
+			if(!(u.wardsknown & WARD_GARUDA)){
+				obj->ovar1 = WARD_GARUDA;
+				u.wardsknown |= obj->ovar1;
+		break;
+			}
+		case 12:
+		case 13:
+			if(!(u.wardsknown & WARD_EYE)){
+				obj->ovar1 = WARD_EYE;
+				u.wardsknown |= obj->ovar1;
+		break;
+			}
+		case 14:
+			if(!(u.wardsknown & WARD_CAT_LORD)){
+				obj->ovar1 = WARD_CAT_LORD;
+				u.wardsknown |= obj->ovar1;
+		break;
+			}
+		case 15:
+			if(!(u.wardsknown & WARD_ELDER_SIGN)){
+				obj->ovar1 = WARD_ELDER_SIGN;
+				u.wardsknown |= obj->ovar1;
+			}
+		break; /*Fall through to here*/
+	}
+	return;
+}
+
+long
+doreadstudy(prompt)
+const char *prompt;
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Read the spellbook or Study its wardings?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+		Sprintf(buf, "Read spell");
+		any.a_int = READ_SPELL;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'r', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Study warding");
+		any.a_int = STUDY_WARD;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			's', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	
+	end_menu(tmpwin, prompt);
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? selected[0].item.a_int : 0;
+}
+
 
 /*spell.c*/

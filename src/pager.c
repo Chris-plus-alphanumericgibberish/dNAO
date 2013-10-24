@@ -278,6 +278,11 @@ lookat(x, y, buf, monbuf)
     case S_cloud:
 	Strcpy(buf, Is_airlevel(&u.uz) ? "cloudy area" : "fog/vapor cloud");
 	break;
+	//Lethe patch by way of Slashem
+    case S_water:
+    case S_pool:
+	Strcpy(buf, level.flags.lethe? "sparkling water" : "water");
+	break;
     default:
 	Strcpy(buf,defsyms[glyph_to_cmap(glyph)].explanation);
 	break;
@@ -452,6 +457,337 @@ bad_data_file:	impossible("'data' file in wrong format");
 /* also used by getpos hack in do_name.c */
 const char what_is_an_unknown_object[] = "an unknown object";
 
+static const char * const bogusobjects[] = {
+       /* Real */
+	   "eleven arrow"
+	   "ortish arrow",
+       "ruined arrow",
+       "vulgar arrow",
+       "ja",
+       "bamboozled sparrow",
+       "crossbow bolt",
+	   "crossbow dolt",
+	   "throwing fart",
+       "shurunken",
+	   "bomberang",
+       "elven drear",
+       "orcish dear",
+       "dwarvish peer",
+       "sliver spear",
+       "throwing spar",
+       "2x3dent",
+       "danger",
+       "elven danger",
+       "orcish danger",
+       "sliver danger",
+	   "allthame",
+       "scalp",
+       "stiletto",
+	   "silletto",
+       "criesknife",
+       "old battle-axe",
+       "length-challenged sword",
+       "re-curved sword",
+       "de-curved sword",
+       "circular sword",
+       "longer sword",
+       "three-handed sword",
+       "catana",
+       "dunesword",
+       "bi-partisan",
+       "parisian",
+       "sniptem",
+       "fave",
+       "rancor",
+       "lancer",
+       "halbeard",
+       "snake-eyed bardiche",
+       "vouge",
+       "dwarvish hassock",
+       "fauchard",
+       "mysarme",
+       "uisarme",
+       "lucifer's hammer",
+       "bec de corwin",
+       "yet another poorly-differentiated polearm",
+       "rusty YAPDP",
+       "can of mace",
+       "evening star",
+       "dawn star",
+       "day star",
+       "peace hammer",
+       "wooden sandwich",
+       "halfstaff",
+       "iron bar",
+       "thong club",
+       "dire flail",
+       "dire fail",
+       "trollwhip",
+       "partially-eaten yumi",
+       "X-bow",
+       "conical flat",
+       "mithril-boat",
+       "barded mail",
+       "yet another substandard mail variant",
+       "scale-reinforced banded-splint mail with chain joints",
+       "leather studd armor",
+       "white shirt",
+       "undershirt",
+       "cope [sic]",
+       "lion skin",
+       "bear skin robe",
+       "bear skin rug",
+       "undersized shield",
+       "shield of reflection",
+       "shield of rarefaction",
+       "padding gloves",
+       "rideable gloves",
+       "feching gloves",
+       "wandering walking shoes",
+       "hardly shoes",
+       "jackboots",
+       "combat boats",
+       "hiking boots",
+       "wild hiking boots",
+       "muddy boots",
+	   
+	   "can of Greece",
+	   "can of crease",
+	   "can of Grease",
+	   "can of greaser",
+		
+       "blessed greased +5 silly object of hilarity",
+	   "kinda lame joke",
+# ifdef TOURIST
+       /* Modern */
+       "polo mallet",
+       "string vest",
+       "applied theology textbook",        /* AFutD */
+       "handbag",
+       "onion ring",
+       "tuxedo",
+       "breath mint",
+       "potion of antacid",
+       "traffic cone",
+       "chainsaw",
+/*	   "pair of high-heeled stilettos",    /* the *other* stiletto */
+	   "high-heeled stiletto",
+	   "comic book",
+	   "lipstick",
+       "dinner-jacket",
+       "three-piece suit",
+
+       /* Silly */
+       "left-handed iron chain",
+       "holy hand grenade",                /* Monty Python */
+       "decoder ring",
+       "amulet of huge gold chains",       /* Foo' */
+       "rubber Marduk",
+       "unicron horn",                     /* Transformers */
+       "holy grail",                       /* Monty Python */
+       "chainmail bikini",
+	   "leather shorts",
+       "first class one-way ticket to Albuquerque", /* Weird Al */
+       "yellow spandex dragon scale mail", /* X-Men */
+
+       /* Musical Instruments */
+       "grand piano",
+       "set of two slightly sampled electric eels", /* Oldfield */
+       "kick drum",                        /* 303 */
+       "tooled airhorn",
+
+       /* Pop Culture */
+       "flux capacitor",                   /* BTTF */
+       "Walther PPK",                      /* Bond */
+       "hanging chad",                     /* US Election 2000 */
+       "99 red balloons",                  /* 80s */
+       "pincers of peril",                 /* Goonies */
+       "ring of schwartz",                 /* Spaceballs */
+       "signed copy of Diaspora",          /* Greg Egan */
+       "file containing the missing evidence in the Kelner case", /* Naked Gun */
+       "blessed 9 helm of Des Lynam",     /* Bottom */
+	   "oscillation overthruster",
+	   "magic device",
+	   
+	   "Infinity Gauntlet",
+
+        /* Geekery */
+       "AAA chipset",                      /* Amiga */
+       "thoroughly used copy of Nethack for Dummies",
+       "named pipe",                       /* UNIX */
+       "kernel trap",
+       "copy of nethack 3.4.4",            /* recursion... */
+       "YAFM", "YAAP", "YANI", "YAAD", "YASD", "YAFAP", "malevolent RNG", /* rgrn */
+       "cursed smooth manifold",           /* Topology */
+       "vi clone",
+       "maximally subsentient emacs mode",
+       "bongard diagram",                  /* Intelligence test */
+	   
+	   /* Movies etc. */
+	   "overloading phaser", /* Star Trek */
+	   "thermal detinator", /* Star Wars */
+       "thing that is not tea",/*"no tea here!", "no tea, sadly",*/ /* HGttG */
+		"potion almost, but not quite, entirely unlike tea",
+		"potion of Pan-Galactic Gargle Blaster", "black scroll-case labled DON'T PANIC", /* HGttG */
+	   "ridiculously dangerous epaulet [it's armed]", /* Schlock Mercenary*/
+	   "pokeball", /* Pokemon */
+	   "scroll of oxygen-destroyer plans", /* Godzilla */
+	   "hologram of Death Star plans",
+	   "sonic screwdriver", /* Dr. Who */
+
+	   /* British goodness */
+       "bum bag",
+       "blessed tin of marmite",
+       "tesco value potion",
+       "ringtone of drawbridge opening",
+       "burberry cap",
+       "potion of bitter",
+       "cursed -2 bargain plane ticket to Ibiza",
+       "black pudding corpse",
+# endif
+       /* Fantasy */
+       "leaf of pipe weed",                /* LOTR */
+       "knife missile",                    /* Iain M. Banks */
+       "large gem",                        /* Valhalla */
+       "monster manual",                   /* D&D */
+       "ring of power",                    /* LOTR */
+       "lightsaber",	                   /* Star Wars */
+/*       "pan-galactic gargle blaster",      /* HGttG */
+       "silmaril",                         /* LOTR */
+       "pentagram of protection",          /* Quake */
+	   "crown of swords",
+	   
+	   /* Books */
+	   "Codex of the Infinite Planes",	   /* DnD */
+	   "spellbook of Non-Conduit Transdimensional Fabric Fluxes and Real-Time Inter-dimensional Matrix Transformations", /* Maldin's Greyhawk */
+       "spellbook named The Book of Sand",                     /* Jorge Luis Borges */
+       "spellbook named Octavo",       	   /* Discworld */
+		"Necrotelicomnicon",
+	   "lost copy of The Nice and Accurate Prophecies of Anges Nutter", /* Good Omens */
+	   "spellbook of Addition Made Simple",
+	   "spellbook of Noncommutative Hyperdimensional Geometry Made (Merely!) Complicated",
+	   "heavily obfuscated spellbook",
+	   "scroll of abstruse logic",
+	   "spellbook of sub-formal introtransreductive logic [for Dummies!]",
+	   "spellbook named A Brief History of Time",
+	   "spellbook named The Book of Eibon", 					/* Clark Ashton Smith */
+	   "playbook named The King in Yellow", 					/* Robert W. Chambers */
+	   "spellbook named De Vermis Mysteriis",					/* Robert Bloch */
+	   "spellbook named Necronomicon",							/* HP Lovecraft (yes, I know there is a game artifact of this name) */
+	   "spellbook named Al Azif",								/* "Arabic" name for the Necronomicon, HP Lovecraft */
+	   "spellbook named Unaussprechlichen Kulten",				/*  Robert E. Howard; Lovecraft and Derleth */
+	   "spellbook named Nameless Cults",						/*  (the original name) */
+	   "spellbook named Unspeakable Cults",						/*  One of the two things "Unaussprechlichen" translates to */
+	   "spellbook named Unpronouncable Cults",					/*  The other thing "Unaussprechlichen" translates to */
+	   "spellbook named The Diary of Drenicus the Wise",		/*  Dicefreaks, The Gates of Hell */
+	   "spellbook named Clavicula Salomonis Regis",				/* ie, The Lesser Key of Solomon */
+	   "copy of The Five Books of Moses",				/* aka the Torah */
+	   "spellbook named The Six and Seventh Books of Moses",	/* 18th- or 19th-century magical text allegedly written by Moses */
+	   "spellbook named The Book of Coming Forth by Day", "spellbook named The Book of emerging forth into the Light",
+	   "spellbook named Sefer Raziel HaMalakh",
+	   "spellbook named The Testament of Solomon",
+	   "spellbook named The Book of Enoch",
+	   "spellbook named The Uruk Tablets",
+       "dead sea scroll",
+	   "mayan codex",
+
+       /* Historical */
+	   "Amarna letter",
+	   "lost ark of the covenant",
+       "cat o'nine tails",
+       "pieces of eight",
+       "codpiece",
+       "straight-jacket",
+       "bayonet",
+       "iron maiden",
+       "oubliette",
+       "pestle and mortar",
+       "plowshare",
+	   "petard",
+	   "caltrop",
+
+       /* Mashups */
+       "potion of rebigulation",           /* Simpsons */
+       "potion of score doubling",
+	   "potion of bad breath",
+	   "potion of fire breathing",
+	   "potion of intoxication",
+	   "potion of immorality",
+	   "potion of immoratlity",
+	   "potion of gain divinity",
+       "scroll labeled ED AWK YACC",      /* the standard scroll */
+       "scroll labeled RTFM",
+       "scroll labeled KLAATU BARADA NIKTO", /* Evil Dead 3 */
+       "scroll of omniscience",
+       "scroll of mash keyboard",
+       "scroll of RNG taming",
+       "scroll of fungicide",
+	   "scroll of apocalypse",
+	   "scroll of profits",
+	   "scroll of stupidity",
+	   "spellbook of firebear",
+	   "spellbook of dip",
+	   "spellbook of cone of cord",
+       "helm of telemetry",
+       "helm of head-butting",
+       "pair of blue suede boots of charisma",
+	   "pair of boots of rug-cutting",
+	   "pair of cursed boots of mazing",
+       "pair of wisdom boots",
+       "cubic zirconium",
+       "amulet of instadeath",
+       "amulet of bad luck",
+       "amulet of refraction",
+       "amulet of deflection",
+       "amulet of rarefaction",
+       "O-ring",
+       "ring named Frost Band",
+       "expensive exact replica of the Amulet of Yendor",
+       "giant beatle",
+       "lodestone",
+       "rubber chicken",                   /* c corpse */
+       "figurine of a god",
+       "tin of Player meat",
+       "tin of whoop ass",
+	   "ragnarok horn",
+       "cursed -3 earring of adornment",
+       "ornamental cape",
+       "acid blob skeleton",
+       "wand of washing",
+	   "wand of intoxication",
+	   "wand of vaporization",
+	   "wand of disruption",
+	   "wand of transubstantiation",
+	   "wand of disintegration",
+	   "wand of renewal",
+	   
+	   "little piece of home",
+
+# ifdef MAIL
+       "brand new, all time lowest introductory rate special offer",
+       "tin of spam",
+# endif
+       "dirty rag"
+};
+
+/* Return a random bogus object name, for hallucination */
+const char *
+rndobjnam()
+{
+    int name;
+	if(!rn2(3)){
+		name = rn2(SIZE(bogusobjects));
+		return bogusobjects[name];
+//	} else if(!rn2(2)){
+//		name = rn2(TIN);
+//		return OBJ_DESCR(objects[name]);
+	} else{
+		name = rn2(TIN);
+		return OBJ_NAME(objects[name]);
+	}
+}
+
+
 STATIC_OVL int
 do_look(quick)
     boolean quick;	/* use cursor && don't search for "more info" */
@@ -468,6 +804,7 @@ do_look(quick)
     boolean need_to_look;	/* need to get explan. from glyph */
     boolean hit_trap;		/* true if found trap explanation */
     int skipped_venom;		/* non-zero if we ignored "splash of venom" */
+	int hallu_obj;		/* non-zero if found hallucinable object */
     static const char *mon_interior = "the interior of a monster";
 
     if (quick) {
@@ -505,6 +842,7 @@ do_look(quick)
 	need_to_look = FALSE;
 	pm = (struct permonst *)0;
 	skipped_venom = 0;
+	hallu_obj = 0;
 	found = 0;
 	out_str[0] = '\0';
 
@@ -606,6 +944,7 @@ do_look(quick)
 		    Sprintf(out_str, "%c       %s", sym, an(objexplain[i]));
 		    firstmatch = objexplain[i];
 		    found++;
+			hallu_obj++;
 		} else {
 		    found += append_str(out_str, an(objexplain[i]));
 		}
@@ -638,6 +977,8 @@ do_look(quick)
 		    if (is_cmap_trap(i)) {
 			Sprintf(out_str, "%c       a trap", sym);
 			hit_trap = TRUE;
+		    } else if (level.flags.lethe && !strcmp(x_str, "water")) { //Lethe patch
+			Sprintf(out_str, "%c       sparkling water", sym); //Lethe patch
 		    } else {
 			Sprintf(out_str, "%c       %s", sym,
 				article == 2 ? the(x_str) :
@@ -647,6 +988,9 @@ do_look(quick)
 		    found++;
 		} else if (!u.uswallow && !(hit_trap && is_cmap_trap(i)) &&
 			   !(found >= 3 && is_cmap_drawbridge(i))) {
+		    if (level.flags.lethe && !strcmp(x_str, "water")) //lethe
+			found += append_str(out_str, "sparkling water"); //lethe
+		    else //lethe
 		    found += append_str(out_str,
 					article == 2 ? the(x_str) :
 					article == 1 ? an(x_str) : x_str);
@@ -672,8 +1016,8 @@ do_look(quick)
 		}
 		/* Kludge: warning trumps boulders on the display.
 		   Reveal the boulder too or player can get confused */
-		if (from_screen && sobj_at(BOULDER, cc.x, cc.y))
-			Strcat(out_str, " co-located with a boulder");
+		if (from_screen && boulder_at(cc.x, cc.y))
+			Strcat(out_str, " co-located with a large object");
 		break;	/* out of for loop*/
 	    }
 	}
@@ -706,7 +1050,12 @@ do_look(quick)
 	 * an ambiguous explanation by something more detailed.
 	 */
 	if (from_screen) {
-	    if (found > 1 || need_to_look) {
+	    if (hallu_obj && Hallucination) {
+			char temp_buf[BUFSZ];
+			Sprintf(temp_buf, " (%s)", rndobjnam());
+			(void)strncat(out_str, temp_buf, BUFSZ-strlen(out_str)-1);
+	    } else if (found > 1 || need_to_look) {
+
 		char monbuf[BUFSZ];
 		char temp_buf[BUFSZ];
 
@@ -731,7 +1080,9 @@ do_look(quick)
 	    if (found == 1 && ans != LOOK_QUICK && ans != LOOK_ONCE &&
 			(ans == LOOK_VERBOSE || (flags.help && !quick))) {
 		char temp_buf[BUFSZ];
-		Strcpy(temp_buf, firstmatch);
+		Strcpy(temp_buf, level.flags.lethe //lethe
+					&& !strcmp(firstmatch, "water")?
+				"lethe" : firstmatch);
 		checkfile(temp_buf, pm, FALSE, (boolean)(ans == LOOK_VERBOSE));
 	    }
 	} else {

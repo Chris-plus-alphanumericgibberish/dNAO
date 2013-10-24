@@ -176,7 +176,8 @@ struct obj *wep;
 	    if (artifact_light(wep) && !wep->lamplit) {
 		begin_burn(wep, FALSE);
 		if (!Blind)
-		    pline("%s to glow brilliantly!", Tobjnam(wep, "begin"));
+			pline("%s to %s%s!", Tobjnam(wep, "begin"),
+				(wep->blessed ? "shine very" : "glow"), (wep->cursed ? "" : " brilliantly"));
 	    }
 
 #if 0
@@ -490,7 +491,7 @@ can_twoweapon()
 		pline("%s isn't one-handed.", Yname2(otmp));
 	} else if (uarms)
 		You_cant("use two weapons while wearing a shield.");
-	else if (uswapwep->oartifact)
+	else if (uswapwep->oartifact && !is_twoweapable_artifact(uswapwep))
 		pline("%s %s being held second to another weapon!",
 			Yname2(uswapwep), otense(uswapwep, "resist"));
 	else if (!uarmg && !Stone_resistance && (uswapwep->otyp == CORPSE &&
@@ -721,14 +722,14 @@ register int amount;
 		return(1);
 	}
 
-	if (amount < 0 && uwep->oartifact && restrict_name(uwep, ONAME(uwep), TRUE)) {
+	if (amount < 0 && uwep->oartifact && restrict_name(uwep, ONAME(uwep))) {
 	    if (!Blind)
 		Your("%s %s.", aobjnam(uwep, "faintly glow"), color);
 	    return(1);
 	}
 	/* there is a (soft) upper and lower limit to uwep->spe */
 	if(((uwep->spe > 5 && amount >= 0) || (uwep->spe < -5 && amount < 0))
-								&& rn2(3)) {
+								&& rn2(3) && uwep->oartifact != ART_ROD_OF_SEVEN_PARTS) {
 	    if (!Blind)
 	    Your("%s %s for a while and then %s.",
 		 aobjnam(uwep, "violently glow"), color,
@@ -765,9 +766,15 @@ register int amount;
 	/* an elven magic clue, cookie@keebler */
 	/* elven weapons vibrate warningly when enchanted beyond a limit */
 	if ((uwep->spe > 5)
-		&& (is_elven_weapon(uwep) || uwep->oartifact || !rn2(7)))
+		&& (is_elven_weapon(uwep) || uwep->oartifact || !rn2(7)) &&
+		uwep->oartifact != ART_ROD_OF_SEVEN_PARTS)
 	    Your("%s unexpectedly.",
 		aobjnam(uwep, "suddenly vibrate"));
+
+	if(uwep->oartifact == ART_ROD_OF_SEVEN_PARTS && uwep->spe > 7){
+		uwep->spe = 7;
+		Your("%s faintly for a moment.",aobjnam(uwep, "rattle"));
+	}
 
 	return(1);
 }

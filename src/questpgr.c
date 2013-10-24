@@ -439,4 +439,404 @@ qt_montype()
 	return (mkclass(urole.enemy2sym, 0));
 }
 
+struct permonst *
+chaos_montype()
+{
+	if(on_level(&chaosf_level,&u.uz)){
+		int chance = d(1,100);
+		if(chance < 10){
+			return mkclass(S_ZOMBIE, 0);
+		}
+		else if(chance < 30){
+			return &mons[PM_HUMAN_ZOMBIE];
+		}
+		else if(chance < 50){
+			return &mons[PM_HOBGOBLIN];
+		}
+		else{
+			return &mons[PM_GOBLIN];
+		}
+	}
+	else if(on_level(&chaoss_level,&u.uz)){
+		//Mordor orcs, orc shaman, orc-captain, ogre, rock troll, stone golem, clay golem
+		int chance = d(1,100);
+		if(chance < 10){
+			return &mons[PM_STONE_GOLEM];
+		}
+		else if(chance < 30){
+			return &mons[PM_CLAY_GOLEM];
+		}
+		else if(chance < 40){
+			return &mons[PM_ROCK_TROLL];
+		}
+		else if(chance < 50){
+			return &mons[PM_ORC_CAPTAIN];
+		}
+		else if(chance < 60){
+			return &mons[PM_ORC_SHAMAN];
+		}
+		else if(chance < 70){
+			return &mons[PM_OGRE];
+		}
+		else{
+			return &mons[PM_MORDOR_ORC];
+		}
+	}
+	else if(on_level(&chaost_level,&u.uz)){
+//		purple worm, mind flayer, white dragon, black light, beholders
+		int chance = d(1,100);
+		if(chance < 10){
+			return &mons[PM_WHITE_DRAGON];
+		}
+		else if(chance < 20){
+			return &mons[PM_PURPLE_WORM];
+		}
+		else if(chance < 30){
+			return &mons[PM_BEHOLDER];
+		}
+		else if(chance < 65){
+			return &mons[PM_MIND_FLAYER];
+		}
+		else{
+			return &mons[PM_BLACK_LIGHT];
+		}
+	}
+	else if(on_level(&chaosm_level,&u.uz)){
+//		purple worm, mind flayer, GREEN dragon, black light, beholders
+		int chance = d(1,100);
+		if(chance < 10){
+			return &mons[PM_GREEN_DRAGON];
+		}
+		else if(chance < 20){
+			return &mons[PM_PURPLE_WORM];
+		}
+		else if(chance < 30){
+			return &mons[PM_BEHOLDER];
+		}
+		else if(chance < 65){
+			return &mons[PM_MIND_FLAYER];
+		}
+		else{
+			return &mons[PM_BLACK_LIGHT];
+		}
+	}
+	else if(on_level(&chaosfrh_level,&u.uz)){
+		//vampire lord, vampire, earth elemental, zombie
+		int chance = d(1,100);
+		if(chance < 10){
+			return &mons[PM_VAMPIRE_LORD];
+		}
+		else if(chance < 20){
+			return &mons[PM_EARTH_ELEMENTAL];
+		}
+		else if(chance < 30){
+			return mkclass(S_ZOMBIE, 0);
+		}
+		else if(chance < 65){
+			return &mons[PM_VAMPIRE];
+		}
+		else{
+			return &mons[PM_HUMAN_ZOMBIE];
+		}
+	}
+	else if(on_level(&chaosffh_level,&u.uz)){
+		//fire giant, salamander, imps, fire elemtal
+		int chance = d(1,100);
+		if(chance < 10){
+			return &mons[PM_FIRE_GIANT];
+		}
+		else if(chance < 20){
+			return &mons[PM_FIRE_ELEMENTAL];
+		}
+		else if(chance < 30){
+			return &mons[PM_SALAMANDER];
+		}
+		else{
+			return &mons[PM_IMP];
+		}
+	}
+	else if(on_level(&chaossth_level,&u.uz)){
+		//winter wolf, water troll, python, water moccasin, water elemental
+		int chance = d(1,100);
+		if(chance < 10){
+			return &mons[PM_WATER_ELEMENTAL];
+		}
+		else if(chance < 30){
+			return &mons[PM_WINTER_WOLF];
+		}
+		else if(chance < 50){
+			return &mons[PM_PYTHON];
+		}
+		else if(chance < 70){
+			return &mons[PM_WATER_TROLL];
+		}
+		else{
+			return &mons[PM_WATER_MOCCASIN];
+		}
+	}
+	else if(on_level(&chaosvth_level,&u.uz)){
+		//iron golem, air elemental
+		int chance = d(1,8);
+		if(chance == 1){
+			return &mons[PM_AIR_ELEMENTAL];
+		}
+		else if(chance == 2){
+			return &mons[PM_IRON_GOLEM];
+		}
+		else{
+			return (struct permonst *)0;
+		}
+	}
+	else if(on_level(&chaose_level,&u.uz)){
+		return (struct permonst *)0;
+	}
+	else return (struct permonst *)0;
+}
+
+struct permonst *
+neutral_montype()
+{
+	if(on_level(&sum_of_all_level,&u.uz)){
+		return mkclass(S_GOLEM, 0);
+	}
+	if(on_level(&rlyeh_level,&u.uz)){
+		int chance = d(1,100);
+		int num = 0;
+		if(rn2(20)) return (struct permonst *)0; /*GREATLY reduce monster generation*/
+		if(chance < 2){
+				num = d(2,3);
+				for(num; num >= 0; num--) makemon(&mons[PM_HUNTING_HORROR], xupstair, yupstair, MM_ADJACENTOK);
+				return (struct permonst *)0;
+		}
+		else if(chance < 6){
+				num = d(2,4);
+				for(num; num >= 0; num--) makemon(&mons[PM_BYAKHEE], xupstair, yupstair, MM_ADJACENTOK);
+				return (struct permonst *)0;
+		}
+		else if(chance < 8){
+				makemon(&mons[PM_SHOGGOTH], xupstair, yupstair, MM_ADJACENTOK);
+				return (struct permonst *)0;
+		}
+		else if(chance < 10){
+				makemon(&mons[PM_DEEPEST_ONE], xupstair, yupstair, MM_ADJACENTOK);
+				num = rnd(4);
+				for(num; num >= 0; num--) makemon(&mons[PM_DEEPER_ONE], xupstair, yupstair, MM_ADJACENTOK);
+				num = rn1(2,1);
+				for(num; num >= 0; num--) makemon(&mons[PM_DEEP_ONE], xupstair, yupstair, MM_ADJACENTOK);
+				return (struct permonst *)0;
+		}
+		else if(chance < 30){
+				num = rnd(3);
+				for(num; num >= 0; num--) makemon(&mons[PM_MASTER_MIND_FLAYER], xupstair, yupstair, MM_ADJACENTOK);
+				return (struct permonst *)0;
+		}
+		else if(chance < 50){
+				num = rn1(2,2);
+				for(num; num >= 0; num--) makemon(&mons[PM_MIND_FLAYER], xupstair, yupstair, MM_ADJACENTOK);
+				return (struct permonst *)0;
+		}
+		else if(chance < 70){
+				num = rnd(6);
+				for(num; num >= 0; num--) makemon(&mons[PM_DEEPER_ONE], xupstair, yupstair, MM_ADJACENTOK);
+				return (struct permonst *)0;
+		}
+		else{
+				num = rn1(4,3);
+				for(num; num >= 0; num--) makemon(&mons[PM_DEEP_ONE], xupstair, yupstair, MM_ADJACENTOK);
+				return (struct permonst *)0;
+		}
+	}
+	return (struct permonst *)0;
+}
+
+struct permonst *
+law_montype()
+{
+	if(on_level(&path1_level,&u.uz)){
+		int chance = d(1,100);
+		if(chance < 10){
+			return mkclass(S_DEMON, 0);
+		}
+		else if(chance < 60){
+			return mkclass(S_IMP, 0);
+		}
+		else{
+			chance = d(1,31);
+			if(chance == 1){
+				return &mons[PM_QUINON];
+			}
+			else if(chance <= 3){
+				return &mons[PM_QUATON];
+			}
+			else if(chance <= 7){
+				return &mons[PM_TRITON];
+			}
+			else if(chance <= 15){
+				return &mons[PM_DUTON];
+			}
+			else{
+				return &mons[PM_MONOTON];
+			}
+		}
+	}
+	else if(on_level(&path2_level,&u.uz)){
+		int chance = d(1,100);
+		if(chance < 2){
+			return mkclass(S_DEMON, 0);
+		}
+		else if(chance < 40){
+			return mkclass(S_IMP, 0);
+		}
+		else{
+			chance = d(1,31);
+			if(chance == 1){
+				return &mons[PM_QUINON];
+			}
+			else if(chance <= 3){
+				return &mons[PM_QUATON];
+			}
+			else if(chance <= 7){
+				return &mons[PM_TRITON];
+			}
+			else if(chance <= 15){
+				return &mons[PM_DUTON];
+			}
+			else{
+				return &mons[PM_MONOTON];
+			}
+		}
+	}
+	else if(on_level(&path3_level,&u.uz)){
+		int chance = d(1,100);
+		if(chance < 20){
+			return mkclass(S_IMP, 0);
+		}
+		else{
+			chance = d(1,31);
+			if(chance == 1){
+				return &mons[PM_QUINON];
+			}
+			else if(chance <= 3){
+				return &mons[PM_QUATON];
+			}
+			else if(chance <= 7){
+				return &mons[PM_TRITON];
+			}
+			else if(chance <= 15){
+				return &mons[PM_DUTON];
+			}
+			else{
+				return &mons[PM_MONOTON];
+			}
+		}
+	}
+	else if(on_level(&illregrd_level,&u.uz)){
+		int chance = d(1,31);
+		if(chance == 1){
+			return &mons[PM_QUINON];
+		}
+		else if(chance <= 3){
+			return &mons[PM_QUATON];
+		}
+		else if(chance <= 7){
+			return &mons[PM_TRITON];
+		}
+		else if(chance <= 15){
+			return &mons[PM_DUTON];
+		}
+		else{
+			return &mons[PM_MONOTON];
+		}
+	}
+	else if(on_level(&arcadia1_level,&u.uz)){
+		int chance = d(1,100);
+		if(chance <= 20){
+			return &mons[PM_KILLER_BEE];
+		}
+		else if(chance <= 40){
+			return &mons[PM_SOLDIER_ANT];
+		}
+		else if(chance <= 70){
+			return &mons[PM_GIANT_ANT];
+		}
+		else if(chance <= 90){
+			chance = d(1,6);
+			if(chance <= 5) return &mons[PM_DWARF];
+			else if(chance <= 9) return &mons[PM_DWARF_LORD];
+		}
+		else{
+			chance = d(1,31);
+			if(chance == 1){
+				return &mons[PM_QUINON];
+			}
+			else if(chance <= 3){
+				return &mons[PM_QUATON];
+			}
+			else if(chance <= 7){
+				return &mons[PM_TRITON];
+			}
+			else if(chance <= 15){
+				return &mons[PM_DUTON];
+			}
+			else{
+				return &mons[PM_MONOTON];
+			}
+		}
+	}
+	else if(on_level(&arcadia2_level,&u.uz)){
+		int chance = d(1,100);
+		if(chance <= 20){
+			return &mons[PM_KILLER_BEE];
+		}
+		else if(chance <= 40){
+			return &mons[PM_SOLDIER_ANT];
+		}
+		else if(chance <= 70){
+			return &mons[PM_GIANT_ANT];
+		}
+		else if(chance <= 90){
+			chance = d(1,6);
+			if(chance <= 5) return &mons[PM_DWARF];
+			else if(chance <= 9) return &mons[PM_DWARF_LORD];
+		}
+		else{
+			chance = d(1,6);
+			if(chance <= 5) return &mons[PM_SOLDIER];
+			else return &mons[PM_SERGEANT];
+		}
+	}
+	else if(on_level(&arcadia3_level,&u.uz)){
+		int chance = d(1,100);
+		if(chance <= 20){
+			return &mons[PM_KILLER_BEE];
+		}
+		else if(chance <= 40){
+			return &mons[PM_SOLDIER_ANT];
+		}
+		else if(chance <= 70){
+			return &mons[PM_GIANT_ANT];
+		}
+		else{
+			chance = d(1,6);
+			if(chance <= 5) return &mons[PM_SOLDIER];
+			else return &mons[PM_SERGEANT];
+		}
+	}
+	else if(on_level(&arcward_level,&u.uz) || on_level(&arcfort_level,&u.uz)){
+		int chance = d(1,100);
+		if(chance <= 20){
+			return &mons[PM_KILLER_BEE];
+		}
+		else if(chance <= 50){
+			return &mons[PM_SOLDIER_ANT];
+		}
+		else{
+			chance = d(1,6);
+			if(chance <= 5) return &mons[PM_SOLDIER];
+			else return &mons[PM_SERGEANT];
+		}
+	}
+	return (struct permonst *)0;
+}
+
 /*questpgr.c*/

@@ -597,6 +597,51 @@ const char * const random_malediction[] = {
 	"Verily, thou shalt be one dead"
 };
 
+const char * const random_garlandism[] = {
+	"Cornelia will be mine!",
+	"Thou art but a worthless lapdog of the King!",
+	"Do you have any idea who you're messing with!?",
+	"You really think you have what it takes to cross swords with ME?",
+	"I, Garland, will knock you all down!!"
+};
+const char * const random_chaos_garlandism[] = {
+	"Do you remember me!?",
+	"Two thousand years from now...you killed me.\n  Now, it's my turn!",
+	"I!  AM!  GAR! LAAAAND!",
+	"Oh, you did defeat me then.  But now I shall kill you, and live forever!",
+	"In two thousand years, I will remember none of this.",
+	"I, Garland, will knock you all down!!"
+};
+const char * const random_chaosism[] = {
+	"Do you remember me!?",																	//0
+	"Two thousand years from now...you killed me.\n  Now, YOU will die!",					//1
+	"Oh, you did defeat me then.  But now I shall kill you, and live FOREVER.",				//2
+	"In two thousand years, I will remember none of this.",									//3
+	"I, Chaos, will knock you all down!!",													//4
+																							///
+	"Many times have you kill me hence!",													//5
+	"But I have ever been reborn here!",													//6
+	"Many times have you followed me!",														//7
+	"Many times, have you DIED!",															//8
+	"So even as you die again and again, I shall return!\n\
+	Born forever into this endless circle that I have created, here, writ with your BLOOD!"	//9
+
+};
+const char * const random_apollyon[] = {
+	"Tremble, mortal!", /*0*/
+	"Tremble, mortal!", /*1*/
+	"Tremble, mortal!", /*2*/
+	"Kneel.", /*3*/
+	"Bow before me!", /*4*/
+	"You viper!", /*5*/
+	"Cower, mortal!", /*6*/
+	"Cower, mortal!", /*7*/
+	"Tremble, mortal, you face the Angel of the Pit!", /*8*/
+	"Bow before me, mortal.  For I am Apollyon.", /*9*/
+	"You viper.  I shall sentence you to Gehennom!", /*10*/
+	"Cower, mortal.  I am the Jailer of Heaven!" /*11*/
+};
+
 /* Insult or intimidate the player */
 void
 cuss(mtmp)
@@ -622,7 +667,24 @@ register struct monst	*mtmp;
 		    verbalize("%s %s!",
 			  random_malediction[rn2(SIZE(random_malediction))],
 			  random_insult[rn2(SIZE(random_insult))]);
-	} else if(is_lminion(mtmp)) {
+	}
+	else if(mtmp->data == &mons[PM_CHAOS]){
+		if(mtmp->mextra[1]<5){
+			verbalize("%s", random_chaosism[mtmp->mextra[1]+5]);
+			mtmp->mextra[1]++;
+		}
+		else verbalize("%s", random_chaosism[rn2(5)]);
+	}
+	else if(mtmp->data == &mons[PM_GARLAND]){
+		verbalize("%s", random_chaos_garlandism[rn2(SIZE(random_chaos_garlandism))]);
+	}
+	else if(mtmp->data == &mons[PM_SIR_GARLAND]){
+		verbalize("%s", random_garlandism[rn2(SIZE(random_garlandism))]);
+	}
+	else if(mtmp->data == &mons[PM_APOLLYON]){
+		verbalize("%s", random_apollyon[rn2(SIZE(random_apollyon))]);
+	}
+	else if(is_lminion(mtmp)) {
 		com_pager(rn2(QTN_ANGELIC - 1 + (Hallucination ? 1 : 0)) +
 			      QT_ANGELIC);
 	} else {

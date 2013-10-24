@@ -3,6 +3,8 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "artifact.h"
+#include "artilist.h"
 
 #define NOINVSYM	'#'
 #define CONTAINED_SYM	'>'	/* designator for inside a container */
@@ -287,6 +289,9 @@ struct obj *obj;
 		    u.uhave.questart = 1;
 		    artitouch();
 		}
+		if(obj->oartifact == ART_TREASURY_OF_PROTEUS){
+			u.ukinghill = TRUE;
+		}
 		set_artifact_intrinsic(obj, 1, W_ART);
 	}
 
@@ -545,6 +550,9 @@ struct obj *obj;
 			impossible("don't have quest artifact?");
 		    u.uhave.questart = 0;
 		}
+		if(obj->oartifact == ART_TREASURY_OF_PROTEUS){
+			u.ukinghill = FALSE;
+		}
 		set_artifact_intrinsic(obj, 0, W_ART);
 	}
 
@@ -637,6 +645,83 @@ register int n, x, y;
 
 	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
 		if(otmp->otyp == n)
+		    return(otmp);
+	return((struct obj *)0);
+}
+
+struct obj *
+boulder_at(x,y)
+register int x, y;
+{
+	register struct obj *otmp;
+
+	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
+		if(	is_boulder(otmp) ) return(otmp);
+	return((struct obj *)0);
+}
+
+struct obj *
+toustefna_at(x,y)
+register int x, y;
+{
+	register struct obj *otmp;
+
+	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
+		if(otmp->oclass == WEAPON_CLASS && objects[(otmp)->otyp].oc_material == WOOD && (otmp->ovar1 & WARD_TOUSTEFNA))
+		    return(otmp);
+	return((struct obj *)0);
+}
+
+struct obj *
+dreprun_at(x,y)
+register int x, y;
+{
+	register struct obj *otmp;
+
+	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
+		if(otmp->oclass == WEAPON_CLASS && objects[(otmp)->otyp].oc_material == WOOD && (otmp->ovar1 & WARD_DREPRUN))
+		    return(otmp);
+	return((struct obj *)0);
+}
+
+struct obj *
+veioistafur_at(x,y)
+register int x, y;
+{
+	register struct obj *otmp;
+
+	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
+		if(otmp->oclass == WEAPON_CLASS && objects[(otmp)->otyp].oc_material == WOOD && (otmp->ovar1 & WARD_VEIOISTAFUR))
+		    return(otmp);
+	return((struct obj *)0);
+}
+
+struct obj *
+thjofastafur_at(x,y)
+register int x, y;
+{
+	register struct obj *otmp;
+
+	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
+		if(otmp->oclass == WEAPON_CLASS && objects[(otmp)->otyp].oc_material == WOOD && (otmp->ovar1 & WARD_THJOFASTAFUR))
+		    return(otmp);
+	return((struct obj *)0);
+}
+
+struct obj *
+aligned_sartprop3_at(n,x,y)
+register int n, x, y;
+{
+	register struct obj *otmp;
+
+	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
+		if(spec_ability3(otmp,n) 
+			&& (artilist[(int) (otmp)->oartifact].alignment == A_NONE
+				|| (artilist[(int) (otmp)->oartifact].alignment == u.ualign.type 
+					&& u.ualign.record > 0
+					)
+				)
+			)
 		    return(otmp);
 	return((struct obj *)0);
 }
@@ -886,7 +971,7 @@ register const char *let,*word;
 #ifdef GOLDOBJ
 		|| (usegold && otmp->invlet == GOLD_SYM)
 #endif
-		|| (useboulder && otmp->otyp == BOULDER)
+		|| (useboulder && is_boulder(otmp))
 		) {
 		register int otyp = otmp->otyp;
 		bp[foo++] = otmp->invlet;
@@ -928,7 +1013,7 @@ register const char *let,*word;
 		     otyp != AMULET_OF_YENDOR && otyp != FAKE_AMULET_OF_YENDOR))
 		|| (!strcmp(word, "write with") &&
 		    (otmp->oclass == TOOL_CLASS &&
-		     otyp != MAGIC_MARKER && otyp != TOWEL))
+		     otyp != MAGIC_MARKER && otyp != TOWEL && !spec_ability3(otmp, SPFX3_ENGRV)))
 		|| (!strcmp(word, "tin") &&
 		    (otyp != CORPSE || !tinnable(otmp)))
 		|| (!strcmp(word, "rub") &&
@@ -943,7 +1028,8 @@ register const char *let,*word;
 			!strcmp(word, "untrap with")) &&
 		     /* Picks, axes, pole-weapons, bullwhips */
 		    ((otmp->oclass == WEAPON_CLASS && !is_pick(otmp) &&
-		      !is_axe(otmp) && !is_pole(otmp) && otyp != BULLWHIP) ||
+		      !is_axe(otmp) && !is_pole(otmp) && otyp != BULLWHIP &&
+			  !is_knife(otmp)) ||
 		     (otmp->oclass == POTION_CLASS &&
 		     /* only applicable potion is oil, and it will only
 			be offered as a choice when already discovered */
@@ -951,6 +1037,10 @@ register const char *let,*word;
 		      !objects[POT_OIL].oc_name_known)) ||
 		     (otmp->oclass == FOOD_CLASS &&
 		      otyp != CREAM_PIE && otyp != EUCALYPTUS_LEAF) ||
+		     /* MRKR: mining helmets */
+		     (otmp->oclass == ARMOR_CLASS &&
+		      otyp != DWARVISH_IRON_HELM &&
+			  otyp != GNOMISH_POINTY_HAT) || 
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp))))
 		|| (!strcmp(word, "invoke") &&
 		    (!otmp->oartifact && !objects[otyp].oc_unique &&
@@ -984,6 +1074,21 @@ register const char *let,*word;
 		    )))
 			allowall = TRUE;
 	    }
+		//Make an exception for the Rod, so you can read the inscription.
+		if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS && !strcmp(word, "read")){
+			bp[foo++] = otmp->invlet;
+			allowall = TRUE;//for whatever reason, must allow all in order to get message other than "silly"
+		}
+		//Make exceptions for wooden weapons that have been engraved
+		if(otmp->oclass == WEAPON_CLASS && objects[(otmp)->otyp].oc_material == WOOD && otmp->ovar1 && !strcmp(word, "read")){
+			bp[foo++] = otmp->invlet;
+			allowall = TRUE;
+		}
+		//Make exceptions for rings that have been engraved
+		if(otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && otmp->ovar1 && (!strcmp(word, "read") || !strcmp(word, "use or apply"))){
+			bp[foo++] = otmp->invlet;
+			allowall = TRUE;
+		}
 
 	    if(ilet == 'z') ilet = 'A'; else ilet++;
 	}
@@ -1538,7 +1643,7 @@ struct obj *otmp;
 {
     makeknown(otmp->otyp);
     if (otmp->oartifact) discover_artifact((xchar)otmp->oartifact);
-    otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = 1;
+    otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
     if (otmp->otyp == EGG && otmp->corpsenm != NON_PM)
 	learn_egg_type(otmp->corpsenm);
 }
@@ -2749,6 +2854,8 @@ char *buf;
 	    cmap = S_tree;				/* "tree" */
 	else if (ltyp == IRONBARS)
 	    dfeature = "set of iron bars";
+	else if (ltyp == DEADTREE)
+	    cmap = S_deadtree;
 
 	if (cmap >= 0) dfeature = defsyms[cmap].explanation;
 	if (dfeature) Strcpy(buf, dfeature);
@@ -2843,7 +2950,7 @@ boolean picked_some;
 #ifdef INVISIBLE_OBJECTS
 	    if (otmp->oinvis && !See_invisible) verb = "feel";
 #endif
-	    You("%s here %s.", verb, doname_with_price(otmp));
+	    You("%s here %s.", verb, Hallucination ? an(rndobjnam()) : doname(otmp));
 	    if (otmp->otyp == CORPSE) feel_cockatrice(otmp, FALSE);
 	} else {
 	    display_nhwindow(WIN_MESSAGE, FALSE);
@@ -2858,12 +2965,12 @@ boolean picked_some;
 		if (otmp->otyp == CORPSE && will_feel_cockatrice(otmp, FALSE)) {
 			char buf[BUFSZ];
 			felt_cockatrice = TRUE;
-			Strcpy(buf, doname(otmp));
+			Strcpy(buf, Hallucination ? an(rndobjnam()) : doname(otmp));
 			Strcat(buf, "...");
 			putstr(tmpwin, 0, buf);
 			break;
 		}
-		putstr(tmpwin, 0, doname_with_price(otmp));
+		putstr(tmpwin, 0, Hallucination ? an(rndobjnam()) : doname(otmp));
 	    }
 	    display_nhwindow(tmpwin, TRUE);
 	    destroy_nhwindow(tmpwin);
@@ -2935,6 +3042,9 @@ mergable(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	if (obj->oclass == COIN_CLASS) return TRUE;
 #endif
 	if (obj->unpaid != otmp->unpaid ||
+		obj->sknown != otmp->sknown ||
+		obj->ostolen != otmp->ostolen ||
+		obj->ovar1 != otmp->ovar1 ||
 	    obj->spe != otmp->spe || obj->dknown != otmp->dknown ||
 	    (obj->bknown != otmp->bknown && !Role_if(PM_PRIEST)) ||
 	    obj->cursed != otmp->cursed || obj->blessed != otmp->blessed ||
@@ -3184,6 +3294,17 @@ STATIC_VAR NEARDATA const char *names[] = { 0,
 	"Chains", "Venoms"
 };
 
+STATIC_VAR NEARDATA const char *bogusclasses[] = {
+	"Illegal objects", "Weapons", "Armor", "Rings", "Amulets",
+	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
+	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
+	"Chains", "Venoms",
+	"Filler","Useless Objects", "Artifacts", "Ascension Kit Items",
+	"Staves", "Songs", "Drinks", "Grimoires", "Gears", "Cogs",
+	"Marmosets", "Bugs", "Easter Eggs", "Tiny Monuments","Consumables",
+	"Junk", "Foos", "Spoilers", "YANIs"
+};
+
 static NEARDATA const char oth_symbols[] = {
 	CONTAINED_SYM,
 	'\0'
@@ -3229,6 +3350,24 @@ boolean showsym;
 	    Sprintf(eos(invbuf), ocsymformat,
 		    iflags.menu_tab_sep ? "\t" : "  ", def_oc_syms[let]);
 	return invbuf;
+}
+
+char *
+rand_class_name()
+{
+       int name;
+       const char *class_name;
+ 	   unsigned len;
+       name = rn2(SIZE(bogusclasses));
+	   class_name = bogusclasses[name];
+	   len = strlen(class_name);
+	   if (len > invbufsiz) {
+			if (invbuf) free((genericptr_t)invbuf);
+			invbufsiz = len + 10; /* add slop to reduce incremental realloc */
+			invbuf = (char *) alloc(invbufsiz);
+	   }
+	   Strcpy(invbuf, class_name);
+	   return invbuf;
 }
 
 void

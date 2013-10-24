@@ -70,8 +70,8 @@ dowaternymph() /* Water Nymph */
 {
 	register struct monst *mtmp;
 
-	if(!(mvitals[PM_WATER_NYMPH].mvflags & G_GONE) &&
-	   (mtmp = makemon(&mons[PM_WATER_NYMPH],u.ux,u.uy, NO_MM_FLAGS))) {
+	if(!(mvitals[PM_NAIAD].mvflags & G_GONE) &&
+	   (mtmp = makemon(&mons[PM_NAIAD],u.ux,u.uy, NO_MM_FLAGS))) {
 		if (!Blind)
 		   You("attract %s!", a_monnam(mtmp));
 		else
@@ -112,7 +112,7 @@ genericptr_t poolcnt;
 	if (((x+y)%2) || (x == u.ux && y == u.uy) ||
 	    (rn2(1 + distmin(u.ux, u.uy, x, y)))  ||
 	    (levl[x][y].typ != ROOM) ||
-	    (sobj_at(BOULDER, x, y)) || nexttodoor(x, y))
+	    (boulder_at(x, y)) || nexttodoor(x, y))
 		return;
 
 	if ((ttmp = t_at(x, y)) != 0 && !delfloortrap(ttmp))
@@ -124,8 +124,8 @@ genericptr_t poolcnt;
 	/* Put a pool at x, y */
 	levl[x][y].typ = POOL;
 	/* No kelp! */
-	del_engr_at(x, y);
-	water_damage(level.objects[x][y], FALSE, TRUE);
+	del_engr_ward_at(x, y);
+	water_damage(level.objects[x][y], FALSE, TRUE, FALSE);
 
 	if ((mtmp = m_at(x, y)) != 0)
 		(void) minliquid(mtmp);
@@ -391,7 +391,7 @@ register struct obj *obj;
 		if(in_town(u.ux, u.uy))
 		    (void) angry_guards(FALSE);
 		return;
-	} else if (get_wet(obj) && !rn2(2))
+	} else if (get_wet(obj,FALSE) && !rn2(2))
 		return;
 
 	/* Acid and water don't mix */

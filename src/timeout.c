@@ -6,6 +6,9 @@
 #include "lev.h"	/* for checking save modes */
 
 STATIC_DCL void NDECL(stoned_dialogue);
+#ifdef CONVICT
+STATIC_DCL void NDECL(phasing_dialogue);
+#endif /* CONVICT */
 STATIC_DCL void NDECL(vomiting_dialogue);
 STATIC_DCL void NDECL(choke_dialogue);
 STATIC_DCL void NDECL(slime_dialogue);
@@ -41,6 +44,28 @@ stoned_dialogue()
 	exercise(A_DEX, FALSE);
 }
 
+#ifdef CONVICT
+STATIC_OVL void
+phasing_dialogue()
+{
+    if (Phasing == 15) {
+        if (!Hallucination) {
+            Your("body is beginning to feel more solid.");
+        } else {
+            You_feel("more distant from the spirit world.");
+        }
+        stop_occupation();
+    } else if (Phasing == 1) {
+        if (!Hallucination) {
+            Your("body is solid again.");
+        } else {
+            You_feel("totally separated from the spirit world.");
+        }
+        stop_occupation();
+    }
+}
+#endif /* CONVICT */
+
 /* He is getting sicker and sicker prior to vomiting */
 static NEARDATA const char * const vomiting_texts[] = {
 	"are feeling mildly nauseated.",	/* 14 */
@@ -57,7 +82,7 @@ vomiting_dialogue()
 
 	if ((((Vomiting & TIMEOUT) % 3L) == 2) && (i >= 0)
 	    && (i < SIZE(vomiting_texts)))
-		You(vomiting_texts[SIZE(vomiting_texts) - i - 1]);
+		You("%s", vomiting_texts[SIZE(vomiting_texts) - i - 1]);
 
 	switch ((int) i) {
 	case 0:
@@ -169,21 +194,54 @@ nh_timeout()
 
 	if (flags.friday13) baseluck -= 1;
 
-	if (u.uluck != baseluck &&
-		moves % (u.uhave.amulet || u.ugangr ? 300 : 600) == 0) {
-	/* Cursed luckstones stop bad luck from timing out; blessed luckstones
-	 * stop good luck from timing out; normal luckstones stop both;
-	 * neither is stopped if you don't have a luckstone.
+	if (u.uluck != baseluck) {
+	    int timeout = 600;
+	    int time_luck = stone_luck(FALSE);
+	/* Cursed luckstones slow bad luck timing out; blessed luckstones
+	 * slow good luck timing out; normal luckstones slow both;
+	 * neither is affected if you don't have a luckstone.
 	 * Luck is based at 0 usually, +1 if a full moon and -1 on Friday 13th
 	 */
-	    register int time_luck = stone_luck(FALSE);
-	    boolean nostone = !carrying(LUCKSTONE) && !stone_luck(TRUE);
+	    if (has_luckitem() && 
+		    (!time_luck ||
+		     (time_luck > 0 && u.uluck > baseluck) ||
+		     (time_luck < 0 && u.uluck < baseluck))) {
 
-	    if(u.uluck > baseluck && (nostone || time_luck < 0))
+		/* The slowed timeout depends on the distance between your 
+		 * luck (not including luck bonuses) and your base luck.
+		 * 
+		 * distance	timeout
+		 * --------------------
+		 *  1		24800
+		 *  2		24200
+		 *  3		23200
+		 *  4		21800
+		 *  5		20000
+		 *  6		17800
+		 *  7		15200
+		 *  8		12200
+		 *  9		8800
+		 *  10		5000
+		 *  11		800
+		 */ 
+		int base_dist = u.uluck - baseluck;
+		int slow_timeout = 25000 - 200 * (base_dist * base_dist);
+		if (slow_timeout > timeout) timeout = slow_timeout;
+	    }
+
+	    if (u.uhave.amulet || u.ugangr) timeout = timeout / 2;
+
+	    if (moves >= u.luckturn + timeout) {
+		if(u.uluck > baseluck)
 		u.uluck--;
-	    else if(u.uluck < baseluck && (nostone || time_luck > 0))
+		else if(u.uluck < baseluck)
 		u.uluck++;
+		u.luckturn = moves;
 	}
+	}
+#ifdef CONVICT
+    if(Phasing) phasing_dialogue();
+#endif /* CONVICT */
 	if(u.uinvulnerable) return; /* things past this point could kill you */
 	if(Stoned) stoned_dialogue();
 	if(Slimed) slime_dialogue();
@@ -219,6 +277,53 @@ nh_timeout()
 	for(upp = u.uprops; upp < u.uprops+SIZE(u.uprops); upp++)
 	    if((upp->intrinsic & TIMEOUT) && !(--upp->intrinsic & TIMEOUT)) {
 		switch(upp - u.uprops){
+		case FIRE_RES:
+			You_feel("warmer!");
+			if(HFire_resistance){
+				You(Hallucination ? "still be chillin', tho'." :
+					"still feel a bit chill, though.");
+			}
+		break;
+		case SLEEP_RES:
+			You_feel("tired!");
+			if(HSleep_resistance){
+				You_feel("wide awake the next moment, though.");
+			}
+		break;
+		case COLD_RES:
+			You_feel("cooler!");
+			if(HCold_resistance){
+				You("still feel full of hot air, though.");
+			}
+		break;
+		case SHOCK_RES:
+			You_feel("conductive!");
+			if(HShock_resistance){
+				pline("...But only a bit.");
+			}
+		break;
+		case ACID_RES:
+			Your("skin feels more sensitive!");
+			if(HAcid_resistance){
+				pline("...But only a bit.");
+			}
+		break;
+		case DRAIN_RES:
+			You_feel("less energetic!");
+			if(HDrain_resistance){
+				pline("...But only a bit.");
+			}
+		break;
+		case DISPLACED:
+			if(Hallucination){
+				You("calm down");
+				if(Displaced){
+					pline("...But only a bit.");
+				}
+			}
+			if(!Displaced) Your("outline ceases shimmering.");
+			else Your("outline becomes more distinct.");
+		break;
 		case STONED:
 			if (delayed_killer && !killer) {
 				killer = delayed_killer;
@@ -446,10 +551,11 @@ long timeout;
 			 !(mon = makemon(&mons[mnum], cc.x, cc.y, NO_MINVENT)))
 			break;
 		    /* tame if your own egg hatches while you're on the
-		       same dungeon level, or any dragon egg which hatches
+		       same dungeon level, or any dragon egg (or metroid) which hatches
 		       while it's in your inventory */
 		    if ((yours && !silent) ||
-			(carried(egg) && mon->data->mlet == S_DRAGON)) {
+			(carried(egg) && mon->data->mlet == S_DRAGON) ||
+			(carried(egg) && mon->data == &mons[PM_METROID_QUEEN]) ) { //metroid egg
 			if ((mon2 = tamedog(mon, (struct obj *)0)) != 0) {
 			    mon = mon2;
 			    if (carried(egg) && mon->data->mlet != S_DRAGON)
@@ -756,13 +862,15 @@ long timeout;
 	many = menorah ? obj->spe > 1 : obj->quan > 1L;
 
 	/* timeout while away */
-	if (timeout != monstermoves) {
+	if (timeout != monstermoves && (obj->where != OBJ_MINVENT || (
+				(!is_dwarf(obj->ocarry->data) || obj->otyp != DWARVISH_IRON_HELM) &&
+				(!is_gnome(obj->ocarry->data) || obj->otyp != GNOMISH_POINTY_HAT)
+				))) {
 	    long how_long = monstermoves - timeout;
 
-	    if (how_long >= obj->age) {
+		if (how_long >= obj->age){
 		obj->age = 0;
 		end_burn(obj, FALSE);
-
 		if (menorah) {
 		    obj->spe = 0;	/* no more candles */
 		} else if (Is_candle(obj) || obj->otyp == POT_OIL) {
@@ -771,7 +879,6 @@ long timeout;
 		    obfree(obj, (struct obj *)0);
 		    obj = (struct obj *) 0;
 		}
-
 	    } else {
 		obj->age -= how_long;
 		begin_burn(obj, TRUE);
@@ -812,6 +919,7 @@ long timeout;
 		    obj = (struct obj *) 0;
 		    break;
 
+   	    case DWARVISH_IRON_HELM:
 	    case BRASS_LANTERN:
 	    case OIL_LAMP:
 		switch((int)obj->age) {
@@ -819,17 +927,23 @@ long timeout;
 		    case 100:
 		    case 50:
 			if (canseeit) {
-			    if (obj->otyp == BRASS_LANTERN)
+			    if (obj->otyp == BRASS_LANTERN 
+				|| obj->otyp == DWARVISH_IRON_HELM)
 				lantern_message(obj);
 			    else
 				see_lamp_flicker(obj,
 				    obj->age == 50L ? " considerably" : "");
 			}
+			//Dwarvish lamps don't go out in monster inventories
+			if(obj->where == OBJ_MINVENT && 
+				is_dwarf(obj->ocarry->data) &&
+				obj->otyp == DWARVISH_IRON_HELM) obj->age = (long) rn1(250,250);
 			break;
 
 		    case 25:
 			if (canseeit) {
-			    if (obj->otyp == BRASS_LANTERN)
+			    if (obj->otyp == BRASS_LANTERN 
+				|| obj->otyp == DWARVISH_IRON_HELM)
 				lantern_message(obj);
 			    else {
 				switch (obj->where) {
@@ -845,6 +959,10 @@ long timeout;
 				}
 			    }
 			}
+			//Dwarvish lamps don't go out in monster inventories
+			if(obj->where == OBJ_MINVENT && 
+				is_dwarf(obj->ocarry->data) &&
+				obj->otyp == DWARVISH_IRON_HELM) obj->age = (long) rn1(50,25);
 			break;
 
 		    case 0:
@@ -853,7 +971,8 @@ long timeout;
 			    switch (obj->where) {
 				case OBJ_INVENT:
 				case OBJ_MINVENT:
-				    if (obj->otyp == BRASS_LANTERN)
+			    if (obj->otyp == BRASS_LANTERN 
+				|| obj->otyp == DWARVISH_IRON_HELM)
 					pline("%s lantern has run out of power.",
 					    whose);
 				    else
@@ -861,7 +980,8 @@ long timeout;
 					    whose, xname(obj));
 				    break;
 				case OBJ_FLOOR:
-				    if (obj->otyp == BRASS_LANTERN)
+			    if (obj->otyp == BRASS_LANTERN 
+				|| obj->otyp == DWARVISH_IRON_HELM)
 					You("see a lantern run out of power.");
 				    else
 					You("see %s go out.",
@@ -889,6 +1009,7 @@ long timeout;
 	    case CANDELABRUM_OF_INVOCATION:
 	    case TALLOW_CANDLE:
 	    case WAX_CANDLE:
+		case GNOMISH_POINTY_HAT:
 		switch (obj->age) {
 		    case 75:
 			if (canseeit)
@@ -930,6 +1051,11 @@ long timeout;
 					    many ? "s" : "");
 				    break;
 			    }
+			if(obj->where == OBJ_MINVENT &&
+				is_gnome(obj->ocarry->data) &&
+				obj->otyp == GNOMISH_POINTY_HAT){
+				obj->age = (long) rn1(50,15);
+			}
 			break;
 
 		    case 0:
@@ -946,6 +1072,17 @@ long timeout;
 				    case OBJ_FLOOR:
 					You("see a candelabrum's flame%s die.",
 						many ? "s" : "");
+					break;
+				}
+				}else if(obj->otyp == GNOMISH_POINTY_HAT){
+				switch (obj->where) {
+				    case OBJ_INVENT:
+				    case OBJ_MINVENT:
+					pline("%s pointy hat's candle dies.",
+					    whose);
+					break;
+				    case OBJ_FLOOR:
+						You("see a pointy hat's candle die.");
 					break;
 				}
 			    } else {
@@ -982,7 +1119,7 @@ long timeout;
 
 			if (menorah) {
 			    obj->spe = 0;
-			} else {
+			} else if(obj->otyp != GNOMISH_POINTY_HAT){
 			    obj_extract_self(obj);
 			    obfree(obj, (struct obj *)0);
 			    obj = (struct obj *) 0;
@@ -1003,6 +1140,56 @@ long timeout;
 
 		break;
 
+	    case DOUBLE_LIGHTSABER:
+	    	if (obj->altmode && obj->cursed && !rn2(25)) {
+		    obj->altmode = FALSE;
+		    pline("%s %s reverts to single blade mode!",
+			    whose, xname(obj));
+	    	}
+	    case LIGHTSABER: 
+	    case BEAMSWORD:
+	        /* Callback is checked every 5 turns - 
+	        	lightsaber automatically deactivates if not wielded */
+	        if ((obj->cursed && !rn2(50)) ||
+	            (obj->where == OBJ_FLOOR) || 
+		    (obj->where == OBJ_MINVENT && 
+		    	(!MON_WEP(obj->ocarry) || MON_WEP(obj->ocarry) != obj)) ||
+		    (obj->where == OBJ_INVENT &&
+		    	((!uwep || uwep != obj) &&
+		    	 (!u.twoweap || !uswapwep || obj != uswapwep))))
+	            lightsaber_deactivate(obj, FALSE);
+		switch (obj->age) {			
+		    case 100:
+			/* Single warning time */
+			if (canseeit) {
+			    switch (obj->where) {
+				case OBJ_INVENT:
+				case OBJ_MINVENT:
+				    pline("%s %s dims!",whose, xname(obj));
+				    break;
+				case OBJ_FLOOR:
+				    You("see %s dim!", an(xname(obj)));
+				    break;
+			    }
+			} else {
+			    You("hear the hum of %s change!", an(xname(obj)));
+			}
+			break;
+		    case 0:
+			lightsaber_deactivate(obj, FALSE);
+			break;
+
+		    default:
+			/*
+			 * Someone added fuel to the lightsaber while it was
+			 * lit.  Just fall through and let begin burn
+			 * handle the new age.
+			 */
+			break;
+		}
+		if (obj && obj->age && obj->lamplit) /* might be deactivated */
+		    begin_burn(obj, TRUE);
+		break;
 	    default:
 		impossible("burn_object: unexpeced obj %s", xname(obj));
 		break;
@@ -1010,6 +1197,37 @@ long timeout;
 	if (need_newsym) newsym(x, y);
 }
 
+/* lightsabers deactivate when they hit the ground/not wielded */
+/* assumes caller checks for correct conditions */
+void
+lightsaber_deactivate (obj, timer_attached)
+	struct obj *obj;
+	boolean timer_attached;
+{
+	xchar x,y;
+	char whose[BUFSZ];
+
+	(void) Shk_Your(whose, obj);
+		
+	if (get_obj_location(obj, &x, &y, 0)) {
+	    if (cansee(x, y)) {
+		switch (obj->where) {
+			case OBJ_INVENT:
+			case OBJ_MINVENT:
+			    pline("%s %s deactivates.",whose, xname(obj));
+			    break;
+			case OBJ_FLOOR:
+			    You("see %s deactivate.", an(xname(obj)));
+			    break;
+		}
+	    } else {
+		You("hear a lightsaber deactivate.");
+	    }
+	}
+	if (obj->otyp == DOUBLE_LIGHTSABER) obj->altmode = FALSE;
+	if ((obj == uwep) || (u.twoweap && obj != uswapwep)) unweapon = TRUE;
+	end_burn(obj, timer_attached);
+}
 /*
  * Start a burn timeout on the given object. If not "already lit" then
  * create a light source for the vision system.  There had better not
@@ -1050,7 +1268,7 @@ begin_burn(obj, already_lit)
 	long turns = 0;
 	boolean do_timer = TRUE;
 
-	if (obj->age == 0 && obj->otyp != MAGIC_LAMP && !artifact_light(obj))
+	if (obj->age == 0 && obj->otyp != MAGIC_LAMP && !artifact_light(obj) && !arti_light(obj))
 	    return;
 
 	switch (obj->otyp) {
@@ -1058,12 +1276,33 @@ begin_burn(obj, already_lit)
 		obj->lamplit = 1;
 		do_timer = FALSE;
 		break;
+	    case DOUBLE_LIGHTSABER:
+	    	if (!obj->oartifact && obj->altmode && obj->age > 1) 
+				obj->age--; /* Double power usage */
+	    case LIGHTSABER:
+	    case BEAMSWORD:
+			if(obj->oartifact){
+				obj->lamplit = 1;
+				do_timer = FALSE;
+			} else turns = 1;
+    	    radius = 1;
+		break;
 
 	    case POT_OIL:
 		turns = obj->age;
 		radius = 1;	/* very dim light */
 		break;
 
+		case GNOMISH_POINTY_HAT:
+			turns = obj->age;
+			radius = 2;
+			if (obj->age > 75L)
+				turns = obj->age - 75L;
+			else if (obj->age > 15L)
+				turns = obj->age - 15L;
+		break;
+		
+	    case DWARVISH_IRON_HELM:
 	    case BRASS_LANTERN:
 	    case OIL_LAMP:
 		/* magic times are 150, 100, 50, 25, and 0 */
@@ -1094,10 +1333,10 @@ begin_burn(obj, already_lit)
 
 	    default:
                 /* [ALI] Support artifact light sources */
-                if (artifact_light(obj)) {
+        if (artifact_light(obj) || arti_light(obj)) {
 		    obj->lamplit = 1;
 		    do_timer = FALSE;
-		    radius = 2;
+			radius = (obj->blessed ? 3 : (obj->cursed ? 1 : 2));
 		} else {
 		    impossible("begin burn: unexpected %s", xname(obj));
 		    turns = obj->age;
@@ -1213,7 +1452,7 @@ do_storms()
 	    diry = rn2(3) - 1;
 	    if(dirx != 0 || diry != 0)
 		buzz(-15, /* "monster" LIGHTNING spell */
-		     8, x, y, dirx, diry);
+		     8, x, y, dirx, diry,0);
 	}
     }
 
@@ -1317,6 +1556,7 @@ typedef struct {
 static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
     TTAB(rot_organic,	(timeout_proc)0,	"rot_organic"),
     TTAB(rot_corpse,	(timeout_proc)0,	"rot_corpse"),
+    TTAB(moldy_corpse,  (timeout_proc)0,	"moldy_corpse"),
     TTAB(revive_mon,	(timeout_proc)0,	"revive_mon"),
     TTAB(burn_object,	cleanup_burn,		"burn_object"),
     TTAB(hatch_egg,	(timeout_proc)0,	"hatch_egg"),

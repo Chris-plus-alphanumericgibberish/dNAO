@@ -123,16 +123,18 @@ use_saddle(otmp)
 	}
 	if (Confusion || Fumbling || Glib)
 	    chance -= 20;
-	else if (uarmg &&
+	else{
+		if (uarmg &&
 		(s = OBJ_DESCR(objects[uarmg->otyp])) != (char *)0 &&
 		!strncmp(s, "riding ", 7))
 	    /* Bonus for wearing "riding" (but not fumbling) gloves */
 	    chance += 10;
-	else if (uarmf &&
+		if (uarmf &&
 		(s = OBJ_DESCR(objects[uarmf->otyp])) != (char *)0 &&
 		!strncmp(s, "riding ", 7))
-	    /* ... or for "riding boots" */
+			/* ... and for "riding boots" */
 	    chance += 10;
+	}
 	if (otmp->cursed)
 	    chance -= 50;
 
@@ -195,6 +197,8 @@ mount_steed(mtmp, force)
 	struct obj *otmp;
 	char buf[BUFSZ];
 	struct permonst *ptr;
+	int chance=0;
+	const char *s;
 
 	/* Sanity checks */
 	if (u.usteed) {
@@ -311,8 +315,24 @@ mount_steed(mtmp, force)
 			mon_nam(mtmp));
 	    return (FALSE);
 	}
-	if (!force && (Confusion || Fumbling || Glib || Wounded_legs ||
-		otmp->cursed || (u.ulevel+mtmp->mtame < rnd(MAXULEV/2+5)))) {
+	
+	//So, you can at least ATTEMPT to mount. Now calculate chances!
+	chance = u.ulevel+mtmp->mtame;
+	if(Confusion) chance -= 30;
+	if(Glib) chance -= 30;
+	if(Fumbling) chance -= 20;
+	if(Wounded_legs) chance -= 20;
+	if (uarmg &&
+		(s = OBJ_DESCR(objects[uarmg->otyp])) != (char *)0 &&
+		!strncmp(s, "riding ", 7))
+		/* Bonus for wearing "riding" (but not fumbling) gloves */
+		chance += 10;
+	if (uarmf &&
+		(s = OBJ_DESCR(objects[uarmf->otyp])) != (char *)0 &&
+		!strncmp(s, "riding ", 7))
+		/* ... and for "riding boots" */
+		chance += 10;
+	if (!force && (otmp->cursed || chance < rnd(MAXULEV/2+5))) {
 	    if (Levitation) {
 		pline("%s slips away from you.", Monnam(mtmp));
 		return FALSE;
@@ -437,7 +457,7 @@ int forceit;
 		    if (min_distance < 0 || distance < min_distance ||
 			    (distance == min_distance && rn2(2))) {
 			if (i > 0 || (((t = t_at(x, y)) == 0 || !t->tseen) &&
-				      (!sobj_at(BOULDER, x, y) ||
+				      (!boulder_at(x, y) ||
 				       throws_rocks(youmonst.data)))) {
 			    spot->x = x;
 			    spot->y = y;
@@ -482,6 +502,7 @@ dismount_steed(reason)
 		verb = "are thrown";
 	    case DISMOUNT_FELL:
 		You("%s off of %s!", verb, mon_nam(mtmp));
+	    case DISMOUNT_VANISHED:
 		if (!have_spot) have_spot = landing_spot(&cc,reason,1);
 		losehp(rn1(10,10), "riding accident", KILLED_BY_AN);
 		set_wounded_legs(BOTH_SIDES, (int)HWounded_legs + rn1(5,5));
@@ -634,6 +655,8 @@ int x, y;
     }
     mon->mx = x, mon->my = y;
     level.monsters[x][y] = mon;
+	if (opaque(mon->data) && (!mon->minvis || See_invisible))
+		block_point(x,y);
 }
 
 #endif /* STEED */

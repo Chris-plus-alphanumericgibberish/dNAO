@@ -102,7 +102,7 @@ Commands:
                 D%u - drop only unpaid food.
         ^D      Kick (for doors, usually).
         e       Eat food.
-        E       Engrave a message on the floor.
+        E       Engrave a message or ward on the floor.
                 E- - write in the dust with your fingers.
         f       Fire ammunition from quiver.
         F       Followed by direction, fight a monster (even if you don't
@@ -127,6 +127,7 @@ Commands:
                 The behavior can be varied via the msg_window option.
         q       Drink (quaff) something (potion, water, etc).
         Q       Select ammunition for quiver.
+		^Q		Draw a ward on the floor.
         r       Read a scroll or spellbook.
         R       Remove an accessory (ring, amulet, etc).
         ^R      Redraw the screen.

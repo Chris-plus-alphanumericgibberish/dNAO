@@ -1063,6 +1063,8 @@ water_friction()
 	if (Swimming && rn2(4))
 		return;		/* natural swimmers have advantage */
 
+    if (uarmf && uarmf->otyp == IRON_SHOES) return; /* iron boots let you walk on the seafloor (Zelda) */
+
 	if (u.dx && !rn2(!u.dy ? 3 : 6)) {	/* 1/3 chance or half that */
 		/* cancel delta x and choose an arbitrary delta y value */
 		x = u.ux;
@@ -1339,7 +1341,7 @@ register boolean ini;
 	for (i = 0, x = b->x; i < (int) b->bm[0]; i++, x++)
 	    for (j = 0, y = b->y; j < (int) b->bm[1]; j++, y++)
 		if (b->bm[j + 2] & (1 << i)) {
-		    levl[x][y].typ = AIR;
+		    levl[x][y].typ = ROOM;// was AIR
 		    levl[x][y].lit = 1;
 		    unblock_point(x,y);
 		}

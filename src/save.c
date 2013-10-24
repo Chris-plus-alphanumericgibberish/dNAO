@@ -307,6 +307,11 @@ register int fd, mode;
 	bwrite(fd, (genericptr_t) &flags, sizeof(struct flag));
 	bwrite(fd, (genericptr_t) &u, sizeof(struct you));
 
+	/* save random monsters*/
+	bwrite(fd, (genericptr_t) &mons[PM_SHAMBLING_HORROR], sizeof(struct permonst));
+	bwrite(fd, (genericptr_t) &mons[PM_STUMBLING_HORROR], sizeof(struct permonst));
+	bwrite(fd, (genericptr_t) &mons[PM_WANDERING_HORROR], sizeof(struct permonst));
+
 	/* must come before migrating_objs and migrating_mons are freed */
 	save_timers(fd, mode, RANGE_GLOBAL);
 	save_light_sources(fd, mode, RANGE_GLOBAL);
@@ -343,7 +348,6 @@ register int fd, mode;
 	savefruitchn(fd, mode);
 	savenames(fd, mode);
 	save_waterlevel(fd, mode);
-
 #ifdef RECORD_ACHIEVE
         bwrite(fd, (genericptr_t) &achieve, sizeof achieve);
 #endif
@@ -351,7 +355,6 @@ register int fd, mode;
         realtime = get_realtime();
         bwrite(fd, (genericptr_t) &realtime, sizeof realtime);
 #endif
-
 	bflush(fd);
 }
 

@@ -7,7 +7,6 @@
 #include "hack.h"
 #include "edog.h"
 
-STATIC_DCL int FDECL(throw_obj, (struct obj *,int));
 STATIC_DCL void NDECL(autoquiver);
 STATIC_DCL int FDECL(gem_accept, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(tmiss, (struct obj *, struct monst *));
@@ -33,7 +32,7 @@ extern boolean notonhead;	/* for long worms */
 
 
 /* Throw the selected object, asking for direction */
-STATIC_OVL int
+int
 throw_obj(obj, shotlimit)
 struct obj *obj;
 int shotlimit;
@@ -77,13 +76,17 @@ int shotlimit;
 
 	if(!canletgo(obj,"throw"))
 		return(0);
-	if (obj->oartifact == ART_MJOLLNIR && obj != uwep) {
+	if ( (obj->oartifact == ART_MJOLLNIR || 
+			obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORD ||
+			obj->oartifact == ART_WINDRIDER) && 
+			obj != uwep) {
 	    pline("%s must be wielded before it can be thrown.",
 		The(xname(obj)));
 		return(0);
 	}
-	if ((obj->oartifact == ART_MJOLLNIR && ACURR(A_STR) < STR19(25))
-	   || (obj->otyp == BOULDER && !throws_rocks(youmonst.data))) {
+	if ((obj->oartifact == ART_MJOLLNIR || 
+			obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORD) && ACURR(A_STR) < STR19(25)
+	   || (is_boulder(obj) && !throws_rocks(youmonst.data))) {
 		pline("It's too heavy.");
 		return(1);
 	}
@@ -472,7 +475,7 @@ hurtle_step(arg, x, y)
 	    const char *s;
 
 	    pline("Ouch!");
-	    if (IS_TREE(levl[x][y].typ))
+	    if (IS_TREES(levl[x][y].typ))
 		s = "bumping into a tree";
 	    else if (IS_ROCK(levl[x][y].typ))
 		s = "bumping into a wall";
@@ -486,9 +489,9 @@ hurtle_step(arg, x, y)
 	    losehp(rnd(2+*range), "crashing into iron bars", KILLED_BY);
 	    return FALSE;
 	}
-	if ((obj = sobj_at(BOULDER,x,y)) != 0) {
+	if ((obj = boulder_at(x,y)) != 0) {
 	    You("bump into a %s.  Ouch!", xname(obj));
-	    losehp(rnd(2+*range), "bumping into a boulder", KILLED_BY);
+	    losehp(rnd(2+*range), "bumping into a heavy object", KILLED_BY);
 	    return FALSE;
 	}
 	if (!may_pass) {
@@ -658,7 +661,8 @@ mhurtle(mon, dx, dy, range)
     coord mc, cc;
 
 	/* At the very least, debilitate the monster */
-	mon->movement = 0;
+//	mon->movement = 0;
+	mon->movement -= 10;
 	mon->mstun = 1;
 
 	/* Is the monster stuck or too heavy to push?
@@ -913,8 +917,13 @@ boolean twoweap; /* used to restore twoweapon mode if wielded weapon returns */
 		bhitpos.x = mon->mx;
 		bhitpos.y = mon->my;
 	} else if(u.dz) {
-	    if (u.dz < 0 && Role_if(PM_VALKYRIE) &&
-		    obj->oartifact == ART_MJOLLNIR && !impaired) {
+	    if (u.dz < 0 &&  ( 
+				(obj->oartifact == ART_MJOLLNIR &&
+				 Role_if(PM_VALKYRIE)) || 
+				(obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORD && 
+				 Race_if(PM_DWARF)) ||
+				 obj->oartifact == ART_WINDRIDER
+			  ) && !impaired) {
 		pline("%s the %s and returns to your hand!",
 		      Tobjnam(obj, "hit"), ceiling(u.ux,u.uy));
 		obj = addinv(obj);
@@ -963,8 +972,9 @@ boolean twoweap; /* used to restore twoweapon mode if wielded weapon returns */
 		if (range < 1) range = 1;
 
 		if (is_ammo(obj)) {
-		    if (ammo_and_launcher(obj, uwep))
-			range++;
+			if (ammo_and_launcher(obj, uwep)) //make range of longbow of diana effectively unlimited
+				if(uwep->oartifact == ART_LONGBOW_OF_DIANA) range = 1000;
+				else range++;
 		    else if (obj->oclass != GEM_CLASS)
 			range /= 2;
 		}
@@ -977,9 +987,9 @@ boolean twoweap; /* used to restore twoweapon mode if wielded weapon returns */
 		    if(range < 1) range = 1;
 		}
 
-		if (obj->otyp == BOULDER)
+		if (is_boulder(obj))
 		    range = 20;		/* you must be giant */
-		else if (obj->oartifact == ART_MJOLLNIR)
+		else if (obj->oartifact == ART_MJOLLNIR) //But the axe of D Lords can be thrown
 		    range = (range + 1) / 2;	/* it's heavy */
 		else if (obj == uball && u.utrap && u.utraptype == TT_INFLOOR)
 		    range = 1;
@@ -1027,12 +1037,18 @@ boolean twoweap; /* used to restore twoweapon mode if wielded weapon returns */
 		if (obj != uball) (void) mpickobj(u.ustuck,obj);
 	} else {
 		/* the code following might become part of dropy() */
-		if (obj->oartifact == ART_MJOLLNIR &&
-			Role_if(PM_VALKYRIE) && rn2(100)) {
+		if ( ( 
+				(obj->oartifact == ART_MJOLLNIR &&
+				 Role_if(PM_VALKYRIE)) || 
+				(obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORD && 
+				 Race_if(PM_DWARF)) ||
+				 obj->oartifact == ART_WINDRIDER
+			  ) &&
+			(obj->blessed || rn2(100))) {
 		    /* we must be wearing Gauntlets of Power to get here */
-		    sho_obj_return_to_u(obj);	    /* display its flight */
+		    if(obj->oartifact != ART_WINDRIDER) sho_obj_return_to_u(obj);	    /* display its flight */
 
-		    if (!impaired && rn2(100)) {
+		    if (!impaired && (obj->blessed || rn2(100))) {
 			pline("%s to your hand!", Tobjnam(obj, "return"));
 			obj = addinv(obj);
 			(void) encumber_msg();
@@ -1145,6 +1161,9 @@ boolean mon_notices;
 	case BOULDER:
 	    tmp += 6;
 	    break;
+	case STATUE:
+	    if(is_boulder(obj)) tmp += 6;
+    break;
 	default:
 	    if (obj->oclass == WEAPON_CLASS || is_weptool(obj) ||
 		    obj->oclass == GEM_CLASS)
@@ -1282,7 +1301,25 @@ register struct obj   *obj;
 	    return(0);
 	}
 
-	if (obj->oclass == WEAPON_CLASS || is_weptool(obj) ||
+        if (mon->mtame && mon->mcanmove &&
+                (!is_animal(mon->data)) && (!mindless(mon->data)) &&
+                could_use_item(mon, obj, FALSE)) {
+            if (could_use_item(mon, obj, TRUE)) {
+                pline("%s catches %s.", Monnam(mon), the(xname(obj)));
+                obj_extract_self(obj);
+                (void) mpickobj(mon,obj);
+                if (attacktype(mon->data, AT_WEAP) &&
+                    mon->weapon_check == NEED_WEAPON) {
+                    mon->weapon_check = NEED_HTH_WEAPON;
+                    (void) mon_wield_item(mon);
+                }
+                m_dowear(mon, FALSE);
+                newsym(mon->mx, mon->my);
+                return 1;
+            }
+            miss(xname(obj), mon);
+        }
+	else if (obj->oclass == WEAPON_CLASS || is_weptool(obj) ||
 		obj->oclass == GEM_CLASS) {
 	    if (is_ammo(obj)) {
 		if (!ammo_and_launcher(obj, uwep)) {
@@ -1367,7 +1404,7 @@ register struct obj   *obj;
 		tmiss(obj, mon);
 	    }
 
-	} else if (otyp == BOULDER) {
+	} else if (is_boulder(obj)) {
 	    exercise(A_STR, TRUE);
 	    if (tmp >= rnd(20)) {
 		exercise(A_DEX, TRUE);

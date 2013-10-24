@@ -463,6 +463,21 @@ xchar
     return TRUE;
 }
 
+boolean
+check_stinking_cloud_region(x, y)
+xchar x, y;
+{
+	int i;
+    for (i = 0; i < n_regions; i++) {
+		if (inside_region(regions[i], x, y) &&
+			regions[i]->inside_f == INSIDE_GAS_CLOUD
+		) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 /*
  * check wether a monster enters/leaves one or more region.
 */
@@ -714,7 +729,7 @@ boolean ghostly; /* If a bones file restore */
 	/* check for expired region */
 	if (regions[i]->ttl >= 0)
 	    regions[i]->ttl =
-		(regions[i]->ttl > tmstamp) ? regions[i]->ttl - tmstamp : 0;
+		(regions[i]->ttl > tmstamp) ? regions[i]->ttl - (short)tmstamp : 0;
 	mread(fd, (genericptr_t) &regions[i]->expire_f, sizeof (short));
 	mread(fd, (genericptr_t) &regions[i]->can_enter_f, sizeof (short));
 	mread(fd, (genericptr_t) &regions[i]->enter_f, sizeof (short));
@@ -921,8 +936,10 @@ genericptr_t p2;
     } else {			/* A monster is inside the cloud */
 	mtmp = (struct monst *) p2;
 
-	/* Non living and non breathing monsters are not concerned */
-	if (!nonliving(mtmp->data) && !breathless(mtmp->data)) {
+	/* Non living, non breathing, and
+	   poison-resistant monsters are not concerned */
+	if (!nonliving(mtmp->data) && !breathless(mtmp->data) &&
+		!resists_poison(mtmp)) {
 	    if (cansee(mtmp->mx, mtmp->my))
 		pline("%s coughs!", Monnam(mtmp));
 	    setmangry(mtmp);
@@ -971,7 +988,7 @@ int damage;
 	tmprect.hy--;
     }
     cloud->ttl = rn1(3,4);
-    if (!in_mklev && !flags.mon_moving)
+    if (!in_mklev && !flags.mon_moving && !flags.cth_attk)
 	set_heros_fault(cloud);		/* assume player has created it */
     cloud->inside_f = INSIDE_GAS_CLOUD;
     cloud->expire_f = EXPIRE_GAS_CLOUD;

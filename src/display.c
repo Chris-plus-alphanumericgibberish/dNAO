@@ -527,7 +527,7 @@ feel_location(x, y)
 	if (IS_ROCK(lev->typ) || (IS_DOOR(lev->typ) &&
 				(lev->doormask & (D_LOCKED | D_CLOSED)))) {
 	    map_background(x, y, 1);
-	} else if ((boulder = sobj_at(BOULDER,x,y)) != 0) {
+	} else if ((boulder = boulder_at(x,y)) != 0) {
 	    map_object(boulder, 1);
 	} else if (IS_DOOR(lev->typ)) {
 	    map_background(x, y, 1);
@@ -774,6 +774,7 @@ show_mem:
  * Put magic shield pyrotechnics at the given location.  This *could* be
  * pulled into a platform dependent routine for fancier graphics if desired.
  */
+//reduce number of cycles.  D_E
 void
 shieldeff(x,y)
     xchar x,y;
@@ -1083,6 +1084,8 @@ see_monsters()
  * Block/unblock light depending on what a mimic is mimicing and if it's
  * invisible or not.  Should be called only when the state of See_invisible
  * changes.
+ * Also contains a backup check for M3_OPAQUE monsters, since that wasn't
+ * always working -CM
  */
 void
 set_mimic_blocking()
@@ -1100,6 +1103,12 @@ set_mimic_blocking()
 	    else
 		unblock_point(mon->mx, mon->my);
 	}
+	 else if(mon->minvis && opaque(mon->data)){
+	    if(See_invisible)
+			block_point(mon->mx, mon->my);
+	    else
+			unblock_point(mon->mx, mon->my);
+	 }
     }
 }
 
@@ -1552,6 +1561,7 @@ back_to_glyph(x,y)
 	    break;
 	case IRONBARS:	idx = S_bars;     break;
 	case TREE:		idx = S_tree;     break;
+	case DEADTREE:		idx = S_deadtree; break;
 	case POOL:
 	case MOAT:		idx = S_pool;	  break;
 	case STAIRS:
@@ -1679,7 +1689,7 @@ static const char *type_names[MAX_TYPE] = {
 	"TUWALL",	"TDWALL",	"TLWALL",	"TRWALL",
 	"DBWALL",	"SDOOR",	"SCORR",	"POOL",
 	"MOAT",		"WATER",	"DRAWBRIDGE_UP","LAVAPOOL",
-	"DOOR",		"CORR",		"ROOM",		"STAIRS",
+	"DEADTREE", "DOOR",		"CORR",		"ROOM",		"STAIRS",
 	"LADDER",	"FOUNTAIN",	"THRONE",	"SINK",
 	"ALTAR",	"ICE",		"DRAWBRIDGE_DOWN","AIR",
 	"CLOUD"

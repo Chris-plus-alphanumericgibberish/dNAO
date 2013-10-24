@@ -135,7 +135,7 @@ const char def_monsyms[MAXMCLASSES] = {
 	DEF_GIANT,
 	'\0',
 	DEF_JABBERWOCK,
-	DEF_KOP,
+	DEF_KETER,
 	DEF_LICH,
 	DEF_MUMMY,
 	DEF_NAGA,		/* 40 */
@@ -157,8 +157,9 @@ const char def_monsyms[MAXMCLASSES] = {
 	DEF_DEMON,
 	DEF_EEL,
 	DEF_LIZARD,
-	DEF_WORM_TAIL,
-	DEF_MIMIC_DEF,		/* 60 */
+	DEF_PLANT,
+	DEF_WORM_TAIL,		/* 60 */
+	DEF_MIMIC_DEF,		/* 61 */
 };
 
 /* The explanations below are also used when the user gives a string
@@ -168,27 +169,27 @@ const char def_monsyms[MAXMCLASSES] = {
 const char * const monexplain[MAXMCLASSES] = {
     0,
     "ant or other insect",	"blob",			"cockatrice",
-    "dog or other canine",	"eye or sphere",	"cat or other feline",
-    "gremlin",			"humanoid",		"imp or minor demon",
+    "dog or other canine",	"eye, sphere, or auton",	"cat or other feline",
+    "gremlinoid",			"humanoid",		"imp or minor demon",
     "jelly",			"kobold",		"leprechaun",
     "mimic",			"nymph",		"orc",
     "piercer",			"quadruped",		"rodent",
-    "arachnid or centipede",	"trapper or lurker above", "unicorn or horse",
+    "arachnid or centipede",	"trapper, lurker, or metroid", "unicorn or horse",
     "vortex",		"worm", "xan or other mythical/fantastic insect",
     "light",			"zruty",
 
     "angelic being",		"bat or bird",		"centaur",
     "dragon",			"elemental",		"fungus or mold",
     "gnome",			"giant humanoid",	0,
-    "jabberwock",		"Keystone Kop",		"lich",
+    "jabberwock",		"Keter Sephiroth",		"lich",
     "mummy",			"naga",			"ogre",
     "pudding or ooze",		"quantum mechanic",	"rust monster or disenchanter",
-    "snake",			"troll",		"umber hulk",
+    "snake",			"troll",		"unknown abomination",
     "vampire",			"wraith",		"xorn",
     "apelike creature",		"zombie",
 
     "human or elf",		"ghost",		"golem",
-    "major demon",		"sea monster",		"lizard",
+    "major demon",		"sea monster",		"lizard", "plant",
     "long worm tail",		"mimic"
 };
 
@@ -227,6 +228,7 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'+', "closed door",	C(CLR_BROWN)},	/* hcdoor */
 	{'#', "iron bars",	C(HI_METAL)},	/* bars */
 	{'#', "tree",		C(CLR_GREEN)},	/* tree */
+	{'#', "dead tree",	C(CLR_BLACK)},	/* dead tree */
 	{'.', "floor of a room",C(CLR_GRAY)},	/* room */
 /*20*/	{'#', "corridor",	C(CLR_GRAY)},	/* dark corr */
 	{'#', "lit corridor",	C(CLR_GRAY)},	/* lit corr (see mapglyph.c) */
@@ -342,6 +344,7 @@ static uchar ibm_graphics[MAXPCHARS] = {
 	g_FILLER(S_hcdoor),
 	240,	/* S_bars:	equivalence symbol */
 	241,	/* S_tree:	plus or minus symbol */
+	241,	/* S_deadtree:	plus or minus symbol */
 	0xfa,	/* S_room:	meta-z, centered dot */
 /*20*/	0xb0,	/* S_corr:	meta-0, light shading */
 	0xb1,	/* S_litcorr:	meta-1, medium shading */
@@ -441,6 +444,7 @@ static uchar dec_graphics[MAXPCHARS] = {
 	g_FILLER(S_hcdoor),
 	0xfb,	/* S_bars:	meta-{, small pi */
 	0xe7,	/* S_tree:	meta-g, plus-or-minus */
+	0xe7,	/* S_deadtree:	meta-g, plus-or-minus */
 	0xfe,	/* S_room:	meta-~, centered dot */
 /*20*/	g_FILLER(S_corr),
 	g_FILLER(S_litcorr),
@@ -538,6 +542,7 @@ static uchar mac_graphics[MAXPCHARS] = {
 	0xef,	/* S_hcdoor */
 	0xf0,	/* S_bars:	equivalency symbol */
 	0xf1,	/* S_tree:	plus-or-minus */
+	0xf1,	/* S_deadtree:	plus-or-minus */
 	g_FILLER(S_Room),
 /*20*/	0xB0,	/* S_corr */
 	g_FILLER(S_litcorr),

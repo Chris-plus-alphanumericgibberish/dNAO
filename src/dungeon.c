@@ -609,36 +609,77 @@ struct level_map {
 	const char *lev_name;
 	d_level *lev_spec;
 } level_map[] = {
-	{ "air",	&air_level },
-	{ "asmodeus",	&asmodeus_level },
-	{ "astral",	&astral_level },
-	{ "baalz",	&baalzebub_level },
-	{ "bigroom",	&bigroom_level },
+	/*Dungeons of Doom*/
 	{ "castle",	&stronghold_level },
-	{ "earth",	&earth_level },
-	{ "fakewiz1",	&portal_level },
-	{ "fire",	&fire_level },
-	{ "juiblex",	&juiblex_level },
-	{ "knox",	&knox_level },
-	{ "medusa",	&medusa_level },
 	{ "oracle",	&oracle_level },
-	{ "orcus",	&orcus_level },
+	{ "bigroom",	&bigroom_level },
 #ifdef REINCARNATION
 	{ "rogue",	&rogue_level },
 #endif
-	{ "sanctum",	&sanctum_level },
+	{ "medusa",	&medusa_level },
+	/*Gehennom*/
 	{ "valley",	&valley_level },
-	{ "water",	&water_level },
+	
 	{ "wizard1",	&wiz1_level },
 	{ "wizard2",	&wiz2_level },
 	{ "wizard3",	&wiz3_level },
+	
+//	{ "asmodeus",	&asmodeus_level },
+//	{ "baalz",	&baalzebub_level },
+	{ "hell",	&hell2_level },
+	{ "hell2",	&hell2_level },
+	{ "hell3",	&hell3_level },
+	{ "fakewiz1",	&portal_level },
+//	{ "juiblex",	&juiblex_level },
+//	{ "orcus",	&orcus_level },
+	{ "abyss",	&abyss1_level },
+	{ "abyss-1",	&abyss1_juiblex_level },
+	{ "abys2",	&abyss2_level },
+	{ "brine",	&abyss3_level },
+	
+	{ "sanctum",	&sanctum_level },
+
 #ifdef RECORD_ACHIEVE
         { "minend",     &mineend_level },
         { "soko1",      &sokoend_level },
 #endif
+	/*Planes*/
+	{ "air",	&air_level },
+	{ "astral",	&astral_level },
+	{ "earth",	&earth_level },
+	{ "fire",	&fire_level },
+	{ "water",	&water_level },
+	/*Quest Levels*/
 	{ X_START,	&qstart_level },
 	{ X_LOCATE,	&qlocate_level },
 	{ X_GOAL,	&nemesis_level },
+	/*Law Levels*/
+	{ "path1",&path1_level },
+	{ "path2",	&path2_level },
+	{ "path3",	&path3_level },
+	{ "illregrd",	&illregrd_level },
+	{ "arcadia1",	&arcadia1_level },
+	{ "arcadia2",	&arcadia2_level },
+	{ "arcadia3",	&arcadia3_level },
+	{ "arcward",	&arcward_level },
+	{ "arcfort",	&arcfort_level },
+	/*Neutral Levels*/
+	{ "gatetwn",&gatetown_level },
+	{ "spire",	&spire_level },
+	{ "sumall",	&sum_of_all_level },
+	{ "rlyeh",	&rlyeh_level },
+	/*Chaos levels*/
+	{ "chaosf",	&chaosf_level },
+	{ "chaoss",	&chaoss_level },
+	{ "chaost",	&chaost_level },
+	{ "chaosm",	&chaosm_level },
+	{ "chaosfrh",	&chaosfrh_level },
+	{ "chaosffh",	&chaosffh_level },
+	{ "chaossth",	&chaossth_level },
+	{ "chaosvth",	&chaosvth_level },
+	{ "chaose",	&chaose_level },
+	/*Fort Knox*/
+	{ "knox",	&knox_level },
 	{ "",		(d_level *)0 }
 };
 
@@ -881,9 +922,15 @@ init_dungeons()		/* initialize the "dungeon" structs */
  *	I hate hardwiring these names. :-(
  */
 	quest_dnum = dname_to_dnum("The Quest");
+	neutral_dnum = dname_to_dnum("Neutral Quest");
+	chaos_dnum = dname_to_dnum("Chaos Quest");
+	law_dnum = dname_to_dnum("Law Quest");
 	sokoban_dnum = dname_to_dnum("Sokoban");
 	mines_dnum = dname_to_dnum("The Gnomish Mines");
 	tower_dnum = dname_to_dnum("Vlad's Tower");
+	tomb_dnum = dname_to_dnum("The Lost Tomb");
+	sea_dnum = dname_to_dnum("The Sunless Sea");
+	temple_dnum = dname_to_dnum("The Temple of Moloch");
 
 	/* one special fixup for dummy surface level */
 	if ((x = find_level("dummy")) != 0) {
@@ -1288,6 +1335,28 @@ d_level	*lev;
 {
 	return((boolean)(lev->dnum == mines_dnum));
 }
+
+boolean
+In_neu(lev)	/* are you on the neutral quest? */
+d_level	*lev;
+{
+	return((boolean)(lev->dnum == neutral_dnum));
+}
+
+boolean
+In_cha(lev)	/* are you on the chaotic quest? */
+d_level	*lev;
+{
+	return((boolean)(lev->dnum == chaos_dnum));
+}
+
+boolean
+In_law(lev)	/* are you on the lawful quest? */
+d_level	*lev;
+{
+	return((boolean)(lev->dnum == law_dnum));
+}
+
 
 /*
  * Return the branch for the given dungeon.

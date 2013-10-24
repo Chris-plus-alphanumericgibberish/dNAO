@@ -43,6 +43,7 @@ rn2(x)		/* 0 <= rn2(x) < x */
 register int x;
 {
     check_reseed();
+	if(x <= 0) x = 1; //I prefer this behavior -CM
 #ifdef DEBUG
 	if (x <= 0) {
 		impossible("rn2(%d) attempted", x);
@@ -89,6 +90,7 @@ rnd(x)		/* 1 <= rnd(x) <= x */
 register int x;
 {
     check_reseed();
+	if(x<=0) x=1; //fixes a crash from feeding rnd a negative number.  I'd rather have this behavior.
 #ifdef DEBUG
 	if (x <= 0) {
 		impossible("rnd(%d) attempted", x);
@@ -119,6 +121,70 @@ register int n, x;
 #endif
 	while(n--) tmp += RND(x);
 	return(tmp); /* Alea iacta est. -- J.C. */
+}
+
+int
+exploding_d(n,x,m)
+register int n, x, m;
+{
+	register int tmp=0, cur;
+    check_reseed();
+	if(x < 2) return d(n,x) + m*n; //A die of size 1 or 0 would always explode.
+#ifdef DEBUG
+	if (x < 0 || n < 0 || (x == 0 && n != 0)) {
+		impossible("exploding d(%d,%d) attempted", n, x);
+		return(1);
+	}
+#endif
+	while(n--){
+		cur = RND(x) + 1;
+		while(cur == x){
+			tmp += cur+m;
+			cur = RND(x) + 1;
+		}
+		tmp += cur+m;
+	}
+	return(tmp); /* How do you get the average of an exploding die? 
+				 If you ask a friend who's good at math, 
+				 he'll tell you a long explanation about Sequences and Limits, 
+				 of which you'll forget half. 
+				 What you'll remember is the conclusion: 
+				 
+				 The average of an exploding Dn tends to the average of a 
+				 regular Dn (which is (n+1)/2) multiplied by n/(n-1)
+
+				 -1d4chan wiki entry on exploding dice, retrieved 2/13/2012 
+				 
+				 .:, the average of this function tends to n*( ((x+1)/2 + m) * x/(x-1) ) 
+					The minimum value is n + n*m, and the maximum is unbounded
+					-CM */
+}
+
+int
+lucky_exploding_d(n,x,m)
+register int n, x, m;
+{
+	register int tmp=0, cur;
+    check_reseed();
+	if(x < 2) return d(n,x) + m*n; //A die of size 1 or 0 would always explode.
+#ifdef DEBUG
+	if (x < 0 || n < 0 || (x == 0 && n != 0)) {
+		impossible("exploding d(%d,%d) attempted", n, x);
+		return(1);
+	}
+#endif
+	while(n--){
+		cur = x-rnl(x);
+//		pline("damage %d",cur);
+		while(cur == x){
+			tmp += cur+m;
+			cur = x-rnl(x);
+//			pline("looping %d",cur);
+		}
+		tmp += cur+m;
+	}
+//	pline("damage total %d",tmp);
+	return(tmp);
 }
 
 #endif /* OVL1 */

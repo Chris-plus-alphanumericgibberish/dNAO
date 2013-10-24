@@ -583,6 +583,7 @@ create_door(dd, broom)
 room_door *dd;
 struct mkroom *broom;
 {
+	int i;
 	int	x, y;
 	int	trycnt = 0;
 
@@ -654,7 +655,8 @@ struct mkroom *broom;
 		impossible("create_door: Can't find a proper place!");
 		return;
 	}
-	add_door(x,y,broom);
+	i = add_door(x,y,broom);
+	doors[i].arti_text = dd->arti_text;
 	levl[x][y].typ = (dd->secret ? SDOOR : DOOR);
 	levl[x][y].doormask = dd->mask;
 }
@@ -767,7 +769,6 @@ struct mkroom	*croom;
 
 	if (class == MAXMCLASSES)
 	    panic("create_monster: unknown monster class '%c'", m->class);
-
 	amask = (m->align == AM_SPLEV_CO) ?
 			Align2amask(u.ualignbase[A_ORIGINAL]) :
 		(m->align == AM_SPLEV_NONCO) ?
@@ -1010,13 +1011,13 @@ struct mkroom	*croom;
 	    struct monst *was;
 	    struct obj *obj;
 	    int wastyp;
-	    int i = 0; /* prevent endless loop in case makemon always fails */
+	    int li = 0; /* prevent endless loop in case makemon always fails */
 
 	    /* Named random statues are of player types, and aren't stone-
 	     * resistant (if they were, we'd have to reset the name as well as
 	     * setting corpsenm).
 	     */
-	    for (wastyp = otmp->corpsenm; i < 1000; i++) {
+	    for (wastyp = otmp->corpsenm; li < 1000; li++) {
 		/* makemon without rndmonst() might create a group */
 		was = makemon(&mons[wastyp], 0, 0, NO_MM_FLAGS);
 		if (was) {
@@ -1032,6 +1033,7 @@ struct mkroom	*croom;
 		    obj->owornmask = 0;
 		    obj_extract_self(obj);
 		    (void) add_to_container(otmp, obj);
+
 		}
 		otmp->owt = weight(otmp);
 		mongone(was);
@@ -1139,7 +1141,6 @@ create_altar(a, croom)
 	 * values to avoid conflicting with the rest of the encoding,
 	 * shared by many other parts of the special level code.
 	 */
-
 	amask = (a->align == AM_SPLEV_CO) ?
 			Align2amask(u.ualignbase[A_ORIGINAL]) :
 		(a->align == AM_SPLEV_NONCO) ?
@@ -1759,6 +1760,20 @@ int typ;
 	    level.flags.shortsighted = 1;
 	if (lev_flags & ARBOREAL)
 	    level.flags.arboreal = 1;
+	if (lev_flags & LETHE)
+	    level.flags.lethe = 1;
+	if (lev_flags & SLIME)
+		level.flags.slime = 1;
+	if (lev_flags & FUNGI)
+		level.flags.fungi = 1;
+	if (lev_flags & DUN)
+		level.flags.dun = 1;
+	if (lev_flags & NECRO)
+		level.flags.necro = 1;
+	if (lev_flags & CAVE)
+		level.flags.cave = 1;
+	if (lev_flags & OUTSIDE)
+		level.flags.outside = 1;
 
 	/* Read message */
 	Fread((genericptr_t) &n, 1, sizeof(n), fd);
@@ -2373,13 +2388,23 @@ dlb *fd;
 
 		/* Now the complicated part, list it with each subroom */
 		/* The dog move and mail daemon routines use this */
+		xi = -1;
 		while(croom->hx >= 0 && doorindex < DOORMAX) {
 		    if(croom->hx >= x-1 && croom->lx <= x+1 &&
 		       croom->hy >= y-1 && croom->ly <= y+1) {
 			/* Found it */
-			add_door(x, y, croom);
+			xi = add_door(x, y, croom);
+			doors[xi].arti_text = tmpdoor.arti_text;
 		    }
 		    croom++;
+		}
+		if (xi < 0) {	/* Not in any room */
+		    if (doorindex >= DOORMAX)
+			impossible("Too many doors?");
+		    else {
+			xi = add_door(x, y, (struct mkroom *)0);
+			doors[xi].arti_text = tmpdoor.arti_text;
+		    }
 		}
 	}
 
@@ -2482,7 +2507,6 @@ dlb *fd;
 						/* Number of altars */
 	while(n--) {
 		Fread((genericptr_t)&tmpaltar, 1, sizeof(tmpaltar), fd);
-
 		create_altar(&tmpaltar, (struct mkroom *)0);
 	}
 
@@ -2616,13 +2640,17 @@ dlb *fd;
 		    maze1xy(&mm, DRY);
 		    (void) mksobj_at(BOULDER, mm.x, mm.y, TRUE, FALSE);
 	    }
+		if(u.uz.dnum != law_dnum){
 	    for (x = rn2(2); x; x--) {
 		maze1xy(&mm, DRY);
 		(void) makemon(&mons[PM_MINOTAUR], mm.x, mm.y, NO_MM_FLAGS);
 	    }
+	    }
+		if(u.uz.dnum != neutral_dnum || !on_level(&rlyeh_level,&u.uz)){/*Note, this was suposed to stop spawn on level-load random monsters, but does nothing*/
 	    for(x = rnd((int) (12 * mapfact) / 100); x; x--) {
 		    maze1xy(&mm, WET|DRY);
 		    (void) makemon((struct permonst *) 0, mm.x, mm.y, NO_MM_FLAGS);
+	    }
 	    }
 	    for(x = rn2((int) (15 * mapfact) / 100); x; x--) {
 		    maze1xy(&mm, DRY);
@@ -2633,7 +2661,7 @@ dlb *fd;
 
 		    maze1xy(&mm, DRY);
 		    trytrap = rndtrap();
-		    if (sobj_at(BOULDER, mm.x, mm.y))
+		    if (boulder_at(mm.x, mm.y))
 			while (trytrap == PIT || trytrap == SPIKED_PIT ||
 				trytrap == TRAPDOOR || trytrap == HOLE)
 			    trytrap = rndtrap();
@@ -2658,7 +2686,6 @@ const char *name;
 
 	fd = dlb_fopen(name, RDBMODE);
 	if (!fd) return FALSE;
-
 	Fread((genericptr_t) &vers_info, sizeof vers_info, 1, fd);
 	if (!check_version(&vers_info, name, TRUE))
 	    goto give_up;

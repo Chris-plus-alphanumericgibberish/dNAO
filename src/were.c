@@ -24,6 +24,7 @@ register struct monst *mon;
 		    switch (monsndx(mon->data)) {
 		    case PM_WEREWOLF:	howler = "wolf";    break;
 		    case PM_WEREJACKAL: howler = "jackal";  break;
+		    case PM_ANUBAN_JACKAL: howler = "jackal";  break;
 		    default:		howler = (char *)0; break;
 		    }
 		    if (howler)
@@ -51,6 +52,8 @@ int pm;
 	    case PM_HUMAN_WEREJACKAL: return(PM_WEREJACKAL);
 	    case PM_WERERAT:	      return(PM_HUMAN_WERERAT);
 	    case PM_HUMAN_WERERAT:    return(PM_WERERAT);
+		case PM_ANUBITE:		  return(PM_ANUBAN_JACKAL);
+		case PM_ANUBAN_JACKAL:	  return(PM_ANUBITE);
 	    default:		      return(0);
 	}
 }
@@ -67,10 +70,15 @@ register struct monst *mon;
 	    return;
 	}
 
-	if(canseemon(mon) && !Hallucination)
+	if(canseemon(mon) && !Hallucination) {
+		if(mon->data != &mons[PM_ANUBITE] && mon->data != &mons[PM_ANUBAN_JACKAL])
 	    pline("%s changes into a %s.", Monnam(mon),
 			is_human(&mons[pm]) ? "human" :
 			mons[pm].mname+4);
+		else pline("%s changes into a %s.", Monnam(mon),
+			mons[pm].mname);
+		
+	}
 
 	set_mon_data(mon, &mons[pm], 0);
 	if (mon->msleeping || !mon->mcanmove) {
@@ -118,6 +126,10 @@ char *genbuf;
 			typ = rn2(5) ? PM_WOLF : PM_WINTER_WOLF ;
 			if (genbuf) Strcpy(genbuf, "wolf");
 			break;
+		case PM_ANUBITE:
+		case PM_ANUBAN_JACKAL:
+			typ = PM_WEREJACKAL;
+			if (genbuf) Strcpy(genbuf, "werejackal");
 		default:
 			continue;
 	    }

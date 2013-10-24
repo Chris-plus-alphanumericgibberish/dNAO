@@ -43,15 +43,12 @@ static NEARDATA const long takeoff_order[] = { WORN_BLINDF, W_WEP,
 
 STATIC_DCL void FDECL(on_msg, (struct obj *));
 STATIC_PTR int NDECL(Armor_on);
-STATIC_PTR int NDECL(Boots_on);
 STATIC_DCL int NDECL(Cloak_on);
-STATIC_PTR int NDECL(Helmet_on);
 STATIC_PTR int NDECL(Gloves_on);
 STATIC_PTR int NDECL(Shield_on);
 #ifdef TOURIST
 STATIC_PTR int NDECL(Shirt_on);
 #endif
-STATIC_DCL void NDECL(Amulet_on);
 STATIC_DCL void FDECL(Ring_off_or_gone, (struct obj *, BOOLEAN_P));
 STATIC_PTR int FDECL(select_off, (struct obj *));
 STATIC_DCL struct obj *NDECL(do_takeoff);
@@ -90,7 +87,7 @@ register struct obj *otmp;
  * The Type_off() functions call setworn() themselves.
  */
 
-STATIC_PTR
+
 int
 Boots_on()
 {
@@ -193,7 +190,8 @@ Boots_off()
     return 0;
 }
 
-STATIC_OVL int
+STATIC_OVL 
+int
 Cloak_on()
 {
     long oldprop =
@@ -210,6 +208,7 @@ Cloak_on()
 	case CLOAK_OF_MAGIC_RESISTANCE:
 	case ROBE:
 	case LEATHER_CLOAK:
+	case LEO_NEMAEUS_HIDE:
 		break;
 	case MUMMY_WRAPPING:
 		/* Note: it's already being worn, so we have to cheat here. */
@@ -239,6 +238,7 @@ Cloak_on()
   		break;
 	default: impossible(unknown_type, c_cloak, uarmc->otyp);
     }
+	if(arti_lighten(uarmc)) inv_weight();
     return 0;
 }
 
@@ -246,11 +246,13 @@ int
 Cloak_off()
 {
     int otyp = uarmc->otyp;
+	boolean checkweight = FALSE;
     long oldprop = u.uprops[objects[otyp].oc_oprop].extrinsic & ~WORN_CLOAK;
-
+	if(arti_lighten(uarmc)) checkweight = TRUE;
     takeoff_mask &= ~W_ARMC;
 	/* For mummy wrapping, taking it off first resets `Invisible'. */
     setworn((struct obj *)0, W_ARMC);
+	if(checkweight) inv_weight();
     switch (otyp) {
 	case ELVEN_CLOAK:
 	case ORCISH_CLOAK:
@@ -261,6 +263,7 @@ Cloak_off()
 	case OILSKIN_CLOAK:
 	case ROBE:
 	case LEATHER_CLOAK:
+	case LEO_NEMAEUS_HIDE:
 		break;
 	case MUMMY_WRAPPING:
 		if (Invis && !Blind) {
@@ -288,16 +291,17 @@ Cloak_off()
     return 0;
 }
 
-STATIC_PTR
+
 int
 Helmet_on()
 {
     switch(uarmh->otyp) {
 	case FEDORA:
 	case HELMET:
-	case DENTED_POT:
+	case FLACK_HELMET:
 	case ELVEN_LEATHER_HELM:
 	case DWARVISH_IRON_HELM:
+	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
 	case HELM_OF_TELEPATHY:
 		break;
@@ -354,9 +358,10 @@ Helmet_off()
     switch(uarmh->otyp) {
 	case FEDORA:
 	case HELMET:
-	case DENTED_POT:
+	case FLACK_HELMET:
 	case ELVEN_LEATHER_HELM:
 	case DWARVISH_IRON_HELM:
+	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
 	    break;
 	case DUNCE_CAP:
@@ -470,7 +475,8 @@ Gloves_off()
     return 0;
 }
 
-STATIC_OVL int
+STATIC_OVL 
+int
 Shield_on()
 {
 /*
@@ -511,7 +517,8 @@ Shield_off()
 }
 
 #ifdef TOURIST
-STATIC_OVL int
+STATIC_OVL 
+int
 Shirt_on()
 {
 /*
@@ -522,13 +529,16 @@ Shirt_on()
 	default: impossible(unknown_type, c_shirt, uarmu->otyp);
     }
 */
+	if(arti_lighten(uarmu)) inv_weight();
     return 0;
 }
 
 int
 Shirt_off()
 {
+	boolean checkweight = FALSE;
     takeoff_mask &= ~W_ARMU;
+	if(arti_lighten(uarmu)) checkweight = TRUE;
 /*
     switch (uarmu->otyp) {
 	case HAWAIIAN_SHIRT:
@@ -538,6 +548,7 @@ Shirt_off()
     }
 */
     setworn((struct obj *)0, W_ARMU);
+	if(checkweight) inv_weight();
     return 0;
 }
 #endif	/*TOURIST*/
@@ -550,14 +561,18 @@ STATIC_PTR
 int
 Armor_on()
 {
+	if(arti_lighten(uarm)) inv_weight();
     return 0;
 }
 
 int
 Armor_off()
 {
+	boolean checkweight = FALSE;
     takeoff_mask &= ~W_ARM;
+	if(arti_lighten(uarmu)) checkweight = TRUE;
     setworn((struct obj *)0, W_ARM);
+	if(checkweight) inv_weight();
     cancelled_don = FALSE;
     return 0;
 }
@@ -574,13 +589,14 @@ Armor_gone()
     return 0;
 }
 
-STATIC_OVL void
+void
 Amulet_on()
 {
     switch(uamul->otyp) {
 	case AMULET_OF_ESP:
 	case AMULET_OF_LIFE_SAVING:
 	case AMULET_VERSUS_POISON:
+	case AMULET_OF_DRAIN_RESISTANCE:
 	case AMULET_OF_REFLECTION:
 	case AMULET_OF_MAGICAL_BREATHING:
 	case FAKE_AMULET_OF_YENDOR:
@@ -641,6 +657,7 @@ Amulet_off()
 		return;
 	case AMULET_OF_LIFE_SAVING:
 	case AMULET_VERSUS_POISON:
+	case AMULET_OF_DRAIN_RESISTANCE:
 	case AMULET_OF_REFLECTION:
 	case AMULET_OF_CHANGE:
 	case AMULET_OF_UNCHANGING:
@@ -1070,8 +1087,11 @@ dotakeoff()
 	     /* assert( GRAY_DRAGON_SCALES > YELLOW_DRAGON_SCALE_MAIL ); */
 		if (uskin)
 		    pline_The("%s merged with your skin!",
+				uskin->otyp == LEO_NEMAEUS_HIDE ? 
+				"lion skin is" : 
 			      uskin->otyp >= GRAY_DRAGON_SCALES ?
-				"dragon scales are" : "dragon scale mail is");
+				"dragon scales are" : 
+				"dragon scale mail is");
 		else
 		    pline("Not wearing any armor.%s", (iflags.cmdassist && 
 				(uleft || uright || uamul || ublindf)) ?
@@ -1602,6 +1622,7 @@ doputon()
 void
 find_ac()
 {
+	int dexbonus = 0;
 	int uac = mons[u.umonnum].ac;
 
 	if(uarm) uac -= ARM_BONUS(uarm);
@@ -1613,10 +1634,44 @@ find_ac()
 #ifdef TOURIST
 	if(uarmu) uac -= ARM_BONUS(uarmu);
 #endif
+    static int cbootsd = 0;
+    if (!cbootsd) cbootsd = find_cboots();
+    if (uarmf && uarmf->otyp == cbootsd) uac -= 1; /*max( (int)(uarmf->spe/2+1),(int)(uarmf->spe/-2+1));/* adds half again the enchantment, 
+																									and mitigates penalties from negative enchantment */
+    static int pgloves = 0;
+    if (!pgloves) pgloves = find_pgloves();
+    if (uarmf && uarmf->otyp == pgloves) uac -= 1;
+
+	if(uwep && uwep->oartifact == ART_TOBIUME) uac -= max(uwep->spe,0);
+	if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
+		uac -= max( (uwep->spe+1)/2,0);
+		if(!uarmc || !uarm) uac -= max( uwep->spe,0);
+		if(!uarmc && !uarm) uac -= max( (uwep->spe+1)/2,0);
+	}
 	if(uleft && uleft->otyp == RIN_PROTECTION) uac -= uleft->spe;
 	if(uright && uright->otyp == RIN_PROTECTION) uac -= uright->spe;
 	if (HProtection & INTRINSIC) uac -= u.ublessed;
+	uac -= u.uacinc;
 	uac -= u.uspellprot;
+	dexbonus = (int)( (ACURR(A_DEX)-11)/2 ); /*ranges from -5 to +7 (1 to 25) */
+	if(Role_if(PM_MONK) && !uarm){
+		if(dexbonus < 0) dexbonus = (int)(dexbonus / 2);
+		dexbonus += max((int)( (ACURR(A_WIS)-1)/2 - 5 ),0) + (int)(u.ulevel/6 + 1);
+	}
+	if(dexbonus > 0 && uarm){
+		if(uarm->otyp == BRONZE_PLATE_MAIL || uarm->otyp == CHAIN_MAIL || uarm->otyp == SCALE_MAIL || 
+			uarm->otyp == STUDDED_LEATHER_ARMOR || uarm->otyp == LEATHER_ARMOR || uarm->otyp == BANDED_MAIL)
+				dexbonus = max(
+						(int)(dexbonus/2), 
+						(int)((dexbonus - objects[(uarm)->otyp].a_ac) + 
+							(dexbonus - (dexbonus - objects[(uarm)->otyp].a_ac))/2
+						)
+					);
+		else if(uarm->otyp != DWARVISH_MITHRIL_COAT && uarm->otyp != ELVEN_MITHRIL_COAT &&
+			uarm->otyp != LEATHER_JACKET)
+				dexbonus = max(0, dexbonus - objects[(uarm)->otyp].a_ac); /* not cumulative w/ bodyarmor */
+	}
+	uac -= dexbonus;
 	if (uac < -128) uac = -128;	/* u.uac is an schar */
 	if(uac != u.uac){
 		u.uac = uac;
@@ -2155,6 +2210,121 @@ register struct obj *atmp;
 	} else if (DESTROY_ARM(uarms)) {
 		if (donning(otmp)) cancel_don();
 		Your("shield crumbles away!");
+		(void) Shield_off();
+		useup(otmp);
+	} else {
+		return 0;		/* could not destroy anything */
+	}
+
+#undef DESTROY_ARM
+	stop_occupation();
+	return(1);
+}
+
+/* hit by destroy armor scroll/black dragon breath/monster spell */
+int
+claws_destroy_arm(atmp)
+register struct obj *atmp;
+{
+	register struct obj *otmp;
+#define DESTROY_ARM(o) ((otmp = (o)) != 0 && \
+			(!atmp || atmp == otmp) && \
+			(!obj_resists(otmp, 0, 90)))
+
+	if (DESTROY_ARM(uarmc)) {
+		if (donning(otmp)) cancel_don();
+		Your("%s is torn to shreads!",
+		     cloak_simple_name(uarmc));
+		(void) Cloak_off();
+		useup(otmp);
+	} else if (DESTROY_ARM(uarm)) {
+		if (donning(otmp)) cancel_don();
+		Your("armor rips open and falls to the %s!",
+			surface(u.ux,u.uy));
+		(void) Armor_gone();
+		useup(otmp);
+#ifdef TOURIST
+	} else if (DESTROY_ARM(uarmu)) {
+		if (donning(otmp)) cancel_don();
+		Your("shirt is torn off!");
+		(void) Shirt_off();
+		useup(otmp);
+#endif
+	} else if (DESTROY_ARM(uarmh)) {
+		if (donning(otmp)) cancel_don();
+		Your("helmet is knocked to pieces!");
+		(void) Helmet_off();
+		useup(otmp);
+	} else if (DESTROY_ARM(uarmg)) {
+		if (donning(otmp)) cancel_don();
+		Your("gloves are torn off!");
+		(void) Gloves_off();
+		useup(otmp);
+		selftouch("You");
+	} else if (DESTROY_ARM(uarmf)) {
+		if (donning(otmp)) cancel_don();
+		Your("boots are ripped open!");
+		(void) Boots_off();
+		useup(otmp);
+	} else if (DESTROY_ARM(uarms)) {
+		if (donning(otmp)) cancel_don();
+		Your("shield shatters!");
+		(void) Shield_off();
+		useup(otmp);
+	} else {
+		return 0;		/* could not destroy anything */
+	}
+
+#undef DESTROY_ARM
+	stop_occupation();
+	return(1);
+}
+
+int
+tent_destroy_arm(atmp)
+register struct obj *atmp;
+{
+	register struct obj *otmp;
+#define DESTROY_ARM(o) ((otmp = (o)) != 0 && \
+			(!atmp || atmp == otmp) && \
+			(!obj_resists(otmp, 0, 90)))
+
+	if (DESTROY_ARM(uarmc)) {
+		if (donning(otmp)) cancel_don();
+		pline("The tentacles tear your cloak to shreads!");
+		(void) Cloak_off();
+		useup(otmp);
+	} else if (DESTROY_ARM(uarm)) {
+		if (donning(otmp)) cancel_don();
+		pline("The tentacles tear your armor to pieces!");
+		(void) Armor_gone();
+		useup(otmp);
+#ifdef TOURIST
+	} else if (DESTROY_ARM(uarmu)) {
+		if (donning(otmp)) cancel_don();
+		pline("The tentacles tear your shirt to shreads!");
+		(void) Shirt_off();
+		useup(otmp);
+#endif
+	} else if (DESTROY_ARM(uarmh)) {
+		if (donning(otmp)) cancel_don();
+		pline("The tentacles break your helmet to pieces!");
+		(void) Helmet_off();
+		useup(otmp);
+	} else if (DESTROY_ARM(uarmg)) {
+		if (donning(otmp)) cancel_don();
+		pline("The tentacles tear apart your gloves!");
+		(void) Gloves_off();
+		useup(otmp);
+		selftouch("You");
+	} else if (DESTROY_ARM(uarmf)) {
+		if (donning(otmp)) cancel_don();
+		pline("The tentacles tear your boots apart!");
+		(void) Boots_off();
+		useup(otmp);
+	} else if (DESTROY_ARM(uarms)) {
+		if (donning(otmp)) cancel_don();
+		pline("The tentacles smash your shield to bits!");
 		(void) Shield_off();
 		useup(otmp);
 	} else {

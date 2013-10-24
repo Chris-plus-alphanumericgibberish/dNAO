@@ -144,7 +144,7 @@ NEARDATA struct obj *current_wand = 0;	/* wand currently zapped/applied */
 NEARDATA boolean in_steed_dismounting = FALSE;
 
 NEARDATA coord bhitpos = DUMMY;
-NEARDATA coord doors[DOORMAX] = {DUMMY};
+NEARDATA struct door doors[DOORMAX] = {DUMMY};
 
 NEARDATA struct mkroom rooms[(MAXNROFROOMS+1)*2] = {DUMMY};
 NEARDATA struct mkroom* subrooms = &rooms[MAXNROFROOMS+1];
@@ -192,8 +192,8 @@ const int zapcolors[NUM_ZAP] = {
 
 const int shield_static[SHIELD_COUNT] = {
     S_ss1, S_ss2, S_ss3, S_ss2, S_ss1, S_ss2, S_ss4,	/* 7 per row */
-    S_ss1, S_ss2, S_ss3, S_ss2, S_ss1, S_ss2, S_ss4,
-    S_ss1, S_ss2, S_ss3, S_ss2, S_ss1, S_ss2, S_ss4,
+//    S_ss1, S_ss2, S_ss3, S_ss2, S_ss1, S_ss2, S_ss4,
+//    S_ss1, S_ss2, S_ss3, S_ss2, S_ss1, S_ss2, S_ss4,
 };
 
 NEARDATA struct spell spl_book[MAXSPELL + 1] = {DUMMY};
@@ -214,6 +214,9 @@ NEARDATA struct obj zeroobj = DUMMY;
 NEARDATA char dogname[PL_PSIZ] = DUMMY;
 NEARDATA char catname[PL_PSIZ] = DUMMY;
 NEARDATA char horsename[PL_PSIZ] = DUMMY;
+#ifdef CONVICT
+NEARDATA char ratname[PL_PSIZ] = DUMMY;
+#endif /* CONVICT */
 char preferred_pet;	/* '\0', 'c', 'd', 'n' (none) */
 /* monsters that went down/up together with @ */
 NEARDATA struct monst *mydogs = (struct monst *)0;

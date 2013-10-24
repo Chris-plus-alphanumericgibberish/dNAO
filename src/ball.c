@@ -668,17 +668,33 @@ xchar x, y;
 		break;
 	    case TT_BEARTRAP: {
 		register long side = rn2(3) ? LEFT_SIDE : RIGHT_SIDE;
+		static int jboots6 = 0;
+		if (!jboots6) jboots6 = find_jboots();
 		pline(pullmsg, "bear trap");
-		set_wounded_legs(side, rn1(1000, 500));
 #ifdef STEED
+		if(u.usteed) set_wounded_legs(side, rn1(1000, 500)); /*clunky as hell, but gets the job done! */
 		if (!u.usteed)
 #endif
 		{
+			if (uarmf && uarmf->otyp == jboots6){
+				int bootdamage = d(1,10);
+				losehp(2, "leg damage from being pulled out of a bear trap",
+						KILLED_BY);
+				set_wounded_legs(side, rn1(100,50));
+				if(bootdamage > uarmf->spe){
+					claws_destroy_arm(uarmf);
+				}else{
+					for(bootdamage; bootdamage >= 0; bootdamage--) drain_item(uarmf);
+					Your("boots are damaged!");
+				}
+			}
+			else{
+				losehp(rn1(10,20), "leg damage from being pulled out of a bear trap", KILLED_BY);
+				set_wounded_legs(side, rn1(1000,500));
 		    Your("%s %s is severely damaged.",
 					(side == LEFT_SIDE) ? "left" : "right",
 					body_part(LEG));
-		    losehp(2, "leg damage from being pulled out of a bear trap",
-					KILLED_BY);
+			}
 		}
 		break;
 	      }

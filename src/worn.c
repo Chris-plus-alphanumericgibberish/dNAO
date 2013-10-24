@@ -6,7 +6,6 @@
 
 STATIC_DCL void FDECL(m_lose_armor, (struct monst *,struct obj *));
 STATIC_DCL void FDECL(m_dowear_type, (struct monst *,long, BOOLEAN_P, BOOLEAN_P));
-STATIC_DCL int FDECL(extra_pref, (struct monst *, struct obj *));
 
 const struct worn {
 	long w_mask;
@@ -100,6 +99,7 @@ long mask;
 		}
 	    }
 	}
+	see_monsters(); //More objects than just artifacts grant warning now, and this is a convienient place to add a failsafe see_monsters check
 	update_inventory();
 }
 
@@ -135,6 +135,8 @@ struct monst *mon;
 	mon->perminvis = 1;
 	if (!mon->invis_blkd) {
 	    mon->minvis = 1;
+	    if (opaque(mon->data))
+		unblock_point(mon->mx, mon->my);
 	    newsym(mon->mx, mon->my);		/* make it disappear */
 	    if (mon->wormno) see_wsegs(mon);	/* and any tail too */
 	}
@@ -194,9 +196,17 @@ struct obj *obj;	/* item to make known if effect can be seen */
 	       even if fast movement rate retained via worn speed boots */
 	    if (flags.verbose) pline("%s is slowing down.", Monnam(mon));
 	} else if (adjust > 0 || mon->mspeed == MFAST)
+	    if (is_weeping(mon->data)) {
+		pline("%s is suddenly changing positions %sfaster.", Monnam(mon), howmuch);
+	    } else {
 	    pline("%s is suddenly moving %sfaster.", Monnam(mon), howmuch);
+	    }
 	else
+	    if (is_weeping(mon->data)) {
+		pline("%s is suddenly changing positions %sslower.", Monnam(mon), howmuch);
+	    } else {
 	    pline("%s seems to be moving %sslower.", Monnam(mon), howmuch);
+	    }
 
 	/* might discover an object if we see the speed change happen, but
 	   avoid making possibly forgotten book known when casting its spell */
@@ -254,7 +264,7 @@ boolean on, silently;
 	 case PROTECTION:
 	    break;
 	 default:
-	    if (which <= 8) {	/* 1 thru 8 correspond to MR_xxx mask values */
+	    if (which <= 10) {	/* 1 thru 10 correspond to MR_xxx mask values */
 		/* FIRE,COLD,SLEEP,DISINT,SHOCK,POISON,ACID,STONE */
 		mask = (uchar) (1 << (which - 1));
 		mon->mintrinsics |= (unsigned short) mask;
@@ -282,6 +292,8 @@ boolean on, silently;
 	 case POISON_RES:
 	 case ACID_RES:
 	 case STONE_RES:
+	 case DRAIN_RES:
+	 case SICK_RES:
 	    mask = (uchar) (1 << (which - 1));
 	    /* If the monster doesn't have this resistance intrinsically,
 	       check whether any other worn item confers it.  Note that
@@ -329,14 +341,37 @@ find_mac(mon)
 register struct monst *mon;
 {
 	register struct obj *obj;
-	int base = mon->data->ac;
+	int base = mon->data->ac, armac = 0;
 	long mwflags = mon->misc_worn_check;
 
-	for (obj = mon->minvent; obj; obj = obj->nobj) {
-	    if (obj->owornmask & mwflags)
-		base -= ARM_BONUS(obj);
-		/* since ARM_BONUS is positive, subtracting it increases AC */
+	if(mon->data == &mons[PM_ASMODEUS] && base < -9) base = -9 + AC_VALUE(base+9);
+	else if(mon->data == &mons[PM_PALE_NIGHT] && base < -6) base = -6 + AC_VALUE(base+6);
+	else if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH]){
+		base -= u.chokhmah;
 	}
+	else if(is_weeping(mon->data)){
+		if(mon->mextra[1] & 0x4L) base = -125; //Fully Quantum Locked
+		if(mon->mextra[1] & 0x2L) base = -20; //Partial Quantum Lock
+	}
+	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
+		if(uarm) armac += ARM_BONUS(uarm);
+		if(uarmf) armac += ARM_BONUS(uarmf);
+		if(uarmg) armac += ARM_BONUS(uarmg);
+		if(uarmu) armac += ARM_BONUS(uarmu);
+		if(uarms) armac += ARM_BONUS(uarms);
+		if(uarmh) armac += ARM_BONUS(uarmh);
+		if(uarmc) armac += ARM_BONUS(uarmc);
+		
+		if(armac < 0) armac *= -1;
+	}
+	else for (obj = mon->minvent; obj; obj = obj->nobj) {
+	    if (obj->owornmask & mwflags)
+		armac += ARM_BONUS(obj);
+	}
+	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
+
+	base -= armac;
+		/* since ARM_BONUS is positive, subtracting it increases AC */
 	return base;
 }
 
@@ -755,7 +790,7 @@ boolean polyspot;
 /* bias a monster's preferences towards armor that has special benefits. */
 /* currently only does speed boots, but might be expanded if monsters get to
    use more armor abilities */
-static int
+int
 extra_pref(mon, obj)
 struct monst *mon;
 struct obj *obj;

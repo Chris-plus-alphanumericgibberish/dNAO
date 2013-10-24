@@ -460,10 +460,12 @@ dlb_fopen(name, mode)
     if (!dlb_initialized) return (dlb *) 0;
 
     dp = (dlb *) alloc(sizeof(dlb));
-    if (do_dlb_fopen(dp, name, mode))
+	if (do_dlb_fopen(dp, name, mode)){
     	dp->fp = (FILE *) 0;
-    else if ((fp = fopen_datafile(name, mode, DATAPREFIX)) != 0)
+	}
+	else if ((fp = fopen_datafile(name, mode, DATAPREFIX)) != 0){
 	dp->fp = fp;
+	}
     else {
 	/* can't find anything */
 	free((genericptr_t) dp);

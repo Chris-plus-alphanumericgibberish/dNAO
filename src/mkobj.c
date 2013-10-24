@@ -13,6 +13,7 @@ STATIC_DCL struct obj *FDECL(save_mtraits, (struct obj *, struct monst *));
 #ifdef WIZARD
 STATIC_DCL const char *FDECL(where_name, (int));
 STATIC_DCL void FDECL(check_contained, (struct obj *,const char *));
+STATIC_DCL int FDECL(maid_clean, (struct monst *, struct obj *));
 #endif
 #endif /* OVL1 */
 
@@ -379,6 +380,16 @@ boolean artif;
 	otmp->otyp = otyp;
 	otmp->where = OBJ_FREE;
 	otmp->dknown = index(dknowns, let) ? 0 : 1;
+	otmp->corpsenm = 0; /* BUGFIX: Where does this get set? shouldn't it be given a default during initialization? */
+	otmp->ovar1 = 0;
+	otmp->gifted = A_NONE;
+	otmp->lifted = 0;
+	otmp->shopOwned = 0;
+	otmp->sknown = 0;
+	otmp->ostolen = 0;
+	otmp->lightened = 0;
+	otmp->obroken = 0; /* BUGFIX: shouldn't this be set to 0 initially? */
+	otmp->opoisoned = 0;
 	if ((otmp->otyp >= ELVEN_SHIELD && otmp->otyp <= ORCISH_SHIELD) ||
 			otmp->otyp == SHIELD_OF_REFLECTION)
 		otmp->dknown = 0;
@@ -397,8 +408,17 @@ boolean artif;
 			curse(otmp);
 			otmp->spe = -rne(3);
 		} else	blessorcurse(otmp, 10);
-		if (is_poisonable(otmp) && !rn2(100))
-			otmp->opoisoned = 1;
+		if (is_poisonable(otmp) && ((is_ammo(otmp) && !rn2(100)) || !rn2(1000) )){
+			if(!rn2(100)) otmp->opoisoned = OPOISON_FILTH; /* Once a game or once every few games */
+			else otmp->opoisoned = OPOISON_BASIC;
+		} else if(objects[(otmp)->otyp].oc_material == WOOD && !rn2(100)){
+			switch(d(1,4)){
+				case 1: otmp->ovar1 = WARD_TOUSTEFNA; break;
+				case 2: otmp->ovar1 = WARD_DREPRUN; break;
+				case 3: otmp->ovar1 = WARD_VEIOISTAFUR; break;
+				case 4: otmp->ovar1 = WARD_THJOFASTAFUR; break;
+			}
+		}
 
 		if (artif && !rn2(20))
 		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
@@ -481,6 +501,14 @@ boolean artif;
 					otmp->lamplit = 0;
 					blessorcurse(otmp, 2);
 					break;
+		case DOUBLE_LIGHTSABER:
+					otmp->altmode = FALSE;
+		case LIGHTSABER:
+		case BEAMSWORD:
+					otmp->lamplit = 0;
+					otmp->age = (long) rn1(500,1000);
+					blessorcurse(otmp, 2);
+					break;
 		case CHEST:
 		case LARGE_BOX:		otmp->olocked = !!(rn2(5));
 					otmp->otrapped = !(rn2(10));
@@ -543,9 +571,145 @@ boolean artif;
 		if (otmp->otyp != SCR_MAIL)
 #endif
 			blessorcurse(otmp, 4);
+		if(otmp->otyp == SCR_WARD){
+			int prob = rn2(73);
+			/*The circle of acheron is so common and so easy to draw that noone makes ward scrolls of it*/
+			if(prob < 10) otmp->ovar1 = WINGS_OF_GARUDA;
+			else if(prob < 20) otmp->ovar1 = CARTOUCHE_OF_THE_CAT_LORD;
+			else if(prob < 30) otmp->ovar1 = SIGN_OF_THE_SCION_QUEEN;
+			else if(prob < 40) otmp->ovar1 = ELDER_ELEMENTAL_EYE;
+			else if(prob < 50) otmp->ovar1 = ELDER_SIGN;
+			else if(prob < 60) otmp->ovar1 = HAMSA;
+			else if(prob < 70) otmp->ovar1 = PENTAGRAM;
+			else otmp->ovar1 = HEXAGRAM;
+		}
 		break;
 	case SPBOOK_CLASS:
 		blessorcurse(otmp, 17);
+		// WARD_ACHERON			0x0000008L
+		// WARD_QUEEN			0x0000200L
+		// WARD_GARUDA			0x0000800L
+
+		// WARD_ELDER_SIGN		0x0000080L
+		// WARD_EYE				0x0000100L
+		// WARD_CAT_LORD		0x0000400L
+
+		// WARD_HEXAGRAM		0x0000020L
+		// WARD_PENTAGRAM		0x0000010L
+		// WARD_HAMSA			0x0000040L
+
+		// WARD_HEPTAGRAM		0x0000002L
+
+		/*Spellbooks are warded to help contain the magic.
+		  Some of the wards contain usable symbols*/
+		switch (objects[otmp->otyp].oc_level) {
+		 case 0:
+		 break;
+		 case 1:
+			if( (rn2(3)) ) otmp->ovar1 = WARD_ACHERON;
+			else if( !(rn2(3)) ){
+				if( rn2(2) ) otmp->ovar1 = WARD_QUEEN;
+				else otmp->ovar1 = WARD_GARUDA;
+			}
+		 break;
+		 case 2:
+			if( rn2(2) ){
+				if( !(rn2(8)) ) otmp->ovar1 = WARD_EYE;
+				else if( rn2(2) ) otmp->ovar1 = WARD_QUEEN;
+				else otmp->ovar1 = WARD_GARUDA;
+			}
+			else if( rn2(3) ) otmp->ovar1 = WARD_ACHERON;
+		 break;
+		 case 3:
+			if( !(rn2(3)) ){
+				if( !(rn2(5)) ) otmp->ovar1 = WARD_EYE;
+				else if( !(rn2(4)) ) otmp->ovar1 = WARD_QUEEN;
+				else if( !(rn2(3)) )otmp->ovar1 = WARD_GARUDA;
+				else if(   rn2(2) )otmp->ovar1 = WARD_ELDER_SIGN;
+				else otmp->ovar1 = WARD_CAT_LORD;
+			}
+			else if(rn2(2)){
+				if( !(rn2(4)) ) otmp->ovar1 = WARD_TOUSTEFNA;
+				else if( !(rn2(3)) )otmp->ovar1 = WARD_DREPRUN;
+				else if(  (rn2(2)) )otmp->ovar1 = WARD_VEIOISTAFUR;
+				else otmp->ovar1 = WARD_THJOFASTAFUR;
+			}
+			else if( rn2(3) ) otmp->ovar1 = WARD_ACHERON;
+		 break;
+		 case 4:
+			if( rn2(4) ){
+				if( !(rn2(9)) ) otmp->ovar1 = WARD_EYE;
+				else if( !rn2(8) ) otmp->ovar1 = WARD_QUEEN;
+				else if( !rn2(7) )otmp->ovar1 = WARD_GARUDA;
+				else if( !rn2(6) )otmp->ovar1 = WARD_ELDER_SIGN;
+				else if( !rn2(5) )otmp->ovar1 = WARD_CAT_LORD;
+				else if( !rn2(4) ) otmp->ovar1 = WARD_TOUSTEFNA;
+				else if( !rn2(3) )otmp->ovar1 = WARD_DREPRUN;
+				else if(  rn2(2) )otmp->ovar1 = WARD_VEIOISTAFUR;
+				else otmp->ovar1 = WARD_THJOFASTAFUR;
+			}
+			else otmp->ovar1 = WARD_ACHERON;
+		 break;
+		 case 5:
+			if( !(rn2(4)) ){
+				if( !(rn2(2)) ) otmp->ovar1 = WARD_PENTAGRAM;
+				else otmp->ovar1 = WARD_HAMSA;
+			}
+			else if( (rn2(3)) ){
+				if( !(rn2(8)) ) otmp->ovar1 = WARD_QUEEN;
+				else if( !rn2(7) )otmp->ovar1 = WARD_GARUDA;
+				else if( !rn2(6) )otmp->ovar1 = WARD_ELDER_SIGN;
+				else if( !rn2(5) )otmp->ovar1 = WARD_CAT_LORD;
+				else if( !rn2(4) ) otmp->ovar1 = WARD_TOUSTEFNA;
+				else if( !rn2(3) )otmp->ovar1 = WARD_DREPRUN;
+				else if(  rn2(2) )otmp->ovar1 = WARD_VEIOISTAFUR;
+				else otmp->ovar1 = WARD_THJOFASTAFUR;
+			}
+			else otmp->ovar1 = WARD_EYE;
+		 break;
+		 case 6:
+			if( !(rn2(3)) ){
+				if( !(rn2(3)) ) otmp->ovar1 = WARD_PENTAGRAM;
+				else if( !rn2(2) )otmp->ovar1 = WARD_HEXAGRAM;
+				else otmp->ovar1 = WARD_HAMSA;
+			}
+			else if( (rn2(6)) ){
+				if( !(rn2(8)) ) otmp->ovar1 = WARD_QUEEN;
+				else if( !rn2(7) )otmp->ovar1 = WARD_GARUDA;
+				else if( !rn2(6) )otmp->ovar1 = WARD_ELDER_SIGN;
+				else if( !rn2(5) )otmp->ovar1 = WARD_CAT_LORD;
+				else if( !rn2(4) ) otmp->ovar1 = WARD_TOUSTEFNA;
+				else if( !rn2(3) )otmp->ovar1 = WARD_DREPRUN;
+				else if(  rn2(2) )otmp->ovar1 = WARD_VEIOISTAFUR;
+				else otmp->ovar1 = WARD_THJOFASTAFUR;
+			}
+			else otmp->ovar1 = WARD_EYE;
+		 break;
+		 case 7:
+			if( !(rn2(4)) ){
+				if( !(rn2(3)) ) otmp->ovar1 = WARD_EYE;
+				else if( !rn2(2) )otmp->ovar1 = WARD_ELDER_SIGN;
+				else otmp->ovar1 = WARD_CAT_LORD;
+			}
+			else if( !(rn2(3)) ){
+				if( !(rn2(3)) ) otmp->ovar1 = WARD_ACHERON;
+				else if( !rn2(2) )otmp->ovar1 = WARD_QUEEN;
+				else otmp->ovar1 = WARD_GARUDA;
+			}
+			else if( !(rn2(2)) ){
+				if( !(rn2(3)) ) otmp->ovar1 = WARD_HEXAGRAM;
+				else if( !rn2(2) )otmp->ovar1 = WARD_PENTAGRAM;
+				else otmp->ovar1 = WARD_HAMSA;
+			}
+			else{
+				otmp->ovar1 = WARD_HEPTAGRAM;
+			}
+		 break;
+		 default:
+			impossible("Unknown spellbook level %d, book %d;",
+				objects[otmp->otyp].oc_level, otmp->otyp);
+			return 0;
+		}
 		break;
 	case ARMOR_CLASS:
 		if(rn2(10) && (otmp->otyp == FUMBLE_BOOTS ||
@@ -572,6 +736,17 @@ boolean artif;
 			otmp->oerodeproof = otmp->rknown = 1;
 #endif
 		}
+		
+		/* MRKR: Mining helmets have lamps */
+		if (otmp->otyp == DWARVISH_IRON_HELM) {
+		    otmp->age = (long) rn1(300,300);//Many fewer turns than brass lanterns, as there are so many.
+		    otmp->lamplit = 0;
+		}
+		/* CM: gnomish hats have candles */
+		if (otmp->otyp == GNOMISH_POINTY_HAT) {
+		    otmp->age = (long) rn1(50,50);
+		    otmp->lamplit = 0;
+		}
 		break;
 	case WAND_CLASS:
 		if(otmp->otyp == WAN_WISHING) otmp->spe = rnd(3); else
@@ -581,6 +756,22 @@ boolean artif;
 		otmp->recharged = 0; /* used to control recharging */
 		break;
 	case RING_CLASS:
+		if(isEngrRing(otmp->otyp) && !rn2(3) ){
+			if(rn2(4)){
+				otmp->ohaluengr = TRUE;
+				otmp->ovar1 = (long)random_haluIndex();
+			}
+			else{
+				otmp->ohaluengr = FALSE;
+				otmp->ovar1 = rn2(4) ? CIRCLE_OF_ACHERON :
+								!rn2(6) ? HAMSA : 
+								!rn2(5) ? ELDER_SIGN : 
+								!rn2(4) ? WINGS_OF_GARUDA : 
+								!rn2(3) ? ELDER_ELEMENTAL_EYE : 
+								!rn2(2) ? SIGN_OF_THE_SCION_QUEEN : 
+								          CARTOUCHE_OF_THE_CAT_LORD ;
+			}
+		}
 		if(objects[otmp->otyp].oc_charged) {
 		    blessorcurse(otmp, 3);
 		    if(rn2(10)) {
@@ -647,10 +838,12 @@ start_corpse_timeout(body)
 
 #define TAINT_AGE (50L)		/* age when corpses go bad */
 #define TROLL_REVIVE_CHANCE 37	/* 1/37 chance for 50 turns ~ 75% chance */
+#define MOLD_REVIVE_CHANCE 23	/*  1/23 chance for 50 turns ~ 90% chance */
+#define MOLDY_CHANCE 290	/*  1/290 chance for 200 turns ~ 50% chance */
 #define ROT_AGE (250L)		/* age when corpses rot away */
 
-	/* lizards and lichen don't rot or revive */
-	if (body->corpsenm == PM_LIZARD || body->corpsenm == PM_LICHEN) return;
+	/* lizards, beholders, and lichen don't rot or revive */
+	if (body->corpsenm == PM_LIZARD || body->corpsenm == PM_LICHEN || body->corpsenm == PM_BEHOLDER) return;
 
 	action = ROT_CORPSE;		/* default action: rot away */
 	rot_adjust = in_mklev ? 25 : 10;	/* give some variation */
@@ -660,6 +853,10 @@ start_corpse_timeout(body)
 	else
 		when = ROT_AGE - corpse_age;
 	when += (long)(rnz(rot_adjust) - rot_adjust);
+
+	if(body->corpsenm >= PM_MIGO_WORKER && body->corpsenm <= PM_MIGO_QUEEN){
+		when = when/10 + 1;
+	}
 
 	if (is_rider(&mons[body->corpsenm])) {
 		/*
@@ -675,6 +872,30 @@ start_corpse_timeout(body)
 		for (age = 2; age <= TAINT_AGE; age++)
 		    if (!rn2(TROLL_REVIVE_CHANCE)) {	/* troll revives */
 			action = REVIVE_MON;
+			when = age;
+			break;
+		    }
+	} else if (mons[body->corpsenm].mlet == S_FUNGUS) {
+		/* Fungi come back with a vengeance - if you don't eat it or
+		 * destroy it,  any live cells will quickly use the dead ones
+		 * as food and come back.
+		 */
+		long age;
+		for (age = 2; age <= TAINT_AGE; age++)
+		    if (!rn2(MOLD_REVIVE_CHANCE)) {    /* mold revives */
+			action = REVIVE_MON;
+			when = age;
+			break;
+		    }
+	} 
+	
+	if (action == ROT_CORPSE && !acidic(&mons[body->corpsenm])) {
+		/* Corpses get moldy
+		 */
+		long age;
+		for (age = TAINT_AGE + 1; age <= ROT_AGE; age++)
+		    if (!rn2(MOLDY_CHANCE)) {    /* "revives" as a random s_fungus */
+			action = MOLDY_CORPSE;
 			when = age;
 			break;
 		    }
@@ -697,6 +918,8 @@ register struct obj *otmp;
 	    set_moreluck();
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
+	else if (artifact_light(otmp) && otmp->lamplit)
+		begin_burn(otmp, FALSE);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
 		(void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
 	return;
@@ -711,6 +934,9 @@ register struct obj *otmp;
 	    set_moreluck();
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
+	else if (artifact_light(otmp) && otmp->lamplit)
+		begin_burn(otmp, FALSE);
+
 }
 
 void
@@ -733,6 +959,8 @@ register struct obj *otmp;
 	    set_moreluck();
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
+	else if (artifact_light(otmp) && otmp->lamplit) 
+		begin_burn(otmp, FALSE);
 	else if (otmp->otyp == FIGURINE) {
 		if (otmp->corpsenm != NON_PM
 		    && !dead_species(otmp->corpsenm,TRUE)
@@ -753,6 +981,9 @@ register struct obj *otmp;
 	    otmp->owt = weight(otmp);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
 	    (void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
+	else if (artifact_light(otmp) && otmp->lamplit)
+		begin_burn(otmp, FALSE);
+
 	return;
 }
 
@@ -802,9 +1033,24 @@ weight(obj)
 register struct obj *obj;
 {
 	int wt = objects[obj->otyp].oc_weight;
+	if(obj->oartifact == ART_EARTH_CRYSTAL){
+		wt *= 2; //300
+	}
+	else if(obj->oartifact == ART_DRAGON_PLATE){
+		wt =  (int)(wt * 1.5); //450
+	}
 
-	if (obj->otyp == LARGE_BOX && obj->spe == 1) /* Schroedinger's Cat */
+	if(obj->oartifact == ART_TREASURY_OF_PROTEUS){
+		wt =  150; /* Same as a crystal ball (ie, the Orb of Weight) */
+	}
+
+	if (obj->otyp == LARGE_BOX && obj->spe){ /* Schroedinger's Cat */
+		if(obj->spe == 1){
 		wt += mons[PM_HOUSECAT].cwt;
+		}else if(obj->spe == 4){
+			wt += mons[PM_VAMPIRE].cwt;
+		}
+	}
 	if (Is_container(obj) || obj->otyp == STATUE) {
 		struct obj *contents;
 		register int cwt = 0;
@@ -891,6 +1137,7 @@ int x, y;
 /* return TRUE if the corpse has special timing */
 #define special_corpse(num)  (((num) == PM_LIZARD)		\
 				|| ((num) == PM_LICHEN)		\
+				|| ((num) == PM_BEHOLDER)		\
 				|| (is_rider(&mons[num]))	\
 				|| (mons[num].mlet == S_TROLL))
 
@@ -1108,10 +1355,10 @@ int x, y;
 	panic("place_object: obj not free");
 
     obj_no_longer_held(otmp);
-    if (otmp->otyp == BOULDER) block_point(x,y);	/* vision */
+    if (is_boulder(otmp)) block_point(x,y);	/* vision */
 
     /* obj goes under boulders */
-    if (otmp2 && (otmp2->otyp == BOULDER)) {
+    if (otmp2 && is_boulder(otmp2)) {
 	otmp->nexthere = otmp2->nexthere;
 	otmp2->nexthere = otmp;
     } else {
@@ -1261,7 +1508,7 @@ register struct obj *otmp;
 
     if (otmp->where != OBJ_FLOOR)
 	panic("remove_object: obj not on floor");
-    if (otmp->otyp == BOULDER) unblock_point(x,y); /* vision */
+    if (is_boulder(otmp)) unblock_point(x,y); /* vision */
     extract_nexthere(otmp, &level.objects[x][y]);
     extract_nobj(otmp, &fobj);
     if (otmp->timed) obj_timer_checks(otmp,x,y,0);
@@ -1395,6 +1642,8 @@ add_to_minv(mon, obj)
     if (obj->where != OBJ_FREE)
 	panic("add_to_minv: obj not free");
 
+	if(mon->data == &mons[PM_MAID] && maid_clean(mon, obj) ) return 1; /*destroyed by maid*/
+
     /* merge if possible */
     for (otmp = mon->minvent; otmp; otmp = otmp->nobj)
 	if (merged(&otmp, &obj))
@@ -1405,6 +1654,78 @@ add_to_minv(mon, obj)
     obj->nobj = mon->minvent;
     mon->minvent = obj;
     return 0;	/* obj on mon's inventory chain */
+}
+
+/*
+ * A maid is evaluating and repairing the object.
+ * If she decides to throw it out, useup is called and 1 is returned.
+ */
+int
+maid_clean(mon, obj)
+    struct monst *mon;
+    struct obj *obj;
+{
+	if(obj->oeroded){
+		if( d(1,20) < (int)is_rustprone(obj) ? (int)obj->oeroded : ((int)obj->oeroded) * 4){
+			if(canseemon(mon)) pline("The maid breaks the %s trash down for parts.", is_rustprone(obj) ? "rusted-out" : "burned-out");
+			obj->quan = 0;
+			obfree(obj, (struct obj *)0);
+			return 1;
+		}
+		obj->oeroded = 0;
+		if(canseemon(mon)) pline("The maid %s", is_rustprone(obj) ? "scourers off the rust." : "patches the burned areas.");
+	}
+	if(obj->oeroded2){
+		if( d(1,12) < (int)is_corrodeable(obj) ? (int)obj->oeroded2 : ((int)obj->oeroded2) * 4){
+			if(canseemon(mon)) pline("The maid breaks the %s trash down for parts.", is_corrodeable(obj) ? "corroded" : "rotten");
+			obj->quan = 0;
+			obfree(obj, (struct obj *)0);
+			return 1;
+		}
+		obj->oeroded2 = 0;
+		if(canseemon(mon)) pline("The maid %s", is_corrodeable(obj) ? "scourers away the corrosion." : "excises and patches the rotted areas.");
+	}
+	if(obj->obroken){
+		if(canseemon(mon)) pline("The maid mends the broken lock.");
+		obj->obroken = 0;
+	}
+	if(obj->cursed){
+		if( d(1,20) < 5){
+			struct engr *oep = engr_at(mon->mx,mon->my);
+			if(canseemon(mon)) pline("The maid banishes the unholy object to hell.");
+			add_to_migration(obj);
+			obj->ox = valley_level.dnum;
+			obj->oy = sanctum_level.dlevel - 1; /* vs level, bottom of the accesible part of hell */
+			obj->owornmask = (long)MIGR_RANDOM;
+			if(!oep){
+				make_engr_at(mon->mx, mon->my,
+			     "U G I EI A", 0L, MARK);
+				oep = engr_at(mon->mx,mon->my);
+			}
+			oep->ward_id = PENTAGRAM;
+			oep->halu_ward = 0;
+			oep->ward_type = MARK;
+			oep->complete_wards = 1;
+			return 1;
+		}
+		if(canseemon(mon)) pline("The maid sticks an ofuda to the offending object.");
+		obj->cursed = 0;
+	}
+	if(obj->otyp == DWARVISH_IRON_HELM || obj->otyp == OIL_LAMP || obj->otyp == BRASS_LANTERN){
+		if(obj->age < 750){
+			obj->age += 750;
+			if(canseemon(mon)) pline("The maid adds some oil.");
+		}
+	}
+#ifdef TOURIST
+	if(obj->otyp == EXPENSIVE_CAMERA){
+		if (obj->spe <= 50){
+			obj->spe = 50+rn1(16,10);		/* 10..25 */
+			if(canseemon(mon)) pline("The maid replaces the film.");
+		}
+	}
+#endif
+	return 0;
 }
 
 /*

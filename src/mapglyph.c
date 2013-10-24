@@ -145,7 +145,36 @@ unsigned *ospecial;
 #endif /* USER_DUNGEONCOLOR */
 	    else
 #endif
-	    cmap_color(offset);
+		/* Special colours for special dungeon areas */
+			if (iflags.use_color && offset == S_tree) {
+				if (Is_abyss1(&u.uz)) color = CLR_BROWN;
+			}
+			if (iflags.use_color && Is_juiblex_level(&u.uz)){
+				if (offset == S_pool || offset == S_water)
+					color = CLR_BRIGHT_GREEN;
+				if(offset >= S_vwall && offset <= S_hcdoor)
+					color = CLR_GREEN;
+			}
+			if (iflags.use_color && offset >= S_vwall && offset <= S_hcdoor) {
+				if (*in_rooms(x,y,BEEHIVE))
+					color = CLR_YELLOW;
+				else if (In_W_tower(x, y, &u.uz))
+					color = CLR_MAGENTA;
+				else if (In_mines(&u.uz) /*&& !Is_minetown_level(&u.uz)*/)
+					color = CLR_BROWN;
+				else if (Is_astralevel(&u.uz))
+					color = CLR_WHITE;
+			} else if (iflags.use_color && offset == S_room) {
+				if (*in_rooms(x,y,BEEHIVE))
+					color = CLR_YELLOW;
+//				else if (*in_rooms(x,y,SWAMP)){
+//					if (Is_juiblex_level(&u.uz)) color = CLR_BRIGHT_GREEN;//Doesn't stick....?
+//					else color = CLR_GREEN;
+//				}
+			} else if (iflags.use_color && offset == S_altar) {
+				color = CLR_WHITE;
+			}
+		if (color == NO_COLOR) cmap_color(offset);
     } else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
 	if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
 	if (offset == BOULDER && iflags.bouldersym) ch = iflags.bouldersym;

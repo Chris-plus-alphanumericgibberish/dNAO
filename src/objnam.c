@@ -35,28 +35,61 @@ struct Jitem {
 #ifndef OVLB
 
 STATIC_DCL struct Jitem Japanese_items[];
+STATIC_OVL struct Jitem Pirate_items[];
 
 #else /* OVLB */
 
 STATIC_OVL struct Jitem Japanese_items[] = {
-	{ SHORT_SWORD, "wakizashi" },
+	{ BATTLE_AXE, "ono" },
 	{ BROADSWORD, "ninja-to" },
+	{ BRONZE_PLATE_MAIL, "tanko" },
+	{ CLUB, "jo" },
+	{ CRYSTAL_PLATE_MAIL, "jade o-yoroi" },
+	{ DAGGER, "kunai" },
+	{ DART, "bo-shuriken" },
+	{ DWARVISH_MATTOCK, "dwarvish zaghnal" },
 	{ FLAIL, "nunchaku" },
-	{ GLAIVE, "naginata" },
-	{ LOCK_PICK, "osaku" },
-	{ WOODEN_HARP, "koto" },
-	{ KNIFE, "shito" },
-	{ PLATE_MAIL, "tanko" },
-	{ HELMET, "kabuto" },
-	{ LEATHER_GLOVES, "yugake" },
 	{ FOOD_RATION, "gunyoki" },
+	{ GAUNTLETS_OF_FUMBLING, "kote of power" },
+	{ GAUNTLETS_OF_POWER, "kote of power" },
+	{ GLAIVE, "naginata" },
+	{ GUISARME, "kamayari" },
+	{ HALBERD, "bisento" },
+	{ HELMET, "kabuto" },
+	{ KNIFE, "shito" },
+	{ LANCE, "uma-yari" },
+	{ LEATHER_GLOVES, "yugake" },
+	{ LOCK_PICK, "osaku" },
+	{ LONG_SWORD, "chokuto" },
+	{ PLATE_MAIL, "o-yoroi" },
 	{ POT_BOOZE, "sake" },
+	{ QUARTERSTAFF, "bo" },
+	{ SHORT_SWORD, "wakizashi" },
+	{ SHURIKEN, "hira-shuriken" },
+	{ SPEAR, "yari" },
+	{ SPLINT_MAIL, "dou-maru" },
+	{ SILVER_DAGGER, "jade-hilted kunai" },
+	{ SILVER_SPEAR, "jade-set yari" },
+	{ TRIDENT, "magari yari" },
+	{ TWO_HANDED_SWORD, "no-dachi" },
+	{ WAR_HAMMER, "dai tsuchi" },
+	{ WOODEN_HARP, "koto" },
 	{0, "" }
 };
 
+STATIC_OVL struct Jitem Pirate_items[] = {
+	{ POT_BOOZE, "rum" },
+	{ CRAM_RATION, "sea biscuit" },
+	{ SCIMITAR, "cutlass" },
+	{ SMALL_SHIELD, "buckler" },
+	{ SACK, "ditty bag" },
+	{ LARGE_BOX, "foot locker" },
+	{ CLUB, "belaying pin" },
+	{0, "" }
+};
 #endif /* OVLB */
 
-STATIC_DCL const char *FDECL(Japanese_item_name,(int i));
+STATIC_DCL const char *FDECL(Alternate_item_name,(int i, struct Jitem * ));
 
 #ifdef OVL1
 
@@ -101,8 +134,10 @@ register int otyp;
 	register const char *un = ocl->oc_uname;
 	register int nn = ocl->oc_name_known;
 
-	if (Role_if(PM_SAMURAI) && Japanese_item_name(otyp))
-		actualn = Japanese_item_name(otyp);
+	if (Role_if(PM_SAMURAI) && Alternate_item_name(otyp,Japanese_items))
+		actualn = Alternate_item_name(otyp,Japanese_items);
+	if (Role_if(PM_PIRATE) && Alternate_item_name(otyp,Pirate_items))
+		actualn = Alternate_item_name(otyp,Pirate_items);
 	switch(ocl->oc_class) {
 	case COIN_CLASS:
 		Strcpy(buf, "coin");
@@ -255,8 +290,10 @@ boolean ignore_oquan;
 	register const char *un = ocl->oc_uname;
 
 	buf = nextobuf() + PREFIX;	/* leave room for "17 -3 " */
-	if (Role_if(PM_SAMURAI) && Japanese_item_name(typ))
-		actualn = Japanese_item_name(typ);
+	if (Role_if(PM_SAMURAI) && Alternate_item_name(typ,Japanese_items))
+		actualn = Alternate_item_name(typ,Japanese_items);
+	if (Role_if(PM_PIRATE) && Alternate_item_name(typ,Pirate_items))
+		actualn = Alternate_item_name(typ,Pirate_items);
 
 	buf[0] = '\0';
 	/*
@@ -286,8 +323,15 @@ boolean ignore_oquan;
 			Sprintf(buf,"%s amulet", dn);
 		break;
 	    case WEAPON_CLASS:
-		if (is_poisonable(obj) && obj->opoisoned)
-			Strcpy(buf, "poisoned ");
+		if (is_poisonable(obj) && obj->opoisoned){
+			if(obj->opoisoned & OPOISON_BASIC) Strcpy(buf, "poisoned ");
+			if(obj->opoisoned & OPOISON_FILTH) Strcpy(buf, "filth-crusted ");
+			if(obj->opoisoned & OPOISON_SLEEP) Strcpy(buf, "drug-coated ");
+//			if(obj->opoisoned & OPOISON_BLIND) Strcpy(buf, "poisoned ");
+//			if(obj->opoisoned & OPOISON_PARAL) Strcpy(buf, "poisoned ");
+			if(obj->opoisoned & OPOISON_AMNES) Strcpy(buf, "lethe-rusted ");
+		}
+		if(objects[(obj)->otyp].oc_material == WOOD && obj->ovar1) Strcpy(buf, "carved ");
 	    case VENOM_CLASS:
 	    case TOOL_CLASS:
 		if (typ == LENSES)
@@ -419,7 +463,8 @@ boolean ignore_oquan;
 		if(!obj->dknown) break;
 		if(nn) {
 			Strcat(buf, " of ");
-			Strcat(buf, actualn);
+			if(obj->otyp != SCR_WARD) Strcat(buf, actualn);
+			else Strcat(buf, wardDecode[obj->ovar1]);
 		} else if(un) {
 			Strcat(buf, " called ");
 			Strcat(buf, un);
@@ -573,7 +618,7 @@ doname_base(obj, with_price)
 register struct obj *obj;
 boolean with_price;
 {
-	boolean ispoisoned = FALSE;
+	int ispoisoned = 0;
 	char prefix[PREFIX];
 	char tmpbuf[PREFIX+1];
 	/* when we have to add something at the start of prefix instead of the
@@ -587,9 +632,29 @@ boolean with_price;
 	 * combining both into one function taking a parameter.
 	 */
 	/* must check opoisoned--someone can have a weirdly-named fruit */
-	if (!strncmp(bp, "poisoned ", 9) && obj->opoisoned) {
+	if (!strncmp(bp, "lethe-rusted ", 13) && obj->opoisoned & OPOISON_AMNES) {
+		bp += 13;
+		ispoisoned = OPOISON_AMNES;
+	}
+	// if (!strncmp(bp, "poisoned ", 9) && obj->opoisoned & OPOISON_PARAL) {
+		// bp += 9;
+		// ispoisoned = OPOISON_PARAL;
+	// }
+	// if (!strncmp(bp, "poisoned ", 9) && obj->opoisoned & OPOISON_BLIND) {
+		// bp += 9;
+		// ispoisoned = OPOISON_BLIND;
+	// }
+	if (!strncmp(bp, "drug-coated ", 12) && obj->opoisoned & OPOISON_BASIC) {
+		bp += 12;
+		ispoisoned = OPOISON_SLEEP;
+	}
+	if (!strncmp(bp, "filth-crusted ", 14) && obj->opoisoned & OPOISON_FILTH) {
+		bp += 14;
+		ispoisoned = OPOISON_FILTH;
+	}
+	if (!strncmp(bp, "poisoned ", 9) && obj->opoisoned & OPOISON_BASIC) {
 		bp += 9;
-		ispoisoned = TRUE;
+		ispoisoned = OPOISON_BASIC;
 	}
 
 	if(obj->quan != 1L)
@@ -605,6 +670,7 @@ boolean with_price;
 	if (obj->oinvis) Strcat(prefix,"invisible ");
 #endif
 
+	if(obj->sknown && obj->ostolen) Strcpy(prefix, "stolen ");
 	if (obj->bknown &&
 	    obj->oclass != COIN_CLASS &&
 	    (obj->otyp != POT_WATER || !objects[POT_WATER].oc_name_known
@@ -646,13 +712,25 @@ boolean with_price;
 			Strcat(bp, " (being worn)");
 		break;
 	case WEAPON_CLASS:
-		if(ispoisoned)
+		if(ispoisoned & OPOISON_BASIC)
 			Strcat(prefix, "poisoned ");
+		if(ispoisoned & OPOISON_FILTH)
+			Strcat(prefix, "filth-crusted ");
+		if(ispoisoned & OPOISON_SLEEP)
+			Strcat(prefix, "drug-coated ");
+		if(ispoisoned & OPOISON_AMNES)
+			Strcat(prefix, "lethe-rusted ");
 plus:
 		add_erosion_words(obj, prefix);
 		if(obj->known) {
 			Strcat(prefix, sitoa(obj->spe));
 			Strcat(prefix, " ");
+		}
+		if (is_lightsaber(obj)) {
+		    if (obj->lamplit) Strcat(bp, " (lit)");
+#  ifdef DEBUG
+		    Sprintf(eos(bp), " (%d)", obj->age);		
+#  endif
 		}
 		break;
 	case ARMOR_CLASS:
@@ -712,6 +790,7 @@ charges:
 	case RING_CLASS:
 		add_erosion_words(obj, prefix);
 ring:
+		if(obj->ovar1 && isEngrRing(obj->otyp)) Strcat(prefix, "engraved ");
 		if(obj->owornmask & W_RINGR) Strcat(bp, " (on right ");
 		if(obj->owornmask & W_RINGL) Strcat(bp, " (on left ");
 		if(obj->owornmask & W_RING) {
@@ -840,7 +919,7 @@ register struct obj *otmp;
     if (otmp->oclass == COIN_CLASS) return FALSE;	/* always fully ID'd */
 #endif
     /* check fundamental ID hallmarks first */
-    if (!otmp->known || !otmp->dknown ||
+    if (!otmp->known || !otmp->dknown || !otmp->sknown || 
 #ifdef MAIL
 	    (!otmp->bknown && otmp->otyp != SCR_MAIL) ||
 #else
@@ -918,7 +997,7 @@ struct obj *obj;
     /* killer name should be more specific than general xname; however, exact
        info like blessed/cursed and rustproof makes things be too verbose */
     obj->known = obj->dknown = 1;
-    obj->bknown = obj->rknown = obj->greased = 0;
+    obj->bknown = obj->rknown = obj->sknown = obj->greased = 0;
     /* if character is a priest[ess], bknown will get toggled back on */
     obj->blessed = obj->cursed = 0;
     /* "killed by poisoned <obj>" would be misleading when poison is
@@ -1152,6 +1231,11 @@ register const char *verb;
 	 * special case: allow null sobj to get the singular 3rd person
 	 * present tense form so we don't duplicate this code elsewhere.
 	 */
+	if(Role_if(PM_PIRATE) && !strcmp(verb,"are")) {
+		Strcpy(buf,"be");
+		return buf;
+	}
+
 	if (subj) {
 	    if (!strncmpi(subj, "a ", 2) || !strncmpi(subj, "an ", 3))
 		goto sing;
@@ -1804,7 +1888,7 @@ boolean from_user;
 	register int i;
 	register struct obj *otmp;
 	int cnt, spe, spesgn, typ, very, rechrg;
-	int blessed, uncursed, iscursed, ispoisoned, isgreased;
+	int blessed, uncursed, iscursed, ispoisoned, isgreased, stolen;
 	int eroded, eroded2, erodeproof;
 #ifdef INVISIBLE_OBJECTS
 	int isinvisible;
@@ -1829,12 +1913,28 @@ boolean from_user;
 	 * automatically sticks 'candied' in front of such names.
 	 */
 
+    short dummyshort;
+	boolean heptagram = FALSE,
+		gorgoneion = FALSE,
+		acheron = FALSE,
+		pentagram = FALSE,
+		hexagram = FALSE,
+		hamsa = FALSE,
+		sign = FALSE,
+		eye = FALSE,
+		queen = FALSE,
+		cartouche = FALSE,
+		garuda = FALSE,
+		toustefna = FALSE,
+		dreprun = FALSE,
+		veioistafur = FALSE,
+		thjofastafur = FALSE;
 	char oclass;
 	char *un, *dn, *actualn;
 	const char *name=0;
 
 	cnt = spe = spesgn = typ = very = rechrg =
-		blessed = uncursed = iscursed =
+		blessed = uncursed = iscursed = stolen = 
 #ifdef INVISIBLE_OBJECTS
 		isinvisible =
 #endif
@@ -1878,6 +1978,42 @@ boolean from_user;
 			while(digit(*bp)) bp++;
 			while(*bp == ' ') bp++;
 			l = 0;
+		} else if (!strncmpi(bp, "stolen ", l=7)) {
+			stolen = 1;
+		} else if(!strncmpi(bp, "heptagram ", l=10)){
+			heptagram = TRUE;
+		} else if(!strncmpi(bp, "gorgoneion ", l=10)){
+			gorgoneion = TRUE;
+		} else if(!strncmpi(bp, "circle of acheron ", l=18)){
+			acheron = TRUE;
+		} else if(!strncmpi(bp, "pentagram ", l=10)){
+			pentagram = TRUE;
+		} else if(!strncmpi(bp, "hexagram ", l=9)){
+			hexagram = TRUE;
+		} else if(!strncmpi(bp, "hamsa ", l=6)){
+			hamsa = TRUE;
+		} else if(!strncmpi(bp, "elder sign ", l=11)){
+			sign = TRUE;
+		} else if(!strncmpi(bp, "elder elemental eye ", l=20)){
+			eye = TRUE;
+		} else if(!strncmpi(bp, "sign of the scion queen mother ", l=31)){
+			queen = TRUE;
+		} else if(!strncmpi(bp, "cartouche of the cat lord ", l=26)){
+			cartouche = TRUE;
+		} else if(!strncmpi(bp, "wings of garuda ", l=16)){
+			garuda = TRUE;
+		} else if(!strncmpi(bp, "toustefna ", l=10)){
+			toustefna = TRUE;
+		} else if(!strncmpi(bp, "dreprun ", l=8)){
+			dreprun = TRUE;
+		} else if(!strncmpi(bp, "veioistafur ", l=12)){
+			veioistafur = TRUE;
+		} else if(!strncmpi(bp, "thjofastafur ", l=13)){
+			thjofastafur = TRUE;
+		} else if(!strncmpi(bp, "engraved ", l=9)){
+			/*This modifier does nothing, really, but people should be allowed to write it.*/;
+		} else if(!strncmpi(bp, "carved ", l=7)){
+			/*This modifier does nothing, really, but people should be allowed to write it.*/;
 		} else if (!strncmpi(bp, "blessed ", l=8) ||
 			   !strncmpi(bp, "holy ", l=5)) {
 			blessed = 1;
@@ -2274,18 +2410,77 @@ srch:
 		i++;
 	}
 	if (actualn) {
-		struct Jitem *j = Japanese_items;
-		while(j->item) {
-			if (actualn && !strcmpi(actualn, j->name)) {
-				typ = j->item;
+		struct Jitem *j[] = {Japanese_items,Pirate_items};
+		for(i=0;i<sizeof(j)/sizeof(j[0]);i++)
+		{
+		while(j[i]->item) {
+			if (actualn && !strcmpi(actualn, j[i]->name)) {
+				typ = j[i]->item;
 				goto typfnd;
 			}
-			j++;
+			j[i]++;
+		}
 		}
 	}
 	if (!strcmpi(bp, "spinach")) {
 		contents = SPINACH;
 		typ = TIN;
+		goto typfnd;
+	}
+	/*This is meant to catch "scrolls of X"*/
+	if(!strncmpi(actualn, "heptagram", 9)){
+		heptagram = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "gorgoneion", 9)){
+		gorgoneion = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "circle of acheron", 9)){
+		acheron = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "pentagram", 9)){
+		pentagram = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "hexagram", 8)){
+		hexagram = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "hamsa", 5)){
+		hamsa = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "elder sign", 10)){
+		sign = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "elder elemental eye", 19)){
+		eye = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "sign of the scion queen mother", 30)){
+		queen = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "cartouche of the cat lord", 25)){
+		cartouche = TRUE;
+		typ = SCR_WARD;
+		goto typfnd;
+	}
+	if(!strncmpi(actualn, "wings of garuda", 15)){
+		garuda = TRUE;
+		typ = SCR_WARD;
 		goto typfnd;
 	}
 	/* Note: not strncmpi.  2 fruits, one capital, one not, are possible. */
@@ -2397,16 +2592,16 @@ srch:
 # endif
 		if(!BSTRCMP(bp, p-4, "pool")) {
 			levl[u.ux][u.uy].typ = POOL;
-			del_engr_at(u.ux, u.uy);
+			del_engr_ward_at(u.ux, u.uy);
 			pline("A pool.");
 			/* Must manually make kelp! */
-			water_damage(level.objects[u.ux][u.uy], FALSE, TRUE);
+			water_damage(level.objects[u.ux][u.uy], FALSE, TRUE, FALSE);
 			newsym(u.ux, u.uy);
 			return &zeroobj;
 		}
 		if (!BSTRCMP(bp, p-4, "lava")) {  /* also matches "molten lava" */
 			levl[u.ux][u.uy].typ = LAVAPOOL;
-			del_engr_at(u.ux, u.uy);
+			del_engr_ward_at(u.ux, u.uy);
 			pline("A pool of molten lava.");
 			if (!(Levitation || Flying)) (void) lava_effects();
 			newsym(u.ux, u.uy);
@@ -2438,6 +2633,14 @@ srch:
 		    pline("A grave.");
 		    newsym(u.ux, u.uy);
 		    return(&zeroobj);
+		}
+
+		if(!BSTRCMP(bp, p-9, "dead tree")) {
+		    levl[u.ux][u.uy].typ = DEADTREE;
+		    pline("A dead tree.");
+		    newsym(u.ux, u.uy);
+		    block_point(u.ux, u.uy);
+		    return &zeroobj;
 		}
 
 		if(!BSTRCMP(bp, p-4, "tree")) {
@@ -2564,7 +2767,7 @@ typfnd:
 			break;
 		case SLIME_MOLD: otmp->spe = ftype;
 			/* Fall through */
-		case SKELETON_KEY: case CHEST: case LARGE_BOX:
+		case SKELETON_KEY: case UNIVERSAL_KEY: case CHEST: case LARGE_BOX:
 		case HEAVY_IRON_BALL: case IRON_CHAIN: case STATUE:
 			/* otmp->cobj already done in mksobj() */
 				break;
@@ -2647,6 +2850,51 @@ typfnd:
 		}
 	}
 
+	if(stolen){
+		otmp->ostolen = 1;
+		otmp->sknown = 1;
+	}
+	
+	if(otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && (wizard || (otmp->ovar1 && !(otmp->ohaluengr)))){
+		if(heptagram);  /*can't be wished for*/
+		else if(gorgoneion);  /*can't be wished for*/
+		else if(acheron) otmp->ovar1 = CIRCLE_OF_ACHERON;
+		else if(pentagram) otmp->ovar1 = PENTAGRAM; /*not found randomly, but can be wished for*/
+		else if(hexagram); /*can't be wished for*/
+		else if(hamsa) otmp->ovar1 = HAMSA;
+		else if(sign) otmp->ovar1 = ELDER_SIGN;
+		else if(eye) otmp->ovar1 = ELDER_ELEMENTAL_EYE;
+		else if(queen) otmp->ovar1 = SIGN_OF_THE_SCION_QUEEN;
+		else if(cartouche) otmp->ovar1 = CARTOUCHE_OF_THE_CAT_LORD;
+		else if(garuda) otmp->ovar1 = WINGS_OF_GARUDA;
+		else if(toustefna); /*can't be wished for*/
+		else if(dreprun); /*can't be wished for*/
+		else if(veioistafur); /*can't be wished for*/
+		else if(thjofastafur); /*can't be wished for*/
+	}
+	
+	if(otmp->otyp == SCR_WARD){
+		/* Can wish for a scroll of any ward, including heptagram. You are spending a wish, after all.*/
+		if(heptagram) otmp->ovar1 = HEPTAGRAM;
+		else if(gorgoneion) otmp->ovar1 = GORGONEION;
+		else if(acheron) otmp->ovar1 = CIRCLE_OF_ACHERON;
+		else if(pentagram) otmp->ovar1 = PENTAGRAM;
+		else if(hexagram) otmp->ovar1 = HEXAGRAM;
+		else if(hamsa) otmp->ovar1 = HAMSA;
+		else if(sign) otmp->ovar1 = ELDER_SIGN;
+		else if(eye) otmp->ovar1 = ELDER_ELEMENTAL_EYE;
+		else if(queen) otmp->ovar1 = SIGN_OF_THE_SCION_QUEEN;
+		else if(cartouche) otmp->ovar1 = CARTOUCHE_OF_THE_CAT_LORD;
+		else if(garuda) otmp->ovar1 = WINGS_OF_GARUDA;
+	}
+	
+	/*You're spending a wish, you can get whatever stave you ask for*/
+	if(otmp->oclass == WEAPON_CLASS && objects[(otmp)->otyp].oc_material == WOOD){
+		if(toustefna) otmp->ovar1 = WARD_TOUSTEFNA; 
+		else if(dreprun) otmp->ovar1 = WARD_DREPRUN;
+		else if(veioistafur) otmp->ovar1 = WARD_VEIOISTAFUR;
+		else if(thjofastafur) otmp->ovar1 = WARD_THJOFASTAFUR;
+	}
 	/* set blessed/cursed -- setting the fields directly is safe
 	 * since weight() is called below and addinv() will take care
 	 * of luck */
@@ -2708,7 +2956,7 @@ typfnd:
 	/* set poisoned */
 	if (ispoisoned) {
 	    if (is_poisonable(otmp))
-		otmp->opoisoned = (Luck >= 0);
+		otmp->opoisoned = (Luck >= 0) ? OPOISON_BASIC : 0;
 	    else if (Is_box(otmp) || typ == TIN)
 		otmp->otrapped = 1;
 	    else if (oclass == FOOD_CLASS)
@@ -2739,8 +2987,14 @@ typfnd:
 
 	/* more wishing abuse: don't allow wishing for certain artifacts */
 	/* and make them pay; charge them for the wish anyway! */
-	if ((is_quest_artifact(otmp) ||
-	     (otmp->oartifact && rn2(nartifact_exist()) > 1))
+	if ((is_quest_artifact(otmp) || //redundant failsafe.  You can't wish for ANY quest artifacts
+	     (otmp->oartifact && rn2(nartifact_exist()) > 1) || 
+		 (otmp->oartifact >= ART_ITLACHIAYAQUE && otmp->oartifact <= ART_EYE_OF_THE_AETHIOPICA) || //no wishing for quest artifacts
+		 (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS && otmp->oartifact <= ART_SILVER_KEY) || //no wishing for alignment quest artifacts
+		 (otmp->oartifact >= ART_SWORD_OF_ERATHAOL && otmp->oartifact <= ART_HAMMER_OF_BARQUIEL) || //no wishing for angel artifacts
+		 (otmp->oartifact >= ART_GENOCIDE && otmp->oartifact <= ART_DOOMSCREAMER) || //no wishing for demon artifacts
+		 (otmp->oartifact == ART_KUSANAGI_NO_TSURUGI) ||
+		 (Role_if(PM_PIRATE) && otmp->oartifact == ART_REAVER))
 #ifdef WIZARD
 	    && !wizard
 #endif
@@ -2786,15 +3040,14 @@ int first,last;
 }
 
 STATIC_OVL const char *
-Japanese_item_name(i)
+Alternate_item_name(i,alternate_items)
 int i;
+struct Jitem *alternate_items;
 {
-	struct Jitem *j = Japanese_items;
-
-	while(j->item) {
-		if (i == j->item)
-			return j->name;
-		j++;
+	while(alternate_items->item) {
+		if (i == alternate_items->item)
+			return alternate_items->name;
+		alternate_items++;
 	}
 	return (const char *)0;
 }

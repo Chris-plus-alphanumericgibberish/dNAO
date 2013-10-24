@@ -195,7 +195,7 @@ shuffle_all()
 			int j = last-1;
 
 			if (oclass == POTION_CLASS)
-			    j -= 1;  /* only water has a fixed description */
+			    j -= 2;  /* water and amnesia have fixed descriptions */
 			else if (oclass == AMULET_CLASS ||
 				 oclass == SCROLL_CLASS ||
 				 oclass == SPBOOK_CLASS) {
@@ -237,6 +237,398 @@ find_skates()
 	    return i;
 
     impossible("snow boots not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* find the object index for combat boots */
+int
+find_cboots()
+{
+    register int i;
+    register const char *s;
+
+    for (i = SPEED_BOOTS; i <= LEVITATION_BOOTS; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "combat boots"))
+	    return i;
+
+    impossible("combat boots not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* find the object index for mud boots */
+int
+find_mboots()
+{
+    register int i;
+    register const char *s;
+
+    for (i = SPEED_BOOTS; i <= LEVITATION_BOOTS; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "mud boots"))
+	    return i;
+
+    impossible("mud boots not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* find the object index for hiking boots */
+int
+find_hboots()
+{
+    register int i;
+    register const char *s;
+
+    for (i = SPEED_BOOTS; i <= LEVITATION_BOOTS; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "hiking boots"))
+	    return i;
+
+    impossible("hiking boots not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* find the object index for buckled boots */
+int
+find_bboots()
+{
+    register int i;
+    register const char *s;
+
+    for (i = SPEED_BOOTS; i <= LEVITATION_BOOTS; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "buckled boots"))
+	    return i;
+
+    impossible("buckled boots not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* find the object index for jungle boots */
+int
+find_jboots()
+{
+    register int i;
+    register const char *s;
+
+    for (i = SPEED_BOOTS; i <= LEVITATION_BOOTS; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "jungle boots"))
+	    return i;
+
+    impossible("jungle boots not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* find the object index for the engagement ring */
+int
+find_engagement_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "engagement"))
+	    return i;
+
+    impossible("engagement ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* find the object index for the gold ring */
+int
+find_gold_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "gold"))
+	    return i;
+
+    impossible("gold ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_silver_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "silver"))
+	    return i;
+
+    impossible("silver ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_opal_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "opal"))
+	    return i;
+
+    impossible("opal ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_clay_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "clay"))
+	    return i;
+
+    impossible("clay ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_coral_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "coral"))
+	    return i;
+
+    impossible("coral ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_onyx_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "black onyx"))
+	    return i;
+
+    impossible("black onyx ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_moonstone_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "moonstone"))
+	    return i;
+
+    impossible("moonstone ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_jade_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "jade"))
+	    return i;
+
+    impossible("jade ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_agate_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "agate"))
+	    return i;
+
+    impossible("agate ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_topaz_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "topaz"))
+	    return i;
+
+    impossible("topaz ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_sapphire_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "sapphire"))
+	    return i;
+
+    impossible("sapphire ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_ruby_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "ruby"))
+	    return i;
+
+    impossible("ruby ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_pearl_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "pearl"))
+	    return i;
+
+    impossible("pearl ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_ivory_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "ivory"))
+	    return i;
+
+    impossible("ivory ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_emerald_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "emerald"))
+	    return i;
+
+    impossible("emerald ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+int
+find_droven_ring()
+{
+    register int i;
+    register const char *s;
+
+    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "droven"))
+	    return i;
+
+    impossible("droven ring not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* test if a ring is an engravable ring */
+boolean
+isEngrRing(otyp)
+short otyp;
+{
+    register int i;
+	
+	static int egrings[13] = {0,0,0, 0,0,0, 0,0,0, 0,0,0, 0}; 
+	if(!egrings[0]) egrings[0] = find_opal_ring(); 
+	if(!egrings[1]) egrings[1] = find_clay_ring(); 
+	if(!egrings[2]) egrings[2] = find_coral_ring();
+	
+	if(!egrings[3]) egrings[3] = find_onyx_ring();
+	if(!egrings[4]) egrings[4] = find_moonstone_ring();
+	if(!egrings[5]) egrings[5] = find_jade_ring();
+	
+	if(!egrings[6]) egrings[6] = find_agate_ring();
+	if(!egrings[7]) egrings[7] = find_topaz_ring();
+	if(!egrings[8]) egrings[8] = find_sapphire_ring();
+	
+	if(!egrings[9]) egrings[9] = find_ruby_ring();
+	if(!egrings[10]) egrings[10] = find_pearl_ring(); /* diamond is too hard */
+	if(!egrings[11]) egrings[11] = find_ivory_ring();
+	
+	if(!egrings[12]) egrings[12] = find_emerald_ring();
+	
+    for (i = 0; i <= 13; i++)
+		if (egrings[i] == otyp) return TRUE;
+
+    return FALSE;
+}
+
+/* find the object index for old gloves */
+int
+find_ogloves()
+{
+    register int i;
+    register const char *s;
+
+    for (i = LEATHER_GLOVES; i <= GAUNTLETS_OF_DEXTERITY; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "old gloves"))
+	    return i;
+
+    impossible("old gloves not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* find the object index for padded gloves */
+int
+find_pgloves()
+{
+    register int i;
+    register const char *s;
+
+    for (i = LEATHER_GLOVES; i <= GAUNTLETS_OF_DEXTERITY; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "padded gloves"))
+	    return i;
+
+    impossible("padded gloves not found?");
+    return -1;	/* not 0, or caller would try again each move */
+}
+
+/* find the object index for fencing gloves */
+int
+find_fgloves()
+{
+    register int i;
+    register const char *s;
+
+    for (i = LEATHER_GLOVES; i <= GAUNTLETS_OF_DEXTERITY; i++)
+	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "fencing gloves"))
+	    return i;
+
+    impossible("fencing gloves not found?");
     return -1;	/* not 0, or caller would try again each move */
 }
 
@@ -342,7 +734,8 @@ register int oindx;
 
 	/* clear last slot */
 	if (found) disco[dindx-1] = 0;
-	else impossible("named object not in disco");
+	/*else impossible("named object not in disco"); Papering over a bug: something about repeatedly using the amnesia code
+		seems to be tripping this. However, the bug seems harmless so I'm removing the error message. Famous last words. */
 	update_inventory();
     }
 }

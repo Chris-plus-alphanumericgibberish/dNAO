@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "lev.h"
+#include	"artifact.h"
 #include <ctype.h>
 
 STATIC_VAR NEARDATA struct engr *head_engr;
@@ -17,6 +18,8 @@ static const char *random_mesg[] = {
 	/* take-offs and other famous engravings */
 	"Owlbreath", "Galadriel",
 	"Kilroy was here",
+	"quis custodiet ipsos custodes?", /* Watchmen */
+	"Bad Wolf", /* Dr. Who */
 	"A.S. ->", "<- A.S.", /* Journey to the Center of the Earth */
 	"You won't get it up the steps", /* Adventure */
 	"Lasciate ogni speranza o voi ch'entrate.", /* Inferno */
@@ -29,6 +32,8 @@ static const char *random_mesg[] = {
 	"Madam, in Eden, I'm Adam.", /* A palindrome */
 	"Two thumbs up!", /* Siskel & Ebert */
 	"Hello, World!", /* The First C Program */
+	"Dare mighty things.", /* Moto of the Mars Science Laboratory */
+	"I seem to be having tremendous difficulty with my lifestyle",
 #ifdef MAIL
 	"You've got mail!", /* AOL */
 #endif
@@ -53,6 +58,502 @@ static const char *random_mesg[] = {
         "X marks the spot",
         "X <--- You are here.",
         "You are the one millionth visitor to this place!  Please wait 200 turns for your wand of wishing.",
+	/*weeping angels, Unnethack*/
+	"Beware of the weeping angels", /* Doctor Who */
+	"Duck, Sally Sparrow", /* Doctor Who */
+	
+	/* contributed by members of NetHackWiki */
+	"Write down the coordinates, he said.", /* the Submachine series */
+		"...look for a green leaf...",
+		"...bring it to the statue...",
+		"...you should arrive at the lab...",
+		"...or somewhere nearby...", 
+};
+
+static const char *haluMesg[] = {
+/* contributed by members of NetHackWiki */
+	"Please disable the following security protocols: 2-18, 1-12, 1-0", /* the Submachine series */
+		"Our coil is broken, and we don't have a replacement. It's useless. It's so useless.", 
+	
+/* contributed by members of the Nethack Usenet group, rec.games.roguelike.nethack */
+	"Which way did he go, George, which way did he go?",
+	"Until you stalk and overrun, you can't devour anyone.",
+	"Fee.  Fie.  Foe.  Foo.",
+	"Violence is the last refuge of the incompetent.",
+	"Be vewy vewy quiet.  I'm hunting wabbits.",
+	"Eh, what's up, doc?",
+	"We prefer your extinction to the loss of our job.",
+	"You're weird, sir.",
+	"I do not know for what reason the enemy is pursuing you, but I perceive that he is, strange indeed though that seems to me.",
+	"When it is falling on your head, then you are knowing it is a rock.",
+	"The very best mail is made from corbomite.",
+	"Woah, duude, look at all the colors.",
+	"I'm bringing home a baby bumblebee.",
+	"Now, if you'll permit me, I'll continue my character assassination unimpeded.",
+	"Cry havoc, and let slip the dogs of war.",
+	"Virtue needs some cheaper thrills.",
+	"I just saw Absolom hanging in an oak tree!",
+	"And I may do anything I wish as long as I squeeze?",
+	"Marsey Dotesin Dosey Dotesin Diddley Damsey Divey.",
+	"I knew I should have taken that left turn at Albuquerque.",
+	"YOU BROKE MY SWORD!",
+	"An atom-blaster is a good weapon, but it can point both ways.",
+	"You may have already won ten million zorkmids.",
+	"They say the satisfaction of teaching makes up for the lousy pay.",
+	"Tharr she blows!",
+	"Perhaps today is a good day to die.",
+	"Sufferin' succotash.",
+	"To succeed, planning alone is insufficient. One must improvise as well.",
+	"I love it when a plan comes together.",
+	"Very fond of rumpots, crackpots, and how are you Mr. Wilson?",
+	"No matter how valuable it might be, any man's life is still worth more than any animal's.",
+	"No clock for this.  Flyin' now.",
+	"Of course, you realize, this means war.",
+	"She's fast enough for you, old man. What's the cargo?",
+	"There're few who haven't heard the name of Gurney Halleck.",
+	"Do you like mayonnaise and corn on your pizza?",
+	"I am that merry wanderer of the night.",
+	"Don't try any games.  Remember I can see your face if you can't see mine.",
+	"Ah hates rabbits.",
+	"Captain, there be whales here!",
+	"Mimesis is a plant.  Go Bucks!",
+	"That's all we live for, isn't it?  For pleasure, for titillation?",
+	"The only brew for the brave and true comes from the Green Dragon.",
+	"There is an old Vulcan proverb: only Nixon could go to China.",
+	"Yo, put me in a trebuchet and launch me to the stratosphere.",
+	"Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua.",
+	"Sola lingua bona lingua mortua est.",
+	"Mairzy Doats And Dozy Doats And Liddle Lamzy Divey A kiddley divey too, wouldn't you?",
+	"Madam, I may be drunk, but you are ugly, and in the morning I shall be sober.",
+	"Outside of a dog, a book is a man's best friend.",
+	"Inside of a dog, it's too dark to read." ,
+	"You are superior in only one aspect. You are better at dying.",
+	"No McFly ever amounted to anything in the history of Hill Valley!",
+	"You've got to ask yourself one question: 'Do I feel lucky?' Well, do ya, punk?",
+	"In this pearl it is hard to see a Strange Loop.",
+	"That is because the Strange Loop is buried in the oyster -- the proof.",
+	"I love the smell of napalm in the morning.",
+	"Et tu, Brute?",
+	"The conditions were difficult. Several contestants were maimed, but... I was triumphant. I won Champion Standing.",
+	"We're not gonna take it. No, we ain't gonna take it. We're not gonna take it anymore.",
+	"Absurd!  Your 'MU' is as silly as a cow's moo.",
+	"Hasta la vista, baby.",
+	"I see...  I see...  I see a lavender man...  bearing tidings.",
+	"It is a sign of creative genius to reconcile the seemingly disparate.",
+	"It pays to be obvious, especially if you have a reputation for subtlety.",
+	"Bother. I've left my new torch in Narnia",
+	"If you put into the machine wrong figures, will the right answers come out?",
+	"I am not able rightly to apprehend the kind of confusion of ideas that could provoke such a question.",
+	"Colorless green ideas sleep furiously",
+	"We fear a few dwarf watercraft stewardesses were regarded as desegregated after a great Texas tweezer war.",
+	"I'll kill him in Honolulu, you unhook my pink kimono.",
+	"The clown can stay, but the Ferengi in the gorilla suit has got to go.",
+	"All roads lead to Trantor, and that is where all stars end.",
+	"It is a far, far better thing I do than I have ever done. It is a far, far better rest I go to than I have ever known.",
+	"Yes, this is Network 23. The net-net-net-net-network that puts it right... where they want you to be!",
+	"You're listening to the E.I.B Radio Network.",
+	"We shall this day light such a candle, by God's grace, in England, as I trust shall never be put out.",
+	"How about a little fire, scarecrow?",
+	"And if you're the kind of person who parties with a bathtub full of pasta, I suspect you don't care much about cholesterol anyway.",
+	"I AM A SEXY SHOELESS GOD OF WAR!!!",
+	
+	"Bad Wolf", /* Dr. Who */
+	"It's only the end if you want it to be.", /*Batgirl*/
+	"Mistakes were made.",
+	"But at what cost?",
+	"For we wrestle not against flesh and blood, but against principalities and powers.", /* Ephesians 6:12 */
+	"Life is truth, and never a dream...", /* Persona 4 */
+	"fire, walk with me.", /*Twin Peaks*/
+	"redefine happiness", /* Blue Oyster Cult */
+	"no more sadness, no more anger, no more envy...", /*Halo*/
+	"Even false things are true",	"FIVE TONS OF FLAX!",	"Fnord", /*Discordianism*/
+	"Ash nazg durbatuluk, ash nazg gimbatul, ash nazg thrakatuluk, agh burzum-ishi krimpatul", /*the Lord of the Rings*/
+	"No Fate", /*Terminator*/
+	"This world can have but one Emperor.", /*FF II*/
+	"We shall devour your light, and use it to return this world to the Void!", /*FFIII*/
+	"My hatred will not be stanched until it has consumed all else!", /*FFV*/
+	"Life... dreams... hope... Where do they come from? And where do they go...?", /*FFVI*/
+	"I will NEVER be a memory.", /*FFVII Advent Children*/
+	"All the world will be your enemy, Prince With A Thousand Enemies...", /*Watership Down*/
+		"...and when they catch you they will kill you... but first they must catch you.",
+	"This statement is false.", /*Logical contradiction*/
+	"Quod Erat Demonstrandum",	"anno Domini",	"per centum", /* QED, AD, percent */
+	"I was so surprised, I CLASSIFIED INFORMATION, I really did!", /*Haruhi Suzumiya*/
+	"[REDACTED]",	"[DATA EXPUNGED]",	"[DATA PLUNGED]",	"[DATA EXPANDED]",	"I am a toaster!", /* SCP Foundation */
+	"I prepared Explosive Runes this morning.", /*Order of the Stick*/
+		"In any battle, there's always a level of force against which no tactics can succeed.",
+	"1002: He is Not that Which He Says He Is.", /*Good Omens*/
+		"3001: Behinde the Eagle's Neste a grate Ash hath fellen.",
+	"VI. You Shall Not Subject Your God To Market Forces!",	/*Discworld*/
+		"Nae quin! Nae laird! Nae master! We willna be fooled again!"
+		"Morituri Nolumus Mori"
+		"End-of-the-World Switch. PLEASE DO NOT TOUCH"
+		"Give a man a fire and he's warm for a day, but set fire to him and he's warm for the rest of his life."
+		"Do not, under any circumstances, open this door"
+		"WORDS IN THE HEART CANNOT BE TAKEN"
+		"Slab: Jus' say \"AarrghaarrghpleeassennononoUGH\""
+		"Ahahahahaha! Ahahahaha! Aahahaha!\nBEWARE!!!!!\nYrs sincerely\nThe Opera Ghost"
+		"Bee There Orr Bee A Rectangular Thyng"
+	"NOT A Secret Base", /*Gunnerkrigg Court*/
+	"Short to long term memory impaired. Go to Robotics Building. Explain about Bowman's architecture. Write down everything.", /*Freefall*/
+	"I SAW THE EYE. Over the horizon, like a rising sun!", /* Dresden Codak */
+		"That's Science, isn't it? The perpetual horizon.\nBut we found a way, haha, we found a way around that!",
+		"What would YOU give up to... to see it through?",
+	"Don't trust the skull.", /* Cynarfpncr: Gbezrag (mild spoiler) */
+	"We do not threaten or warn or advise. We tell the truth.", /* The Mansion of E */
+		"What you stole is even more dangerous and precious than you know.",
+		"In the end, you will fly away and live forever, and you will leave the world shattered in your wake.",
+		"You will return to where you started, and you will become what you hate.",
+		"And in doing so, you will restore the world to what it was.",
+	"Fall in a more hardboiled manner.", /* MS Paint Adventures */
+		"Since you are reading this, chances are you have already installed this game on your computer.\nIf this is true, you have just participated in bringing about the end of the world.\nBut don't beat yourself up about it.",
+		"YOU HATE TIME TRAVEL YOU HATE TIME TRAVEL YOU HATE....",
+		"It begins to dawn on you that everything you just did may have been a colossal waste of time.",
+	"We will BUILD heroes!", /* THE PROTOMEN */
+		"If you replace the working parts, you get a different machine.",
+		"If you destroy the working parts, what you get is a broken machine.",
+	"Never tell me the odds!" /* Starwars */
+};
+
+const int wardStrokes[][7] = {
+	{1,1,1, 1,1,1, 1},
+	{21,21,21, 21,21,21, 21},
+	{60,60,60, 60,60,60, 60},
+	{2,2,2, 2,2,2, 2},
+	{10,10,10, 10,10,10, 10},
+	{12,12,12, 12,12,12, 12},
+	{10,10,20, 10,20,10, 10},
+	{6,10,8, 8,8,8, 8},
+	{5,5,5, 5,5,5, 5},
+	{8,8,8, 8,8,8, 8},
+	{7,5,6, 7,5,4, 7},
+	{10,10,10, 10,10,10, 10},
+	{1,1,1, 1,1,1, 1},
+	{1,1,1, 1,1,1, 1},
+	{1,1,1, 1,1,1, 1},
+	{4,4,4, 4,4,4, 4},
+	{10,10,10, 10,10,10, 10}
+};
+
+const int wardsAdded[][7] = {
+	{1,1,1, 1,1,1, 1},
+	{1,1,1, 1,1,1, 1},
+	{1,1,1, 0,0,0, 0},
+	{1,1,1, 1,0,0, 0},
+	{1,1,1, 1,1,1, 1},
+	{1,1,1, 1,1,1, 1},
+	{1,1,2, 1,2,1, 0},
+	{1,1,1, 1,1,0, 0},
+	{1,1,1, 1,1,1, 1},
+	{1,1,1, 1,1,1, 1},
+	{1,1,1, 1,1,1, 1},
+	{1,1,1, 1,1,1, 1},
+	{1,0,0, 0,0,0, 0},
+	{1,0,0, 0,0,0, 0},
+	{1,0,0, 0,0,0, 0},
+	{1,0,0, 0,0,0, 0},
+	{0,0,0, 0,0,0, 0}
+};
+
+int wardMax[16] = {
+	7,
+	7,
+	3,
+	4,
+	7,
+	7,
+	6,
+	5,
+	7,
+	7,
+	7,
+	7,
+	1,
+	1,
+	1,
+	1
+};
+
+//const int wardDesc[] = {0, 0,0,0, 0,0,0, 0,0,0, 0,1}
+//const char * descOfWards[] = {"There is	",	"The	"}
+//There is ? inscribed here.
+const char * wardText[][7] =  {
+	{"a one",	"a two",	"a three",	"a four",	"a five","a six",	"a seven"},
+	{"a heptagram",	"a two-fold heptagram",	"a three-fold heptagram",	"a four-fold heptagram", 
+		"a five-fold heptagram","a six-fold heptagram",	"a seven-fold heptagram"},
+	{"a Gorgoneion",	"a pair of Gorgoneia",	"a trio of Gorgoneia",	"too many (4) Gorgoneia", 
+		"too many (5) Gorgoneia",	"too many (6) Gorgoneia",	"too many (7) Gorgoneia"},
+	{"a circle of Acheron",	"a two-level circle of Acheron",	"a three-level circle of Acheron", 
+		"a four-level circle of Acheron",	"too many (5) circles of Acheron",
+		"too many (6) circles of Acheron",	"too many (7) circles of Acheron"},
+	{"a pentagram",	"a two-fold pentagram",	"a three-fold pentagram",	"a four-fold pentagram", 
+		"a five-fold pentagram","a six-fold pentagram",	"a seven-fold pentagram"},
+	{"a hexagram",	"a two-fold hexagram",	"a three-fold hexagram",	"a four-fold hexagram", 
+		"a five-fold hexagram","a six-fold hexagram",	"a seven-fold hexagram"},
+	{"a hamsa mark",	"a pair of hamsa marks",	"a three-handed hamsa mark", 
+		"a four-handed hamsa mark",	"a five-handed hamsa mark","a six-handed hamsa mark", 
+		"an overabundance of hamsa marks"},
+	{"an elder sign",	"a one-armed elder sign",	"a two-armed elder sign",	"a three-armed elder sign", 
+		"a four-armed elder sign","a five-armed elder sign",	"an extra-dimensional elder sign"},
+	{"an elder elemental eye",	"a two-lobed elder elemental eye",	"a three-lobed elder elemental eye",
+		"a four-lobed elder elemental eye",	"a five-lobed elder elemental eye",
+		"a six-lobed elder elmental eye",	"a seven-lobed elder elemental eye"},
+	{"a sign of the Scion Queen Mother",	"a reinforced sign of the Scion Queen Mother", 
+		"a doubly reinforced sign of the Scion Queen Mother", 
+		"a triply reinforced sign of the Scion Queen Mother", 
+		"a quadruply reinforced sign of the Scion Queen Mother",
+		"a quintuply reinforced sign of the Scion Queen Mother", 
+		"a sextuply reinforced sign of the Scion Queen Mother"},
+	{"a one-hieroglyph partial cartouche of the Cat Lord", 
+		"a two-hieroglyph partial cartouche of the Cat Lord", 
+		"a three-hieroglyph partial cartouche of the Cat Lord", 
+		"a five-hieroglyph partial cartouche of the Cat Lord", 
+		"a six-hieroglyph partial cartouche of the Cat Lord",
+		"a seven-hieroglyph partial cartouche of the Cat Lord", 
+		"a nine-hieroglyph completed cartouche of the Cat Lord"},
+	{"a rudamentary rendition of the wings of Garuda",
+		"a almost passable rendition of the wings of Garuda", 
+		"a passable rendition of the wings of Garuda",
+		"a somewhat detailed rendition of the wings of Garuda",
+		"a detailed rendition of the wings of Garuda",
+		"a very detailed rendition of the wings of Garuda",
+		"a splendid rendition of the wings of Garuda"},
+	{"a sigil of Cthugha",
+		"", 
+		"",
+		"",
+		"",
+		"",
+		""},
+	{"a brand of Ithaqua",
+		"", 
+		"",
+		"",
+		"",
+		"",
+		""},
+	{"a tracery of Krakal",
+		"", 
+		"",
+		"",
+		"",
+		"",
+		""},
+	{"a yellow sign",
+		"", 
+		"",
+		"",
+		"",
+		"",
+		""},
+};
+const char * wardNames[][2] = {
+	{"digit",	"digits"},
+	{"heptagram",	"heptagrams"},
+	{"Gorgoneion",	"Gorgoneia"},
+	{"circle of Acheron",	"circles of Acheron"},
+	{"pentagram",	"pentagrams"},
+	{"hexagram",	"hexagrams"},
+	{"hamsa mark",	"hamsa marks"},
+	{"elder sign",	"elder signs"},
+	{"elder elemental eye",	"elder elemental eyes"},
+	{"sign of the Scion Queen Mother",	"signs of the Scion Queen Mother"},
+	{"hieroglyph",	"hieroglyphs"},
+	{"wing of Garuda",	"wings of Garuda"},
+	{"sigil of Cthugha",	"sigils of Cthugha"},
+	{"brand of Ithaqua",	"brands of Ithaqua"},
+	{"tracery of Krakal",	"traceries of Krakal"},
+	{"yellow sign",	"yellow signs"},
+};
+
+
+/* There is %s drawn here */
+const char * haluWard[] =  {
+	"", /* 0 index */
+	"a series of disconected lines", /* nondescript*/
+
+	/*DnD*/
+	"a cerulean weeping-willow", /* it's magic. Unlike the others, this one works. Keep in sync with engrave.h!*/
+	
+	/*Special behavior, these move across the floor, keep in sync with allmain.c*/
+	"a north-east facing glider",
+	"a north-west facing glider",
+	"a south-west facing glider",
+	"a south-east facing glider",
+	"a square"
+	
+	
+	/* books */
+	"a set of holy horns",	"a Summoning Dark mine-sign",	"a Long Dark mine-sign",
+	"a Following Dark mine-sign",	"a Closing Dark mine-sign",	"an Opening Dark mine-sign",
+	"a Breathing Dark mine-sign",	"a Speaking Dark mine-sign",	"a Catching Dark mine-sign",
+	"a Secret Dark mine-sign",	"a Calling Dark mine-sign",	"a Waiting Dark mine-sign",
+	"a florid crest dominated by a double-headed bat",
+	"a Guarding Dark mine-sign",	"the mark of the Caller of Eight", /* Discworld */
+	"a lidless eye", /* Lord of the Rings */
+	"a white tree", /* Gondor, Lord of the Rings */
+	"a triangle enclosing a circle and bisected by a line", /* Harry Potter */
+	"a set of three trefoils, the lower most inverted", /* describes the three of clubs. Too Many Magicians*/
+	"a Trump of Doom",	"a Sign of Chaos",	"a Pattern of Amber",	"a Ghostwheel",
+	
+	"a Court symbol",	"a Forest symbol",	"the sign of the Wandering Eye", /* Gunnerkrigg Court */
+
+	/* Not quite */
+	"a heptagenarian",
+	"an octogram",
+	"a pentagrain",
+	"a circle of da Vinci",
+	"a hand making a rude gesture",
+	"a junior sign",
+	"a childish compound eye",
+	"a Sign of an Illegitimate Step-daughter",
+	"a cenotaph of a catgirl",
+	"a groovy rendition of the wings of Gargula",
+	
+	"a Robotech Defense Force insignia", /*...Robotech*/
+	"a Black Knights insignia", /* Code Geass */
+	"an inverted triangle flanked by seven eyes", /* NGE */
+	"a laughing man", /* Ghost in the Shell */
+	"an alchemic array",	"a human transmutation circle", /* Fullmetal Alchemist */
+	"a triangle composed of three smaller triangles",	"an eye and single tear", 
+	"a circle enclosing four swirling lines",	"a flame inside a circle",
+	"a snowflake within a circle",	"an inverted triangle with a dot above each face, enclosed by a circle",
+	"a sign resembling an eyeless yin-yang", 
+	"a circle surrounding a triangle of dots and another of triangels",/*Zelda*/
+	"a setting (rising?) sun", /* Dresden Codak */
+	"an asymmetric, stylized arrowhead, point upwards", /* Star Trek*/
+	"a set of three blades, the top blade straight, the dexter curved down, the sinister curved up",
+	"a Sharuan Mindharp", /* Star Wars expanded universe */
+	"a winged blade of light", /* Jedi Order symbol */
+	"an angular S before a segmented circle",/*a screw attack symbol*/
+	"more dakka",
+	
+	"a symbol of pain", /* DnD */
+	/* Planescape */
+	"a mimir",
+	"a symbol of torment",
+	"a circle enclosing two colliding arrows",
+	"a pair of triangles, drawn tip to tip,",
+	"a stylized beast",
+	"a triangle crowned by a single line",
+	"a simple image of many mountains",
+	"a sketch of a shining diamond",
+	"a tree-rune",
+	"an eight-toothed gear",
+	"a random scribble",
+	"a square with two small handles on opposite sides",
+	"a square enclosing a spiral",
+	"an eye with three inverted crosses",
+	"an infinity symbol crossed by a burning downwards arrow",
+	"a set of four nested triangles",
+	"a watchful eye blocking an upward arrow",
+	"a pitchfork stabbing the ground",
+	
+	/* Zodiac */
+	"an Aries sign",
+	"a Taurus sign",
+	"a Gemini sign",
+	"a Cancer sign",
+	"a Leo sign",
+	"a Virgo sign",
+	"a Libra sign",
+	"a Scorpio sign",
+	"a Sagittarius sign",
+	"a Capricorn sign",
+	"an Aquarius sign",
+	"a Pisces sign",
+	
+	"a heart pierced through with an arrow",
+	"a broken heart",
+	"a skull and crossed bones",
+	"a bad situation",
+	"a zorkmid",
+	
+	"a diagram of the bridges of Konigsberg",
+
+	"a hand-mirror of Aphrodite",
+	"a shield and spear of Ares", /* alchemy/male/female */
+	
+	"a black moon lilith sign",
+	
+	"a window", /* op-sys*/
+	"a no symbol",
+	"a test pattern",
+	"a work of modern art",
+	"a flag of Neverland",
+	"a hyped-up duck dressed in a sailor's shirt and hat", /* Disney */
+		"a mouse with 2d ears",
+		"a set of three circles in the shape of a mouse's head",
+	"a meaningless coincidence",
+	
+	/*Corporate Logos*/
+	"a stylized, fan-shaped seashell",
+	"a bitten apple",
+	"a pair of arches meeting to form an \"M\"",
+	"a Swoosh mark",
+	
+	"a set of five interlocked rings", /*Olympics logo*/
+	"a running man", /* Exit */
+	"a running man holding a cane",
+	"a one-and-zero", /* Power toggle */
+	"a thick soup of mist",	"a pattern of squared circles", 
+	"a void",	"a notable lack of images",	"a stark absence of pictures",	"nothing much",
+	"a convergence of parallel lines",	"a sphere", /* How did you manage that? */
+	"a yin-yang",	"a taijitu",/* Taoist */
+	"a hand of Eris", /* Discordian */
+	"an ichthus",	"a Cross", /* Christian*/
+	"a wheel with eight spokes", /* Budhism */
+	"a fish with legs",	"a fat fish",	"a fish with tentacles, legs, and wings",
+		/* ichthus parodies/derivitives: darwin, buddha, and Cthulhu. */
+	"a set of seven concentric circles",
+	"a left-handed trefoil knot",
+	"a triskelion", /* Ancient Symbol */
+	"a rough circle enclosing an A", /* Anarchy */
+	"a Tree of Life", /* Kabbalah */
+	"a winged oak",
+	"a wheel cross",	"a labyrinth",	"sign of Shamash", 
+	"a naudh rune", /* misery */
+	"an Eye of Providence",	"a pyramid surmounted by an eye", /* Christian */
+	"a one-way staircase",
+	"an 'a' encircled by its own tail" /* meta */
+};
+
+//There is a seal of ? inscribed here.
+const char * sealNames[] =  {
+	"Ahazu", /* 0 */
+	"Amon", /* 1 */
+	"Andrealphus", /* 2 */
+	"Andromalius", /* 3 */
+	"Astaroth", /* 4 */
+	"Balam", /* 5 */
+	"Berith", /* 6 */
+	"Buer", /* 7 */
+	"Chupoclops", /* 8 */
+	"Dantalion", /* 9 */
+	"Dunstan", /* 10 */
+	"Echidna", /* 11 */
+	"Eden", /* 12 */
+	"Eridu", /* 13 */
+	"Eurynome", /* 14 */
+	"Eve", /* 15 */
+	"Fáfnir", /* 16 */
+	"Huginn and Muninn", /* 17 */
+	"Iris", /* 18 */
+	"Jack", /* 19 */
+	"Malphas", /* 20 */
+	"Marionette", /* 21 */
+	"Mother", /* 22 */
+	"Naberius", /* 23 */
+	"Orthos", /* 24 */
+	"Ose", /* 25 */
+	"Otiax", /* 26 */
+	"Paimon", /* 27 */
+	"Simurgh", /* 28 */
+	"Tenebrous", /* 29 */
+	"Ymir", /* 30 */
+	"Dahlver-Nar", /* 31 */
+	"Acererak", /* 32 */
+	"Numina" /* 33 */
 };
 
 char *
@@ -69,6 +570,21 @@ char *outbuf;
 	wipeout_text(outbuf, (int)(strlen(outbuf) / 4), 0);
 	return outbuf;
 }
+
+int
+random_haluIndex()
+{
+	return rn2(SIZE(haluMesg));
+}
+
+int
+get_num_wards_added(ward,complete)
+int ward;
+int complete;
+{
+	return wardsAdded[ward][complete];
+}
+
 
 /* Partial rubouts for engraving characters. -3. */
 static const struct {
@@ -89,6 +605,23 @@ static const struct {
 	{'0', "C("},    {'1', "|"},     {'6', "o"},     {'7', "/"},
 	{'8', "3o"}
 };
+
+struct engr *
+get_head_engr(){
+	return head_engr;
+}
+
+char *
+fetchHaluWard(index)
+int index;
+{
+	return haluWard[index];
+}
+
+int
+randHaluWard(){
+	return rn2(SIZE(haluWard)-1)+1;
+}
 
 void
 wipeout_text(engr, cnt, seed)
@@ -148,6 +681,136 @@ unsigned seed;		/* for semi-controlled randomization */
 
 	/* trim trailing spaces */
 	while (lth && engr[lth-1] == ' ') engr[--lth] = 0;
+}
+
+void
+wipeout_ward(ep, cnt, seed)
+struct engr *ep;
+int cnt;
+unsigned seed;		/* for semi-controlled randomization */
+{
+	char *s;
+	int i, j, nxt, lth, clth, slth, dlth, plth;
+	lth = 0;
+	clth = slth = dlth = plth = 0;
+	j = 0;
+	if(ep->halu_ward){
+		clth = ep->complete_wards * 12;
+		slth = ep->scuffed_wards * 6;
+		dlth = ep->degraded_wards * 3;
+		plth = ep->partial_wards * 1;
+		lth = clth+slth+dlth+plth;
+	}else if(ep->complete_wards >= FIRST_SEAL){
+		clth = ep->complete_wards * 5;
+		slth = ep->scuffed_wards * 4;
+		dlth = ep->degraded_wards * 3;
+		plth = ep->partial_wards * 2;
+		lth = clth+slth+dlth+plth;
+	}
+	else{
+		i = ep->complete_wards;
+		while(i-- > 0){
+			lth += wardStrokes[ep->ward_id][j];
+			clth += wardStrokes[ep->ward_id][j];
+			j++;
+		}
+		i = ep->scuffed_wards;
+		slth = clth;
+		while(i-- > 0){
+			lth += wardStrokes[ep->ward_id][j] * .9;
+			slth += wardStrokes[ep->ward_id][j] * .9;
+			j++;
+		}
+		i = ep->degraded_wards;
+		dlth = slth;
+		while(i-- > 0){
+			lth += wardStrokes[ep->ward_id][j] * .75;
+			dlth += wardStrokes[ep->ward_id][j] * .75;
+			j++;
+		}
+		i = ep->partial_wards;
+		plth = dlth;
+		while(i-- > 0){
+			lth += wardStrokes[ep->ward_id][j] * .5;
+			plth += wardStrokes[ep->ward_id][j] * .5;
+			j++;
+		}
+	}
+	if (ep->ward_id && cnt > 0) {
+	    while (ep->ward_id && cnt--) {
+			/* pick next character */
+			if (!seed) {
+				/* random */
+				nxt = rn2(lth);
+			} else {
+				/* predictable; caller can reproduce the same sequence by
+				   supplying the same arguments later, or a pseudo-random
+				   sequence by varying any of them */
+				nxt = seed % lth;
+				seed *= 31,  seed %= (BUFSZ-1);
+			}
+			if(nxt < clth){
+				ep->complete_wards--;
+				ep->scuffed_wards++;
+			}
+			else if(nxt < slth){
+				ep->scuffed_wards--;
+				ep->degraded_wards++;
+			}
+			else if(nxt < dlth){
+				ep->degraded_wards--;
+				ep->partial_wards++;
+			}
+			else if(nxt < plth) ep->partial_wards--;
+			
+			lth = 0;
+			clth = slth = dlth = plth = 0;
+			j = 0;
+			if(ep->halu_ward){
+				clth = ep->complete_wards * 10;
+				slth = ep->scuffed_wards * 10;
+				dlth = ep->degraded_wards * 10;
+				plth = ep->partial_wards * 10;
+				lth = clth+slth+dlth+plth;
+			}else if(ep->complete_wards >= FIRST_SEAL){
+				clth = ep->complete_wards * 5;
+				slth = ep->scuffed_wards * 4;
+				dlth = ep->degraded_wards * 3;
+				plth = ep->partial_wards * 2;
+				lth = clth+slth+dlth+plth;
+			}
+			else{
+				i = ep->complete_wards;
+				while(i-- > 0){
+					lth += wardStrokes[ep->ward_id][j];
+					clth += wardStrokes[ep->ward_id][j];
+					j++;
+				}
+				i = ep->scuffed_wards;
+				while(i-- > 0){
+					lth += wardStrokes[ep->ward_id][j] * .9;
+					slth += wardStrokes[ep->ward_id][j] * .9;
+					j++;
+				}
+				i = ep->degraded_wards;
+				while(i-- > 0){
+					lth += wardStrokes[ep->ward_id][j] * .75;
+					dlth += wardStrokes[ep->ward_id][j] * .75;
+					j++;
+				}
+				i = ep->partial_wards;
+				while(i-- > 0){
+					lth += wardStrokes[ep->ward_id][j] * .5;
+					plth += wardStrokes[ep->ward_id][j] * .5;
+					j++;
+				}
+			}
+			if(!lth){
+				ep->ward_id = 0;
+				ep->ward_type = 0;
+			}
+		}
+	}
 }
 
 boolean
@@ -229,7 +892,7 @@ struct engr *
 engr_at(x, y)
 xchar x, y;
 {
-	register struct engr *ep = head_engr;
+	struct engr *ep = head_engr;
 
 	while(ep) {
 		if(x == ep->engr_x && y == ep->engr_y)
@@ -239,10 +902,10 @@ xchar x, y;
 	return((struct engr *) 0);
 }
 
-#ifdef ELBERETH
 /* Decide whether a particular string is engraved at a specified
  * location; a case-insensitive substring match used.
  * Ignore headstones, in case the player names herself "Elbereth".
+	Heh. Why not? Restriction on headstone Elberenths removed.
  */
 int
 sengr_at(s, x, y)
@@ -251,10 +914,30 @@ sengr_at(s, x, y)
 {
 	register struct engr *ep = engr_at(x,y);
 
-	return (ep && ep->engr_type != HEADSTONE &&
+	return (ep && /*ep->engr_type != HEADSTONE &&*/
 		ep->engr_time <= moves && strstri(ep->engr_txt, s) != 0);
 }
-#endif /* ELBERETH */
+
+int
+ward_at(x, y)
+	xchar x, y;
+{
+	register struct engr *ep = engr_at(x,y);
+
+	if(!ep || ep->engr_time > moves) return 0;
+	else if(ep->halu_ward) return ep->ward_id == CERULEAN_SIGN ? ELDER_SIGN : 0;
+	else return ep->ward_id;
+}
+
+int
+num_wards_at(x, y)
+	xchar x, y;
+{
+	register struct engr *ep = engr_at(x,y);
+
+	if(!ep || ep->engr_time > moves) return 0;
+	else return ep->complete_wards;
+}
 
 #endif /* OVL0 */
 #ifdef OVL2
@@ -271,22 +954,32 @@ register int cnt;
 #ifdef OVL1
 
 void
-wipe_engr_at(x,y,cnt)
-register xchar x,y,cnt;
+wipe_engr_at(x,y,strt_cnt)
+register xchar x,y,strt_cnt;
 {
 	register struct engr *ep = engr_at(x,y);
+	xchar cnt;
 
 	/* Headstones are indelible */
 	if(ep && ep->engr_type != HEADSTONE){
-	    if(ep->engr_type != BURN || is_ice(x,y)) {
+	    if(ep->engr_txt[0] && (ep->engr_type != BURN || is_ice(x,y))) {
 		if(ep->engr_type != DUST && ep->engr_type != ENGR_BLOOD) {
-			cnt = rn2(1 + 50/(cnt+1)) ? 0 : 1;
+				cnt = rn2(1 + 50/(strt_cnt+1)) ? 0 : 1;
 		}
+			else cnt = strt_cnt;
 		wipeout_text(ep->engr_txt, (int)cnt, 0);
 		while(ep->engr_txt[0] == ' ')
 			ep->engr_txt++;
-		if(!ep->engr_txt[0]) del_engr(ep);
 	    }
+	    if(ep->ward_id && (ep->ward_type != BURN || is_ice(x,y))) {
+			if(ep->ward_type != DUST && ep->ward_type != ENGR_BLOOD) {
+				cnt = rn2(1 + 50/(strt_cnt+1)) ? 0 : 1;
+			}
+			else cnt = strt_cnt;
+			wipeout_ward(ep, (int) cnt, 0);
+		}
+		if(!ep->engr_txt[0] && !ep->ward_id) del_engr_ward(ep);
+
 	}
 }
 
@@ -300,6 +993,7 @@ register int x,y;
 	register struct engr *ep = engr_at(x,y);
 	register int	sensed = 0;
 	char buf[BUFSZ];
+	char * word;
 	
 	/* Sensing an engraving does not require sight,
 	 * nor does it necessarily imply comprehension (literacy).
@@ -355,16 +1049,150 @@ register int x,y;
 	    if (sensed) {
 	    	char *et;
 	    	unsigned maxelen = BUFSZ - sizeof("You feel the words: \"\". ");
+			if(!Hallucination /*|| rn2(20)*/ ){
 	    	if (strlen(ep->engr_txt) > maxelen) {
 	    		(void) strncpy(buf,  ep->engr_txt, (int)maxelen);
 			buf[maxelen] = '\0';
 			et = buf;
 		} else
 			et = ep->engr_txt;
-		You("%s: \"%s\".",
+			}
+			else{
+				int haluDex = rn2(SIZE(haluMesg));
+				if(strlen(haluMesg[haluDex]) > maxelen){
+					(void) strncpy(buf,  haluMesg[haluDex], (int)maxelen);
+					buf[maxelen] = '\0';
+					et = buf;
+				}
+				else et = haluMesg[haluDex];
+			}
+			You("%s: \"%s\"",
 		      (Blind) ? "feel the words" : "read",  et);
 		if(flags.run > 1) nomul(0, NULL);
 	    }
+	}
+	if(ep && ep->ward_id){
+		sensed = 0;
+	    switch(ep->ward_type) {
+	    case DUST:
+		if(!Blind) {
+			sensed = 1;
+			word = is_ice(x,y) ?	"drawn here in the frost." : 
+					"drawn here in the dust.";
+		}
+		break;
+	    case ENGRAVE:
+	    case HEADSTONE:
+		if (!Blind || can_reach_floor()) {
+			sensed = 1;
+			word =	"carved here.";
+		}
+		break;
+	    case BURN:
+		if (!Blind || can_reach_floor()) {
+			sensed = 1;
+			word = is_ice(x,y) ?	"melted into the ice here." : 
+					"burned into the floor here.";
+		
+		}
+		break;
+	    case MARK:
+		if(!Blind) {
+			sensed = 1;
+			word =	"drawn in ink here.";
+		}
+		break;
+	    case ENGR_BLOOD:
+		/*	"It's a message!  Scrawled in blood!"
+		 *	"What's it say?"
+		 *	"It says... `See you next Wednesday.'" -- Thriller
+		 */
+		if(!Blind) {
+			sensed = 1;
+			word =	"drawn in blood here.";
+		}
+		break;
+	    default:
+			sensed = 1;
+			word =	"drawn here in a very strange way.";
+	    }
+	    if (sensed) {
+		 if(!Hallucination){
+		  if(!(ep->halu_ward)){
+				if( ep->ward_id < FIRST_SEAL ){
+					int sum;
+					if(ep->complete_wards){
+						int wardhere = get_wardID(ep->ward_id);
+						pline("There is %s %s", 
+							wardText[ep->ward_id][ep->complete_wards-1],
+							word);
+						if( !(u.wardsknown & wardhere) ){
+							You("have learned a new warding!");
+							u.wardsknown |= wardhere;
+						}
+					}
+					sum = ep->scuffed_wards + ep->degraded_wards + ep->partial_wards;
+					if(sum){
+						char wardbuf[BUFSZ];
+						int wardbuflen = 0;
+						wardbuf[0] = (char)0;
+						if(ep->complete_wards) wardbuflen += sprintf(&wardbuf[wardbuflen],	"There %s also", sum > 1 ?	"are" :	"is");
+						else wardbuflen += sprintf(&wardbuf[wardbuflen],	"There %s", sum > 1 ?	"are" :	"is");
+						if(ep->scuffed_wards)
+							wardbuflen += sprintf(&wardbuf[wardbuflen]," %d scuffed%s", ep->scuffed_wards, ep->degraded_wards && ep->partial_wards ? 
+															"," : 
+															ep->degraded_wards || ep->partial_wards ? 
+															" and" :	"");
+						if(ep->degraded_wards)
+							wardbuflen += sprintf(&wardbuf[wardbuflen]," %d degraded%s", ep->degraded_wards, ep->scuffed_wards && ep->partial_wards ? 
+															", and" : 
+															ep->partial_wards ? 
+															" and" :	"");
+						if(ep->partial_wards)
+							wardbuflen += sprintf(&wardbuf[wardbuflen]," %d fragmentary", ep->partial_wards);
+						/*if(!(ep->complete_wards))*/ 
+						wardbuflen += sprintf(&wardbuf[wardbuflen]," %s",
+													wardNames[ep->ward_id][sum>1 ? 1 : 0]);
+						//pline("%d",wardbuflen);
+						pline("%s %s", wardbuf, word);
+					}
+				}else{
+//					pline("%d-%d=%d", ep->ward_id, FIRST_SEAL, ((int)ep->ward_id)-((int)FIRST_SEAL));
+					if(ep->complete_wards){
+						pline("There is a seal of %s %s", 
+							sealNames[((int)ep->ward_id)-((int)FIRST_SEAL)],
+							word);
+					}
+					else if(ep->scuffed_wards){
+						pline("There is a scuffed seal of %s %s", 
+							sealNames[((int)ep->ward_id)-((int)FIRST_SEAL)],
+							word);
+					}
+					else if(ep->degraded_wards){
+						pline("There is a degraded seal of %s %s", 
+							sealNames[((int)ep->ward_id)-((int)FIRST_SEAL)],
+							word);
+					}
+					else if(ep->partial_wards){
+						pline("There is a fragmentary seal of %s %s", 
+							sealNames[((int)ep->ward_id)-((int)FIRST_SEAL)],
+							word);
+					}
+				}
+		  }
+		  else{//note: assumes that there can only be ONE halucinatory ward scribed.
+			if(ep->complete_wards) pline("There is %s %s", 
+										haluWard[ep->ward_id],
+										word);
+			if(ep->scuffed_wards) pline("It is scuffed.");
+			else if(ep->degraded_wards) pline("It is degraded.");
+			else if(ep->partial_wards) pline("Although only fragments are left.");
+		  }
+		 }
+		 else{
+			pline("There is %s drawn here.", haluWard[randHaluWard()]);
+		 }
+		}
 	}
 }
 
@@ -373,15 +1201,32 @@ register int x,y;
 
 void
 make_engr_at(x,y,s,e_time,e_type)
-register int x,y;
-register const char *s;
-register long e_time;
-register xchar e_type;
+int x,y;
+const char *s;
+long e_time;
+xchar e_type;
 {
-	register struct engr *ep;
+	struct engr *ep;
 
-	if ((ep = engr_at(x,y)) != 0)
-	    del_engr(ep);
+	xchar exist_ward_type = 0;
+	int exist_ward_id = 0;
+	xchar exist_halu_ward = FALSE;
+	xchar exist_complete_wards = 0;
+	xchar exist_scuffed_wards = 0; 
+	xchar exist_degraded_wards = 0;
+	xchar exist_partial_wards = 0;
+
+	if ((ep = engr_at(x,y)) != 0){
+		exist_ward_type = ep->ward_type;
+		exist_ward_id = ep->ward_id;
+		exist_halu_ward = ep->halu_ward;
+		exist_complete_wards = ep->complete_wards;
+		exist_scuffed_wards = ep->scuffed_wards; 
+		exist_degraded_wards = ep->degraded_wards;
+		exist_partial_wards = ep->partial_wards;
+
+	    del_engr_ward(ep);
+	}
 	ep = newengr(strlen(s) + 1);
 	ep->nxt_engr = head_engr;
 	head_engr = ep;
@@ -390,7 +1235,17 @@ register xchar e_type;
 	ep->engr_txt = (char *)(ep + 1);
 	Strcpy(ep->engr_txt, s);
 	/* engraving Elbereth shows wisdom */
-	if (!in_mklev && !strcmp(s, "Elbereth")) exercise(A_WIS, TRUE);
+	if (!in_mklev && !strcmp(s,	"Elbereth")){
+		exercise(A_WIS, TRUE);
+		u.uconduct.elbereth++;
+	}
+	ep->ward_type = exist_ward_type;
+	ep->ward_id = exist_ward_id;
+	ep->halu_ward = exist_halu_ward;
+	ep->complete_wards = exist_complete_wards;
+	ep->scuffed_wards = exist_scuffed_wards;
+	ep->degraded_wards = exist_degraded_wards;
+	ep->partial_wards = exist_partial_wards;
 	ep->engr_time = e_time;
 	ep->engr_type = e_type > 0 ? e_type : rnd(N_ENGRAVE-1);
 	ep->engr_lth = strlen(s) + 1;
@@ -404,6 +1259,24 @@ int x, y;
 	register struct engr *ep = engr_at(x, y);
 
 	if (ep) del_engr(ep);
+}
+
+void
+del_ward_at(x, y)
+int x, y;
+{
+	register struct engr *ep = engr_at(x, y);
+
+	if (ep) del_ward(ep);
+}
+
+void
+del_engr_ward_at(x, y)
+int x, y;
+{
+	register struct engr *ep = engr_at(x, y);
+
+	if (ep) del_engr_ward(ep);
 }
 
 /*
@@ -424,6 +1297,20 @@ freehand()
 static NEARDATA const char styluses[] =
 	{ ALL_CLASSES, ALLOW_NONE, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS,
 	  GEM_CLASS, RING_CLASS, 0 };
+
+	  
+int
+doengward()
+{
+    char c = 'n';
+	if(u.wardsknown){
+		c = yn_function("Do you want to scribe a warding sign?",
+						ynqchars, 'q');
+	}
+	if(c == 'y') doward();
+	else if(c=='n') doengrave();
+	else return 0;
+}
 
 /* Mohs' Hardness Scale:
  *  1 - Talc		 6 - Orthoclase
@@ -477,6 +1364,8 @@ doengrave()
 	struct engr *oep = engr_at(u.ux,u.uy);
 				/* The current engraving */
 	struct obj *otmp;	/* Object selected with which to engrave */
+	int randWard = 0; /* random ward */
+	xchar randHalu = FALSE; /* whether or not the randWard should be read as a real or hallucinatory ward */
 	char *writer;
 
 	multi = 0;		/* moves consumed */
@@ -503,8 +1392,11 @@ doengrave()
 	} else if (is_lava(u.ux, u.uy)) {
 		You_cant("write on the lava!");
 		return(0);
-	} else if (is_pool(u.ux,u.uy) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
-		You_cant("write on the water!");
+	} /*else if (is_pool(u.ux,u.uy) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
+		You_cant("draw on the water!");
+		return(0);
+	}*/else if(is_pool(u.ux,u.uy) && !u.uinwater){
+		You_cant("draw on the water!");
 		return(0);
 	}
 	if(Is_airlevel(&u.uz) || Is_waterlevel(&u.uz)/* in bubble */) {
@@ -592,6 +1484,7 @@ doengrave()
 	    /* Objects too large to engrave with */
 	    case BALL_CLASS:
 	    case ROCK_CLASS:
+/*	    case BED_CLASS:*/
 		You_cant("engrave with such a large object!");
 		ptext = FALSE;
 		break;
@@ -660,11 +1553,42 @@ doengrave()
 			break;
 		    case WAN_POLYMORPH:
 			if(oep)  {
-			    if (!Blind) {
+			    if (oep->engr_txt[0]) {
 				type = (xchar)0;	/* random */
 				(void) random_engraving(buf);
 			    }
+				if(oep->ward_id){
+					randWard = rn2(10) ? 1 : rn2(10) ? randHaluWard() : 0;
+					if(!randWard){
+						randWard = rn2(NUMBER_OF_WARDS)+1;
+						randHalu = FALSE;
+					}
+					else randHalu = TRUE;
+				}
 			    dengr = TRUE;
+			}
+			break;
+		    case WAN_DRAINING:	/* KMH */
+			if (oep) {
+			    /*
+			     * [ALI] Wand of draining give messages like
+			     * either polymorph or cancellation/make
+			     * invisible depending on whether the
+			     * old engraving is completely wiped or not.
+			     * Note: Blindness has slightly different
+			     * effect than with wand of polymorph.
+			     */
+			    u_wipe_engr(5);
+			    oep = engr_at(u.ux,u.uy);
+			    if (!Blind) {
+				if (!oep)
+				    pline_The("engraving on the %s vanishes!",
+				      surface(u.ux,u.uy));
+				else {
+				    strcpy(buf, oep->engr_txt);
+			    dengr = TRUE;
+			}
+			    }
 			}
 			break;
 		    case WAN_NOTHING:
@@ -780,7 +1704,10 @@ doengrave()
 		break;
 
 	    case WEAPON_CLASS:
-		if (is_blade(otmp)) {
+		if (is_lightsaber(otmp)) {
+			if (otmp->lamplit) type = BURN;
+			else Your("%s is deactivated!", aobjnam(otmp,"are"));
+		} else if (is_blade(otmp)) {
 		    if ((int)otmp->spe > -3)
 			type = ENGRAVE;
 		    else
@@ -819,11 +1746,13 @@ doengrave()
 			    } else
 				Your("%s can't wipe out this engraving.",
 				     xname(otmp));
-			else
+			else{
 			    Your("%s %s %s.", xname(otmp), otense(otmp, "get"),
 				  is_ice(u.ux,u.uy) ? "frosty" : "dusty");
+			}
 			break;
 		    default:
+				if(spec_ability3(otmp, SPFX3_ENGRV)) type = ENGRAVE;
 			break;
 		}
 		break;
@@ -866,14 +1795,32 @@ doengrave()
 	}
 
 	if (dengr) {
-	    del_engr(oep);
+	    del_engr_ward(oep);
 	    oep = (struct engr *)0;
 	}
 
 	/* Something has changed the engraving here */
-	if (*buf) {
+	if (*buf || randWard) {
+		if(*buf){
 	    make_engr_at(u.ux, u.uy, buf, moves, type);
-	    pline_The("engraving now reads: \"%s\".", buf);
+			oep = engr_at(u.ux,u.uy);
+		}
+		if(randWard){
+			oep = engr_at(u.ux,u.uy);
+			if(!oep){
+				make_engr_at(u.ux, u.uy,	"", moves, DUST);
+				oep = engr_at(u.ux,u.uy);
+			}
+			oep->ward_id = randWard;
+			oep->halu_ward = randHalu;
+			oep->ward_type = rnd(N_ENGRAVE-1);
+			oep->complete_wards = 1;
+		}
+	    if(!Blind){ 
+			/*pline_The("engraving now reads: \"%s\".", buf);*/
+			pline_The("engraving here has changed.");
+			read_engr_at(u.ux,u.uy);
+		}
 	    ptext = FALSE;
 	}
 
@@ -925,7 +1872,7 @@ doengrave()
 			    ((oep->engr_type == ENGR_BLOOD) ? "scrawled in blood"   :
 							 "written")));
 			del_engr(oep);
-			oep = (struct engr *)0;
+			oep = engr_at(u.ux,u.uy);
 		    } else
 		   /* Don't delete engr until after we *know* we're engraving */
 			eow = TRUE;
@@ -992,6 +1939,10 @@ doengrave()
 	Sprintf(qbuf,"What do you want to %s the %s here?", everb, eloc);
 	getlin(qbuf, ebuf);
 
+	if(Hallucination && !rn2(20)){
+		ebuf[0] = (char)0;
+		Strcpy(ebuf, haluMesg[rn2(SIZE(haluMesg))]);		
+	}
 	/* Count the actual # of chars engraved not including spaces */
 	len = strlen(ebuf);
 	for (sp = ebuf; *sp; sp++) if (isspace(*sp)) len -= 1;
@@ -1000,11 +1951,11 @@ doengrave()
 	    if (zapwand) {
 		if (!Blind)
 		    pline("%s, then %s.",
-			  Tobjnam(otmp, "glow"), otense(otmp, "fade"));
+			  Tobjnam(otmp,	"glow"), otense(otmp,	"fade"));
 		return(1);
 	    } else {
-		pline(Never_mind);
-		return(0);
+			pline(Never_mind);
+			return(0);
 	    }
 	}
 
@@ -1018,7 +1969,7 @@ doengrave()
 	    if (isspace(*sp)) continue;
 	    if (((type == DUST || type == ENGR_BLOOD) && !rn2(25)) ||
 		    (Blind && !rn2(11)) || (Confusion && !rn2(7)) ||
-		    (Stunned && !rn2(4)) || (Hallucination && !rn2(2)))
+		    (Stunned && !rn2(4)) || (Hallucination && !rn2(7)))
 		*sp = ' ' + rnd(96 - 2);	/* ASCII '!' thru '~'
 						   (excludes ' ' and DEL) */
 	}
@@ -1026,7 +1977,7 @@ doengrave()
 	/* Previous engraving is overwritten */
 	if (eow) {
 	    del_engr(oep);
-	    oep = (struct engr *)0;
+	    oep = engr_at(u.ux,u.uy);
 	}
 
 	/* Figure out how long it took to engrave, and if player has
@@ -1035,24 +1986,1844 @@ doengrave()
 	switch(type){
 	    default:
 		multi = -(len/10);
-		if (multi) nomovemsg = "You finish your weird engraving.";
+		if (multi) nomovemsg =	"You finish your weird engraving.";
 		break;
 	    case DUST:
 		multi = -(len/10);
-		if (multi) nomovemsg = "You finish writing in the dust.";
+		if (multi) nomovemsg =	"You finish writing in the dust.";
+		break;
+	    case HEADSTONE:
+	    case ENGRAVE:
+			multi = -(len/10);
+			if ((otmp->oclass == WEAPON_CLASS || spec_ability3(otmp, SPFX3_ENGRV)) &&
+				((otmp->otyp != ATHAME && !spec_ability3(otmp, SPFX3_ENGRV)) || otmp->cursed)) {
+				multi = -len;
+				maxelen = ((otmp->spe + 3) * 2) + 1;
+				/* -2 = 3, -1 = 5, 0 = 7, +1 = 9, +2 = 11
+				 * Note: this does not allow a +0 anything (except
+				 *	 an athame) to engrave	"Elbereth" all at once.
+				 *	 However, you could now engrave	"Elb", then
+				 *		"ere", then	"th".
+				 */
+				Your("%s dull.", aobjnam(otmp,	"get"));
+				if (otmp->unpaid) {
+				struct monst *shkp = shop_keeper(*u.ushops);
+				if (shkp) {
+					You("damage it, you pay for it!");
+					bill_dummy_object(otmp);
+				}
+				}
+				if (len > maxelen) {
+				multi = -maxelen;
+				otmp->spe = -3;
+				} else if (len > 1)
+				otmp->spe -= len >> 1;
+				else otmp->spe -= 1; /* Prevent infinite engraving */
+			} else if ( (otmp->oclass == RING_CLASS) ||
+				 (otmp->oclass == GEM_CLASS) ) multi = -len;
+			else if(otmp->oclass == WAND_CLASS){
+				multi = -(len/10);
+				maxelen = otmp->spe*10;
+				if (multi < -1*otmp->spe){
+					multi = -(otmp->spe);
+					otmp->spe = 0;
+					nomovemsg = is_ice(u.ux,u.uy) ?
+					"You fail to finish blasting your message into the ice before running out of charges!":
+					"You fail to finish blasting your message into the floor before running out of charges!";
+				}
+				else if (multi){
+					otmp->spe += multi; /* multi is already negative*/
+					nomovemsg = is_ice(u.ux,u.uy) ?
+					"You finish blasting your message into the ice.":
+					"You finish blasting your message into the floor.";
+				}
+			}
+			if (multi && !nomovemsg) nomovemsg =	"You finish engraving.";
+		break;
+	    case BURN:
+			multi = -(len/10);
+			maxelen = otmp->spe*10;
+			if (multi < -1*otmp->spe){
+				multi = -(otmp->spe);
+				otmp->spe = 0;
+				nomovemsg = is_ice(u.ux,u.uy) ?
+				"You fail to finish melting your message into the ice before running out of charges!":
+				"You fail to finish burning your message into the floor before running out of charges!";
+			}
+			else if (multi){
+				otmp->spe += multi; /* multi is already negative*/
+				nomovemsg = is_ice(u.ux,u.uy) ?
+				"You finish melting your message into the ice.":
+				"You finish burning your message into the floor.";
+			}
+		break;
+	    case MARK:
+		multi = -(len/10);
+		if ((otmp->oclass == TOOL_CLASS) &&
+		    (otmp->otyp == MAGIC_MARKER)) {
+		    maxelen = (otmp->spe) * 2; /* one charge / 2 letters */
+		    if (len > maxelen) {
+			Your("marker dries out.");
+			otmp->spe = 0;
+			multi = -(maxelen/10);
+		    } else
+			if (len > 1) otmp->spe -= len >> 1;
+			else otmp->spe -= 1; /* Prevent infinite grafitti */
+		}
+		if (multi) nomovemsg =	"You finish defacing the dungeon.";
+		break;
+	    case ENGR_BLOOD:
+		multi = -(len/10);
+		if (multi) nomovemsg =	"You finish scrawling.";
+		break;
+	}
+
+	/* Chop engraving down to size if necessary */
+	if (len > maxelen) {
+	    for (sp = ebuf; (maxelen && *sp); sp++)
+		if (!isspace(*sp)) maxelen--;
+	    if (!maxelen && *sp) {
+		*sp = (char)0;
+		if (multi) nomovemsg =	"You cannot write any more.";
+		You("only are able to write \"%s\"", ebuf);
+	    }
+	}
+
+	/* Add to existing engraving */
+	if (oep) Strcpy(buf, oep->engr_txt);
+
+	(void) strncat(buf, ebuf, (BUFSZ - (int)strlen(buf) - 1));
+
+	make_engr_at(u.ux, u.uy, buf, (moves - multi), type);
+
+	if (post_engr_text[0]) pline(post_engr_text);
+
+	if (doblind && !resists_blnd(&youmonst)) {
+	    You("are blinded by the flash!");
+	    make_blinded((long)rnd(50),FALSE);
+	    if (!Blind) Your(vision_clears);
+	}
+
+	return(1);
+}
+
+/* return 1 if action took 1 (or more) moves, 0 if error or aborted */
+int
+doward()
+{
+	boolean dengr = FALSE;	/* TRUE if we wipe out the current ward */
+	boolean doblind = FALSE;/* TRUE if warding blinds the player */
+	boolean doknown = FALSE;/* TRUE if we identify the stylus */
+	boolean eow = FALSE;	/* TRUE if we are overwriting oep */
+	boolean jello = FALSE;	/* TRUE if we are engraving in slime */
+	boolean ptext = TRUE;	/* TRUE if we must prompt for engrave text */
+	boolean teleengr =FALSE;/* TRUE if we move the old engraving */
+	boolean zapwand = FALSE;/* TRUE if we remove a wand charge */
+	xchar type = DUST;	/* Type of ward made */
+	char buf[BUFSZ];	/* Buffer for final/poly engraving text */
+	char ebuf[BUFSZ];	/* Buffer for initial engraving text */
+	char qbuf[QBUFSZ];	/* Buffer for query text */
+	char post_engr_text[BUFSZ]; /* Text displayed after engraving prompt */
+	const char *everb;	/* Present tense of engraving type */
+	const char *eloc;	/* Where the engraving is (ie dust/floor/...) */
+	char *sp;		/* Place holder for space count of engr text */
+	int ward = 0;	/* ID number of the ward to be engraved */
+	int len = 0;		/* # of nonspace chars of new engraving text */
+	int maxelen;		/* Max allowable length of engraving text */
+	struct engr *oep = engr_at(u.ux,u.uy);
+				/* The current engraving */
+	struct obj *otmp;	/* Object selected with which to engrave */
+	int randWard = 0; /* random ward */
+	xchar randHalu = FALSE; /* whether or not the randWard should be read as a real or hallucinatory ward */
+	char *writer;
+
+	multi = 0;		/* moves consumed */
+	nomovemsg = (char *)0;	/* occupation end message */
+
+	buf[0] = (char)0;
+	ebuf[0] = (char)0;
+	post_engr_text[0] = (char)0;
+	maxelen = BUFSZ - 1;
+	if (is_demon(youmonst.data) || youmonst.data->mlet == S_VAMPIRE)
+	    type = ENGR_BLOOD;
+
+	/* Can the adventurer engrave at all? */
+	if(!u.wardsknown){
+		You("don't know any wards.");
+		return 0;
+	}
+
+	if(u.uswallow) {
+		if (is_animal(u.ustuck->data)) {
+			pline("What would you do, write \"Jonah was here\"?");
+			return(0);
+		} else if (is_whirly(u.ustuck->data)) {
+			You_cant("reach the %s.", surface(u.ux,u.uy));
+			return(0);
+		} else
+			jello = TRUE;
+	} else if (is_lava(u.ux, u.uy)) {
+		You_cant("draw on the lava!");
+		return(0);
+	} /*else if (is_pool(u.ux,u.uy) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
+		You_cant("draw on the water!");
+		return(0);
+	}*/else if(is_pool(u.ux,u.uy) && !u.uinwater){
+		You_cant("draw on the water!");
+		return(0);
+	}
+	if(Is_airlevel(&u.uz) || Is_waterlevel(&u.uz)/* in bubble */ /*|| is_sky(u.ux, u.uy)*/) {
+		You_cant("draw in thin air!");
+		return(0);
+	}
+	if (cantwield(youmonst.data)) {
+		You_cant("even hold anything!");
+		return(0);
+	}
+	if (check_capacity((char *)0)) return (0);
+
+	/* One may draw with finger, or weapon, or wand, or..., or...
+	 * Edited by GAN 10/20/86 so as not to change weapon wielded.
+	 */
+
+	otmp = getobj(styluses,	"draw with");
+	if(!otmp) return(0);		/* otmp == zeroobj if fingers */
+
+	if (otmp == &zeroobj) writer = makeplural(body_part(FINGER));
+	else writer = xname(otmp);
+
+	/* There's no reason you should be able to draw with a wand
+	 * while both your hands are tied up.
+	 */
+	if (!freehand() && otmp != uwep && !otmp->owornmask) {
+		You("have no free %s to draw with!", body_part(HAND));
+		return(0);
+	}
+
+	if (jello) {
+		You("tickle %s with your %s.", mon_nam(u.ustuck), writer);
+		Your("message dissolves...");
+		return(0);
+	}
+	if (otmp->oclass != WAND_CLASS && !can_reach_floor()) {
+		You_cant("reach the %s!", surface(u.ux,u.uy));
+		return(0);
+	}
+	if (IS_ALTAR(levl[u.ux][u.uy].typ)) {
+		You("make a motion towards the altar with your %s.", writer);
+		altar_wrath(u.ux, u.uy);
+		return(0);
+	}
+/*	if (IS_GRAVE(levl[u.ux][u.uy].typ)) {
+		You("don't have room to draw a ward on the %s.",
+			surface(u.ux, u.uy));
+			return(0);
+	}
+*/
+	/* SPFX for items */
+
+	switch (otmp->oclass) {
+	    default:
+	    case AMULET_CLASS:
+	    case CHAIN_CLASS:
+	    case POTION_CLASS:
+	    case COIN_CLASS:
+		break;
+
+	    case RING_CLASS:
+		/*	"diamond" rings and others should work */
+	    case GEM_CLASS:
+		/* diamonds & other hard gems should work */
+		if (objects[otmp->otyp].oc_tough) {
+			type = ENGRAVE;
+			break;
+		}
+		break;
+
+	    case ARMOR_CLASS:
+		if (is_boots(otmp)) {
+			type = DUST;
+			break;
+		}
+		/* fall through */
+	    /* Objects too large to draw with */
+	    case BALL_CLASS:
+	    case ROCK_CLASS:
+/*	    case BED_CLASS:*/
+		You_cant("draw with such a large object!");
+		ptext = FALSE;
+		break;
+
+	    /* Objects too silly to draw with */
+	    case FOOD_CLASS:
+	    case SCROLL_CLASS:
+	    case SPBOOK_CLASS:
+		Your("%s would get %s.", xname(otmp),
+			is_ice(u.ux,u.uy) ?	"all frosty" :	"too dirty");
+		ptext = FALSE;
+		break;
+
+	    case RANDOM_CLASS:	/* This should mean fingers */
+		break;
+
+	    /* The charge is removed from the wand before prompting for
+	     * the engraving text, because all kinds of setup decisions
+	     * and pre-engraving messages are based upon knowing what type
+	     * of engraving the wand is going to do.  Also, the player
+	     * will have potentially seen	"You wrest .." message, and
+	     * therefore will know they are using a charge.
+	     */
+	    case WAND_CLASS:
+		if (zappable(otmp)) {
+		    check_unpaid(otmp);
+		    zapwand = TRUE;
+		    if (Levitation) ptext = FALSE;
+
+		    switch (otmp->otyp) {
+		    /* DUST wands */
+		    default:
+			break;
+
+			/* NODIR wands */
+		    case WAN_LIGHT:
+		    case WAN_SECRET_DOOR_DETECTION:
+		    case WAN_CREATE_MONSTER:
+		    case WAN_WISHING:
+		    case WAN_ENLIGHTENMENT:
+			zapnodir(otmp);
+			break;
+
+			/* IMMEDIATE wands */
+			/* If wand is	"IMMEDIATE", remember to affect the
+			 * previous engraving even if turning to dust.
+			 */
+		    case WAN_STRIKING:
+			Strcpy(post_engr_text,
+			"The wand unsuccessfully fights your attempt to draw!"
+			);
+			break;
+		    case WAN_SLOW_MONSTER:
+			if (!Blind) {
+			   Sprintf(post_engr_text,
+				  	"The bugs on the %s slow down!",
+				   surface(u.ux, u.uy));
+			}
+			break;
+		    case WAN_SPEED_MONSTER:
+			if (!Blind) {
+			   Sprintf(post_engr_text,
+				  	"The bugs on the %s speed up!",
+				   surface(u.ux, u.uy));
+			}
+			break;
+		    case WAN_POLYMORPH:
+			if(oep)  {
+			    if (oep->engr_txt[0]) {
+					type = (xchar)0;	/* random */
+					(void) random_engraving(buf);
+			    }
+				if(oep->ward_id){
+					randWard = rn2(10) ? 1 : rn2(10) ? randHaluWard() : 0;
+					if(!randWard){
+						randWard = rn2(NUMBER_OF_WARDS)+1;
+						randHalu = FALSE;
+					}
+					else randHalu = TRUE;
+				}
+			    dengr = TRUE;
+			}
+			break;
+		    case WAN_DRAINING:	/* KMH */
+			if (oep) {
+			    /*
+			     * [ALI] Wand of draining give messages like
+			     * either polymorph or cancellation/make
+			     * invisible depending on whether the
+			     * old engraving is completely wiped or not.
+			     * Note: Blindness has slightly different
+			     * effect than with wand of polymorph.
+			     */
+			    u_wipe_engr(5);
+			    oep = engr_at(u.ux,u.uy);
+			    if (!Blind) {
+				if (!oep)
+				    pline_The("engraving on the %s vanishes!",
+				      surface(u.ux,u.uy));
+				else {
+				    strcpy(buf, oep->engr_txt);
+				    dengr = TRUE;
+				}
+			    }
+			}
+			break;
+		    case WAN_NOTHING:
+		    case WAN_UNDEAD_TURNING:
+		    case WAN_OPENING:
+		    case WAN_LOCKING:
+		    case WAN_PROBING:
+			break;
+
+			/* RAY wands */
+		    case WAN_MAGIC_MISSILE:
+			ptext = TRUE;
+			if (!Blind) {
+			   Sprintf(post_engr_text,
+				  	"The %s is riddled by bullet holes!",
+				   surface(u.ux, u.uy));
+			}
+			break;
+
+		    /* can't tell sleep from death - Eric Backus */
+		    case WAN_SLEEP:
+		    case WAN_DEATH:
+			if (!Blind) {
+			   Sprintf(post_engr_text,
+				  	"The bugs on the %s stop moving!",
+				   surface(u.ux, u.uy));
+			}
+			break;
+
+		    case WAN_COLD:
+			if (!Blind)
+			    Strcpy(post_engr_text,
+				"A few ice cubes drop from the wand.");
+			if(!oep || (oep->engr_type != BURN))
+			    break;
+		    case WAN_CANCELLATION:
+		    case WAN_MAKE_INVISIBLE:
+			if (oep && oep->engr_type != HEADSTONE) {
+			    if (!Blind)
+				pline_The("engraving on the %s vanishes!",
+					surface(u.ux,u.uy));
+			    dengr = TRUE;
+			}
+			break;
+		    case WAN_TELEPORTATION:
+			if (oep && oep->engr_type != HEADSTONE) {
+			    if (!Blind)
+				pline_The("engraving on the %s vanishes!",
+					surface(u.ux,u.uy));
+			    teleengr = TRUE;
+			}
+			break;
+
+		    /* type = ENGRAVE wands */
+		    case WAN_DIGGING:
+			ptext = TRUE;
+			type  = ENGRAVE;
+			if(!objects[otmp->otyp].oc_name_known) {
+			    if (flags.verbose)
+				pline("This %s is a wand of digging!",
+				xname(otmp));
+			    doknown = TRUE;
+			}
+			if (!Blind)
+			    Strcpy(post_engr_text,
+				IS_GRAVE(levl[u.ux][u.uy].typ) ?
+				"Chips fly out from the headstone." :
+				is_ice(u.ux,u.uy) ?
+				"Ice chips fly up from the ice surface!" :
+				"Gravel flies up from the floor.");
+			else
+			    Strcpy(post_engr_text,	"You hear drilling!");
+			break;
+
+		    /* type = BURN wands */
+		    case WAN_FIRE:
+			ptext = TRUE;
+			type  = BURN;
+			if(!objects[otmp->otyp].oc_name_known) {
+			if (flags.verbose)
+			    pline("This %s is a wand of fire!", xname(otmp));
+			    doknown = TRUE;
+			}
+			Strcpy(post_engr_text,
+				Blind ?	"You feel the wand heat up." :
+					"Flames fly from the wand.");
+			break;
+		    case WAN_LIGHTNING:
+			ptext = TRUE;
+			type  = BURN;
+			if(!objects[otmp->otyp].oc_name_known) {
+			    if (flags.verbose)
+				pline("This %s is a wand of lightning!",
+					xname(otmp));
+			    doknown = TRUE;
+			}
+			if (!Blind) {
+			    Strcpy(post_engr_text,
+				   	"Lightning arcs from the wand.");
+			    doblind = TRUE;
+			} else
+			    Strcpy(post_engr_text,	"You hear crackling!");
+			break;
+
+		    /* type = MARK wands */
+		    /* type = ENGR_BLOOD wands */
+		    }
+		} else /* end if zappable */
+		    if (!can_reach_floor()) {
+			You_cant("reach the %s!", surface(u.ux,u.uy));
+			return(0);
+		    }
+		break;
+
+	    case WEAPON_CLASS:
+				if (is_lightsaber(otmp)) {
+			if (otmp->lamplit) type = BURN;
+			else Your("%s is deactivated!", aobjnam(otmp,"are"));
+		} else if (is_blade(otmp)) {
+		    if ((int)otmp->spe > -3)
+			type = ENGRAVE;
+		    else
+			Your("%s too dull for drawing.", aobjnam(otmp,"are"));
+		}
+		break;
+
+	    case TOOL_CLASS:
+		if(otmp == ublindf) {
+		    pline(
+		"That is a bit difficult to draw with, don't you think?");
+		    return(0);
+		}
+		switch (otmp->otyp)  {
+		    case MAGIC_MARKER:
+			if (otmp->spe <= 0)
+			    Your("marker has dried out.");
+			else
+			    type = MARK;
+			break;
+		    case TOWEL:
+			/* Can't really engrave with a towel */
+			ptext = FALSE;
+			if (oep)
+			    if ((oep->engr_type == DUST ) ||
+				(oep->engr_type == ENGR_BLOOD) ||
+				(oep->engr_type == MARK )) {
+				if (!Blind)
+				    You("wipe out the message here.");
+				else
+				    Your("%s %s %s.", xname(otmp),
+					 otense(otmp,	"get"),
+					 is_ice(u.ux,u.uy) ?
+						"frosty" :	"dusty");
+				dengr = TRUE;
+			    } else
+				Your("%s can't wipe out this engraving.",
+				     xname(otmp));
+			else{
+			    Your("%s %s %s.", xname(otmp), otense(otmp,	"get"),
+				  is_ice(u.ux,u.uy) ?	"frosty" :	"dusty");
+			}
+			break;
+		    default:
+				if(spec_ability3(otmp, SPFX3_ENGRV)) type = ENGRAVE;
+			break;
+		}
+		break;
+
+	    case VENOM_CLASS:
+#ifdef WIZARD
+		if (wizard) {
+		    pline("Writing a poison pen letter??");
+		    break;
+		}
+#endif
+	    case ILLOBJ_CLASS:
+		impossible("You're drawing with an illegal object!");
+		break;
+	}
+
+/*	if (IS_GRAVE(levl[u.ux][u.uy].typ)) {
+	    if (type == ENGRAVE || type == 0)
+		type = HEADSTONE;
+	    else {
+		// ensures the	"cannot wipe out" case
+		type = DUST;
+		dengr = FALSE;
+		teleengr = FALSE;
+		buf[0] = (char)0;
+	    }
+	}
+*/
+	/* End of implement setup */
+
+	/* Identify stylus */
+	if (doknown) {
+	    makeknown(otmp->otyp);
+	    more_experienced(0,10);
+	}
+
+	if (teleengr) {
+	    rloc_engr(oep);
+	    oep = (struct engr *)0;
+	}
+
+	if (dengr) {
+	    del_engr_ward(oep);
+	    oep = (struct engr *)0;
+	}
+
+	/* Something has changed the engraving here */
+	if (*buf || randWard) {
+		if(*buf){
+			make_engr_at(u.ux, u.uy, buf, moves, type);
+			oep = engr_at(u.ux,u.uy);
+		}
+		if(randWard){
+			oep = engr_at(u.ux,u.uy);
+			if(!oep){
+				make_engr_at(u.ux, u.uy,	"", moves, DUST);
+				oep = engr_at(u.ux,u.uy);
+			}
+			oep->ward_id = randWard;
+			oep->halu_ward = randHalu;
+			oep->ward_type = rnd(N_ENGRAVE-1);
+			oep->complete_wards = 1;
+		}
+	    if(!Blind){ 
+			/*pline_The("engraving now reads: \"%s\".", buf);*/
+			pline_The("engraving here has changed.");
+			read_engr_at(u.ux,u.uy);
+		}
+	    ptext = FALSE;
+	}
+
+	if (zapwand && (otmp->spe < 0)) {
+	    pline("%s %sturns to dust.",
+		  The(xname(otmp)), Blind ?	"" :	"glows violently, then	");
+	    if (!IS_GRAVE(levl[u.ux][u.uy].typ))
+		You("are not going to get anywhere trying to draw in the %s with your dust.",
+		    is_ice(u.ux,u.uy) ?	"frost" :	"dust");
+	    useup(otmp);
+	    ptext = FALSE;
+	}
+
+	if (!ptext) {		/* Early exit for some implements. */
+	    if (otmp->oclass == WAND_CLASS && !can_reach_floor())
+		You_cant("reach the %s!", surface(u.ux,u.uy));
+	    return(1);
+	}
+
+	/* Special effects should have deleted the current engraving (if
+	 * possible) by now.
+	 */
+	if (oep && oep->ward_id) {
+		char c = 'n';
+
+	    /* Give player the choice to add to ward. */
+
+/*	    if (type == HEADSTONE) {
+		// headstones are not big enough for wards
+			pline("This headstone is not big enough for drawing one");
+		    return(0);
+	    } else*/ if ( (type == oep->ward_type) && !Hallucination && (!Blind ||
+		 (oep->ward_type == BURN) || (oep->ward_type == ENGRAVE)) ) {
+			c = yn_function("Do you want to reinforce the existing ward?",
+					ynqchars, 'y');
+			if (c == 'q') {
+				pline(Never_mind);
+				return(0);
+			}
+	    }
+		
+	    if (c == 'n' || Blind) {
+
+			if( (oep->ward_type == DUST) || (oep->ward_type == ENGR_BLOOD) ||
+				(oep->ward_type == MARK) ) {
+				if (!Blind) {
+				You("wipe out the ward that was %s here.",
+					((oep->ward_type == DUST)  ?	"drawn in the dust" :
+					((oep->ward_type == ENGR_BLOOD) ?	"painted in blood"   :
+									"drawn")));
+				del_ward(oep);
+				oep = engr_at(u.ux,u.uy);
+				} else
+			   /* Don't delete engr until after we *know* we're engraving */
+				eow = TRUE;
+			} else{
+				if ( (type == DUST) || (type == MARK) || (type == ENGR_BLOOD) ) {
+				You(
+					"cannot wipe out the ward that is %s the %s here.",
+				 oep->ward_type == BURN ?
+				   (is_ice(u.ux,u.uy) ?	"melted into" :	"burned into") :
+				  	"engraved in", surface(u.ux,u.uy));
+				return(1);
+				} else
+				if ( (type != oep->ward_type) || (c == 'n') ) {
+					if (!Blind || can_reach_floor())
+					You("will replace the current ward.");
+					eow = TRUE;
+				}
+			}
+	    }
+		else if(c == 'y'){
+			int newWards = get_num_wards_added(oep->ward_id, oep->complete_wards);
+			int increment;
+			if(oep->complete_wards >= 7 || newWards < 1){
+				pline("The warding sign can be reinforced no further!");
+				return 0;
+			}
+			/*pline("%d to be added, %d there already", newWards, oep->complete_wards);*/
+			boolean continue_loop = TRUE;
+			ward = oep->ward_id;
+			len = wardStrokes[ward][oep->complete_wards];
+			increment = len/newWards;
+			while(newWards && continue_loop){
+				if(oep->scuffed_wards){
+					len -= (int)(increment*.9);
+					newWards--;
+					oep->scuffed_wards--;
+				}
+				else if(oep->degraded_wards){
+					len -= (int) (increment*.75);
+					newWards--;
+					oep->degraded_wards--;
+				}
+				else if(oep->partial_wards){
+					len -= (int) (increment*.75);
+					newWards--;
+					oep->degraded_wards--;
+				}
+				else continue_loop = FALSE;
+			}
+		}
+	}
+
+	eloc = surface(u.ux,u.uy);
+	switch(type){
+	    default:
+		everb = (oep && !eow ?	"add to the weird drawing on" :
+				      	"draw strangely on");
+		break;
+	    case DUST:
+		everb = (oep && !eow ?	"add to the drawing in" :
+				      	"draw in");
+		eloc = is_ice(u.ux,u.uy) ?	"frost" :	"dust";
+		break;
+	    case HEADSTONE:
+		everb = (oep && !eow ?	"add to the drawing on" :
+				      	"draw on");
+		break;
+	    case ENGRAVE:
+		everb = (oep && !eow ?	"add to the drawing in" :
+				      	"draw in");
+		break;
+	    case BURN:
+		everb = (oep && !eow ?
+			( is_ice(u.ux,u.uy) ?	"add to the drawing melted into" :
+					     	"add to the drawing burned into") :
+			( is_ice(u.ux,u.uy) ?	"melt into" :	"burn into"));
+		break;
+	    case MARK:
+		everb = (oep && !eow ?	"add to the graffiti on" :
+				      	"draw on");
+		break;
+	    case ENGR_BLOOD:
+		everb = (oep && !eow ?	"add to the drawing on" :
+				      	"draw on");
+		break;
+	}
+
+	/* Tell adventurer what is going on */
+	if (otmp != &zeroobj)
+	    You("%s the %s with %s.", everb, eloc, doname(otmp));
+	else
+	    You("%s the %s with your %s.", everb, eloc,
+		makeplural(body_part(FINGER)));
+
+	/* Prompt for engraving! */
+	if(!len){
+		ward = pick_ward();
+		len = wardStrokes[ward][0];
+	}
+	if (ward == 0 || index(ebuf, '\033')) {
+	    if (zapwand) {
+			if (!Blind)
+				pline("%s, then %s.",
+				  Tobjnam(otmp,	"glow"), otense(otmp,	"fade"));
+			return(1);
+	    } else {
+			pline(Never_mind);
+			return(0);
+	    }
+	}
+	u.uconduct.wardless++;
+	if (eow) {
+		del_ward(oep);
+		oep = engr_at(u.ux,u.uy);
+	}
+	switch(type){
+	    default:
+			multi = -(len/10);
+			if (multi) nomovemsg =	"You finish your weird drawing.";
+		break;
+	    case DUST:
+			multi = -(len/10);
+			if (multi) nomovemsg =	"You finish drawing in the dust.";
+		break;
+	    case HEADSTONE:
+	    case ENGRAVE:
+			multi = -(len/10);
+			if ((otmp->oclass == WEAPON_CLASS || spec_ability3(otmp, SPFX3_ENGRV)) &&
+				((otmp->otyp != ATHAME && !spec_ability3(otmp, SPFX3_ENGRV)) || otmp->cursed)) {
+				multi = -len;
+				maxelen = ((otmp->spe + 3) * 2) + 1;
+				/* -2 = 3, -1 = 5, 0 = 7, +1 = 9, +2 = 11
+				 */
+				Your("%s dull.", aobjnam(otmp,	"get"));
+				if (otmp->unpaid) {
+					struct monst *shkp = shop_keeper(*u.ushops);
+					if (shkp) {
+						You("damage it, you pay for it!");
+						bill_dummy_object(otmp);
+					}
+				}
+				if (len > maxelen) {
+					multi = -maxelen;
+					otmp->spe = -3;
+				} else if (len > 1)
+					otmp->spe -= len >> 1;
+				else otmp->spe -= 1; /* Prevent infinite engraving */
+			} else if ( (otmp->oclass == RING_CLASS) ||
+				 (otmp->oclass == GEM_CLASS) ) multi = -len;
+			else if(otmp->oclass == WAND_CLASS){
+				multi = -(len/10);
+				maxelen = otmp->spe*10;
+				if(multi < -1*otmp->spe){
+					multi = -(otmp->spe);
+					otmp->spe = 0;
+					nomovemsg = is_ice(u.ux,u.uy) ?
+					"You fail to finish blasting your drawing into the ice before running out of charges!":
+					"You fail to finish blasting your drawing into the floor before running out of charges!";
+				}
+				else if (multi){
+					otmp->spe += multi; /* multi is already negative*/
+					nomovemsg = is_ice(u.ux,u.uy) ?
+					"You finish blasting your drawing into the ice.":
+					"You finish blasting your drawing into the floor.";
+				}
+			}
+			if (multi && !nomovemsg) nomovemsg =	"You finish drawing.";
+		break;
+	    case BURN:
+			multi = -(len/10);
+			maxelen = otmp->spe*10;
+			if(multi < -1*otmp->spe){
+				multi = -(otmp->spe);
+				otmp->spe = 0;
+				nomovemsg = is_ice(u.ux,u.uy) ?
+				"You fail to finish melting your drawing into the ice before running out of charges!":
+				"You fail to finish burning your drawing into the floor before running out of charges!";
+			}
+			else if (multi){
+				otmp->spe += multi; /* multi is already negative*/
+				nomovemsg = is_ice(u.ux,u.uy) ?
+				"You finish melting your drawing into the ice.":
+				"You finish burning your drawing into the floor.";
+			}
+		break;
+	    case MARK:
+			multi = -(len/10);
+			if ((otmp->oclass == TOOL_CLASS) &&
+				(otmp->otyp == MAGIC_MARKER)) {
+				maxelen = (otmp->spe) * 2; /* one charge / 2 letters */
+				if (len > maxelen) {
+				Your("marker dries out.");
+				otmp->spe = 0;
+				multi = -(maxelen/10);
+				} else
+				if (len > 1) otmp->spe -= len >> 1;
+				else otmp->spe -= 1; /* Prevent infinite grafitti */
+			}
+			if (multi) nomovemsg =	"You finish defacing the dungeon.";
+		break;
+	    case ENGR_BLOOD:
+			multi = -(len/10);
+			if (multi) nomovemsg =	"You finish scrawling.";
+		break;
+	}
+
+	/* Chop engraving down to size if necessary */
+	/* BETA: engraving fails if too long */
+	if (len > maxelen) {
+	    for (sp = ebuf; (maxelen && *sp); sp++)
+		if (!isspace(*sp)) maxelen--;
+	    if (!maxelen && *sp) {
+		*sp = (char)0;
+		if (multi) nomovemsg =	"Unfortunatly, you can't complete the symbol.";
+		You("can't complete the symbol.", ebuf);
+	    }
+	}
+	else if (oep && oep->ward_id){
+		oep->complete_wards += get_num_wards_added(oep->ward_id, oep->complete_wards);
+	}
+	else if(oep){
+		if(!Hallucination || !rn2(4)){
+			oep->ward_id = ward;
+			oep->ward_type = type;
+			oep->complete_wards = get_num_wards_added(oep->ward_id, 0);
+		}
+		else{
+			oep->ward_id = rn2(4) ? 1 : rn2(100) ? randHaluWard() : 0;
+			if(!oep->ward_id){
+				oep->ward_id = rn2(NUMBER_OF_WARDS)+1;
+				oep->halu_ward = FALSE;
+			}
+			else oep->halu_ward = TRUE;
+			oep->ward_type = type;
+			oep->complete_wards = 1;
+		}
+	}
+	else{
+		make_engr_at(u.ux, u.uy,	"", (moves - multi), DUST); /* absense of text =  dust */
+		oep = engr_at(u.ux,u.uy);
+		if(!Hallucination){
+			oep->ward_id = ward;
+			oep->ward_type = type;
+			oep->complete_wards = get_num_wards_added(oep->ward_id, 0);
+		}
+		else{
+			oep->ward_id = rn2(4) ? 1 : rn2(100) ? randHaluWard() : 0;
+			if(!oep->ward_id){
+				oep->ward_id = rn2(NUMBER_OF_WARDS)+1;
+				oep->halu_ward = FALSE;
+			}
+			else oep->halu_ward = TRUE;
+			oep->ward_type = type;
+			oep->complete_wards = 1;
+		}
+	}
+
+	if (post_engr_text[0]) pline(post_engr_text);
+
+	if (doblind && !resists_blnd(&youmonst)) {
+	    You("are blinded by the flash!");
+	    make_blinded((long)rnd(50),FALSE);
+	    if (!Blind) Your(vision_clears);
+	}
+
+	return(1);
+}
+
+int
+random_unknown_ward()
+{
+	int options[FIRST_RUNE];
+	int num_unknown=0;
+	
+	if(~u.wardsknown & WARD_HEPTAGRAM){
+		options[num_unknown++] = HEPTAGRAM;
+	}
+	if(~u.wardsknown & WARD_GORGONEION){
+		options[num_unknown++] = GORGONEION;	/* must be non-zero */
+	}
+	if(~u.wardsknown & WARD_ACHERON){
+		options[num_unknown++] = CIRCLE_OF_ACHERON;	/* must be non-zero */
+	}
+	if(~u.wardsknown & WARD_PENTAGRAM){
+		options[num_unknown++] = PENTAGRAM;	/* must be non-zero */
+	}
+	if(~u.wardsknown & WARD_HEXAGRAM){
+		options[num_unknown++] = HEXAGRAM;	/* must be non-zero */
+	}
+	if(~u.wardsknown & WARD_HAMSA){
+		options[num_unknown++] = HAMSA;	/* must be non-zero */
+	}
+	if(~u.wardsknown & WARD_ELDER_SIGN){
+		options[num_unknown++] = ELDER_SIGN;	/* must be non-zero */
+	}
+	if(~u.wardsknown & WARD_EYE){
+		options[num_unknown++] = ELDER_ELEMENTAL_EYE;	/* must be non-zero */
+	}
+	if(~u.wardsknown & WARD_QUEEN){
+		options[num_unknown++] = SIGN_OF_THE_SCION_QUEEN;	/* must be non-zero */
+	}
+	if(~u.wardsknown & WARD_CAT_LORD){
+		options[num_unknown++] = CARTOUCHE_OF_THE_CAT_LORD;	/* must be non-zero */
+	}
+	if(~u.wardsknown & WARD_GARUDA){
+		options[num_unknown++] = WINGS_OF_GARUDA;	/* must be non-zero */
+	}
+	if(!rn2(100) || (!num_unknown && !rn2(10))){ /*!num_unknown: ie, if the character knows all non-legendary wards*/
+		if(~u.wardsknown & WARD_CTHUGHA){
+			options[num_unknown++] = SIGIL_OF_CTHUGHA;	/* must be non-zero */
+		}
+		if(~u.wardsknown & WARD_ITHAQUA){
+			options[num_unknown++] = BRAND_OF_ITHAQUA;	/* must be non-zero */
+		}
+		if(~u.wardsknown & WARD_KRAKAL){
+			options[num_unknown++] = TRACERY_OF_KRAKAL;	/* must be non-zero */
+		}
+		if(~u.wardsknown & WARD_YELLOW){
+			options[num_unknown++] = YELLOW_SIGN;	/* must be non-zero */
+		}
+	}
+	if(num_unknown){
+		return options[rn2(num_unknown)];
+	}
+	else return -1;
+}
+
+int
+pick_ward()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf,	"Known Wards");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	if(u.wardsknown & WARD_HEPTAGRAM){
+		Sprintf(buf,	"Heptagram");
+		any.a_int = HEPTAGRAM;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_GORGONEION){
+		Sprintf(buf,	"Gorgoneion");
+		any.a_int = GORGONEION;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_ACHERON){
+		Sprintf(buf,	"Circle of Acheron");
+		any.a_int = CIRCLE_OF_ACHERON;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_PENTAGRAM){
+		Sprintf(buf,	"Pentagram");
+		any.a_int = PENTAGRAM;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_HEXAGRAM){
+		Sprintf(buf,	"Hexagram");
+		any.a_int = HEXAGRAM;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_HAMSA){
+		Sprintf(buf,	"Hamsa");
+		any.a_int = HAMSA;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_ELDER_SIGN){
+		Sprintf(buf,	"Elder Sign");
+		any.a_int = ELDER_SIGN;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_EYE){
+		Sprintf(buf,	"Elder Elemental Eye");
+		any.a_int = ELDER_ELEMENTAL_EYE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_QUEEN){
+		Sprintf(buf,	"Sign of the Scion Queen Mother");
+		any.a_int = SIGN_OF_THE_SCION_QUEEN;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_CAT_LORD){
+		Sprintf(buf,	"Cartouche of the Cat Lord");
+		any.a_int = CARTOUCHE_OF_THE_CAT_LORD;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_GARUDA){
+		Sprintf(buf,	"The Wings of Garuda");
+		any.a_int = WINGS_OF_GARUDA;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_CTHUGHA){
+		Sprintf(buf,	"The Sigil of Cthugha");
+		any.a_int = SIGIL_OF_CTHUGHA;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_ITHAQUA){
+		Sprintf(buf,	"The Brand of Ithaqua");
+		any.a_int = BRAND_OF_ITHAQUA;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_KRAKAL){
+		Sprintf(buf,	"The Tracery of Krakal");
+		any.a_int = TRACERY_OF_KRAKAL;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.wardsknown & WARD_YELLOW){
+		Sprintf(buf,	"The Yellow Sign");
+		any.a_int = YELLOW_SIGN;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	end_menu(tmpwin,	"Choose ward:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return ( n > 0 ) ? selected[0].item.a_int : 0;
+}
+
+int
+decode_wardID(wardID)
+int wardID;
+{
+	switch(wardID){
+		case WARD_HEPTAGRAM: return HEPTAGRAM;
+		break;
+		case WARD_GORGONEION: return GORGONEION;
+		break;
+		case WARD_ACHERON: return CIRCLE_OF_ACHERON;
+		break;
+		case WARD_PENTAGRAM: return PENTAGRAM;
+		break;
+		case WARD_HEXAGRAM: return HEXAGRAM;
+		break;
+		case WARD_HAMSA: return HAMSA;
+		break;
+		case WARD_ELDER_SIGN: return ELDER_SIGN;
+		break;
+		case WARD_EYE: return ELDER_ELEMENTAL_EYE;
+		break;
+		case WARD_QUEEN: return SIGN_OF_THE_SCION_QUEEN;
+		break;
+		case WARD_CAT_LORD: return CARTOUCHE_OF_THE_CAT_LORD;
+		break;
+		case WARD_GARUDA: return WINGS_OF_GARUDA;
+		break;
+		case WARD_CTHUGHA: return SIGIL_OF_CTHUGHA;
+		break;
+		case WARD_ITHAQUA: return BRAND_OF_ITHAQUA;
+		break;
+		case WARD_KRAKAL: return TRACERY_OF_KRAKAL;
+		break;
+		case WARD_YELLOW: return YELLOW_SIGN;
+		break;
+		case WARD_TOUSTEFNA: return TOUSTEFNA;
+		break;
+		case WARD_DREPRUN: return DREPRUN;
+		break;
+		case WARD_OTTASTAFUR: return OTTASTAFUR;
+		break;
+		case WARD_KAUPALOKI: return KAUPALOKI;
+		break;
+		case WARD_VEIOISTAFUR: return VEIOISTAFUR;
+		break;
+		case WARD_THJOFASTAFUR: return THJOFASTAFUR;
+		break;
+		default:
+		return 0;
+		break;
+	}
+}
+
+int
+get_wardID(floorID)
+int floorID;
+{
+	switch(floorID){
+		case HEPTAGRAM: return WARD_HEPTAGRAM;
+		break;
+		case GORGONEION: return WARD_GORGONEION;
+		break;
+		case CIRCLE_OF_ACHERON: return WARD_ACHERON;
+		break;
+		case PENTAGRAM: return WARD_PENTAGRAM;
+		break;
+		case HEXAGRAM: return WARD_HEXAGRAM;
+		break;
+		case HAMSA: return WARD_HAMSA;
+		break;
+		case ELDER_SIGN: return WARD_ELDER_SIGN;
+		break;
+		case ELDER_ELEMENTAL_EYE: return WARD_EYE;
+		break;
+		case SIGN_OF_THE_SCION_QUEEN: return WARD_QUEEN;
+		break;
+		case CARTOUCHE_OF_THE_CAT_LORD: return WARD_CAT_LORD;
+		break;
+		case WINGS_OF_GARUDA: return WARD_GARUDA;
+		break;
+		case SIGIL_OF_CTHUGHA: return WARD_CTHUGHA;
+		break;
+		case BRAND_OF_ITHAQUA: return WARD_ITHAQUA;
+		break;
+		case TRACERY_OF_KRAKAL: return WARD_KRAKAL;
+		break;
+		case YELLOW_SIGN: return WARD_YELLOW;
+		break;
+		case TOUSTEFNA: return WARD_TOUSTEFNA;
+		break;
+		case DREPRUN: return WARD_DREPRUN;
+		break;
+		case OTTASTAFUR: return WARD_OTTASTAFUR;
+		break;
+		case KAUPALOKI: return WARD_KAUPALOKI;
+		break;
+		case VEIOISTAFUR: return WARD_VEIOISTAFUR;
+		break;
+		case THJOFASTAFUR: return WARD_THJOFASTAFUR;
+		break;
+		default:
+		return 0;
+		break;
+	}
+}
+
+/* return 1 if action took 1 (or more) moves, 0 if error or aborted */
+int
+doseal()
+{
+	boolean dengr = FALSE;	/* TRUE if we wipe out the current ward */
+	boolean doblind = FALSE;/* TRUE if warding blinds the player */
+	boolean doknown = FALSE;/* TRUE if we identify the stylus */
+	boolean eow = FALSE;	/* TRUE if we are overwriting oep */
+	boolean jello = FALSE;	/* TRUE if we are engraving in slime */
+	boolean ptext = TRUE;	/* TRUE if we must prompt for engrave text */
+	boolean teleengr =FALSE;/* TRUE if we move the old engraving */
+	boolean zapwand = FALSE;/* TRUE if we remove a wand charge */
+	xchar type = DUST;	/* Type of ward made */
+	char buf[BUFSZ];	/* Buffer for final/poly engraving text */
+	char ebuf[BUFSZ];	/* Buffer for initial engraving text */
+	char qbuf[QBUFSZ];	/* Buffer for query text */
+	char post_engr_text[BUFSZ]; /* Text displayed after engraving prompt */
+	const char *everb;	/* Present tense of engraving type */
+	const char *eloc;	/* Where the engraving is (ie dust/floor/...) */
+	char *sp;		/* Place holder for space count of engr text */
+	int ward = 0;	/* ID number of the ward to be engraved */
+	int len = 0;		/* # of nonspace chars of new engraving text */
+	int maxelen;		/* Max allowable length of engraving text */
+	struct engr *oep = engr_at(u.ux,u.uy);
+				/* The current engraving */
+	struct obj *otmp;	/* Object selected with which to engrave */
+	int randWard = 0; /* random ward */
+	xchar randHalu = FALSE; /* whether or not the randWard should be read as a real or hallucinatory ward */
+	char *writer;
+
+	multi = 0;		/* moves consumed */
+	nomovemsg = (char *)0;	/* occupation end message */
+
+	buf[0] = (char)0;
+	ebuf[0] = (char)0;
+	post_engr_text[0] = (char)0;
+	maxelen = BUFSZ - 1;
+	if (is_demon(youmonst.data) || youmonst.data->mlet == S_VAMPIRE)
+	    type = ENGR_BLOOD;
+	/* Can the adventurer engrave at all? */
+	if(Role_if(PM_EXILE)) binderup(); //reaply all known seals, in case of memory loss.
+	if(!u.sealsKnown){
+		You("don't know any seals.");
+		return 0;
+	}
+	if(u.uswallow) {
+		if (is_animal(u.ustuck->data)) {
+			pline("What would you do, write \"Jonah was here\"?");
+			return(0);
+		} else if (is_whirly(u.ustuck->data)) {
+			You_cant("reach the %s.", surface(u.ux,u.uy));
+			return(0);
+		} else
+			jello = TRUE;
+	} else if (is_lava(u.ux, u.uy)) {
+		You_cant("draw on the lava!");
+		return(0);
+	} /*else if (is_pool(u.ux,u.uy) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
+		You_cant("draw on the water!");
+		return(0);
+	}*/else if(is_pool(u.ux,u.uy) && !u.uinwater){
+		You_cant("draw on the water!");
+		return(0);
+	}
+	if(Is_airlevel(&u.uz) || Is_waterlevel(&u.uz)/* in bubble */) {
+		You_cant("draw in thin air!");
+		return(0);
+	}
+	if (cantwield(youmonst.data)) {
+		You_cant("even hold anything!");
+		return(0);
+	}
+	if (check_capacity((char *)0)) return (0);
+
+	/* One may draw with finger, or weapon, or wand, or..., or...
+	 * Edited by GAN 10/20/86 so as not to change weapon wielded.
+	 */
+
+	otmp = getobj(styluses,	"draw with");
+	if(!otmp) return(0);		/* otmp == zeroobj if fingers */
+
+	if (otmp == &zeroobj) writer = makeplural(body_part(FINGER));
+	else writer = xname(otmp);
+
+	/* There's no reason you should be able to draw with a wand
+	 * while both your hands are tied up.
+	 */
+	if (!freehand() && otmp != uwep && !otmp->owornmask) {
+		You("have no free %s to draw with!", body_part(HAND));
+		return(0);
+	}
+
+	if (jello) {
+		You("tickle %s with your %s.", mon_nam(u.ustuck), writer);
+		Your("message dissolves...");
+		return(0);
+	}
+	if (otmp->oclass != WAND_CLASS && !can_reach_floor()) {
+		You_cant("reach the %s!", surface(u.ux,u.uy));
+		return(0);
+	}
+	if (IS_ALTAR(levl[u.ux][u.uy].typ)) {
+		You("make a motion towards the altar with your %s.", writer);
+		altar_wrath(u.ux, u.uy);
+		return(0);
+	}
+/*	if (IS_GRAVE(levl[u.ux][u.uy].typ)) {
+		You("don't have room to draw a seal on the %s.",
+			surface(u.ux, u.uy));
+			return(0);
+	}
+*/
+	/* SPFX for items */
+
+	switch (otmp->oclass) {
+	    default:
+	    case AMULET_CLASS:
+	    case CHAIN_CLASS:
+	    case POTION_CLASS:
+	    case COIN_CLASS:
+		break;
+
+	    case RING_CLASS:
+		/*	"diamond" rings and others should work */
+	    case GEM_CLASS:
+		/* diamonds & other hard gems should work */
+		if (objects[otmp->otyp].oc_tough) {
+			type = ENGRAVE;
+			break;
+		}
+		break;
+
+	    case ARMOR_CLASS:
+		if (is_boots(otmp)) {
+			type = DUST;
+			break;
+		}
+		/* fall through */
+	    /* Objects too large to draw with */
+	    case BALL_CLASS:
+	    case ROCK_CLASS:
+/*	    case BED_CLASS:*/
+		You_cant("draw with such a large object!");
+		ptext = FALSE;
+		break;
+
+	    /* Objects too silly to draw with */
+	    case FOOD_CLASS:
+	    case SCROLL_CLASS:
+	    case SPBOOK_CLASS:
+		Your("%s would get %s.", xname(otmp),
+			is_ice(u.ux,u.uy) ?	"all frosty" :	"too dirty");
+		ptext = FALSE;
+		break;
+
+	    case RANDOM_CLASS:	/* This should mean fingers */
+		break;
+
+	    /* The charge is removed from the wand before prompting for
+	     * the engraving text, because all kinds of setup decisions
+	     * and pre-engraving messages are based upon knowing what type
+	     * of engraving the wand is going to do.  Also, the player
+	     * will have potentially seen	"You wrest .." message, and
+	     * therefore will know they are using a charge.
+	     */
+	    case WAND_CLASS:
+		if (zappable(otmp)) {
+		    check_unpaid(otmp);
+		    zapwand = TRUE;
+		    if (Levitation) ptext = FALSE;
+
+		    switch (otmp->otyp) {
+		    /* DUST wands */
+		    default:
+			break;
+
+			/* NODIR wands */
+		    case WAN_LIGHT:
+		    case WAN_SECRET_DOOR_DETECTION:
+		    case WAN_CREATE_MONSTER:
+		    case WAN_WISHING:
+		    case WAN_ENLIGHTENMENT:
+			zapnodir(otmp);
+			break;
+
+			/* IMMEDIATE wands */
+			/* If wand is	"IMMEDIATE", remember to affect the
+			 * previous engraving even if turning to dust.
+			 */
+		    case WAN_STRIKING:
+			Strcpy(post_engr_text,
+			"The wand unsuccessfully fights your attempt to draw!"
+			);
+			break;
+		    case WAN_SLOW_MONSTER:
+			if (!Blind) {
+			   Sprintf(post_engr_text,
+				  	"The bugs on the %s slow down!",
+				   surface(u.ux, u.uy));
+			}
+			break;
+		    case WAN_SPEED_MONSTER:
+			if (!Blind) {
+			   Sprintf(post_engr_text,
+				  	"The bugs on the %s speed up!",
+				   surface(u.ux, u.uy));
+			}
+			break;
+		    case WAN_POLYMORPH:
+			if(oep)  {
+			    if (oep->engr_txt[0]) {
+					type = (xchar)0;	/* random */
+					(void) random_engraving(buf);
+			    }
+				if(oep->ward_id){
+					randWard = rn2(10) ? 1 : rn2(10) ? randHaluWard() : 0;
+					if(!randWard){
+						randWard = rn2(NUMBER_OF_WARDS)+1;
+						randHalu = FALSE;
+					}
+					else randHalu = TRUE;
+				}
+			    dengr = TRUE;
+			}
+			break;
+		    case WAN_DRAINING:	/* KMH */
+			if (oep) {
+			    /*
+			     * [ALI] Wand of draining give messages like
+			     * either polymorph or cancellation/make
+			     * invisible depending on whether the
+			     * old engraving is completely wiped or not.
+			     * Note: Blindness has slightly different
+			     * effect than with wand of polymorph.
+			     */
+			    u_wipe_engr(5);
+			    oep = engr_at(u.ux,u.uy);
+			    if (!Blind) {
+				if (!oep)
+				    pline_The("engraving on the %s vanishes!",
+				      surface(u.ux,u.uy));
+				else {
+				    strcpy(buf, oep->engr_txt);
+				    dengr = TRUE;
+				}
+			    }
+			}
+			break;
+		    case WAN_NOTHING:
+		    case WAN_UNDEAD_TURNING:
+		    case WAN_OPENING:
+		    case WAN_LOCKING:
+		    case WAN_PROBING:
+			break;
+
+			/* RAY wands */
+		    case WAN_MAGIC_MISSILE:
+			ptext = TRUE;
+			if (!Blind) {
+			   Sprintf(post_engr_text,
+				  	"The %s is riddled by bullet holes!",
+				   surface(u.ux, u.uy));
+			}
+			break;
+
+		    /* can't tell sleep from death - Eric Backus */
+		    case WAN_SLEEP:
+		    case WAN_DEATH:
+			if (!Blind) {
+			   Sprintf(post_engr_text,
+				  	"The bugs on the %s stop moving!",
+				   surface(u.ux, u.uy));
+			}
+			break;
+
+		    case WAN_COLD:
+			if (!Blind)
+			    Strcpy(post_engr_text,
+				"A few ice cubes drop from the wand.");
+			if(!oep || (oep->engr_type != BURN))
+			    break;
+		    case WAN_CANCELLATION:
+		    case WAN_MAKE_INVISIBLE:
+			if (oep && oep->engr_type != HEADSTONE) {
+			    if (!Blind)
+				pline_The("engraving on the %s vanishes!",
+					surface(u.ux,u.uy));
+			    dengr = TRUE;
+			}
+			break;
+		    case WAN_TELEPORTATION:
+			if (oep && oep->engr_type != HEADSTONE) {
+			    if (!Blind)
+				pline_The("engraving on the %s vanishes!",
+					surface(u.ux,u.uy));
+			    teleengr = TRUE;
+			}
+			break;
+
+		    /* type = ENGRAVE wands */
+		    case WAN_DIGGING:
+			ptext = TRUE;
+			type  = ENGRAVE;
+			if(!objects[otmp->otyp].oc_name_known) {
+			    if (flags.verbose)
+				pline("This %s is a wand of digging!",
+				xname(otmp));
+			    doknown = TRUE;
+			}
+			if (!Blind)
+			    Strcpy(post_engr_text,
+				IS_GRAVE(levl[u.ux][u.uy].typ) ?
+				"Chips fly out from the headstone." :
+				is_ice(u.ux,u.uy) ?
+				"Ice chips fly up from the ice surface!" :
+				"Gravel flies up from the floor.");
+			else
+			    Strcpy(post_engr_text,	"You hear drilling!");
+			break;
+
+		    /* type = BURN wands */
+		    case WAN_FIRE:
+			ptext = TRUE;
+			type  = BURN;
+			if(!objects[otmp->otyp].oc_name_known) {
+			if (flags.verbose)
+			    pline("This %s is a wand of fire!", xname(otmp));
+			    doknown = TRUE;
+			}
+			Strcpy(post_engr_text,
+				Blind ?	"You feel the wand heat up." :
+					"Flames fly from the wand.");
+			break;
+		    case WAN_LIGHTNING:
+			ptext = TRUE;
+			type  = BURN;
+			if(!objects[otmp->otyp].oc_name_known) {
+			    if (flags.verbose)
+				pline("This %s is a wand of lightning!",
+					xname(otmp));
+			    doknown = TRUE;
+			}
+			if (!Blind) {
+			    Strcpy(post_engr_text,
+				   	"Lightning arcs from the wand.");
+			    doblind = TRUE;
+			} else
+			    Strcpy(post_engr_text,	"You hear crackling!");
+			break;
+
+		    /* type = MARK wands */
+		    /* type = ENGR_BLOOD wands */
+		    }
+		} else /* end if zappable */
+		    if (!can_reach_floor()) {
+			You_cant("reach the %s!", surface(u.ux,u.uy));
+			return(0);
+		    }
+		break;
+
+	    case WEAPON_CLASS:
+				if (is_lightsaber(otmp)) {
+			if (otmp->lamplit) type = BURN;
+			else Your("%s is deactivated!", aobjnam(otmp,"are"));
+		} else if (is_blade(otmp)) {
+		    if ((int)otmp->spe > -3)
+			type = ENGRAVE;
+		    else
+			Your("%s too dull for drawing.", aobjnam(otmp,"are"));
+		}
+		break;
+
+	    case TOOL_CLASS:
+		if(otmp == ublindf) {
+		    pline(
+		"That is a bit difficult to draw with, don't you think?");
+		    return(0);
+		}
+		switch (otmp->otyp)  {
+		    case MAGIC_MARKER:
+			if (otmp->spe <= 0)
+			    Your("marker has dried out.");
+			else
+			    type = MARK;
+			break;
+		    case TOWEL:
+			/* Can't really engrave with a towel */
+			ptext = FALSE;
+			if (oep)
+			    if ((oep->engr_type == DUST ) ||
+				(oep->engr_type == ENGR_BLOOD) ||
+				(oep->engr_type == MARK )) {
+				if (!Blind)
+				    You("wipe out the message here.");
+				else
+				    Your("%s %s %s.", xname(otmp),
+					 otense(otmp,	"get"),
+					 is_ice(u.ux,u.uy) ?
+						"frosty" :	"dusty");
+				dengr = TRUE;
+			    } else
+				Your("%s can't wipe out this engraving.",
+				     xname(otmp));
+			else{
+			    Your("%s %s %s.", xname(otmp), otense(otmp,	"get"),
+				  is_ice(u.ux,u.uy) ?	"frosty" :	"dusty");
+			}
+			break;
+		    default:
+				if(spec_ability3(otmp, SPFX3_ENGRV)) type = ENGRAVE;
+			break;
+		}
+		break;
+
+	    case VENOM_CLASS:
+#ifdef WIZARD
+		if (wizard) {
+		    pline("Writing a poison pen letter??");
+		    break;
+		}
+#endif
+	    case ILLOBJ_CLASS:
+		impossible("You're drawing with an illegal object!");
+		break;
+	}
+/*
+	if (IS_GRAVE(levl[u.ux][u.uy].typ)) {
+	    if (type == ENGRAVE || type == 0)
+		type = HEADSTONE;
+	    else {
+		// ensures the	"cannot wipe out" case 
+		type = DUST;
+		dengr = FALSE;
+		teleengr = FALSE;
+		buf[0] = (char)0;
+	    }
+	}
+*/
+	/* End of implement setup */
+
+	/* Identify stylus */
+	if (doknown) {
+	    makeknown(otmp->otyp);
+	    more_experienced(0,10);
+	}
+
+	if (teleengr) {
+	    rloc_engr(oep);
+	    oep = (struct engr *)0;
+	}
+
+	if (dengr) {
+	    del_engr_ward(oep);
+	    oep = (struct engr *)0;
+	}
+
+	/* Something has changed the engraving here */
+	if (*buf || randWard) {
+		if(*buf){
+			make_engr_at(u.ux, u.uy, buf, moves, type);
+			oep = engr_at(u.ux,u.uy);
+		}
+		if(randWard){
+			oep = engr_at(u.ux,u.uy);
+			if(!oep){
+				make_engr_at(u.ux, u.uy,	"", moves, DUST);
+				oep = engr_at(u.ux,u.uy);
+			}
+			oep->ward_id = randWard;
+			oep->halu_ward = randHalu;
+			oep->ward_type = rnd(N_ENGRAVE-1);
+			oep->complete_wards = 1;
+		}
+	    if(!Blind){ 
+			/*pline_The("engraving now reads: \"%s\".", buf);*/
+			pline_The("engraving here has changed.");
+			read_engr_at(u.ux,u.uy);
+		}
+	    ptext = FALSE;
+	}
+
+	if (zapwand && (otmp->spe < 0)) {
+	    pline("%s %sturns to dust.",
+		  The(xname(otmp)), Blind ?	"" :	"glows violently, then	");
+	    if (!IS_GRAVE(levl[u.ux][u.uy].typ))
+		You("are not going to get anywhere trying to draw in the %s with your dust.",
+		    is_ice(u.ux,u.uy) ?	"frost" :	"dust");
+	    useup(otmp);
+	    ptext = FALSE;
+	}
+
+	if (!ptext) {		/* Early exit for some implements. */
+	    if (otmp->oclass == WAND_CLASS && !can_reach_floor())
+			You_cant("reach the %s!", surface(u.ux,u.uy));
+	    return(1);
+	}
+
+	/* Special effects should have deleted the current engraving (if
+	 * possible) by now.
+	 */
+	if (oep && oep->ward_id) {
+		if( (oep->ward_type == DUST) || (oep->ward_type == ENGR_BLOOD) ||
+			(oep->ward_type == MARK) ) {
+			if (!Blind) {
+			You("wipe out the drawing that was %s here.",
+				((oep->ward_type == DUST)  ?	"drawn in the dust" :
+				((oep->ward_type == ENGR_BLOOD) ?	"painted in blood"   :
+								"drawn")));
+			del_ward(oep);
+			oep = engr_at(u.ux,u.uy);
+			} else
+		   /* Don't delete engr until after we *know* we're engraving */
+			eow = TRUE;
+		} else{
+			if ( (type == DUST) || (type == MARK) || (type == ENGR_BLOOD) ) {
+			You(
+				"cannot wipe out the drawing that is %s the %s here.",
+			 oep->ward_type == BURN ?
+			   (is_ice(u.ux,u.uy) ?	"melted into" :	"burned into") :
+			  	"engraved in", surface(u.ux,u.uy));
+			return(1);
+			} else
+			if ( (type != oep->ward_type) ) {
+				if (!Blind || can_reach_floor())
+				You("will replace the current drawing.");
+				eow = TRUE;
+			}
+		}
+	}
+
+	eloc = surface(u.ux,u.uy);
+	switch(type){
+	    default:
+		everb = (oep && !eow ?	"add to the weird drawing on" :
+				      	"draw strangely on");
+		break;
+	    case DUST:
+		everb = (oep && !eow ?	"add to the drawing in" :
+				      	"draw in");
+		eloc = is_ice(u.ux,u.uy) ?	"frost" :	"dust";
+		break;
+	    case HEADSTONE:
+		everb = (oep && !eow ?	"add to the drawing on" :
+				      	"draw on");
+		break;
+	    case ENGRAVE:
+		everb = (oep && !eow ?	"add to the drawing in" :
+				      	"draw in");
+		break;
+	    case BURN:
+		everb = (oep && !eow ?
+			( is_ice(u.ux,u.uy) ?	"add to the drawing melted into" :
+					     	"add to the drawing burned into") :
+			( is_ice(u.ux,u.uy) ?	"melt into" :	"burn into"));
+		break;
+	    case MARK:
+		everb = (oep && !eow ?	"add to the graffiti on" :
+				      	"draw on");
+		break;
+	    case ENGR_BLOOD:
+		everb = (oep && !eow ?	"add to the drawing on" :
+				      	"draw on");
+		break;
+	}
+
+	/* Tell adventurer what is going on */
+	if (otmp != &zeroobj)
+	    You("%s the %s with %s.", everb, eloc, doname(otmp));
+	else
+	    You("%s the %s with your %s.", everb, eloc,
+		makeplural(body_part(FINGER)));
+
+	/* Prompt for engraving! */
+	if(!len){
+		ward = pick_seal();
+		len = 5;//seals are always 5.
+	}
+	if (ward == 0 || index(ebuf, '\033')) {
+	    if (zapwand) {
+		if (!Blind)
+		    pline("%s, then %s.",
+			  Tobjnam(otmp, "glow"), otense(otmp, "fade"));
+		return(1);
+	    } else {
+		pline(Never_mind);
+		return(0);
+	    }
+	}
+	if (eow) {
+		del_ward(oep);
+		oep = engr_at(u.ux,u.uy);
+	}
+	switch(type){
+	    default:
+		multi = -(len/10);
+			if (multi) nomovemsg =	"You finish your weird drawing.";
+		break;
+	    case DUST:
+		multi = -(len/10);
+			if (multi) nomovemsg =	"You finish drawing in the dust.";
 		break;
 	    case HEADSTONE:
 	    case ENGRAVE:
 		multi = -(len/10);
-		if ((otmp->oclass == WEAPON_CLASS) &&
-		    ((otmp->otyp != ATHAME) || otmp->cursed)) {
+			if ((otmp->oclass == WEAPON_CLASS || spec_ability3(otmp, SPFX3_ENGRV)) &&
+				((otmp->otyp != ATHAME && !spec_ability3(otmp, SPFX3_ENGRV)) || otmp->cursed)) {
 		    multi = -len;
 		    maxelen = ((otmp->spe + 3) * 2) + 1;
 			/* -2 = 3, -1 = 5, 0 = 7, +1 = 9, +2 = 11
-			 * Note: this does not allow a +0 anything (except
-			 *	 an athame) to engrave "Elbereth" all at once.
-			 *	 However, you could now engrave "Elb", then
-			 *	 "ere", then "th".
 			 */
 		    Your("%s dull.", aobjnam(otmp, "get"));
 		    if (otmp->unpaid) {
@@ -1068,18 +3839,43 @@ doengrave()
 		    } else if (len > 1)
 			otmp->spe -= len >> 1;
 		    else otmp->spe -= 1; /* Prevent infinite engraving */
-		} else
-		    if ( (otmp->oclass == RING_CLASS) ||
-			 (otmp->oclass == GEM_CLASS) )
-			multi = -len;
-		if (multi) nomovemsg = "You finish engraving.";
+			} else if ( (otmp->oclass == RING_CLASS) ||
+				 (otmp->oclass == GEM_CLASS) ) multi = -len;
+			else if(otmp->oclass == WAND_CLASS){
+				multi = -(len/10);
+				maxelen = otmp->spe*10;
+				if(multi < -1*otmp->spe){
+					multi = -(otmp->spe);
+					otmp->spe = 0;
+					nomovemsg = is_ice(u.ux,u.uy) ?
+					"You fail to finish blasting your drawing into the ice before running out of charges!":
+					"You fail to finish blasting your drawing into the floor before running out of charges!";
+				}
+				else if (multi){
+					otmp->spe += multi; /* multi is already negative*/
+					nomovemsg = is_ice(u.ux,u.uy) ?
+					"You finish blasting your drawing into the ice.":
+					"You finish blasting your drawing into the floor.";
+				}
+			}
+			if (multi && !nomovemsg) nomovemsg =	"You finish drawing.";
 		break;
 	    case BURN:
 		multi = -(len/10);
-		if (multi)
+			maxelen = otmp->spe*10;
+			if(multi < -1*otmp->spe){
+				multi = -(otmp->spe);
+				otmp->spe = 0;
+				nomovemsg = is_ice(u.ux,u.uy) ?
+				"You fail to finish melting your drawing into the ice before running out of charges!":
+				"You fail to finish burning your drawing into the floor before running out of charges!";
+			}
+			else if (multi){
+				otmp->spe += multi; /* multi is already negative*/
 		    nomovemsg = is_ice(u.ux,u.uy) ?
-			"You finish melting your message into the ice.":
-			"You finish burning your message into the floor.";
+				"You finish melting your drawing into the ice.":
+				"You finish burning your drawing into the floor.";
+			}
 		break;
 	    case MARK:
 		multi = -(len/10);
@@ -1103,22 +3899,55 @@ doengrave()
 	}
 
 	/* Chop engraving down to size if necessary */
+	/* BETA: engraving fails if too long */
 	if (len > maxelen) {
 	    for (sp = ebuf; (maxelen && *sp); sp++)
 		if (!isspace(*sp)) maxelen--;
 	    if (!maxelen && *sp) {
 		*sp = (char)0;
-		if (multi) nomovemsg = "You cannot write any more.";
-		You("only are able to write \"%s\"", ebuf);
+		if (multi) nomovemsg =	"Unfortunatly, you can't complete the symbol.";
+		You("can't complete the symbol.", ebuf);
 	    }
 	}
-
-	/* Add to existing engraving */
-	if (oep) Strcpy(buf, oep->engr_txt);
-
-	(void) strncat(buf, ebuf, (BUFSZ - (int)strlen(buf) - 1));
-
-	make_engr_at(u.ux, u.uy, buf, (moves - multi), type);
+	else if (oep && oep->ward_id){
+		oep->complete_wards = 1;
+	}
+	else if(oep){
+		if(!Hallucination || !rn2(4)){
+			oep->ward_id = ward;
+			oep->ward_type = type;
+			oep->complete_wards = 1;
+		}
+		else{
+			oep->ward_id = rn2(4) ? 1 : rn2(100) ? randHaluWard() : 0;
+			if(!oep->ward_id){
+				oep->ward_id = rn2(NUMBER_OF_WARDS)+1;
+				oep->halu_ward = FALSE;
+			}
+			else oep->halu_ward = TRUE;
+			oep->ward_type = type;
+			oep->complete_wards = 1;
+		}
+	}
+	else{
+		make_engr_at(u.ux, u.uy,	"", (moves - multi), DUST); /* absense of text =  dust */
+		oep = engr_at(u.ux,u.uy);
+		if(!Hallucination){
+			oep->ward_id = ward;
+			oep->ward_type = type;
+			oep->complete_wards = 1;
+		}
+		else{
+			oep->ward_id = rn2(4) ? 1 : rn2(100) ? randHaluWard() : 0;
+			if(!oep->ward_id){
+				oep->ward_id = rn2(NUMBER_OF_WARDS)+1;
+				oep->halu_ward = FALSE;
+			}
+			else oep->halu_ward = TRUE;
+			oep->ward_type = type;
+			oep->complete_wards = 1;
+	    }
+	}
 
 	if (post_engr_text[0]) pline(post_engr_text);
 
@@ -1131,6 +3960,384 @@ doengrave()
 	return(1);
 }
 
+int
+pick_seal()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+	
+	Sprintf(buf,	"Known Seals");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	if(u.sealsKnown & SEAL_AHAZU){
+		Sprintf(buf,	"Ahazu, the Siezer");
+		any.a_int = AHAZU;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_AMON){
+		Sprintf(buf,	"Amon, the shadow before the altar");
+		any.a_int = AMON;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_ANDREALPHUS){
+		Sprintf(buf,	"Andrealphus, Marquis of Angles");
+		any.a_int = ANDREALPHUS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_ANDROMALIUS){
+		Sprintf(buf,	"Andromalius, the Repentent Rogue");
+		any.a_int = ANDROMALIUS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_ASTAROTH){
+		Sprintf(buf,	"Astaroth, the Broken Clockmaker");
+		any.a_int = ASTAROTH;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_BALAM){
+		Sprintf(buf,	"Balam, the Last Sacrifice");
+		any.a_int = BALAM;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_BERITH){
+		Sprintf(buf,	"Berith, the Red Horseman");
+		any.a_int = BERITH;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_BUER){
+		Sprintf(buf,	"Buer, who walks all places");
+		any.a_int = BUER;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_CHUPOCLOPS){
+		Sprintf(buf,	"Chupoclops, Hopetrapper");
+		any.a_int = CHUPOCLOPS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_DANTALION){
+		Sprintf(buf,	"Dantalion, the Star Emperor");
+		any.a_int = DANTALION;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_DUNSTAN){
+		Sprintf(buf,	"Dunstan, the stone man");
+		any.a_int = DUNSTAN;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_ECHIDNA){
+		Sprintf(buf,	"Echidna, Mother of Monsters");
+		any.a_int = ECHIDNA;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_EDEN){
+		Sprintf(buf,	"Eden, the First Garden");
+		any.a_int = EDEN;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_ERIDU){
+		Sprintf(buf,	"Eridu, the First City");
+		any.a_int = ERIDU;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_EURYNOME){
+		Sprintf(buf,	"Eurynome, lonely dancer");
+		any.a_int = EURYNOME;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_EVE){
+		Sprintf(buf,	"Eve, the first Sinner");
+		any.a_int = EVE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_FAFNIR){
+		Sprintf(buf,	"Fafnir, Dwarf-dragon");
+		any.a_int = FAFNIR;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_HUGINN_MUNINN){
+		Sprintf(buf,	"Huginn and Muninn, Thought and Memory");
+		any.a_int = HUGINN_MUNINN;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_IRIS){
+		Sprintf(buf,	"Iris, Friend from Afar");
+		any.a_int = IRIS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_JACK){
+		Sprintf(buf,	"Jack of the Lantern");
+		any.a_int = JACK;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_MALPHAS){
+		Sprintf(buf,	"Malphas, the Prince of Crows");
+		any.a_int = MALPHAS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_MARIONETTE){
+		Sprintf(buf,	"Marionette, Puppet of Screams");
+		any.a_int = MARIONETTE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_MOTHER){
+		Sprintf(buf,	"Mother, who beheld Beauty");
+		any.a_int = MOTHER;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_NABERIUS){
+		Sprintf(buf,	"Naberius, mysterious councilor");
+		any.a_int = NABERIUS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_ORTHOS){
+		Sprintf(buf,	"Orthos, Sovereign of the Howling Dark");
+		any.a_int = ORTHOS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_OSE){
+		Sprintf(buf,	"Ose, dreamer in a drowned city");
+		any.a_int = OSE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_OTIAX){
+		Sprintf(buf,	"Otiax, the Key to the Gate");
+		any.a_int = OTIAX;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_PAIMON){
+		Sprintf(buf,	"Paimon, the Fell Archivist");
+		any.a_int = PAIMON;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_SIMURGH){
+		Sprintf(buf,	"Simurgh, who roosts on the Tree of Life");
+		any.a_int = SIMURGH;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_TENEBROUS){
+		Sprintf(buf,	"Tenebrous, the Demonic Shadow");
+		any.a_int = TENEBROUS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(u.sealsKnown & SEAL_YMIR){
+		Sprintf(buf,	"Ymir, Lord of the Grassless Gap");
+		any.a_int = YMIR;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(Role_if(PM_EXILE) && quest_status.got_quest){
+		Sprintf(buf,	"Dahlver-Nar, the first Binder");
+		any.a_int = DAHLVER_NAR;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(Role_if(PM_EXILE) && quest_status.killed_nemesis){
+		Sprintf(buf,	"Acererak, the Demi-Lich");
+		any.a_int = ACERERAK;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(Role_if(PM_EXILE) && u.ulevel == 30){
+		Sprintf(buf,	"Numina, The Whispering Multitude");
+		any.a_int = NUMINA;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	end_menu(tmpwin,	"Choose seal:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return ( n > 0 ) ? selected[0].item.a_int : 0;
+}
+
+int
+decode_sealID(sealID)
+int sealID;
+{
+	switch(sealID){
+		case WARD_HEPTAGRAM: return HEPTAGRAM;
+		break;
+		case WARD_GORGONEION: return GORGONEION;
+		break;
+		case WARD_ACHERON: return CIRCLE_OF_ACHERON;
+		break;
+		case WARD_PENTAGRAM: return PENTAGRAM;
+		break;
+		case WARD_HEXAGRAM: return HEXAGRAM;
+		break;
+		case WARD_HAMSA: return HAMSA;
+		break;
+		case WARD_ELDER_SIGN: return ELDER_SIGN;
+		break;
+		case WARD_EYE: return ELDER_ELEMENTAL_EYE;
+		break;
+		case WARD_QUEEN: return SIGN_OF_THE_SCION_QUEEN;
+		break;
+		case WARD_CAT_LORD: return CARTOUCHE_OF_THE_CAT_LORD;
+		break;
+		case WARD_GARUDA: return WINGS_OF_GARUDA;
+		break;
+		case WARD_CTHUGHA: return SIGIL_OF_CTHUGHA;
+		break;
+		case WARD_ITHAQUA: return BRAND_OF_ITHAQUA;
+		break;
+		case WARD_KRAKAL: return TRACERY_OF_KRAKAL;
+		break;
+		case WARD_YELLOW: return YELLOW_SIGN;
+		break;
+		default:
+		return 0;
+		break;
+	}
+}
+
+int
+get_sealID(floorID)
+int floorID;
+{
+	switch(floorID){
+		case HEPTAGRAM: return WARD_HEPTAGRAM;
+		break;
+		case GORGONEION: return WARD_GORGONEION;
+		break;
+		case CIRCLE_OF_ACHERON: return WARD_ACHERON;
+		break;
+		case PENTAGRAM: return WARD_PENTAGRAM;
+		break;
+		case HEXAGRAM: return WARD_HEXAGRAM;
+		break;
+		case HAMSA: return WARD_HAMSA;
+		break;
+		case ELDER_SIGN: return WARD_ELDER_SIGN;
+		break;
+		case ELDER_ELEMENTAL_EYE: return WARD_EYE;
+		break;
+		case SIGN_OF_THE_SCION_QUEEN: return WARD_QUEEN;
+		break;
+		case CARTOUCHE_OF_THE_CAT_LORD: return WARD_CAT_LORD;
+		break;
+		case WINGS_OF_GARUDA: return WARD_GARUDA;
+		break;
+		case SIGIL_OF_CTHUGHA: return WARD_CTHUGHA;
+		break;
+		case BRAND_OF_ITHAQUA: return WARD_ITHAQUA;
+		break;
+		case TRACERY_OF_KRAKAL: return WARD_KRAKAL;
+		break;
+		case YELLOW_SIGN: return WARD_YELLOW;
+		break;
+		default:
+		return 0;
+		break;
+	}
+}
+
 void
 save_engravings(fd, mode)
 int fd, mode;
@@ -1141,7 +4348,7 @@ int fd, mode;
 
 	while (ep) {
 	    ep2 = ep->nxt_engr;
-	    if (ep->engr_lth && ep->engr_txt[0] && perform_bwrite(mode)) {
+	    if (((ep->engr_lth && ep->engr_txt[0]) || ep->ward_id) && perform_bwrite(mode)) {
 		bwrite(fd, (genericptr_t)&(ep->engr_lth), sizeof(ep->engr_lth));
 		bwrite(fd, (genericptr_t)ep, sizeof(struct engr) + ep->engr_lth);
 	    }
@@ -1179,7 +4386,7 @@ int fd;
 }
 
 void
-del_engr(ep)
+del_engr_ward(ep)
 register struct engr *ep;
 {
 	if (ep == head_engr) {
@@ -1193,13 +4400,62 @@ register struct engr *ep;
 			break;
 		    }
 		if (!ept) {
-		    impossible("Error in del_engr?");
+		    impossible("Error in del_engr_ward?");
 		    return;
 		}
 	}
 	dealloc_engr(ep);
 }
 
+void
+del_engr(ep)
+register struct engr *ep;
+{
+	if(!ep->ward_id) del_engr_ward(ep);
+	else make_engr_at(ep->engr_x,ep->engr_y,"",moves,DUST);
+}
+
+void
+del_ward(ep)
+register struct engr *ep;
+{
+	if(!ep->engr_txt[0]) del_engr_ward(ep);
+	else{
+		ep->ward_type = 0;
+		ep->ward_id = 0;
+		ep->halu_ward = FALSE;
+		ep->complete_wards = 0;
+		ep->scuffed_wards = 0;
+		ep->degraded_wards = 0;
+		ep->partial_wards = 0;
+	}
+}
+
+void
+blank_all_wards()
+{
+	struct engr *ep = head_engr, *np;
+	
+	while(ep) {
+		np = ep->nxt_engr;
+		del_ward(ep);
+		ep = np;
+	}
+}
+
+void
+randomize_all_wards()
+{
+	struct engr *ep = head_engr;
+	
+	while(ep) {
+		if(ep->ward_id){
+			ep->halu_ward = TRUE;
+			ep->ward_id = random_haluIndex();
+		}
+		ep = ep->nxt_engr;
+	}
+}
 /* randomly relocate an engraving */
 void
 rloc_engr(ep)
@@ -1632,7 +4888,7 @@ const char *str;
 
 	/* Engrave the headstone */
 	if (!str) str = epitaphs[rn2(SIZE(epitaphs))];
-	del_engr_at(x, y);
+	del_engr_ward_at(x, y);
 	make_engr_at(x, y, str, 0L, HEADSTONE);
 	return;
 }

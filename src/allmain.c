@@ -94,9 +94,15 @@ moveloop()
 #if defined(MICRO) || defined(WIN32)
     char ch;
     int abort_lev;
+	struct obj *pobj;
 #endif
     int moveamt = 0, wtcap = 0, change = 0;
     boolean didmove = FALSE, monscanmove = FALSE;
+    /* don't make it obvious when monsters will start speeding up */
+    int monclock;
+    int timeout_start = rnd(10000)+25000;
+    int clock_base = 80000L-timeout_start;
+    int past_clock;
 
     flags.moonphase = phase_of_the_moon();
     if(flags.moonphase == FULL_MOON) {
@@ -123,6 +129,9 @@ moveloop()
     objects_init();
 
     commands_init();
+#ifdef WIZARD
+    if (wizard) add_debug_extended_commands();
+#endif
 
     (void) encumber_msg(); /* in case they auto-picked up something */
 
@@ -159,12 +168,76 @@ moveloop()
 		    mcalcdistress();	/* adjust monsters' trap, blind, etc */
 
 		    /* reallocate movement rations to monsters */
-		    for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
+		    for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 			mtmp->movement += mcalcmove(mtmp);
+				if(mtmp->data == &mons[PM_GREAT_CTHULHU]) mtmp->mspec_used = 0;
+				if(is_weeping(mtmp->data)) mtmp->mspec_used = 0;
+			}
+			 /* Vanilla generates a critter every 70-ish turns.
+			  * The rate accelerates to every 50 or so below the Castle,
+			  * and 'round every 25 turns once you've done the Invocation.
+			  *
+			  * We will push it even further.  Monsters post-Invocation
+			  * will almost always appear on the stairs (if present), and 
+			  * much more frequently; this, along with the extra intervene()
+			  * calls, should certainly make it seem like you're wading back
+			  * through the teeming hordes.
+			  *
+			  * Aside from that, a more general clock should be put on things;
+			  * after about 30,000 turns, the frequency rate of appearance
+			  * and (TODO) difficulty of monsters generated will slowly increase until
+			  * it reaches the point it will be at as if you were post-Invocation.
+			  *
+			  * 80,000 turns should be adequate as a target mark for this effect;
+			  * if you haven't ascended in 80,000 turns, you're intentionally
+			  * fiddling around somewhere and will certainly be strong enough
+			  * to handle anything that comes your way, so this won't be 
+			  * dropping newbies off the edge of the planet.  -- DSR 12/2/07
+			  */
+			monclock = 70;
+			if (u.uevent.udemigod) {
+				monclock = 10;
+			} else {
+				if (depth(&u.uz) > depth(&stronghold_level)) {
+					monclock = 50;
+				}
+				past_clock = moves - timeout_start;
+				if (past_clock > 0) {
+					monclock -= past_clock*60/clock_base;
+				}
+			}
+			/* make sure we don't fall off the bottom */
+			if (monclock < 10) { monclock = 10; }
 
-		    if(!rn2(u.uevent.udemigod ? 25 :
-			    (depth(&u.uz) > depth(&stronghold_level)) ? 50 : 70))
+			/* TODO: adj difficulty in makemon */
+			if (!rn2(monclock)) {
+				if (u.uevent.udemigod && xupstair && rn2(10)) {
+					(void) makemon((struct permonst *)0, xupstair, yupstair, MM_ADJACENTOK);
+				} else {
 			(void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
+				}
+			}
+			//If the player no longer meets the kusanagi's requirements (ie, they lost the amulet,
+			//blast 'em and drop to the ground.
+			if (uwep && uwep->oartifact == ART_KUSANAGI_NO_TSURUGI){
+				if(!touch_artifact(uwep,&youmonst)){
+					dropx(uwep);
+				}
+			}
+			if(uwep && uwep->oartifact == ART_ATMA_WEAPON &&
+				uwep->cursed && 
+				uwep->lamplit
+			){
+				if (!Drain_resistance) {
+					pline("%s for a moment, then %s brightly.",
+					  Tobjnam(uwep, "flicker"), otense(uwep, "burn"));
+					losexp("life force drain",TRUE,TRUE,TRUE);
+					uwep->cursed = FALSE;
+				}
+			}
+
+		    /* reset summon monster block. */
+			if(u.summonMonster) u.summonMonster = FALSE;
 
 		    /* calculate how much time passed. */
 #ifdef STEED
@@ -184,6 +257,28 @@ moveloop()
 			    /* average movement is 1.33 times normal */
 			    if (rn2(3) != 0) moveamt += NORMAL_SPEED / 2;
 			}
+			
+			if (uwep && uwep->oartifact == ART_GARNET_ROD) moveamt += NORMAL_SPEED / 2;
+			if (uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
+				moveamt += NORMAL_SPEED;
+				if(!is_undead(youmonst.data) && u.ZangetsuSafe-- < 1){
+					losehp(5, "inadvisable haste", KILLED_BY);
+					if (Upolyd) {
+						if(u.mhmax > u.ulevel && moves % 2) u.mhmax--;
+						if (u.mh > u.mhmax) u.mh = u.mhmax;
+					}
+					else{
+						if(u.uhpmax > u.ulevel && moves % 2) u.uhpmax--;
+						if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
+					}
+//					if( !(moves % 5) )
+					You_feel("your %s %s!", 
+						body_part(BONES), rnd(6) ? body_part(CREAK) : body_part(CRACK));
+					exercise(A_CON, FALSE);
+					exercise(A_STR, FALSE);
+				}
+			}
+			else if(u.ZangetsuSafe < u.ulevel) u.ZangetsuSafe++;
 		    }
 
 		    switch (wtcap) {
@@ -196,7 +291,8 @@ moveloop()
 		    }
 
 		    youmonst.movement += moveamt;
-		    if (youmonst.movement < 0) youmonst.movement = 0;
+			//floor how far into movement-debt you can fall.
+		    if (youmonst.movement < -2*NORMAL_SPEED) youmonst.movement = -2*NORMAL_SPEED;
 		    settrack();
 
 		    monstermoves++;
@@ -216,10 +312,23 @@ moveloop()
 			flags.botl = 1;
 
 		    if ((prev_dgl_extrainfo == 0) || (prev_dgl_extrainfo < (moves + 250))) {
-			prev_dgl_extrainfo = moves;
-			mk_dgl_extrainfo();
+				prev_dgl_extrainfo = moves;
+				mk_dgl_extrainfo();
 		    }
-
+			if(u.ukinghill){
+				if(u.protean > 0) u.protean--;
+				else{
+					for(pobj = invent; pobj; pobj=pobj->nobj)
+						if(pobj->oartifact == ART_TREASURY_OF_PROTEUS)
+							break;
+					if(!pobj) pline("Treasury not actually in inventory??");
+					else if(pobj->cobj){
+						arti_poly_contents(pobj);
+					}
+					u.protean = rnz(100)+d(3,10);
+					update_inventory();
+				}
+			}
 
 		    /* One possible result of prayer is healing.  Whether or
 		     * not you get healed depends on your current hit points.
@@ -462,7 +571,7 @@ moveloop()
 	if ((u.uhave.amulet || Clairvoyant) &&
 	    !In_endgame(&u.uz) && !BClairvoyant &&
 	    !(moves % 15) && !rn2(2))
-		do_vicinity_map();
+		do_vicinity_map(u.ux,u.uy);
 
 #ifdef WIZARD
 	if (iflags.sanity_check)
@@ -621,10 +730,27 @@ newgame()
 	if(MON_AT(u.ux, u.uy)) mnexto(m_at(u.ux, u.uy));
 	(void) makedog();
 	docrt();
+#ifdef CONVICT
+       if (Role_if(PM_CONVICT)) {
+              setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
+              setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
+              uball->spe = 1;
+              placebc();
+              newsym(u.ux,u.uy);
+       }
+#endif /* CONVICT */
 
 	if (flags.legacy) {
 		flush_screen(1);
+#ifdef CONVICT
+        if (Role_if(PM_CONVICT)) {
+		    com_pager(199);
+        } else {
 		com_pager(1);
+	}
+#else
+		com_pager(1);
+#endif /* CONVICT */
 	}
 
 #ifdef INSURANCE

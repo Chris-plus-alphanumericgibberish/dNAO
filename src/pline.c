@@ -131,6 +131,9 @@ pline VA_DECL(const char *, line)
 	    Vsprintf(pbuf,line,VA_ARGS);
 	    line = pbuf;
 	}
+	if(Role_if(PM_PIRATE)){/*Ben Collver's fixes*/
+		line = piratesay(line);
+	}
 #if defined(DUMP_LOG) && defined(DUMPMSGS)
 	if (DUMPMSGS > 0 && !program_state.gameover) {
 	  lastmsg = (lastmsg + 1) % DUMPMSGS;
@@ -348,10 +351,48 @@ impossible VA_DECL(const char *, s)
 	VA_END();
 }
 
+const char * const hallu_alignments[] = {
+	"radishes",
+	"binary",
+	
+	"evil",
+	"really evil",
+	"omnicidal",
+	"mad",
+	"crazy",
+	"loud",
+	"hungry",
+	"greedy",
+	
+	"cuddly",
+	"funky",
+	"chilly",
+	"relaxed",
+	"drunk",
+	"curious",
+	"bi-curious",
+	"magnificent",
+	"cool",
+	
+	"currently not available",
+	"gone swimming",
+	"not listening",
+	"smashing things",
+	"thinking",
+
+	"yellow",
+	"purple",
+	"orange",
+	"blue"
+};
+
 const char *
 align_str(alignment)
     aligntyp alignment;
 {
+	if (Hallucination) {
+		return hallu_alignments[rn2(SIZE(hallu_alignments))];
+	}
     switch ((int)alignment) {
 	case A_CHAOTIC: return "chaotic";
 	case A_NEUTRAL: return "neutral";
@@ -390,9 +431,11 @@ register struct monst *mtmp;
 #endif
 	}
 	else if (mtmp->mpeaceful) Strcat(info, ", peaceful");
+	else if (mtmp->mtraitor)  Strcat(info, ", traitor");
 	if (mtmp->meating)	  Strcat(info, ", eating");
 	if (mtmp->mcan)		  Strcat(info, ", cancelled");
 	if (mtmp->mconf)	  Strcat(info, ", confused");
+	if (mtmp->mcrazed)	  Strcat(info, ", crazed");
 	if (mtmp->mblinded || !mtmp->mcansee)
 				  Strcat(info, ", blind");
 	if (mtmp->mstun)	  Strcat(info, ", stunned");
@@ -516,11 +559,78 @@ ustatusline()
 void
 self_invis_message()
 {
+	if(Role_if(PM_PIRATE)){
+	pline("%s %s.",
+	    Hallucination ? "Arr, Matey!  Ye" : "Avast!  All of a sudden, ye",
+	    See_invisible ? "can see right through yerself" :
+		"can't see yerself");
+	}
+	else{
 	pline("%s %s.",
 	    Hallucination ? "Far out, man!  You" : "Gee!  All of a sudden, you",
 	    See_invisible ? "can see right through yourself" :
 		"can't see yourself");
+	}
 }
 
+char *
+replace(st, orig, repl)
+const char *st, *orig, *repl;
+{
+	static char retval[BUFSZ];
+	char buffer[BUFSZ];
+	char *ch, *pos;
+	int len;
+	memset(buffer, 0, BUFSZ);
+	pos = st;
+	while ((ch = strstr(pos, orig))){
+		len = (ch - pos);
+		strncat(buffer, pos, len);
+		strncat(buffer, repl, strlen(repl));
+		pos = (ch + strlen(orig));
+	}
+	if (pos == st) {
+		return st;
+	}
+	if (pos < (st + strlen(st))) {
+		strncat(buffer, pos, (st - pos));
+	}
+	strcpy(retval, buffer);
+	return retval;
+}
+
+/*Ben Collver's fixes*/
+char *
+piratesay(orig)
+const char *orig;
+{
+		orig = replace(orig,"You","Ye");
+		orig = replace(orig,"you","ye");
+		orig = replace(orig,"His","'is");
+		orig = replace(orig," his"," 'is");
+		orig = replace(orig,"Her","'er");
+		orig = replace(orig," her"," 'er");
+		orig = replace(orig,"Are","Be");
+		orig = replace(orig," are"," be");
+		orig = replace(orig,"Is","Be");
+		orig = replace(orig," is"," be");
+		orig = replace(orig,"Of","O'");
+		orig = replace(orig," ear"," lug");
+		orig = replace(orig," lugth"," earth");
+		orig = replace(orig,"Ear","Lug");
+		orig = replace(orig,"Lugth","Earth");
+		orig = replace(orig," eye"," deadlight");
+		orig = replace(orig,"Eye","Deadlight");
+		orig = replace(orig,"zorkmid","doubloon");
+		orig = replace(orig,"Zorkmid","Doubloon");
+		orig = replace(orig,"gold coins","pieces of eight");
+		orig = replace(orig,"Gold coins","Pieces of eight");
+		orig = replace(orig,"gold coin","piece of eight");
+		orig = replace(orig,"Gold coin","Piece of eight");
+		orig = replace(orig,"gold pieces","pieces of eight");
+		orig = replace(orig,"Gold pieces","Pieces of eight");
+		orig = replace(orig,"gold piece","piece of eight");
+		orig = replace(orig,"Gold piece","Piece of eight");
+}
 #endif /* OVLB */
 /*pline.c*/

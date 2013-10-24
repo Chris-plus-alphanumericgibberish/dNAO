@@ -49,6 +49,12 @@ MONSTER:'d',"hell hound",(15,05)
 MONSTER:'V',"vampire lord",(17,05)
 # The local treasure
 OBJECT:'+',"Book of the Dead",(16,05)
+# Kinda mean to place these here, since the player may be blindsided by an upgraded wizard,
+# 	but them's the breaks!
+OBJECT[10%]:'+',"secrets",(16,05),"Necronomicon",0
+OBJECT[5%]:')',"quarterstaff",(16,05), blessed, 7, "The Staff of the Archmagi"
+OBJECT[5%]:'[',"robe",(16,05), blessed, 7, "The Robe of the Archmagi"
+OBJECT[5%]:'[',"cornuthaum",(16,05), blessed, 7, "The Hat of the Archmagi"
 # Surrounding terror
 MONSTER:';',"kraken",(14,02)
 MONSTER:';',"giant eel",(17,02)
@@ -274,3 +280,63 @@ TRAP:"board",(03,04)
 TRAP:"board",(05,04)
 # treasures
 OBJECT:'"',random,(04,04)
+
+MAZE:"fakewiz3",random
+GEOMETRY:center,center
+MAP
+.........
+.}}}}}}}.
+.}}---}}.
+.}--.--}.
+.}|...|}.
+.}--.--}.
+.}}---}}.
+.}}}}}}}.
+ENDMAP
+STAIR:levregion(01,00,79,20),(0,0,8,7),up
+STAIR:levregion(01,00,79,20),(0,0,8,7),down
+BRANCH:levregion(01,00,79,20),(0,0,8,7)
+TELEPORT_REGION:levregion(01,00,79,20),(2,2,6,6)
+MAZEWALK:(08,05),east
+REGION:(04,03,06,06),unlit,"ordinary",unfilled,true
+MONSTER:'L',random,(04,04)
+MONSTER:'V',"vampire lord",(03,04)
+MONSTER:';',"kraken",(06,06)
+# And to make things a little harder.
+TRAP:"board",(04,03)
+TRAP:"board",(04,05)
+TRAP:"board",(03,04)
+TRAP:"board",(05,04)
+# treasures
+OBJECT:'"',random,(04,04)
+
+
+MAZE:"fakewiz4",random
+GEOMETRY:center,center
+MAP
+.........
+.}}}}}}}.
+.}}---}}.
+.}--.--}.
+.}|...|}.
+.}--.--}.
+.}}---}}.
+.}}}}}}}.
+ENDMAP
+STAIR:levregion(01,00,79,20),(0,0,8,7),up
+STAIR:levregion(01,00,79,20),(0,0,8,7),down
+BRANCH:levregion(01,00,79,20),(0,0,8,7)
+TELEPORT_REGION:levregion(01,00,79,20),(2,2,6,6)
+MAZEWALK:(08,05),east
+REGION:(04,03,06,06),unlit,"ordinary",unfilled,true
+MONSTER:'L',random,(04,04)
+MONSTER:'V',"vampire lord",(03,04)
+MONSTER:';',"kraken",(06,06)
+# And to make things a little harder.
+TRAP:"board",(04,03)
+TRAP:"board",(04,05)
+TRAP:"board",(03,04)
+TRAP:"board",(05,04)
+# treasures
+OBJECT:'"',random,(04,04)
+

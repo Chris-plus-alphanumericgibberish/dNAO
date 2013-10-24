@@ -5,6 +5,7 @@
 #include "hack.h"
 #include "emin.h"
 #include "epri.h"
+#include "artifact.h"
 
 void
 msummon(mon)		/* mon summons a monster */
@@ -14,6 +15,12 @@ struct monst *mon;
 	register int dtype = NON_PM, cnt = 0;
 	aligntyp atyp;
 	struct monst *mtmp;
+
+	/* Wielded Demonbane prevents demons from gating in others. From Sporkhack*/
+	if (uwep && uwep->oartifact && spec_ability2(uwep, SPFX2_NOCALL) && is_demon(mon->data)) {
+		pline("%s looks puzzled for a moment.",Monnam(mon));
+		return;
+	}
 
 	if (mon) {
 	    ptr = mon->data;
@@ -83,17 +90,18 @@ struct monst *mon;
 	}
 }
 
-void
-summon_minion(alignment, talk)
+struct monst *
+summon_minion(alignment, talk, devils)
 aligntyp alignment;
 boolean talk;
+boolean devils;
 {
     register struct monst *mon;
     int mnum;
 
     switch ((int)alignment) {
 	case A_LAWFUL:
-	    mnum = lminion();
+	    mnum = devils ? ndemon(alignment) : lminion();
 	    break;
 	case A_NEUTRAL:
 	    mnum = PM_AIR_ELEMENTAL + rn2(4);
@@ -134,6 +142,7 @@ boolean talk;
 	mon->mpeaceful = FALSE;
 	/* don't call set_malign(); player was naughty */
     }
+	return mon;
 }
 
 #define Athome	(Inhell && !mtmp->cham)
@@ -144,7 +153,11 @@ register struct monst *mtmp;
 {
 	long cash, demand, offer;
 
-	if (uwep && uwep->oartifact == ART_EXCALIBUR) {
+	if (uwep && (
+			   uwep->oartifact == ART_EXCALIBUR 
+			|| uwep->oartifact == ART_ROD_OF_SEVEN_PARTS
+			|| uwep->oartifact == ART_LANCEA_LONGINI
+		) ) {
 	    pline("%s looks very angry.", Amonnam(mtmp));
 	    mtmp->mpeaceful = mtmp->mtame = 0;
 	    set_malign(mtmp);
@@ -177,6 +190,7 @@ register struct monst *mtmp;
 	    set_malign(mtmp);
 	    return 0;
 	} else {
+		if(demand < 2000) demand = max(1000+rnd(1000), demand); //demons can't be bribed with chump change.
 	    /* make sure that the demand is unmeetable if the monster
 	       has the Amulet, preventing monster from being satisified
 	       and removed from the game (along with said Amulet...) */

@@ -32,20 +32,14 @@ struct conditionals {
 	int sequence, predecessor;
 	const char *name;
 } conditionals[] = {
-#ifndef CHARON /* not supported yet */
-	{ MON_GLYPH, PM_HELL_HOUND, "Cerberus" },
-#endif
+//#ifndef CHARON /* not supported yet */
+//	{ MON_GLYPH, PM_HELL_HOUND, "Cerberus" },
+//#endif
 	/* commented out in monst.c at present */
-	{ MON_GLYPH, PM_SHOCKING_SPHERE, "beholder" },
-	{ MON_GLYPH, PM_BABY_SILVER_DRAGON, "baby shimmering dragon" },
-	{ MON_GLYPH, PM_SILVER_DRAGON, "shimmering dragon" },
-	{ MON_GLYPH, PM_JABBERWOCK, "vorpal jabberwock" },
-#ifndef KOPS
-	{ MON_GLYPH, PM_JABBERWOCK, "Keystone Kop" },
-	{ MON_GLYPH, PM_JABBERWOCK, "Kop Sergeant" },
-	{ MON_GLYPH, PM_JABBERWOCK, "Kop Lieutenant" },
-	{ MON_GLYPH, PM_JABBERWOCK, "Kop Kaptain" },
-#endif
+//	{ MON_GLYPH, PM_SHOCKING_SPHERE, "beholder" },
+//	{ MON_GLYPH, PM_BABY_SILVER_DRAGON, "baby shimmering dragon" },
+//	{ MON_GLYPH, PM_SILVER_DRAGON, "shimmering dragon" },
+//	{ MON_GLYPH, PM_JABBERWOCK, "vorpal jabberwock" },
 	{ MON_GLYPH, PM_VAMPIRE_LORD, "vampire mage" },
 #ifndef CHARON /* not supported yet */
 	{ MON_GLYPH, PM_CROESUS, "Charon" },
@@ -68,12 +62,9 @@ struct conditionals {
 #ifndef TOURIST
 	{ MON_GLYPH, PM_ROSHI, "guide" },
 #endif
-#ifndef KOPS
-	{ OBJ_GLYPH, CLUB, "rubber hose" },
-#endif
 	/* objects commented out in objects.c at present */
-	{ OBJ_GLYPH, SILVER_DRAGON_SCALE_MAIL, "shimmering dragon scale mail" },
-	{ OBJ_GLYPH, SILVER_DRAGON_SCALES, "shimmering dragon scales" },
+//	{ OBJ_GLYPH, SILVER_DRAGON_SCALE_MAIL, "shimmering dragon scale mail" },
+//	{ OBJ_GLYPH, SILVER_DRAGON_SCALES, "shimmering dragon scales" },
 #ifndef TOURIST
 	{ OBJ_GLYPH, LEATHER_JACKET, "Hawaiian shirt" },
 	{ OBJ_GLYPH, LEATHER_JACKET, "T-shirt" },
@@ -87,7 +78,7 @@ struct conditionals {
 	 * don't know what a slime mold should look like when renamed anyway
 	 */
 #ifndef MAIL
-	{ OBJ_GLYPH, SCR_STINKING_CLOUD+4, "stamped / mail" },
+	{ OBJ_GLYPH, SCR_STINKING_CLOUD+6, "stamped / mail" },
 #endif
 	{ 0, 0, 0}
 };
@@ -100,6 +91,7 @@ struct conditionals {
  * for the same set of tiles grouped together.  You will have to change
  * more code in process_substitutions()/substitute_tiles() if the sets
  * overlap in the future.
+ * The substitution made is according to this order. -CMM
  */
 struct substitute {
 	int first_glyph, last_glyph;
@@ -107,13 +99,13 @@ struct substitute {
 	const char *level_test;
 } substitutes[] = {
 	{ GLYPH_CMAP_OFF + S_vwall, GLYPH_CMAP_OFF + S_trwall,
-					"mine walls", "In_mines(plev)" },
+					"mine walls", "In_mines(plev) || (In_neu(plev) && (spire_level.dlevel == plev->dlevel || sum_of_all_level.dlevel == plev->dlevel) )" },
 	{ GLYPH_CMAP_OFF + S_vwall, GLYPH_CMAP_OFF + S_trwall,
 					"gehennom walls", "In_hell(plev)" },
 	{ GLYPH_CMAP_OFF + S_vwall, GLYPH_CMAP_OFF + S_trwall,
-					"knox walls", "Is_knox(plev)" },
+					"knox walls", "Is_knox(plev) || (In_neu(plev)&& (gatetown_level.dlevel == plev->dlevel ))" },
 	{ GLYPH_CMAP_OFF + S_vwall, GLYPH_CMAP_OFF + S_trwall,
-					"sokoban walls", "In_sokoban(plev)" }
+					"sokoban walls", "In_sokoban(plev) || (In_neu(plev)&& (rlyeh_level.dlevel == plev->dlevel ))" }
 };
 
 

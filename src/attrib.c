@@ -35,9 +35,19 @@ const struct innate {
 		     {  15, &(HStealth), "stealthy", "" },
 		     {	 0, 0, 0, 0 } },
 
+	bin_abil[] = {
+		     {	 0, 0, 0, 0 } },
+
 	cav_abil[] = { {	 7, &(HFast), "quick", "slow" },
 		     {	15, &(HWarning), "sensitive", "" },
 		     {	 0, 0, 0, 0 } },
+
+#ifdef CONVICT
+	con_abil[] = { {   1, &(HSick_resistance), "", "" },
+	         {	 7, &(HPoison_resistance), "healthy", "" },
+		     {  20, &(HSearching), "perceptive", "unaware" },
+		     {	 0, 0, 0, 0 } },
+#endif	/* CONVICT */
 
 	hea_abil[] = { {	 1, &(HPoison_resistance), "", "" },
 		     {	15, &(HWarning), "sensitive", "" },
@@ -59,6 +69,12 @@ const struct innate {
 		     {  17, &(HTeleport_control), "controlled","uncontrolled" },
 		     {   0, 0, 0, 0 } },
 
+	pir_abil[] = {	{1, &(HSwimming), "", ""  },
+			 {	7, &(HStealth), "stealthy", ""  },	/* with cat-like tread ... */
+		     {  11, &(HFast), "quick", "slow" },
+		     {	 0, 0, 0, 0 } },
+
+			 
 	pri_abil[] = { {	15, &(HWarning), "sensitive", "" },
 		     {  20, &(HFire_resistance), "cool", "warmer" },
 		     {	 0, 0, 0, 0 } },
@@ -217,18 +233,29 @@ boolean parameter; /* So I can't think up of a good name.  So sue me. --KAA */
 		else if (otmp->blessed) bonchance += otmp->quan;
 		else if (parameter) bonchance += otmp->quan;
 	    }
-
+#ifdef CONVICT
+	if(Role_if(PM_CONVICT)) bonchance -= (u.ulevel-1)/10 + 1; /* a Convict's karmic burden becomes 
+																only more heavy as they level up */
+#endif	/* CONVICT */
 	return sgn((int)bonchance);
+}
+
+boolean
+has_luckitem()
+{
+	register struct obj *otmp;
+
+	for (otmp = invent; otmp; otmp = otmp->nobj)
+	    if (confers_luck(otmp)) return TRUE;
+	return FALSE;
 }
 
 /* there has just been an inventory change affecting a luck-granting item */
 void
 set_moreluck()
 {
-	int luckbon = stone_luck(TRUE);
-
-	if (!luckbon && !carrying(LUCKSTONE)) u.moreluck = 0;
-	else if (luckbon >= 0) u.moreluck = LUCKADD;
+	if (!has_luckitem()) u.moreluck = 0;
+	else if (stone_luck(TRUE) >= 0) u.moreluck = LUCKADD;
 	else u.moreluck = -LUCKADD;
 }
 
@@ -267,7 +294,7 @@ boolean	inc_or_dec;
 #ifdef DEBUG
 	pline("Exercise:");
 #endif
-	if (i == A_INT || i == A_CHA) return;	/* can't exercise these */
+	if (i == A_CHA) return;	/* can't exercise cha */
 
 	/* no physical exercise while polymorphed; the body's temporary */
 	if (Upolyd && i != A_WIS) return;
@@ -286,7 +313,7 @@ boolean	inc_or_dec;
 #ifdef DEBUG
 		pline("%s, %s AEXE = %d",
 			(i == A_STR) ? "Str" : (i == A_WIS) ? "Wis" :
-			(i == A_DEX) ? "Dex" : "Con",
+			(i == A_DEX) ? "Dex" : (i == A_INT) ? "Int" : "Con",
 			(inc_or_dec) ? "inc" : "dec", AEXE(i));
 #endif
 	}
@@ -391,12 +418,12 @@ exerchk()
 	    for(i = 0; i < A_MAX; AEXE(i++) /= 2) {
 
 		if(ABASE(i) >= 18 || !AEXE(i)) continue;
-		if(i == A_INT || i == A_CHA) continue;/* can't exercise these */
+		if(i == A_CHA) continue;/* can't exercise cha */
 
 #ifdef DEBUG
 		pline("exerchk: testing %s (%d).",
 			(i == A_STR) ? "Str" : (i == A_WIS) ? "Wis" :
-			(i == A_DEX) ? "Dex" : "Con", AEXE(i));
+			(i == A_DEX) ? "Dex" : (i == A_INT) ? "Int" : "Con", AEXE(i));
 #endif
 		/*
 		 *	Law of diminishing returns (Part III):
@@ -422,18 +449,27 @@ exerchk()
 		    case A_STR: You((mod_val >0) ?
 				    "must have been exercising." :
 				    "must have been abusing your body.");
-				break;
-		    case A_WIS: You((mod_val >0) ?
-				    "must have been very observant." :
-				    "haven't been paying attention.");
+				if(mod_val < 0)	AMAX(i) -= mod_val; /* permanent drain */
 				break;
 		    case A_DEX: You((mod_val >0) ?
 				    "must have been working on your reflexes." :
 				    "haven't been working on reflexes lately.");
+				if(mod_val < 0)	AMAX(i) -= mod_val; /* permanent drain */
 				break;
 		    case A_CON: You((mod_val >0) ?
 				    "must be leading a healthy life-style." :
 				    "haven't been watching your health.");
+				if(mod_val < 0)	AMAX(i) -= mod_val; /* permanent drain */
+			break;
+		    case A_INT: You((mod_val >0) ?
+					"must have been really concentrating lately." :
+					"haven't been thinking things through.");
+				if(mod_val < 0)	AMAX(i) -= mod_val; /* permanent drain */
+			break;
+		    case A_WIS: You((mod_val >0) ?
+				    "must have been very observant." :
+				    "haven't been paying attention.");
+				if(mod_val < 0)	AMAX(i) -= mod_val; /* permanent drain */
 				break;
 		    }
 		}
@@ -543,10 +579,15 @@ int oldlevel, newlevel;
 	switch (Role_switch) {
 	case PM_ARCHEOLOGIST:   abil = arc_abil;	break;
 	case PM_BARBARIAN:      abil = bar_abil;	break;
+	case PM_EXILE:      	abil = bin_abil;	break;
 	case PM_CAVEMAN:        abil = cav_abil;	break;
+#ifdef CONVICT
+	case PM_CONVICT:        abil = con_abil;	break;
+#endif	/* CONVICT */
 	case PM_HEALER:         abil = hea_abil;	break;
 	case PM_KNIGHT:         abil = kni_abil;	break;
 	case PM_MONK:           abil = mon_abil;	break;
+	case PM_PIRATE:         abil = pir_abil;	break;
 	case PM_PRIEST:         abil = pri_abil;	break;
 	case PM_RANGER:         abil = ran_abil;	break;
 	case PM_ROGUE:          abil = rog_abil;	break;
@@ -667,8 +708,35 @@ int x;
 {
 	register int tmp = (u.abon.a[x] + u.atemp.a[x] + u.acurr.a[x]);
 
+	if(x ==A_CHA && uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
+		tmp += uwep->spe;
+	}
+
+	if(x == A_WIS && uarm && arti_chawis(uarm) && uarmc){
+		tmp += uarm->spe;
+	}
+#ifdef TOURIST
+	if(x == A_WIS && uarmu && arti_chawis(uarmu) && (uarmc || uarm)){
+		tmp += uarmu->spe;
+	}
+#endif	/*TOURIST*/
+
+	if(x == A_CHA && uarmc && arti_chawis(uarmc)){
+		tmp += uarmc->spe;
+	}
+	if(x == A_CHA && uarm && arti_chawis(uarm) && !uarmc){
+		tmp += uarm->spe;
+	}
+#ifdef TOURIST
+	if(x == A_CHA && uarmu && arti_chawis(uarmu) && !uarmc && !uarm){
+		tmp += uarmu->spe;
+	}
+#endif	/*TOURIST*/
+
 	if (x == A_STR) {
-		if (uarmg && uarmg->otyp == GAUNTLETS_OF_POWER) return(125);
+		if ((uarmg && uarmg->otyp == GAUNTLETS_OF_POWER) || 
+			(uwep && uwep->oartifact == ART_SCEPTRE_OF_MIGHT) || 
+			(uwep && uwep->oartifact == ART_OGRESMASHER) ) return(125);
 #ifdef WIN32_BUG
 		else return(x=((tmp >= 125) ? 125 : (tmp <= 3) ? 3 : tmp));
 #else
@@ -718,6 +786,8 @@ register int n;
 	if(n < 0) {
 		if(newalign < u.ualign.record)
 			u.ualign.record = newalign;
+			if(u.ualign.record > ALIGNLIM)
+				u.ualign.record = ALIGNLIM;
 	} else
 		if(newalign > u.ualign.record) {
 			u.ualign.record = newalign;

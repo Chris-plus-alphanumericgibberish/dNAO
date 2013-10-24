@@ -51,7 +51,9 @@ extern int NDECL(dofire); /**/
 extern int NDECL(dothrow); /**/
 extern int NDECL(doeat); /**/
 extern int NDECL(done2); /**/
+extern int NDECL(doengward); /**/
 extern int NDECL(doengrave); /**/
+extern int NDECL(doward); /**/
 extern int NDECL(dopickup); /**/
 extern int NDECL(ddoinv); /**/
 extern int NDECL(dotypeinv); /**/
@@ -151,6 +153,7 @@ STATIC_PTR int NDECL(enter_explore_mode);
 STATIC_PTR int NDECL(doattributes);
 STATIC_PTR int NDECL(doconduct); /**/
 STATIC_PTR boolean NDECL(minimal_enlightenment);
+STATIC_PTR void NDECL(resistances_enlightenment);
 
 static void FDECL(bind_key, (unsigned char, char*));
 static void NDECL(init_bind_list);
@@ -472,6 +475,10 @@ domonability()
 {
 	if (can_breathe(youmonst.data)) return dobreathe();
 	else if (attacktype(youmonst.data, AT_SPIT)) return dospit();
+	else if (attacktype(youmonst.data, AT_MAGC))
+	    return castum((struct monst *)0,
+	                   &youmonst.data->mattk[attackindex(youmonst.data, 
+			                         AT_MAGC,AD_ANY)]);
 	else if (youmonst.data->mlet == S_NYMPH) return doremove();
 	else if (attacktype(youmonst.data, AT_GAZE)) return dogaze();
 	else if (is_were(youmonst.data)) return dosummon();
@@ -665,7 +672,7 @@ wiz_level_change()
 	}
 	if (newlevel < 1) newlevel = 1;
 	while (u.ulevel > newlevel)
-	    losexp("#levelchange");
+	    losexp("#levelchange",TRUE,TRUE,TRUE);
     } else {
 	if (u.ulevel >= MAXULEV) {
 	    You("are already as experienced as you can get.");
@@ -895,16 +902,24 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	putstr(en_win, 0, final ? "Final Attributes:" : "Current Attributes:");
 	putstr(en_win, 0, "");
 
-#ifdef ELBERETH
 	if (u.uevent.uhand_of_elbereth) {
+#ifdef ELBERETH
 	    static const char * const hofe_titles[3] = {
 				"the Hand of Elbereth",
 				"the Envoy of Balance",
 				"the Glory of Arioch"
 	    };
-	    you_are(hofe_titles[u.uevent.uhand_of_elbereth - 1]);
-	}
+#else
+	    static const char * const hofe_titles[3] = {
+				"the Arm of the Law",
+				"the Envoy of Balance",
+				"the Glory of Arioch"
+	    };
 #endif
+	    if(Role_if(PM_PIRATE)) you_are("the Pirate King");
+		else you_are(hofe_titles[u.uevent.uhand_of_elbereth - 1]);
+	}
+	
 
 	/* note: piousness 20 matches MIN_QUEST_ALIGN (quest.h) */
 	if (u.ualign.record >= 20)	you_are("piously aligned");
@@ -921,6 +936,18 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (wizard) {
 		Sprintf(buf, " %d", u.ualign.record);
 		enl_msg("Your alignment ", "is", "was", buf);
+		Sprintf(buf, " %d sins", u.ualign.sins);
+		enl_msg("You ", "carry", "carried", buf);
+		Sprintf(buf, " %d", (int) ALIGNLIM);
+		enl_msg("Your max alignment ", "is", "was", buf);
+		Sprintf(buf, "a hod wantedness of %d", u.hod);
+		you_have(buf);
+		Sprintf(buf, "a gevurah wantedness of %d", u.gevurah);
+		you_have(buf);
+		Sprintf(buf, "a chokhmah wantedness of %d", u.keter);
+		you_have(buf);
+		Sprintf(buf, "%d chokhmah sephiroth ", u.chokhmah);
+		enl_msg(buf, "are", "were", " deployed.");
 	}
 #endif
 
@@ -954,6 +981,11 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 			if (u.usick_type & SICK_NONVOMITABLE)
 				you_are("sick from illness");
 		}
+#ifdef CONVICT
+        if (Punished) {
+            you_are("punished");
+        }
+#endif /* CONVICT */
 	}
 	if (Stoned) you_are("turning to stone");
 	if (Slimed) you_are("turning into slime");
@@ -1001,6 +1033,10 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (u.umconf) you_are("going to confuse monsters");
 
 	/*** Appearance and behavior ***/
+#ifdef WIZARD
+	Sprintf(buf, "a carrying capacity of %d remaining", -1*inv_weight());
+    you_have(buf);
+#endif
 	if (Adornment) {
 	    int adorn = 0;
 
@@ -1102,6 +1138,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (u.twoweap) you_are("wielding two weapons at once");
 
 	/*** Miscellany ***/
+	if (Spellboost) you_have("augmented spellcasting");
 	if (Luck) {
 	    ltmp = abs((int)Luck);
 	    Sprintf(buf, "%s%slucky",
@@ -1117,12 +1154,12 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 #endif
 	if (u.moreluck > 0) you_have("extra luck");
 	else if (u.moreluck < 0) you_have("reduced luck");
-	if (carrying(LUCKSTONE) || stone_luck(TRUE)) {
+	if (has_luckitem()) {
 	    ltmp = stone_luck(FALSE);
 	    if (ltmp <= 0)
-		enl_msg("Bad luck ", "does", "did", " not time out for you");
+		enl_msg("Bad luck ", "times", "timed", " out slowly for you");
 	    if (ltmp >= 0)
-		enl_msg("Good luck ", "does", "did", " not time out for you");
+		enl_msg("Good luck ", "times", "timed", " out slowly for you");
 	}
 
 	if (u.ugangr) {
@@ -1483,6 +1520,54 @@ int final;
 } /* dump_enlightenment */
 #endif
 
+void
+resistances_enlightenment()
+{
+	int ltmp;
+	char buf[BUFSZ];
+
+	en_win = create_nhwindow(NHW_MENU);
+	putstr(en_win, 0, "Current Status:");
+	putstr(en_win, 0, "");
+
+	/*** Resistances to troubles ***/
+	/* It is important to inform the player as to the status of any resistances that can expire */
+	if (Fire_resistance && Cold_resistance) putstr(en_win, 0, "You feel comfortable.");
+	else{
+		if (Fire_resistance) putstr(en_win, 0, "You feel chilly.");
+		if (Cold_resistance) putstr(en_win, 0, "You feel warm inside.");
+	}
+	if (Sleep_resistance) putstr(en_win, 0, "You feel wide awake.");
+	if (Disint_resistance) putstr(en_win, 0, "You feel very firm.");
+	if (Shock_resistance) putstr(en_win, 0, "You feel well grounded.");
+	if (Poison_resistance) putstr(en_win, 0, "You feel healthy.");
+	if (Acid_resistance) putstr(en_win, 0, "Your skin feels leathery.");
+	if (Displaced) putstr(en_win, 0, "Your outline shimmers and shifts.");
+	if (Drain_resistance) putstr(en_win, 0, "You feel especially energetic.");
+/*
+	if (Sick_resistance) you_are("immune to sickness");
+	if (Antimagic) you_are("magic-protected");
+	if (Stone_resistance)
+		you_are("petrification resistant");
+	if (Invulnerable) you_are("invulnerable");
+	if (u.uedibility) you_can("recognize detrimental food");
+	if (Halluc_resistance)
+		enl_msg("You resist", "", "ed", " hallucinations");
+*/
+	/*** Troubles ***/
+	if (Wounded_legs
+#ifdef STEED
+	    && !u.usteed
+#endif
+			  ) {
+		Sprintf(buf, "You have wounded %s", makeplural(body_part(LEG)));
+		putstr(en_win, 0, buf);
+	}
+	display_nhwindow(en_win, TRUE);
+	destroy_nhwindow(en_win);
+	return;
+}
+
 /*
  * Courtesy function for non-debug, non-explorer mode players
  * to help refresh them about who/what they are.
@@ -1682,6 +1767,7 @@ doattributes()
 		return 0;
 	if (wizard || discover)
 		enlightenment(0);
+	else resistances_enlightenment();
 	return 0;
 }
 
@@ -1932,7 +2018,8 @@ struct ext_func_tab extcmdlist[] = {
 	{"updatestatus", "update status lines", force_bot, IFBURIED},
 	{"travel", "Travel to a specific location", dotravel, !IFBURIED},
 	{"eat", "eat something", doeat, !IFBURIED},
-	{"engrave", "engrave writing on the floor", doengrave, !IFBURIED},
+	{"engrave", "engrave writing on the floor", doengward, !IFBURIED},
+	{"drawward", "engrave a ward on the floor", doward, !IFBURIED},
 	{"fire", "fire ammunition from quiver", dofire, !IFBURIED},
 	{"history", "show long version and game history", dohistory, IFBURIED},
 	{"help", "give a help message", dohelp, IFBURIED},
@@ -2168,7 +2255,7 @@ init_bind_list(void)
 	bind_key(M('p'), "pray" );
 	bind_key('q',    "quaff" );
 	bind_key('Q',    "quiver" );
-	bind_key(M('q'), "quit" );
+	bind_key(M('q'), "drawward" );
 	bind_key('r',    "read" );
 	bind_key('R',    "remove" );
 	bind_key(M('r'), "rub" );
@@ -2250,7 +2337,7 @@ change_bind_list(void)
  * You must add entries in ext_func_tab every time you add one to the
  * debug_extcmdlist().
  */
-static void
+void
 add_debug_extended_commands()
 {
 	int i, j, k, n;
@@ -3053,7 +3140,7 @@ char sym;
 	u.dx = xdir[dp-sdp];
 	u.dy = ydir[dp-sdp];
 	u.dz = zdir[dp-sdp];
-	if (u.dx && u.dy && u.umonnum == PM_GRID_BUG) {
+	if (u.dx && u.dy && (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH)) {
 		u.dx = u.dy = 0;
 		return 0;
 	}
@@ -3172,14 +3259,14 @@ const char *msg;
 		putstr(win, 0, "");
 	    }
 	}
-	if (iflags.num_pad && u.umonnum == PM_GRID_BUG) {
+	if (iflags.num_pad && (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH)) {
 	    putstr(win, 0, "Valid direction keys in your current form (with number_pad on) are:");
 	    putstr(win, 0, "             8   ");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "          4- . -6");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "             2   ");
-	} else if (u.umonnum == PM_GRID_BUG) {
+	} else if (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) {
 	    putstr(win, 0, "Valid direction keys in your current form are:");
 	    putstr(win, 0, "             k   ");
 	    putstr(win, 0, "             |   ");
@@ -3218,7 +3305,7 @@ const char *msg;
 void
 confdir()
 {
-	register int x = (u.umonnum == PM_GRID_BUG) ? 2*rn2(4) : rn2(8);
+	register int x = (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) ? 2*rn2(4) : rn2(8);
 	u.dx = xdir[x];
 	u.dy = ydir[x];
 	return;
@@ -3557,13 +3644,18 @@ wiz_port_debug()
  *   window port causing a buffer overflow there.
  */
 char
-yn_function(query,resp, def)
-const char *query,*resp;
+yn_function(plainquery,resp, def)
+const char *plainquery,*resp;
 char def;
 {
 	char qbuf[QBUFSZ];
+	const char *query;
 	unsigned truncspot, reduction = sizeof(" [N]  ?") + 1;
 
+	/*Ben Collver's fixes*/
+	if(Role_if(PM_PIRATE)) query = piratesay(plainquery);
+	else query = plainquery;
+	
 	if (resp) reduction += strlen(resp) + sizeof(" () ");
 	if (strlen(query) < (QBUFSZ - reduction))
 		return (*windowprocs.win_yn_function)(query, resp, def);

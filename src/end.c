@@ -81,7 +81,7 @@ extern void FDECL(nethack_exit,(int));
  * The order of these needs to match the macros in hack.h.
  */
 static NEARDATA const char *deaths[] = {		/* the array of death */
-	"died", "choked", "poisoned", "starvation", "drowning",
+	"died", "betrayed", "choked", "poisoned", "starvation", "drowning",
 	"burning", "dissolving under the heat and pressure",
 	"crushed", "turned to stone", "turned into slime",
 	"genocided", "panic", "trickery",
@@ -89,7 +89,7 @@ static NEARDATA const char *deaths[] = {		/* the array of death */
 };
 
 static NEARDATA const char *ends[] = {		/* "when you..." */
-	"died", "choked", "were poisoned", "starved", "drowned",
+	"died", "were betrayed", "choked", "were poisoned", "starved", "drowned",
 	"burned", "dissolved in the lava",
 	"were crushed", "turned to stone", "turned into slime",
 	"were genocided", "panicked", "were tricked",
@@ -388,7 +388,8 @@ register struct monst *mtmp;
 	killer_format = KILLED_BY_AN;
 	/* "killed by the high priest of Crom" is okay, "killed by the high
 	   priest" alone isn't */
-	if ((mtmp->data->geno & G_UNIQ) != 0 && !(mtmp->data == &mons[PM_HIGH_PRIEST] && !mtmp->ispriest)) {
+	if ((mtmp->data->geno & G_UNIQ) != 0 && !( (mtmp->data == &mons[PM_HIGH_PRIEST] || 
+												mtmp->data == &mons[PM_ELDER_PRIEST]) && !mtmp->ispriest)) {
 	    if (!type_is_pname(mtmp->data))
 		Strcat(buf, "the ");
 	    killer_format = KILLED_BY;
@@ -441,6 +442,8 @@ register struct monst *mtmp;
 		u.ugrave_arise = NON_PM;
 	if (touch_petrifies(mtmp->data))
 		done(STONING);
+	else if (mtmp->mtraitor)
+		done(BETRAYED);
 	else
 		done(DIED);
 	return;
@@ -579,7 +582,7 @@ boolean taken;
 
 			for (obj = invent; obj; obj = obj->nobj) {
 			    makeknown(obj->otyp);
-			    obj->known = obj->bknown = obj->dknown = obj->rknown = 1;
+			    obj->known = obj->bknown = obj->dknown = obj->rknown = obj->sknown = 1;
 			}
 #ifdef DUMP_LOG
 			(void) dump_inventory((char *)0, TRUE, want_disp);
@@ -750,7 +753,7 @@ winid endwin;
 		u.urexp += points;
 	    } else {
 		makeknown(otmp->otyp);
-		otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = 1;
+		otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
 		/* assumes artifacts don't have quan > 1 */
 		Sprintf(pbuf, "%s%s (worth %ld %s and %ld points)",
 			the_unique_obj(otmp) ? "The " : "",
@@ -822,6 +825,7 @@ int how;
 		if (how == CHOKING) You("vomit ...");
 		You_feel("much better!");
 		pline_The("medallion crumbles to dust!");
+		u.gevurah += 4;//cheated death.
 		if (uamul) useup(uamul);
 
 		(void) adjattrib(A_CON, -1, TRUE);
@@ -846,6 +850,7 @@ int how;
 			(how == CHOKING) ? "choke" : "die");
 		if(u.uhpmax <= 0) u.uhpmax = u.ulevel * 8;	/* arbitrary */
 		savelife(how);
+		u.gevurah += 4;//cheated death.
 		killer = 0;
 		killer_format = 0;
 		return;
@@ -1332,7 +1337,7 @@ boolean identified, all_containers, want_dump, want_disp;
 			if (identified) {
 			    makeknown(obj->otyp);
 			    obj->known = obj->bknown =
-			    obj->dknown = obj->rknown = 1;
+			    obj->dknown = obj->rknown = obj->sknown = 1;
 			}
 #ifdef DUMP_LOG
 			if (want_dump)  dump("  ", doname(obj));

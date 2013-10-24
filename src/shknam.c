@@ -16,6 +16,10 @@ STATIC_DCL void FDECL(mkshobj_at, (const struct shclass *,int,int));
 STATIC_DCL void FDECL(nameshk, (struct monst *,const char * const *));
 STATIC_DCL int  FDECL(shkinit, (const struct shclass *,struct mkroom *));
 
+#ifdef OTHER_SERVICES
+/* WAC init shk services */
+static void FDECL(init_shk_services, (struct monst *));
+#endif
 static const char * const shkliquors[] = {
     /* Ukraine */
     "Njezjin", "Tsjernigof", "Ossipewsk", "Gorlowka",
@@ -251,6 +255,7 @@ int sx, sy;
 	struct monst *mtmp;
 	int atype;
 	struct permonst *ptr;
+	struct obj *curobj = 0;
 
 	if (rn2(100) < depth(&u.uz) &&
 		!MON_AT(sx, sy) && (ptr = mkclass(S_MIMIC,0)) &&
@@ -263,9 +268,13 @@ int sx, sy;
 	} else {
 	    atype = get_shop_item(shp - shtypes);
 	    if (atype < 0)
-		(void) mksobj_at(-atype, sx, sy, TRUE, TRUE);
+			curobj = mksobj_at(-atype, sx, sy, TRUE, TRUE);
 	    else
-		(void) mkobj_at(atype, sx, sy, TRUE);
+			curobj = mkobj_at(atype, sx, sy, TRUE);
+		
+		if(curobj){
+			curobj->shopOwned = TRUE;
+		}
 	}
 }
 
@@ -398,7 +407,8 @@ struct mkroom	*sroom;
 	sroom->resident = shk;
 	ESHK(shk)->shoptype = sroom->rtype;
 	assign_level(&(ESHK(shk)->shoplevel), &u.uz);
-	ESHK(shk)->shd = doors[sh];
+	ESHK(shk)->shd.x = doors[sh].x;
+	ESHK(shk)->shd.y = doors[sh].y;
 	ESHK(shk)->shk.x = sx;
 	ESHK(shk)->shk.y = sy;
 	ESHK(shk)->robbed = 0L;
@@ -408,6 +418,10 @@ struct mkroom	*sroom;
 	ESHK(shk)->visitct = 0;
 	ESHK(shk)->following = 0;
 	ESHK(shk)->billct = 0;
+#ifdef OTHER_SERVICES
+	/* WAC init services */
+	init_shk_services(shk);
+#endif
 #ifndef GOLDOBJ
 	shk->mgold = 1000L + 30L*(long)rnd(100);	/* initial capital */
 #else
@@ -488,6 +502,46 @@ register struct mkroom *sroom;
 
     level.flags.has_shop = TRUE;
 }
+#ifdef OTHER_SERVICES
+
+static void
+init_shk_services(shk)
+struct monst *shk;
+{
+	ESHK(shk)->services = 0L;
+
+	/* KMH, balance patch 2 -- Increase probability of shopkeeper services.
+	 * Requested by Dave <mitch45678@aol.com>
+	 */
+	/* Guarantee some form of identification
+	 * 1/3 		both Basic and Premium ID
+	 * 2/15 	Premium ID only
+	 * 8/15 	Basic ID only
+	 */
+	if (!rn2(2)) ESHK(shk)->services |= (SHK_ID_BASIC|SHK_ID_PREMIUM);
+	else if (!rn2(4)) ESHK(shk)->services |= SHK_ID_PREMIUM;
+	else ESHK(shk)->services |= SHK_ID_BASIC;
+
+	if (!rn2(3)) ESHK(shk)->services |= SHK_UNCURSE;
+
+	if (!rn2(3) && shk_class_match(WEAPON_CLASS, shk))
+		ESHK(shk)->services |= SHK_APPRAISE;
+
+	if ((shk_class_match(WEAPON_CLASS, shk) == SHK_MATCH) ||
+	(shk_class_match(ARMOR_CLASS, shk) == SHK_MATCH) ||
+	(shk_class_match(WAND_CLASS, shk) == SHK_MATCH) ||
+	(shk_class_match(TOOL_CLASS, shk) == SHK_MATCH) ||
+	(shk_class_match(SPBOOK_CLASS, shk) == SHK_MATCH) ||
+	(shk_class_match(RING_CLASS, shk) == SHK_MATCH)) {
+		if (!rn2(4/*5*/)) ESHK(shk)->services |= SHK_SPECIAL_A;
+		if (!rn2(4/*5*/)) ESHK(shk)->services |= SHK_SPECIAL_B;
+	}
+	if (!rn2(4/*5*/) && (shk_class_match(WEAPON_CLASS, shk) == SHK_MATCH))
+	 ESHK(shk)->services |= SHK_SPECIAL_C;
+
+	return;
+}
+#endif
 
 #endif /* OVLB */
 #ifdef OVL0

@@ -30,11 +30,13 @@ kickdmg(mon, clumsy)
 register struct monst *mon;
 register boolean clumsy;
 {
-	register int mdx, mdy;
-	register int dmg = ( ACURRSTR + ACURR(A_DEX) + ACURR(A_CON) )/ 15;
+	int mdx, mdy;
+	struct permonst *mdat = mon->data;
+	int dmg = ( ACURRSTR + ACURR(A_DEX) + ACURR(A_CON) )/ 15;
 	int kick_skill = P_NONE;
 	int blessed_foot_damage = 0;
 	boolean trapkilled = FALSE;
+	boolean silvermsg = FALSE, silverobj = FALSE;
 
 	if (uarmf && uarmf->otyp == KICKING_BOOTS)
 	    dmg += 5;
@@ -53,7 +55,12 @@ register boolean clumsy;
 		uarmf->blessed)
 	    blessed_foot_damage = 1;
 
-	if (mon->data == &mons[PM_SHADE] && !blessed_foot_damage) {
+	if (uarmf && (objects[uarmf->otyp].oc_material == SILVER || arti_silvered(uarmf) )
+		&& hates_silver(mdat)) {
+			dmg += rnd(20);
+			silvermsg = TRUE; silverobj = TRUE;
+	}
+	if (mon->data == &mons[PM_SHADE] && !blessed_foot_damage && !silverobj) {
 	    pline_The("%s.", kick_passes_thru);
 	    /* doesn't exercise skill or abuse alignment or frighten pet,
 	       and shades have no passive counterattack */
@@ -79,6 +86,7 @@ register boolean clumsy;
 		if (martial()) {
 		    if (dmg > 1) kick_skill = P_MARTIAL_ARTS;
 		    dmg += rn2(ACURR(A_DEX)/2 + 1);
+			if(uarmf && uarmf->oartifact) artifact_hit(&youmonst, mon, uarmf, &dmg, d(1,20));
 		}
 		/* a good kick exercises your dex */
 		exercise(A_DEX, TRUE);
@@ -88,6 +96,22 @@ register boolean clumsy;
 	dmg += u.udaminc;	/* add ring(s) of increase damage */
 	if (dmg > 0)
 		mon->mhp -= dmg;
+	if (silvermsg) {
+		const char *fmt;
+		char *whom = mon_nam(mon);
+		char silverobjbuf[BUFSZ];
+
+		if (canspotmon(mon)) {
+			fmt = "Your silver shoes sear %s!";
+		} else {
+		    *whom = highc(*whom);	/* "it" -> "It" */
+		    fmt = "%s is seared!";
+		}
+		/* note: s_suffix returns a modifiable buffer */
+		if (!noncorporeal(mdat))
+		    whom = strcat(s_suffix(whom), " flesh");
+		pline(fmt, whom);
+	}
 	if (mon->mhp > 0 && martial() && !bigmonst(mon->data) && !rn2(3) &&
 	    mon->mcanmove && mon != u.ustuck && !mon->mtrapped) {
 		/* see if the monster has a place to move into */
@@ -307,6 +331,10 @@ register struct obj *gold;
 			   goldreqd = 500L;
 			else if (mtmp->data == &mons[PM_CAPTAIN])
 			   goldreqd = 750L;
+#ifdef CONVICT
+			else if (mtmp->data == &mons[PM_PRISON_GUARD])
+			   goldreqd = 200L;
+#endif /* CONVICT */
 
 			if (goldreqd) {
 #ifndef GOLDOBJ
@@ -410,12 +438,12 @@ xchar x, y;
 	kickobj = level.objects[x][y];
 
 	/* kickobj should always be set due to conditions of call */
-	if(!kickobj || kickobj->otyp == BOULDER
+	if(!kickobj || is_boulder(kickobj)
 			|| kickobj == uball || kickobj == uchain)
 		return(0);
 
-	if ((trap = t_at(x,y)) != 0 &&
-			(((trap->ttyp == PIT ||
+	if ((trap = t_at(x,y)) != 0){
+		if( (((trap->ttyp == PIT ||
 			   trap->ttyp == SPIKED_PIT) && !Passes_walls) ||
 			 trap->ttyp == WEB)) {
 		if (!trap->tseen) find_trap(trap);
@@ -423,6 +451,13 @@ xchar x, y;
 			 Hallucination ? "tizzy" :
 			 (trap->ttyp == WEB) ? "web" : "pit");
 		return 1;
+	}
+		/*	Bug fix: it used to be that you could kick statues off traps,
+			preventing them from activating. No more. */
+		if(trap->ttyp == STATUE_TRAP){
+			activate_statue_trap(trap, x, y, FALSE);
+			return 1;
+		}
 	}
 
 	if(Fumbling && !rn2(3)) {
@@ -462,7 +497,8 @@ xchar x, y;
 	}
 
 	/* Mjollnir is magically too heavy to kick */
-	if(kickobj->oartifact == ART_MJOLLNIR) range = 1;
+	if(kickobj->oartifact == ART_MJOLLNIR || 
+		kickobj->oartifact == ART_AXE_OF_THE_DWARVISH_LORD) range = 1;
 
 	/* see if the object has a place to move into */
 	if(!ZAP_POS(levl[x+u.dx][y+u.dy].typ) || closed_door(x+u.dx, y+u.dy))
@@ -602,6 +638,7 @@ char *buf;
 	else if (IS_DOOR(maploc->typ)) what = "a door";
 	else if (IS_TREE(maploc->typ)) what = "a tree";
 	else if (IS_STWALL(maploc->typ)) what = "a wall";
+	else if (IS_DEADTREE(maploc->typ)) what = "a dead tree";
 	else if (IS_ROCK(maploc->typ)) what = "a rock";
 	else if (IS_THRONE(maploc->typ)) what = "a throne";
 	else if (IS_FOUNTAIN(maploc->typ)) what = "a fountain";
@@ -777,7 +814,7 @@ dokick()
 	kickobj = (struct obj *)0;
 	if (OBJ_AT(x, y) &&
 	    (!Levitation || Is_airlevel(&u.uz) || Is_waterlevel(&u.uz)
-	     || sobj_at(BOULDER,x,y))) {
+	     || boulder_at(x,y))) {
 		if(kick_object(x, y)) {
 		    if(Is_airlevel(&u.uz))
 			hurtle(-u.dx, -u.dy, 1, TRUE); /* assume it's light */
@@ -889,6 +926,103 @@ dokick()
 		    goto ouch;
 		if(IS_TREE(maploc->typ)) {
 		    struct obj *treefruit;
+			if(u.uz.dnum == tower_dnum || on_level(&medusa_level,&u.uz)){
+			    if (rn2(3)) {
+					if ( !rn2(3) && !(mvitals[PM_CROW].mvflags & G_GONE) )
+					    You_hear("flapping wings."); /* a warning */
+					goto ouch;
+			    } else if (!(maploc->looted & TREE_SWARM)) {
+			    	int cnt = rnl(4) + 2;
+					int made = 0;
+			    	coord mm;
+			    	mm.x = x; mm.y = y;
+					while (cnt--) {
+					    if (enexto(&mm, mm.x, mm.y, &mons[PM_CROW])
+						&& makemon(&mons[PM_CROW],
+							       mm.x, mm.y, MM_ANGRY)
+						) made++;
+					}
+					if ( made )
+					    pline("You've disturbed the birds nesting high in the tree's branches!");
+					else
+					    pline("Some black feathers drift down.");
+					maploc->looted |= TREE_SWARM;
+					return(1);
+				}
+			    goto ouch;
+			} else if(u.uz.dnum == chaos_dnum) {
+			    if (rn2(6)) {
+					if ( !rn2(3) && !(mvitals[PM_DRYAD].mvflags & G_GONE) )
+					    pline("The tree shifts slightly."); /* a warning */
+					goto ouch;
+			    } else if (!(maploc->looted & TREE_SWARM)) {
+					int made = 0;
+			    	coord mm;
+			    	mm.x = x; mm.y = y;
+				    if (enexto(&mm, mm.x, mm.y, &mons[PM_DRYAD])
+					&& makemon(&mons[PM_DRYAD],
+						       mm.x, mm.y, MM_ANGRY)
+					) made++;
+					if ( made )
+					    pline("You've woken the tree's spirit!");
+					maploc->looted |= TREE_SWARM;
+					return(1);
+				}
+			    goto ouch;
+			} else if(u.uz.dnum == neutral_dnum) {
+					goto ouch;
+			} else if(u.uz.dnum == law_dnum) {
+			    if (rn2(3)) {
+					if ( !rn2(6) && !(mvitals[PM_KILLER_BEE].mvflags & G_GONE) )
+					    You_hear("a insects crawling."); /* a warning */
+					goto ouch;
+			    }
+			    if (rn2(2) && !(maploc->looted & TREE_LOOTED) &&
+				  (treefruit = rnd_treefruit_at(x, y))) {
+					long nfruit = 8L-rnl(7), nfall;
+					short frtype = treefruit->otyp;
+					treefruit->quan = nfruit;
+					if (is_plural(treefruit))
+					    pline("Some %s fall from the tree!", xname(treefruit));
+					else
+					    pline("%s falls from the tree!", An(xname(treefruit)));
+					nfall = scatter(x,y,2,MAY_HIT,treefruit);
+					if (nfall != nfruit) {
+					    /* scatter left some in the tree, but treefruit
+					     * may not refer to the correct object */
+					    treefruit = mksobj(frtype, TRUE, FALSE);
+					    treefruit->quan = nfruit-nfall;
+					    pline("%ld %s got caught in the branches.",
+						nfruit-nfall, xname(treefruit));
+					    dealloc_obj(treefruit);
+					}
+					exercise(A_DEX, TRUE);
+					exercise(A_WIS, TRUE);	/* discovered a new food source! */
+					newsym(x, y);
+					maploc->looted |= TREE_LOOTED;
+					return(1);
+			    } else if (!(maploc->looted & TREE_SWARM)) {
+			    	int cnt = rnl(4) + 4;
+					int made = 0;
+			    	coord mm;
+			    	mm.x = x; mm.y = y;
+					while (cnt--) {
+					    if (rn2(5) && enexto(&mm, mm.x, mm.y, &mons[PM_SOLDIER_ANT])
+						&& makemon(&mons[PM_SOLDIER_ANT],
+							       mm.x, mm.y, MM_ANGRY)
+						) made++;
+						else if(enexto(&mm, mm.x, mm.y, &mons[PM_KILLER_BEE])
+						&& makemon(&mons[PM_KILLER_BEE],
+							       mm.x, mm.y, MM_ANGRY)
+						) made++;
+					}
+					if ( made )
+					    pline("You've attracted the tree's guardians!");
+					maploc->looted |= TREE_SWARM;
+					return(1);
+				}
+			    goto ouch;
+			} else{
 		    /* nothing, fruit or trouble? 75:23.5:1.5% */
 		    if (rn2(3)) {
 			if ( !rn2(6) && !(mvitals[PM_KILLER_BEE].mvflags & G_GONE) )
@@ -927,8 +1061,8 @@ dokick()
 			while (cnt--) {
 			    if (enexto(&mm, mm.x, mm.y, &mons[PM_KILLER_BEE])
 				&& makemon(&mons[PM_KILLER_BEE],
-					       mm.x, mm.y, MM_ANGRY))
-				made++;
+							       mm.x, mm.y, MM_ANGRY)
+						) made++;
 			}
 			if ( made )
 			    pline("You've attracted the tree's former occupants!");
@@ -938,6 +1072,36 @@ dokick()
 			return(1);
 		    }
 		    goto ouch;
+		}
+		}
+		if(IS_DEADTREE(maploc->typ)) {
+			if(Levitation) goto dumb;
+			You("kick %s.", Blind ? something : "the dead tree");
+			switch (!(maploc->looted & TREE_SWARM) ? rn2(5) : rn2(4)) {
+			case 0:	goto ouch;
+			case 1:	pline("The tree is tottering...");
+				break;
+			case 2:	pline("Some branches are swinging...");
+				break;
+			case 3:	if (!may_dig(x,y)) goto ouch;
+				pline("The dead tree falls down.");
+				maploc->typ = ROOM;
+				if (Blind)
+					feel_location(x,y);	/* we know it's gone */
+				else
+					newsym(x,y);
+				unblock_point(x,y);	/* vision */
+				break;
+			case 4: {
+				coord mm;
+				mm.x = x; mm.y = y;
+					enexto(&mm, mm.x, mm.y, &mons[PM_RAVEN]);
+				makemon(&mons[PM_RAVEN], mm.x, mm.y, MM_ANGRY);
+				maploc->looted |= TREE_SWARM;
+				break;
+			}
+			}
+			return(1);
 		}
 #ifdef SINKS
 		if(IS_SINK(maploc->typ)) {
@@ -1008,7 +1172,9 @@ ouch:
 			(void) find_drawbridge(&x,&y);
 			maploc = &levl[x][y];
 		    }
-		    if(!rn2(3)) set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
+			static int jboots2 = 0;
+			if (!jboots2) jboots2 = find_jboots();
+		    if( !(uarmf && uarmf->otyp == jboots2) && !rn2(3)) set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
 		    losehp(rnd(ACURR(A_CON) > 15 ? 3 : 5), kickstr(buf),
 			KILLED_BY);
 		    if(Is_airlevel(&u.uz) || Levitation)
@@ -1037,6 +1203,9 @@ dumb:
 		}
 		return(0);
 	}
+
+	/* Ali - artifact doors from slashem*/
+	if (artifact_door(x, y)) goto ouch;
 
 	/* not enough leverage to kick open doors while levitating */
 	if(Levitation) goto ouch;
@@ -1199,8 +1368,8 @@ xchar x, y, dlev;
 		oct += obj->quan;
 		if(obj == uball || obj == uchain) continue;
 		/* boulders can fall too, but rarely & never due to rocks */
-		if((isrock && obj->otyp == BOULDER) ||
-		   rn2(obj->otyp == BOULDER ? 30 : 3)) continue;
+		if((isrock && is_boulder(obj) ) ||
+		   rn2(is_boulder(obj) ? 30 : 3)) continue;
 		obj_extract_self(obj);
 
 		if(costly) {
@@ -1302,7 +1471,7 @@ boolean shop_floor_obj;
 	}
 	/* boulders never fall through trap doors, but they might knock
 	   other things down before plugging the hole */
-	if (otmp->otyp == BOULDER &&
+	if (is_boulder(otmp) &&
 		((t = t_at(x, y)) != 0) &&
 		(t->ttyp == TRAPDOOR || t->ttyp == HOLE)) {
 	    if (impact) impact_drop(otmp, x, y, 0);
@@ -1369,7 +1538,7 @@ boolean shop_floor_obj;
 	otmp->oy = cc.y;
 	otmp->owornmask = (long)toloc;
 	/* boulder from rolling boulder trap, no longer part of the trap */
-	if (otmp->otyp == BOULDER) otmp->otrapped = 0;
+	if (is_boulder(otmp)) otmp->otrapped = 0;
 
 	if(impact) {
 	    /* the objs impacted may be in a shop other than

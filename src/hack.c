@@ -40,7 +40,7 @@ const char *msg;
 	    if((mtmp = m_at(x,y)) && enexto(&cc, x, y, mtmp->data))
 		rloc_to(mtmp, cc.x, cc.y);
 	    if(msg) Norep("%s", msg);
-	    revived = revive_corpse(otmp);
+	    revived = revive_corpse(otmp, REVIVE_MONSTER);
 	}
     }
 
@@ -66,7 +66,7 @@ moverock()
     register struct monst *mtmp;
 
     sx = u.ux + u.dx,  sy = u.uy + u.dy;	/* boulder starting position */
-    while ((otmp = sobj_at(BOULDER, sx, sy)) != 0) {
+    while ((otmp = boulder_at(sx, sy)) != 0) {
 	/* make sure that this boulder is visible as the top object */
 	if (otmp != level.objects[sx][sy]) movobj(otmp, sx, sy);
 
@@ -95,7 +95,7 @@ moverock()
 		!Is_rogue_level(&u.uz) &&
 #endif
 		(levl[rx][ry].doormask & ~D_BROKEN) == D_NODOOR)) &&
-	    !sobj_at(BOULDER, rx, ry)) {
+	    !boulder_at(rx, ry)) {
 	    ttmp = t_at(rx, ry);
 	    mtmp = m_at(rx, ry);
 
@@ -314,7 +314,7 @@ still_chewing(x,y)
     xchar x, y;
 {
     struct rm *lev = &levl[x][y];
-    struct obj *boulder = sobj_at(BOULDER,x,y);
+    struct obj *boulder = boulder_at(x,y);
     const char *digtxt = (char *)0, *dmgtxt = (char *)0;
 
     if (digging.down)		/* not continuing previous dig (w/ pick-axe) */
@@ -322,7 +322,7 @@ still_chewing(x,y)
 
     if (!boulder && IS_ROCK(lev->typ) && !may_dig(x,y)) {
 	You("hurt your teeth on the %s.",
-	    IS_TREE(lev->typ) ? "tree" : "hard stone");
+	    IS_TREES(lev->typ) ? "tree" : "hard stone");
 	nomul(0, NULL);
 	return 1;
     } else if (digging.pos.x != x || digging.pos.y != y ||
@@ -335,11 +335,13 @@ still_chewing(x,y)
 	assign_level(&digging.level, &u.uz);
 	/* solid rock takes more work & time to dig through */
 	digging.effort =
-	    (IS_ROCK(lev->typ) && !IS_TREE(lev->typ) ? 30 : 60) + u.udaminc;
-	You("start chewing %s %s.",
-	    (boulder || IS_TREE(lev->typ)) ? "on a" : "a hole in the",
-	    boulder ? "boulder" :
-	    IS_TREE(lev->typ) ? "tree" : IS_ROCK(lev->typ) ? "rock" : "door");
+	    (IS_ROCK(lev->typ) && !IS_TREES(lev->typ) ? 30 : 60) + u.udaminc;
+	You("start chewing %s.",
+	    boulder ? (boulder_at(x,y))->otyp==STATUE ? "on a statue" : "on a boulder" :
+	    lev->typ == IRONBARS ? "on the iron bars" :
+	    IS_TREES(lev->typ) ? "on a tree" :
+	    IS_ROCK(lev->typ) ? "a hole in the rock" :
+	    "a hole in the door");
 	watch_dig((struct monst *)0, x, y, FALSE);
 	return 1;
     } else if ((digging.effort += (30 + u.udaminc)) <= 100)  {
@@ -347,7 +349,8 @@ still_chewing(x,y)
 	    You("%s chewing on the %s.",
 		digging.chew ? "continue" : "begin",
 		boulder ? "boulder" :
-		IS_TREE(lev->typ) ? "tree" :
+		lev->typ == IRONBARS ? "bars" :
+		IS_TREES(lev->typ) ? "tree" :
 		IS_ROCK(lev->typ) ? "rock" : "door");
 	digging.chew = TRUE;
 	watch_dig((struct monst *)0, x, y, FALSE);
@@ -360,7 +363,7 @@ still_chewing(x,y)
 
     if (boulder) {
 	delobj(boulder);		/* boulder goes bye-bye */
-	You("eat the boulder.");	/* yum */
+	You("eat the %s.",xname(boulder));	/* yum */
 
 	/*
 	 *  The location could still block because of
@@ -369,7 +372,7 @@ still_chewing(x,y)
 	 *
 	 *  [perhaps use does_block() below (from vision.c)]
 	 */
-	if (IS_ROCK(lev->typ) || closed_door(x,y) || sobj_at(BOULDER,x,y)) {
+	if (IS_ROCK(lev->typ) || closed_door(x,y) || boulder_at(x,y)) {
 	    block_point(x,y);	/* delobj will unblock the point */
 	    /* reset dig state */
 	    (void) memset((genericptr_t)&digging, 0, sizeof digging);
@@ -524,7 +527,7 @@ bad_rock(mdat,x,y)
 struct permonst *mdat;
 register xchar x,y;
 {
-	return((boolean) ((In_sokoban(&u.uz) && sobj_at(BOULDER,x,y)) ||
+	return((boolean) ((In_sokoban(&u.uz) && boulder_at(x,y)) ||
 	       (IS_ROCK(levl[x][y].typ)
 		    && (!tunnels(mdat) || needspick(mdat) || !may_dig(x,y))
 		    && !(passes_walls(mdat) && may_passwall(x,y)))));
@@ -560,12 +563,14 @@ int mode;
 	if (Blind && mode == DO_MOVE) feel_location(x,y);
 	if (Passes_walls && may_passwall(x,y)) {
 	    ;	/* do nothing */
-	} else if (tmpr->typ == IRONBARS) {
-	    if (!(Passes_walls || passes_bars(youmonst.data))) {
-		if (iflags.notice_walls)
-		    pline("You cannot pass through the bars.");
-		return FALSE;
+	} else if (tmpr->typ == IRONBARS && (u.uz.dnum != law_dnum || !on_level(&illregrd_level,&u.uz))) {
+	    if ((dmgtype(youmonst.data, AD_RUST) ||
+			dmgtype(youmonst.data, AD_CORR))) {
+			You("eat through the bars.");
+			dissolve_bars(x,y);
 	    }
+	    if (!(Passes_walls || passes_bars(youmonst.data)))
+		return FALSE;
 	} else if (tunnels(youmonst.data) && !needspick(youmonst.data)) {
 	    /* Eat the rock. */
 	    if (mode == DO_MOVE && still_chewing(x,y)) return FALSE;
@@ -589,7 +594,22 @@ int mode;
     } else if (IS_DOOR(tmpr->typ)) {
 	if (closed_door(x,y)) {
 	    if (Blind && mode == DO_MOVE) feel_location(x,y);
-	    if (Passes_walls)
+	    /* ALI - artifact doors from slash'em */
+	    if (artifact_door(x, y)) {
+		if (mode == DO_MOVE) {
+		    if (amorphous(youmonst.data))
+			You("try to ooze under the door, but the gap is too small.");
+		    else if (tunnels(youmonst.data) && !needspick(youmonst.data))
+			You("hurt your teeth on the re-enforced door.");
+		    else if (x == u.ux || y == u.uy) {
+			if (Blind || Stunned || ACURR(A_DEX) < 10 || Fumbling) {
+				pline("Ouch!  You bump into a heavy door.");
+			    exercise(A_DEX, FALSE);
+			} else pline("That door is closed.");
+		    }
+		}
+		return FALSE;
+	    }	    if (Passes_walls)
 		;	/* do nothing */
 	    else if (can_ooze(&youmonst)) {
 		if (mode == DO_MOVE) You("ooze under the door.");
@@ -647,6 +667,9 @@ int mode;
 	}
 	if (invent && (inv_weight() + weight_cap() > 600)) {
 	    if (mode == DO_MOVE)
+#ifdef CONVICT
+        if (!Passes_walls)
+#endif /* CONVICT */
 		You("are carrying too much to get through.");
 	    return FALSE;
 	}
@@ -678,7 +701,7 @@ int mode;
 	return FALSE;
     }
 
-    if (sobj_at(BOULDER,x,y) && (In_sokoban(&u.uz) || !Passes_walls)) {
+    if (boulder_at(x,y) && (In_sokoban(&u.uz) || !Passes_walls)) {
 	if (!(Blind || Hallucination) && (flags.run >= 2) && mode != TEST_TRAV)
 	    return FALSE;
 	if (mode == DO_MOVE) {
@@ -692,7 +715,7 @@ int mode;
 	    struct obj* obj;
 
 	    /* don't pick two boulders in a row, unless there's a way thru */
-	    if (sobj_at(BOULDER,ux,uy) && !In_sokoban(&u.uz)) {
+	    if (boulder_at(ux,uy) && !In_sokoban(&u.uz)) {
 		if (!Passes_walls &&
 		    !(tunnels(youmonst.data) && !needspick(youmonst.data)) &&
 		    !carrying(PICK_AXE) && !carrying(DWARVISH_MATTOCK) &&
@@ -764,7 +787,7 @@ boolean guess;
 		int y = travelstepy[set][i];
 		static int ordered[] = { 0, 2, 4, 6, 1, 3, 5, 7 };
 		/* no diagonal movement for grid bugs */
-		int dirmax = u.umonnum == PM_GRID_BUG ? 4 : 8;
+		int dirmax = (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) ? 4 : 8;
 
 		for (dir = 0; dir < dirmax; ++dir) {
 		    int nx = x+xdir[ordered[dir]];
@@ -772,7 +795,7 @@ boolean guess;
 
 		    if (!isok(nx, ny)) continue;
 		    if ((!Passes_walls && !can_ooze(&youmonst) &&
-			closed_door(x, y)) || sobj_at(BOULDER, x, y)) {
+			closed_door(x, y)) || boulder_at(x, y)) {
 			/* closed doors and boulders usually
 			 * cause a delay, so prefer another path */
 			if (travel[x][y] > radius-3) {
@@ -877,6 +900,7 @@ domove()
 	int bc_control;				/* control for ball&chain */
 	boolean cause_delay = FALSE;	/* dragging ball will skip a move */
 	const char *predicament;
+	boolean displacer = FALSE;	/* defender attempts to displace you */
 
 	u_wipe_engr(rnd(5));
 
@@ -1093,10 +1117,13 @@ domove()
 		    }
 		}
 		if(multi < 0) return;	/* we just fainted */
-
+		/* new displacer beast thingie -- by [Tom] */
+		/* sometimes, instead of attacking, you displace it. */
+		/* Good joke, huh? */
+		if (is_displacer(mtmp->data) && !rn2(2)) displacer = TRUE;
 		/* try to attack; note that it might evade */
 		/* also, we don't attack tame when _safepet_ */
-		if(attack(mtmp)) return;
+		else if(attack(mtmp)) return;
 	    }
 	}
 
@@ -1125,6 +1152,8 @@ domove()
 	    newsym(x, y);
 	}
 	/* not attacking an animal, so we try to move */
+	if (!displacer) {
+
 #ifdef STEED
 	if (u.usteed && !u.usteed->mcanmove && (u.dx || u.dy)) {
 		pline("%s won't move!", upstart(y_monnam(u.usteed)));
@@ -1141,7 +1170,7 @@ domove()
 	}
 	if(u.utrap) {
 		if(u.utraptype == TT_PIT) {
-		    if (!rn2(2) && sobj_at(BOULDER, u.ux, u.uy)) {
+		    if (!rn2(2) && boulder_at(u.ux, u.uy)) {
 			Your("%s gets stuck in a crevice.", body_part(LEG));
 			display_nhwindow(WIN_MESSAGE, FALSE);
 			clear_nhwindow(WIN_MESSAGE);
@@ -1252,7 +1281,7 @@ domove()
 #endif
 			Norep("You are %s.", predicament);
 		    }
-		    if((u.dx && u.dy) || !rn2(5)) u.utrap--;
+		    if((u.dx || u.dy) || !rn2(5)) u.utrap--; //was dx && dy, I think this was a typo
 		}
 		return;
 	}
@@ -1263,6 +1292,18 @@ domove()
 	    return;
 	}
 
+	} else if (!test_move(u.ux, u.uy, x-u.ux, y-u.uy, TEST_MOVE)) {
+	    /*
+	     * If a monster attempted to displace us but failed
+	     * then we are entitled to our normal attack.
+	     */
+	    if (!attack(mtmp)) {
+		flags.move = 0;
+		nomul(0, NULL);
+	    }
+	    return;
+	}
+
 	/* Move ball and chain.  */
 	if (Punished)
 	    if (!drag_ball(x,y, &bc_control, &ballx, &bally, &chainx, &chainy,
@@ -1270,8 +1311,15 @@ domove()
 		return;
 
 	/* Check regions entering/leaving */
-	if (!in_out_region(x,y))
+	if (!in_out_region(x,y)) {
+#if 0
+	    /* [ALI] This can't happen at present, but if it did we would
+	     * also need to worry about the call to drag_ball above.
+	     */
+	    if (displacer) (void)attack(mtmp);
+#endif
 	    return;
+	}
 
  	/* now move the hero */
 	mtmp = m_at(x, y);
@@ -1285,6 +1333,28 @@ domove()
 		exercise_steed();
 	}
 #endif
+
+	if (displacer) {
+	    char pnambuf[BUFSZ];
+
+	    u.utrap = 0;			/* A lucky escape */
+	    /* save its current description in case of polymorph */
+	    Strcpy(pnambuf, mon_nam(mtmp));
+	    remove_monster(x, y);
+	    place_monster(mtmp, u.ux0, u.uy0);
+	    /* check for displacing it into pools and traps */
+	    switch (minliquid(mtmp) ? 2 : mintrap(mtmp)) {
+		case 0:
+		    You("displaced %s.", pnambuf);
+		    break;
+		case 1:
+		case 3:
+		    break;
+		case 2:
+		    u.uconduct.killer++;
+		    break;
+	    }
+	}
 
 	/*
 	 * If safepet at destination then move the pet to the hero's
@@ -1317,7 +1387,7 @@ domove()
 	    if (mtmp->mtrapped &&
 		    (trap = t_at(mtmp->mx, mtmp->my)) != 0 &&
 		    (trap->ttyp == PIT || trap->ttyp == SPIKED_PIT) &&
-		    sobj_at(BOULDER, trap->tx, trap->ty)) {
+		    boulder_at(trap->tx, trap->ty)) {
 		/* can't swap places with pet pinned in a pit by a boulder */
 		u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
 	    } else if (u.ux0 != x && u.uy0 != y &&
@@ -1547,7 +1617,7 @@ stillinwater:;
 			    int dmg;
 			    You("are hit by %s!",
 				x_monnam(mtmp, ARTICLE_A, "falling", 0, TRUE));
-			    dmg = d(4,6);
+			    dmg = d(mtmp->m_lev,6);
 			    if(Half_physical_damage) dmg = (dmg+1) / 2;
 			    mdamageu(mtmp, dmg);
 			}
@@ -1743,6 +1813,7 @@ register boolean newlev;
 
 	    /* Did we just enter some other special room? */
 	    /* vault.c insists that a vault remain a VAULT,
+		 * BEEHIVEs, GARDENs have special colouration,
 	     * and temples should remain TEMPLEs,
 	     * but everything else gives a message only the first time */
 	    switch (rt) {
@@ -1768,7 +1839,10 @@ register boolean newlev;
 			You("have an uncanny feeling...");
 		    break;
 		case BEEHIVE:
+			if (monstinroom(&mons[PM_QUEEN_BEE], roomno)) {
 		    You("enter a giant beehive!");
+			}
+			rt = 0;
 		    break;
 		case COCKNEST:
 		    You("enter a disgusting nest!");
@@ -1928,7 +2002,7 @@ lookaround()
 
     /* Grid bugs stop if trying to move diagonal, even if blind.  Maybe */
     /* they polymorphed while in the middle of a long move. */
-    if (u.umonnum == PM_GRID_BUG && u.dx && u.dy) {
+    if ((u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) && u.dx && u.dy) {
 	nomul(0, NULL);
 	return;
     }
@@ -1937,7 +2011,7 @@ lookaround()
     for(x = u.ux-1; x <= u.ux+1; x++) for(y = u.uy-1; y <= u.uy+1; y++) {
 	if(!isok(x,y)) continue;
 
-	if(u.umonnum == PM_GRID_BUG && x != u.ux && y != u.uy) continue;
+	if((u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) && x != u.ux && y != u.uy) continue;
 
 	if(x == u.ux && y == u.uy) continue;
 
@@ -2168,7 +2242,7 @@ boolean k_format;
 int
 weight_cap()
 {
-	register long carrcap;
+	long carrcap = 0;
 
 	carrcap = 25*(ACURRSTR + ACURR(A_CON)) + 50;
 	if (Upolyd) {
@@ -2190,12 +2264,35 @@ weight_cap()
 		carrcap = MAX_CARR_CAP;
 	else {
 		if(carrcap > MAX_CARR_CAP) carrcap = MAX_CARR_CAP;
+		carrcap += u.ucarinc; /* note that carinc bonues can push you over the normal limit! */
+		static int hboots = 0;
+		if (!hboots) hboots = find_hboots();
+		if (uarmf && uarmf->otyp == hboots) carrcap += uarmf->cursed ? 0 : 100; 
+		
 		if (!Flying) {
 			if(EWounded_legs & LEFT_SIDE) carrcap -= 100;
 			if(EWounded_legs & RIGHT_SIDE) carrcap -= 100;
 		}
 		if (carrcap < 0) carrcap = 0;
 	}
+	if(arti_lighten(uarm)){
+		if(uarm->blessed) carrcap *= 1.5;
+		else if(uarm->cursed) carrcap *= 1.25;
+		else carrcap *= .75;
+	}
+	if(arti_lighten(uarmc)){
+		if(uarmc->blessed) carrcap *= 1.5;
+		else if(uarmc->cursed) carrcap *= 1.25;
+		else carrcap *= .75;
+	}
+#ifdef TOURIST
+	if(arti_lighten(uarmu)){
+		if(uarmu->blessed) carrcap *= 1.5;
+		else if(uarmu->cursed) carrcap *= 1.25;
+		else carrcap *= .75;
+	}
+#endif	/* TOURIST */
+
 	return((int) carrcap);
 }
 
@@ -2219,11 +2316,11 @@ inv_weight()
 #endif
 	while (otmp) {
 #ifndef GOLDOBJ
-		if (otmp->otyp != BOULDER || !throws_rocks(youmonst.data))
+		if (!is_boulder(otmp) || !throws_rocks(youmonst.data))
 #else
 		if (otmp->oclass == COIN_CLASS)
 			wt += (int)(((long)otmp->quan + 50L) / 100L);
-		else if (otmp->otyp != BOULDER || !throws_rocks(youmonst.data))
+		else if (!is_boulder(otmp) || !throws_rocks(youmonst.data))
 #endif
 			wt += otmp->owt;
 		otmp = otmp->nobj;

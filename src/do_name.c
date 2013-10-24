@@ -6,6 +6,7 @@
 
 #ifdef OVLB
 
+STATIC_DCL void FDECL(do_oname, (struct obj *));
 static void FDECL(getpos_help, (BOOLEAN_P,const char *));
 
 extern const char what_is_an_unknown_object[];		/* from pager.c */
@@ -378,13 +379,9 @@ do_mname()
 	/* strip leading and trailing spaces; unnames monster if all spaces */
 	(void)mungspaces(buf);
 
-	if (mtmp->data->geno & G_UNIQ) {
-	  if (mtmp->data == &mons[PM_HIGH_PRIEST] && Is_astralevel(&u.uz)) {
-	    pline_The("high priest%s doesn't like being called names!", mtmp->female ? "ess" : "");
-	  } else {
+	if (mtmp->data->geno & G_UNIQ)
 	    pline("%s doesn't like being called names!", Monnam(mtmp));
-	  }
-	} else
+	else
 	    (void) christen_monst(mtmp, buf);
 	return(0);
 }
@@ -423,9 +420,9 @@ register struct obj *obj;
 		c1 = lowc(buf[n]);
 		do c2 = 'a' + rn2('z'-'a'); while (c1 == c2);
 		buf[n] = (buf[n] == c1) ? c2 : highc(c2);  /* keep same case */
-		pline("While engraving your %s slips.", body_part(HAND));
+//		pline("While engraving your %s slips.", body_part(HAND));
 		display_nhwindow(WIN_MESSAGE, FALSE);
-		You("engrave: \"%s\".",buf);
+		You("christen it \"%s\".",buf);
 	}
 	obj = oname(obj, buf);
 }
@@ -981,7 +978,7 @@ char *outbuf;
     /* high priest(ess)'s identity is concealed on the Astral Plane,
        unless you're adjacent (overridden for hallucination which does
        its own obfuscation) */
-    if (mon->data == &mons[PM_HIGH_PRIEST] && !Hallucination &&
+    if ( (mon->data == &mons[PM_HIGH_PRIEST] || mon->data == &mons[PM_ELDER_PRIEST]) && !Hallucination &&
 	    Is_astralevel(&u.uz) && distu(mon->mx, mon->my) > 2) {
 	Strcpy(outbuf, article == ARTICLE_THE ? "the " : "");
 	Strcat(outbuf, mon->female ? "high priestess" : "high priest");
@@ -992,13 +989,30 @@ char *outbuf;
 }
 
 static const char * const bogusmons[] = {
-	"jumbo shrimp", "giant pigmy", "gnu", "killer penguin",
-	"giant cockroach", "giant slug", "maggot", "pterodactyl",
-	"tyrannosaurus rex", "basilisk", "beholder", "nightmare",
-	"efreeti", "marid", "rot grub", "bookworm", "master lichen",
+	"jumbo shrimp", "giant pigmy", /* oxymorons */
+	"gnu", "killer penguin", "Hexley", /* op-syses */
+	"lemming with a suicide vest", /* Because jumping to just YOUR death isn't enough. */
+	"giant cockroach", "giant slug", "maggot", 
+	"pterodactyl", "tyrannosaurus rex", "basilisk",
+	"efreeti", "marid", "dao",/* dnd genies */
+	"rot grub", "bookworm", 
+	"Euryale", "Stheno", /* Medusa's elder sisters. Oddly enough "The X" works for them,
+							as their names can be interpreted as titles. */
+	"demi lichen", "master lichen", "arch-lichen", /* lich lichens */
+	"priest of a well-known god", /* Not very mysterious */
+	"shallow one", /* Not very deep */
+	"fungi from your-sock", /* Not from very far away */
+	"mochtroid", "youtroid", /* fake metroids */
+	"serge-ant", "lieuten-ant", "captant", /* soldier ant officers */
 	"shadow", "hologram", "jester", "attorney", "sleazoid",
-	"killer tomato", "amazon", "robot", "battlemech",
-	"rhinovirus", "harpy", "lion-dog", "rat-ant", "Y2K bug",
+	"killer tomato", "shrinking violet",
+	"amazon", "mermaid", "gynoid", "magical girl",
+	"wild man", "merman", "android", "shonen hero", "delinquent",
+	"robot", "battlemech",
+	"rhinovirus", 
+	"harpy", 
+	"lion-dog", "rat-ant", 
+	"Y2K bug", "foo",
 						/* misc. */
 	"grue", "Christmas-tree monster", "luck sucker", "paskald",
 	"brogmoid", "dornbeast",		/* Quendor (Zork, &c.) */
@@ -1010,28 +1024,45 @@ static const char * const bogusmons[] = {
 						/* Rogue V5 http://rogue.rogueforge.net/vade-mecum/ */
 	"creeping coins",			/* Wizardry */
 	"hydra", "siren",			/* Greek legend */
+	"jotun",					/* Norse legend */
 	"killer bunny",				/* Monty Python */
 	"rodent of unusual size",		/* The Princess Bride */
-	"Smokey the bear",	/* "Only you can prevent forest fires!" */
-	"Luggage",				/* Discworld */
+	"bear named Smokey",	/* "Only you can prevent forest fires!" */
+	"5.9176 pentranomeker worm", /* The Mimir, contributed by Joshua Jarvis */
+	"andalite",					/* Animorphs */
+	"yithian", "elder thing", "old one", "great old one", "outer god", "other god", "elder god", /* Lovecraft */
+	"eyeless albino penguin", /* More Lovecraft */
+	"shadowgirl",				/* Shadowgirls */
+	"Luggage", "God of Stuff", "vampiric watermelon",	/* Discworld */
 	"Ent",					/* Lord of the Rings */
 	"tangle tree", "nickelpede", "wiggle",	/* Xanth */
 	"white rabbit", "snark",		/* Lewis Carroll */
 	"pushmi-pullyu",			/* Dr. Doolittle */
 	"smurf",				/* The Smurfs */
 	"tribble", "Klingon", "Borg",		/* Star Trek */
-	"Ewok",					/* Star Wars */
-	"Totoro",				/* Tonari no Totoro */
+	"Ewok",	"Wookiee", "Jedi", "Sith",	/* Star Wars */
+	"incredible hulk",		/* Comics */
+	"incredible bulk",		/* 8-bit theater */
+	"hegemonic brute", "sovereign slayer", "draconian dignitary", "courtyard droll", /* Homestuck */
+	"sprit named Totoro",	/* Tonari no Totoro */
 	"ohmu",					/* Nausicaa */
 	"youma",				/* Sailor Moon */
-	"nyaasu",				/* Pokemon (Meowth) */
-	"Godzilla", "King Kong",		/* monster movies */
+	"Lone Power", 			/* So you want to be a Wizard? */
+	"electric boid", "feral waffle-iron", "Bowman's wolf", "worried machine", "omniquantalist", 
+		"squid in a space-suit", /* Freefall */
+	"carbosilicate amorph", "debatably-sapient kreely", "viral boy-band", 
+		"self-replicating, self-aware war machine", "maximally effective mercenary", /* Schlock Mercenary */
+	"friend demon", /* Drowtales */
+	"big dumb object", /* Scifi */
+	"kaiju named Godzilla", "giant ape named King Kong",		/* monster movies */
 	"earthquake beast",			/* old L of SH */
-	"Invid",				/* Robotech */
-	"Terminator",				/* The Terminator */
+	"shinigami captain", "shinigami lieutenant", "arrancar", "hollow",	/* Bleach */
+	"nyaasu",				/* Pokemon (Meowth) */
+	"Invid", "Veritech",		/* Robotech */
+	"berserk Eva",				/* Neon Genesis Evangelion */
 	"boomer",				/* Bubblegum Crisis */
 	"Dalek",				/* Dr. Who ("Exterminate!") */
-	"microscopic space fleet", "Ravenous Bugblatter Beast of Traal",
+	"microscopic space fleet", "Ravenous Bugblatter Beast of Traal", "dolphin",
 						/* HGttG */
 	"teenage mutant ninja turtle",		/* TMNT */
 	"samurai rabbit",			/* Usagi Yojimbo */
@@ -1039,12 +1070,21 @@ static const char * const bogusmons[] = {
 	"Audrey II",				/* Little Shop of Horrors */
 	"witch doctor", "one-eyed one-horned flying purple people eater",
 						/* 50's rock 'n' roll */
-	"Barney the dinosaur",			/* saccharine kiddy TV */
+	"purple dinosaur",			/* Barney, saccharine kiddy TV */
+	"sparkly vampire",			/* Twilight */
 	"Morgoth",				/* Angband */
+	"Terminator",				/* The Terminator */
+	"Cylon",				/* Battlestar Galactica */
 	"Vorlon",				/* Babylon 5 */
+	"Mondoshawan",			/* Fifth Element */
+	"Tralfamadorian",		/* Slaghterhouse 5 */
+	"RIME", "Ch'Thone","palaeotech","wheeler","spindle king", "kung", "shand", /* Strata */
 	"questing beast",		/* King Arthur */
 	"Predator",				/* Movie */
-	"mother-in-law",			/* common pest */
+	"mother-in-law", 		/* common pests */
+	"visible stalker",		/* occupational hazard */
+	"Minosaur", "vestigal virgin", "octagenarian", /*"saint called Mary of the Immaculate Contraption,"*/ /*non campus mentus*/
+	"arsassin",				/* Psych */
         "one-winged dewinged stab-bat",  /* KoL */
         "praying mantis",
         "arch-pedant",
@@ -1062,7 +1102,7 @@ static const char * const bogusmons[] = {
         "Crow T. Robot",
         "diagonally moving grid bug",
         "dropbear",
-        "Dudley",
+        "@ named Dudley",
         "El Pollo Diablo",
         "evil overlord",
         "existential angst",
@@ -1106,6 +1146,7 @@ static const char * const bogusmons[] = {
 	"dust speck",
 	"kitten prospecting robot",
 	"angry mariachi",
+	"manbearpig",
 	"star-nosed mole",
 	"acid blog",
 	"guillemet",
@@ -1114,12 +1155,12 @@ static const char * const bogusmons[] = {
 	"miniature blimp",
 	"lungfish",
 
-        "apostrophe golem", "Bob the angry flower",
+        "apostrophe golem", "angry flower named Bob",
         "bonsai-kitten", "Boxxy", "lonelygirl15",
         "tie-thulu", "Domo-kun",
         "looooooooooooong cat",                 /* internet memes */
         "bohrbug", "mandelbug", "schroedinbug", /* bugs */
-        "Gerbenok",                             /* Monty Python killer rabbit */
+        "rabbit named Gerbenok",                /* Monty Python killer rabbit */
         "doenertier",                           /* Erkan & Stefan */
         "Invisible Pink Unicorn",
         "Flying Spaghetti Monster",             /* deities */
@@ -1127,9 +1168,11 @@ static const char * const bogusmons[] = {
         "Qwerty Uiop", "troglotroll",           /* Zamonien */
         "wolpertinger", "elwedritsche", "skvader",
         "Nessie", "tatzelwurm", "dahu",         /* european cryptids */
+			"bigfoot", "tree octopus",
         "three-headed monkey",                  /* Monkey Island */
         "little green man",                     /* modern folklore */
         "weighted Companion Cube",              /* Portal */
+			"Oracle turret", "morality core",
         "/b/tard",                              /* /b/ */
         "manbearpig",                           /* South Park */
         "ceiling cat", "basement cat",
@@ -1241,8 +1284,13 @@ static const char * const bogusmons[] = {
 	"water lemon",
 	"water melon",
 	"winged grizzly",
-	"yellow wight"
+	"yellow wight", 
 
+	/* bogus UnNetHack monsters */
+	"weeping angle",
+	"gelatinous sphere", "gelatinous pyramid",
+	"gelatinous Klein bottle", "gelatinous Mandelbrot set",
+	"array terminator"
 };
 
 
@@ -1295,7 +1343,7 @@ static NEARDATA const char * const hcolors[] = {
 	"striped", "spiral", "swirly", "plaid", "checkered", "argyle",
 	"paisley", "blotchy", "guernsey-spotted", "polka-dotted",
 	"square", "round", "triangular",
-	"cabernet", "sangria", "fuchsia", "wisteria",
+	"cabernet", "sangria", "fuchsia", "wisteria", "mauve", "puce",
 	"lemon-lime", "strawberry-banana", "peppermint",
 	"romantic", "incandescent"
 };

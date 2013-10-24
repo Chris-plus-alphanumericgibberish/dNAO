@@ -300,7 +300,7 @@ struct mkroom *sroom;
 		    (type == COCKNEST) ? &mons[PM_COCKATRICE] :
 		    (type == ANTHOLE) ? antholemon() :
 		    (struct permonst *) 0,
-		   sx, sy, NO_MM_FLAGS);
+		   sx, sy, NO_MM_FLAGS|MM_NOCOUNTBIRTH);//did add MM_NOCOUNTBIRTH.
 		if(mon) {
 			mon->msleeping = 1;
 			if (type==COURT && mon->mpeaceful) {
@@ -420,7 +420,8 @@ morguemon()
 
 	if(hd > 10 && i < 10)
 		return((Inhell || In_endgame(&u.uz)) ? mkclass(S_DEMON,0) :
-						       &mons[ndemon(A_NONE)]);
+							   mkclass(S_MUMMY,0));
+//						       &mons[ndemon(A_NONE)]); Was this, but I think this was nullpointering
 	if(hd > 8 && i > 85)
 		return(mkclass(S_VAMPIRE,0));
 
@@ -474,6 +475,10 @@ mkswamp()	/* Michiel Huisjes & Fred de Wilde */
 		    } else
 			if(!rn2(4))	/* swamps tend to be moldy */
 			    (void) makemon(mkclass(S_FUNGUS,0),
+						sx, sy, NO_MM_FLAGS);
+			else if(!rn2(6))
+			    if (!rn2(2)) /* swamp ferns like swamps */
+				(void) makemon(&mons[PM_SWAMP_FERN],
 						sx, sy, NO_MM_FLAGS);
 		}
 		level.flags.has_swamp = 1;
@@ -700,7 +705,8 @@ squadmon()		/* return soldier types. */
 	}
 	mndx = squadprob[rn2(NSTYPES)].pm;
 gotone:
-	if (!(mvitals[mndx].mvflags & G_GONE)) return(&mons[mndx]);
+//	if (!(mvitals[mndx].mvflags & G_GONE)) return(&mons[mndx]);
+	if (!(mvitals[mndx].mvflags & G_GENOD)) return(&mons[mndx]);//empty if genocided
 	else			    return((struct permonst *) 0);
 }
 
