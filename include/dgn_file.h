@@ -70,7 +70,9 @@ struct tmpbranch {
 /*
  *	Max number of prototype levels and branches.
  */
-#define LEV_LIMIT	50
+//increased LEV_LIMIT from 50 to 100 >:[ Not sure WHY there is a limit to begin with...
+//...and now to 150
+#define LEV_LIMIT	150
 #define BRANCH_LIMIT	32
 
 #endif /* DGN_FILE_H */

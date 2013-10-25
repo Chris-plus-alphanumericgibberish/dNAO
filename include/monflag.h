@@ -27,9 +27,7 @@
 #define MS_IMITATE	19	/* imitates others (leocrotta) */
 #define MS_ORC		MS_GRUNT	/* intelligent brutes */
 #define MS_HUMANOID	20	/* generic traveling companion */
-#ifdef KOPS
-#define MS_ARREST	21	/* "Stop in the name of the law!" (Kops) */
-#endif
+#define MS_ARREST	21	/* "Stop in the name of the law!" (was Keystones) */
 #define MS_SOLDIER	22	/* army and watchmen expressions */
 #define MS_GUARD	23	/* "Please drop that gold and follow me." */
 #define MS_DJINNI	24	/* "Thank you for freeing me!" */
@@ -50,20 +48,23 @@
 #define MS_BOAST	39	/* giants */
 
 
-#define MR_FIRE		0x01	/* resists fire */
-#define MR_COLD		0x02	/* resists cold */
-#define MR_SLEEP	0x04	/* resists sleep */
-#define MR_DISINT	0x08	/* resists disintegration */
-#define MR_ELEC		0x10	/* resists electricity */
-#define MR_POISON	0x20	/* resists poison */
-#define MR_ACID		0x40	/* resists acid */
-#define MR_STONE	0x80	/* resists petrification */
+#define MR_FIRE		0x001	/* 1 resists fire */
+#define MR_COLD		0x002	/* 2 resists cold */
+#define MR_SLEEP	0x004	/* 4 resists sleep */
+#define MR_DISINT	0x008	/* 8 resists disintegration */
+#define MR_ELEC		0x010	/* 16 resists electricity */
+#define MR_POISON	0x020	/* 32 resists poison */
+#define MR_ACID		0x040	/* 64 resists acid */
+#define MR_STONE	0x080	/* 128 resists petrification */
+#define MR_DRAIN	0x100	/* 256 resists level drain */
+#define MR_SICK		0x200	/* resists sickness */
+#define MR_ALL		(MR_STONE|MR_ACID|MR_POISON|MR_ELEC|MR_DISINT|MR_SLEEP|MR_COLD|MR_FIRE|MR_DRAIN|MR_SICK)
 /* other resistances: magic, sickness */
 /* other conveyances: teleport, teleport control, telepathy */
 
 /* individual resistances */
-#define MR2_SEE_INVIS	0x0100	/* see invisible */
-#define MR2_LEVITATE	0x0200	/* levitation */
+//#define MR2_SEE_INVIS	0x0100	/* slot taken by MR_DRAIN see invisible */
+//#define MR2_LEVITATE	0x0200	/* slot taken by MR_SICK levitation */
 #define MR2_WATERWALK	0x0400	/* water walking */
 #define MR2_MAGBREATH	0x0800	/* magical breathing */
 #define MR2_DISPLACED	0x1000	/* displaced */
@@ -143,22 +144,29 @@
 #else
 #define M2_MAGIC	0x80000000L	/* picks up magic items */
 #endif
+#define M2_MAID		M2_MAGIC|M2_COLLECT|M2_JEWELS|M2_GREEDY	/* tiddies up the dungeon */
 
-#define M3_WANTSAMUL	0x0001		/* would like to steal the amulet */
-#define M3_WANTSBELL	0x0002		/* wants the bell */
-#define M3_WANTSBOOK	0x0004		/* wants the book */
-#define M3_WANTSCAND	0x0008		/* wants the candelabrum */
-#define M3_WANTSARTI	0x0010		/* wants the quest artifact */
-#define M3_WANTSALL	0x001f		/* wants any major artifact */
-#define M3_WAITFORU	0x0040		/* waits to see you or get attacked */
-#define M3_CLOSE	0x0080		/* lets you close unless attacked */
+#define M3_WANTSAMUL	0x00000001L		/* would like to steal the amulet */
+#define M3_WANTSBELL	0x00000002L		/* wants the bell */
+#define M3_WANTSBOOK	0x00000004L		/* wants the book */
+#define M3_WANTSCAND	0x00000008L		/* wants the candelabrum */
+#define M3_WANTSARTI	0x00000010L		/* wants the quest artifact */
+#define M3_WANTSALL		0x0000001fL		/* wants any major artifact */
+#define M3_WAITFORU		0x00000040L		/* waits to see you or get attacked */
+#define M3_CLOSE		0x00000080L		/* lets you close unless attacked */
 
-#define M3_COVETOUS	0x001f		/* wants something */
-#define M3_WAITMASK	0x00c0		/* waiting... */
+#define M3_COVETOUS		0x0000001fL		/* wants something */
+#define M3_WAITMASK		0x000000c0L		/* waiting... */
 
 /* Infravision is currently implemented for players only */
-#define M3_INFRAVISION	0x0100		/* has infravision */
-#define M3_INFRAVISIBLE 0x0200		/* visible by infravision */
+#define M3_INFRAVISION	0x00000100L		/* has infravision */
+#define M3_INFRAVISIBLE 0x00000200L		/* visible by infravision */
+#define M3_TRAITOR		0x00000400L		/* slash'em tag. */
+#define M3_OPAQUE		0x00000800L		/* Monster blocks line of sight */
+#define M3_TENGTPORT	0x00001000L		/* Monster teleports as Tengu */
+#define M3_CHILL		0x00002000L		/* cold to eat */
+#define M3_TOSTY		0x00004000L		/* hot to eat */
+#define M3_STATIONARY	0x00008000L		/* does not move. */
 
 #define MZ_TINY		0		/* < 2' */
 #define MZ_SMALL	1		/* 2-4' */

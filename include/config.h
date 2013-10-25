@@ -331,10 +331,22 @@ typedef unsigned char	uchar;
 #define WALLIFIED_MAZE	/* Fancy mazes - Jean-Christophe Collet */
 #define REINCARNATION	/* Special Rogue-like levels */
 /* monsters & objects */
-#define KOPS		/* Keystone Kops by Scott R. Turner */
+/*define KOPS*/		/* Keystone Kops by Scott R. Turner */
+	/*They Kops have been removed and replaced with the Keter Sephiroth*/
 #define SEDUCE		/* Succubi/incubi seduction, by KAA, suggested by IM */
 #define STEED		/* Riding steeds */
 #define TOURIST		/* Tourist players with cameras and Hawaiian shirts */
+#define CONVICT		/* Convict player with heavy iron ball */
+#define OTHER_SERVICES  /* shopkeeper services (SLASH'EM) */
+
+#define TAME_RANGED_ATTACKS /* tame monsters use ranged attacks */
+#define ATTACK_PETS         /* monsters attack pets directly */
+/* #define TAME_SUMMONING */  /* tame spellcasters can summon tame monsters */
+                              /* (including you) */
+#define YOUMONST_SPELL      /* you can cast monster spells in the form
+                               of a monster */
+#define PET_SATIATION       /* pets can become satiated and choke;
+                               they can also hoard food if intelligent */
 /* difficulty */
 #define ELBERETH	/* Engraving the E-word repels monsters */
 /* I/O */
@@ -423,6 +435,7 @@ typedef unsigned char	uchar;
 #define XLOGFILE "xlogfile"  /* even larger logfile */
 /* #define REALTIME_ON_BOTL */  /* Show elapsed time on bottom line.  Note:
                                  * this breaks savefile compatibility. */
+
 /* The options in this section require the extended logfile support */
 #ifdef XLOGFILE
 #define RECORD_CONDUCT  /* Record conducts kept in logfile */

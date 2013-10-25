@@ -43,6 +43,7 @@ struct u_event {
 	Bitfield(qcompleted,1);		/* successfully completed Quest task */
 	Bitfield(uheard_tune,2);	/* 1=know about, 2=heard passtune */
 	Bitfield(uopened_dbridge,1);	/* opened the drawbridge */
+	Bitfield(uread_necronomicon,1);		/* have read the necronomicon */
 
 	Bitfield(invoked,1);		/* invoked Gate to the Sanctum level */
 	Bitfield(gehennom_entered,1);	/* entered Gehennom via Valley */
@@ -50,6 +51,9 @@ struct u_event {
 	Bitfield(uhand_of_elbereth,2);	/* became Hand of Elbereth */
 #endif
 	Bitfield(udemigod,1);		/* killed the wiz */
+	Bitfield(ukilled_apollyon,1);		/* killed the angel of the pit.  Lucifer should spawn on Astral */
+	Bitfield(sum_entered,1);		/* entered Sum-of-All */
+	Bitfield(uaxus_foe,1);		/* enemy of the modrons */
 	Bitfield(ascended,1);		/* has offered the Amulet */
 };
 
@@ -61,9 +65,12 @@ struct u_conduct {		/* number of times... */
 	long	unvegetarian;	/* eaten any animal */
 	long	unvegan;	/* ... or any animal byproduct */
 	long	food;		/* ... or any comestible */
+	long	ratseaten;	/* number of rats eaten */
 	long	gnostic;	/* used prayer, priest, or altar */
 	long	weaphit;	/* hit a monster with a weapon */
 	long	killer;		/* killed a monster yourself */
+	long	wardless;	/* drew a warding symbol */
+	long	elbereth;	/* wrote elbereth */
 	long	literate;	/* read something (other than BotD) */
 	long	polypiles;	/* polymorphed an object */
 	long	polyselfs;	/* transformed yourself */
@@ -261,6 +268,8 @@ struct you {
 	int	 uhunger;	/* refd only in eat.c and shk.c */
 	unsigned uhs;		/* hunger state - see eat.c */
 
+	boolean ukinghill; /* records if you are carying the pirate treasure (and are therefor king of the hill) */
+	int protean; /* counter for the auto-polypiling power of the*/
 	struct prop uprops[LAST_PROP+1];
 
 	unsigned umconf;
@@ -321,12 +330,15 @@ struct you {
 #define A_CURRENT	0
 	aligntyp ualignbase[CONVERT];	/* for ualign conversion record */
 	schar uluck, moreluck;		/* luck and luck bonus */
+	int luckturn;
 #define Luck	(u.uluck + u.moreluck)
 #define LUCKADD		3	/* added value when carrying luck stone */
 #define LUCKMAX		10	/* on moonlit nights 11 */
 #define LUCKMIN		(-10)
 	schar	uhitinc;
 	schar	udaminc;
+	int		ucarinc;		/* bonus carrying capacity*/
+	schar	uacinc;			/* bonus AC (not spell/divine) */
 	schar	uac;
 	uchar	uspellprot;		/* protection by SPE_PROTECTION */
 	uchar	usptime;		/* #moves until uspellprot-- */
@@ -361,8 +373,133 @@ struct you {
 	struct skills weapon_skills[P_NUM_SKILLS];
 	boolean twoweap;		/* KMH -- Using two-weapon combat */
 
+	long	wardsknown;	/* known wards */
+#define	WARD_ELBERETH		0x0000001L
+#define WARD_HEPTAGRAM		0x0000002L
+#define WARD_GORGONEION		0x0000004L
+#define WARD_ACHERON		0x0000008L
+#define WARD_PENTAGRAM		0x0000010L
+#define WARD_HEXAGRAM		0x0000020L
+#define WARD_HAMSA			0x0000040L
+#define WARD_ELDER_SIGN		0x0000080L
+#define WARD_EYE			0x0000100L
+#define WARD_QUEEN			0x0000200L
+#define WARD_CAT_LORD		0x0000400L
+#define WARD_GARUDA			0x0000800L
+#define WARD_CTHUGHA		0x0001000L
+#define WARD_ITHAQUA		0x0002000L
+#define WARD_KRAKAL			0x0004000L
+#define WARD_YELLOW			0x0008000L
+#define WARD_TOUSTEFNA		0x0010000L
+#define WARD_DREPRUN		0x0020000L
+#define WARD_OTTASTAFUR		0x0040000L
+#define WARD_KAUPALOKI		0x0080000L
+#define WARD_VEIOISTAFUR	0x0100000L
+#define WARD_THJOFASTAFUR	0x0200000L
+
+	
+	short sealorder[31];
+	long	sealsKnown;
+#define SEAL_AHAZU					0x0000001L
+	long	ahazu;	//turn on which spirit will be again eligible for binding.
+#define SEAL_AMON					0x0000002L
+	long	amon;
+#define SEAL_ANDREALPHUS			0x0000004L
+	long	andrealphus;
+#define SEAL_ANDROMALIUS			0x0000008L
+	long	andromalius;
+#define SEAL_ASTAROTH				0x0000010L
+	long	astaroth;
+#define SEAL_BALAM					0x0000020L
+	long	balam;
+#define SEAL_BERITH					0x0000040L
+	long	berith;
+#define SEAL_BUER					0x0000080L
+	long	buer;
+#define SEAL_CHUPOCLOPS				0x0000100L
+	long	chupoclops;
+#define SEAL_DANTALION				0x0000200L
+	long	dantalion;
+#define SEAL_DUNSTAN				0x0000400L
+	long	dunstan;
+#define SEAL_ECHIDNA				0x0000800L
+	long	echidna;
+#define SEAL_EDEN					0x0001000L
+	long	eden;
+#define SEAL_ERIDU					0x0002000L
+	long	eridu;
+#define SEAL_EURYNOME				0x0004000L
+	long	eurynome;
+#define SEAL_EVE					0x0008000L
+	long	eve;
+#define SEAL_FAFNIR					0x0010000L
+	long	fafnir;
+#define SEAL_HUGINN_MUNINN			0x0020000L
+	long	huginn_muninn;
+#define SEAL_IRIS					0x0040000L
+	long	iris;
+#define SEAL_JACK					0x0080000L
+	long	jack;
+#define SEAL_MALPHAS				0x0100000L
+	long	malphas;
+#define SEAL_MARIONETTE				0x0200000L
+	long	marionette;
+#define SEAL_MOTHER					0x0400000L
+	long	mother;
+#define SEAL_NABERIUS				0x0800000L
+	long	naberius;
+#define SEAL_ORTHOS					0x1000000L
+	long	orthos;
+#define SEAL_OSE					0x2000000L
+	long	ose;
+#define SEAL_OTIAX					0x4000000L
+	long	otiax;
+#define SEAL_PAIMON					0x8000000L
+	long	paimon;
+#define SEAL_SIMURGH				0x10000000L
+	long	simurgh;
+#define SEAL_TENEBROUS				0x20000000L
+	long	tenebrous;
+#define SEAL_YMIR					0x40000000L
+	long	ymir;
+
+//The remaining seals (Dahlver-Nar, Acererak, and the Numina) can't be learned in any way other than binder class features
+#define SEAL_DAHLVER_NAR			0x0000001L
+	long	dahlver_nar;
+#define SEAL_ACERERAK				0x0000002L
+	long	acererak;
+#define SEAL_NUMINA					0x0000004L
+//	long	numina;	//numina does not expire, and can be immediatly re-bound once 30th level is achived if the pact is broken.
+	
+	char sealCounts;
+	long sealsActive;
+	long specialSealsActive;
+	
+	//Spirits in order bound:
+	long spirit[5];
+	long spiritQuest,spiritTineA,spiritTineB;
+	//Corresponding timeouts (turn on which binding expires):
+	long spiritT[5];
+	long spiritQuestT,spiritTineTA,spiritTineTB;
+
+	/* 	variable that keeps track of summoning in your vicinity.
+		Only allow 1 per turn, to help reduce summoning cascades. */
+	boolean summonMonster;
+	/* 	Variable that checks if the Wizard has increased the weight of the amulet */
+	boolean uleadamulet;
+	/*Ugly extra artifact variables workaround.  Spaghetti code alert!*/
+	long SnSd1, SnSd2, SnSd3, SnSd3duration;
+	int ZangetsuSafe;
+	short RoSPkills, RoSPflights;
+	/*Keter counters*/
+	int keter, chokhmah, gevurah, hod;
+	int regifted; /*keeps track of how many artifacts the player has given to the unknown god*/
 };	/* end of `struct you' */
 
+extern long sealKey[31]; /*Defined in */
+extern char *wardDecode[26]; /*Defined in spell.c*/
+extern int wardMax[16]; /*Defined in engrave.c*/
+extern char *andromaliusItems[18]; /*Defined in */
 #define Upolyd (u.umonnum != u.umonster)
 
 #endif	/* YOU_H */

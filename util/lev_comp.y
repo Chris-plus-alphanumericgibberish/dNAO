@@ -591,12 +591,19 @@ room_door	: DOOR_ID ':' secret ',' door_state ',' door_wall ',' door_pos
 			/* ERR means random here */
 			if ($7 == ERR && $9 != ERR) {
 		     yyerror("If the door wall is random, so must be its pos!");
+			    tmprdoor[ndoor] = 0;
 			} else {
 			    tmprdoor[ndoor] = New(room_door);
 			    tmprdoor[ndoor]->secret = $3;
 			    tmprdoor[ndoor]->mask = $5;
 			    tmprdoor[ndoor]->wall = $7;
 			    tmprdoor[ndoor]->pos = $9;
+			    tmprdoor[ndoor]->arti_text = 0;
+			}
+		  }
+		  room_door_infos
+		  {
+			if (tmprdoor[ndoor]) {
 			    ndoor++;
 			    if (ndoor >= MAX_OF_TYPE) {
 				    yyerror("Too many doors in room!");
@@ -605,6 +612,19 @@ room_door	: DOOR_ID ':' secret ',' door_state ',' door_wall ',' door_pos
 			}
 		  }
 		;
+
+room_door_infos	: /* nothing */
+		| room_door_infos room_door_info
+		;
+
+room_door_info	: ',' INTEGER
+		  {
+
+			if (tmprdoor[ndoor])
+			    tmprdoor[ndoor]->arti_text = $2;
+		  }
+		;
+
 
 secret		: BOOLEAN
 		| RANDOM_TYPE
@@ -1001,15 +1021,28 @@ door_detail	: DOOR_ID ':' door_state ',' coordinate
 			tmpdoor[ndoor]->x = current_coord.x;
 			tmpdoor[ndoor]->y = current_coord.y;
 			tmpdoor[ndoor]->mask = $<i>3;
+			tmpdoor[ndoor]->arti_text = 0;
 			if(current_coord.x >= 0 && current_coord.y >= 0 &&
 			   tmpmap[current_coord.y][current_coord.x] != DOOR &&
 			   tmpmap[current_coord.y][current_coord.x] != SDOOR)
 			    yyerror("Door decl doesn't match the map");
-			ndoor++;
-			if (ndoor >= MAX_OF_TYPE) {
+		  }
+		 door_infos
+		  {
+			if (++ndoor >= MAX_OF_TYPE) {
 				yyerror("Too many doors in mazepart!");
 				ndoor--;
 			}
+		  }
+		;
+
+door_infos	: /* nothing */
+		| door_infos door_info
+		;
+
+door_info	: ',' INTEGER
+		  {
+			tmpdoor[ndoor]->arti_text = $2;
 		  }
 		;
 

@@ -60,7 +60,7 @@ struct monst {
 #define M_AP_MONSTER	3	/* a monster */
 
 	schar mtame;		/* level of tameness, implies peaceful */
-	unsigned short mintrinsics;	/* low 8 correspond to mresists */
+	unsigned int mintrinsics;	/* low 10 correspond to mresists */
 	int mspec_used;		/* monster's special ability attack timeout */
 
 	Bitfield(female,1);	/* is female */
@@ -90,6 +90,8 @@ struct monst {
 	Bitfield(mflee,1);	/* fleeing */
 	Bitfield(mfleetim,7);	/* timeout for mflee */
 
+	Bitfield(mcrazed,1);	/* monster is crazed */
+
 	Bitfield(mcansee,1);	/* cansee 1, temp.blinded 0, blind 0 */
 	Bitfield(mblinded,7);	/* cansee 0, temp.blinded n, blind 0 */
 
@@ -102,6 +104,7 @@ struct monst {
 	Bitfield(mpeaceful,1);	/* does not attack unprovoked */
 	Bitfield(mtrapped,1);	/* trapped in a pit, web or bear trap */
 	Bitfield(mleashed,1);	/* monster is on a leash */
+	Bitfield(mtraitor,1);	/* Former pet that turned traitor */
 	Bitfield(isshk,1);	/* is shopkeeper */
 	Bitfield(isminion,1);	/* is a minion */
 
@@ -138,6 +141,7 @@ struct monst {
 	struct obj *mw;
 	long misc_worn_check;
 	xchar weapon_check;
+
 
 	uchar mnamelth;		/* length of name (following mxlth) */
 	short mxlth;		/* length of following data */

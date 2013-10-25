@@ -101,7 +101,8 @@ options:	../util/makedefs
 
 spec_levs: ../util/lev_comp \
 	bigroom.des castle.des endgame.des gehennom.des knox.des medusa.des \
-	mines.des oracle.des sokoban.des tower.des yendor.des
+	mines.des oracle.des law.des chaos.des neutrality.des sokoban.des \
+	tower.des yendor.des tomb.des blacktemple.des sunlesssea.des storage.des
 	../util/lev_comp bigroom.des
 	../util/lev_comp castle.des
 	../util/lev_comp endgame.des
@@ -110,21 +111,30 @@ spec_levs: ../util/lev_comp \
 	../util/lev_comp medusa.des
 	../util/lev_comp mines.des
 	../util/lev_comp oracle.des
+	../util/lev_comp law.des
+	../util/lev_comp chaos.des
+	../util/lev_comp neutrality.des
 	../util/lev_comp sokoban.des
 	../util/lev_comp tower.des
 	../util/lev_comp yendor.des
+	../util/lev_comp tomb.des
+	../util/lev_comp blacktemple.des
+	../util/lev_comp sunlesssea.des
+	../util/lev_comp storage.des
 	touch spec_levs
 
 quest_levs: ../util/lev_comp \
-	Arch.des Barb.des Caveman.des Healer.des Knight.des Monk.des \
-	Priest.des Ranger.des Rogue.des Samurai.des Tourist.des Valkyrie.des \
-	Wizard.des
+	Arch.des Barb.des Caveman.des Convict.des Healer.des Knight.des Monk.des \
+	Pirate.des Priest.des Ranger.des Rogue.des Samurai.des Tourist.des \
+	Valkyrie.des Wizard.des
 	../util/lev_comp Arch.des
 	../util/lev_comp Barb.des
 	../util/lev_comp Caveman.des
+	../util/lev_comp Convict.des
 	../util/lev_comp Healer.des
 	../util/lev_comp Knight.des
 	../util/lev_comp Monk.des
+	../util/lev_comp Pirate.des
 	../util/lev_comp Priest.des
 	../util/lev_comp Ranger.des
 	../util/lev_comp Rogue.des

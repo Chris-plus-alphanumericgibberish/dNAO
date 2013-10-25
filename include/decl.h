@@ -50,39 +50,82 @@ E NEARDATA int in_doagain;
 #endif
 
 E struct dgn_topology {		/* special dungeon levels for speed */
+	/*Dungeons of Doom*/
     d_level	d_oracle_level;
     d_level	d_bigroom_level;	/* unused */
+    d_level	d_bigroomb_level;	/* unused */
 #ifdef REINCARNATION
     d_level	d_rogue_level;
 #endif
+	/*Medusa's Island*/
     d_level	d_medusa_level;
+	/*Castle*/
     d_level	d_stronghold_level;
+	/*Gehennom*/
     d_level	d_valley_level;
+    d_level	d_stair1_level;
+    d_level	d_stair2_level;
+    d_level	d_stair3_level;
     d_level	d_wiz1_level;
     d_level	d_wiz2_level;
     d_level	d_wiz3_level;
-    d_level	d_juiblex_level;
-    d_level	d_orcus_level;
-    d_level	d_baalzebub_level;	/* unused */
-    d_level	d_asmodeus_level;	/* unused */
+//    d_level	d_juiblex_level;
+//    d_level	d_orcus_level;
+    d_level	d_demogorgon_level;
+    d_level	d_hell1_level;
+    d_level	d_hell2_level;
+    d_level	d_hell3_level;
+    d_level	d_abyss_level;
+    d_level	d_abyss_juiblex_level;
+    d_level	d_abys2_level;
+    d_level	d_brine_level;
+//    d_level	d_baalzebub_level;	/* unused */
+//    d_level	d_asmodeus_level;	/* unused */
     d_level	d_portal_level;		/* only in goto_level() [do.c] */
     d_level	d_sanctum_level;
+	/*Planes*/
     d_level	d_earth_level;
     d_level	d_water_level;
     d_level	d_fire_level;
     d_level	d_air_level;
     d_level	d_astral_level;
+	/*Vlad's Tower*/
     xchar	d_tower_dnum;
+	/*The Lost Tomb*/
+    xchar	d_tomb_dnum;
+	/*The Sunless Sea*/
+    xchar	d_sea_dnum;
+	/*The Temple of Moloch*/
+    xchar	d_temple_dnum;
+	/*Sokoban*/
     xchar	d_sokoban_dnum;
-    xchar	d_mines_dnum, d_quest_dnum;
+	/*Mines of the Gnomes of Zurich*/
+    xchar	d_mines_dnum;
+	/*Quest Levels*/
+	xchar	d_quest_dnum;
     d_level	d_qstart_level, d_qlocate_level, d_nemesis_level;
+
+	xchar	d_neutral_dnum;
+    d_level	d_gatetown_level, d_spire_level, d_sum_of_all_level, d_rlyeh_level;
+	xchar	d_chaos_dnum;
+    d_level	d_chaosf_level, d_chaoss_level, d_chaost_level, d_chaosm_level,
+		d_chaosfrh_level, d_chaosffh_level, d_chaossth_level,
+		d_chaosvth_level, d_chaose_level;
+	xchar	d_law_dnum;
+	d_level d_path1, d_path2, d_path3, d_illregrd, 
+		d_arcadia1, d_arcadia2, d_arcadia3, d_arcward, d_arcfort,
+		d_tower1, d_tower2, d_tower3, d_tower4, d_tower5,
+		d_tower6, d_tower7, d_tower8, d_tower9, d_towertop;
+	/*Fort Knox*/
     d_level	d_knox_level;
 #ifdef RECORD_ACHIEVE
     d_level     d_mineend_level;
     d_level     d_sokoend_level;
 #endif
+
 } dungeon_topology;
 /* macros for accesing the dungeon levels by their old names */
+	/*Dungeons of Doom*/
 #define oracle_level		(dungeon_topology.d_oracle_level)
 #define bigroom_level		(dungeon_topology.d_bigroom_level)
 #ifdef REINCARNATION
@@ -90,28 +133,90 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #endif
 #define medusa_level		(dungeon_topology.d_medusa_level)
 #define stronghold_level	(dungeon_topology.d_stronghold_level)
+	/*Gehennom*/
 #define valley_level		(dungeon_topology.d_valley_level)
 #define wiz1_level		(dungeon_topology.d_wiz1_level)
 #define wiz2_level		(dungeon_topology.d_wiz2_level)
 #define wiz3_level		(dungeon_topology.d_wiz3_level)
-#define juiblex_level		(dungeon_topology.d_juiblex_level)
-#define orcus_level		(dungeon_topology.d_orcus_level)
-#define baalzebub_level		(dungeon_topology.d_baalzebub_level)
-#define asmodeus_level		(dungeon_topology.d_asmodeus_level)
+#define abyss1_level	(dungeon_topology.d_abyss_level)
+#define abyss1_juiblex_level	(dungeon_topology.d_abyss_juiblex_level)
+#define abyss2_level	(dungeon_topology.d_abys2_level)
+#define orcus_level		(dungeon_topology.d_abys2_level)
+#define abyss3_level	(dungeon_topology.d_brine_level)
+#define hell1_level		(dungeon_topology.d_hell1_level)
+#define hell2_level		(dungeon_topology.d_hell2_level)
+#define hell3_level		(dungeon_topology.d_hell3_level)
+////define juiblex_level		(dungeon_topology.d_juiblex_level)
+//define orcus_level		(dungeon_topology.d_orcus_level)
+//define demogoron_level		(dungeon_topology.d_demogorgon_level)
+//define baalzebub_level		(dungeon_topology.d_baalzebub_level)
+//define asmodeus_level		(dungeon_topology.d_asmodeus_level)
 #define portal_level		(dungeon_topology.d_portal_level)
 #define sanctum_level		(dungeon_topology.d_sanctum_level)
+	/*Planes*/
 #define earth_level		(dungeon_topology.d_earth_level)
 #define water_level		(dungeon_topology.d_water_level)
 #define fire_level		(dungeon_topology.d_fire_level)
 #define air_level		(dungeon_topology.d_air_level)
 #define astral_level		(dungeon_topology.d_astral_level)
+	/*Vlad's Tower*/
 #define tower_dnum		(dungeon_topology.d_tower_dnum)
+	/*The Lost Tomb*/
+#define tomb_dnum		(dungeon_topology.d_tomb_dnum)
+	/*The Sunless Sea*/
+#define sea_dnum		(dungeon_topology.d_sea_dnum)
+	/*The Temple of Moloch*/
+#define temple_dnum		(dungeon_topology.d_temple_dnum)
+	/*Medusa's Island*/
+#define medusa_level		(dungeon_topology.d_medusa_level)
+	/*Sokoban*/
 #define sokoban_dnum		(dungeon_topology.d_sokoban_dnum)
+	/*Mines of the Gnomes of Zurich*/
 #define mines_dnum		(dungeon_topology.d_mines_dnum)
+	/*Quest Levels*/
 #define quest_dnum		(dungeon_topology.d_quest_dnum)
 #define qstart_level		(dungeon_topology.d_qstart_level)
 #define qlocate_level		(dungeon_topology.d_qlocate_level)
 #define nemesis_level		(dungeon_topology.d_nemesis_level)
+	/*Neutral Quest*/
+#define neutral_dnum		(dungeon_topology.d_neutral_dnum)
+#define gatetown_level		(dungeon_topology.d_gatetown_level)
+#define spire_level		(dungeon_topology.d_spire_level)
+#define sum_of_all_level		(dungeon_topology.d_sum_of_all_level)
+#define rlyeh_level		(dungeon_topology.d_rlyeh_level)
+	/*Chaos Quest*/
+#define chaos_dnum		(dungeon_topology.d_chaos_dnum)
+#define chaosf_level		(dungeon_topology.d_chaosf_level)
+#define chaoss_level		(dungeon_topology.d_chaoss_level)
+#define chaost_level		(dungeon_topology.d_chaost_level)
+#define chaosm_level		(dungeon_topology.d_chaosm_level)
+#define chaosfrh_level		(dungeon_topology.d_chaosfrh_level)
+#define chaosffh_level		(dungeon_topology.d_chaosffh_level)
+#define chaossth_level		(dungeon_topology.d_chaossth_level)
+#define chaosvth_level		(dungeon_topology.d_chaosvth_level)
+#define chaose_level		(dungeon_topology.d_chaose_level)
+	/*Law Quest*/
+#define law_dnum		(dungeon_topology.d_law_dnum)
+#define path1_level		(dungeon_topology.d_path1)
+#define path2_level		(dungeon_topology.d_path2)
+#define path3_level		(dungeon_topology.d_path3)
+#define illregrd_level	(dungeon_topology.d_illregrd)
+#define arcadia1_level	(dungeon_topology.d_arcadia1)
+#define arcadia2_level	(dungeon_topology.d_arcadia2)
+#define arcadia3_level	(dungeon_topology.d_arcadia3)
+#define arcward_level	(dungeon_topology.d_arcward)
+#define arcfort_level	(dungeon_topology.d_arcfort)
+#define tower1_level	(dungeon_topology.d_tower1)
+#define tower2_level	(dungeon_topology.d_tower2)
+#define tower3_level	(dungeon_topology.d_tower3)
+#define tower4_level	(dungeon_topology.d_tower4)
+#define tower5_level	(dungeon_topology.d_tower5)
+#define tower6_level	(dungeon_topology.d_tower6)
+#define tower7_level	(dungeon_topology.d_tower7)
+#define tower8_level	(dungeon_topology.d_tower8)
+#define tower9_level	(dungeon_topology.d_tower9)
+#define towertop_level	(dungeon_topology.d_towertop)
+	/*Fort Knox*/
 #define knox_level		(dungeon_topology.d_knox_level)
 #ifdef RECORD_ACHIEVE
 #define mineend_level           (dungeon_topology.d_mineend_level)
@@ -208,6 +313,9 @@ E NEARDATA char plname[PL_NSIZ];
 E NEARDATA char dogname[];
 E NEARDATA char catname[];
 E NEARDATA char horsename[];
+#ifdef CONVICT
+E NEARDATA char ratname[];
+#endif /* CONVICT */
 E char preferred_pet;
 E const char *occtxt;			/* defined when occupation != NULL */
 E const char *nomovemsg;

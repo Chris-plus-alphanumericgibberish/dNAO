@@ -183,6 +183,12 @@
 
 #endif /* NHSTDC */
 
+/*
+ * Used for definitions of functions which take no arguments to force
+ * an explicit match with the NDECL prototype.  Needed in some cases
+ * (MS Visual C 2005) for functions called through pointers.
+ */
+#define VOID_ARGS void
 
 #ifndef genericptr_t
 typedef genericptr genericptr_t;	/* (void *) or (char *) */

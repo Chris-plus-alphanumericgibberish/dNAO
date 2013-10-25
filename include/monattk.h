@@ -24,6 +24,11 @@
 #define AT_BOOM		14	/* explodes when killed */
 #define AT_GAZE		15	/* gaze - ranged */
 #define AT_TENT		16	/* tentacles */
+#define AT_ARRW		17	/* fire silver arrows from internal reservour.  Other ammo created as needed. */
+#define AT_WHIP		18	/* Whips you */
+#define AT_LRCH		19	/* Reach attack */
+#define AT_HODS		20  /* Hod Sephirah's mirror attack */
+#define AT_LNCK		21  /* Bite attack with reach */
 
 #define AT_WEAP		254	/* uses weapon */
 #define AT_MAGC		255	/* uses magic spell(s) */
@@ -78,13 +83,75 @@
 #define AD_SLIM		40	/* turns you into green slime */
 #define AD_ENCH		41	/* remove enchantment (disenchanter) */
 #define AD_CORR		42	/* corrode armor (black pudding) */
+#define AD_POSN		43	/* poison damage */
+#define AD_WISD		44	/* wisdom damage */
+#define AD_VORP		45	/* vorpal strike */
+#define AD_SHRD		46	/* shreads low enchantment armor, disenchants high ench armor */
+#define AD_SLVR		47	/* arrows should be silver */
+#define AD_BALL		48	/* arrows should be iron balls */
+#define AD_BLDR		49	/* arrows should be boulders */
+#define AD_VBLD		50	/* arrows should be boulders and fired in a random spread */
+#define AD_TCKL		51	/* Tickle (Nightgaunts) */
+#define AD_WET		52	/* Splash with water */
+#define AD_LETHE	53	/* Splash with lethe water */
+#define AD_BIST		54	/* yora hawk bisecting beak attack (not implemented) */
+#define AD_CNCL		60	/* same effect as a wand of cancelation */
+#define AD_DEAD		61	/* deadly gaze (gaze ONLY, please!) */
+#define AD_SUCK		62	/* tries to suck you appart */
+#define AD_MALK		63	/* tries immobalizes you and destroys wands and rings */
+#define AD_UVUU		64	/* Uvuudaum head spike attack */
+#define AD_ABDC		65	/* Abduction attack, teleports you regardless of monster cancellation */
+#define AD_KAOS		96  /* Spawn Chaos */
+#define AD_LSEX		97	/* DEPRICATED? Lilith's seduction (extended) */
+#define AD_HLBD		99  /* Asmodeus's blood */
+#define AD_SPNL		100	/* Spawns Leviathan when used with AT_BOOM*/
+#define AD_MIST		110 /* Mi-go mist projector.  Works with AT_GAZE */
+#define AD_TELE		111 /* Monster teleports away.  Use for hit and run attacks */
+#define AD_POLY		112	/* Monster alters your DNA (was for the now-defunct genetic enginier Q) */
+#define AD_PSON		113 /* DEFERED psionic attacks.  uses some from cleric and wiz */
+#define AD_GROW		114 /* Monster causes a child to grow up upon death.  'ton special */
+#define AD_SOUL		115 /* Monster causes like monsters to power up upon death.  Deep One special */
+#define AD_TENT		116	/* extended tentacle invasion (elder priest) */
+#define AD_JAILER	117	/* Sets Lucifer to apear and drops third key of law when killed */
+#define AD_AXUS		118 /* Multi-element counterattack, angers 'tons */
+#define AD_UNKNWN	119	/* Priest of an unknown God */
+#define AD_SOLR		120	/* Solar's silver arrow attack */
+#define AD_CHKH		121 /* Chokhmah Sephirah's escalating damage attack */
+#define AD_HODS		122 /* Hod Sephirah's mirror attack */
+#define AD_CHRN		123 /* Nightmare's horn attack */
+#define AD_LOAD		124 /* throws loadstones */
+#define AD_GARO		125 /* blows up after dispensing rumor */
+#define AD_GARO_MASTER	126 /* blows up after dispensing oracle */
+#define AD_LVLT		127	/* level teleport (was weeping angel) */
+#define AD_BLNK		128	/* mental invasion (weeping angel) */
+#define AD_WEEP		129	/* Level teleport and drain (weeping angel) */
+#define AD_SPOR		130	/* generate spore */
+#define AD_FNEX		131	/* FerN spore EXplosion */
+#define AD_SSUN		132	/* Slaver Sunflower gaze */
+#define AD_MAND		133	/* Mandrake's dying shriek (kills all on level, use w/ AT_BOOM) */
+#define AD_BARB		134	/* Physical damage retalitory attack */
+#define AD_LUCK		135	/* Luck-draining gaze (UnNetHack) */
+
+
+
+//#define AD_VMSL		180 //Vorlon missile: elect, disintegration, blast.  Triple damage.
+#define AD_CMSL		181 //Cold missile
+#define AD_FMSL		182 //Fire missile
+#define AD_EMSL		183 //Electric missile
+#define AD_SMSL		184 //Shrapnel missile: physical
+
+//#define AD_VTGT		200 //Vorlon targeting GAZE
+#define AD_WMTG		201 //War machine targeting GAZE
 
 #define AD_CLRC		240	/* random clerical spell */
 #define AD_SPEL		241	/* random magic spell */
 #define AD_RBRE		242	/* random breath weapon */
+#define AD_RGAZ		242	/* random gaze attack */
+#define AD_RETR		243 /* elemental gaze attack */
 
 #define AD_SAMU		252	/* hits, may steal Amulet (Wizard) */
 #define AD_CURS		253	/* random curse (ex. gremlin) */
+#define AD_SQUE		254	/* hits, may steal Quest Art or Amulet (Nemeses) */
 
 
 /*

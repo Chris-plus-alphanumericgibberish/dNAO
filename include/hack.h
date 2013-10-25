@@ -45,6 +45,7 @@
 #define DISMOUNT_ENGULFED	4
 #define DISMOUNT_BONES		5
 #define DISMOUNT_BYCHOICE	6
+#define DISMOUNT_VANISHED	7
 #endif
 
 /* Special returns from mapglyph() */
@@ -102,8 +103,11 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define FLASHED_LIGHT	3
 #define INVIS_BEAM	4
 
-#define MATCH_WARN_OF_MON(mon)	 (Warn_of_mon && flags.warntype && \
-		   		 (flags.warntype & (mon)->data->mflags2))
+#define MATCH_WARN_OF_MON(mon)	( (Warn_of_mon && flags.warntype && \
+					(flags.warntype & (mon)->data->mflags2)) || \
+					(uwep && uwep->oclass == WEAPON_CLASS && objects[(uwep)->otyp].oc_material == WOOD && \
+					(uwep->ovar1 & WARD_THJOFASTAFUR) && (mon->data->mlet == S_LEPRECHAUN || mon->data->mlet == S_NYMPH)) \
+				)
 
 #include "trap.h"
 #include "flag.h"
@@ -143,6 +147,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define MM_NOCOUNTBIRTH	  0x40  /* don't increment born counter (for revival) */
 #define MM_IGNOREWATER	  0x80	/* ignore water when positioning */
 #define MM_ADJACENTOK	  0x100 /* it is acceptable to use adjacent coordinates */
+#define MM_ADJACENTSTRICT 0x200 /* ...but only ONE removed.*/
 
 /* special mhpmax value when loading bones monster to flag as extinct or genocided */
 #define DEFUNCT_MONSTER	(-100)
@@ -246,6 +251,13 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define LUNG 16
 #define NOSE 17
 #define STOMACH 18
+#define HEART 19
+#define BODY_SKIN 20
+#define BODY_FLESH 21
+#define BEAT 22
+#define BONES 23
+#define CREAK 24
+#define CRACK 25
 
 /* Flags to control menus */
 #define MENUTYPELEN sizeof("traditional ")
@@ -292,6 +304,8 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define onlineu(xx,yy)	online2((int)(xx),(int)(yy),(int)u.ux,(int)u.uy)
 
 #define rn1(x,y)	(rn2(x)+(y))
+
+#define a_align(x,y)	((aligntyp)Amask2align(levl[x][y].altarmask & AM_MASK))
 
 /* negative armor class is randomly weakened to prevent invulnerability */
 #define AC_VALUE(AC)	((AC) >= 0 ? (AC) : -rnd(-(AC)))

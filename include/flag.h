@@ -52,6 +52,8 @@ struct flag {
 	boolean  lit_corridor;	/* show a dark corr as lit if it is in sight */
 	boolean  made_amulet;
 	boolean  mon_moving;	/* monsters' turn to move */
+	boolean  cth_attk;		/* for use with stinking cloud, mark when 
+							 'thulhu makes a cloud sos the comp knows he did it */
 	boolean  move;
 	boolean  mv;
 	boolean  bypasses;	/* bypass flag is set on at least one fobj */

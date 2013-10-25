@@ -28,12 +28,14 @@
 #define HFire_resistance	u.uprops[FIRE_RES].intrinsic
 #define EFire_resistance	u.uprops[FIRE_RES].extrinsic
 #define Fire_resistance		(HFire_resistance || EFire_resistance || \
-				 resists_fire(&youmonst))
+				 resists_fire(&youmonst) || \
+				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
 
 #define HCold_resistance	u.uprops[COLD_RES].intrinsic
 #define ECold_resistance	u.uprops[COLD_RES].extrinsic
 #define Cold_resistance		(HCold_resistance || ECold_resistance || \
-				 resists_cold(&youmonst))
+				 resists_cold(&youmonst) || \
+				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 
 #define HSleep_resistance	u.uprops[SLEEP_RES].intrinsic
 #define ESleep_resistance	u.uprops[SLEEP_RES].extrinsic
@@ -48,33 +50,46 @@
 #define HShock_resistance	u.uprops[SHOCK_RES].intrinsic
 #define EShock_resistance	u.uprops[SHOCK_RES].extrinsic
 #define Shock_resistance	(HShock_resistance || EShock_resistance || \
-				 resists_elec(&youmonst))
+				 resists_elec(&youmonst) || \
+				 ward_at(u.ux,u.uy) == TRACERY_OF_KRAKAL)
 
 #define HPoison_resistance	u.uprops[POISON_RES].intrinsic
 #define EPoison_resistance	u.uprops[POISON_RES].extrinsic
 #define Poison_resistance	(HPoison_resistance || EPoison_resistance || \
-				 resists_poison(&youmonst))
+				 resists_poison(&youmonst) || \
+				 (ward_at(u.ux,u.uy) == WINGS_OF_GARUDA && num_wards_at(u.ux, u.uy) > rn2(7)))
+
+#define HAcid_resistance	u.uprops[ACID_RES].intrinsic
+#define EAcid_resistance	u.uprops[ACID_RES].extrinsic
+#define Acid_resistance		(HAcid_resistance || EAcid_resistance || resists_acid(&youmonst))
 
 #define HDrain_resistance	u.uprops[DRAIN_RES].intrinsic
 #define EDrain_resistance	u.uprops[DRAIN_RES].extrinsic
 #define Drain_resistance	(HDrain_resistance || EDrain_resistance || \
-				 resists_drli(&youmonst))
+				 resists_drli(&youmonst) || \
+				 (ward_at(u.ux,u.uy) == CARTOUCHE_OF_THE_CAT_LORD && num_wards_at(u.ux, u.uy) >=4 ) && \
+					!( 	(mvitals[PM_KITTEN].mvflags & G_GENOD || mvitals[PM_KITTEN].died >= 120) && \
+						(mvitals[PM_HOUSECAT].mvflags & G_GENOD || mvitals[PM_HOUSECAT].died >= 120) && \
+						(mvitals[PM_LARGE_CAT].mvflags & G_GENOD || mvitals[PM_LARGE_CAT].died >= 120) \
+					) \
+				)
 
 /* Intrinsics only */
 #define HSick_resistance	u.uprops[SICK_RES].intrinsic
 #define Sick_resistance		(HSick_resistance || \
-				 youmonst.data->mlet == S_FUNGUS || \
-				 youmonst.data == &mons[PM_GHOUL] || \
-				 defends(AD_DISE,uwep))
+				 defends(AD_DISE,uwep) || \
+				 (ward_at(u.ux,u.uy) == CARTOUCHE_OF_THE_CAT_LORD && num_wards_at(u.ux, u.uy) == 7 && \
+					!( 	(mvitals[PM_KITTEN].mvflags & G_GENOD || mvitals[PM_KITTEN].died >= 120) && \
+						(mvitals[PM_HOUSECAT].mvflags & G_GENOD || mvitals[PM_HOUSECAT].died >= 120) && \
+						(mvitals[PM_LARGE_CAT].mvflags & G_GENOD || mvitals[PM_LARGE_CAT].died >= 120) \
+					) \
+				 ))
 #define Invulnerable		u.uprops[INVULNERABLE].intrinsic    /* [Tom] */
 
 /* Extrinsics only */
 #define EAntimagic		u.uprops[ANTIMAGIC].extrinsic
 #define Antimagic		(EAntimagic || \
 				 (Upolyd && resists_magm(&youmonst)))
-
-#define EAcid_resistance	u.uprops[ACID_RES].extrinsic
-#define Acid_resistance		(EAcid_resistance || resists_acid(&youmonst))
 
 #define EStone_resistance	u.uprops[STONE_RES].extrinsic
 #define Stone_resistance	(EStone_resistance || resists_ston(&youmonst))
@@ -152,7 +167,8 @@
 /* Warning for a specific type of monster */
 #define HWarn_of_mon		u.uprops[WARN_OF_MON].intrinsic
 #define EWarn_of_mon		u.uprops[WARN_OF_MON].extrinsic
-#define Warn_of_mon		(HWarn_of_mon || EWarn_of_mon)
+#define Warn_of_mon		(HWarn_of_mon || EWarn_of_mon || (uwep && uwep->oclass == WEAPON_CLASS && objects[(uwep)->otyp].oc_material == WOOD && \
+					(uwep->ovar1 & WARD_THJOFASTAFUR)))
 
 #define HUndead_warning		u.uprops[WARN_UNDEAD].intrinsic
 #define Undead_warning		(HUndead_warning)
@@ -183,18 +199,22 @@
 #define HInvis			u.uprops[INVIS].intrinsic
 #define EInvis			u.uprops[INVIS].extrinsic
 #define BInvis			u.uprops[INVIS].blocked
-#define Invis			((HInvis || EInvis || \
-				 pm_invisible(youmonst.data)) && !BInvis)
+#define Invis			((HInvis || EInvis || Underwater || \
+						 pm_invisible(youmonst.data) || \
+						 (ward_at(u.ux,u.uy) == HAMSA \
+							&& num_wards_at(u.ux, u.uy) == 6 ) \
+						  ) && !BInvis)
 #define Invisible		(Invis && !See_invisible)
 		/* Note: invisibility also hides inventory and steed */
 
+#define HDisplaced		u.uprops[DISPLACED].intrinsic
 #define EDisplaced		u.uprops[DISPLACED].extrinsic
-#define Displaced		EDisplaced
+#define Displaced		(HDisplaced || EDisplaced || is_displacer(youmonst.data))
 
 #define HStealth		u.uprops[STEALTH].intrinsic
 #define EStealth		u.uprops[STEALTH].extrinsic
 #define BStealth		u.uprops[STEALTH].blocked
-#define Stealth			((HStealth || EStealth) && !BStealth)
+#define Stealth			((HStealth || EStealth || Underwater) && !BStealth)
 
 #define HAggravate_monster	u.uprops[AGGRAVATE_MONSTER].intrinsic
 #define EAggravate_monster	u.uprops[AGGRAVATE_MONSTER].extrinsic
@@ -275,7 +295,9 @@
 #define EPasses_walls		u.uprops[PASSES_WALLS].extrinsic
 #define Passes_walls		(HPasses_walls || EPasses_walls || \
 				 passes_walls(youmonst.data))
-
+#ifdef CONVICT
+# define Phasing            u.uprops[PASSES_WALLS].intrinsic
+#endif /* CONVICT */
 
 /*** Physical attributes ***/
 #define HSlow_digestion		u.uprops[SLOW_DIGESTION].intrinsic
@@ -322,6 +344,10 @@
 #define HUnchanging		u.uprops[UNCHANGING].intrinsic
 #define EUnchanging		u.uprops[UNCHANGING].extrinsic
 #define Unchanging		(HUnchanging || EUnchanging)	/* KMH */
+
+#define HSpellboost		u.uprops[SPELLBOOST].intrinsic
+#define ESpellboost		u.uprops[SPELLBOOST].extrinsic
+#define Spellboost		(HSpellboost || ESpellboost)
 
 #define HFast			u.uprops[FAST].intrinsic
 #define EFast			u.uprops[FAST].extrinsic

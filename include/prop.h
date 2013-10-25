@@ -14,9 +14,9 @@
 #define POISON_RES		 6
 #define ACID_RES		 7
 #define STONE_RES		 8
-/* note: for the first eight properties, MR_xxx == (1 << (xxx_RES - 1)) */
-#define ADORNED			 9
-#define REGENERATION		10
+#define DRAIN_RES		 9
+#define SICK_RES		10
+/* note: for the first ten properties, MR_xxx == (1 << (xxx_RES - 1)) */
 #define SEARCHING		11
 #define SEE_INVIS		12
 #define INVIS			13
@@ -58,8 +58,8 @@
 #define MAGICAL_BREATHING	49
 #define HALF_SPDAM		50
 #define HALF_PHDAM		51
-#define SICK_RES		52
-#define DRAIN_RES		53
+#define ADORNED			52
+#define REGENERATION	53
 #define WARN_UNDEAD		54
 #define INVULNERABLE		55
 #define FREE_ACTION		56
@@ -73,7 +73,9 @@
 #define INFRAVISION		64
 #define WARN_OF_MON		65
 #define DETECT_MONSTERS		66
-#define LAST_PROP		(DETECT_MONSTERS)
+#define SPELLBOOST		67
+#define CARCAP		68
+#define LAST_PROP		(CARCAP)
 
 /*** Where the properties come from ***/
 /* Definitions were moved here from obj.h and you.h */
@@ -121,7 +123,7 @@ struct prop {
 	/* Permanent properties */
 #	define FROMEXPER    0x01000000L /* Gain/lose with experience, for role */
 #	define FROMRACE     0x02000000L /* Gain/lose with experience, for race */
-#	define FROMOUTSIDE  0x04000000L /* By corpses, prayer, thrones, etc. */
+#	define FROMOUTSIDE  0x04000000L /* By prayer, thrones, etc. */
 #	define INTRINSIC    (FROMOUTSIDE|FROMRACE|FROMEXPER)
 	/* Control flags */
 #	define I_SPECIAL    0x10000000L /* Property is controllable */

@@ -337,8 +337,9 @@ struct version_info {
 
 #define BUFSZ		256	/* for getlin buffers */
 #define QBUFSZ		128	/* for building question text */
-#define TBUFSZ		300	/* toplines[] buffer max msg: 3 81char names */
+#define TBUFSZ		600	/* toplines[] buffer max msg: 3 81char names */
 				/* plus longest prefix plus a few extra words */
+				/* tmptext keeps overflowing.  Maybe this is too small? Doubling the size (300-600). -CM */
 
 #define PL_NSIZ		32	/* name of player, ghost, shopkeeper */
 #define PL_CSIZ		32	/* sizeof pl_character */
@@ -346,8 +347,8 @@ struct version_info {
 #define PL_PSIZ		63	/* player-given names for pets, other
 				 * monsters, objects */
 
-#define MAXDUNGEON	16	/* current maximum number of dungeons */
-#define MAXLEVEL	32	/* max number of levels in one dungeon */
+#define MAXDUNGEON	32	/* current maximum number of dungeons */ //where the hell did these come from?
+#define MAXLEVEL	64	/* max number of levels in one dungeon */ // NOTE:flagged as DANGEROUS!  was 16 dungeons and 32 levels
 #define MAXSTAIRS	1	/* max # of special stairways in a dungeon */
 #define ALIGNWEIGHT	4	/* generation weight of alignment */
 

@@ -41,6 +41,7 @@ struct obj {
 	char	oclass;		/* object class */
 	char	invlet;		/* designation in inventory */
 	char	oartifact;	/* artifact array index */
+	schar 	altmode; 	/* alternate modes - eg. SMG, double Lightsaber */
 
 	xchar where;		/* where the object thinks it is */
 #define OBJ_FREE	0		/* object not attached to anything */
@@ -62,6 +63,7 @@ struct obj {
 	Bitfield(dknown,1);	/* color or text known */
 	Bitfield(bknown,1);	/* blessing or curse known */
 	Bitfield(rknown,1);	/* rustproof or not known */
+	Bitfield(sknown,1);	/* stolen or not known */
 
 	Bitfield(oeroded,2);	/* rusted/burnt weapon/armor */
 	Bitfield(oeroded2,2);	/* corroded/rotted weapon/armor */
@@ -73,9 +75,9 @@ struct obj {
 	Bitfield(oerodeproof,1); /* erodeproof weapon/armor */
 	Bitfield(olocked,1);	/* object is locked */
 	Bitfield(obroken,1);	/* lock has been broken */
+#define ohaluengr obroken	/* engraving on ring isn't a ward */
 	Bitfield(otrapped,1);	/* container is trapped */
 				/* or accidental tripped rolling boulder trap */
-#define opoisoned otrapped	/* object (weapon) is coated with poison */
 
 	Bitfield(recharged,3);	/* number of times it's been recharged */
 	Bitfield(lamplit,1);	/* a light-source -- can be lit */
@@ -91,13 +93,26 @@ struct obj {
 
 	Bitfield(in_use,1);	/* for magic items before useup items */
 	Bitfield(bypass,1);	/* mark this as an object to be skipped by bhito() */
+	Bitfield(lifted,1); /* dipped in potion of levitation */
+	Bitfield(lightened,1);/* dipped in potion of enlightenment */
+	Bitfield(shopOwned,1);	/* owned by a shopkeeper */
+	Bitfield(ostolen,1); 	/* was removed from a shop without being sold */
        Bitfield(was_thrown,1); /* for pickup_thrown */
-       /* 5 free bits */
+	/* 0 free bits */
 
 	int	corpsenm;	/* type of corpse is mons[corpsenm] */
 #define leashmon  corpsenm	/* gets m_id of attached pet */
 #define spestudied corpsenm	/* # of times a spellbook has been studied */
 #define fromsink  corpsenm	/* a potion from a sink */
+
+	int opoisoned; /* poisons smeared on the weapon*/
+#define OPOISON_NONE	 0
+#define OPOISON_BASIC	 1 /* Deadly Poison */
+#define OPOISON_FILTH	 2 /* Deadly Sickness */
+#define OPOISON_SLEEP	 4 /* Sleeping Poison */
+#define OPOISON_BLIND	 8 /* Blinding Poison */
+#define OPOISON_PARAL	16 /* Paralysis Poison */
+#define OPOISON_AMNES	32 /* Amnesia Poison */
 
 #ifdef RECORD_ACHIEVE
 #define record_achieve_special corpsenm
@@ -111,8 +126,14 @@ struct obj {
 	/* in order to prevent alignment problems oextra should
 	   be (or follow) a long int */
 	long owornmask;
+	long ovar1;		/* extra variable. Specifies the contents of Books of Secrets, and the warding sign of spellbooks. */
+			/* Also, records special features for weapons. Currently, the only special feature is runes on wooden weapons. */
+			/* Rings: specifies # of charges on droven ring and engraving on gemstone rings */
+
+	schar gifted; /*gifted is of type aligntyp.  For some reson aligntyp isn't being seen at compile*/
+
 	long oextra[1];		/* used for name of ordinary objects - length
-				   is flexible; amount for tmp gold objects */
+				   is flexible; amount for tmp gold objects.  Must be last? */
 };
 
 #define newobj(xl)	(struct obj *)alloc((unsigned)(xl) + sizeof(struct obj))
@@ -130,15 +151,20 @@ struct obj {
  *	#define is_multigen(otyp) (otyp <= SHURIKEN)
  *	#define is_poisonable(otyp) (otyp <= BEC_DE_CORBIN)
  */
+#define artitypematch(a, o) (( (a)->otyp ) == BEAMSWORD ? is_sword(o) : (a)->otyp == (o)->otyp)
 #define is_blade(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill >= P_DAGGER && \
 			 objects[otmp->otyp].oc_skill <= P_SABER)
+#define is_knife(otmp)	(otmp->oclass == WEAPON_CLASS && \
+			 (objects[otmp->otyp].oc_skill == P_DAGGER || \
+			 objects[otmp->otyp].oc_skill == P_KNIFE))
 #define is_axe(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == TOOL_CLASS) && \
 			 objects[otmp->otyp].oc_skill == P_AXE)
 #define is_pick(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == TOOL_CLASS) && \
-			 objects[otmp->otyp].oc_skill == P_PICK_AXE)
+			 (objects[otmp->otyp].oc_skill == P_PICK_AXE || \
+			  arti_digs(otmp)))
 #define is_sword(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill >= P_SHORT_SWORD && \
 			 objects[otmp->otyp].oc_skill <= P_SABER)
@@ -149,6 +175,8 @@ struct obj {
 #define is_spear(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill >= P_SPEAR && \
 			 objects[otmp->otyp].oc_skill <= P_JAVELIN)
+#define is_farm(otmp)	(otmp->oclass == WEAPON_CLASS && \
+			 objects[otmp->otyp].oc_skill >= P_HARVEST)
 #define is_launcher(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill >= P_BOW && \
 			 objects[otmp->otyp].oc_skill <= P_CROSSBOW)
@@ -168,12 +196,14 @@ struct obj {
 #define bimanual(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == TOOL_CLASS) && \
 			 objects[otmp->otyp].oc_bimanual)
+#define is_lightsaber(otmp) ((otmp)->otyp == LIGHTSABER || \
+							 (otmp)->otyp == BEAMSWORD || \
+							 (otmp)->otyp == DOUBLE_LIGHTSABER)
 #define is_multigen(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill >= -P_SHURIKEN && \
 			 objects[otmp->otyp].oc_skill <= -P_BOW)
 #define is_poisonable(otmp)	(otmp->oclass == WEAPON_CLASS && \
-			 objects[otmp->otyp].oc_skill >= -P_SHURIKEN && \
-			 objects[otmp->otyp].oc_skill <= -P_BOW)
+			objects[otmp->otyp].oc_dir != WHACK)
 #define uslinging()	(uwep && objects[uwep->otyp].oc_skill == P_SLING)
 
 /* Armor */
@@ -206,8 +236,27 @@ struct obj {
 				|| (otmp)->otyp == DWARVISH_MITHRIL_COAT\
 				|| (otmp)->otyp == DWARVISH_CLOAK\
 				|| (otmp)->otyp == DWARVISH_ROUNDSHIELD)
-#define is_gnomish_armor(otmp)	(FALSE)
+#define is_gnomish_armor(otmp)	((otmp)->otyp == GNOMISH_POINTY_HAT)
 
+#define is_twoweapable_artifact(otmp) ((otmp)->oartifact == ART_STING\
+				|| (otmp)->oartifact == ART_ORCRIST\
+				|| (otmp)->oartifact == ART_GRIMTOOTH\
+				|| (otmp)->oartifact == ART_DRAGONLANCE\
+				|| (otmp)->oartifact == ART_DEMONBANE\
+				|| (otmp)->oartifact == ART_WEREBANE\
+				|| (otmp)->oartifact == ART_GIANTSLAYER\
+				|| (otmp)->oartifact == ART_VAMPIRE_KILLER\
+				|| (otmp)->oartifact == ART_KINGSLAYER\
+				|| (otmp)->oartifact == ART_OGRESMASHER\
+				|| (otmp)->oartifact == ART_TROLLSBANE\
+				|| ((otmp)->oartifact == ART_CLARENT && uwep && uwep->oartifact==ART_EXCALIBUR)\
+				|| ((otmp)->oartifact == ART_BLADE_DANCER_S_DAGGER && uwep && uwep->oartifact==ART_BLADE_SINGER_S_SPEAR)\
+				|| ((otmp)->oartifact == ART_BLADE_DANCER_S_DAGGER && uwep && uwep->oartifact==ART_SODE_NO_SHIRAYUKI)\
+				|| ((otmp)->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE))\
+				|| ((otmp)->oartifact == ART_CLEAVER && Role_if(PM_BARBARIAN))\
+				|| ((otmp)->oartifact == ART_KIKU_ICHIMONJI && Role_if(PM_SAMURAI))\
+				|| ((otmp)->oartifact == ART_SNICKERSNEE && (Role_if(PM_SAMURAI) || Role_if(PM_TOURIST) ))\
+				|| ((otmp)->oartifact == ART_MAGICBANE && Role_if(PM_WIZARD)))
 				
 /* Eggs and other food */
 #define MAX_EGG_HATCH_TIME 200	/* longest an egg can remain unhatched */
@@ -275,6 +324,8 @@ struct obj {
 /* age field of this is relative age rather than absolute */
 #define age_is_relative(otmp)	((otmp)->otyp == BRASS_LANTERN\
 				|| (otmp)->otyp == OIL_LAMP\
+				|| (otmp)->otyp == DWARVISH_IRON_HELM\
+				|| (otmp)->otyp == GNOMISH_POINTY_HAT\
 				|| (otmp)->otyp == CANDELABRUM_OF_INVOCATION\
 				|| (otmp)->otyp == TALLOW_CANDLE\
 				|| (otmp)->otyp == WAX_CANDLE\
@@ -282,6 +333,8 @@ struct obj {
 /* object can be ignited */
 #define ignitable(otmp)	((otmp)->otyp == BRASS_LANTERN\
 				|| (otmp)->otyp == OIL_LAMP\
+ 				|| (otmp)->otyp == DWARVISH_IRON_HELM\
+ 				|| (otmp)->otyp == GNOMISH_POINTY_HAT\
 				|| (otmp)->otyp == CANDELABRUM_OF_INVOCATION\
 				|| (otmp)->otyp == TALLOW_CANDLE\
 				|| (otmp)->otyp == WAX_CANDLE\
@@ -293,13 +346,19 @@ struct obj {
 				 (obj)->otyp == FLINT     || \
 				 (obj)->otyp == TOUCHSTONE)
 
+/* spirit related */
+#define is_berithable(otmp)	(otmp->otyp == SADDLE\
+				|| otmp->otyp == SILVER_SABER\
+				|| otmp->otyp == LONG_SWORD\
+				|| otmp->otyp == BOW\
+				|| otmp->otyp == LANCE\
+				|| (OBJ_DESCR(objects[otmp->otyp]) != (char *)0 && !strncmp(OBJ_DESCR(objects[otmp->otyp]), "riding ", 7))\
+				)
+#define is_chupodible(otmp) (your_race(&mons[otmp->corpsenm]))
+
 /* misc */
-#ifdef KOPS
-#define is_flimsy(otmp)		(objects[(otmp)->otyp].oc_material <= LEATHER || \
-				 (otmp)->otyp == RUBBER_HOSE)
-#else
 #define is_flimsy(otmp)		(objects[(otmp)->otyp].oc_material <= LEATHER)
-#endif
+#define is_boulder(otmp)		((otmp)->otyp == BOULDER || ((otmp)->otyp == STATUE && opaque(&mons[(otmp)->corpsenm])))
 
 /* helpers, simple enough to be macros */
 #define is_plural(o)	((o)->quan > 1 || \

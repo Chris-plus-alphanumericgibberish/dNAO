@@ -15,6 +15,10 @@
 #ifdef STRICT_REF_DEF
 #include "tcap.h"
 #endif
+/* ALI - We need the list of artifact names for artifact doors */
+#define MAKEDEFS_C      /* We only want the names, not the complete defn */
+#include "artilist.h"
+#undef MAKEDEFS_C
 
 #ifdef MAC
 # if defined(__SC__) || defined(__MRC__)
@@ -75,6 +79,7 @@ int  FDECL (main, (int, char **));
 void FDECL (yyerror, (const char *));
 void FDECL (yywarning, (const char *));
 int  NDECL (yywrap);
+int FDECL(get_artifact_id, (char *));
 int FDECL(get_floor_type, (CHAR_P));
 int FDECL(get_room_type, (char *));
 int FDECL(get_trap_type, (char *));
@@ -332,6 +337,22 @@ int
 yywrap()
 {
 	return 1;
+}
+
+/*
+ * Find the index of an artifact in the table, knowing its name.
+ */
+int
+get_artifact_id(s)
+char *s;
+{
+	register int i;
+
+	SpinCursor(3);
+	for(i=0; artifact_names[i]; i++)
+	    if (!strcmp(s, artifact_names[i]))
+		return ((int) i);
+	return ERR;
 }
 
 /*
