@@ -1698,6 +1698,7 @@ lootcont:
 		if (multi < 0) return 1;		/* chest trap */
 	    }
 	}
+	}
 	if (any) c = 'y';
     } else if (Confusion) {
 #ifndef GOLDOBJ
@@ -1755,7 +1756,6 @@ gotit:
 #endif
 		pline("Ok, now there is loot here.");
 	    }
-	}
     } else if (IS_GRAVE(levl[cc.x][cc.y].typ)) {
 	You("need to dig up the grave to effectively loot it...");
     }
