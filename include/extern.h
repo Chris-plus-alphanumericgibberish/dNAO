@@ -1214,7 +1214,6 @@ E struct mkroom *FDECL(search_special, (SCHAR_P));
 
 /* ### mon.c ### */
 
-E void FDECL(remove_monster, (int, int));
 E int FDECL(undead_to_corpse, (int));
 E int FDECL(genus, (int,int));
 E int FDECL(pm_to_cham, (int));
@@ -1268,6 +1267,8 @@ E void NDECL(kill_genocided_monsters);
 E void FDECL(golemeffects, (struct monst *,int,int));
 E boolean FDECL(angry_guards, (BOOLEAN_P));
 E void NDECL(pacify_guards);
+E void FDECL(removeMonster,(int,int));
+/*E void FDECL(remove_monster, (int, int)); The hell ?:S */
 
 /* ### mondata.c ### */
 

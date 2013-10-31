@@ -159,7 +159,7 @@ static void FDECL(bind_key, (unsigned char, char*));
 static void NDECL(init_bind_list);
 static void NDECL(change_bind_list);
 #ifdef WIZARD
-static void NDECL(add_debug_extended_commands);
+//static void NDECL(add_debug_extended_commands); //Moved to extern.h
 #endif /* WIZARD */
 
 #ifdef OVLB

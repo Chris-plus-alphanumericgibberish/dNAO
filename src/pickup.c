@@ -1698,6 +1698,7 @@ lootcont:
 		if (multi < 0) return 1;		/* chest trap */
 	    }
 	}
+	}
 	if (any) c = 'y';
     } else if (Confusion) {
 #ifndef GOLDOBJ

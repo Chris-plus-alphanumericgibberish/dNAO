@@ -472,10 +472,9 @@ struct obj *obj;
 #ifdef OVLB
 
 boolean
-restrict_name(otmp, name, restrict_typ)  /* returns 1 if name is restricted for otmp->otyp */
+restrict_name(otmp, name)  /* returns 1 if name is restricted for otmp->otyp */
 register struct obj *otmp;
 register const char *name;
-register boolean restrict_typ; /* restrict for otmp->otyp? */
 {
 	register const struct artifact *a;
 	register const char *aname;
@@ -824,6 +823,8 @@ struct monst *mtmp;
 {
 	struct permonst *ptr;
 	boolean yours;
+	
+	if(!mtmp) return FALSE; //Invoked with a null monster while calculating hypothetical data (I think)
 
 	if(!(weap->spfx & (SPFX_DBONUS | SPFX_ATTK)))
 	    return(weap->attk.adtyp == AD_PHYS);
