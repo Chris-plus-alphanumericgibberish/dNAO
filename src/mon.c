@@ -12,6 +12,8 @@
 #include "edog.h"
 #include <ctype.h>
 #include <stdlib.h>
+//include <math.h> //Incompatible with nethack!
+
 
 STATIC_DCL boolean FDECL(restrap,(struct monst *));
 #ifdef OVL2
@@ -54,8 +56,39 @@ STATIC_DCL struct obj *FDECL(make_corpse,(struct monst *));
 STATIC_DCL void FDECL(m_detach, (struct monst *, struct permonst *));
 STATIC_DCL void FDECL(lifesaved_monster, (struct monst *));
 
+STATIC_DCL double FDECL(pow, (double x, size_t n));
+STATIC_DCL double FDECL(atanGerald, (double x));
+
+STATIC_OVL double 
+pow(x, n)
+double x;
+size_t n;
+{
+	if (n == 0)
+		return 1;
+	else if (n % 2 == 0)
+		return pow(x * x, n >> 1);
+	else
+	return x * pow(x * x, n >> 1);
+}
+
+STATIC_OVL double 
+atanGerald(x)
+double x;
+{
+	double temp1 = x >= 0 ? x : -x;
+	double temp2 = temp1 <= 1.0 ? temp1 : (temp1 - 1) / (temp1 + 1);
+	double sum = temp2;
+	size_t i;
+	for (i = 1; i != 6; ++i)
+		sum += (i % 2 ? -1 : 1) * pow(temp2, (i << 1) + 1) / ((i << 1) + 1);
+
+	if (temp1 > 1.0) sum += 0.785398;
+	return x >= 0 ? sum : -sum;
+}
+
 void
-remove_monster(x,y)
+removeMonster(x,y)
 int x,y;
 {
     if (level.monsters[x][y] &&
@@ -725,7 +758,7 @@ movemon()
 		if(is_weeping(mtmp->data) && canseemon(mtmp)){
 			deltax = u.ux - mtmp->mx;
 			deltay = u.uy - mtmp->my;
-			theta = (int)(atan((float)deltay/(float)deltax)*100);
+			theta = (int)(atanGerald((float)deltay/(float)deltax)*100);
 			if(deltax<0&&deltay<0) theta+=314;
 			else if(deltax<0) theta+=314;
 			else if(deltay<=0) theta+=628;
@@ -1630,7 +1663,7 @@ register struct monst *mon;
 
 	if (fmon == (struct monst *)0)  panic ("relmon: no fmon available.");
 
-	remove_monster(mon->mx, mon->my);
+	removeMonster(mon->mx, mon->my);
 
 	if(mon == fmon) fmon = fmon->nmon;
 	else {
