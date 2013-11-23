@@ -121,8 +121,6 @@ E int NDECL(newhp);
 E schar FDECL(acurr, (int));
 E schar NDECL(acurrstr);
 E void FDECL(adjalign, (int));
-E int NDECL(uhp);
-E int NDECL(uhpmax);
 
 /* ### ball.c ### */
 
@@ -671,6 +669,7 @@ E int FDECL(experience, (struct monst *,int));
 E void FDECL(more_experienced, (int,int));
 E void FDECL(losexp, (const char *,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P));
 E void NDECL(newexplevel);
+E void NDECL(binderup);
 E void FDECL(pluslvl, (BOOLEAN_P));
 E long FDECL(rndexp, (BOOLEAN_P));
 
