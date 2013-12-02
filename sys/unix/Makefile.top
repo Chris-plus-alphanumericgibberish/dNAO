@@ -73,11 +73,18 @@ CHGRP = chgrp
 
 DATHELP = help hh cmdhelp history opthelp wizhelp
 
-SPEC_LEVS = asmodeus.lev baalz.lev bigrm-?.lev castle.lev fakewiz?.lev \
-	juiblex.lev knox.lev medusa-?.lev minend-?.lev minefill.lev \
-	minetn-?.lev oracle.lev orcus.lev sanctum.lev soko?-?.lev \
-	tower?.lev valley.lev wizard?.lev \
-	astral.lev air.lev earth.lev fire.lev water.lev
+SPEC_LEVS = abys2-?.lev air.lev arcadia?.lev arcfort.lev arcward.lev astral.lev atower?.lev bgrmb-?.lev \
+	    bigrm-?.lev brine-?.lev castle-?.lev chalev.lev chaos?.lev chaos???.lev earth.lev fakewiz?.lev \
+	    fire.lev gatetwn.lev hell-?.lev hell2-?.lev hell3.lev illregrd.lev knox.lev lawlev-?.lev \
+	    leth-?-?.lev lethe-?.lev medusa-?.lev minefill.lev minend-?.lev minetn-?.lev mtemple.lev \
+	    neulev.lev nkai-?-?.lev nkai-?.lev out?.lev oracle.lev path?.lev qstlb.lev rlyeh.lev sanctum.lev \
+	    sea.lev soko?-?.lev spire.lev stair?.lev stor-?.lev sumall.lev tomb.lev tower?.lev towrtop.lev \
+	    valley.lev water.lev wizard?.lev
+#asmodeus.lev baalz.lev bigrm-?.lev castle.lev fakewiz?.lev \
+#	juiblex.lev knox.lev medusa-?.lev minend-?.lev minefill.lev \
+#	minetn-?.lev oracle.lev orcus.lev sanctum.lev soko?-?.lev \
+#	tower?.lev valley.lev wizard?.lev \
+#	astral.lev air.lev earth.lev fire.lev water.lev
 QUEST_LEVS = ???-goal.lev ???-fil?.lev ???-loca.lev ???-strt.lev
 
 DATNODLB = $(VARDATND) license

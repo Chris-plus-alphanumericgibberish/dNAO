@@ -1804,7 +1804,7 @@ gotit:
 		    underfoot ? "here" : "there");
     }
     return (timepassed);
-}
+}}
 
 /* loot_mon() returns amount of time passed.
  */
