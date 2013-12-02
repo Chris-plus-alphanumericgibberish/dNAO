@@ -41,7 +41,7 @@ const struct Role roles[] = {
 	PM_LORD_CARNARVON, PM_STUDENT, PM_MINION_OF_HUHETOTL,
 	NON_PM, PM_HUMAN_MUMMY, S_SNAKE, S_MUMMY,
 	ART_ITLACHIAYAQUE,
-	MH_HUMAN|MH_DWARF|MH_GNOME | ROLE_MALE|ROLE_FEMALE |
+	MH_HUMAN|MH_DWARF|MH_GNOME|MH_CLOCK|MH_VAMPIRE | ROLE_MALE|ROLE_FEMALE |
 	  ROLE_LAWFUL|ROLE_NEUTRAL,
 	/* Str Int Wis Dex Con Cha */
 	{   7, 10, 10,  7,  7,  7 },
@@ -77,32 +77,32 @@ const struct Role roles[] = {
 	{  1, 0,  0, 1,  0, 1 },10,	/* Energy */
 	10, 14, 0, 0,  8, A_INT, SPE_HASTE_SELF,      -4
 },
-//{	{"Binder", 		 0}, {
-//	{"Exile",        0},
-//	{"Heratic",      0},
-//	{"Cultist",      0},
-//	{"Binder",       0},
-//	{"Akousmatikoi", 0},
-//	{"Mathematikoi", 0},
-//	{"Doctor",       0},
-//	{"Unbinder",     0},
-//	{"Gnostikos",    0} },
-//	"Yaldabaoth", "the void", "_Sophia", /* Gnostic */
-//	"Bin", "the lost library", "the Tower of Woe",
-//	PM_EXILE, NON_PM, NON_PM,
-//	PM_STRANGE_CORPSE, NON_PM, PM_ACERERAK,
-//	PM_SKELETON, PM_LICH, S_HUMANOID, S_LICH,
-//	ART_PEN_OF_THE_VOID,
-//	MH_HUMAN|MH_DWARF|MH_GNOME|MH_ELF|MH_ORC | ROLE_MALE|ROLE_FEMALE |
-//	  ROLE_NEUTRAL,
-//	/* Str Int Wis Dex Con Cha */
-//	{  6,  6,  6,  6,  6,  6 },
-//	{  10,  10,  10, 10, 10,  10 },
-//	/* Init   Lower  Higher */
-//	{ 11, 0,  0, 10,  2, 0 },	/* Hit points */
-//	{  5, 0,  1, 0,  1, 0 },15,	/* Energy */
-//	-5, 10, 5, 10,  25, A_INT, SPE_SLEEP,             -4
-//},
+// {	{"Binder", 		 0}, {
+	// {"Exile",        0},
+	// {"Heratic",      0},
+	// {"Cultist",      0},
+	// {"Binder",       0},
+	// {"Akousmatikoi", 0},
+	// {"Mathematikoi", 0},
+	// {"Doctor",       0},
+	// {"Unbinder",     0},
+	// {"Gnostikos",    0} },
+	// "Yaldabaoth", "the void", "_Sophia", /* Gnostic */
+	// "Bin", "the lost library", "the Tower of Woe",
+	// PM_EXILE, NON_PM, NON_PM,
+	// PM_STRANGE_CORPSE, NON_PM, PM_ACERERAK,
+	// PM_SKELETON, PM_LICH, S_HUMANOID, S_LICH,
+	// ART_PEN_OF_THE_VOID,
+	// MH_HUMAN|MH_DWARF|MH_GNOME|MH_ELF|MH_ORC | ROLE_MALE|ROLE_FEMALE |
+	  // ROLE_NEUTRAL,
+	// /* Str Int Wis Dex Con Cha */
+	// {  6,  6,  6,  6,  6,  6 },
+	// {  10,  10,  10, 10, 10,  10 },
+	// /* Init   Lower  Higher */
+	// { 11, 0,  0, 10,  2, 0 },	/* Hit points */
+	// {  5, 0,  1, 0,  1, 0 },15,	/* Energy */
+	// -5, 10, 5, 10,  25, A_INT, SPE_SLEEP,             -4
+// },
 {	{"Caveman", "Cavewoman"}, {
 	{"Troglodyte",  0},
 	{"Aborigine",   0},
@@ -146,7 +146,7 @@ const struct Role roles[] = {
 	PM_ROBERT_THE_LIFER, PM_INMATE, PM_WARDEN_ARIANNA,
 	PM_SOLDIER_ANT, PM_MALKUTH_SEPHIRAH, S_RODENT, S_SPIDER,
 	ART_IRON_BALL_OF_LIBERATION,
-	MH_HUMAN|MH_DWARF|MH_GNOME|MH_ORC | ROLE_MALE|ROLE_FEMALE |
+	MH_HUMAN|MH_DWARF|MH_GNOME|MH_ORC|MH_VAMPIRE | ROLE_MALE|ROLE_FEMALE |
 	  ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{  10,  7,  7,  7, 13,  6 },
@@ -198,7 +198,7 @@ const struct Role roles[] = {
 	PM_KING_ARTHUR, PM_PAGE, PM_IXOTH,
 	PM_QUASIT, PM_OCHRE_JELLY, S_IMP, S_JELLY,
 	ART_MAGIC_MIRROR_OF_MERLIN,
-	MH_HUMAN | ROLE_MALE|ROLE_FEMALE | ROLE_LAWFUL,
+	MH_HUMAN|MH_CLOCK | ROLE_MALE|ROLE_FEMALE | ROLE_LAWFUL,
 	/* Str Int Wis Dex Con Cha */
 	{  13,  7, 14,  8, 10, 17 },
 	{  30, 15, 15, 10, 20, 10 },
@@ -224,7 +224,7 @@ const struct Role roles[] = {
 	PM_GRAND_MASTER, PM_ABBOT, PM_MASTER_KAEN,
 	PM_EARTH_ELEMENTAL, PM_XORN, S_ELEMENTAL, S_XORN,
 	ART_EYES_OF_THE_OVERWORLD,
-	MH_HUMAN | ROLE_MALE|ROLE_FEMALE |
+	MH_HUMAN|MH_CLOCK | ROLE_MALE|ROLE_FEMALE |
 	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{  10,  7,  8,  8,  7,  7 },
@@ -247,10 +247,10 @@ const struct Role roles[] = {
 	0, 0, 0,	/* chosen randomly from among the other roles */
 	"Pri", "the Great Temple", "the Temple of Nalzok",
 	PM_PRIEST, PM_PRIESTESS, NON_PM,
-	PM_ARCH_PRIEST, PM_ACOLYTE, PM_NALZOK,
-	PM_HUMAN_ZOMBIE, PM_WRAITH, S_ZOMBIE, S_WRAITH,
+	PM_ARCH_PRIEST, PM_ACOLYTE, PM_NALZOK,//Legion
+	PM_HUMAN_ZOMBIE, PM_WRAITH, S_ZOMBIE, S_WRAITH,//Zombies, wraiths, elementals, zombies.  Place oozes.
 	ART_MITRE_OF_HOLINESS,
-	MH_HUMAN|MH_ELF | ROLE_MALE|ROLE_FEMALE |
+	MH_HUMAN|MH_ELF|MH_CLOCK | ROLE_MALE|ROLE_FEMALE |
 	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{   7,  7, 10,  7,  7,  7 },
@@ -304,7 +304,7 @@ const struct Role roles[] = {
 	PM_MASTER_OF_THIEVES, PM_THUG, PM_MASTER_ASSASSIN,
 	PM_LEPRECHAUN, PM_GUARDIAN_NAGA, S_NYMPH, S_NAGA,
 	ART_MASTER_KEY_OF_THIEVERY,
-	MH_HUMAN|MH_ORC | ROLE_MALE|ROLE_FEMALE |
+	MH_HUMAN|MH_ORC|MH_VAMPIRE | ROLE_MALE|ROLE_FEMALE |
 	  ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{   7,  7,  7, 10,  7,  6 },
@@ -370,7 +370,7 @@ const struct Role roles[] = {
 	PM_LORD_SATO, PM_ROSHI, PM_ASHIKAGA_TAKAUJI,
 	PM_WOLF, PM_STALKER, S_DOG, S_ELEMENTAL,
 	ART_TSURUGI_OF_MURAMASA,
-	MH_HUMAN | ROLE_MALE|ROLE_FEMALE | ROLE_LAWFUL,
+	MH_HUMAN|MH_CLOCK | ROLE_MALE|ROLE_FEMALE | ROLE_LAWFUL,
 	/* Str Int Wis Dex Con Cha */
 	{  10,  8,  7, 10, 17,  6 },
 	{  30, 10,  8, 30, 14,  8 },
@@ -448,7 +448,7 @@ const struct Role roles[] = {
 	PM_NEFERET_THE_GREEN, PM_APPRENTICE, PM_DARK_ONE,
 	PM_VAMPIRE_BAT, PM_XORN, S_BAT, S_WRAITH,
 	ART_EYE_OF_THE_AETHIOPICA,
-	MH_HUMAN|MH_ELF|MH_GNOME|MH_ORC | ROLE_MALE|ROLE_FEMALE |
+	MH_HUMAN|MH_ELF|MH_GNOME|MH_ORC|MH_VAMPIRE | ROLE_MALE|ROLE_FEMALE |
 	  ROLE_NEUTRAL|ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{   7, 10,  7,  7,  7,  7 },
@@ -496,10 +496,25 @@ const struct Race races[] = {
 	{ STR18(100), 18, 18, 18, 18, 18 },
 	/* Init   Lower  Higher */
 	{  2, 0,  0, 2,  1, 0 },	/* Hit points */
-	{  1, 0,  2, 0,  2, 0 }		/* Energy */
+	{  1, 0,  2, 0,  2, 0 },		/* Energy */
+	NO_NIGHTVISION
+},
+{	"incantifier", "incantifier", "wanterkind", "Inc",
+	{0, 0},
+	PM_INCANTIFIER, NON_PM, PM_HUMAN_MUMMY, PM_HUMAN_ZOMBIE,
+	MH_HUMAN | ROLE_MALE|ROLE_FEMALE |
+	  ROLE_NEUTRAL|ROLE_CHAOTIC,
+	MH_HUMAN, 0, MH_GNOME|MH_ORC|MH_ELF,
+	/*    Str     Int Wis Dex Con Cha */
+	{      3,      3,  3,  3,  3,  3 },
+	{ STR18(100), 18, 18, 18, 18, 18 },
+	/* Init   Lower  Higher */
+	{  2, 0,  0, 2,  0, 2 },	/* Hit points */
+	{  0, 0,  10, 0, 10, 0 },		/* Energy */
+	NO_NIGHTVISION
 },
 {	"elf", "elven", "elvenkind", "Elf",
-	{0, 0},
+	{"elf", "elf-maid"},
 	PM_ELF, NON_PM, PM_ELF_MUMMY, PM_ELF_ZOMBIE,
 	MH_ELF | ROLE_MALE|ROLE_FEMALE | ROLE_CHAOTIC,
 	MH_ELF, MH_ELF, MH_ORC,
@@ -508,7 +523,21 @@ const struct Race races[] = {
 	{   18,    20, 20, 18, 16, 18 },
 	/* Init   Lower  Higher */
 	{  1, 0,  0, 1,  1, 0 },	/* Hit points */
-	{  2, 0,  3, 0,  3, 0 }		/* Energy */
+	{  2, 0,  3, 0,  3, 0 },	/* Energy */
+	NIGHTVISION3
+},
+{	"drow", "droven", "drovenkind", "Dro",
+	{"hedrow", "drow"},
+	PM_DROW, NON_PM, PM_DROW_MUMMY, PM_DROW_ZOMBIE,
+	MH_ELF | ROLE_MALE|ROLE_FEMALE | ROLE_CHAOTIC,
+	MH_ELF, 0, MH_ELF|MH_ORC,
+	/*  Str    Int Wis Dex Con Cha */
+	{    3,     3,  3,  3,  3,  3 },
+	{   18,    20, 20, 18, 16, 18 },
+	/* Init   Lower  Higher */
+	{  1, 0,  0, 1,  1, 0 },	/* Hit points */
+	{  2, 0,  3, 0,  3, 0 },	/* Energy */
+	NIGHTVISION2
 },
 {	"dwarf", "dwarven", "dwarvenkind", "Dwa",
 	{0, 0},
@@ -520,7 +549,8 @@ const struct Race races[] = {
 	{ STR18(100), 16, 16, 20, 20, 16 },
 	/* Init   Lower  Higher */
 	{  4, 0,  0, 3,  2, 0 },	/* Hit points */
-	{  0, 0,  0, 0,  0, 0 }		/* Energy */
+	{  0, 0,  0, 0,  0, 0 },	/* Energy */
+	NO_NIGHTVISION
 },
 {	"gnome", "gnomish", "gnomehood", "Gno",
 	{0, 0},
@@ -532,7 +562,8 @@ const struct Race races[] = {
 	{STR18(50),19, 18, 18, 18, 18 },
 	/* Init   Lower  Higher */
 	{  1, 0,  0, 1,  0, 0 },	/* Hit points */
-	{  2, 0,  2, 0,  2, 0 }		/* Energy */
+	{  2, 0,  2, 0,  2, 0 },	/* Energy */
+	NO_NIGHTVISION
 },
 {	"orc", "orcish", "orcdom", "Orc",
 	{0, 0},
@@ -544,10 +575,37 @@ const struct Race races[] = {
 	{STR18(50),16, 16, 18, 18, 16 },
 	/* Init   Lower  Higher */
 	{  1, 0,  0, 1,  0, 0 },	/* Hit points */
-	{  1, 0,  1, 0,  1, 0 }		/* Energy */
+	{  1, 0,  1, 0,  1, 0 },	/* Energy */
+	NO_NIGHTVISION
+},
+{	"vampire", "vampiric", "vampirehood", "Vam",
+	{"vampire", "vampiress"},
+	PM_VAMPIRE, NON_PM, PM_HUMAN_MUMMY, PM_HUMAN_ZOMBIE,
+	MH_VAMPIRE | ROLE_MALE|ROLE_FEMALE | ROLE_CHAOTIC|ROLE_NEUTRAL,
+	MH_VAMPIRE, 0, MH_ELF|MH_GNOME|MH_DWARF|MH_ORC,
+	/*    Str     Int Wis Dex Con Cha */
+	{      3,      3,  3,  3,  3,  3 },
+	{ STR19(19), 18, 18, 20, 20, 20 },
+	/* Init   Lower  Higher */
+	{  3, 0,  0, 3,  2, 0 },	/* Hit points */
+	{  3, 0,  4, 0,  4, 0 },	/* Energy */
+	NO_NIGHTVISION
+},
+{	"clockwork automaton", "automatic", "clockwork-kind", "Clk",
+	{0, 0},
+	PM_CLOCKWORK_AUTOMATON, NON_PM, NON_PM, NON_PM,
+	MH_CLOCK | ROLE_MALE|ROLE_FEMALE | ROLE_LAWFUL,
+	MH_CLOCK, MH_DWARF, MH_GNOME,
+	/*    Str     Int Wis Dex Con Cha */
+	{      8,      8,  8,  8,  8,  8 },
+	{ STR18(100), 18, 18, 18, 18, 18 },
+	/* Init   Lower  Higher */
+	{  3, 0,  3, 0,  3, 0 },	/* Hit points */
+	{  3, 0,  3, 0,  3, 0 },	/* Energy */
+	NO_NIGHTVISION
 },
 /* Array terminator */
-{ 0, 0, 0, 0 }};
+{ 0, 0, 0, 0, 0 }};
 
 
 /* The player's race, created at runtime from initial
@@ -563,7 +621,8 @@ struct Race urace =
 	{ STR18(100), 18, 18, 18, 18, 18 },
 	/* Init   Lower  Higher */
 	{  2, 0,  0, 2,  1, 0 },	/* Hit points */
-	{  1, 0,  2, 0,  2, 0 }		/* Energy */
+	{  1, 0,  2, 0,  2, 0 },	/* Energy */
+	NO_NIGHTVISION
 };
 
 
@@ -779,7 +838,10 @@ validalign(rolenum, racenum, alignnum)
 	return (alignnum >= 0 && alignnum < ROLE_ALIGNS &&
 		(((roles[rolenum].allow & races[racenum].allow &
 		 aligns[alignnum].allow & ROLE_ALIGNMASK)) || 
-		(roles[rolenum].malenum==PM_EXILE && aligns[alignnum].allow == ROLE_NEUTRAL)
+		(roles[rolenum].malenum==PM_EXILE && aligns[alignnum].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#ifdef CONVICT
+	|| (roles[rolenum].malenum==PM_CONVICT && aligns[alignnum].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#endif
 		));
 }
 
@@ -794,7 +856,10 @@ randalign(rolenum, racenum)
 	for (i = 0; i < ROLE_ALIGNS; i++)
 	    if ((roles[rolenum].allow & races[racenum].allow &
 	    		aligns[i].allow & ROLE_ALIGNMASK) ||
-			(roles[rolenum].malenum==PM_EXILE && aligns[i].allow == ROLE_NEUTRAL)
+			(roles[rolenum].malenum==PM_EXILE && aligns[i].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#ifdef CONVICT
+		|| (roles[rolenum].malenum==PM_CONVICT && aligns[i].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#endif
 			)
 	    	n++;
 
@@ -803,7 +868,10 @@ randalign(rolenum, racenum)
 	for (i = 0; i < ROLE_ALIGNS; i++)
 	    if ((roles[rolenum].allow & races[racenum].allow &
 	    		aligns[i].allow & ROLE_ALIGNMASK) ||
-			(roles[rolenum].malenum==PM_EXILE && aligns[i].allow == ROLE_NEUTRAL)
+			(roles[rolenum].malenum==PM_EXILE && aligns[i].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#ifdef CONVICT
+		|| (roles[rolenum].malenum==PM_CONVICT && aligns[i].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#endif
 			) {
 	    	if (n) n--;
 	    	else return (i);
@@ -858,7 +926,12 @@ int rolenum, racenum, gendnum, alignnum;
 		!(allow & genders[gendnum].allow & ROLE_GENDMASK))
 	    return FALSE;
 	if (alignnum >= 0 && alignnum < ROLE_ALIGNS &&
-		!(allow & aligns[alignnum].allow & ROLE_ALIGNMASK))
+		!(allow & aligns[alignnum].allow & ROLE_ALIGNMASK || 
+			(roles[rolenum].malenum==PM_EXILE && aligns[alignnum].allow & allow & ROLE_ALIGNMASK && allow & races[racenum].allow & ROLE_RACEMASK)
+#ifdef CONVICT
+		|| (roles[rolenum].malenum==PM_CONVICT && aligns[alignnum].allow & allow & ROLE_ALIGNMASK && allow & races[racenum].allow & ROLE_RACEMASK)
+#endif
+	))
 	    return FALSE;
 	return TRUE;
     } else {
@@ -871,7 +944,12 @@ int rolenum, racenum, gendnum, alignnum;
 		    !(allow & genders[gendnum].allow & ROLE_GENDMASK))
 		continue;
 	    if (alignnum >= 0 && alignnum < ROLE_ALIGNS &&
-		    !(allow & aligns[alignnum].allow & ROLE_ALIGNMASK))
+		    !(allow & aligns[alignnum].allow & ROLE_ALIGNMASK || 
+				(roles[rolenum].malenum==PM_EXILE && aligns[alignnum].allow & allow & ROLE_ALIGNMASK && allow & races[racenum].allow & ROLE_RACEMASK)
+#ifdef CONVICT
+			|| (roles[rolenum].malenum==PM_CONVICT && aligns[alignnum].allow & allow & ROLE_ALIGNMASK && allow & races[racenum].allow & ROLE_RACEMASK)
+#endif
+		))
 		continue;
 	    return TRUE;
 	}
@@ -924,7 +1002,12 @@ int rolenum, racenum, gendnum, alignnum;
 		!(allow & genders[gendnum].allow & ROLE_GENDMASK))
 	    return FALSE;
 	if (alignnum >= 0 && alignnum < ROLE_ALIGNS &&
-		!(allow & aligns[alignnum].allow & ROLE_ALIGNMASK))
+		!(allow & aligns[alignnum].allow & ROLE_ALIGNMASK || 
+			(roles[rolenum].malenum==PM_EXILE && aligns[alignnum].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & allow & ROLE_RACEMASK)
+#ifdef CONVICT
+		|| (roles[rolenum].malenum==PM_CONVICT && aligns[alignnum].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & allow & ROLE_RACEMASK)
+#endif
+	))
 	    return FALSE;
 	return TRUE;
     } else {
@@ -937,7 +1020,12 @@ int rolenum, racenum, gendnum, alignnum;
 		    !(allow & genders[gendnum].allow & ROLE_GENDMASK))
 		continue;
 	    if (alignnum >= 0 && alignnum < ROLE_ALIGNS &&
-		    !(allow & aligns[alignnum].allow & ROLE_ALIGNMASK))
+		    !(allow & aligns[alignnum].allow & ROLE_ALIGNMASK || 
+				(roles[rolenum].malenum==PM_EXILE && aligns[alignnum].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & allow & ROLE_RACEMASK)
+#ifdef CONVICT
+			|| (roles[rolenum].malenum==PM_CONVICT && aligns[alignnum].allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & allow & ROLE_RACEMASK)
+#endif
+	))
 		continue;
 	    return TRUE;
 	}
@@ -1050,7 +1138,12 @@ int rolenum, racenum, gendnum, alignnum;
 		!(allow & roles[rolenum].allow & ROLE_ALIGNMASK))
 	    return FALSE;
 	if (racenum >= 0 && racenum < SIZE(races)-1 &&
-		!(allow & races[racenum].allow & ROLE_ALIGNMASK))
+		!(allow & races[racenum].allow & ROLE_ALIGNMASK || 
+			(roles[rolenum].malenum==PM_EXILE && allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#ifdef CONVICT
+		|| (roles[rolenum].malenum==PM_CONVICT && allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#endif
+	))
 	    return FALSE;
 	return TRUE;
     } else {
@@ -1060,7 +1153,12 @@ int rolenum, racenum, gendnum, alignnum;
 		    !(allow & roles[rolenum].allow & ROLE_ALIGNMASK))
 		continue;
 	    if (racenum >= 0 && racenum < SIZE(races)-1 &&
-		    !(allow & races[racenum].allow & ROLE_ALIGNMASK))
+		    !(allow & races[racenum].allow & ROLE_ALIGNMASK || 
+				(roles[rolenum].malenum==PM_EXILE && allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#ifdef CONVICT
+			|| (roles[rolenum].malenum==PM_CONVICT && allow & roles[rolenum].allow & ROLE_ALIGNMASK && roles[rolenum].allow & races[racenum].allow & ROLE_RACEMASK)
+#endif
+		))
 		continue;
 	    return TRUE;
 	}

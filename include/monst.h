@@ -113,6 +113,8 @@ struct monst {
 	Bitfield(iswiz,1);	/* is the Wizard of Yendor */
 	Bitfield(wormno,5);	/* at most 31 worms on any level */
 #define MAX_NUM_WORMS	32	/* should be 2^(wormno bitfield size) */
+	Bitfield(moccupation,1);/* linked to your occupation */
+	
 
 	long mstrategy;		/* for monsters with mflag3: current strategy */
 #define STRAT_ARRIVE	0x40000000L	/* just arrived on current level */
@@ -148,6 +150,13 @@ struct monst {
 	/* in order to prevent alignment problems mextra should
 	   be (or follow) a long int */
 	int meating;		/* monster is eating timeout */
+	//hatching situation
+	//AT_LAYEGG, PM_HATCHLING_NAME, x, d
+	//timetohatch
+	//larvatime (larva effects default or by hatchling, time default or by hatchling)
+	//	time:  AT_LARVA+x, where x=time, and AT_LARVA is large, 10000 or so.
+	//utype = PM_HATCHLING_NAME
+	//inventory
 	long mextra[1]; /* monster dependent info */
 };
 

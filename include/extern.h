@@ -574,6 +574,8 @@ E int NDECL(eatfood);
 E int NDECL(opentin);
 E int NDECL(unfaint);
 #endif
+E void FDECL(cprefx, (int, BOOLEAN_P));
+E void FDECL(cpostfx, (int, BOOLEAN_P));
 E boolean FDECL(is_edible, (struct obj *));
 E void NDECL(init_uhunger);
 E int NDECL(Hear_again);
@@ -597,6 +599,8 @@ E void FDECL(food_substitution, (struct obj *,struct obj *));
 E void NDECL(fix_petrification);
 E void FDECL(consume_oeaten, (struct obj *,int));
 E boolean FDECL(maybe_finished_meal, (BOOLEAN_P));
+E int FDECL(ask_turns, (struct monst *, int, int));
+E int FDECL(start_clockwinding, (struct obj *,struct monst *, int));
 
 /* ### end.c ### */
 
@@ -638,6 +642,7 @@ E struct engr *NDECL(get_head_engr);
 E const char *FDECL(surface, (int,int));
 E const char *FDECL(ceiling, (int,int));
 E struct engr *FDECL(engr_at, (XCHAR_P,XCHAR_P));
+E void NDECL(move_gliders);
 E int FDECL(sengr_at, (const char *,XCHAR_P,XCHAR_P));
 E int FDECL(ward_at, (XCHAR_P,XCHAR_P));
 E int FDECL(num_wards_at, (XCHAR_P,XCHAR_P));
@@ -785,7 +790,10 @@ E void NDECL(lookaround);
 E int NDECL(monster_nearby);
 E void FDECL(nomul, (int, const char *));
 E void FDECL(unmul, (const char *));
+E void FDECL(showdmg, (int, BOOLEAN_P));
 E void FDECL(losehp, (int,const char *,BOOLEAN_P));
+E void FDECL(set_uhpmax, (int,BOOLEAN_P));
+E void NDECL(check_uhpmax);
 E int NDECL(weight_cap);
 E int NDECL(inv_weight);
 E int NDECL(near_capacity);
@@ -1489,6 +1497,7 @@ E int NDECL(find_mboots);
 E int NDECL(find_hboots);
 E int NDECL(find_bboots);
 E int NDECL(find_jboots);
+E int NDECL(find_signet_ring);
 E int NDECL(find_engagement_ring);
 E int NDECL(find_gold_ring);
 E int NDECL(find_opal_ring);
@@ -1506,6 +1515,7 @@ E int NDECL(find_ivory_ring);
 E int NDECL(find_emerald_ring);
 E int NDECL(find_droven_ring);
 E boolean FDECL(isEngrRing, (short));
+E boolean FDECL(isSignetRing, (short));
 E void NDECL(oinit);
 E void FDECL(savenames, (int,int));
 E void FDECL(restnames, (int));
@@ -1705,6 +1715,7 @@ E char *FDECL(piratesay, (const char *));
 
 /* ### polyself.c ### */
 
+E void NDECL(init_uasmon);
 E void NDECL(set_uasmon);
 E void NDECL(change_sex);
 E void FDECL(polyself, (BOOLEAN_P));
@@ -1718,6 +1729,7 @@ E int NDECL(dosummon);
 E int NDECL(dogaze);
 E int NDECL(dohide);
 E int NDECL(domindblast);
+E int NDECL(dodarken);
 E void FDECL(skinback, (BOOLEAN_P));
 E const char *FDECL(mbodypart, (struct monst *,int));
 E const char *FDECL(body_part, (int));
@@ -2053,6 +2065,10 @@ E void FDECL(yelp, (struct monst *));
 E void FDECL(whimper, (struct monst *));
 E void FDECL(beg, (struct monst *));
 E int NDECL(dotalk);
+E int FDECL(P_MAX_SKILL, (int));
+E int FDECL(P_SKILL, (int));
+E int FDECL(P_RESTRICTED, (int));
+E boolean FDECL(spiritSkill, (int));
 #ifdef USER_SOUNDS
 E int FDECL(add_sound_mapping, (const char *));
 E void FDECL(play_sound_for_message, (const char *));
@@ -2456,6 +2472,7 @@ E int NDECL(uwep_skill_type);
 E int FDECL(weapon_hit_bonus, (struct obj *));
 E int FDECL(weapon_dam_bonus, (struct obj *));
 E void FDECL(skill_init, (const struct def_skill *));
+E void FDECL(skill_add, (const struct def_skill *));
 
 /* ### were.c ### */
 
@@ -2543,6 +2560,7 @@ E int FDECL(extra_pref, (struct monst *, struct obj *));
 E void FDECL(bypass_obj, (struct obj *));
 E void NDECL(clear_bypasses);
 E int FDECL(racial_exception, (struct monst *, struct obj *));
+E void FDECL(light_damage, (genericptr_t, long));
 
 /* ### write.c ### */
 

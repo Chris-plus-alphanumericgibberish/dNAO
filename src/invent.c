@@ -1008,6 +1008,8 @@ register const char *let,*word;
 		|| (!strcmp(word, "wield") &&
 		    (otmp->oclass == TOOL_CLASS && !is_weptool(otmp)))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
+		|| (!strcmp(word, "wind with") && (otmp->oclass == TOOL_CLASS &&
+		     otyp != SKELETON_KEY))
 		|| (!strcmp(word, "sacrifice") &&
 		    (otyp != CORPSE &&
 		     otyp != AMULET_OF_YENDOR && otyp != FAKE_AMULET_OF_YENDOR))
@@ -1040,6 +1042,7 @@ register const char *let,*word;
 		     /* MRKR: mining helmets */
 		     (otmp->oclass == ARMOR_CLASS &&
 		      otyp != DWARVISH_IRON_HELM &&
+		      otyp != DROVEN_CLOAK &&
 			  otyp != GNOMISH_POINTY_HAT) || 
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp))))
 		|| (!strcmp(word, "invoke") &&
@@ -1068,10 +1071,9 @@ register const char *let,*word;
 		/* "ugly check" for reading fortune cookies, part 2 */
 		if ((!strcmp(word, "read") &&
 		    (otmp->otyp == FORTUNE_COOKIE
-#ifdef TOURIST
 			|| otmp->otyp == T_SHIRT
-#endif
-		    )))
+		    )
+		))
 			allowall = TRUE;
 	    }
 		//Make an exception for the Rod, so you can read the inscription.
@@ -1084,8 +1086,19 @@ register const char *let,*word;
 			bp[foo++] = otmp->invlet;
 			allowall = TRUE;
 		}
+		//Make exceptions for armors that have been engraved
+		if(otmp->oclass == ARMOR_CLASS
+			&& otmp->ohaluengr
+			&& otmp->ovar1
+			&& (   otmp->otyp == DROVEN_PLATE_MAIL 
+				|| otmp->otyp == DROVEN_CHAIN_MAIL)
+			&& otmp->ovar1 && !strcmp(word, "read")
+		){
+			bp[foo++] = otmp->invlet;
+			allowall = TRUE;
+		}
 		//Make exceptions for rings that have been engraved
-		if(otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && otmp->ovar1 && (!strcmp(word, "read") || !strcmp(word, "use or apply"))){
+		if(otmp->oclass == RING_CLASS && (isEngrRing((otmp)->otyp) || isSignetRing((otmp)->otyp)) && otmp->ovar1 && (!strcmp(word, "read") || !strcmp(word, "use or apply"))){
 			bp[foo++] = otmp->invlet;
 			allowall = TRUE;
 		}
@@ -3066,10 +3079,10 @@ mergable(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	    return FALSE;
 
 	if (obj->oclass == FOOD_CLASS && (obj->oeaten != otmp->oeaten ||
-					  obj->orotten != otmp->orotten))
+	  obj->odrained != otmp->odrained || obj->orotten != otmp->orotten))
 	    return(FALSE);
 
-	if (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN) {
+	if (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) {
 		if (obj->corpsenm != otmp->corpsenm)
 				return FALSE;
 	}

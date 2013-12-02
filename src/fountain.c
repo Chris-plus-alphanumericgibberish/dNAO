@@ -229,7 +229,8 @@ drinkfountain()
 
 	if (fate < 10) {
 		pline_The("cool draught refreshes you.");
-		u.uhunger += rnd(10); /* don't choke on water */
+		if(Race_if(PM_INCANTIFIER)) u.uen += rnd(10); /* don't choke on water */
+		else u.uhunger += rnd(10); /* don't choke on water */
 		newuhs(FALSE);
 		if(mgkftn) return;
 	} else {
@@ -538,10 +539,16 @@ drinksink()
 			}
 			break;
 		case 4: do {
+				/* use Luck here instead of u.uluck */
+				if (!rn2(13) && ((Luck >= 0 && maybe_polyd(is_vampire(youmonst.data), Race_if(PM_VAMPIRE))) ||
+				    (Luck <= 0 && !maybe_polyd(is_vampire(youmonst.data), Race_if(PM_VAMPIRE))))) {
+					otmp = mksobj(POT_BLOOD,FALSE,FALSE);
+				} else {
 				otmp = mkobj(POTION_CLASS,FALSE);
 				if (otmp->otyp == POT_WATER) {
 					obfree(otmp, (struct obj *)0);
 					otmp = (struct obj *) 0;
+				}
 				}
 			} while(!otmp);
 			otmp->cursed = otmp->blessed = 0;

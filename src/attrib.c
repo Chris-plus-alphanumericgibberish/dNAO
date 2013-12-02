@@ -59,14 +59,21 @@ const struct innate {
 	mon_abil[] = { {   1, &(HFast), "", "" },
 		     {   1, &(HSleep_resistance), "", "" },
 		     {   1, &(HSee_invisible), "", "" },
-		     {   3, &(HPoison_resistance), "healthy", "" },
-		     {   5, &(HStealth), "stealthy", "" },
-		     {   7, &(HWarning), "sensitive", "" },
+		     {   3, &(HPoison_resistance), "healthy", "sickly" },
+		     {   5, &(HStealth), "stealthy", "noisy" },
+		     {   7, &(HWarning), "sensitive", "insensitive" },
 		     {   9, &(HSearching), "perceptive", "unaware" },
 		     {  11, &(HFire_resistance), "cool", "warmer" },
 		     {  13, &(HCold_resistance), "warm", "cooler" },
 		     {  15, &(HShock_resistance), "insulated", "conductive" },
 		     {  17, &(HTeleport_control), "controlled","uncontrolled" },
+		     {  19, &(HAcid_resistance), "thick-skinned","soft-skinned" },
+		     {  21, &(HSee_invisible), "keen-eyed","shortsighted" },
+		     {  23, &(HSick_resistance), "immunized","immunocompromised" },
+		     {  25, &(EDisint_resistance), "firm","less firm" },
+		     {  27, &(HStone_resistance), "limber","stiff" },
+		     {  29, &(HAntimagic), "sceptical","credulous" },
+		     {  30, &(HDrain_resistance), "above earthly concerns","not so above it all" },
 		     {   0, 0, 0, 0 } },
 
 	pir_abil[] = {	{1, &(HSwimming), "", ""  },
@@ -110,6 +117,17 @@ const struct innate {
 		     {	 0, 0, 0, 0 } },
 
 	orc_abil[] = { {	1, &(HPoison_resistance), "", "" },
+		     {	 0, 0, 0, 0 } },
+
+	clk_abil[] = { {	1, &(HPoison_resistance), "", "" },
+		     {	 1, &(HSick_resistance), "", "" },
+		     {	 1, &(HStone_resistance), "", "" },
+		     {	 5, &(HShock_resistance), "", "" },
+		     {	 10, &(HCold_resistance), "", "" },
+		     {	 15, &(HFire_resistance), "", "" },
+		     {	 0, 0, 0, 0 } },
+
+	inc_abil[] = { {	1, &(HAntimagic), "", "" },
 		     {	 0, 0, 0, 0 } };
 
 static long next_check = 600L;	/* arbitrary first setting */
@@ -295,6 +313,7 @@ boolean	inc_or_dec;
 	pline("Exercise:");
 #endif
 	if (i == A_CHA) return;	/* can't exercise cha */
+	if(uclockwork) return; /* Clockwork Automata can't excercise abilities */
 
 	/* no physical exercise while polymorphed; the body's temporary */
 	if (Upolyd && i != A_WIS) return;
@@ -335,16 +354,18 @@ exerper()
 	if(!(moves % 10)) {
 		/* Hunger Checks */
 
-		int hs = (u.uhunger > 1000) ? SATIATED :
-			 (u.uhunger > 150) ? NOT_HUNGRY :
-			 (u.uhunger > 50) ? HUNGRY :
-			 (u.uhunger > 0) ? WEAK : FAINTING;
+		int hs = (YouHunger > 1000) ? SATIATED :
+			 (YouHunger > 150) ? NOT_HUNGRY :
+			 (YouHunger > 50) ? HUNGRY :
+			 (YouHunger > 0) ? WEAK : FAINTING;
 
 #ifdef DEBUG
 		pline("exerper: Hunger checks");
 #endif
 		switch (hs) {
-		    case SATIATED:	exercise(A_DEX, FALSE);
+		    case SATIATED:	if (maybe_polyd(!is_vampire(youmonst.data),
+						!Race_if(PM_VAMPIRE)))  /* undead */
+					    exercise(A_DEX, FALSE);
 					if (Role_if(PM_MONK))
 					    exercise(A_WIS, FALSE);
 					break;
@@ -395,6 +416,7 @@ exerchk()
 {
 	int	i, mod_val;
 
+	if(uclockwork) return; /* Clockwork Automata can't excercise abilities */
 	/*	Check out the periodic accumulations */
 	exerper();
 
@@ -602,10 +624,14 @@ int oldlevel, newlevel;
 
 	switch (Race_switch) {
 	case PM_ELF:            rabil = elf_abil;	break;
+	case PM_DROW:           rabil = elf_abil;	break;
 	case PM_ORC:            rabil = orc_abil;	break;
 	case PM_HUMAN:
+	case PM_CLOCKWORK_AUTOMATON:rabil = clk_abil;	break;
+	case PM_INCANTIFIER:	rabil = inc_abil;	break;
 	case PM_DWARF:
 	case PM_GNOME:
+	case PM_VAMPIRE:
 	default:                rabil = 0;		break;
 	}
 

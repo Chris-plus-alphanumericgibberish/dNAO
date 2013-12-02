@@ -65,8 +65,8 @@ struct obj {
 	Bitfield(rknown,1);	/* rustproof or not known */
 	Bitfield(sknown,1);	/* stolen or not known */
 
-	Bitfield(oeroded,2);	/* rusted/burnt weapon/armor */
-	Bitfield(oeroded2,2);	/* corroded/rotted weapon/armor */
+	Bitfield(oeroded,2);	/* rusted/burnt/vaporized weapon/armor */
+	Bitfield(oeroded2,2);	/* corroded/rotted/fractured weapon/armor */
 #define greatest_erosion(otmp) (int)((otmp)->oeroded > (otmp)->oeroded2 ? (otmp)->oeroded : (otmp)->oeroded2)
 #define MAX_ERODE 3
 #define orotten oeroded		/* rotten food */
@@ -74,6 +74,7 @@ struct obj {
 #define norevive oeroded2
 	Bitfield(oerodeproof,1); /* erodeproof weapon/armor */
 	Bitfield(olocked,1);	/* object is locked */
+#define odrained olocked	/* drained corpse */
 	Bitfield(obroken,1);	/* lock has been broken */
 #define ohaluengr obroken	/* engraving on ring isn't a ward */
 	Bitfield(otrapped,1);	/* container is trapped */
@@ -99,11 +100,14 @@ struct obj {
 	Bitfield(ostolen,1); 	/* was removed from a shop without being sold */
        Bitfield(was_thrown,1); /* for pickup_thrown */
 	/* 0 free bits */
+	Bitfield(fromsink,1);
+	/* 31 free bits in this field, I think -CM */
 
 	int	corpsenm;	/* type of corpse is mons[corpsenm] */
 #define leashmon  corpsenm	/* gets m_id of attached pet */
 #define spestudied corpsenm	/* # of times a spellbook has been studied */
-#define fromsink  corpsenm	/* a potion from a sink */
+//define fromsink  corpsenm	/* a potion from a sink */
+#define opoisonchrgs corpsenm	/* number of poison doses left */
 
 	int opoisoned; /* poisons smeared on the weapon*/
 #define OPOISON_NONE	 0
@@ -128,7 +132,8 @@ struct obj {
 	long owornmask;
 	long ovar1;		/* extra variable. Specifies the contents of Books of Secrets, and the warding sign of spellbooks. */
 			/* Also, records special features for weapons. Currently, the only special feature is runes on wooden weapons. */
-			/* Rings: specifies # of charges on droven ring and engraving on gemstone rings */
+			/* Rings: specifies engraving on certain rings */
+			/* Cloaks: Droven: Tattered level.  */
 
 	schar gifted; /*gifted is of type aligntyp.  For some reson aligntyp isn't being seen at compile*/
 
@@ -202,6 +207,9 @@ struct obj {
 #define is_multigen(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill >= -P_SHURIKEN && \
 			 objects[otmp->otyp].oc_skill <= -P_BOW)
+// define is_poisonable(otmp)	(otmp->oclass == WEAPON_CLASS && \
+			 // objects[otmp->otyp].oc_skill >= -P_SHURIKEN && \
+			 // objects[otmp->otyp].oc_skill <= -P_BOW)
 #define is_poisonable(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			objects[otmp->otyp].oc_dir != WHACK)
 #define uslinging()	(uwep && objects[uwep->otyp].oc_skill == P_SLING)
@@ -266,13 +274,14 @@ struct obj {
 			 pm_to_cham((obj)->corpsenm) != CHAM_ORDINARY)
 #define mlevelgain(obj) (ofood(obj) && (obj)->corpsenm == PM_WRAITH)
 #define mhealup(obj)	(ofood(obj) && (obj)->corpsenm == PM_NURSE)
+#define drainlevel(corpse) (mons[(corpse)->corpsenm].cnutrit*4/5)
 
 /* Containers */
 #define carried(o)	((o)->where == OBJ_INVENT)
 #define mcarried(o)	((o)->where == OBJ_MINVENT)
 #define Has_contents(o) (/* (Is_container(o) || (o)->otyp == STATUE) && */ \
 			 (o)->cobj != (struct obj *)0)
-#define Is_container(o) ((o)->otyp >= LARGE_BOX && (o)->otyp <= BAG_OF_TRICKS)
+#define Is_container(o) ((o)->otyp >= LARGE_BOX && (o)->otyp <= BAG_OF_TRICKS/*DISTRESSED_PRINCESS*/)
 #define Is_box(otmp)	(otmp->otyp == LARGE_BOX || otmp->otyp == CHEST)
 #define Is_mbag(otmp)	(otmp->otyp == BAG_OF_HOLDING || \
 			 otmp->otyp == BAG_OF_TRICKS)

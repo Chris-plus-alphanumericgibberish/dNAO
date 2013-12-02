@@ -35,7 +35,15 @@ register struct monst *mtmp;
 STATIC_OVL int
 pet_type()
 {
-	if (urole.petnum != NON_PM)
+	if(Race_if(PM_DROW)){
+		if(preferred_pet == 's')
+			return (PM_CAVE_SPIDER);
+		else if(preferred_pet == ':' || preferred_pet == 'l')
+			return (PM_BABY_CROCODILE);
+		else 
+			return (rn2(3) ? PM_CAVE_SPIDER : PM_BABY_CROCODILE);
+	}
+	else if (urole.petnum != NON_PM)
 	    return (urole.petnum);
 	else if (preferred_pet == 'c')
 	    return (PM_KITTEN);
@@ -680,10 +688,20 @@ register struct obj *obj;
 		    return TABU;
 
 	    /* Ghouls only eat old corpses... yum! */
-	    if (mon->data == &mons[PM_GHOUL])
+	    if (mon->data == &mons[PM_GHOUL]){
+		return (obj->otyp == CORPSE && obj->corpsenm != PM_ACID_BLOB &&
+		  peek_at_iced_corpse_age(obj) + 5*rn1(20,10) <= monstermoves) ?
+			DOGFOOD : TABU;
+	    }
+	    /* vampires only "eat" very fresh corpses ... 
+	     * Assume meat -> blood
+	     */
+	    if (is_vampire(mon->data)) {
 		return (obj->otyp == CORPSE &&
-			peek_at_iced_corpse_age(obj) + 50L <= monstermoves) ?
+		  has_blood(&mons[obj->corpsenm]) && !obj->oeaten &&
+	    	  peek_at_iced_corpse_age(obj) + 5 >= monstermoves) ?
 				DOGFOOD : TABU;
+	    }
 
 	    if (!carni && !herbi)
 		    return (obj->cursed ? UNDEF : APPORT);

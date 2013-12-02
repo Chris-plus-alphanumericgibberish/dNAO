@@ -1111,7 +1111,7 @@ char *type;			/* blade, staff, etc */
 	    } else {
 		if (mdef->data == &mons[PM_CLAY_GOLEM] || mdef->data == &mons[PM_SPELL_GOLEM])
 		    mdef->mhp = 1;	/* cancelled clay golems will die */
-		if (youattack && attacktype(mdef->data, AT_MAGC)) {
+		if (youattack && (attacktype(mdef->data, AT_MAGC) || attacktype(mdef->data, AT_MMGC))) {
 		    You("absorb magical energy!");
 		    u.uenmax++;
 		    u.uen++;
@@ -3775,7 +3775,7 @@ read_necro(VOID_ARGS)
 					u.uen -= 100;
 					u.uenmax -= 20;
 					unrestrict_weapon_skill(objects[uwep->otyp].oc_skill);
-					P_MAX_SKILL(objects[uwep->otyp].oc_skill) = P_EXPERT;
+					u.weapon_skills[objects[uwep->otyp].oc_skill].max_skill = P_EXPERT;
 				}
 			break;
 			case SELECT_HEALTH:

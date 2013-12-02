@@ -220,6 +220,25 @@ static struct trobj Wizard[] = {
  *	Optional extra inventory items.
  */
 
+static struct trobj Key[] = {
+	{ SKELETON_KEY, 0, TOOL_CLASS, 1, 1 },
+	{ 0, 0, 0, 0, 0 }
+};
+
+static struct trobj HealingBook[] = {
+	{ SPE_HEALING, 0, SPBOOK_CLASS, 1, 1 },
+	{ 0, 0, 0, 0, 0 }
+};
+
+static struct trobj ForceBook[] = {
+	{ SPE_FORCE_BOLT, 0, SPBOOK_CLASS, 1, 1 },
+	{ 0, 0, 0, 0, 0 }
+};
+
+static struct trobj ExtraBook[] = {
+	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 1 },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj GnomishHat[] = {
 	{ GNOMISH_POINTY_HAT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ 0, 0, 0, 0, 0 }
@@ -230,6 +249,14 @@ static struct trobj TallowCandles[] = {
 	{ 0, 0, 0, 0, 0 }
 };
 
+static struct trobj SleepPotions[] = {
+	{ POT_SLEEPING, 0, POTION_CLASS, 1, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
+static struct trobj DrovenCloak[] = {
+	{ DROVEN_CLOAK, 0, ARMOR_CLASS, 1, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj Tinopener[] = {
 	{ TIN_OPENER, 0, TOOL_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
@@ -248,6 +275,10 @@ static struct trobj Blindfold[] = {
 };
 static struct trobj Instrument[] = {
 	{ WOODEN_FLUTE, 0, TOOL_CLASS, 1, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
+static struct trobj RandRing[] = {
+	{ UNDEF_TYP, UNDEF_SPE, RING_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Xtra_food[] = {
@@ -306,6 +337,35 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_GNOME, CLUB,			AKLYS    },
     { PM_GNOME, BOW,			CROSSBOW	      },
     { PM_GNOME, ARROW,			CROSSBOW_BOLT	      },
+    { PM_DROW,	CLOAK_OF_DISPLACEMENT,		DROVEN_PLATE_MAIL  },
+    { PM_DROW,	CLOAK_OF_MAGIC_RESISTANCE,	DROVEN_CHAIN_MAIL  },
+    { PM_DROW,	ROBE,						DROVEN_PLATE_MAIL  },
+    { PM_DROW,	DAGGER,			DROVEN_DAGGER	      },
+    { PM_DROW,	SPEAR,			DROVEN_SHORT_SWORD	      },
+    { PM_DROW,	SHORT_SWORD,	DROVEN_SHORT_SWORD     },
+    { PM_DROW,	BOW,			DROVEN_CROSSBOW	      },
+    { PM_DROW,	ARROW,			DROVEN_BOLT	      },
+    { PM_DROW,	LEATHER_CLOAK,				DROVEN_CLOAK  },
+    { PM_INCANTIFIER,CLOAK_OF_MAGIC_RESISTANCE,		ROBE  },
+    { PM_INCANTIFIER,CLOAK_OF_DISPLACEMENT,		ROBE  },
+    { PM_INCANTIFIER,	LEATHER_ARMOR,		ROBE  },
+    { PM_INCANTIFIER,	LEATHER_JACKET,		ROBE  },
+    { PM_INCANTIFIER,	RING_MAIL,			ROBE  },
+    { PM_INCANTIFIER,	SPLINT_MAIL,		ROBE  },
+    { PM_VAMPIRE,	FOOD_RATION,		POT_BLOOD    	  },
+    { PM_VAMPIRE,	CRAM_RATION,		POT_BLOOD    	  },
+    { PM_VAMPIRE,	POT_FRUIT_JUICE,	POT_BLOOD	      },
+    { PM_VAMPIRE,	TRIPE_RATION,		POT_BLOOD    	  },
+    { PM_VAMPIRE,	BANANA,				POT_BLOOD    	  },
+    { PM_VAMPIRE,	APPLE,				POT_BLOOD    	  },
+    { PM_VAMPIRE,	POT_BOOZE,			POT_BLOOD    	  },
+    { PM_CLOCKWORK_AUTOMATON,	FOOD_RATION, 		POT_OIL },
+    { PM_CLOCKWORK_AUTOMATON,	CRAM_RATION, 		POT_OIL },
+    { PM_CLOCKWORK_AUTOMATON,	POT_FRUIT_JUICE,	POT_OIL	      },
+    { PM_CLOCKWORK_AUTOMATON,	TRIPE_RATION,		POT_OIL    	  },
+    { PM_CLOCKWORK_AUTOMATON,	BANANA,				POT_OIL    	  },
+    { PM_CLOCKWORK_AUTOMATON,	APPLE,				POT_OIL    	  },
+    { PM_CLOCKWORK_AUTOMATON,	POT_BOOZE,			POT_OIL    	  },
     { NON_PM,	STRANGE_OBJECT,		STRANGE_OBJECT	      }
 };
 
@@ -390,6 +450,14 @@ static const struct def_skill Skill_H[] = {
     { P_SHURIKEN, P_SKILLED },		{ P_UNICORN_HORN, P_EXPERT },
     { P_HEALING_SPELL, P_EXPERT },
     { P_BARE_HANDED_COMBAT, P_BASIC },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_I[] = {
+    { P_ATTACK_SPELL, P_EXPERT },	{ P_HEALING_SPELL, P_EXPERT },
+    { P_DIVINATION_SPELL, P_EXPERT },	{ P_ENCHANTMENT_SPELL, P_EXPERT },
+    { P_CLERIC_SPELL, P_EXPERT },	{ P_ESCAPE_SPELL, P_EXPERT },
+    { P_MATTER_SPELL, P_EXPERT },
     { P_NONE, 0 }
 };
 
@@ -586,7 +654,6 @@ static const struct def_skill Skill_W[] = {
     { P_NONE, 0 }
 };
 
-
 STATIC_OVL void
 knows_object(obj)
 register int obj;
@@ -628,6 +695,7 @@ int randSpecialAttackTypes[] =
 						 AT_GAZE, 
 						 AT_ENGL, 
 						 AT_ARRW, 
+						 AT_BREA, 
 						 AT_MAGC };
 
 int randMeleeDamageTypes[] = 
@@ -686,6 +754,17 @@ int randMeleeDamageTypes[] =
 						 AD_LVLT,
 						 AD_WEEP };
 
+int randBreathDamageTypes[] = 
+						{AD_RBRE, 
+						 AD_MAGM, 
+						 AD_COLD, 
+						 AD_DRST, 
+						 AD_FIRE, 
+						 AD_SLEE, 
+						 AD_ELEC, 
+						 AD_ACID, 
+						 AD_DISN };
+
 int randSpitDamageTypes[] = 
 						{AD_BLND, 
 						 AD_ACID, 
@@ -734,6 +813,14 @@ int randArrowDamageTypes[] =
  // AT_MAGC }
 int randMagicDamageTypes[] = 
 						{AD_SPEL, 
+						 AD_SPEL,
+						 AD_SPEL,
+						 AD_MAGM,
+						 AD_FIRE,
+						 AD_COLD,
+						 AD_ELEC,
+						 AD_CLRC,
+						 AD_CLRC,
 						 AD_CLRC };
 void
 u_init()
@@ -743,6 +830,7 @@ u_init()
 					*stumbler = &mons[PM_STUMBLING_HORROR], 
 					*wanderer = &mons[PM_WANDERING_HORROR];
 	struct attack* attkptr;
+	int shamattacks, stumattacks, wandattacks;
 
 	flags.female = flags.initgend;
 	flags.beginner = 1;
@@ -803,6 +891,8 @@ u_init()
 	u.ukinghill = 0;
 	u.protean = 0;
 	
+	u.uhouse = 0;
+	
 	if(Role_if(PM_EXILE)){
 		short i,j,tmp;
 		for(i=0;i<31;i++) u.sealorder[i]=i;
@@ -832,7 +922,7 @@ u_init()
 	u.umonnum = u.umonster = (flags.female &&
 			urole.femalenum != NON_PM) ? urole.femalenum :
 			urole.malenum;
-	set_uasmon();
+	init_uasmon();
 
 	u.ulevel = 0;	/* set up some of the initial attributes */
 	u.uhp = u.uhpmax = newhp();
@@ -846,6 +936,7 @@ u_init()
 	adjabil(0,1);
 	u.ulevel = u.ulevelmax = 1;
 
+	if(Race_if(PM_INCANTIFIER)) u.uenmax += 900;
 	init_uhunger();
 	for (i = 0; i <= MAXSPELL; i++) spl_book[i].sp_id = NO_SPELL;
 	u.ublesscnt = 300;			/* no prayers just yet */
@@ -898,6 +989,8 @@ u_init()
 		skill_init(Skill_N);
     	u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
 			u.ualign.type = A_NEUTRAL; /* Override racial alignment */
+		u.hod += 10;  /*One transgression is all it takes*/
+		u.gevurah += 5; /*One resurection or two rehumanizations is all it takes*/
 		break;
 	case PM_CAVEMAN:
 		Cave_man[C_AMMO].trquan = rn1(11, 10);	/* 10..20 */
@@ -910,9 +1003,13 @@ u_init()
         knows_object(SKELETON_KEY);
         knows_object(GRAPPLING_HOOK);
         skill_init(Skill_Con);
-		u.hod = 6;
-		u.ualign.sins = 16; /* You have sinned */
-        u.uhunger = 200;  /* On the verge of hungry */
+		u.hod += 6;
+		u.ualign.sins += 16; /* You have sinned */
+        /* On the verge of hungry */
+		if(Race_if(PM_INCANTIFIER)){
+			u.uen = 200;
+		}
+		else u.uhunger = 200;
     	u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
 			u.ualign.type = A_CHAOTIC; /* Override racial alignment */
         urace.hatemask |= urace.lovemask;   /* Hated by the race's allies */
@@ -1049,6 +1146,17 @@ u_init()
 	    /* Nothing special */
 	    break;
 
+	case PM_CLOCKWORK_AUTOMATON:
+		ini_inv(Key);
+    break;
+
+	case PM_INCANTIFIER:
+		skill_add(Skill_I);
+	    if (!Role_if(PM_HEALER)) ini_inv(HealingBook);
+	    if (!Role_if(PM_WIZARD)) ini_inv(ForceBook);
+	    if (Role_if(PM_WIZARD) || Role_if(PM_HEALER)) ini_inv(ExtraBook);
+    break;
+
 	case PM_ELF:
 	    /*
 	     * Elves are people of music and song, or they are warriors.
@@ -1078,7 +1186,55 @@ u_init()
 	    knows_object(ELVEN_CLOAK);
 	    break;
 
-	case PM_DWARF:
+	case PM_DROW:{
+		struct obj* pobj;
+		
+	    /*
+	     * All drow get signet rings. Pirates and wizards get them through their
+		 * class equipment
+	     */
+		ini_inv(SleepPotions);
+	    if (!Role_if(PM_PIRATE) && !Role_if(PM_WIZARD)) {
+			ini_inv(RandRing);
+	    }
+		
+		if(!Role_if(PM_EXILE)) ini_inv(DrovenCloak);
+	    /* Drow can recognize all droven objects */
+	    knows_object(DROVEN_SHORT_SWORD);
+	    knows_object(DROVEN_BOLT);
+	    knows_object(DROVEN_CROSSBOW);
+	    knows_object(DROVEN_DAGGER);
+	    knows_object(DROVEN_CHAIN_MAIL);
+	    knows_object(DROVEN_PLATE_MAIL);
+	    knows_object(DROVEN_CLOAK);
+	    knows_object(find_signet_ring());
+		
+		u.uhouse = !Role_if(PM_EXILE) ?
+				rn2(LAST_HOUSE+1-FIRST_HOUSE)+FIRST_HOUSE :
+				rn2(LAST_FALLEN_HOUSE+1-FIRST_FALLEN_HOUSE)+FIRST_FALLEN_HOUSE;;
+		for(pobj = invent; pobj; pobj=pobj->nobj){
+			if(pobj->otyp == DROVEN_CHAIN_MAIL ||
+				pobj->otyp == DROVEN_PLATE_MAIL){
+					pobj->ohaluengr = TRUE;
+					pobj->ovar1 = !flags.female ? 
+						u.uhouse :
+						LOLTH_SYMBOL;
+			}
+			else if(isSignetRing(pobj->otyp)){
+				pobj->ohaluengr = TRUE;
+				pobj->ovar1 = u.uhouse;
+				pobj->opoisoned = OPOISON_SLEEP;
+				pobj->opoisonchrgs = 30;
+			}
+			else if(is_poisonable(pobj)){
+				pobj->opoisoned = OPOISON_SLEEP;
+			}
+			
+		}
+    }break;
+
+	case PM_DWARF:{
+		struct obj* otmp;
 	    /* Dwarves can recognize all dwarvish objects */
 	    knows_object(DWARVISH_SPEAR);
 	    knows_object(DWARVISH_SHORT_SWORD);
@@ -1088,12 +1244,40 @@ u_init()
 	    knows_object(DWARVISH_CLOAK);
 	    knows_object(DWARVISH_ROUNDSHIELD);
 		switch(d(1,4)){
-			case 1: u.wardsknown |= WARD_TOUSTEFNA;break;
-			case 2: u.wardsknown |= WARD_DREPRUN;break;
-			case 3: u.wardsknown |= WARD_VEIOISTAFUR;break;
-			case 4: u.wardsknown |= WARD_THJOFASTAFUR;break;
+			case 1: 
+				u.wardsknown |= WARD_TOUSTEFNA;
+				otmp = mksobj(CLUB, TRUE, FALSE);
+				otmp->spe = otmp->cursed = otmp->blessed = 0;
+				otmp->dknown = otmp->bknown = otmp->rknown = 0;
+				otmp->ovar1 = WARD_TOUSTEFNA;
+				addinv(otmp);
+			break;
+			case 2: 
+				u.wardsknown |= WARD_DREPRUN;
+				otmp = mksobj(CLUB, TRUE, FALSE);
+				otmp->spe = otmp->cursed = otmp->blessed = 0;
+				otmp->dknown = otmp->bknown = otmp->rknown = 0;
+				otmp->ovar1 = WARD_DREPRUN;
+				addinv(otmp);
+			break;
+			case 3: 
+				u.wardsknown |= WARD_VEIOISTAFUR;
+				otmp = mksobj(CLUB, TRUE, FALSE);
+				otmp->spe = otmp->cursed = otmp->blessed = 0;
+				otmp->dknown = otmp->bknown = otmp->rknown = 0;
+				otmp->ovar1 = WARD_VEIOISTAFUR;
+				addinv(otmp);
+			break;
+			case 4: 
+				u.wardsknown |= WARD_THJOFASTAFUR;
+				otmp = mksobj(CLUB, TRUE, FALSE);
+				otmp->spe = otmp->cursed = otmp->blessed = 0;
+				otmp->dknown = otmp->bknown = otmp->rknown = 0;
+				otmp->ovar1 = WARD_THJOFASTAFUR;
+				addinv(otmp);
+			break;
 		}	
-	    break;
+	}break;
 
 	case PM_GNOME:
 	    /* Gnomes can recognize common dwarvish objects */
@@ -1110,11 +1294,11 @@ u_init()
 
 	case PM_ORC:
 	    /* compensate for generally inferior equipment */
-	    if (!Role_if(PM_WIZARD))
+	    if (!Role_if(PM_WIZARD)
 #ifdef CONVICT
-        if (!Role_if(PM_CONVICT))
+         && !Role_if(PM_CONVICT)
 #endif /* CONVICT */
-		ini_inv(Xtra_food);
+		) ini_inv(Xtra_food);
 	    /* Orcs can recognize all orcish objects */
 	    knows_object(ORCISH_SHORT_SWORD);
 	    knows_object(ORCISH_ARROW);
@@ -1128,7 +1312,12 @@ u_init()
 	    knows_object(URUK_HAI_SHIELD);
 	    knows_object(ORCISH_CLOAK);
 	    break;
-
+	case PM_VAMPIRE:
+	    /* Vampires start off with gods not as pleased, luck penalty */
+	    adjalign(-5); 
+		u.ualign.sins += 5;
+	    change_luck(-1);
+	    break;
 	default:	/* impossible */
 		break;
 	}
@@ -1190,8 +1379,9 @@ u_init()
 	wanderer->mr = rn2(11)*10;				/* varying amounts of MR */
 	wanderer->maligntyp = rn2(21)-10;			/* any alignment */
 	
-	/* attacks...? (basic only to start)  */
-	for (i = 0; i < rnd(4); i++) {
+	/* attacks...?  */
+	shamattacks = rnd(4);
+	for (i = 0; i < shamattacks; i++) {
 		attkptr = &shambler->mattk[i];
 		/* restrict it to certain types of attacks */
 		attkptr->aatyp = randMeleeAttackTypes[rn2(SIZE(randMeleeAttackTypes))];
@@ -1200,8 +1390,43 @@ u_init()
 		attkptr->damd = rn2(4)*2+6;		/* either too high or too low */
 //		pline("shambling horror attack %d: %d %d %d %d",i,attkptr->aatyp,attkptr->adtyp,attkptr->damn,attkptr->damd);
 	}
-	/* attacks...? (basic only to start)  */
-	for (i = 0; i < rnd(4); i++) {
+	shamattacks = shamattacks + (rnd(9)/3)-1; //(0),(0),0,0,0,1,1,1,2
+	for(i; i < shamattacks; i++){
+		attkptr = &shambler->mattk[i];
+		/* restrict it to certain types of attacks */
+		attkptr->aatyp = randSpecialAttackTypes[rn2(SIZE(randSpecialAttackTypes))];
+		switch(attkptr->aatyp){
+			case AT_SPIT:
+				attkptr->adtyp = randSpitDamageTypes[rn2(SIZE(randSpitDamageTypes))];
+			break;
+			case AT_HUGS:
+				attkptr->adtyp = AD_PHYS;
+			break;
+			case AT_GAZE:
+				attkptr->adtyp = randGazeDamageTypes[rn2(SIZE(randGazeDamageTypes))];
+			break;
+			case AT_ENGL:
+				attkptr->adtyp = randEngulfDamageTypes[rn2(SIZE(randEngulfDamageTypes))];
+			break;
+			case AT_ARRW:
+				attkptr->adtyp = randArrowDamageTypes[rn2(SIZE(randArrowDamageTypes))];
+			break;
+			case AT_MAGC:
+				attkptr->adtyp = randMagicDamageTypes[rn2(SIZE(randMagicDamageTypes))];
+			break;
+			case AT_BREA:
+				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
+			break;
+			default:
+			break;
+		}
+		attkptr->damn = d(3,3);			/* we're almost sure to get this wrong first time */
+		attkptr->damd = rn2(3)*2+8;		/* either too high or too low */
+	}
+
+	/* attacks...? */
+	stumattacks = rnd(4);
+	for (i = 0; i < stumattacks; i++) {
 		attkptr = &stumbler->mattk[i];
 		/* restrict it to certain types of attacks */
 		attkptr->aatyp = randMeleeAttackTypes[rn2(SIZE(randMeleeAttackTypes))];
@@ -1210,8 +1435,42 @@ u_init()
 		attkptr->damd = rn2(4)*2+6;		/* either too high or too low */
 //		pline("stumbling horror attack %d: %d %d %d %d",i,attkptr->aatyp,attkptr->adtyp,attkptr->damn,attkptr->damd);
 	}
-	/* attacks...? (basic only to start)  */
-	for (i = 0; i < rnd(4); i++) {
+	stumattacks = stumattacks + (rnd(9)/3)-1; //(0),(0),0,0,0,1,1,1,2
+	for(i; i < stumattacks; i++){
+		attkptr = &stumbler->mattk[i];
+		/* restrict it to certain types of attacks */
+		attkptr->aatyp = randSpecialAttackTypes[rn2(SIZE(randSpecialAttackTypes))];
+		switch(attkptr->aatyp){
+			case AT_SPIT:
+				attkptr->adtyp = randSpitDamageTypes[rn2(SIZE(randSpitDamageTypes))];
+			break;
+			case AT_HUGS:
+				attkptr->adtyp = AD_PHYS;
+			break;
+			case AT_GAZE:
+				attkptr->adtyp = randGazeDamageTypes[rn2(SIZE(randGazeDamageTypes))];
+			break;
+			case AT_ENGL:
+				attkptr->adtyp = randEngulfDamageTypes[rn2(SIZE(randEngulfDamageTypes))];
+			break;
+			case AT_ARRW:
+				attkptr->adtyp = randArrowDamageTypes[rn2(SIZE(randArrowDamageTypes))];
+			break;
+			case AT_MAGC:
+				attkptr->adtyp = randMagicDamageTypes[rn2(SIZE(randMagicDamageTypes))];
+			break;
+			case AT_BREA:
+				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
+			break;
+			default:
+			break;
+		}
+		attkptr->damn = d(3,3);			/* we're almost sure to get this wrong first time */
+		attkptr->damd = rn2(3)*2+8;		/* either too high or too low */
+	}
+	/* attacks...? */
+	wandattacks = rnd(4);
+	for (i = 0; i < wandattacks; i++) {
 		attkptr = &wanderer->mattk[i];
 		/* restrict it to certain types of attacks */
 		attkptr->aatyp = randMeleeAttackTypes[rn2(SIZE(randMeleeAttackTypes))];
@@ -1219,6 +1478,39 @@ u_init()
 		attkptr->damn = d(1,3);			/* we're almost sure to get this wrong first time */
 		attkptr->damd = rn2(4)*2+6;		/* either too high or too low */
 //		pline("wandering horror attack %d: %d %d %d %d",i,attkptr->aatyp,attkptr->adtyp,attkptr->damn,attkptr->damd);
+	}
+	wandattacks = wandattacks + (rnd(9)/3)-1; //(0),(0),0,0,0,1,1,1,2
+	for(i; i < wandattacks; i++){
+		attkptr = &wanderer->mattk[i];
+		/* restrict it to certain types of attacks */
+		attkptr->aatyp = randSpecialAttackTypes[rn2(SIZE(randSpecialAttackTypes))];
+		switch(attkptr->aatyp){
+			case AT_SPIT:
+				attkptr->adtyp = randSpitDamageTypes[rn2(SIZE(randSpitDamageTypes))];
+			break;
+			case AT_HUGS:
+				attkptr->adtyp = AD_PHYS;
+			break;
+			case AT_GAZE:
+				attkptr->adtyp = randGazeDamageTypes[rn2(SIZE(randGazeDamageTypes))];
+			break;
+			case AT_ENGL:
+				attkptr->adtyp = randEngulfDamageTypes[rn2(SIZE(randEngulfDamageTypes))];
+			break;
+			case AT_ARRW:
+				attkptr->adtyp = randArrowDamageTypes[rn2(SIZE(randArrowDamageTypes))];
+			break;
+			case AT_MAGC:
+				attkptr->adtyp = randMagicDamageTypes[rn2(SIZE(randMagicDamageTypes))];
+			break;
+			case AT_BREA:
+				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
+			break;
+			default:
+			break;
+		}
+		attkptr->damn = d(3,3);			/* we're almost sure to get this wrong first time */
+		attkptr->damd = rn2(3)*2+8;		/* either too high or too low */
 	}
 	shambler->msize = rn2(MZ_GIGANTIC+1);			/* any size */
 	shambler->cwt = 20;					/* fortunately moot as it's flagged NOCORPSE */
@@ -1240,7 +1532,11 @@ u_init()
 	
 	for (i = 0; i < rnd(6); i++) {
 		shambler->mresists |= (1 << rn2(10));		/* physical resistances... */
+	}
+	for (i = 0; i < rnd(6); i++) {
 		stumbler->mresists |= (1 << rn2(10));		/* physical resistances... */
+	}
+	for (i = 0; i < rnd(6); i++) {
 		wanderer->mresists |= (1 << rn2(10));		/* physical resistances... */
 	}
 	// for (i = 0; i < rnd(5); i++) {
@@ -1257,7 +1553,11 @@ u_init()
 	shambler->mflags1 = 0;
 	for (i = 0; i < rnd(17); i++) {
 		shambler->mflags1 |= (1 << rn2(33));		/* trainwreck this way :D */
+	}
+	for (i = 0; i < rnd(17); i++) {
 		stumbler->mflags1 |= (1 << rn2(33));
+	}
+	for (i = 0; i < rnd(17); i++) {
 		wanderer->mflags1 |= (1 << rn2(33));
 	}
 	shambler->mflags1 &= ~M1_UNSOLID;			/* no ghosts */
@@ -1272,7 +1572,11 @@ u_init()
 	wanderer->mflags2 = M2_NOPOLY | M2_HOSTILE;		/* Don't let the player be one of these yet. */
 	for (i = 0; i < rnd(17); i++) {
 		shambler->mflags2 |= (1 << rn2(31));
+	}
+	for (i = 0; i < rnd(17); i++) {
 		stumbler->mflags2 |= (1 << rn2(31));
+	}
+	for (i = 0; i < rnd(17); i++) {
 		wanderer->mflags2 |= (1 << rn2(31));
 	}
 	shambler->mflags2 &= ~M2_MERC;				/* no guards */
@@ -1292,7 +1596,11 @@ u_init()
 
 	for (i = 0; i < rnd(17); i++) {
 		shambler->mflags2 |= (0x100 << rn2(7));
+	}
+	for (i = 0; i < rnd(17); i++) {
 		stumbler->mflags2 |= (0x100 << rn2(7));
+	}
+	for (i = 0; i < rnd(17); i++) {
 		wanderer->mflags2 |= (0x100 << rn2(7));
 	}
 	return;
@@ -1365,6 +1673,9 @@ register struct trobj *trop;
 			static NEARDATA short nocreate2 = STRANGE_OBJECT;
 			static NEARDATA short nocreate3 = STRANGE_OBJECT;
 			static NEARDATA short nocreate4 = STRANGE_OBJECT;
+			static NEARDATA short nocreate5 = STRANGE_OBJECT;
+			static NEARDATA short nocreate6 = STRANGE_OBJECT;
+			static NEARDATA short nocreate7 = STRANGE_OBJECT;
 		/*
 		 * For random objects, do not create certain overly powerful
 		 * items: wand of wishing, ring of levitation, or the
@@ -1375,16 +1686,18 @@ register struct trobj *trop;
 		 * one will immediately read it and use the iron ball as a
 		 * weapon.)
 		 */
-			obj = mkobj(trop->trclass, FALSE);
+			if(Race_if(PM_DROW)) obj = mksobj(find_signet_ring(),TRUE,FALSE);
+			else obj = mkobj(trop->trclass, FALSE);
 			otyp = obj->otyp;
 			while (otyp == WAN_WISHING
 				|| otyp == nocreate
 				|| otyp == nocreate2
 				|| otyp == nocreate3
 				|| otyp == nocreate4
-#ifdef ELBERETH
+				|| otyp == nocreate5
+				|| otyp == nocreate6
+				|| otyp == nocreate7
 				|| otyp == RIN_LEVITATION
-#endif
 				/* 'useless' items */
 				|| otyp == POT_HALLUCINATION
 				|| otyp == POT_ACID
@@ -1401,7 +1714,9 @@ register struct trobj *trop;
 				    Role_if(PM_MONK))
 				/* wizard patch -- they already have one */
 				|| (otyp == SPE_FORCE_BOLT &&
-				    Role_if(PM_WIZARD))
+				    (Role_if(PM_WIZARD) || Race_if(PM_INCANTIFIER)))
+				|| (otyp == SPE_HEALING &&
+				    Race_if(PM_INCANTIFIER))
 				/* powerful spells are either useless to
 				   low level players or unbalancing; also
 				   spells in restricted skill categories */
@@ -1438,7 +1753,10 @@ register struct trobj *trop;
 			/* Don't have 2 of the same ring or spellbook */
 			if (obj->oclass == RING_CLASS ||
 			    obj->oclass == SPBOOK_CLASS)
-				nocreate4 = otyp;
+				if(nocreate4 == STRANGE_OBJECT) nocreate4 = otyp;
+				else if(nocreate5 == STRANGE_OBJECT) nocreate5 = otyp;
+				else if(nocreate6 == STRANGE_OBJECT) nocreate6 = otyp;
+				else if(nocreate7 == STRANGE_OBJECT) nocreate7 = otyp;
 		}
 
 #ifdef GOLDOBJ
@@ -1455,6 +1773,9 @@ register struct trobj *trop;
 			if (objects[otyp].oc_uses_known) obj->known = 1;
 			}
 			obj->cursed = 0;
+			if(obj->otyp == DROVEN_PLATE_MAIL ||
+				obj->otyp == DROVEN_CHAIN_MAIL)
+					obj->oerodeproof = 1;
 			if (obj->opoisoned && u.ualign.type != A_CHAOTIC)
 			    obj->opoisoned = 0;
 			if (obj->ovar1){

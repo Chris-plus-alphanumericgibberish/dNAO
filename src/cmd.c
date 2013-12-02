@@ -485,6 +485,8 @@ domonability()
 	else if (webmaker(youmonst.data)) return dospinweb();
 	else if (is_hider(youmonst.data)) return dohide();
 	else if (is_mind_flayer(youmonst.data)) return domindblast();
+	else if (uclockwork) return doclockspeed();
+	else if (is_drow(youmonst.data) || (!Upolyd && Race_if(PM_DROW))) return dodarken();
 	else if (u.umonnum == PM_GREMLIN) {
 	    if(IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
 		if (split_mon(&youmonst, (struct monst *)0))
@@ -1035,6 +1037,8 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	/*** Appearance and behavior ***/
 #ifdef WIZARD
 	Sprintf(buf, "a carrying capacity of %d remaining", -1*inv_weight());
+    you_have(buf);
+	Sprintf(buf, "%d points of nutrition remaining", YouHunger);
     you_have(buf);
 #endif
 	if (Adornment) {

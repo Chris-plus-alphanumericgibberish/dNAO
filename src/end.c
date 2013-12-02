@@ -84,7 +84,9 @@ static NEARDATA const char *deaths[] = {		/* the array of death */
 	"died", "betrayed", "choked", "poisoned", "starvation", "drowning",
 	"burning", "dissolving under the heat and pressure",
 	"crushed", "turned to stone", "turned into slime",
-	"genocided", "panic", "trickery",
+	"genocided",
+	"disintegrated", "exploded after being overwound",
+	"panic", "trickery",
 	"quit", "escaped", "ascended"
 };
 
@@ -92,7 +94,9 @@ static NEARDATA const char *ends[] = {		/* "when you..." */
 	"died", "were betrayed", "choked", "were poisoned", "starved", "drowned",
 	"burned", "dissolved in the lava",
 	"were crushed", "turned to stone", "turned into slime",
-	"were genocided", "panicked", "were tricked",
+	"were genocided",
+	"were disintegrated", "were overwound and exploded",
+	"panicked", "were tricked",
 	"quit", "escaped", "ascended"
 };
 
@@ -651,8 +655,9 @@ int how;
 {
 	u.uswldtim = 0;
 	u.uhp = u.uhpmax;
-	if (u.uhunger < 500) {
-	    u.uhunger = 500;
+	if (YouHunger < 500) {
+		if(Race_if(PM_INCANTIFIER)) u.uen = u.uenmax/4;
+		else u.uhunger = 500;
 	    newuhs(FALSE);
 	}
 	/* cure impending doom of sickness hero won't have time to fix */
@@ -823,7 +828,10 @@ int how;
 		Your("medallion %s!",
 		      !Blind ? "begins to glow" : "feels warm");
 		if (how == CHOKING) You("vomit ...");
-		You_feel("much better!");
+		if (how == DISINTEGRATED) You("reconstitute!");
+		else if (how == OVERWOUND) You("reassemble!");
+		else You_feel("much better!");
+
 		pline_The("medallion crumbles to dust!");
 		u.gevurah += 4;//cheated death.
 		if (uamul) useup(uamul);

@@ -29,6 +29,7 @@
 #define AT_LRCH		19	/* Reach attack */
 #define AT_HODS		20  /* Hod Sephirah's mirror attack */
 #define AT_LNCK		21  /* Bite attack with reach */
+#define AT_MMGC		22	/* uses magic spell(s), but don't allow player spellcasting (Monster-only MaGiC) */
 
 #define AT_WEAP		254	/* uses weapon */
 #define AT_MAGC		255	/* uses magic spell(s) */
@@ -54,7 +55,7 @@
 #define AD_STUN		12	/* stuns */
 #define AD_SLOW		13	/* slows */
 #define AD_PLYS		14	/* paralyses */
-#define AD_DRLI		15	/* drains life levels (Vampire) */
+#define AD_DRLI		15	/* drains life levels */
 #define AD_DREN		16	/* drains magic energy */
 #define AD_LEGS		17	/* damages legs (xan) */
 #define AD_STON		18	/* petrifies (Medusa, cockatrice) */
@@ -131,7 +132,8 @@
 #define AD_MAND		133	/* Mandrake's dying shriek (kills all on level, use w/ AT_BOOM) */
 #define AD_BARB		134	/* Physical damage retalitory attack */
 #define AD_LUCK		135	/* Luck-draining gaze (UnNetHack) */
-
+#define AD_VAMP		136	/* Vampire's blood drain attack */
+#define AD_WEBS		137	/* Vampire's blood drain attack */
 
 
 //#define AD_VMSL		180 //Vorlon missile: elect, disintegration, blast.  Triple damage.

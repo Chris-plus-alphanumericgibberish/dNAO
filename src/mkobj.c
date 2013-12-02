@@ -390,6 +390,7 @@ boolean artif;
 	otmp->lightened = 0;
 	otmp->obroken = 0; /* BUGFIX: shouldn't this be set to 0 initially? */
 	otmp->opoisoned = 0;
+	otmp->fromsink = 0;
 	if ((otmp->otyp >= ELVEN_SHIELD && otmp->otyp <= ORCISH_SHIELD) ||
 			otmp->otyp == SHIELD_OF_REFLECTION)
 		otmp->dknown = 0;
@@ -424,6 +425,7 @@ boolean artif;
 		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
 		break;
 	case FOOD_CLASS:
+	    otmp->odrained = 0;
 	    otmp->oeaten = 0;
 	    switch(otmp->otyp) {
 	    case CORPSE:
@@ -563,6 +565,19 @@ boolean artif;
 	case BALL_CLASS:
 		break;
 	case POTION_CLASS:
+		if(otmp->otyp == POT_BLOOD){
+			otmp->corpsenm = NON_PM;	/* empty (so far) */
+			for (tryct = 200; tryct > 0; --tryct) {
+				mndx = undead_to_corpse(rndmonnum());
+				if (mons[mndx].cnutrit &&
+					!(mvitals[mndx].mvflags & G_NOCORPSE)
+					&& has_blood(&mons[mndx]) ) {
+				otmp->corpsenm = mndx;
+				break;
+				}
+			}
+			blessorcurse(otmp, 10);
+		}
 		if (otmp->otyp == POT_OIL)
 		    otmp->age = MAX_OIL_IN_FLASK;	/* amount of oil */
 		/* fall through */
@@ -736,6 +751,9 @@ boolean artif;
 			otmp->oerodeproof = otmp->rknown = 1;
 #endif
 		}
+		if(is_evaporable(otmp)) start_timer(1, TIMER_OBJECT,
+					LIGHT_DAMAGE, (genericptr_t)otmp);
+
 		
 		/* MRKR: Mining helmets have lamps */
 		if (otmp->otyp == DWARVISH_IRON_HELM) {
@@ -747,6 +765,13 @@ boolean artif;
 		    otmp->age = (long) rn1(50,50);
 		    otmp->lamplit = 0;
 		}
+		if(otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL){
+			otmp->ohaluengr = TRUE;
+			if(!(rn2(10))) otmp->ovar1 = LOLTH_SYMBOL;
+			else if(!(rn2(4))) otmp->ovar1 = rn2(LAST_HOUSE+1-FIRST_HOUSE)+FIRST_HOUSE;
+			else otmp->ovar1 = rn2(LAST_FALLEN_HOUSE+1-FIRST_FALLEN_HOUSE)+FIRST_FALLEN_HOUSE;
+		}
+
 		break;
 	case WAND_CLASS:
 		if(otmp->otyp == WAN_WISHING) otmp->spe = rnd(3); else
@@ -771,6 +796,12 @@ boolean artif;
 								!rn2(2) ? SIGN_OF_THE_SCION_QUEEN : 
 								          CARTOUCHE_OF_THE_CAT_LORD ;
 			}
+		}
+		if(isSignetRing(otmp->otyp)){
+			otmp->ohaluengr = TRUE;
+			if(!(rn2(100))) otmp->ovar1 = LOLTH_SYMBOL;
+			else if(!(rn2(4))) otmp->ovar1 = rn2(LAST_HOUSE+1-FIRST_HOUSE)+FIRST_HOUSE;
+			else otmp->ovar1 = rn2(LAST_FALLEN_HOUSE+1-FIRST_FALLEN_HOUSE)+FIRST_FALLEN_HOUSE;
 		}
 		if(objects[otmp->otyp].oc_charged) {
 		    blessorcurse(otmp, 3);

@@ -963,7 +963,7 @@ pleased(g_align)
 	    u.uhp = u.uhpmax;
 	    if (Upolyd) u.mh = u.mhmax;
 	    ABASE(A_STR) = AMAX(A_STR);
-	    if (u.uhunger < 900) init_uhunger();
+	    if (YouHunger < 900) init_uhunger();
 	    if (u.uluck < 0) u.uluck = 0;
 	    make_blinded(0L,TRUE);
 	    flags.botl = 1;
@@ -1138,7 +1138,7 @@ consume_offering(otmp)
 register struct obj *otmp;
 {
     if (Hallucination)
-	switch (rn2(22)) {
+	switch (rn2(23)) {
 	    case 0:
 		Your("sacrifice sprouts wings and a propeller and roars away!");
 		break;
@@ -1204,6 +1204,9 @@ register struct obj *otmp;
 		break;
 	    case 21:
 		Your("sacrifice was stolen by fairies!");
+		break;
+	    case 22:
+		Your("sacrifice is vanishes in a dash at night!");
 		break;
 	}
     else if (Blind && u.ualign.type == A_LAWFUL)
@@ -1728,8 +1731,18 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 		 "Walk no more, perversion of nature!");
 	You_feel("like you are falling apart.");
 	/* KMH -- Gods have mastery over unchanging */
+	if (!Race_if(PM_VAMPIRE)) {
 	rehumanize();
 	losehp(rnd(20), "residual undead turning effect", KILLED_BY_AN);
+	} else {
+	   /* Starting vampires are inherently vampiric */
+	   losehp(rnd(20), "undead turning effect", KILLED_BY_AN);
+	   pline("You get the idea that %s will be of %s help to you.",
+	      align_gname(alignment),
+			 alignment == A_LAWFUL ?
+			 "little" :
+			 "at best sporadic");
+	}
 	exercise(A_CON, FALSE);
 	if(on_altar()){
 		(void) water_prayer(FALSE);
@@ -1847,6 +1860,7 @@ doturn()
 			       than zombies. */
 			case S_LICH:    xlev += 2;  /*FALLTHRU*/
 			case S_GHOST:   xlev += 2;  /*FALLTHRU*/
+			case S_BAT: //Asumes undead bats are vampires
 			case S_VAMPIRE: xlev += 2;  /*FALLTHRU*/
 			case S_WRAITH:  xlev += 2;  /*FALLTHRU*/
 			case S_MUMMY:   xlev += 2;  /*FALLTHRU*/

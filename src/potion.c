@@ -467,7 +467,9 @@ peffects(otmp)
 		    make_sick(0L, (char *) 0, TRUE, SICK_ALL);
 
 		    /* You feel refreshed */
-		    u.uhunger += 50 + rnd(50);
+		    if(Race_if(PM_INCANTIFIER)) u.uen += 50 + rnd(50);
+		    else u.uhunger += 50 + rnd(50);
+		    
 		    newuhs(FALSE);
 		} else
 		    exercise(A_WIS, FALSE);
@@ -475,7 +477,7 @@ peffects(otmp)
 	case POT_WATER:
 		if(!otmp->blessed && !otmp->cursed) {
 		    pline("This tastes like water.");
-		    u.uhunger += rnd(10);
+		    if(!Race_if(PM_INCANTIFIER)) u.uhunger += rnd(10);
 		    newuhs(FALSE);
 		    break;
 		}
@@ -529,7 +531,7 @@ peffects(otmp)
 		    make_confused(itimeout_incr(HConfusion, d(3,8)), FALSE);
 		/* the whiskey makes us feel better */
 		if (!otmp->odiluted) healup(1, 0, FALSE, FALSE);
-		u.uhunger += 10 * (2 + bcsign(otmp));
+		if(!Race_if(PM_INCANTIFIER)) u.uhunger += 10 * (2 + bcsign(otmp));
 		newuhs(FALSE);
 		exercise(A_WIS, FALSE);
 		if(otmp->cursed) {
@@ -593,7 +595,7 @@ peffects(otmp)
 			  otmp->odiluted ? "reconstituted " : "",
 			  fruitname(TRUE));
 		if (otmp->otyp == POT_FRUIT_JUICE) {
-		    u.uhunger += (otmp->odiluted ? 5 : 10) * (2 + bcsign(otmp));
+		    if(!Race_if(PM_INCANTIFIER)) u.uhunger += (otmp->odiluted ? 5 : 10) * (2 + bcsign(otmp));
 		    newuhs(FALSE);
 		    break;
 		}
@@ -899,8 +901,15 @@ peffects(otmp)
 			    }
 			} else if(otmp->cursed)
 			    pline("This tastes like castor oil.");
-			else
+			else{
 			    pline("That was smooth!");
+				if(uclockwork){
+					boolean good_for_you = TRUE;
+					healup(d(4 + 2 * bcsign(otmp), 4),
+						   !otmp->cursed ? 1 : 0, !!otmp->blessed, !otmp->cursed);
+					if(u.uhs < WEAK && u.uhs > SATIATED) lesshungry(20);
+				}
+			}
 			exercise(A_WIS, good_for_you);
 		}
 		break;
@@ -922,6 +931,46 @@ peffects(otmp)
 		You_feel("a little %s.", Hallucination ? "normal" : "strange");
 		if (!Unchanging) polyself(FALSE);
 		break;
+	case POT_BLOOD:
+		unkn++;
+		if (maybe_polyd(is_vampire(youmonst.data), Race_if(PM_VAMPIRE))) {
+			pline("It smells like %s%s.", 
+					!type_is_pname(&mons[otmp->corpsenm]) ||
+					!(mons[otmp->corpsenm].geno & G_UNIQ) ||
+					Hallucination ? 
+						"the " : 
+						"", 
+					Hallucination ? 
+						makeplural(rndmonnam()) : 
+						mons[otmp->corpsenm].geno & G_UNIQ ? 
+						mons[otmp->corpsenm].mname : 
+						makeplural(mons[otmp->corpsenm].mname)
+			);
+			if (yn("Drink it?") == 'n') {
+				break;
+			}else{
+				violated_vegetarian();
+				u.uconduct.unvegan++;
+				if (otmp->cursed)
+				pline("Yecch!  This %s.", Hallucination ?
+				"liquid could do with a good stir" : "blood has congealed");
+				else pline(Hallucination ?
+				  "The %s liquid stirs memories of home." :
+				  "The %s blood tastes delicious.",
+				  otmp->odiluted ? "watery" : "thick");
+				if (!otmp->cursed)
+				lesshungry((otmp->odiluted ? 1 : 2) *
+				  (otmp->blessed ? mons[(otmp)->corpsenm].cnutrit*1.5/5 : mons[(otmp)->corpsenm].cnutrit/5 ));
+			}
+
+		} else {
+		    violated_vegetarian();
+		    pline("Ugh.  That was vile.");
+		    if(!uclockwork) make_vomiting(Vomiting+d(10,8), TRUE);
+		}
+		cprefx(otmp->corpsenm, TRUE);
+	    cpostfx(otmp->corpsenm, FALSE);
+	break;
 	default:
 		impossible("What a funny potion! (%u)", otmp->otyp);
 		return(0);
@@ -1434,6 +1483,13 @@ register struct obj *obj;
 	case POT_POLYMORPH:
 		exercise(A_CON, FALSE);
 		break;
+	case POT_BLOOD:
+		if (maybe_polyd(is_vampire(youmonst.data), Race_if(PM_VAMPIRE))) {
+		    exercise(A_WIS, FALSE);
+		    You_feel("a sense of loss.");
+		} else
+		    exercise(A_CON, FALSE);
+		break;
 /*
 	case POT_GAIN_LEVEL:
 	case POT_LEVITATION:
@@ -1500,6 +1556,7 @@ register struct obj *o1, *o2;
 			    case POT_HALLUCINATION:
 			    case POT_BLINDNESS:
 			    case POT_CONFUSION:
+			    case POT_BLOOD:
 				return POT_WATER;
 			}
 			break;
@@ -1528,6 +1585,8 @@ register struct obj *o1, *o2;
 			switch (o2->otyp) {
 			    case POT_SICKNESS:
 				return POT_SICKNESS;
+			    case POT_BLOOD:
+				return POT_BLOOD;
 			    case POT_SPEED:
 				return POT_BOOZE;
 			    case POT_GAIN_LEVEL:
@@ -2213,6 +2272,7 @@ dodip()
 		    Sprintf(buf, "One of %s", the(xname(potion)));
 		else
 		    Strcpy(buf, The(xname(potion)));
+			obj->opoisoned = 0;
 		pline("%s forms a coating on %s.",
 		      buf, the(xname(obj)));
 			obj->opoisoned = OPOISON_BASIC;
@@ -2223,9 +2283,9 @@ dodip()
 				Sprintf(buf, "One of %s", the(xname(potion)));
 			else
 				Strcpy(buf, The(xname(potion)));
+			obj->opoisoned = 0;
 			pline("%s forms a drug-coating on %s.",
 				  buf, the(xname(obj)));
-			obj->opoisoned = 0;
 			obj->opoisoned = OPOISON_SLEEP;
 			goto poof;
 	    } else if(potion->otyp == POT_BLINDNESS && !(obj->opoisoned & OPOISON_BLIND)) {
@@ -2234,9 +2294,9 @@ dodip()
 				Sprintf(buf, "One of %s", the(xname(potion)));
 			else
 				Strcpy(buf, The(xname(potion)));
+			obj->opoisoned = 0;
 			pline("%s forms a coating on %s.",
 				  buf, the(xname(obj)));
-			obj->opoisoned = 0;
 			obj->opoisoned = OPOISON_BLIND;
 			goto poof;
 	    } else if(potion->otyp == POT_PARALYSIS && !(obj->opoisoned & OPOISON_PARAL)) {
@@ -2257,6 +2317,54 @@ dodip()
 		pline("A coating wears off %s.", the(xname(obj)));
 		obj->opoisoned = 0;
 		goto poof;
+	    }
+	}
+	if(isSignetRing(obj->otyp)) {
+	    if(potion->otyp == POT_SICKNESS && (!obj->opoisoned || obj->opoisoned & OPOISON_BASIC)){
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			obj->opoisoned = OPOISON_BASIC;
+			obj->opoisonchrgs = 30;
+			goto poof;
+	    } else if(potion->otyp == POT_SLEEPING && (!obj->opoisoned || obj->opoisoned & OPOISON_SLEEP)){
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			obj->opoisoned = OPOISON_SLEEP;
+			obj->opoisonchrgs = 30;
+			goto poof;
+	    } else if(potion->otyp == POT_BLINDNESS && (!obj->opoisoned || obj->opoisoned & OPOISON_BLIND)) {
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			obj->opoisoned = OPOISON_BLIND;
+			obj->opoisonchrgs = 30;
+			goto poof;
+	    } else if(potion->otyp == POT_PARALYSIS && (!obj->opoisoned || obj->opoisoned & OPOISON_PARAL)) {
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			obj->opoisoned = 0;
+			pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			obj->opoisoned = OPOISON_PARAL;
+			obj->opoisonchrgs = 30;
+			goto poof;
 	    }
 	}
 

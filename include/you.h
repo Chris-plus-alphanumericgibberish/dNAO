@@ -181,8 +181,11 @@ struct Race {
 	xchar attrmax[A_MAX];	/* maximum allowable attribute */
 	struct RoleAdvance hpadv; /* hit point advancement */
 	struct RoleAdvance enadv; /* energy advancement */
-#if 0	/* DEFERRED */
 	int   nv_range;		/* night vision range */
+#define NO_NIGHTVISION	0
+#define NIGHTVISION2	2
+#define NIGHTVISION3	3
+#if 0	/* DEFERRED */
 	int   xray_range;	/* X-ray vision range */
 #endif
 
@@ -266,10 +269,12 @@ struct you {
 	char	ushops_left[5]; /* ditto, shops exited this turn */
 
 	int	 uhunger;	/* refd only in eat.c and shk.c */
+#define YouHunger	(Race_if(PM_INCANTIFIER) ? u.uen : u.uhunger)
 	unsigned uhs;		/* hunger state - see eat.c */
 
 	boolean ukinghill; /* records if you are carying the pirate treasure (and are therefor king of the hill) */
-	int protean; /* counter for the auto-polypiling power of the*/
+	int protean; /* counter for the auto-polypiling power of the pirate treasure*/
+	int uhouse; /* drow house info */
 	struct prop uprops[LAST_PROP+1];
 
 	unsigned umconf;
@@ -300,7 +305,10 @@ struct you {
 	struct attribs	macurr,		/* for monster attribs */
 			mamax;		/* for monster attribs */
 	int ulycn;			/* lycanthrope type */
-
+	short ucspeed;
+#define	HIGH_CLOCKSPEED	1
+#define	NORM_CLOCKSPEED	2
+#define	SLOW_CLOCKSPEED	3
 	unsigned ucreamed;
 	unsigned uswldtim;		/* time you have been swallowed */
 
@@ -485,8 +493,6 @@ struct you {
 	/* 	variable that keeps track of summoning in your vicinity.
 		Only allow 1 per turn, to help reduce summoning cascades. */
 	boolean summonMonster;
-	/* 	Variable that checks if the Wizard has increased the weight of the amulet */
-	boolean uleadamulet;
 	/*Ugly extra artifact variables workaround.  Spaghetti code alert!*/
 	long SnSd1, SnSd2, SnSd3, SnSd3duration;
 	int ZangetsuSafe;
@@ -495,6 +501,7 @@ struct you {
 	int keter, chokhmah, gevurah, hod;
 	int regifted; /*keeps track of how many artifacts the player has given to the unknown god*/
 };	/* end of `struct you' */
+#define uclockwork ((Race_if(PM_CLOCKWORK_AUTOMATON) && !Upolyd) || (Upolyd && youmonst.data == &mons[PM_CLOCKWORK_AUTOMATON]))
 
 extern long sealKey[31]; /*Defined in */
 extern char *wardDecode[26]; /*Defined in spell.c*/

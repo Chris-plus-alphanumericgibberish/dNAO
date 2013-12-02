@@ -19,6 +19,7 @@ STATIC_PTR int NDECL(eatfood);
 STATIC_PTR void FDECL(costly_tin, (const char*));
 STATIC_PTR int NDECL(opentin);
 STATIC_PTR int NDECL(unfaint);
+STATIC_PTR int NDECL(windclock);
 
 #ifdef OVLB
 STATIC_DCL const char *FDECL(food_xname, (struct obj *,BOOLEAN_P));
@@ -27,10 +28,8 @@ STATIC_DCL void NDECL(recalc_wt);
 STATIC_DCL struct obj *FDECL(touchfood, (struct obj *));
 STATIC_DCL void NDECL(do_reset_eat);
 STATIC_DCL void FDECL(done_eating, (BOOLEAN_P));
-STATIC_DCL void FDECL(cprefx, (int));
 STATIC_DCL int FDECL(intrinsic_possible, (int,struct permonst *));
 STATIC_DCL void FDECL(givit, (int,struct permonst *, unsigned short));
-STATIC_DCL void FDECL(cpostfx, (int, BOOLEAN_P));
 STATIC_DCL void FDECL(start_tin, (struct obj *));
 STATIC_DCL int FDECL(eatcorpse, (struct obj *));
 STATIC_DCL void FDECL(start_eating, (struct obj *));
@@ -49,17 +48,9 @@ char msgbuf[BUFSZ];
 
 #endif /* OVLB */
 
-/* hunger texts used on bottom line (each 8 chars long) */
-#define SATIATED	0
-#define NOT_HUNGRY	1
-#define HUNGRY		2
-#define WEAK		3
-#define FAINTING	4
-#define FAINTED		5
-#define STARVED		6
-
 /* also used to see if you're allowed to eat cats and dogs */
-#define CANNIBAL_ALLOWED() (Role_if(PM_CAVEMAN) || Race_if(PM_ORC))
+#define CANNIBAL_ALLOWED() (Role_if(PM_CAVEMAN) || Race_if(PM_ORC) || \
+		Race_if(PM_VAMPIRE))
 
 #ifndef OVLB
 
@@ -75,7 +66,7 @@ STATIC_OVL NEARDATA const char comestibles[] = { FOOD_CLASS, 0 };
 STATIC_OVL NEARDATA const char allobj[] = {
 	COIN_CLASS, WEAPON_CLASS, ARMOR_CLASS, POTION_CLASS, SCROLL_CLASS,
 	WAND_CLASS, RING_CLASS, AMULET_CLASS, FOOD_CLASS, TOOL_CLASS,
-	GEM_CLASS, ROCK_CLASS, BALL_CLASS, CHAIN_CLASS, SPBOOK_CLASS, 0 };
+	GEM_CLASS, ROCK_CLASS, BALL_CLASS, CHAIN_CLASS, SPBOOK_CLASS, /*BED_CLASS,*/ 0 };
 
 STATIC_OVL boolean force_save_hs = FALSE;
 
@@ -89,9 +80,45 @@ const char *hu_stat[] = {
 	"Starved "
 };
 
+const char *ca_hu_stat[] = {
+	"OvrWound",
+	"        ",
+	"Waning  ",
+	"Unwound ",
+	"Slipping",
+	"Slipped ",
+	"Stopped "
+};
+
 #endif /* OVLB */
 #ifdef OVL1
 
+boolean
+incantifier_edible(obj)
+register struct obj *obj;
+{
+	/* protect invocation tools but not Rider corpses (handled elsewhere)*/
+     /* if (obj->oclass != FOOD_CLASS && obj_resists(obj, 0, 0)) */
+	 /* Repeating this check in the name of futureproofing */
+	if (objects[obj->otyp].oc_unique)
+		return FALSE;
+	
+	if(obj->spe>0){
+		if(obj->oclass == WEAPON_CLASS && objects[obj->otyp].oc_skill > 0) return TRUE;//ie, not amunition
+		if(obj->oclass == ARMOR_CLASS) return TRUE;
+		if(obj->oclass == TOOL_CLASS && objects[obj->otyp].oc_skill > 0) return TRUE;
+	}
+	if(obj->oclass == SCROLL_CLASS && obj->otyp != SCR_BLANK_PAPER && 
+#ifdef MAIL
+		obj->otyp != MAIL && 
+#endif
+		!obj->oartifact) return TRUE;
+	if(obj->oclass == SPBOOK_CLASS && obj->otyp != SPE_BLANK_PAPER && !obj->oartifact) return TRUE;
+	if(obj->oclass == RING_CLASS && obj->spe >= 0 && !obj->oartifact) return TRUE;
+	if(obj->oclass == WAND_CLASS && obj->spe > 0 && obj->otyp != WAN_NOTHING) return TRUE;
+	
+	return FALSE;
+}
 /*
  * Decide whether a particular object can be eaten by the possibly
  * polymorphed character.  Not used for monster checks.
@@ -107,6 +134,8 @@ register struct obj *obj;
 	/* above also prevents the Amulet from being eaten, so we must never
 	   allow fake amulets to be eaten either [which is already the case] */
 
+	if(Race_if(PM_INCANTIFIER)) return incantifier_edible(obj);
+	
 	if (metallivorous(youmonst.data) && is_metallic(obj) &&
 	    (youmonst.data != &mons[PM_RUST_MONSTER] || is_rustprone(obj)))
 		return TRUE;
@@ -115,6 +144,18 @@ register struct obj *obj;
 		    as engulfed items, but poly'd player can't do that] */
 	    !Has_contents(obj))
 		return TRUE;
+
+	/* Ghouls only eat corpses */
+	if (u.umonnum == PM_GHOUL)
+	   	return (boolean)(obj->otyp == CORPSE);
+	/* Vampires drink the blood of meaty corpses */
+	/* [ALI] (fully) drained food is not presented as an option,
+	 * but partly eaten food is (even though you can't drain it).
+	 */
+	if (is_vampire(youmonst.data))
+		return (boolean)(obj->otyp == CORPSE &&
+		  has_blood(&mons[obj->corpsenm]) && (!obj->odrained ||
+		  obj->oeaten > drainlevel(obj)));
 
      /* return((boolean)(!!index(comestibles, obj->oclass))); */
 	return (boolean)(obj->oclass == FOOD_CLASS);
@@ -126,7 +167,8 @@ register struct obj *obj;
 void
 init_uhunger()
 {
-	u.uhunger = 900;
+	if(Race_if(PM_INCANTIFIER)) u.uen = min(u.uenmax, 900);
+	else u.uhunger = 900;
 	u.uhs = NOT_HUNGRY;
 }
 
@@ -167,6 +209,7 @@ static NEARDATA struct {
 	int	usedtime,	/* turns spent eating */
 		reqtime;	/* turns required to eat */
 	int	nmod;		/* coded nutrition per turn */
+	struct	monst *mon; /* monster associated with item */
 	Bitfield(canchoke,1);	/* was satiated at beginning */
 
 	/* start_eating() initializes these */
@@ -238,7 +281,7 @@ choke(food)	/* To a full belly all food is bad. (It.) */
 
 	exercise(A_CON, FALSE);
 
-	if (Breathless || (!Strangled && !rn2(20))) {
+	if ((Breathless && !Race_if(PM_INCANTIFIER)) || (!Strangled && !rn2(20))) {
 		/* choking by eating AoS doesn't involve stuffing yourself */
 		if (food && food->otyp == AMULET_OF_STRANGULATION) {
 			You("choke, but recover your composure.");
@@ -249,6 +292,17 @@ choke(food)	/* To a full belly all food is bad. (It.) */
 		nomovemsg = 0;
 		vomit();
 	} else {
+	 if(Race_if(PM_INCANTIFIER)){
+		killer_format = KILLED_BY;
+		You("absorb too much energy and explode.");
+		killer = Hallucination ? "amateur-hour horseshit" : "absorbing too much energy and exploding"; //8-bit theater
+		You("die...");
+		done(DISINTEGRATED);
+		explode(u.ux, u.uy, 0, u.uhpmax/2, MON_EXPLODE, EXPL_MAGICAL);
+		u.uhp = u.uhpmax/2;
+		pline("You reform!");
+		morehungry(u.uenmax/2);	/* lifesaved */
+	 } else{
 		killer_format = KILLED_BY_AN;
 		/*
 		 * Note all "killer"s below read "Choked on %s" on the
@@ -273,6 +327,7 @@ choke(food)	/* To a full belly all food is bad. (It.) */
 		}
 		You("die...");
 		done(CHOKING);
+	}
 	}
 }
 
@@ -437,12 +492,23 @@ eatfood()		/* called each move during eating process */
 		do_reset_eat();
 		return(0);
 	}
+	if (is_vampire(youmonst.data) != victual.piece->odrained) {
+	    /* Polymorphed while eating/draining */
+	    do_reset_eat();
+	    return(0);
+	}
 	if(!victual.eating) return(0);
 
 	if(++victual.usedtime <= victual.reqtime) {
 	    if(bite()) return(0);
 	    return(1);	/* still busy */
 	} else {	/* done */
+	    int crumbs = victual.piece->oeaten;		/* The last crumbs */
+	    if (victual.piece->odrained) crumbs -= drainlevel(victual.piece);
+	    if (crumbs > 0) {
+			lesshungry(crumbs);
+			victual.piece->oeaten -= crumbs;
+	    }
 	    done_eating(TRUE);
 	    return(0);
 	}
@@ -459,13 +525,18 @@ boolean message;
 		if (message) pline(nomovemsg);
 		nomovemsg = 0;
 	} else if (message)
-		You("finish eating %s.", food_xname(victual.piece, TRUE));
+		You("finish %s %s.", victual.piece->odrained ? "draining" :
+		  "eating", food_xname(victual.piece, TRUE));
 
-	if(victual.piece->otyp == CORPSE)
+	if(victual.piece->otyp == CORPSE) {
+		if (!victual.piece->odrained || (Race_if(PM_VAMPIRE) && !rn2(5)))
 		cpostfx(victual.piece->corpsenm, FALSE);
-	else
+	} else
 		fpostfx(victual.piece);
 
+	if (victual.piece->odrained)
+		victual.piece->in_use = FALSE;
+	else
 	if (carried(victual.piece)) useup(victual.piece);
 	else useupf(victual.piece, 1L);
 	victual.piece = (struct obj *) 0;
@@ -477,7 +548,8 @@ maybe_cannibal(pm, allowmsg)
 int pm;
 boolean allowmsg;
 {
-	if (!CANNIBAL_ALLOWED() && your_race(&mons[pm])) {
+	if(your_race(&mons[pm])){
+		if (!CANNIBAL_ALLOWED()) {
 		if (allowmsg) {
 			if (Upolyd)
 				You("have a bad feeling deep inside.");
@@ -485,20 +557,28 @@ boolean allowmsg;
 		}
 		HAggravate_monster |= FROMOUTSIDE;
 		change_luck(-rn1(4,2));		/* -5..-2 */
+		} else if (Role_if(PM_CAVEMAN)) {
+			adjalign(sgn(u.ualign.type));
+			You("honour the dead.");
+		} else {
+			adjalign(-sgn(u.ualign.type));
+			You_feel("evil and fiendish!");
+		}
 		return TRUE;
 	}
 	return FALSE;
 }
 
-STATIC_OVL void
-cprefx(pm)
-register int pm;
+void
+cprefx(pm,bld)
+int pm;
+BOOLEAN_P bld;
 {
 	(void) maybe_cannibal(pm,TRUE);
 	if (touch_petrifies(&mons[pm]) || pm == PM_MEDUSA) {
 	    if (!Stone_resistance &&
 		!(poly_when_stoned(youmonst.data) && polymon(PM_STONE_GOLEM))) {
-		Sprintf(killer_buf, "tasting %s meat", mons[pm].mname);
+		Sprintf(killer_buf, "tasting %s %s", mons[pm].mname, bld ? "blood" : "meat");
 		killer_format = KILLED_BY;
 		killer = killer_buf;
 		You("turn to stone.");
@@ -517,13 +597,17 @@ register int pm;
 	    case PM_HOUSECAT:
 	    case PM_LARGE_CAT:
 		if (!CANNIBAL_ALLOWED()) {
-		    You_feel("that eating the %s was a bad idea.", mons[pm].mname);
+		    You_feel("that %s the %s%s%s was a bad idea.",
+		      victual.eating ? "eating" : bld ? "drinking" : "biting",
+		      occupation == opentin ? "tinned " : "", mons[pm].mname,
+			  bld ? " blood" : "");
 		    HAggravate_monster |= FROMOUTSIDE;
 		}
 		break;
 	    case PM_LIZARD:
 		if (Stoned) fix_petrification();
 		break;
+		/*Note: these three imply corpse*/
 	    case PM_DEATH:
 	    case PM_PESTILENCE:
 	    case PM_FAMINE:
@@ -554,6 +638,42 @@ register int pm;
 		    fix_petrification();
 		break;
 	}
+}
+
+/*
+ * Called when a vampire bites a monster.
+ * Returns TRUE if hero died and was lifesaved.
+ */
+
+boolean
+bite_monster(mon)
+struct monst *mon;
+{
+    switch(monsndx(mon->data)) {
+	case PM_LIZARD:
+	    if (Stoned) fix_petrification();
+	    break;
+	case PM_DEATH:
+	case PM_PESTILENCE:
+	case PM_FAMINE:
+	    pline("Unfortunately, eating any of it is fatal.");
+	    done_in_by(mon);
+	    return TRUE;		/* lifesaved */
+
+	case PM_GREEN_SLIME:
+	    if (!Unchanging && youmonst.data != &mons[PM_FIRE_VORTEX] &&
+			    youmonst.data != &mons[PM_FIRE_ELEMENTAL] &&
+			    youmonst.data != &mons[PM_GREEN_SLIME]) {
+		You("don't feel very well.");
+		Slimed = 10L;
+	    }
+	    /* Fall through */
+	default:
+	    if (acidic(mon->data) && Stoned)
+		fix_petrification();
+	    break;
+    }
+    return FALSE;
 }
 
 void
@@ -940,7 +1060,7 @@ unsigned short nutval;
 	}
 }
 
-STATIC_OVL void
+void
 cpostfx(pm, tin)		/* called after completely consuming a corpse */
 register int pm;
 BOOLEAN_P tin;
@@ -1285,6 +1405,11 @@ opentin()		/* called during each move whilst opening a tin */
 		costly_tin((const char*)0);
 		goto use_me;
 	    }
+         if (uclockwork){
+           You("have no way to eat, so you discard the tin instead.");
+           if (!Hallucination) tin.tin->dknown = tin.tin->known = TRUE;
+           goto use_me;
+         }
 	    /* in case stop_occupation() was called on previous meal */
 	    victual.piece = (struct obj *)0;
 	    victual.fullwarn = victual.eating = victual.doreset = FALSE;
@@ -1300,7 +1425,7 @@ opentin()		/* called during each move whilst opening a tin */
 		violated_vegetarian();
 
 	    tin.tin->dknown = tin.tin->known = TRUE;
-	    cprefx(tin.tin->corpsenm); cpostfx(tin.tin->corpsenm, TRUE);
+	    cprefx(tin.tin->corpsenm,FALSE); cpostfx(tin.tin->corpsenm, TRUE);
 
 	    /* charge for one at pre-eating cost */
 	    costly_tin((const char*)0);
@@ -1419,7 +1544,9 @@ STATIC_OVL int
 rottenfood(obj)
 struct obj *obj;
 {
-	pline("Blecch!  Rotten %s!", foodword(obj));
+	pline("Blecch!  Rotten %s!",
+		maybe_polyd(is_vampire(youmonst.data),
+			Race_if(PM_VAMPIRE)) ? "blood" : foodword(obj));
 	if(!rn2(4)) {
 		if (Hallucination) You_feel("rather trippy.");
 		else You_feel("rather %s.", body_part(LIGHT_HEADED));
@@ -1427,7 +1554,7 @@ struct obj *obj;
 	} else if(!rn2(4) && !Blind) {
 		pline("Everything suddenly goes dark.");
 		make_blinded((long)d(2,10),FALSE);
-		if (!Blind) Your(vision_clears);
+		if (!Blind) Your("%s", vision_clears);
 	} else if(!rn2(3)) {
 		const char *what, *where;
 		if (!Blind)
@@ -1483,12 +1610,53 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 		else if (otmp->blessed) rotted -= 2L;
 	}
 
+	/* Vampires only drink the blood of very young, meaty corpses 
+	 * is_edible only allows meaty corpses here
+	 * Blood is assumed to be 1/5 of the nutrition
+	 * Thus happens before the conduct checks intentionally - should it be after?
+	 * Blood is assumed to be meat and flesh.
+	 */
+	if (is_vampire(youmonst.data)) {
+	    /* oeaten is set up by touchfood */
+	    if (otmp->odrained ? otmp->oeaten <= drainlevel(otmp) :
+	      otmp->oeaten < mons[otmp->corpsenm].cnutrit) {
+	    	pline("There is no blood left in this corpse!");
+	    	return 3;
+	    } else if (rotted <= 0 &&
+	      (peek_at_iced_corpse_age(otmp) + 5) >= monstermoves) {
+		char buf[BUFSZ];
+
+		/* Generate the name for the corpse */
+		if (!uniq || Hallucination)
+		    Sprintf(buf, "%s", the(corpse_xname(otmp,TRUE)));
+		else
+		    Sprintf(buf, "%s%s corpse",
+			    !type_is_pname(&mons[mnum]) ? "the " : "",
+			    s_suffix(mons[mnum].mname));
+
+	    	pline("You drain the blood from %s.", buf);
+		otmp->odrained = 1;
+	    } else {
+	    	pline("The blood in this corpse has coagulated!");
+	    	return 3;
+	    }
+	}
+	else
+	    otmp->odrained = 0;
+
+	/* Very rotten corpse will make you sick unless you are a ghoul or a ghast */
 	if (mnum != PM_ACID_BLOB && !stoneable && rotted > 5L) {
 		boolean cannibal = maybe_cannibal(mnum, FALSE);
+	    if (u.umonnum == PM_GHOUL) {
+	    	pline("Yum - that %s was well aged%s!",
+		      mons[mnum].mlet == S_FUNGUS ? "fungoid vegetation" :
+		      !vegetarian(&mons[mnum]) ? "meat" : "protoplasm",
+		      cannibal ? ", cannibal" : "");
+	    } else {	    
 		pline("Ulch - that %s was tainted%s!",
 		      mons[mnum].mlet == S_FUNGUS ? "fungoid vegetation" :
 		      !vegetarian(&mons[mnum]) ? "meat" : "protoplasm",
-		      cannibal ? " cannibal" : "");
+		      cannibal ? ", cannibal" : "");
 		if (Sick_resistance) {
 			pline("It doesn't seem at all sickening, though...");
 		} else {
@@ -1510,7 +1678,11 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 		if (carried(otmp)) useup(otmp);
 		else useupf(otmp, 1L);
 		return(2);
-	} if (acidic(&mons[mnum]) && !Acid_resistance) {
+	    }
+	} else if (youmonst.data == &mons[PM_GHOUL]) {
+		pline ("This corpse is too fresh!");
+		return 3;
+	} else if (acidic(&mons[mnum]) && !Acid_resistance) {
 		tp++;
 		You("have a very bad case of stomach acid."); /* not body_part() */
 		losehp(rnd(15), "acidic corpse", KILLED_BY_AN);
@@ -1544,10 +1716,11 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 
 	/* delay is weight dependent */
 	victual.reqtime = 3 + (mons[mnum].cwt >> 6);
+	if (otmp->odrained) victual.reqtime = rounddiv(victual.reqtime, 5);
 
 	if (!tp && mnum != PM_LIZARD && mnum != PM_LICHEN && mnum != PM_BEHOLDER &&
 			(otmp->orotten || !rn2(7))) {
-	    if (rottenfood(otmp)) {
+	    if ( (monstermoves - peek_at_iced_corpse_age(otmp)) > 5 && rottenfood(otmp)) {
 		otmp->orotten = TRUE;
 		(void)touchfood(otmp);
 		retcode = 1;
@@ -1562,7 +1735,10 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	    }
 		    
 	    if (!retcode) consume_oeaten(otmp, 2);	/* oeaten >>= 2 */
-	} else if(is_rat(&mons[mnum]) && Race_if(PM_DWARF)){
+	    if (otmp->odrained && otmp->oeaten < drainlevel(otmp))
+	        otmp->oeaten = drainlevel(otmp);
+	} else if (!is_vampire(youmonst.data)) {
+		if(is_rat(&mons[mnum]) && Race_if(PM_DWARF)){
 		if(u.uconduct.ratseaten<SIZE(eatrat)) pline("%s", eatrat[u.uconduct.ratseaten++]);
 		else{
 			u.uconduct.ratseaten++;
@@ -1578,6 +1754,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 		   (!carnivorous(youmonst.data) && herbivorous(youmonst.data)) :
 		   (carnivorous(youmonst.data) && !herbivorous(youmonst.data)))
 		  ? "is delicious" : "tastes terrible");
+	}
 	}
 
 	return(retcode);
@@ -1598,7 +1775,7 @@ start_eating(otmp)		/* called as you start to eat */
 	victual.eating = TRUE;
 
 	if (otmp->otyp == CORPSE) {
-	    cprefx(victual.piece->corpsenm);
+	    cprefx(victual.piece->corpsenm,FALSE);
 	    if (!victual.piece || !victual.eating) {
 		/* rider revived, or died and lifesaved */
 		return;
@@ -1613,7 +1790,8 @@ start_eating(otmp)		/* called as you start to eat */
 	    return;
 	}
 
-	Sprintf(msgbuf, "eating %s", food_xname(otmp, TRUE));
+	Sprintf(msgbuf, "%s %s", otmp->odrained ? "draining" : "eating",
+	  food_xname(otmp, TRUE));
 	set_occupation(eatfood, msgbuf, 0);
 }
 
@@ -1628,14 +1806,19 @@ struct obj *otmp;
 {
 	switch(otmp->otyp) {
 	    case FOOD_RATION:
-		if(u.uhunger <= 200)
+		if(YouHunger <= 200)
 		    pline(Hallucination ? "Oh wow, like, superior, man!" :
 			  "That food really hit the spot!");
-		else if(u.uhunger <= 700) pline("That satiated your %s!",
+		else if(YouHunger <= 700) pline("That satiated your %s!",
 						body_part(STOMACH));
 		break;
 	    case TRIPE_RATION:
-		if (carnivorous(youmonst.data) && !humanoid(youmonst.data))
+		if (carnivorous(youmonst.data) && (!humanoid(youmonst.data)) || 
+			u.ulycn != NON_PM && carnivorous(&mons[u.ulycn]) && 
+			!humanoid(&mons[u.ulycn]))
+		    /* Symptom of lycanthropy is starting to like your
+		     * alternative form's food! 
+		     */
 		    pline("That tripe ration was surprisingly good!");
 		else if (maybe_polyd(is_orc(youmonst.data), Race_if(PM_ORC)))
 		    pline(Hallucination ? "Tastes great! Less filling!" :
@@ -1962,8 +2145,10 @@ register struct obj *otmp;
 		make_blinded((long)u.ucreamed,TRUE);
 		break;
 	    case FORTUNE_COOKIE:
+	   	if (yn("Read the fortune?") == 'y') {
 		outrumor(bcsign(otmp), BY_COOKIE);
 		if (!Blind) u.uconduct.literate++;
+		}
 		break;
 	    case LUMP_OF_ROYAL_JELLY:
 		/* This stuff seems to be VERY healthy! */
@@ -2147,10 +2332,19 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 {
 	register struct obj *otmp;
 	int basenutrit;			/* nutrition of full item */
+	int nutrit;			/* nutrition available */
+	char qbuf[QBUFSZ];
+	char c;
+	
 	boolean dont_start = FALSE;
 	
 	if (Strangled) {
 		pline("If you can't breathe air, how can you consume solids?");
+		return 0;
+	}
+
+	if(uclockwork){
+		pline("You are metal and springs, not flesh and blood. You cannot eat.");
 		return 0;
 	}
 	if (!(otmp = floorfood("eat", 0))) return 0;
@@ -2203,6 +2397,58 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			dropy(otmp);
 		}
 		stackobj(otmp);
+		return 1;
+	}
+	if(Race_if(PM_INCANTIFIER) && !objects[otmp->otyp].oc_unique){ //redundant check against unique
+		switch(otmp->oclass){
+			case WEAPON_CLASS:
+	    	    (void) drain_item(otmp);
+				lesshungry(50);
+				You("drain the %s%s.", xname(otmp),otmp->spe?"":" dry");
+			break;
+			case RING_CLASS:
+				if(otmp->oartifact) break; //redundant check
+				pline("The %s turns to dust as you drain it dry.", xname(otmp));
+				eataccessory(otmp);
+				lesshungry(50);
+				if (otmp == uwep && otmp->quan == 1L) uwepgone();
+				if (otmp == uquiver && otmp->quan == 1L) uqwepgone();
+				if (otmp == uswapwep && otmp->quan == 1L) uswapwepgone();
+
+				if (carried(otmp)) useup(otmp);
+				else useupf(otmp, 1L);
+			break;
+			case ARMOR_CLASS:
+	    	    (void) drain_item(otmp);
+				lesshungry(50);
+				You("drain the %s%s.", xname(otmp),otmp->spe?"":" dry");
+			break;
+			case TOOL_CLASS:
+	    	    (void) drain_item(otmp);
+				lesshungry(50);
+				You("drain the %s%s.", xname(otmp),otmp->spe?"":" dry");
+			break;
+			case SCROLL_CLASS:
+				if(otmp->oartifact) break; //redundant check
+	    	    otmp->otyp = SCR_BLANK_PAPER;
+				lesshungry(50);
+				You("lick the ink off the %s.", xname(otmp));
+			break;
+			case SPBOOK_CLASS:
+				if(otmp->oartifact) break; //redundant check
+				otmp->spestudied++;
+				lesshungry(50);
+				You("drain the magic from the %s.", xname(otmp));
+	    	    if(otmp->spestudied > MAX_SPELL_STUDY) otmp->otyp = SPE_BLANK_PAPER;
+			break;
+			case WAND_CLASS:
+	    	    (void) drain_item(otmp);
+//	    	    otmp->otyp = SPE_BLANK_PAPER;
+				lesshungry(10);
+				if(!otmp->spe) otmp->otyp = WAN_NOTHING;
+				You("drain the %s%s.", xname(otmp),otmp->spe?"":" dry");
+			break;
+		}
 		return 1;
 	}
 	/* KMH -- Slow digestion is... indigestible */
@@ -2320,7 +2566,8 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 					make_sick(0L, (char *) 0, TRUE, SICK_ALL);
 
 					/* You feel refreshed */
-					u.uhunger += 50 + rnd(50);
+					if(Race_if(PM_INCANTIFIER)) u.uen += 50 + rnd(50);
+					else u.uhunger += 50 + rnd(50);
 					newuhs(FALSE);
 				} else
 					exercise(A_WIS, FALSE);
@@ -2333,6 +2580,19 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    eatspecial();
 	    return 1;
 	}
+
+	/* [ALI] Hero polymorphed in the meantime.
+	 */
+	if (otmp == victual.piece &&
+	  is_vampire(youmonst.data) != otmp->odrained)
+	    victual.piece = (struct obj *)0;	/* Can't resume */
+
+	/* [ALI] Blood can coagulate during the interruption
+	 *       but not during the draining process.
+	 */
+	if(otmp == victual.piece && otmp->odrained &&
+	  (peek_at_iced_corpse_age(otmp) + victual.usedtime + 5) < monstermoves)
+	    victual.piece = (struct obj *)0;	/* Can't resume */
 
 	if(otmp == victual.piece) {
 	/* If they weren't able to choke, they don't suddenly become able to
@@ -2368,7 +2628,23 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	 */
 	if(otmp->otyp == CORPSE) {
 	    int tmp = eatcorpse(otmp);
-	    if (tmp == 2) {
+	    if (tmp == 3) {
+		/* inedible */
+		victual.piece = (struct obj *)0;
+		/*
+		 * The combination of odrained == TRUE and oeaten == cnutrit
+		 * represents the case of starting to drain a corpse but not
+		 * getting any further (eg., loosing consciousness due to
+		 * rotten food). We must preserve this case to avoid corpses
+		 * changing appearance after a failed attempt to eat.
+		 */
+		if (!otmp->odrained &&
+			otmp->oeaten == mons[otmp->corpsenm].cnutrit)
+		    otmp->oeaten = 0;
+		/* ALI, conduct: didn't eat it after all */
+		u.uconduct.food--;
+		return 0;
+	    } else if (tmp == 2) {
 		/* used up */
 		victual.piece = (struct obj *)0;
 		return(1);
@@ -2407,6 +2683,12 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		    otmp->orotten = TRUE;
 		    dont_start = TRUE;
 		}
+		if (otmp->oeaten < 2) {
+		    victual.piece = (struct obj *)0;
+		    if (carried(otmp)) useup(otmp);
+		    else useupf(otmp, 1L);
+		    return 1;
+		} else
 		consume_oeaten(otmp, 1);	/* oeaten >>= 1 */
 	    } else fprefx(otmp);
 	}
@@ -2414,29 +2696,34 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	/* re-calc the nutrition */
 	if (otmp->otyp == CORPSE) basenutrit = mons[otmp->corpsenm].cnutrit;
 	else basenutrit = objects[otmp->otyp].oc_nutrition;
+	nutrit = otmp->oeaten;
+	if (otmp->otyp == CORPSE && otmp->odrained) {
+	    nutrit -= drainlevel(otmp);
+	    basenutrit -= drainlevel(otmp);
+	}
 
 #ifdef DEBUG
 	debugpline("before rounddiv: victual.reqtime == %d", victual.reqtime);
 	debugpline("oeaten == %d, basenutrit == %d", otmp->oeaten, basenutrit);
+	debugpline("nutrit == %d, cnutrit == %d", nutrit, otmp->otyp == CORPSE ?
+	  mons[otmp->corpsenm].cnutrit : objects[otmp->otyp].oc_nutrition);
 #endif
 	victual.reqtime = (basenutrit == 0 ? 0 :
-		rounddiv(victual.reqtime * (long)otmp->oeaten, basenutrit));
+		rounddiv(victual.reqtime * (long)nutrit, basenutrit));
 #ifdef DEBUG
 	debugpline("after rounddiv: victual.reqtime == %d", victual.reqtime);
 #endif
 	/* calculate the modulo value (nutrit. units per round eating)
-	 * note: this isn't exact - you actually lose a little nutrition
-	 *	 due to this method.
-	 * TODO: add in a "remainder" value to be given at the end of the
-	 *	 meal.
+	 * [ALI] Note: although this is not exact, the remainder is
+	 *       now dealt with in done_eating().
 	 */
-	if (victual.reqtime == 0 || otmp->oeaten == 0)
+	if (victual.reqtime == 0 || nutrit == 0)
 	    /* possible if most has been eaten before */
 	    victual.nmod = 0;
-	else if ((int)otmp->oeaten >= victual.reqtime)
-	    victual.nmod = -((int)otmp->oeaten / victual.reqtime);
+	else if (nutrit >= victual.reqtime)
+	    victual.nmod = -(nutrit / victual.reqtime);
 	else
-	    victual.nmod = victual.reqtime % otmp->oeaten;
+	    victual.nmod = victual.reqtime % nutrit;
 	victual.canchoke = (u.uhs == SATIATED);
 
 	if (!dont_start) start_eating(otmp);
@@ -2449,7 +2736,10 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 STATIC_OVL int
 bite()
 {
-	if(victual.canchoke && u.uhunger >= 2000) {
+	if(victual.canchoke && 
+		((Race_if(PM_INCANTIFIER) && u.uen >= u.uenmax) ||
+		 (!Race_if(PM_INCANTIFIER)&& u.uhunger >= 2000) )
+		) {
 		choke(victual.piece);
 		return 1;
 	}
@@ -2479,40 +2769,45 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	if (u.uinvulnerable) return;	/* you don't feel hungrier */
 
 	if ((!u.usleep || !rn2(10))	/* slow metabolic rate while asleep */
-		&& (carnivorous(youmonst.data) || herbivorous(youmonst.data))
+		&& (carnivorous(youmonst.data) || herbivorous(youmonst.data) || uclockwork)
 #ifdef CONVICT
         /* Convicts can last twice as long at hungry and below */
         && (!Role_if(PM_CONVICT) || (moves % 2) || (u.uhs < HUNGRY))
 #endif /* CONVICT */
-		&& !Slow_digestion)
-	    u.uhunger--;		/* ordinary food consumption */
+		&& !( (Slow_digestion && (!Race_if(PM_INCANTIFIER) || moves%2)) || 
+				(uclockwork && u.ucspeed == SLOW_CLOCKSPEED) ))
+			(Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);		/* ordinary food consumption */
 	if(uwep && (
 			uwep->oartifact == ART_GARNET_ROD || (uwep->oartifact == ART_TENSA_ZANGETSU && !is_undead(youmonst.data)))
-		) u.uhunger -= 9; //time warp massively increases food consumption
+	){
+		if(Race_if(PM_INCANTIFIER)) u.uen -= 9;
+		else u.uhunger -= 9;
+	}
+	if(uclockwork && u.ucspeed == SLOW_CLOCKSPEED && !(moves%10)) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 	if (moves % 2) {	/* odd turns */
 	    /* Regeneration uses up food, unless due to an artifact */
 	    if (HRegeneration || ((ERegeneration & (~W_ART)) &&
 				(ERegeneration != W_WEP || !uwep->oartifact)))
-			u.uhunger--;
-	    if (near_capacity() > SLT_ENCUMBER) u.uhunger--;
+			(Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
+	    if (near_capacity() > SLT_ENCUMBER) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 	} else {		/* even turns */
-	    if (Hunger) u.uhunger--;
+	    if (Hunger) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 	    /* Conflict uses up food too */
-	    if (HConflict || (EConflict & (~W_ARTI))) u.uhunger--;
+	    if (HConflict || (EConflict & (~W_ARTI))) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 	    /* +0 charged rings don't do anything, so don't affect hunger */
 	    /* Slow digestion still uses ring hunger */
 	    switch ((int)(moves % 20)) {	/* note: use even cases only */
 	     case  4: if (uleft &&
 			  (uleft->spe || !objects[uleft->otyp].oc_charged))
-			    u.uhunger--;
+			    (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 		    break;
-	     case  8: if (uamul) u.uhunger--;
+	     case  8: if (uamul) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 		    break;
 	     case 12: if (uright &&
 			  (uright->spe || !objects[uright->otyp].oc_charged))
-			    u.uhunger--;
+			    (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 		    break;
-	     case 16: if (u.uhave.amulet) u.uhunger--;
+	     case 16: if (u.uhave.amulet) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 		    break;
 	     default: break;
 	    }
@@ -2527,7 +2822,8 @@ void
 morehungry(num)	/* called after vomiting and after performing feats of magic */
 register int num;
 {
-	u.uhunger -= num;
+	if(Race_if(PM_INCANTIFIER)) u.uen -= num;
+	else u.uhunger -= num;
 	newuhs(TRUE);
 }
 
@@ -2541,24 +2837,44 @@ register int num;
 #ifdef DEBUG
 	debugpline("lesshungry(%d)", num);
 #endif
-	u.uhunger += num;
-	if(u.uhunger >= 2000) {
+	if(Race_if(PM_INCANTIFIER)) u.uen += num;
+	else u.uhunger += num;
+	if(((Race_if(PM_INCANTIFIER) && u.uen >= u.uenmax) ||
+		 (!Race_if(PM_INCANTIFIER)&& u.uhunger >= 2000) )
+		) {
 	    if (!iseating || victual.canchoke) {
 		if (iseating) {
 		    choke(victual.piece);
 		    reset_eat();
 		} else
-		    choke(occupation == opentin ? tin.tin : (struct obj *)0);
+		    if(!uclockwork) choke(occupation == opentin ? tin.tin : (struct obj *)0);
+			else{
+				Your("mainspring is wound too tight!");
+				Your("clockwork breaks apart!");
+				killer_format = KILLED_BY;
+				killer = "overclocking";
+				done(OVERWOUND);
+				victual.piece = 0;
+				victual.mon = 0;
+				return;
+			}
 		/* no reset_eat() */
 	    }
 	} else {
 	    /* Have lesshungry() report when you're nearly full so all eating
 	     * warns when you're about to choke.
 	     */
-	    if (u.uhunger >= 1500) {
+	    if ((Race_if(PM_INCANTIFIER) && u.uen >= u.uenmax * 3/4) ||
+			(!Race_if(PM_INCANTIFIER) && u.uhunger >= 1500)) {
 		if (!victual.eating || (victual.eating && !victual.fullwarn)) {
+				if(!uclockwork){
 		    pline("You're having a hard time getting all of it down.");
 		    nomovemsg = "You're finally finished.";
+				}
+				else{
+					Your("mainspring is being overwound!");
+					nomovemsg = "The winding finally stopped.";
+				}
 		    if (!victual.eating)
 			multi = -2;
 		    else {
@@ -2579,7 +2895,7 @@ register int num;
 
 STATIC_PTR
 int
-unfaint()
+unfaint(VOID_ARGS)
 {
 	(void) Hear_again();
 	if(u.uhs > FAINTING)
@@ -2589,6 +2905,132 @@ unfaint()
 	return 0;
 }
 
+int
+ask_turns(mon, flatrate, perturn)
+struct monst *mon;
+int flatrate;
+int perturn;
+{
+	int ret, turns;
+	long price;
+	char buf[BUFSZ], qbuf[QBUFSZ];
+	boolean pay;
+	
+	Sprintf(qbuf, "How many turns?");
+	getlin(qbuf, buf);
+	(void)mungspaces(buf);
+	if (buf[0] == '\033' || buf[0] == '\0') ret = 0;
+	else ret = sscanf(buf, "%d", &turns);
+	
+	if (ret != 1 || turns <= 0){
+		return 0;
+	}
+	
+	price = (long)(turns*perturn + flatrate);
+	
+	if(price){
+	Sprintf(qbuf, "That will be %ld %s. (Pay?)", price, currency(price));
+	if(yn(qbuf)=='y'){
+#ifndef GOLDOBJ
+	if (price >= u.ugold) {
+		You("don't have enough %s!", currency(price));
+		return 0;
+	} else {
+		You("give %s %ld %s.", mon_nam(mon), price, currency(price));
+	}
+	u.ugold -= price;
+	mon->mgold += price;
+#else
+	if (price >= umoney) {
+		You("don't have enough %s!", currency(price));
+		return 0;
+	} else {
+		You("give %s %ld %s.", mon_nam(mon), price, currency(price));
+	}
+	(void) money2mon(mon, price);
+#endif
+	}
+	return turns;
+	}
+	else return turns;
+}
+
+int
+start_clockwinding(key, mon, turns)
+struct obj * key;
+struct monst *mon;
+int turns;
+{
+  // int ret;
+  // char buf[BUFSZ], qbuf[QBUFSZ];
+  // Sprintf(qbuf, "How many turns?");
+  // getlin(qbuf, buf);
+  // (void)mungspaces(buf);
+  // if (buf[0] == '\033' || buf[0] == '\0') ret = 0;
+  // else ret = sscanf(buf, "%d", &turns);
+
+  // if (ret != 1 || turns <= 0){
+    // pline(Never_mind);
+    // return 0;
+  // }
+
+  if (key->otyp != SKELETON_KEY)
+    return 0;
+  pline("%s uses the key to wind up your clockwork.", Monnam(mon));
+  victual.piece = key;
+  victual.canchoke = TRUE;
+  victual.usedtime = 0;
+  victual.fullwarn = FALSE;
+  victual.reqtime = turns;
+  victual.mon = mon;
+  mon->moccupation = 1;
+  mon->mcanmove = 0;
+  Sprintf(msgbuf, "winding");
+  set_occupation(windclock, msgbuf, 0);
+  return 1;
+}
+
+
+
+STATIC_PTR
+int
+windclock()
+{ 
+  if (victual.reqtime == victual.usedtime){
+    occupation = 0;
+	pline("%s finishes winding up your clockwork.", Monnam(victual.mon));
+	victual.mon->moccupation = 0;
+	victual.mon->mcanmove = 1;
+    newuhs(FALSE);
+    victual.piece = 0;
+    victual.mon = 0;
+  }else if (!carried(victual.piece)){
+    newuhs(FALSE);
+    stop_occupation();
+    victual.piece = 0;
+    victual.mon = 0;
+    return 0;
+  }else if(victual.canchoke && u.uhunger >= 2000) {
+    Your("mainspring is wound too tight!");
+    Your("clockwork breaks apart!");
+    killer_format = KILLED_BY;
+    killer = "overclocking";
+    done(OVERWOUND);
+    victual.piece = 0;
+    victual.mon = 0;
+    return 0;
+  }
+  else if (u.uhunger >= 1500 && !victual.fullwarn) {
+    pline("%s is having a hard time cranking the key.",Monnam(victual.mon));
+    victual.fullwarn = TRUE;
+  }
+  else {
+    u.uhunger += 10;
+    victual.usedtime ++;
+  }
+  flags.botl = 1;
+  return 1;
+}
 #endif /* OVLB */
 #ifdef OVL0
 
@@ -2612,7 +3054,7 @@ sync_hunger()
 	if(is_fainted()) {
 
 		flags.soundok = 0;
-		nomul(-10+(u.uhunger/10), "fainted from lack of food");
+		nomul(-10+( YouHunger/10), "fainted from lack of food");
 		nomovemsg = "You regain consciousness.";
 		afternmv = unfaint;
 	}
@@ -2626,9 +3068,10 @@ boolean incr;
 	unsigned newhs;
 	static unsigned save_hs;
 	static boolean saved_hs = FALSE;
-	int h = u.uhunger;
+	int h = YouHunger;
+     boolean clockwork = uclockwork;
 
-	newhs = (h > 1000) ? SATIATED :
+	newhs = (h > (Race_if(PM_INCANTIFIER) ? max(u.uenmax/2,200) : 1000) ) ? SATIATED :
 		(h > 150) ? NOT_HUNGRY :
 		(h > 50) ? HUNGRY :
 		(h > 0) ? WEAK : FAINTING;
@@ -2671,19 +3114,32 @@ boolean incr;
 
 	if(newhs == FAINTING) {
 		if(is_fainted()) newhs = FAINTED;
-		if(u.uhs <= WEAK || rn2(20-u.uhunger/10) >= 19) {
+		if(u.uhs <= WEAK || rn2(20-YouHunger/10) >= 19) {
 			if(!is_fainted() && multi >= 0 /* %% */) {
 				/* stop what you're doing, then faint */
 				stop_occupation();
+	            if (clockwork){
+	              Your("clockwork slips.");
+	              flags.soundok=0;
+				  nomul(-2, "immobilized by slipping gears.");
+	              nomovemsg = "Your clockwork catches again.";
+	            } else {
 				You("faint from lack of food.");
 				flags.soundok = 0;
-				nomul(-10+(u.uhunger/10), "fainted from lack of food");
+					nomul(-10+YouHunger/10, "fainted from lack of food");
 				nomovemsg = "You regain consciousness.";
 				afternmv = unfaint;
+            	}
 				newhs = FAINTED;
 			}
 		} else
-		if(u.uhunger < -(int)(200 + 20*ACURR(A_CON))) {
+		if(YouHunger < -(int)(200 + 20*ACURR(A_CON))) {
+            if (clockwork){
+              Your("clockwork comes to a complete stop.");
+			  killer_format = KILLED_BY_AN;
+			  killer = "unwound spring";
+			  done(DIED);
+            } else {
 			u.uhs = STARVED;
 			flags.botl = 1;
 			bot();
@@ -2691,6 +3147,7 @@ boolean incr;
 			killer_format = KILLED_BY;
 			killer = "starvation";
 			done(STARVING);
+			}
 			/* if we return, we lifesaved, and that calls newuhs */
 			return;
 		}
@@ -2703,19 +3160,44 @@ boolean incr;
 			losestr(-1);
 		switch(newhs){
 		case HUNGRY:
+	        if (clockwork){
+	          if (Hallucination)
+	            Your((!incr)? "cuckoo only feels hungry now.":
+	                "cuckoo is feeling hungry.");
+	          else
+	          You_feel((!incr) ? "your mainspring tightening." :
+	             "the power of your mainspring waning.");
+	          if (incr && occupation && occupation != windclock)
+	            stop_occupation();
+		break;
+	        }
 			if (Hallucination) {
 			    You((!incr) ?
 				"now have a lesser case of the munchies." :
 				"are getting the munchies.");
 			} else
 			    You((!incr) ? "only feel hungry now." :
-				  (u.uhunger < 145) ? "feel hungry." :
+				  (YouHunger < 145) ? "feel hungry." :
 				   "are beginning to feel hungry.");
 			if (incr && occupation &&
 			    (occupation != eatfood && occupation != opentin))
 			    stop_occupation();
 			break;
 		case WEAK:
+	        if (clockwork){
+	          You_feel("your mainspring %s and your gears %s.",
+	              (Hallucination)?"sprunging":"unwinding",
+	              (!incr)?"still slipping":
+	              (u.uhunger < 45 ) ? "slipping":
+	              "starting to slip");  
+	          if (incr && occupation && occupation != windclock)
+	            stop_occupation();
+			  if(u.ucspeed == HIGH_CLOCKSPEED){
+				pline("There is no longer sufficient tension in your mainspring to maintain a high clock-speed");
+				u.ucspeed = NORM_CLOCKSPEED;
+			  }
+		break;
+	        }
 			if (Hallucination)
 			    pline((!incr) ?
 				  "You still have the munchies." :
@@ -2728,12 +3210,28 @@ boolean incr;
 				  urole.name.m : "Elf");
 			else
 			    You((!incr) ? "feel weak now." :
-				  (u.uhunger < 45) ? "feel weak." :
+				  (YouHunger < 45) ? "feel weak." :
 				   "are beginning to feel weak.");
 			if (incr && occupation &&
 			    (occupation != eatfood && occupation != opentin))
 			    stop_occupation();
 			break;
+		case SATIATED:
+	        if (clockwork){
+			  if(u.ucspeed == SLOW_CLOCKSPEED){
+				pline("There is now too much tension in your mainspring to maintain a slow clock-speed");
+				u.ucspeed = NORM_CLOCKSPEED;
+			  }
+			}
+		break;
+		case FAINTING:
+	        if (clockwork){
+			  if(u.ucspeed == HIGH_CLOCKSPEED){
+				pline("There is no longer sufficient tension in your mainspring to maintain a high clock-speed");
+				u.ucspeed = NORM_CLOCKSPEED;
+			  }
+			}
+		break;
 		}
 		u.uhs = newhs;
 		flags.botl = 1;

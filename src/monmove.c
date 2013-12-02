@@ -167,7 +167,7 @@ struct monst *mtmp;
 			 || (scaryDre(mtmp) && dreprun_at(x,y))
 			 || (scaryVei(mtmp) && veioistafur_at(x,y))
 			 || (scaryThj(mtmp) && thjofastafur_at(x,y))
-			 || (mtmp->data->mlet == S_VAMPIRE && IS_ALTAR(levl[x][y].typ))
+			 || (is_vampire(mtmp->data) && IS_ALTAR(levl[x][y].typ))
 			);
 }
 
@@ -613,6 +613,12 @@ boolean fleemsg;
 		if (fleetime == 1) fleetime++;
 		mtmp->mfleetim = min(fleetime, 127);
 	    }
+           if( !mtmp->mflee && mtmp->data == &mons[PM_GIANT_TURTLE]){
+             mtmp->mcanmove=0;
+			 // mtmp->mfrozen = mtmp->mfleetim;
+             if(canseemon(mtmp)) 
+               pline("%s hides in %s shell!",Monnam(mtmp),mhis(mtmp));
+           }else
 	    if (!mtmp->mflee && fleemsg && canseemon(mtmp) && !mtmp->mfrozen)
 		pline("%s turns to flee!", (Monnam(mtmp)));
 	    mtmp->mflee = 1;
@@ -705,6 +711,7 @@ register struct monst *mtmp;
 	/* update quest status flags */
 	quest_stat_check(mtmp);
 
+   if (mdat != &mons[PM_GIANT_TURTLE] || !mtmp->mflee)
 	if (!mtmp->mcanmove || (mtmp->mstrategy & STRAT_WAITMASK)) {
 	    if (Hallucination) newsym(mtmp->mx,mtmp->my);
 	    if (mtmp->mcanmove && (mtmp->mstrategy & STRAT_CLOSE) &&
@@ -754,7 +761,15 @@ register struct monst *mtmp;
 
 	/* fleeing monsters might regain courage */
 	if (mtmp->mflee && !mtmp->mfleetim
-	   && mtmp->mhp == mtmp->mhpmax && !rn2(25)) mtmp->mflee = 0;
+	   && mtmp->mhp == mtmp->mhpmax && !rn2(25)){
+		mtmp->mflee = 0;
+        if(canseemon(mtmp) && (mdat == &mons[PM_GIANT_TURTLE]) && !(mtmp->mfrozen)){
+         pline("%s comes out of %s shell.", Monnam(mtmp), mhis(mtmp));
+         mtmp->mcanmove=1;
+		}
+    }
+   else if (mdat == &mons[PM_GIANT_TURTLE] && !mtmp->mcanmove)
+     return (0);
 
 	set_apparxy(mtmp);
 	/* Must be done after you move and before the monster does.  The
@@ -900,7 +915,7 @@ toofar:
 	if (( attacktype(mtmp->data, AT_BREA) ||
 	      attacktype(mtmp->data, AT_GAZE) ||
 	      attacktype(mtmp->data, AT_SPIT) ||
-	     (attacktype(mtmp->data, AT_MAGC) &&
+	     ((attacktype(mtmp->data, AT_MAGC) || attacktype(mtmp->data, AT_MMGC)) &&
 	      (((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp
 	         <= AD_SPC2))
 	      ) ||
@@ -953,7 +968,7 @@ toofar:
 		    struct attack *a;
 
 		    for (a = &mdat->mattk[0]; a < &mdat->mattk[NATTK]; a++) {
-			if (a->aatyp == AT_MAGC && (a->adtyp == AD_SPEL || a->adtyp == AD_CLRC)) {
+			if ((a->aatyp == AT_MAGC || a->aatyp == AT_MMGC) && (a->adtyp == AD_SPEL || a->adtyp == AD_CLRC)) {
 			    if (castmu(mtmp, a, FALSE, FALSE)) {
 				tmp = 3;
 				break;

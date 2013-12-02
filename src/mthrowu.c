@@ -256,7 +256,7 @@ boolean verbose;  /* give message(s) even when you can't see what happened */
 			}
 			if(otmp->opoisoned & OPOISON_PARAL){
 				if (resists_poison(mtmp)) {
-					if (vis) pline_The("poison doesn't seem to affect %s.",
+					if (vis) pline_The("venom doesn't seem to affect %s.",
 						   mon_nam(mtmp));
 				} else {
 					if (rn2(10)) {
@@ -1404,6 +1404,7 @@ int whodidit;	/* 1==hero, 0=other, -1==just check whether it'll pass thru */
 	case WAND_CLASS:
 	case BALL_CLASS:
 	case CHAIN_CLASS:
+/*	case BED_CLASS:*/
 		hits = TRUE;
 		break;
 	default:

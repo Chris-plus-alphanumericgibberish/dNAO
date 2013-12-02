@@ -359,7 +359,8 @@ still_chewing(x,y)
 
     /* Okay, you've chewed through something */
     u.uconduct.food++;
-    u.uhunger += rnd(20);
+	if(Race_if(PM_INCANTIFIER)) u.uen += rnd(20);
+	else u.uhunger += rnd(20);
 
     if (boulder) {
 	delobj(boulder);		/* boulder goes bye-bye */
@@ -928,7 +929,13 @@ domove()
 		u.ux = x = u.ustuck->mx;
 		u.uy = y = u.ustuck->my;
 		mtmp = u.ustuck;
-	} else {
+	}else if(u.ustuck && !flags.nopick && !(u.ustuck->mpeaceful && !Hallucination)){
+		u.dx = u.ustuck->mx - u.ux;
+		u.dy = u.ustuck->my - u.uy;
+		x = u.ustuck->mx;
+		y = u.ustuck->my;
+		mtmp = u.ustuck;
+	}else {
 		if (Is_airlevel(&u.uz) && rn2(4) &&
 			!Levitation && !Flying) {
 		    switch(rn2(3)) {
@@ -2206,6 +2213,51 @@ maybe_wail()
 	You_hear(u.uhp == 1 ? "the wailing of the Banshee..."
 			    : "the howling of the CwnAnnwn...");
     }
+}
+
+/** Print the amount n of damage inflicted,
+ * if the Mother is bound.
+ */
+void
+showdmg(n,you)
+int n; /**< amount of damage inflicted */
+boolean you; /**< true, if you are hit */
+{
+	if (u.sealsActive & SEAL_MOTHER && n > 0) {
+		if (you)
+			pline("[%d pts.]", n);
+		else
+			pline("(%d pts.)", n);
+	}
+}
+
+void
+check_uhpmax()
+{
+
+	if (u.uhpmax < 1)
+		u.uhpmax = 1;
+	if (u.mhmax < 1)
+		u.mhmax = 1;
+	if (u.uhp < 1)
+		u.uhp = 1;
+	if (u.mh < 1)
+		u.mh = 1;
+}
+
+void
+set_uhpmax(new_hpmax, poly)
+int new_hpmax;
+boolean poly;
+{
+	if (new_hpmax < 1) {
+		if (!poly) u.uhpmax = new_hpmax;
+		else       u.mhmax = new_hpmax;
+		return;
+	}
+	
+	if (!poly) u.uhpmax = 1;
+	else       u.mhmax = 1;
 }
 
 void

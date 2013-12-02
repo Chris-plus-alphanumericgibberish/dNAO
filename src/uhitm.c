@@ -293,10 +293,14 @@ register struct monst *mtmp;
 	if(!mtmp->mcanmove) {
 		tmp += 4;
 		if(!rn2(10)) {
+      if(mtmp->data != &mons[PM_GIANT_TURTLE] || !(mtmp->mflee)){
 			mtmp->mcanmove = 1;
 			mtmp->mfrozen = 0;
+}
 		}
 	}
+   if(mtmp->data == &mons[PM_GIANT_TURTLE] && mtmp->mflee && !mtmp->mcanmove)
+     tmp -=6;  /* don't penalize enshelled turtles */
 	if (is_orc(mtmp->data) && maybe_polyd(is_elf(youmonst.data),
 			Race_if(PM_ELF)))
 	    tmp++;
@@ -443,7 +447,7 @@ register struct monst *mtmp;
 		return(FALSE);
 
 	tmp = find_roll_to_hit(mtmp);
-	if (Upolyd)
+	if (Upolyd || Race_if(PM_VAMPIRE))
 		(void) hmonas(mtmp, tmp);
 	else
 		(void) hitum(mtmp, tmp, youmonst.data->mattk);
@@ -584,6 +588,7 @@ int thrown;
 #ifdef STEED
 	int jousting = 0;
 #endif
+	boolean vapekilled = FALSE; /* WAC added boolean for vamps vaporize */
 	int wtype;
 	struct obj *monwep;
 	char yourbuf[BUFSZ];
@@ -622,10 +627,22 @@ int thrown;
 	     * don't get both bonuses.
 	     */
 	    if (!uarmg) {
-			if (uleft && (objects[uleft->otyp].oc_material == SILVER || arti_silvered(uleft)))
-		    barehand_silver_rings++;
-			if (uright && (objects[uright->otyp].oc_material == SILVER || arti_silvered(uright)))
-		    barehand_silver_rings++;
+			if (uleft 
+				&& (objects[uleft->otyp].oc_material == SILVER 
+					|| arti_silvered(uleft) 
+					|| (uleft->ohaluengr
+						&& (isEngrRing(uleft->otyp) || isSignetRing(uleft->otyp))
+						&& uleft->ovar1 == LOLTH_SYMBOL)
+				)
+			) barehand_silver_rings++;
+			if (uright 
+				&& (objects[uright->otyp].oc_material == SILVER 
+					|| arti_silvered(uright)
+					|| (uright->ohaluengr
+						&& (isEngrRing(uright->otyp) || isSignetRing(uright->otyp))
+						&& uright->ovar1 == LOLTH_SYMBOL)
+				)
+			) barehand_silver_rings++;
 		if (barehand_silver_rings && hates_silver(mdat)) {
 			    tmp += d(barehand_silver_rings,20);
 		    silvermsg = TRUE;
@@ -637,6 +654,107 @@ int thrown;
 			if (barehand_jade_rings && hates_silver(mdat)) {
 			    tmp += d(barehand_jade_rings, 20);
 			    silvermsg = TRUE; /* jade ring handled in same code block as silver ring */
+			}
+			/* posioned rings */
+			if(uright && uright->opoisoned && isSignetRing(uright->otyp)){
+				if(uright->opoisoned & OPOISON_BASIC && !rn2(10)){
+					if (resists_poison(mon))
+						needpoismsg = TRUE;
+					else poiskilled = TRUE;
+					
+					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
+				}
+				if(uright->opoisoned & OPOISON_FILTH && !rn2(10)){
+					if (resists_sickness(mon))
+						needfilthmsg = TRUE;
+					else filthkilled = TRUE;
+					
+					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
+				}
+				if(uright->opoisoned & OPOISON_SLEEP && !rn2(5)){
+					if (resists_poison(mon) || resists_sleep(mon))
+						needdrugmsg = TRUE;
+					else if(!rn2(5) && sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
+					
+					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
+				}
+				if(uright->opoisoned & OPOISON_BLIND && !rn2(10)){
+					if (resists_poison(mon))
+						needpoismsg = TRUE;
+					 else {
+						poisblindmon = TRUE;
+					}
+					
+					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
+				}
+				if(uright->opoisoned & OPOISON_PARAL && !rn2(8)){
+					if (resists_poison(mon))
+						needpoismsg = TRUE;
+					 else {
+						if (mon->mcanmove) {
+							mon->mcanmove = 0;
+							mon->mfrozen = rnd(25);
+						}
+					}
+					
+					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
+				}
+				if(uright->opoisoned & OPOISON_AMNES && !rn2(10)){
+					if(mindless(mon->data)) needsamnesiamsg = TRUE;
+					else amnesiamon = TRUE;
+					
+					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
+				}
+			}
+			if(uleft && uleft->opoisoned && isSignetRing(uleft->otyp)){
+				if(uleft->opoisoned & OPOISON_BASIC && !rn2(10)){
+					if (resists_poison(mon))
+						needpoismsg = TRUE;
+					else poiskilled = TRUE;
+					
+					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
+				}
+				if(uleft->opoisoned & OPOISON_FILTH && !rn2(10)){
+					if (resists_sickness(mon))
+						needfilthmsg = TRUE;
+					else filthkilled = TRUE;
+					
+					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
+				}
+				if(uleft->opoisoned & OPOISON_SLEEP && !rn2(5)){
+					if (resists_poison(mon) || resists_sleep(mon))
+						needdrugmsg = TRUE;
+					else if(!rn2(5) && sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
+					
+					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
+				}
+				if(uleft->opoisoned & OPOISON_BLIND && !rn2(10)){
+					if (resists_poison(mon))
+						needpoismsg = TRUE;
+					 else {
+						poisblindmon = TRUE;
+					}
+					
+					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
+				}
+				if(uleft->opoisoned & OPOISON_PARAL && !rn2(8)){
+					if (resists_poison(mon))
+						needpoismsg = TRUE;
+					 else {
+						if (mon->mcanmove) {
+							mon->mcanmove = 0;
+							mon->mfrozen = rnd(25);
+						}
+					}
+					
+					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
+				}
+				if(uleft->opoisoned & OPOISON_AMNES && !rn2(10)){
+					if(mindless(mon->data)) needsamnesiamsg = TRUE;
+					else amnesiamon = TRUE;
+					
+					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
+				}
 			}
 	    }
 	} else {
@@ -694,9 +812,11 @@ int thrown;
 		    valid_weapon_attack = (tmp > 1);
 		    if (!valid_weapon_attack || mon == u.ustuck || u.twoweap) {
 			;	/* no special bonuses */
-		    } else if (mon->mflee && Role_if(PM_ROGUE) && !Upolyd) {
+		    } else if ((mon->mflee && Role_if(PM_ROGUE) && !Upolyd) ||
+						u.sealsActive&SEAL_ANDROMALIUS) {
 			You("strike %s from behind!", mon_nam(mon));
-			tmp += rnd(u.ulevel);
+				if(Role_if(PM_ROGUE) &&!Upolyd) tmp += rnd(u.ulevel);
+				if(u.sealsActive&SEAL_ANDROMALIUS) tmp += rnd(u.ulevel/2);
 			hittxt = TRUE;
 		    } else if ( (( (dieroll <= 2 || (Role_if(PM_BARBARIAN) && dieroll <= 4)) && 
 						  obj == uwep &&
@@ -1256,16 +1376,6 @@ defaultvalue:
 		pline_The("drug doesn't seem to affect %s.", mon_nam(mon));
 	if (needsamnesiamsg)
 		pline_The("lethe-rust doesn't seem to affect %s.", mon_nam(mon));
-	if (poiskilled) {
-		pline_The("poison was deadly...");
-		if (!already_killed) xkilled(mon, 0);
-		return FALSE;
-	}
-	if (filthkilled) {
-		pline_The("tainted filth was deadly...");
-		if (!already_killed) xkilled(mon, 0);
-		return FALSE;
-	}
 	if (druggedmon){
 		pline("%s falls asleep.", Monnam(mon));
 		slept_monst(mon);
@@ -1286,7 +1396,21 @@ defaultvalue:
 		mon->mtame = FALSE;
 		mon->mpeaceful = TRUE;
 	}
-	else if (destroyed) {
+	if (poiskilled) {
+		pline_The("poison was deadly...");
+		if (!already_killed) xkilled(mon, 0);
+		return FALSE;
+	} else if (filthkilled) {
+		pline_The("tainted filth was deadly...");
+		if (!already_killed) xkilled(mon, 0);
+		return FALSE;
+	} else if (vapekilled) {
+		if (cansee(mon->mx, mon->my))
+			pline("%s%ss body vaporizes!", Monnam(mon),
+				canseemon(mon) ? "'" : "");                
+		if (!already_killed) xkilled(mon, 2);
+		return FALSE;
+	} else if (destroyed) {
 		if (!already_killed)
 		    killed(mon);	/* takes care of most messages */
 	} else if(u.umconf && !thrown) {
@@ -1712,9 +1836,26 @@ register struct attack *mattk;
 		}
 		tmp = 0;
 		break;
+	    case AD_VAMP:
 	    case AD_DRLI:
 		if (!negated && !rn2(3) && !resists_drli(mdef)) {
 			int xtmp = d(2,6);
+			if (mdef->mhp < xtmp) xtmp = mdef->mhp;
+			/* Player vampires are smart enough not to feed while
+			   biting if they might have trouble getting it down */
+			if (!Race_if(PM_INCANTIFIER) && maybe_polyd(is_vampire(youmonst.data),
+			    Race_if(PM_VAMPIRE)) && u.uhunger <= 1420 &&
+			    mattk->aatyp == AT_BITE && has_blood(pd)) {
+				/* For the life of a creature is in the blood
+				   (Lev 17:11) */
+				if (flags.verbose)
+				    You("feed on the lifeblood.");
+				/* [ALI] Biting monsters does not count against
+				   eating conducts. The draining of life is
+				   considered to be primarily a non-physical
+				   effect */
+				lesshungry(xtmp * 6);
+			}
 			pline("%s suddenly seems weaker!", Monnam(mdef));
 			mdef->mhpmax -= xtmp;
 			if ((mdef->mhp -= xtmp) <= 0 || !mdef->m_lev) {
@@ -1901,6 +2042,7 @@ register struct attack *mattk;
 		break;
 	}
 
+   if (mdef->data == &mons[PM_GIANT_TURTLE] && mdef->mflee) tmp = tmp/2;
 	mdef->mstrategy &= ~STRAT_WAITFORU; /* in case player is very fast */
 	if((mdef->mhp -= tmp) < 1) {
 	    if (mdef->mtame && !cansee(mdef->mx,mdef->my)) {
@@ -2013,7 +2155,7 @@ register struct attack *mattk;
 
 	if(mdef->data->msize >= MZ_HUGE) return 0;
 
-	if(u.uhunger < 1500 && !u.uswallow) {
+	if(YouHunger < (Race_if(PM_INCANTIFIER) ? u.uenmax*3/4 : 1500) && !u.uswallow) {
 	    for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
 		(void) snuff_lit(otmp);
 
@@ -2064,7 +2206,8 @@ register struct attack *mattk;
 				!(mvitals[monsndx(mdef->data)].mvflags &
 				  G_NOCORPSE)) {
 				/* nutrition only if there can be a corpse */
-				u.uhunger += (mdef->data->cnutrit+1) / 2;
+				if(Race_if(PM_INCANTIFIER)) u.uen += mdef->m_lev;
+				else u.uhunger += (mdef->data->cnutrit+1) / 2;
 			    } else tmp = 0;
 			    Sprintf(msgbuf, "You totally digest %s.",
 					    mon_nam(mdef));
@@ -2200,9 +2343,9 @@ register int tmp;
 	int	i, sum[NATTK], hittmp = 0;
 	int	nsum = 0;
 	int	dhit = 0;
+	boolean Old_Upolyd = Upolyd;
 
 	for(i = 0; i < NATTK; i++) {
-
 	    sum[i] = 0;
 	    mattk = getmattk(youmonst.data, i, sum, &alt_attk);
 	    switch(mattk->aatyp) {
@@ -2252,11 +2395,26 @@ use_weapon:
 		case AT_KICK:
 		case AT_BITE:
 		case AT_LNCK: /*Note: long reach attacks are being treated as melee only for polymorph purposes*/
+			/* [ALI] Vampires are also smart. They avoid biting
+			   monsters if doing so would be fatal */
+			if ((uwep || (u.twoweap && uswapwep)) &&
+				is_vampire(youmonst.data) &&
+				(is_rider(mon->data) ||
+				 mon->data == &mons[PM_GREEN_SLIME])){
+					pline("breaking bite");
+			    	break;
+				}
 		case AT_STNG:
 		case AT_TUCH:
 		case AT_BUTT:
 		case AT_TENT:
 			if (i==0 && uwep && (youmonst.data->mlet==S_LICH)) goto use_weapon;
+			if ((uwep || u.twoweap && uswapwep) &&
+				(touch_petrifies(mon->data) ||
+				 mon->data == &mons[PM_MEDUSA])){
+					pline("breaking contact");
+			    	break;
+				}
 			if ((dhit = (tmp > rnd(20) || u.uswallow)) != 0) {
 			    int compat;
 
@@ -2392,8 +2550,8 @@ use_weapon:
 		(void) passive(mon, sum[i], 1, mattk->aatyp);
 		nsum |= sum[i];
 	    }
-	    if (!Upolyd)
-		break; /* No extra attacks if no longer a monster */
+	    if (Upolyd != Old_Upolyd)
+		break; /* No extra attacks if form changed */
 	    if (multi < 0)
 		break; /* If paralyzed while attacking, i.e. floating eye */
 	}
@@ -2412,6 +2570,10 @@ uchar aatyp;
 	register struct permonst *ptr = mon->data;
 	register int i, tmp;
 	struct obj *optr;
+	if (mhit && aatyp == AT_BITE && is_vampire(youmonst.data)) {
+	    if (bite_monster(mon))
+		return 2;			/* lifesaved */
+	}
 	for(i = 0; ; i++) {
 	    if(i >= NATTK) return(malive | mhit);	/* no passive attacks */
 	    if(ptr->mattk[i].aatyp == AT_NONE) break;	/* try this one */
@@ -2506,6 +2668,19 @@ uchar aatyp;
 		mdamageu(mon, tmp);
 	    }
 	    break;
+	  case AD_WEBS:{
+		struct trap *ttmp2 = maketrap(u.ux, u.uy, WEB);
+		if (ttmp2) {
+			pline_The("webbing sticks to you. You're caught!");
+			dotrap(ttmp2, NOWEBMSG);
+#ifdef STEED
+			if (u.usteed && u.utrap) {
+			/* you, not steed, are trapped */
+			dismount_steed(DISMOUNT_FELL);
+			}
+#endif
+		}
+	 } break;
 	  case AD_ENCH:	/* KMH -- remove enchantment (disenchanter) */
 	    if (mhit) {
 		struct obj *obj = (struct obj *)0;

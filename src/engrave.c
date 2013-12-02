@@ -380,8 +380,37 @@ const char * haluWard[] =  {
 	"a north-west facing glider",
 	"a south-west facing glider",
 	"a south-east facing glider",
-	"a square"
+	"a square",
 	
+	/*Special behavior, these identify drow houses*/
+	"a House Baenre crest",
+	"a House Barrison Del'Armgo crest",
+	"a House Xorlarrin crest",
+	"a House Faen Tlabbar crest",
+	"a House Mizzrym crest",
+	"a House Fey-Branche crest",
+	"a House Melarn crest",
+	"a House Duskryn crest",
+	
+	/*Special behavior, these identify fallen drow houses*/
+	"a House Bront'tej crest",
+	"a House Celofraie crest",
+	"a House DeVir crest",
+	"a House Do'Urden crest",
+	"a House Elec'thil crest",
+	"a House H'Kar crest",
+	"a House Hun'ett crest",
+	"a House Masq'il'yr crest",
+	"a House Mlin'thobbyn crest",
+	"a House Oblodra crest",
+	"a House S'sril crest",
+	"a House Syr'thaerl crest",
+	"a House Teken'duis crest",
+	"a House Thaeyalla crest",
+	"a House X'larraz'et'soj crest",
+	
+	/* Special behavior, lolth holly symbol */
+	"a silver spider-like star",
 	
 	/* books */
 	"a set of holy horns",	"a Summoning Dark mine-sign",	"a Long Dark mine-sign",
@@ -886,6 +915,83 @@ register int x, y;
 	    what = "rock above";
 
 	return what;
+}
+
+
+/*Preliminary glider implementation
+ *Gliders can move engravings in their square along with them.
+ */
+void
+move_gliders()
+{
+	struct engr *ep = head_engr;
+
+	while(ep) {
+		if(ep->halu_ward){
+			switch(ep->ward_id){
+				case NORTHEAST_GLIDER:
+					if((monstermoves - ep->engr_time)%4 == 3){ //Gliders move at c/4 
+						if(IS_ROOM(levl[ep->engr_x+1][ep->engr_y-1].typ)
+							&& !engr_at(ep->engr_x+1,ep->engr_y-1)
+						){
+							/* The glider moves, towing any engravings in the square
+							 * along for the ride. Allows for strategic use of glider-rings
+							 */
+							ep->engr_x++;
+							ep->engr_y--;
+						}
+						else ep->ward_id = DEAD_GLIDER; //Glider turns into a square.
+					}
+				break;
+				case NORTHWEST_GLIDER:
+					if((monstermoves - ep->engr_time)%4 == 3){ //Gliders move at c/4 
+						if(IS_ROOM(levl[ep->engr_x-1][ep->engr_y-1].typ)
+							&& !engr_at(ep->engr_x-1,ep->engr_y-1)
+						){
+							/* The glider moves, towing any engravings in the square
+							 * along for the ride. Allows for strategic use of glider-rings
+							 */
+							ep->engr_x--;
+							ep->engr_y--;
+						}
+						else ep->ward_id = DEAD_GLIDER; //Glider turns into a square.
+					}
+				break;
+				case SOUTHWEST_GLIDER:
+					if((monstermoves - ep->engr_time)%4 == 3){ //Gliders move at c/4 
+						if(IS_ROOM(levl[ep->engr_x-1][ep->engr_y+1].typ)
+							&& !engr_at(ep->engr_x-1,ep->engr_y+1)
+						){
+							/* The glider moves, towing any engravings in the square
+							 * along for the ride. Allows for strategic use of glider-rings
+							 */
+							ep->engr_x--;
+							ep->engr_y++;
+						}
+						else ep->ward_id = DEAD_GLIDER; //Glider turns into a square.
+					}
+				break;
+				case SOUTHEAST_GLIDER:
+				break;
+					if((monstermoves - ep->engr_time)%4 == 3){ //Gliders move at c/4 
+						if(IS_ROOM(levl[ep->engr_x+1][ep->engr_y+1].typ)
+							&& !engr_at(ep->engr_x+1,ep->engr_y+1)
+						){
+							/* The glider moves, towing any engravings in the square
+							 * along for the ride. Allows for strategic use of glider-rings
+							 */
+							ep->engr_x++;
+							ep->engr_y++;
+						}
+						else ep->ward_id = DEAD_GLIDER; //Glider turns into a square.
+					}
+				default:
+				//Nothing special
+				break;
+			}
+		}
+		ep = ep->nxt_engr;
+	}
 }
 
 struct engr *
@@ -3254,6 +3360,7 @@ doseal()
 	maxelen = BUFSZ - 1;
 	if (is_demon(youmonst.data) || youmonst.data->mlet == S_VAMPIRE)
 	    type = ENGR_BLOOD;
+
 	/* Can the adventurer engrave at all? */
 	if(Role_if(PM_EXILE)) binderup(); //reaply all known seals, in case of memory loss.
 	if(!u.sealsKnown){

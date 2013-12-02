@@ -947,8 +947,8 @@ long timeout;
 				lantern_message(obj);
 			    else {
 				switch (obj->where) {
-				    case OBJ_INVENT:
 				    case OBJ_MINVENT:
+				    case OBJ_INVENT:
 					pline("%s %s seems about to go out.",
 					    whose, xname(obj));
 					break;
@@ -1033,8 +1033,8 @@ long timeout;
 		    case 15:
 			if (canseeit)
 			    switch (obj->where) {
-				case OBJ_INVENT:
 				case OBJ_MINVENT:
+				case OBJ_INVENT:
 				    pline(
 					"%s %scandle%s flame%s flicker%s low!",
 					    whose,
@@ -1560,7 +1560,8 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
     TTAB(revive_mon,	(timeout_proc)0,	"revive_mon"),
     TTAB(burn_object,	cleanup_burn,		"burn_object"),
     TTAB(hatch_egg,	(timeout_proc)0,	"hatch_egg"),
-    TTAB(fig_transform,	(timeout_proc)0,	"fig_transform")
+    TTAB(fig_transform,	(timeout_proc)0,	"fig_transform"),
+    TTAB(light_damage,	(timeout_proc)0,	"light_damage")
 };
 #undef TTAB
 

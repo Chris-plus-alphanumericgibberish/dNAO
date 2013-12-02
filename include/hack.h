@@ -22,6 +22,9 @@
 #define MAX_CARR_CAP	1000	/* so that boulders can be heavier */
 #define DUMMY { 0 }
 
+/* number of times a spellbook can be read before blanking */
+#define MAX_SPELL_STUDY 3
+
 /* symbolic names for capacity levels */
 #define UNENCUMBERED	0
 #define SLT_ENCUMBER	1	/* Burdened */
@@ -29,6 +32,15 @@
 #define HVY_ENCUMBER	3	/* Strained */
 #define EXT_ENCUMBER	4	/* Overtaxed */
 #define OVERLOADED	5	/* Overloaded */
+
+/* hunger texts used on bottom line (each 8 chars long) */
+#define SATIATED	0
+#define NOT_HUNGRY	1
+#define HUNGRY		2
+#define WEAK		3
+#define FAINTING	4
+#define FAINTED		5
+#define STARVED		6
 
 /* Macros for how a rumor was delivered in outrumor() */
 #define BY_ORACLE	0
@@ -78,12 +90,14 @@
 #define CRUSHING	 8
 #define STONING		 9
 #define TURNED_SLIME	10
-#define GENOCIDED	11
-#define PANICKED	12
-#define TRICKED		13
-#define QUIT		14
-#define ESCAPED		15
-#define ASCENDED	16
+#define DISINTEGRATED 11
+#define OVERWOUND 	12
+#define GENOCIDED	13
+#define PANICKED	14
+#define TRICKED		15
+#define QUIT		16
+#define ESCAPED		17
+#define ASCENDED	18
 
 #include "align.h"
 #include "dungeon.h"
@@ -309,7 +323,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define a_align(x,y)	((aligntyp)Amask2align(levl[x][y].altarmask & AM_MASK))
 
 /* negative armor class is randomly weakened to prevent invulnerability */
-#define AC_VALUE(AC)	((AC) >= 0 ? (AC) : -rnd(-(AC)))
+#define AC_VALUE(AC)	((AC) >= 0 ? (AC) : u.sealsActive&SEAL_BALAM ? min(-rnd(-(AC)),-rnd(-(AC))) : -rnd(-(AC)) )
 
 #if defined(MICRO) && !defined(__DJGPP__)
 #define getuid() 1

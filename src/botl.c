@@ -6,6 +6,7 @@
 
 #ifdef OVL0
 extern const char *hu_stat[];	/* defined in eat.c */
+extern const char *ca_hu_stat[];	/* defined in eat.c */
 
 const char * const enc_stat[] = {
 	"",

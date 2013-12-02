@@ -94,7 +94,6 @@ extern void FDECL(interject, (int));
 # endif
 #endif
 
-
 #define NO_SIGNAL
 #define index	strchr
 #define rindex	strrchr

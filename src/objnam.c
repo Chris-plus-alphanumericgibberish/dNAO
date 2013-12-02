@@ -305,6 +305,7 @@ boolean ignore_oquan;
 	if (!nn && ocl->oc_uses_known && ocl->oc_unique) obj->known = 0;
 	if (!Blind) obj->dknown = TRUE;
 	if (Role_if(PM_PRIEST)) obj->bknown = TRUE;
+	if (u.sealsActive&SEAL_ANDROMALIUS) obj->sknown = TRUE;
 	if (obj_is_pname(obj))
 	    goto nameit;
 	switch (obj->oclass) {
@@ -327,8 +328,8 @@ boolean ignore_oquan;
 			if(obj->opoisoned & OPOISON_BASIC) Strcpy(buf, "poisoned ");
 			if(obj->opoisoned & OPOISON_FILTH) Strcpy(buf, "filth-crusted ");
 			if(obj->opoisoned & OPOISON_SLEEP) Strcpy(buf, "drug-coated ");
-//			if(obj->opoisoned & OPOISON_BLIND) Strcpy(buf, "poisoned ");
-//			if(obj->opoisoned & OPOISON_PARAL) Strcpy(buf, "poisoned ");
+			if(obj->opoisoned & OPOISON_BLIND) Strcpy(buf, "stained ");
+			if(obj->opoisoned & OPOISON_PARAL) Strcpy(buf, "envenomed ");
 			if(obj->opoisoned & OPOISON_AMNES) Strcpy(buf, "lethe-rusted ");
 		}
 		if(objects[(obj)->otyp].oc_material == WOOD && obj->ovar1) Strcpy(buf, "carved ");
@@ -439,7 +440,11 @@ boolean ignore_oquan;
 	    case POTION_CLASS:
 		if (obj->dknown && obj->odiluted)
 			Strcpy(buf, "diluted ");
-		if(nn || un || !obj->dknown) {
+		if( typ == POT_BLOOD && obj->known) {
+			Strcat(buf, "potion");
+			Sprintf(eos(buf), " of %s blood", mons[obj->corpsenm].mname);
+		}
+		else if(nn || un || !obj->dknown) {
 			Strcat(buf, "potion");
 			if(!obj->dknown) break;
 			if(nn) {
@@ -595,7 +600,8 @@ char *prefix;
 			case 2:	Strcat(prefix, "very "); break;
 			case 3:	Strcat(prefix, "thoroughly "); break;
 		}			
-		Strcat(prefix, is_rustprone(obj) ? "rusty " : "burnt ");
+		Strcat(prefix, is_rustprone(obj) ? "rusty " : 
+					   is_evaporable(obj) ? "nebulous " : "burnt ");
 	}
 	if (obj->oeroded2 && !iscrys) {
 		switch (obj->oeroded2) {
@@ -605,9 +611,16 @@ char *prefix;
 		Strcat(prefix, is_corrodeable(obj) ? "corroded " :
 			"rotted ");
 	}
+	if (obj->ovar1 && obj->otyp == DROVEN_CLOAK) {
+		switch (obj->ovar1) {
+			case 2:	Strcat(prefix, "very "); break;
+			case 3:	Strcat(prefix, "thoroughly "); break;
+		}			
+		Strcat(prefix, "tattered ");
+	}
 	if (obj->rknown && obj->oerodeproof)
 		Strcat(prefix,
-		       iscrys ? "fixed " :
+		       (iscrys || is_evaporable(obj)) ? "fixed " :
 		       is_rustprone(obj) ? "rustproof " :
 		       is_corrodeable(obj) ? "corrodeproof " :	/* "stainless"? */
 		       is_flammable(obj) ? "fireproof " : "");
@@ -636,14 +649,14 @@ boolean with_price;
 		bp += 13;
 		ispoisoned = OPOISON_AMNES;
 	}
-	// if (!strncmp(bp, "poisoned ", 9) && obj->opoisoned & OPOISON_PARAL) {
-		// bp += 9;
-		// ispoisoned = OPOISON_PARAL;
-	// }
-	// if (!strncmp(bp, "poisoned ", 9) && obj->opoisoned & OPOISON_BLIND) {
-		// bp += 9;
-		// ispoisoned = OPOISON_BLIND;
-	// }
+	if (!strncmp(bp, "envenomed ", 10) && obj->opoisoned & OPOISON_PARAL) {
+		bp += 9;
+		ispoisoned = OPOISON_PARAL;
+	}
+	if (!strncmp(bp, "stained ", 8) && obj->opoisoned & OPOISON_BLIND) {
+		bp += 9;
+		ispoisoned = OPOISON_BLIND;
+	}
 	if (!strncmp(bp, "drug-coated ", 12) && obj->opoisoned & OPOISON_BASIC) {
 		bp += 12;
 		ispoisoned = OPOISON_SLEEP;
@@ -714,6 +727,10 @@ boolean with_price;
 	case WEAPON_CLASS:
 		if(ispoisoned & OPOISON_BASIC)
 			Strcat(prefix, "poisoned ");
+		if(ispoisoned & OPOISON_PARAL)
+			Strcat(prefix, "envenomed ");
+		if(ispoisoned & OPOISON_BLIND)
+			Strcat(prefix, "stained ");
 		if(ispoisoned & OPOISON_FILTH)
 			Strcat(prefix, "filth-crusted ");
 		if(ispoisoned & OPOISON_SLEEP)
@@ -722,7 +739,7 @@ boolean with_price;
 			Strcat(prefix, "lethe-rusted ");
 plus:
 		add_erosion_words(obj, prefix);
-		if(obj->known) {
+		if(obj->known || Race_if(PM_INCANTIFIER)) {
 			Strcat(prefix, sitoa(obj->spe));
 			Strcat(prefix, " ");
 		}
@@ -790,28 +807,40 @@ charges:
 	case RING_CLASS:
 		add_erosion_words(obj, prefix);
 ring:
-		if(obj->ovar1 && isEngrRing(obj->otyp)) Strcat(prefix, "engraved ");
+		if(obj->ovar1 && (isEngrRing(obj->otyp))) Strcat(prefix, "engraved ");
 		if(obj->owornmask & W_RINGR) Strcat(bp, " (on right ");
 		if(obj->owornmask & W_RINGL) Strcat(bp, " (on left ");
 		if(obj->owornmask & W_RING) {
 		    Strcat(bp, body_part(HAND));
 		    Strcat(bp, ")");
 		}
-		if(obj->known && objects[obj->otyp].oc_charged) {
+		if((obj->known || Race_if(PM_INCANTIFIER)) && objects[obj->otyp].oc_charged) {
 			Strcat(prefix, sitoa(obj->spe));
 			Strcat(prefix, " ");
 		}
 		break;
 	case FOOD_CLASS:
-		if (obj->oeaten)
-		    Strcat(prefix, "partly eaten ");
+		if (obj->otyp == CORPSE && obj->odrained) {
+#ifdef WIZARD
+		    if (wizard && obj->oeaten < drainlevel(obj))
+			Strcpy(tmpbuf, "over-drained ");
+		    else
+#endif
+		    Sprintf(tmpbuf, "%sdrained ",
+		      (obj->oeaten > drainlevel(obj)) ? "partly " : "");
+		}
+		else if (obj->oeaten)
+		    Strcpy(tmpbuf, "partly eaten ");
+		else
+		    tmpbuf[0] = '\0';
+		Strcat(prefix, tmpbuf);
 		if (obj->otyp == CORPSE) {
 		    if (mons[obj->corpsenm].geno & G_UNIQ) {
 			Sprintf(prefix, "%s%s ",
 				(type_is_pname(&mons[obj->corpsenm]) ?
 					"" : "the "),
 				s_suffix(mons[obj->corpsenm].mname));
-			if (obj->oeaten) Strcat(prefix, "partly eaten ");
+			Strcat(prefix, tmpbuf);
 		    } else {
 			Strcat(prefix, mons[obj->corpsenm].mname);
 			Strcat(prefix, " ");
@@ -1888,12 +1917,12 @@ boolean from_user;
 	register int i;
 	register struct obj *otmp;
 	int cnt, spe, spesgn, typ, very, rechrg;
-	int blessed, uncursed, iscursed, ispoisoned, isgreased, stolen;
-	int eroded, eroded2, erodeproof;
+	int blessed, uncursed, iscursed, ispoisoned, isgreased, isdrained, stolen;
+	int eroded, eroded2, eroded3, erodeproof;
 #ifdef INVISIBLE_OBJECTS
 	int isinvisible;
 #endif
-	int halfeaten, mntmp, contents;
+	int halfeaten, halfdrained, mntmp, contents;
 	int islit, unlabeled, ishistoric, isdiluted;
 	struct fruit *f;
 	int ftype = current_fruit;
@@ -1935,10 +1964,11 @@ boolean from_user;
 
 	cnt = spe = spesgn = typ = very = rechrg =
 		blessed = uncursed = iscursed = stolen = 
+		isdrained = halfdrained =
 #ifdef INVISIBLE_OBJECTS
 		isinvisible =
 #endif
-		ispoisoned = isgreased = eroded = eroded2 = erodeproof =
+		ispoisoned = isgreased = eroded = eroded2 = eroded3 = erodeproof =
 		halfeaten = islit = unlabeled = ishistoric = isdiluted = 0;
 	mntmp = NON_PM;
 #define UNDEFINED 0
@@ -1984,23 +2014,35 @@ boolean from_user;
 			heptagram = TRUE;
 		} else if(!strncmpi(bp, "gorgoneion ", l=10)){
 			gorgoneion = TRUE;
-		} else if(!strncmpi(bp, "circle of acheron ", l=18)){
+		} else if(!strncmpi(bp, "circle of acheron ", l=18) ||
+					!strncmpi(bp, "circle ", l=7) ||
+					!strncmpi(bp, "acheron ", l=8)){
 			acheron = TRUE;
 		} else if(!strncmpi(bp, "pentagram ", l=10)){
 			pentagram = TRUE;
 		} else if(!strncmpi(bp, "hexagram ", l=9)){
 			hexagram = TRUE;
-		} else if(!strncmpi(bp, "hamsa ", l=6)){
+		} else if(!strncmpi(bp, "hamsa mark ", l=11) ||
+					!strncmpi(bp, "hamsa ", l=6)){
 			hamsa = TRUE;
 		} else if(!strncmpi(bp, "elder sign ", l=11)){
 			sign = TRUE;
-		} else if(!strncmpi(bp, "elder elemental eye ", l=20)){
+		} else if(!strncmpi(bp, "elder elemental eye ", l=20) ||
+					!strncmpi(bp, "elder eye ", l=10) ||
+					!strncmpi(bp, "elemental eye ", l=14)){
 			eye = TRUE;
-		} else if(!strncmpi(bp, "sign of the scion queen mother ", l=31)){
+		} else if(!strncmpi(bp, "sign of the scion queen mother ", l=31) ||
+					!strncmpi(bp, "scion queen mother ", l=19) ||
+					!strncmpi(bp, "queen mother ", l=13) ||
+					!strncmpi(bp, "mother ", l=7)){
 			queen = TRUE;
-		} else if(!strncmpi(bp, "cartouche of the cat lord ", l=26)){
+		} else if(!strncmpi(bp, "cartouche of the cat lord ", l=26) ||
+					!strncmpi(bp, "cat lord ", l=9) ||
+					!strncmpi(bp, "cartouche ", l=10)){
 			cartouche = TRUE;
-		} else if(!strncmpi(bp, "wings of garuda ", l=16)){
+		} else if(!strncmpi(bp, "wings of garuda ", l=16) ||
+					!strncmpi(bp, "garuda ", l=7) ||
+					!strncmpi(bp, "wings ", l=6)){
 			garuda = TRUE;
 		} else if(!strncmpi(bp, "toustefna ", l=10)){
 			toustefna = TRUE;
@@ -2067,6 +2109,15 @@ boolean from_user;
 			   !strncmpi(bp, "rotted ", l=7)) {
 			eroded2 = 1 + very;
 			very = 0;
+		} else if (!strncmpi(bp, "tattered ", l=9)) {
+			eroded3 = 1 + very;
+			very = 0;
+		} else if (!strncmpi(bp, "partly drained ", l=15)) {
+			isdrained = 1;
+			halfdrained = 1;
+		} else if (!strncmpi(bp, "drained ", l=8)) {
+			isdrained = 1;
+			halfdrained = 0;
 		} else if (!strncmpi(bp, "partly eaten ", l=13)) {
 			halfeaten = 1;
 		} else if (!strncmpi(bp, "historic ", l=9)) {
@@ -2932,6 +2983,8 @@ typfnd:
 		    otmp->oeroded = eroded;
 	    if (eroded2 && (is_corrodeable(otmp) || is_rottable(otmp)))
 		    otmp->oeroded2 = eroded2;
+	    if (eroded3 && otmp->otyp == DROVEN_CLOAK)
+		    otmp->ovar1 = eroded3;
 
 	    /* set erodeproof */
 	    if (erodeproof && !eroded && !eroded2)
@@ -3013,6 +3066,18 @@ typfnd:
 		else otmp->oeaten = objects[otmp->otyp].oc_nutrition;
 		/* (do this adjustment before setting up object's weight) */
 		consume_oeaten(otmp, 1);
+	}
+	if (isdrained && otmp->otyp == CORPSE) {
+		int amt;
+		otmp->odrained = 1;
+		amt = mons[otmp->corpsenm].cnutrit - drainlevel(otmp);
+		if (halfdrained) {
+		    amt /= 2;
+		    if (amt == 0)
+			amt++;
+		}
+		/* (do this adjustment before setting up object's weight) */
+		consume_oeaten(otmp, -amt);
 	}
 	otmp->owt = weight(otmp);
 	if (very && otmp->otyp == HEAVY_IRON_BALL) otmp->owt += 160;

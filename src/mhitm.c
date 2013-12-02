@@ -223,6 +223,7 @@ mattackm(magr, mdef)
     /* Calculate the armour class differential. */
     tmp = find_mac(mdef) + magr->m_lev;
     if (mdef->mconf || !mdef->mcanmove || mdef->msleeping) {
+		if(mdef->data != &mons[PM_GIANT_TURTLE] || !mdef->mflee)
 	tmp += 4;
 	mdef->msleeping = 0;
     }
@@ -424,6 +425,7 @@ meleeattack:
 
 #ifdef TAME_RANGED_ATTACKS
             case AT_MAGC:
+            case AT_MMGC:
 		if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > 2) break;
 
 	        res[i] = castmm(magr, mdef, mattk);
@@ -1254,8 +1256,14 @@ mdamagem(magr, mdef, mattk)
 			pline("%s suddenly disappears!", buf);
 		}
 		break;
+	    case AD_VAMP:
 	    case AD_DRLI:
-		if (!cancelled && !rn2(3) && !resists_drli(mdef)) {
+		if (!cancelled && magr->mtame && !magr->isminion &&
+			is_vampire(pa) && mattk->aatyp == AT_BITE &&
+			has_blood(pd))
+		    EDOG(magr)->hungrytime += ((int)((mdef->data)->cnutrit / 20) + 1);
+		
+		if (!cancelled && rn2(2) && !resists_drli(mdef)) {
 			tmp = d(2,6);
 			if (vis)
 			    pline("%s suddenly seems weaker!", Monnam(mdef));
@@ -1476,6 +1484,7 @@ mdamagem(magr, mdef, mattk)
 	    default:	tmp = 0;
 			break;
 	}
+   if(mdef->data == &mons[PM_GIANT_TURTLE] && mdef->mflee) tmp=tmp/2; 
 	if(!tmp) return(MM_MISS);
 
 	if((mdef->mhp -= tmp) < 1) {
@@ -1669,6 +1678,10 @@ int mdead;
 		goto assess_dmg;
 	    }
 	    break;
+	    case AD_WEBS:{	/* KMH -- remove enchantment (disenchanter) */
+			struct trap *ttmp2 = maketrap(magr->mx, magr->my, WEB);
+			if (ttmp2) mintrap(magr);
+		}break;
 	    case AD_ENCH:	/* KMH -- remove enchantment (disenchanter) */
 		if (mhit && !mdef->mcan && otmp) {
 		    (void) drain_item(otmp);
@@ -1797,6 +1810,7 @@ int aatyp;
     case AT_GAZE:
     case AT_BREA:
     case AT_MAGC:
+    case AT_MMGC:
 	w_mask = ~0L;		/* special case; no defense needed */
 	break;
     case AT_CLAW:

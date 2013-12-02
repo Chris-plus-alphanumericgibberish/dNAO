@@ -573,13 +573,13 @@ self_invis_message()
 	}
 }
 
-char *
+const char *
 replace(st, orig, repl)
 const char *st, *orig, *repl;
 {
 	static char retval[BUFSZ];
 	char buffer[BUFSZ];
-	char *ch, *pos;
+	const char *ch, *pos;
 	int len;
 	memset(buffer, 0, BUFSZ);
 	pos = st;

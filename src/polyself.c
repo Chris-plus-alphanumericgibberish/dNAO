@@ -19,12 +19,58 @@ STATIC_DCL void FDECL(drop_weapon,(int));
 STATIC_DCL void NDECL(uunstick);
 STATIC_DCL int FDECL(armor_to_dragon,(int));
 STATIC_DCL void NDECL(newman);
+STATIC_DCL short NDECL(doclockmenu);
+
+/* Assumes u.umonster is set up already */
+/* Use u.umonster since we might be restoring and you may be polymorphed */
+void
+init_uasmon()
+{
+	int i;
+
+	upermonst = mons[u.umonster];
+
+	/* Fix up the flags */
+	/* Default flags assume human,  so replace with your race's flags */
+
+	upermonst.mflags1 &= ~(mons[PM_HUMAN].mflags1);
+	upermonst.mflags1 |= (mons[urace.malenum].mflags1);
+
+	upermonst.mflags2 &= ~(mons[PM_HUMAN].mflags2);
+	upermonst.mflags2 |= (mons[urace.malenum].mflags2);
+
+	upermonst.mflags3 &= ~(mons[PM_HUMAN].mflags3);
+	upermonst.mflags3 |= (mons[urace.malenum].mflags3);
+	
+	/* Fix up the attacks */
+	/* crude workaround, needs better general solution */
+	if (Race_if(PM_VAMPIRE)) {
+	  for(i = 0; i < NATTK; i++) {
+	    upermonst.mattk[i] = mons[urace.malenum].mattk[i];
+	  }
+	}
+	
+	set_uasmon();
+}
 
 /* update the youmonst.data structure pointer */
 void
 set_uasmon()
 {
-	set_mon_data(&youmonst, &mons[u.umonnum], 0);
+	set_mon_data(&youmonst, ((u.umonnum == u.umonster) ? 
+					&upermonst : &mons[u.umonnum]), 0);
+}
+
+/** Returns true if the player monster is genocided. */
+boolean
+is_playermon_genocided()
+{
+	return ((mvitals[urole.malenum].mvflags & G_GENOD) ||
+			(urole.femalenum != NON_PM &&
+			(mvitals[urole.femalenum].mvflags & G_GENOD)) ||
+			(mvitals[urace.malenum].mvflags & G_GENOD) ||
+			(urace.femalenum != NON_PM &&
+			(mvitals[urace.femalenum].mvflags & G_GENOD)));
 }
 
 /* make a (new) human out of the player */
@@ -61,12 +107,7 @@ const char *fmt, *arg;
 
 	You(fmt, arg);
 	/* check whether player foolishly genocided self while poly'd */
-	if ((mvitals[urole.malenum].mvflags & G_GENOD) ||
-			(urole.femalenum != NON_PM &&
-			(mvitals[urole.femalenum].mvflags & G_GENOD)) ||
-			(mvitals[urace.malenum].mvflags & G_GENOD) ||
-			(urace.femalenum != NON_PM &&
-			(mvitals[urace.femalenum].mvflags & G_GENOD))) {
+	if (is_playermon_genocided()) {
 	    /* intervening activity might have clobbered genocide info */
 	    killer = delayed_killer;
 	    if (!killer || !strstri(killer, "genocid")) {
@@ -185,8 +226,11 @@ newman()
 	u.uen = (tmp ? u.uen * (long)u.uenmax / tmp : u.uenmax);
 #endif
 
+	check_uhpmax();
+
 	redist_attr();
-	u.uhunger = rn1(500,500);
+	if(Race_if(PM_INCANTIFIER)) u.uen = min(u.uenmax, rn1(500,500));
+	else u.uhunger = rn1(500,500);
 	if (Sick) make_sick(0L, (char *) 0, FALSE, SICK_ALL);
 	Stoned = 0;
 	delayed_killer = 0;
@@ -230,12 +274,12 @@ boolean forcecontrol;
 				uarm->otyp <= YELLOW_DRAGON_SCALES);
 	boolean leonine = (uarmc && uarmc->otyp == LEO_NEMAEUS_HIDE);
 	boolean iswere = (u.ulycn >= LOW_PM || is_were(youmonst.data));
-	boolean isvamp = (youmonst.data->mlet == S_VAMPIRE || u.umonnum == PM_VAMPIRE_BAT);
+	boolean isvamp = (is_vampire(youmonst.data));
 	boolean was_floating = (Levitation || Flying);
 
         if(!Polymorph_control && !forcecontrol && !draconian && !iswere && !isvamp) {
 	    if (rn2(20) > ACURR(A_CON)) {
-		You(shudder_for_moment);
+		You("%s", shudder_for_moment);
 		losehp(rnd(30), "system shock", KILLED_BY_AN);
 		exercise(A_CON, FALSE);
 		return;
@@ -257,7 +301,7 @@ boolean forcecontrol;
 				You("cannot polymorph into that.");
 			else break;
 		} while(++tries < 5);
-		if (tries==5) pline(thats_enough_tries);
+		if (tries==5) pline("%s", thats_enough_tries);
 		/* allow skin merging, even when polymorph is controlled */
 		if (draconian &&
 		    (mntmp == armor_to_dragon(uarm->otyp) || tries == 5))
@@ -290,16 +334,16 @@ boolean forcecontrol;
 				/* save/restore hack */
 				uskin->owornmask |= I_SPECIAL;
 			}
-		}else if (iswere) {
+		} else if (iswere) {
 			if (is_were(youmonst.data))
 				mntmp = PM_HUMAN; /* Illegal; force newman() */
 			else
 				mntmp = u.ulycn;
-		} else {
-			if (youmonst.data->mlet == S_VAMPIRE)
+		} else if (isvamp) {
+			if (u.umonnum != PM_VAMPIRE_BAT)
 				mntmp = PM_VAMPIRE_BAT;
 			else
-				mntmp = PM_VAMPIRE;
+				mntmp = PM_HUMAN; /* newman() */
 		}
 		/* if polymon fails, "you feel" message has been given
 		   so don't follow up with another polymon or newman */
@@ -350,6 +394,7 @@ int	mntmp;
 		was_blind = !!Blind, dochange = FALSE;
 	boolean could_pass_walls = Passes_walls;
 	int mlvl;
+	const char *s;
 
 	if (mvitals[mntmp].mvflags & G_GENOD) {	/* allow G_EXTINCT */
 		You_feel("rather %s-ish.",mons[mntmp].mname);
@@ -408,6 +453,12 @@ int	mntmp;
 		Stoned = 0;
 		delayed_killer = 0;
 	}
+	if (uarmc && (s = OBJ_DESCR(objects[uarmc->otyp])) != (char *)0 &&
+	   !strcmp(s, "opera cloak") &&
+	   maybe_polyd(is_vampire(youmonst.data), Race_if(PM_VAMPIRE))) {
+		ABON(A_CHA) -= 1;
+		flags.botl = 1;
+	}
 
 	u.mtimedone = rn1(500, 500);
 	u.umonnum = mntmp;
@@ -417,6 +468,16 @@ int	mntmp;
 	 * Currently only strength gets changed.
 	 */
 	if(strongmonst(&mons[mntmp])) ABASE(A_STR) = AMAX(A_STR) = STR18(100);
+
+	if (uarmc && (s = OBJ_DESCR(objects[uarmc->otyp])) != (char *)0 &&
+	   !strcmp(s, "opera cloak") &&
+	   maybe_polyd(is_vampire(youmonst.data), Race_if(PM_VAMPIRE))) {
+		You("%s very impressive in your %s.", Blind ||
+				(Invis && !See_invisible) ? "feel" : "look",
+				OBJ_DESCR(objects[uarmc->otyp]));
+		ABON(A_CHA) += 1;
+		flags.botl = 1;
+	}
 
 	if (Stone_resistance && Stoned) { /* parnes@eniac.seas.upenn.edu */
 		Stoned = 0;
@@ -447,15 +508,17 @@ int	mntmp;
 	 */
 	mlvl = (int)mons[mntmp].mlevel;
 	if (youmonst.data->mlet == S_DRAGON && mntmp >= PM_GRAY_DRAGON) {
-		u.mhmax = In_endgame(&u.uz) ? (8*mlvl) : (4*mlvl + d(mlvl,4));
+		set_uhpmax(In_endgame(&u.uz) ? (8*mlvl) : (4*mlvl + d(mlvl,4)), TRUE);
 	} else if (is_golem(youmonst.data)) {
-		u.mhmax = golemhp(mntmp);
+		set_uhpmax(golemhp(mntmp), TRUE);
 	} else {
 		if (!mlvl) u.mhmax = rnd(4);
 		else u.mhmax = d(mlvl, 8);
 		if (is_home_elemental(&mons[mntmp])) u.mhmax *= 3;
 	}
 	u.mh = u.mhmax;
+
+	check_uhpmax();
 
 	if (u.ulevel < mlvl) {
 	/* Low level characters can't become high level monsters for long */
@@ -1127,6 +1190,58 @@ domindblast()
 	return 1;
 }
 
+int
+dodarken()
+{
+
+	if (u.uen < 15 && u.uen<u.uenmax) {
+	    You("lack the energy to invoke the darkness.");
+	    return(0);
+	}
+	u.uen = max(u.uen-15,0);
+	flags.botl = 1;
+	You("invoke the darkness.");
+	litroom(FALSE,NULL);
+	
+	return 1;
+}
+
+int
+doclockspeed()
+{
+	short newspeed = doclockmenu();
+	if(newspeed != u.ucspeed){
+		if(newspeed == HIGH_CLOCKSPEED && u.uhs < WEAK) morehungry(10);
+		/*Note: that adjustment may have put you at weak*/
+		if(newspeed == HIGH_CLOCKSPEED && u.uhs >= WEAK){
+			pline("There is insufficient tension left in your mainspring for you to move at high speed.");
+		}
+		else if(newspeed == SLOW_CLOCKSPEED && u.uhs == SATIATED){
+			pline("There is too much tension in your mainspring for you to move at low speed.");
+		}
+		else{
+			switch(newspeed){
+			case HIGH_CLOCKSPEED:
+				You("increase your clock to high speed.");
+				u.ucspeed = newspeed;
+			break;
+			case NORM_CLOCKSPEED:
+				You("%s your clock to normal speed.",u.ucspeed== HIGH_CLOCKSPEED ? "decrease" : "increase");
+				u.ucspeed = newspeed;
+			break;
+			case SLOW_CLOCKSPEED:
+				You("decrease your clock to low speed.");
+				u.ucspeed = newspeed;
+			break;
+			}
+		}
+		return 1;
+	} else{
+		You("leave your clock at its current speed.");
+		return 0;
+	}
+}
+
 STATIC_OVL void
 uunstick()
 {
@@ -1165,6 +1280,11 @@ int part;
 		"light headed", "neck", "spine", "toe", "hair",
 		"blood", "lung", "nose", "stomach","heart","skin",
 		"flesh","beat","bones","creak","crack"},
+	*clockwork_parts[] = { "arm", "photoreceptor", "face", "finger",
+		"fingertip", "foot", "hand", "handed", "head", "leg",
+		"addled", "neck", "chassis", "toe", "doll-hair",
+		"blood", "gear", "chemoreceptor", "keyhole","mainspring","metal skin",
+		"brass structure","tick","rods","creak","bend"},
 	*jelly_parts[] = { "pseudopod", "dark spot", "front",
 		"pseudopod extension", "pseudopod extremity",
 		"pseudopod root", "grasp", "grasped", "cerebral area",
@@ -1187,11 +1307,10 @@ int part;
 		"light headed", "neck", "backbone", "rear hoof tip",
 		"mane", "blood", "lung", "nose", "stomach","heart","skin",
 		"flesh","beat","bones","creak","crack"},
-	*sphere_parts[] = { "appendage", "optic nerve", "body", "tentacle",
-		"tentacle tip", "lower appendage", "tentacle", "tentacled",
-		"body", "lower tentacle", "rotational", "equator", "body",
-		"lower tentacle tip", "surface", "life force", "retina",
-		"olfactory nerve","interior","core","surface",
+	*sphere_parts[] = { "appendage", "optic nerve", "body", "tentacle", "tentacle tip", 
+		"lower appendage", "tentacle", "tentacled", "body", "lower tentacle", 
+		"rotational", "equator", "body", "lower tentacle tip", 
+		"surface", "life force", "retina", "olfactory nerve","interior","core","surface",
 		"subsurface layers","pulse","auras","flicker","blink out"},
 	*fungus_parts[] = { "mycelium", "visual area", "front", "hypha",
 		"hypha", "root", "strand", "stranded", "cap area",
@@ -1248,7 +1367,7 @@ int part;
 	if (humanoid(mptr) &&
 		(part == ARM || part == FINGER || part == FINGERTIP ||
 		    part == HAND || part == HANDED))
-	    return humanoid_parts[part];
+	    return uclockwork ? clockwork_parts[part] : humanoid_parts[part];
 	if (mptr == &mons[PM_RAVEN] || mptr == &mons[PM_CROW])
 	    return bird_parts[part];
 	if (mptr->mlet == S_CENTAUR || mptr->mlet == S_UNICORN ||
@@ -1274,7 +1393,7 @@ int part;
 	if (mptr->mlet == S_FUNGUS)
 	    return fungus_parts[part];
 	if (humanoid(mptr))
-	    return humanoid_parts[part];
+	    return uclockwork ? clockwork_parts[part] : humanoid_parts[part];
 	return animal_parts[part];
 }
 
@@ -1372,6 +1491,54 @@ int atyp;
 	    default:
 		return -1;
 	}
+}
+
+
+STATIC_OVL short
+doclockmenu()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "To what speed will you set your clock?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	Sprintf(buf, "High speed");
+	any.a_int = HIGH_CLOCKSPEED;	/* must be non-zero */
+	incntlet = 'a';
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	
+	Sprintf(buf, "Normal speed");
+	incntlet = 'b';
+	any.a_int = NORM_CLOCKSPEED;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	
+	
+	Sprintf(buf, "Low speed");
+	incntlet = 'c';
+	any.a_int = SLOW_CLOCKSPEED;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	
+	
+	end_menu(tmpwin, "Change your clock-speed");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? (short)selected[0].item.a_int : (short)u.ucspeed;
 }
 
 #endif /* OVLB */
