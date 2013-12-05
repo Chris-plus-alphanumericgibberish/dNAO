@@ -48,6 +48,7 @@ const char def_oc_syms[MAXOCLASSES] = {
 /*15*/	BALL_SYM,
 	CHAIN_SYM,
 	VENOM_SYM
+	/*BED_SYM*/
 };
 
 const char invisexplain[] = "remembered, unseen, creature";
@@ -771,6 +772,7 @@ static const uchar r_oc_syms[MAXOCLASSES] = {
 /*15*/	BALL_SYM,
 	CHAIN_SYM,
 	VENOM_SYM
+/*	BED_SYM*/
 };
 
 # ifdef ASCIIGRAPH
@@ -814,6 +816,7 @@ static const uchar IBM_r_oc_syms[MAXOCLASSES] = {	/* a la EPYX Rogue */
 /*15*/	BALL_SYM,
 	CHAIN_SYM,
 	VENOM_SYM
+	/*BED_SYM*/
 };
 # endif /* ASCIIGRAPH */
 
