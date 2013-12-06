@@ -614,19 +614,23 @@ int thrown;
 		}
 	    else tmp = rnd(2);
 	    valid_weapon_attack = (tmp > 1);
+		if(uarmg){
 	    /* blessed gloves give bonuses when fighting 'bare-handed' */
-	    if (uarmg && uarmg->blessed && (is_undead(mdat) || is_demon(mdat))) tmp += rnd(4);
+			if (uarmg->blessed && (is_undead(mdat) || is_demon(mdat))) tmp += rnd(4);
 		/* silver gloves give sliver bonus -CM */
-		if (uarmg && 
-			(objects[uarmg->otyp].oc_material == SILVER || arti_silvered(uarmg)) &&
+			if ((objects[uarmg->otyp].oc_material == SILVER || arti_silvered(uarmg)) &&
 			hates_silver(mdat)){
 				tmp += rnd(20);
 			    silvermsg = TRUE;
 		}
+			if(uarmg->oartifact){
+				artifact_hit(&youmonst, mon, uarmg, &tmp, rnd(20));
+			}
+		}
+	    else { //if (!uarmg) {
 	    /* So do silver rings.  Note: rings are worn under gloves, so you
 	     * don't get both bonuses.
 	     */
-	    if (!uarmg) {
 			if (uleft 
 				&& (objects[uleft->otyp].oc_material == SILVER 
 					|| arti_silvered(uleft) 
@@ -1273,8 +1277,9 @@ defaultvalue:
 
 	/* VERY small chance of stunning opponent if unarmed. */
 	if (unarmed && tmp > 1 && !thrown && !obj && !Upolyd) {
-	    if (rnd(100) < P_SKILL(P_BARE_HANDED_COMBAT) &&
-			!bigmonst(mdat) && !thick_skinned(mdat)) {
+	    if (!bigmonst(mdat) && !thick_skinned(mdat)) {
+			if((uarmg && uarmg->oartifact == ART_PREMIUM_HEART && rnd(20) < P_SKILL(P_BARE_HANDED_COMBAT)) || 
+				rnd(100) < P_SKILL(P_BARE_HANDED_COMBAT))
 		if (canspotmon(mon))
 		    pline("%s %s from your powerful strike!", Monnam(mon),
 			  makeplural(stagger(mon->data, "stagger")));
@@ -2738,6 +2743,7 @@ uchar aatyp;
 		  int mndx = 0;
 		  struct monst *mtmp;
 		  u.uevent.uaxus_foe = 1;//enemy of the modrons
+		  livelog_write_string("enraged the auton race");
 		   if(ward_at(u.ux,u.uy) != HAMSA){
 		    if(canseemon(mon) && mon->mcansee) {//paralysis gaze
 				if (Free_action)
