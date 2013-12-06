@@ -623,8 +623,12 @@ int thrown;
 				tmp += rnd(20);
 			    silvermsg = TRUE;
 		}
-			if(uarmg->oartifact){
-				artifact_hit(&youmonst, mon, uarmg, &tmp, rnd(20));
+			if(uarmg->oartifact && 
+			   artifact_hit(&youmonst, mon, uarmg, &tmp, rnd(20)) ){
+				if(mon->mhp <= 0) /* artifact killed monster */
+					return FALSE;
+				if (tmp == 0) return TRUE;
+				hittxt = TRUE;
 			}
 		}
 	    else { //if (!uarmg) {
