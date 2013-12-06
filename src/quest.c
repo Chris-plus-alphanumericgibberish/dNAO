@@ -155,16 +155,17 @@ boolean seal;
 		  !seal ? 1 : -1;
     schedule_goto(dest, FALSE, FALSE, portal_flag, (char *)0, (char *)0);
     if (seal) {	/* remove the portal to the quest - sealing it off */
-	int reexpelled = u.uevent.qexpelled;
-	u.uevent.qexpelled = 1;
-	/* Delete the near portal now; the far (main dungeon side)
-	   portal will be deleted as part of arrival on that level.
-	   If monster movement is in progress, any who haven't moved
-	   yet will now miss out on a chance to wander through it... */
-	for (t = ftrap; t; t = t->ntrap)
-	    if (t->ttyp == MAGIC_PORTAL) break;
-	if (t) deltrap(t);	/* (display might be briefly out of sync) */
-	else if (!reexpelled) impossible("quest portal already gone?");
+		int reexpelled = u.uevent.qexpelled;
+		u.uevent.qexpelled = 1;
+		/* Delete the near portal now; the far (main dungeon side)
+		   portal will be deleted as part of arrival on that level.
+		   If monster movement is in progress, any who haven't moved
+		   yet will now miss out on a chance to wander through it... */
+		for (t = ftrap; t; t = t->ntrap)
+			if (t->ttyp == MAGIC_PORTAL) break;
+		if (t) deltrap(t);	/* (display might be briefly out of sync) */
+		else if (!reexpelled) impossible("quest portal already gone?");
+		livelog_write_string("was banished from their homeland");
     }
 }
 

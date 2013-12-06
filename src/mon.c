@@ -1842,16 +1842,57 @@ boolean was_swallowed;			/* digestion */
 	struct permonst *mdat = mon->data;
 	int i, tmp;
 
-	if (mdat == &mons[PM_VLAD_THE_IMPALER] || mdat->mlet == S_LICH) {
+	if (mdat == &mons[PM_VLAD_THE_IMPALER]) {
+		livelog_write_string("destroyed Vlad the Impaler");
+	    if (cansee(mon->mx, mon->my) && !was_swallowed)
+		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
+	    return FALSE;
+	}
+	if (mdat->mlet == S_LICH) {
 	    if (cansee(mon->mx, mon->my) && !was_swallowed)
 		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    return FALSE;
 	}
 	if(mdat == &mons[PM_CHOKHMAH_SEPHIRAH]){
+		livelog_write_string("destroyed a chokhmah sephirah");
 		u.chokhmah++;
 		u.keter++;
 		return FALSE;
 	}
+	if (mdat == &mons[PM_DEMOGORGON]) {
+		livelog_write_string("destroyed Demogorgon");
+	}
+	else if (mdat == &mons[PM_ASMODEUS]) {
+		livelog_write_string("destroyed Asmodeus");
+	}
+	else if (mdat == &mons[PM_CHAOS]) {
+		if(Hallucination) livelog_write_string("perpetuated an asinine paradigm");
+		else livelog_write_string("destroyed Chaos");
+	}
+	// else if (mdat == &mons[PM_DAGON]) {
+		// livelog_write_string("destroyed Dagon");
+	// }
+	// else if (mdat == &mons[PM_VERIER]) {
+		// livelog_write_string("destroyed Verier");
+	// }
+	// else if (mdat == &mons[PM_BAALPHEGOR]) {
+		// livelog_write_string("destroyed Baalphegor");
+	// }
+	// else if (mdat == &mons[PM_PALE_NIGHT]) {
+		// livelog_write_string("destroyed Pale Night");
+	// }
+	// else if (mdat == &mons[PM_MEPHISTOPHELES]) {
+		// livelog_write_string("destroyed Mephistopheles");
+	// }
+	// else if (mdat == &mons[PM_BAALZEBUB]) {
+		// livelog_write_string("destroyed Baalzebub");
+	// }
+	// else if (mdat == &mons[PM_DISPATER]) {
+		// livelog_write_string("destroyed Dispater");
+	// }
+	// else if (mdat == &mons[PM_LEVIATHAN]) {
+		// livelog_write_string("destroyed Leviathan");
+	// }
 	/* Gas spores always explode upon death */
 	for(i = 0; i < NATTK; i++) {
 	    if (mdat->mattk[i].aatyp == AT_BOOM  &&  mdat->mattk[i].adtyp != AD_HLBD && mdat->mattk[i].adtyp != AD_POSN) {
@@ -1905,6 +1946,7 @@ boolean was_swallowed;			/* digestion */
 			    obj->cursed = obj->blessed = FALSE;
 				explode(mon->mx, mon->my, 1, tmp, MON_EXPLODE, EXPL_FIERY);
 				u.uevent.ukilled_apollyon = 1;
+				livelog_write_string("destroyed Apollyon");
 			}
 			else if(mdat->mattk[i].adtyp == AD_GARO){
 				pline("\"R-regrettable... Although my rival, you were spectacular.");
@@ -1924,6 +1966,7 @@ boolean was_swallowed;			/* digestion */
 				pline("Die I shall, leaving no corpse.\"");
 				explode(mon->mx, mon->my, 0, tmp, MON_EXPLODE, EXPL_MUDDY);
 				pline("\"That is the law of us Garo.\"");
+				livelog_write_string("destroyed the Garo Master");
 			}
 			else if(mdat->mattk[i].adtyp == AD_COLD){
 			//mdat == &mons[PM_BAALPHEGOR] || mdat == &mons[PM_ANCIENT_OF_ICE] || mdat == &mons[PM_FREEZING_SPHERE]){

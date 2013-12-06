@@ -820,6 +820,7 @@ dodown()
 			return(0);
 		else pline("So be it.");
 		u.uevent.gehennom_entered = 1;	/* don't ask again */
+		livelog_write_string("entered Gehennom");
 	}
 	if(on_level(&spire_level,&u.uz)){
 		u.uevent.sum_entered = 1; //entered sum of all
@@ -1423,6 +1424,7 @@ final_level()
 	create_mplayers(rn1(4, 3), TRUE);
 
 	if(u.uevent.ukilled_apollyon){
+		livelog_write_string("confronted the Fallen");
 		int host;
 	    pline(
 	     "A voice booms: \"The Angel of the Pit hast fallen!  We have returned!\"");

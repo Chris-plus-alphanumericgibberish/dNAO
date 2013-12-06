@@ -660,6 +660,7 @@ gcrownu()
 		in_hand = (uwep && uwep->oartifact == ART_REAVER);
 		already_exists = exist_artifact(SCIMITAR, artiname(ART_REAVER));
 		verbalize("Hurrah for our Pirate King!");
+		livelog_write_string("became the Pirate King");
 	}
 	else {
     switch (u.ualign.type) {
@@ -667,8 +668,10 @@ gcrownu()
 	u.uevent.uhand_of_elbereth = 1;
 #ifdef ELBERETH
 	verbalize("I crown thee...  The Hand of Elbereth!");
+	livelog_write_string("became the Hand of Elbereth");
 #else
 		verbalize("I dub thee...  The Arm of the Law!");
+	livelog_write_string("became the Arm of the Law");
 #endif
 	break;
     case A_NEUTRAL:
@@ -676,6 +679,7 @@ gcrownu()
 	in_hand = (uwep && uwep->oartifact == ART_VORPAL_BLADE);
 	already_exists = exist_artifact(LONG_SWORD, artiname(ART_VORPAL_BLADE));
 	verbalize("Thou shalt be my Envoy of Balance!");
+	livelog_write_string("became the Envoy of Balance");
 	break;
     case A_CHAOTIC:
 	u.uevent.uhand_of_elbereth = 3;
@@ -683,6 +687,7 @@ gcrownu()
 	already_exists = exist_artifact(RUNESWORD, artiname(ART_STORMBRINGER));
 	verbalize("Thou art chosen to %s for My Glory!",
 		  already_exists && !in_hand ? "take lives" : "steal souls");
+	livelog_write_string("became the Glory of Arioch");
 	break;
     }
 	}
