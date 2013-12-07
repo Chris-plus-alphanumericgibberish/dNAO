@@ -1689,9 +1689,10 @@ int id_limit;
 
 	if (n > 0) {
 	    if (n > id_limit) n = id_limit;
-	    for (i = 0; i < n; i++, id_limit--)
-		(void) identify(pick_list[i].item.a_obj);
-	    first = 0;
+	    for (i = 0; i < n; i++, id_limit--){
+			(void) identify(pick_list[i].item.a_obj);
+			u.uconduct.IDs++;
+		}
 	    free((genericptr_t) pick_list);
 	    mark_synch(); /* Before we loop to pop open another menu */
 	} else if (n < 0) {
@@ -1720,11 +1721,16 @@ int id_limit;
 	/* identify everything */
 	if (unid_cnt == 1) {
 	    (void) identify(the_obj);
+		u.uconduct.IDs++;
 	} else {
 
 	    /* TODO:  use fully_identify_obj and cornline/menu/whatever here */
-	    for (obj = invent; obj; obj = obj->nobj)
-		if (not_fully_identified(obj)) (void) identify(obj);
+	    for (obj = invent; obj; obj = obj->nobj){
+			if (not_fully_identified(obj)){
+				(void) identify(obj);
+				u.uconduct.IDs++;
+			}
+		}
 
 	}
     } else {
