@@ -352,6 +352,9 @@ impossible VA_DECL(const char *, s)
 }
 
 const char * const hallu_alignments[] = {
+	"trinitarian",
+	"sectarian",
+	
 	"radishes",
 	"binary",
 	
@@ -366,13 +369,16 @@ const char * const hallu_alignments[] = {
 	
 	"cuddly",
 	"funky",
-	"chilly",
+	"chill",
 	"relaxed",
 	"drunk",
 	"curious",
 	"bi-curious",
 	"magnificent",
 	"cool",
+	
+	"chilly",
+	"standoffish",
 	
 	"currently not available",
 	"gone swimming",
