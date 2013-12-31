@@ -440,7 +440,7 @@ boolean ignore_oquan;
 	    case POTION_CLASS:
 		if (obj->dknown && obj->odiluted)
 			Strcpy(buf, "diluted ");
-		if( typ == POT_BLOOD && obj->known) {
+		if( typ == POT_BLOOD && obj->known && obj->dknown ) {
 			Strcat(buf, "potion");
 			Sprintf(eos(buf), " of %s blood", mons[obj->corpsenm].mname);
 		}
