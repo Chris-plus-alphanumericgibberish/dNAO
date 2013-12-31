@@ -2589,7 +2589,8 @@ xkilled(mtmp, dest)
 			    && (otmp->owt > 3 ||
 				objects[typ].oc_big /*oc_bimanual/oc_bulky*/ ||
 				is_spear(otmp) || is_pole(otmp) ||
-				typ == MORNING_STAR)) {
+				typ == MORNING_STAR)
+				&& !is_divider(mdat)) {
 			    delobj(otmp);
 			} else redisp = TRUE;
 		}
