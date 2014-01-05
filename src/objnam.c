@@ -754,6 +754,8 @@ plus:
 		if(obj->owornmask & W_ARMOR)
 			Strcat(bp, (obj == uskin) ? " (embedded in your skin)" :
 				" (being worn)");
+		if(obj->lamplit)
+			Strcat(bp, " (lit)");
 		goto plus;
 	case TOOL_CLASS:
 		/* weptools already get this done when we go to the +n code */
