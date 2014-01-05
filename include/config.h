@@ -214,7 +214,7 @@
  * otherwise it will be the current directory.
  */
 # ifndef HACKDIR
-#  define HACKDIR "/nh343"
+#  define HACKDIR "/dnao"
 # endif
 
 /*
@@ -392,7 +392,7 @@ typedef unsigned char	uchar;
 #define AUTOPICKUP_EXCEPTIONS  /* exceptions to autopickup */
 
 #define DUMP_LOG        /* Dump game end information to a file */
-#define DUMP_FN "/dgldir/userdata/%N/%n/dumplog/%t.nh343.txt"      /* Fixed dumpfile name, if you want
+#define DUMP_FN "/dgldir/userdata/%N/%n/dumplog/%t.dnao.txt"      /* Fixed dumpfile name, if you want
                                    * to prevent definition by users */
 #define DUMPMSGS 20     /* Number of latest messages in the dump file  */
 
@@ -404,7 +404,7 @@ typedef unsigned char	uchar;
 
 /* Filename for the wizard-mode command for dumping the map data.
    Can be left undefined, in which case the wiz-mode command does nothing. */
-#define MAPDUMP_FN "/dgldir/userdata/%N/%n/nh343.mapdump"
+#define MAPDUMP_FN "/dgldir/userdata/%N/%n/dnao.mapdump"
 
 /* Filename for where HUPping a game is saved.
    Can be left undefined, in which case HUPping doesn't write the data. */
@@ -412,7 +412,7 @@ typedef unsigned char	uchar;
 
 /* Filename for dgamelaunch extra info field.
    Can be left undefined for not writing extrainfo. */
-#define EXTRAINFO_FN "/dgldir/extrainfo-nh343/%n.extrainfo"
+#define EXTRAINFO_FN "/dgldir/extrainfo-dnao/%n.extrainfo"
 
 #define SHOW_BORN    /* extinct & showborn -patch */
 #define SHOW_EXTINCT
