@@ -317,6 +317,7 @@ char *argv[];
 		case 'D':
 #ifdef WIZARD
 			wizard = TRUE;
+			break;
 #endif
 		case 'X':
 			discover = TRUE;
