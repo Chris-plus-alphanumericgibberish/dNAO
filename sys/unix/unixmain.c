@@ -181,11 +181,11 @@ char *argv[];
 #ifdef MAIL
 	getmailstatus();
 #endif
-#ifdef WIZARD
-	if (wizard)
-		Strcpy(plname, "wizard");
-	else
-#endif
+/* #ifdef WIZARD
+ * 	if (wizard)
+ * 		Strcpy(plname, "wizard");
+ * 	else
+ * #endif */
 	if(!*plname /*|| !strncmp(plname, "player", 4)
 		      || !strncmp(plname, "games", 4)*/) {
 		askname();
@@ -316,34 +316,7 @@ char *argv[];
 		switch(argv[0][1]){
 		case 'D':
 #ifdef WIZARD
-			{
-			  char *user;
-			  int uid;
-			  struct passwd *pw = (struct passwd *)0;
-
-			  uid = getuid();
-			  user = getlogin();
-			  if (user) {
-			      pw = getpwnam(user);
-			      if (pw && (pw->pw_uid != uid)) pw = 0;
-			  }
-			  if (pw == 0) {
-			      user = nh_getenv("USER");
-			      if (user) {
-				  pw = getpwnam(user);
-				  if (pw && (pw->pw_uid != uid)) pw = 0;
-			      }
-			      if (pw == 0) {
-				  pw = getpwuid(uid);
-			      }
-			  }
-			  if (pw && !strcmp(pw->pw_name,WIZARD)) {
-			      wizard = TRUE;
-			      break;
-			  }
-			}
-			/* otherwise fall thru to discover */
-			wiz_error_flag = TRUE;
+			wizard = TRUE;
 #endif
 		case 'X':
 			discover = TRUE;
