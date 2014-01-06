@@ -153,10 +153,10 @@
 
 #ifndef WIZARD		/* allow for compile-time or Makefile changes */
 # ifndef KR1ED
-#  define WIZARD  "wizard" /* the person allowed to use the -D option */
+#  define WIZARD  "nethack" /* the person allowed to use the -D option */
 # else
 #  define WIZARD
-#  define WIZARD_NAME "wizard"
+#  define WIZARD_NAME "nethack"
 # endif
 #endif
 
@@ -373,7 +373,7 @@ typedef unsigned char	uchar;
 #if defined(TTY_GRAPHICS) || defined(MSWIN_GRAPHICS)
 # define MENU_COLOR
 # define MENU_COLOR_REGEX
-# define MENU_COLOR_REGEX_POSIX
+/* # define MENU_COLOR_REGEX_POSIX */
 /* if MENU_COLOR_REGEX is defined, use regular expressions (regex.h,
  * GNU specific functions by default, POSIX functions with
  * MENU_COLOR_REGEX_POSIX).
@@ -433,7 +433,7 @@ typedef unsigned char	uchar;
 #define LIVELOGFILE "livelog"
 
 #define XLOGFILE "xlogfile"  /* even larger logfile */
-/* #define REALTIME_ON_BOTL */  /* Show elapsed time on bottom line.  Note:
+#define REALTIME_ON_BOTL  /* Show elapsed time on bottom line.  Note:
                                  * this breaks savefile compatibility. */
 
 /* The options in this section require the extended logfile support */
