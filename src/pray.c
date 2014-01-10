@@ -1927,6 +1927,7 @@ const char * const hallu_gods[] = {
 	"the Yggdrasil Entity",
 	"the Unbounded Blue",
 	"the Silencer in the stars",
+	"the Drowned",
 	
 	//Games
 	"Armok",
@@ -1954,6 +1955,9 @@ const char * const hallu_gods[] = {
 	"Eru Iluvatar",
 	"the Powers that Be",
 	"the Lone Power",
+	"Om",
+	"small gods",
+	"Orannis",
 	
 	//Internet
 	"SCP-343",
@@ -1981,6 +1985,8 @@ const char * const hallu_gods[] = {
 	"thingy",
 	"whatchamacallit",
 	"whosamawhatsit",
+	"some guy",
+	"some gal",
 	
 	//nethack
 	"the gnome with the wand of death",
