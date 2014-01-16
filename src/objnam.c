@@ -2542,6 +2542,7 @@ srch:
 		goto typfnd;
 	}
 	/*This is meant to catch "scrolls of X"*/
+	if(actualn){
 	if(!strncmpi(actualn, "heptagram", 9)){
 		heptagram = TRUE;
 		typ = SCR_WARD;
@@ -2596,6 +2597,7 @@ srch:
 		garuda = TRUE;
 		typ = SCR_WARD;
 		goto typfnd;
+	}
 	}
 	/* Note: not strncmpi.  2 fruits, one capital, one not, are possible. */
 	{
