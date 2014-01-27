@@ -2744,16 +2744,17 @@ uchar aatyp;
 	    break;
 	}
 
+	if(ptr->mattk[i].adtyp==AD_AXUS){
+		  if(!u.uevent.uaxus_foe)livelog_write_string("enraged the auton race");
+		  u.uevent.uaxus_foe = 1;//enemy of the modrons
+	}
 /*	These only affect you if they still live */
-
 	if(malive && !mon->mcan && rn2(3)) {
 
 	    switch(ptr->mattk[i].adtyp) {
 		  case AD_AXUS:{
 		  int mndx = 0;
 		  struct monst *mtmp;
-		  u.uevent.uaxus_foe = 1;//enemy of the modrons
-		  livelog_write_string("enraged the auton race");
 		   if(ward_at(u.ux,u.uy) != HAMSA){
 		    if(canseemon(mon) && mon->mcansee) {//paralysis gaze
 				if (Free_action)
