@@ -267,8 +267,8 @@ struct monst *mon;
 			){
 				tmp += u.ulevel;
 				tmp *= Upolyd ?
-						u.mh/u.mhmax  :
-						u.uhp/u.uhpmax;
+						((float)u.mh)/u.mhmax  :
+						((float)u.uhp)/u.uhpmax;
 			}
 			break;
 		case DOUBLE_LIGHTSABER: 
@@ -321,8 +321,8 @@ struct monst *mon;
 			){
 				tmp += u.ulevel;
 				tmp *= Upolyd ?
-						u.mh/u.mhmax  :
-						u.uhp/u.uhpmax;
+						((float)u.mh)/u.mhmax  :
+						((float)u.uhp)/u.uhpmax;
 			}
 			break;
 		case DOUBLE_LIGHTSABER: 
