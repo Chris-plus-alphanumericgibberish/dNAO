@@ -2631,6 +2631,8 @@ xkilled(mtmp, dest)
 		/* might be here after swallowed */
 		if (!rn2(6) && !(mvitals[mndx].mvflags & G_NOCORPSE)
 					&& mdat->mlet != S_KETER
+					&& mdat->mlet != S_PLANT
+					&& !(mtmp->mclone)
 							) {
 			int typ;
 
