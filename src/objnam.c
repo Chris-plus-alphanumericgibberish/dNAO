@@ -361,6 +361,10 @@ boolean ignore_oquan;
 			Sprintf(buf, "set of %s", actualn);
 			break;
 		}
+		if (typ == VICTORIAN_UNDERWEAR) {
+			Sprintf(buf, "set of %s", actualn);
+			break;
+		}
 		if(is_boots(obj) || is_gloves(obj)) Strcpy(buf,"pair of ");
 
 		if(obj->otyp >= ELVEN_SHIELD && obj->otyp <= ORCISH_SHIELD
@@ -742,6 +746,9 @@ plus:
 		if(obj->known || Race_if(PM_INCANTIFIER)) {
 			Strcat(prefix, sitoa(obj->spe));
 			Strcat(prefix, " ");
+		}
+		if(obj->known && obj->oartifact == ART_ROD_OF_LORDLY_MIGHT){
+			Sprintf(eos(bp), " (%s)", OBJ_NAME(objects[obj->otyp]));
 		}
 		if (is_lightsaber(obj)) {
 		    if (obj->lamplit) Strcat(bp, " (lit)");
@@ -2300,6 +2307,7 @@ boolean from_user;
 	 */
 	if (!strstri(bp, "wand ")
 	 && !strstri(bp, "spellbook ")
+	 && !strstri(bp, "rod ")
 	 && !strstri(bp, "finger ")) {
 	    if ((p = strstri(bp, " of ")) != 0
 		&& (mntmp = name_to_mon(p+4)) >= LOW_PM)
@@ -2310,6 +2318,7 @@ boolean from_user;
 	if (strncmpi(bp, "wizard lock", 11)) /* not the "wizard" monster! */
 	if (strncmpi(bp, "ninja-to", 8)) /* not the "ninja" rank */
 	if (strncmpi(bp, "master key", 10)) /* not the "master" rank */
+	if (strncmpi(bp, "rod of lordly might", 19)) /* not the "lord" rank */
 	if (strncmpi(bp, "magenta", 7)) /* not the "mage" rank */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
 	    (mntmp = name_to_mon(bp)) >= LOW_PM) {
@@ -2428,6 +2437,7 @@ boolean from_user;
 	   strncmpi(bp, "tooled horn", 11) &&
 	   strncmpi(bp, "food ration", 11) &&
 	   strncmpi(bp, "meat ring", 9) && 
+	   strncmpi(bp, "rod of lordly might", 19) && 
 	   strncmpi(bp, "atma weapon", 11)
 	)
 	for (i = 0; i < (int)(sizeof wrpsym); i++) {
