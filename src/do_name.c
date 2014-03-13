@@ -1085,6 +1085,7 @@ static const char * const bogusmons[] = {
 	"carbosilicate amorph", "debatably-sapient kreely", "viral boy-band", 
 		"self-replicating, self-aware war machine", "maximally effective mercenary", /* Schlock Mercenary */
 	"friend demon", /* Drowtales */
+	"unicorn jelly", "crystal basilisk", /*Unicorn Jelly*/
 	"big dumb object", /* Scifi */
 	"kaiju named Godzilla", "giant ape named King Kong",		/* monster movies */
 	"earthquake beast",			/* old L of SH */
@@ -1116,6 +1117,7 @@ static const char * const bogusmons[] = {
 	"mother-in-law", 		/* common pests */
 	"visible stalker",		/* occupational hazard */
 	"Minosaur", "vestigal virgin", "octagenarian", /*"saint called Mary of the Immaculate Contraption,"*/ /*non campus mentus*/
+	"spherical cow",		/* Joke about theoretical physicists */
 	"arsassin",				/* Psych */
         "one-winged dewinged stab-bat",  /* KoL */
         "praying mantis",
