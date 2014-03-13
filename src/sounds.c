@@ -695,6 +695,19 @@ asGuardian:
 	case MS_BURBLE:
 	    pline_msg = "burbles.";
 	    break;
+	case MS_JUBJUB:{
+		struct monst *tmpm;
+	    pline_msg = "screams high and shrill.";
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(tmpm != mtmp){
+				if(tmpm->mtame && tmpm->mtame<20) tmpm->mtame++;
+				if(d(1,tmpm->mhp) < mtmp->mhpmax){
+					tmpm->mflee = 1;
+				}
+			}
+		}
+		make_stunned(HStun + mtmp->mhp/10, TRUE);
+	}break;
 	case MS_SHRIEK:
 	    pline_msg = "shrieks.";
 	    aggravate();
@@ -1999,9 +2012,13 @@ int tx,ty;
 			//Spirit requires that its seal be drawn by a fountain.
 			if(IS_FOUNTAIN(levl[tx][ty].typ)){
 				if(!Blind){
-//					pline();
+					pline("The water in the fountain begins to bubble.");
+					pline("A dome of cerulean crystal emerges from the center of the fountain.");
+					pline("As the water continues to fall away from the rising dome,");
+					pline("you see that it is merely the apex of a circular silver cathedral.");
+				} else {
+					pline(".");
 				}
-				pline(".");
 				if(u.sealCounts < numSlots){
 					pline("");
 					pline("");

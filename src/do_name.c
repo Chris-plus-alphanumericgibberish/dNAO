@@ -782,8 +782,8 @@ boolean called;
 	    if (mdat == &mons[PM_SHOPKEEPER] && !do_invis)
 		return buf;
 	    Strcat(buf, " the ");
-	    if (do_invis)
-		Strcat(buf, "invisible ");
+	    if (do_invis) Strcat(buf, "invisible ");
+		if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]) Strcat(buf, "frumious ");
 	    Strcat(buf, mdat->mname);
 	    return buf;
 	}
@@ -815,6 +815,7 @@ boolean called;
 		Sprintf(eos(buf), "%s ghost", s_suffix(name));
 		name_at_start = TRUE;
 	    } else if (called) {
+		if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]) Sprintf(eos(buf), "frumious ");
 		Sprintf(eos(buf), "%s called %s", mdat->mname, name);
 		name_at_start = (boolean)type_is_pname(mdat);
 	    } else if (is_mplayer(mdat) && (bp = strstri(name, " the ")) != 0) {
@@ -841,6 +842,7 @@ boolean called;
 	    Strcat(buf, lcase(pbuf));
 	    name_at_start = FALSE;
 	} else {
+		if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]) Strcat(buf, "frumious ");
 	    Strcat(buf, mdat->mname);
 	    name_at_start = (boolean)type_is_pname(mdat);
 	}

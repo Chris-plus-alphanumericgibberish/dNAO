@@ -572,7 +572,7 @@ disturb(mtmp)
 		(!(mtmp->data->mlet == S_NYMPH
 			|| mtmp->data == &mons[PM_JABBERWOCK]
 //#if 0	/* DEFERRED */
-			|| mtmp->data == &mons[PM_VORPAL_JABBERWOCK]
+			// || mtmp->data == &mons[PM_VORPAL_JABBERWOCK]
 //#endif
 			|| mtmp->data->mlet == S_LEPRECHAUN) || !rn2(50)) &&
 		(Aggravate_monster
