@@ -1361,7 +1361,6 @@ xchar e_type;
 	/* engraving Elbereth shows wisdom */
 	if (!in_mklev && !strcmp(s,	"Elbereth")){
 		exercise(A_WIS, TRUE);
-		u.uconduct.elbereth++;
 	}
 	ep->ward_type = exist_ward_type;
 	ep->ward_id = exist_ward_id;
@@ -2219,7 +2218,9 @@ doengrave()
 	(void) strncat(buf, ebuf, (BUFSZ - (int)strlen(buf) - 1));
 
 	make_engr_at(u.ux, u.uy, buf, (moves - multi), type);
-
+	if(sengr_at("Elbereth", u.ux, u.uy)){
+		u.uconduct.elbereth++;
+	}
 	if (post_engr_text[0]) pline(post_engr_text);
 
 	if (doblind && !resists_blnd(&youmonst)) {
