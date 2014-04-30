@@ -8,6 +8,7 @@
 
 #include <errno.h>
 #include <sys/stat.h>
+#include <limits.h>
 #if defined(NO_FILE_LINKS) || defined(SUNOS4) || defined(POSIX_TYPES)
 #include <fcntl.h>
 #endif
@@ -25,6 +26,8 @@ extern void NDECL(linux_mapoff);
 #ifndef NHSTDC
 extern int errno;
 #endif
+
+extern int FDECL(restore_savefile, (char *, const char *));
 
 static struct stat buf;
 
@@ -150,30 +153,42 @@ getlock()
 		(void) close(fd);
 
 		if(iflags.window_inited) {
-		    pline("There is already a game in progress under your name.");
-		    pline("If your previous game ended abruptly, say no at the following prompt and ask the admins to recover your game.");
-		    c = yn("  Destroy old game?");
+		    c = yn_function("There is already a game in progress under your name.  Destroy old game [y], Recover it [r], Cancel [n] ?", "ynr", 'n');
 		} else {
-		    int tmpc;
-		    (void) printf("\nThere is already a game in progress under your name.");
-		    (void) printf("\nIf your previous game ended abruptly, say no at the following prompt and ask the admins to recover your game.");
-		    (void) printf("\n  Destroy old game? [yn] ");
-		    (void) fflush(stdout);
-		    c = getchar();
-		    (void) putchar(c);
+		    (void) printf("\nThere is already a game in progress under your name. Do what?\n");
+		    (void) printf("\n  y - Destroy old game?");
+		    (void) printf("\n  r - Try to recover it?");
+		    (void) printf("\n  n - Cancel");
+		    (void) printf("\n\n  => ");
 		    (void) fflush(stdout);
 		    do {
-			tmpc = getchar();
-		    } while (tmpc != '\n' && tmpc != -1); /* eat rest of line and newline */
+			c = getchar();
+		    } while (!index("rRyYnN", c) && c != -1);
+		    (void) printf("\e[7A"); /* cursor up 7 */
+		    (void) printf("\e[J"); /* clear from cursor down */
 		}
-		if(c == 'y' || c == 'Y')
+		if (c == 'r' || c == 'R') {
+		    if (restore_savefile(lock, fqn_prefix[SAVEPREFIX]) == 0) {
+			const char *msg = "Automatical recovery of save file successful! "
+			    "Press any key to continue ...\n";
+			fflush(stdout);
+			if (iflags.window_inited) {
+			    pline("%s", msg);
+			} else {
+			    printf("\n\n%s", msg);
+			    fflush(stdout);
+			    c = getchar();
+			}
+			goto gotlock;
+		    }
+		} else if (c == 'y' || c == 'Y') {
 			if(eraseoldlocks())
 				goto gotlock;
 			else {
 				unlock_file(HLOCK);
 				error("Couldn't destroy old game.");
 			}
-		else {
+		} else {
 			unlock_file(HLOCK);
 			error("%s", "");
 		}
