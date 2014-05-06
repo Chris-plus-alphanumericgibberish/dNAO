@@ -590,6 +590,8 @@ struct you {
 	/* 	variable that keeps track of summoning in your vicinity.
 		Only allow 1 per turn, to help reduce summoning cascades. */
 	boolean summonMonster;
+	/* 	Variable that checks if the Wizard has increased the weight of the amulet */
+	boolean uleadamulet;
 	/*Ugly extra artifact variables workaround.  Spaghetti code alert!*/
 	long SnSd1, SnSd2, SnSd3, SnSd3duration;
 	int ZangetsuSafe;
