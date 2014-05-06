@@ -2261,6 +2261,8 @@ struct ext_func_tab extcmdlist[] = {
  	 */
 	{(char *)0, (char *)0, donull, TRUE}, /* #levelchange */
 	{(char *)0, (char *)0, donull, TRUE}, /* #lightsources */
+	{(char *)0, (char *)0, donull, TRUE}, /* #detect */
+	{(char *)0, (char *)0, donull, TRUE}, /* #map level*/
 #ifdef DEBUG_MIGRATING_MONS
 	{(char *)0, (char *)0, donull, TRUE}, /* #migratemons */
 #endif
@@ -2295,6 +2297,8 @@ struct ext_func_tab extcmdlist[] = {
 static struct ext_func_tab debug_extcmdlist[] = {
 	{"levelchange", "change experience level", wiz_level_change, IFBURIED, AUTOCOMPLETE},
 	{"lightsources", "show mobile light sources", wiz_light_sources, IFBURIED, AUTOCOMPLETE},
+	{"detect", "do wizard detection", wiz_detect, IFBURIED, AUTOCOMPLETE},
+	{"map", "map the current level", wiz_map, IFBURIED, AUTOCOMPLETE},
 #ifdef DEBUG_MIGRATING_MONS
 	{"migratemons", "migrate n random monsters", wiz_migrate_mons, IFBURIED, AUTOCOMPLETE},
 #endif
@@ -2353,13 +2357,10 @@ init_bind_list(void)
 	bind_key(C('d'), "kick" ); /* "D" is for door!...?  Msg is in dokick.c */
 #ifdef WIZARD
 	if (wizard) {
-		bind_key(C('e'), "detect" );
-		bind_key(C('f'), "map" );
 		bind_key(C('g'), "genesis" );
 		bind_key(C('i'), "identify" );
 		bind_key(C('o'), "where" );
 		bind_key(C('v'), "levelport" );
-		bind_key(C('w'), "wish" );
 	}
 #endif
 	bind_key(C('l'), "redraw" ); /* if number_pad is set */
@@ -2380,6 +2381,7 @@ init_bind_list(void)
 	bind_key('d',    "drop" );
 	bind_key('D',    "dropall" );
 	bind_key(M('d'), "dip" );
+	bind_key(C('e'), "doseal" );
 	bind_key('e',    "eat" );
 	bind_key('E',    "engrave" );
 	bind_key(M('e'), "enhance" );
@@ -2388,6 +2390,7 @@ init_bind_list(void)
 	bind_key(M('f'), "force" );
 	/*       'g', 'G' : multiple go */
 	/*       'h', 'H' : go west */
+	bind_key(C('f'), "dospirit" );
 	bind_key('h',    "help" ); /* if number_pad is set */
 	bind_key('i',    "inventory" );
 	bind_key('I',    "inventoryall" ); /* Robert Viduya */
@@ -2429,6 +2432,7 @@ init_bind_list(void)
 	bind_key(M('v'), "versionext" );
 	bind_key('w',    "wield" );
 	bind_key('W',    "wear" );
+	bind_key(C('w'), "doward" );
 	bind_key(M('w'), "wipe" );
 	bind_key('x',    "swap" );
 	bind_key('X',    "twoweapon" );
