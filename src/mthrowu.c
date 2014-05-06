@@ -186,8 +186,7 @@ boolean verbose;  /* give message(s) even when you can't see what happened */
 	    return 1;
 	} else {
 	    damage = dmgval(otmp, mtmp);
-	    if (otmp->otyp == ACID_VENOM && resists_acid(mtmp))
-		damage = 0;
+	    if (otmp->otyp == ACID_VENOM && resists_acid(mtmp)) damage = 0;
 	    if (ismimic) seemimic(mtmp);
 	    mtmp->msleeping = 0;
 	    if (vis) hit(distant_name(otmp,mshot_xname), mtmp, exclam(damage));
@@ -1007,8 +1006,15 @@ register struct attack *mattk;
 		    return 0;
 		}
 	}
+    if(mtmp->mspec_used){
+		return 0;
+	}
 	if(lined_up(mtmp)) {
 		switch (mattk->adtyp) {
+		    case AD_WEBS:
+				mtmp->mspec_used = d(2,6);
+				otmp = mksobj(BALL_OF_WEBBING, TRUE, FALSE);
+			break;
 		    case AD_BLND:
 		    case AD_DRST:
 			otmp = mksobj(BLINDING_VENOM, TRUE, FALSE);
@@ -1018,8 +1024,6 @@ register struct attack *mattk;
 				/* fall through */
 		    case AD_ACID:
 			otmp = mksobj(ACID_VENOM, TRUE, FALSE);
-//		    case AD_SHOG:
-//			otmp = mksobj(SHOGGOTH_VENOM, TRUE, FALSE);
 			break;
 		}
 		if(!rn2(BOLT_LIM-distmin(mtmp->mx,mtmp->my,mtmp->mux,mtmp->muy))) {
@@ -1028,7 +1032,7 @@ register struct attack *mattk;
 //				pline("%s splashes venom!", Monnam(mtmp));
 //			else
 //				pline("%s spits venom!", Monnam(mtmp));
-		    if (canseemon(mtmp)) pline("%s spits venom!", Monnam(mtmp));
+		    if (canseemon(mtmp)) pline("%s spits %s!", Monnam(mtmp), mattk->adtyp == AD_WEBS ? "webbing" : "venom");
 			m_throw(mtmp, mtmp->mx, mtmp->my, sgn(tbx), sgn(tby),
 			distmin(mtmp->mx,mtmp->my,mtmp->mux,mtmp->muy), otmp,
 			TRUE);
@@ -1061,8 +1065,15 @@ register struct attack *mattk;
 		                      s_suffix(mon_nam(mtmp)));
 	    return 0;
 	}
+    if(mtmp->mspec_used){
+		return 0;
+	}
 	if(mlined_up(mtmp, mdef, FALSE)) {
 		switch (mattk->adtyp) {
+		    case AD_WEBS:
+				mtmp->mspec_used = d(2,6);
+				otmp = mksobj(BALL_OF_WEBBING, TRUE, FALSE);
+			break;
 		    case AD_BLND:
 		    case AD_DRST:
 			otmp = mksobj(BLINDING_VENOM, TRUE, FALSE);
@@ -1076,7 +1087,7 @@ register struct attack *mattk;
 		}
 		if(!rn2(BOLT_LIM-distmin(mtmp->mx,mtmp->my,mdef->mx,mdef->my))) {
 		    if (canseemon(mtmp)) {
-			pline("%s spits venom!", Monnam(mtmp));
+			pline("%s spits %s!",  Monnam(mtmp), mattk->adtyp == AD_WEBS ? "webbing" : "venom");
 		    nomul(0, NULL);
 		    }
 			destroy_thrown = 1; //state variable referenced in drop_throw

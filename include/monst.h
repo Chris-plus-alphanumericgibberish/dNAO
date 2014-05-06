@@ -115,6 +115,7 @@ struct monst {
 #define MAX_NUM_WORMS	32	/* should be 2^(wormno bitfield size) */
 	Bitfield(moccupation,1);/* linked to your occupation */
 	Bitfield(mclone,1);		/* is a clone of another monster (don't make death drop) */
+	Bitfield(housealert,1);	/* won't accept house-based pacification */
 	
 
 	long mstrategy;		/* for monsters with mflag3: current strategy */
@@ -153,6 +154,7 @@ struct monst {
 	/* in order to prevent alignment problems mextra should
 	   be (or follow) a long int */
 	int meating;		/* monster is eating timeout */
+	int mfaction;		/* faction to which monster belongs */
 	//hatching situation
 	//AT_LAYEGG, PM_HATCHLING_NAME, x, d
 	//timetohatch
