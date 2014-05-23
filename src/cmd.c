@@ -90,6 +90,7 @@ extern int NDECL(dosearch); /**/
 extern int NDECL(doidtrap); /**/
 extern int NDECL(dopay); /**/
 extern int NDECL(dosit); /**/
+extern int NDECL(dodeepswim); /**/
 extern int NDECL(dotalk); /**/
 extern int NDECL(docast); /**/
 extern int NDECL(dovspell); /**/
@@ -2117,6 +2118,20 @@ int final;
 		dump("", "  You did not wish for any artifacts");
 	}
 
+	if (!u.uconduct.shopID == 0) {
+	    dump("You never payed a shopkeeper to identify an item");
+	} else {
+	    Sprintf(buf, "payed to have %d item%s identified",
+		    u.uconduct.shopID, plur(u.uconduct.shopID));
+	    dump("  You ", buf);
+	}
+	if (!u.uconduct.IDs == 0) {
+	    dump("You never magically identified an item");
+	} else {
+	    Sprintf(buf, "magically identified %d item%s",
+		    u.uconduct.IDs, plur(u.uconduct.shopID));
+	    dump("  You ", buf);
+	}
 	dump("", "");
 }
 #endif /* DUMP_LOG */
@@ -2176,7 +2191,9 @@ struct ext_func_tab extcmdlist[] = {
 	{"eat", "eat something", doeat, !IFBURIED},
 	{"engrave", "engrave writing on the floor", doengward, !IFBURIED},
 	{"drawward", "engrave a ward on the floor", doward, !IFBURIED},
+	{"drawseal", "engrave a seal on the floor", doseal, !IFBURIED},
 	{"fire", "fire ammunition from quiver", dofire, !IFBURIED},
+	{"activepower", "use an active spirit power", dospirit, IFBURIED},
 	{"history", "show long version and game history", dohistory, IFBURIED},
 	{"help", "give a help message", dohelp, IFBURIED},
 	{"seetrap", "show the type of a trap", doidtrap, IFBURIED},
@@ -2247,6 +2264,7 @@ struct ext_func_tab extcmdlist[] = {
 #endif
 	{"rub", "rub a lamp", dorub, !IFBURIED, AUTOCOMPLETE},
 	{"sit", "sit down", dosit, !IFBURIED, AUTOCOMPLETE},
+	{"swim", "swim under water", dodeepswim, !IFBURIED, AUTOCOMPLETE},
 	{"turn", "turn undead", doturn, IFBURIED, AUTOCOMPLETE},
 	{"twoweapon", "toggle two-weapon combat", dotwoweapon, !IFBURIED, AUTOCOMPLETE},
 	{"untrap", "untrap something", dountrap, !IFBURIED, AUTOCOMPLETE},

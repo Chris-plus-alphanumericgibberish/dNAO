@@ -67,7 +67,7 @@ struct engr {
 #define SHIRO						LAST_WARD+11
 #define ECHIDNA						LAST_WARD+12
 #define EDEN						LAST_WARD+13
-#define ERIDU						LAST_WARD+14
+#define ENKI						LAST_WARD+14
 #define EURYNOME					LAST_WARD+15
 #define EVE							LAST_WARD+16
 #define FAFNIR						LAST_WARD+17
@@ -128,8 +128,15 @@ struct engr {
 #define FIRST_FALLEN_HOUSE	BRONT_TEJ
 #define LAST_FALLEN_HOUSE	X_LARRAZ_ET_SOJ
 
-#define LOLTH_SYMBOL		31
-#define EDDER_SYMBOL		32
+	/*Special behavior, these identify hedrow towers*/
+#define SORCERE				31
+#define MAGTHERE			32
+#define XAXOX				33
+#define FIRST_TOWER			SORCERE
+#define LAST_TOWER			XAXOX
+
+#define LOLTH_SYMBOL		34
+#define EDDER_SYMBOL		35
 
 	xchar halu_ward; /* If you draw while halucinating, you inscribe a halucinatory symbol */
 

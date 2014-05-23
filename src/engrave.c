@@ -448,6 +448,11 @@ const char * haluWard[] =  {
 	"a House Thaeyalla crest",
 	"a House X'larraz'et'soj crest",
 	
+	/*Special behavior, these identify hedrow towers*/
+	"a Tower Sorcere crest",
+	"a Tower Magthere crest",
+	"a Tower Xaxox crest",
+	
 	/* Special behavior, lolth holy symbol */
 	"a silver spider-like star",
 	
@@ -605,7 +610,7 @@ char * sealNames[] =  {
 	"Shiro", /* 10 */
 	"Echidna", /* 11 */
 	"Eden", /* 12 */
-	"Eridu", /* 13 */
+	"Enki", /* 13 */
 	"Eurynome", /* 14 */
 	"Eve", /* 15 */
 	"Fáfnir", /* 16 */
@@ -4223,9 +4228,9 @@ pick_seal()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(u.sealsKnown & SEAL_ERIDU){
-		Sprintf(buf,	"Eridu, the First City");
-		any.a_int = ERIDU;	/* must be non-zero */
+	if(u.sealsKnown & SEAL_ENKI){
+		Sprintf(buf,	"Enki, God of the first city");
+		any.a_int = ENKI;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);

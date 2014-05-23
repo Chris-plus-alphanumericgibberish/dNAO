@@ -104,6 +104,7 @@ boolean pushing;
 
 		if (fills_up && u.uinwater && distu(rx,ry) == 0) {
 		    u.uinwater = 0;
+		    u.usubwater = 0;
 		    docrt();
 		    vision_full_recalc = 1;
 		    You("find yourself on dry land again!");
@@ -1063,6 +1064,7 @@ boolean at_stairs, falling, portal;
 	fill_pit(u.ux, u.uy);
 	u.ustuck = 0;				/* idem */
 	u.uinwater = 0;
+	u.usubwater = 0;
 	u.uundetected = 0;	/* not hidden, even if means are available */
 	keepdogs(FALSE);
 	if (u.uswallow)				/* idem */
@@ -1324,11 +1326,12 @@ boolean at_stairs, falling, portal;
 		display_nhwindow(WIN_MESSAGE, FALSE);
 #endif
 		You_hear("groans and moans everywhere.");
-	    } else pline("It is hot here.  You smell smoke...");
-
+	    } else {
+			pline("It is hot here.  You smell smoke...");
 #ifdef RECORD_ACHIEVE
             achieve.enter_gehennom = 1;
 #endif
+	}
 	}
 
 	if (familiar) {
