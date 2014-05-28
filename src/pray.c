@@ -45,6 +45,7 @@ STATIC_DCL boolean FDECL(blocked_boulder,(int,int));
 static const char	*Moloch = "Moloch";
 static const char	*Chaos = "Chaos";
 static const char	*DeepChaos = "Cosmos in chains";
+static const char	*tVoid = "the Void";
 static const char	*Other = "an alien god";
 static const char	*BlackMother = "the Black Mother";
 
@@ -152,7 +153,7 @@ in_trouble()
 	for (i= -1; i<=1; i++) for(j= -1; j<=1; j++) {
 		if (!i && !j) continue;
 		if (!isok(u.ux+i, u.uy+j) || IS_ROCK(levl[u.ux+i][u.uy+j].typ)
-		    || (blocked_boulder(i,j) && !throws_rocks(youmonst.data)))
+		    || (blocked_boulder(i,j) && !throws_rocks(youmonst.data) && !(u.sealsActive&SEAL_YMIR)))
 			count++;
 	}
 	if (count == 8 && !Passes_walls)
@@ -1861,7 +1862,7 @@ doturn()
 
 		    if (sp_no < MAXSPELL &&
 			spl_book[sp_no].sp_id == SPE_TURN_UNDEAD)
-			    return spelleffects(sp_no, TRUE);
+			    return spelleffects(sp_no, TRUE, 0);
 		}
 
 		You("don't know how to turn undead!");
@@ -2074,6 +2075,7 @@ aligntyp alignment;
      case A_LAWFUL:	gnam = urole.lgod; break;
      case A_NEUTRAL:	gnam = urole.ngod; break;
      case A_CHAOTIC:	gnam = urole.cgod; break;
+     case A_VOID:		gnam = tVoid; break;
      default:		impossible("unknown alignment.");
 			gnam = "someone"; break;
     }

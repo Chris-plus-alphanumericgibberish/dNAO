@@ -92,6 +92,7 @@ msgpline_type(msg)
 /* Note that these declarations rely on knowledge of the internals
  * of the variable argument handling stuff in "tradstdc.h"
  */
+const char * FDECL(replace, (const char *, const char *, const char *));
 
 #if defined(USE_STDARG) || defined(USE_VARARGS)
 static void FDECL(vpline, (const char *, va_list));
@@ -404,6 +405,8 @@ align_str(alignment)
 	case A_NEUTRAL: return "neutral";
 	case A_LAWFUL:	return "lawful";
 	case A_NONE:	return "unaligned";
+	case A_VOID:	return "non-aligned";
+//	case A_UNKNOWN:	return "unknown";
     }
     return "unknown";
 }
@@ -453,6 +456,8 @@ register struct monst *mtmp;
 	else if (mtmp->mfrozen || !mtmp->mcanmove)
 				  Strcat(info, ", can't move");
 #endif
+	else if (mtmp->mlaughing || !mtmp->mnotlaugh)
+				  Strcat(info, is_silent(mtmp->data) ? ", shaking uncontrollably" : ", laughing hysterically");
 				  /* [arbitrary reason why it isn't moving] */
 	else if (mtmp->mstrategy & STRAT_WAITMASK)
 				  Strcat(info, ", meditating");

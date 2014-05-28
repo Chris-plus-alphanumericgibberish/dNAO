@@ -854,7 +854,7 @@ dobreathe(mdat)
 	    impossible("bad breath attack?");	/* mouthwash needed... */
 	else
 	    buzz((int) (20 + mattk->adtyp-1), (int)mattk->damn,
-		u.ux, u.uy, u.dx, u.dy,0);
+		u.ux, u.uy, u.dx, u.dy,0,0);
 	return(1);
 }
 
@@ -1075,7 +1075,7 @@ dogaze()
 			if (yn(qbuf) != 'y') continue;
 			setmangry(mtmp);
 		    }
-		    if (!mtmp->mcanmove || mtmp->mstun || mtmp->msleeping ||
+		    if (!mtmp->mcanmove || !mtmp->mnotlaugh || mtmp->mstun || mtmp->msleeping ||
 				    !mtmp->mcansee || !haseyes(mtmp->data)) {
 			looked--;
 			continue;

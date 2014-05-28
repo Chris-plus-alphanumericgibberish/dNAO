@@ -1513,7 +1513,7 @@ struct obj	*sobj;
 				    if (mtmp->minvis && !canspotmon(mtmp))
 					map_invisible(mtmp->mx, mtmp->my);
 				}
-	    	    	    	mdmg = dmgval(otmp2, mtmp) * otmp2->quan;
+	    	    	    	mdmg = dmgval(otmp2, mtmp, 0) * otmp2->quan;
 				if (helmet) {
 				    if(is_metallic(helmet)) {
 					if (canspotmon(mtmp))
@@ -1557,7 +1557,7 @@ struct obj	*sobj;
 				!noncorporeal(youmonst.data) &&
 				!unsolid(youmonst.data)) {
 			You("are hit by %s!", doname(otmp2));
-			dmg = dmgval(otmp2, &youmonst) * otmp2->quan;
+			dmg = dmgval(otmp2, &youmonst, 0) * otmp2->quan;
 			if (uarmh && !sobj->cursed) {
 			    if(is_metallic(uarmh)) {
 				pline("Fortunately, you are wearing a hard helmet.");
@@ -2268,6 +2268,10 @@ register struct obj	*sobj;
     struct obj *otmp;
 #endif /* CONVICT */
 	/* KMH -- Punishment is still okay when you are riding */
+	if(u.sealsActive&SEAL_MALPHAS){
+		You("avoid punishment for your misbehavior!");
+		return;
+	}
 	You("are being punished for your misbehavior!");
 	if(Punished){
 		Your("iron ball gets heavier.");

@@ -427,7 +427,12 @@ register struct monst *mtmp;
 	    default:
 		if (mvitals[mndx].mvflags & G_NOCORPSE)
 		    return (struct obj *)0;
-		else{	/* preserve the unique traits of some creatures */
+		else if(u.sealsActive&SEAL_BERITH && !(mvitals[mndx].mvflags & G_UNIQ) 
+				&& mtmp->m_lev > u.ulevel && !KEEPTRAITS(mtmp)
+		){
+			obj = mkgold((long)(mtmp->m_lev*25 - rnl(mtmp->m_lev*25/2+1)), x, y);
+			mtmp->mnamelth = 0;
+		} else{	/* preserve the unique traits of some creatures */
 //			pline("preserving unique traits");
 		    obj = mkcorpstat(CORPSE, KEEPTRAITS(mtmp) ? mtmp : 0,
 				     mdat, x, y, TRUE);
@@ -655,7 +660,9 @@ struct monst *mon;
 	}
     }
 #endif
-
+	if(u.sealsActive&SEAL_CHUPOCLOPS && dist2(mon->mx, mon->my, u.ux, u.uy) <= u.ulevel){
+		mmove = max(mmove-(u.ulevel/10+1),1);
+	}
     return mmove;
 }
 
@@ -1941,40 +1948,23 @@ boolean was_swallowed;			/* digestion */
 		u.keter++;
 		return FALSE;
 	}
-	if (mdat == &mons[PM_DEMOGORGON]) {
-		livelog_write_string("destroyed Demogorgon");
-	}
-	else if (mdat == &mons[PM_ASMODEUS]) {
-		livelog_write_string("destroyed Asmodeus");
-	}
-	else if (mdat == &mons[PM_CHAOS]) {
+	if (mdat == &mons[PM_CHAOS]) {
 		if(Hallucination) livelog_write_string("perpetuated an asinine paradigm");
 		else livelog_write_string("destroyed Chaos");
+	} else if(mdat->geno & G_UNIQ){
+		char buf[BUFSZ];
+		buf[0]='\0';
+		Sprintf(buf,"destroyed %s",mon_nam(mon))
+		livelog_write_string();
 	}
-	// else if (mdat == &mons[PM_DAGON]) {
-		// livelog_write_string("destroyed Dagon");
-	// }
-	// else if (mdat == &mons[PM_VERIER]) {
-		// livelog_write_string("destroyed Verier");
-	// }
-	// else if (mdat == &mons[PM_BAALPHEGOR]) {
-		// livelog_write_string("destroyed Baalphegor");
-	// }
-	// else if (mdat == &mons[PM_PALE_NIGHT]) {
-		// livelog_write_string("destroyed Pale Night");
-	// }
-	// else if (mdat == &mons[PM_MEPHISTOPHELES]) {
-		// livelog_write_string("destroyed Mephistopheles");
-	// }
-	// else if (mdat == &mons[PM_BAALZEBUB]) {
-		// livelog_write_string("destroyed Baalzebub");
-	// }
-	// else if (mdat == &mons[PM_DISPATER]) {
-		// livelog_write_string("destroyed Dispater");
-	// }
-	// else if (mdat == &mons[PM_LEVIATHAN]) {
-		// livelog_write_string("destroyed Leviathan");
-	// }
+	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_MALPHAS && rn2(20) <= spiritDsize()){
+		struct monst *mtmp;
+		mtmp = makemon(&mons[PM_CROW], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+		initedog(mtmp);
+		mtmp->m_lev += uwep->spe;
+		mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
+		mtmp->mhp =  mtmp->mhpmax;
+	}
 	/* Gas spores always explode upon death */
 	for(i = 0; i < NATTK; i++) {
 	    if (mdat->mattk[i].aatyp == AT_BOOM  &&  mdat->mattk[i].adtyp != AD_HLBD && mdat->mattk[i].adtyp != AD_POSN) {
@@ -2028,7 +2018,6 @@ boolean was_swallowed;			/* digestion */
 			    obj->cursed = obj->blessed = FALSE;
 				explode(mon->mx, mon->my, 1, tmp, MON_EXPLODE, EXPL_FIERY);
 				u.uevent.ukilled_apollyon = 1;
-				livelog_write_string("destroyed Apollyon");
 			}
 			else if(mdat->mattk[i].adtyp == AD_GARO){
 				pline("\"R-regrettable... Although my rival, you were spectacular.");
@@ -2048,7 +2037,6 @@ boolean was_swallowed;			/* digestion */
 				pline("Die I shall, leaving no corpse.\"");
 				explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, EXPL_MUDDY);
 				pline("\"That is the law of us Garo.\"");
-				livelog_write_string("destroyed the Garo Master");
 			}
 			else if(mdat->mattk[i].adtyp == AD_COLD){
 			//mdat == &mons[PM_BAALPHEGOR] || mdat == &mons[PM_ANCIENT_OF_ICE] || mdat == &mons[PM_FREEZING_SPHERE]){
@@ -2062,7 +2050,7 @@ boolean was_swallowed;			/* digestion */
 				makemon(&mons[PM_LEVIATHAN], mon->mx, mon->my, MM_ADJACENTOK);
 			}
 			else if(mdat == &mons[PM_ANCIENT_OF_DEATH]){
-			  explode(mon->mx, mon->my, 0, tmp, MON_EXPLODE, EXPL_DARK);
+			  if(!(u.sealsActive&SEAL_OSE)) explode(mon->mx, mon->my, 0, tmp, MON_EXPLODE, EXPL_DARK);
 			}
 			else if(mdat->mattk[i].adtyp == AD_MAND){
 				struct monst *mtmp, *mtmp2;
@@ -2078,7 +2066,7 @@ boolean was_swallowed;			/* digestion */
 				/* And a finger of death type attack on you */
 				if (nonliving(youmonst.data) || is_demon(youmonst.data)) {
 					You("seem no deader than before.");
-				} else if (rn2(mon->m_lev) > 12) {
+				} else if (rn2(mon->m_lev) > 12 && !(u.sealsActive&SEAL_OSE)) {
 					if (Hallucination) {
 					You("have an out of body experience.");
 					} else {
@@ -2086,11 +2074,11 @@ boolean was_swallowed;			/* digestion */
 					killer = "mandrake's dying shriek";
 					done(DIED);
 					}
-				} else {
+				} else if(!(u.sealsActive&SEAL_OSE)){
 					if (Antimagic) shieldeff(u.ux, u.uy);
 					Your("%s flutters!", body_part(HEART));
 					mdamageu(mon, rnd(mon->m_lev));
-				}
+				} else shieldeff(u.ux,u.uy);
 			}
 			else{
 			  explode(mon->mx, mon->my, 0, tmp, MON_EXPLODE, EXPL_MUDDY);
@@ -2324,8 +2312,10 @@ boolean was_swallowed;			/* digestion */
 //		   || mdat == &mons[PM_PINK_UNICORN]
 		   )
 		return TRUE;
-	return (boolean) (!rn2((int)
-		(2 + ((int)(mdat->geno & G_FREQ)<2) + verysmall(mdat))));
+	tmp = (int)(2 + ((int)(mdat->geno & G_FREQ)<2) + verysmall(mdat));
+	return u.sealsActive&SEAL_EVE ? !rn2(tmp)||!rn2(tmp) : 
+		  (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_EVE) ?  !rn2(tmp)||!rn2(2*tmp - 1) :
+		  !rn2(tmp);
 }
 
 
@@ -2698,7 +2688,7 @@ xkilled(mtmp, dest)
 	if(redisp) newsym(x,y);
 cleanup:
 	/* punish bad behaviour */
-	if(is_human(mdat) && (!always_hostile(mdat) && mtmp->malign <= 0) &&
+	if(is_human(mdat) && !(u.sealsActive&SEAL_MALPHAS) && (!always_hostile(mdat) && mtmp->malign <= 0) &&
 	   (mndx < PM_ARCHEOLOGIST || mndx > PM_WIZARD) &&
 	   u.ualign.type != A_CHAOTIC) {
 		HTelepat &= ~INTRINSIC;

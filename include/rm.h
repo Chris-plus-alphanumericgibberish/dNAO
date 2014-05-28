@@ -262,7 +262,7 @@ extern uchar showsymcolors[MAXPCHARS];
 /*
  * Some altars are considered as shrines, so we need a flag.
  */
-#define AM_SHRINE	8
+#define AM_SHRINE	16
 
 /*
  * Thrones should only be looted once.
