@@ -2119,14 +2119,14 @@ int final;
 	}
 
 	if (!u.uconduct.shopID == 0) {
-	    dump("You never payed a shopkeeper to identify an item");
+	    dump("", "  You never payed a shopkeeper to identify an item");
 	} else {
 	    Sprintf(buf, "payed to have %d item%s identified",
 		    u.uconduct.shopID, plur(u.uconduct.shopID));
 	    dump("  You ", buf);
 	}
 	if (!u.uconduct.IDs == 0) {
-	    dump("You never magically identified an item");
+	    dump("", "  You never magically identified an item");
 	} else {
 	    Sprintf(buf, "magically identified %d item%s",
 		    u.uconduct.IDs, plur(u.uconduct.shopID));
