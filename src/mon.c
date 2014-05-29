@@ -1954,7 +1954,7 @@ boolean was_swallowed;			/* digestion */
 	} else if(mdat->geno & G_UNIQ){
 		char buf[BUFSZ];
 		buf[0]='\0';
-		Sprintf(buf,"destroyed %s",mon_nam(mon))
+		Sprintf(buf,"destroyed %s",mon_nam(mon));
 		livelog_write_string();
 	}
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_MALPHAS && rn2(20) <= spiritDsize()){
