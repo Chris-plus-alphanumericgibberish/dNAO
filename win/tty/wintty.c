@@ -375,6 +375,8 @@ tty_player_selection()
 	menu_item *selected = 0;
 
 	in_character_selection = TRUE;
+	/*Hackish solution to mysterious crashes*/
+	youmonst.data = &mons[PM_HUMAN];
 
 	/* prevent an unnecessary prompt */
 	rigid_role_checks();
@@ -430,7 +432,7 @@ give_up:	/* Quit */
 						flags.initalign, PICK_RANDOM);
 		if (flags.initrole < 0) {
 		    tty_putstr(BASE_WINDOW, 0, "Incompatible role!");
-		    flags.initrole = randrole();
+		    flags.initrole = randrole(0);
 		}
  	    } else {
 	    	tty_clear_nhwindow(BASE_WINDOW);
@@ -466,7 +468,7 @@ give_up:	/* Quit */
 		any.a_int = pick_role(flags.initrace, flags.initgend,
 				    flags.initalign, PICK_RANDOM)+1;
 		if (any.a_int == 0)	/* must be non-zero */
-		    any.a_int = randrole()+1;
+		    any.a_int = randrole(0)+1;
 		add_menu(win, NO_GLYPH, &any , '*', 0, ATR_NONE,
 				"Random", MENU_UNSELECTED);
 		any.a_int = i+1;	/* must be non-zero */
