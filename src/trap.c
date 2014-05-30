@@ -2991,6 +2991,8 @@ drown()
 	int i, x, y;
 	const char *sparkle = level.flags.lethe? "sparkling " : "";
 
+	if(u.sealsActive&SEAL_OSE) unbind(SEAL_OSE,TRUE);
+	
 	/* happily wading in the same contiguous pool */
 	if (u.uinwater && is_pool(u.ux-u.dx,u.uy-u.dy) &&
 	    (Swimming || (Amphibious && u.usubwater))) {
