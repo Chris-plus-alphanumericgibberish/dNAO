@@ -1362,6 +1362,7 @@ domove()
 		    break;
 		case 2:
 		    u.uconduct.killer++;
+			if(mtmp->data == &mons[PM_CROW] && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
 		    break;
 	    }
 	}
@@ -1442,6 +1443,7 @@ domove()
 		     * minliquid and mintrap don't know to do this
 		     */
 		    u.uconduct.killer++;
+			if(mtmp->data == &mons[PM_CROW] && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
 		    break;
 		default:
 		    pline("that's strange, unknown mintrap result!");
