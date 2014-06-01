@@ -866,6 +866,7 @@ int how;
 					u.spiritTineB = 0;
 					u.spiritTineTB = 0;
 				}
+				if(uwep->lamplit) end_burn(uwep, TRUE);
 			}
 		} else {
 			impossible("Lifesaved with no amulet or Jack?");
