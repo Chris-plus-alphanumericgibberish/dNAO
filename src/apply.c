@@ -914,6 +914,11 @@ struct obj **optr;
 
 	You("ring %s.", the(xname(obj)));
 
+	if(Role_if(PM_EXILE) && obj->otyp == BELL_OF_OPENING){
+		pline("It makes a rather sad clonk.");
+		return;
+	}
+	
 	if (Underwater || (u.uswallow && ordinary)) {
 #ifdef	AMIGA
 	    amii_speaker( obj, "AhDhGqEqDhEhAqDqFhGw", AMII_MUFFLED_VOLUME );
