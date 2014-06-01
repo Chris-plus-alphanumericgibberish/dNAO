@@ -126,6 +126,7 @@ hack_artifacts()
 	    artilist[urole.questarti].alignment = alignmnt;
 	    artilist[urole.questarti].role = Role_switch;
 	}
+	artilist[ART_PEN_OF_THE_VOID].alignment = A_VOID; //something changed this??? Change it back.
 	return;
 }
 
@@ -190,7 +191,7 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 	    if ((!by_align ? artitypematch(a, otmp) :
 		    (a->alignment == alignment ||
 			(a->alignment == A_NONE && u.ugifts > 0))) &&
-		(!(a->spfx & SPFX_NOGEN) || unique) && !artiexist[m]) {
+		(!(a->spfx & SPFX_NOGEN) || unique || (m==ART_PEN_OF_THE_VOID && Role_if(PM_EXILE))) && !artiexist[m]) {
 		if (by_align && a->race != NON_PM && race_hostile(&mons[a->race]))
 		    continue;	/* skip enemies' equipment */
 		else if (by_align && Role_if(a->role))
