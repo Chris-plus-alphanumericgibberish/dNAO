@@ -2923,16 +2923,16 @@ init_bind_list(void)
 	bind_key('d',    "drop" );
 	bind_key('D',    "dropall" );
 	bind_key(M('d'), "dip" );
-	bind_key(C('e'), "doseal" );
 	bind_key('e',    "eat" );
 	bind_key('E',    "engrave" );
 	bind_key(M('e'), "enhance" );
+	bind_key(C('e'), "drawseal" );
 	bind_key('f',    "fire" );
 	/*       'F' : fight (one time) */
 	bind_key(M('f'), "force" );
 	/*       'g', 'G' : multiple go */
 	/*       'h', 'H' : go west */
-	bind_key(C('f'), "dospirit" );
+	bind_key(C('f'), "activepower" );
 	bind_key('h',    "help" ); /* if number_pad is set */
 	bind_key('i',    "inventory" );
 	bind_key('I',    "inventoryall" ); /* Robert Viduya */
@@ -2956,7 +2956,7 @@ init_bind_list(void)
 	bind_key(M('p'), "pray" );
 	bind_key('q',    "quaff" );
 	bind_key('Q',    "quiver" );
-	bind_key(M('q'), "drawward" );
+//	bind_key(M('q'), "drawward" );
 	bind_key('r',    "read" );
 	bind_key('R',    "remove" );
 	bind_key(M('r'), "rub" );
@@ -2974,7 +2974,7 @@ init_bind_list(void)
 	bind_key(M('v'), "versionext" );
 	bind_key('w',    "wield" );
 	bind_key('W',    "wear" );
-	bind_key(C('w'), "doward" );
+	bind_key(C('w'), "drawward" );
 	bind_key(M('w'), "wipe" );
 	bind_key('x',    "swap" );
 	bind_key('X',    "twoweapon" );
