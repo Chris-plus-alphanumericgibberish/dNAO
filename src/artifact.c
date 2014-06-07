@@ -1305,6 +1305,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		else if(mdef->mcansee && haseyes(mdef->data)){
 			pline("%s is dazzled by prismatic feathers!", Monnam(mdef));
 			mdef->mstun = 1;
+			mdef->mconf = 1;
 		}
 		and = TRUE;
 	}
