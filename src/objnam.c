@@ -699,7 +699,7 @@ boolean with_price;
 		Strcat(prefix, "cursed ");
 	    else if (obj->blessed)
 		Strcat(prefix, "blessed ");
-	    else if (iflags.show_buc || (!obj->known || !objects[obj->otyp].oc_charged ||
+	    else if ((!obj->known || !objects[obj->otyp].oc_charged ||
 		      (obj->oclass == ARMOR_CLASS ||
 		       obj->oclass == RING_CLASS))
 		/* For most items with charges or +/-, if you know how many
@@ -1803,9 +1803,11 @@ const char *oldstr;
 			   !BSTRCMP(bp, p-15, "detect monsters") ||
 			   !BSTRCMPI(bp, p-11, "Aesculapius") || /* staff */
 			   !BSTRCMPI(bp, p-8, "Longinus") || 	/* spear */
-			   !BSTRCMPI(bp, p-13, "Water Flowers") || 	/* spear */
+			   !BSTRCMPI(bp, p-13, "Water Flowers") || 	/* boots */
 			   !BSTRCMPI(bp, p-14, "Dwarvish Lords") || /* axe */
 			   !BSTRCMPI(bp, p-11, "Seven Parts") || /* spear */
+			   !BSTRCMPI(bp, p-10, "Lost Names") || /* book */
+			   !BSTRCMPI(bp, p-10, "Infinite Spells") || /* book */
 			   !BSTRCMP(bp, p-10, "eucalyptus") ||
 #ifdef WIZARD
 			   !BSTRCMP(bp, p-9, "iron bars") ||
@@ -2315,6 +2317,7 @@ boolean from_user;
 	 */
 	if (!strstri(bp, "wand ")
 	 && !strstri(bp, "spellbook ")
+	 && !strstri(bp, "book ")
 	 && !strstri(bp, "rod ")
 	 && !strstri(bp, "finger ")) {
 	    if ((p = strstri(bp, " of ")) != 0
