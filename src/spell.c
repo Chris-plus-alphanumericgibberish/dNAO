@@ -1728,8 +1728,10 @@ spiriteffects(power, atme)
 				else perc = (u.uhp - mon->mhp)*100/u.uhp;
 				
 				if(perc>0 && rnd(100) < perc){
+					pline("%s vanishes.", Monnam(mon));
+					healup(d(rnd(5),dsize), 0, FALSE, FALSE);
 					mongone(mon);
-				}
+				} else You("fail.");
 			} else break;
 		}break;
 		case PWR_STARGATE:
