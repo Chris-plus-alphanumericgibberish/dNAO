@@ -638,6 +638,7 @@ boolean with_price;
 	int ispoisoned = 0;
 	char prefix[PREFIX];
 	char tmpbuf[PREFIX+1];
+    xchar pricex, pricey;
 	/* when we have to add something at the start of prefix instead of the
 	 * end (Strcat is used on the end)
 	 */
@@ -926,7 +927,9 @@ ring:
 			Strcat(bp, " (alternate weapon; not wielded)");
 	}
 	if(obj->owornmask & W_QUIVER) Strcat(bp, " (in quiver)");
-	if(obj->unpaid) {
+	if(obj->unpaid || 
+	   (get_obj_location(obj, &pricex, &pricey, 0) && obj->where==OBJ_FLOOR && !obj->no_charge && costly_spot(pricex,pricey))
+	) {
 		xchar ox, oy; 
 		long quotedprice = unpaid_cost(obj);
 		struct monst *shkp = (struct monst *)0;
