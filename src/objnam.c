@@ -938,7 +938,7 @@ ring:
 			quotedprice += contained_cost(obj, shkp, 0L, FALSE, TRUE);
 		Sprintf(eos(bp), " (unpaid, %ld %s)",
 			quotedprice, currency(quotedprice));
-        } else if (with_price) {
+    } else if (with_price) {
 	    long price = get_cost_of_shop_item(obj);
 	    if (price > 0) {
 		Sprintf(eos(bp), " (%ld %s)", price, currency(price));
