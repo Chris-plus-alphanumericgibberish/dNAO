@@ -2014,7 +2014,7 @@ spiriteffects(power, atme)
 				if (throwspell()) {
 					if(uwep->age < 500) uwep->age = 0;
 					else uwep->age -= 500;
-					explode(u.dx,u.dy,1/*Fire*/, d(5,dsize), WAND_CLASS, EXPL_FIERY);
+					explode(u.dx,u.dy,1/*Fire*/, d(rnd(5),dsize), WAND_CLASS, EXPL_FIERY);
 					end_burn(uwep, TRUE);
 					begin_burn(uwep, FALSE);
 				} else return 0;
