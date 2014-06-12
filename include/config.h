@@ -392,7 +392,7 @@ typedef unsigned char	uchar;
 #define AUTOPICKUP_EXCEPTIONS  /* exceptions to autopickup */
 
 #define DUMP_LOG        /* Dump game end information to a file */
-#define DUMP_FN "/dgldir/userdata/%N/%n/dumplog/%t.dnao.txt"      /* Fixed dumpfile name, if you want
+#define DUMP_FN "/dgldir/userdata/%n/dumplog/%t.dnao.txt"      /* Fixed dumpfile name, if you want
                                    * to prevent definition by users */
 #define DUMPMSGS 20     /* Number of latest messages in the dump file  */
 
