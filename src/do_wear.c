@@ -350,7 +350,9 @@ Helmet_on()
 	case HELM_OF_OPPOSITE_ALIGNMENT:
 		if (u.ualign.type == A_NEUTRAL)
 		    u.ualign.type = rn2(2) ? A_CHAOTIC : A_LAWFUL;
-		else u.ualign.type = -(u.ualign.type);
+		else if(u.ualign.type == A_VOID){
+		    u.ualign.type = rn2(2) ? A_CHAOTIC : A_LAWFUL;
+		}else u.ualign.type = -(u.ualign.type);
 		u.ublessed = 0; /* lose your god's protection */
 	     /* makeknown(uarmh->otyp);   -- moved below, after xname() */
 		/*FALLTHRU*/
