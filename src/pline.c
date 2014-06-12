@@ -646,6 +646,7 @@ const char *orig;
 		orig = replace(orig,"Gold pieces","Pieces of eight");
 		orig = replace(orig,"gold piece","piece of eight");
 		orig = replace(orig,"Gold piece","Piece of eight");
+		return orig;
 }
 #endif /* OVLB */
 /*pline.c*/
