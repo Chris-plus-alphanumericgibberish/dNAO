@@ -5503,7 +5503,7 @@ struct monst *mon;
 	if(couldsee(mon->mx, mon->my) && mon->mcansee){
 		if(u.sealsActive&SEAL_AHAZU && !(ublindf && ublindf->otyp==MASK)) count++;
 		// if(u.sealsActive&SEAL_AMON && !Invis && !(uarmh && is_metallic(uarmh))) count ++;
-		if(u.sealsActive&SEAL_ANDREALPHUS && !Invis && !(levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT))) count++;
+		if(u.sealsActive&SEAL_ANDREALPHUS && !Invis && !(ublindf && ublindf->otyp==MASK) && !levl[u.ux][u.uy].lit != 0) count++;
 		if(u.sealsActive&SEAL_ANDROMALIUS && !NoBInvis && !(levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT))) count++;
 		// if(u.sealsActive&SEAL_ASTAROTH && !Invis && !(ublindf && ublindf->otyp != LENSES)) count++;
 		if(u.sealsActive&SEAL_BALAM && !Invis && (uarmc || uarm) && !(uarmg && uarmf)) count++;
