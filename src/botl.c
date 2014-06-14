@@ -496,12 +496,23 @@ bot2()
   }
 #endif
 
-  if(strcmp(hu_stat[u.uhs], "        "))
+	if(uclockwork){
+		if(strcmp(ca_hu_stat[u.uhs], "        ")) {
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text(hu_stat[u.uhs], newbot2);
+    	  add_colored_text(ca_hu_stat[u.uhs], newbot2);
 #else
-  Sprintf(nb = eos(nb), " %s", hu_stat[u.uhs]);
+		  Sprintf(nb = eos(nb), " %s", ca_hu_stat[u.uhs]);
 #endif
+		}
+	} else{
+	  if(strcmp(hu_stat[u.uhs], "        ")) {
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+	      add_colored_text(hu_stat[u.uhs], newbot2);
+#else
+		  Sprintf(nb = eos(nb), " %s", hu_stat[u.uhs]);
+#endif
+	  }
+	}
   if(Confusion)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Conf", newbot2);
