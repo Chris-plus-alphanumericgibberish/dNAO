@@ -669,12 +669,13 @@ register char *enterstring;
 	}
 #ifdef CONVICT
 	/* Visible striped prison shirt */
-	if ((uarmu && (uarmu->otyp == STRIPED_SHIRT)) && !uarm && !uarmc) {
+	if ((uarmu && (uarmu->otyp == STRIPED_SHIRT)) && !uarm && !uarmc && strcmp(shkname(shkp), "Izchak") != 0) {
 	    eshkp->pbanned = TRUE;
 	}
 #endif /* CONVICT */
 
 	seenSeals = countFarSigns(shkp);
+	if(seenSeals && strcmp(shkname(shkp), "Izchak") == 0) seenSeals = 0;
 	eshkp->signspotted = max(seenSeals, eshkp->signspotted);
 	if(seenSeals > 1){
 		eshkp->pbanned = TRUE;
@@ -1513,6 +1514,7 @@ proceed:
 		return(0);
 	}        
 	seenSeals = countFarSigns(shkp);
+	if(seenSeals && strcmp(shkname(shkp), "Izchak") == 0) seenSeals = 0;
 	eshkp->signspotted = max(seenSeals, eshkp->signspotted);
 	if(seenSeals > 1){
 		eshkp->pbanned = TRUE;
@@ -1740,6 +1742,7 @@ shk_other_services()
 	shkp = shop_keeper(*u.ushops);
 	
 	seenSeals = countCloseSigns(shkp);
+	if(seenSeals && strcmp(shkname(shkp), "Izchak") == 0) seenSeals = 0;
 	ESHK(shkp)->signspotted = max(seenSeals, ESHK(shkp)->signspotted);
 	if(seenSeals > 1){
 		ESHK(shkp)->pbanned = TRUE;
@@ -4221,6 +4224,7 @@ struct monst *shkp;
 	}
 
 	seenSeals = countCloseSigns(shkp);
+	if(seenSeals && strcmp(shkname(shkp), "Izchak") == 0) seenSeals = 0;
 	ESHK(shkp)->signspotted = max(seenSeals, ESHK(shkp)->signspotted);
 	if(seenSeals > 1){
 		ESHK(shkp)->pbanned = TRUE;
