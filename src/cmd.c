@@ -2735,7 +2735,8 @@ struct ext_func_tab extcmdlist[] = {
 	{"updatestatus", "update status lines", force_bot, IFBURIED},
 	{"travel", "Travel to a specific location", dotravel, !IFBURIED},
 	{"eat", "eat something", doeat, !IFBURIED},
-	{"engrave", "engrave writing on the floor", doengward, !IFBURIED},
+/*	{"engrave", "engrave writing on the floor", doengward, !IFBURIED},*/
+	{"engrave", "engrave writing on the floor", doengrave, !IFBURIED},
 	{"ward", "engrave a ward on the floor", doward, !IFBURIED},
 	{"seal", "engrave a seal on the floor", doseal, !IFBURIED},
 	{"fire", "fire ammunition from quiver", dofire, !IFBURIED},
