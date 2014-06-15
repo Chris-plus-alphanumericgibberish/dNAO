@@ -796,6 +796,7 @@ int how;
 	int i;
 
 	if (how == TRICKED) {
+		abort();
 	    if (killer) {
 		paniclog("trickery", killer);
 		killer = 0;
