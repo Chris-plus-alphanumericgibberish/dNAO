@@ -2664,14 +2664,14 @@ int final;
 		dump("", "  You did not wish for any artifacts");
 	}
 
-	if (!u.uconduct.shopID == 0) {
-	    dump("", "  You never payed a shopkeeper to identify an item");
+	if (u.uconduct.shopID == 0) {
+	    dump("", "  You never paid a shopkeeper to identify an item");
 	} else {
-	    Sprintf(buf, "payed to have %d item%s identified",
+	    Sprintf(buf, "paid to have %d item%s identified",
 		    u.uconduct.shopID, plur(u.uconduct.shopID));
 	    dump("  You ", buf);
 	}
-	if (!u.uconduct.IDs == 0) {
+	if (u.uconduct.IDs == 0) {
 	    dump("", "  You never magically identified an item");
 	} else {
 	    Sprintf(buf, "magically identified %d item%s",
