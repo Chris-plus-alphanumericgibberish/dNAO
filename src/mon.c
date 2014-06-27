@@ -1949,24 +1949,24 @@ boolean was_swallowed;			/* digestion */
 		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    return FALSE;
 	}
-	if (mdat->mlet == S_LICH) {
+	else if (mdat->mlet == S_LICH) {
 	    if (cansee(mon->mx, mon->my) && !was_swallowed)
 		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    return FALSE;
 	}
-	if(mdat == &mons[PM_CHOKHMAH_SEPHIRAH]){
+	else if(mdat == &mons[PM_CHOKHMAH_SEPHIRAH]){
 		livelog_write_string("destroyed a chokhmah sephirah");
 		u.chokhmah++;
 		u.keter++;
 		return FALSE;
 	}
-	if (mdat == &mons[PM_CHAOS]) {
+	else if (mdat == &mons[PM_CHAOS]) {
 		if(Hallucination) livelog_write_string("perpetuated an asinine paradigm");
 		else livelog_write_string("destroyed Chaos");
 	} else if(mdat->geno & G_UNIQ){
 		char buf[BUFSZ];
 		buf[0]='\0';
-		Sprintf(buf,"destroyed %s",mon_nam(mon));
+		Sprintf(buf,"destroyed %s",noit_mon_nam(mon));
 		livelog_write_string(buf);
 	}
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_MALPHAS && rn2(20) <= spiritDsize()){
