@@ -1267,10 +1267,6 @@ register struct obj *otmp;
 		struct permonst *ptr = &mons[otmp->corpsenm];
 		if(!(is_animal(ptr) || nohands(ptr))) unbind(SEAL_BALAM,TRUE);
 	}
-	if(u.sealsActive&SEAL_TENEBROUS){
-		struct permonst *ptr = &mons[otmp->corpsenm];
-		if(ptr == &mons[PM_WRAITH]) unbind(SEAL_TENEBROUS,TRUE);
-	}
 	if(u.sealsActive&SEAL_YMIR){
 		struct permonst *ptr = &mons[otmp->corpsenm];
 		if(is_giant(ptr)) unbind(SEAL_YMIR,TRUE);
