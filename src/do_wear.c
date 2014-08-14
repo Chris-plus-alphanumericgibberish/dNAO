@@ -91,7 +91,9 @@ register struct obj *otmp;
 int
 Boots_on()
 {
-    long oldprop =
+    long oldprop;
+    if (!uarmf) return 0;
+    oldprop =
 	u.uprops[objects[uarmf->otyp].oc_oprop].extrinsic & ~WORN_BOOTS;
 
     switch(uarmf->otyp) {
@@ -194,7 +196,9 @@ STATIC_OVL
 int
 Cloak_on()
 {
-    long oldprop =
+    long oldprop;
+    if (!uarmc) return 0;
+    oldprop =
 	u.uprops[objects[uarmc->otyp].oc_oprop].extrinsic & ~WORN_CLOAK;
 
     switch(uarmc->otyp) {
@@ -318,6 +322,7 @@ Cloak_off()
 int
 Helmet_on()
 {
+    if (!uarmh) return 0;
     switch(uarmh->otyp) {
 	case FEDORA:
 	case HELMET:
@@ -422,7 +427,9 @@ STATIC_PTR
 int
 Gloves_on()
 {
-    long oldprop =
+    long oldprop;
+    if (!uarmg) return 0;
+    oldprop =
 	u.uprops[objects[uarmg->otyp].oc_oprop].extrinsic & ~WORN_GLOVES;
 
     switch(uarmg->otyp) {
@@ -639,6 +646,7 @@ Armor_gone()
 void
 Amulet_on()
 {
+    if (!uamul) return;
     switch(uamul->otyp) {
 	case AMULET_OF_ESP:
 	case AMULET_OF_LIFE_SAVING:
