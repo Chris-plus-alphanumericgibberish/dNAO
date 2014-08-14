@@ -1151,6 +1151,7 @@ E void FDECL(add_subroom, (struct mkroom *,int,int,int,int,
 			   BOOLEAN_P,SCHAR_P,BOOLEAN_P));
 E void NDECL(makecorridors);
 E int FDECL(add_door, (int,int,struct mkroom *));
+E void NDECL(mkpoolroom);
 E void NDECL(mklev);
 #ifdef SPECIALIZATION
 E void FDECL(topologize, (struct mkroom *,BOOLEAN_P));
@@ -1237,6 +1238,7 @@ E void NDECL(obj_sanity_check);
 
 /* ### mkroom.c ### */
 
+E struct mkroom * FDECL(pick_room,(BOOLEAN_P));
 E void FDECL(mkroom, (int));
 E void FDECL(fill_zoo, (struct mkroom *));
 E boolean FDECL(nexttodoor, (int,int));
