@@ -688,8 +688,8 @@ A("The Iron Ball of Liberation", HEAVY_IRON_BALL,
 A("Silver Starlight",		RAPIER,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL), 0, 0,
 	PHYS(4,4),	NO_DFNS,	NO_CARY,
-	CREATE_AMMO, A_NONE, NON_PM, PM_DROW, 5000L,
-	SPFX2_SILVERED|SPFX2_SHINING,0,0),
+	CREATE_AMMO, A_NONE, NON_PM, PM_DROW, 5000L, /*Creates throwing stars. Makes throwing stars count as silver if wielded */
+	SPFX2_SILVERED|SPFX2_SHINING,0,0),			/*Also can be (a)pplied as a magic flute.*/
 
 A("Wrathful Spider",		DROVEN_CROSSBOW,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL), 0, 0,
