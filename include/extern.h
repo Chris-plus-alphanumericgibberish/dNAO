@@ -1362,6 +1362,7 @@ E const struct permonst *FDECL(raceptr, (struct monst *));
 /* ### monmove.c ### */
 
 E boolean FDECL(scaryElb, (struct monst *));
+E boolean FDECL(scaryLol, (struct monst *));
 E boolean FDECL(scaryItem, (struct monst *));
 E boolean FDECL(scaryYellow, (int, struct monst *));
 E boolean FDECL(scaryHept, (int, struct monst *));
