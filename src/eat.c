@@ -3057,6 +3057,7 @@ int perturn;
 	
 	if(turns > 2000){
 		pline("\"That sounds really boring.\"");
+		return 0;
 	}
 	
 	price = (long)(turns*perturn + flatrate);
