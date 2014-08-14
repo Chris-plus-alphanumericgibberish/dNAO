@@ -1838,6 +1838,7 @@ register boolean newlev;
 
 	for (ptr = &u.uentered[0]; *ptr; ptr++) {
 	    register int roomno = *ptr - ROOMOFFSET, rt = rooms[roomno].rtype;
+		boolean wake = FALSE;
 
 	    /* Did we just enter some other special room? */
 	    /* vault.c insists that a vault remain a VAULT,
@@ -1847,17 +1848,29 @@ register boolean newlev;
 	    switch (rt) {
 		case ZOO:
 		    pline("Welcome to David's treasure zoo!");
+			wake = TRUE;
+		    break;
+		case GARDEN:
+		    if (Blind) pline_The("air here smells nice and fresh!");
+		    else You("enter a beautiful garden.");
+			rt = 0;
+			wake = TRUE;
 		    break;
 		case SWAMP:
 		    pline("It %s rather %s down here.",
 			  Blind ? "feels" : "looks",
 			  Blind ? "humid" : "muddy");
+			rt = 0;
+			wake = TRUE;
 		    break;
 		case COURT:
 		    You("enter an opulent throne room!");
+			rt = 0;
+			wake = TRUE;
 		    break;
 		case LEPREHALL:
 		    You("enter a leprechaun hall!");
+			rt = 0;
 		    break;
 		case MORGUE:
 		    if(midnight()) {
@@ -1865,18 +1878,24 @@ register boolean newlev;
 			pline("%s away!  %s away!", run, run);
 		    } else
 			You("have an uncanny feeling...");
+			rt = 0;
+			wake = TRUE;
 		    break;
 		case BEEHIVE:
 			if (monstinroom(&mons[PM_QUEEN_BEE], roomno)) {
 		    You("enter a giant beehive!");
 			}
 			rt = 0;
+			wake = TRUE;
 		    break;
 		case COCKNEST:
 		    You("enter a disgusting nest!");
+			rt = 0;
 		    break;
 		case ANTHOLE:
 		    You("enter an anthole!");
+			rt = 0;
+			wake = TRUE;
 		    break;
 		case BARRACKS:
 		    if(monstinroom(&mons[PM_SOLDIER], roomno) ||
@@ -1886,6 +1905,7 @@ register boolean newlev;
 			You("enter a military barracks!");
 		    else
 			You("enter an abandoned barracks.");
+			rt = 0;
 		    break;
 		case DELPHI:
 		    if(monstinroom(&mons[PM_ORACLE], roomno))
@@ -1927,11 +1947,11 @@ register boolean newlev;
 				break;
 			}
 		}
-		if (rt == COURT || rt == SWAMP || rt == MORGUE || rt == ZOO)
+	    }
+		if (wake)
 		    for(mtmp = fmon; mtmp; mtmp = mtmp->nmon)
 			if (!DEADMONSTER(mtmp) && !Stealth && !rn2(3)) mtmp->msleeping = 0;
 	    }
-	}
 
 	return;
 }
