@@ -1,6 +1,8 @@
 #	NetHack Makefile.
 #	SCCS Id: @(#)Makefile.top	3.4	1995/01/05
 
+export VERSION := $(shell util/version.pl)
+
 # newer makes predefine $(MAKE) to 'make' and do smarter processing of
 # recursive make calls if $(MAKE) is used
 # these makes allow $(MAKE) to be overridden by the environment if someone
@@ -35,8 +37,10 @@ DIRPERM  = 0755
 # therefore there should not be anything in GAMEDIR that you want to keep
 # (if there is, you'll have to do the installation by hand or modify the
 # instructions)
-GAMEDIR  = $(PREFIX)/dnao
-VARDIR  = $(GAMEDIR)/var
+GAMESUFFIX = dnao-$(VERSION)
+GAMEDIR  = $(PREFIX)/$(GAMESUFFIX)
+GAMELINK = $(PREFIX)/dnao-0.0.0-0
+VARDIR  = $(PREFIX)/playground
 #SHELLDIR = $(PREFIX)/games
 
 # per discussion in Install.X11 and Install.Qt
@@ -241,7 +245,7 @@ install: $(GAME) recover $(VARDAT) dungeon spec_levs
 # set up the directories
 # not all mkdirs have -p; those that don't will create a -p directory
 #	-mkdir -p $(SHELLDIR)
-	-rm -rf $(GAMEDIR) $(VARDIR)
+	-rm -rf $(GAMEDIR)
 	-mkdir -p $(GAMEDIR) $(VARDIR) $(VARDIR)/save
 	-rmdir ./-p
 	-$(CHOWN) $(GAMEUID) $(GAMEDIR) $(VARDIR) $(VARDIR)/save
@@ -256,6 +260,11 @@ install: $(GAME) recover $(VARDAT) dungeon spec_levs
 			chmod $(FILEPERM) perm record logfile xlogfile )
 # and a reminder
 	@echo You may also want to reinstall the man pages via the doc Makefile.
+	@echo Remember to make symlink if you are installing an updated version.
+
+symlink:
+	-rm $(GAMELINK)
+	ln -s $(GAMESUFFIX) $(GAMELINK)
 
 
 # 'make clean' removes all the .o files, but leaves around all the executables

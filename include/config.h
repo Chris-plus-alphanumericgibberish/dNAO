@@ -5,6 +5,7 @@
 #ifndef CONFIG_H /* make sure the compiler does not see the typedefs twice */
 #define CONFIG_H
 
+#include "patchlevel.h"
 
 /*
  * Section 1:	Operating and window systems selection.
@@ -214,7 +215,10 @@
  * otherwise it will be the current directory.
  */
 # ifndef HACKDIR
-#  define HACKDIR "/dnao"
+#  define STR_HELPER(x) # x /* Make the preprocessor stringify a number. Don't ask. */
+#  define STR(x) STR_HELPER(x)
+#  define HACKDIR "/dnao-" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) \
+    "." STR(PATCHLEVEL) "-" STR(EDITLEVEL)
 # endif
 
 /*
