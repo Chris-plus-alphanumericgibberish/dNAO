@@ -83,6 +83,7 @@ STATIC_OVL struct Jitem Pirate_items[] = {
 	{ SCIMITAR, "cutlass" },
 	{ SMALL_SHIELD, "buckler" },
 	{ SACK, "ditty bag" },
+	{ OILSKIN_SACK, "buccaneer's ditty bag" },
 	{ LARGE_BOX, "foot locker" },
 	{ CLUB, "belaying pin" },
 	{0, "" }
@@ -1959,6 +1960,7 @@ struct alt_spellings {
 	{ "sea biscuit", CRAM_RATION },
 	{ "cutlass", SCIMITAR },
 	{ "buckler", SMALL_SHIELD },
+	{ "buccaneer's ditty bag", OILSKIN_SACK },
 	{ "ditty bag", SACK },
 	{ "foot locker", LARGE_BOX },
 	{ "belaying pin", CLUB },
