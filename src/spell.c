@@ -3882,9 +3882,11 @@ set_spirit_powers(spirits_seal)
 	long spirits_seal;
 {
 	int i,j;
+	pline("flag = %lx",spirits_seal);
+	pline("seals active: %lx", u.sealsActive);
+	pline("special seals active: %lx", u.specialSealsActive);
 	if(spirits_seal==0) return;
 	for(i=0;i<NUMBER_POWERS;i++){
-		pline("cur = %d",i);
 		if(spiritPOwner[i]==spirits_seal){
 			pline("%d",i);
 			u.spiritPColdowns[i] = 0;
