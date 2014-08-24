@@ -3887,6 +3887,7 @@ set_spirit_powers(spirits_seal)
 	pline("special seals active: %lx", u.specialSealsActive);
 	if(spirits_seal==0) return;
 	for(i=0;i<NUMBER_POWERS;i++){
+		pline("owner of power %d is %lx",i,spiritPOwner[i]);
 		if(spiritPOwner[i]==spirits_seal){
 			pline("%d",i);
 			u.spiritPColdowns[i] = 0;
