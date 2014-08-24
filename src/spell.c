@@ -3884,6 +3884,7 @@ set_spirit_powers(spirits_seal)
 	int i,j;
 	if(spirits_seal==0) return;
 	for(i=0;i<NUMBER_POWERS;i++){
+		pline("cur = %d",i);
 		if(spiritPOwner[i]==spirits_seal){
 			pline("%d",i);
 			u.spiritPColdowns[i] = 0;
