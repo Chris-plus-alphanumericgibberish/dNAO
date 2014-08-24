@@ -748,7 +748,7 @@ getspirit(power_no)
 	return dospiritmenu("Choose which power to use", power_no);
 }
 
-static const int spiritPOwner[NUMBER_POWERS] = {
+static const long spiritPOwner[NUMBER_POWERS] = {
 	SEAL_AHAZU,
 	SEAL_AMON,
 	SEAL_ANDREALPHUS, SEAL_ANDREALPHUS,
@@ -3882,14 +3882,9 @@ set_spirit_powers(spirits_seal)
 	long spirits_seal;
 {
 	int i,j;
-	pline("flag = %lx",spirits_seal);
-	pline("seals active: %lx", u.sealsActive);
-	pline("special seals active: %lx", u.specialSealsActive);
 	if(spirits_seal==0) return;
 	for(i=0;i<NUMBER_POWERS;i++){
-		pline("owner of power %d is %lx",i,spiritPOwner[i]);
 		if(spiritPOwner[i]==spirits_seal){
-			pline("%d",i);
 			u.spiritPColdowns[i] = 0;
 			for(j=0;j<52;j++){
 				if(u.spiritPOrder[j] == i) break;
