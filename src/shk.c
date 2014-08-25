@@ -2500,6 +2500,8 @@ register struct monst *shkp;
 {
 	long tmp = getprice(obj, TRUE) * obj->quan;
 
+	obj->sknown = TRUE;
+	
 	if ((Role_if(PM_TOURIST) && u.ulevel < (MAXULEV/2))
 	    || (uarmu && uarmu->otyp == HAWAIIAN_SHIRT && !uarm && !uarmc))	/* touristy shirt visible */
 		tmp /= 3L;
