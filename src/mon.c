@@ -771,15 +771,6 @@ movemon()
 	 * 3) Once the current movement loop begins, scale the angel's movement by the value calculated in 2. Also, scale
 	 *		the angel's AC based on the value from 2, slower speed equals higher AC (Quantum Lock).
 	 */
-	struct monst *nextmon;
-	int first = 1;
-	for(mtmp = fmon; mtmp; mtmp = nextmon){
-		nextmon = mtmp->nmon;
-		if(is_weeping(mtmp->data)){
-			if(first) first = 0;
-			else mongone(mtmp);
-		}
-	}
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 	//Weeping angel step 1
 		if(is_weeping(mtmp->data)){
