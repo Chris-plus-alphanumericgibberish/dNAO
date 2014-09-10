@@ -150,11 +150,16 @@ getlock()
 		(void) close(fd);
 
 		if(iflags.window_inited) {
-		    c = yn("There is already a game in progress under your name.  Destroy old game?");
+		    pline("There is already a game in progress under your name.");
+		    pline("If this message is unexpected, say no at the following prompt and ask bcode in #dnethack to recover your game.");
+		    pline("Press 'i' at this server's main menu for help connecting.");
+		    c = yn("  Destroy old game?");
 		} else {
 		    int tmpc;
 		    (void) printf("\nThere is already a game in progress under your name.");
-		    (void) printf("  Destroy old game? [yn] ");
+		    (void) printf("\nIf this message is unexpected, say no at the following prompt\nand ask bcode in #dnethack to recover your game.");
+		    (void) printf("\nPress 'i' at this server's main menu for help connecting.");
+		    (void) printf("\n  Destroy old game? [yn] ");
 		    (void) fflush(stdout);
 		    c = getchar();
 		    (void) putchar(c);
