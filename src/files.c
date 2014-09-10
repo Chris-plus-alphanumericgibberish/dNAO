@@ -689,20 +689,25 @@ set_bonesfile_name(file, lev)
 char *file;
 d_level *lev;
 {
+	static char bonesid[16];
 	s_level *sptr;
 	char *dptr;
 
-	Sprintf(file, "bon%c%s", dungeons[lev->dnum].boneid,
+	Sprintf(bonesid, "%c%s", dungeons[lev->dnum].boneid,
 			In_quest(lev) ? urole.filecode : "0");
-	dptr = eos(file);
+	dptr = eos(bonesid);
 	if ((sptr = Is_special(lev)) != 0)
 	    Sprintf(dptr, ".%c", sptr->boneid);
 	else
 	    Sprintf(dptr, ".%d", lev->dlevel);
-#ifdef VMS
-	Strcat(dptr, ";1");
+	Sprintf(file, "bon%s", bonesid);
+#ifdef BONES_POOL
+	Sprintf(eos(file), ".%d", (u.ubirthday % 10));
 #endif
-	return(dptr-2);
+#ifdef VMS
+	Strcat(file, ";1");
+#endif
+	return(bonesid);
 }
 
 /* set up temporary file name for writing bones, to avoid another game's
@@ -1771,6 +1776,82 @@ gi_error:
     /*NOTREACHED*/
 }
 
+/*
+ * Retrieve a list of integers from a file into a longint array.
+ *
+ * Accepts decimals, hexadecimals (0x1234) or unicode codepoints (U+1234)
+ *
+ * NOTE: zeros are inserted unless modlist is TRUE, in which case the list
+ *  location is unchanged.  Callers must handle zeros if modlist is FALSE.
+ */
+STATIC_OVL int
+get_longs(fp, buf, bufp, list, modlist, size, name)
+    FILE *fp;		/* input file pointer */
+    char *buf;		/* read buffer, must be of size BUFSZ */
+    char *bufp;		/* current pointer */
+    long *list;		/* return list */
+    boolean modlist;	/* TRUE: list is being modified in place */
+    int  size;		/* return list size */
+    const char *name;		/* name of option for error message */
+{
+    long num = 0;
+    int count = 0;
+    boolean havenum = FALSE;
+    char tmpnum[16];
+    int tmpnumpos = 0;
+
+    memset(tmpnum, 0, 16);
+
+    while (1) {
+	switch(*bufp) {
+	    case ' ':  case '\0':
+	    case '\t': case '\n':
+		if (havenum) {
+		    num = parse_codepoint(tmpnum);
+		    /* if modifying in place, don't insert zeros */
+		    if (num || !modlist) list[count] = num;
+		    count++;
+		    havenum = FALSE;
+		}
+		if (count == size || !*bufp) return count;
+		bufp++;
+		memset(tmpnum, 0, 16);
+		tmpnumpos = 0;
+		break;
+
+	    case '0': case '1': case '2': case '3':
+	    case '4': case '5': case '6': case '7':
+	    case '8': case '9': /* decimals */
+	    case 'a': case 'A': case 'b': case 'B':
+	    case 'c': case 'C': case 'd': case 'D':
+	    case 'e': case 'E': case 'f': case 'F': /* hexadecimals */
+	    case 'x': case 'X': case 'u': case 'U': case '+': /* see parse_codepoint() */
+		havenum = TRUE;
+		if (tmpnumpos >= 16) goto gi_error;
+		tmpnum[tmpnumpos++] = *bufp;
+		bufp++;
+		break;
+
+	    case '\\':
+		if (fp == (FILE *)0)
+		    goto gi_error;
+		do  {
+		    if (!fgets(buf, BUFSZ, fp)) goto gi_error;
+		} while (buf[0] == '#');
+		bufp = buf;
+		break;
+
+	    default:
+gi_error:
+		raw_printf("Syntax error in %s", name);
+		wait_synch();
+		return count;
+	}
+    }
+    /*NOTREACHED*/
+}
+
+
 #ifdef NOCWD_ASSUMPTIONS
 STATIC_OVL void
 adjust_prefix(bufp, prefixid)
@@ -1943,10 +2024,20 @@ char		*tmp_levels;
 #endif
 	} else if (match_varname(buf, "MONSTERCOLOR", 12)) {
 	    return parse_monster_color(bufp);
+	} else if (match_varname(buf, "MONSTERSYMBOL", 13)) {
+	    return parse_monster_symbol(bufp);
+	} else if (match_varname(buf, "OBJECTSYMBOL", 12)) {
+	    return parse_object_symbol(bufp);
+	} else if (match_varname(buf, "SYMBOL", 6)) {
+	    return parse_symbol(bufp);
+	} else if (match_varname(buf, "DUNGEONSYMBOLS", 14)) {
+	    long utf8symbols[MAXDCHARS];
+	    len = get_longs(fp, buf, bufp, utf8symbols, FALSE, MAXDCHARS, "DUNGEONSYMBOLS");
+	    assign_graphics((glyph_t *)utf8symbols, len, MAXDCHARS, 0);
 	} else if (match_varname(buf, "GRAPHICS", 4)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
 			     MAXPCHARS, "GRAPHICS");
-	    assign_graphics(translate, len, MAXPCHARS, 0);
+	    assign_graphics((glyph_t *) translate, len, MAXPCHARS, 0);
         } else if (match_varname(buf, "STATUSCOLOR", 11)) {
             /* ignore statuscolor entries if not compiled in */
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
@@ -1955,15 +2046,15 @@ char		*tmp_levels;
 	} else if (match_varname(buf, "DUNGEON", 4)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
 			     MAXDCHARS, "DUNGEON");
-	    assign_graphics(translate, len, MAXDCHARS, 0);
+	    assign_graphics((glyph_t *) translate, len, MAXDCHARS, 0);
 	} else if (match_varname(buf, "TRAPS", 4)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
 			     MAXTCHARS, "TRAPS");
-	    assign_graphics(translate, len, MAXTCHARS, MAXDCHARS);
+	    assign_graphics((glyph_t *) translate, len, MAXTCHARS, MAXDCHARS);
 	} else if (match_varname(buf, "EFFECTS", 4)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
 			     MAXECHARS, "EFFECTS");
-	    assign_graphics(translate, len, MAXECHARS, MAXDCHARS+MAXTCHARS);
+	    assign_graphics((glyph_t *)translate, len, MAXECHARS, MAXDCHARS+MAXTCHARS);
 #ifdef USER_DUNGEONCOLOR
 	} else if (match_varname(buf, "DUNGEONCOLOR", 10)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,

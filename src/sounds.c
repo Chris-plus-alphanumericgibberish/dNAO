@@ -3180,7 +3180,7 @@ int tx,ty;
 			bindspirit(ep->ward_id);
 		} else pline("You hear whispering all around you.");
 	}break;
-		}
+	}
 	return 1;
 }
 

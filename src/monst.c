@@ -1840,7 +1840,7 @@ then fill new spaces with our spawn!’
 	M1_FLY|M1_THICK_HIDE|M1_NOHANDS|M1_CARNIVORE|M1_ACID,
 	M2_HOSTILE|M2_STRONG|M2_GREEDY|M2_JEWELS, 0, CLR_YELLOW),
     MON("gray dragon", S_DRAGON,//23
-	LVL(18, 9, -4, 20, 4), (G_GENO|1),
+	LVL(15, 9, -4, 20, 4), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_MAGM, 4, 10), ATTK(AT_BITE, AD_PHYS, 3, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 3, 4), ATTK(AT_CLAW, AD_PHYS, 3, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1849,7 +1849,7 @@ then fill new spaces with our spawn!’
 	  M1_CARNIVORE,
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC, 0, CLR_GRAY),
     MON("silver dragon", S_DRAGON,//23
-	LVL(18, 9, -4, 20, 5), (G_GENO|1),
+	LVL(15, 9, -4, 20, 5), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_COLD, 4, 10), ATTK(AT_BITE, AD_PHYS, 3, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 3, 4), ATTK(AT_CLAW, AD_PHYS, 3, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1859,7 +1859,7 @@ then fill new spaces with our spawn!’
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC,
 	0, DRAGON_SILVER),
     MON("shimmering dragon", S_DRAGON,//23
-	LVL(18, 9, -4, 20, 4), (G_GENO|1),
+	LVL(15, 9, -4, 20, 4), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_RBRE, 4, 6), ATTK(AT_BITE, AD_PHYS, 3, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 3, 4), ATTK(AT_CLAW, AD_PHYS, 3, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1869,7 +1869,7 @@ then fill new spaces with our spawn!’
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC,
 	0, CLR_CYAN),
     MON("deep dragon", S_DRAGON, //26
-	LVL(18, 9, -4, 20, -6), (G_GENO|1),
+	LVL(15, 9, -4, 20, -6), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_DRST, 4, 6), ATTK(AT_BITE, AD_DRLI, 2, 8),
 	  ATTK(AT_CLAW, AD_DRLI, 1, 4), ATTK(AT_CLAW, AD_DRLI, 1, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1880,7 +1880,7 @@ then fill new spaces with our spawn!’
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC,
 	M3_TRAITOR, CLR_MAGENTA),
     MON("red dragon", S_DRAGON,//23
-	LVL(18, 9, -4, 20, -5), (G_GENO|1),
+	LVL(15, 9, -4, 20, -5), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_FIRE, 6, 10), ATTK(AT_BITE, AD_PHYS, 4, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 3, 4), ATTK(AT_CLAW, AD_PHYS, 3, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1890,7 +1890,7 @@ then fill new spaces with our spawn!’
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC,
 	M3_INFRAVISIBLE|M3_TOSTY, CLR_RED),
     MON("white dragon", S_DRAGON,//23
-	LVL(18, 12, -4, 20, -5), (G_GENO|1),
+	LVL(15, 12, -4, 20, -5), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_COLD, 4, 6), ATTK(AT_BITE, AD_PHYS, 3, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 1, 4), ATTK(AT_CLAW, AD_PHYS, 1, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1899,7 +1899,7 @@ then fill new spaces with our spawn!’
 	  M1_CARNIVORE,
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC, M3_CHILL, CLR_WHITE),
     MON("orange dragon", S_DRAGON,//23
-	LVL(18, 9, -4, 20, 5), (G_GENO|1),
+	LVL(15, 9, -4, 20, 5), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_SLEE, 4,25), ATTK(AT_BITE, AD_PHYS, 3, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 3, 4), ATTK(AT_CLAW, AD_PHYS, 3, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1909,7 +1909,7 @@ then fill new spaces with our spawn!’
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC,
 	0, CLR_ORANGE),
     MON("black dragon", S_DRAGON,//23
-	LVL(18, 9, -4, 20, -5), (G_GENO|1),
+	LVL(15, 9, -4, 20, -5), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_DISN, 4,10), ATTK(AT_BITE, AD_PHYS, 3, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 3, 4), ATTK(AT_CLAW, AD_PHYS, 3, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1918,7 +1918,7 @@ then fill new spaces with our spawn!’
 	  M1_CARNIVORE,
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC, 0, CLR_BLACK),
     MON("blue dragon", S_DRAGON,//23
-	LVL(18, 9, -4, 20, -5), (G_GENO|1),
+	LVL(15, 9, -4, 20, -5), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_ELEC, 4, 8), ATTK(AT_BITE, AD_PHYS, 3, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 3, 4), ATTK(AT_CLAW, AD_PHYS, 3, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1927,7 +1927,7 @@ then fill new spaces with our spawn!’
 	  M1_CARNIVORE,
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC, 0, CLR_BLUE),
     MON("green dragon", S_DRAGON,//23
-	LVL(18, 9, -4, 20, 5), (G_GENO|1),
+	LVL(15, 9, -4, 20, 5), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_DRST, 4, 10), ATTK(AT_BITE, AD_PHYS, 3, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 3, 4), ATTK(AT_CLAW, AD_PHYS, 3, 4),
 	  NO_ATTK, NO_ATTK),
@@ -1936,7 +1936,7 @@ then fill new spaces with our spawn!’
 	  M1_CARNIVORE|M1_POIS,
 	M2_HOSTILE|M2_STRONG|M2_NASTY|M2_GREEDY|M2_JEWELS|M2_MAGIC, 0, CLR_GREEN),
     MON("yellow dragon", S_DRAGON,//23
-	LVL(18, 9, -4, 20, 5), (G_GENO|1),
+	LVL(15, 9, -4, 20, 5), (G_GENO|1),
 	A(ATTK(AT_BREA, AD_ACID, 4, 10), ATTK(AT_BITE, AD_PHYS, 3, 8),
 	  ATTK(AT_CLAW, AD_PHYS, 3, 4), ATTK(AT_CLAW, AD_PHYS, 3, 4),
 	  NO_ATTK, NO_ATTK),

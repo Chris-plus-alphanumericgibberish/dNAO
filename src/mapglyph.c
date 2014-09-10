@@ -61,18 +61,48 @@ int explcolors[] = {
 # endif
 #endif
 
+/** Returns the correct monster glyph.
+ *  Returns a Unicode codepoint in UTF8graphics and an ASCII character otherwise. */
+static glyph_t
+get_monsym(glyph)
+int glyph;
+{
+	if (iflags.UTF8graphics &&
+	    permonst_unicode_codepoint[glyph]) {
+		/* only return a Unicode codepoint when there is one configured */
+		return permonst_unicode_codepoint[glyph];
+	} else {
+		return monsyms[(int)mons[glyph].mlet];
+	}
+}
+
+/** Returns the correct object glyph.
+ *  Returns a Unicode codepoint in UTF8graphics and an ASCII character otherwise. */
+static glyph_t
+get_objsym(glyph)
+int glyph;
+{
+	if (iflags.UTF8graphics &&
+	    objclass_unicode_codepoint[glyph]) {
+		/* only return a Unicode codepoint when there is one configured */
+		return objclass_unicode_codepoint[glyph];
+	} else {
+		return oc_syms[(int)objects[glyph].oc_class];
+	}
+}
+
 /*ARGSUSED*/
 void
 mapglyph(glyph, ochar, ocolor, ospecial, x, y)
 int glyph, *ocolor, x, y;
-int *ochar;
+glyph_t *ochar;
 unsigned *ospecial;
 {
 	register int offset;
 #if defined(TEXTCOLOR) || defined(ROGUE_COLOR)
 	int color = NO_COLOR;
 #endif
-	uchar ch;
+	glyph_t ch;
 	unsigned special = 0;
 
     /*
@@ -91,7 +121,7 @@ unsigned *ospecial;
 	    warn_color(offset);
     } else if ((offset = (glyph - GLYPH_SWALLOW_OFF)) >= 0) {	/* swallow */
 	/* see swallow_to_glyph() in display.c */
-	ch = (uchar) showsyms[S_sw_tl + (offset & 0x7)];
+	ch = showsyms[S_sw_tl + (offset & 0x7)];
 #ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color)
 	    color = NO_COLOR;
@@ -363,7 +393,7 @@ unsigned *ospecial;
     } else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
 	if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
 	if (offset == BOULDER && iflags.bouldersym) ch = iflags.bouldersym;
-	else ch = oc_syms[(int)objects[offset].oc_class];
+	else ch = get_objsym(offset);
 #ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color) {
 	    switch(objects[offset].oc_class) {
@@ -380,7 +410,7 @@ unsigned *ospecial;
 	    special |= MG_OBJPILE;
 	}
     } else if ((offset = (glyph - GLYPH_RIDDEN_OFF)) >= 0) {	/* mon ridden */
-	ch = monsyms[(int)mons[offset].mlet];
+	ch = get_monsym(offset);
 #ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS)
 	    /* This currently implies that the hero is here -- monsters */
@@ -393,7 +423,7 @@ unsigned *ospecial;
 	    special |= MG_RIDDEN;
     } else if ((offset = (glyph - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */
 	if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
-	ch = oc_syms[(int)objects[CORPSE].oc_class];
+	ch = get_objsym(CORPSE);
 #ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color)
 	    color = CLR_RED;
@@ -407,7 +437,7 @@ unsigned *ospecial;
 	    special |= MG_OBJPILE;
 	}
     } else if ((offset = (glyph - GLYPH_DETECT_OFF)) >= 0) {	/* mon detect */
-	ch = monsyms[(int)mons[offset].mlet];
+	ch = get_monsym(offset);
 #ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS)
 	    color = NO_COLOR;	/* no need to check iflags.use_color */
@@ -427,7 +457,7 @@ unsigned *ospecial;
 	    invis_color(offset);
 	    special |= MG_INVIS;
     } else if ((offset = (glyph - GLYPH_PET_OFF)) >= 0) {	/* a pet */
-	ch = monsyms[(int)mons[offset].mlet];
+	ch = get_monsym(offset);
 #ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS)
 	    color = NO_COLOR;	/* no need to check iflags.use_color */
@@ -436,7 +466,7 @@ unsigned *ospecial;
 	    pet_color(offset);
 	    special |= MG_PET;
     } else {							/* a monster */
-	ch = monsyms[(int)mons[glyph].mlet];
+	ch = get_monsym(glyph);
 #ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color) {
 	    if (x == u.ux && y == u.uy)
@@ -471,7 +501,7 @@ unsigned *ospecial;
 	color = NO_COLOR;
 #endif
 
-    *ochar = (int)ch;
+    *ochar = ch;
     *ospecial = special;
 #ifdef TEXTCOLOR
     *ocolor = color;
