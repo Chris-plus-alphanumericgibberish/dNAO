@@ -8,7 +8,6 @@ STATIC_PTR int NDECL(stealarm);
 
 #ifdef OVLB
 STATIC_DCL const char *FDECL(equipname, (struct obj *));
-STATIC_DCL void FDECL(mdrop_obj, (struct monst *,struct obj *,BOOLEAN_P));
 
 STATIC_OVL const char *
 equipname(otmp)
@@ -143,7 +142,7 @@ unsigned int stealoid;		/* object to be stolen */
 unsigned int stealmid;		/* monster doing the stealing */
 
 STATIC_PTR int
-stealarm()
+stealarm(VOID_ARGS)
 {
 	register struct monst *mtmp;
 	register struct obj *otmp;
