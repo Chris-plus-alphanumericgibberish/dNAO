@@ -576,7 +576,7 @@ struct monst *mtmp;
 #ifdef OVL0
 
 /* drop one object taken from a (possibly dead) monster's inventory */
-STATIC_OVL void
+void
 mdrop_obj(mon, obj, verbosely)
 struct monst *mon;
 struct obj *obj;
