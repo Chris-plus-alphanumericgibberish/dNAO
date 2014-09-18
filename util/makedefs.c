@@ -69,6 +69,7 @@ static	const char	SCCS_Id[] = "@(#)makedefs.c\t3.4\t2002/02/03";
 #define QTXT_O_FILE	"quest.dat"
 #define VIS_TAB_H	"vis_tab.h"
 #define VIS_TAB_C	"vis_tab.c"
+#define COMMIT_DESC	"commit_desc"
 	/* locations for those files */
 #ifdef AMIGA
 # define FILE_PREFIX
@@ -521,7 +522,8 @@ version_id_string(outbuf, build_date)
 char *outbuf;
 const char *build_date;
 {
-    char subbuf[64], versbuf[64];
+    char subbuf[64], versbuf[64], infile[60];
+    size_t tmp;
 
     subbuf[0] = '\0';
 #ifdef PORT_SUB_ID
@@ -532,8 +534,22 @@ const char *build_date;
     Strcat(subbuf, " Beta");
 #endif
 
-    Sprintf(outbuf, "%s NetHack%s Version %s - last build %s.",
-	    PORT_ID, subbuf, version_string(versbuf), build_date);
+    Sprintf(infile, DATA_IN_TEMPLATE, COMMIT_DESC);
+    if (!(ifp = fopen(infile, RDTMODE))) {
+        perror(infile);
+        exit(EXIT_FAILURE);
+    }
+    if (!fgets(in_line, sizeof in_line, ifp)) {
+        perror(infile);
+        Fclose(ifp);
+        exit(EXIT_FAILURE);
+    }
+    Fclose(ifp);
+    tmp = strlen(in_line);
+    if (tmp && in_line[tmp-1] == '\n')
+        in_line[tmp-1] = '\0';
+    Sprintf(outbuf, "%s dNetHack%s Version %s - commit %s, last build %s.",
+	    PORT_ID, subbuf, version_string(versbuf), in_line, build_date);
     return outbuf;
 }
 

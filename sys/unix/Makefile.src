@@ -500,6 +500,9 @@ tile.c: ../win/share/tilemap.c $(HACK_H)
 ../win/gnome/gn_rip.h: ../win/X11/rip.xpm
 	cp ../win/X11/rip.xpm ../win/gnome/gn_rip.h
 
+../dat/commit_desc:
+	git describe --always > ../dat/commit_desc
+
 #	date.h should be remade any time any of the source or include code
 #	is modified.  Unfortunately, this would make the contents of this
 #	file far more complex.  Since "hack.h" depends on most of the include
@@ -508,7 +511,7 @@ tile.c: ../win/share/tilemap.c $(HACK_H)
 #
 #	hack.h depends on makedefs' output, so we know makedefs will be
 #	up to date before being executed
-../include/date.h:	$(VERSOURCES) $(HACK_H)
+../include/date.h:	$(VERSOURCES) $(HACK_H) ../dat/commit_desc
 	../util/makedefs -v
 
 
