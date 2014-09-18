@@ -548,8 +548,8 @@ const char *build_date;
     tmp = strlen(in_line);
     if (tmp && in_line[tmp-1] == '\n')
         in_line[tmp-1] = '\0';
-    Sprintf(outbuf, "%s dNetHack%s Version %s - commit %s, last build %s.",
-	    PORT_ID, subbuf, version_string(versbuf), in_line, build_date);
+    Sprintf(outbuf, "dNetHack Version %s (dNAO %s), last build %s.",
+	    version_string(versbuf), in_line, build_date);
     return outbuf;
 }
 
