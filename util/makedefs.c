@@ -548,7 +548,7 @@ const char *build_date;
     tmp = strlen(in_line);
     if (tmp && in_line[tmp-1] == '\n')
         in_line[tmp-1] = '\0';
-    Sprintf(outbuf, "dNetHack Version %s (dNAO %s), last build %s.",
+    Sprintf(outbuf, "dNetHack v%s (dNAO git %s), last build %s.",
 	    version_string(versbuf), in_line, build_date);
     return outbuf;
 }
