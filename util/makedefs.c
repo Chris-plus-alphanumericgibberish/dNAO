@@ -522,7 +522,7 @@ version_id_string(outbuf, build_date)
 char *outbuf;
 const char *build_date;
 {
-    char subbuf[64], versbuf[64], infile[60];
+    char subbuf[64], versbuf[64];
     size_t tmp;
 
     subbuf[0] = '\0';
@@ -534,13 +534,13 @@ const char *build_date;
     Strcat(subbuf, " Beta");
 #endif
 
-    Sprintf(infile, DATA_IN_TEMPLATE, COMMIT_DESC);
-    if (!(ifp = fopen(infile, RDTMODE))) {
-        perror(infile);
+    Sprintf(filename, DATA_IN_TEMPLATE, COMMIT_DESC);
+    if (!(ifp = fopen(filename, RDTMODE))) {
+        perror(filename);
         exit(EXIT_FAILURE);
     }
     if (!fgets(in_line, sizeof in_line, ifp)) {
-        perror(infile);
+        perror(filename);
         Fclose(ifp);
         exit(EXIT_FAILURE);
     }
@@ -572,13 +572,9 @@ do_date()
 	Fprintf(ofp,"/*\tSCCS Id: @(#)date.h\t3.4\t2002/02/03 */\n\n");
 	Fprintf(ofp,Dont_Edit_Code);
 
-#ifdef KR1ED
-	(void) time(&clocktim);
-	Strcpy(cbuf, ctime(&clocktim));
-#else
 	(void) time((time_t *)&clocktim);
-	Strcpy(cbuf, ctime((time_t *)&clocktim));
-#endif
+	strftime(cbuf, sizeof cbuf, "%F %T", gmtime((time_t *)&clocktim));
+
 	for (c = cbuf; *c; c++) if (*c == '\n') break;
 	*c = '\0';	/* strip off the '\n' */
 	Fprintf(ofp,"#define BUILD_DATE \"%s\"\n", cbuf);
