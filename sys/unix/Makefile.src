@@ -24,6 +24,8 @@
 #	'SysBe'		-- BeOS
 SYSTEM = Sysunix
 
+.PHONY: ../dat/commit_desc
+
 #
 # Make sure that your bourne shell is specified here, as you have to spawn
 # some of the commands (eg. depend) in bourne shell for them to work.
