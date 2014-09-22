@@ -764,12 +764,18 @@ gcrownu()
 			if (obj && obj->oartifact == ART_NECRONOMICON){
 				obj->ovar1 |= SP_DEATH;
 				discover_artifact(ART_NECRONOMICON);
+			} else if (obj && obj->oartifact == ART_SCROLL_OF_INFINITE_SPELLS){
+				obj->ovar1 = SPE_FINGER_OF_DEATH;
+				discover_artifact(ART_SCROLL_OF_INFINITE_SPELLS);
     }
 		}
 		else{
 			for(obj = invent; obj; obj=obj->nobj)
 				if(obj->oartifact == ART_NECRONOMICON) 
 					obj->ovar1 |= SP_DEATH;
+			if(!obj) for(obj = invent; obj; obj=obj->nobj)
+				if(obj->oartifact == ART_SCROLL_OF_INFINITE_SPELLS) 
+					obj->ovar1 = SPE_FINGER_OF_DEATH;
 
 		}
 	} else if (Role_if(PM_MONK)) {
