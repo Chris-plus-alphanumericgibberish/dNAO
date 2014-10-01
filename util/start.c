@@ -35,7 +35,7 @@ void oops(const char *err, int errnum) {
         printf("error trying to determine game version: %s\n", err);
 
     getchar();
-    exit(1);
+    exit(2);
 }
 
 /* parameters: playground path, player name, arguments to game binary */
@@ -117,6 +117,11 @@ int main (int argc, char *argv[]) {
         fd = open(path, O_RDONLY);
         if (fd == -1)
             goto mostrecent;
+        else {
+            printf("\e[5;2H\e[1mA game is already in progress for %s.\e[0m"
+                    "\e[6;2HIf this is unexpected, please contact the server administrator.\n", player);
+            exit(1);
+        }
         lseek(fd, 53, SEEK_SET);
     }
 
