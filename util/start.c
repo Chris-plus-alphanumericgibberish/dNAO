@@ -120,6 +120,7 @@ int main (int argc, char *argv[]) {
         else {
             printf("\e[5;2H\e[1mA game is already in progress for %s.\e[0m"
                     "\e[6;2HIf this is unexpected, please contact the server administrator.\n", player);
+            getchar();
             exit(1);
         }
         lseek(fd, 53, SEEK_SET);
