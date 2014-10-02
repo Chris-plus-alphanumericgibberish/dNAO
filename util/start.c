@@ -11,6 +11,7 @@
 
 int lockfd = -1;
 struct flock sflock;
+long e = 0;
 
 int file_exists(const char *path) {
     struct stat buf;
@@ -28,11 +29,13 @@ void oops(const char *err, int errnum) {
 
     if (errnum)
         printf("error trying to determine game version: %s (%s)\n", err, strerror(errnum));
+    else if (e == -1)
+        printf("error trying to determine game version: %s (%s)\n", err, strerror(errno));
     else
         printf("error trying to determine game version: %s\n", err);
 
     getchar();
-    exit(1);
+    exit(2);
 }
 
 /* parameters: playground path, player name, arguments to game binary */
@@ -94,6 +97,7 @@ int main (int argc, char *argv[]) {
 
     if (file_exists(path)) {
         pid_t pid = fork();
+        printf("decompressing '%s'...\n", path);
         if (pid == -1)
             oops("could not fork", errno);
         else if (pid)
@@ -113,10 +117,17 @@ int main (int argc, char *argv[]) {
         fd = open(path, O_RDONLY);
         if (fd == -1)
             goto mostrecent;
+        else {
+            printf("\e[5;2H\e[1mA game is already in progress for %s.\e[0m"
+                    "\e[6;2HIf this is unexpected, please contact the server administrator.\n", player);
+            getchar();
+            exit(1);
+        }
         lseek(fd, 53, SEEK_SET);
     }
 
-    if (read(fd, &ver, sizeof(ver)) != sizeof(ver))
+    printf("looking at file '%s'...\n", path);
+    if ((e = read(fd, &ver, sizeof(ver))) != sizeof(ver))
         oops("read wrong number of version bytes", 0);
 
     close(fd);
