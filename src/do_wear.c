@@ -322,6 +322,8 @@ Cloak_off()
 int
 Helmet_on()
 {
+	static int gcircletsa = 0;
+	if(!gcircletsa) gcircletsa = find_gcirclet();
     if (!uarmh) return 0;
     switch(uarmh->otyp) {
 	case FEDORA:
@@ -332,6 +334,8 @@ Helmet_on()
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
 	case HELM_OF_TELEPATHY:
+	case HELM_OF_DRAIN_RESISTANCE:
+		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, uarmh->spe);
 		break;
 	case HELM_OF_BRILLIANCE:
 		adj_abon(uarmh, uarmh->spe);
@@ -346,6 +350,7 @@ Helmet_on()
 		makeknown(uarmh->otyp);
 		break;
 	case HELM_OF_OPPOSITE_ALIGNMENT:
+		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, uarmh->spe);
 		if (u.ualign.type == A_NEUTRAL)
 		    u.ualign.type = rn2(2) ? A_CHAOTIC : A_LAWFUL;
 		else if(u.ualign.type == A_VOID){
@@ -383,6 +388,9 @@ Helmet_on()
 int
 Helmet_off()
 {
+	static int gcircletsa = 0;
+	if(!gcircletsa) gcircletsa = find_gcirclet();
+	
     takeoff_mask &= ~W_ARMH;
 
     switch(uarmh->otyp) {
@@ -393,6 +401,7 @@ Helmet_off()
 	case DWARVISH_IRON_HELM:
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
+		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, -uarmh->spe);
 	    break;
 	case DUNCE_CAP:
 	    flags.botl = 1;
@@ -405,6 +414,7 @@ Helmet_off()
 	    break;
 	case HELM_OF_TELEPATHY:
 	    /* need to update ability before calling see_monsters() */
+		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, -uarmh->spe);
 	    setworn((struct obj *)0, W_ARMH);
 	    see_monsters();
 	    return 0;
@@ -412,10 +422,15 @@ Helmet_off()
 	    if (!cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    break;
 	case HELM_OF_OPPOSITE_ALIGNMENT:
+		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, -uarmh->spe);
 	    u.ualign.type = u.ualignbase[A_CURRENT];
 	    u.ublessed = 0; /* lose the other god's protection */
 	    flags.botl = 1;
 	    break;
+	case HELM_OF_DRAIN_RESISTANCE:
+		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, -uarmh->spe);
+	    setworn((struct obj *)0, W_ARMH);
+	    return 0;
 	default: impossible(unknown_type, c_helmet, uarmh->otyp);
     }
     setworn((struct obj *)0, W_ARMH);
@@ -2521,6 +2536,9 @@ adj_abon(otmp, delta)
 register struct obj *otmp;
 register schar delta;
 {
+	static int gcircletsa = 0;
+	if(!gcircletsa) gcircletsa = find_gcirclet();
+	
 	if (uarmg && uarmg == otmp && otmp->otyp == GAUNTLETS_OF_DEXTERITY) {
 		if (delta) {
 			makeknown(uarmg->otyp);
@@ -2534,6 +2552,10 @@ register schar delta;
 			ABON(A_INT) += (delta);
 			ABON(A_WIS) += (delta);
 		}
+		flags.botl = 1;
+	}
+	if(uarmh && uarmh == otmp && otmp->otyp == gcircletsa){
+		if (delta) ABON(A_CHA) += (delta);
 		flags.botl = 1;
 	}
 }
