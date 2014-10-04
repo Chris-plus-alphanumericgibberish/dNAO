@@ -595,7 +595,7 @@ const char *st, *orig, *repl;
 	static char retval[TBUFSZ];
 	char buffer[TBUFSZ];
 	const char *ch, *pos;
-	long len;
+	size_t len;
 	memset(buffer, 0, TBUFSZ);
 	pos = st;
 	while ((ch = strstr(pos, orig))){
