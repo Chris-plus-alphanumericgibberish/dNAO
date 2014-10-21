@@ -2006,6 +2006,9 @@ register struct monst *mtmp;
 	struct permonst *mptr;
 	int tmp;
 
+	/* cease occupation if the monster was associated */
+	if(mtmp->moccupation) stop_occupation();
+	
 	if(mtmp->isgd) {
 		/* if we're going to abort the death, it *must* be before
 		 * the m_detach or there will be relmon problems later */
@@ -2567,6 +2570,9 @@ register struct monst *mdef;
 	if (mdef == u.usteed)
 		dismount_steed(DISMOUNT_GENERIC);
 #endif
+	/* cease occupation if the monster was associated */
+	if(mdef->moccupation) stop_occupation();
+	
 
 	/* drop special items like the Amulet so that a dismissed Keter or nurse
 	   can't remove them from the game */
@@ -2591,6 +2597,9 @@ register struct monst *mdef;
 		dismount_steed(DISMOUNT_GENERIC);
 #endif
 
+	/* cease occupation if the monster was associated */
+	if(mdef->moccupation) stop_occupation();
+	
 	/* drop special items like the Amulet so that a dismissed Keter or nurse
 	   can't remove them from the game */
 	mdrop_special_objs(mdef);
