@@ -720,7 +720,17 @@ gcrownu()
 			u.uevent.uhand_of_elbereth = 7;
 			verbalize("I crown thee...  The Saint %s!", flags.female ? "Queen" : "King");
 			livelog_write_string("recieved the crown of the Saint King");
-	}
+		}
+	} else if(Role_if(PM_SAMURAI)){
+		char crown_msg[BUFSZ];
+		u.uevent.uhand_of_elbereth = 1; /* Alignment of Nasu clan is treated as lawful */
+		in_hand = FALSE;
+		already_exists = exist_artifact(YUMI, artiname(ART_YOICHI_NO_YUMI));
+		strcpy(crown_msg, "I proclame thee...  Nasu no ");
+		strcat(crown_msg, plname);
+		strcat(crown_msg, "!");
+		verbalize(crown_msg);
+		livelog_write_string(crown_msg)
 	} else {
 		u.uevent.uhand_of_elbereth = 1;
 #ifdef ELBERETH
