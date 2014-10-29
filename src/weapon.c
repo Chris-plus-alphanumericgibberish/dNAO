@@ -279,7 +279,7 @@ int spec;
 			if(otmp->oartifact == ART_ATMA_WEAPON &&
 				!Drain_resistance
 			){
-				tmp += u.ulevel;
+				tmp += rnd(u.ulevel);
 				tmp *= Upolyd ?
 						((float)u.mh)/u.mhmax  :
 						((float)u.uhp)/u.uhpmax;
@@ -343,7 +343,7 @@ int spec;
 			if(otmp->oartifact == ART_ATMA_WEAPON &&
 				!Drain_resistance
 			){
-				tmp += u.ulevel;
+				tmp += rnd(u.ulevel);
 				tmp *= Upolyd ?
 						((float)u.mh)/u.mhmax  :
 						((float)u.uhp)/u.uhpmax;
