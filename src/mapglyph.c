@@ -179,8 +179,8 @@ unsigned *ospecial;
 		if(iflags.use_color && iflags.dnethack_dungeon_colors){
 			if(In_sokoban(&u.uz)){
 				if(offset >= S_vwall && offset <= S_trwall){
-					color = CLR_BLUE;
-			}
+					color = CLR_BRIGHT_BLUE;
+				}
 			} else if(In_endgame(&u.uz)){
 				if(Is_earthlevel(&u.uz)){
 					if(offset >= S_vwall && offset <= S_trwall){
@@ -191,7 +191,7 @@ unsigned *ospecial;
 					}
 				} else if(Is_waterlevel(&u.uz)){
 					if(offset >= S_vwall && offset <= S_trwall){
-						color = CLR_BLUE;
+						color = CLR_BRIGHT_BLUE;
 					}
 					if(offset >= S_room && offset <= S_dnladder){
 						color = CLR_BLUE;
@@ -264,7 +264,7 @@ unsigned *ospecial;
 				}
 				else if(Is_rlyeh(&u.uz)){
 					if(offset >= S_vwall && offset <= S_trwall){
-						color = CLR_BLUE;
+						color = CLR_BRIGHT_BLUE;
 					}
 					else if(offset >= S_room && offset <= S_dnladder){
 						color = CLR_BLUE;
@@ -290,7 +290,7 @@ unsigned *ospecial;
 						}
 						else if(offset >= S_room && offset <= S_dnladder){
 							color = CLR_GREEN;
-			}
+						}
 					}
 				}
 			} else if(In_hell(&u.uz)){
