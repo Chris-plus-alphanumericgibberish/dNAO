@@ -1713,7 +1713,7 @@ dopois:
 
 			}
 			if (!mtmp->mcan && !rn2(3) && !Drain_resistance) {
-				if(!has_blood(youmonst.data) || uclockwork) pline("%s feeds on you life force!",Monnam(mtmp));
+				if(!has_blood(youmonst.data) || uclockwork) pline("%s feeds on your life force!",Monnam(mtmp));
 			    losexp("life force drain",TRUE,FALSE,FALSE);
 			}
 		break;
