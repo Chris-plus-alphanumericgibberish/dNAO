@@ -730,7 +730,7 @@ gcrownu()
 		strcat(crown_msg, plname);
 		strcat(crown_msg, "!");
 		verbalize(crown_msg);
-		livelog_write_string(crown_msg)
+		livelog_write_string(crown_msg);
 	} else {
 		u.uevent.uhand_of_elbereth = 1;
 #ifdef ELBERETH
