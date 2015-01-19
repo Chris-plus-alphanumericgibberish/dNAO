@@ -191,9 +191,11 @@ rank_of(lev, monnum, female)
 
 
 	/* Find the role */
-	for (role = (struct Role *) roles; role->name.m; role++)
+	if(Role_if(monnum)) role = &urole;
+	else for (role = (struct Role *) roles; role->name.m; role++)
 	    if (monnum == role->malenum || monnum == role->femalenum)
 	    	break;
+	
 	if (!role->name.m)
 	    role = &urole;
 
@@ -213,7 +215,18 @@ rank_of(lev, monnum, female)
 STATIC_OVL const char *
 rank()
 {
-	return(rank_of(u.ulevel, Role_switch, flags.female));
+	int i;
+	/* Find the rank */
+	for (i = xlev_to_rank((int)(u.ulevel)); i >= 0; i--) {
+	    if (flags.female && urole.rank[i].f) return (urole.rank[i].f);
+	    if (urole.rank[i].m) return (urole.rank[i].m);
+	}
+
+	/* Try the role name, instead */
+	if (flags.female && urole.name.f) return (urole.name.f);
+	else if (urole.name.m) return (urole.name.m);
+	return ("Player");
+	// return(rank_of(u.ulevel, Role_switch, flags.female));
 }
 
 int
