@@ -7,9 +7,12 @@
 
 #ifdef OVLB
 
-static const char tools[] = { COIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
+static const char tools[] = { COIN_CLASS, CHAIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
 static const char tools_too[] = { COIN_CLASS, ALL_CLASSES, TOOL_CLASS, POTION_CLASS,
-				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, 0 };
+				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, 0 };
+static const char apply_armor[] = { ARMOR_CLASS, 0 };
+static const char apply_corpse[] = { FOOD_CLASS, 0 };
+static const char apply_all[] = { ALL_CLASSES, CHAIN_CLASS, 0 };
 
 #ifdef TOURIST
 STATIC_DCL int FDECL(use_camera, (struct obj *));
@@ -100,7 +103,7 @@ STATIC_OVL int
 do_present_ring(obj)
 	struct obj *obj;
 {
-	register struct monst *mtmp;
+	register struct monst *mtmp, *tm;
 
 	if(!getdir((char *)0)) return 0;
 	
@@ -180,7 +183,8 @@ do_present_ring(obj)
 	} else if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0) {
 		You("display the ring's engraving to %s.", mon_nam(mtmp));
 		if (obj->cursed && rn2(3)) {
-			return 0;
+			pline("But the ring's engraving is fogged over!");
+			return 1;
 		}
 		if(!(obj->ohaluengr) || obj->ovar1 == CERULEAN_SIGN){
 			if(
@@ -210,6 +214,121 @@ do_present_ring(obj)
 					monflee(mtmp, rnd(10), TRUE, TRUE);
 				else
 					monflee(mtmp, rnd(100), TRUE, TRUE);
+			}
+		} else if(obj->ohaluengr && obj->ovar1 >= FIRST_DROW_SYM && obj->ovar1 <= LAST_DROW_SYM && 
+			(is_elf(mtmp->data) || is_drow(mtmp->data) || mtmp->data == &mons[PM_EDDERKOP])
+		){
+			if(flags.stag && 
+				(mtmp->mfaction == u.uhouse || allied_faction(mtmp->mfaction,u.uhouse)) && 
+				obj->ovar1 == EDDER_SYMBOL && 
+				!(mtmp->female)
+			){
+				verbalize("The revolution has begun!");
+				for(tm = fmon; tm; tm = tm->nmon){
+					if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
+						((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+						((mtmp->mfaction == u.uhouse || allied_faction(mtmp->mfaction,u.uhouse)) && 
+							obj->ovar1 == EDDER_SYMBOL && !(mtmp->female))
+					){
+						if(is_drow(tm->data)) tm->mfaction = EDDER_SYMBOL;
+						tm->housealert = 1;
+						tm->mpeaceful = 1;
+					}
+				}
+			} else if((obj->ovar1 == mtmp->mfaction) || 
+				(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(mtmp->data)) || 
+				((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  mtmp->data == &mons[PM_EDDERKOP])
+			){
+				if(mtmp->housealert && !(mtmp->mpeaceful)){
+					verbalize("Die, spy!");
+					for(tm = fmon; tm; tm = tm->nmon){
+						if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
+							((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+							(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+						){
+							tm->housealert = 1;
+							tm->mpeaceful = 0;
+						}
+					}
+				} else if(flags.female){
+					if((obj->ovar1 == XAXOX && uarm && uarm->ovar1 && uarm->ovar1 == obj->ovar1) ||
+					   (obj->ovar1 == EDDER_SYMBOL && uarm && uarm->ovar1 && uarm->ovar1 == obj->ovar1) ||
+						!(uarm) || !(uarm->ovar1) || uarm->ovar1 == obj->ovar1 ||
+						(
+						 uarm->ovar1 == LOLTH_SYMBOL && 
+						 obj->ovar1 != EILISTRAEE_SYMBOL &&   
+						 obj->ovar1 != XAXOX &&   
+						 obj->ovar1 != EDDER_SYMBOL
+						)
+					){
+						verbalize("She's one of ours!");
+						if(obj->ovar1 != XAXOX && obj->ovar1 != EDDER_SYMBOL) verbalize("Apologies, my lady!");
+						for(tm = fmon; tm; tm = tm->nmon){
+							if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
+								((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+							){
+								tm->housealert = 1;
+								tm->mpeaceful = 1;
+							}
+						}
+					} else {
+						verbalize("Die, spy!");
+						for(tm = fmon; tm; tm = tm->nmon){
+							if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
+								((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+							){
+								tm->housealert = 1;
+								tm->mpeaceful = 0;
+							}
+						}
+					}
+				} else {
+					if(((obj->ovar1 <= LAST_TOWER && obj->ovar1 >= FIRST_TOWER) && 
+						(!(uarm) || !(uarm->ovar1) || uarm->ovar1 == obj->ovar1)) ||
+					   ((obj->ovar1 == EDDER_SYMBOL || 
+					     obj->ovar1 == XAXOX || 
+						 obj->ovar1 == EILISTRAEE_SYMBOL) && (!(uarm) || !(uarm->ovar1) || uarm->ovar1 == obj->ovar1)) ||
+					   (uarm && uarm->ovar1 && uarm->ovar1 == obj->ovar1)
+					){
+						verbalize("He's one of ours!");
+						verbalize("Move along, sir.");
+						for(tm = fmon; tm; tm = tm->nmon){
+							if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
+								((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+							){
+								tm->mpeaceful = 1;
+							}
+						}
+					} else {
+						verbalize("Die, spy!");
+						for(tm = fmon; tm; tm = tm->nmon){
+							if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
+								((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+							){
+								tm->housealert = 1;
+								tm->mpeaceful = 0;
+							}
+						}
+					}
+				}
+			} else {
+				verbalize("Die!");
+				mtmp->housealert = 1;
+				for(tm = fmon; tm; tm = tm->nmon){
+					if((is_drow(tm->data) && (mtmp->mfaction == tm->mfaction || allied_faction(mtmp->mfaction, tm->mfaction))) || 
+						((mtmp->mfaction == EDDER_SYMBOL || mtmp->mfaction == XAXOX || tm->data == &mons[PM_EDDERKOP]) && 
+							(tm->mfaction == EDDER_SYMBOL || tm->mfaction == XAXOX || tm->data == &mons[PM_EDDERKOP])) ||
+						((mtmp->mfaction == EILISTRAEE_SYMBOL || is_elf(mtmp->data)) && 
+							(tm->mfaction == EILISTRAEE_SYMBOL || is_elf(tm->data)))
+					){
+						tm->housealert = 1;
+						tm->mpeaceful = 0;
+					}
+				}
 			}
 		}
 	}
@@ -774,26 +893,26 @@ struct obj *obj;
 			obj->age = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
 		} else if(!Blind && !Invisible) {
 		    if (u.umonnum == PM_FLOATING_EYE && ward_at(u.ux, u.uy) != HAMSA) {
-			if (!Free_action) {
+				if (!Free_action) {
 					pline("%s", Hallucination ?
-			      "Yow!  The mirror stares back!" :
-			      "Yikes!  You've frozen yourself!");
+						  "Yow!  The mirror stares back!" :
+						  "Yikes!  You've frozen yourself!");
 					nomul(-rnd((MAXULEV+6) - u.ulevel), "frozen by your own reflection");
-			} else You("stiffen momentarily under your gaze.");
+				} else You("stiffen momentarily under your gaze.");
 		    } else if (youmonst.data->mlet == S_VAMPIRE)
-			You("don't have a reflection.");
+				You("don't have a reflection.");
 		    else if (u.umonnum == PM_UMBER_HULK && ward_at(u.ux, u.uy) != HAMSA) {
-			pline("Huh?  That doesn't look like you!");
-			make_confused(HConfusion + d(3,4),FALSE);
+				pline("Huh?  That doesn't look like you!");
+				make_confused(HConfusion + d(3,4),FALSE);
 		    } else if (u.sealsActive&SEAL_IRIS){
 				pline("What?  Who is that in the mirror!?");
 				unbind(SEAL_IRIS,TRUE);
 		    } else if (Hallucination)
-			You(look_str, hcolor((char *)0));
+				You(look_str, hcolor((char *)0));
 		    else if (Sick)
-			You(look_str, "peaked");
+				You(look_str, "peaked");
 		    else if (u.uhs >= WEAK)
-			You(look_str, "undernourished");
+				You(look_str, "undernourished");
 		    else You("look as %s as ever.",
 				ACURR(A_CHA) > 14 ?
 				(poly_gender()==1 ? "beautiful" : "handsome") :
@@ -930,7 +1049,7 @@ struct obj **optr;
 			 invocation_pos(u.ux, u.uy) && !On_stairs(u.ux, u.uy));
 
 	You("ring %s.", the(xname(obj)));
-
+	
 	if(Role_if(PM_EXILE) && obj->otyp == BELL_OF_OPENING){
 		pline("It makes a rather sad clonk.");
 		return;
@@ -1205,7 +1324,7 @@ struct obj *obj;
 }
 
 /* Called when potentially lightable object is affected by fire_damage().
-   Return TRUE if object was lit and FALSE otherwise --ALI */
+	Return TRUE if object was lit and FALSE otherwise --ALI */
 boolean
 catch_lit(obj)
 struct obj *obj;
@@ -1538,7 +1657,7 @@ int magic; /* 0=Physical, otherwise skill level */
 		    You("rip yourself free of the bear trap!  Ouch!");
 			if (uarmf && uarmf->otyp == jboots4){
 				int bootdamage = d(1,10);
-		    losehp(rnd(10), "jumping out of a bear trap", KILLED_BY);
+				losehp(rnd(10), "jumping out of a bear trap", KILLED_BY);
 				set_wounded_legs(side, rn1(100,50));
 				if(bootdamage > uarmf->spe){
 					claws_destroy_arm(uarmf);
@@ -1549,7 +1668,7 @@ int magic; /* 0=Physical, otherwise skill level */
 			}
 		    else{
 				losehp(d(5,6), "jumping out of a bear trap", KILLED_BY);
-		    set_wounded_legs(side, rn1(1000,500));
+				set_wounded_legs(side, rn1(1000,500));
 			}
 		    break;
 		  }
@@ -1666,7 +1785,7 @@ register struct obj *obj;
 		){
 		if ((can = mksobj(POT_BLOOD, FALSE, FALSE)) != 0) {
 			static const char you_buy_it[] = "You bottle it, you bought it!";
-
+			
 			can->corpsenm = corpse->corpsenm;
 			can->cursed = obj->cursed;
 			can->blessed = obj->blessed;
@@ -1689,25 +1808,25 @@ register struct obj *obj;
 			|| yn("This corpse does not have blood. Tin it?") == 'y'
 		){
 			if ((can = mksobj(TIN, FALSE, FALSE)) != 0) {
-			    static const char you_buy_it[] = "You tin it, you bought it!";
-	
-			    can->corpsenm = corpse->corpsenm;
-			    can->cursed = obj->cursed;
-			    can->blessed = obj->blessed;
-			    can->owt = weight(can);
-			    can->known = 1;
-			    can->spe = -1;  /* Mark tinned tins. No spinach allowed... */
-			    if (carried(corpse)) {
+				static const char you_buy_it[] = "You tin it, you bought it!";
+
+				can->corpsenm = corpse->corpsenm;
+				can->cursed = obj->cursed;
+				can->blessed = obj->blessed;
+				can->owt = weight(can);
+				can->known = 1;
+				can->spe = -1;  /* Mark tinned tins. No spinach allowed... */
+				if (carried(corpse)) {
 				if (corpse->unpaid)
-				    verbalize(you_buy_it);
+					verbalize(you_buy_it);
 				useup(corpse);
-			    } else {
+				} else {
 				if (costly_spot(corpse->ox, corpse->oy) && !corpse->no_charge)
-				    verbalize(you_buy_it);
+					verbalize(you_buy_it);
 				useupf(corpse, 1L);
-			    }
-			    can = hold_another_object(can, "You make, but cannot pick up, %s.",
-					      doname(can), (const char *)0);
+				}
+				can = hold_another_object(can, "You make, but cannot pick up, %s.",
+							  doname(can), (const char *)0);
 			} else impossible("Tinning failed.");
 		}
 	}
@@ -2432,7 +2551,7 @@ struct obj *otmp;
 		if(rx==u.ux && ry==u.uy) u.utrap = 0;
 		else if(mtmp) mtmp->mtrapped = 0;
 	}
-	else {
+	else if(!(otmp->oartifact) || otmp->ovar1 < 3){
 		ttmp = maketrap(rx, ry, WEB);
 		if(ttmp){
 			pline("A web spins out from the cloak!");
@@ -2444,13 +2563,13 @@ struct obj *otmp;
 			}
 			if(rx==u.ux && ry==u.uy) dotrap(ttmp, NOWEBMSG);
 			else if(mtmp) mintrap(mtmp);
-		}
+		} else pline("The cloak cannot spin a web there!");
 		if(++otmp->ovar1 > 3){
 			gone = TRUE;
 			useup(otmp);
 			pline("The thoroughly tattered cloak falls to pieces");
 		}
-	}
+	} else pline("The cloak cannot spin any more webs.");
 	reset_trapset();
 	if(gone) return 0;
 	else return 1;
@@ -3006,7 +3125,7 @@ do_break_wand(obj)
     if (nohands(youmonst.data)) {
 	You_cant("break %s without hands!", the_wand);
 	return 0;
-    } else if (ACURR(A_STR) < (is_fragile ? 5 : 10)) {
+    } else if (obj->oartifact || ACURR(A_STR) < (is_fragile ? 5 : 10)) {
 	You("don't have the strength to break %s!", the_wand);
 	return 0;
     }
@@ -3020,7 +3139,7 @@ do_break_wand(obj)
 	check_unpaid(obj);		/* Extra charge for use */
 	bill_dummy_object(obj);
     }
-
+	
 	if(u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
 
     current_wand = obj;		/* destroy_item might reset this */
@@ -3196,15 +3315,15 @@ do_break_wand(obj)
 		     * do if it's a wall or door that's being dug */
 		    watch_dig((struct monst *)0, x, y, TRUE);
 		    if (*in_rooms(x,y,SHOPBASE)) shop_damage = TRUE;
-		}		    
+		}
 		if(IS_GRAVE(levl[x][y].typ)){
 			digactualhole(x, y, BY_OBJECT, PIT);
 			dig_up_grave(x,y);
 		} else{
-		digactualhole(x, y, BY_OBJECT,
-			      (rn2(obj->spe) < 3 || !Can_dig_down(&u.uz)) ?
-			       PIT : HOLE);
-	    }
+			digactualhole(x, y, BY_OBJECT,
+					  (rn2(obj->spe) < 3 || !Can_dig_down(&u.uz)) ?
+					   PIT : HOLE);
+			}
 		}
 	    continue;
 	} else if(obj->otyp == WAN_CREATE_MONSTER) {
@@ -3457,7 +3576,7 @@ pick_carvee()
 	Sprintf(buf, "Carvable items");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	for(otmp = invent; otmp; otmp = otmp->nobj){
-		if(otmp->oclass == WEAPON_CLASS && objects[(otmp)->otyp].oc_material == WOOD){
+		if(otmp->oclass == WEAPON_CLASS && objects[(otmp)->otyp].oc_material == WOOD && otmp->oartifact != ART_BOW_OF_SKADI){
 			Sprintf(buf, xname(otmp));
 			any.a_char = otmp->invlet;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -3519,6 +3638,61 @@ STATIC_OVL struct permonst *
 clockworkMenu(obj)
 struct obj *obj;
 {
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+	
+	Sprintf(buf, "Clockwork types");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	if(obj->otyp == CLOCKWORK_COMPONENT){
+		Sprintf(buf, "clockwork soldier");
+		any.a_int = PM_CLOCKWORK_SOLDIER;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+		
+		Sprintf(buf, "clockwork dwarf");
+		any.a_int = PM_CLOCKWORK_DWARF;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+		
+		Sprintf(buf, "faberge sphere");
+		any.a_int = PM_FABERGE_SPHERE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	} else if(obj->otyp == SUBETHAIC_COMPONENT){
+		Sprintf(buf, "golden heart");
+		any.a_int = PM_GOLDEN_HEART;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	} else if(obj->otyp == HELLFIRE_COMPONENT){
+		Sprintf(buf, "hellfire orb");
+		any.a_int = PM_HELLFIRE_ORB;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	end_menu(tmpwin, "Choose type:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return ( n > 0 ) ? &mons[selected[0].item.a_int] : (struct permonst *) 0;
 }
 
 STATIC_OVL int
@@ -3527,34 +3701,79 @@ struct obj **optr;
 {
 	struct obj *obj = *optr;
 	struct monst *mm;
+	struct permonst *pmm;
 	xchar x, y;
 	coord cc;
 
 	if(!getdir((char *)0)) {
 		flags.move = multi = 0;
-		return;
+		return 0;
 	}
 	if(u.dx || u.dy || u.dz){
 		if (u.uswallow) {
 			/* can't activate a figurine while swallowed */
 			if (!clockwork_location_checks(obj, (coord *)0, FALSE))
-				return;
+				return 0;
 		}
 		x = u.ux + u.dx; y = u.uy + u.dy;
 		if(mm = m_at(x,y)){
 			if(is_clockwork(mm->data)){
-				if(mm->mhp < mm->mhpmax){
-					if(yn("Repair it?") == 'y'){
-						mm->mhp += mm->m_lev;
-						if(mm->mhp > mm->mhpmax) mm->mhp = mm->mhpmax;
-						useup(obj);
+				if(obj->otyp == CLOCKWORK_COMPONENT){
+					if(	mm->data != &mons[PM_GOLDEN_HEART] && 
+						mm->data != &mons[PM_ID_JUGGERNAUT] && 
+						mm->data != &mons[PM_HELLFIRE_ORB] && 
+						mm->data != &mons[PM_HELLFIRE_COLOSSUS]
+					){
+						if(mm->mhp < mm->mhpmax){
+							if(yn("Repair it?") == 'y'){
+								mm->mhp += mm->m_lev;
+								if(mm->mhp > mm->mhpmax) mm->mhp = mm->mhpmax;
+								useup(obj);
+							}
+						} else pline("It doesn't need repairs.");
 					}
-				} else pline("It doesn't need repairs.");
+				} else if(obj->otyp == HELLFIRE_COMPONENT && (
+					mm->data == &mons[PM_HELLFIRE_ORB] || 
+					mm->data == &mons[PM_HELLFIRE_COLOSSUS] || 
+					mm->data == &mons[PM_SCRAP_TITAN]
+				)){
+					if(mm->mhp < mm->mhpmax){
+						if(yn("Repair it?") == 'y'){
+							mm->mhp += mm->m_lev;
+							if(mm->mhp > mm->mhpmax) mm->mhp = mm->mhpmax;
+							useup(obj);
+						}
+					} else pline("It doesn't need repairs.");
+				} else if(obj->otyp == SUBETHAIC_COMPONENT && (
+					mm->data == &mons[PM_GOLDEN_HEART] || 
+					mm->data == &mons[PM_ID_JUGGERNAUT] || 
+					mm->data == &mons[PM_SCRAP_TITAN]
+				)){
+					if(mm->mhp < mm->mhpmax){
+						if(yn("Repair it?") == 'y'){
+							mm->mhp += mm->m_lev;
+							if(mm->mhp > mm->mhpmax) mm->mhp = mm->mhpmax;
+							useup(obj);
+						}
+					} else pline("It doesn't need repairs.");
+				} else pline("This device can't take this part.");
 			} else pline("It isn't made of clockwork.");
+		}
+		else {
+			pline("You don't see anything there.");
 		}
 		cc.x = x; cc.y = y;
 		/* Passing FALSE arg here will result in messages displayed */
-		if (!clockwork_location_checks(obj, &cc, FALSE)) return;
+		
+		if(obj->quan < 10 && obj->otyp != SCRAP){
+			You("don't have enough components to build a clockwork servant");
+			return 0;
+		}
+		if(obj->otyp == SCRAP) return 0;
+		pmm = clockworkMenu(obj);
+		if(!pmm) return 0;
+		obj->quan -= 9;
+		if (!clockwork_location_checks(obj, &cc, FALSE)) return 0;
 		You("build a clockwork and %s.",
 			(u.dx||u.dy) ? "set it beside you" :
 			(Is_airlevel(&u.uz) || Is_waterlevel(&u.uz) ||
@@ -3564,7 +3783,7 @@ struct obj **optr;
 			"toss it into the air" :
 			"set it on the ground"));
 		
-		mm = makemon(clockworkMenu(obj), u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+		mm = makemon(pmm, u.ux+u.dx, u.uy+u.dy, MM_EDOG|MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
 		if(mm){
 			initedog(mm);
 			mm->m_lev = u.ulevel / 2 + 1;
@@ -3572,11 +3791,271 @@ struct obj **optr;
 			mm->mhp =  mm->mhpmax;
 			mm->mtame = 10;
 			mm->mpeaceful = 1;
+			if((u.dx || u.dy) && (mm->data == &mons[PM_CLOCKWORK_SOLDIER] || mm->data == &mons[PM_CLOCKWORK_DWARF] || 
+				mm->data == &mons[PM_FABERGE_SPHERE] || mm->data == &mons[PM_FIREWORK_CART] || 
+				mm->data == &mons[PM_JUGGERNAUT] || mm->data == &mons[PM_ID_JUGGERNAUT])
+			){
+				mm->mextra[0] = -1;
+				while(xdir[(int)(++mm->mextra[0])] != u.dx || ydir[(int)mm->mextra[0]] != u.dy);
+			}
 		}
 		useup(obj);
 		*optr = 0;
 	} else {
+		if(uclockwork){
+			if(Upolyd && u.mh < u.mhmax) u.mh = min(u.mhmax,u.mh+mons[u.umonnum].mlevel);
+			else if(!Upolyd && u.uhp < u.uhpmax) u.uhp = min(u.uhpmax,u.uhp + u.ulevel);
+			else {
+				You("don't need repairs.");
+				return 0;
+			}
+		} else {
+			You("aren't made of clockwork!");
+			return 0;
+		}
 	}
+	return 1;
+}
+
+STATIC_OVL long
+upgradeMenu()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+	
+	Sprintf(buf, "Upgrade types");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	if(!(u.clockworkUpgrades&OIL_STOVE)){
+		Sprintf(buf, "oil stove");
+		any.a_int = 1;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(!(u.clockworkUpgrades&WOOD_STOVE) && u.clockworkUpgrades&OIL_STOVE){
+		Sprintf(buf, "wood stove");
+		any.a_int = 2;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(!(u.clockworkUpgrades&FAST_SWITCH)){
+		Sprintf(buf, "fast speed switch");
+		any.a_int = 3;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(!(u.clockworkUpgrades&EFFICIENT_SWITCH)){
+		Sprintf(buf, "efficient speed switch");
+		any.a_int = 4;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(!(u.clockworkUpgrades&ARMOR_PLATING)){
+		Sprintf(buf, "armor plating");
+		any.a_int = 5;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(!(u.clockworkUpgrades&PHASE_ENGINE) && !flags.beginner){
+		Sprintf(buf, "phase engine");
+		any.a_int = 6;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(!(u.clockworkUpgrades&MAGIC_FURNACE) && u.clockworkUpgrades&OIL_STOVE && !flags.beginner){
+		Sprintf(buf, "magic furnace");
+		any.a_int = 7;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(!(u.clockworkUpgrades&HELLFIRE_FURNACE) && u.clockworkUpgrades&OIL_STOVE && !flags.beginner){
+		Sprintf(buf, "hellfire furnace");
+		any.a_int = 8;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(!(u.clockworkUpgrades&SCRAP_MAW && !flags.beginner)){
+		Sprintf(buf, "scrap maw");
+		any.a_int = 9;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(!(u.clockworkUpgrades&HIGH_TENSION)){
+		Sprintf(buf, "high-tension spring");
+		any.a_int = 10;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	end_menu(tmpwin, "Choose type:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return ( n > 0 ) ? 0x1L<<(selected[0].item.a_int - 1) :  0;
+}
+
+STATIC_OVL int
+doUseUpgradeKit(optr)
+struct obj **optr;
+{
+	struct obj *obj = *optr;
+	struct obj *comp;
+	if(uclockwork){
+		long upgrade = upgradeMenu();
+		switch(upgrade){
+			case OIL_STOVE:
+				You("use the components in the upgrade kit to install an oil stove.");
+				u.clockworkUpgrades |= upgrade;
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+			case WOOD_STOVE:
+				comp = getobj(tools, "upgrade your stove with");
+				if(!comp || comp->otyp != TINNING_KIT){
+					pline("Never mind.");
+					return 0;
+				}
+				You("use the components in the upgrade kit and the tinning kit to install a wood-burning stove.");
+				u.clockworkUpgrades |= upgrade;
+				useup(comp);
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+			case FAST_SWITCH:
+				You("use the components in the upgrade kit to install a fast switch on your clock.");
+				u.clockworkUpgrades |= upgrade;
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+			case EFFICIENT_SWITCH:
+				comp = getobj(tools, "upgrade your switch with");
+				if(!comp || comp->otyp != CROSSBOW){
+					pline("Never mind.");
+					return 0;
+				}
+				You("use the components in the upgrade kit and the crossbow to upgrade the switch on your clock.");
+				u.clockworkUpgrades |= upgrade;
+				useup(comp);
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+			case ARMOR_PLATING:
+				comp = getobj(apply_armor, "upgrade your armor with");
+				if(!comp || comp->otyp != BRONZE_PLATE_MAIL){
+					pline("Never mind.");
+					return 0;
+				}
+				You("use the components in the upgrade kit to reinforce your armor with bronze plates.");
+				u.clockworkUpgrades |= upgrade;
+				useup(comp);
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+			case PHASE_ENGINE:
+				comp = getobj(apply_all, "build a phase engine with");
+				if(!comp || comp->otyp != SUBETHAIC_COMPONENT){
+					pline("Never mind.");
+					return 0;
+				}
+				You("combine the components in the upgrade kit with the subethaic component and build a phase engine.");
+				u.clockworkUpgrades |= upgrade;
+				useup(comp);
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+			case MAGIC_FURNACE:
+				comp = getobj(apply_corpse, "build a magic furnace with");
+				if(!comp || comp->otyp != CORPSE || comp->corpsenm != PM_DISENCHANTER){
+					pline("Never mind.");
+					return 0;
+				}
+				You("combine the components in the upgrade kit with the disenchanter corpse and build a magic furnace.");
+				u.clockworkUpgrades |= upgrade;
+				useup(comp);
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+			case HELLFIRE_FURNACE:
+				comp = getobj(apply_all, "build a hellfire furnace with");
+				if(!comp || comp->otyp != HELLFIRE_COMPONENT){
+					pline("Never mind.");
+					return 0;
+				}
+				You("combine the components in the upgrade kit with the hellfire component and build a hellfire furnace.");
+				u.clockworkUpgrades |= upgrade;
+				useup(comp);
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+			case SCRAP_MAW:
+				comp = getobj(tools, "build a scrap maw with");
+				if(!comp || comp->otyp != SCRAP){
+					pline("Never mind.");
+					return 0;
+				}
+				You("combine the components in the upgrade kit with the scrap and build a scrap maw.");
+				u.clockworkUpgrades |= upgrade;
+				useup(comp);
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+			case HIGH_TENSION:
+				// Maybe one day a spring pistol or something
+				// comp = getobj(tools, "build a scrap maw with");
+				// if(!comp || comp->otyp != SCRAP){
+					// pline("Never mind.");
+					// return 0;
+				// }
+				You("use the components in the upgrade kit to increase the maximum tension in your mainspring.");
+				u.uhungermax += DEFAULT_HMAX;
+				if(u.uhungermax >= DEFAULT_HMAX*10) u.clockworkUpgrades |= upgrade;
+				// useup(comp);
+				useup(obj);
+				*optr = 0;
+				return 1;
+			break;
+		}
+	} else {
+		You("aren't made of clockwork!");
+		return 0;
+	}
+	return 0;
 }
 
 int
@@ -3615,7 +4094,7 @@ doapply()
 	else if (obj->oclass == RING_CLASS)
 	    return do_present_ring(obj);
 	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_MARIONETTE)) return do_carve_obj(obj);
-
+	
 	if(obj->oartifact == ART_SILVER_STARLIGHT) do_play_instrument(obj);
 	else switch(obj->otyp){
 	case BLINDFOLD:
@@ -3742,24 +4221,25 @@ doapply()
 	case MAGIC_LAMP:
 	case BRASS_LANTERN:
 		use_lamp(obj);
-		break;
+	break;
 	case POT_OIL:
 		light_cocktail(obj);
-		break;
+		obj = 0; //May have been dealocated, just get rid of it
+	break;
 #ifdef TOURIST
 	case EXPENSIVE_CAMERA:
 		res = use_camera(obj);
-		break;
+	break;
 #endif
 	case TOWEL:
 		res = use_towel(obj);
-		break;
+	break;
 	case CRYSTAL_BALL:
 		res = use_crystal_ball(obj);
-		break;
+	break;
 	case MAGIC_MARKER:
 		res = dowrite(obj);
-		break;
+	break;
 	case TIN_OPENER:
 		if(!carrying(TIN)) {
 			You("have no tin to open.");
@@ -3774,10 +4254,10 @@ doapply()
 
 	case FIGURINE:
 		use_figurine(&obj);
-		break;
+	break;
 	case UNICORN_HORN:
 		use_unicorn_horn(obj);
-		break;
+	break;
 	case WOODEN_FLUTE:
 	case MAGIC_FLUTE:
 	case TOOLED_HORN:
@@ -3789,7 +4269,7 @@ doapply()
 	case LEATHER_DRUM:
 	case DRUM_OF_EARTHQUAKE:
 		res = do_play_instrument(obj);
-		break;
+	break;
 	case HORN_OF_PLENTY:	/* not a musical instrument */
 		if (obj->spe > 0) {
 		    struct obj *otmp;
@@ -3825,21 +4305,30 @@ doapply()
 		    makeknown(HORN_OF_PLENTY);
 		} else
 		    pline("%s", nothing_happens);
-		break;
+	break;
 	case LAND_MINE:
 	case BEARTRAP:
 		use_trap(obj);
-		break;
+	break;
 	case DROVEN_CLOAK:
 		if(obj->oartifact == ART_DARKWEAVER_S_CLOAK) res = use_darkweavers_cloak(obj);
 		else res = use_droven_cloak(obj);
-		break;
+	break;
 	case FLINT:
 	case LUCKSTONE:
 	case LOADSTONE:
 	case TOUCHSTONE:
 		use_stone(obj);
-		break;
+	break;
+	case CLOCKWORK_COMPONENT:
+	case SUBETHAIC_COMPONENT:
+	case HELLFIRE_COMPONENT:
+	case SCRAP:
+		res = doUseComponents(&obj);
+	break;
+	case UPGRADE_KIT:
+		res = doUseUpgradeKit(&obj);
+	break;
 	default:
 		/* Pole-weapons can strike at a distance */
 		if (is_pole(obj)) {
