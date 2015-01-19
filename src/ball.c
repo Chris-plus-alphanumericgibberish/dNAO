@@ -32,7 +32,7 @@ ballfall()
 		pline_The("iron ball falls on your %s.",
 			body_part(HEAD));
 		if (uarmh) {
-		    if(is_metallic(uarmh) || uarmh->otyp == FLACK_HELMET) {
+		    if(is_metallic(uarmh) || uarmh->otyp == FLACK_HELMET || uarmh->otyp == DROVEN_HELM) {
 			pline("Fortunately, you are wearing a hard helmet.");
 			dmg = 3;
 		    } else if (flags.verbose)
@@ -691,9 +691,9 @@ xchar x, y;
 			else{
 				losehp(rn1(10,20), "leg damage from being pulled out of a bear trap", KILLED_BY);
 				set_wounded_legs(side, rn1(1000,500));
-		    Your("%s %s is severely damaged.",
-					(side == LEFT_SIDE) ? "left" : "right",
-					body_part(LEG));
+				Your("%s %s is severely damaged.",
+						(side == LEFT_SIDE) ? "left" : "right",
+						body_part(LEG));
 			}
 		}
 		break;
