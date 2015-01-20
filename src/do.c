@@ -99,7 +99,7 @@ boolean pushing;
 			      what);
 		    } else if (flags.soundok)
 			You_hear("a%s splash.", lava ? " sizzling" : "");
-		    wake_nearto(rx, ry, 40);
+		    wake_nearto_noisy(rx, ry, 40);
 		}
 
 		if (fills_up && u.uinwater && distu(rx,ry) == 0) {
@@ -1049,7 +1049,18 @@ boolean at_stairs, falling, portal;
 	/* Prevent the player from going past the first quest level unless
 	 * (s)he has been given the go-ahead by the leader.
 	 */
-	if (on_level(&u.uz, &qstart_level) && !newdungeon && !ok_to_quest()) {
+	if (on_level(&u.uz, &qstart_level) && !newdungeon && !ok_to_quest() && !flags.stag) {
+		pline("A mysterious force prevents you from descending.");
+		return;
+	}
+	// if (on_level(&u.uz, &nemesis_level) && !(quest_status.got_quest) && flags.stag) {
+		// pline("A mysterious force prevents you from leaving.");
+		// return;
+	// }
+	if (In_quest(&u.uz) && Race_if(PM_DWARF) &&  !up &&
+		urole.neminum == PM_BOLG && Is_qlocate(&u.uz) && 
+		!(mvitals[PM_SMAUG].mvflags & G_GENOD || mvitals[PM_SMAUG].died > 0)
+	) {
 		pline("A mysterious force prevents you from descending.");
 		return;
 	}
@@ -1168,7 +1179,7 @@ boolean at_stairs, falling, portal;
 		}
 		if(!found){
 			for (ttrap = ftrap; ttrap; ttrap = ttrap->ntrap) //otherwise just go with any portal
-		if (ttrap->ttyp == MAGIC_PORTAL) break;
+				if (ttrap->ttyp == MAGIC_PORTAL) break;
 		}
 
 	    if (!ttrap) panic("goto_level: no corresponding portal!");
@@ -1339,9 +1350,9 @@ boolean at_stairs, falling, portal;
 	    } else {
 			pline("It is hot here.  You smell smoke...");
 #ifdef RECORD_ACHIEVE
-            achieve.enter_gehennom = 1;
+			achieve.enter_gehennom = 1;
 #endif
-	}
+		}
 	}
 
 	if (familiar) {
@@ -1388,12 +1399,12 @@ boolean at_stairs, falling, portal;
 		if(Role_if(PM_EXILE)){
 			You("sense something reaching out to you....");
 		} else {
-		if (u.uevent.qcalled) {
-			com_pager(Role_if(PM_ROGUE) ? 4 : 3);
-		} else {
-			com_pager(2);
-			u.uevent.qcalled = TRUE;
-		}
+			if (u.uevent.qcalled) {
+				com_pager(Role_if(PM_ROGUE) ? 4 : 3);
+			} else {
+				com_pager(2);
+				u.uevent.qcalled = TRUE;
+			}
 		}
 	}
 
@@ -1601,8 +1612,8 @@ int different;
 	    case OBJ_INVENT:
 		if (is_uwep) {
 		    if (different==GROW_MOLD) {
-			Your("weapon goes moldy.");
-			pline("%s writhes out of your grasp!", Monnam(mtmp));
+				Your("weapon goes moldy.");
+				pline("%s writhes out of your grasp!", Monnam(mtmp));
 		    }
 		    else if (different==GROW_SLIME) {
 				Your("weapon goes slimy.");
@@ -1613,8 +1624,8 @@ int different;
 				pline("%s writhes out of your grasp!", Monnam(mtmp));
 		    }
 		    else{
-		    pline_The("%s writhes out of your grasp!", cname);
-		}
+				pline_The("%s writhes out of your grasp!", cname);
+			}
 		}
 		else
 		    You_feel("squirming in your backpack!");
@@ -1623,8 +1634,8 @@ int different;
 	    case OBJ_FLOOR:
 		if (cansee(mtmp->mx, mtmp->my)) {
 		    if (different==GROW_MOLD)
-			pline("%s grows on a moldy corpse!",
-			  Amonnam(mtmp));
+				pline("%s grows on a moldy corpse!",
+				  Amonnam(mtmp));
 		    else if (different==REVIVE_MOLD)
 				pline("%s regrows from its corpse!",
 				  Amonnam(mtmp));
@@ -1639,9 +1650,9 @@ int different;
 				  Amonnam(mtmp));
 		    else if (mtmp->data==&mons[PM_DEATH])
 				pline("Death cannot die.");
-		    else
-		    pline("%s rises from the dead!", chewed ?
-			  Adjmonnam(mtmp, "bite-covered") : Monnam(mtmp));
+			else
+				pline("%s rises from the dead!", chewed ?
+					Adjmonnam(mtmp, "bite-covered") : Monnam(mtmp));
 		}
 		break;
 
@@ -1707,10 +1718,10 @@ long timeout;
 						REVIVE_MOLD : 
 						REVIVE_MONSTER)
 	) {
-	if (is_rider(&mons[body->corpsenm]))
-	    You_feel("less hassled.");
-	(void) start_timer(250L - (monstermoves-body->age),
-					TIMER_OBJECT, ROT_CORPSE, arg);
+		if (is_rider(&mons[body->corpsenm]))
+			You_feel("less hassled.");
+		(void) start_timer(250L - (monstermoves-body->age),
+						TIMER_OBJECT, ROT_CORPSE, arg);
     }
 }
 
@@ -1838,9 +1849,9 @@ long timeout;
 
 	if (pmtype != -1) {
 	/* We don't want special case revivals */
-	if (cant_create(&pmtype, TRUE) || (body->oxlth &&
-				(body->oattached == OATTACHED_MONST)))
-		pmtype = -1; /* cantcreate might have changed it so change it back */
+		if (cant_create(&pmtype, TRUE) || (body->oxlth &&
+					(body->oattached == OATTACHED_MONST)))
+			pmtype = -1; /* cantcreate might have changed it so change it back */
 		else {
 			body->corpsenm = pmtype;
 
