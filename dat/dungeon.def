@@ -36,6 +36,7 @@ RNDLEVEL:	"medusa" "none" @ (-5, 4) 4
 LEVALIGN:	chaotic
 RNDLEVEL:	"castle" "none" @ (-1, 0) 5
 CHAINBRANCH:	"Gehennom" "castle" + (0, 0) no_down
+
 RNDLEVEL:		"lawlev" "none" @ (12, 8) 3
 LEVALIGN:	lawful
 CHAINBRANCH:	"Law Quest" "lawlev" + (0, 0) portal
@@ -81,7 +82,7 @@ LEVEL:		"stair4" "K" @ (5, 0)
 LEVEL:		"stair5" "L" @ (6, 0)
 LEVEL:		"sanctum" "none" @ (-1, 0)
 LEVEL:		"wizard1" "none" @ (7, 0)
-CHAINLEVEL:	"wizard2" "X" "wizard1" + (1, 0)
+CHAINLEVEL:			"wizard2" "X" "wizard1" + (1, 0)
 CHAINLEVEL:			"wizard3" "Z" "wizard1" + (2, 0)
 LEVEL:		"hell3" "none" @ (-3, 0)
 LEVALIGN:		lawful
@@ -91,7 +92,7 @@ RNDLEVEL:		"hell" "B" @ (-9, 0) 4
 LEVALIGN:		lawful
 RNDLEVEL:		"abys2" "C" @ (-12,9) 3
 LEVALIGN:		chaotic
-RNDLEVEL:		"abyss" "D" @ (-12,9) 5
+RNDLEVEL:		"abyss" "D" @ (-12,9) 6
 LEVALIGN:		chaotic
 RNDLEVEL:		"brine" "none" @ (-12,9) 2
 LEVALIGN:		chaotic
