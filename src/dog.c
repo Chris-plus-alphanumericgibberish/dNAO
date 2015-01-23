@@ -36,6 +36,10 @@ STATIC_OVL int
 pet_type()
 {
 	if(Race_if(PM_DROW)){
+		if(Role_if(PM_NOBLEMAN)){
+			if(flags.initgend) return (PM_GIANT_SPIDER);
+			else return (PM_SMALL_CAVE_LIZARD);
+		}
 		if(preferred_pet == 's')
 			return (PM_CAVE_SPIDER);
 		else if(preferred_pet == ':' || preferred_pet == 'l')
@@ -190,7 +194,9 @@ makedog()
 
 #ifdef STEED
 	/* Horses already wear a saddle */
-	if (pettype == PM_PONY && !!(otmp = mksobj(SADDLE, TRUE, FALSE))) {
+	if ((pettype == PM_PONY || pettype == PM_GIANT_SPIDER || pettype == PM_SMALL_CAVE_LIZARD)
+		&& !!(otmp = mksobj(SADDLE, TRUE, FALSE))
+	) {
 	    if (mpickobj(mtmp, otmp))
 		panic("merged saddle?");
 	    mtmp->misc_worn_check |= W_SADDLE;
@@ -474,7 +480,12 @@ long nmv;		/* number of moves */
 	else mtmp->mspec_used -= imv;
 
 	/* reduce tameness for every 150 moves you are separated */
-	if (mtmp->mtame) {
+	if (mtmp->mtame && !(
+		In_quest(&u.uz) && 
+		((Is_qstart(&u.uz) && !flags.stag) || 
+		 (Is_nemesis(&u.uz) && flags.stag)) &&
+	 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN))
+	)) {
 	    int wilder = (imv + 75) / 150;
 	    if (mtmp->mtame > wilder) mtmp->mtame -= wilder;	/* less tame */
 	    else if (mtmp->mtame > rn2(wilder)) mtmp->mtame = 0;  /* untame */
@@ -487,7 +498,12 @@ long nmv;		/* number of moves */
 	 * of dying the next time we call dog_move()
 	 */
 	if (mtmp->mtame && !mtmp->isminion &&
-			(carnivorous(mtmp->data) || herbivorous(mtmp->data))) {
+		(carnivorous(mtmp->data) || herbivorous(mtmp->data)) && !(
+		 In_quest(&u.uz) && 
+			((Is_qstart(&u.uz) && !flags.stag) || 
+			 (Is_nemesis(&u.uz) && flags.stag)) &&
+		 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN))
+	)) {
 	    struct edog *edog = EDOG(mtmp);
 
 	    if ((monstermoves > edog->hungrytime + 500 && mtmp->mhp < 3) ||
@@ -508,7 +524,7 @@ long nmv;		/* number of moves */
 	/* recover lost hit points */
 	if (regenerates(mtmp->data)){
 		if (mtmp->mhp + imv >= mtmp->mhpmax)
-		    mtmp->mhp = mtmp->mhpmax;
+			mtmp->mhp = mtmp->mhpmax;
 		else mtmp->mhp += imv;
 	}
 	if(!nonliving(mtmp->data)){
@@ -536,7 +552,7 @@ boolean pets_only;	/* true for ascension or final escape */
 	    mtmp2 = mtmp->nmon;
 	    if (DEADMONSTER(mtmp)) continue;
 	    if (pets_only && !mtmp->mtame) continue;
-	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)) ||
+	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)) || 
 			 (mtmp->mtame && u.specialSealsActive&SEAL_COSMOS) ||
 			 (mtmp->mtame && uarmh && uarmh->oartifact == ART_CROWN_OF_THE_SAINT_KING) ||
 			 (mtmp->mtame && uarmh && uarmh->oartifact == ART_HELM_OF_THE_DARK_LORD) ||
@@ -556,70 +572,72 @@ boolean pets_only;	/* true for ascension or final escape */
 		    )
 		/* monster won't follow if it hasn't noticed you yet */
 		&& !(mtmp->mstrategy & STRAT_WAITFORU)) {
-		stay_behind = FALSE;
-		if (mtmp->mtame && mtmp->meating) {
-			if (canseemon(mtmp))
-			    pline("%s is still eating.", Monnam(mtmp));
-			stay_behind = TRUE;
-		} else if (mon_has_amulet(mtmp)) {
-			if (canseemon(mtmp))
-			    pline("%s seems very disoriented for a moment.",
-				Monnam(mtmp));
-			stay_behind = TRUE;
-		} else if (mtmp->mtame && mtmp->mtrapped) {
-			if (canseemon(mtmp))
-			    pline("%s is still trapped.", Monnam(mtmp));
-			stay_behind = TRUE;
-		}
-#ifdef STEED
-		if (mtmp == u.usteed) stay_behind = FALSE;
-#endif
-		if (stay_behind) {
-			if (mtmp->mleashed) {
-				pline("%s leash suddenly comes loose.",
-					humanoid(mtmp->data)
-					    ? (mtmp->female ? "Her" : "His")
-					    : "Its");
-				m_unleash(mtmp, FALSE);
+			stay_behind = FALSE;
+			if (mtmp->mtame && mtmp->meating) {
+				if (canseemon(mtmp))
+					pline("%s is still eating.", Monnam(mtmp));
+				stay_behind = TRUE;
+			} else if (mon_has_amulet(mtmp)) {
+				if (canseemon(mtmp))
+					pline("%s seems very disoriented for a moment.",
+					Monnam(mtmp));
+				stay_behind = TRUE;
+			} else if (mtmp->mtame && mtmp->mtrapped) {
+				if (canseemon(mtmp))
+					pline("%s is still trapped.", Monnam(mtmp));
+				stay_behind = TRUE;
 			}
-			continue;
-		}
-		if (mtmp->isshk)
-			set_residency(mtmp, TRUE);
+#ifdef STEED
+			if (mtmp == u.usteed) stay_behind = FALSE;
+#endif
+			if (stay_behind) {
+				if (mtmp->mleashed) {
+					pline("%s leash suddenly comes loose.",
+						humanoid(mtmp->data)
+							? (mtmp->female ? "Her" : "His")
+							: "Its");
+					m_unleash(mtmp, FALSE);
+				}
+				continue;
+			}
+			if (mtmp->isshk)
+				set_residency(mtmp, TRUE);
 
-		if (mtmp->wormno) {
-		    register int cnt;
-		    /* NOTE: worm is truncated to # segs = max wormno size */
-		    cnt = count_wsegs(mtmp);
-		    num_segs = min(cnt, MAX_NUM_WORMS - 1);
-		    wormgone(mtmp);
-		} else num_segs = 0;
+			if (mtmp->wormno) {
+				register int cnt;
+				/* NOTE: worm is truncated to # segs = max wormno size */
+				cnt = count_wsegs(mtmp);
+				num_segs = min(cnt, MAX_NUM_WORMS - 1);
+				wormgone(mtmp);
+			} else num_segs = 0;
 
-		/* set minvent's obj->no_charge to 0 */
-		for(obj = mtmp->minvent; obj; obj = obj->nobj) {
-		    if (Has_contents(obj))
-			picked_container(obj);	/* does the right thing */
-		    obj->no_charge = 0;
-		}
+			/* set minvent's obj->no_charge to 0 */
+			for(obj = mtmp->minvent; obj; obj = obj->nobj) {
+				if (Has_contents(obj))
+				picked_container(obj);	/* does the right thing */
+				obj->no_charge = 0;
+			}
 
-		relmon(mtmp);
-		newsym(mtmp->mx,mtmp->my);
-		mtmp->mx = mtmp->my = 0; /* avoid mnexto()/MON_AT() problem */
-		mtmp->wormno = num_segs;
-		mtmp->mlstmv = monstermoves;
-		mtmp->nmon = mydogs;
-		mydogs = mtmp;
-	    } else if (mtmp->iswiz) {
-		/* we want to be able to find him when his next resurrection
-		   chance comes up, but have him resume his present location
-		   if player returns to this level before that time */
-		migrate_to_level(mtmp, ledger_no(&u.uz),
-				 MIGR_EXACT_XY, (coord *)0);
+			relmon(mtmp);
+			newsym(mtmp->mx,mtmp->my);
+			mtmp->mx = mtmp->my = 0; /* avoid mnexto()/MON_AT() problem */
+			mtmp->wormno = num_segs;
+			mtmp->mlstmv = monstermoves;
+			mtmp->nmon = mydogs;
+			mydogs = mtmp;
+	    } else if (quest_status.touched_artifact && Race_if(PM_DROW) && !flags.initgend && Role_if(PM_NOBLEMAN) && mtmp->m_id == quest_status.leader_m_id) {
+			mongone(mtmp);
+	    } else if (mtmp->iswiz || mtmp->data == &mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES]) {
+			/* we want to be able to find him when his next resurrection
+			   chance comes up, but have him resume his present location
+			   if player returns to this level before that time */
+			migrate_to_level(mtmp, ledger_no(&u.uz),
+					 MIGR_EXACT_XY, (coord *)0);
 	    } else if (mtmp->mleashed) {
-		/* this can happen if your quest leader ejects you from the
-		   "home" level while a leashed pet isn't next to you */
-		pline("%s leash goes slack.", s_suffix(Monnam(mtmp)));
-		m_unleash(mtmp, FALSE);
+			/* this can happen if your quest leader ejects you from the
+			   "home" level while a leashed pet isn't next to you */
+			pline("%s leash goes slack.", s_suffix(Monnam(mtmp)));
+			m_unleash(mtmp, FALSE);
 	    }
 	}
 }
@@ -746,6 +764,9 @@ register struct obj *obj;
 rock:
 		   if ((peek_at_iced_corpse_age(obj) + 50L <= monstermoves
 					    && obj->corpsenm != PM_LIZARD
+					    && obj->corpsenm != PM_SMALL_CAVE_LIZARD
+					    && obj->corpsenm != PM_CAVE_LIZARD
+					    && obj->corpsenm != PM_LARGE_CAVE_LIZARD
 					    && obj->corpsenm != PM_LICHEN
 					    && obj->corpsenm != PM_BEHOLDER
 					    && mon->data->mlet != S_FUNGUS) ||
@@ -797,6 +818,8 @@ rock:
 	    if (hates_silver(mon->data) &&
 		objects[obj->otyp].oc_material == SILVER)
 		return(TABU);
+	    if (herbi && obj->otyp == SHEAF_OF_HAY)
+		return CADAVER;
 	    if (mon->data == &mons[PM_GELATINOUS_CUBE] && is_organic(obj))
 		return(ACCFOOD);
 	    if (metallivorous(mon->data) && is_metallic(obj) && (is_rustprone(obj) || mon->data != &mons[PM_RUST_MONSTER])) {
@@ -883,7 +906,7 @@ register struct obj *obj;
 		    {
 		        /* You choked your pet, you cruel, cruel person! */
 		        You_feel("guilty about losing your pet like this.");
-				u.ugangr++;
+				u.ugangr[Align2gangr(u.ualign.type)]++;
 				adjalign(-15);
 				u.hod += 5;
 		    }
@@ -1029,7 +1052,7 @@ struct monst *mtmp;
 	    if (mtmp->mtame) betrayed(mtmp);
 
 	    /* Give monster a chance to betray you now */
-	    if (!mtmp->mtame) newsym(mtmp->mx, mtmp->my);
+		if (!mtmp->mtame) newsym(mtmp->mx, mtmp->my);
 	}
 }
 
