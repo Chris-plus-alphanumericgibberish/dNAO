@@ -124,6 +124,10 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 					(u.sealsActive&SEAL_PAIMON && is_magical((mon)->data)) || \
 					(u.sealsActive&SEAL_ANDROMALIUS && is_thief((mon)->data)) || \
 					(u.sealsActive&SEAL_TENEBROUS && !nonliving((mon)->data)) || \
+					(Race_if(PM_VAMPIRE) && has_blood((mon)->data) && couldsee((mon)->mx, (mon)->my)) || \
+					(Upolyd && is_metroid(youmonst.data) && !nonliving((mon)->data) && couldsee((mon)->mx, (mon)->my)) || \
+					(Upolyd && youmonst.data == &mons[PM_SHARK] && has_blood((mon)->data) && \
+						(mon)->mhp < (mon)->mhpmax && is_pool(u.ux, u.uy) && is_pool((mon)->mx, (mon)->my)) || \
 					(u.specialSealsActive&SEAL_ACERERAK && is_undead((mon)->data)) || \
 					(uwep && uwep->oclass == WEAPON_CLASS && objects[(uwep)->otyp].oc_material == WOOD && \
 					(uwep->ovar1 & WARD_THJOFASTAFUR) && (mon->data->mlet == S_LEPRECHAUN || mon->data->mlet == S_NYMPH)) \
