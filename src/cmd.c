@@ -1087,7 +1087,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 				/* Hedrow Noble */
 				"the Sword of Selvetarm",	 /*25*/
 				"the Hand of Keptolo",		 /*26*/
-				"the Maw of Ghaunadaur",	 /*27*/
+				"the Hammer of Ghaunadaur",	 /*27*/
 				
 				/* uhand_of_elbereth max == 31 */
 	    };
