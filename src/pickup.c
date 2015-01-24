@@ -790,10 +790,10 @@ boolean FDECL((*allow), (OBJ_P));/* allow function */
 
 		    /* if sorting, print type name (once only) */
 		    if (qflags & INVORDER_SORT && !printed_type_name) {
-			any.a_obj = (struct obj *) 0;
-			add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-				 Hallucination ? rand_class_name() : let_to_name(*pack, FALSE, iflags.show_obj_sym), MENU_UNSELECTED);
-			printed_type_name = TRUE;
+				any.a_obj = (struct obj *) 0;
+				add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
+						Hallucination ? rand_class_name() : let_to_name(*pack, FALSE, iflags.show_obj_sym), MENU_UNSELECTED);
+				printed_type_name = TRUE;
 		    }
 
 		    any.a_obj = curr;
@@ -2100,7 +2100,7 @@ register struct obj *obj;
 			}
 		}
 	}
-
+	
 	if (obj->otyp == CORPSE) {
 	    if ( (touch_petrifies(&mons[obj->corpsenm])) && !uarmg
 		 && !Stone_resistance) {
