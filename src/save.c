@@ -295,7 +295,7 @@ register int fd, mode;
 {
 	int uid;
 #if defined(RECORD_REALTIME) || defined(REALTIME_ON_BOTL)
-        time_t realtime;
+	time_t realtime;
 #endif
 
 
@@ -307,7 +307,7 @@ register int fd, mode;
 	flags.end_around = has_loaded_bones;
 	bwrite(fd, (genericptr_t) &flags, sizeof(struct flag));
 	bwrite(fd, (genericptr_t) &u, sizeof(struct you));
-
+	
 	/* save random monsters*/
 	bwrite(fd, (genericptr_t) &mons[PM_SHAMBLING_HORROR], sizeof(struct permonst));
 	bwrite(fd, (genericptr_t) &mons[PM_STUMBLING_HORROR], sizeof(struct permonst));
@@ -350,11 +350,11 @@ register int fd, mode;
 	save_artifacts(fd);
 	save_waterlevel(fd, mode);
 #ifdef RECORD_ACHIEVE
-        bwrite(fd, (genericptr_t) &achieve, sizeof achieve);
+	bwrite(fd, (genericptr_t) &achieve, sizeof achieve);
 #endif
 #if defined(RECORD_REALTIME) || defined(REALTIME_ON_BOTL)
-        realtime = get_realtime();
-        bwrite(fd, (genericptr_t) &realtime, sizeof realtime);
+	realtime = get_realtime();
+	bwrite(fd, (genericptr_t) &realtime, sizeof realtime);
 #endif
 	bflush(fd);
 }
@@ -884,9 +884,9 @@ register struct obj *otmp;
 	while(otmp) {
 	    otmp2 = otmp->nobj;
 	    if (perform_bwrite(mode)) {
-		xl = otmp->oxlth + otmp->onamelth;
-		bwrite(fd, (genericptr_t) &xl, sizeof(int));
-		bwrite(fd, (genericptr_t) otmp, xl + sizeof(struct obj));
+			xl = otmp->oxlth + otmp->onamelth;
+			bwrite(fd, (genericptr_t) &xl, sizeof(int));
+			bwrite(fd, (genericptr_t) otmp, xl + sizeof(struct obj));
 			if(otmp->mp){
 				bwrite(fd, (genericptr_t) otmp->mp, (unsigned) sizeof(struct mask_properties));
 //				bwrite(fd, (genericptr_t) otmp->mp->mskacurr, sizeof(struct attribs));
