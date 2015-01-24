@@ -332,7 +332,7 @@ char *pname;		/* caller-supplied output buffer */
 			Strcat(pname, "a whole faith");
 //			Strcat(pname, "?");
 		} else {
-		Strcat(pname, halu_gname((int)EPRI(mon)->shralign));
+	 		Strcat(pname, halu_gname((int)EPRI(mon)->shralign));
 		}
 		return(pname);
 	}
@@ -528,7 +528,7 @@ register struct monst *priest;
 	
 	/* KMH, conduct */
 	u.uconduct.gnostic++;
-
+	
 
 	if(priest->mflee || (!priest->ispriest && coaligned && strayed)) {
 	    pline("%s doesn't want anything to do with you!",
