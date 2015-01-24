@@ -659,7 +659,8 @@ static const char * const bogusobjects[] = {
 	   /* Interwebs */
 	   "memetic kill agent",				/* SCP Foundation */
 	   "bottle of squid pro quo ink",		/* MSPA */
-	   "highly indulgent self-insert",
+		"highly indulgent self-insert",
+	   "cursed -1 phillips head",			/* xkcd nethack joke */
 	   
 	   /* Mythology */
 	   "sampo",
@@ -710,7 +711,7 @@ static const char * const bogusobjects[] = {
 	   "spellbook called Unpronouncable Cults",					/*  The other thing "Unaussprechlichen" translates to */
 	   "spellbook named The Diary of Drenicus the Wise",		/*  Dicefreaks, The Gates of Hell */
 	   "spellbook named Clavicula Salomonis Regis",				/* ie, The Lesser Key of Solomon */
-	   "copy of The Five Books of Moses",				/* aka the Torah */
+	   "copy of The Five Books of Moses",						/* aka the Torah */
 	   "spellbook named The Six and Seventh Books of Moses",	/* 18th- or 19th-century magical text allegedly written by Moses */
 	   "spellbook named The Book of Coming Forth by Day", "spellbook named The Book of emerging forth into the Light",
 	   "spellbook named Sepher Ha-Razim",						/* Book given to Noah by the angel Raziel */
@@ -961,7 +962,7 @@ do_look(quick)
 	if ((from_screen ?
 		(sym == monsyms[S_HUMAN] && cc.x == u.ux && cc.y == u.uy) :
 		(sym == def_monsyms[S_HUMAN] && !iflags.showrace)) &&
-	    !(Race_if(PM_HUMAN) || Race_if(PM_ELF)) && !Upolyd)
+	    !(Race_if(PM_HUMAN) || Race_if(PM_ELF) || Race_if(PM_DROW)) && !Upolyd)
 	    found += append_str(out_str, "you");	/* tack on "or you" */
 
 	/*
@@ -1016,7 +1017,7 @@ do_look(quick)
 	    x_str = defsyms[i].explanation;
 	    if (sym == (force_defsyms ? defsyms[i].sym : (from_screen ? showsyms[i] : defsyms[i].sym)) && *x_str) {
 		/* avoid "an air", "a water", or "a floor of a room" */
-		int article = (i == S_room) ? 2 :		/* 2=>"the" */
+		int article = (i == S_drkroom || i == S_litroom) ? 2 :		/* 2=>"the" */
 			      !(strcmp(x_str, "air") == 0 ||	/* 1=>"an"  */
 				strcmp(x_str, "water") == 0);	/* 0=>(none)*/
 
@@ -1038,7 +1039,7 @@ do_look(quick)
 		    if (level.flags.lethe && !strcmp(x_str, "water")) //lethe
 			found += append_str(out_str, "sparkling water"); //lethe
 		    else //lethe
-		    found += append_str(out_str,
+		    	found += append_str(out_str,
 					article == 2 ? the(x_str) :
 					article == 1 ? an(x_str) : x_str);
 		    if (is_cmap_trap(i)) hit_trap = TRUE;
