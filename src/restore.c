@@ -477,11 +477,11 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	restore_artifacts(fd);
 	restore_waterlevel(fd);
 #ifdef RECORD_ACHIEVE
-        mread(fd, (genericptr_t) &achieve, sizeof achieve);
+	mread(fd, (genericptr_t) &achieve, sizeof achieve);
 #endif
 #if defined(RECORD_REALTIME) || defined(REALTIME_ON_BOTL)
-        mread(fd, (genericptr_t) &realtime_data.realtime, 
-                  sizeof realtime_data.realtime);
+	mread(fd, (genericptr_t) &realtime_data.realtime, 
+			  sizeof realtime_data.realtime);
 #endif
 	/* must come after all mons & objs are restored */
 	relink_timers(FALSE);
@@ -726,9 +726,9 @@ register int fd;
 
 /* Start the timer here (realtime has already been set) */
 #if defined(BSD) && !defined(POSIX_TYPES)
-        (void) time((long *)&realtime_data.restoretime);
+	(void) time((long *)&realtime_data.restoretime);
 #else
-        (void) time(&realtime_data.restoretime);
+	(void) time(&realtime_data.restoretime);
 #endif
 
 #endif /* RECORD_REALTIME || REALTIME_ON_BOTL */
@@ -742,10 +742,12 @@ void
 trickery(reason)
 char *reason;
 {
+	int *c = (int *)0;
 	pline("Strange, this map is not as I remember it.");
 	pline("Somebody is trying some trickery here...");
 	pline("This game is void.");
 	killer = reason;
+	*c = 1;
 	done(TRICKED);
 }
 
