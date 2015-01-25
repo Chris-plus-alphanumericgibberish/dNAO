@@ -4174,6 +4174,8 @@ doapply()
 		    use_magic_whistle(obj);
 		    /* sometimes the blessing will be worn off */
 		    if (!rn2(49)) {
+			obj = splitobj(obj, 1L);
+
 			if (!Blind) {
 			    char buf[BUFSZ];
 
@@ -4182,6 +4184,10 @@ doapply()
 			    obj->bknown = 1;
 			}
 			unbless(obj);
+			obj_extract_self(obj);	/* free from inv */
+			/* shouldn't merge */
+			obj = hold_another_object(obj, "You drop %s!",
+						  doname(obj), (const char *)0);
 		    }
 		} else {
 		    use_whistle(obj);
