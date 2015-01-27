@@ -408,7 +408,6 @@ const struct Role roles[] = {
 	"Tou", "Ankh-Morpork", "the Thieves' Guild Hall",
 	PM_TOURIST, NON_PM, NON_PM,
 	PM_TWOFLOWER, PM_GUIDE, PM_MASTER_OF_THIEVES,
-//	PM_GIANT_SPIDER, PM_FOREST_CENTAUR, S_SPIDER, S_CENTAUR,
 	PM_DWARF, PM_ROCK_TROLL, S_RODENT, S_HUMANOID,
 	ART_YENDORIAN_EXPRESS_CARD,
 	MH_HUMAN | ROLE_MALE|ROLE_FEMALE | ROLE_NEUTRAL,
@@ -591,7 +590,7 @@ const char *DrowMaleLgodKnown = "the Eddergud",
 		   *DrowMaleNgod = "Vhaeraun",
 		   *DrowMaleCgod = "_Lolth"; /* Hedroven */
 
-const char *DrowNobMaleLgod = "Selvetarm",
+const char *DrowNobMaleLgod = "Selvetarm", /*Nevermind, using Ver'tas instead*/
 		   *DrowNobMaleNgod = "Keptolo",
 		   *DrowNobMaleCgod = "Ghaunadaur"; /* Hedroven Nobles */
 
@@ -1852,7 +1851,7 @@ role_init()
 			if(Role_if(PM_NOBLEMAN)){
 				urole.filecode = "Nhd";
 				
-				urole.lgod = DrowNobMaleLgod;
+				urole.lgod = DrowNobFemaleLgod;
 				urole.ngod = DrowNobMaleNgod;
 				urole.cgod = DrowNobMaleCgod;
 				
