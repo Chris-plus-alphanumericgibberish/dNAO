@@ -3,3 +3,5 @@ script: sudo adduser --system --group nethack && make && sudo make install
 notifications:
   irc:
     channels: "chat.freenode.net#dnethack"
+	use_notice: true
+	skip_join: true
