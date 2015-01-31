@@ -386,7 +386,9 @@ int spec;
 		if (tmp > 25) tmp = 25;	/* objects[].oc_wldam */
 	    }
 	}
-
+	
+	if(ptr == &mons[PM_RAZORVINE]) tmp *= 2; /*Double damage vs razorvine, since can't halve HP on the fly*/
+	
 	if(is_farm(otmp) && ptr->mlet == S_PLANT) tmp *= 2;
 	if(u.sealsActive&SEAL_EVE && ptr->mlet == S_PLANT) tmp *= 2;
 /*	Put weapon vs. monster type damage bonuses in below:	*/
