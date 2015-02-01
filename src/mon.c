@@ -2952,6 +2952,7 @@ xkilled(mtmp, dest)
 					&& mdat->mlet != S_PLANT
 					&& !(mtmp->mvanishes)
 					&& !(mtmp->mclone)
+					&& !(is_auton(mtmp->data))
 							) {
 			int typ;
 
