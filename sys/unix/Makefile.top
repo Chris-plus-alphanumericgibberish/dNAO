@@ -39,8 +39,8 @@ DIRPERM  = 0755
 # instructions)
 GAMESUFFIX = dnao-$(VERSION)
 GAMEDIR  = $(PREFIX)/$(GAMESUFFIX)
-GAMELINK = $(PREFIX)/dnao-0.0.0-0
-VARDIR  = $(PREFIX)/playground
+GAMELINK = $(PREFIX)/dnao-cur
+VARDIR  = $(GAMEDIR)
 #SHELLDIR = $(PREFIX)/games
 
 # per discussion in Install.X11 and Install.Qt
