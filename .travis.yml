@@ -1,5 +1,6 @@
 language: c
-script: sudo adduser --system --group nethack && make && sudo make install
+script: make PREFIX=/tmp CHOWN=true CHGRP=true install
+sudo: false
 notifications:
   irc:
     channels: "chat.freenode.net#dnethack"
