@@ -4151,10 +4151,10 @@ doapply()
 	case CREDIT_CARD:
 #endif
 	case SKELETON_KEY:
-		(void) pick_lock(obj);
+		res = pick_lock(obj);
 		break;
 	case UNIVERSAL_KEY:
-		(void) pick_lock(obj);
+		res =  pick_lock(obj);
 		break;
 	case PICK_AXE:
 	case DWARVISH_MATTOCK:
