@@ -12,12 +12,12 @@
 #define PREFIX "dnao-"
 #define GAMEBIN "dnethack"
 
-char *path_fmt[] = {"/%s/%s.0",
-                    "/%s/save/%s",
-                    "/%s/save/%s.gz",
-                    "/%s/save/%s.bz2",
-                    "/%s/save/%s.e",
-                    NULL};
+char const * const path_fmt[] = {"/%s/%s.0",
+                                 "/%s/save/%s",
+                                 "/%s/save/%s.gz",
+                                 "/%s/save/%s.bz2",
+                                 "/%s/save/%s.e",
+                                 NULL};
 
 int main(int argc, char **argv) {
     if (argc < 2) return 111;
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        char **fmt;
+        char const * const *fmt;
         for (fmt = path_fmt; *fmt; fmt++) {
             snprintf(path, PATH_MAX, *fmt, ent->d_name, argv[1]);
             if (!access(path, F_OK)) {
