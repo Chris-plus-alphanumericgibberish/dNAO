@@ -196,7 +196,7 @@ struct instance_flags {
 	boolean travel1;	/* first travel step */
 	coord	travelcc;	/* coordinates for travel_cache */
 #ifdef QWERTZ
-	boolean  qwertz_layout; /* swap y/z for this key layout */
+	boolean  qwertz_movement; /* replace y with z for this key layout */
 #endif
 #ifdef SIMPLE_MAIL
 	boolean simplemail;	/* simple mail format $NAME:$MESSAGE */

@@ -198,7 +198,7 @@ static struct Bool_Opt
 	{"pushweapon", &flags.pushweapon, FALSE, SET_IN_GAME},
 	{"quiver_fired", &iflags.quiver_fired, TRUE, SET_IN_GAME},
 #ifdef QWERTZ
-	{"qwertz_layout", &iflags.qwertz_layout, FALSE, SET_IN_GAME},
+	{"qwertz_movement", &iflags.qwertz_movement, FALSE, SET_IN_GAME},
 #endif
 #if defined(MICRO) && !defined(AMIGA)
 	{"rawio", &iflags.rawio, FALSE, DISP_IN_GAME},
@@ -1799,13 +1799,13 @@ boolean tinitial, tfrom_file;
 	}
 
 #ifdef QWERTZ
-        fullname = "qwertz_layout";
+        fullname = "qwertz_movement";
         if (match_optname(opts, fullname, 6, FALSE)) {
                 if (negated)
                         sdir=qykbd_dir;
                 else
                         sdir=qzkbd_dir;
-                iflags.qwertz_layout=!negated;
+                iflags.qwertz_movement=!negated;
                 return;
         }
 #endif
