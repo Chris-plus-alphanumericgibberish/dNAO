@@ -433,6 +433,8 @@ typedef long glyph_t;
 
 #define PARANOID /* paranoid quit &c */
 
+#define QWERTZ /* qwertz_layout patch */
+
 /* If this file exists, players get a message from the user defined
    in the file.  The file format is "username:message to be shown" all
    in one line.  Can be left undefined to disable the feature.
