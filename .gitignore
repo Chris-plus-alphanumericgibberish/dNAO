@@ -5,6 +5,7 @@ dat/commit_desc
 dat/data
 dat/dungeon
 dat/dungeon.pdf
+dat/nhdat
 dat/options
 dat/oracles
 dat/quest.dat
@@ -30,6 +31,7 @@ src/vis_tab.c
 util/dgn_comp
 util/dgn_lex.c
 util/dgn_yacc.c
+util/dlb
 util/lev_comp
 util/lev_lex.c
 util/lev_yacc.c
