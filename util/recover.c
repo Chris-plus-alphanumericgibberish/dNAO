@@ -168,7 +168,7 @@ const char *directory;
 	char levelfile[BUFSIZ];
 	set_levelfile_name(lev);
 	if (directory) {
-	    snprintf(levelfile, BUFSIZ, "%s%s", directory, lock);
+	    snprintf(levelfile, BUFSIZ, "%s/%s", directory, lock);
 	} else {
 	    strcpy(levelfile, lock);
 	}
@@ -186,7 +186,11 @@ const char *directory;
 {
 	int fd;
 	char savefile[BUFSIZ];
-	sprintf(savefile, "%s/%s", directory, savename);
+	if (directory) {
+		sprintf(savefile, "%s/%s", directory, savename);
+	} else {
+		strcpy(savefile, savename);
+	}
 #if defined(MICRO) || defined(WIN32) || defined(MSDOS)
 	fd = open(savefile, O_WRONLY | O_BINARY | O_CREAT | O_TRUNC, FCMASK);
 #else
