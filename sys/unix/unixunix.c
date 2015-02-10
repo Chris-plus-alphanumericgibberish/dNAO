@@ -152,6 +152,8 @@ getlock()
 			goto gotlock;
 		(void) close(fd);
 
+		/* drop the "perm" lock while the user decides */
+		unlock_file(HLOCK);
 		if(iflags.window_inited) {
 		    c = yn_function("There is already a game in progress under your name.  Destroy old game [y], Recover it [r], Cancel [n] ?", "ynr", 'n');
 		} else {
@@ -166,6 +168,10 @@ getlock()
 		    } while (!index("rRyYnN", c) && c != -1);
 		    (void) printf("\e[7A"); /* cursor up 7 */
 		    (void) printf("\e[J"); /* clear from cursor down */
+		}
+		if (!lock_file(HLOCK, LOCKPREFIX, 10)) {
+			wait_synch();
+			error("%s", "");
 		}
 		if (c == 'r' || c == 'R') {
 		    if (restore_savefile(lock, fqn_prefix[SAVEPREFIX]) == 0) {
