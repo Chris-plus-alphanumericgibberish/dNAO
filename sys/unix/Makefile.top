@@ -263,8 +263,8 @@ install: $(GAME) recover $(VARDAT) dungeon spec_levs
 	@echo Remember to make symlink if you are installing an updated version.
 
 symlink:
-	-rm $(GAMELINK)
-	ln -s $(GAMESUFFIX) $(GAMELINK)
+	ln -s $(GAMESUFFIX) $(GAMELINK).new
+	mv -T $(GAMELINK).new $(GAMELINK)
 
 
 # 'make clean' removes all the .o files, but leaves around all the executables
