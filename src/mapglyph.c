@@ -253,7 +253,7 @@ unsigned *ospecial;
 					}
 				}
 			} else if(In_neu(&u.uz)){
-				if(u.uz.dlevel <= sum_of_all_level.dlevel){
+				if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
 					if(offset >= S_vwall && offset <= S_trwall){
 						color = CLR_BROWN;
 					}
@@ -271,7 +271,7 @@ unsigned *ospecial;
 					else if(offset >= S_drkroom && offset <= S_dnladder){
 						color = CLR_BLUE;
 					}
-				}else{
+				} else {
 					if(offset >= S_vwall && offset <= S_trwall){
 						color = CLR_BLACK;
 					}
