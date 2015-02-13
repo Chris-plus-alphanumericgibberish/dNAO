@@ -3642,6 +3642,7 @@ bindspirit(seal_id)
 		}break;
 		case MARIONETTE:{
 			if(u.sealTimeout[MARIONETTE-FIRST_SEAL] < moves){
+				unrestrict_weapon_skill(P_MATTER_SPELL);
 				u.sealsActive |= SEAL_MARIONETTE;
 				u.sealsUsed |= SEAL_MARIONETTE;
 				u.spirit[u.sealCounts] = SEAL_MARIONETTE;
