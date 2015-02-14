@@ -9,8 +9,12 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define PREFIX "dnao-"
-#define GAMEBIN "dnethack"
+#ifndef PREFIX
+# define PREFIX "dnao-"
+#endif
+#ifndef GAMEBIN
+# define GAMEBIN "dnethack"
+#endif
 
 char const * const path_fmt[] = {"/%s/%s.0",
                                  "/%s/save/%s",
