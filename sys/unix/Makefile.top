@@ -274,6 +274,13 @@ slave:
 	chmod $(DIRPERM) $(GAMEDIR) $(VARDIR) $(VARDIR)/save
 	ln $(MASTERDIR)/* $(VARDIR)
 
+master:
+	mkdir -p $(MASTERDIR)
+	touch $(MASTERDIR)/perm $(MASTERDIR)/record $(MASTERDIR)/logfile $(MASTERDIR)/xlogfile $(MASTERDIR)/livelog
+	-( cd $(MASTERDIR) ; $(CHOWN) $(GAMEUID) perm record logfile xlogfile livelog ; \
+			$(CHGRP) $(GAMEGRP) perm record logfile xlogfile livelog ; \
+			chmod $(FILEPERM) perm record logfile xlogfile livelog )
+
 # 'make clean' removes all the .o files, but leaves around all the executables
 # and compiled data files
 clean:
