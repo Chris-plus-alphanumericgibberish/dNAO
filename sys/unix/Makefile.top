@@ -37,8 +37,7 @@ DIRPERM  = 0755
 # therefore there should not be anything in GAMEDIR that you want to keep
 # (if there is, you'll have to do the installation by hand or modify the
 # instructions)
-GAMESUFFIX = dnao-$(VERSION)
-GAMEDIR  = $(PREFIX)/$(GAMESUFFIX)
+GAMEDIR  = $(PREFIX)/dnao-$(VERSION)
 GAMELINK = $(PREFIX)/dnao-cur
 VARDIR  = $(GAMEDIR)
 #SHELLDIR = $(PREFIX)/games
@@ -264,7 +263,7 @@ install: $(GAME) recover $(VARDAT) dungeon spec_levs
 	@echo Remember to make symlink if you are installing an updated version.
 
 symlink:
-	ln -s $(GAMESUFFIX) $(GAMELINK).new
+	ln -s $(GAMEDIR) $(GAMELINK).new
 	mv -T $(GAMELINK).new $(GAMELINK)
 
 slave:
