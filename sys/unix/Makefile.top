@@ -42,6 +42,7 @@ GAMEDIR  = $(PREFIX)/$(GAMESUFFIX)
 GAMELINK = $(PREFIX)/dnao-cur
 VARDIR  = $(GAMEDIR)
 #SHELLDIR = $(PREFIX)/games
+MASTERDIR = $(PREFIX)/dnethackdir
 
 # per discussion in Install.X11 and Install.Qt
 VARDATND = 
@@ -266,6 +267,12 @@ symlink:
 	ln -s $(GAMESUFFIX) $(GAMELINK).new
 	mv -T $(GAMELINK).new $(GAMELINK)
 
+slave:
+	mkdir -p $(GAMEDIR) $(VARDIR) $(VARDIR)/save
+	-$(CHOWN) $(GAMEUID) $(GAMEDIR) $(VARDIR) $(VARDIR)/save
+	$(CHGRP) $(GAMEGRP) $(GAMEDIR) $(VARDIR) $(VARDIR)/save
+	chmod $(DIRPERM) $(GAMEDIR) $(VARDIR) $(VARDIR)/save
+	ln $(MASTERDIR)/* $(VARDIR)
 
 # 'make clean' removes all the .o files, but leaves around all the executables
 # and compiled data files
