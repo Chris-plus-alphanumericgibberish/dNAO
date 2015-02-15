@@ -9,50 +9,47 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#ifndef PREFIX
-# define PREFIX "dnao-"
-#endif
-#ifndef GAMEBIN
-# define GAMEBIN "dnethack"
-#endif
-
-char const * const path_fmt[] = {"/%s/%s.0",
-                                 "/%s/save/%s",
-                                 "/%s/save/%s.gz",
-                                 "/%s/save/%s.bz2",
-                                 "/%s/save/%s.e",
+char const * const path_fmt[] = {"%s/%s.0",
+                                 "%s/save/%s",
+                                 "%s/save/%s.gz",
+                                 "%s/save/%s.bz2",
+                                 "%s/save/%s.e",
                                  NULL};
 
 int main(int argc, char **argv) {
-    if (argc < 2) return 111;
+    if (argc < 4) return 111;
+
+    int prefixlen = strlen(argv[1]);
 
     char path[PATH_MAX + 1];
     path[PATH_MAX] = '\0';
 
-    DIR *root = opendir("/");
+    DIR *root = opendir(".");
+    if (!root) return 112;
+
     struct dirent *ent;
     while ((ent = readdir(root))) {
         if (ent->d_type != DT_DIR) {
             continue;
         }
 
-        if (strncmp(ent->d_name, PREFIX, strlen(PREFIX))) {
+        if (strncmp(ent->d_name, argv[1], prefixlen)) {
             continue;
         }
 
         char const * const *fmt;
         for (fmt = path_fmt; *fmt; fmt++) {
-            snprintf(path, PATH_MAX, *fmt, ent->d_name, argv[1]);
+            snprintf(path, PATH_MAX, *fmt, ent->d_name, argv[2]);
             if (!access(path, F_OK)) {
-                snprintf(path, PATH_MAX, "/%s/" GAMEBIN, ent->d_name);
+                chdir(ent->d_name);
                 goto found;
             }
         }
     }
 
-    snprintf(path, PATH_MAX, "/%s/" GAMEBIN, PREFIX "cur");
+    snprintf(path, PATH_MAX, "%scur", argv[1]);
+    chdir(path);
 found:
-    argv[1] = path;
-    execv(path, argv + 1);
+    execv(argv[3], argv + 3);
     return 127;
 }
