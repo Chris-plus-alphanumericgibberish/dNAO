@@ -1,8 +1,5 @@
 language: c
 script: make PREFIX=/tmp CHOWN=true CHGRP=true install
-compiler:
-  - clang
-  - gcc
 sudo: false
 notifications:
   irc:
