@@ -275,7 +275,7 @@ moveloop()
 				/* Possibly vanish */
 				if(mtmp->mvanishes>-1){
 					if(mtmp->mvanishes-- == 0){
-						mongone(mtmp);
+						monvanished(mtmp);
 						continue;
 					}
 				}
