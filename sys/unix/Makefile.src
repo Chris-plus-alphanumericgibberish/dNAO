@@ -1,6 +1,8 @@
 #	NetHack Makefile.
 #	SCCS Id: @(#)Makefile.src	3.4	2002/03/02
 
+COMMIT_DESC := $(shell git describe --always)
+
 # newer makes predefine $(MAKE) to 'make' and do smarter processing of
 # recursive make calls if $(MAKE) is used
 # these makes allow $(MAKE) to be overridden by the environment if someone
@@ -23,8 +25,6 @@
 #	'Systos'	-- Atari
 #	'SysBe'		-- BeOS
 SYSTEM = Sysunix
-
-.PHONY: ../dat/commit_desc
 
 #
 # Make sure that your bourne shell is specified here, as you have to spawn
@@ -502,8 +502,9 @@ tile.c: ../win/share/tilemap.c $(HACK_H)
 ../win/gnome/gn_rip.h: ../win/X11/rip.xpm
 	cp ../win/X11/rip.xpm ../win/gnome/gn_rip.h
 
-../dat/commit_desc:
-	git describe --always > ../dat/commit_desc
+# this has to be reentrant, sadly
+../dat/commit_desc::
+	( if ! ( echo $(COMMIT_DESC) | cmp -s ../dat/commit_desc ) ; then echo $(COMMIT_DESC) > ../dat/commit_desc ; fi )
 
 #	date.h should be remade any time any of the source or include code
 #	is modified.  Unfortunately, this would make the contents of this
