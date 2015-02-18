@@ -174,11 +174,17 @@ GEM_RSC.RSC:
 title.img:
 	( cd dat ; $(MAKE) title.img )
 
-check-dlb: options
+# little kludge to make sure this runs after everything else, in make all
+# there's much worse, in these makefiles
+check-dlb: options $(VARDAT) dungeon spec_levs
 	@if egrep -s librarian dat/options ; then $(MAKE) dlb ; else true ; fi
 
-dlb:
+dlb: dat/nhdat
+
+util/dlb:
 	( cd util ; $(MAKE) dlb )
+
+dat/nhdat: util/dlb $(addprefix dat/,$(DATDLB))
 	( cd dat ; ../util/dlb cf nhdat $(DATDLB) )
 
 # recover can be used when INSURANCE is defined in include/config.h
