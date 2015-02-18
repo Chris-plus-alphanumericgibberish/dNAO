@@ -14,6 +14,8 @@ char const * const path_fmt[] = {"%s/%s.0",
                                  "%s/save/%s.gz",
                                  "%s/save/%s.bz2",
                                  "%s/save/%s.e",
+                                 "%s/save/%s.e.gz",
+                                 "%s/save/%s.e.bz2",
                                  NULL};
 
 int main(int argc, char **argv) {
