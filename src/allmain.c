@@ -103,6 +103,7 @@ moveloop()
 	int tx,ty;
 	int nmonsclose,nmonsnear,enkispeedlim;
 	static boolean oldBlind = 0;
+	static int oldCon;
 
     flags.moonphase = phase_of_the_moon();
     if(flags.moonphase == FULL_MOON) {
@@ -139,6 +140,7 @@ moveloop()
     youmonst.movement = NORMAL_SPEED;	/* give the hero some movement points */
     prev_hp_notify = uhp();
 
+	oldCon = ACURR(A_CON);
     for(;;) {/////////////////////////MAIN LOOP/////////////////////////////////
 	get_nh_event();
 #ifdef POSITIONBAR
@@ -177,6 +179,14 @@ moveloop()
 				vision_full_recalc = 1;	/* blindness just got toggled */
 				if (Blind_telepat || Infravision) see_monsters();
 				oldBlind = !!Blind;
+			}
+////////////////////////////////////////////////////////////////////////////////////////////////
+			if (!oldCon != ACURR(A_CON)) {
+				int condif = conplus(ACURR(A_CON)) - conplus(oldCon);
+				if(condif != 0) u.uhpmax += u.ulevel*condif;
+				if(u.uhpmax < 1) u.uhpmax = 1;
+				if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
+				oldCon = ACURR(A_CON);
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
 			oldspiritAC = u.spiritAC;
