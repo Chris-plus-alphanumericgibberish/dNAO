@@ -103,7 +103,7 @@ moveloop()
 	int tx,ty;
 	int nmonsclose,nmonsnear,enkispeedlim;
 	static boolean oldBlind = 0;
-	static int oldCon;
+	static int oldCon, oldWisBon;
 
     flags.moonphase = phase_of_the_moon();
     if(flags.moonphase == FULL_MOON) {
@@ -141,6 +141,7 @@ moveloop()
     prev_hp_notify = uhp();
 
 	oldCon = ACURR(A_CON);
+	oldWisBon = ACURR(A_WIS)/4;
     for(;;) {/////////////////////////MAIN LOOP/////////////////////////////////
 	get_nh_event();
 #ifdef POSITIONBAR
@@ -187,6 +188,13 @@ moveloop()
 				if(u.uhpmax < 1) u.uhpmax = 1;
 				if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 				oldCon = ACURR(A_CON);
+			}
+////////////////////////////////////////////////////////////////////////////////////////////////
+			if (!oldWisBon != ACURR(A_WIS)/4) {
+				u.uenmax += u.ulevel*(ACURR(A_WIS)/4 - oldWisBon);
+				if(u.uenmax < 0) u.uenmax = 0;
+				if(u.uen > u.uenmax) u.uen = u.uenmax;
+				oldWisBon = ACURR(A_WIS)/4;
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
 			oldspiritAC = u.spiritAC;
@@ -810,6 +818,14 @@ moveloop()
 				if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 				oldCon = ACURR(A_CON);
 			}
+////////////////////////////////////////////////////////////////////////////////////////////////
+			if (!oldWisBon != ACURR(A_WIS)/4) {
+				u.uenmax += u.ulevel*(ACURR(A_WIS)/4 - oldWisBon);
+				if(u.uenmax < 0) u.uenmax = 0;
+				if(u.uen > u.uenmax) u.uen = u.uenmax;
+				oldWisBon = ACURR(A_WIS)/4;
+			}
+////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	
 #ifdef REALTIME_ON_BOTL
