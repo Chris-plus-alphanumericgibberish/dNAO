@@ -1369,6 +1369,7 @@ static const char * const bogusmons[] = {
         "tie-thulu", "Domo-kun",
         "looooooooooooong cat",                 /* internet memes */
         "bohrbug", "mandelbug", "schroedinbug", /* bugs */
+        "clockwork bug",						/* often quite deadly */
         "rabbit named Gerbenok",                /* Monty Python killer rabbit */
         "doenertier",                           /* Erkan & Stefan */
         "Invisible Pink Unicorn",
