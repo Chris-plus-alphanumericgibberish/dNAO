@@ -266,11 +266,6 @@ install: $(GAME) recover $(VARDAT) dungeon spec_levs
 			chmod $(FILEPERM) perm record logfile xlogfile livelog )
 # and a reminder
 	@echo You may also want to reinstall the man pages via the doc Makefile.
-	@echo Remember to make symlink if you are installing an updated version.
-
-symlink:
-	ln -s $(GAMEDIR) $(GAMELINK).new
-	mv -T $(GAMELINK).new $(GAMELINK)
 
 slave:
 	mkdir -p $(GAMEDIR) $(VARDIR) $(VARDIR)/save

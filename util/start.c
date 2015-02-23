@@ -19,7 +19,8 @@ char const * const path_fmt[] = {"%s/%s.0",
                                  NULL};
 
 int main(int argc, char **argv) {
-    if (argc < 4) return 111;
+    /* start prefix- 1337name prefix-cur ./game [options...] */
+    if (argc < 5) return 111;
 
     int prefixlen = strlen(argv[1]);
 
@@ -49,9 +50,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    snprintf(path, PATH_MAX, "%scur", argv[1]);
-    chdir(path);
+    chdir(argv[3]);
 found:
-    execv(argv[3], argv + 3);
+    execv(argv[4], argv + 4);
     return 127;
 }
