@@ -493,7 +493,8 @@ print_glyph(window, x, y, glyph)
 */
 void curses_print_glyph(winid wid, XCHAR_P x, XCHAR_P y, int glyph)
 {
-    int ch, color;
+    glyph_t ch;
+    int color;
     unsigned int special;
     int attr = -1;
 

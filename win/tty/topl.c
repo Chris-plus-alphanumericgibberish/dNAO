@@ -15,7 +15,7 @@
 #endif
 
 STATIC_DCL void FDECL(redotoplin, (const char*));
-STATIC_DCL void FDECL(topl_putsym, (CHAR_P));
+STATIC_DCL void FDECL(topl_putsym, (glyph_t));
 STATIC_DCL void NDECL(remember_topl);
 STATIC_DCL void FDECL(removetopl, (int));
 
@@ -261,7 +261,7 @@ update_topl(bp)
 STATIC_OVL
 void
 topl_putsym(c)
-    char c;
+    glyph_t c;
 {
     register struct WinDesc *cw = wins[WIN_MESSAGE];
 
@@ -295,7 +295,7 @@ topl_putsym(c)
     cw->curx = ttyDisplay->curx;
     if(cw->curx == 0) cl_end();
 #ifndef WIN32CON
-    (void) putchar(c);
+    (void) pututf8char(c);
 #endif
 }
 
