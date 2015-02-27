@@ -1637,6 +1637,7 @@ int final;
 	int ltmp;
 	char buf[BUFSZ];
 	char buf2[BUFSZ];
+	char prebuf[BUFSZ];
 	const char *enc_stat[] = { /* copied from botl.c */
 	     "",
 	     "burdened",
@@ -1654,16 +1655,91 @@ int final;
 
 #ifdef ELBERETH
 	if (u.uevent.uhand_of_elbereth) {
-	    static const char * const hofe_titles[3] = {
-				"the Hand of Elbereth",
-				"the Envoy of Balance",
-				"the Glory of Arioch"
+	    static const char * const hofe_titles[27] = {
+				/* Default */
+				"the Arm of the Law",		 /*01*/
+				"the Envoy of Balance",		 /*02*/
+				"the Glory of Arioch",		 /*03*/
+				/* Monk */
+				"the Sage of Law",			 /*04*/
+				"the Grandmaster of Balance",/*05*/
+				"the Glory of Eequor",		 /*06*/
+				/* Noble (human, vampire, incant) */
+				"the Saint %s",				 /*07*/
+				"the Grey Saint",			 /*08*/
+				"the Dark %s",				 /*09*/
+				/* Wizard */
+				"the Magister of Law",		 /*10*/
+				"the Wizard of Balance",	 /*11*/
+				"the Glory of Chardros",	 /*12*/
+				/* Elf */
+				"the Hand of Elbereth",		 /*13*/
+				"the Doomspeaker of Vaire",	 /*14*/
+				"the Whisperer of Este",	 /*15*/
+				/* Drow */
+				"the Hand of Eilistraee",	 /*16*/
+				"the Hand of Kiaransali",	 /*17*/
+				"the Hand of Lolth",		 /*18*/
+				/* Hedrow */
+				"the Shepherd of spiders",	 /*19*/
+				"the Sword of Vhaeraun",	 /*20*/
+				"the Fang of Lolth",		 /*21*/
+				/* Drow Noble */
+				"the Blade of Ver'tas",		 /*22*/
+				"the Hand of Kiaransali",	 /*23*/
+				"the Hand of Lolth",		 /*24*/
+				/* Hedrow Noble */
+				"the Sword of Selvetarm",	 /*25*/
+				"the Hand of Keptolo",		 /*26*/
+				"the Hammer of Ghaunadaur",	 /*27*/
+				
+				/* uhand_of_elbereth max == 31 */
 	    };
-	    dump(youwere,
+	    if(Role_if(PM_EXILE)) dump(youwere,"the Emissary of Elements");
+	    else if(Pantheon_if(PM_PIRATE) || Role_if(PM_PIRATE)) dump(youwere,"the Pirate King");
+	    else if((Pantheon_if(PM_VALKYRIE) || Role_if(PM_VALKYRIE)) && flags.initgend) dump(youwere,"the Daughter of Skadi");
+	    else if(Race_if(PM_DWARF) && (urole.ldrnum == PM_THORIN_II_OAKENSHIELD || urole.ldrnum == PM_DAIN_II_IRONFOOT)){
+			if(urole.ldrnum == PM_THORIN_II_OAKENSHIELD) dump(youwere,"King under the Mountain");
+			else if(urole.ldrnum == PM_DAIN_II_IRONFOOT) dump(youwere,"Lord of Moria");
+	    } else if((Pantheon_if(PM_SAMURAI) || Role_if(PM_SAMURAI)) && u.uevent.uhand_of_elbereth == 1){
+			strcpy(buf, "Nasu no ");
+			strcat(buf, plname);
+			dump(youwere,buf);
+		} else if(Role_if(PM_NOBLEMAN) && !Race_if(PM_DROW)){
+			if(u.uevent.uhand_of_elbereth == 9) Sprintf(buf, hofe_titles[u.uevent.uhand_of_elbereth - 1], flags.female ? "Lady" : "Lord");
+			else if(u.uevent.uhand_of_elbereth == 7) Sprintf(buf, hofe_titles[u.uevent.uhand_of_elbereth - 1], flags.female ? "Queen" : "King");
+			else Sprintf(buf, " %s", hofe_titles[u.uevent.uhand_of_elbereth - 1]);
+			dump(youwere, buf);
+		} else dump(youwere,
 		(char *)hofe_titles[u.uevent.uhand_of_elbereth - 1]);
 	}
-#endif
-
+	
+	if(u.lastprayed){
+		Sprintf(buf, "You last %s %ld turns ago", u.lastprayresult==PRAY_GIFT ? "recieved a gift" :
+												  u.lastprayresult==PRAY_ANGER ? "angered your god" : 
+												  u.lastprayresult==PRAY_CONV ? "converted to a new god" : 
+												  "prayed",
+			moves - u.lastprayed);
+		dump("", buf);
+		if(u.lastprayresult==PRAY_GOOD){
+			Sprintf(buf, "That prayer was well recieved");
+			dump("", buf);
+		} else if(u.lastprayresult==PRAY_BAD){
+			Sprintf(buf, "That prayer was poorly recieved");
+			dump("", buf);
+		}
+		if(u.reconciled){
+			if(u.reconciled==REC_REC){
+				Sprintf(buf, " since reconciled with your god");
+				dump(youhad,buf);
+			} else if(u.reconciled==REC_MOL){
+				Sprintf(buf, " since mollified your god");
+				dump(youhad,buf);
+			}
+		}
+	}
+	
+	/* note: piousness 20 matches MIN_QUEST_ALIGN (quest.h) */
 	if (u.ualign.record >= 20)
 		dump(youwere, "piously aligned");
 	else if (u.ualign.record > 13)
@@ -1683,22 +1759,197 @@ int final;
 	else dump("  You have ", "transgressed");
 	Sprintf(buf, " %d", u.ualign.record);
 	dump("  Your alignment was ", buf);
+	Sprintf(buf, " %d sins", u.ualign.sins);
+	dump("  You carried", buf);
+	if(flags.stag) dump(youhad,"turned stag on your quest leader");
+	if(flags.leader_backstab) dump(youwere,"betrayed by your quest leader");
+	Sprintf(buf, "a hod wantedness of %d", u.hod);
+	dump(youhad,buf);
+	Sprintf(buf, "a gevurah wantedness of %d", u.gevurah);
+	dump(youhad,buf);
+	Sprintf(buf, "a chokhmah wantedness of %d", u.keter);
+	dump(youhad,buf);
+	Sprintf(buf, "%d weakness from being studied", u.ustdy);
+	dump(youhad,buf);
+
+	if(u.sealsActive || u.specialSealsActive){
+		int i,j,numBound,numFound=0;
+		numBound = u.sealCounts;
+		if(u.spirit[QUEST_SPIRIT]) numBound++;
+		if(Role_if(PM_EXILE) && u.uevent.uhand_of_elbereth) numBound++;
+		if(u.spirit[CROWN_SPIRIT]) numBound++;
+		if(u.spirit[GPREM_SPIRIT]) numBound++;
+		if(u.spirit[ALIGN_SPIRIT]) numBound++;
+		if(u.spirit[OUTER_SPIRIT]) numBound++;
+		Sprintf(prebuf, "Your soul was ");
+		Sprintf(buf, " bound to ");
+		for(i=0;i<QUEST_SPIRIT;i++){
+			if(u.spirit[i]) for(j=0;j<32;j++){
+				if((u.spirit[i] >> j) == 1){
+					Strcat(buf,sealNames[j]);
+					numFound++;
+					if(numBound==2 && numFound==1) Strcat(buf," and ");
+					else if(numBound>=3){
+						if(numFound<numBound-1) Strcat(buf,", ");
+						if(numFound==numBound-1) Strcat(buf,", and ");
+					}
+					break;
+				}
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_DAHLVER_NAR){
+			Strcat(buf, sealNames[(DAHLVER_NAR) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_ACERERAK){
+			Strcat(buf, sealNames[(ACERERAK) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_COUNCIL){
+			Strcat(buf, sealNames[(COUNCIL) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		if(numFound < numBound && u.spirit[CROWN_SPIRIT]) for(j=0;j<32;j++){
+			if((u.spirit[CROWN_SPIRIT] >> j) == 1){
+				Strcat(buf,sealNames[j]);
+				numFound++;
+				if(numBound==2 && numFound==1) Strcat(buf," and ");
+				else if(numBound>=3){
+					if(numFound<numBound-1) Strcat(buf,", ");
+					if(numFound==numBound-1) Strcat(buf,", and ");
+				}
+				break;
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_COSMOS){
+			Strcat(buf, sealNames[(COSMOS) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_MISKA){
+			Strcat(buf, sealNames[(MISKA) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_NUDZIARTH){
+			Strcat(buf, sealNames[(NUDZIARTH) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_ALIGNMENT_THING){
+			Strcat(buf, sealNames[(ALIGNMENT_THING) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_UNKNOWN_GOD){
+			Strcat(buf, sealNames[(UNKNOWN_GOD) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_BLACK_WEB){
+			Strcat(buf, sealNames[(BLACK_WEB) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		if(numFound < numBound && u.specialSealsActive&SEAL_NUMINA){
+			Strcat(buf, sealNames[(NUMINA) - (FIRST_SEAL)]);
+			numFound++;
+			if(numBound==2 && numFound==1) Strcat(buf," and ");
+			else if(numBound>=3){
+				if(numFound<numBound-1) Strcat(buf,", ");
+				if(numFound==numBound-1) Strcat(buf,", and ");
+			}
+		}
+		dump(prebuf, buf);
+	}
+	if(u.sealsKnown || u.specialSealsKnown){
+		int numSlots;
+		if(Role_if(PM_EXILE)){
+			if(u.ulevel <= 2) numSlots=1;
+			else if(u.ulevel <= 9) numSlots=2;
+			else if(u.ulevel <= 18) numSlots=3;
+			else if(u.ulevel <= 25) numSlots=4;
+			else numSlots=5;
+		} else {
+			numSlots=1;
+		}
+		if(!u.spirit[QUEST_SPIRIT] && u.specialSealsKnown&(SEAL_DAHLVER_NAR|SEAL_ACERERAK|SEAL_BLACK_WEB)){
+			you_are("able to bind with a quest spirit");
+		}
+		if(!u.spirit[ALIGN_SPIRIT] && u.specialSealsKnown&(SEAL_COSMOS|SEAL_MISKA|SEAL_NUDZIARTH|SEAL_ALIGNMENT_THING|SEAL_UNKNOWN_GOD)){
+			you_are("able to bind with an aligned spirit");
+		}
+		if(!u.spirit[OUTER_SPIRIT] && u.ulevel == 30){
+			you_are("able to bind with the Numina");
+		}
+		if(u.sealCounts < numSlots){
+			Sprintf(prebuf, "You could ");
+			Sprintf(buf, " bind to %d more spirit%s", numSlots-u.sealCounts, (numSlots-u.sealCounts)>1 ? "s" : "");
+			dump(prebuf, buf);
+		}
+	}
 
 
 	/*** Resistances to troubles ***/
-	if (Fire_resistance) dump(youwere, "fire resistant");
-	if (Cold_resistance) dump(youwere, "cold resistant");
-	if (Sleep_resistance) dump(youwere, "sleep resistant");
-	if (Disint_resistance) dump(youwere, "disintegration-resistant");
-	if (Shock_resistance) dump(youwere, "shock resistant");
-	if (Poison_resistance) dump(youwere, "poison resistant");
-	if (Drain_resistance) dump(youwere, "level-drain resistant");
-	if (Sick_resistance) dump(youwere, "immune to sickness");
-	if (Antimagic) dump(youwere, "magic-protected");
 	if (Acid_resistance) dump(youwere, "acid resistant");
-	if (Stone_resistance) dump(youwere, "petrification resistant");
+	if (Cold_resistance) dump(youwere, "cold resistant");
+	if (Disint_resistance) dump(youwere, "disintegration-resistant");
+	if (Fire_resistance) dump(youwere, "fire resistant");
+	if (Halluc_resistance)
+		dump(youwere, "resistant to hallucinations");
 	if (Invulnerable) dump(youwere, "invulnerable");
-	if (u.uedibility) dump(youcould, "recognize detrimental food");
+	if (Drain_resistance) dump(youwere, "level-drain resistant");
+	if (Antimagic) dump(youwere, "magic-protected");
+	if (Stone_resistance)
+		dump(youwere, "petrification resistant");
+	if (Poison_resistance) dump(youwere, "poison resistant");
+	if (Shock_resistance) dump(youwere, "shock resistant");
+	if (Sick_resistance) dump(youwere, "immune to sickness");
+	if (Sleep_resistance) dump(youwere, "sleep resistant");
+	if (u.uedibility || u.sealsActive&SEAL_BUER) dump(youcould, "recognize detrimental food");
+	if ( (ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE && !ublindf->cursed) || 
+		 (uarmc && uarmc->otyp == OILSKIN_CLOAK && !uarmc->cursed) ||
+		 (u.sealsActive&SEAL_ENKI)
+	) dump(youwere, "waterproof");
 
 	/*** Troubles ***/
 	if (Halluc_resistance) 	dump("  ", "You resisted hallucinations");
@@ -1740,6 +1991,21 @@ int final;
 #endif
 	if (Sleeping) dump("  ", "You fell asleep");
 	if (Hunger) dump("  ", "You hungered rapidly");
+	if(u.wimage){
+		if(ACURR(A_WIS) < 6){
+			Sprintf(buf, " filled with the image of a weeping angel");
+			dump("  Your mind was ",buf);
+		} else if(ACURR(A_WIS) < 9){
+			Sprintf(buf, " ever on your mind");
+			dump("  The image of a weeping angel was ",buf);
+		} else if(ACURR(A_WIS) < 12){
+			Sprintf(buf, " seem to shake the image of a weeping angel from your mind");
+			dump("  You couldn't ",buf);
+		} else {
+			Sprintf(buf, " in the back of your mind");
+			dump("  The image of a weeping angel lurked ",buf);
+		}
+	}
 
 	/*** Vision and senses ***/
 	if (See_invisible) dump("  ", "You saw invisible");
@@ -1761,6 +2027,10 @@ int final;
 	if (u.umconf) dump(youwere, "going to confuse monsters");
 
 	/*** Appearance and behavior ***/
+	Sprintf(buf, "a carrying capacity of %d remaining", -1*inv_weight());
+    dump(youhad, buf);
+	Sprintf(buf, "%d points of nutrition remaining", YouHunger);
+    dump(youhad, buf);
 	if (Adornment) {
 	    int adorn = 0;
 	    if(uleft && uleft->otyp == RIN_ADORNMENT) adorn += uleft->spe;
@@ -1814,6 +2084,12 @@ int final;
 	}
 
 	/*** Physical attributes ***/
+	if (uclockwork){
+		if(u.ucspeed==HIGH_CLOCKSPEED) dump(youwere, "set to high clockspeed");
+		if(u.ucspeed==NORM_CLOCKSPEED) dump(youwere, "set to normal clockspeed");
+		if(u.ucspeed==SLOW_CLOCKSPEED) dump(youwere, "set to low clockspeed");
+		if(u.phasengn) dump(youwere, "in phase mode");
+	}
 	if (u.uhitinc)
 	    dump(youhad,
 		enlght_combatinc("to hit", u.uhitinc, final, buf));
