@@ -1653,7 +1653,6 @@ int final;
 
 	dump("", "Final attributes");
 
-#ifdef ELBERETH
 	if (u.uevent.uhand_of_elbereth) {
 	    static const char * const hofe_titles[27] = {
 				/* Default */
