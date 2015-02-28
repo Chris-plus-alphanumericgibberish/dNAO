@@ -2158,11 +2158,11 @@ int final;
 		dump("  ", "Good luck did not time out for you");
 	}
 
-	if (u.ugangr) {
+	if (u.ugangr[Align2gangr(u.ualign.type)]) {
 	    Sprintf(buf, " %sangry with you",
-		u.ugangr > 6 ? "extremely " : u.ugangr > 3 ? "very " : "");
+		u.ugangr[Align2gangr(u.ualign.type)] > 6 ? "extremely " : u.ugangr[Align2gangr(u.ualign.type)] > 3 ? "very " : "");
 #ifdef WIZARD
-	    if (wizard) Sprintf(eos(buf), " (%d)", u.ugangr);
+	    if (wizard) Sprintf(eos(buf), " (%d)", u.ugangr[Align2gangr(u.ualign.type)]);
 #endif
 	    Sprintf(buf2, "%s was %s", u_gname(), buf);
 	    dump("  ", buf2);
