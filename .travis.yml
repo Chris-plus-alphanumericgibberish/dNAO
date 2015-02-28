@@ -1,5 +1,5 @@
 language: c
-script: make PREFIX=/tmp GAMEUID= GAMEGID= install
+script: make
 sudo: false
 notifications:
   irc:
