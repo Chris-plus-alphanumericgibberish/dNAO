@@ -5,8 +5,6 @@
 #ifndef CONFIG_H /* make sure the compiler does not see the typedefs twice */
 #define CONFIG_H
 
-#include "patchlevel.h"
-
 /*
  * Section 1:	Operating and window systems selection.
  *		Select the version of the OS you are using.
@@ -196,7 +194,7 @@
  *	a tar-like file, thus making a neater installation.  See *conf.h
  *	for detailed configuration.
  */
-#define DLB	/* not supported on all platforms */
+/* #define DLB */	/* not supported on all platforms */
 
 /*
  *	Defining INSURANCE slows down level changes, but allows games that
@@ -215,10 +213,7 @@
  * otherwise it will be the current directory.
  */
 # ifndef HACKDIR
-#  define STR_HELPER(x) # x /* Make the preprocessor stringify a number. Don't ask. */
-#  define STR(x) STR_HELPER(x)
-#  define HACKDIR "/dnao-" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) \
-    "." STR(PATCHLEVEL) "-" STR(EDITLEVEL)
+#  define HACKDIR "."
 # endif
 
 /*
@@ -228,7 +223,7 @@
  * since the user might create files in a directory of his choice.
  * Of course SECURE is meaningful only if HACKDIR is defined.
  */
-/* #define SECURE */	/* do setuid(getuid()) after chdir() */
+# define SECURE		/* do setuid(getuid()) after chdir() */
 
 /*
  * If it is desirable to limit the number of people that can play Hack
