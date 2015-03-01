@@ -1,4 +1,4 @@
-VERSION := $(shell util/version.pl)
+VERSION := $(shell util/version.sh $(CC))
 
 GAME = dnethack
 GAMEUID = acehack
