@@ -23,7 +23,6 @@ util/dgn_lex.c
 util/lev_lex.c
 src/tile.c
 
-dat/commit_desc
 dat/*.tag
 dat/nhdat
 dat/data
