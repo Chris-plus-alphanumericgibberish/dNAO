@@ -188,8 +188,18 @@ $(AUTO_C:%.c=%.d): ;
 
 ##### DATA FILES #####
 
-ALL_DES = $(wildcard dat/*.des)
-ALL_TAG = $(ALL_DES:%.des=%.tag)
+QUEST_DES = Arch.des Barb.des Binder.des Caveman.des Convict.des	\
+            Drow.des DrowNoble.des Elf.des Erebor.des Healer.des	\
+            Hedrow.des HedrowNoble.des Knight.des Monk.des Moria.des	\
+            Noble.des Pirate.des Priest.des Ranger.des Rogue.des	\
+            Samurai.des Tourist.des Valkyrie.des Wizard.des
+
+SPEC_DES = bigroom.des blacktemple.des castle.des chaos.des		\
+           endgame.des gehennom.des knox.des labr.des law.des		\
+           medusa.des mines.des neutrality.des oracle.des sokoban.des	\
+           storage.des sunlesssea.des tomb.des tower.des yendor.des
+
+ALL_TAG = $(QUEST_DES:%.des=dat/%.tag) $(SPEC_DES:%.des=dat/%.tag)
 
 $(ALL_TAG): dat/%.tag: dat/%.des util/lev_comp
 	cd dat && ../util/lev_comp $(<F) && touch $(@F)
