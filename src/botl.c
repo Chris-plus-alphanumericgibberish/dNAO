@@ -181,6 +181,23 @@ int rank;
 #endif
 
 const char *
+code_of(monnum)
+	short monnum;
+{
+	register struct Role *role;
+	register int i;
+
+
+	for (role = (struct Role *) roles; role->name.m; role++)
+	    if (monnum == role->malenum || monnum == role->femalenum)
+	    	break;
+	
+	if(role) return role->filecode;
+	// else return ("Player");
+	return ("Plr");
+}
+
+const char *
 rank_of(lev, monnum, female)
 	int lev;
 	short monnum;

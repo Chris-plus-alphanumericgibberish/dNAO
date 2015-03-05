@@ -155,6 +155,7 @@ E void NDECL(max_rank_sz);
 E long NDECL(botl_score);
 #endif
 E int FDECL(describe_level, (char *));
+E const char *FDECL(code_of, (int,SHORT_P,BOOLEAN_P));
 E const char *FDECL(rank_of, (int,SHORT_P,BOOLEAN_P));
 E void NDECL(bot);
 #ifdef DUMP_LOG
