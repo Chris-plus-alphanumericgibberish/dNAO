@@ -2542,6 +2542,7 @@ const char * const hallu_gods[] = {
 	"Ulyaoth",
 	"Xel'lo'tath",
 	"Mantorok",
+	"Martel",
 	
 	//Literature
 	"Mahasamatman",
@@ -2556,6 +2557,16 @@ const char * const hallu_gods[] = {
 	"Om",
 	"small gods",
 	"Orannis",
+	
+	"The Water Phoenix King",
+	"Ailari, Goddess of Safe Journeys",
+	"Yuenki, Dark Lady of Apotheosis",
+	"Zeth Kahl, Dark Empress of The Gift Given to Bind",
+	
+	"the Data Overmind",
+	"the Sky Canopy Domain",
+	
+	"the Truth and the Gate",
 	
 	//Internet
 	"SCP-343",
@@ -2614,6 +2625,10 @@ const char * const hallu_gods[] = {
 	"ChrisANG the binder",
 	"FIQ the fifth demigod",
 	"Tariru the elven noble",
+	"Tariru the dwarf knight",
+	"Tariru the samurai",
+	"Tariru the archeologist",
+	"Tariru the droven noble",
 	
 	"Dudley",
 	"the RNG"
