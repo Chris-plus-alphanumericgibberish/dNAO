@@ -3076,6 +3076,9 @@ typfnd:
 			    otmp->corpsenm = mntmp;
 			}
 			break;
+		case MASK:
+		    otmp->corpsenm = mntmp;
+		break;
 		case CORPSE:
 			if (!(mons[mntmp].geno & G_UNIQ) &&
 				   !(mvitals[mntmp].mvflags & G_NOCORPSE)) {
