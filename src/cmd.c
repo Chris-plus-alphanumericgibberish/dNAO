@@ -4707,7 +4707,7 @@ const char *s;
 		return 0;
 	}
 	saved_dirsym = dirsym;
-	if(!u.dz && (Stunned || (Confusion && !rn2(5)))) confdir();
+	if(!u.dz && ((Stunned || (Confusion && !rn2(5))) && (u.udrunken < 3 || !rn2(u.udrunken/3)))) confdir();
 	return 1;
 }
 
