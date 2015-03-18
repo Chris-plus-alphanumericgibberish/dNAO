@@ -34,11 +34,17 @@ all: src/$(GAME) util/recover dat/nhdat dat/license
 ATOMIC_LN = ln $(1) $(2).new && mv $(2).new $(2)
 
 .PHONY: install
-install: all
+install: gamedata playground
+
+.PHONY: gamedata
+gamedata: all
 	mkdir -p $(GAMEDIR)
 	$(INSTALL_GAME) src/$(GAME) $(GAMEDIR)
 	$(INSTALL_PROGRAM) util/recover $(GAMEDIR)
 	$(INSTALL_DATA) dat/nhdat dat/license $(GAMEDIR)
+
+.PHONY: playground
+playground:
 	$(INSTALL_VARDIR) $(VARDIR) $(VARDIR)/save
 	$(call ATOMIC_LN,$(MASTERDIR)/perm,$(VARDIR)/perm)
 	$(call ATOMIC_LN,$(MASTERDIR)/record,$(VARDIR)/record)
