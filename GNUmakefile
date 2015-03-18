@@ -1,12 +1,12 @@
 VERSION := $(shell util/version.sh $(CC))
 
 GAME = dnethack
-GAMEUID = acehack
-GAMEGID = acehack
+GAMEUID = nethack
+GAMEGID = nethack
 
 INSTALL = install
 
-PREFIX = /srv/acehack
+PREFIX = /opt/nethack
 GAMEDIR = $(PREFIX)/dnao-$(VERSION)
 VARDIR = $(GAMEDIR)
 MASTERDIR = $(PREFIX)/dnethackdir
