@@ -568,9 +568,9 @@ domonability()
 				}
 			}
 			if (nohole || !ttmp || (ttmp->ttyp != PIT && ttmp->ttyp != SPIKED_PIT && ttmp->ttyp != TRAPDOOR))
-				digactualhole(u.ux, u.uy, &youmonst, PIT);
+				digactualhole(u.ux, u.uy, &youmonst, PIT, FALSE);
 			else
-				digactualhole(u.ux, u.uy, &youmonst, HOLE);
+				digactualhole(u.ux, u.uy, &youmonst, HOLE, FALSE);
 		}
 	} else if(youmonst.data == &mons[PM_BANDERSNATCH]){
 		use_reach_attack();
