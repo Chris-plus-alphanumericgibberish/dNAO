@@ -1344,6 +1344,8 @@ int x, y;
 			otmp->spe = fruitadd("tree squid");
 			return otmp;
 		}
+	} else if(In_quest(&u.uz) && Role_if(PM_KNIGHT)){
+		return mksobj_at(APPLE, x, y, TRUE, FALSE);
 	}
 	return mksobj_at(treefruits[rn2(SIZE(treefruits))], x, y, TRUE, FALSE);
 }
