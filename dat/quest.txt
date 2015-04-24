@@ -3542,15 +3542,16 @@ When you reach the temple, sacrifice the Amulet to the black web.
 #	Knight
 #
 %Cc Kni 00001
-You materialize in the shadows of %H.  Immediately, you notice
+You materialize in the shadow of %H.  Immediately, you notice
 that something is wrong.  The fields around the castle are trampled and
 withered, as if some great battle has been recently fought.
 
-Looking closer, you %x long gouges in the walls of %H.
-You know of only one creature that makes those kinds of marks...
+You quicken your pace.  Surely Merlin would have not allowed the 
+enemies of %l to gain such advantage as to be able to
+besiege %H itself?  Something must be very wrong.
 %E
 %Cp Kni 00002
-Once again you stand in the shadows of %H.
+Once again you stand in the shadow of %H.
 %E
 %Cp Kni 00003
 Again, you stand before %H.  You vaguely sense that this
@@ -3570,7 +3571,7 @@ near %i."
 "Verily, %l could have no better champion, %p."
 %E
 %Cp Kni 00009
-"Many brave %cP died when %n attacked."
+"Many brave %cP died when Ixoth attacked."
 %E
 %Cp Kni 00010
 "Hail, %p!  Verily, thou lookest well."
@@ -3609,7 +3610,7 @@ Begone from Our sight!"
 "Verily, %p, thou hast done well.  That thou hast survived thus
 far is a credit to thy valor, but thou art yet unprepared for
 the demands required as Our Champion.  %rA, no matter how
-pure, could never hope to defeat the foul %n.
+pure, could never hope to aid the great Merlin.
 
 "Journey forth from this place, and hone thy skills.  Return to
 Our presence when thou hast attained the noble title of %R."
@@ -3625,56 +3626,55 @@ been.  Hear now Our words:
 
 "As thou noticed as thou approached %H, a great battle hath
 been fought recently in these fields.  Know thou that Merlin himself
-came to aid Us here as We battled the foul %n.  In the midst of that
-battle, %n struck Merlin a great blow, felling him.  Then, as Our
-forces were pressed back, %n stole %o.
+came to aid Us here as We battled the foul Ixoth.  In the midst of that
+battle, Ixoth struck Merlin a great blow, felling him.  Merlin was 
+taken off by his apprentice, %n, but hath not recovered.
 
-"We eventually turned the tide, but lost many %cP in doing so.
-Merlin was taken off by his apprentice, but hath not recovered.  We have
-been told that so long as %n possesseth %o,
-Merlin will not regain his health.
+"Withiout Merlin's aid, Our forces were pressed back, and We have been
+beseiged here in %H.  Thy return hath turned the tide, but many %cP 
+were lost in the battle, and Our rule remaineth imperiled as long 
+as Merlin is away.
 
 "We hereby charge thee with this most important of duties:
 
 "Go forth from this place, to the fens, and there thou wilt find
-%i.  From there, thou must track down %n.  Destroy the
-beast, and return to Us %o.  Only then can
-We restore Merlin to health."
+%i.  From there, thou must track down %n.  Only from her will
+thou learn what is required, that Merlin may regain his health.
 %E
 %Cp Kni 00025
 "Remember, %p, follow always the path of %d."
 %E
 %Cp Kni 00026
-"Though %n is verily a mighty foe, We have confidence in thy victory."
+"Ixoth was verily a mighty foe, We gained confidence through thy victory."
 %E
 %Cp Kni 00027
-"Beware, for %n hath surrounded himself with hordes of foul creatures."
+"Beware, for hordes of foul creatures have pursued Merlin."
 %E
 %Cp Kni 00028
-"Great treasure, 'tis said, is hoarded in the lair of %n."
+"Great treasure, 'tis said, is hoarded on %i."
 %E
 %Cp Kni 00029
-"If thou possessest %o, %p, %ns magic
-shall therewith be thwarted."
+"If thou possessest %o, %p, the magic of thine
+enemies shall therewith be thwarted."
 %E
 %Cp Kni 00030
 "The gates of %i are guarded by forces unseen, %p.
 Go carefully."
 %E
 %Cp Kni 00031
-"Return %o to Us quickly, %p."
+"Return Merlin to Us quickly, %p."
 %E
 %Cp Kni 00032
-"Destroy %n, %p, else %H shall surely fall."
+"Find Merlin, %p, else %H shall surely fall."
 %E
 %Cp Kni 00033
 "Call upon %d when thou art in need."
 %E
 %Cp Kni 00034
-"To find %i, thou must keep thy heart pure."
+"To find Merlin, thou must keep thy heart pure."
 %E
 %Cc Kni 00035
-You stand at the foot of %i.  Atop, you can %x a shrine.
+You stand at the foot of %i.  Ahead, you can %x a shrine.
 Strange energies seem to be focused here, and the hair on the back
 of your neck stands on end.
 %E
@@ -3683,58 +3683,58 @@ Again, you stand at the foot of %i.
 %E
 %Cc Kni 00040
 As you exit the swamps, you %x before you a huge, gaping hole in the
-side of a hill.  From within, you smell the foul stench of carrion.
+side of a hill.  From within, you see light glinting off gems.
 
 The pools on either side of the entrance are fouled with blood, and
 pieces of rusted metal and broken weapons show above the surface.
 %E
 %Cp Kni 00041
-Again, you stand at the entrance to %ns lair.
+Again, you stand at the entrance to the Crystal Cave.
 %E
 %Cc Kni 00050
-"Hah!  Another puny %c seeks death.  I shall dine well tonight,
-then tomorrow, %H shall fall!"
+"Hah!  Another puny %c comes seeking Merlin, but finds only death.
+Merlin is lost to you. He shall sleep forever, ensrined in crystal
+beneath this cave!"
 %E
 %Cp Kni 00051
-"Again, thou challengest me, %r?  So be it.  Thou wilt die here."
+"Again, you return, %r?  So be it."
 %E
 %Cp Kni 00052
-"Thou art truly foolish, %r.  I shall dispatch thee anon."
+"Thou art truly foolish, %r.  Merlin shall not return."
 %E
 %Cp Kni 00053
-"So, thou darest touch MY property!  I shall have that bauble back,
-puny %r.  Thou wilt die in agony!"
+"So, you dare touch MY property!  I shall have that back,
+puny %r.  You will die in agony!"
 %E
 %Cp Kni 00060
-"A mere %r can never withstand me!"
+"Merlin taught me all he knew."
 %E
 %Cp Kni 00061
-"I shall kill thee now, and feast!"
+"Now I am the ruler of your Fate!"
 %E
 %Cp Kni 00062
-"Puny %c.  What manner of death dost thou wish?"
+"Now %l must bow before ME!"
 %E
 %Cp Kni 00063
-"First thee, %p, then I shall feast upon %l."
+"Your quest has already failed, %r!"
 %E
 %Cp Kni 00064
-"Hah!  Thou hast failed, %r.  Now thou shalt die."
+"Die, %c!  You are nothing before my magic!"
 %E
 %Cp Kni 00065
-"Die, %c.  Thou art as nothing against my might."
+"Who are you to stand before me, the heir to Merlin's power!?"
 %E
 %Cp Kni 00066
-"I shall suck the marrow from thy bones, %c."
+"Call upon your precious %d, %p.  She shall not avail thee."
 %E
 %Cp Kni 00067
-"Let's see...  Baked?  No.  Fried?  Nay.  Broiled?  Yea verily,
-that is the way I like my %c for dinner."
+"%H is mine, now."
 %E
 %Cp Kni 00068
-"Thy strength waneth, %p.  The time of thy death draweth near."
+"Merlin shall sleep forever, entombed beneath this hill of crystals!"
 %E
 %Cp Kni 00069
-"Call upon thy precious %d, %p.  It shall not avail thee."
+"I am %n, queen of Avalon!"
 %E
 %Cc Kni 00070
 As you pick up %o, you feel its protective fields
@@ -3743,27 +3743,29 @@ as if you are in two places at once, and in the second, you are waking
 from a long sleep.
 %E
 %Cc Kni 00080
-As %n sinks to the ground, blood gushing from his open mouth, he
+As %n sinks to the ground, blood gushing from her open mouth, she
 defiantly curses you and %l:
 
-    Thou hast not won yet, %r.  By the gods, I shall return and dog
-    thy steps to the grave!
+    You have not won yet, %r.  By the gods of old, I shall return 
+	and dog your steps to the grave!
 
-His tail flailing madly, %n tries to crawl towards you, but slumps
-to the ground and dies in a pool of his own blood.
+Flailing madly about, %n tries to crawl towards you, but slumps
+to the ground and dies in a pool of her own blood.
 %E
 %Cc Kni 00081
 As you approach %l, he beams at you and says:
 
-    Well done!  Thou art truly the Champion of %H.  We
-    have received word that Merlin is recovering, and shall soon
-    rejoin Us.
-
+    Well done!  Thou art truly the Champion of %H.  
+	
+	We hath received a vision from Merlin.
+	
     He hath instructed Us that thou art now to be the guardian of
-    %o.  He feeleth that thou mayst have need of
-    its powers in thine adventures.  It is Our wish that thou keepest
-    %o with thee as thou searchest for the fabled
-    Amulet of Yendor.
+    %o, and of %H.  He feeleth that thou 
+	mayst have need of the powers of %o in thine 
+	adventures.  It is Our wish that thou keepest %o
+	with thee as thou searchest for the fabled Amulet of Yendor,
+	that thou may ascend to become even greater a guardian of
+	%H than Merlin himself.
 %E
 # assumes Magic Mirror of Merlin (glass object)
 %Cc Kni 00082
