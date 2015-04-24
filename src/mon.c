@@ -252,6 +252,20 @@ register struct monst *mtmp;
 		    obj->cursed = obj->blessed = FALSE;
 		}
 		goto default_1;
+	    case PM_CHROMATIC_DRAGON:
+		    obj = mksobj_at(BLACK_DRAGON_SCALES, x, y, FALSE, FALSE);
+			obj = oname(obj, artiname(ART_CHROMATIC_DRAGON_SCALES));
+		goto default_1;
+	    case PM_MANTICORE:
+		if (mtmp->mrevived ? !rn2(6) : TRUE) {
+			obj = mksobj_at(SPIKE, x, y, TRUE, FALSE);
+			obj->blessed = 0;
+			obj->cursed = 0;
+			obj->quan = d(4,6);
+			obj->spe = 0;
+			obj->opoisoned = (OPOISON_PARAL);
+		}
+		goto default_1;
 	    case PM_SON_OF_TYPHON:
 		if (!rn2(mtmp->mrevived ? 20 : 3)) {
 			obj = mksobj_at(LEO_NEMAEUS_HIDE, x, y, FALSE, FALSE);
@@ -515,14 +529,6 @@ register struct monst *mtmp;
 			while(num--) {
 				obj = mksobj_at(QUARTERSTAFF, x, y, TRUE, FALSE);
 			}
-			mtmp->mnamelth = 0;
-		break;
-	    case PM_LIVING_LECTURN:
-			num = d(2,3);
-			while(num--) {
-				obj = mksobj_at(CLUB, x, y, TRUE, FALSE);
-			}
-			obj = mkobj_at(SPBOOK_CLASS, x, y, FALSE);
 			mtmp->mnamelth = 0;
 		break;
 	    case PM_LEATHER_GOLEM:
@@ -934,7 +940,7 @@ movemon()
 				  !rn2(4)
 		){
 			struct monst *sprout = (struct monst *) 0;
-			sprout = makemon(mtmp->data,(mtmp->mx-1)+rn2(3),(mtmp->my-1)+rn2(3),MM_NOCOUNTBIRTH|NO_MINVENT);
+			sprout = makemon(mtmp->data,(mtmp->mx-1)+rn2(3),(mtmp->my-1)+rn2(3),MM_CHECK_GOODPOS|MM_NOCOUNTBIRTH|NO_MINVENT);
 			if(sprout) sprout->mhp = In_hell(&u.uz) ? sprout->mhp*3/4 : sprout->mhp/2;
 		}
 	}
@@ -3335,9 +3341,21 @@ register struct monst *mtmp;
 	}
 	aggravate();
     } else if(mtmp->data->msound == MS_JUBJUB && !(mtmp->mspec_used)) {
-		domonnoise(mtmp);
-    } else if(mtmp->data->msound == MS_DREAD && !(mtmp->mspec_used)) {
-		domonnoise(mtmp);
+		struct monst *tmpm;
+		mtmp->mspec_used = 10;
+		if(flags.soundok) {
+			pline("%s screams high and shrill.", Monnam(mtmp));
+			stop_occupation();
+		}
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(tmpm != mtmp){
+				if(tmpm->mtame && tmpm->mtame<20) tmpm->mtame++;
+				if(tmpm->mhp > 0 && d(1,tmpm->mhp) < mtmp->mhpmax){
+					tmpm->mflee = 1;
+				}
+			}
+		}
+		make_stunned(HStun + mtmp->mhp/10, TRUE);
     }
     if(mtmp->data == &mons[PM_MEDUSA]) {
 		register int i;
