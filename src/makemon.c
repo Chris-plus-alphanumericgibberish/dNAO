@@ -3166,6 +3166,13 @@ register int	mmflags;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 		break;
+		case S_ZOMBIE:
+			if (mndx == PM_DREAD_SERAPH){
+				mtmp->m_lev = max(mtmp->m_lev,30);
+				mtmp->mhpmax = 4*8*mtmp->m_lev;
+				mtmp->mhp = mtmp->mhpmax;
+			}
+		break;
 		case S_DEMON:
 //			pline("%d\n",mtmp->mhpmax);
 			if(mndx == PM_JUIBLEX){
@@ -3336,7 +3343,7 @@ register int	mmflags;
 		/*At this point, we have FINALLY created the inventory for the initial creature and all its associates, so the global should be unset now.*/
 		curhouse = 0;
 	}
-	if ((ptr->mflags3 & M3_WAITMASK) && !(mmflags & MM_NOWAIT)) {
+	if ((ptr->mflags3 & M3_WAITMASK) && !(mmflags & MM_NOWAIT) && !u.uevent.udemigod) {
 		if (ptr->mflags3 & M3_WAITFORU)
 			mtmp->mstrategy |= STRAT_WAITFORU;
 		if (ptr->mflags3 & M3_CLOSE)
@@ -4138,6 +4145,7 @@ int type;
 		case PM_LEATHER_GOLEM: return 40;
 		case PM_GOLD_GOLEM: return 40;
 		case PM_WOOD_GOLEM: return 50;
+		case PM_LIVING_LECTURN: return 50;
 		case PM_FLESH_GOLEM: return 40;
 		case PM_SPELL_GOLEM: return 20;
 //		case PM_SAURON_THE_IMPRISONED: return 45;

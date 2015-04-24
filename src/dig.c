@@ -533,10 +533,12 @@ int x, y;
 }
 
 void
-digactualhole(x, y, madeby, ttyp)
+digactualhole(x, y, madeby, ttyp, forceknown, msgs)
 register int	x, y;
 struct monst	*madeby;
 int ttyp;
+boolean forceknown;
+boolean msgs;
 {
 	struct obj *oldobjs, *newobjs;
 	register struct trap *ttmp;
@@ -590,7 +592,7 @@ int ttyp;
 	ttmp = maketrap(x, y, ttyp);
 	if (!ttmp) return;
 	newobjs = level.objects[x][y];
-	ttmp->tseen = (madeby_u || cansee(x,y));
+	ttmp->tseen = (forceknown || madeby_u || cansee(x,y));
 	ttmp->madeby_u = madeby_u;
 	newsym(ttmp->tx,ttmp->ty);
 
@@ -599,9 +601,9 @@ int ttyp;
 	    if(madeby_u) {
 		You("dig a pit in the %s.", surface_type);
 		if (shopdoor) pay_for_damage("ruin", FALSE);
-	    } else if (!madeby_obj && canseemon(madeby))
+	    } else if (!madeby_obj && canseemon(madeby) && msgs)
 		pline("%s digs a pit in the %s.", Monnam(madeby), surface_type);
-	    else if (cansee(x, y) && flags.verbose)
+	    else if (cansee(x, y) && flags.verbose && msgs)
 		pline("A pit appears in the %s.", surface_type);
 
 	    if(at_u) {
@@ -627,10 +629,10 @@ int ttyp;
 
 	    if(madeby_u)
 		You("dig a hole through the %s.", surface_type);
-	    else if(!madeby_obj && canseemon(madeby))
+	    else if(!madeby_obj && canseemon(madeby) && msgs)
 		pline("%s digs a hole through the %s.",
 		      Monnam(madeby), surface_type);
-	    else if(cansee(x, y) && flags.verbose)
+	    else if(cansee(x, y) && flags.verbose && msgs)
 		pline("A hole appears in the %s.", surface_type);
 
 	    if (at_u) {
@@ -687,7 +689,7 @@ int ttyp;
 			if (Is_stronghold(&u.uz)) {
 			    assign_level(&tolevel, &valley_level);
 			} else if (Is_botlevel(&u.uz)) {
-			    if (canseemon(mtmp))
+			    if (canseemon(mtmp) && msgs)
 				pline("%s avoids the trap.", Monnam(mtmp));
 			    return;
 			} else {
@@ -932,7 +934,7 @@ boolean pit_only;
 		return TRUE;
 
 	} else if (IS_GRAVE(lev->typ)) {        
-	    digactualhole(u.ux, u.uy, BY_YOU, PIT);
+	    digactualhole(u.ux, u.uy, BY_YOU, PIT, FALSE, TRUE);
 	    dig_up_grave(u.ux, u.uy);
 	    return TRUE;
 	} else if (lev->typ == DRAWBRIDGE_UP) {
@@ -985,9 +987,9 @@ boolean pit_only;
 
 		/* finally we get to make a hole */
 		if (nohole || pit_only)
-			digactualhole(u.ux, u.uy, BY_YOU, PIT);
+			digactualhole(u.ux, u.uy, BY_YOU, PIT, FALSE, TRUE);
 		else
-			digactualhole(u.ux, u.uy, BY_YOU, HOLE);
+			digactualhole(u.ux, u.uy, BY_YOU, HOLE, FALSE, TRUE);
 
 		return TRUE;
 	}
@@ -1895,17 +1897,17 @@ register int zx, zy, digdepth;
 		    break;
 		} else if (IS_TREE(room->typ)) { /* check trees before stone */
 		    if (!(room->wall_info & W_NONDIGGABLE)) {
-			room->typ = ROOM;
-			unblock_point(zx,zy); /* vision */
+				room->typ = ROOM;
+				unblock_point(zx,zy); /* vision */
 		    } else if (!Blind)
-			pline_The("tree shudders but is unharmed.");
+				pline_The("tree shudders but is unharmed.");
 		    break;
 		} else if (room->typ == STONE || room->typ == SCORR) {
 		    if (!(room->wall_info & W_NONDIGGABLE)) {
-			room->typ = CORR;
-			unblock_point(zx,zy); /* vision */
+				room->typ = CORR;
+				unblock_point(zx,zy); /* vision */
 		    } else if (!Blind)
-			pline_The("rock glows then fades.");
+				pline_The("rock glows then fades.");
 		    break;
 		}
 	    } else if (IS_ROCK(room->typ)) {
@@ -2180,7 +2182,7 @@ int y;
 		return TRUE;
 
 	} else if (IS_GRAVE(lev->typ)) {        
-	    digactualhole(x, y, BY_YOU, PIT);
+	    digactualhole(x, y, BY_YOU, PIT, FALSE, TRUE);
 	    dig_up_grave(x,y);
 	    return TRUE;
 	} else if (lev->typ == DRAWBRIDGE_UP) {
@@ -2234,9 +2236,9 @@ int y;
 
 		/* finally we get to make a hole */
 		if (nohole || pit_only)
-			digactualhole(x, y, BY_YOU, PIT);
+			digactualhole(x, y, BY_YOU, PIT, FALSE, TRUE);
 		else
-			digactualhole(x, y, BY_YOU, HOLE);
+			digactualhole(x, y, BY_YOU, HOLE, FALSE, TRUE);
 
 		return TRUE;
 	}

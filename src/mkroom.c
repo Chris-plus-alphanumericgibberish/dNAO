@@ -21,6 +21,7 @@ STATIC_DCL boolean FDECL(isspacious, (struct mkroom *));
 STATIC_DCL void NDECL(mkshop), FDECL(mkzoo,(int)), NDECL(mkswamp);
 STATIC_DCL void NDECL(mktemple);
 STATIC_DCL void FDECL(mkgarden, (struct mkroom *));
+STATIC_DCL void FDECL(mklibrary, (struct mkroom *));
 STATIC_DCL void NDECL(mkisland);
 STATIC_DCL void NDECL(mkriver);
 STATIC_DCL void FDECL(liquify, (xchar, xchar, boolean));
@@ -57,12 +58,48 @@ register struct mkroom *sroom;
 }
 
 void
+mksepulcher()
+{
+	int x,y,tries=0;
+	int i,j;
+	boolean good=FALSE,okspot;
+	while(!good && tries < 50){
+		x = rn2(COLNO-7)+3;
+		y = rn2(ROWNO-7)+3;
+		tries++;
+		okspot = TRUE;
+		for(i=-1;i<2;i++) for(j=-1;j<2;j++) if(levl[x+i][y+j].typ != STONE) okspot = FALSE;
+		for(i=-2;i<3;i++) for(j=-2;j<3;j++) if(levl[x+i][y+j].typ >= CORR) okspot = FALSE;
+		if(okspot){
+			good = TRUE;
+			for(i=-1;i<2;i++) for(j=-1;j<2;j++) levl[x+i][y+j].typ = STONE;
+			levl[x+2][y+2].typ = BRCORNER;
+			levl[x-2][y+2].typ = BLCORNER;
+			for(i=-1;i<2;i++) levl[x+i][y+2].typ = HWALL;
+			for(i=-1;i<2;i++) levl[x+i][y-2].typ = HWALL;
+			for(i=-1;i<2;i++) levl[x+2][y+i].typ = VWALL;
+			for(i=-1;i<2;i++) levl[x-2][y+i].typ = VWALL;
+			levl[x+2][y-2].typ = TRCORNER;
+			levl[x-2][y-2].typ = TLCORNER;
+			levl[x][y].typ = ROOM;
+			for(i=-2;i<3;i++) {
+				for(j=-2;j<3;j++) {
+					levl[x+i][y+j].lit = 0;
+					levl[x+i][y+j].wall_info |= W_NONDIGGABLE;
+				}
+			}
+			makemon(&mons[PM_DREAD_SERAPH], x, y, 0);
+		}
+	}
+}
+
+void
 mkroom(roomtype)
 /* make and stock a room of a given type */
 int	roomtype;
 {
     if (roomtype >= SHOPBASE)
-	mkshop();	/* someday, we should be able to specify shop type */
+		mkshop();	/* someday, we should be able to specify shop type */
     else switch(roomtype) {
 	case COURT:	mkzoo(COURT); break;
 	case ZOO:	mkzoo(ZOO); break;
@@ -71,6 +108,7 @@ int	roomtype;
 	case BARRACKS:	mkzoo(BARRACKS); break;
 	case SWAMP:	mkswamp(); break;
 	case GARDEN:	mkgarden((struct mkroom *)0); break;
+	case LIBRARY:	mklibrary((struct mkroom *)0); break;
 	case TEMPLE:	mktemple(); break;
 	case LEPREHALL:	mkzoo(LEPREHALL); break;
 	case COCKNEST:	mkzoo(COCKNEST); break;
@@ -136,6 +174,10 @@ mkshop()
 			}
 			if(*ep == 'n'){
 				mkgarden((struct mkroom *)0);
+				return;
+			}
+			if(*ep == '\''){
+				mklibrary((struct mkroom *)0);
 				return;
 			}
 			if(*ep == '}'){
@@ -270,7 +312,11 @@ struct mkroom *sroom;
 		case GARDEN:
 			mkgarden(sroom);
 			/* mkgarden() sets flags and we don't want other fillings */
-			return; 
+		return; 
+		case LIBRARY:
+			mklibrary(sroom);
+			/* mklibrary() sets flags and we don't want other fillings */
+		return;
 	    case COURT:
 		if(level.flags.is_maze_lev) {
 		    for(tx = sroom->lx; tx <= sroom->hx; tx++)
@@ -550,6 +596,60 @@ struct mkroom *croom; /* NULL == choose random room */
 	    }
 	}
     }
+}
+
+STATIC_OVL void
+mklibrary(croom)
+struct mkroom *croom; /* NULL == choose random room */
+{
+    register int tryct = 0;
+    boolean maderoom = FALSE;
+    coord pos;
+    register int i, tried;
+
+    while ((tryct++ < 25) && !maderoom) {
+	register struct mkroom *sroom = croom ? croom : &rooms[rn2(nroom)];
+	
+	if (sroom->hx < 0 || (!croom && (sroom->rtype != OROOM)))
+	    	continue;
+
+	sroom->rtype = LIBRARY;
+	maderoom = TRUE;
+	level.flags.has_library = 1;
+	
+	tried = 0;
+	i = rnd(4);
+	while ((tried++ < 50) && (i > 0) && somexy(sroom, &pos)) {
+	    struct permonst *pmon;
+	    if (!MON_AT(pos.x, pos.y)) {
+			struct monst *mtmp = makemon(&mons[PM_LIVING_LECTURN], pos.x,pos.y, NO_MM_FLAGS);
+			if (mtmp) mtmp->msleeping = 1;
+			i--;
+	    }
+	}
+	tried = 0;
+	i = rn1(3,3);
+	while ((tried++ < 50) && (i > 0) && somexy(sroom, &pos)) {
+	    if (levl[pos.x][pos.y].typ == ROOM && !MON_AT(pos.x,pos.y) &&
+		!nexttodoor(pos.x,pos.y)) {
+		if (rn2(3))
+		  levl[pos.x][pos.y].typ = POOL;
+		else {
+		    levl[pos.x][pos.y].typ = FOUNTAIN;
+		    level.flags.nfountains++;
+		}
+		i--;
+	    }
+	}
+	for(pos.x=sroom->lx-1; pos.x <= sroom->hx+1; pos.x++){
+		for(pos.y=sroom->ly-1; pos.y <= sroom->hy+1; pos.y++){
+			if(levl[pos.x][pos.y].typ >= STONE && levl[pos.x][pos.y].typ <= DBWALL){
+				if(rn2(6)) mksobj_at(SPE_BLANK_PAPER, pos.x, pos.y, TRUE, FALSE);
+				else mkobj_at(SPBOOK_CLASS, pos.x, pos.y, FALSE);
+			}
+		}
+	}
+	}
 }
 
 STATIC_OVL void
