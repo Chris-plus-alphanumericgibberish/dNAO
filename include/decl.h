@@ -346,6 +346,11 @@ E NEARDATA char plname[PL_NSIZ];
 E NEARDATA char dogname[];
 E NEARDATA char catname[];
 E NEARDATA char horsename[];
+E NEARDATA char lizardname[];
+E NEARDATA char spidername[];
+E NEARDATA char dragonname[];
+E NEARDATA char parrotname[];
+E NEARDATA char monkeyname[];
 #ifdef CONVICT
 E NEARDATA char ratname[];
 #endif /* CONVICT */
