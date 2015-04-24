@@ -531,6 +531,14 @@ register struct monst *mtmp;
 			}
 			mtmp->mnamelth = 0;
 		break;
+	    case PM_LIVING_LECTURN:
+			num = d(2,3);
+			while(num--) {
+				obj = mksobj_at(CLUB, x, y, TRUE, FALSE);
+			}
+			obj = mkobj_at(SPBOOK_CLASS, x, y, FALSE);
+			mtmp->mnamelth = 0;
+		break;
 	    case PM_LEATHER_GOLEM:
 			num = d(2,4);
 			while(num--)
@@ -878,6 +886,7 @@ mcalcdistress()
 	/* FIXME: mtmp->mlstmv ought to be updated here */
     }
 }
+
 
 int
 movemon()

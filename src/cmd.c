@@ -768,12 +768,14 @@ domonability()
 				digactualhole(u.ux, u.uy, &youmonst, PIT, FALSE, TRUE);
 			else
 				digactualhole(u.ux, u.uy, &youmonst, HOLE, FALSE, TRUE);
+			return 1;
+		} else {
+			You("gyre and gimble, but the %s is too hard!", surface(u.ux,u.uy));
+			return 1;
 		}
-	} else if(youmonst.data == &mons[PM_BANDERSNATCH]){
-		use_reach_attack();
-	} else if (Upolyd)
-		pline("Any special ability you may have is purely reflexive.");
-	else You("don't have a special ability in your normal form!");
+	}
+	case MATTK_REACH: use_reach_attack();
+	}
 	return 0;
 }
 
