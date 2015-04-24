@@ -841,7 +841,15 @@ asGuardian:
 	case MS_SHRIEK:
 	    pline_msg = "shrieks.";
 	    aggravate();
-	    break;
+		if(mtmp->data == &mons[PM_LAMASHTU]){
+			struct monst *tmpm;
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(tmpm->mtame) tmpm->mtame -= 10;
+				if(tmpm->mtame <= 0) tmpm->mtame = 0;
+				else tmpm->mflee = 1;
+			}
+		}
+	break;
 	case MS_IMITATE:
 	    pline_msg = "imitates you.";
 	    break;
