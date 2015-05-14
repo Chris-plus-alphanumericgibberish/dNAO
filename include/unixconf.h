@@ -259,7 +259,7 @@
 # endif
 #endif
 #if defined(BSD_JOB_CONTROL) || defined(POSIX_JOB_CONTROL) || defined(AUX)
-#define SUSPEND		/* let ^Z suspend the game */
+/*#define SUSPEND*/		/* let ^Z suspend the game */
 #endif
 
 

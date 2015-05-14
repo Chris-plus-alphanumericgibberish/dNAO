@@ -176,6 +176,7 @@
  *	compression.
  */
 
+#if 0
 #ifdef UNIX
 /* path and file name extension for compression program */
 /* #define COMPRESS "/usr/bin/compress" */	/* Lempel-Ziv compression */
@@ -187,6 +188,7 @@
 
 #ifndef COMPRESS
 # define INTERNAL_COMP	/* control use of NetHack's compression routines */
+#endif
 #endif
 
 /*
@@ -397,7 +399,7 @@ typedef long glyph_t;
 #define AUTOPICKUP_EXCEPTIONS  /* exceptions to autopickup */
 
 #define DUMP_LOG        /* Dump game end information to a file */
-#define DUMP_FN "/dgldir/userdata/%n/dumplog/%t.dnao.txt"      /* Fixed dumpfile name, if you want
+#define DUMP_FN "/dgldir/userdata/%n/dnethack/dumplog/%t"      /* Fixed dumpfile name, if you want
                                    * to prevent definition by users */
 #define DUMPMSGS 20     /* Number of latest messages in the dump file  */
 
@@ -409,15 +411,15 @@ typedef long glyph_t;
 
 /* Filename for the wizard-mode command for dumping the map data.
    Can be left undefined, in which case the wiz-mode command does nothing. */
-#define MAPDUMP_FN "/dgldir/userdata/%N/%n/dnao.mapdump"
+/* #define MAPDUMP_FN "/dgldir/userdata/%N/%n/dnao.mapdump" */
 
 /* Filename for where HUPping a game is saved.
    Can be left undefined, in which case HUPping doesn't write the data. */
-#define HUPLIST_FN "/dgldir/userdata/%N/%n/hanguplist.txt"
+#define HUPLIST_FN "/dgldir/userdata/%n/dnethack/hangup"
 
 /* Filename for dgamelaunch extra info field.
    Can be left undefined for not writing extrainfo. */
-#define EXTRAINFO_FN "/dgldir/extrainfo-dnao/%n.extrainfo"
+/* #define EXTRAINFO_FN "/dgldir/extrainfo-dnao/%n.extrainfo" */
 
 #define SHOW_BORN    /* extinct & showborn -patch */
 #define SHOW_EXTINCT
@@ -462,7 +464,7 @@ typedef long glyph_t;
 
 /* Write out player's current location to this file.
    Can be left undefined, which will disable the feature. */
-#define WHEREIS_FILE "whereis/%n.whereis"
+/* #define WHEREIS_FILE "whereis/%n.whereis" */
 
 #define USER_DUNGEONCOLOR
 
