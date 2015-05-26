@@ -645,7 +645,10 @@ boolean pets_only;	/* true for ascension or final escape */
 			mydogs = mtmp;
 	    } else if (quest_status.touched_artifact && Race_if(PM_DROW) && !flags.initgend && Role_if(PM_NOBLEMAN) && mtmp->m_id == quest_status.leader_m_id) {
 			mongone(mtmp);
-	    } else if (mtmp->iswiz || mtmp->data == &mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES]) {
+	    } else if (mtmp->iswiz || 
+			mtmp->data == &mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES] || 
+			mtmp->data == &mons[PM_HUNGRY_DEAD]
+		) {
 			/* we want to be able to find him when his next resurrection
 			   chance comes up, but have him resume his present location
 			   if player returns to this level before that time */
