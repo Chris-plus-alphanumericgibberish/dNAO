@@ -466,6 +466,8 @@ typedef long glyph_t;
 
 #define USER_DUNGEONCOLOR
 
+#define BARD		/* Bards and songs - Andre Bertelli */
+
 #define BONES_POOL /* Multiple bones files per level */
 
 /* End of Section 5 */
