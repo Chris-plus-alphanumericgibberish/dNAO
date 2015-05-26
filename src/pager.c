@@ -139,6 +139,9 @@ lookat(x, y, buf, monbuf)
 		    (mtmp->mtame && accurate) ? "tame " :
 		    (mtmp->mpeaceful && accurate) ? (mtmp->data==&mons[PM_UVUUDAUM]) ? "meditating " : "peaceful " : "",
 		    name);
+	    if (mtmp->data==&mons[PM_DREAD_SERAPH] && mtmp->mextra[1])
+		Strcat(buf, "praying ");
+		
 	    if (u.ustuck == mtmp)
 		Strcat(buf, (Upolyd && sticks(youmonst.data)) ?
 			", being held" : ", holding you");
