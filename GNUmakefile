@@ -193,7 +193,7 @@ $(AUTO_C:%.c=%.d): ;
 
 ##### DATA FILES #####
 
-QUEST_DES = Arch.des Barb.des Binder.des Caveman.des Convict.des	\
+QUEST_DES = Arch.des Barb.des Bard.des Binder.des Caveman.des Convict.des	\
             Drow.des DrowNoble.des Elf.des Erebor.des Healer.des	\
             Hedrow.des HedrowNoble.des Knight.des Monk.des Moria.des	\
             Noble.des Pirate.des Priest.des Ranger.des Rogue.des	\
