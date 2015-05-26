@@ -285,6 +285,7 @@ struct instance_flags {
     boolean hilite_obj_piles;
 	
     boolean role_obj_names;
+    boolean obscure_role_obj_names;
     boolean dnethack_start_text;
     boolean dnethack_dungeon_colors;
 /*
