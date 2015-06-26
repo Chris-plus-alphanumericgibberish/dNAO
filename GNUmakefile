@@ -1,55 +1,34 @@
-VERSION := $(shell util/version.sh $(CC))
+GAMEDIR = dnethackdir
 
-GAME = dnethack
-GAMEUID = nethack
-GAMEGID = nethack
+CFLAGS = -g -fPIE -fstack-protector
+LDFLAGS = -fPIE -pie
 
-INSTALL = install
+GAMELIBS = -lncurses
 
-PREFIX = /opt/nethack
-GAMEDIR = $(PREFIX)/dnao-$(VERSION)
-VARDIR = $(GAMEDIR)
-MASTERDIR = $(PREFIX)/dnethackdir
-
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_GAME = $(INSTALL)
-INSTALL_DATA = $(INSTALL) -m 644
-INSTALL_VARDIR = $(INSTALL) -d -o $(GAMEUID) -g $(GAMEGID)
-
-CFLAGS = -g -O2
+-include local.mk
 
 CPPFLAGS += -Iinclude
 CPPFLAGS += -DDLB
 
-GAMELIBS = -lncurses
-
-LOCAL_MK = local.mk
--include $(LOCAL_MK)
-
 .DELETE_ON_ERROR:
 
 .PHONY: all
-all: src/$(GAME) util/recover dat/nhdat dat/license
+all: src/dnethack util/recover dat/nhdat dat/license
 
 ATOMIC_LN = ln $(1) $(2).new && mv $(2).new $(2)
 
 .PHONY: install
-install: gamedata playground
-
-.PHONY: gamedata
-gamedata: all
+install: all
 	mkdir -p $(GAMEDIR)
-	$(INSTALL_GAME) src/$(GAME) $(GAMEDIR)
-	$(INSTALL_PROGRAM) util/recover $(GAMEDIR)
-	$(INSTALL_DATA) dat/nhdat dat/license $(GAMEDIR)
-
-.PHONY: playground
-playground:
-	$(INSTALL_VARDIR) $(VARDIR) $(VARDIR)/save
-	$(call ATOMIC_LN,$(MASTERDIR)/perm,$(VARDIR)/perm)
-	$(call ATOMIC_LN,$(MASTERDIR)/record,$(VARDIR)/record)
-	$(call ATOMIC_LN,$(MASTERDIR)/logfile,$(VARDIR)/logfile)
-	$(call ATOMIC_LN,$(MASTERDIR)/xlogfile,$(VARDIR)/xlogfile)
+	install src/dnethack $(GAMEDIR)
+	install util/recover $(GAMEDIR)
+	install -m 644 dat/nhdat dat/license $(GAMEDIR)
+	touch $(GAMEDIR)/perm
+	touch $(GAMEDIR)/record
+	touch $(GAMEDIR)/logfile
+	touch $(GAMEDIR)/xlogfile
+	touch $(GAMEDIR)/livelog
+	mkdir -p $(GAMEDIR)/save
 
 ##### BINARIES #####
 
@@ -79,9 +58,9 @@ GAME_O = $(SRCOBJ:%.o=src/%.o) $(SYSUNIXOBJ:%.o=sys/unix/%.o)	\
          $(SYSSHAREOBJ:%.o=sys/share/%.o)			\
          $(WINTTYOBJ:%.o=win/tty/%.o)				\
          $(WINCURSESOBJ:%.o=win/curses/%.o)
-src/$(GAME): $(GAME_O)
+src/dnethack: $(GAME_O)
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) $(GAMELIBS) -o $@
-AUTO_BIN += src/$(GAME)
+AUTO_BIN += src/dnethack
 
 RECOVER_O = util/recover_main.o src/recover.o
 util/recover: $(RECOVER_O)
@@ -157,9 +136,7 @@ AUTO_C += src/monstr.c
 
 include/dgn_comp.h include/lev_comp.h: include/%_comp.h: util/%_yacc.c
 util/dgn_yacc.c util/lev_yacc.c: util/%_yacc.c: util/%_comp.y
-	$(YACC) $(YFLAGS) -d -b $* $<
-	mv $*.tab.c util/$*_yacc.c
-	mv $*.tab.h include/$*_comp.h
+	bison --defines=include/$*_comp.h -o util/$*_yacc.c util/$*_comp.y
 AUTO_H += include/dgn_comp.h include/lev_comp.h
 AUTO_C += util/dgn_yacc.c util/lev_yacc.c
 
@@ -167,7 +144,7 @@ util/dgn_yacc.o: include/verinfo.h
 util/lev_yacc.o: include/onames.h include/pm.h
 
 util/dgn_lex.c util/lev_lex.c: util/%_lex.c: util/%_comp.l
-	$(LEX) $(LFLAGS) -t $< > $@
+	flex -o$@ $<
 AUTO_C += util/dgn_lex.c util/lev_lex.c
 
 util/dgn_lex.o: include/dgn_comp.h
