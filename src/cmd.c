@@ -1393,7 +1393,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(u.spirit[ALIGN_SPIRIT]) numBound++;
 		if(u.spirit[OUTER_SPIRIT]) numBound++;
 		Sprintf(prebuf, "Your soul ");
-		Sprintf(buf, " bound to ");
+		Sprintf(buf, "bound to ");
 		for(i=0;i<QUEST_SPIRIT;i++){
 			if(u.spirit[i]) for(j=0;j<32;j++){
 				if((u.spirit[i] >> j) == 1){
@@ -1529,7 +1529,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(!u.spirit[ALIGN_SPIRIT] && u.specialSealsKnown&(SEAL_COSMOS|SEAL_MISKA|SEAL_NUDZIARTH|SEAL_ALIGNMENT_THING|SEAL_UNKNOWN_GOD)){
 			you_are("able to bind with an aligned spirit");
 		}
-		if(!u.spirit[OUTER_SPIRIT] && u.ulevel == 30){
+		if(!u.spirit[OUTER_SPIRIT] && u.ulevel == 30 && Role_if(PM_EXILE)){
 			you_are("able to bind with the Numina");
 		}
 		if(u.sealCounts < numSlots){
@@ -1988,7 +1988,7 @@ int final;
 		if(u.spirit[ALIGN_SPIRIT]) numBound++;
 		if(u.spirit[OUTER_SPIRIT]) numBound++;
 		Sprintf(prebuf, "Your soul was ");
-		Sprintf(buf, " bound to ");
+		Sprintf(buf, "bound to ");
 		for(i=0;i<QUEST_SPIRIT;i++){
 			if(u.spirit[i]) for(j=0;j<32;j++){
 				if((u.spirit[i] >> j) == 1){
@@ -2124,7 +2124,7 @@ int final;
 		if(!u.spirit[ALIGN_SPIRIT] && u.specialSealsKnown&(SEAL_COSMOS|SEAL_MISKA|SEAL_NUDZIARTH|SEAL_ALIGNMENT_THING|SEAL_UNKNOWN_GOD)){
 			you_are("able to bind with an aligned spirit");
 		}
-		if(!u.spirit[OUTER_SPIRIT] && u.ulevel == 30){
+		if(!u.spirit[OUTER_SPIRIT] && u.ulevel == 30 && Role_if(PM_EXILE)){
 			you_are("able to bind with the Numina");
 		}
 		if(u.sealCounts < numSlots){
