@@ -305,10 +305,12 @@ int spec;
 		break;
 		case LIGHTSABER:
 		case BEAMSWORD:
-			tmp += d(2, objects[otyp].oc_wldam); 
+			tmp += d(2, objects[otyp].oc_wldam)+2*otmp->spe;
+			otmp->age -= 100;
 			if(otmp->oartifact == ART_ATMA_WEAPON &&
 				!Drain_resistance
 			){
+				otmp->age += 100;
 				tmp += rnd(u.ulevel);
 				tmp *= Upolyd ?
 						((float)u.mh)/u.mhmax  :
@@ -316,8 +318,12 @@ int spec;
 			}
 			break;
 		case DOUBLE_LIGHTSABER: 
-			tmp += d(2, objects[otyp].oc_wldam); 
-			if (otmp->altmode) tmp += d(3, objects[otyp].oc_wldam);
+			tmp += d(2, objects[otyp].oc_wldam)+2*otmp->spe;
+			otmp->age -= 100;
+			if (otmp->altmode){
+				tmp += d(3, objects[otyp].oc_wldam)+3*otmp->spe;
+				otmp->age -= 100;
+			}
 			break;
 		case WAR_HAMMER:
 			if(otmp->oartifact == ART_MJOLLNIR) tmp += d(2,4); break;
@@ -384,10 +390,12 @@ int spec;
 		break;
 		case LIGHTSABER:
 		case BEAMSWORD:
-			tmp += d(2, objects[otyp].oc_wsdam);
+			tmp += d(2, objects[otyp].oc_wsdam)+2*otmp->spe;
+			otmp->age -= 100;
 			if(otmp->oartifact == ART_ATMA_WEAPON &&
 				!Drain_resistance
 			){
+				otmp->age += 100;
 				tmp += rnd(u.ulevel);
 				tmp *= Upolyd ?
 						((float)u.mh)/u.mhmax  :
@@ -395,8 +403,12 @@ int spec;
 			}
 			break;
 		case DOUBLE_LIGHTSABER: 
-			tmp += d(2, objects[otyp].oc_wsdam);
-			if (otmp->altmode) tmp += d(3, objects[otyp].oc_wsdam);
+			tmp += d(2, objects[otyp].oc_wsdam)+2*otmp->spe;
+			otmp->age -= 100;
+			if (otmp->altmode){
+				tmp += d(3, objects[otyp].oc_wsdam)+3*otmp->spe;
+				otmp->age -= 100;
+			}
 			break;
 		case ACID_VENOM:
 			if(otmp->ovar1) tmp = otmp->ovar1;
