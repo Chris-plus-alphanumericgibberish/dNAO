@@ -1166,7 +1166,7 @@ int thrown;
 					monwep->owornmask = 0L;
 					update_mon_intrinsics(mon, monwep, FALSE, FALSE);
 				}
-				pline("%s %s is snaged by your %s.",
+				pline("%s %s is snagged by your %s.",
 				      s_suffix(Monnam(mon)), xname(monwep), xname(obj));
 				getdir((char *)0);
 				if(u.dx || u.dy){
@@ -2602,10 +2602,10 @@ register struct attack *mattk;
 		}break;
 		case AD_SIMURGH:
 			if(hates_iron(mdef->data)){
-				Your("claws of cold iron sear %s",mon_nam(mdef));
+				Your("claws of cold iron sear %s.",mon_nam(mdef));
 				tmp+=rnd(20);
 			}
-			pline("Raidient feathers slice through %s.",mon_nam(mdef));
+			pline("Radiant feathers slice through %s.",mon_nam(mdef));
 			switch(rn2(15)){
 				case 0:
 					if(!resists_fire(mdef)){
