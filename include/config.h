@@ -342,6 +342,7 @@ typedef long glyph_t;
 	/*They Kops have been removed and replaced with the Keter Sephiroth*/
 #define SEDUCE		/* Succubi/incubi seduction, by KAA, suggested by IM */
 #define STEED		/* Riding steeds */
+#define FIREARMS	/* KMH -- Guns and bullets */
 #define TOURIST		/* Tourist players with cameras and Hawaiian shirts */
 #define CONVICT		/* Convict player with heavy iron ball */
 #define OTHER_SERVICES  /* shopkeeper services (SLASH'EM) */
