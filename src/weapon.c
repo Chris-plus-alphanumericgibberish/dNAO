@@ -31,9 +31,12 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_MATTER_SPELL			(-14)
 #define PN_HARVEST			(-15)
 #define PN_BEAST_MASTERY		(-16)
+#define PN_FIREARMS			(-17)
 #ifdef BARD
-#define PN_MUSICALIZE			(-17)
+#define PN_MUSICALIZE			(-18)
 #endif
+
+
 static void FDECL(mon_ignite_lightsaber, (struct obj *, struct monst *));
 
 STATIC_DCL void FDECL(give_may_advance_msg, (int));
@@ -55,7 +58,7 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	MACE,             MORNING_STAR,   FLAIL,
 	PN_HAMMER,        QUARTERSTAFF,   PN_POLEARMS,  SPEAR,
 	JAVELIN,          TRIDENT,        LANCE,        BOW,
-	SLING,            CROSSBOW,       DART,
+	SLING,            PN_FIREARMS,	  CROSSBOW,     DART,
 	SHURIKEN,         BOOMERANG,      PN_WHIP,      PN_HARVEST,
 	UNICORN_HORN,
 	PN_ATTACK_SPELL,     PN_HEALING_SPELL,
@@ -91,6 +94,7 @@ STATIC_VAR NEARDATA const char * const odd_skill_names[] = {
     "matter spells",
 	"farm implements",
 	"beast mastery",
+    "firearms",
 #ifdef BARD
 	"musicalize spell",
 #endif
@@ -303,6 +307,23 @@ int spec;
 		case LONG_SWORD:	
 			if(otmp->oartifact == ART_TOBIUME) tmp -= 3; 
 		break;
+		case BULLET:
+		case SILVER_BULLET:
+		case SHOTGUN_SHELL:
+		case ROCKET:
+			tmp += rnd(objects[otyp].oc_wldam)+4;
+		break;
+		case VIBROBLADE:
+			if(otmp->ovar1-->0) tmp += d(1, objects[otyp].oc_wldam)+4; 
+		break;
+		case FORCE_PIKE:
+			if(otmp->ovar1-->0) tmp += d(2, objects[otyp].oc_wldam)+8; 
+		break;
+		case LASER_BEAM:
+		case BLASTER_BOLT:
+		case HEAVY_BLASTER_BOLT:
+			tmp += d(2, objects[otyp].oc_wldam)+10;
+		break;
 		case LIGHTSABER:
 		case BEAMSWORD:
 			tmp += d(2, objects[otyp].oc_wldam)+2*otmp->spe;
@@ -387,6 +408,23 @@ int spec;
 		case SCYTHE:
 		case VOULGE:		
 			tmp += rnd(4);
+		break;
+		case BULLET:
+		case SILVER_BULLET:
+		case SHOTGUN_SHELL:
+		case ROCKET:
+			tmp += rnd(objects[otyp].oc_wsdam)+4;
+		break;
+		case VIBROBLADE:
+			if(otmp->ovar1-->0) tmp += d(1, objects[otyp].oc_wsdam)+3; 
+		break;
+		case FORCE_PIKE:
+			if(otmp->ovar1-->0) tmp += d(2, objects[otyp].oc_wsdam)+6; 
+		break;
+		case LASER_BEAM:
+		case BLASTER_BOLT:
+		case HEAVY_BLASTER_BOLT:
+			tmp += d(2, objects[otyp].oc_wsdam)+10;
 		break;
 		case LIGHTSABER:
 		case BEAMSWORD:
@@ -646,6 +684,9 @@ struct monst *mtmp;
 
 static NEARDATA const int rwep[] =
 {	LOADSTONE/*1d30*/, 
+// #ifdef FIREARMS
+	FRAG_GRENADE, GAS_GRENADE, ROCKET, SILVER_BULLET, BULLET, SHOTGUN_SHELL,
+// #endif
 	DWARVISH_SPEAR/*1d9/1d9*/, 
 	DROVEN_BOLT/*1d9/1d6*/, 
 	SHURIKEN/*1d8/1d6*/, 
@@ -790,6 +831,16 @@ register struct monst *mtmp;
 	    }
 	}
 
+	if(mtmp->data->msize == MZ_HUMAN && (propellor = m_carrying_charged(mtmp, ARM_BLASTER)) && !(
+		((otmp = MON_WEP(mtmp)) && otmp->cursed && otmp != propellor && mtmp->weapon_check == NO_WEAPON_WANTED) || (mtmp->combat_mode == HNDHND_MODE)
+	)){
+		return propellor;
+	} else if(!bigmonst(mtmp->data) && (propellor = m_carrying_charged(mtmp, HAND_BLASTER)) && !(
+		((otmp = MON_WEP(mtmp)) && otmp->cursed && otmp != propellor && mtmp->weapon_check == NO_WEAPON_WANTED) || (mtmp->combat_mode == HNDHND_MODE)
+	)){
+		return propellor;
+	}
+
 	/*
 	 * other than these two specific cases, always select the
 	 * most potent ranged weapon to hand.
@@ -824,6 +875,31 @@ register struct monst *mtmp;
 		case P_SLING:
 		  propellor = (oselect(mtmp, SLING));
 		  break;
+//ifdef FIREARMS
+		case P_FIREARM:
+		  if ((objects[rwep[i]].w_ammotyp) == WP_BULLET) {
+			propellor = (oselect(mtmp, BFG));
+			if (!propellor) propellor = (oselect(mtmp, HEAVY_MACHINE_GUN));
+			if (!propellor) propellor = (oselect(mtmp, ASSAULT_RIFLE));
+			if (!propellor) propellor = (oselect(mtmp, SUBMACHINE_GUN));
+			if (!propellor) propellor = (oselect(mtmp, SNIPER_RIFLE));
+			if (!propellor) propellor = (oselect(mtmp, RIFLE));
+			if (!propellor) propellor = (oselect(mtmp, PISTOL));
+			if (!propellor) propellor = (oselect(mtmp, FLINTLOCK));
+		  } else if ((objects[rwep[i]].w_ammotyp) == WP_SHELL) {
+			propellor = (oselect(mtmp, BFG));
+			if (!propellor) propellor = (oselect(mtmp, AUTO_SHOTGUN));
+			if (!propellor) propellor = (oselect(mtmp, SHOTGUN));
+		  } else if ((objects[rwep[i]].w_ammotyp) == WP_ROCKET) {
+			propellor = (oselect(mtmp, BFG));
+			if (!propellor) propellor = (oselect(mtmp, ROCKET_LAUNCHER));
+		  } else if ((objects[rwep[i]].w_ammotyp) == WP_GRENADE) {
+			propellor = (oselect(mtmp, BFG));
+			if (!propellor) propellor = (oselect(mtmp, GRENADE_LAUNCHER));
+			if (!propellor) propellor = &zeroobj;  /* can toss grenades */
+		  }
+		break;
+//endif
 		case P_CROSSBOW:
 		  propellor = (oselect(mtmp, DROVEN_CROSSBOW));
 		  if(!propellor) propellor = (oselect(mtmp, CROSSBOW));
@@ -2074,7 +2150,7 @@ const struct def_skill *class_skill;
 
 	/* walk through array to set skill maximums */
 	for (; class_skill->skill != P_NONE; class_skill++) {
-		if(!Race_if(PM_VAMPIRE) || class_skill->skill != P_TWO_WEAPON_COMBAT){
+		if(!(Race_if(PM_VAMPIRE) && !Role_if(PM_ANACHRONIST)) || class_skill->skill != P_TWO_WEAPON_COMBAT){
 			skmax = class_skill->skmax;
 			skill = class_skill->skill;
 
