@@ -1696,7 +1696,9 @@ lootcont:
 		You("carefully open %s...", the(xname(cobj)));
 		timepassed |= use_container(cobj, 0);
 		if (multi < 0) return 1;		/* chest trap */
-	    }
+	    } else if(is_lightsaber(cobj)){
+			timepassed |= use_lightsaber(cobj, 0);
+			if(timepassed) underfoot = TRUE;
 	}
 	}
 	if (any) c = 'y';
@@ -1756,6 +1758,7 @@ gotit:
 #endif
 		pline("Ok, now there is loot here.");
 	    }
+	}
     } else if (IS_GRAVE(levl[cc.x][cc.y].typ)) {
 	You("need to dig up the grave to effectively loot it...");
     }
@@ -1804,7 +1807,7 @@ gotit:
 		    underfoot ? "here" : "there");
     }
     return (timepassed);
-}}
+}
 
 /* loot_mon() returns amount of time passed.
  */
