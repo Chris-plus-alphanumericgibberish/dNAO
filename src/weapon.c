@@ -686,7 +686,8 @@ static NEARDATA const int pwep[] =
 	FAUCHARD, 
 	ELVEN_LANCE,
 	PARTISAN, 
-	LANCE
+	LANCE,
+	AKLYS
 };
 
 boolean
