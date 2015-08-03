@@ -644,6 +644,7 @@ initoptions()
 	iflags.travelcc.x = iflags.travelcc.y = -1;
 	flags.warnlevel = 1;
 	flags.warntype = 0L;
+	flags.montype = (long long int)0;
 
 #ifdef SORTLOOT
 	iflags.sortloot = 'n';
