@@ -390,7 +390,7 @@ dig()
 					staff->spe = 0;
 					staff->cursed = staff->blessed = FALSE;
 				}
-				if(u.sealsActive&SEAL_EDEN) unbind(SEAL_EDEN,TRUE);
+				if(!flags.mon_moving && u.sealsActive&SEAL_EDEN) unbind(SEAL_EDEN,TRUE);
 			} else {
 			    digtxt = "You succeed in cutting away some rock.";
 			    lev->typ = CORR;
@@ -559,7 +559,7 @@ boolean msgs;
 	    dogushforth(FALSE);
 	    SET_FOUNTAIN_WARNED(x,y);		/* force dryup */
 	    dryup(x, y, madeby_u);
-		if(u.sealsActive&SEAL_EDEN) unbind(SEAL_EDEN,TRUE);
+		if(!flags.mon_moving && u.sealsActive&SEAL_EDEN) unbind(SEAL_EDEN,TRUE);
 	    return;
 #ifdef SINKS
 	} else if (IS_SINK(lev->typ)) {
@@ -1929,7 +1929,7 @@ register int zx, zy, digdepth;
 		} else if (IS_TREE(room->typ)) {
 		    room->typ = ROOM;
 		    digdepth -= 2;
-			if(u.sealsActive&SEAL_EDEN) unbind(SEAL_EDEN,TRUE);
+			if(!flags.mon_moving && u.sealsActive&SEAL_EDEN) unbind(SEAL_EDEN,TRUE);
 		} else {	/* IS_ROCK but not IS_WALL or SDOOR */
 		    room->typ = CORR;
 		    digdepth--;
