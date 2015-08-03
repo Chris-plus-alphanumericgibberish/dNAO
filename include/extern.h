@@ -2558,6 +2558,7 @@ E void FDECL(possibly_unwield, (struct monst *,BOOLEAN_P));
 E int FDECL(mon_wield_item, (struct monst *));
 E int NDECL(abon);
 E int FDECL(dbon, (struct obj *));
+E int FDECL(dtypbon, (int));
 E int NDECL(enhance_weapon_skill);
 #ifdef DUMP_LOG
 E void NDECL(dump_weapon_skill);
