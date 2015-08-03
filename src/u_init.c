@@ -1115,6 +1115,43 @@ int randBreathDamageTypes[] =
 						 AD_ACID, 
 						 AD_DISN };
 
+int randBeamDamageTypes[] = 
+						{AD_MAGM, 
+						 AD_COLD, 
+						 AD_DRST, 
+						 AD_FIRE, 
+						 AD_SLEE, 
+						 AD_ELEC, 
+						 AD_ACID,
+						 AD_BLND,
+						 AD_STUN,
+						 AD_PLYS,
+						 AD_DRLI,
+						 AD_DREN,
+						 AD_STON,
+						 AD_SGLD,
+						 AD_SITM,
+						 AD_TLPT,
+						 AD_RUST,
+						 AD_CONF,
+						 AD_DISE,
+						 AD_DCAY,
+						 AD_HALU,
+						 AD_SLIM,
+						 AD_ENCH,
+						 AD_CORR,
+						 AD_POSN,
+						 AD_SHRD,
+						 AD_ABDC,
+						 AD_TELE,
+						 AD_POLY,
+						 AD_CHRN,
+						 AD_LVLT,
+						 AD_VAMP,
+						 AD_WEBS,
+						 AD_SHDW,
+						 AD_STTP };
+
 int randSpitDamageTypes[] = 
 						{AD_BLND, 
 						 AD_ACID, 
@@ -1956,6 +1993,9 @@ u_init()
 			case AT_BREA:
 				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
 			break;
+			case AT_BEAM:
+				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
+			break;
 			default:
 				attkptr->adtyp = AD_PHYS;
 			break;
@@ -2002,6 +2042,9 @@ u_init()
 			case AT_BREA:
 				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
 			break;
+			case AT_BEAM:
+				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
+			break;
 			default:
 				attkptr->adtyp = AD_PHYS;
 			break;
@@ -2046,6 +2089,9 @@ u_init()
 			break;
 			case AT_BREA:
 				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
+			break;
+			case AT_BEAM:
+				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
 			break;
 			default:
 				attkptr->adtyp = AD_PHYS;
