@@ -456,8 +456,33 @@ boolean ignore_oquan;
 	    case TOOL_CLASS:
 		if (typ == LENSES)
 			Strcpy(buf, "pair of ");
-
-		if (!obj->dknown)
+		if(typ == HYPOSPRAY_AMPULE){
+			int ptyp = (int)(obj->ovar1);
+			struct objclass *pcl = &objects[ptyp];
+			// register int pnn = ocl->oc_name_known;
+			register const char *pactualn = OBJ_NAME(*pcl);
+			// register const char *pdn = OBJ_DESCR(*pcl);
+			// register const char *pun = pcl->oc_uname;
+			if(!obj->dknown); //add "ampule" below and finish
+			else if(nn) {
+			    if (ptyp == POT_WATER &&
+				obj->bknown && (obj->blessed || obj->cursed)) {
+				Strcat(buf, obj->blessed ? "holy " : "unholy ");
+			    }
+			    Strcat(buf, pactualn);
+			    Strcat(buf, " ");
+				// pline("(%d)", (int)(obj->ovar1));
+			} else if(un) {
+				Strcat(buf, "ampule called ");
+				Strcat(buf, un);
+				break;
+			} else {
+				Strcat(buf, dn);
+				break;
+			}
+			Strcat(buf, "ampule");
+			break;
+		} else if (!obj->dknown)
 			Strcat(buf, dn ? dn : actualn);
 		else if (nn)
 			Strcat(buf, actualn);
@@ -486,7 +511,7 @@ boolean ignore_oquan;
 			Sprintf(buf, "set of %s", actualn);
 			break;
 		}
-		if (typ == VICTORIAN_UNDERWEAR) {
+		if ((typ == VICTORIAN_UNDERWEAR && nn) || (typ == JUMPSUIT && !nn) || (typ == BODYGLOVE && !nn)) {
 			Sprintf(buf, "set of %s", actualn);
 			break;
 		}
