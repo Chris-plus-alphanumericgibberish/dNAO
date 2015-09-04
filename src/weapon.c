@@ -615,8 +615,12 @@ int x;
 		    (!otmp->oartifact || touch_artifact(otmp,mtmp)))
 		{
 			if (!obest ||
-				dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(obest, 0 /*zeromonst*/,0))
-					obest = otmp;
+				// dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(obest, 0 /*zeromonst*/,0)
+				(is_bludgeon(otmp) ? 
+					(otmp->spe - greatest_erosion(otmp) > obest->spe - greatest_erosion(obest)):
+					(otmp->spe > obest->spe)
+				)
+			) obest = otmp;
 		}
 	}
 	return obest;
