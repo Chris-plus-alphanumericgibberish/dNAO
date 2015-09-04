@@ -43,7 +43,7 @@ doread()
 	scroll = getobj(readable, "read");
 	if(!scroll) return(0);
 	
-	if(scroll->oartifact && !arti_mandala(scroll)){
+	if(scroll->oartifact && !(scroll->oclass == SCROLL_CLASS) && !arti_mandala(scroll)){
 		if(scroll->oartifact == ART_ROD_OF_SEVEN_PARTS){
 			if (Blind) {
 				You_cant("see the writing!");
