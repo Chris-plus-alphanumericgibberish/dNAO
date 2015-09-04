@@ -732,7 +732,8 @@ TOOL("mirror", "looking glass", 0, 0, 0, 0,  45, 13,  10, GLASS, HI_SILVER),
 TOOL("mirror", "looking glass", 0, 0, 0, 0,  60, 13,  10, GLASS, HI_SILVER),
 #endif
 TOOL("crystal ball", "glass orb",
-								0, 0, 1, 1,  15,150, 200, GLASS, HI_GLASS),
+								0, 0, 1, 1,  15, 50, 200, GLASS, HI_GLASS),
+
 TOOL("mask", (char *)0,			1, 0, 0, 0,  10, 10,  80, LEATHER, CLR_WHITE),
 TOOLMASK("R'lyehian faceplate", "ebon pane", POISON_RES,
 								0, 0, 1, 0,   0, 15, 200, GLASS, CLR_BLACK),
