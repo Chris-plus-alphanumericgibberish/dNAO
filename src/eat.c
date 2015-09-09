@@ -3688,7 +3688,7 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 							Race_if(PM_VAMPIRE)))
 #ifdef CONVICT
         /* Convicts can last twice as long at hungry and below */
-        && (!Role_if(PM_CONVICT) || (u.uhs < HUNGRY) || (moves % 2 && u.uhs == HUNGRY) || (moves % 5))
+        && (!Role_if(PM_CONVICT) || (u.uhs < HUNGRY) || (moves % 4 && u.uhs == HUNGRY) || !(moves % 10))
 #endif /* CONVICT */
         && (!Race_if(PM_VAMPIRE) || !(moves % (u.ulevel/10 + 1)))
 		&& !( (Slow_digestion && !Race_if(PM_INCANTIFIER)) ||
