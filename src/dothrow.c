@@ -329,7 +329,7 @@ int shots, shotlimit;
 		buzz(raygun->altmode+40, 6, u.ux, u.uy, u.dx, u.dy, objects[(raygun->otyp)].oc_range,0);
 		shots--;
 	}
-
+	
 	if(clicky){
 		You("push the firing stud, but nothing happens.");
 	}
@@ -389,14 +389,13 @@ int shotlimit;
 	     * Only for valid launchers 
 	     * (currently oc_rof conflicts with wsdam)
 	     */
-	if (objects[(blaster->otyp)].oc_rof) 
-		multishot += (objects[(blaster->otyp)].oc_rof - 1);
-	if (blaster->otyp != RAYGUN && blaster->altmode == WP_MODE_SINGLE)
-	  /* weapons switchable b/w full/semi auto */
-		multishot = 1;
-	else if (blaster->otyp != RAYGUN && blaster->altmode == WP_MODE_BURST)
-		multishot = ((multishot > 3) ? (multishot / 3) : 1);
-	/* else it is auto == no change */
+	if (objects[(blaster->otyp)].oc_rof && blaster->otyp != RAYGUN && blaster->altmode != WP_MODE_SINGLE) {
+		if (blaster->otyp != RAYGUN && blaster->altmode == WP_MODE_BURST)
+			multishot += objects[(blaster->otyp)].oc_rof / 3;
+		/* else it is full auto */
+		else multishot += (objects[(blaster->otyp)].oc_rof - 1);
+	}
+	/* single shot, don't add anything */
 
 	if(blaster->otyp == RAYGUN)
 		return zap_raygun(blaster,multishot,shotlimit); 
@@ -598,10 +597,10 @@ dofire()
 			}
 		}
 		result = fire_blaster(uwep, shotlimit);
-
+		
 		return result;
 	}
-
+	
 	if(check_capacity((char *)0)) return(0);
 	if (!uquiver) {
 		if (!flags.autoquiver) {
@@ -651,7 +650,7 @@ dofire()
 		}
 	}
 	result = (throw_obj(uquiver, shotlimit, THROW_UWEP));
-
+	
 	return result;
 }
 
