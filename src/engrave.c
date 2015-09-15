@@ -2115,11 +2115,8 @@ doengrave()
 		break;
 
 	    case WEAPON_CLASS:
-		if (is_lightsaber(otmp)) {
-			if (otmp->lamplit) type = BURN;
-			else Your("%s is deactivated!", aobjnam(otmp,"are"));
-		} else if (otmp->oartifact == ART_PEN_OF_THE_VOID &&
-				mvitals[PM_ACERERAK].died > 0 && otmp->ovar1 & SEAL_ANDREALPHUS
+		if (otmp->oartifact == ART_PEN_OF_THE_VOID &&
+				mvitals[PM_ACERERAK].died > 0 && (otmp->ovar1 & SEAL_ANDREALPHUS)
 		) {
 			type = BURN;
 		} else if (is_blade(otmp)) {
@@ -2131,7 +2128,10 @@ doengrave()
 		break;
 
 	    case TOOL_CLASS:
-		if(otmp == ublindf) {
+		if (is_lightsaber(otmp)) {
+			if (otmp->lamplit) type = BURN;
+			else Your("%s is deactivated!", aobjnam(otmp,"are"));
+		} else if(otmp == ublindf) {
 		    pline(
 		"That is a bit difficult to engrave with, don't you think?");
 		    return(0);
@@ -2445,6 +2445,13 @@ doengrave()
 		break;
 	    case BURN:
 			multi = -(len/10);
+			if(is_lightsaber(otmp)){
+				maxelen = ((otmp->age/101) + 1)*10;
+				if (len > maxelen) {
+					multi = -(maxelen/10);
+					otmp->age = 0;
+				} else otmp->age += (multi-1)*100; //NOTE: multi is negative
+			}
 		if (multi)
 				nomovemsg = is_ice(u.ux,u.uy) ?
 				"You finish melting your message into the ice.":
@@ -3197,6 +3204,13 @@ doward()
 		break;
 	    case BURN:
 			multi = -(len/10);
+			if(is_lightsaber(otmp)){
+				maxelen = ((otmp->age/101) + 1)*10;
+				if (len > maxelen) {
+					multi = -(maxelen/10);
+					otmp->age = 0;
+				} else otmp->age += (multi-1)*100; //NOTE: multi is negative
+			}
 		if (multi)
 				nomovemsg = is_ice(u.ux,u.uy) ?
 				"You finish melting your drawing into the ice.":
@@ -4272,6 +4286,13 @@ doseal()
 		break;
 	    case BURN:
 			multi = -(len/10);
+			if(is_lightsaber(otmp)){
+				maxelen = ((otmp->age/101) + 1)*10;
+				if (len > maxelen) {
+					multi = -(maxelen/10);
+					otmp->age = 0;
+				} else otmp->age += (multi-1)*100; //NOTE: multi is negative
+			}
 		if (multi)
 				nomovemsg = is_ice(u.ux,u.uy) ?
 				"You finish melting your drawing into the ice.":
