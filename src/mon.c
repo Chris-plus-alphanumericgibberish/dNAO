@@ -611,6 +611,18 @@ register struct monst *mtmp;
 			obj->corpsenm = PM_GARO_MASTER;
 		goto default_1;
 		break;
+	    case PM_CHANGED:
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_gas_cloud(x, y, 4, rnd(3)+1);
+			flags.cth_attk=FALSE;
+		goto default_1;
+		break;
+	    case PM_WARRIOR_CHANGED:
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_gas_cloud(x, y, 5, rnd(3)+1);
+			flags.cth_attk=FALSE;
+		goto default_1;
+		break;
 	    default_1:
 	    default:
 		if (mvitals[mndx].mvflags & G_NOCORPSE)
@@ -1073,7 +1085,7 @@ movemon()
 		mtmp->mpeaceful = 0;
 	}
 	if(mtmp->data == &mons[PM_UVUUDAUM]){
-		if(u.uevent.udemigod){ 
+		if(u.uevent.udemigod || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))){ 
 			if(mtmp->mpeaceful){
 				pline("%s ceases its meditation...", Amonnam(mtmp));
 				mtmp->mpeaceful = 0;
@@ -1789,6 +1801,11 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 		md == &mons[PM_GUG])
 			return ALLOW_M|ALLOW_TM;
 
+	/* In the anachrononaut quest, all peaceful monsters are at threat from all hostile monsters.
+		The leader IS in serious danger */
+	if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+		if(magr->mpeaceful != mdef->mpeaceful) return ALLOW_M|ALLOW_TM;
+	}
 	/* Since the quest guardians are under siege, it makes sense to have 
        them fight hostiles.  (But we don't want the quest leader to be in danger.) */
 	if( (ma->msound==MS_GUARDIAN 
@@ -3393,9 +3410,12 @@ register struct monst *mtmp;
 
 	}
 	aggravate();
-    } else if(mtmp->data->msound == MS_JUBJUB && !(mtmp->mspec_used)) {
-		domonnoise(mtmp);
-    } else if(mtmp->data->msound == MS_DREAD && !(mtmp->mspec_used)) {
+    } else if(!(mtmp->mspec_used) &&
+		(
+		mtmp->data->msound == MS_JUBJUB || mtmp->data->msound == MS_DREAD || 
+		mtmp->data->msound == MS_SONG
+		)
+	) {
 		domonnoise(mtmp);
     }
     if(mtmp->data == &mons[PM_MEDUSA]) {
@@ -3764,7 +3784,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	    while (++tryct <= 100) {
 		mndx = select_newcham_form(mtmp);
 		mdat = &mons[mndx];
-		if ((mvitals[mndx].mvflags & G_GENOD) != 0 ||
+		if ((mvitals[mndx].mvflags & G_GENOD && !In_quest(&u.uz)) != 0 ||
 			is_placeholder(mdat)) continue;
 		/* polyok rules out all M2_PNAME and M2_WERE's;
 		   select_newcham_form might deliberately pick a player
@@ -3774,7 +3794,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		    break;
 	    }
 	    if (tryct > 100) return 0;	/* Should never happen */
-	} else if (mvitals[monsndx(mdat)].mvflags & G_GENOD)
+	} else if (mvitals[monsndx(mdat)].mvflags & G_GENOD && !In_quest(&u.uz))
 	    return(0);	/* passed in mdat is genocided */
 
 	if(is_male(mdat)) {
@@ -3994,9 +4014,9 @@ boolean egg;
 	 */
 	return (boolean)
 		(m_idx >= LOW_PM &&
-		 ((mvitals[m_idx].mvflags & G_GENOD) != 0 ||
+		 ((mvitals[m_idx].mvflags & G_GENOD && !In_quest(&u.uz)) != 0 ||
 		  (egg &&
-		   (mvitals[big_to_little(m_idx)].mvflags & G_GENOD) != 0)));
+		   (mvitals[big_to_little(m_idx)].mvflags & G_GENOD && !In_quest(&u.uz)) != 0)));
 }
 
 /* kill off any eggs of genocided monsters */
@@ -4040,7 +4060,7 @@ kill_genocided_monsters()
 
 	kill_cham[CHAM_ORDINARY] = FALSE;	/* (this is mndx==0) */
 	for (mndx = 1; mndx <= CHAM_MAX_INDX; mndx++)
-	  kill_cham[mndx] = (mvitals[cham_to_pm[mndx]].mvflags & G_GENOD) != 0;
+	  kill_cham[mndx] = (mvitals[cham_to_pm[mndx]].mvflags & G_GENOD && !In_quest(&u.uz)) != 0;
 	/*
 	 * Called during genocide, and again upon level change.  The latter
 	 * catches up with any migrating monsters as they finally arrive at
@@ -4056,7 +4076,7 @@ kill_genocided_monsters()
 	    mtmp2 = mtmp->nmon;
 	    if (DEADMONSTER(mtmp)) continue;
 	    mndx = monsndx(mtmp->data);
-	    if ((mvitals[mndx].mvflags & G_GENOD) || kill_cham[mtmp->cham]) {
+	    if ((mvitals[mndx].mvflags & G_GENOD && !In_quest(&u.uz)) || kill_cham[mtmp->cham]) {
 		if (mtmp->cham && !kill_cham[mtmp->cham])
 		    (void) newcham(mtmp, (struct permonst *)0, FALSE, FALSE);
 		else
