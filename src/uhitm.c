@@ -803,6 +803,11 @@ int thrown;
 		if(u.specialSealsActive&SEAL_DAHLVER_NAR) tmp += d(2,6)+min(u.ulevel/2,(u.uhpmax - u.uhp)/10);
 		if(uarmg && uarmg->otyp == tgloves) tmp += 1;
 	    valid_weapon_attack = (tmp > 1);
+		
+		//The Annulus is very heavy
+		if(uright && uright->oartifact == ART_ANNULUS) tmp = (tmp+uright->spe)*2;
+		else if(uleft && uleft->oartifact == ART_ANNULUS) tmp = (tmp+uleft->spe)*2;
+		
 		if(uarm && uarm->otyp <= YELLOW_DRAGON_SCALES && uarm->otyp >= GRAY_DRAGON_SCALE_MAIL){
 			dragon_hit(mon, uarm, uarm->otyp, &tmp, &needpoismsg, &poiskilled, &druggedmon);
 		}
@@ -1188,7 +1193,7 @@ int thrown;
 			}
 		    if ((objects[obj->otyp].oc_material == SILVER || arti_silvered(obj)  || 
 					(thrown && obj->otyp == SHURIKEN && uwep && uwep->oartifact == ART_SILVER_STARLIGHT) )
-			   && hates_silver(mdat) && !(is_lightsaber(obj) && obj->lamplit)) {
+			   && hates_silver(mdat) && !(is_lightsaber(obj) && obj->lamplit && obj->oartifact != ART_ANNULUS)) {
 				if(obj->oartifact == ART_SUNSWORD) sunmsg = TRUE;
 				else silvermsg = TRUE;
 				silverobj = TRUE;
@@ -3807,7 +3812,9 @@ dobpois:
 		   }
 		} break;
 	  	  case AD_UNKNWN:
-			  if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)){
+			  if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
+				&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
+			  ){
 					You_feel("%s tug gently on your %s.",mon_nam(mon), ONAME(uwep));
 					if(yn("Release it?")=='n'){
 						You("hold on tight.");
