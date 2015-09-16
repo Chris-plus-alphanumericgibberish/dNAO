@@ -2469,6 +2469,9 @@ register struct trobj *trop;
 			static NEARDATA short nocreate5 = STRANGE_OBJECT;
 			static NEARDATA short nocreate6 = STRANGE_OBJECT;
 			static NEARDATA short nocreate7 = STRANGE_OBJECT;
+			
+			static NEARDATA short nocreateam1 = STRANGE_OBJECT;
+			static NEARDATA short nocreateam2 = STRANGE_OBJECT;
 		/*
 		 * For random objects, do not create certain overly powerful
 		 * items: wand of wishing, ring of levitation, or the
@@ -2490,6 +2493,8 @@ register struct trobj *trop;
 				|| otyp == nocreate5
 				|| otyp == nocreate6
 				|| otyp == nocreate7
+				|| (obj->otyp == HYPOSPRAY_AMPULE && nocreateam1 == (short)obj->ovar1)
+				|| (obj->otyp == HYPOSPRAY_AMPULE && nocreateam2 == (short)obj->ovar1)
 				|| otyp == RIN_LEVITATION
 				/* 'useless' items */
 				|| otyp == POT_HALLUCINATION
@@ -2554,6 +2559,10 @@ register struct trobj *trop;
 				else if(nocreate5 == STRANGE_OBJECT) nocreate5 = otyp;
 				else if(nocreate6 == STRANGE_OBJECT) nocreate6 = otyp;
 				else if(nocreate7 == STRANGE_OBJECT) nocreate7 = otyp;
+			/* or ampule */
+			if (obj->otyp == HYPOSPRAY_AMPULE)
+				if(nocreateam1 == STRANGE_OBJECT) nocreateam1 = (short)obj->ovar1;
+				else if(nocreateam2 == STRANGE_OBJECT) nocreateam2 = (short)obj->ovar1;
 		}
 
 #ifdef GOLDOBJ
