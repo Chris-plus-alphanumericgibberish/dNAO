@@ -712,16 +712,19 @@ domonability()
 			return 0;
 		}
 	}
+	break;
 	case MATTK_UHORN: {
 	    use_unicorn_horn((struct obj *)0);
 	    return 1;
 	}
+	break;
 	case MATTK_SHRIEK: {
 	    You("shriek.");
 	    if(u.uburied) pline("Unfortunately sound does not carry well through rock.");
 	    else aggravate();
 		return 1;
 	}
+	break;
 	case MATTK_SCREAM: {
 	    You("scream high and shrill.");
 	    if(u.uburied) pline("Unfortunately sound does not carry well through rock.");
@@ -734,7 +737,9 @@ domonability()
 				}
 			}
 		}
+		return 1;
 	}
+	break;
 	case MATTK_HOLE: {
 		struct trap *ttmp = t_at(u.ux, u.uy);
 		struct rm *lev = &levl[u.ux][u.uy];
@@ -784,7 +789,9 @@ domonability()
 			return 1;
 		}
 	}
-	case MATTK_REACH: use_reach_attack();
+	break;
+	case MATTK_REACH: return use_reach_attack();
+	break;
 	}
 	return 0;
 }
