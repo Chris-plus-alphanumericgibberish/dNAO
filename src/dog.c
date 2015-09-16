@@ -89,7 +89,7 @@ boolean quietly;
 		   maximum number of the target critter created--unless
 		   it has a special limit (erinys, Nazgul) */
 		if ((mvitals[mndx].mvflags & G_EXTINCT) &&
-			mbirth_limit(mndx) != MAXMONNO) {
+			mbirth_limit(mndx) < MAXMONNO) {
 		    if (!quietly)
 			/* have just been given "You <do something with>
 			   the figurine and it transforms." message */
