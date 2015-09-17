@@ -3238,6 +3238,7 @@ register int	mmflags;
 	place_monster(mtmp, x, y);
 	mtmp->mcansee = mtmp->mcanmove = mtmp->mnotlaugh = TRUE;
 	mtmp->mblinded = mtmp->mfrozen = mtmp->mlaughing = 0;
+	mtmp->mvar1 = mtmp->mvar2 = mtmp->mvar3 = 0;
 	if(Race_if(PM_DROW) && in_mklev && Is_qstart(&u.uz) && 
 		(ptr == &mons[PM_SPROW] || ptr == &mons[PM_DRIDER] || ptr == &mons[PM_CAVE_LIZARD] || ptr == &mons[PM_LARGE_CAVE_LIZARD])
 	) mtmp->mpeaceful = TRUE;
@@ -3249,6 +3250,7 @@ register int	mmflags;
 	mtmp->mvanishes  = -1;
 
 	mtmp->mspec_used = 3;
+	mtmp->encouraged = 0;
 	/* Ok, here's the deal: I'm using a global to coordinate the house emblems on the drow's armor. 
 	   It needs to be set up here so that everyone created as part of the group gets the same emblem, 
 	   and then unset after this creature's armor is created. */
