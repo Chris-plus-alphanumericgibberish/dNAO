@@ -438,8 +438,8 @@ struct monst *mon;
 		base -= u.chokhmah;
 	}
 	else if(is_weeping(mon->data)){
-		if(mon->mextra[1] & 0x4L) base = -125; //Fully Quantum Locked
-		if(mon->mextra[1] & 0x2L) base = -20; //Partial Quantum Lock
+		if(mon->mvar2 & 0x4L) base = -125; //Fully Quantum Locked
+		if(mon->mvar2 & 0x2L) base = -20; //Partial Quantum Lock
 	}
 	else if(mon->data == &mons[PM_MARILITH] || mon->data == &mons[PM_SHAKTARI]){
 	    struct obj *mwep = (mon == &youmonst) ? uwep : MON_WEP(mon);
@@ -467,8 +467,8 @@ struct monst *mon;
 		base -= u.chokhmah;
 	}
 	else if(is_weeping(mon->data)){
-		if(mon->mextra[1] & 0x4L) base = -125; //Fully Quantum Locked
-		if(mon->mextra[1] & 0x2L) base = -20; //Partial Quantum Lock
+		if(mon->mvar2 & 0x4L) base = -125; //Fully Quantum Locked
+		if(mon->mvar2 & 0x2L) base = -20; //Partial Quantum Lock
 	}
 	else if(mon->data == &mons[PM_GIANT_TURTLE] && mon->mflee){
 		base -= 15;
@@ -516,8 +516,8 @@ struct monst *mon;
 		base -= u.chokhmah;
 	}
 	else if(is_weeping(mon->data)){
-		if(mon->mextra[1] & 0x4L) base = -125; //Fully Quantum Locked
-		if(mon->mextra[1] & 0x2L) base = -20; //Partial Quantum Lock
+		if(mon->mvar2 & 0x4L) base = -125; //Fully Quantum Locked
+		if(mon->mvar2 & 0x2L) base = -20; //Partial Quantum Lock
 	}
 	else if(mon->data == &mons[PM_GIANT_TURTLE] && mon->mflee){
 		base -= 15;
