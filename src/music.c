@@ -482,7 +482,7 @@ struct obj *instr;
 	any.a_int = SNG_IMPROVISE;
 	add_menu(tmpwin, NO_GLYPH, &any, SNG_IMPROVISE_CHAR, 0, ATR_NONE,
 		 "improvise", MENU_UNSELECTED);
-	if(instr != LEATHER_DRUM && instr != DRUM_OF_EARTHQUAKE){
+	if(instr->otyp != LEATHER_DRUM && instr->otyp != DRUM_OF_EARTHQUAKE){
 		/* play notes option */
 		any.a_int = SNG_NOTES;
 		add_menu(tmpwin, NO_GLYPH, &any, SNG_NOTES_CHAR, 0, ATR_NONE,
