@@ -772,6 +772,7 @@ int thrown;
 	char yourbuf[BUFSZ];
 	char unconventional[BUFSZ];	/* substituted for word "attack" in msg */
 	char saved_oname[BUFSZ];
+	int unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : 1;
 
 	static short jadeRing = 0;
 	if(!jadeRing) jadeRing = find_jade_ring();
@@ -788,16 +789,19 @@ int thrown;
 	    if (mdat->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS || u.sealsActive&SEAL_EDEN)) tmp = 0;
 		else if (martial_bonus()){
 			if(uarmc && uarmc->oartifact == ART_GRANDMASTER_S_ROBE){
-				if(u.sealsActive&SEAL_EURYNOME) tmp = rn2(2) ? exploding_d(1,rnd(5)*2+2,0)+exploding_d(1,rnd(5)*2+2,0) : exploding_d(1,rnd(5)*2+2,0);
-				else tmp = rn2(2) ? exploding_d(2,4,0) : exploding_d(1,4,0);
+				if(u.sealsActive&SEAL_EURYNOME) tmp = rn2(2) ? 
+											exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0)
+												+exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0) : 
+											exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0);
+				else tmp = rn2(2) ? exploding_d(2,4*unarmedMult,0) : exploding_d(1,4*unarmedMult,0);
 			}
 			else{
-				tmp = u.sealsActive&SEAL_EURYNOME ? exploding_d(1,rnd(5)*2+2,0) : rnd(4);	/* bonus for martial arts */
+				tmp = u.sealsActive&SEAL_EURYNOME ? exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0) : rnd(4*unarmedMult);	/* bonus for martial arts */
 			}
 			if(uarmg && uarmg->otyp == tgloves) tmp += 2;
 		}
 	    else {
-			tmp = u.sealsActive&SEAL_EURYNOME ? exploding_d(1,rnd(5)*2,0) : rnd(2);
+			tmp = u.sealsActive&SEAL_EURYNOME ? exploding_d(1,max_ints(2*unarmedMult,rnd(5)*2),0) : rnd(2*unarmedMult);
 		}
 		if(uarmg && uarmg->oartifact == ART_PREMIUM_HEART) tmp += uarmg->spe;
 		if(u.specialSealsActive&SEAL_DAHLVER_NAR) tmp += d(2,6)+min(u.ulevel/2,(u.uhpmax - u.uhp)/10);
