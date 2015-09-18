@@ -172,11 +172,11 @@ WEAPON("elven sickle", (char *)0, /* Vs plants: +6 to hit and double damage */
 	1, 1, 0,  0, 20,  4,  6,  3,  0, S,   P_HARVEST, WOOD, HI_WOOD),
 
 WEAPON("axe", (char *)0,
-	1, 0, 0, 36, 60,  8,  6,  4, 0, S,   P_AXE, IRON, HI_METAL),
+	1, 0, 0, 20, 60,  8,  6,  4, 0, S,   P_AXE, IRON, HI_METAL),
 WEAPON("battle-axe", "double-headed axe",/* "double-bitted" ? */
-	0, 0, 1, 10,120, 40,  8,  6, 0, S,   P_AXE, IRON, HI_METAL), /*+1d4/+2d4*/
+	0, 0, 1, 16,120, 40,  8,  6, 0, S,   P_AXE, IRON, HI_METAL), /*+1d4/+2d4*/
 WEAPON("moon axe", "large silver axe",
-	0, 0, 1,  2,160, 40,  6,  6, 0, S,   P_AXE, SILVER, HI_SILVER),
+	0, 0, 1, 12,160, 40,  6,  6, 0, S,   P_AXE, SILVER, HI_SILVER),
 
 /* swords */
 WEAPON("short sword", (char *)0,
@@ -418,7 +418,7 @@ HELM("skullcap", "metal disk",
 HELM("flack helmet", "green bowel",
 		0, 0,  0,	0, 0, 10,   50, 8, 1, PLASTIC, CLR_GREEN),
 HELM("droven helm", "spider shaped helm",
-		1, 0,  0,	0, 0, 50,   5, 7, 0, MINERAL, CLR_BLACK),
+		0, 0,  0,	0, 1, 50,   5, 7, 0, MINERAL, CLR_BLACK),
 HELM("plasteel helm", "white skull helm",
 		0, 0,  0,   0, 2, 25,  50, 7, 2, PLASTIC, CLR_WHITE),
 HELM("crystal helm", "fish bowl",
@@ -551,8 +551,8 @@ ARMOR("striped shirt", (char *)0,
 ARMOR("ruffled shirt", (char *)0,
 	1, 0, 0, 0,	 0, 0,	 5,   2, 10, 0, ARM_SHIRT, CLOTH, CLR_WHITE),
 /* victorian underwear, on the other hand, inflicts a penalty to AC but grants MC 3 */
-ARMOR("victorian underwear", (char *)0,
-	1, 0, 1, 0,	 0, 5,	 5,   2, 10, 3, ARM_SHIRT, CLOTH, CLR_WHITE),
+ARMOR("victorian underwear", "white dress",
+	0, 0, 1, 0,	 0, 5,	 5,   10, 10, 3, ARM_SHIRT, CLOTH, CLR_WHITE),
 ARMOR("jumpsuit", "silver clothes",
 	0, 0, 1, REFLECTING,	 0, 5,	 5, 1000, 10, 3, ARM_SUIT, PLASTIC, HI_SILVER),
 ARMOR("bodyglove", "tight black clothes",
