@@ -606,7 +606,13 @@ struct obj *spellbook;
 			delay = 0;
 			return 0;
 		}
-		/* Books are often wiser than their readers (Rus.) */
+		if((spellbook->ovar1) && RoSbook == STUDY_WARD){
+			if( (u.wardsknown & spellbook->ovar1) ){
+				You("are already familar with this ward.");
+				delay = 0;
+				return 0;
+			}
+		}		/* Books are often wiser than their readers (Rus.) */
 		spellbook->in_use = TRUE;
 		if (!spellbook->blessed &&
 			!spellbook->oartifact && 
@@ -1870,7 +1876,10 @@ spiriteffects(power, atme)
 					shieldeff(mon->mx, mon->my);
 				} else {
 					pline("%s recovers.", Monnam(mon));
-					if(mon->permspeed == MSLOW) mon->permspeed = 0;
+					if(mon->permspeed == MSLOW){
+						mon->permspeed = 0;
+						if(mon->mspeed == MSLOW) mon->mspeed = 0;
+					}
 					mon->mcan = 0;
 					mon->mcrazed = 0; 
 					mon->mcansee = 1;
@@ -2948,7 +2957,7 @@ spiriteffects(power, atme)
 			mon = m_at(u.ux+u.dx,u.uy+u.dy);
 			if(!mon) return 0;
 			You("speak an echo of the Last Word of creation.");
-			if(resists_drli(mon) || !(mon->data->geno & G_GENO) || is_demon(mon->data)){
+			if(resists_drli(mon) || !(mon->data->geno & G_GENO) || resists_death(mon)){
 				int nlev;
 				d_level tolevel;
 				int migrate_typ = MIGR_RANDOM;
