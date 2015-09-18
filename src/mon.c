@@ -2172,7 +2172,7 @@ struct monst *mtmp;
 		}
 		if (mtmp->mhpmax <= 0) mtmp->mhpmax = 10;
 		mtmp->mhp = mtmp->mhpmax;
-		if (mvitals[monsndx(mtmp->data)].mvflags & G_GENOD) {
+		if (mvitals[monsndx(mtmp->data)].mvflags & G_GENOD && !In_quest(&u.uz)) {
 			if (cansee(mtmp->mx, mtmp->my))
 			    pline("Unfortunately %s is still genocided...",
 				mon_nam(mtmp));
