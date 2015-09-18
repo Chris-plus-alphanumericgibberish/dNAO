@@ -599,9 +599,9 @@ static const struct def_skill Skill_Ana[] = {
     { P_SHORT_SWORD, P_EXPERT },{ P_LANCE,  P_EXPERT },
     { P_SABER, P_EXPERT },		{ P_LONG_SWORD,  P_SKILLED },
     { P_CLUB, P_SKILLED },		{ P_QUARTERSTAFF, P_SKILLED },
-#ifdef FIREARMS
+//#ifdef FIREARMS
     { P_FIREARM, P_EXPERT },
-#endif
+//#endif
     { P_DART, P_BASIC },		{ P_CROSSBOW, P_BASIC },
     { P_WHIP, P_SKILLED },
     { P_ATTACK_SPELL, P_SKILLED },	{ P_HEALING_SPELL, P_SKILLED },
@@ -1154,6 +1154,7 @@ int randSpecialAttackTypes[] =
 						 AT_ARRW, 
 						 AT_BREA, 
 						 AT_BEAM, 
+						 AT_DEVA, 
 						 AT_MAGC };
 
 int randMeleeDamageTypes[] = 
@@ -2153,6 +2154,7 @@ u_init()
 				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
 			break;
 			case AT_BEAM:
+			case AT_DEVA:
 				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
 			break;
 			default:
@@ -2202,6 +2204,7 @@ u_init()
 				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
 			break;
 			case AT_BEAM:
+			case AT_DEVA:
 				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
 			break;
 			default:
@@ -2250,6 +2253,7 @@ u_init()
 				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
 			break;
 			case AT_BEAM:
+			case AT_DEVA:
 				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
 			break;
 			default:
