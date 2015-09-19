@@ -1608,6 +1608,7 @@ doloot()	/* loot a container on the floor or loot saddle from mon. */
     char qbuf[BUFSZ];
     int prev_inquiry = 0;
     boolean prev_loot = FALSE;
+	boolean any = FALSE;
     int num_cont = 0;
 
     if (check_capacity((char *)0)) {
@@ -1622,94 +1623,94 @@ doloot()	/* loot a container on the floor or loot saddle from mon. */
 
 lootcont:
 
-    if (container_at(cc.x, cc.y, FALSE)) {
-	boolean any = FALSE;
+	if (container_at(cc.x, cc.y, FALSE)) {
 
-	if (!able_to_loot(cc.x, cc.y)) return 0;
+		if (!able_to_loot(cc.x, cc.y)) return 0;
 
-	for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
-	    if (Is_container(cobj)) num_cont++;
-	}
-
-	if (num_cont > 1) {
-	    /* use a menu to loot many containers */
-	    int n, i;
-
-	    winid win;
-	    anything any;
-	    menu_item *pick_list;
-
-	    timepassed = 0;
-
-	    any.a_void = 0;
-	    win = create_nhwindow(NHW_MENU);
-	    start_menu(win);
-
-	    for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
-		if (Is_container(cobj)) {
-		    any.a_obj = cobj;
-		    add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, doname(cobj),
-			     MENU_UNSELECTED);
+		for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
+			if (Is_container(cobj)) num_cont++;
 		}
-	    }
-	    end_menu(win, "Loot which containers?");
-	    n = select_menu(win, PICK_ANY, &pick_list);
-	    destroy_nhwindow(win);
 
-	    if (n > 0) {
-		for (i = 0; i < n; i++) {
-		    timepassed |= do_loot_cont(pick_list[i].item.a_obj, TRUE);
-		    if (multi < 0) {/* chest trap, stop looting */
-			free((genericptr_t) pick_list);
-			return 1;
-		    }
-		}
-	    }
-	    if (pick_list)
-		free((genericptr_t) pick_list);
-	    if (n != 0) c = 'y';
-	} else {
-		for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = nobj) {
-			nobj = cobj->nexthere;
+		if (num_cont > 1) {
+			/* use a menu to loot many containers */
+			int n, i;
 
+			winid win;
+			anything any;
+			menu_item *pick_list;
+
+			timepassed = 0;
+
+			any.a_void = 0;
+			win = create_nhwindow(NHW_MENU);
+			start_menu(win);
+
+			for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
 			if (Is_container(cobj)) {
-				Sprintf(qbuf, "There is %s here, loot it?",
-					safe_qbuf("", sizeof("There is  here, loot it?"),
-						 doname(cobj), an(simple_typename(cobj->otyp)),
-						 "a container"));
-				c = ynq(qbuf);
-				if (c == 'q') return (timepassed);
-				if (c == 'n') continue;
-				any = TRUE;
+				any.a_obj = cobj;
+				add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, doname(cobj),
+					 MENU_UNSELECTED);
+			}
+			}
+			end_menu(win, "Loot which containers?");
+			n = select_menu(win, PICK_ANY, &pick_list);
+			destroy_nhwindow(win);
 
-				if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
-					// Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
-					// c = ynq(qbuf);
-					// if (c == 'q') return (timepassed);
-					// if (c == 'n') continue;
-					// any = TRUE;
-					timepassed |= use_lightsaber(cobj, 0);
-					if(timepassed) underfoot = TRUE;
-					break;
+			if (n > 0) {
+			for (i = 0; i < n; i++) {
+				timepassed |= do_loot_cont(pick_list[i].item.a_obj, TRUE);
+				if (multi < 0) {/* chest trap, stop looting */
+				free((genericptr_t) pick_list);
+				return 1;
 				}
-				if (cobj->olocked) {
-					pline("Hmmm, it seems to be locked.");
-					continue;
+			}
+			}
+			if (pick_list)
+			free((genericptr_t) pick_list);
+			if (n != 0) c = 'y';
+		} else {
+			for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = nobj) {
+				nobj = cobj->nexthere;
+
+				if (Is_container(cobj)) {
+					Sprintf(qbuf, "There is %s here, loot it?",
+						safe_qbuf("", sizeof("There is  here, loot it?"),
+							 doname(cobj), an(simple_typename(cobj->otyp)),
+							 "a container"));
+					c = ynq(qbuf);
+					if (c == 'q') return (timepassed);
+					if (c == 'n') continue;
+					any = TRUE;
+
+					if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
+						// Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
+						// c = ynq(qbuf);
+						// if (c == 'q') return (timepassed);
+						// if (c == 'n') continue;
+						// any = TRUE;
+						timepassed |= use_lightsaber(cobj, 0);
+						if(timepassed) underfoot = TRUE;
+						break;
+					}
+					if (cobj->olocked) {
+						pline("Hmmm, it seems to be locked.");
+						continue;
+					}
+					if (cobj->otyp == BAG_OF_TRICKS) {
+						int tmp;
+						You("carefully open the bag...");
+						pline("It develops a huge set of teeth and bites you!");
+						tmp = rnd(10);
+						if (Half_physical_damage) tmp = (tmp+1) / 2;
+						losehp(tmp, "carnivorous bag", KILLED_BY_AN);
+						makeknown(BAG_OF_TRICKS);
+						timepassed = 1;
+						continue;
+					}
+					You("carefully open %s...", the(xname(cobj)));
+					timepassed |= use_container(cobj, 0);
+					if (multi < 0) return 1;		/* chest trap */
 				}
-				if (cobj->otyp == BAG_OF_TRICKS) {
-					int tmp;
-					You("carefully open the bag...");
-					pline("It develops a huge set of teeth and bites you!");
-					tmp = rnd(10);
-					if (Half_physical_damage) tmp = (tmp+1) / 2;
-					losehp(tmp, "carnivorous bag", KILLED_BY_AN);
-					makeknown(BAG_OF_TRICKS);
-					timepassed = 1;
-					continue;
-				}
-				You("carefully open %s...", the(xname(cobj)));
-				timepassed |= use_container(cobj, 0);
-				if (multi < 0) return 1;		/* chest trap */
 			}
 		}
 	}
@@ -1732,47 +1733,47 @@ lootcont:
 	    freeinv(goldob);
 #endif
 	    if (IS_THRONE(levl[u.ux][u.uy].typ)){
-		struct obj *coffers;
-		int pass;
-		/* find the original coffers chest, or any chest */
-		for (pass = 2; pass > -1; pass -= 2)
-		    for (coffers = fobj; coffers; coffers = coffers->nobj)
-			if (coffers->otyp == CHEST && coffers->spe == pass)
-			    goto gotit;	/* two level break */
+			struct obj *coffers;
+			int pass;
+			/* find the original coffers chest, or any chest */
+			for (pass = 2; pass > -1; pass -= 2)
+				for (coffers = fobj; coffers; coffers = coffers->nobj)
+				if (coffers->otyp == CHEST && coffers->spe == pass)
+					goto gotit;	/* two level break */
 gotit:
-		if (coffers) {
-	    verbalize("Thank you for your contribution to reduce the debt.");
-		    (void) add_to_container(coffers, goldob);
-		    coffers->owt = weight(coffers);
-		} else {
-		    struct monst *mon = makemon(courtmon(),
-					    u.ux, u.uy, NO_MM_FLAGS);
-		    if (mon) {
+			if (coffers) {
+			verbalize("Thank you for your contribution to reduce the debt.");
+				(void) add_to_container(coffers, goldob);
+				coffers->owt = weight(coffers);
+			} else {
+				struct monst *mon = makemon(courtmon(),
+							u.ux, u.uy, NO_MM_FLAGS);
+				if (mon) {
 #ifndef GOLDOBJ
-			mon->mgold += goldob->quan;
-			delobj(goldob);
-			pline("The exchequer accepts your contribution.");
-		    } else {
+					mon->mgold += goldob->quan;
+					delobj(goldob);
+					pline("The exchequer accepts your contribution.");
+				} else {
+					dropx(goldob);
+				}
+			}
+	    } else {
 			dropx(goldob);
-		    }
-		}
-	    } else {
-		dropx(goldob);
 #else
-			add_to_minv(mon, goldob);
-			pline("The exchequer accepts your contribution.");
-		    } else {
-			dropy(goldob);
-		    }
-		}
+					add_to_minv(mon, goldob);
+					pline("The exchequer accepts your contribution.");
+				} else {
+					dropy(goldob);
+				}
+			}
 	    } else {
-		dropy(goldob);
+			dropy(goldob);
 #endif
-		pline("Ok, now there is loot here.");
+			pline("Ok, now there is loot here.");
 	    }
 	}
     } else if (IS_GRAVE(levl[cc.x][cc.y].typ)) {
-	You("need to dig up the grave to effectively loot it...");
+		You("need to dig up the grave to effectively loot it...");
     }
     /*
      * 3.3.1 introduced directional looting for some things.
