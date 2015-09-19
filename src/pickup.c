@@ -1571,6 +1571,10 @@ boolean noit;
 {
     if (!cobj) return 0;
 
+	if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
+		You("carefully open %s...",the(xname(cobj)));
+		return use_lightsaber(cobj, 0);
+	}
     if (cobj->olocked) {
 	pline("Hmmm, %s seems to be locked.", noit ? the(xname(cobj)) : "it");
 	return 0;
@@ -1669,44 +1673,46 @@ lootcont:
 			nobj = cobj->nexthere;
 
 			if (Is_container(cobj)) {
-			Sprintf(qbuf, "There is %s here, loot it?",
-				safe_qbuf("", sizeof("There is  here, loot it?"),
-					 doname(cobj), an(simple_typename(cobj->otyp)),
-					 "a container"));
-			c = ynq(qbuf);
-			if (c == 'q') return (timepassed);
-			if (c == 'n') continue;
-			any = TRUE;
+				Sprintf(qbuf, "There is %s here, loot it?",
+					safe_qbuf("", sizeof("There is  here, loot it?"),
+						 doname(cobj), an(simple_typename(cobj->otyp)),
+						 "a container"));
+				c = ynq(qbuf);
+				if (c == 'q') return (timepassed);
+				if (c == 'n') continue;
+				any = TRUE;
 
-			if (cobj->olocked) {
-				pline("Hmmm, it seems to be locked.");
-				continue;
+				if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
+					// Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
+					// c = ynq(qbuf);
+					// if (c == 'q') return (timepassed);
+					// if (c == 'n') continue;
+					// any = TRUE;
+					timepassed |= use_lightsaber(cobj, 0);
+					if(timepassed) underfoot = TRUE;
+					break;
+				}
+				if (cobj->olocked) {
+					pline("Hmmm, it seems to be locked.");
+					continue;
+				}
+				if (cobj->otyp == BAG_OF_TRICKS) {
+					int tmp;
+					You("carefully open the bag...");
+					pline("It develops a huge set of teeth and bites you!");
+					tmp = rnd(10);
+					if (Half_physical_damage) tmp = (tmp+1) / 2;
+					losehp(tmp, "carnivorous bag", KILLED_BY_AN);
+					makeknown(BAG_OF_TRICKS);
+					timepassed = 1;
+					continue;
+				}
+				You("carefully open %s...", the(xname(cobj)));
+				timepassed |= use_container(cobj, 0);
+				if (multi < 0) return 1;		/* chest trap */
 			}
-			if (cobj->otyp == BAG_OF_TRICKS) {
-				int tmp;
-				You("carefully open the bag...");
-				pline("It develops a huge set of teeth and bites you!");
-				tmp = rnd(10);
-				if (Half_physical_damage) tmp = (tmp+1) / 2;
-				losehp(tmp, "carnivorous bag", KILLED_BY_AN);
-				makeknown(BAG_OF_TRICKS);
-				timepassed = 1;
-				continue;
-			}
-
-			You("carefully open %s...", the(xname(cobj)));
-			timepassed |= use_container(cobj, 0);
-			if (multi < 0) return 1;		/* chest trap */
-	    } else if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
-			Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
-			c = ynq(qbuf);
-			if (c == 'q') return (timepassed);
-			if (c == 'n') continue;
-			timepassed |= use_lightsaber(cobj, 0);
-			if(timepassed) underfoot = TRUE;
-	    }
-	}
-	if (any) c = 'y';
+		}
+		if (any) c = 'y';
     } else if (Confusion) {
 #ifndef GOLDOBJ
 	if (u.ugold){
