@@ -1712,8 +1712,9 @@ lootcont:
 				if (multi < 0) return 1;		/* chest trap */
 			}
 		}
-		if (any) c = 'y';
-    } else if (Confusion) {
+	}
+	if (any) c = 'y';
+    else if (Confusion) {
 #ifndef GOLDOBJ
 	if (u.ugold){
 	    long contribution = rnd((int)min(LARGEST_INT,u.ugold));
