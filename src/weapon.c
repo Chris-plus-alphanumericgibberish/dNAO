@@ -447,7 +447,7 @@ int spec;
 				tmp += d(3, 3);
 				otmp->age -= 100;
 			}
-			break;
+		break;
 		case DOUBLE_LIGHTSABER: 
 			tmp += d(2, objects[otyp].oc_wsdam);
 			otmp->age -= 100;
@@ -1775,7 +1775,7 @@ int skill;
 int degree;
 {
     boolean advance_before;
-
+	
 	if(skill < 0) skill *= -1;
 	
     if (skill != P_NONE && !P_RESTRICTED(skill)) {
