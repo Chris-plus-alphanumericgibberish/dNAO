@@ -2699,7 +2699,8 @@ boolean was_swallowed;			/* digestion */
 				if(!found && chain) break;//exit outer loop if child[i] not found
 											//AND the growth is chained.
 			}
-			
+			free(growto);
+			free(child);
 		}//end AD_GROW basic
 		else if(mdat->mattk[i].adtyp == AD_SOUL){
 			struct monst *mtmp;
