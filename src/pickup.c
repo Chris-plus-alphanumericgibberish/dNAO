@@ -1628,7 +1628,7 @@ lootcont:
 		if (!able_to_loot(cc.x, cc.y)) return 0;
 
 		for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
-			if (Is_container(cobj)) num_cont++;
+			if (Is_container(cobj) || (is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS)) num_cont++;
 		}
 
 		if (num_cont > 1) {
@@ -1646,7 +1646,7 @@ lootcont:
 			start_menu(win);
 
 			for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
-			if (Is_container(cobj)) {
+			if (Is_container(cobj) || (is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS)) {
 				any.a_obj = cobj;
 				add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, doname(cobj),
 					 MENU_UNSELECTED);
@@ -1682,16 +1682,6 @@ lootcont:
 					if (c == 'n') continue;
 					any = TRUE;
 
-					if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
-						// Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
-						// c = ynq(qbuf);
-						// if (c == 'q') return (timepassed);
-						// if (c == 'n') continue;
-						// any = TRUE;
-						timepassed |= use_lightsaber(cobj, 0);
-						if(timepassed) underfoot = TRUE;
-						break;
-					}
 					if (cobj->olocked) {
 						pline("Hmmm, it seems to be locked.");
 						continue;
@@ -1707,9 +1697,17 @@ lootcont:
 						timepassed = 1;
 						continue;
 					}
+
 					You("carefully open %s...", the(xname(cobj)));
 					timepassed |= use_container(cobj, 0);
 					if (multi < 0) return 1;		/* chest trap */
+			    } else if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
+					Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
+					c = ynq(qbuf);
+					if (c == 'q') return (timepassed);
+					if (c == 'n') continue;
+					timepassed |= use_lightsaber(cobj, 0);
+					if(timepassed) underfoot = TRUE;
 				}
 			}
 		}
