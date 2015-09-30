@@ -2376,6 +2376,15 @@ boolean was_swallowed;			/* digestion */
 		Sprintf(buf,"destroyed %s",noit_mon_nam(mon));
 		livelog_write_string(buf);
 	}
+	if(Role_if(PM_ANACHRONONAUT) && mon->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
+		if(mdat == &mons[PM_TROOPER] || mdat == &mons[PM_HEDROW_WARRIOR]){
+			verbalize("**ALERT: trooper %d vital signs terminated**", (int)(mon->m_id));
+			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
+		} else {
+			verbalize("**ALERT: citizen %d vital signs terminated**", (int)(mon->m_id));
+			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
+		}
+	}
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_MALPHAS && rn2(20) <= (mvitals[PM_ACERERAK].died > 0 ? 4 : 1)){
 		struct monst *mtmp;
 		mtmp = makemon(&mons[PM_CROW], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
