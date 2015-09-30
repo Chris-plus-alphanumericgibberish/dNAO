@@ -540,9 +540,21 @@ boolean newlev;
 	}
 
 	if (rob_shop(shkp)) {
+		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+			verbalize("Help me, Ilsensine!");
+			makemon(&mons[PM_WARRIOR_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_MASTER_MIND_FLAYER], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_MIND_FLAYER], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_UMBER_HULK], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
+			shkp->mhp = 0;
+			mondied(shkp);
+		} else {
 	    call_keter(shkp, (!newlev && levl[u.ux0][u.uy0].edge));
 	    (void) angry_guards(FALSE);
 	}
+}
 }
 
 /* robbery from outside the shop via telekinesis or grappling hook */
@@ -562,10 +574,22 @@ xchar x, y;
 	    return;
 
 	if (rob_shop(shkp)) {
+		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+			verbalize("Help me, Ilsensine!");
+			makemon(&mons[PM_WARRIOR_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_MASTER_MIND_FLAYER], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_MIND_FLAYER], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_UMBER_HULK], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
+			makemon(&mons[PM_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
+			shkp->mhp = 0;
+			mondied(shkp);
+		} else {
 	    /*[might want to set 2nd arg based on distance from shop doorway]*/
 	    call_keter(shkp, FALSE);
 	    (void) angry_guards(FALSE);
 	}
+}
 }
 
 /* shop merchandise has been taken; pay for it with any credit available;  
