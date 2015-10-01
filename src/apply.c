@@ -2835,8 +2835,6 @@ struct obj *hypo;
 				if (!Unchanging) polyself(FALSE);
 			break;
 			case POT_AMNESIA:
-				pline(Hallucination? "This tastes like champagne!" :
-					"This liquid bubbles and fizzes as you drink it.");
 				forget((!amp->blessed? ALL_SPELLS : 0) | ALL_MAP);
 				if (Hallucination)
 					pline("Hakuna matata!");
