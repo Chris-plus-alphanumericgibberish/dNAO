@@ -1,7 +1,6 @@
 GAMEDIR = dnethackdir
 
-CFLAGS = -g -fPIE -fstack-protector
-LDFLAGS = -fPIE -pie
+CFLAGS = -g -O2
 
 GAMELIBS = -lncurses
 
