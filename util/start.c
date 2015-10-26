@@ -9,13 +9,13 @@
 #include <stdlib.h>
 #include <limits.h>
 
-char const * const path_fmt[] = {"%s/%s.0",
-                                 "%s/save/%s",
-                                 "%s/save/%s.gz",
-                                 "%s/save/%s.bz2",
-                                 "%s/save/%s.e",
-                                 "%s/save/%s.e.gz",
-                                 "%s/save/%s.e.bz2",
+char const * const path_fmt[] = {"%s/var/%s.0",
+                                 "%s/var/save/%s",
+                                 "%s/var/save/%s.gz",
+                                 "%s/var/save/%s.bz2",
+                                 "%s/var/save/%s.e",
+                                 "%s/var/save/%s.e.gz",
+                                 "%s/var/save/%s.e.bz2",
                                  NULL};
 
 int main(int argc, char **argv) {
