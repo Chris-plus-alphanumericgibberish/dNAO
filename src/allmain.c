@@ -1055,6 +1055,7 @@ moveloop()
 			if(Polymorph && !rn2(100))
 			    change = 1;
 			else if (u.ulycn >= LOW_PM && !Upolyd &&
+				 !uclockwork &&
 				 !rn2(80 - (20 * night())))
 			    change = 2;
 			if (change && !Unchanging) {
