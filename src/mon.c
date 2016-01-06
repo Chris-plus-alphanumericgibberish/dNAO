@@ -2422,8 +2422,10 @@ boolean was_swallowed;			/* digestion */
 			mtmp2 = mtmp->nmon;
 			if(mtmp->data == &mons[PM_HUNGRY_DEAD]){
 				if(mon->mvar1 == (long)mtmp->m_id){
-					mtmp->mhp = 0;
-					mondied(mtmp);
+					if(mtmp->mhp > 0){
+						mtmp->mhp = 0;
+						mondied(mtmp);
+					}
 					break;
 				}
 			}
@@ -2434,8 +2436,10 @@ boolean was_swallowed;			/* digestion */
 				if(mtmp->data == &mons[PM_HUNGRY_DEAD]){
 					if(mon->mvar1 == (long)mtmp->m_id){
 						mon_arrive(mtmp, TRUE);
-						mtmp->mhp = 0;
-						mondied(mtmp);
+						if(mtmp->mhp > 0){
+							mtmp->mhp = 0;
+							mondied(mtmp);
+						}
 						break;
 					}
 				}
