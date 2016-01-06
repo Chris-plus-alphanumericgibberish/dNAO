@@ -1037,6 +1037,8 @@ register const char *let,*word;
 			(otmp->oclass == CHAIN_CLASS)))
 		|| (!strcmp(word, "sacrifice") &&
 		    (otyp != CORPSE &&
+		     otyp != SEVERED_HAND &&                    
+		     otyp != EYEBALL &&	/* KMH -- fixed */
 		     otyp != AMULET_OF_YENDOR && otyp != FAKE_AMULET_OF_YENDOR))
 		|| (!strcmp(word, "write with") &&
 		    ((otmp->oclass == TOOL_CLASS &&

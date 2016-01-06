@@ -373,6 +373,24 @@ register struct monst *mtmp;
 			place_object(otmp, x, y);
 			}
 		goto default_1;
+		case PM_VECNA:
+			{
+			if(!rn2(2)){
+				pline("All that remains is a hand...");
+				otmp = oname(mksobj(SEVERED_HAND, TRUE, FALSE),
+						artiname(ART_HAND_OF_VECNA));
+			} else {
+				pline("All that remains is a single eye...");
+				otmp = oname(mksobj(EYEBALL, TRUE, FALSE),
+						artiname(ART_EYE_OF_VECNA));
+			}
+		    /* create special stuff; can't use mongets */
+			
+		    curse(otmp);
+		    otmp->oerodeproof = TRUE;
+			place_object(otmp, x, y);
+			}
+		goto default_1;
 	    case PM_LONG_WORM:
 			(void) mksobj_at(WORM_TOOTH, x, y, TRUE, FALSE);
 		goto default_1;
@@ -2361,10 +2379,10 @@ boolean was_swallowed;			/* digestion */
 		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    return FALSE;
 	}
-	else if (mdat->mlet == S_LICH && mdat != &mons[PM_LICH__THE_FIEND_OF_EARTH]) {
+	else if (mdat->mlet == S_LICH) {
 	    if (cansee(mon->mx, mon->my) && !was_swallowed)
-		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
-	    return FALSE;
+			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
+	    if(mdat != &mons[PM_VECNA] && mdat != &mons[PM_LICH__THE_FIEND_OF_EARTH]) return FALSE; /*Vecna leaves his hand or eye*/
 	}
 	else if(mdat == &mons[PM_CHOKHMAH_SEPHIRAH]){
 		livelog_write_string("destroyed a chokhmah sephirah");
@@ -2841,6 +2859,7 @@ boolean was_swallowed;			/* digestion */
 		   || mdat == &mons[PM_SEYLL_AUZKOVYN]
 		   || mdat == &mons[PM_DARUTH_XAXOX]
 		   || mdat == &mons[PM_ORION]
+		   || mdat == &mons[PM_VECNA]
 //		   || mdat == &mons[PM_UNICORN_OF_AMBER]
 		   || mdat == &mons[PM_NIGHTMARE]
 //		   || mdat == &mons[PM_PINK_UNICORN]
