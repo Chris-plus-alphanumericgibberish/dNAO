@@ -551,10 +551,10 @@ boolean newlev;
 			shkp->mhp = 0;
 			mondied(shkp);
 		} else {
-	    call_keter(shkp, (!newlev && levl[u.ux0][u.uy0].edge));
-	    (void) angry_guards(FALSE);
+			call_keter(shkp, (!newlev && levl[u.ux0][u.uy0].edge));
+			(void) angry_guards(FALSE);
+		}
 	}
-}
 }
 
 /* robbery from outside the shop via telekinesis or grappling hook */
@@ -585,11 +585,11 @@ xchar x, y;
 			shkp->mhp = 0;
 			mondied(shkp);
 		} else {
-	    /*[might want to set 2nd arg based on distance from shop doorway]*/
-	    call_keter(shkp, FALSE);
-	    (void) angry_guards(FALSE);
+			/*[might want to set 2nd arg based on distance from shop doorway]*/
+			call_keter(shkp, FALSE);
+			(void) angry_guards(FALSE);
+		}
 	}
-}
 }
 
 /* shop merchandise has been taken; pay for it with any credit available;  
