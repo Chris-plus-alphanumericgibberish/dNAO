@@ -1900,6 +1900,10 @@ dosacrifice()
 	return 0;
     }
 
+	if(Role_if(PM_ANACHRONONAUT) && flags.questprogress != 2 && u.uhave.questart && Is_astralevel(&u.uz)){
+		You("worry that you have not yet completed your mission.");
+	}
+	
     if (In_endgame(&u.uz)) {
 	if (!(otmp = getobj(sacrifice_types, "sacrifice"))) return 0;
     } else {
