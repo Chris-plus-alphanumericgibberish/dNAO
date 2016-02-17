@@ -169,6 +169,7 @@ E void FDECL(bot2str, (char *));
 #ifdef USE_TRAMPOLI
 E int NDECL(doextcmd);
 E int NDECL(domonability);
+E int NDECL(dofightingform);
 E int NDECL(doprev_message);
 E int NDECL(timed_occupation);
 E int NDECL(wiz_attributes);
@@ -1496,7 +1497,7 @@ E void FDECL(Delay, (int));
 
 E int FDECL(set_bypassDR, (int));
 E int FDECL(set_destroy_thrown, (int));
-E int FDECL(thitu, (int,int,struct obj *,const char *));
+E int FDECL(thitu, (int,int,struct obj *,const char *, boolean));
 E int FDECL(ohitmon, (struct monst *,struct monst *,struct obj *,int,BOOLEAN_P));
 E void FDECL(thrwmu, (struct monst *));
 E int FDECL(spitmu, (struct monst *,struct attack *));
