@@ -517,6 +517,7 @@ E void FDECL(impact_drop, (struct obj *,XCHAR_P,XCHAR_P,XCHAR_P));
 /* ### dothrow.c ### */
 
 E int FDECL(throw_obj, (struct obj *,int, int));
+E int FDECL(zap_raygun, (struct obj *,int,int));
 E int NDECL(dothrow);
 E int NDECL(dofire);
 E void FDECL(hitfloor, (struct obj *));
@@ -701,10 +702,11 @@ E void FDECL(del_engr_at, (int,int));
 E void FDECL(del_ward_at, (int,int));
 E void FDECL(del_engr_ward_at, (int,int));
 E int NDECL(freehand);
+E int NDECL(doengward);
 E int NDECL(doengrave);
 E int NDECL(doward);
 E int NDECL(doseal);
-E int NDECL(doengward);
+E int NDECL(pick_seal);
 E void FDECL(save_engravings, (int,int));
 E void FDECL(rest_engravings, (int));
 E void FDECL(del_engr, (struct engr *));
