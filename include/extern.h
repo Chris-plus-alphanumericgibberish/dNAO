@@ -127,6 +127,8 @@ E int FDECL(conplus, (int));
 E schar FDECL(acurr, (int));
 E schar NDECL(acurrstr);
 E void FDECL(adjalign, (int));
+E int NDECL(uhp);
+E int NDECL(uhpmax);
 
 /* ### ball.c ### */
 
@@ -1081,6 +1083,7 @@ E void NDECL(getmailstatus);
 E void NDECL(ckmailstatus);
 E void FDECL(readmail, (struct obj *));
 #endif /* MAIL */
+E void NDECL(ck_server_admin_msg);
 
 /* ### makemon.c ### */
 
@@ -1544,6 +1547,7 @@ E boolean FDECL(munstone, (struct monst *,BOOLEAN_P));
 /* ### music.c ### */
 
 E void NDECL(awaken_soldiers);
+E void FDECL(do_earthquake, (int,BOOLEAN_P,struct monst *));
 E int FDECL(do_play_instrument, (struct obj *));
 #ifdef BARD
 E int FDECL(pet_can_sing, (struct monst *,BOOLEAN_P));

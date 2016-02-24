@@ -3542,8 +3542,8 @@ arti_invoke(obj)
 					}
 				}
 				pline_The("entire dungeon is quaking around you!");
-				do_earthquake(u.ulevel / 4 + 1);
-				do_earthquake(u.ulevel / 3 + 1);
+				do_earthquake(u.ulevel / 4 + 1, obj->cursed, (struct monst *)0);
+				do_earthquake(u.ulevel / 3 + 1, obj->cursed, (struct monst *)0);
 				awaken_monsters(ROWNO * COLNO);
 			   }
 	break;

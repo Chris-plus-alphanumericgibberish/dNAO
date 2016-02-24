@@ -288,7 +288,7 @@ hpnotify_format_str(char *str)
       if (ispercent) {
 	switch (*f) {
 	case 'a':
-	    snprintf (p, end + 1 - p, "%ld", abs(uhp()-prev_hp_notify));
+	    snprintf (p, end + 1 - p, "%d", abs(uhp()-prev_hp_notify));
 	  while (*p != '\0')
 	    p++;
 	  break;
@@ -297,7 +297,7 @@ hpnotify_format_str(char *str)
 	  p++;
 	  break;
 	case 'm':
-	    snprintf (p, end + 1 - p, "%ld", uhpmax());
+	    snprintf (p, end + 1 - p, "%d", uhpmax());
 	  while (*p != '\0')
 	    p++;
 	  break;
@@ -305,13 +305,13 @@ hpnotify_format_str(char *str)
 	    if (uhp() == uhpmax()) {
 	    snprintf (p, end + 1 - p, "%s", "max");
 	  } else {
-		snprintf (p, end + 1 - p, "%ld", uhp());
+		snprintf (p, end + 1 - p, "%d", uhp());
 	  }
 	  while (*p != '\0')
 	    p++;
 	  break;
 	case 'h':
-	    snprintf (p, end + 1 - p, "%ld", uhp());
+	    snprintf (p, end + 1 - p, "%d", uhp());
 	  while (*p != '\0')
 	    p++;
 	  break;
