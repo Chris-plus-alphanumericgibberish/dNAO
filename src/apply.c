@@ -3108,7 +3108,7 @@ struct obj *otmp;
 	    what = "underwater";
 	if (what) {
 	    You_cant("release darkness %s!",what);
-	    return;
+	    return 0;
 	}
 	
 	if(!levl[u.ux][u.uy].lit) {

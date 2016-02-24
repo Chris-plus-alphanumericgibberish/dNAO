@@ -2237,7 +2237,7 @@ spiriteffects(power, atme)
 			if(uquiver) throw_obj(uquiver, 0, 1);
 			else{
 				You("have nothing quivered.");
-				return;
+				return 0;
 			}
 			barage = FALSE;
 		break;
@@ -2335,7 +2335,7 @@ spiriteffects(power, atme)
 				mon = m_at(u.ux+u.dx, u.uy+u.dy);
 				if(!mon){
 					pline("\"There's no one there, buddy!\"");
-					return;
+					return 0;
 				} if(nonliving(mon->data) || is_anhydrous(mon->data)){
 					shieldeff(mon->mx, mon->my);
 					break;
@@ -2357,7 +2357,7 @@ spiriteffects(power, atme)
 				healup(dmg, 0, FALSE, FALSE);
 			} else {
 				pline("\"There's no one there, buddy!\"");
-				return;
+				return 0;
 			}
 		}break;
 		case PWR_TURN_ANIMALS_AND_HUMANOIDS:{
