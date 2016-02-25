@@ -702,7 +702,7 @@ d_level *lev;
 	    Sprintf(dptr, ".%d", lev->dlevel);
 	Sprintf(file, "bon%s", bonesid);
 #ifdef BONES_POOL
-	Sprintf(eos(file), ".%d", (u.ubirthday % 10));
+	Sprintf(eos(file), ".%ld", (u.ubirthday % 10));
 #endif
 #ifdef VMS
 	Strcat(file, ";1");
@@ -2715,7 +2715,7 @@ livelog_write_string(buffer)
 		     aligns[1-u.ualign.type].filecode,
 		     moves, (long)u.ubirthday, (long)time(NULL), msgbuf);
 
-	    fprintf(livelogfile, tmpbuf);
+	    fprintf(livelogfile, "%s", tmpbuf);
 	    (void) fclose(livelogfile);
 	}
 	unlock_file(LIVELOGFILE);

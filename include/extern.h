@@ -1699,6 +1699,9 @@ E boolean FDECL(add_menu_coloring, (char *));
 #endif /* MENU_COLOR */
 E boolean FDECL(parse_monster_color, (char *));
 E int FDECL(parse_codepoint, (char *));
+E boolean FDECL(parse_monster_symbol, (const char *));
+E boolean FDECL(parse_object_symbol, (const char *));
+E boolean FDECL(parse_symbol, (const char *));
 
 /* ### pager.c ### */
 
