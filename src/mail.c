@@ -321,7 +321,7 @@ md_rush(md,tx,ty)
 	if (fx == tx && fy == ty) break;
 
 	if ((mon = m_at(fx,fy)) != 0)	/* save monster at this position */
-	    verbalize(md_exclamations());
+	    verbalize1(md_exclamations());
 	else if (fx == u.ux && fy == u.uy)
 	    verbalize("Excuse me.");
 
@@ -727,7 +727,7 @@ ck_server_admin_msg()
 	  pline("The voice of %s booms through the caverns:", curline);
 	  shown_name = TRUE;
 	}
-	verbalize(msg);
+	verbalize1(msg);
       }
       ost.st_mtime = nst.st_mtime;
       fclose(mb);
