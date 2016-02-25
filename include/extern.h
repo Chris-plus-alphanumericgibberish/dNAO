@@ -1276,6 +1276,7 @@ E void NDECL(obj_sanity_check);
 
 /* ### mkroom.c ### */
 
+E void NDECL(mksepulcher);
 E struct mkroom * FDECL(pick_room,(BOOLEAN_P));
 E void FDECL(mkroom, (int));
 E void FDECL(fill_zoo, (struct mkroom *));
