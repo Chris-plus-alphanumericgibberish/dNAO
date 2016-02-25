@@ -1464,7 +1464,7 @@ int style;
     int lastc;
     /* D: botl.c has a closer approximation to the size, but we'll go with
      *    this */
-    char buf[350], *ptr;
+    char buf[400], *ptr;
     if (style == 0) {
 	for (y = 0; y < ROWNO; y++) {
 	    lastc = 0;
@@ -1492,7 +1492,7 @@ int style;
 	    first = 1;
 	    buf[0] = '\0';
 	    for (x = 1; x < COLNO; x++) {
-		Sprintf(eos(buf), "%s%i\0", (first ? "" : ","), glyph2tile[gbuf[y][x].glyph]);
+		Sprintf(eos(buf), "%s%i", (first ? "" : ","), glyph2tile[gbuf[y][x].glyph]);
 		first = 0;
 	    }
 	    dump("", buf);
