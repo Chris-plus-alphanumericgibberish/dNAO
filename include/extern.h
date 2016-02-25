@@ -255,7 +255,7 @@ E int FDECL(gold_detect, (struct obj *));
 E int FDECL(food_detect, (struct obj *));
 E int FDECL(object_detect, (struct obj *,int));
 E int FDECL(artifact_detect, (struct obj *));
-E int FDECL(book_detect, (boolean));
+E int FDECL(book_detect, (BOOLEAN_P));
 E int FDECL(monster_detect, (struct obj *,int));
 E int FDECL(pet_detect_and_tame, (struct obj *));
 E int FDECL(trap_detect, (struct obj *));
