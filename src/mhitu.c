@@ -14,13 +14,17 @@ STATIC_DCL boolean FDECL(u_slip_free, (struct monst *,struct attack *));
 STATIC_DCL int FDECL(passiveum, (struct permonst *,struct monst *,struct attack *));
 # endif /* OVL1 */
 
+STATIC_DCL int FDECL(dololthseduce, (struct monst *));
+STATIC_DCL int FDECL(dobelialseduce, (struct monst *));
+STATIC_DCL int FDECL(dograzseduce, (struct monst *));
+
 #ifdef OVLB
 # ifdef SEDUCE
 STATIC_DCL void FDECL(mayberem, (struct obj *, const char *));
 STATIC_DCL void FDECL(lrdmayberem, (struct obj *, const char *));
-STATIC_DCL void FDECL(mlcmayberem, (struct obj *, const char *, boolean));
-STATIC_DCL void FDECL(sflmayberem, (struct obj *, const char *, boolean));
-STATIC_DCL void FDECL(palemayberem, (struct obj *, const char *, boolean));
+STATIC_DCL void FDECL(mlcmayberem, (struct obj *, const char *, BOOLEAN_P));
+STATIC_DCL void FDECL(sflmayberem, (struct obj *, const char *, BOOLEAN_P));
+STATIC_DCL void FDECL(palemayberem, (struct obj *, const char *, BOOLEAN_P));
 # endif
 #endif /* OVLB */
 
@@ -1784,7 +1788,7 @@ hitmu(mtmp, mattk)
 		if (can_blnd(mtmp, &youmonst, mattk->aatyp, (struct obj*)0)) {
 		    if (!Blind) pline("%s blinds you!", Monnam(mtmp));
 		    make_blinded(Blinded+(long)dmg,FALSE);
-		    if (!Blind) Your(vision_clears);
+		    if (!Blind) Your1(vision_clears);
 		}
 		dmg = 0;
 		break;
@@ -2392,7 +2396,7 @@ dopois:
 					level_tele();
 					You("suddenly feel like you've lost some potential.");
 					potentialLost = min(abs(u.uz.dlevel - u.utolev.dlevel),u.ulevel-1)/2 + 1;
-					for(potentialLost; potentialLost>0; potentialLost--) losexp("loss of potential",FALSE,TRUE,TRUE); /*not verbose, force drain, drain exp also*/
+					for(; potentialLost>0; potentialLost--) losexp("loss of potential",FALSE,TRUE,TRUE); /*not verbose, force drain, drain exp also*/
 					dmg = 0;
 					return 3; /*You teleported, monster should stop attacking.*/
 				}
@@ -2499,9 +2503,10 @@ dopois:
 		    dmg = 0;
 		} else {
 		    if (mtmp->mpeaceful) {
-			if (flags.soundok && !(moves % 5))
-		      if(Role_if(PM_HEALER)) verbalize("Doc, I can't help you unless you cooperate.");
-			  else pline("%s changes %s mind.", Monnam(mtmp), mhis(mtmp));
+			if (flags.soundok && !(moves % 5)) {
+			    if (Role_if(PM_HEALER)) verbalize("Doc, I can't help you unless you cooperate.");
+			    else pline("%s changes %s mind.", Monnam(mtmp), mhis(mtmp));
+			}
 			dmg = 0;
 			monflee(mtmp, d(3, 6), TRUE, FALSE);
 		    } else hitmsg(mtmp, mattk);
@@ -2705,7 +2710,7 @@ dopois:
 			 }
 			 i = 1;
 			 if(mtmp->data==&mons[PM_DEMOGORGON]) i += rnd(4);
-			 for(i; i>0; i--){
+			 for(; i>0; i--){
 				if(obj->spe > -1*objects[(obj)->otyp].a_ac){
 					damage_item(obj);
 					if(!i) Your("%s less effective.", aobjnam(obj, "seem"));
@@ -2848,9 +2853,10 @@ dopois:
 ///////////////////////////////////////////////////////////////////////////////////////////
 	    case AD_MALK:
 		hitmsg(mtmp, mattk);
-		if (!rn2(4) && /*!u.ustuck &&*/ !sticks(youmonst.data))
-			if(Upolyd && u.umonnum == PM_TOVE) You("are much too slithy to grab!");
-			else u.ustuck = mtmp;
+		if (!rn2(4) && /*!u.ustuck &&*/ !sticks(youmonst.data)) {
+		    if (Upolyd && u.umonnum == PM_TOVE) You("are much too slithy to grab!");
+		    else u.ustuck = mtmp;
+		}
 		if (uncancelled) {
 		    You("get zapped!");
 		    if (Shock_resistance) {
@@ -2931,8 +2937,8 @@ dopois:
 		}break;
 ///////////////////////////////////////////////////////////////////////////////////////////
 		case AD_FRWK:{
-			int x,y,i = rn2(3)+2;
-			for(i; i > 0; i--){
+			int x, y, i;
+			for (i = rn2(3)+2; i > 0; i--) {
 				x = rn2(3)-1;
 				y = rn2(3)-1;
 				explode(mtmp->mx+x, mtmp->my+y, 8, dmg, -1, rn2(7));		//-1 is unspecified source. 8 is physical
@@ -3167,7 +3173,7 @@ gulpmu(mtmp, mattk)	/* monster swallows you, or damage if u.uswallow */
 			if(!Blind) {
 			    You_cant("see in here!");
 			    make_blinded((long)tmp,FALSE);
-			    if (!Blind) Your(vision_clears);
+			    if (!Blind) Your1(vision_clears);
 			} else
 			    /* keep him blind until disgorged */
 			    make_blinded(Blinded+1,FALSE);
@@ -3573,7 +3579,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		  if(!Blind && !is_blind(mtmp) && canseemon(mtmp)){
 			if((!Free_action || !rn2(2)) && (!Sleep_resistance || rn2(4))){
 				You("meet the gaze of Aameul, left head of Demogorgon!");
-				You("are mesmerized!", mon_nam(mtmp));
+				You("are mesmerized!");
 				nomovemsg = 0;	/* default: "you can move again" */
 				if(!Free_action && !Sleep_resistance) nomul(-rn1(5,2), "mesmerized by Aameul");
 				else if(!Free_action || !Sleep_resistance) nomul(-1, "mesmerized by Aameul");
@@ -3708,10 +3714,10 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 			}
 			if (couldsee(mtmp->mx, mtmp->my) &&
 				!Stone_resistance) {
-				You("see the truth behind the veil!", s_suffix(mon_nam(mtmp)));
+				You("see the truth behind the veil!");
 				stop_occupation();
-				if(poly_when_stoned(youmonst.data) && polymon(PM_STONE_GOLEM))
-				break;
+				if (poly_when_stoned(youmonst.data) && polymon(PM_STONE_GOLEM))
+					break;
 				You("turn to stone...");
 				killer_format = KILLED_BY;
 				killer = mtmp->data->mname;
@@ -3795,7 +3801,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		    /* not blind at this point implies you're wearing
 		       the Eyes of the Overworld; make them block this
 		       particular stun attack too */
-		    if (!Blind) Your(vision_clears);
+		    if (!Blind) Your1(vision_clears);
 		    else make_stunned((long)d(1,3),TRUE);
 			succeeded=1;
 		}
@@ -4507,12 +4513,12 @@ register struct monst *mon;
 					Strcpy(class_list, tools);
 					key = getobj(class_list, "wind with");
 					if (!key){
-						pline(Never_mind);
+						pline1(Never_mind);
 						goto pay;
 					}
 					turns = ask_turns(mon, 0, 0);
 					if(!turns){
-						pline(Never_mind);
+						pline1(Never_mind);
 						goto pay;
 					}
 					turns = (.8 + ((double)rn2(5))) * (turns);
@@ -4783,8 +4789,7 @@ LolthAttacks:
 			//Lolth good
 			if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
 				if(flags.female){
-					verbalize("You're such a sweet lady, I wish you were more open to new things...",
-							flags.female ? "sweet lady" : "nice guy");
+					verbalize("You're such a sweet lady, I wish you were more open to new things...");
 					if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
 					if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
 					return 1;
@@ -5016,12 +5021,12 @@ struct monst *mon;
 				Strcpy(class_list, tools);
 				key = getobj(class_list, "wind with");
 				if (!key){
-					pline(Never_mind);
+					pline1(Never_mind);
 					goto pay;
 				}
 				turns = ask_turns(mon, 0, 0);
 				if(!turns){
-					pline(Never_mind);
+					pline1(Never_mind);
 					goto pay;
 				}
 				lesshungry(turns*10);
@@ -5073,7 +5078,7 @@ pay:
 	return 1;
 }
 
-int
+STATIC_OVL int
 dobelialseduce(mon)
 struct monst *mon;
 {
@@ -5256,12 +5261,12 @@ struct monst *mon;
 				Strcpy(class_list, tools);
 				key = getobj(class_list, "wind with");
 				if (!key){
-					pline(Never_mind);
+					pline1(Never_mind);
 					goto pay;
 				}
 				turns = ask_turns(mon, 0, 0);
 				if(!turns){
-					pline(Never_mind);
+					pline1(Never_mind);
 					goto pay;
 				}
 				lesshungry(turns*10);
@@ -5652,7 +5657,7 @@ pay:
 	return 1;
 }
 
-int
+STATIC_OVL int
 dograzseduce(mon)
 register struct monst *mon;
 {
@@ -5971,9 +5976,9 @@ register struct monst *mon;
 			do_genocide(0);
 		break;
 		case 2:{
-		   int i = 6;
+			int i;
 			verbalize("I grant you six magics!");
-		   for(i;i>0;i--){
+			for (i = 6; i > 0; i--) {
 				/* IMPROVEMENT NOTE: Randomize order, also, you will never
 					reach this code while wearing armor or a cloak. */
 				if(uwep && uwep->spe < 6) uwep->spe = 6;
@@ -5986,15 +5991,15 @@ register struct monst *mon;
 				else if(uarmf && uarmf->spe < 6) uarmf->spe = 6;
 				else if(uquiver && uquiver->spe < 6) uquiver->spe = 6;
 				else if(uarmu && uarmu->spe < 6) uarmu->spe = 6;
-		   }
+			}
 		}break;
 		case 3:{
-		   int i = 6;
+			int i;
 			verbalize("I grant you six truths!");
-		   for(i;i>0;i--){
-			optr = mksobj(POT_ENLIGHTENMENT, TRUE, FALSE);		
-			bless(optr);
-			(void) hold_another_object(optr, u.uswallow ?
+			for (i = 6; i > 0; i--) {
+				optr = mksobj(POT_ENLIGHTENMENT, TRUE, FALSE);
+				bless(optr);
+				hold_another_object(optr, u.uswallow ?
 				       "Oops!  %s out of your reach!" :
 				       (Is_airlevel(&u.uz) ||
 					Is_waterlevel(&u.uz) ||
@@ -6006,7 +6011,7 @@ register struct monst *mon;
 					     Is_airlevel(&u.uz) || u.uinwater ?
 						   "slip" : "drop")),
 				       (const char *)0);
-		   }
+			}
 		}break;
 		case 4:
 			verbalize("I grant you life!");
@@ -6032,12 +6037,12 @@ register struct monst *mon;
 			}
 		break;
 		case 5:{
-		   int i = 6;
+			int i;
 			verbalize("I grant you six followers!");
-		   for(i;i>0;i--){
-			optr = mksobj(FIGURINE, TRUE, FALSE);		
-			bless(optr);
-			(void) hold_another_object(optr, u.uswallow ?
+			for (i = 6; i > 0; i--) {
+				optr = mksobj(FIGURINE, TRUE, FALSE);
+				bless(optr);
+				hold_another_object(optr, u.uswallow ?
 				       "Oops!  %s out of your reach!" :
 				       (Is_airlevel(&u.uz) ||
 					Is_waterlevel(&u.uz) ||
@@ -6049,7 +6054,7 @@ register struct monst *mon;
 					     Is_airlevel(&u.uz) || u.uinwater ?
 						   "slip" : "drop")),
 				       (const char *)0);
-		   }
+			}
 		}
 		break;
 		}
@@ -6123,11 +6128,10 @@ register struct monst *mon;
 		mon->mspec_used = turns;
 		return 0;
 	} else {
-		pline("But you gain the upper hand!",
-			noit_Monnam(mon));
-	    mon->mcanmove = 0;
-	    mon->mfrozen = d(1,4)+1;
-	    return 3;
+		pline("But you gain the upper hand!");
+		mon->mcanmove = 0;
+		mon->mfrozen = d(1,4)+1;
+		return 3;
 	}
 	return 0;
 }
@@ -6465,12 +6469,12 @@ register struct monst *mon;
 				Strcpy(class_list, tools);
 				key = getobj(class_list, "wind with");
 				if (!key){
-					pline(Never_mind);
+					pline1(Never_mind);
 					goto pay;
 				}
 				turns = ask_turns(mon, 0, 0);
 				if(!turns){
-					pline(Never_mind);
+					pline1(Never_mind);
 					goto pay;
 				}
 				turns = (.8 + ((double)rn2(5))) * (turns);
@@ -6547,8 +6551,7 @@ int dmg;
 					if( d(1,100) > 15){
 						pline("The tentacles begin to tear at your shirt!");
 						 if(uarmu->spe > 1){
-							int i = rn2(4);
-							for(i; i>=0; i--)
+							for(i=rn2(4); i>=0; i--)
 								drain_item(uarmu);
 							Your("%s less effective.", aobjnam(uarmu, "seem"));
 						 }
@@ -6579,8 +6582,7 @@ int dmg;
 				if( d(1,100) > 25){
 					pline("The tentacles begin to tear at your armor!");
 					 if(uarm->spe > 1){
-						int i = rn2(4);
-						for(i; i>=0; i--)
+						for(i=rn2(4); i>=0; i--)
 							drain_item(uarm);
 						Your("%s less effective.", aobjnam(uarm, "seem"));
 					 }
@@ -6606,8 +6608,7 @@ int dmg;
 				if( d(1,100) > 66){
 					pline("The tentacles begin to tear at the cloak!");
 					 if(uarmc->spe > 1){
-						int i = rn2(4);
-						for(i; i>=0; i--)
+						for(i=rn2(4); i>=0; i--)
 							drain_item(uarmc);
 						Your("%s less effective.", aobjnam(uarmc, "seem"));
 					 }
@@ -6641,8 +6642,7 @@ int dmg;
 					if( d(1,100) > 66){
 						pline("The tentacles begin to tear at your boots!");
 						 if(uarmf->spe > 1){
-							int i = rn2(4);
-							for(i; i>=0; i--)
+							for(i=rn2(4); i>=0; i--)
 								drain_item(uarmf);
 							Your("%s less effective.", aobjnam(uarmf, "seem"));
 						 }
@@ -6693,8 +6693,7 @@ int dmg;
 					if( d(1,40) <= ACURR(A_STR) || uwep){
 						pline("The tentacles begin to tear at your gloves!");
 						 if(uarmg->spe > 1){
-							int i = rn2(4);
-							for(i; i>=0; i--)
+							for(i=rn2(4); i>=0; i--)
 								drain_item(uarmg);
 							Your("%s less effective.", aobjnam(uarmg, "seem"));
 						 }
@@ -6742,8 +6741,7 @@ int dmg;
 					if( d(1,100) > 90){
 						pline("The tentacles begin to tear at your helmet!");
 						 if(uarmh->spe > 1){
-							int i = rn2(4);
-							for(i; i>=0; i--)
+							for(i=rn2(4); i>=0; i--)
 								drain_item(uarmh);
 							Your("%s less effective.", aobjnam(uarmh, "seem"));
 						 }
@@ -7029,7 +7027,7 @@ const char *str;
 		Sprintf(qbuf,"She tries to rip open your %s!",
 			str);
 		her_strength -= ACURR(A_STR);
-		for(her_strength; her_strength >= 0; her_strength--){
+		for(; her_strength >= 0; her_strength--){
 			if(obj->spe > -1*objects[(obj)->otyp].a_ac){
 				damage_item(obj);
 //				Your("%s less effective.", aobjnam(obj, "seem"));

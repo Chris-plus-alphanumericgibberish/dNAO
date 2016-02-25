@@ -474,6 +474,7 @@ E void NDECL(reset_remarm);
 E int NDECL(doddoremarm);
 E int FDECL(destroy_arm, (struct obj *));
 E int FDECL(claws_destroy_arm, (struct obj *));
+E int FDECL(teleport_arm, (struct obj *));
 E int FDECL(tent_destroy_arm, (struct obj *));
 E void FDECL(adj_abon, (struct obj *,SCHAR_P));
 
