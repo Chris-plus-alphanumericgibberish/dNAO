@@ -20,7 +20,7 @@ STATIC_PTR void FDECL(costly_tin, (const char*));
 STATIC_PTR int NDECL(opentin);
 STATIC_PTR int NDECL(unfaint);
 STATIC_PTR int NDECL(windclock);
-STATIC_PTR int FDECL(clockwork_eat_menu, (boolean,boolean));
+STATIC_PTR int FDECL(clockwork_eat_menu, (BOOLEAN_P,BOOLEAN_P));
 
 #ifdef OVLB
 STATIC_DCL const char *FDECL(food_xname, (struct obj *,BOOLEAN_P));
@@ -30,7 +30,7 @@ STATIC_DCL struct obj *FDECL(touchfood, (struct obj *));
 STATIC_DCL void NDECL(do_reset_eat);
 STATIC_DCL void FDECL(done_eating, (BOOLEAN_P));
 STATIC_DCL int FDECL(intrinsic_possible, (int,struct permonst *));
-STATIC_DCL void FDECL(givit, (int,struct permonst *, unsigned short, boolean));
+STATIC_DCL void FDECL(givit, (int,struct permonst *,SHORT_P,BOOLEAN_P));
 STATIC_DCL void FDECL(start_tin, (struct obj *));
 STATIC_DCL int FDECL(eatcorpse, (struct obj *));
 STATIC_DCL void FDECL(start_eating, (struct obj *));
@@ -620,7 +620,7 @@ boolean message;
 	occupation = 0; /* do this early, so newuhs() knows we're done */
 	newuhs(FALSE);
 	if (nomovemsg) {
-		if (message) pline(nomovemsg);
+		if (message) pline1(nomovemsg);
 		nomovemsg = 0;
 	} else if (message)
 		You("finish %s %s.", victual.piece->odrained ? "draining" :
@@ -946,7 +946,7 @@ STATIC_OVL void
 givit(type, ptr, nutval, drained)
 int type;
 register struct permonst *ptr;
-unsigned short nutval;
+short nutval;
 boolean drained;
 {
 	int chance = 0; //starts at 0. Changing it indicates a non-energy resistence
@@ -2145,9 +2145,9 @@ struct obj *otmp;
 						body_part(STOMACH));
 		break;
 	    case TRIPE_RATION:
-		if (carnivorous(youmonst.data) && (!humanoid(youmonst.data)) || 
-			u.ulycn != NON_PM && carnivorous(&mons[u.ulycn]) && 
-			!humanoid(&mons[u.ulycn]))
+		if ((carnivorous(youmonst.data) && !humanoid(youmonst.data)) ||
+			(u.ulycn != NON_PM && carnivorous(&mons[u.ulycn]) &&
+			 !humanoid(&mons[u.ulycn])))
 		    /* Symptom of lycanthropy is starting to like your
 		     * alternative form's food! 
 		     */
@@ -4481,7 +4481,7 @@ int amt;
     }
 }
 
-int
+STATIC_PTR int
 clockwork_eat_menu(dry,mgc)
 	boolean dry;
 	boolean mgc;
