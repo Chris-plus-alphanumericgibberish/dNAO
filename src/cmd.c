@@ -159,7 +159,7 @@ STATIC_PTR boolean NDECL(minimal_enlightenment);
 STATIC_PTR void NDECL(resistances_enlightenment);
 STATIC_PTR void NDECL(signs_enlightenment);
 
-static void FDECL(bind_key, (unsigned char, char*));
+static void FDECL(bind_key, (UCHAR_P, char*));
 static void NDECL(init_bind_list);
 static void NDECL(change_bind_list);
 #ifdef WIZARD
@@ -683,8 +683,8 @@ domonability()
 	switch (selected[0].item.a_int) {
 	case MATTK_BREATH: return dobreathe(youmonst.data);
 	case MATTK_DSCALE:{
-		int res;
-		if(res = dobreathe(Dragon_shield_to_pm(uarms))){
+		int res = dobreathe(Dragon_shield_to_pm(uarms));
+		if(res){
 			uarm->age = monstermoves + (long)(rnz(100)*(Role_if(PM_CAVEMAN) ? .8 : 1));
 			uarms->age= monstermoves + (long)(rnz(100)*(Role_if(PM_CAVEMAN) ? .8 : 1));
 		}
@@ -1161,7 +1161,7 @@ wiz_level_change()
     else ret = sscanf(buf, "%d", &newlevel);
 
     if (ret != 1) {
-	pline(Never_mind);
+	pline1(Never_mind);
 	return 0;
     }
     if (newlevel == u.ulevel) {
@@ -1452,7 +1452,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		
 	    if(Role_if(PM_EXILE)) you_are("the Emissary of Elements");
 	    else if(Pantheon_if(PM_PIRATE) || Role_if(PM_PIRATE)) you_are("the Pirate King");
-	    else if(Pantheon_if(PM_KNIGHT) || Role_if(PM_KNIGHT) && u.uevent.uhand_of_elbereth == 1) you_are("the King of the Angles");
+	    else if((Pantheon_if(PM_KNIGHT) || Role_if(PM_KNIGHT)) && u.uevent.uhand_of_elbereth == 1) you_are("the King of the Angles");
 	    else if((Pantheon_if(PM_VALKYRIE) || Role_if(PM_VALKYRIE)) && flags.initgend) you_are("the Daughter of Skadi");
 	    else if(Race_if(PM_DWARF) && (urole.ldrnum == PM_THORIN_II_OAKENSHIELD || urole.ldrnum == PM_DAIN_II_IRONFOOT)){
 			if(urole.ldrnum == PM_THORIN_II_OAKENSHIELD) you_are("King under the Mountain");
@@ -3686,14 +3686,14 @@ int final;
 	if (u.uconduct.shopID == 0) {
 	    you_have_never("paid a shopkeeper to identify an item");
 	} else {
-	    Sprintf(buf, "paid to have %d item%s identified",
+	    Sprintf(buf, "paid to have %ld item%s identified",
 		    u.uconduct.shopID, plur(u.uconduct.shopID));
 	    you_have_X(buf);
 	}
 	if (u.uconduct.IDs == 0) {
 	    you_have_never("magically identified an item");
 	} else {
-	    Sprintf(buf, "magically identified %d item%s",
+	    Sprintf(buf, "magically identified %ld item%s",
 		    u.uconduct.IDs, plur(u.uconduct.shopID));
 	    you_have_X(buf);
 	}
@@ -3794,14 +3794,14 @@ int final;
 	if (u.uconduct.shopID == 0) {
 	    dump("", "  You never paid a shopkeeper to identify an item");
 	} else {
-	    Sprintf(buf, "paid to have %d item%s identified",
+	    Sprintf(buf, "paid to have %ld item%s identified",
 		    u.uconduct.shopID, plur(u.uconduct.shopID));
 	    dump("  You ", buf);
 	}
 	if (u.uconduct.IDs == 0) {
 	    dump("", "  You never magically identified an item");
 	} else {
-	    Sprintf(buf, "magically identified %d item%s",
+	    Sprintf(buf, "magically identified %ld item%s",
 		    u.uconduct.IDs, plur(u.uconduct.shopID));
 	    dump("  You ", buf);
 	}
@@ -4025,7 +4025,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 
 static void
 bind_key(key, command)
-     unsigned char key;
+     uchar key;
      char* command;
 {
 	struct ext_func_tab * extcmd;
@@ -5043,7 +5043,7 @@ coord *cc;
 {
 	xchar new_x, new_y;
 	if (!getdir(prompt)) {
-		pline(Never_mind);
+		pline1(Never_mind);
 		return 0;
 	}
 	new_x = x + u.dx;
@@ -5052,7 +5052,7 @@ coord *cc;
 		cc->x = new_x;
 		cc->y = new_y;
 	} else {
-		if (emsg) pline(emsg);
+		if (emsg) pline1(emsg);
 		return 0;
 	}
 	return 1;
@@ -5330,7 +5330,7 @@ parse()
 		    if (multi > 9) {
 			clear_nhwindow(WIN_MESSAGE);
 			Sprintf(in_line, "Count: %d", multi);
-			pline(in_line);
+			pline1(in_line);
 			mark_synch();
 		    }
 		    last_multi = multi;
