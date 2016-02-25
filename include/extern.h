@@ -1316,6 +1316,7 @@ E void FDECL(relmon, (struct monst *));
 E struct obj *FDECL(mlifesaver, (struct monst *));
 E boolean FDECL(corpse_chance,(struct monst *,struct monst *,BOOLEAN_P));
 E void FDECL(mondead, (struct monst *));
+E void FDECL(spore_dies, (struct monst *));
 E void FDECL(mondied, (struct monst *));
 E void FDECL(monvanished, (struct monst *));
 E void FDECL(mongone, (struct monst *));
