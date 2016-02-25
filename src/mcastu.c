@@ -84,8 +84,8 @@ extern void demonpet();
 extern void you_aggravate(struct monst *);
 
 STATIC_DCL void FDECL(cursetxt,(struct monst *,BOOLEAN_P));
-STATIC_DCL int FDECL(choose_magic_spell, (int,int,boolean));
-STATIC_DCL int FDECL(choose_clerical_spell, (int,int,boolean));
+STATIC_DCL int FDECL(choose_magic_spell, (int,int,BOOLEAN_P));
+STATIC_DCL int FDECL(choose_clerical_spell, (int,int,BOOLEAN_P));
 STATIC_DCL void FDECL(cast_spell,(struct monst *, int,int));
 STATIC_DCL boolean FDECL(is_undirected_spell,(int));
 STATIC_DCL boolean FDECL(is_aoe_spell,(int));
@@ -1162,9 +1162,12 @@ int spellnum;
                                     rn2(2) ? "power" : "might");
             else verbalize("Open thy maw, mighty earth!");
 		}
-		mtmp ? 
-			do_earthquake(min(((int)mtmp->m_lev - 1) / 6 + 1,12), TRUE, mtmp)
-		:	do_earthquake(rnd(5), TRUE, 1); //Fixme: true "not my fault" flag needed.
+		if (mtmp) {
+			do_earthquake(min(((int)mtmp->m_lev - 1) / 6 + 1,12), TRUE, mtmp);
+		} else {
+			pline("cast_spell: [FIXME] true \"not my fault\" flag needed.");
+			do_earthquake(rnd(5), TRUE, (struct monst *)1); //Fixme: true "not my fault" flag needed.
+		}
 		aggravate(); /* wake up without scaring */
 		dmg = 0;
 		stop_occupation();
@@ -1196,7 +1199,7 @@ int spellnum;
 				pline_The("acid gets into your %s!", eyecount(youmonst.data) == 1 ?
 						body_part(EYE) : makeplural(body_part(EYE)));
 				make_blinded((long)rnd(Acid_resistance ? 10 : 50),FALSE);
-				if (!Blind) Your(vision_clears);
+				if (!Blind) Your1(vision_clears);
 			}
 		}
 		/* TODO: corrode floor objects */
@@ -1295,7 +1298,7 @@ int spellnum;
        if (!resists_blnd(&youmonst)) {
            You("are blinded by the flash!");
            make_blinded((long)rnd(100),FALSE);
-           if (!Blind) Your(vision_clears);
+           if (!Blind) Your1(vision_clears);
         }
 	   stop_occupation();
        break;
@@ -1382,7 +1385,9 @@ summon_alien:
 									&mons[PM_BYAKHEE],
 									&mons[PM_UVUUDAUM]};
 	   if(!mtmp) goto psibolt;
-	   while (!(mtmp2 = makemon(aliens[rn2(SIZE(aliens))], mtmp->mux, mtmp->muy, MM_ADJACENTOK|MM_NOCOUNTBIRTH)) && tries++ < 10);
+	   do {
+	       mtmp2 = makemon(aliens[rn2(SIZE(aliens))], mtmp->mux, mtmp->muy, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+	   } while (!mtmp2 && tries++ < 10);
        if (mtmp2) {
            if (canspotmon(mtmp2))
                pline("The world tears open, and %s steps through!",
@@ -1836,7 +1841,7 @@ ray:
 		pline("Oh, bummer!  Everything is dark!  Help!");
 	    else pline("A cloud of darkness falls upon you.");
 	    make_blinded(Half_spell_damage ? 100L : 200L, FALSE);
-	    if (!Blind) Your(vision_clears);
+	    if (!Blind) Your1(vision_clears);
 	    dmg = 0;
 	} else
 	    impossible("no reason for monster to cast blindness spell?");
@@ -2186,14 +2191,14 @@ int spellnum;
        if ((levl[u.ux][u.uy].typ <= IRONBARS || levl[u.ux][u.uy].typ > ICE ||
                t_at(u.ux,u.uy) || amorphous(youmonst.data) ||
                is_whirly(youmonst.data) || flaming(youmonst.data) ||
-               unsolid(youmonst.data) || uwep && uwep->oartifact == ART_STING ||
+               unsolid(youmonst.data) || (uwep && uwep->oartifact == ART_STING) ||
                ACURR(A_STR) >= 18) && spellnum == MAKE_WEB)
            return TRUE;
        /* don't summon spheres when one type is gone */
-       if (spellnum == SUMMON_SPHERE &&
-               (mvitals[PM_FLAMING_SPHERE].mvflags & G_GONE && !In_quest(&u.uz)) ||
-               (mvitals[PM_FREEZING_SPHERE].mvflags & G_GONE && !In_quest(&u.uz)) ||
-               (mvitals[PM_SHOCKING_SPHERE].mvflags & G_GONE && !In_quest(&u.uz)))
+       if (spellnum == SUMMON_SPHERE && !In_quest(&u.uz) &&
+               ((mvitals[PM_FLAMING_SPHERE].mvflags & G_GONE) ||
+                (mvitals[PM_FREEZING_SPHERE].mvflags & G_GONE) ||
+                (mvitals[PM_SHOCKING_SPHERE].mvflags & G_GONE)))
 	    return TRUE;
 	/* haste self when already fast */
 	if (mtmp->permspeed == MFAST && spellnum == HASTE_SELF)
@@ -2271,7 +2276,7 @@ castmm(mtmp, mdef, mattk)
 	    if (canseemon(mtmp) && couldsee(mtmp->mx, mtmp->my))
 	    {
                 char buf[BUFSZ];
-		Sprintf(buf, Monnam(mtmp));
+		Sprintf1(buf, Monnam(mtmp));
 
 		if (is_undirected_spell(spellnum))
 	            pline("%s points all around, then curses.", buf);
@@ -2591,7 +2596,7 @@ buzzmm(magr, mdef, mattk, ml)		/* monster uses spell (ranged) */
 		Sprintf(buf,"%s zaps ",Monnam(magr));
 		Sprintf(buf,"%s%s with a ",buf,mon_nam(mdef));
 		Sprintf(buf,"%s%s!",buf,flash_types[ad_to_typ(type)]);
-		if(canseemon(magr)) pline(buf);
+		if(canseemon(magr)) pline1(buf);
 		buzz(-ad_to_typ(type), dmn,
 		     magr->mx, magr->my, sgn(mdef->mx - magr->mx), sgn(mdef->my - magr->my),0,0);
 	    } else impossible("Monster spell %d cast", type-1);
