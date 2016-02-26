@@ -22,7 +22,7 @@ static boolean FDECL(wishymatch, (const char *,const char *,BOOLEAN_P));
 static char *NDECL(nextobuf);
 static void FDECL(add_erosion_words, (struct obj *, char *));
 #ifdef SORTLOOT
-char * FDECL(xname2, (struct obj *, boolean));
+char * FDECL(xname2, (struct obj *,BOOLEAN_P));
 #endif
 
 struct Jitem {
@@ -241,7 +241,7 @@ nextobuf()
 	return bufs[bufidx];
 }
 
-char *
+const char *
 lightsaber_colorText(otmp)
 struct obj *otmp;
 {
@@ -910,7 +910,7 @@ boolean with_price;
 		Strcat(prefix, "cursed ");
 	    else if (obj->blessed)
 		Strcat(prefix, "blessed ");
-	    else if (iflags.show_buc || (!obj->known || !objects[obj->otyp].oc_charged ||
+	    else if (iflags.show_buc || ((!obj->known || !objects[obj->otyp].oc_charged ||
 		      (obj->oclass == ARMOR_CLASS ||
 		       obj->oclass == RING_CLASS))
 		/* For most items with charges or +/-, if you know how many
@@ -928,7 +928,7 @@ boolean with_price;
 #endif
 			&& obj->otyp != FAKE_AMULET_OF_YENDOR
 			&& obj->otyp != AMULET_OF_YENDOR
-			&& !Role_if(PM_PRIEST))
+			&& !Role_if(PM_PRIEST)))
 		Strcat(prefix, "uncursed ");
 	}
 
@@ -3421,7 +3421,7 @@ typfnd:
 		else if(toustefna); /*can't be wished for*/
 		else if(dreprun); /*can't be wished for*/
 		else if(veioistafur); /*can't be wished for*/
-		else if(thjofastafur); /*can't be wished for*/
+		else if(thjofastafur) (void)0; /*can't be wished for*/
 	}
 	
 	if(otmp->otyp == SCR_WARD){
