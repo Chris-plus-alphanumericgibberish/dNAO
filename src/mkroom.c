@@ -24,7 +24,7 @@ STATIC_DCL void FDECL(mkgarden, (struct mkroom *));
 STATIC_DCL void FDECL(mklibrary, (struct mkroom *));
 STATIC_DCL void NDECL(mkisland);
 STATIC_DCL void NDECL(mkriver);
-STATIC_DCL void FDECL(liquify, (xchar, xchar, boolean));
+STATIC_DCL void FDECL(liquify, (XCHAR_P,XCHAR_P,BOOLEAN_P));
 STATIC_DCL struct permonst * NDECL(morguemon);
 STATIC_DCL struct permonst * NDECL(antholemon);
 STATIC_DCL struct permonst * NDECL(squadmon);
