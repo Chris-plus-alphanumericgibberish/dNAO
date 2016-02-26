@@ -498,6 +498,7 @@ E void FDECL(wary_dog, (struct monst *, BOOLEAN_P));
 /* ### dogmove.c ### */
 
 E boolean FDECL(could_use_item, (struct monst *,struct obj *,BOOLEAN_P));
+E boolean FDECL(acceptable_pet_target, (struct monst *,struct monst *,BOOLEAN_P));
 E boolean FDECL(betrayed, (struct monst *));
 E int FDECL(dog_nutrition, (struct monst *,struct obj *));
 E int FDECL(dog_eat, (struct monst *,struct obj *,int,int,BOOLEAN_P));
@@ -1506,7 +1507,7 @@ E void FDECL(Delay, (int));
 
 E int FDECL(set_bypassDR, (int));
 E int FDECL(set_destroy_thrown, (int));
-E int FDECL(thitu, (int,int,struct obj *,const char *, boolean));
+E int FDECL(thitu, (int,int,struct obj *,const char *,BOOLEAN_P));
 E int FDECL(ohitmon, (struct monst *,struct monst *,struct obj *,int,BOOLEAN_P));
 E void FDECL(thrwmu, (struct monst *));
 E int FDECL(spitmu, (struct monst *,struct attack *));
