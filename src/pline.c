@@ -72,7 +72,7 @@ msgpline_free()
 
 int
 msgpline_type(msg)
-     char *msg;
+     const char *msg;
 {
     struct _plinemsg *tmp = pline_msg;
     while (tmp) {
@@ -642,7 +642,7 @@ const char *st, *orig, *repl;
 }
 
 /*Ben Collver's fixes*/
-char *
+const char *
 piratesay(orig)
 const char *orig;
 {
