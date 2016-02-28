@@ -2264,7 +2264,7 @@ E long NDECL(somegold);
 #endif
 E void FDECL(stealgold, (struct monst *));
 E void FDECL(remove_worn_item, (struct obj *,BOOLEAN_P));
-E int FDECL(steal, (struct monst *, char *,boolean));
+E int FDECL(steal, (struct monst *,char *,BOOLEAN_P));
 E int FDECL(mpickobj, (struct monst *,struct obj *));
 E void FDECL(stealamulet, (struct monst *));
 E void FDECL(stealquestart, (struct monst *));
