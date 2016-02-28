@@ -1604,6 +1604,7 @@ E int NDECL(find_opera_cloak);
 E int NDECL(find_signet_ring);
 E int NDECL(find_engagement_ring);
 E int NDECL(find_gold_ring);
+E int NDECL(find_silver_ring);
 E int NDECL(find_opal_ring);
 E int NDECL(find_clay_ring);
 E int NDECL(find_coral_ring);
