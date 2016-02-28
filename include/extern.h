@@ -2201,6 +2201,8 @@ E void FDECL(yelp, (struct monst *));
 E void FDECL(whimper, (struct monst *));
 E void FDECL(beg, (struct monst *));
 E int NDECL(dotalk);
+E void FDECL(councilspirit, (int));
+E void FDECL(gnosisspirit, (int));
 E int FDECL(P_MAX_SKILL, (int));
 E int FDECL(P_SKILL, (int));
 E int FDECL(P_RESTRICTED, (int));
