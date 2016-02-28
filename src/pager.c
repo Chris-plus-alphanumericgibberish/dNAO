@@ -717,7 +717,7 @@ static const char * const bogusobjects[] = {
 		   "spellbook named the Book of Keeping",
 		   "Black Scroll of Ahm",
 	   "Elder Scroll", /*the Elder Scrolls*/
-       "spellbook named The Ta’ge Fragments", /* Cthulhutech */
+       "spellbook named The Ta'ge Fragments", /* Cthulhutech */
        "spellbook named Tome of Eternal Darkness", /* Eternal Darkness */
        "history book called A Chronicle of the Daevas", /* SCP Foundation */
        "spellbook named The Book of Sand",                     /* Jorge Luis Borges */
