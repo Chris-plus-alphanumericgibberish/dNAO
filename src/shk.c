@@ -28,8 +28,8 @@ STATIC_VAR NEARDATA long int followmsg;	/* last time of follow message */
 
 STATIC_DCL void FDECL(setpaid, (struct monst *));
 STATIC_DCL long FDECL(addupbill, (struct monst *));
-STATIC_DCL long FDECL(setallstolen, (struct obj *));
-STATIC_DCL long FDECL(setallpaid, (struct obj *));
+STATIC_DCL void FDECL(setallstolen, (struct obj *));
+STATIC_DCL void FDECL(setallpaid, (struct obj *));
 STATIC_DCL void FDECL(pacify_shk, (struct monst *));
 STATIC_DCL struct bill_x *FDECL(onbill, (struct obj *, struct monst *, BOOLEAN_P));
 STATIC_DCL struct monst *FDECL(next_shkp, (struct monst *, BOOLEAN_P));
@@ -361,7 +361,7 @@ register struct monst *shkp;
 	return(total);
 }
 
-STATIC_OVL long
+STATIC_OVL void
 setallstolen(obj)
 register struct obj *obj;
 {
@@ -386,7 +386,7 @@ register struct obj *obj;
 	    }
 }
 
-STATIC_OVL long
+STATIC_OVL void
 setallpaid(obj)
 register struct obj *obj;
 {
@@ -1607,7 +1607,7 @@ proceed:
 		    else Strcat(sbuf,
 			   "for gold picked up and the use of merchandise.");
 		} else Strcat(sbuf, "for the use of merchandise.");
-		pline(sbuf);
+		pline1(sbuf);
 #ifndef GOLDOBJ
 		if (u.ugold + eshkp->credit < dtmp) {
 #else
@@ -1831,12 +1831,12 @@ shk_other_services()
 		Strcpy(class_list, tools);
 		key = getobj(class_list, "wind with");
 		if (!key){
-			pline(Never_mind);
+			pline1(Never_mind);
 			return;
 		}
 		turns = ask_turns(shkp, 0, 1);
 		if(!turns){
-			pline(Never_mind);
+			pline1(Never_mind);
 			return;
 		}
 		start_clockwinding(key, shkp, turns);
@@ -4703,8 +4703,8 @@ shk_identify(slang, shkp)
 
 	/* Here we go */
 	/* KMH -- fixed */
-	if (ESHK(shkp)->services & (SHK_ID_BASIC|SHK_ID_PREMIUM) ==
-			SHK_ID_BASIC|SHK_ID_PREMIUM) {
+	if ((ESHK(shkp)->services & (SHK_ID_BASIC|SHK_ID_PREMIUM)) ==
+			(SHK_ID_BASIC|SHK_ID_PREMIUM)) {
 		ident_type = yn_function("[B]asic service or [P]remier",
 		     ident_chars, '\0');
 		if (ident_type == '\0') return;
@@ -5061,7 +5061,7 @@ struct monst *shkp;
     if (service > 0)
 	verbalize(we_offer);
     else
-	pline(Never_mind);
+	pline1(Never_mind);
 
     switch(service) {
 	case 0:
