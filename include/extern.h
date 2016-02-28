@@ -1621,6 +1621,7 @@ E int NDECL(find_emerald_ring);
 E int NDECL(find_droven_ring);
 E boolean FDECL(isEngrRing, (SHORT_P));
 E boolean FDECL(isSignetRing, (SHORT_P));
+E int NDECL(find_ogloves);
 E int NDECL(find_pgloves);
 E void NDECL(oinit);
 E void FDECL(savenames, (int,int));
