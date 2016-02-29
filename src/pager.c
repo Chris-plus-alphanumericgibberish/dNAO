@@ -604,7 +604,7 @@ static const char * const bogusobjects[] = {
        "potion of antacid",
        "traffic cone",
        "chainsaw",
-/*	   "pair of high-heeled stilettos",    /* the *other* stiletto */
+//	   "pair of high-heeled stilettos",    /* the *other* stiletto */
 	   "high-heeled stiletto",
 	   "comic book",
 	   "lipstick",
@@ -717,7 +717,7 @@ static const char * const bogusobjects[] = {
 		   "spellbook named the Book of Keeping",
 		   "Black Scroll of Ahm",
 	   "Elder Scroll", /*the Elder Scrolls*/
-       "spellbook named The Ta’ge Fragments", /* Cthulhutech */
+       "spellbook named The Ta'ge Fragments", /* Cthulhutech */
        "spellbook named Tome of Eternal Darkness", /* Eternal Darkness */
        "history book called A Chronicle of the Daevas", /* SCP Foundation */
        "spellbook named The Book of Sand",                     /* Jorge Luis Borges */
@@ -749,7 +749,7 @@ static const char * const bogusobjects[] = {
 	   "spellbook named The Six and Seventh Books of Moses",	/* 18th- or 19th-century magical text allegedly written by Moses */
 	   "spellbook named The Book of Coming Forth by Day", "spellbook named The Book of emerging forth into the Light",
 	   "spellbook named Sepher Ha-Razim",						/* Book given to Noah by the angel Raziel */
-	   "spellbook named Sefer Raziel HaMalakh", 				/*"Book of Raziel the Angel”, given to Adam */
+	   "spellbook named Sefer Raziel HaMalakh", 				/*"Book of Raziel the Angel, given to Adam */
 	   "spellbook named The Testament of Solomon",
 	   "spellbook named The Book of Enoch",
 	   "spellbook named The Book of Inverted Darkness",
@@ -985,7 +985,7 @@ do_look(quick)
 		monexplain[i]) {
 		need_to_look = TRUE;
 		if (!found) {
-		    Sprintf(out_str, "%c       %s", sym, an(monexplain[i]));
+		    Sprintf(out_str, "%c       %s", (uchar)sym, an(monexplain[i]));
 		    firstmatch = monexplain[i];
 		    found++;
 		} else {
@@ -1009,7 +1009,7 @@ do_look(quick)
 	 */
 	if (u.uswallow && from_screen && is_swallow_sym(sym)) {
 	    if (!found) {
-		Sprintf(out_str, "%c       %s", sym, mon_interior);
+		Sprintf(out_str, "%c       %s", (uchar)sym, mon_interior);
 		firstmatch = mon_interior;
 	    } else {
 		found += append_str(out_str, mon_interior);
@@ -1026,7 +1026,7 @@ do_look(quick)
 		    continue;
 		}
 		if (!found) {
-		    Sprintf(out_str, "%c       %s", sym, an(objexplain[i]));
+		    Sprintf(out_str, "%c       %s", (uchar)sym, an(objexplain[i]));
 		    firstmatch = objexplain[i];
 		    found++;
 			hallu_obj++;
@@ -1038,7 +1038,7 @@ do_look(quick)
 
 	if (sym == DEF_INVISIBLE) {
 	    if (!found) {
-		Sprintf(out_str, "%c       %s", sym, an(invisexplain));
+		Sprintf(out_str, "%c       %s", (uchar)sym, an(invisexplain));
 		firstmatch = invisexplain;
 		found++;
 	    } else {
@@ -1060,12 +1060,12 @@ do_look(quick)
 
 		if (!found) {
 		    if (is_cmap_trap(i)) {
-			Sprintf(out_str, "%c       a trap", sym);
+			Sprintf(out_str, "%c       a trap", (uchar)sym);
 			hit_trap = TRUE;
 		    } else if (level.flags.lethe && !strcmp(x_str, "water")) { //Lethe patch
-			Sprintf(out_str, "%c       sparkling water", sym); //Lethe patch
+			Sprintf(out_str, "%c       sparkling water", (uchar)sym); //Lethe patch
 		    } else {
-			Sprintf(out_str, "%c       %s", sym,
+			Sprintf(out_str, "%c       %s", (uchar)sym,
 				article == 2 ? the(x_str) :
 				article == 1 ? an(x_str) : x_str);
 		    }
@@ -1093,7 +1093,7 @@ do_look(quick)
 	    if (sym == (from_screen ? warnsyms[i] : def_warnsyms[i].sym)) {
 		if (!found) {
 			Sprintf(out_str, "%c       %s",
-				sym, def_warnsyms[i].explanation);
+				(uchar)sym, def_warnsyms[i].explanation);
 			firstmatch = def_warnsyms[i].explanation;
 			found++;
 		} else {
@@ -1111,7 +1111,7 @@ do_look(quick)
 	if (skipped_venom && found < 2) {
 	    x_str = objexplain[VENOM_CLASS];
 	    if (!found) {
-		Sprintf(out_str, "%c       %s", sym, an(x_str));
+		Sprintf(out_str, "%c       %s", (uchar)sym, an(x_str));
 		firstmatch = x_str;
 		found++;
 	    } else {
@@ -1123,7 +1123,7 @@ do_look(quick)
 	if (iflags.bouldersym && sym == iflags.bouldersym) {
 	    if (!found) {
 		firstmatch = "boulder";
-		Sprintf(out_str, "%c       %s", sym, an(firstmatch));
+		Sprintf(out_str, "%c       %s", (uchar)sym, an(firstmatch));
 		found++;
 	    } else {
 		found += append_str(out_str, "boulder");

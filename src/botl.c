@@ -3,6 +3,9 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#ifdef TTY_GRAPHICS
+# include "wintty.h"
+#endif
 
 #ifdef OVL0
 extern const char *hu_stat[];	/* defined in eat.c */
@@ -532,8 +535,8 @@ bot2()
 #ifdef REALTIME_ON_BOTL
   if(iflags.showrealtime) {
     time_t currenttime = get_realtime();
-    Sprintf(nb = eos(nb), " %d:%2.2d", currenttime / 3600, 
-                                       (currenttime % 3600) / 60);
+    Sprintf(nb = eos(nb), " %ld:%2.2ld", currenttime / 3600,
+                                         (currenttime % 3600) / 60);
   }
 #endif
 

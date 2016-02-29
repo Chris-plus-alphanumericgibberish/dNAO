@@ -6,7 +6,7 @@
 
 static NEARDATA schar delay;		/* moves left for this spell */
 static NEARDATA struct obj *book;	/* last/current book being xscribed */
-static NEARDATA int RoSbook;		/* Read spell or Study Wards?"
+static NEARDATA int RoSbook;		/* Read spell or Study Wards?" */
 
 /* spellmenu arguments; 0 thru n-1 used as spl_book[] index when swapping */
 #define SPELLMENU_CAST (-2)
@@ -25,7 +25,7 @@ static NEARDATA int RoSbook;		/* Read spell or Study Wards?"
 STATIC_PTR int NDECL(purifying_blast);
 STATIC_PTR struct permonst * NDECL(choose_crystal_summon);
 STATIC_DCL int FDECL(spell_let_to_idx, (CHAR_P));
-STATIC_DCL boolean FDECL(check_spirit_let, (char));
+STATIC_DCL boolean FDECL(check_spirit_let, (CHAR_P));
 STATIC_DCL boolean FDECL(cursed_book, (struct obj *bp));
 STATIC_DCL boolean FDECL(confused_book, (struct obj *));
 STATIC_DCL void FDECL(deadbook, (struct obj *));
@@ -33,6 +33,7 @@ STATIC_PTR int NDECL(learn);
 STATIC_DCL boolean FDECL(getspell, (int *));
 STATIC_DCL boolean FDECL(getspirit, (int *));
 STATIC_DCL boolean FDECL(spiritLets, (char *));
+STATIC_DCL int FDECL(dospiritmenu, (const char *, int *));
 STATIC_DCL boolean FDECL(dospellmenu, (const char *,int,int *));
 STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
@@ -780,7 +781,7 @@ getspirit(power_no)
 		spiritLets(lets);
 		
 	    for(;;)  {
-		Sprintf(qbuf, "Use which power?", lets);
+		Sprintf(qbuf, "Use which power? [%s ?]", lets);
 		if ((ilet = yn_function(qbuf, (char *)0, '\0')) == '?')
 		    break;
 
@@ -1221,6 +1222,7 @@ int dx,dy,x1,y1,x2,y2;
 	if(dy > 0 && dx < 0) return deltax<0 && deltay>0;
 	if(dy < 0 && dx < 0) return deltax<0 && deltay<0;
 	if(dy < 0 && dx > 0) return deltax>0 && deltay<0;
+	return FALSE;
 	// // if(dy){
 		// // if(dx < 0){
 			// // if(x1 < x2) gx = TRUE;
@@ -1402,6 +1404,7 @@ purifying_blast()
 			u.ux, u.uy, u.dx, u.dy,25,d(10,dsize));
 	}
 	// u.uacinc-=7;  //Note: was added when purifying blast began to charge.
+	return 0;
 }
 
 int
@@ -2170,7 +2173,8 @@ spiriteffects(power, atme)
 			for(i=dsize; i > 0; i--){
 				do pm = &mons[rn2(PM_LONG_WORM_TAIL)];
 				while( (pm->geno & (G_UNIQ|G_NOGEN)) || pm->mlevel >= u.ulevel+5);
-				if(mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT)){
+				mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
+				if(mon){
 					initedog(mon);
 					mon->mvanishes = 5;
 				}
@@ -2247,7 +2251,7 @@ spiriteffects(power, atme)
 			cc.x = u.ux;
 			cc.y = u.uy;
 			if (getpos(&cc, TRUE, "the desired position") < 0) {
-				pline(Never_mind);
+				pline1(Never_mind);
 				return 0;
 			}
 			if (!cansee(cc.x, cc.y) || distu(cc.x, cc.y) >= 32) {
@@ -2515,7 +2519,7 @@ spiriteffects(power, atme)
 								if(bootdamage > uarmf->spe){
 									claws_destroy_arm(uarmf);
 								}else{
-									for(bootdamage; bootdamage >= 0; bootdamage--) drain_item(uarmf);
+									for(; bootdamage >= 0; bootdamage--) drain_item(uarmf);
 									Your("boots are damaged!");
 								}
 							}
@@ -2597,7 +2601,8 @@ spiriteffects(power, atme)
 			struct monst *mon;
 			if(!getdir((char *)0)  || !(u.dx || u.dy)) return 0;
 			Your("forked red tongue speaks of its own accord.");
-			if(mon = m_at(u.ux+u.dx, u.uy+u.dy)){
+			mon = m_at(u.ux+u.dx, u.uy+u.dy);
+			if(mon){
 				mon->mflee = 1;//does not make monster hostile
 				pline("%s turns to flee.", Monnam(mon));
 			} else return 0;
@@ -2605,7 +2610,8 @@ spiriteffects(power, atme)
 		case PWR_SILVER_TOUNGE:{
 			struct monst *mon;
 			if(!getdir((char *)0)  || !(u.dx || u.dy)) return 0;
-			if(mon = m_at(u.ux+u.dx, u.uy+u.dy)){
+			mon = m_at(u.ux+u.dx, u.uy+u.dy);
+			if(mon){
 				Your("forked tongue speaks with silvery grace.");
 				if((!always_hostile(mon->data) &&
 				!(mon->data->geno & G_UNIQ) &&
@@ -3651,7 +3657,7 @@ boolean atme;
 		break;
 	case SPE_JUMPING:
 		if (!jump(max(role_skill,1)))
-			pline(nothing_happens);
+			pline1(nothing_happens);
 		break;
 	default:
 		impossible("Unknown spell %d attempted.", spell);
@@ -3813,13 +3819,13 @@ int *power_no;
 				for(i = 0; i<52; i++){
 					if(spiritPOwner[u.spiritPOrder[i]] == u.spirit[s]){
 						if(u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves){
-							Sprintf(buf, spiritPName[u.spiritPOrder[i]]);
+							Sprintf1(buf, spiritPName[u.spiritPOrder[i]]);
 							any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
 							add_menu(tmpwin, NO_GLYPH, &any,
 								i<26 ? 'a'+(char)i : 'A'+(char)(i-26), 
 								0, ATR_NONE, buf, MENU_UNSELECTED);
 						} else {
-							Sprintf(buf, " %2d %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spiritPName[u.spiritPOrder[i]]);
+							Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spiritPName[u.spiritPOrder[i]]);
 							add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
 						}
 					}
@@ -3835,13 +3841,13 @@ int *power_no;
 				spiritPOwner[u.spiritPOrder[i]] & u.specialSealsActive & ~SEAL_SPECIAL))
 			){
 				if(u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves){
-					Sprintf(buf, spiritPName[u.spiritPOrder[i]]);
+					Sprintf1(buf, spiritPName[u.spiritPOrder[i]]);
 					any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
 					add_menu(tmpwin, NO_GLYPH, &any,
 						i<26 ? 'a'+(char)i : 'A'+(char)(i-26), 
 						0, ATR_NONE, buf, MENU_UNSELECTED);
 				} else {
-					Sprintf(buf, " %2d %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spiritPName[u.spiritPOrder[i]]);
+					Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spiritPName[u.spiritPOrder[i]]);
 					add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
 				}
 			}

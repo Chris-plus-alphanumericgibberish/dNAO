@@ -2063,7 +2063,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
            if(rnd_tmp<2) rnd_tmp = 2;
            if(youdefend) {
                    make_blinded(Blinded+rnd_tmp, FALSE);
-                   if (!Blind) Your(vision_clears);
+                   if (!Blind) Your1(vision_clears);
            } else {
                if ((rnd_tmp += mdef->mblinded) > 127) rnd_tmp = 127;
                mdef->mblinded = rnd_tmp;
@@ -2769,7 +2769,7 @@ arti_invoke(obj)
 	if(obj->otyp == CRYSTAL_BALL)
 	    use_crystal_ball(obj);
 	else
-	    pline(nothing_happens);
+	    pline1(nothing_happens);
 	return 1;
     }
 
@@ -2982,7 +2982,7 @@ arti_invoke(obj)
 			rloco(obj);
 			pline("%s teleports without you.",xname(obj));
 		}else{
-			pline("%s shakes for an instant.");
+			pline("%s shakes for an instant.",xname(obj));
 		}
 	break;
 #ifdef CONVICT
@@ -3344,7 +3344,7 @@ arti_invoke(obj)
               You("may summon a stinking cloud.");
                pline("Where do you want to center the cloud?");
                if (getpos(&cc, TRUE, "the desired position") < 0) {
-                   pline(Never_mind);
+                   pline1(Never_mind);
                    obj->age = 0;
                    return 0;
                }
@@ -3542,8 +3542,8 @@ arti_invoke(obj)
 					}
 				}
 				pline_The("entire dungeon is quaking around you!");
-				do_earthquake(u.ulevel / 4 + 1);
-				do_earthquake(u.ulevel / 3 + 1);
+				do_earthquake(u.ulevel / 4 + 1, obj->cursed, (struct monst *)0);
+				do_earthquake(u.ulevel / 3 + 1, obj->cursed, (struct monst *)0);
 				awaken_monsters(ROWNO * COLNO);
 			   }
 	break;
@@ -3551,7 +3551,7 @@ arti_invoke(obj)
 		int starfall = rnd(u.ulevel/10+1), x, y, n;
 		coord cc;
 		verbalize("Even Stars Fall");
-		for (starfall; starfall > 0; starfall--){
+		for (; starfall > 0; starfall--){
 			x = rn2(COLNO-2)+1;
 			y = rn2(ROWNO-2)+1;
 			cc.x=x;cc.y=y;
@@ -3964,7 +3964,7 @@ arti_invoke(obj)
 				} else pline("Your weapon rattles faintly.");
 			}
 			else {
-				You_feel("foolish.", the(xname(obj)));
+				You_feel("foolish.");
 				exercise(A_WIS, FALSE);
 				if( (d(1,20)-10) > 0 ){
 					obj->spe--;//lose charge for false invoke
@@ -4624,7 +4624,7 @@ arti_invoke(obj)
 							boolean maanze = FALSE;
 							
 							You("raise the Annulus into the %s, and it releases a rapidly-expanding ring of cerulean energy.", Underwater ? "water" : "air");
-							for(mtmp; mtmp; mtmp = ntmp){
+							for(; mtmp; mtmp = ntmp){
 								ntmp = mtmp->nmon;
 								if(telepathic(mtmp->data) && couldsee(mtmp->mx,mtmp->my)){
 									if(mtmp->data == &mons[PM_LUGRIBOSSK]) maanze = TRUE;

@@ -37,6 +37,7 @@ STATIC_DCL int FDECL(in_or_out_menu, (const char *,struct obj *, BOOLEAN_P, BOOL
 STATIC_DCL int FDECL(container_at, (int, int, BOOLEAN_P));
 STATIC_DCL boolean FDECL(able_to_loot, (int, int));
 STATIC_DCL boolean FDECL(mon_beside, (int, int));
+STATIC_DCL int FDECL(use_lightsaber, (struct obj *));
 
 /* define for query_objlist() and autopickup() */
 #define FOLLOW(curr, flags) \
@@ -1579,7 +1580,7 @@ boolean noit;
 
 	if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
 		You("carefully open %s...",the(xname(cobj)));
-		return use_lightsaber(cobj, 0);
+		return use_lightsaber(cobj);
 	}
     if (cobj->olocked) {
 	pline("Hmmm, %s seems to be locked.", noit ? the(xname(cobj)) : "it");
@@ -1712,7 +1713,7 @@ lootcont:
 					c = ynq(qbuf);
 					if (c == 'q') return (timepassed);
 					if (c == 'n') continue;
-					timepassed |= use_lightsaber(cobj, 0);
+					timepassed |= use_lightsaber(cobj);
 					if(timepassed) underfoot = TRUE;
 				}
 			}
@@ -2326,7 +2327,7 @@ pick_gemstone()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	for(otmp = invent; otmp; otmp = otmp->nobj){
 		if(otmp->oclass == GEM_CLASS && otmp->otyp < LUCKSTONE){
-			Sprintf(buf, doname(otmp));
+			Sprintf1(buf, doname(otmp));
 			any.a_char = otmp->invlet;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
 				otmp->invlet, 0, ATR_NONE, buf,
@@ -2343,7 +2344,7 @@ pick_gemstone()
 	return ( n > 0 ) ? selected[0].item.a_char : 0;
 }
 
-int
+STATIC_OVL int
 use_lightsaber(obj)
 register struct obj *obj;
 {

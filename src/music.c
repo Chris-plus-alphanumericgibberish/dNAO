@@ -250,7 +250,7 @@ boolean domsg;
 				You_hear("a horrible voice chanting your song!");
 			else if (mtmp->data->mlet == S_MUMMY || mtmp->data->mlet == S_GHOST
 					 || mtmp->data->mlet == S_WRAITH || mtmp->data->mlet == S_SHADE)
-				You_hear("someone mourning while you play!", Monnam(mtmp));
+				You_hear("someone mourning while you play!");
 			else if (mtmp->data == &mons[PM_CROW] || mtmp->data == &mons[PM_RAVEN])
 				You_hear("something caw and croak while you play!");
 			else if (mtmp->data == &mons[PM_PARROT])
@@ -346,7 +346,7 @@ boolean domsg;
 				You_hear("a horrible voice chanting in opposition to your song!");
 			else if (mtmp->data->mlet == S_MUMMY || mtmp->data->mlet == S_GHOST
 					 || mtmp->data->mlet == S_WRAITH || mtmp->data->mlet == S_SHADE)
-				You_hear("someone wailing in opposition to your song!", Monnam(mtmp));
+				You_hear("someone wailing in opposition to your song!");
 			else if (mtmp->data == &mons[PM_CROW] || mtmp->data == &mons[PM_RAVEN])
 				You_hear("something caws and croaks in opposition to your song!");
 			else if (mtmp->data == &mons[PM_PARROT])
@@ -914,7 +914,7 @@ int distance;
 		    resist_song(mtmp, SNG_COURAGE, song_instr) >= 0) {
 			if (mtmp->encouraged < BASE_DOG_ENCOURAGED_MAX)
 				mtmp->encouraged = min(BASE_DOG_ENCOURAGED_MAX, mtmp->encouraged+(P_SKILL(P_MUSICALIZE)-P_UNSKILLED+1));
-			if (mtmp->mflee)
+			if (mtmp->mflee) {
 				switch (P_SKILL(P_MUSICALIZE)) {
 				case P_UNSKILLED:
 				case P_BASIC:
@@ -927,15 +927,18 @@ int distance;
 					mtmp->mfleetim = 0;
 					break;
 				}
-			if (canseemon(mtmp))
-				if (Hallucination)
+			}
+			if (canseemon(mtmp)) {
+				if (Hallucination) {
 					pline("%s looks %s!", Monnam(mtmp),
 					      mtmp->encouraged == BASE_DOG_ENCOURAGED_MAX ? "way cool" :
 					      mtmp->encouraged > (BASE_DOG_ENCOURAGED_MAX/2) ? "cooler" : "cool");
-				else
+				} else {
 					pline("%s looks %s!", Monnam(mtmp),
 					      mtmp->encouraged == BASE_DOG_ENCOURAGED_MAX ? "berserk" :
 					      mtmp->encouraged > (BASE_DOG_ENCOURAGED_MAX/2) ? "wilder" : "wild");
+				}
+			}
 		}
 		mtmp = mtmp->nmon;
 	}

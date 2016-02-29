@@ -887,7 +887,7 @@ m_throw(mon, x, y, dx, dy, range, obj, verbose)
 	if (blindinc) {
 		u.ucreamed += blindinc;
 		make_blinded(Blinded + (long)blindinc, FALSE);
-		if (!Blind) Your(vision_clears);
+		if (!Blind) Your1(vision_clears);
 	}
 }
 
@@ -1756,7 +1756,8 @@ mlined_up(mtmp, mdef, breath)	/* is mtmp in position to use ranged attack? */
             if (x == u.ux && y == u.uy) 
 	        return FALSE;
 
-	    if (mat = m_at(x, y)) 
+	    mat = m_at(x, y);
+	    if (mat)
 	    {
 	        if (!breath && mat == mdef) return lined_up;
 

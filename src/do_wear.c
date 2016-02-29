@@ -1955,8 +1955,7 @@ find_ac()
 	
     static int cbootsd = 0;
     if (!cbootsd) cbootsd = find_cboots();
-    if (uarmf && uarmf->otyp == cbootsd) uac -= 1; /*max( (int)(uarmf->spe/2+1),(int)(uarmf->spe/-2+1));/* adds half again the enchantment, 
-																									and mitigates penalties from negative enchantment */
+    if (uarmf && uarmf->otyp == cbootsd) uac -= 1; /*max( (int)(uarmf->spe/2+1),(int)(uarmf->spe/-2+1));*/ /* adds half again the enchantment, and mitigates penalties from negative enchantment */
     static int pgloves = 0;
     if (!pgloves) pgloves = find_pgloves();
     if (uarmf && uarmf->otyp == pgloves) uac -= 1;
@@ -2860,9 +2859,9 @@ register schar delta;
 		if (delta) ABON(A_CHA) += (delta);
 		flags.botl = 1;
 	}
-	if((uarm && uarm == otmp) || (uarmu && uarmu == otmp) &&
+	if(((uarm && uarm == otmp) || (uarmu && uarmu == otmp)) &&
 		(otmp->otyp == NOBLE_S_DRESS || otmp->otyp == BLACK_DRESS || otmp->otyp == CONSORT_S_SUIT
-		 || otmp->otyp == VICTORIAN_UNDERWEAR || otmp->otyp == GENTLEMAN_S_SUIT || otmp->otyp == GENTLEMAN_S_SUIT)
+		 || otmp->otyp == VICTORIAN_UNDERWEAR || otmp->otyp == GENTLEMAN_S_SUIT)
 	){
 		if (delta){
 			if(otmp->otyp == GENTLEWOMAN_S_DRESS || 
