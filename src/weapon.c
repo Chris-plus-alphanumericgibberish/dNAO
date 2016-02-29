@@ -1938,7 +1938,7 @@ int enhance_skill(boolean want_dump)
 		 i <= skill_ranges[pass].last; i++) {
 		/* Print headings for skill types */
 		any.a_void = 0;
-		if (i == skill_ranges[pass].first)
+		if (i == skill_ranges[pass].first) {
 #ifdef DUMP_LOG
 		if (want_dump) {
 		    dump("  ",(char *)skill_ranges[pass].name);
@@ -1947,6 +1947,7 @@ int enhance_skill(boolean want_dump)
 #endif
 		    add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
 			     skill_ranges[pass].name, MENU_UNSELECTED);
+		}
 #ifdef DUMP_LOG
 		if (want_dump) {
 		    if (P_SKILL(i) > P_UNSKILLED) {
@@ -2281,7 +2282,7 @@ struct obj *weapon;
 		if(P_SKILL(u.fightingForm) < P_BASIC) u.fightingForm = FFORM_SHII_CHO;
 		if(u.fightingForm == FFORM_MAKASHI){
 			if(wep_type != P_SABER){
-				if(makashiwarn) pline("Your %s seem%s very unwieldy.",uwep,uwep->quan == 1 ? "s" : "");
+				if(makashiwarn) pline("Your %s seem%s very unwieldy.",xname(uwep),uwep->quan == 1 ? "s" : "");
 				makashiwarn = FALSE;
 				bonus += -20;
 			} else if(!makashiwarn) makashiwarn = TRUE;
