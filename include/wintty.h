@@ -143,6 +143,7 @@ E void NDECL(term_start_raw_bold);
 E void NDECL(term_end_raw_bold);
 
 #ifdef TEXTCOLOR
+E void FDECL(term_start_bgcolor,(int color));
 E void NDECL(term_end_color);
 E void FDECL(term_start_color,(int color));
 E int FDECL(has_color,(int color));
