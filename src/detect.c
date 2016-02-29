@@ -1098,7 +1098,7 @@ struct obj *obj;
 
     if (Blind) {
 	pline("Too bad you can't see %s.", the(xname(obj)));
-	return;
+	return 0;
     }
     oops = (rnd(obj->blessed ? 16 : 20) > ACURR(A_INT) || obj->cursed);
     if (oops && (obj->spe > 0)) {

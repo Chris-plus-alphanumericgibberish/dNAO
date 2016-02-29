@@ -154,7 +154,7 @@ static NEARDATA char msgbuf[BUFSZ];
  * We cannot check song_played directly because if the song was interrupted,
  * we have no means to reset song_played.
  */
-int inline
+STATIC_DCL int
 song_being_played()
 {
     if (occupation != play_song)
@@ -162,14 +162,13 @@ song_being_played()
     return song_played;
 }
 
-STATIC_PTR int
+STATIC_DCL void
 reset_song()
 {
     song_played = SNG_NONE;
     song_delay = 0;
     song_penalty = 0;
 /*	song_lastturn = 0L;*/
-    return;
 }
 
 /* music being played is at its last turn? */
