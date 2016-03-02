@@ -4019,7 +4019,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"identify", "identify items in pack", wiz_identify, IFBURIED},
 	{"levelport", "to trans-level teleport", wiz_level_tele, IFBURIED},
 	{"wish", "make wish", wiz_wish, IFBURIED},
-	{"where", "tell locations of special levels", wiz_where, IFBURIED},
+	{"where", "tell locations of special levels", dooverview_or_wiz_where, IFBURIED},
 	{(char *)0, (char *)0, donull, IFBURIED}
 };
 
@@ -4104,6 +4104,10 @@ init_bind_list(void)
 	bind_key('o',    "open" );
 	bind_key('O',    "setoptions" );
 	bind_key(M('o'), "offer" );
+#ifdef WIZARD
+	if (!wizard) /* Avoid doubling up on Ctrl-o. */
+#endif
+	bind_key(C('o'), "overview");
 	bind_key('p',    "pay" );
 	bind_key('P',    "puton" );
 	bind_key(M('p'), "pray" );
