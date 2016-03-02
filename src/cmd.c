@@ -1548,7 +1548,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(u.spirit[ALIGN_SPIRIT]) numBound++;
 		if(u.spirit[OUTER_SPIRIT]) numBound++;
 		Sprintf(prebuf, "Your soul ");
-		Sprintf(buf, "bound to ");
+		Sprintf(buf, " bound to ");
 		for(i=0;i<QUEST_SPIRIT;i++){
 			if(u.spirit[i]) for(j=0;j<32;j++){
 				if((u.spirit[i] >> j) == 1){
