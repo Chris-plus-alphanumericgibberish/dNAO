@@ -3557,7 +3557,7 @@ arti_invoke(obj)
 			cc.x=x;cc.y=y;
 			n=rnd(4)+1;
 			explode(x, y,
-				8, //1 = AD_PHYS, explode uses nonstandard damage type flags...
+				8, //8 = AD_PHYS, explode uses nonstandard damage type flags...
 				d(5,6), 0,
 				EXPL_MUDDY);
 			while(n--) {
