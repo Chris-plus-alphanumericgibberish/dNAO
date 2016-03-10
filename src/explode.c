@@ -897,28 +897,28 @@ boolean isyou;
 	mon = u.usteed;
 #endif
     if (mon && !DEADMONSTER(mon)) {
-	if (resists_fire(mon)) {
-	    shielded = TRUE;
-	} else {
-	    for (obj = mon->minvent; obj; obj = obj2) {
-		obj2 = obj->nobj;
-		GRENADE_TRIGGER(obj);
-		for(i = 0; i < delquan; i++)
-		    m_useup(mon, obj);
-	    }
-	}
+		if (resists_fire(mon)) {
+		    shielded = TRUE;
+		} else {
+		    for (obj = mon->minvent; obj; obj = obj2) {
+			obj2 = obj->nobj;
+			GRENADE_TRIGGER(obj);
+			for(i = 0; i < delquan; i++)
+			    m_useup(mon, obj);
+		    }
+		}
     }
     if (x == u.ux && y == u.uy) {
-	if (Fire_resistance) {
-	    shielded = TRUE;
-	} else {
-	    for (obj = invent; obj; obj = obj2) {
-		obj2 = obj->nobj;
-		GRENADE_TRIGGER(obj);
-		for(i = 0; i < delquan; i++)
-		    useup(obj);
-	    }
-	}
+		if (Fire_resistance) {
+		    shielded = TRUE;
+		} else {
+		    for (obj = invent; obj; obj = obj2) {
+			obj2 = obj->nobj;
+			GRENADE_TRIGGER(obj);
+			for(i = 0; i < delquan; i++)
+			    useup(obj);
+		    }
+		}
     }
     if (!shielded)
 	for(obj = level.objects[x][y]; obj; obj = obj2) {

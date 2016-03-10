@@ -1482,8 +1482,8 @@ register int x,y;
 			sensed = 1;
 	    }
 	    if (sensed) {
-		const char *et;
-		unsigned maxelen = BUFSZ - sizeof("You feel the words: \"\". ");
+			const char *et;
+			unsigned maxelen = BUFSZ - sizeof("You feel the words: \"\". ");
 			if(!Hallucination /*|| rn2(20)*/ ){
 				if (strlen(ep->engr_txt) > maxelen) {
 					(void) strncpy(buf,  ep->engr_txt, (int)maxelen);
