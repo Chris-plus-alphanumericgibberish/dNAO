@@ -1956,6 +1956,7 @@ find_ac()
     static int cbootsd = 0;
     if (!cbootsd) cbootsd = find_cboots();
     if (uarmf && uarmf->otyp == cbootsd) uac -= 1; /*max( (int)(uarmf->spe/2+1),(int)(uarmf->spe/-2+1));*/ /* adds half again the enchantment, and mitigates penalties from negative enchantment */
+																									and mitigates penalties from negative enchantment */
     static int pgloves = 0;
     if (!pgloves) pgloves = find_pgloves();
     if (uarmf && uarmf->otyp == pgloves) uac -= 1;
