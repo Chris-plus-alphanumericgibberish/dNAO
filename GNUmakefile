@@ -1,6 +1,6 @@
 GAMEDIR = dnethackdir
 
-CFLAGS = -g
+CFLAGS = -g -O2
 
 GAMELIBS = -lncurses
 
