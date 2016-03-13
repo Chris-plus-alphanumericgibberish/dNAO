@@ -3012,8 +3012,7 @@ use_droven_cloak(optr)
 struct obj **optr;
 {
 	struct obj *otmp = *optr;
-	int ttyp, tmp, rx, ry;
-	boolean gone = FALSE;
+	int rx, ry;
 	const char *what = (char *)0;
 	struct trap *ttmp;
 	struct monst *mtmp;
@@ -3076,7 +3075,6 @@ struct obj **optr;
 			else if(mtmp) mintrap(mtmp);
 		} else pline("The cloak cannot spin a web there!");
 		if(++otmp->ovar1 > 3){
-			gone = TRUE;
 			useup(otmp);
 			*optr = 0;
 			pline("The thoroughly tattered cloak falls to pieces");
@@ -3093,10 +3091,7 @@ STATIC_OVL int
 use_darkweavers_cloak(otmp)
 struct obj *otmp;
 {
-	int ttyp, tmp, rx, ry;
-	boolean gone = FALSE;
 	const char *what = (char *)0;
-	struct monst *mtmp;
 
 	if (nohands(youmonst.data))
 	    what = "without hands";
