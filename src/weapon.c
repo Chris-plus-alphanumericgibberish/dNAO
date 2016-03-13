@@ -413,7 +413,7 @@ int spec;
 							tmp += d(3,sbon);
 						break;
 					}
-				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || is_light_armor(uarm))){
+				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
 					switch(min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
 						case P_BASIC:
 							tmp -= 2;
@@ -488,7 +488,7 @@ int spec;
 							tmp += d(3,sbon);
 						break;
 					}
-				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || is_light_armor(uarm))){
+				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
 					switch(min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
 						case P_BASIC:
 							tmp -= 2;
@@ -656,7 +656,7 @@ int spec;
 							tmp += d(3,sbon);
 						break;
 					}
-				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || is_light_armor(uarm))){
+				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
 					switch(min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
 						case P_BASIC:
 							tmp -= 2;
@@ -731,7 +731,7 @@ int spec;
 							tmp += d(3,sbon);
 						break;
 					}
-				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || is_light_armor(uarm))){
+				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
 					switch(min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
 						case P_BASIC:
 							tmp -= 2;
