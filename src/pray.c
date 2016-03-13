@@ -1911,7 +1911,7 @@ dosacrifice()
 	return 0;
     }
 
-	if(Role_if(PM_ANACHRONONAUT) && flags.questprogress != 2 && u.uhave.questart && Is_astralevel(&u.uz)){
+	if(Role_if(PM_ANACHRONONAUT) && flags.questprogress != 2 && u.uevent.qcompleted && u.uhave.questart && Is_astralevel(&u.uz)){
 		You("worry that you have not yet completed your mission.");
 	}
 	
