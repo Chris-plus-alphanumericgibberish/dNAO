@@ -3421,7 +3421,7 @@ typfnd:
 		else if(toustefna); /*can't be wished for*/
 		else if(dreprun); /*can't be wished for*/
 		else if(veioistafur); /*can't be wished for*/
-		else if(thjofastafur) (void)0; /*can't be wished for*/
+		else if(thjofastafur); /*can't be wished for*/
 	}
 	
 	if(otmp->otyp == SCR_WARD){
