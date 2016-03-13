@@ -791,8 +791,7 @@ register unsigned num;
 	if (buffering) {
 	    if(fd != bw_fd)
 		panic("unbuffered write to fd %d (!= %d)", fd, bw_fd);
-		
-		setvbuf(bw_FILE, NULL, _IONBF, 0);
+
 	    failed = (fwrite(loc, (int)num, 1, bw_FILE) != 1);
 	} else
 #endif /* UNIX */
