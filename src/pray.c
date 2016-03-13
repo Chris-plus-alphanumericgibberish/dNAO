@@ -104,7 +104,7 @@ static int p_type; /* (-1)-3: (-1)=really naughty, 3=really good */
 
 #define TROUBLE_PUNISHED	       (-1)
 #define TROUBLE_FUMBLING	       (-2)
-#define TROUBLE_CURSED_ITEMS	       (-3)
+#define TROUBLE_CURSED_ITEMS	   (-3)
 #define TROUBLE_SADDLE		       (-4)
 #define TROUBLE_CARRY_CURSED	   (-5)
 #define TROUBLE_TOHIT_CURSED	   (-6)
@@ -1610,6 +1610,17 @@ pleased(g_align)
 			break;
 		}
 	}
+	
+	/*Scare hostile monsters on level*/
+	{
+		struct monst *tmpm;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(!tmpm->mpeaceful){
+				monflee(tmpm, 77, TRUE, TRUE);
+			}
+		}
+	}
+	
 	u.ublesscnt = rnz(350);
 	kick_on_butt = u.uevent.udemigod ? 1 : 0;
 #ifdef ELBERETH
