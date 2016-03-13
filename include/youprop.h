@@ -74,7 +74,9 @@
 					!( 	(mvitals[PM_KITTEN].mvflags & G_GENOD || mvitals[PM_KITTEN].died >= 120) && \
 						(mvitals[PM_HOUSECAT].mvflags & G_GENOD || mvitals[PM_HOUSECAT].died >= 120) && \
 						(mvitals[PM_LARGE_CAT].mvflags & G_GENOD || mvitals[PM_LARGE_CAT].died >= 120) \
-					)) || u.sealsActive&SEAL_TENEBROUS\
+					) \
+				 ) || \
+				 u.sealsActive&SEAL_TENEBROUS\
 				)
 
 #define HAntimagic		u.uprops[ANTIMAGIC].intrinsic
