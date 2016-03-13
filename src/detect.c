@@ -603,7 +603,7 @@ struct obj	*detector;	/* object doing the detecting */
 					detector->oartifact) &&
 			detector->blessed);
     int ct = 0;
-    register struct obj *obj, *otmp = (struct obj *)0;
+    register struct obj *obj;
     register struct monst *mtmp;
     int uw = u.uinwater;
     int usw = u.usubwater;
@@ -715,7 +715,7 @@ boolean blessed;	/* do blessed detecting */
     char stuff[BUFSZ];
     int do_dknown = blessed;
     int ct = 0;
-    register struct obj *obj, *otmp = (struct obj *)0;
+    register struct obj *obj;
     register struct monst *mtmp;
     int uw = u.uinwater;
     int usw = u.usubwater;
