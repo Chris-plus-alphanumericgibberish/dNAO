@@ -2237,13 +2237,14 @@ spiriteffects(power, atme)
 		}break;
 		case PWR_BARAGE:
 			You("get ready to fire a barrage.");
-			barage = TRUE; //state variable
-			if(uquiver) throw_obj(uquiver, 0, 1);
-			else{
+			if(uquiver){
+				barage = TRUE; //state variable
+				throw_obj(uquiver, 0, 1);
+				barage = FALSE;
+			} else {
 				You("have nothing quivered.");
-				return 0;
+				return;
 			}
-			barage = FALSE;
 		break;
 		case PWR_BREATH_POISON:{
 	        coord cc;
