@@ -2159,10 +2159,10 @@ STATIC_OVL boolean
 interest_mapseen(mptr)
 mapseen *mptr;
 {
-	return on_level(&u.uz, &mptr->lev) || (!mptr->feat.forgot && (
+	return ((on_level(&u.uz, &mptr->lev) || (!mptr->feat.forgot)) && (
 		INTEREST(mptr->feat) ||
-		mptr->custom ||
-		mptr->br
+		(mptr->custom) || 
+		(mptr->br)
 	));
 }
 
