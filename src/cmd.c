@@ -861,10 +861,9 @@ int
 dofightingform()
 {
 	winid tmpwin;
-	int i, n, how;
+	int n, how;
 	char buf[BUFSZ];
 	char incntlet = 'a';
-	long seal_flag = 0x1L;
 	menu_item *selected;
 	anything any;
 	
@@ -898,9 +897,17 @@ dofightingform()
 	}
 	if(P_SKILL(FFORM_MAKASHI) >= P_BASIC){
 		if(u.fightingForm == FFORM_MAKASHI) {
-			Sprintf(buf,	"Makashi (active)");
+			if(uarm && !(is_light_armor(uarm) || is_medium_armor(uarm))){
+				Sprintf(buf,	"Makashi (selected; blocked by armor)");
+			} else {
+				Sprintf(buf,	"Makashi (active)");
+			}
 		} else {
-			Sprintf(buf,	"Makashi");
+			if(uarm && !(is_light_armor(uarm) || is_medium_armor(uarm))){
+				Sprintf(buf,	"Makashi (blocked by armor)");
+			} else {
+				Sprintf(buf,	"Makashi");
+			}
 		}
 		any.a_int = FFORM_MAKASHI;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -910,9 +917,17 @@ dofightingform()
 	}
 	if(P_SKILL(FFORM_SORESU) >= P_BASIC){
 		if(u.fightingForm == FFORM_SORESU) {
-			Sprintf(buf,	"Soresu (active)");
+			if(uarm && !(is_light_armor(uarm) || is_medium_armor(uarm))){
+				Sprintf(buf,	"Soresu (selected; blocked by armor)");
+			} else {
+				Sprintf(buf,	"Soresu (active)");
+			}
 		} else {
-			Sprintf(buf,	"Soresu");
+			if(uarm && !(is_light_armor(uarm) || is_medium_armor(uarm))){
+				Sprintf(buf,	"Soresu (blocked by armor)");
+			} else {
+				Sprintf(buf,	"Soresu");
+			}
 		}
 		any.a_int = FFORM_SORESU;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -922,9 +937,17 @@ dofightingform()
 	}
 	if(P_SKILL(FFORM_ATARU) >= P_BASIC){
 		if(u.fightingForm == FFORM_ATARU) {
-			Sprintf(buf,	"Ataru (active)");
+			if(uarm && !(is_light_armor(uarm))){
+				Sprintf(buf,	"Ataru (selected; blocked by armor)");
+			} else {
+				Sprintf(buf,	"Ataru (active)");
+			}
 		} else {
-			Sprintf(buf,	"Ataru");
+			if(uarm && !(is_light_armor(uarm))){
+				Sprintf(buf,	"Ataru (blocked by armor)");
+			} else {
+				Sprintf(buf,	"Ataru");
+			}
 		}
 		any.a_int = FFORM_ATARU;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -934,9 +957,17 @@ dofightingform()
 	}
 	if(P_SKILL(FFORM_SHIEN) >= P_BASIC){
 		if(u.fightingForm == FFORM_SHIEN) {
-			Sprintf(buf,	"Shien (active)");
+			if(uarm && !(is_light_armor(uarm))){
+				Sprintf(buf,	"Shien (selected; blocked by armor)");
+			} else {
+				Sprintf(buf,	"Shien (active)");
+			}
 		} else {
-			Sprintf(buf,	"Shien");
+			if(uarm && !(is_light_armor(uarm))){
+				Sprintf(buf,	"Shien (blocked by armor)");
+			} else {
+				Sprintf(buf,	"Shien");
+			}
 		}
 		any.a_int = FFORM_SHIEN;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -946,9 +977,17 @@ dofightingform()
 	}
 	if(P_SKILL(FFORM_DJEM_SO) >= P_BASIC){
 		if(u.fightingForm == FFORM_DJEM_SO) {
-			Sprintf(buf,	"Djem So (active)");
+			if(uarm && !(is_light_armor(uarm) || is_medium_armor(uarm))){
+				Sprintf(buf,	"Djem So (selected; blocked by armor)");
+			} else {
+				Sprintf(buf,	"Djem So (active)");
+			}
 		} else {
-			Sprintf(buf,	"Djem So");
+			if(uarm && !(is_light_armor(uarm) || is_medium_armor(uarm))){
+				Sprintf(buf,	"Djem So (blocked by armor)");
+			} else {
+				Sprintf(buf,	"Djem So");
+			}
 		}
 		any.a_int = FFORM_DJEM_SO;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -958,9 +997,17 @@ dofightingform()
 	}
 	if(P_SKILL(FFORM_NIMAN) >= P_BASIC){
 		if(u.fightingForm == FFORM_NIMAN) {
-			Sprintf(buf,	"Niman (active)");
+			if(uarm && (is_metallic(uarm))){
+				Sprintf(buf,	"Niman (selected; blocked by armor)");
+			} else {
+				Sprintf(buf,	"Niman (active)");
+			}
 		} else {
-			Sprintf(buf,	"Niman");
+			if(uarm && (is_metallic(uarm))){
+				Sprintf(buf,	"Niman (blocked by armor)");
+			} else {
+				Sprintf(buf,	"Niman");
+			}
 		}
 		any.a_int = FFORM_NIMAN;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -970,9 +1017,17 @@ dofightingform()
 	}
 	if(P_SKILL(FFORM_JUYO) >= P_BASIC){
 		if(u.fightingForm == FFORM_JUYO) {
-			Sprintf(buf,	"Juyo (active)");
+			if(uarm && !(is_light_armor(uarm))){
+				Sprintf(buf,	"Juyo (selected; blocked by armor)");
+			} else {
+				Sprintf(buf,	"Juyo (active)");
+			}
 		} else {
-			Sprintf(buf,	"Juyo");
+			if(uarm && !(is_light_armor(uarm))){
+				Sprintf(buf,	"Juyo (blocked by armor)");
+			} else {
+				Sprintf(buf,	"Juyo");
+			}
 		}
 		any.a_int = FFORM_JUYO;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
