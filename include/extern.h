@@ -1713,7 +1713,6 @@ E boolean FDECL(parse_object_symbol, (const char *));
 E boolean FDECL(parse_symbol, (const char *));
 
 /* ### pager.c ### */
-
 E int NDECL(dowhatis);
 E int NDECL(doquickwhatis);
 E int NDECL(doidtrap);
