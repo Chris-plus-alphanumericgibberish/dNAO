@@ -258,6 +258,7 @@ struct monst *mtmp;
 	return 	mtmp->data->mlet == S_LEPRECHAUN ||
 			mtmp->data->mlet == S_NYMPH;
 }
+
 boolean
 scaryQueen(complete, mtmp)
 int complete;
