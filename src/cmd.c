@@ -540,7 +540,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD)){
+	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14){
 		Sprintf(buf, "Sing an Elemental into being");
 		any.a_int = MATTK_ELMENTAL;	/* must be non-zero */
 		incntlet = 'E';
