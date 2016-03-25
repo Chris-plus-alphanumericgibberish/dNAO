@@ -350,7 +350,7 @@ dig()
 	}
 
 	if (digging.effort > 100) {
-		register const char *digtxt, *dmgtxt = (const char*) 0;
+		register const char *digtxt = (char *) 0, *dmgtxt = (const char*) 0;
 		register struct obj *obj;
 		register boolean shopedge = *in_rooms(dpx, dpy, SHOPBASE);
 
