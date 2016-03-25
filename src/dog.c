@@ -1130,7 +1130,7 @@ boolean was_dead;
 	    edog->droptime = 0L;
 	    edog->dropdist = 10000;
 	    edog->whistletime = 0L;
-	    edog->apport = 5;
+		    edog->apport = ACURR(A_CHA);
 	} /* else lifesaved, so retain current values */
     }
 }
