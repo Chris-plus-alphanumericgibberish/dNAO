@@ -1887,7 +1887,8 @@ shk_other_services()
 */
   	/* Weapon-works!  Only a weapon store. */
 	if ((ESHK(shkp)->services & (SHK_SPECIAL_A|SHK_SPECIAL_B|SHK_SPECIAL_C))
-			&& (shk_class_match(WEAPON_CLASS, shkp) == SHK_MATCH)) {
+			&& (shk_class_match(WEAPON_CLASS, shkp) == SHK_MATCH)
+	) {
 		any.a_int = 4;
 		if (ESHK(shkp)->services & (SHK_SPECIAL_A|SHK_SPECIAL_B))
 			add_menu(tmpwin, NO_GLYPH, &any , 'w', 0, ATR_NONE,
@@ -1899,7 +1900,8 @@ shk_other_services()
   
   	/* Armor-works */
 	if ((ESHK(shkp)->services & (SHK_SPECIAL_A|SHK_SPECIAL_B))
-			 && (shk_class_match(ARMOR_CLASS, shkp) == SHK_MATCH)) {
+			 && (shk_class_match(ARMOR_CLASS, shkp) == SHK_MATCH)
+	) {
 		any.a_int = 5;
 		add_menu(tmpwin, NO_GLYPH, &any , 'r', 0, ATR_NONE,
 				"Armor-works", MENU_UNSELECTED);
@@ -1910,7 +1912,8 @@ shk_other_services()
 			((shk_class_match(WAND_CLASS, shkp) == SHK_MATCH) ||
 			(shk_class_match(TOOL_CLASS, shkp) == SHK_MATCH) ||
 			(shk_class_match(SPBOOK_CLASS, shkp) == SHK_MATCH) ||
-			(shk_class_match(RING_CLASS, shkp) == SHK_MATCH))) {
+			(shk_class_match(RING_CLASS, shkp) == SHK_MATCH))
+	) {
 		any.a_int = 6;
 		add_menu(tmpwin, NO_GLYPH, &any , 'c', 0, ATR_NONE,
 				"Charge", MENU_UNSELECTED);
