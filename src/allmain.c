@@ -383,7 +383,8 @@ moveloop()
 
     commands_init();
 #ifdef WIZARD
-    if (wizard) add_debug_extended_commands();
+	// Called twice in dNAO?
+    //if (wizard) add_debug_extended_commands();
 #endif
 
     (void) encumber_msg(); /* in case they auto-picked up something */
