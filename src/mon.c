@@ -3597,7 +3597,7 @@ register struct monst *mtmp;
 		mtmp->data->msound == MS_SONG || mtmp->data->msound == MS_OONA
 		)
 	) {
-		domonnoise(mtmp);
+		domonnoise(mtmp, FALSE);
     }
     if(mtmp->data == &mons[PM_MEDUSA]) {
 		register int i;
