@@ -2204,6 +2204,7 @@ E void FDECL(yelp, (struct monst *));
 E void FDECL(whimper, (struct monst *));
 E void FDECL(beg, (struct monst *));
 E int NDECL(dotalk);
+E int FDECL(dochat, (BOOLEAN_P, int, int, int));
 E void FDECL(councilspirit, (int));
 E void FDECL(gnosisspirit, (int));
 E int FDECL(P_MAX_SKILL, (int));
@@ -2211,7 +2212,7 @@ E int FDECL(P_SKILL, (int));
 E int FDECL(P_RESTRICTED, (int));
 E boolean FDECL(spiritSkill, (int));
 E boolean FDECL(roleSkill, (int));
-E int FDECL(domonnoise,(struct monst *));
+E int FDECL(domonnoise,(struct monst *, BOOLEAN_P));
 #ifdef USER_SOUNDS
 E int FDECL(add_sound_mapping, (const char *));
 E void FDECL(play_sound_for_message, (const char *));

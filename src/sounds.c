@@ -14,7 +14,6 @@
 
 static const char *FDECL(DantalionRace,(int));
 int FDECL(dobinding,(int, int));
-static int NDECL(dochat);
 
 static const char tools[] = { TOOL_CLASS, 0 };
 
@@ -565,7 +564,7 @@ register struct monst *mtmp;
 
     /* presumably nearness and soundok checks have already been made */
     if (!is_silent(mtmp->data) && mtmp->data->msound <= MS_ANIMAL)
-	(void) domonnoise(mtmp);
+	(void) domonnoise(mtmp, FALSE);
     else if (mtmp->data->msound >= MS_HUMANOID) {
 	if (!canspotmon(mtmp))
 	    map_invisible(mtmp->mx, mtmp->my);
@@ -574,8 +573,9 @@ register struct monst *mtmp;
 }
 
 int
-domonnoise(mtmp)
-register struct monst *mtmp;
+domonnoise(mtmp, chatting)
+struct monst *mtmp;
+boolean chatting;
 {
 	register const char *pline_msg = 0,	/* Monnam(mtmp) will be prepended */
 			*verbl_msg = 0;	/* verbalize() */
@@ -585,7 +585,13 @@ register struct monst *mtmp;
 
     /* presumably nearness and sleep checks have already been made */
 	if (!flags.soundok) return(0);
-	if (is_silent(ptr)) return(0);
+	if (is_silent(ptr)){
+		if (chatting) {
+			pline("%s does not respond.", Monnam(mtmp));
+			return 1;
+		}
+		return(0);
+	}
 	
 	/* Make sure its your role's quest quardian; adjust if not */
 	if (ptr->msound == MS_GUARDIAN && ptr != &mons[urole.guardnum] && ptr != &mons[PM_CELEBORN]){
@@ -810,9 +816,11 @@ asGuardian:
 	    	pline_msg = "squawks.";
 	    break;
 	case MS_HISS:
-	    if (!mtmp->mpeaceful)
-		pline_msg = "hisses!";
-	    else return 0;	/* no sound */
+	    if (!mtmp->mpeaceful) pline_msg = "hisses!";
+	    else {
+			if (chatting) pline_msg = "does not respond.";
+			else return 0;	/* no sound */
+		}
 	    break;
 	case MS_BUZZ:
 	    pline_msg = mtmp->mpeaceful ? "drones." : "buzzes angrily.";
@@ -1811,7 +1819,10 @@ humanoid_sound:
 		pline_msg = "is busy reading a copy of Sandman #8.";
 	    else verbl_msg = "Who do you think you are, War?";
 	    break;
-    }
+	default:
+		if (chatting) pline_msg = "does not respond.";
+	break;
+	}
 
     if (pline_msg) pline("%s %s", Monnam(mtmp), pline_msg);
     else if (verbl_msg) verbalize1(verbl_msg);
@@ -1825,13 +1836,17 @@ dotalk()
     int result;
     boolean save_soundok = flags.soundok;
     flags.soundok = 1;	/* always allow sounds while chatting */
-    result = dochat();
+    result = dochat(TRUE, 0, 0, 0);
     flags.soundok = save_soundok;
     return result;
 }
 
-static int
-dochat()
+int
+dochat(ask_for_dir, dx, dy, dz)
+boolean ask_for_dir;
+int dx;
+int dy;
+int dz;
 {
     register struct monst *mtmp;
     register int tx,ty,bindresult;
@@ -1862,14 +1877,18 @@ dochat()
 //		return(1); //proceed with chat code (maybe you want to speak to the shopkeep about something else, maybe not. shouldn't block either way)
 	}
 
-    if (!getdir("Talk to whom? (in what direction)")) {
+	if (!ask_for_dir) {
+		u.dx = dx;
+		u.dy = dy;
+		u.dz = dz;
+	} else if (!getdir("Talk to whom? (in what direction)")) {
 		/* decided not to chat */
 		return(0);
 	}
 
 #ifdef STEED
     if (u.usteed && u.dz > 0)
-	return (domonnoise(u.usteed));
+	return (domonnoise(u.usteed, FALSE));
 #endif
 	if (u.dz) {
 		struct engr *ep = get_head_engr();
@@ -2005,7 +2024,7 @@ dochat()
         return 0;
     }
 #endif /* CONVICT */
-    return domonnoise(mtmp);
+    return domonnoise(mtmp, FALSE);
 }
 
 //definition of externs in you.h

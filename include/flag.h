@@ -30,7 +30,6 @@ struct flag {
 #endif
 	boolean  botl;		/* partially redo status line */
 	boolean  botlx;		/* print an entirely new bottom line */
-	boolean  confirm;	/* confirm before hitting tame monsters */
 	boolean  debug;		/* in debugging mode */
 #define wizard	 flags.debug
 	boolean  end_own;	/* list all own scores */
@@ -175,7 +174,14 @@ struct flag {
  *
  */
 
+/* values for iflags.attack_mode */
+#define ATTACK_MODE_PACIFIST  'p'
+#define ATTACK_MODE_CHAT      'c'
+#define ATTACK_MODE_ASK       'a'
+#define ATTACK_MODE_FIGHT_ALL 'f'
+ 
 struct instance_flags {
+	char attack_mode;         /* attack, refrain or ask to attack monsters */
 	boolean  cbreak;	/* in cbreak mode, rogue format */
 #ifdef CURSES_GRAPHICS
     boolean  cursesgraphics;    /* Use portable curses extended characters */

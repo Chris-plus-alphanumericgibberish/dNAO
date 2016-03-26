@@ -6,6 +6,7 @@
 #include "artifact.h"
 
 STATIC_DCL boolean FDECL(known_hitum, (struct monst *,int *,struct attack *));
+STATIC_DCL boolean FDECL(pacifist_attack_checks, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(steal_it, (struct monst *, struct attack *));
 STATIC_DCL boolean FDECL(hitum, (struct monst *,int,struct attack *));
 STATIC_DCL boolean FDECL(hmon_hitmon, (struct monst *,struct obj *,int));
@@ -93,17 +94,38 @@ int attk;
 	}
 }
 
+/* Extra pacifist attack checks; FALSE means it's OK to attack. */
+STATIC_OVL boolean
+pacifist_attack_checks(mtmp, wep)
+struct monst *mtmp;
+struct obj *wep; /* uwep for attack(), null for kick_monster() */
+{
+	if (Confusion || Hallucination || Stunned)
+		return FALSE;
+
+	/* Intelligent chaotic weapons (Stormbringer) want blood */
+	if (wep && spec_ability2(wep, SPFX2_BLDTHRST)) {
+		/* Don't show Stormbringer's message unless pacifist. */
+		if (iflags.attack_mode == ATTACK_MODE_PACIFIST)
+			override_confirmation = TRUE;
+		return FALSE;
+	}
+
+	if (iflags.attack_mode == ATTACK_MODE_PACIFIST) {
+		You("stop for %s.", mon_nam(mtmp));
+		context.move = 0;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 /* FALSE means it's OK to attack */
 boolean
 attack_checks(mtmp, wep)
-register struct monst *mtmp;
+struct monst *mtmp;
 struct obj *wep;	/* uwep for attack(), null for kick_monster() */
 {
-	char qbuf[QBUFSZ];
-#ifdef PARANOID
-	char buf[BUFSZ];
-#endif
-
 	/* if you're close enough to attack, alert any waiting monster */
 	mtmp->mstrategy &= ~STRAT_WAITMASK;
 
@@ -195,39 +217,53 @@ struct obj *wep;	/* uwep for attack(), null for kick_monster() */
 	    wakeup(mtmp);
 	}
 
-	if (flags.confirm && mtmp->mpeaceful
-	    && !Confusion && !Hallucination && !Stunned) {
+	if (mtmp->mpeaceful && !Confusion && !Hallucination && !Stunned) {
 		/* Intelligent chaotic weapons (Stormbringer) want blood */
 		/* NOTE:  now generalized to a flag, also, more lawful weapons than chaotic weps have it now :) */
 		if (wep && spec_ability2(wep, SPFX2_BLDTHRST)) {
-			override_confirmation = TRUE;
+			/* Don't show Stormbringer's message if attack is intended. */
+			if (iflags.attack_mode != ATTACK_MODE_FIGHT_ALL)
+				override_confirmation = TRUE;
 			return(FALSE);
 		}
 		if (canspotmon(mtmp)) {
-#ifdef PARANOID
-			Sprintf(qbuf, "Really attack %s? [no/yes]",
-				mon_nam(mtmp));
-			if (iflags.paranoid_hit) {
-				getlin (qbuf, buf);
-				(void) lcase (buf);
-				if (strcmp (buf, "yes")) {
-				  flags.move = 0;
-				  return(TRUE);
+			if (iflags.attack_mode == ATTACK_MODE_CHAT
+				|| iflags.attack_mode == ATTACK_MODE_PACIFIST) {
+				if (mtmp->ispriest) {
+					/* Prevent accidental donation prompt. */
+					pline("%s mutters a prayer.", Monnam(mtmp));
+				} else if (!dochat(FALSE, u.dx, u.dy, 0)) {
+					context.move = 0;
 				}
-			} else {
-#endif
-			Sprintf(qbuf, "Really attack %s?", mon_nam(mtmp));
-			if (yn(qbuf) != 'y') {
-				flags.move = 0;
-				return(TRUE);
-			}
+				return TRUE;
+			} else if(iflags.attack_mode == ATTACK_MODE_ASK){
+				char qbuf[QBUFSZ];
 #ifdef PARANOID
-			}
+				char buf[BUFSZ];
+				if (iflags.paranoid_hit) {
+					Sprintf(qbuf, "Really attack %s? [no/yes]",
+						mon_nam(mtmp));
+					getlin (qbuf, buf);
+					(void) lcase (buf);
+					if (strcmp (buf, "yes")) {
+					  flags.move = 0;
+					  return(TRUE);
+					}
+				} else {
 #endif
+					Sprintf(qbuf, "Really attack %s?", mon_nam(mtmp));
+					if (yn(qbuf) != 'y') {
+						flags.move = 0;
+						return(TRUE);
+					}
+#ifdef PARANOID
+				}
+#endif
+			}
 		}
 	}
 
-	return(FALSE);
+	return pacifist_attack_checks(mtmp, wep);
 }
 
 /*
@@ -664,7 +700,7 @@ struct attack *uattk;
 	if (override_confirmation) {
 	    /* this may need to be generalized if weapons other than
 	       Stormbringer acquire similar anti-social behavior... */
-	    if (flags.verbose) Your("bloodthirsty blade attacks!");
+	    if (flags.verbose) Your("bloodthirsty weapon attacks!");
 	}
 
 	if(!*mhit) {

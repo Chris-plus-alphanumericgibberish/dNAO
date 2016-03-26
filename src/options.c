@@ -86,7 +86,6 @@ static struct Bool_Opt
 # else	/* systems that support multiple terminals, many monochrome */
 	{"color",         &iflags.wc_color, FALSE, SET_IN_GAME},	/*WC*/
 # endif
-	{"confirm",&flags.confirm, TRUE, SET_IN_GAME},
 #ifdef CURSES_GRAPHICS
 	{"cursesgraphics", &iflags.cursesgraphics, TRUE, SET_IN_GAME},
 #else
@@ -300,6 +299,8 @@ static struct Comp_Opt
 	{ "align_message", "message window alignment", 20, DISP_IN_GAME }, 	/*WC*/
 	{ "align_status", "status window alignment", 20, DISP_IN_GAME }, 	/*WC*/
 	{ "altkeyhandler", "alternate key handler", 20, DISP_IN_GAME },
+	{ "attack_mode", "attack, refrain or ask to attack monsters", 1,
+		SET_IN_GAME },
 	{ "boulder",  "the symbol to use for displaying boulders",
 						1, SET_IN_GAME },
 	{ "catname",  "the name of your (first) cat (e.g., catname:Tabby)",
@@ -615,6 +616,7 @@ initoptions()
 	iflags.prevmsg_window = 's';
 #endif
 	iflags.menu_headings = ATR_INVERSE;
+	iflags.attack_mode = ATTACK_MODE_CHAT;
 
 	/* Use negative indices to indicate not yet selected */
 	flags.initrole = -1;
@@ -1694,6 +1696,30 @@ boolean tinitial, tfrom_file;
 #endif /* MICRO */
 
 	/* compound options */
+
+	fullname = "attack_mode";
+	/* attack_mode:pacifist, chat, ask, or fight */
+	if (match_optname(opts, fullname, 11, TRUE)) {
+		if (duplicate)
+			complain_about_duplicate(opts, 1);
+		if (negated) {
+			bad_negation(fullname, FALSE);
+		} else if ((op = string_for_opt(opts, FALSE))) {
+			int tmp = tolower(*op);
+			switch (tmp) {
+				case ATTACK_MODE_PACIFIST:
+				case ATTACK_MODE_CHAT:
+				case ATTACK_MODE_ASK:
+				case ATTACK_MODE_FIGHT_ALL:
+					iflags.attack_mode = tmp;
+				break;
+				default:
+					badoption(opts);
+					return;
+			}
+		}
+		return;
+	}
 
 	fullname = "pettype";
 	if (match_optname(opts, fullname, 3, TRUE)) {
@@ -3380,276 +3406,302 @@ boolean setinitial,setfromfile;
     
     /* Special handling of menustyle, pickup_burden, pickup_types,
      * disclose, runmode, msg_window, menu_headings, number_pad and sortloot
+	 * attack_mode,
 #ifdef AUTOPICKUP_EXCEPTIONS
      * Also takes care of interactive autopickup_exception_handling changes.
 #endif
      */
-    if (!strcmp("menustyle", optname)) {
-	const char *style_name;
-	menu_item *style_pick = (menu_item *)0;
-        tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	for (i = 0; i < SIZE(menutype); i++) {
-		style_name = menutype[i];
-    		/* note: separate `style_name' variable used
-		   to avoid an optimizer bug in VAX C V2.3 */
-		any.a_int = i + 1;
-		add_menu(tmpwin, NO_GLYPH, &any, *style_name, 0,
-			 ATR_NONE, style_name, MENU_UNSELECTED);
-        }
-	end_menu(tmpwin, "Select menustyle:");
-	if (select_menu(tmpwin, PICK_ONE, &style_pick) > 0) {
-		flags.menu_style = style_pick->item.a_int - 1;
-		free((genericptr_t)style_pick);
-        }
-	destroy_nhwindow(tmpwin);
-        retval = TRUE;
-    } else if (!strcmp("pickup_burden", optname)) {
-	const char *burden_name, *burden_letters = "ubsntl";
-	menu_item *burden_pick = (menu_item *)0;
-        tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	for (i = 0; i < SIZE(burdentype); i++) {
-		burden_name = burdentype[i];
-		any.a_int = i + 1;
-		add_menu(tmpwin, NO_GLYPH, &any, burden_letters[i], 0,
-			 ATR_NONE, burden_name, MENU_UNSELECTED);
-        }
-	end_menu(tmpwin, "Select encumbrance level:");
-	if (select_menu(tmpwin, PICK_ONE, &burden_pick) > 0) {
-		flags.pickup_burden = burden_pick->item.a_int - 1;
-		free((genericptr_t)burden_pick);
-	}
-	destroy_nhwindow(tmpwin);
-	retval = TRUE;
-    } else if (!strcmp("pickup_types", optname)) {
-	/* parseoptions will prompt for the list of types */
-	parseoptions(strcpy(buf, "pickup_types"), setinitial, setfromfile);
-	retval = TRUE;
-    } else if (!strcmp("disclose", optname)) {
-	int pick_cnt, pick_idx, opt_idx;
-	menu_item *disclosure_category_pick = (menu_item *)0;
-	/*
-	 * The order of disclose_names[]
-         * must correspond to disclosure_options in decl.h
-         */
-	static const char *disclosure_names[] = {
-		"inventory", "attributes", "vanquished", "genocides", "conduct"
-	};
-	int disc_cat[NUM_DISCLOSURE_OPTIONS];
-	const char *disclosure_name;
-
-        tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	for (i = 0; i < NUM_DISCLOSURE_OPTIONS; i++) {
-		disclosure_name = disclosure_names[i];
-		any.a_int = i + 1;
-		add_menu(tmpwin, NO_GLYPH, &any, disclosure_options[i], 0,
-			 ATR_NONE, disclosure_name, MENU_UNSELECTED);
-		disc_cat[i] = 0;
-        }
-	end_menu(tmpwin, "Change which disclosure options categories:");
-	if ((pick_cnt = select_menu(tmpwin, PICK_ANY, &disclosure_category_pick)) > 0) {
-	    for (pick_idx = 0; pick_idx < pick_cnt; ++pick_idx) {
-		opt_idx = disclosure_category_pick[pick_idx].item.a_int - 1;
-		disc_cat[opt_idx] = 1;
-	    }
-	    free((genericptr_t)disclosure_category_pick);
-	    disclosure_category_pick = (menu_item *)0;
-	}
-	destroy_nhwindow(tmpwin);
-
-	for (i = 0; i < NUM_DISCLOSURE_OPTIONS; i++) {
-	    if (disc_cat[i]) {
-	    	char dbuf[BUFSZ];
-		menu_item *disclosure_option_pick = (menu_item *)0;
-		Sprintf(dbuf, "Disclosure options for %s:", disclosure_names[i]);
-	        tmpwin = create_nhwindow(NHW_MENU);
+	if(!strcmp("attack_mode", optname)){
+		menu_item *pick = (menu_item *) 0;
+		tmpwin = create_nhwindow(NHW_MENU);
 		start_menu(tmpwin);
-		any.a_char = DISCLOSE_NO_WITHOUT_PROMPT;
-		add_menu(tmpwin, NO_GLYPH, &any, 'a', 0,
-			ATR_NONE,"Never disclose and don't prompt", MENU_UNSELECTED);
-		any.a_void = 0;
-		any.a_char = DISCLOSE_YES_WITHOUT_PROMPT;
-		add_menu(tmpwin, NO_GLYPH, &any, 'b', 0,
-			ATR_NONE,"Always disclose and don't prompt", MENU_UNSELECTED);
-		any.a_void = 0;
-		any.a_char = DISCLOSE_PROMPT_DEFAULT_NO;
-		add_menu(tmpwin, NO_GLYPH, &any, 'c', 0,
-			ATR_NONE,"Prompt and default answer to \"No\"", MENU_UNSELECTED);
-		any.a_void = 0;
-		any.a_char = DISCLOSE_PROMPT_DEFAULT_YES;
-		add_menu(tmpwin, NO_GLYPH, &any, 'd', 0,
-			ATR_NONE,"Prompt and default answer to \"Yes\"", MENU_UNSELECTED);
-		end_menu(tmpwin, dbuf);
-		if (select_menu(tmpwin, PICK_ONE, &disclosure_option_pick) > 0) {
-			flags.end_disclose[i] = disclosure_option_pick->item.a_char;
-			free((genericptr_t)disclosure_option_pick);
+		any = zeroany;
+		any.a_char = ATTACK_MODE_PACIFIST;
+		add_menu(tmpwin, NO_GLYPH, &any, ATTACK_MODE_PACIFIST, 0, 0,
+			"pacifist: don't fight anything", MENU_UNSELECTED);
+		any.a_char = ATTACK_MODE_CHAT;
+		add_menu(tmpwin, NO_GLYPH, &any, ATTACK_MODE_CHAT, 0, 0,
+			"chat: chat with peacefuls, fight hostiles",
+			MENU_UNSELECTED);
+		any.a_char = ATTACK_MODE_ASK;
+		add_menu(tmpwin, NO_GLYPH, &any, ATTACK_MODE_ASK, 0, 0,
+			"ask: ask to fight peacefuls", MENU_UNSELECTED);
+		any.a_char = ATTACK_MODE_FIGHT_ALL;
+		add_menu(tmpwin, NO_GLYPH, &any, ATTACK_MODE_FIGHT_ALL, 0, 0,
+			"fightall: fight peacefuls and hostiles", MENU_UNSELECTED);
+		end_menu(tmpwin, "Select attack_mode:");
+		if (select_menu(tmpwin, PICK_ONE, &pick) > 0) {
+			iflags.attack_mode = pick->item.a_char;
+			free((genericptr_t) pick);
 		}
 		destroy_nhwindow(tmpwin);
-	    }
-	}
-	retval = TRUE;
+    } else if (!strcmp("menustyle", optname)){
+		const char *style_name;
+		menu_item *style_pick = (menu_item *)0;
+			tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		for (i = 0; i < SIZE(menutype); i++) {
+			style_name = menutype[i];
+				/* note: separate `style_name' variable used
+			   to avoid an optimizer bug in VAX C V2.3 */
+			any.a_int = i + 1;
+			add_menu(tmpwin, NO_GLYPH, &any, *style_name, 0,
+				 ATR_NONE, style_name, MENU_UNSELECTED);
+			}
+		end_menu(tmpwin, "Select menustyle:");
+		if (select_menu(tmpwin, PICK_ONE, &style_pick) > 0) {
+			flags.menu_style = style_pick->item.a_int - 1;
+			free((genericptr_t)style_pick);
+			}
+		destroy_nhwindow(tmpwin);
+			retval = TRUE;
+    } else if (!strcmp("pickup_burden", optname)) {
+		const char *burden_name, *burden_letters = "ubsntl";
+		menu_item *burden_pick = (menu_item *)0;
+			tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		for (i = 0; i < SIZE(burdentype); i++) {
+			burden_name = burdentype[i];
+			any.a_int = i + 1;
+			add_menu(tmpwin, NO_GLYPH, &any, burden_letters[i], 0,
+				 ATR_NONE, burden_name, MENU_UNSELECTED);
+			}
+		end_menu(tmpwin, "Select encumbrance level:");
+		if (select_menu(tmpwin, PICK_ONE, &burden_pick) > 0) {
+			flags.pickup_burden = burden_pick->item.a_int - 1;
+			free((genericptr_t)burden_pick);
+		}
+		destroy_nhwindow(tmpwin);
+		retval = TRUE;
+    } else if (!strcmp("pickup_types", optname)) {
+		/* parseoptions will prompt for the list of types */
+		parseoptions(strcpy(buf, "pickup_types"), setinitial, setfromfile);
+		retval = TRUE;
+    } else if (!strcmp("disclose", optname)) {
+		int pick_cnt, pick_idx, opt_idx;
+		menu_item *disclosure_category_pick = (menu_item *)0;
+		/*
+		 * The order of disclose_names[]
+			 * must correspond to disclosure_options in decl.h
+			 */
+		static const char *disclosure_names[] = {
+			"inventory", "attributes", "vanquished", "genocides", "conduct"
+		};
+		int disc_cat[NUM_DISCLOSURE_OPTIONS];
+		const char *disclosure_name;
+
+			tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		for (i = 0; i < NUM_DISCLOSURE_OPTIONS; i++) {
+			disclosure_name = disclosure_names[i];
+			any.a_int = i + 1;
+			add_menu(tmpwin, NO_GLYPH, &any, disclosure_options[i], 0,
+				 ATR_NONE, disclosure_name, MENU_UNSELECTED);
+			disc_cat[i] = 0;
+			}
+		end_menu(tmpwin, "Change which disclosure options categories:");
+		if ((pick_cnt = select_menu(tmpwin, PICK_ANY, &disclosure_category_pick)) > 0) {
+			for (pick_idx = 0; pick_idx < pick_cnt; ++pick_idx) {
+			opt_idx = disclosure_category_pick[pick_idx].item.a_int - 1;
+			disc_cat[opt_idx] = 1;
+			}
+			free((genericptr_t)disclosure_category_pick);
+			disclosure_category_pick = (menu_item *)0;
+		}
+		destroy_nhwindow(tmpwin);
+
+		for (i = 0; i < NUM_DISCLOSURE_OPTIONS; i++) {
+			if (disc_cat[i]) {
+				char dbuf[BUFSZ];
+			menu_item *disclosure_option_pick = (menu_item *)0;
+			Sprintf(dbuf, "Disclosure options for %s:", disclosure_names[i]);
+				tmpwin = create_nhwindow(NHW_MENU);
+			start_menu(tmpwin);
+			any.a_char = DISCLOSE_NO_WITHOUT_PROMPT;
+			add_menu(tmpwin, NO_GLYPH, &any, 'a', 0,
+				ATR_NONE,"Never disclose and don't prompt", MENU_UNSELECTED);
+			any.a_void = 0;
+			any.a_char = DISCLOSE_YES_WITHOUT_PROMPT;
+			add_menu(tmpwin, NO_GLYPH, &any, 'b', 0,
+				ATR_NONE,"Always disclose and don't prompt", MENU_UNSELECTED);
+			any.a_void = 0;
+			any.a_char = DISCLOSE_PROMPT_DEFAULT_NO;
+			add_menu(tmpwin, NO_GLYPH, &any, 'c', 0,
+				ATR_NONE,"Prompt and default answer to \"No\"", MENU_UNSELECTED);
+			any.a_void = 0;
+			any.a_char = DISCLOSE_PROMPT_DEFAULT_YES;
+			add_menu(tmpwin, NO_GLYPH, &any, 'd', 0,
+				ATR_NONE,"Prompt and default answer to \"Yes\"", MENU_UNSELECTED);
+			end_menu(tmpwin, dbuf);
+			if (select_menu(tmpwin, PICK_ONE, &disclosure_option_pick) > 0) {
+				flags.end_disclose[i] = disclosure_option_pick->item.a_char;
+				free((genericptr_t)disclosure_option_pick);
+			}
+			destroy_nhwindow(tmpwin);
+			}
+		}
+		retval = TRUE;
     } else if (!strcmp("runmode", optname)) {
-	const char *mode_name;
-	menu_item *mode_pick = (menu_item *)0;
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	for (i = 0; i < SIZE(runmodes); i++) {
-		mode_name = runmodes[i];
-		any.a_int = i + 1;
-		add_menu(tmpwin, NO_GLYPH, &any, *mode_name, 0,
-			 ATR_NONE, mode_name, MENU_UNSELECTED);
-	}
-	end_menu(tmpwin, "Select run/travel display mode:");
-	if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
-		iflags.runmode = mode_pick->item.a_int - 1;
-		free((genericptr_t)mode_pick);
-	}
-	destroy_nhwindow(tmpwin);
-	retval = TRUE;
-    } 
+		const char *mode_name;
+		menu_item *mode_pick = (menu_item *)0;
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		for (i = 0; i < SIZE(runmodes); i++) {
+			mode_name = runmodes[i];
+			any.a_int = i + 1;
+			add_menu(tmpwin, NO_GLYPH, &any, *mode_name, 0,
+				 ATR_NONE, mode_name, MENU_UNSELECTED);
+		}
+		end_menu(tmpwin, "Select run/travel display mode:");
+		if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
+			iflags.runmode = mode_pick->item.a_int - 1;
+			free((genericptr_t)mode_pick);
+		}
+		destroy_nhwindow(tmpwin);
+		retval = TRUE;
+    }
 #ifdef TTY_GRAPHICS
-      else if (!strcmp("msg_window", optname)) {
-	/* by Christian W. Cooper */
-	menu_item *window_pick = (menu_item *)0;
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	any.a_char = 's';
-	add_menu(tmpwin, NO_GLYPH, &any, 's', 0,
-		ATR_NONE, "single", MENU_UNSELECTED);
-	any.a_char = 'c';
-	add_menu(tmpwin, NO_GLYPH, &any, 'c', 0,
-		ATR_NONE, "combination", MENU_UNSELECTED);
-	any.a_char = 'f';
-	add_menu(tmpwin, NO_GLYPH, &any, 'f', 0,
-		ATR_NONE, "full", MENU_UNSELECTED);
-	any.a_char = 'r';
-	add_menu(tmpwin, NO_GLYPH, &any, 'r', 0,
-		ATR_NONE, "reversed", MENU_UNSELECTED);
-	end_menu(tmpwin, "Select message history display type:");
-	if (select_menu(tmpwin, PICK_ONE, &window_pick) > 0) {
-		iflags.prevmsg_window = window_pick->item.a_char;
-		free((genericptr_t)window_pick);
-	}
-	destroy_nhwindow(tmpwin);
-        retval = TRUE;
+    else if (!strcmp("msg_window", optname)) {
+		/* by Christian W. Cooper */
+		menu_item *window_pick = (menu_item *)0;
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_char = 's';
+		add_menu(tmpwin, NO_GLYPH, &any, 's', 0,
+			ATR_NONE, "single", MENU_UNSELECTED);
+		any.a_char = 'c';
+		add_menu(tmpwin, NO_GLYPH, &any, 'c', 0,
+			ATR_NONE, "combination", MENU_UNSELECTED);
+		any.a_char = 'f';
+		add_menu(tmpwin, NO_GLYPH, &any, 'f', 0,
+			ATR_NONE, "full", MENU_UNSELECTED);
+		any.a_char = 'r';
+		add_menu(tmpwin, NO_GLYPH, &any, 'r', 0,
+			ATR_NONE, "reversed", MENU_UNSELECTED);
+		end_menu(tmpwin, "Select message history display type:");
+		if (select_menu(tmpwin, PICK_ONE, &window_pick) > 0) {
+			iflags.prevmsg_window = window_pick->item.a_char;
+			free((genericptr_t)window_pick);
+		}
+		destroy_nhwindow(tmpwin);
+			retval = TRUE;
     }
 #endif
-     else if (!strcmp("align_message", optname) ||
-		!strcmp("align_status", optname)) {
-	menu_item *window_pick = (menu_item *)0;
-	char abuf[BUFSZ];
-	boolean msg = (*(optname+6) == 'm');
+	else if (!strcmp("align_message", optname) ||
+		!strcmp("align_status", optname)
+	) {
+		menu_item *window_pick = (menu_item *)0;
+		char abuf[BUFSZ];
+		boolean msg = (*(optname+6) == 'm');
 
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	any.a_int = ALIGN_TOP;
-	add_menu(tmpwin, NO_GLYPH, &any, 't', 0,
-		ATR_NONE, "top", MENU_UNSELECTED);
-	any.a_int = ALIGN_BOTTOM;
-	add_menu(tmpwin, NO_GLYPH, &any, 'b', 0,
-		ATR_NONE, "bottom", MENU_UNSELECTED);
-	any.a_int = ALIGN_LEFT;
-	add_menu(tmpwin, NO_GLYPH, &any, 'l', 0,
-		ATR_NONE, "left", MENU_UNSELECTED);
-	any.a_int = ALIGN_RIGHT;
-	add_menu(tmpwin, NO_GLYPH, &any, 'r', 0,
-		ATR_NONE, "right", MENU_UNSELECTED);
-	Sprintf(abuf, "Select %s window placement relative to the map:",
-		msg ? "message" : "status");
-	end_menu(tmpwin, abuf);
-	if (select_menu(tmpwin, PICK_ONE, &window_pick) > 0) {		
-		if (msg) iflags.wc_align_message = window_pick->item.a_int;
-		else iflags.wc_align_status = window_pick->item.a_int;
-		free((genericptr_t)window_pick);
-	}
-	destroy_nhwindow(tmpwin);
-        retval = TRUE;
-    } else if (!strcmp("number_pad", optname)) {
-	static const char *npchoices[3] =
-		{"0 (off)", "1 (on)", "2 (on, DOS compatible)"};
-	const char *npletters = "abc";
-	menu_item *mode_pick = (menu_item *)0;
-
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	for (i = 0; i < SIZE(npchoices); i++) {
-		any.a_int = i + 1;
-		add_menu(tmpwin, NO_GLYPH, &any, npletters[i], 0,
-			 ATR_NONE, npchoices[i], MENU_UNSELECTED);
-        }
-	end_menu(tmpwin, "Select number_pad mode:");
-	if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
-		int mode = mode_pick->item.a_int - 1;
-		switch(mode) {
-			case 2:
-				iflags.num_pad = 1;
-				iflags.num_pad_mode = 1;
-				break;
-			case 1:
-				iflags.num_pad = 1;
-				iflags.num_pad_mode = 0;
-				break;
-			case 0:
-			default:
-				iflags.num_pad = 0;
-				iflags.num_pad_mode = 0;
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_int = ALIGN_TOP;
+		add_menu(tmpwin, NO_GLYPH, &any, 't', 0,
+			ATR_NONE, "top", MENU_UNSELECTED);
+		any.a_int = ALIGN_BOTTOM;
+		add_menu(tmpwin, NO_GLYPH, &any, 'b', 0,
+			ATR_NONE, "bottom", MENU_UNSELECTED);
+		any.a_int = ALIGN_LEFT;
+		add_menu(tmpwin, NO_GLYPH, &any, 'l', 0,
+			ATR_NONE, "left", MENU_UNSELECTED);
+		any.a_int = ALIGN_RIGHT;
+		add_menu(tmpwin, NO_GLYPH, &any, 'r', 0,
+			ATR_NONE, "right", MENU_UNSELECTED);
+		Sprintf(abuf, "Select %s window placement relative to the map:",
+			msg ? "message" : "status");
+		end_menu(tmpwin, abuf);
+		if (select_menu(tmpwin, PICK_ONE, &window_pick) > 0) {		
+			if (msg) iflags.wc_align_message = window_pick->item.a_int;
+			else iflags.wc_align_status = window_pick->item.a_int;
+			free((genericptr_t)window_pick);
 		}
-		free((genericptr_t)mode_pick);
-        }
-	destroy_nhwindow(tmpwin);
-        retval = TRUE;
+		destroy_nhwindow(tmpwin);
+			retval = TRUE;
+	} else if (!strcmp("number_pad", optname)) {
+		static const char *npchoices[3] =
+			{"0 (off)", "1 (on)", "2 (on, DOS compatible)"};
+		const char *npletters = "abc";
+		menu_item *mode_pick = (menu_item *)0;
+
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		for (i = 0; i < SIZE(npchoices); i++) {
+			any.a_int = i + 1;
+			add_menu(tmpwin, NO_GLYPH, &any, npletters[i], 0,
+				 ATR_NONE, npchoices[i], MENU_UNSELECTED);
+			}
+		end_menu(tmpwin, "Select number_pad mode:");
+		if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
+			int mode = mode_pick->item.a_int - 1;
+			switch(mode) {
+				case 2:
+					iflags.num_pad = 1;
+					iflags.num_pad_mode = 1;
+					break;
+				case 1:
+					iflags.num_pad = 1;
+					iflags.num_pad_mode = 0;
+					break;
+				case 0:
+				default:
+					iflags.num_pad = 0;
+					iflags.num_pad_mode = 0;
+			}
+			free((genericptr_t)mode_pick);
+			}
+		destroy_nhwindow(tmpwin);
+			retval = TRUE;
 #ifdef SORTLOOT
     } else if (!strcmp("sortloot", optname)) {
-	const char *sortl_name;
-	menu_item *sortl_pick = (menu_item *)0;
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	for (i = 0; i < SIZE(sortltype); i++) {
-	    sortl_name = sortltype[i];
-	    any.a_char = *sortl_name;
-	    add_menu(tmpwin, NO_GLYPH, &any, *sortl_name, 0,
-		     ATR_NONE, sortl_name, MENU_UNSELECTED);
-	}
-	end_menu(tmpwin, "Select loot sorting type:");
-	if (select_menu(tmpwin, PICK_ONE, &sortl_pick) > 0) {
-	    iflags.sortloot = sortl_pick->item.a_char;
-	    free((genericptr_t)sortl_pick);
-	}
-	destroy_nhwindow(tmpwin);
-	retval = TRUE;
+		const char *sortl_name;
+		menu_item *sortl_pick = (menu_item *)0;
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		for (i = 0; i < SIZE(sortltype); i++) {
+			sortl_name = sortltype[i];
+			any.a_char = *sortl_name;
+			add_menu(tmpwin, NO_GLYPH, &any, *sortl_name, 0,
+				 ATR_NONE, sortl_name, MENU_UNSELECTED);
+		}
+		end_menu(tmpwin, "Select loot sorting type:");
+		if (select_menu(tmpwin, PICK_ONE, &sortl_pick) > 0) {
+			iflags.sortloot = sortl_pick->item.a_char;
+			free((genericptr_t)sortl_pick);
+		}
+		destroy_nhwindow(tmpwin);
+		retval = TRUE;
 #endif /* SORTLOOT */
     } else if (!strcmp("menu_headings", optname)) {
-	static const char *mhchoices[3] = {"bold", "inverse", "underline"};
-	const char *npletters = "biu";
-	menu_item *mode_pick = (menu_item *)0;
+		static const char *mhchoices[3] = {"bold", "inverse", "underline"};
+		const char *npletters = "biu";
+		menu_item *mode_pick = (menu_item *)0;
 
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	for (i = 0; i < SIZE(mhchoices); i++) {
-		any.a_int = i + 1;
-		add_menu(tmpwin, NO_GLYPH, &any, npletters[i], 0,
-			 ATR_NONE, mhchoices[i], MENU_UNSELECTED);
-        }
-	end_menu(tmpwin, "How to highlight menu headings:");
-	if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
-		int mode = mode_pick->item.a_int - 1;
-		switch(mode) {
-			case 2:
-				iflags.menu_headings = ATR_ULINE;
-				break;
-			case 0:
-				iflags.menu_headings = ATR_BOLD;
-				break;
-			case 1:
-			default:
-				iflags.menu_headings = ATR_INVERSE;
-		}
-		free((genericptr_t)mode_pick);
-        }
-	destroy_nhwindow(tmpwin);
-        retval = TRUE;
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		for (i = 0; i < SIZE(mhchoices); i++) {
+			any.a_int = i + 1;
+			add_menu(tmpwin, NO_GLYPH, &any, npletters[i], 0,
+				 ATR_NONE, mhchoices[i], MENU_UNSELECTED);
+			}
+		end_menu(tmpwin, "How to highlight menu headings:");
+		if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
+			int mode = mode_pick->item.a_int - 1;
+			switch(mode) {
+				case 2:
+					iflags.menu_headings = ATR_ULINE;
+					break;
+				case 0:
+					iflags.menu_headings = ATR_BOLD;
+					break;
+				case 1:
+				default:
+					iflags.menu_headings = ATR_INVERSE;
+			}
+			free((genericptr_t)mode_pick);
+			}
+		destroy_nhwindow(tmpwin);
+			retval = TRUE;
 #ifdef AUTOPICKUP_EXCEPTIONS
     } else if (!strcmp("autopickup_exception", optname)) {
     	boolean retval;
@@ -3774,6 +3826,17 @@ char *buf;
 		Sprintf(buf, "%s", iflags.altkeyhandler[0] ?
 			iflags.altkeyhandler : "default");
 #endif
+	else if (!strcmp(optname, "attack_mode"))
+	Sprintf(buf, "%s",
+		iflags.attack_mode == ATTACK_MODE_PACIFIST
+			? "pacifist"
+			: iflags.attack_mode == ATTACK_MODE_CHAT
+				? "chat"
+				: iflags.attack_mode == ATTACK_MODE_ASK
+					? "ask"
+					: iflags.attack_mode == ATTACK_MODE_FIGHT_ALL
+						? "fight"
+						: none);
 	else if (!strcmp(optname, "boulder"))
 		Sprintf(buf, "%c", iflags.bouldersym ?
 			iflags.bouldersym : oc_syms[(int)objects[BOULDER].oc_class]);

@@ -1131,13 +1131,20 @@ dogaze()
 		  && mtmp->mtame) {
 		    You("avoid gazing at %s.", y_monnam(mtmp));
 		} else {
-		    if (flags.confirm && mtmp->mpeaceful && !Confusion
-							&& !Hallucination) {
-			Sprintf(qbuf, "Really %s %s?",
-			    (adtyp == AD_CONF) ? "confuse" : "attack",
-			    mon_nam(mtmp));
-			if (yn(qbuf) != 'y') continue;
-			setmangry(mtmp);
+			if (mtmp->mpeaceful && !Confusion && !Hallucination) {
+				if (iflags.attack_mode == ATTACK_MODE_PACIFIST
+					|| iflags.attack_mode == ATTACK_MODE_CHAT
+				) {
+					You("avoid gazing at %s.", mon_nam(mtmp));
+					continue;
+				} else if (iflags.attack_mode == ATTACK_MODE_ASK) {
+					Sprintf(qbuf, "Really %s %s?",
+						(adtyp == AD_CONF) ? "confuse" : "attack",
+						mon_nam(mtmp));
+					if (yn(qbuf) != 'y')
+						continue;
+				}
+				setmangry(mtmp);
 		    }
 		    if (!mtmp->mcanmove || !mtmp->mnotlaugh || mtmp->mstun || mtmp->msleeping ||
 				    is_blind(mtmp) || !haseyes(mtmp->data)) {
