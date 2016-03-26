@@ -2376,7 +2376,7 @@ boolean was_swallowed;			/* digestion */
 		u.ill_cnt = rn1(1000, 250);
 	}
 	if (mdat == &mons[PM_VLAD_THE_IMPALER]) {
-		livelog_write_string("destroyed Vlad the Impaler");
+		if(mvitals[PM_VLAD_THE_IMPALER].died == 1) livelog_write_string("destroyed Vlad the Impaler");
 	    if (cansee(mon->mx, mon->my) && !was_swallowed)
 		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    return FALSE;
@@ -2387,15 +2387,15 @@ boolean was_swallowed;			/* digestion */
 	    if(mdat != &mons[PM_VECNA] && mdat != &mons[PM_LICH__THE_FIEND_OF_EARTH]) return FALSE; /*Vecna leaves his hand or eye*/
 	}
 	else if(mdat == &mons[PM_CHOKHMAH_SEPHIRAH]){
-		livelog_write_string("destroyed a chokhmah sephirah");
+		if(mvitals[PM_CHOKHMAH_SEPHIRAH].died == 1) livelog_write_string("destroyed a chokhmah sephirah");
 		u.chokhmah++;
 		u.keter++;
 		return FALSE;
 	}
-	else if (mdat == &mons[PM_CHAOS]) {
+	else if (mdat == &mons[PM_CHAOS] && mvitals[PM_CHAOS].died == 1) {
 		if(Hallucination) livelog_write_string("perpetuated an asinine paradigm");
 		else livelog_write_string("destroyed Chaos");
-	} else if(mdat->geno & G_UNIQ){
+	} else if(mdat->geno & G_UNIQ && mvitals[monsndx(mdat)].died == 1){
 		char buf[BUFSZ];
 		buf[0]='\0';
 		Sprintf(buf,"destroyed %s",noit_mon_nam(mon));
