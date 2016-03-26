@@ -113,7 +113,7 @@ struct obj *wep; /* uwep for attack(), null for kick_monster() */
 
 	if (iflags.attack_mode == ATTACK_MODE_PACIFIST) {
 		You("stop for %s.", mon_nam(mtmp));
-		context.move = 0;
+		flags.move = 0;
 		return TRUE;
 	}
 
@@ -233,7 +233,7 @@ struct obj *wep;	/* uwep for attack(), null for kick_monster() */
 					/* Prevent accidental donation prompt. */
 					pline("%s mutters a prayer.", Monnam(mtmp));
 				} else if (!dochat(FALSE, u.dx, u.dy, 0)) {
-					context.move = 0;
+					flags.move = 0;
 				}
 				return TRUE;
 			} else if(iflags.attack_mode == ATTACK_MODE_ASK){

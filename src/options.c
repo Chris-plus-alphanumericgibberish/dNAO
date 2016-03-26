@@ -1700,8 +1700,6 @@ boolean tinitial, tfrom_file;
 	fullname = "attack_mode";
 	/* attack_mode:pacifist, chat, ask, or fight */
 	if (match_optname(opts, fullname, 11, TRUE)) {
-		if (duplicate)
-			complain_about_duplicate(opts, 1);
 		if (negated) {
 			bad_negation(fullname, FALSE);
 		} else if ((op = string_for_opt(opts, FALSE))) {
