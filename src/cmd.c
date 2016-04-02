@@ -1956,6 +1956,15 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Unchanging) you_can("not change from your current form");
 	if (Fast) you_are(Very_fast ? "very fast" : "fast");
 	if (Reflecting) you_have("reflection");
+	if (Reflecting && (
+			(uwep && is_lightsaber(uwep) && uwep->lamplit && 
+				((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) || 
+				 (u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+				)
+			) ||
+			(uarm && (uarm->otyp == SILVER_DRAGON_SCALE_MAIL || uarm->otyp == SILVER_DRAGON_SCALES || uarm->otyp == SILVER_DRAGON_SCALE_SHIELD)) ||
+			(uwep && uwep->oartifact == ART_DRAGONLANCE)
+	)) you_have("dragon-breath reflection");
 	if (Free_action) you_have("free action");
 	if (Fixed_abil) you_have("fixed abilities");
 	if (Lifesaved)
@@ -2653,7 +2662,7 @@ resistances_enlightenment()
 	if (u.uinwater){
 		if(ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE && !ublindf->cursed)
 			putstr(en_win, 0, "Your faceplate wraps you in a waterproof field.");
-		else if(uarmc && uarmc->otyp == OILSKIN_CLOAK && !uarmc->cursed)
+		else if(uarmc && (uarmc->otyp == OILSKIN_CLOAK || uarmc->greased) && !uarmc->cursed)
 			putstr(en_win, 0, "Your waterproof cloak protects your gear.");
 		else if(u.sealsActive&SEAL_ENKI)
 			putstr(en_win, 0, "YOU'RE soaked, but the water doesn't wet your gear.");
@@ -3046,7 +3055,7 @@ signs_enlightenment()
 		if(!uarmg)
 			putstr(en_win, 0, "You have iron claws.");
 		else
-			putstr(en_win, 0, "Your iron claws seem to be part of you gloves.");
+			putstr(en_win, 0, "Your iron claws seem to be part of your gloves.");
 		putstr(en_win, 0, "There are prismatic feathers around your head.");
 		message = TRUE;
 	}
@@ -3109,7 +3118,7 @@ signs_enlightenment()
 		message = TRUE;
 	}
 	if(u.specialSealsActive&SEAL_MISKA){
-		putstr(en_win, 0, "You have 4 arms, and a wolf head growing from both hips.");
+		putstr(en_win, 0, "You have 4 arms, and a wolf head grows from each hip.");
 		message = TRUE;
 	}
 	// if(u.specialSealsActive&SEAL_NUDZIARTH){
@@ -3243,7 +3252,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_EDEN && !NoBInvis){
-		putstr(en_win, 0, "You see a garden through the dome of cerulean crystal enbedded in your head!");
+		putstr(en_win, 0, "You see a garden through the dome of cerulean crystal embedded in your head!");
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ENKI && !Invis){
@@ -3395,7 +3404,7 @@ signs_mirror()
 		}
 	}
 	if(u.specialSealsActive&SEAL_ACERERAK && !NoBInvis && !(ublindf && ublindf->otyp != LENSES)){
-		putstr(en_win, 0, "You gave gemstones for eyes!");
+		putstr(en_win, 0, "You have gemstones for eyes!");
 		message = TRUE;
 	}
 	if(u.specialSealsActive&SEAL_COUNCIL && !NoBInvis){
@@ -3422,7 +3431,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.specialSealsActive&SEAL_ALIGNMENT_THING && !NoBInvis){
-		putstr(en_win, 0, "You see a small black halo just behind your head. Their is an eye in the center, staring at you!");
+		putstr(en_win, 0, "You see a small black halo just behind your head. There is an eye in the center, staring at you!");
 		message = TRUE;
 	}
 	
