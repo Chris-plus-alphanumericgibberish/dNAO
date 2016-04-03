@@ -283,6 +283,8 @@ struct artifact {
 #define ARTI_REMOVE_CURSE	(LAST_PROP+44)
 #define SUMMON_UNDEAD   (LAST_PROP+45)
 #define DEATH_GAZE      (LAST_PROP+46)
+#define SMITE           (LAST_PROP+47)
+#define PROTECTION      (LAST_PROP+48)
 
 #define is_nameable_artifact(a) (\
 			(a->spfx & (SPFX_NOGEN|SPFX_RESTR)) == 0\
@@ -295,8 +297,12 @@ struct artifact {
 			|| (a == &artilist[ART_FIRST_KEY_OF_CHAOS] && \
 							(exist_artifact(SKELETON_KEY,artilist[ART_THIRD_KEY_OF_CHAOS].name) \
 							||  u.ualign.type == A_CHAOTIC ) \
-				)\
-)
+              )\
+            || ((a) == &artilist[ART_MACE_OF_THE_EVANGELIST] && Role_if(PM_PRIEST) && u.ulevel >= 20 &&\
+                !exist_artifact(ORIHALCYON_GAUNTLETS, artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI].name))\
+            || ((a) == &artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI] && Role_if(PM_PRIEST) && u.ulevel >= 20 &&\
+                !exist_artifact(MACE, artilist[ART_MACE_OF_THE_EVANGELIST].name))\
+            )
 
 #define is_monk_safe_artifact(m) (\
 				(m) == ART_TIE_DYE_SHIRT_OF_SHAMBHALA ||\

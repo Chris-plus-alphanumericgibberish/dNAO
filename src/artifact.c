@@ -4721,6 +4721,43 @@ arti_invoke(obj)
 			adjalign(-3);
 			u.uluck -= 3;
 	    }break;
+        case SMITE: {
+          if(uwep && uwep == obj){
+            /*if(ugod_is_angry()){
+            } else
+            */
+            if(!getdir((char *)0) ||
+                (!u.dx && !u.dy) ||
+                ((mtmp = m_at(u.ux+u.dx,u.uy+u.dy)) == 0)){
+              pline("The %s glows and then fades.", the(xname(obj)));
+            } else {
+              pline("Suddenly a bolt of divine energy comes down at the %s from the heavens!", mon_nam(mtmp));
+              pline("It strikes the %s!", mon_nam(mtmp));
+
+              int dmg;
+
+              if(u.ublesscnt){
+                dmg = d(2, 10);
+                u.ublesscnt += rnz(350);
+              } else {
+                dmg = d(4,20);
+                u.ublesscnt = rnz(350);
+              }
+
+              u.lastprayed = moves;
+              u.uconduct.gnostic++;
+              if(u.sealsActive&SEAL_AMON) unbind(SEAL_AMON,TRUE);
+
+              mtmp->mhp -= dmg;
+
+              if(mtmp->mhp <= 0)
+                  xkilled(mtmp, 1);
+            }
+          } else You_feel("that you should be wielding %s", the(xname(obj)));
+        } break;
+        case PROTECTION: {
+          /* TODO */
+        } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
 			struct monst *mtmp2;

@@ -1332,6 +1332,20 @@ A("The Hammer of Barquiel",			LUCERN_HAMMER,		/* Yes, I know it's bladed ;-) */
 	0, A_LAWFUL, NON_PM, NON_PM, 7500L, 	/**/
 	SPFX2_SILVERED|SPFX2_BLIND|SPFX2_BRIGHT,SPFX3_NOCNT,0),
 
+/* prestige artifacts */
+
+A("Gauntlets of the Divine Disciple",	ORIHALCYON_GAUNTLETS,
+	(SPFX_NOGEN|SPFX_RESTR), 0,0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0,	A_NONE, PM_PRIEST, NON_PM, 0L,
+	0,0,0),
+
+A("Mace of the Evangelist",	MACE,
+	NO_ATTK, 0,0,
+	PHYS(5, 0),	NO_DFNS,	NO_CARY,
+	SMITE,	A_NONE, PM_PRIEST, NON_PM, 0L,
+	0,0,0),
+
 /*
  *  terminator; otyp must be zero
  */
