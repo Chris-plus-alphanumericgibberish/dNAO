@@ -1339,15 +1339,15 @@ A("The Hammer of Barquiel",			LUCERN_HAMMER,		/* Yes, I know it's bladed ;-) */
 A("The Pink Panther", DIAMOND,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	0, A_NONE, PM_ARCHEOLOGIST, NON_PM, 0L,
-	TRAP_DET,0,0),
+	TRAP_DET, A_NONE, PM_ARCHEOLOGIST, NON_PM, 0L,
+	0,0,0),
 
 /* TODO read */
 A("The Tome of the Loremaster", SPE_BLANK_PAPER,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	CARY(AD_MAGM),
-	0, A_NONE, PM_ARCHEOLOGIST, NON_PM, 0L,
-	OBJECT_DET,0,0),
+	OBJECT_DET, A_NONE, PM_ARCHEOLOGIST, NON_PM, 0L,
+	0,0,0),
 
 /* Anachrononaut */
 /* Barbarian */
@@ -1355,8 +1355,8 @@ A("The Tome of the Loremaster", SPE_BLANK_PAPER,
 A("The Declaration of the Apostate", SCR_REMOVE_CURSE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	0, A_NONE, PM_EXILE, NON_PM, 0L,
-	UNBIND_SEALS,0,0),
+	UNBIND_SEALS, A_NONE, PM_EXILE, NON_PM, 0L,
+	0,0,0),
 
 A("The Soul Lens", LENSES,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_WARN), 0, 0,
