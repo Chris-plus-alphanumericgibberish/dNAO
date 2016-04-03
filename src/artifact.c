@@ -4771,6 +4771,15 @@ arti_invoke(obj)
           trap_detect(obj);
         } break;
         case UNBIND_SEALS: {
+            boolean released = FALSE;
+            long seal;
+            for(seal = SEAL_AHAZU; seal < SEAL_SPECIAL; seal *= 2){
+              if(u.sealsActive & seal){
+                unbind(seal, FALSE);
+                released = TRUE;
+              }
+            }
+            if(released) You_feel("cleansed.");
         } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
