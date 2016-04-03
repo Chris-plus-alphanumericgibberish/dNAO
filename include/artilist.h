@@ -1339,7 +1339,6 @@ A("The Hammer of Barquiel",			LUCERN_HAMMER,		/* Yes, I know it's bladed ;-) */
 /* Barbarian */
 /* Binder */
 /* Caveman/Cavewoman */
-/* TODO vaporize some struck/zapped targets */
 A("The Torch of Origins", WAN_FIRE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	FIRE(0,5),	DFNS(AD_FIRE),	CARY(AD_FIRE),
