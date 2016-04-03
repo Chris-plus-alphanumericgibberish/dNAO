@@ -1337,7 +1337,7 @@ A("The Hammer of Barquiel",			LUCERN_HAMMER,		/* Yes, I know it's bladed ;-) */
 A("Gauntlets of the Divine Disciple",	ORIHALCYON_GAUNTLETS,
 	(SPFX_NOGEN|SPFX_RESTR), 0,0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	0,	A_NONE, PM_PRIEST, NON_PM, 0L,
+	PROTECT,	A_NONE, PM_PRIEST, NON_PM, 0L,
 	0,0,0),
 
 A("Mace of the Evangelist",	MACE,

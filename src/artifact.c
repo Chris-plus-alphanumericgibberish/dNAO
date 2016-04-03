@@ -4756,7 +4756,10 @@ arti_invoke(obj)
           } else You_feel("that you should be wielding %s", the(xname(obj)));
         } break;
         case PROTECT: {
-          /* TODO */
+          if(uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_DIVINE_DI){
+            cast_protection();
+            if(!u.ublesscnt) cast_protection();
+          } else You_feel("that you should be wearing %s", the(xname(obj)));
         } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
