@@ -4755,7 +4755,7 @@ arti_invoke(obj)
             }
           } else You_feel("that you should be wielding %s", the(xname(obj)));
         } break;
-        case PROTECTION: {
+        case PROTECT: {
           /* TODO */
         } break;
 		case SUMMON_UNDEAD:{

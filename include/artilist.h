@@ -1341,7 +1341,7 @@ A("Gauntlets of the Divine Disciple",	ORIHALCYON_GAUNTLETS,
 	0,0,0),
 
 A("Mace of the Evangelist",	MACE,
-	NO_ATTK, 0,0,
+	(SPFX_NOGEN|SPFX_RESTR), 0,0,
 	PHYS(5, 0),	NO_DFNS,	NO_CARY,
 	SMITE,	A_NONE, PM_PRIEST, NON_PM, 0L,
 	0,0,0),
