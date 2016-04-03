@@ -2151,6 +2151,9 @@ struct obj *obj;
 			type = P_LONG_SWORD;
 		else type = P_SHORT_SWORD;
 	}
+	if(obj && obj->oartifact && obj->oartifact == ART_TORCH_OF_ORIGINS){
+		type = P_CLUB;
+	}
 	else type = objects[obj->otyp].oc_skill;
 	return ((type < 0) ? -type : type);
 }

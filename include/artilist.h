@@ -1332,19 +1332,46 @@ A("The Hammer of Barquiel",			LUCERN_HAMMER,		/* Yes, I know it's bladed ;-) */
 	0, A_LAWFUL, NON_PM, NON_PM, 7500L, 	/**/
 	SPFX2_SILVERED|SPFX2_BLIND|SPFX2_BRIGHT,SPFX3_NOCNT,0),
 
-/* prestige artifacts */
+/* mastery artifacts */
 
-A("Gauntlets of the Divine Disciple",	ORIHALCYON_GAUNTLETS,
+/* Archeologist */
+/* Anachrononaut */
+/* Barbarian */
+/* Binder */
+/* Caveman/Cavewoman */
+/* TODO vaporize some struck/zapped targets */
+A("The Torch of Origins", WAN_FIRE,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	FIRE(0,5),	DFNS(AD_FIRE),	CARY(AD_FIRE),
+	0, A_NONE, NON_PM, NON_PM, 0L, 
+	SPFX2_FIRE2,0,0),
+
+/* Convict */
+/* Healer */
+/* Knight */
+/* Monk */
+/* Nobleman/Noblewoman */
+/* Priest/Priestess */
+A("The Gauntlets of the Divine Disciple",	ORIHALCYON_GAUNTLETS,
 	(SPFX_NOGEN|SPFX_RESTR), 0,0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	PROTECT,	A_NONE, PM_PRIEST, NON_PM, 0L,
 	0,0,0),
 
-A("Mace of the Evangelist",	MACE,
+A("The Mace of the Evangelist",	MACE,
 	(SPFX_NOGEN|SPFX_RESTR), 0,0,
 	PHYS(5, 0),	NO_DFNS,	NO_CARY,
 	SMITE,	A_NONE, PM_PRIEST, NON_PM, 0L,
 	0,0,0),
+
+/* Pirate */
+/* Rogue */
+/* Ranger */
+/* Samurai */
+/* Tourist */
+/* Troubadour */
+/* Valkyrie */
+/* Wizard */
 
 /*
  *  terminator; otyp must be zero

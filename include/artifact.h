@@ -286,6 +286,8 @@ struct artifact {
 #define SMITE           (LAST_PROP+47)
 #define PROTECT         (LAST_PROP+48)
 
+#define MASTERY_ARTIFACT_LEVEL 20
+
 #define is_nameable_artifact(a) (\
 			(a->spfx & (SPFX_NOGEN|SPFX_RESTR)) == 0\
 			|| (a == &artilist[ART_SNICKERSNEE] && Role_if(PM_TOURIST) && (u.ulevel > 18 || u.uevent.qcompleted) )\
@@ -298,10 +300,31 @@ struct artifact {
 							(exist_artifact(SKELETON_KEY,artilist[ART_THIRD_KEY_OF_CHAOS].name) \
 							||  u.ualign.type == A_CHAOTIC ) \
               )\
-            || ((a) == &artilist[ART_MACE_OF_THE_EVANGELIST] && Role_if(PM_PRIEST) && u.ulevel >= 20 &&\
+            /* Mastery artifacts */\
+            /* Archeologist */\
+            /* Anachrononaut */\
+            /* Barbarian */\
+            /* Binder */\
+            /* Caveman/Cavewoman */\
+            || ((a) == &artilist[ART_TORCH_OF_ORIGINS] && Role_if(PM_CAVEMAN) && u.ulevel >= MASTERY_ARTIFACT_LEVEL)\
+            /* Convict */\
+            /* Healer */\
+            /* Knight */\
+            /* Monk */\
+            /* Nobleman/Noblewoman */\
+            /* Priest/Priestess */\
+            || ((a) == &artilist[ART_MACE_OF_THE_EVANGELIST] && Role_if(PM_PRIEST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !exist_artifact(ORIHALCYON_GAUNTLETS, artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI].name))\
-            || ((a) == &artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI] && Role_if(PM_PRIEST) && u.ulevel >= 20 &&\
+            || ((a) == &artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI] && Role_if(PM_PRIEST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !exist_artifact(MACE, artilist[ART_MACE_OF_THE_EVANGELIST].name))\
+            /* Pirate */\
+            /* Rogue */\
+            /* Ranger */\
+            /* Samurai */\
+            /* Tourist */\
+            /* Troubadour */\
+            /* Valkyrie */\
+            /* Wizard */\
             )
 
 #define is_monk_safe_artifact(m) (\
