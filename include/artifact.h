@@ -285,9 +285,11 @@ struct artifact {
 #define DEATH_GAZE      (LAST_PROP+46)
 #define SMITE           (LAST_PROP+47)
 #define PROTECT         (LAST_PROP+48)
-#define TRAP_DET      (LAST_PROP+49)
-#define UNBIND_SEALS  (LAST_PROP+50)
-#define HEAL_PETS     (LAST_PROP+51)
+#define TRAP_DET        (LAST_PROP+49)
+#define UNBIND_SEALS    (LAST_PROP+50)
+#define HEAL_PETS       (LAST_PROP+51)
+#define FREE_SPELL      (LAST_PROP+52)
+#define BURN_WARD       (LAST_PROP+53)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -331,6 +333,10 @@ struct artifact {
             || ((a) == &artilist[ART_RING_OF_UBER_HEALING] && Role_if(PM_HEALER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !exist_artifact(HEALER_UNIFORM, artilist[ART_UNIFORM_OF_THE_HEALING_HAN].name))\
             /* Knight */\
+            || ((a) == &artilist[ART_COPE_OF_THE_ELDRITCH_KNIGH] && Role_if(PM_KNIGHT) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(ROBE, artilist[ART_SHIELD_OF_THE_PALADIN].name))\
+            || ((a) == &artilist[ART_SHIELD_OF_THE_PALADIN] && Role_if(PM_KNIGHT) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(ROBE, artilist[ART_COPE_OF_THE_ELDRITCH_KNIGH].name))\
             /* Monk */\
             /* Nobleman/Noblewoman */\
             /* Priest/Priestess */\

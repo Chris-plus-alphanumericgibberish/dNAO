@@ -4783,7 +4783,23 @@ arti_invoke(obj)
         } break;
         case HEAL_PETS: {
           (void) pet_detect_and_heal(obj);
-          break;
+        } break;
+        case FREE_SPELL: {
+          if(uarmc && uarmc == obj){
+            if(!docast()){
+              pline("Your %s glows then fades.", The(xname(obj)));
+            }
+          } else You_feel("that you should be wearing %s.", The(xname(obj)));
+        } break;
+        case BURN_WARD: {
+          if(uarms && uarms == obj){
+            struct obj *scroll;
+            scroll = mksobj(SCR_WARDING, TRUE, FALSE);
+            scroll->blessed = scroll->blessed;
+            scroll->cursed = scroll->cursed;
+            seffects(scroll);
+            obfree(scroll,(struct obj *)0);
+          } else You_feel("that you should be wearing %s.", The(xname(obj)));
         } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;

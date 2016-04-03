@@ -1382,16 +1382,28 @@ A("The Torch of Origins", WAN_FIRE,
 A("The Uniform of the Healing Hand",	HEALER_UNIFORM,
 	(SPFX_NOGEN|SPFX_RESTR), 0,0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	HEAL_PETS,	A_NONE, PM_PRIEST, NON_PM, 0L,
-	0,0,0),
+	HEAL_PETS,	A_NONE, PM_HEALER, NON_PM, 0L,
+	0,0,WSFX_PLUSSEV),
 
 A("The Ring of Uber Healing",	RIN_REGENERATION,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_REGEN), 0,0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	HEALING,	A_NONE, PM_PRIEST, NON_PM, 0L,
+	HEALING,	A_NONE, PM_HEALER, NON_PM, 0L,
 	0,0,0),
 
 /* Knight */
+A("The Cope of the Eldritch Knight",	ROBE, /*double robe effect*/
+	(SPFX_NOGEN|SPFX_RESTR), 0,0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	FREE_SPELL,	A_NONE, PM_KNIGHT, NON_PM, 0L,
+	0,0,WSFX_PLUSSEV),
+
+A("The Shield of the Paladin",	LARGE_SHIELD,
+	(SPFX_NOGEN|SPFX_RESTR), SPFX_WARN, (M2_UNDEAD|M2_DEMON),
+	NO_ATTK,	DFNS(AD_MAGM),	NO_CARY,
+	BURN_WARD,	A_NONE, PM_KNIGHT, NON_PM, 0L,
+	0,0,WSFX_PLUSSEV),
+
 /* Monk */
 /* Nobleman/Noblewoman */
 /* Priest/Priestess */
@@ -1399,7 +1411,7 @@ A("The Gauntlets of the Divine Disciple",	ORIHALCYON_GAUNTLETS,
 	(SPFX_NOGEN|SPFX_RESTR), 0,0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	PROTECT,	A_NONE, PM_PRIEST, NON_PM, 0L,
-	0,0,0),
+	0,0,WSFX_PLUSSEV),
 
 A("The Mace of the Evangelist",	MACE,
 	(SPFX_NOGEN|SPFX_RESTR), 0,0,
