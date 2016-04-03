@@ -419,6 +419,7 @@ peffects(otmp)
 	register struct obj	*otmp;
 {
 	register int i, ii, lim;
+    boolean enhanced;
 
 	switch(otmp->otyp){
 	case POT_RESTORE_ABILITY:
@@ -842,15 +843,17 @@ peffects(otmp)
 		break;
 	case POT_HEALING:
 		You_feel("better.");
-		healup(d(6 + 2 * bcsign(otmp), 4),
-		       !otmp->cursed ? 1 : 0, !!otmp->blessed, !otmp->cursed);
+        enhanced = uarm && uarm->oartifact == ART_UNIFORM_OF_THE_HEALING_HAN;
+		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 4),
+		       ((enhanced ? 2 : 1) * !otmp->cursed ? 1 : 0), !!otmp->blessed, !otmp->cursed);
 		exercise(A_CON, TRUE);
 		break;
 	case POT_EXTRA_HEALING:
 as_extra_healing:
 		You_feel("much better.");
-		healup(d(6 + 2 * bcsign(otmp), 8),
-		       otmp->blessed ? 5 : !otmp->cursed ? 2 : 0,
+        enhanced = uarm && uarm->oartifact == ART_UNIFORM_OF_THE_HEALING_HAN;
+		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 8),
+		       (enhanced ? 2 : 1) * (otmp->blessed ? 5 : !otmp->cursed ? 2 : 0),
 		       !otmp->cursed, TRUE);
 		(void) make_hallucinated(0L,TRUE,0L);
 		exercise(A_CON, TRUE);
@@ -858,7 +861,8 @@ as_extra_healing:
 		break;
 	case POT_FULL_HEALING:
 		You_feel("completely healed.");
-		healup(400, 4+4*bcsign(otmp), !otmp->cursed, TRUE);
+        enhanced = uarm && uarm->oartifact == ART_UNIFORM_OF_THE_HEALING_HAN;
+		healup(enhanced ? 800 : 400, (enhanced ? 2 : 1) * (4+4*bcsign(otmp)), !otmp->cursed, TRUE);
 		/* Restore one lost level if blessed */
 		if (otmp->blessed && u.ulevel < u.ulevelmax) {
 		    ///* when multiple levels have been lost, drinking

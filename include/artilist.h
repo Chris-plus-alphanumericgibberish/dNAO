@@ -1379,6 +1379,18 @@ A("The Torch of Origins", WAN_FIRE,
 
 /* Convict */
 /* Healer */
+A("The Uniform of the Healing Hand",	HEALER_UNIFORM,
+	(SPFX_NOGEN|SPFX_RESTR), 0,0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	HEAL_PETS,	A_NONE, PM_PRIEST, NON_PM, 0L,
+	0,0,0),
+
+A("The Ring of Uber Healing",	RIN_REGENERATION,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_REGEN), 0,0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	HEALING,	A_NONE, PM_PRIEST, NON_PM, 0L,
+	0,0,0),
+
 /* Knight */
 /* Monk */
 /* Nobleman/Noblewoman */

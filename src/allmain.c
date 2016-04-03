@@ -1040,6 +1040,13 @@ moveloop()
 				}
 			}
 		    }
+            if(uleft  && uleft->oartifact  == ART_RING_OF_UBER_HEALING ||
+               uright && uright->oartifact == ART_RING_OF_UBER_HEALING){
+              if(u.uhp < u.uhpmax) u.uhp++;
+              if(u.uhp < u.uhpmax / 2) u.uhp++;
+              if(u.uhp < u.uhpmax / 3) u.uhp++;
+              if(u.uhp < u.uhpmax / 4) u.uhp++;
+            }
 			if(u.sealsActive&SEAL_BUER){
 				int dsize = spiritDsize(), regenrate = dsize/3, remainderrate = dsize%3;
 				if(Upolyd && u.mh < u.mhmax){

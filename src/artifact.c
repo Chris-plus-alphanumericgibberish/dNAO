@@ -4781,6 +4781,10 @@ arti_invoke(obj)
             }
             if(released) You_feel("cleansed.");
         } break;
+        case HEAL_PETS: {
+          (void) pet_detect_and_heal(obj);
+          break;
+        } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
 			struct monst *mtmp2;
