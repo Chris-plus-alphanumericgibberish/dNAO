@@ -202,6 +202,16 @@ doread()
 			pline(silly_thing_to, "read");
 			return(0);
 		}
+    } else if(scroll->oartifact && scroll->oartifact == ART_TOME_OF_THE_LOREMASTER){
+      int oindx = 1 + rn2(NUM_OBJECTS - 1);
+      if(objects[oindx].oc_name_known){
+        makeknown(oindx);
+        You("study the pages of %s, you learn to recognize %s!", xname(scroll),
+            obj_typename(oindx));
+      } else {
+        You("study the pages of %s, but you already can recognize that.", xname(scroll));
+      }
+      return 1;
 	} else if(scroll->oclass == WEAPON_CLASS && objects[(scroll)->otyp].oc_material == WOOD && scroll->ovar1 != 0){
 		pline("A %s is carved into the wood.",wardDecode[decode_wardID(scroll->ovar1)]);
 		if(! (u.wardsknown & scroll->ovar1) ){

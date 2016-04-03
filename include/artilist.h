@@ -1335,6 +1335,20 @@ A("The Hammer of Barquiel",			LUCERN_HAMMER,		/* Yes, I know it's bladed ;-) */
 /* mastery artifacts */
 
 /* Archeologist */
+/* TODO aggrevate 'f' */
+A("The Pink Panther", DIAMOND,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_ARCHEOLOGIST, NON_PM, 0L,
+	TRAP_DET,0,0),
+
+/* TODO read */
+A("The Tome of the Loremaster", SPE_BLANK_PAPER,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	CARY(AD_MAGM),
+	0, A_NONE, PM_ARCHEOLOGIST, NON_PM, 0L,
+	OBJECT_DET,0,0),
+
 /* Anachrononaut */
 /* Barbarian */
 /* Binder */
@@ -1342,7 +1356,7 @@ A("The Hammer of Barquiel",			LUCERN_HAMMER,		/* Yes, I know it's bladed ;-) */
 A("The Torch of Origins", WAN_FIRE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	FIRE(0,5),	DFNS(AD_FIRE),	CARY(AD_FIRE),
-	0, A_NONE, NON_PM, NON_PM, 0L, 
+	0, A_NONE, PM_CAVEMAN, NON_PM, 0L,
 	SPFX2_FIRE2,0,0),
 
 /* Convict */

@@ -4767,6 +4767,9 @@ arti_invoke(obj)
             if(!u.ublesscnt) cast_protection();
           } else You_feel("that you should be wearing %s", the(xname(obj)));
         } break;
+        case TRAPS_DET: {
+          trap_detect(obj);
+        } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
 			struct monst *mtmp2;

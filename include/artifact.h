@@ -285,6 +285,7 @@ struct artifact {
 #define DEATH_GAZE      (LAST_PROP+46)
 #define SMITE           (LAST_PROP+47)
 #define PROTECT         (LAST_PROP+48)
+#define TRAP_DET      (LAST_PROP+49)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -302,6 +303,10 @@ struct artifact {
               )\
             /* Mastery artifacts */\
             /* Archeologist */\
+            || ((a) == &artilist[ART_PINK_PANTHER] && Role_if(PM_ARCHEOLOGIST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(SPE_BLANK_PAPER, artilist[ART_TOME_OF_THE_LOREMASTER].name))\
+            || ((a) == &artilist[ART_TOME_OF_THE_LOREMASTER] && Role_if(PM_ARCHEOLOGIST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(DIAMOND, artilist[ART_PINK_PANTHER].name))\
             /* Anachrononaut */\
             /* Barbarian */\
             /* Binder */\
