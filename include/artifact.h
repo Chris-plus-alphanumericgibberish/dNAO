@@ -286,6 +286,7 @@ struct artifact {
 #define SMITE           (LAST_PROP+47)
 #define PROTECT         (LAST_PROP+48)
 #define TRAP_DET      (LAST_PROP+49)
+#define UNBIND_SEALS  (LAST_PROP+50)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -310,6 +311,16 @@ struct artifact {
             /* Anachrononaut */\
             /* Barbarian */\
             /* Binder */\
+            || ((a) == &artilist[ART_DECLARATION_OF_THE_APOSTAT] && Role_if(PM_EXILE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !u.sealCounts &&\
+                !exist_artifact(LENSES, artilist[ART_SOUL_LENS].name) &&\
+                !exist_artifact(SCR_BLANK_PAPER, artilist[ART_SEAL_OF_THE_SPIRITS].name))\
+            || ((a) == &artilist[ART_SOUL_LENS] && Role_if(PM_EXILE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(SCR_REMOVE_CURSE, artilist[ART_DECLARATION_OF_THE_APOSTAT].name) &&\
+                !exist_artifact(SCR_BLANK_PAPER, artilist[ART_SEAL_OF_THE_SPIRITS].name))\
+            || ((a) == &artilist[ART_SEAL_OF_THE_SPIRITS] && Role_if(PM_EXILE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(SCR_REMOVE_CURSE, artilist[ART_DECLARATION_OF_THE_APOSTAT].name) &&\
+                !exist_artifact(LENSES, artilist[ART_SOUL_LENS].name))\
             /* Caveman/Cavewoman */\
             || ((a) == &artilist[ART_TORCH_OF_ORIGINS] && Role_if(PM_CAVEMAN) && u.ulevel >= MASTERY_ARTIFACT_LEVEL)\
             /* Convict */\

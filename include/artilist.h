@@ -1352,6 +1352,24 @@ A("The Tome of the Loremaster", SPE_BLANK_PAPER,
 /* Anachrononaut */
 /* Barbarian */
 /* Binder */
+A("The Declaration of the Apostate", SCR_REMOVE_CURSE,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_EXILE, NON_PM, 0L,
+	UNBIND_SEALS,0,0),
+
+A("The Soul Lens", LENSES,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_EXILE, NON_PM, 0L,
+	0,0,0),
+
+A("The Seal of the Spirits", SCR_BLANK_PAPER,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_EXILE, NON_PM, 0L,
+
+	0,0,0),
 /* Caveman/Cavewoman */
 A("The Torch of Origins", WAN_FIRE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
