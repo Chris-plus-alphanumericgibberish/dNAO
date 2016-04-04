@@ -531,6 +531,10 @@ const char *name;
        obj && obj->otyp == SCALPEL){
       obj->ovar1 = COMMAND_DEATH;
     }
+    if(((!strcmp((&artilist[ART_FIGURINE_OF_GALATEA])->name,name)) || (!strcmp((&artilist[ART_FIGURINE_OF_PYGMALION])->name,name))) &&
+       obj && obj->otyp == SCALPEL){
+      obj->corpsenm = u.umonster;
+    }
 	if(!strcmp((&artilist[ART_MANTLE_OF_HEAVEN])->name,name) &&
 	   obj && obj->otyp == LEATHER_CLOAK){
 		if(!Race_if(PM_VAMPIRE)) obj = poly_obj(obj,find_cope());
