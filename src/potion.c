@@ -844,7 +844,7 @@ peffects(otmp)
 		break;
 	case POT_HEALING:
 		You_feel("better.");
-        enhanced = uarm && uarm->oartifact == ART_UNIFORM_OF_THE_HEALING_HAN;
+        enhanced = uarm && uarm->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
 		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 4),
 		       ((enhanced ? 2 : 1) * !otmp->cursed ? 1 : 0), !!otmp->blessed, !otmp->cursed);
 		exercise(A_CON, TRUE);
@@ -852,7 +852,7 @@ peffects(otmp)
 	case POT_EXTRA_HEALING:
 as_extra_healing:
 		You_feel("much better.");
-        enhanced = uarm && uarm->oartifact == ART_UNIFORM_OF_THE_HEALING_HAN;
+        enhanced = uarm && uarm->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
 		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 8),
 		       (enhanced ? 2 : 1) * (otmp->blessed ? 5 : !otmp->cursed ? 2 : 0),
 		       !otmp->cursed, TRUE);
@@ -862,7 +862,7 @@ as_extra_healing:
 		break;
 	case POT_FULL_HEALING:
 		You_feel("completely healed.");
-        enhanced = uarm && uarm->oartifact == ART_UNIFORM_OF_THE_HEALING_HAN;
+        enhanced = uarm && uarm->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
 		healup(enhanced ? 800 : 400, (enhanced ? 2 : 1) * (4+4*bcsign(otmp)), !otmp->cursed, TRUE);
 		/* Restore one lost level if blessed */
 		if (otmp->blessed && u.ulevel < u.ulevelmax) {

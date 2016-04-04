@@ -227,6 +227,8 @@
 #define COMMAND_IMPROVE_WEP     40
 #define COMMAND_IMPROVE_ARM     41
 
+#define COMMAND_DEATH           42
+
 struct artifact {
 	int	    otyp;
 	const char  *name;
@@ -305,6 +307,8 @@ struct artifact {
 #define TOWEL_ITEMS     (LAST_PROP+58)
 #define MAJ_RUMOR       (LAST_PROP+59)
 #define ARTIFICE        (LAST_PROP+60)
+#define SUMMON_PET      (LAST_PROP+61)
+#define LIFE_DEATH      (LAST_PROP+62)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -340,10 +344,15 @@ struct artifact {
             || ((a) == &artilist[ART_TORCH_OF_ORIGINS] && Role_if(PM_CAVEMAN) && u.ulevel >= MASTERY_ARTIFACT_LEVEL)\
             /* Convict */\
             /* Healer */\
-            || ((a) == &artilist[ART_UNIFORM_OF_THE_HEALING_HAN] && Role_if(PM_HEALER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
-                !exist_artifact(RIN_REGENERATION, artilist[ART_RING_OF_UBER_HEALING].name))\
-            || ((a) == &artilist[ART_RING_OF_UBER_HEALING] && Role_if(PM_HEALER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
-                !exist_artifact(HEALER_UNIFORM, artilist[ART_UNIFORM_OF_THE_HEALING_HAN].name))\
+            || ((a) == &artilist[ART_SCALPEL_OF_LIFE_AND_DEATH] && Role_if(PM_HEALER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(GAUNTLETS_OF_DEXTERITY, artilist[ART_GAUNTLETS_OF_THE_HEALING_H].name) &&\
+                !exist_artifact(RIN_REGENERATION, artilist[ART_RING_OF_HYGIENE_S_DISCIPLE].name))\
+            || ((a) == &artilist[ART_GAUNTLETS_OF_THE_HEALING_H] && Role_if(PM_HEALER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(SCALPEL, artilist[ART_SCALPEL_OF_LIFE_AND_DEATH].name) &&\
+                !exist_artifact(RIN_REGENERATION, artilist[ART_RING_OF_HYGIENE_S_DISCIPLE].name))\
+            || ((a) == &artilist[ART_RING_OF_HYGIENE_S_DISCIPLE] && Role_if(PM_HEALER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(SCALPEL, artilist[ART_SCALPEL_OF_LIFE_AND_DEATH].name) &&\
+                !exist_artifact(GAUNTLETS_OF_DEXTERITY, artilist[ART_GAUNTLETS_OF_THE_HEALING_H].name))\
             /* Knight */\
             || ((a) == &artilist[ART_COPE_OF_THE_ELDRITCH_KNIGH] && Role_if(PM_KNIGHT) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !exist_artifact(ROBE, artilist[ART_SHIELD_OF_THE_PALADIN].name))\
@@ -372,7 +381,15 @@ struct artifact {
             || ((a) == &artilist[ART_SWORD_OF_THE_KLEPTOMANIAC] && Role_if(PM_ROGUE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !exist_artifact(DART, artilist[ART_DART_OF_THE_ASSASSIN].name))\
             /* Ranger */\
-            || ((a) == &artilist[ART_HELM_OF_THE_ARCANE_ARCHER] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL)\
+            || ((a) == &artilist[ART_HELM_OF_THE_ARCANE_ARCHER] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_PYGMALION].name) &&\
+                !exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_GALATEA].name))\
+            || ((a) == &artilist[ART_FIGURINE_OF_PYGMALION] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(HELM_OF_BRILLIANCE, artilist[ART_HELM_OF_THE_ARCANE_ARCHER].name) &&\
+                !exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_GALATEA].name))\
+            || ((a) == &artilist[ART_FIGURINE_OF_GALATEA] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(HELM_OF_BRILLIANCE, artilist[ART_HELM_OF_THE_ARCANE_ARCHER].name) &&\
+                !exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_PYGMALION].name))\
             /* Samurai */\
             || ((a) == &artilist[ART_HELM_OF_THE_NINJA] && Role_if(PM_SAMURAI) && u.ulevel >= MASTERY_ARTIFACT_LEVEL)\
             /* Tourist */\

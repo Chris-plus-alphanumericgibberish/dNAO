@@ -527,6 +527,10 @@ const char *name;
 	if (obj->oartifact || (lth && exist_artifact(obj->otyp, name)))
 		return obj;
 	
+    if(!strcmp((&artilist[ART_SCALPEL_OF_LIFE_AND_DEATH])->name,name) &&
+       obj && obj->otyp == SCALPEL){
+      obj->ovar1 = COMMAND_DEATH;
+    }
 	if(!strcmp((&artilist[ART_MANTLE_OF_HEAVEN])->name,name) &&
 	   obj && obj->otyp == LEATHER_CLOAK){
 		if(!Race_if(PM_VAMPIRE)) obj = poly_obj(obj,find_cope());

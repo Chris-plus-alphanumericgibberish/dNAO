@@ -983,6 +983,10 @@ plus:
 		){
 			Sprintf(eos(bp), " (%s)", OBJ_NAME(objects[obj->otyp]));
 		}
+        if(obj->oartifact == ART_SCALPEL_OF_LIFE_AND_DEATH){
+            if(COMMAND_LIFE == obj->ovar1) Sprintf(eos(bp), " (Life)");
+            if(COMMAND_DEATH  == obj->ovar1) Sprintf(eos(bp), " (Death)");
+        }
 //#ifdef FIREARMS
 	if(obj->otyp == STICK_OF_DYNAMITE) {
 	    if (obj->lamplit) Strcat(bp, " (lit)");

@@ -1367,13 +1367,20 @@ A("The Torch of Origins", WAN_FIRE,
 
 /* Convict */
 /* Healer */
-A("The Uniform of the Healing Hand",	HEALER_UNIFORM,
+/* TODO 2x vs living */
+A("Scalpel of Life and Death",	SCALPEL,
+	(SPFX_NOGEN|SPFX_RESTR), 0,0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	LIFE_DEATH,	A_NONE, PM_HEALER, NON_PM, 0L,
+	0,0,WSFX_PLUSSEV),
+
+A("The Gauntlets of the Healing Hand",	GAUNTLETS_OF_DEXTERITY,
 	(SPFX_NOGEN|SPFX_RESTR), 0,0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	HEAL_PETS,	A_NONE, PM_HEALER, NON_PM, 0L,
 	0,0,WSFX_PLUSSEV),
 
-A("The Ring of Uber Healing",	RIN_REGENERATION,
+A("The Ring of Hygiene's Disciple",	RIN_REGENERATION,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_REGEN), 0,0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	HEALING,	A_NONE, PM_HEALER, NON_PM, 0L,
@@ -1448,8 +1455,22 @@ A("The Sword of the Kleptomaniac", SHORT_SWORD,
 A("The Helm of the Arcane Archer", HELM_OF_BRILLIANCE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	0, A_NONE, PM_ROGUE, NON_PM, 0L,
+	0, A_NONE, PM_RANGER, NON_PM, 0L,
 	SPFX2_COLD|SPFX2_FIRE|SPFX2_ELEC,0,0),
+
+/* TODO stoning resistance */
+A("The Figurine of Pygmalion", FIGURINE,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_RANGER, NON_PM, 0L,
+	0,0,0),
+
+/* TODO sex resistance */
+A("The Figurine of Galatea", FIGURINE,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	SUMMON_PET, A_NONE, PM_RANGER, NON_PM, 0L,
+	0,0,0),
 
 /* Samurai */
 A("The Helm of the Ninja", HELM_OF_OPPOSITE_ALIGNMENT,

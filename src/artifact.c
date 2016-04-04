@@ -4760,7 +4760,7 @@ arti_invoke(obj)
               mtmp->mhp -= dmg;
 
               if(mtmp->mhp <= 0)
-                  xkilled(mtmp, 1);
+                xkilled(mtmp, 1);
             }
           } else You_feel("that you should be wielding %s", the(xname(obj)));
         } break;
@@ -4876,7 +4876,7 @@ arti_invoke(obj)
           } else You_feel("like you should be wearing %s.", The(xname(obj)));
         } break;
         case TOWEL_ITEMS:{
-          if(uwep != obj){
+          if(uwep == obj){
             struct obj *otmp;
             switch(rn2(5)){
               case 0:
@@ -4924,6 +4924,52 @@ arti_invoke(obj)
           scroll->cursed = obj->cursed;
           seffects(scroll);
           obfree(scroll,(struct obj *)0);
+        } break;
+        case SUMMON_PET:{
+        } break;
+        case LIFE_DEATH:{
+          if(uwep == obj){
+            if(!getdir((char *)0))
+              break;
+            switch(obj->ovar1){
+              case COMMAND_DEATH: {
+                struct monst *mtmp;
+                if((u.dx || u.dy) && (mtmp = m_at(u.ux+u.dx,u.uy+u.dy))){
+                  if(!resists_death(mtmp)){
+                    if(!(nonliving(mtmp->data) || is_demon(mtmp->data) || is_angel(mtmp->data))){
+                      pline("%s withers under the touch of %s.", The(Monnam(mtmp)), The(xname(obj)));
+                      xkilled(mtmp, 1);
+                      obj->ovar1 = COMMAND_LIFE;
+                    } else {
+                      pline("%s seems no deader than before.", The(Monnam(mtmp)));
+                    }
+                  } else {
+                    pline("%s resists.", the(Monnam(mtmp)));
+                  }
+                } else {
+                  pline("The %s glows and then fades.", the(xname(obj)));
+                  break;
+                }
+              } break;
+              case COMMAND_LIFE:{
+                struct obj *ocur,*onxt;
+                struct monst *mtmp;
+                for(ocur = level.objects[u.ux+u.dx][u.uy+u.dy]; ocur; ocur = onxt) {
+                    onxt = ocur->nexthere;
+                    if (ocur->otyp != EGG){
+                      revive(ocur);
+                      if(mtmp = m_at(u.ux+u.dx,u.uy+u.dy)){
+                        pline("%s resurrects!", Monnam(mtmp));
+                        obj->ovar1 = COMMAND_DEATH;
+                        break;
+                      } else {
+                        pline("You fail to resurrect %s.", the(xname(ocur)));
+                      }
+                    }
+                }
+              } break;
+            }
+          } else You_feel("like you should be wielding %s.", The(xname(obj)));
         } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
