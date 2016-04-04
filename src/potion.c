@@ -410,7 +410,7 @@ register struct obj *otmp;
 		} else if(!objects[otmp->otyp].oc_uname)
 			docall(otmp);
 	}
-	useup(otmp);
+	if(!otmp->oartifact) useup(otmp);
 	return(1);
 }
 
@@ -628,6 +628,7 @@ peffects(otmp)
 			  fruitname(TRUE));
 		if (otmp->otyp == POT_FRUIT_JUICE) {
 		    if(!Race_if(PM_INCANTIFIER)) u.uhunger += (otmp->odiluted ? 40 : 100) + 10 * (2 + bcsign(otmp));
+            if(u.uhunger > u.uhungermax) u.uhunger = u.uhungermax;
 		    newuhs(FALSE);
 		    break;
 		}

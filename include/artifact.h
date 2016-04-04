@@ -290,6 +290,8 @@ struct artifact {
 #define HEAL_PETS       (LAST_PROP+51)
 #define FREE_SPELL      (LAST_PROP+52)
 #define BURN_WARD       (LAST_PROP+53)
+#define FAST_TURNING    (LAST_PROP+54)
+#define SPIT_FIRE    (LAST_PROP+55)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -338,6 +340,15 @@ struct artifact {
             || ((a) == &artilist[ART_SHIELD_OF_THE_PALADIN] && Role_if(PM_KNIGHT) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !exist_artifact(ROBE, artilist[ART_COPE_OF_THE_ELDRITCH_KNIGH].name))\
             /* Monk */\
+            || ((a) == &artilist[ART_BOOZE_OF_THE_INEBRIATE] && Role_if(PM_MONK) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(LEATHER_GLOVES, artilist[ART_WRAPPINGS_OF_THE_SACRED_FI].name) &&\
+                !exist_artifact(SILVER_KHAKKHARA, artilist[ART_KHAKKHARA_OF_THE_MONKEY].name))\
+            || ((a) == &artilist[ART_WRAPPINGS_OF_THE_SACRED_FI] && Role_if(PM_MONK) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(POT_BOOZE, artilist[ART_BOOZE_OF_THE_INEBRIATE].name) &&\
+                !exist_artifact(SILVER_KHAKKHARA, artilist[ART_KHAKKHARA_OF_THE_MONKEY].name))\
+            || ((a) == &artilist[ART_KHAKKHARA_OF_THE_MONKEY] && Role_if(PM_MONK) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(LEATHER_GLOVES, artilist[ART_WRAPPINGS_OF_THE_SACRED_FI	].name) &&\
+                !exist_artifact(POT_BOOZE, artilist[ART_BOOZE_OF_THE_INEBRIATE].name))\
             /* Nobleman/Noblewoman */\
             /* Priest/Priestess */\
             || ((a) == &artilist[ART_MACE_OF_THE_EVANGELIST] && Role_if(PM_PRIEST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\

@@ -1366,17 +1366,17 @@ struct monst *mon;
 int
 spiritDsize()
 {
-    int bonus = 0;
-    if(ublindf && ublindf->oartifact == ART_SOUL_LENS) bonus = 1;
-	if(u.ulevel <= 2) return 1 + bonus;
-	else if(u.ulevel <= 5) return 2 + bonus;
-	else if(u.ulevel <= 9) return 3 + bonus;
-	else if(u.ulevel <= 13) return 4 + bonus;
-	else if(u.ulevel <= 17) return 5 + bonus;
-	else if(u.ulevel <= 21) return 6 + bonus;
-	else if(u.ulevel <= 25) return 7 + bonus;
-	else if(u.ulevel <= 29) return 8 + bonus;
-	else return 9 + bonus;
+    int bonus = 1;
+    if(ublindf && ublindf->oartifact == ART_SOUL_LENS) bonus = 2;
+	if(u.ulevel <= 2) return 1 * bonus;
+	else if(u.ulevel <= 5) return 2 * bonus;
+	else if(u.ulevel <= 9) return 3 * bonus;
+	else if(u.ulevel <= 13) return 4 * bonus;
+	else if(u.ulevel <= 17) return 5 * bonus;
+	else if(u.ulevel <= 21) return 6 * bonus;
+	else if(u.ulevel <= 25) return 7 * bonus;
+	else if(u.ulevel <= 29) return 8 * bonus;
+	else return 9 * bonus;
 }
 STATIC_PTR int
 purifying_blast()

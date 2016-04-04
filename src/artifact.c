@@ -4795,11 +4795,45 @@ arti_invoke(obj)
           if(uarms && uarms == obj){
             struct obj *scroll;
             scroll = mksobj(SCR_WARDING, TRUE, FALSE);
-            scroll->blessed = scroll->blessed;
-            scroll->cursed = scroll->cursed;
+            scroll->blessed = obj->blessed;
+            scroll->cursed = obj->cursed;
             seffects(scroll);
             obfree(scroll,(struct obj *)0);
           } else You_feel("that you should be wearing %s.", The(xname(obj)));
+        } break;
+        case FAST_TURNING: {
+          if(uarmg && uarmg == obj){
+            if(!obj->cursed){
+              if(!getdir((char *)0))
+                break;
+              struct obj *wand;
+              wand = mksobj(WAN_UNDEAD_TURNING, TRUE, FALSE);
+              wand->blessed = obj->blessed;
+              wand->cursed = obj->cursed;
+              wand->ovar1 = 1;
+              weffects(wand);
+              obfree(wand,(struct obj *)0);
+            } else {
+              uncurse(obj);
+              if(!Blind)
+                pline("Your %s %s.", aobjnam(obj, "softly glow"), hcolor(NH_AMBER));
+            }
+          } else You_feel("that you should be wearing %s.", The(xname(obj)));
+        } break;
+        case SPIT_FIRE: {
+          if(obj->oartifact == ART_BOOZE_OF_THE_INEBRIATE){
+            if(!getdir((char *)0))
+              break;
+            struct obj *wand;
+            You("take a sip from %s, then belch out a blast of fire.", The(xname(obj)));
+            wand = mksobj(WAN_FIRE, TRUE, FALSE);
+            wand->blessed = obj->blessed;
+            wand->cursed= obj->cursed;
+            wand->ovar1 = 1;
+            if(wand->cursed) uncurse(wand);
+            weffects(wand);
+            obfree(wand,(struct obj *)0);
+          }
         } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;

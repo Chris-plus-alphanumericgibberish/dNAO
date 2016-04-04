@@ -585,6 +585,7 @@ dofire()
 	
 	if(uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && uwep->oartifact && 
 		(
+        (uwep->oartifact == ART_KHAKKHARA_OF_THE_MONKEY) ||
 		(uwep->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE) && ACURR(A_STR) == STR19(25)) ||
 		(uwep->oartifact == ART_ANNULUS && (uwep->otyp == SILVER_CHAKRAM || uwep->otyp == LIGHTSABER)) ||
 		(uwep->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && Race_if(PM_DWARF) && ACURR(A_STR) == STR19(25))
@@ -1284,11 +1285,13 @@ int thrown;
 
 	thrownobj = obj;
 
+    pline("test");
 	if(u.uswallow) {
 		mon = u.ustuck;
 		bhitpos.x = mon->mx;
 		bhitpos.y = mon->my;
 	} else if(u.dz) {
+        pline("test2");
 	    if (u.dz < 0 &&  ( 
 				(obj->oartifact == ART_MJOLLNIR &&
 				 Role_if(PM_VALKYRIE)) || 
@@ -1296,6 +1299,7 @@ int thrown;
 				 Race_if(PM_DWARF)) ||
 				 obj->oartifact == ART_WINDRIDER ||
 				 obj->oartifact == ART_ANNULUS ||
+				 obj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
 				 obj->oartifact == ART_SICKLE_MOON
 			  ) && !impaired
 		) {

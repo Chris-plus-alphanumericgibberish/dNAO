@@ -1405,6 +1405,26 @@ A("The Shield of the Paladin",	LARGE_SHIELD,
 	0,0,WSFX_PLUSSEV),
 
 /* Monk */
+A("The Booze of the Inebriate",	POT_BOOZE,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	SPIT_FIRE,	A_NONE, PM_MONK, NON_PM, 0L,
+	0,0,0),
+
+/* TODO 2x damage against undead/demons */
+A("The Wrappings of the Sacred Fist",	LEATHER_GLOVES,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	FAST_TURNING,	A_NONE, PM_MONK, NON_PM, 0L,
+	0,0,WSFX_PLUSSEV),
+
+/* TODO jumping while worn */
+A("Khakkhara of the Monkey",	SILVER_KHAKKHARA,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0,	A_NONE, PM_MONK, NON_PM, 0L,
+	SPFX2_SILVERED,0,0),
+
 /* Nobleman/Noblewoman */
 /* Priest/Priestess */
 A("The Gauntlets of the Divine Disciple",	ORIHALCYON_GAUNTLETS,
