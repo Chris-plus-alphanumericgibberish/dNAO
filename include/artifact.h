@@ -385,10 +385,10 @@ struct artifact {
                 !exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_PYGMALION].name) &&\
                 !exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_GALATEA].name))\
             || ((a) == &artilist[ART_FIGURINE_OF_PYGMALION] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
-                !exist_artifact(HELM_OF_BRILLIANCE, artilist[ART_HELM_OF_THE_ARCANE_ARCHER].name) &&\
+                !exist_artifact(LEATHER_HELM, artilist[ART_HELM_OF_THE_ARCANE_ARCHER].name) &&\
                 !exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_GALATEA].name))\
             || ((a) == &artilist[ART_FIGURINE_OF_GALATEA] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
-                !exist_artifact(HELM_OF_BRILLIANCE, artilist[ART_HELM_OF_THE_ARCANE_ARCHER].name) &&\
+                !exist_artifact(LEATHER_HELM, artilist[ART_HELM_OF_THE_ARCANE_ARCHER].name) &&\
                 !exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_PYGMALION].name))\
             /* Samurai */\
             || ((a) == &artilist[ART_HELM_OF_THE_NINJA] && Role_if(PM_SAMURAI) && u.ulevel >= MASTERY_ARTIFACT_LEVEL)\

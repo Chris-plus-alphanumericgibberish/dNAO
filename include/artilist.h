@@ -1452,7 +1452,7 @@ A("The Sword of the Kleptomaniac", SHORT_SWORD,
 
 /* Ranger */
 /* TODO confirm proper handling of artifact_hit w/ Chris_ANG */
-A("The Helm of the Arcane Archer", HELM_OF_BRILLIANCE,
+A("The Helm of the Arcane Archer", LEATHER_HELM,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	0, A_NONE, PM_RANGER, NON_PM, 0L,
