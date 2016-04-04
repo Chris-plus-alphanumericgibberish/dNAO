@@ -33,6 +33,7 @@ int FDECL(donecromenu, (const char *,struct obj *));
 int FDECL(dopetmenu, (const char *,struct obj *));
 int FDECL(dolordsmenu, (const char *,struct obj *));
 int FDECL(doannulmenu, (const char *,struct obj *));
+int FDECL(doaddpoisonmenu, (const char *,struct obj *));
 
 static NEARDATA schar delay;		/* moves left for this spell */
 static NEARDATA struct obj *artiptr;/* last/current artifact being used */
@@ -293,6 +294,9 @@ make_artif:
 	    otmp = oname(otmp, a->name);
 	    otmp->oartifact = m;
 	    artiexist[m] = TRUE;
+        if(m == ART_HELM_OF_THE_ARCANE_ARCHER){
+          unrestrict_weapon_skill(P_ATTACK_SPELL);
+        }
 	} else {
 	    /* nothing appropriate could be found; return the original object */
 	    if (by_align) otmp = 0;	/* (there was no original object) */
@@ -1847,7 +1851,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			make_stunned((HStun + 3), FALSE);
 		}
 	}
-	if( (spec_ability2(otmp, SPFX2_FIRE) && !rn2(4)) || 
+	if( ((spec_ability2(otmp, SPFX2_FIRE) || (uarmh && uarmh == otmp && spec_ability2(uarmh, SPFX2_FIRE))) && !rn2(4)) || 
 		(spec_ability2(otmp, SPFX2_FIRE2) && (otmp->oartifact != ART_TOBIUME || *dmgptr+6 >= mdef->mhp))
 		){
 		if(youattack){
@@ -1869,7 +1873,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				EXPL_FIERY);
 		}
 	}
-	if( (spec_ability2(otmp, SPFX2_COLD) && !rn2(4)) || spec_ability2(otmp, SPFX2_COLD2)){
+	if( ((spec_ability2(otmp, SPFX2_COLD) || (uarmh && uarmh == otmp && spec_ability2(uarmh, SPFX2_COLD))) && !rn2(4)) || spec_ability2(otmp, SPFX2_COLD2)){
 		if(youattack){
 			explode(mdef->mx, mdef->my,
 				2, //1 = AD_COLD, explode uses nonstandard damage type flags...
@@ -1889,7 +1893,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				EXPL_FROSTY);
 		}
 	}
-	if( (spec_ability2(otmp, SPFX2_ELEC) && !rn2(4)) || spec_ability2(otmp, SPFX2_ELEC2)){
+	if( ((spec_ability2(otmp, SPFX2_ELEC) || (uarmh && uarmh == otmp && spec_ability2(uarmh, SPFX2_ELEC))) && !rn2(4)) || spec_ability2(otmp, SPFX2_ELEC2)){
 		if(youattack){
 			int deltax = mdef->mx-u.ux;
 			int deltay = mdef->my-u.uy;
@@ -4835,6 +4839,33 @@ arti_invoke(obj)
             obfree(wand,(struct obj *)0);
           }
         } break;
+        case ADD_POISON:{
+          int addpoisonFunc = doaddpoisonmenu("Pick your poison.", obj);
+          switch(addpoisonFunc){
+              case 0:
+                break;
+              case COMMAND_POISON:
+                obj->opoisoned = OPOISON_BASIC;
+                pline("A poisoned coating forms on %s.", The(xname(obj)));
+                break;
+              case COMMAND_DRUG:
+                obj->opoisoned = OPOISON_SLEEP;
+                pline("A drug coating forms on %s.", The(xname(obj)));
+                break;
+              case COMMAND_STAIN:
+                obj->opoisoned = OPOISON_BLIND;
+                pline("A stained  coating forms on %s.", The(xname(obj)));
+                break;
+              case COMMAND_ENVENOM:
+                obj->opoisoned = OPOISON_PARAL;
+                pline("A venomous coating forms on %s.", The(xname(obj)));
+                break;
+              case COMMAND_FILTH:
+                obj->opoisoned = OPOISON_FILTH;
+                pline("A filty coating forms on %s.", The(xname(obj)));
+                break;
+          }
+        } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
 			struct monst *mtmp2;
@@ -5606,6 +5637,56 @@ struct obj *obj;
 				MENU_UNSELECTED);
 		}
 	}
+	end_menu(tmpwin, prompt);
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? selected[0].item.a_int : 0;
+}
+
+int
+doaddpoisonmenu(prompt, obj)
+const char *prompt;
+struct obj *obj;
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Pick your poison:");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+    Sprintf(buf, "Poison");
+    any.a_int = COMMAND_POISON;	/* must be non-zero */
+    add_menu(tmpwin, NO_GLYPH, &any,
+        'p', 0, ATR_NONE, buf,
+        MENU_UNSELECTED);
+    Sprintf(buf, "Drug");
+    any.a_int = COMMAND_DRUG;	/* must be non-zero */
+    add_menu(tmpwin, NO_GLYPH, &any,
+        'd', 0, ATR_NONE, buf,
+        MENU_UNSELECTED);
+    Sprintf(buf, "Stain");
+    any.a_int = COMMAND_STAIN;	/* must be non-zero */
+    add_menu(tmpwin, NO_GLYPH, &any,
+        'f', 0, ATR_NONE, buf,
+        MENU_UNSELECTED);
+    Sprintf(buf, "Envenom");
+    any.a_int = COMMAND_ENVENOM;	/* must be non-zero */
+    add_menu(tmpwin, NO_GLYPH, &any,
+        'e', 0, ATR_NONE, buf,
+        MENU_UNSELECTED);
+    Sprintf(buf, "Diseased Filth");
+    any.a_int = COMMAND_FILTH;	/* must be non-zero */
+    add_menu(tmpwin, NO_GLYPH, &any,
+        'f', 0, ATR_NONE, buf,
+        MENU_UNSELECTED);
 	end_menu(tmpwin, prompt);
 
 	how = PICK_ONE;

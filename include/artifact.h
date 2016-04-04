@@ -218,6 +218,11 @@
 #define COMMAND_ANNUL			34
 #define COMMAND_CHARGE			35
 
+#define COMMAND_POISON			35
+#define COMMAND_DRUG  			36
+#define COMMAND_STAIN 			37
+#define COMMAND_ENVENOM			38
+#define COMMAND_FILTH 			39
 
 struct artifact {
 	int	    otyp;
@@ -291,7 +296,8 @@ struct artifact {
 #define FREE_SPELL      (LAST_PROP+52)
 #define BURN_WARD       (LAST_PROP+53)
 #define FAST_TURNING    (LAST_PROP+54)
-#define SPIT_FIRE    (LAST_PROP+55)
+#define SPIT_FIRE       (LAST_PROP+55)
+#define ADD_POISON      (LAST_PROP+56)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -357,7 +363,12 @@ struct artifact {
                 !exist_artifact(MACE, artilist[ART_MACE_OF_THE_EVANGELIST].name))\
             /* Pirate */\
             /* Rogue */\
+            || ((a) == &artilist[ART_DART_OF_THE_ASSASSIN] && Role_if(PM_ROGUE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(SHORT_SWORD, artilist[ART_SWORD_OF_THE_KLEPTOMANIAC].name))\
+            || ((a) == &artilist[ART_SWORD_OF_THE_KLEPTOMANIAC] && Role_if(PM_ROGUE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(DART, artilist[ART_DART_OF_THE_ASSASSIN].name))\
             /* Ranger */\
+            || ((a) == &artilist[ART_HELM_OF_THE_ARCANE_ARCHER] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL)\
             /* Samurai */\
             /* Tourist */\
             /* Troubadour */\

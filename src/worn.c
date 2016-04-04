@@ -75,7 +75,10 @@ long mask;
 				obj->ovar1 |= u.spirit[i];
 			}
 		}
-	}
+	} else if(obj && obj->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER){
+      if(P_UNSKILLED == OLD_P_SKILL(P_ATTACK_SPELL)) OLD_P_SKILL(P_ATTACK_SPELL) = P_BASIC;
+      if(P_BASIC     == OLD_P_SKILL(P_ATTACK_SPELL)) OLD_P_SKILL(P_ATTACK_SPELL) = P_SKILLED;
+    }
 	
 	if ((mask & (W_ARM|I_SPECIAL)) == (W_ARM|I_SPECIAL)) {
 	    /* restoring saved game; no properties are conferred via skin */
@@ -162,6 +165,10 @@ register struct obj *obj;
 
 	if (!obj) return;
 	if (obj == uwep || obj == uswapwep) u.twoweap = 0;
+	if (obj->oartifact && obj->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER){
+      if(P_BASIC   == OLD_P_SKILL(P_ATTACK_SPELL)) OLD_P_SKILL(P_ATTACK_SPELL) = P_UNSKILLED;
+      if(P_SKILLED == OLD_P_SKILL(P_ATTACK_SPELL)) OLD_P_SKILL(P_ATTACK_SPELL) = P_BASIC;
+    }
 	for(wp = worn; wp->w_mask; wp++)
 	    if(obj == *(wp->w_obj)) {
 		*(wp->w_obj) = 0;

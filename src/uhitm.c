@@ -1409,6 +1409,13 @@ int thrown;
 						if (tmp == 0) return TRUE; /* NOTE: ditto */
 						hittxt = TRUE;
 					}
+					if(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER &&
+						artifact_hit(&youmonst, mon, uarmh, &tmp, dieroll)){
+						if(mon->mhp <= 0) /* artifact killed monster */
+							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
+						if (tmp == 0) return TRUE; /* NOTE: ditto */
+						hittxt = TRUE;
+					}
 				}
 			}
 		}

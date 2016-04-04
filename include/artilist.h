@@ -1441,7 +1441,28 @@ A("The Mace of the Evangelist",	MACE,
 
 /* Pirate */
 /* Rogue */
+/* TODO appearance when poisoned/drugged etc */
+A("The Dart of the Assassin", DART,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	ADD_POISON, A_NONE, PM_ROGUE, NON_PM, 0L,
+	0,0,0),
+
+/* TODO only name w/ expert short sword */
+A("The Sword of the Kleptomaniac", SHORT_SWORD,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	PHYS(5, 5),	DFNS(AD_MAGM),	NO_CARY,
+	THEFT_TYPE, A_NONE, PM_ROGUE, NON_PM, 0L,
+	SPFX2_STEAL,0,0),
+
 /* Ranger */
+/* TODO confirm proper handling of artifact_hit w/ Chris_ANG */
+A("The Helm of the Arcane Archer", HELM_OF_BRILLIANCE,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_ROGUE, NON_PM, 0L,
+	SPFX2_COLD|SPFX2_FIRE|SPFX2_ELEC,0,0),
+
 /* Samurai */
 /* Tourist */
 /* Troubadour */

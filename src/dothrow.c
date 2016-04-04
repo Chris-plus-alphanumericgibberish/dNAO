@@ -194,8 +194,8 @@ int thrown;
 		else if(launcher->oartifact == ART_ROGUE_GEAR_SPIRITS) multishot = 2;
 	}
 	
-	if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
-		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS
+	if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER
+		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_DART_OF_THE_ASSASSIN
 	) multishot = (int)obj->quan;
 	if (shotlimit > 0 && multishot > shotlimit) multishot = shotlimit;
 	
@@ -222,8 +222,9 @@ int thrown;
 		/* else it is auto == no change */
 	    }
 
-	    if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
-		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS) multishot = (int)obj->quan;
+	    if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER
+		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS != ART_DART_OF_THE_ASSASSIN)
+          multishot = (int)obj->quan;
 //#endif
 
 	if (multishot < 1) multishot = 1;
@@ -1296,6 +1297,7 @@ int thrown;
 				(obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && 
 				 Race_if(PM_DWARF)) ||
 				 obj->oartifact == ART_WINDRIDER ||
+				 obj->oartifact == ART_DART_OF_THE_ASSASSIN ||
 				 obj->oartifact == ART_ANNULUS ||
 				 obj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
 				 obj->oartifact == ART_SICKLE_MOON
@@ -1487,6 +1489,7 @@ int thrown;
 				 obj->oartifact == ART_SICKLE_MOON ||
 				 obj->oartifact == ART_ANNULUS ||
 				 obj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
+				 obj->oartifact == ART_DART_OF_THE_ASSASSIN ||
 				 obj->oartifact == ART_WINDRIDER
 			  )
 		) {
