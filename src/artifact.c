@@ -34,6 +34,7 @@ int FDECL(dopetmenu, (const char *,struct obj *));
 int FDECL(dolordsmenu, (const char *,struct obj *));
 int FDECL(doannulmenu, (const char *,struct obj *));
 int FDECL(doselfpoisonmenu, (const char *,struct obj *));
+int FDECL(doartificemenu, (const char *,struct obj *));
 
 static NEARDATA schar delay;		/* moves left for this spell */
 static NEARDATA struct obj *artiptr;/* last/current artifact being used */
@@ -190,8 +191,6 @@ hack_artifacts()
 	}
 	if (Role_if(PM_MONK)) {
 	    artilist[ART_GRANDMASTER_S_ROBE].alignment = alignmnt;
-	    artilist[ART_ROBE_OF_THE_ARCHMAGI].alignment = alignmnt;
-	    artilist[ART_ROBE_OF_THE_ARCHMAGI].role = Role_switch;
 	}
 	if (urole.questarti) {
 	    artilist[urole.questarti].alignment = alignmnt;
@@ -4882,6 +4881,7 @@ arti_invoke(obj)
             switch(rn2(5)){
               case 0:
                 otmp = mkobj(TIN, FALSE);
+                otmp->corpsenm = PM_LICHEN;
                 break;
               case 1:
                 otmp = mkobj(POT_BOOZE, FALSE);
@@ -4902,10 +4902,28 @@ arti_invoke(obj)
             otmp->owt = weight(otmp);
             otmp = hold_another_object(otmp, "Suddenly %s out.",
                            aobjnam(otmp, "fall"), (const char *)0);
-          } else You_feel("like you should be weilding %s.", The(xname(obj)));
+          } else You_feel("like you should be wielding %s.", The(xname(obj)));
         } break;
         case MAJ_RUMOR:{
           outgmaster();
+        } break;
+        case ARTIFICE:{
+          int artificeFunc = doartificemenu("Improve weapon or armor:", obj);
+          struct obj *scroll;
+          switch(artificeFunc){
+              case 0:
+                break;
+              case COMMAND_IMPROVE_WEP:
+                scroll = mksobj(SCR_ENCHANT_ARMOR, TRUE, FALSE);
+                break;
+              case COMMAND_IMPROVE_ARM:
+                scroll = mksobj(SCR_ENCHANT_WEAPON, TRUE, FALSE);
+                break;
+          }
+          scroll->blessed = obj->blessed;
+          scroll->cursed = obj->cursed;
+          seffects(scroll);
+          obfree(scroll,(struct obj *)0);
         } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
@@ -5727,6 +5745,40 @@ struct obj *obj;
     any.a_int = COMMAND_FILTH;	/* must be non-zero */
     add_menu(tmpwin, NO_GLYPH, &any,
         'f', 0, ATR_NONE, buf,
+        MENU_UNSELECTED);
+	end_menu(tmpwin, prompt);
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? selected[0].item.a_int : 0;
+}
+
+int
+doartificemenu(prompt, obj)
+const char *prompt;
+struct obj *obj;
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Improve weapons or armors:");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+    Sprintf(buf, "Weapons");
+    any.a_int = COMMAND_IMPROVE_WEP;	/* must be non-zero */
+    add_menu(tmpwin, NO_GLYPH, &any,
+        'w', 0, ATR_NONE, buf,
+        MENU_UNSELECTED);
+    any.a_int = COMMAND_IMPROVE_ARM;	/* must be non-zero */
+    add_menu(tmpwin, NO_GLYPH, &any,
+        'a', 0, ATR_NONE, buf,
         MENU_UNSELECTED);
 	end_menu(tmpwin, prompt);
 

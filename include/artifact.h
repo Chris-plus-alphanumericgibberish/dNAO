@@ -224,6 +224,9 @@
 #define COMMAND_ENVENOM			38
 #define COMMAND_FILTH 			39
 
+#define COMMAND_IMPROVE_WEP     40
+#define COMMAND_IMPROVE_ARM     41
+
 struct artifact {
 	int	    otyp;
 	const char  *name;
@@ -301,6 +304,7 @@ struct artifact {
 #define ADD_POISON      (LAST_PROP+57)
 #define TOWEL_ITEMS     (LAST_PROP+58)
 #define MAJ_RUMOR       (LAST_PROP+59)
+#define ARTIFICE        (LAST_PROP+60)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -309,9 +313,6 @@ struct artifact {
 			|| (a == &artilist[ART_SNICKERSNEE] && Role_if(PM_TOURIST) && (u.ulevel > 18 || u.uevent.qcompleted) )\
 			|| (a == &artilist[ART_KUSANAGI_NO_TSURUGI] && Role_if(PM_SAMURAI) && u.ulevel >= 22 )\
 			|| (a == &artilist[ART_GRANDMASTER_S_ROBE] && P_SKILL(P_MARTIAL_ARTS) >= P_GRAND_MASTER && u.ulevel >= 30 )\
-			|| (a == &artilist[ART_STAFF_OF_THE_ARCHMAGI] && Role_if(PM_WIZARD) && u.ulevel == 30 )\
-			|| (a == &artilist[ART_ROBE_OF_THE_ARCHMAGI] && Role_if(PM_WIZARD) && u.ulevel == 30 )\
-			|| (a == &artilist[ART_HAT_OF_THE_ARCHMAGI] && Role_if(PM_WIZARD) && u.ulevel == 30 )\
 			|| (a == &artilist[ART_FIRST_KEY_OF_CHAOS] && \
 							(exist_artifact(SKELETON_KEY,artilist[ART_THIRD_KEY_OF_CHAOS].name) \
 							||  u.ualign.type == A_CHAOTIC ) \
@@ -381,7 +382,20 @@ struct artifact {
                 !exist_artifact(TOWEL, artilist[ART_TOWEL_OF_THE_INTERSTELLAR_].name))\
             /* Troubadour */\
             /* Valkyrie */\
+            || ((a) == &artilist[ART_TWIG_OF_YGGDRASIL] && Role_if(PM_VALKYRIE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(SADDLE, artilist[ART_SADDLE_OF_BRYNHILDR].name))\
+            || ((a) == &artilist[ART_SADDLE_OF_BRYNHILDR] && Role_if(PM_VALKYRIE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(WAN_TELEPORTATION, artilist[ART_TWIG_OF_YGGDRASIL].name))\
             /* Wizard */\
+            || ((a) == &artilist[ART_STAFF_OF_THE_ARCHMAGI] && Role_if(PM_WIZARD) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(ROBE, artilist[ART_ROBE_OF_WILD_MAGIC].name) &&\
+                !exist_artifact(WAR_HAMMER, artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI].name))\
+            || ((a) == &artilist[ART_ROBE_OF_WILD_MAGIC] && Role_if(PM_WIZARD) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(QUARTERSTAFF, artilist[ART_STAFF_OF_THE_ARCHMAGI].name) &&\
+                !exist_artifact(WAR_HAMMER, artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI].name))\
+            || ((a) == &artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI] && Role_if(PM_WIZARD) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(QUARTERSTAFF, artilist[ART_STAFF_OF_THE_ARCHMAGI].name) &&\
+                !exist_artifact(ROBE, artilist[ART_ROBE_OF_WILD_MAGIC].name))\
             )
 
 #define is_monk_safe_artifact(m) (\

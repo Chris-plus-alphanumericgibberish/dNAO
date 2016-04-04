@@ -1168,7 +1168,7 @@ struct obj	*sobj;
 		special_armor = is_elven_armor(otmp) ||
 			arti_plussev(otmp) || /* special artifact armors */
 			(Role_if(PM_WIZARD) && otmp->otyp == CORNUTHAUM) ||
-			(Role_if(PM_WIZARD) && otmp->otyp == ROBE && otmp->oartifact == ART_ROBE_OF_THE_ARCHMAGI) ||
+			(Role_if(PM_WIZARD) && otmp->otyp == ROBE && otmp->oartifact == ART_ROBE_OF_WILD_MAGIC ) ||
 			otmp->otyp == CRYSTAL_HELM ||
 			otmp->otyp == CRYSTAL_PLATE_MAIL ||
 			otmp->otyp == CRYSTAL_SHIELD ||

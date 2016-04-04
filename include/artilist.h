@@ -1112,18 +1112,6 @@ A("The Eye of the Aethiopica",	AMULET_OF_ESP,
 
 /*//////////Special High-Level Artifacts//////////*/
 
-A("The Staff of the Archmagi",			QUARTERSTAFF,
-	(SPFX_NOGEN|SPFX_RESTR|SPFX_ATTK|SPFX_SEARCH|SPFX_LUCK|SPFX_INTEL), 0, 0,
-	STUN(20,4),	NO_DFNS,	NO_CARY,
-	ENERGY_BOOST, A_NONE, PM_WIZARD, NON_PM, 9000L, 
-	SPFX2_DIG|SPFX2_FIRE|SPFX2_COLD|SPFX2_ELEC|SPFX2_RAM2,0,0),
-
-A("The Robe of the Archmagi",			ROBE,
-	(SPFX_NOGEN|SPFX_RESTR|SPFX_REFLECT|SPFX_DISPL|SPFX_INTEL), 0, 0,
-	NO_ATTK,	DFNS(AD_MAGM),	NO_CARY,	
-	ENERGY_BOOST, A_NONE, PM_WIZARD, NON_PM, 9000L, 
-	0,0,WSFX_PLUSSEV),
-
 A("The Hat of the Archmagi",			CORNUTHAUM,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_SPEAK|SPFX_WARN|SPFX_XRAY|SPFX_INTEL), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,	
@@ -1474,6 +1462,7 @@ A("The Helm of the Ninja", HELM_OF_OPPOSITE_ALIGNMENT,
 /* TODO towel wetting as in vanilla 3.6.0 */
 /* TODO 2x damage while wet */
 /* TODO +1 whip skill while wielded */
+/* TODO create tinned biscuits instead of lichen */
 A("The Towel of the Interstellar Hitchhiker", TOWEL,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	PHYS(5, 0),	DFNS(AD_COLD),	NO_CARY,
@@ -1488,7 +1477,40 @@ A("The Encyclopedia Galactica", SPE_BLANK_PAPER,
 
 /* Troubadour */
 /* Valkyrie */
+A("The Twig of Yggdrasil", WAN_TELEPORTATION,
+	(SPFX_NOGEN|SPFX_RESTR), (SPFX_TCTRL), 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	CREATE_PORTAL, A_NONE, PM_VALKYRIE, NON_PM, 0L,
+	0,0,0),
+
+/* TODO flying */
+A("The Saddle of Brynhildr", SADDLE,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_VALKYRIE, NON_PM, 0L,
+	0,0,0),
+
 /* Wizard */
+A("The Staff of the Archmagi",			QUARTERSTAFF,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_ATTK|SPFX_SEARCH|SPFX_LUCK|SPFX_INTEL), 0, 0,
+	STUN(20,4),	NO_DFNS,	NO_CARY,
+	ENERGY_BOOST, A_NONE, PM_WIZARD, NON_PM, 0L, 
+	SPFX2_DIG|SPFX2_FIRE|SPFX2_COLD|SPFX2_ELEC|SPFX2_RAM2,0,0),
+
+/* TODO exploding spell dice */
+/* TODO remove as crowning option */
+A("The Robe of Wild Magic",			ROBE,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_WARN|SPFX_XRAY|SPFX_INTEL), 0, 0,
+	NO_ATTK,	DFNS(AD_MAGM),	NO_CARY,	
+	ENERGY_BOOST, A_NONE, PM_WIZARD, NON_PM, 0L, 
+	0,0,WSFX_PLUSSEV),
+
+/* TODO 2x damage vs non-living */
+A("The Forge Hammer of the Artificer",			WAR_HAMMER,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,	
+	ARTIFICE, A_NONE, PM_WIZARD, NON_PM, 0L, 
+	0,0,0),
 
 /*
  *  terminator; otyp must be zero
