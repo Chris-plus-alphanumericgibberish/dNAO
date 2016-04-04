@@ -1285,13 +1285,11 @@ int thrown;
 
 	thrownobj = obj;
 
-    pline("test");
 	if(u.uswallow) {
 		mon = u.ustuck;
 		bhitpos.x = mon->mx;
 		bhitpos.y = mon->my;
 	} else if(u.dz) {
-        pline("test2");
 	    if (u.dz < 0 &&  ( 
 				(obj->oartifact == ART_MJOLLNIR &&
 				 Role_if(PM_VALKYRIE)) || 
@@ -1488,6 +1486,7 @@ int thrown;
 				 Race_if(PM_DWARF)) ||
 				 obj->oartifact == ART_SICKLE_MOON ||
 				 obj->oartifact == ART_ANNULUS ||
+				 obj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
 				 obj->oartifact == ART_WINDRIDER
 			  )
 		) {
