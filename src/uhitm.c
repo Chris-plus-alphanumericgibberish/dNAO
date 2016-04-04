@@ -292,14 +292,19 @@ struct monst *mtmp;
 	}
 /*	attacking peaceful creatures is bad for the samurai's giri */
 	if (Role_if(PM_SAMURAI) && mtmp->mpeaceful){
-		You("dishonorably attack the innocent!");
-		u.ualign.sins++;
-		u.ualign.sins++;
-		u.hod++;
-		adjalign(-1);
-		if(u.ualign.record > -10) {
-			adjalign(-4);
-		}
+        if(!(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_NINJA)){
+          You("dishonorably attack the innocent!");
+          u.ualign.sins++;
+          u.ualign.sins++;
+          u.hod++;
+          adjalign(-1);
+          if(u.ualign.record > -10) {
+              adjalign(-4);
+          }
+        } else {
+          You("dishonorably attack the innocent!");
+          adjalign(1);
+        }
 	}
 	
 }
@@ -1746,10 +1751,15 @@ defaultvalue:
 	}
 	if (ispoisoned || (obj && (arti_poisoned(obj) || obj->oartifact == ART_WEBWEAVER_S_CROOK || obj->oartifact == ART_MOONBEAM))) {
 	    if Role_if(PM_SAMURAI) {
+          if(!(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_NINJA)){
 			You("dishonorably use a poisoned weapon!");
 			adjalign(-sgn(u.ualign.type)*5); //stiffer penalty
 			u.ualign.sins++;
 			u.hod++;
+          } else {
+			You("dishonorably use a poisoned weapon!");
+			adjalign(5);
+          }
 	    } else if ((u.ualign.type == A_LAWFUL) && !Race_if(PM_ORC) &&
 				!((Race_if(PM_DROW) && !flags.initgend && 
 					(Role_if(PM_PRIEST) || Role_if(PM_ROGUE) || Role_if(PM_RANGER) || Role_if(PM_WIZARD)) ) ||

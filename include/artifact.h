@@ -297,7 +297,10 @@ struct artifact {
 #define BURN_WARD       (LAST_PROP+53)
 #define FAST_TURNING    (LAST_PROP+54)
 #define SPIT_FIRE       (LAST_PROP+55)
-#define ADD_POISON      (LAST_PROP+56)
+#define SELF_POISON     (LAST_PROP+56)
+#define ADD_POISON      (LAST_PROP+57)
+#define TOWEL_ITEMS     (LAST_PROP+58)
+#define MAJ_RUMOR       (LAST_PROP+59)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -370,7 +373,12 @@ struct artifact {
             /* Ranger */\
             || ((a) == &artilist[ART_HELM_OF_THE_ARCANE_ARCHER] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL)\
             /* Samurai */\
+            || ((a) == &artilist[ART_HELM_OF_THE_NINJA] && Role_if(PM_SAMURAI) && u.ulevel >= MASTERY_ARTIFACT_LEVEL)\
             /* Tourist */\
+            || ((a) == &artilist[ART_TOWEL_OF_THE_INTERSTELLAR_] && Role_if(PM_TOURIST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(SPE_BLANK_PAPER, artilist[ART_ENCYCLOPEDIA_GALACTICA].name))\
+            || ((a) == &artilist[ART_ENCYCLOPEDIA_GALACTICA] && Role_if(PM_TOURIST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !exist_artifact(TOWEL, artilist[ART_TOWEL_OF_THE_INTERSTELLAR_].name))\
             /* Troubadour */\
             /* Valkyrie */\
             /* Wizard */\

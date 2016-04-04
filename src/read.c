@@ -202,6 +202,17 @@ doread()
 			pline(silly_thing_to, "read");
 			return(0);
 		}
+    } else if(scroll->oartifact && scroll->oartifact == ART_ENCYCLOPEDIA_GALACTICA){
+      const char *line;
+      char buf[BUFSZ];
+
+      line = getrumor(bcsign(scroll), buf, TRUE);
+      if (!*line)
+        line = "NetHack rumors file closed for renovation.";
+
+      pline("%s:", Tobjnam(scroll, "display"));
+      verbalize("%s", line);
+      return 1;
     } else if(scroll->oartifact && scroll->oartifact == ART_TOME_OF_THE_LOREMASTER){
       int oindx = 1 + rn2(NUM_OBJECTS - 1);
       if(objects[oindx].oc_name_known){

@@ -33,7 +33,7 @@ int FDECL(donecromenu, (const char *,struct obj *));
 int FDECL(dopetmenu, (const char *,struct obj *));
 int FDECL(dolordsmenu, (const char *,struct obj *));
 int FDECL(doannulmenu, (const char *,struct obj *));
-int FDECL(doaddpoisonmenu, (const char *,struct obj *));
+int FDECL(doselfpoisonmenu, (const char *,struct obj *));
 
 static NEARDATA schar delay;		/* moves left for this spell */
 static NEARDATA struct obj *artiptr;/* last/current artifact being used */
@@ -4839,9 +4839,9 @@ arti_invoke(obj)
             obfree(wand,(struct obj *)0);
           }
         } break;
-        case ADD_POISON:{
-          int addpoisonFunc = doaddpoisonmenu("Pick your poison.", obj);
-          switch(addpoisonFunc){
+        case SELF_POISON:{
+          int selfpoisonFunc = doselfpoisonmenu("Pick your poison.", obj);
+          switch(selfpoisonFunc){
               case 0:
                 break;
               case COMMAND_POISON:
@@ -4854,7 +4854,7 @@ arti_invoke(obj)
                 break;
               case COMMAND_STAIN:
                 obj->opoisoned = OPOISON_BLIND;
-                pline("A stained  coating forms on %s.", The(xname(obj)));
+                pline("A stained coating forms on %s.", The(xname(obj)));
                 break;
               case COMMAND_ENVENOM:
                 obj->opoisoned = OPOISON_PARAL;
@@ -4865,6 +4865,47 @@ arti_invoke(obj)
                 pline("A filty coating forms on %s.", The(xname(obj)));
                 break;
           }
+        } break;
+        case ADD_POISON:{
+          if(!(uarmh && uarmh == obj)){
+            if(uwep){
+              if(is_poisonable(uwep)){
+                uwep->opoisoned = OPOISON_BASIC;
+                pline("A poisoned coating forms your %s.", xname(uwep));
+              } else pline("Interesting...");
+            } else You_feel("like you should be wielding something.");
+          } else You_feel("like you should be wearing %s.", The(xname(obj)));
+        } break;
+        case TOWEL_ITEMS:{
+          if(uwep != obj){
+            struct obj *otmp;
+            switch(rn2(5)){
+              case 0:
+                otmp = mkobj(TIN, FALSE);
+                break;
+              case 1:
+                otmp = mkobj(POT_BOOZE, FALSE);
+                break;
+              case 2:
+                otmp = mkobj(SCR_MAGIC_MAPPING, FALSE);
+                break;
+              case 3:
+                otmp = mkobj(OILSKIN_CLOAK, FALSE);
+                break;
+              case 4:
+                otmp = mkobj(CRYSTAL_HELM, FALSE);
+                break;
+            }
+            otmp->blessed = obj->blessed;
+            otmp->cursed = obj->cursed;
+            otmp->bknown = obj->bknown;
+            otmp->owt = weight(otmp);
+            otmp = hold_another_object(otmp, "Suddenly %s out.",
+                           aobjnam(otmp, "fall"), (const char *)0);
+          } else You_feel("like you should be weilding %s.", The(xname(obj)));
+        } break;
+        case MAJ_RUMOR:{
+          outgmaster();
         } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
@@ -5646,7 +5687,7 @@ struct obj *obj;
 }
 
 int
-doaddpoisonmenu(prompt, obj)
+doselfpoisonmenu(prompt, obj)
 const char *prompt;
 struct obj *obj;
 {

@@ -1445,7 +1445,7 @@ A("The Mace of the Evangelist",	MACE,
 A("The Dart of the Assassin", DART,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	ADD_POISON, A_NONE, PM_ROGUE, NON_PM, 0L,
+	SELF_POISON, A_NONE, PM_ROGUE, NON_PM, 0L,
 	0,0,0),
 
 /* TODO only name w/ expert short sword */
@@ -1464,7 +1464,28 @@ A("The Helm of the Arcane Archer", HELM_OF_BRILLIANCE,
 	SPFX2_COLD|SPFX2_FIRE|SPFX2_ELEC,0,0),
 
 /* Samurai */
+A("The Helm of the Ninja", HELM_OF_OPPOSITE_ALIGNMENT,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	ADD_POISON, A_NONE, PM_SAMURAI, NON_PM, 0L,
+	0,0,WSFX_PLUSSEV),
+
 /* Tourist */
+/* TODO towel wetting as in vanilla 3.6.0 */
+/* TODO 2x damage while wet */
+/* TODO +1 whip skill while wielded */
+A("The Towel of the Interstellar Hitchhiker", TOWEL,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	PHYS(5, 0),	DFNS(AD_COLD),	NO_CARY,
+	TOWEL_ITEMS, A_NONE, PM_TOURIST, NON_PM, 0L,
+	0,0,0),
+
+A("The Encyclopedia Galactica", SPE_BLANK_PAPER,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_LUCK), (SPFX_WARN|SPFX_ESP), 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	MAJ_RUMOR, A_NONE, PM_TOURIST, NON_PM, 0L,
+	0,0,0),
+
 /* Troubadour */
 /* Valkyrie */
 /* Wizard */
