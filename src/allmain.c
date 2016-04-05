@@ -1259,7 +1259,6 @@ moveloop()
         long diff = next - uarmg->ovar1;
         uarmg->ovar1 = next;
         //if(diff) adj_abon(uarmg, diff);
-        pline("%d", uarmg->ovar1);
       }
 
 	} /* actual time passed */
