@@ -4823,7 +4823,7 @@ arti_invoke(obj)
             }
           } else You_feel("that you should be wearing %s.", The(xname(obj)));
         } break;
-        case SPIT_FIRE: {
+        case FIRE_BLAST: {
           if(obj->oartifact == ART_BOOZE_OF_THE_INEBRIATE){
             if(!getdir((char *)0))
               break;

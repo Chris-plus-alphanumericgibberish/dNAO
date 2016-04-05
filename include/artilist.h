@@ -1403,7 +1403,7 @@ A("The Shield of the Paladin",	LARGE_SHIELD,
 A("The Booze of the Inebriate",	POT_BOOZE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	SPIT_FIRE,	A_NONE, PM_MONK, NON_PM, 0L,
+	FIRE_BLAST,	A_NONE, PM_MONK, NON_PM, 0L,
 	0,0,0),
 
 /* TODO 2x damage against undead/demons */
@@ -1532,6 +1532,42 @@ A("The Forge Hammer of the Artificer",			WAR_HAMMER,
 	NO_ATTK,	NO_DFNS,	NO_CARY,	
 	ARTIFICE, A_NONE, PM_WIZARD, NON_PM, 0L, 
 	0,0,0),
+
+/* Drow */
+/* Dwarf */
+A("The Bulwark of the Dwarven Defender", DWARVISH_ROUNDSHIELD,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	DFNS(AD_MAGM),	NO_CARY,	
+	BLESS, A_NONE, NON_PM, PM_DWARF, 0L, 
+	0,0,WSFX_PLUSSEV),
+
+/* Elf */
+A("Narya", RIN_TELEPORT_CONTROL,
+	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
+	NO_ATTK,	DFNS(AD_FIRE),	NO_CARY,	
+	FIRE_BLAST, A_NONE, NON_PM, PM_ELF, 0L, 
+	0,0,0),
+
+/* TODO water walking */
+/* TODO protect inventory from water damage */
+A("Nenya", RIN_TELEPORTATION,
+	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
+	NO_ATTK,	NO_DFNS,	NO_CARY,	
+	0, A_NONE, NON_PM, PM_ELF, 0L, 
+	0,0,0),
+
+A("Vilya", RIN_AGGRAVATE_MONSTER,
+	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
+	NO_ATTK,	DFNS(AD_ELEC),	NO_CARY,	
+	HEALING, A_NONE, NON_PM, PM_ELF, 0L, 
+	0,0,0),
+
+/* Gnome */
+/* Half-Dragon */
+/* Human */
+/* Incantifier */
+/* Orc */
+/* Vampire */
 
 /*
  *  terminator; otyp must be zero
