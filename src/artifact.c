@@ -4825,20 +4825,25 @@ arti_invoke(obj)
           } else You_feel("that you should be wearing %s.", The(xname(obj)));
         } break;
         case FIRE_BLAST: {
-          /* TODO other otyp */
-          if(obj->oartifact == ART_BOOZE_OF_THE_INEBRIATE){
-            if(!getdir((char *)0))
+          if(!getdir((char *)0))
+            break;
+          switch(obj->oclass){
+            case POTION_CLASS:
+              You("take a sip from %s, then belch out a blast of fire.", The(xname(obj)));
               break;
-            struct obj *wand;
-            You("take a sip from %s, then belch out a blast of fire.", The(xname(obj)));
-            wand = mksobj(WAN_FIRE, TRUE, FALSE);
-            wand->blessed = obj->blessed;
-            wand->cursed= obj->cursed;
-            wand->ovar1 = 1;
-            if(wand->cursed) uncurse(wand);
-            weffects(wand);
-            obfree(wand,(struct obj *)0);
+            case RING_CLASS:
+              /* TODO players who don't have fingers but wear rings */
+              You_feel("%s grow hot on your finger.", The(xname(obj)));
+              break;
           }
+          struct obj *wand;
+          wand = mksobj(WAN_FIRE, TRUE, FALSE);
+          wand->blessed = obj->blessed;
+          wand->cursed= obj->cursed;
+          wand->ovar1 = 1;
+          if(wand->cursed) uncurse(wand);
+          weffects(wand);
+          obfree(wand,(struct obj *)0);
         } break;
         case SELF_POISON:{
           int selfpoisonFunc = doselfpoisonmenu("Pick your poison.", obj);
