@@ -160,6 +160,7 @@ struct obj {
 			/* 	Records theft type for stealing artifacts (reaver (scimitar) and averice (shortsword) */
 			/* 	Records remaining ammo for blasters and force pikes */
 			/* 	Records the hilt-type for lightsabers */
+			/* 	Records the ema of damage taken for gloves of the berserker */
 			
 #define ECLIPSE_MOON	0
 #define CRESCENT_MOON	1

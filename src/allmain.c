@@ -356,6 +356,7 @@ moveloop()
 	int nmonsclose,nmonsnear,enkispeedlim;
 	static boolean oldBlind = 0, oldLightBlind = 0;
 	static int oldCon, oldWisBon;
+    int hpDiff;
 
     flags.moonphase = phase_of_the_moon();
     if(flags.moonphase == FULL_MOON) {
@@ -396,6 +397,7 @@ moveloop()
 	oldCon = ACURR(A_CON);
 	oldWisBon = ACURR(A_WIS)/4;
     for(;;) {/////////////////////////MAIN LOOP/////////////////////////////////
+    hpDiff = u.uhp;
 	get_nh_event();
 #ifdef POSITIONBAR
 	do_positionbar();
@@ -1247,6 +1249,18 @@ moveloop()
 				}
 			}
 		}
+
+      hpDiff -= u.uhp;
+      hpDiff = (hpDiff > 0) ? hpDiff : 0;
+      if(uarmg && ART_GAUNTLETS_OF_THE_BERSERKER == uarmg->oartifact){
+        float a = .1; /* closer to 1 -> discard older faster */
+        long next = (long)(a * hpDiff + (1 - a) * uarmg->ovar1);
+        next = (next > 10) ? 10 : next;
+        long diff = next - uarmg->ovar1;
+        uarmg->ovar1 = next;
+        //if(diff) adj_abon(uarmg, diff);
+        pline("%d", uarmg->ovar1);
+      }
 
 	} /* actual time passed */
 

@@ -190,6 +190,10 @@ register struct obj *obj;
 		} else if(obj->oartifact == ART_CLAWS_OF_THE_REVENANCER){
 			for(p = 0; p < 5; p++) u.uprops[REV_PROPS[p]].extrinsic = u.uprops[REV_PROPS[p]].extrinsic & ~wp->w_mask;
 		} else u.uprops[p].extrinsic = u.uprops[p].extrinsic & ~wp->w_mask;
+		if(obj->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER){
+//        adj_abon(uarmg, -uarmg->ovar1);
+          uarmg->ovar1 = 0;
+        }
 		obj->owornmask &= ~wp->w_mask;
 		if (obj->oartifact)
 		    set_artifact_intrinsic(obj, 0, wp->w_mask);
