@@ -1577,7 +1577,7 @@ A("The Hat of the Giant Killer", GNOMISH_POINTY_HAT,
 
 /* Half-Dragon */
 /* TODO pet dragons +1 beast mastery */
-A("The Prismatic Plate of the Draconic Disciple", PLATE_MAIL,
+A("The Prismatic Dragon Plate", PLATE_MAIL,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_HPHDAM), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,	
 	PRISMATIC, A_NONE, NON_PM, PM_HALF_DRAGON, 0L, 

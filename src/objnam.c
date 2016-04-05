@@ -984,8 +984,8 @@ plus:
 			Sprintf(eos(bp), " (%s)", OBJ_NAME(objects[obj->otyp]));
 		}
         if(obj->oartifact == ART_SCALPEL_OF_LIFE_AND_DEATH){
-            if(COMMAND_LIFE == obj->ovar1) Sprintf(eos(bp), " (Life)");
-            if(COMMAND_DEATH  == obj->ovar1) Sprintf(eos(bp), " (Death)");
+            if(COMMAND_LIFE == obj->ovar1) Sprintf(eos(bp), " (life)");
+            if(COMMAND_DEATH  == obj->ovar1) Sprintf(eos(bp), " (death)");
         }
 //#ifdef FIREARMS
 	if(obj->otyp == STICK_OF_DYNAMITE) {
@@ -1044,6 +1044,32 @@ plus:
 			if(Is_dragon_mail(obj)) Sprintf(eos(bp), " (mail)");
 			if(Is_dragon_scales(obj)) Sprintf(eos(bp), " (scales)");
 		}
+        if(obj->oartifact == ART_PRISMATIC_DRAGON_PLATE){
+          if(GRAY_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (gray)");
+          if(SILVER_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (silver)");
+          if(MERCURIAL_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (mercurial)");
+          if(SHIMMERING_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (shimmering)");
+          if(DEEP_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (deep)");
+          if(RED_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (red)");
+          if(WHITE_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (white)");
+          if(ORANGE_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (orange)");
+          if(BLACK_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (black)");
+          if(BLUE_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (blue)");
+          if(GREEN_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (green)");
+          if(YELLOW_DRAGON_SCALE_MAIL == obj->otyp)
+            Sprintf(eos(bp), " (yellow)");
+        }
 		goto plus;
 	case TOOL_CLASS:
 		/* weptools already get this done when we go to the +n code */

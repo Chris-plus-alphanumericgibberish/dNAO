@@ -460,10 +460,10 @@ struct artifact {
             || ((a) == &artilist[ART_VILYA] && PM_ELF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Gnome */\
-            || ((a) == &artilist[ART_VILYA] && PM_ELF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_HAT_OF_THE_GIANT_KILLER] && PM_ELF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Half-Dragon */\
-            || ((a) == &artilist[ART_VILYA] && PM_HALF_DRAGON == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_PRISMATIC_DRAGON_PLATE] && PM_HALF_DRAGON == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Human */\
             /* Incantifier */\
