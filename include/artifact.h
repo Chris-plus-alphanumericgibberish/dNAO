@@ -359,7 +359,10 @@ struct artifact {
             exist_artifact(DWARVISH_ROUNDSHIELD, artilist[ART_BULWARK_OF_THE_DWARVEN_DEF].name) ||\
             exist_artifact(RIN_TELEPORT_CONTROL,artilist[ART_NARYA].name) ||\
             exist_artifact(RIN_TELEPORTATION,artilist[ART_NENYA].name) ||\
-            exist_artifact(RIN_AGGRAVATE_MONSTER,artilist[ART_VILYA].name)\
+            exist_artifact(RIN_AGGRAVATE_MONSTER,artilist[ART_VILYA].name) ||\
+            exist_artifact(GNOMISH_POINTY_HAT,artilist[ART_HAT_OF_THE_GIANT_KILLER].name) ||\
+            exist_artifact(PLATE_MAIL,artilist[ART_PRISMATIC_DRAGON_PLATE].name) ||\
+            exist_artifact(SPE_FORCE_BOLT,artilist[ART_BOOK_OF_PURE_MAGIC].name)\
 )
 
 #define is_nameable_artifact(a) (\
@@ -450,23 +453,25 @@ struct artifact {
                 !has_named_mastery_artifact())\
             /* Drow */\
             /* Dwarf */\
-            || ((a) == &artilist[ART_BULWARK_OF_THE_DWARVEN_DEF] && PM_DWARF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_BULWARK_OF_THE_DWARVEN_DEF] && Race_if(PM_DWARF) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Elf */\
-            || ((a) == &artilist[ART_NARYA] && PM_ELF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_NARYA] && Race_if(PM_ELF) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_NENYA] && PM_ELF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_NENYA] && Race_if(PM_ELF) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_VILYA] && PM_ELF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_VILYA] && Race_if(PM_ELF) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Gnome */\
-            || ((a) == &artilist[ART_HAT_OF_THE_GIANT_KILLER] && PM_ELF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_HAT_OF_THE_GIANT_KILLER] && Race_if(PM_ELF) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Half-Dragon */\
-            || ((a) == &artilist[ART_PRISMATIC_DRAGON_PLATE] && PM_HALF_DRAGON == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_PRISMATIC_DRAGON_PLATE] && Race_if(PM_HALF_DRAGON) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Human */\
             /* Incantifier */\
+            || ((a) == &artilist[ART_BOOK_OF_PURE_MAGIC] && Race_if(PM_INCANTIFIER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
             /* Orc */\
             /* Vampire */\
             )

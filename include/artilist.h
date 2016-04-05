@@ -1585,6 +1585,12 @@ A("The Prismatic Dragon Plate", PLATE_MAIL,
 
 /* Human */
 /* Incantifier */
+A("The Book of Pure Magic", SPE_FORCE_BOLT,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_EREGEN), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,	
+	PRISMATIC, A_NONE, NON_PM, PM_HALF_DRAGON, 0L, 
+	SPFX2_SPELLUP,0,WSFX_PLUSSEV),
+
 /* Orc */
 /* Vampire */
 
