@@ -229,6 +229,19 @@
 
 #define COMMAND_DEATH           42
 
+#define COMMAND_GRAY            43
+#define COMMAND_SILVER          44
+#define COMMAND_MERCURIAL       45
+#define COMMAND_SHIMMERING      46
+#define COMMAND_DEEP            47
+#define COMMAND_RED             48
+#define COMMAND_WHITE           49
+#define COMMAND_ORANGE          50
+#define COMMAND_BLACK           51
+#define COMMAND_BLUE            52
+#define COMMAND_GREEN           53
+#define COMMAND_YELLOW          54
+
 struct artifact {
 	int	    otyp;
 	const char  *name;
@@ -309,6 +322,7 @@ struct artifact {
 #define ARTIFICE        (LAST_PROP+60)
 #define SUMMON_PET      (LAST_PROP+61)
 #define LIFE_DEATH      (LAST_PROP+62)
+#define PRISMATIC       (LAST_PROP+63)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -359,79 +373,80 @@ struct artifact {
               )\
             /* Mastery artifacts */\
             /* Archeologist */\
-            || ((a) == &artilist[ART_PINK_PANTHER] && Role_if(PM_ARCHEOLOGIST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_PINK_PANTHER] && (Role_if(PM_ARCHEOLOGIST) || Pantheon_if(PM_ARCHEOLOGIST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_TOME_OF_THE_LOREMASTER] && Role_if(PM_ARCHEOLOGIST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_TOME_OF_THE_LOREMASTER] && (Role_if(PM_ARCHEOLOGIST) || Pantheon_if(PM_ARCHEOLOGIST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Anachrononaut */\
             /* Barbarian */\
             /* Binder */\
-            || ((a) == &artilist[ART_DECLARATION_OF_THE_APOSTAT] && Role_if(PM_EXILE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_DECLARATION_OF_THE_APOSTAT] && (Role_if(PM_EXILE) || Pantheon_if(PM_EXILE)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !u.sealCounts &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_SOUL_LENS] && Role_if(PM_EXILE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_SOUL_LENS] && (Role_if(PM_EXILE) || Pantheon_if(PM_EXILE)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_SEAL_OF_THE_SPIRITS] && Role_if(PM_EXILE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_SEAL_OF_THE_SPIRITS] && (Role_if(PM_EXILE) || Pantheon_if(PM_EXILE)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Caveman/Cavewoman */\
-            || ((a) == &artilist[ART_TORCH_OF_ORIGINS] && Role_if(PM_CAVEMAN) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_TORCH_OF_ORIGINS] && (Role_if(PM_CAVEMAN) || Pantheon_if(PM_CAVEMAN)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Convict */\
             /* Healer */\
-            || ((a) == &artilist[ART_SCALPEL_OF_LIFE_AND_DEATH] && Role_if(PM_HEALER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_SCALPEL_OF_LIFE_AND_DEATH] && (Role_if(PM_HEALER) || Pantheon_if(PM_HEALER)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_GAUNTLETS_OF_THE_HEALING_H] && Role_if(PM_HEALER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_GAUNTLETS_OF_THE_HEALING_H] && (Role_if(PM_HEALER) || Pantheon_if(PM_HEALER)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_RING_OF_HYGIENE_S_DISCIPLE] && Role_if(PM_HEALER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_RING_OF_HYGIENE_S_DISCIPLE] && (Role_if(PM_HEALER) || Pantheon_if(PM_HEALER)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Knight */\
-            || ((a) == &artilist[ART_COPE_OF_THE_ELDRITCH_KNIGH] && Role_if(PM_KNIGHT) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_COPE_OF_THE_ELDRITCH_KNIGH] && (Role_if(PM_KNIGHT) || Pantheon_if(PM_KNIGHT)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            /* Monk */\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_BOOZE_OF_THE_INEBRIATE] && Role_if(PM_MONK) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_BOOZE_OF_THE_INEBRIATE] && (Role_if(PM_MONK) || Pantheon_if(PM_MONK)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_WRAPPINGS_OF_THE_SACRED_FI] && Role_if(PM_MONK) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_WRAPPINGS_OF_THE_SACRED_FI] && (Role_if(PM_MONK) || Pantheon_if(PM_MONK)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_KHAKKHARA_OF_THE_MONKEY] && Role_if(PM_MONK) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_KHAKKHARA_OF_THE_MONKEY] && (Role_if(PM_MONK) || Pantheon_if(PM_MONK)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Nobleman/Noblewoman */\
             /* Priest/Priestess */\
-            || ((a) == &artilist[ART_MACE_OF_THE_EVANGELIST] && Role_if(PM_PRIEST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_MACE_OF_THE_EVANGELIST] && (Role_if(PM_PRIEST) || Pantheon_if(PM_PRIEST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !exist_artifact(ORIHALCYON_GAUNTLETS, artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI].name))\
-            || ((a) == &artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI] && Role_if(PM_PRIEST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI] && (Role_if(PM_PRIEST) || Pantheon_if(PM_PRIEST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Pirate */\
             /* Rogue */\
-            || ((a) == &artilist[ART_DART_OF_THE_ASSASSIN] && Role_if(PM_ROGUE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_DART_OF_THE_ASSASSIN] && (Role_if(PM_ROGUE) || Pantheon_if(PM_ROGUE)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_SWORD_OF_THE_KLEPTOMANIAC] && Role_if(PM_ROGUE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_SWORD_OF_THE_KLEPTOMANIAC] && (Role_if(PM_ROGUE) || Pantheon_if(PM_ROGUE)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Ranger */\
-            || ((a) == &artilist[ART_HELM_OF_THE_ARCANE_ARCHER] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_HELM_OF_THE_ARCANE_ARCHER] && (Role_if(PM_RANGER) || Role_if(PM_BARD) || Pantheon_if(PM_RANGER)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_FIGURINE_OF_PYGMALION] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_FIGURINE_OF_PYGMALION] && (Role_if(PM_RANGER) || Role_if(PM_BARD) || Pantheon_if(PM_RANGER)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_FIGURINE_OF_GALATEA] && Role_if(PM_RANGER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_FIGURINE_OF_GALATEA] && (Role_if(PM_RANGER) || Role_if(PM_BARD) || Pantheon_if(PM_RANGER)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Samurai */\
-            || ((a) == &artilist[ART_HELM_OF_THE_NINJA] && Role_if(PM_SAMURAI) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_HELM_OF_THE_NINJA] && (Role_if(PM_SAMURAI) || Pantheon_if(PM_SAMURAI)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Tourist */\
-            || ((a) == &artilist[ART_TOWEL_OF_THE_INTERSTELLAR_] && Role_if(PM_TOURIST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_TOWEL_OF_THE_INTERSTELLAR_] && (Role_if(PM_TOURIST) || Pantheon_if(PM_TOURIST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_ENCYCLOPEDIA_GALACTICA] && Role_if(PM_TOURIST) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_ENCYCLOPEDIA_GALACTICA] && (Role_if(PM_TOURIST) || Pantheon_if(PM_TOURIST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Troubadour */\
             /* Valkyrie */\
-            || ((a) == &artilist[ART_TWIG_OF_YGGDRASIL] && Role_if(PM_VALKYRIE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_TWIG_OF_YGGDRASIL] && (Role_if(PM_VALKYRIE) || Pantheon_if(PM_VALKYRIE)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_SADDLE_OF_BRYNHILDR] && Role_if(PM_VALKYRIE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_SADDLE_OF_BRYNHILDR] && (Role_if(PM_VALKYRIE) || Pantheon_if(PM_VALKYRIE)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Wizard */\
-            || ((a) == &artilist[ART_STAFF_OF_THE_ARCHMAGI] && Role_if(PM_WIZARD) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_STAFF_OF_THE_ARCHMAGI] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_ROBE_OF_WILD_MAGIC] && Role_if(PM_WIZARD) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_ROBE_OF_WILD_MAGIC] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI] && Role_if(PM_WIZARD) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Drow */\
             /* Dwarf */\
@@ -445,7 +460,11 @@ struct artifact {
             || ((a) == &artilist[ART_VILYA] && PM_ELF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Gnome */\
+            || ((a) == &artilist[ART_VILYA] && PM_ELF == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
             /* Half-Dragon */\
+            || ((a) == &artilist[ART_VILYA] && PM_HALF_DRAGON == u.umonster && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
             /* Human */\
             /* Incantifier */\
             /* Orc */\

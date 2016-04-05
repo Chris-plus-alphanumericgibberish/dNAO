@@ -1230,7 +1230,7 @@ moveloop()
 				}
 			}
 	    }
-		if(Role_if(PM_TOURIST) && !Blind){
+		if(!Blind){
 			int dx, dy;
 			
 			for(dx=-1; dx<2; dx++){
@@ -1238,8 +1238,10 @@ moveloop()
 					if(isok(u.ux+dx, u.uy+dy)){
 						if((mtmp = m_at(u.ux+dx, u.uy+dy)) && !mtmp->mtame && canseemon(mtmp) && !(mvitals[monsndx(mtmp->data)].seen)){
 							mvitals[monsndx(mtmp->data)].seen = 1;
-							more_experienced(experience(mtmp,0),0);
-							newexplevel();
+							if(Role_if(PM_TOURIST)){
+                              more_experienced(experience(mtmp,0),0);
+                              newexplevel();
+                            }
 						}
 					}
 				}

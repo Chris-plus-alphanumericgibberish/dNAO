@@ -35,6 +35,7 @@ int FDECL(dolordsmenu, (const char *,struct obj *));
 int FDECL(doannulmenu, (const char *,struct obj *));
 int FDECL(doselfpoisonmenu, (const char *,struct obj *));
 int FDECL(doartificemenu, (const char *,struct obj *));
+int FDECL(doprismaticmenu, (const char *,struct obj *));
 
 static NEARDATA schar delay;		/* moves left for this spell */
 static NEARDATA struct obj *artiptr;/* last/current artifact being used */
@@ -4908,24 +4909,27 @@ arti_invoke(obj)
           outgmaster();
         } break;
         case ARTIFICE:{
-          int artificeFunc = doartificemenu("Improve weapon or armor:", obj);
-          struct obj *scroll;
-          switch(artificeFunc){
-              case 0:
-                break;
-              case COMMAND_IMPROVE_WEP:
-                scroll = mksobj(SCR_ENCHANT_ARMOR, TRUE, FALSE);
-                break;
-              case COMMAND_IMPROVE_ARM:
-                scroll = mksobj(SCR_ENCHANT_WEAPON, TRUE, FALSE);
-                break;
-          }
-          scroll->blessed = obj->blessed;
-          scroll->cursed = obj->cursed;
-          seffects(scroll);
-          obfree(scroll,(struct obj *)0);
+          if(uwep == obj){
+            int artificeFunc = doartificemenu("Improve weapon or armor:", obj);
+            struct obj *scroll;
+            switch(artificeFunc){
+                case 0:
+                  break;
+                case COMMAND_IMPROVE_WEP:
+                  scroll = mksobj(SCR_ENCHANT_ARMOR, TRUE, FALSE);
+                  break;
+                case COMMAND_IMPROVE_ARM:
+                  scroll = mksobj(SCR_ENCHANT_WEAPON, TRUE, FALSE);
+                  break;
+            }
+            scroll->blessed = obj->blessed;
+            scroll->cursed = obj->cursed;
+            seffects(scroll);
+            obfree(scroll,(struct obj *)0);
+          } else You_feel("like you should be wielding %s.", The(xname(obj)));
         } break;
         case SUMMON_PET:{
+          /* TODO */
         } break;
         case LIFE_DEATH:{
           if(uwep == obj){
@@ -4970,6 +4974,53 @@ arti_invoke(obj)
               } break;
             }
           } else You_feel("like you should be wielding %s.", The(xname(obj)));
+        } break;
+        case PRISMATIC:{
+          if(uarm && uarm == obj){
+            int prismaticFunc  = doprismaticmenu("Choose a new color for your armor:", obj);
+            switch(prismaticFunc){
+                case 0:
+                  break;
+                  break;
+                case COMMAND_GRAY:
+                  uwep->otyp = GRAY_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_SILVER:
+                  uwep->otyp = SILVER_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_MERCURIAL:
+                  uwep->otyp = MERCURIAL_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_SHIMMERING:
+                  uwep->otyp = SHIMMERING_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_DEEP:
+                  uwep->otyp = DEEP_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_RED:
+                  uwep->otyp = RED_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_WHITE:
+                  uwep->otyp = WHITE_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_ORANGE:
+                  uwep->otyp = ORANGE_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_BLACK:
+                  uwep->otyp = BLACK_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_BLUE:
+                  uwep->otyp = BLUE_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_GREEN:
+                  uwep->otyp = GREEN_DRAGON_SCALE_MAIL;
+                  break;
+                case COMMAND_YELLOW:
+                  uwep->otyp = YELLOW_DRAGON_SCALE_MAIL;
+                  break;
+            }
+            obj->owt = weight(obj);
+          } else You_feel("like you should be wearing %s.", The(xname(obj)));
         } break;
 		case SUMMON_UNDEAD:{
 			int summon_loop;
@@ -5822,10 +5873,120 @@ struct obj *obj;
     add_menu(tmpwin, NO_GLYPH, &any,
         'w', 0, ATR_NONE, buf,
         MENU_UNSELECTED);
+    Sprintf(buf, "Armors");
     any.a_int = COMMAND_IMPROVE_ARM;	/* must be non-zero */
     add_menu(tmpwin, NO_GLYPH, &any,
         'a', 0, ATR_NONE, buf,
         MENU_UNSELECTED);
+	end_menu(tmpwin, prompt);
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? selected[0].item.a_int : 0;
+}
+
+int
+doprismaticmenu(prompt, obj)
+const char *prompt;
+struct obj *obj;
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Choose a new color for your armor:");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+    if(mvitals[PM_GRAY_DRAGON].seen || mvitals[PM_BABY_GRAY_DRAGON].seen){
+      Sprintf(buf, "Gray");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'g', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_SILVER_DRAGON].seen || mvitals[PM_BABY_SILVER_DRAGON].seen){
+      Sprintf(buf, "Silver");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          's', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_MERCURIAL_DRAGON].seen || mvitals[PM_BABY_MERCURIAL_DRAGON].seen){
+      Sprintf(buf, "Mercurial");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'm', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_SHIMMERING_DRAGON].seen || mvitals[PM_BABY_SHIMMERING_DRAGON].seen){
+      Sprintf(buf, "Shimmering");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'S', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_DEEP_DRAGON].seen || mvitals[PM_BABY_DEEP_DRAGON].seen){
+      Sprintf(buf, "Deep");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'd', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_RED_DRAGON].seen || mvitals[PM_BABY_RED_DRAGON].seen){
+      Sprintf(buf, "Red");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'r', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_WHITE_DRAGON].seen || mvitals[PM_BABY_WHITE_DRAGON].seen){
+      Sprintf(buf, "White");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'w', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_ORANGE_DRAGON].seen || mvitals[PM_BABY_ORANGE_DRAGON].seen){
+      Sprintf(buf, "Orange");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'o', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_BLACK_DRAGON].seen || mvitals[PM_BABY_BLACK_DRAGON].seen){
+      Sprintf(buf, "Black");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'b', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_BLUE_DRAGON].seen || mvitals[PM_BABY_BLUE_DRAGON].seen){
+      Sprintf(buf, "Blue");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'B', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_GREEN_DRAGON].seen || mvitals[PM_BABY_GREEN_DRAGON].seen){
+      Sprintf(buf, "Green");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'G', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
+    if(mvitals[PM_YELLOW_DRAGON].seen || mvitals[PM_BABY_YELLOW_DRAGON].seen){
+      Sprintf(buf, "Yellow");
+      any.a_int = COMMAND_GRAY;	/* must be non-zero */
+      add_menu(tmpwin, NO_GLYPH, &any,
+          'Y', 0, ATR_NONE, buf,
+          MENU_UNSELECTED);
+    }
 	end_menu(tmpwin, prompt);
 
 	how = PICK_ONE;

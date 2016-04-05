@@ -1458,6 +1458,7 @@ A("The Helm of the Arcane Archer", LEATHER_HELM,
 	0, A_NONE, PM_RANGER, NON_PM, 0L,
 	SPFX2_COLD|SPFX2_FIRE|SPFX2_ELEC,0,0),
 
+/* TODO naming gender */
 /* TODO stoning resistance */
 A("The Figurine of Pygmalion", FIGURINE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
@@ -1465,6 +1466,7 @@ A("The Figurine of Pygmalion", FIGURINE,
 	0, A_NONE, PM_RANGER, NON_PM, 0L,
 	0,0,0),
 
+/* TODO naming gender */
 /* TODO sex resistance */
 A("The Figurine of Galatea", FIGURINE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
@@ -1542,6 +1544,7 @@ A("The Bulwark of the Dwarven Defender", DWARVISH_ROUNDSHIELD,
 	0,0,WSFX_PLUSSEV),
 
 /* Elf */
+/* TODO name by appearance */
 A("Narya", RIN_TELEPORT_CONTROL,
 	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
 	NO_ATTK,	DFNS(AD_FIRE),	NO_CARY,	
@@ -1550,12 +1553,14 @@ A("Narya", RIN_TELEPORT_CONTROL,
 
 /* TODO water walking */
 /* TODO protect inventory from water damage */
+/* TODO name by appearance */
 A("Nenya", RIN_TELEPORTATION,
 	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
 	NO_ATTK,	NO_DFNS,	NO_CARY,	
 	0, A_NONE, NON_PM, PM_ELF, 0L, 
 	0,0,0),
 
+/* TODO name by appearance */
 A("Vilya", RIN_AGGRAVATE_MONSTER,
 	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
 	NO_ATTK,	DFNS(AD_ELEC),	NO_CARY,	
@@ -1563,7 +1568,21 @@ A("Vilya", RIN_AGGRAVATE_MONSTER,
 	0,0,0),
 
 /* Gnome */
+/* TODO +1d5 bth against large+ */
+A("The Hat of the Giant Killer", GNOMISH_POINTY_HAT,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_HPHDAM), (SPFX_WARN), (MZ_LARGE|MZ_HUGE|MZ_GIGANTIC),
+	NO_ATTK,	NO_DFNS,	NO_CARY,	
+	0, A_NONE, NON_PM, PM_GNOME, 0L, 
+	0,0,WSFX_PLUSSEV),
+
 /* Half-Dragon */
+/* TODO pet dragons +1 beast mastery */
+A("The Prismatic Plate of the Draconic Disciple", PLATE_MAIL,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_HPHDAM), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,	
+	PRISMATIC, A_NONE, NON_PM, PM_HALF_DRAGON, 0L, 
+	0,0,WSFX_PLUSSEV),
+
 /* Human */
 /* Incantifier */
 /* Orc */
