@@ -4825,6 +4825,7 @@ arti_invoke(obj)
           } else You_feel("that you should be wearing %s.", The(xname(obj)));
         } break;
         case FIRE_BLAST: {
+          /* TODO other otyp */
           if(obj->oartifact == ART_BOOZE_OF_THE_INEBRIATE){
             if(!getdir((char *)0))
               break;
@@ -4909,26 +4910,33 @@ arti_invoke(obj)
           outgmaster();
         } break;
         case ARTIFICE:{
-          if(uwep == obj){
-            int artificeFunc = doartificemenu("Improve weapon or armor:", obj);
-            struct obj *scroll;
-            switch(artificeFunc){
-                case 0:
-                  break;
-                case COMMAND_IMPROVE_WEP:
-                  scroll = mksobj(SCR_ENCHANT_ARMOR, TRUE, FALSE);
-                  break;
-                case COMMAND_IMPROVE_ARM:
-                  scroll = mksobj(SCR_ENCHANT_WEAPON, TRUE, FALSE);
-                  break;
-            }
-            scroll->blessed = obj->blessed;
-            scroll->cursed = obj->cursed;
-            seffects(scroll);
-            obfree(scroll,(struct obj *)0);
-          } else You_feel("like you should be wielding %s.", The(xname(obj)));
+          int artificeFunc = doartificemenu("Improve weapon or armor:", obj);
+          struct obj *scroll;
+          switch(artificeFunc){
+              case 0:
+                break;
+              case COMMAND_IMPROVE_WEP:
+                scroll = mksobj(SCR_ENCHANT_ARMOR, TRUE, FALSE);
+                break;
+              case COMMAND_IMPROVE_ARM:
+                scroll = mksobj(SCR_ENCHANT_WEAPON, TRUE, FALSE);
+                break;
+          }
+          scroll->blessed = obj->blessed;
+          scroll->cursed = obj->cursed;
+          seffects(scroll);
+          obfree(scroll,(struct obj *)0);
         } break;
         case SUMMON_PET:{
+          /* TODO */
+        } break;
+        case UNTRAP_SELF:{
+          /* TODO */
+        } break;
+        case STEAL:{
+          /* TODO */
+        } break;
+        case COLLECT_TAX:{
           /* TODO */
         } break;
         case LIFE_DEATH:{
@@ -5021,6 +5029,11 @@ arti_invoke(obj)
             }
             setworn(obj, W_ARM);
             obj->owt = weight(obj);
+          } else You_feel("like you should be wearing %s.", The(xname(obj)));
+        } break;
+        case SUMMON_VAMP:{
+          if(uamul && uamul == obj){
+            /* TODO */
           } else You_feel("like you should be wearing %s.", The(xname(obj)));
         } break;
 		case SUMMON_UNDEAD:{

@@ -623,7 +623,7 @@ int curse_bless;
 
 	    /* destruction depends on current state, not adjustment */
 	    if (obj->spe > (6-rnl(7)) || obj->spe <= -5) {
-			if(obj->oartifact != ART_ANNULUS){
+			if(!obj->oartifact){
 				Your("%s %s momentarily, then %s!",
 					 xname(obj), otense(obj,"pulsate"), otense(obj,"explode"));
 				if (is_on) Ring_gone(obj);

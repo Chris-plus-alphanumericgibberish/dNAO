@@ -323,16 +323,23 @@ struct artifact {
 #define SUMMON_PET      (LAST_PROP+61)
 #define LIFE_DEATH      (LAST_PROP+62)
 #define PRISMATIC       (LAST_PROP+63)
+#define STEAL           (LAST_PROP+64)
+#define SUMMON_VAMP     (LAST_PROP+65)
+#define UNTRAP_SELF     (LAST_PROP+66)
+#define COLLECT_TAX     (LAST_PROP+67)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
 #define has_named_mastery_artifact() (\
             exist_artifact(DIAMOND, artilist[ART_PINK_PANTHER].name) ||\
             exist_artifact(SPE_BLANK_PAPER, artilist[ART_TOME_OF_THE_LOREMASTER].name) ||\
+            exist_artifact(FORCE_PIKE, artilist[ART_FORCE_PIKE_OF_THE_RED_GUAR].name) ||\
+            exist_artifact(LEATHER_GLOVES, artilist[ART_GAUNTLETS_OF_THE_BERSERKER].name) ||\
             exist_artifact(SCR_REMOVE_CURSE, artilist[ART_DECLARATION_OF_THE_APOSTAT].name) ||\
             exist_artifact(LENSES, artilist[ART_SOUL_LENS].name) ||\
             exist_artifact(SCR_BLANK_PAPER, artilist[ART_SEAL_OF_THE_SPIRITS].name) ||\
             exist_artifact(WAN_FIRE, artilist[ART_TORCH_OF_ORIGINS].name) ||\
+            exist_artifact(STRIPED_SHIRT, artilist[ART_SHIRT_OF_BILLY_THE_KID].name) ||\
             exist_artifact(SCALPEL, artilist[ART_SCALPEL_OF_LIFE_AND_DEATH].name) ||\
             exist_artifact(GAUNTLETS_OF_DEXTERITY, artilist[ART_GAUNTLETS_OF_THE_HEALING_H].name) ||\
             exist_artifact(RIN_REGENERATION, artilist[ART_RING_OF_HYGIENE_S_DISCIPLE].name) ||\
@@ -341,6 +348,7 @@ struct artifact {
             exist_artifact(POT_BOOZE, artilist[ART_BOOZE_OF_THE_INEBRIATE].name) ||\
             exist_artifact(LEATHER_GLOVES, artilist[ART_WRAPPINGS_OF_THE_SACRED_FI].name) ||\
             exist_artifact(SILVER_KHAKKHARA, artilist[ART_KHAKKHARA_OF_THE_MONKEY].name) ||\
+            exist_artifact(RIN_TELEPORTATION, artilist[ART_MARK_OF_THE_RIGHTFUL_SCION].name) ||\
             exist_artifact(ORIHALCYON_GAUNTLETS, artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI].name) ||\
             exist_artifact(MACE, artilist[ART_MACE_OF_THE_EVANGELIST].name) ||\
             exist_artifact(DART, artilist[ART_DART_OF_THE_ASSASSIN].name) ||\
@@ -356,13 +364,16 @@ struct artifact {
             exist_artifact(QUARTERSTAFF, artilist[ART_STAFF_OF_THE_ARCHMAGI].name) ||\
             exist_artifact(ROBE, artilist[ART_ROBE_OF_WILD_MAGIC].name) ||\
             exist_artifact(WAR_HAMMER, artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI].name) ||\
+            exist_artifact(RIN_PROTECTION_FROM_SHAPE_CHAN, artilist[ART_RING_OF_LOLTH].name) ||\
             exist_artifact(DWARVISH_ROUNDSHIELD, artilist[ART_BULWARK_OF_THE_DWARVEN_DEF].name) ||\
+            exist_artifact(RIN_PROTECTION_FROM_SHAPE_CHAN,artilist[ART_RING_OF_LOLTH].name) ||\
             exist_artifact(RIN_TELEPORT_CONTROL,artilist[ART_NARYA].name) ||\
             exist_artifact(RIN_TELEPORTATION,artilist[ART_NENYA].name) ||\
             exist_artifact(RIN_AGGRAVATE_MONSTER,artilist[ART_VILYA].name) ||\
             exist_artifact(GNOMISH_POINTY_HAT,artilist[ART_HAT_OF_THE_GIANT_KILLER].name) ||\
             exist_artifact(PLATE_MAIL,artilist[ART_PRISMATIC_DRAGON_PLATE].name) ||\
-            exist_artifact(SPE_FORCE_BOLT,artilist[ART_BOOK_OF_PURE_MAGIC].name)\
+            exist_artifact(SPE_FORCE_BOLT,artilist[ART_BOOK_OF_PURE_MAGIC].name) ||\
+            exist_artifact(AMULET_OF_RESTFUL_SLEEP,artilist[ART_TRAPPINGS_OF_THE_GRAVE].name)\
 )
 
 #define is_nameable_artifact(a) (\
@@ -381,7 +392,11 @@ struct artifact {
             || ((a) == &artilist[ART_TOME_OF_THE_LOREMASTER] && (Role_if(PM_ARCHEOLOGIST) || Pantheon_if(PM_ARCHEOLOGIST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Anachrononaut */\
+            || ((a) == &artilist[ART_FORCE_PIKE_OF_THE_RED_GUAR] && (Role_if(PM_ANACHRONONAUT) || Pantheon_if(PM_ANACHRONONAUT)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
             /* Barbarian */\
+            || ((a) == &artilist[ART_GAUNTLETS_OF_THE_BERSERKER] && (Role_if(PM_BARBARIAN) || Pantheon_if(PM_BARBARIAN)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
             /* Binder */\
             || ((a) == &artilist[ART_DECLARATION_OF_THE_APOSTAT] && (Role_if(PM_EXILE) || Pantheon_if(PM_EXILE)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !u.sealCounts &&\
@@ -452,6 +467,8 @@ struct artifact {
             || ((a) == &artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Drow */\
+            || ((a) == &artilist[ART_RING_OF_LOLTH] && Race_if(PM_DROW) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
             /* Dwarf */\
             || ((a) == &artilist[ART_BULWARK_OF_THE_DWARVEN_DEF] && Race_if(PM_DWARF) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
@@ -474,6 +491,8 @@ struct artifact {
                 !has_named_mastery_artifact())\
             /* Orc */\
             /* Vampire */\
+            || ((a) == &artilist[ART_TRAPPINGS_OF_THE_GRAVE] && Race_if(PM_VAMPIRE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
             )
 
 #define is_monk_safe_artifact(m) (\

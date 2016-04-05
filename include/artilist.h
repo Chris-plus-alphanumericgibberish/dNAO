@@ -1338,7 +1338,23 @@ A("The Tome of the Loremaster", SPE_BLANK_PAPER,
 	0,0,0),
 
 /* Anachrononaut */
+/* TODO stun on hit */
+A("The Force Pike of the Red Guard", FORCE_PIKE,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_ANACHRONONAUT, NON_PM, 0L,
+	0,0,0),
+
 /* Barbarian */
+/* TODO increase STR, DEX, CON by damage taken average */
+/* TODO gaining CON increases hp with max hp */
+/* TODO implement UNTRAP_SELF */
+A("The Gauntlets of the Berserker", LEATHER_GLOVES,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	UNTRAP_SELF, A_NONE, PM_BARBARIAN, NON_PM, 0L,
+	0,0,0),
+
 /* Binder */
 A("The Declaration of the Apostate", SCR_REMOVE_CURSE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
@@ -1356,8 +1372,8 @@ A("The Seal of the Spirits", SCR_BLANK_PAPER,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	0, A_NONE, PM_EXILE, NON_PM, 0L,
-
 	0,0,0),
+
 /* Caveman/Cavewoman */
 A("The Torch of Origins", WAN_FIRE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
@@ -1366,6 +1382,14 @@ A("The Torch of Origins", WAN_FIRE,
 	SPFX2_FIRE2,0,0),
 
 /* Convict */
+/* TODO protect from theft */
+/* TODO implement STEAL */
+A("The Shirt of Billy the Kid", STRIPED_SHIRT,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	STEAL, A_NONE, PM_CONVICT, NON_PM, 0L,
+	0,0,0),
+
 /* Healer */
 /* TODO 2x vs living */
 A("Scalpel of Life and Death",	SCALPEL,
@@ -1413,7 +1437,8 @@ A("The Wrappings of the Sacred Fist",	LEATHER_GLOVES,
 	FAST_TURNING,	A_NONE, PM_MONK, NON_PM, 0L,
 	0,0,WSFX_PLUSSEV),
 
-/* TODO jumping while worn */
+/* TODO jumping while wielded */
+/* TODO staggering blows while wielded */
 A("Khakkhara of the Monkey",	SILVER_KHAKKHARA,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
@@ -1421,6 +1446,15 @@ A("Khakkhara of the Monkey",	SILVER_KHAKKHARA,
 	SPFX2_SILVERED,0,0),
 
 /* Nobleman/Noblewoman */
+/* TODO name by appearance */
+/* TODO implement LOOT_GOLD */
+/* TODO PM_NOBLEWOMAN */
+A("The Mark of the Rightful Scion", RIN_TELEPORT_CONTROL, /* gold */
+	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
+	NO_ATTK,	NO_DFNS,	NO_CARY,	
+	COLLECT_TAX, A_NONE, PM_NOBLEMAN, NON_PM, 0L, 
+	0,0,0),
+
 /* Priest/Priestess */
 A("The Gauntlets of the Divine Disciple",	ORIHALCYON_GAUNTLETS,
 	(SPFX_NOGEN|SPFX_RESTR), 0,0,
@@ -1437,6 +1471,7 @@ A("The Mace of the Evangelist",	MACE,
 /* Pirate */
 /* Rogue */
 /* TODO appearance when poisoned/drugged etc */
+/* TODO multishot */
 A("The Dart of the Assassin", DART,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
@@ -1460,6 +1495,7 @@ A("The Helm of the Arcane Archer", LEATHER_HELM,
 
 /* TODO naming gender */
 /* TODO stoning resistance */
+/* TODO apply */
 A("The Figurine of Pygmalion", FIGURINE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
@@ -1468,6 +1504,7 @@ A("The Figurine of Pygmalion", FIGURINE,
 
 /* TODO naming gender */
 /* TODO sex resistance */
+/* TODO apply */
 A("The Figurine of Galatea", FIGURINE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
@@ -1506,7 +1543,7 @@ A("The Twig of Yggdrasil", WAN_TELEPORTATION,
 	CREATE_PORTAL, A_NONE, PM_VALKYRIE, NON_PM, 0L,
 	0,0,0),
 
-/* TODO flying */
+/* TODO flying pets */
 A("The Saddle of Brynhildr", SADDLE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
@@ -1536,6 +1573,13 @@ A("The Forge Hammer of the Artificer",			WAR_HAMMER,
 	0,0,0),
 
 /* Drow */
+/* TODO name by appearance */
+A("The Ring of Lolth", RIN_PROTECTION_FROM_SHAPE_CHAN, /* black signet */
+	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
+	NO_ATTK,	DFNS(AD_FIRE),	NO_CARY,	
+	FIRE_BLAST, A_NONE, NON_PM, PM_DROW, 0L, 
+	0,0,0),
+
 /* Dwarf */
 A("The Bulwark of the Dwarven Defender", DWARVISH_ROUNDSHIELD,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
@@ -1545,7 +1589,7 @@ A("The Bulwark of the Dwarven Defender", DWARVISH_ROUNDSHIELD,
 
 /* Elf */
 /* TODO name by appearance */
-A("Narya", RIN_TELEPORT_CONTROL,
+A("Narya", RIN_TELEPORT_CONTROL, /* gold */
 	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
 	NO_ATTK,	DFNS(AD_FIRE),	NO_CARY,	
 	FIRE_BLAST, A_NONE, NON_PM, PM_ELF, 0L, 
@@ -1554,14 +1598,14 @@ A("Narya", RIN_TELEPORT_CONTROL,
 /* TODO water walking */
 /* TODO protect inventory from water damage */
 /* TODO name by appearance */
-A("Nenya", RIN_TELEPORTATION,
+A("Nenya", RIN_TELEPORTATION, /* silver */
 	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
 	NO_ATTK,	NO_DFNS,	NO_CARY,	
 	0, A_NONE, NON_PM, PM_ELF, 0L, 
 	0,0,0),
 
 /* TODO name by appearance */
-A("Vilya", RIN_AGGRAVATE_MONSTER,
+A("Vilya", RIN_AGGRAVATE_MONSTER, /* sapphire */
 	(SPFX_NOGEN|SPFX_RESTR), (SPFX_WARN), (M2_ORC),
 	NO_ATTK,	DFNS(AD_ELEC),	NO_CARY,	
 	HEALING, A_NONE, NON_PM, PM_ELF, 0L, 
@@ -1588,11 +1632,18 @@ A("The Prismatic Dragon Plate", PLATE_MAIL,
 A("The Book of Pure Magic", SPE_FORCE_BOLT,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_EREGEN), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,	
-	PRISMATIC, A_NONE, NON_PM, PM_HALF_DRAGON, 0L, 
+	PRISMATIC, A_NONE, NON_PM, PM_INCANTIFIER, 0L, 
 	SPFX2_SPELLUP,0,WSFX_PLUSSEV),
 
 /* Orc */
 /* Vampire */
+/* TODO grant darkvision */
+/* TODO implement SUMMON_VAMP */
+A("The Trappings of the Grave", AMULET_OF_RESTFUL_SLEEP,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	DFNS(AD_MAGM),	NO_CARY,	
+	SUMMON_VAMP, A_NONE, NON_PM, PM_VAMPIRE, 0L, 
+	0,0,WSFX_PLUSSEV),
 
 /*
  *  terminator; otyp must be zero
