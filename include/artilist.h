@@ -1382,12 +1382,26 @@ A("The Torch of Origins", WAN_FIRE,
 	SPFX2_FIRE2,0,0),
 
 /* Convict */
+/* TODO */
+A("The Striped Shirt of the Murderer", STRIPED_SHIRT,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_CONVICT, NON_PM, 0L,
+	0,0,0),
+
 /* TODO protect from theft */
 /* TODO implement STEAL */
-A("The Shirt of Billy the Kid", STRIPED_SHIRT,
+A("The Striped Shirt of the Thief", STRIPED_SHIRT,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	STEAL, A_NONE, PM_CONVICT, NON_PM, 0L,
+	0,0,0),
+
+/* TODO */
+A("The Striped Shirt of the Falsely Accused", STRIPED_SHIRT,
+	(SPFX_NOGEN|SPFX_RESTR), (SPFX_LUCK), 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0, A_NONE, PM_CONVICT, NON_PM, 0L,
 	0,0,0),
 
 /* Healer */

@@ -339,7 +339,9 @@ struct artifact {
             exist_artifact(LENSES, artilist[ART_SOUL_LENS].name) ||\
             exist_artifact(SCR_BLANK_PAPER, artilist[ART_SEAL_OF_THE_SPIRITS].name) ||\
             exist_artifact(WAN_FIRE, artilist[ART_TORCH_OF_ORIGINS].name) ||\
-            exist_artifact(STRIPED_SHIRT, artilist[ART_SHIRT_OF_BILLY_THE_KID].name) ||\
+            exist_artifact(STRIPED_SHIRT, artilist[ART_STRIPED_SHIRT_OF_THE_MURDE].name) ||\
+            exist_artifact(STRIPED_SHIRT, artilist[ART_STRIPED_SHIRT_OF_THE_THIEF].name) ||\
+            exist_artifact(STRIPED_SHIRT, artilist[ART_STRIPED_SHIRT_OF_THE_FALSE].name) ||\
             exist_artifact(SCALPEL, artilist[ART_SCALPEL_OF_LIFE_AND_DEATH].name) ||\
             exist_artifact(GAUNTLETS_OF_DEXTERITY, artilist[ART_GAUNTLETS_OF_THE_HEALING_H].name) ||\
             exist_artifact(RIN_REGENERATION, artilist[ART_RING_OF_HYGIENE_S_DISCIPLE].name) ||\
@@ -409,6 +411,12 @@ struct artifact {
             || ((a) == &artilist[ART_TORCH_OF_ORIGINS] && (Role_if(PM_CAVEMAN) || Pantheon_if(PM_CAVEMAN)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Convict */\
+            || ((a) == &artilist[ART_STRIPED_SHIRT_OF_THE_MURDE] && (Role_if(PM_CONVICT) || Pantheon_if(PM_CONVICT)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
+            || ((a) == &artilist[ART_STRIPED_SHIRT_OF_THE_THIEF] && (Role_if(PM_CONVICT) || Pantheon_if(PM_CONVICT)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
+            || ((a) == &artilist[ART_STRIPED_SHIRT_OF_THE_FALSE] && (Role_if(PM_CONVICT) || Pantheon_if(PM_CONVICT)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+                !has_named_mastery_artifact())\
             /* Healer */\
             || ((a) == &artilist[ART_SCALPEL_OF_LIFE_AND_DEATH] && (Role_if(PM_HEALER) || Pantheon_if(PM_HEALER)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
