@@ -1338,21 +1338,19 @@ A("The Tome of the Loremaster", SPE_BLANK_PAPER,
 	0,0,0),
 
 /* Anachrononaut */
-/* TODO stun on hit */
 A("The Force Pike of the Red Guard", FORCE_PIKE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
-	NO_ATTK,	NO_DFNS,	NO_CARY,
+	STUN(1, 0),	NO_DFNS,	NO_CARY,
 	0, A_NONE, PM_ANACHRONONAUT, NON_PM, 0L,
 	0,0,0),
 
 /* Barbarian */
 /* TODO increase STR, DEX, CON by damage taken average */
 /* TODO gaining CON increases hp with max hp */
-/* TODO implement UNTRAP_SELF */
 A("The Gauntlets of the Berserker", LEATHER_GLOVES,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	UNTRAP_SELF, A_NONE, PM_BARBARIAN, NON_PM, 0L,
+	0, A_NONE, PM_BARBARIAN, NON_PM, 0L,
 	0,0,0),
 
 /* Binder */
@@ -1375,9 +1373,10 @@ A("The Seal of the Spirits", SCR_BLANK_PAPER,
 	0,0,0),
 
 /* Caveman/Cavewoman */
+/* TODO use club skill */
 A("The Torch of Origins", WAN_FIRE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
-	FIRE(0,5),	DFNS(AD_FIRE),	CARY(AD_FIRE),
+	FIRE(0,5),	DFNS(AD_FIRE),	NO_CARY,
 	0, A_NONE, PM_CAVEMAN, NON_PM, 0L,
 	SPFX2_FIRE2,0,0),
 
@@ -1453,13 +1452,27 @@ A("The Wrappings of the Sacred Fist",	LEATHER_GLOVES,
 
 /* TODO jumping while wielded */
 /* TODO staggering blows while wielded */
-A("Khakkhara of the Monkey",	SILVER_KHAKKHARA,
+A("The Khakkhara of the Monkey",	SILVER_KHAKKHARA,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	0,	A_NONE, PM_MONK, NON_PM, 0L,
 	SPFX2_SILVERED,0,0),
 
 /* Nobleman/Noblewoman */
+/* TODO */
+A("The Ruffled Shirt of the Aristocrat",	RUFFLED_SHIRT,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0,	A_NONE, PM_NOBLEMAN, NON_PM, 0L,
+	0,0,0),
+
+/* TODO */
+A("The Victorian Underwear of the Aristocrat",	VICTORIAN_UNDERWEAR,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	0,	A_NONE, PM_NOBLEWOMAN, NON_PM, 0L,
+	0,0,0),
+
 /* TODO name by appearance */
 /* TODO implement LOOT_GOLD */
 /* TODO PM_NOBLEWOMAN */
@@ -1643,11 +1656,12 @@ A("The Prismatic Dragon Plate", PLATE_MAIL,
 
 /* Human */
 /* Incantifier */
-A("The Book of Pure Magic", SPE_FORCE_BOLT,
-	(SPFX_NOGEN|SPFX_RESTR|SPFX_EREGEN), 0, 0,
+/* TODO random clairvoyance */
+A("The Footprints of the Labyrinth", STAR_SAPPHIRE,
+	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,	
-	PRISMATIC, A_NONE, NON_PM, PM_INCANTIFIER, 0L, 
-	SPFX2_SPELLUP,0,WSFX_PLUSSEV),
+	ENLIGHTENING, A_NONE, NON_PM, PM_INCANTIFIER, 0L, 
+	SPFX2_SPELLUP,0,0),
 
 /* Orc */
 /* Vampire */

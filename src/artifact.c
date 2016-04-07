@@ -4935,9 +4935,6 @@ arti_invoke(obj)
         case SUMMON_PET:{
           /* TODO */
         } break;
-        case UNTRAP_SELF:{
-          /* TODO */
-        } break;
         case STEAL:{
           /* TODO */
         } break;

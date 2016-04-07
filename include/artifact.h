@@ -325,8 +325,7 @@ struct artifact {
 #define PRISMATIC       (LAST_PROP+63)
 #define STEAL           (LAST_PROP+64)
 #define SUMMON_VAMP     (LAST_PROP+65)
-#define UNTRAP_SELF     (LAST_PROP+66)
-#define COLLECT_TAX     (LAST_PROP+67)
+#define COLLECT_TAX     (LAST_PROP+66)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 
@@ -374,7 +373,7 @@ struct artifact {
             exist_artifact(RIN_AGGRAVATE_MONSTER,artilist[ART_VILYA].name) ||\
             exist_artifact(GNOMISH_POINTY_HAT,artilist[ART_HAT_OF_THE_GIANT_KILLER].name) ||\
             exist_artifact(PLATE_MAIL,artilist[ART_PRISMATIC_DRAGON_PLATE].name) ||\
-            exist_artifact(SPE_FORCE_BOLT,artilist[ART_BOOK_OF_PURE_MAGIC].name) ||\
+            exist_artifact(STAR_SAPPHIRE,artilist[ART_FOOTPRINTS_OF_THE_LABYRINT].name) ||\
             exist_artifact(AMULET_OF_RESTFUL_SLEEP,artilist[ART_TRAPPINGS_OF_THE_GRAVE].name)\
 )
 
@@ -495,7 +494,7 @@ struct artifact {
                 !has_named_mastery_artifact())\
             /* Human */\
             /* Incantifier */\
-            || ((a) == &artilist[ART_BOOK_OF_PURE_MAGIC] && Race_if(PM_INCANTIFIER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_FOOTPRINTS_OF_THE_LABYRINT] && Race_if(PM_INCANTIFIER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Orc */\
             /* Vampire */\
