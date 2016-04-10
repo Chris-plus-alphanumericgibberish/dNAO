@@ -272,16 +272,16 @@ int spec;
 	if (bigmonst(ptr)) {
 		if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp = exploding_d(2,objects[otyp].oc_wldam,1);
 		else if(otmp->oartifact == ART_LUCK_BLADE) tmp = youdefend ? 
-															unlucky_exploding_d(1,objects[otyp].oc_wldam,0) : 
-															lucky_exploding_d(1,objects[otyp].oc_wldam,0);
+															rnl(objects[otyp].oc_wldam)+1 : 
+															objects[otyp].oc_wldam - rnl(objects[otyp].oc_wldam);
 	    else if (otyp == MOON_AXE && otmp->ovar1) tmp = d(2,objects[otyp].oc_wldam + 2*(otmp->ovar1-1));
 	    else if (objects[otyp].oc_wldam) tmp = rnd(objects[otyp].oc_wldam);
 		
 		if(spec & SPEC_MARIONETTE){
 			if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp += exploding_d(1,objects[otyp].oc_wldam+2,1);
-			else if(otmp->oartifact == ART_LUCK_BLADE) tmp += youdefend ? 
-															unlucky_exploding_d(1,objects[otyp].oc_wldam+2,0) : 
-															lucky_exploding_d(1,objects[otyp].oc_wldam+2,0);
+			else if(otmp->oartifact == ART_LUCK_BLADE) tmp = youdefend ? 
+																rnl(objects[otyp].oc_wldam+2)+1 : 
+																objects[otyp].oc_wldam+2 - rnl(objects[otyp].oc_wldam+2);
 			else if (objects[otyp].oc_wldam) tmp += rnd(objects[otyp].oc_wldam+2);
 		}
 	    switch (otyp) {
@@ -518,16 +518,16 @@ int spec;
 	} else {
 		if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp = exploding_d(2,objects[otyp].oc_wsdam,1);
 		else if(otmp->oartifact == ART_LUCK_BLADE) tmp = youdefend ? 
-															unlucky_exploding_d(1,objects[otyp].oc_wsdam,0) : 
-															lucky_exploding_d(1,objects[otyp].oc_wsdam,0);
+															rnl(objects[otyp].oc_wsdam)+1 : 
+															objects[otyp].oc_wsdam - rnl(objects[otyp].oc_wsdam);
 	    else if (otyp == MOON_AXE) tmp = d(2,otmp->ovar1 ? objects[otyp].oc_wsdam + 2*(otmp->ovar1-1) : 12);
 	    else if (objects[otyp].oc_wsdam) tmp = rnd(objects[otyp].oc_wsdam);
 		
 		if(spec & SPEC_MARIONETTE){
 			if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp += exploding_d(1,objects[otyp].oc_wsdam+2,1);
-			else if(otmp->oartifact == ART_LUCK_BLADE) tmp += youdefend ? 
-															unlucky_exploding_d(1,objects[otyp].oc_wsdam+2,0) : 
-															lucky_exploding_d(1,objects[otyp].oc_wsdam+2,0);
+			else if(otmp->oartifact == ART_LUCK_BLADE) tmp = youdefend ? 
+																rnl(objects[otyp].oc_wsdam+2)+1 : 
+																objects[otyp].oc_wsdam+2 - rnl(objects[otyp].oc_wsdam+2);
 			else if (objects[otyp].oc_wsdam) tmp += rnd(objects[otyp].oc_wsdam+2);
 		}
 	    switch (otyp) {
