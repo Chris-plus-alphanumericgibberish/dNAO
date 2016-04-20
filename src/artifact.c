@@ -6066,7 +6066,6 @@ read_necro(VOID_ARGS)
 				else{
 					You("find another section on Lost Carcosa.");
 				}
-//				u.wardsknown |= WARD_YELLOW;
 			break;
 			case 24:
 				if(!(artiptr->ovar1 & R_WARDS)){
@@ -6080,7 +6079,6 @@ read_necro(VOID_ARGS)
 				else{
 					You("discover another treatise on ancient warding signs.");
 				}
-//				u.wardsknown |= WARD_ACHERON|WARD_PENTAGRAM|WARD_HEXAGRAM|WARD_ELDER_SIGN|WARD_HAMSA|WARD_EYE|WARD_QUEEN|WARD_CAT_LORD|WARD_GARUDA;
 			break;
 			case 25:
 				if(!(artiptr->ovar1 & R_ELEMENTS)){
@@ -6094,7 +6092,7 @@ read_necro(VOID_ARGS)
 				else{
 					You("discover another section on the Lords of the Elements.");
 				}
-//				u.wardsknown |= WARD_CTHUGHA|WARD_ITHAQUA|WARD_KARAKAL;
+			break;
 			case 26:
 				if(!(artiptr->ovar1 & R_NAMES_1)){
 					if(artiptr->ovar1 & R_NAMES_2) You("find the first half of the testament of whispers.");
@@ -6108,7 +6106,7 @@ read_necro(VOID_ARGS)
 				else{
 					You("discover another transcription of the first half of the testament of whispers.");
 				}
-//				u.wardsknown |= WARD_CTHUGHA|WARD_ITHAQUA|WARD_KARAKAL;
+			break;
 			case 27:
 				if(!(artiptr->ovar1 & R_NAMES_2)){
 					if(artiptr->ovar1 & R_NAMES_1) You("find the second half of the testament of whispers.");
@@ -6122,7 +6120,6 @@ read_necro(VOID_ARGS)
 				else{
 					You("discover another transcription of the latter half of the testament of whispers.");
 				}
-//				u.wardsknown |= WARD_CTHUGHA|WARD_ITHAQUA|WARD_KARAKAL;
 			break;
 		}
 //		artiptr->ovar1 = ~0; //debug
