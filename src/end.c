@@ -477,59 +477,7 @@ panic VA_DECL(const char *, str)
 	VA_START(str);
 	VA_INIT(str, char *);
 
-	if (program_state.panicking++)
-	    NH_abort();	/* avoid loops - this should never happen*/
-
-	if (iflags.window_inited) {
-	    raw_print("\r\nOops...");
-	    wait_synch();	/* make sure all pending output gets flushed */
-	    exit_nhwindows((char *)0);
-	    iflags.window_inited = 0; /* they're gone; force raw_print()ing */
-	}
-
-	raw_print(program_state.gameover ?
-		  "Postgame wrapup disrupted." :
-		  !program_state.something_worth_saving ?
-		  "Program initialization has failed." :
-		  "Suddenly, the dungeon collapses.");
-#if defined(WIZARD) && !defined(MICRO)
-# if defined(NOTIFY_NETHACK_BUGS)
-	if (!wizard)
-	    raw_printf("Report the following error to \"%s\".",
-			"nethack-bugs@nethack.org");
-	else if (program_state.something_worth_saving)
-	    raw_print("\nError save file being written.\n");
-# else
-	if (!wizard)
-	    raw_printf("Report error to \"%s\"%s.",
-#  ifdef WIZARD_NAME	/*(KR1ED)*/
-			WIZARD_NAME,
-#  else
-			WIZARD,
-#  endif
-			!program_state.something_worth_saving ? "" :
-			" and it may be possible to rebuild.");
-# endif
-	if (program_state.something_worth_saving) {
-	    set_error_savefile();
-	    (void) dosave0();
-	}
-#endif
-	{
-	    char buf[BUFSZ];
-	    Vsprintf(buf,str,VA_ARGS);
-	    raw_print(buf);
-	    paniclog("panic", buf);
-	}
-#ifdef WIN32
-	interject(INTERJECT_PANIC);
-#endif
-#if defined(WIZARD) && (defined(UNIX) || defined(VMS) || defined(LATTICE) || defined(WIN32))
-	if (wizard)
-	    NH_abort();	/* generate core dump */
-#endif
-	VA_END();
-	done(PANICKED);
+	NH_abort(); /*actually just die here*/
 }
 
 STATIC_OVL boolean
