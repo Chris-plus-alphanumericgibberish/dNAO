@@ -423,7 +423,7 @@ unsigned *ospecial;
 		if (color == NO_COLOR) cmap_color(offset);
 		} else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
 			if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
-			if (offset == BOULDER && iflags.bouldersym) ch = iflags.bouldersym;
+			if ((offset == BOULDER || offset == HUGE_STONE_CRATE) && iflags.bouldersym) ch = iflags.bouldersym;
 			else ch = get_objsym(offset);
 #ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color) {
