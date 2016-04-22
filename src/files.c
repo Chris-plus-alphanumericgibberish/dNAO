@@ -621,7 +621,10 @@ touch_whereis()
   FILE* fp;
   char whereis_file[255];
   char whereis_work[255];
+  char questcode[255];
 
+  if(urole.filecode != code_of(urole.malenum)) Sprintf(questcode,"%s-%s",urole.filecode, code_of(urole.malenum));
+  else Sprintf(questcode,"%s", urole.filecode);
   Sprintf(whereis_file,"%s",dump_format_str(WHEREIS_FILE));
   Sprintf(whereis_work,
 	  "depth=%d:dnum=%d:hp=%d:maxhp=%d:turns=%d:score=%ld:role=%s:race=%s:gender=%s:align=%s:conduct=0x%lx:amulet=%d\n",
@@ -631,7 +634,7 @@ touch_whereis()
 	  u.uhpmax,
 	  moves,
 	  botl_score(),
-	  urole.filecode,
+	  questcode,
 	  urace.filecode,
 	  genders[flags.female].filecode,
 	  aligns[1-u.ualign.type].filecode,
@@ -2700,6 +2703,10 @@ livelog_write_string(buffer)
 	} else {
 	    char tmpbuf[1024+1];
 	    char msgbuf[512+1];
+		char questcode[255];
+
+		if(urole.filecode != code_of(urole.malenum)) Sprintf(questcode,"%s-%s",urole.filecode, code_of(urole.malenum));
+		else Sprintf(questcode,"%s", urole.filecode);
 	    char *c1 = msgbuf;
 	    strncpy(msgbuf, buffer, 512);
 	    msgbuf[512] = '\0';
@@ -2709,7 +2716,7 @@ livelog_write_string(buffer)
 	    }
 	    snprintf(tmpbuf, 1024, "player=%s:role=%s:race=%s:gender=%s:align=%s:turns=%ld:starttime=%ld:curtime=%ld:message=%s\n",
 		     plname,
-		     urole.filecode,
+		     questcode,
 		     urace.filecode,
 		     genders[flags.female].filecode,
 		     aligns[1-u.ualign.type].filecode,
