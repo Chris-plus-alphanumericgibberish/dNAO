@@ -1459,10 +1459,15 @@ int x, y;
 		u.hod++;
 	    You_feel("like a despicable grave-robber!");
 	} else if (Role_if(PM_SAMURAI)) {
-	    adjalign(-sgn(u.ualign.type)*10);//stiffer penalty
-		u.ualign.sins++;
-		u.hod++;
-	    You("disturb the honorable dead!");
+        if(!(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_NINJA)){
+          adjalign(-sgn(u.ualign.type)*10);//stiffer penalty
+          u.ualign.sins++;
+          u.hod++;
+          You("disturb the honorable dead!");
+        } else {
+          adjalign(10);
+          You("disturb the honorable dead!");
+        }
 	} else if ((u.ualign.type == A_LAWFUL) && (u.ualign.record > -10)) {
 	    adjalign(-sgn(u.ualign.type)*2);
 	    You("have violated the sanctity of this grave!");

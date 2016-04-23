@@ -356,6 +356,7 @@ moveloop()
 	int nmonsclose,nmonsnear,enkispeedlim;
 	static boolean oldBlind = 0, oldLightBlind = 0;
 	static int oldCon, oldWisBon;
+    int hpDiff;
 
     flags.moonphase = phase_of_the_moon();
     if(flags.moonphase == FULL_MOON) {
@@ -396,6 +397,7 @@ moveloop()
 	oldCon = ACURR(A_CON);
 	oldWisBon = ACURR(A_WIS)/4;
     for(;;) {/////////////////////////MAIN LOOP/////////////////////////////////
+    hpDiff = u.uhp;
 	get_nh_event();
 #ifdef POSITIONBAR
 	do_positionbar();
@@ -1040,6 +1042,13 @@ moveloop()
 				}
 			}
 		    }
+            if(uleft  && uleft->oartifact  == ART_RING_OF_HYGIENE_S_DISCIPLE||
+               uright && uright->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE){
+              if(u.uhp < u.uhpmax) u.uhp++;
+              if(u.uhp < u.uhpmax / 2) u.uhp++;
+              if(u.uhp < u.uhpmax / 3) u.uhp++;
+              if(u.uhp < u.uhpmax / 4) u.uhp++;
+            }
 			if(u.sealsActive&SEAL_BUER){
 				int dsize = spiritDsize(), regenrate = dsize/3, remainderrate = dsize%3;
 				if(Upolyd && u.mh < u.mhmax){
@@ -1223,7 +1232,7 @@ moveloop()
 				}
 			}
 	    }
-		if(Role_if(PM_TOURIST) && !Blind){
+		if(!Blind){
 			int dx, dy;
 			
 			for(dx=-1; dx<2; dx++){
@@ -1231,13 +1240,26 @@ moveloop()
 					if(isok(u.ux+dx, u.uy+dy)){
 						if((mtmp = m_at(u.ux+dx, u.uy+dy)) && !mtmp->mtame && canseemon(mtmp) && !(mvitals[monsndx(mtmp->data)].seen)){
 							mvitals[monsndx(mtmp->data)].seen = 1;
-							more_experienced(experience(mtmp,0),0);
-							newexplevel();
+							if(Role_if(PM_TOURIST)){
+                              more_experienced(experience(mtmp,0),0);
+                              newexplevel();
+                            }
 						}
 					}
 				}
 			}
 		}
+
+      hpDiff -= u.uhp;
+      hpDiff = (hpDiff > 0) ? hpDiff : 0;
+      if(uarmg && ART_GAUNTLETS_OF_THE_BERSERKER == uarmg->oartifact){
+        float a = .1; /* closer to 1 -> discard older faster */
+        long next = (long)(a * hpDiff + (1 - a) * uarmg->ovar1);
+        next = (next > 10) ? 10 : next;
+        long diff = next - uarmg->ovar1;
+        uarmg->ovar1 = next;
+        //if(diff) adj_abon(uarmg, diff);
+      }
 
 	} /* actual time passed */
 

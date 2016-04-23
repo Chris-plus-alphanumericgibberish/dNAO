@@ -197,8 +197,8 @@ int thrown;
 		else if(launcher->oartifact == ART_ROGUE_GEAR_SPIRITS) multishot = 2;
 	}
 	
-	if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
-		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS
+	if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER
+		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_DART_OF_THE_ASSASSIN
 	) multishot = (int)obj->quan;
 	if (shotlimit > 0 && multishot > shotlimit) multishot = shotlimit;
 	
@@ -225,8 +225,9 @@ int thrown;
 		/* else it is auto == no change */
 	    }
 
-	    if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
-		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS) multishot = (int)obj->quan;
+	    if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER
+		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS != ART_DART_OF_THE_ASSASSIN)
+          multishot = (int)obj->quan;
 //#endif
 
 	if (multishot < 1) multishot = 1;
@@ -607,6 +608,7 @@ dofire()
 	
 	if(uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && uwep->oartifact && 
 		(
+        (uwep->oartifact == ART_KHAKKHARA_OF_THE_MONKEY) ||
 		(uwep->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE) && ACURR(A_STR) == STR19(25)) ||
 		(uwep->oartifact == ART_ANNULUS && (uwep->otyp == SILVER_CHAKRAM || uwep->otyp == LIGHTSABER)) ||
 		(uwep->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && Race_if(PM_DWARF) && ACURR(A_STR) == STR19(25))
@@ -1317,7 +1319,9 @@ int thrown;
 				(obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && 
 				 Race_if(PM_DWARF)) ||
 				 obj->oartifact == ART_WINDRIDER ||
+				 obj->oartifact == ART_DART_OF_THE_ASSASSIN ||
 				 obj->oartifact == ART_ANNULUS ||
+				 obj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
 				 obj->oartifact == ART_SICKLE_MOON
 			  ) && !impaired
 		) {
@@ -1506,6 +1510,8 @@ int thrown;
 				 Race_if(PM_DWARF)) ||
 				 obj->oartifact == ART_SICKLE_MOON ||
 				 obj->oartifact == ART_ANNULUS ||
+				 obj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
+				 obj->oartifact == ART_DART_OF_THE_ASSASSIN ||
 				 obj->oartifact == ART_WINDRIDER
 			  )
 		) {

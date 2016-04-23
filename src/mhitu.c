@@ -7265,6 +7265,27 @@ register struct attack *mattk;
 		break;
 	}
 	else tmp = 0;
+
+    if(uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_DIVINE_DI && !rn2(4)){
+      if (resists_elec(mtmp)) {
+          shieldeff(mtmp->mx, mtmp->my);
+          pline("%s is slightly tingled.", Monnam(mtmp));
+          golemeffects(mtmp, AD_ELEC, tmp);
+          tmp = 0;
+      } else {
+        pline("Suddenly a bolt of divine energy comes down at the %s from the heavens!", mon_nam(mtmp));
+        pline("It strikes the %s!", mon_nam(mtmp));
+
+        int dmg = d(2, 12);
+
+        mtmp->mhp -= dmg;
+
+        if(DEADMONSTER(mtmp)){
+          xkilled(mtmp, 2);
+          return 2;
+        }
+      }
+    }
 	
 	if(u.sealsActive){
 		if(u.sealsActive&SEAL_ECHIDNA){
