@@ -297,7 +297,7 @@ make_artif:
 	    otmp->oartifact = m;
 	    artiexist[m] = TRUE;
         if(m == ART_HELM_OF_THE_ARCANE_ARCHER){
-          unrestrict_weapon_skill(P_ATTACK_SPELL);
+			unrestrict_weapon_skill(P_ATTACK_SPELL);
         }
 	} else {
 	    /* nothing appropriate could be found; return the original object */
