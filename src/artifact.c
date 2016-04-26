@@ -1862,7 +1862,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			make_stunned((HStun + 3), FALSE);
 		}
 	}
-	if( ((spec_ability2(otmp, SPFX2_FIRE) || (uarmh && uarmh == otmp && spec_ability2(uarmh, SPFX2_FIRE))) && !rn2(4)) || 
+	if( ((spec_ability2(otmp, SPFX2_FIRE) || (uarmh && spec_ability2(uarmh, SPFX2_FIRE))) && !rn2(4)) || 
 		(spec_ability2(otmp, SPFX2_FIRE2) && (otmp->oartifact != ART_TOBIUME || *dmgptr+6 >= mdef->mhp))
 		){
 		if(youattack){
@@ -1884,7 +1884,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				EXPL_FIERY);
 		}
 	}
-	if( ((spec_ability2(otmp, SPFX2_COLD) || (uarmh && uarmh == otmp && spec_ability2(uarmh, SPFX2_COLD))) && !rn2(4)) || spec_ability2(otmp, SPFX2_COLD2)){
+	if( ((spec_ability2(otmp, SPFX2_COLD) || (uarmh && spec_ability2(uarmh, SPFX2_COLD))) && !rn2(4)) || spec_ability2(otmp, SPFX2_COLD2)){
 		if(youattack){
 			explode(mdef->mx, mdef->my,
 				2, //1 = AD_COLD, explode uses nonstandard damage type flags...
@@ -1904,7 +1904,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				EXPL_FROSTY);
 		}
 	}
-	if( ((spec_ability2(otmp, SPFX2_ELEC) || (uarmh && uarmh == otmp && spec_ability2(uarmh, SPFX2_ELEC))) && !rn2(4)) || spec_ability2(otmp, SPFX2_ELEC2)){
+	if( ((spec_ability2(otmp, SPFX2_ELEC) || (uarmh && spec_ability2(uarmh, SPFX2_ELEC))) && !rn2(4)) || spec_ability2(otmp, SPFX2_ELEC2)){
 		if(youattack){
 			int deltax = mdef->mx-u.ux;
 			int deltay = mdef->my-u.uy;
