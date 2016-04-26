@@ -1457,7 +1457,7 @@ A("The Shield of the Paladin",	LARGE_SHIELD,
 	0,0,WSFX_PLUSSEV),
 
 /* Monk */
-A("The Booze of the Inebriate",	POT_BOOZE,
+A("The Booze of the Drunken Master",	POT_BOOZE,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	FIRE_BLAST,	A_NONE, PM_MONK, NON_PM, 0L,
