@@ -532,8 +532,8 @@ const char *name;
       obj->ovar1 = COMMAND_DEATH;
     }
     if(((!strcmp((&artilist[ART_FIGURINE_OF_GALATEA])->name,name)) || (!strcmp((&artilist[ART_FIGURINE_OF_PYGMALION])->name,name))) &&
-       obj && obj->otyp == SCALPEL){
-      obj->corpsenm = u.umonster;
+       obj && obj->otyp == FIGURINE){
+      obj->corpsenm = u.umonster*S*D*D*D*S*;
     }
 	if(!strcmp((&artilist[ART_MANTLE_OF_HEAVEN])->name,name) &&
 	   obj && obj->otyp == LEATHER_CLOAK){
