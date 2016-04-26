@@ -1490,7 +1490,7 @@ A("The Ruffled Shirt of the Aristocrat",	RUFFLED_SHIRT,
 A("The Victorian Underwear of the Aristocrat",	VICTORIAN_UNDERWEAR,
 	(SPFX_NOGEN|SPFX_RESTR), 0, 0,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
-	0,	A_NONE, PM_NOBLEWOMAN, NON_PM, 0L,
+	0,	A_NONE, PM_NOBLEMAN, NON_PM, 0L,
 	0,0,0),
 
 /* TODO name by appearance */
