@@ -226,7 +226,7 @@ int thrown;
 	    }
 
 	    if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER
-		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS != ART_DART_OF_THE_ASSASSIN)
+		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_DART_OF_THE_ASSASSIN)
           multishot = (int)obj->quan;
 //#endif
 
