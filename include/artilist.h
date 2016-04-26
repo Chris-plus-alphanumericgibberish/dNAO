@@ -390,6 +390,13 @@ A("The Lance of Longinus",			SILVER_SPEAR,
 	WWALKING, A_LAWFUL, NON_PM, NON_PM, 1500L, 
 	0,0,0),
 
+// /* TODO aggrevate 'f' */
+// A("The Pink Panther", DIAMOND,
+	// (SPFX_NOGEN|SPFX_RESTR), 0, 0,
+	// NO_ATTK,	NO_DFNS,	NO_CARY,
+	// TRAP_DET, A_NONE, PM_ARCHEOLOGIST, NON_PM, 0L,
+	// 0,0,0),
+
 A("The Arkenstone", DIAMOND,
     SPFX_RESTR, SPFX_AGGRM, 0,
     NO_ATTK, NO_DFNS, NO_CARY,
