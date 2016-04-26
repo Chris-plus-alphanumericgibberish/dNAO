@@ -1042,8 +1042,9 @@ moveloop()
 				}
 			}
 		    }
-            if(uleft  && uleft->oartifact  == ART_RING_OF_HYGIENE_S_DISCIPLE||
-               uright && uright->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE){
+            if((uleft  && uleft->oartifact  == ART_RING_OF_HYGIENE_S_DISCIPLE)||
+               (uright && uright->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE)
+			){
               if(u.uhp < u.uhpmax) u.uhp++;
               if(u.uhp < u.uhpmax / 2) u.uhp++;
               if(u.uhp < u.uhpmax / 3) u.uhp++;
