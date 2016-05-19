@@ -419,6 +419,9 @@ unsigned *ospecial;
 			if(artifact_door(x, y)){
 				color = CLR_MAGENTA;
 			}
+			
+			if (offset == S_drkroom)
+				color = CLR_BLACK;
 		}
 		if (color == NO_COLOR) cmap_color(offset);
 		} else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
