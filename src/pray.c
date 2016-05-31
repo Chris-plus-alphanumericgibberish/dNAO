@@ -965,7 +965,7 @@ gcrownu()
 	} else if(Pantheon_if(PM_MONK) || Role_if(PM_MONK)){
 		u.uevent.uhand_of_elbereth = 6;
 		in_hand = FALSE;
-		already_exists = exist_artifact(ROBE, artiname(ART_ROBE_OF_WILD_MAGIC));
+		already_exists = exist_artifact(ROBE, artiname(ART_ROBE_OF_THE_ARCHMAGI));
 		verbalize("Thou art chosen to cause dismay in My Name!");
 		livelog_write_string("became the Glory of Eequor");
 	} else if(Pantheon_if(PM_WIZARD) || Role_if(PM_WIZARD)){
@@ -1202,7 +1202,7 @@ gcrownu()
 			if(u.ualign.type != A_CHAOTIC){
 				obj = oname(obj, artiname(ART_GRANDMASTER_S_ROBE));
 			} else {
-				obj = oname(obj, artiname(ART_ROBE_OF_WILD_MAGIC));
+				obj = oname(obj, artiname(ART_ROBE_OF_THE_ARCHMAGI));
 			}
 			obj->spe = 1;
 			at_your_feet("A robe");
@@ -1211,8 +1211,8 @@ gcrownu()
 		}
 		if (obj && obj->oartifact == ART_GRANDMASTER_S_ROBE)
 			discover_artifact(ART_GRANDMASTER_S_ROBE);
-		else if(obj && obj->oartifact == ART_ROBE_OF_WILD_MAGIC)
-			discover_artifact(ART_ROBE_OF_WILD_MAGIC);
+		else if(obj && obj->oartifact == ART_ROBE_OF_THE_ARCHMAGI)
+			discover_artifact(ART_ROBE_OF_THE_ARCHMAGI);
 	} else if (Pantheon_if(PM_WIZARD) || Role_if(PM_WIZARD)) {
 		if(!already_exists){
 			if (class_gift != STRANGE_OBJECT) {

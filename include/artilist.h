@@ -1598,7 +1598,7 @@ A("The Saddle of Brynhildr", SADDLE,
 	0,0,0),
 
 /* Wizard */
-A("The Staff of the Archmagi",			QUARTERSTAFF,
+A("The Staff of Wild Magic",			QUARTERSTAFF,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_ATTK|SPFX_SEARCH|SPFX_LUCK|SPFX_INTEL), 0, 0,
 	STUN(20,4),	NO_DFNS,	NO_CARY,
 	ENERGY_BOOST, A_NONE, PM_WIZARD, NON_PM, 0L, 
@@ -1606,7 +1606,7 @@ A("The Staff of the Archmagi",			QUARTERSTAFF,
 
 /* TODO exploding spell dice */
 /* TODO remove as crowning option */
-A("The Robe of Wild Magic",			ROBE,
+A("The Robe of the Archmagi",			ROBE,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_WARN|SPFX_XRAY|SPFX_INTEL), 0, 0,
 	NO_ATTK,	DFNS(AD_MAGM),	NO_CARY,	
 	ENERGY_BOOST, A_NONE, PM_WIZARD, NON_PM, 0L, 
