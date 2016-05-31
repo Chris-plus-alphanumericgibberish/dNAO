@@ -209,6 +209,7 @@ struct instance_flags {
 	uchar	bouldersym;	/* symbol for boulder display */
 	boolean travel1;	/* first travel step */
 	coord	travelcc;	/* coordinates for travel_cache */
+	boolean  door_opened;	/* set to true if door was opened during test_move */
 #ifdef QWERTZ
 	boolean  qwertz_movement; /* replace y with z for this key layout */
 #endif
@@ -282,6 +283,7 @@ struct instance_flags {
 #ifdef USE_TILES
 	boolean  vt_nethack;
 #endif
+	boolean  autoopen;	/* open doors by walking into them */
 	boolean  quiver_fired;
        boolean  pickup_thrown;
     boolean msgtype_regex;
