@@ -620,14 +620,14 @@ boolean chatting;
 	 * which case we want to check its pre-teleport position
 	 */
 	if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 2 && ptr->msound != MS_SONG && ptr->msound != MS_OONA)
-	map_invisible(mtmp->mx, mtmp->my);
+		map_invisible(mtmp->mx, mtmp->my);
 	
 	if(mtmp->ispriest){
 		priest_talk(mtmp);
 		return 1;
 	}
 	
-	if (mtmp->mtame && uclockwork && !nohands(ptr) && !is_animal(ptr) && yn("(Ask for help winding your clockwork?)") == 'y'){
+	if (mtmp->mtame && !flags.mon_moving && uclockwork && !nohands(ptr) && !is_animal(ptr) && yn("(Ask for help winding your clockwork?)") == 'y'){
 		struct obj *key;
 		int turns = 0;
 		
@@ -724,7 +724,7 @@ asGuardian:
 				verbl_msg = verbuf;
 	    		} else
 		    		verbl_msg = "I only drink... potions.";
-    	        } else {
+    	} else {
 			int vampindex;
 	    		static const char * const vampmsg[] = {
 			       /* These first two (0 and 1) are specially handled below */
@@ -753,19 +753,19 @@ asGuardian:
 		    	    } else
 			    	verbl_msg = vampmsg[vampindex];
 			}
-	        }
 	    }
-	    break;
+	}
+	break;
 	case MS_WERE:
 		if (flags.moonphase == FULL_MOON && (night() ^ !rn2(13))) {
-		pline("%s throws back %s head and lets out a blood curdling %s!",
-		      Monnam(mtmp), mhis(mtmp),
-		      ptr == &mons[PM_HUMAN_WERERAT] ? "shriek" : "howl");
-		wake_nearto_noisy(mtmp->mx, mtmp->my, 11*11);
-	    } else
-		pline_msg =
-		     "whispers inaudibly.  All you can make out is \"moon\".";
-	    break;
+			pline("%s throws back %s head and lets out a blood curdling %s!",
+				  Monnam(mtmp), mhis(mtmp),
+				  ptr == &mons[PM_HUMAN_WERERAT] ? "shriek" : "howl");
+			wake_nearto_noisy(mtmp->mx, mtmp->my, 11*11);
+		} else
+			pline_msg =
+				 "whispers inaudibly.  All you can make out is \"moon\".";
+	break;
 	case MS_BARK:
 	    if (flags.moonphase == FULL_MOON && night()) {
 		pline_msg = "howls.";
@@ -1369,7 +1369,7 @@ asGuardian:
 					
 					pline_msg = "sings a dirge.";
 					mtmp->mspec_used = rn1(3,3);
-
+					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
 							if(!mindless(tmpm->data)){
@@ -1718,7 +1718,7 @@ humanoid_sound:
 #endif /* CONVICT */
 	    if (mtmp->mpeaceful) {
 			if(!mtmp->mtame) (void) demon_talk(mtmp);
-		break;
+			break;
 	    }
 	    /* fall through */
 	case MS_CUSS:
@@ -1809,11 +1809,11 @@ humanoid_sound:
 	    if (ptr == &mons[PM_DEATH] && !rn2(10))
 		pline_msg = "is busy reading a copy of Sandman #8.";
 	    else verbl_msg = "Who do you think you are, War?";
-	    break;
+    break;
 	default:
 		if (chatting) pline_msg = "does not respond.";
 	break;
-	}
+    }
 
     if (pline_msg) pline("%s %s", Monnam(mtmp), pline_msg);
     else if (verbl_msg) verbalize1(verbl_msg);
@@ -1920,7 +1920,7 @@ int dz;
 		}
 		return 1;
 	}
-
+	
 	bindresult = dobinding(tx,ty);
 	if(bindresult) return bindresult;
 	
