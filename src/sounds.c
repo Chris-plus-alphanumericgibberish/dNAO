@@ -2105,7 +2105,7 @@ int tx,ty;
 		if(u.sealTimeout[AHAZU-FIRST_SEAL] < moves){
 			struct trap *t=t_at(tx,ty);
 			//Ahazu requires that his seal be drawn in a pit.
-			if((t && t->ttyp == PIT) || hasSealofSpirits){
+			if(t && t->ttyp == PIT){
 				pline("The walls of the pit are lifted swiftly away, revealing a vast starry expanse beneath the world.");
 				if(u.sealCounts < numSlots){
 					pline("A voice whispers from bellow:");
@@ -2146,7 +2146,7 @@ int tx,ty;
 				for(cury=1;cury < ROWNO;cury++)
 					if(IS_ALTAR(levl[curx][cury].typ)){ altarfound=1; cury=ROWNO; curx=COLNO;}//end search
 			
-			if(!altarfound || hasSealofSpirits){
+			if(!altarfound){
 				pline("A golden flame roars suddenly to life within the seal, throwning the world into a stark relief of hard-edged shadows and brilliant light.");
 				if(u.sealCounts < numSlots){
 					pline("No sooner are the shadows born than they rise up against their creator, smothering the flame under a tide of darkness.");
@@ -2191,8 +2191,8 @@ int tx,ty;
 	case ANDREALPHUS:{
 		if(u.sealTimeout[ANDREALPHUS-FIRST_SEAL] < moves){
 			//Andrealphus requires that his seal be drawn in a corner.
-			if((isok(tx+(tx-u.ux), ty+(ty-u.uy)) && IS_CORNER(levl[tx+(tx-u.ux)][ty+(ty-u.uy)].typ) && 
-				IS_WALL(levl[tx+(tx-u.ux)][ty].typ) && IS_WALL(levl[tx][ty+(ty-u.uy)].typ)) || hasSealofSpirits
+			if(isok(tx+(tx-u.ux), ty+(ty-u.uy)) && IS_CORNER(levl[tx+(tx-u.ux)][ty+(ty-u.uy)].typ) && 
+				IS_WALL(levl[tx+(tx-u.ux)][ty].typ) && IS_WALL(levl[tx][ty+(ty-u.uy)].typ)
 			){
 				Your("perspective shifts, and the walls before you take on new depth.");
 				pline("The dim dungeon light refracts oddly, casting the alien figure before you in rainbow hues.");
@@ -2283,7 +2283,7 @@ int tx,ty;
 					}
 					else break;
 				}
-			if(((o2 || rat) && o1) || hasSealofSpirits){
+			if((o2 || rat) && o1){
 				int i1 = rn2(18), i2 = rn2(18), i3 = rn2(18);
 				
 				while(i1 == t1 || i1 == t2) i1 = rn2(18);
@@ -2456,7 +2456,7 @@ int tx,ty;
 					pline("When your attention returns to the seal, the hands have gone.");
 					// u.sealTimeout[ANDROMALIUS-FIRST_SEAL] = moves + bindingPeriod/10;
 				}
-				if(o1 && !o1->oartifact){
+				if(o1){
 					if(o1->quan > 1) o1->quan--; 
 					else{
 						obj_extract_self(o1);
@@ -2466,7 +2466,7 @@ int tx,ty;
 					}
 				}
 				if(rat) mongone(rat);
-				if(o2 && !o2->oartifact){
+				if(o2){
 					if(o2->quan > 1) o2->quan--; 
 					else{
 						obj_extract_self(o2);
@@ -2500,36 +2500,32 @@ int tx,ty;
 				}
 			}
 			//Astaroth requires that his seal be drawn on a square with a damaged item.
-			if((o || hasSealofSpirits) && u.sealCounts < numSlots){
+			if(o && u.sealCounts < numSlots){
 				iscrys = (o->otyp == CRYSKNIFE);
-                if(!hasSealofSpirits){
-                  if (o->oeroded && !iscrys) {
-                      switch (o->oeroded) {
-                          case 2:	Strcat(prefix, "very "); break;
-                          case 3:	Strcat(prefix, "thoroughly "); break;
-                      }
-                      Strcat(prefix, is_rustprone(o) ? "rusty " : "burnt ");
-                  }
-                  if (o->oeroded2 && !iscrys) {
-                      switch (o->oeroded2) {
-                          case 2:	Strcat(prefix, "very "); break;
-                          case 3:	Strcat(prefix, "thoroughly "); break;
-                      }
-                      Strcat(prefix, is_corrodeable(o) ? "corroded " :
-                          "rotted ");
-                  }
-                }
+				if (o->oeroded && !iscrys) {
+					switch (o->oeroded) {
+						case 2:	Strcat(prefix, "very "); break;
+						case 3:	Strcat(prefix, "thoroughly "); break;
+					}			
+					Strcat(prefix, is_rustprone(o) ? "rusty " : "burnt ");
+				}
+				if (o->oeroded2 && !iscrys) {
+					switch (o->oeroded2) {
+						case 2:	Strcat(prefix, "very "); break;
+						case 3:	Strcat(prefix, "thoroughly "); break;
+					}			
+					Strcat(prefix, is_corrodeable(o) ? "corroded " :
+						"rotted ");
+				}
 				pline("A hand of worn and broken clockwork on a rusted metal arm reaches into the seal.");
 				pline("The hand gently touches the %s%s, then rests on the seal's surface as its unseen owner shifts his weight onto that arm.", prefix, xname(o));
 				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metalic armature.");
 				pline("A voice speaks to you, as the immobile white face weeps tears of black oil onto the %s.", surface(tx,ty));
 				pline("*I am Astaroth, the Clockmaker. You shall be my instrument, to repair this broken world.*");
 				bindspirit(ep->ward_id);
-                if(!hasSealofSpirits){
-                  if(o->spe<0) o->spe=0;
-                  if(o->oeroded) o->oeroded=0;
-                  if(o->oeroded2) o->oeroded2=0;
-                }
+				if(o->spe<0) o->spe=0;
+				if(o->oeroded) o->oeroded=0;
+				if(o->oeroded2) o->oeroded2=0;
 				u.sealTimeout[ASTAROTH-FIRST_SEAL] = moves + bindingPeriod;
 			}
 			else if(uwep && (uwep->spe<0 || uwep->oeroded || uwep->oeroded2) && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
@@ -2577,9 +2573,8 @@ int tx,ty;
 	case BALAM:{
 		if(u.sealTimeout[BALAM-FIRST_SEAL] < moves){
 			//Balam requires that her seal be drawn on an icy square.
-			if((levl[tx][ty].typ == ICE && uwep) || hasSealofSpirits){
-				if(!hasSealofSpirits) You("stab your weapon down into the ice, cracking it.");
-				else pline("The ice cracks beneath the Seal of the Spirits.");
+			if(levl[tx][ty].typ == ICE && uwep){
+				You("stab your weapon down into the ice, cracking it.");
 				if(u.sealCounts < numSlots){
 					if(!Blind){
 						pline("A woman's scream echos through your mind as the cracks form a vaguely humanoid outline on the ice.");
@@ -2641,7 +2636,7 @@ int tx,ty;
 				}
 			}
 			//Berith also allows the summoner to wear a blessed silver ring on his or her left hand.
-			if((o || (uleft && uleft->otyp == slvring && uleft->blessed)) || hasSealofSpirits){
+			if(o || (uleft && uleft->otyp == slvring && uleft->blessed)){
 				if(u.sealCounts < numSlots){
 					if(!Blind){
 						pline("Gold rains down within the circumference of the seal, melting slowly to blood where it lands.");
@@ -2732,7 +2727,7 @@ int tx,ty;
 				}
 			}
 			//Chupoclops requires that her seal be drawn around a humanoid corpse or grave.
-			if(o || IS_GRAVE(levl[tx][ty].typ) || hasSealofSpirits){
+			if(o || IS_GRAVE(levl[tx][ty].typ)){
 				// pline("The %s within the seal begins to twitch and shake.");
 				// Your("consciousness expands, and you sense great currents of despair and mortality that wrap the world like silken threads.");
 				// pline("The %s falls still, and you know you're in the presence of the Spider.");
@@ -2779,7 +2774,7 @@ int tx,ty;
 	case DANTALION:{
 		if(u.sealTimeout[DANTALION-FIRST_SEAL] < moves){
 			//Spirit requires that his seal be drawn around a throne.
-			if(IS_THRONE(levl[tx][ty].typ) || hasSealofSpirits){
+			if(IS_THRONE(levl[tx][ty].typ)){
 				if(!Blind) {
 					You("see a man with many countenances step out from behind the throne.");
 					pline("Below his crown are many faces of %s,", DantalionRace(u.umonster)); /*  */
@@ -2838,7 +2833,7 @@ int tx,ty;
 				}
 			}
 			//Spirit requires that his seal be drawn in a ring of rocks.
-			if(validLocation || hasSealofSpirits){
+			if(validLocation){
 				pline("\"I'm shocked. So few ever speak to me, everyone ignores me and passes me by.\"");
 				pline("\"It's 'cause I'm about as impressive as a stone, right?...I'm used to it, though.\"");
 				if(u.sealCounts < numSlots){
@@ -2875,7 +2870,7 @@ int tx,ty;
 	case ECHIDNA:{
 		if(u.sealTimeout[ECHIDNA-FIRST_SEAL] < moves){
 			//NOT YET IMPLEMENTED: Spirit requires that her seal be drawn in a cave.
-			if(In_cave(&u.uz) || hasSealofSpirits){
+			if(In_cave(&u.uz)){
 				if(!Blind){
 					You("suddenly notice a monstrous nymph reclining in the center of the seal.");
 					pline("She is half a fair woman, with glancing eyes and fair cheeks,");
@@ -2918,7 +2913,7 @@ int tx,ty;
 	case EDEN:{
 		if(u.sealTimeout[EDEN-FIRST_SEAL] < moves){
 			//Spirit requires that its seal be drawn by a fountain.
-			if(IS_FOUNTAIN(levl[tx][ty].typ) || hasSealofSpirits){
+			if(IS_FOUNTAIN(levl[tx][ty].typ)){
 				if(!Blind){
 					pline("The water in the fountain begins to bubble.");
 					pline("A dome of cerulean crystal emerges from the center of the fountain,");
@@ -2972,7 +2967,7 @@ int tx,ty;
 				}
 			}
 			//Spirit requires that his seal be drawn in a large open space.
-			if(largeRoom || hasSealofSpirits){
+			if(largeRoom){
 				pline("Water bubbles up inside the seal,");
 				pline("and a figure rises within it.");
 				if(u.sealCounts < numSlots){
@@ -3009,9 +3004,9 @@ int tx,ty;
 	case EURYNOME:{
 		if(u.sealTimeout[EURYNOME-FIRST_SEAL] < moves){
 			//Spirit requires that her seal be drawn before some water.
-			if((isok(tx+(tx-u.ux), ty+(ty-u.uy)) && 
+			if(isok(tx+(tx-u.ux), ty+(ty-u.uy)) && 
 				IS_POOL(levl[tx+(tx-u.ux)][ty+(ty-u.uy)].typ)
-            ) || hasSealofSpirits){
+			){
 				if(!Blind)
 					You("see a figure dancing, far out upon the waters.");
 				if(u.sealCounts < numSlots){
@@ -3056,9 +3051,9 @@ int tx,ty;
 	case EVE:{
 		if(u.sealTimeout[EVE-FIRST_SEAL] < moves){
 			//Spirit requires that her seal be drawn beside a tree.
-			if((isok(tx+(tx-u.ux), ty+(ty-u.uy)) && 
+			if(isok(tx+(tx-u.ux), ty+(ty-u.uy)) && 
 				IS_TREE(levl[tx+(tx-u.ux)][ty+(ty-u.uy)].typ) 
-			) || hasSealofSpirits){
+			){
 				You("%s a woman within the seal.", Blind ? "sense" : "see");
 				pline("She is both young and old at once.");
 				pline("She looks hurt.");
@@ -3103,7 +3098,7 @@ int tx,ty;
 				}
 			}
 			//Spirit requires that his seal be drawn in a vault, or on a pile of 1000xyour level coins.
-			if((coins || (*in_rooms(tx,ty,VAULT) && u.uinvault)) || hasSealofSpirits){
+			if(coins || (*in_rooms(tx,ty,VAULT) && u.uinvault)){
 				if(!Blind) You("suddenly notice a dragon %s", coins ? "buired in the coins" : "in the room.");
 				if(u.sealCounts < numSlots){
 					if(!Blind) pline("The dragon lunges forwards to bite you.");
@@ -3186,7 +3181,7 @@ int tx,ty;
 	case IRIS:{
 		if(u.sealTimeout[IRIS-FIRST_SEAL] < moves){
 			//Spirit requires that her seal be drawn inside a stinking cloud.
-			if(check_stinking_cloud_region((xchar)tx,(xchar)ty) || hasSealofSpirits){ 
+			if(check_stinking_cloud_region((xchar)tx,(xchar)ty)){ 
 				You("catch a glimpse of somthing moving in the stinking cloud....");
 				pline("But you can't see what it was.");
 				if(u.sealCounts < numSlots){
@@ -3222,7 +3217,7 @@ int tx,ty;
 	case JACK:{
 		if(u.sealTimeout[JACK-FIRST_SEAL] < moves){
 			//Spirit requires that his seal be drawn outside of hell and the endgame.
-			if((!In_hell(&u.uz) && !In_endgame(&u.uz)) || hasSealofSpirits){
+			if(!In_hell(&u.uz) && !In_endgame(&u.uz)){
 				if(u.sealCounts < numSlots){
 					You("feel something climb onto your back!");
 					pline("\"Will you let me stay with you?\"");
@@ -3270,60 +3265,56 @@ int tx,ty;
 			break;
 				}
 			}
-			if(o || hasSealofSpirits){
+			if(o){
 				  /*////////////////////////////////*/
 				 /* Do a light sacrificing routine */
 				/*////////////////////////////////*/
-                if(!hasSealofSpirits){
-                  if (your_race(&mons[otmp->corpsenm])) {
-                      /* Human sacrifice on a chaotic or unaligned altar */
-                      /* is equivalent to demon summoning */
-                      pline_The("%s blood covers the %s!", urace.adj, surface(tx,ty));
-                      change_luck(-2);
+				if (your_race(&mons[otmp->corpsenm])) {
+					/* Human sacrifice on a chaotic or unaligned altar */
+					/* is equivalent to demon summoning */
+					pline_The("%s blood covers the %s!", urace.adj, surface(tx,ty));
+					change_luck(-2);
+					
+					if (is_demon(youmonst.data)) {
+						You("find the idea of sealing a pact with the blood of your own race to be pleasing.");
+						exercise(A_WIS, TRUE);
+						adjalign(5);
+					} else if (u.ualign.type != A_CHAOTIC) {
+						You_feel("you'll regret this infamous offense!");
+						(void) adjattrib(A_WIS, -1, TRUE);
+						exercise(A_WIS, FALSE);
+						adjalign(-5);
+						u.ugangr[Align2gangr(u.ualign.type)] += 3;
+						if (!Inhell) {
+							angrygods(u.ualign.type);
+							change_luck(-5);
+						}
+					}
+				} /* your race */
+				else if (otmp->oxlth && otmp->oattached == OATTACHED_MONST
+						&& ((mtmp = get_mtraits(otmp, FALSE)) != (struct monst *)0)
+						&& mtmp->mtame) {
+					/* mtmp is a temporary pointer to a tame monster's attributes,
+					 * not a real monster */
+					pline("So this is how you repay loyalty?");
+					adjalign(-3);
+					HAggravate_monster |= FROMOUTSIDE;
+				} else if (is_unicorn(&mons[otmp->corpsenm])) {
+					int unicalign = sgn((&mons[otmp->corpsenm])->maligntyp);
 
-                      if (is_demon(youmonst.data)) {
-                          You("find the idea of sealing a pact with the blood of your own race to be pleasing.");
-                          exercise(A_WIS, TRUE);
-                          adjalign(5);
-                      } else if (u.ualign.type != A_CHAOTIC) {
-                          You_feel("you'll regret this infamous offense!");
-                          (void) adjattrib(A_WIS, -1, TRUE);
-                          exercise(A_WIS, FALSE);
-                          adjalign(-5);
-                          u.ugangr[Align2gangr(u.ualign.type)] += 3;
-                          if (!Inhell) {
-                              angrygods(u.ualign.type);
-                              change_luck(-5);
-                          }
-                      }
-                  } /* your race */
-                  else if (otmp->oxlth && otmp->oattached == OATTACHED_MONST
-                          && ((mtmp = get_mtraits(otmp, FALSE)) != (struct monst *)0)
-                          && mtmp->mtame) {
-                      /* mtmp is a temporary pointer to a tame monster's attributes,
-                       * not a real monster */
-                      pline("So this is how you repay loyalty?");
-                      adjalign(-3);
-                      HAggravate_monster |= FROMOUTSIDE;
-                  } else if (is_unicorn(&mons[otmp->corpsenm])) {
-                      int unicalign = sgn((&mons[otmp->corpsenm])->maligntyp);
-
-                      if (unicalign == u.ualign.type) {
-                          pline("This is a grave insult to %s!",
-                                (unicalign == A_CHAOTIC)
-                                ? "chaos" : unicalign ? "law" : "balance");
-                          u.ualign.record = -1;
-                          u.ualign.sins += 10;
-                      } else{
-                          if (u.ualign.record < ALIGNLIM)
-                              You_feel("appropriately %s.", align_str(u.ualign.type));
-                          else You_feel("you are thoroughly on the right path.");
-                          adjalign(5);
-                      }
-                  }
-                } else {
-                  pline("Blood covers the Seal of the Spirits.");
-                }
+					if (unicalign == u.ualign.type) {
+						pline("This is a grave insult to %s!",
+							  (unicalign == A_CHAOTIC)
+							  ? "chaos" : unicalign ? "law" : "balance");
+						u.ualign.record = -1;
+						u.ualign.sins += 10;
+					} else{
+						if (u.ualign.record < ALIGNLIM)
+							You_feel("appropriately %s.", align_str(u.ualign.type));
+						else You_feel("you are thoroughly on the right path.");
+						adjalign(5);
+					}
+				}
 				Your("sacrifice is accepted.");
 				if(!Blind){
 					pline("A murder of crows decends on the seal.");
@@ -3365,7 +3356,7 @@ int tx,ty;
 		if(u.sealTimeout[MARIONETTE-FIRST_SEAL] < moves){
 			//Spirit requires that her seal be drawn in the Valley of the Dead or in a graveyard.
 			boolean in_a_graveyard = rooms[levl[tx][ty].roomno - ROOMOFFSET].rtype == MORGUE;
-			if((in_a_graveyard || on_level(&valley_level, &u.uz)) || hasSealofSpirits){
+			if(in_a_graveyard || on_level(&valley_level, &u.uz)){
 				if(!Blind) You("notice metal wires sticking out of the ground within the seal.");
 				if(u.sealCounts < numSlots){
 					if(!Blind) pline("In fact, there are wires sticking up all around you.");
@@ -3403,8 +3394,7 @@ int tx,ty;
 	case MOTHER:{
 		if(u.sealTimeout[MOTHER-FIRST_SEAL] < moves){
 			//Spirit requires that her seal addressed while blind.
-			if(Blind || hasSealofSpirits){
-                if(hasSealofSpirits && !Blind) pline("A cloud of darkness descends before you.");
+			if(Blind){
 				Your("Hands itch painfully.");
 				if(u.sealCounts < numSlots){
 					You("feel eyes open in your hands!");
@@ -3412,7 +3402,6 @@ int tx,ty;
 					pline("...the eyeballs don't belong to you!");
 					bindspirit(ep->ward_id);
 					u.sealTimeout[MOTHER-FIRST_SEAL] = moves + bindingPeriod;
-                if(hasSealofSpirits && !Blind) You("can see again.");
 				}
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("You're pretty sure somthing is staring at your weapon....");
@@ -3440,9 +3429,9 @@ int tx,ty;
 	case NABERIUS:{
 		if(u.sealTimeout[NABERIUS-FIRST_SEAL] < moves){
 			//Spirit requires that his seal be drawn by an intelligent and wise person.
-			if((ACURR(A_INT) >= 14 &&
+			if(ACURR(A_INT) >= 14 &&
 				ACURR(A_WIS) >= 14
-            ) || hasSealofSpirits){
+			){ 
 				You_hear("a snuffing noise.");
 				if(u.sealCounts < numSlots){
 					if(!Blind){
@@ -3489,7 +3478,7 @@ int tx,ty;
 		if(u.sealTimeout[ORTHOS-FIRST_SEAL] < moves){
 			struct trap *t=t_at(tx+(tx-u.ux), ty+(ty-u.uy));
 			//Spirit requires that his seal be drawn in a square with a hole.
-			if((t && t->ttyp == HOLE) || hasSealofSpirits){
+			if(t && t->ttyp == HOLE){
 				if(!Blind) pline("The hole grows darker, and a whistling occurs at the edge of hearing.");
 				else pline("A whistling occurs at the edge of hearing.");
 				pline("The mournful whistle grows louder, as the air around you flows into the pit.");
@@ -3521,7 +3510,7 @@ int tx,ty;
 	case OSE:{
 		if(u.sealTimeout[OSE-FIRST_SEAL] < moves){
 			//Spirit requires that its seal be drawn underwater.
-			if((IS_POOL(levl[tx][ty].typ) && IS_POOL(levl[u.ux][u.uy].typ) && u.uinwater && Underwater) || hasSealofSpirits){ 
+			if(IS_POOL(levl[tx][ty].typ) && IS_POOL(levl[u.ux][u.uy].typ) && u.uinwater && Underwater){ 
 				if(u.sealCounts < numSlots){
 					pline("The sea-bottom within the seal fades, as if it were silt settling out of muddy water.");
 					pline("A sleeping %s floats gently up out of the dark seas below the seal.",u.osegen);
@@ -3593,7 +3582,7 @@ int tx,ty;
 	case OTIAX:{
 		if(u.sealTimeout[OTIAX-FIRST_SEAL] < moves){
 			//Spirit requires that its seal be drawn on a closed door.
-			if((IS_DOOR(levl[tx][ty].typ) && closed_door(tx,ty)) || hasSealofSpirits){
+			if(IS_DOOR(levl[tx][ty].typ) && closed_door(tx,ty)){ 
 				if(!Blind) pline("Thick fingers of mist reach under the door.");
 				if(u.sealCounts < numSlots){
 					pline("BANG!! Something hits the door from the other side!");
@@ -3644,24 +3633,17 @@ int tx,ty;
 				}
 			}
 			//Spirit requires that her seal be drawn around a spellbook. The summoner must face toward the northwest during the ritual.
-			if((o && tx - u.ux < 0 && ty - u.uy < 0) || hasSealofSpirits){
+			if( o && tx - u.ux < 0 && ty - u.uy < 0){
 				pline("The pages of %s begin to turn.", xname(o));
 				if(u.sealCounts < numSlots){
 					if(!Blind){
 						pline("A beautiful woman rides into the seal on a camel.");
-						if(!hasSealofSpirits){
-                          pline("She scoops up the book and begins pouring through it.");
-                          pline("As she reads, she absentmindedly hands you her crown.");
-                        } else {
-                          pline("She scoops up the scroll and begins pouring over it.");
-                          pline("She finishes reading, drops the scroll and absentmindedly hands you her crown.");
-                        }
+						pline("She scoops up the book and begins pouring through it.");
+						pline("As she reads, she absentmindedly hands you her crown.");
 					}
 					pline("\"Your contribution is appreciated. Now don't bother me.\"");
-                    if(!hasSealofSpirits){
-                      o->otyp = SPE_BLANK_PAPER;
-                      newsym(tx,ty);
-                    }
+					o->otyp = SPE_BLANK_PAPER;
+					newsym(tx,ty);
 					bindspirit(ep->ward_id);
 					u.sealTimeout[PAIMON-FIRST_SEAL] = moves + bindingPeriod;
 				}
@@ -3698,7 +3680,7 @@ int tx,ty;
 	case SIMURGH:{
 		if(u.sealTimeout[SIMURGH-FIRST_SEAL] < moves){
 			//Spirit requires that her seal be drawn outside.
-			if(In_outdoors(&u.uz) || hasSealofSpirits){
+			if(In_outdoors(&u.uz)){
 				pline("A brilliantly colored bird with iron claws flies high overhead.");
 				if(u.sealCounts < numSlots){
 					pline("It swoops down and lands on your shoulder.");
@@ -3736,7 +3718,7 @@ int tx,ty;
 	case TENEBROUS:{
 		if(u.sealTimeout[TENEBROUS-FIRST_SEAL] < moves){
 			//Spirit requires that his seal be drawn in darkness.
-			if( (!(levl[tx][ty].lit) && !(viz_array[ty][tx]&TEMP_LIT) && !(levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_LIT))) || hasSealofSpirits ){
+			if( !(levl[tx][ty].lit) && !(viz_array[ty][tx]&TEMP_LIT) && !(levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_LIT)) ){
 				if(!Blind) pline("Within the seal, darkness takes on its own meaning,");
 				if(!Blind) pline("beyond mere absense of light.");
 				if(u.sealCounts < numSlots){
@@ -3789,7 +3771,7 @@ int tx,ty;
 				}
 			}
 			//Spirit requires that his seal be drawn around a rotting corpse of a poisonous creature.
-			if(	o || hasSealofSpirits){
+			if(	o ){
 				if(!Blind){
 					pline("An eye opens on the ground within the seal,");
 					pline("and a voice speaks to you out of the Earth:");
