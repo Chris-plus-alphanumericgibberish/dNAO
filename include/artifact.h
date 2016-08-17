@@ -5,41 +5,39 @@
 #ifndef ARTIFACT_H
 #define ARTIFACT_H
 
-#define SPFX_NONE   0x0000000L	/* no special effects, just a bonus */
-#define SPFX_NOGEN  0x0000001L	/* item is special, bequeathed by gods */
-#define SPFX_RESTR  0x0000002L	/* item is restricted - can't be named */
-#define SPFX_INTEL  0x0000004L	/* item is self-willed - intelligent */
-#define SPFX_SPEAK  0x0000008L	/* item can speak (not implemented) */
-#define SPFX_SEEK   0x0000010L	/* item helps you search for things, ie, adds enhancement bonus to attempts */
-#define SPFX_WARN   0x0000020L	/* item warns you of danger */
-#define SPFX_ATTK   0x0000040L	/* item has a special attack (attk) */
-#define SPFX_DEFN   0x0000080L	/* item has a special defence (defn) */
-#define SPFX_DRLI   0x0000100L	/* drains a level from monsters */
-#define SPFX_SEARCH 0x0000200L	/* automatic searching */
-#define SPFX_BEHEAD 0x0000400L	/* beheads monsters */
-#define SPFX_HALRES 0x0000800L	/* blocks hallucinations */
-#define SPFX_ESP    0x0001000L	/* ESP (like amulet of ESP) */
-#define SPFX_DISPL  0x0002000L	/* Displacement */
-#define SPFX_REGEN  0x0004000L	/* Regeneration */
-#define SPFX_EREGEN 0x0008000L	/* Energy Regeneration */
-#define SPFX_HSPDAM 0x0010000L	/* 1/2 spell damage (on player) in combat */
-#define SPFX_HPHDAM 0x0020000L	/* 1/2 physical damage (on player) in combat */
-#define SPFX_TCTRL  0x0040000L	/* Teleportation Control */
-#define SPFX_LUCK   0x0080000L	/* Increase Luck (like Luckstone) */
-#define SPFX_DMONS  0x0100000L	/* attack bonus on one monster type */
-#define SPFX_DCLAS  0x0200000L	/* attack bonus on monsters w/ symbol mtype */
-#define SPFX_DFLAG1 0x0400000L	/* attack bonus on monsters w/ mflags1 flag */
-#define SPFX_DFLAG2 0x0800000L	/* attack bonus on monsters w/ mflags2 flag */
-#define SPFX_DALIGN 0x1000000L	/* attack bonus on non-aligned monsters  */
-#define SPFX_DBONUS 0x1F00000L	/* attack bonus mask */
-#define SPFX_XRAY   0x2000000L	/* gives X-RAY vision to player */
-#define SPFX_REFLECT 0x4000000L /* Reflection */
-#define SPFX_CONFL  0x8000000L  /* Conflict */
-#define SPFX_AGGRM  0x10000000L /* Aggravate monster */
+#define SPFX_NONE   0x00000000L	/* no special effects, just a bonus */
+#define SPFX_NOGEN  0x00000001L	/* item is special, bequeathed by gods */
+#define SPFX_RESTR  0x00000002L	/* item is restricted - can't be named */
+#define SPFX_INTEL  0x00000004L	/* item is self-willed - intelligent */
+#define SPFX_SPEAK  0x00000008L	/* item can speak (not implemented) */
+#define SPFX_SEEK   0x00000010L	/* item helps you search for things, ie, adds enhancement bonus to attempts */
+#define SPFX_WARN   0x00000020L	/* item warns you of danger */
+#define SPFX_ATTK   0x00000040L	/* item has a special attack (attk) */
+#define SPFX_DEFN   0x00000080L	/* item has a special defence (defn) */
+#define SPFX_DRLI   0x00000100L	/* drains a level from monsters */
+#define SPFX_SEARCH 0x00000200L	/* automatic searching */
+#define SPFX_BEHEAD 0x00000400L	/* beheads monsters */
+#define SPFX_HALRES 0x00000800L	/* blocks hallucinations */
+#define SPFX_ESP    0x00001000L	/* ESP (like amulet of ESP) */
+#define SPFX_DISPL  0x00002000L	/* Displacement */
+#define SPFX_REGEN  0x00004000L	/* Regeneration */
+#define SPFX_EREGEN 0x00008000L	/* Energy Regeneration */
+#define SPFX_HSPDAM 0x00010000L	/* 1/2 spell damage (on player) in combat */
+#define SPFX_HPHDAM 0x00020000L	/* 1/2 physical damage (on player) in combat */
+#define SPFX_TCTRL  0x00040000L	/* Teleportation Control */
+#define SPFX_LUCK   0x00080000L	/* Increase Luck (like Luckstone) */
+#define SPFX_CON_AND 0x00100000L	/* Affects only those monsters with ALL flags specified */
+#define SPFX_CON_OR 0x00200000L	/* Affects any monster with ANY flag specified */
+#define SPFX_DALIGN 0x00400000L	/* attack bonus on non-aligned monsters  */
+#define SPFX_DBONUS (SPFX_DALIGN|SPFX_CON_OR|SPFX_CON_AND)	/* attack bonus mask */
+#define SPFX_XRAY   0x00800000L	/* gives X-RAY vision to player */
+#define SPFX_REFLECT 0x01000000L /* Reflection */
+#define SPFX_CONFL  0x02000000L  /* Conflict */
+#define SPFX_AGGRM  0x04000000L /* Aggravate monster */
 /* expanded special effects*/
 #define SPFX2_NONE		0x0000000L	/* nothing special */
 #define SPFX2_DIG		0x0000001L	/* Can dig with artifact, as if it were a pick. Clarent Patch (GreyKnight)*/
-#define SPFX2_DEMIBANE  0x0000002L	/* +1d20 damage vs is_demihuman() mon types */
+
 #define SPFX2_BLIND		0x0000004L	/* causes blindness */
 
 #define SPFX2_FIRE		0x0000010L	/* Fireball strike (1/4) */
@@ -247,7 +245,13 @@ struct artifact {
 	const char  *name;
 	unsigned long spfx;	/* special effect from wielding/wearing */
 	unsigned long cspfx;	/* special effect just from carrying obj */
-	unsigned long mtype;	/* monster type, symbol, or flag */
+	unsigned long mtype;	/* monster symbol */
+	unsigned long mflagsm;	/* Monster Motility boolean bitflags */
+	unsigned long mflagst;	/* Monster Thoughts and behavior boolean bitflags */
+	unsigned long mflagsb;	/* Monster Body plan boolean bitflags */
+	unsigned long mflagsg;	/* Monster Game mechanics and bookkeeping boolean bitflags */
+	unsigned long mflagsa;	/* Monster rAce boolean bitflags */
+	unsigned long mflagsv;	/* Monster Vision boolean bitflags */
 	struct attack attk, defn, cary;
 	uchar	    inv_prop;	/* property obtained by invoking artifact */
 	aligntyp    alignment;	/* alignment of bequeathing gods */
@@ -330,8 +334,8 @@ struct artifact {
 #define MASTERY_ARTIFACT_LEVEL 20
 
 #define has_named_mastery_artifact() (\
-            exist_artifact(DIAMOND, artilist[ART_PINK_PANTHER].name) ||\
-            exist_artifact(SPE_BLANK_PAPER, artilist[ART_TOME_OF_THE_LOREMASTER].name) ||\
+            exist_artifact(BULLWHIP, artilist[ART_TRUSTY_ADVENTURER_S_WHIP].name) ||\
+            exist_artifact(SPE_BLANK_PAPER, artilist[ART_LOG_OF_THE_CURATOR].name) ||\
             exist_artifact(FORCE_PIKE, artilist[ART_FORCE_PIKE_OF_THE_RED_GUAR].name) ||\
             exist_artifact(LEATHER_GLOVES, artilist[ART_GAUNTLETS_OF_THE_BERSERKER].name) ||\
             exist_artifact(SCR_REMOVE_CURSE, artilist[ART_DECLARATION_OF_THE_APOSTAT].name) ||\
@@ -345,8 +349,8 @@ struct artifact {
             exist_artifact(GAUNTLETS_OF_DEXTERITY, artilist[ART_GAUNTLETS_OF_THE_HEALING_H].name) ||\
             exist_artifact(RIN_REGENERATION, artilist[ART_RING_OF_HYGIENE_S_DISCIPLE].name) ||\
             exist_artifact(ROBE, artilist[ART_COPE_OF_THE_ELDRITCH_KNIGH].name) ||\
-            exist_artifact(LARGE_SHIELD, artilist[ART_SHIELD_OF_THE_PALADIN].name) ||\
-            exist_artifact(POT_BOOZE, artilist[ART_BOOZE_OF_THE_INEBRIATE].name) ||\
+            exist_artifact(KITE_SHIELD, artilist[ART_SHIELD_OF_THE_PALADIN].name) ||\
+            exist_artifact(POT_BOOZE, artilist[ART_BOOZE_OF_THE_DRUNKEN_MASTE].name) ||\
             exist_artifact(LEATHER_GLOVES, artilist[ART_WRAPPINGS_OF_THE_SACRED_FI].name) ||\
             exist_artifact(SILVER_KHAKKHARA, artilist[ART_KHAKKHARA_OF_THE_MONKEY].name) ||\
             exist_artifact(RIN_TELEPORTATION, artilist[ART_MARK_OF_THE_RIGHTFUL_SCION].name) ||\
@@ -362,8 +366,8 @@ struct artifact {
             exist_artifact(SPE_BLANK_PAPER, artilist[ART_ENCYCLOPEDIA_GALACTICA].name) ||\
             exist_artifact(WAN_TELEPORTATION, artilist[ART_TWIG_OF_YGGDRASIL].name) ||\
             exist_artifact(SADDLE, artilist[ART_SADDLE_OF_BRYNHILDR].name) ||\
-            exist_artifact(QUARTERSTAFF, artilist[ART_STAFF_OF_THE_ARCHMAGI].name) ||\
-            exist_artifact(ROBE, artilist[ART_ROBE_OF_WILD_MAGIC].name) ||\
+            exist_artifact(QUARTERSTAFF, artilist[ART_STAFF_OF_WILD_MAGIC].name) ||\
+            exist_artifact(ROBE, artilist[ART_ROBE_OF_THE_ARCHMAGI].name) ||\
             exist_artifact(WAR_HAMMER, artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI].name) ||\
             exist_artifact(RIN_PROTECTION_FROM_SHAPE_CHAN, artilist[ART_RING_OF_LOLTH].name) ||\
             exist_artifact(DWARVISH_ROUNDSHIELD, artilist[ART_BULWARK_OF_THE_DWARVEN_DEF].name) ||\
@@ -373,7 +377,7 @@ struct artifact {
             exist_artifact(RIN_AGGRAVATE_MONSTER,artilist[ART_VILYA].name) ||\
             exist_artifact(GNOMISH_POINTY_HAT,artilist[ART_HAT_OF_THE_GIANT_KILLER].name) ||\
             exist_artifact(PLATE_MAIL,artilist[ART_PRISMATIC_DRAGON_PLATE].name) ||\
-            exist_artifact(STAR_SAPPHIRE,artilist[ART_FOOTPRINTS_OF_THE_LABYRINT].name) ||\
+            exist_artifact(STAR_SAPPHIRE,artilist[ART_FOOTPRINTS_IN_THE_LABYRINT].name) ||\
             exist_artifact(AMULET_OF_RESTFUL_SLEEP,artilist[ART_TRAPPINGS_OF_THE_GRAVE].name)\
 )
 
@@ -385,12 +389,12 @@ struct artifact {
 			|| (a == &artilist[ART_FIRST_KEY_OF_CHAOS] && \
 							(exist_artifact(SKELETON_KEY,artilist[ART_THIRD_KEY_OF_CHAOS].name) \
 							||  u.ualign.type == A_CHAOTIC ) \
-              )\
+				)\
             /* Mastery artifacts */\
             /* Archeologist */\
-            || ((a) == &artilist[ART_PINK_PANTHER] && (Role_if(PM_ARCHEOLOGIST) || Pantheon_if(PM_ARCHEOLOGIST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_TRUSTY_ADVENTURER_S_WHIP] && (Role_if(PM_ARCHEOLOGIST) || Pantheon_if(PM_ARCHEOLOGIST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_TOME_OF_THE_LOREMASTER] && (Role_if(PM_ARCHEOLOGIST) || Pantheon_if(PM_ARCHEOLOGIST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_LOG_OF_THE_CURATOR] && (Role_if(PM_ARCHEOLOGIST) || Pantheon_if(PM_ARCHEOLOGIST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Anachrononaut */\
             || ((a) == &artilist[ART_FORCE_PIKE_OF_THE_RED_GUAR] && (Role_if(PM_ANACHRONONAUT) || Pantheon_if(PM_ANACHRONONAUT)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
@@ -427,7 +431,7 @@ struct artifact {
             || ((a) == &artilist[ART_COPE_OF_THE_ELDRITCH_KNIGH] && (Role_if(PM_KNIGHT) || Pantheon_if(PM_KNIGHT)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
             /* Monk */\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_BOOZE_OF_THE_INEBRIATE] && (Role_if(PM_MONK) || Pantheon_if(PM_MONK)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_BOOZE_OF_THE_DRUNKEN_MASTE] && (Role_if(PM_MONK) || Pantheon_if(PM_MONK)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             || ((a) == &artilist[ART_WRAPPINGS_OF_THE_SACRED_FI] && (Role_if(PM_MONK) || Pantheon_if(PM_MONK)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
@@ -467,9 +471,9 @@ struct artifact {
             || ((a) == &artilist[ART_SADDLE_OF_BRYNHILDR] && (Role_if(PM_VALKYRIE) || Pantheon_if(PM_VALKYRIE)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Wizard */\
-            || ((a) == &artilist[ART_STAFF_OF_THE_ARCHMAGI] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_STAFF_OF_WILD_MAGIC] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            || ((a) == &artilist[ART_ROBE_OF_WILD_MAGIC] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_ROBE_OF_THE_ARCHMAGI] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             || ((a) == &artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
@@ -494,13 +498,13 @@ struct artifact {
                 !has_named_mastery_artifact())\
             /* Human */\
             /* Incantifier */\
-            || ((a) == &artilist[ART_FOOTPRINTS_OF_THE_LABYRINT] && Race_if(PM_INCANTIFIER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_FOOTPRINTS_IN_THE_LABYRINT] && Race_if(PM_INCANTIFIER) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Orc */\
             /* Vampire */\
             || ((a) == &artilist[ART_TRAPPINGS_OF_THE_GRAVE] && Race_if(PM_VAMPIRE) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
-            )
+)
 
 #define is_monk_safe_artifact(m) (\
 				(m) == ART_TIE_DYE_SHIRT_OF_SHAMBHALA ||\
