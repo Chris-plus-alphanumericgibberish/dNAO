@@ -520,6 +520,7 @@ bot2()
 #else
         Sprintf(nb = eos(nb), " Pw:%d(%d)", u.uen, u.uenmax);
 #endif
+        Sprintf(nb = eos(nb), " Br:%d", u.divetimer);
         Sprintf(nb = eos(nb), " AC:%-2d", u.uac);
 	if (Upolyd)
 		Sprintf(nb = eos(nb), " HD:%d", mons[u.umonnum].mlevel);
