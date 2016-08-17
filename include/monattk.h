@@ -152,16 +152,20 @@
 #define AD_STTP		106 /* Steal by Teleportation: Teleports your gear away */
 #define AD_HDRG		107 /* Half-dragon breath weapon */
 #define AD_STAR		108 /* Tulani silver starlight rapier */
+#define AD_EELC		109	/* Elemental electric */
+#define AD_EFIR		110	/* Elemental fire */
+#define AD_EDRC		111	/* Elemental poison (con) */
+#define AD_ECLD		112	/* Elemental cold */
+#define AD_EACD		113	/* Elemental acid */
 
-
-//#define AD_AHAZU	109 /*  */
+//#define AD_AHAZU	114 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	110
-#define AD_IRIS		111
-#define AD_NABERIUS	112
-#define AD_OTIAX	113
-#define AD_SIMURGH	114
+#define AD_DUNSTAN	115
+#define AD_IRIS		116
+#define AD_NABERIUS	117
+#define AD_OTIAX	118
+#define AD_SIMURGH	119
 
 
 //#define AD_VMSL		239 //Vorlon missile: elect, disintegration, blast.  Triple damage.
