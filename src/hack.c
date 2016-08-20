@@ -2068,6 +2068,9 @@ register boolean newlev;
 			You("enter an abandoned barracks.");
 			rt = 0;
 	    break;
+		case ARMORY:
+			You("enter a dilapidated armory.");
+	    break;
 		case DELPHI:
 		    if(monstinroom(&mons[PM_ORACLE], roomno))
 			verbalize("%s, %s, welcome to Delphi!",
@@ -2096,6 +2099,9 @@ register boolean newlev;
 					break;
 					case ZOO:
 					level.flags.has_zoo = 0;
+					break;
+					case ARMORY:
+					level.flags.has_armory = 0;
 					break;
 					case BARRACKS:
 					level.flags.has_barracks = 0;
