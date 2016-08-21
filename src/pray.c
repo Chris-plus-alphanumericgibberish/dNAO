@@ -2797,6 +2797,7 @@ const char * const hallu_gods[] = {
 	"_Xel'lo'tath",
 	"Mantorok",
 	"_Martel",
+	"Gwyn, Lord of Sunlight",
 	
 	//Literature
 	"Mahasamatman",
@@ -2817,6 +2818,7 @@ const char * const hallu_gods[] = {
 	"_Yuenki, Dark Lady of Apotheosis",
 	"_Zeth Kahl, Dark Empress of The Gift Given to Bind",
 	
+	//Anime
 	"the Data Overmind",
 	"the Sky Canopy Domain",
 	
@@ -2887,6 +2889,7 @@ const char * const hallu_gods[] = {
 	"Khor the priest",
 	"Khor the ranger",
 	"Khor the monk",
+	"Khor the gnomish ranger",
 	"ChrisANG the fourth demigod",
 	"ChrisANG the binder",
 	"FIQ the fifth demigod",
