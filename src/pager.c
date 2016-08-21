@@ -167,7 +167,7 @@ lookat(x, y, buf, monbuf)
 			    an(defsyms[trap_to_defsym(tt)].explanation));
 	    }
 
-	    {
+		{
 		int ways_seen = 0, normal = 0, xraydist;
 		boolean useemon = (boolean) canseemon(mtmp);
 
@@ -722,7 +722,7 @@ static const char * const bogusobjects[] = {
 	   "thermal detinator", /* Star Wars */
        "thing that is not tea",/*"no tea here!", "no tea, sadly",*/ /* HGttG */
 		"potion almost, but not quite, entirely unlike tea",
-		"potion of Pan-Galactic Gargle Blaster", "black scroll-case labled DON'T PANIC", /* HGttG */
+		"potion of Pan-Galactic Gargle Blaster", "black scroll-case labeled DON'T PANIC", /* HGttG */
 	   "ridiculously dangerous epaulet [it's armed]", /* Schlock Mercenary*/
 	   "pokeball", /* Pokemon */
 	   "scroll of oxygen-destroyer plans", /* Godzilla */
@@ -808,8 +808,8 @@ static const char * const bogusobjects[] = {
 	   "copy of The Five Books of Moses",						/* aka the Torah */
 	   "spellbook named The Six and Seventh Books of Moses",	/* 18th- or 19th-century magical text allegedly written by Moses */
 	   "spellbook named The Book of Coming Forth by Day", "spellbook named The Book of emerging forth into the Light",
-	   "spellbook named Sepher Ha-Razim",						/* Book given to Noah by the angel Raziel */
-	   "spellbook named Sefer Raziel HaMalakh", 				/*"Book of Raziel the Angel, given to Adam */
+	   "spellbook named Sepher Ha-Razim",						/*  Book given to Noah by the angel Raziel */
+	   "spellbook named Sefer Raziel HaMalakh", 				/* Book of Raziel the Angel, given to Adam */
 	   "spellbook named The Testament of Solomon",
 	   "spellbook named The Book of Enoch",
 	   "spellbook named The Book of Inverted Darkness",
