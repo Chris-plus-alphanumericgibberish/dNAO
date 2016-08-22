@@ -828,7 +828,10 @@ boolean called;
 		return buf;
 	    Strcat(buf, " the ");
 	    if (do_invis) Strcat(buf, "invisible ");
-		if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]) Strcat(buf, "frumious ");
+		if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]){
+			Strcat(buf, "frumious ");
+			name_at_start = FALSE;
+		}
 		if ((u.sealsActive&SEAL_MOTHER && !is_undead(mtmp->data)) || (Role_if(PM_HEALER) && (!nonliving(mtmp->data) || has_blood(mtmp->data))) ){
 			if(mtmp->mhp == mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 			else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
@@ -836,12 +839,16 @@ boolean called;
 			else if(mtmp->mhp >= .25*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
 			else if(mtmp->mhp >= .1*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
 			else if(mtmp->mhp > 0) (has_blood(mtmp->data)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
+			name_at_start = FALSE;
 		}
 		if(is_drow(mdat)){
 			struct obj *otmp;
 			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 				if ((otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT) 
-					&& otmp->owornmask & mtmp->misc_worn_check) Sprintf(eos(buf), "%s ", getDrowHouse(otmp->ovar1));
+					&& otmp->owornmask & mtmp->misc_worn_check){
+						Sprintf(eos(buf), "%s ", getDrowHouse(otmp->ovar1));
+						name_at_start = FALSE;
+					}
 			}
 		}
 	    Strcat(buf, mdat->mname);
@@ -881,7 +888,10 @@ boolean called;
 			Sprintf(eos(buf), "%s broken shadow", s_suffix(name));
 			name_at_start = TRUE;
 	    } else if (called) {
-			if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]) Sprintf(eos(buf), "frumious ");
+			if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]){
+				Sprintf(eos(buf), "frumious ");
+				name_at_start = FALSE;
+			}
 			if ((u.sealsActive&SEAL_MOTHER && !is_undead(mtmp->data)) || (Role_if(PM_HEALER) && (!nonliving(mtmp->data) || has_blood(mtmp->data))) ){
 				if(mtmp->mhp == mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 				else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
@@ -889,12 +899,16 @@ boolean called;
 				else if(mtmp->mhp >= .25*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
 				else if(mtmp->mhp >= .1*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
 				else if(mtmp->mhp > 0) (has_blood(mtmp->data)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
+				name_at_start = FALSE;
 			}
 			if(is_drow(mdat)){
 				struct obj *otmp;
 				for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 					if ((otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT) 
-						&& otmp->owornmask & mtmp->misc_worn_check) Sprintf(eos(buf), "%s ", getDrowHouse(otmp->ovar1));
+						&& otmp->owornmask & mtmp->misc_worn_check){
+							Sprintf(eos(buf), "%s ", getDrowHouse(otmp->ovar1));
+							name_at_start = FALSE;
+						}
 				}
 			}
 			Sprintf(eos(buf), "%s called %s", mdat->mname, name);
@@ -923,7 +937,11 @@ boolean called;
 	    Strcat(buf, lcase(pbuf));
 	    name_at_start = FALSE;
 	} else {
-		if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]) Strcat(buf, "frumious ");
+	    name_at_start = (boolean)type_is_pname(mdat);
+		if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]){
+			Strcat(buf, "frumious ");
+			name_at_start = FALSE;
+		}
 		if ((u.sealsActive&SEAL_MOTHER && !is_undead(mtmp->data)) || (Role_if(PM_HEALER) && (!nonliving(mtmp->data) || has_blood(mtmp->data))) ){
 			if(mtmp->mhp == mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 			else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
@@ -931,14 +949,89 @@ boolean called;
 			else if(mtmp->mhp >= .25*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
 			else if(mtmp->mhp >= .1*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
 			else if(mtmp->mhp > 0) (has_blood(mtmp->data)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
+			name_at_start = FALSE;
 		}
 		if(is_drow(mdat)){
 			struct obj *otmp;
 			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 				if ((otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT) 
-					&& otmp->owornmask & mtmp->misc_worn_check) Sprintf(eos(buf), "%s ", getDrowHouse(otmp->ovar1));
+					&& otmp->owornmask & mtmp->misc_worn_check){
+						Sprintf(eos(buf), "%s ", getDrowHouse(otmp->ovar1));
+						name_at_start = FALSE;
+					}
 			}
 		}
+	    Strcat(buf, mdat->mname);
+	}
+
+	if (name_at_start && (article == ARTICLE_YOUR || !has_adjectives)) {
+	    if (mdat == &mons[PM_WIZARD_OF_YENDOR])
+		article = ARTICLE_THE;
+	    else
+		article = ARTICLE_NONE;
+	} else if ((mdat->geno & G_UNIQ) && article == ARTICLE_A) {
+	    article = ARTICLE_THE;
+	}
+
+	{
+	    char buf2[BUFSZ];
+
+	    switch(article) {
+		case ARTICLE_YOUR:
+		    Strcpy(buf2, "your ");
+		    Strcat(buf2, buf);
+		    Strcpy(buf, buf2);
+		    return buf;
+		case ARTICLE_THE:
+		    Strcpy(buf2, "the ");
+		    Strcat(buf2, buf);
+		    Strcpy(buf, buf2);
+		    return buf;
+		case ARTICLE_A:
+		    return(an(buf));
+		case ARTICLE_NONE:
+		default:
+		    return buf;
+	    }
+	}
+}
+
+char *
+x_ptrnam(ptr, article, adjective, called)
+register struct permonst *ptr;
+int article;
+/* ARTICLE_NONE, ARTICLE_THE, ARTICLE_A: obvious
+ * ARTICLE_YOUR: "your" on pets, "the" on everything else
+ *
+ * If the monster would be referred to as "it" or if the monster has a name
+ * _and_ there is no adjective, "invisible", "saddled", etc., override this
+ * and always use no article.
+ */
+const char *adjective;
+boolean called;
+{
+#ifdef LINT	/* static char buf[BUFSZ]; */
+	char buf[BUFSZ];
+#else
+	static char buf[BUFSZ];
+#endif
+	struct permonst *mdat = ptr;
+	boolean name_at_start, has_adjectives;
+	char *bp;
+
+	buf[0] = 0;
+
+	/* Put the adjectives in the buffer */
+	if (adjective)
+	    Strcat(strcat(buf, adjective), " ");
+	if (buf[0] != 0)
+	    has_adjectives = TRUE;
+	else
+	    has_adjectives = FALSE;
+
+	/* Put the actual monster name or type into the buffer now */
+	/* Be sure to remember whether the buffer starts with a name */
+	{
 	    Strcat(buf, mdat->mname);
 	    name_at_start = (boolean)type_is_pname(mdat);
 	}
