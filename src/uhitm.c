@@ -837,6 +837,7 @@ int thrown;
 	char unconventional[BUFSZ];	/* substituted for word "attack" in msg */
 	char saved_oname[BUFSZ];
 	int unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : 1;
+	if(uarmg && uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN) unarmedMult += 2;
 
 	static short jadeRing = 0;
 	if(!jadeRing) jadeRing = find_jade_ring();
@@ -867,7 +868,7 @@ int thrown;
 	    else {
 			tmp = u.sealsActive&SEAL_EURYNOME ? exploding_d(1,max_ints(2*unarmedMult,rnd(5)*2),0) : rnd(2*unarmedMult);
 		}
-		if(uarmg && uarmg->oartifact == ART_PREMIUM_HEART) tmp += uarmg->spe;
+		if(uarmg && (uarmg->oartifact == ART_PREMIUM_HEART || uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)) tmp += uarmg->spe;
 		if(u.specialSealsActive&SEAL_DAHLVER_NAR) tmp += d(2,6)+min(u.ulevel/2,(u.uhpmax - u.uhp)/10);
 		if(uarmg && uarmg->otyp == tgloves) tmp += 1;
 	    valid_weapon_attack = (tmp > 1);
