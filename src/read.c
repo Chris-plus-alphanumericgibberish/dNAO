@@ -1143,6 +1143,7 @@ struct obj	*sobj;
 				/* assumes same order */
 				otmp->otyp = GRAY_DRAGON_SCALE_SHIELD +
 					otmp->otyp - GRAY_DRAGON_SCALES;
+				otmp->objsize = youracedata->msize;
 				otmp->cursed = 0;
 				if (sobj->blessed) {
 					otmp->spe++;
@@ -1231,6 +1232,8 @@ struct obj	*sobj;
 			/* assumes same order */
 			otmp->otyp = GRAY_DRAGON_SCALE_MAIL +
 						otmp->otyp - GRAY_DRAGON_SCALES;
+			otmp->objsize = youracedata->msize;
+			otmp->bodytypeflag = youracedata->mflagsb&MB_BODYTYPEMASK;
 			otmp->cursed = 0;
 			if (sobj->blessed) {
 				otmp->spe++;
