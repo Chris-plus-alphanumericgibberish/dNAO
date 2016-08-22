@@ -2454,7 +2454,7 @@ int final;
 	if (See_invisible) dump("  ", "You saw invisible");
 	if (Blind_telepat) dump(youwere, "telepathic");
 	if (Warning) dump(youwere, "warned");
-	if (Warn_of_mon && flags.warntype) {
+	if (Warn_of_mon && flags.warntypea) {
 		Sprintf(buf, "aware of the presence of %s",
 			(flags.warntypea & MA_ORC) ? "orcs" :
 			(flags.warntypea & MA_DEMON) ? "demons" :
