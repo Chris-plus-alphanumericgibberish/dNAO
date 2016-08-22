@@ -2456,8 +2456,8 @@ int final;
 	if (Warning) dump(youwere, "warned");
 	if (Warn_of_mon && flags.warntype) {
 		Sprintf(buf, "aware of the presence of %s",
-			(flags.warntype & M2_ORC) ? "orcs" :
-			(flags.warntype & M2_DEMON) ? "demons" :
+			(flags.warntypea & MA_ORC) ? "orcs" :
+			(flags.warntypea & MA_DEMON) ? "demons" :
 			something); 
 		dump(youwere, buf);
 	}
