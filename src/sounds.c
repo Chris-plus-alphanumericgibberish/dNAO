@@ -2011,10 +2011,10 @@ int dz;
      !mtmp->mtame) {
         You("attempt to soothe the %s with chittering sounds.",
          l_monnam(mtmp));
-        if (rnl(10) < 2) {
+        if (rnl(100) < 20) {
             (void) tamedog(mtmp, (struct obj *) 0);
         } else {
-            if (rnl(10) > 8) {
+            if (rnl(100) >= 90) {
                 pline("%s unfortunately ignores your overtures.",
                  Monnam(mtmp));
                 return 0;

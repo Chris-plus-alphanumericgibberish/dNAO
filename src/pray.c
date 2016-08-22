@@ -2431,7 +2431,7 @@ dosacrifice()
 			}
 			return(1);
 		}
-	    } else if (!rnl(30 + u.ulevel)) {
+	    } else if (rnl((30 + u.ulevel)*10) < 10) {
 			/* no artifact, but maybe a helpful pet? */
 			/* WAC is now some generic benefit (includes pets) */
 			god_gives_benefit(altaralign);
@@ -3121,7 +3121,7 @@ aligntyp alignment;
 	register struct obj *otmp;
 	const char *what = (const char *)0;
 	
-	// if (!rnl(30 + u.ulevel)) god_gives_pet(align_gname_full(alignment),alignment);
+	// if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(align_gname_full(alignment),alignment);
 	// else {
 	{ //For now, remove gods giving pets, since I think it crashes the game.
 		switch (rnl(5)) {
