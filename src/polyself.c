@@ -1136,7 +1136,7 @@ dogaze()
 		  && mtmp->mtame) {
 		    You("avoid gazing at %s.", y_monnam(mtmp));
 		} else {
-		    if (flags.confirm && mtmp->mpeaceful && !Confusion
+		    if (iflags.attack_mode != ATTACK_MODE_FIGHT_ALL && mtmp->mpeaceful && !Confusion
 							&& !Hallucination) {
 			Sprintf(qbuf, "Really %s %s?",
 			    (adtyp == AD_CONF) ? "confuse" : "attack",
