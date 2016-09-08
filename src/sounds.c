@@ -879,7 +879,7 @@ asGuardian:
 	case MS_JUBJUB:{
 		struct monst *tmpm;
 		if(!(mtmp->mspec_used || mtmp->mcan)){
-			pline_msg = "screams high and shrill.";
+			pline("%s screams high and shrill.", Monnam(mtmp));
 			mtmp->mspec_used = 10;
 			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 				if(tmpm != mtmp){
@@ -890,6 +890,27 @@ asGuardian:
 				}
 			}
 			make_stunned(HStun + mtmp->mhp/10, TRUE);
+		}
+	}break;
+	case MS_TRUMPET:{
+		struct obj *otmp;
+		struct monst *tmpm;
+		otmp = MON_WEP(mtmp);
+		if(!(mtmp->mspec_used || mtmp->mcan) && otmp){
+			if(canspotmon(mtmp)) pline("%s raises %s %s to %s lips and it becomes a trumpet.", Monnam(mtmp), hisherits(mtmp), xname(otmp), hisherits(mtmp));
+			pline("%s blows %s trumpet.", Monnam(mtmp), hisherits(mtmp));
+			mtmp->mspec_used = 10;
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(tmpm != mtmp){
+					if(tmpm->mpeaceful != mtmp->mpeaceful){
+						tmpm->mconf = 1;
+					}
+				}
+			}
+			if(!mtmp->mpeaceful && mtmp->mux != 0){
+				make_stunned(HStun + mtmp->mhp/10, TRUE);
+				cast_spell(mtmp, 0, !rn2(4) ? SUMMON_ANGEL : SUMMON_MONS);
+			}
 		}
 	}break;
 	case MS_DREAD:{
@@ -923,7 +944,7 @@ asGuardian:
 			}
 		}
 		else if(!(mtmp->mspec_used)){
-			pline_msg = "sings, and the world ripples and trembles around you.";
+			pline("%s sings, and the world ripples and trembles around you.", Monnam(mtmp));
 			mtmp->mspec_used = rnd(4);
 			switch(rnd(5)){
 				case 1:{
@@ -1099,7 +1120,7 @@ asGuardian:
 				map_invisible(mtmp->mx, mtmp->my);
 			switch(rnd(4)){
 				case 1:
-					pline_msg = "sings the song of broken eyes.";
+					pline("%s sings the song of broken eyes.", Monnam(mtmp));
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1118,7 +1139,7 @@ asGuardian:
 					}
 				break;
 				case 2:
-					pline_msg = "sings a harmless song of ruin.";
+					pline("%s sings a harmless song of ruin.", Monnam(mtmp));
 					ix = rn2(COLNO);
 					iy = rn2(ROWNO);
 					for(i = rnd(5); i > 0; i--){
@@ -1137,7 +1158,7 @@ asGuardian:
 				break;
 				case 3:{
 					struct obj *ispe = mksobj(SPE_TURN_UNDEAD,TRUE,FALSE);
-					pline_msg = "sings the song of the day of repentance.";
+					pline("%s sings the song of the day of repentance.", Monnam(mtmp));
 					//Rapture invisible creatures
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm) && mtmp->mrevived){
@@ -1170,7 +1191,7 @@ asGuardian:
 					}
 				}break;
 				case 4:
-					pline_msg = "sings the song of bloodied prayers.";
+					pline("%s sings the song of bloodied prayers.", Monnam(mtmp));
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm) && tmpm->mpeaceful == tmpm->mpeaceful){
@@ -1197,7 +1218,7 @@ asGuardian:
 					if(!inrange) break;
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5)
 						map_invisible(mtmp->mx, mtmp->my);
-					pline_msg = "sings a song of courage.";
+					pline("%s sings a song of courage.", Monnam(mtmp));
 					if(mtmp->data != &mons[PM_INTONER]) mtmp->mspec_used = rn1(10,10);
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1209,11 +1230,11 @@ asGuardian:
 									if (tmpm->mflee) tmpm->mfleetim = 0;
 									if (canseemon(tmpm)) {
 										if (Hallucination) {
-											pline("%s looks %s!", Monnam(tmpm),
+											if(canspotmon(tmpm)) pline("%s looks %s!", Monnam(tmpm),
 												  tmpm->encouraged == BASE_DOG_ENCOURAGED_MAX ? "way cool" :
 												  tmpm->encouraged > (BASE_DOG_ENCOURAGED_MAX/2) ? "cooler" : "cool");
 										} else {
-											pline("%s looks %s!", Monnam(tmpm),
+											if(canspotmon(tmpm)) pline("%s looks %s!", Monnam(tmpm),
 												  tmpm->encouraged == BASE_DOG_ENCOURAGED_MAX ? "berserk" :
 												  tmpm->encouraged > (BASE_DOG_ENCOURAGED_MAX/2) ? "wilder" : "wild");
 										}
@@ -1240,7 +1261,7 @@ asGuardian:
 					if(!inrange) break;
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5)
 						map_invisible(mtmp->mx, mtmp->my);
-					pline_msg = "sings a song of good health.";
+					pline("%s sings a song of good health.", Monnam(mtmp));
 					if(mtmp->data != &mons[PM_INTONER]) mtmp->mspec_used = rn1(10,10);
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1288,7 +1309,7 @@ asGuardian:
 					if(!inrange) break;
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5)
 						map_invisible(mtmp->mx, mtmp->my);
-					pline_msg = "sings a song of haste.";
+					pline("%s sings a song of haste.", Monnam(mtmp));
 					if(mtmp->data != &mons[PM_INTONER]) mtmp->mspec_used = rn1(10,10);
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1298,7 +1319,7 @@ asGuardian:
 									tmpm->movement += 12;
 									tmpm->permspeed = MFAST;
 									tmpm->mspeed = MFAST;
-									pline("%s moves quickly to attack.", Monnam(tmpm));
+									if(canspotmon(tmpm)) pline("%s moves quickly to attack.", Monnam(tmpm));
 								}
 							}
 						}
@@ -1332,13 +1353,13 @@ asGuardian:
 					mtmp->mspec_used = rn1(3,3);
 					switch(u.oonaenergy){
 						case AD_FIRE:
-							pline_msg = "sings the lament of flames.";
+							pline("%s sings the lament of flames.", Monnam(mtmp));
 						break;
 						case AD_COLD:
-							pline_msg = "sings the lament of ice.";
+							pline("%s sings the lament of ice.", Monnam(mtmp));
 						break;
 						case AD_ELEC:
-							pline_msg = "sings the lament of storms.";
+							pline("%s sings the lament of storms.", Monnam(mtmp));
 						break;
 					}
 
@@ -1401,7 +1422,7 @@ asGuardian:
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 4)
 						map_invisible(mtmp->mx, mtmp->my);
 					
-					pline_msg = "sings a dirge.";
+					pline("%s sings a dirge.", Monnam(mtmp));
 					mtmp->mspec_used = rn1(3,3);
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1413,11 +1434,11 @@ asGuardian:
 									if (tmpm->mflee) tmpm->mfleetim = 0;
 									if (canseemon(tmpm)) {
 										if (Hallucination) {
-											pline("%s looks %s!", Monnam(tmpm),
+											if(canspotmon(tmpm)) pline("%s looks %s!", Monnam(tmpm),
 												  tmpm->encouraged == -1*BASE_DOG_ENCOURAGED_MAX ? "peaced out" :
 												  tmpm->encouraged < (-1*BASE_DOG_ENCOURAGED_MAX/2) ? "mellower" : "mellow");
 										} else {
-											pline("%s looks %s!", Monnam(tmpm),
+											if(canspotmon(tmpm)) pline("%s looks %s!", Monnam(tmpm),
 												  tmpm->encouraged == -1*BASE_DOG_ENCOURAGED_MAX ? "inconsolable" :
 												  tmpm->encouraged > -1*(BASE_DOG_ENCOURAGED_MAX/2) ? "depressed" : "a bit sad");
 										}
@@ -1442,7 +1463,7 @@ asGuardian:
 					
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 4)
 						map_invisible(mtmp->mx, mtmp->my);
-					pline_msg = "sings a slow march.";
+					pline("%s sings a slow march.", Monnam(mtmp));
 					mtmp->mspec_used = rn1(3,3);
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
