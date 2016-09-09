@@ -1497,7 +1497,7 @@ boolean at_stairs, falling, portal;
 	/* assume this will always return TRUE when changing level */
 	(void) in_out_region(u.ux, u.uy);
 	(void) pickup(1);
-
+	if(Is_waterlevel(&u.uz)) spoteffects(FALSE); /*Decided to be specific about this.  Dump character in water when coming out of portal*/
 #ifdef WHEREIS_FILE
         touch_whereis();
 #endif
