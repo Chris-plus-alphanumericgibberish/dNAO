@@ -766,9 +766,9 @@ gcrownu()
 			} else { /*male*/
 				in_hand = FALSE;
 				u.uevent.uhand_of_elbereth = 19;
-				verbalize("As shadows define the light, so to do webs define the spider.");
+				verbalize("As shadows define the light, so too do webs define the spider.");
 				verbalize("You shall be my shepherd, to wrap the world in webs of shadow!");
-				livelog_write_string("became the Shepherd of the Unknown God");
+				livelog_write_string("became the Shepherd of the Black Web");
 				u.specialSealsKnown |= SEAL_BLACK_WEB;
 				return;
 			}
