@@ -89,7 +89,7 @@ moverock()
 	rx = u.ux + 2 * u.dx;	/* boulder destination position */
 	ry = u.uy + 2 * u.dy;
 	nomul(0, NULL);
-	if (Levitation || Is_airlevel(&u.uz)) {
+	if (Levitation || Weightless) {
 	    if (Blind) feel_location(sx, sy);
 	    You("don't have enough leverage to push %s.", the(xname(otmp)));
 	    /* Give them a chance to climb over it? */
@@ -955,7 +955,7 @@ domove()
 	    || (wtcap > SLT_ENCUMBER &&
 		(Upolyd ? (u.mh < 5 && u.mh != u.mhmax)
 			: (u.uhp < 10 && u.uhp != u.uhpmax))))
-	   && !Is_airlevel(&u.uz)) {
+	   && !Weightless) {
 	    if(wtcap < OVERLOADED) {
 		You("don't have enough stamina to move.");
 		exercise(A_CON, FALSE);
@@ -983,7 +983,7 @@ domove()
 		y = u.ustuck->my;
 		mtmp = u.ustuck;
 	}else {
-		if (Is_airlevel(&u.uz) && rn2(4) &&
+		if (Weightless && rn2(4) &&
 			!Levitation && !Flying) {
 		    switch(rn2(3)) {
 		    case 0:
@@ -1232,7 +1232,7 @@ domove()
 #endif
 	if(!youmonst.data->mmove) {
 		You("are rooted %s.",
-		    Levitation || Is_airlevel(&u.uz) || Is_waterlevel(&u.uz) ?
+		    Levitation || Weightless || Is_waterlevel(&u.uz) ?
 		    "in place" : "to the ground");
 		nomul(0, NULL);
 		return;
@@ -1323,8 +1323,10 @@ domove()
 									uwep->oartifact == ART_LIECLEAVER ? "Liecleaver cuts" : "Sting cuts");
 				if(is_lightsaber(uwep)) uwep->age -= 100;
 				if(trap->ttyp == WEB){
-					deltrap(trap);
-					newsym(u.ux,u.uy);
+					if(!Is_lolth_level(&u.uz)){
+						deltrap(trap);
+						newsym(u.ux,u.uy);
+					}
 				}
 				usedmove = FALSE;
 			} else {
@@ -1754,7 +1756,7 @@ stillinwater:;
 		    dismount_steed(Underwater ?
 			    DISMOUNT_FELL : DISMOUNT_GENERIC);
 		    /* dismount_steed() -> float_down() -> pickup() */
-		    if (!Is_airlevel(&u.uz) && !Is_waterlevel(&u.uz))
+		    if (!Weightless && !Is_waterlevel(&u.uz))
 			pick = FALSE;
 		} else
 #endif
@@ -2064,6 +2066,8 @@ register boolean newlev;
 			monstinroom(&mons[PM_LIEUTENANT], roomno) ||
 			monstinroom(&mons[PM_CAPTAIN], roomno))
 			You("enter a military barracks!");
+			else if(Is_lolth_level(&u.uz) && monstinroom(&mons[PM_GNOLL], roomno))
+			You("enter a gnoll barracks.");
 		    else
 			You("enter an abandoned barracks.");
 			rt = 0;
@@ -2516,7 +2520,7 @@ weight_cap()
 			carrcap = (carrcap * (long)youmonst.data->cwt / WT_HUMAN);
 	}
 
-	if (Levitation || Is_airlevel(&u.uz)    /* pugh@cornell */
+	if (Levitation || Weightless    /* pugh@cornell */
 #ifdef STEED
 			|| (u.usteed && u.usteed->data && strongmonst(u.usteed->data))
 #endif
