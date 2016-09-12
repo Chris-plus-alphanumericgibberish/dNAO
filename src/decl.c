@@ -182,7 +182,8 @@ NEARDATA struct obj *invent = (struct obj *)0,
 	*uleft = (struct obj *)0,
 	*ublindf = (struct obj *)0,
 	*uchain = (struct obj *)0,
-	*uball = (struct obj *)0;
+	*uball = (struct obj *)0,
+	*urope = (struct obj *)0;
 
 #ifdef TEXTCOLOR
 /*
