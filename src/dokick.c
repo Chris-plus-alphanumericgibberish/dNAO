@@ -1116,12 +1116,17 @@ dokick()
 					int made = 0;
 			    	coord mm;
 			    	mm.x = x; mm.y = y;
-				    if (enexto(&mm, mm.x, mm.y, &mons[PM_DRYAD])
-					&& makemon(&mons[PM_DRYAD],
+					maploc->typ = ROOM;
+					maploc->looted = 0; /* don't leave loose ends.. */
+					unblock_point(x,y);	/* vision */
+					if (!Blind) newsym(x,y);
+				    if (mtmp = makemon(&mons[PM_DRYAD],
 						       mm.x, mm.y, MM_ANGRY)
 					) made++;
 					if ( made )
 					    pline("You've woken the tree's spirit!");
+					mtmp->msleeping  = FALSE;
+					mtmp->mcanmove  = TRUE;
 					maploc->looted |= TREE_SWARM;
 					return(1);
 				}
@@ -1252,6 +1257,7 @@ dokick()
 				struct obj *staff;
 				pline("The dead tree falls down.");
 				maploc->typ = ROOM;
+				maploc->looted = 0; /* don't leave loose ends.. */
 				for(numsticks = d(1,4); numsticks > 0; numsticks--){
 					staff = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, x, y, FALSE, FALSE);
 					staff->spe = 0;
