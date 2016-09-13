@@ -60,6 +60,7 @@ static struct Bool_Opt
 	{"asksavedisk", (boolean *)0, FALSE, SET_IN_FILE},
 #endif
 	{"autodig", &flags.autodig, FALSE, SET_IN_GAME},
+	{"autoopen", &iflags.autoopen, TRUE, SET_IN_GAME},
 	{"autopickup", &flags.pickup, TRUE, SET_IN_GAME},
 	{"apexception_regex", &iflags.ape_regex, FALSE,  SET_IN_FILE},
 	{"autoquiver", &flags.autoquiver, FALSE, SET_IN_GAME},
@@ -735,7 +736,12 @@ initoptions()
 	/* as a named (or default) fruit.  Wishing for "fruit" will	*/
 	/* result in the player's preferred fruit [better than "\033"].	*/
 	obj_descr[SLIME_MOLD].oc_name = "fruit";
-
+	
+        if (flags.lit_corridor && iflags.use_color) {
+            showsyms[S_drkroom]=showsyms[S_litroom];
+        } else {
+            showsyms[S_drkroom]=showsyms[S_stone];
+        }
 	return;
 }
 
@@ -3076,6 +3082,7 @@ goodfruit:
 			     */
 			    vision_recalc(2);		/* shut down vision */
 			    vision_full_recalc = 1;	/* delayed recalc */
+			    if (iflags.use_color) need_redraw = TRUE;  /* darkroom refresh */
 			}
 			else if ((boolopt[i].addr) == &iflags.use_inverse ||
 					(boolopt[i].addr) == &iflags.showrace ||
@@ -3391,8 +3398,14 @@ doset()
 	}
 
 	destroy_nhwindow(tmpwin);
-	if (need_redraw)
-	    (void) doredraw();
+	if (need_redraw) {
+	    if (flags.lit_corridor && iflags.use_color) {
+		showsyms[S_drkroom]=showsyms[S_litroom];
+	    } else {
+		showsyms[S_drkroom]=showsyms[S_stone];
+	    }
+ 	    (void) doredraw();
+	}
 	return 0;
 }
 
