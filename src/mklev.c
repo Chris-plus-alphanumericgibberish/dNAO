@@ -647,6 +647,8 @@ makelevel()
 	if(wiz1_level.dlevel == 0) init_dungeons();
 	oinit();	/* assign level dependent obj probabilities */
 	clear_level_structures();
+	
+	if(Is_minetown_level(&u.uz)) livelog_write_string("entered Minetown for the first time");
 
 	{
 	    register s_level *slev = Is_special(&u.uz);
