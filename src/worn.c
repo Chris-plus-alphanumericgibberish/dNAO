@@ -666,7 +666,7 @@ boolean racialexception;
 		    if (!is_shirt(obj) || obj->objsize != mon->data->msize || !shirt_match(mon->data,obj)) continue;
 		    break;
 		case W_ARMC:
-		    if (!is_cloak(obj) || (abs(obj->objsize - mon->data->msize) > 1) || !shirt_match(mon->data,obj)) continue;
+		    if (!is_cloak(obj) || (abs(obj->objsize - mon->data->msize) > 1)) continue;
 		    break;
 		case W_ARMH:
 		    if (!is_helmet(obj) || ((!helm_match(mon->data,obj) || !has_head(mon->data) || obj->objsize != mon->data->msize) && !is_flimsy(obj))) continue;
@@ -869,7 +869,7 @@ boolean polyspot;
 		}
 	}
 	if ((otmp = which_armor(mon, W_ARMC)) != 0) {
-		if(abs(otmp->objsize - mon->data->msize) > 1 || !shirt_match(mon->data,otmp) || is_whirly(mon->data) || noncorporeal(mon->data)){
+		if(abs(otmp->objsize - mon->data->msize) > 1 || is_whirly(mon->data) || noncorporeal(mon->data)){
 			if (otmp->oartifact || otmp->objsize > mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)) {
 				if (vis)
 				pline("%s %s falls off!", s_suffix(Monnam(mon)),
@@ -992,31 +992,6 @@ struct obj *obj;
 	if (obj->otyp == SPEED_BOOTS && mon->permspeed != MFAST)
 	    return 20;
     }
-    return 0;
-}
-
-/*
- * Exceptions to things based on race. Correctly checks polymorphed player race.
- * Returns:
- *	 0 No exception, normal rules apply.
- * 	 1 If the race/object combination is acceptable.
- *	-1 If the race/object combination is unacceptable.
- */
-int
-racial_exception(mon, obj)
-struct monst *mon;
-struct obj *obj;
-{
-    const struct permonst *ptr = raceptr(mon);
-
-    /* Acceptable Exceptions: */
-    /* Allow hobbits to wear elven armor - LoTR */
-    if (ptr == &mons[PM_HOBBIT] && is_elven_armor(obj))
-	return 1;
-    /* Unacceptable Exceptions: */
-    /* Checks for object that certain races should never use go here */
-    /*	return -1; */
-
     return 0;
 }
 
