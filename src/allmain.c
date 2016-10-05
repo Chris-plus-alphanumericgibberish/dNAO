@@ -578,7 +578,7 @@ moveloop()
 				}
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-		    if (youmonst.movement > NORMAL_SPEED)
+		    if (youmonst.movement >= NORMAL_SPEED)
 			break;	/* it's now your turn */
 		} while (monscanmove);
 		flags.mon_moving = FALSE;
