@@ -2424,8 +2424,11 @@ boolean was_swallowed;			/* digestion */
 		livelog_write_string(buf);
 	}
 	if(Role_if(PM_ANACHRONONAUT) && mon->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
-		if(mdat == &mons[PM_TROOPER] || mdat == &mons[PM_HEDROW_WARRIOR]){
+		if(mdat == &mons[PM_TROOPER]){
 			verbalize("**ALERT: trooper %d vital signs terminated**", (int)(mon->m_id));
+			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
+		} else if(mdat == &mons[PM_MYRKALFAR_WARRIOR]){
+			verbalize("**ALERT: warrior %d vital signs terminated**", (int)(mon->m_id));
 			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
 		} else if(mdat != &mons[PM_PHANTASM]){
 			verbalize("**ALERT: citizen %d vital signs terminated**", (int)(mon->m_id));
