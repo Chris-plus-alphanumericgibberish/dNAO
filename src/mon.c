@@ -2699,7 +2699,7 @@ boolean was_swallowed;			/* digestion */
 		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    return FALSE;
 	}
-	else if (mdat->mlet == S_LICH) {
+	else if (mdat->mlet == S_LICH && mdat != &mons[PM_LICH__THE_FIEND_OF_EARTH]) {
 	    if (cansee(mon->mx, mon->my) && !was_swallowed)
 			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    if(mdat != &mons[PM_VECNA] && mdat != &mons[PM_LICH__THE_FIEND_OF_EARTH]) return FALSE; /*Vecna leaves his hand or eye*/
@@ -2716,7 +2716,8 @@ boolean was_swallowed;			/* digestion */
 	} else if(mdat->geno & G_UNIQ && mvitals[monsndx(mdat)].died == 1){
 		char buf[BUFSZ];
 		buf[0]='\0';
-		Sprintf(buf,"destroyed %s",noit_mon_nam(mon));
+		if(nonliving(mdat)) Sprintf(buf,"destroyed %s",noit_mon_nam(mon));
+		else Sprintf(buf,"killed %s",noit_mon_nam(mon));
 		livelog_write_string(buf);
 	}
 	if(Role_if(PM_ANACHRONONAUT) && mon->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
