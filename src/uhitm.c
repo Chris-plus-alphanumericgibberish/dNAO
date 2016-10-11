@@ -166,7 +166,7 @@ struct obj *wep;	/* uwep for attack(), null for kick_monster() */
 		    if(!u.ustuck && !mtmp->mflee && dmgtype(mtmp->data,AD_STCK))
 			u.ustuck = mtmp;
 		}
-		if(!mtmp->mpeaceful) wakeup(mtmp); /* always necessary; also un-mimics mimics */
+		if(!mtmp->mpeaceful) wakeup(mtmp, TRUE); /* always necessary; also un-mimics mimics */
 		return TRUE;
 	}
 
@@ -213,7 +213,7 @@ struct obj *wep;	/* uwep for attack(), null for kick_monster() */
 	 */
 	if ((mtmp->mundetected || mtmp->m_ap_type) && sensemon(mtmp)) {
 	    mtmp->mundetected = 0;
-	    wakeup(mtmp);
+	    wakeup(mtmp, TRUE);
 	}
 
 	if (mtmp->mpeaceful && !Confusion && !Hallucination && !Stunned) {
@@ -857,7 +857,7 @@ int thrown;
     if (!tgloves) tgloves = find_tgloves();
 	
 	if(!helpless(mon)) wake_nearto(mon->mx, mon->my, Stealth ? combatNoise(youmonst.data)/2 : combatNoise(youmonst.data)); //Nearby monsters may be awakened
-	wakeup(mon);
+	wakeup(mon, TRUE);
 	if(!obj) {	/* attack with bare hands */
 	    if (mdat->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS || u.sealsActive&SEAL_EDEN)) tmp = 0;
 		else if (martial_bonus()){
@@ -3524,7 +3524,7 @@ register struct attack *mattk;
 	else
 		You("miss it.");
 	if (!mdef->msleeping && mdef->mcanmove)
-		wakeup(mdef);
+		wakeup(mdef, TRUE);
 }
 
 boolean
@@ -3648,7 +3648,7 @@ wisp_shdw_dhit:
 				sum[i] = damageum(mon, mattk);
 				break;
 			    }
-			    wakeup(mon);
+			    wakeup(mon, TRUE);
 			    /* maybe this check should be in damageum()? */
 			    if (mon->data->mlet == S_SHADE &&
 					!(mattk->aatyp == AT_KICK &&
@@ -3691,7 +3691,7 @@ wisp_shdw_dhit:
 			 * already grabbed in a previous attack
 			 */
 			dhit = 1;
-			wakeup(mon);
+			wakeup(mon, TRUE);
 			if (mon->data->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS))
 			    Your("hug passes harmlessly through %s.",
 				mon_nam(mon));
@@ -3711,13 +3711,13 @@ wisp_shdw_dhit:
 
 		case AT_EXPL:	/* automatic hit if next to */
 			dhit = -1;
-			wakeup(mon);
+			wakeup(mon, TRUE);
 			sum[i] = explum(mon, mattk);
 			break;
 
 		case AT_ENGL:
 			if((dhit = (tmp > rnd(20+i)))) {
-				wakeup(mon);
+				wakeup(mon, TRUE);
 				if (mon->data->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS))
 				    Your("attempt to surround %s is harmless.",
 					mon_nam(mon));
@@ -3899,7 +3899,7 @@ wisp_shdw_dhit2:
 				sum[i] = damageum(mon, mattk);
 			break;
 			}
-			wakeup(mon);
+			wakeup(mon, TRUE);
 			/* maybe this check should be in damageum()? */
 			if (mon->data->mlet == S_SHADE &&
 				!(mattk->aatyp == AT_KICK &&
@@ -3940,7 +3940,7 @@ wisp_shdw_dhit2:
 		 * already grabbed in a previous attack
 		 */
 		dhit = 1;
-		wakeup(mon);
+		wakeup(mon, TRUE);
 		if (mon->data->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS))
 			Your("hug passes harmlessly through %s.",
 			mon_nam(mon));
@@ -3960,13 +3960,13 @@ wisp_shdw_dhit2:
 
 	case AT_EXPL:	/* automatic hit if next to */
 		dhit = -1;
-		wakeup(mon);
+		wakeup(mon, TRUE);
 			sum[i] = explum(mon, mattk);
 		break;
 
 	case AT_ENGL:
 		if((dhit = (tmp > rnd(20+i)))) {
-			wakeup(mon);
+			wakeup(mon, TRUE);
 			if (mon->data->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS))
 				Your("attempt to surround %s is harmless.",
 				mon_nam(mon));
@@ -4391,7 +4391,7 @@ dobpois:
 					else{
 						You("let %s take your %s.",mon_nam(mon), ONAME(uwep));
 						pline_The(Hallucination ? "world pats you on the head." : "world quakes around you.  Perhaps it is the voice of a god?");
-						do_earthquake(5,0,0);
+						do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
 						optr = uwep;
 						uwepgone();
 						if(optr->gifted != A_NONE && !Role_if(PM_EXILE)){
@@ -4634,7 +4634,7 @@ struct monst *mtmp;
 	}
 	if (what) pline(fmt, what);
 
-	wakeup(mtmp);	/* clears mimicking */
+	wakeup(mtmp, TRUE);	/* clears mimicking */
 }
 
 STATIC_OVL void
