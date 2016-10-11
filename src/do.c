@@ -1571,6 +1571,7 @@ final_level()
 			    otmp->otyp != SHIELD_OF_REFLECTION) {
 			(void) mongets(mtmp, AMULET_OF_REFLECTION);
 			m_dowear(mtmp, TRUE);
+			init_mon_wield_item(mtmp);
 		    }
 		}
 	    }
