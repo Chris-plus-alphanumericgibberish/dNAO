@@ -673,7 +673,7 @@ echo_location(x, y)
 		/* Floor spaces are dark if unlit.  Corridors are dark if unlit. */
 		if (lev->typ == ROOM &&
 				lev->glyph == cmap_to_glyph(S_litroom) && !lev->waslit)
-			show_glyph(x,y, lev->glyph = cmap_to_glyph(S_stone));
+			show_glyph(x,y, lev->glyph = cmap_to_glyph(S_drkroom));
 		else if (lev->typ == CORR &&
 				lev->glyph == cmap_to_glyph(S_litcorr) && !lev->waslit)
 			show_glyph(x,y, lev->glyph = cmap_to_glyph(S_corr));
