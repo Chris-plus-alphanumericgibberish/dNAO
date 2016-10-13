@@ -6,3 +6,7 @@ notifications:
     channels: "chat.freenode.net#dnethack"
     use_notice: true
     skip_join: true
+compiler:
+  - clang
+  - gcc
+  
