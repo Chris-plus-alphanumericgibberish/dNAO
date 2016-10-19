@@ -2735,8 +2735,8 @@ boolean was_swallowed;			/* digestion */
 	} else if(mdat->geno & G_UNIQ && mvitals[monsndx(mdat)].died == 1){
 		char buf[BUFSZ];
 		buf[0]='\0';
-		if(nonliving(mdat)) Sprintf(buf,"destroyed %s",noit_mon_nam(mon));
-		else Sprintf(buf,"killed %s",noit_mon_nam(mon));
+		if(nonliving(mdat)) Sprintf(buf,"destroyed %s",noit_nohalu_mon_nam(mon));
+		else Sprintf(buf,"killed %s",noit_nohalu_mon_nam(mon));
 		livelog_write_string(buf);
 	}
 	if(Role_if(PM_ANACHRONONAUT) && mon->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){

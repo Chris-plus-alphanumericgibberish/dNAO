@@ -414,6 +414,7 @@ E const char *FDECL(hisherits, (struct monst *));
 E const char *FDECL(HisHerIts, (struct monst *));
 E const char *FDECL(himherit, (struct monst *));
 E char *FDECL(noit_mon_nam, (struct monst *));
+E char *FDECL(noit_nohalu_mon_nam, (struct monst *));
 E char *FDECL(Monnam, (struct monst *));
 E char *FDECL(noit_Monnam, (struct monst *));
 E char *FDECL(m_monnam, (struct monst *));
