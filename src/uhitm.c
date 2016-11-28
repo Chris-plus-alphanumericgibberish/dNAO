@@ -892,12 +892,12 @@ int thrown;
 			/* blessed gloves give bonuses when fighting 'bare-handed' */
 			if (uarmg->blessed && (is_undead(mdat) || is_demon(mdat))) tmp += rnd(4);
 			/* silver gloves give sliver bonus -CM */
-			if ((objects[uarmg->otyp].oc_material == SILVER || arti_silvered(uarmg)) &&
+			if ((uarmg->obj_material == SILVER || arti_silvered(uarmg)) &&
 				hates_silver(mdat)){
 					tmp += rnd(20);
 					silvermsg = TRUE;
 			}
-			if ((objects[uarmg->otyp].oc_material == IRON) &&
+			if ((uarmg->obj_material == IRON) &&
 				hates_iron(mdat)){
 					tmp += rnd(mon->m_lev*2);
 					ironmsg = TRUE;
@@ -920,7 +920,7 @@ int thrown;
 			 * don't get both bonuses.
 			 */
 			if (uleft 
-				&& (objects[uleft->otyp].oc_material == SILVER 
+				&& (uleft->obj_material == SILVER 
 					|| arti_silvered(uleft) 
 					|| (uleft->ohaluengr
 						&& (isEngrRing(uleft->otyp) || isSignetRing(uleft->otyp))
@@ -930,7 +930,7 @@ int thrown;
 			) barehand_silver_rings++;
 			else if(u.sealsActive&SEAL_EDEN) eden_silver++;
 			if (uright 
-				&& (objects[uright->otyp].oc_material == SILVER 
+				&& (uright->obj_material == SILVER 
 					|| arti_silvered(uright)
 					|| (uright->ohaluengr
 						&& (isEngrRing(uright->otyp) || isSignetRing(uright->otyp))
@@ -948,10 +948,10 @@ int thrown;
 			 * don't get both bonuses.
 			 */
 			if (uleft 
-				&& (objects[uleft->otyp].oc_material == IRON)
+				&& (uleft->obj_material == IRON)
 			) barehand_iron_rings++;
 			if (uright 
-				&& (objects[uright->otyp].oc_material == IRON)
+				&& (uright->obj_material == IRON)
 			) barehand_iron_rings++;
 			
 			if ((barehand_iron_rings) && hates_iron(mdat)) {
@@ -1124,7 +1124,7 @@ int thrown;
 		if (/* if you strike with a bow... */
 		    is_launcher(obj) ||
 		    /* or strike with a missile in your hand... */
-		    (!thrown && obj->otyp != SILVER_CHAKRAM &&
+		    (!thrown && obj->otyp != CHAKRAM &&
 				(is_missile(obj) || is_ammo(obj))
 			) ||
 		    /* or use a pole at short range and not mounted... */
@@ -1150,7 +1150,7 @@ int thrown;
 		) {
 			
 		    /* then do only 1-2 points of damage */
-		    if (mdat->mlet == S_SHADE && !(objects[obj->otyp].oc_material == SILVER || arti_silvered(obj) || u.sealsActive&SEAL_CHUPOCLOPS))
+		    if (mdat->mlet == S_SHADE && !(obj->obj_material == SILVER || arti_silvered(obj) || u.sealsActive&SEAL_CHUPOCLOPS))
 				tmp = 0;
 		    else if(obj->oartifact == ART_LIECLEAVER) tmp = 2*(rnd(12) + rnd(10) + obj->spe);
 		    else if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS) tmp = 2*(rnd(bigmonst(mon->data) ? 2 : 5) + obj->spe);
@@ -1168,7 +1168,7 @@ int thrown;
 				tmp += rnd(20); //I think this is the right thing to do here.  I don't think it enters the main silver section
 				lightmsg = TRUE;
 			}
-		    if ((objects[obj->otyp].oc_material == SILVER || arti_silvered(obj) || 
+		    if ((obj->obj_material == SILVER || arti_silvered(obj) || 
 					(thrown && obj->otyp == SHURIKEN && uwep && uwep->oartifact == ART_SILVER_STARLIGHT) )
 				&& hates_silver(mdat)) {
 				tmp += rnd(20); //I think this is the right thing to do here.  I don't think it enters the main silver section
@@ -1423,7 +1423,7 @@ int thrown;
 				tmp += rnd(20);
 				lightmsg = TRUE;
 			}
-		    if ((objects[obj->otyp].oc_material == SILVER || arti_silvered(obj)  || 
+		    if ((obj->obj_material == SILVER || arti_silvered(obj)  || 
 					(thrown && obj->otyp == SHURIKEN && uwep && uwep->oartifact == ART_SILVER_STARLIGHT) )
 			   && hates_silver(mdat) && !(is_lightsaber(obj) && obj->lamplit)) {
 				if(obj->oartifact == ART_SUNSWORD) sunmsg = TRUE;
@@ -1705,7 +1705,7 @@ defaultvalue:
 					 * Things like silver wands can arrive here so
 					 * so we need another silver check.
 					 */
-					if (obj && (objects[obj->otyp].oc_material == SILVER || arti_silvered(obj) || 
+					if (obj && (obj->obj_material == SILVER || arti_silvered(obj) || 
 							(thrown && obj->otyp == SHURIKEN && uwep && uwep->oartifact == ART_SILVER_STARLIGHT) )
 								&& hates_silver(mdat)
 					) {
@@ -2014,7 +2014,7 @@ defaultvalue:
 	if((mdat == &mons[PM_BLACK_PUDDING] || mdat == &mons[PM_BROWN_PUDDING] 
 		|| mdat == &mons[PM_DARKNESS_GIVEN_HUNGER])
 		   && obj && obj == uwep
-		   && objects[obj->otyp].oc_material == IRON
+		   && obj->obj_material == IRON
 		   && mon->mhp > 1 && !thrown && !mon->mcan
 		   /* && !destroyed  -- guaranteed by mhp > 1 */ ) {
 		if (clone_mon(mon, 0, 0)) {
@@ -2254,7 +2254,7 @@ struct obj *obj;
 	    || obj->otyp == IRON_CHAIN		/* dmgval handles those first three */
 	    || obj->otyp == MIRROR		/* silver in the reflective surface */
 	    || obj->otyp == CLOVE_OF_GARLIC	/* causes shades to flee */
-	    || objects[obj->otyp].oc_material == SILVER 
+	    || obj->obj_material == SILVER 
 		|| (obj->otyp == SHURIKEN && uwep && uwep->oartifact == ART_SILVER_STARLIGHT) 
 		|| arti_silvered(obj) )
 		return TRUE;
