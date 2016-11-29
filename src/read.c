@@ -949,7 +949,7 @@ forget_map(howmuch)
 
 	known = TRUE;
 	for(zx = 0; zx < COLNO; zx++) for(zy = 0; zy < ROWNO; zy++)
-		if (howmuch & ALL_MAP || rn2(7)) {
+		if (howmuch >= 100 || rn2(100) < howmuch) {
 			/* Zonk all memory of this location. */
 			levl[zx][zy].seenv = 0;
 			levl[zx][zy].waslit = 0;
@@ -1048,12 +1048,12 @@ int howmuch;
 	forget_traps();
 
 	/* 1 in 3 chance of forgetting some levels */
-	if (!rn2(3)) forget_levels(rn2(25));
+	if (howmuch && !rn2(3)) forget_levels(howmuch);
 
 	/* 1 in 3 chance of forgeting some objects */
-	if (!rn2(3)) forget_objects(rn2(25));
+	if (howmuch && !rn2(3)) forget_objects(howmuch);
 
-	if (howmuch & ALL_SPELLS) losespells();
+	if (howmuch) losespells(howmuch);
 	/*
 	 * Make sure that what was seen is restored correctly.  To do this,
 	 * we need to go blind for an instant --- turn off the display,
@@ -1668,8 +1668,7 @@ struct obj	*sobj;
 		break;
 	case SCR_AMNESIA:
 		known = TRUE;
-		forget(	(!sobj->blessed ? ALL_SPELLS : 0) |
-			(!confused || sobj->cursed ? ALL_MAP : 0) );
+		forget(sobj->cursed ? 25 : sobj->blessed ? 0 : 10);
 		if (Hallucination) /* Ommmmmm! */
 			Your("mind releases itself from mundane concerns.");
 		else if (!strncmpi(plname, "Maud", 4))
