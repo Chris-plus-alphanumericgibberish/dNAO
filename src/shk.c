@@ -1768,7 +1768,7 @@ shk_other_services()
 	int n, seenSeals;
 	
 	/* Init your name */
-	if (!is_human(youmonst.data))
+	if (!is_human(youracedata))
 		slang = "ugly";
 	else
 		slang = (flags.female) ? "lady" : "buddy";
@@ -2788,7 +2788,7 @@ speak:
 		  "most renowned and sacred"
 		};
 		Strcat(buf, honored[rn2(4) + u.uevent.udemigod]);
-		if (!is_human(youmonst.data)) Strcat(buf, " creature");
+		if (!is_human(youracedata)) Strcat(buf, " creature");
 		else
 		    Strcat(buf, (flags.female) ? " lady" : " sir");
 	    }
@@ -5290,7 +5290,7 @@ shk_armor_works(slang, shkp)
 	if (n > 0)
 	switch(selected[0].item.a_int) {
 		case 1:
-		if (!flags.female && is_human(youmonst.data))
+		if (!flags.female && is_human(youracedata))
 		     verbalize("They'll call you the man of stainless steel!");
 
 		/* Costs more the more rusty it is (oeroded 0-3) */
@@ -5666,7 +5666,7 @@ struct monst *mon;
 		if(u.sealsActive&SEAL_DANTALION && !NoBInvis && !(uarmc || (uarm && uarm->otyp != CRYSTAL_PLATE_MAIL) || uarmu)) count++;
 		// if(u.sealsActive&SEAL_SHIRO);
 		if(u.sealsActive&SEAL_ECHIDNA && !Invis && !(uarmf && (uarmc || uarm))) count++;
-		if(u.sealsActive&SEAL_EDEN && !NoBInvis && verysmall(youmonst.data) && !uarmh) count++;
+		if(u.sealsActive&SEAL_EDEN && !NoBInvis && verysmall(youracedata) && !uarmh) count++;
 		if(u.sealsActive&SEAL_ENKI && !Invis && !(uarm || uarmc)) count++;
 		if(u.sealsActive&SEAL_EURYNOME && !Invis && levl[u.ux][u.uy].lit != 0) count++;
 		if(u.sealsActive&SEAL_EVE && !NoBInvis && !(uarmf && (uarm || uarmc))) count++;
@@ -5718,7 +5718,7 @@ struct monst *mon;
 		// if(u.sealsActive&SEAL_DANTALION && !NoBInvis && !(uarmc || (uarm && uarm != CRYSTAL_PLATE_MAIL))) count++;
 		// if(u.sealsActive&SEAL_SHIRO);
 		// if(u.sealsActive&SEAL_ECHIDNA && !Invis && !(uarmf && (uarmc || uarm))) count++;
-		if(u.sealsActive&SEAL_EDEN && !NoBInvis && !verysmall(youmonst.data) && !bigmonst(youmonst.data) && !uarmh) count++;
+		if(u.sealsActive&SEAL_EDEN && !NoBInvis && !verysmall(youracedata) && !bigmonst(youracedata) && !uarmh) count++;
 		// if(u.sealsActive&SEAL_ENKI && !Invis && !(uarm || uarmc)) count++;
 		if(u.sealsActive&SEAL_EURYNOME && !Invis && levl[u.ux][u.uy].lit == 0 && viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)) count++;
 		// if(u.sealsActive&SEAL_EVE && !NoBInvis && !(uarmf && (uarm || uarmc))) count++;

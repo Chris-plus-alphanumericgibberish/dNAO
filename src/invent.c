@@ -950,8 +950,8 @@ register const char *let,*word;
 
 	/* Equivalent of an "ugly check" for gold */
 	if (usegold && !strcmp(word, "eat") &&
-	    (!metallivorous(youmonst.data)
-	     || youmonst.data == &mons[PM_RUST_MONSTER]))
+	    (!metallivorous(youracedata)
+	     || youracedata == &mons[PM_RUST_MONSTER]))
 #ifndef GOLDOBJ
 		usegold = allowgold = FALSE;
 #else
@@ -970,7 +970,7 @@ register const char *let,*word;
 
 	/* another ugly check: show boulders (not statues) */
 	if(*let == WEAPON_CLASS &&
-	   !strcmp(word, "throw") && (throws_rocks(youmonst.data) || (u.sealsActive&SEAL_YMIR)))
+	   !strcmp(word, "throw") && (throws_rocks(youracedata) || (u.sealsActive&SEAL_YMIR)))
 	    useboulder = TRUE;
 
 	if(allownone) *bp++ = '-';
@@ -3109,7 +3109,7 @@ boolean force_touch;
 	char kbuf[BUFSZ];
 
 	if (will_feel_cockatrice(otmp, force_touch)) {
-	    if(poly_when_stoned(youmonst.data))
+	    if(poly_when_stoned(youracedata))
 			You("touched the %s corpse with your bare %s.",
 				mons[otmp->corpsenm].mname, makeplural(body_part(HAND)));
 	    else
@@ -3388,7 +3388,7 @@ long numused;
 	    else (void)stolen_value(otmp, otmp->ox, otmp->oy, FALSE, FALSE);
 	}
 	delobj(otmp);
-	if (at_u && u.uundetected && hides_under(youmonst.data))
+	if (at_u && u.uundetected && hides_under(youracedata))
 	    u.uundetected = OBJ_AT(u.ux, u.uy);
 }
 

@@ -504,7 +504,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(is_were(youmonst.data)){
+	if(is_were(youracedata)){
 		Sprintf(buf, "Summon Aid");
 		any.a_int = MATTK_SUMM;	/* must be non-zero */
 		incntlet = 'A';
@@ -522,7 +522,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(youmonst.data == &mons[PM_TOVE]){
+	if(youracedata == &mons[PM_TOVE]){
 		Sprintf(buf, "Bore Hole");
 		any.a_int = MATTK_HOLE;	/* must be non-zero */
 		incntlet = 'B';
@@ -549,7 +549,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(attacktype(youmonst.data, AT_GAZE)){
+	if(attacktype(youracedata, AT_GAZE)){
 		Sprintf(buf, "Gaze");
 		any.a_int = MATTK_GAZE;	/* must be non-zero */
 		incntlet = 'g';
@@ -558,7 +558,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(is_hider(youmonst.data)){
+	if(is_hider(youracedata)){
 		Sprintf(buf, "Hide");
 		any.a_int = MATTK_HIDE;	/* must be non-zero */
 		incntlet = 'h';
@@ -567,7 +567,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(is_drow(youmonst.data)){
+	if(is_drow(youracedata)){
 		Sprintf(buf, "Invoke Darkness");
 		any.a_int = MATTK_DARK;	/* must be non-zero */
 		incntlet = 'i';
@@ -576,7 +576,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(youmonst.data->mlet == S_NYMPH){
+	if(youracedata->mlet == S_NYMPH){
 		Sprintf(buf, "Remove Iron Ball");
 		any.a_int = MATTK_REMV;	/* must be non-zero */
 		incntlet = 'I';
@@ -585,7 +585,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(is_mind_flayer(youmonst.data)){
+	if(is_mind_flayer(youracedata)){
 		Sprintf(buf, "Mind Blast");
 		any.a_int = MATTK_MIND;	/* must be non-zero */
 		incntlet = 'm';
@@ -594,7 +594,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(attacktype(youmonst.data, AT_MAGC)){
+	if(attacktype(youracedata, AT_MAGC)){
 		Sprintf(buf, "Monster Spells");
 		any.a_int = MATTK_MAGIC;	/* must be non-zero */
 		incntlet = 'M';
@@ -603,7 +603,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(youmonst.data == &mons[PM_BANDERSNATCH]){
+	if(youracedata == &mons[PM_BANDERSNATCH]){
 		Sprintf(buf, "Reach Attack");
 		any.a_int = MATTK_REACH;	/* must be non-zero */
 		incntlet = 'r';
@@ -621,7 +621,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(attacktype(youmonst.data, AT_SPIT)){
+	if(attacktype(youracedata, AT_SPIT)){
 		Sprintf(buf, "Spit");
 		any.a_int = MATTK_SPIT;	/* must be non-zero */
 		incntlet = 's';
@@ -630,7 +630,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(youmonst.data->msound == MS_SHRIEK){
+	if(youracedata->msound == MS_SHRIEK){
 		Sprintf(buf, "Shriek");
 		any.a_int = MATTK_SHRIEK;	/* must be non-zero */
 		incntlet = 'S';
@@ -639,7 +639,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(youmonst.data->msound == MS_JUBJUB){
+	if(youracedata->msound == MS_JUBJUB){
 		Sprintf(buf, "Scream");
 		any.a_int = MATTK_SCREAM;	/* must be non-zero */
 		incntlet = 'S';
@@ -648,7 +648,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(is_unicorn(youmonst.data)){
+	if(is_unicorn(youracedata)){
 		Sprintf(buf, "Unicorn Horn");
 		any.a_int = MATTK_UHORN;	/* must be non-zero */
 		incntlet = 'u';
@@ -657,7 +657,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(webmaker(youmonst.data)){
+	if(webmaker(youracedata)){
 		Sprintf(buf, "Make Web");
 		any.a_int = MATTK_WEBS;	/* must be non-zero */
 		incntlet = 'w';
@@ -692,7 +692,7 @@ domonability()
 	}
 	case MATTK_SPIT: return dospit();
 	case MATTK_MAGIC: return castum((struct monst *)0,
-	                   &youmonst.data->mattk[attackindex(youmonst.data, 
+	                   &youracedata->mattk[attackindex(youracedata, 
 			                         AT_MAGC,AD_ANY)]);
 	case MATTK_REMV: return doremove();
 	case MATTK_GAZE: return dogaze();
@@ -1893,7 +1893,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	else if (Invis) you_are("invisible to others");
 	/* ordinarily "visible" is redundant; this is a special case for
 	   the situation when invisibility would be an expected attribute */
-	else if ((HInvis || EInvis || pm_invisible(youmonst.data)) && BInvis)
+	else if ((HInvis || EInvis || pm_invisible(youracedata)) && BInvis)
 	    you_are("visible");
 	if (Displaced) you_are("displaced");
 	if (Stealth) you_are("stealthy");
@@ -1929,7 +1929,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	    you_are(buf);
 	} else if (u.ustuck) {
 	    Sprintf(buf, "%s %s",
-		    (Upolyd && sticks(youmonst.data)) ? "holding" : "held by",
+		    (Upolyd && sticks(youracedata)) ? "holding" : "held by",
 		    a_monnam(u.ustuck));
 	    you_are(buf);
 	}
@@ -2492,7 +2492,7 @@ int final;
 	else if (Invis) dump(youwere, "invisible to others");
 	/* ordinarily "visible" is redundant; this is a special case for
 	   the situation when invisibility would be an expected attribute */
-	else if ((HInvis || EInvis || pm_invisible(youmonst.data)) && BInvis)
+	else if ((HInvis || EInvis || pm_invisible(youracedata)) && BInvis)
 	    dump(youwere, "visible");
 	if (Displaced) dump(youwere, "displaced");
 	if (Stealth) dump(youwere, "stealthy");
@@ -2526,7 +2526,7 @@ int final;
 	    dump(youwere, buf);
 	} else if (u.ustuck) {
 	    Sprintf(buf, "%s %s",
-		    (Upolyd && sticks(youmonst.data)) ? "holding" : "held by",
+		    (Upolyd && sticks(youracedata)) ? "holding" : "held by",
 		    a_monnam(u.ustuck));
 	    dump(youwere, buf);
 	}
@@ -3524,7 +3524,7 @@ minimal_enlightenment()
 	    add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 	}
 	/* don't want poly_gender() here; it forces `2' for non-humanoids */
-	genidx = is_neuter(youmonst.data) ? 2 : flags.female;
+	genidx = is_neuter(youracedata) ? 2 : flags.female;
 	Sprintf(buf, fmtstr, "gender", genders[genidx].adj);
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 	if (Upolyd && (int)u.mfemale != genidx) {
@@ -5184,7 +5184,7 @@ const char *s;
 		return 0;
 	}
 	saved_dirsym = dirsym;
-	if(!u.dz && ((Stunned || (Confusion && !rn2(5))) && (u.udrunken < 3 || !rn2(u.udrunken/3)))) confdir();
+	if(!u.dz && ((Stunned || (Confusion && !rn2(5))) && (u.udrunken < 3 || !rn2(u.udrunken/3 + 1)))) confdir();
 	return 1;
 }
 

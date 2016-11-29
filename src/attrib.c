@@ -145,6 +145,10 @@ const struct innate {
 	hlf_abil[] = { {	14, &(HFlying), "wings sprout from your back", "your wings shrivel and die" },
 		     {	 0, 0, 0, 0 } },
 
+	yki_abil[] = { {	1, &(HCold_resistance), "", "" },
+		     {  11, &(HFire_resistance), "cool", "warmer" },
+		     {	 0, 0, 0, 0 } },
+
 	inc_abil[] = { {	1, &(HAntimagic), "", "" },
 		     {	 0, 0, 0, 0 } };
 
@@ -394,8 +398,7 @@ exerper()
 		pline("exerper: Hunger checks");
 #endif
 		switch (hs) {
-		    case SATIATED:	if (maybe_polyd(!is_vampire(youmonst.data),
-						!Race_if(PM_VAMPIRE)) && !Race_if(PM_INCANTIFIER))  /* undead/magic metabolism */
+		    case SATIATED:	if(!is_vampire(youracedata) && !Race_if(PM_INCANTIFIER))  /* undead/magic metabolism */
 							exercise(A_DEX, FALSE);
 					if (Role_if(PM_MONK))
 					    exercise(A_WIS, FALSE);
@@ -613,6 +616,57 @@ init_attr(np)
 }
 
 void
+init_mask_attr(np, mask)
+	int	np;
+	struct obj *mask;
+{
+	int	i, x, tryct;
+	struct Role *mrole = pm2role(mask->mp->mskrolenum);
+
+	for(i = 0; i < A_MAX; i++) {
+	    ABASE(i) = AMAX(i) = urole.attrbase[i];
+	    ATEMP(i) = ATIME(i) = 0;
+	    np -= urole.attrbase[i];
+	}
+
+	tryct = 0;
+	while(np > 0 && tryct < 100) {
+
+	    x = rn2(100);
+	    for (i = 0; (i < A_MAX) && ((x -= urole.attrdist[i]) > 0); i++) ;
+	    if(i >= A_MAX) continue; /* impossible */
+
+	    if(ABASE(i) >= ATTRMAX(i)) {
+
+		tryct++;
+		continue;
+	    }
+	    tryct = 0;
+	    ABASE(i)++;
+	    AMAX(i)++;
+	    np--;
+	}
+
+	tryct = 0;
+	while(np < 0 && tryct < 100) {		/* for redistribution */
+
+	    x = rn2(100);
+	    for (i = 0; (i < A_MAX) && ((x -= urole.attrdist[i]) > 0); i++) ;
+	    if(i >= A_MAX) continue; /* impossible */
+
+	    if(ABASE(i) <= ATTRMIN(i)) {
+
+		tryct++;
+		continue;
+	    }
+	    tryct = 0;
+	    ABASE(i)--;
+	    AMAX(i)--;
+	    np++;
+	}
+}
+
+void
 redist_attr()
 {
 	register int i, tmp;
@@ -685,6 +739,7 @@ int oldlevel, newlevel;
 	case PM_INCANTIFIER:	rabil = inc_abil;	break;
 	case PM_VAMPIRE:		rabil = vam_abil;	break;
 	case PM_HALF_DRAGON:	rabil = hlf_abil;	break;
+	case PM_YUKI_ONNA:		rabil = yki_abil;	break;
 	case PM_HUMAN:
 	case PM_DWARF:
 	case PM_GNOME:
@@ -764,8 +819,10 @@ newhp()
 	if (u.ulevel == 0) {
 	    /* Initialize hit points */
 	    hp = urole.hpadv.infix + urace.hpadv.infix;
-	    if (urole.hpadv.inrnd > 0) hp += rnd(urole.hpadv.inrnd);
-	    if (urace.hpadv.inrnd > 0) hp += rnd(urace.hpadv.inrnd);
+	    if (urole.hpadv.inrnd > 1) hp += rnd(urole.hpadv.inrnd);
+		else if(urole.hpadv.inrnd > 0) hp += rn2(urole.hpadv.inrnd);
+	    if (urace.hpadv.inrnd > 1) hp += rnd(urace.hpadv.inrnd);
+		else if(urace.hpadv.inrnd > 0) hp += rn2(urace.hpadv.inrnd);
 
 	    /* Initialize alignment stuff */
 	    u.ualign.type = aligns[flags.initalign].value;
@@ -775,12 +832,16 @@ newhp()
 	} else {
 	    if (u.ulevel < urole.xlev) {
 	    	hp = urole.hpadv.lofix + urace.hpadv.lofix;
-	    	if (urole.hpadv.lornd > 0) hp += rnd(urole.hpadv.lornd);
-	    	if (urace.hpadv.lornd > 0) hp += rnd(urace.hpadv.lornd);
+	    	if (urole.hpadv.lornd > 1) hp += rnd(urole.hpadv.lornd);
+	    	else if (urole.hpadv.lornd > 0) hp += rn2(urole.hpadv.lornd);
+	    	if (urace.hpadv.lornd > 1) hp += rnd(urace.hpadv.lornd);
+	    	else if (urace.hpadv.lornd > 0) hp += rn2(urace.hpadv.lornd);
 	    } else {
 	    	hp = urole.hpadv.hifix + urace.hpadv.hifix;
-	    	if (urole.hpadv.hirnd > 0) hp += rnd(urole.hpadv.hirnd);
-	    	if (urace.hpadv.hirnd > 0) hp += rnd(urace.hpadv.hirnd);
+	    	if (urole.hpadv.hirnd > 1) hp += rnd(urole.hpadv.hirnd);
+	    	else if (urole.hpadv.hirnd > 0) hp += rn2(urole.hpadv.hirnd);
+	    	if (urace.hpadv.hirnd > 1) hp += rnd(urace.hpadv.hirnd);
+	    	else if (urace.hpadv.hirnd > 0) hp += rn2(urace.hpadv.hirnd);
 	    }
 	}
 	
@@ -899,10 +960,9 @@ int x;
 /* condense clumsy ACURR(A_STR) value into value that fits into game formulas
  */
 schar
-acurrstr()
+acurrstr(str)
+	int str;
 {
-	register int str = ACURR(A_STR);
-
 	if (str <= 18) return((schar)str);
 	if (str <= 121) return((schar)(19 + str / 50)); /* map to 19-21 */
 	else return((schar)(str - 100));

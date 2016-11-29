@@ -549,7 +549,7 @@ register struct monst *mtmp;
 
 	if (Upolyd) {
 		/* certain "pacifist" monsters don't attack */
-		if(noattacks(youmonst.data)) {
+		if(noattacks(youracedata)) {
 			You("have no way to attack monsters physically.");
 			mtmp->mstrategy &= ~STRAT_WAITMASK;
 			goto atk_done;
@@ -568,7 +568,7 @@ register struct monst *mtmp;
 		if(uwep)
 		    You("begin bashing monsters with your %s.",
 			aobjnam(uwep, (char *)0));
-		else if (!cantwield(youmonst.data))
+		else if (!cantwield(youracedata))
 		    You("begin %sing monsters with your %s %s.",
 			Role_if(PM_MONK) ? "strik" : "bash",
 			uarmg ? "gloved" : "bare",	/* Del Lamb */
@@ -590,8 +590,12 @@ register struct monst *mtmp;
 	
 	check_caitiff(mtmp);
 	
-	if (Upolyd || Race_if(PM_VAMPIRE)){
-		keepattacking = hmonas(mtmp, youmonst.data, tmp, weptmp, tchtmp);
+	if (Upolyd 
+		|| Race_if(PM_VAMPIRE) 
+		|| Race_if(PM_CHIROPTERAN) 
+		|| (!uwep && Race_if(PM_YUKI_ONNA))
+	){
+		keepattacking = hmonas(mtmp, youracedata, tmp, weptmp, tchtmp);
 		attacksmade = 1;
 	} else {
 		keepattacking = hitum(mtmp, weptmp, youmonst.data->mattk);
@@ -741,7 +745,7 @@ struct attack *uattk;
 			monflee(mon, rnd(100), FALSE, TRUE);
 		    } else monflee(mon, 0, FALSE, TRUE);
 
-		    if(u.ustuck == mon && !u.uswallow && !sticks(youmonst.data))
+		    if(u.ustuck == mon && !u.uswallow && !sticks(youracedata))
 			u.ustuck = 0;
 		}
 		/* Vorpal Blade hit converted to miss */
@@ -834,6 +838,7 @@ int thrown;
 	silverobj = FALSE, ironobj = FALSE, unholyobj = FALSE, lightmsg = FALSE;
 	boolean valid_weapon_attack = FALSE;
 	boolean unarmed = !uwep && !uarm && !uarms;
+	boolean phasearmor = FALSE;
 #ifdef STEED
 	int jousting = 0;
 #endif
@@ -855,7 +860,7 @@ int thrown;
     static int tgloves = 0;
     if (!tgloves) tgloves = find_tgloves();
 	
-	if(!helpless(mon)) wake_nearto(mon->mx, mon->my, Stealth ? combatNoise(youmonst.data)/2 : combatNoise(youmonst.data)); //Nearby monsters may be awakened
+	if(!helpless(mon)) wake_nearto(mon->mx, mon->my, Stealth ? combatNoise(youracedata)/2 : combatNoise(youracedata)); //Nearby monsters may be awakened
 	wakeup(mon, TRUE);
 	if(!obj) {	/* attack with bare hands */
 	    if (mdat->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS || u.sealsActive&SEAL_EDEN)) tmp = 0;
@@ -1192,7 +1197,10 @@ int thrown;
 			else if(obj == uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_MARIONETTE)
 				tmp = dmgval(obj, mon, SPEC_MARIONETTE);
 			else tmp = dmgval(obj, mon, 0);
-		    /* a minimal hit doesn't exercise proficiency */
+			
+			if(obj && ((is_lightsaber(obj) && obj->lamplit) || arti_shining(obj))) phasearmor = TRUE;
+		    
+			/* a minimal hit doesn't exercise proficiency */
 			valid_weapon_attack = (tmp > 1 || (obj && obj->otyp == SPOON && Role_if(PM_CONVICT)));
 			if (!valid_weapon_attack || mon == u.ustuck || u.twoweap) {
 			;	/* no special bonuses */
@@ -1507,6 +1515,7 @@ int thrown;
 					case HEAVY_IRON_BALL:	/* 1d25 */
 					case IRON_CHAIN:		/* 1d4+1 */
 						tmp = dmgval(obj, mon, 0);
+						if(obj && ((is_lightsaber(obj) && obj->lamplit) || arti_shining(obj))) phasearmor = TRUE;
 					break;
 					case MIRROR:
 						if (breaktest(obj)) {
@@ -1675,6 +1684,7 @@ int thrown;
 						} else {
 							Your("venom burns %s!", mon_nam(mon));
 							tmp = dmgval(obj, mon, 0);
+							if(obj && ((is_lightsaber(obj) && obj->lamplit) || arti_shining(obj))) phasearmor = TRUE;
 						}
 						if (thrown) obfree(obj, (struct obj *)0);
 						else useup(obj);
@@ -1736,6 +1746,13 @@ defaultvalue:
 
 	if(resist_attacks(mdat))
 		tmp = 0;
+	else {
+		int mac = full_marmorac(mon);
+		if(mac < 0){
+			tmp += AC_VALUE(mac);
+			if(tmp < 1) tmp = 1;
+		}
+	}
 	
 	/****** NOTE: perhaps obj is undefined!! (if !thrown && BOOMERANG)
 	 *      *OR* if attacking bare-handed!! */
@@ -1772,6 +1789,7 @@ defaultvalue:
 				for(;i>0;i--){
 					// pline("%d",i);
 					tmp += dmgval(obj, mon, 0);
+					if(obj && ((is_lightsaber(obj) && obj->lamplit) || arti_shining(obj))) phasearmor = TRUE;
 					if(wep->oartifact == ART_LIECLEAVER) tmp += rnd(10);
 				}
 			}
@@ -1990,6 +2008,14 @@ defaultvalue:
 	
 	/*Now apply damage*/
 	// pline("Damage: %d",tmp);
+	
+	if(tmp && !phasearmor){
+		int mac = full_marmorac(mon);
+		if(mac < 0){
+			tmp += AC_VALUE(mac);
+			if(tmp < 1) tmp = 1;
+		}
+	}
 	
 	if (!already_killed){
 		mon->mhp -= tmp;
@@ -2345,9 +2371,9 @@ demonpet()
 	struct monst *dtmp;
 
 	pline("Some hell-p has arrived!");
-	i = (!is_demon(youmonst.data) || !rn2(6)) 
+	i = (!is_demon(youracedata) || !rn2(6)) 
 	     ? ndemon(u.ualign.type) : NON_PM;
-	pm = i != NON_PM ? &mons[i] : youmonst.data;
+	pm = i != NON_PM ? &mons[i] : youracedata;
 	if ((dtmp = makemon(pm, u.ux, u.uy, NO_MM_FLAGS)) != 0)
 	    (void)tamedog(dtmp, (struct obj *)0);
 	exercise(A_WIS, TRUE);
@@ -2394,7 +2420,7 @@ struct attack *mattk;
 
 	if (stealoid) {		/* we will be taking everything */
 	    if (gender(mdef) == (int) u.mfemale &&
-			youmonst.data->mlet == S_NYMPH)
+			youracedata->mlet == S_NYMPH)
 		You("charm %s.  She gladly hands over her possessions.",
 		    mon_nam(mdef));
 	    else
@@ -2403,7 +2429,6 @@ struct attack *mattk;
 	}
 
 	while ((otmp = mdef->minvent) != 0) {
-	    if (!Upolyd) break;		/* no longer have ability to steal */
 	    /* take the object away from the monster */
 	    obj_extract_self(otmp);
 	    if ((unwornmask = otmp->owornmask) != 0L) {
@@ -2452,7 +2477,7 @@ register struct attack *mattk;
 	register struct permonst *pd = mdef->data;
 	register int	tmp = d((int)mattk->damn, (int)mattk->damd);
 	int armpro;
-	boolean negated;
+	boolean negated, phasearmor = FALSE;
 
 	armpro = magic_negation(mdef);
 	/* since hero can't be cancelled, only defender's armor applies */
@@ -2460,7 +2485,7 @@ register struct attack *mattk;
 	
 	tmp += dbon((struct obj *)0);
 	
-	if (is_demon(youmonst.data) && !rn2(13) && !uwep
+	if (is_demon(youracedata) && !rn2(13) && !uwep
 		&& u.umonnum != PM_SUCCUBUS && u.umonnum != PM_INCUBUS
 		&& u.umonnum != PM_BALROG) {
 	    demonpet();
@@ -2729,7 +2754,7 @@ register struct attack *mattk;
 	    case AD_VAMP:
 	    case AD_DRLI:
 		if(has_blood(mdef->data) && 
-			maybe_polyd(youmonst.data == &mons[PM_BLOOD_BLOATER], Race_if(PM_BLOOD_BLOATER))
+			youracedata == &mons[PM_BLOOD_BLOATER]
 		){
 			if(Upolyd ? u.mh < u.mhmax : u.uhp < u.uhpmax){
 				You("bloat yourself with blood.");
@@ -2741,8 +2766,8 @@ register struct attack *mattk;
 			if (mdef->mhp < xtmp) xtmp = mdef->mhp;
 			/* Player vampires are smart enough not to feed while
 			   biting if they might have trouble getting it down */
-			if (!Race_if(PM_INCANTIFIER) && maybe_polyd(is_vampire(youmonst.data),
-			    Race_if(PM_VAMPIRE)) && u.uhunger <= 1420 &&
+			if (!Race_if(PM_INCANTIFIER) && is_vampire(youracedata)
+				&& u.uhunger <= 1420 &&
 			    mattk->aatyp == AT_BITE && has_blood(pd)) {
 				/* For the life of a creature is in the blood
 				   (Lev 17:11) */
@@ -2755,7 +2780,7 @@ register struct attack *mattk;
 				lesshungry(xtmp * 6);
 			}
 			if(has_blood(mdef->data) && 
-				maybe_polyd(youmonst.data == &mons[PM_BLOOD_BLOATER], Race_if(PM_BLOOD_BLOATER))
+				youracedata == &mons[PM_BLOOD_BLOATER]
 			){
 				if(Upolyd ? u.mh < u.mhmax : u.uhp < u.uhpmax){
 					(void)split_mon(&youmonst, 0);
@@ -2961,14 +2986,24 @@ register struct attack *mattk;
 		    (void) newcham(mdef, &mons[PM_GREEN_SLIME], FALSE, FALSE);
 		    tmp = 0;
 		}
+		}
 		break;
 	    case AD_WEBS:{
 			struct trap *ttmp2 = maketrap(mdef->mx, mdef->my, WEB);
 			if (ttmp2) mintrap(mdef);
 		}break;
 	    case AD_ENCH:	/* KMH -- remove enchantment (disenchanter) */
-		/* there's no msomearmor() function, so just do damage */
-	     /* if (negated) break; */
+	    if (!negated){
+		    struct obj *obj = some_armor(mdef);
+
+		    if (drain_item(obj)) {
+				pline("%s's %s less effective.", Monnam(mdef), aobjnam(obj, "seem"));
+		    }
+		}
+		break;
+///////////////////////////////////////////////////////////////////////////////////////////
+		case AD_WET:
+			water_damage(mdef->minvent, FALSE, FALSE, FALSE, mdef);
 		break;
 	    case AD_SLOW:
 		if (!negated && mdef->mspeed != MSLOW) {
@@ -3162,6 +3197,19 @@ register struct attack *mattk;
 	}
 	if(mdef->ustdym){
 		tmp += rnd(mdef->ustdym);
+	}
+	
+	// if(attacktype_fordmg(youracedata, AT_NONE, AD_STAR)){
+		// if(otmp && otmp == uwep && !otmp->oartifact && otmp->spe <= 0) tmp = 0;
+		// else if(!otmp || otmp != uwep) tmp /= 2;
+	// }
+	
+	if(tmp && mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
+		int mac = full_marmorac(mdef);
+		if(mac < 0){
+			tmp += AC_VALUE(mac);
+			if(tmp < 1) tmp = 1;
+		}
 	}
 	
 	if((mdef->mhp -= tmp) < 1) {
@@ -3379,7 +3427,7 @@ register struct attack *mattk;
 			end_engulf();
 			return(2);
 		    case AD_PHYS:
-			if (youmonst.data == &mons[PM_FOG_CLOUD]) {
+			if (youracedata == &mons[PM_FOG_CLOUD]) {
 			    pline("%s is laden with your moisture.",
 				  Monnam(mdef));
 			    if (amphibious(mdef->data) &&
@@ -3498,9 +3546,9 @@ register struct attack *mattk;
 			return(2);
 		}
 		if(dam > 0) mdef->uhurtm = TRUE;
-		You("%s %s!", is_animal(youmonst.data) ? "regurgitate"
+		You("%s %s!", is_animal(youracedata) ? "regurgitate"
 			: "expel", mon_nam(mdef));
-		if (Slow_digestion || is_animal(youmonst.data)) {
+		if (Slow_digestion || is_animal(youracedata)) {
 		    pline("Obviously, you didn't like %s taste.",
 			  s_suffix(mon_nam(mdef)));
 		}
@@ -3540,7 +3588,7 @@ register int tmp, weptmp, tchtmp;
 	int	i, sum[NATTK], hittmp = 0;
 	int	nsum = 0;
 	int	dhit = 0;
-	boolean Old_Upolyd = Upolyd;
+	boolean Old_Upolyd = Upolyd, wepused;
 	
 	if(is_displacer(mon->data) && rn2(2)){
 		You("attack a displaced image!");
@@ -3550,6 +3598,7 @@ register int tmp, weptmp, tchtmp;
 	for(i = 0; i < NATTK; i++) {
 	    sum[i] = 0;
 	    mattk = getmattk(mas, i, sum, &alt_attk);
+		wepused = FALSE;
 		
 		/*Plasteel helms cover the face and prevent bite attacks*/
 		if(uarmh && 
@@ -3610,7 +3659,7 @@ use_weapon:
 			/* [ALI] Vampires are also smart. They avoid biting
 			   monsters if doing so would be fatal */
 			if ((uwep || (u.twoweap && uswapwep) || uarmg) &&
-				maybe_polyd(is_vampire(mas), Race_if(PM_VAMPIRE)) &&
+				is_vampire(mas) &&
 				(is_rider(mon->data) ||
 				 mon->data == &mons[PM_GREEN_SLIME] ||
 				 mon->data == &mons[PM_FLUX_SLIME])
@@ -3849,7 +3898,7 @@ use_weapon:
 	break;
 	case AT_CLAW:
 	case AT_LRCH: /*Note: long reach attacks are being treated as melee only for polymorph purposes*/
-		// if (i==0 && uwep && !cantwield(youmonst.data)) goto use_weapon;
+		// if (i==0 && uwep && !cantwield(youracedata)) goto use_weapon;
 #ifdef SEDUCE
 		/* succubi/incubi are humanoid, but their _second_
 		 * attack is AT_CLAW, not their first...
@@ -3863,7 +3912,7 @@ use_weapon:
 		/* [ALI] Vampires are also smart. They avoid biting
 		   monsters if doing so would be fatal */
 		if ((uwep || (u.twoweap && uswapwep)  || uarmg) &&
-			maybe_polyd(is_vampire(youmonst.data), Race_if(PM_VAMPIRE)) &&
+			is_vampire(youracedata) &&
 			(is_rider(mon->data) ||
 			 mon->data == &mons[PM_GREEN_SLIME] ||
 			 mon->data == &mons[PM_FLUX_SLIME])){
@@ -3926,7 +3975,7 @@ wisp_shdw_dhit2:
 			else if (mattk->aatyp == AT_WHIP)
 				Your("barbed whips lash %s.", mon_nam(mon));
 			else if(mattk->adtyp == AT_SHDW) {
-				if(youmonst.data == &mons[PM_EDDERKOP]) You("slash %s with bladed shadows.", mon_nam(mon));
+				if(youracedata == &mons[PM_EDDERKOP]) You("slash %s with bladed shadows.", mon_nam(mon));
 				else Your("bladed shadow srikes %s.", mon_nam(mon));
 			} else if(mattk->aatyp == AT_WISP) 
 				Your("mist tendrils lash %s.", mon_nam(mon));
@@ -3995,9 +4044,9 @@ wisp_shdw_dhit2:
 		 * do the normal 1-2 points bare hand damage...
 		 */
 		/*
-		if (i==0 && (youmonst.data->mlet==S_KOBOLD
-			|| youmonst.data->mlet==S_ORC
-			|| youmonst.data->mlet==S_GNOME
+		if (i==0 && (youracedata->mlet==S_KOBOLD
+			|| youracedata->mlet==S_ORC
+			|| youracedata->mlet==S_GNOME
 			)) goto use_weapon;
 		*/
 			sum[i] = castum(mon, mattk);
@@ -4057,13 +4106,13 @@ uchar aatyp, adtyp;
 	if(aatyp == AT_WISP || aatyp == AT_SHDW) return (malive | mhit);
 	
 	if(u.sealsActive&SEAL_IRIS && !Blind && canseemon(mon) && !Invisible
-		&& maybe_polyd(is_vampire(youmonst.data), Race_if(PM_VAMPIRE))
+		&& !is_vampire(youracedata)
 		&& mon_reflects(mon,"You catch a glimpse of a stranger's reflection in %s %s.")
 	){
 		if(u.sealsActive&SEAL_IRIS) unbind(SEAL_IRIS,TRUE);
 	}
 	
-	if (mhit && aatyp == AT_BITE && maybe_polyd(is_vampire(youmonst.data), Race_if(PM_VAMPIRE))) {
+	if (mhit && aatyp == AT_BITE && is_vampire(youracedata)) {
 	    if (bite_monster(mon))
 		return 2;			/* lifesaved */
 	}
@@ -4132,7 +4181,7 @@ uchar aatyp, adtyp;
 			(protector == W_ARMH && !uarmh) ||
 			(protector == (W_ARMC|W_ARMG) && (!uarmc || !uarmg))) {
 		    if (!Stone_resistance &&
-			    !(poly_when_stoned(youmonst.data) &&
+			    !(poly_when_stoned(youracedata) &&
 				polymon(PM_STONE_GOLEM))) {
 			You("turn to stone...");
 			done_in_by(mon);
@@ -4501,7 +4550,7 @@ dobpois:
 			    mon->mhp += tmp / 2;
 			    if (mon->mhpmax < mon->mhp) mon->mhpmax = mon->mhp;
 			/* at a certain point, the monster will reproduce! */
-			    if(mon->mhpmax > ((int) (mon->m_lev+1) * 8) && !is_eladrin(mon->data))
+			    if(mon->mhpmax > ((int) (mon->m_lev+1) * 8) && (mon->data == &mons[PM_BROWN_MOLD] || mon->data == &mons[PM_BLUE_JELLY]))
 				(void)split_mon(mon, &youmonst);
 			}
 		break;
