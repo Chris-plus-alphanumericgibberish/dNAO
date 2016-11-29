@@ -21,7 +21,6 @@ STATIC_DCL void NDECL(end_engulf);
 STATIC_DCL int FDECL(gulpum, (struct monst *,struct attack *));
 STATIC_DCL void FDECL(nohandglow, (struct monst *));
 STATIC_DCL boolean FDECL(shade_aware, (struct obj *));
-STATIC_DCL boolean FDECL(dragon_hit, (struct monst *, struct obj *, int, int *, boolean *, boolean *, boolean *));
 
 extern boolean notonhead;	/* for long worms */
 /* The below might become a parameter instead if we use it a lot */
@@ -885,9 +884,6 @@ int thrown;
 		if(uright && uright->oartifact == ART_ANNULUS) tmp = (tmp+uright->spe)*2;
 		else if(uleft && uleft->oartifact == ART_ANNULUS) tmp = (tmp+uleft->spe)*2;
 		
-		if(uarm && uarm->otyp <= YELLOW_DRAGON_SCALES && uarm->otyp >= GRAY_DRAGON_SCALE_MAIL){
-			dragon_hit(mon, uarm, uarm->otyp, &tmp, &needpoismsg, &poiskilled, &druggedmon);
-		}
 		if(uarmg){
 			/* blessed gloves give bonuses when fighting 'bare-handed' */
 			if (uarmg->blessed && (is_undead(mdat) || is_demon(mdat))) tmp += rnd(4);
@@ -1370,9 +1366,6 @@ int thrown;
 					}
 					hittxt = TRUE;
 				}
-			}
-			if(uarm && uarm->otyp <= YELLOW_DRAGON_SCALES && uarm->otyp >= GRAY_DRAGON_SCALE_MAIL){
-				dragon_hit(mon, uarm, uarm->otyp, &tmp, &needpoismsg, &poiskilled, &druggedmon);
 			}
 		    if (obj->oartifact &&
 				artifact_hit(&youmonst, mon, obj, &tmp, dieroll)) {
@@ -2951,7 +2944,16 @@ register struct attack *mattk;
 		break;
 	    case AD_SLIM:
 		if (negated) break;	/* physical damage only */
-		if (!rn2(4) && !flaming(mdef->data) &&
+		{
+		struct obj *armor = which_armor(mdef, W_ARM);
+		struct obj *shield = which_armor(mdef, W_ARMS);
+		if (!rn2(4) && !flaming(mdef->data)
+				&& mdef->data != &mons[PM_RED_DRAGON]
+				&& !(
+					(armor && (armor->otyp == RED_DRAGON_SCALES || armor->otyp == RED_DRAGON_SCALE_MAIL)
+					) || (shield && shield->otyp == RED_DRAGON_SCALE_SHIELD
+					)
+				) &&
 				mdef->data != &mons[PM_GREEN_SLIME] && mdef->data != &mons[PM_FLUX_SLIME] && 
 				!is_rider(mdef->data) && !resists_poly(mdef->data)
 		) {
@@ -4714,251 +4716,3 @@ struct obj *otmp;	/* source of flash */
 
 /*uhitm.c*/
 
-boolean
-dragon_hit(mon, otmp, type, dmgptr, needpoismsg, poiskilled, druggedmon)
-struct monst *mon;
-struct obj *otmp;
-int *dmgptr;
-boolean *needpoismsg;
-boolean *poiskilled;
-boolean *druggedmon;
-{
-	int mail = 1;//Was it mail or just scales? 1=scales, 2 = mail
-	switch(type){
-		case SILVER_DRAGON_SCALE_MAIL:
-			if(otmp->oartifact == ART_DRAGON_PLATE){
-				boolean success = FALSE;
-				if(!rn2(10)) pline("Holy fire radiates from your %s.", aobjnam(otmp, (char *)0) );//message spam is bad
-				if(!resists_fire(mon)){
-					*dmgptr += d(1,10) + otmp->spe;
-					success = TRUE;
-				    if (!rn2(10)) (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-				    if (!rn2(10)) (void) destroy_mitem(mon, SCROLL_CLASS, AD_FIRE);
-				    if (!rn2(10)) (void) destroy_mitem(mon, SPBOOK_CLASS, AD_FIRE);
-				}
-				if(!resists_elec(mon)){
-					*dmgptr += d(1,10) + otmp->spe;
-					success = TRUE;
-				    if (!rn2(10)) (void) destroy_mitem(mon, RING_CLASS, AD_ELEC);
-				    if (!rn2(10)) (void) destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-				}
-				if(!resists_sleep(mon) && !rn2(20)){ //Half the rate of other sleep sources
-					pline("Gas rises from your %s.", aobjnam(otmp, (char *)0));
-					sleep_monst(mon, d(max(1,otmp->spe), 12),'\0');
-					success = TRUE;
-				}
-				if(!resists_disint(mon) && !rn2(60)){ //One third the rate of vorpal sword/black dragon plate
-					pline("Divine light shines from your %s!", aobjnam(otmp, (char *)0));
-					touch_artifact(otmp,&youmonst);
-				    if ( (is_rider(mon->data) || mon->data == &mons[PM_LAMASHTU] || mon->data == &mons[PM_DEMOGORGON])) {
-						*dmgptr *= 2; /* Reintegrating monster are instead heavily damaged */
-					}
-					else{
-						*dmgptr = 2 * mon->mhp + 200;
-					    pline("%s disintegrates.", Monnam(mon));
-					}
-				    if (!rn2(2)) (void) destroy_mitem(mon, RING_CLASS, AD_ELEC);
-				    if (!rn2(2)) (void) destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-				   (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-					success = TRUE;
-				}
-				return success;
-			}
-		break;
-		case RED_DRAGON_SCALE_MAIL:
-			mail=2;
-		case RED_DRAGON_SCALES:
-			if(!rn2(10)) pline("Fire radiates from your %s.", aobjnam(otmp, (char *)0) );//message spam is bad
-			if(!resists_fire(mon)){
-				*dmgptr += d(1,10*mail) + otmp->spe;
-				return TRUE;
-			}
-		    if (!rn2(4)) (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-		    if (!rn2(4)) (void) destroy_mitem(mon, SCROLL_CLASS, AD_FIRE);
-		    if (!rn2(7)) (void) destroy_mitem(mon, SPBOOK_CLASS, AD_FIRE);
-		break;
-		case WHITE_DRAGON_SCALE_MAIL:
-			mail=2;
-		case WHITE_DRAGON_SCALES:
-			if(!rn2(10)) pline("Frost radiates from your %s.", aobjnam(otmp, (char *)0) );
-			if(!resists_cold(mon)){
-				*dmgptr += d(1,10*mail) + otmp->spe;
-				return TRUE;
-			}
-		    if (!rn2(4)) (void) destroy_mitem(mon, POTION_CLASS, AD_COLD);
-		break;
-		case BLUE_DRAGON_SCALE_MAIL:
-			mail=2;
-		case BLUE_DRAGON_SCALES:
-			if(!rn2(10)) pline("Lightning strikes from your %s.", aobjnam(otmp, (char *)0) );
-			if(!resists_elec(mon)){
-				*dmgptr += d(1,10*mail) + otmp->spe;
-				return TRUE;
-			}
-		    if (!rn2(5)) (void) destroy_mitem(mon, RING_CLASS, AD_ELEC);
-		    if (!rn2(5)) (void) destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-		break;
-		case YELLOW_DRAGON_SCALE_MAIL:
-			mail=2;
-		case YELLOW_DRAGON_SCALES:
-			if(!rn2(10)) pline("Acid flows from your %s.", aobjnam(otmp, (char *)0) );
-			if(!resists_acid(mon)){
-				*dmgptr += d(1,10*mail) + otmp->spe;
-				return TRUE;
-			}
-		    if (!rn2(2)) (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-		break;
-		case GREEN_DRAGON_SCALE_MAIL:
-			if(!rn2(10)) pline("Poison drips from your %s.", aobjnam(otmp, (char *)0) );
-		    if (resists_poison(mon))
-				*needpoismsg = TRUE;
-			else if (rn2(10)){
-				*dmgptr += rnd(6) + otmp->spe;
-				return TRUE;
-			}
-			else{ 
-				*poiskilled = TRUE;
-				return TRUE;
-			}
-		break;
-		case GREEN_DRAGON_SCALES:
-			if(!rn2(10)) pline("Poison drips from your %s.", aobjnam(otmp, (char *)0) );
-		    if (resists_poison(mon))
-				*needpoismsg = TRUE;
-			else{
-				*dmgptr += rnd(6) + otmp->spe;
-				return TRUE;
-			}
-		break;
-		case ORANGE_DRAGON_SCALE_MAIL:
-			mail=2;
-		case ORANGE_DRAGON_SCALES:
-			if(!resists_sleep(mon) && !rn2(20/mail)){
-				pline("Gas rises from your %s.", aobjnam(otmp, (char *)0));
-				if(sleep_monst(mon, d(max(1,otmp->spe), 12),'\0')) *druggedmon = TRUE;
-				return TRUE;
-			}
-		break;
-		case BLACK_DRAGON_SCALE_MAIL:{
-			boolean success = FALSE;
-			if(otmp->oartifact == ART_CHROMATIC_DRAGON_SCALES){
-				if(!rn2(10)) pline("Irridescent energy radiates from your %s.", aobjnam(otmp, (char *)0) );
-				if(!resists_fire(mon)){
-					*dmgptr += d(1,8) + otmp->spe;
-					success = TRUE;
-				    if (!rn2(10)) (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-				    if (!rn2(10)) (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-				    if (!rn2(10)) (void) destroy_mitem(mon, SCROLL_CLASS, AD_FIRE);
-				    if (!rn2(10)) (void) destroy_mitem(mon, SPBOOK_CLASS, AD_FIRE);
-				}
-				if(!resists_acid(mon)){
-					*dmgptr += d(1,8) + otmp->spe;
-					success = TRUE;
-				    if (!rn2(6)) (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-				}
-				if(!resists_elec(mon)){
-					*dmgptr += d(1,8) + otmp->spe;
-					success = TRUE;
-				    if (!rn2(10)) (void) destroy_mitem(mon, RING_CLASS, AD_ELEC);
-				    if (!rn2(10)) (void) destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-				}
-				if(!resists_cold(mon)){
-					*dmgptr += d(1,8) + otmp->spe;
-					if (!rn2(4)) (void) destroy_mitem(mon, POTION_CLASS, AD_COLD);
-					success = TRUE;
-				}
-				if (resists_poison(mon))
-					*needpoismsg = TRUE;
-				else if (rn2(20)){
-					*dmgptr += rnd(6) + otmp->spe;
-					return TRUE;
-				}
-				else{ 
-					*poiskilled = TRUE;
-					return TRUE;
-				}
-			}
-			if(!resists_disint(mon) && !rn2(20)){
-				pline("Black light shines from your %s!", aobjnam(otmp, (char *)0));
-			    if ( (is_rider(mon->data) || mon->data == &mons[PM_DEMOGORGON] || mon->data == &mons[PM_LAMASHTU])) {
-					if (canseemon(mon)) {
-					    pline("%s disintegrates.", Monnam(mon));
-					    pline("%s body reintegrates before your %s!",
-						  s_suffix(Monnam(mon)),
-						  (eyecount(youmonst.data) == 1) ?
-						  	body_part(EYE) : makeplural(body_part(EYE)));
-					    pline("%s resurrects!", Monnam(mon));
-					}
-					mon->mhp = mon->mhpmax;
-					*dmgptr = 0;
-					success |= FALSE;
-				}
-				else{
-					*dmgptr = 2 * mon->mhp + 200;
-				    pline("%s disintegrates.", Monnam(mon));
-				}
-			    (void) destroy_mitem(mon, RING_CLASS, AD_ELEC);
-			    (void) destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-			    (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-				success = TRUE;
-			}
-			return success;
-		}break;
-		case BLACK_DRAGON_SCALES:{
-			boolean success = FALSE;
-			if(otmp->oartifact == ART_CHROMATIC_DRAGON_SCALES){
-				if(!resists_fire(mon)){
-					*dmgptr += d(1,3) + otmp->spe;
-					success = TRUE;
-				    if (!rn2(10)) (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-				    if (!rn2(10)) (void) destroy_mitem(mon, SCROLL_CLASS, AD_FIRE);
-				    if (!rn2(10)) (void) destroy_mitem(mon, SPBOOK_CLASS, AD_FIRE);
-				}
-				if(!resists_acid(mon)){
-					*dmgptr += d(1,3) + otmp->spe;
-					success = TRUE;
-				    if (!rn2(6)) (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-				}
-				if(!resists_elec(mon)){
-					*dmgptr += d(1,3) + otmp->spe;
-					success = TRUE;
-				    if (!rn2(10)) (void) destroy_mitem(mon, RING_CLASS, AD_ELEC);
-				    if (!rn2(10)) (void) destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-				}
-				if(!resists_cold(mon)){
-					*dmgptr += d(1,3) + otmp->spe;
-					if (!rn2(4)) (void) destroy_mitem(mon, POTION_CLASS, AD_COLD);
-					success = TRUE;
-				}
-				if (resists_poison(mon))
-					*needpoismsg = TRUE;
-				else {
-					*dmgptr += rnd(3) + otmp->spe;
-					return TRUE;
-				}
-			}
-			if(!resists_disint(mon) && !rn2(20)){
-				pline("Your %s glows with black light.", aobjnam(otmp, (char *)0));
-			    if ( (is_rider(mon->data) || mon->data == &mons[PM_LAMASHTU] || mon->data == &mons[PM_DEMOGORGON])) {
-					if (canseemon(mon)) {
-					    pline("%s wounds flow and regenerate before your %s!",
-						  s_suffix(Monnam(mon)),
-						  (eyecount(youmonst.data) == 1) ?
-						  	body_part(EYE) : makeplural(body_part(EYE)));
-					}
-					mon->mhp = min(mon->mhp+(*dmgptr)*2,mon->mhpmax);
-					*dmgptr = 0;
-					return FALSE;
-				}
-				else{
-					*dmgptr *= 2;
-				}
-			    if(rn2(2)) (void) destroy_mitem(mon, RING_CLASS, AD_ELEC);
-			    if(rn2(2)) (void) destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-			    if(rn2(2)) (void) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-				return TRUE;
-			}
-		}break;
-	}
-	return FALSE;//didn't do anything special
-}
