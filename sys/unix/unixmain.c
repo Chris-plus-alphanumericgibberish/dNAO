@@ -1133,6 +1133,7 @@ static void extract_monsterdata_to_yaml(
         fprintf(f, "   flags: [");
         {
             int comma_set = 0;
+#ifndef DNETHACK
 #define AT(a, b) if (pm->mflags1 & a) { \
     if ( comma_set ) fprintf(f, ", "); \
     comma_set = 1;\
@@ -1269,6 +1270,237 @@ static void extract_monsterdata_to_yaml(
         else if (vegetarian(pm)) fprintf(f, ", FlVegetarian");
 
 #undef AT
+#endif /*non DNETHACK*/
+
+#ifdef DNETHACK
+#define AT(a, b) if (pm->mflagsm & a) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", b); \
+}
+        AT(MM_FLY, "FlFly");
+        AT(MM_SWIM, "FlSwim");
+        AT(MM_AMORPHOUS, "FlAmorphous");
+        AT(MM_WALLWALK, "FlWallwalk");
+        AT(MM_CLING, "FlCling");
+        AT(MM_TUNNEL, "FlTunnel");
+        AT(MM_NEEDPICK, "FlNeedPick");
+        AT(MM_AMPHIBIOUS, "FlAmphibious");
+        AT(MM_BREATHLESS, "FlBreathless");
+        AT(MM_TPORT, "FlTeleport");
+        AT(MM_TPORT_CNTRL, "FlTeleportControl");
+        AT(MM_TENGTPORT, "FlFastTeleport");
+        AT(MM_STATIONARY, "FlStationary");
+        AT(MM_FLOAT, "FlFloat");
+        AT(MM_NOTONL, "FlNoLine");
+        AT(MM_FLEETFLEE, "FlFlee");
+#undef AT
+#define AT(a, b) if (pm->mflagst & a) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", b); \
+}
+        AT(MT_CONCEAL, "FlConceal");
+        AT(MT_HIDE, "FlHide");
+        AT(MT_MINDLESS, "FlMindless");
+        AT(MT_ANIMAL, "FlAnimalMind");
+        AT(MT_CARNIVORE, "FlCarnivore");
+        AT(MT_HERBIVORE, "FlHerbivore");
+        AT(MT_HOSTILE, "FlHostile");
+        AT(MT_PEACEFUL, "FlPeaceful");
+        AT(MT_DOMESTIC, "FlDomestic");
+        AT(MT_WANDER, "FlWander");
+        AT(MT_STALK, "FlStalk");
+        AT(MT_ROCKTHROW, "FlRockThrow");
+        AT(MT_GREEDY, "FlGreedy");
+        AT(MT_JEWELS, "FlJewels");
+        AT(MT_COLLECT, "FlCollect");
+        AT(MT_MAGIC, "FlMagicCollect");
+        AT(MT_WANTSAMUL, "FlWantsAmulet");
+        AT(MT_WANTSBELL, "FlWantsBell");
+        AT(MT_WANTSBOOK, "FlWantsBook");
+        AT(MT_WANTSCAND, "FlWantsCand");
+        AT(MT_WANTSARTI, "FlWantsArti");
+        AT(MT_WANTSALL, "FlWantsAll");
+        AT(MT_COVETOUS, "FlCovetous");
+        AT(MT_WAITFORU, "FlWaitsForYou");
+        AT(MT_CLOSE, "FlClose");
+        AT(MT_TRAITOR, "FlTraitor");
+        AT(MT_NOTAKE, "FlNoTake");
+        AT(MT_METALLIVORE, "FlMetallivore");
+        AT(MT_MAGIVORE, "FlMagivore");
+        AT(MT_BOLD, "FlBold");
+#undef AT
+#define AT(a, b) if (pm->mflagsb & a) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", b); \
+}
+        AT(MB_NOEYES, "FlNoEyes");
+        AT(MB_NOHANDS, "FlNoHands");
+        AT(MB_NOLIMBS, "FlNoLimbs");
+        AT(MB_NOHEAD, "FlNoHead");
+        AT(MB_UNSOLID, "FlUnSolid");
+        AT(MB_THICK_HIDE, "FlThickHide");
+        AT(MB_OVIPAROUS, "FlOviparous");
+        AT(MB_ACID, "FlAcid");
+        AT(MB_POIS, "FlPoisonous");
+        AT(MB_CHILL, "FlChill");
+        AT(MB_TOSTY, "FlHot");
+        AT(MB_MALE, "FlMale");
+        AT(MB_FEMALE, "FlFemale");
+        AT(MB_NEUTER, "FlNeuter");
+        AT(MB_STRONG, "FlStrong");
+        AT(MB_WINGS, "FlWings");
+        AT(MB_LONGHEAD, "FlAnimalHead");
+        AT(MB_LONGNECK, "FlLongNeck");
+#undef AT
+if ((pm->mflagsb & (MB_HUMANOID|MB_ANIMAL)) == (MB_HUMANOID|MB_ANIMAL)) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlCentauroid"); \
+} else if ((pm->mflagsb & (MB_HUMANOID|MB_SLITHY)) == (MB_HUMANOID|MB_SLITHY)) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlSnakeleg"); \
+} else if ((pm->mflagsb & (MB_ANIMAL|MB_SLITHY)) == (MB_ANIMAL|MB_SLITHY)) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlSnakeback"); \
+} else if (pm->mflagsb & (MB_HUMANOID)) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlHumanoid"); \
+} else if (pm->mflagsb & (MB_ANIMAL)) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlAnimalBody"); \
+} else if (pm->mflagsb & (MB_SLITHY)) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlSlithy"); \
+}
+#define AT(a, b) if (pm->mflagsv & a) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", b); \
+}
+        AT(MV_NORMAL, "FlNormalSight");
+        AT(MV_INFRAVISION, "FlInfravision");
+        AT(MV_DARKSIGHT, "FlDarkSight");
+        AT(MV_LOWLIGHT2, "FlLowLight2");
+        AT(MV_LOWLIGHT3, "FlLowLight3");
+        AT(MV_CATSIGHT, "FlCatsight");
+        AT(MV_ECHOLOCATE, "FlEcholocate");
+        AT(MV_BLOODSENSE, "FlBloodsense");
+        AT(MV_LIFESENSE, "FlLifesense");
+        AT(MV_EXTRAMISSION, "FlExtramission");
+        AT(MV_TELEPATHIC, "FlTelepathic");
+        AT(MV_RLYEHIAN, "FlRlyehianSight");
+        AT(MV_SEE_INVIS, "FlSeeInvis");
+        AT(MV_DETECTION, "FlDetection");
+        AT(MV_OMNI, "FlOmniscient");
+        AT(MV_SCENT, "FlScent");
+        AT(MV_EARTHSENSE, "FlEarthSense");
+#undef AT
+#define AT(a, b) if (pm->mflagsg & a) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", b); \
+}
+        AT(MG_REGEN, "FlRegen");
+        AT(MG_NOPOLY, "FlNoPoly");
+        AT(MG_MERC, "FlMerc");
+        AT(MG_PNAME, "FlProperName");
+        AT(MG_LORD, "FlLord");
+        AT(MG_PRINCE, "FlPrince");
+        AT(MG_NASTY, "FlNasty");
+        AT(MG_INFRAVISIBLE, "FlInfravisible");
+        AT(MG_OPAQUE, "FlOpaque");
+        AT(MG_DISPLACEMENT, "FlDisplacement");
+        AT(MG_HATESSILVER, "FlHatesSilver");
+        AT(MG_HATESIRON, "FlFlHatesIron");
+        AT(MG_HATESUNHOLY, "FlFlHatesCursed");
+        AT(MG_RIDER, "FlRiderRes");
+        AT(MG_DEADLY, "FlDeadly");
+        AT(MG_TRACKER, "FlTracker");
+        AT(MG_NOSPELLCOOLDOWN, "FlNoSpellCooldowns");
+#undef AT
+if ((pm->mflagsg & MG_WRESIST) == MG_WRESIST) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlMeleeResist"); \
+} else if ((pm->mflagsg & MG_RALL) == MG_RALL) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlResAll"); \
+} else if ((pm->mflagsg & MG_VPIERCE) == MG_VPIERCE) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlVulPierce"); \
+} else if ((pm->mflagsg & MG_VSLASH) == MG_VSLASH) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlVulSlash"); \
+} else if ((pm->mflagsg & MG_VBLUNT) == MG_VBLUNT) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlVulBlunt"); \
+} else if ((pm->mflagsg & MG_RPIERCE) == MG_RPIERCE) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlResPierce"); \
+} else if ((pm->mflagsg & MG_RSLASH) == MG_RSLASH) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlResSlash"); \
+} else if ((pm->mflagsg & MG_RBLUNT) == MG_RBLUNT) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", "FlResBlunt"); \
+}
+#define AT(a, b) if (pm->mflagsa & a) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", b); \
+}
+        AT(MA_UNDEAD, "FlUndead");
+        AT(MA_WERE, "FlWere");
+        AT(MA_HUMAN, "FlHuman");
+        AT(MA_ELF, "FlElf");
+        AT(MA_DROW, "FlDrow");
+        AT(MA_DWARF, "FlDwarf");
+        AT(MA_GNOME, "FlGnome");
+        AT(MA_ORC, "FlOrc");
+        AT(MA_VAMPIRE, "FlVampire");
+        AT(MA_CLOCK, "FlClockwork");
+        AT(MA_UNLIVING, "FlUnliving");
+        AT(MA_PLANT, "FlPlant");
+        AT(MA_GIANT, "FlGiant");
+        AT(MA_INSECTOID, "FlInsectiod");
+        AT(MA_ARACHNID, "FlArachnid");
+        AT(MA_AVIAN, "FlAvian");
+        AT(MA_REPTILIAN, "FlReptilian");
+        AT(MA_ANIMAL, "FlAnimal");
+        AT(MA_AQUATIC, "FlAquatic");
+        AT(MA_DEMIHUMAN, "FlDemihuman");
+        AT(MA_FEY, "FlFey");
+        AT(MA_ELEMENTAL, "FlElemental");
+        AT(MA_DRAGON, "FlDragon");
+        AT(MA_DEMON, "FlDemon");
+        AT(MA_MINION, "FlMinion");
+        AT(MA_PRIMORDIAL, "FlPrimordial");
+        AT(MA_ET, "FlET");
+#undef AT
+        if (passes_bars(pm)) {
+            if ( comma_set ) fprintf(f, ", ");
+            comma_set = 1;
+            fprintf(f, "FlPassesBars");
+        }
+        if (vegan(pm)) fprintf(f, ", FlVegan");
+        else if (vegetarian(pm)) fprintf(f, ", FlVegetarian");
+
+#endif /*DNETHACK*/
         }
         fprintf(f, "]\n");
         fprintf(f, "   color: ");
