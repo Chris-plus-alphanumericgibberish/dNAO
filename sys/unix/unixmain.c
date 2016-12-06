@@ -596,6 +596,11 @@ static int extract_data(int argc, char* argv[])
 
 static const char* detect_variant( const char** command_prefix )
 {
+#ifdef DNETHACK
+	/*Build system is different, just hard-code that if we're dealing w/ dNethack export dNethack*/
+	return "dNethack";
+#endif
+#ifndef DNETHACK
     const char* vid = VERSION_ID;
     if ( strstri( vid, "UnNetHackPlus" ) ) {
         (*command_prefix) = "u+";
@@ -613,7 +618,7 @@ static const char* detect_variant( const char** command_prefix )
         (*command_prefix) = "v";
         return "Vanilla";
     }
-
+#endif /*non-DNETHACK*/
     fprintf( stderr
            , "I don't know what variant this is. "
            "Replace module, data type name and command prefix manually. "
