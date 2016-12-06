@@ -543,8 +543,9 @@ char *name;
 
 
 /*** EXTRACTOR STUFF ***/
-
+#ifndef DNETHACK
 #include "date.h"
+#endif
 static void extract_monsterdata_to_yaml(
         FILE* f
       , const char* variant
