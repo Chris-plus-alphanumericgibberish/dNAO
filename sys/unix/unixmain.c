@@ -1505,6 +1505,22 @@ if ((pm->mflagsg & MG_WRESIST) == MG_WRESIST) { \
         }
         if (vegan(pm)) fprintf(f, ", FlVegan");
         else if (vegetarian(pm)) fprintf(f, ", FlVegetarian");
+#define AT(a, b) if (pm->msound == a) { \
+    if ( comma_set ) fprintf(f, ", "); \
+    comma_set = 1;\
+    fprintf(f, "%s", b); \
+}
+        AT(MS_SILENT, "MsSilent");
+        AT(MS_JUBJUB, "MsJubjub");
+        AT(MS_SHRIEK, "MsShriek");
+        AT(MS_BRIBE, "MsBribe");
+        AT(MS_DREAD, "MsDread");
+        AT(MS_OONA, "MsOona");
+        AT(MS_SONG, "MsSong");
+        AT(MS_INTONE, "MsIntone");
+        AT(MS_FLOWER, "MsFlower");
+        AT(MS_TRUMPET, "MsTrumpet");
+#undef AT
 
 #endif /*DNETHACK*/
         }
