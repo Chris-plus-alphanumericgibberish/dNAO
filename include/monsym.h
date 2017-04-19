@@ -113,7 +113,7 @@ extern uchar monsyms[MAXMCLASSES];		/* current class symbols */
 #define DEF_LIGHT	'y'
 #define DEF_ZRUTY	'z'
 #define DEF_LAW_ANGEL	'7'
-#define DEF_NEU_ANGEL	'0'
+#define DEF_NEU_ANGEL	'9'
 #define DEF_CHA_ANGEL	'A'
 #define DEF_BAT		'B'
 #define DEF_CENTAUR	'C'
