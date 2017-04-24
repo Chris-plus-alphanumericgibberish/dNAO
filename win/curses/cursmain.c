@@ -280,8 +280,9 @@ void curses_display_nhwindow(winid wid, BOOLEAN_P block)
 
     if ((wid == MESSAGE_WIN) && block)
     {
-      if (u.uhp != -1) (void) curses_block(TRUE);
-      /* don't bug player with TAB prompt on "Saving..." */
+      if (u.uhp != -1 && program_state.gameover != 1)
+          (void) curses_block(TRUE);
+      /* don't bug player with TAB prompt on "Saving..." or endgame*/
       else (void) curses_more();
     }
 
