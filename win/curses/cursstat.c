@@ -60,6 +60,7 @@ static nhstat prevmhp;
 static nhstat prevlevel;
 static nhstat prevpow;
 static nhstat prevmpow;
+static nhstat prevdive;
 static nhstat prevac;
 static nhstat prevexp;
 static nhstat prevtime;
@@ -502,6 +503,11 @@ void curses_update_stats(boolean redraw)
                 prevalign.txt = curses_copy_of("Chaotic");
                 break;
             }
+            case A_VOID:
+            {
+                prevalign.txt = curses_copy_of("Gnostic");
+                break;
+            }
         }
     }
 
@@ -591,51 +597,51 @@ void curses_update_stats(boolean redraw)
     if (prevau.label != NULL)
     {
         mvwaddstr(win, sy, sx, prevau.label);
-        sx += strlen(prevau.label);
-    }
-    
-    color_stat(prevau, ON);
-    mvwaddstr(win, sy, sx, prevau.txt);
-    color_stat(prevau, OFF);
-
-    if (horiz)
-    {
-        sx += strlen(prevau.txt) + 1;
-    }
-    else
-    {
-        sx = sx_start;
-        sy++;
-    }
-
-
-    /* Hit Points */
+		sx += strlen(prevau.label);
+	    }
 	    
-    if (u.mtimedone)    /* Currently polymorphed - show monster HP */
-    {
-	    hp = u.mh;
-	    hpmax = u.mhmax;
-	}
-	else    /* Not polymorphed */
-	{
-	    hp = u.uhp;
-	    hpmax = u.uhpmax;
-	}
-    
-	if (hp != prevhp.value)
-	{
-	    if (hp > prevhp.value)
+	    color_stat(prevau, ON);
+	    mvwaddstr(win, sy, sx, prevau.txt);
+	    color_stat(prevau, OFF);
+
+	    if (horiz)
 	    {
-	        prevhp.highlight_color = STAT_UP_COLOR;
+		sx += strlen(prevau.txt) + 1;
 	    }
 	    else
 	    {
-            prevhp.highlight_color = STAT_DOWN_COLOR;
+		sx = sx_start;
+		sy++;
 	    }
-        prevhp.value = hp;
-        if (prevhp.value < 0)
-        {
-            prevhp.value = 0;
+
+
+	    /* Hit Points */
+		    
+	    if (u.mtimedone)    /* Currently polymorphed - show monster HP */
+	    {
+		    hp = u.mh;
+		    hpmax = u.mhmax;
+		}
+		else    /* Not polymorphed */
+		{
+		    hp = u.uhp;
+		    hpmax = u.uhpmax;
+		}
+	    
+		if (hp != prevhp.value)
+		{
+		    if (hp > prevhp.value)
+		    {
+			prevhp.highlight_color = STAT_UP_COLOR;
+		    }
+		    else
+		    {
+		    prevhp.highlight_color = STAT_DOWN_COLOR;
+		    }
+		prevhp.value = hp;
+		if (prevhp.value < 0)
+		{
+		    prevhp.value = 0;
         }
         sprintf(buf, "%ld", prevhp.value);
         free(prevhp.txt);
@@ -757,6 +763,45 @@ void curses_update_stats(boolean redraw)
     if (horiz)
     {
         sx += strlen(prevmpow.txt) + 1;
+    }
+    else
+    {
+        sx = sx_start;
+        sy++;
+    }
+
+    /* Dive Timer */
+    if (u.divetimer != prevdive.value)  /* Dive Time changed */
+    {   
+
+        if (u.divetimer > prevdive.value)
+        {   
+            prevdive.highlight_color = STAT_UP_COLOR;
+        }
+        else
+        {   
+            prevdive.highlight_color = STAT_DOWN_COLOR;
+        }
+        prevdive.value = u.divetimer;
+        sprintf(buf, "%d", u.divetimer);
+        free(prevdive.txt);
+        prevdive.txt = curses_copy_of(buf);
+        prevdive.highlight_turns = 5;
+    }
+
+    if (prevdive.label != NULL)
+    {
+        mvwaddstr(win, sy, sx, prevdive.label);
+        sx += strlen(prevdive.label);
+    }
+    
+    color_stat(prevdive, ON);
+    mvwaddstr(win, sy, sx, prevdive.txt);
+    color_stat(prevdive, OFF);
+
+    if (horiz)
+    {
+        sx += strlen(prevint.txt) + 1;
     }
     else
     {
@@ -1824,6 +1869,11 @@ static void init_stats()
             prevalign.txt = curses_copy_of("Chaotic");
             break;
         }
+        case A_VOID:
+        {
+            prevalign.txt = curses_copy_of("Gnostic");
+            break;
+        }
     }
     
     prevalign.alignment = u.ualign.type;
@@ -1923,6 +1973,16 @@ static void init_stats()
     prevmpow.label = curses_copy_of("/");
     prevmpow.id = "mpw";
     set_stat_color(&prevmpow);
+
+    /* Dive Timer */
+    prevdive.value = u.divetimer;
+    sprintf(buf, "%d", u.divetimer);
+    prevdive.txt = curses_copy_of(buf);
+	prevdive.display = TRUE;
+	prevdive.highlight_turns = 0;
+    prevdive.label = NULL;
+    prevdive.id = "pw";
+    set_stat_color(&prevdive);
 
     /* Armor Class */
     prevac.value = u.uac;
@@ -2216,6 +2276,13 @@ static void set_labels(int label_width)
             }
             prevpow.label = curses_copy_of("Pw:");
             
+            /* Dive Timer */
+            if (prevdive.label)
+            {
+                free (prevdive.label);
+            }
+            prevdive.label = curses_copy_of("Br:");
+
             /* Armor Class */
             if (prevac.label)
             {
@@ -2350,6 +2417,13 @@ static void set_labels(int label_width)
             }
             prevpow.label = curses_copy_of("Pw:");
             
+            /* Dive Timer */
+            if (prevdive.label)
+            {
+                free (prevdive.label);
+            }
+            prevdive.label = curses_copy_of("Br:");
+
             /* Armor Class */
             if (prevac.label)
             {
@@ -2483,6 +2557,13 @@ static void set_labels(int label_width)
                 free (prevpow.label);
             }
             prevpow.label = curses_copy_of("Magic Power:   ");
+            
+            /* Dive Timer */
+            if (prevdive.label)
+            {
+                free (prevdive.label);
+            }
+            prevdive.label = curses_copy_of("Breath:        ");
             
             /* Armor Class */
             if (prevac.label)
@@ -2661,6 +2742,11 @@ static void color_stat(nhstat stat, int onoff)
             case A_CHAOTIC:
             {
                 stat_color = text_color_of("chaotic", text_colors);
+                break;
+            }
+            case A_VOID:
+            {
+                stat_color = text_color_of("gnostic", text_colors);
                 break;
             }
         }
