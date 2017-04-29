@@ -1166,6 +1166,7 @@ dogaze()
 		    /* No reflection check for consistency with when a monster
 		     * gazes at *you*--only medusa gaze gets reflected then.
 		     */
+		}
 		    switch (adtyp)
 			{
 			case AD_CONF:
