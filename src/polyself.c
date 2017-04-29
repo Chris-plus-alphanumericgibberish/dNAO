@@ -1095,22 +1095,36 @@ dogaze()
 	char qbuf[QBUFSZ];
 	int i;
 	uchar adtyp = 0;
-
+	static const int gazeattacks[] = { AD_DEAD, AD_CNCL, AD_PLYS, AD_DRLI, AD_ENCH, AD_STON, AD_LUCK,
+		AD_CONF, AD_SLOW, AD_STUN, AD_BLND, AD_FIRE, AD_FIRE,
+		AD_COLD, AD_COLD, AD_ELEC, AD_ELEC, AD_HALU, AD_SLEE };
+	static const int elementalgaze[] = { AD_FIRE, AD_COLD, AD_ELEC };
+	
 	for (i = 0; i < NATTK; i++) {
 	    if(youracedata->mattk[i].aatyp == AT_GAZE) {
 		adtyp = youracedata->mattk[i].adtyp;
 		break;
 	    }
 	}
-	if (adtyp != AD_CONF && adtyp != AD_FIRE) {
-	    impossible("gaze attack %d?", adtyp);
-	    return 0;
-	}
-
-
 	if (Blind) {
 	    You_cant("see anything to gaze at.");
 	    return 0;
+	}
+	// random gaze types
+	if (adtyp == AD_RGAZ)
+		adtyp = gazeattacks[rn2(SIZE(gazeattacks))];		//flat random member of gazeattacks. Currently only on beholder, a nopoly. Sometimes gives unsupported gaze types.
+	if (adtyp == AD_RETR)
+		adtyp = elementalgaze[rn2(SIZE(elementalgaze))];	//flat random member of elementalgaze
+	
+	// no minion making
+	if (adtyp == AD_SPOR || adtyp == AD_MIST) {
+		You("decide against populating the dungeon against you.");
+		return 0;
+	}
+
+	if (adtyp != AD_CONF && adtyp != AD_BLND && adtyp != AD_FIRE && adtyp != AD_COLD && adtyp != AD_ELEC && adtyp != AD_STDY) {
+		impossible("gaze attack %d?", adtyp);
+		return 0;
 	}
 	if (u.uen < 15) {
 	    You("lack the energy to use your special gaze!");
@@ -1152,29 +1166,69 @@ dogaze()
 		    /* No reflection check for consistency with when a monster
 		     * gazes at *you*--only medusa gaze gets reflected then.
 		     */
-		    if (adtyp == AD_CONF) {
-			if (!mtmp->mconf)
-			    Your("gaze confuses %s!", mon_nam(mtmp));
-			else
-			    pline("%s is getting more and more confused.",
-							Monnam(mtmp));
-			mtmp->mconf = 1;
-		    } else if (adtyp == AD_FIRE) {
-			int dmg = d(2,6);
-			You("attack %s with a fiery gaze!", mon_nam(mtmp));
-			if (resists_fire(mtmp)) {
-			    pline_The("fire doesn't burn %s!", mon_nam(mtmp));
-			    dmg = 0;
-			}
-			if((int) u.ulevel > rn2(20))
-			    (void) destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			if((int) u.ulevel > rn2(20))
-			    (void) destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
-			if((int) u.ulevel > rn2(25))
-			    (void) destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
-			if (dmg && !DEADMONSTER(mtmp)) mtmp->mhp -= dmg;
-			if (mtmp->mhp <= 0) killed(mtmp);
-		    }
+		    switch (adtyp)
+			{
+			case AD_CONF:
+				if (!mtmp->mconf) 
+					Your("gaze confuses %s!", mon_nam(mtmp));
+				else
+					pline("%s is getting more and more confused.", Monnam(mtmp));
+				mtmp->mconf = 1;
+				break;
+			case AD_BLND:
+				if (can_blnd(&youmonst, mtmp, AT_GAZE, (struct obj*)0) && dmg > 0)
+				{
+					Your("gaze blinds %s!", mon_nam(mtmp));
+					if ((dmg += mtmp->mblinded) > 127) dmg = 127;
+					mtmp->mblinded = dmg;
+					mtmp->mcansee = 0;
+					mtmp->mstrategy &= ~STRAT_WAITFORU;
+				}
+				break;
+			case AD_FIRE:
+				You("attack %s with a fiery gaze!", mon_nam(mtmp));
+				if (resists_fire(mtmp)) {
+					pline_The("fire doesn't burn %s!", mon_nam(mtmp));
+					dmg = 0;
+				}
+				if ((int)u.ulevel > rn2(20))
+					(void)destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
+				if ((int)u.ulevel > rn2(20))
+					(void)destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+				if ((int)u.ulevel > rn2(25))
+					(void)destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+				if (dmg && !DEADMONSTER(mtmp)) mtmp->mhp -= dmg;
+				if (mtmp->mhp <= 0) killed(mtmp);
+				break;
+			case AD_COLD:
+				You("attack %s with a freezing gaze!", mon_nam(mtmp));
+				if (resists_cold(mtmp)) {
+					pline_The("frost doesn't hurt %s!", mon_nam(mtmp));
+					dmg = 0;
+				}
+				if ((int)u.ulevel > rn2(20))
+					(void)destroy_mitem(mtmp, POTION_CLASS, AD_COLD);
+				if (dmg && !DEADMONSTER(mtmp)) mtmp->mhp -= dmg;
+				if (mtmp->mhp <= 0) killed(mtmp);
+				break;
+			case AD_ELEC:
+				You("attack %s with an electrifying gaze!", mon_nam(mtmp));
+				if (resists_elec(mtmp)) {
+					pline_The("shock doesn't zap %s!", mon_nam(mtmp));
+					dmg = 0;
+				}
+				if ((int)u.ulevel > rn2(20))
+					(void)destroy_mitem(mtmp, WAND_CLASS, AD_ELEC);
+				if ((int)u.ulevel > rn2(20))
+					(void)destroy_mitem(mtmp, RING_CLASS, AD_ELEC);
+				if (dmg && !DEADMONSTER(mtmp)) mtmp->mhp -= dmg;
+				if (mtmp->mhp <= 0) killed(mtmp);
+				break;
+			case AD_STDY:
+				You("study %s carefully.", mon_nam(mtmp));
+				mtmp->mstdy = max(dmg, mtmp->mstdy);
+				break;
+			} /* switch adtyp */
 		    /* For consistency with passive() in uhitm.c, this only
 		     * affects you if the monster is still alive.
 		     */
