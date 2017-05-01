@@ -399,7 +399,7 @@ void curses_add_menu(winid wid, int glyph, const ANY_P * identifier,
 {
     int curses_attr = curses_convert_attr(attr);
 
-    curses_add_nhmenu_item(wid, identifier, accelerator, group_accel,
+    curses_add_nhmenu_item(wid, glyph, identifier, accelerator, group_accel,
      curses_attr, str, presel);
 }
 
