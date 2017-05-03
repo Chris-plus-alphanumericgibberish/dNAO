@@ -982,7 +982,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	    int cnt = 40;
 		
 		// if(Race_if(PM_DROW) && mtmp->data == &mons[PM_AVATAR_OF_LOLTH] && !Role_if(PM_EXILE) && !mtmp->mpeaceful){
-		if(mtmp->data == &mons[PM_AVATAR_OF_LOLTH] && !mtmp->mpeaceful && strcmp(urole.cgod,"Lolth")){
+		if(mtmp->data == &mons[PM_AVATAR_OF_LOLTH] && !mtmp->mpeaceful && !strcmp(urole.cgod,"Lolth")){
 			u.ugangr[Align2gangr(A_CHAOTIC)]++;
 			angrygods(A_CHAOTIC);
 			return 1;
@@ -3204,7 +3204,7 @@ fire_um:
 	    case AD_COLD:
 cold_um:
 		pline("%s is covered in frost.", Monnam(mtmp));
-		if(resists_fire(mtmp)) {
+		if(resists_cold(mtmp)) {
 			shieldeff(mtmp->mx, mtmp->my);
 			pline("But %s resists the effects.",
 			    mhe(mtmp));
