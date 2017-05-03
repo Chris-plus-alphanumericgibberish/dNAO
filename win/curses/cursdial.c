@@ -25,6 +25,7 @@ typedef struct nhmi
     int line_num;   /* Line number on page where entry begins */
     int num_lines;  /* Number of lines entry uses on page */
     int count;      /* Count for selected item */
+    struct obj *obj; /* Object required for correct glyph rendering */
     struct nhmi *prev_item;    /* Pointer to previous entry */
     struct nhmi *next_item;    /* Pointer to next entry */
 } nhmenu_item;
@@ -588,7 +589,8 @@ void curses_add_nhmenu_item(winid wid, int glyph, const ANY_P *identifier,
     new_item->identifier = *identifier;
     new_item->accelerator = accelerator;
     new_item->group_accel = group_accel;
-    new_item->attr = attr;
+    new_item->attr = attr & ~1;
+    new_item->obj = attr & 1 ? identifier->a_obj : NULL;
     new_item->str = new_str;
     new_item->presel = presel;
     new_item->selected = FALSE;
@@ -1144,7 +1146,8 @@ static void menu_display_page(nhmenu *menu, WINDOW *win, int page_num)
         {
             /* stuff to display the glyph at line_num+1, start_col goes here */
             unsigned special; /*notused */
-            mapglyph(menu_item_ptr->glyph, &curletter, &color, &special, 0, 0);
+            mapglyph_obj(menu_item_ptr->glyph, &curletter, &color, &special,
+                                               u.ux, u.uy, menu_item_ptr->obj);
             curses_toggle_color_attr(win, color, NONE, ON);
             mvwaddch(win, menu_item_ptr->line_num + 1, start_col, curletter);
             curses_toggle_color_attr(win, color, NONE, OFF);
