@@ -1885,13 +1885,15 @@ register struct obj *obj;
 		pline("That's too insubstantial to tin.");
 		return;
 	}
-	consume_obj_charge(obj, TRUE);
-	if(!(Race_if(PM_VAMPIRE) || Race_if(PM_INCANTIFIER) || 
-			Race_if(PM_CLOCKWORK_AUTOMATON))
-		|| yn("This corpse does not have blood. Tin it?") == 'y'
-	){
+	
+	static const char you_buy_it[] = "You tin it, you bought it!";
+
+	if (mons[corpse->corpsenm].cnutrit && !(mvitals[corpse->corpsenm].mvflags & G_NOCORPSE) && has_blood(&mons[corpse->corpsenm]) ?
+		!(Race_if(PM_VAMPIRE) || Race_if(PM_INCANTIFIER) || Race_if(PM_CLOCKWORK_AUTOMATON)) && yn("Tin this corpse?") == 'y' :
+		yn("This corpse does not have blood. Tin it?") == 'y'
+		){
+		//tin
 		if ((can = mksobj(TIN, FALSE, FALSE)) != 0) {
-			static const char you_buy_it[] = "You tin it, you bought it!";
 
 			can->corpsenm = corpse->corpsenm;
 			can->cursed = obj->cursed;
@@ -1899,32 +1901,40 @@ register struct obj *obj;
 			can->owt = weight(can);
 			can->known = 1;
 			can->spe = -1;  /* Mark tinned tins. No spinach allowed... */
-			if(mons[corpse->corpsenm].cnutrit 
-				&& !(mvitals[corpse->corpsenm].mvflags & G_NOCORPSE)
-				&& has_blood(&mons[corpse->corpsenm])
-			){
-				if ((bld = mksobj(POT_BLOOD, FALSE, FALSE)) != 0) {
-					bld->corpsenm = corpse->corpsenm;
-					bld->cursed = obj->cursed;
-					bld->blessed = obj->blessed;
-					bld->known = 1;
-				}
-			}
-			if (carried(corpse)) {
-			if (corpse->unpaid)
-				verbalize(you_buy_it);
-			useup(corpse);
-			} else {
-			if (costly_spot(corpse->ox, corpse->oy) && !corpse->no_charge)
-				verbalize(you_buy_it);
-			useupf(corpse, 1L);
-			}
+
 			can = hold_another_object(can, "You make, but cannot pick up, %s.",
-						  doname(can), (const char *)0);
-			bld = hold_another_object(bld, "You make, but cannot pick up, %s.",
-						  doname(bld), (const char *)0);
-		} else impossible("Tinning failed.");
+				doname(can), (const char *)0);
+		}
+		else impossible("Tinning failed.");
 	}
+	else if (mons[corpse->corpsenm].cnutrit && !(mvitals[corpse->corpsenm].mvflags & G_NOCORPSE) && has_blood(&mons[corpse->corpsenm])) {
+		//potion
+		if ((bld = mksobj(POT_BLOOD, FALSE, FALSE)) != 0) {
+			bld->corpsenm = corpse->corpsenm;
+			bld->cursed = obj->cursed;
+			bld->blessed = obj->blessed;
+			bld->known = 1;
+
+			bld = hold_another_object(bld, "You make, but cannot pick up, %s.",
+				doname(bld), (const char *)0);
+		}
+		else impossible("Tinning failed.");
+	}
+	else
+		return;
+
+	if (carried(corpse)) {
+		if (corpse->unpaid)
+			verbalize(you_buy_it);
+		useup(corpse);
+	}
+	else {
+		if (costly_spot(corpse->ox, corpse->oy) && !corpse->no_charge)
+			verbalize(you_buy_it);
+		useupf(corpse, 1L);
+	}
+	consume_obj_charge(obj, TRUE);
+	return;
 }
 
 void
