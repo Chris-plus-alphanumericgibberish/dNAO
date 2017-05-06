@@ -21,9 +21,7 @@ typedef struct nhpm {
 static void scroll_window(winid wid);
 static void unscroll_window(winid wid);
 static void directional_scroll(winid wid, int nlines);
-
 static void mesg_add_line(char *mline);
-
 static nhprev_mesg *get_msg_line(boolean reverse, int mindex);
 
 static int turn_lines = 1;
