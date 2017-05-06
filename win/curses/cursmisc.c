@@ -620,7 +620,6 @@ int
 curses_convert_attr(int attr)
 {
     int curses_attr;
-
     switch (attr) {
     case ATR_NONE:
         curses_attr = A_NORMAL;

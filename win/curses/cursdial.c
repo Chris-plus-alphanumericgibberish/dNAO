@@ -845,8 +845,7 @@ menu_win_size(nhmenu *menu)
     maxheight = menu_max_height();
 
     /* First, determine the width of the longest menu entry */
-    while (menu_item_ptr != NULL)
-    {
+    while (menu_item_ptr != NULL) {
         if (menu_item_ptr->identifier.a_void == NULL) {
             curentrywidth = strlen(menu_item_ptr->str);
 
@@ -856,6 +855,9 @@ menu_win_size(nhmenu *menu)
         } else {
             /* Add space for accelerator */
             curentrywidth = strlen(menu_item_ptr->str) + 4;
+            if (menu_item_ptr->glyph != NO_GLYPH
+                        && iflags.use_menu_glyphs)
+                curentrywidth += 2;
         }
         if (curentrywidth > maxentrywidth) {
             maxentrywidth = curentrywidth;
