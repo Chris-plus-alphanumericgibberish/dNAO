@@ -664,6 +664,7 @@ curses_update_stats(boolean redraw)
 
 /* Decrement a single highlight, return 1 if decremented to zero */
 
+<<<<<<< HEAD
 static int
 decrement_highlight(nhstat *stat)
 {
@@ -679,6 +680,7 @@ decrement_highlight(nhstat *stat)
 /* Decrement the highlight_turns for all stats.  Call curses_update_stats
 if needed to unhighlight a stat */
 
+<<<<<<< HEAD
 void
 curses_decrement_highlight()
 {
