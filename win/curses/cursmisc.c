@@ -544,7 +544,6 @@ void curses_move_cursor(winid wid, int x, int y)
     {
         return;
     }
-
 #ifdef PDCURSES
     /* PDCurses seems to not handle wmove correctly, so we use move and
     physical screen coordinates instead */
