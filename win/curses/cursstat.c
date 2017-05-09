@@ -421,7 +421,7 @@ curses_update_stats(boolean redraw)
 
     statchange(&prevhp, hp, STAT_HPEN);
     statchange(&prevmhp, hpmax, STAT_OTHER);
-    statchange(&prevdive, u.value, STAT_HPEN);
+    statchange(&prevdive, u.divetimer, STAT_HPEN);
     statchange(&prevpow, u.uen, STAT_HPEN);
     statchange(&prevmpow, u.uenmax, STAT_OTHER);
     statchange(&prevac, u.uac, STAT_AC);
@@ -664,7 +664,6 @@ curses_update_stats(boolean redraw)
 
 /* Decrement a single highlight, return 1 if decremented to zero */
 
-<<<<<<< HEAD
 static int
 decrement_highlight(nhstat *stat)
 {
@@ -680,7 +679,6 @@ decrement_highlight(nhstat *stat)
 /* Decrement the highlight_turns for all stats.  Call curses_update_stats
 if needed to unhighlight a stat */
 
-<<<<<<< HEAD
 void
 curses_decrement_highlight()
 {
