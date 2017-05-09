@@ -96,20 +96,22 @@ handle_stat_change(nhstat *stat, int new, int type,
     char buf[BUFSZ];
     WINDOW *win = curses_get_nhwin(STATUS_WIN);
 
-    /* Turncount isn't highlighted, or it would be highlighted constantly.
-       Also note that these colors can be ignored if statuscolors is enabled
+    /* Note that these colors can be ignored if statuscolors is enabled
        in color_stat() */
-    if (new != stat->value && type != STAT_TIME) {
-        /* Less AC is better */
-        if ((type == STAT_AC && new < stat->value) ||
-            (type != STAT_AC && new > stat->value)) {
-            if (type == STAT_GOLD) {
-                stat->highlight_color = HI_GOLD;
+    if (new != stat->value) {
+        /* Turncount isn't highlighted, or it would be highlighted constantly. */
+        if (type != STAT_TIME) {
+            /* Less AC is better */
+            if ((type == STAT_AC && new < stat->value) ||
+                (type != STAT_AC && new > stat->value)) {
+                if (type == STAT_GOLD) {
+                    stat->highlight_color = HI_GOLD;
+                } else {
+                    stat->highlight_color = STAT_UP_COLOR;
+                }
             } else {
-                stat->highlight_color = STAT_UP_COLOR;
+                stat->highlight_color = STAT_DOWN_COLOR;
             }
-        } else {
-            stat->highlight_color = STAT_DOWN_COLOR;
         }
         stat->value = new;
 
@@ -128,9 +130,11 @@ handle_stat_change(nhstat *stat, int new, int type,
 
         free(stat->txt);
         stat->txt = curses_copy_of(buf);
-        stat->highlight_turns = 5;
-        if (type == STAT_HPEN) {
-            stat->highlight_turns = 3;
+        if (type != STAT_TIME) {
+            stat->highlight_turns = 5;
+            if (type == STAT_HPEN) {
+                stat->highlight_turns = 3;
+            }
         }
     }
 
@@ -421,7 +425,7 @@ curses_update_stats(boolean redraw)
 
     statchange(&prevhp, hp, STAT_HPEN);
     statchange(&prevmhp, hpmax, STAT_OTHER);
-    statchange(&prevdive, u.divetimer, STAT_HPEN);
+    statchange(&prevdive, u.divetimer, STAT_OTHER);
     statchange(&prevpow, u.uen, STAT_HPEN);
     statchange(&prevmpow, u.uenmax, STAT_OTHER);
     statchange(&prevac, u.uac, STAT_AC);
@@ -942,7 +946,7 @@ init_stats()
     prevdive.display = TRUE;
     prevdive.highlight_turns = 0;
     prevdive.label = NULL;
-    prevdive.id = "pw";
+    prevdive.id = "br";
     set_stat_color(&prevdive);
 
     /* Armor Class */
