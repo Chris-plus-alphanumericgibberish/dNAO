@@ -782,12 +782,17 @@ curses_choose_character()
                     pickmap[n++] = i;
                 }
             }
-            if (n > 0) break;
-            else if (flags.initalign >= 0) flags.initalign = -1;    /* reset */
-            else if (flags.initgend >= 0) flags.initgend = -1;
-            else if (flags.initrace >= 0) flags.initrace = -1;
-            else panic("no available ROLE+race+gender+alignment combinations");
-	}
+            if (n > 0)
+                break;
+            else if (flags.initalign >= 0)
+                flags.initalign = -1;   /* reset */
+            else if (flags.initgend >= 0)
+                flags.initgend = -1;
+            else if (flags.initrace >= 0)
+                flags.initrace = -1;
+            else
+                panic("no available ROLE+race+gender+alignment combinations");
+        }
         choices[n] = (const char *) 0;
         if (n > 1)
             sel =
@@ -811,7 +816,7 @@ curses_choose_character()
     if (sel == ROLE_RANDOM) {   /* Random role */
         sel = pick_role(flags.initrace, flags.initgend,
                         flags.initalign, PICK_RANDOM);
-	if (sel < 0) sel = randrole(0);
+        if (sel < 0) sel = randrole(0);
     }
 
     flags.initrole = sel;

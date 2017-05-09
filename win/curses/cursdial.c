@@ -321,7 +321,7 @@ curses_ext_cmd()
     
     startx = 0;
     starty = 0;
-    if (iflags.wc_popup_dialog) {       /* Prompt in popup window */
+    if (iflags.wc_popup_dialog) { /* Prompt in popup window */
         int x0, y0, w, h; /* bounding coords of popup */
         extwin2 = curses_create_window(25, 1, UP);
         wrefresh(extwin2);
@@ -340,7 +340,7 @@ curses_ext_cmd()
         }
 
         winy += messageh - 1;
-        extwin = newwin(1, messagew - 2, winy, winx);
+        extwin = newwin(1, messagew-2, winy, winx);
         if (messagew - 4 < maxlen) maxlen = messagew - 4;
         pline("#");
     }
@@ -988,7 +988,7 @@ menu_display_page(nhmenu *menu, WINDOW * win, int page_num)
             entry_cols -= 4;
             start_col += 4;
         }
-        if (menu_item_ptr->glyph != NO_GLYPH) {
+        if (menu_item_ptr->glyph != NO_GLYPH && iflags.use_menu_glyphs) {
             unsigned special;   /*notused */
             mapglyph(menu_item_ptr->glyph, &curletter, &color, &special, u.ux, u.uy);
             curses_toggle_color_attr(win, color, NONE, ON);

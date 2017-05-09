@@ -341,7 +341,6 @@ curses_count_window(const char *count_text)
     wrefresh(countwin);
 }
 
-
 	/* Gets a "line" (buffer) of input. */
 void
 curses_message_win_getline(const char *prompt, char *answer, int buffer)
@@ -501,7 +500,6 @@ curses_message_win_getline(const char *prompt, char *answer, int buffer)
 }
 
 /* Scroll lines upward in given window, or clear window if only one line. */
-
 static void
 scroll_window(winid wid)
 {
