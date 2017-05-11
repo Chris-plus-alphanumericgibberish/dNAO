@@ -53,11 +53,7 @@ static nhstat prevdex;
 static nhstat prevcon;
 static nhstat prevcha;
 static nhstat prevau;
-static nhstat prevhp;
-static nhstat prevmhp;
 static nhstat prevlevel;
-static nhstat prevpow;
-static nhstat prevmpow;
 static nhstat prevdive;
 static nhstat prevac;
 static nhstat prevexp;
@@ -786,11 +782,7 @@ decrement_highlights(boolean zero)
     unhighlight |= decrement_highlight(&prevwis, zero);
     unhighlight |= decrement_highlight(&prevcha, zero);
     unhighlight |= decrement_highlight(&prevau, zero);
-    unhighlight |= decrement_highlight(&prevhp, zero);
-    unhighlight |= decrement_highlight(&prevmhp, zero);
     unhighlight |= decrement_highlight(&prevlevel, zero);
-    unhighlight |= decrement_highlight(&prevpow, zero);
-    unhighlight |= decrement_highlight(&prevmpow, zero);
     unhighlight |= decrement_highlight(&prevdive, zero);
     unhighlight |= decrement_highlight(&prevac, zero);
 #ifdef EXP_ON_BOTL
