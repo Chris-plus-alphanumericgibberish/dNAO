@@ -32,7 +32,6 @@ static void decrement_highlights(boolean);
 
 #ifdef STATUS_COLORS
 static attr_t hpen_color_attr(boolean, int, int);
-
 extern struct color_option text_color_of(const char *text,
                                          const struct text_color_option *color_options);
 struct color_option percentage_color_of(int value, int max,
@@ -67,10 +66,6 @@ static nhstat prevtime;
 #ifdef SCORE_ON_BOTL
 static nhstat prevscore;
 #endif
-
-#define COMPACT_LABELS  1
-#define NORMAL_LABELS   2
-#define WIDE_LABELS     3
 
 extern const char *hu_stat[];   /* from eat.c */
 extern const char *enc_stat[];  /* from botl.c */
@@ -167,7 +162,6 @@ get_playerrank(char *rank)
 /* Handles numerical stat changes of various kinds.
    type is generally STAT_OTHER (generic "do nothing special"),
    but is used if the stat needs to be handled in a special way. */
-
 static void
 print_statdiff(const char *append, nhstat *stat, int new, int type)
 {
@@ -322,7 +316,7 @@ curses_color_attr(int nh_color, int bg_color)
     return cattr;
 }
 
-/* Returns a complete curses attribute. Used to color HP/Pw text. */
+/* Returns a complete curses attribute. Used to possibly bold/underline/etc HP/Pw. */
 #ifdef STATUS_COLORS
 static attr_t
 hpen_color_attr(boolean is_hp, int cur, int max)
