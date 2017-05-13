@@ -51,7 +51,7 @@ SYSUNIXOBJ = unixmain.o unixres.o unixunix.o
 SYSSHAREOBJ = ioctl.o unixtty.o
 WINTTYOBJ = getline.o termcap.o topl.o wintty.o
 WINCURSESOBJ = cursdial.o cursinit.o cursmain.o cursmesg.o cursmisc.o	\
-               cursstat.o curswins.o
+               cursstat.o curswins.o cursinvt.o
 
 GAME_O = $(SRCOBJ:%.o=src/%.o) $(SYSUNIXOBJ:%.o=sys/unix/%.o)	\
          $(SYSSHAREOBJ:%.o=sys/share/%.o)			\

@@ -503,7 +503,7 @@ curses_add_nhmenu_item(winid wid, int glyph, const ANY_P * identifier,
     new_item->identifier = *identifier;
     new_item->accelerator = accelerator;
     new_item->group_accel = group_accel;
-    new_item->attr = attr & ~1;
+    new_item->attr = attr;
     new_item->str = new_str;
     new_item->presel = presel;
     new_item->selected = FALSE;
