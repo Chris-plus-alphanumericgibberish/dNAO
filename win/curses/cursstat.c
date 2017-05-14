@@ -811,7 +811,7 @@ draw_vertical(int x, int y, int hp, int hpmax)
     wattroff(win, pwattr);
     wmove(win, y++, x);
 
-    print_statdiff("Breath:   ", &prevdive, u.divetimer, STAT_OTHER);
+    print_statdiff("Breath:        ", &prevdive, u.divetimer, STAT_OTHER);
     wmove(win, y++, x);
     print_statdiff("Armor Class:   ", &prevac, u.uac, STAT_AC);
     wmove(win, y++, x);
