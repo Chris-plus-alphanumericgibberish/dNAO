@@ -733,6 +733,7 @@ E boolean FDECL(allied_faction, (int,int));
 
 /* ### exper.c ### */
 
+E long FDECL(newuexp, (int));
 E int FDECL(experience, (struct monst *,int));
 E int FDECL(ptrexperience, (struct permonst *));
 E void FDECL(more_experienced, (int,int));
