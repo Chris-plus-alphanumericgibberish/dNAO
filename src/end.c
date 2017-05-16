@@ -895,7 +895,7 @@ die:
                 dump("", pbuf);
                 /* D: Add a line for clearance from the screen dump */
 	        dump("", "");
-	        dump_screen();
+	        dump_screen(0);
             }
         }
 #endif /* DUMP_LOG */
