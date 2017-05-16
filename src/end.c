@@ -173,14 +173,15 @@ dump_init ()
     char new_dump_fn[512];
     Sprintf(new_dump_fn, "%s", dump_format_str(dump_fn));
 
-    dump_fp = fopen(new_dump_fn, "w");
-#ifdef UNIX
-    chmod(new_dump_fn, dumpmode);
-#endif
+    dump_fp = fopen (new_dump_fn, "w");
     if (!dump_fp) {
       pline("Can't open %s for output.", new_dump_fn);
       pline("Dump file not created.");
+      return;
     }
+#if defined(UNIX) && defined(DGAMELAUNCH)
+    chmod(new_dump_fn, dumpmode);
+#endif
   }
 }
 
@@ -882,19 +883,21 @@ die:
 	program_state.something_worth_saving = 0;
 #ifdef DUMP_LOG
 	/* D: Grab screen dump right here */
-	if (dump_fn[0]) {
-	  dump_init();
-	  Sprintf(pbuf, "%s, %s %s %s %s", plname,
-		  aligns[1 - u.ualign.type].adj,
-		  genders[flags.female].adj,
-		  urace.adj,
-		  (flags.female && urole.name.f)?
-		   urole.name.f : urole.name.m);
-	  dump("", pbuf);
-	  /* D: Add a line for clearance from the screen dump */
-	  dump("", "");
-	  dump_screen(0);
-	}
+        if (dump_fn[0]) {
+            dump_init();
+            if (dump_fp) {
+                Sprintf(pbuf, "%s, %s %s %s %s", plname,
+                        aligns[1 - u.ualign.type].adj,
+                        genders[flags.female].adj,
+                        urace.adj,
+                        (flags.female && urole.name.f)?
+                        urole.name.f : urole.name.m);
+                dump("", pbuf);
+                /* D: Add a line for clearance from the screen dump */
+	        dump("", "");
+	        dump_screen();
+            }
+        }
 #endif /* DUMP_LOG */
 
 #ifdef WHEREIS_FILE
