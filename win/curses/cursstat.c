@@ -624,15 +624,28 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
         print_statdiff(" HD:", &prevlevel, mons[u.umonnum].mlevel, STAT_OTHER);
 #ifdef EXP_ON_BOTL
     else if (flags.showexp) {
+        /* Ensure that Xp have proper highlight on level change. */
+        int levelchange = 0;
+        if (prevlevel.value != u.ulevel) {
+            if (prevlevel.value < u.ulevel)
+                levelchange = 1;
+            else
+                levelchange = 2;
+        }
         print_statdiff(" Xp:", &prevlevel, u.ulevel, STAT_OTHER);
         /* use waddch, we don't want to highlight the '/' */
         waddch(win, '(');
 
         /* Figure out amount of Xp needed to next level */
         int xp_left = 0;
-        if (u.ulevel < 29)
+        if (u.ulevel < 30)
             xp_left = (newuexp(u.ulevel) - u.uexp);
 
+        if (levelchange) {
+            prevexp.value = (xp_left + 1);
+            if (levelchange == 2)
+                prevexp.value = (xp_left - 1);
+        }
         print_statdiff("", &prevexp, xp_left, STAT_AC);
         waddch(win, ')');
 #endif
