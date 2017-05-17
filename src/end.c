@@ -179,7 +179,7 @@ dump_init ()
       pline("Dump file not created.");
       return;
     }
-#if defined(UNIX) && defined(DGAMELAUNCH)
+#if defined(UNIX)
     chmod(new_dump_fn, dumpmode);
 #endif
   }
