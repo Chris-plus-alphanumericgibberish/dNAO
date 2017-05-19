@@ -473,7 +473,7 @@ typedef long glyph_t;
 
 /* Write out player's current location to this file.
    Can be left undefined, which will disable the feature. */
-/* #define WHEREIS_FILE "whereis/%n.whereis" */
+#define WHEREIS_FILE "whereis/%n.whereis"
 
 #define USER_DUNGEONCOLOR
 
