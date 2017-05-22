@@ -1395,32 +1395,37 @@ register struct obj *obj;
 #define Au		19
 #define Pt		21
 #define Mi		2
-		if(objects[obj->otyp].oc_material == SILVER){
-			if(obj->obj_material == GOLD) wt *= (Au/Ag);
-			else if(obj->obj_material == PLATINUM) wt *= (Pt/Ag);
-			else if(obj->obj_material == MITHRIL) wt = wt/(Ag/Mi) + 1;
-			else /*treat it as if it's steel*/ wt = wt/(Ag/Fe) + 1;
-		} else if(objects[obj->otyp].oc_material == GOLD){
-			if(obj->obj_material == SILVER) wt = wt/(Au/Ag) + 1;
-			else if(obj->obj_material == PLATINUM) wt *= (Pt/Au);
-			else if(obj->obj_material == MITHRIL) wt = wt/(Au/Mi) + 1;
-			else /*treat it as if it's steel*/ wt = wt/(Au/Fe) + 1;
-		} else if(objects[obj->otyp].oc_material == PLATINUM){
-			if(obj->obj_material == SILVER) wt = wt/(Pt/Ag) + 1;
-			else if(obj->obj_material == GOLD) wt = wt/(Pt/Au) + 1;
-			else if(obj->obj_material == MITHRIL) wt = wt/(Pt/Mi) + 1;
-			else /*treat it as if it's steel*/ wt = wt/(Pt/Fe) + 1;
-		} else if(objects[obj->otyp].oc_material == MITHRIL){
-			if(obj->obj_material == SILVER) wt *= (Ag/Mi);
-			else if(obj->obj_material == GOLD) wt *= (Au/Mi);
-			else if(obj->obj_material == PLATINUM) wt *= (Pt/Mi);
-			else /*treat it as if it's steel*/ wt *= (Fe/Mi);
-		} else { /*treat it as if it's steel*/
-			if(obj->obj_material == SILVER) wt *= (Ag/Fe);
-			else if(obj->obj_material == GOLD) wt *= (Au/Fe);
-			else if(obj->obj_material == PLATINUM) wt *= (Pt/Fe);
-			else if(obj->obj_material == MITHRIL) wt = wt/(Fe/Mi) + 1;
-			/*treat it as if it's still steel, leave it alone*/
+		switch (obj->obj_material){
+			case SILVER:
+				wt *= Ag;
+				break;
+			case GOLD:	
+				wt *= Au;
+				break;
+			case PLATINUM:
+				wt *= Pt;
+				break;
+			case MITHRIL:
+				wt *= Mi;
+				break;
+			default:	//treat as if steel
+				wt *= Fe;
+		}
+		switch (objects[obj->otyp].oc_material){
+			case SILVER:
+				wt = wt/Ag;
+				break;
+			case GOLD:
+				wt = wt/Au;
+				break;
+			case PLATINUM:
+				wt = wt/Pt;
+				break;
+			case MITHRIL:
+				wt = wt/Mi;
+				break;
+			default:	//treat as if steel
+				wt = wt/Fe;
 		}
 	}
 	
