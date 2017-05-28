@@ -945,8 +945,8 @@ unsigned int type;
 	break;
 	}
     if (type == AD_CLRC)
-        return choose_clerical_spell(rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
-    return choose_magic_spell(rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
+        return choose_clerical_spell(mtmp->m_id == 0 ? (rn2(u.ulevel) * 18 / 30) : rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
+    return choose_magic_spell(mtmp->m_id == 0 ? (rn2(u.ulevel) * 24 / 30) : rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
 }
 
 /* return values:
@@ -2912,14 +2912,18 @@ uspell_would_be_useless(mdef, spellnum)
 struct monst *mdef;
 int spellnum;
 {
-	int wardAt = ward_at(mdef->mx, mdef->my);
-	
-	/*Don't cast at warded spaces*/
-	if(onscary(mdef->mx, mdef->my, &youmonst) && !is_undirected_spell(spellnum))
-		return TRUE;
-	
-	if(spellnum == DEATH_TOUCH && (wardAt == CIRCLE_OF_ACHERON || wardAt == HEPTAGRAM || wardAt == HEXAGRAM))
-		return TRUE;
+	/* do not check for wards on target if given no target */
+	if (mdef)
+	{
+		int wardAt = ward_at(mdef->mx, mdef->my);
+
+		/*Don't cast at warded spaces*/
+		if (onscary(mdef->mx, mdef->my, &youmonst) && !is_undirected_spell(spellnum))
+			return TRUE;
+
+		if (spellnum == DEATH_TOUCH && (wardAt == CIRCLE_OF_ACHERON || wardAt == HEPTAGRAM || wardAt == HEXAGRAM))
+			return TRUE;
+	}
 	
 	/* PC drow can't be warded off this way */
 	
@@ -3103,6 +3107,10 @@ castum(mtmp, mattk)
 		return 0;
 	    }
 	}
+	else if (!mtmp) {
+		You("have no spells to cast right now!");
+		return 0;
+	}
 
 	if (spellnum == AGGRAVATION && !mtmp)
 	{
@@ -3280,6 +3288,7 @@ int spellnum;
 	else if(spellnum == SUMMON_ANGEL) spellnum = CURE_SELF;
 	else if(spellnum == SUMMON_ALIEN) spellnum = CURE_SELF;
 	else if(spellnum == SUMMON_DEVIL) spellnum = CURE_SELF;
+	else if(spellnum == INSECTS) spellnum = CURE_SELF;
     switch (spellnum) {
     case DEATH_TOUCH:
 	if (!mtmp || mtmp->mhp < 1) {
@@ -3373,6 +3382,8 @@ int spellnum;
 			if (!munstone(mtmp, yours))
 				minstapetrify(mtmp, yours);
 		   }
+		   else
+			goto uspsibolt;
         }
 		dmg = 0;
 	 stop_occupation();
