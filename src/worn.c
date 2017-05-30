@@ -185,8 +185,10 @@ long mask;
 		}
 	    }
 	}
-	if(!restoring) see_monsters(); //More objects than just artifacts grant warning now, and this is a convienient place to add a failsafe see_monsters check
-	update_inventory();
+	if(!restoring) {
+            see_monsters(); //More objects than just artifacts grant warning now, and this is a convienient place to add a failsafe see_monsters check
+            update_inventory();
+        }
 }
 
 /* called e.g. when obj is destroyed */

@@ -21,6 +21,7 @@ boolean counting;   /* Count window is active */
 #define NONE -1
 #define KEY_ESC 0x1b
 #define DIALOG_BORDER_COLOR CLR_MAGENTA
+#define ALERT_BORDER_COLOR CLR_RED
 #define SCROLLBAR_COLOR CLR_MAGENTA
 #define SCROLLBAR_BACK_COLOR CLR_BLACK
 #define HIGHLIGHT_COLOR CLR_WHITE
@@ -30,7 +31,8 @@ boolean counting;   /* Count window is active */
 #define MESSAGE_WIN 1
 #define STATUS_WIN  2
 #define MAP_WIN     3
-#define NHWIN_MAX   4
+#define INV_WIN     4
+#define NHWIN_MAX   5
 #define MESG_HISTORY_MAX   200
 #if !defined(__APPLE__) || !defined(NCURSES_VERSION)
 # define USE_DARKGRAY /* Allow "bright" black; delete if not visible */
@@ -178,6 +180,10 @@ extern void curses_puts(winid wid, int attr, const char *text);
 
 extern void curses_clear_nhwin(winid wid);
 
+extern void curses_alert_win_border(winid wid, boolean onoff);
+
+extern void curses_alert_main_borders(boolean onoff);
+
 extern void curses_draw_map(int sx, int sy, int ex, int ey);
 
 extern boolean curses_map_borders(int *sx, int *sy, int *ex, int *ey,
@@ -237,8 +243,10 @@ extern int curses_character_input_dialog(const char *prompt, const char *choices
 extern int curses_ext_cmd(void);
 
 extern void curses_create_nhmenu(winid wid);
-
-extern void curses_add_nhmenu_item(winid wid, const ANY_P *identifier,
+#ifdef MENU_COLOR
+extern boolean get_menu_coloring(char *, int *, int *);
+#endif
+extern void curses_add_nhmenu_item(winid wid, int glyph, const ANY_P *identifier,
  CHAR_P accelerator, CHAR_P group_accel, int attr, const char *str,
  BOOLEAN_P presel);
 
@@ -253,10 +261,15 @@ extern void curses_del_menu(winid wid);
 
 /* cursstat.c */
 
-extern void curses_update_stats(boolean redraw);
+extern attr_t curses_color_attr(int nh_color, int bg_color);
+extern void curses_update_stats(void);
 
 extern void curses_decrement_highlight(void);
 
+/* cursinvt.c */
+
+extern void curses_update_inv(void);
+extern void curses_add_inv(int, int, CHAR_P, attr_t, const char *);
 
 /* cursinit.c */
 
@@ -279,9 +292,13 @@ extern void curses_cleanup(void);
 
 extern void curses_message_win_puts(const char *message, boolean recursed);
 
+extern int curses_block(boolean require_tab); /* for MSGTYPE=STOP */
+
 extern int curses_more(void);
 
 extern void curses_clear_unhighlight_message_window(void);
+
+extern void curses_message_win_getline(const char *prompt, char *answer, int buffer);
 
 extern void curses_last_messages(void);
 

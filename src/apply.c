@@ -1885,8 +1885,8 @@ register struct obj *obj;
 		pline("That's too insubstantial to tin.");
 		return;
 	}
-	
-	static const char you_buy_it[] = "You tin it, you bought it!";
+
+  static const char you_buy_it[] = "You tin it, you bought it!";
 
 	if (mons[corpse->corpsenm].cnutrit && !(mvitals[corpse->corpsenm].mvflags & G_NOCORPSE) && has_blood(&mons[corpse->corpsenm]) ?
 		!(Race_if(PM_VAMPIRE) || Race_if(PM_INCANTIFIER) || Race_if(PM_CLOCKWORK_AUTOMATON)) && yn("Tin this corpse?") == 'y' :
