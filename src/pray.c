@@ -2534,6 +2534,11 @@ dosacrifice()
 			u.reconciled = REC_NONE;
 			u.lastprayresult = PRAY_GIFT;
 		    exercise(A_WIS, TRUE);
+		    if (!flags.debug && otmp->oartifact) {
+				char llog[BUFSZ+22];
+				Sprintf(llog, "was given \"%s\"", the(artilist[otmp->oartifact].name));
+				livelog_write_string(llog);
+		    }
 		    /* make sure we can use this weapon */
 		    unrestrict_weapon_skill(weapon_type(otmp));
 		    discover_artifact(otmp->oartifact);
