@@ -3702,11 +3702,13 @@ describe_ward(floorID)
 int floorID;
 {
 	winid datawin;
-	char name[80];
-	char strokes[80];
-	char warded[80];
-	char reinforce[80];
-	char secondary[80];
+	char name[80] = "";
+	char strokes[80] = "";
+	char warded[80] = "";
+	char warded2[80] = "";
+	char warded3[80] = "";
+	char reinforce[80] = "";
+	char secondary[80] = "";
 
 	switch (floorID){
 	case HEPTAGRAM: 
@@ -3754,16 +3756,20 @@ int floorID;
 	case ELDER_SIGN:
 		strcpy(name, " Elder Sign");
 		strcpy(strokes, " 6, 12, 8, 8, 8, 8");
-		strcpy(warded, " b, j, m, p, w, l, P, U, ;, mind flayer, deep(er) one, byakhee, nightgaunt");
+		strcpy(warded, " 1-fold: b, j, m, p, w, l, P, U, ;, mind flayer");
+		strcpy(warded2,"         deep one, deeper one, byakhee, nightgaunt");
+		strcpy(warded3," 6-fold: deepest one, master mind flayer");
 		strcpy(reinforce, " 6-fold");
-		strcpy(secondary, " Also affects deepest ones and master mind flayers when 6-fold.");
+		strcpy(secondary, " Wards against more monsters at maximum reinforcement.");
 		break;
 	case ELDER_ELEMENTAL_EYE:
 		strcpy(name, " Elder Elemental Eye");
 		strcpy(strokes, " 5");
-		strcpy(warded, " 1+: spheres, v, E, F, X   4+: y, D, N, undead, metroids   7: A, K, i, &, autons");
+		strcpy(warded, " 1-fold: spheres, v, E, F, X");
+		strcpy(warded2," 4-fold: y, D, N, undead, metroids");
+		strcpy(warded3," 7-fold: A, K, i, &, autons");
 		strcpy(reinforce, " 7-fold");
-		strcpy(secondary, " None.");
+		strcpy(secondary, " Wards against more monsters as it is reinforced.");
 		break;
 	case SIGN_OF_THE_SCION_QUEEN:
 		strcpy(name, " Sign of the Scion Queen Mother");
@@ -3842,6 +3848,10 @@ int floorID;
 	putstr(datawin, 0, "");
 	putstr(datawin, 0, " Warded creatures:");
 	putstr(datawin, 0, warded);
+	if(warded2[0] != 0)
+		putstr(datawin, 0, warded2);
+	if (warded3[0] != 0)
+		putstr(datawin, 0, warded3);
 	putstr(datawin, 0, "");
 	putstr(datawin, 0, " Maximum reinforcement:");
 	putstr(datawin, 0, reinforce);
