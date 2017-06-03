@@ -1920,7 +1920,7 @@ struct obj	*sobj;
 		}
 		struct engr *engrHere = engr_at(u.ux,u.uy);
 		int wardNum;
-		if(!confused) wardNum = pick_ward();
+		if(!confused) wardNum = pick_ward(FALSE);
 		else wardNum = random_unknown_ward();
 //		pline("%d",wardNum);
 		known = TRUE;
