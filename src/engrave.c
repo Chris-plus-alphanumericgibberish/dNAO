@@ -666,7 +666,10 @@ const char * haluWard[] =  {
 	"a crest of a lost house of Svartalfheim",
 
 	/* Eddergud holy symbol */
-	"an obsidian spiderweb",	
+	"an obsidian spiderweb",
+	
+	/* Footprint */
+	"a footprint",
 	
 	/* Not quite */
 	"a heptagenarian",
@@ -5076,7 +5079,7 @@ static const char *epitaphs[] = {
 	"Of course, you realize, this means war.",
 	
 	"In death ground, fight.", /* Sun Tzu */
-
+	
 	"Did you see him passing by?", /* Dark Souls 3 */
 	
 	"For every hero commemorated, a thousand martyrs die unmourned and unremembered." /*Warhammer 40k*/
