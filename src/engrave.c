@@ -3709,6 +3709,7 @@ int floorID;
 	char warded3[80] = "";
 	char reinforce[80] = "";
 	char secondary[80] = "";
+	char secondary2[80] = "";
 
 	switch (floorID){
 	case HEPTAGRAM: 
@@ -3751,7 +3752,8 @@ int floorID;
 		strcpy(strokes, " 10, but drawn in pairs after 2-fold reinforcement");
 		strcpy(warded, " floating eyes, beholders, autons");
 		strcpy(reinforce, " 6-fold");
-		strcpy(secondary, " Protects from all gaze attacks. Grants invisbility at maximum reinforcement.");
+		strcpy(secondary, " Protects from all gaze attacks.");
+		strcpy(secondary2," Grants invisbility at maximum reinforcement.");
 		break;
 	case ELDER_SIGN:
 		strcpy(name, " Elder Sign");
@@ -3784,6 +3786,7 @@ int floorID;
 		strcpy(warded, " birds, bats, r, s, S, ;, :");
 		strcpy(reinforce, " 7-fold");
 		strcpy(secondary, " Pacifies f. 4-fold grants drain resistance. 7-fold grants sickness resistance.");
+		strcpy(secondary2," Stops working when all domestic cats are genocided or extinct.");
 		break;
 	case WINGS_OF_GARUDA:
 		strcpy(name, " The Wings of Garuda");
@@ -3858,6 +3861,8 @@ int floorID;
 	putstr(datawin, 0, "");
 	putstr(datawin, 0, " Secondary effects:");
 	putstr(datawin, 0, secondary);
+	if (secondary2[0] != 0)
+		putstr(datawin, 0, secondary2)
 	putstr(datawin, 0, "");
 	display_nhwindow(datawin, FALSE);
 	destroy_nhwindow(datawin);
