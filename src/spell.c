@@ -465,7 +465,7 @@ learn()
 			u.wardsknown |= book->ovar1;
 		}
 		else{
-			You("are already familar with this ward.");
+			You("are already familiar with this ward.");
 		}
 	 } else{
 		pline("The spellbook is warded with a thaumaturgical ward, good for spellbooks but not much else.");
@@ -611,7 +611,7 @@ struct obj *spellbook;
 		}
 		if((spellbook->ovar1) && RoSbook == STUDY_WARD){
 			if( (u.wardsknown & spellbook->ovar1) ){
-				You("are already familar with this ward.");
+				You("are already familiar with this ward.");
 				delay = 0;
 				return 0;
 			}
@@ -1827,7 +1827,7 @@ spiriteffects(power, atme)
 		}break;
 		case PWR_SOW_DISCORD:
 			You("sow discord amongst your enemies.");
-			u.sowdisc = 5+dsize;
+			u.sowdisc = 1+rnd(dsize);
 		break;
 		case PWR_GIFT_OF_HEALING:{
 			struct monst *mon;
@@ -2118,7 +2118,7 @@ spiriteffects(power, atme)
 					boots = which_armor(mon, W_ARMF);
 					find_to_hit_rolls(mon, &tmp, &weptmp, &tchtmp);
 					if(tmp <= rnd(20)){
-						if(Wwalking){
+						if(boots && boots->otyp == WATER_WALKING_BOOTS){
 							pline("A sudden geyser from the abzu washes under %s's feet!", mon_nam(mon));
 							if(canseemon(mon)) makeknown(boots->otyp);
 						} else {
@@ -2127,7 +2127,7 @@ spiriteffects(power, atme)
 							water_damage(mon->minvent, FALSE, FALSE, FALSE, mon);
 						}
 					} else {
-						if(Wwalking){
+						if(boots && boots->otyp == WATER_WALKING_BOOTS){
 							pline("A sudden geyser from the abzu erupts under %s's feet!", mon_nam(mon));
 							if(mon->data->mmove >= 14){
 								pline("%s puts the added momentum to good use!", Monnam(mon));
@@ -2852,7 +2852,15 @@ spiriteffects(power, atme)
 					pline("%s is not solid enough to open a door in.",Monnam(mon));
 					shieldeff(mon->mx, mon->my);
 					return FALSE;
-				} else if (no_innards(mon->data)) {	/* match effect on player */
+				} else if (skeleton_innards(mon->data)) {
+					pline("Skeletons don't really do \"inside\" vs \"outside\".");
+					shieldeff(mon->mx, mon->my);
+					break;
+				} else if (removed_innards(mon->data)) {
+					pline("%s organs have already been removed!", HisHerIts(mon));
+					shieldeff(mon->mx, mon->my);
+					break;
+				} else if (no_innards(mon->data)) {
 					pline("The inside of %s is much like the outside.",mon_nam(mon));
 					shieldeff(mon->mx, mon->my);
 					break;

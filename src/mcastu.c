@@ -945,8 +945,8 @@ unsigned int type;
 	break;
 	}
     if (type == AD_CLRC)
-        return choose_clerical_spell(rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
-    return choose_magic_spell(rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
+        return choose_clerical_spell(mtmp->m_id == 0 ? (rn2(u.ulevel) * 18 / 30) : rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
+    return choose_magic_spell(mtmp->m_id == 0 ? (rn2(u.ulevel) * 24 / 30) : rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
 }
 
 /* return values:
@@ -962,8 +962,9 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 {
 	int	dmg, ml = mtmp->m_lev;
 	int ret;
-	int spellnum = 0;
+	int spellnum = 0, chance;
 	int dmd, dmn;
+	struct obj *mirror;
 
 	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
 	/* Three cases:
@@ -982,7 +983,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	    int cnt = 40;
 		
 		// if(Race_if(PM_DROW) && mtmp->data == &mons[PM_AVATAR_OF_LOLTH] && !Role_if(PM_EXILE) && !mtmp->mpeaceful){
-		if(mtmp->data == &mons[PM_AVATAR_OF_LOLTH] && !mtmp->mpeaceful && strcmp(urole.cgod,"Lolth")){
+		if(mtmp->data == &mons[PM_AVATAR_OF_LOLTH] && !mtmp->mpeaceful && !strcmp(urole.cgod,"Lolth")){
 			u.ugangr[Align2gangr(A_CHAOTIC)]++;
 			angrygods(A_CHAOTIC);
 			return 1;
@@ -1032,11 +1033,31 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	}
 
 	nomul(0, NULL);
-       /* increased to rn2(ml*20) to make kobold/orc shamans less helpless */
-       if(rn2(ml*20) < (mtmp->mconf ? 100 : 20)) {     /* fumbled attack */
-	    if (canseemon(mtmp) && flags.soundok)
-		pline_The("air crackles around %s.", mon_nam(mtmp));
-	    return(0);
+	/* increased spell success rate vs vanilla to make kobold/orc shamans less helpless */
+	if(mtmp->data == &mons[PM_SPELL_GOLEM]){
+		/* find mirror */
+		for (mirror = mtmp->minvent; mirror; mirror = mirror->nobj)
+			if (mirror->otyp == MIRROR && !mirror->cursed)
+				break;
+	}
+	
+	if(mtmp->data != &mons[PM_SPELL_GOLEM] || !mirror){
+		chance = 2;
+		if(mtmp->mconf) chance += 8;
+		if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
+			if(u.uz.dlevel == sum_of_all_level.dlevel) chance += 90;
+			else if(u.uz.dlevel == spire_level.dlevel-1) chance -= 50;
+			else if(u.uz.dlevel == spire_level.dlevel-2) chance -= 40;
+			else if(u.uz.dlevel == spire_level.dlevel-3) chance -= 30;
+			else if(u.uz.dlevel == spire_level.dlevel-4) chance -= 20;
+			else if(u.uz.dlevel == spire_level.dlevel-5) chance -= 10;
+		}
+		
+		if(u.uz.dlevel == spire_level.dlevel || rn2(ml*2) < chance) {	/* fumbled attack */
+			if (canseemon(mtmp) && flags.soundok)
+			pline_The("air crackles around %s.", mon_nam(mtmp));
+			return(0);
+		}
 	}
 	if (canspotmon(mtmp) || !is_undirected_spell(spellnum)) {
 	    pline("%s casts a spell%s!",
@@ -1057,7 +1078,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	if (!foundyou) {
 		if(is_aoe_spell(spellnum)){
 			dmd = 6;
-			dmn = ml/3;
+			dmn = min(MAX_BONUS_DICE, ml/3+1);
 			if (mattk->damd) dmd = (int)(mattk->damd);
 			
 			if (mattk->damn) dmn+= (int)(mattk->damn);
@@ -1075,7 +1096,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 		return(0);
 	    }
 	} else {
-		int dmd = 6, dmn = ml/3;
+		int dmd = 6, dmn = min(MAX_BONUS_DICE, ml/3+1);
 		
 		if (dmn > 15) dmn = 15;
 		
@@ -1823,7 +1844,7 @@ summon_alien:
            if (weap == TRIDENT) weap = JAVELIN;
        }
        otmp = mksobj(weap, TRUE, FALSE);
-       otmp->quan = (long) rn1(mtmp ? (mtmp->m_lev/2 + 1) : (rn2(12) + 1), 4);
+       otmp->quan = (long) rn1(mtmp ? (min(MAX_BONUS_DICE, mtmp->m_lev/3 + 1)) : (rn2(12) + 1), 4);
 	   otmp->quan = min(otmp->quan, 16L);
        otmp->owt = weight(otmp);
        otmp->spe = 0;
@@ -1982,7 +2003,7 @@ summon_alien:
 		} else {
 			x = (int) mtmp->mux;
 			y = (int) mtmp->muy;
-			n = mtmp->m_lev/3+4;
+			n = min(MAX_BONUS_DICE, mtmp->m_lev/3+1)+3;
 		}
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
 			if( cmon != mtmp &&
@@ -2142,7 +2163,7 @@ ray:
        if(canspotmon(mtmp))
            pline("%s zaps you with a %s!", Monnam(mtmp),
                      flash_types[10+zap-1]);
-       buzz(-(10+zap-1),(mtmp->m_lev/2)+1, mtmp->mx, mtmp->my, sgn(tbx), sgn(tby),0,0);
+       buzz(-(10+zap-1),min(MAX_BONUS_DICE, (mtmp->m_lev/3)+1), mtmp->mx, mtmp->my, sgn(tbx), sgn(tby),0,0);
        dmg = 0;
 	   stop_occupation();
        break;
@@ -2245,7 +2266,7 @@ ray:
 	    if (canseemon(mtmp))
 		pline("%s looks better.", Monnam(mtmp));
 	    /* note: player healing does 6d4; this used to do 1d8; then it did 3d6 */
-	    if ((mtmp->mhp += min(d(mtmp->m_lev/3+1,8), 10)) > mtmp->mhpmax)
+	    if ((mtmp->mhp += d(min(MAX_BONUS_DICE, mtmp->m_lev/3+1),8)) > mtmp->mhpmax)
 			mtmp->mhp = mtmp->mhpmax;
 	}
 	dmg = 0;
@@ -2260,7 +2281,7 @@ ray:
 		} else {
 			x = (int) mtmp->mx;
 			y = (int) mtmp->my;
-			n = mtmp->m_lev/3+1;
+			n = min(MAX_BONUS_DICE, mtmp->m_lev/3+1);
 		}
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
 			if( !DEADMONSTER(cmon) &&
@@ -2294,7 +2315,7 @@ ray:
 		} else {
 			x = (int) mtmp->mx;
 			y = (int) mtmp->my;
-			n = mtmp->m_lev/3+1;
+			n = min(MAX_BONUS_DICE, mtmp->m_lev/3+1);
 		}
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
 			if( cmon->mhp < cmon->mhpmax && 
@@ -2330,7 +2351,7 @@ ray:
 				x = (int) mtmp->mux;
 				y = (int) mtmp->muy;
 			}
-			n = mtmp->m_lev/3+1;
+			n = min(MAX_BONUS_DICE, mtmp->m_lev/3+1);
 		}
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
 			if( cmon != mtmp &&
@@ -2367,7 +2388,7 @@ ray:
 				x = (int) mtmp->mux;
 				y = (int) mtmp->muy;
 			}
-			n = mtmp->m_lev/3+4;
+			n = min(MAX_BONUS_DICE, mtmp->m_lev/3+1)+3;
 		}
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
 			if( cmon != mtmp &&
@@ -2677,8 +2698,9 @@ castmm(mtmp, mdef, mattk)
 {
 	int	dmg, ml = mtmp->m_lev;
 	int ret;
-	int spellnum = 0;
+	int spellnum = 0, chance;
 	int dmd, dmn;
+	struct obj *mirror;
 
 	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
 	
@@ -2717,11 +2739,31 @@ castmm(mtmp, mdef, mattk)
 	    mtmp->mspec_used = 10 - mtmp->m_lev;
 	    if (mtmp->mspec_used < 2) mtmp->mspec_used = 2;
 	}
-
-	if(rn2(ml*20) < (mtmp->mconf ? 100 : 20)) {	/* fumbled attack */
-	    if (canseemon(mtmp) && flags.soundok)
-		pline_The("air crackles around %s.", mon_nam(mtmp));
-	    return(0);
+	
+	if(mtmp->data == &mons[PM_SPELL_GOLEM]){
+		/* find mirror */
+		for (mirror = mtmp->minvent; mirror; mirror = mirror->nobj)
+			if (mirror->otyp == MIRROR && !mirror->cursed)
+				break;
+	}
+	
+	if(mtmp->data != &mons[PM_SPELL_GOLEM] || !mirror){
+		chance = 2;
+		if(mtmp->mconf) chance += 8;
+		if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
+			if(u.uz.dlevel == sum_of_all_level.dlevel) chance += 90;
+			else if(u.uz.dlevel == spire_level.dlevel-1) chance -= 50;
+			else if(u.uz.dlevel == spire_level.dlevel-2) chance -= 40;
+			else if(u.uz.dlevel == spire_level.dlevel-3) chance -= 30;
+			else if(u.uz.dlevel == spire_level.dlevel-4) chance -= 20;
+			else if(u.uz.dlevel == spire_level.dlevel-5) chance -= 10;
+		}
+		
+		if(u.uz.dlevel == spire_level.dlevel || rn2(ml*2) < chance) {	/* fumbled attack */
+			if (canseemon(mtmp) && flags.soundok)
+			pline_The("air crackles around %s.", mon_nam(mtmp));
+			return(0);
+		}
 	}
 	if (cansee(mtmp->mx, mtmp->my) ||
 	    canseemon(mtmp) ||
@@ -2737,7 +2779,7 @@ castmm(mtmp, mdef, mattk)
 
 	{
 		dmd = 6;
-		dmn = ml/3;
+		dmn = min(MAX_BONUS_DICE, ml/3+1);
 		
 		if(dmn > 15) dmn = 15;
 		
@@ -2912,14 +2954,18 @@ uspell_would_be_useless(mdef, spellnum)
 struct monst *mdef;
 int spellnum;
 {
-	int wardAt = ward_at(mdef->mx, mdef->my);
-	
-	/*Don't cast at warded spaces*/
-	if(onscary(mdef->mx, mdef->my, &youmonst) && !is_undirected_spell(spellnum))
-		return TRUE;
-	
-	if(spellnum == DEATH_TOUCH && (wardAt == CIRCLE_OF_ACHERON || wardAt == HEPTAGRAM || wardAt == HEXAGRAM))
-		return TRUE;
+	/* do not check for wards on target if given no target */
+	if (mdef)
+	{
+		int wardAt = ward_at(mdef->mx, mdef->my);
+
+		/*Don't cast at warded spaces*/
+		if (onscary(mdef->mx, mdef->my, &youmonst) && !is_undirected_spell(spellnum))
+			return TRUE;
+
+		if (spellnum == DEATH_TOUCH && (wardAt == CIRCLE_OF_ACHERON || wardAt == HEPTAGRAM || wardAt == HEXAGRAM))
+			return TRUE;
+	}
 	
 	/* PC drow can't be warded off this way */
 	
@@ -2953,7 +2999,7 @@ buzzmu(mtmp, mattk, ml)		/* monster uses spell (ranged) */
 	register struct attack  *mattk;
 	int ml;
 {
-	int dmn = (int)(ml/3);
+	int dmn = (int)(min(MAX_BONUS_DICE, ml/3+1));
 	int type = mattk->adtyp;
 	
 	if(mattk->damn) dmn += mattk->damn;
@@ -3006,7 +3052,7 @@ buzzmm(magr, mdef, mattk, ml)		/* monster uses spell (ranged) */
 	struct attack  *mattk;
 	int ml;
 {
-	int dmn = (int)(ml/3);
+	int dmn = (int)(min(MAX_BONUS_DICE, ml/3+1));
 	int type = mattk->adtyp;
     char buf[BUFSZ];
 	
@@ -3103,6 +3149,10 @@ castum(mtmp, mattk)
 		return 0;
 	    }
 	}
+	else if (!mtmp) {
+		You("have no spells to cast right now!");
+		return 0;
+	}
 
 	if (spellnum == AGGRAVATION && !mtmp)
 	{
@@ -3149,7 +3199,7 @@ castum(mtmp, mattk)
  */
 	{
 		dmd = 6;
-		dmn = ml/3;
+		dmn = min(MAX_BONUS_DICE, ml/3+1);
 		
 		if(dmn > 15) dmn = 15;
 		
@@ -3204,7 +3254,7 @@ fire_um:
 	    case AD_COLD:
 cold_um:
 		pline("%s is covered in frost.", Monnam(mtmp));
-		if(resists_fire(mtmp)) {
+		if(resists_cold(mtmp)) {
 			shieldeff(mtmp->mx, mtmp->my);
 			pline("But %s resists the effects.",
 			    mhe(mtmp));
@@ -3280,6 +3330,7 @@ int spellnum;
 	else if(spellnum == SUMMON_ANGEL) spellnum = CURE_SELF;
 	else if(spellnum == SUMMON_ALIEN) spellnum = CURE_SELF;
 	else if(spellnum == SUMMON_DEVIL) spellnum = CURE_SELF;
+	else if(spellnum == INSECTS) spellnum = CURE_SELF;
     switch (spellnum) {
     case DEATH_TOUCH:
 	if (!mtmp || mtmp->mhp < 1) {
@@ -3373,6 +3424,8 @@ int spellnum;
 			if (!munstone(mtmp, yours))
 				minstapetrify(mtmp, yours);
 		   }
+		   else
+			goto uspsibolt;
         }
 		dmg = 0;
 	 stop_occupation();
@@ -3672,11 +3725,11 @@ int spellnum;
 		if(yours){
 			x = (int) u.ux;
 			y = (int) u.uy;
-			n = u.ulevel/3+1;
+			n = min(MAX_BONUS_DICE, u.ulevel/3+1);
 		} else {
 			x = (int) mattk->mx;
 			y = (int) mattk->my;
-			n = mattk->m_lev/3+1;
+			n = min(MAX_BONUS_DICE, mattk->m_lev/3+1);
 		}
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
 			if( !DEADMONSTER(cmon) &&
@@ -3706,11 +3759,11 @@ int spellnum;
 		if(yours){
 			x = (int) u.ux;
 			y = (int) u.uy;
-			n = u.ulevel/3+1;
+			n = min(MAX_BONUS_DICE, u.ulevel/3+1);
 		} else {
 			x = (int) mattk->mx;
 			y = (int) mattk->my;
-			n = mattk->m_lev/3+1;
+			n = min(MAX_BONUS_DICE, mattk->m_lev/3+1);
 		}
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
 			if( cmon->mhp < cmon->mhpmax && 
@@ -3738,7 +3791,7 @@ int spellnum;
 		if(yours){
 			x = (int) u.ux;
 			y = (int) u.uy;
-			n = u.ulevel/3+1;
+			n = min(MAX_BONUS_DICE, u.ulevel/3+1);
 		} else {
 			if(mattk->mux == 0 && mattk->muy == 0){
 				x = (int) mattk->mx;
@@ -3747,7 +3800,7 @@ int spellnum;
 				x = (int) mattk->mux;
 				y = (int) mattk->muy;
 			}
-			n = mattk->m_lev/3+1;
+			n = min(MAX_BONUS_DICE, mattk->m_lev/3+1);
 		}
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
 			if( cmon != mattk &&
@@ -3776,7 +3829,7 @@ int spellnum;
 		if(yours){
 			x = (int) u.ux;
 			y = (int) u.uy;
-			n = u.ulevel/3+1;
+			n = min(MAX_BONUS_DICE, u.ulevel/3+1);
 		} else {
 			if(mattk->mux == 0 && mattk->muy == 0){
 				x = (int) mattk->mx;
@@ -3785,7 +3838,7 @@ int spellnum;
 				x = (int) mattk->mux;
 				y = (int) mattk->muy;
 			}
-			n = mattk->m_lev/3+1;
+			n = min(MAX_BONUS_DICE, mattk->m_lev/3+1);
 		}
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
 			if( cmon != mattk &&

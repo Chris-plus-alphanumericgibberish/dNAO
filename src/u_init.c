@@ -365,15 +365,15 @@ static struct trobj Wizard[] = {
 #define W_WEAPON	0
 #define W_MULTSTART	2
 #define W_MULTEND	6
-	{ QUARTERSTAFF, 1, WEAPON_CLASS, 1, 1 },
-	{ ATHAME, -1, WEAPON_CLASS, 1, 1 },
-	{ CLOAK_OF_MAGIC_RESISTANCE, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
-	{ UNDEF_TYP, UNDEF_SPE, WAND_CLASS, 1, UNDEF_BLESS },
+	{ QUARTERSTAFF, 1, WEAPON_CLASS, 1, 0 },
+	{ ATHAME, -1, WEAPON_CLASS, 1, 0 },
+	{ CLOAK_OF_MAGIC_RESISTANCE, 0, ARMOR_CLASS, 1, 0 },
 	{ UNDEF_TYP, UNDEF_SPE, RING_CLASS, 2, UNDEF_BLESS },
-	{ UNDEF_TYP, UNDEF_SPE, POTION_CLASS, 3, UNDEF_BLESS },
-	{ UNDEF_TYP, UNDEF_SPE, SCROLL_CLASS, 3, UNDEF_BLESS },
-	{ SPE_FORCE_BOLT, 0, SPBOOK_CLASS, 1, 1 },
-	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, UNDEF_BLESS },
+	{ UNDEF_TYP, UNDEF_SPE, SCROLL_CLASS, 3, 0 },
+	{ SPE_FORCE_BOLT, 0, SPBOOK_CLASS, 1, 0 },
+	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 0 },
+	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 0 },
+	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 
@@ -786,6 +786,11 @@ static const struct def_skill Skill_DP[] = {
 
 static const struct def_skill Skill_DW[] = {
     { P_CLERIC_SPELL, P_EXPERT },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_HD_Female[] = {
+    { P_HARVEST, P_EXPERT },
     { P_NONE, 0 }
 };
 
@@ -1923,7 +1928,6 @@ u_init()
 			}
 			ini_inv(DarkWand);
 		}
-		if(!rn2(5)) ini_inv(Magicmarker);
 		// if(!rn2(5)) ini_inv(Blindfold);
 		skill_init(Skill_W);
 		if(Race_if(PM_DROW) && flags.female) skill_add(Skill_DW);
@@ -2129,6 +2133,9 @@ u_init()
 			u.uen = u.uenmax;
 		} else if(u.uenmax < 15) {
 			u.uen = u.uenmax = 15;
+		}
+		if(flags.initgend){
+			skill_add(Skill_HD_Female);
 		}
     break;
 	case PM_VAMPIRE:
@@ -2388,16 +2395,19 @@ u_init()
 	stumbler->mconveys = 0;
 	wanderer->mconveys = 0;
 	
-	if(!rn2(10)) u.shambin = 2;
-	else if(rn2(9) > 1) u.shambin = 1;
+	if(!rn2(10)) u.shambin = 3;
+	else if(!rn2(9)) u.shambin = 2;
+	else if(rn2(8) > 1) u.shambin = 1;
 	else u.shambin = 0;
 	
-	if(!rn2(10)) u.stumbin = 2;
-	else if(rn2(9) > 1) u.stumbin = 1;
+	if(!rn2(10)) u.stumbin = 3;
+	else if(!rn2(9)) u.stumbin = 2;
+	else if(rn2(8) > 1) u.stumbin = 1;
 	else u.stumbin = 0;
 	
-	if(!rn2(10)) u.wandein = 2;
-	else if(rn2(9) > 1) u.wandein = 1;
+	if(!rn2(10)) u.wandein = 3;
+	else if(!rn2(9)) u.wandein = 2;
+	else if(rn2(8) > 1) u.wandein = 1;
 	else u.wandein = 0;
 	
 	/*

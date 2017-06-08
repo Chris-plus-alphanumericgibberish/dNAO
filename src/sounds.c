@@ -900,7 +900,7 @@ asGuardian:
 			mtmp->mspec_used = 7;
 			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 				if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-					if(tmpm->mpeaceful != mtmp->mpeaceful){
+					if(tmpm->mpeaceful != mtmp->mpeaceful && !resist(tmpm, 0, 0, FALSE)){
 						tmpm->mconf = 1;
 					}
 				}
@@ -1370,17 +1370,17 @@ asGuardian:
 								dmg = 0;
 								switch(u.oonaenergy){
 									case AD_FIRE:
-										if(resists_fire(tmpm)) dmg = d(mtmp->m_lev/2+10,4);
+										if(resists_fire(tmpm)) dmg = d(min(MAX_BONUS_DICE, mtmp->m_lev/3)+10,4);
 										else break;
 										if(!resists_cold(tmpm)) dmg *= 1.5;
 									break;
 									case AD_COLD:
-										if(resists_cold(tmpm)) dmg = d(mtmp->m_lev/2+10,4);
+										if(resists_cold(tmpm)) dmg = d(min(MAX_BONUS_DICE, mtmp->m_lev/3)+10,4);
 										else break;
 										if(!resists_fire(tmpm)) dmg *= 1.5;
 									break;
 									case AD_ELEC:
-										if(resists_elec(tmpm)) dmg = d(mtmp->m_lev/2+10,4);
+										if(resists_elec(tmpm)) dmg = d(min(MAX_BONUS_DICE, mtmp->m_lev/3)+10,4);
 									break;
 								}
 								if(dmg) tmpm->mhp = max(tmpm->mhp - dmg,1);
@@ -1391,17 +1391,17 @@ asGuardian:
 						dmg = 0;
 						switch(u.oonaenergy){
 							case AD_FIRE:
-								if(Fire_resistance) dmg = d(mtmp->m_lev/2+10,4);
+								if(Fire_resistance) dmg = d(min(MAX_BONUS_DICE, mtmp->m_lev/3)+10,4);
 								else break;
 								if(!Cold_resistance) dmg *= 1.5;
 							break;
 							case AD_COLD:
-								if(Cold_resistance) dmg = d(mtmp->m_lev/2+10,4);
+								if(Cold_resistance) dmg = d(min(MAX_BONUS_DICE, mtmp->m_lev/3)+10,4);
 								else break;
 								if(!Fire_resistance) dmg *= 1.5;
 							break;
 							case AD_ELEC:
-								if(Shock_resistance) dmg = d(mtmp->m_lev/2+10,4);
+								if(Shock_resistance) dmg = d(min(MAX_BONUS_DICE, mtmp->m_lev/3)+10,4);
 							break;
 						}
 						if(Half_spell_damage) dmg /= 2;
@@ -3506,7 +3506,8 @@ int tx,ty;
 		if(u.sealTimeout[NABERIUS-FIRST_SEAL] < moves){
 			//Spirit requires that his seal be drawn by an intelligent and wise person.
 			if(ACURR(A_INT) >= 14 &&
-				ACURR(A_WIS) >= 14
+				ACURR(A_WIS) >= 14 &&
+				(u.udrunken >= u.ulevel || Confusion)
 			){ 
 				You_hear("a snuffing noise.");
 				if(u.sealCounts < numSlots){

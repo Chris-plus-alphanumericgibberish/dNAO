@@ -108,15 +108,31 @@
 				 (ptr)->mlet == S_KETER || \
 				 (ptr) == &mons[PM_AOA] || \
 				 (ptr) == &mons[PM_AOA_DROPLET])
+#define removed_innards(ptr)	(((ptr) == &mons[PM_HUNGRY_DEAD]) || \
+						 ((ptr) == &mons[PM_KOBOLD_MUMMY]) || \
+						 ((ptr) == &mons[PM_GNOME_MUMMY]) || \
+						 ((ptr) == &mons[PM_ORC_MUMMY]) || \
+						 ((ptr) == &mons[PM_DWARF_MUMMY]) || \
+						 ((ptr) == &mons[PM_ELF_MUMMY]) || \
+						 ((ptr) == &mons[PM_HUMAN_MUMMY]) || \
+						 ((ptr) == &mons[PM_HALF_DRAGON_MUMMY]) || \
+						 ((ptr) == &mons[PM_ETTIN_MUMMY]) || \
+						 ((ptr) == &mons[PM_CHIROPTERAN_MUMMY]) || \
+						 ((ptr) == &mons[PM_GIANT_MUMMY]) || \
+						 ((ptr) == &mons[PM_SHAMBLING_HORROR] && u.shambin == 3) || \
+						 ((ptr) == &mons[PM_STUMBLING_HORROR] && u.stumbin == 3) || \
+						 ((ptr) == &mons[PM_WANDERING_HORROR] && u.wandein == 3) || \
+						 ((ptr) == &mons[PM_PHARAOH]) \
+						)
+#define skeleton_innards(ptr)	(((ptr) == &mons[PM_SKELETON]) || \
+						 ((ptr) == &mons[PM_SKELETAL_PIRATE]) \
+						)
 #define no_innards(ptr)	((ptr)->mlet == S_VORTEX || \
 						 (ptr)->mlet == S_LIGHT || \
 						 (ptr)->mlet == S_ELEMENTAL || \
 						 ((ptr) == &mons[PM_SHAMBLING_HORROR] && u.shambin == 2) || \
 						 ((ptr) == &mons[PM_STUMBLING_HORROR] && u.stumbin == 2) || \
 						 ((ptr) == &mons[PM_WANDERING_HORROR] && u.wandein == 2) || \
-						 ((ptr) == &mons[PM_HUNGRY_DEAD]) || \
-						 ((ptr) == &mons[PM_SKELETON]) || \
-						 ((ptr) == &mons[PM_SKELETAL_PIRATE]) || \
 						 (ptr)->mlet == S_WRAITH || \
 						 (ptr)->mlet == S_GHOST || \
 						 (ptr)->mlet == S_SHADE || \
@@ -128,6 +144,7 @@
 								 (ptr)->mlet == S_TRAPPER || \
 								 (ptr)->mlet == S_FUNGUS || \
 								 (ptr)->mlet == S_PUDDING || \
+								 ((ptr) == &mons[PM_DROW_MUMMY]) || \
 								 ((ptr) == &mons[PM_SHAMBLING_HORROR] && u.shambin == 1) || \
 								 ((ptr) == &mons[PM_STUMBLING_HORROR] && u.stumbin == 1) || \
 								 ((ptr) == &mons[PM_WANDERING_HORROR] && u.wandein == 1) || \
@@ -347,6 +364,7 @@
 				 (ptr) == &mons[PM_GIANT_SPIDER] || (ptr) == &mons[PM_PHASE_SPIDER] || \
 				 (ptr) == &mons[PM_MIRKWOOD_SPIDER] || (ptr) == &mons[PM_MIRKWOOD_ELDER] || \
 				 (ptr) == &mons[PM_SPROW] || (ptr) == &mons[PM_DRIDER] || \
+				 (ptr) == &mons[PM_EDDERKOP] || \
 				 (ptr) == &mons[PM_AVATAR_OF_LOLTH] || (ptr) == &mons[PM_DROW_MUMMY])
 #define is_unicorn(ptr)		((ptr)->mlet == S_UNICORN && likes_gems(ptr))
 #define is_longworm(ptr)	(((ptr) == &mons[PM_BABY_LONG_WORM]) || \
@@ -460,11 +478,11 @@
 				 (ptr) == &mons[PM_GREAT_CTHULHU] \
 				)
 
-#define nonliving(ptr)		(is_unalive(ptr) || is_undead(ptr) || \
+#define nonliving(ptr)	(is_unalive(ptr) || is_undead(ptr) || \
 				 (ptr) == &mons[PM_MANES] \
 				)
 
-#define is_unalive(ptr)		(on_level(&valley_level, &u.uz) || ((ptr->mflagsa & MA_UNLIVING)) )
+#define is_unalive(ptr)		(on_level(&valley_level, &u.uz) || (((ptr)->mflagsa & MA_UNLIVING)) )
 
 #define is_elemental(ptr)		( (ptr->mflagsa & MA_ELEMENTAL) )
 
@@ -504,8 +522,9 @@
 				   (ptr)->mlet != S_GOLEM && \
 				   (ptr)->mlet != S_KETER && \
 				   (ptr)->mlet != S_MIMIC && \
+				   (ptr) != &mons[PM_WEEPING_ANGEL] && \
 				   !is_clockwork(ptr) && \
-				   (!is_undead(ptr) || is_vampire(ptr)))
+				   (!nonliving(ptr) || is_vampire(ptr)))
 
 /* Keep track of ferns, fern sprouts, fern spores, and other plants */
 

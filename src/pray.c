@@ -5,6 +5,7 @@
 #include "hack.h"
 #include "epri.h"
 #include "artifact.h"
+#include "artilist.h"
 
 extern const int monstr[];
 
@@ -2038,8 +2039,8 @@ dosacrifice()
 			if (is_demon(youracedata)) {
 				You("find the idea very satisfying.");
 				exercise(A_WIS, TRUE);
-			} else if (u.ualign.type != A_CHAOTIC) {
-				if(u.ualign.record >= rnd(u.ulevel) || (u.ualign.record == ALIGNLIM && u.ualign.sins <= u.ulevel)){
+			} else if (u.ualign.type != A_CHAOTIC || u.ualign.type != A_CHAOTIC) {
+				if(u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))){
 					char buf[BUFSZ];
 					Sprintf(buf, "You feel a deep sense of kinship to %s!  Sacrifice %s anyway?",
 						the(xname(otmp)), (otmp->quan == 1L) ? "it" : "one");
@@ -2534,6 +2535,11 @@ dosacrifice()
 			u.reconciled = REC_NONE;
 			u.lastprayresult = PRAY_GIFT;
 		    exercise(A_WIS, TRUE);
+		    if (!flags.debug && otmp->oartifact) {
+				char llog[BUFSZ+22];
+				Sprintf(llog, "was given \"%s\"", the(artilist[otmp->oartifact].name));
+				livelog_write_string(llog);
+		    }
 		    /* make sure we can use this weapon */
 		    unrestrict_weapon_skill(weapon_type(otmp));
 		    discover_artifact(otmp->oartifact);

@@ -119,6 +119,8 @@ hack_artifacts()
 {
 	struct artifact *art;
 	int alignmnt = flags.stag ? u.ualign.type : aligns[flags.initalign].value;
+	
+	if(Role_if(PM_EXILE)) alignmnt = A_VOID; //hack_artifacts may be called before this is propperly set
 
 	int gcircletsa = find_gcirclet();
 	
@@ -126,6 +128,19 @@ hack_artifacts()
 	for (art = artilist+1; art->otyp; art++)
 	    if ((art->role == Role_switch || Pantheon_if(art->role)) && art->alignment != A_NONE)
 			art->alignment = alignmnt;
+
+	if(Race_if(PM_HALF_DRAGON) && flags.initgend){
+		int i;
+		
+
+		
+		for(i = 0; i < ART_ROD_OF_SEVEN_PARTS; i++)
+			if(artilist[i].role == Role_switch)
+				artilist[i].role = NON_PM;
+		
+		artilist[ART_LIFEHUNT_SCYTHE].role = Role_switch;
+		artilist[ART_LIFEHUNT_SCYTHE].alignment = alignmnt;
+	}
 
 	/* Excalibur can be used by any lawful character, not just knights */
 	if (!Role_if(PM_KNIGHT)){
@@ -256,9 +271,10 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 	/* gather eligible artifacts */
 	for (n = 0, a = artilist+1, m = 1; a->otyp; a++, m++)
 	    if ((!by_align ? artitypematch(a, otmp) :
-		    (a->alignment == alignment ||
-			(a->alignment == A_NONE && (u.ugifts > 0 || alignment == A_VOID )))) &&
-		(!(a->spfx & SPFX_NOGEN) || unique || (m==ART_PEN_OF_THE_VOID && Role_if(PM_EXILE))) && !artiexist[m]
+				(a->alignment == alignment ||
+				(a->alignment == A_NONE && (u.ugifts > 0 || alignment == A_VOID )))) &&
+			(!(a->spfx & SPFX_NOGEN) || unique || (m==ART_PEN_OF_THE_VOID && Role_if(PM_EXILE))) && 
+			!artiexist[m]
 		) {
 			if (by_align && (Role_if(a->role) || Pantheon_if(a->role))){
 				goto make_artif;	/* 'a' points to the desired one */
@@ -2059,6 +2075,10 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	 */
 	*dmgptr += spec_dbon(otmp, mdef, *dmgptr);
 	
+	//If there is no attacker (ie. you threw the artifact at yourself), make yourself the attacker
+	if (!magr)
+		magr = &youmonst;
+
 	if(otmp->oartifact == ART_LIMITED_MOON && magr == &youmonst){
 		*dmgptr *= ((double)u.uen/u.uenmax);
 		// if(u.uen >= 10) u.uen -= 10;
@@ -3090,22 +3110,36 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	    return messaged;
 	}
 	if (otmp->oartifact == ART_LIFEHUNT_SCYTHE) {
-		if (!youdefend) {
+		if (youattack) {
 			int life = (*dmgptr)/2+1;
-			mdef->mstdy += life;
-			u.ustdy = life/2+1;
-			life /= 2;
-			if (life) healup(life+1, 0, FALSE, FALSE);
-		} else { /* youdefend */
+			if(mdef->mstdy > 0) life += (mdef->mstdy)/2+1;
+			
+			mdef->mstdy += (*dmgptr)/2+1;
+			u.ustdy += (*dmgptr)/4+1;
+			
+			healup(life, 0, FALSE, FALSE);
+		} else if (youdefend) {
 			int life = (*dmgptr)/2+1;
-			u.ustdy = life;
-			magr->mstdy += life/2+1;
-			life /= 2;
+			if(u.ustdy > 0) life += (u.ustdy)/2+1;
+			
+			u.ustdy += (*dmgptr)/2+1;
+			magr->mstdy += (*dmgptr)/4+1;
+			
+			if (magr && magr->mhp < magr->mhpmax) {
+				magr->mhp += life;
+				if (magr->mhp > magr->mhpmax) magr->mhp = magr->mhpmax;
+			}
+		} else { /* m vs m */
+			int life = (*dmgptr)/2+1;
+			if(mdef->mstdy > 0) life += (mdef->mstdy)/2+1;
+			
+			mdef->mstdy += (*dmgptr)/2+1;
+			magr->mstdy += (*dmgptr)/4+1;
+			
 			if (magr && magr->mhp < magr->mhpmax) {
 				magr->mhp += life+1;
 				if (magr->mhp > magr->mhpmax) magr->mhp = magr->mhpmax;
 			}
-			messaged = TRUE;
 		}
 	}
 	if (otmp->oartifact == ART_SHADOWLOCK) {

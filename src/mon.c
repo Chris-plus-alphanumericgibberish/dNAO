@@ -1920,7 +1920,7 @@ mfndpos(mon, poss, info, flag)
 	register int cnt = 0;
 	register uchar ntyp;
 	uchar nowtyp;
-	boolean wantpool,poolok,lavaok,nodiag,quantumlock;
+	boolean wantpool,poolok,cubewaterok,lavaok,nodiag,quantumlock;
 	boolean rockok = FALSE, treeok = FALSE, thrudoor;
 	int maxx, maxy;
 	
@@ -1942,6 +1942,7 @@ mfndpos(mon, poss, info, flag)
 
 	nodiag = (mdat == &mons[PM_GRID_BUG]) || (mdat == &mons[PM_BEBELITH]);
 	wantpool = mdat->mlet == S_EEL;
+	cubewaterok = (is_swimmer(mdat) || breathless(mdat) || amphibious(mdat));
 	poolok = is_flyer(mdat) || is_clinger(mdat) ||
 		 (is_swimmer(mdat) && !wantpool);
 	lavaok = is_flyer(mdat) || is_clinger(mdat) || likes_lava(mdat);
@@ -2031,6 +2032,7 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 		if(quantumlock && IS_ROOM(levl[mon->mx][mon->my].typ) && !IS_ROOM(ntyp) ) continue;
 		
 		if((is_pool(nx,ny) == wantpool || poolok) &&
+			(cubewaterok || !is_3dwater(nx,ny)) && 
 			(lavaok || !is_lava(nx,ny))) {
 		int dispx, dispy;
 		boolean monseeu = (!is_blind(mon) && (!Invis || perceives(mdat)));
@@ -2208,7 +2210,7 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	
 	if(is_drow(ma) && is_drow(md) && (magr->mfaction == mdef->mfaction)) return 0L;
 	
-	if (u.sowdisc && !mdef->mtame)
+	if (u.sowdisc && !mdef->mtame && canseemon(magr) && canseemon(mdef))
 	    return ALLOW_M|ALLOW_TM;
 	/* supposedly purple worms are attracted to shrieking because they
 	   like to eat shriekers, so attack the latter when feasible */
@@ -3176,7 +3178,7 @@ boolean was_swallowed;			/* digestion */
 					found = FALSE; //haven't found the child yet.
 //				    mtmp2 = mtmp->nmon;
 					mdat1 = mtmp->data;
-					if(mdat1==child[i]){
+					if(!DEADMONSTER(mtmp) && mdat1==child[i]){
 						set_mon_data(mtmp, growto[i], 0);
 						//Assumes Auton
 						mtmp->m_lev += 1;

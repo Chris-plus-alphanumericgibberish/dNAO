@@ -146,8 +146,10 @@ register int x, y, n;
 			do {
 				mm.x = rn1(COLNO-3,2);
 				mm.y = rn2(ROWNO);
-			} while(!goodpos(mm.x, mm.y, &fakemon, NO_MM_FLAGS) ||
+			} while(!goodpos(mm.x, mm.y, &fakemon, NO_MM_FLAGS) &&
 				(tryct++ < 200 && ((tryct < 100 && couldsee(mm.x, mm.y)) || (tryct < 150 && cansee(mm.x, mm.y)) || distmin(mm.x,mm.y,u.ux,u.uy) < BOLT_LIM)));
+			if(!goodpos(mm.x, mm.y, &fakemon, NO_MM_FLAGS))
+				return;
 		}
 		if (enexto(&mm, mm.x, mm.y, mtmp->data)) {
 		    mon = makemon(mtmp->data, mm.x, mm.y, NO_MM_FLAGS);
@@ -176,6 +178,8 @@ register int x, y, n;
 				mm.y = rn2(ROWNO);
 			} while(!goodpos(mm.x, mm.y, &fakemon, NO_MM_FLAGS) ||
 				(tryct++ < 150 && ((tryct < 50 && couldsee(mm.x, mm.y)) || (tryct < 100 && cansee(mm.x, mm.y)) || distmin(mm.x,mm.y,u.ux,u.uy) < BOLT_LIM)));
+			if(!goodpos(mm.x, mm.y, &fakemon, NO_MM_FLAGS))
+				return;
 		}
 		if (enexto(&mm, mm.x, mm.y, mtmp->data)) {
 		    mon = makemon(mtmp->data, mm.x, mm.y, NO_MM_FLAGS);
@@ -243,7 +247,7 @@ register struct monst *mtmp;
 	    struct obj *otmp = mksobj(SILVER_ARROW, TRUE, FALSE);
 	    otmp->blessed = FALSE;
 	    otmp->cursed = FALSE;
-		otmp->quan += 43;
+		otmp->quan += 18+rnd(8);
 		(void) mpickobj(mtmp,otmp);
 		switch(rnd(12)){
 			case 1:
@@ -3077,17 +3081,15 @@ register struct monst *mtmp;
 				otmp->obj_material = IRON;
 				(void) mpickobj(mtmp, otmp);
 			break;
-		    case PM_KARY__THE_FIEND_OF_FIRE:{
-				mongets(mtmp, LEATHER_ARMOR);
-				mongets(mtmp, SCIMITAR);
-			}break;
 		    case PM_MARILITH:{
-				chance = rnd(10);
-				if(chance >= 9) mongets(mtmp, PLATE_MAIL);
-				else if(chance >= 6) mongets(mtmp, CHAIN_MAIL);
-				else if(chance >= 3) mongets(mtmp, STUDDED_LEATHER_ARMOR);
-				else mongets(mtmp, LEATHER_ARMOR);
-				mongets(mtmp, SCIMITAR);
+				if(Inhell){
+					chance = rnd(10);
+					if(chance >= 9) mongets(mtmp, PLATE_MAIL);
+					else if(chance >= 6) mongets(mtmp, CHAIN_MAIL);
+					else if(chance >= 3) mongets(mtmp, STUDDED_LEATHER_ARMOR);
+					else mongets(mtmp, LEATHER_ARMOR);
+					mongets(mtmp, SCIMITAR);
+				}
 			}break;
 		    case PM_PIT_FIEND:
 				otmp = mksobj(TRIDENT, FALSE, FALSE);
@@ -3371,7 +3373,7 @@ register struct	monst	*mtmp;
 					if(!rn2(4)){
 						mongets(mtmp, LEATHER_ARMOR);
 					}
-				} else if(mtmp->data == &mons[PM_KILLER_BEE]){
+				} else if(mtmp->data == &mons[PM_QUEEN_BEE]){
 					chance = rnd(10);
 					if(chance == 10) mongets(mtmp, PLATE_MAIL);
 					else if(chance >= 8) mongets(mtmp, SCALE_MAIL);
@@ -3604,30 +3606,6 @@ register struct	monst	*mtmp;
 		if (ptr == &mons[PM_MINOTAUR]) {
 		    if (!rn2(3) || (in_mklev && Is_earthlevel(&u.uz)))
 			(void) mongets(mtmp, WAN_DIGGING);
-		} else if (is_giant(ptr)) {
-		    for (cnt = rn2((int)(mtmp->m_lev / 2)); cnt; cnt--) {
-			otmp = mksobj(rnd_class(DILITHIUM_CRYSTAL,LUCKSTONE-1),
-				      FALSE, FALSE);
-			otmp->quan = (long) rn1(2, 3);
-			otmp->owt = weight(otmp);
-			(void) mpickobj(mtmp, otmp);
-			if(ptr == &mons[PM_GIANT] || ptr == &mons[PM_STONE_GIANT] || ptr == &mons[PM_HILL_GIANT]){
-				if(!rn2(4)) mongets(mtmp, CLUB);
-			} else if(ptr == &mons[PM_FIRE_GIANT]){
-				mongets(mtmp, CLUB);
-				mongets(mtmp, LEATHER_ARMOR);
-			} else if(ptr == &mons[PM_FROST_GIANT]){
-				mongets(mtmp, BROADSWORD);
-				mongets(mtmp, HELMET);
-				mongets(mtmp, SCALE_MAIL);
-			} else if(ptr == &mons[PM_STORM_GIANT]){
-				mongets(mtmp, TWO_HANDED_SWORD);
-				mongets(mtmp, HELMET);
-				mongets(mtmp, CHAIN_MAIL);
-				mongets(mtmp, GLOVES);
-				mongets(mtmp, IRON_SHOES);
-			}
-		    }
 		} else if(monsndx(ptr) == PM_DEEPEST_ONE) {
 		 if(!on_level(&rlyeh_level,&u.uz)){
 		    switch (rn2(6)) {
@@ -3688,7 +3666,31 @@ register struct	monst	*mtmp;
 			otmp->cursed = FALSE;
 			(void) mpickobj(mtmp, otmp);
 		 }
-		}
+		} else if (is_giant(ptr)) {
+		    for (cnt = rn2((int)(mtmp->m_lev / 2)); cnt; cnt--) {
+			otmp = mksobj(rnd_class(DILITHIUM_CRYSTAL,LUCKSTONE-1),
+				      FALSE, FALSE);
+			otmp->quan = (long) rn1(2, 3);
+			otmp->owt = weight(otmp);
+			(void) mpickobj(mtmp, otmp);
+		    }
+			if(ptr == &mons[PM_GIANT] || ptr == &mons[PM_STONE_GIANT] || ptr == &mons[PM_HILL_GIANT]){
+				if(!rn2(4)) mongets(mtmp, CLUB);
+			} else if(ptr == &mons[PM_FIRE_GIANT]){
+				mongets(mtmp, CLUB);
+				mongets(mtmp, LEATHER_ARMOR);
+			} else if(ptr == &mons[PM_FROST_GIANT]){
+				mongets(mtmp, BROADSWORD);
+				mongets(mtmp, HELMET);
+				mongets(mtmp, SCALE_MAIL);
+			} else if(ptr == &mons[PM_STORM_GIANT]){
+				mongets(mtmp, TWO_HANDED_SWORD);
+				mongets(mtmp, HELMET);
+				mongets(mtmp, CHAIN_MAIL);
+				mongets(mtmp, GLOVES);
+				mongets(mtmp, IRON_SHOES);
+			}
+		} 
 		break;
 	    case S_NAGA:
 			if(ptr == &mons[PM_ANCIENT_NAGA]){
@@ -3858,6 +3860,11 @@ register struct	monst	*mtmp;
 	    	/* moved here from m_initweap() because these don't
 		   have AT_WEAP so m_initweap() is not called for them */
 			switch(monsndx(ptr)){
+///////////////////////////////
+		    case PM_KARY__THE_FIEND_OF_FIRE:
+				mongets(mtmp, LEATHER_ARMOR);
+				mongets(mtmp, SCIMITAR);
+			break;
 ///////////////////////////////
 			case PM_ALDINACH:
 				otmp = mksobj(MASK, FALSE, FALSE);
@@ -4255,6 +4262,9 @@ register struct	monst	*mtmp;
 			}
 		break;
 		case S_GOLEM:
+			if(ptr == &mons[PM_SPELL_GOLEM] && u.uz.dnum == neutral_dnum){
+				(void) mongets(mtmp, MIRROR);
+			}
 			if(ptr == &mons[PM_CENTER_OF_ALL]){
 				struct obj *otmp = mksobj(BARDICHE, TRUE, FALSE);
 				otmp->blessed = TRUE;
@@ -4489,8 +4499,8 @@ register int	mmflags;
 			}
 			fakemon.data = ptr;
 			gpflags = (mmflags & MM_IGNOREWATER) ? MM_IGNOREWATER : 0;
-		} while((!goodpos(x, y, &fakemon, gpflags) || (!in_mklev && cansee(x, y))) && tryct++ < 50);
-		if(tryct >= 50){
+		} while((!goodpos(x, y, &fakemon, gpflags) || (!in_mklev && cansee(x, y))) && tryct++ < 200);
+		if(tryct >= 200){
 			//That failed, return to the default way of handling things
 			ptr = (struct permonst *)0;
 			x = y = 0;
@@ -4508,8 +4518,11 @@ register int	mmflags;
 		do {
 			x = rn1(COLNO-3,2);
 			y = rn2(ROWNO);
-		} while(!goodpos(x, y, ptr ? &fakemon : (struct monst *)0, gpflags) ||
-			(!in_mklev && tryct++ < 150 && ((tryct < 50 && couldsee(x, y)) || ((tryct < 100 && cansee(x, y))) || distmin(x,y,u.ux,u.uy) < BOLT_LIM)));
+		} while(!goodpos(x, y, ptr ? &fakemon : (struct monst *)0, Is_waterlevel(&u.uz) ? gpflags|MM_IGNOREWATER : gpflags) &&
+			(tryct++ < 150 && ((tryct < 50 && couldsee(x, y)) || ((tryct < 100 && cansee(x, y))) || distmin(x,y,u.ux,u.uy) < BOLT_LIM)));
+		if(tryct >= 150){
+			return((struct monst *)0);
+		}
 		if(ptr && PM_ARCHEOLOGIST <= monsndx(ptr) && monsndx(ptr) <= PM_WIZARD && !(mmflags & MM_EDOG)){
 			return mk_mplayer(ptr, x, y, FALSE);
 		}
@@ -4589,7 +4602,11 @@ register int	mmflags;
 			    return((struct monst *) 0);	/* no more monsters! */
 			}
 			fakemon.data = ptr;	/* set up for goodpos */
-		} while(!goodpos(x, y, &fakemon, gpflags) && tryct++ < 50);
+		} while(!goodpos(x, y, &fakemon, gpflags) && tryct++ < 150);
+		if(tryct >= 150){
+			return((struct monst *) 0);	/* no more monsters! */
+		}
+		
 		mndx = monsndx(ptr);
 	}
 	if(allow_minvent) allow_minvent = !(mons[mndx].maligntyp < 0 && Is_illregrd(&u.uz));

@@ -484,10 +484,10 @@ moveloop()
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
 			if (!oldCon != ACURR(A_CON)) {
-				if(conplus(oldCon) > 0) u.uhpmax -= conplus(oldCon)*u.ulevel/2;
+				if(conplus(oldCon) > 0) u.uhpmax -= conplus(oldCon)*u.ulevel;
 				else u.uhpmax -= conplus(oldCon)*u.ulevel;
 				
-				if(conplus(ACURR(A_CON)) > 0) u.uhpmax += conplus(ACURR(A_CON))*u.ulevel/2;
+				if(conplus(ACURR(A_CON)) > 0) u.uhpmax += conplus(ACURR(A_CON))*u.ulevel;
 				else u.uhpmax += conplus(ACURR(A_CON))*u.ulevel;
 				
 				if(u.uhpmax < 1) u.uhpmax = 1;
@@ -561,7 +561,7 @@ moveloop()
 					else pline("You are likely to be eaten by a grue.");
 				} else You_feel("increasingly panicked about being in the dark!");
 			}
-			if(u.sealsActive&SEAL_NABERIUS && u.udrunken<u.ulevel) unbind(SEAL_NABERIUS,TRUE);
+			if(u.sealsActive&SEAL_NABERIUS && (ACURR(A_WIS) < 14 || ACURR(A_INT) < 14)) unbind(SEAL_NABERIUS,TRUE);
 			if(u.specialSealsActive&SEAL_NUMINA && u.ulevel<30) unbind(SEAL_SPECIAL|SEAL_NUMINA,TRUE);
 			if(u.sealsActive&SEAL_SHIRO && uarmc && uarmc->otyp == MUMMY_WRAPPING){
 				struct obj *otmp = uarmc;
@@ -1109,48 +1109,50 @@ moveloop()
 				wtcap = UNENCUMBERED;
 		    } else {
 				if (youracedata->mlet == S_EEL && !is_pool(u.ux,u.uy) && !Is_waterlevel(&u.uz)) {
-				if (u.mh > 1) {
-					u.mh--;
-					flags.botl = 1;
-				} else if (u.mh < 1)
-					rehumanize();
-				} else if (Upolyd && u.mh < u.mhmax) {
-				if (u.mh < 1)
-					rehumanize();
-				else if (Regeneration ||
-						(wtcap < MOD_ENCUMBER && !(moves%20))) {
-					if(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4)) {
+					if (u.mh > 1) {
+						u.mh--;
 						flags.botl = 1;
-						u.mh++;
-					}
-				}
-				} else if (u.uhp < u.uhpmax &&
-				 (wtcap < MOD_ENCUMBER || !u.umoved || Regeneration)) {
-				if (u.ulevel > 9 && !(moves % 3) && 
-					!(Race_if(PM_INCANTIFIER) || uclockwork || on_level(&valley_level, &u.uz))) {
-					int heal, Con = (int) ACURR(A_CON);
-					if(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4)) {
-						if (Con < 12) {
-						heal = 1;
-						} else {
-						heal = rnd(Con-10);
-						if (heal > u.ulevel-9) heal = u.ulevel-9;
+					} else if (u.mh < 1)
+						rehumanize();
+				} else if (Upolyd) {
+					if(u.mh < u.mhmax){
+						if (u.mh < 1)
+							rehumanize();
+						if(Regeneration){
+							flags.botl = 1;
+							u.mh++;
 						}
-						flags.botl = 1;
-						u.uhp += heal;
-						if(u.uhp > u.uhpmax)
-						u.uhp = u.uhpmax;
+						if(!nonliving(youracedata) && !Race_if(PM_INCANTIFIER) && (wtcap < MOD_ENCUMBER || !u.umoved) && 
+							(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4))
+						){
+							flags.botl = 1;
+							//recover 1/30th hp per turn:
+							u.mh += u.ulevel/30;
+							//Now deal with any remainder
+							if(((moves)*(u.ulevel%30))/30 > ((moves-1)*(u.ulevel%30))/30) u.mh += 1;
+						}
+						if(u.mh > u.mhmax) u.mh = u.mhmax;
 					}
-				} else if (Regeneration ||
-					 (u.ulevel <= 9 && 
-					 !(Race_if(PM_INCANTIFIER) || uclockwork || on_level(&valley_level, &u.uz)) &&
-					  !(moves % ((MAXULEV+12) / (u.ulevel+2) + 1)))) {
-					if(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4)){
+				} else if (u.uhp < u.uhpmax){
+					if(Regeneration){
 						flags.botl = 1;
 						u.uhp++;
 					}
+					if(!nonliving(youracedata) && !Race_if(PM_INCANTIFIER) && (wtcap < MOD_ENCUMBER || !u.umoved) && 
+						(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4))
+					){
+						int reglevel = u.ulevel + (((int) ACURR(A_CON)) - 10)/2;
+						if(reglevel < 1) reglevel = 1;
+						if(Role_if(PM_HEALER)) reglevel += 10;
+						flags.botl = 1;
+						//recover 1/30th hp per turn:
+						u.uhp += reglevel/30;
+						//Now deal with any remainder
+						if(((moves)*(reglevel%30))/30 > ((moves-1)*(reglevel%30))/30) u.uhp += 1;
+					}
+					if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 				}
-				}
+				
 				if((uleft  && uleft->oartifact  == ART_RING_OF_HYGIENE_S_DISCIPLE)||
 				   (uright && uright->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE)
 				){
@@ -1199,26 +1201,36 @@ moveloop()
 			}
 		    /* moving around while encumbered is hard work */
 		    if (wtcap > MOD_ENCUMBER && u.umoved) {
-			if(!(wtcap < EXT_ENCUMBER ? moves%30 : moves%10)) {
-			    if (Upolyd && u.mh > 1) {
-				u.mh--;
-			    } else if (!Upolyd && u.uhp > 1) {
-				u.uhp--;
-			    } else {
-				You("pass out from exertion!");
-				exercise(A_CON, FALSE);
-				fall_asleep(-10, FALSE);
-			    }
-			}
+				if(!(wtcap < EXT_ENCUMBER ? moves%30 : moves%10)) {
+					if (Upolyd && u.mh > 1) {
+					u.mh--;
+					} else if (!Upolyd && u.uhp > 1) {
+					u.uhp--;
+					} else {
+					You("pass out from exertion!");
+					exercise(A_CON, FALSE);
+					fall_asleep(-10, FALSE);
+					}
+				}
 		    }
 
-		    if ((u.uen < u.uenmax) && 
-			(wtcap < MOD_ENCUMBER && !Race_if(PM_INCANTIFIER) &&
-			  (!(moves%(((MAXULEV+5) - u.ulevel) *
-				    (Role_if(PM_WIZARD) ? 3 : 4) / 6))))) {
-				u.uen += rn1((int)(ACURR(A_WIS) + ACURR(A_INT)) / 10 + 1,1);
-				if (u.uen > u.uenmax)  u.uen = u.uenmax;
+		    if (u.uen < u.uenmax && 
+				wtcap < MOD_ENCUMBER && 
+				!Race_if(PM_INCANTIFIER)
+			) {
 				flags.botl = 1;
+				int reglevel = u.ulevel + (((int) ACURR(A_WIS)) - 10)/2;
+				if(reglevel < 1) reglevel = 1;
+				if(Role_if(PM_WIZARD)) reglevel += 10;
+				if(Role_if(PM_HEALER)) reglevel += 6;
+				if(Role_if(PM_PRIEST)) reglevel += 6;
+				if(Role_if(PM_VALKYRIE)) reglevel += 3;
+				if(Role_if(PM_MONK)) reglevel += 3;
+				//recover 1/30th energy per turn:
+				u.uen += reglevel/30;
+				//Now deal with any remainder
+				if(((moves)*(reglevel%30))/30 > ((moves-1)*(reglevel%30))/30) u.uen += 1;
+				if (u.uen > u.uenmax)  u.uen = u.uenmax;
 		    }
 			if(Energy_regeneration && u.uen < u.uenmax){
 				u.uen++;

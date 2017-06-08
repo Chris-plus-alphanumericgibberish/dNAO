@@ -638,10 +638,10 @@ boolean digest_meal;
 	if(mon->mhp < mon->mhpmax && regenerates(mon->data)) mon->mhp++;
 	if(!nonliving(mon->data)){
 		if (mon->mhp < mon->mhpmax){
-			//recover 1/20th hp per turn:
-			mon->mhp += (mon->m_lev)/20;
+			//recover 1/30th hp per turn:
+			mon->mhp += (mon->m_lev)/30;
 			//Now deal with any remainder
-			if(moves % 20 >= (20 - ((mon->m_lev)%20))) mon->mhp += 1;
+			if(((moves)*((mon->m_lev)%30))/30 > ((moves-1)*((mon->m_lev)%30))/30) mon->mhp += 1;
 		}
 	}
 	if (mon->mhp > mon->mhpmax) mon->mhp = mon->mhpmax;
@@ -864,11 +864,21 @@ register struct monst *mtmp;
 			nlev = random_teleport_level();
 			// pline("going to %d",nlev);
 			if (nlev != depth(&u.uz)) {
+				struct engr *oep = engr_at(mtmp->mx,mtmp->my);
+				if(!oep){
+					make_engr_at(mtmp->mx, mtmp->my,
+					 "", 0L, DUST);
+					oep = engr_at(mtmp->mx,mtmp->my);
+				}
+				oep->ward_id = FOOTPRINT;
+				oep->halu_ward = 1;
+				oep->ward_type = BURN;
+				oep->complete_wards = 1;
 				get_level(&flev, nlev);
 				migrate_to_level(mtmp, ledger_no(&flev), MIGR_RANDOM,
 					(coord *)0);
+				return 0;
 			}
-			return 0;
 		}
 	}
 
@@ -1084,7 +1094,8 @@ register struct monst *mtmp;
 			(IS_GRAVE(lev->typ)) ||
 			(lev->typ == DRAWBRIDGE_UP) ||
 			(IS_THRONE(lev->typ)) ||
-			(IS_ALTAR(lev->typ))
+			(IS_ALTAR(lev->typ)) ||
+			(Is_airlevel(&u.uz))
 		)){
 			typ = fillholetyp(mtmp->mx,mtmp->my);
 			if (canseemon(mtmp))

@@ -185,8 +185,10 @@ long mask;
 		}
 	    }
 	}
-	if(!restoring) see_monsters(); //More objects than just artifacts grant warning now, and this is a convienient place to add a failsafe see_monsters check
-	update_inventory();
+	if(!restoring) {
+            see_monsters(); //More objects than just artifacts grant warning now, and this is a convienient place to add a failsafe see_monsters check
+            update_inventory();
+        }
 }
 
 /* called e.g. when obj is destroyed */
@@ -507,6 +509,7 @@ struct monst *mon;
 	else if(mon->data == &mons[PM_ZAPHKIEL] && base < -8) base = -8 + AC_VALUE(base+8);
 	else if(mon->data == &mons[PM_QUEEN_OF_STARS] && base < -6) base = -6 + AC_VALUE(base+6);
 	else if(mon->data == &mons[PM_ETERNAL_LIGHT] && base < -6) base = -6 + AC_VALUE(base+6);
+	else if(mon->data == &mons[PM_STRANGE_CORPSE] && base < -5) base = -5 + AC_VALUE(base+5);
 	else if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH]){
 		base -= u.chokhmah;
 	}
@@ -517,7 +520,7 @@ struct monst *mon;
 	else if(mon->data == &mons[PM_MARILITH] || mon->data == &mons[PM_SHAKTARI]){
 	    struct obj *mwep = (mon == &youmonst) ? uwep : MON_WEP(mon);
 		if(mwep){
-			base += AC_VALUE(base*10);
+			base -= rnd(20);
 		}
 	}
 	
@@ -538,6 +541,10 @@ struct monst *mon;
 	if(mon->data == &mons[PM_ASMODEUS] && base < -9) base = -9 + AC_VALUE(base+9);
 	else if(mon->data == &mons[PM_PALE_NIGHT] && base < -6) base = -6 + AC_VALUE(base+6);
 	else if(mon->data == &mons[PM_BAALPHEGOR] && base < -8) base = -8 + AC_VALUE(base+8);
+	else if(mon->data == &mons[PM_ZAPHKIEL] && base < -8) base = -8 + AC_VALUE(base+8);
+	else if(mon->data == &mons[PM_QUEEN_OF_STARS] && base < -6) base = -6 + AC_VALUE(base+6);
+	else if(mon->data == &mons[PM_ETERNAL_LIGHT] && base < -6) base = -6 + AC_VALUE(base+6);
+	else if(mon->data == &mons[PM_STRANGE_CORPSE] && base < -5) base = -5 + AC_VALUE(base+5);
 	else if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH]){
 		base -= u.chokhmah;
 	}
@@ -551,7 +558,7 @@ struct monst *mon;
 	else if(mon->data == &mons[PM_MARILITH] || mon->data == &mons[PM_SHAKTARI]){
 	    struct obj *mwep = (mon == &youmonst) ? uwep : MON_WEP(mon);
 		if(mwep){
-			base += AC_VALUE(base*10);
+			base -= rnd(20);
 		}
 	}
 	
@@ -606,7 +613,7 @@ struct monst *mon;
 	else if(mon->data == &mons[PM_MARILITH] || mon->data == &mons[PM_SHAKTARI]){
 	    struct obj *mwep = (mon == &youmonst) ? uwep : MON_WEP(mon);
 		if(mwep){
-			base += base*10;
+			base -= 20;
 		}
 	}
 	
