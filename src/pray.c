@@ -3266,7 +3266,7 @@ aligntyp alignment;
 		switch (rnl(5)) {
 			case 0: /* randomly charge an object */
 			case 1: /* increase weapon bonus */
-				if(uwep && uwep->spe < 7 && (otmp->oclass == WEAPON_CLASS || is_weptool(otmp))){
+				if(uwep && uwep->spe < 7 && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))){
 					uwep->spe++;
 				}
 			case 2: /* randomly identify items in the backpack */
