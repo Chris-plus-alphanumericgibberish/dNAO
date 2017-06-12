@@ -5,6 +5,7 @@
 #include "hack.h"
 #include "epri.h"
 #include "artifact.h"
+#include "artilist.h"
 
 extern const int monstr[];
 
@@ -2534,6 +2535,11 @@ dosacrifice()
 			u.reconciled = REC_NONE;
 			u.lastprayresult = PRAY_GIFT;
 		    exercise(A_WIS, TRUE);
+		    if (!flags.debug && otmp->oartifact) {
+				char llog[BUFSZ+22];
+				Sprintf(llog, "was given \"%s\"", the(artilist[otmp->oartifact].name));
+				livelog_write_string(llog);
+		    }
 		    /* make sure we can use this weapon */
 		    unrestrict_weapon_skill(weapon_type(otmp));
 		    discover_artifact(otmp->oartifact);
@@ -3260,7 +3266,7 @@ aligntyp alignment;
 		switch (rnl(5)) {
 			case 0: /* randomly charge an object */
 			case 1: /* increase weapon bonus */
-				if(uwep && uwep->spe < 7 && (otmp->oclass == WEAPON_CLASS || is_weptool(otmp))){
+				if(uwep && uwep->spe < 7 && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))){
 					uwep->spe++;
 				}
 			case 2: /* randomly identify items in the backpack */

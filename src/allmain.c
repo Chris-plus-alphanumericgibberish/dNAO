@@ -1109,19 +1109,19 @@ moveloop()
 				wtcap = UNENCUMBERED;
 		    } else {
 				if (youracedata->mlet == S_EEL && !is_pool(u.ux,u.uy) && !Is_waterlevel(&u.uz)) {
-				if (u.mh > 1) {
-					u.mh--;
-					flags.botl = 1;
-				} else if (u.mh < 1)
-					rehumanize();
+					if (u.mh > 1) {
+						u.mh--;
+						flags.botl = 1;
+					} else if (u.mh < 1)
+						rehumanize();
 				} else if (Upolyd) {
 					if(u.mh < u.mhmax){
-				if (u.mh < 1)
-					rehumanize();
+						if (u.mh < 1)
+							rehumanize();
 						if(Regeneration){
-						flags.botl = 1;
-						u.mh++;
-					}
+							flags.botl = 1;
+							u.mh++;
+						}
 						if(!nonliving(youracedata) && !Race_if(PM_INCANTIFIER) && (wtcap < MOD_ENCUMBER || !u.umoved) && 
 							(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4))
 						){
@@ -1130,9 +1130,9 @@ moveloop()
 							u.mh += u.ulevel/30;
 							//Now deal with any remainder
 							if(((moves)*(u.ulevel%30))/30 > ((moves-1)*(u.ulevel%30))/30) u.uhp += 1;
-				}
-						if(u.mh > u.mhmax) u.mh = u.mhmax;
 						}
+						if(u.mh > u.mhmax) u.mh = u.mhmax;
+					}
 				} else if (u.uhp < u.uhpmax){
 					if(Regeneration){
 						flags.botl = 1;
@@ -1149,7 +1149,7 @@ moveloop()
 						u.uhp += reglevel/30;
 						//Now deal with any remainder
 						if(((moves)*(reglevel%30))/30 > ((moves-1)*(reglevel%30))/30) u.uhp += 1;
-				}
+					}
 					if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 				}
 				
@@ -1201,17 +1201,17 @@ moveloop()
 			}
 		    /* moving around while encumbered is hard work */
 		    if (wtcap > MOD_ENCUMBER && u.umoved) {
-			if(!(wtcap < EXT_ENCUMBER ? moves%30 : moves%10)) {
-			    if (Upolyd && u.mh > 1) {
-				u.mh--;
-			    } else if (!Upolyd && u.uhp > 1) {
-				u.uhp--;
-			    } else {
-				You("pass out from exertion!");
-				exercise(A_CON, FALSE);
-				fall_asleep(-10, FALSE);
-			    }
-			}
+				if(!(wtcap < EXT_ENCUMBER ? moves%30 : moves%10)) {
+					if (Upolyd && u.mh > 1) {
+					u.mh--;
+					} else if (!Upolyd && u.uhp > 1) {
+					u.uhp--;
+					} else {
+					You("pass out from exertion!");
+					exercise(A_CON, FALSE);
+					fall_asleep(-10, FALSE);
+					}
+				}
 		    }
 
 		    if (u.uen < u.uenmax && 
