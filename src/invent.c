@@ -1087,7 +1087,8 @@ register const char *let,*word;
 		      otyp != STICK_OF_DYNAMITE &&
 //endif
 		      !is_axe(otmp) && !is_pole(otmp) && otyp != BULLWHIP &&
-			  !is_knife(otmp) && otmp->oartifact != ART_SILVER_STARLIGHT) ||
+			  !is_knife(otmp) && otmp->oartifact != ART_SILVER_STARLIGHT &&
+			  otmp->oartifact != ART_HOLY_MOONLIGHT_SWORD) ||
 			 (otmp->oclass == CHAIN_CLASS && 
 				(otyp == IRON_CHAIN || otyp == SHEAF_OF_HAY)
 			 ) ||
