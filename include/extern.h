@@ -1002,6 +1002,7 @@ E struct obj *NDECL(getnextgetobj);
 #ifdef SORTLOOT
 E int FDECL(sortloot_cmp, (struct obj *, struct obj *));
 #endif
+E int NDECL(u_healing_penalty);
 
 /* ### ioctl.c ### */
 
