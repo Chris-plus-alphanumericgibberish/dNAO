@@ -497,7 +497,8 @@ boolean ignore_oquan;
 				Strcat(buf, "wooden ");
 			break;
 			case BONE:
-				Strcat(buf, "bone ");
+				if(obj->oartifact == ART_WEBWEAVER_S_CROOK) Strcat(buf, "chitin ");
+				else Strcat(buf, "bone ");
 			break;
 			case DRAGON_HIDE:
 				obj->oclass == WEAPON_CLASS ? Strcat(buf, "dragon-tooth ") : Strcat(buf, "dragon-scale ");
