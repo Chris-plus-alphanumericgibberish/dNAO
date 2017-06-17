@@ -610,7 +610,8 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
     race[0] = highc(race[0]);
     wprintw(win, "%s the %s %s%s%s", plname,
             (u.ualign.type == A_CHAOTIC ? "Chaotic" :
-             u.ualign.type == A_NEUTRAL ? "Neutral" : "Lawful"),
+             u.ualign.type == A_NEUTRAL ? "Neutral" :
+             u.ualign.type == A_VOID    ? "Gnostic" : "Lawful"),
             Upolyd ? "" : race, Upolyd ? "" : " ",
             rank);
 

@@ -804,7 +804,9 @@ curses_choose_character()
     /* force compatibility with role/race/gender */
     if (flags.initalign < 0 ||
         !validalign(flags.initrole, flags.initrace, flags.initalign)) {
-        if (flags.initalign == ROLE_RANDOM || flags.randomall) {
+        if (flags.initalign == ROLE_RANDOM || flags.randomall
+            || (flags.initrole != ROLE_NONE
+                && roles[flags.initrole].malenum == PM_EXILE)) {
             flags.initalign = pick_align(flags.initrole, flags.initrace,
                                          flags.initgend, PICK_RANDOM);
             if (flags.initalign < 0)
