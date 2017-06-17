@@ -905,7 +905,7 @@ int thrown;
 			}
 			if ((uarmg->cursed) &&
 				hates_unholy(mdat)){
-					tmp += rnd(20);
+					tmp += rnd(9);
 					unholymsg = TRUE;
 			}
 			if(uarmg->oartifact && 
@@ -971,7 +971,7 @@ int thrown;
 			) barehand_unholy_rings++;
 			
 			if ((barehand_unholy_rings) && hates_unholy(mdat)) {
-			    tmp += d(barehand_unholy_rings,20);
+			    tmp += d(barehand_unholy_rings,9);
 			    ironmsg = TRUE;
 			}
 			
@@ -1182,7 +1182,7 @@ int thrown;
 				ironobj = TRUE;
 			}
 			if (obj->cursed == TRUE && hates_unholy(mdat)) {
-				tmp += rnd(20);	//I think this is the right thing to do here.  I don't think it enters the main unholy section
+				tmp += rnd(9);	//I think this is the right thing to do here.  I don't think it enters the main unholy section
 				unholymsg = TRUE;
 				unholyobj = TRUE;
 			}
@@ -1723,7 +1723,7 @@ defaultvalue:
 						ironobj = TRUE;
 					}
 					if (obj && obj->cursed == TRUE && hates_unholy(mdat)) {
-						tmp += rnd(20);
+						tmp += rnd(9);
 						unholymsg = TRUE;
 						unholyobj = TRUE;
 					}
