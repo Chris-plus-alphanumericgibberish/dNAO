@@ -1716,10 +1716,19 @@ defaultvalue:
 					 * Things like silver wands can arrive here so
 					 * so we need another silver check.
 					 */
-					if (obj && (obj->obj_material == SILVER || arti_silvered(obj)) && hates_silver(mdat)) {
+					if (obj && (obj->obj_material == SILVER || arti_silvered(obj) || 
+							(thrown && obj->otyp == SHURIKEN && uwep && uwep->oartifact == ART_SILVER_STARLIGHT) )
+								&& hates_silver(mdat)
+					) {
 						tmp += rnd(20);
-						silvermsg = TRUE;
+						if(obj->oartifact == ART_SUNSWORD) sunmsg = TRUE;
+						else silvermsg = TRUE;
 						silverobj = TRUE;
+					}
+					if(obj->oartifact == ART_GLAMDRING && (is_orc(mdat) || is_demon(mdat))){
+						tmp += rnd(20); //I think this is the right thing to do here.  I don't think it enters the main silver section
+						lightmsg = TRUE;
+					}
 					if (obj && obj->obj_material == IRON && hates_iron(mdat)) {
 						tmp += rnd(mon->m_lev * 2);
 						ironmsg = TRUE;
@@ -1729,7 +1738,6 @@ defaultvalue:
 						tmp += rnd(9);
 						unholymsg = TRUE;
 						unholyobj = TRUE;
-					}
 					}
 				}
 			}
