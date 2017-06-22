@@ -2487,6 +2487,7 @@ int *passed_info;
 	winid tmpwin;
 	int n=0, how,count=0;
 	char buf[BUFSZ];
+	char incntlet='a';
 	struct obj *otmp;
 	menu_item *selected;
 	anything any;
@@ -2502,8 +2503,13 @@ int *passed_info;
 			Sprintf1(buf, doname(otmp));
 			any.a_obj = otmp;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
-				otmp->invlet, 0, ATR_NONE, buf,
+				incntlet, 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
+			incntlet++;
+			if(incntlet > 'z')
+				incntlet = 'A';
+			if(incntlet > 'Z' && incntlet < 'a')
+				incntlet = 'a';
 			count++;
 		// }
 	}
