@@ -1796,6 +1796,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 #endif /* CONVICT */
 	}
 	if (Stoned) you_are("turning to stone");
+	if (Golded) you_are("turning to gold");
 	if (Slimed) you_are("turning into slime");
 	if (Strangled) you_are((u.uburied) ? "buried" : "being strangled");
 	if (Glib) {
@@ -2414,6 +2415,7 @@ int final;
 			dump(youwere, "sick from illness");
 	}
 	if (Stoned) dump(youwere, "turning to stone");
+	if (Golded) dump(youwere, "turning to gold");
 	if (Slimed) dump(youwere, "turning into slime");
 	if (Strangled)
 		dump(youwere, (u.uburied) ? "buried" : "being strangled");

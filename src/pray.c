@@ -158,6 +158,7 @@ in_trouble()
 	 * major troubles
 	 */
 	if(Stoned) return(TROUBLE_STONED);
+	if(Golded) return(TROUBLE_STONED);
 	if(Slimed) return(TROUBLE_SLIMED);
 	if(Strangled) return(TROUBLE_STRANGLED);
 	if(u.utrap && u.utraptype == TT_LAVA) return(TROUBLE_LAVA);
@@ -300,6 +301,7 @@ register int trouble;
 	    case TROUBLE_STONED:
 		    You_feel("more limber.");
 		    Stoned = 0;
+		    Golded = 0;
 		    flags.botl = 1;
 		    delayed_killer = 0;
 		    break;
