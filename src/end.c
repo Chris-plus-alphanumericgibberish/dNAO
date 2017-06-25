@@ -909,7 +909,14 @@ die:
 	/* might have been killed while using a disposable item, so make sure
 	   it's gone prior to inventory disclosure and creation of bones data */
 	inven_inuse(TRUE);
-
+	{
+		struct monst *mtmp;
+		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+			if(mtmp->data == &mons[PM_OONA] && mtmp->mtame)
+				achieve.get_keys |= (1 << (ART_THIRD_KEY_OF_LAW - ART_FIRST_KEY_OF_LAW));
+				
+		}
+	}
 #ifdef RECORD_REALTIME
         /* Update the realtime counter to reflect the playtime of the current
          * game. */
