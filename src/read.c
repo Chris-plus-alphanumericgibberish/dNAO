@@ -655,7 +655,7 @@ int curse_bless;
 	    }
 
 	} else if (obj->oclass == TOOL_CLASS || is_blaster(obj)
-		   || obj->otyp == DWARVISH_HELM || obj->otyp == VIBROBLADE 
+		   || obj->otyp == DWARVISH_IRON_HELM || obj->otyp == VIBROBLADE 
 		   || obj->otyp == FORCE_PIKE) {
 	    int rechrg = (int)obj->recharged;
 
@@ -711,11 +711,11 @@ int curse_bless;
 		    p_glow2(obj, NH_WHITE);
 		}
 		break;
-	    case DWARVISH_HELM:
+	    case DWARVISH_IRON_HELM:
 	    case OIL_LAMP:
 	    case BRASS_LANTERN:
 		if (is_cursed) {
-		    if (obj->otyp == DWARVISH_HELM) {
+		    if (obj->otyp == DWARVISH_IRON_HELM) {
 			/* Don't affect the +/- of the helm */
 			obj->age = 0;
 		    }
@@ -727,13 +727,13 @@ int curse_bless;
 			end_burn(obj, TRUE);
 		    }
 		} else if (is_blessed) {
-		    if (obj->otyp != DWARVISH_HELM) {
+		    if (obj->otyp != DWARVISH_IRON_HELM) {
 				obj->spe = 1;
 		    }
 		    obj->age = 1500;
 		    p_glow2(obj, NH_BLUE);
 		} else {
-		    if (obj->otyp != DWARVISH_HELM) {
+		    if (obj->otyp != DWARVISH_IRON_HELM) {
 				obj->spe = 1;
 		    }
 		}
