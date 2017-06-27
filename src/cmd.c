@@ -31,12 +31,14 @@ extern int NDECL(wiz_debug_cmd);
 extern int NDECL(doapply); /**/
 extern int NDECL(dorub); /**/
 extern int NDECL(dojump); /**/
+extern int NDECL(docome); /**/
 extern int NDECL(doextlist); /**/
 extern int NDECL(dodrop); /**/
 extern int NDECL(doddrop); /**/
 extern int NDECL(dodown); /**/
 extern int NDECL(doup); /**/
 extern int NDECL(donull); /**/
+extern int NDECL(dowait); /**/
 extern int NDECL(dowipe); /**/
 extern int NDECL(do_mname); /**/
 extern int NDECL(ddocall); /**/
@@ -4012,6 +4014,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"adjust", "adjust inventory letters", doorganize, IFBURIED, AUTOCOMPLETE},
 	{"annotate", "annotate current dungeon level", donamelevel, IFBURIED, AUTOCOMPLETE},
 	{"chat", "talk to someone", dotalk, IFBURIED, AUTOCOMPLETE},	/* converse? */
+	{"come", "order pets to come", docome, !IFBURIED, AUTOCOMPLETE},
 	{"conduct", "list which challenges you have adhered to", doconduct, IFBURIED, AUTOCOMPLETE},
 	{"dip", "dip an object into something", dodip, !IFBURIED, AUTOCOMPLETE},
 	{"enhance", "advance or check weapons skills", enhance_weapon_skill, IFBURIED, AUTOCOMPLETE},
@@ -4039,6 +4042,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"untrap", "untrap something", dountrap, !IFBURIED, AUTOCOMPLETE},
 	{"versionext", "list compile time options for this version of NetHack",
 		doextversion, IFBURIED, AUTOCOMPLETE},
+	{"wait", "order pets to wait", dowait, !IFBURIED, AUTOCOMPLETE},
 	{"wipe", "wipe off your face", dowipe, !IFBURIED, AUTOCOMPLETE},
 	{"?", "get this list of extended commands", doextlist, IFBURIED, AUTOCOMPLETE},
 #if defined(WIZARD)
