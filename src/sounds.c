@@ -1495,6 +1495,14 @@ asGuardian:
 			}
 		}
 	break;
+	case MS_SHOG:
+		if(couldsee(mtmp->mx,mtmp->my)){
+			verbl_msg = "Tekeli-li! Tekeli-li!";
+		} else {
+			You_hear("distant piping sounds.");
+		}
+		aggravate();
+	break;
 	case MS_IMITATE:
 	    pline_msg = "imitates you.";
 	    break;
