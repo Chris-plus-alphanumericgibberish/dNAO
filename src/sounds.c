@@ -326,7 +326,7 @@ dosounds()
     if (level.flags.has_morgue && !rn2(200)) {
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    if (DEADMONSTER(mtmp)) continue;
-	    if (is_undead(mtmp->data) &&
+	    if (is_undead_mon(mtmp) &&
 		mon_in_room(mtmp, MORGUE)) {
 		switch (rn2(2)+hallu) {
 		    case 0:
@@ -992,7 +992,7 @@ asGuardian:
 				// pline("nightmare\n");
 				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 					if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-						if(!mindless(tmpm->data)){
+						if(!mindless_mon(tmpm)){
 							tmpm->mstun = 1;
 							tmpm->mconf = 1;
 							tmpm->mberserk = 1;
@@ -1208,7 +1208,7 @@ asGuardian:
 				case 1:
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data)){
+							if(!mindless_mon(tmpm)){
 								if ( mtmp->mpeaceful == tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 5) {
 									inrange=TRUE;
 								}
@@ -1224,7 +1224,7 @@ asGuardian:
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data)){
+							if(!mindless_mon(tmpm)){
 								if ( mtmp->mpeaceful == tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 5) {
 									if (tmpm->encouraged < BASE_DOG_ENCOURAGED_MAX)
 										tmpm->encouraged = min_ints(BASE_DOG_ENCOURAGED_MAX, tmpm->encouraged + rnd(mtmp->m_lev/3+1));
@@ -1248,7 +1248,7 @@ asGuardian:
 				case 2:
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data)){
+							if(!mindless_mon(tmpm)){
 								if ( mtmp->mpeaceful == tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 5) {
 									if(tmpm->mcan || tmpm->mspec_used || (!tmpm->mnotlaugh && tmpm->mlaughing) || (!tmpm->mcansee && tmpm->mblinded) ||
 										tmpm->mberserk || (tmpm->mhp < tmpm->mhpmax) || (!tmpm->mcanmove && tmpm->mfrozen) || tmpm->mstdy > 0 || tmpm->mstun ||
@@ -1267,7 +1267,7 @@ asGuardian:
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data)){
+							if(!mindless_mon(tmpm)){
 								if ( mtmp->mpeaceful == tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 5) {
 									tmpm->mcan = 0;
 									tmpm->mspec_used = 0;
@@ -1299,7 +1299,7 @@ asGuardian:
 				case 3:
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data) && tmpm->data->mmove){
+							if(!mindless_mon(tmpm) && tmpm->data->mmove){
 								if ( mtmp->mpeaceful == tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 5) {
 									inrange = TRUE;
 								}
@@ -1315,7 +1315,7 @@ asGuardian:
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data) && tmpm->data->mmove){
+							if(!mindless_mon(tmpm) && tmpm->data->mmove){
 								if ( mtmp->mpeaceful == tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 5) {
 									tmpm->movement += 12;
 									tmpm->permspeed = MFAST;
@@ -1412,7 +1412,7 @@ asGuardian:
 				case 2:
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data)){
+							if(!mindless_mon(tmpm)){
 								if ( mtmp->mpeaceful != tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 4) {
 									inrange = TRUE;
 								}
@@ -1428,7 +1428,7 @@ asGuardian:
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data)){
+							if(!mindless_mon(tmpm)){
 								if ( mtmp->mpeaceful != tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 5) {
 									if (tmpm->encouraged > -1*BASE_DOG_ENCOURAGED_MAX)
 										tmpm->encouraged = max_ints(-1*BASE_DOG_ENCOURAGED_MAX, tmpm->encouraged - rnd(mtmp->m_lev/3+1));
@@ -1452,7 +1452,7 @@ asGuardian:
 				case 3:
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data) && tmpm->data->mmove){
+							if(!mindless_mon(tmpm) && tmpm->data->mmove){
 								if ( mtmp->mpeaceful != tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 4) {
 									inrange = TRUE;
 								}
@@ -1469,7 +1469,7 @@ asGuardian:
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
-							if(!mindless(tmpm->data) && tmpm->data->mmove){
+							if(!mindless_mon(tmpm) && tmpm->data->mmove){
 								if ( mtmp->mpeaceful != tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 4 && !resist(tmpm, 0, 0, FALSE)) {
 									tmpm->movement -= 12;
 									tmpm->permspeed = MSLOW;
@@ -2055,7 +2055,7 @@ int dz;
 		mtmp = tamedog(mtmp, (struct obj *)0);
 		return 1;
 	}
-	if(is_undead(mtmp->data) && u.specialSealsActive&SEAL_ACERERAK && u.ulevel > mtmp->m_lev){
+	if(is_undead_mon(mtmp) && u.specialSealsActive&SEAL_ACERERAK && u.ulevel > mtmp->m_lev){
 		You("order the lesser dead to stand at ease.");
 		mtmp->mpeaceful = 1;
 		mtmp->mhp = mtmp->mhpmax;

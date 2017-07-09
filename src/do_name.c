@@ -881,7 +881,10 @@ boolean called;
 			Strcat(buf, "frumious ");
 			name_at_start = FALSE;
 		}
-		if ((u.sealsActive&SEAL_MOTHER && !is_undead(mtmp->data)) || (Role_if(PM_HEALER) && (!nonliving(mtmp->data) || has_blood(mtmp->data))) ){
+		if (
+			(u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood(mtmp->data))) 
+			&& !DEADMONSTER(mtmp)
+		){
 			if(mtmp->mhp == mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 			else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
 			else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood(mtmp->data)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
@@ -901,6 +904,9 @@ boolean called;
 			}
 		}
 	    Strcat(buf, mdat->mname);
+		if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
+		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
+		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
 	    return buf;
 	}
 
@@ -941,7 +947,7 @@ boolean called;
 				Sprintf(eos(buf), "frumious ");
 				name_at_start = FALSE;
 			}
-			if ((u.sealsActive&SEAL_MOTHER && !is_undead(mtmp->data)) || (Role_if(PM_HEALER) && (!nonliving(mtmp->data) || has_blood(mtmp->data))) ){
+			if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood(mtmp->data))) ){
 				if(mtmp->mhp == mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 				else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
 				else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood(mtmp->data)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
@@ -960,7 +966,13 @@ boolean called;
 						}
 				}
 			}
-			Sprintf(eos(buf), "%s called %s", mdat->mname, name);
+			
+			Sprintf(eos(buf), "%s", mdat->mname);
+			if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
+			else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
+			else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
+			Sprintf(eos(buf), " called %s", name);
+			
 			name_at_start = (boolean)type_is_pname(mdat);
 	    } else if (is_mplayer(mdat) && (bp = strstri(name, " the ")) != 0) {
 		/* <name> the <adjective> <invisible> <saddled> <rank> */
@@ -991,7 +1003,7 @@ boolean called;
 			Strcat(buf, "frumious ");
 			name_at_start = FALSE;
 		}
-		if ((u.sealsActive&SEAL_MOTHER && !is_undead(mtmp->data)) || (Role_if(PM_HEALER) && (!nonliving(mtmp->data) || has_blood(mtmp->data))) ){
+		if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood(mtmp->data))) ){
 			if(mtmp->mhp == mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 			else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
 			else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood(mtmp->data)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
@@ -1011,6 +1023,9 @@ boolean called;
 			}
 		}
 	    Strcat(buf, mdat->mname);
+		if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
+		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
+		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
 	}
 
 	if (name_at_start && (article == ARTICLE_YOUR || !has_adjectives)) {
