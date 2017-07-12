@@ -154,11 +154,12 @@ curses_destroy_win(WINDOW * win)
 void
 curses_refresh_nethack_windows()
 {
-    WINDOW *status_window, *message_window, *map_window;
+    WINDOW *status_window, *message_window, *map_window, *inv_window;
 
     status_window = curses_get_nhwin(STATUS_WIN);
     message_window = curses_get_nhwin(MESSAGE_WIN);
     map_window = curses_get_nhwin(MAP_WIN);
+    inv_window = curses_get_nhwin(INV_WIN);
 
     if ((moves <= 1) && !invent) {
         /* Main windows not yet displayed; refresh base window instead */
@@ -171,6 +172,10 @@ curses_refresh_nethack_windows()
         wnoutrefresh(map_window);
         touchwin(message_window);
         wnoutrefresh(message_window);
+        if (inv_window) {
+            touchwin(inv_window);
+            wnoutrefresh(inv_window);
+        }
         doupdate();
     }
 }
@@ -276,7 +281,8 @@ curses_add_wid(winid wid)
 void
 curses_refresh_nhwin(winid wid)
 {
-    wrefresh(curses_get_nhwin(wid));
+    wnoutrefresh(curses_get_nhwin(wid));
+    doupdate();
 }
 
 
@@ -369,8 +375,9 @@ curses_putch(winid wid, int x, int y, int ch, int color, int attr)
 
         write_char(mapwin, x - sx, y - sy, nch);
     }
-
-    wrefresh(mapwin);
+    /* refresh after every character?
+     * Fair go, mate! Some of us are playing from Australia! */
+    /* wrefresh(mapwin); */
 }
 
 
@@ -476,7 +483,7 @@ curses_puts(winid wid, int attr, const char *text)
                                FALSE);
     } else {
         waddstr(win, text);
-        wrefresh(win);
+        wnoutrefresh(win);
     }
 }
 
@@ -507,14 +514,14 @@ curses_alert_win_border(winid wid, boolean onoff)
 {
     WINDOW *win = curses_get_nhwin(wid);
 
-    if (!curses_window_has_border(wid))
+    if (!win || !curses_window_has_border(wid))
         return;
     if (onoff)
         curses_toggle_color_attr(win, ALERT_BORDER_COLOR, NONE, ON);
     box(win, 0, 0);
     if (onoff)
         curses_toggle_color_attr(win, ALERT_BORDER_COLOR, NONE, OFF);
-    wrefresh(win);
+    wnoutrefresh(win);
 }
 
 
@@ -524,6 +531,7 @@ curses_alert_main_borders(boolean onoff)
     curses_alert_win_border(MAP_WIN, onoff);
     curses_alert_win_border(MESSAGE_WIN, onoff);
     curses_alert_win_border(STATUS_WIN, onoff);
+    curses_alert_win_border(INV_WIN, onoff);
 }
 
 /* Return true if given wid is a main NetHack window */
