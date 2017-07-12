@@ -258,6 +258,7 @@ E void NDECL(decl_init);
 
 E struct obj *FDECL(o_in, (struct obj*,CHAR_P));
 E struct obj *FDECL(o_material, (struct obj*,unsigned));
+E struct obj *FDECL(o_artifact, (struct obj*));
 E int FDECL(gold_detect, (struct obj *));
 E int FDECL(food_detect, (struct obj *));
 E int FDECL(object_detect, (struct obj *,int));
