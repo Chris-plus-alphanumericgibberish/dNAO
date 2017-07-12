@@ -488,7 +488,7 @@ curses_update_stats(void)
     if (border)
         box(win, 0, 0);
 
-    wrefresh(win);
+    wnoutrefresh(win);
 
     if (first) {
         first = FALSE;
@@ -584,8 +584,9 @@ draw_horizontal(int x, int y, int hp, int hpmax)
         /* use waddch, we don't want to highlight the '/' */
         waddch(win, '/');
         print_statdiff("", &prevexp, u.uexp, STAT_OTHER);
+    }
 #endif
-    } else
+    else
         print_statdiff(" Exp:", &prevlevel, u.ulevel, STAT_OTHER);
 
     if (flags.time)
@@ -649,8 +650,9 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
         }
         print_statdiff("", &prevexp, xp_left, STAT_AC);
         waddch(win, ')');
+    }
 #endif
-    } else
+    else
         print_statdiff(" Exp:", &prevlevel, u.ulevel, STAT_OTHER);
 
     waddch(win, ' ');
@@ -832,8 +834,9 @@ draw_vertical(int x, int y, int hp, int hpmax)
         /* use waddch, we don't want to highlight the '/' */
         waddch(win, '/');
         print_statdiff("", &prevexp, u.uexp, STAT_OTHER);
+    }
 #endif
-    } else
+    else
         print_statdiff("Level:         ", &prevlevel, u.ulevel, STAT_OTHER);
     wmove(win, y++, x);
 
