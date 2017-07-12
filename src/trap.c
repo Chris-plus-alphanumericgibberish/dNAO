@@ -472,6 +472,14 @@ int *fail_reason;
 	    if (fail_reason) *fail_reason = AS_NO_MON;
 	    return (struct monst *)0;
 	}
+	
+	if(Role_if(PM_BARD) && mon && cause == ANIMATE_SPELL && rnd(20) < ACURR(A_CHA) && 
+		!(is_animal(mon->data) || mindless(mon->data))
+	){
+		struct monst *newmon;
+		newmon = tamedog(mon, (struct obj *)0);
+		if(newmon) mon = newmon;
+	}
 
 	/* in case statue is wielded and hero zaps stone-to-flesh at self */
 	if (statue->owornmask) remove_worn_item(statue, TRUE);
@@ -991,8 +999,8 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 				losehp(rnd(10), "fell into a pit of iron spikes",
 				NO_KILLER_PREFIX);
 			}
-			else{//half cold-iron damage
-				losehp((rnd(10) + rnd(u.ulevel*2)/2), "fell into a pit of cold-iron spikes",
+			else{//cold-iron damage
+				losehp((rnd(10) + rnd(u.ulevel)), "fell into a pit of cold-iron spikes",
 				NO_KILLER_PREFIX);
 			}
 		    if (!rn2(6))
@@ -1139,7 +1147,8 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		    You("are caught in a magical explosion!");
 		    losehp(rnd(10), "magical explosion", KILLED_BY_AN);
 		    Your("body absorbs some of the magical energy!");
-		    u.uen = (u.uenmax += 2);
+		    u.uenmax += 2;
+			u.uen = min(u.uen+400, u.uenmax);
 		} else domagictrap();
 #ifdef STEED
 		(void) steedintrap(trap, (struct obj *)0);
@@ -1324,7 +1333,7 @@ struct obj *otmp;
 			}
 			if (mtmp->mhp <= 0 ||
 				thitm(0, mtmp, (struct obj *)0,
-				      rnd((tt == PIT) ? 6 : 10) + (tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev*2)/2 : 0, FALSE))
+				      rnd((tt == PIT) ? 6 : 10) + (tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0, FALSE))
 			    trapkilled = TRUE;
 			steedhit = TRUE;
 			break;
@@ -2056,13 +2065,13 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    seetrap(trap);
 			}
 			if (in_sight && hates_iron(mtmp->data) && tt == SPIKED_PIT) {
-				pline("The cold-iron sears %s!",	//half cold-iron damage
+				pline("The cold-iron sears %s!",
 					Monnam(mtmp));
 			}
 			mselftouch(mtmp, "Falling, ", FALSE);
 			if (mtmp->mhp <= 0 ||
 				thitm(0, mtmp, (struct obj *)0,
-				      rnd((tt == PIT) ? 6 : 10) + (tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev * 2)/2 : 0, FALSE))
+				      rnd((tt == PIT) ? 6 : 10) + (tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0, FALSE))
 			    trapkilled = TRUE;
 			break;
 		case HOLE:
@@ -2327,6 +2336,29 @@ boolean byplayer;
 		stoned = TRUE;
 		xkilled(mon,0);
 	} else monstone(mon);
+}
+
+void
+minstagoldify(mon,byplayer)
+struct monst *mon;
+boolean byplayer;
+{
+	if (resists_ston(mon)) return;
+	if (poly_when_golded(mon->data)) {
+		mon_to_gold(mon);
+		return;
+	}
+
+	/* give a "<mon> is slowing down" message and also remove
+	   intrinsic speed (comparable to similar effect on the hero) */
+	mon_adjust_speed(mon, -3, (struct obj *)0);
+
+	if (cansee(mon->mx, mon->my))
+		pline("%s turns to gold.", Monnam(mon));
+	if (byplayer) {
+		golded = TRUE;
+		xkilled(mon,0);
+	} else mongolded(mon);
 }
 
 void
@@ -3340,6 +3372,8 @@ dodeepswim()
 	}
 }
 
+static const char antimagic_killer[] = "antimagic";
+
 void
 drain_en(n)
 register int n;
@@ -3348,6 +3382,11 @@ register int n;
 	You_feel("your magical energy drain away!");
 	u.uen -= n;
 	if(u.uen < 0)  {
+		if(Race_if(PM_INCANTIFIER)){
+			killer_format = KILLED_BY;
+			killer = antimagic_killer;
+			done(DIED);
+		}
 		u.uenmax += u.uen;
 		if(u.uenmax < 0) u.uenmax = 0;
 		u.uen = 0;

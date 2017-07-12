@@ -273,8 +273,9 @@ int spec;
 	        return 9999;
 	
 	dmod = otmp->objsize - MZ_MEDIUM;
-	ldie = max(2, objects[otyp].oc_wldam + dmod);
-	sdie = max(2, objects[otyp].oc_wsdam + dmod);
+	if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit) dmod += 2;
+	ldie = max(2, objects[otyp].oc_wldam + 2*dmod);
+	sdie = max(2, objects[otyp].oc_wsdam + 2*dmod);
 	
 	if (bigmonst(ptr)) {
 		if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp = exploding_d(2,ldie,1);
@@ -314,31 +315,31 @@ int spec;
 		case FLAIL:
 		case RANSEUR:
 		case SCYTHE:
-		case VOULGE:		tmp += rnd(4+dmod); break;
+		case VOULGE:		tmp += rnd(4+2*dmod); break;
 
 		case HALBERD:
-		case SPETUM:		tmp += rnd(6+dmod); break;
+		case SPETUM:		tmp += rnd(6+2*dmod); break;
 		case ACID_VENOM:
 			if(otmp->ovar1) tmp = otmp->ovar1;
 			else tmp += rnd(6);
 		break;
 		
-		case CRYSTAL_SWORD:	tmp += d(1,12+dmod); break;
+		case CRYSTAL_SWORD:	tmp += d(1,12+2*dmod)+otmp->spe; break;
 		
 		case AXE:
-			if(otmp->oartifact == ART_GIANTSLAYER) tmp += d(2,4+dmod);
+			if(otmp->oartifact == ART_GIANTSLAYER) tmp += d(2,4+2*dmod);
 		break;
 		case BATTLE_AXE:
 		case BARDICHE:
-		case TRIDENT:		tmp += d(2,4+dmod); break;
+		case TRIDENT:		tmp += d(2,4+2*dmod); break;
 
 		case TSURUGI:
 		case DWARVISH_MATTOCK:
-		case TWO_HANDED_SWORD:	tmp += d(2,6+dmod); break;
+		case TWO_HANDED_SWORD:	tmp += d(2,6+2*dmod); break;
 		case SCIMITAR:
-			if(otmp->oartifact == ART_REAVER) tmp += d(1,8+dmod); break;
+			if(otmp->oartifact == ART_REAVER) tmp += d(1,8+2*dmod); break;
 		case LONG_SWORD:	
-			if(otmp->oartifact == ART_TOBIUME) tmp -= (3-dmod); 
+			if(otmp->oartifact == ART_TOBIUME) tmp -= (3+dmod); 
 		break;
 		case BULLET:
 		case SILVER_BULLET:
@@ -374,7 +375,7 @@ int spec;
 						((float)u.uhp)/u.uhpmax;
 			}
 			if(otmp->altmode){ //Probably just the Annulus
-				tmp += d(3, 3+dmod);
+				tmp += d(3, 3+2*dmod);
 				otmp->age -= 100;
 			}
 			if(otmp == uwep || (u.twoweap && otmp == uswapwep) ){
@@ -521,14 +522,14 @@ int spec;
 			}
 		break;
 		case WAR_HAMMER:
-			if(otmp->oartifact == ART_MJOLLNIR) tmp += d(2,4+dmod); break;
+			if(otmp->oartifact == ART_MJOLLNIR) tmp += d(2,4+2*dmod); break;
 		case BULLWHIP:
-			if(otmp->oartifact == ART_VAMPIRE_KILLER) tmp += d(1,10+dmod);
+			if(otmp->oartifact == ART_VAMPIRE_KILLER) tmp += d(1,10+2*dmod);
 			else if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) tmp = d(1,2) + rnd(4);
-			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH)  tmp += exploding_d(2,max(2,2+dmod),0);
+			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH)  tmp += exploding_d(2,max(2,2+2*dmod),0);
 		break;
 		case RAPIER:
-			if(otmp->oartifact == ART_SILVER_STARLIGHT && !(noncorporeal(ptr) || amorphous(ptr) || stationary(ptr))) tmp += d(2,4+dmod); break;
+			if(otmp->oartifact == ART_SILVER_STARLIGHT && !(noncorporeal(ptr) || amorphous(ptr) || stationary(ptr))) tmp += d(2,4+2*dmod); break;
 	    }
 	} else {
 		if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp = exploding_d(2,sdie,1);
@@ -562,23 +563,23 @@ int spec;
 		case SPETUM:
 		case TRIDENT:
 			tmp++; 
-			if(otmp->oartifact == ART_MJOLLNIR) tmp += d(2,4+dmod)+2;
+			if(otmp->oartifact == ART_MJOLLNIR) tmp += d(2,4+2*dmod)+2;
 		break;
 
 		case BULLWHIP:
-			if(otmp->oartifact == ART_VAMPIRE_KILLER) tmp += 10+dmod;
+			if(otmp->oartifact == ART_VAMPIRE_KILLER) tmp += 10+2*dmod;
 			else if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) tmp = d(1,2) + rnd(4);
-			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH)  tmp += exploding_d(4,4+dmod,0);
+			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH)  tmp += exploding_d(4,4+2*dmod,0);
 		break;
 
 		case LONG_SWORD:	
-			if(otmp->oartifact == ART_TOBIUME) tmp -= 2-dmod;
+			if(otmp->oartifact == ART_TOBIUME) tmp -= 2+dmod;
 		break;
 		
-		case CRYSTAL_SWORD:	tmp += d(1,8+dmod); break;
+		case CRYSTAL_SWORD:	tmp += d(1,8+2*dmod)+otmp->spe; break;
 		
 		case AXE:
-			if(otmp->oartifact == ART_GIANTSLAYER) tmp += d(1,4+dmod);
+			if(otmp->oartifact == ART_GIANTSLAYER) tmp += d(1,4+2*dmod);
 		break;
 		
 		case BATTLE_AXE:
@@ -593,7 +594,7 @@ int spec;
 		case RUNESWORD:
 		case SCYTHE:
 		case VOULGE:		
-			tmp += rnd(4+dmod);
+			tmp += rnd(4+2*dmod);
 		break;
 		case BULLET:
 		case SILVER_BULLET:
@@ -629,7 +630,7 @@ int spec;
 						((float)u.uhp)/u.uhpmax;
 			}
 			if(otmp->altmode){ //Probably just the Annulus
-				tmp += d(3, 3+dmod);
+				tmp += d(3, 3+2*dmod);
 				otmp->age -= 100;
 			}
 			if(otmp == uwep || (u.twoweap && otmp == uswapwep) ){
@@ -780,9 +781,9 @@ int spec;
 			else tmp += rnd(6);
 		break;
 		case SCIMITAR:
-			if(otmp->oartifact == ART_REAVER) tmp += d(1,8+dmod); break;
+			if(otmp->oartifact == ART_REAVER) tmp += d(1,8+2*dmod); break;
 		case RAPIER:
-			if(otmp->oartifact == ART_SILVER_STARLIGHT && !(noncorporeal(ptr) || amorphous(ptr) || stationary(ptr))) tmp += d(1,6+dmod)+d(1,4+dmod); break;
+			if(otmp->oartifact == ART_SILVER_STARLIGHT && !(noncorporeal(ptr) || amorphous(ptr) || stationary(ptr))) tmp += d(1,6+2*dmod)+d(1,4+2*dmod); break;
 	    }
 	}
 	
@@ -868,14 +869,22 @@ int spec;
 			&& hates_iron(ptr)
 			&& !(is_lightsaber(otmp) && otmp->lamplit)
 		){
-			if(otyp == KHAKKHARA) bonus += d(rnd(3),mon->m_lev*2);
-			else bonus += rnd(mon->m_lev*2);
+			if(youdefend){
+				if(otyp == KHAKKHARA) bonus += d(rnd(3),u.ulevel);
+				else bonus += rnd(u.ulevel);
+			} else {
+				if(otyp == KHAKKHARA) bonus += d(rnd(3),mon->m_lev);
+				else bonus += rnd(mon->m_lev);
+			}
+		}
+	    if (otmp->oartifact == ART_GLAMDRING && (is_orc(ptr) || is_demon(ptr))){
+			bonus += rnd(20);
 		}
 	    if (otmp->cursed
 			&& hates_unholy(ptr)
 		){
-			if(otyp == KHAKKHARA) bonus += d(rnd(3),20);
-			else bonus += rnd(20);
+			if(otyp == KHAKKHARA) bonus += d(rnd(3),9);
+			else bonus += rnd(9);
 		}
 		
 		if(otmp->oclass == WEAPON_CLASS && otmp->obj_material == WOOD && otmp->otyp != MOON_AXE
@@ -884,10 +893,10 @@ int spec;
 
 	    /* if the weapon is going to get a double damage bonus, adjust
 	       this bonus so that effectively it's added after the doubling */
-	    if (bonus > 1 && otmp->oartifact && spec_dbon(otmp, mon, 25) >= 25)
+	    if (bonus > 1 && otmp->oartifact && spec_dbon(otmp, mon, 100) >= 100)
 		bonus = (bonus + 1) / 2;
 		
-		if(resists_all(ptr) || resist_attacks(ptr)){
+		if((resists_all(ptr) || resist_attacks(ptr)) && !(otmp->oartifact && spec_dbon(otmp, mon, 1))){
 			tmp /= 4;
 			if(!flags.mon_moving && !youdefend && warnedptr != ptr){
 				pline("Weapons are ineffective against %s", mon_nam(mon));
@@ -917,7 +926,7 @@ int spec;
 				resistmask |= SLASH;
 			}
 			
-			if((weaponmask & ~(resistmask)) == 0L){
+			if((weaponmask & ~(resistmask)) == 0L && !(otmp->oartifact && spec_dbon(otmp, mon, 1))){
 				tmp /= 4;
 				if(!flags.mon_moving && !youdefend && (warnedotyp != otmp->otyp || warnedptr != ptr)){
 					pline("%s is ineffective against %s", The(xname(otmp)), mon_nam(mon));
@@ -2891,6 +2900,9 @@ const struct def_skill *class_skill;
 	if (Role_if(PM_BARD)) {
 	  OLD_P_SKILL(P_MUSICALIZE) = P_BASIC;
 	  OLD_P_SKILL(P_BARE_HANDED_COMBAT) = P_BASIC;
+	  OLD_P_SKILL(P_BEAST_MASTERY) = P_BASIC;
+	  OLD_P_SKILL(P_DART) = P_BASIC;
+	  OLD_P_SKILL(P_DAGGER) = P_BASIC;
 	}
 #endif
 

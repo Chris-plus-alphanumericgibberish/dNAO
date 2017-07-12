@@ -406,7 +406,7 @@ MONSTER:'E',"fire elemental",random,hostile
 MONSTER:'E',"fire elemental",random,hostile
 MONSTER:'d',"hell hound",random
 MONSTER:'H',"fire giant",random
-MONSTER:'A',"Tulani Eladrin",random
+MONSTER:'9',"Surya Deva",random
 MONSTER:'E',"fire elemental",random,hostile
 MONSTER:'E',"fire elemental",random,hostile
 #
@@ -519,6 +519,7 @@ MONSTER:'E',"water elemental",random,hostile
 MONSTER:'E',"water elemental",random,hostile
 MONSTER:'E',"water elemental",random,hostile
 
+MONSTER:'A',"Tulani Eladrin",random
 MONSTER:'A',"Noviere Eladrin",random
 MONSTER:'A',"Noviere Eladrin",random
 MONSTER:'A',"Noviere Eladrin",random

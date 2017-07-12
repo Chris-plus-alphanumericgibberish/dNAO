@@ -6,6 +6,7 @@
 #include "lev.h"	/* for checking save modes */
 
 STATIC_DCL void NDECL(stoned_dialogue);
+STATIC_DCL void NDECL(golded_dialogue);
 #ifdef CONVICT
 STATIC_DCL void NDECL(phasing_dialogue);
 #endif /* CONVICT */
@@ -41,6 +42,30 @@ stoned_dialogue()
 		HFast = 0L;
 	if (i == 3L)
 		nomul(-3, "getting stoned");
+	exercise(A_DEX, FALSE);
+}
+
+static NEARDATA const char * const golded_texts[] = {
+	"You are slowing down.",		/* 5 */
+	"Your limbs are stiffening.",		/* 4 */
+	"Your limbs have turned to gold.",	/* 3 */
+	"You have turned to gold.",		/* 2 */
+	"You are a gold statue."			/* 1 */
+};
+
+STATIC_OVL void
+golded_dialogue()
+{
+	register long i = (Golded & TIMEOUT);
+
+	if (i > 0L && i <= SIZE(golded_texts)) {
+		pline1(golded_texts[SIZE(golded_texts) - i]);
+		nomul(0, NULL); /* fix for C343-74 */
+	}
+	if (i == 5L)
+		HFast = 0L;
+	if (i == 3L)
+		nomul(-3, "turning to gold");
 	exercise(A_DEX, FALSE);
 }
 
@@ -365,6 +390,7 @@ nh_timeout()
 #endif /* CONVICT */
 	if(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20) return; /* things past this point could kill you */
 	if(Stoned) stoned_dialogue();
+	if(Golded) golded_dialogue();
 	if(Slimed) slime_dialogue();
 	if(Vomiting) vomiting_dialogue();
 	if(Strangled) choke_dialogue();
@@ -557,6 +583,19 @@ nh_timeout()
 				   "petrified by petrification" */
 				killer_format = NO_KILLER_PREFIX;
 				killer = "killed by petrification";
+			}
+			done(STONING);
+			break;
+		case GOLDED:
+			if (delayed_killer && !killer) {
+				killer = delayed_killer;
+				delayed_killer = 0;
+			}
+			if (!killer) {
+				/* leaving killer_format would make it
+				   "petrified by petrification" */
+				killer_format = NO_KILLER_PREFIX;
+				killer = "killed by turning to gold";
 			}
 			done(STONING);
 			break;
@@ -1220,7 +1259,7 @@ long timeout;
 
 	/* timeout while away */
 	if (timeout != monstermoves && (obj->where != OBJ_MINVENT || (
-				(!is_dwarf(obj->ocarry->data) || obj->otyp != DWARVISH_IRON_HELM) &&
+				(!is_dwarf(obj->ocarry->data) || obj->otyp != DWARVISH_HELM) &&
 				(!is_gnome(obj->ocarry->data) || obj->otyp != GNOMISH_POINTY_HAT)
 				))) {
 	    long how_long = monstermoves - timeout;
@@ -1258,8 +1297,17 @@ long timeout;
 	}
 	need_newsym = FALSE;
 
-	/* obj->age is the age remaining at this point.  */
-	switch (obj->otyp) {
+	if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD){	
+	        if ((obj->where == OBJ_FLOOR) || 
+		    (obj->where == OBJ_MINVENT && 
+		    	(!MON_WEP(obj->ocarry) || MON_WEP(obj->ocarry) != obj)) ||
+		    (obj->where == OBJ_INVENT &&
+		    	((!uwep || uwep != obj) &&
+		    	 (!u.twoweap || !uswapwep || obj != uswapwep))))
+	            lightsaber_deactivate(obj, FALSE);
+			if (obj && obj->age && obj->lamplit) /* might be deactivated */
+				begin_burn(obj, TRUE);
+	} else switch (obj->otyp) {
 	    case POT_OIL:
 		    /* this should only be called when we run out */
 		    if (canseeit) {
@@ -1281,7 +1329,7 @@ long timeout;
 		    obj = (struct obj *) 0;
 		    break;
 
-   	    case DWARVISH_IRON_HELM:
+   	    case DWARVISH_HELM:
 	    case BRASS_LANTERN:
 	    case OIL_LAMP:
 		switch((int)obj->age) {
@@ -1290,7 +1338,7 @@ long timeout;
 		    case 50:
 			if (canseeit) {
 			    if (obj->otyp == BRASS_LANTERN 
-				|| obj->otyp == DWARVISH_IRON_HELM)
+				|| obj->otyp == DWARVISH_HELM)
 				lantern_message(obj);
 			    else
 				see_lamp_flicker(obj,
@@ -1299,13 +1347,13 @@ long timeout;
 			//Dwarvish lamps don't go out in monster inventories
 			if(obj->where == OBJ_MINVENT && 
 				is_dwarf(obj->ocarry->data) &&
-				obj->otyp == DWARVISH_IRON_HELM) obj->age = (long) rn1(250,250);
+				obj->otyp == DWARVISH_HELM) obj->age = (long) rn1(250,250);
 			break;
 
 		    case 25:
 			if (canseeit) {
 			    if (obj->otyp == BRASS_LANTERN 
-				|| obj->otyp == DWARVISH_IRON_HELM)
+				|| obj->otyp == DWARVISH_HELM)
 				lantern_message(obj);
 			    else {
 				switch (obj->where) {
@@ -1324,7 +1372,7 @@ long timeout;
 			//Dwarvish lamps don't go out in monster inventories
 			if(obj->where == OBJ_MINVENT && 
 				is_dwarf(obj->ocarry->data) &&
-				obj->otyp == DWARVISH_IRON_HELM) obj->age = (long) rn1(50,25);
+				obj->otyp == DWARVISH_HELM) obj->age = (long) rn1(50,25);
 			break;
 
 		    case 0:
@@ -1334,7 +1382,7 @@ long timeout;
 				case OBJ_INVENT:
 				case OBJ_MINVENT:
 			    if (obj->otyp == BRASS_LANTERN 
-				|| obj->otyp == DWARVISH_IRON_HELM)
+				|| obj->otyp == DWARVISH_HELM)
 					pline("%s lantern has run out of power.",
 					    whose);
 				    else
@@ -1343,7 +1391,7 @@ long timeout;
 				    break;
 				case OBJ_FLOOR:
 			    if (obj->otyp == BRASS_LANTERN 
-				|| obj->otyp == DWARVISH_IRON_HELM)
+				|| obj->otyp == DWARVISH_HELM)
 					You("see a lantern run out of power.");
 				    else
 					You("see %s go out.",
@@ -1627,7 +1675,7 @@ lightsaber_deactivate (obj, timer_attached)
 			    break;
 		}
 	    } else {
-		You("hear a lightsaber deactivate.");
+		You_hear("a lightsaber deactivate.");
 	    }
 	}
 	// if (obj->otyp == DOUBLE_LIGHTSABER)
@@ -1683,10 +1731,14 @@ begin_burn(obj, already_lit)
 		obj->otyp != CHUNK_OF_FOSSILE_DARK && 
 		!artifact_light(obj) && 
 		!arti_light(obj) && 
+		obj->oartifact != ART_HOLY_MOONLIGHT_SWORD &&
 		obj->oartifact != ART_ATMA_WEAPON
 	) return;
 	
-	switch (obj->otyp) {
+	if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD){
+		turns = 1;
+		radius = 1;
+	} else switch (obj->otyp) {
 	    case MAGIC_LAMP:
 		obj->lamplit = 1;
 		do_timer = FALSE;
@@ -1715,7 +1767,9 @@ begin_burn(obj, already_lit)
 				} else if(!Drain_resistance) obj->age++;
 			}
 			turns = 1;
-    	    radius = 1;
+			if(obj->cobj && obj->cobj->oartifact == obj->oartifact && arti_light(obj->cobj)) 
+				radius = (obj->cobj->blessed ? 3 : (obj->cobj->cursed ? 1 : 2));
+    	    else radius = 1;
 		break;
 
 	    case POT_OIL:
@@ -1732,7 +1786,7 @@ begin_burn(obj, already_lit)
 				turns = obj->age - 15L;
 		break;
 		
-	    case DWARVISH_IRON_HELM:
+	    case DWARVISH_HELM:
 	    case BRASS_LANTERN:
 	    case OIL_LAMP:
 		/* magic times are 150, 100, 50, 25, and 0 */

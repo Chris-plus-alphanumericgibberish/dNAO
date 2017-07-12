@@ -121,6 +121,9 @@ hack_artifacts()
 	int alignmnt = flags.stag ? u.ualign.type : aligns[flags.initalign].value;
 	
 	if(Role_if(PM_EXILE)) alignmnt = A_VOID; //hack_artifacts may be called before this is propperly set
+	if(Race_if(PM_DROW) || Race_if(PM_MYRKALFR) && !Role_if(PM_EXILE) && !Role_if(PM_CONVICT) && !flags.female){
+		alignmnt = A_NEUTRAL; /* Males are neutral */
+	}
 
 	int gcircletsa = find_gcirclet();
 	
@@ -520,7 +523,9 @@ struct obj *obj;
 {
     return (obj && obj->oartifact && (spec_ability2(obj, SPFX2_SILVERED) || 
 									  (obj->oartifact == ART_PEN_OF_THE_VOID &&
-									   obj->ovar1 & SEAL_EDEN)));
+									   obj->ovar1 & SEAL_EDEN) ||
+									  ((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && !obj->lamplit))
+			);
 }
 
 /* used so that callers don't need to known about SPFX_ codes */
@@ -584,7 +589,8 @@ struct obj *obj;
 {
     return (obj && (
 		(obj->oartifact && spec_ability2(obj, SPFX2_SHINING)) ||
-		(is_lightsaber(obj) && obj->lamplit)
+		(is_lightsaber(obj) && obj->lamplit) ||
+		((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && obj->lamplit)
 	));
 }
 
@@ -1176,6 +1182,8 @@ struct monst *mtmp;
 
 	if(weap == &artilist[ART_PEN_OF_THE_VOID]) return (mvitals[PM_ACERERAK].died > 0);
 	
+	if(weap == &artilist[ART_HOLY_MOONLIGHT_SWORD]) return !((mtmp == &youmonst) ? Antimagic : resists_magm(mtmp));
+	
 	if(!(weap->spfx & (SPFX_DBONUS | SPFX_ATTK)))
 	    return(weap->attk.adtyp == AD_PHYS);
 
@@ -1406,10 +1414,12 @@ int tmp;
 	}
 	
 	if (!weap || (weap->attk.adtyp == AD_PHYS && /* check for `NO_ATTK' */
-			weap->attk.damn == 0 && weap->attk.damd == 0) 
-			|| (weap->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves))
+			weap->attk.damn == 0 && weap->attk.damd == 0)
+			|| (weap->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)){
 	    spec_dbon_applies = FALSE;
-	else{
+	} else if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit){
+		spec_dbon_applies = FALSE;
+	} else {
 	    spec_dbon_applies = spec_applies(weap, mon);
 		// if(spec_dbon_applies) pline("dbon applies");
 	}
@@ -1423,6 +1433,7 @@ int tmp;
 			if(Confusion) multiplier++;
 			if(Sick) multiplier++;
 			if(Stoned) multiplier++;
+			if(Golded) multiplier++;
 			if(Strangled) multiplier++;
 			if(Vomiting) multiplier++;
 			if(Slimed) multiplier++;
@@ -2647,6 +2658,10 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			 "%s beheads %s!",
 			 "%s decapitates %s!"
 		};
+		static const char * const heart_msg[2] = {
+			 "%s pierces %s heart!",
+			 "%s punctures %s heart!"
+		};
 	    if (otmp->oartifact == ART_TSURUGI_OF_MURAMASA && dieroll == 1) {
 			wepdesc = "The razor-sharp blade";
 			/* not really beheading, but so close, why add another SPFX */
@@ -2854,6 +2869,41 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 						if(mdef->mhp <= 0) return TRUE; //otherwise lifesaved
 						messaged = TRUE;
 					}
+				}
+			}
+		} else if ( dieroll <= 1 && otmp->oartifact == ART_ARROW_OF_SLAYING){
+			wepdesc = artilist[otmp->oartifact].name;
+			if (!youdefend) {
+				if (!has_blood(mdef->data) || !(mdef->data->mflagsb&MB_BODYTYPEMASK) || noncorporeal(mdef->data) || amorphous(mdef->data)) {
+					if (vis){
+						pline("%s pierces deeply into %s!",
+							  The(wepdesc), mon_nam(mdef));
+						*dmgptr *= 2;
+						messaged = TRUE;
+					}
+				} else {
+					pline(heart_msg[rn2(SIZE(heart_msg))],
+						  The(wepdesc), s_suffix(mon_nam(mdef)));
+					otmp->dknown = TRUE;
+					if(youattack) killed(mdef);
+					else monkilled(mdef, (const char *)0, AD_PHYS);
+					
+					if(mdef->mhp <= 0) return TRUE; //otherwise lifesaved
+					messaged = TRUE;
+				}
+			} else {
+				if (!has_blood(youracedata) || !(youracedata->mflagsb&MB_BODYTYPEMASK) || noncorporeal(youracedata) || amorphous(youracedata)) {
+					pline("%s pierces deeply into you!",
+						  The(wepdesc));
+					*dmgptr *= 2;
+					messaged = TRUE;
+				} else {
+					pline(heart_msg[rn2(SIZE(heart_msg))],
+						  The(wepdesc), "your");
+					otmp->dknown = TRUE;
+					losehp((Upolyd ? u.mh : u.uhp) + 1, wepdesc, KILLED_BY);
+					/* Should amulets fall off? */
+					messaged = TRUE;
 				}
 			}
 		} else if ( dieroll == 1  || 
@@ -3109,6 +3159,24 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	       no further attacks have side-effects on inventory */
 	    return messaged;
 	}
+	if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD) {
+		if (youattack && mdef->mattackedu) {
+			int life = (*dmgptr)*.3+1;
+			healup(life, 0, FALSE, FALSE);
+		} else if (youdefend) {
+			int life = (*dmgptr)*.3+1;
+			if (magr && magr->mhp < magr->mhpmax) {
+				magr->mhp += life;
+				if (magr->mhp > magr->mhpmax) magr->mhp = magr->mhpmax;
+			}
+		} else { /* m vs m */
+			int life = (*dmgptr)*.3+1;
+			if (magr && magr->mhp < magr->mhpmax) {
+				magr->mhp += life+1;
+				if (magr->mhp > magr->mhpmax) magr->mhp = magr->mhpmax;
+			}
+		}
+	}
 	if (otmp->oartifact == ART_LIFEHUNT_SCYTHE) {
 		if (youattack) {
 			int life = (*dmgptr)/2+1;
@@ -3282,6 +3350,8 @@ doinvoke()
     obj = getobj(invoke_types, "invoke");
     if (!obj) return 0;
     if (obj->oartifact && !touch_artifact(obj, &youmonst)) return 1;
+	if(is_lightsaber(obj) && obj->cobj && obj->oartifact == obj->cobj->oartifact)
+		obj = obj->cobj;
     return arti_invoke(obj);
 }
 
@@ -3291,6 +3361,8 @@ doparticularinvoke(obj)
 {
     if (!obj) return 0;
     if (obj->oartifact && !touch_artifact(obj, &youmonst)) return 1;
+	if(is_lightsaber(obj) && obj->cobj && obj->oartifact == obj->cobj->oartifact)
+		obj = obj->cobj;
     return arti_invoke(obj);
 }
 
@@ -3387,7 +3459,8 @@ arti_invoke(obj)
 	  }
 	case ENERGY_BOOST: {
 	    int epboost = (u.uenmax + 1 - u.uen) / 2;
-	    if (epboost < u.uenmax*.1) epboost = u.uenmax - u.uen;
+	    if(epboost < u.uenmax*.1) epboost = u.uenmax - u.uen;
+		if(epboost > 400) epboost = 400;
 	    if(epboost) {
 			You_feel("re-energized.");
 			u.uen += epboost;
@@ -3469,6 +3542,9 @@ arti_invoke(obj)
 	       newlev.dnum == u.uz.dnum) {
 		You_feel("very disoriented for a moment.");
 	    } else {
+		if(u.usteed && mon_has_amulet(u.usteed)){
+			dismount_steed(DISMOUNT_VANISHED);
+		}
 		if(!Blind) You("are surrounded by a shimmering sphere!");
 		else You_feel("weightless for a moment.");
 		goto_level(&newlev, FALSE, FALSE, FALSE);
@@ -3636,7 +3712,7 @@ arti_invoke(obj)
 			else if(u.dz < 0 && (yn("This is a forbidden technique.  Do you wish to use it anyway?") == 'y')){
 				pline("Time Stop!");
 				youmonst.movement += NORMAL_SPEED*10;
-				Stoned = 5;
+				Stoned = 9;
 				delayed_killer = "termination of personal timeline.";
 				killer_format = KILLED_BY;
 			}
@@ -5583,10 +5659,12 @@ arti_invoke(obj)
 				   default: mtmp = makemon(mkclass(S_WRAITH,0), u.ux, u.uy, NO_MM_FLAGS);
 			   break;
 			  }
-			  if ((mtmp2 = tamedog(mtmp, (struct obj *)0)) != 0)
-				mtmp = mtmp2;
-			  mtmp->mtame = 30;
-			  summon_loop--;
+			  if ((mtmp2 = tamedog(mtmp, (struct obj *)0)) != 0){
+					mtmp = mtmp2;
+					mtmp->mtame = 30;
+					summon_loop--;
+					mtmp->mvanishes = 100;
+				} else mongone(mtmp);
 			} while (summon_loop);
 			/* Tsk,tsk.. */
 			adjalign(-3);
@@ -7282,7 +7360,7 @@ arti_light(obj)
     struct obj *obj;
 {
 	const struct artifact *arti = get_artifact(obj);
-    return	(arti && 
+    return	(arti && !is_lightsaber(obj) &&
 				(arti->cspfx3 & SPFX3_LIGHT)
 			);
 }

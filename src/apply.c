@@ -579,7 +579,7 @@ use_stethoscope(obj)
 	}
 
 	if (!its_dead(rx, ry, &res, obj))
-	    You("hear nothing special.");	/* not You_hear()  */
+	    You_hear("nothing special.");	/* not You_hear()  */
 	return res;
 }
 
@@ -1332,7 +1332,7 @@ struct obj *obj;
 	if (obj->lamplit) {
 	    if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
 		    obj->otyp == BRASS_LANTERN || obj->otyp == POT_OIL ||
-			obj->otyp == DWARVISH_IRON_HELM || obj->otyp == GNOMISH_POINTY_HAT) {
+			obj->otyp == DWARVISH_HELM || obj->otyp == GNOMISH_POINTY_HAT) {
 		(void) get_obj_location(obj, &x, &y, 0);
 		if (obj->where == OBJ_MINVENT ? cansee(x,y) : !Blind)
 		    pline("%s %s out!", Yname2(obj), otense(obj, "go"));
@@ -1364,7 +1364,7 @@ struct obj *obj;
 	    if (obj->otyp == CANDELABRUM_OF_INVOCATION && obj->cursed)
 		return FALSE;
 	    if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-		 obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_IRON_HELM ||
+		 obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_HELM ||
 		 obj->otyp == GNOMISH_POINTY_HAT) && 
 			obj->cursed && !rn2(2))
 		return FALSE;
@@ -1390,14 +1390,14 @@ struct obj *obj;
 {
 	char buf[BUFSZ];
 
-	if(Underwater) {
+	if(Underwater && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
 		pline("This is not a diving lamp.");
 		return;
 	}
 	if(obj->lamplit) {
 		if(obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
 		   obj->otyp == BRASS_LANTERN ||
-		   obj->otyp == DWARVISH_IRON_HELM)
+		   obj->otyp == DWARVISH_HELM)
 		    pline("%s lamp is now off.", Shk_Your(buf, obj));
 		else if(is_lightsaber(obj)) {
 		    if (obj->otyp == DOUBLE_LIGHTSABER || obj->oartifact == ART_ANNULUS) {
@@ -1416,11 +1416,12 @@ struct obj *obj;
 		return;
 	}
 	/* magic lamps with an spe == 0 (wished for) cannot be lit */
-	if ((!Is_candle(obj) && obj->age == 0 && !(is_lightsaber(obj) && obj->oartifact == ART_ATMA_WEAPON ))
+	if ((!Is_candle(obj) && obj->age == 0 && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD &&
+			!(is_lightsaber(obj) && obj->oartifact == ART_ATMA_WEAPON ))
 			|| (obj->otyp == MAGIC_LAMP && obj->spe == 0)
 		) {
 		if (obj->otyp == BRASS_LANTERN || 
-			obj->otyp == DWARVISH_IRON_HELM || 
+			obj->otyp == DWARVISH_HELM || 
 			is_lightsaber(obj)
 		)
 			Your("%s has run out of power.", xname(obj));
@@ -1438,20 +1439,31 @@ struct obj *obj;
 			obj->cursed = FALSE;
 		}
 	}
-	if (obj->cursed && !rn2(2)) {
+	if (obj->cursed && !rn2(2) && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
 		pline("%s for a moment, then %s.",
 		      Tobjnam(obj, "flicker"), otense(obj, "die"));
 	} else {
 		if(obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-				obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_IRON_HELM) {
+				obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_HELM) {
 		    check_unpaid(obj);
 		    pline("%s lamp is now on.", Shk_Your(buf, obj));
 		} else if (is_lightsaber(obj)) {
-		    /* WAC -- lightsabers */
-		    /* you can see the color of the blade */
-		    
-		    if (!Blind) makeknown(obj->otyp);
 		    You("ignite %s.", yname(obj));
+		    unweapon = FALSE;
+		} else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) {
+			int biman;
+			obj->lamplit = 1;
+			biman = bimanual(obj,youracedata);
+			obj->lamplit = 0;
+			if(biman && uarms){
+				You_cant("invoke %s while wearing a shield!", yname(obj));
+				return;
+			}
+		    You("invoke %s.", yname(obj));
+			if(biman && u.twoweap){
+				u.twoweap = 0;
+				You("find you must hold %s with both hands!", yname(obj)); 
+			}
 		    unweapon = FALSE;
 		} else {	/* candle(s) */
 		    pline("%s flame%s %s%s",
@@ -1628,7 +1640,7 @@ dorub()
 	    } else if (rn2(2) && !Blind)
 		You("see a puff of smoke.");
 	    else pline1(nothing_happens);
-	} else if (obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_IRON_HELM) {
+	} else if (obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_HELM) {
 	    /* message from Adventure */
 	    pline("Rubbing the electric lamp is not particularly rewarding.");
 	    pline("Anyway, nothing exciting happens.");
@@ -4510,7 +4522,7 @@ resizeArmor()
 	}
 	// check that the armor is not dragon scales (which cannot be resized)
 	if (Is_dragon_scales(otmp)){
-		You("cannot resize the dragon scales!");
+		pline("Dragon scales cannot be resized.");
 		return(0);
 	}
 
@@ -4520,7 +4532,9 @@ resizeArmor()
 	if (is_suit(otmp)) otmp->bodytypeflag = (youracedata->mflagsb&MB_BODYTYPEMASK);
 	else if (is_helmet(otmp)) otmp->bodytypeflag = (youracedata->mflagsb&MB_HEADMODIMASK);
 	else if (is_shirt(otmp)) otmp->bodytypeflag = (youracedata->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (youracedata->mflagsb&MB_BODYTYPEMASK);
-
+	
+	fix_object(otmp);
+	
 	You("resize the armor to fit your current form.");
 	pline("The kit is used up.");
 	return(1);
@@ -4685,7 +4699,7 @@ doapply()
 		Strcpy(class_list, tools);
 	if (carrying(CREAM_PIE) || carrying(EUCALYPTUS_LEAF))
 		add_class(class_list, FOOD_CLASS);
-	if (carrying(DWARVISH_IRON_HELM) || carrying(GNOMISH_POINTY_HAT) 
+	if (carrying(DWARVISH_HELM) || carrying(GNOMISH_POINTY_HAT) 
 		|| carrying(DROVEN_CLOAK))
 		add_class(class_list, ARMOR_CLASS);
 
@@ -4708,6 +4722,7 @@ doapply()
 	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_MARIONETTE)) return do_carve_obj(obj);
 	
 	if(obj->oartifact == ART_SILVER_STARLIGHT) do_play_instrument(obj);
+	if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) use_lamp(obj);
 	else switch(obj->otyp){
 	case BLINDFOLD:
 	case LENSES:
@@ -4828,7 +4843,7 @@ doapply()
 		use_candle(&obj);
 	break;
 	case BULLET_FABBER:
-	if(!Role_if(PM_ANACHRONONAUT)) pline("It seems inert.");
+	if(!(Role_if(PM_ANACHRONONAUT) || Role_if(PM_TOURIST))) pline("It seems inert.");
 	else {
 		static const char all_count[] = { ALLOW_COUNT, WEAPON_CLASS, GEM_CLASS, 0 };
 		struct obj *otmp = getobj(all_count, "feed to the fabber");
@@ -5003,7 +5018,7 @@ doapply()
  * From an idea posted to RGRN by "Dr Darth"
  * Code by Malcom Ryan
  */
-	case DWARVISH_IRON_HELM: 
+	case DWARVISH_HELM: 
 	case OIL_LAMP:
 	case MAGIC_LAMP:
 	case BRASS_LANTERN:
@@ -5251,6 +5266,7 @@ unfixable_trouble_count(is_horn)
 	int unfixable_trbl = 0;
 
 	if (Stoned) unfixable_trbl++;
+	if (Golded) unfixable_trbl++;
 	if (Strangled) unfixable_trbl++;
 	if (Wounded_legs
 #ifdef STEED

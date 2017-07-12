@@ -21,7 +21,6 @@ static const char brief_feeling[] =
 STATIC_DCL char *FDECL(mon_nam_too, (char *,struct monst *,struct monst *));
 STATIC_DCL void FDECL(mrustm, (struct monst *, struct monst *, struct obj *));
 STATIC_DCL int FDECL(hitmm, (struct monst *,struct monst *,struct attack *));
-STATIC_DCL int FDECL(gazemm, (struct monst *,struct monst *,struct attack *));
 STATIC_DCL int FDECL(gulpmm, (struct monst *,struct monst *,struct attack *));
 STATIC_DCL int FDECL(explmm, (struct monst *,struct monst *,struct attack *));
 STATIC_DCL int FDECL(mdamagem, (struct monst *,struct monst *,struct attack *));
@@ -235,11 +234,11 @@ mattackm(magr, mdef)
 		) return(MM_MISS);
 	
     /* Calculate the armour class differential. */
-    tmp = find_mac(mdef) + (magr->m_lev)/3;
+    tmp = find_mac(mdef) + 2*magr->m_lev/3;
 	tmp += mdef->mstdy;
 	if(is_prince(magr->data)) tmp += 5;
 	if(is_lord(magr->data)) tmp += 2;
-    tchtmp = base_mac(mdef) + (magr->m_lev)/3;
+    tchtmp = base_mac(mdef) + 2*magr->m_lev/3;
 	tchtmp += mdef->mstdy;
 	if(is_prince(magr->data)) tchtmp += 5;
 	if(is_lord(magr->data)) tchtmp += 2;
@@ -318,7 +317,11 @@ mattackm(magr, mdef)
      *	and it shouldn't move again.
      */
     magr->mlstmv = monstermoves;
-
+	
+	if(pa == &mons[PM_LILLEND] && rn2(2)){
+		pa = find_mask(magr);
+		if(!Blind && pa != &mons[PM_LILLEND]) pline("%s uses a %s mask!",Monnam(magr), pa->mname);
+	}
     /* Now perform all attacks for the monster. */
     for (i = 0; i < NATTK; i++) {
         int tmphp = mdef->mhp;
@@ -482,9 +485,13 @@ meleeattack:
 
 #ifdef TAME_RANGED_ATTACKS
 	    case AT_BREA:
-			if(is_dragon(magr->data) && !is_pseudodragon(magr->data)) flags.drgn_brth = 1;
+			if(is_true_dragon(magr->data) ||
+				(is_half_dragon(magr->data) && magr->m_lev >= 14)
+			) flags.drgn_brth = 1;
+			if(magr->data == &mons[PM_MAMMON]) flags.mamn_brth = 1;
 	        breamm(magr, mdef, mattk);
 			flags.drgn_brth = 0;
+			flags.mamn_brth = 0;
 		if (tmphp > mdef->mhp){
 			res[i] = MM_HIT;
 			if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
@@ -550,6 +557,10 @@ meleeattack:
 
 	    case AT_GAZE:
 		strike = 0;	/* will not wake up a sleeper */
+		if(magr->data == &mons[PM_MEDUSA] || is_weeping(magr->data) || magr->data == &mons[PM_GREAT_CTHULHU]){
+			res[i] = MM_MISS;
+			break;
+		}
 		res[i] = gazemm(magr, mdef, mattk);
 		if(res[i] && magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 		break;
@@ -908,7 +919,7 @@ defaultmmhit:
 }
 
 /* Returns the same values as mdamagem(). */
-STATIC_OVL int
+int
 gazemm(magr, mdef, mattk)
 	register struct monst *magr, *mdef;
 	struct attack *mattk;
@@ -925,16 +936,13 @@ gazemm(magr, mdef, mattk)
 				Sprintf(buf,"%s is staring at", Monnam(magr));
 				pline("%s %s.", buf, mon_nam(mdef));
 			}
-		} else {
-			Sprintf(buf,"%s gazes at", Monnam(magr));
-			pline("%s %s...", buf, mon_nam(mdef));
 		}
 	}
 
 	if (magr->mcan || is_blind(magr) ||
 	    (magr->minvis && !perceives(mdef->data)) ||
 	    is_blind(mdef) || mdef->msleeping) {
-	    if(vis && !is_weeping(magr->data)) pline("but nothing happens.");
+	    // if(vis && !is_weeping(magr->data)) pline("but nothing happens.");
 	    return(MM_MISS);
 	}
 	/* call mon_reflects 2x, first test, then, if visible, print message */
@@ -1180,6 +1188,10 @@ mdamagem(magr, mdef, mattk)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	    case AD_STUN:
 		if (magr->mcan) break;
+		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+			Sprintf(buf,"%s gazes at", Monnam(magr));
+			pline("%s %s...", buf, mon_nam(mdef));
+		}
 		if (canseemon(mdef))
 		    pline("%s %s for a moment.", Monnam(mdef),
 			  makeplural(stagger(mdef->data, "stagger")));
@@ -1270,9 +1282,9 @@ physical:{
 				if(otmp && (otmp->obj_material == IRON) && hates_iron(pd) &&
 					!(is_lightsaber(otmp) && otmp->lamplit)
 				)
-					tmp += rnd(mdef->m_lev*2);
+					tmp += rnd(mdef->m_lev);
 				if(otmp && (otmp->cursed) && hates_unholy(pd))
-					tmp += rnd(20);
+					tmp += rnd(9);
 			} else {
 				tmp += dmgval(otmp, mdef, 0);
 				if(otmp && ((is_lightsaber(otmp) && otmp->lamplit) || arti_shining(otmp))) phasearmor = TRUE;
@@ -1316,6 +1328,8 @@ physical:{
 		    if (tmp >= mdef->mhp) tmp = mdef->mhp - 1;
 		} else {
 			if(oarm && tmp && oarm->otyp == GAUNTLETS_OF_POWER) tmp += 8;
+			if(resist_attacks(mdef->data))
+				tmp = 0;
 		}
 		if(pa == &mons[PM_BABY_METROID]){
 				magr->mhpmax += 1;
@@ -1330,6 +1344,10 @@ physical:{
 		if (cancelled) {
 		    tmp = 0;
 		    break;
+		}
+		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+			Sprintf(buf,"%s gazes at", Monnam(magr));
+			pline("%s %s...", buf, mon_nam(mdef));
 		}
 		if (vis)
 		    pline("%s is %s!", Monnam(mdef),
@@ -1368,6 +1386,10 @@ physical:{
 		break;
 /////////////////////////////////////////////////
 		case AD_STDY:
+			if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+				Sprintf(buf,"%s studies ", Monnam(magr));
+				pline("%s %s intently.", buf, mon_nam(mdef));
+			}
 			if (!magr->mcan && !is_blind(magr)) {
 				mdef->mstdy = max(tmp,mdef->mstdy);
 				tmp = 0;
@@ -1378,6 +1400,10 @@ physical:{
 		if (cancelled) {
 		    tmp = 0;
 		    break;
+		}
+		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+			Sprintf(buf,"%s gazes at", Monnam(magr));
+			pline("%s %s...", buf, mon_nam(mdef));
 		}
 		if (vis) pline("%s is covered in frost!", Monnam(mdef));
 		if (resists_cold(mdef)) {
@@ -1395,6 +1421,10 @@ physical:{
 		if (cancelled) {
 		    tmp = 0;
 		    break;
+		}
+		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+			Sprintf(buf,"%s gazes at", Monnam(magr));
+			pline("%s %s...", buf, mon_nam(mdef));
 		}
 		if (vis) pline("%s gets zapped!", Monnam(mdef));
 		tmp += destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
@@ -1483,6 +1513,10 @@ physical:{
 		if (magr->mcan) {
 		    tmp = 0;
 		    break;
+		}
+		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+			Sprintf(buf,"%s gazes at", Monnam(magr));
+			pline("%s %s...", buf, mon_nam(mdef));
 		}
 		if (resists_acid(mdef)) {
 		    if (vis)
@@ -1608,6 +1642,10 @@ physical:{
 	    case AD_SLEE:
 		if (!cancelled && !mdef->msleeping &&
 			sleep_monst(mdef, rnd(10), -1)) {
+			if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+				Sprintf(buf,"%s gazes at", Monnam(magr));
+				pline("%s %s...", buf, mon_nam(mdef));
+			}
 		    if (vis) {
 			Strcpy(buf, Monnam(mdef));
 			pline("%s is put to sleep by %s.", buf, mon_nam(magr));
@@ -1620,6 +1658,10 @@ physical:{
 		if (is_weeping(mdef->data)) {
 		    tmp = 0;
 		    break;
+		}
+		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+			Sprintf(buf,"%s gazes at", Monnam(magr));
+			pline("%s %s...", buf, mon_nam(mdef));
 		}
 		if(!cancelled && mdef->mcanmove) {
 		    if (vis) {
@@ -1651,6 +1693,10 @@ physical:{
 		    tmp = 0;
 		    break;
 		}
+		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+			Sprintf(buf,"%s gazes at", Monnam(magr));
+			pline("%s %s...", buf, mon_nam(mdef));
+		}
 		if (!cancelled && mdef->mspeed != MSLOW) {
 		    unsigned int oldspeed = mdef->mspeed;
 
@@ -1668,6 +1714,10 @@ physical:{
 		 * limit, setting spec_used would not really be right (though
 		 * we still should check for it).
 		 */
+		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+			Sprintf(buf,"%s gazes at", Monnam(magr));
+			pline("%s %s...", buf, mon_nam(mdef));
+		}
 		if (!magr->mcan && !mdef->mconf && !magr->mspec_used) {
 		    if (vis) pline("%s looks confused.", Monnam(mdef));
 		    mdef->mconf = 1;
@@ -1675,6 +1725,10 @@ physical:{
 		}
 		break;
 	    case AD_BLND:
+		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+			Sprintf(buf,"%s gazes at", Monnam(magr));
+			pline("%s %s...", buf, mon_nam(mdef));
+		}
 		if (can_blnd(magr, mdef, mattk->aatyp, (struct obj*)0)) {
 		    register unsigned rnd_tmp;
 
@@ -1703,6 +1757,10 @@ physical:{
 		break;
 	    case AD_HALU:
 		if (!magr->mcan && haseyes(pd) && !is_blind(mdef)) {
+			if(canseemon(magr) && mattk->aatyp == AT_GAZE){
+				Sprintf(buf,"%s gazes at", Monnam(magr));
+				pline("%s %s...", buf, mon_nam(mdef));
+			}
 		    if (vis) pline("%s looks %sconfused.",
 				    Monnam(mdef), mdef->mconf ? "more " : "");
 		    mdef->mconf = 1;
@@ -1779,7 +1837,9 @@ physical:{
 			magr->mhp += tmp;
 			if (magr->mhpmax < magr->mhp) magr->mhpmax = magr->mhp;
 		}
-		if (!cancelled && rn2(2) && !resists_drli(mdef)) {
+		if (!cancelled && rn2(2) && !resists_drli(mdef)
+			&& (magr->data != &mons[PM_VAMPIRE_BAT] || mdef->msleeping)
+		) {
 			tmp = d(2,6);
 			if (vis)
 			    pline("%s suddenly seems weaker!", Monnam(mdef));
@@ -1943,6 +2003,7 @@ physical:{
 			mdef->mhp = 0;
 		        monkilled(mdef, "", AD_DETH);
 			tmp = 0;
+			magr->mhp = magr->mhpmax;
 			break;
 		    } /* else FALLTHRU */
 		default: /* case 16: ... case 5: */
@@ -1950,7 +2011,8 @@ physical:{
 		        pline("%s looks weaker!", Monnam(mdef));
 		    mdef->mhpmax -= rn2(tmp / 2 + 1); /* mhp will then  */
 		                                      /* still be less than  */
-						      /* this value */
+											  /* this value */
+			magr->mhp = min(magr->mhp+tmp, magr->mhpmax);
 		    break;
 		case 4: case 3: case 2: case 1: case 0:
 		    if (resists_magm(mdef)) shieldeff(mdef->mx, mdef->my);
@@ -1961,28 +2023,39 @@ physical:{
 		}
 		break;
 	    case AD_PEST:
-		Strcpy(buf, mon_nam(mdef));
-	        if (vis)
-		    pline("%s reaches out, and %s looks rather ill.",
-		  	    Monnam(magr), buf);
-		if((mdef->mhpmax > 3) && !resist(mdef, 0, 0, NOTELL))
-			mdef->mhpmax /= 2;
-		if((mdef->mhp > 2) && !resist(mdef, 0, 0, NOTELL))
-			mdef->mhp /= 2;
-		if (mdef->mhp > mdef->mhpmax) mdef->mhp = mdef->mhpmax;
+			Strcpy(buf, mon_nam(mdef));
+			if (vis)
+				pline("%s reaches out, and %s looks rather ill.",
+					Monnam(magr), buf);
+			if((mdef->mhpmax > 3) && !resist(mdef, 0, 0, NOTELL)){
+				magr->mhp = min(magr->mhp+mdef->mhpmax/2, magr->mhpmax);
+				mdef->mhpmax /= 2;
+			}
+			if((mdef->mhp > 2) && !resist(mdef, 0, 0, NOTELL)){
+				magr->mhp = min(magr->mhp+mdef->mhp/2, magr->mhpmax);
+				mdef->mhp /= 2;
+			}
+			if (mdef->mhp > mdef->mhpmax){
+				magr->mhp = min(magr->mhp+(mdef->mhp - mdef->mhpmax), magr->mhpmax);
+				mdef->mhp = mdef->mhpmax;
+			}
 		break;
 	    case AD_FAMN:
 		Strcpy(buf, s_suffix(mon_nam(mdef)));
 	        if (vis)
 		    pline("%s reaches out, and %s body shrivels.",
 			    Monnam(magr), buf);
-		if (mdef->mtame && !mdef->isminion)
-		    EDOG(mdef)->hungrytime -= rn1(120, 120);
-		else
+		if (mdef->mtame && !mdef->isminion){
+			int hngr = rn1(120, 120);
+		    EDOG(mdef)->hungrytime -= hngr;
+			magr->mhp = min(magr->mhp+magr->m_lev*hngr/30, magr->mhpmax); //ie, normal healing rate for that amount of nutrition
+		} else
 		{
 		    tmp += rnd(10); /* lacks a food rating */
-		    if (tmp >= mdef->mhp && vis)
+		    if (tmp >= mdef->mhp && vis){
 		        pline("%s starves.", Monnam(mdef));
+				magr->mhp = magr->mhpmax;
+			} else magr->mhp = min(magr->mhp+tmp, magr->mhpmax);
 		}
 		/* plus the normal damage */
 		break;

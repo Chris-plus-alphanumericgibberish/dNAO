@@ -128,7 +128,8 @@ STATIC_OVL char *SaberHilts[] = {
 /*35*/"Four lines of silver Qualith stand out from this basalt hilt.",
 /*36*/"This %s is decorated with subtle swirls.",
 /*37*/"This %s is decorated with non-euclidean curves and angles.", /*Given that a lightsaber handle is a curved surface....*/
-/*38*/"This %s is quite intricate in its design, covered in delicate runes and inlaid with black markings.",
+/*38*/"This %s is wrapped with silver spiderwebs.",
+/*39*/"This %s is quite intricate in its design, covered in delicate runes and inlaid with black markings.",
 };
 
 STATIC_OVL struct Jitem ObscureJapanese_items[] = {
@@ -246,7 +247,15 @@ const char *
 lightsaber_colorText(otmp)
 struct obj *otmp;
 {
-	if(otmp->oartifact == ART_ANNULUS) return Hallucination ? hcolor(0) : "cerulean";
+	if(otmp->oartifact) switch(otmp->oartifact){
+		case ART_ANNULUS: return Hallucination ? hcolor(0) : "cerulean";
+		case ART_ARKENSTONE: return Hallucination ? hcolor(0) : "rainbow-glinting sparking white";
+		case ART_FLUORITE_OCTAHEDRON: return Hallucination ? hcolor(0) : "burning cerulean";
+		case ART_HEART_OF_AHRIMAN: return Hallucination ? hcolor(0) : "pulsing and shimmering ruby";
+		case ART_GLITTERSTONE: return Hallucination ? hcolor(0) : "glittering gold";
+		
+		default: return Hallucination ? hcolor(0) : LightsaberColor[((int)otmp->cobj->otyp) - MAGICITE_CRYSTAL].colorText;
+	}
 	return Hallucination ? hcolor(0) : LightsaberColor[((int)otmp->cobj->otyp) - MAGICITE_CRYSTAL].colorText;
 }
 
@@ -461,7 +470,9 @@ boolean ignore_oquan;
 		else if(obj->objsize == MZ_GIGANTIC) Strcat(buf, "gigantic ");
 	}
 	if(obj->obj_material != objects[obj->otyp].oc_material && !(obj->oartifact && obj->known) && !(is_lightsaber(obj) && obj->lamplit)){
-		switch(obj->obj_material){
+		if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
+			Strcat(buf, "pale moonlight ");
+		} else switch(obj->obj_material){
 			case LIQUID: /*Wut?*/
 				Strcat(buf, "liquid ");
 			break;
@@ -487,10 +498,11 @@ boolean ignore_oquan;
 				Strcat(buf, "wooden ");
 			break;
 			case BONE:
-				Strcat(buf, "bone ");
+				if(obj->oartifact == ART_WEBWEAVER_S_CROOK) Strcat(buf, "chitin ");
+				else Strcat(buf, "bone ");
 			break;
 			case DRAGON_HIDE:
-				Strcat(buf, "dragon-scale ");
+				obj->oclass == WEAPON_CLASS ? Strcat(buf, "dragon-tooth ") : Strcat(buf, "dragon-scale ");
 			break;
 			case IRON:
 				if(obj->oartifact == ART_STEEL_SCALES_OF_KURTULMAK) Strcat(buf, "steel ");
@@ -1066,7 +1078,7 @@ boolean with_price;
 plus:
 		add_erosion_words(obj, prefix);
 		if(obj->known || Race_if(PM_INCANTIFIER)) {
-			Strcat(prefix, sitoa(obj->spe));
+			Strcat(prefix, sitoa((obj->otyp == CRYSTAL_PLATE_MAIL || obj->otyp == CRYSTAL_SWORD) ? obj->spe*2 : obj->spe));
 			Strcat(prefix, " ");
 		}
 		if(obj->known && obj->oartifact && 
@@ -1105,6 +1117,8 @@ plus:
 			if (obj->altmode == WP_MODE_AUTO) Strcat(bp, " (auto)");
 			else if (obj->altmode == WP_MODE_BURST) Strcat(bp, " (burst)");
 			else if (obj->altmode == WP_MODE_SINGLE) Strcat(bp, " (single)");
+		} else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit) {
+			Strcat(bp, " (lit)");
 		} else if (is_lightsaber(obj)) {
 		    if (obj->lamplit){
 				if(obj->altmode){
@@ -1249,7 +1263,7 @@ ring:
 				if(obj->opoisoned & OPOISON_AMNES) Strcat(bp, " (lethe injecting)");
 		}
 		if((obj->known || Race_if(PM_INCANTIFIER)) && objects[obj->otyp].oc_charged) {
-			Strcat(prefix, sitoa(obj->spe));
+			Strcat(prefix, sitoa((obj->otyp == CRYSTAL_PLATE_MAIL || obj->otyp == CRYSTAL_SWORD) ? obj->spe*2 : obj->spe));
 			Strcat(prefix, " ");
 		}
 		break;
@@ -2644,7 +2658,7 @@ boolean from_user;
 		} else if(!strncmpi(bp, "snakeneck ", l=10)){
 			bodytype = MB_LONGNECK;
 		} else if (!strncmpi(bp, "blessed ", l=8) ||
-			   !strncmpi(bp, "holy ", l=5)) {
+			   (!strncmpi(bp, "holy ", l=5) && strncmpi(bp, "holy moonlight sword", l=20))) {
 			blessed = 1;
 		} else if (!strncmpi(bp, "cursed ", l=7) ||
 			   !strncmpi(bp, "unholy ", l=7)) {
@@ -2724,7 +2738,7 @@ boolean from_user;
 		} else if (!strncmpi(bp, "full ", l=5) && strncmpi(bp, "full healing", 12)) {
 			moonphase = FULL_MOON;
 		} else if (!strncmpi(bp, "iron ", l=5) && strncmpi(bp, "iron skull cap", 14)
-			&& strncmpi(bp, "iron gauntlets", 14) && strncmpi(bp, "iron shoes", 10)
+			&& strncmpi(bp, "iron shoes", 10)
 			&& strncmpi(bp, "iron ring", 9) && strncmpi(bp, "iron hook", 9) && strncmpi(bp, "iron wand", 9)
 			&& strncmpi(bp, "iron wand", 9) && strncmpi(bp, "iron bands", 10)
 			&& strncmpi(bp, "Iron Ball of Levitation", 23) && strncmpi(bp, "Iron Spoon of Liberation", 24)
@@ -2733,7 +2747,7 @@ boolean from_user;
 		} else if (!strncmpi(bp, "bronze ", l=7)
 			&& strncmpi(bp, "bronze helm", 11) && strncmpi(bp, "bronze plate mail", 17)
 			&& strncmpi(bp, "bronze roundshield", 18) && strncmpi(bp, "bronze gauntlets", 16)
-			&& strncmpi(bp, "bronze boots", 12) && strncmpi(bp, "bronze ring", 11)
+			&& strncmpi(bp, "bronze ring", 11)
 			&& strncmpi(bp, "bronze spellbook", 16)
 		) {
 			mat = COPPER;
@@ -3612,6 +3626,7 @@ typfnd:
 						mntmp <= PM_YELLOW_DRAGON)
 			    otmp->otyp = GRAY_DRAGON_SCALE_SHIELD +
 						    mntmp - PM_GRAY_DRAGON;
+				otmp->obj_material = objects[otmp->otyp].oc_material;
 			break;
 		}
 	}
@@ -3621,7 +3636,7 @@ typfnd:
 		otmp->sknown = 1;
 	}
 	
-	if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS){
+	if(otmp->oclass == WEAPON_CLASS || (otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp))){
 		otmp->objsize = objsize;
 	}
 	
@@ -3763,6 +3778,11 @@ typfnd:
 			otmp->otyp != POT_WATER)
 		otmp->odiluted = 1;
 
+	/* set material */
+	if(otmp->oclass == WEAPON_CLASS && !is_ammo(otmp) && mat && !otmp->oartifact){
+		otmp->obj_material = mat;
+	}
+	
 	if (name) {
 		const char *aname;
 		short objtyp;
@@ -3804,11 +3824,6 @@ typfnd:
 	    pline("For a moment, you feel %s in your %s, but it disappears!",
 		  something,
 		  makeplural(body_part(HAND)));
-	}
-	
-	/* set material */
-	if(otmp->oclass == WEAPON_CLASS && !is_ammo(otmp) && mat && !otmp->oartifact){
-		otmp->obj_material = mat;
 	}
 	
 	if (halfeaten && otmp->oclass == FOOD_CLASS) {

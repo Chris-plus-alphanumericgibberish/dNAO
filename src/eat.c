@@ -210,7 +210,9 @@ register struct obj *obj;
 	if(Race_if(PM_INCANTIFIER)) return incantifier_edible(obj);
 	if(magivorous(youracedata)) return incantifier_edible(obj);
 	if(uclockwork) return uclockwork_edible(obj);
-	if(Role_if(PM_ANACHRONONAUT) && !(Upolyd || Race_if(PM_VAMPIRE))) return ((obj->otyp >= SLIME_MOLD && obj->otyp <= TIN)); /*Processed foods only*/
+	if(Role_if(PM_ANACHRONONAUT) && !(Upolyd || Race_if(PM_VAMPIRE))) 
+		return ((obj->otyp >= K_RATION && obj->otyp <= TIN) || (obj->otyp >= SLIME_MOLD && obj->otyp <= TIN && 
+			(obj->obj_material == VEGGY || obj->obj_material == FLESH))); /*Processed foods only*/
 	
 	if (metallivorous(youracedata) && is_metallic(obj) &&
 	    (youracedata != &mons[PM_RUST_MONSTER] || is_rustprone(obj)))
@@ -222,25 +224,28 @@ register struct obj *obj;
 		return TRUE;
 
 	/* a sheaf of straw is VEGGY, but only edible for herbivorous animals */
-	if ((obj->otyp == ROPE_OF_ENTANGLING || obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT) && herbivorous(youracedata))
-		return !carnivorous(youracedata);
+	if ((obj->otyp == ROPE_OF_ENTANGLING || obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT) 
+		&& herbivorous(youracedata)
+		&& (obj->obj_material == VEGGY || obj->obj_material == FLESH)
+	) return !carnivorous(youracedata);
+	
 	if (herbivorous(youracedata) && is_veggy(obj))
 		return TRUE;
 		
 	/* Ghouls only eat corpses */
 	if (u.umonnum == PM_GHOUL)
-	   	return (boolean)(obj->otyp == CORPSE);
+	   	return (boolean)(obj->otyp == CORPSE && obj->obj_material == FLESH);
 	/* Vampires drink the blood of meaty corpses */
 	/* [ALI] (fully) drained food is not presented as an option,
 	 * but partly eaten food is (even though you can't drain it).
 	 */
 	if (is_vampire(youracedata))
-		return (boolean)(obj->otyp == CORPSE &&
+		return (boolean)(obj->otyp == CORPSE && obj->obj_material == FLESH &&
 		  has_blood(&mons[obj->corpsenm]) && (!obj->odrained ||
 		  obj->oeaten > drainlevel(obj)));
 
      /* return((boolean)(!!index(comestibles, obj->oclass))); */
-	return (boolean)(obj->oclass == FOOD_CLASS);
+	return (boolean)(obj->oclass == FOOD_CLASS && (obj->obj_material == VEGGY || obj->obj_material == FLESH || obj->otyp == TIN));
 }
 
 #endif /* OVL1 */
@@ -263,11 +268,12 @@ void
 reset_uhunger()
 {
 	if(Race_if(PM_INCANTIFIER)){
-		u.uen = u.uenmax*.45;
+		u.uen = min(u.uen+400, u.uenmax*.45);
+		newuhs(TRUE);
 	} else {
 		u.uhunger = u.uhungermax*.45;
+		u.uhs = NOT_HUNGRY;
 	}
-	u.uhs = NOT_HUNGRY;
 }
 
 static const struct { const char *txt; int nut; } tintxts[] = {
@@ -713,6 +719,7 @@ BOOLEAN_P bld, nobadeffects;
 	    case PM_CAVE_LIZARD:
 	    case PM_LARGE_CAVE_LIZARD:
 			if (Stoned) fix_petrification();
+			if (Golded) fix_petrification();
 		break;
 	    case PM_MANDRAKE:
 			if(!nobadeffects){
@@ -720,6 +727,7 @@ BOOLEAN_P bld, nobadeffects;
 				make_hallucinated(HHallucination + 200,FALSE,0L);
 			}
 			if (Stoned) fix_petrification();
+			if (Golded) fix_petrification();
 			make_sick(0L, (char *) 0, TRUE, SICK_ALL);
 		break;
 	    case PM_GREEN_SLIME:
@@ -751,7 +759,7 @@ BOOLEAN_P bld, nobadeffects;
 			victual.piece = (struct obj *)0;
 		    return;
 		}
-		if (acidic(&mons[pm]) && Stoned)
+		if (acidic(&mons[pm]) && (Stoned || Golded))
 		    fix_petrification();
 		break;
 	}
@@ -773,7 +781,17 @@ struct monst *mon;
 	case PM_CAVE_LIZARD:
 	case PM_LARGE_CAVE_LIZARD:
 	    if (Stoned) fix_petrification();
+	    if (Golded) fix_petrification();
 	    break;
+	// case PM_MANDRAKE: No blood
+		// if(!nobadeffects){
+			// pline ("Oh wow!  Great stuff!");
+			// make_hallucinated(HHallucination + 200,FALSE,0L);
+		// }
+		// if (Stoned) fix_petrification();
+		// if (Golded) fix_petrification();
+		// make_sick(0L, (char *) 0, TRUE, SICK_ALL);
+		// return TRUE;
 	case PM_DEATH:
 	case PM_PESTILENCE:
 	case PM_FAMINE:
@@ -791,7 +809,7 @@ struct monst *mon;
 	    }
 	    /* Fall through */
 	default:
-	    if (acidic(mon->data) && Stoned)
+	    if (acidic(mon->data) && (Stoned || Golded))
 		fix_petrification();
 	    break;
     }
@@ -802,6 +820,7 @@ void
 fix_petrification()
 {
 	Stoned = 0;
+	Golded = 0;
 	delayed_killer = 0;
 	if (Hallucination)
 	    pline("What a pity - you just ruined a future piece of %sart!",
@@ -1246,7 +1265,7 @@ BOOLEAN_P tin, nobadeffects, drained;
 			if(Race_if(PM_INCANTIFIER)) u.uen += amnt*10;
 			else u.uen += amnt;
 			flags.botl = 1;
-			u.uen = u.uen + 10 > (u.uenmax - 40) ? u.uen + 10 : (u.uenmax - 40);
+			u.uen = u.uen + 400;
 		    u.uen += amnt;
 		    if (u.uen > u.uenmax) {
 				u.uenmax+=10;
@@ -1438,8 +1457,7 @@ BOOLEAN_P tin, nobadeffects, drained;
 		register struct permonst *ptr = &mons[pm];
 		int i, count;
 
-		if (!nobadeffects && (dmgtype(ptr, AD_STUN) || dmgtype(ptr, AD_HALU) ||
-		    pm == PM_VIOLET_FUNGUS)) {
+		if (!nobadeffects && hallucinogenic(ptr)) {
 			pline ("Oh wow!  Great stuff!");
 			make_hallucinated(HHallucination + 200,FALSE,0L);
 		}
@@ -2450,7 +2468,7 @@ static const char *foodwords[] = {
 	"meal", "liquid", "wax", "food", "meat",
 	"paper", "cloth", "leather", "wood", "bone", "scale",
 	"metal", "metal", "metal", "silver", "gold", "platinum", "mithril",
-	"plastic", "glass", "rich food", "stone"
+	"plastic", "glass", "rich food", "stone", "obsidian", "shadow"
 };
 
 STATIC_OVL const char *
@@ -4423,7 +4441,7 @@ void
 vomit()		/* A good idea from David Neves */
 {
 	make_sick(0L, (char *) 0, TRUE, SICK_VOMITABLE);
-	nomul(-2, "vomiting");
+	if (!Free_action) nomul(-2, "vomiting");
 }
 
 int

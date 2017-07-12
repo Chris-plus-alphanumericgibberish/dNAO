@@ -139,7 +139,11 @@ boolean quietly;
 	    chance = rn2(10);	/* 0==tame, 1==peaceful, 2==hostile */
 	    if (chance > 2) chance = otmp->blessed ? 0 : !otmp->cursed ? 1 : 2;
 	    /* 0,1,2:  b=80%,10,10; nc=10%,80,10; c=10%,10,80 */
-	    if (chance > 0) {
+	    if (chance > 0 && 
+			!(Role_if(PM_BARD) && rnd(20) < ACURR(A_CHA) && 
+				!(is_animal(mtmp->data) || mindless(mtmp->data)))
+		) {
+
 		mtmp->mtame = 0;	/* not tame after all */
 		if (chance == 2) { /* hostile (cursed figurine) */
 		    if (!quietly)
@@ -248,30 +252,50 @@ makedog()
 	initedog(mtmp);
 	EDOG(mtmp)->loyal = TRUE;
 	if(is_half_dragon(mtmp->data) && flags.HDbreath){
+		switch(mtmp->mvar1){
+			case AD_COLD:
+				mtmp->mintrinsics[(COLD_RES-1)/32] &= ~(1 << (COLD_RES-1)%32);
+			break;
+			case AD_FIRE:
+				mtmp->mintrinsics[(FIRE_RES-1)/32] &= ~(1 << (FIRE_RES-1)%32);
+			break;
+			case AD_SLEE:
+				mtmp->mintrinsics[(SLEEP_RES-1)/32] &= ~(1 << (SLEEP_RES-1)%32);
+			break;
+			case AD_ELEC:
+				mtmp->mintrinsics[(SHOCK_RES-1)/32] &= ~(1 << (SHOCK_RES-1)%32);
+			break;
+			case AD_DRST:
+				mtmp->mintrinsics[(POISON_RES-1)/32] &= ~(1 << (POISON_RES-1)%32);
+			break;
+			case AD_ACID:
+				mtmp->mintrinsics[(ACID_RES-1)/32] &= ~(1 << (ACID_RES-1)%32);
+			break;
+		}
 		switch(flags.HDbreath){
 			case AD_COLD:
 				mtmp->mvar1 = AD_COLD;
-				mtmp->mintrinsics == MR_COLD;
+				mtmp->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
 			break;
 			case AD_FIRE:
 				mtmp->mvar1 = AD_FIRE;
-				mtmp->mintrinsics == MR_FIRE;
+				mtmp->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
 			break;
 			case AD_SLEE:
 				mtmp->mvar1 = AD_SLEE;
-				mtmp->mintrinsics == MR_SLEEP;
+				mtmp->mintrinsics[(SLEEP_RES-1)/32] |= (1 << (SLEEP_RES-1)%32);
 			break;
 			case AD_ELEC:
 				mtmp->mvar1 = AD_ELEC;
-				mtmp->mintrinsics == MR_ELEC;
+				mtmp->mintrinsics[(SHOCK_RES-1)/32] |= (1 << (SHOCK_RES-1)%32);
 			break;
 			case AD_DRST:
 				mtmp->mvar1 = AD_DRST;
-				mtmp->mintrinsics == MR_POISON;
+				mtmp->mintrinsics[(POISON_RES-1)/32] |= (1 << (POISON_RES-1)%32);
 			break;
 			case AD_ACID:
 				mtmp->mvar1 = AD_ACID;
-				mtmp->mintrinsics == MR_ACID;
+				mtmp->mintrinsics[(ACID_RES-1)/32] |= (1 << (ACID_RES-1)%32);
 			break;
 		}
 	}
@@ -544,13 +568,18 @@ long nmv;		/* number of moves */
 	else mtmp->mspec_used -= imv;
 
 	/* reduce tameness for every 150 moves you are separated */
-	if (mtmp->mtame && !(EDOG(mtmp)->loyal) && !(
+	if (mtmp->mtame && !mtmp->isminion && !(EDOG(mtmp)->loyal) && !(
 		In_quest(&u.uz) && 
 		((Is_qstart(&u.uz) && !flags.stag) || 
 		 (Is_nemesis(&u.uz) && flags.stag)) &&
-	 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend)
-	)) {
+	 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend) &&
+	 !(Role_if(PM_ANACHRONONAUT) && quest_status.leader_is_dead) &&
+	 !(Role_if(PM_EXILE))
+	) && !In_sokoban(&u.uz)
+	) {
 	    int wilder = (imv + 75) / 150;
+		if(mtmp->mwait && !EDOG(mtmp)->friend) wilder = max(0, wilder - 11);
+		if(P_SKILL(P_BEAST_MASTERY) > 1 && !EDOG(mtmp)->friend) wilder = max(0, wilder - (3*(P_SKILL(P_BEAST_MASTERY)-1) + 1));
 #ifdef BARD
 	    /* monsters under influence of Friendship song go wilder faster */
 	    if (EDOG(mtmp)->friend)
@@ -571,8 +600,11 @@ long nmv;		/* number of moves */
 		 In_quest(&u.uz) && 
 			((Is_qstart(&u.uz) && !flags.stag) || 
 			 (Is_nemesis(&u.uz) && flags.stag)) &&
-		 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN))
-	)) {
+		 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend) &&
+		 !(Role_if(PM_ANACHRONONAUT) && quest_status.leader_is_dead) &&
+		 !(Role_if(PM_EXILE))
+	) && !In_sokoban(&u.uz)
+	) {
 	    struct edog *edog = EDOG(mtmp);
 
 	    if ((monstermoves > edog->hungrytime + 500 && mtmp->mhp < 3) ||
@@ -655,7 +687,11 @@ boolean pets_only;	/* true for ascension or final escape */
 		/* monster won't follow if it hasn't noticed you yet */
 		&& !(mtmp->mstrategy & STRAT_WAITFORU)) {
 			stay_behind = FALSE;
-			if (mtmp->mtame && mtmp->meating && mtmp != u.usteed) {
+			if (mtmp->mtame && mtmp->mwait && (mtmp->mwait+100 > monstermoves)) {
+				if (canseemon(mtmp))
+					pline("%s obediently waits for you to return.", Monnam(mtmp));
+				stay_behind = TRUE;
+			} else if (mtmp->mtame && mtmp->meating && mtmp != u.usteed) {
 				if (canseemon(mtmp))
 					pline("%s is still eating.", Monnam(mtmp));
 				stay_behind = TRUE;
@@ -1005,10 +1041,10 @@ struct obj *obj;
 {
 	struct monst *mtmp2, *curmon, *weakdog = (struct monst *) 0;
 	int numdogs = 0;
-	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. */
-	if (mtmp->iswiz || mtmp->data == &mons[PM_MEDUSA]
-				|| (&mons[urole.neminum] == mtmp->data))
-		return((struct monst *)0);
+	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. || mtmp->data == &mons[PM_MEDUSA] */
+	if (is_untamable(mtmp->data) || mtmp->notame || mtmp->iswiz
+		|| (&mons[urole.neminum] == mtmp->data)
+	) return((struct monst *)0);
 
 	/* worst case, at least it'll be peaceful. */
 	if(!obj || !is_instrument(obj)){
@@ -1084,7 +1120,7 @@ struct obj *obj;
 	if (mtmp->mtame || (!mtmp->mcanmove && !mtmp->moccupation) ||
 	    /* monsters with conflicting structures cannot be tamed */
 	    mtmp->isshk || mtmp->isgd || mtmp->ispriest || mtmp->isminion ||
-	    is_covetous(mtmp->data) || is_human(mtmp->data) || mtmp->data == &mons[urole.neminum] ||
+	    is_covetous(mtmp->data) || mtmp->data == &mons[urole.neminum] ||
 	    (is_demon(mtmp->data) && !is_demon(youracedata)) ||
 	    (obj && !is_instrument(obj) && obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS && dogfood(mtmp, obj) >= MANFOOD)) return (struct monst *)0;
 

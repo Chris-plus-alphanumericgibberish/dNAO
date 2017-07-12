@@ -24,21 +24,31 @@ STATIC_DCL long FDECL(target_on, (long int,struct monst *));
 STATIC_DCL long FDECL(strategy, (struct monst *));
 STATIC_DCL void FDECL(wizgush, (int, int, genericptr_t));
 STATIC_DCL void NDECL(dowizgush);
+STATIC_DCL void FDECL(aglaopesong, (struct monst *));
 
 static int xprime = 0, yprime = 0;
 
 static NEARDATA const int nasties[] = {
-	PM_COCKATRICE, PM_ETTIN, PM_STALKER, PM_MINOTAUR, PM_RED_DRAGON,
-	PM_BLACK_DRAGON, PM_GREEN_DRAGON, PM_OWLBEAR, PM_PURPLE_WORM,
-	PM_ROCK_TROLL, PM_XAN, PM_GREMLIN, PM_UMBER_HULK, PM_VAMPIRE_LORD,
-	PM_XORN, /*PM_ZRUTY,*/ /*PM_ELF_LORD, PM_ELVENKING,*/ PM_YELLOW_DRAGON,
-	PM_LEOCROTTA, PM_BALUCHITHERIUM, PM_CARNIVOROUS_APE, PM_FIRE_GIANT,
-	PM_COUATL, PM_CAPTAIN, PM_WINGED_GARGOYLE, PM_MASTER_MIND_FLAYER,
-	PM_FIRE_ELEMENTAL, PM_JABBERWOCK, PM_ARCH_LICH, PM_OGRE_KING,
-	PM_OLOG_HAI, PM_IRON_GOLEM, PM_OCHRE_JELLY, PM_GREEN_SLIME,
-	PM_DISENCHANTER,
-	PM_DISPLACER_BEAST, PM_MANTICORE, PM_GNOLL, PM_ARCADIAN_AVENGER, PM_JUBJUB_BIRD, PM_BANDERSNATCH,
-	PM_SCRAP_TITAN, PM_GUG, PM_GIANT_TURTLE, PM_DUNGEON_FERN
+	/* neutral */
+	PM_COCKATRICE, PM_ETTIN, PM_STALKER, PM_MINOTAUR, 
+	PM_OWLBEAR, PM_PURPLE_WORM, PM_XAN, PM_UMBER_HULK, 
+	PM_XORN, PM_LEOCROTTA, PM_BALUCHITHERIUM, PM_CARNIVOROUS_APE,
+	PM_MASTER_MIND_FLAYER, PM_FIRE_ELEMENTAL, PM_JABBERWOCK, PM_DUNGEON_FERN,
+	PM_IRON_GOLEM, PM_OCHRE_JELLY, PM_GREEN_SLIME, PM_JUBJUB_BIRD, 
+	PM_BANDERSNATCH, PM_GIANT_TURTLE, PM_WATER_ELEMENTAL,
+	
+	/* chaotic */
+	PM_RED_DRAGON, PM_BLACK_DRAGON, PM_ROCK_TROLL, PM_GREMLIN, 
+	PM_VAMPIRE_LORD, PM_WINGED_GARGOYLE, PM_ARCH_LICH, PM_SON_OF_TYPHON, 
+	PM_OGRE_KING, PM_OLOG_HAI, PM_DISENCHANTER, PM_DISPLACER_BEAST, 
+	PM_MANTICORE, PM_GNOLL, PM_SCRAP_TITAN, PM_GUG, 
+	PM_ANUBAN_JACKAL, PM_BEBELITH, PM_WEREWOLF, PM_WERERAT,
+	
+	/* lawful */
+	PM_GREEN_DRAGON, PM_YELLOW_DRAGON, PM_ORANGE_DRAGON, PM_CAPTAIN,
+	PM_ANCIENT_NAGA, PM_GUARDIAN_NAGA, PM_GOLDEN_NAGA, PM_SERPENT_NECKED_LIONESS, 
+	PM_EDDERKOP, PM_LEGION_DEVIL_SERGEANT, PM_LEGION_DEVIL_CAPTAIN, PM_HELLFIRE_COLOSSUS, 
+	PM_MAID, PM_HELLCAT
 	};
 
 static NEARDATA const unsigned wizapp[] = {
@@ -235,9 +245,9 @@ target_on(mask, mtmp)
 	if(!mon_has_arti(mtmp, otyp)) {
 	    if(you_have(mask))
 		return(STRAT(STRAT_PLAYER, u.ux, u.uy, mask));
-	    else if((otmp = on_ground(otyp)))
-		return(STRAT(STRAT_GROUND, otmp->ox, otmp->oy, mask));
-	    else if(!is_Rebel(mtmp->data) && (mtmp2 = other_mon_has_arti(mtmp, otyp)))
+	    else if((otmp = on_ground(otyp))){
+			return(STRAT(STRAT_GROUND, otmp->ox, otmp->oy, mask));
+	    } else if(!is_Rebel(mtmp->data) && (mtmp2 = other_mon_has_arti(mtmp, otyp)))
 		return(STRAT(STRAT_MONSTR, mtmp2->mx, mtmp2->my, mask));
 	}
 	return(STRAT_NONE);
@@ -276,7 +286,7 @@ strategy(mtmp)
 
 	if(flags.made_amulet)
 	    if((strat = target_on(MT_WANTSAMUL, mtmp)) != STRAT_NONE)
-		return(strat);
+			return(strat);
 
 	if(u.uevent.invoked) {		/* priorities change once gate opened */
 
@@ -296,8 +306,9 @@ strategy(mtmp)
 		return(strat);
 	    if((strat = target_on(MT_WANTSCAND, mtmp)) != STRAT_NONE)
 		return(strat);
-	    if((strat = target_on(MT_WANTSARTI, mtmp)) != STRAT_NONE)
+	    if((strat = target_on(MT_WANTSARTI, mtmp)) != STRAT_NONE){
 		return(strat);
+		}
 	}
 	return(dstrat);
 }
@@ -348,13 +359,32 @@ tactics(mtmp)
 		if (!rn2((!mtmp->mflee || mtmp->data == &mons[PM_BANDERSNATCH]) ? 5 : 33)){
 			if(mtmp->data == &mons[PM_AGLAOPE]){
 				coord cc;
+				aglaopesong(mtmp);
 				pline("%s's song warps space to draw you together.",Monnam(mtmp));
 				if( tt_findadjacent(&cc, mtmp) ){
 					teleds(cc.x, cc.y, FALSE);
 					return(0);
 				}
 			}
-			mnexto(mtmp);
+			if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_ARRW, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )
+				//do something about poss of cancellation
+			){
+				monline(mtmp);
+				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
+			} else if((attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY) )
+				//do something about poss of cancellation
+			){
+				mofflin(mtmp);
+				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
+			} else {
+				mnexto(mtmp);
+			}
 		}
 		return(0);
 
@@ -373,6 +403,7 @@ tactics(mtmp)
 		    /* player is standing on it (or has it) */
 			if(mtmp->data == &mons[PM_AGLAOPE]){
 				coord cc;
+				aglaopesong(mtmp);
 				pline("%s's song warps space to draw you together.",Monnam(mtmp));
 				if( tt_findadjacent(&cc, mtmp) ){
 					teleds(cc.x, cc.y, FALSE);
@@ -381,7 +412,25 @@ tactics(mtmp)
 			} else if(mtmp->data == &mons[PM_GREAT_CTHULHU]){
 				pline("%s steps through strange angles.",Monnam(mtmp));
 			}
-			mnexto(mtmp);
+			if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_ARRW, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )
+				//do something about poss of cancellation
+			){
+				monline(mtmp);
+				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
+			} else if((attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY) )
+				//do something about poss of cancellation
+			){
+				mofflin(mtmp);
+				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
+			} else {
+				mnexto(mtmp);
+			}
 		    return(0);
 		}
 		if(where == STRAT_GROUND) {
@@ -496,7 +545,10 @@ nasty(mcast)
 				continue;
 			if(mvitals[makeindex].mvflags & G_GENOD)
 				continue;
-			if(castalign == 0 || mons[makeindex].maligntyp == 0 || sgn(mons[makeindex].maligntyp) == sgn(castalign)){
+			if(castalign == A_NONE || mons[makeindex].maligntyp == A_NONE 
+				|| sgn(mons[makeindex].maligntyp) == sgn(castalign)
+				|| (!rn2(4) && abs(sgn(mons[makeindex].maligntyp) - sgn(castalign)) == 1)
+			){
 				if ((mtmp = makemon(&mons[makeindex],
 							bypos.x, bypos.y, NO_MM_FLAGS)) != 0);
 				else /* makemon failed for some reason */
@@ -911,6 +963,129 @@ register struct monst	*mtmp;
 	}
 }
 
+STATIC_PTR void
+aglaopesong(mtmp)
+	struct monst *mtmp;
+{
+		struct monst *tmpm;
+		struct trap *ttmp;
+		int ix, iy, i;
+		switch(rnd(3)){
+			case 1:
+				pline("%s sings a song of courage.", Monnam(mtmp));
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(tmpm != mtmp && !DEADMONSTER(tmpm)){
+						if(!mindless(tmpm->data)){
+							if ( mtmp->mpeaceful == tmpm->mpeaceful ) {
+								if (tmpm->encouraged < BASE_DOG_ENCOURAGED_MAX)
+									tmpm->encouraged = min_ints(BASE_DOG_ENCOURAGED_MAX, tmpm->encouraged + rnd(mtmp->m_lev/3+1));
+								if (tmpm->mflee) tmpm->mfleetim = 0;
+								if (canseemon(tmpm)) {
+									if (Hallucination) {
+										if(canspotmon(tmpm)) pline("%s looks %s!", Monnam(tmpm),
+											  tmpm->encouraged == BASE_DOG_ENCOURAGED_MAX ? "way cool" :
+											  tmpm->encouraged > (BASE_DOG_ENCOURAGED_MAX/2) ? "cooler" : "cool");
+									} else {
+										if(canspotmon(tmpm)) pline("%s looks %s!", Monnam(tmpm),
+											  tmpm->encouraged == BASE_DOG_ENCOURAGED_MAX ? "berserk" :
+											  tmpm->encouraged > (BASE_DOG_ENCOURAGED_MAX/2) ? "wilder" : "wild");
+									}
+								}
+							}
+						}
+					}
+				}
+			break;
+			case 2:
+				pline("%s sings a song of good health.", Monnam(mtmp));
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(tmpm != mtmp && !DEADMONSTER(tmpm)){
+						if(!mindless(tmpm->data)){
+							if ( mtmp->mpeaceful == tmpm->mpeaceful ) {
+								tmpm->mcan = 0;
+								tmpm->mspec_used = 0;
+								if(!tmpm->mnotlaugh && tmpm->mlaughing){
+									tmpm->mnotlaugh = 1;
+									tmpm->mlaughing = 0;
+								}
+								if(!tmpm->mcansee && tmpm->mblinded){
+									tmpm->mcansee = 1;
+									tmpm->mblinded = 0;
+								}
+								tmpm->mberserk = 0;
+								if(tmpm->mhp < tmpm->mhpmax) tmpm->mhp = min(tmpm->mhp + tmpm->m_lev,tmpm->mhpmax);
+								if(!tmpm->mcanmove && tmpm->mfrozen){
+									tmpm->mcanmove = 1;
+									tmpm->mfrozen = 0;
+								}
+								if(tmpm->mstdy > 0) tmpm->mstdy = 0;
+								tmpm->mstun = 0;
+								tmpm->mconf = 0;
+								tmpm->msleeping = 0;
+								tmpm->mflee = 0;
+								tmpm->mfleetim = 0;
+							}
+						}
+					}
+				}
+			break;
+			case 3:
+				pline("%s sings a song of haste.", Monnam(mtmp));
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(tmpm != mtmp && !DEADMONSTER(tmpm)){
+						if(!mindless(tmpm->data) && tmpm->data->mmove){
+							if ( mtmp->mpeaceful == tmpm->mpeaceful ) {
+								tmpm->movement += 12;
+								tmpm->permspeed = MFAST;
+								tmpm->mspeed = MFAST;
+								if(canspotmon(tmpm)) pline("%s moves quickly to attack.", Monnam(tmpm));
+							}
+						}
+					}
+				}
+			break;
+			case 4:
+				pline("%s sings a dirge.", Monnam(mtmp));
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(tmpm != mtmp && !DEADMONSTER(tmpm)){
+						if(!mindless(tmpm->data)){
+							if ( mtmp->mpeaceful != tmpm->mpeaceful && !resist(tmpm, 0, 0, FALSE) ) {
+								if (tmpm->encouraged > -1*BASE_DOG_ENCOURAGED_MAX)
+									tmpm->encouraged = max_ints(-1*BASE_DOG_ENCOURAGED_MAX, tmpm->encouraged - rnd(mtmp->m_lev/3+1));
+								if (tmpm->mflee) tmpm->mfleetim = 0;
+								if (canseemon(tmpm)) {
+									if (Hallucination) {
+										if(canspotmon(tmpm)) pline("%s looks %s!", Monnam(tmpm),
+											  tmpm->encouraged == -1*BASE_DOG_ENCOURAGED_MAX ? "peaced out" :
+											  tmpm->encouraged < (-1*BASE_DOG_ENCOURAGED_MAX/2) ? "mellower" : "mellow");
+									} else {
+										if(canspotmon(tmpm)) pline("%s looks %s!", Monnam(tmpm),
+											  tmpm->encouraged == -1*BASE_DOG_ENCOURAGED_MAX ? "inconsolable" :
+											  tmpm->encouraged > -1*(BASE_DOG_ENCOURAGED_MAX/2) ? "depressed" : "a bit sad");
+									}
+								}
+							}
+						}
+					}
+				}
+			break;
+			case 5:
+				pline("%s sings a slow march.", Monnam(mtmp));
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(tmpm != mtmp && !DEADMONSTER(tmpm)){
+						if(!mindless(tmpm->data) && tmpm->data->mmove){
+							if ( mtmp->mpeaceful != tmpm->mpeaceful && !resist(tmpm, 0, 0, FALSE) ) {
+								tmpm->movement -= 12;
+								tmpm->permspeed = MSLOW;
+								tmpm->mspeed = MSLOW;
+							}
+						}
+					}
+				}
+			break;
+		}
+
+}
 #endif /* OVLB */
 
 /*wizard.c*/

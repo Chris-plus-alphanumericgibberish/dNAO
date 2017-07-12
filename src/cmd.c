@@ -31,12 +31,14 @@ extern int NDECL(wiz_debug_cmd);
 extern int NDECL(doapply); /**/
 extern int NDECL(dorub); /**/
 extern int NDECL(dojump); /**/
+extern int NDECL(docome); /**/
 extern int NDECL(doextlist); /**/
 extern int NDECL(dodrop); /**/
 extern int NDECL(doddrop); /**/
 extern int NDECL(dodown); /**/
 extern int NDECL(doup); /**/
 extern int NDECL(donull); /**/
+extern int NDECL(dowait); /**/
 extern int NDECL(dowipe); /**/
 extern int NDECL(do_mname); /**/
 extern int NDECL(ddocall); /**/
@@ -630,7 +632,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(youracedata->msound == MS_SHRIEK){
+	if(youracedata->msound == MS_SHRIEK || youracedata->msound == MS_SHOG){ //player can't speak elder thing.
 		Sprintf(buf, "Shriek");
 		any.a_int = MATTK_SHRIEK;	/* must be non-zero */
 		incntlet = 'S';
@@ -1796,6 +1798,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 #endif /* CONVICT */
 	}
 	if (Stoned) you_are("turning to stone");
+	if (Golded) you_are("turning to gold");
 	if (Slimed) you_are("turning into slime");
 	if (Strangled) you_are((u.uburied) ? "buried" : "being strangled");
 	if (Glib) {
@@ -1803,6 +1806,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		you_have(buf);
 	}
 	if (Fumbling) enl_msg("You fumble", "", "d", "");
+	if(u_healing_penalty()) enl_msg("You heal", "", "ed", " slowly due to your equipment");
 	if (Wounded_legs
 #ifdef STEED
 	    && !u.usteed
@@ -2413,6 +2417,7 @@ int final;
 			dump(youwere, "sick from illness");
 	}
 	if (Stoned) dump(youwere, "turning to stone");
+	if (Golded) dump(youwere, "turning to gold");
 	if (Slimed) dump(youwere, "turning into slime");
 	if (Strangled)
 		dump(youwere, (u.uburied) ? "buried" : "being strangled");
@@ -2420,6 +2425,7 @@ int final;
 		Sprintf(buf, "slippery %s", makeplural(body_part(FINGER)));
 		dump(youhad, buf);
 	}
+	if(u_healing_penalty()) dump("  ", "You healed slowly as a result of your equipment");
 	if (Fumbling) dump("  ", "You fumbled");
 	if (Wounded_legs
 #ifdef STEED
@@ -2702,6 +2708,7 @@ resistances_enlightenment()
 		enl_msg("You resist", "", "ed", " hallucinations");
 */
 	/*** Troubles ***/
+	if(u_healing_penalty()) putstr(en_win, 0, "You feel itchy.");
 	if (Wounded_legs
 #ifdef STEED
 	    && !u.usteed
@@ -4007,6 +4014,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"adjust", "adjust inventory letters", doorganize, IFBURIED, AUTOCOMPLETE},
 	{"annotate", "annotate current dungeon level", donamelevel, IFBURIED, AUTOCOMPLETE},
 	{"chat", "talk to someone", dotalk, IFBURIED, AUTOCOMPLETE},	/* converse? */
+	{"come", "order pets to come", docome, !IFBURIED, AUTOCOMPLETE},
 	{"conduct", "list which challenges you have adhered to", doconduct, IFBURIED, AUTOCOMPLETE},
 	{"dip", "dip an object into something", dodip, !IFBURIED, AUTOCOMPLETE},
 	{"enhance", "advance or check weapons skills", enhance_weapon_skill, IFBURIED, AUTOCOMPLETE},
@@ -4034,6 +4042,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"untrap", "untrap something", dountrap, !IFBURIED, AUTOCOMPLETE},
 	{"versionext", "list compile time options for this version of NetHack",
 		doextversion, IFBURIED, AUTOCOMPLETE},
+	{"wait", "order pets to wait", dowait, !IFBURIED, AUTOCOMPLETE},
 	{"wipe", "wipe off your face", dowipe, !IFBURIED, AUTOCOMPLETE},
 	{"?", "get this list of extended commands", doextlist, IFBURIED, AUTOCOMPLETE},
 #if defined(WIZARD)
@@ -5185,7 +5194,7 @@ const char *s;
 		return 0;
 	}
 	saved_dirsym = dirsym;
-	if(!u.dz && ((Stunned || (Confusion && !rn2(5))) && (u.udrunken < 3 || !rn2(u.udrunken/3 + 1)))) confdir();
+	if(!u.dz && (Stunned || (Confusion && !rn2(5)))) confdir();
 	return 1;
 }
 
@@ -5275,7 +5284,10 @@ const char *msg;
 void
 confdir()
 {
-	register int x = (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) ? 2*rn2(4) : rn2(8);
+	register int x;
+	if(u.udrunken >= 3 && rn2(u.udrunken/3 + 1))
+		return;
+	x = (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) ? 2*rn2(4) : rn2(8);
 	u.dx = xdir[x];
 	u.dy = ydir[x];
 	return;

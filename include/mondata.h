@@ -9,18 +9,20 @@
 #define bigmonst(ptr)		((ptr)->msize >= MZ_LARGE)
 
 #define pm_resistance(ptr,typ)	(((ptr)->mresists & (typ)) != 0)
+#define mon_intrinsic(mon,typ)	(((mon)->mintrinsics[((typ)-1)/32] & (1 << ((typ)-1)%32)) != 0)
+#define mon_extrinsic(mon,typ)	(((mon)->mextrinsics[((typ)-1)/32] & (1 << ((typ)-1)%32)) != 0)
+#define mon_resistance(mon,typ)	(mon_intrinsic(mon,typ) || mon_extrinsic(mon,typ))
 
-//#define resists_fire(mon)	(((mon)->mintrinsics & MR_FIRE) != 0 || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Fire_resistance))
-// #define resists_fire(mon)	(((mon)->mintrinsics & MR_FIRE) != 0)
-// #define resists_cold(mon)	(((mon)->mintrinsics & MR_COLD) != 0)
-// #define resists_sleep(mon)	(((mon)->mintrinsics & MR_SLEEP) != 0)
-// #define resists_disint(mon)	(((mon)->mintrinsics & MR_DISINT) != 0)
-// #define resists_elec(mon)	(((mon)->mintrinsics & MR_ELEC) != 0)
-// #define resists_poison(mon)	(((mon)->mintrinsics & MR_POISON) != 0)
-// #define resists_acid(mon)	(((mon)->mintrinsics & MR_ACID) != 0)
-// #define resists_ston(mon)	(((mon)->mintrinsics & MR_STONE) != 0)
-// #define resists_drain(mon)	(((mon)->mintrinsics & MR_DRAIN) != 0)
-// #define resists_sickness(mon)	(((mon)->mintrinsics & MR_SICK) != 0)
+#define species_resists_fire(mon)	(((mon)->data->mresists & MR_FIRE) != 0)
+#define species_resists_cold(mon)	(((mon)->data->mresists & MR_COLD) != 0)
+#define species_resists_sleep(mon)	(((mon)->data->mresists & MR_SLEEP) != 0)
+#define species_resists_disint(mon)	(((mon)->data->mresists & MR_DISINT) != 0)
+#define species_resists_elec(mon)	(((mon)->data->mresists & MR_ELEC) != 0)
+#define species_resists_poison(mon)	(((mon)->data->mresists & MR_POISON) != 0)
+#define species_resists_acid(mon)	(((mon)->data->mresists & MR_ACID) != 0)
+#define species_resists_ston(mon)	(((mon)->data->mresists & MR_STONE) != 0)
+#define species_resists_drain(mon)	(((mon)->data->mresists & MR_DRAIN) != 0)
+#define species_resists_sickness(mon)	(((mon)->data->mresists & MR_SICK) != 0)
 
 #define	resist_attacks(ptr)	((((ptr)->mflagsg & MG_WRESIST) != 0L))
 #define	resist_blunt(ptr)	((((ptr)->mflagsg & MG_RBLUNT) != 0L))
@@ -28,7 +30,7 @@
 #define	resist_pierce(ptr)	((((ptr)->mflagsg & MG_RPIERCE) != 0L))
 #define	resists_all(ptr)	((((ptr)->mflagsg & MG_RALL) == MG_RALL))
 
-#define resists_poly(ptr)	((ptr) == &mons[PM_OONA] || is_weeping(ptr) || is_yochlol(ptr))
+#define resists_poly(ptr)	(((ptr)->geno&G_UNIQ) || is_weeping(ptr) || is_yochlol(ptr))
 
 #define is_blind(mon)		(!((mon)->mcansee) || (darksight((mon)->data) && (viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1 || levl[(mon)->mx][(mon)->my].lit)))
 #define is_deaf(mon)		(!((mon)->mcanhear))
@@ -179,6 +181,7 @@
 #define poisonous(ptr)		(((ptr)->mflagsb & MB_POIS) != 0L)
 #define freezing(ptr)		(((ptr)->mflagsb & MB_CHILL) != 0L)
 #define burning(ptr)		(((ptr)->mflagsb & MB_TOSTY) != 0L)
+#define hallucinogenic(ptr)		(((ptr)->mflagsb & MB_HALUC) != 0L)
 #define carnivorous(ptr)	(((ptr)->mflagst & MT_CARNIVORE) != 0L)
 #define herbivorous(ptr)	(((ptr)->mflagst & MT_HERBIVORE) != 0L)
 #define metallivorous(ptr)	(((ptr)->mflagst & MT_METALLIVORE) != 0L)
@@ -239,6 +242,7 @@
 #define is_kobold(ptr)		((ptr)->mlet == S_KOBOLD)
 #define is_ettin(ptr)		((ptr) == &mons[PM_ETTIN])
 #define is_human(ptr)		(((ptr)->mflagsa & MA_HUMAN) != 0L)
+#define is_untamable(ptr)	(((ptr)->mflagsg & MG_NOTAME) != 0L)
 #define is_fungus(ptr)		((ptr)->mlet == S_FUNGUS)
 #define is_migo(ptr)		((ptr) == &mons[PM_MIGO_WORKER] ||\
 							 (ptr) == &mons[PM_MIGO_SOLDIER] ||\
@@ -269,7 +273,8 @@
 				 (ptr) == &mons[PM_ENORMOUS_RAT] || \
 				 (ptr) == &mons[PM_RODENT_OF_UNUSUAL_SIZE])
 #define is_dragon(ptr)		(((ptr)->mflagsa & MA_DRAGON) != 0L)
-#define is_true_dragon(ptr)		(monsndx(ptr) >= PM_BABY_GRAY_DRAGON && monsndx(ptr) <= PM_YELLOW_DRAGON)
+#define is_true_dragon(ptr)		((monsndx(ptr) >= PM_BABY_GRAY_DRAGON && monsndx(ptr) <= PM_YELLOW_DRAGON) ||\
+								(ptr) == &mons[PM_PLATINUM_DRAGON] || (ptr) == &mons[PM_CHROMATIC_DRAGON])
 #define is_pseudodragon(ptr)	(monsndx(ptr) >= PM_TINY_PSEUDODRAGON && monsndx(ptr) <= PM_GIGANTIC_PSEUDODRAGON)
 #define is_bird(ptr)		(((ptr)->mflagsa & MA_AVIAN) != 0L)
 #define is_giant(ptr)		(((ptr)->mflagsa & MA_GIANT) != 0L)
@@ -314,6 +319,7 @@
 							  || (ptr) == &mons[PM_RAZORVINE]\
 							)
 #define is_mercenary(ptr)	(((ptr)->mflagsg & MG_MERC) != 0L)
+#define is_bardmon(ptr)		((ptr) == &mons[PM_LILLEND] || (ptr) == &mons[PM_RHYMER] || (ptr) == &mons[PM_BARD])
 #define is_male(ptr)		(((ptr)->mflagsb & MB_MALE) != 0L)
 #define is_female(ptr)		(((ptr)->mflagsb & MB_FEMALE) != 0L)
 #define is_neuter(ptr)		(((ptr)->mflagsb & MB_NEUTER) != 0L)

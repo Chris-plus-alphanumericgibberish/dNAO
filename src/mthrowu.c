@@ -106,20 +106,17 @@ boolean burn;
 				!(is_lightsaber(obj) && obj->lamplit) &&
 				!(u.sealsActive&SEAL_EDEN)
 				&& hates_silver(youracedata)) {
-			// dam += rnd(20);
 			pline_The("silver sears your flesh!");
 			exercise(A_CON, FALSE);
 		}
 		if (obj && (obj->obj_material == IRON) &&
 				!(is_lightsaber(obj) && obj->lamplit)
 				&& hates_iron(youracedata)) {
-			// dam += rnd(20);
 			pline_The("cold-iron sears your flesh!");
 			exercise(A_CON, FALSE);
 		}
 		if (obj && (obj->obj_material == SILVER || arti_silvered(obj))
 				&& hates_unholy(youracedata)) {
-			// dam += rnd(20);
 			pline_The("curse sears your flesh!");
 			exercise(A_CON, FALSE);
 		}
@@ -1508,6 +1505,17 @@ register struct attack *mattk;
 				rngmod = 1000; /* Fly until it strikes something */
 				bypassDR = 1;
 			break;
+		    case AD_SURY:
+				ammo_type = SILVER_ARROW;
+				qvr = mksobj(ammo_type, TRUE, FALSE);
+				// qvr->oartifact = ART_ARROW_OF_SLAYING;
+			    qvr->blessed = 1;
+			    qvr->cursed = 0;
+			    qvr->quan = 1;
+			    qvr->spe = 7 + 50; //Arrows of slaying actually just get +50 damage anyway :/
+				rngmod = 1000; /* Fly until it strikes something */
+				bypassDR = 1;
+			break;
 			case AD_SLVR:
 				ammo_type = SILVER_ARROW;
 			break;
@@ -1629,6 +1637,16 @@ register struct attack *mattk;
 			    qvr->spe = 7;
 				rngmod = 1000; /* Fly until it strikes something */
 			break;
+		    case AD_SURY:
+				ammo_type = SILVER_ARROW;
+				qvr = mksobj(ammo_type, TRUE, FALSE);
+				// qvr->oartifact = ART_ARROW_OF_SLAYING;
+			    qvr->blessed = 1;
+			    qvr->cursed = 0;
+			    qvr->quan = 1;
+			    qvr->spe = 7 + 50;
+				rngmod = 1000; /* Fly until it strikes something */
+			break;
 			case AD_SLVR:
 				ammo_type = SILVER_ARROW;
 			break;
@@ -1712,12 +1730,52 @@ breamu(mtmp, mattk)			/* monster breathes at you (ranged) */
 	if(mtmp->mux == 0 && mtmp->muy == 0) return 0;
 	
 	/* if new breath types are added, change AD_ACID to max type */
-	int typ = (mattk->adtyp == AD_RBRE) ? rnd(AD_ACID) : mattk->adtyp, mult = 1;
+	int typ = mattk->adtyp, mult = 1;
 	if(typ == AD_HDRG){
 		typ = mtmp->mvar1;
 		if(typ == AD_SLEE) mult = 4;
 	}
 
+	if(typ == AD_RBRE){
+		if(mtmp->data == &mons[PM_CHROMATIC_DRAGON]){
+			switch(rnd(6)){
+				case 1:
+					typ = AD_FIRE;
+				break;
+				case 2:
+					typ = AD_COLD;
+				break;
+				case 3:
+					typ = AD_ELEC;
+				break;
+				case 4:
+					typ = AD_DRST;
+				break;
+				case 5:
+					typ = AD_DISN;
+				break;
+				case 6:
+					typ = AD_ACID;
+				break;
+			}
+		} else if(mtmp->data == &mons[PM_PLATINUM_DRAGON]){
+			switch(rnd(4)){
+				case 1:
+					typ = AD_FIRE;
+				break;
+				case 2:
+					typ = AD_DISN;
+				break;
+				case 3:
+					typ = AD_SLEE;
+				break;
+				case 4:
+					typ = AD_ELEC;
+				break;
+			}
+		} else typ = rnd(AD_ACID);
+	}
+	
 	if(lined_up(mtmp)) {
 
 	    if(mtmp->mcan) {
@@ -1807,12 +1865,12 @@ breamm(mtmp, mdef, mattk)		/* monster breathes at monst (ranged) */
 					typ = AD_ELEC;
 				break;
 			}
-		} else rnd(AD_ACID);
+		} else typ = rnd(AD_ACID);
 	}
 
 	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
 	
-	if (distmin(mtmp->mx, mtmp->my, mdef->mx, mdef->my) < 3)
+	if (distmin(mtmp->mx, mtmp->my, mdef->mx, mdef->my) < 3 && mtmp->data != &mons[PM_ANCIENT_OF_ICE])
 	    return 0;  /* not at close range */
 
 	if(mlined_up(mtmp, mdef, TRUE)) {

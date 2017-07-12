@@ -544,7 +544,7 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_DWARF,	KNIFE,				DAGGER	      		  },
     { PM_DWARF, SPEAR,				DWARVISH_SPEAR	      },
     { PM_DWARF, SHORT_SWORD,		DWARVISH_SHORT_SWORD  },
-    { PM_DWARF, HELMET,				DWARVISH_IRON_HELM    },
+    { PM_DWARF, HELMET,				DWARVISH_HELM    },
 	{ PM_DWARF, BUCKLER,			DWARVISH_ROUNDSHIELD  }, 
     { PM_DWARF, PICK_AXE,			DWARVISH_MATTOCK      },
     { PM_DWARF, TWO_HANDED_SWORD,	BATTLE_AXE    },
@@ -627,15 +627,15 @@ static const struct def_skill Skill_A[] = {
 };
 
 static const struct def_skill Skill_Ana[] = {
-    { P_DAGGER, P_EXPERT },		{ P_KNIFE,  P_EXPERT },
+    { P_DAGGER, P_SKILLED },		{ P_KNIFE,  P_SKILLED },
     { P_SHORT_SWORD, P_EXPERT },{ P_LANCE,  P_EXPERT },
-    { P_SABER, P_EXPERT },		{ P_LONG_SWORD,  P_SKILLED },
-    { P_CLUB, P_SKILLED },		{ P_QUARTERSTAFF, P_SKILLED },
-	{ P_BROAD_SWORD, P_BASIC },
+    { P_SABER, P_EXPERT },		{ P_LONG_SWORD,  P_BASIC },
+    { P_CLUB, P_SKILLED },		{ P_QUARTERSTAFF, P_EXPERT },
+	{ P_BROAD_SWORD, P_EXPERT },
 //#ifdef FIREARMS
     { P_FIREARM, P_EXPERT },
 //#endif
-    { P_DART, P_BASIC },		{ P_CROSSBOW, P_BASIC },
+    { P_DART, P_BASIC },		{ P_CROSSBOW, P_EXPERT },
     { P_WHIP, P_SKILLED },		 { P_BOOMERANG, P_SKILLED },
     { P_ATTACK_SPELL, P_SKILLED },	{ P_HEALING_SPELL, P_SKILLED },
     { P_DIVINATION_SPELL, P_SKILLED},	{ P_MATTER_SPELL, P_SKILLED},
@@ -1928,7 +1928,6 @@ u_init()
 			}
 			ini_inv(DarkWand);
 		}
-		// if(!rn2(5)) ini_inv(Blindfold);
 		skill_init(Skill_W);
 		if(Race_if(PM_DROW) && flags.female) skill_add(Skill_DW);
 		break;
@@ -2014,12 +2013,18 @@ u_init()
 		skill_add(Skill_Drow_Unarmed);
 		
 		if(Role_if(PM_NOBLEMAN)){
-			if(!flags.female) u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
-				u.ualign.type = A_NEUTRAL; /* Males are neutral */
+			if(!flags.female){
+				u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
+					u.ualign.type = A_NEUTRAL; /* Males are neutral */
+				flags.initalign = 1; // 1 == neutral
+			}
 		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT)){
 			ini_inv(DrovenCloak);
-			if(!flags.female) u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
-				u.ualign.type = A_NEUTRAL; /* Males are neutral */
+			if(!flags.female){
+				u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
+					u.ualign.type = A_NEUTRAL; /* Males are neutral */
+				flags.initalign = 1; // 1 == neutral
+			}
 		}
 	    /* Drow can recognize all droven objects */
 	    knows_object(DROVEN_SHORT_SWORD);
@@ -2068,7 +2073,7 @@ u_init()
 	    knows_object(DWARVISH_SPEAR);
 	    knows_object(DWARVISH_SHORT_SWORD);
 	    knows_object(DWARVISH_MATTOCK);
-	    knows_object(DWARVISH_IRON_HELM);
+	    knows_object(DWARVISH_HELM);
 	    knows_object(DWARVISH_MITHRIL_COAT);
 	    knows_object(DWARVISH_CLOAK);
 	    knows_object(DWARVISH_ROUNDSHIELD);
@@ -2097,7 +2102,7 @@ u_init()
 		ini_inv(TallowCandles);
 		knows_object(GNOMISH_POINTY_HAT);
 	    knows_object(AKLYS);
-	    knows_object(DWARVISH_IRON_HELM);
+	    knows_object(DWARVISH_HELM);
 	    knows_object(DWARVISH_MATTOCK);
 	    knows_object(DWARVISH_CLOAK);
     break;
@@ -2168,6 +2173,8 @@ u_init()
 		init_attr(55);
 	} else if (Role_if(PM_VALKYRIE)){
 		init_attr(85);
+	} else if (Race_if(PM_ELF)){
+		init_attr(80);
 	} else init_attr(75);	/* init attribute values */
 	find_ac();				/* get initial ac value */
 	max_rank_sz();			/* set max str size for class ranks */
@@ -2631,6 +2638,7 @@ register struct trobj *trop;
 			/* Don't start with +0 or negative rings */
 			if (objects[obj->otyp].oc_charged && obj->spe <= 0)
 				obj->spe = rne(3);
+			fix_object(obj);
 		} else {	/* UNDEF_TYP */
 			static NEARDATA short nocreate = STRANGE_OBJECT;
 			static NEARDATA short nocreate2 = STRANGE_OBJECT;

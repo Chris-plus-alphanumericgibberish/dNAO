@@ -371,7 +371,7 @@ moveloop()
 	int oldspiritAC=0;
 	int tx,ty;
 	int nmonsclose,nmonsnear,enkispeedlim;
-	static boolean oldBlind = 0, oldLightBlind = 0;
+	static boolean oldBlind = 0, oldLightBlind = 0, healing_penalty = 0;
 	static int oldCon, oldWisBon;
     int hpDiff;
 
@@ -446,26 +446,50 @@ moveloop()
 			 /*once-per-monster-moving things go here*/
 			/****************************************/
 ////////////////////////////////////////////////////////////////////////////////////////////////
-	if(echolocation(youracedata)){
-		for(i=1; i<COLNO; i++)
-			for(j=0; j<ROWNO; j++)
-				if(viz_array[j][i]&COULD_SEE)
-					echo_location(i, j);
-	}
-	/*If anything a monster did caused us to get moved out of water, surface*/
-	if(u.usubwater && !is_pool(u.ux, u.uy)){
-		u.usubwater = 0;
-		vision_full_recalc = 1;
-		vision_recalc(2);	/* unsee old position */
-		doredraw();
-	} else if(Is_waterlevel(&u.uz) && u.usubwater && !is_3dwater(u.ux, u.uy)){
-		You("pop out into an airbubble!");
-		u.usubwater = 0;
-	} else if(Is_waterlevel(&u.uz) && !u.usubwater && is_3dwater(u.ux, u.uy)){
-		Your("%s goes under water!", body_part(HEAD));
-		if(!Breathless) You("can't breath.");
-		u.usubwater = 1;
-	}
+			for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+				if(mtmp->data == &mons[PM_HELLCAT]){
+					if(!isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
+						mtmp->minvis = TRUE;
+						mtmp->perminvis = TRUE;
+						newsym(mtmp->mx,mtmp->my);
+					} else if(isdark(mtmp->mx,mtmp->my) && mtmp->minvis){
+						mtmp->minvis = FALSE;
+						mtmp->perminvis = FALSE;
+						newsym(mtmp->mx,mtmp->my);
+					}
+				}
+			}
+////////////////////////////////////////////////////////////////////////////////////////////////
+			if(echolocation(youracedata)){
+				for(i=1; i<COLNO; i++)
+					for(j=0; j<ROWNO; j++)
+						if(viz_array[j][i]&COULD_SEE)
+							echo_location(i, j);
+			}
+			/*If anything a monster did caused us to get moved out of water, surface*/
+			if(u.usubwater && !is_pool(u.ux, u.uy)){
+				u.usubwater = 0;
+				vision_full_recalc = 1;
+				vision_recalc(2);	/* unsee old position */
+				doredraw();
+			} else if(Is_waterlevel(&u.uz) && u.usubwater && !is_3dwater(u.ux, u.uy)){
+				You("pop out into an airbubble!");
+				u.usubwater = 0;
+			} else if(Is_waterlevel(&u.uz) && !u.usubwater && is_3dwater(u.ux, u.uy)){
+				Your("%s goes under water!", body_part(HEAD));
+				if(!Breathless) You("can't breath.");
+				u.usubwater = 1;
+			}
+////////////////////////////////////////////////////////////////////////////////////////////////
+			if (healing_penalty != u_healing_penalty()) {
+				if (!Hallucination){
+					You_feel("%s.", (!healing_penalty) ? "itchy" : "relief");
+				} else {
+					You_feel("%s.", (!healing_penalty) ? (hates_silver(youracedata) ? "tarnished" :
+						hates_iron(youracedata) ? "magnetic" : "like you are failing Organic Chemistry") : "like you are no longer failing Organic Chemistry");
+				}
+				healing_penalty = u_healing_penalty();
+			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
 			if (!oldBlind ^ !Blind) {  /* one or the other but not both */
 				see_monsters();
@@ -561,7 +585,7 @@ moveloop()
 					else pline("You are likely to be eaten by a grue.");
 				} else You_feel("increasingly panicked about being in the dark!");
 			}
-			if(u.sealsActive&SEAL_NABERIUS && (ACURR(A_WIS) < 14 || ACURR(A_INT) < 14)) unbind(SEAL_NABERIUS,TRUE);
+			if(u.sealsActive&SEAL_NABERIUS && u.udrunken < u.ulevel/3) unbind(SEAL_NABERIUS,TRUE);
 			if(u.specialSealsActive&SEAL_NUMINA && u.ulevel<30) unbind(SEAL_SPECIAL|SEAL_NUMINA,TRUE);
 			if(u.sealsActive&SEAL_SHIRO && uarmc && uarmc->otyp == MUMMY_WRAPPING){
 				struct obj *otmp = uarmc;
@@ -612,7 +636,7 @@ moveloop()
 				nxtmon = mtmp->nmon;
 				/* Possibly vanish */
 				if(mtmp->mvanishes>-1){
-					if(mtmp->mvanishes-- == 0){
+					if(--mtmp->mvanishes == 0){
 						monvanished(mtmp);
 						continue;
 					}
@@ -634,7 +658,7 @@ moveloop()
 							blade->mtame = 0;
 						}
 						if(mtmp->mpeaceful != blade->mpeaceful){
-							mtmp->mpeaceful == blade->mpeaceful;
+							mtmp->mpeaceful = blade->mpeaceful;
 						}
 					}
 				}
@@ -1144,6 +1168,8 @@ moveloop()
 						int reglevel = u.ulevel + (((int) ACURR(A_CON)) - 10)/2;
 						if(reglevel < 1) reglevel = 1;
 						if(Role_if(PM_HEALER)) reglevel += 10;
+						reglevel -= u_healing_penalty();
+						if(reglevel < 1) reglevel = 1;
 						flags.botl = 1;
 						//recover 1/30th hp per turn:
 						u.uhp += reglevel/30;
@@ -1226,11 +1252,17 @@ moveloop()
 				if(Role_if(PM_PRIEST)) reglevel += 6;
 				if(Role_if(PM_VALKYRIE)) reglevel += 3;
 				if(Role_if(PM_MONK)) reglevel += 3;
+				if(u.uen < u.uenmax && (Role_if(PM_WIZARD)) && uarmh && uarmh->otyp == CORNUTHAUM){
+					reglevel += uarmh->spe;
+				}
+				reglevel -= u_healing_penalty();
+				if(reglevel < 1) reglevel = 1;
 				//recover 1/30th energy per turn:
 				u.uen += reglevel/30;
 				//Now deal with any remainder
 				if(((moves)*(reglevel%30))/30 > ((moves-1)*(reglevel%30))/30) u.uen += 1;
 				if (u.uen > u.uenmax)  u.uen = u.uenmax;
+				flags.botl = 1;
 		    }
 			if(Energy_regeneration && u.uen < u.uenmax){
 				u.uen++;
@@ -1238,12 +1270,11 @@ moveloop()
 				flags.botl = 1;
 			}
 			if(u.specialSealsActive&SEAL_UNKNOWN_GOD && u.uen < u.uenmax){
-				u.uen+=min_ints(rnd(spiritDsize()),5);
-				if (u.uen > u.uenmax)  u.uen = u.uenmax;
-				flags.botl = 1;
-			}
-			if(u.uen < u.uenmax && (Role_if(PM_WIZARD) || Race_if(PM_INCANTIFIER)) && uarmh && uarmh->otyp == CORNUTHAUM && uarmh->spe > 0){
-				u.uen += rnd(uarmh->spe);
+				int dsize = spiritDsize(), reglevel = 5*dsize;
+				//recover 1/30th energy per turn:
+				u.uen += reglevel/30;
+				//Now deal with any remainder
+				if(((moves)*(reglevel%30))/30 > ((moves-1)*(reglevel%30))/30) u.uen += 1;
 				if (u.uen > u.uenmax)  u.uen = u.uenmax;
 				flags.botl = 1;
 			}
@@ -1347,7 +1378,13 @@ moveloop()
 	    /******************************************/
 		if(u.ustdy > 0) u.ustdy -= 1;
 		
-
+		for (mtmp = fmon; mtmp; mtmp = nxtmon){
+			nxtmon = mtmp->nmon;
+			if ((mtmp->data == &mons[PM_MEDUSA] || mtmp->data == &mons[PM_GREAT_CTHULHU])
+				&& couldsee(mtmp->mx, mtmp->my)
+				&& ((rn2(3) >= magic_negation(mtmp)))
+			) m_respond(mtmp);
+		}
 		
 		if(echolocation(youracedata)){
 			for(i=1; i<COLNO; i++)
@@ -1407,6 +1444,20 @@ moveloop()
 	/****************************************/
 	find_ac();
 ////////////////////////////////////////////////////////////////////////////////////////////////
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+		if(mtmp->data == &mons[PM_HELLCAT]){
+			if(!isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
+				mtmp->minvis = TRUE;
+				mtmp->perminvis = TRUE;
+				newsym(mtmp->mx,mtmp->my);
+			} else if(isdark(mtmp->mx,mtmp->my) && mtmp->minvis){
+				mtmp->minvis = FALSE;
+				mtmp->perminvis = FALSE;
+				newsym(mtmp->mx,mtmp->my);
+			}
+		}
+	}
+////////////////////////////////////////////////////////////////////////////////////////////////
 	if(!flags.mv || Blind || oldBlind != (!!Blind)) {
 	    /* redo monsters if hallu or wearing a helm of telepathy */
 	    if (Hallucination) {	/* update screen randomly */
@@ -1419,6 +1470,16 @@ moveloop()
 	    } else if (Warning || Warn_of_mon)
 	     	see_monsters();
 
+		if (healing_penalty != u_healing_penalty()) {
+			if (!Hallucination){
+				You_feel("%s.", (u_healing_penalty()) ? "itchy" : "relief");
+			} else {
+				You_feel("%s.", (u_healing_penalty()) ? (hates_silver(youracedata) ? "tarnished" :
+					hates_iron(youracedata) ? "magnetic" : "like you are failing Organic Chemistry") : "like you are no longer failing Organic Chemistry");
+			}
+			healing_penalty = u_healing_penalty();
+		}
+		
 		if (!oldBlind ^ !Blind) {  /* one or the other but not both */
 			see_monsters();
 			flags.botl = 1;

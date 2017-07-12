@@ -242,6 +242,7 @@ newman()
 	else u.uhunger = rn1(500,500);
 	if (Sick) make_sick(0L, (char *) 0, FALSE, SICK_ALL);
 	Stoned = 0;
+	Golded = 0;
 	delayed_killer = 0;
 	if (u.uhp <= 0 || u.uhpmax <= 0) {
 		if (Polymorph_control) {
@@ -470,6 +471,13 @@ int	mntmp;
 		Stoned = 0;
 		delayed_killer = 0;
 	}
+	if (Golded && poly_when_golded(&mons[mntmp])) {
+		/* poly_when_golded already checked gold golem genocide */
+		You("turn to gold!");
+		mntmp = PM_GOLD_GOLEM;
+		Golded = 0;
+		delayed_killer = 0;
+	}
 	if (uarmc && (s = OBJ_DESCR(objects[uarmc->otyp])) != (char *)0 &&
 	   !strcmp(s, "opera cloak") &&
 	   is_vampire(youracedata)) {
@@ -500,6 +508,11 @@ int	mntmp;
 		Stoned = 0;
 		delayed_killer = 0;
 		You("no longer seem to be petrifying.");
+	}
+	if (Stone_resistance && Golded) { /* parnes@eniac.seas.upenn.edu */
+		Golded = 0;
+		delayed_killer = 0;
+		You("no longer seem to be turning to gold.");
 	}
 	if (Sick_resistance && Sick) {
 		make_sick(0L, (char *) 0, FALSE, SICK_ALL);
@@ -621,7 +634,7 @@ int	mntmp;
 		pline(use_thec,monsterc,"use your horn");
 	    if (is_mind_flayer(youmonst.data))
 		pline(use_thec,monsterc,"emit a mental blast");
-	    if (youmonst.data->msound == MS_SHRIEK) /* worthless, actually */
+	    if (youmonst.data->msound == MS_SHRIEK || youmonst.data->msound == MS_SHOG) /* worthless, actually */
 		pline(use_thec,monsterc,"shriek");
 	    if (youmonst.data->msound == MS_JUBJUB)
 		pline(use_thec,monsterc,"scream");
@@ -728,7 +741,7 @@ break_armor()
 			} else {
 				Your("shirt rips to shreds!");
 				(void) Shirt_off();
-				useup(uarmu);
+				useup(otmp);
 			}
 		}
     }
@@ -872,7 +885,7 @@ dobreathe(mdat)
 			type = flags.HDbreath;
 			if(type == AD_SLEE) multiplier = 4;
 		}
-		if(is_dragon(mdat)) flags.drgn_brth = 1;
+		if(is_true_dragon(mdat) || (Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) flags.drgn_brth = 1;
 	    buzz((int) (20 + type-1), (int)mattk->damn + (u.ulevel/2),
 			u.ux, u.uy, u.dx, u.dy,0, mattk->damd ? (d((int)mattk->damn + (u.ulevel/2), (int)mattk->damd)*multiplier) : 0);
 		flags.drgn_brth = 0;
@@ -1257,6 +1270,8 @@ domindblast()
 		if (distu(mtmp->mx, mtmp->my) > BOLT_LIM * BOLT_LIM)
 			continue;
 		if(mtmp->mpeaceful)
+			continue;
+		if(mindless(mtmp->data))
 			continue;
 		u_sen = telepathic(mtmp->data) && is_blind(mtmp);
 		if (u_sen || (telepathic(mtmp->data) && rn2(2)) || !rn2(10)) {

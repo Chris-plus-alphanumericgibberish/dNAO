@@ -112,7 +112,7 @@ int thrown;
 	}
 	
 	if(obj->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
-	if((obj->oclass == POTION_CLASS || obj->obj_material == GLASS) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
+	if((obj->oclass == POTION_CLASS || obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
 	if((obj->otyp == EGG) && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA, TRUE);
 	
 	u_wipe_engr(2);
@@ -706,6 +706,7 @@ dofire()
 		bolt->blessed = uwep->blessed;
 		bolt->cursed = uwep->cursed;
 		bolt->objsize = MZ_SMALL;
+		fix_object(bolt);
 		/*See below for shotlimit*/
 		shotlimit = (multi || save_cm) ? multi + 1 : 0;
 		multi = 0;		/* reset; it's been used up */
@@ -735,6 +736,47 @@ dofire()
 		result = fire_blaster(uwep, shotlimit);
 		
 		return result;
+	} else if(uwep && uwep->oartifact == ART_HOLY_MOONLIGHT_SWORD && uwep->lamplit && u.uen > 25){
+		int dmg;
+		int range = (u.sealsActive&SEAL_NABERIUS) ? 6 : 3;
+		xchar lsx, lsy, sx, sy;
+		struct monst *mon;
+		sx = u.ux;
+		sy = u.uy;
+		if (!getdir((char *)0) || !(u.dx || u.dy)) return 0;
+		u.uen -= 25;
+		flags.forcefight = 1;
+		domove();
+		flags.forcefight = 0;
+		if(u.uswallow){
+			if(u.sealsActive&SEAL_NABERIUS) explode2(u.ux,u.uy,0/*Magical*/, (d(2,12)+2*uwep->spe)*1.5, WAND_CLASS, EXPL_CYAN);
+			else explode(u.ux,u.uy,0/*Magical*/, d(2,12)+2*uwep->spe, WAND_CLASS, EXPL_CYAN);
+		} else {
+			while(--range >= 0){
+				lsx = sx; sx += u.dx;
+				lsy = sy; sy += u.dy;
+				if(isok(sx,sy) && isok(lsx,lsy) && !IS_STWALL(levl[sx][sy].typ)) {
+					mon = m_at(sx, sy);
+					if(mon){
+						dmg = d(2,12)+2*uwep->spe;
+						if(u.sealsActive&SEAL_NABERIUS) explode2(sx, sy, 0/*Nagical*/, dmg*1.5, WAND_CLASS, EXPL_CYAN);
+						else explode(sx, sy, 0/*Nagical*/, dmg, WAND_CLASS, EXPL_CYAN);
+						break;//break loop
+					} else {
+						tmp_at(DISP_BEAM, cmap_to_glyph(S_digbeam));
+						tmp_at(sx, sy);
+						delay_output();
+						tmp_at(DISP_END, 0);
+					}
+				} else {
+					dmg = d(2,12)+2*uwep->spe;
+					if(u.sealsActive&SEAL_NABERIUS) explode2(lsx, lsy, 0/*Nagical*/, dmg*1.5, WAND_CLASS, EXPL_CYAN);
+					else explode(lsx, lsy, 0/*Nagical*/, dmg, WAND_CLASS, EXPL_CYAN);
+					break;//break loop
+				}
+			}
+			return 1;
+		}
 	} else if(u.twoweap && uswapwep && is_blaster(uswapwep) && !(uquiver && ammo_and_launcher(uquiver, uwep))){
 		shotlimit = (multi || save_cm) ? multi + 1 : 0;
 		multi = 0;		/* reset; it's been used up */
@@ -1692,7 +1734,7 @@ int thrown;
 			struct monst *msmon;
 			sx = bhitpos.x;
 			sy = bhitpos.y;
-			if(obj->obj_material == GLASS && u.specialSealsActive&SEAL_NUDZIARTH){
+			if((obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) && u.specialSealsActive&SEAL_NUDZIARTH){
 				if(obj->otyp == MIRROR){
 					if(u.spiritPColdowns[PWR_MIRROR_SHATTER] < monstermoves && !u.uswallow && uwep && uwep->otyp == MIRROR && !(uwep->oartifact)){
 						useup(uwep);
@@ -1734,7 +1776,7 @@ int thrown;
 						}
 						u.spiritPColdowns[PWR_MIRROR_SHATTER] = monstermoves + 25;
 					} else explode(sx,sy,8/*Phys*/, d(rnd(5),dsize), TOOL_CLASS, HI_SILVER);
-				} else if(obj->oclass == WEAPON_CLASS && obj->otyp != CRYSTAL_SWORD) explode(sx,sy,8/*Phys*/, d(rnd(5),dsize), WEAPON_CLASS, EXPL_DARK);
+				} else if(obj->obj_material == OBSIDIAN_MT) explode(sx,sy,8/*Phys*/, d(rnd(5),dsize), WEAPON_CLASS, EXPL_DARK);
 			}
 		    tmp_at(DISP_FLASH, obj_to_glyph(obj));
 		    tmp_at(bhitpos.x, bhitpos.y);
@@ -1936,7 +1978,7 @@ int thrown;
 	    switch (uarmg->otyp) {
 	    case ORIHALCYON_GAUNTLETS:    /* metal */
 	    case GAUNTLETS_OF_POWER:    /* metal */
-		case IRON_GAUNTLETS:
+		case GAUNTLETS:
 		case CRYSTAL_GAUNTLETS:
 		tmp -= 2;
 		break;
@@ -2270,7 +2312,7 @@ int thrown;
 	    }
 
 	} else if ((otyp == EGG || otyp == CREAM_PIE ||
-		    otyp == BLINDING_VENOM || otyp == ACID_VENOM || otyp == BALL_OF_WEBBING) &&
+		    otyp == BLINDING_VENOM || otyp == ACID_VENOM) &&
 		(guaranteed_hit || ACURR(A_DEX) > rnd(25))) {
 	    (void) hmon(mon, obj, 1);
 	    return 1;	/* hmon used it up */
@@ -2540,7 +2582,7 @@ breaktest(obj)
 struct obj *obj;
 {
 	if (obj_resists(obj, 0, 100)) return 0;
-	if (obj->obj_material == GLASS &&
+	if ((obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) &&
 		obj->oclass != GEM_CLASS)
 	    return 1;
 	switch (obj->oclass == POTION_CLASS ? POT_WATER : obj->otyp) {

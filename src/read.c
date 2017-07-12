@@ -376,13 +376,15 @@ doread()
 	/* #nethack suggestions */
     "Lich Park",
     "I'd rather be pudding farming",
+	
+    "Great Cthulhu for President -- why settle for the lesser evil?",
 	    };
 	    char buf[BUFSZ];
 	    int erosion;
 		if(arti_mandala(scroll)){
 			if(uarmu && uarmu == scroll && uarm){
-				if( uarm->otyp == CRYSTAL_PLATE_MAIL){
-					You("look at your shirt through your crystal armor.");
+				if( uarm->obj_material == GLASS){
+					You("look at your shirt through your glass armor.");
 				}
 				else{
 					if (Blind) You_cant("see that.");
@@ -401,8 +403,8 @@ doread()
 				return 0;
 			}
 			if(uarmu && uarmu == scroll && uarm){
-				if( uarm->otyp == CRYSTAL_PLATE_MAIL){
-					You("look at your shirt through your crystal armor.");
+				if( uarm->obj_material == GLASS){
+					You("look at your shirt through your glass armor.");
 				}
 				else{
 					You_cant("read that through your %s.", aobjnam(uarm, (char *)0));
@@ -655,7 +657,7 @@ int curse_bless;
 	    }
 
 	} else if (obj->oclass == TOOL_CLASS || is_blaster(obj)
-		   || obj->otyp == DWARVISH_IRON_HELM || obj->otyp == VIBROBLADE 
+		   || obj->otyp == DWARVISH_HELM || obj->otyp == VIBROBLADE 
 		   || obj->otyp == FORCE_PIKE) {
 	    int rechrg = (int)obj->recharged;
 
@@ -711,11 +713,11 @@ int curse_bless;
 		    p_glow2(obj, NH_WHITE);
 		}
 		break;
-	    case DWARVISH_IRON_HELM:
+	    case DWARVISH_HELM:
 	    case OIL_LAMP:
 	    case BRASS_LANTERN:
 		if (is_cursed) {
-		    if (obj->otyp == DWARVISH_IRON_HELM) {
+		    if (obj->otyp == DWARVISH_HELM) {
 			/* Don't affect the +/- of the helm */
 			obj->age = 0;
 		    }
@@ -727,13 +729,13 @@ int curse_bless;
 			end_burn(obj, TRUE);
 		    }
 		} else if (is_blessed) {
-		    if (obj->otyp != DWARVISH_IRON_HELM) {
+		    if (obj->otyp != DWARVISH_HELM) {
 				obj->spe = 1;
 		    }
 		    obj->age = 1500;
 		    p_glow2(obj, NH_BLUE);
 		} else {
-		    if (obj->otyp != DWARVISH_IRON_HELM) {
+		    if (obj->otyp != DWARVISH_HELM) {
 				obj->spe = 1;
 		    }
 		}
@@ -761,7 +763,7 @@ int curse_bless;
 			else obj->ovar1 = 80L + rn2(20);
 		break;
 	    case RAYGUN:
-			if(Role_if(PM_ANACHRONONAUT)){
+			if(Role_if(PM_ANACHRONONAUT) || Role_if(PM_TOURIST)){
 				if(is_blessed) obj->ovar1 = 160L;
 				else if(is_cursed) obj->ovar1 = 10L;
 				else obj->ovar1 = (8 + rn2(8))*10L;
@@ -1155,7 +1157,7 @@ struct obj	*sobj;
 					otmp->blessed = 1;
 				}
 				otmp->known = 1;
-				otmp->owt = weight(otmp);
+				fix_object(otmp);
 				setworn(otmp, W_ARMS);
 				break;
 			} else {
@@ -1210,7 +1212,7 @@ struct obj	*sobj;
 
 		/* KMH -- catch underflow */
 		s = sobj->cursed ? -otmp->spe : otmp->spe;
-		if (s > (special_armor ? (otmp->otyp == CRYSTAL_PLATE_MAIL ? 12 : 5) : 3) && rn2(s)) {
+		if (s > (special_armor ? 5 : 3) && rn2(s)) {
 		Your("%s violently %s%s%s for a while, then %s.",
 		     xname(otmp),
 		     otense(otmp, Blind ? "vibrate" : "glow"),
@@ -1228,9 +1230,8 @@ struct obj	*sobj;
 			break;
 		}
 		s = sobj->cursed ? -1 :
-		    otmp->spe >= (otmp->otyp == CRYSTAL_PLATE_MAIL ? 18 : 9) ? (rn2(otmp->spe) == 0) :
+		    otmp->spe >= 9 ? (rn2(otmp->spe) == 0) :
 		    sobj->blessed ? rnd(3-otmp->spe/3) : 1;
-		if(otmp->otyp == CRYSTAL_PLATE_MAIL) s *= 2;
 		if (s >= 0 && otmp->otyp >= GRAY_DRAGON_SCALES &&
 					otmp->otyp <= YELLOW_DRAGON_SCALES) {
 			/* dragon scales get turned into dragon scale mail */
@@ -1266,7 +1267,7 @@ struct obj	*sobj;
 			known = otmp->known;
 		}
 
-		if ((otmp->spe > (special_armor ? (otmp->otyp == CRYSTAL_PLATE_MAIL ? 12 : 5) : 3)) &&
+		if ((otmp->spe > (special_armor ? 5 : 3)) &&
 		    (special_armor || !rn2(7)))
 			Your("%s suddenly %s %s.",
 				xname(otmp), otense(otmp, "vibrate"),
@@ -1592,7 +1593,7 @@ struct obj	*sobj;
 		if (confused) {
 		    You_feel("charged up!");
 		    if (u.uen < u.uenmax)
-			u.uen = u.uenmax;
+			u.uen = min(u.uen+400, u.uenmax);
 		    else
 			u.uen = (u.uenmax += d(5,4));
 		    flags.botl = 1;
@@ -2067,7 +2068,7 @@ struct obj	*sobj;
 							SCROLL_CLASS, EXPL_NOXIOUS);
 	break;
 		}
-		long rturns = sobj->blessed ? 500L : sobj->cursed ? 5L : 250L;
+		long rturns = sobj->blessed ? 5000L : sobj->cursed ? 5L : 250L;
 		if( !(HFire_resistance) ) {
 			You(Hallucination ? "be chillin'." :
 			    "feel a momentary chill.");

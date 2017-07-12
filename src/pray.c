@@ -158,6 +158,7 @@ in_trouble()
 	 * major troubles
 	 */
 	if(Stoned) return(TROUBLE_STONED);
+	if(Golded) return(TROUBLE_STONED);
 	if(Slimed) return(TROUBLE_SLIMED);
 	if(Strangled) return(TROUBLE_STRANGLED);
 	if(u.utrap && u.utraptype == TT_LAVA) return(TROUBLE_LAVA);
@@ -300,6 +301,7 @@ register int trouble;
 	    case TROUBLE_STONED:
 		    You_feel("more limber.");
 		    Stoned = 0;
+		    Golded = 0;
 		    flags.botl = 1;
 		    delayed_killer = 0;
 		    break;
@@ -1226,6 +1228,7 @@ gcrownu()
 				obj = oname(obj, artiname(ART_GREAT_CLAWS_OF_URDLEN));
 				obj->spe = 1;
 				obj->objsize = MZ_SMALL;
+				fix_object(obj);
 				at_your_feet("Clawed gauntlets");
 				dropy(obj);
 				discover_artifact(ART_GREAT_CLAWS_OF_URDLEN);
@@ -1594,8 +1597,8 @@ pleased(g_align)
 			if (Upolyd) u.mh = u.mhmax;
 			ABASE(A_STR) = AMAX(A_STR);
 			if(Race_if(PM_INCANTIFIER)){
-				if (u.uen < u.uenmax*.45) u.uen = u.uenmax*.45;
-				u.uhs = NOT_HUNGRY;
+				if (u.uen < u.uenmax*.45) u.uen += 400;
+				newuhs(TRUE);
 			} else {
 				if (u.uhunger < u.uhungermax*.45) u.uhunger = u.uhungermax*.45;
 				u.uhs = NOT_HUNGRY;
@@ -2537,7 +2540,7 @@ dosacrifice()
 		    exercise(A_WIS, TRUE);
 		    if (!flags.debug && otmp->oartifact) {
 				char llog[BUFSZ+22];
-				Sprintf(llog, "was given \"%s\"", the(artilist[otmp->oartifact].name));
+				Sprintf(llog, "was given %s", the(artilist[otmp->oartifact].name));
 				livelog_write_string(llog);
 		    }
 		    /* make sure we can use this weapon */
@@ -3266,7 +3269,7 @@ aligntyp alignment;
 		switch (rnl(5)) {
 			case 0: /* randomly charge an object */
 			case 1: /* increase weapon bonus */
-				if(uwep && uwep->spe < 7 && (otmp->oclass == WEAPON_CLASS || is_weptool(otmp))){
+				if(uwep && uwep->spe < 7 && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))){
 					uwep->spe++;
 				}
 			case 2: /* randomly identify items in the backpack */

@@ -323,9 +323,14 @@ struct obj {
 #define bimanual(otmp,ptr)	(otmp && (otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == TOOL_CLASS) && \
 			 ptr != &mons[PM_THRONE_ARCHON] && \
-			 (objects[otmp->otyp].oc_bimanual ? \
+			 (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit ?\
+			  (objects[otmp->otyp].oc_bimanual ? \
+				((ptr)->msize - otmp->objsize - 2 <  2):\
+				((ptr)->msize - otmp->objsize - 2 < -1)) :\
+			  (objects[otmp->otyp].oc_bimanual ? \
 				((ptr)->msize - otmp->objsize <  2):\
 				((ptr)->msize - otmp->objsize < -1))\
+			 )\
 			)
 #define is_lightsaber(otmp) ((otmp)->otyp == LIGHTSABER || \
 							 (otmp)->otyp == BEAMSWORD || \
@@ -407,7 +412,7 @@ struct obj {
 				|| (otmp)->otyp == ORCISH_CLOAK\
 				|| (otmp)->otyp == URUK_HAI_SHIELD\
 				|| (otmp)->otyp == ORCISH_SHIELD)
-#define is_dwarvish_armor(otmp)	((otmp)->otyp == DWARVISH_IRON_HELM\
+#define is_dwarvish_armor(otmp)	((otmp)->otyp == DWARVISH_HELM\
 				|| (otmp)->otyp == DWARVISH_MITHRIL_COAT\
 				|| (otmp)->otyp == DWARVISH_CLOAK\
 				|| (otmp)->otyp == DWARVISH_ROUNDSHIELD)
@@ -477,6 +482,7 @@ struct obj {
 #define Have_same_dragon_armor_and_shield	(Is_dragon_shield(uarms) && ((Is_dragon_scales(uarm) && Dragon_scales_to_pm(uarm) == Dragon_shield_to_pm(uarms)) ||\
 													 (Is_dragon_mail(uarm) && Dragon_mail_to_pm(uarm) == Dragon_shield_to_pm(uarms)) ||\
 												(uarm->oartifact == ART_DRAGON_PLATE && (\
+													Dragon_shield_to_pm(uarms) == &mons[PM_SILVER_DRAGON] ||\
 													Dragon_shield_to_pm(uarms) == &mons[PM_BLACK_DRAGON] ||\
 													Dragon_shield_to_pm(uarms) == &mons[PM_BLUE_DRAGON] ||\
 													Dragon_shield_to_pm(uarms) == &mons[PM_RED_DRAGON] ||\
@@ -485,6 +491,7 @@ struct obj {
 												)) ||\
 												(uarm->oartifact == ART_CHROMATIC_DRAGON_SCALES && (\
 													Dragon_shield_to_pm(uarms) == &mons[PM_BLACK_DRAGON] ||\
+													Dragon_shield_to_pm(uarms) == &mons[PM_RED_DRAGON] ||\
 													Dragon_shield_to_pm(uarms) == &mons[PM_BLUE_DRAGON] ||\
 													Dragon_shield_to_pm(uarms) == &mons[PM_WHITE_DRAGON] ||\
 													Dragon_shield_to_pm(uarms) == &mons[PM_YELLOW_DRAGON] ||\
@@ -529,7 +536,7 @@ struct obj {
 /* age field of this is relative age rather than absolute */
 #define age_is_relative(otmp)	((otmp)->otyp == BRASS_LANTERN\
 				|| (otmp)->otyp == OIL_LAMP\
-				|| (otmp)->otyp == DWARVISH_IRON_HELM\
+				|| (otmp)->otyp == DWARVISH_HELM\
 				|| (otmp)->otyp == LIGHTSABER\
 				|| (otmp)->otyp == BEAMSWORD\
 				|| (otmp)->otyp == DOUBLE_LIGHTSABER\
@@ -541,7 +548,7 @@ struct obj {
 /* object can be ignited */
 #define ignitable(otmp)	((otmp)->otyp == BRASS_LANTERN\
 				|| (otmp)->otyp == OIL_LAMP\
- 				|| (otmp)->otyp == DWARVISH_IRON_HELM\
+ 				|| (otmp)->otyp == DWARVISH_HELM\
  				|| (otmp)->otyp == GNOMISH_POINTY_HAT\
 				|| (otmp)->otyp == CANDELABRUM_OF_INVOCATION\
 				|| (otmp)->otyp == TALLOW_CANDLE\

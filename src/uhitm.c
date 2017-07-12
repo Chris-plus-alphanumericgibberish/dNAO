@@ -565,10 +565,12 @@ register struct monst *mtmp;
 	if(unweapon) {
 	    unweapon = FALSE;
 	    if(flags.verbose) {
-		if(uwep)
-		    You("begin bashing monsters with your %s.",
-			aobjnam(uwep, (char *)0));
-		else if (!cantwield(youracedata))
+		if(uwep){
+			if(uwep->oartifact == ART_LIECLEAVER) 
+				You("begin slashing monsters with your %s.", aobjnam(uwep, (char *)0));
+		    else You("begin bashing monsters with your %s.",
+				aobjnam(uwep, (char *)0));
+		} else if (!cantwield(youracedata))
 		    You("begin %sing monsters with your %s %s.",
 			Role_if(PM_MONK) ? "strik" : "bash",
 			uarmg ? "gloved" : "bare",	/* Del Lamb */
@@ -900,12 +902,12 @@ int thrown;
 			}
 			if ((uarmg->obj_material == IRON) &&
 				hates_iron(mdat)){
-					tmp += rnd(mon->m_lev*2);
+					tmp += rnd(mon->m_lev);
 					ironmsg = TRUE;
 			}
 			if ((uarmg->cursed) &&
 				hates_unholy(mdat)){
-					tmp += rnd(20);
+					tmp += rnd(9);
 					unholymsg = TRUE;
 			}
 			if(uarmg->oartifact && 
@@ -956,7 +958,7 @@ int thrown;
 			) barehand_iron_rings++;
 			
 			if ((barehand_iron_rings) && hates_iron(mdat)) {
-			    tmp += d(barehand_iron_rings,mon->m_lev*2);
+			    tmp += d(barehand_iron_rings,mon->m_lev);
 			    ironmsg = TRUE;
 			}
 			
@@ -971,7 +973,7 @@ int thrown;
 			) barehand_unholy_rings++;
 			
 			if ((barehand_unholy_rings) && hates_unholy(mdat)) {
-			    tmp += d(barehand_unholy_rings,20);
+			    tmp += d(barehand_unholy_rings,9);
 			    ironmsg = TRUE;
 			}
 			
@@ -1154,7 +1156,8 @@ int thrown;
 		    if (mdat->mlet == S_SHADE && !(obj->obj_material == SILVER || arti_silvered(obj) || u.sealsActive&SEAL_CHUPOCLOPS))
 				tmp = 0;
 		    else if(obj->oartifact == ART_LIECLEAVER) tmp = 2*(rnd(12) + rnd(10) + obj->spe);
-		    else if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS) tmp = 2*(rnd(bigmonst(mon->data) ? 2 : 5) + obj->spe);
+		    else if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS) tmp = 2*(rnd(bigmonst(mon->data) ? 2 : 4) + obj->spe);
+
 			else tmp = rnd(2);
 			
 		    // if (tmp && obj->oartifact &&
@@ -1177,12 +1180,12 @@ int thrown;
 				silverobj = TRUE;
 		    }
 			if (obj->obj_material == IRON && hates_iron(mdat)) {
-				tmp += rnd(mon->m_lev * 2);	//I think this is the right thing to do here.  I don't think it enters the main iron section
+				tmp += rnd(mon->m_lev);	//I think this is the right thing to do here.  I don't think it enters the main iron section
 				ironmsg = TRUE;
 				ironobj = TRUE;
 			}
 			if (obj->cursed == TRUE && hates_unholy(mdat)) {
-				tmp += rnd(20);	//I think this is the right thing to do here.  I don't think it enters the main unholy section
+				tmp += rnd(9);	//I think this is the right thing to do here.  I don't think it enters the main unholy section
 				unholymsg = TRUE;
 				unholyobj = TRUE;
 			}
@@ -1228,15 +1231,13 @@ int thrown;
 							(Role_if(PM_ANACHRONONAUT) && Race_if(PM_MYRKALFR) && !Upolyd) ||
 							u.sealsActive&SEAL_ANDROMALIUS ||
 							(obj == uwep && uwep->oartifact == ART_SPINESEEKER) ||
-							(obj == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && has_head(mon->data) && !is_unalive(mon->data)) ||
 							(obj == uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_ANDROMALIUS) ||
 							(Role_if(PM_CONVICT) && !Upolyd && obj == uwep && uwep->otyp == SPOON))
 				)) {
 					if((mon->mux != u.ux || mon->muy != u.uy) && distmin(u.ux, u.uy, mon->mx, mon->my) > BOLT_LIM)
 						You("snipe the flat-footed %s!", l_monnam(mon));
 					else if((mon->mux != u.ux || mon->muy != u.uy) && 
-						(obj == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE&& !is_unalive(mon->data) && has_head(mon->data)) &&
-						((Role_if(PM_ROGUE) &&!Upolyd) || (u.sealsActive&SEAL_ANDROMALIUS))
+						(obj == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && !is_unalive(mon->data) && has_head(mon->data))
 					){
 						//Lifehunt scythe triggers sneak attack, but you have to actually HAVE sneak attack
 						You("strike the flat-footed %s!", l_monnam(mon));
@@ -1425,7 +1426,6 @@ int thrown;
 				hittxt = TRUE;
 			}
 			if(obj->oartifact == ART_GLAMDRING && (is_orc(mdat) || is_demon(mdat))){
-				tmp += rnd(20);
 				lightmsg = TRUE;
 			}
 		    if ((obj->obj_material == SILVER || arti_silvered(obj)  || 
@@ -1434,6 +1434,14 @@ int thrown;
 				if(obj->oartifact == ART_SUNSWORD) sunmsg = TRUE;
 				else silvermsg = TRUE;
 				silverobj = TRUE;
+		    }
+		    if (obj->obj_material == IRON && hates_iron(mdat) && !(is_lightsaber(obj) && obj->lamplit)) {
+				ironmsg = TRUE;
+				ironobj = TRUE;
+		    }
+		    if (obj->cursed && hates_unholy(mdat)) {
+				unholymsg = TRUE;
+				unholyobj = TRUE;
 		    }
 #ifdef STEED
 		    if (u.usteed && !thrown && tmp > 0 &&
@@ -1461,7 +1469,7 @@ int thrown;
 			    /* Elves and Samurai do extra damage using
 			     * their bows&arrows; they're highly trained.
 			     */
-					if(u.sealsActive&SEAL_DANTALION) tmp += max(0,(ACURR(A_INT)-10)/2);
+					if(u.sealsActive&SEAL_DANTALION && tp_sensemon(mon)) tmp += max(0,(ACURR(A_INT)-10)/2);
 					
 				    if (Role_if(PM_SAMURAI) &&
 						obj->otyp == YA && uwep->otyp == YUMI)
@@ -1715,20 +1723,28 @@ defaultvalue:
 					 * Things like silver wands can arrive here so
 					 * so we need another silver check.
 					 */
-					if (obj && (obj->obj_material == SILVER || arti_silvered(obj)) && hates_silver(mdat)) {
+					if (obj && (obj->obj_material == SILVER || arti_silvered(obj) || 
+							(thrown && obj->otyp == SHURIKEN && uwep && uwep->oartifact == ART_SILVER_STARLIGHT) )
+								&& hates_silver(mdat)
+					) {
 						tmp += rnd(20);
-						silvermsg = TRUE;
+						if(obj->oartifact == ART_SUNSWORD) sunmsg = TRUE;
+						else silvermsg = TRUE;
 						silverobj = TRUE;
+					}
+					if(obj->oartifact == ART_GLAMDRING && (is_orc(mdat) || is_demon(mdat))){
+						tmp += rnd(20); //I think this is the right thing to do here.  I don't think it enters the main silver section
+						lightmsg = TRUE;
+					}
 					if (obj && obj->obj_material == IRON && hates_iron(mdat)) {
-						tmp += rnd(mon->m_lev * 2);
+						tmp += rnd(mon->m_lev);
 						ironmsg = TRUE;
 						ironobj = TRUE;
 					}
 					if (obj && obj->cursed == TRUE && hates_unholy(mdat)) {
-						tmp += rnd(20);
+						tmp += rnd(9);
 						unholymsg = TRUE;
 						unholyobj = TRUE;
-					}
 					}
 				}
 			}
@@ -2420,6 +2436,8 @@ struct attack *mattk;
 {
 	struct obj *otmp, *stealoid, **minvent_ptr;
 	long unwornmask;
+	int petrifies = FALSE;
+	char kbuf[BUFSZ];
 
 	if (!mdef->minvent) return;		/* nothing to take */
 
@@ -2466,18 +2484,24 @@ struct attack *mattk;
 		    pline("%s finishes taking off %s suit.",
 			  Monnam(mdef), mhis(mdef));
 	    }
+		
+		if(near_capacity() < calc_capacity(otmp->owt)){
+			You("steal %s %s and drop it to the %s.",
+				  s_suffix(mon_nam(mdef)), xname(otmp), surface(u.ux, u.uy));
+			if(otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) && !uarmg && !Stone_resistance){
+				Sprintf(kbuf, "stolen %s corpse", mons[otmp->corpsenm].mname);
+				petrifies = TRUE;
+			}
+			dropy(otmp);
+		} else {
 	    /* give the object to the character */
-	    otmp = hold_another_object(otmp, "You snatched but dropped %s.",
-				       doname(otmp), "You steal: ");
-	    if (otmp->where != OBJ_INVENT) continue;
-	    if (otmp->otyp == CORPSE &&
-		    touch_petrifies(&mons[otmp->corpsenm]) && !uarmg) {
-		char kbuf[BUFSZ];
-
-		Sprintf(kbuf, "stolen %s corpse", mons[otmp->corpsenm].mname);
-		instapetrify(kbuf);
-		break;		/* stop the theft even if hero survives */
-	    }
+			if(otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) && !uarmg && !Stone_resistance){
+				Sprintf(kbuf, "stolen %s corpse", mons[otmp->corpsenm].mname);
+				petrifies = TRUE;
+			}
+			otmp = hold_another_object(otmp, "You snatched but dropped %s.",
+						   doname(otmp), "You steal: ");
+		}
 	    /* more take-away handling, after theft message */
 	    if (unwornmask & W_WEP) {		/* stole wielded weapon */
 		possibly_unwield(mdef, FALSE);
@@ -2485,6 +2509,10 @@ struct attack *mattk;
 		mselftouch(mdef, (const char *)0, TRUE);
 		if (mdef->mhp <= 0)	/* it's now a statue */
 		    return;		/* can't continue stealing */
+	    }
+	    if (petrifies) {
+			instapetrify(kbuf);
+			break;		/* stop the theft even if hero survives */
 	    }
 
 	    if (!stealoid) break;	/* only taking one item */
@@ -2783,7 +2811,9 @@ register struct attack *mattk;
 				healup(tmp, 0, FALSE, FALSE);
 			}
 		}
-		if (!negated && !rn2(3) && !resists_drli(mdef)) {
+		if (!negated && !rn2(3) && !resists_drli(mdef)
+			&& (youracedata != &mons[PM_VAMPIRE_BAT] || mdef->msleeping)
+		) {
 			int xtmp = d(2,6);
 			if (mdef->mhp < xtmp) xtmp = mdef->mhp;
 			/* Player vampires are smart enough not to feed while
@@ -3115,7 +3145,7 @@ register struct attack *mattk;
 		case AD_SIMURGH:
 			if(hates_iron(mdef->data)){
 				Your("claws of cold iron sear %s.",mon_nam(mdef));
-				tmp+=rnd(mdef->m_lev*2);
+				tmp+=d(2, mdef->m_lev);
 			}
 			pline("Radiant feathers slice through %s.",mon_nam(mdef));
 			switch(rn2(15)){

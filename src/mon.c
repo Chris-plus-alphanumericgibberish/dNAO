@@ -873,7 +873,12 @@ register struct monst *mtmp;
 	if (!is_clinger(mtmp->data)
 	    && !is_swimmer(mtmp->data) && !amphibious(mtmp->data)) {
 	    if (cansee(mtmp->mx,mtmp->my)) {
-		    pline("%s drowns.", Monnam(mtmp));
+		    if(mtmp->data == &mons[PM_ACID_PARAELEMENTAL]){
+				int tx = mtmp->mx, ty = mtmp->my, dn = mtmp->m_lev;
+				pline("%s explodes.", Monnam(mtmp));
+				mondead(mtmp);
+				explode(tx, ty, 7, d(dn, 10), MON_EXPLODE, EXPL_NOXIOUS);
+			} else pline("%s drowns.", Monnam(mtmp));
 	    }
 	    if (u.ustuck && u.uswallow && u.ustuck == mtmp) {
 	    /* This can happen after a purple worm plucks you off a
@@ -955,6 +960,287 @@ mcalcdistress()
 	    if (minliquid(mtmp)) continue;
 	}
 
+	if(mtmp->data == &mons[PM_HEZROU]){
+		flags.cth_attk=TRUE;//state machine stuff.
+		create_gas_cloud(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, rnd(3), rnd(3)+1);
+		flags.cth_attk=FALSE;
+	}
+	
+	if(mtmp->data == &mons[PM_ANCIENT_OF_ICE] || (mtmp->data == &mons[PM_BAALPHEGOR] && mtmp->mhp < mtmp->mhpmax/2)){
+		struct monst *tmpm;
+		int targets = 0, damage = 0;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
+				&& tmpm->mpeaceful != mtmp->mpeaceful
+				&& tmpm->mtame != mtmp->mtame
+				&& !resists_fire(tmpm)
+				&& !DEADMONSTER(tmpm)
+			) targets++;
+		}
+		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
+			&& !mtmp->mpeaceful
+			&& !mtmp->mtame
+			&& !Fire_resistance
+		) targets++;
+		targets = rnd(targets);
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
+				&& tmpm->mpeaceful != mtmp->mpeaceful
+				&& tmpm->mtame != mtmp->mtame
+				&& !resists_fire(tmpm)
+				&& !DEADMONSTER(tmpm)
+			) targets--;
+			if(!targets) break;
+		}
+		if(tmpm){
+			if(canseemon(tmpm) && canseemon(mtmp)){
+				pline("Heat shimmer dances in the air above %s.", mon_nam(tmpm));
+				pline("%s is covered in frost!", Monnam(tmpm));
+				if(resists_fire(tmpm) && has_head(tmpm->data)) pline("%s looks very surprised!", Monnam(tmpm));
+				pline("The shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
+			} else if(canseemon(tmpm)){
+				pline("Heat shimmer dances in the air above .", mon_nam(tmpm));
+				pline("%s is covered in frost!", Monnam(tmpm));
+				if(resists_fire(tmpm) && has_head(tmpm->data)) pline("%s looks very surprised!", Monnam(tmpm));
+			} else if(canseemon(mtmp)){
+				pline("Heat shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
+			}
+			damage = d((mtmp->m_lev)/3, 8);
+			tmpm->mhp -= damage;
+			if(tmpm->mhp < 1){
+				if (canspotmon(tmpm))
+					pline("%s %s!", Monnam(tmpm),
+					nonliving(tmpm->data)
+					? "is destroyed" : "dies");
+				tmpm->mhp = 0;
+				grow_up(mtmp,tmpm);
+				mondied(tmpm);
+			}
+			mtmp->mhp += damage;
+			if(mtmp->mhp > mtmp->mhpmax){
+				mtmp->mhp = mtmp->mhpmax;
+				grow_up(mtmp,mtmp);
+			}
+			mtmp->mspec_used = 0;
+			mtmp->mcan = 0;
+		} else if(targets > 0
+			&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
+			&& !mtmp->mpeaceful
+			&& !mtmp->mtame
+			&& !Fire_resistance
+		){
+			pline("Heat shimmer dances in the air above you.");
+			pline("You are covered in frost!");
+			if(canseemon(mtmp)){
+				pline("The shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
+			}
+			damage = d((mtmp->m_lev)/3, 8);
+			losehp(damage, "heat drain", KILLED_BY);
+			mtmp->mhp += damage;
+			if(mtmp->mhp > mtmp->mhpmax){
+				mtmp->mhp = mtmp->mhpmax;
+				grow_up(mtmp,mtmp);
+			}
+			mtmp->mspec_used = 0;
+			mtmp->mcan = 0;
+			mtmp->mux = u.ux;
+			mtmp->muy = u.uy;
+		}
+		if(damage){
+			struct attack mattk;
+			mattk.aatyp = AT_BREA;
+			mattk.adtyp = AD_COLD;
+			mattk.damn = 8;
+			mattk.damd = 8;
+			
+			if(mon_can_see_you(mtmp)){
+				mtmp->mux = u.ux;
+				mtmp->muy = u.uy;
+			}
+			
+			if(!mtmp->mtame && lined_up(mtmp)){
+				flags.drgn_brth = 1;
+				breamu(mtmp, &mattk);
+				flags.drgn_brth = 0;
+			} else {
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM
+						&& tmpm->mpeaceful != mtmp->mpeaceful
+						&& tmpm->mtame != mtmp->mtame
+						&& !resists_cold(tmpm)
+						&& mlined_up(mtmp, tmpm, TRUE)
+						&& !DEADMONSTER(tmpm)
+					){
+						flags.drgn_brth = 1;
+						breamm(mtmp, tmpm, &mattk);
+						flags.drgn_brth = 0;
+						break;
+					};
+				}
+			}
+		}
+	}
+	
+	if(mtmp->data == &mons[PM_ANCIENT_OF_DEATH] || (mtmp->data == &mons[PM_BAALPHEGOR] && mtmp->mhp < mtmp->mhpmax/2)){
+		struct monst *tmpm;
+		int targets = 0, damage = 0;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
+				&& tmpm->mpeaceful != mtmp->mpeaceful
+				&& tmpm->mtame != mtmp->mtame
+				&& !nonliving(tmpm->data)
+				&& !DEADMONSTER(tmpm)
+			) targets++;
+		}
+		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
+			&& !mtmp->mpeaceful
+			&& !mtmp->mtame
+			&& !nonliving(youracedata)
+		) targets++;
+		targets = rnd(targets);
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
+				&& tmpm->mpeaceful != mtmp->mpeaceful
+				&& tmpm->mtame != mtmp->mtame
+				&& !nonliving(tmpm->data)
+				&& !DEADMONSTER(tmpm)
+			) targets--;
+			if(!targets) break;
+		}
+		if(tmpm){
+			if(canseemon(tmpm) && canseemon(mtmp)){
+				pline("Motes of light dance in the air above %s.", mon_nam(tmpm));
+				pline("%s suddenly seems weaker!", Monnam(tmpm));
+				if(resists_drain(tmpm) && has_head(tmpm->data)) pline("%s looks very surprised!", Monnam(tmpm));
+				pline("The motes are drawn into the %s of %s.", mtmp->data == &mons[PM_BAALPHEGOR] ? "open mouth" : "ghostly hood", mon_nam(mtmp));
+			} else if(canseemon(tmpm)){
+				pline("Motes of light dance in the air above %s.", mon_nam(tmpm));
+				pline("%s suddenly seems weaker!", Monnam(tmpm));
+				if(resists_drain(tmpm) && has_head(tmpm->data)) pline("%s looks very surprised!", Monnam(tmpm));
+			} else if(canseemon(mtmp)){
+				pline("Motes of light are drawn into the %s of %s.", mtmp->data == &mons[PM_BAALPHEGOR] ? "open mouth" : "ghostly hood", mon_nam(mtmp));
+			}
+			damage = d((mtmp->m_lev)/3, 4);
+			tmpm->mhp -= damage;
+			if(tmpm->mhp < 1){
+				if (canspotmon(tmpm))
+					pline("%s %s!", Monnam(tmpm),
+					nonliving(tmpm->data)
+					? "is destroyed" : "dies");
+				tmpm->mhp = 0;
+				grow_up(mtmp,tmpm);
+				mondied(tmpm);
+			}
+			mtmp->mhp += damage;
+			if(mtmp->mhp > mtmp->mhpmax){
+				mtmp->mhp = mtmp->mhpmax;
+				grow_up(mtmp,mtmp);
+			}
+			mtmp->mspec_used = 0;
+			mtmp->mcan = 0;
+		} else if(targets > 0
+			&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
+			&& !mtmp->mpeaceful
+			&& !mtmp->mtame
+			&& !nonliving(youracedata)
+		){
+			pline("Motes of light dance in the air above you.");
+			pline("You suddenly feel weaker!");
+			if(canseemon(mtmp)){
+				pline("The motes are drawn into the %s of %s.", mtmp->data == &mons[PM_BAALPHEGOR] ? "open mouth" : "ghostly hood", mon_nam(mtmp));
+			}
+			damage = d((mtmp->m_lev)/3, 4);
+			losehp(damage, "life-force theft", KILLED_BY);
+			mtmp->mhp += damage;
+			if(mtmp->mhp > mtmp->mhpmax){
+				mtmp->mhp = mtmp->mhpmax;
+				grow_up(mtmp,mtmp);
+			}
+			mtmp->mspec_used = 0;
+			mtmp->mcan = 0;
+			mtmp->mux = u.ux;
+			mtmp->muy = u.uy;
+		}
+		if(damage){
+			if(!mtmp->mtame && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= BOLT_LIM
+				&& !(nonliving(youracedata) || is_demon(youracedata))
+				&& !(ward_at(u.ux,u.uy) == CIRCLE_OF_ACHERON)
+				&& !(u.sealsActive&SEAL_OSE || resists_death(&youmonst))
+			){
+				if(canseemon(mtmp)){
+					pline("%s breathes out dark vapors.", Monnam(mtmp));
+				}
+				if(Hallucination){
+					You("have an out of body experience.");
+					losehp(8, "a bad trip", KILLED_BY); //you still take damage
+				} else if (Antimagic){
+					shieldeff(u.ux, u.uy);
+					Your("%s flutters!", body_part(HEART));
+					losehp(d(4,4), "the ancient breath of death", KILLED_BY); //you still take damage
+				} else if(Upolyd ? (u.mh >= 100) : (u.uhp >= 100)){
+					Your("%s stops!  When it finally beats again, it is weak and thready.", body_part(HEART));
+					losehp(d(8,8), "the ancient breath of death", KILLED_BY); //Same as death's touch attack, sans special effects
+				} else {
+					killer_format = KILLED_BY;
+					killer = "the ancient breath of death";
+					done(DIED);
+				}
+			} else {
+				struct monst *targ = 0;
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM
+						&& tmpm->mpeaceful != mtmp->mpeaceful
+						&& tmpm->mtame != mtmp->mtame
+						&& !(nonliving(tmpm->data) || is_demon(tmpm->data))
+						&& !(ward_at(tmpm->mx,tmpm->my) == CIRCLE_OF_ACHERON)
+						&& !(resists_death(tmpm))
+						&& !DEADMONSTER(tmpm)
+					){
+						if(!targ || (distmin(tmpm->mx, tmpm->my, mtmp->mx, mtmp->my) < distmin(targ->mx, targ->my, mtmp->mx, mtmp->my))){
+							targ = tmpm;
+						}
+					}
+				}
+				if(targ){
+					if(canseemon(mtmp)){
+						pline("%s breathes out dark vapors.", Monnam(mtmp));
+					}
+					if(resists_magm(targ)){
+						targ->mhp -= 8;
+						if(targ->mhp < 1){
+							if (canspotmon(targ))
+								pline("%s %s!", Monnam(targ),
+								nonliving(targ->data)
+								? "is destroyed" : "dies");
+							targ->mhp = 0;
+							grow_up(mtmp,targ);
+							mondied(targ);
+						}
+					} else if(targ->mhp >= 100){
+						targ->mhp -= d(8,8);
+						if(targ->mhp < 1){
+							if (canspotmon(targ))
+								pline("%s %s!", Monnam(targ),
+								nonliving(targ->data)
+								? "is destroyed" : "dies");
+							targ->mhp = 0;
+							grow_up(mtmp,targ);
+							mondied(targ);
+						}
+					} else {
+						if (canspotmon(targ))
+							pline("%s %s!", Monnam(targ),
+							nonliving(targ->data)
+							? "is destroyed" : "dies");
+						targ->mhp = 0;
+						grow_up(mtmp,targ);
+						mondied(targ);
+					}
+				}
+			}
+		}
+	}
+	
 	/* regenerate hit points */
 	mon_regen(mtmp, FALSE);
 	
@@ -2152,7 +2438,7 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 						mwep->oartifact == ART_LIECLEAVER))))
 			) {
 			    if (!(flag & ALLOW_TRAPS)) {
-				if (mon->mtrapseen & (1L << (ttmp->ttyp - 1)))
+				if (mon->mtrapseen & (1L << (ttmp->ttyp - 1)) || mon_resistance(mon, SEARCHING))
 				    continue;
 			    }
 			    info[cnt] |= ALLOW_TRAPS;
@@ -2188,6 +2474,8 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	md = mdef->data;
 	
 	// if(magr->mpeaceful && mdef->mpeaceful && (magr->mtame || mdef->mtame)) return 0L;
+	
+	if(magr->mtame && mdef->mtame) return 0L;
 	
 	if(!mon_can_see_mon(magr, mdef)) return 0L;
 	
@@ -3482,6 +3770,126 @@ register struct monst *mdef;
 	}
 }
 
+/* drop a gold statue or rock and remove monster */
+void
+mongolded(mdef)
+register struct monst *mdef;
+{
+	struct obj *otmp, *obj, *oldminvent;
+	xchar x = mdef->mx, y = mdef->my;
+	boolean wasinside = FALSE;
+
+	/* we have to make the statue before calling mondead, to be able to
+	 * put inventory in it, and we have to check for lifesaving before
+	 * making the statue....
+	 */
+	lifesaved_monster(mdef);
+	if (mdef->mhp > 0) return;
+
+	mdef->mtrapped = 0;	/* (see m_detach) */
+
+	if ((int)mdef->data->msize > MZ_TINY ||
+		    !rn2(2 + ((int) (mdef->data->geno & G_FREQ) > 2))) {
+		oldminvent = 0;
+		/* some objects may end up outside the statue */
+		while ((obj = mdef->minvent) != 0) {
+		    obj_extract_self(obj);
+		    if (obj->owornmask)
+			update_mon_intrinsics(mdef, obj, FALSE, TRUE);
+		    obj_no_longer_held(obj);
+		    if (obj->owornmask & W_WEP)
+			setmnotwielded(mdef,obj);
+		    obj->owornmask = 0L;
+		    if (is_boulder(obj) ||
+#if 0				/* monsters don't carry statues */
+     (obj->otyp == STATUE && mons[obj->corpsenm].msize >= mdef->data->msize) ||
+#endif
+				obj_resists(obj, 0, 0)) {
+			if (flooreffects(obj, x, y, "fall")) continue;
+			place_object(obj, x, y);
+		    } else {
+			if (obj->lamplit) end_burn(obj, TRUE);
+			obj->nobj = oldminvent;
+			oldminvent = obj;
+		    }
+		}
+		/* defer statue creation until after inventory removal
+		   so that saved monster traits won't retain any stale
+		   item-conferred attributes */
+		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
+				  mdef->data, x, y, FALSE);
+		set_material(otmp, GOLD);
+		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		while ((obj = oldminvent) != 0) {
+		    oldminvent = obj->nobj;
+			set_material(obj, GOLD);
+		    (void) add_to_container(otmp, obj);
+		}
+#ifndef GOLDOBJ
+		if (mdef->mgold) {
+			struct obj *au;
+			au = mksobj(GOLD_PIECE, FALSE, FALSE);
+			au->quan = mdef->mgold;
+			au->owt = weight(au);
+			(void) add_to_container(otmp, au);
+			mdef->mgold = 0;
+		}
+#endif
+		/* Archeologists should not break unique statues */
+		if (mdef->data->geno & G_UNIQ)
+			otmp->spe = 1;
+		otmp->owt = weight(otmp);
+	} else {
+		oldminvent = 0;
+		/* some objects may end up outside the statue */
+		while ((obj = mdef->minvent) != 0) {
+		    obj_extract_self(obj);
+		    if (obj->owornmask)
+			update_mon_intrinsics(mdef, obj, FALSE, TRUE);
+		    obj_no_longer_held(obj);
+		    if (obj->owornmask & W_WEP)
+			setmnotwielded(mdef,obj);
+		    obj->owornmask = 0L;
+		    if (is_boulder(obj) ||
+#if 0				/* monsters don't carry statues */
+     (obj->otyp == STATUE && mons[obj->corpsenm].msize >= mdef->data->msize) ||
+#endif
+				obj_resists(obj, 0, 0)) {
+			if (flooreffects(obj, x, y, "fall")) continue;
+			place_object(obj, x, y);
+		    } else {
+			if (obj->lamplit) end_burn(obj, TRUE);
+			obj->nobj = oldminvent;
+			oldminvent = obj;
+		    }
+		}
+		while ((obj = oldminvent) != 0) {
+		    oldminvent = obj->nobj;
+			set_material(obj, GOLD);
+			place_object(obj, x, y);
+			stackobj(obj);
+		}
+		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
+		set_material(otmp, GOLD);
+		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+	}
+	
+	stackobj(otmp);
+	/* mondead() already does this, but we must do it before the newsym */
+	if(glyph_is_invisible(levl[x][y].glyph))
+	    unmap_object(x, y);
+	if (cansee(x, y)) newsym(x,y);
+	/* We don't currently trap the hero in the statue in this case but we could */
+	if (u.uswallow && u.ustuck == mdef) wasinside = TRUE;
+	mondead(mdef);
+	if (wasinside) {
+		if (is_animal(mdef->data))
+			You("%s through an opening in the new %s.",
+				locomotion(youracedata, "jump"),
+				xname(otmp));
+	}
+}
+
 /* another monster has killed the monster mdef */
 void
 monkilled(mdef, fltxt, how)
@@ -3593,6 +4001,7 @@ xkilled(mtmp, dest)
 
 	/* dispose of monster and make cadaver */
 	if(stoned) monstone(mtmp);
+	else if(golded) mongolded(mtmp);
 	else mondead(mtmp);
 
 	if (mtmp->mhp > 0) { /* monster lifesaved */
@@ -3602,6 +4011,7 @@ xkilled(mtmp, dest)
 		 * appears).
 		 */
 		stoned = FALSE;
+		golded = FALSE;
 		if (!cansee(x,y)) pline("Maybe not...");
 		return;
 	}
@@ -3614,6 +4024,11 @@ xkilled(mtmp, dest)
 	}
 	if (stoned) {
 		stoned = FALSE;
+		goto cleanup;
+	}
+
+	if (golded) {
+		golded = FALSE;
 		goto cleanup;
 	}
 
@@ -3636,7 +4051,7 @@ xkilled(mtmp, dest)
 		if (!rn2(6) && !(mvitals[mndx].mvflags & G_NOCORPSE)
 					&& mdat->mlet != S_KETER
 					&& mdat->mlet != S_PLANT
-					&& !(mtmp->mvanishes)
+					&& !(mtmp->mvanishes >= 0)
 					&& !(mtmp->mclone)
 					&& !(is_auton(mtmp->data))
 		) {
@@ -3755,6 +4170,25 @@ mon_to_stone(mtmp)
 }
 
 void
+mon_to_gold(mtmp)
+    register struct monst *mtmp;
+{
+    if(mtmp->data->mlet == S_GOLEM) {
+	/* it's a golem, and not a stone golem */
+	if(canseemon(mtmp))
+	    pline("%s turns shiny...", Monnam(mtmp));
+	if (newcham(mtmp, &mons[PM_GOLD_GOLEM], FALSE, FALSE)) {
+	    if(canseemon(mtmp))
+		pline("Now it's %s.", an(mtmp->data->mname));
+	} else {
+	    if(canseemon(mtmp))
+		pline("... and returns to normal.");
+	}
+    } else
+	impossible("Can't polygold %s!", a_monnam(mtmp));
+}
+
+void
 mnexto(mtmp)	/* Make monster mtmp next to you (if possible) */
 	struct monst *mtmp;
 {
@@ -3770,6 +4204,46 @@ mnexto(mtmp)	/* Make monster mtmp next to you (if possible) */
 #endif
 
 	if(!enexto(&mm, u.ux, u.uy, mtmp->data)) return;
+	rloc_to(mtmp, mm.x, mm.y);
+	return;
+}
+
+void
+monline(mtmp)	/* Make monster mtmp next to you (if possible) */
+	struct monst *mtmp;
+{
+	coord mm;
+
+#ifdef STEED
+	if (mtmp == u.usteed) {
+		/* Keep your steed in sync with you instead */
+		mtmp->mx = u.ux;
+		mtmp->my = u.uy;
+		return;
+	}
+#endif
+
+	if(!eonline(&mm, u.ux, u.uy, mtmp->data)) return;
+	rloc_to(mtmp, mm.x, mm.y);
+	return;
+}
+
+void
+mofflin(mtmp)	/* Make monster mtmp next to you (if possible) */
+	struct monst *mtmp;
+{
+	coord mm;
+
+#ifdef STEED
+	if (mtmp == u.usteed) {
+		/* Keep your steed in sync with you instead */
+		mtmp->mx = u.ux;
+		mtmp->my = u.uy;
+		return;
+	}
+#endif
+
+	if(!eofflin(&mm, u.ux, u.uy, mtmp->data)) return;
 	rloc_to(mtmp, mm.x, mm.y);
 	return;
 }
@@ -3991,7 +4465,7 @@ register struct monst *mtmp;
 		register int i;
 		for(i = 0; i < NATTK; i++)
 			 if(mtmp->data->mattk[i].aatyp == AT_GAZE) {
-				 if(!mtmp->mtame) (void) gazemu(mtmp, &mtmp->data->mattk[i]);
+				 (void) gazemu(mtmp, &mtmp->data->mattk[i]);
 				 break;
 			 }
     } else if(mtmp->data == &mons[PM_GREAT_CTHULHU]) {

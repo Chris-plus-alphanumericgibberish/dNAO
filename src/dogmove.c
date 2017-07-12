@@ -119,6 +119,8 @@ boolean check_if_better;
 		   (!check_if_better ||
 		    would_prefer_hwep(mtmp, otmp) ||
 		    would_prefer_rwep(mtmp, otmp))) ||
+	    /* useful masks */
+	     (otmp->otyp == MASK && mtmp->data == &mons[PM_LILLEND]) ||
 	    /* better armor */
 	     (otmp->oclass == ARMOR_CLASS &&
 	      (!check_if_better || is_better_armor(mtmp, otmp))) ||
@@ -1117,7 +1119,7 @@ register int after;	/* this is extra fast monster movement */
 			    /* 1/40 chance of stepping on it anyway, in case
 			     * it has to pass one to follow the player...
 			     */
-			    if (trap->tseen && rn2(40)) continue;
+			    if ((trap->tseen || mon_resistance(mtmp, SEARCHING)) && rn2(40)) continue;
 		    }
 		}
 

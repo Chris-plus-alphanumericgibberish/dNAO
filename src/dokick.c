@@ -67,12 +67,12 @@ register boolean clumsy;
 	}
 	if (uarmf && (uarmf->obj_material == IRON)
 		&& hates_iron(mdat)) {
-			dmg += rnd(mon->m_lev*2);
+			dmg += rnd(mon->m_lev);
 			ironmsg = TRUE; ironobj = TRUE;
 	}
 	if (uarmf && uarmf->cursed
 		&& hates_unholy(mdat)) {
-			dmg += rnd(20);
+			dmg += rnd(9);
 			unholymsg = TRUE; unholyobj = TRUE;
 	}
 	if (mon->data->mlet == S_SHADE && !blessed_foot_damage && !silverobj && !ironobj && !unholyobj) {
@@ -439,7 +439,7 @@ struct obj *obj;
 	    const char *result = (char *)0;
 
 	    otmp2 = otmp->nobj;
-	    if (otmp->obj_material == GLASS &&
+	    if ((otmp->obj_material == GLASS || otmp->obj_material == OBSIDIAN_MT) &&
 		otmp->oclass != GEM_CLASS && !obj_resists(otmp, 33, 100)) {
 		result = "shatter";
 	    } else if (otmp->otyp == EGG && !rn2(3)) {
@@ -1693,7 +1693,7 @@ boolean shop_floor_obj;
 	if (breaktest(otmp)) {
 	    const char *result;
 
-	    if (otmp->obj_material == GLASS
+	    if ((otmp->obj_material == GLASS || otmp->obj_material == OBSIDIAN_MT)
 #ifdef TOURIST
 		|| otmp->otyp == EXPENSIVE_CAMERA
 #endif

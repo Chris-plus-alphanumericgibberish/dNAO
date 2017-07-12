@@ -610,6 +610,8 @@ const char *name;
 		else if(obj->oartifact == ART_SODE_NO_SHIRAYUKI) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_TOBIUME) obj->obj_material = METAL;
 		else if(obj->oartifact == ART_LANCE_OF_LONGINUS) obj->obj_material = SILVER;
+		else if(obj->oartifact == ART_LIFEHUNT_SCYTHE) obj->obj_material = DRAGON_HIDE;
+		else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) obj->obj_material = METAL;
 		else if(obj->oartifact == ART_BLADE_SINGER_S_SPEAR) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_BLADE_DANCER_S_DAGGER) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_QUICKSILVER) obj->obj_material = SILVER;
@@ -617,6 +619,7 @@ const char *name;
 		else if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_SILVER_STARLIGHT) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_CLAWS_OF_THE_REVENANCER) obj->obj_material = SILVER;
+		else if(obj->oartifact == ART_WEBWEAVER_S_CROOK) obj->obj_material = BONE;
 		else if(obj->oartifact == ART_RUINOUS_DESCENT_OF_STARS) obj->obj_material = METAL;
 		else if(obj->oartifact == ART_SICKLE_MOON) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_FIRE_OF_HEAVEN) obj->obj_material = SILVER;
@@ -625,6 +628,14 @@ const char *name;
 		else if(obj->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO) obj->obj_material = METAL;
 		else if(obj->oartifact == ART_SCOURGE_OF_LOLTH) obj->obj_material = SILVER;
 		else if(obj->oartifact >= ART_SWORD_OF_ERATHAOL && obj->oartifact <= ART_HAMMER_OF_BARQUIEL) obj->obj_material = SILVER;
+		else if(obj->oartifact == ART_SOL_VALTIVA) obj->obj_material = OBSIDIAN_MT;
+		else if(is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR); //keep current/default material
+		else obj->obj_material = objects[obj->otyp].oc_material;
+		
+		if(is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR); //keep current/default body type
+		else obj->bodytypeflag = MB_HUMANOID;
+		
+		fix_object(obj);
 		
 	    /* can't dual-wield with artifact as secondary weapon */
 	    if (obj == uswapwep) untwoweapon();

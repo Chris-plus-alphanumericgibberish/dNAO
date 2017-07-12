@@ -115,6 +115,7 @@ boolean restore;
 			    otmp->otyp = BELL;
 				otmp->obj_material = COPPER;
 			    curse(otmp);
+				fix_object(otmp);
 			} else if (otmp->otyp == SPE_BOOK_OF_THE_DEAD) {
 			    otmp->otyp = SPE_BLANK_PAPER;
 			    curse(otmp);
@@ -169,6 +170,7 @@ struct obj *cont;
 		obj_no_longer_held(otmp);
 
 		otmp->owornmask = 0;
+		if(u.ugrave_arise == (NON_PM - 3)) set_material(otmp, GOLD);
 		/* lamps don't go out when dropped */
 		if ((cont || artifact_light(otmp)) && obj_is_burning(otmp))
 		    end_burn(otmp, TRUE);	/* smother in statue */
@@ -299,6 +301,16 @@ struct obj *corpse;
 		otmp = mk_named_object(STATUE, &mons[u.umonnum],
 				       u.ux, u.uy, plname);
 
+		drop_upon_death((struct monst *)0, otmp);
+		if (!otmp) return;	/* couldn't make statue */
+		mtmp = (struct monst *)0;
+	} else if (u.ugrave_arise == (NON_PM - 3)) {
+		struct obj *otmp;
+
+		/* embed your possessions in your statue */
+		otmp = mk_named_object(STATUE, &mons[u.umonnum],
+				       u.ux, u.uy, plname);
+		set_material(otmp, GOLD);
 		drop_upon_death((struct monst *)0, otmp);
 		if (!otmp) return;	/* couldn't make statue */
 		mtmp = (struct monst *)0;

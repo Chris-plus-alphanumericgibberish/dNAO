@@ -1249,7 +1249,7 @@ int spellnum;
 	    if (Hallucination) {
 			You("have an out of body experience.");
 	    } else if(Upolyd ? (u.mh >= 100) : (u.uhp >= 100)){
-			Your("%s stops!  When it finally beats again, it is weak and thready", body_part(HEART));
+			Your("%s stops!  When it finally beats again, it is weak and thready.", body_part(HEART));
 			if(Upolyd) u.mh -= d(8,8);	//Same as death's touch attack, sans special effects
 			else u.uhp -= d(8,8);		//Not reduced by AC
 		} else {
@@ -1302,7 +1302,7 @@ int spellnum;
 			Glib += rn1(20, 9);
 			if(is_poisonable(uswapwep)) uswapwep->opoisoned = OPOISON_FILTH;
 	   }
-       if(haseyes(youracedata) && !Blindfolded && mtmp && monsndx(mtmp->data) != PM_DEMOGORGON && rn2(3)) {
+       if(haseyes(youracedata) && !Blindfolded && !(mtmp && monsndx(mtmp->data) == PM_DEMOGORGON) && rn2(3)) {
            old = u.ucreamed;
            u.ucreamed += rn1(20, 9);
            Your("%s is coated in %sgunk!", body_part(FACE),
@@ -1310,14 +1310,14 @@ int spellnum;
            make_blinded(Blinded + (long)u.ucreamed - old, FALSE);
        }
        You("smell putrid! You gag and vomit.");
-       /* same effect as "This water gives you bad breath!" */
-       for(mtmp2 = fmon; mtmp2; mtmp2 = mtmp2->nmon) {
-           if(!DEADMONSTER(mtmp2) && (mtmp2 != mtmp))
-           monflee(mtmp2, 0, FALSE, FALSE);
-		}
 		vomit();
-	   if(!Sick) make_sick((long)rn1(ACURR(A_CON), 20), /* Don't make the PC more sick */
-					(char *)0, TRUE, SICK_NONVOMITABLE);
+		/* same effect as "This water gives you bad breath!" */
+		for(mtmp2 = fmon; mtmp2; mtmp2 = mtmp2->nmon) {
+			if(!DEADMONSTER(mtmp2) && (mtmp2 != mtmp))
+			monflee(mtmp2, 0, FALSE, FALSE);
+		}
+		if(!Sick) make_sick((long)rn1(ACURR(A_CON), 20), /* Don't make the PC more sick */
+								(char *)0, TRUE, SICK_NONVOMITABLE);
 		dmg = rnd(Half_physical_damage ? 5 : 10);
 		stop_occupation();
 	break;
@@ -2139,7 +2139,7 @@ drainhp:
                      !See_invisible ? "disappears" : "becomes transparent");
            mon_set_minvis(mtmp);
           if (malediction && !canspotmon(mtmp))
-               You("hear %s fiendish laughter all around you.", s_suffix(mon_nam(mtmp)));
+               You_hear("%s fiendish laughter all around you.", s_suffix(mon_nam(mtmp)));
        } else
            impossible("no reason for monster to cast disappear spell?");
 	   dmg = 0;
@@ -2607,7 +2607,7 @@ int spellnum;
        /* drain energy when you have less than 5 */
        if(spellnum == DRAIN_ENERGY && u.uen < 5) return TRUE;
        /* don't cast acid rain if the player is petrifying */
-       if (spellnum == ACID_RAIN && Stoned) return TRUE;
+       if (spellnum == ACID_RAIN && (Stoned || Golded)) return TRUE;
        /* don't cast drain life if not in range */
        if (spellnum == DRAIN_LIFE &&  distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 2) return TRUE;
        /* don't destroy weapon if not wielding anything */

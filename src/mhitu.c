@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "artifact.h"
+#include "monflag.h"
 #include "edog.h"
 
 STATIC_VAR NEARDATA struct obj *otmp;
@@ -549,10 +550,10 @@ mattacku(mtmp)
 /*	Work out the armor class differential	*/
 	tmp = AC_VALUE(u.uac+u.uspellprot) + 10 - u.uspellprot;		/* tmp ~= 0 - 20 */
 	tchtmp = AC_VALUE(base_uac()+u.uspellprot) + 10 - u.uspellprot;
-	tmp += mtmp->m_lev/3;
+	tmp += 2*mtmp->m_lev/3;
 	if(is_prince(mtmp->data)) tmp += 5;
 	if(is_lord(mtmp->data)) tmp += 2;
-	tchtmp += mtmp->m_lev/3;
+	tchtmp += 2*mtmp->m_lev/3;
 	if(is_prince(mtmp->data)) tchtmp += 5;
 	if(is_lord(mtmp->data)) tchtmp += 2;
 	tmp += u.ustdy;
@@ -800,7 +801,7 @@ mattacku(mtmp)
 			 * Weeping angels gaze during movemon().
 			 * Don't gaze more than once per round.
 			 */
-			if (mdat == &mons[PM_MEDUSA] || is_weeping(mdat) || u.ux != mtmp->mux || u.uy != mtmp->muy)
+			if (mdat == &mons[PM_MEDUSA] || mdat == &mons[PM_GREAT_CTHULHU] || is_weeping(mdat) || u.ux != mtmp->mux || u.uy != mtmp->muy)
 				break;
 			sum[i] = gazemu(mtmp, mattk);
 			if(mdat == &mons[PM_DEMOGORGON] && sum[i]){
@@ -879,9 +880,13 @@ mattacku(mtmp)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 		case AT_BREA:
 //			if( mdat == &mons[PM_UNMASKED_GOD_EMPEROR] ) mtmp->mspec_used = 0;
-			if(is_true_dragon(mdat)) flags.drgn_brth = 1;
+			if(is_true_dragon(mdat) ||
+				(is_half_dragon(mdat) && mtmp->m_lev >= 14)
+			) flags.drgn_brth = 1;
+			if(mdat == &mons[PM_MAMMON]) flags.mamn_brth = 1;
 			if(range2) sum[i] = breamu(mtmp, mattk);
 			flags.drgn_brth = 0;
+			flags.mamn_brth = 0;
 			/* Note: breamu takes care of displacement */
 //			if( mdat == &mons[PM_UNMASKED_GOD_EMPEROR] ) mtmp->mspec_used = 0;
 			break;
@@ -1332,10 +1337,10 @@ struct monst *mon;
 		if(armpro < cpro) armpro = cpro;
 	}
 	armor = (mon == &youmonst) ? uarmh : which_armor(mon, W_ARMH);
-	if(mon == &youmonst && !uarmc && 
-		uwep && uwep->oartifact==ART_TENSA_ZANGETSU) armpro = max(armpro, 2); //magic cancelation for tensa zangetsu
 	if (armor && armpro < objects[armor->otyp].a_can)
 	    armpro = objects[armor->otyp].a_can;
+	if(mon == &youmonst && !uarmc && 
+		uwep && uwep->oartifact==ART_TENSA_ZANGETSU) armpro = max(armpro, 2); //magic cancelation for tensa zangetsu
 
 	/* armor types for shirt, gloves, shoes, and shield may not currently
 	   provide any magic cancellation but we should be complete */
@@ -1482,10 +1487,10 @@ hitmu(mtmp, mattk)
 				if(uwep && (uwep->obj_material == IRON) && 
 					hates_iron(youracedata) &&
 					!(is_lightsaber(uwep) && uwep->lamplit)
-				) dmg += rnd(u.ulevel*2);
+				) dmg += rnd(u.ulevel);
 				if(uwep && (uwep->cursed) && 
 					hates_unholy(youracedata)
-				) dmg += rnd(20);
+				) dmg += rnd(9);
 			} else {
 				dmg += dmgval(uwep, &youmonst, 0);
 				if(uwep && ((is_lightsaber(uwep) && uwep->lamplit) || arti_shining(uwep))) phasearmor = TRUE;
@@ -1591,10 +1596,10 @@ hitmu(mtmp, mattk)
 				if(otmp && (otmp->obj_material == IRON) && 
 					hates_iron(youracedata) &&
 					!(is_lightsaber(otmp) && otmp->lamplit)
-				) dmg += rnd(u.ulevel*2);
+				) dmg += rnd(u.ulevel);
 				if(otmp && (otmp->cursed) && 
 					hates_unholy(youracedata)
-				) dmg += rnd(20);
+				) dmg += rnd(9);
 			} else {
 				dmg += dmgval(otmp, &youmonst, 0);
 				if(otmp && ((is_lightsaber(otmp) && otmp->lamplit) || arti_shining(otmp))) phasearmor = TRUE;
@@ -2166,6 +2171,7 @@ dopois:
 			/* if vampire biting (and also a pet) */
 			if (mattk->aatyp == AT_BITE &&
 				has_blood(youracedata) && !uclockwork
+				&& (mtmp->data != &mons[PM_VAMPIRE_BAT] || u.usleep)
 			) {
 			   Your("blood is being drained!");
 			   /* Get 1/20th of full corpse value
@@ -2783,6 +2789,7 @@ dopois:
 		switch (rn2(20)) {
 		case 19: case 18: case 17:
 		    if (!Antimagic) {
+			mtmp->mhp = mtmp->mhpmax;
 			killer_format = KILLED_BY_AN;
 			killer = "touch of death";
 			done(DIED);
@@ -2792,6 +2799,7 @@ dopois:
 		default: /* case 16: ... case 5: */
 		    You_feel("your life force draining away...");
 		    permdmg = 1;	/* actual damage done below */
+			mtmp->mhp = min(mtmp->mhp+dmg,mtmp->mhpmax);
 		    break;
 		case 4: case 3: case 2: case 1: case 0:
 		    if (Antimagic) shieldeff(u.ux, u.uy);
@@ -2805,13 +2813,18 @@ dopois:
 		pline("%s reaches out, and you feel fever and chills.",
 			Monnam(mtmp));
 		(void) diseasemu(mdat); /* plus the normal damage */
+		if(!Sick_resistance) mtmp->mhp = min(mtmp->mhp+mtmp->mhpmax/Sick,mtmp->mhpmax);
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////
 	    case AD_FAMN:
 		pline("%s reaches out, and your body shrivels.",
 			Monnam(mtmp));
 		exercise(A_CON, FALSE);
-		if (!is_fainted()) morehungry(rn1(40,40));
+		if (!is_fainted()){
+			int hungr = rn1(40,40);
+			morehungry(hungr);
+			mtmp->mhp = min(mtmp->mhp+mtmp->m_lev*hungr/30,mtmp->mhpmax); //ie, heal by the amount of HP it would heal by resting for that nutr worth of turns
+		}
 		/* plus the normal damage */
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -3727,10 +3740,7 @@ common:
 		break;
 
 	    case AD_HALU:
-		not_affected |= NoLightBlind ||
-			(u.umonnum == PM_BLACK_LIGHT ||
-			 u.umonnum == PM_VIOLET_FUNGUS ||
-			 dmgtype(youracedata, AD_STUN));
+		not_affected |= NoLightBlind || hallucinogenic(youracedata);
 		if (!not_affected) {
 		    boolean chg;
 		    if (!Hallucination)

@@ -395,6 +395,8 @@ E int NDECL(donull);
 E int NDECL(dowipe);
 E void FDECL(set_wounded_legs, (long,int));
 E void NDECL(heal_legs);
+E int NDECL(dowait);
+E int NDECL(docome);
 
 /* ### do_name.c ### */
 
@@ -1003,6 +1005,7 @@ E struct obj *NDECL(getnextgetobj);
 #ifdef SORTLOOT
 E int FDECL(sortloot_cmp, (struct obj *, struct obj *));
 #endif
+E int NDECL(u_healing_penalty);
 
 /* ### ioctl.c ### */
 
@@ -1157,6 +1160,7 @@ E int FDECL(sleep_monst, (struct monst *,int,int));
 E void FDECL(slept_monst, (struct monst *));
 E long FDECL(attk_protection, (int));
 E int FDECL(thrwmm, (struct monst *, struct monst *));
+E int FDECL(gazemm, (struct monst *,struct monst *,struct attack *));
 
 /* ### mhitu.c ### */
 
@@ -1257,6 +1261,7 @@ E void FDECL(replace_object, (struct obj *,struct obj *));
 E void FDECL(bill_dummy_object, (struct obj *));
 E struct obj *FDECL(mksobj, (int,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(bcsign, (struct obj *));
+E void FDECL(set_material, (struct obj *, int));
 E int FDECL(weight, (struct obj *));
 E struct obj *FDECL(mkgold, (long,int,int));
 E struct obj *FDECL(mkcorpstat,
@@ -1354,6 +1359,8 @@ E void FDECL(killed, (struct monst *));
 E void FDECL(xkilled, (struct monst *,int));
 E void FDECL(mon_to_stone, (struct monst*));
 E void FDECL(mnexto, (struct monst *));
+E void FDECL(monline, (struct monst *));
+E void FDECL(mofflin, (struct monst *));
 E boolean FDECL(mnearto, (struct monst *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E void FDECL(poisontell, (int));
 E void FDECL(poisoned, (const char *,int,const char *,int,int));
@@ -1640,8 +1647,23 @@ E int NDECL(find_pearl_ring);
 E int NDECL(find_ivory_ring);
 E int NDECL(find_emerald_ring);
 E int NDECL(find_droven_ring);
-E boolean FDECL(isEngrRing, (SHORT_P));
-E boolean FDECL(isSignetRing, (SHORT_P));
+E boolean FDECL(isEngrRing, (int));
+E boolean FDECL(isSignetRing, (int));
+E int NDECL(find_golden_potion);
+E int NDECL(find_cloth_book);
+E int NDECL(find_leather_book);
+E int NDECL(find_bronze_book);
+E int NDECL(find_silver_book);
+E int NDECL(find_gold_book);
+E int NDECL(find_hexagonal_wand);
+E int NDECL(find_short_wand);
+E int NDECL(find_runed_wand);
+E int NDECL(find_long_wand);
+E int NDECL(find_curved_wand);
+E int NDECL(find_forked_wand);
+E int NDECL(find_spiked_wand);
+E int NDECL(find_jeweled_wand);
+E int FDECL(matWand, (int, int));
 E int NDECL(find_ogloves);
 E int NDECL(find_tgloves);
 E int NDECL(find_pgloves);
@@ -1652,6 +1674,7 @@ E void FDECL(restnames, (int));
 E void FDECL(discover_object, (int,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(undiscover_object, (int));
 E int NDECL(dodiscovered);
+E void FDECL(fix_object, (struct obj *));
 
 /* ### objects.c ### */
 
@@ -2322,6 +2345,8 @@ E void FDECL(place_monster, (struct monst *,int,int));
 
 E boolean FDECL(teleok, (int,int,BOOLEAN_P));
 E boolean FDECL(goodpos, (int,int,struct monst *,unsigned));
+E boolean FDECL(eonline, (coord *,XCHAR_P,XCHAR_P,struct permonst *));
+E boolean FDECL(eofflin, (coord *,XCHAR_P,XCHAR_P,struct permonst *));
 E boolean FDECL(enexto, (coord *,XCHAR_P,XCHAR_P,struct permonst *));
 E boolean FDECL(enexto_core, (coord *,XCHAR_P,XCHAR_P,struct permonst *,unsigned));
 E void FDECL(xpathto, (int,XCHAR_P,XCHAR_P,int (*)(genericptr_t,int,int),void *));

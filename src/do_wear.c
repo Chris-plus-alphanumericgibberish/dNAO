@@ -94,7 +94,7 @@ Boots_on()
     switch(uarmf->otyp) {
 	case LOW_BOOTS:
 	case IRON_SHOES:
-	case BRONZE_BOOTS:
+	case ARMORED_BOOTS:
 	case HIGH_BOOTS:
 	case PLASTEEL_BOOTS:
 	case CRYSTAL_BOOTS:
@@ -180,7 +180,7 @@ Boots_off()
 		break;
 	case LOW_BOOTS:
 	case IRON_SHOES:
-	case BRONZE_BOOTS:
+	case ARMORED_BOOTS:
 	case HIGH_BOOTS:
 	case PLASTEEL_BOOTS:
 	case CRYSTAL_BOOTS:
@@ -340,7 +340,7 @@ Helmet_on()
 	case BRONZE_HELM:
 	case LEATHER_HELM:
 	case HIGH_ELVEN_HELM:
-	case DWARVISH_IRON_HELM:
+	case DWARVISH_HELM:
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
 	case HELM_OF_TELEPATHY:
@@ -416,7 +416,7 @@ Helmet_off()
 	case BRONZE_HELM:
 	case LEATHER_HELM:
 	case HIGH_ELVEN_HELM:
-	case DWARVISH_IRON_HELM:
+	case DWARVISH_HELM:
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
 		if(uarmh->otyp == gcircletsa && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
@@ -468,7 +468,7 @@ Gloves_on()
     switch(uarmg->otyp) {
 	case GLOVES:
 	case HIGH_ELVEN_GAUNTLETS:
-	case IRON_GAUNTLETS:
+	case GAUNTLETS:
 	case BRONZE_GAUNTLETS:
 	case CRYSTAL_GAUNTLETS:
 	case PLASTEEL_GAUNTLETS:
@@ -501,7 +501,7 @@ Gloves_off()
     switch(uarmg->otyp) {
 	case GLOVES:
 	case HIGH_ELVEN_GAUNTLETS:
-	case IRON_GAUNTLETS:
+	case GAUNTLETS:
 	case BRONZE_GAUNTLETS:
 	case CRYSTAL_GAUNTLETS:
 	case PLASTEEL_GAUNTLETS:
@@ -1979,6 +1979,8 @@ find_ac()
 	if(uarm){
 		if(uarm->oartifact == ART_STEEL_SCALES_OF_KURTULMAK) uac -= ARM_BONUS(uarm)*2;
 		else uac -= ARM_BONUS(uarm);
+		
+		if(uarm->otyp == CRYSTAL_PLATE_MAIL) uac -= uarm->spe;
 	}
 	if(uarmc){
 		if(uarmc->oartifact == ART_MANTLE_OF_HEAVEN || 
@@ -1991,7 +1993,8 @@ find_ac()
 	if(uarmh) uac -= ARM_BONUS(uarmh);
 	if(uarmf) uac -= ARM_BONUS(uarmf);
 	if(uarms){
-		uac -= ARM_BONUS(uarms);
+		if(uarms->oartifact == ART_STEEL_SCALES_OF_KURTULMAK) uac -= ARM_BONUS(uarms)*2;
+		else uac -= ARM_BONUS(uarms);
 		uac -= (uarms->objsize - youracedata->msize);
 	}
 	if(uarmg) uac -= ARM_BONUS(uarmg);
@@ -2078,7 +2081,7 @@ find_ac()
 		uac -= (u.ulevel+2)/3;
 	} else if(Race_if(PM_HALF_DRAGON)) uac -= (u.ulevel)/3;
 	if(u.specialSealsActive&SEAL_COSMOS) uac -= spiritDsize();
-	if(u.sealsActive&SEAL_ECHIDNA) uac -= (ACURR(A_CON)-10)/2;
+	if(u.sealsActive&SEAL_ECHIDNA) uac -= max((ACURR(A_CON)-10)/2, 0);
 	if(u.specialSealsActive&SEAL_DAHLVER_NAR && !Upolyd) uac -=  min(u.ulevel/2,(u.uhpmax - u.uhp)/10);
 	else if(u.specialSealsActive&SEAL_DAHLVER_NAR && Upolyd) uac -=  min(u.ulevel/2,(u.mhmax - u.mh)/10);
 	if(u.specialSealsActive&SEAL_UNKNOWN_GOD && uwep && uwep->oartifact == ART_PEN_OF_THE_VOID) uac -= 2*uwep->spe;
