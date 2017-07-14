@@ -4247,8 +4247,8 @@ init_bind_list(void)
 #ifdef SHELL
 	bind_key('!',    "shell" );
 #endif
-	bind_key('.',    "wait" );
-	bind_key(' ',    "wait" );
+	bind_key('.',    "rest" );
+	bind_key(' ',    "rest" );
 	bind_key(',',    "pickup" );
 	bind_key(':',    "look" );
 	bind_key(';',    "glance" );
