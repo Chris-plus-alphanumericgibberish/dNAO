@@ -419,7 +419,6 @@ unsigned *ospecial;
 		}
 		if (color == NO_COLOR) cmap_color(offset);
 		} else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
-			if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
 			if ((offset == BOULDER || offset == MASSIVE_STONE_CRATE) && iflags.bouldersym) ch = iflags.bouldersym;
 			else ch = get_objsym(offset);
 #ifdef ROGUE_COLOR
@@ -450,7 +449,6 @@ unsigned *ospecial;
 	    mon_color(offset);
 	    special |= MG_RIDDEN;
     } else if ((offset = (glyph - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */
-	if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
 	ch = get_objsym(CORPSE);
 #ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color)
@@ -514,6 +512,7 @@ unsigned *ospecial;
 #endif
 	}
     }
+	if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
 
 #ifdef TEXTCOLOR
     /* Turn off color if no color defined, or rogue level w/o PC graphics. */
