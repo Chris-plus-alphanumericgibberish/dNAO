@@ -35,7 +35,8 @@ STATIC_DCL boolean FDECL(getspell, (int *));
 STATIC_DCL boolean FDECL(getspirit, (int *));
 STATIC_DCL boolean FDECL(spiritLets, (char *));
 STATIC_DCL int FDECL(dospiritmenu, (const char *, int *));
-STATIC_DCL boolean FDECL(dospellmenu, (const char *,int,int *));
+STATIC_DCL boolean FDECL(dospellmenu, (const char *,int,int *, boolean));
+STATIC_DCL void FDECL(describe_spell, (int));
 STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
 STATIC_DCL int NDECL(throwgaze);
@@ -762,7 +763,7 @@ getspell(spell_no)
 		}
 	}
 	return dospellmenu("Choose which spell to cast",
-				SPELLMENU_CAST, spell_no);
+				SPELLMENU_CAST, spell_no, FALSE);
 }
 /*
  * Return TRUE if a spell was picked, with the spell index in the return
@@ -3842,10 +3843,10 @@ dovspell()
 	    You("don't know any spells right now.");
 	else {
 	    while (dospellmenu("Currently known spells",
-			       SPELLMENU_VIEW, &splnum)) {
+			       SPELLMENU_VIEW, &splnum, FALSE)) {
 		Sprintf(qbuf, "Reordering spells; swap '%c' with",
 			spellet(splnum));
-		if (!dospellmenu(qbuf, splnum, &othnum)) break;
+		if (!dospellmenu(qbuf, splnum, &othnum, FALSE)) break;
 
 		spl_tmp = spl_book[splnum];
 		spl_book[splnum] = spl_book[othnum];
@@ -3933,10 +3934,11 @@ int *power_no;
 }
 
 STATIC_OVL boolean
-dospellmenu(prompt, splaction, spell_no)
+dospellmenu(prompt, splaction, spell_no, describe)
 const char *prompt;
 int splaction;	/* SPELLMENU_CAST, SPELLMENU_VIEW, or spl_book[] index */
 int *spell_no;
+boolean describe;
 {
 	winid tmpwin;
 	int i, n, how;
@@ -3977,13 +3979,36 @@ int *spell_no;
 			 spellet(i), 0, ATR_NONE, buf,
 			 (i == splaction) ? MENU_SELECTED : MENU_UNSELECTED);
 	}
-	end_menu(tmpwin, prompt);
+	if (!describe){
+		// Describe a spell
+		Sprintf(buf, "Describe a spell instead");
+		any.a_int = -1;					/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'?', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	else {
+		Sprintf(buf, splaction == SPELLMENU_VIEW ? "Rearrange spells instead" : "Cast a spell instead");
+		any.a_int = -1;					/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'!', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+		
+	end_menu(tmpwin, describe ? "Choose spell to describe:" : prompt);
 
 	how = PICK_ONE;
 	if (splaction == SPELLMENU_VIEW && spellid(1) == NO_SPELL)
 	    how = PICK_NONE;	/* only one spell => nothing to swap with */
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
+	if (n > 0 && selected[0].item.a_int == -1){
+		return dospellmenu(prompt, splaction, spell_no, !describe);
+	}
+	if (n > 0 && describe){
+		describe_spell(selected[0].item.a_int - 1);
+		return dospellmenu(prompt, splaction, spell_no, describe);
+	}
 	if (n > 0) {
 		*spell_no = selected[0].item.a_int - 1;
 		/* menu selection for `PICK_ONE' does not
@@ -4003,6 +4028,311 @@ int *spell_no;
 	}
 	return FALSE;
 }
+
+
+STATIC_OVL void
+describe_spell(spellID)
+int spellID;
+{
+	struct obj *pseudo = mksobj(spellid(spellID), FALSE, FALSE);
+	pseudo->blessed = pseudo->cursed = 0;
+
+	winid datawin;
+	char name[20];
+	sprintf(name,  " %s", spellname(spellID));
+	name[1] = name[1] - 32;
+	char stats[30];
+	sprintf(stats, " Level %d %s spell", spellev(spellID), spelltypemnemonic(spell_skilltype(spellid(spellID))));
+	char fail[20];
+	sprintf(fail,  " Fail chance: %d%%", (100 - percent_success(spellID)));
+	char known[20];
+	sprintf(known, " Memory:      %d%%", (spellknow(spellID) * 100 + (KEEN - 1)) / KEEN);
+	
+	char desc1[80] = " ";
+	char desc2[80] = " ";
+	char desc3[80] = " ";
+	char desc4[80] = " ";
+
+	switch (pseudo->otyp){
+	case SPE_LIGHTNING_BOLT:
+		strcat(desc1, "Creates a directed bolt of lightning that can bounce off walls.");
+		strcat(desc2, "The flash is blindingly bright, and the shock can damage wands.");
+		strcat(desc3, "At Skilled or better, can be cast as an AoE smiting attack.");
+		strcat(desc4, "Deals no damage to shock-resistant creatures.");
+		break;
+	case SPE_CONE_OF_COLD:
+		strcat(desc1, "Creates a directed cone of cold that can bounce off walls.");
+		strcat(desc2, "The chill can freeze potions, shattering them.");
+		strcat(desc3, "At Skilled or better, can be cast as an AoE smiting attack.");
+		strcat(desc4, "Deals no damage to cold-resistant creatures.");
+		break;
+	case SPE_FIREBALL:
+		strcat(desc1, "Launches a directed fireball that explodes on hitting something.");
+		strcat(desc2, "The fire can boil potions and burn other flammable items.");
+		strcat(desc3, "At Skilled or better, can be cast as an AoE smiting attack.");
+		strcat(desc4, "Deals no damage to fire-resistant creatures.");
+		break;
+	case SPE_ACID_BLAST:
+		strcat(desc1, "Launches a directed blast of acid that explodes on hitting something.");
+		strcat(desc2, "The acid can boil potions and wet other items.");
+		strcat(desc3, "At Skilled or better, can be cast as an AoE smiting attack.");
+		strcat(desc4, "Deals no damage to acid-resistant creatures.");
+		break;
+	case SPE_HASTE_SELF:
+		strcat(desc1, "You temporarily move very quickly.");
+		strcat(desc2, "Casting while already very fast increase the duration of your haste.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_FORCE_BOLT:
+		strcat(desc1, "Creates a directed ray of physical force.");
+		strcat(desc2, "It can shatter boulders, doors, drawbridges, iron bars, and more.");
+		strcat(desc3, "Deals no damage to magic-resistant creatures.");
+		strcat(desc4, "");
+		break;
+	case SPE_SLEEP:
+		strcat(desc1, "Creates a directed beam of magic that bounces off walls.");
+		strcat(desc2, "Creatures hit by the beam fall asleep.");
+		strcat(desc3, "Has no effect on sleep-resistant creatures.");
+		strcat(desc4, "");
+		break;
+	case SPE_MAGIC_MISSILE:
+		strcat(desc1, "Creates a directed beam of magic missiles that bounces off walls.");
+		strcat(desc2, "Deals no damage to magic-resistant creatures.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_KNOCK:
+		strcat(desc1, "Creates a directed ray of unlocking magic.");
+		strcat(desc2, "Containers and doors hit by the ray unlock.");
+		strcat(desc3, "Secret doors are uncovered and drawbridges are lowered.");
+		strcat(desc4, "Iron balls can be unchained from you by casting downwards.");
+		break;
+	case SPE_SLOW_MONSTER:
+		strcat(desc1, "Creates a directed ray of slowing magic.");
+		strcat(desc2, "Creatures affected by it move more slowly.");
+		strcat(desc3, "The strength of the spell is dependent on your skill.");
+		strcat(desc4, "Creatures can roll to resist the effect.");
+		break;
+	case SPE_WIZARD_LOCK:
+		strcat(desc1, "Creates a directed ray of locking magic.");
+		strcat(desc2, "Containers and doors hit by the ray lock.");
+		strcat(desc3, "Doors appear in doorways and drawbridges are raised.");
+		strcat(desc4, "");
+		break;
+	case SPE_DIG:
+		strcat(desc1, "Creates a directed beam of excavating magic.");
+		strcat(desc2, "Solid rock, walls, and trees are removed.");
+		strcat(desc3, "However, in some places, the terrain refuses to be altered.");
+		strcat(desc4, "");
+		break;
+	case SPE_TURN_UNDEAD:
+		strcat(desc1, "Creates a directed ray of necromatic magic.");
+		strcat(desc2, "Corpses hit by the ray revive into living creatures.");
+		strcat(desc3, "Pets revived this way will not always be revived tame.");
+		strcat(desc4, "");
+		break;
+	case SPE_POLYMORPH:
+		strcat(desc1, "Creates a directed ray of polymorphing magic.");
+		strcat(desc2, "Creatures affected by the ray polymorph into different creatures.");
+		strcat(desc3, "Items hit by the ray polymorph into similar items, or evaporate.");
+		strcat(desc4, "Creatures can roll to resist the effect. Magic resistance provides immunity.");
+		break;
+	case SPE_TELEPORT_AWAY:
+		strcat(desc1, "Creates a directed ray of teleportation magic.");
+		strcat(desc2, "Creatures and items hit by the ray are teleported away.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_CANCELLATION:
+		strcat(desc1, "Creates a directed ray of negating magic.");
+		strcat(desc2, "Creatures affected by the ray are cancelled, losing most special abilites.");
+		strcat(desc3, "Items hit by the ray are disenchanted, made uncursed, and made mundane.");
+		strcat(desc4, "Creatures can roll to resist the effect.");
+		break;
+	case SPE_FINGER_OF_DEATH:
+		strcat(desc1, "Creates a directed beam of death magic that bounces off walls.");
+		strcat(desc2, "Creatures hit by the beam are killed outright.");
+		strcat(desc3, "Has no effect on undead, demons, or magic-resistant creatures.");
+		strcat(desc4, "");
+		break;
+	case SPE_POISON_SPRAY:
+		strcat(desc1, "Creates a directed spray of posion.");
+		strcat(desc2, "Creatures hit are killed instantly.");
+		strcat(desc3, "Has no effect on poison-resistant creatures.");
+		strcat(desc4, "");
+		break;
+	case SPE_LIGHT:
+		strcat(desc1, "Creates a lit field around you.");
+		strcat(desc2, "");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_DETECT_UNSEEN:
+		strcat(desc1, "Detects unseen things in an area around you.");
+		strcat(desc2, "The location of monsters are shown.");
+		strcat(desc3, "Traps and secret doors become visible.");
+		strcat(desc4, "");
+		break;
+	case SPE_HEALING:
+		strcat(desc1, "Creates a directed ray of healing magic.");
+		strcat(desc2, "Creatures hit by the ray are healed for a small amount.");
+		strcat(desc3, "Blinded monsters hit by the ray can see again.");
+		strcat(desc4, "");
+		break;
+	case SPE_EXTRA_HEALING:
+		strcat(desc1, "Creates a directed ray of healing magic.");
+		strcat(desc2, "Creatures hit by the ray are healed for a moderate amount.");
+		strcat(desc3, "Blinded creatures hit by the ray can see again.");
+		strcat(desc4, "");
+		break;
+	case SPE_DRAIN_LIFE:
+		strcat(desc1, "Creates a directed ray of draining magic.");
+		strcat(desc2, "Creatures affected by the ray lose a level and max health.");
+		strcat(desc3, "Items affected by the ray lose one point of enchantment.");
+		strcat(desc4, "Has no effect on undead, demons, or other drain-resistant creatures.");
+		break;
+	case SPE_STONE_TO_FLESH:
+		strcat(desc1, "Creates a directed ray of magic that turns stone into meat.");
+		strcat(desc2, "Boulders, rocks, and stone items turn into meaty equivalents.");
+		strcat(desc3, "Stone golems turn into flesh golems.");
+		strcat(desc4, "Cast at oneself, it counteracts the effects of delayed petrification.");
+		break;
+	case SPE_REMOVE_CURSE:
+		strcat(desc1, "Cleanses curses from items in your inventory.");
+		strcat(desc2, "At Unskilled or Basic, it only affects loadstones and wielded or worn items.");
+		strcat(desc3, "At Skilled or better, it affects your entire inventory.");
+		strcat(desc4, "");
+		break;
+	case SPE_CONFUSE_MONSTER:
+		strcat(desc1, "Makes your next melee attack confuse the monster you hit.");
+		strcat(desc2, "Casting multiple times increases the number of remaining hits.");
+		strcat(desc3, "At Skilled, one cast grants several confusing hits.");
+		strcat(desc4, "Creatures can roll to resist the effect.");
+		break;
+	case SPE_DETECT_FOOD:
+		strcat(desc1, "Detects all food items on the level.");
+		strcat(desc2, "Has no nutrition cost to cast.");
+		strcat(desc3, "At Skilled or better, you will be warned of the first harmful food you eat.");
+		strcat(desc4, "");
+		break;
+	case SPE_CAUSE_FEAR:
+		strcat(desc1, "Causes all enemies in line-of-sight to flee.");
+		strcat(desc2, "Creatures can roll to resist the effect.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_CHARM_MONSTER:
+		strcat(desc1, "Attempts to charm an adjacent creature.");
+		strcat(desc2, "Untamable creatures become peaceful.");
+		strcat(desc3, "Creatures can roll to resist the effect.");
+		strcat(desc4, "");
+		break;
+	case SPE_MAGIC_MAPPING:
+		strcat(desc1, "Maps the current level.");
+		strcat(desc2, "However, some levels are unmappable.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_CREATE_MONSTER:
+		strcat(desc1, "Creates a monster next to you.");
+		strcat(desc2, "It creates monsters with normal generation.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_IDENTIFY:
+		strcat(desc1, "Identifes some (to all) of your inventory.");
+		strcat(desc2, "");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_DETECT_TREASURE:
+		strcat(desc1, "Detects all items on the level.");
+		strcat(desc2, "At Skilled or better, the detected objects are marked on your map.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_DETECT_MONSTERS:
+		strcat(desc1, "Detects all monsters on the level.");
+		strcat(desc2, "At Skilled or better, you continue detecting monsters for a time.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_LEVITATION:
+		strcat(desc1, "You start levitating for a time.");
+		strcat(desc2, "At Skilled or better, you can descend at will.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_RESTORE_ABILITY:
+		strcat(desc1, "Restores your drained attribute scores.");
+		strcat(desc2, "Attributes lost from abuse cannot be restored.");
+		strcat(desc3, "At Skilled or better, it restores all lost attributes at once.");
+		strcat(desc4, "");
+		break;
+	case SPE_INVISIBILITY:
+		strcat(desc1, "You turn invisible for a time.");
+		strcat(desc2, "");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_CURE_BLINDNESS:
+		strcat(desc1, "Cures blindness.");
+		strcat(desc2, "");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_CURE_SICKNESS:
+		strcat(desc1, "Cures food poisioning, illness, and sliming.");
+		strcat(desc2, "");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_CREATE_FAMILIAR:
+		strcat(desc1, "Creates a tame creature.");
+		strcat(desc2, "1/3 of the time, you summon a tame domestic pet.");
+		strcat(desc3, "2/3 of the time, you summon a tame random monster.");
+		strcat(desc4, "");
+		break;
+	case SPE_CLAIRVOYANCE:
+		strcat(desc1, "You map out an area of the dungeon around you.");
+		strcat(desc2, "At Skilled or better, you can target anywhere on the level.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	case SPE_PROTECTION:
+		strcat(desc1, "Creates a golden haze around you, temporarily improving your AC.");
+		strcat(desc2, "The effect decays over time and can be restored by recasting.");
+		strcat(desc3, "The strength and duration of the effect is improved with casting skill.");
+		strcat(desc4, "");
+		break;
+	case SPE_JUMPING:
+		strcat(desc1, "You make a magically-boosted jump.");
+		strcat(desc2, "The range that you can jump is improved with casting skill.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
+	default:
+		impossible("Spell %d?", pseudo->otyp);
+	}
+	datawin = create_nhwindow(NHW_TEXT);
+	putstr(datawin, 0, "");
+	putstr(datawin, 0, name);
+	putstr(datawin, 0, "");
+	putstr(datawin, 0, stats);
+	putstr(datawin, 0, "");
+	putstr(datawin, 0, fail);
+	putstr(datawin, 0, known);
+	putstr(datawin, 0, "");
+	if (desc1[3] != 0) putstr(datawin, 0, desc1);
+	if (desc2[3] != 0) putstr(datawin, 0, desc2);
+	if (desc3[3] != 0) putstr(datawin, 0, desc3);
+	if (desc4[3] != 0) putstr(datawin, 0, desc4);
+	display_nhwindow(datawin, FALSE);
+	destroy_nhwindow(datawin);
+	return;
+}
+
 
 #ifdef DUMP_LOG
 void 
