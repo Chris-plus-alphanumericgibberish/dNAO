@@ -52,7 +52,7 @@ STATIC_DCL boolean FDECL(figurine_location_checks,
 STATIC_DCL boolean NDECL(uhave_graystone);
 STATIC_DCL void FDECL(add_class, (char *, CHAR_P));
 STATIC_DCL int FDECL(do_carve_obj, (struct obj *));
-STATIC_PTR int NDECL(pick_rune);
+STATIC_PTR int FDECL(pick_rune, (BOOLEAN_P));
 STATIC_DCL void FDECL(describe_rune, (int));
 STATIC_PTR char NDECL(pick_carvee);
 
@@ -4071,7 +4071,7 @@ struct obj *obj;
 
 int
 pick_rune(describe)
-boolean describe
+boolean describe;
 {
 	winid tmpwin;
 	int n, how;
