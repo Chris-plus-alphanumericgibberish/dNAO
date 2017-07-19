@@ -3862,7 +3862,7 @@ int floorID;
 	putstr(datawin, 0, " Secondary effects:");
 	putstr(datawin, 0, secondary);
 	if (secondary2[0] != 0)
-		putstr(datawin, 0, secondary2)
+		putstr(datawin, 0, secondary2);
 	putstr(datawin, 0, "");
 	display_nhwindow(datawin, FALSE);
 	destroy_nhwindow(datawin);
