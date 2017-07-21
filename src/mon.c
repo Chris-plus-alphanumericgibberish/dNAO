@@ -1014,7 +1014,7 @@ mcalcdistress()
 				if(resists_fire(tmpm) && has_head(tmpm->data)) pline("%s looks very surprised!", Monnam(tmpm));
 				pline("The shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
 			} else if(canseemon(tmpm)){
-				pline("Heat shimmer dances in the air above .", mon_nam(tmpm));
+				pline("Heat shimmer dances in the air above %s.", mon_nam(tmpm));
 				pline("%s is covered in frost!", Monnam(tmpm));
 				if(resists_fire(tmpm) && has_head(tmpm->data)) pline("%s looks very surprised!", Monnam(tmpm));
 			} else if(canseemon(mtmp)){
@@ -3259,7 +3259,7 @@ boolean was_swallowed;			/* digestion */
 			} else if(mdat->mattk[i].adtyp == AD_MAND){
 				struct monst *mtmp, *mtmp2;
 				if(mon->mcan){
-					buf[BUFSZ];
+					char buf[BUFSZ];
 					Sprintf(buf, "%s croaks out a horse shriek.", Monnam(mon)); //Monnam and mon_nam share a buffer and can't be used on the same line.
 					pline("%s  It seems %s has a sore throat!", buf, mon_nam(mon));
 					return FALSE;
