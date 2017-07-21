@@ -2616,6 +2616,7 @@ tty_print_glyph(window, x, y, glyph)
 
     /* must be after color check; term_end_color may turn off inverse too */
     if (((special & MG_PET) && iflags.hilite_pet) ||
+		(special & MG_ZOMBIE) ||
 	((special & MG_DETECT))) {
 		if(iflags.use_inverse){
 			term_start_attr(ATR_INVERSE);
