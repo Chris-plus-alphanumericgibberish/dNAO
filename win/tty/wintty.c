@@ -2578,7 +2578,7 @@ tty_print_glyph(window, x, y, glyph)
 {
     glyph_t ch;
     boolean reverse_on = FALSE;
-    int	    color;
+    int	    color, bgcolor=NO_COLOR;
     unsigned special;
     
 #ifdef CLIPPING
@@ -2615,29 +2615,39 @@ tty_print_glyph(window, x, y, glyph)
 #endif /* TEXTCOLOR */
 
     /* must be after color check; term_end_color may turn off inverse too */
-    if (((special & MG_PET) && iflags.hilite_pet) ||
-		(special & MG_ZOMBIE) ||
-	((special & MG_DETECT))) {
-		if(iflags.use_inverse){
-			term_start_attr(ATR_INVERSE);
-			reverse_on = TRUE;
-		} else if (special & MG_PET) {
+#ifdef TEXTCOLOR
+    if (special) {
+//		if(iflags.use_inverse){
+//			term_start_attr(ATR_INVERSE);
+//			reverse_on = TRUE;
+//		} else if (special & MG_PET) {
+		if ((special & MG_PET) && iflags.hilite_pet) {
 			term_start_bgcolor(CLR_BLUE);
+			bgcolor = CLR_BLUE;
+		} else if ((special & MG_STAIRS) && iflags.hilite_hidden_stairs && (window == NHW_MAP)){
+		    term_start_bgcolor(CLR_RED);
+			bgcolor = CLR_RED;
+		} else if (special & MG_PEACE) {
+			term_start_bgcolor(CLR_BROWN);
+			bgcolor = CLR_GREEN;
 		} else if (special & MG_ZOMBIE) {
 			term_start_bgcolor(CLR_GREEN);
+			bgcolor = CLR_GREEN;
 		} else if (special & MG_DETECT) {
 			term_start_bgcolor(CLR_MAGENTA);
-	    }
-    }
-
-#ifdef TEXTCOLOR
-    else if ((window == NHW_MAP) && !reverse_on && (special & (MG_STAIRS|MG_OBJPILE))) {
-		if ((special & MG_STAIRS) && iflags.hilite_hidden_stairs)
-		    term_start_bgcolor(CLR_RED);
-		else if ((special & MG_OBJPILE) && iflags.hilite_obj_piles)
+			bgcolor = CLR_MAGENTA;
+		} else if ((special & MG_OBJPILE) && iflags.hilite_obj_piles && (window == NHW_MAP)){
 		    term_start_bgcolor(CLR_BLUE);
+			bgcolor = CLR_BLUE;
+		}
     }
 #endif
+
+    if (color == bgcolor) {
+		if(ttyDisplay->color != NO_COLOR)
+		    term_end_color();
+		ttyDisplay->color = NO_COLOR;
+    }
 
 #if defined(USE_TILES) && defined(MSDOS)
     if (iflags.grmode && iflags.tile_view)
