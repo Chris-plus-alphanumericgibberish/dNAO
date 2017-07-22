@@ -2647,6 +2647,7 @@ tty_print_glyph(window, x, y, glyph)
 		if(ttyDisplay->color != NO_COLOR)
 		    term_end_color();
 		ttyDisplay->color = NO_COLOR;
+		term_start_bgcolor(bgcolor);
     }
 
 #if defined(USE_TILES) && defined(MSDOS)
