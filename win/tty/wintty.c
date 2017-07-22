@@ -2646,8 +2646,11 @@ tty_print_glyph(window, x, y, glyph)
     if (color == bgcolor) {
 		if(ttyDisplay->color != NO_COLOR)
 		    term_end_color();
-		ttyDisplay->color = NO_COLOR;
-		term_start_bgcolor(bgcolor);
+		ttyDisplay->color = color;
+		if(color != NO_COLOR)
+			term_start_color(color);
+		term_start_attr(ATR_INVERSE);
+		reverse_on = TRUE;
     }
 
 #if defined(USE_TILES) && defined(MSDOS)
