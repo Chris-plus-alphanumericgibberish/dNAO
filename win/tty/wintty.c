@@ -2629,7 +2629,7 @@ tty_print_glyph(window, x, y, glyph)
 			bgcolor = CLR_RED;
 		} else if ((special & MG_PEACE) && iflags.hilite_peaceful) {
 			term_start_bgcolor(CLR_BROWN);
-			bgcolor = CLR_GREEN;
+			bgcolor = CLR_BROWN;
 		} else if ((special & MG_ZOMBIE)) {
 			if(iflags.hilite_zombies){
 				term_start_bgcolor(CLR_GREEN);
@@ -2648,7 +2648,7 @@ tty_print_glyph(window, x, y, glyph)
     }
 #endif
 
-    if (color == bgcolor) {
+    if (color == bgcolor && color != NO_COLOR) {
 		if(ttyDisplay->color != NO_COLOR)
 		    term_end_color();
 		ttyDisplay->color = color;
