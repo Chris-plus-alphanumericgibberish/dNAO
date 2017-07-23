@@ -2627,13 +2627,18 @@ tty_print_glyph(window, x, y, glyph)
 		} else if ((special & MG_STAIRS) && iflags.hilite_hidden_stairs && (window == NHW_MAP)){
 		    term_start_bgcolor(CLR_RED);
 			bgcolor = CLR_RED;
-		} else if (special & MG_PEACE) {
+		} else if ((special & MG_PEACE) && iflags.hilite_peaceful) {
 			term_start_bgcolor(CLR_BROWN);
 			bgcolor = CLR_GREEN;
-		} else if (special & MG_ZOMBIE) {
-			term_start_bgcolor(CLR_GREEN);
-			bgcolor = CLR_GREEN;
-		} else if (special & MG_DETECT) {
+		} else if ((special & MG_ZOMBIE)) {
+			if(iflags.hilite_zombies){
+				term_start_bgcolor(CLR_GREEN);
+				bgcolor = CLR_GREEN;
+			}
+			if(iflags.zombie_z){
+				ch = 'Z';
+			}
+		} else if ((special & MG_DETECT)) {
 			term_start_bgcolor(CLR_MAGENTA);
 			bgcolor = CLR_MAGENTA;
 		} else if ((special & MG_OBJPILE) && iflags.hilite_obj_piles && (window == NHW_MAP)){

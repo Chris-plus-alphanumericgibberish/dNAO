@@ -122,6 +122,17 @@ static struct Bool_Opt
 	{"guicolor", &iflags.wc2_guicolor, TRUE, SET_IN_GAME},
 	{"help", &flags.help, TRUE, SET_IN_GAME},
 	{"hilite_pet",    &iflags.wc_hilite_pet, TRUE, SET_IN_GAME},	/*WC*/
+#ifdef WIN32CON
+	{"hilite_peaceful",    &iflags.wc_hilite_peaceful, FALSE, SET_IN_GAME},	/*WC*/
+	{"hilite_zombie",    &iflags.wc_hilite_zombie, FALSE, SET_IN_GAME},	/*WC*/
+	{"zombies_as_Z",    &iflags.wc_zombie_z, TRUE, SET_IN_GAME},	/*WC*/
+	{"use_inverse",   &iflags.wc_inverse, TRUE, SET_IN_GAME},		/*WC*/
+#else
+	{"hilite_peaceful",    &iflags.wc_hilite_peaceful, TRUE, SET_IN_GAME},	/*WC*/
+	{"hilite_zombie",    &iflags.wc_hilite_zombie, TRUE, SET_IN_GAME},	/*WC*/
+	{"zombies_as_Z",    &iflags.wc_zombie_z, FALSE, SET_IN_GAME},	/*WC*/
+	{"use_inverse",   &iflags.wc_inverse, FALSE, SET_IN_GAME},		/*WC*/
+#endif
 	{"hilite_hidden_stairs",    &iflags.hilite_hidden_stairs, TRUE, SET_IN_GAME},	/*WC*/
 	{"hilite_obj_piles",    &iflags.hilite_obj_piles, FALSE, SET_IN_GAME},	/*WC*/
 	{"dnethack_start_text",    &iflags.dnethack_start_text, TRUE, DISP_IN_GAME},
