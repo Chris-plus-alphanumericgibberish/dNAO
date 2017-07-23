@@ -500,6 +500,16 @@ unsigned *ospecial;
 #endif
 	    zombie_color(offset);
 	    special |= MG_ZOMBIE;
+    } else if ((offset = (glyph - GLYPH_PEACE_OFF)) >= 0) {	/* a peaceful monster */
+		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		ch = monsyms[(int)mons[offset].mlet];
+#ifdef ROGUE_COLOR
+		if (HAS_ROGUE_IBM_GRAPHICS)
+			color = NO_COLOR;	/* no need to check iflags.use_color */
+		else
+#endif
+	    peace_color(offset);
+	    special |= MG_PEACE;
     } else if ((offset = (glyph - GLYPH_PET_OFF)) >= 0) {	/* a pet */
 		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = monsyms[(int)mons[offset].mlet];
