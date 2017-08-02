@@ -615,7 +615,7 @@ register struct monst *mtmp;
 
     /* presumably nearness and soundok checks have already been made */
     if (!is_silent_mon(mtmp) && mtmp->data->msound <= MS_ANIMAL)
-	(void) domonnoise(mtmp);
+	(void) domonnoise(mtmp, FALSE);
     else if (mtmp->data->msound >= MS_HUMANOID) {
 	if (!canspotmon(mtmp))
 	    map_invisible(mtmp->mx, mtmp->my);
