@@ -4412,7 +4412,7 @@ int  typ, fatal, opoistype;
 		} else {
 			long sick_time;
 
-			sick_time = (long) rn1(20, 20);
+			sick_time = (long)rn1(ACURR(A_CON), 20);
 			/* make sure new ill doesn't result in improvement */
 			if (Sick && (sick_time > Sick))
 				sick_time = (Sick > 2L) ? Sick/2L : 1L;

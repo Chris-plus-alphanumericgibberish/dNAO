@@ -3794,6 +3794,7 @@ use_weapon:
 			}
 		case AT_STNG:
 		case AT_TUCH:
+		case AT_5SQR:
 		case AT_BUTT:
 		case AT_TENT:
 		case AT_WHIP:
@@ -3843,7 +3844,7 @@ wisp_shdw_dhit:
 				    You("sting %s.", mon_nam(mon));
 			    else if (mattk->aatyp == AT_BUTT)
 				    You("butt %s.", mon_nam(mon));
-			    else if (mattk->aatyp == AT_TUCH){
+			    else if (mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR){
 					if(mattk->adtyp == AD_SHDW) You("slash %s with bladed shadows.", mon_nam(mon));
 					else if(mattk->adtyp == AD_STAR)  You("slash %s with a starlight rapier.", mon_nam(mon));
 					else if(mattk->adtyp == AD_BLUD) You("slash %s with a blade of blood.", mon_nam(mon));
@@ -4046,6 +4047,7 @@ use_weapon:
 			}
 	case AT_STNG:
 	case AT_TUCH:
+	case AT_5SQR:
 	case AT_BUTT:
 	case AT_TENT:
 	case AT_WHIP:
@@ -4094,7 +4096,7 @@ wisp_shdw_dhit2:
 				You("sting %s.", mon_nam(mon));
 			else if (mattk->aatyp == AT_BUTT)
 				You("butt %s.", mon_nam(mon));
-			else if (mattk->aatyp == AT_TUCH)
+			else if (mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR)
 				You("touch %s.", mon_nam(mon));
 			else if (mattk->aatyp == AT_TENT)
 				Your("tentacles suck %s.", mon_nam(mon));
@@ -4284,7 +4286,7 @@ uchar aatyp, adtyp;
 		    if (uarmf && !rn2(6))
 			(void)rust_dmg(uarmf, xname(uarmf), 3, TRUE, &youmonst);
 		} else if (aatyp == AT_WEAP || aatyp == AT_CLAW ||
-			   aatyp == AT_MAGC || aatyp == AT_TUCH)
+			   aatyp == AT_MAGC || aatyp == AT_TUCH || aatyp == AT_5SQR)
 		    passive_obj(mon, (struct obj*)0, &(ptr->mattk[i]));
 	    }
 	    exercise(A_STR, FALSE);
@@ -4333,7 +4335,7 @@ uchar aatyp, adtyp;
 		    if (uarmf)
 			(void)rust_dmg(uarmf, xname(uarmf), 1, TRUE, &youmonst);
 		} else if (aatyp == AT_WEAP || aatyp == AT_CLAW ||
-			   aatyp == AT_MAGC || aatyp == AT_TUCH)
+			   aatyp == AT_MAGC || aatyp == AT_TUCH || aatyp == AT_5SQR)
 		    passive_obj(mon, (struct obj*)0, &(ptr->mattk[i]));
 	    }
 	    break;
@@ -4343,7 +4345,7 @@ uchar aatyp, adtyp;
 		    if (uarmf)
 			(void)rust_dmg(uarmf, xname(uarmf), 3, TRUE, &youmonst);
 		} else if (aatyp == AT_WEAP || aatyp == AT_CLAW ||
-			   aatyp == AT_MAGC || aatyp == AT_TUCH)
+			   aatyp == AT_MAGC || aatyp == AT_TUCH || aatyp == AT_5SQR)
 		    passive_obj(mon, (struct obj*)0, &(ptr->mattk[i]));
 	    }
 	    break;
