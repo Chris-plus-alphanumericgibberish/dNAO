@@ -473,7 +473,7 @@ register struct monst *mtmp;
 {
 	const char *ret;
 
-	switch (mtmp->data->msound) {
+	switch (is_silent_mon(mtmp) ? MS_SILENT : mtmp->data->msound) {
 	case MS_MEW:
 	case MS_HISS:
 	    ret = "hiss";
@@ -614,8 +614,8 @@ register struct monst *mtmp;
 	return;
 
     /* presumably nearness and soundok checks have already been made */
-    if (!is_silent(mtmp->data) && mtmp->data->msound <= MS_ANIMAL)
-	(void) domonnoise(mtmp, FALSE);
+    if (!is_silent_mon(mtmp) && mtmp->data->msound <= MS_ANIMAL)
+	(void) domonnoise(mtmp);
     else if (mtmp->data->msound >= MS_HUMANOID) {
 	if (!canspotmon(mtmp))
 	    map_invisible(mtmp->mx, mtmp->my);
@@ -636,7 +636,7 @@ boolean chatting;
 
     /* presumably nearness and sleep checks have already been made */
 	if (!flags.soundok) return(0);
-	if (is_silent(ptr)){
+	if (is_silent_mon(mtmp)){
 		if (chatting) {
 			pline("%s does not respond.", Monnam(mtmp));
 			return 1;
@@ -680,7 +680,7 @@ boolean chatting;
 			}
 		}
 	}
-	switch (ptr->msound) {
+	switch (mtmp->mfaction == SKELIFIED ? MS_BONES : is_silent_mon(mtmp) ? MS_SILENT : ptr->msound) {
 	case MS_ORACLE:
 	    return doconsult(mtmp);
 	case MS_PRIEST: /*Most (all?) things with this will have ispriest set*/
@@ -2038,7 +2038,7 @@ int dz;
 
     /* laughing monsters can't talk */
     if (!mtmp->mnotlaugh) {
-		if (!is_silent(mtmp->data)) pline("%s laughs hysterically", Monnam(mtmp));
+		if (!is_silent_mon(mtmp)) pline("%s laughs hysterically", Monnam(mtmp));
 		return(0);
     }
 	
