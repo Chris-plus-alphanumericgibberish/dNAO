@@ -4894,6 +4894,7 @@ doapply()
 		break;
 	case PICK_AXE:
 	case DWARVISH_MATTOCK:
+	case SEISMIC_HAMMER:
 		res = use_pick_axe(obj);
 		break;
 	case TINNING_KIT:

@@ -653,6 +653,8 @@ boolean ignore_oquan;
 		    Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
 		else if(obj->otyp == VIBROBLADE && obj->known)
 		    Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
+		else if(obj->otyp == SEISMIC_HAMMER && obj->known)
+		    Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
 		break;
 	    case ARMOR_CLASS:
 		if((obj->bodytypeflag&MB_BODYTYPEMASK) != MB_HUMANOID){
