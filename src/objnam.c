@@ -3933,7 +3933,7 @@ typfnd:
 
 	/* set viper heads, probability of getting what you wished for copied loosely from setting weapon/armor spe, but the minimum is 1, not 0. */
 	if(viperheads != -1 && otmp->otyp == VIPERWHIP){
-		otmp->ovar1 = (viperheads > rnd(5) && viperheads > otmp->ovar1 && !wizard) : 1 ? viperheads;
+		otmp->ovar1 = (viperheads > rnd(5) && viperheads > otmp->ovar1 && !wizard) ? 1 : viperheads;
 	}
 	
 	/* set moon phase */
