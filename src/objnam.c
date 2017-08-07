@@ -509,7 +509,7 @@ boolean ignore_oquan;
 				else Strcat(buf, "iron ");
 			break;
 			case METAL:
-				Strcat(buf, "metalic ");
+				Strcat(buf, "metallic ");
 			break;
 			case COPPER:
 				Strcat(buf, "bronze ");
@@ -578,6 +578,8 @@ boolean ignore_oquan;
 				case 3: Strcat(buf, "three-headed "); break;
 				case 4: Strcat(buf, "four-headed "); break;
 				case 5: Strcat(buf, "five-headed "); break;
+				case 6: Strcat(buf, "six-headed "); break;
+				case 7: Strcat(buf, "seven-headed "); break;
 				case 8: Strcat(buf, "eight-headed "); break;
 			}
 		}
@@ -2499,7 +2501,7 @@ boolean from_user;
 	register struct obj *otmp;
 	int cnt, spe, spesgn, typ, very, rechrg;
 	int blessed, uncursed, iscursed, ispoisoned, isgreased, isdrained, stolen;
-	int moonphase = -1, mat = 0;
+	int moonphase = -1, viperheads = -1, mat = 0;
 	int eroded, eroded2, eroded3, erodeproof;
 #ifdef INVISIBLE_OBJECTS
 	int isinvisible;
@@ -2712,10 +2714,20 @@ boolean from_user;
 			unlabeled = 1;
 		} else if(!strncmpi(bp, "poisoned ",l=9)
 #ifdef WIZARD
-			  || (wizard && !strncmpi(bp, "trapped ",l=8))
+			|| (wizard && !strncmpi(bp, "trapped ",l=8))
 #endif
-			  ) {
-			ispoisoned=1;
+			) {
+			ispoisoned=OPOISON_BASIC;
+		} else if(!strncmpi(bp, "filth-crusted ",l=14) || !strncmpi(bp, "filthy ",l=7)) {
+			ispoisoned=OPOISON_FILTH;
+		} else if(!strncmpi(bp, "drug-coated ",l=12) || !strncmpi(bp, "drugged ",l=8)) {
+			ispoisoned=OPOISON_SLEEP;
+		} else if(!strncmpi(bp, "stained ",l=8)) {
+			ispoisoned=OPOISON_BLIND;
+		} else if(!strncmpi(bp, "envenomed ",l=10)) {
+			ispoisoned=OPOISON_PARAL;
+		} else if(!strncmpi(bp, "lethe-rusted ",l=13)) {
+			ispoisoned=OPOISON_AMNES;
 		} else if(!strncmpi(bp, "greased ",l=8)) {
 			isgreased=1;
 		} else if (!strncmpi(bp, "very ", l=5)) {
@@ -2750,6 +2762,22 @@ boolean from_user;
 			isdiluted = 1;
 		} else if(!strncmpi(bp, "empty ", l=6)) {
 			contents = EMPTY;
+		} else if (!strncmpi(bp, "1-headed ", l=9) || !strncmpi(bp, "one-headed ", l=11)) {
+			viperheads = 1;
+		} else if (!strncmpi(bp, "2-headed ", l=9) || !strncmpi(bp, "two-headed ", l=11)) {
+			viperheads = 2;
+		} else if (!strncmpi(bp, "3-headed ", l=9) || !strncmpi(bp, "three-headed ", l=13)) {
+			viperheads = 3;
+		} else if (!strncmpi(bp, "4-headed ", l=9) || !strncmpi(bp, "four-headed ", l=12)) {
+			viperheads = 4;
+		} else if (!strncmpi(bp, "5-headed ", l=9) || !strncmpi(bp, "five-headed ", l=12)) {
+			viperheads = 5;
+		} else if (!strncmpi(bp, "6-headed ", l=9) || !strncmpi(bp, "six-headed ", l=11)) {
+			viperheads = 6;
+		} else if (!strncmpi(bp, "7-headed ", l=9) || !strncmpi(bp, "seven-headed ", l=13)) {
+			viperheads = 7;
+		} else if (!strncmpi(bp, "8-headed ", l=9) || !strncmpi(bp, "eight-headed ", l=13)) {
+			viperheads = 8;
 		} else if (!strncmpi(bp, "eclipse ", l=8)) {
 			moonphase = ECLIPSE_MOON;
 		} else if (!strncmpi(bp, "crescent ", l=9)) {
@@ -2760,19 +2788,57 @@ boolean from_user;
 			moonphase = GIBBOUS_MOON;
 		} else if (!strncmpi(bp, "full ", l=5) && strncmpi(bp, "full healing", 12)) {
 			moonphase = FULL_MOON;
+		} else if (!strncmpi(bp, "wax ", l=4) && strncmpi(bp, "wax candle", 10)
+			) {
+			mat = WAX;
+		} else if ((!strncmpi(bp, "veggy ", l=6) || !strncmpi(bp, "organic ", l=8))
+			) {
+			mat = VEGGY;
+		} else if (!strncmpi(bp, "flesh ", l=6) && strncmpi(bp, "flesh golem", 11)
+			) {
+			mat = FLESH;
+		} else if (!strncmpi(bp, "paper ", l=6) && strncmpi(bp, "paper golem", 11)
+			) {
+			mat = PAPER;
+		} else if (!strncmpi(bp, "cloth ", l=6) && strncmpi(bp, "cloth spellbook", 15)
+			) {
+			mat = CLOTH;
+		} else if (!strncmpi(bp, "leather ", l=8) && strncmpi(bp, "leather spellbook", 17)
+			&& strncmpi(bp, "leather armor", 13) && strncmpi(bp, "leather gloves", 14)
+			&& strncmpi(bp, "leather jacket", 14) && strncmpi(bp, "leather armor", 13)
+			&& strncmpi(bp, "leather helm", 12) && strncmpi(bp, "leather hat", 11)
+			&& strncmpi(bp, "leather cloak", 13) && strncmpi(bp, "leather drum", 12)
+			) {
+			mat = LEATHER;
+		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", 7))
+			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wooden flute", 13)
+			&& strncmpi(bp, "wooden harp", 12) && strncmpi(bp, "wood golem", 11)
+			) {
+			mat = WOOD;
+		} else if ((!strncmpi(bp, "dragonhide ", l=11) || !strncmpi(bp, "dragon-hide ", l=12) || !strncmpi(bp, "dragon hide ", l=12)
+			|| !strncmpi(bp, "dragonscale ", l=12) || !strncmpi(bp, "dragon-scale ", l=13) || !strncmpi(bp, "dragon scale ", l=13)
+			|| !strncmpi(bp, "dragontooth ", l=12) || !strncmpi(bp, "dragon-tooth ", l=13) || !strncmpi(bp, "dragon tooth ", l=13))
+			&& strncmpi(bp, "dragon scale mail", 17)
+			) {
+			mat = DRAGON_HIDE;
 		} else if (!strncmpi(bp, "iron ", l=5) && strncmpi(bp, "iron skull cap", 14)
-			&& strncmpi(bp, "iron shoes", 10)
+			&& strncmpi(bp, "iron shoes", 10) && strncmpi(bp, "iron golem", 10)
 			&& strncmpi(bp, "iron ring", 9) && strncmpi(bp, "iron hook", 9) && strncmpi(bp, "iron wand", 9)
 			&& strncmpi(bp, "iron wand", 9) && strncmpi(bp, "iron bands", 10)
 			&& strncmpi(bp, "Iron Ball of Levitation", 23) && strncmpi(bp, "Iron Spoon of Liberation", 24)
-		) {
+			) {
 			mat = IRON;
+		} else if ((!strncmpi(bp, "metal ", l=6) || !strncmpi(bp, "metallic ", l=9))
+			&& strncmpi(bp, "metal tube", 10) && strncmpi(bp, "metal gauntlets", 15)
+			&& strncmpi(bp, "metal tube", 10)
+			) {
+			mat = METAL;
 		} else if (!strncmpi(bp, "bronze ", l=7)
 			&& strncmpi(bp, "bronze helm", 11) && strncmpi(bp, "bronze plate mail", 17)
 			&& strncmpi(bp, "bronze roundshield", 18) && strncmpi(bp, "bronze gauntlets", 16)
 			&& strncmpi(bp, "bronze ring", 11)
 			&& strncmpi(bp, "bronze spellbook", 16)
-		) {
+			) {
 			mat = COPPER;
 		} else if (!strncmpi(bp, "silver ", l=7)
 			&& strncmpi(bp, "silver arrow", 12) && strncmpi(bp, "silver bullet", 13)
@@ -2782,7 +2848,7 @@ boolean from_user;
 			&& strncmpi(bp, "silver wand", 11) && strncmpi(bp, "silver slingstone", 17)
 			&& strncmpi(bp, "silver stone", 12) && strncmpi(bp, "Silver Key", 10)
 			&& strncmpi(bp, "Silver Starlight", 16)
-		) {
+			) {
 			mat = SILVER;
 		} else if ((!strncmpi(bp, "golden ", l=7) || !strncmpi(bp, "gold ", l=5))
 			&& strncmpi(bp, "golden arrow", 12) && strncmpi(bp, "gold ring", 9)
@@ -2790,15 +2856,35 @@ boolean from_user;
 			&& strncmpi(bp, "golden scroll", 13) && strncmpi(bp, "Gold Scroll of Law", 18)
 			&& strncmpi(bp, "gold wand", 9) && strncmpi(bp, "gold piece", 10)
 			&& strncmpi(bp, "gold coin", 9) && strncmpi(bp, "Golden Sword of Y'ha-Talla", 26)
-		) {
+			&& strncmpi(bp, "gold golem", 10)
+			) {
 			mat = GOLD;
 		} else if (!strncmpi(bp, "platinum ", l=9)
 			&& strncmpi(bp, "platinum wand", 13) && strncmpi(bp, "Platinum Yendorian", 18)
 			&& strncmpi(bp, "Platinum Dragon", 15)
-		) {
+			) {
 			mat = PLATINUM;
 		} else if (!strncmpi(bp, "mithril ", l=8)) {
 			mat = MITHRIL;
+		} else if (!strncmpi(bp, "plastic ", l=8)
+			) {
+			mat = PLASTIC;
+		} else if (!strncmpi(bp, "glass ", l=6)
+			&& strncmpi(bp, "glass shield", 12) && strncmpi(bp, "glass gauntlets", 15) 
+			&& strncmpi(bp, "glass boots", 11) && strncmpi(bp, "glass orb", 9)  
+			&& strncmpi(bp, "glass golem", 11)  
+			) {
+			mat = GLASS;
+		} else if ((!strncmpi(bp, "gemstone ", l=9) || !strncmpi(bp, "gem ", l=4))
+			) {
+			mat = GEMSTONE;
+		} else if (!strncmpi(bp, "stone ", l=6)
+			) {
+			mat = MINERAL;
+		} else if (!strncmpi(bp, "obsidian ", l=9)
+			&& strncmpi(bp, "obsidian stone", 14) && strncmpi(bp, "obsidian gem", 12)
+			) {
+			mat = OBSIDIAN_MT;
 		} else break;
 		bp += l;
 	}
@@ -3681,22 +3767,23 @@ typfnd:
 	}
 	
 	if(otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && (wizard || (otmp->ovar1 && !(otmp->ohaluengr)))){
-		if(heptagram);  /*can't be wished for*/
-		else if(gorgoneion);  /*can't be wished for*/
-		else if(acheron) otmp->ovar1 = CIRCLE_OF_ACHERON;
-		else if(pentagram) otmp->ovar1 = PENTAGRAM; /*not found randomly, but can be wished for*/
-		else if(hexagram); /*can't be wished for*/
-		else if(hamsa) otmp->ovar1 = HAMSA;
-		else if(sign) otmp->ovar1 = ELDER_SIGN;
-		else if(eye) otmp->ovar1 = ELDER_ELEMENTAL_EYE;
-		else if(queen) otmp->ovar1 = SIGN_OF_THE_SCION_QUEEN;
-		else if(cartouche) otmp->ovar1 = CARTOUCHE_OF_THE_CAT_LORD;
-		else if(garuda) otmp->ovar1 = WINGS_OF_GARUDA;
-		else if(toustefna); /*can't be wished for*/
-		else if(dreprun); /*can't be wished for*/
-		else if(veioistafur); /*can't be wished for*/
-		else if(thjofastafur); /*can't be wished for*/
+		if(heptagram && wizard)			otmp->ovar1 = HEPTAGRAM;  /*can't be wished for*/
+		else if(gorgoneion && wizard)   otmp->ovar1 = GORGONEION;/*can't be wished for*/
+		else if(acheron)				otmp->ovar1 = CIRCLE_OF_ACHERON;
+		else if(pentagram)				otmp->ovar1 = PENTAGRAM; /*not found randomly, but can be wished for*/
+		else if(hexagram && wizard) 	otmp->ovar1 = HEXAGRAM;/*can't be wished for*/
+		else if(hamsa)					otmp->ovar1 = HAMSA;
+		else if(sign)					otmp->ovar1 = ELDER_SIGN;
+		else if(eye)					otmp->ovar1 = ELDER_ELEMENTAL_EYE;
+		else if(queen)					otmp->ovar1 = SIGN_OF_THE_SCION_QUEEN;
+		else if(cartouche)				otmp->ovar1 = CARTOUCHE_OF_THE_CAT_LORD;
+		else if(garuda)					otmp->ovar1 = WINGS_OF_GARUDA;
+		else if(toustefna && wizard)	otmp->ovar1 = TOUSTEFNA;/*can't be wished for*/
+		else if(dreprun && wizard)		otmp->ovar1 = DREPRUN;/*can't be wished for*/
+		else if(veioistafur && wizard)	otmp->ovar1 = VEIOISTAFUR;/*can't be wished for*/
+		else if(thjofastafur && wizard)	otmp->ovar1 = THJOFASTAFUR; /*can't be wished for*/
 	}
+
 	
 	if(otmp->otyp == SCR_WARD){
 		/* Can wish for a scroll of any ward, including heptagram. You are spending a wish, after all.*/
@@ -3783,7 +3870,7 @@ typfnd:
 	/* set poisoned */
 	if (ispoisoned) {
 	    if (is_poisonable(otmp))
-		otmp->opoisoned = (Luck >= 0) ? OPOISON_BASIC : 0;
+		otmp->opoisoned = (Luck >= 0) ? ispoisoned : 0;
 	    else if (Is_box(otmp) || typ == TIN)
 		otmp->otrapped = 1;
 	    else if (oclass == FOOD_CLASS)
@@ -3798,9 +3885,34 @@ typfnd:
 		otmp->odiluted = 1;
 
 	/* set material */
-	if(otmp->oclass == WEAPON_CLASS && !is_ammo(otmp) && mat && !otmp->oartifact){
-		otmp->obj_material = mat;
-	}
+	if(mat)
+		if(wizard)
+			otmp->obj_material = mat;
+		else
+			if(otmp->oclass == WEAPON_CLASS && !otmp->oartifact){
+				if(		// flexible materials
+						((otmp->obj_material == CLOTH
+						|| otmp->obj_material == LEATHER
+						|| otmp->obj_material == PLASTIC)
+						&&(mat == CLOTH
+						|| mat == LEATHER)
+					)
+					||	// rigid materials
+						(((otmp->obj_material >= DRAGON_HIDE && otmp->obj_material <= MITHRIL)
+						|| otmp->obj_material == GLASS
+						|| otmp->obj_material == BONE
+						|| otmp->obj_material == WOOD
+						|| otmp->obj_material == OBSIDIAN_MT
+						|| otmp->obj_material == GEMSTONE
+						|| otmp->obj_material == MINERAL)
+						&&((mat >= DRAGON_HIDE && mat <= MITHRIL)
+						|| mat == GLASS
+						|| mat == OBSIDIAN_MT
+						|| mat == MINERAL)
+						)
+					)
+					set_material(otmp, mat);
+			}
 	
 	if (name) {
 		const char *aname;
@@ -3819,6 +3931,11 @@ typfnd:
 		}
 	}
 
+	/* set viper heads, probability of getting what you wished for copied loosely from setting weapon/armor spe, but the minimum is 1, not 0. */
+	if(viperheads != -1 && otmp->otyp == VIPERWHIP){
+		otmp->ovar1 = (viperheads > rnd(5) && viperheads > otmp->ovar1 && !wizard) : 1 ? viperheads;
+	}
+	
 	/* set moon phase */
 	if(moonphase != -1 && otmp->otyp == MOON_AXE){
 		otmp->ovar1 = moonphase;
