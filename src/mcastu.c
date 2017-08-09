@@ -3439,7 +3439,7 @@ int spellnum;
 				minstapetrify(mtmp, yours);
 		   }
 		   else
-			goto uspsibolt;
+			pline("%s stiffens momentarily.", Monnam(mtmp));
         }
 		dmg = 0;
 	 stop_occupation();
