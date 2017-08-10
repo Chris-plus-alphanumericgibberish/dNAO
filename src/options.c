@@ -126,11 +126,13 @@ static struct Bool_Opt
 	{"hilite_peaceful",    &iflags.wc_hilite_peaceful, FALSE, SET_IN_GAME},	/*WC*/
 	{"hilite_zombie",    &iflags.wc_hilite_zombies, FALSE, SET_IN_GAME},	/*WC*/
 	{"zombies_as_Z",    &iflags.wc_zombie_z, TRUE, SET_IN_GAME},	/*WC*/
+	{"hilite_detected",    &iflags.wc_hilite_detected, FALSE, SET_IN_GAME},	/*WC*/
 	{"use_inverse",   &iflags.wc_inverse, TRUE, SET_IN_GAME},		/*WC*/
 #else
 	{"hilite_peaceful",    &iflags.wc_hilite_peaceful, TRUE, SET_IN_GAME},	/*WC*/
 	{"hilite_zombie",    &iflags.wc_hilite_zombies, TRUE, SET_IN_GAME},	/*WC*/
 	{"zombies_as_Z",    &iflags.wc_zombie_z, FALSE, SET_IN_GAME},	/*WC*/
+	{"hilite_detected",    &iflags.wc_hilite_detected, TRUE, SET_IN_GAME},	/*WC*/
 	{"use_inverse",   &iflags.wc_inverse, FALSE, SET_IN_GAME},		/*WC*/
 #endif
 	{"hilite_hidden_stairs",    &iflags.hilite_hidden_stairs, TRUE, SET_IN_GAME},	/*WC*/

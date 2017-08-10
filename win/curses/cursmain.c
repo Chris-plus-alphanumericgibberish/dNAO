@@ -567,7 +567,7 @@ curses_print_glyph(winid wid, XCHAR_P x, XCHAR_P y, int glyph)
             attr = curses_color_attr(color, CLR_GREEN);
         if (iflags.zombie_z)
             ch = 'Z';
-    } else if (special & MG_DETECT)
+    } else if ((special & MG_DETECT) && iflags.hilite_detected)
         attr = curses_color_attr(color, CLR_MAGENTA);
     else if (special & MG_OBJPILE && iflags.hilite_obj_piles)
         attr = curses_color_attr(color, CLR_BLUE);
