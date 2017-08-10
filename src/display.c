@@ -422,16 +422,7 @@ display_monster(x, y, mon, sightflags, worm_tail)
     if (!mon_mimic || sensed) {
 	int num;
 
-	/* [ALI] Only use detected glyphs when monster wouldn't be
-	 * visible by any other means.
-	 */
-	if (sightflags == DETECTED) {
-	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
-			detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL)):
-			detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL));
-	    else
-		num = detected_mon_to_glyph(mon);
-	} else if (mon->mtame && !Hallucination) {
+	if (mon->mtame && !Hallucination) {
 	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
 			petnum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			petnum_to_glyph(PM_LONG_WORM_TAIL);
@@ -449,6 +440,15 @@ display_monster(x, y, mon, sightflags, worm_tail)
 			zombienum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
 		num = zombie_to_glyph(mon);
+	/* [ALI] Only use detected glyphs when monster wouldn't be
+	 * visible by any other means.
+	 */
+	} else if (sightflags == DETECTED) {
+	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
+			detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL)):
+			detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL));
+	    else
+		num = detected_mon_to_glyph(mon);
 	} else {
 	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
 			monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL)):
