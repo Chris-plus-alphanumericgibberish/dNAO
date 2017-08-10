@@ -2687,7 +2687,7 @@ tty_print_glyph(window, x, y, glyph)
     print_vt_code(AVTC_GLYPH_END, -1);
 
 #ifdef TEXTCOLOR
-    if (!reverse_on && (special & (MG_STAIRS|MG_OBJPILE))) {
+    if (!reverse_on && (special)) {
 	term_end_color();
 	ttyDisplay->color = NO_COLOR;
     }
