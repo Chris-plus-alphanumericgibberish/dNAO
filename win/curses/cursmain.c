@@ -556,23 +556,24 @@ curses_print_glyph(winid wid, XCHAR_P x, XCHAR_P y, int glyph)
 
     /* map glyph to character and color */
     mapglyph(glyph, &ch, &color, &special, x, y);
-    if ((special & MG_PET) && iflags.hilite_pet) {
-        attr = iflags.wc2_petattr;
-    }
-    if ((special & MG_DETECT) && iflags.use_inverse) {
-        attr = A_REVERSE;
-    }
-    if (iflags.cursesgraphics) {
-        ch = curses_convert_glyph(ch, glyph);
-    }
+    if ((special & MG_PET) && iflags.hilite_pet)
+        attr = curses_color_attr(color, CLR_BLUE);
+    else if ((special & MG_STAIRS) && iflags.hilite_hidden_stairs)
+        attr = curses_color_attr(color, CLR_RED);
+    else if ((special & MG_PEACE) && iflags.hilite_peaceful)
+        attr = curses_color_attr(color, CLR_BROWN);
+    else if (special & MG_ZOMBIE) {
+        if (iflags.hilite_zombies)
+            attr = curses_color_attr(color, CLR_GREEN);
+        if (iflags.zombie_z)
+            ch = 'Z';
+    } else if (special & MG_DETECT)
+        attr = curses_color_attr(color, CLR_MAGENTA);
+    else if (special & MG_OBJPILE && iflags.hilite_obj_piles)
+        attr = curses_color_attr(color, CLR_BLUE);
 
-    if (wid == NHW_MAP) {
-        if ((special & MG_STAIRS) && iflags.hilite_hidden_stairs) {
-            color = 16 + (color * 2);
-        } else if ((special & MG_OBJPILE) && iflags.hilite_obj_piles) {
-            color = 16 + (color * 2) + 1;
-        }
-    }
+    if (iflags.cursesgraphics)
+        ch = curses_convert_glyph(ch, glyph);
 
     curses_putch(wid, x, y, ch, color, attr);
 }
