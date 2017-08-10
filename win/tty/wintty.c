@@ -2638,7 +2638,7 @@ tty_print_glyph(window, x, y, glyph)
 			if(iflags.zombie_z){
 				ch = 'Z';
 			}
-		} else if ((special & MG_DETECT)) {
+		} else if ((special & MG_DETECT) && iflags.hilite_detected) {
 			term_start_bgcolor(CLR_MAGENTA);
 			bgcolor = CLR_MAGENTA;
 		} else if ((special & MG_OBJPILE) && iflags.hilite_obj_piles && (window == NHW_MAP)){
