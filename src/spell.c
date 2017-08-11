@@ -4499,7 +4499,7 @@ int spellID;
 		strcat(desc1, "Creates a golden haze around you, temporarily improving your AC.");
 		strcat(desc2, "The effect decays over time and can be restored by recasting.");
 		strcat(desc3, "The strength and duration of the effect is improved with casting skill.");
-		strcat(desc4, "");
+		strcat(desc4, "While active, reduces magic power recovery.");
 		break;
 	case SPE_JUMPING:
 		strcat(desc1, "You make a magically-boosted jump.");
