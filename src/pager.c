@@ -30,6 +30,8 @@ STATIC_DCL int generate_list_of_resistances(struct monst *, char *, int);
 extern void NDECL(port_help);
 #endif
 
+extern const int monstr[];
+
 /* Returns "true" for characters that could represent a monster's stomach. */
 STATIC_OVL boolean
 is_swallow_sym(c)
