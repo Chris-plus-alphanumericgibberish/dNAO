@@ -1210,7 +1210,10 @@ int thrown;
 		    /* or throw a missile without the proper bow... */
 		    (is_ammo(obj) && !(ammo_and_launcher(obj, uwep) || obj->oclass == GEM_CLASS))
 		) {
-			
+			int resistmask = 0;
+			int weaponmask = 0;
+			static int warnedotyp = 0;
+			static struct permonst *warnedptr = 0;
 		    /* then do only 1-2 points of damage */
 		    if (mdat->mlet == S_SHADE && !(obj->obj_material == SILVER || arti_silvered(obj) || u.sealsActive&SEAL_CHUPOCLOPS))
 				tmp = 0;
@@ -1221,6 +1224,37 @@ int thrown;
 
 			else tmp = rnd(2);
 			
+			if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS){
+				weaponmask |= PIERCE;
+			}
+			if(obj->oartifact == ART_LIECLEAVER){
+				weaponmask |= SLASH;
+			}
+			else {
+				weaponmask |= WHACK;
+			}
+			
+			if(resist_blunt(mdat) || (mon->mfaction == ZOMBIFIED)){
+				resistmask |= WHACK;
+			}
+			if(resist_pierce(mdat) || (mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED)){
+				resistmask |= PIERCE;
+			}
+			if(resist_slash(mdat) || (mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED)){
+				resistmask |= SLASH;
+			}
+			
+			if((weaponmask & ~(resistmask)) == 0L && !narrow_spec_applies(obj, mon)){
+				tmp /= 4;
+				if(warnedptr != mdat){
+					pline("%s is ineffective against %s.", The(xname(obj)), mon_nam(mon));
+					warnedptr = mdat;
+				}
+			} else {
+				if(warnedptr != mdat){
+					warnedptr = 0;
+				}
+			}
 		    // if (tmp && obj->oartifact &&
 				// artifact_hit(&youmonst, mon, obj, &tmp, dieroll)) {
 				// if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
@@ -1849,9 +1883,10 @@ defaultvalue:
 		tmp += rnd(mon->ustdym);
 	}
 	
-	if(resist_attacks(mdat))
+	if(resist_attacks(mdat)){
 		tmp = 0;
-	else {
+		valid_weapon_attack = 0;
+	} else {
 		int mac = full_marmorac(mon);
 		if(mac < 0){
 			tmp += AC_VALUE(mac);
@@ -2048,6 +2083,21 @@ defaultvalue:
 	    }
 	}
 
+	if (unarmed && !thrown && !obj && !Upolyd) {
+		static struct permonst *warnedptr = 0;
+		if((resist_blunt(mdat) || (mon->mfaction == ZOMBIFIED)) && !(uarmg && narrow_spec_applies(uarmg, mon))){
+			tmp /= 4;
+			if(warnedptr != mdat){
+				Your("%s are ineffective against %s.", makeplural(body_part(HAND)), mon_nam(mon));
+				warnedptr = mdat;
+			}
+		} else {
+			if(warnedptr != mdat){
+				warnedptr = 0;
+			}
+		}
+	}
+	
 #ifdef STEED
 	if (jousting) {
 	    tmp += d(2, (obj == uwep) ? 10 : 2);	/* [was in dmgval()] */
