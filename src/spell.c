@@ -4496,7 +4496,7 @@ int spellID;
 		strcat(desc4, "");
 		break;
 	case SPE_PROTECTION:
-		strcat(desc1, "Creates a golden haze around you, temporarily improving your AC.");
+		strcat(desc1, "Temporarily improves your AC. AC from this spell is better than normal.");
 		strcat(desc2, "The effect decays over time and can be restored by recasting.");
 		strcat(desc3, "The strength and duration of the effect is improved with casting skill.");
 		strcat(desc4, "While active, reduces magic power recovery.");
