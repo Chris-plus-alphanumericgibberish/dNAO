@@ -3058,6 +3058,18 @@ boolean was_swallowed;			/* digestion */
 		u.uevent.ukilled_illurien = 1;
 		u.ill_cnt = rn1(1000, 250);
 	}
+	if(mdat == &mons[PM_ORCUS]){
+		struct engr *oep = engr_at(mon->mx,mon->my);
+		if(!oep){
+			make_engr_at(mon->mx, mon->my,
+			 "", 0L, DUST);
+			oep = engr_at(mon->mx,mon->my);
+		}
+		oep->ward_id = TENEBROUS;
+		oep->halu_ward = 0;
+		oep->ward_type = BURN;
+		oep->complete_wards = 1;
+	}
 	if (mdat == &mons[PM_VLAD_THE_IMPALER]) {
 		if(mvitals[PM_VLAD_THE_IMPALER].died == 1) livelog_write_string("destroyed Vlad the Impaler");
 	    if (cansee(mon->mx, mon->my) && !was_swallowed)
