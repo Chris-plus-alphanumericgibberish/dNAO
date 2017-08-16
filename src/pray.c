@@ -2945,6 +2945,7 @@ const char * const hallu_gods[] = {
 	"Mahasamatman",
 	"Nyarlathotep",
 	"Azathoth",
+	"Ubbo-Sathla",
 	"Galactus",
 	"Sauron",
 	"Morgoth",
