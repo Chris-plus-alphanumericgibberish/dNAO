@@ -1732,7 +1732,7 @@ get_description_of_damage_type(uchar id)
 	case AD_CNCL: return "cancelation";
 	case AD_DEAD: return "deadly gaze";
 	case AD_SUCK: return "sucks you apart";
-	case AD_MALK: return "immobilizes you destroying wands";
+	case AD_MALK: return "immobilize and shock";
 	case AD_UVUU: return "splatters your head";
 	case AD_ABDC: return "abduction teleportation";
 	case AD_KAOS: return "spawn Chaos";
@@ -1787,11 +1787,11 @@ get_description_of_damage_type(uchar id)
 	case AD_BLUD: return "Sword of Blood";
 	case AD_SURY: return "Arrows of Slaying";
 	case AD_NPDC: return "drains constitution";
-	case AD_DUNSTAN: return "spirit damage type?";
-	case AD_IRIS: return "spirit damage type?";
-	case AD_NABERIUS: return "spirit damage type?";
-	case AD_OTIAX: return "spirit damage type?";
-	case AD_SIMURGH: return "spirit damage type?";
+	case AD_DUNSTAN: return "stones throw themselves at target";
+	case AD_IRIS: return "iridescent tentacles";
+	case AD_NABERIUS: return "tarnished bloody fangs";
+	case AD_OTIAX: return "mist tendrals";
+	case AD_SIMURGH: return "thirty-colored feathers";
 	case AD_CMSL: return "cold missile";
 	case AD_FMSL: return "fire missile";
 	case AD_EMSL: return "electric missile";
