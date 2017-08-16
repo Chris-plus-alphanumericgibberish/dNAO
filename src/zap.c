@@ -41,6 +41,8 @@ STATIC_DCL int FDECL(spell_hit_bonus, (int));
 /* WAC -- ZT_foo #defines moved to spell.h, since explode uses these types */
 
 #define is_hero_spell(type)	((type) >= 10 && (type) < 20)
+#define wand_damage_die(skill)	(((skill) > 1) ? (2*(skill) + 4) : 6)
+#define wandlevel(otyp)	(otyp == WAN_MAGIC_MISSILE ? 1 : otyp == WAN_SLEEP ? 1 : otyp == WAN_STRIKING ? 2 : otyp == WAN_FIRE ? 4 : otyp == WAN_COLD ? 4 : otyp == WAN_LIGHTNING ? 5 : otyp == WAN_DEATH ? 7 : 1)
 
 #ifndef OVLB
 STATIC_VAR const char are_blinded_by_the_flash[];
@@ -127,6 +129,7 @@ struct obj *otmp;
 
 	switch(otyp) {
 	case WAN_STRIKING:
+		use_skill(P_WAND_POWER, wandlevel(otyp));
 		zap_type_text = "wand";
 		/* fall through */
 	case SPE_FORCE_BOLT:
@@ -135,7 +138,8 @@ struct obj *otmp;
 			shieldeff(mtmp->mx, mtmp->my);
 			break;	/* skip makeknown */
 		} else if (u.uswallow || otyp == WAN_STRIKING || rnd(20) < 10 + find_mac(mtmp)) {
-			dmg = d(2,12);
+			if(otyp == WAN_STRIKING) dmg = d(wand_damage_die(P_SKILL(P_WAND_POWER))-4,12);
+			else dmg = d(wand_damage_die(P_SKILL(P_ATTACK_SPELL))-4,12);
 			if (!flags.mon_moving && otyp == SPE_FORCE_BOLT && (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM))
 				dmg += d((u.ulevel+1)/2, 12);
 			if(dbldam) dmg *= 2;
@@ -174,7 +178,8 @@ struct obj *otmp;
 		if (is_undead_mon(mtmp)) {
 			reveal_invis = TRUE;
 			wake = TRUE;
-			dmg = rnd(8);
+			if(otyp == WAN_UNDEAD_TURNING) dmg = d(wand_damage_die(P_SKILL(P_WAND_POWER)),8);
+			else dmg = rnd(8);
 			if(dbldam) dmg *= 2;
 			if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS) dmg *= 1.5;
 			if (otyp == SPE_TURN_UNDEAD)
@@ -334,7 +339,8 @@ struct obj *otmp;
 	case SPE_DRAIN_LIFE:
 	case WAN_DRAINING:	/* KMH */
 		reveal_invis = TRUE;
-		dmg = rnd(8);
+		if(otyp == WAN_DRAINING) d((wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2,8);
+		else dmg = rnd(8);
 		if(dbldam) dmg *= 2;
 		if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS) dmg *= 1.5;
 		if (otyp == SPE_DRAIN_LIFE)
@@ -346,12 +352,13 @@ struct obj *otmp;
 				mtmp->mhp > 0) {
 		    mtmp->mhp -= dmg;
 		    mtmp->mhpmax -= dmg;
-		    if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < 1)
-			xkilled(mtmp, 1);
+		    if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < ((otyp == WAN_DRAINING) ? ((wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2) : 1))
+				xkilled(mtmp, 1);
 		    else {
-			mtmp->m_lev--;
-			if (canseemon(mtmp))
-			    pline("%s suddenly seems weaker!", Monnam(mtmp));
+				if(otyp == WAN_DRAINING)  mtmp->m_lev -= (wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2;
+				else mtmp->m_lev--;
+				if (canseemon(mtmp))
+					pline("%s suddenly seems weaker!", Monnam(mtmp));
 		    }
 		} else if(cansee(mtmp->mx,mtmp->my)) shieldeff(mtmp->mx, mtmp->my);
 		makeknown(otyp);
@@ -2782,11 +2789,12 @@ register struct	obj	*obj;
 		buzz(otyp - SPE_MAGIC_MISSILE + 10,
 		     u.ulevel / 2 + 1,
 		     u.ux, u.uy, u.dx, u.dy,0,0);
-	    } else if (otyp >= WAN_MAGIC_MISSILE && otyp <= WAN_LIGHTNING)
+	    } else if (otyp >= WAN_MAGIC_MISSILE && otyp <= WAN_LIGHTNING){
+		use_skill(P_WAND_POWER, wandlevel(otyp));
 		buzz(otyp - WAN_MAGIC_MISSILE,
-		     (otyp == WAN_MAGIC_MISSILE) ? 2 : 6,
+		     wand_damage_die(P_SKILL(P_WAND_POWER))/((otyp == WAN_MAGIC_MISSILE) ? 2 : 1),
 		     u.ux, u.uy, u.dx, u.dy,0,0);
-	    else
+	    } else
 		impossible("weffects: unexpected spell or wand");
 	    disclose = TRUE;
 	}

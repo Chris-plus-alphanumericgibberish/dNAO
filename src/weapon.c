@@ -43,6 +43,7 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_SHIEN				(-24)
 #define PN_NIMAN				(-25)
 #define PN_JUYO					(-26)
+#define PN_WAND_DAMAGE			(-27)
 
 
 static void FDECL(mon_ignite_lightsaber, (struct obj *, struct monst *));
@@ -73,6 +74,7 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	PN_DIVINATION_SPELL, PN_ENCHANTMENT_SPELL,
 	PN_CLERIC_SPELL,     PN_ESCAPE_SPELL,
 	PN_MATTER_SPELL,
+	PN_WAND_DAMAGE,
 #ifdef BARD
 	PN_MUSICALIZE,
 #endif
@@ -116,6 +118,7 @@ STATIC_VAR NEARDATA const char * const odd_skill_names[] = {
     "form V: Shien",
     "form VI: Niman",
     "form VII: Juyo",
+    "wand damage",
 };
 /* indexed vis `is_martial() */
 STATIC_VAR NEARDATA const char * const barehands_or_martial[] = {
