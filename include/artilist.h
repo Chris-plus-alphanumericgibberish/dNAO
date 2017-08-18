@@ -323,7 +323,7 @@ A("The Golden Sword of Y'ha-Talla",			SCIMITAR,
 	SPFX2_POISONED,0,0),
 
 A("Mirror Brand",	LONG_SWORD,	
-	(SPFX_ATTK|SPFX_RESTR|SPFX_DALIGN|SPFX_REFLECT), 0,
+	(SPFX_ATTK|SPFX_RESTR|SPFX_DALIGN|SPFX_CON_OR|SPFX_REFLECT), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	STUN(1,0),	NO_DFNS,	NO_CARY,
 	0,	A_NEUTRAL, NON_PM, NON_PM, 3000L, 
@@ -529,7 +529,7 @@ A("Sky Render",		KATANA, /*Needs encyc entry*/
 	0,0,0),
 
 A("Fuma-itto no Ken",		BROADSWORD, /*Needs encyc entry*/
-	(SPFX_RESTR|SPFX_DALIGN),0,
+	(SPFX_RESTR|SPFX_DALIGN|SPFX_CON_OR),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,   
 	PHYS(1,8),	NO_DFNS,	NO_CARY,
 	CREATE_AMMO, A_CHAOTIC, NON_PM, NON_PM, 1200L,/*makes shuriken*/
@@ -713,7 +713,7 @@ A("Masamune",			TSURUGI, /*Needs encyc entry*/
 	SPFX2_SILVERED,SPFX3_NOCNT,0), /*does not count against artifacts generated*/
 
 A("The Black Crystal", CRYSTAL_BALL, /*from Final Fantasy*/
-        (SPFX_NOGEN|SPFX_RESTR|SPFX_DEFN|SPFX_DALIGN|SPFX_WARN),0,
+        (SPFX_NOGEN|SPFX_RESTR|SPFX_DEFN|SPFX_DALIGN|SPFX_CON_OR|SPFX_WARN),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
         PHYS(3,0), NO_DFNS, CARY(AD_MAGM), 
 		SHADOW_FLARE, A_CHAOTIC, NON_PM, NON_PM, 100L, 
@@ -960,7 +960,7 @@ A("The Lyre of Orpheus",	MAGIC_HARP,
 #endif
 
 A("The Sceptre of Might",	MACE,
-	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_DALIGN|SPFX_DEFN),0,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_DALIGN|SPFX_CON_OR|SPFX_DEFN),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(5,0),	NO_DFNS,	CARY(AD_MAGM),
 	CONFLICT,	A_LAWFUL, PM_CAVEMAN, NON_PM, 2500L, 
@@ -973,7 +973,7 @@ A("The Sceptre of Might",	MACE,
 	// PHASING,	A_CHAOTIC, PM_CONVICT, NON_PM, 5000L,
 	// SPFX2_STLTH,0,0), /*Note: it had caried stealth before*/
 A("The Iron Ball of Levitation", HEAVY_IRON_BALL, /*Needs encyc entry*/
-	(SPFX_NOGEN|SPFX_RESTR|SPFX_DALIGN|SPFX_LUCK|SPFX_INTEL), (SPFX_WARN),
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_DALIGN|SPFX_CON_OR|SPFX_LUCK|SPFX_INTEL), (SPFX_WARN),
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(5,10),	NO_DFNS,	CARY(AD_DRLI),
 	LEVITATION,	A_CHAOTIC, PM_CONVICT, NON_PM, 5000L,
