@@ -720,7 +720,7 @@ long wp_mask;
 	long *mask = 0;
 	register const struct artifact *oart = get_artifact(otmp);
 	uchar dtyp;
-	long spfx, spfx2, spfx3;
+	long spfx, spfx2, spfx3, wpfx;
 	long exist_warntypem = 0, exist_warntypet = 0, exist_warntypeb = 0, exist_warntypeg = 0, exist_warntypea = 0, exist_warntypev = 0;
 	long long exist_montype = 0;
 	boolean exist_nonspecwarn;
@@ -784,6 +784,7 @@ long wp_mask;
 	spfx = (wp_mask != W_ART) ? oart->spfx : oart->cspfx;
 	spfx2 = (wp_mask != W_ART) ? oart->spfx2 : 0;
 	spfx3 = (wp_mask != W_ART) ? 0 : oart->cspfx3;
+	wpfx = (wp_mask != W_ART) ? oart->wpfx : 0;
 	if(spfx && wp_mask == W_ART && !on) {
 	    /* don't change any spfx also conferred by other artifacts */
 	    register struct obj* obj;
@@ -970,6 +971,11 @@ long wp_mask;
 	if (spfx3 & SPFX3_PCTRL) {
 		if (on) EPolymorph_control |= wp_mask;
 		else EPolymorph_control &= ~wp_mask;
+	}
+	
+	if (wpfx & WSFX_FREEACT) {
+	    if (on) u.uprops[FREE_ACTION].extrinsic |= wp_mask;
+	    else u.uprops[FREE_ACTION].extrinsic &= ~wp_mask;
 	}
 
 	if(wp_mask == W_ART && !on && oart->inv_prop) {
