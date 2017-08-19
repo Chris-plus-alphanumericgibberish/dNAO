@@ -2680,6 +2680,7 @@ E int FDECL(dbon, (struct obj *));
 E int FDECL(dtypbon, (int));
 E int NDECL(enhance_weapon_skill);
 E void FDECL(expert_weapon_skill, (int));
+E void FDECL(gm_weapon_skill, (int));
 #ifdef DUMP_LOG
 E void NDECL(dump_weapon_skill);
 #endif
