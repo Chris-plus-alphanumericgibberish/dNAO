@@ -1761,7 +1761,9 @@ register const char *verb;
 	     * Guess at a few other special cases that makeplural creates.
 	     */
 	    if ((*spot == 's' && spot != subj &&
-			(*(spot-1) != 'u' && *(spot-1) != 's')) ||
+			(*(spot-1) != 'u' && *(spot-1) != 's') &&
+			!((spot - subj) >= 5 && !strncmp(spot-4, "Chaos", 5))
+		) ||
 		((spot - subj) >= 4 && !strncmp(spot-3, "eeth", 4)) ||
 		((spot - subj) >= 3 && !strncmp(spot-3, "feet", 4)) ||
 		((spot - subj) >= 2 && !strncmp(spot-1, "ia", 2)) ||
