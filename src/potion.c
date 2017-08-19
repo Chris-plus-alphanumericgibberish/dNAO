@@ -2073,13 +2073,14 @@ boolean amnesia;
 
 		/* Diluting a !ofAmnesia just gives water... */
 //Actually, the waters of the lethe shouldn't dilute
-//		if (obj->otyp == POT_AMNESIA) {
-//			Your("%s flat.", aobjnam(obj, "become"));
-//			obj->odiluted = 0;
-//			obj->otyp = POT_WATER;
-//			used = TRUE;
-//			break;
-//		}
+		if (obj->otyp == POT_AMNESIA) {
+			return FALSE;
+			// Your("%s flat.", aobjnam(obj, "become"));
+			// obj->odiluted = 0;
+			// obj->otyp = POT_WATER;
+			// used = TRUE;
+			// break;
+		}
 
 		/* KMH -- Water into acid causes an explosion */
 		if (obj->otyp == POT_ACID || (obj->otyp == POT_BLOOD && acidic(&mons[obj->corpsenm]))) {
