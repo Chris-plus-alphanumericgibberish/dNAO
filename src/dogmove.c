@@ -937,7 +937,7 @@ register int after;	/* this is extra fast monster movement */
 		return(3);
 	/* lose tameness if under effects of taming song */
 	if (has_edog && EDOG(mtmp)->friend && mtmp->mtame) {
-		mtmp->mtame -= (always_hostile(mtmp->data) ? 2 : 1);
+		mtmp->mtame -= (always_hostile_mon(mtmp) ? 2 : 1);
 		if (mtmp->mtame <= 0) {
 			mtmp->mtame = 0;
 			EDOG(mtmp)->friend = 0;
@@ -1014,6 +1014,7 @@ register int after;	/* this is extra fast monster movement */
 	      attacktype(mtmp->data, AT_ARRW) ||
 	      attacktype(mtmp->data, AT_LRCH) ||
 	      attacktype(mtmp->data, AT_LNCK) ||
+	      attacktype(mtmp->data, AT_5SQR) ||
 	      attacktype(mtmp->data, AT_TNKR) ||
 	     ( (attacktype(mtmp->data, AT_MAGC) &&
 			(attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp <= AD_SPC2

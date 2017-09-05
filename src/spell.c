@@ -44,7 +44,9 @@ STATIC_DCL void NDECL(cast_protection);
 STATIC_DCL boolean FDECL(sightwedge, (int,int, int,int, int,int));
 STATIC_DCL void FDECL(spell_backfire, (int));
 STATIC_DCL const char *FDECL(spelltypemnemonic, (int));
+STATIC_DCL int FDECL(spellhunger, (int));
 STATIC_DCL int FDECL(isqrt, (int));
+STATIC_DCL void FDECL(run_maintained_spell, (int));
 
 long FDECL(doreadstudy, (const char *));
 
@@ -684,6 +686,162 @@ struct obj *spellbook;
 	return(1);
 }
 
+boolean
+spell_maintained(spell)
+int spell;
+{
+    spell = (spell - SPE_DIG);
+    return !!(u.spells_maintained & ((unsigned long long int)1 << spell));
+}
+
+void
+spell_maintain(spell)
+int spell;
+{
+    spell = (spell - SPE_DIG);
+    u.spells_maintained |= ((unsigned long long int)1 << spell);
+}
+
+void
+spell_unmaintain(spell)
+int spell;
+{
+    spell = (spell - SPE_DIG);
+    u.spells_maintained &= ~((unsigned long long int)1 << spell);
+}
+
+void
+run_maintained_spells()
+{
+    int spell;
+	int spell_index;
+	/* Check forgotten spells */
+	for (spell = SPE_DIG; spell != SPE_BLANK_PAPER; spell++) {
+		if (!spell_maintained(spell))
+			continue;
+	
+		for (spell_index = 0; spell_index < MAXSPELL; spell_index++)
+			if (spellid(spell_index) == spell)
+				break;
+
+		boolean knows_spell = FALSE; /* might not be true if amnesia removed it */
+		if (spell_index < MAXSPELL)
+			knows_spell = TRUE;
+
+		/* We can't use spellname() but need to use OBJ_NAME directly, because
+		   amnesia can delete any trace of spell index... */
+		if (!knows_spell || spellknow(spell_index) <= 0 || Confusion) {
+			pline("You can no longer maintain %s.",
+				  OBJ_NAME(objects[spell]));
+			spell_unmaintain(spell);
+			continue;
+		}
+
+		/* Decrease power depending on spell level and proficiency.
+		   If an attempted cast fails 5 times in a row, unmaintain the spell. */
+		int chance = percent_success(spell_index);
+		int tries = 5;
+		while (tries) {
+			if (rnd(100) > chance) {
+				tries--;
+				continue;
+			}
+			break;
+		}
+		if (!tries) {
+			pline("You lose concentration and fail to maintain %s!",
+				  spellname(spell_index));
+			spell_unmaintain(spell);
+			continue;
+		}
+
+		int spell_level = objects[spell].oc_level;
+		if (u.uhave.amulet)
+			spell_level *= 2;
+		spell_level += (spell_level*(5-tries))/2;
+		if (!(moves % 5)) {
+			if (u.uen < spell_level) {
+				You("lack the energy to maintain %s.",
+					  spellname(spell_index));
+				spell_unmaintain(spell);
+				continue;
+			}
+			if (spell != SPE_DETECT_FOOD && !(Race_if(PM_INCANTIFIER)) ) {
+				int basehungr = spellhunger(spell_level*5);
+				int hungr = basehungr/5;
+				hungr += ((((moves)/5)*(basehungr%5))/5 > (((moves-5)/5)*(basehungr%5))/5) ? 1 : 0;
+				/* don't put player (quite) into fainting from
+				 * casting a spell, particularly since they might
+				 * not even be hungry at the beginning; however,
+				 * this is low enough that they must eat before
+				 * casting anything else except detect food
+				 */
+				
+				if (hungr > YouHunger-3){
+					You("are too hungry to maintain %s.",
+						  spellname(spell_index));
+					spell_unmaintain(spell);
+					continue;
+				}
+				morehungry(hungr);
+			}
+			u.uen -= spell_level;
+		}
+		run_maintained_spell(spell);
+	}
+}
+
+STATIC_OVL void
+run_maintained_spell(spell)
+int spell;
+{
+    // /* Find the skill for the given spell type category */
+    // int skill = P_SKILL(spell_skilltype(spell));
+
+    int leviprop = LEVITATION;
+    // if (skill == P_EXPERT)
+        // leviprop = FLYING;
+
+    switch (spell) {
+    case SPE_HASTE_SELF:
+        if ((HFast&TIMEOUT) < 50)
+			incr_itimeout(&HFast, 50);
+		incr_itimeout(&HFast, 1);
+       break;
+    case SPE_DETECT_MONSTERS:
+        if ((HDetect_monsters&TIMEOUT) < 50)
+			incr_itimeout(&HDetect_monsters, 50);
+		incr_itimeout(&HDetect_monsters, 1);
+        break;
+    case SPE_LEVITATION:
+        if ((HLevitation&TIMEOUT) < 50)
+			incr_itimeout(&HLevitation, 50);
+		incr_itimeout(&HLevitation, 1);
+        break;
+    case SPE_INVISIBILITY:
+        if ((HInvis&TIMEOUT) < 50)
+			incr_itimeout(&HInvis, 50);
+		incr_itimeout(&HInvis, 1);
+        break;
+    case SPE_DETECT_UNSEEN:
+        if ((HSee_invisible&TIMEOUT) < 50)
+			incr_itimeout(&HSee_invisible, 50);
+		incr_itimeout(&HSee_invisible, 1);
+        break;
+    // case SPE_PHASE:
+        // if (property_timeout(mon, PASSES_WALLS) < 5)
+            // inc_timeout(mon, PASSES_WALLS, 20, TRUE);
+        // break;
+    case SPE_PROTECTION:
+		u.usptime++;
+        break;
+    default:
+        impossible("player maintaining an unmaintainable spell? (%d)", spell);
+        spell_unmaintain(spell);
+        break;
+    }
+}
+
 /* a spellbook has been destroyed or the character has changed levels;
    the stored address for the current book is no longer valid */
 void
@@ -1106,6 +1264,44 @@ int skill;
 	}
 }
 
+STATIC_OVL int
+spellhunger(energy)
+int energy;
+{
+	int hungr = energy * 2;
+	int intell;
+
+	/* If hero is a wizard, their current intelligence
+	 * (bonuses + temporary + current)
+	 * affects hunger reduction in casting a spell.
+	 * 1. int = 17-18 no reduction
+	 * 2. int = 16    1/4 hungr
+	 * 3. int = 15    1/2 hungr
+	 * 4. int = 1-14  normal reduction
+	 * The reason for this is:
+	 * a) Intelligence affects the amount of exertion
+	 * in thinking.
+	 * b) Wizards have spent their life at magic and
+	 * understand quite well how to cast spells.
+	 */
+	intell = acurr(A_INT);
+	if (!Role_if(PM_WIZARD) && !(u.sealsActive&SEAL_PAIMON) ){
+		if(u.sealsActive&SEAL_PAIMON) intell -= 6;
+		else intell -= 10;
+	}
+	if(intell < 15);
+	else if(intell < 16) hungr /= 2;
+	else if(intell < 20) hungr /= 4;
+	else hungr = 0;
+	// switch (intell) {
+		// case 25: case 24: case 23: case 22:
+		// case 21: case 20: case 19: case 18:
+		// case 17: hungr = 0; break;
+		// case 16: hungr /= 4; break;
+		// case 15: hungr /= 2; break;
+	// }
+	return hungr;
+}
 int
 spell_skilltype(booktype)
 int booktype;
@@ -1148,8 +1344,10 @@ cast_protection()
 	 *     16-30   0    0,  5,  9, 11, 13, 14, 15
 	 *     16-30 -10    0,  5,  8,  9, 10
 	 */
-	gain = loglev - (int)u.uspellprot / (4 - min(3,(10 - natac)/10));
-
+	// gain = loglev - (int)u.uspellprot / (4 - min(3,(10 - natac)/10));
+	
+	gain = 2*loglev - u.uspellprot; //refill spellprot, don't stack it.
+	
 	if (gain > 0) {
 	    if (!Blind) {
 		const char *hgolden = hcolor(NH_GOLDEN);
@@ -1169,7 +1367,6 @@ cast_protection()
 			P_SKILL(spell_skilltype(SPE_PROTECTION)) == P_EXPERT ? 30:
 			P_SKILL(spell_skilltype(SPE_PROTECTION)) == P_SKILLED ? 20: 
 			P_SKILL(spell_skilltype(SPE_PROTECTION)) == P_BASIC ? 15: 10;
-	    if (!u.usptime)
 		u.usptime = u.uspmtime;
 	    find_ac();
 	} else {
@@ -2539,7 +2736,7 @@ spiriteffects(power, atme)
 						break;
 						case TT_WEB:
 						pline(pullmsg, "web");
-						if(!Is_lolth_level(&u.uz)){
+						if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){
 							pline_The("web is destroyed!");
 							deltrap(t_at(u.ux,u.uy));
 						}
@@ -2659,7 +2856,7 @@ spiriteffects(power, atme)
 			mon = m_at(u.ux+u.dx, u.uy+u.dy);
 			if(mon){
 				Your("forked tongue speaks with silvery grace.");
-				if((!always_hostile(mon->data) &&
+				if((!always_hostile_mon(mon) &&
 				!(mon->data->geno & G_UNIQ) &&
 				!mon->mtraitor) || !resist(mon, '\0', 0, NOTELL)
 				){
@@ -3355,7 +3552,7 @@ spiriteffects(power, atme)
 		    pline("The poison shadow of the Black Web flows in your wake.");
 			static struct attack webattack[] = 
 			{
-				{AT_SHDW,AD_SHDW,4,6},
+				{AT_SHDW,AD_SHDW,4,8},
 				{0,0,0,0}
 			};
 			struct monst *mon;
@@ -3454,7 +3651,14 @@ boolean atme;
 	struct obj *pseudo;
 	coord cc;
 	
+
 	if(!spelltyp){
+		if (spell_maintained(spellid(spell))) {
+			spell_unmaintain(spellid(spell));
+			pline("Spell no longer maintained.");
+
+			return 0;
+		}
 		/*
 		 * Spell casting no longer affects knowledge of the spell. A
 		 * decrement of spell knowledge is done every turn.
@@ -3502,37 +3706,7 @@ boolean atme;
 			return(0);
 		} else {
 			if (spellid(spell) != SPE_DETECT_FOOD && !(Race_if(PM_INCANTIFIER)) ) {
-				int hungr = energy * 2;
-
-				/* If hero is a wizard, their current intelligence
-				 * (bonuses + temporary + current)
-				 * affects hunger reduction in casting a spell.
-				 * 1. int = 17-18 no reduction
-				 * 2. int = 16    1/4 hungr
-				 * 3. int = 15    1/2 hungr
-				 * 4. int = 1-14  normal reduction
-				 * The reason for this is:
-				 * a) Intelligence affects the amount of exertion
-				 * in thinking.
-				 * b) Wizards have spent their life at magic and
-				 * understand quite well how to cast spells.
-				 */
-				intell = acurr(A_INT);
-				if (!Role_if(PM_WIZARD) && !(u.sealsActive&SEAL_PAIMON) ){
-					if(u.sealsActive&SEAL_PAIMON) intell -= 6;
-					else intell -= 10;
-				}
-				if(intell < 15);
-				else if(intell < 16) hungr /= 2;
-				else if(intell < 20) hungr /= 4;
-				else hungr = 0;
-				// switch (intell) {
-					// case 25: case 24: case 23: case 22:
-					// case 21: case 20: case 19: case 18:
-					// case 17: hungr = 0; break;
-					// case 16: hungr /= 4; break;
-					// case 15: hungr /= 2; break;
-				// }
+				int hungr = spellhunger(energy);
 				/* don't put player (quite) into fainting from
 				 * casting a spell, particularly since they might
 				 * not even be hungry at the beginning; however,
@@ -3743,7 +3917,28 @@ boolean atme;
 		obfree(pseudo, (struct obj *)0);
 		return(0);
 	}
+	
+	switch(pseudo->otyp){
+    /* These spells can be toggled for whether or not to maintain it */
+    case SPE_HASTE_SELF:
+    case SPE_DETECT_MONSTERS:
+    case SPE_LEVITATION:
+    case SPE_INVISIBILITY:
+    case SPE_DETECT_UNSEEN:
+    // case SPE_PHASE:
+    case SPE_PROTECTION:
+        /* Detect monsters isn't useful to maintain on a lower level */
+        if (pseudo->otyp == SPE_DETECT_MONSTERS && role_skill < P_SKILLED)
+            break;
+        if (yn("Maintain the spell?") == 'y')
+			spell_maintain(pseudo->otyp);
+		else
+			spell_unmaintain(pseudo->otyp);
 
+	default:
+	break;
+	}
+	
 	/* gain skill for successful cast */
 	use_skill(skill, spellev(spell));
 	u.lastcast = monstermoves + spellev(spell);
@@ -4301,10 +4496,10 @@ int spellID;
 		strcat(desc4, "");
 		break;
 	case SPE_PROTECTION:
-		strcat(desc1, "Creates a golden haze around you, temporarily improving your AC.");
+		strcat(desc1, "Temporarily improves your AC. AC from this spell is better than normal.");
 		strcat(desc2, "The effect decays over time and can be restored by recasting.");
 		strcat(desc3, "The strength and duration of the effect is improved with casting skill.");
-		strcat(desc4, "");
+		strcat(desc4, "While active, reduces magic power recovery.");
 		break;
 	case SPE_JUMPING:
 		strcat(desc1, "You make a magically-boosted jump.");

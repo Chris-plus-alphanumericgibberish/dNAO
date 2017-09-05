@@ -409,20 +409,20 @@ tactics(mtmp)
 				}
 			} else if(mtmp->data == &mons[PM_GREAT_CTHULHU]){
 				pline("%s steps through strange angles.",Monnam(mtmp));
+				mofflin(mtmp);
+				return(0);
 			}
 			if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_ARRW, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )
-				//do something about poss of cancellation
+				&& !mtmp->mcan && !mtmp->mspec_used
 			){
 				monline(mtmp);
 				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
-			} else if((attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY) ||
-				attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY) ||
-				attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
+			} else if((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY) )
-				//do something about poss of cancellation
+				&& !mtmp->mcan && !mtmp->mspec_used
 			){
 				mofflin(mtmp);
 				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
@@ -646,6 +646,7 @@ illur_resurrect()
 	if (mtmp) {
 		mtmp->msleeping = mtmp->mtame = mtmp->mpeaceful = 0;
 		set_malign(mtmp);
+		pline("A voice booms out...");
 		verbalize("You thought to steal memories from ME, she of the Myriad Glimpses!?");
 	}
 

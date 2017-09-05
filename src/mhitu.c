@@ -85,6 +85,7 @@ register struct attack *mattk;
 		case AT_BUTT:
 			pline("%s butts!", Monnam(mtmp));
 			break;
+		case AT_5SQR:
 		case AT_TUCH:
 			if(mattk->adtyp == AD_SHDW) pline("%s slashes you with bladed shadows!", Monnam(mtmp));
 			else if(mattk->adtyp == AD_STAR) pline("%s slashes you with a starlight rapier!", Monnam(mtmp));
@@ -170,7 +171,7 @@ struct attack *mattk;
 	       it's better than "sting" when not a stinging attack... */
 	    return (!mwep || !mwep->opoisoned) ? "attack" : "weapon";
 	} else {
-	    return (mattk->aatyp == AT_TUCH) ? "contact" :
+	    return (mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR) ? "contact" :
 		   (mattk->aatyp == AT_GAZE) ? "gaze" :
 		   (mattk->aatyp == AT_ENGL) ? "vapor" :
 		   (mattk->aatyp == AT_BITE || mattk->aatyp == AT_LNCK) ? "bite" : "sting";
@@ -355,8 +356,8 @@ struct attack *alt_attk_buf;
        already hit, switch to a stun attack for the second */
     if (indx > 0 && prev_result[indx - 1] > 0 &&
 	    (attk->adtyp == AD_DISE ||
-		attk->adtyp == AD_PEST ||
-		attk->adtyp == AD_FAMN ||
+		// attk->adtyp == AD_PEST ||
+		// attk->adtyp == AD_FAMN ||
 		mptr == &mons[PM_ASTRAL_DEVA]) &&
 	    attk->adtyp == mptr->mattk[indx - 1].adtyp
 	) {
@@ -403,6 +404,8 @@ mattacku(mtmp)
 		/* Might be attacking your image around the corner, or
 		 * invisible, or you might be blind....
 		 */
+	boolean derundspec = 0;
+		/*derived undead has used its special attack*/
 	if(!ranged) nomul(0, NULL);
 	if(mtmp->mhp <= 0 || (Underwater && !is_swimmer(mtmp->data)))
 	    return(0);
@@ -708,31 +711,38 @@ mattacku(mtmp)
 				|| mattk->aatyp == AT_BEAM 
 				|| mattk->aatyp == AT_MAGC
 				|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
+				|| (i == 0 && 
+					(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP) && 
+					mattk->adtyp == AD_PHYS && 
+					mattk->damn*mattk->damd/2 < (mtmp->m_lev/10+1)*max(mtmp->data->msize*2, 4)/2
+				   )
+				|| (!derundspec && mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
+				|| (!derundspec && i == NATTK-1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
 			){
 				if(i == 0){
-					mattk->aatyp = AT_CLAW;
-					mattk->adtyp = AD_PHYS;
-					mattk->damn = mtmp->m_lev/10+1;
-					mattk->damd = max(mtmp->data->msize*2, 4);
+					alt_attk.aatyp = AT_CLAW;
+					alt_attk.adtyp = AD_PHYS;
+					alt_attk.damn = mtmp->m_lev/10+1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
+					alt_attk.damd = max(mtmp->data->msize*2, 4);
+					mattk = &alt_attk;
 				}
-				else if(i == NATTK-1 
-					&& mtmp->mfaction == CRYSTALFIED
-				){
-					mattk->aatyp = AT_TUCH;
-					mattk->adtyp = AD_ECLD;
-					mattk->damn = min(10,mtmp->m_lev/3);
-					mattk->damd = 8;
+				else if(!derundspec && mtmp->mfaction == SKELIFIED){
+					derundspec = TRUE;
+					alt_attk.aatyp = AT_TUCH;
+					alt_attk.adtyp = AD_SLOW;
+					alt_attk.damn = 1;
+					alt_attk.damd = max(mtmp->data->msize*2, 4);
+					mattk = &alt_attk;
+				}
+				else if(!derundspec && mtmp->mfaction == CRYSTALFIED){
+					derundspec = TRUE;
+					alt_attk.aatyp = AT_TUCH;
+					alt_attk.adtyp = AD_ECLD;
+					alt_attk.damn = min(10,mtmp->m_lev/3);
+					alt_attk.damd = 8;
+					mattk = &alt_attk;
 				}
 				else continue;
-			}
-			else if(i == NATTK-1 
-				&& mtmp->mfaction == CRYSTALFIED
-				&& !mattk->aatyp && !mattk->adtyp && !mattk->damn && !mattk->damd
-			){
-				mattk->aatyp = AT_TUCH;
-				mattk->adtyp = AD_ECLD;
-				mattk->damn = min(10,mtmp->m_lev/3);
-				mattk->damd = 8;
 			}
 		}
 		
@@ -919,8 +929,9 @@ mattacku(mtmp)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 		case AT_BREA:
 //			if( mdat == &mons[PM_UNMASKED_GOD_EMPEROR] ) mtmp->mspec_used = 0;
-			if(is_true_dragon(mdat) ||
-				(is_half_dragon(mdat) && mtmp->m_lev >= 14)
+			if(is_true_dragon(mdat)
+				|| (is_half_dragon(mdat) && mtmp->m_lev >= 14)
+				|| (mdat == &mons[PM_CERBERUS])
 			) flags.drgn_brth = 1;
 			if(mdat == &mons[PM_MAMMON]) flags.mamn_brth = 1;
 			if(range2) sum[i] = breamu(mtmp, mattk);
@@ -981,6 +992,7 @@ mattacku(mtmp)
 				if (foundyou) sum[i] = hitmu(mtmp, mattk);
 				else wildmiss(mtmp, mattk);
 			}
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 		case AT_LNCK:
 		case AT_LRCH:{
 			if(dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 8 && couldsee(mtmp->mx, mtmp->my)){
@@ -1005,6 +1017,30 @@ mattacku(mtmp)
 				}
 			}
 		}break;
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+		case AT_5SQR:
+			if(distmin(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 5 && (!MON_WEP(mtmp) || mtmp->mconf || Conflict || 
+					mattk->adtyp == AD_STAR || mattk->adtyp == AD_BLUD || mattk->adtyp == AD_SHDW || 
+					!touch_petrifies(youracedata))) {
+			    if (foundyou) {
+				if(tchtmp > (j = rnd(20+i*2))) {
+				    if (mattk->aatyp != AT_KICK ||
+					    !(thick_skinned(youracedata) || u.sealsActive&SEAL_ECHIDNA))
+					sum[i] = hitmu(mtmp, mattk);
+				} else
+				    missmu(mtmp, (tchtmp == j), mattk);
+			    } else
+				wildmiss(mtmp, mattk);
+			}
+			if(mdat == &mons[PM_DEMOGORGON] && sum[i]){
+				mtmp->mvar2 = mtmp->mvar2+1;
+				if(!range2 && mtmp->mvar2>=2){
+					struct attack rend = {AT_HUGS, AD_SHRD, 3, 12};
+					sum[i] = hitmu(mtmp, &rend);
+					mtmp->mvar2=0;
+				}
+			}
+		break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 		case AT_WEAP:
 		case AT_DEVA:
@@ -1431,7 +1467,7 @@ hitmu(mtmp, mattk)
 	    map_invisible(mtmp->mx, mtmp->my);
 	
 	/* Nearby monsters may be awakened NOTE: no way to tell if a player that can't move is paralyized or engraving or something */
-	if(!is_silent(mtmp->data) || !(u.usleep)) wake_nearto(u.ux, u.uy, combatNoise(mtmp->data));
+	if(!is_silent_mon(mtmp) || !(u.usleep)) wake_nearto(u.ux, u.uy, combatNoise(mtmp->data));
 /*	If the monster is undetected & hits you, you should know where
  *	the attack came from.
  */
@@ -2047,6 +2083,11 @@ dopois:
 					exercise(A_WIS, FALSE);
 				}
 			}
+		break;
+///////////////////////////////////////////////////////////////////////////////////////////////////
+		case AD_NPDC:
+			hitmsg(mtmp, mattk);
+			if(ACURR(A_CON) > 3 && uncancelled) (void) adjattrib(A_CON, -1, FALSE);
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 		case AD_DRIN:
@@ -4947,7 +4988,8 @@ register struct monst *mon;
 			switch (rn2(5)) {
 			case 0: You_feel("raised to your full potential.");
 				exercise(A_CON, TRUE);
-				u.uen = (u.uenmax += rnd(5));
+				u.uenmax += rnd(10)+5;
+				u.uen = min(u.uen+400,u.uenmax);
 				break;
 			case 1: You_feel("good enough to do it again.");
 				(void) adjattrib(A_CON, 1, TRUE);
@@ -5465,7 +5507,8 @@ struct monst *mon;
 		switch (rn2(5)) {
 		case 0: You_feel("raised to your full potential.");
 			exercise(A_CON, TRUE);
-			u.uen = (u.uenmax += rnd(10)+5);
+			u.uenmax += rnd(10)+5;
+			u.uen = min(u.uen+400,u.uenmax);
 			exercise(A_CON, TRUE);
 			break;
 		case 1: You_feel("good enough to do it again.");
@@ -5492,7 +5535,8 @@ struct monst *mon;
 			u.uhp = u.uhpmax;
 			if (Upolyd) u.mh = u.mhmax;
 			exercise(A_STR, TRUE);
-			u.uen = (u.uenmax += rnd(5));
+			u.uenmax += rnd(10)+5;
+			u.uen = min(u.uen+400,u.uenmax);
 			flags.botl = 1;
 			break;
 		}
@@ -5705,7 +5749,8 @@ struct monst *mon;
 		switch (rn2(5)) {
 		case 0: You_feel("raised to your full potential.");
 			exercise(A_CON, TRUE);
-			u.uen = (u.uenmax += rnd(10)+5);
+			u.uenmax += rnd(10)+5;
+			u.uen = min(u.uenmax, u.uen+400);
 			exercise(A_CON, TRUE);
 			break;
 		case 1: You_feel("good enough to do it again.");
@@ -5732,7 +5777,8 @@ struct monst *mon;
 			u.uhp = u.uhpmax;
 			if (Upolyd) u.mh = u.mhmax;
 			exercise(A_STR, TRUE);
-			u.uen = (u.uenmax += rnd(5));
+			u.uenmax += rnd(10)+5;
+			u.uen = min(u.uen+400,u.uenmax);
 			flags.botl = 1;
 			break;
 		}
@@ -6910,7 +6956,8 @@ register struct monst *mon;
 		switch (rn2(5)) {
 		case 0: You_feel("raised to your full potential.");
 			exercise(A_CON, TRUE);
-			u.uen = (u.uenmax += rnd(5));
+			u.uenmax += rnd(10)+5;
+			u.uen = min(u.uen+400,u.uenmax);
 			break;
 		case 1: You_feel("good enough to do it again.");
 			(void) adjattrib(A_CON, 1, TRUE);

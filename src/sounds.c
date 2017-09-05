@@ -473,7 +473,7 @@ register struct monst *mtmp;
 {
 	const char *ret;
 
-	switch (mtmp->data->msound) {
+	switch (is_silent_mon(mtmp) ? MS_SILENT : mtmp->data->msound) {
 	case MS_MEW:
 	case MS_HISS:
 	    ret = "hiss";
@@ -614,7 +614,7 @@ register struct monst *mtmp;
 	return;
 
     /* presumably nearness and soundok checks have already been made */
-    if (!is_silent(mtmp->data) && mtmp->data->msound <= MS_ANIMAL)
+    if (!is_silent_mon(mtmp) && mtmp->data->msound <= MS_ANIMAL)
 	(void) domonnoise(mtmp, FALSE);
     else if (mtmp->data->msound >= MS_HUMANOID) {
 	if (!canspotmon(mtmp))
@@ -636,7 +636,7 @@ boolean chatting;
 
     /* presumably nearness and sleep checks have already been made */
 	if (!flags.soundok) return(0);
-	if (is_silent(ptr)){
+	if (is_silent_mon(mtmp)){
 		if (chatting) {
 			pline("%s does not respond.", Monnam(mtmp));
 			return 1;
@@ -680,7 +680,7 @@ boolean chatting;
 			}
 		}
 	}
-	switch (ptr->msound) {
+	switch (mtmp->mfaction == SKELIFIED ? MS_BONES : is_silent_mon(mtmp) ? MS_SILENT : ptr->msound) {
 	case MS_ORACLE:
 	    return doconsult(mtmp);
 	case MS_PRIEST: /*Most (all?) things with this will have ispriest set*/
@@ -935,7 +935,7 @@ asGuardian:
 				mtmp->mstun = 0; mtmp->mconf = 0;
 				mtmp->mpeaceful = 0; mtmp->mtame = 0;
 				
-				u.ustdy = 54;
+				u.ustdy = mtmp->m_lev;
 				pline_msg = "ends its prayer.";
 			} else {
 				pline_msg = "prays, and the whispers fill the world.";
@@ -2038,7 +2038,7 @@ int dz;
 
     /* laughing monsters can't talk */
     if (!mtmp->mnotlaugh) {
-		if (!is_silent(mtmp->data)) pline("%s laughs hysterically", Monnam(mtmp));
+		if (!is_silent_mon(mtmp)) pline("%s laughs hysterically", Monnam(mtmp));
 		return(0);
     }
 	
@@ -4459,6 +4459,7 @@ bindspirit(seal_id)
 			if(u.sealTimeout[PAIMON-FIRST_SEAL] < moves){
 				u.sealsActive |= SEAL_PAIMON;
 				u.sealsUsed |= SEAL_PAIMON;
+				unrestrict_weapon_skill(P_WAND_POWER);
 				u.spirit[u.sealCounts] = SEAL_PAIMON;
 				set_spirit_powers(SEAL_PAIMON);
 				u.spiritT[u.sealCounts] = moves + bindingPeriod;
@@ -4837,6 +4838,7 @@ int p_skill;
 	if(p_skill == P_CLERIC_SPELL) return u.sealsActive & SEAL_AMON? TRUE : FALSE;
 	if(p_skill == P_ESCAPE_SPELL) return u.sealsActive & SEAL_ANDREALPHUS? TRUE : FALSE;
 	if(p_skill == P_MATTER_SPELL) return u.sealsActive & SEAL_MARIONETTE? TRUE : FALSE;
+	if(p_skill == P_WAND_POWER) return u.sealsActive & SEAL_PAIMON? TRUE : FALSE;
 	if(p_skill == P_RIDING) return u.sealsActive & SEAL_BERITH? TRUE : FALSE;
 	if(p_skill == P_BARE_HANDED_COMBAT) return u.sealsActive & (SEAL_EURYNOME|SEAL_BUER)? TRUE : FALSE;
 	if(p_skill == P_BEAST_MASTERY) return u.sealsActive & SEAL_MALPHAS? TRUE : FALSE;

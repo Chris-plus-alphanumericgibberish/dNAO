@@ -34,6 +34,8 @@ STATIC_DCL void FDECL(m_initinv,(struct monst *));
 extern const int monstr[];
 int curhouse = 0;
 int undeadfaction = 0;
+int zombiepm = -1;
+int skeletpm = -1;
 
 #define m_initsgrp(mtmp, x, y)	m_initgrp(mtmp, x, y, 3)
 #define m_initlgrp(mtmp, x, y)	m_initgrp(mtmp, x, y, 10)
@@ -132,7 +134,7 @@ register int x, y, n;
 	mndx = monsndx(mtmp->data);
 	if(!(u.uevent.uaxus_foe) || mndx > PM_QUINON || mndx < PM_MONOTON){
 	 while(cnt--) {
-		if (peace_minded(mtmp->data)) continue;
+		if (peace_minded(mtmp->data) && !is_derived_undead_mon(mtmp)) continue;
 		/* Don't create groups of peaceful monsters since they'll get
 		 * in our way.  If the monster has a percentage chance so some
 		 * are peaceful and some are not, the result will just be a
@@ -746,7 +748,7 @@ register struct monst *mtmp;
 					otmp->ovar1 = LOLTH_SYMBOL;
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
-					otmp->spe = 6;
+					otmp->spe = 3;
 					(void) mpickobj(mtmp, otmp);
 					/*Dress*/
 					otmp = mksobj(BLACK_DRESS, TRUE, FALSE);
@@ -3404,8 +3406,10 @@ register struct	monst	*mtmp;
 #endif /* CONVICT */
 			ptr != &mons[PM_WATCHMAN] &&
 			ptr != &mons[PM_WATCH_CAPTAIN]) {
-			if (!rn2(3)) (void) mongets(mtmp, K_RATION);
-			if (!rn2(2)) (void) mongets(mtmp, C_RATION);
+			if(!(level.flags.has_barracks || In_law(&u.uz) || in_mklev || undeadfaction)){
+				if (!rn2(3)) (void) mongets(mtmp, K_RATION);
+				if (!rn2(2)) (void) mongets(mtmp, C_RATION);
+			}
 			if (ptr != &mons[PM_SOLDIER] && !rn2(3))
 				(void) mongets(mtmp, BUGLE);
 		    } else
@@ -3941,7 +3945,7 @@ register struct	monst	*mtmp;
 		}
 		break;
 		case S_ZOMBIE:
-			if(ptr == &mons[PM_DROW_ZOMBIE] && !rn2(10)){
+			if(ptr == &mons[PM_HEDROW_ZOMBIE] && !rn2(10)){
 				otmp = mksobj(find_signet_ring(), FALSE, FALSE);
 				otmp->ohaluengr = TRUE;
 				otmp->ovar1 = mtmp->mfaction;
@@ -4098,7 +4102,7 @@ register struct	monst	*mtmp;
 				otmp->ovar1 = LOLTH_SYMBOL;
 				otmp->blessed = TRUE;
 				otmp->cursed = FALSE;
-				otmp->spe = 14;
+				otmp->spe = 7;
 				(void) mpickobj(mtmp, otmp);
 				/*Gauntlets*/
 				otmp = mksobj(ORIHALCYON_GAUNTLETS, TRUE, FALSE);
@@ -4604,6 +4608,17 @@ boolean ghostly;
 	return result;
 }
 
+struct monst *
+makeundead(ptr, x, y, mmflags, undeadtype)
+register struct permonst *ptr;
+register int	x, y;
+register int	mmflags;
+register int	undeadtype;
+{
+	undeadfaction = undeadtype;
+	makemon(ptr, x, y, mmflags);
+	undeadfaction = 0;
+}
 /*
  * called with [x,y] = coordinates;
  *	[0,0] means anyplace
@@ -4936,7 +4951,7 @@ register int	mmflags;
 					} else if(!(rn2(4))) curhouse = rn2(LAST_HOUSE+1-FIRST_HOUSE)+FIRST_HOUSE;
 					else curhouse = rn2(LAST_FALLEN_HOUSE+1-FIRST_FALLEN_HOUSE)+FIRST_FALLEN_HOUSE;
 				}
-				else if(ptr == &mons[PM_DROW_ZOMBIE]){
+				else if(ptr == &mons[PM_HEDROW_ZOMBIE]){
 					if(!rn2(6)) curhouse = SORCERE;
 					else if(!rn2(5)) curhouse = MAGTHERE;
 					else if(!(rn2(4))) curhouse = rn2(LAST_HOUSE+1-FIRST_HOUSE)+FIRST_HOUSE;
@@ -4965,8 +4980,35 @@ register int	mmflags;
 			unsethouse = TRUE;
 		}
 		mtmp->mfaction = curhouse;
+	} else if(!undeadfaction && ((zombiepm >=0 && &mons[zombiepm] == mtmp->data) || (skeletpm >=0 && &mons[skeletpm] == mtmp->data))){
+		if(zombiepm >=0 && &mons[zombiepm] == mtmp->data){
+			undeadfaction = ZOMBIFIED;
+			unsethouse = TRUE;
+			zombiepm = -1;
+		} else {
+			undeadfaction = SKELIFIED;
+			unsethouse = TRUE;
+			skeletpm = -1;
+		}
+	} else if(In_quest(&u.uz) && urole.neminum == PM_NECROMANCER && mtmp->data == &mons[PM_ELF]){
+		undeadfaction = ZOMBIFIED;
+		unsethouse = TRUE;
+		m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+	} else if(!undeadfaction && (mtmp->data->geno&G_HELL) == 0 && Is_mephisto_level(&u.uz)){
+		undeadfaction = CRYSTALFIED;
+		unsethouse = TRUE;
 	} else if(randmonst && !undeadfaction && can_undead_mon(mtmp)){
-		if(!rn2(2)){
+		if(In_mines(&u.uz)){
+			if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && rn2(10) <= 5){
+				undeadfaction = ZOMBIFIED;
+				unsethouse = TRUE;
+				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+			} else if(!rn2(10)){
+				undeadfaction = ZOMBIFIED;
+				unsethouse = TRUE;
+				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+			}
+		} else if(!rn2(100)){
 			undeadfaction = ZOMBIFIED;
 			unsethouse = TRUE;
 			m_initlgrp(mtmp, mtmp->mx, mtmp->my);
@@ -4974,12 +5016,14 @@ register int	mmflags;
 	}
 	if(undeadfaction){
 		mtmp->mfaction = undeadfaction;
+		newsym(mtmp->mx,mtmp->my);
+		allow_minvent = !rn2(4);
 	}
 	
 	if(Race_if(PM_DROW) && in_mklev && Is_qstart(&u.uz) && 
 		(ptr == &mons[PM_SPROW] || ptr == &mons[PM_DRIDER] || ptr == &mons[PM_CAVE_LIZARD] || ptr == &mons[PM_LARGE_CAVE_LIZARD])
 	) mtmp->mpeaceful = TRUE;
-	else mtmp->mpeaceful = (mmflags & MM_ANGRY) ? FALSE : peace_minded(ptr);
+	else mtmp->mpeaceful = (mmflags & MM_ANGRY) ? FALSE : (peace_minded(ptr) && !is_derived_undead_mon(mtmp));
 	
 	switch(ptr->mlet) {
 		case S_MIMIC:
@@ -5085,7 +5129,7 @@ register int	mmflags;
 					m_initsgrp(makemon(&mons[PM_DROW_MATRON], mtmp->mx, mtmp->my, MM_ADJACENTOK), mtmp->mx, mtmp->my);
 					m_initlgrp(makemon(&mons[PM_HEDROW_WARRIOR], mtmp->mx, mtmp->my, MM_ADJACENTOK), mtmp->mx, mtmp->my);
 					m_initlgrp(makemon(&mons[PM_DROW_MUMMY], mtmp->mx, mtmp->my, MM_ADJACENTOK), mtmp->mx, mtmp->my);
-					m_initlgrp(makemon(&mons[PM_DROW_ZOMBIE], mtmp->mx, mtmp->my, MM_ADJACENTOK), mtmp->mx, mtmp->my);
+					m_initlgrp(makemon(&mons[PM_HEDROW_ZOMBIE], mtmp->mx, mtmp->my, MM_ADJACENTOK), mtmp->mx, mtmp->my);
 				} else if (mndx == PM_ELVENKING || mndx == PM_ELVENQUEEN){
 					for(num = rnd(2); num >= 0; num--) makemon(&mons[rn2(2) ? PM_ELF_LORD : PM_ELF_LADY], mtmp->mx, mtmp->my, MM_ADJACENTOK);
 					for(num = rn1(6,3); num >= 0; num--) makemon(&mons[PM_GREY_ELF], mtmp->mx, mtmp->my, MM_ADJACENTOK);
@@ -5515,6 +5559,14 @@ register int	mmflags;
 	    if (mtmp->minvent) discard_minvent(mtmp);
 	    mtmp->minvent = (struct obj *)0;    /* caller expects this */
 	}
+	if(zombiepm >= 0){
+		//wasn't used
+		zombiepm = -1;
+	}
+	if(skeletpm >= 0){
+		//wasn't used
+		skeletpm = -1;
+	}
 	if(unsethouse){
 		/*At this point, we have FINALLY created the inventory for the initial creature and all its associates, so the global should be unset now.*/
 		curhouse = 0;
@@ -5549,6 +5601,7 @@ int mndx;
 		: mndx == PM_ALPHA_METROID ? 45 : mndx == PM_GAMMA_METROID ? 48 : mndx == PM_ZETA_METROID ? 9 
 		: mndx == PM_OMEGA_METROID ? 12 : mndx == PM_METROID_QUEEN ? 3 : mndx == PM_ARGENTUM_GOLEM ? 8 
 		: mndx == PM_ALHOON ? 2 : mndx == PM_CENTER_OF_ALL ? 1 : mndx == PM_SOLDIER ? 250
+		: mndx == PM_ANCIENT_OF_ICE ? 8 : mndx == PM_ANCIENT_OF_DEATH ? 4
 		: mndx == PM_SOLDIER_ANT ? 250 : MAXMONNO); 
 }
 
@@ -5667,7 +5720,7 @@ static int roguemons[] = {
 	PM_WRAITH,
 	PM_XORN,
 	PM_YETI,
-	PM_HUMAN_ZOMBIE
+	PM_ZOMBIE
 };
 
 STATIC_OVL
@@ -5738,7 +5791,7 @@ rndmonst()
 		if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && rn2(2)){
 			switch(roll){
 				case 1:	case 2: case 3: case 4: return mkclass(S_KOBOLD, G_NOHELL); break;
-				case 5:	case 6: return rn2(6) ? &mons[PM_GNOME_ZOMBIE] : &mons[PM_DWARF_ZOMBIE]; break;
+				case 5:	case 6: return rn2(6) ? &mons[PM_GNOME] : &mons[PM_DWARF]; break;
 				case 7: return &mons[PM_IMP]; break;
 				default: break; //proceed with normal generation
 			}
@@ -5746,7 +5799,7 @@ rndmonst()
 			switch(roll){
 				case 1:	case 2: case 3: case 4: return mkclass(S_GNOME, G_NOHELL); break;
 				case 5:	case 6: return &mons[PM_DWARF]; break;
-				case 7: return rn2(6) ? &mons[PM_GNOME_ZOMBIE] : &mons[PM_DWARF_ZOMBIE]; break;
+				case 7: return rn2(6) ? &mons[PM_GNOME] : &mons[PM_DWARF]; break;
 				default: break; //proceed with normal generation
 			}
 		}
@@ -6152,8 +6205,10 @@ int	spc;
 		!flags.initgend && flags.stag == 0 && In_quest(&u.uz) && class == S_MUMMY && !(mvitals[PM_DROW_MUMMY].mvflags & G_GENOD && !In_quest(&u.uz))
 	) return &mons[PM_DROW_MUMMY];
 	if(Race_if(PM_DROW) && (Role_if(PM_PRIEST) || Role_if(PM_ROGUE) || Role_if(PM_RANGER) || Role_if(PM_WIZARD)) &&
-		!flags.initgend && flags.stag == 0 && In_quest(&u.uz) && class == S_ZOMBIE && !(mvitals[PM_DROW_ZOMBIE].mvflags & G_GENOD && !In_quest(&u.uz))
-	) return &mons[PM_DROW_ZOMBIE];
+		!flags.initgend && flags.stag == 0 && In_quest(&u.uz) && class == S_ZOMBIE && !(mvitals[PM_HEDROW_ZOMBIE].mvflags & G_GENOD && !In_quest(&u.uz))
+	) return &mons[PM_HEDROW_ZOMBIE];
+	if(class == S_ZOMBIE)
+		return mkzombie();
 /*	Assumption #1:	monsters of a given class are contiguous in the
  *			mons[] array.
  */
@@ -6191,6 +6246,142 @@ int	spc;
 	first--; /* correct an off-by-one error */
 
 	return(&mons[first]);
+}
+
+static const int standardZombies[] = {
+					  PM_KOBOLD, //1
+					  PM_HUMAN, //2
+					  PM_GNOME, //3
+					  PM_ORC, //3
+					  PM_DWARF, //4
+					  PM_DOG, //?
+					  PM_URUK_HAI, //5
+					  PM_ELF, //6
+					  PM_OGRE, //7
+					  PM_GIANT, //8
+					  PM_ETTIN, //13
+					  PM_HALF_DRAGON, //16
+					  PM_MASTODON //23
+					};
+
+static const int orcusZombies[] = {
+					  PM_WEREWOLF,
+					  PM_MANTICORE,
+					  PM_TITANOTHERE,
+					  PM_BALUCHITHERIUM,
+					  PM_MASTODON,
+					  PM_LONG_WORM,
+					  PM_PURPLE_WORM,
+					  PM_JABBERWOCK
+					};
+
+static const int orcusSkeletons[] = {
+					  PM_WINGED_KOBOLD,
+					  PM_SOLDIER,
+					  PM_HILL_ORC,
+					  PM_DWARF,
+					  PM_BUGBEAR,
+					  PM_DOG,
+					  PM_URUK_HAI,
+					  PM_ELF,
+					  PM_OGRE,
+					  PM_GIANT,
+					  PM_ETTIN,
+					  PM_HALF_DRAGON
+					};
+
+static const int granfaloonZombies[] = {
+						// PM_NOBLEMAN,
+						// PM_NOBLEWOMAN,
+						// PM_PRIEST,
+						// PM_PRIESTESS,
+						PM_CAPTAIN,
+						PM_DWARF_KING,
+						PM_DWARF_QUEEN,
+						PM_GNOME_KING,
+						PM_GNOME_QUEEN,
+						PM_ELVENKING,
+						PM_ELVENQUEEN
+						// PM_DROW_MATRON
+					};
+static const int elfZombies[] = {
+						PM_WOODLAND_ELF,
+						PM_GREEN_ELF,
+						PM_GREY_ELF,
+						PM_ELF_LORD,
+						PM_ELF_LADY,
+						PM_HILL_ORC,
+						PM_MORDOR_ORC,
+						PM_ANGBAND_ORC
+					};
+
+struct permonst *
+mkzombie()
+{
+	register int	first, last, num = 0;
+	int maxmlev;
+
+	maxmlev = level_difficulty() >> 1;
+	if(Is_orcus_level(&u.uz)){
+		if(!rn2(2)){
+			skeletpm = orcusSkeletons[rn2(SIZE(orcusSkeletons))];
+			return &mons[skeletpm];
+		} else {
+			zombiepm = orcusZombies[rn2(SIZE(orcusZombies))];
+			return &mons[zombiepm];
+		}
+	}
+	if(In_quest(&u.uz) && Role_if(PM_EXILE)){
+		(urace.zombienum != NON_PM) ? (zombiepm = urace.zombienum) : (zombiepm = PM_HUMAN);
+		return &mons[zombiepm];
+	}
+	if(In_quest(&u.uz) && Role_if(PM_PIRATE)){
+		zombiepm = PM_HUMAN;
+		return &mons[zombiepm];
+	}
+	if(In_quest(&u.uz) && Role_if(PM_PRIEST) && urole.neminum == PM_LEGION && mvitals[PM_LEGION].died == 0){
+		zombiepm = granfaloonZombies[rn2(SIZE(granfaloonZombies))];
+		return &mons[zombiepm];
+	}
+	if(In_quest(&u.uz) && urole.neminum == PM_NECROMANCER){
+		zombiepm = elfZombies[rn2(SIZE(elfZombies))];
+		return &mons[zombiepm];
+	}
+	if(u.uz.dnum == tower_dnum){
+		zombiepm = rn2(3) ? PM_PEASANT : PM_WOLF;
+		return &mons[zombiepm];
+	}
+	// if(Race_if(PM_DROW) && (Role_if(PM_PRIEST) || Role_if(PM_ROGUE) || Role_if(PM_RANGER) || Role_if(PM_WIZARD)) &&
+		// !flags.initgend && flags.stag == 0 && In_quest(&u.uz) && class == S_ZOMBIE && !(mvitals[PM_HEDROW_ZOMBIE].mvflags & G_GENOD && !In_quest(&u.uz))
+	// ) return &mons[PM_HEDROW_ZOMBIE];
+	// if(class == S_ZOMBIE)
+		// return mkzombie();
+
+	first = 0;
+
+	for (last = first; last < SIZE(standardZombies); last++)
+	    if (!(mvitals[standardZombies[last]].mvflags & G_GENOD && !In_quest(&u.uz)) ) {
+		/* consider it */
+		if(num && toostrong(standardZombies[last], maxmlev) &&
+		   monstr[standardZombies[last]] != monstr[standardZombies[last-1]] && (rn2(2) || monstr[standardZombies[last]] > maxmlev+5)
+		) break;
+		num += mons[standardZombies[last]].geno & G_FREQ;
+	    }
+
+	if(!num) return((struct permonst *) 0);
+
+/*	Assumption #2:	monsters of a given class are presented in ascending
+ *			order of strength.
+ */
+	for(num = rnd(num); num > 0; first++)
+	    if (!(mvitals[standardZombies[first]].mvflags & G_GENOD && !In_quest(&u.uz)) ) {
+			num -= mons[standardZombies[first]].geno & G_FREQ;
+	    }
+	first--; /* correct an off-by-one error */
+	
+	zombiepm = standardZombies[first];
+	 
+	return(&mons[standardZombies[first]]);
 }
 
 int
@@ -6316,6 +6507,7 @@ struct monst *mtmp, *victim;
 	    return ptr;		/* doesn't gain a level */
 
 	if (is_mplayer(ptr) || ptr == &mons[PM_BYAKHEE] || ptr == &mons[PM_LILLEND]) lev_limit = 30;	/* same as player */
+	else if (is_eladrin(ptr) && ptr->mlevel <= 20) lev_limit = 30;
 	else if (ptr == &mons[PM_ANCIENT_OF_ICE] || ptr == &mons[PM_ANCIENT_OF_DEATH]) lev_limit = 45;
 	else if (lev_limit < 5) lev_limit = 5;	/* arbitrary */
 	else if (lev_limit > 49) lev_limit = (ptr->mlevel > 49 ? ptr->mlevel : 49);

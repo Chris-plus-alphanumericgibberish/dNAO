@@ -8,36 +8,36 @@ STATIC_DCL void NDECL(binderdown);
 STATIC_DCL int FDECL(enermod, (int));
 
 static long expUps[] = {
-0,     //1
-20,    //2
-50,    //3
-100,   //4
-200,   //5
-400,   //6
-800,   //7
-1600,  //8
-3200,  //9
-6400,  //10
-10000, //11
-14000, //12
-19000, //13
-25000, //14
-32000, //15
-41000, //16
-52000, //17
-65000, //18
-80000, //19
-97000, //20
-117000,//21
-140000,//22
-166000,//23
-195000,//24
-227000,//25
-263000,//26
-303000,//27
-347000,//28
-395000,//29
-450000 //30
+0,		//1
+20,		//2
+50,		//3
+100,	//4
+200,	//5
+400,	//6
+800,	//7
+1600,	//8
+3200,	//9
+6400,	//10
+10400,	//11
+15600,	//12
+22800,	//13
+32500,	//14
+45200,	//15
+61900,	//16
+83100,	//17
+109300,	//18
+141000,	//19
+178700,	//20
+223000,	//21
+274500,	//22
+333800,	//23
+401500,	//24
+478200,	//25
+563900,	//26
+659600,	//27
+766300,	//28
+885000,	//29
+1000000	//30
 };
 
 long
@@ -84,7 +84,10 @@ experience(mtmp, nk)	/* return # of exp points for mtmp after nk killed */
 	if(mtmp->data == &mons[PM_DANCING_BLADE] || mtmp->data == &mons[PM_LONG_SINUOUS_TENTACLE] || mtmp->data == &mons[PM_SWARM_OF_SNAKING_TENTACLES] || mtmp->data == &mons[PM_WIDE_CLUBBED_TENTACLE]) return 0;
 	
 /*	Dungeon fern spores give no experience */
-	if(is_fern_spore(mtmp->data)) tmp = 0;
+	if(is_fern_spore(mtmp->data)) return 0;
+
+/*	zombies give no experience (resurecting and infecting)*/
+	if(is_derived_undead_mon(mtmp)) return 0;
 
 	tmp = 1 + mtmp->m_lev * mtmp->m_lev;
 
@@ -147,7 +150,7 @@ ptrexperience(ptr)	/* return # of exp points for mtmp after nk killed */
 	if(ptr == &mons[PM_DANCING_BLADE] || ptr == &mons[PM_LONG_SINUOUS_TENTACLE] || ptr == &mons[PM_SWARM_OF_SNAKING_TENTACLES] || ptr == &mons[PM_WIDE_CLUBBED_TENTACLE]) return 0;
 	
 /*	Dungeon fern spores give no experience */
-	if(is_fern_spore(ptr)) tmp = 0;
+	if(is_fern_spore(ptr)) return 0;
 
 	tmp = 1 + ptr->mlevel * ptr->mlevel;
 

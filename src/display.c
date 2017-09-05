@@ -422,27 +422,33 @@ display_monster(x, y, mon, sightflags, worm_tail)
     if (!mon_mimic || sensed) {
 	int num;
 
-	/* [ALI] Only use detected glyphs when monster wouldn't be
-	 * visible by any other means.
-	 */
-	if (sightflags == DETECTED) {
-	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
-			detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL)):
-			detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL));
-	    else
-		num = detected_mon_to_glyph(mon);
-	} else if (mon->mtame && !Hallucination) {
+	if (mon->mtame && !Hallucination) {
 	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
 			petnum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			petnum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
 		num = pet_to_glyph(mon);
+	} else if (mon->mpeaceful && !Hallucination) {
+	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
+			peacenum_to_glyph(PM_HUNTING_HORROR_TAIL):
+			peacenum_to_glyph(PM_LONG_WORM_TAIL);
+	    else
+		num = peace_to_glyph(mon);
 	} else if (is_derived_undead_mon(mon) && !Hallucination) {
 	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
 			zombienum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			zombienum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
 		num = zombie_to_glyph(mon);
+	/* [ALI] Only use detected glyphs when monster wouldn't be
+	 * visible by any other means.
+	 */
+	} else if (sightflags == DETECTED) {
+	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
+			detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL)):
+			detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL));
+	    else
+		num = detected_mon_to_glyph(mon);
 	} else {
 	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
 			monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL)):
@@ -1377,6 +1383,8 @@ show_glyph(x,y,glyph)
 	    text = "invisible mon";	offset = glyph - GLYPH_INVIS_OFF;
 	} else if (glyph >= GLYPH_ZOMBIE_OFF) {		/* a zombie */
 	    text = "zombie";		offset = glyph - GLYPH_ZOMBIE_OFF;
+	} else if (glyph >= GLYPH_PEACE_OFF) {		/* a peaceful monster */
+	    text = "peaceful mon";		offset = glyph - GLYPH_PEACE_OFF;
 	} else if (glyph >= GLYPH_PET_OFF) {		/* a pet */
 	    text = "pet";		offset = glyph - GLYPH_PET_OFF;
 	} else {					/* a monster */
@@ -1536,6 +1544,10 @@ int glyph;
 	ch = def_monsyms[(int)mons[offset].mlet];
     } else if ((offset = (glyph - GLYPH_INVIS_OFF)) >= 0) {  /* invisible */
 	ch = DEF_INVISIBLE;
+    } else if ((offset = (glyph - GLYPH_ZOMBIE_OFF)) >= 0) {	/* a zombie */
+	ch = def_monsyms[(int)mons[offset].mlet];
+    } else if ((offset = (glyph - GLYPH_PEACE_OFF)) >= 0) {	/* a peaceful monster */
+	ch = def_monsyms[(int)mons[offset].mlet];
     } else if ((offset = (glyph - GLYPH_PET_OFF)) >= 0) {	/* a pet */
 	ch = def_monsyms[(int)mons[offset].mlet];
     } else {						    /* a monster */

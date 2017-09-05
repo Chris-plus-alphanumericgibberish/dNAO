@@ -60,15 +60,16 @@
 #define DISMOUNT_VANISHED	7
 #endif
 
-/* Special returns from mapglyph() */
-#define MG_CORPSE	0x01
-#define MG_INVIS	0x02
-#define MG_DETECT	0x04
-#define MG_PET		0x08
-#define MG_RIDDEN	0x10
-#define MG_STAIRS	0x20
-#define MG_OBJPILE	0x40
-#define MG_ZOMBIE	0x80
+/* Special returns from mapglyph() (note: type is unsigned int) */
+#define MG_CORPSE	0x001
+#define MG_INVIS	0x002
+#define MG_DETECT	0x004
+#define MG_PET		0x008
+#define MG_RIDDEN	0x010
+#define MG_STAIRS	0x020
+#define MG_OBJPILE	0x040
+#define MG_ZOMBIE	0x080
+#define MG_PEACE	0x100
 
 /* sellobj_state() states */
 #define SELL_NORMAL	(0)

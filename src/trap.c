@@ -429,8 +429,8 @@ int *fail_reason;
 	if (statue->oxlth && statue->oattached == OATTACHED_MONST) {
 	    cc.x = x,  cc.y = y;
 	    mon = montraits(statue, &cc);
-	    if (mon && mon->mtame && !mon->isminion)
-		wary_dog(mon, TRUE);
+	    // if (mon && mon->mtame && !mon->isminion)
+		// wary_dog(mon, TRUE);
 	} else {
 	    /* statue of any golem hit with stone-to-flesh becomes flesh golem */
 	    if (is_golem(&mons[statue->corpsenm]) && cause == ANIMATE_SPELL)
@@ -1051,7 +1051,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 			    You("%s %s spider web!",
 				(u.umonnum == PM_FIRE_ELEMENTAL) ? "burn" : "dissolve",
 				a_your[trap->madeby_u]);
-			if(!Is_lolth_level(&u.uz)){
+			if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){
 				deltrap(trap);
 				newsym(u.ux,u.uy);
 			}
@@ -1127,7 +1127,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 			u.utrap = 0;
 			if (webmsgok)
 			    You("tear through %s web!", a_your[trap->madeby_u]);
-			if(!Is_lolth_level(&u.uz)){
+			if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){
 				deltrap(trap);
 				newsym(u.ux,u.uy);	/* get rid of trap symbol */
 			}
@@ -1309,7 +1309,7 @@ struct obj *otmp;
 			steedhit = TRUE;
 			break;
 		case SLP_GAS_TRAP:
-		    if (!resists_sleep(mtmp) && !breathless(mptr) &&
+		    if (!resists_sleep(mtmp) && !breathless_mon(mtmp) &&
 				!mtmp->msleeping && mtmp->mcanmove) {
 			    mtmp->mcanmove = 0;
 			    mtmp->mfrozen = rnd(25);
@@ -1902,7 +1902,7 @@ register struct monst *mtmp;
 			break;
 
 		case SLP_GAS_TRAP:
-		    if (!resists_sleep(mtmp) && !breathless(mptr) &&
+		    if (!resists_sleep(mtmp) && !breathless_mon(mtmp) &&
 				!mtmp->msleeping && mtmp->mcanmove) {
 			    mtmp->mcanmove = 0;
 			    mtmp->mfrozen = rnd(25);
@@ -2126,7 +2126,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 					  (mptr == &mons[PM_FIRE_ELEMENTAL]) ?
 					    "burns" : "dissolves",
 					  a_your[trap->madeby_u]);
-				if(!Is_lolth_level(&u.uz)){
+				if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){
 					deltrap(trap);
 					newsym(mtmp->mx, mtmp->my);
 				}
@@ -2147,7 +2147,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 					pline("%s slices through %s spider web.",
 						  Monnam(mtmp),
 						  a_your[trap->madeby_u]);
-					if(!Is_lolth_level(&u.uz)){
+					if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){
 						deltrap(trap);
 						newsym(mtmp->mx, mtmp->my);
 					}
@@ -2203,7 +2203,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    if (in_sight)
 				pline("%s tears through %s spider web!",
 				      Monnam(mtmp), a_your[trap->madeby_u]);
-				if(!Is_lolth_level(&u.uz)){
+				if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){
 					deltrap(trap);
 					newsym(mtmp->mx, mtmp->my);
 				}
@@ -2476,6 +2476,11 @@ long hmask, emask;     /* might cancel timeout */
 	HLevitation &= ~hmask;
 	ELevitation &= ~emask;
 	if(Levitation) return(0); /* maybe another ring/potion/boots */
+	
+    /* Unmaintain the levitation spell if applicable */
+    if (spell_maintained(SPE_LEVITATION))
+        spell_unmaintain(SPE_LEVITATION);
+
 	if(u.uswallow) {
 	    You("float down, but you are still %s.",
 		is_animal(u.ustuck->data) ? "swallowed" : "engulfed");
@@ -3622,7 +3627,7 @@ struct trap *ttmp;
 		if (ttmp->ttyp == BEAR_TRAP) {
 			You("disarm %s bear trap.", the_your[ttmp->madeby_u]);
 			cnv_trap_obj(BEARTRAP, 1, ttmp);
-		} else if(!Is_lolth_level(&u.uz)) /* if (ttmp->ttyp == WEB) */ {
+		} else if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)) /* if (ttmp->ttyp == WEB) */ {
 			You("succeed in removing %s web.", the_your[ttmp->madeby_u]);
 			deltrap(ttmp);
 		}

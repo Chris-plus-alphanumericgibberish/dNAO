@@ -145,7 +145,7 @@ resists_fire(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_fire(mon) || mon_resistance(mon, MR_FIRE) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Fire_resistance));
+	return (species_resists_fire(mon) || mon_resistance(mon, FIRE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Fire_resistance));
 }
 
 boolean
@@ -154,7 +154,7 @@ resists_cold(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_cold(mon) || mon_resistance(mon, MR_COLD) || 
+	return (species_resists_cold(mon) || mon_resistance(mon, COLD_RES) || 
 		mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED || 
 		(mon == u.usteed && u.sealsActive&SEAL_BERITH && Cold_resistance));
 }
@@ -165,7 +165,7 @@ resists_sleep(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_sleep(mon) || mon_resistance(mon, MR_SLEEP) || 
+	return (species_resists_sleep(mon) || mon_resistance(mon, SLEEP_RES) || 
 		mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED || 
 		((mon) == u.usteed && u.sealsActive&SEAL_BERITH && Sleep_resistance) || (mon)->cham == CHAM_DREAM);
 }
@@ -176,7 +176,7 @@ resists_disint(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_disint(mon) || mon_resistance(mon, MR_DISINT) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Disint_resistance));
+	return (species_resists_disint(mon) || mon_resistance(mon, DISINT_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Disint_resistance));
 }
 
 boolean
@@ -185,7 +185,7 @@ resists_elec(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_elec(mon) || mon_resistance(mon, MR_ELEC) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Shock_resistance));
+	return (species_resists_elec(mon) || mon_resistance(mon, SHOCK_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Shock_resistance));
 }
 
 boolean
@@ -194,7 +194,7 @@ resists_poison(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_poison(mon) || mon_resistance(mon, MR_POISON) || 
+	return (species_resists_poison(mon) || mon_resistance(mon, POISON_RES) || 
 		mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED || 
 		(mon == u.usteed && u.sealsActive&SEAL_BERITH && Poison_resistance));
 }
@@ -205,7 +205,7 @@ resists_acid(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_acid(mon) || mon_resistance(mon, MR_ACID) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Acid_resistance));
+	return (species_resists_acid(mon) || mon_resistance(mon, ACID_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Acid_resistance));
 }
 
 boolean
@@ -214,7 +214,7 @@ resists_ston(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_ston(mon) || mon_resistance(mon, MR_STONE) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Stone_resistance));
+	return (species_resists_ston(mon) || mon_resistance(mon, STONE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Stone_resistance));
 }
 
 boolean
@@ -223,7 +223,7 @@ resists_drain(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_drain(mon) || mon_resistance(mon, MR_DRAIN) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Drain_resistance));
+	return (species_resists_drain(mon) || mon_resistance(mon, DRAIN_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Drain_resistance));
 }
 
 boolean
@@ -232,7 +232,7 @@ resists_sickness(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_sickness(mon) || mon_resistance(mon, MR_SICK) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Sick_resistance));
+	return (species_resists_sickness(mon) || mon_resistance(mon, SICK_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Sick_resistance));
 }
 
 boolean
@@ -249,7 +249,7 @@ struct monst *mon;
 	return (boolean)(is_undead_mon(mon) || is_demon(ptr) || is_were(ptr) ||
 			 species_resists_drain(mon) || 
 			 ptr == &mons[PM_DEATH] ||
-			 mon_resistance(mon, MR_DRAIN) ||
+			 mon_resistance(mon, DRAIN_RES) ||
 			 (wep && wep->oartifact && defends(AD_DRLI, wep))  || 
 			 (mon == u.usteed && u.sealsActive&SEAL_BERITH && Drain_resistance));
 }
@@ -434,7 +434,7 @@ struct permonst *ptr;
 {
 	register int i, atyp;
 	long atk_mask = (1L << AT_BREA) | (1L << AT_SPIT) | (1L << AT_GAZE) | (1L << AT_LRCH) | (1L << AT_LNCK)
-					| (1L << AT_MMGC) | (1L << AT_TNKR) | (1L << AT_ARRW) | (1L << AT_BEAM);
+					| (1L << AT_MMGC) | (1L << AT_TNKR) | (1L << AT_ARRW) | (1L << AT_BEAM) | (1L << AT_5SQR);
 
 	/* was: (attacktype(ptr, AT_BREA) || attacktype(ptr, AT_WEAP) ||
 		attacktype(ptr, AT_SPIT) || attacktype(ptr, AT_GAZE) ||
@@ -745,7 +745,7 @@ struct monst *mtmp;
 
 	/* stalking types follow, but won't when fleeing unless you hold
 	   the Amulet */
-	return (boolean)((mtmp->data->mflagst & MT_STALK) &&
+	return (boolean)(((mtmp->data->mflagst & MT_STALK) || is_derived_undead_mon(mtmp)) &&
 				(!mtmp->mflee || mtmp->data == &mons[PM_BANDERSNATCH] || u.uhave.amulet));
 }
 
@@ -782,6 +782,7 @@ static const short grownups[][2] = {
 	{PM_ELF_LADY, PM_ELVENQUEEN},
 	{PM_DROW, PM_HEDROW_WARRIOR},
 	{PM_DROW, PM_DROW_CAPTAIN}, {PM_DROW_CAPTAIN, PM_DROW_MATRON},
+	{PM_NUPPERIBO, PM_METAMORPHOSED_NUPPERIBO}, {PM_METAMORPHOSED_NUPPERIBO, PM_ANCIENT_NUPPERIBO},
 	{PM_LICH, PM_DEMILICH}, {PM_DEMILICH, PM_MASTER_LICH},
 	{PM_MASTER_LICH, PM_ARCH_LICH},
 	{PM_BABY_METROID, PM_METROID},{PM_METROID, PM_ALPHA_METROID}, {PM_ALPHA_METROID, PM_GAMMA_METROID},

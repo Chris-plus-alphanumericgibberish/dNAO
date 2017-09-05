@@ -54,13 +54,14 @@ static struct trobj Anachrononaut_Hu[] = {
 static struct trobj Anachrononaut_Dw[] = {
 	{ HEAVY_MACHINE_GUN, 5, WEAPON_CLASS, 1, 0 },
 	{ PISTOL, 1, WEAPON_CLASS, 1, 0 },
+	{ SEISMIC_HAMMER, 0, WEAPON_CLASS, 1, 0 },
 	{ STICK_OF_DYNAMITE, 0, TOOL_CLASS, 15, 0 },
 	{ HIGH_ELVEN_PLATE, 0, ARMOR_CLASS, 1, 0 },
 	{ BODYGLOVE, 0, ARMOR_CLASS, 1, 0 },
 	{ HIGH_ELVEN_HELM, 0, ARMOR_CLASS, 1, 0 },
 	{ HIGH_ELVEN_GAUNTLETS, 0, ARMOR_CLASS, 1, 0 },
 	{ ELVEN_BOOTS, 0, ARMOR_CLASS, 1, 0 },
-	{ CLOAK_OF_MAGIC_RESISTANCE, 0, ARMOR_CLASS, 1, 0 },
+	{ AMULET_OF_NULLIFY_MAGIC, 0, AMULET_CLASS, 1, 0 },
 	{ BULLET, 3, WEAPON_CLASS, 100, 0 },
 	{ BULLET_FABBER, 0, TOOL_CLASS, 1, 0 },
 	{ PROTEIN_PILL, 0, FOOD_CLASS, 10, 0 },
@@ -107,6 +108,7 @@ static struct trobj Anachrononaut_ShDro[] = {
 	{ PROTEIN_PILL, 0, FOOD_CLASS, 10, 0 },
 	{ SPE_FORCE_BOLT, 0, SPBOOK_CLASS, 1, 0 },
 	{ SPE_SLOW_MONSTER, 0, SPBOOK_CLASS, 1, 0 },
+	{ SPE_PROTECTION, 0, SPBOOK_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Anachrononaut_Dro[] = {
@@ -650,6 +652,7 @@ static const struct def_skill Skill_A[] = {
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
+    { P_WAND_POWER, P_SKILLED },
     { P_TWO_WEAPON_COMBAT, P_BASIC },
     { P_BARE_HANDED_COMBAT, P_EXPERT },
     { P_NONE, 0 }
@@ -660,7 +663,7 @@ static const struct def_skill Skill_Ana[] = {
     { P_SHORT_SWORD, P_EXPERT },{ P_LANCE,  P_EXPERT },
     { P_SABER, P_EXPERT },		{ P_LONG_SWORD,  P_BASIC },
     { P_CLUB, P_SKILLED },		{ P_QUARTERSTAFF, P_EXPERT },
-	{ P_BROAD_SWORD, P_EXPERT },
+	{ P_BROAD_SWORD, P_EXPERT },{ P_HAMMER, P_BASIC },
 //#ifdef FIREARMS
     { P_FIREARM, P_EXPERT },
 //#endif
@@ -773,6 +776,7 @@ static const struct def_skill Skill_H[] = {
     { P_SLING, P_SKILLED },		{ P_DART, P_EXPERT },
     { P_SHURIKEN, P_SKILLED },		{ P_UNICORN_HORN, P_EXPERT },
     { P_HEALING_SPELL, P_EXPERT },
+    { P_WAND_POWER, P_BASIC },
     { P_BARE_HANDED_COMBAT, P_BASIC },
     { P_BEAST_MASTERY, P_EXPERT },
     { P_NONE, 0 }
@@ -1023,6 +1027,7 @@ static const struct def_skill Skill_Pir[] = {
 //#endif
 	{ P_ATTACK_SPELL, P_BASIC },{ P_DIVINATION_SPELL, P_BASIC },
 	{ P_ENCHANTMENT_SPELL, P_BASIC },{ P_ESCAPE_SPELL, P_SKILLED },
+    { P_WAND_POWER, P_SKILLED },
     { P_TWO_WEAPON_COMBAT, P_SKILLED },
     { P_BARE_HANDED_COMBAT, P_EXPERT },
     { P_NONE, 0 }
@@ -1040,6 +1045,7 @@ static const struct def_skill Skill_R[] = {
     { P_DART, P_EXPERT },		{ P_SHURIKEN, P_SKILLED },
     { P_DIVINATION_SPELL, P_SKILLED },	{ P_ESCAPE_SPELL, P_SKILLED },
     { P_MATTER_SPELL, P_SKILLED },
+    { P_WAND_POWER, P_EXPERT },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
@@ -1063,6 +1069,7 @@ static const struct def_skill Skill_Ran[] = {
     { P_HEALING_SPELL, P_BASIC },
     { P_DIVINATION_SPELL, P_EXPERT },
     { P_ESCAPE_SPELL, P_BASIC },
+    { P_WAND_POWER, P_BASIC },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
@@ -1112,6 +1119,7 @@ static const struct def_skill Skill_T[] = {
 	{ P_UNICORN_HORN, P_SKILLED },
     { P_DIVINATION_SPELL, P_SKILLED },	{ P_ENCHANTMENT_SPELL, P_BASIC },
     { P_ESCAPE_SPELL, P_SKILLED },
+    { P_WAND_POWER, P_SKILLED },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
@@ -1137,6 +1145,7 @@ static const struct def_skill Skill_V[] = {
     { P_SLING, P_BASIC },			{ P_BOW, P_EXPERT },
     { P_ATTACK_SPELL, P_EXPERT },	{ P_ESCAPE_SPELL, P_BASIC },
 	{ P_DIVINATION_SPELL, P_SKILLED },
+    { P_WAND_POWER, P_BASIC },
 #ifdef STEED
     { P_RIDING, P_SKILLED },
 #endif
@@ -1160,6 +1169,7 @@ static const struct def_skill Skill_W[] = {
     { P_DIVINATION_SPELL, P_EXPERT },	{ P_ENCHANTMENT_SPELL, P_SKILLED },
     { P_CLERIC_SPELL, P_SKILLED },	{ P_ESCAPE_SPELL, P_EXPERT },
     { P_MATTER_SPELL, P_EXPERT },
+    { P_WAND_POWER, P_SKILLED },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
@@ -1260,6 +1270,7 @@ int randSpecialAttackTypes[] =
 						 AT_ARRW, 
 						 AT_BREA, 
 						 AT_BEAM, 
+						 AT_5SQR, 
 						 AT_DEVA, 
 						 AT_MAGC };
 
@@ -1296,6 +1307,7 @@ int randMeleeDamageTypes[] =
 						 AD_DRDX,
 						 AD_DRCO,
 						 AD_DRIN,
+						 AD_NPDC,
 						 AD_DISE,
 						 // AD_SSEX,
 						 AD_HALU,
@@ -1701,6 +1713,9 @@ u_init()
 		knows_object(HYPOSPRAY_AMPULE);
 		knows_object(POWER_PACK);
 		knows_object(PROTEIN_PILL);
+		knows_object(FORCE_PIKE);
+		knows_object(VIBROBLADE);
+		knows_object(SEISMIC_HAMMER);
 		knows_object(LIGHTSABER);
 		knows_object(BEAMSWORD);
 		knows_object(DOUBLE_LIGHTSABER);
@@ -2313,6 +2328,7 @@ u_init()
 			break;
 			case AT_BEAM:
 			case AT_DEVA:
+			case AT_5SQR:
 				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
 			break;
 			default:
@@ -2368,6 +2384,7 @@ u_init()
 			break;
 			case AT_BEAM:
 			case AT_DEVA:
+			case AT_5SQR:
 				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
 			break;
 			default:
@@ -2416,6 +2433,7 @@ u_init()
 				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
 			break;
 			case AT_BEAM:
+			case AT_5SQR:
 			case AT_DEVA:
 				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
 			break;
@@ -2697,6 +2715,18 @@ register struct trobj *trop;
 				obj->ovar1 = 1;
 				fix_object(obj);
 			}
+			if(obj->otyp == HEAVY_MACHINE_GUN && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
+				obj->obj_material = MITHRIL;
+				fix_object(obj);
+			}
+			if(obj->otyp == PISTOL && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
+				obj->obj_material = MITHRIL;
+				fix_object(obj);
+			}
+			if(obj->otyp == SEISMIC_HAMMER && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
+				obj->obj_material = MITHRIL;
+				fix_object(obj);
+			}
 			/* Don't start with +0 or negative rings */
 			if (objects[obj->otyp].oc_charged && obj->spe <= 0)
 				obj->spe = rne(3);
@@ -2869,6 +2899,10 @@ register struct trobj *trop;
 		if (otyp == OIL_LAMP)
 			discover_object(POT_OIL, TRUE, FALSE);
 
+		if(obj->otyp == AMULET_OF_NULLIFY_MAGIC && Role_if(PM_ANACHRONONAUT) && !uamul){
+			setworn(obj, W_AMUL);
+		}
+		
 		if(obj->oclass == ARMOR_CLASS){
 			if (is_shield(obj) && !uarms) {
 				setworn(obj, W_ARMS);

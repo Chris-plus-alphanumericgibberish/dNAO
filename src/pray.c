@@ -2854,6 +2854,7 @@ doturn()
 			case S_WRAITH:  xlev += 2;  /*FALLTHRU*/
 			case S_MUMMY:   xlev += 2;  /*FALLTHRU*/
 			case S_ZOMBIE:
+			default:
 			    if (u.ulevel >= xlev &&
 				    !resist(mtmp, '\0', 0, NOTELL)) {
 				if (u.ualign.type == A_CHAOTIC || Race_if(PM_VAMPIRE)){
@@ -2866,7 +2867,6 @@ doturn()
 				break;
 			    } /* else flee */
 			    /*FALLTHRU*/
-			default:
 			    monflee(mtmp, 0, FALSE, TRUE);
 			    break;
 			}
@@ -2945,6 +2945,7 @@ const char * const hallu_gods[] = {
 	"Mahasamatman",
 	"Nyarlathotep",
 	"Azathoth",
+	"Ubbo-Sathla",
 	"Galactus",
 	"Sauron",
 	"Morgoth",

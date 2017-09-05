@@ -621,6 +621,7 @@ const char *name;
 		else if(obj->oartifact == ART_QUICKSILVER) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_SKY_RENDER) obj->obj_material = METAL;
 		else if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS) obj->obj_material = SILVER;
+		else if(obj->oartifact == ART_ANNULUS) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_SILVER_STARLIGHT) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_CLAWS_OF_THE_REVENANCER) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_WEBWEAVER_S_CROOK) obj->obj_material = BONE;
@@ -888,15 +889,15 @@ boolean called;
 			name_at_start = FALSE;
 		}
 		if (
-			(u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood(mtmp->data))) 
+			(u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) 
 			&& !DEADMONSTER(mtmp)
 		){
-			if(mtmp->mhp == mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
+			if(mtmp->mhp == mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 			else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
-			else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood(mtmp->data)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
-			else if(mtmp->mhp >= .25*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
-			else if(mtmp->mhp >= .1*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
-			else if(mtmp->mhp > 0) (has_blood(mtmp->data)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
+			else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood_mon(mtmp)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
+			else if(mtmp->mhp >= .25*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
+			else if(mtmp->mhp >= .1*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
+			else if(mtmp->mhp > 0) (has_blood_mon(mtmp)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
 			name_at_start = FALSE;
 		}
 		if(is_drow(mdat)){
@@ -953,13 +954,13 @@ boolean called;
 				Sprintf(eos(buf), "frumious ");
 				name_at_start = FALSE;
 			}
-			if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood(mtmp->data))) ){
-				if(mtmp->mhp == mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
+			if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) ){
+				if(mtmp->mhp == mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 				else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
-				else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood(mtmp->data)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
-				else if(mtmp->mhp >= .25*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
-				else if(mtmp->mhp >= .1*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
-				else if(mtmp->mhp > 0) (has_blood(mtmp->data)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
+				else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood_mon(mtmp)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
+				else if(mtmp->mhp >= .25*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
+				else if(mtmp->mhp >= .1*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
+				else if(mtmp->mhp > 0) (has_blood_mon(mtmp)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
 				name_at_start = FALSE;
 			}
 			if(is_drow(mdat)){
@@ -1009,13 +1010,13 @@ boolean called;
 			Strcat(buf, "frumious ");
 			name_at_start = FALSE;
 		}
-		if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood(mtmp->data))) ){
-			if(mtmp->mhp == mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
+		if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) ){
+			if(mtmp->mhp == mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 			else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
-			else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood(mtmp->data)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
-			else if(mtmp->mhp >= .25*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
-			else if(mtmp->mhp >= .1*mtmp->mhpmax) (has_blood(mtmp->data)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
-			else if(mtmp->mhp > 0) (has_blood(mtmp->data)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
+			else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood_mon(mtmp)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
+			else if(mtmp->mhp >= .25*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
+			else if(mtmp->mhp >= .1*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
+			else if(mtmp->mhp > 0) (has_blood_mon(mtmp)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
 			name_at_start = FALSE;
 		}
 		if(is_drow(mdat)){

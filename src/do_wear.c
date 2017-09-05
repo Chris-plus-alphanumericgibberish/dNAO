@@ -1946,11 +1946,12 @@ int base_uac()
 	uac -= u.uacinc;
 	uac -= u.spiritAC;
 	if(u.edenshield > moves) uac -= 7;
+	if(u.specialSealsActive&SEAL_BLACK_WEB && u.utrap && u.utraptype == TT_WEB)
+		 uac -= 8;
 	if(Race_if(PM_ORC)){
 		uac -= (u.ulevel+1)/3;
 	}
 	if(u.specialSealsActive&SEAL_UNKNOWN_GOD && uwep && uwep->oartifact == ART_PEN_OF_THE_VOID) uac -= 2*uwep->spe;
-	uac -= u.uspellprot;
 	dexbonus = (int)( (ACURR(A_DEX)-11)/2 ); /*ranges from -5 to +7 (1 to 25) */
 	if(Role_if(PM_MONK) && !uarm){
 		if(dexbonus < 0) dexbonus = (int)(dexbonus / 2);
@@ -1979,6 +1980,8 @@ int base_uac()
 				dexbonus = max(0, dexbonus - objects[(uarm)->otyp].a_ac); /* not cumulative w/ bodyarmor */
 	}
 	uac -= dexbonus;
+	if(u.uspellprot > 0 && uac > 0) uac = 0;
+	uac -= u.uspellprot;
 	if (uac < -128) uac = -128;	/* u.uac is an schar */
 	return uac;
 }
@@ -2089,6 +2092,8 @@ find_ac()
 	uac -= u.uacinc;
 	uac -= u.spiritAC;
 	if(u.edenshield > moves) uac -= 7;
+	if(u.specialSealsActive&SEAL_BLACK_WEB && u.utrap && u.utraptype == TT_WEB)
+		 uac -= 8;
 	if(Race_if(PM_ORC)){
 		uac -= (u.ulevel+1)/3;
 		uac -= (u.ulevel+2)/3;
@@ -2098,7 +2103,6 @@ find_ac()
 	if(u.specialSealsActive&SEAL_DAHLVER_NAR && !Upolyd) uac -=  min(u.ulevel/2,(u.uhpmax - u.uhp)/10);
 	else if(u.specialSealsActive&SEAL_DAHLVER_NAR && Upolyd) uac -=  min(u.ulevel/2,(u.mhmax - u.mh)/10);
 	if(u.specialSealsActive&SEAL_UNKNOWN_GOD && uwep && uwep->oartifact == ART_PEN_OF_THE_VOID) uac -= 2*uwep->spe;
-	uac -= u.uspellprot;
 	if(uclockwork) uac -= (u.clockworkUpgrades&ARMOR_PLATING) ? 10 : 3; /*armor bonus for automata*/
 	dexbonus = (int)( (ACURR(A_DEX)-11)/2 ); /*ranges from -5 to +7 (1 to 25) */
 	if(Role_if(PM_MONK) && !uarm){
@@ -2132,6 +2136,10 @@ find_ac()
 				dexbonus = max(0, dexbonus - objects[(uarm)->otyp].a_ac); /* not cumulative w/ bodyarmor */
 	}
 	uac -= dexbonus;
+	
+	if(u.uspellprot > 0 && uac > 0) uac = 0;
+	uac -= u.uspellprot;
+	
 	if (uac < -128) uac = -128;	/* u.uac is an schar */
 	if(uac != u.uac){
 		u.uac = uac;
@@ -2400,12 +2408,14 @@ do_takeoff()
 	  if(!cursed(uwep)) {
 	    setuwep((struct obj *) 0);
 	    You("are empty %s.", body_part(HANDED));
-	    u.twoweap = FALSE;
+		if(u.twoweap && !can_twoweapon())
+			untwoweapon();
 	  }
 	} else if (taking_off == W_SWAPWEP) {
-	  setuswapwep((struct obj *) 0);
-	  You("no longer have a second weapon readied.");
-	  u.twoweap = FALSE;
+		setuswapwep((struct obj *) 0);
+		You("no longer have a second weapon readied.");
+		if(u.twoweap && !can_twoweapon())
+			untwoweapon();
 	} else if (taking_off == W_QUIVER) {
 	  setuqwep((struct obj *) 0);
 	  You("no longer have ammunition readied.");

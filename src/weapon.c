@@ -43,6 +43,7 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_SHIEN				(-24)
 #define PN_NIMAN				(-25)
 #define PN_JUYO					(-26)
+#define PN_WAND_DAMAGE			(-27)
 
 
 static void FDECL(mon_ignite_lightsaber, (struct obj *, struct monst *));
@@ -73,6 +74,7 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	PN_DIVINATION_SPELL, PN_ENCHANTMENT_SPELL,
 	PN_CLERIC_SPELL,     PN_ESCAPE_SPELL,
 	PN_MATTER_SPELL,
+	PN_WAND_DAMAGE,
 #ifdef BARD
 	PN_MUSICALIZE,
 #endif
@@ -116,6 +118,7 @@ STATIC_VAR NEARDATA const char * const odd_skill_names[] = {
     "form V: Shien",
     "form VI: Niman",
     "form VII: Juyo",
+    "wand damage",
 };
 /* indexed vis `is_martial() */
 STATIC_VAR NEARDATA const char * const barehands_or_martial[] = {
@@ -297,11 +300,11 @@ int spec;
 		
 		if(spec & SPEC_MARIONETTE){
 			if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp += exploding_d(2,ldie+2,1);
-			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH) tmp = exploding_d(1,ldie,0);
-			else if(otmp->oartifact == ART_LUCK_BLADE) tmp = youdefend ? 
+			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH) tmp += exploding_d(1,ldie,0);
+			else if(otmp->oartifact == ART_LUCK_BLADE) tmp += youdefend ? 
 																rnl(ldie+2)+1 : 
 																ldie+2 - rnl(ldie+2);
-			else if(otmp->oartifact == ART_FLUORITE_OCTAHEDRON) tmp = youdefend ? 
+			else if(otmp->oartifact == ART_FLUORITE_OCTAHEDRON) tmp += youdefend ? 
 																unlucky_exploding_d(otmp->quan,10,0) : 
 																lucky_exploding_d(otmp->quan,10,0);
 			else if (ldie) tmp += rnd(ldie+2);
@@ -360,6 +363,9 @@ int spec;
 		break;
 		case FORCE_PIKE:
 			if(otmp->ovar1 && otmp->ovar1-->0) tmp += d(2, ldie)+ldie;
+		break;
+		case SEISMIC_HAMMER:
+			if(otmp->ovar1 && otmp->ovar1-->0) tmp = rnd(3*(ldie+otmp->spe));
 		break;
 		case LASER_BEAM:
 			tmp += d(2, ldie)+10;
@@ -558,11 +564,11 @@ int spec;
 		
 		if(spec & SPEC_MARIONETTE){
 			if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp += exploding_d(2,sdie+2,1);
-			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH) tmp = exploding_d(1,sdie,0);
-			else if(otmp->oartifact == ART_LUCK_BLADE) tmp = youdefend ? 
+			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH) tmp += exploding_d(1,sdie,0);
+			else if(otmp->oartifact == ART_LUCK_BLADE) tmp += youdefend ? 
 																rnl(sdie+2)+1 : 
 																sdie+2 - rnl(sdie+2);
-			else if(otmp->oartifact == ART_FLUORITE_OCTAHEDRON) tmp = youdefend ? 
+			else if(otmp->oartifact == ART_FLUORITE_OCTAHEDRON) tmp += youdefend ? 
 																unlucky_exploding_d(otmp->quan,10,0) : 
 																lucky_exploding_d(otmp->quan,10,0);
 			else if (sdie) tmp += rnd(sdie+2);
@@ -628,6 +634,9 @@ int spec;
 		break;
 		case FORCE_PIKE:
 			if(otmp->ovar1 && otmp->ovar1-->0) tmp += d(2, sdie)+sdie;
+		break;
+		case SEISMIC_HAMMER:
+			if(otmp->ovar1 && otmp->ovar1-->0) tmp = rnd(3*(sdie+otmp->spe));
 		break;
 		case LASER_BEAM:
 			tmp += d(2, sdie)+10;
@@ -808,10 +817,6 @@ int spec;
 	    }
 	}
 	
-	if(otmp->oartifact == ART_PEN_OF_THE_VOID){
-		tmp += pendamage(otmp, mon);
-	}
-	
 	if (Is_weapon || (otmp && (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1 == -P_FIREARM))) {
 		if(is_lightsaber(otmp)){
 			if(otmp == uwep && Race_if(PM_ORC)){
@@ -836,10 +841,10 @@ int spec;
 	if (otmp->obj_material <= LEATHER && (thick_skinned(ptr) || (youdefend && u.sealsActive&SEAL_ECHIDNA)))
 		/* thick skinned/scaled creatures don't feel it */
 		tmp = 0;
-	if (ptr->mlet == S_SHADE && (
+	if (ptr->mlet == S_SHADE && !(
 		(is_lightsaber(otmp) && otmp->lamplit) || 
-		(hates_silver(ptr) && (otmp->obj_material != SILVER || arti_silvered(otmp))) || 
-		(hates_iron(ptr) && otmp->obj_material != IRON) || 
+		(hates_silver(ptr) && (otmp->obj_material == SILVER || arti_silvered(otmp))) || 
+		(hates_iron(ptr) && otmp->obj_material == IRON) || 
 		(hates_unholy(ptr) && otmp->cursed) || 
 		arti_shining(otmp)
 	)) tmp = 0;
@@ -869,6 +874,10 @@ int spec;
 		static int warnedotyp = 0;
 		static struct permonst *warnedptr = 0;
 		
+		if(otmp->oartifact == ART_PEN_OF_THE_VOID){
+			tmp += pendamage(otmp, mon);
+		}
+	
 	    if (otmp->blessed && (is_undead_mon(mon) || is_demon(ptr))){
 			if(otmp->oartifact == ART_EXCALIBUR) bonus += d(3,7); //Quite holy
 			else if(otmp->otyp == KHAKKHARA) bonus += d(rnd(3),4);
@@ -922,7 +931,7 @@ int spec;
 	    if (bonus > 1 && otmp->oartifact && spec_dbon(otmp, mon, 100) >= 100)
 		bonus = (bonus + 1) / 2;
 		
-		if((resists_all(ptr) || resist_attacks(ptr)) && !narrow_spec_applies(otmp, mon)){
+		if((resists_all(ptr) && !narrow_spec_applies(otmp, mon)) || resist_attacks(ptr)){
 			tmp /= 4;
 			if(!flags.mon_moving && !youdefend && warnedptr != ptr){
 				pline("Weapons are ineffective against %s.", mon_nam(mon));
@@ -2933,6 +2942,9 @@ const struct def_skill *class_skill;
 	  OLD_P_SKILL(P_DAGGER) = P_BASIC;
 	}
 #endif
+	if (u.specialSealsActive&SEAL_BLACK_WEB) {
+	  OLD_P_SKILL(P_CROSSBOW) = P_BASIC;
+	}
 
 	/* walk through array to set skill maximums */
 	for (; class_skill->skill != P_NONE; class_skill++) {

@@ -271,6 +271,7 @@ doread()
     "It's not the size of your sword, it's how #enhance'd you are with it.",
     "Madame Elvira's House O' Succubi Lifetime Customer",
     "Madame Elvira's House O' Succubi Employee of the Month",
+    "Rogues Do It From Behind", /*the original D&D joke now fits*/
     "Ludios Vault Guards Do It In Small, Dark Rooms",
     "Yendor Military Soldiers Do It In Large Groups",
     "Arcadian Ants Do It In Swarms",
@@ -545,7 +546,7 @@ struct obj *obj;
 //#ifdef FIREARMS
 	if (is_blaster(obj) && (obj->recharged < 4 || (obj->otyp != HAND_BLASTER && obj->otyp != ARM_BLASTER)))
 	    return TRUE;
-	if ((obj->otyp == FORCE_PIKE || obj->otyp == VIBROBLADE))
+	if ((obj->otyp == FORCE_PIKE || obj->otyp == VIBROBLADE || obj->otyp == SEISMIC_HAMMER))
 	    return TRUE;
 //#endif
 	if (is_weptool(obj))	/* specific check before general tools */
@@ -658,7 +659,7 @@ int curse_bless;
 
 	} else if (obj->oclass == TOOL_CLASS || is_blaster(obj)
 		   || obj->otyp == DWARVISH_HELM || obj->otyp == VIBROBLADE 
-		   || obj->otyp == FORCE_PIKE) {
+		   || obj->otyp == FORCE_PIKE || obj->otyp == SEISMIC_HAMMER) {
 	    int rechrg = (int)obj->recharged;
 
 	    if (objects[obj->otyp].oc_charged) {
@@ -758,6 +759,7 @@ int curse_bless;
 	    case CUTTING_LASER:
 	    case VIBROBLADE:
 	    case FORCE_PIKE:
+	    case SEISMIC_HAMMER:
 			if(is_blessed) obj->ovar1 = 100L;
 			else if(is_cursed) obj->ovar1 = 10L;
 			else obj->ovar1 = 80L + rn2(20);
@@ -1604,9 +1606,9 @@ struct obj	*sobj;
 		if (confused) {
 		    You_feel("charged up!");
 		    if (u.uen < u.uenmax)
-			u.uen = min(u.uen+400, u.uenmax);
+				u.uen = min(u.uen+400, u.uenmax);
 		    else
-			u.uen = (u.uenmax += d(5,4));
+				u.uen = (u.uenmax += d(5,4));
 		    flags.botl = 1;
 		    break;
 		}
@@ -2773,7 +2775,7 @@ boolean revival;
 	/* SHOPKEEPERS can be revived now */
 	if (*mtype==PM_GUARD || (*mtype==PM_SHOPKEEPER && !revival)
 	     || *mtype==PM_ALIGNED_PRIEST || *mtype==PM_ANGEL) {
-		*mtype = PM_HUMAN_ZOMBIE;
+		*mtype = PM_ZOMBIE;
 		return TRUE;
 	} else if (*mtype==PM_LONG_WORM_TAIL) {	/* for create_particular() */
 		*mtype = PM_LONG_WORM;

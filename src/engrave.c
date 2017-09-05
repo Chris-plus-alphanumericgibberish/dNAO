@@ -36,7 +36,6 @@ static const char *random_mesg[] = {
 	"are we cool yet?", /* SCP Foundation */
 	"I seem to be having tremendous difficulty with my lifestyle", /* Hitchhiker's Guide to the Galaxy */
 	"The flow of time itself is convoluted, with heroes centuries old phasing in and out.", /* Dark Souls */
-		"The world began without knowledge, and without knowledge will it end.", /* Dark Souls */
 #ifdef MAIL
 	"You've got mail!", /* AOL */
 #endif
@@ -263,6 +262,7 @@ static const char *haluMesg[] = {
 		"I'm sorry you could never forgive me.",
 	"Reach heaven through violence.",/*Kill 6 Billion Demons*/
 		"Kindly ignore my first three answers.",
+	"ALL POWER TO THE OLD FLESH!!!!!!! A HOWLING VOID UPON DETRACTORS!!!", /*Awful Hospital*/
 	"You are lost. You can never go home.", /* Gollum's Song */
 	"But now, we dance this grim fandango, and will for years until we rest.", /* Grim Fandango */
 	"Bad Wolf", /* Dr. Who */
@@ -1623,8 +1623,8 @@ register int x,y;
 							sealNames[((int)ep->ward_id)-((int)FIRST_SEAL)],
 							word);
 						if(!Role_if(PM_EXILE) && ep->ward_id < QUEST_SPIRITS){
-							long wardhere = 1L << (((int)ep->ward_id)-((int)FIRST_SEAL)-1);
-							if( !(u.wardsknown & wardhere) && ep->ward_id < DONTLEARNWARD ){
+							long wardhere = 1L << (((int)ep->ward_id)-((int)FIRST_SEAL));
+							if( !(u.wardsknown & wardhere) ){
 								You("have learned a new seal!");
 								u.sealsKnown |= wardhere;
 							}
@@ -5286,6 +5286,7 @@ static const char *epitaphs[] = {
 	"In death ground, fight.", /* Sun Tzu */
 	
 	"Did you see him passing by?", /* Dark Souls 3 */
+		"The world began without knowledge, and without knowledge will it end.", /* Dark Souls */
 		"Fear not the dark, my friend. And let the feast begin.",
 	
 	"For every hero commemorated, a thousand martyrs die unmourned and unremembered." /*Warhammer 40k*/
@@ -5317,14 +5318,20 @@ static const char *epitaphs[] = {
 	
 	"Omnes una manet nox", /*One night awaits us all*/
 	
+	"I wake. I work. I sleep. I die." /*Alpha Centauri*/
+	
 	"I suddenly have a LOT of regrets.", /*Water Phoenix King is very quoteable...*/
 	
 	"You either die a hero, or you live long enough to see yourself become the villain.", /* Batman, the Dark Knight */
+	
+	"What can men do against such reckless hate?", /* the Lord of the Rings (Two Towers movie) */
 	
 	"I'll just hit this thing a couple more times, it'll die.", /*jonadab*/
 		"I don't need to unburden myself, they're only soldiers, I've been killing soldiers, it'll be fine.",
 	
 	"Maybe if I press this key a bit harder I'll hit for more damage next time.", /*Grasshopper*/
+	
+	"...nor the battle to the strong", /*Bible*/
 
 	
        	"Alas fair Death, 'twas missed in life - some peace and quiet from my wife",

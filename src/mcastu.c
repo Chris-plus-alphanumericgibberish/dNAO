@@ -505,6 +505,16 @@ unsigned int type;
        case PM_BARROW_WIGHT:
            return (!rn2(3) ? DARKNESS : (rn2(2) ? MAKE_WEB : SLEEP));
 
+       case PM_BAELNORN:
+			switch(rnd(6)){
+				case 1: return ACID_RAIN;
+				case 2: return CURSE_ITEMS;
+				case 3: return MASS_CURE_CLOSE;
+				case 4: return SLEEP;
+				case 5: return DARKNESS;
+				case 6: return CONFUSE_YOU;
+			}
+	   break;
        case PM_PRIEST_OF_GHAUNADAUR:
            if (rn2(2)) return FIRE_PILLAR;
 		   else if(rn2(2)) return MON_FIRAGA;
@@ -967,6 +977,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	struct obj *mirror;
 
 	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(is_derived_undead_mon(mtmp)) return 0;
 	/* Three cases:
 	 * -- monster is attacking you.  Search for a useful spell.
 	 * -- monster thinks it's attacking you.  Search for a useful spell,
@@ -3428,7 +3439,7 @@ int spellnum;
 				minstapetrify(mtmp, yours);
 		   }
 		   else
-			goto uspsibolt;
+			pline("%s stiffens momentarily.", Monnam(mtmp));
         }
 		dmg = 0;
 	 stop_occupation();
@@ -4121,7 +4132,7 @@ uspsibolt:
 	}
 	break;
     }
-
+	
     if (dmg > 0 && mtmp->mhp > 0)
     {
         mtmp->mhp -= dmg;

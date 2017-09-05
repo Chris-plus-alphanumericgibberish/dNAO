@@ -598,6 +598,9 @@ boolean artif;
 					otmp->lamplit = 0;
 					blessorcurse(otmp, 2);
 					break;
+		case SEISMIC_HAMMER:
+			otmp->ovar1 = 80L + rnd(20);
+		break;
 		case DOUBLE_LIGHTSABER:
 		case LIGHTSABER:
 		case BEAMSWORD:
@@ -778,7 +781,7 @@ boolean artif;
 		break;
 	case POTION_CLASS:
 		if(otmp->otyp == POT_BLOOD){
-			otmp->corpsenm = NON_PM;	/* empty (so far) */
+			otmp->corpsenm = PM_HUMAN;	/* default value */
 			for (tryct = 200; tryct > 0; --tryct) {
 				mndx = undead_to_corpse(rndmonnum());
 				if (mons[mndx].cnutrit &&
@@ -1594,6 +1597,8 @@ register struct obj *obj;
 	
 	if(obj->obj_material != objects[obj->otyp].oc_material){
 	static const double matDensityLookup[] = {
+//	FENCEPOST
+		0.5,
 //  LIQUID
 		1.0,
 //  WAX

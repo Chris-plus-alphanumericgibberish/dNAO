@@ -2097,6 +2097,8 @@ int croaked;	/* -1: escaped dungeon; 0: quit; 1: died */
 	    numsk++;
 	    resident = mtmp;
 	    taken = inherits(resident, numsk, croaked);
+	    ESHK(mtmp)->pbanned = FALSE; /* Un-ban for bones levels */
+	    ESHK(mtmp)->signspotted = 0; /* seen no signs */
 	}
 	for (mtmp = next_shkp(fmon, FALSE);
 		mtmp; mtmp = next_shkp(mtmp2, FALSE)) {
@@ -3915,7 +3917,7 @@ register int fall;
 
     /* 0 == can't speak, 1 == makes animal noises, 2 == speaks */
     lang = 0;
-    if (shkp->msleeping || !shkp->mcanmove || !shkp->mnotlaugh || is_silent(shkp->data))
+    if (shkp->msleeping || !shkp->mcanmove || !shkp->mnotlaugh || is_silent_mon(shkp))
 	;	/* lang stays 0 */
     else if (shkp->data->msound <= MS_ANIMAL)
 	lang = 1;

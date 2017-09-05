@@ -565,16 +565,20 @@ register struct monst *mtmp;
 	if(unweapon) {
 	    unweapon = FALSE;
 	    if(flags.verbose) {
-		if(uwep){
-			if(uwep->oartifact == ART_LIECLEAVER) 
-				You("begin slashing monsters with your %s.", aobjnam(uwep, (char *)0));
-		    else You("begin bashing monsters with your %s.",
-				aobjnam(uwep, (char *)0));
-		} else if (!cantwield(youracedata))
-		    You("begin %sing monsters with your %s %s.",
-			Role_if(PM_MONK) ? "strik" : "bash",
-			uarmg ? "gloved" : "bare",	/* Del Lamb */
-			makeplural(body_part(HAND)));
+			if(uwep){
+				if(uwep->oartifact == ART_LIECLEAVER) 
+					You("begin slashing monsters with your %s.", aobjnam(uwep, (char *)0));
+				else You("begin bashing monsters with your %s.",
+					aobjnam(uwep, (char *)0));
+			} else if (!cantwield(youracedata)){
+				if(u.specialSealsActive&SEAL_BLACK_WEB)
+					You("begin slashing monsters with your shadow-blades.");
+				else
+					You("begin %sing monsters with your %s %s.",
+					Role_if(PM_MONK) ? "strik" : "bash",
+					uarmg ? "gloved" : "bare",	/* Del Lamb */
+					makeplural(body_part(HAND)));
+			}
 	    }
 	}
 	exercise(A_STR, TRUE);		/* you're exercising muscles */
@@ -592,32 +596,85 @@ register struct monst *mtmp;
 	
 	check_caitiff(mtmp);
 	
-	if (Upolyd 
-		|| Race_if(PM_VAMPIRE) 
-		|| Race_if(PM_CHIROPTERAN) 
-		|| (!uwep && Race_if(PM_YUKI_ONNA))
-	){
-		keepattacking = hmonas(mtmp, youracedata, tmp, weptmp, tchtmp);
-		attacksmade = 1;
+	if((u.specialSealsActive&SEAL_BLACK_WEB) && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves+20){
+		static struct attack webattack[] = 
+		{
+			{AT_SHDW,AD_SHDW,4,8},
+			{0,0,0,0}
+		};
+		if(u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves+20){
+			struct monst *mon;
+			int i, tmp, weptmp, tchtmp;
+			for(i=0; i<8;i++){
+				if(isok(u.ux+xdir[i],u.uy+ydir[i])){
+					mon = m_at(u.ux+xdir[i],u.uy+ydir[i]);
+					if(mon && !mon->mpeaceful && mon != mtmp){
+						find_to_hit_rolls(mon,&tmp,&weptmp,&tchtmp);
+						hmonwith(mon, tmp, weptmp, tchtmp, webattack, 1);
+					}
+				}
+			}
+		}
+	}
+	
+	if((u.specialSealsActive&SEAL_BLACK_WEB) && ((u.twoweap && !uswapwep) || (!u.twoweap && !uwep))){
+		if(u.twoweap){
+			if(!uwep){
+				static struct attack webattack[] = 
+				{
+					{AT_SHDW,AD_SHDW,4,8},
+					{AT_SHDW,AD_SHDW,4,8},
+					{0,0,0,0}
+				};
+				hmonwith(mtmp, tmp, weptmp, tchtmp, webattack, 2);
+			} else {
+				static struct attack webattack[] = 
+				{
+					{AT_WEAP,AD_PHYS,0,0},
+					{AT_SHDW,AD_SHDW,4,8},
+					{0,0,0,0}
+				};
+				u.twoweap = 0; //Otherwise hits 3x, weapon-fist-shadow
+				hmonwith(mtmp, tmp, weptmp, tchtmp, webattack, 2);
+				u.twoweap = 1;
+			}
+		} else {
+			static struct attack webattack[] = 
+			{
+				{AT_SHDW,AD_SHDW,4,8},
+				{0,0,0,0}
+			};
+			hmonwith(mtmp, tmp, weptmp, tchtmp, webattack, 1);
+		}
 	} else {
-		keepattacking = hitum(mtmp, weptmp, youmonst.data->mattk);
-		attacksmade = 1;
-	}
-	if(uwep && uwep->oartifact == ART_QUICKSILVER){
-		if(keepattacking && u.ulevel > 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
-			keepattacking = hitum(mtmp, weptmp-10, youmonst.data->mattk);
-		if(keepattacking && u.ulevel > 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
-			keepattacking = hitum(mtmp, weptmp-20, youmonst.data->mattk);
-		if(keepattacking && u.ulevel ==30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
-			keepattacking = hitum(mtmp, weptmp-30, youmonst.data->mattk);
-	}
-	if(Role_if(PM_BARBARIAN) && !Upolyd){
-		if(keepattacking && u.ulevel > 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
-			keepattacking = hitum(mtmp, weptmp-10, youmonst.data->mattk);
-		if(keepattacking && u.ulevel > 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
-			keepattacking = hitum(mtmp, weptmp-20, youmonst.data->mattk);
-		if(keepattacking && u.ulevel ==30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
-			keepattacking = hitum(mtmp, weptmp-30, youmonst.data->mattk);
+
+		if (Upolyd 
+			|| Race_if(PM_VAMPIRE) 
+			|| Race_if(PM_CHIROPTERAN) 
+			|| (!uwep && Race_if(PM_YUKI_ONNA))
+		){
+			keepattacking = hmonas(mtmp, youracedata, tmp, weptmp, tchtmp);
+			attacksmade = 1;
+		} else {
+			keepattacking = hitum(mtmp, weptmp, youmonst.data->mattk);
+			attacksmade = 1;
+		}
+		if(uwep && uwep->oartifact == ART_QUICKSILVER){
+			if(keepattacking && u.ulevel > 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+				keepattacking = hitum(mtmp, weptmp-10, youmonst.data->mattk);
+			if(keepattacking && u.ulevel > 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+				keepattacking = hitum(mtmp, weptmp-20, youmonst.data->mattk);
+			if(keepattacking && u.ulevel ==30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+				keepattacking = hitum(mtmp, weptmp-30, youmonst.data->mattk);
+		}
+		if(Role_if(PM_BARBARIAN) && !Upolyd){
+			if(keepattacking && u.ulevel >= 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+				keepattacking = hitum(mtmp, weptmp-10, youmonst.data->mattk);
+			if(keepattacking && u.ulevel >= 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+				keepattacking = hitum(mtmp, weptmp-20, youmonst.data->mattk);
+			if(keepattacking && u.ulevel == 30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+				keepattacking = hitum(mtmp, weptmp-30, youmonst.data->mattk);
+		}
 	}
 	if((u.sealsActive || u.specialSealsActive) && keepattacking && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp){
 		static int nspiritattacks;
@@ -912,7 +969,7 @@ int thrown;
 			}
 			if(uarmg->oartifact && 
 			   artifact_hit(&youmonst, mon, uarmg, &tmp, rnd(20)) ){
-				if(mon->mhp <= 0) /* artifact killed monster */
+				if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 					return FALSE;
 				if (tmp == 0) return TRUE;
 				hittxt = TRUE;
@@ -1153,7 +1210,10 @@ int thrown;
 		    /* or throw a missile without the proper bow... */
 		    (is_ammo(obj) && !(ammo_and_launcher(obj, uwep) || obj->oclass == GEM_CLASS))
 		) {
-			
+			int resistmask = 0;
+			int weaponmask = 0;
+			static int warnedotyp = 0;
+			static struct permonst *warnedptr = 0;
 		    /* then do only 1-2 points of damage */
 		    if (mdat->mlet == S_SHADE && !(obj->obj_material == SILVER || arti_silvered(obj) || u.sealsActive&SEAL_CHUPOCLOPS))
 				tmp = 0;
@@ -1164,9 +1224,40 @@ int thrown;
 
 			else tmp = rnd(2);
 			
+			if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS){
+				weaponmask |= PIERCE;
+			}
+			if(obj->oartifact == ART_LIECLEAVER){
+				weaponmask |= SLASH;
+			}
+			else {
+				weaponmask |= WHACK;
+			}
+			
+			if(resist_blunt(mdat) || (mon->mfaction == ZOMBIFIED)){
+				resistmask |= WHACK;
+			}
+			if(resist_pierce(mdat) || (mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED)){
+				resistmask |= PIERCE;
+			}
+			if(resist_slash(mdat) || (mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED)){
+				resistmask |= SLASH;
+			}
+			
+			if((weaponmask & ~(resistmask)) == 0L && !narrow_spec_applies(obj, mon)){
+				tmp /= 4;
+				if(warnedptr != mdat){
+					pline("%s is ineffective against %s.", The(xname(obj)), mon_nam(mon));
+					warnedptr = mdat;
+				}
+			} else {
+				if(warnedptr != mdat){
+					warnedptr = 0;
+				}
+			}
 		    // if (tmp && obj->oartifact &&
 				// artifact_hit(&youmonst, mon, obj, &tmp, dieroll)) {
-				// if(mon->mhp <= 0) /* artifact killed monster */
+				// if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 				    // return FALSE;
 				// if (tmp == 0) return TRUE;
 				// hittxt = TRUE;
@@ -1386,7 +1477,7 @@ int thrown;
 			}
 		    if (obj->oartifact &&
 				artifact_hit(&youmonst, mon, obj, &tmp, dieroll)) {
-				if(mon->mhp <= 0) /* artifact killed monster */
+				if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 				    return FALSE;
 				if (tmp == 0) return TRUE;
 				hittxt = TRUE;
@@ -1484,21 +1575,21 @@ int thrown;
 							tmp++;
 					if(uwep->oartifact &&
 						artifact_hit(&youmonst, mon, uwep, &tmp, dieroll)){
-						if(mon->mhp <= 0) /* artifact killed monster */
+						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
 						if (tmp == 0) return TRUE; /* NOTE: ditto */
 						hittxt = TRUE;
 					}
 					if(obj->oartifact &&
 						artifact_hit(&youmonst, mon, obj, &tmp, dieroll)){
-						if(mon->mhp <= 0) /* artifact killed monster */
+						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
 						if (tmp == 0) return TRUE; /* NOTE: ditto */
 						hittxt = TRUE;
 					}
 					if(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER &&
 						artifact_hit(&youmonst, mon, uarmh, &tmp, dieroll)){
-						if(mon->mhp <= 0) /* artifact killed monster */
+						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
 						if (tmp == 0) return TRUE; /* NOTE: ditto */
 						hittxt = TRUE;
@@ -1761,7 +1852,7 @@ defaultvalue:
 			if(obj){/*may have broken*/
 				if (obj->oartifact &&
 					artifact_hit(&youmonst, mon, obj, &tmp, dieroll)) {
-					if(mon->mhp <= 0) /* artifact killed monster */
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 						return FALSE;
 					if (tmp == 0) return TRUE;
 					hittxt = TRUE;
@@ -1792,9 +1883,10 @@ defaultvalue:
 		tmp += rnd(mon->ustdym);
 	}
 	
-	if(resist_attacks(mdat))
+	if(resist_attacks(mdat)){
 		tmp = 0;
-	else {
+		valid_weapon_attack = 0;
+	} else {
 		int mac = full_marmorac(mon);
 		if(mac < 0){
 			tmp += AC_VALUE(mac);
@@ -1957,7 +2049,7 @@ defaultvalue:
 				} else {
 					if(obj->otyp == VIPERWHIP && obj->opoisonchrgs){
 						obj->opoisonchrgs--;
-						pline("Poison from the internal reservoir coats the fangs of your %s", xname(obj));
+						pline("Poison from the internal reservoir coats the fangs of your %s.", xname(obj));
 					} else {
 						obj->opoisoned = FALSE;
 						pline("The coating on your %s has worn off.", xname(obj));
@@ -1991,6 +2083,21 @@ defaultvalue:
 	    }
 	}
 
+	if (unarmed && !thrown && !obj && !Upolyd) {
+		static struct permonst *warnedptr = 0;
+		if((resist_blunt(mdat) || (mon->mfaction == ZOMBIFIED)) && !(uarmg && narrow_spec_applies(uarmg, mon))){
+			tmp /= 4;
+			if(warnedptr != mdat){
+				Your("%s are ineffective against %s.", makeplural(body_part(HAND)), mon_nam(mon));
+				warnedptr = mdat;
+			}
+		} else {
+			if(warnedptr != mdat){
+				warnedptr = 0;
+			}
+		}
+	}
+	
 #ifdef STEED
 	if (jousting) {
 	    tmp += d(2, (obj == uwep) ? 10 : 2);	/* [was in dmgval()] */
@@ -2822,7 +2929,7 @@ register struct attack *mattk;
 		break;
 	    case AD_VAMP:
 	    case AD_DRLI:
-		if(has_blood(mdef->data) && 
+		if(has_blood_mon(mdef) && 
 			youracedata == &mons[PM_BLOOD_BLOATER]
 		){
 			if(Upolyd ? u.mh < u.mhmax : u.uhp < u.uhpmax){
@@ -2839,7 +2946,7 @@ register struct attack *mattk;
 			   biting if they might have trouble getting it down */
 			if (!Race_if(PM_INCANTIFIER) && is_vampire(youracedata)
 				&& u.uhunger <= 1420 &&
-			    mattk->aatyp == AT_BITE && has_blood(pd)) {
+			    mattk->aatyp == AT_BITE && has_blood_mon(mdef)) {
 				/* For the life of a creature is in the blood
 				   (Lev 17:11) */
 				if (flags.verbose)
@@ -2850,7 +2957,7 @@ register struct attack *mattk;
 				   effect */
 				lesshungry(xtmp * 6);
 			}
-			if(has_blood(mdef->data) && 
+			if(has_blood_mon(mdef) && 
 				youracedata == &mons[PM_BLOOD_BLOATER]
 			){
 				if(Upolyd ? u.mh < u.mhmax : u.uhp < u.uhpmax){
@@ -2899,13 +3006,13 @@ register struct attack *mattk;
 			tmp += dtypbon(RAPIER);
 		break;
 	    case AD_BLUD:
-			if(has_blood(pd)) {
+			if(has_blood_mon(mdef) || (has_blood(pd) && mdef->mfaction == ZOMBIFIED)) {
             	tmp += mdef->m_lev;
             	pline("The blade of rotted blood tears through the veins of %s!", mon_nam(mdef));
             }
 		break;
 	    case AD_SHDW:
-			if(u.specialSealsActive&SEAL_BLACK_WEB) tmp = d(rnd(8),spiritDsize()+1);
+			// if(u.specialSealsActive&SEAL_BLACK_WEB) tmp = d(rnd(8),spiritDsize()+1);
 			// else tmp = d(rnd(8),rnd(5)+1);
 			tmp += dbon((struct obj *)0);
 	    case AD_DRST:
@@ -2935,6 +3042,10 @@ register struct attack *mattk;
 			    tmp = mdef->mhp;
 			} else tmp += rn1(10,6);
 		    }
+		break;
+		case AD_NPDC:
+			// if(!cancelled) tmp += rnd(10);
+			tmp += rnd(10);
 		break;
 	    case AD_DRIN:
 		if (notonhead || !has_head(mdef->data)) {
@@ -3739,6 +3850,7 @@ use_weapon:
 			}
 		case AT_STNG:
 		case AT_TUCH:
+		case AT_5SQR:
 		case AT_BUTT:
 		case AT_TENT:
 		case AT_WHIP:
@@ -3788,7 +3900,7 @@ wisp_shdw_dhit:
 				    You("sting %s.", mon_nam(mon));
 			    else if (mattk->aatyp == AT_BUTT)
 				    You("butt %s.", mon_nam(mon));
-			    else if (mattk->aatyp == AT_TUCH){
+			    else if (mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR){
 					if(mattk->adtyp == AD_SHDW) You("slash %s with bladed shadows.", mon_nam(mon));
 					else if(mattk->adtyp == AD_STAR)  You("slash %s with a starlight rapier.", mon_nam(mon));
 					else if(mattk->adtyp == AD_BLUD) You("slash %s with a blade of blood.", mon_nam(mon));
@@ -3991,6 +4103,7 @@ use_weapon:
 			}
 	case AT_STNG:
 	case AT_TUCH:
+	case AT_5SQR:
 	case AT_BUTT:
 	case AT_TENT:
 	case AT_WHIP:
@@ -4039,7 +4152,7 @@ wisp_shdw_dhit2:
 				You("sting %s.", mon_nam(mon));
 			else if (mattk->aatyp == AT_BUTT)
 				You("butt %s.", mon_nam(mon));
-			else if (mattk->aatyp == AT_TUCH)
+			else if (mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR)
 				You("touch %s.", mon_nam(mon));
 			else if (mattk->aatyp == AT_TENT)
 				Your("tentacles suck %s.", mon_nam(mon));
@@ -4229,7 +4342,7 @@ uchar aatyp, adtyp;
 		    if (uarmf && !rn2(6))
 			(void)rust_dmg(uarmf, xname(uarmf), 3, TRUE, &youmonst);
 		} else if (aatyp == AT_WEAP || aatyp == AT_CLAW ||
-			   aatyp == AT_MAGC || aatyp == AT_TUCH)
+			   aatyp == AT_MAGC || aatyp == AT_TUCH || aatyp == AT_5SQR)
 		    passive_obj(mon, (struct obj*)0, &(ptr->mattk[i]));
 	    }
 	    exercise(A_STR, FALSE);
@@ -4278,7 +4391,7 @@ uchar aatyp, adtyp;
 		    if (uarmf)
 			(void)rust_dmg(uarmf, xname(uarmf), 1, TRUE, &youmonst);
 		} else if (aatyp == AT_WEAP || aatyp == AT_CLAW ||
-			   aatyp == AT_MAGC || aatyp == AT_TUCH)
+			   aatyp == AT_MAGC || aatyp == AT_TUCH || aatyp == AT_5SQR)
 		    passive_obj(mon, (struct obj*)0, &(ptr->mattk[i]));
 	    }
 	    break;
@@ -4288,7 +4401,7 @@ uchar aatyp, adtyp;
 		    if (uarmf)
 			(void)rust_dmg(uarmf, xname(uarmf), 3, TRUE, &youmonst);
 		} else if (aatyp == AT_WEAP || aatyp == AT_CLAW ||
-			   aatyp == AT_MAGC || aatyp == AT_TUCH)
+			   aatyp == AT_MAGC || aatyp == AT_TUCH || aatyp == AT_5SQR)
 		    passive_obj(mon, (struct obj*)0, &(ptr->mattk[i]));
 	    }
 	    break;
@@ -4359,29 +4472,8 @@ dobpois:
 	    if(!mhit) break; //didn't draw blood, forget it.
 		if(mon->data == &mons[PM_LEGION]){
 			int n = rnd(4);
-			for(n; n>0; n--) switch(rnd(7)){
-			case 1:
-				makemon(&mons[PM_LEGIONNAIRE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
-			break;
-			case 2:
-				makemon(&mons[PM_GNOME_ZOMBIE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
-			break;
-			case 3:
-				makemon(&mons[PM_ORC_ZOMBIE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
-			break;
-			case 4:
-				makemon(&mons[PM_DWARF_ZOMBIE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
-			break;
-			case 5:
-				makemon(&mons[PM_ELF_ZOMBIE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
-			break;
-			case 6:
-				makemon(&mons[PM_HUMAN_ZOMBIE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
-			break;
-			case 7:
-				makemon(&mons[PM_HALF_DRAGON_ZOMBIE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
-			break;
-			}
+			for(n; n>0; n--) rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
+									  makemon(&mons[PM_LEGIONNAIRE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 		} else {
 			if(mon->mhp > .75*mon->mhpmax) makemon(&mons[PM_LEMURE], mon->mx, mon->my, MM_ADJACENTOK);
 			else if(mon->mhp > .50*mon->mhpmax) makemon(&mons[PM_HORNED_DEVIL], mon->mx, mon->my, MM_ADJACENTOK);

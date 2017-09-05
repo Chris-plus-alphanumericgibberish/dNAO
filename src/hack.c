@@ -610,11 +610,11 @@ int mode;
 	    /* Eat the rock. */
 	    if (mode == DO_MOVE && still_chewing(x,y)) return FALSE;
 	} else if (flags.autodig && !flags.run && !flags.nopick &&
-		   ((uwep && (is_pick(uwep) || (is_lightsaber(uwep) && uwep->lamplit))) ||
+		   ((uwep && (is_pick(uwep) || (is_lightsaber(uwep) && uwep->lamplit) || (uwep->otyp == SEISMIC_HAMMER))) ||
 			(uarmg && is_pick(uarmg)))) {
 	/* MRKR: Automatic digging when wielding the appropriate tool */
 	    if (mode == DO_MOVE){
-			if(uwep && (is_pick(uwep) || (is_lightsaber(uwep) && uwep->lamplit))) (void) use_pick_axe2(uwep);
+			if(uwep && (is_pick(uwep) || (is_lightsaber(uwep) && uwep->lamplit) || (uwep->otyp == SEISMIC_HAMMER))) (void) use_pick_axe2(uwep);
 			else if(uarmg && is_pick(uarmg)) (void) use_pick_axe2(uarmg);
 		}
 	    return FALSE;
@@ -1326,7 +1326,7 @@ domove()
 									uwep->oartifact == ART_LIECLEAVER ? "Liecleaver cuts" : "Sting cuts");
 				if(is_lightsaber(uwep)) uwep->age -= 100;
 				if(trap->ttyp == WEB){
-					if(!Is_lolth_level(&u.uz)){
+					if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){
 						deltrap(trap);
 						newsym(u.ux,u.uy);
 					}
@@ -1628,7 +1628,7 @@ domove()
 	if(u.specialSealsActive&SEAL_BLACK_WEB && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves+20){
 		static struct attack webattack[] = 
 		{
-			{AT_SHDW,AD_SHDW,4,6},
+			{AT_SHDW,AD_SHDW,4,8},
 			{0,0,0,0}
 		};
 		struct monst *mon;
