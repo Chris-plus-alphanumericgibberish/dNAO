@@ -4326,21 +4326,25 @@ int spellID;
 		strcat(desc2, "The electric shock can damage wands.");
 		strcat(desc3, "Deals no damage to shock-resistant creatures.");
 		strcat(desc4, "");
+		break;
 	case SPE_FROST_STORM:
 		strcat(desc1, "Creates a series of cold explosions centered around a target.");
 		strcat(desc2, "The chill can freeze potions, shattering them.");
 		strcat(desc3, "Deals no damage to cold-resistant creatures.");
 		strcat(desc4, "");
+		break;
 	case SPE_FIRE_STORM:
 		strcat(desc1, "Creates a series of fire explosions centered around a target.");
 		strcat(desc2, "The fire can boil potions and burn other flammable items.");
 		strcat(desc3, "Worn armor is also damaged.");
 		strcat(desc4, "Deals no damage to fire-resistant creatures.");
+		break;
 	case SPE_ACID_STORM:
 		strcat(desc1, "Creates a series of acid explosions centered around a target.");
 		strcat(desc2, "The acid can boil potions and wet other items.");
 		strcat(desc3, "Deals no damage to acid-resistant creatures.");
 		strcat(desc4, "");
+		break;
 	case SPE_HASTE_SELF:
 		strcat(desc1, "You temporarily move very quickly.");
 		strcat(desc2, "Casting while already very fast increase the duration of your haste.");
