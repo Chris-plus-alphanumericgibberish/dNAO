@@ -1231,12 +1231,6 @@ update_alternate_spells()
 							j = MAXSPELL;
 						}
 					}
-					else {
-						if (spellid(j) == altspell[k]) {
-							spl_book[j].sp_know = 0;	// does not have expected behaviour for (learned from InfSpells) -> (level-drain caused skill loss) -> (retrained)
-							j = MAXSPELL;
-						}
-					}
 				}
 			}
 		}
@@ -4792,6 +4786,17 @@ int spell;
 		else if(u.uz.dlevel == spire_level.dlevel-4) chance -= 20*spellev(spell);
 		else if(u.uz.dlevel == spire_level.dlevel-5) chance -= 10*spellev(spell);
 	}
+	
+	// players are unable to cast 'advanced' spells if they are not Skilled+
+	int altspell[] = {  	SPE_LIGHTNING_STORM,
+				SPE_FROST_STORM,
+				SPE_FIRE_STORM,
+				SPE_ACID_STORM };
+	int i;
+
+	for (i = 0; i < 4; i++)
+		if (spellid(spell) == altspell[i] && (P_SKILL(spell_skilltype(spellid(spell))) + Spellboost) < P_SKILLED)
+			chance = 0;
 	
 	/* Clamp to percentile */
 	if (chance > 100) chance = 100;
