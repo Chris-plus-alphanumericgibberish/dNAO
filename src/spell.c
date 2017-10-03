@@ -1789,7 +1789,7 @@ spiriteffects(power, atme)
 			sy = u.uy;
 			if (!getdir((char *)0) || !(u.dx || u.dy)) return(0);
 			if(u.uswallow){
-				if(u.sealsActive&SEAL_NABERIUS) explode2(u.ux,u.uy,5/*Electrical*/, d(range,dsize)*1.5, WAND_CLASS, EXPL_MAGICAL);
+				if(Double_spell_size) explode2(u.ux,u.uy,5/*Electrical*/, d(range,dsize)*1.5, WAND_CLASS, EXPL_MAGICAL);
 				else explode(u.ux,u.uy,5/*Electrical*/, d(range,dsize), WAND_CLASS, EXPL_MAGICAL);
 			} else {
 				while(--range >= 0){
@@ -1799,14 +1799,14 @@ spiriteffects(power, atme)
 						mon = m_at(sx, sy);
 						if(mon){
 							dmg = d(range+1,dsize); //Damage decreases with range
-							if(u.sealsActive&SEAL_NABERIUS) explode2(sx, sy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
+							if(Double_spell_size) explode2(sx, sy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
 							else explode(sx, sy, 5/*Electrical*/, dmg, WAND_CLASS, EXPL_MAGICAL);
 							break;//break loop
 						}
 					} else {
 						if(range < 4) range++;
 						dmg = d(range+1,dsize); //Damage decreases with range
-						if(u.sealsActive&SEAL_NABERIUS) explode2(lsx, lsy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
+						if(Double_spell_size) explode2(lsx, lsy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
 						else explode(lsx, lsy, 5/*Electrical*/, dmg, WAND_CLASS, EXPL_MAGICAL);
 						break;//break loop
 					}
@@ -2666,7 +2666,7 @@ spiriteffects(power, atme)
 				if (throwspell()) {
 					if(uwep->age < 500) uwep->age = 0;
 					else uwep->age -= 500;
-					if(u.sealsActive&SEAL_NABERIUS) explode2(u.dx,u.dy,1/*Fire*/, d(rnd(5),dsize)*1.5, WAND_CLASS, EXPL_FIERY);
+					if(Double_spell_size) explode2(u.dx,u.dy,1/*Fire*/, d(rnd(5),dsize)*1.5, WAND_CLASS, EXPL_FIERY);
 					explode(u.dx,u.dy,1/*Fire*/, d(rnd(5),dsize), WAND_CLASS, EXPL_FIERY);
 					end_burn(uwep, TRUE);
 					begin_burn(uwep, FALSE);
@@ -3800,7 +3800,7 @@ boolean atme;
 		if (throwspell()) {
 			cc.x = u.dx; cc.y = u.dy;
 			n = rnd(8) + 1;
-			if (u.sealsActive&SEAL_NABERIUS) n *= 1.5;
+			if (Double_spell_size) n *= 1.5;
 			while (n--) {
 				if (!u.dx && !u.dy && !u.dz) {
 					if ((damage = zapyourself(pseudo, TRUE)) != 0) {
@@ -3810,7 +3810,7 @@ boolean atme;
 					}
 				}
 				else {
-					if (u.sealsActive&SEAL_NABERIUS) explode2(u.dx, u.dy,
+					if (Double_spell_size) explode2(u.dx, u.dy,
 						pseudo->otyp - SPE_LIGHT + 10,
 						u.ulevel / 2 + 1 + spell_damage_bonus(), 0,
 						(pseudo->otyp == SPE_FROST_STORM) ?
