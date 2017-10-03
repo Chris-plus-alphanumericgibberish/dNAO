@@ -143,7 +143,7 @@ struct obj *otmp;
 			if (!flags.mon_moving && otyp == SPE_FORCE_BOLT && (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM))
 				dmg += d((u.ulevel+1)/2, 12);
 			if(dbldam) dmg *= 2;
-			if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS) dmg *= 1.5;
+			if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
 			if (otyp == SPE_FORCE_BOLT)
 			    dmg += spell_damage_bonus();
 			
@@ -181,7 +181,7 @@ struct obj *otmp;
 			if(otyp == WAN_UNDEAD_TURNING) dmg = d(wand_damage_die(P_SKILL(P_WAND_POWER)),8);
 			else dmg = rnd(8);
 			if(dbldam) dmg *= 2;
-			if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS) dmg *= 1.5;
+			if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
 			if (otyp == SPE_TURN_UNDEAD)
 				dmg += spell_damage_bonus();
 			flags.bypasses = TRUE;	/* for make_corpse() */
@@ -342,7 +342,7 @@ struct obj *otmp;
 		if(otyp == WAN_DRAINING) d((wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2,8);
 		else dmg = rnd(8);
 		if(dbldam) dmg *= 2;
-		if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS) dmg *= 1.5;
+		if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
 		if (otyp == SPE_DRAIN_LIFE)
 			dmg += spell_damage_bonus();
 		if (resists_drli(mtmp)){
@@ -3830,7 +3830,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
     }
     if(type < 0) newsym(u.ux,u.uy);
     if(!range) range = rn1(7,7);
-	if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS){
+	if(!flags.mon_moving && Double_spell_size){
 		range *= 2;
 		flat *= 1.5;
 		nd *= 1.5;
@@ -4170,7 +4170,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 	////////////////////////////////////////////////////////////////////////////////////////
 	if(redrawneeded) doredraw();
     tmp_at(DISP_END,0);
-	if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS){
+	if(!flags.mon_moving && Double_spell_size){
 		if (type == ZT_SPELL(ZT_FIRE))
 			explode2(sx, sy, type, flat ? flat : d(18,6), 0, EXPL_FIERY);
 		else if (type == ZT_SPELL(ZT_ACID))
