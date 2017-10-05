@@ -724,10 +724,11 @@ int mode;
     if (flags.run == 8 && mode != DO_MOVE && (x != u.ux || y != u.uy)) {
 	struct trap* t = t_at(x, y);
 
-	if ((Is_dagon_level(&u.uz) || ((t && t->tseen) || !Levitation && !Flying &&
-	     !is_clinger(youracedata) &&
-	     (is_pool(x, y) || is_lava(x, y)) && levl[x][y].seenv)))
-	    return FALSE;
+	if ((t && t->tseen) ||
+        (((!Levitation && !Flying &&
+         !is_clinger(youracedata)) || Is_dagon_level(&u.uz)) &&
+         (is_pool(x, y) || is_lava(x, y)) && levl[x][y].seenv))
+        return FALSE;
     }
 
     ust = &levl[ux][uy];
