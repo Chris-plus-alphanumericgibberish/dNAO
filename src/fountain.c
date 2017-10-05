@@ -249,10 +249,15 @@ drinkfountain()
 
 		case 20: /* Foul water */
 
-			pline_The("water is foul!  You gag and vomit.");
-			morehungry(rn1(20, 11));
-			vomit();
-			break;
+			if (!uclockwork){
+				pline_The("water is foul!  You gag and vomit.");
+				morehungry(rn1(20, 11));
+				vomit();
+				break;
+	    		} 
+			else {
+				pline_The("water is foul! It offends your olfactory receptors.");
+			}
 
 		case 21: /* Poisonous */
 
