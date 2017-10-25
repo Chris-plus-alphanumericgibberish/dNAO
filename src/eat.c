@@ -1644,7 +1644,7 @@ opentin()		/* called during each move whilst opening a tin */
 					costly_tin((const char*)0);
 					goto use_me;
 				} else if(eatHow == SCRAP_MAW){
-					You("crunch up the tin can");
+					You("crunch up the tin can.");
 					if(!Upolyd){
 						u.uhp += 5;
 						if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
@@ -1744,7 +1744,7 @@ opentin()		/* called during each move whilst opening a tin */
 			} else if(u.clockworkUpgrades&SCRAP_MAW &&
 				yn("Feed it to your scrap maw?") == 'y'
 			){
-				You("crunch up the tin can");
+				You("crunch up the tin can.");
 				if(!Upolyd){
 					u.uhp += 5;
 					if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
