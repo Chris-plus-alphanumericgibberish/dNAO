@@ -739,7 +739,7 @@ dofire()
 		return result;
 	} else if(uwep && uwep->oartifact == ART_HOLY_MOONLIGHT_SWORD && uwep->lamplit && u.uen > 25){
 		int dmg;
-		int range = (u.sealsActive&SEAL_NABERIUS) ? 6 : 3;
+		int range = (Double_spell_size) ? 6 : 3;
 		xchar lsx, lsy, sx, sy;
 		struct monst *mon;
 		sx = u.ux;
@@ -750,7 +750,7 @@ dofire()
 		domove();
 		flags.forcefight = 0;
 		if(u.uswallow){
-			if(u.sealsActive&SEAL_NABERIUS) explode2(u.ux,u.uy,0/*Magical*/, (d(2,12)+2*uwep->spe)*1.5, WAND_CLASS, EXPL_CYAN);
+			if(Double_spell_size) explode2(u.ux,u.uy,0/*Magical*/, (d(2,12)+2*uwep->spe)*1.5, WAND_CLASS, EXPL_CYAN);
 			else explode(u.ux,u.uy,0/*Magical*/, d(2,12)+2*uwep->spe, WAND_CLASS, EXPL_CYAN);
 		} else {
 			while(--range >= 0){
@@ -760,7 +760,7 @@ dofire()
 					mon = m_at(sx, sy);
 					if(mon){
 						dmg = d(2,12)+2*uwep->spe;
-						if(u.sealsActive&SEAL_NABERIUS) explode2(sx, sy, 0/*Nagical*/, dmg*1.5, WAND_CLASS, EXPL_CYAN);
+						if(Double_spell_size) explode2(sx, sy, 0/*Nagical*/, dmg*1.5, WAND_CLASS, EXPL_CYAN);
 						else explode(sx, sy, 0/*Nagical*/, dmg, WAND_CLASS, EXPL_CYAN);
 						break;//break loop
 					} else {
@@ -771,7 +771,7 @@ dofire()
 					}
 				} else {
 					dmg = d(2,12)+2*uwep->spe;
-					if(u.sealsActive&SEAL_NABERIUS) explode2(lsx, lsy, 0/*Nagical*/, dmg*1.5, WAND_CLASS, EXPL_CYAN);
+					if(Double_spell_size) explode2(lsx, lsy, 0/*Nagical*/, dmg*1.5, WAND_CLASS, EXPL_CYAN);
 					else explode(lsx, lsy, 0/*Nagical*/, dmg, WAND_CLASS, EXPL_CYAN);
 					break;//break loop
 				}
