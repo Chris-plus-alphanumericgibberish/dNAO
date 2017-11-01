@@ -602,17 +602,21 @@ peffects(otmp)
 		if (!otmp->odiluted) healup(u.ulevel, 0, FALSE, FALSE);
 		if(!Race_if(PM_INCANTIFIER) && !uclockwork) u.uhunger += 130 + 10 * (2 + bcsign(otmp));
 		newuhs(FALSE);
-		if(u.uhunger > u.uhungermax){
-			u.uhunger = u.uhungermax - d(2,20);
-			vomit();
+		if (!uclockwork){
+			if(u.uhunger > u.uhungermax){
+				u.uhunger = u.uhungermax - d(2,20);
+				vomit();
+				exercise(A_WIS, FALSE);
+			}
 			exercise(A_WIS, FALSE);
-		}
-		exercise(A_WIS, FALSE);
-		if(otmp->cursed) {
-			You("pass out.");
-			multi = -rnd(15);
-			nomovemsg = "You awake with a headache.";
-			make_vomiting(Vomiting+15+d(5,4), TRUE);
+			if(otmp->cursed) {
+				You("pass out.");
+				multi = -rnd(15);
+				nomovemsg = "You awake with a headache.";
+				if (!uclockwork){
+					make_vomiting(Vomiting+15+d(5,4), TRUE);
+				}
+			}
 		}
 		break;
 	case POT_ENLIGHTENMENT:
