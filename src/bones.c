@@ -117,7 +117,7 @@ boolean restore;
 			    curse(otmp);
 				fix_object(otmp);
 			} else if (otmp->otyp == ART_SILVER_KEY) {
-			    otmp->otyp = UNIVERSAL_KEY;
+			    otmp->otyp = KEY;
 				otmp->obj_material = SILVER;
 				
 			} else if (otmp->otyp == SPE_BOOK_OF_THE_DEAD) {
