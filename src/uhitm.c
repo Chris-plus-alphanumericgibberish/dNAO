@@ -660,19 +660,19 @@ register struct monst *mtmp;
 			attacksmade = 1;
 		}
 		if(uwep && uwep->oartifact == ART_QUICKSILVER){
-			if(keepattacking && u.ulevel > 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel > 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-10, youmonst.data->mattk);
-			if(keepattacking && u.ulevel > 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel > 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-20, youmonst.data->mattk);
-			if(keepattacking && u.ulevel ==30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel ==30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-30, youmonst.data->mattk);
 		}
 		if(Role_if(PM_BARBARIAN) && !Upolyd){
-			if(keepattacking && u.ulevel >= 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel >= 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-10, youmonst.data->mattk);
-			if(keepattacking && u.ulevel >= 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel >= 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-20, youmonst.data->mattk);
-			if(keepattacking && u.ulevel == 30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel == 30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-30, youmonst.data->mattk);
 		}
 	}
@@ -4012,6 +4012,8 @@ wisp_shdw_dhit:
 							/* defender dead */
 	    else {
 		(void) passive(mon, sum[i], 1, mattk->aatyp, mattk->adtyp);
+		if (DEADMONSTER(mon))
+			return TRUE;
 		nsum |= sum[i];
 	    }
 	    if (Upolyd != Old_Upolyd)
@@ -4262,6 +4264,8 @@ wisp_shdw_dhit2:
 						/* defender dead */
 	else {
 		(void) passive(mon, sum[i], 1, mattk->aatyp, mattk->adtyp);
+		if (DEADMONSTER(mon))
+			return TRUE;
 		nsum |= sum[i];
 	}
 	if (Upolyd != Old_Upolyd)
