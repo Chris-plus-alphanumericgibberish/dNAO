@@ -958,6 +958,7 @@ register struct obj *obj;
 	    }
 	    switch (obj->oclass) {
 	      case SCROLL_CLASS:
+		if (obj->otyp == SCR_GOLD_SCROLL_OF_LAW) break;	//no cancelling these
 		costly_cancel(obj);
 		obj->otyp = SCR_BLANK_PAPER;
 		obj->spe = 0;
