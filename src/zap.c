@@ -3330,7 +3330,7 @@ death_blast:
 		} else if(flags.mamn_brth){
 		    struct obj *otmp2;
 
-		    if (resists_disint(mon)) {
+		    if (resists_ston(mon)) {
 			sho_shieldeff = TRUE;
 		    } else if (mon->misc_worn_check & W_ARMS && (*ootmp = which_armor(mon, W_ARMS)) && (*ootmp)->obj_material != GOLD) {
 				/* destroy shield; victim survives */
@@ -4444,23 +4444,26 @@ void
 fracture_rock(obj)	/* fractured by pick-axe or wand of striking */
 register struct obj *obj;		   /* no texts here! */
 {
+	int mat = obj->obj_material;
 	/* A little Sokoban guilt... */
 	if (obj->otyp == BOULDER && In_sokoban(&u.uz) && !flags.mon_moving)
 	    change_luck(-1); /*boulders only*/
 
 	obj->otyp = ROCK;
 	obj->quan = (long) rn1(60, 7);
-	obj->owt = weight(obj);
 	obj->oclass = GEM_CLASS;
 	obj->known = FALSE;
 	obj->onamelth = 0;		/* no names */
 	obj->oxlth = 0;			/* no extra data */
 	obj->oattached = OATTACHED_NOTHING;
+	obj->obj_material = MINERAL;
+	obj->owt = weight(obj);
+	set_material(obj, mat);
 	if (obj->where == OBJ_FLOOR) {
 		obj_extract_self(obj);		/* move rocks back on top */
 		place_object(obj, obj->ox, obj->oy);
 		if(!does_block(obj->ox,obj->oy,&levl[obj->ox][obj->oy]))
-	    		unblock_point(obj->ox,obj->oy);
+			unblock_point(obj->ox,obj->oy);
 		if(cansee(obj->ox,obj->oy))
 		    newsym(obj->ox,obj->oy);
 	}

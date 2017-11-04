@@ -1467,9 +1467,21 @@ int mat;
 		// break;
 		case ROCK:
 			if(mat == SILVER) obj->otyp = SILVER_SLINGSTONE;
+			if(mat == GLASS){
+				obj->otyp = LAST_GEM + rnd(9);
+			}
+			if(mat == GEMSTONE){
+				obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+			}
 		break;
 		case SILVER_SLINGSTONE:
 			obj->otyp = ROCK;
+			if(mat == GLASS){
+				obj->otyp = LAST_GEM + rnd(9);
+			}
+			if(mat == GEMSTONE){
+				obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+			}
 		break;
 		// case HEAVY_IRON_BALL:
 			// obj->otyp = ;
@@ -1537,6 +1549,13 @@ int mat;
 			if(obj->otyp == WAN_WISHING)
 				obj->spe /= 5;
 			if(!(obj->recharged)) obj->recharged = 1;
+			obj->obj_material = mat;
+		break;
+		case GEM_CLASS:
+			if(mat != GLASS && mat != GEMSTONE){
+				if(mat == SILVER) obj->otyp = SILVER_SLINGSTONE;
+				else obj->otyp = ROCK;
+			}
 			obj->obj_material = mat;
 		break;
 		default:

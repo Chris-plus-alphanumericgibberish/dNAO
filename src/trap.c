@@ -2362,6 +2362,23 @@ boolean byplayer;
 }
 
 void
+minstaglass(mon,byplayer)
+struct monst *mon;
+boolean byplayer;
+{
+	/* give a "<mon> is slowing down" message and also remove
+	   intrinsic speed (comparable to similar effect on the hero) */
+	mon_adjust_speed(mon, -3, (struct obj *)0);
+
+	if (cansee(mon->mx, mon->my))
+		pline("%s turns to glass.", Monnam(mon));
+	if (byplayer) {
+		glassed = TRUE;
+		xkilled(mon,0);
+	} else monglassed(mon);
+}
+
+void
 selftouch(arg)
 const char *arg;
 {

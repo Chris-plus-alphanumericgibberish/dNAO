@@ -410,6 +410,7 @@ E NEARDATA long wailmsg;
 E NEARDATA boolean in_mklev;
 E NEARDATA boolean stoned;
 E NEARDATA boolean golded;
+E NEARDATA boolean glassed;
 E NEARDATA boolean unweapon;
 E NEARDATA boolean mrg_to_wielded;
 E NEARDATA struct obj *current_wand;
