@@ -1356,6 +1356,8 @@ E void FDECL(mondied, (struct monst *));
 E void FDECL(monvanished, (struct monst *));
 E void FDECL(mongone, (struct monst *));
 E void FDECL(monstone, (struct monst *));
+E void FDECL(mongolded, (struct monst *));
+E void FDECL(monglassed, (struct monst *));
 E void FDECL(monkilled, (struct monst *,const char *,int));
 E void FDECL(unstuck, (struct monst *));
 E void FDECL(killed, (struct monst *));
