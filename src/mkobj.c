@@ -578,8 +578,7 @@ boolean artif;
 					otmp->age = 20L * /* 400 or 200 */
 					      (long)objects[otmp->otyp].oc_cost;
 					otmp->lamplit = 0;
-					otmp->quan = 1L +
-					      (long)(rn2(2) ? rn2(7) : 0);
+					otmp->quan = 1L + ((long)(rn2(2) && !Is_grue_level(&u.uz)) ? rn2(7) : 0);
 					blessorcurse(otmp, 5);
 					break;
 		case BRASS_LANTERN:
