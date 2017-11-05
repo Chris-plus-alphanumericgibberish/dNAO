@@ -1305,7 +1305,7 @@ mcalcdistress()
 				pline("Some unseen virtue is sucked into the open mouth of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 8);
-			if(resists_cold()) damage /= 2;
+			if(resists_cold(mtmp)) damage /= 2;
 			if(damage >= tmpm->mhp){
 				grow_up(mtmp,tmpm);
 				if (canspotmon(tmpm))
