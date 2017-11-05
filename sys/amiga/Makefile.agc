@@ -296,8 +296,10 @@ INSTDUNGEONFILES1= \
 	$(SLIB)bigrm-3.lev	$(SLIB)bigrm-4.lev	$(SLIB)bigrm-5.lev \
 	$(SLIB)castle.lev	$(SLIB)dungeon		$(SLIB)earth.lev \
 	$(SLIB)fakewiz1.lev	$(SLIB)fakewiz2.lev	$(SLIB)fire.lev \
-	$(SLIB)juiblex.lev	$(SLIB)knox.lev		$(SLIB)medusa-1.lev \
-	$(SLIB)medusa-2.lev	$(SLIB)minend-1.lev	$(SLIB)minend-2.lev \
+	$(SLIB)juiblex.lev	$(SLIB)knox.lev		$(SLIB)chall-1.lev \
+	$(SLIB)chall-2.lev	$(SLIB)chall-3.lev	$(SLIB)chall-4.lev \
+	$(SLIB)chall-5.lev	$(SLIB)chall-6.lev \
+	$(SLIB)minend-1.lev	$(SLIB)minend-2.lev \
 	$(SLIB)minetn-1.lev	$(SLIB)minetn-2.lev	$(SLIB)minefill.lev \
 	$(SLIB)options		$(SLIB)oracle.lev	$(SLIB)orcus.lev \
 	$(SLIB)sanctum.lev	$(SLIB)soko1-1.lev	$(SLIB)soko1-2.lev \
@@ -393,7 +395,9 @@ spotless:  clean
 #	-delete $(SLIB)water.lev $(SLIB)astral.lev
 #	-delete $(SLIB)tower1.lev $(SLIB)tower2.lev $(SLIB)tower3.lev
 #	-delete $(SLIB)fakewiz1.lev $(SLIB)fakewiz2.lev
-#	-delete $(SLIB)medusa-1.lev $(SLIB)medusa-2.lev
+#	-delete $(SLIB)chall-1.lev $(SLIB)chall-2.lev
+#	-delete $(SLIB)chall-3.lev $(SLIB)chall-4.lev
+#	-delete $(SLIB)chall-5.lev $(SLIB)chall-6.lev
 #	-delete $(SLIB)oracle.lev $(SLIB)wizard1.lev $(SLIB)wizard2.lev
 #	-delete $(SLIB)wizard3.lev $(DAT)dungeon.pdf $(SLIB)valley.lev
 #	-delete $(SLIB)minefill.lev
@@ -821,10 +825,14 @@ $(WIZARD1):  $(SLIB)fakewiz2.lev
 
 $(SLIB)fakewiz2.lev:  $(DAT)yendor.des $(SBIN)lev_comp
 
-MEDUSA1= $(SLIB)medusa-1.lev
-$(MEDUSA1): $(SLIB)medusa-2.lev
+MEDUSA1= $(SLIB)chall-1.lev
+$(MEDUSA1): $(SLIB)chall-2.lev
 
-$(SLIB)medusa-2.lev:	$(DAT)medusa.des $(SBIN)lev_comp
+$(SLIB)chall-2.lev:	$(DAT)medusa.des $(SBIN)lev_comp
+$(SLIB)chall-3.lev:	$(DAT)medusa.des $(SBIN)lev_comp
+$(SLIB)chall-4.lev:	$(DAT)medusa.des $(SBIN)lev_comp
+$(SLIB)chall-5.lev:	$(DAT)grue.des $(SBIN)lev_comp
+$(SLIB)chall-6.lev:	$(DAT)grue.des $(SBIN)lev_comp
 
 SOKOBAN1= $(SLIB)soko1-1.lev $(SLIB)soko1-2.lev $(SLIB)soko2-1.lev \
 	$(SLIB)soko2-2.lev $(SLIB)soko3-1.lev $(SLIB)soko3-2.lev \
