@@ -1673,6 +1673,35 @@ struct obj *obj, *otmp;
 		    res = 0;
 	} else
 	switch(otmp->otyp) {
+	case WAN_LIGHT:
+	case SCR_LIGHT:
+	case SPE_LIGHT:
+		if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
+			obj->otyp == BRASS_LANTERN || obj->otyp == POT_OIL ||
+			obj->otyp == DWARVISH_HELM || obj->otyp == GNOMISH_POINTY_HAT ||
+			obj->otyp == TALLOW_CANDLE || obj->otyp == WAX_CANDLE) &&
+			!((!Is_candle(obj) && obj->age == 0) || (obj->otyp == MAGIC_LAMP && obj->spe == 0))
+			&& (!obj->cursed || rn2(2))
+			&& !obj->lamplit) {
+
+			// Assumes the player is the only cause of this effect for purposes of shk billing
+
+			if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
+				obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_HELM) {
+				check_unpaid(obj);
+			}
+			else {
+				if (obj->unpaid && costly_spot(obj->ox, obj->oy) &&
+					obj->age == 20L * (long)objects[obj->otyp].oc_cost) {
+					const char *ithem = obj->quan > 1L ? "them" : "it";
+					verbalize("You burn %s, you bought %s!", ithem, ithem);
+					bill_dummy_object(obj);
+				}
+			}
+			begin_burn(obj, FALSE);
+		}
+		res = 0;
+		break;
 	case WAN_POLYMORPH:
 	case SPE_POLYMORPH:
 		if (obj->otyp == WAN_POLYMORPH ||
