@@ -1028,7 +1028,7 @@ mcalcdistress()
 			} else if(canseemon(mtmp)){
 				pline("Heat shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
 			}
-			damage = d((mtmp->m_lev)/3, 8);
+			damage = d(min(10, (mtmp->m_lev)/3), 8);
 			tmpm->mhp -= damage;
 			if(tmpm->mhp < 1){
 				if (canspotmon(tmpm))
@@ -1057,7 +1057,7 @@ mcalcdistress()
 			if(canseemon(mtmp)){
 				pline("The shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
 			}
-			damage = d((mtmp->m_lev)/3, 8);
+			damage = d(min(10, (mtmp->m_lev)/3), 8);
 			losehp(damage, "heat drain", KILLED_BY);
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
@@ -1143,7 +1143,7 @@ mcalcdistress()
 			} else if(canseemon(mtmp)){
 				pline("Motes of light are drawn into the %s of %s.", mtmp->data == &mons[PM_BAALPHEGOR] ? "open mouth" : "ghostly hood", mon_nam(mtmp));
 			}
-			damage = d((mtmp->m_lev)/3, 4);
+			damage = d(min(10, (mtmp->m_lev)/3), 4);
 			tmpm->mhp -= damage;
 			if(tmpm->mhp < 1){
 				if (canspotmon(tmpm))
@@ -1172,7 +1172,7 @@ mcalcdistress()
 			if(canseemon(mtmp)){
 				pline("The motes are drawn into the %s of %s.", mtmp->data == &mons[PM_BAALPHEGOR] ? "open mouth" : "ghostly hood", mon_nam(mtmp));
 			}
-			damage = d((mtmp->m_lev)/3, 4);
+			damage = d(min(10, (mtmp->m_lev)/3), 4);
 			losehp(damage, "life-force theft", KILLED_BY);
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
@@ -1304,7 +1304,8 @@ mcalcdistress()
 			} else if(canseemon(mtmp)){
 				pline("Some unseen virtue is sucked into the open mouth of %s.", mon_nam(mtmp));
 			}
-			damage = d((mtmp->m_lev)/3, 8);
+			damage = d(min(10, (mtmp->m_lev)/3), 8);
+			if(resists_cold()) damage /= 2;
 			if(damage >= tmpm->mhp){
 				grow_up(mtmp,tmpm);
 				if (canspotmon(tmpm))
@@ -1316,8 +1317,8 @@ mcalcdistress()
 				mtmp->mhp += tmpm->mhp;
 			}
 			else{
-				tmpm->mhp -= damage/4;
-				mtmp->mhp += damage/4;
+				tmpm->mhp -= damage;
+				mtmp->mhp += damage;
 			}
 			
 			if(mtmp->mhp > mtmp->mhpmax){
@@ -1336,20 +1337,17 @@ mcalcdistress()
 			if(canseemon(mtmp)){
 				pline("The virtue is sucked into the open mouth of %s.", mon_nam(mtmp));
 			}
-			damage = d((mtmp->m_lev)/3, 8);
-			if(Free_action) damage /= 4;
-			if(damage >= (maybe_polyd(u.mh, u.uhp))){
-				int temparise = u.ugrave_arise;
-				mtmp->mhp += maybe_polyd(u.mh, u.uhp);
-				u.ugrave_arise = PM_BAALPHEGOR;
-				mdamageu(mtmp, damage);
-				/*If the player surived the attack, restore the value of arise*/
-				u.ugrave_arise = temparise;
-			}
-			else{
-				losehp(damage/4, "motion theft", KILLED_BY);
-				mtmp->mhp += damage/4;
-			}
+			damage = d(min(10, (mtmp->m_lev)/3), 8);
+			if(Free_action) damage /= 2;
+			if((HCold_resistance && ECold_resistance)
+				|| (Cold_resistance && !(HCold_resistance || ECold_resistance))
+			) damage /= 2;
+			int temparise = u.ugrave_arise;
+			mtmp->mhp += maybe_polyd(u.mh, u.uhp);
+			u.ugrave_arise = PM_BAALPHEGOR;
+			mdamageu(mtmp, damage);
+			/*If the player surived the attack, restore the value of arise*/
+			u.ugrave_arise = temparise;
 			
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
@@ -4177,6 +4175,124 @@ register struct monst *mdef;
 		}
 		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
 		set_material(otmp, GOLD);
+		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+	}
+	
+	stackobj(otmp);
+	/* mondead() already does this, but we must do it before the newsym */
+	if(glyph_is_invisible(levl[x][y].glyph))
+	    unmap_object(x, y);
+	if (cansee(x, y)) newsym(x,y);
+	/* We don't currently trap the hero in the statue in this case but we could */
+	if (u.uswallow && u.ustuck == mdef) wasinside = TRUE;
+	mondead(mdef);
+	if (wasinside) {
+		if (is_animal(mdef->data))
+			You("%s through an opening in the new %s.",
+				locomotion(youracedata, "jump"),
+				xname(otmp));
+	}
+}
+
+/* drop a glass statue or rock and remove monster */
+void
+monglassed(mdef)
+register struct monst *mdef;
+{
+	struct obj *otmp, *obj, *oldminvent;
+	xchar x = mdef->mx, y = mdef->my;
+	boolean wasinside = FALSE;
+
+	/* we have to make the statue before calling mondead, to be able to
+	 * put inventory in it, and we have to check for lifesaving before
+	 * making the statue....
+	 */
+	lifesaved_monster(mdef);
+	if (mdef->mhp > 0) return;
+
+	mdef->mtrapped = 0;	/* (see m_detach) */
+
+	if ((int)mdef->data->msize > MZ_TINY ||
+		    !rn2(2 + ((int) (mdef->data->geno & G_FREQ) > 2))) {
+		oldminvent = 0;
+		/* some objects may end up outside the statue */
+		while ((obj = mdef->minvent) != 0) {
+		    obj_extract_self(obj);
+		    if (obj->owornmask)
+			update_mon_intrinsics(mdef, obj, FALSE, TRUE);
+		    obj_no_longer_held(obj);
+		    if (obj->owornmask & W_WEP)
+			setmnotwielded(mdef,obj);
+		    obj->owornmask = 0L;
+		    if (is_boulder(obj) ||
+#if 0				/* monsters don't carry statues */
+     (obj->otyp == STATUE && mons[obj->corpsenm].msize >= mdef->data->msize) ||
+#endif
+				obj_resists(obj, 0, 0)) {
+			if (flooreffects(obj, x, y, "fall")) continue;
+			place_object(obj, x, y);
+		    } else {
+			if (obj->lamplit) end_burn(obj, TRUE);
+			obj->nobj = oldminvent;
+			oldminvent = obj;
+		    }
+		}
+		/* defer statue creation until after inventory removal
+		   so that saved monster traits won't retain any stale
+		   item-conferred attributes */
+		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
+				  mdef->data, x, y, FALSE);
+		set_material(otmp, GLASS);
+		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		while ((obj = oldminvent) != 0) {
+		    oldminvent = obj->nobj;
+		    (void) add_to_container(otmp, obj);
+		}
+#ifndef GOLDOBJ
+		if (mdef->mgold) {
+			struct obj *au;
+			au = mksobj(GOLD_PIECE, FALSE, FALSE);
+			au->quan = mdef->mgold;
+			au->owt = weight(au);
+			(void) add_to_container(otmp, au);
+			mdef->mgold = 0;
+		}
+#endif
+		/* Archeologists should not break unique statues */
+		if (mdef->data->geno & G_UNIQ)
+			otmp->spe = 1;
+		otmp->owt = weight(otmp);
+	} else {
+		oldminvent = 0;
+		/* some objects may end up outside the statue */
+		while ((obj = mdef->minvent) != 0) {
+		    obj_extract_self(obj);
+		    if (obj->owornmask)
+			update_mon_intrinsics(mdef, obj, FALSE, TRUE);
+		    obj_no_longer_held(obj);
+		    if (obj->owornmask & W_WEP)
+			setmnotwielded(mdef,obj);
+		    obj->owornmask = 0L;
+		    if (is_boulder(obj) ||
+#if 0				/* monsters don't carry statues */
+     (obj->otyp == STATUE && mons[obj->corpsenm].msize >= mdef->data->msize) ||
+#endif
+				obj_resists(obj, 0, 0)) {
+			if (flooreffects(obj, x, y, "fall")) continue;
+			place_object(obj, x, y);
+		    } else {
+			if (obj->lamplit) end_burn(obj, TRUE);
+			obj->nobj = oldminvent;
+			oldminvent = obj;
+		    }
+		}
+		while ((obj = oldminvent) != 0) {
+		    oldminvent = obj->nobj;
+			place_object(obj, x, y);
+			stackobj(obj);
+		}
+		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
+		set_material(otmp, GLASS);
 		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
 	}
 	
