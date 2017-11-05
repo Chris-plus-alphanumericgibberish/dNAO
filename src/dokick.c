@@ -996,7 +996,7 @@ dokick()
 		    goto ouch;
 		if(IS_TREE(maploc->typ)) {
 		    struct obj *treefruit;
-			if(u.uz.dnum == tower_dnum || on_level(&medusa_level,&u.uz)){
+			if(u.uz.dnum == tower_dnum || Is_medusa_level(&u.uz)){
 			    if (rn2(3)) {
 					if ( !rn2(3) && !(mvitals[PM_CROW].mvflags & G_GONE && !In_quest(&u.uz)) )
 					    You_hear("flapping wings."); /* a warning */
