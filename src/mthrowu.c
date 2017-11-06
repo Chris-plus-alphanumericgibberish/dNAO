@@ -937,10 +937,10 @@ m_throw(mon, x, y, dx, dy, range, obj, verbose)
 		    break;
 		}
 		tmp_at(bhitpos.x, bhitpos.y);
-		delay_output();
+		if(cansee(bhitpos.x, bhitpos.y)) delay_output();
 	}
 	tmp_at(bhitpos.x, bhitpos.y);
-	delay_output();
+	if(cansee(bhitpos.x, bhitpos.y)) delay_output();
 	tmp_at(DISP_END, 0);
 
 	if (blindinc) {
