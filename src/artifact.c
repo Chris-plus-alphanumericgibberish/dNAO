@@ -3916,7 +3916,7 @@ arti_invoke(obj)
 		return 0;
 	    }
 	    b_effect = obj->blessed &&
-		((Role_switch == oart->role || !oart->role) && (Race_switch == oart->race || !oart->race));
+		((Role_switch == oart->role || oart->role == NON_PM) && (Race_switch == oart->race || oart->race == NON_PM));
 	    recharge(otmp, b_effect ? 1 : obj->cursed ? -1 : 0);
 	    update_inventory();
 	    break;
@@ -4433,7 +4433,7 @@ arti_invoke(obj)
            cc.x = u.ux;
            cc.y = u.uy;
            /* Cause trouble if cursed or player is wrong role */
-           if (obj->cursed || ((Role_switch == oart->role || !oart->role) && (Race_switch == oart->race || !oart->race))) {
+           if (obj->cursed || ((Role_switch == oart->role || oart->role == NON_PM) && (Race_switch == oart->race || oart->race == NON_PM))) {
               You("may summon a stinking cloud.");
                pline("Where do you want to center the cloud?");
                if (getpos(&cc, TRUE, "the desired position") < 0) {
@@ -5748,7 +5748,7 @@ arti_invoke(obj)
 						boolean b_effect;
 						
 						b_effect = obj->blessed &&
-							((Role_switch == oart->role || !oart->role) && (Race_switch == oart->race || !oart->race));
+							((Role_switch == oart->role || oart->role == NON_PM) && (Race_switch == oart->race || oart->race == NON_PM));
 						recharge(uwep, b_effect ? 1 : obj->cursed ? -1 : 0);
 						update_inventory();
 						break;

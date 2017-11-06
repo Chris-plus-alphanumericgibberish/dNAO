@@ -520,7 +520,7 @@ $(O)sp_lev.tag: $(O)utility.tag $(DAT)/bigroom.des  $(DAT)/castle.des \
 	 $(DAT)/endgame.des $(DAT)/gehennom.des $(DAT)/knox.des   \
 	 $(DAT)/medusa.des  $(DAT)/oracle.des   $(DAT)/tower.des  \
 	 $(DAT)/yendor.des  $(DAT)/arch.des     $(DAT)/barb.des   \
-	 $(DAT)/bard.des   \
+	 $(DAT)/bard.des    $(DAT)/grue.des \
 	 $(DAT)/caveman.des $(DAT)/healer.des   $(DAT)/knight.des \
 	 $(DAT)/monk.des    $(DAT)/priest.des   $(DAT)/ranger.des \
 	 $(DAT)/rogue.des   $(DAT)/samurai.des  $(DAT)/sokoban.des \
@@ -540,6 +540,7 @@ $(O)sp_lev.tag: $(O)utility.tag $(DAT)/bigroom.des  $(DAT)/castle.des \
 	$(subst /,\,$(U)lev_comp $(DAT)/knox.des)
 	$(subst /,\,$(U)lev_comp $(DAT)/mines.des)
 	$(subst /,\,$(U)lev_comp $(DAT)/medusa.des)
+	$(subst /,\,$(U)lev_comp $(DAT)/grue.des)
 	$(subst /,\,$(U)lev_comp $(DAT)/oracle.des)
 	$(subst /,\,$(U)lev_comp $(DAT)/sokoban.des)
 	$(subst /,\,$(U)lev_comp $(DAT)/tower.des)
@@ -1037,7 +1038,7 @@ spotless: clean
 	$(subst /,\,if exist $(DAT)/fire.lev     del $(DAT)/fire.lev)
 	$(subst /,\,if exist $(DAT)/juiblex.lev  del $(DAT)/juiblex.lev)
 	$(subst /,\,if exist $(DAT)/knox.lev     del $(DAT)/knox.lev)
-	$(subst /,\,if exist $(DAT)/medusa-?.lev      del $(DAT)/medusa-?.lev)
+	$(subst /,\,if exist $(DAT)/chall-?.lev  del $(DAT)/chall-?.lev)
 	$(subst /,\,if exist $(DAT)/mine*.lev    del $(DAT)/mine*.lev)
 	$(subst /,\,if exist $(DAT)/options      del $(DAT)/options)
 	$(subst /,\,if exist $(DAT)/ttyoptions   del $(DAT)/ttyoptions)

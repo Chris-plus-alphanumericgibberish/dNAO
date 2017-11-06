@@ -3460,7 +3460,7 @@ int spellnum;
      case PLAGUE:
 	   if(!mtmp) break;
        if (!resists_sickness(mtmp)) {
-          pline("%s is afflicted with disease!", Monnam(mtmp));
+          	if(canseemon(mtmp)) pline("%s is afflicted with disease!", Monnam(mtmp));
 		  if(!rn2(10)){
 			if (yours) killed(mtmp);
 			else monkilled(mtmp, "", AD_SPEL);

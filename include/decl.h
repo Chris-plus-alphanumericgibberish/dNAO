@@ -57,8 +57,15 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #ifdef REINCARNATION
     d_level	d_rogue_level;
 #endif
-	/*Medusa's Island*/
-    d_level	d_medusa_level;
+	/*Medusa's Island + Friends */
+	int		challenge_variant;
+#define MEDUSA_LEVEL1	1
+#define MEDUSA_LEVEL2	2
+#define MEDUSA_LEVEL3	3
+#define MEDUSA_LEVEL4	4
+#define GRUE_LEVEL1		5
+#define GRUE_LEVEL2		6
+    d_level	d_challenge_level;
 	/*Castle*/
 	d_level	d_stronghold_level;
 	/*Gehennom*/
@@ -167,7 +174,7 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #ifdef REINCARNATION
 #define rogue_level		(dungeon_topology.d_rogue_level)
 #endif
-#define medusa_level		(dungeon_topology.d_medusa_level)
+#define challenge_level		(dungeon_topology.d_challenge_level)
 #define stronghold_level	(dungeon_topology.d_stronghold_level)
 	/*Gehennom*/
 #define valley_level		(dungeon_topology.d_valley_level)
@@ -203,8 +210,8 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #define sea_dnum		(dungeon_topology.d_sea_dnum)
 	/*The Temple of Moloch*/
 #define temple_dnum		(dungeon_topology.d_temple_dnum)
-	/*Medusa's Island*/
-#define medusa_level		(dungeon_topology.d_medusa_level)
+	/*Medusa's Island + Friends*/
+#define challenge_level		(dungeon_topology.d_challenge_level)
 	/*Sokoban*/
 #define sokoban_dnum		(dungeon_topology.d_sokoban_dnum)
 	/*Mines of the Gnomes of Zurich*/

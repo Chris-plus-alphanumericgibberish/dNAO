@@ -406,9 +406,9 @@ boolean artif;
 	else if(otyp == BAR) otmp->obj_material = IRON;
 	else if(otyp == VIPERWHIP) otmp->obj_material = SILVER;
 	else if(otyp == find_gcirclet()) otmp->obj_material = GOLD;
-	else if(otyp == SPEAR){if(!rn2(25)) otmp->obj_material = SILVER;}
-	else if(otyp == DAGGER){if(!rn2(12)) otmp->obj_material = SILVER;}
-	else if(otyp == STILETTOS){if(!rn2(12)) otmp->obj_material = SILVER;}
+	else if(otyp == SPEAR && !rn2(25)) otmp->obj_material = SILVER;
+	else if(otyp == DAGGER && !rn2(12)) otmp->obj_material = SILVER;
+	else if(otyp == STILETTOS && !rn2(12)) otmp->obj_material = SILVER;
 	else if(otyp == ARMORED_BOOTS) otmp->obj_material = COPPER;
 	else if(otyp == ROUNDSHIELD) otmp->obj_material = COPPER;
 	else otmp->obj_material = objects[otyp].oc_material;
@@ -578,8 +578,7 @@ boolean artif;
 					otmp->age = 20L * /* 400 or 200 */
 					      (long)objects[otmp->otyp].oc_cost;
 					otmp->lamplit = 0;
-					otmp->quan = 1L +
-					      (long)(rn2(2) ? rn2(7) : 0);
+					otmp->quan = 1L + ((long)(rn2(2) && !Is_grue_level(&u.uz)) ? rn2(7) : 0);
 					blessorcurse(otmp, 5);
 					break;
 		case BRASS_LANTERN:
