@@ -1620,7 +1620,7 @@ NEARDATA struct permonst mons[] = {
  * vortices
  */
     MON("fog cloud", S_VORTEX,//4
-	LVL(3, 1, 0, 0, 0), (G_GENO|G_NOCORPSE|2),
+	LVL(3, 1, 0, 0, 0), (G_GENO|G_NOCORPSE|2), /*Engulfing vorticies slower than 12 get 2x speed when stuck to you*/
 	A(ATTK(AT_ENGL, AD_PHYS, 1, 6),
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(0, 0, 0, MS_SILENT, MZ_HUGE), MR_SLEEP|MR_POISON|MR_STONE, 0,
@@ -1628,7 +1628,7 @@ NEARDATA struct permonst mons[] = {
 	MB_NOEYES|MB_NOLIMBS|MB_NOHEAD|MB_UNSOLID|MB_NEUTER /*MB*/, MG_RALL /*MG*/,
 	MA_ELEMENTAL /*MA*/,  MV_DETECTION /*MV*/, CLR_GRAY),
     MON("dust vortex", S_VORTEX,//6
-	LVL(4, 10, 2, 30, 0), (G_GENO|G_NOCORPSE|2),
+	LVL(4, 6, 2, 30, 0), (G_GENO|G_NOCORPSE|2), /*Engulfing vorticies slower than 12 get 2x speed when stuck to you*/
 	A(ATTK(AT_ENGL, AD_BLND, 2, 8),
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(0, 0, 0, MS_SILENT, MZ_HUGE), MR_SLEEP|MR_POISON|MR_STONE, 0,
@@ -1636,7 +1636,7 @@ NEARDATA struct permonst mons[] = {
 	MB_NOEYES|MB_NOLIMBS|MB_NOHEAD|MB_NEUTER /*MB*/, MG_RALL /*MG*/,
 	MA_ELEMENTAL /*MA*/,  MV_DETECTION /*MV*/, CLR_BROWN),
     MON("ice vortex", S_VORTEX,//7
-	LVL(5, 10, 2, 30, 0), (G_NOHELL|G_GENO|G_NOCORPSE|1),
+	LVL(5, 8, 2, 30, 0), (G_NOHELL|G_GENO|G_NOCORPSE|1), /*Engulfing vorticies slower than 12 get 2x speed when stuck to you*/
 	A(ATTK(AT_ENGL, AD_COLD, 2, 6),
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(0, 0, 0, MS_SILENT, MZ_HUGE),
@@ -1645,7 +1645,7 @@ NEARDATA struct permonst mons[] = {
 	MB_NOEYES|MB_NOLIMBS|MB_NOHEAD|MB_NEUTER /*MB*/, MG_RALL|MG_INFRAVISIBLE /*MG*/,
 	MA_ELEMENTAL /*MA*/,  MV_DETECTION /*MV*/, CLR_CYAN),
     MON("energy vortex", S_VORTEX,//9
-	LVL(6, 10, 2, 30, 0), (G_GENO|G_NOCORPSE|1),
+	LVL(6, 8, 2, 30, 0), (G_GENO|G_NOCORPSE|1), /*Engulfing vorticies slower than 12 get 2x speed when stuck to you*/
 	A(ATTK(AT_ENGL, AD_ELEC, 2, 6), ATTK(AT_ENGL, AD_DREN, 0, 0),
 	  ATTK(AT_NONE, AD_ELEC, 0, 4), NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(0, 0, 0, MS_SILENT, MZ_HUGE),
@@ -1654,16 +1654,17 @@ NEARDATA struct permonst mons[] = {
 	MB_NOEYES|MB_NOLIMBS|MB_NOHEAD|MB_UNSOLID|MB_NEUTER /*MB*/, MG_RALL /*MG*/,
 	MA_ELEMENTAL /*MA*/,  MV_DETECTION /*MV*/, HI_ZAP),
     MON("steam vortex", S_VORTEX,//9
-	LVL(7, 12, 2, 30, 0), (G_HELL|G_GENO|G_NOCORPSE|2),
+	LVL(7, 18, 2, 30, 0), (G_HELL|G_GENO|G_NOCORPSE|2),
 	A(ATTK(AT_ENGL, AD_FIRE, 2, 8),
-	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
+	  ATTK(AT_ENGL, AD_PHYS, 2, 8), 
+	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(0, 0, 0, MS_SILENT, MZ_HUGE),
 	MR_FIRE|MR_SLEEP|MR_POISON|MR_STONE, 0,
 	MM_FLY|MM_BREATHLESS /*MM*/, MT_MINDLESS|MT_HOSTILE /*MT*/,
 	MB_NOEYES|MB_NOLIMBS|MB_NOHEAD|MB_UNSOLID|MB_NEUTER /*MB*/, MG_RALL|MG_INFRAVISIBLE /*MG*/,
 	MA_ELEMENTAL /*MA*/,  MV_DETECTION /*MV*/, CLR_BLUE),
     MON("fire vortex", S_VORTEX,//10
-	LVL(8, 12, 2, 30, 0), (G_HELL|G_GENO|G_NOCORPSE|1),
+	LVL(8, 8, 2, 30, 0), (G_HELL|G_GENO|G_NOCORPSE|1), /*Engulfing vorticies slower than 12 get 2x speed when stuck to you*/
 	A(ATTK(AT_ENGL, AD_FIRE, 2,10), ATTK(AT_NONE, AD_FIRE, 0, 4),
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(0, 0, 0, MS_SILENT, MZ_HUGE),
@@ -1680,7 +1681,7 @@ NEARDATA struct permonst mons[] = {
 	MB_STRONG|MB_NOEYES|MB_NOLIMBS|MB_NOHEAD /*MB*/, MG_RALL|MG_NOPOLY|MG_NASTY|MG_REGEN|MG_HATESUNHOLY|MG_TRACKER /*MG*/,
 	MA_MINION|MA_FEY /*MA*/,  MV_CATSIGHT|MV_SEE_INVIS|MV_LOWLIGHT3 /*MV*/, CLR_BROWN),
     MON("stinking cloud", S_VORTEX,// /*Needs encyc entry*//*Needs tile*/
-	LVL(10, 6, -1, 19, -10), (G_HELL|G_NOCORPSE|G_NOGEN),
+	LVL(10, 6, -1, 19, -10), (G_HELL|G_NOCORPSE|G_NOGEN), /*Engulfing vorticies slower than 12 get 2x speed when stuck to you*/
 	A(ATTK(AT_ENGL, AD_DRST, 3,8), NO_ATTK,
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(0, 0, 0, MS_SILENT, MZ_MEDIUM),

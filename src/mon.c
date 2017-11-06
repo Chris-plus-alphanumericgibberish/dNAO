@@ -932,6 +932,10 @@ struct monst *mon;
 		if(mmove < 6) mmove = 6;
 	}
 	
+	if(u.ustuck == mon && mmove < 12 && mon->data->mlet == S_VORTEX){
+		mmove *= 2;
+	}
+	
 	if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH])
 		mmove += u.chokhmah;
 	if(mon->data == &mons[PM_PYTHON] && 
