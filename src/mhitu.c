@@ -3096,7 +3096,7 @@ dopois:
 				}
 				else{
 					You_feel("%s trying to suck your extremities off!",mon_nam(mtmp));
-					if(youmonst.movement > -1 * NORMAL_SPEED) youmonst.movement -= NORMAL_SPEED / 2;
+					// if(youmonst.movement > -1 * NORMAL_SPEED) youmonst.movement -= NORMAL_SPEED / 2; //Tarmunora memorial balance correction
 					if(!rn2(10)){
 						Your("%s twist from the suction!", makeplural(body_part(LEG)));
 					    set_wounded_legs(RIGHT_SIDE, rnd(60-ACURR(A_DEX)));
