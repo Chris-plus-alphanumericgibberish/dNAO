@@ -725,10 +725,10 @@ int mode;
 	struct trap* t = t_at(x, y);
 
 	if ((t && t->tseen) ||
-	    (!Levitation && !Flying &&
-	     !is_clinger(youracedata) &&
-	     (is_pool(x, y) || is_lava(x, y)) && levl[x][y].seenv))
-	    return FALSE;
+        (((!Levitation && !Flying &&
+         !is_clinger(youracedata)) || Is_dagon_level(&u.uz)) &&
+         (is_pool(x, y) || is_lava(x, y)) && levl[x][y].seenv))
+        return FALSE;
     }
 
     ust = &levl[ux][uy];
