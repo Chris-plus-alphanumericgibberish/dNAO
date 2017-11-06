@@ -680,7 +680,7 @@ boolean chatting;
 			}
 		}
 	}
-	switch (mtmp->mfaction == SKELIFIED ? MS_BONES : is_silent_mon(mtmp) ? MS_SILENT : ptr->msound) {
+	switch ((mtmp->mfaction == SKELIFIED && ptr != &mons[PM_ECHO]) ? MS_BONES : is_silent_mon(mtmp) ? MS_SILENT : ptr->msound) {
 	case MS_ORACLE:
 	    return doconsult(mtmp);
 	case MS_PRIEST: /*Most (all?) things with this will have ispriest set*/
