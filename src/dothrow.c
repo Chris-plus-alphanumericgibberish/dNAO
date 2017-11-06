@@ -769,7 +769,7 @@ dofire()
 					} else {
 						tmp_at(DISP_BEAM, cmap_to_glyph(S_digbeam));
 						tmp_at(sx, sy);
-						delay_output();
+						if(cansee(sx, sy)) delay_output();
 						tmp_at(DISP_END, 0);
 					}
 				} else {
@@ -1083,9 +1083,9 @@ hurtle_step(arg, x, y)
     	}
     }
     if (--*range < 0)		/* make sure our range never goes negative */
-	*range = 0;
+		*range = 0;
     if (*range != 0)
-	delay_output();
+		delay_output();
     return TRUE;
 }
 
@@ -1381,7 +1381,7 @@ int desty;
 	tmp_at(DISP_FLASH, obj_to_glyph(obj));
 	while(x != destx || y != desty) {
 	    tmp_at(x, y);
-	    delay_output();
+		if(cansee(x,y)) delay_output();
 	    x -= u.dx; y -= u.dy;
 	}
 	tmp_at(DISP_END, 0);
@@ -1785,7 +1785,7 @@ int thrown;
 			}
 		    tmp_at(DISP_FLASH, obj_to_glyph(obj));
 		    tmp_at(bhitpos.x, bhitpos.y);
-		    delay_output();
+		    if(cansee(bhitpos.x, bhitpos.y)) delay_output();
 		    tmp_at(DISP_END, 0);
 		    breakmsg(obj, cansee(bhitpos.x, bhitpos.y));
 		    breakobj(obj, bhitpos.x, bhitpos.y, TRUE, TRUE);
