@@ -163,7 +163,7 @@ do_present_ring(obj)
 					engrHere->halu_ward = obj->ohaluengr;
 					engrHere->complete_wards = engrHere->halu_ward ? 1 : get_num_wards_added(engrHere->ward_id,0);
 					engrHere->ward_type = obj->blessed ? BURN : obj->cursed ? DUST : ENGRAVE;
-					if( !(u.wardsknown & get_wardID(engrHere->ward_id)) ){
+					if( !(obj->ohaluengr) && !(u.wardsknown & get_wardID(engrHere->ward_id)) ){
 						You("have learned a new warding sign!");
 						u.wardsknown |= get_wardID(engrHere->ward_id);
 					}
