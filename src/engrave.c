@@ -400,8 +400,8 @@ static const char *haluMesg[] = {
 		"Another world awaits. ...And you're going!",
 		"You have seven days.",
 	"But the future refused to change.", /*Chrono Trigger*/
-	"WHEN ALL ELSE FAILS USE FIRE",
-	"Don't you see? All of you... YOUR GODS DESTROYED YOU",
+	"WHEN ALL ELSE FAILS USE FIRE", /*Zelda II*/
+	"Don't you see? All of you... YOUR GODS DESTROYED YOU", /*Wind Waker*/
 		"The wind... It is blowing...",
 	"I wonder... If you do the right thing... Does it really make... everybody... happy?",/*Majora's Mask*/
 		"Your friends... What kind of... people are they? I wonder... Do these people... think of you... as a friend?",
