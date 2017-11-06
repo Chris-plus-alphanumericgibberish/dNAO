@@ -791,7 +791,7 @@ unsigned trflags;
 		} else {
 		    seetrap(trap);
 		    pline("A board beneath you squeaks loudly.");
-		    wake_nearby();
+		    wake_nearby_noisy();
 		}
 		break;
 
@@ -4272,7 +4272,7 @@ boolean disarm;
 					  TRUE);
 			      delobj(otmp);
 			  }
-			  wake_nearby();
+			  wake_nearby_noisy();
 			  losehp(d(6,6), buf, KILLED_BY_AN);
 			  exercise(A_STR, FALSE);
 			  if(costly && loss) {
@@ -4450,7 +4450,7 @@ register int bodypart;
 	int dmg = rnd(5 + (lvl < 5 ? lvl : 2+lvl/2));
 
 	pline("KABOOM!!  %s was booby-trapped!", The(item));
-	wake_nearby();
+	wake_nearby_noisy();
 	losehp(dmg, "explosion", KILLED_BY_AN);
 	exercise(A_STR, FALSE);
 	if (bodypart) exercise(A_CON, FALSE);

@@ -2163,7 +2163,7 @@ register struct monst *mtmp;
 	if(couldsee(mtmp->mx,mtmp->my) &&
 		distu(mtmp->mx,mtmp->my) <= 100 &&
 		(!Stealth || (mtmp->data == &mons[PM_ETTIN] && rn2(10))) &&
-		(Aggravate_monster || (sensitive_ears(mtmp->data) && !is_deaf(mtmp)) || (!rn2(7)))
+		(Aggravate_monster || ((sensitive_ears(mtmp->data) || !rn2(7)) && !is_deaf(mtmp)))
 	) {
 		notseen = FALSE;
 	}

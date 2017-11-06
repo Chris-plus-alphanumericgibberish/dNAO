@@ -1373,6 +1373,7 @@ E void FDECL(m_respond, (struct monst *));
 E void FDECL(setmangry, (struct monst *));
 E void FDECL(wakeup, (struct monst *, boolean));
 E void NDECL(wake_nearby);
+E void NDECL(wake_nearby_noisy);
 E void FDECL(wake_nearto, (int,int,int));
 E void FDECL(wake_nearto_noisy, (int,int,int));
 E void FDECL(seemimic, (struct monst *));

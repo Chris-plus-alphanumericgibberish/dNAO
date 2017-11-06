@@ -5012,6 +5012,22 @@ wake_nearby()
 	}
 }
 
+/* Wake up nearby monsters, deafening those with sensitive ears. */
+void
+wake_nearby_noisy(){
+	register struct monst *mtmp;
+	wake_nearby();
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+	    if (!DEADMONSTER(mtmp) && sensitive_ears(mtmp->data) && !is_deaf(mtmp) &&
+				 distu(mtmp->mx,mtmp->my) < (u.ulevel*20)/3){
+			mtmp->mstun = 1;
+			mtmp->mconf = 1;
+			mtmp->mcanhear = 0;
+			mtmp->mdeafened = (u.ulevel*20)/3 - distu(mtmp->mx,mtmp->my);
+		}
+	}
+}
+
 /* Wake up monsters near some particular location. */
 void
 wake_nearto(x, y, distance)
@@ -5032,7 +5048,7 @@ register int x, y, distance;
 	}
 }
 
-/* Wake up monsters near some particular location. */
+/* Wake up monsters near some particular location, deafening those with sensitive ears. */
 void
 wake_nearto_noisy(x, y, distance)
 register int x, y, distance;

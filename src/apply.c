@@ -593,7 +593,7 @@ struct obj *obj;
 	register struct monst *mtmp;
 
 	You(whistle_str, obj->cursed ? "shrill" : "high");
-	wake_nearby();
+	wake_nearby_noisy();
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    if (!DEADMONSTER(mtmp)) {
 			if (mtmp->mtame && !mtmp->isminion)
@@ -1179,7 +1179,7 @@ boolean spiritseal;
 	    makeknown(BELL_OF_OPENING);
 	    obj->known = 1;
 	}
-	if (wakem) wake_nearby();
+	if (wakem) wake_nearby_noisy();
 }
 
 STATIC_OVL void
