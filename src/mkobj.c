@@ -1164,6 +1164,7 @@ start_corpse_timeout(body)
 
 	} else if (attchmon && attchmon->mfaction == ZOMBIFIED && !body->norevive) {
 //		pline("setting up zombie revival for %s", xname(body));
+		attchmon->mclone = 1;
 		for (age = 2; age <= TAINT_AGE; age++)
 		    if (!rn2(TROLL_REVIVE_CHANCE)) {	/* zombie revives */
 			action = REVIVE_MON;
