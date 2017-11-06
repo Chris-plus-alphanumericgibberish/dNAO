@@ -1665,7 +1665,7 @@ struct obj *obj;
 				}
 			} else if (lev->typ == IRONBARS) {
 			    pline("Clang!");
-			    wake_nearby();
+			    wake_nearby_noisy();
 			} else if (IS_TREES(lev->typ))
 			    You("need an axe to cut down a tree.");
 			else if (IS_ROCK(lev->typ))

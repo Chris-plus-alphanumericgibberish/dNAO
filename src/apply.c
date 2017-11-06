@@ -163,7 +163,7 @@ do_present_ring(obj)
 					engrHere->halu_ward = obj->ohaluengr;
 					engrHere->complete_wards = engrHere->halu_ward ? 1 : get_num_wards_added(engrHere->ward_id,0);
 					engrHere->ward_type = obj->blessed ? BURN : obj->cursed ? DUST : ENGRAVE;
-					if( !(u.wardsknown & get_wardID(engrHere->ward_id)) ){
+					if( !(obj->ohaluengr) && !(u.wardsknown & get_wardID(engrHere->ward_id)) ){
 						You("have learned a new warding sign!");
 						u.wardsknown |= get_wardID(engrHere->ward_id);
 					}
@@ -593,7 +593,7 @@ struct obj *obj;
 	register struct monst *mtmp;
 
 	You(whistle_str, obj->cursed ? "shrill" : "high");
-	wake_nearby();
+	wake_nearby_noisy();
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    if (!DEADMONSTER(mtmp)) {
 			if (mtmp->mtame && !mtmp->isminion)
@@ -1179,7 +1179,7 @@ boolean spiritseal;
 	    makeknown(BELL_OF_OPENING);
 	    obj->known = 1;
 	}
-	if (wakem) wake_nearby();
+	if (wakem) wake_nearby_noisy();
 }
 
 STATIC_OVL void
@@ -2610,6 +2610,10 @@ struct obj *hypo;
 	struct obj *amp = getobj(tools, "inject");
 	int i, ii, nothing=0;
 	if(!amp) return 0;
+	if(amp->otyp != HYPOSPRAY_AMPULE){
+		You("can't inject that!");
+		return 0;
+	}
     if (!getdir((char *)0)) return 0;
 	if(u.dz < 0){
 		You("don't see a patient up there.");
@@ -2621,6 +2625,10 @@ struct obj *hypo;
 		struct monst *mtarg = m_at(u.ux+u.dx,u.uy+u.dy);
 		if(!mtarg){
 			You("don't find a patient there.");
+			return 1;
+		}
+		if(amp->spe <= 0){
+			pline("The ampule is empty!");
 			return 1;
 		}
 		if(!has_blood_mon(mtarg)){

@@ -911,9 +911,9 @@ boolean called;
 			}
 		}
 	    Strcat(buf, mdat->mname);
-		if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
-		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
-		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
+		if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, "'s zombie");
+		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
+		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
 	    return buf;
 	}
 
@@ -975,27 +975,33 @@ boolean called;
 			}
 			
 			Sprintf(eos(buf), "%s", mdat->mname);
-			if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
-			else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
-			else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
+			if(type_is_pname(mdat)){
+				if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, "'s zombie");
+				else if(mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
+				else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
+			} else {
+				if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
+				else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
+				else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
+			}
 			Sprintf(eos(buf), " called %s", name);
 			
 			name_at_start = (boolean)type_is_pname(mdat);
 	    } else if (is_mplayer(mdat) && (bp = strstri(name, " the ")) != 0) {
-		/* <name> the <adjective> <invisible> <saddled> <rank> */
-		char pbuf[BUFSZ];
+			/* <name> the <adjective> <invisible> <saddled> <rank> */
+			char pbuf[BUFSZ];
 
-		Strcpy(pbuf, name);
-		pbuf[bp - name + 5] = '\0'; /* adjectives right after " the " */
-		if (has_adjectives)
-		    Strcat(pbuf, buf);
-		Strcat(pbuf, bp + 5);	/* append the rest of the name */
-		Strcpy(buf, pbuf);
-		article = ARTICLE_NONE;
-		name_at_start = TRUE;
+			Strcpy(pbuf, name);
+			pbuf[bp - name + 5] = '\0'; /* adjectives right after " the " */
+			if (has_adjectives)
+				Strcat(pbuf, buf);
+			Strcat(pbuf, bp + 5);	/* append the rest of the name */
+			Strcpy(buf, pbuf);
+			article = ARTICLE_NONE;
+			name_at_start = TRUE;
 	    } else {
-		Strcat(buf, name);
-		name_at_start = TRUE;
+			Strcat(buf, name);
+			name_at_start = TRUE;
 	    }
 	} else if (is_mplayer(mdat) && !In_endgame(&u.uz)) {
 	    char pbuf[BUFSZ];
@@ -1003,6 +1009,9 @@ boolean called;
 				 monsndx(mdat),
 				 (boolean)mtmp->female));
 	    Strcat(buf, lcase(pbuf));
+		if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
+		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
+		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
 	    name_at_start = FALSE;
 	} else {
 	    name_at_start = (boolean)type_is_pname(mdat);
@@ -1030,9 +1039,15 @@ boolean called;
 			}
 		}
 	    Strcat(buf, mdat->mname);
-		if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
-		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
-		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
+		if(type_is_pname(mdat)){
+			if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, "'s zombie");
+			else if(mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
+			else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
+		} else {
+			if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
+			else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
+			else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
+		}
 	}
 
 	if (name_at_start && (article == ARTICLE_YOUR || !has_adjectives)) {

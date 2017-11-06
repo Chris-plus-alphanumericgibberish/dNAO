@@ -1322,14 +1322,14 @@ int spellnum;
                    (old ? "even more " : ""));
            make_blinded(Blinded + (long)u.ucreamed - old, FALSE);
        }
-       You("smell putrid! You gag and vomit.");
-		vomit();
+       You("smell putrid!%s", !uclockwork?" You gag and vomit.":"");
+		if (!uclockwork) vomit();
 		/* same effect as "This water gives you bad breath!" */
 		for(mtmp2 = fmon; mtmp2; mtmp2 = mtmp2->nmon) {
 			if(!DEADMONSTER(mtmp2) && (mtmp2 != mtmp))
 			monflee(mtmp2, 0, FALSE, FALSE);
 		}
-		if(!Sick) make_sick((long)rn1(ACURR(A_CON), 20), /* Don't make the PC more sick */
+		if(!Sick && !uclockwork) make_sick((long)rn1(ACURR(A_CON), 20), /* Don't make the PC more sick */
 								(char *)0, TRUE, SICK_NONVOMITABLE);
 		dmg = rnd(Half_physical_damage ? 5 : 10);
 		stop_occupation();
@@ -1389,7 +1389,7 @@ int spellnum;
 	   stop_occupation();
      break;
      case PLAGUE:
-       if (!Sick_resistance) {
+       if (!Sick_resistance && !uclockwork) {
           You("are afflicted with disease!");
            make_sick(Sick ? Sick/3L + 1L : (long)rn1(ACURR(A_CON), 20),
                         (char *)0, TRUE, SICK_NONVOMITABLE);
@@ -1979,7 +1979,7 @@ summon_alien:
 		} else if ((smarm = some_armor(&youmonst)) == (struct obj *)0) {
 		   Your("skin itches.");
 		/* Quest nemesis maledictions */
-		} else {
+		} else if(objects[smarm->otyp].oc_oprop == DISINT_RES){
 			if(smarm->spe <= -1*objects[smarm->otyp].a_ac) destroy_arm(smarm);
 			else{
 				smarm->spe -= 1;

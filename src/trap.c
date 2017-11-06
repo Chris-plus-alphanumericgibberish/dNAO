@@ -791,7 +791,7 @@ unsigned trflags;
 		} else {
 		    seetrap(trap);
 		    pline("A board beneath you squeaks loudly.");
-		    wake_nearby();
+		    wake_nearby_noisy();
 		}
 		break;
 
@@ -2359,6 +2359,23 @@ boolean byplayer;
 		golded = TRUE;
 		xkilled(mon,0);
 	} else mongolded(mon);
+}
+
+void
+minstaglass(mon,byplayer)
+struct monst *mon;
+boolean byplayer;
+{
+	/* give a "<mon> is slowing down" message and also remove
+	   intrinsic speed (comparable to similar effect on the hero) */
+	mon_adjust_speed(mon, -3, (struct obj *)0);
+
+	if (cansee(mon->mx, mon->my))
+		pline("%s turns to glass.", Monnam(mon));
+	if (byplayer) {
+		glassed = TRUE;
+		xkilled(mon,0);
+	} else monglassed(mon);
 }
 
 void
@@ -4255,7 +4272,7 @@ boolean disarm;
 					  TRUE);
 			      delobj(otmp);
 			  }
-			  wake_nearby();
+			  wake_nearby_noisy();
 			  losehp(d(6,6), buf, KILLED_BY_AN);
 			  exercise(A_STR, FALSE);
 			  if(costly && loss) {
@@ -4433,7 +4450,7 @@ register int bodypart;
 	int dmg = rnd(5 + (lvl < 5 ? lvl : 2+lvl/2));
 
 	pline("KABOOM!!  %s was booby-trapped!", The(item));
-	wake_nearby();
+	wake_nearby_noisy();
 	losehp(dmg, "explosion", KILLED_BY_AN);
 	exercise(A_STR, FALSE);
 	if (bodypart) exercise(A_CON, FALSE);
