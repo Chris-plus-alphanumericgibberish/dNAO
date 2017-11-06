@@ -2840,7 +2840,7 @@ boolean from_user;
 			&& strncmpi(bp, "bronze roundshield", 18) && strncmpi(bp, "bronze gauntlets", 16)
 			&& strncmpi(bp, "bronze ring", 11)
 			&& strncmpi(bp, "bronze spellbook", 16)
-			) {
+		) {
 			mat = COPPER;
 		} else if (!strncmpi(bp, "silver ", l=7)
 			&& strncmpi(bp, "silver arrow", 12) && strncmpi(bp, "silver bullet", 13)
@@ -2850,7 +2850,7 @@ boolean from_user;
 			&& strncmpi(bp, "silver wand", 11) && strncmpi(bp, "silver slingstone", 17)
 			&& strncmpi(bp, "silver stone", 12) && strncmpi(bp, "Silver Key", 10)
 			&& strncmpi(bp, "Silver Starlight", 16)
-			) {
+		) {
 			mat = SILVER;
 		} else if ((!strncmpi(bp, "golden ", l=7) || !strncmpi(bp, "gold ", l=5))
 			&& strncmpi(bp, "golden arrow", 12) && strncmpi(bp, "gold ring", 9)
@@ -2859,12 +2859,12 @@ boolean from_user;
 			&& strncmpi(bp, "gold wand", 9) && strncmpi(bp, "gold piece", 10)
 			&& strncmpi(bp, "gold coin", 9) && strncmpi(bp, "Golden Sword of Y'ha-Talla", 26)
 			&& strncmpi(bp, "gold golem", 10)
-			) {
+		) {
 			mat = GOLD;
 		} else if (!strncmpi(bp, "platinum ", l=9)
 			&& strncmpi(bp, "platinum wand", 13) && strncmpi(bp, "Platinum Yendorian", 18)
 			&& strncmpi(bp, "Platinum Dragon", 15)
-			) {
+		) {
 			mat = PLATINUM;
 		} else if (!strncmpi(bp, "mithril ", l=8)) {
 			mat = MITHRIL;
