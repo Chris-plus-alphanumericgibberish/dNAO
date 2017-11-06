@@ -118,7 +118,7 @@ WEAPON("shuriken", "throwing star",
 WEAPON("boomerang", (char *)0,
 	1, 1, 0, 13,  5, 20,  9,  9, 0, B,   -P_BOOMERANG, WOOD, HI_WOOD),
 WEAPON("chakram", "circular blade", /*Needs encyc entry*//*Needs tile*/
-	1, 1, 0,  6,  5, 20,  9,  9, 0, S,   -P_BOOMERANG, WOOD, HI_SILVER),
+	1, 1, 0,  6,  5, 20,  9,  9, 0, S,   -P_BOOMERANG, IRON, HI_SILVER),
 WEAPON("spike", (char *)0, /*Needs encyc entry*/
 	1, 1, 0,  0,  1,  2,  3,  2, 0, P,   -P_DART, BONE, CLR_WHITE),
 
