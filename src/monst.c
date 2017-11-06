@@ -6749,7 +6749,7 @@ is a red right hand
 	  ATTK(AT_CLAW, AD_SQUE, 4, 4), ATTK(AT_CLAW, AD_SQUE, 4, 4),//33% Blizzaga -> Slowra -> Thundaga -> Curaja -> Haste -> Firaga -> Blizzara -> Flare
 	  NO_ATTK, NO_ATTK), 										 //33% Flame Strike -> Geyser -> Cyclone -> Earthquake
 	SIZ(WT_HUGE, 400, 0, MS_CUSS, MZ_HUGE), MR_ALL, 0,
-	0 /*MM*/, MT_WANTSARTI|MT_HOSTILE|MT_COLLECT /*MT*/,
+	MM_BREATHLESS|MM_FLY /*MM*/, MT_WANTSARTI|MT_HOSTILE|MT_COLLECT /*MT*/,
 	MB_HUMANOID|MB_WINGS|MB_MALE|MB_POIS /*MB*/, MG_NOTAME|MG_NOPOLY|MG_NASTY|MG_PNAME|MG_INFRAVISIBLE|MG_NOSPELLCOOLDOWN /*MG*/,
 	MA_DEMON|MA_HUMAN /*MA*/,  MV_SEE_INVIS|MV_EXTRAMISSION /*MV*/, CLR_BROWN),
 /*
