@@ -6677,6 +6677,8 @@ register struct monst *mon;
 	if (rn2(66) > 2*ACURR(A_WIS) - ACURR(A_INT) || helpless) {
 		int lifesaved = 0;
 		int wdmg = (int)(d(1,10)) + 1;
+		You("move to embrace %s, brushing aside the gossamer shroud hiding %s body from you.",
+			noit_Monnam(mon), fem ? "her" : "his");
 		palemayberem(uarmc, cloak_simple_name(uarmc), helpless);
 		if(!uarmc)
 			palemayberem(uarm, "suit", helpless);
@@ -6688,8 +6690,6 @@ register struct monst *mon;
 		if(!uarmc && !uarm)
 			palemayberem(uarmu, "shirt", helpless);
 	#endif
-		You("move to embrace %s, brushing aside the gossamer shroud hiding %s body from you.",
-			noit_Monnam(mon), fem ? "her" : "his");
 		if(rn2( (int)(ACURR(A_WIS)/2))){
 			boolean loopingDeath = TRUE;
 			while(loopingDeath) {
