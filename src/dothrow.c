@@ -176,6 +176,9 @@ int thrown;
 	    case PM_DROW:
 			if(obj->oartifact == ART_SICKLE_MOON) multishot++;
 		break;
+	    case PM_MYRKALFR:
+			if(obj->oartifact == ART_SICKLE_MOON) multishot++;
+		break;
 	    case PM_ORC:
 			if (obj->otyp == ORCISH_ARROW && launcher &&
 					launcher->otyp == ORCISH_BOW) multishot++;
