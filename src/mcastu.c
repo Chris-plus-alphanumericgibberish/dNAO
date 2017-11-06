@@ -1979,7 +1979,7 @@ summon_alien:
 		} else if ((smarm = some_armor(&youmonst)) == (struct obj *)0) {
 		   Your("skin itches.");
 		/* Quest nemesis maledictions */
-		} else {
+		} else if(objects[smarm->otyp].oc_oprop == DISINT_RES){
 			if(smarm->spe <= -1*objects[smarm->otyp].a_ac) destroy_arm(smarm);
 			else{
 				smarm->spe -= 1;
