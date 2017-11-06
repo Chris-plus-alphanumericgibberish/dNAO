@@ -964,6 +964,7 @@ moveloop()
 			default: break;
 		    }
 			
+		    if(In_fog_cloud(&youmonst)) moveamt = max(moveamt/3, 1);
 		    youmonst.movement += moveamt;
 			//floor how far into movement-debt you can fall.
 		    if (youmonst.movement < -2*NORMAL_SPEED) youmonst.movement = -2*NORMAL_SPEED;

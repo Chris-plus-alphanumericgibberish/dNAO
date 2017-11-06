@@ -68,6 +68,7 @@ enum {
     DRAWBRIDGE_DOWN,
     AIR,
     CLOUD,
+    FOG,
     MAX_TYPE
 };
 #define INVALID_TYPE	127
@@ -154,6 +155,7 @@ enum {
     S_hcdbridge,	/* closed drawbridge, horizontal wall */
     S_air,
     S_cloud,
+    S_fog,
     S_water,
 
 /* end dungeon characters, begin traps */

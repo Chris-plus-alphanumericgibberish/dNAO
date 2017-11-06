@@ -526,7 +526,7 @@ unsigned int type;
     }//50% favored spells
 	
 	//100% favored spells
-	switch(monsndx(mtmp->data)) {
+    switch(monsndx(mtmp->data)) {
 	case PM_DWARF_CLERIC:
 	case PM_DWARF_QUEEN:
 		switch (rnd(4)) {
@@ -608,6 +608,13 @@ unsigned int type;
 				return OPEN_WOUNDS;
 			break;
 		}
+	break;
+	case PM_PLUMACH:
+		return SOLID_FOG;
+	break;
+	case PM_FERRUMACH:
+		if(rn2(4)) return ICE_STORM;
+		return SOLID_FOG;
 	break;
 	case PM_GREAT_HIGH_SHAMAN_OF_KURTULMAK:
 		return SUMMON_DEVIL; 
@@ -1626,9 +1633,29 @@ int spellnum;
 		stop_occupation();
 	break;
 	case MON_POISON_GAS:
-		flags.cth_attk=TRUE;//state machine stuff.
-		create_gas_cloud(mtmp->mux, mtmp->muy, rnd(3), rnd(3)+1);
-		flags.cth_attk=FALSE;
+		if(!mtmp){
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_gas_cloud(u.ux, u.uy, rnd(3), rnd(3)+1);
+			flags.cth_attk=FALSE;
+		} else {
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_gas_cloud(mtmp->mux, mtmp->muy, rnd(3), rnd(3)+1);
+			flags.cth_attk=FALSE;
+		}
+		dmg = 0;
+		stop_occupation();
+	break;
+	case SOLID_FOG:
+		if(!mtmp){
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_fog_cloud(u.ux, u.uy, 3, 8);
+			flags.cth_attk=FALSE;
+		} else {
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_fog_cloud(mtmp->mux, mtmp->muy, 3, 8);
+			flags.cth_attk=FALSE;
+			if(mtmp->data == &mons[PM_PLUMACH]) mtmp->mcan = 1;
+		}
 		dmg = 0;
 		stop_occupation();
 	break;

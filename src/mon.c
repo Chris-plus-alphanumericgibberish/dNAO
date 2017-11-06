@@ -965,8 +965,8 @@ struct monst *mon;
 	if(u.sealsActive&SEAL_CHUPOCLOPS && distmin(mon->mx, mon->my, u.ux, u.uy) <= u.ulevel/5+1){
 		mmove = max(mmove-(u.ulevel/10+1),1);
 	}
-	
-    return mmove;
+	if(In_fog_cloud(mon)) mmove = max(mmove/3, 1);
+	return mmove;
 }
 
 /* actions that happen once per ``turn'', regardless of each

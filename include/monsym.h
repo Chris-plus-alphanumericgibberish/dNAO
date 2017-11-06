@@ -71,11 +71,12 @@
 #define S_EEL		60
 #define S_LIZARD	61
 #define S_PLANT		62
+#define S_NEU_OUTSIDER	63
 
-#define S_WORM_TAIL	63
-#define S_MIMIC_DEF	64
+#define S_WORM_TAIL	64 /*NOTE: spec_s detection only works up to S_Num 64!*/
+#define S_MIMIC_DEF	65
 
-#define MAXMCLASSES 65	/* number of monster classes */ /*NOTE: spec_s detection only works up to S_Num 64! Right now it's fine, but add any more....*/
+#define MAXMCLASSES 66	/* number of monster classes */
 
 #if 0	/* moved to decl.h so that makedefs.c won't see them */
 extern const char def_monsyms[MAXMCLASSES];	/* default class symbols */
@@ -147,6 +148,7 @@ extern uchar monsyms[MAXMCLASSES];		/* current class symbols */
 #define DEF_EEL		';'
 #define DEF_LIZARD	':'
 #define DEF_PLANT	'{'
+#define DEF_NEU_OUTSIDER	'"'
 
 #define DEF_INVISIBLE	'I'
 #define DEF_WORM_TAIL	'~'

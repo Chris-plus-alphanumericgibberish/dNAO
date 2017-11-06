@@ -162,6 +162,7 @@ const char def_monsyms[MAXMCLASSES] = {
 	DEF_EEL,
 	DEF_LIZARD,
 	DEF_PLANT,
+	DEF_NEU_OUTSIDER,
 	DEF_WORM_TAIL,		/* 60 */
 	DEF_MIMIC_DEF,		/* 61 */
 };
@@ -195,7 +196,7 @@ const char * const monexplain[MAXMCLASSES] = {
 
     "human or elf",		"ghost",		"shade",	"golem",
     "major demon",		"sea monster",	"lizard",	"plant",
-    "long worm tail",		"mimic"
+    "neutral spiritual being",	"long worm tail",		"mimic"
 };
 
 const struct symdef def_warnsyms[WARNCOUNT] = {
@@ -233,12 +234,12 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'+', "closed door",	C(CLR_BROWN)},	/* hcdoor */
 	{'#', "iron bars",	C(HI_METAL)},	/* bars */
 	{'#', "tree",		C(CLR_GREEN)},	/* tree */
-	{'#', "dead tree",	C(CLR_BLACK)},	/* dead tree */
+	{'#', "dead tree",	C(CLR_BROWN)},	/* dead tree */
 	{'.', "floor of a dark room", C(CLR_BLACK)},	/* drkroom */
 	{'.', "floor of a room",C(CLR_GRAY)},	/* litroom */
 	{'#', "bright room",C(CLR_WHITE)},	/* brightrm */
 /*20*/	{'#', "corridor",	C(CLR_GRAY)},	/* dark corr */
-	{'#', "lit corridor",	C(CLR_GRAY)},	/* lit corr (see mapglyph.c) */
+	{'#', "lit corridor",	C(CLR_BLACK)},	/* lit corr (see mapglyph.c) */
 	{'<', "staircase up",	C(CLR_GRAY)},	/* upstair */
 	{'>', "staircase down",	C(CLR_GRAY)},	/* dnstair */
 	{'<', "ladder up",	C(CLR_BROWN)},	/* upladder */
@@ -247,9 +248,9 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'|', "grave",      C(CLR_GRAY)},   /* grave */
 	{'\\', "opulent throne",C(HI_GOLD)},	/* throne */
 #ifdef SINKS
-	{'#', "sink",		C(CLR_GRAY)},	/* sink */
+	{'#', "sink",		C(CLR_WHITE)},	/* sink */
 #else
-	{'#', "",		C(CLR_GRAY)},	/* sink */
+	{'#', "",		C(CLR_WHITE)},	/* sink */
 #endif
 /*30*/	{'{', "fountain",	C(CLR_BLUE)},	/* fountain */
 	{'}', "water",		C(CLR_BLUE)},	/* pool */
@@ -261,7 +262,8 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'#', "raised drawbridge",C(CLR_BROWN)},/* hcdbridge */
 	{' ', "air",		C(CLR_CYAN)},	/* open air */
 	{'#', "cloud",		C(CLR_GRAY)},	/* [part of] a cloud */
-/*40*/	{'}', "water",		C(CLR_BLUE)},	/* under water */
+/*40*/	{'#', "fog cloud",	C(HI_ZAP)},	/* [part of] a cloud */
+	{'}', "water",		C(CLR_BLUE)},	/* under water */
 	{'^', "arrow trap",	C(HI_METAL)},	/* trap */
 	{'^', "dart trap",	C(HI_METAL)},	/* trap */
 	{'^', "falling rock trap",C(CLR_GRAY)},	/* trap */
@@ -270,8 +272,8 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'^', "land mine",	C(CLR_RED)},	/* trap */
 	{'^', "rolling boulder trap",	C(CLR_GRAY)},	/* trap */
 	{'^', "sleeping gas trap",C(HI_ZAP)},	/* trap */
-	{'^', "rust trap",	C(CLR_BLUE)},	/* trap */
-/*50*/	{'^', "fire trap",	C(CLR_ORANGE)},	/* trap */
+/*50*/	{'^', "rust trap",	C(CLR_BLUE)},	/* trap */
+	{'^', "fire trap",	C(CLR_ORANGE)},	/* trap */
 	{'^', "pit",		C(CLR_BLACK)},	/* trap */
 	{'^', "spiked pit",	C(CLR_BLACK)},	/* trap */
 	{'^', "hole",	C(CLR_BROWN)},	/* trap */
@@ -280,8 +282,8 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'^', "level teleporter", C(CLR_MAGENTA)},	/* trap */
 	{'^', "magic portal",	C(CLR_BRIGHT_MAGENTA)},	/* trap */
 	{'"', "web",		C(CLR_GRAY)},	/* web */
-	{'^', "statue trap",	C(CLR_GRAY)},	/* trap */
-/*60*/	{'^', "magic trap",	C(HI_ZAP)},	/* trap */
+/*60*/	{'^', "statue trap",	C(CLR_GRAY)},	/* trap */
+	{'^', "magic trap",	C(HI_ZAP)},	/* trap */
 	{'^', "anti-magic field", C(HI_ZAP)},	/* trap */
 	{'^', "polymorph trap",	C(CLR_BRIGHT_GREEN)},	/* trap */
 	{'|', "wall",		C(CLR_GRAY)},	/* vbeam */
@@ -290,8 +292,8 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'/', "wall",		C(CLR_GRAY)},	/* rslant */
 	{'*', "",		C(CLR_WHITE)},	/* dig beam */
 	{'!', "",		C(CLR_WHITE)},	/* camera flash beam */
-	{')', "",		C(HI_WOOD)},	/* boomerang open left */
-/*70*/	{'(', "",		C(HI_WOOD)},	/* boomerang open right */
+/*70*/	{')', "",		C(HI_WOOD)},	/* boomerang open left */
+	{'(', "",		C(HI_WOOD)},	/* boomerang open right */
 	{'0', "",		C(HI_ZAP)},	/* 4 magic shield symbols */
 	{'#', "",		C(HI_ZAP)},
 	{'@', "",		C(HI_ZAP)},
@@ -300,8 +302,8 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'-', "",		C(CLR_GREEN)},	/* swallow top center	*/
 	{'\\', "",		C(CLR_GREEN)},	/* swallow top right	*/
 	{'|', "",		C(CLR_GREEN)},	/* swallow middle left	*/
-	{'|', "",		C(CLR_GREEN)},	/* swallow middle right	*/
-/*80*/	{'\\', "",		C(CLR_GREEN)},	/* swallow bottom left	*/
+/*80*/	{'|', "",		C(CLR_GREEN)},	/* swallow middle right	*/
+	{'\\', "",		C(CLR_GREEN)},	/* swallow bottom left	*/
 	{'-', "",		C(CLR_GREEN)},	/* swallow bottom center*/
 	{'/', "",		C(CLR_GREEN)},	/* swallow bottom right	*/
 	{'/', "",		C(CLR_ORANGE)},	/* explosion top left     */
@@ -310,8 +312,8 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'|', "",		C(CLR_ORANGE)},	/* explosion middle left  */
 	{' ', "",		C(CLR_ORANGE)},	/* explosion middle center*/
 	{'|', "",		C(CLR_ORANGE)},	/* explosion middle right */
-	{'\\', "",		C(CLR_ORANGE)},	/* explosion bottom left  */
-/*90*/	{'-', "",		C(CLR_ORANGE)},	/* explosion bottom center*/
+/*90*/	{'\\', "",		C(CLR_ORANGE)},	/* explosion bottom left  */
+	{'-', "",		C(CLR_ORANGE)},	/* explosion bottom center*/
 	{'/', "",		C(CLR_ORANGE)},	/* explosion bottom right */
 /*
  *  Note: Additions to this array should be reflected in the
@@ -375,6 +377,7 @@ static glyph_t ibm_graphics[MAXPCHARS] = {
 	g_FILLER(S_hcdbridge),
 	g_FILLER(S_air),
 	g_FILLER(S_cloud),
+	g_FILLER(S_fog),
 /*40*/	0xf7,	/* S_water:	meta-w, approx. equals */
 	g_FILLER(S_arrow_trap),
 	g_FILLER(S_dart_trap),
@@ -477,6 +480,7 @@ static glyph_t dec_graphics[MAXPCHARS] = {
 	g_FILLER(S_hcdbridge),
 	g_FILLER(S_air),
 	g_FILLER(S_cloud),
+	g_FILLER(S_fog),
 /*40*/	0xe0,	/* S_water:	meta-\, diamond */
 	g_FILLER(S_arrow_trap),
 	g_FILLER(S_dart_trap),
@@ -577,6 +581,7 @@ static glyph_t mac_graphics[MAXPCHARS] = {
 	g_FILLER(S_hcdbridge),
 	g_FILLER(S_air),
 	g_FILLER(S_cloud),
+	g_FILLER(S_fog),
 /*40*/	g_FILLER(S_water),
 	g_FILLER(S_arrow_trap),
 	g_FILLER(S_dart_trap),
@@ -679,6 +684,7 @@ static glyph_t utf8_graphics[MAXPCHARS] = {
 	g_FILLER(S_hcdbridge),
 	g_FILLER(S_air),
 	g_FILLER(S_cloud),
+	g_FILLER(S_fog),
 	0x2248,	/* S_water:	ALMOST EQUAL TO */
 	g_FILLER(S_arrow_trap),
 	g_FILLER(S_dart_trap),
