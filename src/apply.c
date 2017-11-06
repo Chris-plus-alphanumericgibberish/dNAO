@@ -2610,6 +2610,10 @@ struct obj *hypo;
 	struct obj *amp = getobj(tools, "inject");
 	int i, ii, nothing=0;
 	if(!amp) return 0;
+	if(amp->otyp != HYPOSPRAY_AMPULE){
+		You("can't inject that!");
+		return 0;
+	}
     if (!getdir((char *)0)) return 0;
 	if(u.dz < 0){
 		You("don't see a patient up there.");
@@ -2621,6 +2625,10 @@ struct obj *hypo;
 		struct monst *mtarg = m_at(u.ux+u.dx,u.uy+u.dy);
 		if(!mtarg){
 			You("don't find a patient there.");
+			return 1;
+		}
+		if(amp->spe <= 0){
+			pline("The ampule is empty!");
 			return 1;
 		}
 		if(!has_blood_mon(mtarg)){
