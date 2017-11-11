@@ -640,6 +640,9 @@ register const char *s;
 				}
 			}
 		}
+		if(In_outlands(&u.uz) && !(u.uz.dlevel == spire_level.dlevel || Is_gatetown(&u.uz) || Is_sumall(&u.uz))){
+			place_neutral_features();
+		}
 		if(Is_lolth_level(&u.uz)){
 			int x, y;
 			place_lolth_vaults();

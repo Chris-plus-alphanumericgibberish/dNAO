@@ -1459,6 +1459,13 @@ d_level	*lev;
 }
 
 boolean
+In_outlands(lev)	/* are you on the neutral quest? */
+d_level	*lev;
+{
+	return((boolean)(lev->dnum == neutral_dnum));
+}
+
+boolean
 In_cha(lev)	/* are you on the chaotic quest? */
 d_level	*lev;
 {
