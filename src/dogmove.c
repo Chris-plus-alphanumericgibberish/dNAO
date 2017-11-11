@@ -1154,12 +1154,6 @@ register int after;	/* this is extra fast monster movement */
 		if (cursemsg[i] && !mtmp->mleashed && uncursedcnt > 0 &&
 		    rn2(13 * uncursedcnt)) continue;
 
-		/* lessen the chance of backtracking to previous position(s) */
-		k = has_edog ? uncursedcnt : cnt;
-		for (j = 0; j < MTSZ && j < k - 1; j++)
-			if (nx == mtmp->mtrack[j].x && ny == mtmp->mtrack[j].y)
-				if (rn2(MTSZ * (k - j))) goto nxti;
-
 		j = ((ndist = GDIST(nx,ny)) - nidist) * appr;
 		if ((j == 0 && !rn2(++chcnt)) || j < 0 ||
 			(j > 0 && !whappr &&
