@@ -181,21 +181,21 @@ hack_artifacts()
 			urole.questarti = ART_VESTMENT_OF_HELL;
 			artilist[ART_HELM_OF_THE_DARK_LORD].alignment = alignmnt;
 		} else if(Race_if(PM_ELF)){
-			artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN|SPFX_INTEL;
+			artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
 			artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
-			artilist[ART_ROD_OF_THE_ELVISH_LORDS].spfx &= ~(SPFX_NOGEN|SPFX_INTEL);
+			artilist[ART_ROD_OF_THE_ELVISH_LORDS].spfx &= ~(SPFX_NOGEN);
 		} else if(Race_if(PM_DROW)){
 			if(flags.initgend){ /* TRUE == female */
-				artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN|SPFX_INTEL;
+				artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
 				artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
-				artilist[ART_SCEPTRE_OF_LOLTH].spfx &= ~(SPFX_NOGEN|SPFX_INTEL);
+				artilist[ART_SCEPTRE_OF_LOLTH].spfx &= ~(SPFX_NOGEN);
 			} else {
 				artilist[ART_ROD_OF_LORDLY_MIGHT].alignment = A_NEUTRAL;
 			}
 		} else if(Race_if(PM_DWARF) && urole.ldrnum == PM_DAIN_II_IRONFOOT){
-			artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN|SPFX_INTEL;
+			artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
 			artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
-			artilist[ART_ARMOR_OF_KHAZAD_DUM].spfx &= ~(SPFX_NOGEN|SPFX_INTEL);
+			artilist[ART_ARMOR_OF_KHAZAD_DUM].spfx &= ~(SPFX_NOGEN);
 		} else if(alignmnt == A_NEUTRAL) {
 			artilist[ART_CROWN_OF_THE_SAINT_KING].alignment = alignmnt;
 		}
