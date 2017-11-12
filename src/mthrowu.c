@@ -1248,7 +1248,7 @@ struct monst *mtmp;
 			   ))
 		)
 	){
-	    if(!(mtmp->data == &mons[PM_OONA] && resists_oona(mtmp2))) return mtmp2;
+	    if(!(mtmp->data == &mons[PM_OONA] && resists_oona(mtmp2)) && mm_aggression(mtmp, mtmp2)) return mtmp2;
 	}
 	
 #if 0
@@ -1379,6 +1379,7 @@ struct monst *mtmp;
 					(monstr[monsndx(mat->data)] >
 					monstr[monsndx(oldmret->data)])
 					) && !(mtmp->data == &mons[PM_OONA] && resists_oona(mat))
+					 && mm_aggression(mtmp, mat)
 				) mret = mat;
 			}
 			else if ((mm_aggression(mtmp, mat) & ALLOW_M)
@@ -1398,6 +1399,7 @@ struct monst *mtmp;
 						(monstr[monsndx(mat->data)] >
 						monstr[monsndx(oldmret->data)])
 						) && !(mtmp->data == &mons[PM_OONA] && resists_oona(mat))
+						 && mm_aggression(mtmp, mat)
 					)
 						mret = mat;
 				}
@@ -1431,6 +1433,7 @@ struct monst *mtmp;
 				(monstr[monsndx(mtmp2->data)] >
 				monstr[monsndx(mret->data)])
 				) && !(mtmp->data == &mons[PM_OONA] && resists_oona(mtmp2))
+				 && mm_aggression(mtmp, mtmp2)
 			){
 				mret = mtmp2;
 			}

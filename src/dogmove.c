@@ -824,7 +824,7 @@ boolean ranged;
 		((   mtmp2->data == &mons[urole.guardnum]
 		  || mtmp2->data == &mons[urole.ldrnum]
 		  || (Role_if(PM_NOBLEMAN) && (mtmp->data == &mons[PM_KNIGHT] || mtmp->data == &mons[PM_MAID] || mtmp->data == &mons[PM_PEASANT]) && mtmp->mpeaceful)
-		  || (Race_if(PM_DROW) && (mtmp->data == &mons[PM_GROMPH] || mtmp->data == &mons[PM_DANTRAG]) && mtmp->mpeaceful)
+		  || (Race_if(PM_DROW) && is_drow(mtmp->data) && mtmp->mpeaceful)
 		  || (Role_if(PM_KNIGHT) && (mtmp->data == &mons[PM_KNIGHT]) && mtmp->mpeaceful)
 		  || (Race_if(PM_GNOME) && (is_gnome(mtmp->data) && !is_undead_mon(mtmp)) && mtmp->mpeaceful)
 		  || always_peaceful(mtmp2->data)) &&
