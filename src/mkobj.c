@@ -1592,10 +1592,8 @@ register struct obj *obj;
 	int wt = objects[obj->otyp].oc_weight;
 	if(obj->oartifact == ART_ROD_OF_LORDLY_MIGHT) wt = objects[MACE].oc_weight;
 	else if(obj->oartifact == ART_ANNULUS) wt = objects[BELL_OF_OPENING].oc_weight;
-	else if(obj->oartifact == ART_SCEPTRE_OF_LOLTH){
-		wt = 3*objects[MACE].oc_weight;
-		obj->obj_material = SILVER;
-	} else if(obj->oartifact == ART_ROD_OF_THE_ELVISH_LORDS) wt = objects[ELVEN_MACE].oc_weight;
+	else if(obj->oartifact == ART_SCEPTRE_OF_LOLTH) wt = 3*objects[MACE].oc_weight;
+	else if(obj->oartifact == ART_ROD_OF_THE_ELVISH_LORDS) wt = objects[ELVEN_MACE].oc_weight;
 	else if(obj->oartifact == ART_EARTH_CRYSTAL){
 		wt = 160;
 	}
@@ -1615,9 +1613,8 @@ register struct obj *obj;
 		wt =  (int)(wt * 1.5); //225
 	} else if(obj->oartifact == ART_TREASURY_OF_PROTEUS){
 		wt =  50; /* Same as a crystal ball (ie, the Orb of Weight) */
-	}
-	
-	if(obj->obj_material != objects[obj->otyp].oc_material){
+	} else if(obj->obj_material != objects[obj->otyp].oc_material){
+	//ie, for normal objects and non-special weight artifacts
 	static const double matDensityLookup[] = {
 //	FENCEPOST
 		0.5,
@@ -1671,7 +1668,7 @@ register struct obj *obj;
 		wt = wt*matDensityLookup[obj->obj_material]/matDensityLookup[objects[obj->otyp].oc_material];
 	}
 	
-	if(obj->otyp == MOON_AXE){
+	if(obj->otyp == MOON_AXE && obj->oartifact != ART_SCEPTRE_OF_LOLTH){
 		if(obj->ovar1) wt =  wt/4*obj->ovar1;
 		else wt = wt/4;
 	}
