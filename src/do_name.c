@@ -634,6 +634,15 @@ const char *name;
 		else if(obj->oartifact == ART_SCOURGE_OF_LOLTH) obj->obj_material = SILVER;
 		else if(obj->oartifact >= ART_SWORD_OF_ERATHAOL && obj->oartifact <= ART_HAMMER_OF_BARQUIEL) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_SOL_VALTIVA) obj->obj_material = OBSIDIAN_MT;
+		else if(obj->otyp == SABER) obj->obj_material = SILVER;
+		else if(obj->otyp == KHAKKHARA) obj->obj_material = SILVER;
+		else if(obj->otyp == CHAKRAM) obj->obj_material = SILVER;
+		else if(obj->otyp == GLOVES) obj->obj_material = LEATHER;
+		else if(obj->otyp == BAR) obj->obj_material = IRON;
+		else if(obj->otyp == VIPERWHIP) obj->obj_material = SILVER;
+		else if(obj->otyp == find_gcirclet()) obj->obj_material = GOLD;
+		else if(obj->otyp == ARMORED_BOOTS) obj->obj_material = COPPER;
+		else if(obj->otyp == ROUNDSHIELD) obj->obj_material = COPPER;
 		else if(is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR); //keep current/default material
 		else obj->obj_material = objects[obj->otyp].oc_material;
 		
