@@ -122,7 +122,7 @@ hack_artifacts()
 	int alignmnt = flags.stag ? u.ualign.type : aligns[flags.initalign].value;
 	
 	if(Role_if(PM_EXILE)) alignmnt = A_VOID; //hack_artifacts may be called before this is propperly set
-	if(Race_if(PM_DROW) || Race_if(PM_MYRKALFR) && !Role_if(PM_EXILE) && !Role_if(PM_CONVICT) && !flags.female){
+	if((Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && !Role_if(PM_EXILE) && !Role_if(PM_CONVICT) && !flags.initgend){
 		alignmnt = A_NEUTRAL; /* Males are neutral */
 	}
 
