@@ -1206,7 +1206,7 @@ mkpluvillage()
 					levl[x+i][y+j].typ = CORR;
 					levl[x+i][y+j].edge = 1;
 					levl[x+i][y+j].lit = 1;
-					// if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+j, 0);
+					if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+j, 0);
 				}
 			}
 			for(i=1+3;i<4+3;i++){
@@ -1255,7 +1255,7 @@ mkpluvillage()
 					for(j=1;j<3;j++){
 						levl[x+i][y+j].typ = CORR;
 						levl[x+i][y+j].lit = 1;
-						// if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+j, 0);
+						if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+j, 0);
 						if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, FALSE);
 					}
 				}
@@ -1284,7 +1284,7 @@ mkpluvillage()
 					for(j=1;j<3;j++){
 						levl[x+i][y+7+j].typ = CORR;
 						levl[x+i][y+j].lit = 1;
-						// if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+7+j, 0);
+						if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+7+j, 0);
 						if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+7+j, FALSE);
 					}
 				}
@@ -1311,7 +1311,7 @@ mkpluvillage()
 					levl[x+i][y+j].roomno = ROOMOFFSET+roomnumb;
 					levl[x+i][y+j].typ = CORR;
 					levl[x+i][y+j].lit = 1;
-					// if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+j, 0);
+					if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+j, 0);
 				}
 			}
 			for(i=1+3;i<4+3;i++){
