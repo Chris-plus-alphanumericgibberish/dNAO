@@ -1179,58 +1179,42 @@ mkpluvillage()
 				}
 			
 			//Make left-hand big building
-			add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, SHOPBASE, TRUE);
-			roomnumb = nroom - 1;
+			roomnumb = nroom;
 			
-			levl[x+sizebig1-1][y+4+3].roomno = ROOMOFFSET+roomnumb;
 			levl[x+sizebig1-1][y+4+3].typ = BRCORNER;
-			levl[x+sizebig1-1][y+4+3].edge = 1;
 			levl[x+sizebig1-1][y+4+3].lit = 1;
-			levl[x][y+4+3].roomno = ROOMOFFSET+roomnumb;
 			levl[x][y+4+3].typ = BLCORNER;
-			levl[x][y+4+3].edge = 1;
 			levl[x][y+4+3].lit = 1;
 			for(i=1;i<sizebig1-1;i++){
-				levl[x+i][y+4+3].roomno = ROOMOFFSET+roomnumb;
 				levl[x+i][y+4+3].typ = HWALL;
-				levl[x+i][y+4+3].edge = 1;
 				levl[x+i][y+4+3].lit = 1;
-				levl[x+i][y+3].roomno = ROOMOFFSET+roomnumb;
 				levl[x+i][y+3].typ = HWALL;
-				levl[x+i][y+3].edge = 1;
 				levl[x+i][y+3].lit = 1;
 			}
 			for(i=1;i<sizebig1-1;i++){
 				for(j=1+3;j<4+3;j++){
-					levl[x+i][y+j].roomno = ROOMOFFSET+roomnumb;
-					levl[x+i][y+j].typ = CORR;
-					levl[x+i][y+j].edge = 1;
+					levl[x+i][y+j].typ = ROOM;
 					levl[x+i][y+j].lit = 1;
-					if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+j, 0);
+					// if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+j, 0);
 				}
 			}
 			for(i=1+3;i<4+3;i++){
-				levl[x+sizebig1-1][y+i].roomno = ROOMOFFSET+roomnumb;
 				levl[x+sizebig1-1][y+i].typ = VWALL;
-				levl[x+sizebig1-1][y+i].edge = 1;
 				levl[x+sizebig1-1][y+i].lit = 1;
-				levl[x][y+i].roomno = ROOMOFFSET+roomnumb;
 				levl[x][y+i].typ = VWALL;
-				levl[x][y+i].edge = 1;
 				levl[x][y+i].lit = 1;
 			}
 			levl[x+sizebig1-1][y+5].typ = DOOR;
 			levl[x+sizebig1-1][y+5].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
 
-			levl[x+sizebig1-1][y+3].roomno = ROOMOFFSET+roomnumb;
 			levl[x+sizebig1-1][y+3].typ = TRCORNER;
-			levl[x+sizebig1-1][y+3].edge = 1;
 			levl[x+sizebig1-1][y+3].lit = 1;
-			levl[x][y+3].roomno = ROOMOFFSET+roomnumb;
 			levl[x][y+3].typ = TLCORNER;
-			levl[x][y+3].edge = 1;
 			levl[x][y+3].lit = 1;
 			
+		    flood_fill_rm(x+1, y+5,
+				  nroom+ROOMOFFSET, TRUE, TRUE);
+			add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, SHOPBASE, TRUE);
 			add_door(x+sizebig1-1,y+5,&rooms[roomnumb]);
 			fill_room(&rooms[roomnumb], FALSE);
 			
@@ -1297,9 +1281,6 @@ mkpluvillage()
 			}
 			
 			//Make right big building
-			add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
-			roomnumb = nroom - 1;
-			
 			levl[x+sizetot][y+4+3].typ = BRCORNER;
 			levl[x+sizetot-sizebig2][y+4+3].typ = BLCORNER;
 			for(i=sizetot-sizebig2+1;i<sizetot;i++){
@@ -1308,49 +1289,24 @@ mkpluvillage()
 			}
 			for(i=sizetot-sizebig2+1;i<sizetot;i++){
 				for(j=1+3;j<4+3;j++){
-					levl[x+i][y+j].roomno = ROOMOFFSET+roomnumb;
 					levl[x+i][y+j].typ = CORR;
-					levl[x+i][y+j].lit = 1;
 					if(rn2(2)) makemon(&mons[PM_PLUMACH], x+i, y+j, 0);
 				}
 			}
 			for(i=1+3;i<4+3;i++){
-				levl[x+sizetot][y+i].roomno = ROOMOFFSET+roomnumb;
 				levl[x+sizetot][y+i].typ = VWALL;
-				levl[x+sizetot][y+i].edge = 1;
 				levl[x+sizetot][y+i].lit = 1;
-				levl[x+sizetot-sizebig2][y+i].roomno = ROOMOFFSET+roomnumb;
 				levl[x+sizetot-sizebig2][y+i].typ = VWALL;
-				levl[x+sizetot-sizebig2][y+i].edge = 1;
 				levl[x+sizetot-sizebig2][y+i].lit = 1;
 			}
 			
 			levl[x+sizetot-sizebig2][y+5].typ = DOOR;
 			levl[x+sizetot-sizebig2][y+5].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
 			
-			levl[x+sizetot][y+3].roomno = ROOMOFFSET+roomnumb;
 			levl[x+sizetot][y+3].typ = TRCORNER;
-			levl[x+sizetot][y+3].edge = 1;
 			levl[x+sizetot][y+3].lit = 1;
-			levl[x+sizetot-sizebig2][y+3].roomno = ROOMOFFSET+roomnumb;
 			levl[x+sizetot-sizebig2][y+3].typ = TLCORNER;
-			levl[x+sizetot-sizebig2][y+3].edge = 1;
 			levl[x+sizetot-sizebig2][y+3].lit = 1;
-			
-			// for(i=0;i<15;i++){
-				// levl[x][y+i].edge = 1;
-				// levl[x+i][y].edge = 1;
-				// levl[x+3][y+i].edge = 1;
-				// levl[x+i][y+3].edge = 1;
-			// }
-			// levl[x+3][y+3].typ = BRCORNER;
-			// levl[x][y+3].typ = BLCORNER;
-			// for(i=1;i<3;i++) levl[x+i][y+3].typ = HWALL;
-			// for(i=1;i<3;i++) levl[x+i][y].typ = HWALL;
-			// for(i=1;i<3;i++) levl[x+3][y+i].typ = VWALL;
-			// for(i=1;i<3;i++) levl[x][y+i].typ = VWALL;
-			// levl[x+3][y].typ = TRCORNER;
-			// levl[x][y].typ = TLCORNER;
 			
 			// mkgold((long) rn1((10+rnd(10)) * level_difficulty(),10), x+1, y+1);
 			// mkgold((long) rn1((10+rnd(10)) * level_difficulty(),10), x+2, y+1);
