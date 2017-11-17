@@ -3277,8 +3277,9 @@ register struct monst *mtmp;
 	else if(mtmp->data == &mons[PM_DEMOGORGON]){
 		achieve.killed_demogorgon = 1;
 	}
-	else if(mtmp->data == &mons[PM_MEDUSA])
-		achieve.killed_medusa = 1;
+	else if (mtmp->data == &mons[PM_MEDUSA] || mtmp->data == &mons[PM_GRUE]) {
+		achieve.killed_challenge = 1;
+	}
 #endif
 	if(glyph_is_invisible(levl[mtmp->mx][mtmp->my].glyph))
 		unmap_object(mtmp->mx, mtmp->my);

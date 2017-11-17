@@ -700,8 +700,8 @@ mattacku(mtmp)
 	    if (u.uswallow && (mattk->aatyp != AT_ENGL && mattk->aatyp != AT_ILUR))
 			continue;
 		
-		if (mdat == &mons[PM_GRUE] && (i>=2) && !((!levl[mtmp->mx][mtmp->my].lit && !(viz_array[mtmp->my][mtmp->mx] & TEMP_LIT1 && !(viz_array[mtmp->my][mtmp->mx] & TEMP_DRK1)))
-			|| (levl[mtmp->mx][mtmp->my].lit && (viz_array[mtmp->my][mtmp->mx] & TEMP_DRK1 && !(viz_array[mtmp->my][mtmp->mx] & TEMP_LIT1)))))
+		if (mdat == &mons[PM_GRUE] && (i>=2) && !((!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux] & TEMP_LIT1 && !(viz_array[u.uy][u.ux] & TEMP_DRK1)))
+			|| (levl[u.ux][u.uy].lit && (viz_array[u.uy][u.ux] & TEMP_DRK1 && !(viz_array[u.uy][u.ux] & TEMP_LIT1)))))
 			continue;
 		
 		if(mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
@@ -7589,8 +7589,8 @@ register struct attack *mattk;
 	    tmp = 0;
 
 	// Grue's passive is inactive in light
-	if (olduasmon == &mons[PM_GRUE] && !((!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux] & TEMP_LIT1 && !(viz_array[u.uy][u.ux] & TEMP_DRK1)))
-		|| (levl[u.ux][u.uy].lit && (viz_array[u.uy][u.ux] & TEMP_DRK1 && !(viz_array[u.uy][u.ux] & TEMP_LIT1)))))
+	if (olduasmon == &mons[PM_GRUE] && !((!levl[mtmp->mx][mtmp->my].lit && !(viz_array[mtmp->my][mtmp->mx] & TEMP_LIT1 && !(viz_array[mtmp->my][mtmp->mx] & TEMP_DRK1)))
+		|| (levl[mtmp->mx][mtmp->my].lit && (viz_array[mtmp->my][mtmp->mx] & TEMP_DRK1 && !(viz_array[mtmp->my][mtmp->mx] & TEMP_LIT1)))))
 		return 1;	
 
 	/* These affect the enemy even if you were "killed" (rehumanized) */

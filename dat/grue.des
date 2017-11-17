@@ -135,6 +135,10 @@ TRAP:"rust",random
 TRAP:"rust",random
 TRAP:"rust",random
 TRAP:"rust",random
+TRAP:"board",random
+TRAP:"board",random
+TRAP:"board",random
+TRAP:"board",random
 
 # Monsters
 MONSTER:'U',"Grue",(68,10),asleep
@@ -289,6 +293,11 @@ TRAP:random,random
 TRAP:random,random
 TRAP:"rust",random
 TRAP:"rust",random
+TRAP:"board",random
+TRAP:"board",random
+TRAP:"board",random
+TRAP:"board",random
+TRAP:"board",(64,11)
 
 # Monsters
 MONSTER:'U',"Grue",(66,15),asleep

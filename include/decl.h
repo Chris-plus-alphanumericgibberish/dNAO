@@ -629,7 +629,7 @@ struct u_achieve {
         Bitfield(get_luckstone,1);   /* You obtained the luckstone at the
                                       * end of the mines. */
         Bitfield(finish_sokoban,1);  /* You obtained the sokoban prize. */
-        Bitfield(killed_medusa,1);   /* You defeated Medusa. */
+        Bitfield(killed_challenge,1);   /* You defeated the challenge boss. */
 		Bitfield(killed_lucifer,1);		/* Bragging rights */
 		Bitfield(killed_asmodeus,1);		/* Bragging rights */
 		Bitfield(killed_demogorgon,1);		/* Bragging rights */
