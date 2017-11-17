@@ -51,9 +51,9 @@
  * although they are nonnegative they must not be declared unsigned
  * since otherwise comparisons with signed quantities are done incorrectly
  */
-typedef schar	xchar;
+typedef int	xchar;
 #ifndef SKIP_BOOLEAN
-typedef xchar	boolean;		/* 0 or 1 */
+typedef schar	boolean;		/* 0 or 1 */
 #endif
 
 #ifndef TRUE		/* defined in some systems' native include files */
