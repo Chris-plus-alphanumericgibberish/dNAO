@@ -3086,7 +3086,7 @@ signs_enlightenment()
 		} else if(!uarmc && moves <= u.irisAttack+5){
 			putstr(en_win, 0, "There are iridescent tentacles wrapped around your forearms.");
 			message = TRUE;
-		} else if(!uarm){
+		} else if(!uarm && !uarmc){
 			putstr(en_win, 0, "There are iridescent veins just under the skin of your forearms.");
 			message = TRUE;
 		}
@@ -3370,12 +3370,6 @@ signs_mirror()
 	if(u.sealsActive&SEAL_IRIS && !NoBInvis){
 		if(moves <= u.irisAttack+1){
 			putstr(en_win, 0, "Waving, iridescent tentacles sprout from your forearms.");
-			message = TRUE;
-		} else if(!uarmc && moves <= u.irisAttack+5){
-			putstr(en_win, 0, "There are iridescent tentacles wrapped around your forearms.");
-			message = TRUE;
-		} else if(!uarm){
-			putstr(en_win, 0, "There are iridescent veins just under the skin of your forearms.");
 			message = TRUE;
 		}
 	}
