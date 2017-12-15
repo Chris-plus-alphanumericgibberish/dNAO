@@ -1286,7 +1286,7 @@ A("The Warhammer of Vandria", WAR_HAMMER, /*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(5,0),	NO_DFNS,	NO_CARY,
-	0, A_CHAOTIC, NON_PM, PM_ELF, 4000L, 
+	0, A_LAWFUL, NON_PM, PM_ELF, 4000L, 
 	0,0,0),
 
 A("The Shield of Saint Cuthbert", SHIELD_OF_REFLECTION, /*Needs encyc entry*/
