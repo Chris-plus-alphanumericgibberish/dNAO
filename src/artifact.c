@@ -5608,7 +5608,7 @@ arti_invoke(obj)
 #ifdef	AMIGA
 							amii_speaker( obj, "aefeaefeaefeaefeaefe", AMII_LOUDER_VOLUME );
 #endif
-							u.voidChime = 5;
+							u.rangBell = moves;
 							wake_nearby_noisy();
 						} else if (obj->blessed) {
 							int res = 0;
