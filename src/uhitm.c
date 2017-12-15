@@ -3802,8 +3802,8 @@ register int tmp, weptmp, tchtmp;
 	    mattk = getmattk(mas, i, sum, &alt_attk);
 		wepused = FALSE;
 		
-		if (mas == &mons[PM_GRUE] && (i>=2) && !((!levl[mon->mx][mon->my].lit && !(viz_array[mon->my][mon->mx] & TEMP_LIT1 && !(viz_array[mon->my][mon->mx] & TEMP_DRK1)))
-			|| (levl[mon->mx][mon->my].lit && (viz_array[mon->my][mon->mx] & TEMP_DRK1 && !(viz_array[mon->my][mon->mx] & TEMP_LIT1)))))
+		if (mas == &mons[PM_GRUE] && (i>=2) && !((!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux] & TEMP_LIT1 && !(viz_array[u.uy][u.ux] & TEMP_DRK1)))
+			|| (levl[u.ux][u.uy].lit && (viz_array[u.uy][u.ux] & TEMP_DRK1 && !(viz_array[u.uy][u.ux] & TEMP_LIT1)))))
 			continue;
 		
 		/*Plasteel helms cover the face and prevent bite attacks*/
@@ -4343,9 +4343,9 @@ uchar aatyp, adtyp;
 /*	These affect you even if they just died */
 
 	// Grue has no passive attacks while in the light
-	if (ptr == &mons[PM_GRUE] && !((!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux] & TEMP_LIT1 && !(viz_array[u.uy][u.ux] & TEMP_DRK1)))
-		|| (levl[u.ux][u.uy].lit && (viz_array[u.uy][u.ux] & TEMP_DRK1 && !(viz_array[u.uy][u.ux] & TEMP_LIT1)))))
-		return (malive | mhit);
+	if (ptr == &mons[PM_GRUE] && !((!levl[mon->mx][mon->my].lit && !(viz_array[mon->my][mon->mx] & TEMP_LIT1 && !(viz_array[mon->my][mon->mx] & TEMP_DRK1)))
+		|| (levl[mon->mx][mon->my].lit && (viz_array[mon->my][mon->mx] & TEMP_DRK1 && !(viz_array[mon->my][mon->mx] & TEMP_LIT1)))))
+		return (malive | mhit);	
 
 	switch(ptr->mattk[i].adtyp) {
 		

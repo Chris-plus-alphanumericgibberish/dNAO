@@ -2586,6 +2586,8 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 		) if(x + xdir[(int)mon->mvar1] != nx || 
 			   y + ydir[(int)mon->mvar1] != ny 
 			) continue;
+		if((mdat == &mons[PM_GRUE]) && isdark(mon->mx, mon->my) && !isdark(nx, ny))
+				continue;
 		if((mdat == &mons[PM_WATCHER_IN_THE_WATER] || mdat == &mons[PM_KETO]) && 
 			distmin(nx, ny, mon->mux, mon->muy) <= 3 && 
 			dist2(nx, ny, mon->mux, mon->muy) <= dist2(mon->mx, mon->my, mon->mux, mon->muy)) continue;
