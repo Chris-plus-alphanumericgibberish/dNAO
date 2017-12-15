@@ -3962,6 +3962,8 @@ wisp_shdw_dhit:
 							/* defender dead */
 	    else {
 		(void) passive(mon, sum[i], 1, mattk->aatyp, mattk->adtyp);
+		if (DEADMONSTER(mon))
+			return TRUE;
 		nsum |= sum[i];
 	    }
 	    if (Upolyd != Old_Upolyd)
