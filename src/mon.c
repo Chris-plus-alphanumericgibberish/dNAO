@@ -661,7 +661,7 @@ register struct monst *mtmp;
 			mtmp->mnamelth = 0;
 		break;
 		case PM_PAPER_GOLEM:
-			num = rnd(4);
+			num = (u.uz.dlevel != sum_of_all_level.dlevel || mvitals[PM_PAPER_GOLEM].born < 30) ? rnd(4) : 1;
 			while (num--)
 				obj = mksobj_at(SCR_BLANK_PAPER, x, y, TRUE, FALSE);
 			mtmp->mnamelth = 0;
@@ -676,7 +676,7 @@ register struct monst *mtmp;
 		case PM_SPELL_GOLEM:{
 			int scrnum = 0;
 			int scrrng = SCR_STINKING_CLOUD-SCR_ENCHANT_ARMOR;
-			num = rnd(8);
+			num = (u.uz.dlevel != sum_of_all_level.dlevel || mvitals[PM_SPELL_GOLEM].born < 20) ? rnd(8) : rnd(2);
 			while (num--){
 				scrnum = d(1, scrrng)-1;
 				obj = mksobj_at(scrnum+SCR_ENCHANT_ARMOR, x, y, TRUE, FALSE);
