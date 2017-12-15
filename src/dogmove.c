@@ -805,6 +805,7 @@ register struct monst *mtmp;
 register struct monst *mtmp2;
 boolean ranged;
 {
+	if(mtmp2->moccupation) return FALSE;
     return !((!ranged &&
 #ifdef BARD
                 (int)mtmp2->m_lev >= (int)mtmp->m_lev+2 + (mtmp->encouraged)*2 &&
@@ -1007,19 +1008,19 @@ register int after;	/* this is extra fast monster movement */
 	    if (ret == 2) return 1; /* did something */
 	}
 	else
-	if (( attacktype(mtmp->data, AT_BREA) ||
+	if (( (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan) ||
 	      attacktype(mtmp->data, AT_BEAM) ||
-	      attacktype(mtmp->data, AT_GAZE) ||
+	      (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan) ||
 	      attacktype(mtmp->data, AT_SPIT) ||
 	      attacktype(mtmp->data, AT_ARRW) ||
 	      attacktype(mtmp->data, AT_LRCH) ||
 	      attacktype(mtmp->data, AT_LNCK) ||
 	      attacktype(mtmp->data, AT_5SQR) ||
 	      attacktype(mtmp->data, AT_TNKR) ||
-	     ( (attacktype(mtmp->data, AT_MAGC) &&
+	     ( (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan &&
 			(attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp <= AD_SPC2
 			) || 
-			(attacktype(mtmp->data, AT_MMGC) &&
+			(attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan &&
 			(attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp <= AD_SPC2
 			)
 	      ) ||
