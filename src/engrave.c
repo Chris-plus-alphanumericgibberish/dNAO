@@ -298,6 +298,8 @@ static const char *haluMesg[] = {
 	"Ash nazg durbatuluk, ash nazg gimbatul, ash nazg thrakatuluk, agh burzum-ishi krimpatul", /*the Lord of the Rings*/
 		"This thing all things devours.",
 		"Not all those who wander are lost.",
+		"But if of ships I now should sing, what ship would come for me?  What ship would bear me ever back across so wide a Sea?",
+		"Seven stars, and seven stones, and one white tree.",
 	"This is the curse of the Buddha-you will never again be the same as once you were.", /*Lord of Light*/
 		"Tricky and brilliant and heartfelt and dangerous.",
 		"Death is mighty, and is no one's friend.",
@@ -364,6 +366,7 @@ static const char *haluMesg[] = {
 		"Bee There Orr Bee A Rectangular Thyng",
 		"We're certainly dwarves",
 		"There is no doubt being human is incredibly difficult and cannot be mastered in one lifetime.",
+	"Now, here, you see, it takes all the running you can do, to keep in the same place.", /*Through the Looking-Glass */
 	"NOT A Secret Base", /*Gunnerkrigg Court*/
 	"We have the option to definitely die, but I've decided against it.", /*Schlock Mercenary*/
 	"Short to long term memory impaired. Go to Robotics Building. Explain about Bowman's architecture. Write down everything.", /*Freefall*/
