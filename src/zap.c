@@ -3900,7 +3900,9 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 			range += zap_over_floor(sx, sy, type, &shopdamage);
 
 		if (mon) {
-			if (type == ZT_SPELL(ZT_FIRE) || type == ZT_SPELL(ZT_ACID)) break;
+			if (type == ZT_SPELL(ZT_FIRE) || 
+				type == ZT_SPELL(ZT_ACID)
+			) break;
 			if (type >= 0) mon->mstrategy &= ~STRAT_WAITMASK;
 #ifdef STEED
 			buzzmonst:
@@ -4026,6 +4028,8 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 						if (mon_could_move && !mon->mcanmove)	/* ZT_SLEEP */
 							slept_monst(mon);
 					}
+					if(type == ZT_SPELL(ZT_MAGIC_MISSILE))
+							break; //mm is single target
 				}
 				range -= 2;
 			} else {
