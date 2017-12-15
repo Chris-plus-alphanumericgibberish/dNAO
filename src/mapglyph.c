@@ -282,7 +282,11 @@ unsigned *ospecial;
 					if(offset == S_drkroom || offset == S_litroom){
 						if(u.uz.dlevel < spire_level.dlevel &&
 							u.uz.dlevel > gatetown_level.dlevel){
-								if (*in_rooms(x,y,SHOPBASE)) color = (offset == S_litroom) ? CLR_BROWN : CLR_BLACK;
+								if (*in_rooms(x,y, SHOPBASE)
+									|| *in_rooms(x,y, TEMPLE)
+									|| *in_rooms(x,y, BARRACKS)
+									|| *in_rooms(x,y, COURT)
+								) color = (offset == S_litroom) ? CLR_BROWN : CLR_BLACK;
 								else color = (offset == S_litroom) ? CLR_BRIGHT_GREEN : CLR_GREEN;
 							}
 						else color = (offset == S_litroom) ? CLR_BROWN : CLR_BLACK;
