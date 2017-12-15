@@ -1565,7 +1565,7 @@ moveloop()
 	}
 ////////////////////////////////////////////////////////////////////////////////////////////////
 	/*If anything we did caused us to get moved out of water, surface*/
-	if(u.usubwater && !is_pool(u.ux, u.uy)){
+	if(u.usubwater && !is_pool(u.ux, u.uy, FALSE)){
 		u.usubwater = 0;
 		vision_full_recalc = 1;
 		vision_recalc(2);	/* unsee old position */

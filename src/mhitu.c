@@ -496,7 +496,7 @@ mattacku(mtmp)
 			struct obj *obj = level.objects[u.ux][u.uy];
 
 			if (obj ||
-			      (youracedata->mlet == S_EEL && is_pool(u.ux, u.uy))) {
+			      (youracedata->mlet == S_EEL && is_pool(u.ux, u.uy, FALSE))) {
 			    int save_spe = 0; /* suppress warning */
 			    if (obj) {
 				save_spe = obj->spe;
