@@ -952,6 +952,10 @@ struct monst *mon;
 		mmove *= 2;
 	}
 	
+	if(isdark(mon->mx, mon->my) && mon->data == &mons[PM_GRUE]){
+		mmove *= 2;
+	}
+	
 	if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH])
 		mmove += u.chokhmah;
 	if(mon->data == &mons[PM_PYTHON] && 
@@ -2757,13 +2761,19 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	
 	// if(magr->mpeaceful && mdef->mpeaceful && (magr->mtame || mdef->mtame)) return 0L;
 	
-	if(magr->mtame && mdef->mtame) return 0L;
+	if(magr->mtame && (mdef->mtame || mdef->moccupation)){
+			return 0L;
+	}
 	
 	if(!mon_can_see_mon(magr, mdef)) return 0L;
 	
 	if(ma == &mons[PM_DREADBLOSSOM_SWARM]){
 		if(!(is_fey(md) || is_plant(md))) return ALLOW_M|ALLOW_TM;
 	}
+	if(ma == &mons[PM_GRUE]){
+		if(isdark(mdef->mx, mdef->my)) return ALLOW_M|ALLOW_TM;
+	}
+	
 	
 	/* In the anachrononaut quest, all peaceful monsters are at threat from all hostile monsters.
 		The leader IS in serious danger */
