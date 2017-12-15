@@ -439,7 +439,8 @@ In_fog_cloud(mon)
 		for (i = 0; i < n_regions; i++) {
 			/* Check if player is inside region */
 			f_indx = regions[i]->inside_f;
-			if (f_indx == INSIDE_FOG_CLOUD && mon_in_region(regions[i], mon)){
+			// if (f_indx == INSIDE_FOG_CLOUD && mon_in_region(regions[i], mon)){
+			if (f_indx == INSIDE_FOG_CLOUD && inside_region(regions[i], mon->mx, mon->my)){
 			    return TRUE;
 			}
 		}
@@ -506,6 +507,21 @@ xchar x, y;
     for (i = 0; i < n_regions; i++) {
 		if (inside_region(regions[i], x, y) &&
 			regions[i]->inside_f == INSIDE_GAS_CLOUD
+		) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+boolean
+check_solid_fog_region(x, y)
+xchar x, y;
+{
+	int i;
+    for (i = 0; i < n_regions; i++) {
+		if (regions[i]->inside_f == INSIDE_FOG_CLOUD &&
+			inside_region(regions[i], x, y)
 		) {
 			return TRUE;
 		}

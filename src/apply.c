@@ -1120,7 +1120,8 @@ boolean spiritseal;
 	} else {
 	    /* charged Bell of Opening */
 	    consume_obj_charge(obj, TRUE);
-
+		
+		
 	    if (u.uswallow) {
 		if (!obj->cursed)
 		    (void) openit();
@@ -2151,7 +2152,7 @@ long timeout;
 			    Sprintf(carriedby, "%s pack",
 				     s_suffix(a_monnam(mon)));
 			}
-			else if (is_pool(mon->mx, mon->my))
+			else if (is_pool(mon->mx, mon->my, FALSE))
 			    Strcpy(carriedby, "empty water");
 			else
 			    Strcpy(carriedby, "thin air");
@@ -2235,7 +2236,7 @@ struct obj **optr;
 	You("%s and it transforms.",
 	    (u.dx||u.dy) ? "set the figurine beside you" :
 	    (Weightless || Is_waterlevel(&u.uz) ||
-	     is_pool(cc.x, cc.y)) ?
+	     is_pool(cc.x, cc.y, TRUE)) ?
 		"release the figurine" :
 	    (u.dz < 0 ?
 		"toss the figurine into the air" :
@@ -2966,7 +2967,7 @@ struct obj *otmp;
 	    what = "underwater";
 	else if (Levitation)
 	    what = "while levitating";
-	else if (is_pool(u.ux, u.uy))
+	else if (is_pool(u.ux, u.uy, TRUE))
 	    what = "in water";
 	else if (is_lava(u.ux, u.uy))
 	    what = "in lava";
@@ -3110,7 +3111,7 @@ struct obj **optr;
 	    what = "underwater";
 	else if (Levitation)
 	    what = "while levitating";
-	else if (is_pool(rx, ry))
+	else if (is_pool(rx, ry, TRUE))
 	    what = "in water";
 	else if (is_lava(rx, ry))
 	    what = "in lava";
@@ -3662,7 +3663,7 @@ use_grapple (obj)
 	    }
 	    /* FALL THROUGH */
 	case 3:	/* Surface */
-	    if (IS_AIR(levl[cc.x][cc.y].typ) || is_pool(cc.x, cc.y))
+	    if (IS_AIR(levl[cc.x][cc.y].typ) || is_pool(cc.x, cc.y, TRUE))
 		pline_The("hook slices through the %s.", surface(cc.x, cc.y));
 	    else {
 		You("are yanked toward the %s!", surface(cc.x, cc.y));
@@ -4459,7 +4460,7 @@ struct obj **optr;
 		You("build a clockwork and %s.",
 			(u.dx||u.dy) ? "set it beside you" :
 			(Weightless || Is_waterlevel(&u.uz) ||
-			 is_pool(cc.x, cc.y)) ?
+			 is_pool(cc.x, cc.y, TRUE)) ?
 			"release it" :
 			(u.dz < 0 ?
 			"toss it into the air" :
