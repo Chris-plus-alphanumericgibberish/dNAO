@@ -1567,7 +1567,7 @@ hitmu(mtmp, mattk)
 					hates_iron(youracedata) &&
 					!(is_lightsaber(uwep) && uwep->lamplit)
 				) dmg += rnd(u.ulevel);
-				if(uwep && (uwep->cursed) && 
+				if(uwep && is_unholy(uwep) && 
 					hates_unholy(youracedata)
 				) dmg += rnd(9);
 			} else {
@@ -1679,7 +1679,7 @@ hitmu(mtmp, mattk)
 					hates_iron(youracedata) &&
 					!(is_lightsaber(otmp) && otmp->lamplit)
 				) dmg += rnd(u.ulevel);
-				if(otmp && (otmp->cursed) && 
+				if(otmp && is_unholy(otmp) && 
 					hates_unholy(youracedata)
 				) dmg += rnd(9);
 			} else {
@@ -1707,7 +1707,7 @@ hitmu(mtmp, mattk)
 			    pline("The cold-iron sears your flesh!");
 			}
 			
-			if (otmp && (otmp->cursed) &&
+			if (otmp && is_unholy(otmp) &&
 				hates_unholy(youracedata)
 			) {
 			    pline("The curse sears your flesh!");
