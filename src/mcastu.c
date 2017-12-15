@@ -526,7 +526,7 @@ unsigned int type;
     }//50% favored spells
 	
 	//100% favored spells
-    switch(monsndx(mtmp->data)) {
+	switch(monsndx(mtmp->data)) {
 	case PM_DWARF_CLERIC:
 	case PM_DWARF_QUEEN:
 		switch (rnd(4)) {
