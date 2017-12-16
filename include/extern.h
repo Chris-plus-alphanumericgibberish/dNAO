@@ -572,14 +572,14 @@ E void NDECL(init_dungeons);
 E s_level *FDECL(find_level, (const char *));
 E s_level *FDECL(Is_special, (d_level *));
 E branch *FDECL(Is_branchlev, (d_level *));
-E xchar FDECL(ledger_no, (d_level *));
-E xchar NDECL(maxledgerno);
+E int FDECL(ledger_no, (d_level *));
+E int NDECL(maxledgerno);
 E schar FDECL(depth, (d_level *));
-E xchar FDECL(dunlev, (d_level *));
-E xchar FDECL(dunlevs_in_dungeon, (d_level *));
-E xchar FDECL(ledger_to_dnum, (XCHAR_P));
-E xchar FDECL(ledger_to_dlev, (XCHAR_P));
-E xchar FDECL(deepest_lev_reached, (BOOLEAN_P));
+E int FDECL(dunlev, (d_level *));
+E int FDECL(dunlevs_in_dungeon, (d_level *));
+E int FDECL(ledger_to_dnum, (int));
+E int FDECL(ledger_to_dlev, (int));
+E int FDECL(deepest_lev_reached, (BOOLEAN_P));
 E boolean FDECL(on_level, (d_level *,d_level *));
 E void FDECL(next_level, (BOOLEAN_P));
 E void FDECL(prev_level, (BOOLEAN_P));
@@ -614,10 +614,10 @@ E void FDECL(assign_level, (d_level *,d_level *));
 E void FDECL(assign_rnd_level, (d_level *,d_level *,int));
 E int FDECL(induced_align, (int));
 E boolean FDECL(Invocation_lev, (d_level *));
-E xchar NDECL(level_difficulty);
+E int NDECL(level_difficulty);
 E schar FDECL(lev_by_name, (const char *));
 #ifdef WIZARD
-E schar FDECL(print_dungeon, (BOOLEAN_P,schar *,xchar *));
+E schar FDECL(print_dungeon, (BOOLEAN_P,schar *,int *));
 #endif
 E int NDECL(donamelevel);
 E int NDECL(dooverview);
@@ -1244,7 +1244,7 @@ E void FDECL(walkfrom, (int,int));
 E void FDECL(makemaz, (const char *));
 E void FDECL(mazexy, (coord *));
 E void NDECL(bound_digging);
-E void FDECL(mkportal, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P));
+E void FDECL(mkportal, (XCHAR_P,XCHAR_P,int,int));
 E boolean FDECL(bad_location, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P));
 E void FDECL(place_lregion, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,
 			     XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,
@@ -2070,7 +2070,7 @@ E NhRegion* FDECL(create_gas_cloud, (XCHAR_P, XCHAR_P, int, int));
 E void FDECL(inven_inuse, (BOOLEAN_P));
 E int FDECL(dorecover, (int));
 E void FDECL(trickery, (char *));
-E void FDECL(getlev, (int,int,XCHAR_P,BOOLEAN_P));
+E void FDECL(getlev, (int,int,int,BOOLEAN_P));
 E void NDECL(minit);
 E boolean FDECL(lookup_id_mapping, (unsigned, unsigned *));
 #ifdef ZEROCOMP
@@ -2157,11 +2157,11 @@ E int NDECL(dosave0);
 E void NDECL(savestateinlock);
 #endif
 #ifdef MFLOPPY
-E boolean FDECL(savelev, (int,XCHAR_P,int));
+E boolean FDECL(savelev, (int,int,int));
 E boolean FDECL(swapin_file, (int));
 E void NDECL(co_false);
 #else
-E void FDECL(savelev, (int,XCHAR_P,int));
+E void FDECL(savelev, (int,int,int));
 #endif
 E void FDECL(bufon, (int));
 E void FDECL(bufoff, (int));
