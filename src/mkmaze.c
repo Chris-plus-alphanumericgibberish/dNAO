@@ -681,23 +681,6 @@ register const char *s;
 				}
 			}
 		}
-		if (Is_asmo_level(&u.uz)){
-			int i = 0;
-			for (x = 0; x < COLNO; x++){
-				for (y = 0; y < ROWNO; y++){
-					if (levl[x][y].typ == STAIRS){
-						if (!(x == xupstair && y == yupstair)){
-							if (!rn2(5-i)){
-								xdnstair = x;
-								ydnstair = y;
-								return;
-							}
-							i += 1;
-						}
-					}
-				}
-			}
-		}
 		return;	/* no mazification right now */
 	    }
 	    impossible("Couldn't load \"%s\" - making a maze.", protofile);
