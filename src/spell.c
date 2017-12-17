@@ -2654,7 +2654,7 @@ spiriteffects(power, atme)
 			nomul(5,"recovering from the Horrid Rainbow");
 		}break;
 		case PWR_REFILL_LANTERN:
-			if(uwep && (uwep->otyp == OIL_LAMP || is_lightsaber(uwep)) && !uwep->oartifact){
+			if(uwep && (uwep->otyp == OIL_LAMP || (is_lightsaber(uwep) && uwep->oartifact != ART_INFINITY_S_MIRRORED_ARC)) && !uwep->oartifact){
 				int multiplier = is_lightsaber(uwep) ? 100 : 1;
 				uwep->age += d(5,dsize) * 10 * multiplier;
 				if(uwep->age > 1500*multiplier) uwep->age = 1500*multiplier;
@@ -2666,7 +2666,7 @@ spiriteffects(power, atme)
 			} else return 0;
 		break;
 		case PWR_HELLFIRE:
-			if(uwep && (uwep->otyp == OIL_LAMP || uwep->otyp == POT_OIL || is_lightsaber(uwep)) && !uwep->oartifact && uwep->lamplit){
+			if(uwep && (uwep->otyp == OIL_LAMP || uwep->otyp == POT_OIL || (is_lightsaber(uwep) && uwep->oartifact != ART_INFINITY_S_MIRRORED_ARC)) && !uwep->oartifact && uwep->lamplit){
 				if (throwspell()) {
 					if(uwep->age < 500) uwep->age = 0;
 					else uwep->age -= 500;
@@ -3993,6 +3993,8 @@ boolean atme;
 	/* gain skill for successful cast */
 	use_skill(skill, spellev(spell));
 	u.lastcast = monstermoves + spellev(spell);
+	if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC && uwep->spe > 0)
+		u.lastcast += uwep->spe;
 
 	obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 	return(1);
@@ -4700,7 +4702,10 @@ int spell;
 	// ) splcaster -= urole.spelarmr;
 	
 	if(uwep){
-		if(uwep->oartifact == ART_TENTACLE_ROD || uwep->oartifact == ART_ARYFAERN_KERYM) splcaster -= urole.spelarmr;
+		if(uwep->oartifact == ART_TENTACLE_ROD
+			|| uwep->oartifact == ART_ARYFAERN_KERYM
+			|| uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC
+		) splcaster -= urole.spelarmr;
 		else if(uwep->otyp == KHAKKHARA) splcaster -= uwep->oartifact ? 2*urole.spelarmr : urole.spelarmr;
 	}
 	

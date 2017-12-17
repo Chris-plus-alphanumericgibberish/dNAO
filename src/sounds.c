@@ -2009,6 +2009,38 @@ int dz;
 		else pline("....");
 	}
 	
+	if(mtmp && mtmp->data == &mons[PM_PRIEST_OF_AN_UNKNOWN_GOD]){
+	  if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
+		&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
+	  ){
+			struct obj *optr;
+			You_feel("%s tug gently on your %s.",mon_nam(mtmp), ONAME(uwep));
+			if(yn("Release it?")=='n'){
+				You("hold on tight.");
+			}
+			else{
+				You("let %s take your %s.",mon_nam(mtmp), ONAME(uwep));
+				pline_The(Hallucination ? "world pats you on the head." : "world quakes around you.  Perhaps it is the voice of a god?");
+				do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
+				optr = uwep;
+				uwepgone();
+				if(optr->gifted != A_NONE && !Role_if(PM_EXILE)){
+					gods_angry(optr->gifted);
+					gods_upset(optr->gifted);
+				}
+				useup(optr);
+				u.regifted++;
+				mongone(mtmp);
+				if(Role_if(PM_EXILE) && u.regifted == 5){
+					pline("The image of an unknown and strange seal fills your mind!");
+					u.specialSealsKnown |= SEAL_UNKNOWN_GOD;
+				}
+				return 1;
+			}
+	  }
+	}
+	
+	
     if ( (!mtmp || mtmp->mundetected ||
 		mtmp->m_ap_type == M_AP_FURNITURE ||
 		mtmp->m_ap_type == M_AP_OBJECT) && levl[tx][ty].typ == IRONBARS
@@ -4745,6 +4777,13 @@ int p_skill;
 		else maxskill = P_UNSKILLED;
 	}
 	
+	if(p_skill == FFORM_NIMAN){
+		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			maxskill = min(P_EXPERT, P_SKILL(weapon_type(uwep)));
+		else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			maxskill = min(P_EXPERT, P_SKILL(weapon_type(uswapwep)));
+	}
+	
 	return maxskill;
 }
 
@@ -4777,6 +4816,13 @@ int p_skill;
 		if(OLD_P_SKILL(FFORM_SHIEN) >= P_EXPERT) curskill++;
 	}
 	
+	if(p_skill == FFORM_NIMAN && curskill < P_BASIC){
+		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			curskill = P_BASIC;
+		else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			curskill = P_BASIC;
+	}
+	
 	if(u.sealsActive&SEAL_NABERIUS && (curskill<P_BASIC || maxskill<P_BASIC)){
 		return P_BASIC;
 	}
@@ -4788,6 +4834,12 @@ int
 P_RESTRICTED(p_skill)
 int p_skill;
 {
+	if(p_skill == FFORM_NIMAN){
+		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			return P_RESTRICTED(weapon_type(uwep));
+		else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			return P_RESTRICTED(weapon_type(uswapwep));
+	}
 	return (u.weapon_skills[p_skill].skill==P_ISRESTRICTED 
 		&& !(spiritSkill(p_skill) || u.specialSealsActive&SEAL_NUMINA) );
 }

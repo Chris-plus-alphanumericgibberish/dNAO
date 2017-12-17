@@ -1004,7 +1004,15 @@ dofightingform()
 			if(uarm && (is_metallic(uarm))){
 				Sprintf(buf,	"Niman (selected; blocked by armor)");
 			} else {
-				Sprintf(buf,	"Niman (active)");
+				int nskill = P_SKILL(FFORM_NIMAN);
+				if(u.lastcast >= monstermoves && nskill >= P_BASIC){
+					Sprintf(buf,	"Niman (active; +%dd%d)", 
+						nskill == P_BASIC ? 3 : 
+						nskill == P_SKILLED ? 6 : 
+						nskill == P_EXPERT ? 9 : 0, 
+						u.lastcast-monstermoves+1);
+				} else
+					Sprintf(buf,	"Niman (active)");
 			}
 		} else {
 			if(uarm && (is_metallic(uarm))){
@@ -2037,7 +2045,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Fast) you_are(Very_fast ? "very fast" : "fast");
 	if (Reflecting) you_have("reflection");
 	if (Reflecting && (
-			(uwep && is_lightsaber(uwep) && uwep->lamplit && 
+			(uwep && is_lightsaber(uwep) && litsaber(uwep) && 
 				((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) || 
 				 (u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 				)
