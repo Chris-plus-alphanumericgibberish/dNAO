@@ -1163,9 +1163,9 @@ int x;
 		    !((x == CORPSE || x == EGG) &&
 			!touch_petrifies(&mons[otmp->corpsenm])) &&
 			/* never uncharged lightsabers */
-            ((!is_lightsaber(otmp) || otmp->age
+            (!is_lightsaber(otmp) || otmp->age
 					 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
-             ) &&
+            ) &&
 			/* never untouchable artifacts */
 		    (!otmp->oartifact || touch_artifact(otmp, mtmp, FALSE)) &&
 			/* never too-large for available hands */
@@ -1174,8 +1174,7 @@ int x;
 			(!hates_silver(mtmp->data) || otmp->obj_material != SILVER) &&
 			(!hates_iron(mtmp->data) || otmp->obj_material != IRON) &&
 			(!hates_unholy(mtmp->data) || !is_unholy(otmp))
-			)
-		{
+		){
 			if (!obest ||
 				(dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(obest, 0 /*zeromonst*/,0))
 				/*
