@@ -1164,7 +1164,7 @@ int x;
 			!touch_petrifies(&mons[otmp->corpsenm])) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
-					 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
+			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
             ) &&
 			/* never untouchable artifacts */
 		    (!otmp->oartifact || touch_artifact(otmp, mtmp, FALSE)) &&
@@ -1566,7 +1566,9 @@ register struct monst *mtmp;
 			/* an artifact */
 			otmp->oartifact &&
 			/* never uncharged lightsabers */
-			(!is_lightsaber(otmp) || otmp->age) &&
+            (!is_lightsaber(otmp) || otmp->age
+			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
+            ) &&
 			/* never untouchable artifacts */
 			(touch_artifact(otmp, mtmp, FALSE)) &&
 			/* never too-large for available hands */
