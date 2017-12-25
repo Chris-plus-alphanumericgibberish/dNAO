@@ -382,7 +382,7 @@ typedef long glyph_t;
 
 #if defined(TTY_GRAPHICS) || defined(MSWIN_GRAPHICS)
 # define MENU_COLOR
-# define MENU_COLOR_REGEX
+// # define MENU_COLOR_REGEX
 /* # define MENU_COLOR_REGEX_POSIX */
 /* if MENU_COLOR_REGEX is defined, use regular expressions (regex.h,
  * GNU specific functions by default, POSIX functions with
