@@ -4186,7 +4186,7 @@ const char *mapping;
 		    int errnum;
 		    char errbuf[80];
 		    const char *err = (char *)0;
-		    errnum = regcomp(&ape->match, text2, REG_EXTENDED | REG_NOSUB);
+		    errnum = 0;//regcomp(&ape->match, text2, REG_EXTENDED | REG_NOSUB);
 		    if (errnum != 0) {
 			regerror(errnum, &ape->match, errbuf, sizeof(errbuf));
 			err = errbuf;
