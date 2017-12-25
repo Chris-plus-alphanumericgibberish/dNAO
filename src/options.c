@@ -1385,7 +1385,7 @@ char *str;
     tmp = (struct menucoloring *)alloc(sizeof(struct menucoloring));
 #ifdef MENU_COLOR_REGEX
 #ifdef MENU_COLOR_REGEX_POSIX
-    errnum = regcomp(&tmp->match, tmps, REG_EXTENDED | REG_NOSUB);
+    errnum = 0;//regcomp(&tmp->match, tmps, REG_EXTENDED | REG_NOSUB);
     if (errnum != 0)
     {
 	regerror(errnum, &tmp->match, errbuf, sizeof(errbuf));
