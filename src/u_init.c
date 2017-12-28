@@ -2730,7 +2730,10 @@ register struct trobj *trop;
 				obj->obj_material = COPPER; // which is actually bronze nice one Chris
 				fix_object(obj);
 			}
-			
+			if(obj->otyp == GAUNTLETS && Role_if(PM_ANACHRONONAUT)){
+				obj->obj_material = COPPER;
+				fix_object(obj);
+			}
 			if(obj->otyp == PISTOL && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
 				obj->obj_material = MITHRIL;
 				fix_object(obj);
