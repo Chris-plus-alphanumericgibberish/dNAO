@@ -837,6 +837,11 @@ static const struct def_skill Skill_HD_Female[] = {
     { P_NONE, 0 }
 };
 
+static const struct def_skill Skill_Hlf_Ana[] = {
+    { P_PICK_AXE, P_EXPERT },
+    { P_NONE, 0 }
+};
+
 static const struct def_skill Skill_G[] = {
     { P_PICK_AXE, P_EXPERT }, { P_CROSSBOW, P_EXPERT },
     { P_CLUB, P_EXPERT }, { P_NONE, 0 }
@@ -1683,6 +1688,7 @@ u_init()
 		else if(Race_if(PM_INCANTIFIER)) ini_inv(Anachrononaut_Inc);
 		else if(Race_if(PM_VAMPIRE)) ini_inv(Anachrononaut_Vam);
 		else if(Race_if(PM_DWARF)) ini_inv(Anachrononaut_Dw);
+		else if(Race_if(PM_HALF_DRAGON)) ini_inv(Anachrononaut_Hlf);
 		else ini_inv(Anachrononaut_Hu);
 		knows_object(FLINTLOCK);
 		knows_object(PISTOL);
@@ -2215,6 +2221,9 @@ u_init()
 			u.uen = u.uenmax;
 		} else if(u.uenmax < 15) {
 			u.uen = u.uenmax = 15;
+		}
+		if(Role_if(PM_ANACHRONONAUT)){
+			skill_add(Skill_Hlf_Ana);
 		}
 		if(flags.initgend){
 			skill_add(Skill_HD_Female);
