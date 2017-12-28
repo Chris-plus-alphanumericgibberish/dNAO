@@ -52,8 +52,9 @@ static struct trobj Anachrononaut_Hu[] = {
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Anachrononaut_Hlf[] = {
-	{ DWARVISH_MATTOCK, 0, WEAPON_CLASS, 1, 0 },
+	{ PICK_AXE, UNDEF_SPE, TOOL_CLASS, 1, 0 },
 	{ AUTO_SHOTGUN,  0, WEAPON_CLASS, 1, 0 },
+	{ SHOTGUN_SHELL, 3, WEAPON_CLASS, 100, 0 },
 	{ SCALE_MAIL, 0, ARMOR_CLASS, 1, 0 },
 	{ BRONZE_HELM, 0, ARMOR_CLASS, 1, 0 },
 	{ GAUNTLETS, 0, ARMOR_CLASS, 1, 0 },
@@ -1732,6 +1733,7 @@ u_init()
 		skill_init(Skill_Ana);
 		if(Race_if(PM_DWARF)) u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] = u.ualign.type = A_CHAOTIC;
 		if(u.ualign.type == A_CHAOTIC) skill_add(Skill_Cha_Ana);
+		if(Race_if(PM_HALF_DRAGON)) skill_add(Skill_Hlf_Ana);
 		else skill_add(Skill_Neu_Ana);
 	break;
 	case PM_BARBARIAN:
@@ -2221,9 +2223,6 @@ u_init()
 			u.uen = u.uenmax;
 		} else if(u.uenmax < 15) {
 			u.uen = u.uenmax = 15;
-		}
-		if(Role_if(PM_ANACHRONONAUT)){
-			skill_add(Skill_Hlf_Ana);
 		}
 		if(flags.initgend){
 			skill_add(Skill_HD_Female);
