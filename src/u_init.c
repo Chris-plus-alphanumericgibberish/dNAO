@@ -61,6 +61,7 @@ static struct trobj Anachrononaut_Hlf[] = {
 	{ CLOAK_OF_PROTECTION, 0, ARMOR_CLASS, 1, 0 },
 	{ BULLET_FABBER, 0, TOOL_CLASS, 1, 0 },
 	{ CUTTING_LASER,  0, WEAPON_CLASS, 1, 0 },
+	{ POWER_PACK, 0, TOOL_CLASS, 5, 0 },
 	{ PROTEIN_PILL, 0, FOOD_CLASS, 10, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
