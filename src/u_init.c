@@ -51,6 +51,18 @@ static struct trobj Anachrononaut_Hu[] = {
 	{ PROTEIN_PILL, 0, FOOD_CLASS, 10, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
+static struct trobj Anachrononaut_Hlf[] = {
+	{ DWARVISH_MATTOCK, 0, WEAPON_CLASS, 1, 0 },
+	{ AUTO_SHOTGUN,  0, WEAPON_CLASS, 1, 0 },
+	{ SCALE_MAIL, 0, ARMOR_CLASS, 1, 0 },
+	{ BRONZE_HELM, 0, ARMOR_CLASS, 1, 0 },
+	{ GAUNTLETS, 0, ARMOR_CLASS, 1, 0 },
+	{ ARMORED_BOOTS, 0, ARMOR_CLASS, 1, 0 },
+	{ CLOAK_OF_PROTECTION, 0, ARMOR_CLASS, 1, 0 },
+	{ BULLET_FABBER, 0, TOOL_CLASS, 1, 0 },
+	{ PROTEIN_PILL, 0, FOOD_CLASS, 10, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj Anachrononaut_Dw[] = {
 	{ HEAVY_MACHINE_GUN, 5, WEAPON_CLASS, 1, 0 },
 	{ PISTOL, 1, WEAPON_CLASS, 1, 0 },
@@ -2711,6 +2723,11 @@ register struct trobj *trop;
 				obj->obj_material = MITHRIL;
 				fix_object(obj);
 			}
+			if(obj->otyp == SCALE_MAIL && Role_if(PM_ANACHRONONAUT)){
+				obj->obj_material = BRONZE;
+				fix_object(obj);
+			}
+			
 			if(obj->otyp == PISTOL && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
 				obj->obj_material = MITHRIL;
 				fix_object(obj);
