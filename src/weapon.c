@@ -43,6 +43,7 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_SHIEN				(-24)
 #define PN_NIMAN				(-25)
 #define PN_JUYO					(-26)
+#define PN_WAND_DAMAGE			(-27)
 
 
 static void FDECL(mon_ignite_lightsaber, (struct obj *, struct monst *));
@@ -73,6 +74,7 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	PN_DIVINATION_SPELL, PN_ENCHANTMENT_SPELL,
 	PN_CLERIC_SPELL,     PN_ESCAPE_SPELL,
 	PN_MATTER_SPELL,
+	PN_WAND_DAMAGE,
 #ifdef BARD
 	PN_MUSICALIZE,
 #endif
@@ -116,6 +118,7 @@ STATIC_VAR NEARDATA const char * const odd_skill_names[] = {
     "form V: Shien",
     "form VI: Niman",
     "form VII: Juyo",
+    "wand damage",
 };
 /* indexed vis `is_martial() */
 STATIC_VAR NEARDATA const char * const barehands_or_martial[] = {
@@ -200,7 +203,12 @@ struct monst *mon;
 	/* Blessed weapons used against undead or demons */
 	if (Is_weapon && otmp->blessed &&
 	   (is_demon(ptr) || is_undead_mon(mon))){
-		if(otmp->oartifact == ART_EXCALIBUR) tmp += 7; //Quite holy
+		if(otmp->oartifact == ART_EXCALIBUR)
+			tmp += 7; //Quite holy
+		else if(otmp->oartifact == ART_VAMPIRE_KILLER)
+			tmp += 7; //Quite holy
+		else if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)
+			tmp += rnd(20); //Quite holy
 		else tmp += 2;
 	}
 	if (is_spear(otmp) &&
@@ -211,7 +219,7 @@ struct monst *mon;
 
 	/* trident is highly effective against swimmers */
 	if (otmp->otyp == TRIDENT && is_swimmer(ptr)) {
-	   if (is_pool(mon->mx, mon->my)) tmp += 4;
+	   if (is_pool(mon->mx, mon->my, FALSE)) tmp += 4;
 	   else if (ptr->mlet == S_EEL || ptr->mlet == S_SNAKE) tmp += 2;
 	}
 
@@ -270,7 +278,8 @@ int spec;
 	struct permonst *ptr;
 	boolean Is_weapon = (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)), youdefend = mon == &youmonst;
 	
-	if (!mon) ptr = &mons[NUMMONS];
+	// if (!mon) ptr = &mons[NUMMONS];
+	if (!mon) ptr = &mons[PM_HUMAN];
 	else ptr = youdefend ? youracedata : mon->data;
 
 	if (otyp == CREAM_PIE) return 0;
@@ -458,11 +467,29 @@ int spec;
 			}
 		break;
 		case DOUBLE_LIGHTSABER: 
-			tmp += d(2, ldie);
-			otmp->age -= 100;
-			if (otmp->altmode){
-				tmp += d(3, ldie);
+			if(otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+				xchar x, y;
+				int dnm = 0;
+				get_obj_location(otmp, &x, &y, 0);
+				if(levl[x][y].lit && 
+					!(viz_array[y][x]&TEMP_DRK3 && 
+					 !(viz_array[y][x]&TEMP_LIT1)
+					)
+				) dnm += 2;
+				if(viz_array[y][x]&TEMP_LIT1 && 
+					!(viz_array[y][x]&TEMP_DRK3)
+				) dnm += 1;
+				if(dnm > 1)
+					tmp += d(dnm-1, ldie);
+				if (otmp->altmode)
+					tmp += d(dnm, ldie);
+			} else {
+				tmp += d(2, ldie);
 				otmp->age -= 100;
+				if (otmp->altmode){
+					tmp += d(3, ldie);
+					otmp->age -= 100;
+				}
 			}
 			if(otmp == uwep){
 				if(u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
@@ -728,12 +755,30 @@ int spec;
 				}
 			}
 		break;
-		case DOUBLE_LIGHTSABER: 
-			tmp += d(2, sdie);
-			otmp->age -= 100;
-			if (otmp->altmode){
-				tmp += d(3, sdie);
+		case DOUBLE_LIGHTSABER:
+			if(otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+				xchar x, y;
+				int dnm = 0;
+				get_obj_location(otmp, &x, &y, 0);
+				if(levl[x][y].lit && 
+					!(viz_array[y][x]&TEMP_DRK3 && 
+					 !(viz_array[y][x]&TEMP_LIT1)
+					)
+				) dnm += 2;
+				if(viz_array[y][x]&TEMP_LIT1 && 
+					!(viz_array[y][x]&TEMP_DRK3)
+				) dnm += 1;
+				if(dnm > 1)
+					tmp += d(dnm-1, sdie);
+				if (otmp->altmode)
+					tmp += d(dnm, sdie);
+			} else {
+				tmp += d(2, sdie);
 				otmp->age -= 100;
+				if (otmp->altmode){
+					tmp += d(3, sdie);
+					otmp->age -= 100;
+				}
 			}
 			if(otmp == uwep){
 				if(u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
@@ -839,10 +884,10 @@ int spec;
 		/* thick skinned/scaled creatures don't feel it */
 		tmp = 0;
 	if (ptr->mlet == S_SHADE && !(
-		(is_lightsaber(otmp) && otmp->lamplit) || 
+		(is_lightsaber(otmp) && litsaber(otmp)) || 
 		(hates_silver(ptr) && (otmp->obj_material == SILVER || arti_silvered(otmp))) || 
 		(hates_iron(ptr) && otmp->obj_material == IRON) || 
-		(hates_unholy(ptr) && otmp->cursed) || 
+		(hates_unholy(ptr) && is_unholy(otmp)) || 
 		arti_shining(otmp)
 	)) tmp = 0;
 
@@ -874,9 +919,22 @@ int spec;
 		if(otmp->oartifact == ART_PEN_OF_THE_VOID){
 			tmp += pendamage(otmp, mon);
 		}
-	
+		if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS 
+			&& !otmp->blessed && !otmp->cursed
+			&& (is_undead_mon(mon) || is_demon(ptr) || hates_unholy(ptr))
+		){
+			bonus += rnd(10);
+		}
 	    if (otmp->blessed && (is_undead_mon(mon) || is_demon(ptr))){
 			if(otmp->oartifact == ART_EXCALIBUR) bonus += d(3,7); //Quite holy
+			else if(otmp->oartifact == ART_LANCE_OF_LONGINUS)
+				bonus += d(3,7); //Quite holy
+			else if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)
+				bonus += rnd(10) + otmp->spe; //Quite holy
+			else if(otmp->oartifact == ART_VAMPIRE_KILLER) 
+					bonus += 7; //Quite holy
+			else if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
+				bonus += rnd(20); //Divinity
 			else if(otmp->otyp == KHAKKHARA) bonus += d(rnd(3),4);
 			else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking+1,4);
 			else bonus += rnd(4);
@@ -885,7 +943,7 @@ int spec;
 			bonus += rnd(4);
 	    if ((otmp->obj_material == SILVER || arti_silvered(otmp))
 			&& hates_silver(ptr)
-			&& !(is_lightsaber(otmp) && otmp->lamplit)
+			&& !(is_lightsaber(otmp) && litsaber(otmp))
 			&& (!youdefend || !(u.sealsActive&SEAL_EDEN))
 		){
 			if(otyp == KHAKKHARA) bonus += d(rnd(3),20);
@@ -896,7 +954,7 @@ int spec;
 		}
 	    if (otmp->obj_material == IRON 
 			&& hates_iron(ptr)
-			&& !(is_lightsaber(otmp) && otmp->lamplit)
+			&& !(is_lightsaber(otmp) && litsaber(otmp))
 		){
 			if(youdefend){
 				if(otyp == KHAKKHARA) bonus += d(rnd(3),u.ulevel);
@@ -911,10 +969,18 @@ int spec;
 	    if (otmp->oartifact == ART_GLAMDRING && (is_orc(ptr) || is_demon(ptr))){
 			bonus += rnd(20);
 		}
-	    if (otmp->cursed
+	    if (is_unholy(otmp)
 			&& hates_unholy(ptr)
 		){
-			if(otyp == KHAKKHARA) bonus += d(rnd(3),9);
+			if(otmp->oartifact == ART_STORMBRINGER) 
+				bonus += d(2,9); //Extra unholy (2d9 vs excal's 3d7)
+			else if(otmp->oartifact == ART_LANCE_OF_LONGINUS)
+				bonus += d(3,9); //Quite unholy
+			else if(otmp->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO) 
+				bonus += 8; //Extra unholy
+			else if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
+				bonus += rnd(20); //Tyrany
+			else if(otyp == KHAKKHARA) bonus += d(rnd(3),9);
 			else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking,9);
 			else bonus += rnd(9);
 		}
@@ -928,7 +994,7 @@ int spec;
 	    if (bonus > 1 && otmp->oartifact && spec_dbon(otmp, mon, 100) >= 100)
 		bonus = (bonus + 1) / 2;
 		
-		if((resists_all(ptr) && !narrow_spec_applies(otmp, mon)) || resist_attacks(ptr)){
+		if(mon && ((resists_all(ptr) && !narrow_spec_applies(otmp, mon))) || resist_attacks(ptr)){
 			tmp /= 4;
 			if(!flags.mon_moving && !youdefend && warnedptr != ptr){
 				pline("Weapons are ineffective against %s.", mon_nam(mon));
@@ -958,7 +1024,7 @@ int spec;
 				resistmask |= SLASH;
 			}
 			
-			if((weaponmask & ~(resistmask)) == 0L && !narrow_spec_applies(otmp, mon)){
+			if(mon && (weaponmask & ~(resistmask)) == 0L && !narrow_spec_applies(otmp, mon)){
 				tmp /= 4;
 				if(!flags.mon_moving && !youdefend && (warnedotyp != otmp->otyp || warnedptr != ptr)){
 					pline("%s is ineffective against %s.", The(xname(otmp)), mon_nam(mon));
@@ -1097,15 +1163,27 @@ int x;
 		    /* never select non-cockatrice corpses */
 		    !((x == CORPSE || x == EGG) &&
 			!touch_petrifies(&mons[otmp->corpsenm])) &&
-                    (!is_lightsaber(otmp) || otmp->age) &&
-		    (!otmp->oartifact || touch_artifact(otmp, mtmp, FALSE)))
-		{
+			/* never uncharged lightsabers */
+            (!is_lightsaber(otmp) || otmp->age
+			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
+            ) &&
+			/* never untouchable artifacts */
+		    (!otmp->oartifact || touch_artifact(otmp, mtmp, FALSE)) &&
+			/* never too-large for available hands */
+			(!bimanual(otmp, mtmp->data) || ((mtmp->misc_worn_check & W_ARMS) == 0 && strongmonst(mtmp->data))) &&
+			/* never a hated weapon */
+			(!hates_silver(mtmp->data) || otmp->obj_material != SILVER) &&
+			(!hates_iron(mtmp->data) || otmp->obj_material != IRON) &&
+			(!hates_unholy(mtmp->data) || !is_unholy(otmp))
+		){
 			if (!obest ||
-				// dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(obest, 0 /*zeromonst*/,0)
+				(dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(obest, 0 /*zeromonst*/,0))
+				/*
 				(is_bludgeon(otmp) ? 
 					(otmp->spe - greatest_erosion(otmp) > obest->spe - greatest_erosion(obest)):
 					(otmp->spe > obest->spe)
 				)
+				*/
 			) obest = otmp;
 		}
 	}
@@ -1208,7 +1286,7 @@ struct obj *otmp;
 		|| !hates_silver(mtmp->data))
 		&& (otmp->obj_material != IRON
 		|| !hates_iron(mtmp->data))
-		&& (otmp->cursed
+		&& (is_unholy(otmp)
 		|| !hates_unholy(mtmp->data))
 	){
         for (i = 0; i < SIZE(pwep); i++)
@@ -1228,7 +1306,7 @@ struct obj *otmp;
         if ( wep &&
              wep->otyp == rwep[i] &&
            !(otmp->otyp == rwep[i] &&
-	     dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(wep, 0 /*zeromonst*/, 0)))
+	     (dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(wep, 0 /*zeromonst*/, 0))))
 	    return FALSE;
         if (otmp->otyp == rwep[i]) return TRUE;
     }
@@ -1265,22 +1343,10 @@ register struct monst *mtmp;
 	/* if (dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 13 && couldsee(mtmp->mx, mtmp->my)) */
 	{
 	    for (i = 0; i < SIZE(pwep); i++) {
-		/* Only strong monsters can wield big (esp. long) weapons.
-		 * Big weapon is basically the same as bimanual.
-		 * All monsters can wield the remaining weapons.
-		 */
-		if (((strongmonst(mtmp->data) && (mtmp->misc_worn_check & W_ARMS) == 0)
-			|| !objects[pwep[i]].oc_bimanual || mtmp->data == &mons[PM_THRONE_ARCHON])
-		    && (objects[pwep[i]].oc_material != SILVER
-			|| !hates_silver(mtmp->data))
-		    && (objects[pwep[i]].oc_material != IRON
-			|| !hates_iron(mtmp->data))
-		) {
-		    if ((otmp = oselect(mtmp, pwep[i])) != 0) {
+		if ((otmp = oselect(mtmp, pwep[i])) != 0) {
 			propellor = otmp; /* force the monster to wield it */
 			return otmp;
-		    }
-		}
+			}
 	    }
 	}
 	//Check for charged arm blasters or hand blasters
@@ -1496,29 +1562,32 @@ register struct monst *mtmp;
 
 	/* prefer artifacts to everything else */
 	for(otmp=mtmp->minvent; otmp; otmp = otmp->nobj) {
-		if (otmp->oclass == WEAPON_CLASS
-			&& otmp->oartifact && touch_artifact(otmp, mtmp, FALSE)
-			&& ((strong && !wearing_shield)
-			    || !bimanual(otmp,mtmp->data))
+		if (/* valid weapon */
+			(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) &&
+			/* an artifact */
+			otmp->oartifact &&
+			/* never uncharged lightsabers */
+            (!is_lightsaber(otmp) || otmp->age
+			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
+            ) &&
+			/* never untouchable artifacts */
+			(touch_artifact(otmp, mtmp, FALSE)) &&
+			/* never too-large for available hands */
+			(!bimanual(otmp, mtmp->data) || ((mtmp->misc_worn_check & W_ARMS) == 0 && strongmonst(mtmp->data))) &&
+			/* never a hated weapon */
+			(!hates_silver(mtmp->data) || otmp->obj_material != SILVER) &&
+			(!hates_iron(mtmp->data) || otmp->obj_material != IRON) &&
+			(!hates_unholy(mtmp->data) || !is_unholy(otmp))
 			) return otmp;
 	}
 
 	if(is_giant(mtmp->data))	/* giants just love to use clubs */
 	    Oselect(CLUB);
 
-	/* only strong monsters can wield big (esp. long) weapons */
-	/* big weapon is basically the same as bimanual */
-	/* all monsters can wield the remaining weapons */
 	for (i = 0; i < SIZE(hwep); i++) {
 	    if (hwep[i] == CORPSE && !(mtmp->misc_worn_check & W_ARMG))
 		continue;
-	    if (((strong && !wearing_shield)
-			|| !objects[hwep[i]].oc_bimanual || mtmp->data == &mons[PM_THRONE_ARCHON])
-		    && (objects[hwep[i]].oc_material != SILVER
-			|| !hates_silver(mtmp->data))
-		    && (objects[hwep[i]].oc_material != IRON
-			|| !hates_iron(mtmp->data))
-		) Oselect(hwep[i]);
+	    Oselect(hwep[i]);
 	}
 
 	/* failure */
@@ -1614,14 +1683,17 @@ register struct monst *mon;
 			    obj = m_carrying(mon, DWARVISH_MATTOCK);
 			break;
 		case NEED_AXE:
-			/* currently, only 2 types of axe */
-			obj = m_carrying(mon, BATTLE_AXE);
+			/* currently, only 3 types of axe */
+			obj = m_carrying(mon, MOON_AXE);
+			if (!obj)
+				obj = m_carrying(mon, BATTLE_AXE);
 			if (!obj || which_armor(mon, W_ARMS))
 			    obj = m_carrying(mon, AXE);
 			break;
 		case NEED_PICK_OR_AXE:
 			/* prefer pick for fewer switches on most levels */
 			obj = m_carrying(mon, DWARVISH_MATTOCK);
+			if (!obj) obj = m_carrying(mon, MOON_AXE);
 			if (!obj) obj = m_carrying(mon, BATTLE_AXE);
 			if (!obj || which_armor(mon, W_ARMS)) {
 			    obj = m_carrying(mon, PICK_AXE);
@@ -1748,8 +1820,8 @@ mon_ignite_lightsaber(obj, mon)
 struct obj * obj;
 struct monst * mon;
 {
-	/* No obj or not lightsaber */
-	if (!obj || !is_lightsaber(obj)) return;
+	/* No obj or not lightsaber or unlightable */
+	if (!obj || !is_lightsaber(obj) || obj->oartifact == ART_INFINITY_S_MIRRORED_ARC) return;
 
 	/* WAC - Check lightsaber is on */
 	if (!obj->lamplit) {
@@ -1817,7 +1889,7 @@ struct obj *otmp;
 	
 	
 	// if (Upolyd || otmp == uswapwep) return(0);
-	if (otmp == uswapwep) return(0);
+	if (otmp == uswapwep) return (str < 6) ? (-6+str) : 0;
 	
 	if (str < 6) bonus = -6+str;
 	else if (str < 16) bonus = 0;
@@ -2357,6 +2429,13 @@ struct obj *obj;
 			type = P_LONG_SWORD;
 		else type = P_SHORT_SWORD;
 	}
+	else if(obj && obj->otyp == DOUBLE_LIGHTSABER && !obj->altmode){
+		if(P_SKILL(P_BROAD_SWORD) > P_SKILL(P_QUARTERSTAFF))
+			type = P_BROAD_SWORD;
+		else if(P_MAX_SKILL(P_BROAD_SWORD) > P_MAX_SKILL(P_QUARTERSTAFF))
+			type = P_BROAD_SWORD;
+		else type = P_QUARTERSTAFF;
+	}
 	else if(obj && obj->oartifact && obj->oartifact == ART_TORCH_OF_ORIGINS){
 		type = P_CLUB;
 	}
@@ -2497,9 +2576,13 @@ struct obj *weapon;
 	}
 #endif
 	//Do to-hit bonuses for lightsaber forms here.  May do other fighting styles at some point.
-	if(weapon && is_lightsaber(weapon) && weapon->lamplit && uwep == weapon){
+	if(weapon && is_lightsaber(weapon) && litsaber(weapon) && uwep == weapon){
 		if(u.fightingForm < FFORM_SHII_CHO || u.fightingForm > FFORM_JUYO) u.fightingForm = FFORM_SHII_CHO;
-		if(P_SKILL(u.fightingForm) < P_BASIC) u.fightingForm = FFORM_SHII_CHO;
+		if(P_SKILL(u.fightingForm) < P_BASIC){
+			if(weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+				u.fightingForm = FFORM_NIMAN;
+			else u.fightingForm = FFORM_SHII_CHO;
+		}
 		if(u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
 			if(wep_type != P_SABER){
 				if(makashiwarn) pline("Your %s seem%s very unwieldy.",xname(uwep),uwep->quan == 1 ? "s" : "");
@@ -2806,7 +2889,7 @@ struct obj *weapon;
 #endif
 
 	//Do damage bonuses for lightsaber forms here.  May do other fighting styles at some point.
-	if(weapon && is_lightsaber(weapon) && weapon->lamplit && uwep == weapon){
+	if(weapon && is_lightsaber(weapon) && litsaber(weapon) && uwep == weapon){
 		if(u.fightingForm < FFORM_SHII_CHO || u.fightingForm > FFORM_JUYO) u.fightingForm = FFORM_SHII_CHO;
 		if(P_SKILL(u.fightingForm) < P_BASIC) u.fightingForm = FFORM_SHII_CHO;
 		switch(u.fightingForm){

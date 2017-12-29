@@ -57,8 +57,15 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #ifdef REINCARNATION
     d_level	d_rogue_level;
 #endif
-	/*Medusa's Island*/
-    d_level	d_medusa_level;
+	/*Medusa's Island + Friends */
+	int		challenge_variant;
+#define MEDUSA_LEVEL1	1
+#define MEDUSA_LEVEL2	2
+#define MEDUSA_LEVEL3	3
+#define MEDUSA_LEVEL4	4
+#define GRUE_LEVEL1		5
+#define GRUE_LEVEL2		6
+    d_level	d_challenge_level;
 	/*Castle*/
 	d_level	d_stronghold_level;
 	/*Gehennom*/
@@ -167,7 +174,7 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #ifdef REINCARNATION
 #define rogue_level		(dungeon_topology.d_rogue_level)
 #endif
-#define medusa_level		(dungeon_topology.d_medusa_level)
+#define challenge_level		(dungeon_topology.d_challenge_level)
 #define stronghold_level	(dungeon_topology.d_stronghold_level)
 	/*Gehennom*/
 #define valley_level		(dungeon_topology.d_valley_level)
@@ -203,8 +210,8 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #define sea_dnum		(dungeon_topology.d_sea_dnum)
 	/*The Temple of Moloch*/
 #define temple_dnum		(dungeon_topology.d_temple_dnum)
-	/*Medusa's Island*/
-#define medusa_level		(dungeon_topology.d_medusa_level)
+	/*Medusa's Island + Friends*/
+#define challenge_level		(dungeon_topology.d_challenge_level)
 	/*Sokoban*/
 #define sokoban_dnum		(dungeon_topology.d_sokoban_dnum)
 	/*Mines of the Gnomes of Zurich*/
@@ -594,7 +601,7 @@ E char *fqn_prefix_names[PREFIX_COUNT];
 #ifdef AUTOPICKUP_EXCEPTIONS
 struct autopickup_exception {
 	char *pattern;
-	regex_t match;
+	char *match;
 	boolean grab;
 	boolean is_regexp;
 	struct autopickup_exception *next;
@@ -622,7 +629,7 @@ struct u_achieve {
         Bitfield(get_luckstone,1);   /* You obtained the luckstone at the
                                       * end of the mines. */
         Bitfield(finish_sokoban,1);  /* You obtained the sokoban prize. */
-        Bitfield(killed_medusa,1);   /* You defeated Medusa. */
+        Bitfield(killed_challenge,1);   /* You defeated the challenge boss. */
 		Bitfield(killed_lucifer,1);		/* Bragging rights */
 		Bitfield(killed_asmodeus,1);		/* Bragging rights */
 		Bitfield(killed_demogorgon,1);		/* Bragging rights */
@@ -649,7 +656,7 @@ E int mailckfreq;
 struct _plinemsg {
     xchar msgtype;
     char *pattern;
-    regex_t match;
+    char *match;
     boolean is_regexp;
     struct _plinemsg *next;
 };

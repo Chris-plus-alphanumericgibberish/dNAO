@@ -88,6 +88,7 @@ static const char *echidnaTitles[] = {
 
 static const char *alignmentThings[] = {
 	"Can a paladin kill baby orcs?",
+	"A paladin must kill baby orcs?",
 	"Must a paladin never stab a man in the back?",
 	"Must laws be upheld with no reason or logic?",
 	"Saying you love someone is always good?",
@@ -680,7 +681,7 @@ boolean chatting;
 			}
 		}
 	}
-	switch (mtmp->mfaction == SKELIFIED ? MS_BONES : is_silent_mon(mtmp) ? MS_SILENT : ptr->msound) {
+	switch ((mtmp->mfaction == SKELIFIED && ptr != &mons[PM_ECHO]) ? MS_BONES : is_silent_mon(mtmp) ? MS_SILENT : ptr->msound) {
 	case MS_ORACLE:
 	    return doconsult(mtmp);
 	case MS_PRIEST: /*Most (all?) things with this will have ispriest set*/
@@ -1197,7 +1198,7 @@ asGuardian:
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm) && tmpm->mpeaceful == tmpm->mpeaceful){
 							if(tmpm->mhp < tmpm->mhpmax){
-								for(i = (tmpm->mhpmax - tmpm->mhp); i > 0; i--) grow_up(tmpm, 0);
+								for(i = (tmpm->mhpmax - tmpm->mhp); i > 0; i--) grow_up(tmpm, tmpm);
 							}
 						}
 					}
@@ -2007,6 +2008,38 @@ int dz;
 		}
 		else pline("....");
 	}
+	
+	if(mtmp && mtmp->data == &mons[PM_PRIEST_OF_AN_UNKNOWN_GOD]){
+	  if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
+		&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
+	  ){
+			struct obj *optr;
+			You_feel("%s tug gently on your %s.",mon_nam(mtmp), ONAME(uwep));
+			if(yn("Release it?")=='n'){
+				You("hold on tight.");
+			}
+			else{
+				You("let %s take your %s.",mon_nam(mtmp), ONAME(uwep));
+				pline_The(Hallucination ? "world pats you on the head." : "world quakes around you.  Perhaps it is the voice of a god?");
+				do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
+				optr = uwep;
+				uwepgone();
+				if(optr->gifted != A_NONE && !Role_if(PM_EXILE)){
+					gods_angry(optr->gifted);
+					gods_upset(optr->gifted);
+				}
+				useup(optr);
+				u.regifted++;
+				mongone(mtmp);
+				if(Role_if(PM_EXILE) && u.regifted == 5){
+					pline("The image of an unknown and strange seal fills your mind!");
+					u.specialSealsKnown |= SEAL_UNKNOWN_GOD;
+				}
+				return 1;
+			}
+	  }
+	}
+	
 	
     if ( (!mtmp || mtmp->mundetected ||
 		mtmp->m_ap_type == M_AP_FURNITURE ||
@@ -3089,7 +3122,7 @@ int tx,ty;
 		if(u.sealTimeout[EURYNOME-FIRST_SEAL] < moves){
 			//Spirit requires that her seal be drawn before some water.
 			if(isok(tx+(tx-u.ux), ty+(ty-u.uy)) && 
-				IS_POOL(levl[tx+(tx-u.ux)][ty+(ty-u.uy)].typ)
+				IS_PUDDLE_OR_POOL(levl[tx+(tx-u.ux)][ty+(ty-u.uy)].typ)
 			){
 				if(!Blind)
 					You("see a figure dancing, far out upon the waters.");
@@ -3265,8 +3298,11 @@ int tx,ty;
 	case IRIS:{
 		if(u.sealTimeout[IRIS-FIRST_SEAL] < moves){
 			//Spirit requires that her seal be drawn inside a stinking cloud.
-			if(check_stinking_cloud_region((xchar)tx,(xchar)ty)){ 
-				You("catch a glimpse of somthing moving in the stinking cloud....");
+			if(check_stinking_cloud_region((xchar)tx,(xchar)ty) || check_solid_fog_region((xchar)tx,(xchar)ty)){ 
+				You("catch a glimpse of somthing moving in the%s cloud....", 
+					check_solid_fog_region((xchar)tx,(xchar)ty) ? " fog" : 
+					check_stinking_cloud_region((xchar)tx,(xchar)ty) ? " stinking" : ""
+				);
 				pline("But you can't see what it was.");
 				if(u.sealCounts < numSlots){
 					pline("Something jumps on you from behind!");
@@ -3633,7 +3669,7 @@ int tx,ty;
 				}
 			} else if(In_depths(&u.uz)){ 
 				if(u.sealCounts < numSlots){
-					pline("There is a %s sleeping in the center of the seal.",u.osegen);
+					pline("There is %s sleeping in the center of the seal.",an(u.osegen));
 					pline("You supose %s could be called comely,",u.osepro);
 					pline("though to be honest %s is about average among %s you have known.",u.osepro,makeplural(u.osegen));
 					if(!rn2(20)) pline("The %s's eyes open, and you have a long negotiation before achieving a good pact.", u.osegen);
@@ -4459,6 +4495,7 @@ bindspirit(seal_id)
 			if(u.sealTimeout[PAIMON-FIRST_SEAL] < moves){
 				u.sealsActive |= SEAL_PAIMON;
 				u.sealsUsed |= SEAL_PAIMON;
+				unrestrict_weapon_skill(P_WAND_POWER);
 				u.spirit[u.sealCounts] = SEAL_PAIMON;
 				set_spirit_powers(SEAL_PAIMON);
 				u.spiritT[u.sealCounts] = moves + bindingPeriod;
@@ -4740,6 +4777,13 @@ int p_skill;
 		else maxskill = P_UNSKILLED;
 	}
 	
+	if(p_skill == FFORM_NIMAN){
+		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			maxskill = min(P_EXPERT, P_SKILL(weapon_type(uwep)));
+		else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			maxskill = min(P_EXPERT, P_SKILL(weapon_type(uswapwep)));
+	}
+	
 	return maxskill;
 }
 
@@ -4772,6 +4816,16 @@ int p_skill;
 		if(OLD_P_SKILL(FFORM_SHIEN) >= P_EXPERT) curskill++;
 	}
 	
+	if(p_skill == FFORM_NIMAN && curskill < P_BASIC){
+		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+			curskill = P_BASIC;
+			OLD_P_SKILL(FFORM_NIMAN) = P_BASIC;
+		} else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC) {
+			curskill = P_BASIC;
+			OLD_P_SKILL(FFORM_NIMAN) = P_BASIC;
+		}
+	}
+	
 	if(u.sealsActive&SEAL_NABERIUS && (curskill<P_BASIC || maxskill<P_BASIC)){
 		return P_BASIC;
 	}
@@ -4783,6 +4837,12 @@ int
 P_RESTRICTED(p_skill)
 int p_skill;
 {
+	if(p_skill == FFORM_NIMAN){
+		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			return P_RESTRICTED(weapon_type(uwep));
+		else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			return P_RESTRICTED(weapon_type(uswapwep));
+	}
 	return (u.weapon_skills[p_skill].skill==P_ISRESTRICTED 
 		&& !(spiritSkill(p_skill) || u.specialSealsActive&SEAL_NUMINA) );
 }
@@ -4837,6 +4897,7 @@ int p_skill;
 	if(p_skill == P_CLERIC_SPELL) return u.sealsActive & SEAL_AMON? TRUE : FALSE;
 	if(p_skill == P_ESCAPE_SPELL) return u.sealsActive & SEAL_ANDREALPHUS? TRUE : FALSE;
 	if(p_skill == P_MATTER_SPELL) return u.sealsActive & SEAL_MARIONETTE? TRUE : FALSE;
+	if(p_skill == P_WAND_POWER) return u.sealsActive & SEAL_PAIMON? TRUE : FALSE;
 	if(p_skill == P_RIDING) return u.sealsActive & SEAL_BERITH? TRUE : FALSE;
 	if(p_skill == P_BARE_HANDED_COMBAT) return u.sealsActive & (SEAL_EURYNOME|SEAL_BUER)? TRUE : FALSE;
 	if(p_skill == P_BEAST_MASTERY) return u.sealsActive & SEAL_MALPHAS? TRUE : FALSE;

@@ -54,6 +54,17 @@ A("Excalibur",			LONG_SWORD,
 /*
  *	Stormbringer only has a 2 because it can drain a level,
  *	providing 8 more.
+ *
+ *  Stormbringer now has a 10% chance to get +8 damage,
+ *  and then convert all damage to level drain damage (dmg/4)
+ *  
+ *  Stormbringer now always counts as cursed against curse hating
+ *  targets
+ *  
+ *  Stormbringer now gives its wielder great strength and vitality
+ *	(25 Str and Con)
+ *
+ *	Stormbringer cuts through any substance (ie, it counts as shining)
  */
 
 A("Stormbringer",		RUNESWORD,
@@ -61,7 +72,7 @@ A("Stormbringer",		RUNESWORD,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	DRLI(5,2),	DRLI(0,0),	NO_CARY,	
 	0, A_CHAOTIC, NON_PM, NON_PM, 8000L, 
-	SPFX2_BLDTHRST,0,0),
+	SPFX2_SHINING|SPFX2_BLDTHRST,0,0),
 /*
  *	Two problems:  1) doesn't let trolls regenerate heads,
  *	2) doesn't give unusual message for 2-headed monsters (but
@@ -150,7 +161,7 @@ A("Dragonlance",			LANCE,
 A("Nodensfork",			TRIDENT,
 	(SPFX_RESTR|SPFX_CON_OR), SPFX_WARN,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_PRIMORDIAL|MA_ET /*MA*/, MV_TELEPATHIC|MV_RLYEHIAN /*MV*/,
-	PHYS(10,20),	NO_DFNS,	ELEC(0,0),				/* plus, reflection */
+	PHYS(10,20),	NO_DFNS,	ELEC(0,0),	
 	0, A_NONE, NON_PM, NON_PM, 5000L, 
 	SPFX2_SILVERED,0,0),
 
@@ -159,7 +170,7 @@ A("Gaia's Fate",			SICKLE,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 
 	MA_PLANT|MA_INSECTOID|MA_ARACHNID|MA_AVIAN|MA_REPTILIAN|MA_ANIMAL|MA_FEY|MA_ELF|MA_ELEMENTAL /*MA*/, 
 	0 /*MV*/,
-	PHYS(10,20),	NO_DFNS,	NO_CARY,				/* plus, reflection */
+	PHYS(10,20),	NO_DFNS,	NO_CARY,
 	0, A_NONE, NON_PM, NON_PM, 5000L, 
 	0,0,0),
 
@@ -289,7 +300,7 @@ A("Magicbane",			ATHAME, /*Needs encyc entry*/
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	STUN(3,4),	DFNS(AD_MAGM),	NO_CARY,	
 	0, A_NEUTRAL, PM_WIZARD, NON_PM, 3500L, 
-	SPFX2_SILVERED,0,0),
+	0,0,0),
 
 
 /*//////////Double Damage Artifacts//////////*/
@@ -829,6 +840,20 @@ A("The Necronomicon", SPE_SECRETS, /*from the works of HP Lovecraft*/
 	NECRONOMICON,	A_NONE, NON_PM, NON_PM, 5000L, 
 	0,SPFX3_NOCNT,0),
 
+A("Infinity's Mirrored Arc",	DOUBLE_LIGHTSABER,	
+	(SPFX_RESTR|SPFX_REFLECT), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	NO_ATTK,	NO_DFNS,	NO_CARY,
+	ALTMODE,	A_NEUTRAL, NON_PM, NON_PM, 3000L, 
+	0,0,0),
+
+A("The Staff of Twelve Mirrors",	KHAKKHARA,	
+	(SPFX_RESTR|SPFX_REFLECT|SPFX_DISPL), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	PHYS(5,6),	NO_DFNS,	NO_CARY,
+	0,	A_NEUTRAL, NON_PM, NON_PM, 3000L, 
+	0,0,0),
+
 A("The Hand-Mirror of Cthylla", MIRROR, /*from the works of HP Lovecraft*/
 	(SPFX_NOGEN|SPFX_RESTR), (SPFX_SEARCH|SPFX_TCTRL),
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/, /*Needs encyc entry*/
@@ -1268,7 +1293,7 @@ A("The Warhammer of Vandria", WAR_HAMMER, /*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(5,0),	NO_DFNS,	NO_CARY,
-	0, A_CHAOTIC, NON_PM, PM_ELF, 4000L, 
+	0, A_LAWFUL, NON_PM, PM_ELF, 4000L, 
 	0,0,0),
 
 A("The Shield of Saint Cuthbert", SHIELD_OF_REFLECTION, /*Needs encyc entry*/

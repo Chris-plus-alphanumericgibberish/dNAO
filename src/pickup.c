@@ -411,7 +411,7 @@ int what;		/* should be a long */
 		struct trap *ttmp = t_at(u.ux, u.uy);
 		/* no auto-pick if no-pick move, nothing there, or in a pool */
 		if (autopickup && (flags.nopick || !OBJ_AT(u.ux, u.uy) ||
-			(is_pool(u.ux, u.uy) && !Underwater) || is_lava(u.ux, u.uy))) {
+			(is_pool(u.ux, u.uy, FALSE) && !Underwater) || is_lava(u.ux, u.uy))) {
 			read_engr_at(u.ux, u.uy);
 			return (0);
 		}
@@ -1523,7 +1523,7 @@ boolean countem;
 	for(cobj = level.objects[x][y]; cobj; cobj = nobj) {
 		nobj = cobj->nexthere;
 		if(Is_container(cobj) || 
-			(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS) ||
+			(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC) ||
 			(cobj->otyp == MASS_SHADOW_PISTOL)
 		) {
 			container_count++;
@@ -1545,7 +1545,7 @@ int x, y;
 #endif
 			You("cannot reach the %s.", surface(x, y));
 		return FALSE;
-	} else if (is_pool(x, y) || is_lava(x, y)) {
+	} else if (is_pool(x, y, FALSE) || is_lava(x, y)) {
 		/* at present, can't loot in water even when Underwater */
 		You("cannot loot things that are deep in the %s.",
 		    is_lava(x, y) ? "lava" : "water");
@@ -1583,7 +1583,7 @@ boolean noit;
 {
     if (!cobj) return 0;
 
-	if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
+	if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC){
 		You("carefully open %s...",the(xname(cobj)));
 		return use_lightsaber(cobj);
 	} else if(cobj->otyp == MASS_SHADOW_PISTOL){
@@ -1630,8 +1630,8 @@ doloot()	/* loot a container on the floor or loot saddle from mon. */
 	/* "Can't do that while carrying so much stuff." */
 	return 0;
     }
-    if (nohands(youracedata)) {
-	You("have no hands!");	/* not `body_part(HAND)' */
+    if (nolimbs(youracedata)) {
+	You("have no limbs!");	/* not `body_part(HAND)' */
 	return 0;
     }
     cc.x = u.ux; cc.y = u.uy;
@@ -1643,7 +1643,7 @@ lootcont:
 		if (!able_to_loot(cc.x, cc.y)) return 0;
 
 		for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
-			if (Is_container(cobj) || cobj->otyp == MASS_SHADOW_PISTOL || (is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS)) num_cont++;
+			if (Is_container(cobj) || cobj->otyp == MASS_SHADOW_PISTOL || (is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC)) num_cont++;
 		}
 
 		if (num_cont > 1) {
@@ -1663,7 +1663,7 @@ lootcont:
 			for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
 			if (Is_container(cobj) || 
 				cobj->otyp == MASS_SHADOW_PISTOL ||
-				(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS)
+				(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC)
 			) {
 				any.a_obj = cobj;
 				add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, doname(cobj),
@@ -1719,7 +1719,7 @@ lootcont:
 					You("carefully open %s...", the(xname(cobj)));
 					timepassed |= use_container(cobj, 0);
 					if (multi < 0) return 1;		/* chest trap */
-			    } else if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS){
+			    } else if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC){
 					Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
 					c = ynq(qbuf);
 					if (c == 'q') return (timepassed);
@@ -1939,6 +1939,9 @@ dopetequip()
 		if (nolimbs(youracedata)) {
 		    You_cant("do that without limbs."); /* not body_part(HAND) */
 		    return (0);
+		}
+		if(!freehand()){
+			You("have no free %s to dress %s with!", body_part(HAND), mon_nam(mtmp));
 		}
 		if(otmp->oclass == AMULET_CLASS){
 			flag = W_AMUL;

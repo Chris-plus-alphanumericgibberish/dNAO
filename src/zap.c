@@ -41,6 +41,8 @@ STATIC_DCL int FDECL(spell_hit_bonus, (int));
 /* WAC -- ZT_foo #defines moved to spell.h, since explode uses these types */
 
 #define is_hero_spell(type)	((type) >= 10 && (type) < 20)
+#define wand_damage_die(skill)	(((skill) > 1) ? (2*(skill) + 4) : 6)
+#define wandlevel(otyp)	(otyp == WAN_MAGIC_MISSILE ? 1 : otyp == WAN_SLEEP ? 1 : otyp == WAN_STRIKING ? 2 : otyp == WAN_FIRE ? 4 : otyp == WAN_COLD ? 4 : otyp == WAN_LIGHTNING ? 5 : otyp == WAN_DEATH ? 7 : 1)
 
 #ifndef OVLB
 STATIC_VAR const char are_blinded_by_the_flash[];
@@ -127,6 +129,7 @@ struct obj *otmp;
 
 	switch(otyp) {
 	case WAN_STRIKING:
+		use_skill(P_WAND_POWER, wandlevel(otyp));
 		zap_type_text = "wand";
 		/* fall through */
 	case SPE_FORCE_BOLT:
@@ -135,11 +138,12 @@ struct obj *otmp;
 			shieldeff(mtmp->mx, mtmp->my);
 			break;	/* skip makeknown */
 		} else if (u.uswallow || otyp == WAN_STRIKING || rnd(20) < 10 + find_mac(mtmp)) {
-			dmg = d(2,12);
+			if(otyp == WAN_STRIKING) dmg = d(wand_damage_die(P_SKILL(P_WAND_POWER))-4,12);
+			else dmg = d(wand_damage_die(P_SKILL(P_ATTACK_SPELL))-4,12);
 			if (!flags.mon_moving && otyp == SPE_FORCE_BOLT && (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM))
 				dmg += d((u.ulevel+1)/2, 12);
 			if(dbldam) dmg *= 2;
-			if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS) dmg *= 1.5;
+			if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
 			if (otyp == SPE_FORCE_BOLT)
 			    dmg += spell_damage_bonus();
 			
@@ -174,9 +178,10 @@ struct obj *otmp;
 		if (is_undead_mon(mtmp)) {
 			reveal_invis = TRUE;
 			wake = TRUE;
-			dmg = rnd(8);
+			if(otyp == WAN_UNDEAD_TURNING) dmg = d(wand_damage_die(P_SKILL(P_WAND_POWER)),8);
+			else dmg = rnd(8);
 			if(dbldam) dmg *= 2;
-			if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS) dmg *= 1.5;
+			if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
 			if (otyp == SPE_TURN_UNDEAD)
 				dmg += spell_damage_bonus();
 			flags.bypasses = TRUE;	/* for make_corpse() */
@@ -334,9 +339,10 @@ struct obj *otmp;
 	case SPE_DRAIN_LIFE:
 	case WAN_DRAINING:	/* KMH */
 		reveal_invis = TRUE;
-		dmg = rnd(8);
+		if(otyp == WAN_DRAINING) d((wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2,8);
+		else dmg = rnd(8);
 		if(dbldam) dmg *= 2;
-		if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS) dmg *= 1.5;
+		if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
 		if (otyp == SPE_DRAIN_LIFE)
 			dmg += spell_damage_bonus();
 		if (resists_drli(mtmp)){
@@ -346,12 +352,13 @@ struct obj *otmp;
 				mtmp->mhp > 0) {
 		    mtmp->mhp -= dmg;
 		    mtmp->mhpmax -= dmg;
-		    if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < 1)
-			xkilled(mtmp, 1);
+		    if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < ((otyp == WAN_DRAINING) ? ((wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2) : 1))
+				xkilled(mtmp, 1);
 		    else {
-			mtmp->m_lev--;
-			if (canseemon(mtmp))
-			    pline("%s suddenly seems weaker!", Monnam(mtmp));
+				if(otyp == WAN_DRAINING)  mtmp->m_lev -= (wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2;
+				else mtmp->m_lev--;
+				if (canseemon(mtmp))
+					pline("%s suddenly seems weaker!", Monnam(mtmp));
 		    }
 		} else if(cansee(mtmp->mx,mtmp->my)) shieldeff(mtmp->mx, mtmp->my);
 		makeknown(otyp);
@@ -952,6 +959,7 @@ register struct obj *obj;
 	    switch (obj->oclass) {
 	      case SCROLL_CLASS:
 		costly_cancel(obj);
+		if (obj->otyp == SCR_GOLD_SCROLL_OF_LAW) break;	//no cancelling these
 		obj->otyp = SCR_BLANK_PAPER;
 		obj->spe = 0;
 		obj->ovar1 = 0;
@@ -1480,6 +1488,15 @@ poly_obj(obj, id)
 				(can_merge && otmp->quan > (long)rn2(1000))))
 	    otmp->quan = 1L;
 
+	if (id == STRANGE_OBJECT && obj->otyp == SCR_GOLD_SCROLL_OF_LAW)
+	{
+		/* turn gold scrolls of law into a handful of gold pieces */
+		otmp->otyp = GOLD_PIECE;
+		otmp->oclass = COIN_CLASS;
+		otmp->obj_material = GOLD;
+		otmp->quan = rnd(50 * obj->quan) + 50 * obj->quan;
+	}
+	
 	switch (otmp->oclass) {
 
 	case TOOL_CLASS:
@@ -1666,6 +1683,35 @@ struct obj *obj, *otmp;
 		    res = 0;
 	} else
 	switch(otmp->otyp) {
+	case WAN_LIGHT:
+	case SCR_LIGHT:
+	case SPE_LIGHT:
+		if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
+			obj->otyp == BRASS_LANTERN || obj->otyp == POT_OIL ||
+			obj->otyp == DWARVISH_HELM || obj->otyp == GNOMISH_POINTY_HAT ||
+			obj->otyp == TALLOW_CANDLE || obj->otyp == WAX_CANDLE) &&
+			!((!Is_candle(obj) && obj->age == 0) || (obj->otyp == MAGIC_LAMP && obj->spe == 0))
+			&& (!obj->cursed || rn2(2))
+			&& !obj->lamplit) {
+
+			// Assumes the player is the only cause of this effect for purposes of shk billing
+
+			if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
+				obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_HELM) {
+				check_unpaid(obj);
+			}
+			else {
+				if (obj->unpaid && costly_spot(obj->ox, obj->oy) &&
+					obj->age == 20L * (long)objects[obj->otyp].oc_cost) {
+					const char *ithem = obj->quan > 1L ? "them" : "it";
+					verbalize("You burn %s, you bought %s!", ithem, ithem);
+					bill_dummy_object(obj);
+				}
+			}
+			begin_burn(obj, FALSE);
+		}
+		res = 0;
+		break;
 	case WAN_POLYMORPH:
 	case SPE_POLYMORPH:
 		if (obj->otyp == WAN_POLYMORPH ||
@@ -2656,10 +2702,12 @@ struct obj *obj;	/* wand or spell */
 		*/
 		e = engr_at(u.ux, u.uy);
 		if (!(e && e->engr_type == ENGRAVE)) {
-		    if (is_pool(u.ux, u.uy) || is_ice(u.ux, u.uy))
+		    if (is_pool(u.ux, u.uy, FALSE) || is_ice(u.ux, u.uy))
 			pline1(nothing_happens);
-		    else
-			pline("Blood %ss %s your %s.",
+		    else if (IS_PUDDLE(levl[u.ux][u.uy].typ))
+			    pline("The water at your %s turns slightly %s.",
+				makeplural(body_part(FOOT)), hcolor(NH_RED));
+			else pline("Blood %ss %s your %s.",
 			      is_lava(u.ux, u.uy) ? "boil" : "pool",
 			      Levitation ? "beneath" : "at",
 			      makeplural(body_part(FOOT)));
@@ -2782,11 +2830,12 @@ register struct	obj	*obj;
 		buzz(otyp - SPE_MAGIC_MISSILE + 10,
 		     u.ulevel / 2 + 1,
 		     u.ux, u.uy, u.dx, u.dy,0,0);
-	    } else if (otyp >= WAN_MAGIC_MISSILE && otyp <= WAN_LIGHTNING)
+	    } else if (otyp >= WAN_MAGIC_MISSILE && otyp <= WAN_LIGHTNING){
+		use_skill(P_WAND_POWER, wandlevel(otyp));
 		buzz(otyp - WAN_MAGIC_MISSILE,
-		     (otyp == WAN_MAGIC_MISSILE) ? 2 : 6,
+		     wand_damage_die(P_SKILL(P_WAND_POWER))/((otyp == WAN_MAGIC_MISSILE) ? 2 : 1),
 		     u.ux, u.uy, u.dx, u.dy,0,0);
-	    else
+	    } else
 		impossible("weffects: unexpected spell or wand");
 	    disclose = TRUE;
 	}
@@ -3110,7 +3159,7 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 		delay_output();
 		/* kicked objects fall in pools */
 		if((weapon == KICKED_WEAPON) &&
-		   (is_pool(bhitpos.x, bhitpos.y) ||
+		   (is_pool(bhitpos.x, bhitpos.y, TRUE) ||
 		   is_lava(bhitpos.x, bhitpos.y)))
 		    break;
 #ifdef SINKS
@@ -3436,8 +3485,11 @@ death_blast:
 		break;
 	}
 	if (sho_shieldeff) shieldeff(mon->mx, mon->my);
-	if (is_hero_spell(type) && ((Role_if(PM_KNIGHT) && u.uhave.questart) || Spellboost))
-	    tmp *= 2;
+	if (is_hero_spell(type) && (
+		(Role_if(PM_KNIGHT) && u.uhave.questart) || 
+		(uwep && uwep->oartifact == ART_STAFF_OF_TWELVE_MIRRORS) || 
+		Spellboost)
+	) tmp *= 2;
 	if (tmp > 0 && type >= 0 &&
 		resist(mon, type < ZT_SPELL(0) ? WAND_CLASS : '\0', 0, NOTELL))
 	    tmp /= 2;
@@ -3800,7 +3852,8 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 				shienuse = TRUE;
 			break;
 		}
-	}
+	} else if(uwep && uwep->oartifact == ART_STAFF_OF_TWELVE_MIRRORS)
+			shienuse = TRUE;
     /* if its a Hero Spell then get its SPE_TYPE */
     spell_type = is_hero_spell(type) ? SPE_MAGIC_MISSILE + abstype : 0;
 
@@ -3822,7 +3875,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
     }
     if(type < 0) newsym(u.ux,u.uy);
     if(!range) range = rn1(7,7);
-	if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS){
+	if(!flags.mon_moving && Double_spell_size){
 		range *= 2;
 		flat *= 1.5;
 		nd *= 1.5;
@@ -3860,7 +3913,9 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 			range += zap_over_floor(sx, sy, type, &shopdamage);
 
 		if (mon) {
-			if (type == ZT_SPELL(ZT_FIRE) || type == ZT_SPELL(ZT_ACID)) break;
+			if (type == ZT_SPELL(ZT_FIRE) || 
+				type == ZT_SPELL(ZT_ACID)
+			) break;
 			if (type >= 0) mon->mstrategy &= ~STRAT_WAITMASK;
 #ifdef STEED
 			buzzmonst:
@@ -3986,6 +4041,8 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 						if (mon_could_move && !mon->mcanmove)	/* ZT_SLEEP */
 							slept_monst(mon);
 					}
+					if(type == ZT_SPELL(ZT_MAGIC_MISSILE))
+							break; //mm is single target
 				}
 				range -= 2;
 			} else {
@@ -4012,6 +4069,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 							 (u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 							)
 						) ||
+						(uwep && uwep->oartifact == ART_STAFF_OF_TWELVE_MIRRORS) ||
 						(uarm && (uarm->otyp == SILVER_DRAGON_SCALE_MAIL || uarm->otyp == SILVER_DRAGON_SCALES || uarm->otyp == JUMPSUIT)) ||
 						(uarms && (uarms->otyp == SILVER_DRAGON_SCALE_SHIELD)) ||
 						(uwep && uwep->oartifact == ART_DRAGONLANCE)
@@ -4162,7 +4220,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 	////////////////////////////////////////////////////////////////////////////////////////
 	if(redrawneeded) doredraw();
     tmp_at(DISP_END,0);
-	if(!flags.mon_moving && u.sealsActive&SEAL_NABERIUS){
+	if(!flags.mon_moving && Double_spell_size){
 		if (type == ZT_SPELL(ZT_FIRE))
 			explode2(sx, sy, type, flat ? flat : d(18,6), 0, EXPL_FIERY);
 		else if (type == ZT_SPELL(ZT_ACID))
@@ -4194,25 +4252,28 @@ xchar x, y;
 	else {	/* lev->typ == ICE */
 #ifdef STUPID
 	    if (lev->icedpool == ICED_POOL) lev->typ = POOL;
+	    if (lev->icedpool == ICED_PUDDLE) lev->typ = PUDDLE;
 	    else lev->typ = MOAT;
 #else
-	    lev->typ = (lev->icedpool == ICED_POOL ? POOL : MOAT);
+	    lev->typ = (lev->icedpool == ICED_POOL ? POOL :
+			lev->icedpool == ICED_PUDDLE ? PUDDLE : MOAT);
 #endif
 	    lev->icedpool = 0;
 	}
 	obj_ice_effects(x, y, FALSE);
-	unearth_objs(x, y);
+	if (lev->typ != PUDDLE)
+		unearth_objs(x, y);
 	if (Underwater) vision_recalc(1);
 	newsym(x,y);
 	if (cansee(x,y)) Norep("The ice crackles and melts.");
-	if ((otmp = boulder_at(x, y)) != 0) {
+	if (lev->typ != PUDDLE && (otmp = boulder_at(x, y)) != 0) {
 	    if (cansee(x,y)) pline("%s settles...", An(xname(otmp)));
 	    do {
 		obj_extract_self(otmp);	/* boulder isn't being pushed */
 		if (!boulder_hits_pool(otmp, x, y, FALSE))
 		    impossible("melt_ice: no pool?");
 		/* try again if there's another boulder and pool didn't fill */
-	    } while (is_pool(x,y) && (otmp = boulder_at(x, y)) != 0);
+	    } while (is_pool(x,y, FALSE) && (otmp = boulder_at(x, y)) != 0);
 	    newsym(x,y);
 	}
 	if (x == u.ux && y == u.uy)
@@ -4246,9 +4307,9 @@ boolean *shopdamage;
 	    }
 	    if(is_ice(x, y)) {
 		melt_ice(x, y);
-	    } else if(is_pool(x,y)) {
+	    } else if(is_pool(x,y, TRUE)) {
 		const char *msgtxt = "You hear hissing gas.";
-		if(lev->typ != POOL) {	/* MOAT or DRAWBRIDGE_UP */
+		if(lev->typ != POOL || IS_PUDDLE(lev->typ)) {	/* MOAT or DRAWBRIDGE_UP */
 		    if (cansee(x,y)) msgtxt = "Some water evaporates.";
 		} else {
 		    register struct trap *ttmp;
@@ -4266,12 +4327,18 @@ boolean *shopdamage;
 			pline("Steam billows from the fountain.");
 		    rangemod -= 1;
 		    dryup(x, y, type > 0);
+	    } else if (IS_PUDDLE(lev->typ)) {
+		    rangemod -= 3;
+		    lev->typ = ROOM;
+		    if (cansee(x,y)) pline("The water evaporates.");
+		    else You_hear("hissing gas.");
 	    }
 	}
-	else if(abstype == ZT_COLD && (is_pool(x,y) || is_lava(x,y))) {
+	else if(abstype == ZT_COLD && (is_pool(x,y, TRUE) || is_lava(x,y))) {
 		boolean lava = is_lava(x,y);
 		boolean moat = (!lava && (lev->typ != POOL) &&
 				(lev->typ != WATER) &&
+				(lev->typ != PUDDLE) &&
 				!Is_medusa_level(&u.uz) &&
 				!Is_waterlevel(&u.uz));
 
@@ -4290,10 +4357,12 @@ boolean *shopdamage;
 		    } else {
 			if (!lava)
 			    lev->icedpool =
-				    (lev->typ == POOL ? ICED_POOL : ICED_MOAT);
+				    (lev->typ == POOL ? ICED_POOL :
+				     lev->typ == PUDDLE ? ICED_PUDDLE : ICED_MOAT);
 			lev->typ = (lava ? ROOM : ICE);
 		    }
-		    bury_objs(x,y);
+		    if (lev->icedpool != ICED_PUDDLE)
+				bury_objs(x,y);
 		    if(cansee(x,y)) {
 			if(moat)
 				Norep("The moat is bridged with ice!");

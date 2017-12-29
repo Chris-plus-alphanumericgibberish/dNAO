@@ -68,7 +68,7 @@ boolean burn;
 			    (obj && obj->quan > 1L) ? name : an(name);
 	is_acid = (obj && obj->otyp == ACID_VENOM);
 
-	if(uwep && is_lightsaber(uwep) && uwep->lamplit && P_SKILL(weapon_type(uwep)) >= P_BASIC){
+	if(uwep && is_lightsaber(uwep) && litsaber(uwep) && P_SKILL(weapon_type(uwep)) >= P_BASIC){
 		if(P_SKILL(FFORM_SHII_CHO) >= P_BASIC){
 			if(u.fightingForm == FFORM_SHII_CHO || 
 				(u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm)))
@@ -103,19 +103,19 @@ boolean burn;
 		}
 
 		if (obj && (obj->obj_material == SILVER || arti_silvered(obj)) &&
-				!(is_lightsaber(obj) && obj->lamplit) &&
+				!(is_lightsaber(obj) && litsaber(obj)) &&
 				!(u.sealsActive&SEAL_EDEN)
 				&& hates_silver(youracedata)) {
 			pline_The("silver sears your flesh!");
 			exercise(A_CON, FALSE);
 		}
 		if (obj && (obj->obj_material == IRON) &&
-				!(is_lightsaber(obj) && obj->lamplit)
+				!(is_lightsaber(obj) && litsaber(obj))
 				&& hates_iron(youracedata)) {
 			pline_The("cold-iron sears your flesh!");
 			exercise(A_CON, FALSE);
 		}
-		if (obj && (obj->obj_material == SILVER || arti_silvered(obj))
+		if (obj && is_unholy(obj)
 				&& hates_unholy(youracedata)) {
 			pline_The("curse sears your flesh!");
 			exercise(A_CON, FALSE);
@@ -384,7 +384,7 @@ boolean verbose;  /* give message(s) even when you can't see what happened */
 			}
 	    }
 	    if ( (otmp->obj_material == SILVER || arti_silvered(otmp)) &&
-			!(is_lightsaber(otmp) && otmp->lamplit) &&
+			!(is_lightsaber(otmp) && litsaber(otmp)) &&
 		    hates_silver(mtmp->data)
 		) {
 			if (vis) pline_The("silver sears %s flesh!",
@@ -392,14 +392,14 @@ boolean verbose;  /* give message(s) even when you can't see what happened */
 			else if (verbose) pline("Its flesh is seared!");
 	    }
 	    if ( (otmp->obj_material == IRON) &&
-			!(is_lightsaber(otmp) && otmp->lamplit) &&
+			!(is_lightsaber(otmp) && litsaber(otmp)) &&
 		    hates_iron(mtmp->data)
 		) {
 			if (vis) pline_The("cold-iron sears %s flesh!",
 					s_suffix(mon_nam(mtmp)));
 			else if (verbose) pline("Its flesh is seared!");
 	    }
-	    if ( (otmp->cursed) &&
+	    if ( is_unholy(otmp) &&
 		    hates_unholy(mtmp->data)
 		) {
 			if (vis) pline_The("curse sears %s flesh!",
@@ -668,7 +668,7 @@ m_throw(mon, x, y, dx, dy, range, obj, verbose)
 			case BLINDING_VENOM:
 				if(
 				  !(singleobj->otyp == LASER_BEAM || singleobj->otyp == BLASTER_BOLT || singleobj->otyp == HEAVY_BLASTER_BOLT || singleobj->oartifact) && 
-					uwep && is_lightsaber(uwep) && uwep->lamplit && 
+					uwep && is_lightsaber(uwep) && litsaber(uwep) && 
 						((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) || 
 						 (u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 						)
@@ -728,7 +728,7 @@ m_throw(mon, x, y, dx, dy, range, obj, verbose)
 					//This is definitly a temporary setup.
 				if(
 				  !(singleobj->otyp == LASER_BEAM || singleobj->otyp == BLASTER_BOLT || singleobj->otyp == HEAVY_BLASTER_BOLT || singleobj->oartifact) && 
-					uwep && is_lightsaber(uwep) && uwep->lamplit && 
+					uwep && is_lightsaber(uwep) && litsaber(uwep) && 
 						((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) || 
 						 (u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 						)
@@ -766,7 +766,7 @@ m_throw(mon, x, y, dx, dy, range, obj, verbose)
 			if(hitu < 0){
 				boolean shienuse = FALSE;
 				if(
-					uwep && is_lightsaber(uwep) && uwep->lamplit && u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))
+					uwep && is_lightsaber(uwep) && litsaber(uwep) && u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))
 				){
 					switch(min(P_SKILL(u.fightingForm), P_SKILL(weapon_type(uwep)))){
 						case P_BASIC:
@@ -785,7 +785,7 @@ m_throw(mon, x, y, dx, dy, range, obj, verbose)
 					}
 				}
 
-				if(uwep && is_lightsaber(uwep) && uwep->lamplit && shienuse && getdir((char *)0) && (u.dx || u.dy)){
+				if(uwep && is_lightsaber(uwep) && litsaber(uwep) && shienuse && getdir((char *)0) && (u.dx || u.dy)){
 					dx = u.dx;
 					dy = u.dy;
 				} else {
@@ -1218,17 +1218,17 @@ struct monst *mtmp;
                      gy = STRAT_GOALY(mtmp->mstrategy);
         mtmp2 = m_at(gx, gy);
 	if (mtmp2 && (
-			   (attacktype(mtmp->data, AT_BREA) && mlined_up(mtmp, mtmp2, FALSE))
+			   (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan && mlined_up(mtmp, mtmp2, FALSE))
 			|| (attacktype(mtmp->data, AT_SPIT) && mlined_up(mtmp, mtmp2, FALSE))
 			|| (attacktype(mtmp->data, AT_TNKR) && mlined_up(mtmp, mtmp2, FALSE))
 			|| (attacktype(mtmp->data, AT_ARRW) && mlined_up(mtmp, mtmp2, FALSE))
-			|| (attacktype(mtmp->data, AT_MAGC) && (
+			|| (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan && (
 			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp <= AD_SPC2) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_RBRE) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_OONA) )
 				&& mlined_up(mtmp, mtmp2, FALSE)
 			  )
-			|| (attacktype(mtmp->data, AT_MMGC) && (
+			|| (attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan && (
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp <= AD_SPC2) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_RBRE) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_OONA) )
@@ -1237,11 +1237,11 @@ struct monst *mtmp;
 			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 6)
-			|| (attacktype(mtmp->data, AT_GAZE) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
 			|| (attacktype_fordmg(mtmp->data, AT_WEAP, AD_PHYS) && mrwep && (
 				(!is_pole(mrwep) && mlined_up(mtmp, mtmp2, FALSE)) ||
 				( is_pole(mrwep) && mlined_up(mtmp, mtmp2, FALSE) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 2 && (mtmp2->mx == mtmp->mx || mtmp2->my == mtmp->my))
@@ -1259,17 +1259,17 @@ struct monst *mtmp;
 #endif
     	if (!mtmp->mpeaceful && !conflicted &&
 			((mtmp->mstrategy & STRAT_STRATMASK) == STRAT_NONE) && (
-			   (attacktype(mtmp->data, AT_BREA) && lined_up(mtmp))
+			   (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_SPIT) && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_TNKR) && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_ARRW) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_MAGC) && (
+			|| (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan && (
 			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp <= AD_SPC2) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_RBRE) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_OONA) )
 				&& lined_up(mtmp)
 			  )
-			|| (attacktype(mtmp->data, AT_MMGC) && (
+			|| (attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan && (
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp <= AD_SPC2) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_RBRE) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_OONA) )
@@ -1278,11 +1278,11 @@ struct monst *mtmp;
 			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 6)
-			|| (attacktype(mtmp->data, AT_GAZE) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
 			|| (attacktype_fordmg(mtmp->data, AT_WEAP, AD_PHYS) && mrwep && (
 				(!is_pole(mrwep) && lined_up(mtmp)) ||
 				( is_pole(mrwep) && lined_up(mtmp) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2 && (mtmp->mux == mtmp->mx || mtmp->muy == mtmp->my))
@@ -1311,17 +1311,17 @@ struct monst *mtmp;
 		origdir = -1;
 
     	if (!mtmp->mpeaceful && !conflicted && (
-			   (attacktype(mtmp->data, AT_BREA) && lined_up(mtmp))
+			   (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_SPIT) && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_TNKR) && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_ARRW) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_MAGC) && (
+			|| (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan && (
 			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp <= AD_SPC2) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_RBRE) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_OONA) )
 				&& lined_up(mtmp)
 			  )
-			|| (attacktype(mtmp->data, AT_MMGC) && (
+			|| (attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan && (
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp <= AD_SPC2) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_RBRE) ||
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_OONA) )
@@ -1330,12 +1330,12 @@ struct monst *mtmp;
 			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 6)
-			|| (attacktype(mtmp->data, AT_GAZE) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_WEAP, AD_PHYS) && mrwep && (
+			|| (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_WEAP, AD_PHYS) && !mtmp->mcan && mrwep && (
 				(!is_pole(mrwep) && lined_up(mtmp)) ||
 				( is_pole(mrwep) && lined_up(mtmp) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2 && (mtmp->mux == mtmp->mx || mtmp->muy == mtmp->my))
 			   ))
@@ -1423,11 +1423,11 @@ struct monst *mtmp;
 			   (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 6)
-			|| (attacktype(mtmp->data, AT_GAZE) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
+			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
 		)) {
 			if (((!mret) ||
 				(monstr[monsndx(mtmp2->data)] >

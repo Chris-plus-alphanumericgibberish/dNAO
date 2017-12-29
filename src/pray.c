@@ -377,9 +377,13 @@ register int trouble;
 		    }
 		    goto decurse;
 	    case TROUBLE_UNUSEABLE_HANDS:
-		    if (welded(uwep)) {
-			otmp = uwep;
-			goto decurse;
+			if(uarm && uarm->otyp == STRAITJACKET && uarm->cursed){
+				otmp = uarm;
+				goto decurse;
+			}
+		    else if (welded(uwep)) {
+				otmp = uwep;
+				goto decurse;
 		    }
 		    if (Upolyd && nohands(youracedata)) {
 			if (!Unchanging) {
@@ -2188,7 +2192,7 @@ dosacrifice()
 					pline("%s accepts your gift, and regains complete control over his creation.", a_gname());
 					pline("In that instant, you loose all your powers as %s shuts the Gate.", a_gname());
 					pline("Fortunately, %s permits you to live...", a_gname());
-					pline("Occasionally, you may even be able to remeber that you have forgoten something.");
+					pline("Occasionally, you may even be able to remember that you have forgoten something.");
 					pline("A cloud of %s smoke surrounds you...",
 						hcolor((const char *)"orange"));
 					done(ESCAPED);

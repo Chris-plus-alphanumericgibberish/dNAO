@@ -331,6 +331,10 @@ mattackm(magr, mdef)
 	otmp = (struct obj *)0;
 	attk = 1;
 	
+	if (magr->data == &mons[PM_GRUE] && (i >= 2) && !((!levl[magr->mx][magr->my].lit && !(viz_array[magr->my][magr->mx] & TEMP_LIT1 && !(viz_array[magr->my][magr->mx] & TEMP_DRK1)))
+		|| (levl[magr->mx][magr->my].lit && (viz_array[magr->my][magr->mx] & TEMP_DRK1 && !(viz_array[magr->my][magr->mx] & TEMP_LIT1)))))
+		continue;
+	    
 	if(magr->mfaction == ZOMBIFIED || magr->mfaction == SKELIFIED || magr->mfaction == CRYSTALFIED){
 		if(mattk->aatyp == AT_SPIT 
 			|| mattk->aatyp == AT_BREA 
@@ -1308,7 +1312,7 @@ physical:{
 				/* houchou not thrown */
 				(otmp->oartifact == ART_HOUCHOU) ||
 			    /* lightsaber that isn't lit ;) */
-			    (is_lightsaber(otmp) && !otmp->lamplit) ||
+			    (is_lightsaber(otmp) && !litsaber(otmp)) ||
 			    /* WAC -- or using a pole at short range... */
 			    (is_pole(otmp) &&
 					otmp->otyp != AKLYS && 
@@ -1322,10 +1326,10 @@ physical:{
 			    /* then do only 1-2 points of damage */
 			    if (mdef->data->mlet == S_SHADE && !(
 					((otmp->obj_material != SILVER || arti_silvered(otmp)) && hates_silver(pd) &&
-						!(is_lightsaber(otmp) && otmp->lamplit)) ||
+						!(is_lightsaber(otmp) && litsaber(otmp))) ||
 					(otmp->obj_material != IRON && hates_iron(pd) &&
-						!(is_lightsaber(otmp) && otmp->lamplit)) ||
-					(otmp->cursed && hates_unholy(pd))
+						!(is_lightsaber(otmp) && litsaber(otmp))) ||
+					(is_unholy(otmp) && hates_unholy(pd))
 				)) tmp = 0;
 				else if(otmp->oartifact == ART_LIECLEAVER)
 					tmp = 2*(rnd(12) + rnd(10) + otmp->spe);
@@ -1334,34 +1338,34 @@ physical:{
 				else tmp = rnd(2);
 				
 				if(otmp && (otmp->obj_material == SILVER || arti_silvered(otmp)) && hates_silver(pd) &&
-					!(is_lightsaber(otmp) && otmp->lamplit)
+					!(is_lightsaber(otmp) && litsaber(otmp))
 				)
 					tmp += rnd(20);
 				if(otmp && (otmp->obj_material == IRON) && hates_iron(pd) &&
-					!(is_lightsaber(otmp) && otmp->lamplit)
+					!(is_lightsaber(otmp) && litsaber(otmp))
 				)
 					tmp += rnd(mdef->m_lev);
-				if(otmp && (otmp->cursed) && hates_unholy(pd))
+				if(otmp && is_unholy(otmp) && hates_unholy(pd))
 					tmp += rnd(9);
 			} else {
 				tmp += dmgval(otmp, mdef, 0);
-				if(otmp && ((is_lightsaber(otmp) && otmp->lamplit) || arti_shining(otmp))) phasearmor = TRUE;
+				if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))) phasearmor = TRUE;
 			}
 			
 			if(resist_attacks(mdef->data))
 				tmp = 0;
             /* WAC Weres get seared */
             if(otmp && (otmp->obj_material == SILVER || arti_silvered(otmp)) && hates_silver(pd) &&
-				!(is_lightsaber(otmp) && otmp->lamplit)
+				!(is_lightsaber(otmp) && litsaber(otmp))
 			) {
             	if (vis) pline("The silver sears %s!", mon_nam(mdef));
             }
             if(otmp && (otmp->obj_material == IRON) && hates_iron(pd) &&
-				!(is_lightsaber(otmp) && otmp->lamplit)
+				!(is_lightsaber(otmp) && litsaber(otmp))
 			) {
             	if (vis) pline("The cold-iron sears %s!", mon_nam(mdef));
             }
-            if(otmp && (otmp->cursed) && hates_unholy(pd)) {
+            if(otmp && is_unholy(otmp) && hates_unholy(pd)) {
             	if (vis) pline("The curse sears %s!", mon_nam(mdef));
             }
 			if(oarm && tmp && oarm->otyp == GAUNTLETS_OF_POWER){
@@ -2384,6 +2388,10 @@ struct attack *mattk;
 	else
 	    tmp = 0;
 
+	if (mdef->data == &mons[PM_GRUE] && !((!levl[mdef->mx][mdef->my].lit && !(viz_array[mdef->my][mdef->mx] & TEMP_LIT1 && !(viz_array[mdef->my][mdef->mx] & TEMP_DRK1)))
+		|| (levl[mdef->mx][mdef->my].lit && (viz_array[mdef->my][mdef->mx] & TEMP_DRK1 && !(viz_array[mdef->my][mdef->mx] & TEMP_LIT1)))))
+		return (mdead | mhit);
+	
 	/* These affect the enemy even if defender killed */
 	switch(mddat->mattk[i].adtyp) {
 		case AD_BARB:

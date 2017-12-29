@@ -47,6 +47,7 @@ STATIC_DCL const char *FDECL(spelltypemnemonic, (int));
 STATIC_DCL int FDECL(spellhunger, (int));
 STATIC_DCL int FDECL(isqrt, (int));
 STATIC_DCL void FDECL(run_maintained_spell, (int));
+STATIC_DCL void NDECL(update_alternate_spells);
 
 long FDECL(doreadstudy, (const char *));
 
@@ -270,9 +271,10 @@ struct obj *book2;
 	    return;
 	}
 
-	if(!(u.uhave.bell || (uwep && uwep->oartifact == ART_SILVER_KEY) || (u.voidChime && (u.sealsActive&SEAL_OTIAX || Role_if(PM_ANACHRONONAUT)))) || !u.uhave.menorah) {
+	if(!(u.uhave.bell || (uwep && uwep->oartifact == ART_SILVER_KEY) || (u.voidChime && (u.sealsActive&SEAL_OTIAX)) || (moves - u.rangBell < 5)) || !u.uhave.menorah) {
 	    pline("A chill runs down your %s.", body_part(SPINE));
-	    if(!u.uhave.bell) You_hear("a faint chime...");
+	    if(!(u.uhave.bell || (uwep && uwep->oartifact == ART_SILVER_KEY) || (u.voidChime && (u.sealsActive&SEAL_OTIAX)) || (moves - u.rangBell < 5))) 
+				You_hear("a faint chime...");
 	    if(!u.uhave.menorah) pline("Vlad's doppelganger is amused.");
 	    return;
 	}
@@ -283,14 +285,17 @@ struct obj *book2;
 		if(!otmp->cursed) arti1_primed = TRUE;
 		else arti_cursed = TRUE;
 	    }
-	    if(!Role_if(PM_EXILE) && otmp->otyp == BELL_OF_OPENING &&
+	    if(otmp->otyp == BELL_OF_OPENING &&
 	       (moves - otmp->age) < 5L
 		) { /* you rang it recently */
 			if(!otmp->cursed) arti2_primed = TRUE;
 			else arti_cursed = TRUE;
 	    }
 	}
-	if(u.voidChime && (u.sealsActive&SEAL_OTIAX || Role_if(PM_ANACHRONONAUT))){
+	if(u.voidChime && u.sealsActive&SEAL_OTIAX){
+		arti2_primed = TRUE;
+	}
+	if(moves - u.rangBell < 5L){
 		arti2_primed = TRUE;
 	}
 	if(!arti2_primed && !arti_cursed && uwep && uwep->oartifact == ART_SILVER_KEY){
@@ -1151,12 +1156,30 @@ int
 docast()
 {
 	int spell_no;
-	
-	if(uarmh && uarmh->oartifact == ART_STORMHELM){
-		int i;
+	if (getspell(&spell_no))
+					return spelleffects(spell_no, FALSE, 0);
+	return 0;
+}
+
+/* allow the player to conditionally cast advanced spells like fire storm */
+void
+update_alternate_spells()
+{
+	int i, j, k;
+	int basespell[] = { SPE_LIGHTNING_BOLT,
+						SPE_CONE_OF_COLD,
+						SPE_FIREBALL,
+						SPE_ACID_BLAST };
+	int altspell[] = {  SPE_LIGHTNING_STORM,
+						SPE_FROST_STORM,
+						SPE_FIRE_STORM,
+						SPE_ACID_STORM };
+
+	// for artifacts
+	if (uarmh && uarmh->oartifact == ART_STORMHELM){
 		for (i = 0; i < MAXSPELL; i++) {
 			if (spellid(i) == SPE_LIGHTNING_BOLT) {
-				if(spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
 				break;
 			}
 			if (spellid(i) == NO_SPELL)  {
@@ -1167,11 +1190,10 @@ docast()
 			}
 		}
 	}
-	if(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM){
-		int i;
+	if (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM){
 		for (i = 0; i < MAXSPELL; i++) {
 			if (spellid(i) == SPE_MAGIC_MISSILE) {
-				if(spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
 				break;
 			}
 			if (spellid(i) == NO_SPELL) {
@@ -1183,7 +1205,7 @@ docast()
 		}
 		for (i = 0; i < MAXSPELL; i++) {
 			if (spellid(i) == SPE_FORCE_BOLT) {
-				if(spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
 				break;
 			}
 			if (spellid(i) == NO_SPELL) {
@@ -1194,10 +1216,30 @@ docast()
 			}
 		}
 	}
-	
-	if (getspell(&spell_no))
-					return spelleffects(spell_no, FALSE, 0);
-	return 0;
+
+	// for advanced offensive spells
+#define ADVANCED(x) (P_SKILL(x) + Spellboost >= P_SKILLED)
+	for (k = 0; k < 4; k++){
+		for (i = 0; i < MAXSPELL; i++) {
+			if (spellid(i) == basespell[k]) {
+				for (j = 0; j < MAXSPELL; j++) {
+					if (ADVANCED(spell_skilltype(basespell[k]))) {
+						if (spellid(j) == altspell[k]) {
+							spl_book[j].sp_know = max(spl_book[i].sp_know, spl_book[j].sp_know);
+							j = MAXSPELL;
+						}
+						if (spellid(j) == NO_SPELL) {
+							spl_book[j].sp_id = altspell[k];
+							spl_book[j].sp_lev = objects[altspell[k]].oc_level;
+							spl_book[j].sp_know = spl_book[i].sp_know;
+							j = MAXSPELL;
+						}
+					}
+				}
+			}
+		}
+	}
+#undef ADVANCED
 }
 
 /* the '^f' command -- fire a spirit power */
@@ -1751,7 +1793,7 @@ spiriteffects(power, atme)
 			sy = u.uy;
 			if (!getdir((char *)0) || !(u.dx || u.dy)) return(0);
 			if(u.uswallow){
-				if(u.sealsActive&SEAL_NABERIUS) explode2(u.ux,u.uy,5/*Electrical*/, d(range,dsize)*1.5, WAND_CLASS, EXPL_MAGICAL);
+				if(Double_spell_size) explode2(u.ux,u.uy,5/*Electrical*/, d(range,dsize)*1.5, WAND_CLASS, EXPL_MAGICAL);
 				else explode(u.ux,u.uy,5/*Electrical*/, d(range,dsize), WAND_CLASS, EXPL_MAGICAL);
 			} else {
 				while(--range >= 0){
@@ -1761,14 +1803,14 @@ spiriteffects(power, atme)
 						mon = m_at(sx, sy);
 						if(mon){
 							dmg = d(range+1,dsize); //Damage decreases with range
-							if(u.sealsActive&SEAL_NABERIUS) explode2(sx, sy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
+							if(Double_spell_size) explode2(sx, sy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
 							else explode(sx, sy, 5/*Electrical*/, dmg, WAND_CLASS, EXPL_MAGICAL);
 							break;//break loop
 						}
 					} else {
 						if(range < 4) range++;
 						dmg = d(range+1,dsize); //Damage decreases with range
-						if(u.sealsActive&SEAL_NABERIUS) explode2(lsx, lsy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
+						if(Double_spell_size) explode2(lsx, lsy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
 						else explode(lsx, lsy, 5/*Electrical*/, dmg, WAND_CLASS, EXPL_MAGICAL);
 						break;//break loop
 					}
@@ -2594,7 +2636,7 @@ spiriteffects(power, atme)
 			int range = BOLT_LIM + dsize;	/* 5 to 14 */
 			range *= range;
 			You("try to turn away or slay animals and humanoids.");
-			pline("A rainbow of unearthly colors dances behind your eyes!");
+			pline("A rainbow of unearthly colors dances before your eyes!");
 			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 				if (DEADMONSTER(mtmp)) continue;
 				if(cansee(mtmp->mx,mtmp->my) && distu(mtmp->mx,mtmp->my) <= range &&
@@ -2612,7 +2654,7 @@ spiriteffects(power, atme)
 			nomul(5,"recovering from the Horrid Rainbow");
 		}break;
 		case PWR_REFILL_LANTERN:
-			if(uwep && (uwep->otyp == OIL_LAMP || is_lightsaber(uwep)) && !uwep->oartifact){
+			if(uwep && (uwep->otyp == OIL_LAMP || (is_lightsaber(uwep) && uwep->oartifact != ART_INFINITY_S_MIRRORED_ARC)) && !uwep->oartifact){
 				int multiplier = is_lightsaber(uwep) ? 100 : 1;
 				uwep->age += d(5,dsize) * 10 * multiplier;
 				if(uwep->age > 1500*multiplier) uwep->age = 1500*multiplier;
@@ -2624,11 +2666,11 @@ spiriteffects(power, atme)
 			} else return 0;
 		break;
 		case PWR_HELLFIRE:
-			if(uwep && (uwep->otyp == OIL_LAMP || uwep->otyp == POT_OIL || is_lightsaber(uwep)) && !uwep->oartifact && uwep->lamplit){
+			if(uwep && (uwep->otyp == OIL_LAMP || uwep->otyp == POT_OIL || (is_lightsaber(uwep) && uwep->oartifact != ART_INFINITY_S_MIRRORED_ARC)) && !uwep->oartifact && uwep->lamplit){
 				if (throwspell()) {
 					if(uwep->age < 500) uwep->age = 0;
 					else uwep->age -= 500;
-					if(u.sealsActive&SEAL_NABERIUS) explode2(u.dx,u.dy,1/*Fire*/, d(rnd(5),dsize)*1.5, WAND_CLASS, EXPL_FIERY);
+					if(Double_spell_size) explode2(u.dx,u.dy,1/*Fire*/, d(rnd(5),dsize)*1.5, WAND_CLASS, EXPL_FIERY);
 					explode(u.dx,u.dy,1/*Fire*/, d(rnd(5),dsize), WAND_CLASS, EXPL_FIERY);
 					end_burn(uwep, TRUE);
 					begin_burn(uwep, FALSE);
@@ -3734,10 +3776,17 @@ boolean atme;
 		pseudo = mksobj(spellid(spell), FALSE, FALSE);
 		pseudo->blessed = pseudo->cursed = 0;
 		pseudo->quan = 20L;			/* do not let useup get it */
+		
+		if(uwep && uwep->oartifact == ART_STAFF_OF_TWELVE_MIRRORS){
+			wake_nearto_noisy(u.ux, u.uy, energy*energy*2);
+		}
+		
 	} else {
 		pseudo = mksobj(spelltyp, FALSE, FALSE);
 		pseudo->blessed = pseudo->cursed = 0;
 		pseudo->quan = 20L;			/* do not let useup get it */
+		
+		//book-casting doesn't use the staff of twelve mirrors
 	}
 	/*
 	 * Find the skill the hero has in a spell type category.
@@ -3746,7 +3795,7 @@ boolean atme;
 	skill = spell_skilltype(pseudo->otyp);
 	role_skill = P_SKILL(skill);
 	if(Spellboost) role_skill++;
-
+	
 	switch(pseudo->otyp)  {
 	/*
 	 * At first spells act as expected.  As the hero increases in skill
@@ -3754,60 +3803,62 @@ boolean atme;
 	 * effects, e.g. more damage, further distance, and so on, without
 	 * additional cost to the spellcaster.
 	 */
+	// split advanced spells from regular spells
+	case SPE_LIGHTNING_STORM:
+	case SPE_FROST_STORM:
+	case SPE_FIRE_STORM:
+	case SPE_ACID_STORM:
+		if (throwspell()) {
+			cc.x = u.dx; cc.y = u.dy;
+			n = rnd(8) + 1;
+			if (Double_spell_size) n *= 1.5;
+			while (n--) {
+				if (!u.dx && !u.dy && !u.dz) {
+					if ((damage = zapyourself(pseudo, TRUE)) != 0) {
+						char buf[BUFSZ];
+						Sprintf(buf, "zapped %sself with a spell", uhim());
+						losehp(damage, buf, NO_KILLER_PREFIX);
+					}
+				}
+				else {
+					if (Double_spell_size) explode2(u.dx, u.dy,
+						pseudo->otyp - SPE_LIGHT + 10,
+						u.ulevel / 2 + 1 + spell_damage_bonus(), 0,
+						(pseudo->otyp == SPE_FROST_STORM) ?
+					EXPL_FROSTY :
+								(pseudo->otyp == SPE_LIGHTNING_STORM) ?
+							EXPL_MAGICAL :
+											(pseudo->otyp == SPE_ACID_STORM) ?
+										EXPL_NOXIOUS :
+													EXPL_FIERY);
+					else explode(u.dx, u.dy,
+						pseudo->otyp - SPE_LIGHT + 10,
+						u.ulevel / 2 + 1 + spell_damage_bonus(), 0,
+						(pseudo->otyp == SPE_FROST_STORM) ?
+					EXPL_FROSTY :
+								(pseudo->otyp == SPE_LIGHTNING_STORM) ?
+							EXPL_MAGICAL :
+											(pseudo->otyp == SPE_ACID_STORM) ?
+										EXPL_NOXIOUS :
+													EXPL_FIERY);
+				}
+				u.dx = cc.x + rnd(3) - 2; u.dy = cc.y + rnd(3) - 2;
+				if (!isok(u.dx, u.dy) || !cansee(u.dx, u.dy) ||
+					IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
+					/* Spell is reflected back to center */
+					u.dx = cc.x;
+					u.dy = cc.y;
+				}
+			}
+		}
+		break;
 	case SPE_LIGHTNING_BOLT:
 	case SPE_CONE_OF_COLD:
 	case SPE_FIREBALL:
 	case SPE_ACID_BLAST:
-	    if (role_skill >= P_SKILLED) { //if you're skilled, do meteor storm version of spells
-		  if(yn("Cast advanced spell?") == 'y'){
-	        if (throwspell()) {
-			    cc.x=u.dx;cc.y=u.dy;
-			    n=rnd(8)+1;
-				if(u.sealsActive&SEAL_NABERIUS) n *= 1.5;
-			    while(n--) {
-					if(!u.dx && !u.dy && !u.dz) {
-					    if ((damage = zapyourself(pseudo, TRUE)) != 0) {
-							char buf[BUFSZ];
-							Sprintf(buf, "zapped %sself with a spell", uhim());
-							losehp(damage, buf, NO_KILLER_PREFIX);
-					    }
-					} else {
-						if(u.sealsActive&SEAL_NABERIUS) explode2(u.dx, u.dy,
-						    pseudo->otyp - SPE_MAGIC_MISSILE + 10,
-						    u.ulevel/2 + 1 + spell_damage_bonus(), 0,
-							(pseudo->otyp == SPE_CONE_OF_COLD) ?
-								EXPL_FROSTY : 
-							(pseudo->otyp == SPE_LIGHTNING_BOLT) ? 
-								EXPL_MAGICAL : 
-							(pseudo->otyp == SPE_ACID_BLAST) ? 
-								EXPL_NOXIOUS : 
-								EXPL_FIERY);
-					    else explode(u.dx, u.dy,
-						    pseudo->otyp - SPE_MAGIC_MISSILE + 10,
-						    u.ulevel/2 + 1 + spell_damage_bonus(), 0,
-							(pseudo->otyp == SPE_CONE_OF_COLD) ?
-								EXPL_FROSTY : 
-							(pseudo->otyp == SPE_LIGHTNING_BOLT) ? 
-								EXPL_MAGICAL : 
-							(pseudo->otyp == SPE_ACID_BLAST) ? 
-								EXPL_NOXIOUS : 
-								EXPL_FIERY);
-					}
-					u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
-					if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
-					    IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
-					    /* Spell is reflected back to center */
-						    u.dx = cc.x;
-						    u.dy = cc.y;
-			        }
-			    }
-			}
-	break;
-		  }
-		  // else if(!spelltyp && pseudo->otyp == SPE_FIREBALL) u.uen += energy/2; //get some energy back for casting basic fireball, cone of cold is a line so maybe it's beter
-		  else if(!spelltyp) u.uen += energy/2;
-		} /* else fall through... */
-
+		if (role_skill >= P_SKILLED) //if you're skilled, you can do meteor storm version of spells
+			if (!spelltyp) u.uen += energy / 2;	//and for some reason that makes the basic versions cheaper to cast
+		// and fall through
 	/* these spells are all duplicates of wand effects */
 	case SPE_HASTE_SELF:
 	case SPE_FORCE_BOLT:
@@ -3942,6 +3993,8 @@ boolean atme;
 	/* gain skill for successful cast */
 	use_skill(skill, spellev(spell));
 	u.lastcast = monstermoves + spellev(spell);
+	if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC && uwep->spe > 0)
+		u.lastcast += uwep->spe;
 
 	obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 	return(1);
@@ -4145,6 +4198,8 @@ boolean describe;
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
 
+	update_alternate_spells();	// make sure all spells are listed
+	
 	/*
 	 * The correct spacing of the columns depends on the
 	 * following that (1) the font is monospaced and (2)
@@ -4252,26 +4307,50 @@ int spellID;
 	case SPE_LIGHTNING_BOLT:
 		strcat(desc1, "Creates a directed bolt of lightning that can bounce off walls.");
 		strcat(desc2, "The flash is blindingly bright, and the shock can damage wands.");
-		strcat(desc3, "At Skilled or better, can be cast as an AoE smiting attack.");
-		strcat(desc4, "Deals no damage to shock-resistant creatures.");
+		strcat(desc3, "Deals no damage to shock-resistant creatures.");
+		strcat(desc4, "");
 		break;
 	case SPE_CONE_OF_COLD:
 		strcat(desc1, "Creates a directed cone of cold that can bounce off walls.");
 		strcat(desc2, "The chill can freeze potions, shattering them.");
-		strcat(desc3, "At Skilled or better, can be cast as an AoE smiting attack.");
-		strcat(desc4, "Deals no damage to cold-resistant creatures.");
+		strcat(desc3, "Deals no damage to cold-resistant creatures.");
+		strcat(desc4, "");
 		break;
 	case SPE_FIREBALL:
 		strcat(desc1, "Launches a directed fireball that explodes on hitting something.");
 		strcat(desc2, "The fire can boil potions and burn other flammable items.");
-		strcat(desc3, "At Skilled or better, can be cast as an AoE smiting attack.");
-		strcat(desc4, "Deals no damage to fire-resistant creatures.");
+		strcat(desc3, "Deals no damage to fire-resistant creatures.");
+		strcat(desc4, "");
 		break;
 	case SPE_ACID_BLAST:
 		strcat(desc1, "Launches a directed blast of acid that explodes on hitting something.");
 		strcat(desc2, "The acid can boil potions and wet other items.");
-		strcat(desc3, "At Skilled or better, can be cast as an AoE smiting attack.");
-		strcat(desc4, "Deals no damage to acid-resistant creatures.");
+		strcat(desc3, "Deals no damage to acid-resistant creatures.");
+		strcat(desc4, "");
+		break;
+	case SPE_LIGHTNING_STORM:
+		strcat(desc1, "Creates a series of lightning explosions centered around a target.");
+		strcat(desc2, "The electric shock can damage wands.");
+		strcat(desc3, "Deals no damage to shock-resistant creatures.");
+		strcat(desc4, "");
+		break;
+	case SPE_FROST_STORM:
+		strcat(desc1, "Creates a series of cold explosions centered around a target.");
+		strcat(desc2, "The chill can freeze potions, shattering them.");
+		strcat(desc3, "Deals no damage to cold-resistant creatures.");
+		strcat(desc4, "");
+		break;
+	case SPE_FIRE_STORM:
+		strcat(desc1, "Creates a series of fire explosions centered around a target.");
+		strcat(desc2, "The fire can boil potions and burn other flammable items.");
+		strcat(desc3, "Worn armor is also damaged.");
+		strcat(desc4, "Deals no damage to fire-resistant creatures.");
+		break;
+	case SPE_ACID_STORM:
+		strcat(desc1, "Creates a series of acid explosions centered around a target.");
+		strcat(desc2, "The acid can boil potions and wet other items.");
+		strcat(desc3, "Deals no damage to acid-resistant creatures.");
+		strcat(desc4, "");
 		break;
 	case SPE_HASTE_SELF:
 		strcat(desc1, "You temporarily move very quickly.");
@@ -4622,7 +4701,13 @@ int spell;
 		// && uwep && uwep->otyp == KHAKKHARA
 	// ) splcaster -= urole.spelarmr;
 	
-	if(uwep && (uwep->otyp == KHAKKHARA || uwep->oartifact == ART_TENTACLE_ROD || uwep->oartifact == ART_ARYFAERN_KERYM)) splcaster -= urole.spelarmr;
+	if(uwep){
+		if(uwep->oartifact == ART_TENTACLE_ROD
+			|| uwep->oartifact == ART_ARYFAERN_KERYM
+			|| uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC
+		) splcaster -= urole.spelarmr;
+		else if(uwep->otyp == KHAKKHARA) splcaster -= uwep->oartifact ? 2*urole.spelarmr : urole.spelarmr;
+	}
 	
 	if(u.sealsActive&SEAL_PAIMON) splcaster -= urole.spelarmr;
 	
@@ -4720,6 +4805,17 @@ int spell;
 		else if(u.uz.dlevel == spire_level.dlevel-4) chance -= 20*spellev(spell);
 		else if(u.uz.dlevel == spire_level.dlevel-5) chance -= 10*spellev(spell);
 	}
+	
+	// players are unable to cast 'advanced' spells if they are not Skilled+
+	int altspell[] = {  	SPE_LIGHTNING_STORM,
+				SPE_FROST_STORM,
+				SPE_FIRE_STORM,
+				SPE_ACID_STORM };
+	int i;
+
+	for (i = 0; i < 4; i++)
+		if (spellid(spell) == altspell[i] && (P_SKILL(spell_skilltype(spellid(spell))) + Spellboost) < P_SKILLED)
+			chance = 0;
 	
 	/* Clamp to percentile */
 	if (chance > 100) chance = 100;

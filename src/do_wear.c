@@ -167,7 +167,7 @@ Boots_off()
 		}
 		break;
 	case WATER_WALKING_BOOTS:
-		if (is_pool(u.ux,u.uy) && !Levitation && !Flying &&
+		if (is_pool(u.ux,u.uy, TRUE) && !Levitation && !Flying &&
 		    !is_clinger(youracedata) && !cancelled_don) {
 			makeknown(otyp);
 			/* make boots known in case you survive the drowning */
@@ -1242,6 +1242,17 @@ dotakeoff()
 	register struct obj *otmp = (struct obj *)0;
 	int armorpieces = 0;
 
+	/* nohands checks for shields, gloves, etc... */
+	if (nohands(youracedata)) {
+		pline("Don't even bother.");
+		return(0);
+	}
+	
+	if(!freehand()){
+		You("have no free %s to undress yourself with!", body_part(HAND));
+		return(0);
+	}
+
 #define MOREARM(x) if (x) { armorpieces++; otmp = x; }
 	MOREARM(uarmh);
 	MOREARM(uarms);
@@ -1680,6 +1691,11 @@ dowear()
 		pline("Don't even bother.");
 		return(0);
 	}
+	
+	if(!freehand()){
+		You("have no free %s to dress yourself with!", body_part(HAND));
+		return(0);
+	}
 
 	otmp = getobj(clothes, "wear");
 	if(!otmp) return(0);
@@ -1894,7 +1910,7 @@ int base_uac()
 			if(!uarmc || !uarm) uac -= max( uwep->spe,0);
 			if(!uarmc && !uarm) uac -= max( (uwep->spe+1)/2,0);
 		}
-		if(is_lightsaber(uwep) && uwep->lamplit){
+		if(is_lightsaber(uwep) && litsaber(uwep)){
 			if(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
 				switch(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:
@@ -2040,7 +2056,7 @@ find_ac()
 			if(!uarmc || !uarm) uac -= max( uwep->spe,0);
 			if(!uarmc && !uarm) uac -= max( (uwep->spe+1)/2,0);
 		}
-		if(is_lightsaber(uwep) && uwep->lamplit){
+		if(is_lightsaber(uwep) && litsaber(uwep)){
 			if(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
 				switch(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:

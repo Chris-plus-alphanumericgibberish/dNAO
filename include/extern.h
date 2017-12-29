@@ -239,7 +239,7 @@ E int NDECL(dotravel);
 
 /* ### dbridge.c ### */
 
-E boolean FDECL(is_pool, (int,int));
+E boolean FDECL(is_pool, (int,int, BOOLEAN_P));
 E boolean FDECL(is_3dwater, (int,int));
 E boolean FDECL(is_lava, (int,int));
 E boolean FDECL(is_ice, (int,int));
@@ -572,14 +572,14 @@ E void NDECL(init_dungeons);
 E s_level *FDECL(find_level, (const char *));
 E s_level *FDECL(Is_special, (d_level *));
 E branch *FDECL(Is_branchlev, (d_level *));
-E xchar FDECL(ledger_no, (d_level *));
-E xchar NDECL(maxledgerno);
+E int FDECL(ledger_no, (d_level *));
+E int NDECL(maxledgerno);
 E schar FDECL(depth, (d_level *));
-E xchar FDECL(dunlev, (d_level *));
-E xchar FDECL(dunlevs_in_dungeon, (d_level *));
-E xchar FDECL(ledger_to_dnum, (XCHAR_P));
-E xchar FDECL(ledger_to_dlev, (XCHAR_P));
-E xchar FDECL(deepest_lev_reached, (BOOLEAN_P));
+E int FDECL(dunlev, (d_level *));
+E int FDECL(dunlevs_in_dungeon, (d_level *));
+E int FDECL(ledger_to_dnum, (int));
+E int FDECL(ledger_to_dlev, (int));
+E int FDECL(deepest_lev_reached, (BOOLEAN_P));
 E boolean FDECL(on_level, (d_level *,d_level *));
 E void FDECL(next_level, (BOOLEAN_P));
 E void FDECL(prev_level, (BOOLEAN_P));
@@ -599,6 +599,7 @@ E boolean FDECL(In_cave, (d_level *));
 E boolean FDECL(In_mines, (d_level *));
 E boolean FDECL(In_mines_quest, (d_level *));
 E boolean FDECL(In_neu, (d_level *));
+E boolean FDECL(In_outlands, (d_level *));
 E boolean FDECL(In_cha, (d_level *));
 E boolean FDECL(In_law, (d_level *));
 E branch *FDECL(dungeon_branch, (const char *));
@@ -613,10 +614,10 @@ E void FDECL(assign_level, (d_level *,d_level *));
 E void FDECL(assign_rnd_level, (d_level *,d_level *,int));
 E int FDECL(induced_align, (int));
 E boolean FDECL(Invocation_lev, (d_level *));
-E xchar NDECL(level_difficulty);
+E int NDECL(level_difficulty);
 E schar FDECL(lev_by_name, (const char *));
 #ifdef WIZARD
-E schar FDECL(print_dungeon, (BOOLEAN_P,schar *,xchar *));
+E schar FDECL(print_dungeon, (BOOLEAN_P,schar *,int *));
 #endif
 E int NDECL(donamelevel);
 E int NDECL(dooverview);
@@ -1033,6 +1034,7 @@ E boolean NDECL(any_light_source);
 E void FDECL(snuff_light_source, (int, int));
 E boolean FDECL(obj_sheds_light, (struct obj *));
 E boolean FDECL(obj_is_burning, (struct obj *));
+E boolean FDECL(litsaber, (struct obj *));
 E void FDECL(obj_split_light_source, (struct obj *, struct obj *));
 E void FDECL(obj_merge_light_sources, (struct obj *,struct obj *));
 E int FDECL(candle_light_range, (struct obj *));
@@ -1242,7 +1244,7 @@ E void FDECL(walkfrom, (int,int));
 E void FDECL(makemaz, (const char *));
 E void FDECL(mazexy, (coord *));
 E void NDECL(bound_digging);
-E void FDECL(mkportal, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P));
+E void FDECL(mkportal, (XCHAR_P,XCHAR_P,int,int));
 E boolean FDECL(bad_location, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P));
 E void FDECL(place_lregion, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,
 			     XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,
@@ -1309,6 +1311,7 @@ E void NDECL(mksepulcher);
 E void NDECL(mkmivault);
 E void FDECL(mkmivaultitem,(struct obj *));
 E void NDECL(place_lolth_vaults);
+E void NDECL(place_neutral_features);
 E struct mkroom * FDECL(pick_room,(BOOLEAN_P));
 E void FDECL(mkroom, (int));
 E void FDECL(fill_zoo, (struct mkroom *));
@@ -1573,6 +1576,7 @@ E int FDECL(mbhitm, (struct monst *,struct obj *));
 #endif
 E int FDECL(use_offensive, (struct monst *));
 E int FDECL(rnd_offensive_item, (struct monst *));
+E boolean FDECL(is_attack_wand, (int));
 E int FDECL(rnd_attack_wand, (struct monst *));
 E int FDECL(rnd_attack_potion, (struct monst *));
 E int FDECL(rnd_utility_wand, (struct monst *));
@@ -1624,6 +1628,7 @@ E void NDECL(synch_cursor);
 /* ### o_init.c ### */
 
 E void NDECL(init_objects);
+E int NDECL(find_sawant);
 E int NDECL(find_gcirclet);
 E int NDECL(find_sring);
 E int NDECL(find_vhelm);
@@ -2049,6 +2054,8 @@ E void FDECL(split_rects, (NhRect *,NhRect *));
 /* ## region.c ### */
 E void NDECL(clear_regions);
 E void NDECL(run_regions);
+E boolean FDECL(In_fog_cloud, (struct monst *));
+E boolean FDECL(check_solid_fog_region, (XCHAR_P,XCHAR_P));
 E boolean FDECL(check_stinking_cloud_region, (XCHAR_P,XCHAR_P));
 E boolean FDECL(in_out_region, (XCHAR_P,XCHAR_P));
 E boolean FDECL(m_in_out_region, (struct monst *,XCHAR_P,XCHAR_P));
@@ -2065,7 +2072,7 @@ E NhRegion* FDECL(create_gas_cloud, (XCHAR_P, XCHAR_P, int, int));
 E void FDECL(inven_inuse, (BOOLEAN_P));
 E int FDECL(dorecover, (int));
 E void FDECL(trickery, (char *));
-E void FDECL(getlev, (int,int,XCHAR_P,BOOLEAN_P));
+E void FDECL(getlev, (int,int,int,BOOLEAN_P));
 E void NDECL(minit);
 E boolean FDECL(lookup_id_mapping, (unsigned, unsigned *));
 #ifdef ZEROCOMP
@@ -2152,11 +2159,11 @@ E int NDECL(dosave0);
 E void NDECL(savestateinlock);
 #endif
 #ifdef MFLOPPY
-E boolean FDECL(savelev, (int,XCHAR_P,int));
+E boolean FDECL(savelev, (int,int,int));
 E boolean FDECL(swapin_file, (int));
 E void NDECL(co_false);
 #else
-E void FDECL(savelev, (int,XCHAR_P,int));
+E void FDECL(savelev, (int,int,int));
 #endif
 E void FDECL(bufon, (int));
 E void FDECL(bufoff, (int));

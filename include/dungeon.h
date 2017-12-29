@@ -16,8 +16,8 @@ typedef struct d_flags {	/* dungeon/level type flags */
 } d_flags;
 
 typedef struct d_level {	/* basic dungeon level element */
-	xchar	dnum;		/* dungeon number */
-	xchar	dlevel;		/* level number */
+	int		dnum;		/* dungeon number */
+	int		dlevel;		/* level number */
 	d_flags flags;		/* type flags */
 } d_level;
 
@@ -57,9 +57,9 @@ typedef struct dungeon {	/* basic dungeon identifier */
 	char	proto[15];	/* name of prototype file (eg. "tower") */
 	char	boneid;		/* character to id dungeon in bones files */
 	d_flags flags;		/* dungeon flags */
-	xchar	entry_lev;	/* entry level */
+	int	entry_lev;	/* entry level */
 	int	num_dunlevs;	/* number of levels in this dungeon */
-	xchar	dunlev_ureached; /* how deep you have been in this dungeon */
+	int	dunlev_ureached; /* how deep you have been in this dungeon */
 	int	ledger_start,	/* the starting depth in "real" terms */
 		depth_start;	/* the starting depth in "logical" terms */
 } dungeon;
@@ -106,7 +106,10 @@ typedef struct branch {
 #define Is_firelevel(x)		(on_level(x, &fire_level))
 #define Is_airlevel(x)		(on_level(x, &air_level))
 
-#define Is_medusa_level(x)	(on_level(x, &medusa_level))
+#define Is_challenge_level(x)	(on_level(x, &challenge_level))
+#define Is_medusa_level(x)	(on_level(x, &challenge_level) && dungeon_topology.challenge_variant >= MEDUSA_LEVEL1 && dungeon_topology.challenge_variant <= MEDUSA_LEVEL4)
+#define Is_grue_level(x)	(on_level(x, &challenge_level) && dungeon_topology.challenge_variant >= GRUE_LEVEL1 && dungeon_topology.challenge_variant <= GRUE_LEVEL2)
+
 #define Is_oracle_level(x)	(on_level(x, &oracle_level))
 
 #define Is_path(x)		(on_level(x, &path1_level) || on_level(x, &path2_level) || on_level(x, &path3_level))

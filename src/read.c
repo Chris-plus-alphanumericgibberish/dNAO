@@ -32,6 +32,7 @@ static void FDECL(p_glow2,(struct obj *,const char *));
 static void FDECL(randomize,(int *, int));
 static void FDECL(forget_single_object, (int));
 static void FDECL(maybe_tame, (struct monst *,struct obj *));
+static void FDECL(ranged_set_lightsources, (int, int, genericptr_t));
 
 int
 doread()
@@ -541,7 +542,7 @@ struct obj *obj;
 	if (obj->oclass == RING_CLASS)
 	    return (boolean)(objects[obj->otyp].oc_charged &&
 			(obj->known || objects[obj->otyp].oc_uname));
-	if (is_lightsaber(obj))
+	if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC)
 	    return TRUE;
 //#ifdef FIREARMS
 	if (is_blaster(obj) && (obj->recharged < 4 || (obj->otyp != HAND_BLASTER && obj->otyp != ARM_BLASTER)))
@@ -1903,7 +1904,7 @@ struct obj	*sobj;
 		else{
 			engrHere->ward_id = sobj->ovar1;
 			if(sobj->cursed){
-				if(is_pool(u.ux, u.uy)){
+				if(is_pool(u.ux, u.uy, TRUE)){
 					pline("The lines of blood quickly disperse into the water.");
 	break;
 				}
@@ -2299,6 +2300,22 @@ genericptr_t val;
 	}
 }
 
+// lights/snuffs simple lightsources lying at the location, lighting assumes this is triggered by the player for shk purposes
+// this could also be added to set_lit, I suppose
+void
+ranged_set_lightsources(x,y,val)
+int x, y;
+genericptr_t val;
+{
+	if (val) {
+		struct obj *ispe = mksobj(SPE_LIGHT, TRUE, FALSE);
+		bhitpile(ispe, bhito, x, y);
+	}
+	else {
+		snuff_light_source(x, y);
+	}
+}
+
 void
 litroom(on,obj)
 register boolean on;
@@ -2306,7 +2323,7 @@ struct obj *obj;
 {
 	char is_lit;	/* value is irrelevant; we use its address
 			   as a `not null' flag for set_lit() */
-
+	boolean permanent_darkness = Is_grue_level(&u.uz);
 	/* first produce the text (provided you're not blind) */
 	if(!on) {
 		register struct obj *otmp;
@@ -2343,7 +2360,10 @@ struct obj *obj;
 					pline("%s glistens.", Monnam(u.ustuck));
 			return;
 		}
-		pline("A lit field surrounds you!");
+		if (!permanent_darkness)
+			pline("A lit field surrounds you!");
+		else
+			pline("A ripple of energy travels through the darkness.");
 	}
 
 do_it:
@@ -2374,7 +2394,7 @@ do_it:
 	} else
 #endif
 	    do_clear_area(u.ux,u.uy,
-		(obj && obj->oclass==SCROLL_CLASS && obj->blessed) ? 9 : 5,
+		((obj && obj->oclass==SCROLL_CLASS && obj->blessed) ? 9 : 5) * (permanent_darkness ? 3 : 2) / 2, permanent_darkness ? ranged_set_lightsources :
 		set_lit, (genericptr_t)(on ? &is_lit : (char *)0));
 
 	/*

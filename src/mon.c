@@ -338,6 +338,13 @@ register struct monst *mtmp;
 		}
 		goto default_1;
 
+	    case PM_WATER_ELEMENTAL:
+		if (levl[mtmp->mx][mtmp->my].typ == ROOM) {
+		    levl[mtmp->mx][mtmp->my].typ = PUDDLE;
+		    water_damage(level.objects[mtmp->mx][mtmp->my], FALSE, TRUE, level.flags.lethe, 0);
+		}
+		goto default_1;
+
 	    case PM_WHITE_UNICORN:
 	    case PM_GRAY_UNICORN:
 	    case PM_BLACK_UNICORN:
@@ -808,13 +815,15 @@ int
 minliquid(mtmp)
 register struct monst *mtmp;
 {
-    boolean inpool, inlava, infountain;
+	boolean inpool, inlava, infountain, inshallow;
 
-    inpool = is_pool(mtmp->mx,mtmp->my) &&
+	inpool = is_pool(mtmp->mx,mtmp->my, FALSE) &&
 	     ((!is_flyer(mtmp->data) && !is_floater(mtmp->data)) || is_3dwater(mtmp->mx,mtmp->my));
-    inlava = is_lava(mtmp->mx,mtmp->my) &&
+	inlava = is_lava(mtmp->mx,mtmp->my) &&
 	     !is_flyer(mtmp->data) && !is_floater(mtmp->data);
-    infountain = IS_FOUNTAIN(levl[mtmp->mx][mtmp->my].typ);
+	infountain = IS_FOUNTAIN(levl[mtmp->mx][mtmp->my].typ);
+	inshallow = IS_PUDDLE(levl[mtmp->mx][mtmp->my].typ) &&
+	     (!is_flyer(mtmp->data) && !is_floater(mtmp->data));
 
 #ifdef STEED
 	/* Flying and levitation keeps our steed out of the liquid */
@@ -827,22 +836,29 @@ register struct monst *mtmp;
      * keep going down, and when it gets to 1 hit point the clone
      * function will fail.
      */
-    if (mtmp->data == &mons[PM_GREMLIN] && (inpool || infountain) && rn2(3)) {
+    if (mtmp->data == &mons[PM_GREMLIN] && (inpool || infountain || inshallow) && rn2(3)) {
 	if (split_mon(mtmp, (struct monst *)0))
 	    dryup(mtmp->mx, mtmp->my, FALSE);
 	if (inpool) water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
 	return (0);
-    } else if (mtmp->data == &mons[PM_IRON_GOLEM] && inpool && !rn2(5)) {
+    } else if (mtmp->data == &mons[PM_IRON_GOLEM] && ((inpool && !rn2(5)) || inshallow)) {
+	/* rusting requires oxygen and water, so it's faster for shallow water */
 	int dam = d(2,6);
 	if (cansee(mtmp->mx,mtmp->my))
 	    pline("%s rusts.", Monnam(mtmp));
 	mtmp->mhp -= dam;
 	if (mtmp->mhpmax > dam) mtmp->mhpmax -= dam;
 	if (mtmp->mhp < 1) {
+	    if (canseemon(mtmp)) pline("%s falls to pieces!", Monnam(mtmp));
 	    mondead(mtmp);
-	    if (mtmp->mhp < 1) return (1);
+	    if (mtmp->mhp < 1) {
+			if (mtmp->mtame && !canseemon(mtmp))
+				pline("May %s rust in peace.", mon_nam(mtmp));
+			return (1);
+		}
 	}
-	water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
+	if(inpool) water_damage(which_armor(mtmp, W_ARMF), FALSE, FALSE, level.flags.lethe, mtmp);
+	else water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
 	return (0);
     }
 
@@ -932,6 +948,14 @@ struct monst *mon;
 		if(mmove < 6) mmove = 6;
 	}
 	
+	if(u.ustuck == mon && mmove < 12 && mon->data->mlet == S_VORTEX){
+		mmove *= 2;
+	}
+	
+	if(isdark(mon->mx, mon->my) && mon->data == &mons[PM_GRUE]){
+		mmove *= 2;
+	}
+	
 	if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH])
 		mmove += u.chokhmah;
 	if(mon->data == &mons[PM_PYTHON] && 
@@ -961,8 +985,8 @@ struct monst *mon;
 	if(u.sealsActive&SEAL_CHUPOCLOPS && distmin(mon->mx, mon->my, u.ux, u.uy) <= u.ulevel/5+1){
 		mmove = max(mmove-(u.ulevel/10+1),1);
 	}
-	
-    return mmove;
+	if(In_fog_cloud(mon)) mmove = max(mmove/3, 1);
+	return mmove;
 }
 
 /* actions that happen once per ``turn'', regardless of each
@@ -1042,7 +1066,7 @@ mcalcdistress()
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
-				grow_up(mtmp,mtmp);
+				// grow_up(mtmp,mtmp);
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
@@ -1062,7 +1086,7 @@ mcalcdistress()
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
-				grow_up(mtmp,mtmp);
+				// grow_up(mtmp,mtmp);
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
@@ -1157,7 +1181,7 @@ mcalcdistress()
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
-				grow_up(mtmp,mtmp);
+				// grow_up(mtmp,mtmp);
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
@@ -1177,7 +1201,7 @@ mcalcdistress()
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
-				grow_up(mtmp,mtmp);
+				// grow_up(mtmp,mtmp);
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
@@ -1323,7 +1347,7 @@ mcalcdistress()
 			
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
-				grow_up(mtmp,mtmp);
+				// grow_up(mtmp,mtmp);
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
@@ -1351,7 +1375,7 @@ mcalcdistress()
 			
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
-				grow_up(mtmp,mtmp);
+				// grow_up(mtmp,mtmp);
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
@@ -2021,7 +2045,7 @@ mpickstuff(mtmp, str)
 			!acidic(&mons[otmp->corpsenm])) continue;
 		if (!touch_artifact(otmp, mtmp, FALSE)) continue;
 		if (!can_carry(mtmp,otmp)) continue;
-		if (is_pool(mtmp->mx,mtmp->my)) continue;
+		if (is_pool(mtmp->mx,mtmp->my, FALSE)) continue;
 #ifdef INVISIBLE_OBJECTS
 		if (otmp->oinvis && !perceives(mtmp->data)) continue;
 #endif
@@ -2562,6 +2586,8 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 		) if(x + xdir[(int)mon->mvar1] != nx || 
 			   y + ydir[(int)mon->mvar1] != ny 
 			) continue;
+		if((mdat == &mons[PM_GRUE]) && isdark(mon->mx, mon->my) && !isdark(nx, ny))
+				continue;
 		if((mdat == &mons[PM_WATCHER_IN_THE_WATER] || mdat == &mons[PM_KETO]) && 
 			distmin(nx, ny, mon->mux, mon->muy) <= 3 && 
 			dist2(nx, ny, mon->mux, mon->muy) <= dist2(mon->mx, mon->my, mon->mux, mon->muy)) continue;
@@ -2579,7 +2605,7 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 		//Weeping angels should avoid stepping into corredors, where they can be forced into a standoff.
 		if(quantumlock && IS_ROOM(levl[mon->mx][mon->my].typ) && !IS_ROOM(ntyp) ) continue;
 		
-		if((is_pool(nx,ny) == wantpool || poolok) &&
+		if((is_pool(nx,ny, FALSE) == wantpool || poolok) &&
 			(cubewaterok || !is_3dwater(nx,ny)) && 
 			(lavaok || !is_lava(nx,ny))) {
 		int dispx, dispy;
@@ -2712,7 +2738,7 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 		cnt++;
 	    }
 	}
-	if(!cnt && wantpool && !is_pool(x,y)) {
+	if(!cnt && wantpool && !is_pool(x,y, FALSE)) {
 		wantpool = FALSE;
 		goto nexttry;
 	}
@@ -2737,13 +2763,19 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	
 	// if(magr->mpeaceful && mdef->mpeaceful && (magr->mtame || mdef->mtame)) return 0L;
 	
-	if(magr->mtame && mdef->mtame) return 0L;
+	if(magr->mtame && (mdef->mtame || mdef->moccupation)){
+			return 0L;
+	}
 	
 	if(!mon_can_see_mon(magr, mdef)) return 0L;
 	
 	if(ma == &mons[PM_DREADBLOSSOM_SWARM]){
 		if(!(is_fey(md) || is_plant(md))) return ALLOW_M|ALLOW_TM;
 	}
+	if(ma == &mons[PM_GRUE]){
+		if(isdark(mdef->mx, mdef->my)) return ALLOW_M|ALLOW_TM;
+	}
+	
 	
 	/* In the anachrononaut quest, all peaceful monsters are at threat from all hostile monsters.
 		The leader IS in serious danger */
@@ -3239,7 +3271,14 @@ register struct monst *mtmp;
 	 */
 	tmp = monsndx(mtmp->data);
 	if (mvitals[tmp].died < 255) mvitals[tmp].died++;
-
+	
+	if (tmp == PM_NAZGUL){
+			if(mvitals[tmp].born > 0) mvitals[tmp].born--;
+			if(mvitals[tmp].mvflags&G_EXTINCT){
+				mvitals[tmp].mvflags &= (~G_EXTINCT);
+				reset_rndmonst(tmp);
+			}
+	}
 	/* if it's a (possibly polymorphed) quest leader, mark him as dead */
 	if (mtmp->m_id == quest_status.leader_m_id)
 		quest_status.leader_is_dead = TRUE;
@@ -3273,8 +3312,9 @@ register struct monst *mtmp;
 	else if(mtmp->data == &mons[PM_DEMOGORGON]){
 		achieve.killed_demogorgon = 1;
 	}
-	else if(mtmp->data == &mons[PM_MEDUSA])
-		achieve.killed_medusa = 1;
+	else if (mtmp->data == &mons[PM_MEDUSA] || mtmp->data == &mons[PM_GRUE]) {
+		achieve.killed_challenge = 1;
+	}
 #endif
 	if(glyph_is_invisible(levl[mtmp->mx][mtmp->my].glyph))
 		unmap_object(mtmp->mx, mtmp->my);
@@ -3739,7 +3779,8 @@ boolean was_swallowed;			/* digestion */
 				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 					mdat1 = mtmp->data;
 					if(mdat1==&mons[PM_AXUS]){
-						makemon(&mons[PM_MONOTON], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY|MM_NOCOUNTBIRTH);
+						mtmp = makemon(&mons[PM_MONOTON], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY|MM_NOCOUNTBIRTH);
+						if(mtmp) mtmp->mclone = 1;
 						break; //break special for loop
 					}
 				}
@@ -3762,7 +3803,8 @@ boolean was_swallowed;			/* digestion */
 							for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 								mdat1 = mtmp->data;
 								if(mdat1==&mons[PM_AXUS]){
-									makemon(child[i], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY);
+									mtmp = makemon(child[i], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY);
+									if(mtmp) mtmp->mclone = 1;
 									break; //break special for loop
 								}
 							}
@@ -3775,7 +3817,8 @@ boolean was_swallowed;			/* digestion */
 						mdat1 = mtmp->data;
 						if(mdat1==&mons[PM_AXUS]){
 							chain = FALSE;
-							makemon(growto[i], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY);
+							mtmp = makemon(growto[i], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY);
+							if(mtmp) mtmp->mclone = 1;
 //							makemon(&mons[PM_MONOTON], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY);
 							break; //break special for loop
 						}
@@ -3838,9 +3881,6 @@ boolean was_swallowed;			/* digestion */
 	/* must duplicate this below check in xkilled() since it results in
 	 * creating no objects as well as no corpse
 	 */
-	if (LEVEL_SPECIFIC_NOCORPSE(mdat))
-		return FALSE;
-
 	if (mon->mfaction == SKELIFIED)
 		return FALSE;
 
@@ -3860,6 +3900,9 @@ boolean was_swallowed;			/* digestion */
 		   )
 		return TRUE;
 	
+	if (LEVEL_SPECIFIC_NOCORPSE(mdat))
+		return FALSE;
+
 	if(In_hell(&u.uz) || In_endgame(&u.uz)) //u.uevent.udemigod || 
 		return FALSE;
 	
@@ -3886,17 +3929,17 @@ struct monst *mon;
 	       the generic fern spore, which guarantees a terrain-appropriate fern */
 	    if (mon->data == &mons[PM_DUNGEON_FERN_SPORE]) {
 		/* dungeon ferns cannot reproduce on ice, lava, or water; swamp is okay */
-			if (!is_ice(mm.x, mm.y) && !is_lava(mm.x, mm.y) && !is_pool(mm.x, mm.y))
+			if (!is_ice(mm.x, mm.y) && !is_lava(mm.x, mm.y) && !is_pool(mm.x, mm.y, FALSE))
 				sporetype = 0;
 			else return;
 			if (rn2(3)) return;
 	    } else if (mon->data == &mons[PM_SWAMP_FERN_SPORE]) {
-			if (!is_ice(mm.x, mm.y) && !is_lava(mm.x, mm.y) && !is_pool(mm.x, mm.y))
+			if (!is_ice(mm.x, mm.y) && !is_lava(mm.x, mm.y))
 				sporetype = 2;
 			else return;
 			if (rn2(3)) return;
 	    } else if (mon->data == &mons[PM_BURNING_FERN_SPORE]) {
-			if (!is_ice(mm.x, mm.y) && !is_pool(mm.x, mm.y))
+			if (!is_ice(mm.x, mm.y) && !is_pool(mm.x, mm.y, TRUE))
 				sporetype = 3;
 			else return;
 			if (rn2(3)) return;
@@ -3933,7 +3976,7 @@ register struct monst *mdef;
 	if (mdef->mhp > 0) return;	/* lifesaved */
 
 	if (corpse_chance(mdef, (struct monst *)0, FALSE) &&
-	    (accessible(mdef->mx, mdef->my) || is_pool(mdef->mx, mdef->my)))
+	    (accessible(mdef->mx, mdef->my) || is_pool(mdef->mx, mdef->my, FALSE)))
 		(void) make_corpse(mdef);
 }
 
@@ -4471,7 +4514,7 @@ xkilled(mtmp, dest)
 		redisp = TRUE;
 	}
 #endif
-	if((!accessible(x, y) && !is_pool(x, y)) ||
+	if((!accessible(x, y) && !is_pool(x, y, FALSE)) ||
 	   (x == u.ux && y == u.uy)) {
 	    /* might be mimic in wall or corpse in lava or on player's spot */
 	    redisp = TRUE;
@@ -5385,7 +5428,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	    mtmp->perminvis = pm_invisible(mdat);
 	mtmp->minvis = mtmp->invis_blkd ? 0 : mtmp->perminvis;
 	if (!(hides_under(mdat) && OBJ_AT(mtmp->mx, mtmp->my)) &&
-			!(mdat->mlet == S_EEL && is_pool(mtmp->mx, mtmp->my)))
+			!(mdat->mlet == S_EEL && is_pool(mtmp->mx, mtmp->my, FALSE)))
 		mtmp->mundetected = 0;
 	if (u.ustuck == mtmp) {
 		if(u.uswallow) {

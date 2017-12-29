@@ -496,7 +496,7 @@ mattacku(mtmp)
 			struct obj *obj = level.objects[u.ux][u.uy];
 
 			if (obj ||
-			      (youracedata->mlet == S_EEL && is_pool(u.ux, u.uy))) {
+			      (youracedata->mlet == S_EEL && is_pool(u.ux, u.uy, FALSE))) {
 			    int save_spe = 0; /* suppress warning */
 			    if (obj) {
 				save_spe = obj->spe;
@@ -698,6 +698,10 @@ mattacku(mtmp)
 	    sum[i] = 0;
 	    mattk = getmattk(mdat, i, sum, &alt_attk);
 	    if (u.uswallow && (mattk->aatyp != AT_ENGL && mattk->aatyp != AT_ILUR))
+			continue;
+		
+		if (mdat == &mons[PM_GRUE] && (i>=2) && !((!levl[mtmp->mx][mtmp->my].lit && !(viz_array[mtmp->my][mtmp->mx] & TEMP_LIT1 && !(viz_array[mtmp->my][mtmp->mx] & TEMP_DRK1)))
+			|| (levl[mtmp->mx][mtmp->my].lit && (viz_array[mtmp->my][mtmp->mx] & TEMP_DRK1 && !(viz_array[mtmp->my][mtmp->mx] & TEMP_LIT1)))))
 			continue;
 		
 		if(mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
@@ -1075,7 +1079,7 @@ mattacku(mtmp)
 						}
 						mswings(mtmp, otmp);
 					}
-					if(otmp && ((is_lightsaber(otmp) && otmp->lamplit) || arti_shining(otmp))){
+					if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))){
 						if(tchtmp > (j = dieroll = rnd(20+i*2))){
 							sum[i] = hitmu(mtmp, mattk);
 							if(mattk->aatyp == AT_DEVA && sum[i]){
@@ -1178,7 +1182,7 @@ mattacku(mtmp)
 	    if(sum[i] == 2) return 1;		/* attacker dead */
 	    if(sum[i] == 3) break;  /* attacker teleported, no more attacks */
 		
-		if(uwep && is_lightsaber(uwep) && uwep->lamplit){
+		if(uwep && is_lightsaber(uwep) && litsaber(uwep)){
 			if(u.fightingForm == FFORM_SHIEN && multi >= 0 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) == 1 && (!uarm || is_light_armor(uarm))){
 				switch(min(P_SKILL(FFORM_SHIEN), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:
@@ -1480,7 +1484,7 @@ hitmu(mtmp, mattk)
 		if ((obj = level.objects[mtmp->mx][mtmp->my]) != 0) {
 		    if (Blind && !obj->dknown)
 			what = something;
-		    else if (is_pool(mtmp->mx, mtmp->my) && !Underwater)
+		    else if (is_pool(mtmp->mx, mtmp->my, TRUE) && !Underwater)
 			what = "the water";
 		    else
 			what = doname(obj);
@@ -1531,7 +1535,7 @@ hitmu(mtmp, mattk)
 					!(uwep->otyp == CHAKRAM)
 				) ||
 				/* lightsaber that isn't lit ;) */
-				(is_lightsaber(uwep) && !uwep->lamplit) ||
+				(is_lightsaber(uwep) && !litsaber(uwep)) ||
 				/* houchou not thrown */
 				(uwep->oartifact == ART_HOUCHOU) ||
 				/* WAC -- or using a pole at short range... */
@@ -1557,18 +1561,18 @@ hitmu(mtmp, mattk)
 				if(uwep && (uwep->obj_material == SILVER || arti_silvered(uwep)) && 
 					!(u.sealsActive&SEAL_EDEN) &&
 					hates_silver(youracedata) &&
-					!(is_lightsaber(uwep) && uwep->lamplit)
+					!(is_lightsaber(uwep) && litsaber(uwep))
 				) dmg += rnd(20);
 				if(uwep && (uwep->obj_material == IRON) && 
 					hates_iron(youracedata) &&
-					!(is_lightsaber(uwep) && uwep->lamplit)
+					!(is_lightsaber(uwep) && litsaber(uwep))
 				) dmg += rnd(u.ulevel);
-				if(uwep && (uwep->cursed) && 
+				if(uwep && is_unholy(uwep) && 
 					hates_unholy(youracedata)
 				) dmg += rnd(9);
 			} else {
 				dmg += dmgval(uwep, &youmonst, 0);
-				if(uwep && ((is_lightsaber(uwep) && uwep->lamplit) || arti_shining(uwep))) phasearmor = TRUE;
+				if(uwep && ((is_lightsaber(uwep) && litsaber(uwep)) || arti_shining(uwep))) phasearmor = TRUE;
 			}
 			
 			if (uwep->opoisoned){
@@ -1644,7 +1648,7 @@ hitmu(mtmp, mattk)
 					!(otmp->otyp == CHAKRAM)
 				) ||
 				/* lightsaber that isn't lit ;) */
-				(is_lightsaber(otmp) && !otmp->lamplit) ||
+				(is_lightsaber(otmp) && !litsaber(otmp)) ||
 				/* houchou not thrown */
 				(otmp->oartifact == ART_HOUCHOU) ||
 				/* WAC -- or using a pole at short range... */
@@ -1669,18 +1673,18 @@ hitmu(mtmp, mattk)
 				if(otmp && (otmp->obj_material == SILVER || arti_silvered(otmp)) && 
 					!(u.sealsActive&SEAL_EDEN) &&
 					hates_silver(youracedata) &&
-					!(is_lightsaber(otmp) && otmp->lamplit)
+					!(is_lightsaber(otmp) && litsaber(otmp))
 				) dmg += rnd(20);
 				if(otmp && (otmp->obj_material == IRON) && 
 					hates_iron(youracedata) &&
-					!(is_lightsaber(otmp) && otmp->lamplit)
+					!(is_lightsaber(otmp) && litsaber(otmp))
 				) dmg += rnd(u.ulevel);
-				if(otmp && (otmp->cursed) && 
+				if(otmp && is_unholy(otmp) && 
 					hates_unholy(youracedata)
 				) dmg += rnd(9);
 			} else {
 				dmg += dmgval(otmp, &youmonst, 0);
-				if(otmp && ((is_lightsaber(otmp) && otmp->lamplit) || arti_shining(otmp))) phasearmor = TRUE;
+				if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))) phasearmor = TRUE;
 			}
 			
 			if(oarm && dmg && oarm->otyp == GAUNTLETS_OF_POWER){
@@ -1691,19 +1695,19 @@ hitmu(mtmp, mattk)
 			if (otmp && (otmp->obj_material == SILVER || arti_silvered(otmp)) &&
 				!(u.sealsActive&SEAL_EDEN) &&
 				hates_silver(youracedata) &&
-				!(is_lightsaber(otmp) && otmp->lamplit)
+				!(is_lightsaber(otmp) && litsaber(otmp))
 			) {
 			    pline("The silver sears your flesh!");
 			}
 			
 			if (otmp && (otmp->obj_material == IRON) &&
 				hates_iron(youracedata) &&
-				!(is_lightsaber(otmp) && otmp->lamplit)
+				!(is_lightsaber(otmp) && litsaber(otmp))
 			) {
 			    pline("The cold-iron sears your flesh!");
 			}
 			
-			if (otmp && (otmp->cursed) &&
+			if (otmp && is_unholy(otmp) &&
 				hates_unholy(youracedata)
 			) {
 			    pline("The curse sears your flesh!");
@@ -2419,7 +2423,7 @@ dopois:
 				else u.ustuck = mtmp;
 			}
 		    } else if(u.ustuck == mtmp) {
-				if (is_pool(mtmp->mx,mtmp->my) && !Swimming
+				if (is_pool(mtmp->mx,mtmp->my, FALSE) && !Swimming
 					&& !Breathless) {
 					boolean moat =
 					(levl[mtmp->mx][mtmp->my].typ != POOL) &&
@@ -7584,6 +7588,11 @@ register struct attack *mattk;
 	else
 	    tmp = 0;
 
+	// Grue's passive is inactive in light
+	if (olduasmon == &mons[PM_GRUE] && !((!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux] & TEMP_LIT1 && !(viz_array[u.uy][u.ux] & TEMP_DRK1)))
+		|| (levl[u.ux][u.uy].lit && (viz_array[u.uy][u.ux] & TEMP_DRK1 && !(viz_array[u.uy][u.ux] & TEMP_LIT1)))))
+		return 1;	
+
 	/* These affect the enemy even if you were "killed" (rehumanized) */
 	switch(olduasmon->mattk[i].adtyp) {
 	    case AD_ACID:
@@ -7857,7 +7866,7 @@ register struct attack *mattk;
 			if(DEADMONSTER(mtmp)) return 2;
 		}
 	}
-	if(uwep && is_lightsaber(uwep) && uwep->lamplit){
+	if(uwep && is_lightsaber(uwep) && litsaber(uwep)){
 		if(P_SKILL(weapon_type(uwep)) >= P_BASIC){
 			if(P_SKILL(FFORM_SHII_CHO) >= P_BASIC){
 				if(u.fightingForm == FFORM_SHII_CHO || 

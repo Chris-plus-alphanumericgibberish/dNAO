@@ -2940,8 +2940,10 @@ char *buf;
 	    cmap = S_lava;				/* "molten lava" */
 	else if (is_ice(x,y))
 	    cmap = S_ice;				/* "ice" */
-	else if (is_pool(x,y))
+	else if (is_pool(x,y, FALSE))
 	    dfeature = "pool of water";
+	else if (IS_PUDDLE(ltyp))
+	    dfeature = "puddle of shallow water";
 #ifdef SINKS
 	else if (IS_SINK(ltyp))
 	    cmap = S_sink;				/* "sink" */
@@ -3044,7 +3046,7 @@ boolean picked_some;
 	if (dfeature)
 		Sprintf(fbuf, "There is %s here.", an(dfeature));
 
-	if (!otmp || is_lava(u.ux,u.uy) || (is_pool(u.ux,u.uy) && !Underwater)) {
+	if (!otmp || is_lava(u.ux,u.uy) || (is_pool(u.ux,u.uy, FALSE) && !Underwater)) {
 		if (dfeature) pline1(fbuf);
 		read_engr_at(u.ux, u.uy); /* Eric Backus */
 		if (!skip_objects && (Blind || !dfeature))
@@ -3867,7 +3869,7 @@ STATIC_OVL int
 u_bcu_next_to_skin(bcu)
 int bcu;
 {
-	#define bcu(otmp) (otmp->cursed ? -1 : otmp->blessed ? 1 : 0)
+	#define bcu(otmp) (is_unholy(otmp) ? -1 : otmp->blessed ? 1 : 0)
 	int count = 0;
 	if(uwep && bcu(uwep) == bcu && !uarmg)
 		count++;

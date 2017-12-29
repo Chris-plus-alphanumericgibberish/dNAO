@@ -927,6 +927,14 @@ register struct monst *mtmp;
 			monflee(mtmp, 0, TRUE, TRUE);
 		}
 	}
+	if(mtmp->data == &mons[PM_GRUE]){
+		if(!mtmp->mflee && !isdark(mtmp->mx, mtmp->my)){
+			monflee(mtmp, 0, TRUE, TRUE);
+		} else if(mtmp->mflee && isdark(mtmp->mx, mtmp->my)){
+			mtmp->mflee = 0;
+			mtmp->mfleetim = 0;
+		}
+	}
 	
 	/* stunned monsters get un-stunned with larger probability */
 	if (mtmp->mstun && !rn2(10)) mtmp->mstun = 0;
@@ -1103,7 +1111,7 @@ register struct monst *mtmp;
 			(IS_DOOR(levl[mtmp->mx][mtmp->my].typ) && artifact_door(mtmp->mx, mtmp->my)) ||
 			(IS_ROCK(lev->typ) && lev->typ != SDOOR &&
 			(lev->wall_info & W_NONDIGGABLE) != 0) ||
-			(is_pool(mtmp->mx, mtmp->my) || is_lava(mtmp->mx, mtmp->my)) ||
+			(is_pool(mtmp->mx, mtmp->my, TRUE) || is_lava(mtmp->mx, mtmp->my)) ||
 			(lev->typ == DRAWBRIDGE_DOWN ||
 			   (is_drawbridge_wall(mtmp->mx, mtmp->my) >= 0)) ||
 			(boulder_at(mtmp->mx, mtmp->my)) ||
@@ -1224,7 +1232,7 @@ toofar:
 	}
 /*      Look for other monsters to fight (at a distance) */
 	if ((
-	      attacktype(mtmp->data, AT_GAZE) ||
+	      (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan) ||
 	      attacktype(mtmp->data, AT_ARRW) ||
 	      attacktype(mtmp->data, AT_LNCK) ||
 	      attacktype(mtmp->data, AT_LRCH) ||
@@ -1233,22 +1241,22 @@ toofar:
 			(attacktype(mtmp->data, AT_SPIT) ||
 			 attacktype(mtmp->data, AT_TNKR) ||
 			 attacktype(mtmp->data, AT_BEAM) ||
-			 attacktype(mtmp->data, AT_BREA)
+			 (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan)
 			)
 		  )||
-	     (attacktype(mtmp->data, AT_MMGC) &&
+	     (attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan &&
 			(((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp
 	         <= AD_SPC2))
 	      ) ||
-	     (attacktype(mtmp->data, AT_MAGC) &&
+	     (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan &&
 	      (((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp
 	         <= AD_SPC2))
 	      ) ||
-	     (attacktype(mtmp->data, AT_MAGC) &&
+	     (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan &&
 	      (((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp
 	         == AD_RBRE))
 	      ) ||
-	     (attacktype(mtmp->data, AT_MAGC) &&
+	     (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan &&
 	      (((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp
 	         == AD_OONA))
 	      ) ||
@@ -1448,7 +1456,7 @@ register int after;
 	    else mtmp->meating--;
 	    return 3;			/* still eating */
 	}
-	if (hides_under(ptr) && OBJ_AT(mtmp->mx, mtmp->my) && rn2(10))
+	if (hides_under(ptr) && OBJ_AT(mtmp->mx, mtmp->my) && !mtmp->mtame && rn2(10))
 	    return 0;		/* do not leave hiding place */
 
 	set_apparxy(mtmp);
@@ -2095,7 +2103,7 @@ postmov:
 			(mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->msleeping && rn2(5)))
 		    mtmp->mundetected = (ptr->mlet != S_EEL) ?
 			OBJ_AT(mtmp->mx, mtmp->my) :
-			(is_pool(mtmp->mx, mtmp->my) && !Is_waterlevel(&u.uz));
+			(is_pool(mtmp->mx, mtmp->my, FALSE) && !Is_waterlevel(&u.uz));
 		newsym(mtmp->mx, mtmp->my);
 	    }
 	    if (mtmp->isshk) {

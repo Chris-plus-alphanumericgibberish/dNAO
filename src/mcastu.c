@@ -609,6 +609,13 @@ unsigned int type;
 			break;
 		}
 	break;
+	case PM_PLUMACH_RILMANI:
+		return SOLID_FOG;
+	break;
+	case PM_FERRUMACH_RILMANI:
+		if(rn2(4)) return ICE_STORM;
+		return SOLID_FOG;
+	break;
 	case PM_GREAT_HIGH_SHAMAN_OF_KURTULMAK:
 		return SUMMON_DEVIL; 
 	case PM_LICH__THE_FIEND_OF_EARTH:
@@ -1626,9 +1633,29 @@ int spellnum;
 		stop_occupation();
 	break;
 	case MON_POISON_GAS:
-		flags.cth_attk=TRUE;//state machine stuff.
-		create_gas_cloud(mtmp->mux, mtmp->muy, rnd(3), rnd(3)+1);
-		flags.cth_attk=FALSE;
+		if(!mtmp){
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_gas_cloud(u.ux, u.uy, rnd(3), rnd(3)+1);
+			flags.cth_attk=FALSE;
+		} else {
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_gas_cloud(mtmp->mux, mtmp->muy, rnd(3), rnd(3)+1);
+			flags.cth_attk=FALSE;
+		}
+		dmg = 0;
+		stop_occupation();
+	break;
+	case SOLID_FOG:
+		if(!mtmp){
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_fog_cloud(u.ux, u.uy, 3, 8);
+			flags.cth_attk=FALSE;
+		} else {
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_fog_cloud(mtmp->mux, mtmp->muy, 3, 8);
+			flags.cth_attk=FALSE;
+			if(mtmp->data == &mons[PM_PLUMACH_RILMANI]) mtmp->mcan = 1;
+		}
 		dmg = 0;
 		stop_occupation();
 	break;
@@ -1831,7 +1858,7 @@ summon_alien:
        int weap, i, tdmg = 0;
 	   int shienChance = 0, shienCount = 0;
        dmg = 0;
-		if(uwep && is_lightsaber(uwep) && uwep->lamplit){
+		if(uwep && is_lightsaber(uwep) && litsaber(uwep)){
 			if(u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))){
 				switch(min(P_SKILL(FFORM_SHIEN), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:
@@ -3460,7 +3487,7 @@ int spellnum;
      case PLAGUE:
 	   if(!mtmp) break;
        if (!resists_sickness(mtmp)) {
-          pline("%s is afflicted with disease!", Monnam(mtmp));
+          	if(canseemon(mtmp)) pline("%s is afflicted with disease!", Monnam(mtmp));
 		  if(!rn2(10)){
 			if (yours) killed(mtmp);
 			else monkilled(mtmp, "", AD_SPEL);

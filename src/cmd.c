@@ -756,7 +756,7 @@ domonability()
 			(IS_DOOR(levl[u.ux][u.uy].typ) && artifact_door(u.ux, u.uy)) ||
 			(IS_ROCK(lev->typ) && lev->typ != SDOOR &&
 			(lev->wall_info & W_NONDIGGABLE) != 0) ||
-			(is_pool(u.ux, u.uy) || is_lava(u.ux, u.uy)) ||
+			(is_pool(u.ux, u.uy, TRUE) || is_lava(u.ux, u.uy)) ||
 			(lev->typ == DRAWBRIDGE_DOWN ||
 			   (is_drawbridge_wall(u.ux, u.uy) >= 0)) ||
 			(boulder_at(u.ux, u.uy)) ||
@@ -1004,7 +1004,15 @@ dofightingform()
 			if(uarm && (is_metallic(uarm))){
 				Sprintf(buf,	"Niman (selected; blocked by armor)");
 			} else {
-				Sprintf(buf,	"Niman (active)");
+				int nskill = P_SKILL(FFORM_NIMAN);
+				if(u.lastcast >= monstermoves && nskill >= P_BASIC){
+					Sprintf(buf,	"Niman (active; +%dd%d)", 
+						nskill == P_BASIC ? 3 : 
+						nskill == P_SKILLED ? 6 : 
+						nskill == P_EXPERT ? 9 : 0, 
+						u.lastcast-monstermoves+1);
+				} else
+					Sprintf(buf,	"Niman (active)");
 			}
 		} else {
 			if(uarm && (is_metallic(uarm))){
@@ -1828,7 +1836,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		 (uarmc && uarmc->otyp == OILSKIN_CLOAK && !uarmc->cursed) ||
 		 (u.sealsActive&SEAL_ENKI)
 	) you_are("waterproof");
-
+	Sprintf(buf, "a drunkard score of %d", u.udrunken);
+	if(u.udrunken >= u.ulevel*3) Sprintf(eos(buf), ", the maximum for an adventurer of your level");
+	you_have(buf);
 	/*** Troubles ***/
 	if (final) {
 		if (Hallucination) you_are("hallucinating");
@@ -2035,7 +2045,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Fast) you_are(Very_fast ? "very fast" : "fast");
 	if (Reflecting) you_have("reflection");
 	if (Reflecting && (
-			(uwep && is_lightsaber(uwep) && uwep->lamplit && 
+			(uwep && is_lightsaber(uwep) && litsaber(uwep) && 
 				((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) || 
 				 (u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 				)
@@ -3084,7 +3094,7 @@ signs_enlightenment()
 		} else if(!uarmc && moves <= u.irisAttack+5){
 			putstr(en_win, 0, "There are iridescent tentacles wrapped around your forearms.");
 			message = TRUE;
-		} else if(!uarm){
+		} else if(!uarm && !uarmc){
 			putstr(en_win, 0, "There are iridescent veins just under the skin of your forearms.");
 			message = TRUE;
 		}
@@ -3368,12 +3378,6 @@ signs_mirror()
 	if(u.sealsActive&SEAL_IRIS && !NoBInvis){
 		if(moves <= u.irisAttack+1){
 			putstr(en_win, 0, "Waving, iridescent tentacles sprout from your forearms.");
-			message = TRUE;
-		} else if(!uarmc && moves <= u.irisAttack+5){
-			putstr(en_win, 0, "There are iridescent tentacles wrapped around your forearms.");
-			message = TRUE;
-		} else if(!uarm){
-			putstr(en_win, 0, "There are iridescent veins just under the skin of your forearms.");
 			message = TRUE;
 		}
 	}

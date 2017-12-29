@@ -68,6 +68,8 @@ enum {
     DRAWBRIDGE_DOWN,
     AIR,
     CLOUD,
+    FOG,
+    PUDDLE,
     MAX_TYPE
 };
 #define INVALID_TYPE	127
@@ -101,6 +103,8 @@ enum {
 #define IS_FURNITURE(typ) ((typ) >= STAIRS && (typ) <= ALTAR)
 #define IS_AIR(typ)	((typ) == AIR || (typ) == CLOUD)
 #define IS_SOFT(typ)	((typ) == AIR || (typ) == CLOUD || IS_POOL(typ))
+#define IS_PUDDLE(typ)	((typ) == PUDDLE)
+#define IS_PUDDLE_OR_POOL(typ)	(IS_PUDDLE(typ) || IS_POOL(typ))
 
 /*
  * The screen symbols may be the default or defined at game startup time.
@@ -154,6 +158,8 @@ enum {
     S_hcdbridge,	/* closed drawbridge, horizontal wall */
     S_air,
     S_cloud,
+    S_fog,
+    S_puddle,
     S_water,
 
 /* end dungeon characters, begin traps */
@@ -346,6 +352,7 @@ extern uchar showsymcolors[MAXPCHARS];
 /*
  * Room areas may be iced pools
  */
+#define ICED_PUDDLE	4
 #define ICED_POOL	8
 #define ICED_MOAT	16
 

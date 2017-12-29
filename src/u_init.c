@@ -652,6 +652,7 @@ static const struct def_skill Skill_A[] = {
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
+    { P_WAND_POWER, P_SKILLED },
     { P_TWO_WEAPON_COMBAT, P_BASIC },
     { P_BARE_HANDED_COMBAT, P_EXPERT },
     { P_NONE, 0 }
@@ -775,6 +776,7 @@ static const struct def_skill Skill_H[] = {
     { P_SLING, P_SKILLED },		{ P_DART, P_EXPERT },
     { P_SHURIKEN, P_SKILLED },		{ P_UNICORN_HORN, P_EXPERT },
     { P_HEALING_SPELL, P_EXPERT },
+    { P_WAND_POWER, P_BASIC },
     { P_BARE_HANDED_COMBAT, P_BASIC },
     { P_BEAST_MASTERY, P_EXPERT },
     { P_NONE, 0 }
@@ -1025,6 +1027,7 @@ static const struct def_skill Skill_Pir[] = {
 //#endif
 	{ P_ATTACK_SPELL, P_BASIC },{ P_DIVINATION_SPELL, P_BASIC },
 	{ P_ENCHANTMENT_SPELL, P_BASIC },{ P_ESCAPE_SPELL, P_SKILLED },
+    { P_WAND_POWER, P_SKILLED },
     { P_TWO_WEAPON_COMBAT, P_SKILLED },
     { P_BARE_HANDED_COMBAT, P_EXPERT },
     { P_NONE, 0 }
@@ -1042,6 +1045,7 @@ static const struct def_skill Skill_R[] = {
     { P_DART, P_EXPERT },		{ P_SHURIKEN, P_SKILLED },
     { P_DIVINATION_SPELL, P_SKILLED },	{ P_ESCAPE_SPELL, P_SKILLED },
     { P_MATTER_SPELL, P_SKILLED },
+    { P_WAND_POWER, P_EXPERT },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
@@ -1055,7 +1059,7 @@ static const struct def_skill Skill_Ran[] = {
     { P_AXE, P_SKILLED },	 { P_PICK_AXE, P_BASIC },
     { P_SHORT_SWORD, P_BASIC },	 { P_MORNING_STAR, P_BASIC },
     { P_FLAIL, P_SKILLED },	 { P_HAMMER, P_BASIC },
-    { P_QUARTERSTAFF, P_BASIC }, { P_POLEARMS, P_SKILLED },
+    { P_QUARTERSTAFF, P_EXPERT }, { P_POLEARMS, P_SKILLED },
 	{ P_HARVEST, P_SKILLED },
     { P_SPEAR, P_SKILLED },	 { P_JAVELIN, P_EXPERT },
     { P_TRIDENT, P_BASIC },	 { P_BOW, P_EXPERT },
@@ -1065,6 +1069,7 @@ static const struct def_skill Skill_Ran[] = {
     { P_HEALING_SPELL, P_BASIC },
     { P_DIVINATION_SPELL, P_EXPERT },
     { P_ESCAPE_SPELL, P_BASIC },
+    { P_WAND_POWER, P_BASIC },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
@@ -1114,6 +1119,7 @@ static const struct def_skill Skill_T[] = {
 	{ P_UNICORN_HORN, P_SKILLED },
     { P_DIVINATION_SPELL, P_SKILLED },	{ P_ENCHANTMENT_SPELL, P_BASIC },
     { P_ESCAPE_SPELL, P_SKILLED },
+    { P_WAND_POWER, P_SKILLED },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
@@ -1139,6 +1145,7 @@ static const struct def_skill Skill_V[] = {
     { P_SLING, P_BASIC },			{ P_BOW, P_EXPERT },
     { P_ATTACK_SPELL, P_EXPERT },	{ P_ESCAPE_SPELL, P_BASIC },
 	{ P_DIVINATION_SPELL, P_SKILLED },
+    { P_WAND_POWER, P_BASIC },
 #ifdef STEED
     { P_RIDING, P_SKILLED },
 #endif
@@ -1162,6 +1169,7 @@ static const struct def_skill Skill_W[] = {
     { P_DIVINATION_SPELL, P_EXPERT },	{ P_ENCHANTMENT_SPELL, P_SKILLED },
     { P_CLERIC_SPELL, P_SKILLED },	{ P_ESCAPE_SPELL, P_EXPERT },
     { P_MATTER_SPELL, P_EXPERT },
+    { P_WAND_POWER, P_SKILLED },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
@@ -1736,6 +1744,10 @@ u_init()
 		if (Race_if(PM_DROW)) Bard[BARD_CLOAK].trotyp = DROVEN_CHAIN_MAIL;
 		Bard[BARD_BOOZE].trquan = rn1(2, 5);
 		ini_inv(Bard);
+		if(Race_if(PM_DROW)){
+			BlackTorches[0].trquan = 6;
+			ini_inv(BlackTorches);
+		}
 		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
 			u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] = u.ualign.type = A_NEUTRAL; /* Troubadores can't be lawful, so lets bump CAs down to Neutral */
 		}

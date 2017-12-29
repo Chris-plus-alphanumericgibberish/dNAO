@@ -534,6 +534,18 @@ boolean
 arti_bright(obj)
 struct obj *obj;
 {
+	if(obj && obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+		xchar x, y;
+		get_obj_location(obj, &x, &y, 0);
+		if(levl[x][y].lit && 
+			!(viz_array[y][x]&TEMP_DRK3 && 
+			 !(viz_array[y][x]&TEMP_LIT1)
+			)
+		) return TRUE;
+		if(viz_array[y][x]&TEMP_LIT1 && 
+			!(viz_array[y][x]&TEMP_DRK3)
+		) return !rn2(10);
+	}
     return (obj && obj->oartifact && (spec_ability2(obj, SPFX2_BRIGHT) || 
 									  (obj->oartifact == ART_PEN_OF_THE_VOID &&
 									   obj->ovar1 & SEAL_JACK)));
@@ -545,7 +557,7 @@ struct obj *obj;
 {
     return (obj && (
 		(obj->oartifact && spec_ability2(obj, SPFX2_SHATTER)) ||
-		(is_lightsaber(obj) && obj->lamplit)
+		(is_lightsaber(obj) && litsaber(obj))
 	));
 }
 
@@ -590,7 +602,7 @@ struct obj *obj;
 {
     return (obj && (
 		(obj->oartifact && spec_ability2(obj, SPFX2_SHINING)) ||
-		(is_lightsaber(obj) && obj->lamplit) ||
+		(is_lightsaber(obj) && litsaber(obj)) ||
 		((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && obj->lamplit)
 	));
 }
@@ -1022,6 +1034,18 @@ touch_artifact(obj, mon, hypothetical)
 			}
 			else if(obj->oartifact == ART_HAND_MIRROR_OF_CTHYLLA && !(u.specialSealsKnown&SEAL_NUDZIARTH)){
 				pline("The cracks on the mirror's surface form part of a seal.");
+				pline("In fact, you realize that all cracked and broken mirrors everywhere together are working towards writing this seal.");
+				pline("With that realization comes knowledge of the seal's final form!");
+				u.specialSealsKnown |= SEAL_NUDZIARTH;
+			}
+			else if(obj->oartifact == ART_STAFF_OF_TWELVE_MIRRORS && !(u.specialSealsKnown&SEAL_NUDZIARTH)){
+				pline("The cracks on the mirrors' surfaces form part of a seal.");
+				pline("In fact, you realize that all cracked and broken mirrors everywhere together are working towards writing this seal.");
+				pline("With that realization comes knowledge of the seal's final form!");
+				u.specialSealsKnown |= SEAL_NUDZIARTH;
+			}
+			else if(obj->oartifact == ART_INFINITY_S_MIRRORED_ARC && !(u.specialSealsKnown&SEAL_NUDZIARTH)){
+				pline("The cracks on the thin mirrored arcs form part of a seal.");
 				pline("In fact, you realize that all cracked and broken mirrors everywhere together are working towards writing this seal.");
 				pline("With that realization comes knowledge of the seal's final form!");
 				u.specialSealsKnown |= SEAL_NUDZIARTH;
@@ -1589,9 +1613,9 @@ int tmp;
 			if(Fumbling) multiplier++;
 			if(Wounded_legs) multiplier++;
 			return damd ? d(multiplier, damd) : max(multiplier*tmp,multiplier);
-		} else if(otmp && otmp->oartifact == ART_LIMITED_MOON){
-			return 2*(damd ? d(is_lightsaber(otmp) ? 3 : 1, damd) : max(tmp,1));
-		} else return damd ? d(is_lightsaber(otmp) ? 3 : 1, damd) : max(tmp,1);
+		} else if(otmp && (otmp->oartifact == ART_LIMITED_MOON || otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS)){
+			return 2*(damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1));
+		} else return damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1);
 	}
 	return 0;
 }
@@ -2421,7 +2445,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 
 	if(otmp->oartifact == ART_LIMITED_MOON && magr == &youmonst){
 		*dmgptr *= ((double)u.uen/u.uenmax);
-		// if(u.uen >= 10) u.uen -= 10;
+		if(u.uen >= ((int)(.3*u.uenmax + 3))) u.uen -= 3;
 	}
 	
 	if (otmp->oartifact == ART_ICONOCLAST && is_angel(mdef->data) ) *dmgptr += 9;
@@ -2436,6 +2460,13 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	realizes_damage = (youdefend || vis || 
 			   /* feel the effect even if not seen */
 			   (youattack && mdef == u.ustuck));
+	if(otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS){
+		// static clashingmessage = FALSE;
+		if(youdefend) wake_nearto_noisy(u.ux, u.uy, (*dmgptr)*(*dmgptr)*2);
+		else wake_nearto_noisy(mdef->mx, mdef->my, (*dmgptr)*(*dmgptr)*2);
+		// if(youattack && !clashingmessage){
+		// }
+	}
 	if( (spec_ability2(otmp, SPFX2_RAM) && !rn2(4)) || 
 		(spec_ability2(otmp, SPFX2_RAM2) && (otmp->oartifact != ART_TOBIUME || *dmgptr+6 >= mdef->mhp))
 		){
@@ -3592,22 +3623,22 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	  if(!youdefend && mdef->mhp <= 0) return TRUE; //otherwise lifesaved
       messaged = TRUE;
     }
-	if (!spec_dbon_applies) {
-	    /* since damage bonus didn't apply, nothing more to do;  
-	       no further attacks have side-effects on inventory */
-	    return messaged;
-	}
 	if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD) {
 		if (youattack && mdef->mattackedu) {
-			int life = (*dmgptr)*.3+1;
+			int life = otmp->lamplit ? ((*dmgptr)*.3+1) : ((*dmgptr)*.1+1);
 			healup(life, 0, FALSE, FALSE);
 		} else { /* m vs m or m vs u*/
-			int life = (*dmgptr)*.3+1;
 			if (magr && magr->mhp < magr->mhpmax) {
+				int life = otmp->lamplit ? ((*dmgptr)*.3+1) : ((*dmgptr)*.1+1);
 				magr->mhp += life;
 				if (magr->mhp > magr->mhpmax) magr->mhp = magr->mhpmax;
 			}
 		}
+	}
+	if (!spec_dbon_applies) {
+	    /* since damage bonus didn't apply, nothing more to do;  
+	       no further attacks have side-effects on inventory */
+	    return messaged;
 	}
 	if (otmp->oartifact == ART_LIFEHUNT_SCYTHE) {
 		if (youattack) {
@@ -3671,8 +3702,8 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			if(otmp->oartifact == ART_STORMBRINGER && dieroll <= 2){
 				*dmgptr += 8;
 				int leveldrain = *dmgptr/4;
-				if(!is_silent_mon(mdef)) pline("%s cries out in pain and despair and terror.", Monnam(mdef));
 				if(*dmgptr > mdef->mhpmax-1){
+					if(!is_silent_mon(mdef)) pline("%s cries out in pain and despair and terror.", Monnam(mdef));
 					if ((mdef->mhpmax-1)/2){
 						if(youattack) healup((mdef->mhpmax-1)/2, 0, FALSE, FALSE);
 						else {
@@ -5327,6 +5358,16 @@ arti_invoke(obj)
 				pline("The endless pages of the book turn themselves. They settle on a section describing %s.",OBJ_NAME(objects[obj->ovar1]));
 			}
 		}break;
+		case ALTMODE:
+			if(obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+				if(obj->altmode)
+					You("slide the tangled mirrored arcs around (and through?) each-other, closing off the second beam-path.");
+				else
+					You("slide the tangled mirrored arcs around (and through?) each-other, opening the second beam-path.");
+			}
+			obj->altmode = !obj->altmode;
+			obj->age = monstermoves;
+		break;
 		case LORDLY:
 			if(uwep && uwep == obj){
 				//struct obj *otmp;
@@ -5601,7 +5642,7 @@ arti_invoke(obj)
 #ifdef	AMIGA
 							amii_speaker( obj, "aefeaefeaefeaefeaefe", AMII_LOUDER_VOLUME );
 #endif
-							u.voidChime = 5;
+							u.rangBell = moves;
 							wake_nearby_noisy();
 						} else if (obj->blessed) {
 							int res = 0;

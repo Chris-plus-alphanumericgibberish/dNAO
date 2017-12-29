@@ -1120,7 +1120,8 @@ boolean spiritseal;
 	} else {
 	    /* charged Bell of Opening */
 	    consume_obj_charge(obj, TRUE);
-
+		
+		
 	    if (u.uswallow) {
 		if (!obj->cursed)
 		    (void) openit();
@@ -1142,6 +1143,7 @@ boolean spiritseal;
 #ifdef	AMIGA
 		amii_speaker( obj, "aefeaefeaefeaefeaefe", AMII_LOUDER_VOLUME );
 #endif
+		if(spiritseal && !obj->cursed) u.rangBell = moves;
 		obj->age = moves;
 		learno = TRUE;
 		wakem = TRUE;
@@ -1391,6 +1393,10 @@ struct obj *obj;
 {
 	char buf[BUFSZ];
 
+	if(obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+		You("can't find an %s switch", litsaber(obj) ? "off" : "on");
+		return;
+	}
 	if(Underwater && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
 		pline("This is not a diving lamp.");
 		return;
@@ -2151,7 +2157,7 @@ long timeout;
 			    Sprintf(carriedby, "%s pack",
 				     s_suffix(a_monnam(mon)));
 			}
-			else if (is_pool(mon->mx, mon->my))
+			else if (is_pool(mon->mx, mon->my, FALSE))
 			    Strcpy(carriedby, "empty water");
 			else
 			    Strcpy(carriedby, "thin air");
@@ -2235,7 +2241,7 @@ struct obj **optr;
 	You("%s and it transforms.",
 	    (u.dx||u.dy) ? "set the figurine beside you" :
 	    (Weightless || Is_waterlevel(&u.uz) ||
-	     is_pool(cc.x, cc.y)) ?
+	     is_pool(cc.x, cc.y, TRUE)) ?
 		"release the figurine" :
 	    (u.dz < 0 ?
 		"toss the figurine into the air" :
@@ -2957,6 +2963,8 @@ struct obj *otmp;
 
 	if (nohands(youracedata))
 	    what = "without hands";
+	else if(!freehand())
+	    what = "without free hands";
 	else if (Stunned)
 	    what = "while stunned";
 	else if (u.uswallow)
@@ -2966,7 +2974,7 @@ struct obj *otmp;
 	    what = "underwater";
 	else if (Levitation)
 	    what = "while levitating";
-	else if (is_pool(u.ux, u.uy))
+	else if (is_pool(u.ux, u.uy, TRUE))
 	    what = "in water";
 	else if (is_lava(u.ux, u.uy))
 	    what = "in lava";
@@ -3099,9 +3107,7 @@ struct obj **optr;
     mtmp = m_at(rx, ry);
 	ttmp = t_at(rx, ry);
 
-	if (nohands(youracedata))
-	    what = "without hands";
-	else if (Stunned)
+	if (Stunned)
 	    what = "while stunned";
 	else if (u.uswallow)
 	    what = is_animal(u.ustuck->data) ? "while swallowed" :
@@ -3110,7 +3116,7 @@ struct obj **optr;
 	    what = "underwater";
 	else if (Levitation)
 	    what = "while levitating";
-	else if (is_pool(rx, ry))
+	else if (is_pool(rx, ry, TRUE))
 	    what = "in water";
 	else if (is_lava(rx, ry))
 	    what = "in lava";
@@ -3169,9 +3175,7 @@ struct obj *otmp;
 {
 	const char *what = (char *)0;
 
-	if (nohands(youracedata))
-	    what = "without hands";
-	else if (Stunned)
+	if (Stunned)
 	    what = "while stunned";
 	else if (u.uswallow)
 	    what = is_animal(u.ustuck->data) ? "while swallowed" :
@@ -3662,7 +3666,7 @@ use_grapple (obj)
 	    }
 	    /* FALL THROUGH */
 	case 3:	/* Surface */
-	    if (IS_AIR(levl[cc.x][cc.y].typ) || is_pool(cc.x, cc.y))
+	    if (IS_AIR(levl[cc.x][cc.y].typ) || is_pool(cc.x, cc.y, TRUE))
 		pline_The("hook slices through the %s.", surface(cc.x, cc.y));
 	    else {
 		You("are yanked toward the %s!", surface(cc.x, cc.y));
@@ -3707,8 +3711,8 @@ do_break_wand(obj)
 
     is_fragile = (!strcmp(OBJ_DESCR(objects[obj->otyp]), "balsa"));
 
-    if (nohands(youracedata)) {
-	You_cant("break %s without hands!", the_wand);
+    if (nolimbs(youracedata)) {
+	You_cant("break %s without limbs!", the_wand);
 	return 0;
     } else if (obj->oartifact || ACURR(A_STR) < (is_fragile ? 5 : 10)) {
 	You("don't have the strength to break %s!", the_wand);
@@ -4459,7 +4463,7 @@ struct obj **optr;
 		You("build a clockwork and %s.",
 			(u.dx||u.dy) ? "set it beside you" :
 			(Weightless || Is_waterlevel(&u.uz) ||
-			 is_pool(cc.x, cc.y)) ?
+			 is_pool(cc.x, cc.y, TRUE)) ?
 			"release it" :
 			(u.dz < 0 ?
 			"toss it into the air" :

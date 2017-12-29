@@ -281,9 +281,15 @@ unsigned *ospecial;
 					}
 					if(offset == S_drkroom || offset == S_litroom){
 						if(u.uz.dlevel < spire_level.dlevel &&
-							u.uz.dlevel > gatetown_level.dlevel)
-							color = (offset == S_litroom) ? CLR_BRIGHT_GREEN : CLR_GREEN;
-						else color = CLR_BROWN;
+							u.uz.dlevel > gatetown_level.dlevel){
+								if (*in_rooms(x,y, SHOPBASE)
+									|| *in_rooms(x,y, TEMPLE)
+									|| *in_rooms(x,y, BARRACKS)
+									|| *in_rooms(x,y, COURT)
+								) color = (offset == S_litroom) ? CLR_BROWN : CLR_BLACK;
+								else color = (offset == S_litroom) ? CLR_BRIGHT_GREEN : CLR_GREEN;
+							}
+						else color = (offset == S_litroom) ? CLR_BROWN : CLR_BLACK;
 					}
 				}
 				else if(Is_rlyeh(&u.uz)){
@@ -418,6 +424,10 @@ unsigned *ospecial;
 			}
 			if(artifact_door(x, y)){
 				color = CLR_MAGENTA;
+			}
+			if(u.uevent.found_square && invocation_pos(x, y) && !On_stairs(x, y)){
+				color = CLR_MAGENTA;
+				ch = '_';
 			}
 		}
 		if (color == NO_COLOR) cmap_color(offset);

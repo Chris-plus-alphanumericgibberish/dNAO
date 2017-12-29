@@ -1946,6 +1946,108 @@ register struct monst *mtmp;
 			break;}
 			}
 		break;}
+	    case S_NEU_OUTSIDER:{
+			if(ptr == &mons[PM_PLUMACH_RILMANI]){
+				otmp = mksobj(rn2(3) ? SICKLE : rn2(3) ? SCYTHE : SHORT_SWORD, FALSE, FALSE);
+			    otmp->cursed = 0;
+			    otmp->blessed = 0;
+				otmp->obj_material = IRON;
+				fix_object(otmp);
+			    (void) mpickobj(mtmp, otmp);
+				if(otmp->otyp == SHORT_SWORD && !rn2(3)){
+					otmp = mksobj(KITE_SHIELD, FALSE, FALSE);
+					otmp->cursed = 0;
+					otmp->blessed = 0;
+					otmp->obj_material = METAL;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+				}
+			}
+			if(ptr == &mons[PM_FERRUMACH_RILMANI]){
+				otmp = mksobj(rn2(2) ? HALBERD : BATTLE_AXE, FALSE, FALSE);
+				otmp->cursed = 0;
+				otmp->blessed = 0;
+				if(otmp->spe < 1) otmp->spe = 1;
+				otmp->obj_material = IRON;
+				fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
+			}
+			if(ptr == &mons[PM_CUPRILACH_RILMANI]){
+				otmp = mksobj(SHORT_SWORD, FALSE, FALSE);
+				otmp->cursed = 0;
+				otmp->blessed = 0;
+				if(otmp->spe < 2) otmp->spe = 2;
+				otmp->obj_material = COPPER;
+				fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
+				if(!rn2(3)){
+					otmp = mksobj(BUCKLER, FALSE, FALSE);
+					otmp->cursed = 0;
+					otmp->blessed = 0;
+					if(otmp->spe < 2) otmp->spe = 2;
+					otmp->obj_material = COPPER;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+				}
+			}
+			if(ptr == &mons[PM_ARGENACH_RILMANI]){
+				otmp = mksobj(rn2(3) ? BROADSWORD : rn2(3) ? BATTLE_AXE : HALBERD, FALSE, FALSE);
+			    otmp->cursed = 0;
+			    otmp->blessed = 0;
+				if(otmp->spe < 3) otmp->spe = 3;
+				otmp->obj_material = SILVER;
+				fix_object(otmp);
+			    (void) mpickobj(mtmp, otmp);
+				if(otmp->otyp == BROADSWORD){
+					otmp = mksobj(rn2(6) ? KITE_SHIELD : SHIELD_OF_REFLECTION, FALSE, FALSE);
+					otmp->cursed = 0;
+					otmp->blessed = 0;
+					if(otmp->spe < 3) otmp->spe = 3;
+					otmp->obj_material = SILVER;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+				}
+			}
+			if(ptr == &mons[PM_HYDRARGYRUMACH_RILMANI]){
+				otmp = mksobj(VOULGE, FALSE, FALSE);
+			    otmp->cursed = 0;
+			    otmp->blessed = 0;
+				otmp->obj_material = METAL;
+				fix_object(otmp);
+			    (void) mpickobj(mtmp, otmp);
+				otmp = mksobj(LONG_SWORD, FALSE, FALSE);
+			    otmp->cursed = 0;
+			    otmp->blessed = 0;
+				otmp->obj_material = METAL;
+				fix_object(otmp);
+			    (void) mpickobj(mtmp, otmp);
+			}
+			if(ptr == &mons[PM_AURUMACH_RILMANI]){
+				otmp = mksobj(HALBERD, FALSE, FALSE);
+			    otmp->cursed = 0;
+			    otmp->blessed = 0;
+				if(otmp->spe < 4) otmp->spe = 4;
+				otmp->obj_material = GOLD;
+				fix_object(otmp);
+			    (void) mpickobj(mtmp, otmp);
+				otmp = mksobj(TWO_HANDED_SWORD, FALSE, FALSE);
+			    otmp->cursed = 0;
+			    otmp->blessed = 0;
+				if(otmp->spe < 4) otmp->spe = 4;
+				otmp->obj_material = GOLD;
+				fix_object(otmp);
+			    (void) mpickobj(mtmp, otmp);
+				if(!rn2(3)){
+					otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+					otmp->cursed = 0;
+					otmp->blessed = 0;
+					if(otmp->spe < 4) otmp->spe = 4;
+					otmp->obj_material = GOLD;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+				}
+			}
+		break;}
 	    case S_LAW_ANGEL:
 	    case S_NEU_ANGEL:
 	    case S_CHA_ANGEL:
@@ -2938,8 +3040,7 @@ register struct monst *mtmp;
 		break;
 	    case S_ORC:
 		if(rn2(2)) (void)mongets(mtmp, ORCISH_HELM);
-		switch (mm != PM_ORC_CAPTAIN ? mm :
-			rn2(2) ? PM_MORDOR_ORC : PM_URUK_HAI) {
+		switch (mm) {
 		    case PM_ORC_OF_THE_AGES_OF_STARS:
 				(void)mongets(mtmp, HIGH_ELVEN_WARSWORD);
 				(void)mongets(mtmp, ORCISH_SHIELD);
@@ -2960,6 +3061,7 @@ register struct monst *mtmp;
 				(void)mongets(mtmp, GLOVES);
 				(void)mongets(mtmp, HIGH_BOOTS);
 			break;
+		    case PM_ORC_CAPTAIN:
 		    case PM_MORDOR_ORC:
 			if(!rn2(3)) (void)mongets(mtmp, SCIMITAR);
 			if(!rn2(3)) (void)mongets(mtmp, ORCISH_SHIELD);
@@ -2975,13 +3077,14 @@ register struct monst *mtmp;
 			}
 //endif
 			break;
+		    case PM_URUK_CAPTAIN:
 		    case PM_URUK_HAI:
 			if(!rn2(3)) (void)mongets(mtmp, ORCISH_CLOAK);
 			if(!rn2(3)) (void)mongets(mtmp, ORCISH_SHORT_SWORD);
 			if(!rn2(3)) (void)mongets(mtmp, IRON_SHOES);
 			if(!rn2(3)) (void)mongets(mtmp, URUK_HAI_SHIELD);
 //ifdef BARD
-			if (mm == PM_ORC_CAPTAIN ? !rn2(10) : !rn2(50)){
+			if (mm == PM_URUK_CAPTAIN ? !rn2(10) : !rn2(50)){
 			    (void)mongets(mtmp, LEATHER_DRUM);
 				(void)mongets(mtmp, CROSSBOW);
 				m_initthrow(mtmp, CROSSBOW_BOLT, 12);
@@ -4994,6 +5097,9 @@ register int	mmflags;
 		undeadfaction = ZOMBIFIED;
 		unsethouse = TRUE;
 		m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+	} else if(mtmp->data == &mons[PM_ECHO]){
+		undeadfaction = SKELIFIED;
+		unsethouse = TRUE;
 	} else if(!undeadfaction && (mtmp->data->geno&G_HELL) == 0 && Is_mephisto_level(&u.uz)){
 		undeadfaction = CRYSTALFIED;
 		unsethouse = TRUE;
@@ -5024,6 +5130,23 @@ register int	mmflags;
 		(ptr == &mons[PM_SPROW] || ptr == &mons[PM_DRIDER] || ptr == &mons[PM_CAVE_LIZARD] || ptr == &mons[PM_LARGE_CAVE_LIZARD])
 	) mtmp->mpeaceful = TRUE;
 	else mtmp->mpeaceful = (mmflags & MM_ANGRY) ? FALSE : (peace_minded(ptr) && !is_derived_undead_mon(mtmp));
+	
+	if(mndx == PM_CHAOS){
+		mtmp->mhpmax = 15*mtmp->mhpmax;
+		mtmp->mhp = mtmp->mhpmax;
+	} else if(mndx == PM_KARY__THE_FIEND_OF_FIRE){
+		mtmp->mhpmax = 10*mtmp->mhpmax;
+		mtmp->mhp = mtmp->mhpmax;
+	} else if(mndx == PM_LICH__THE_FIEND_OF_EARTH){
+		mtmp->mhpmax = 10*mtmp->mhpmax;
+		mtmp->mhp = mtmp->mhpmax;
+	} else if(mndx == PM_KRAKEN__THE_FIEND_OF_WATER){
+		mtmp->mhpmax = 10*mtmp->mhpmax;
+		mtmp->mhp = mtmp->mhpmax;
+	} else if(mndx == PM_TIAMAT__THE_FIEND_OF_WIND){
+		mtmp->mhpmax = 10*mtmp->mhpmax;
+		mtmp->mhp = mtmp->mhpmax;
+	}
 	
 	switch(ptr->mlet) {
 		case S_MIMIC:
@@ -5279,7 +5402,7 @@ register int	mmflags;
 			}
 		break;
 		case S_EEL:
-			if (is_pool(x, y))
+			if (is_pool(x, y, FALSE))
 			    mtmp->mundetected = TRUE;
 			if(mndx == PM_WATCHER_IN_THE_WATER){ 
 				mtmp->mhpmax = 3*mtmp->mhpmax;
@@ -5308,7 +5431,10 @@ register int	mmflags;
 			}
 			if(!(mmflags & MM_EDOG)){
 			if (anymon && mndx == PM_ORC_CAPTAIN){
-				for(num = rn1(10,3); num >= 0; num--) makemon(&mons[PM_HILL_ORC], mtmp->mx, mtmp->my, MM_ADJACENTOK);
+				for(num = rn1(10,3); num >= 0; num--) makemon(rn2(3) ? &mons[PM_HILL_ORC] : &mons[PM_MORDOR_ORC], mtmp->mx, mtmp->my, MM_ADJACENTOK);
+			}
+			if (anymon && mndx == PM_URUK_CAPTAIN){
+				for(num = rn1(10,3); num >= 0; num--) makemon(&mons[PM_URUK_HAI], mtmp->mx, mtmp->my, MM_ADJACENTOK);
 			}
 			if (anymon && mndx == PM_ORC_SHAMAN){
 				for(num = rnd(3); num >= 0; num--) makemon(&mons[PM_HILL_ORC], mtmp->mx, mtmp->my, MM_ADJACENTOK);
@@ -5394,10 +5520,6 @@ register int	mmflags;
 				mtmp->mhpmax = 2*mtmp->mhpmax;
 				mtmp->mhp = mtmp->mhpmax;
 			}
-			else if(mndx == PM_CHAOS){
-				mtmp->mhpmax = 15*mtmp->mhpmax;
-				mtmp->mhp = mtmp->mhpmax;
-			}
 			else if(mndx == PM_DEMOGORGON){
 				mtmp->mhpmax = 2*mtmp->mhpmax;
 				mtmp->mhp = mtmp->mhpmax;
@@ -5423,6 +5545,13 @@ register int	mmflags;
 			}
 			if(mndx == PM_HELLCAT){
 				if(!isdark(mtmp->mx,mtmp->my)){
+					mtmp->minvis = TRUE;
+					mtmp->perminvis = TRUE;
+				}
+			    mtmp->invis_blkd = TRUE;
+			}
+			if(mndx == PM_GRUE){
+				if(isdark(mtmp->mx,mtmp->my)){
 					mtmp->minvis = TRUE;
 					mtmp->perminvis = TRUE;
 				}
@@ -6464,6 +6593,10 @@ struct monst *mtmp, *victim;
 		) hp_threshold *= 3;
 	    else if (ptr == &mons[PM_RAZORVINE]) hp_threshold *= .5;
 		else if(ptr == &mons[PM_CHAOS]) hp_threshold *= 15;
+		else if(ptr == &mons[PM_KARY__THE_FIEND_OF_FIRE]) hp_threshold *= 10;
+		else if(ptr == &mons[PM_LICH__THE_FIEND_OF_EARTH]) hp_threshold *= 10;
+		else if(ptr == &mons[PM_KRAKEN__THE_FIEND_OF_WATER]) hp_threshold *= 10;
+		else if(ptr == &mons[PM_TIAMAT__THE_FIEND_OF_WIND]) hp_threshold *= 10;
 		else if(ptr == &mons[PM_CHOKHMAH_SEPHIRAH]) hp_threshold *= u.chokhmah;
 	    lev_limit = 3 * (int)ptr->mlevel / 2;	/* same as adj_lev() */
 	    /* If they can grow up, be sure the level is high enough for that */

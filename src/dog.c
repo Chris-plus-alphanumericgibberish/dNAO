@@ -130,7 +130,7 @@ boolean quietly;
 
 	if (!mtmp) return (struct monst *)0;
 
-	if (is_pool(mtmp->mx, mtmp->my) && minliquid(mtmp))
+	if (is_pool(mtmp->mx, mtmp->my, FALSE) && minliquid(mtmp))
 		return (struct monst *)0;
 
 	initedog(mtmp);
@@ -1013,7 +1013,7 @@ rock:
 		obj->obj_material == IRON)
 		return(TABU);
 	    if (hates_unholy(mon->data) &&
-		obj->cursed)
+		is_unholy(obj))
 		return(TABU);
 	    if (herbi && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
 		return CADAVER;

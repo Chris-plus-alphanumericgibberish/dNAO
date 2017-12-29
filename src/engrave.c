@@ -298,6 +298,8 @@ static const char *haluMesg[] = {
 	"Ash nazg durbatuluk, ash nazg gimbatul, ash nazg thrakatuluk, agh burzum-ishi krimpatul", /*the Lord of the Rings*/
 		"This thing all things devours.",
 		"Not all those who wander are lost.",
+		"But if of ships I now should sing, what ship would come for me?  What ship would bear me ever back across so wide a Sea?",
+		"Seven stars, and seven stones, and one white tree.",
 	"This is the curse of the Buddha-you will never again be the same as once you were.", /*Lord of Light*/
 		"Tricky and brilliant and heartfelt and dangerous.",
 		"Death is mighty, and is no one's friend.",
@@ -364,6 +366,7 @@ static const char *haluMesg[] = {
 		"Bee There Orr Bee A Rectangular Thyng",
 		"We're certainly dwarves",
 		"There is no doubt being human is incredibly difficult and cannot be mastered in one lifetime.",
+	"Now, here, you see, it takes all the running you can do, to keep in the same place.", /*Through the Looking-Glass */
 	"NOT A Secret Base", /*Gunnerkrigg Court*/
 	"We have the option to definitely die, but I've decided against it.", /*Schlock Mercenary*/
 	"Short to long term memory impaired. Go to Robotics Building. Explain about Bowman's architecture. Write down everything.", /*Freefall*/
@@ -1221,7 +1224,7 @@ register int x, y;
 	    return "maw";
 	else if (IS_AIR(lev->typ) && Weightless)
 	    return "air";
-	else if (is_pool(x,y))
+	else if (is_pool(x,y, TRUE))
 	    return (Underwater && !Is_waterlevel(&u.uz)) ? "bottom" : "water";
 	else if (is_ice(x,y))
 	    return "ice";
@@ -1235,6 +1238,8 @@ register int x, y;
 	    return "headstone";
 	else if(IS_FOUNTAIN(levl[x][y].typ))
 	    return "fountain";
+	else if(IS_PUDDLE(levl[x][y].typ))
+	    return "muddy floor";
 	else if ((IS_ROOM(lev->typ) && !Is_earthlevel(&u.uz)) ||
 		 IS_WALL(lev->typ) || IS_DOOR(lev->typ) || lev->typ == SDOOR)
 	    return "floor";
@@ -1458,13 +1463,13 @@ register int x,y;
 	/* Sensing an engraving does not require sight,
 	 * nor does it necessarily imply comprehension (literacy).
 	 */
-	if(ep && ep->engr_txt[0] && (Underwater || !is_pool(x,y))) {
+	if(ep && ep->engr_txt[0] && (Underwater || !is_pool(x,y, FALSE))) {
 	    switch(ep->engr_type) {
 	    case DUST:
 		if(!Blind) {
 			sensed = 1;
 			pline("%s is written here in the %s.", Something,
-				is_ice(x,y) ? "frost" : "dust");
+				is_ice(x,y) ? "frost" : is_pool(x,y, TRUE) ? "mud" : "dust");
 		}
 		break;
 	    case ENGRAVE:
@@ -1751,8 +1756,9 @@ int x, y;
 int
 freehand()
 {
-	return(!uwep || !welded(uwep) ||
-	   (!bimanual(uwep,youracedata) && (!uarms || !uarms->cursed)));
+	return((!uarm || uarm->otyp != STRAITJACKET || !(uarm->cursed)) && 
+		(!uwep || !welded(uwep) ||
+	   (!bimanual(uwep,youracedata) && (!uarms || !uarms->cursed))));
 /*	if ((uwep && bimanual(uwep)) ||
 	    (uwep && uarms))
 		return(0);
@@ -1857,10 +1863,10 @@ doengrave()
 	} else if (is_lava(u.ux, u.uy)) {
 		You_cant("write on the lava!");
 		return(0);
-	} /*else if (is_pool(u.ux,u.uy) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
+	} /*else if (is_pool(u.ux,u.uy, FALSE) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
 		You_cant("draw on the water!");
 		return(0);
-	}*/else if(is_pool(u.ux,u.uy) && !u.uinwater){
+	}*/else if(is_pool(u.ux,u.uy, FALSE) && !u.uinwater){
 		You_cant("draw on the water!");
 		return(0);
 	}
@@ -2227,7 +2233,7 @@ doengrave()
 
 	    case TOOL_CLASS:
 		if (is_lightsaber(otmp)) {
-			if (otmp->lamplit) type = BURN;
+			if (litsaber(otmp)) type = BURN;
 			else Your("%s is deactivated!", aobjnam(otmp,"are"));
 		} else if(otmp == ublindf) {
 		    pline(
@@ -2543,7 +2549,7 @@ doengrave()
 		break;
 	    case BURN:
 			multi = -(len/10);
-			if(is_lightsaber(otmp)){
+			if(is_lightsaber(otmp) && otmp->oartifact != ART_INFINITY_S_MIRRORED_ARC){
 				maxelen = ((otmp->age/101) + 1)*10;
 				if (len > maxelen) {
 					multi = -(maxelen/10);
@@ -2666,10 +2672,10 @@ doward()
 	} else if (is_lava(u.ux, u.uy)) {
 		You_cant("draw on the lava!");
 		return(0);
-	} /*else if (is_pool(u.ux,u.uy) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
+	} /*else if (is_pool(u.ux,u.uy, FALSE) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
 		You_cant("draw on the water!");
 		return(0);
-	}*/else if(is_pool(u.ux,u.uy) && !u.uinwater){
+	}*/else if(is_pool(u.ux,u.uy, FALSE) && !u.uinwater){
 		You_cant("draw on the water!");
 		return(0);
 	}
@@ -3028,7 +3034,7 @@ doward()
 
 	    case TOOL_CLASS:
 		if (is_lightsaber(otmp)) {
-			if (otmp->lamplit) type = BURN;
+			if (litsaber(otmp)) type = BURN;
 			else Your("%s is deactivated!", aobjnam(otmp,"are"));
 		} else if(otmp == ublindf) {
 		    pline(
@@ -3346,7 +3352,7 @@ doward()
 		break;
 	    case BURN:
 			multi = -(len/10);
-			if(is_lightsaber(otmp)){
+			if(is_lightsaber(otmp) && otmp->oartifact != ART_INFINITY_S_MIRRORED_ARC){
 				maxelen = ((otmp->age/101) + 1)*10;
 				if (len > maxelen) {
 					multi = -(maxelen/10);
@@ -4048,10 +4054,10 @@ doseal()
 	} else if (is_lava(u.ux, u.uy)) {
 		You_cant("draw on the lava!");
 		return(0);
-	} /*else if (is_pool(u.ux,u.uy) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
+	} /*else if (is_pool(u.ux,u.uy, FALSE) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
 		You_cant("draw on the water!");
 		return(0);
-	}*/else if(is_pool(u.ux,u.uy) && !u.uinwater){
+	}*/else if(is_pool(u.ux,u.uy, FALSE) && !u.uinwater){
 		You_cant("draw on the water!");
 		return(0);
 	}
@@ -4410,7 +4416,7 @@ doseal()
 
 	    case TOOL_CLASS:
 		if (is_lightsaber(otmp)) {
-			if (otmp->lamplit) type = BURN;
+			if (litsaber(otmp)) type = BURN;
 			else Your("%s is deactivated!", aobjnam(otmp,"are"));
 		} else if(otmp == ublindf) {
 		    pline(
@@ -4674,7 +4680,7 @@ doseal()
 		break;
 	    case BURN:
 			multi = -(len/10);
-			if(is_lightsaber(otmp)){
+			if(is_lightsaber(otmp) && otmp->oartifact != ART_INFINITY_S_MIRRORED_ARC){
 				maxelen = ((otmp->age/101) + 1)*10;
 				if (len > maxelen) {
 					multi = -(maxelen/10);

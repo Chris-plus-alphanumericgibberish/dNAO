@@ -312,7 +312,7 @@
 	/* May touch surface; does not override any others */
 
 #define Wwalking		((HWwalking || EWwalking || u.sealsActive&SEAL_EURYNOME) && \
-				 !Is_waterlevel(&u.uz))
+				 !is_3dwater(u.ux, u.uy))
 
 #define HWwalking	u.uprops[WWALKING].intrinsic
 #define EWwalking	u.uprops[WWALKING].extrinsic
@@ -440,5 +440,6 @@
 
 #define Necrospellboost	(u.uprops[NECROSPELLS].extrinsic)
 
+#define Double_spell_size	(u.sealsActive&SEAL_NABERIUS)
 
 #endif /* YOUPROP_H */

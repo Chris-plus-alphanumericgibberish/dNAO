@@ -197,7 +197,7 @@ struct obj *wep;	/* uwep for attack(), null for kick_monster() */
 	    if (!(Blind ? Blind_telepat : Unblind_telepat)) {
 		struct obj *obj;
 
-		if (Blind || (is_pool(mtmp->mx,mtmp->my) && !Underwater))
+		if (Blind || (is_pool(mtmp->mx,mtmp->my, FALSE) && !Underwater))
 		    pline("Wait!  There's a hidden monster there!");
 		else if ((obj = level.objects[mtmp->mx][mtmp->my]) != 0)
 		    pline("Wait!  There's %s hiding under %s!",
@@ -336,8 +336,8 @@ find_to_hit_rolls(mtmp,ptmp,pweptmp,ptchtmp)
 		if(uwep->objsize - youracedata->msize > 0){
 			weptmp += -4*(uwep->objsize - youracedata->msize);
 		}
-		if(is_lightsaber(uwep) && uwep->lamplit){
-			if(u.fightingForm == FFORM_SHII_CHO && MON_WEP(mtmp) && is_lightsaber(MON_WEP(mtmp)) && MON_WEP(mtmp)->lamplit){
+		if(is_lightsaber(uwep) && litsaber(uwep)){
+			if(u.fightingForm == FFORM_SHII_CHO && MON_WEP(mtmp) && is_lightsaber(MON_WEP(mtmp)) && litsaber(MON_WEP(mtmp))){
 				weptmp -= 5;
 				// switch(min(P_SKILL(FFORM_SHII_CHO), P_SKILL(weapon_type(uwep)))){
 					// case P_ISRESTRICTED:weptmp -= 5; break;
@@ -458,7 +458,8 @@ boolean phasing;
 #define ATTK_SIMURGH	5
 #define ATTK_MISKA_ARMS	6
 #define ATTK_MISKA_WOLF	7
-#define SPIRIT_NATTKS	(8+5+1)
+#define SPIRIT_NATTKS	(8+7+5+1)
+//+7 for up to seven extra iris attacks, +1 for second wolf head
 /**/
 static struct attack spiritattack[] = 
 {
@@ -660,20 +661,32 @@ register struct monst *mtmp;
 			attacksmade = 1;
 		}
 		if(uwep && uwep->oartifact == ART_QUICKSILVER){
-			if(keepattacking && u.ulevel > 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel > 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-10, youmonst.data->mattk);
-			if(keepattacking && u.ulevel > 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel > 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-20, youmonst.data->mattk);
-			if(keepattacking && u.ulevel ==30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel ==30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-30, youmonst.data->mattk);
 		}
 		if(Role_if(PM_BARBARIAN) && !Upolyd){
-			if(keepattacking && u.ulevel >= 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel >= 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-10, youmonst.data->mattk);
-			if(keepattacking && u.ulevel >= 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel >= 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-20, youmonst.data->mattk);
-			if(keepattacking && u.ulevel == 30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) ) 
+			if(keepattacking && u.ulevel == 30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
 				keepattacking = hitum(mtmp, weptmp-30, youmonst.data->mattk);
+		}
+		if(uwep && uwep->oartifact == ART_STAFF_OF_TWELVE_MIRRORS){
+			if(keepattacking && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
+				keepattacking = hitum(mtmp, weptmp, youmonst.data->mattk);
+			if(Role_if(PM_BARBARIAN) && !Upolyd){
+				if(keepattacking && u.ulevel >= 10 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
+					keepattacking = hitum(mtmp, weptmp-10, youmonst.data->mattk);
+				if(keepattacking && u.ulevel >= 20 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
+					keepattacking = hitum(mtmp, weptmp-20, youmonst.data->mattk);
+				if(keepattacking && u.ulevel == 30 && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp && (!attacklimit || attacksmade++ < attacklimit) && (multi==0)) 
+					keepattacking = hitum(mtmp, weptmp-30, youmonst.data->mattk);
+			}
 		}
 	}
 	if((u.sealsActive || u.specialSealsActive) && keepattacking && !DEADMONSTER(mtmp) && m_at(x, y) == mtmp){
@@ -686,7 +699,22 @@ register struct monst *mtmp;
 		}
 		if(u.sealsActive&SEAL_AMON) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_AMON];
 		if(u.sealsActive&SEAL_CHUPOCLOPS) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_CHUPOCLOPS];
-		if(u.sealsActive&SEAL_IRIS) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+		if(u.sealsActive&SEAL_IRIS){
+			curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+			if(u.twoweap || (uwep && bimanual(uwep,youracedata))) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+			if(u.specialSealsActive&SEAL_MISKA && u.ulevel >= 26){
+				curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+				if(u.twoweap || (uwep && bimanual(uwep,youracedata))) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+			}
+		}
+		if(youracedata == &mons[PM_MARILITH]){
+				curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+				curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+				if(u.twoweap || (uwep && bimanual(uwep,youracedata))){
+					curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+					curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+				}
+		}
 		if(u.sealsActive&SEAL_NABERIUS) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_NABERIUS];
 		if(u.sealsActive&SEAL_OTIAX){
 			int tendrils,tmp2;
@@ -962,7 +990,7 @@ int thrown;
 					tmp += rnd(mon->m_lev);
 					ironmsg = TRUE;
 			}
-			if ((uarmg->cursed) &&
+			if (is_unholy(uarmg) &&
 				hates_unholy(mdat)){
 					tmp += rnd(9);
 					unholymsg = TRUE;
@@ -1023,10 +1051,10 @@ int thrown;
 			 * don't get both bonuses.
 			 */
 			if (uleft 
-				&& (uleft->cursed)
+				&& (is_unholy(uleft))
 			) barehand_unholy_rings++;
 			if (uright 
-				&& (uright->cursed)
+				&& (is_unholy(uright))
 			) barehand_unholy_rings++;
 			
 			if ((barehand_unholy_rings) && hates_unholy(mdat)) {
@@ -1204,23 +1232,58 @@ int thrown;
 				obj->oartifact != ART_PEN_OF_THE_VOID
 			) ||
 		    /* lightsaber that isn't lit ;) */
-		    (is_lightsaber(obj) && !obj->lamplit) ||
+		    (is_lightsaber(obj) && !litsaber(obj)) ||
 		    /* houchou that isn't thrown */
 		    (!thrown && obj->oartifact == ART_HOUCHOU) ||
 		    /* or throw a missile without the proper bow... */
 		    (is_ammo(obj) && !(ammo_and_launcher(obj, uwep) || obj->oclass == GEM_CLASS))
 		) {
-			
+			int resistmask = 0;
+			int weaponmask = 0;
+			static int warnedotyp = 0;
+			static struct permonst *warnedptr = 0;
 		    /* then do only 1-2 points of damage */
 		    if (mdat->mlet == S_SHADE && !(obj->obj_material == SILVER || arti_silvered(obj) || u.sealsActive&SEAL_CHUPOCLOPS))
 				tmp = 0;
 		    else if(obj->oartifact == ART_LIECLEAVER) tmp = 2*(rnd(12) + rnd(10) + obj->spe);
 		    else if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS) tmp = 2*(rnd(bigmonst(mon->data) ? 2 : 4) + obj->spe);
 			
-		    else if((is_lightsaber(obj) && !obj->lamplit)) tmp = d(1,4) + obj->spe + weapon_dam_bonus(0); //martial arts aid
+		    else if((obj->oartifact == ART_INFINITY_S_MIRRORED_ARC && !litsaber(obj))) tmp = d(1,6) + obj->spe + weapon_dam_bonus(0); //martial arts aid
+		    else if((is_lightsaber(obj) && !litsaber(obj))) tmp = d(1,4) + obj->spe + weapon_dam_bonus(0); //martial arts aid
 
 			else tmp = rnd(2);
 			
+			if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS){
+				weaponmask |= PIERCE;
+			} else if(obj->oartifact == ART_LIECLEAVER){
+				weaponmask |= SLASH;
+			} else if(obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+				weaponmask |= WHACK|SLASH;
+			} else {
+				weaponmask |= WHACK;
+			}
+			
+			if(resist_blunt(mdat) || (mon->mfaction == ZOMBIFIED)){
+				resistmask |= WHACK;
+			}
+			if(resist_pierce(mdat) || (mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED)){
+				resistmask |= PIERCE;
+			}
+			if(resist_slash(mdat) || (mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED)){
+				resistmask |= SLASH;
+			}
+			
+			if((weaponmask & ~(resistmask)) == 0L && !narrow_spec_applies(obj, mon)){
+				tmp /= 4;
+				if(warnedptr != mdat){
+					pline("%s is ineffective against %s.", The(xname(obj)), mon_nam(mon));
+					warnedptr = mdat;
+				}
+			} else {
+				if(warnedptr != mdat){
+					warnedptr = 0;
+				}
+			}
 		    // if (tmp && obj->oartifact &&
 				// artifact_hit(&youmonst, mon, obj, &tmp, dieroll)) {
 				// if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
@@ -1245,7 +1308,7 @@ int thrown;
 				ironmsg = TRUE;
 				ironobj = TRUE;
 			}
-			if (obj->cursed == TRUE && hates_unholy(mdat)) {
+			if (is_unholy(obj) && hates_unholy(mdat)) {
 				tmp += rnd(9);	//I think this is the right thing to do here.  I don't think it enters the main unholy section
 				unholymsg = TRUE;
 				unholyobj = TRUE;
@@ -1271,7 +1334,7 @@ int thrown;
 				tmp = dmgval(obj, mon, SPEC_MARIONETTE);
 			else tmp = dmgval(obj, mon, 0);
 			
-			if(obj && ((is_lightsaber(obj) && obj->lamplit) || arti_shining(obj))) phasearmor = TRUE;
+			if(obj && ((is_lightsaber(obj) && litsaber(obj)) || arti_shining(obj))) phasearmor = TRUE;
 		    
 			/* a minimal hit doesn't exercise proficiency */
 			valid_weapon_attack = (tmp > 1 || (obj && obj->otyp == SPOON && Role_if(PM_CONVICT)));
@@ -1321,7 +1384,7 @@ int thrown;
 					if(Role_if(PM_CONVICT) && !Upolyd && obj == uwep && uwep->otyp == SPOON) tmp += rnd(u.ulevel);
 					hittxt = TRUE;
 				}
-				if(obj == uwep && is_lightsaber(uwep) && uwep->lamplit){
+				if(obj == uwep && is_lightsaber(uwep) && litsaber(uwep)){
 					if (
 						(mon->mflee && mon->data != &mons[PM_BANDERSNATCH]) || is_blind(mon) || !mon->mcanmove || !mon->mnotlaugh ||
 							mon->mstun || mon->mconf || mon->mtrapped || mon->msleeping || (mon->mux == 0 && mon->muy == 0) || stationary(mdat) ||
@@ -1491,16 +1554,16 @@ int thrown;
 			}
 		    if ((obj->obj_material == SILVER || arti_silvered(obj)  || 
 					(thrown && obj->otyp == SHURIKEN && uwep && uwep->oartifact == ART_SILVER_STARLIGHT) )
-			   && hates_silver(mdat) && !(is_lightsaber(obj) && obj->lamplit)) {
+			   && hates_silver(mdat) && !(is_lightsaber(obj) && litsaber(obj))) {
 				if(obj->oartifact == ART_SUNSWORD) sunmsg = TRUE;
 				else silvermsg = TRUE;
 				silverobj = TRUE;
 		    }
-		    if (obj->obj_material == IRON && hates_iron(mdat) && !(is_lightsaber(obj) && obj->lamplit)) {
+		    if (obj->obj_material == IRON && hates_iron(mdat) && !(is_lightsaber(obj) && litsaber(obj))) {
 				ironmsg = TRUE;
 				ironobj = TRUE;
 		    }
-		    if (obj->cursed && hates_unholy(mdat)) {
+		    if (is_unholy(obj) && hates_unholy(mdat)) {
 				unholymsg = TRUE;
 				unholyobj = TRUE;
 		    }
@@ -1588,7 +1651,7 @@ int thrown;
 					case HEAVY_IRON_BALL:	/* 1d25 */
 					case IRON_CHAIN:		/* 1d4+1 */
 						tmp = dmgval(obj, mon, 0);
-						if(obj && ((is_lightsaber(obj) && obj->lamplit) || arti_shining(obj))) phasearmor = TRUE;
+						if(obj && ((is_lightsaber(obj) && litsaber(obj)) || arti_shining(obj))) phasearmor = TRUE;
 					break;
 					case MIRROR:
 						if (breaktest(obj)) {
@@ -1757,7 +1820,7 @@ int thrown;
 						} else {
 							Your("venom burns %s!", mon_nam(mon));
 							tmp = dmgval(obj, mon, 0);
-							if(obj && ((is_lightsaber(obj) && obj->lamplit) || arti_shining(obj))) phasearmor = TRUE;
+							if(obj && ((is_lightsaber(obj) && litsaber(obj)) || arti_shining(obj))) phasearmor = TRUE;
 						}
 						if (thrown) obfree(obj, (struct obj *)0);
 						else useup(obj);
@@ -1808,7 +1871,7 @@ defaultvalue:
 						ironmsg = TRUE;
 						ironobj = TRUE;
 					}
-					if (obj && obj->cursed == TRUE && hates_unholy(mdat)) {
+					if (obj && is_unholy(obj) && hates_unholy(mdat)) {
 						tmp += rnd(9);
 						unholymsg = TRUE;
 						unholyobj = TRUE;
@@ -1849,9 +1912,10 @@ defaultvalue:
 		tmp += rnd(mon->ustdym);
 	}
 	
-	if(resist_attacks(mdat))
+	if(resist_attacks(mdat)){
 		tmp = 0;
-	else {
+		valid_weapon_attack = 0;
+	} else {
 		int mac = full_marmorac(mon);
 		if(mac < 0){
 			tmp += AC_VALUE(mac);
@@ -1894,7 +1958,7 @@ defaultvalue:
 				for(;i>0;i--){
 					// pline("%d",i);
 					tmp += dmgval(obj, mon, 0);
-					if(obj && ((is_lightsaber(obj) && obj->lamplit) || arti_shining(obj))) phasearmor = TRUE;
+					if(obj && ((is_lightsaber(obj) && litsaber(obj)) || arti_shining(obj))) phasearmor = TRUE;
 					if(wep->oartifact == ART_LIECLEAVER) tmp += rnd(10);
 				}
 			}
@@ -1904,9 +1968,9 @@ defaultvalue:
 	    /* [this assumes that `!thrown' implies wielded...] */
 	    wtype = thrown ? weapon_type(wep) : uwep_skill_type();
 	    use_skill(wtype, 1);
-		if(!thrown && uwep && is_lightsaber(uwep) && uwep->lamplit && P_SKILL(wtype) >= P_BASIC){
+		if(!thrown && uwep && is_lightsaber(uwep) && litsaber(uwep) && P_SKILL(wtype) >= P_BASIC){
 			use_skill(FFORM_SHII_CHO,1);
-			if(P_SKILL(FFORM_SHII_CHO) >= P_BASIC){
+			if(P_SKILL(FFORM_SHII_CHO) >= P_BASIC || uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 				if((u.fightingForm == FFORM_SHII_CHO || 
 					 (u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 					) &&
@@ -2048,6 +2112,21 @@ defaultvalue:
 	    }
 	}
 
+	if (unarmed && !thrown && !obj && !Upolyd) {
+		static struct permonst *warnedptr = 0;
+		if((resist_blunt(mdat) || (mon->mfaction == ZOMBIFIED)) && !(uarmg && narrow_spec_applies(uarmg, mon))){
+			tmp /= 4;
+			if(warnedptr != mdat){
+				Your("%s are ineffective against %s.", makeplural(body_part(HAND)), mon_nam(mon));
+				warnedptr = mdat;
+			}
+		} else {
+			if(warnedptr != mdat){
+				warnedptr = 0;
+			}
+		}
+	}
+	
 #ifdef STEED
 	if (jousting) {
 	    tmp += d(2, (obj == uwep) ? 10 : 2);	/* [was in dmgval()] */
@@ -3062,7 +3141,7 @@ register struct attack *mattk;
 			}
 		    } else if(u.ustuck == mdef) {
 			/* Monsters don't wear amulets of magical breathing */
-			if (is_pool(u.ux,u.uy) && !is_swimmer(mdef->data) &&
+			if (is_pool(u.ux,u.uy, FALSE) && !is_swimmer(mdef->data) &&
 			    !amphibious(mdef->data)) {
 			    You("drown %s...", mon_nam(mdef));
 			    tmp = mdef->mhp;
@@ -3732,6 +3811,10 @@ register int tmp, weptmp, tchtmp;
 	    mattk = getmattk(mas, i, sum, &alt_attk);
 		wepused = FALSE;
 		
+		if (mas == &mons[PM_GRUE] && (i>=2) && !((!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux] & TEMP_LIT1 && !(viz_array[u.uy][u.ux] & TEMP_DRK1)))
+			|| (levl[u.ux][u.uy].lit && (viz_array[u.uy][u.ux] & TEMP_DRK1 && !(viz_array[u.uy][u.ux] & TEMP_LIT1)))))
+			continue;
+		
 		/*Plasteel helms cover the face and prevent bite attacks*/
 		if(uarmh && 
 			(uarmh->otyp == PLASTEEL_HELM || uarmh->otyp == CRYSTAL_HELM) && 
@@ -4214,6 +4297,8 @@ wisp_shdw_dhit2:
 						/* defender dead */
 	else {
 		(void) passive(mon, sum[i], 1, mattk->aatyp, mattk->adtyp);
+		if (DEADMONSTER(mon))
+			return TRUE;
 		nsum |= sum[i];
 	}
 	if (Upolyd != Old_Upolyd)
@@ -4265,6 +4350,11 @@ uchar aatyp, adtyp;
 	    tmp = 0;
 	
 /*	These affect you even if they just died */
+
+	// Grue has no passive attacks while in the light
+	if (ptr == &mons[PM_GRUE] && !((!levl[mon->mx][mon->my].lit && !(viz_array[mon->my][mon->mx] & TEMP_LIT1 && !(viz_array[mon->my][mon->mx] & TEMP_DRK1)))
+		|| (levl[mon->mx][mon->my].lit && (viz_array[mon->my][mon->mx] & TEMP_DRK1 && !(viz_array[mon->my][mon->mx] & TEMP_LIT1)))))
+		return (malive | mhit);	
 
 	switch(ptr->mattk[i].adtyp) {
 		

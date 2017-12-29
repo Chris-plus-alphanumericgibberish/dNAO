@@ -406,9 +406,9 @@ boolean artif;
 	else if(otyp == BAR) otmp->obj_material = IRON;
 	else if(otyp == VIPERWHIP) otmp->obj_material = SILVER;
 	else if(otyp == find_gcirclet()) otmp->obj_material = GOLD;
-	else if(otyp == SPEAR){if(!rn2(25)) otmp->obj_material = SILVER;}
-	else if(otyp == DAGGER){if(!rn2(12)) otmp->obj_material = SILVER;}
-	else if(otyp == STILETTOS){if(!rn2(12)) otmp->obj_material = SILVER;}
+	else if(otyp == SPEAR && !rn2(25)) otmp->obj_material = SILVER;
+	else if(otyp == DAGGER && !rn2(12)) otmp->obj_material = SILVER;
+	else if(otyp == STILETTOS && !rn2(12)) otmp->obj_material = SILVER;
 	else if(otyp == ARMORED_BOOTS) otmp->obj_material = COPPER;
 	else if(otyp == ROUNDSHIELD) otmp->obj_material = COPPER;
 	else otmp->obj_material = objects[otyp].oc_material;
@@ -578,8 +578,7 @@ boolean artif;
 					otmp->age = 20L * /* 400 or 200 */
 					      (long)objects[otmp->otyp].oc_cost;
 					otmp->lamplit = 0;
-					otmp->quan = 1L +
-					      (long)(rn2(2) ? rn2(7) : 0);
+					otmp->quan = 1L + ((long)(rn2(2) && !Is_grue_level(&u.uz)) ? rn2(7) : 0);
 					blessorcurse(otmp, 5);
 					break;
 		case BRASS_LANTERN:
@@ -1297,6 +1296,16 @@ register struct obj *otmp;
 	   with cursed alternate weapon */
 	if (otmp == uswapwep && u.twoweap)
 	    drop_uswapwep();
+	if (otmp == uarm && otmp->otyp == STRAITJACKET){
+		struct obj *o;
+		reset_remarm();
+		if(u.twoweap && uswapwep) drop_uswapwep();
+		if(uwep){
+			o = uwep;
+			setuwep((struct obj *)0);
+			dropx(o);
+		}
+	}
 	/* some cursed items need immediate updating */
 	if (carried(otmp) && confers_luck(otmp))
 	    set_moreluck();
@@ -1594,6 +1603,7 @@ register struct obj *obj;
 	else if(obj->oartifact == ART_ANNULUS) wt = objects[BELL_OF_OPENING].oc_weight;
 	else if(obj->oartifact == ART_SCEPTRE_OF_LOLTH) wt = 3*objects[MACE].oc_weight;
 	else if(obj->oartifact == ART_ROD_OF_THE_ELVISH_LORDS) wt = objects[ELVEN_MACE].oc_weight;
+	else if(obj->oartifact == ART_VAMPIRE_KILLER) wt = 2*objects[BULLWHIP].oc_weight;
 	else if(obj->oartifact == ART_EARTH_CRYSTAL){
 		wt = 160;
 	}

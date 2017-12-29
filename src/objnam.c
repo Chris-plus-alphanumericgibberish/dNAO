@@ -249,6 +249,36 @@ struct obj *otmp;
 {
 	if(otmp->oartifact) switch(otmp->oartifact){
 		case ART_ANNULUS: return Hallucination ? hcolor(0) : "cerulean";
+		case ART_INFINITY_S_MIRRORED_ARC: {
+			xchar x, y;
+			int dnm = 0;
+			get_obj_location(otmp, &x, &y, 0);
+			if(levl[x][y].lit && 
+				!(viz_array[y][x]&TEMP_DRK3 && 
+				 !(viz_array[y][x]&TEMP_LIT1)
+				)
+			) dnm += 2;
+			if(viz_array[y][x]&TEMP_LIT1 && 
+				!(viz_array[y][x]&TEMP_DRK3)
+			) dnm += 1;
+			if(Hallucination) return hcolor(0);
+			if(dnm == 3){
+				if(In_outdoors(&u.uz)) return "sky-blue bladed";
+				else if(In_W_tower(u.ux, u.uy, &u.uz)) return "heliotrope bladed";
+				else if(In_hell(&u.uz)) return "scarlet bladed";
+				else if(In_cave(&u.uz)) return "honey bladed";
+				return "sun-white bladed";
+			} else if(dnm == 1){
+				if(rn2(2)) return "faint-orange bladed";
+				else return "faint-yellow bladed";
+			} else {
+				if(In_outdoors(&u.uz)) return "mottled-blue bladed";
+				else if(In_W_tower(u.ux, u.uy, &u.uz)) return "mottled-magenta bladed";
+				else if(In_hell(&u.uz)) return "mottled-crimson bladed";
+				else if(In_cave(&u.uz)) return "mottled-brown bladed";
+				return "mottled-white bladed";
+			}
+		} break;
 		case ART_ARKENSTONE: return Hallucination ? hcolor(0) : "rainbow-glinting sparking white";
 		case ART_FLUORITE_OCTAHEDRON: return Hallucination ? hcolor(0) : "burning cerulean";
 		case ART_HEART_OF_AHRIMAN: return Hallucination ? hcolor(0) : "pulsing and shimmering ruby";
@@ -466,7 +496,7 @@ boolean ignore_oquan;
 		else if(obj->objsize == MZ_HUGE) Strcat(buf, "huge ");
 		else if(obj->objsize == MZ_GIGANTIC) Strcat(buf, "gigantic ");
 	}
-	if(obj->obj_material != objects[obj->otyp].oc_material && !(obj->oartifact && obj->known) && !(is_lightsaber(obj) && obj->lamplit)){
+	if(obj->obj_material != objects[obj->otyp].oc_material && !(obj->oartifact && obj->known) && !(is_lightsaber(obj) && litsaber(obj))){
 		if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
 			Strcat(buf, "pale moonlight ");
 		} else switch(obj->obj_material){
@@ -1142,15 +1172,33 @@ plus:
 		} else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit) {
 			Strcat(bp, " (lit)");
 		} else if (is_lightsaber(obj)) {
-		    if (obj->lamplit){
-				if(obj->altmode){
-					if(obj->age > 1000) Strcat(bp, " (two blades lit)");
-					else Strcat(bp, " (two blades flickering)");
+		    if (litsaber(obj)){
+				if(obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+					xchar x, y;
+					int dnm = 0;
+					get_obj_location(obj, &x, &y, 0);
+					if(levl[x][y].lit && 
+						!(viz_array[y][x]&TEMP_DRK3 && 
+						 !(viz_array[y][x]&TEMP_LIT1)
+						)
+					) dnm += 2;
+					if(viz_array[y][x]&TEMP_LIT1 && 
+						!(viz_array[y][x]&TEMP_DRK3)
+					) dnm += 1;
+					if(obj->altmode){
+						if(dnm > 1) Strcat(bp, " (two blades lit)");
+						else Strcat(bp, " (two blades flickering)");
+					} else if(dnm <= 1) Strcat(bp, " (flickering)");
 				} else {
-					if(obj->age > 1000) Strcat(bp, " (lit)");
-					else Strcat(bp, " (flickering)");
+					if(obj->altmode){
+						if(obj->age > 1000) Strcat(bp, " (two blades lit)");
+						else Strcat(bp, " (two blades flickering)");
+					} else {
+						if(obj->age > 1000) Strcat(bp, " (lit)");
+						else Strcat(bp, " (flickering)");
+					}
 				}
-				if(obj->cobj || obj->oartifact == ART_ANNULUS){
+				if(obj->cobj || obj->oartifact == ART_ANNULUS || obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 					Strcat(prefix, lightsaber_colorText(obj));
 					Strcat(prefix, " ");
 				}
@@ -2276,6 +2324,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-7, "Orpheus") || /* lyre */
 			   !BSTRCMPI(bp, p-7, "Annulus") || /* Ring */
 			   !BSTRCMPI(bp, p-8, "Longinus") || 	/* spear */
+			   !BSTRCMPI(bp, p-14, "Twelve Mirrors") || 	/* staff */
 			   !BSTRCMPI(bp, p-13, "Water Flowers") || 	/* boots */
 			   !BSTRCMPI(bp, p-14, "Dwarvish Lords") || /* axe */
 			   !BSTRCMPI(bp, p-12, "Elvish Lords") || /* mace */
@@ -3434,6 +3483,14 @@ srch:
 			newsym(u.ux, u.uy);
 			return &zeroobj;
 		}
+		if(!BSTRCMP(bp, p-13, "shallow water")) {
+			levl[u.ux][u.uy].typ = PUDDLE;
+			del_engr_at(u.ux, u.uy);
+			pline("Shallow water.");
+			water_damage(level.objects[u.ux][u.uy], FALSE, TRUE, level.flags.lethe, (struct monst *) 0);
+			newsym(u.ux, u.uy);
+			return &zeroobj;
+		}
 		if (!BSTRCMP(bp, p-4, "lava")) {  /* also matches "molten lava" */
 			levl[u.ux][u.uy].typ = LAVAPOOL;
 			del_engr_ward_at(u.ux, u.uy);
@@ -3549,6 +3606,10 @@ typfnd:
 	if((typ == SPE_LIGHTNING_BOLT ||
 		typ == SPE_POISON_SPRAY ||
 		typ == SPE_ACID_BLAST ||
+		typ == SPE_LIGHTNING_STORM ||
+		typ == SPE_FIRE_STORM ||
+		typ == SPE_FROST_STORM ||
+		typ == SPE_ACID_STORM ||
 		typ == SCR_CONSECRATION ||
 		(typ >= HANDGUN && typ <= HEAVY_GUN) ||
 		((
