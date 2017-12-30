@@ -1,7 +1,6 @@
 local.mk
 
 src/dnethack
-Makefile
 dnethackdir/
 util/recover
 util/makedefs
