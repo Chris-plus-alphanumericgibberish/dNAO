@@ -601,7 +601,7 @@ E char *fqn_prefix_names[PREFIX_COUNT];
 #ifdef AUTOPICKUP_EXCEPTIONS
 struct autopickup_exception {
 	char *pattern;
-	regex_t match;
+	char *match;
 	boolean grab;
 	boolean is_regexp;
 	struct autopickup_exception *next;
@@ -656,7 +656,7 @@ E int mailckfreq;
 struct _plinemsg {
     xchar msgtype;
     char *pattern;
-    regex_t match;
+    char *match;
     boolean is_regexp;
     struct _plinemsg *next;
 };
