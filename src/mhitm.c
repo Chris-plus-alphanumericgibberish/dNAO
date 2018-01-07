@@ -392,6 +392,12 @@ mattackm(magr, mdef)
 	    case AT_WEAP:
 		case AT_XWEP: /* weapon attacks */
 #define MAINHAND (mattk->aatyp != AT_XWEP)
+
+		if (!MAINHAND && magr->misc_worn_check & W_ARMS) {
+			// Offhand attacks cannot be made while wearing a shield
+			break;
+		}
+
 #ifdef TAME_RANGED_ATTACKS
 		if (MAINHAND) {
 			if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > 2)

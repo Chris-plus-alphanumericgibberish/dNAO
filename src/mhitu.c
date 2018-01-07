@@ -1125,7 +1125,11 @@ mattacku(mtmp)
 			}
 			break;
 		case AT_XWEP:
-			if(range2) {
+			if (mtmp->misc_worn_check & W_ARMS) {
+				// Offhand attacks cannot be made while wearing a shield
+				break;
+			}
+			else if(range2) {
 				// Offhand ranged attacks disallowed. This is inconsistent for gun usage -- players can, monsters can't. Oh well.
 				break;
 			} else {
