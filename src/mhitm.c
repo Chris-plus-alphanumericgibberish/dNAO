@@ -1265,6 +1265,7 @@ mdamagem(magr, mdef, mattk)
 		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
 			Sprintf(buf,"%s gazes at", Monnam(magr));
 			pline("%s %s...", buf, mon_nam(mdef));
+			tmp = 0;
 		}
 		if (canseemon(mdef))
 		    pline("%s %s for a moment.", Monnam(mdef),
@@ -1466,8 +1467,8 @@ physical:{
 			}
 			if (!magr->mcan && !is_blind(magr)) {
 				mdef->mstdy = max(tmp,mdef->mstdy);
-				tmp = 0;
 			}
+			tmp = 0;
 		break;
 /////////////////////////////////////////////////
 	    case AD_COLD:
@@ -1720,6 +1721,7 @@ physical:{
 			if(canseemon(magr) && mattk->aatyp == AT_GAZE){
 				Sprintf(buf,"%s gazes at", Monnam(magr));
 				pline("%s %s...", buf, mon_nam(mdef));
+				tmp = 0;
 			}
 		    if (vis) {
 			Strcpy(buf, Monnam(mdef));
@@ -1737,6 +1739,7 @@ physical:{
 		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
 			Sprintf(buf,"%s gazes at", Monnam(magr));
 			pline("%s %s...", buf, mon_nam(mdef));
+			tmp = 0;
 		}
 		if(!cancelled && mdef->mcanmove) {
 		    if (vis) {
@@ -1771,6 +1774,7 @@ physical:{
 		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
 			Sprintf(buf,"%s gazes at", Monnam(magr));
 			pline("%s %s...", buf, mon_nam(mdef));
+			tmp = 0;
 		}
 		if (!cancelled && mdef->mspeed != MSLOW) {
 		    unsigned int oldspeed = mdef->mspeed;
@@ -1792,6 +1796,7 @@ physical:{
 		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
 			Sprintf(buf,"%s gazes at", Monnam(magr));
 			pline("%s %s...", buf, mon_nam(mdef));
+			tmp = 0;
 		}
 		if (!magr->mcan && !mdef->mconf && !magr->mspec_used) {
 		    if (vis) pline("%s looks confused.", Monnam(mdef));
@@ -1803,6 +1808,7 @@ physical:{
 		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
 			Sprintf(buf,"%s gazes at", Monnam(magr));
 			pline("%s %s...", buf, mon_nam(mdef));
+			tmp = 0;
 		}
 		if (can_blnd(magr, mdef, mattk->aatyp, (struct obj*)0)) {
 		    register unsigned rnd_tmp;
@@ -1835,6 +1841,7 @@ physical:{
 			if(canseemon(magr) && mattk->aatyp == AT_GAZE){
 				Sprintf(buf,"%s gazes at", Monnam(magr));
 				pline("%s %s...", buf, mon_nam(mdef));
+				tmp = 0;
 			}
 		    if (vis) pline("%s looks %sconfused.",
 				    Monnam(mdef), mdef->mconf ? "more " : "");
