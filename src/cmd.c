@@ -96,6 +96,7 @@ extern int NDECL(dodeepswim); /**/
 extern int NDECL(dotalk); /**/
 extern int NDECL(docast); /**/
 extern int NDECL(dovspell); /**/
+extern int NDECL(reorder_spirit_powers); /**/
 extern int NDECL(dotele); /**/
 extern int NDECL(dountrap); /**/
 extern int NDECL(dounmaintain); /**/
@@ -4017,6 +4018,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"seal", "engrave a seal on the floor", doseal, !IFBURIED},
 	{"fire", "fire ammunition from quiver", dofire, !IFBURIED},
 	{"power", "use an active spirit power", dospirit, IFBURIED},
+	{"reorder", "re-order active spirit powers", reorder_spirit_powers, IFBURIED},
 	{"history", "show long version and game history", dohistory, IFBURIED},
 	{"help", "give a help message", dohelp, IFBURIED},
 	{"seetrap", "show the type of a trap", doidtrap, IFBURIED},
