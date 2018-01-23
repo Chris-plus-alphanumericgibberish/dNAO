@@ -61,7 +61,7 @@ struct menucoloring {
 #  ifdef MENU_COLOR_REGEX_POSIX
     regex_t match;
 #  else
-    struct re_pattern_buffer match;
+    char *match;
 #  endif
 # else
     char *match;

@@ -34,7 +34,7 @@ msgpline_add(typ, pattern)
     tmp->msgtype = typ;
     tmp->is_regexp = iflags.msgtype_regex;
     if (tmp->is_regexp) {
-	errnum = regcomp(&tmp->match, pattern, REG_EXTENDED | REG_NOSUB);
+	errnum = 0;//regcomp(&tmp->match, pattern, REG_EXTENDED | REG_NOSUB);
 	if (errnum != 0) {
 	    regerror(errnum, &tmp->match, errbuf, sizeof(errbuf));
 	    err = errbuf;
