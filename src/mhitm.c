@@ -347,7 +347,7 @@ mattackm(magr, mdef)
 			|| mattk->aatyp == AT_MAGC
 			|| (mattk->aatyp == AT_TENT && magr->mfaction == SKELIFIED)
 			|| (i == 0 && 
-				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP) && 
+				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) && 
 				mattk->adtyp == AD_PHYS && 
 				mattk->damn*mattk->damd/2 < (magr->m_lev/10+1)*max(magr->data->msize*2, 4)/2
 			   )
@@ -389,31 +389,20 @@ mattackm(magr, mdef)
 	
 	switch (mattk->aatyp) {
 	    case AT_DEVA:
-	    case AT_WEAP:		/* weapon attacks */
-#ifdef TAME_RANGED_ATTACKS
-		if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > 2)
-		{
-		    thrwmm(magr, mdef);
-		    if (tmphp > mdef->mhp){
-				res[i] = MM_HIT;
-				if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
-		    } else res[i] = MM_MISS;
-		    if (mdef->mhp < 1) res[i] = MM_DEF_DIED;
-		    if (magr->mhp < 1) res[i] = MM_AGR_DIED;
-		    break;
-		}
-#endif /*TAME_RANGED_ATTACKS*/
+	    case AT_WEAP:
+		case AT_XWEP: /* weapon attacks */
+#define MAINHAND (mattk->aatyp != AT_XWEP)
 
-		if (magr->weapon_check == NEED_WEAPON || !MON_WEP(magr)) {
-		    magr->weapon_check = NEED_HTH_WEAPON;
-		    if (mon_wield_item(magr) != 0) return 0;
+		if (!MAINHAND && magr->misc_worn_check & W_ARMS) {
+			// Offhand attacks cannot be made while wearing a shield
+			break;
 		}
 
 #ifdef TAME_RANGED_ATTACKS
-		if (!MON_WEP(magr) ||
-		    is_launcher(MON_WEP(magr))) {
-				/* implies no melee weapon found */
-			if(thrwmm(magr, mdef)){
+		if (MAINHAND) {
+			if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > 2)
+			{
+				thrwmm(magr, mdef);
 				if (tmphp > mdef->mhp){
 					res[i] = MM_HIT;
 					if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
@@ -423,10 +412,33 @@ mattackm(magr, mdef)
 				break;
 			}
 		}
+#endif /*TAME_RANGED_ATTACKS*/
+
+		if (magr->weapon_check == NEED_WEAPON || (MAINHAND ? (!MON_WEP(magr)) : (!MON_SWEP(magr)))) {
+		    magr->weapon_check = NEED_HTH_WEAPON;
+		    if (mon_wield_item(magr) != 0) return 0;
+		}
+
+#ifdef TAME_RANGED_ATTACKS
+		if (MAINHAND) {
+			if (!MON_WEP(magr) ||
+				is_launcher(MON_WEP(magr))) {
+					/* implies no melee weapon found */
+				if(thrwmm(magr, mdef)){
+					if (tmphp > mdef->mhp){
+						res[i] = MM_HIT;
+						if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
+					} else res[i] = MM_MISS;
+					if (mdef->mhp < 1) res[i] = MM_DEF_DIED;
+					if (magr->mhp < 1) res[i] = MM_AGR_DIED;
+					break;
+				}
+			}
+		}
 #endif
 		possibly_unwield(magr, FALSE);
-		otmp = MON_WEP(magr);
-
+		otmp = (MAINHAND ? MON_WEP(magr) : MON_SWEP(magr));
+#undef MAINHAND
 		if (otmp) {
 		    if (vis) mswingsm(magr, mdef, otmp);
 		    tmp += hitval(otmp, mdef);
@@ -489,7 +501,7 @@ meleeattack:
 		 * players, or under conflict or confusion. 
 		 */
 		if (!magr->mconf && !Conflict && otmp &&
-		    mattk->aatyp != AT_WEAP && mattk->aatyp != AT_DEVA && mattk->aatyp != AT_BEAM && 
+			mattk->aatyp != AT_WEAP && mattk->aatyp != AT_XWEP && mattk->aatyp != AT_DEVA && mattk->aatyp != AT_BEAM &&
 			mattk->adtyp != AD_STAR && mattk->adtyp != AD_BLUD && mattk->adtyp != AD_SHDW && 
 			touch_petrifies(mdef->data)
 		) {
@@ -1295,7 +1307,7 @@ physical:{
 		oarm = which_armor(magr, W_ARMG);
 		if (mattk->aatyp == AT_KICK && thick_skinned(pd)) {
 		    tmp = 0;
-		} else if(mattk->aatyp == AT_WEAP || mattk->aatyp == AT_DEVA) {
+		} else if(mattk->aatyp == AT_WEAP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_XWEP) {
 		    if(otmp) {
 			if (otmp->otyp == CORPSE &&
 				touch_petrifies(&mons[otmp->corpsenm]))
@@ -1449,7 +1461,7 @@ physical:{
 /////////////////////////////////////////////////
 		case AD_STDY:
 			if(canseemon(magr) && mattk->aatyp == AT_GAZE){
-				Sprintf(buf,"%s studies ", Monnam(magr));
+				Sprintf(buf,"%s studies", Monnam(magr));
 				pline("%s %s intently.", buf, mon_nam(mdef));
 			}
 			if (!magr->mcan && !is_blind(magr)) {
@@ -2638,6 +2650,7 @@ int aatyp;
     case AT_TUCH:
     case AT_5SQR:
     case AT_WEAP:
+	case AT_XWEP:
     case AT_DEVA:
 	w_mask = W_ARMG;	/* caller needs to check for weapon */
 	break;

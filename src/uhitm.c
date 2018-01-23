@@ -2719,7 +2719,7 @@ register struct attack *mattk;
 	    case AD_HEAL:	    /* likewise */
 	    case AD_PHYS:
  physical:
-		if(mattk->aatyp == AT_WEAP) {
+		if(mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) {
 		    if(uwep) tmp = 0;
 		} else if(mattk->aatyp == AT_KICK) {
 		    if(thick_skinned(mdef->data)) tmp = 0;
@@ -3829,6 +3829,10 @@ register int tmp, weptmp, tchtmp;
 		) continue;
 		
 	    switch(mattk->aatyp) {
+		case AT_XWEP:	
+			/* general-case two-weaponing is covered in AT_WEAP */
+			/* special case: marilith? */
+			break;	
 		case AT_WEAP:
 use_weapon:
 	/* Certain monsters don't use weapons when encountered as enemies,
@@ -4085,6 +4089,10 @@ int nattk;
 	mattk = &attacklist[i];
 	sum[i] = 0;
 	switch(mattk->aatyp) {
+	case AT_XWEP:
+		/* general-case two-weaponing is covered in AT_WEAP */
+		/* special case: marilith? */
+		break;
 	case AT_WEAP:
 use_weapon:
 	/* Certain monsters don't use weapons when encountered as enemies,
@@ -4389,7 +4397,7 @@ uchar aatyp, adtyp;
 		if (aatyp == AT_KICK) {
 		    if (uarmf && !rn2(6))
 			(void)rust_dmg(uarmf, xname(uarmf), 3, TRUE, &youmonst);
-		} else if (aatyp == AT_WEAP || aatyp == AT_CLAW ||
+		} else if (aatyp == AT_WEAP || aatyp == AT_XWEP || aatyp == AT_CLAW ||
 			   aatyp == AT_MAGC || aatyp == AT_TUCH || aatyp == AT_5SQR)
 		    passive_obj(mon, (struct obj*)0, &(ptr->mattk[i]));
 	    }
@@ -4438,7 +4446,7 @@ uchar aatyp, adtyp;
 		if (aatyp == AT_KICK) {
 		    if (uarmf)
 			(void)rust_dmg(uarmf, xname(uarmf), 1, TRUE, &youmonst);
-		} else if (aatyp == AT_WEAP || aatyp == AT_CLAW ||
+		} else if (aatyp == AT_WEAP || aatyp == AT_XWEP || aatyp == AT_CLAW ||
 			   aatyp == AT_MAGC || aatyp == AT_TUCH || aatyp == AT_5SQR)
 		    passive_obj(mon, (struct obj*)0, &(ptr->mattk[i]));
 	    }
@@ -4448,7 +4456,8 @@ uchar aatyp, adtyp;
 		if (aatyp == AT_KICK) {
 		    if (uarmf)
 			(void)rust_dmg(uarmf, xname(uarmf), 3, TRUE, &youmonst);
-		} else if (aatyp == AT_WEAP || aatyp == AT_CLAW ||
+		}
+		else if (aatyp == AT_WEAP || aatyp == AT_XWEP || aatyp == AT_CLAW ||
 			   aatyp == AT_MAGC || aatyp == AT_TUCH || aatyp == AT_5SQR)
 		    passive_obj(mon, (struct obj*)0, &(ptr->mattk[i]));
 	    }
