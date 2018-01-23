@@ -4579,7 +4579,14 @@ bindspirit(seal_id)
 			if(u.sealTimeout[COSMOS-FIRST_SEAL] < moves){
 				if(u.spirit[ALIGN_SPIRIT]){
 					//Eject current alignment quest spirit
-					unbind(u.spirit[ALIGN_SPIRIT],TRUE);
+					int i;
+					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
+						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
+							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
+							break;
+						}
+					}
+					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
 				}
 				u.specialSealsActive |= SEAL_SPECIAL|SEAL_COSMOS;
 				u.specialSealsUsed |= SEAL_COSMOS;
@@ -4593,7 +4600,14 @@ bindspirit(seal_id)
 			if(u.sealTimeout[MISKA-FIRST_SEAL] < moves){
 				if(u.spirit[ALIGN_SPIRIT]){
 					//Eject current alignment quest spirit
-					unbind(u.spirit[ALIGN_SPIRIT],TRUE);
+					int i;
+					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
+						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
+							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
+							break;
+						}
+					}
+					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
 				}
 				unrestrict_weapon_skill(P_TWO_WEAPON_COMBAT);
 				u.specialSealsActive |= SEAL_SPECIAL|SEAL_MISKA;
@@ -4608,7 +4622,14 @@ bindspirit(seal_id)
 			if(u.sealTimeout[NUDZIARTH-FIRST_SEAL] < moves){
 				if(u.spirit[ALIGN_SPIRIT]){
 					//Eject current alignment quest spirit
-					unbind(u.spirit[ALIGN_SPIRIT],TRUE);
+					int i;
+					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
+						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
+							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
+							break;
+						}
+					}
+					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
 				}
 				u.specialSealsActive |= SEAL_SPECIAL|SEAL_NUDZIARTH;
 				u.specialSealsUsed |= SEAL_NUDZIARTH;
@@ -4622,7 +4643,14 @@ bindspirit(seal_id)
 			if(u.sealTimeout[ALIGNMENT_THING-FIRST_SEAL] < moves){
 				if(u.spirit[ALIGN_SPIRIT]){
 					//Eject current alignment quest spirit
-					unbind(u.spirit[ALIGN_SPIRIT],TRUE);
+					int i;
+					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
+						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
+							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
+							break;
+						}
+					}
+					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
 				}
 				u.specialSealsActive |= SEAL_SPECIAL|SEAL_ALIGNMENT_THING;
 				u.specialSealsUsed |= SEAL_ALIGNMENT_THING;
@@ -4636,7 +4664,14 @@ bindspirit(seal_id)
 			if(u.sealTimeout[UNKNOWN_GOD-FIRST_SEAL] < moves){
 				if(u.spirit[ALIGN_SPIRIT]){
 					//Eject current alignment quest spirit
-					unbind(u.spirit[ALIGN_SPIRIT],TRUE);
+					int i;
+					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
+						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
+							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
+							break;
+						}
+					}
+					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
 				}
 				u.specialSealsActive |= SEAL_SPECIAL|SEAL_UNKNOWN_GOD;
 				u.specialSealsUsed |= SEAL_UNKNOWN_GOD;
