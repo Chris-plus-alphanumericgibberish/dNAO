@@ -12,7 +12,6 @@ STATIC_VAR NEARDATA struct obj *otmp;
 STATIC_DCL void FDECL(urustm, (struct monst *, struct obj *));
 # ifdef OVL1
 STATIC_DCL boolean FDECL(u_slip_free, (struct monst *,struct attack *));
-STATIC_DCL int FDECL(passiveum, (struct permonst *,struct monst *,struct attack *));
 # endif /* OVL1 */
 
 STATIC_DCL int FDECL(dololthseduce, (struct monst *));
@@ -29,7 +28,6 @@ STATIC_DCL void FDECL(palemayberem, (struct obj *, const char *, BOOLEAN_P));
 # endif
 #endif /* OVLB */
 
-STATIC_DCL int FDECL(hitmu, (struct monst *,struct attack *));
 STATIC_DCL int FDECL(gulpmu, (struct monst *,struct attack *));
 STATIC_DCL int FDECL(explmu, (struct monst *,struct attack *,BOOLEAN_P));
 STATIC_DCL void FDECL(missmu,(struct monst *,BOOLEAN_P,struct attack *));
@@ -1523,7 +1521,7 @@ struct monst *mon;
  *	  3 if the monster lives but teleported/paralyzed, so it can't keep
  *	       attacking you
  */
-STATIC_OVL int
+int
 hitmu(mtmp, mattk)
 	register struct monst *mtmp;
 	register struct attack  *mattk;
@@ -3356,6 +3354,11 @@ dopois:
 
 	if(mtmp->mfaction == ZOMBIFIED){
 		dmg *= 2;
+	}
+	
+	if(mtmp->data == &mons[PM_LONG_WORM] && mtmp->wormno && mattk->aatyp == AT_BITE){
+		if(wormline(mtmp, u.ux, u.uy))
+			dmg *= 2;
 	}
 	
 	if(dmg && u.ustdy){
@@ -7642,7 +7645,7 @@ boolean helpless;
 
 #ifdef OVL1
 
-STATIC_OVL int
+int
 passiveum(olduasmon,mtmp,mattk)
 struct permonst *olduasmon;
 register struct monst *mtmp;
