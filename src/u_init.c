@@ -598,7 +598,7 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_DWARF, TWO_HANDED_SWORD,     BATTLE_AXE                  },
     { PM_DWARF, LEATHER_CLOAK,        DWARVISH_CLOAK              },
     { PM_GNOME, FEDORA,               GNOMISH_POINTY_HAT          },
-    { PM_GNOME, BULLWHIP,             AKLY                        },
+    { PM_GNOME, BULLWHIP,             AKLYS                       },
     { PM_GNOME, CLUB,                 AKLYS                       },
     { PM_GNOME, BOW,                  CROSSBOW                    },
     { PM_GNOME, ARROW,                CROSSBOW_BOLT               },
