@@ -5123,7 +5123,7 @@ register int	mmflags;
 	if(undeadfaction){
 		mtmp->mfaction = undeadfaction;
 		newsym(mtmp->mx,mtmp->my);
-		allow_minvent = !rn2(4);
+		allow_minvent = rn2(2);
 	}
 	
 	if(Race_if(PM_DROW) && in_mklev && Is_qstart(&u.uz) && 
@@ -6696,6 +6696,8 @@ register int otyp;
 	register struct obj *otmp;
 	int spe;
 
+	if (mtmp->mfaction == undeadfaction && rn2(2))
+		return 0;
 	if (!otyp) return 0;
 	otmp = mksobj(otyp, TRUE, FALSE);
 	if (otmp) {
