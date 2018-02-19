@@ -1906,10 +1906,11 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 	struct attack alt_attk;
 	int sum[NATTK];
 	int i;
+	boolean derundspec = FALSE;
+
 	for (i = 0; i < NATTK; i++) {
-		sum[i] = 0;
+		sum[i] = 1;
 		mattk = getmattk(ptr, i, sum, &alt_attk);
-		boolean derundspec = FALSE;
 
 		if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
 			if (mattk->aatyp == AT_SPIT
@@ -1923,7 +1924,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 				|| mattk->aatyp == AT_MAGC
 				|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
 				|| (i == 0 &&
-				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP) &&
+				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) &&
 				mattk->adtyp == AD_PHYS &&
 				mattk->damn*mattk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mtmp->data->msize * 2, 4) / 2
 				)
@@ -1953,6 +1954,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 					alt_attk.damd = 8;
 					mattk = &alt_attk;
 				}
+				else continue;
 			}
 		}
 		main_temp_buf[0] = '\0';
