@@ -977,6 +977,8 @@ hitmm(magr, mdef, mattk)
 				    Sprintf(buf,"%s squeezes", magr_name);
 				    break;
 				}
+			case AT_NONE:
+				break;
 			default:
 defaultmmhit:
 				if (is_weeping(magr->data)) {
@@ -1169,6 +1171,8 @@ mdamagem(magr, mdef, mattk)
 	int armpro, num, tmp = d((int)mattk->damn, (int)mattk->damd);
 	boolean cancelled;
 	boolean phasearmor = FALSE;
+	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA);
+	struct attack alt_attk;
 
 	if(magr->mflee && pa == &mons[PM_BANDERSNATCH]) tmp = d((int)mattk->damn, 2*(int)mattk->damd);
 
@@ -1212,7 +1216,7 @@ mdamagem(magr, mdef, mattk)
 	armpro = magic_negation(mdef);
 	cancelled = magr->mcan || !((rn2(3) >= armpro) || !rn2(50));
 
-	switch(mattk->adtyp) {
+	switch (weaponhit ? AD_PHYS : mattk->adtyp) {
 	    case AD_DGST:
 		/* eating a Rider or its corpse is fatal */
 		if (is_rider(mdef->data)) {
@@ -1308,7 +1312,7 @@ physical:{
 		oarm = which_armor(magr, W_ARMG);
 		if (mattk->aatyp == AT_KICK && thick_skinned(pd)) {
 		    tmp = 0;
-		} else if(mattk->aatyp == AT_WEAP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_XWEP) {
+		} else if(weaponhit) {
 		    if(otmp) {
 			if (otmp->otyp == CORPSE &&
 				touch_petrifies(&mons[otmp->corpsenm]))
@@ -1394,6 +1398,39 @@ physical:{
 			if (otmp && tmp)
 				mrustm(magr, mdef, otmp);
 		    }
+			// tack on bonus elemental damage, if applicable
+			if (mattk->adtyp != AD_PHYS){
+				alt_attk.aatyp = AT_NONE;
+				alt_attk.adtyp = mattk->adtyp;
+				switch (alt_attk.adtyp)
+				{
+				case AD_FIRE:
+				case AD_COLD:
+				case AD_ELEC:
+				case AD_ACID:
+					alt_attk.damn = 4;
+					alt_attk.damd = 6;
+					break;
+				case AD_EFIR:
+				case AD_ECLD:
+				case AD_EELC:
+				case AD_EACD:
+					alt_attk.damn = 3;
+					alt_attk.damd = 7;
+					break;
+				case AD_STUN:
+					alt_attk.damn = 1;
+					alt_attk.damd = 4;
+					break;
+				default:
+					alt_attk.damn = 0;
+					alt_attk.damd = 0;
+					break;
+				}
+				mdamagem(magr, mdef, &alt_attk);
+				if (DEADMONSTER(mdef))
+					return (MM_DEF_DIED | (grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
+			}
 		} else if (magr->data == &mons[PM_PURPLE_WORM] &&
 			    mdef->data == &mons[PM_SHRIEKER]) {
 		    /* hack to enhance mm_aggression(); we don't want purple
