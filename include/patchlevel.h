@@ -24,21 +24,22 @@
  * 3.7.0 -> 3.7.1 indicates the advent of the true Binder quest goal level and Alignment spirits, as well as myriad bugfixes fixes
  * 3.8.1 indicates addition of wands of darkness, 
  * 3.8.2 is for addition of berserk status, correct anger tracking for masks, 6th castle, silver bullets for slings, beast mastery, lost cities branch
- * 3.9.1: winged kobold, sky render, stormhelm, quicksilver, and spineseeker
- * 3.9.2: added poison spray and acid blast spells.
- * 3.9.3: added bard, hungry dead, dokkalfar matriarch.
- * 3.10.0: belated increment of minor version, Bugfixed bard, bards gain exp by watching their pets level up.
+ * 3.9.1: Winged kobold, sky render, stormhelm, quicksilver, and spineseeker
+ * 3.9.2: Added poison spray and acid blast spells.
+ * 3.9.3: Added bard, hungry dead, dokkalfar matriarch.
+ * 3.10.0: Belated increment of minor version, Bugfixed bard, bards gain exp by watching their pets level up.
  * 3.12.1: Expand size of ose buffers, to 'fix' buffer overflow.
  * 3.12.2: Expand size of mnum and quest artifact listing to int instead of short int.
  * 3.12.3: Partial reform of charm monster and monster summoning, Gnome ranger quest.
  * 3.13.beta: "The Great Reflagging".
  * 3.13.0: "The Great Reflagging", Monster equipment, Angel symbol split, PoWater revision, Demonweb, Naberius buff, Incant energy gain/loss/cap increase.
- * 3.13.1: implement monster sensoria. Purpose for STUN artifacts. Change guidelines for nopoly rules. Implement a few more angel lords, Alrunes.  Female Drow Anachrononauts, myrkalfar. Dark lights.
+ * 3.13.1: Implement monster sensoria. Purpose for STUN artifacts. Change guidelines for nopoly rules. Implement a few more angel lords, Alrunes.  Female Drow Anachrononauts, myrkalfar. Dark lights.
  * 3.14.0: Begin edging toward WtW again.  Added Chiropteran and Yuki-ona player races.  Added two new Devas.  Revised Extrinsic resistances, DS and DSM.  Made high monster AC also give DR. Finished Gnome Ranger crowning gifts.  Buffed Riding skill.
  * 3.15.0: Begin edging away from WtW again.  Added another round of pet improvements, including #wait and #come commands.
  * 3.15.1: Added derived undead, spell maintainance, a couple of neutral artifacts.
+ * 3.15.2: Reworked neutral quest, minor bug fixes.  Added shallow water, rilmani.
  */
-#define PATCHLEVEL	1
+#define PATCHLEVEL	2
 /*
  * Incrementing EDITLEVEL can be used to force invalidation of old bones
  * and save files.
