@@ -2758,6 +2758,24 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	if (!(otmp = floorfood("eat", 0))) return 0;
 	if (check_capacity((char *)0)) return 0;
 	
+
+	/* We have to make non-foods take 1 move to eat, unless we want to
+	 * do ridiculous amounts of coding to deal with partly eaten plate
+	 * mails, players who polymorph back to human in the middle of their
+	 * metallic meal, etc....
+	 */
+	if (!is_edible(otmp)) {
+	    You("cannot eat that!");
+	    return 0;
+	} else if ((otmp->owornmask & (W_ARMOR|W_TOOL|W_AMUL
+#ifdef STEED
+			|W_SADDLE
+#endif
+			)) != 0) {
+	    /* let them eat rings */
+	    You_cant("eat %s you're wearing.", something);
+	    return 0;
+	}
 	if((otmp->otyp == CORPSE || (otmp->otyp == TIN && otmp->spe != 1)) && your_race(&mons[otmp->corpsenm])
 		&& !CANNIBAL_ALLOWED() && (u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS)))
 	){
@@ -2777,24 +2795,6 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			}
 		    if (res == 1) return 0;
 		}
-	}
-
-	/* We have to make non-foods take 1 move to eat, unless we want to
-	 * do ridiculous amounts of coding to deal with partly eaten plate
-	 * mails, players who polymorph back to human in the middle of their
-	 * metallic meal, etc....
-	 */
-	if (!is_edible(otmp)) {
-	    You("cannot eat that!");
-	    return 0;
-	} else if ((otmp->owornmask & (W_ARMOR|W_TOOL|W_AMUL
-#ifdef STEED
-			|W_SADDLE
-#endif
-			)) != 0) {
-	    /* let them eat rings */
-	    You_cant("eat %s you're wearing.", something);
-	    return 0;
 	}
 	if (is_metallic(otmp) &&
 	    u.umonnum == PM_RUST_MONSTER && otmp->oerodeproof) {
