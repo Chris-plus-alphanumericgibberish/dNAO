@@ -3838,7 +3838,7 @@ int final;
 	    you_have_never("magically identified an item");
 	} else {
 	    Sprintf(buf, "magically identified %ld item%s",
-		    u.uconduct.IDs, plur(u.uconduct.shopID));
+		    u.uconduct.IDs, plur(u.uconduct.IDs));
 	    you_have_X(buf);
 	}
 	/* Pop up the window and wait for a key */
@@ -3946,7 +3946,7 @@ int final;
 	    dump("", "  You never magically identified an item");
 	} else {
 	    Sprintf(buf, "magically identified %ld item%s",
-		    u.uconduct.IDs, plur(u.uconduct.shopID));
+		    u.uconduct.IDs, plur(u.uconduct.IDs));
 	    dump("  You ", buf);
 	}
 	dump("", "");
