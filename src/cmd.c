@@ -847,7 +847,6 @@ use_reach_attack()
 
 	/* Attack the monster there */
 	if ((mtmp = m_at(cc.x, cc.y)) != (struct monst *)0) {
-	    int oldhp = mtmp->mhp;
 		int tmp, tmpw, tmpt;
 
 	    bhitpos = cc;
@@ -2723,7 +2722,6 @@ int final;
 void
 resistances_enlightenment()
 {
-	int ltmp;
 	char buf[BUFSZ];
 
 	en_win = create_nhwindow(NHW_MENU);
@@ -2947,8 +2945,6 @@ resistances_enlightenment()
 void
 signs_enlightenment()
 {
-	int ltmp;
-	char buf[BUFSZ];
 	boolean message = FALSE;
 
 	en_win = create_nhwindow(NHW_MENU);
@@ -3239,8 +3235,6 @@ signs_enlightenment()
 void
 signs_mirror()
 {
-	int ltmp;
-	char buf[BUFSZ];
 	boolean message = FALSE;
 
 	en_win = create_nhwindow(NHW_MENU);
