@@ -3209,7 +3209,7 @@ struct monst *mtmp;
 			pline("But wait...");
 			if (attacktype(mtmp->data, AT_EXPL)
 			    || attacktype(mtmp->data, AT_BOOM))
-				pline("%s reconstitutes!", Monnam(mtmp));
+				pline("%s reappears, looking much better!", Monnam(mtmp));
 			else
 				pline("%s flickers, then reappears looking much better!", Monnam(mtmp));
 		}
