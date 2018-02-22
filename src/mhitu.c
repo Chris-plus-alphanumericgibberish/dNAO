@@ -363,7 +363,7 @@ struct attack *alt_attk_buf;
 		attk->damd = 0;
 		return attk;
 	}
-
+	
     /* prevent a monster with two consecutive disease or hunger attacks
        from hitting with both of them on the same turn; if the first has
        already hit, switch to a stun attack for the second */
@@ -760,6 +760,19 @@ mattacku(mtmp)
 					mattk = &alt_attk;
 				}
 				else continue;
+			}
+		}
+		if(mtmp->mfaction == FRACTURED){
+			if((!derundspec && 
+				mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
+				|| (mattk->aatyp == AT_CLAW && (mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE))
+			){
+				derundspec = TRUE;
+				alt_attk.aatyp = AT_CLAW;
+				alt_attk.adtyp = AD_GLSS;
+				alt_attk.damn = max(mtmp->m_lev/10+1, mattk->damn);
+				alt_attk.damd = max(mtmp->data->msize*2, max(mattk->damd, 4));
+				mattk = &alt_attk;
 			}
 		}
 		
@@ -1825,6 +1838,14 @@ hitmu(mtmp, mattk)
 				!(u.sealsActive&SEAL_EDEN)) {
             	dmg += rnd(20);
             	pline("The rapier of silver starlight sears your flesh!");
+            } else hitmsg(mtmp, mattk);
+		break;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+	    case AD_GLSS:
+			if(hates_silver(youracedata) &&
+				!(u.sealsActive&SEAL_EDEN)) {
+            	dmg += rnd(20);
+            	pline("%s's fractured claws sear your flesh!", Monnam(mtmp));
             } else hitmsg(mtmp, mattk);
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3399,7 +3420,7 @@ dopois:
 			}
 		}
 	}
-
+	
 	if(dmg) {
 	    if (Half_physical_damage
 					/* Mitre of Holiness */

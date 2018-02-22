@@ -380,6 +380,29 @@ mattackm(magr, mdef)
 			else continue;
 		}
 	}
+	if(magr->mfaction == FRACTURED){
+			if(!derundspec && 
+				mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0
+			){
+				derundspec = TRUE;
+				alt_attk.aatyp = AT_CLAW;
+				alt_attk.adtyp = AD_GLSS;
+				alt_attk.damn = max(magr->m_lev/10+1, mattk->damn);
+				alt_attk.damd = max(magr->data->msize*2, max(mattk->damd, 4));
+				mattk = &alt_attk;
+			}
+			if(mattk->aatyp == AT_CLAW && 
+				(mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE)
+			){
+				alt_attk.aatyp = AT_CLAW;
+				alt_attk.adtyp = AD_GLSS;
+				alt_attk.damn = mattk->damn;
+				alt_attk.damd = mattk->damd;
+				mattk = &alt_attk;
+			}
+			if(mattk->aatyp == AT_GAZE)
+				continue;
+	}
 	
 	/*Plasteel helms cover the face and prevent bite attacks*/
 	if((magr->misc_worn_check & W_ARMH) && which_armor(magr, W_ARMH) &&
@@ -2009,6 +2032,12 @@ physical:{
             	if (vis) pline("The rapier of silver light sears %s!", mon_nam(mdef));
             }
 		break;
+		case AD_GLSS:
+			if(hates_silver(pd)) {
+            	tmp += rnd(20);
+            	if (vis) pline("%s's fractured claws sear %s!", Monnam(magr), mon_nam(mdef));
+            }
+		break;
 	    case AD_BLUD:
 			if(has_blood_mon(mdef) || (has_blood(pd) && mdef->mfaction == ZOMBIFIED)) {
             	tmp += mdef->m_lev;
@@ -2264,6 +2293,10 @@ physical:{
 	}
 	
 	if((magr->mfaction == ZOMBIFIED || (magr->mfaction == SKELIFIED && !rn2(20))) && can_undead_mon(mdef)){
+		mdef->zombify = 1;
+	}
+	
+	if(magr->mfaction == FRACTURED && is_kamerel(mdef->data)){
 		mdef->zombify = 1;
 	}
 	
