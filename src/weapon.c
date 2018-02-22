@@ -1198,7 +1198,7 @@ lightsaber_form_sdie:
 			else if(otmp->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO) 
 				bonus += 8; //Extra unholy
 			else if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
-				bonus += rnd(20); //Tyrany
+				bonus += rnd(20); //Tyranny
 			else if(otyp == KHAKKHARA) bonus += d(rnd(3),9);
 			else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking,9);
 			else bonus += rnd(9);
