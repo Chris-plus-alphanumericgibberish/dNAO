@@ -25,6 +25,9 @@ STATIC_DCL char * get_mb_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mv_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mg_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_speed_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_description_of_attack_type(uchar);
+STATIC_DCL char * get_description_of_damage_type(uchar);
+STATIC_DCL char * get_description_of_damage_prefix(uchar, uchar);
 STATIC_DCL int generate_list_of_resistances(struct monst *, char *, int);
 #ifdef PORT_HELP
 extern void NDECL(port_help);
@@ -1814,6 +1817,36 @@ get_description_of_damage_type(uchar id)
 }
 
 char *
+get_description_of_damage_prefix(uchar aatyp, uchar adtyp)
+{
+	switch (aatyp)
+	{
+	case AT_WEAP:
+	case AT_XWEP:
+	case AT_DEVA:
+		switch (adtyp)
+		{
+		case AD_PHYS:
+			return "";
+		case AD_FIRE:
+		case AD_COLD:
+		case AD_ELEC:
+		case AD_ACID:
+			return "physical + 4d6 ";
+		case AD_EFIR:
+		case AD_ECLD:
+		case AD_EELC:
+		case AD_EACD:
+			return "physical + 3d7 ";
+		default:
+			return "physical + ";
+		}
+		break;
+	}
+	return "";
+}
+
+char *
 get_description_of_attack(struct attack *mattk, char * main_temp_buf)
 {
 	if (!(mattk->damn + mattk->damd + mattk->aatyp + mattk->adtyp)) {
@@ -1837,7 +1870,7 @@ get_description_of_attack(struct attack *mattk, char * main_temp_buf)
 		strcat(main_temp_buf, " ");
 	}
 #endif
-	sprintf(temp_buf, "%s - %s", get_description_of_attack_type(mattk->aatyp), get_description_of_damage_type(mattk->adtyp));
+	sprintf(temp_buf, "%s - %s%s", get_description_of_attack_type(mattk->aatyp), get_description_of_damage_prefix(mattk->aatyp, mattk->adtyp), get_description_of_damage_type(mattk->adtyp));
 	strcat(main_temp_buf, temp_buf);
 #ifdef USE_TILES
 	strcat(main_temp_buf, "; ");

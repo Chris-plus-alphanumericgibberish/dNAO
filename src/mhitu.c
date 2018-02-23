@@ -102,6 +102,8 @@ register struct attack *mattk;
 		case AT_BOOM:
 			pline("%s explodes!", Monnam(mtmp));
 			break;
+		case AT_NONE:
+			break;
 		default:
 			pline("%s hits!", Monnam(mtmp));
 	    }
@@ -148,7 +150,7 @@ mpoisons_subj(mtmp, mattk)
 struct monst *mtmp;
 struct attack *mattk;
 {
-	if (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) {
+	if (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA) {
 	    struct obj *mwep = (mtmp == &youmonst) ? uwep : MON_WEP(mtmp);
 	    /* "Foo's attack was poisoned." is pretty lame, but at least
 	       it's better than "sting" when not a stinging attack... */
@@ -172,7 +174,9 @@ struct attack *mattk;
 	    return (mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR) ? "contact" :
 		   (mattk->aatyp == AT_GAZE) ? "gaze" :
 		   (mattk->aatyp == AT_ENGL) ? "vapor" :
-		   (mattk->aatyp == AT_BITE || mattk->aatyp == AT_LNCK) ? "bite" : "sting";
+		   (mattk->aatyp == AT_BITE || mattk->aatyp == AT_LNCK) ? "bite" : 
+		   (mattk->aatyp == AT_NONE) ? "attack" :
+		   "sting";
 	}
 }
 
@@ -1544,9 +1548,11 @@ hitmu(mtmp, mattk)
 	struct obj *optr;
 	int dmg, armpro, permdmg;
 	boolean phasearmor = FALSE;
+	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA);
 	char	 buf[BUFSZ];
 	struct permonst *olduasmon = youracedata;
 	int res;
+	struct attack alt_attk;
 
 	if (!canspotmon(mtmp))
 	    map_invisible(mtmp->mx, mtmp->my);
@@ -1593,7 +1599,7 @@ hitmu(mtmp, mattk)
 	//uncancelled = !mtmp->mcan && ((rn2(3) >= armpro) || !rn2(50));
 	permdmg = 0;
 /*	Now, adjust damages via resistances or specific attacks */
-	switch(mattk->adtyp) {
+	switch(weaponhit ? AD_PHYS : mattk->adtyp) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	    case AD_HODS:
@@ -1711,7 +1717,7 @@ hitmu(mtmp, mattk)
 		    }
 			if(oarm && dmg && oarm->otyp == GAUNTLETS_OF_POWER) dmg += 16;
 		} else {			  /* hand to hand weapon */
-		    if((mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) && otmp) {
+		    if((weaponhit) && otmp) {
 			if (otmp->otyp == CORPSE &&
 				touch_petrifies(&mons[otmp->corpsenm])) {
 			    dmg = 1;
@@ -1829,6 +1835,37 @@ hitmu(mtmp, mattk)
 			){
 				if(oarm && dmg && oarm->otyp == GAUNTLETS_OF_POWER) dmg += 8;
 				hitmsg(mtmp, mattk);
+			}
+			// tack on bonus elemental damage, if applicable
+			if (mattk->adtyp != AD_PHYS){
+				alt_attk.aatyp = AT_NONE;
+				alt_attk.adtyp = mattk->adtyp;
+				switch (alt_attk.adtyp)
+				{
+				case AD_FIRE:
+				case AD_COLD:
+				case AD_ELEC:
+				case AD_ACID:
+					alt_attk.damn = 4;
+					alt_attk.damd = 6;
+					break;
+				case AD_EFIR:
+				case AD_ECLD:
+				case AD_EELC:
+				case AD_EACD:
+					alt_attk.damn = 3;
+					alt_attk.damd = 7;
+					break;
+				case AD_STUN:
+					alt_attk.damn = 1;
+					alt_attk.damd = 4;
+					break;
+				default:
+					alt_attk.damn = 0;
+					alt_attk.damd = 0;
+					break;
+				}
+				hitmu(mtmp, &alt_attk);
 			}
 		}
 		}break;
