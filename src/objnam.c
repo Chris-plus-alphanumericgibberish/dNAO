@@ -1209,6 +1209,11 @@ plus:
 #  ifdef DEBUG
 		    Sprintf(eos(bp), " (%d)", obj->age);		
 #  endif
+		} else if (obj->otyp == SHADOWLANDER_S_TORCH
+			|| obj->otyp == TORCH || obj->otyp == SUNROD
+		) {
+			if(obj->lamplit)
+				Strcat(bp, " (lit)");
 		}
 		break;
 	case ARMOR_CLASS:
@@ -1285,8 +1290,10 @@ plus:
 				tmpbuf, plur(obj->spe),
 				!obj->lamplit ? " attached" : ", lit");
 			break;
-		} else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-			obj->otyp == BRASS_LANTERN || Is_candle(obj) || obj->otyp == SHADOWLANDER_S_TORCH) {
+		} else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP
+			|| obj->otyp == BRASS_LANTERN || Is_candle(obj) || obj->otyp == SHADOWLANDER_S_TORCH
+			|| obj->otyp == TORCH || obj->otyp == SUNROD
+		) {
 			if (Is_candle(obj) &&
 			    obj->age < 20L * (long)objects[obj->otyp].oc_cost)
 				Strcat(prefix, "partly used ");
