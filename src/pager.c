@@ -25,6 +25,9 @@ STATIC_DCL char * get_mb_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mv_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mg_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_speed_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_description_of_attack_type(uchar);
+STATIC_DCL char * get_description_of_damage_type(uchar);
+STATIC_DCL char * get_description_of_damage_prefix(uchar, uchar);
 STATIC_DCL int generate_list_of_resistances(struct monst *, char *, int);
 #ifdef PORT_HELP
 extern void NDECL(port_help);
@@ -1814,6 +1817,36 @@ get_description_of_damage_type(uchar id)
 }
 
 char *
+get_description_of_damage_prefix(uchar aatyp, uchar adtyp)
+{
+	switch (aatyp)
+	{
+	case AT_WEAP:
+	case AT_XWEP:
+	case AT_DEVA:
+		switch (adtyp)
+		{
+		case AD_PHYS:
+			return "";
+		case AD_FIRE:
+		case AD_COLD:
+		case AD_ELEC:
+		case AD_ACID:
+			return "physical + 4d6 ";
+		case AD_EFIR:
+		case AD_ECLD:
+		case AD_EELC:
+		case AD_EACD:
+			return "physical + 3d7 ";
+		default:
+			return "physical + ";
+		}
+		break;
+	}
+	return "";
+}
+
+char *
 get_description_of_attack(struct attack *mattk, char * main_temp_buf)
 {
 	if (!(mattk->damn + mattk->damd + mattk->aatyp + mattk->adtyp)) {
@@ -1837,7 +1870,7 @@ get_description_of_attack(struct attack *mattk, char * main_temp_buf)
 		strcat(main_temp_buf, " ");
 	}
 #endif
-	sprintf(temp_buf, "%s - %s", get_description_of_attack_type(mattk->aatyp), get_description_of_damage_type(mattk->adtyp));
+	sprintf(temp_buf, "%s - %s%s", get_description_of_attack_type(mattk->aatyp), get_description_of_damage_prefix(mattk->aatyp, mattk->adtyp), get_description_of_damage_type(mattk->adtyp));
 	strcat(main_temp_buf, temp_buf);
 #ifdef USE_TILES
 	strcat(main_temp_buf, "; ");
@@ -1906,10 +1939,11 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 	struct attack alt_attk;
 	int sum[NATTK];
 	int i;
+	boolean derundspec = FALSE;
+
 	for (i = 0; i < NATTK; i++) {
-		sum[i] = 0;
+		sum[i] = 1;
 		mattk = getmattk(ptr, i, sum, &alt_attk);
-		boolean derundspec = FALSE;
 
 		if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
 			if (mattk->aatyp == AT_SPIT
@@ -1923,7 +1957,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 				|| mattk->aatyp == AT_MAGC
 				|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
 				|| (i == 0 &&
-				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP) &&
+				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) &&
 				mattk->adtyp == AD_PHYS &&
 				mattk->damn*mattk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mtmp->data->msize * 2, 4) / 2
 				)
@@ -1953,6 +1987,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 					alt_attk.damd = 8;
 					mattk = &alt_attk;
 				}
+				else continue;
 			}
 		}
 		main_temp_buf[0] = '\0';
