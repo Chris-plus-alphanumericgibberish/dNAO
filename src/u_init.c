@@ -2354,25 +2354,25 @@ u_init()
 			switch (attkptr->aatyp){
 			case AT_SPIT:
 				attkptr->adtyp = randSpitDamageTypes[rn2(SIZE(randSpitDamageTypes))];
-				break;
+			break;
 			case AT_HUGS:
 				attkptr->adtyp = AD_PHYS;
-				break;
+			break;
 			case AT_GAZE:
 				attkptr->adtyp = randGazeDamageTypes[rn2(SIZE(randGazeDamageTypes))];
-				break;
+			break;
 			case AT_ENGL:
 				attkptr->adtyp = randEngulfDamageTypes[rn2(SIZE(randEngulfDamageTypes))];
-				break;
+			break;
 			case AT_ARRW:
 				attkptr->adtyp = randArrowDamageTypes[rn2(SIZE(randArrowDamageTypes))];
-				break;
+			break;
 			case AT_MAGC:
 				attkptr->adtyp = randMagicDamageTypes[rn2(SIZE(randMagicDamageTypes))];
-				break;
+			break;
 			case AT_BREA:
 				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
-				break;
+			break;
 			case AT_HODS:
 				attkptr->adtyp = AD_HODS;
 				break;
@@ -2380,10 +2380,10 @@ u_init()
 			case AT_DEVA:
 			case AT_5SQR:
 				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
-				break;
+			break;
 			default:
 				attkptr->adtyp = AD_PHYS;
-				break;
+			break;
 			}
 			switch (attkptr->adtyp){
 			case AD_VBLD:
