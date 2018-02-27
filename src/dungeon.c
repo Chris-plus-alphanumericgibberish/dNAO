@@ -1408,7 +1408,7 @@ d_level *lev;
 		return lev->dlevel==4;
 	} 
 	else if(Is_paradise(lev) || Is_sunkcity(lev)) return TRUE;
-	else if(In_neu(lev)){
+	else if(In_outlands(lev)){
 		return lev->dlevel < sum_of_all_level.dlevel;
 	} else if(Is_arcadia_woods(lev)) return TRUE;
 	else if(In_cha(lev)) {
@@ -1438,9 +1438,10 @@ d_level *lev;
 		}
 	}
 	else if(Is_sunsea(lev)) return TRUE;
-	else if(In_neu(lev)){
+	else if(In_outlands(lev)){
 		return lev->dlevel >= sum_of_all_level.dlevel;
 	}
+	else if(In_lost_cities(lev)) return TRUE;
 	return FALSE;
 }
 
@@ -1463,6 +1464,13 @@ In_outlands(lev)	/* are you on the neutral quest? */
 d_level	*lev;
 {
 	return((boolean)(lev->dnum == neutral_dnum));
+}
+
+boolean
+In_lost_cities(lev)	/* are you on the neutral quest? */
+d_level	*lev;
+{
+	return((boolean)(lev->dnum == rlyeh_dnum));
 }
 
 boolean
