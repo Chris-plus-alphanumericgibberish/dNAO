@@ -1295,7 +1295,7 @@ int randMeleeAttackTypes[] =
 						 AT_WHIP, 
 						 AT_LNCK, 
 						 AT_LRCH, 
-						 AT_WEAP, };
+						 AT_WEAP };
 
 int randSpecialAttackTypes[] = 
 						{AT_SPIT, 
