@@ -1708,8 +1708,8 @@ hitmu(mtmp, mattk)
 				) dmg = 0;
 				else if(uwep->oartifact == ART_LIECLEAVER)
 				dmg = 2*(rnd(12) + rnd(10) + uwep->spe);
-				else if(otmp->oartifact == ART_ROGUE_GEAR_SPIRITS)
-				dmg = 2*(rnd(bigmonst(youracedata) ? 2 : 5) + otmp->spe);
+				else if(uwep->oartifact == ART_ROGUE_GEAR_SPIRITS)
+				dmg = 2*(rnd(bigmonst(youracedata) ? 2 : 5) + uwep->spe);
 				else
 				dmg = rnd(2);
 				if(uwep && (uwep->obj_material == SILVER || arti_silvered(uwep)) && 
