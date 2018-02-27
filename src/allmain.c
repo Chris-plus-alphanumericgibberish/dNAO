@@ -371,7 +371,8 @@ moveloop()
 	int oldspiritAC=0;
 	int tx,ty;
 	int nmonsclose,nmonsnear,enkispeedlim;
-	static boolean oldBlind = 0, oldLightBlind = 0, healing_penalty = 0;
+	static boolean oldBlind = 0, oldLightBlind = 0;
+	int healing_penalty = 0;
 	static int oldCon, oldWisBon;
     int hpDiff;
 
@@ -457,6 +458,16 @@ moveloop()
 						mtmp->perminvis = FALSE;
 						newsym(mtmp->mx,mtmp->my);
 					}
+				} else if(mtmp->data == &mons[PM_HUDOR_KAMEREL]){
+					if(is_pool(mtmp->mx,mtmp->my, TRUE) && !mtmp->minvis){
+						mtmp->minvis = TRUE;
+						mtmp->perminvis = TRUE;
+						newsym(mtmp->mx,mtmp->my);
+					} else if(!is_pool(mtmp->mx,mtmp->my, TRUE) && mtmp->minvis){
+						mtmp->minvis = FALSE;
+						mtmp->perminvis = FALSE;
+						newsym(mtmp->mx,mtmp->my);
+					}
 				} else if(mtmp->data == &mons[PM_GRUE]){
 					if(isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
 						mtmp->minvis = TRUE;
@@ -470,7 +481,7 @@ moveloop()
 				}
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-			if(echolocation(youracedata)){
+			if(Echolocation){
 				for(i=1; i<COLNO; i++)
 					for(j=0; j<ROWNO; j++)
 						if(viz_array[j][i]&COULD_SEE)
@@ -577,15 +588,15 @@ moveloop()
 			if(u.sealsActive&SEAL_FAFNIR && money_cnt(invent) == 0) unbind(SEAL_FAFNIR,TRUE);
 #endif
 			if(u.sealsActive&SEAL_JACK && (Is_astralevel(&u.uz) || Inhell)) unbind(SEAL_JACK,TRUE);
-			if(u.sealsActive&SEAL_ORTHOS && !(u.sealsActive&SEAL_AMON || darksight(youracedata) || catsight(youracedata) || extramission(youracedata))
+			if(u.sealsActive&SEAL_ORTHOS && !(Darksight || Catsight || Extramission)
 				&&!(
 					(viz_array[u.uy][u.ux]&TEMP_LIT3 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)) || 
 					(levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_DRK3 && !(viz_array[u.uy][u.ux]&TEMP_LIT3)))
 				   )
 			){
-				if(lowlightsight3(youracedata)){
+				if(Elfsight){
 					if(++u.orthocounts>(5*3)) unbind(SEAL_ORTHOS,TRUE);
-				} else if(lowlightsight2(youracedata)){
+				} else if(Lowlightsight){
 					if(++u.orthocounts>(5*2)) unbind(SEAL_ORTHOS,TRUE);
 				} else {
 					if(++u.orthocounts>5) unbind(SEAL_ORTHOS,TRUE);
@@ -638,6 +649,7 @@ moveloop()
 		    mcalcdistress();	/* adjust monsters' trap, blind, etc */
 
 		    /* reallocate movement rations to monsters */
+			flags.goldka_level=0;
 			flags.spore_level=0;
 			flags.slime_level=0;
 			flags.walky_level=0;
@@ -659,7 +671,8 @@ moveloop()
 				/* Possibly change hostility */
 				if(mtmp->data == &mons[PM_SURYA_DEVA]){
 					struct monst *blade;
-					for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar1) break;
+					for(blade = fmon; blade; blade = blade->nmon)
+						if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar1) break;
 					if(blade){
 						if(mtmp->mtame && !blade->mtame){
 							if(blade == nxtmon) nxtmon = nxtmon->nmon;
@@ -672,6 +685,11 @@ moveloop()
 						}
 					}
 				}
+				
+				/*Reset fracture flag*/
+				if(mtmp->zombify && is_kamerel(mtmp->data)) mtmp->zombify = 0;
+				
+				if(mtmp->data == &mons[PM_ARA_KAMEREL]) flags.goldka_level=1;
 				if(mtmp->data == &mons[PM_ZUGGTMOY]) flags.spore_level=1;
 				if(mtmp->data == &mons[PM_JUIBLEX]) flags.slime_level=1;
 				if(mtmp->data == &mons[PM_PALE_NIGHT] || mtmp->data == &mons[PM_DREAD_SERAPH] || mtmp->data == &mons[PM_LEGION]) flags.walky_level=1;
@@ -689,6 +707,48 @@ moveloop()
 						digXchasm(mtmp);
 					} else { //Do for y
 						digYchasm(mtmp);
+					}
+				}
+				
+				if(mtmp->data == &mons[PM_GOLD_GOLEM]){
+					int golds = u.goldkamcount_tame + level.flags.goldkamcount_peace + level.flags.goldkamcount_hostile;
+					if(golds > 0){
+						if(canseemon(mtmp)){
+							pline("%s blossoms into a swirl of mirrored arcs!", Monnam(mtmp));
+							You("see the image of %s reflected in the golden mirrors!", an(mons[PM_ARA_KAMEREL].mname));
+						}
+						set_mon_data(mtmp, &mons[PM_ARA_KAMEREL], 0);
+						mtmp->m_lev = 15;
+						mtmp->mhpmax = d(15, 8);
+						mtmp->mhp = mtmp->mhpmax;
+						if(mtmp->mnamelth) mtmp = christen_monst(mtmp, ""); //Now a different entity
+						mtmp->movement = 9;//Don't pause for a turn
+						golds = rnd(golds);
+						
+						golds -= u.goldkamcount_tame;
+						if(golds <= 0){
+							u.goldkamcount_tame--;
+							if(!mtmp->mtame)
+								mtmp = tamedog(mtmp, (struct obj *) 0);
+							newsym(mtmp->mx,mtmp->my);
+							if(!mtmp)
+								continue; //something went wrong, and now mtmp is no good
+							goto karemade;
+						}
+						golds -= level.flags.goldkamcount_peace;
+						if(golds <= 0){
+							level.flags.goldkamcount_peace--;
+							mtmp->mtame = 0;
+							mtmp->mpeaceful = 1;
+							newsym(mtmp->mx,mtmp->my);
+							goto karemade;
+						}
+						level.flags.goldkamcount_hostile--;
+						mtmp->mtame = 0;
+						mtmp->mpeaceful = 0;
+						newsym(mtmp->mx,mtmp->my);
+karemade:						
+						set_malign(mtmp);
 					}
 				}
 				
@@ -1411,7 +1471,7 @@ moveloop()
 			) m_respond(mtmp);
 		}
 		
-		if(echolocation(youracedata)){
+		if(Echolocation){
 			for(i=1; i<COLNO; i++)
 				for(j=0; j<ROWNO; j++)
 					if(viz_array[j][i]&COULD_SEE)
@@ -1476,6 +1536,16 @@ moveloop()
 				mtmp->perminvis = TRUE;
 				newsym(mtmp->mx,mtmp->my);
 			} else if(isdark(mtmp->mx,mtmp->my) && mtmp->minvis){
+				mtmp->minvis = FALSE;
+				mtmp->perminvis = FALSE;
+				newsym(mtmp->mx,mtmp->my);
+			}
+		} else if(mtmp->data == &mons[PM_HUDOR_KAMEREL]){
+			if(is_pool(mtmp->mx,mtmp->my, TRUE) && !mtmp->minvis){
+				mtmp->minvis = TRUE;
+				mtmp->perminvis = TRUE;
+				newsym(mtmp->mx,mtmp->my);
+			} else if(!is_pool(mtmp->mx,mtmp->my, TRUE) && mtmp->minvis){
 				mtmp->minvis = FALSE;
 				mtmp->perminvis = FALSE;
 				newsym(mtmp->mx,mtmp->my);
@@ -1862,7 +1932,7 @@ newgame()
 
 #endif /* RECORD_REALTIME || REALTIME_ON_BOTL */
 
-	if(darksight(youracedata)) litroom(FALSE,NULL);
+	if(Darksight) litroom(FALSE,NULL);
 	/* Success! */
 	welcome(TRUE);
 	return;
@@ -1904,7 +1974,7 @@ boolean new_game;	/* false => restoring an old game */
 		pline("#chat to a fresh seal to contact the spirit beyond.");
 		pline("Press Ctrl^F or type #power to fire active spirit powers!");
 	}
-	if(darksight(youracedata)){
+	if(Darksight){
 		pline("Beware, droven armor evaporates in light!");
 		pline("Use #monster to create a patch of darkness.");
 	}

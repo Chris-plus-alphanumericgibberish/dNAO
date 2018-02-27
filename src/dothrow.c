@@ -194,6 +194,11 @@ int thrown;
 	
 	if(!barage) multishot = rnd(multishot);
 	else multishot += u.ulevel/10+1; //state variable, we are doing a spirit power barage
+	
+	if((uwep && uwep->oartifact == ART_SANSARA_MIRROR)
+		|| (uswapwep && uswapwep->oartifact == ART_SANSARA_MIRROR)
+	) multishot *= 2;
+	
 	if(ammo_and_launcher(obj, launcher) && launcher->oartifact){
 		if(launcher->oartifact == ART_WRATHFUL_SPIDER) multishot += rn2(8);
 		else if(launcher->oartifact == ART_ROGUE_GEAR_SPIRITS) multishot = 2;
@@ -1318,9 +1323,14 @@ boolean hitsroof;
 	    dmg = (int) obj->owt / 100;
 	    if (dmg < 1) dmg = 1;
 	    else if (dmg > 6) dmg = 6;
-	    if (youracedata->mlet == S_SHADE &&
-		    obj->obj_material != SILVER)
-		dmg = 0;
+	    if (insubstantial(youracedata) &&
+		    !(
+				(obj->obj_material == SILVER && hates_silver(youracedata))
+				|| (obj->obj_material == IRON && hates_iron(youracedata))
+				|| (obj->blessed && hates_holy(youracedata))
+				|| (obj->cursed && hates_unholy(youracedata))
+			)
+		) dmg = 0;
 	}
 	if(resist_attacks(youracedata))
 		dmg = 0;
@@ -1739,7 +1749,7 @@ int thrown;
 			struct monst *msmon;
 			sx = bhitpos.x;
 			sy = bhitpos.y;
-			if((obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) && u.specialSealsActive&SEAL_NUDZIARTH){
+			if((obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) && u.specialSealsActive&SEAL_NUDZIRATH){
 				if(obj->otyp == MIRROR){
 					if(u.spiritPColdowns[PWR_MIRROR_SHATTER] < monstermoves && !u.uswallow && uwep && uwep->otyp == MIRROR && !(uwep->oartifact)){
 						useup(uwep);
@@ -2515,7 +2525,7 @@ boolean from_invent;
 	switch (obj->oclass == POTION_CLASS ? POT_WATER : obj->otyp) {
 		case MIRROR:
 			if (hero_caused){
-			    if((u.specialSealsActive&SEAL_NUDZIARTH)) change_luck(+2);
+			    if((u.specialSealsActive&SEAL_NUDZIRATH)) change_luck(+2);
 				else change_luck(-2);
 			}
 			break;

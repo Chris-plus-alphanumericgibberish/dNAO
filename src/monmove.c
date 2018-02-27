@@ -1021,6 +1021,7 @@ register struct monst *mtmp;
 		&& mdat!=&mons[PM_ELDER_PRIEST] /*&& mdat!=&mons[PM_SHAMI_AMOURAE]*/
 		&& mdat!=&mons[PM_LEGION] /*&& mdat!=&mons[PM_SHAMI_AMOURAE]*/
 		&& !(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz))
+		&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful*/
 	) (void) tactics(mtmp);
 	
 	if(mdat == &mons[PM_GREAT_CTHULHU] && !rn2(20)){
@@ -1040,7 +1041,7 @@ register struct monst *mtmp;
 	}
 	
 	if((is_drow(mtmp->data) || mtmp->data == &mons[PM_LUGRIBOSSK] || mtmp->data == &mons[PM_MAANZECORIAN])
-		&& (!mtmp->mpeaceful || darksight(youracedata))
+		&& (!mtmp->mpeaceful || Darksight)
 		&& (levl[mtmp->mx][mtmp->my].lit == 1 || viz_array[mtmp->my][mtmp->mx]&TEMP_LIT1)
 		&& !mtmp->mcan && mtmp->mspec_used < 4
 		&& !(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz))
@@ -1436,7 +1437,7 @@ register int after;
 	int  omx = mtmp->mx, omy = mtmp->my;
 	struct obj *mw_tmp;
 
-	if (stationary(mtmp->data)) return(0);
+	if (stationary(mtmp->data) || sessile(mtmp->data)) return(0);
 	if(mtmp->mtrapped) {
 	    int i = mintrap(mtmp);
 	    if(i >= 2) { newsym(mtmp->mx,mtmp->my); return(2); }/* it died */

@@ -24,8 +24,13 @@ STATIC_DCL void NDECL(mkshop), FDECL(mkzoo,(int)), NDECL(mkswamp);
 STATIC_DCL void NDECL(mktemple);
 STATIC_DCL void NDECL(mkkamereltowers);
 STATIC_DCL void NDECL(mkminorspire);
+STATIC_DCL void NDECL(mkfishingvillage);
 STATIC_DCL void NDECL(mkpluhomestead);
+STATIC_DCL void FDECL(mkfishinghut, (boolean));
 STATIC_DCL void NDECL(mkpluvillage);
+STATIC_DCL void NDECL(mkferrufort);
+STATIC_DCL void NDECL(mkferrutower);
+STATIC_DCL void NDECL(mkinvertzigg);
 STATIC_DCL void NDECL(mklolthsepulcher);
 STATIC_DCL void NDECL(mkmivaultlolth);
 STATIC_DCL void NDECL(mkvaultlolth);
@@ -1139,6 +1144,15 @@ mklolthdown()
 	}
 }
 
+static const int serpents[] = {PM_PYTHON, PM_COBRA, PM_PIT_VIPER, PM_PYTHON, PM_COBRA, PM_PIT_VIPER, PM_PYTHON, PM_COBRA, PM_PIT_VIPER, 
+	PM_LONG_WORM, PM_PURPLE_WORM,
+	PM_COUATL, PM_LILLEND,
+	PM_RED_NAGA, PM_BLACK_NAGA, PM_GOLDEN_NAGA, PM_GUARDIAN_NAGA, 
+	PM_GIANT_EEL, PM_ELECTRIC_EEL,
+	PM_SALAMANDER,
+	PM_MARILITH
+	};
+
 STATIC_OVL
 void
 mkkamereltowers()
@@ -1148,18 +1162,25 @@ mkkamereltowers()
 	boolean left = rn2(2), good=FALSE, okspot;
 	int slant = rn2(3);
 	struct obj *otmp;
+	struct monst *mtmp;
 	if(left){
 		//Make shallow sea
 		edge = rn1(20, 20);
 		for(j = 0; j < ROWNO; j++){
 			for(i = 0; i < edge; i++){
-				if(isok(x+i,y+j)){
+				if(isok(x+i,y+j) && 
+					(levl[x+i][y+j].typ == TREE || levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == PUDDLE)
+				){
 					if(levl[x+i][y+j].typ!=TREE || edge - i > rn2(6)) levl[x+i][y+j].typ = PUDDLE;
 					levl[x+i][y+j].lit = 1;
+					if(t_at(x+i, y+j))
+						rloc_trap(t_at(x+i, y+j));
+					if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 				}
 			}
 			if(rn2(4)) edge += rn2(3)-slant;
 		}
+		
 		//Build central tower
 		while(!good && tries < 500){
 			x=4+rnd(3)+rn2(3);
@@ -1175,11 +1196,16 @@ mkkamereltowers()
 			if(okspot){
 				good = TRUE;
 			} else continue;
+			
+			//Good to go.  Mark tower now
+			level.flags.has_kamerel_towers = 1;
+			
 			for(i=-3;i<=3;i++)
 				for(j=-3;j<=3;j++){
 					if(dist2(x+i,y+j,x,y)<=14){
 						levl[x+i][y+j].typ = HWALL;
 						levl[x+i][y+j].lit = 1;
+						if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 					}
 				}
 			for(i=-2;i<=2;i++)
@@ -1187,6 +1213,10 @@ mkkamereltowers()
 					if(dist2(x+i,y+j,x,y)<=5){
 						levl[x+i][y+j].typ = CORR;
 						levl[x+i][y+j].lit = 0;
+						if(i != 0 || j != 0){
+							mkcorpstat(STATUE, (struct monst *) 0, &mons[serpents[rn2(SIZE(serpents))]], x+i, y+j, FALSE);
+							mkcorpstat(STATUE, (struct monst *) 0, &mons[PM_AMM_KAMEREL], x+i, y+j, TRUE);
+						}
 					}
 				}
 			for(i=-3;i<=3;i++)
@@ -1199,9 +1229,16 @@ mkkamereltowers()
 					}
 				}
 			wallification(x-3, y-3, x+3, y+3);
-			if(rn2(2)){
+			if(!rn2(3)){
 				otmp = mksobj(DOUBLE_LIGHTSABER, FALSE, FALSE);
 				otmp = oname(otmp, artiname(ART_INFINITY_S_MIRRORED_ARC));
+				otmp->spe = 0;
+				otmp->cursed = 0;
+				otmp->blessed = 0;
+				place_object(otmp, x, y);
+			} else if(rn2(2)){
+				otmp = mksobj(MIRRORBLADE, FALSE, FALSE);
+				otmp = oname(otmp, artiname(ART_SANSARA_MIRROR));
 				otmp->spe = 0;
 				otmp->cursed = 0;
 				otmp->blessed = 0;
@@ -1222,9 +1259,14 @@ mkkamereltowers()
 		edge = COLNO - rn1(20, 20);
 		for(j = 0; j < ROWNO; j++){
 			for(i = COLNO; i > edge; i--){
-				if(isok(x+i,y+j)){
+				if(isok(x+i,y+j) && 
+					(levl[x+i][y+j].typ == TREE || levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == PUDDLE)
+				){
 					if(levl[x+i][y+j].typ!=TREE || i - edge > rn2(6)) levl[x+i][y+j].typ = PUDDLE;
 					levl[x+i][y+j].lit = 1;
+					if(t_at(x+i, y+j))
+						rloc_trap(t_at(x+i, y+j));
+					if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 				}
 			}
 			if(rn2(4)) edge += rn2(3)-slant;
@@ -1245,11 +1287,16 @@ mkkamereltowers()
 			if(okspot){
 				good = TRUE;
 			} else continue;
+			
+			//Good to go.  Mark tower now
+			level.flags.has_kamerel_towers = 1;
+			
 			for(i=-3;i<=3;i++)
 				for(j=-3;j<=3;j++){
 					if(dist2(x+i,y+j,x,y)<=14){
 						levl[x+i][y+j].typ = HWALL;
 						levl[x+i][y+j].lit = 1;
+						if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 					}
 				}
 			for(i=-2;i<=2;i++)
@@ -1257,6 +1304,10 @@ mkkamereltowers()
 					if(dist2(x+i,y+j,x,y)<=5){
 						levl[x+i][y+j].typ = CORR;
 						levl[x+i][y+j].lit = 0;
+						if(i != 0 || j != 0){
+							mkcorpstat(STATUE, (struct monst *) 0, &mons[serpents[rn2(SIZE(serpents))]], x+i, y+j, FALSE);
+							mkcorpstat(STATUE, (struct monst *) 0, &mons[PM_AMM_KAMEREL], x+i, y+j, TRUE);
+						}
 					}
 				}
 			for(i=-3;i<=3;i++)
@@ -1269,9 +1320,16 @@ mkkamereltowers()
 					}
 				}
 			wallification(x-3, y-3, x+3, y+3);
-			if(rn2(2)){
+			if(!rn2(3)){
 				otmp = mksobj(DOUBLE_LIGHTSABER, FALSE, FALSE);
 				otmp = oname(otmp, artiname(ART_INFINITY_S_MIRRORED_ARC));
+				otmp->spe = 0;
+				otmp->cursed = 0;
+				otmp->blessed = 0;
+				place_object(otmp, x, y);
+			} else if(rn2(2)){
+				otmp = mksobj(MIRRORBLADE, FALSE, FALSE);
+				otmp = oname(otmp, artiname(ART_SANSARA_MIRROR));
 				otmp->spe = 0;
 				otmp->cursed = 0;
 				otmp->blessed = 0;
@@ -1313,11 +1371,16 @@ mkkamereltowers()
 				for(j=-2;j<=2;j++){
 					levl[x+i][y+j].typ = HWALL;
 					levl[x+i][y+j].lit = 1;
+					if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 				}
 			for(i=-1;i<=1;i++)
 				for(j=-1;j<=1;j++){
 					levl[x+i][y+j].typ = CORR;
 					levl[x+i][y+j].lit = 0;
+					if(i != 0 || j != 0){
+						mkcorpstat(STATUE, (struct monst *) 0, &mons[serpents[rn2(3)]], x+i, y+j, FALSE);
+						mkcorpstat(STATUE, (struct monst *) 0, &mons[PM_AMM_KAMEREL], x+i, y+j, TRUE);
+					}
 				}
 			for(i=-2;i<=2;i++)
 				for(j=-2;j<=2;j++){
@@ -1328,6 +1391,51 @@ mkkamereltowers()
 						place_object(otmp, x+i, y+j);
 					}
 				}
+			switch(rnd(7)){
+				case 1:
+				mtmp = makemon(&mons[PM_AMM_KAMEREL], x, y, MM_ADJACENTOK);
+				if (mtmp){
+					mtmp->m_lev += 4;
+					mtmp->mhpmax += 4*8;
+					mtmp->mhp = mtmp->mhpmax;
+					mtmp->mstrategy |= STRAT_WAITFORU;
+					otmp = mkobj(RANDOM_CLASS, TRUE);
+					(void) mpickobj(mtmp, otmp);
+					otmp = mkobj(RANDOM_CLASS, TRUE);
+					(void) mpickobj(mtmp, otmp);
+					otmp = mkobj(RANDOM_CLASS, TRUE);
+					(void) mpickobj(mtmp, otmp);
+					otmp = mkobj(RANDOM_CLASS, TRUE);
+					(void) mpickobj(mtmp, otmp);
+				}
+				break;
+				case 2:
+					otmp = mksobj(!rn2(3) ? MIRRORBLADE : rn2(2) ? KHAKKHARA : KAMEREL_VAJRA, FALSE, FALSE);
+					otmp->spe = 1;
+					place_object(otmp, x, y);
+				break;
+				case 3:
+					mksobj_at(MIRROR, x, y, FALSE, FALSE);
+				break;
+				case 4:
+					//Nothing
+				break;
+				case 5:{
+					struct trap *ttmp = maketrap(x, y, SPIKED_PIT);
+					ttmp->tseen = 1;/*Tower floor has been destroyed*/
+				}break;
+				case 6:
+					levl[x][y].typ = HWALL;
+					otmp = mksobj(MIRROR, FALSE, FALSE);
+					otmp->objsize = MZ_GIGANTIC;
+					fix_object(otmp);
+					place_object(otmp, x, y);
+				break;
+				case 7:
+					mkobj_at(SPBOOK_CLASS, x, y, FALSE);
+				break;
+			}
+			
 			wallification(x-2, y-2, x+2, y+2);
 		}
 		c--;
@@ -1355,6 +1463,7 @@ mkkamereltowers()
 				for(j=-1;j<=1;j++){
 					levl[x+i][y+j].typ = HWALL;
 					levl[x+i][y+j].lit = 1;
+					if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 				}
 			levl[x][y].typ = CORR;
 			levl[x][y].lit = 0;
@@ -1367,6 +1476,29 @@ mkkamereltowers()
 						place_object(otmp, x+i, y+j);
 					}
 				}
+			switch(rnd(5)){
+				case 1:
+					mtmp = makemon(&mons[PM_AMM_KAMEREL], x, y, MM_ADJACENTOK);
+					if (mtmp){
+						otmp = mkobj(RANDOM_CLASS, TRUE);
+						(void) mpickobj(mtmp, otmp);
+					}
+				break;
+				case 2:
+					mksobj_at(MIRRORBLADE, x, y, FALSE, FALSE);
+				break;
+				case 3:
+					mksobj_at(MIRROR, x, y, FALSE, FALSE);
+				break;
+				case 4:
+					//Nothing
+				break;
+				case 5:{
+					struct trap *ttmp = maketrap(x, y, SPIKED_PIT);
+					ttmp->tseen = 1;/*Tower floor has been destroyed*/
+				}break;
+			}
+			
 			wallification(x-1, y-1, x+1, y+1);
 		}
 		c--;
@@ -1395,6 +1527,7 @@ mkminorspire()
 			good = TRUE;
 		} else continue;
 		
+		level.flags.has_minor_spire = 1; /*Spawn kamerel survivors on this level*/
 		ix = x;
 		iy = y;
 		for(i=-10;i<=10;i++){
@@ -1403,6 +1536,9 @@ mkminorspire()
 					if(levl[ix+i][iy+j].typ == ROOM || (dist2(ix, iy, ix+i, iy+j)) < (rnd(8)*rnd(8)+36))
 						levl[ix+i][iy+j].typ = PUDDLE;
 					levl[ix+i][iy+j].lit = 1;
+					if(t_at(x+i, y+j))
+						rloc_trap(t_at(x+i, y+j));
+					if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 				}
 			}
 		}
@@ -1422,6 +1558,7 @@ mkminorspire()
 			for(j=-1;j<=1;j++){
 				levl[x+i][y+j].typ = HWALL;
 				levl[x+i][y+j].lit = 1;
+				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 			}
 		}
 		wallification(x-1, y-1, x+1, y+1);
@@ -1483,6 +1620,163 @@ mkminorspire()
 
 STATIC_OVL
 void
+mkfishingvillage()
+{
+	int x=0,y=0,tx, ty, tries=0;
+	int i,j, c, edge;
+	boolean left = rn2(2), good=FALSE, okspot;
+	int slant = rn2(3);
+	int shelf = rn1(5, 5);
+	struct obj *otmp;
+	if(left){
+		//Make sea
+		edge = rn1(20, 20);
+		for(j = 0; j < ROWNO; j++){
+			for(i = 0; i < edge; i++){
+				if(isok(x+i,y+j) && 
+					(levl[x+i][y+j].typ == TREE || levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == PUDDLE)
+				){
+					if(i < edge-shelf){
+						levl[x+i][y+j].typ = MOAT;
+						if(t_at(x+i, y+j))
+							rloc_trap(t_at(x+i, y+j));
+						if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+			} else
+						if(levl[x+i][y+j].typ!=TREE || edge - i > rn2(6)) levl[x+i][y+j].typ = PUDDLE;
+					levl[x+i][y+j].lit = 1;
+				}
+			}
+			if(rn2(4)) edge += rn2(3)-slant;
+		}
+	} else {
+		edge = COLNO - rn1(20, 20);
+		for(j = 0; j < ROWNO; j++){
+			for(i = COLNO; i > edge; i--){
+				if(isok(x+i,y+j) && 
+					(levl[x+i][y+j].typ == TREE || levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == PUDDLE)
+				){
+					if(i > edge + shelf){
+						levl[x+i][y+j].typ = MOAT;
+						if(t_at(x+i, y+j))
+							rloc_trap(t_at(x+i, y+j));
+						if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+					} else
+						if(levl[x+i][y+j].typ!=TREE || i - edge > rn2(6)) levl[x+i][y+j].typ = PUDDLE;
+					levl[x+i][y+j].lit = 1;
+				}
+			}
+			if(rn2(4)) edge += rn2(3)-slant;
+		}
+	}
+	
+	{
+	int n = 4 + rnd(4) + rn2(4);
+	for(n; n > 0; n--)
+		mkfishinghut(left);
+	}
+}
+
+STATIC_OVL
+void
+mkfishinghut(left)
+	boolean left;
+{
+	int x,y,tries=0, roomnumb;
+	int i,j, pathto = 0;
+	boolean good=FALSE, okspot, accessible;
+	struct obj *otmp;
+	while(!good && tries < 500){
+		x = rn2(COLNO/2)+1;
+		if(!left)
+			x += COLNO/2;
+		y = rn2(ROWNO-5);
+		tries++;
+		okspot = TRUE;
+		accessible = FALSE;
+		for(i=-1;i<6;i++)
+			for(j=-1;j<6;j++){
+				if(!isok(x+i,y+j) || t_at(x+i, y+j) || 
+					!(levl[x+i][y+j].typ == TREE || levl[x+i][y+j].typ == PUDDLE 
+						|| levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == MOAT
+					 )
+				) okspot = FALSE;
+			}
+		pathto = 0;
+		if(left){
+			if(isok(x+1,y-1) && levl[x+1][y-1].typ == PUDDLE) pathto++;
+			if(isok(x-1,y+1) && levl[x-1][y+1].typ == PUDDLE) pathto++;
+			if(isok(x-1,y+2) && levl[x-1][y+2].typ == PUDDLE) pathto++;
+			if(isok(x+1,y+4) && levl[x+1][y+4].typ == PUDDLE) pathto++;
+		} else {
+			if(isok(x+2,y-1) && levl[x+2][y-1].typ == PUDDLE) pathto++;
+			if(isok(x+4,y+1) && levl[x+4][y+1].typ == PUDDLE) pathto++;
+			if(isok(x+4,y+2) && levl[x+4][y+2].typ == PUDDLE) pathto++;
+			if(isok(x+2,y+4) && levl[x+2][y+4].typ == PUDDLE) pathto++;
+		}
+		if(pathto) accessible = TRUE;
+		if(okspot && accessible){
+			good = TRUE;
+		} else continue;
+		
+		for(i=0;i<4;i++){
+			for(j=0;j<4;j++){
+				levl[x+i][y+j].typ = HWALL;
+				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+			}
+		}
+		for(i=1;i<3;i++){
+			for(j=1;j<3;j++){
+				levl[x+i][y+j].typ = CORR;
+				if(!rn2(9)) mksobj_at(SPEAR, x+1, y+1, TRUE, FALSE);
+				if(!rn2(9)){
+					otmp = mksobj(SLIME_MOLD, TRUE,FALSE);
+					otmp->spe = fruitadd("salted fish");
+					otmp->quan = (long) rnd(4);
+					otmp->owt = weight(otmp);
+					place_object(otmp, x+i, y+j);
+				}
+				if(!rn2(9)) mksobj_at(POT_BOOZE, x+1, y+1, TRUE, FALSE);
+				if(!rn2(9)) mksobj_at(CRAM_RATION, x+1, y+1, TRUE, FALSE);
+				if(!rn2(100)){
+					otmp = mkobj(AMULET_CLASS, TRUE);
+					otmp->obj_material = GOLD;
+					otmp->owt = weight(otmp);
+					place_object(otmp, x+i, y+j);
+				}
+			}
+		}
+		i = 1+rn2(3);
+		for(i;i>0;i--){
+			makemon(&mons[PM_DEEP_ONE], x+rnd(2), y+rnd(2), MM_ADJACENTOK);
+		}
+		
+		wallification(x, y, x+3, y+3);
+		
+		pathto = rn2(pathto);
+		if(left){
+			if(isok(x+1,y-1) && levl[x+1][y-1].typ == PUDDLE && !(pathto--)) 
+				levl[x+1][y].typ = DOOR, levl[x+1][y].doormask = rn2(3) ? D_LOCKED : D_CLOSED;
+			if(isok(x-1,y+1) && levl[x-1][y+1].typ == PUDDLE && !(pathto--)) 
+				levl[x][y+1].typ = DOOR, levl[x][y+1].doormask = rn2(3) ? D_LOCKED : D_CLOSED;
+			if(isok(x-1,y+2) && levl[x-1][y+2].typ == PUDDLE && !(pathto--)) 
+				levl[x][y+2].typ = DOOR, levl[x][y+2].doormask = rn2(3) ? D_LOCKED : D_CLOSED;
+			if(isok(x+1,y+4) && levl[x+1][y+4].typ == PUDDLE && !(pathto--)) 
+				levl[x+1][y+3].typ = DOOR, levl[x+1][y+3].doormask = rn2(3) ? D_LOCKED : D_CLOSED;
+		} else {
+			if(isok(x+2,y-1) && levl[x+2][y-1].typ == PUDDLE && !(pathto--)) 
+				levl[x+2][y].typ = DOOR, levl[x+2][y].doormask = rn2(3) ? D_LOCKED : D_CLOSED;
+			if(isok(x+4,y+1) && levl[x+4][y+1].typ == PUDDLE && !(pathto--)) 
+				levl[x+3][y+1].typ = DOOR, levl[x+3][y+1].doormask = rn2(3) ? D_LOCKED : D_CLOSED;
+			if(isok(x+4,y+2) && levl[x+4][y+2].typ == PUDDLE && !(pathto--)) 
+				levl[x+3][y+2].typ = DOOR, levl[x+3][y+2].doormask = rn2(3) ? D_LOCKED : D_CLOSED;
+			if(isok(x+2,y+4) && levl[x+2][y+4].typ == PUDDLE && !(pathto--)) 
+				levl[x+2][y+3].typ = DOOR, levl[x+2][y+3].doormask = rn2(3) ? D_LOCKED : D_CLOSED;
+		}
+	}
+}
+
+STATIC_OVL
+void
 mkpluhomestead()
 {
 	int x,y,tries=0, roomnumb;
@@ -1518,7 +1812,7 @@ mkpluhomestead()
 		for(i=1;i<4;i++){
 			for(j=1;j<4;j++){
 				levl[x+i][y+j].typ = CORR;
-				if(rn2(9)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, FALSE);
+				if(!rn2(3)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, FALSE);
 			}
 		}
 		i = rnd(3)+rn2(2);
@@ -1577,6 +1871,11 @@ mkpluvillage()
 		if(okspot && accessible){
 			good = TRUE;
 			//Clear village green
+			for(i=sizebig1;i<(sizetot-sizebig2);i++) 
+				for(j=1;j<10;j++){
+					levl[x+i][y+j].typ = HWALL;
+					if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+				}
 			for(i=sizebig1;i<(sizetot-sizebig2);i++) 
 				for(j=1;j<10;j++){
 					levl[x+i][y+j].typ = ROOM;
@@ -1891,6 +2190,365 @@ mkpluvillage()
 	}
 }
 
+STATIC_OVL
+void
+mkferrufort()
+{
+	int wallln = rn2(2) ? 4 : 3;
+	int x=0,y=0,tx, ty, tries=0;
+	int i,j, c;
+	int wallrange = wallln*4+1;
+	int allrange = wallrange+2;
+	boolean good=FALSE, okspot, accessible, throne = 0;
+	
+	struct roomcon{
+		int status;
+		struct roomcon *left;
+		struct roomcon *right;
+	} connect[wallln][wallln];
+	
+	// int connect[wallln][wallln];
+	
+	for(i = 0; i < wallln; i++)
+		for(j = 0; j < wallln; j++){
+			connect[i][j].status = 0;
+			connect[i][j].left = 0;
+			connect[i][j].right = 0;
+		}
+	i = 0;
+	j = 0;
+	
+	connect[0][0].left = &connect[0][1];
+	connect[0][0].right= &connect[1][0];
+	
+	for(i=1; i < wallln - 1; i++){
+		connect[i][j].left = &connect[i-1][j];
+		connect[i][j].right= &connect[i+1][j];
+	}
+	
+	connect[wallln][0].left = &connect[wallln-1][0];
+	connect[wallln][0].right= &connect[wallln][1];
+	
+	for(j=1; j < wallln; j++){
+		connect[i][j].left = &connect[i][j-1];
+		connect[i][j].right= &connect[i][j+1];
+	}
+	
+	connect[wallln][wallln].left = &connect[wallln][wallln-1];
+	connect[wallln][wallln].right= &connect[wallln-1][wallln];
+	
+	for(i=wallln - 1; i > 0; i--){
+		connect[i][j].left = &connect[i+1][j];
+		connect[i][j].right= &connect[i-1][j];
+	}
+	
+	connect[0][wallln].left = &connect[1][wallln];
+	connect[0][wallln].right= &connect[0][wallln-1];
+	
+	for(j=wallln - 1; j > 0; j--){
+		connect[i][j].left = &connect[i][j+1];
+		connect[i][j].right= &connect[i][j-1];
+	}
+	
+	while(tries < 500){
+		x = rn2(COLNO-allrange)+1;
+		y = rn2(ROWNO-allrange);
+		tries++;
+		okspot = TRUE;
+		accessible = FALSE;
+		for(i=0;i<allrange;i++)
+			for(j=0;j<allrange;j++){
+				if(!isok(x+i,y+j) || t_at(x+i, y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == TREE))
+					okspot = FALSE;
+				if(isok(x+i,y+j) && levl[x+i][y+j].typ == ROOM //&&
+//					(i == 0 || j == 0 || i+1 == allrange || j+1 == allrange)
+				)
+					accessible = TRUE;
+			}
+			
+		if(okspot && accessible){
+			//clear around the fort and make a solid block of walls
+			for(i=0;i<allrange;i++)
+				for(j=0;j<allrange;j++){
+					if(i>0 && i+1 < allrange && j>0 && j+1<allrange){
+						levl[x+i][y+j].typ = HWALL;
+						if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+					}
+					else
+						levl[x+i][y+j].typ = ROOM;
+				}
+			//Update coordinates: there is a perimeter of clear terain now, that's all we need.
+			//Use wallrange for all purposes now.
+			x++;y++;
+			
+			//carve the block into grid of 3x3 rooms
+			for(tx=0;tx<wallln;tx++)
+				for(ty=0;ty<wallln;ty++){
+					for(i=0;i<3;i++)
+						for(j=0;j<3;j++)
+							levl[tx*4+x+i+1][ty*4+y+j+1].typ = CORR;
+				}
+			
+			//replace the center rooms with a courtyard
+			for(i=5;i<wallrange-5;i++)
+				for(j=5;j<wallrange-5;j++)
+					levl[x+i][y+j].typ = ROOM;
+			
+			//Make the walls look pretty
+			wallification(x, y, x+wallrange-1, y+wallrange-1);
+			
+			//place outer door
+			if(rn2(2)){
+				//generate x and y of *room*
+				int doorx = rn2(wallln);
+				int doory = rn2(2) ? (wallln-1) : 0;
+				connect[doorx][doory].status = 1;
+				
+				//generate true x and y
+				tx = x+1+doorx*4+1;
+				if(doory)
+					ty = y+wallln*4;
+				else 
+					ty = y;
+				levl[tx][ty].typ = DOOR;
+				levl[tx][ty].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+			} else {
+				int doorx = rn2(2) ? (wallln-1) : 0;
+				int doory = rn2(wallln);
+				connect[doorx][doory].status = 1;
+				
+				//generate true x and y
+				if(doorx)
+					tx = x+wallln*4;
+				else 
+					tx = x;
+				ty = y+1+doory*4+1;
+				
+				levl[tx][ty].typ = DOOR;
+				levl[tx][ty].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+			}
+			// c = TRUE;
+			// while(c){
+				// if((doorx != 0 && doory != wallln-1) || (doory != 0 && doory != wallln-1) ){
+				// }
+			// }
+			break;
+		}
+	}
+}
+
+STATIC_OVL
+void
+mkferrutower()
+{
+	int x,y,tries=0, roomnumb = nroom;
+	int i,j;
+	boolean good=FALSE, okspot, accessible;
+	int size = 8;
+	while(!good && tries < 500){
+		x = rn2(COLNO-size)+1;
+		y = rn2(ROWNO-size);
+		tries++;
+		okspot = TRUE;
+		accessible = FALSE;
+		for(i=0;i<size;i++)
+			for(j=0;j<size;j++){
+				if(!isok(x+i,y+j) || t_at(x+i, y+j) || !(levl[x+i][y+j].typ == TREE || levl[x+i][y+j].typ == ROOM))
+					okspot = FALSE;
+			}
+		if(!okspot)
+			continue;
+		
+		for(i=0;i<size;i++){
+			if(isok(x+i,y) && levl[x+i][y].typ == ROOM)
+				accessible = TRUE;
+			if(isok(x+i,y+size-1) && levl[x+i][y+size-1].typ == ROOM)
+				accessible = TRUE;
+			if(isok(x+size-1,y+i) && levl[x+size-1][y+i].typ == ROOM)
+				accessible = TRUE;
+			if(isok(x,y+i) && levl[x][y+i].typ == ROOM)
+				accessible = TRUE;
+		}
+		
+		if(okspot && accessible){
+			good = TRUE;
+		} else continue;
+		
+		for(i=0;i<size;i++){
+			for(j=0;j<size;j++){
+				levl[x+i][y+j].typ = ROOM;
+			}
+		}
+		for(i=1;i<size-1;i++){
+			for(j=1;j<size-1;j++){
+				levl[x+i][y+j].typ = HWALL;
+				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+			}
+		}
+		for(i=2;i<size-2;i++){
+			for(j=2;j<size-2;j++){
+				levl[x+i][y+j].typ = ROOM;
+			}
+		}
+		
+		wallification(x, y, x+size-1, y+size-1);
+		
+		if(rn2(2)){
+			i = rnd(size-4)+1;
+			j = rn2(2) ? size-2 : 1;
+		} else {
+			i = rn2(2) ? size-2 : 1;
+			j = rnd(size-4)+1;
+		}
+		levl[x+i][y+j].typ = DOOR;
+		levl[x+i][y+j].doormask = D_LOCKED;
+		
+		flood_fill_rm(x+size/2, y+size/2,
+			  nroom+ROOMOFFSET, TRUE, TRUE);
+		add_room(x+2, y+2, x+size-3, y+size-3, TRUE, BARRACKS, TRUE);
+		add_door(x+i,y+j,&rooms[roomnumb]);
+		fill_room(&rooms[roomnumb], FALSE);
+	}
+}
+
+STATIC_OVL
+void
+mkinvertzigg()
+{
+	int x,y,tries=0, roomnumb = nroom;
+	int i,j;
+	boolean good=FALSE, okspot, accessible;
+	int size = 15;
+	struct obj *chest, *otmp;
+	while(!good && tries < 500){
+		x = rn2(COLNO-size)+1;
+		y = rn2(ROWNO-size);
+		tries++;
+		okspot = TRUE;
+		accessible = FALSE;
+		for(i=0;i<size;i++)
+			for(j=0;j<size;j++){
+				if(!isok(x+i,y+j) || t_at(x+i, y+j) || !(levl[x+i][y+j].typ == TREE || levl[x+i][y+j].typ == ROOM))
+					okspot = FALSE;
+			}
+		if(!okspot)
+			continue;
+		
+		for(i=0;i<size;i++){
+			if(isok(x+i,y) && levl[x+i][y].typ == ROOM)
+				accessible = TRUE;
+			if(isok(x+i,y+size-1) && levl[x+i][y+size-1].typ == ROOM)
+				accessible = TRUE;
+			if(isok(x+size-1,y+i) && levl[x+size-1][y+i].typ == ROOM)
+				accessible = TRUE;
+			if(isok(x,y+i) && levl[x][y+i].typ == ROOM)
+				accessible = TRUE;
+		}
+		
+		if(okspot && accessible){
+			good = TRUE;
+		} else continue;
+		
+		for(i=0;i<size;i++){
+			for(j=0;j<size;j++){
+				levl[x+i][y+j].typ = ROOM;
+				levl[x+i][y+j].lit = 1;
+			}
+		}
+		
+		for(i=1;i<size-1;i++){
+			for(j=1;j<size-1;j++){
+				levl[x+i][y+j].typ = HWALL;
+				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+			}
+		}
+		for(i=2;i<size-2;i++){
+			for(j=2;j<size-2;j++){
+				levl[x+i][y+j].typ = CORR;
+				levl[x+i][y+j].lit = 0;
+			}
+		}
+		
+		for(i=4;i<size-4;i++){
+			for(j=4;j<size-4;j++){
+				levl[x+i][y+j].typ = HWALL;
+				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+			}
+		}
+		for(i=5;i<size-5;i++){
+			for(j=5;j<size-5;j++){
+				levl[x+i][y+j].typ = CORR;
+			}
+		}
+		
+		wallification(x, y, x+size-1, y+size-1);
+		
+		if(rn2(2)){
+			i = rnd(size-4)+1;
+			j = rn2(2) ? size-2 : 1;
+		} else {
+			i = rn2(2) ? size-2 : 1;
+			j = rnd(size-4)+1;
+		}
+		levl[x+i][y+j].typ = DOOR;
+		levl[x+i][y+j].doormask = D_LOCKED;
+		
+		if(rn2(2)){
+			i = rnd(size-10)+4;
+			j = rn2(2) ? size-5 : 4;
+		} else {
+			i = rn2(2) ? size-5 : 4;
+			j = rnd(size-10)+4;
+		}
+		levl[x+i][y+j].typ = DOOR;
+		levl[x+i][y+j].doormask = D_LOCKED;
+		
+		if(rn2(3)){
+			chest = mksobj_at(CHEST, x+size/2, y+size/2, TRUE, TRUE);
+			chest->obj_material = IRON;
+			fix_object(chest);
+			if ((otmp = mksobj(TORCH, FALSE, FALSE)) != 0) {
+				otmp->quan = rnd(6);
+				otmp->owt = weight(otmp);
+				add_to_container(chest, otmp);
+			}
+			if ((otmp = mksobj(SHADOWLANDER_S_TORCH, FALSE, FALSE)) != 0) {
+				otmp->quan = rnd(6);
+				otmp->spe = rn2(3);
+				otmp->owt = weight(otmp);
+				add_to_container(chest, otmp);
+			}
+			/*Chance for beads of force*/
+			/*Chance for rod of force*/
+			/*Chance for wand of striking*/
+			if ((otmp = mksobj(WAN_STRIKING, TRUE, FALSE)) != 0) {
+				add_to_container(chest, otmp);
+			}
+			if ((otmp = mksobj(POT_WATER, FALSE, FALSE)) != 0) {
+				otmp->blessed = 0;
+				otmp->cursed = 1;
+				otmp->quan = rnd(3);
+				otmp->owt = weight(otmp);
+				add_to_container(chest, otmp);
+			}
+			bury_an_obj(chest);
+		} else {
+			levl[x+size/2][y+size/2].typ = ALTAR;
+			levl[x+size/2][y+size/2].altarmask = Align2amask( A_NONE );
+		}
+		if(!toostrong(PM_SHATTERED_ZIGGURAT_WIZARD, (level_difficulty() + u.ulevel) / 2 + 5)){
+			makemon(&mons[PM_SHATTERED_ZIGGURAT_WIZARD], x+size/2, y+size/2, MM_ADJACENTOK);
+			for(i = rnd(6)+rnd(4); i > 0; i--)
+				makemon(&mons[PM_SHATTERED_ZIGGURAT_KNIGHT], x+size/2, y+size/2, MM_ADJACENTOK);
+		} else {
+			for(i = rnd(4); i > 0; i--)
+				makemon(&mons[PM_SHATTERED_ZIGGURAT_KNIGHT], x+size/2, y+size/2, MM_ADJACENTOK);
+		}
+		for(i = rn1(6,6); i > 0; i--)
+			makemon(&mons[PM_SHATTERED_ZIGGURAT_CULTIST], x+size/2, y+size/2, MM_ADJACENTOK);
+	}
+}
+
 void
 place_lolth_vaults()
 {
@@ -1938,18 +2596,29 @@ place_neutral_features()
 {
 	if(!rn2(40)){
 		mkkamereltowers();
+		if(!rn2(20))
+			mkfishingvillage();
 	} else if(!rn2(20)){
 		mkminorspire();
-	} else if(!rn2(10)){
-		mkneuriver();
+	} else if(!rn2(20)){
+		mkfishingvillage();
 	}
 	
+	if(!rn2(10)){
+		mkneuriver();
+	}
 	
 	if(!rn2(10)){
 		mkpluvillage();
 	// } else if(){
-		// mkferufort();
+		// mkferrufort();
 	}
+	
+	if(!rn2(20))
+		mkinvertzigg();
+	
+	if(!rn2(10))
+		mkferrutower();
 	
 	if(!rn2(4)){
 		int n = rnd(4) + rn2(4);
@@ -2363,9 +3032,17 @@ struct mkroom *sroom;
 					     sx, sy, TRUE, FALSE);
 			break;
 		    case BARRACKS:
-			if(!rn2(20))	/* the payroll and some loot */
-			    (void) mksobj_at((rn2(3)) ? BOX : CHEST,
+			if(!rn2(20)){
+				/* the payroll and some loot */
+				struct obj *chest, *gold;
+				gold = mksobj(GOLD_PIECE, TRUE, FALSE);
+				gold->quan = (long) rn1(9 * level_difficulty(), level_difficulty()); //1 - 10
+				gold->owt = weight(gold);
+			    chest = mksobj_at((rn2(3)) ? BOX : CHEST,
 					     sx, sy, TRUE, FALSE);
+				add_to_container(chest, gold);
+				chest->owt = weight(chest);
+			}
 			break;
 		    case COCKNEST:
 			if(!rn2(3)) {
@@ -2901,6 +3578,11 @@ register boolean edge; /* Allows room walls to intrude slightly into river. */
 	register int monster = PM_JELLYFISH;
 	/* Don't liquify shop walls */
 	if (level.flags.has_shop && *in_rooms(x, y, SHOPBASE)) {return;}
+	
+	/* Don't liquify other level features */
+	if(typ != TREE && typ != ROOM)
+		return;
+	
 	if (typ!=TREE || (!edge && rn2(6))){
 		if(typ == TREE) levl[x][y].typ = POOL;
 		else levl[x][y].typ = PUDDLE;
@@ -3031,6 +3713,8 @@ mkisland() /* John Harris, modified from mktemple & mkshop,
 	y = (((sroom->hy - sroom->ly) / 2) + sroom->ly);
 	/* Make the treasure, add gold to it, bury & mark it */
 	otmp = mksobj_at(CHEST, x, y, TRUE, TRUE);
+	otmp->obj_material = IRON;
+	fix_object(otmp);
 	ogold = mkgold((long)rn1(u_depth * 100 + 200, 250), x, y);
 	remove_object(ogold);
 	(void) add_to_container(otmp, ogold);

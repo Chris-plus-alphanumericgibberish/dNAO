@@ -600,6 +600,7 @@ E boolean FDECL(In_mines, (d_level *));
 E boolean FDECL(In_mines_quest, (d_level *));
 E boolean FDECL(In_neu, (d_level *));
 E boolean FDECL(In_outlands, (d_level *));
+E boolean FDECL(In_lost_cities, (d_level *));
 E boolean FDECL(In_cha, (d_level *));
 E boolean FDECL(In_law, (d_level *));
 E branch *FDECL(dungeon_branch, (const char *));
@@ -2456,6 +2457,7 @@ E struct monst *FDECL(activate_statue_trap,
 E void FDECL(dotrap, (struct trap *, unsigned));
 E void FDECL(seetrap, (struct trap *));
 E int FDECL(mintrap, (struct monst *));
+E void FDECL(rloc_trap, (struct trap *));
 E void FDECL(instapetrify, (const char *));
 E void FDECL(minstapetrify, (struct monst *,BOOLEAN_P));
 E void FDECL(selftouch, (const char *));
@@ -2808,6 +2810,7 @@ E int FDECL(dowrite, (struct obj *));
 
 /* ### zap.c ### */
 
+E int FDECL(zap_hit, (int,int));
 E int FDECL(bhitm, (struct monst *,struct obj *));
 E void FDECL(probe_monster, (struct monst *));
 E boolean FDECL(get_obj_location, (struct obj *,xchar *,xchar *,int));

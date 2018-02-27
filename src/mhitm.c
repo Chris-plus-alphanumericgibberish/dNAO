@@ -323,6 +323,7 @@ mattackm(magr, mdef)
 		pa = find_mask(magr);
 		if(!Blind && pa != &mons[PM_LILLEND]) pline("%s uses a %s mask!",Monnam(magr), pa->mname);
 	}
+	
     /* Now perform all attacks for the monster. */
     for (i = 0; i < NATTK; i++) {
         int tmphp = mdef->mhp;
@@ -347,7 +348,7 @@ mattackm(magr, mdef)
 			|| mattk->aatyp == AT_MAGC
 			|| (mattk->aatyp == AT_TENT && magr->mfaction == SKELIFIED)
 			|| (i == 0 && 
-				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) && 
+				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_MARI) && 
 				mattk->adtyp == AD_PHYS && 
 				mattk->damn*mattk->damd/2 < (magr->m_lev/10+1)*max(magr->data->msize*2, 4)/2
 			   )
@@ -380,6 +381,29 @@ mattackm(magr, mdef)
 			else continue;
 		}
 	}
+	if(magr->mfaction == FRACTURED){
+			if(!derundspec && 
+				mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0
+			){
+				derundspec = TRUE;
+				alt_attk.aatyp = AT_CLAW;
+				alt_attk.adtyp = AD_GLSS;
+				alt_attk.damn = max(magr->m_lev/10+1, mattk->damn);
+				alt_attk.damd = max(magr->data->msize*2, max(mattk->damd, 4));
+				mattk = &alt_attk;
+			}
+			if(mattk->aatyp == AT_CLAW && 
+				(mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE)
+			){
+				alt_attk.aatyp = AT_CLAW;
+				alt_attk.adtyp = AD_GLSS;
+				alt_attk.damn = mattk->damn;
+				alt_attk.damd = mattk->damd;
+				mattk = &alt_attk;
+			}
+			if(mattk->aatyp == AT_GAZE)
+				continue;
+	}
 	
 	/*Plasteel helms cover the face and prevent bite attacks*/
 	if((magr->misc_worn_check & W_ARMH) && which_armor(magr, W_ARMH) &&
@@ -390,18 +414,18 @@ mattackm(magr, mdef)
 	switch (mattk->aatyp) {
 	    case AT_DEVA:
 	    case AT_WEAP:
-		case AT_XWEP: /* weapon attacks */
-#define MAINHAND (mattk->aatyp != AT_XWEP)
+		case AT_XWEP:
+		case AT_MARI: /* weapon attacks */
+#define MAINHAND (mattk->aatyp != AT_XWEP && mattk->aatyp != AT_MARI)
 
-		if (!MAINHAND && magr->misc_worn_check & W_ARMS) {
+		if (!mattk->aatyp == AT_XWEP && magr->misc_worn_check & W_ARMS) {
 			// Offhand attacks cannot be made while wearing a shield
 			break;
 		}
 
 #ifdef TAME_RANGED_ATTACKS
-		if (MAINHAND) {
-			if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > 2)
-			{
+		if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > 2){
+			if (MAINHAND) {
 				thrwmm(magr, mdef);
 				if (tmphp > mdef->mhp){
 					res[i] = MM_HIT;
@@ -410,13 +434,14 @@ mattackm(magr, mdef)
 				if (mdef->mhp < 1) res[i] = MM_DEF_DIED;
 				if (magr->mhp < 1) res[i] = MM_AGR_DIED;
 				break;
-			}
+			} else break;
 		}
 #endif /*TAME_RANGED_ATTACKS*/
-
-		if (magr->weapon_check == NEED_WEAPON || (MAINHAND ? (!MON_WEP(magr)) : (!MON_SWEP(magr)))) {
-		    magr->weapon_check = NEED_HTH_WEAPON;
-		    if (mon_wield_item(magr) != 0) return 0;
+		if(mattk->aatyp != AT_MARI){
+			if (magr->weapon_check == NEED_WEAPON || (MAINHAND ? (!MON_WEP(magr)) : (!MON_SWEP(magr)))) {
+				magr->weapon_check = NEED_HTH_WEAPON;
+				if (mon_wield_item(magr) != 0) return 0;
+			}
 		}
 
 #ifdef TAME_RANGED_ATTACKS
@@ -437,7 +462,33 @@ mattackm(magr, mdef)
 		}
 #endif
 		possibly_unwield(magr, FALSE);
-		otmp = (MAINHAND ? MON_WEP(magr) : MON_SWEP(magr));
+		if(MAINHAND){
+			otmp = MON_WEP(magr);
+		} else if(mattk->aatyp == AT_XWEP){
+			otmp = MON_SWEP(magr);
+		} else if(mattk->aatyp == AT_MARI){
+			int wcount = 0;
+			for(otmp = magr->minvent; otmp; otmp = otmp->nobj){
+				if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) 
+					&& !otmp->oartifact
+					&& otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)
+				) wcount++;
+			}
+			wcount -= i;
+			if(MON_WEP(magr))
+				wcount++;
+			if(MON_SWEP(magr))
+				wcount++;
+			for(otmp = magr->minvent; otmp; otmp = otmp->nobj){
+				if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) 
+					&& !otmp->oartifact
+					&& otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)
+					&& --wcount <= 0
+				) break;
+			}
+		} else {
+			otmp = MON_WEP(magr);
+		}
 #undef MAINHAND
 		if (otmp) {
 		    if (vis) mswingsm(magr, mdef, otmp);
@@ -500,10 +551,14 @@ meleeattack:
 		 * have a weapon instead.  This instinct doesn't work for
 		 * players, or under conflict or confusion. 
 		 */
-		if (!magr->mconf && !Conflict && otmp &&
-			mattk->aatyp != AT_WEAP && mattk->aatyp != AT_XWEP && mattk->aatyp != AT_DEVA && mattk->aatyp != AT_BEAM &&
-			mattk->adtyp != AD_STAR && mattk->adtyp != AD_BLUD && mattk->adtyp != AD_SHDW && 
-			touch_petrifies(mdef->data)
+		if (!magr->mconf && !Conflict && ((otmp &&
+			mattk->aatyp != AT_WEAP && mattk->aatyp != AT_XWEP && mattk->aatyp != AT_MARI && 
+			mattk->aatyp != AT_DEVA
+			) || (
+			mattk->aatyp != AT_BEAM && mattk->adtyp != AD_STAR
+			&& mattk->adtyp != AD_BLUD && mattk->adtyp != AD_SHDW
+			&& mattk->adtyp != AT_MAGC && mattk->adtyp != AT_MMGC
+			)) && touch_petrifies(mdef->data)
 		) {
 		    strike = 0;
 		    break;
@@ -545,6 +600,10 @@ meleeattack:
 			}
 		} else
 		    missmm(magr, mdef, mattk);
+		if(mattk->aatyp == AT_MARI && i == 5 && res[0] && res[1]){
+			struct attack rend = {AT_HUGS, AD_WRAP, magr->data == &mons[PM_SHAKTARI] ? 8 : 4, 6};
+			res[i] = hitmm(magr, mdef, &rend);
+		}
 		break;
 
 	    case AT_HUGS:	/* automatic if prev two attacks succeed */
@@ -977,6 +1036,8 @@ hitmm(magr, mdef, mattk)
 				    Sprintf(buf,"%s squeezes", magr_name);
 				    break;
 				}
+			case AT_NONE:
+				break;
 			default:
 defaultmmhit:
 				if (is_weeping(magr->data)) {
@@ -1169,6 +1230,8 @@ mdamagem(magr, mdef, mattk)
 	int armpro, num, tmp = d((int)mattk->damn, (int)mattk->damd);
 	boolean cancelled;
 	boolean phasearmor = FALSE;
+	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_MARI);
+	struct attack alt_attk;
 
 	if(magr->mflee && pa == &mons[PM_BANDERSNATCH]) tmp = d((int)mattk->damn, 2*(int)mattk->damd);
 
@@ -1212,7 +1275,7 @@ mdamagem(magr, mdef, mattk)
 	armpro = magic_negation(mdef);
 	cancelled = magr->mcan || !((rn2(3) >= armpro) || !rn2(50));
 
-	switch(mattk->adtyp) {
+	switch (weaponhit ? AD_PHYS : mattk->adtyp) {
 	    case AD_DGST:
 		/* eating a Rider or its corpse is fatal */
 		if (is_rider(mdef->data)) {
@@ -1308,7 +1371,7 @@ physical:{
 		oarm = which_armor(magr, W_ARMG);
 		if (mattk->aatyp == AT_KICK && thick_skinned(pd)) {
 		    tmp = 0;
-		} else if(mattk->aatyp == AT_WEAP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_XWEP) {
+		} else if(weaponhit) {
 		    if(otmp) {
 			if (otmp->otyp == CORPSE &&
 				touch_petrifies(&mons[otmp->corpsenm]))
@@ -1337,12 +1400,13 @@ physical:{
 					otmp->oartifact != ART_PEN_OF_THE_VOID
 			)) {
 			    /* then do only 1-2 points of damage */
-			    if (mdef->data->mlet == S_SHADE && !(
+			    if (insubstantial(mdef->data) && !(
 					((otmp->obj_material != SILVER || arti_silvered(otmp)) && hates_silver(pd) &&
 						!(is_lightsaber(otmp) && litsaber(otmp))) ||
 					(otmp->obj_material != IRON && hates_iron(pd) &&
 						!(is_lightsaber(otmp) && litsaber(otmp))) ||
-					(is_unholy(otmp) && hates_unholy(pd))
+					(is_unholy(otmp) && hates_unholy(pd)) ||
+					(otmp->blessed && hates_holy(pd))
 				)) tmp = 0;
 				else if(otmp->oartifact == ART_LIECLEAVER)
 					tmp = 2*(rnd(12) + rnd(10) + otmp->spe);
@@ -1394,6 +1458,39 @@ physical:{
 			if (otmp && tmp)
 				mrustm(magr, mdef, otmp);
 		    }
+			// tack on bonus elemental damage, if applicable
+			if (mattk->adtyp != AD_PHYS){
+				alt_attk.aatyp = AT_NONE;
+				alt_attk.adtyp = mattk->adtyp;
+				switch (alt_attk.adtyp)
+				{
+				case AD_FIRE:
+				case AD_COLD:
+				case AD_ELEC:
+				case AD_ACID:
+					alt_attk.damn = 4;
+					alt_attk.damd = 6;
+					break;
+				case AD_EFIR:
+				case AD_ECLD:
+				case AD_EELC:
+				case AD_EACD:
+					alt_attk.damn = 3;
+					alt_attk.damd = 7;
+					break;
+				case AD_STUN:
+					alt_attk.damn = 1;
+					alt_attk.damd = 4;
+					break;
+				default:
+					alt_attk.damn = 0;
+					alt_attk.damd = 0;
+					break;
+				}
+				mdamagem(magr, mdef, &alt_attk);
+				if (DEADMONSTER(mdef))
+					return (MM_DEF_DIED | (grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
+			}
 		} else if (magr->data == &mons[PM_PURPLE_WORM] &&
 			    mdef->data == &mons[PM_SHRIEKER]) {
 		    /* hack to enhance mm_aggression(); we don't want purple
@@ -2009,6 +2106,12 @@ physical:{
             	if (vis) pline("The rapier of silver light sears %s!", mon_nam(mdef));
             }
 		break;
+		case AD_GLSS:
+			if(hates_silver(pd)) {
+            	tmp += rnd(20);
+            	if (vis) pline("%s's fractured claws sear %s!", Monnam(magr), mon_nam(mdef));
+            }
+		break;
 	    case AD_BLUD:
 			if(has_blood_mon(mdef) || (has_blood(pd) && mdef->mfaction == ZOMBIFIED)) {
             	tmp += mdef->m_lev;
@@ -2215,6 +2318,21 @@ physical:{
 	if(magr->mfaction == ZOMBIFIED){
 		tmp *= 2;
 	}
+	
+	if ( is_backstabber(magr->data) &&
+		!(noncorporeal(mdef->data) || amorphous(mdef->data) || 
+			((stationary(mdef->data) || sessile(mdef->data)) && (mdef->data->mlet == S_FUNGUS || mdef->data->mlet == S_PLANT))
+		 ) && (
+			(mdef->mflee && mdef->data != &mons[PM_BANDERSNATCH]) || is_blind(mdef) || !mdef->mcanmove || !mdef->mnotlaugh || 
+				mdef->mstun || mdef->mconf || mdef->mtrapped || mdef->msleeping
+		 )
+	){
+		if(magr->data == &mons[PM_CUPRILACH_RILMANI])
+			tmp += rnd((int)(magr->m_lev*1.5));
+		else tmp += rnd((int)(magr->m_lev));
+	}
+	
+	
 	if(magr->data == &mons[PM_LONG_WORM] && magr->wormno && mattk->aatyp == AT_BITE){
 		if(wormline(magr, mdef->mx, mdef->my))
 			tmp *= 2;
@@ -2243,12 +2361,16 @@ physical:{
 	if(tmp && mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
 		int mac = full_marmorac(mdef);
 		if(mac < 0){
-			tmp += AC_VALUE(mac);
+			tmp += MONSTER_AC_VALUE(mac);
 			if(tmp < 1) tmp = 1;
 		}
 	}
 	
 	if((magr->mfaction == ZOMBIFIED || (magr->mfaction == SKELIFIED && !rn2(20))) && can_undead_mon(mdef)){
+		mdef->zombify = 1;
+	}
+	
+	if(magr->mfaction == FRACTURED && is_kamerel(mdef->data)){
 		mdef->zombify = 1;
 	}
 	
@@ -2666,6 +2788,7 @@ int aatyp;
     case AT_5SQR:
     case AT_WEAP:
 	case AT_XWEP:
+	case AT_MARI:
     case AT_DEVA:
 	w_mask = W_ARMG;	/* caller needs to check for weapon */
 	break;

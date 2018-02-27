@@ -35,6 +35,7 @@ static struct trobj Archeologist[] = {
 	{ TINNING_KIT, UNDEF_SPE, TOOL_CLASS, 1, UNDEF_BLESS },
 	{ TOUCHSTONE, 0, GEM_CLASS, 1, 0 },
 	{ SACK, 0, TOOL_CLASS, 1, 0 },
+	{ TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Anachrononaut_Hu[] = {
@@ -164,6 +165,7 @@ static struct trobj Barbarian[] = {
 	{ AXE, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ RING_MAIL, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ FOOD_RATION, 0, FOOD_CLASS, 1, 0 },
+	{ TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 #ifdef BARD
@@ -210,6 +212,7 @@ static struct trobj Cave_man[] = {
 	{ FLINT, 0, GEM_CLASS, 15, UNDEF_BLESS },	/* quan is variable */
 	{ ROCK, 0, GEM_CLASS, 3, 0 },			/* yields 18..33 */
 	{ LEATHER_ARMOR, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 #ifdef CONVICT
@@ -276,6 +279,7 @@ static struct trobj Noble[] = {
 	{ UNDEF_TYP, UNDEF_SPE, RING_CLASS, 1, UNDEF_BLESS },
 	{ APPLE, 0, FOOD_CLASS, 10, 0 },
 	{ FOOD_RATION, 0, FOOD_CLASS, 3, 0 },
+	{ SUNROD, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj DNoble[] = {
@@ -304,6 +308,7 @@ static struct trobj DwarfNoble[] = {
 	{ UNDEF_TYP, UNDEF_SPE, RING_CLASS, 1, UNDEF_BLESS },
 	{ TRIPE_RATION, 0, FOOD_CLASS, 3, 0 },
 	{ FOOD_RATION, 0, FOOD_CLASS, 3, 0 },
+	{ TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Pirate[] = {
@@ -359,6 +364,7 @@ static struct trobj Ranger[] = {
 	{ ARROW, 0, WEAPON_CLASS, 30, UNDEF_BLESS },
 	{ CLOAK_OF_DISPLACEMENT, 2, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ CRAM_RATION, 0, FOOD_CLASS, 4, 0 },
+	{ TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Rogue[] = {
@@ -369,6 +375,8 @@ static struct trobj Rogue[] = {
 	{ POT_SICKNESS, 0, POTION_CLASS, 1, 0 },
 	{ LOCK_PICK, 9, TOOL_CLASS, 1, 0 },
 	{ SACK, 0, TOOL_CLASS, 1, 0 },
+	{ TORCH, 0, TOOL_CLASS, 2, 0 },
+	{ SHADOWLANDER_S_TORCH, 0, TOOL_CLASS, 2, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Samurai[] = {
@@ -621,6 +629,8 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_DROW, GENTLEMAN_S_SUIT,             CONSORT_S_SUIT       },
 //  { PM_DROW, SCIMITAR,                     DROVEN_SPEAR         },
     { PM_DROW, APPLE,                        TRIPE_RATION         },
+    { PM_DROW,	TORCH,						 SHADOWLANDER_S_TORCH  },
+    { PM_DROW,	SUNROD,						 SHADOWLANDER_S_TORCH  },
     // Half-dragon substitutions
     { PM_HALF_DRAGON, APPLE,                 TRIPE_RATION         },
     { PM_HALF_DRAGON, CARROT,                TRIPE_RATION         },
@@ -1042,7 +1052,7 @@ static const struct def_skill Skill_Pir[] = {
     { P_AXE, P_SKILLED },	    { P_SHORT_SWORD, P_BASIC },
     { P_BROAD_SWORD, P_EXPERT },{ P_LONG_SWORD, P_BASIC },
     { P_SCIMITAR, P_EXPERT },	{ P_SABER, P_EXPERT },
-    { P_CLUB, P_BASIC },		{ P_MORNING_STAR, P_SKILLED },
+    { P_CLUB, P_EXPERT },		{ P_MORNING_STAR, P_SKILLED },
     { P_FLAIL, P_EXPERT },		{ P_SPEAR, P_BASIC },
     { P_JAVELIN, P_EXPERT },	{ P_TRIDENT, P_EXPERT },
     { P_CROSSBOW, P_EXPERT },   { P_DART, P_SKILLED },
@@ -1086,7 +1096,7 @@ static const struct def_skill Skill_Ran[] = {
     { P_SHORT_SWORD, P_BASIC },	 { P_MORNING_STAR, P_BASIC },
     { P_FLAIL, P_SKILLED },	 { P_HAMMER, P_BASIC },
     { P_QUARTERSTAFF, P_EXPERT }, { P_POLEARMS, P_SKILLED },
-    { P_HARVEST, P_SKILLED },
+    { P_HARVEST, P_SKILLED }, { P_CLUB, P_SKILLED },
     { P_SPEAR, P_SKILLED },	 { P_JAVELIN, P_EXPERT },
     { P_TRIDENT, P_BASIC },	 { P_BOW, P_EXPERT },
     { P_SLING, P_EXPERT },	 { P_CROSSBOW, P_EXPERT },
@@ -1285,7 +1295,7 @@ int randMeleeAttackTypes[] =
 						 AT_WHIP, 
 						 AT_LNCK, 
 						 AT_LRCH, 
-						 AT_WEAP, };
+						 AT_WEAP };
 
 int randSpecialAttackTypes[] = 
 						{AT_SPIT, 
@@ -2344,25 +2354,25 @@ u_init()
 			switch (attkptr->aatyp){
 			case AT_SPIT:
 				attkptr->adtyp = randSpitDamageTypes[rn2(SIZE(randSpitDamageTypes))];
-				break;
+			break;
 			case AT_HUGS:
 				attkptr->adtyp = AD_PHYS;
-				break;
+			break;
 			case AT_GAZE:
 				attkptr->adtyp = randGazeDamageTypes[rn2(SIZE(randGazeDamageTypes))];
-				break;
+			break;
 			case AT_ENGL:
 				attkptr->adtyp = randEngulfDamageTypes[rn2(SIZE(randEngulfDamageTypes))];
-				break;
+			break;
 			case AT_ARRW:
 				attkptr->adtyp = randArrowDamageTypes[rn2(SIZE(randArrowDamageTypes))];
-				break;
+			break;
 			case AT_MAGC:
 				attkptr->adtyp = randMagicDamageTypes[rn2(SIZE(randMagicDamageTypes))];
-				break;
+			break;
 			case AT_BREA:
 				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
-				break;
+			break;
 			case AT_HODS:
 				attkptr->adtyp = AD_HODS;
 				break;
@@ -2370,10 +2380,10 @@ u_init()
 			case AT_DEVA:
 			case AT_5SQR:
 				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
-				break;
+			break;
 			default:
 				attkptr->adtyp = AD_PHYS;
-				break;
+			break;
 			}
 			switch (attkptr->adtyp){
 			case AD_VBLD:

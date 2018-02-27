@@ -542,7 +542,7 @@ struct obj *obj;
 	if (obj->oclass == RING_CLASS)
 	    return (boolean)(objects[obj->otyp].oc_charged &&
 			(obj->known || objects[obj->otyp].oc_uname));
-	if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC)
+	if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)
 	    return TRUE;
 //#ifdef FIREARMS
 	if (is_blaster(obj) && (obj->recharged < 4 || (obj->otyp != HAND_BLASTER && obj->otyp != ARM_BLASTER)))
@@ -2374,7 +2374,7 @@ do_it:
 	 *  blind, then we have to pick up and replace the ball and chain so
 	 *  that we don't remember them if they are out of sight.
 	 */
-	if (Punished && (darksight(youracedata) ? on : !on) && !Blind)
+	if (Punished && (Darksight ? on : !on) && !Blind)
 	    move_bc(1, 0, uball->ox, uball->oy, uchain->ox, uchain->oy);
 
 #ifdef REINCARNATION
@@ -2407,7 +2407,7 @@ do_it:
 	    vision_recalc(2);
 
 	    /* replace ball&chain */
-	    if (Punished && (darksight(youracedata) ? on : !on))
+	    if (Punished && (Darksight ? on : !on))
 			move_bc(0, 0, uball->ox, uball->oy, uchain->ox, uchain->oy);
 	}
 

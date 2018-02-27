@@ -102,6 +102,8 @@ register struct attack *mattk;
 		case AT_BOOM:
 			pline("%s explodes!", Monnam(mtmp));
 			break;
+		case AT_NONE:
+			break;
 		default:
 			pline("%s hits!", Monnam(mtmp));
 	    }
@@ -148,7 +150,7 @@ mpoisons_subj(mtmp, mattk)
 struct monst *mtmp;
 struct attack *mattk;
 {
-	if (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) {
+	if (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_MARI) {
 	    struct obj *mwep = (mtmp == &youmonst) ? uwep : MON_WEP(mtmp);
 	    /* "Foo's attack was poisoned." is pretty lame, but at least
 	       it's better than "sting" when not a stinging attack... */
@@ -172,7 +174,9 @@ struct attack *mattk;
 	    return (mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR) ? "contact" :
 		   (mattk->aatyp == AT_GAZE) ? "gaze" :
 		   (mattk->aatyp == AT_ENGL) ? "vapor" :
-		   (mattk->aatyp == AT_BITE || mattk->aatyp == AT_LNCK) ? "bite" : "sting";
+		   (mattk->aatyp == AT_BITE || mattk->aatyp == AT_LNCK) ? "bite" : 
+		   (mattk->aatyp == AT_NONE) ? "attack" :
+		   "sting";
 	}
 }
 
@@ -363,7 +367,7 @@ struct attack *alt_attk_buf;
 		attk->damd = 0;
 		return attk;
 	}
-
+	
     /* prevent a monster with two consecutive disease or hunger attacks
        from hitting with both of them on the same turn; if the first has
        already hit, switch to a stun attack for the second */
@@ -729,7 +733,7 @@ mattacku(mtmp)
 				|| mattk->aatyp == AT_MAGC
 				|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
 				|| (i == 0 && 
-					(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) && 
+					(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_MARI) && 
 					mattk->adtyp == AD_PHYS && 
 					mattk->damn*mattk->damd/2 < (mtmp->m_lev/10+1)*max(mtmp->data->msize*2, 4)/2
 				   )
@@ -760,6 +764,19 @@ mattacku(mtmp)
 					mattk = &alt_attk;
 				}
 				else continue;
+			}
+		}
+		if(mtmp->mfaction == FRACTURED){
+			if((!derundspec && 
+				mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
+				|| (mattk->aatyp == AT_CLAW && (mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE))
+			){
+				derundspec = TRUE;
+				alt_attk.aatyp = AT_CLAW;
+				alt_attk.adtyp = AD_GLSS;
+				alt_attk.damn = max(mtmp->m_lev/10+1, mattk->damn);
+				alt_attk.damd = max(mtmp->data->msize*2, max(mattk->damd, 4));
+				mattk = &alt_attk;
 			}
 		}
 		
@@ -1177,6 +1194,73 @@ mattacku(mtmp)
 					wildmiss(mtmp, mattk);
 			}
 			break;
+		case AT_MARI:
+			if(!range2) {
+			    int hittmp = 0;
+				int wcount = 0;
+
+			    if (foundyou) {
+					for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+						if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) 
+							&& otmp != MON_WEP(mtmp) && otmp != MON_SWEP(mtmp)
+						) wcount++;
+					}
+					wcount -= i;
+					if(MON_WEP(mtmp))
+						wcount++;
+					if(MON_SWEP(mtmp))
+						wcount++;
+					for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+						if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) 
+							&& otmp != MON_WEP(mtmp) && otmp != MON_SWEP(mtmp)
+							&& --wcount <= 0
+						) break;
+					}
+					if(otmp) {
+						hittmp = hitval(otmp, &youmonst);
+						tmp += hittmp;
+						tchtmp += hittmp;
+						if(otmp->objsize - mtmp->data->msize > 0){
+							tmp += -4*(otmp->objsize - mtmp->data->msize);
+							tchtmp += -2*(otmp->objsize - mtmp->data->msize);
+						}
+						mswings(mtmp, otmp);
+					}
+					if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))){
+						if(tchtmp > (j = dieroll = rnd(20+i*2))){
+							sum[i] = hitmu(mtmp, mattk);
+							if(mattk->aatyp == AT_DEVA && sum[i]){
+								deva = 1;
+								while(tchtmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
+							}
+						} else missmu(mtmp, (tchtmp == j), mattk);
+					} else {
+						if(tmp > (j = dieroll = rnd(20+i*2))){
+							sum[i] = hitmu(mtmp, mattk);
+							if(mattk->aatyp == AT_DEVA && sum[i]){
+								deva = 1;
+								while(tmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
+							}
+						} else missmu(mtmp, (tmp == j), mattk);
+					}
+					/* KMH -- Don't accumulate to-hit bonuses */
+					if (otmp){
+						tmp -= hittmp;
+						tchtmp -= hittmp;
+						if(otmp->objsize - mtmp->data->msize > 0){
+							tmp += 4*(otmp->objsize - mtmp->data->msize);
+							tchtmp += 2*(otmp->objsize - mtmp->data->msize);
+						}
+					}
+					if(i == 5 && sum[0] && sum[1]){
+						/*Mariliths get a wrap attack if their first two attacks hit*/
+						struct attack rend = {AT_HUGS, AD_WRAP, mdat == &mons[PM_SHAKTARI] ? 8 : 4, 6};
+						sum[i] = hitmu(mtmp, &rend);
+					}
+			    } else
+					wildmiss(mtmp, mattk);
+			}
+			break;
 		case AT_HODS:
 			if(!range2){
 			    int hittmp = 0;
@@ -1531,9 +1615,11 @@ hitmu(mtmp, mattk)
 	struct obj *optr;
 	int dmg, armpro, permdmg;
 	boolean phasearmor = FALSE;
+	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_MARI);
 	char	 buf[BUFSZ];
 	struct permonst *olduasmon = youracedata;
 	int res;
+	struct attack alt_attk;
 
 	if (!canspotmon(mtmp))
 	    map_invisible(mtmp->mx, mtmp->my);
@@ -1580,7 +1666,7 @@ hitmu(mtmp, mattk)
 	//uncancelled = !mtmp->mcan && ((rn2(3) >= armpro) || !rn2(50));
 	permdmg = 0;
 /*	Now, adjust damages via resistances or specific attacks */
-	switch(mattk->adtyp) {
+	switch(weaponhit ? AD_PHYS : mattk->adtyp) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	    case AD_HODS:
@@ -1622,8 +1708,8 @@ hitmu(mtmp, mattk)
 				) dmg = 0;
 				else if(uwep->oartifact == ART_LIECLEAVER)
 				dmg = 2*(rnd(12) + rnd(10) + uwep->spe);
-				else if(otmp->oartifact == ART_ROGUE_GEAR_SPIRITS)
-				dmg = 2*(rnd(bigmonst(youracedata) ? 2 : 5) + otmp->spe);
+				else if(uwep->oartifact == ART_ROGUE_GEAR_SPIRITS)
+				dmg = 2*(rnd(bigmonst(youracedata) ? 2 : 5) + uwep->spe);
 				else
 				dmg = rnd(2);
 				if(uwep && (uwep->obj_material == SILVER || arti_silvered(uwep)) && 
@@ -1698,7 +1784,7 @@ hitmu(mtmp, mattk)
 		    }
 			if(oarm && dmg && oarm->otyp == GAUNTLETS_OF_POWER) dmg += 16;
 		} else {			  /* hand to hand weapon */
-		    if((mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) && otmp) {
+		    if((weaponhit) && otmp) {
 			if (otmp->otyp == CORPSE &&
 				touch_petrifies(&mons[otmp->corpsenm])) {
 			    dmg = 1;
@@ -1817,6 +1903,37 @@ hitmu(mtmp, mattk)
 				if(oarm && dmg && oarm->otyp == GAUNTLETS_OF_POWER) dmg += 8;
 				hitmsg(mtmp, mattk);
 			}
+			// tack on bonus elemental damage, if applicable
+			if (mattk->adtyp != AD_PHYS){
+				alt_attk.aatyp = AT_NONE;
+				alt_attk.adtyp = mattk->adtyp;
+				switch (alt_attk.adtyp)
+				{
+				case AD_FIRE:
+				case AD_COLD:
+				case AD_ELEC:
+				case AD_ACID:
+					alt_attk.damn = 4;
+					alt_attk.damd = 6;
+					break;
+				case AD_EFIR:
+				case AD_ECLD:
+				case AD_EELC:
+				case AD_EACD:
+					alt_attk.damn = 3;
+					alt_attk.damd = 7;
+					break;
+				case AD_STUN:
+					alt_attk.damn = 1;
+					alt_attk.damd = 4;
+					break;
+				default:
+					alt_attk.damn = 0;
+					alt_attk.damd = 0;
+					break;
+				}
+				hitmu(mtmp, &alt_attk);
+			}
 		}
 		}break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1825,6 +1942,14 @@ hitmu(mtmp, mattk)
 				!(u.sealsActive&SEAL_EDEN)) {
             	dmg += rnd(20);
             	pline("The rapier of silver starlight sears your flesh!");
+            } else hitmsg(mtmp, mattk);
+		break;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+	    case AD_GLSS:
+			if(hates_silver(youracedata) &&
+				!(u.sealsActive&SEAL_EDEN)) {
+            	dmg += rnd(20);
+            	pline("%s's fractured claws sear your flesh!", Monnam(mtmp));
             } else hitmsg(mtmp, mattk);
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3089,7 +3214,9 @@ dopois:
 				break;
 				case AT_WEAP:
 				case AT_XWEP:
-					pline("%s's weapon strikes your armor!", Monnam(mtmp));
+				case AT_MARI:
+					if(otmp) pline("%s's weapon strikes your armor!", Monnam(mtmp));
+					else pline("%s's claws catch on your armor!", Monnam(mtmp));
 				break;
 				default:
 					pline("%s's claws catch on your armor!", Monnam(mtmp));
@@ -3356,6 +3483,20 @@ dopois:
 		dmg *= 2;
 	}
 	
+	if(is_backstabber(mtmp->data) && (
+		u.ustuck || u.utrap || 
+		(!canseemon(mtmp) && !sensemon(mtmp)) || //Note: Handles blind
+		multi || Stunned || Confusion || Sleeping
+		) && !(
+			noncorporeal(youracedata) || amorphous(youracedata) || 
+			((stationary(youracedata) || sessile(youracedata)) && (youracedata->mlet == S_FUNGUS || youracedata->mlet == S_PLANT))
+		)
+	) {
+		if(mtmp->data == &mons[PM_CUPRILACH_RILMANI])
+			dmg += rnd((int)(mtmp->m_lev*1.5));
+		else dmg += rnd((int)(mtmp->m_lev));
+	}
+
 	if(mtmp->data == &mons[PM_LONG_WORM] && mtmp->wormno && mattk->aatyp == AT_BITE){
 		if(wormline(mtmp, u.ux, u.uy))
 			dmg *= 2;
@@ -3385,7 +3526,7 @@ dopois:
 			}
 		}
 	}
-
+	
 	if(dmg) {
 	    if (Half_physical_damage
 					/* Mitre of Holiness */
@@ -3511,7 +3652,9 @@ gulpmu(mtmp, mattk)	/* monster swallows you, or damage if u.uswallow */
 		u.uswldtim = (unsigned)((tim_tmp < 2) ? 2 : tim_tmp);
 		swallowed(1);
 		for (otmp2 = invent; otmp2; otmp2 = otmp2->nobj)
-		    (void) snuff_lit(otmp2);
+			if(!is_whirly(u.ustuck->data)
+			|| (otmp2->otyp != TORCH && otmp2->otyp != SHADOWLANDER_S_TORCH && otmp2->otyp != SUNROD))
+				(void) snuff_lit(otmp2);
 	}
 
 	if (mtmp != u.ustuck) return(0);
@@ -7911,6 +8054,25 @@ register struct attack *mattk;
         }
       }
     }
+	
+	if(uwep && uwep->oartifact == ART_SANSARA_MIRROR && multi >= 0 && rn2(2)){
+		You("counterattack!");
+		flags.forcefight = TRUE;
+		attack(mtmp);
+		flags.forcefight = FALSE;
+		if(DEADMONSTER(mtmp)) return 2;
+	}
+	if(u.specialSealsActive&SEAL_BLACK_WEB && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves+20){
+		static struct attack webattack[] = 
+		{
+			{AT_SHDW,AD_SHDW,4,8},
+			{0,0,0,0}
+		};
+		int i, tmp, weptmp, tchtmp;
+		find_to_hit_rolls(mtmp,&tmp,&weptmp,&tchtmp);
+		hmonwith(mtmp, tmp, weptmp, tchtmp, webattack, 1);
+		if(DEADMONSTER(mtmp)) return 2;
+	}
 	
 	if(u.sealsActive){
 		if(u.sealsActive&SEAL_ECHIDNA){

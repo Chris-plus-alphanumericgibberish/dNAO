@@ -446,7 +446,7 @@ A("The Lifehunt Scythe",			SCYTHE, /*Needs encyc entry*/
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(4,4),	DRLI(0,0),	COLD(0,0), //Actually only applies vs living or undead creatures
 	INVIS, A_CHAOTIC, NON_PM, NON_PM, 4000L, 
-	SPFX2_STLTH|SPFX2_BLDTHRST,0,0),
+	SPFX2_STLTH,0,0),
 
 A("The Holy Moonlight Sword",		LONG_SWORD, /*Needs encyc entry*/
 	(SPFX_RESTR),0, //Becomes two sizes larger when lit, likely requiring two hands
@@ -854,6 +854,13 @@ A("The Staff of Twelve Mirrors",	KHAKKHARA,
 	0,	A_NEUTRAL, NON_PM, NON_PM, 3000L, 
 	0,0,0),
 
+A("Sansara Mirror",	MIRRORBLADE,	
+	(SPFX_RESTR|SPFX_REFLECT|SPFX_HPHDAM), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	PHYS(8,8),	NO_DFNS,	NO_CARY,
+	0,	A_NEUTRAL, NON_PM, NON_PM, 3000L, 
+	0,0,0),
+
 A("The Hand-Mirror of Cthylla", MIRROR, /*from the works of HP Lovecraft*/
 	(SPFX_NOGEN|SPFX_RESTR), (SPFX_SEARCH|SPFX_TCTRL),
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/, /*Needs encyc entry*/
@@ -1226,6 +1233,20 @@ A("The Cloak of the Consort",	DROVEN_CLOAK, /* Hedrow noble quest */
 	0,	A_NEUTRAL,	 PM_NOBLEMAN, PM_DROW, 2500L,
 	0,0,0),
 
+A("The Profaned Greatscythe",			SCYTHE, /*Needs encyc entry*/
+	(SPFX_RESTR|SPFX_DEFN),0, //Can only behead creatures that don't know where you are.
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	FIRE(4,0),	NO_DFNS,	FIRE(0,0),
+	0, A_NONE, PM_NOBLEMAN, 0, 4000L, 
+	0,0,0),
+
+A("Friede's Scythe",			SCYTHE, /*Needs encyc entry*/
+	(SPFX_RESTR|SPFX_DEFN),0, //Can only behead creatures that don't know where you are.
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	STUN(4,0),	NO_DFNS,	CARY(AD_MAGM),
+	0, A_NONE, PM_NOBLEMAN, 0, 4000L, 
+	0,0,0),
+
 A("The Mitre of Holiness",	HELM_OF_BRILLIANCE,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_CON_OR|SPFX_WARN|SPFX_INTEL), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_UNDEAD /*MA*/, 0 /*MV*/,
@@ -1338,7 +1359,7 @@ A("The Tsurugi of Muramasa",	TSURUGI,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(2,0),	NO_DFNS,	NO_CARY,
 	0,		A_LAWFUL, PM_SAMURAI, NON_PM, 4500L, 
-	SPFX2_SHATTER|SPFX2_BLDTHRST,0,0),
+	SPFX2_SHATTER,0,0),
 
 #ifdef TOURIST
 A("The Platinum Yendorian Express Card", CREDIT_CARD,

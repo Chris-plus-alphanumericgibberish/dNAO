@@ -183,11 +183,13 @@ WEAPON("elven short sword", "runed short sword",
 	0, 0, 0,  2,  2, 10,  7,  7, 2, P,   P_SHORT_SWORD, WOOD, HI_WOOD),
 WEAPON("droven short sword", "short sword", /*Needs encyc entry*/
 	0, 0, 0,  0, 15, 10,  9,  9, 2, P,   P_SHORT_SWORD, OBSIDIAN_MT, CLR_BLACK),
-
 WEAPON("orcish short sword", "crude short sword",
 	0, 0, 0,  3, 30, 10,  5,  10, -1, P,   P_SHORT_SWORD, IRON, CLR_BLACK),
 WEAPON("dwarvish short sword", "broad short sword",
 	0, 0, 0,  2, 35, 10,  8,  7, 0, P,   P_SHORT_SWORD, IRON, HI_METAL),
+WEAPON("mirrorblade", "polished short sword",
+	1, 0, 0,  0, 40,100,  6,  8, 0, P,   P_SHORT_SWORD, SILVER, HI_SILVER),
+
 WEAPON("scimitar", "curved sword",
 	0, 0, 0, 14, 40, 15,  8,  8, 0, S,   P_SCIMITAR, IRON, HI_METAL),
 WEAPON("high-elven warsword", "runed curved sword",
@@ -293,9 +295,11 @@ WEAPON("club", (char *)0,
 WEAPON("quarterstaff", "staff",
 	0, 0, 1, 10, 40,  5,  6,  6, 0, B,   P_QUARTERSTAFF, WOOD, HI_WOOD),
 WEAPON("khakkhara", "monk's staff", /*Needs encyc entry*//*Needs tile*/
-	0, 0, 1,  2, 120,  5,  6,  4, 0, B|P,   P_QUARTERSTAFF, METAL, HI_SILVER),
+	0, 1, 1,  2, 120,  50,  6,  4, 0, B|P,   P_QUARTERSTAFF, METAL, HI_SILVER),
+WEAPON("kamerel vajra", "short mace", /*Needs encyc entry*/
+	0, 1, 0,  0,  10,800, 6, 6, 1, S|E, P_MACE, METAL, HI_GOLD),
 WEAPON("bar", (char *)0,
-	1, 1, 1, 0, 400,  10,  8,  6, -10, B,   P_QUARTERSTAFF, METAL, HI_METAL),
+	1, 0, 1, 0, 400,  10,  8,  6, -10, B,   P_QUARTERSTAFF, METAL, HI_METAL),
 /* two-piece */
 WEAPON("aklys", "thonged club",
 	0, 0, 0,  8, 15,  4,  6,  3, 0, B,   P_CLUB, IRON, HI_METAL),
@@ -588,6 +592,12 @@ CLOAK("oilskin cloak", "slippery cloak",
 		0, 0,	0,	    8, 0, 10, 50,  9, 3, CLOTH, HI_CLOTH),
 CLOAK("robe", (char *)0,
 		1, 1,	0,	    3, 0, 15, 50,  8, 3, CLOTH, CLR_RED),
+CLOAK("white faceless robe", (char *)0,
+		1, 1,	0,	    0, 2, 20, 50,  9, 3, CLOTH, CLR_WHITE),
+CLOAK("black faceless robe", (char *)0,
+		1, 1,	COLD_RES,	    0, 2, 20, 50,  8, 3, CLOTH, CLR_BLACK),
+CLOAK("smoky violet faceless robe", (char *)0,
+		1, 1,	COLD_RES,	    0, 2, 20,500,  6, 3, CLOTH, CLR_MAGENTA),
 CLOAK("alchemy smock", "apron",
 		0, 1,	POISON_RES, 9, 0, 10, 50,  9, 3, CLOTH, CLR_WHITE),
 CLOAK("Leo Nemaeus hide", "lion skin",
@@ -833,13 +843,13 @@ TOOL("credit card", (char *)0,  1, 0, 0, 0,  15,  1,  10, PLASTIC, CLR_WHITE),
 TOOL("lock pick", (char *)0,    1, 0, 0, 0,  75,  4,  20, IRON, HI_METAL),
 #endif
 /* light sources */
-TOOL("tallow candle", "candle", 0, 1, 0, 0,  20,  2,  10, WAX, CLR_WHITE),
+TOOL("tallow candle", "candle", 0, 1, 0, 0,  15,  2,  10, WAX, CLR_WHITE),
 TOOL("wax candle", "candle",    0, 1, 0, 0,   5,  2,  20, WAX, CLR_WHITE),
-TOOL("brass lantern", (char *)0,1, 0, 0, 0,  25, 30,  12, COPPER, CLR_YELLOW),
-TOOL("oil lamp", "lamp",        0, 0, 0, 0,  40, 20,  10, COPPER, CLR_YELLOW),
+TOOL("brass lantern", (char *)0,1, 0, 0, 0,  20, 30,  12, COPPER, CLR_YELLOW),
+TOOL("oil lamp", "lamp",        0, 0, 0, 0,  30, 20,  10, COPPER, CLR_YELLOW),
 TOOL("magic lamp", "lamp",      0, 0, 1, 0,  15, 20,  50, COPPER, CLR_YELLOW),
-TOOL("shadowlander's torch", "black torch",
-								0, 0, 1, 0,  10, 20,  50, WOOD, CLR_BLACK),
+// TOOL("shadowlander's torch", "black torch",
+								// 0, 0, 1, 0,  10, 20,  50, WOOD, CLR_BLACK),
 /* other tools */
 #ifdef TOURIST
 TOOL("expensive camera", (char *)0,
@@ -907,15 +917,24 @@ WEPTOOL("pick-axe", (char *)0,
 	1, 0, 0, 0, 20, 80,   50,  6,  3, 0, PIERCE,  P_PICK_AXE, IRON, HI_METAL),
 WEPTOOL("seismic hammer", "dull metalic hammer",
 	0, 1, 1, 1,  0,150,  250, 12, 10,-5, WHACK,  P_HAMMER,  METAL, HI_METAL),
+/*
+ * Torches work as clubs
+ */
+WEPTOOL("torch", (char *)0,
+	1, 0, 0, 0, 15, 50,  5,  6,  3, 0, WHACK,   P_CLUB, WOOD, HI_WOOD),
+WEPTOOL("shadowlander's torch", "black torch",
+	0, 0, 0, 0, 10, 50, 50,  6,  3, 0, WHACK,   P_CLUB, WOOD, CLR_BLACK),
+WEPTOOL("sunrod", "gold rod",
+	1, 0, 0, 0,  5, 50, 50,  6,  3, 0, WHACK,   P_MACE, GOLD, HI_GOLD),
 /* 
  * Lightsabers get 3x dice when lit 
  */
 WEPTOOL("lightsaber", "sword hilt", /*Needs (better) encyc entry*/
-	0, 1, 1, 0,  0, 12, 500, 8,  8, -3, SLASH|E, P_SABER, SILVER, HI_SILVER),
+	0, 1, 1, 0,  0, 10, 500, 8,  8, -3, SLASH|E, P_SABER, METAL, HI_SILVER),
 WEPTOOL("beamsword",  "broadsword hilt", /*Needs encyc entry*/
-	0, 1, 1, 0,  0, 20, 500, 10,10, -3, SLASH|E, P_BROAD_SWORD, GOLD, HI_GOLD),
+	0, 1, 1, 0,  0, 20, 500, 10,10, -3, SLASH|E, P_BROAD_SWORD, METAL, HI_GOLD),
 WEPTOOL("double lightsaber",  "long grip", /*Needs encyc entry*//*Needs tile*/
-	0, 1, 1, 1,  0, 24,1000, 10,10, -6, SLASH|E, P_QUARTERSTAFF, PLATINUM, HI_METAL),
+	0, 1, 1, 1,  0, 30,1000, 10,10, -6, SLASH|E, P_QUARTERSTAFF, METAL, HI_METAL),
 WEPTOOL("grappling hook", "iron hook",
 	0, 0, 0, 0,  5,  30,  50,  2,  6, 0, WHACK,  P_FLAIL, IRON, HI_METAL),
 /* 3.4.1: unicorn horn left classified as "magic" */

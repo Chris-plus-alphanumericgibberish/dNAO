@@ -272,6 +272,8 @@ struct monst *mon;
 		mon->data == &mons[PM_DANCING_BLADE] ||
 		mon->data == &mons[PM_MAHADEVA] ||
 		mon->data == &mons[PM_TULANI_ELADRIN] ||
+		mon->data == &mons[PM_ARA_KAMEREL] ||
+		mon->data == &mons[PM_AURUMACH_RILMANI] ||
 		mon->data == &mons[PM_WATCHER_IN_THE_WATER] ||
 		mon->data == &mons[PM_SWARM_OF_SNAKING_TENTACLES] || 
 		mon->data == &mons[PM_LONG_SINUOUS_TENTACLE] ||
@@ -730,8 +732,10 @@ int
 pronoun_gender(mtmp)
 register struct monst *mtmp;
 {
-	if (is_neuter(mtmp->data) || !canspotmon(mtmp)) return 2;
-	return (humanoid(mtmp->data) || (mtmp->data->geno & G_UNIQ) ||
+	if(is_neuter(mtmp->data) || !canspotmon(mtmp)) return 2;
+	if(mtmp->mfaction == SKELIFIED && !Role_if(PM_ARCHEOLOGIST))
+		return 2;
+	return (humanoid_torso(mtmp->data) || (mtmp->data->geno & G_UNIQ) ||
 		type_is_pname(mtmp->data)) ? (int)mtmp->female : 2;
 }
 

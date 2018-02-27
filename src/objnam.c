@@ -100,8 +100,8 @@ STATIC_OVL char *SaberHilts[] = {
 /*07*/"This %s has a smooth hilt with a recessed emitter disk.",
 /*08*/"Six little claws grip the emitter disk of this %s.",
 /*09*/"This %s's grip is composed of a hard, woody substance.",
-/*10*/"This %s's grip is a set of verticle black ridges.",
-/*11*/"This %s is fasioned to appear much like a branch of coral.",
+/*10*/"This %s's grip is a set of vertical black ridges.",
+/*11*/"This %s is fashioned to appear much like a branch of coral.",
 /*12*/"This %s is a single long spiral.",
 /*13*/"This %s's emitter disk is set into the jaws of a white tiger.",
 /*14*/"This %s's emitter disk is held by the coils of a green dragon.",
@@ -117,7 +117,7 @@ STATIC_OVL char *SaberHilts[] = {
 /*24*/"This %s has a ornate golden diskguard.",
 /*25*/"The focusing chamber of this %s can be seen through a viewport.",
 /*26*/"A thin red ribbon hangs from the pommel of this %s.",
-/*27*/"This %s has a crude hilt fashoned from crystalized metal.",
+/*27*/"This %s has a crude hilt fashioned from crystallized metal.",
 /*28*/"There is a winged blade of light carved into the pommel of this %s.",
 /*29*/"The Galactic Roundel is carved into this %s's pommel.",
 /*30*/"A crimson starbird is set the pommel of this %s.",
@@ -1189,6 +1189,8 @@ plus:
 						if(dnm > 1) Strcat(bp, " (two blades lit)");
 						else Strcat(bp, " (two blades flickering)");
 					} else if(dnm <= 1) Strcat(bp, " (flickering)");
+				} else if(obj->otyp == KAMEREL_VAJRA){
+					Strcat(bp, " (lit)");
 				} else {
 					if(obj->altmode){
 						if(obj->age > 1000) Strcat(bp, " (two blades lit)");
@@ -1207,6 +1209,11 @@ plus:
 #  ifdef DEBUG
 		    Sprintf(eos(bp), " (%d)", obj->age);		
 #  endif
+		} else if (obj->otyp == SHADOWLANDER_S_TORCH
+			|| obj->otyp == TORCH || obj->otyp == SUNROD
+		) {
+			if(obj->lamplit)
+				Strcat(bp, " (lit)");
 		}
 		break;
 	case ARMOR_CLASS:
@@ -1283,8 +1290,10 @@ plus:
 				tmpbuf, plur(obj->spe),
 				!obj->lamplit ? " attached" : ", lit");
 			break;
-		} else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-			obj->otyp == BRASS_LANTERN || Is_candle(obj) || obj->otyp == SHADOWLANDER_S_TORCH) {
+		} else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP
+			|| obj->otyp == BRASS_LANTERN || Is_candle(obj) || obj->otyp == SHADOWLANDER_S_TORCH
+			|| obj->otyp == TORCH || obj->otyp == SUNROD
+		) {
 			if (Is_candle(obj) &&
 			    obj->age < 20L * (long)objects[obj->otyp].oc_cost)
 				Strcat(prefix, "partly used ");
@@ -2445,7 +2454,10 @@ struct alt_spellings {
 	{ "scroll of enchant armour", SCR_ENCHANT_ARMOR },
 	{ "scroll of destroy armour", SCR_DESTROY_ARMOR },
 	{ "leather armour", LEATHER_ARMOR },
+	{ "leather gloves", GLOVES },
 	{ "studded leather armour", STUDDED_LEATHER_ARMOR },
+	{ "chain", IRON_CHAIN },
+	{ "iron chain", IRON_CHAIN },
 	{ "iron ball", HEAVY_IRON_BALL },
 	{ "lantern", BRASS_LANTERN },
 	{ "mattock", DWARVISH_MATTOCK },

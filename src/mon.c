@@ -240,7 +240,7 @@ register struct monst *mtmp;
 		return (struct obj *)0;
 	}
 	
-	if(u.specialSealsActive&SEAL_NUDZIARTH && !rn2(4)){
+	if(u.specialSealsActive&SEAL_NUDZIRATH && !rn2(4)){
 		(void) mksobj_at(MIRROR, x, y, TRUE, FALSE);
 	}
 	
@@ -648,6 +648,11 @@ register struct monst *mtmp;
 		break;
 	    case PM_GOLD_GOLEM:
 			/* Good luck gives more coins */
+			obj = mkgold((long)(200 - rnl(101)), x, y);
+			mtmp->mnamelth = 0;
+			break;
+	    case PM_ARA_KAMEREL:
+			/* Ara Kamerel are projecting their images into gold golems */
 			obj = mkgold((long)(200 - rnl(101)), x, y);
 			mtmp->mnamelth = 0;
 			break;
@@ -2786,7 +2791,11 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	
 	if(magr->mberserk) return ALLOW_M|ALLOW_TM;
 	
-	if(touch_petrifies(md) && !resists_ston(magr)) return 0L;
+	if(touch_petrifies(md) && !resists_ston(magr) 
+		&& distmin(magr->mx, magr->my, mdef->mx, mdef->my) < 3
+		&& !MON_WEP(magr)
+	)
+		return 0L;
 	
 	if(md == &mons[PM_MANDRAKE]) return 0L;
 	
@@ -3204,7 +3213,7 @@ struct monst *mtmp;
 			pline("But wait...");
 			if (attacktype(mtmp->data, AT_EXPL)
 			    || attacktype(mtmp->data, AT_BOOM))
-				pline("%s reconstitutes!", Monnam(mtmp));
+				pline("%s reappears, looking much better!", Monnam(mtmp));
 			else
 				pline("%s flickers, then reappears looking much better!", Monnam(mtmp));
 		}
@@ -3214,6 +3223,33 @@ struct monst *mtmp;
 			wary_dog(mtmp, FALSE);
 		}
 		if (mtmp->mhpmax <= 9) mtmp->mhpmax = 10;
+		mtmp->mhp = mtmp->mhpmax;
+		return;
+	} else if(mtmp->mfaction == FRACTURED && !rn2(2)){
+		if (cansee(mtmp->mx, mtmp->my)) {
+			pline("But wait...");
+			pline("%s fractures further%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
+		}
+		mtmp->mcanmove = 1;
+		mtmp->mfrozen = 0;
+		mtmp->mtame = 0;
+		mtmp->mpeaceful = 0;
+		mtmp->m_lev += 4;
+		mtmp->mhpmax = d(mtmp->m_lev, 8);
+		mtmp->mhp = mtmp->mhpmax;
+		return;
+	} else if(mtmp->zombify && is_kamerel(mtmp->data)){
+		if (cansee(mtmp->mx, mtmp->my)) {
+			pline("But wait...");
+			pline("%s fractures%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
+		}
+		mtmp->mfaction = FRACTURED;
+		mtmp->mcanmove = 1;
+		mtmp->mfrozen = 0;
+		mtmp->mtame = 0;
+		mtmp->mpeaceful = 0;
+		mtmp->m_lev += 4;
+		mtmp->mhpmax = d(mtmp->m_lev, 8);
 		mtmp->mhp = mtmp->mhpmax;
 		return;
 	}
@@ -3278,6 +3314,14 @@ register struct monst *mtmp;
 				mvitals[tmp].mvflags &= (~G_EXTINCT);
 				reset_rndmonst(tmp);
 			}
+	}
+	if(tmp == PM_ARA_KAMEREL && mtmp->mfaction != FRACTURED){
+		if(mtmp->mtame)
+			u.goldkamcount_tame++;
+		else if(mtmp->mpeaceful)
+			level.flags.goldkamcount_peace++;
+		else
+			level.flags.goldkamcount_hostile++;
 	}
 	/* if it's a (possibly polymorphed) quest leader, mark him as dead */
 	if (mtmp->m_id == quest_status.leader_m_id)

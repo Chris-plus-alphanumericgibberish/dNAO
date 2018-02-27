@@ -208,7 +208,7 @@ struct monst *mon;
 /*	Put weapon vs. monster type "to hit" bonuses in below:	*/
 
 	/* Blessed weapons used against undead or demons */
-	if (Is_weapon && otmp->blessed &&
+	if (Is_weapon && otmp->blessed && mon &&
 	   (holy_damage(mon))){
 		if(otmp->oartifact == ART_EXCALIBUR)
 			tmp += 7; //Quite holy
@@ -387,6 +387,89 @@ int spec;
 		case HEAVY_BLASTER_BOLT:
 			tmp += d(2, ldie)+ldie;
 		break;
+		case MIRRORBLADE:{
+			int mirdam = 0;
+			if(youdefend){
+				if(uwep){
+					if(uwep->otyp == MIRRORBLADE){
+						mirdam = exploding_d(2, ldie, (uwep->spe+otmp->spe)/2);
+					} else mirdam = dmgval(uwep, &youmonst, 0);
+				}
+			} else {
+				if(mon && MON_WEP(mon)){
+					if(MON_WEP(mon)->otyp == MIRRORBLADE){
+						mirdam = exploding_d(2, ldie, (MON_WEP(mon)->spe+otmp->spe)/2);
+					} else mirdam = dmgval(MON_WEP(mon), &youmonst, 0);
+				}
+			}
+			if(mirdam > tmp) tmp = mirdam;
+		} break;
+		case KAMEREL_VAJRA:
+			if(otmp->where == OBJ_MINVENT && otmp->ocarry->data == &mons[PM_ARA_KAMEREL]){
+				tmp += d(2, ldie);
+				if(youdefend){
+					if(!Shock_resistance){
+						tmp += d(6,6); //wand of lightning
+					}
+					if(!EShock_resistance){
+						if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+						if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+					}
+					if (!resists_blnd(&youmonst)) {
+						You("are blinded by the flash!");
+						make_blinded((long)d(1,50),FALSE);
+						if (!Blind) Your1(vision_clears);
+					}
+				} else if(mon){
+					if(!resists_elec(mon)){
+						tmp += d(6,6); //wand of lightning
+						if (!rn2(3)) (void)destroy_mitem(mon, WAND_CLASS, AD_ELEC);
+						/* not actually possible yet */
+						if (!rn2(3)) (void)destroy_mitem(mon, RING_CLASS, AD_ELEC);
+					}
+					if (!resists_blnd(mon) &&
+							!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
+						register unsigned rnd_tmp = rnd(50);
+						mon->mcansee = 0;
+						if((mon->mblinded + rnd_tmp) > 127)
+							mon->mblinded = 127;
+						else mon->mblinded += rnd_tmp;
+					}
+				}
+			} else {
+				tmp += d(1, ldie);
+				if(youdefend){
+					if(!Shock_resistance){
+						tmp += d(2,6);
+					}
+					if(!EShock_resistance){
+						if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+						if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+					}
+					if (!resists_blnd(&youmonst)) {
+						You("are blinded by the flash!");
+						make_blinded((long)d(1,50),FALSE);
+						if (!Blind) Your1(vision_clears);
+					}
+				} else if(mon){
+					if(!resists_elec(mon)){
+						tmp += d(2,6); //wand of lightning
+						if (!rn2(3)) (void)destroy_mitem(mon, WAND_CLASS, AD_ELEC);
+						/* not actually possible yet */
+						if (!rn2(3)) (void)destroy_mitem(mon, RING_CLASS, AD_ELEC);
+					}
+					if (!resists_blnd(mon) &&
+							!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
+						register unsigned rnd_tmp = rnd(50);
+						mon->mcansee = 0;
+						if((mon->mblinded + rnd_tmp) > 127)
+							mon->mblinded = 127;
+						else mon->mblinded += rnd_tmp;
+					}
+				}
+			}
+			goto lightsaber_form_ldie;
+		break;
 		case LIGHTSABER:
 		case BEAMSWORD:
 			if(otmp->oartifact == ART_ATMA_WEAPON){
@@ -410,6 +493,7 @@ int spec;
 				tmp += d(3, 3+2*dmod);
 				otmp->age -= 100;
 			}
+lightsaber_form_ldie:
 			if(otmp == uwep || (u.twoweap && otmp == uswapwep) ){
 				if(u.fightingForm == FFORM_MAKASHI && otmp == uwep && !u.twoweap && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
 					switch(min(P_SKILL(FFORM_MAKASHI), P_SKILL(weapon_type(otmp)))){
@@ -584,7 +668,10 @@ int spec;
 			}
 		break;
 		case RAPIER:
-			if(otmp->oartifact == ART_SILVER_STARLIGHT && !(noncorporeal(ptr) || amorphous(ptr) || stationary(ptr))) tmp += d(2,4+2*dmod); break;
+			if(otmp->oartifact == ART_SILVER_STARLIGHT 
+			&& !(noncorporeal(ptr) || amorphous(ptr) 
+				|| ((stationary(ptr) || sessile(ptr)) && (ptr->mlet == S_FUNGUS || ptr->mlet == S_PLANT))
+			)) tmp += d(2,4+2*dmod); break;
 	    }
 	} else {
 		if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp = exploding_d(2,sdie,1);
@@ -681,6 +768,91 @@ int spec;
 		case HEAVY_BLASTER_BOLT:
 			tmp += d(2, sdie)+sdie;
 		break;
+		case MIRRORBLADE:{
+			int mirdam = 0;
+			if(youdefend){
+				if(uwep){
+					if(uwep->otyp == MIRRORBLADE){
+						mirdam = exploding_d(2, sdie, (uwep->spe+otmp->spe)/2);
+					} else mirdam = dmgval(uwep, &youmonst, 0);
+				}
+			} else {
+				if(mon && MON_WEP(mon)){
+					if(MON_WEP(mon)->otyp == MIRRORBLADE){
+						mirdam = exploding_d(2, sdie, (MON_WEP(mon)->spe+otmp->spe)/2);
+					} else mirdam = dmgval(MON_WEP(mon), &youmonst, 0);
+				}
+			}
+			if(mirdam > tmp) tmp = mirdam;
+		} break;
+		case KAMEREL_VAJRA:
+			if(otmp->where == OBJ_MINVENT && otmp->ocarry->data == &mons[PM_ARA_KAMEREL]){
+				tmp += d(2, sdie);
+				tmp += 3; //+1x3
+				if(youdefend){
+					if(!Shock_resistance){
+						tmp += d(6,6);
+					}
+					if(!EShock_resistance){
+						if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+						if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+					}
+					if (!resists_blnd(&youmonst)) {
+						You("are blinded by the flash!");
+						make_blinded((long)d(1,50),FALSE);
+						if (!Blind) Your1(vision_clears);
+					}
+				} else if(mon){
+					if(!resists_elec(mon)){
+						tmp += d(6,6); //wand of lightning
+						if (!rn2(3)) (void)destroy_mitem(mon, WAND_CLASS, AD_ELEC);
+						/* not actually possible yet */
+						if (!rn2(3)) (void)destroy_mitem(mon, RING_CLASS, AD_ELEC);
+					}
+					if (!resists_blnd(mon) &&
+							!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
+						register unsigned rnd_tmp = rnd(50);
+						mon->mcansee = 0;
+						if((mon->mblinded + rnd_tmp) > 127)
+							mon->mblinded = 127;
+						else mon->mblinded += rnd_tmp;
+					}
+				}
+			} else {
+				tmp += d(1, sdie);
+				tmp += 2; //+1x2
+				if(youdefend){
+					if(!Shock_resistance){
+						tmp += d(2,6);
+					}
+					if(!EShock_resistance){
+						if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+						if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+					}
+					if (!resists_blnd(&youmonst)) {
+						You("are blinded by the flash!");
+						make_blinded((long)d(1,50),FALSE);
+						if (!Blind) Your1(vision_clears);
+					}
+				} else if(mon){
+					if(!resists_elec(mon)){
+						tmp += d(2,6); //wand of lightning
+						if (!rn2(3)) (void)destroy_mitem(mon, WAND_CLASS, AD_ELEC);
+						/* not actually possible yet */
+						if (!rn2(3)) (void)destroy_mitem(mon, RING_CLASS, AD_ELEC);
+					}
+					if (!resists_blnd(mon) &&
+							!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
+						register unsigned rnd_tmp = rnd(50);
+						mon->mcansee = 0;
+						if((mon->mblinded + rnd_tmp) > 127)
+							mon->mblinded = 127;
+						else mon->mblinded += rnd_tmp;
+					}
+				}
+			}
+			goto lightsaber_form_sdie;
+		break;
 		case LIGHTSABER:
 		case BEAMSWORD:
 			tmp += d(2, sdie);
@@ -699,6 +871,7 @@ int spec;
 				tmp += d(3, 3+2*dmod);
 				otmp->age -= 100;
 			}
+lightsaber_form_sdie:
 			if(otmp == uwep || (u.twoweap && otmp == uswapwep) ){
 				if(u.fightingForm == FFORM_MAKASHI && otmp == uwep && !u.twoweap && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
 					switch(min(P_SKILL(FFORM_MAKASHI), P_SKILL(weapon_type(otmp)))){
@@ -867,7 +1040,10 @@ int spec;
 		case SCIMITAR:
 			if(otmp->oartifact == ART_REAVER) tmp += d(1,8+2*dmod); break;
 		case RAPIER:
-			if(otmp->oartifact == ART_SILVER_STARLIGHT && !(noncorporeal(ptr) || amorphous(ptr) || stationary(ptr))) tmp += d(1,6+2*dmod)+d(1,4+2*dmod); break;
+			if(otmp->oartifact == ART_SILVER_STARLIGHT 
+			&& !(noncorporeal(ptr) || amorphous(ptr) 
+				|| ((stationary(ptr) || sessile(ptr)) && (ptr->mlet == S_FUNGUS || ptr->mlet == S_PLANT))
+			)) tmp += d(1,6+2*dmod)+d(1,4+2*dmod); break;
 	    }
 	}
 	
@@ -893,6 +1069,12 @@ int spec;
 				if(viz_array[y][x]&TEMP_LIT1 && 
 					!(viz_array[y][x]&TEMP_DRK3)
 				) multiplier += 1;
+			} else if(otmp->otyp == KAMEREL_VAJRA){
+				if(otmp->where == OBJ_MINVENT && otmp->ocarry->data == &mons[PM_ARA_KAMEREL]){
+					multiplier = 3;
+				} else {
+					multiplier = 2;
+				}
 			} else {
 				multiplier = 3;
 			}
@@ -920,7 +1102,7 @@ int spec;
 	if (otmp->obj_material <= LEATHER && (thick_skinned(ptr) || (youdefend && u.sealsActive&SEAL_ECHIDNA)))
 		/* thick skinned/scaled creatures don't feel it */
 		tmp = 0;
-	if (ptr->mlet == S_SHADE && !(
+	if (insubstantial(ptr) && !(
 		(is_lightsaber(otmp) && litsaber(otmp)) || 
 		(hates_silver(ptr) && (otmp->obj_material == SILVER || arti_silvered(otmp))) || 
 		(hates_iron(ptr) && otmp->obj_material == IRON) || 
@@ -962,7 +1144,7 @@ int spec;
 		){
 			bonus += rnd(10);
 		}
-	    if (otmp->blessed && (holy_damage(mon))){
+	    if (otmp->blessed && mon && (holy_damage(mon))){
 			if(otmp->oartifact == ART_EXCALIBUR) bonus += d(3,7); //Quite holy
 			else if(otmp->oartifact == ART_LANCE_OF_LONGINUS)
 				bonus += d(3,7); //Quite holy
@@ -1016,10 +1198,80 @@ int spec;
 			else if(otmp->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO) 
 				bonus += 8; //Extra unholy
 			else if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
-				bonus += rnd(20); //Tyrany
+				bonus += rnd(20); //Tyranny
 			else if(otyp == KHAKKHARA) bonus += d(rnd(3),9);
 			else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking,9);
 			else bonus += rnd(9);
+		}
+		
+		if(youdefend){
+			if(otmp->otyp == TORCH && otmp->lamplit){
+				if(!Fire_resistance){
+					if(species_resists_cold(&youmonst)) bonus += 1.5*(rnd(6) + otmp->spe);
+					else bonus += rnd(6) + otmp->spe;
+				}
+				if(!EFire_resistance){
+					if (!rn2(3)) destroy_item(SCROLL_CLASS, AD_FIRE);
+					if (!rn2(3)) destroy_item(SPBOOK_CLASS, AD_FIRE);
+					if (!rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
+				}
+			} else if(otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit){
+				if(!Cold_resistance){
+					if(species_resists_fire(&youmonst)) bonus += 1.5*(rnd(6) + otmp->spe);
+					else bonus += rnd(6) + otmp->spe;
+				}
+				if(!ECold_resistance){
+					if (!rn2(3)) destroy_item(POTION_CLASS, AD_COLD);
+				}
+			} else if(otmp->otyp == SUNROD && otmp->lamplit){
+				if(!(Shock_resistance && Acid_resistance)){
+					if(!(Shock_resistance || Acid_resistance))
+						bonus += 1.5*(rnd(6) + otmp->spe);
+					else bonus += rnd(6) + otmp->spe;
+				}
+				if(!EShock_resistance){
+					if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+					if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+				}
+				if(!EAcid_resistance){
+					if (rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
+				}
+				if (!resists_blnd(&youmonst)) {
+					You("are blinded by the flash!");
+					make_blinded((long)d(1,50),FALSE);
+					if (!Blind) Your1(vision_clears);
+				}
+			}
+		} else if(mon){
+			if(otmp->otyp == TORCH && otmp->lamplit && !resists_fire(mon)){
+				if(species_resists_cold(mon)) bonus += 1.5*(rnd(6) + otmp->spe);
+				else bonus += rnd(6) + otmp->spe;
+				if (!rn2(3)) destroy_mitem(mon, SCROLL_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_mitem(mon, SPBOOK_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
+			} else if(otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit && !resists_cold(mon)){
+				if(species_resists_fire(mon)) bonus += 1.5*(rnd(6) + otmp->spe);
+				else bonus += rnd(6) + otmp->spe;
+				if (!rn2(3)) destroy_mitem(mon, POTION_CLASS, AD_COLD);
+			} else if(otmp->otyp == SUNROD && otmp->lamplit && !(resists_elec(mon) && resists_acid(mon))){
+				if(!(resists_elec(mon) || resists_acid(mon)))
+					bonus += 1.5*(rnd(6) + otmp->spe);
+				else bonus += rnd(6) + otmp->spe;
+				if(!resists_acid(mon))
+					if (rn2(3)) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
+				if(!resists_elec(mon)){
+					if (!rn2(3)) destroy_mitem(mon, WAND_CLASS, AD_ELEC);
+					if (!rn2(3)) destroy_mitem(mon, RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(mon) &&
+						!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
+					register unsigned rnd_tmp = rnd(50);
+					mon->mcansee = 0;
+					if((mon->mblinded + rnd_tmp) > 127)
+						mon->mblinded = 127;
+					else mon->mblinded += rnd_tmp;
+				}
+			}
 		}
 		
 		if(otmp->oclass == WEAPON_CLASS && otmp->obj_material == WOOD && otmp->otyp != MOON_AXE
@@ -1110,7 +1362,7 @@ struct monst *mon;
 	} else if(u.specialSealsActive&SEAL_MISKA){
 		if(mon->data->maligntyp == A_LAWFUL) dmg += d(2*dnum,4);
 		else if(mon->data->maligntyp == A_NEUTRAL) dmg += d(dnum,4);
-	} else if(u.specialSealsActive&SEAL_NUDZIARTH){
+	} else if(u.specialSealsActive&SEAL_NUDZIRATH){
 		if(mon->data->maligntyp != A_NEUTRAL) dmg += d(dnum,6);
 	} else if(u.specialSealsActive&SEAL_ALIGNMENT_THING){
 		if(rn2(3)) dmg += d(rnd(2)*dnum,4);
@@ -1202,7 +1454,7 @@ int spot;
 		    !((x == CORPSE || x == EGG) &&
 			!touch_petrifies(&mons[otmp->corpsenm])) &&
 			/* never uncharged lightsabers */
-            (!is_lightsaber(otmp) || otmp->age || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC) &&
+            (!is_lightsaber(otmp) || otmp->age || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC || otmp->otyp == KAMEREL_VAJRA) &&
 			/* never offhand artifacts */
 			(!otmp->oartifact || spot != W_SWAPWEP) &&
 			/* never untouchable artifacts */
@@ -1493,10 +1745,12 @@ register struct monst *mtmp;
 /* Weapons in order of preference */
 static const NEARDATA short hwep[] = {
 	  CORPSE,  /* cockatrice corpse */
+	  KAMEREL_VAJRA /*quite a lot plus elect plus blindness*/,
 	  DOUBLE_LIGHTSABER/*6d8*/, 
 	  BEAMSWORD/*3d10*/,
 	  FORCE_PIKE,/*2d6+6/2d8+8*/
 	  LIGHTSABER/*3d8*/,
+	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
 	  VIBROBLADE,/*2d6+3/2d8+4*/
 	  CRYSTAL_SWORD/*2d8/2d12*/,
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
@@ -1538,6 +1792,9 @@ static const NEARDATA short hwep[] = {
 	  JAVELIN/*1d6/1d6*/, 
 	  WAR_HAMMER/*1d4+1/1d4*/, 
 	  AKLYS/*1d6/1d3*/, 
+	  SUNROD/*1d6/1d3*/, 
+	  SHADOWLANDER_S_TORCH/*1d6/1d3*/, 
+	  TORCH/*1d6/1d3*/, 
 	  CLUB/*1d6/1d3*/, 
 	  PICK_AXE/*1d6/1d3*/,
 	  ELVEN_SICKLE/*1d6/1d3*/,
@@ -1605,6 +1862,7 @@ register struct monst *mtmp;
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
 			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
+			 || otmp->otyp == KAMEREL_VAJRA
             ) &&
 			/* never untouchable artifacts */
 			(touch_artifact(otmp, mtmp, FALSE)) &&
@@ -1995,7 +2253,7 @@ struct obj * obj;
 struct monst * mon;
 {
 	/* No obj or not lightsaber or unlightable */
-	if (!obj || !is_lightsaber(obj) || obj->oartifact == ART_INFINITY_S_MIRRORED_ARC) return;
+	if (!obj || !is_lightsaber(obj) || obj->oartifact == ART_INFINITY_S_MIRRORED_ARC || obj->otyp == KAMEREL_VAJRA) return;
 
 	/* WAC - Check lightsaber is on */
 	if (!obj->lamplit) {
@@ -2594,6 +2852,8 @@ struct obj *obj;
     if ((obj->otyp == HEAVY_IRON_BALL) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
         return objects[obj->otyp].oc_skill;
 #endif /* CONVICT */
+    if ((obj->otyp == IRON_CHAIN) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
+        return objects[obj->otyp].oc_skill;
 	if (obj->oclass != WEAPON_CLASS && obj->oclass != TOOL_CLASS &&
 	    obj->oclass != GEM_CLASS)
 		/* Not a weapon, weapon-tool, or ammo */

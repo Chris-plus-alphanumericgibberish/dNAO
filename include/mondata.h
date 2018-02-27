@@ -73,10 +73,12 @@
 #define passes_walls(ptr)	(((ptr)->mflagsm & MM_WALLWALK) != 0L)
 #define amorphous(ptr)		(((ptr)->mflagsm & MM_AMORPHOUS) != 0L)
 #define noncorporeal(ptr)	((ptr)->mlet == S_GHOST || (ptr)->mlet == S_SHADE)
+#define insubstantial(ptr)	((ptr)->mlet == S_SHADE || (ptr) == &mons[PM_SHARAB_KAMEREL])
 #define tunnels(ptr)		(((ptr)->mflagsm & MM_TUNNEL) != 0L)
 #define needspick(ptr)		(((ptr)->mflagsm & MM_NEEDPICK) != 0L)
 #define hides_under(ptr)	(((ptr)->mflagst & MT_CONCEAL) != 0L)
 #define is_hider(ptr)		(((ptr)->mflagst & MT_HIDE) != 0L)
+#define is_backstabber(ptr)		(((ptr)->mflagsg & MG_BACKSTAB) != 0L)
 /*#define haseyes(ptr)		(((ptr)->mflagsb & MB_NOEYES) == 0L) when did this get duplicated???*/
 #define haseyes(ptr)		(((ptr)->mflagsb & MB_NOEYES) == 0L)
 #define goodsmeller(ptr)	(((ptr)->mflagsv & MV_SCENT) != 0L)
@@ -162,6 +164,7 @@
 #define mindless_mon(mon)		(mon && (((mon)->mfaction == ZOMBIFIED) || ((mon)->mfaction == SKELIFIED) || ((mon)->mfaction == CRYSTALFIED) || mindless((mon)->data)))
 
 #define slithy(ptr)			((ptr)->mflagsb & MB_SLITHY)
+#define humanoid_torso(ptr)	(((ptr)->mflagsb & MB_HUMANOID) != 0)
 #define humanoid(ptr)		(((ptr)->mflagsb & MB_BODYTYPEMASK) == MB_HUMANOID)
 #define animaloid(ptr)		(((ptr)->mflagsb & MB_BODYTYPEMASK) == MB_ANIMAL)
 #define serpentine(ptr)		(((ptr)->mflagsb & MB_BODYTYPEMASK) == MB_SLITHY)
@@ -197,8 +200,8 @@
 							 ptr == &mons[PM_MILITANT_CLERIC] ||\
 							 ptr == &mons[PM_HALF_ELF_RANGER])
 #define is_undead(ptr)		(((ptr)->mflagsa & MA_UNDEAD) != 0L)
-#define is_undead_mon(mon)	(mon && (is_undead((mon)->data) || (mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED))
-#define is_derived_undead_mon(mon)	(mon && ((mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED))
+#define is_undead_mon(mon)	(mon && (is_undead((mon)->data) || (mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED || (mon)->mfaction == FRACTURED))
+#define is_derived_undead_mon(mon)	(mon && ((mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED || (mon)->mfaction == FRACTURED))
 #define	can_undead_mon(mon)	(mon && !nonliving_mon(mon) && !is_minion((mon)->data) && ((mon)->data->mlet != S_PUDDING) &&\
 								((mon)->data->mlet != S_JELLY) && ((mon)->data->mlet != S_BLOB) && !is_elemental((mon)->data) &&\
 								!is_plant((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data) && !(mvitals[monsndx((mon)->data)].mvflags&G_NOCORPSE))
@@ -248,6 +251,9 @@
 #define is_drow(ptr)		(((ptr)->mflagsa & MA_DROW) != 0L)
 #define is_dwarf(ptr)		(((ptr)->mflagsa & MA_DWARF) != 0L)
 #define is_gnome(ptr)		(((ptr)->mflagsa & MA_GNOME) != 0L)
+#define is_szcultist(ptr)		((ptr) == &mons[PM_SHATTERED_ZIGGURAT_CULTIST] \
+								|| (ptr) == &mons[PM_SHATTERED_ZIGGURAT_KNIGHT] \
+								|| (ptr) == &mons[PM_SHATTERED_ZIGGURAT_WIZARD])
 #define is_orc(ptr)		(((ptr)->mflagsa & MA_ORC) != 0L)
 #define is_ogre(ptr)		((ptr)->mlet == S_OGRE)
 #define is_troll(ptr)		((ptr)->mlet == S_TROLL)
@@ -320,6 +326,11 @@
 								(ptr) == &mons[PM_QUINON] ||\
 								(ptr) == &mons[PM_AXUS]\
 							)
+#define is_kamerel(ptr)		(	(ptr) == &mons[PM_AMM_KAMEREL] ||\
+								(ptr) == &mons[PM_HUDOR_KAMEREL] ||\
+								(ptr) == &mons[PM_SHARAB_KAMEREL] ||\
+								(ptr) == &mons[PM_ARA_KAMEREL]\
+							)
 #define is_divider(ptr)		( (ptr) == &mons[PM_BLACK_PUDDING]\
 							  || (ptr) == &mons[PM_BROWN_PUDDING]\
 							  || (ptr) == &mons[PM_DARKNESS_GIVEN_HUNGER]\
@@ -362,8 +373,8 @@
 #define helm_match(ptr,obj)	(((ptr->mflagsb&MB_HEADMODIMASK) == (obj->bodytypeflag&MB_HEADMODIMASK)))
 /*Note: No-modifier helms are "normal"*/
 
-#define hates_holy_mon(mon)	(is_demon(mon->data) || is_undead_mon(mon))
-#define hates_holy(ptr)		(is_demon(ptr) || is_undead(ptr))
+#define hates_holy_mon(mon)	(is_demon((mon)->data) || is_undead_mon(mon) || (((mon)->data->mflagsg&MG_HATESHOLY) != 0))
+#define hates_holy(ptr)		(is_demon(ptr) || is_undead(ptr) || (((ptr)->mflagsg&MG_HATESHOLY) != 0))
 #define hates_unholy(ptr)	((ptr->mflagsg&MG_HATESUNHOLY) != 0)
 #define hates_silver(ptr)	((ptr->mflagsg&MG_HATESSILVER) != 0)
 #define hates_iron(ptr)		((ptr->mflagsg&MG_HATESIRON) != 0)
@@ -521,6 +532,7 @@
 				 (ptr)->mlet == S_FUNGUS || \
 				 (ptr) == &mons[PM_OCHRE_JELLY])
 #define stationary(ptr)		((ptr)->mflagsm & MM_STATIONARY)
+#define sessile(ptr)		((ptr)->mmove == 0)
 
 /* Used for conduct with corpses, tins, and digestion attacks */
 /* G_NOCORPSE monsters might still be swallowed as a purple worm */

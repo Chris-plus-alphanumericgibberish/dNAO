@@ -947,9 +947,11 @@ int thrown;
 	char yourbuf[BUFSZ];
 	char unconventional[BUFSZ];	/* substituted for word "attack" in msg */
 	char saved_oname[BUFSZ];
-	int unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : 1;
-	if(uarmg && uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN) unarmedMult += 2;
-
+	int unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : (!uarmg && u.sealsActive&SEAL_ECHIDNA) ? 2 : 1;
+	if(uarmg){
+		if(uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN) unarmedMult += 2;
+	}
+	
 	static short jadeRing = 0;
 	if(!jadeRing) jadeRing = find_jade_ring();
 	
@@ -962,7 +964,7 @@ int thrown;
 	if(!helpless(mon)) wake_nearto(mon->mx, mon->my, Stealth ? combatNoise(youracedata)/2 : combatNoise(youracedata)); //Nearby monsters may be awakened
 	wakeup(mon, TRUE);
 	if(!obj) {	/* attack with bare hands */
-	    if (mdat->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS || u.sealsActive&SEAL_EDEN)) tmp = 0;
+	    if (insubstantial(mdat) && !(u.sealsActive&SEAL_CHUPOCLOPS || u.sealsActive&SEAL_EDEN)) tmp = 0;
 		else if (martial_bonus()){
 			if(uarmc && uarmc->oartifact == ART_GRANDMASTER_S_ROBE){
 				if(u.sealsActive&SEAL_EURYNOME) tmp = rn2(2) ? 
@@ -1255,12 +1257,20 @@ int thrown;
 			static int warnedotyp = 0;
 			static struct permonst *warnedptr = 0;
 		    /* then do only 1-2 points of damage */
-		    if (mdat->mlet == S_SHADE && !(obj->obj_material == SILVER || arti_silvered(obj) || u.sealsActive&SEAL_CHUPOCLOPS))
-				tmp = 0;
+		    if (insubstantial(mdat) && !(
+					 u.sealsActive&SEAL_CHUPOCLOPS
+					|| (obj->obj_material == SILVER && hates_silver(mdat))
+					|| (arti_silvered(obj) && hates_silver(mdat))
+					|| (obj->obj_material == IRON && hates_iron(mdat))
+					|| (is_unholy(obj) && hates_unholy(mdat))
+					|| (obj->blessed && hates_holy_mon(mon))
+				)
+			)tmp = 0;
 		    else if(obj->oartifact == ART_LIECLEAVER) tmp = 2*(rnd(12) + rnd(10) + obj->spe);
 		    else if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS) tmp = 2*(rnd(bigmonst(mon->data) ? 2 : 4) + obj->spe);
 			
 		    else if((obj->oartifact == ART_INFINITY_S_MIRRORED_ARC && !litsaber(obj))) tmp = d(1,6) + obj->spe + weapon_dam_bonus(0); //martial arts aid
+		    else if((obj->otyp == KAMEREL_VAJRA && !litsaber(obj))) tmp = d(1,4) + (bigmonst(mdat) ? 0 : 1) + obj->spe + weapon_dam_bonus(0); //small mace
 		    else if((is_lightsaber(obj) && !litsaber(obj))) tmp = d(1,4) + obj->spe + weapon_dam_bonus(0); //martial arts aid
 
 			else tmp = rnd(2);
@@ -1271,6 +1281,8 @@ int thrown;
 				weaponmask |= SLASH;
 			} else if(obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 				weaponmask |= WHACK|SLASH;
+			} else if(obj->otyp == KAMEREL_VAJRA){
+				weaponmask |= WHACK|PIERCE;
 			} else {
 				weaponmask |= WHACK;
 			}
@@ -1336,7 +1348,7 @@ int thrown;
 			useup(obj);
 			if (!more_than_1) obj = (struct obj *) 0;
 			hittxt = TRUE;
-			if (mdat->mlet != S_SHADE || u.sealsActive&SEAL_CHUPOCLOPS)
+			if (!insubstantial(mdat) || u.sealsActive&SEAL_CHUPOCLOPS)
 			    tmp++;
 		    }
 		} else {
@@ -1353,7 +1365,7 @@ int thrown;
 			if (!valid_weapon_attack || mon == u.ustuck || u.twoweap) {
 			;	/* no special bonuses */
 			} else {
-				if (!(noncorporeal(mdat) || amorphous(mdat) || (stationary(mdat) && (mdat->mlet == S_FUNGUS || mdat->mlet == S_PLANT)) || u.uswallow) && (
+				if (!(noncorporeal(mdat) || amorphous(mdat) || ((stationary(mdat) || sessile(mdat)) && (mdat->mlet == S_FUNGUS || mdat->mlet == S_PLANT)) || u.uswallow) && (
 						((mon->mflee && mon->data != &mons[PM_BANDERSNATCH]) || is_blind(mon) || !mon->mcanmove || !mon->mnotlaugh || 
 							mon->mstun || mon->mconf || mon->mtrapped || mon->msleeping || (mon->mux == 0 && mon->muy == 0) ||
 								(sgn(mon->mx - u.ux) != sgn(mon->mx - mon->mux) 
@@ -1399,7 +1411,7 @@ int thrown;
 				if(obj == uwep && is_lightsaber(uwep) && litsaber(uwep)){
 					if (
 						(mon->mflee && mon->data != &mons[PM_BANDERSNATCH]) || is_blind(mon) || !mon->mcanmove || !mon->mnotlaugh ||
-							mon->mstun || mon->mconf || mon->mtrapped || mon->msleeping || (mon->mux == 0 && mon->muy == 0) || stationary(mdat) ||
+							mon->mstun || mon->mconf || mon->mtrapped || mon->msleeping || (mon->mux == 0 && mon->muy == 0) || stationary(mdat) || sessile(mdat) ||
 								((mon->mux != u.ux || mon->muy != u.uy) && distmin(u.ux, u.uy, mon->mx, mon->my) == 1)
 					) {
 						if(P_SKILL(weapon_type(uwep)) >= P_BASIC){
@@ -1410,7 +1422,7 @@ int thrown;
 							}
 						}
 						if(u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm))){
-							if(stationary(mdat)) You("rain blows on the immobile %s!", mon_nam(mon));
+							if(stationary(mdat) || sessile(mdat)) You("rain blows on the immobile %s!", mon_nam(mon));
 							else if(mon->mflee || (mon->mux == 0 && mon->muy == 0) ||
 								(sgn(mon->mx - u.ux) != sgn(mon->mx - mon->mux) 
 								&& sgn(mon->my - u.uy) != sgn(mon->my - mon->muy))
@@ -1650,9 +1662,9 @@ int thrown;
 			hittxt = TRUE;
 			/* in case potion effect causes transformation */
 			mdat = mon->data;
-			tmp = (mdat->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS)) ? 0 : 1;
+			tmp = (insubstantial(mdat) && !(u.sealsActive&SEAL_CHUPOCLOPS)) ? 0 : 1;
 		} else {
-			if (mdat->mlet == S_SHADE && !shade_aware(obj) && !(u.sealsActive&SEAL_CHUPOCLOPS)) {
+			if (insubstantial(mdat) && !shade_aware(obj) && !(u.sealsActive&SEAL_CHUPOCLOPS)) {
 			    tmp = 0;
 			    Strcpy(unconventional, cxname(obj));
 			} else {
@@ -1667,7 +1679,7 @@ int thrown;
 					break;
 					case MIRROR:
 						if (breaktest(obj)) {
-							if(u.specialSealsActive&SEAL_NUDZIARTH){
+							if(u.specialSealsActive&SEAL_NUDZIRATH){
 								You("break %s mirror.  You feel a deep satisfaction!",
 									shk_your(yourbuf, obj));
 								change_luck(+2);
@@ -1930,7 +1942,7 @@ defaultvalue:
 	} else {
 		int mac = full_marmorac(mon);
 		if(mac < 0){
-			tmp += AC_VALUE(mac);
+			tmp += MONSTER_AC_VALUE(mac);
 			if(tmp < 1) tmp = 1;
 		}
 	}
@@ -1960,7 +1972,7 @@ defaultvalue:
 		){
 			if((objects[wep->otyp].oc_skill == P_CROSSBOW ||
 				wep->otyp == SNIPER_RIFLE
-			  ) && !(noncorporeal(mdat) || amorphous(mdat) || stationary(mdat))
+			  ) && !(noncorporeal(mdat) || amorphous(mdat) || ((stationary(mdat) || sessile(mdat)) && (mdat->mlet == S_FUNGUS || mdat->mlet == S_PLANT)))
 			){
 				int dambonus = weapon_dam_bonus(wep);
 				int i=max(P_SKILL(objects[wep->otyp].oc_skill)-2,0); //Expert = 2
@@ -2111,7 +2123,7 @@ defaultvalue:
 	    /* make sure that negative damage adjustment can't result
 	       in inadvertently boosting the victim's hit points */
 	    tmp = 0;
-	    if (mdat->mlet == S_SHADE) {
+	    if (insubstantial(mdat)) {
 			if (!hittxt) {
 				const char *what = unconventional[0] ? unconventional : "attack";
 				Your("%s %s harmlessly through %s.",
@@ -2217,7 +2229,7 @@ defaultvalue:
 	if(tmp && !phasearmor){
 		int mac = full_marmorac(mon);
 		if(mac < 0){
-			tmp += AC_VALUE(mac);
+			tmp += MONSTER_AC_VALUE(mac);
 			if(tmp < 1) tmp = 1;
 		}
 	}
@@ -2701,6 +2713,8 @@ register struct attack *mattk;
 	register int	tmp = d((int)mattk->damn, (int)mattk->damd);
 	int armpro;
 	boolean negated, phasearmor = FALSE;
+	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA);
+	struct attack alt_attk;
 
 	armpro = magic_negation(mdef);
 	/* since hero can't be cancelled, only defender's armor applies */
@@ -2714,7 +2728,7 @@ register struct attack *mattk;
 	    demonpet();
 	    return(0);
 	}
-	switch(mattk->adtyp) {
+	switch (weaponhit ? AD_PHYS : mattk->adtyp) {
 	    case AD_STUN:
 		if(!Blind)
 		    pline("%s %s for a moment.", Monnam(mdef),
@@ -2731,11 +2745,44 @@ register struct attack *mattk;
 	    case AD_HEAL:	    /* likewise */
 	    case AD_PHYS:
  physical:
-		if(mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) {
+		if(weaponhit) {
 		    if(uwep) tmp = 0;
+			// tack on bonus elemental damage, if applicable
+			if (mattk->adtyp != AD_PHYS){
+				alt_attk.aatyp = AT_NONE;
+				alt_attk.adtyp = mattk->adtyp;
+				switch (alt_attk.adtyp)
+				{
+				case AD_FIRE:
+				case AD_COLD:
+				case AD_ELEC:
+				case AD_ACID:
+					alt_attk.damn = 4;
+					alt_attk.damd = 6;
+					break;
+				case AD_EFIR:
+				case AD_ECLD:
+				case AD_EELC:
+				case AD_EACD:
+					alt_attk.damn = 3;
+					alt_attk.damd = 7;
+					break;
+				case AD_STUN:
+					alt_attk.damn = 1;
+					alt_attk.damd = 4;
+					break;
+				default:
+					alt_attk.damn = 0;
+					alt_attk.damd = 0;
+					break;
+				}
+				damageum(mdef, &alt_attk);
+				if (DEADMONSTER(mdef))
+					return 2;
+			}
 		} else if(mattk->aatyp == AT_KICK) {
 		    if(thick_skinned(mdef->data)) tmp = 0;
-		    if(mdef->data->mlet == S_SHADE) {
+		    if(insubstantial(mdef->data)) {
 			if (!(uarmf && uarmf->blessed)) {
 			    impossible("bad shade attack function flow?");
 			    if(!(u.sealsActive&SEAL_CHUPOCLOPS)) tmp = 0;
@@ -3436,7 +3483,7 @@ register struct attack *mattk;
 	if(tmp && mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
 		int mac = full_marmorac(mdef);
 		if(mac < 0){
-			tmp += AC_VALUE(mac);
+			tmp += MONSTER_AC_VALUE(mac);
 			if(tmp < 1) tmp = 1;
 		}
 	}
@@ -3881,6 +3928,7 @@ use_weapon:
 			}
 		break;
 		case AT_CLAW:
+		case AT_MARI: /*Note: Player mariliths can't use extra weapons at the moment */
 		case AT_LRCH: /*Note: long reach attacks are being treated as melee only for polymorph purposes*/
 			if (i==0 && uwep && !cantwield(mas)) goto use_weapon;
 #ifdef SEDUCE
@@ -3940,7 +3988,7 @@ wisp_shdw_dhit:
 			    }
 			    wakeup(mon, TRUE);
 			    /* maybe this check should be in damageum()? */
-			    if (mon->data->mlet == S_SHADE &&
+			    if (insubstantial(mon->data) &&
 					!(mattk->aatyp == AT_KICK &&
 					    uarmf && uarmf->blessed) && !(u.sealsActive&SEAL_CHUPOCLOPS)) {
 				Your("attack passes harmlessly through %s.",
@@ -3965,7 +4013,7 @@ wisp_shdw_dhit:
 			    else if (mattk->aatyp == AT_WHIP)
 				    Your("barbed whips lash %s.", mon_nam(mon));
 				else if(mattk->adtyp == AT_SHDW) {
-					Your("bladed shadow srikes %s.", mon_nam(mon));
+					Your("bladed shadow strikes %s.", mon_nam(mon));
 				} else if(mattk->adtyp == AT_SHDW) {
 					You("slash %s with a starlight rapier.", mon_nam(mon));
 				} else if(mattk->aatyp == AT_WISP) 
@@ -3982,7 +4030,7 @@ wisp_shdw_dhit:
 			 */
 			dhit = 1;
 			wakeup(mon, TRUE);
-			if (mon->data->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS))
+			if (insubstantial(mon->data) && !(u.sealsActive&SEAL_CHUPOCLOPS))
 			    Your("hug passes harmlessly through %s.",
 				mon_nam(mon));
 			else if (!sticks(mon->data) && !u.uswallow) {
@@ -4008,7 +4056,7 @@ wisp_shdw_dhit:
 		case AT_ENGL:
 			if((dhit = (tmp > rnd(20+i)))) {
 				wakeup(mon, TRUE);
-				if (mon->data->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS))
+				if (insubstantial(mon->data) && !(u.sealsActive&SEAL_CHUPOCLOPS))
 				    Your("attempt to surround %s is harmless.",
 					mon_nam(mon));
 				else {
@@ -4198,7 +4246,7 @@ wisp_shdw_dhit2:
 			}
 			wakeup(mon, TRUE);
 			/* maybe this check should be in damageum()? */
-			if (mon->data->mlet == S_SHADE &&
+			if (insubstantial(mon->data) &&
 				!(mattk->aatyp == AT_KICK &&
 					uarmf && uarmf->blessed) && !(u.sealsActive&SEAL_CHUPOCLOPS)) {
 			Your("attack passes harmlessly through %s.",
@@ -4221,7 +4269,7 @@ wisp_shdw_dhit2:
 				Your("barbed whips lash %s.", mon_nam(mon));
 			else if(mattk->adtyp == AT_SHDW) {
 				if(youracedata == &mons[PM_EDDERKOP]) You("slash %s with bladed shadows.", mon_nam(mon));
-				else Your("bladed shadow srikes %s.", mon_nam(mon));
+				else Your("bladed shadow strikes %s.", mon_nam(mon));
 			} else if(mattk->aatyp == AT_WISP) 
 				Your("mist tendrils lash %s.", mon_nam(mon));
 			else You("hit %s.", mon_nam(mon));
@@ -4238,7 +4286,7 @@ wisp_shdw_dhit2:
 		 */
 		dhit = 1;
 		wakeup(mon, TRUE);
-		if (mon->data->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS))
+		if (insubstantial(mon->data) && !(u.sealsActive&SEAL_CHUPOCLOPS))
 			Your("hug passes harmlessly through %s.",
 			mon_nam(mon));
 		else if (!sticks(mon->data) && !u.uswallow) {
@@ -4264,7 +4312,7 @@ wisp_shdw_dhit2:
 	case AT_ENGL:
 		if((dhit = (tmp > rnd(20+i)))) {
 			wakeup(mon, TRUE);
-			if (mon->data->mlet == S_SHADE && !(u.sealsActive&SEAL_CHUPOCLOPS))
+			if (insubstantial(mon->data) && !(u.sealsActive&SEAL_CHUPOCLOPS))
 				Your("attempt to surround %s is harmless.",
 				mon_nam(mon));
 			else {
