@@ -348,7 +348,7 @@ mattackm(magr, mdef)
 			|| mattk->aatyp == AT_MAGC
 			|| (mattk->aatyp == AT_TENT && magr->mfaction == SKELIFIED)
 			|| (i == 0 && 
-				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) && 
+				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_MARI) && 
 				mattk->adtyp == AD_PHYS && 
 				mattk->damn*mattk->damd/2 < (magr->m_lev/10+1)*max(magr->data->msize*2, 4)/2
 			   )
@@ -414,18 +414,18 @@ mattackm(magr, mdef)
 	switch (mattk->aatyp) {
 	    case AT_DEVA:
 	    case AT_WEAP:
-		case AT_XWEP: /* weapon attacks */
-#define MAINHAND (mattk->aatyp != AT_XWEP)
+		case AT_XWEP:
+		case AT_MARI: /* weapon attacks */
+#define MAINHAND (mattk->aatyp != AT_XWEP && mattk->aatyp != AT_MARI)
 
-		if (!MAINHAND && magr->misc_worn_check & W_ARMS) {
+		if (!mattk->aatyp == AT_XWEP && magr->misc_worn_check & W_ARMS) {
 			// Offhand attacks cannot be made while wearing a shield
 			break;
 		}
 
 #ifdef TAME_RANGED_ATTACKS
-		if (MAINHAND) {
-			if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > 2)
-			{
+		if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > 2){
+			if (MAINHAND) {
 				thrwmm(magr, mdef);
 				if (tmphp > mdef->mhp){
 					res[i] = MM_HIT;
@@ -434,13 +434,14 @@ mattackm(magr, mdef)
 				if (mdef->mhp < 1) res[i] = MM_DEF_DIED;
 				if (magr->mhp < 1) res[i] = MM_AGR_DIED;
 				break;
-			}
+			} else break;
 		}
 #endif /*TAME_RANGED_ATTACKS*/
-
-		if (magr->weapon_check == NEED_WEAPON || (MAINHAND ? (!MON_WEP(magr)) : (!MON_SWEP(magr)))) {
-		    magr->weapon_check = NEED_HTH_WEAPON;
-		    if (mon_wield_item(magr) != 0) return 0;
+		if(mattk->aatyp != AT_MARI){
+			if (magr->weapon_check == NEED_WEAPON || (MAINHAND ? (!MON_WEP(magr)) : (!MON_SWEP(magr)))) {
+				magr->weapon_check = NEED_HTH_WEAPON;
+				if (mon_wield_item(magr) != 0) return 0;
+			}
 		}
 
 #ifdef TAME_RANGED_ATTACKS
@@ -461,7 +462,33 @@ mattackm(magr, mdef)
 		}
 #endif
 		possibly_unwield(magr, FALSE);
-		otmp = (MAINHAND ? MON_WEP(magr) : MON_SWEP(magr));
+		if(MAINHAND){
+			otmp = MON_WEP(magr);
+		} else if(mattk->aatyp == AT_XWEP){
+			otmp = MON_SWEP(magr);
+		} else if(mattk->aatyp == AT_MARI){
+			int wcount = 0;
+			for(otmp = magr->minvent; otmp; otmp = otmp->nobj){
+				if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) 
+					&& !otmp->oartifact
+					&& otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)
+				) wcount++;
+			}
+			wcount -= i;
+			if(MON_WEP(magr))
+				wcount++;
+			if(MON_SWEP(magr))
+				wcount++;
+			for(otmp = magr->minvent; otmp; otmp = otmp->nobj){
+				if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) 
+					&& !otmp->oartifact
+					&& otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)
+					&& --wcount <= 0
+				) break;
+			}
+		} else {
+			otmp = MON_WEP(magr);
+		}
 #undef MAINHAND
 		if (otmp) {
 		    if (vis) mswingsm(magr, mdef, otmp);
@@ -524,10 +551,14 @@ meleeattack:
 		 * have a weapon instead.  This instinct doesn't work for
 		 * players, or under conflict or confusion. 
 		 */
-		if (!magr->mconf && !Conflict && otmp &&
-			mattk->aatyp != AT_WEAP && mattk->aatyp != AT_XWEP && mattk->aatyp != AT_DEVA && mattk->aatyp != AT_BEAM &&
-			mattk->adtyp != AD_STAR && mattk->adtyp != AD_BLUD && mattk->adtyp != AD_SHDW && 
-			touch_petrifies(mdef->data)
+		if (!magr->mconf && !Conflict && ((otmp &&
+			mattk->aatyp != AT_WEAP && mattk->aatyp != AT_XWEP && mattk->aatyp != AT_MARI && 
+			mattk->aatyp != AT_DEVA
+			) || (
+			mattk->aatyp != AT_BEAM && mattk->adtyp != AD_STAR
+			&& mattk->adtyp != AD_BLUD && mattk->adtyp != AD_SHDW
+			&& mattk->adtyp != AT_MAGC && mattk->adtyp != AT_MMGC
+			)) && touch_petrifies(mdef->data)
 		) {
 		    strike = 0;
 		    break;
@@ -569,6 +600,10 @@ meleeattack:
 			}
 		} else
 		    missmm(magr, mdef, mattk);
+		if(mattk->aatyp == AT_MARI && i == 5 && res[0] && res[1]){
+			struct attack rend = {AT_HUGS, AD_WRAP, magr->data == &mons[PM_SHAKTARI] ? 8 : 4, 6};
+			res[i] = hitmm(magr, mdef, &rend);
+		}
 		break;
 
 	    case AT_HUGS:	/* automatic if prev two attacks succeed */
@@ -1195,7 +1230,7 @@ mdamagem(magr, mdef, mattk)
 	int armpro, num, tmp = d((int)mattk->damn, (int)mattk->damd);
 	boolean cancelled;
 	boolean phasearmor = FALSE;
-	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA);
+	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_MARI);
 	struct attack alt_attk;
 
 	if(magr->mflee && pa == &mons[PM_BANDERSNATCH]) tmp = d((int)mattk->damn, 2*(int)mattk->damd);
@@ -2753,6 +2788,7 @@ int aatyp;
     case AT_5SQR:
     case AT_WEAP:
 	case AT_XWEP:
+	case AT_MARI:
     case AT_DEVA:
 	w_mask = W_ARMG;	/* caller needs to check for weapon */
 	break;

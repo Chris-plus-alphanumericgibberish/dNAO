@@ -150,7 +150,7 @@ mpoisons_subj(mtmp, mattk)
 struct monst *mtmp;
 struct attack *mattk;
 {
-	if (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA) {
+	if (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_MARI) {
 	    struct obj *mwep = (mtmp == &youmonst) ? uwep : MON_WEP(mtmp);
 	    /* "Foo's attack was poisoned." is pretty lame, but at least
 	       it's better than "sting" when not a stinging attack... */
@@ -733,7 +733,7 @@ mattacku(mtmp)
 				|| mattk->aatyp == AT_MAGC
 				|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
 				|| (i == 0 && 
-					(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) && 
+					(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_MARI) && 
 					mattk->adtyp == AD_PHYS && 
 					mattk->damn*mattk->damd/2 < (mtmp->m_lev/10+1)*max(mtmp->data->msize*2, 4)/2
 				   )
@@ -1194,6 +1194,73 @@ mattacku(mtmp)
 					wildmiss(mtmp, mattk);
 			}
 			break;
+		case AT_MARI:
+			if(!range2) {
+			    int hittmp = 0;
+				int wcount = 0;
+
+			    if (foundyou) {
+					for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+						if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) 
+							&& otmp != MON_WEP(mtmp) && otmp != MON_SWEP(mtmp)
+						) wcount++;
+					}
+					wcount -= i;
+					if(MON_WEP(mtmp))
+						wcount++;
+					if(MON_SWEP(mtmp))
+						wcount++;
+					for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+						if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) 
+							&& otmp != MON_WEP(mtmp) && otmp != MON_SWEP(mtmp)
+							&& --wcount <= 0
+						) break;
+					}
+					if(otmp) {
+						hittmp = hitval(otmp, &youmonst);
+						tmp += hittmp;
+						tchtmp += hittmp;
+						if(otmp->objsize - mtmp->data->msize > 0){
+							tmp += -4*(otmp->objsize - mtmp->data->msize);
+							tchtmp += -2*(otmp->objsize - mtmp->data->msize);
+						}
+						mswings(mtmp, otmp);
+					}
+					if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))){
+						if(tchtmp > (j = dieroll = rnd(20+i*2))){
+							sum[i] = hitmu(mtmp, mattk);
+							if(mattk->aatyp == AT_DEVA && sum[i]){
+								deva = 1;
+								while(tchtmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
+							}
+						} else missmu(mtmp, (tchtmp == j), mattk);
+					} else {
+						if(tmp > (j = dieroll = rnd(20+i*2))){
+							sum[i] = hitmu(mtmp, mattk);
+							if(mattk->aatyp == AT_DEVA && sum[i]){
+								deva = 1;
+								while(tmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
+							}
+						} else missmu(mtmp, (tmp == j), mattk);
+					}
+					/* KMH -- Don't accumulate to-hit bonuses */
+					if (otmp){
+						tmp -= hittmp;
+						tchtmp -= hittmp;
+						if(otmp->objsize - mtmp->data->msize > 0){
+							tmp += 4*(otmp->objsize - mtmp->data->msize);
+							tchtmp += 2*(otmp->objsize - mtmp->data->msize);
+						}
+					}
+					if(i == 5 && sum[0] && sum[1]){
+						/*Mariliths get a wrap attack if their first two attacks hit*/
+						struct attack rend = {AT_HUGS, AD_WRAP, mdat == &mons[PM_SHAKTARI] ? 8 : 4, 6};
+						sum[i] = hitmu(mtmp, &rend);
+					}
+			    } else
+					wildmiss(mtmp, mattk);
+			}
+			break;
 		case AT_HODS:
 			if(!range2){
 			    int hittmp = 0;
@@ -1548,7 +1615,7 @@ hitmu(mtmp, mattk)
 	struct obj *optr;
 	int dmg, armpro, permdmg;
 	boolean phasearmor = FALSE;
-	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA);
+	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_MARI);
 	char	 buf[BUFSZ];
 	struct permonst *olduasmon = youracedata;
 	int res;
@@ -3147,7 +3214,9 @@ dopois:
 				break;
 				case AT_WEAP:
 				case AT_XWEP:
-					pline("%s's weapon strikes your armor!", Monnam(mtmp));
+				case AT_MARI:
+					if(otmp) pline("%s's weapon strikes your armor!", Monnam(mtmp));
+					else pline("%s's claws catch on your armor!", Monnam(mtmp));
 				break;
 				default:
 					pline("%s's claws catch on your armor!", Monnam(mtmp));
