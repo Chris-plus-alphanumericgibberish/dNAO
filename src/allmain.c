@@ -478,6 +478,8 @@ moveloop()
 						mtmp->perminvis = FALSE;
 						newsym(mtmp->mx,mtmp->my);
 					}
+				} else if (mtmp->minvis){
+					newsym(mtmp->mx, mtmp->my);
 				}
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
