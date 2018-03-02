@@ -1476,6 +1476,7 @@ E boolean FDECL(closed_door, (int,int));
 E boolean FDECL(accessible, (int,int));
 E void FDECL(set_apparxy, (struct monst *));
 E boolean FDECL(can_ooze, (struct monst *));
+E void FDECL(remove_monster, (uchar, uchar));
 
 /* ### monst.c ### */
 
