@@ -106,7 +106,7 @@ const char *fmt, *arg;
 	u.uundetected = 0;
 
 	if (sticky) uunstick();
-	find_ac();
+	find_udef();
 	if (was_mimicking) {
 	    if (multi < 0) unmul("");
 	    youmonst.m_ap_type = M_AP_NOTHING;
@@ -651,7 +651,7 @@ int	mntmp;
 	    /* make queen bees recognize killer bee eggs */
 	    learn_egg_type(egg_type_from_parent(u.umonnum, TRUE));
 	}
-	find_ac();
+	find_udef();
 	if((!Levitation && !u.ustuck && !Flying &&
 	    (is_pool(u.ux,u.uy, TRUE) || is_lava(u.ux,u.uy))) ||
 	   (Underwater && !Swimming))

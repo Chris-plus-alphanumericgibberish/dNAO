@@ -2306,7 +2306,7 @@ u_init()
 	} else if (Race_if(PM_ELF)){
 		init_attr(80);
 	} else init_attr(75);	/* init attribute values */
-	find_ac();				/* get initial ac value */
+	find_udef();				/* get initial ac value */
 	max_rank_sz();			/* set max str size for class ranks */
 /*
  *	Do we really need this?

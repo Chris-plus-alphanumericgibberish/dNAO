@@ -1252,10 +1252,7 @@ cold_spell:
 		drain_en(dmg);
 		if(hates_silver(youracedata)) dmg += d(dmn,20);
 		if(Half_physical_damage) dmg /= 2;
-		if(u.uac < 0){
-			if(u.sealsActive&SEAL_BALAM) dmg -= min_ints(rnd(-u.uac),rnd(-u.uac));
-			else dmg -= rnd(-u.uac);
-		}
+		dmg += ureducedmg();
 		if(dmg < 1) dmg = 1;
 		stop_occupation();
 		break;
@@ -1566,10 +1563,7 @@ int spellnum;
     case ICE_STORM:
 	pline("Chunks of ice pummel you from all sides!");
 	dmg = d(4, 8);
-	
-	if(u.sealsActive&SEAL_BALAM) dmg -= min_ints(rnd(-u.uac),rnd(-u.uac));
-	else dmg -= rnd(-u.uac);
-	
+	dmg += ureducedmg(dmg);
 	if (dmg < 1) dmg = 1;
 	
 	if (Half_physical_damage) dmg = (dmg + 1) / 2;
@@ -1616,9 +1610,9 @@ int spellnum;
 	case SILVER_RAYS:{
 		int n = 0;
 		dmg = 0;
-		if(zap_hit(base_uac(), 0))
+		if(zap_hit(u.uev, 0))
 			n++;
-		if(zap_hit(base_uac(), 0))
+		if(zap_hit(u.uev, 0))
 			n++;
 		if(!n){
 			pline("Silver rays whiz past you!");
@@ -1664,17 +1658,15 @@ int spellnum;
 			destroy_item(POTION_CLASS, AD_FIRE);
 		} else {
 			You("are pierced by silver light!");
-			dmg = 0;
-			if(u.uac < 0){
-				dmg += rnd(20) + AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
-				if(dmg < 1)
-					dmg = 1;
-				if(n == 2){
-					dmg += rnd(20) + AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
-					if(dmg < 2)
-						dmg = 2;
-				}
-			} else dmg = d(n, 20);
+			dmg = rnd(20);
+			dmg += ureducedmg(dmg);
+			if(dmg < 1)
+				dmg = 1;
+			if(n == 2){
+				dmg += rnd(20);
+				dmg += ureducedmg(dmg);
+				if(dmg < 2)
+					dmg = 2;
 		}
 	}break;
 	case GOLDEN_WAVE:
@@ -1719,12 +1711,10 @@ int spellnum;
 			destroy_item(POTION_CLASS, AD_FIRE);
 		} else {
 			You("are slashed by golden light!");
-			dmg = 0;
-			if(u.uac < 0){
-				dmg += d(2,12) + AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
-				if(dmg < 1)
-					dmg = 1;
-			} else dmg = d(2, 12);
+			dmg = d(2,12);
+			dmg += ureducedmg();
+			if(dmg < 1)
+				dmg = 1;
 		}
 	break;
 	case PRISMATIC_SPRAY:{
@@ -2102,12 +2092,9 @@ summon_alien:
 				shienCount++;
 				tdmg = 0;
 			} else tdmg = dmgval(otmp, &youmonst, 0);
-			if (tdmg && u.uac < 0) {
-				if(u.sealsActive&SEAL_BALAM) tdmg -= max_ints(rnd(-u.uac),rnd(-u.uac));
-				else tdmg -= rnd(-u.uac);
-				
+			if (tdmg) {
+				tdmg += ureducedmg(tdmg);
 				if (tdmg < 1) tdmg = 1;
-				
 			}
 			if (Half_physical_damage) tdmg = (tdmg + 1) / 2;
 			dmg += tdmg;
@@ -2665,7 +2652,7 @@ ray:
 			u.uspmtime = max(1,u.uspmtime);
 			if (!u.usptime)
 				u.usptime = u.uspmtime;
-			find_ac();
+			find_udef();
 		}
 	    dmg = 0;
 	}break;
@@ -4117,7 +4104,7 @@ int spellnum;
 			u.uspmtime = max(1,u.uspmtime);
 			if (!u.usptime)
 				u.usptime = u.uspmtime;
-			find_ac();
+			find_udef();
 		}
 	    dmg = 0;
 	}break;

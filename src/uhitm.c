@@ -27,6 +27,24 @@ static int dieroll;
 /* Used to flag attacks caused by Stormbringer's maliciousness. */
 static boolean override_confirmation = FALSE;
 
+int
+mreducedmg(dmg, mtmp)
+int dmg;
+struct monst *mtmp;
+{
+	int AC_mod = 40;	// AC can only reduce damage by up to XX/100 percent
+	int rAC = 0;
+	int rDR = 0;
+	int mac = full_marmorac(mtmp);
+	int mdr = full_mdr(mtmp);
+
+	rAC = (mac < 0) ? max(MONSTER_AC_VALUE(mac), -dmg*AC_mod / 100) : 0;
+	rDR = MONSTER_AC_VALUE(-mdr);
+
+	return rAC + rDR;
+}
+
+
 /* modified from hurtarmor() in mhitu.c */
 /* This is not static because it is also used for monsters rusting monsters */
 void
@@ -1932,11 +1950,8 @@ defaultvalue:
 		tmp = 0;
 		valid_weapon_attack = 0;
 	} else {
-		int mac = full_marmorac(mon);
-		if(mac < 0){
-			tmp += MONSTER_AC_VALUE(mac);
-			if(tmp < 1) tmp = 1;
-		}
+		tmp += mreducedmg(tmp, mon);
+		if(tmp < 1) tmp = 1;
 	}
 	
 	/****** NOTE: perhaps obj is undefined!! (if !thrown && BOOMERANG)
@@ -2219,11 +2234,8 @@ defaultvalue:
 	// pline("Damage: %d",tmp);
 	
 	if(tmp && !phasearmor){
-		int mac = full_marmorac(mon);
-		if(mac < 0){
-			tmp += MONSTER_AC_VALUE(mac);
-			if(tmp < 1) tmp = 1;
-		}
+		tmp += mreducedmg(tmp, mon);
+		if(tmp < 1) tmp = 1;
 	}
 	
 	if (!already_killed){
@@ -3517,11 +3529,8 @@ register struct attack *mattk;
 	// }
 	
 	if(tmp && mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
-		int mac = full_marmorac(mdef);
-		if(mac < 0){
-			tmp += MONSTER_AC_VALUE(mac);
-			if(tmp < 1) tmp = 1;
-		}
+		tmp += mreducedmg(tmp, mdef);
+		if(tmp < 1) tmp = 1;
 	}
 	
 	if((mdef->mhp -= tmp) < 1) {

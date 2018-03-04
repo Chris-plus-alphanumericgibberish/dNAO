@@ -28,6 +28,7 @@ NetHack, except that rounddiv may call panic().
 	char *		sitoa		(int)
 	int		sgn		(int)
 	int		rounddiv	(long, int)
+	int		isqrt		(int)
 	int		distmin		(int, int, int, int)
 	int		dist2		(int, int, int, int)
 	boolean		online2		(int, int)
@@ -306,6 +307,21 @@ rounddiv(x, y)		/* calculate x/y, rounding as appropriate */
 #endif /* OVLB */
 
 #ifdef OVL0
+
+int
+isqrt(val) /* Integer square root function without using floating point. */
+int val;
+{
+	int rt = 0;
+	int odd = 1;
+	while (val >= odd) {
+		val = val - odd;
+		odd = odd + 2;
+		rt = rt + 1;
+	}
+	return rt;
+}
+
 int
 distmin(x0, y0, x1, y1) /* distance between two points, in moves */
     int x0, y0, x1, y1;

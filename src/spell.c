@@ -45,7 +45,6 @@ STATIC_DCL boolean FDECL(sightwedge, (int,int, int,int, int,int));
 STATIC_DCL void FDECL(spell_backfire, (int));
 STATIC_DCL const char *FDECL(spelltypemnemonic, (int));
 STATIC_DCL int FDECL(spellhunger, (int));
-STATIC_DCL int FDECL(isqrt, (int));
 STATIC_DCL void FDECL(run_maintained_spell, (int));
 STATIC_DCL void NDECL(update_alternate_spells);
 
@@ -1411,7 +1410,7 @@ cast_protection()
 			P_SKILL(spell_skilltype(SPE_PROTECTION)) == P_SKILLED ? 20: 
 			P_SKILL(spell_skilltype(SPE_PROTECTION)) == P_BASIC ? 15: 10;
 		u.usptime = u.uspmtime;
-	    find_ac();
+	    find_udef();
 	} else {
 	    Your("skin feels warm for a moment.");
 	}
@@ -3582,14 +3581,14 @@ spiriteffects(power, atme)
 			qvr->quan = 1;
 			qvr->spe = d(5,dsize) + 8;
 			qvr->opoisoned = (OPOISON_BASIC|OPOISON_BLIND);
-			set_bypassDR(1);  //state variable referenced in drop_throw
+			set_bypassAC(1);  //state variable referenced in drop_throw
 			set_destroy_thrown(1); //state variable referenced in drop_throw
 				m_throw(&youmonst, mon->mx + (-u.dx), mon->my + (-u.dy), u.dx, u.dy,
 					1, qvr,TRUE);
 				ttmp2 = maketrap(mon->mx, mon->my, WEB);
 				if (ttmp2) mintrap(mon);
 			set_destroy_thrown(0);  //state variable referenced in drop_throw
-			set_bypassDR(0);  //state variable referenced in drop_throw
+			set_bypassAC(0);  //state variable referenced in drop_throw
 		}break;
 		case PWR_WEAVE_BLACK_WEB:{
 		    pline("The poison shadow of the Black Web flows in your wake.");
@@ -4638,21 +4637,6 @@ dump_spells()
 
 } /* dump_spells */
 #endif
-
-/* Integer square root function without using floating point. */
-STATIC_OVL int
-isqrt(val)
-int val;
-{
-    int rt = 0;
-    int odd = 1;
-    while(val >= odd) {
-	val = val-odd;
-	odd = odd+2;
-	rt = rt + 1;
-    }
-    return rt;
-}
 
 STATIC_OVL int
 percent_success(spell)

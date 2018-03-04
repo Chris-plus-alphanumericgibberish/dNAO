@@ -49,6 +49,31 @@ static const char tools[] = { TOOL_CLASS, 0 };
 
 #ifdef OVL1
 
+int
+ureducedmg(dmg)
+int dmg;
+{
+	int AC_mod = 40;	// AC can only reduce damage by up to XX/100 percent
+	int rAC = 0;
+	int rDR = 0;
+
+	rAC = (u.uac < 0) ? max(AC_VALUE(u.uac), -dmg*AC_mod/100) : 0;
+	rDR = AC_VALUE(-u.udr);
+
+	return rAC + rDR;
+}
+
+int
+udeflect()
+{
+	return AC_VALUE(u.uac);
+}
+
+int
+udodge()
+{
+	return AC_VALUE(u.uev);
+}
 
 STATIC_OVL void
 hitmsg(mtmp, mattk)
@@ -568,8 +593,8 @@ mattacku(mtmp)
 	}
 
 /*	Work out the armor class differential	*/
-	tmp = AC_VALUE(u.uac+u.uspellprot) + 10 - u.uspellprot;		/* tmp ~= 0 - 20 */
-	tchtmp = AC_VALUE(base_uac()+u.uspellprot) + 10 - u.uspellprot;
+	tmp = udeflect() + 10;		/* tmp ~= 0 - 20 */
+	tchtmp = udodge() + 10;
 	tmp += 2*mtmp->m_lev/3;
 	if(is_prince(mtmp->data)) tmp += 5;
 	if(is_lord(mtmp->data)) tmp += 2;
@@ -1759,14 +1784,14 @@ hitmu(mtmp, mattk)
 				artifact_hit(mtmp, &youmonst, uwep, &dmg,dieroll)))
 			     hitmsg(mtmp, mattk);
 			if (!dmg) break;
-			if (u.mh > 1 && u.mh > ((u.uac>=0) ? dmg : dmg+AC_VALUE(u.uac+u.uspellprot)-u.uspellprot) &&
+			if (u.mh > 1 && u.mh > (dmg + ureducedmg(dmg)) &&
 				   uwep->obj_material == IRON &&
 					(u.umonnum==PM_BLACK_PUDDING
 					|| u.umonnum==PM_BROWN_PUDDING)) {
 			    /* This redundancy necessary because you have to
 			     * take the damage _before_ being cloned.
 			     */
-			    if (u.uac < 0) dmg += AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
+				dmg += ureducedmg(dmg);
 			    if (dmg < 1) dmg = 1;
 			    if (dmg > 1) exercise(A_STR, FALSE);
 			    u.mh -= dmg;
@@ -1896,14 +1921,14 @@ hitmu(mtmp, mattk)
 				artifact_hit(mtmp, &youmonst, otmp, &dmg,dieroll)))
 			     hitmsg(mtmp, mattk);
 			if (!dmg) break;
-			if (u.mh > 1 && u.mh > ((u.uac>=0) ? dmg : dmg+AC_VALUE(u.uac+u.uspellprot)-u.uspellprot) &&
+			if (u.mh > 1 && u.mh > (dmg + ureducedmg(dmg)) &&
 				   otmp->obj_material == IRON &&
 					(u.umonnum==PM_BLACK_PUDDING
 					|| u.umonnum==PM_BROWN_PUDDING)) {
 			    /* This redundancy necessary because you have to
 			     * take the damage _before_ being cloned.
 			     */
-			    if (u.uac < 0) dmg += AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
+				dmg += ureducedmg(dmg);
 			    if (dmg < 1) dmg = 1;
 			    if (dmg > 1) exercise(A_STR, FALSE);
 			    u.mh -= dmg;
@@ -3532,14 +3557,15 @@ dopois:
  *	against hits.  The bladed shadows of the black web pierce your armor.
  */
 	if (dmg){
-		if(u.uac < 0) {
-			if(mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
-				dmg += AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
-				if (dmg < 1) dmg = 1;
-			} else if(base_uac() < 0){
-				dmg += AC_VALUE(base_uac()+u.uspellprot)-u.uspellprot;
-				if (dmg < 1) dmg = 1;
-			}
+		if(mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
+			dmg += ureducedmg(dmg);
+			if (dmg < 1) dmg = 1;
+		} else {
+			// minor kludge alert: only use DR, and not AC, to determine ureducedmg
+			u.uac = 0;
+			dmg += ureducedmg(dmg);
+			find_udef();
+			if (dmg < 1) dmg = 1;
 		}
 	}
 	

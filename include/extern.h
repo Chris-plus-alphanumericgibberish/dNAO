@@ -476,8 +476,8 @@ E int FDECL(armoroff, (struct obj *));
 E int FDECL(canwearobj, (struct obj *, long *, BOOLEAN_P));
 E int NDECL(dowear);
 E int NDECL(doputon);
-E int NDECL(base_uac);
-E void NDECL(find_ac);
+E void NDECL(find_udef);
+E int FDECL(arm_bonus, (struct obj*));
 E void NDECL(glibr);
 E struct obj *FDECL(some_armor,(struct monst *));
 E void FDECL(erode_armor, (struct monst *,BOOLEAN_P));
@@ -905,6 +905,7 @@ E const char *FDECL(ordin, (int));
 E char *FDECL(sitoa, (int));
 E int FDECL(sgn, (int));
 E int FDECL(rounddiv, (long,int));
+E int FDECL(isqrt, (int));
 E int FDECL(dist2, (int,int,int,int));
 E int FDECL(distmin, (int,int,int,int));
 E boolean FDECL(online2, (int,int,int,int));
@@ -1170,6 +1171,9 @@ E int FDECL(gazemm, (struct monst *,struct monst *,struct attack *));
 
 /* ### mhitu.c ### */
 
+E int FDECL(ureducedmg, (int));
+E int NDECL(udeflect);
+E int NDECL(udodge);
 E boolean FDECL(diseasemu, (struct permonst *));
 E const char *FDECL(mpoisons_subj, (struct monst *,struct attack *));
 E void NDECL(u_slow_down);
@@ -2490,6 +2494,7 @@ E void NDECL(u_init);
 
 /* ### uhitm.c ### */
 
+E int FDECL(mreducedmg, (int, struct monst *));
 E void FDECL(hurtmarmor,(struct monst *,int));
 E boolean FDECL(attack_checks, (struct monst *,struct obj *));
 E void FDECL(check_caitiff, (struct monst *));
@@ -2798,6 +2803,7 @@ E int FDECL(base_mac, (struct monst *));
 E int FDECL(find_mac, (struct monst *));
 E int FDECL(full_mac, (struct monst *));
 E int FDECL(full_marmorac, (struct monst *));
+E int FDECL(full_mdr, (struct monst *));
 E void FDECL(m_dowear, (struct monst *,BOOLEAN_P));
 E struct obj *FDECL(which_armor, (struct monst *,long));
 E void FDECL(mon_break_armor, (struct monst *,BOOLEAN_P));
@@ -2812,7 +2818,7 @@ E int FDECL(dowrite, (struct obj *));
 
 /* ### zap.c ### */
 
-E int FDECL(zap_hit, (int,int));
+E int FDECL(zap_hit, (struct monst *,int));
 E int FDECL(bhitm, (struct monst *,struct obj *));
 E void FDECL(probe_monster, (struct monst *));
 E boolean FDECL(get_obj_location, (struct obj *,xchar *,xchar *,int));

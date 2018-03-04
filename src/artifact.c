@@ -3453,7 +3453,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	} else if(arti_threeHead(otmp) && youdefend){
 		int extrahits = 2;
 		int monAC, extrahit=1;
-		monAC = AC_VALUE(u.uac+u.uspellprot) + 10 - u.uspellprot;		/* monAC ~= 0 - 20 */
+		monAC = udeflect();		/* monAC ~= 0 - 20 */
 		monAC += magr->m_lev;
 		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) monAC += u.chokhmah;
 		if(multi < 0) monAC += 4;
@@ -3562,7 +3562,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	} else if(arti_tentRod(otmp) && youdefend){
 		int extrahits = rn2(7);
 		int extrahit = 1, tmp;
-		tmp = AC_VALUE(u.uac+u.uspellprot) + 10 - u.uspellprot;		/* tmp ~= 0 - 20 */
+		tmp = udeflect();		/* tmp ~= 0 - 20 */
 		tmp += magr->m_lev;
 		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) tmp += u.chokhmah;
 		if(multi < 0) tmp += 4;
@@ -8066,7 +8066,7 @@ cast_protection()
 			P_SKILL(spell_skilltype(SPE_PROTECTION)) == P_EXPERT ? 50 : 20;
 	    if (!u.usptime)
 			u.usptime = 100;
-	    find_ac();
+		find_udef();
 	} else {
 	    Your("skin feels warm for a moment.");
 	}

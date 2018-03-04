@@ -626,26 +626,26 @@ struct monst *mon;
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
-		if(uarm) armac += ARM_BONUS(uarm);
-		if(uarmf) armac += ARM_BONUS(uarmf);
-		if(uarmg) armac += ARM_BONUS(uarmg);
-		if(uarmu) armac += ARM_BONUS(uarmu);
-		if(uarms) armac += ARM_BONUS(uarms);
-		if(uarmh) armac += ARM_BONUS(uarmh);
-		if(uarmc) armac += ARM_BONUS(uarmc);
+		if(uarm) armac += arm_bonus(uarm);
+		if(uarmf) armac += arm_bonus(uarmf);
+		if(uarmg) armac += arm_bonus(uarmg);
+		if(uarmu) armac += arm_bonus(uarmu);
+		if(uarms) armac += arm_bonus(uarms);
+		if(uarmh) armac += arm_bonus(uarmh);
+		if(uarmc) armac += arm_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
-			armac += ARM_BONUS(obj);
+			armac += arm_bonus(obj);
 			if(is_shield(obj)) armac += max(0, obj->objsize - mon->data->msize);
 		}
 	}
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
 
 	base -= armac;
-	/* since ARM_BONUS is positive, subtracting it increases AC */
+	/* since arm_bonus is positive, subtracting it increases AC */
 	return base;
 }
 
@@ -695,23 +695,23 @@ struct monst *mon;
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
-		if(uarm) armac += ARM_BONUS(uarm);
-		if(uarmf) armac += ARM_BONUS(uarmf);
-		if(uarmg) armac += ARM_BONUS(uarmg);
-		if(uarmu) armac += ARM_BONUS(uarmu);
-		if(uarms) armac += ARM_BONUS(uarms);
-		if(uarmh) armac += ARM_BONUS(uarmh);
-		if(uarmc) armac += ARM_BONUS(uarmc);
+		if(uarm) armac += arm_bonus(uarm);
+		if(uarmf) armac += arm_bonus(uarmf);
+		if(uarmg) armac += arm_bonus(uarmg);
+		if(uarmu) armac += arm_bonus(uarmu);
+		if(uarms) armac += arm_bonus(uarms);
+		if(uarmh) armac += arm_bonus(uarmh);
+		if(uarmc) armac += arm_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags)
-		armac += ARM_BONUS(obj);
+		armac += arm_bonus(obj);
 	}
 
 	base -= armac;
-	/* since ARM_BONUS is positive, subtracting it increases AC */
+	/* since arm_bonus is positive, subtracting it increases AC */
 	return base;
 }
 
@@ -732,22 +732,48 @@ struct monst *mon;
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
-		if(uarm) armac += ARM_BONUS(uarm);
-		if(uarmf) armac += ARM_BONUS(uarmf);
-		if(uarmg) armac += ARM_BONUS(uarmg);
-		if(uarmu) armac += ARM_BONUS(uarmu);
-		if(uarms) armac += ARM_BONUS(uarms);
-		if(uarmh) armac += ARM_BONUS(uarmh);
-		if(uarmc) armac += ARM_BONUS(uarmc);
+		if(uarm) armac += arm_bonus(uarm);
+		if(uarmf) armac += arm_bonus(uarmf);
+		if(uarmg) armac += arm_bonus(uarmg);
+		if(uarmu) armac += arm_bonus(uarmu);
+		if(uarms) armac += arm_bonus(uarms);
+		if(uarmh) armac += arm_bonus(uarmh);
+		if(uarmc) armac += arm_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags)
-		armac += ARM_BONUS(obj);
+		armac += arm_bonus(obj);
 	}
 
 	return 10 - armac;
+}
+
+int
+full_mdr(mtmp)
+struct monst *mtmp;
+{
+	int mdr = mtmp->data->dr;
+	struct obj *otmp;
+	int dr_protection = 0;
+	//dr_divine is currently covered in the monster's base DR
+	int dr_armor = 0;
+
+	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+		if (otmp->owornmask & mtmp->misc_worn_check) {
+			if (otmp->owornmask & W_ARM)
+				dr_armor += arm_bonus(otmp);
+			if (otmp->owornmask & W_ARMS)
+				dr_armor += arm_bonus(otmp);
+			if (otmp->owornmask & W_ARMC && otmp->otyp == CLOAK_OF_PROTECTION)
+				dr_protection += 3;
+		}
+	}
+	dr_armor = max(0, (dr_armor + 1) / 2);
+	dr_protection = max(0, dr_protection);
+
+	return isqrt(mdr*mdr + dr_armor*dr_armor + dr_protection*dr_protection);
 }
 
 /* weapons are handled separately; rings and eyewear aren't used by monsters */
@@ -869,13 +895,13 @@ boolean racialexception;
 		    break;
 	    }
 	    if (obj->owornmask) continue;
-	    /* I'd like to define a VISIBLE_ARM_BONUS which doesn't assume the
+	    /* I'd like to define a VISIBLE_arm_bonus which doesn't assume the
 	     * monster knows obj->spe, but if I did that, a monster would keep
 	     * switching forever between two -2 caps since when it took off one
 	     * it would forget spe and once again think the object is better
 	     * than what it already has.
 	     */
-	    if (best && (ARM_BONUS(best) + extra_pref(mon,best) >= ARM_BONUS(obj) + extra_pref(mon,obj)))
+	    if (best && (arm_bonus(best) + extra_pref(mon,best) >= arm_bonus(obj) + extra_pref(mon,obj)))
 		continue;
 	    best = obj;
 	}

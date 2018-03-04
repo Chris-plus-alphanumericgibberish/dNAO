@@ -1529,7 +1529,7 @@ karemade:
 	/****************************************/
 	/* once-per-player-input things go here */
 	/****************************************/
-	find_ac();
+	find_udef();
 ////////////////////////////////////////////////////////////////////////////////////////////////
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(mtmp->data == &mons[PM_HELLCAT]){

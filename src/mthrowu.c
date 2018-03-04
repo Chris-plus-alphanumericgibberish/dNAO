@@ -36,7 +36,7 @@ STATIC_OVL NEARDATA const char *breathwep[] = {
 int destroy_thrown = 0; /*state variable, if nonzero drop_throw always destroys object.  This is necessary 
 						 because the throw code doesn't report the identity of the thrown object, so it can only
 						 be destroyed in the throw code itself */
-int bypassDR=0;
+int bypassAC=0;
 
 /* hero is hit by something other than a monster */
 int
@@ -81,16 +81,22 @@ boolean burn;
 		return 0;
 	}
 	
-	if((bypassDR && (AC_VALUE(base_uac()+u.uspellprot) - u.uspellprot + tlev <= rnd(20))) || 
-	   (!bypassDR && (AC_VALUE(u.uac+u.uspellprot)-u.uspellprot + tlev <= rnd(20)))
+	if((bypassAC && (udodge() - u.uspellprot + tlev <= rnd(20))) || 
+	   (!bypassAC && (udeflect() + tlev <= rnd(20)))
 	){
 		if(Blind || !flags.verbose) pline("It misses.");
 		else You("are almost hit by %s.", onm);
 		return(0);
 	} else {
-		
-		if(bypassDR && base_uac() < 0) dam -= AC_VALUE(base_uac()+u.uspellprot)-u.uspellprot;
-		else if(!bypassDR && u.uac < 0) dam -= AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
+		if (bypassAC){
+			// minor kludge
+			u.uac = 0;
+			dam += ureducedmg(dam);
+			find_udef();
+		}
+		else {
+			dam += ureducedmg(dam);
+		}
 		
 		if(dam < 1) dam = 1;
 		
@@ -244,7 +250,7 @@ boolean verbose;  /* give message(s) even when you can't see what happened */
 	ismimic = mtmp->m_ap_type && mtmp->m_ap_type != M_AP_MONSTER;
 	vis = cansee(bhitpos.x, bhitpos.y);
 	
-	if(bypassDR) tmp = 5 + base_mac(mtmp) + omon_adj(mtmp, otmp, FALSE);
+	if(bypassAC) tmp = 5 + base_mac(mtmp) + omon_adj(mtmp, otmp, FALSE);
 	else tmp = 5 + find_mac(mtmp) + omon_adj(mtmp, otmp, FALSE);
 	if (tmp < rnd(20)) {
 	    if (!ismimic) {
@@ -709,7 +715,7 @@ m_throw(mon, x, y, dx, dy, range, obj, verbose)
 			    if(hitu>0) break;
 			default:
 			    dam = dmgval(singleobj, &youmonst, 0);
-				if(!bypassDR && u.uac<0) dam += AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
+				if(!bypassAC) dam += ureducedmg(dam);
 			    hitv = 3 - distmin(u.ux,u.uy, mon->mx,mon->my);
 			    if (hitv < -4) hitv = (hitv+4)/2-4;
 			    if (hitv < -8) hitv = (hitv+8)*2/3-8;
@@ -1530,11 +1536,11 @@ int value;
 	return destroy_thrown;
 }
 
-int set_bypassDR(value)
+int set_bypassAC(value)
 int value;
 {
-	bypassDR = value;
-	return bypassDR;
+	bypassAC = value;
+	return bypassAC;
 }
 
 int
@@ -1605,7 +1611,7 @@ register struct attack *mattk;
 		int yadj, xadj, rngmod;
 		yadj = xadj = 0;
 		rngmod = 0;
-		bypassDR = 0;
+		bypassAC = 0;
 		switch (mattk->adtyp) {
 		    case AD_SHDW:
 				if(onscary(mtmp->mux,mtmp->muy,mtmp)) return 0; //Warded
@@ -1616,7 +1622,7 @@ register struct attack *mattk;
 			    qvr->quan = 1;
 			    qvr->spe = 8;
 				qvr->opoisoned = (OPOISON_BASIC|OPOISON_BLIND);
-				bypassDR = 1;
+				bypassAC = 1;
 			break;
 		    case AD_PEST:
 				ammo_type = ARROW;
@@ -1626,7 +1632,7 @@ register struct attack *mattk;
 			    qvr->quan = 1;
 			    qvr->spe = d(7,8)+1; //same as touch
 				qvr->opoisoned = OPOISON_FILTH;
-				bypassDR = 1;
+				bypassAC = 1;
 			break;
 		    case AD_PLYS:
 				ammo_type = SPIKE;
@@ -1644,7 +1650,7 @@ register struct attack *mattk;
 			    qvr->quan = 1;
 			    qvr->spe = 7;
 				rngmod = 1000; /* Fly until it strikes something */
-				bypassDR = 1;
+				bypassAC = 1;
 			break;
 		    case AD_SURY:
 				ammo_type = SILVER_ARROW;
@@ -1655,7 +1661,7 @@ register struct attack *mattk;
 			    qvr->quan = 1;
 			    qvr->spe = 7 + 50; //Arrows of slaying actually just get +50 damage anyway :/
 				rngmod = 1000; /* Fly until it strikes something */
-				bypassDR = 1;
+				bypassAC = 1;
 			break;
 			case AD_SLVR:
 				ammo_type = SILVER_ARROW;
@@ -1742,7 +1748,7 @@ ironball:
 			    nomul(0, NULL);
 			destroy_thrown = 0;  //state variable referenced in drop_throw
 		}
-		bypassDR = 0;
+		bypassAC = 0;
 	}
 	return 0;
 }
@@ -1759,7 +1765,7 @@ register struct attack *mattk;
 		int yadj, xadj, rngmod;
 		yadj = xadj = 0;
 		rngmod = 0;
-		bypassDR = 0;
+		bypassAC = 0;
 		switch (mattk->adtyp) {
 		    case AD_SHDW:
 				if(onscary(mdef->mx,mdef->my,mtmp)) return 0; //Warded
@@ -1770,7 +1776,7 @@ register struct attack *mattk;
 			    qvr->quan = 1;
 			    qvr->spe = 8;
 				qvr->opoisoned = (OPOISON_BASIC|OPOISON_BLIND);
-				bypassDR = 1;
+				bypassAC = 1;
 			break;
 		    case AD_PEST:
 				ammo_type = ARROW;
@@ -1780,7 +1786,7 @@ register struct attack *mattk;
 			    qvr->quan = 1;
 			    qvr->spe = d(7,8)+1; //same as touch
 				qvr->opoisoned = OPOISON_FILTH;
-				bypassDR = 1;
+				bypassAC = 1;
 			break;
 		    case AD_SOLR:
 				ammo_type = SILVER_ARROW;
@@ -1870,7 +1876,7 @@ register struct attack *mattk;
 			    nomul(0, NULL);
 			destroy_thrown = 0;  //state variable referenced in drop_throw
 		}
-		bypassDR = 0;
+		bypassAC = 0;
 	}
 	return 0;
 }

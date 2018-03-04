@@ -2543,7 +2543,7 @@ int gaze_cancel;
 			    otmp; otmp = otmp->nobj) cancel_item(otmp);
 	    if (youdefend) {
 			flags.botl = 1;	/* potential AC change */
-			find_ac();
+			find_udef();
 	    }
 	}else if(gaze_cancel){
 	    struct obj *otmp;
@@ -2563,7 +2563,7 @@ int gaze_cancel;
 		
 	    if (youdefend) {
 			flags.botl = 1;	/* potential AC change */
-			find_ac();
+			find_udef();
 	    }
 	}
 
@@ -3792,18 +3792,25 @@ boolean u_caused;
 
 /* will zap/spell/breath attack score a hit against armor class `ac'? */
 int
-zap_hit(ac, type)
-int ac;
+zap_hit(target, type)
+struct monst *target;
 int type;	/* either hero cast spell type or 0 */
 {
     int chance = rn2(20);
     int spell_bonus = type ? spell_hit_bonus(type) : 0;
+	int ac;
 
+	if (target == &youmonst){
+		ac = udeflect();
+	}
+	else{
+		ac = find_mac(target);
+	}
     /* small chance for naked target to avoid being hit */
     if (!chance) return rnd(10) < ac+spell_bonus;
 
-    /* very high armor protection does not achieve invulnerability */
-    ac = AC_VALUE(ac+u.uspellprot)-u.uspellprot;
+    /* Re-randomize AC a second time? */
+    ac = AC_VALUE(ac);
 
     return (3 - chance) < ac+spell_bonus;
 }
@@ -3922,7 +3929,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 #ifdef STEED
 			buzzmonst:
 #endif
-			if (zap_hit(find_mac(mon), spell_type) || (abs(type) >= 20 && abs(type) < 30)) {
+			if (zap_hit(mon, spell_type) || (abs(type) >= 20 && abs(type) < 30)) {
 				if (mon_reflects(mon, (char *)0) && (abs(type) < 20 || abs(type) >= 30)) {
 					if(cansee(mon->mx,mon->my)) {
 					hit(fltxt, mon, exclam(0));
@@ -4058,7 +4065,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 				goto buzzmonst;
 			} else
 #endif
-			if (zap_hit((int) u.uac, 0) || ((flags.drgn_brth && abs(type) != ZT_BREATH(ZT_DEATH))
+			if (zap_hit(&youmonst, 0) || ((flags.drgn_brth && abs(type) != ZT_BREATH(ZT_DEATH))
 				|| flags.mamn_brth
 				|| abs(type) == ZT_BREATH(ZT_SLEEP))
 			) {
