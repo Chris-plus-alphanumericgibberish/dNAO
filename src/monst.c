@@ -41,7 +41,7 @@ void NDECL(monst_init);
 #define MON(nam,sym,lvl,gen,atk,siz,mr1,mr2,flgm,flgt,flgb,flgg,flga,flgv,col) \
 	   {nam,sym,lvl,gen,atk,siz,mr1,mr2,flgm,flgt,flgb,flgg,flga,flgv,C(col)}
 /* LVL() and SIZ() collect several fields to cut down on # of args for MON() */
-#define LVL(lvl,mov,ac,mr,aln) lvl,mov,ac,mr,aln
+#define LVL(lvl,mov,ac,dr,mr,aln) lvl,mov,ac,dr,mr,aln
 #define SIZ(wt,nut,pxl,snd,siz) wt,nut,pxl,snd,siz
 /* ATTK() and A() are to avoid braces and commas within args to MON() */
 #define ATTK(at,ad,n,d) {at,ad,n,d}
@@ -5986,14 +5986,14 @@ is a red right hand
 	/* (marking it unique prevents figurines)
 	 */
     MON("long worm tail", S_WORM_TAIL,//1
-	LVL(0, 0, 0, 0, 0), (G_NOGEN|G_NOCORPSE|G_UNIQ),
+	LVL(0, 0, 0, 0, 0, 0), (G_NOGEN | G_NOCORPSE | G_UNIQ),
 	A(NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(0, 0, 0, 0, 0), 0, 0,
 	0 /*MM*/, 0 /*MT*/,
 	0 /*MB*/, MG_NOPOLY /*MG*/,
 	0 /*MA*/,  0 /*MV*/, CLR_BROWN),
     MON("hunting horror tail", S_WORM_TAIL,//1 /*Needs tile*/
-	LVL(0, 0, 0, 0, 0), (G_NOGEN|G_NOCORPSE|G_UNIQ),
+	LVL(0, 0, 0, 0, 0, 0), (G_NOGEN | G_NOCORPSE | G_UNIQ),
 	A(NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(0, 0, 0, 0, 0), 0, 0,
 	0 /*MM*/, 0 /*MT*/,
