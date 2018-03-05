@@ -1252,7 +1252,7 @@ cold_spell:
 		drain_en(dmg);
 		if(hates_silver(youracedata)) dmg += d(dmn,20);
 		if(Half_physical_damage) dmg /= 2;
-		dmg += ureducedmg();
+		dmg += ureducedmg(dmg);
 		if(dmg < 1) dmg = 1;
 		stop_occupation();
 		break;
@@ -1610,9 +1610,9 @@ int spellnum;
 	case SILVER_RAYS:{
 		int n = 0;
 		dmg = 0;
-		if(zap_hit(u.uev, 0))
+		if(zap_hit(&youmonst, 0))
 			n++;
-		if(zap_hit(u.uev, 0))
+		if(zap_hit(&youmonst, 0))
 			n++;
 		if(!n){
 			pline("Silver rays whiz past you!");
@@ -1662,11 +1662,12 @@ int spellnum;
 			dmg += ureducedmg(dmg);
 			if(dmg < 1)
 				dmg = 1;
-			if(n == 2){
+			if (n == 2){
 				dmg += rnd(20);
 				dmg += ureducedmg(dmg);
-				if(dmg < 2)
+				if (dmg < 2)
 					dmg = 2;
+			}
 		}
 	}break;
 	case GOLDEN_WAVE:
@@ -1712,7 +1713,7 @@ int spellnum;
 		} else {
 			You("are slashed by golden light!");
 			dmg = d(2,12);
-			dmg += ureducedmg();
+			dmg += ureducedmg(dmg);
 			if(dmg < 1)
 				dmg = 1;
 		}
@@ -4201,9 +4202,9 @@ uspsibolt:
 			impossible("silver rays spell with no mtmp");
 			return;
 		}
-		if(zap_hit(base_mac(mtmp), 0))
+		if(zap_hit(mtmp, 0))
 			n++;
-		if(zap_hit(base_mac(mtmp), 0))
+		if(zap_hit(mtmp, 0))
 			n++;
 		if(!n){
 			if (yours || canseemon(mtmp))
@@ -4272,6 +4273,9 @@ uspsibolt:
 				pline("%s is pierced by silver light!",
 					  Monnam(mtmp));
 			dmg = d(n, 20);
+			dmg += n*mreducedmg(mtmp, dmg);
+			if (dmg < n)
+				dmg = n;
 		}
 	}break;
 	case GOLDEN_WAVE:
@@ -4341,6 +4345,9 @@ uspsibolt:
 				pline("%s is slashed by golden light!",
 					  Monnam(mtmp));
 			dmg = d(2, 12);
+			dmg += mreducedmg(mtmp, dmg);
+			if (dmg < 1)
+				dmg = 1;
 		}
 	break;
 	case PRISMATIC_SPRAY:{
