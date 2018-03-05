@@ -2244,8 +2244,6 @@ struct obj *otmp;
 	int oac = objects[otmp->otyp].a_ac;
 
 	oac += otmp->spe;
-	if (otmp->otyp == CRYSTAL_PLATE_MAIL)
-		oac += uarm->spe;
 	oac -= min((int)greatest_erosion(otmp), objects[(otmp)->otyp].a_ac);
 
 	static int cbootsd = 0;
