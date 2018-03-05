@@ -4273,7 +4273,7 @@ uspsibolt:
 				pline("%s is pierced by silver light!",
 					  Monnam(mtmp));
 			dmg = d(n, 20);
-			dmg += n*mreducedmg(mtmp, dmg);
+			dmg += n*mreducedmg(dmg, mtmp);
 			if (dmg < n)
 				dmg = n;
 		}
@@ -4345,7 +4345,7 @@ uspsibolt:
 				pline("%s is slashed by golden light!",
 					  Monnam(mtmp));
 			dmg = d(2, 12);
-			dmg += mreducedmg(mtmp, dmg);
+			dmg += mreducedmg(dmg, mtmp);
 			if (dmg < 1)
 				dmg = 1;
 		}
