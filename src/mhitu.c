@@ -53,9 +53,16 @@ int
 ureducedmg(dmg)
 int dmg;
 {
-	int AC_mod = 40;	// AC can only reduce damage by up to XX/100 percent
+	int AC_mod = 35;	// AC can only reduce damage by up to XX/100 percent
 	int rAC = 0;
 	int rDR = 0;
+
+	if (!uarm || is_light_armor(uarm))
+		AC_mod += ACURR(A_DEX);
+	if (uarm && is_medium_armor(uarm))
+		AC_mod += ACURR(A_DEX) / 2;
+	if (Role_if(PM_MONK) && !uarm)
+		AC_mod += 5;
 
 	rAC = (u.uac < 0) ? max(AC_VALUE(u.uac), -dmg*AC_mod/100) : 0;
 	rDR = AC_VALUE(-u.udr);
