@@ -2216,7 +2216,7 @@ find_udr()
 	if (dr_armor < 0)
 		dr_armor = 0;
 	else
-		dr_armor = (dr_armor + 1) / 2;	// A player would get about ~7 with only DSM, ~15 with only CPM, and up to ~20 with CPM and a good shield
+		dr_armor = (dr_armor + 1) / 2;	// A player would get about ~7 with only DSM, ~12 with only CPM, and up to ~17 with CPM and a good shield
 
 	// use a square root to significantly reduce the effect of having multiple sources of DR. Thus, neglecting one or two aspects has negligable penalty
 	udr = isqrt(udr*udr + dr_divine*dr_divine + dr_protection*dr_protection + dr_armor*dr_armor);
