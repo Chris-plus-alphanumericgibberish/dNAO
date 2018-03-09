@@ -584,9 +584,9 @@ boolean ignore_oquan;
 		else if (nn)
 			Strcat(buf, actualn);
 		else if (un)
-			Sprintf(buf,"amulet called %s", un);
+			Sprintf(eos(buf),"amulet called %s", un);
 		else
-			Sprintf(buf,"%s amulet", dn);
+			Sprintf(eos(buf),"%s amulet", dn);
 		break;
 	    case WEAPON_CLASS:
 		if (is_poisonable(obj) && obj->opoisoned){
@@ -699,11 +699,11 @@ boolean ignore_oquan;
 		}
 		/* depends on order of the dragon scales objects */
 		if (typ >= GRAY_DRAGON_SCALES && typ <= YELLOW_DRAGON_SCALES) {
-			Sprintf(buf, "set of %s", actualn);
+			Sprintf(eos(buf), "set of %s", actualn);
 			break;
 		}
 		if ((typ == VICTORIAN_UNDERWEAR && nn) || (typ == JUMPSUIT && !nn) || (typ == BODYGLOVE && !nn)) {
-			Sprintf(buf, "set of %s", actualn);
+			Sprintf(eos(buf), "set of %s", actualn);
 			break;
 		}
 		if(is_boots(obj) || is_gloves(obj)) Strcat(buf,"pair of ");
@@ -778,7 +778,7 @@ boolean ignore_oquan;
 		break;
 	    case ROCK_CLASS:
 		if (typ == STATUE)
-		    Sprintf(buf, "%s%s of %s%s",
+		    Sprintf(eos(buf), "%s%s of %s%s",
 			(Role_if(PM_ARCHEOLOGIST) && (obj->spe & STATUE_HISTORIC)) ? "historic " : "" ,
 			actualn,
 			type_is_pname(&mons[obj->corpsenm]) ? "" :
@@ -789,7 +789,7 @@ boolean ignore_oquan;
 		else Strcat(buf, actualn);
 		break;
 	    case BALL_CLASS:
-		Sprintf(buf, "%sheavy iron ball",
+		Sprintf(eos(buf), "%sheavy iron ball",
 			(obj->owt > ocl->oc_weight) ? "very " : "");
 		break;
 	    case POTION_CLASS:
@@ -840,11 +840,11 @@ boolean ignore_oquan;
 		if(!obj->dknown)
 			Strcat(buf, "wand");
 		else if(nn)
-			Sprintf(buf, "wand of %s", actualn);
+			Sprintf(eos(buf), "wand of %s", actualn);
 		else if(un)
-			Sprintf(buf, "wand called %s", un);
+			Sprintf(eos(buf), "wand called %s", un);
 		else
-			Sprintf(buf, "%s wand", dn);
+			Sprintf(eos(buf), "%s wand", dn);
 		break;
 	case SPBOOK_CLASS:
 		if (!obj->dknown) {
@@ -854,19 +854,19 @@ boolean ignore_oquan;
 			    Strcat(buf, "spellbook of ");
 			Strcat(buf, actualn);
 		} else if (un) {
-			Sprintf(buf, "spellbook called %s", un);
+			Sprintf(eos(buf), "spellbook called %s", un);
 		} else
-			Sprintf(buf, "%s spellbook", dn);
+			Sprintf(eos(buf), "%s spellbook", dn);
 		break;
 	case RING_CLASS:
 		if(!obj->dknown)
 			Strcat(buf, "ring");
 		else if(nn)
-			Sprintf(buf, "ring of %s", actualn);
+			Sprintf(eos(buf), "ring of %s", actualn);
 		else if(un)
-			Sprintf(buf, "ring called %s", un);
+			Sprintf(eos(buf), "ring called %s", un);
 		else
-			Sprintf(buf, "%s ring", dn);
+			Sprintf(eos(buf), "%s ring", dn);
 		break;
 	case GEM_CLASS:
 	    {
@@ -878,8 +878,8 @@ boolean ignore_oquan;
 		if (!obj->dknown) {
 		    Strcat(buf, rock);
 		} else if (!nn) {
-		    if (un) Sprintf(buf,"%s called %s", rock, un);
-		    else Sprintf(buf, "%s %s", dn, rock);
+		    if (un) Sprintf(eos(buf),"%s called %s", rock, un);
+		    else Sprintf(eos(buf), "%s %s", dn, rock);
 		} else {
 		    Strcat(buf, actualn);
 		    if (GemStone(typ)) Strcat(buf, " stone");
@@ -887,7 +887,7 @@ boolean ignore_oquan;
 		break;
 	    }
 	default:
-		Sprintf(buf,"glorkum %d %d %d", obj->oclass, typ, obj->spe);
+		Sprintf(eos(buf),"glorkum %d %d %d", obj->oclass, typ, obj->spe);
 	}
 #ifdef SORTLOOT
 	if (!ignore_oquan)
