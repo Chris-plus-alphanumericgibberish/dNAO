@@ -1991,10 +1991,12 @@ register struct monst *mtmp;
 		break;}
 	    case S_NEU_OUTSIDER:{
 			if(ptr == &mons[PM_PLUMACH_RILMANI]){
-				otmp = mksobj(rn2(3) ? SICKLE : rn2(3) ? SCYTHE : SHORT_SWORD, TRUE, FALSE);
+				if(!rn2(3)) otmp = mksobj(SHORT_SWORD, TRUE, FALSE);
+				else otmp = mksobj(rn2(3) ? SICKLE : rn2(3) ? SCYTHE : AXE, TRUE, FALSE);
 			    otmp->cursed = 0;
 			    otmp->blessed = 0;
-				otmp->obj_material = IRON;
+			    otmp->spe = -1;
+				otmp->obj_material = METAL;
 				fix_object(otmp);
 			    (void) mpickobj(mtmp, otmp);
 				if(otmp->otyp == SHORT_SWORD && !rn2(3)){
@@ -3038,32 +3040,32 @@ register struct monst *mtmp;
 					otmp = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 					otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
-					break;
+				break;
 				case 1:
 					otmp = mksobj(SCIMITAR, TRUE, FALSE);
 					otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
-					break;
+				break;
 				case 2:
 					otmp = mksobj(TRIDENT, TRUE, FALSE);
 					otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
-					break;
+				break;
 				case 3:
 					otmp = mksobj(SHORT_SWORD, TRUE, FALSE);
 					otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
-					break;
+				break;
 				case 4:
 					otmp = mksobj(DAGGER, TRUE, FALSE);
 					otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
-					break;
+				break;
 				case 5:
 					otmp = mksobj(SPEAR, TRUE, FALSE);
 					otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
-					break;
+				break;
 				}
 				chance--;
 			}
@@ -3275,7 +3277,10 @@ register struct monst *mtmp;
 			break;
 		    case PM_ANGBAND_ORC:
 				(void)mongets(mtmp, SCIMITAR);
-				(void)mongets(mtmp, SCIMITAR);
+				if(rn2(2))
+					(void)mongets(mtmp, SCIMITAR);
+				else
+					(void)mongets(mtmp, ORCISH_SHIELD);
 				(void)mongets(mtmp, KNIFE);
 				(void)mongets(mtmp, ORCISH_HELM);
 				(void)mongets(mtmp, ORCISH_CHAIN_MAIL);
@@ -3517,7 +3522,7 @@ register struct monst *mtmp;
 					mongets(mtmp, GLOVES);
 					mongets(mtmp, HIGH_BOOTS);
 					mongets(mtmp, RAPIER);
-					mongets(mtmp, RAPIER);
+					mongets(mtmp, STILETTO);
 					mongets(mtmp, BOW);
 					m_initthrow(mtmp, ARROW, 20);
 					// mongets(mtmp, ROPE_OF_ENTANGLING);
@@ -4164,25 +4169,25 @@ register struct	monst	*mtmp;
 					otmp->oerodeproof = 1;
 					otmp->spe = 3;
 					(void) mpickobj(mtmp, otmp);
-					//Intentional fall-through for twoweaponing
+				//Intentional fall-through for twoweaponing
 				case 2:
 					otmp = mksobj(SCIMITAR, TRUE, FALSE);
 					otmp->oerodeproof = 1;
 					otmp->spe = 3;
 					(void)mpickobj(mtmp, otmp);
-					break;
+				break;
 				case 3:
 					otmp = mksobj(TRIDENT, TRUE, FALSE);
 					otmp->oerodeproof = 1;
 					otmp->spe = 3;
 					(void) mpickobj(mtmp, otmp);
-					//Intentional fall-through for twoweaponing
+				//Intentional fall-through for twoweaponing
 				case 4:
 					otmp = mksobj(KNIFE, TRUE, FALSE);
 					otmp->oerodeproof = 1;
 					otmp->spe = 3;
 					(void)mpickobj(mtmp, otmp);
-					break;
+				break;
 			}
 		 }else{
 			otmp = mksobj(TRIDENT, TRUE, FALSE);
