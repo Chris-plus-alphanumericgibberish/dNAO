@@ -476,6 +476,7 @@ E int FDECL(armoroff, (struct obj *));
 E int FDECL(canwearobj, (struct obj *, long *, BOOLEAN_P));
 E int NDECL(dowear);
 E int NDECL(doputon);
+E int FDECL(arm_bonus, (struct obj *));
 E int NDECL(base_uac);
 E void NDECL(find_ac);
 E void NDECL(glibr);
