@@ -120,7 +120,7 @@ struct objclass {
 #define WP_GRENADE	16
 #define WP_BLASTER	32
 
-#define a_ac		oc_oc1	/* armor class, used in ARM_BONUS in do.c */
+#define a_ac		oc_oc1	/* armor class, used in arm_bonus in do.c */
 #define a_can		oc_oc2		/* armor: used in mhitu.c */
 #define oc_level	oc_oc2		/* books: spell level */
 

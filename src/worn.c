@@ -628,38 +628,25 @@ struct monst *mon;
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
-		if(uarm) armac += ARM_BONUS(uarm);
-		if(uarmf) armac += ARM_BONUS(uarmf);
-		if(uarmg) armac += ARM_BONUS(uarmg);
-		if(uarmu) armac += ARM_BONUS(uarmu);
-		if(uarms) armac += ARM_BONUS(uarms);
-		if(uarmh) armac += ARM_BONUS(uarmh);
-		if(uarmc) armac += ARM_BONUS(uarmc);
-		
-		if(uarm && uarm->otyp == CRYSTAL_PLATE_MAIL) armac -= uarm->spe;
-		if(uarmh && uarmh->otyp == CRYSTAL_HELM) armac -= .5*uarmh->spe;
-		if(uarmg && uarmg->otyp == CRYSTAL_GAUNTLETS) armac -= .5*uarmg->spe;
-		if(uarms && uarms->otyp == CRYSTAL_SHIELD) armac -= .5*uarms->spe;
-		if(uarmf && uarmf->otyp == CRYSTAL_BOOTS) armac -= .5*uarmf->spe;
-		
+		if(uarm) armac += arm_bonus(uarm);
+		if(uarmf) armac += arm_bonus(uarmf);
+		if(uarmg) armac += arm_bonus(uarmg);
+		if(uarmu) armac += arm_bonus(uarmu);
+		if(uarms) armac += arm_bonus(uarms);
+		if(uarmh) armac += arm_bonus(uarmh);
+		if(uarmc) armac += arm_bonus(uarmc);
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
-			armac += ARM_BONUS(obj);
+			armac += arm_bonus(obj);
 			if(is_shield(obj)) armac += max(0, obj->objsize - mon->data->msize);
-			
-			if(obj->otyp == CRYSTAL_PLATE_MAIL) armac -= obj->spe;
-			if(obj->otyp == CRYSTAL_HELM) armac -= .5*obj->spe;
-			if(obj->otyp == CRYSTAL_GAUNTLETS) armac -= .5*obj->spe;
-			if(obj->otyp == CRYSTAL_SHIELD) armac -= .5*obj->spe;
-			if(obj->otyp == CRYSTAL_BOOTS) armac -= .5*obj->spe;
 		}
 	}
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
 
 	base -= armac;
-	/* since ARM_BONUS is positive, subtracting it increases AC */
+	/* since arm_bonus is positive, subtracting it increases AC */
 	return base;
 }
 
@@ -709,35 +696,23 @@ struct monst *mon;
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
-		if(uarm) armac += ARM_BONUS(uarm);
-		if(uarmf) armac += ARM_BONUS(uarmf);
-		if(uarmg) armac += ARM_BONUS(uarmg);
-		if(uarmu) armac += ARM_BONUS(uarmu);
-		if(uarms) armac += ARM_BONUS(uarms);
-		if(uarmh) armac += ARM_BONUS(uarmh);
-		if(uarmc) armac += ARM_BONUS(uarmc);
-		
-		if(uarm && uarm->otyp == CRYSTAL_PLATE_MAIL) armac -= uarm->spe;
-		if(uarmh && uarmh->otyp == CRYSTAL_HELM) armac -= .5*uarmh->spe;
-		if(uarmg && uarmg->otyp == CRYSTAL_GAUNTLETS) armac -= .5*uarmg->spe;
-		if(uarms && uarms->otyp == CRYSTAL_SHIELD) armac -= .5*uarms->spe;
-		if(uarmf && uarmf->otyp == CRYSTAL_BOOTS) armac -= .5*uarmf->spe;
+		if(uarm) armac += arm_bonus(uarm);
+		if(uarmf) armac += arm_bonus(uarmf);
+		if(uarmg) armac += arm_bonus(uarmg);
+		if(uarmu) armac += arm_bonus(uarmu);
+		if(uarms) armac += arm_bonus(uarms);
+		if(uarmh) armac += arm_bonus(uarmh);
+		if(uarmc) armac += arm_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags)
-		armac += ARM_BONUS(obj);
-		
-		if(obj->otyp == CRYSTAL_PLATE_MAIL) armac -= obj->spe;
-		if(obj->otyp == CRYSTAL_HELM) armac -= .5*obj->spe;
-		if(obj->otyp == CRYSTAL_GAUNTLETS) armac -= .5*obj->spe;
-		if(obj->otyp == CRYSTAL_SHIELD) armac -= .5*obj->spe;
-		if(obj->otyp == CRYSTAL_BOOTS) armac -= .5*obj->spe;
+		armac += arm_bonus(obj);
 	}
 
 	base -= armac;
-	/* since ARM_BONUS is positive, subtracting it increases AC */
+	/* since arm_bonus is positive, subtracting it increases AC */
 	return base;
 }
 
@@ -758,19 +733,19 @@ struct monst *mon;
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
-		if(uarm) armac += ARM_BONUS(uarm);
-		if(uarmf) armac += ARM_BONUS(uarmf);
-		if(uarmg) armac += ARM_BONUS(uarmg);
-		if(uarmu) armac += ARM_BONUS(uarmu);
-		if(uarms) armac += ARM_BONUS(uarms);
-		if(uarmh) armac += ARM_BONUS(uarmh);
-		if(uarmc) armac += ARM_BONUS(uarmc);
+		if(uarm) armac += arm_bonus(uarm);
+		if(uarmf) armac += arm_bonus(uarmf);
+		if(uarmg) armac += arm_bonus(uarmg);
+		if(uarmu) armac += arm_bonus(uarmu);
+		if(uarms) armac += arm_bonus(uarms);
+		if(uarmh) armac += arm_bonus(uarmh);
+		if(uarmc) armac += arm_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags)
-		armac += ARM_BONUS(obj);
+		armac += arm_bonus(obj);
 	}
 
 	return 10 - armac;
@@ -895,13 +870,13 @@ boolean racialexception;
 		    break;
 	    }
 	    if (obj->owornmask) continue;
-	    /* I'd like to define a VISIBLE_ARM_BONUS which doesn't assume the
+	    /* I'd like to define a VISIBLE_arm_bonus which doesn't assume the
 	     * monster knows obj->spe, but if I did that, a monster would keep
 	     * switching forever between two -2 caps since when it took off one
 	     * it would forget spe and once again think the object is better
 	     * than what it already has.
 	     */
-	    if (best && (ARM_BONUS(best) + extra_pref(mon,best) >= ARM_BONUS(obj) + extra_pref(mon,obj)))
+	    if (best && (arm_bonus(best) + extra_pref(mon,best) >= arm_bonus(obj) + extra_pref(mon,obj)))
 		continue;
 	    best = obj;
 	}
