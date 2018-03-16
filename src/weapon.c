@@ -295,7 +295,8 @@ int spec;
 	        return 9999;
 	
 	dmod = otmp->objsize - MZ_MEDIUM;
-	if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit) dmod += 2;
+	if(otmp->oartifact == ART_FRIEDE_S_SCYTHE) dmod += 2;
+	else if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit) dmod += 2;
 	ldie = max(2, objects[otyp].oc_wldam + 2*dmod);
 	sdie = max(2, objects[otyp].oc_wsdam + 2*dmod);
 	
@@ -1283,7 +1284,7 @@ lightsaber_form_sdie:
 				warnedptr = ptr;
 			}
 		} else {
-			if(is_bludgeon(otmp)){
+			if(is_bludgeon(otmp) || otmp->oartifact == ART_YORSHKA_S_SPEAR){
 				weaponmask |= WHACK;
 			}
 			if(is_stabbing(otmp)){
@@ -1455,15 +1456,19 @@ int spot;
 			!touch_petrifies(&mons[otmp->corpsenm])) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC || otmp->otyp == KAMEREL_VAJRA) &&
-			/* never offhand artifacts */
-			(!otmp->oartifact || spot != W_SWAPWEP) &&
+			/* never offhand artifacts (unless you are the Bastard) */
+			(!otmp->oartifact || spot != W_SWAPWEP || mtmp->data == &mons[PM_BASTARD_OF_THE_BOREAL_VALLEY]) &&
 			/* never untouchable artifacts */
 		    (!otmp->oartifact || touch_artifact(otmp, mtmp, FALSE)) &&
 			/* never unsuitable for mainhand wielding */
 			(spot!=W_WEP || (!bimanual(otmp, mtmp->data) || ((mtmp->misc_worn_check & W_ARMS) == 0 && !MON_SWEP(mtmp) && strongmonst(mtmp->data)))) &&
 			/* never unsuitable for offhand wielding */
 			(spot!=W_SWAPWEP || (!(otmp->owornmask & (W_WEP)) && !otmp->cursed && !bimanual(otmp, mtmp->data) && (mtmp->misc_worn_check & W_ARMS) == 0 && 
-				( (otmp->owt <= (30 + (mtmp->m_lev/5)*5)) || (otmp->otyp == IRON_CHAIN && mtmp->data == &mons[PM_CATHEZAR])))) &&
+				( (otmp->owt <= (30 + (mtmp->m_lev/5)*5)) 
+				|| (otmp->otyp == IRON_CHAIN && mtmp->data == &mons[PM_CATHEZAR]) 
+				|| (mtmp->data == &mons[PM_BASTARD_OF_THE_BOREAL_VALLEY])
+				)
+			)) &&
 			/* never a hated weapon */
 			(mtmp->misc_worn_check & W_ARMG || !hates_silver(mtmp->data) || otmp->obj_material != SILVER) &&
 			(mtmp->misc_worn_check & W_ARMG || !hates_iron(mtmp->data)   || otmp->obj_material != IRON) &&
@@ -2909,8 +2914,11 @@ struct obj *weapon;
 
     wep_type = weapon_type(weapon);
     /* use two weapon skill only if attacking with one of the wielded weapons */
-    type = (u.twoweap && (weapon == uwep || weapon == uswapwep)) ?
-	    P_TWO_WEAPON_COMBAT : wep_type;
+	if((u.twoweap && (weapon == uwep || weapon == uswapwep))
+		// && !(uwep && uswapwep && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
+	) type = P_TWO_WEAPON_COMBAT;
+	else type = wep_type;
+	
     if (type == P_NONE) {
 		bonus = 0;
     } else if (type <= P_LAST_WEAPON) {
@@ -2995,7 +3003,9 @@ struct obj *weapon;
 			case P_MASTER:			maxweight = 50; break;
 			case P_GRAND_MASTER:	maxweight = 60; break;
 		}
-		if (uswapwep && !(uwep && uwep->otyp == STILETTOS) && uswapwep->owt > maxweight && uswapwep->oartifact != ART_BLADE_DANCER_S_DAGGER) {
+		if (uswapwep && !(uwep && uwep->otyp == STILETTOS) && uswapwep->owt > maxweight
+		&& uswapwep->oartifact != ART_BLADE_DANCER_S_DAGGER && uswapwep->oartifact != ART_FRIEDE_S_SCYTHE
+		) {
 			if(twowepwarn) pline("Your %s seem%s very unwieldy.",xname(uswapwep),uswapwep->quan == 1 ? "s" : "");
 			twowepwarn = FALSE;
 			bonus += -20;
@@ -3197,8 +3207,11 @@ struct obj *weapon;
 
     wep_type = weapon_type(weapon);
     /* use two weapon skill only if attacking with one of the wielded weapons */
-    type = (u.twoweap && (weapon == uwep || weapon == uswapwep)) ?
-	    P_TWO_WEAPON_COMBAT : wep_type;
+	if((u.twoweap && (weapon == uwep || weapon == uswapwep))
+		&& !(uwep && uswapwep && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
+	) type = P_TWO_WEAPON_COMBAT;
+	else type = wep_type;
+	
     if (type == P_NONE) {
 		bonus = 0;
     } else if (type <= P_LAST_WEAPON) {
@@ -3309,7 +3322,7 @@ struct obj *weapon;
 			case P_MASTER:		 maxweight = 50; break;	 /* war hammer */
 			case P_GRAND_MASTER: maxweight = 60; break;	 /* axe */
 		}
-		if (uswapwep && uswapwep->owt > maxweight) {
+		if (uswapwep && uswapwep->owt > maxweight && uswapwep->oartifact != ART_FRIEDE_S_SCYTHE) {
 			bonus += max(-20, -5 * (uswapwep->owt-maxweight)/maxweight);
 		}
 	}
