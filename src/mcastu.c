@@ -1640,9 +1640,9 @@ int spellnum;
 	case SILVER_RAYS:{
 		int n = 0;
 		dmg = 0;
-		if(zap_hit(base_uac(), 0))
+		if(zap_hit(&youmonst, 0, TRUE))
 			n++;
-		if(zap_hit(base_uac(), 0))
+		if(zap_hit(&youmonst, 0, TRUE))
 			n++;
 		if(!n){
 			pline("Silver rays whiz past you!");
@@ -4238,9 +4238,9 @@ uspsibolt:
 			impossible("silver rays spell with no mtmp");
 			return;
 		}
-		if(zap_hit(base_mac(mtmp), 0))
+		if(zap_hit(mtmp, 0, TRUE))
 			n++;
-		if(zap_hit(base_mac(mtmp), 0))
+		if(zap_hit(mtmp, 0, TRUE))
 			n++;
 		if(!n){
 			if (yours || canseemon(mtmp))
