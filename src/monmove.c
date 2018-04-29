@@ -11,6 +11,7 @@ extern boolean notonhead;
 
 #ifdef OVL0
 
+
 STATIC_DCL int FDECL(disturb,(struct monst *));
 STATIC_DCL void FDECL(distfleeck,(struct monst *,int *,int *,int *));
 STATIC_DCL int FDECL(m_arrival, (struct monst *));
@@ -2309,8 +2310,8 @@ uchar x;
 uchar y;
 {
 	struct monst * mtmp = level.monsters[x][y];
-
-	if (opaque(mtmp->data))
+	if (((mtmp) && ((x != (mtmp)->mx)  || (y != (mtmp)->my))) // check if worm tail
+		&& opaque(mtmp->data))
 		unblock_point(mtmp->mx, mtmp->my);
 	mtmp = (struct monst *)0;
 	level.monsters[x][y] = (struct monst *)0;
