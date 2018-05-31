@@ -15,7 +15,7 @@
    Incremented to 3.11 with the introduction Anachrononauts.
    Incremented to 3.12 with the introduction Magic chests, scrolls of antimagic, resistance, and consecration, YARevison to chaos quest, beter resistance-from-diet, and lightsaber forms.
 */
-#define VERSION_MINOR	15
+#define VERSION_MINOR	16
 /*
  * PATCHLEVEL is updated for each release.
  *
@@ -37,9 +37,9 @@
  * 3.14.0: Begin edging toward WtW again.  Added Chiropteran and Yuki-ona player races.  Added two new Devas.  Revised Extrinsic resistances, DS and DSM.  Made high monster AC also give DR. Finished Gnome Ranger crowning gifts.  Buffed Riding skill.
  * 3.15.0: Begin edging away from WtW again.  Added another round of pet improvements, including #wait and #come commands.
  * 3.15.1: Added derived undead, spell maintainance, a couple of neutral artifacts.
- * 3.15.2: Reworked neutral quest, minor bug fixes.  Added shallow water, rilmani.
+ * 3.16.0: Reworked neutral quest, minor bug fixes.  Added shallow water, rilmani.  Layed groundwork for Half Dragon Noble quests and more neutral quest additions, but these should not be accessable in this version
  */
-#define PATCHLEVEL	2
+#define PATCHLEVEL	0
 /*
  * Incrementing EDITLEVEL can be used to force invalidation of old bones
  * and save files.
