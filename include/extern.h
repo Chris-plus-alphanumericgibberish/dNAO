@@ -267,6 +267,7 @@ E int FDECL(artifact_detect, (struct obj *));
 E int FDECL(book_detect, (BOOLEAN_P));
 E int FDECL(monster_detect, (struct obj *,int));
 E int FDECL(pet_detect_and_tame, (struct obj *));
+E int FDECL(pet_detect_and_heal, (struct obj *));
 E int FDECL(trap_detect, (struct obj *));
 E const char *FDECL(level_distance, (d_level *));
 E int FDECL(use_crystal_ball, (struct obj *));
