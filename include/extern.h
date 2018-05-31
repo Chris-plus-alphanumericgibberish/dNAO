@@ -476,6 +476,7 @@ E int FDECL(armoroff, (struct obj *));
 E int FDECL(canwearobj, (struct obj *, long *, BOOLEAN_P));
 E int NDECL(dowear);
 E int NDECL(doputon);
+E int FDECL(arm_bonus, (struct obj *));
 E int NDECL(base_uac);
 E void NDECL(find_ac);
 E void NDECL(glibr);
@@ -2813,7 +2814,7 @@ E int FDECL(dowrite, (struct obj *));
 
 /* ### zap.c ### */
 
-E int FDECL(zap_hit, (int,int));
+E int FDECL(zap_hit, (struct monst *,int, BOOLEAN_P));
 E int FDECL(bhitm, (struct monst *,struct obj *));
 E void FDECL(probe_monster, (struct monst *));
 E boolean FDECL(get_obj_location, (struct obj *,xchar *,xchar *,int));

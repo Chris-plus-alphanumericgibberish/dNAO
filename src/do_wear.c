@@ -1900,6 +1900,56 @@ doputon()
 
 #endif /* OVLB */
 
+int arm_bonus(otmp)
+struct obj * otmp;
+{
+	int def = objects[otmp->otyp].a_ac;
+	
+	// add enchantment
+	def += otmp->spe;
+	// reduce by erosion
+	def -= min((int)greatest_erosion(otmp), objects[otmp->otyp].a_ac);
+
+	// combat boots
+	static int cbootsd = 0;
+	if (!cbootsd) cbootsd = find_cboots();
+	if (otmp->otyp == cbootsd) def += 1;
+	// padded gloves
+	static int pgloves = 0;
+	if (!pgloves) pgloves = find_pgloves();
+	if (otmp->otyp == pgloves) def += 1;
+
+	// crystal armor bonus enchantment
+	if (otmp->otyp == CRYSTAL_PLATE_MAIL)	def += otmp->spe;
+	if (otmp->otyp == CRYSTAL_HELM)			def += otmp->spe / 2;
+	if (otmp->otyp == CRYSTAL_BOOTS)		def += otmp->spe / 2;
+	if (otmp->otyp == CRYSTAL_SHIELD)		def += otmp->spe / 2;
+	if (otmp->otyp == CRYSTAL_GAUNTLETS)	def += otmp->spe / 2;
+
+	// artifact bonus def
+	switch (otmp->oartifact)
+	{
+	case ART_STEEL_SCALES_OF_KURTULMAK:
+	case ART_MANTLE_OF_HEAVEN:
+	case ART_VESTMENT_OF_HELL:
+	case ART_WEB_OF_THE_CHOSEN:
+	case ART_CLOAK_OF_THE_CONSORT:
+		def *= 2;
+		break;
+	case ART_ARMOR_OF_EREBOR:
+		def += 10;
+		break;
+	case ART_ARMOR_OF_KHAZAD_DUM:
+		def += 4;
+		break;
+	case ART_CLAWS_OF_THE_REVENANCER:
+		def += 5;
+		break;
+	}
+
+	return def;
+}
+
 #ifdef OVL0
 
 int base_uac()
@@ -2019,49 +2069,18 @@ find_ac()
 {
 	int dexbonus = 0;
 	int uac = mons[u.umonnum].ac;
+	
+	if (uarm)	uac -= arm_bonus(uarm);
+	if (uarmc)	uac -= arm_bonus(uarmc);
+	if (uarmh)	uac -= arm_bonus(uarmh);
+	if (uarmf)	uac -= arm_bonus(uarmf);
+	if (uarms){
+				uac -= arm_bonus(uarms);
+				uac -= (uarms->objsize - youracedata->msize);
+	}
+	if (uarmg)	uac -= arm_bonus(uarmg);
+	if (uarmu)	uac -= arm_bonus(uarmu);
 
-	if(uarm){
-		if(uarm->oartifact == ART_STEEL_SCALES_OF_KURTULMAK) uac -= ARM_BONUS(uarm)*2;
-		else uac -= ARM_BONUS(uarm);
-		
-		if(uarm->otyp == CRYSTAL_PLATE_MAIL) uac -= uarm->spe;
-	}
-	if(uarmc){
-		if(uarmc->oartifact == ART_MANTLE_OF_HEAVEN || 
-			uarmc->oartifact == ART_VESTMENT_OF_HELL ||
-			uarmc->oartifact == ART_WEB_OF_THE_CHOSEN ||
-			uarmc->oartifact == ART_CLOAK_OF_THE_CONSORT
-		) uac -= 2*ARM_BONUS(uarmc);
-		else uac -= ARM_BONUS(uarmc);
-	}
-	if(uarmh){ 
-		uac -= ARM_BONUS(uarmh);
-		if(uarmh->otyp == CRYSTAL_HELM) uac -= .5*uarmh->spe;
-	}
-	if(uarmf){
-		uac -= ARM_BONUS(uarmf);
-		if(uarmf->otyp == CRYSTAL_BOOTS) uac -= .5*uarmf->spe;
-	}
-	if(uarms){
-		if(uarms->oartifact == ART_STEEL_SCALES_OF_KURTULMAK) uac -= ARM_BONUS(uarms)*2;
-		else uac -= ARM_BONUS(uarms);
-		uac -= (uarms->objsize - youracedata->msize);
-		if(uarms->otyp == CRYSTAL_SHIELD) uac -= .5*uarms->spe;
-	}
-	if(uarmg){
-		uac -= ARM_BONUS(uarmg);
-		if(uarmg->otyp == CRYSTAL_GAUNTLETS) uac -= .5*uarmg->spe;
-	}
-	if(uarmu) uac -= ARM_BONUS(uarmu);
-	
-    static int cbootsd = 0;
-    if (!cbootsd) cbootsd = find_cboots();
-    if (uarmf && uarmf->otyp == cbootsd) uac -= 1; /*max( (int)(uarmf->spe/2+1),(int)(uarmf->spe/-2+1));*/ /* adds half again the enchantment, and mitigates penalties from negative enchantment */
-																										  /* and mitigates penalties from negative enchantment */
-    static int pgloves = 0;
-    if (!pgloves) pgloves = find_pgloves();
-    if (uarmf && uarmf->otyp == pgloves) uac -= 1;
-	
 	if(uwep){
 		if(uwep->otyp == RAPIER || 
 			(uwep->otyp == LIGHTSABER && uwep->lamplit && uwep->oartifact != ART_ANNULUS && uwep->ovar1 == 0) //ovar1 being 0 means dueling hilt
@@ -2152,14 +2171,6 @@ find_ac()
 	if(uarmu && uarmu->otyp == VICTORIAN_UNDERWEAR){
 		uac += 2; //flat penalty. Something in the code "corrects" ac values >10, this is a kludge.
 		dexbonus = min(dexbonus-2,0);
-	}
-	
-	if(uarm){
-		if(uarm->oartifact == ART_ARMOR_OF_EREBOR) uac -= 10;
-		else if(uarm->oartifact == ART_ARMOR_OF_KHAZAD_DUM) uac -= 4;
-	}
-	if(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER){
-		uac -= 5;
 	}
 	
 	if(dexbonus > 0 && uarm){
