@@ -5490,9 +5490,11 @@ arti_invoke(obj)
 					break;
 					case COMMAND_SCIMITAR:
 						uwep->otyp = SCIMITAR;
+						if(obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) obj->obj_material = GOLD;
 					break;
 					case COMMAND_WHIP:
 						uwep->otyp = BULLWHIP;
+						if(obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) obj->obj_material = DRAGON_HIDE;
 					break;
 					/*These effects are limited by timeout*/
 					case COMMAND_LADDER:
