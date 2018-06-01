@@ -845,10 +845,10 @@ level_tele()
 #ifdef WIZARD
 		if (wizard && !strcmp(buf,"?")) {
 		    schar destlev = 0;
-		    xchar destdnum = 0;
+		    int destdnum = 0;
 
 		    if ((newlev = (int)print_dungeon(TRUE, &destlev, &destdnum))) {
-			newlevel.dnum = destdnum;
+			newlevel.dnum = (xchar) destdnum;
 			newlevel.dlevel = destlev;
 			if (In_endgame(&newlevel) && !In_endgame(&u.uz)) {
 				Sprintf(buf,
