@@ -1883,7 +1883,6 @@ get_description_of_attack(struct attack *mattk, char * main_temp_buf)
 char *
 get_description_of_monster_type(struct monst * mtmp, char * description)
 {
-	int monsternumber = monsndx(ptr);
 	/*
 	pline("%d<><><>", plined_length("12345678901234567890123456789012345678901234567890123456789012345678901234567890"));//0 passed
 	pline("%d<><><>", plined_length("1234567890123456789012345678901234567890123456789012345678901234567890123456789"));
@@ -1891,6 +1890,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 	char temp_buf[BUFSZ] = "";
 	char main_temp_buf[BUFSZ] = "";
 	struct permonst * ptr = mtmp->data;
+	int monsternumber = monsndx(ptr);
 
 	char name[BUFSZ] = "";
 	Strcat(name, ptr->mname);
