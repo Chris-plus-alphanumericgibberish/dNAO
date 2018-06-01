@@ -226,7 +226,7 @@ mkmivault()
 			mon = makemon(mivaultmon(), x+rnd(2)+1, y+rnd(2)+1, 0);
 			// lovecraft monsters
 			if (mon->data == &mons[PM_SHOGGOTH] || mon->data == &mons[PM_NIGHTGAUNT]
-					|| mon->data == &mons[PM_DARK_YOUNG] || mon->data == &mons[PM_HUNTING_HORROR] || mon->data == &mon[PM_HUNTING_HORROR_TAIL]){
+					|| mon->data == &mons[PM_DARK_YOUNG] || mon->data == &mons[PM_HUNTING_HORROR] || mon->data == &mons[PM_HUNTING_HORROR_TAIL]){
 				otmp2 = mksobj(FIGURINE, TRUE, FALSE);
 				switch(rn2(4)){
 					case 0:					
@@ -363,7 +363,7 @@ mkmivaultlolth()
 			
 			// lovecraft monsters
 			if (mon->data == &mons[PM_SHOGGOTH] || mon->data == &mons[PM_NIGHTGAUNT] 
-				|| mon->data == &mons[PM_DARK_YOUNG] || mon->data == &mons[PM_HUNTING_HORROR] || mon->data == &mon[PM_HUNTING_HORROR_TAIL]){
+				|| mon->data == &mons[PM_DARK_YOUNG] || mon->data == &mons[PM_HUNTING_HORROR] || mon->data == &mons[PM_HUNTING_HORROR_TAIL]){
 				otmp2 = mksobj(FIGURINE, TRUE, FALSE);
 				switch(rn2(4)){
 					case 0:					
