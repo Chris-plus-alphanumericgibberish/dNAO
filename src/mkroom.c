@@ -361,6 +361,7 @@ mkmivaultlolth()
 			otmp = mksobj_at(CHEST, x+2, y+2, TRUE, FALSE);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
 			
+			mon = makemon(mivaultmon(), x+rnd(2), y+rnd(2), 0);
 			// lovecraft monsters
 			if (mon->data == &mons[PM_SHOGGOTH] || mon->data == &mons[PM_NIGHTGAUNT] 
 				|| mon->data == &mons[PM_DARK_YOUNG] || mon->data == &mons[PM_HUNTING_HORROR] || mon->data == &mons[PM_HUNTING_HORROR_TAIL]){
