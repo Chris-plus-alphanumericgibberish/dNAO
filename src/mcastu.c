@@ -2845,6 +2845,7 @@ struct monst *mtmp;
 int spellnum;
 {
 	int wardAt = ward_at(mtmp->mux,mtmp->muy);
+	struct monst *tmpm;
     /* Some spells don't require the player to really be there and can be cast
      * by the monster when you're invisible, yet still shouldn't be cast when
      * the monster doesn't even think you're there.
@@ -2952,6 +2953,36 @@ int spellnum;
 	/* healing when already healed */
 	if (mtmp->mhp == mtmp->mhpmax && spellnum == CURE_SELF)
 	    return TRUE;
+	if (mtmp->mhp == mtmp->mhpmax && spellnum == MASS_CURE_CLOSE || spellnum == MASS_CURE_FAR){
+		if(mtmp->mtame && (Upolyd ? (u.mh < u.mhmax) : (u.uhp < u.uhpmax)))
+			return FALSE;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if((mtmp->mtame == tmpm->mtame || mtmp->mpeaceful == tmpm->mpeaceful)
+			&& !mm_aggression(mtmp, tmpm)
+			&& tmpm->mhp < tmpm->mhpmax
+			) return FALSE;
+		}
+		return TRUE;
+	}
+	/* protection when no foes are nearby and not weakened */
+	if (spellnum == MON_PROTECTION){
+		if(mtmp->mhp < mtmp->mhpmax)
+			return FALSE;
+		if(!mtmp->mtame && !mtmp->mpeaceful)
+			return FALSE;
+		if(mtmp->mtame && (Upolyd ? (u.mh < u.mhmax) : (u.uhp < u.uhpmax)) && dist2(u.ux,u.uy,mtmp->mx,mtmp->my) <= 3*3+1)
+			return FALSE;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(mtmp->mtame == tmpm->mtame || mtmp->mpeaceful == tmpm->mpeaceful){
+				if( !mm_aggression(mtmp, tmpm)
+				&& tmpm->mhp < tmpm->mhpmax
+				&& dist2(u.ux,u.uy,mtmp->mx,mtmp->my) <= 3*3+1
+				) return FALSE;
+			} else if(mtmp->mtame != tmpm->mtame && mtmp->mpeaceful != tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) <= 5)
+				return FALSE;
+		}
+		return TRUE;
+	}
 	/* healing when stats are ok */
 	if (spellnum == RECOVER && !(mtmp->mcan || mtmp->mcrazed || 
 								!mtmp->mcansee || !mtmp->mcanmove || 
@@ -3190,6 +3221,7 @@ struct monst *mdef;
 int spellnum;
 {
 	int wardAt = ward_at(mdef->mx, mdef->my);
+	struct monst *tmpm;
 	
 	/*Don't cast at warded spaces*/
 	if(onscary(mdef->mx, mdef->my, mtmp) && !is_undirected_spell(spellnum))
@@ -3217,6 +3249,17 @@ int spellnum;
 	/* healing when already healed */
 	if (mtmp->mhp == mtmp->mhpmax && spellnum == CURE_SELF)
 	    return TRUE;
+	if (mtmp->mhp == mtmp->mhpmax && spellnum == MASS_CURE_CLOSE || spellnum == MASS_CURE_FAR){
+		if(mtmp->mtame && (Upolyd ? (u.mh < u.mhmax) : (u.uhp < u.uhpmax)))
+			return FALSE;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if((mtmp->mtame == tmpm->mtame || mtmp->mpeaceful == tmpm->mpeaceful)
+			&& !mm_aggression(mtmp, tmpm)
+			&& tmpm->mhp < tmpm->mhpmax
+			) return FALSE;
+		}
+		return TRUE;
+	}
 	/* healing when stats are ok */
 	if (spellnum == RECOVER && !(mtmp->mcan || mtmp->mcrazed || 
 								!mtmp->mcansee || !mtmp->mcanmove || 
@@ -3248,6 +3291,7 @@ uspell_would_be_useless(mdef, spellnum)
 struct monst *mdef;
 int spellnum;
 {
+	struct monst *tmpm;
 	/* do not check for wards on target if given no target */
 	if (mdef)
 	{
@@ -3275,6 +3319,14 @@ int spellnum;
 	/* healing when already healed */
 	if (u.mh == u.mhmax && spellnum == CURE_SELF)
 	    return TRUE;
+	if (u.mh == u.mhmax && spellnum == MASS_CURE_CLOSE || spellnum == MASS_CURE_FAR){
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(tmpm->mtame
+			&& tmpm->mhp < tmpm->mhpmax
+			) return FALSE;
+		}
+		return TRUE;
+	}
 #ifndef TAME_SUMMONING
         if (spellnum == SUMMON_MONS)
 	    return TRUE;
