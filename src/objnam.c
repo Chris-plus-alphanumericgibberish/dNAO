@@ -584,6 +584,10 @@ boolean ignore_oquan;
 			break;
 		}
 	}
+	if(is_lightsaber(obj) && litsaber(obj)){
+		Strcat(buf, lightsaber_colorText(obj));
+		Strcat(buf, " ");
+	}
 	switch (obj->oclass) {
 	    case AMULET_CLASS:
 		if (!obj->dknown)
