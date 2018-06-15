@@ -559,7 +559,7 @@ register struct monst *mtmp;
 	if(check_capacity("You cannot fight while so heavily loaded."))
 	    goto atk_done;
 
-	if (u.twoweap && !can_twoweapon())
+	if (u.twoweap && !test_twoweapon())
 		untwoweapon();
 
 	if(unweapon) {
