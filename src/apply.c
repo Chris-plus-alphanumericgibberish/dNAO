@@ -2785,6 +2785,10 @@ struct obj *hypo;
 			break;
 		}
 	} else {
+		if(amp->spe <= 0){
+			pline("The ampule is empty!");
+			return 1;
+		}
 		switch(amp->ovar1){
 			case POT_GAIN_ABILITY:
 				if(amp->cursed) {
