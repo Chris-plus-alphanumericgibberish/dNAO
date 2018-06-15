@@ -2531,11 +2531,6 @@ mfndpos(mon, poss, info, flag)
 			if(madjacent->data == &mons[PM_SURYA_DEVA] && madjacent->m_id == mon->mvar1)
 				break;
 	}
-	if(mdat == &mons[PM_SURYA_DEVA]){
-		for(madjacent = fmon; madjacent; madjacent = madjacent->nmon)
-			if(madjacent->data == &mons[PM_DANCING_BLADE] && madjacent->mvar1 == mon->m_id)
-				break;
-	}
 	
 	x = mon->mx;
 	y = mon->my;
@@ -3270,7 +3265,7 @@ struct monst *mtmp;
 		if (cansee(mtmp->mx, mtmp->my)) {
 			pline("But wait...");
 			if(canseemon(mtmp))
-				pline("%s fractures further%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
+				pline("%s fractures%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
 			else
 				You_hear("something crack%s!", !is_silent(mtmp->data) ? " with an unearthly scream" : "");
 		}

@@ -222,7 +222,7 @@ const char *directory;
 {
 	int gfd, lfd, sfd;
 	int lev, savelev, hpid;
-	xchar levc;
+	int levc;
 	struct version_info version_data;
 
 	/* level 0 file contains:
@@ -310,7 +310,7 @@ const char *directory;
 	set_levelfile_name(0);
 	(void) unlink(lock);
 
-	for (lev = 1; lev < 256; lev++) {
+	for (lev = 1; lev < 2000; lev++) {
 		/* level numbers are kept in xchars in save.c, so the
 		 * maximum level number (for the endlevel) must be < 256
 		 */
@@ -318,7 +318,7 @@ const char *directory;
 		    lfd = open_levelfile(lev, directory);
 			if (lfd >= 0) {
 				/* any or all of these may not exist */
-				levc = (xchar) lev;
+				levc = (int) lev;
 				write(sfd, (genericptr_t) &levc, sizeof(levc));
 				copy_bytes(lfd, sfd);
 				Close(lfd);

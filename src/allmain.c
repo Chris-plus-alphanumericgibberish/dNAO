@@ -508,6 +508,30 @@ moveloop()
 				u.usubwater = 1;
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
+			switch (((u_healing_penalty() - healing_penalty) > 0) - ((u_healing_penalty() - healing_penalty) < 0))
+			{
+			case 0:
+					break;
+			case 1:
+					if (!Hallucination) {
+						You_feel("%s.", (healing_penalty) ? "itchier" : "itchy");
+					}
+					else {
+						You_feel("%s.", (healing_penalty) ? "uglier" : "ugly");
+					}
+					healing_penalty = u_healing_penalty();
+					break;
+			case -1:
+					if (!Hallucination) {
+						You_feel("%s.", (u_healing_penalty()) ? "some relief" : "relieved");
+					}
+					else {
+						You_feel("%s.", (u_healing_penalty()) ? "pretty" : "beautiful");
+					}
+					healing_penalty = u_healing_penalty();
+					break;
+			}
+			/*
 			if (healing_penalty != u_healing_penalty()) {
 				if (!Hallucination){
 					You_feel("%s.", (!healing_penalty) ? "itchy" : "relief");
@@ -515,8 +539,10 @@ moveloop()
 					You_feel("%s.", (!healing_penalty) ? (hates_silver(youracedata) ? "tarnished" :
 						hates_iron(youracedata) ? "magnetic" : "like you are failing Organic Chemistry") : "like you are no longer failing Organic Chemistry");
 				}
-				healing_penalty = u_healing_penalty();
+				
+				
 			}
+			*/
 ////////////////////////////////////////////////////////////////////////////////////////////////
 			if (!oldBlind ^ !Blind) {  /* one or the other but not both */
 				see_monsters();
@@ -1587,14 +1613,28 @@ karemade:
 	    } else if (Warning || Warn_of_mon)
 	     	see_monsters();
 
-		if (healing_penalty != u_healing_penalty()) {
-			if (!Hallucination){
-				You_feel("%s.", (u_healing_penalty()) ? "itchy" : "relief");
-			} else {
-				You_feel("%s.", (u_healing_penalty()) ? (hates_silver(youracedata) ? "tarnished" :
-					hates_iron(youracedata) ? "magnetic" : "like you are failing Organic Chemistry") : "like you are no longer failing Organic Chemistry");
+		switch (((u_healing_penalty() - healing_penalty) > 0) - ((u_healing_penalty() - healing_penalty) < 0))
+		{
+		case 0:
+			break;
+		case 1:
+			if (!Hallucination) {
+				You_feel("%s.", (healing_penalty) ? "itchier" : "itchy");
+			}
+			else {
+				You_feel("%s.", (healing_penalty) ? "uglier" : "ugly");
 			}
 			healing_penalty = u_healing_penalty();
+			break;
+		case -1:
+			if (!Hallucination) {
+				You_feel("%s.", (u_healing_penalty()) ? "some relief" : "relieved");
+			}
+			else {
+				You_feel("%s.", (u_healing_penalty()) ? "pretty" : "beautiful");
+			}
+			healing_penalty = u_healing_penalty();
+			break;
 		}
 		
 		if (!oldBlind ^ !Blind) {  /* one or the other but not both */

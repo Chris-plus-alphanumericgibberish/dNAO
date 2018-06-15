@@ -1150,7 +1150,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 				break;
 	}
 	
-	if(is_kamerel(mtmp->data) || !mirror){
+	if(!is_kamerel(mtmp->data) || !mirror){
 		chance = 2;
 		if(mtmp->mconf) chance += 8;
 		if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
@@ -1619,8 +1619,10 @@ int spellnum;
 	pline("Chunks of ice pummel you from all sides!");
 	dmg = d(4, 8);
 	
-	if(u.sealsActive&SEAL_BALAM) dmg -= min_ints(rnd(-u.uac),rnd(-u.uac));
-	else dmg -= rnd(-u.uac);
+	if(u.uac < 0){
+		if(u.sealsActive&SEAL_BALAM) dmg -= min_ints(rnd(-u.uac),rnd(-u.uac));
+		else dmg -= rnd(-u.uac);
+	}
 	
 	if (dmg < 1) dmg = 1;
 	
