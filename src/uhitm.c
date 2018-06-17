@@ -1113,7 +1113,7 @@ int thrown;
 				if(uright->opoisoned & OPOISON_SLEEP && !rn2(5)){
 					if (resists_poison(mon) || resists_sleep(mon))
 						needdrugmsg = TRUE;
-					else if(!rn2(5) && sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
+					else if(sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
 					
 					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
 				}
@@ -1163,7 +1163,7 @@ int thrown;
 				if(uleft->opoisoned & OPOISON_SLEEP && !rn2(5)){
 					if (resists_poison(mon) || resists_sleep(mon))
 						needdrugmsg = TRUE;
-					else if(!rn2(5) && sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
+					else if(sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
 					
 					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
 				}
