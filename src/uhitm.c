@@ -1238,6 +1238,7 @@ int thrown;
 				is_pole(obj) && 
 				obj->otyp != AKLYS && 
 				obj->otyp != FORCE_PIKE && 
+				obj->otyp != NAGINATA && 
 				obj->oartifact != ART_WEBWEAVER_S_CROOK && 
 				obj->oartifact != ART_SILENCE_GLAIVE && 
 				obj->oartifact != ART_HEARTCLEAVER && 
