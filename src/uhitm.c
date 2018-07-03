@@ -1025,7 +1025,7 @@ int thrown;
 					|| arti_silvered(uleft) 
 					|| (uleft->ohaluengr
 						&& (isEngrRing(uleft->otyp) || isSignetRing(uleft->otyp))
-						&& uleft->ovar1 >= LOLTH_SYMBOL && uleft->ovar1 <= LOST_HOUSE
+						&& uleft->oward >= LOLTH_SYMBOL && uleft->oward <= LOST_HOUSE
 					   )
 				)
 			) barehand_silver_rings++;
@@ -1035,7 +1035,7 @@ int thrown;
 					|| arti_silvered(uright)
 					|| (uright->ohaluengr
 						&& (isEngrRing(uright->otyp) || isSignetRing(uright->otyp))
-						&& uright->ovar1 >= LOLTH_SYMBOL && uright->ovar1 <= LOST_HOUSE
+						&& uright->oward >= LOLTH_SYMBOL && uright->oward <= LOST_HOUSE
 					   )
 				)
 			) barehand_silver_rings++;
@@ -1078,12 +1078,12 @@ int thrown;
 			if (uleft 
 				&& uleft->ohaluengr
 				&& (isEngrRing(uleft->otyp) || isSignetRing(uleft->otyp))
-				&& uleft->ovar1 == EDDER_SYMBOL
+				&& uleft->oward == EDDER_SYMBOL
 			) tmp += 5;
 			if (uright 
 				&& uright->ohaluengr
 				&& (isEngrRing(uright->otyp) || isSignetRing(uright->otyp))
-				&& uright->ovar1 == EDDER_SYMBOL
+				&& uright->oward == EDDER_SYMBOL
 			) tmp += 5;
 			
 			if (uleft && uleft->otyp == jadeRing)
