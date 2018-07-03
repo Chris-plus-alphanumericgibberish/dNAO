@@ -2853,6 +2853,8 @@ register struct	obj	*obj;
 	} else {
 	    /* neither immediate nor directionless */
 
+		if(u.sealsActive&SEAL_BUER && (otyp == SPE_FINGER_OF_DEATH || otyp == WAN_DEATH ))
+			unbind(SEAL_BUER,TRUE);
 		
 	    if (otyp == WAN_DIGGING || otyp == SPE_DIG)
 			zap_dig(-1,-1,-1);//-1-1-1 = "use defaults"
