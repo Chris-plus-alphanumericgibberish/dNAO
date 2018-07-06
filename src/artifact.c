@@ -4299,6 +4299,54 @@ arti_invoke(obj)
 			}
 		}
 	break;
+	case AEGIS:
+		{
+			if (!obj->owornmask) {
+				You_feel("that you should be wearing %s.", the(xname(obj)));
+				obj->age = 0;
+				break;
+			}
+			if (!getdir((char *)0)) { //Oh, getdir must set the .d_ variables below.
+			    /* getdir cancelled, just do the nondirectional scroll */
+				obj->age = 0;
+				break;
+			}
+			else if(u.dx || u.dy) {
+				if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0) {
+					boolean youattack = mtmp == &youmonst;
+					You("display the shield's engraving to %s.", mon_nam(mtmp));
+					if (obj->cursed && rn2(3)) {
+						pline("But the shield's engraving is fogged over!");
+					}
+					else {
+						if (!resists_ston(mtmp)){
+							minstapetrify(mtmp, youattack);
+						}
+						else if(scaryGorg(3, mtmp)) {
+							if (rn2(7))
+								monflee(mtmp, rnd(10), TRUE, TRUE);
+							else
+								monflee(mtmp, rnd(100), TRUE, TRUE);
+						}
+					}
+				}
+			}
+			
+			else if(u.dz > 0){
+				struct engr *engrHere = engr_at(u.ux,u.uy);
+				if(!engrHere){
+					make_engr_at(u.ux, u.uy,	"", (moves - multi), DUST); 
+					engrHere = engr_at(u.ux,u.uy); 
+				}
+				engrHere->ward_type = BURN;
+				engrHere->ward_id = GORGONEION;
+				engrHere->complete_wards = obj->blessed ? 3 : (obj->cursed ? 1 : 2);
+			}
+			else{
+				obj->age = 0;
+			}
+		}
+	break;
  	case SPEED_BANKAI:
 		{
 			if ( !(uwep && uwep == obj) ) {
