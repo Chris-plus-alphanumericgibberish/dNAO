@@ -4315,18 +4315,13 @@ arti_invoke(obj)
 				if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0) {
 					boolean youattack = mtmp == &youmonst;
 					You("display the shield's engraving to %s.", mon_nam(mtmp));
-					if (obj->cursed && rn2(3)) {
-						pline("But the shield's engraving is fogged over!");
-					}
 					else {
-						if (!resists_ston(mtmp)){
+						if (!resists_ston(mtmp) && (rn2(100)>(mtmp->data->mr/2))){
 							minstapetrify(mtmp, youattack);
 						}
-						else if(scaryGorg(3, mtmp)) {
-							if (rn2(7))
-								monflee(mtmp, rnd(10), TRUE, TRUE);
-							else
-								monflee(mtmp, rnd(100), TRUE, TRUE);
+						else{
+							monflee(mtmp, rnd(100), TRUE, TRUE);
+							if (!obj->cursed) mtmp->mcrazed = 1;
 						}
 					}
 				}
