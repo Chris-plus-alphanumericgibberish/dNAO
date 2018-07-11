@@ -4033,7 +4033,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 								inext = itemp->nobj;
 								set_material(itemp, GOLD);
 							}
-							minstagoldify(mon,FALSE);
+							minstagoldify(mon,0);
 						}
 					} else if (tmp == MAGIC_COOKIE) { /* disintegration */
 						struct obj *otmp2, *m_amulet = mlifesaver(mon);

@@ -33,9 +33,9 @@ STATIC_DCL void FDECL(deadbook, (struct obj *));
 STATIC_PTR int NDECL(learn);
 STATIC_DCL boolean FDECL(getspell, (int *));
 STATIC_DCL boolean FDECL(getspirit, (int *));
-STATIC_DCL boolean FDECL(spiritLets, (char *, boolean));
-STATIC_DCL int FDECL(dospiritmenu, (const char *, int *, boolean));
-STATIC_DCL boolean FDECL(dospellmenu, (const char *,int,int *, boolean));
+STATIC_DCL boolean FDECL(spiritLets, (char *, int));
+STATIC_DCL int FDECL(dospiritmenu, (const char *, int *, int));
+STATIC_DCL boolean FDECL(dospellmenu, (const char *,int,int *, int));
 STATIC_DCL void FDECL(describe_spell, (int));
 STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
@@ -946,7 +946,7 @@ getspirit(power_no)
 	    /* we know there is at least 1 known spell */
 		
 		//put characters into lets here
-		spiritLets(lets, TRUE);
+		spiritLets(lets, 1);
 		
 	    for(;;)  {
 		Sprintf(qbuf, "Use which power? [%s ?]", lets);
@@ -963,7 +963,7 @@ getspirit(power_no)
 		    You("don't know that power.");
 		}
 	}
-	return dospiritmenu("Choose which power to use", power_no, TRUE);
+	return dospiritmenu("Choose which power to use", power_no, 1);
 }
 
 static const long spiritPOwner[NUMBER_POWERS] = {
@@ -1129,7 +1129,7 @@ pick_gnosis_seal()
 STATIC_OVL boolean
 spiritLets(lets, respect_timeout)
 	char *lets;
-	boolean respect_timeout;
+	int respect_timeout;
 {
 	int i,s;
 	if(flags.timeoutOrder){
@@ -4111,7 +4111,7 @@ int
 dospiritmenu(prompt, power_no, respect_timeout)
 const char *prompt;
 int *power_no;
-boolean respect_timeout;
+int respect_timeout;
 {
 	winid tmpwin;
 	int n, how;
@@ -4190,7 +4190,7 @@ dospellmenu(prompt, splaction, spell_no, describe)
 const char *prompt;
 int splaction;	/* SPELLMENU_CAST, SPELLMENU_VIEW, or spl_book[] index */
 int *spell_no;
-boolean describe;
+int describe;
 {
 	winid tmpwin;
 	int i, n, how;
@@ -5012,7 +5012,7 @@ reorder_spirit_powers()
 	    /* we know there is at least 1 known spell */
 		
 		//put characters into lets here
-		spiritLets(lets, FALSE);
+		spiritLets(lets, 0);
 		
 		Sprintf(qbuf, "Use which power? [%s ?]", lets);
 		ilet = yn_function(qbuf, (char *)0, '\0');
@@ -5032,7 +5032,7 @@ reorder_spirit_powers()
 		}
 	} else {
 		int power_no;
-		if(dospiritmenu("Choose which power to reorder", &power_no, FALSE))
+		if(dospiritmenu("Choose which power to reorder", &power_no, 1))
 			for(power_indx = 0; power_indx < 52; power_indx++){
 				if(power_no == u.spiritPOrder[power_indx])
 					break;

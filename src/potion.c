@@ -908,7 +908,7 @@ peffects(otmp)
 		You_feel("better.");
         enhanced = uarm && uarm->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
 		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 4),
-		       ((enhanced ? 2 : 1) * !otmp->cursed ? 1 : 0), !!otmp->blessed, !otmp->cursed);
+		       ((enhanced ? 2 : 1) * (!otmp->cursed ? 1 : 0)), !!otmp->blessed, !otmp->cursed);
 		exercise(A_CON, TRUE);
 		break;
 	case POT_EXTRA_HEALING:

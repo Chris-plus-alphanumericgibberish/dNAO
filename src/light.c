@@ -90,7 +90,7 @@ void
 del_light_source(type, id, silent)
     int type;
     genericptr_t id;
-	boolean silent;
+	int silent;
 {
     light_source *curr, *prev;
     genericptr_t tmp_id;

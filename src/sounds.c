@@ -95,8 +95,8 @@ static const char *alignmentThings[] = {
 	"Can a king be lawful?",
 	"Can God be lawful?",
 	"Is it chaotic to refuse to kill an innocent man?",
-	"Chaotic means stabbing a man, then giving him icecream!",
-	"Neutral means stabbing a man, then giving him icecream!",
+	"Chaotic means stabbing a man, then giving him ice cream!",
+	"Neutral means stabbing a man, then giving him ice cream!",
 	"Are you compelled to do evil, regardless of its utility?",
 	"Being nailed to things is good?",
 	"Storms are chaotic?",
@@ -2699,7 +2699,7 @@ int tx,ty;
 				}
 				if(o){
 					pline("A hand of worn and broken clockwork on a rusted metal arm reaches into the seal and rings the bell.");
-					use_bell(&o,TRUE);
+					use_bell(&o,1);
 					u.sealTimeout[ASTAROTH-FIRST_SEAL] = moves + bindingPeriod/10;
 					pline("*Sometimes, what was broken cannot be restored.*");
 				} else {
@@ -4120,9 +4120,9 @@ int tx,ty;
 		if(u.sealTimeout[BLACK_WEB-FIRST_SEAL] < moves){
 			struct trap *t = t_at(tx,ty);
 			if(t && t->ttyp == WEB && (
-				(levl[tx][ty].lit && !(viz_array[ty][tx]&TEMP_DRK3 && !viz_array[ty][tx]&TEMP_LIT1)) || 
+				(levl[tx][ty].lit && !(viz_array[ty][tx]&TEMP_DRK3 && !(viz_array[ty][tx]&TEMP_LIT1))) || 
 				(viz_array[ty][tx]&TEMP_LIT1 && !(viz_array[ty][tx]&TEMP_DRK3)) || 
-				(levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_DRK3 && !viz_array[u.uy][u.ux]&TEMP_LIT1)) || 
+				(levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_DRK3 && !(viz_array[u.uy][u.ux]&TEMP_LIT1))) || 
 				(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3))
 				)
 			){

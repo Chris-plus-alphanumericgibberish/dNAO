@@ -31,7 +31,7 @@ STATIC_DCL void NDECL(mkkamereltowers);
 STATIC_DCL void NDECL(mkminorspire);
 STATIC_DCL void NDECL(mkfishingvillage);
 STATIC_DCL void NDECL(mkpluhomestead);
-STATIC_DCL void FDECL(mkfishinghut, (boolean));
+STATIC_DCL void FDECL(mkfishinghut, (int));
 STATIC_DCL void NDECL(mkpluvillage);
 STATIC_DCL void NDECL(mkferrufort);
 STATIC_DCL void NDECL(mkferrutower);
@@ -54,8 +54,8 @@ STATIC_DCL void FDECL(mkarmory, (struct mkroom *));
 STATIC_DCL void NDECL(mkisland);
 STATIC_DCL void NDECL(mkriver);
 STATIC_DCL void NDECL(mkneuriver);
-STATIC_DCL void FDECL(liquify, (XCHAR_P,XCHAR_P,BOOLEAN_P));
-STATIC_DCL void FDECL(neuliquify, (xchar, xchar, boolean));
+STATIC_DCL void FDECL(liquify, (int,int,int));
+STATIC_DCL void FDECL(neuliquify, (int, int, int));
 STATIC_DCL struct permonst * NDECL(morguemon);
 STATIC_DCL struct permonst * NDECL(antholemon);
 STATIC_DCL struct permonst * NDECL(squadmon);
@@ -1873,7 +1873,8 @@ mkfishingvillage()
 {
 	int x=0,y=0,tx, ty, tries=0;
 	int i,j, c, edge;
-	boolean left = rn2(2), good=FALSE, okspot;
+	int left = rn2(2);
+	boolean good=FALSE, okspot;
 	int slant = rn2(3);
 	int shelf = rn1(5, 5);
 	struct obj *otmp;
@@ -1920,7 +1921,7 @@ mkfishingvillage()
 	
 	{
 	int n = 4 + rnd(4) + rn2(4);
-	for(n; n > 0; n--)
+	for(; n > 0; n--)
 		mkfishinghut(left);
 	}
 }
@@ -1928,7 +1929,7 @@ mkfishingvillage()
 STATIC_OVL
 void
 mkfishinghut(left)
-	boolean left;
+	int left;
 {
 	int x,y,tries=0, roomnumb;
 	int i,j, pathto = 0;
@@ -2000,8 +2001,8 @@ mkfishinghut(left)
 				}
 			}
 		}
-		i = 1+rn2(3);
-		for(i;i>0;i--){
+		
+		for(i = 1+rn2(3);i>0;i--){
 			makemon(&mons[PM_DEEP_ONE], x+rnd(2), y+rnd(2), MM_ADJACENTOK);
 		}
 		
@@ -2071,7 +2072,7 @@ mkpluhomestead()
 			}
 		}
 		i = rnd(3)+rn2(2);
-		for(i;i>0;i--){
+		for(;i>0;i--){
 			makemon(&mons[PM_PLUMACH_RILMANI], x+rnd(3), y+rnd(3), MM_ADJACENTOK);
 		}
 		
@@ -3338,7 +3339,7 @@ int typ;
 				otmp->obj_material = COPPER;
 				fix_object(otmp);
 			}
-			for(nwep; nwep < 6; nwep++){
+			for(; nwep < 6; nwep++){
 				otmp = mksobj_at(ROUNDSHIELD, x, y, TRUE, FALSE);
 				otmp->obj_material = COPPER;
 				otmp->objsize = MZ_SMALL;
@@ -3554,7 +3555,7 @@ place_neutral_features()
 	
 	if(!rn2(4)){
 		int n = rnd(4) + rn2(4);
-		for(n; n > 0; n--)
+		for(; n > 0; n--)
 			mkpluhomestead();
 	} 
 }
@@ -3566,19 +3567,19 @@ place_law_features()
 		if(!rn2(10)){
 		// if(1){
 			int n = 10-int_sqrt(rnd(99));
-			for(n; n > 0; n--)
+			for(; n > 0; n--)
 				mkmch(ROOM);
 		} else if(!rn2(10)){
 			int n = 10-int_sqrt(rnd(99));
-			for(n; n > 0; n--)
+			for(; n > 0; n--)
 				mkmch(STONE);
 		} else if(!rn2(4)){
 			int n = 5 - int_sqrt(rnd(24));
-			for(n; n > 0; n--)
+			for(; n > 0; n--)
 				mkwrk(ROOM);
 		} else {
 			int n = 5 - int_sqrt(rnd(24));
-			for(n; n > 0; n--)
+			for(; n > 0; n--)
 				mkwrk(STONE);
 		}
 	} else if(Is_arcadia_woods(&u.uz)){
@@ -4514,7 +4515,7 @@ mkriver()	/* John Harris */
 		center = rn2(ROWNO-12)+6;
 		width = rn2(4)+4;
 		for (prog = 1; prog<COLNO; prog++) {
-			edge = TRUE;
+			edge = 1;
 			for (fill=center-(width/2); fill<=center+(width/2) ; fill++) {
 				/* edge is true the first time through this loop and the last */
 				liquify(prog, fill, edge);
@@ -4537,7 +4538,7 @@ mkriver()	/* John Harris */
 		center = rn2(COLNO-14)+7;
 		width = rn2(4)+5;
 		for (prog = 1; prog<ROWNO; prog++) {
-			edge = TRUE;
+			edge = 1;
 			for (fill=center-(width/2); fill<=center+(width/2) ; fill++) {
 				liquify(fill, prog, edge);
 				edge = (fill == (center+(width/2)-1));
@@ -4567,7 +4568,7 @@ mkneuriver()	/* John Harris */
 		center = rn2(ROWNO-12)+6;
 		width = rn2(4)+4;
 		for (prog = 1; prog<COLNO; prog++) {
-			edge = TRUE;
+			edge = 1;
 			for (fill=center-(width/2); fill<=center+(width/2) ; fill++) {
 				/* edge is true the first time through this loop and the last */
 				neuliquify(prog, fill, edge);
@@ -4590,7 +4591,7 @@ mkneuriver()	/* John Harris */
 		center = rn2(COLNO-14)+7;
 		width = rn2(4)+5;
 		for (prog = 0; prog<ROWNO; prog++) {
-			edge = TRUE;
+			edge = 1;
 			for (fill=center-(width/2); fill<=center+(width/2) ; fill++) {
 				neuliquify(fill, prog, edge);
 				edge = (fill == (center+(width/2)-1));
@@ -4618,15 +4619,15 @@ mksea()	/* John Harris */
 	/*level.flags.has_river = 1;*/
 	for (x=1 ; x <= COLNO-1 ; x++) {
 		for (y=1 ; y <= ROWNO-1 ; y++) {
-			liquify(x,y, FALSE);
+			liquify(x,y, 0);
 		};
 	}
 }
 
 STATIC_OVL void
 liquify(x, y, edge)
-register xchar x, y;
-register boolean edge; /* Allows room walls to intrude slightly into river. */
+register int x, y;
+register int edge; /* Allows room walls to intrude slightly into river. */
 {
 	register int typ = levl[x][y].typ;
 	register int monster = PM_JELLYFISH;
@@ -4664,8 +4665,8 @@ register boolean edge; /* Allows room walls to intrude slightly into river. */
 
 STATIC_OVL void
 neuliquify(x, y, edge)
-register xchar x, y;
-register boolean edge; /* Allows room walls to intrude slightly into river. */
+register int x, y;
+register int edge; /* Allows room walls to intrude slightly into river. */
 {
 	register int typ = levl[x][y].typ;
 	register int monster = PM_JELLYFISH;
@@ -5498,7 +5499,9 @@ courtmon(kingnum)
 			else if (i > 15)	return(mkclass(S_GNOME, Inhell ? G_HELL : G_NOHELL));
 			else			return(mkclass(S_KOBOLD, Inhell ? G_HELL : G_NOHELL));
 		break;
+	
 	}
+	return &mons[PM_GNOME];
 }
 
 struct permonst *
@@ -5572,6 +5575,7 @@ mivaultmon()
 			return(&mons[PM_BALROG]);
 		break;
 	}
+	return &mons[PM_SHOGGOTH];
 }
 
 #define NSTYPES (PM_CAPTAIN - PM_SOLDIER + 1)

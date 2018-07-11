@@ -1327,7 +1327,7 @@ boolean telekinesis;	/* not picking it up directly by hand */
 	// }
 	if (obj == uchain) {    /* do not pick up attached chain */
 	    return 0;
-	} else if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) {
+	} else if (obj->oartifact && !touch_artifact(obj, &youmonst, 0)) {
 	    return 0;
 #ifndef GOLDOBJ
 	} else if (obj->oclass == COIN_CLASS) {
@@ -1863,7 +1863,7 @@ boolean *prev_loot;
     /* 	*passed_info is set to TRUE if a loot query was given.               */
     /*	*prev_loot is set to TRUE if something was actually acquired in here. */
 	if(mtmp && mtmp != u.usteed && mtmp->mtame){
-	if(otmp = pick_creatures_armor(mtmp, passed_info)){
+	if((otmp = pick_creatures_armor(mtmp, passed_info))){
 	long unwornmask;
 		if (nolimbs(youracedata)) {
 		    You_cant("do that without limbs."); /* not body_part(HAND) */
@@ -1938,7 +1938,7 @@ dopetequip()
 	/* Get a copy of monster's name before altering its visibility */
 	Strcpy(nambuf, See_invisible(mtmp->mx,mtmp->my) ? Monnam(mtmp) : mon_nam(mtmp));
 	
-	if(otmp = pick_armor_for_creature(mtmp)){
+	if((otmp = pick_armor_for_creature(mtmp))){
 		if (nolimbs(youracedata)) {
 		    You_cant("do that without limbs."); /* not body_part(HAND) */
 		    return (0);
@@ -2233,7 +2233,7 @@ register struct obj *obj;
 		obj->owt = weight(obj);
 	}
 
-	if(obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) return 0;
+	if(obj->oartifact && !touch_artifact(obj, &youmonst, 0)) return 0;
 	// if(obj->oartifact && obj->oartifact == ART_PEN_OF_THE_VOID && !Role_if(PM_EXILE)) u.sealsKnown |= obj->ovar1;
 	/*Handle the pen of the void here*/
 	if(obj && obj->oartifact == ART_PEN_OF_THE_VOID){

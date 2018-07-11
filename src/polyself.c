@@ -1346,6 +1346,7 @@ doclockspeed()
 		You("leave your clock at its current speed.");
 		return 0;
 	}
+	return 0;
 }
 
 STATIC_OVL void

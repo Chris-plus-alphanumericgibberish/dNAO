@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "dlb.h"
+#include "system.h"
 
 #ifdef TTY_GRAPHICS
 #include "wintty.h" /* more() */
@@ -2519,7 +2520,7 @@ const char *reason;	/* explanation */
 		lfile = fopen_datafile(PANICLOG, "a", TROUBLEPREFIX);
 		if (lfile) {
 		    (void) fprintf(lfile, "%ld %s: %s %s\n",
-				   u.ubirthday, (plname ? plname : "(none)"),
+				   u.ubirthday, plname,
 				   type, reason);
 		    (void) fclose(lfile);
 		}

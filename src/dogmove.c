@@ -1033,7 +1033,7 @@ register int after;	/* this is extra fast monster movement */
 	      select_rwep(mtmp))) &&
 	    mtmp->mlstmv != monstermoves)
 	{
-	    struct monst *mon = mfind_target(mtmp, FALSE);
+	    struct monst *mon = mfind_target(mtmp, 0);
 	    if (mon && (mon != &youmonst) &&
 	        acceptable_pet_target(mtmp, mon, TRUE))
 	    {

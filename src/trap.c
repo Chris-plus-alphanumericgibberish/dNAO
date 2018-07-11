@@ -1383,7 +1383,7 @@ struct obj *otmp;
 				}
 				if (mtmp->mhp <= 0 ||
 					thitm(0, mtmp, (struct obj *)0,
-						  rnd((tt == PIT) ? 6 : 12) + (tt == SPIKED_PIT && hates_silver(mtmp->data)) ? rnd(20) : 0, FALSE))
+						  rnd((tt == PIT) ? 6 : 12) + ((tt == SPIKED_PIT && hates_silver(mtmp->data)) ? rnd(20) : 0), FALSE))
 					trapkilled = TRUE;
 				steedhit = TRUE;
 			} else {
@@ -1393,7 +1393,7 @@ struct obj *otmp;
 				}
 				if (mtmp->mhp <= 0 ||
 					thitm(0, mtmp, (struct obj *)0,
-						  rnd((tt == PIT) ? 6 : 10) + (tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0, FALSE))
+						  rnd((tt == PIT) ? 6 : 10) + ((tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0), FALSE))
 					trapkilled = TRUE;
 				steedhit = TRUE;
 			}
@@ -2153,7 +2153,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				mselftouch(mtmp, "Falling, ", FALSE);
 				if (mtmp->mhp <= 0 ||
 					thitm(0, mtmp, (struct obj *)0,
-						  rnd((tt == PIT) ? 6 : 12) + (tt == SPIKED_PIT && hates_silver(mtmp->data)) ? rnd(20) : 0, FALSE))
+						  rnd((tt == PIT) ? 6 : 12) + ((tt == SPIKED_PIT && hates_silver(mtmp->data)) ? rnd(20) : 0), FALSE))
 					trapkilled = TRUE;
 			} else {
 				if (in_sight && hates_iron(mtmp->data) && tt == SPIKED_PIT) {
@@ -2163,7 +2163,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				mselftouch(mtmp, "Falling, ", FALSE);
 				if (mtmp->mhp <= 0 ||
 					thitm(0, mtmp, (struct obj *)0,
-						  rnd((tt == PIT) ? 6 : 10) + (tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0, FALSE))
+						  rnd((tt == PIT) ? 6 : 10) + ((tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0), FALSE))
 					trapkilled = TRUE;
 			}
 			break;
@@ -2435,7 +2435,7 @@ boolean byplayer;
 void
 minstagoldify(mon,byplayer)
 struct monst *mon;
-boolean byplayer;
+int byplayer;
 {
 	if (resists_ston(mon)) return;
 	if (poly_when_golded(mon->data)) {
@@ -4108,7 +4108,7 @@ boolean force;
 			case 'n': trap_skipped = TRUE;  continue;
 		    }
 
-		    if(touch_artifact(otmp, &youmonst, FALSE) && u.ualign.type == A_LAWFUL && u.ualign.record >= 14) {
+		    if(touch_artifact(otmp, &youmonst, 0) && u.ualign.type == A_LAWFUL && u.ualign.record >= 14) {
 			pline("It slides out easily!");
 			(void) pick_obj(otmp);
 		    } else {

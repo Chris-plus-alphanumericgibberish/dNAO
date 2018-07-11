@@ -148,7 +148,7 @@ struct monst *mtmp;
 	return (boolean)(
 				((
 					sobj_at(SCR_SCARE_MONSTER, x, y)
-				 || (alignedfearobj && !touch_artifact(alignedfearobj, mtmp, FALSE))
+				 || (alignedfearobj && !touch_artifact(alignedfearobj, mtmp, 0))
 				 ) && scaryItem(mtmp)
 				)
 			 || (u.umonnum == PM_GHOUL && x == mtmp->mux && y == mtmp->muy && mtmp->data == &mons[PM_GUG])
@@ -1281,7 +1281,7 @@ toofar:
 	      find_offensive(mtmp)) && 
 	    mtmp->mlstmv != monstermoves)
 	{
-	    register struct monst *mtmp2 = mfind_target(mtmp, FALSE);
+	    register struct monst *mtmp2 = mfind_target(mtmp, 0);
 	    if (mtmp2 && 
 	        (mtmp2 != &youmonst || 
 				dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) > 2) &&
@@ -1694,7 +1694,7 @@ not_special:
 			!index(indigestion, otmp->oclass) &&
 			!(otmp->otyp == CORPSE &&
 			  touch_petrifies(&mons[otmp->corpsenm])))
-		      ) && touch_artifact(otmp, mtmp, FALSE)) {
+		      ) && touch_artifact(otmp, mtmp, 0)) {
 				if(can_carry(mtmp,otmp) &&
 				 (throws_rocks(ptr) ||
 				  !boulder_at(xx,yy)) &&

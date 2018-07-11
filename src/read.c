@@ -1098,7 +1098,7 @@ struct obj *sobj;
 			if(Spellboost) role_skill++;
 			if(role_skill < 1) role_skill = 1;
 			
-			for(role_skill; role_skill; role_skill--)
+			for(; role_skill; role_skill--)
 				if(!resist(mtmp, sobj->oclass, 0, NOTELL)){
 					(void) tamedog(mtmp, sobj);
 					return;

@@ -1011,7 +1011,7 @@ int
 touch_artifact(obj, mon, hypothetical)
     struct obj *obj;
     struct monst *mon;
-	boolean hypothetical;
+	int hypothetical;
 {
     register const struct artifact *oart = get_artifact(obj);
     boolean badclass=0, badalign=0, self_willed=0, yours, forceEvade = FALSE;
@@ -1289,7 +1289,7 @@ struct monst *mtmp;
 			return TRUE;
 		} else if (weap->mflagsg != 0L && ((ptr->mflagsg & weap->mflagsg) != 0L)) {
 			return TRUE;
-			if(yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & MG_PRINCE|MG_LORD) != 0))
+			if(yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0))
 				return TRUE;
 		} else if (weap->mflagsv != 0L && ((ptr->mflagsv & weap->mflagsv) != 0L)) {
 			return TRUE;
@@ -1322,7 +1322,7 @@ struct monst *mtmp;
 		} else if (weap->mflagsb != 0L && !((ptr->mflagsb & weap->mflagsb) != 0L)) {
 			return FALSE;
 		} else if (weap->mflagsg != 0L && !(((ptr->mflagsg & weap->mflagsg) != 0L)
-			|| (yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & MG_PRINCE|MG_LORD) != 0)))
+			|| (yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0)))
 		) {
 			return FALSE;
 		} else if (weap->mflagsv != 0L && !((ptr->mflagsv & weap->mflagsv) != 0L)) {
@@ -1429,7 +1429,7 @@ struct monst *mtmp;
 			return TRUE;
 		} else if (weap->mflagsg != 0L && ((ptr->mflagsg & weap->mflagsg) != 0L)) {
 			return TRUE;
-			if(yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & MG_PRINCE|MG_LORD) != 0))
+			if(yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0))
 				return TRUE;
 		} else if (weap->mflagsv != 0L && ((ptr->mflagsv & weap->mflagsv) != 0L)) {
 			return TRUE;
@@ -1461,7 +1461,7 @@ struct monst *mtmp;
 		} else if (weap->mflagsb != 0L && !((ptr->mflagsb & weap->mflagsb) != 0L)) {
 			return FALSE;
 		} else if (weap->mflagsg != 0L && !(((ptr->mflagsg & weap->mflagsg) != 0L)
-			|| (yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & MG_PRINCE|MG_LORD) != 0)))
+			|| (yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0)))
 		) {
 			return FALSE;
 		} else if (weap->mflagsv != 0L && !((ptr->mflagsv & weap->mflagsv) != 0L)) {
@@ -3852,7 +3852,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			if(otmp->oartifact == ART_STORMBRINGER && dieroll <= 2){
 				int drains = (*dmgptr)/4+1;
 				*dmgptr = 1; /*Scratch damage; main damage delt by losexp*/
-				for(drains; drains > 0; drains--){
+				for(; drains > 0; drains--){
 					losexp("life drainage",FALSE,FALSE,FALSE);
 					if (magr && magr->mhp < magr->mhpmax) {
 						magr->mhp += (oldhpmax - u.uhpmax)/2;
@@ -3884,7 +3884,7 @@ doinvoke()
 
     obj = getobj(invoke_types, "invoke");
     if (!obj) return 0;
-    if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) return 1;
+    if (obj->oartifact && !touch_artifact(obj, &youmonst, 0)) return 1;
 	if(is_lightsaber(obj) && obj->cobj && obj->oartifact == obj->cobj->oartifact)
 		obj = obj->cobj;
     return arti_invoke(obj);
@@ -3895,7 +3895,7 @@ doparticularinvoke(obj)
     register struct obj *obj;
 {
     if (!obj) return 0;
-    if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) return 1;
+    if (obj->oartifact && !touch_artifact(obj, &youmonst, 0)) return 1;
 	if(is_lightsaber(obj) && obj->cobj && obj->oartifact == obj->cobj->oartifact)
 		obj = obj->cobj;
     return arti_invoke(obj);
@@ -6166,7 +6166,7 @@ arti_invoke(obj)
                     onxt = ocur->nexthere;
                     if (ocur->otyp != EGG){
                       revive(ocur);
-                      if(mtmp = m_at(u.ux+u.dx,u.uy+u.dy)){
+                      if((mtmp = m_at(u.ux+u.dx,u.uy+u.dy))){
                         pline("%s resurrects!", Monnam(mtmp));
                         obj->ovar1 = COMMAND_DEATH;
                         break;
@@ -6958,7 +6958,7 @@ struct obj *obj;
 	}
 
 	if(obj->ovar1 < monstermoves){
-		if((obj->otyp == KHAKKHARA)){
+		if(obj->otyp == KHAKKHARA){
 			Sprintf(buf, "Ring Out");
 			any.a_int = COMMAND_BELL;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -6966,7 +6966,7 @@ struct obj *obj;
 				MENU_UNSELECTED);
 		}
 		
-		if((obj->otyp == BFG)){
+		if(obj->otyp == BFG){
 			Sprintf(buf, "Create Bullets");
 			any.a_int = COMMAND_BULLETS;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -6983,7 +6983,7 @@ struct obj *obj;
 				'F', 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
-		if((obj->otyp == CHAKRAM)){
+		if(obj->otyp == CHAKRAM){
 			Sprintf(buf, "Annul");
 			any.a_int = COMMAND_ANNUL;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -6991,7 +6991,7 @@ struct obj *obj;
 				MENU_UNSELECTED);
 		}
 		
-		if((obj->otyp == LIGHTSABER)){
+		if(obj->otyp == LIGHTSABER){
 			Sprintf(buf, "Recharge");
 			any.a_int = COMMAND_CHARGE;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,

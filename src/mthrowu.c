@@ -1216,7 +1216,7 @@ extern int monstr[];
 struct monst *
 mfind_target(mtmp, force_linedup)
 struct monst *mtmp;
-boolean force_linedup;
+int force_linedup;
 {
     int dir, origdir = -1;
     int x, y, dx, dy;

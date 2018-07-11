@@ -160,7 +160,7 @@ struct obj *wep;
 		    wep->otyp == BATTLE_AXE ? "axe" : "weapon");
 	else if (wep->otyp == ARM_BLASTER && uarmg && is_metal(uarmg))
 		You("cannot fit the bracer over such bulky, rigid gloves.");
-	else if (wep->oartifact && !touch_artifact(wep, &youmonst, FALSE)) {
+	else if (wep->oartifact && !touch_artifact(wep, &youmonst, 0)) {
 	    res++;	/* takes a turn even though it doesn't get wielded */
 	} else {
 	    /* Weapon WILL be wielded after this point */
@@ -543,8 +543,8 @@ test_twoweapon()
 		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep))
 		) && 
 		!(uwep && uswapwep &&
-		  (uwep->oartifact == ART_PROFANED_GREATSCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE) ||
-		  (uwep->oartifact == ART_LIFEHUNT_SCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE))
+		  ((uwep->oartifact == ART_PROFANED_GREATSCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE) ||
+		  (uwep->oartifact == ART_LIFEHUNT_SCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)))
 	) {
 		otmp = bimanual(uwep,youracedata) ? uwep : uswapwep;
 		pline("%s isn't one-handed.", Yname2(otmp));

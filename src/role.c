@@ -1234,7 +1234,7 @@ struct monst *
 god_priest(gptr, sx, sy, sanctum)
 	int sx, sy;
 	const char *gptr;
-	boolean sanctum;   /* is it the seat of the high priest? */
+	int sanctum;   /* is it the seat of the high priest? */
 {
 	struct monst *priest;
 	

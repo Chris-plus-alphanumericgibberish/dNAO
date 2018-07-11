@@ -447,7 +447,7 @@ const char *drop_fmt, *drop_arg, *hold_msg;
 	    /* in case touching this object turns out to be fatal */
 	    place_object(obj, u.ux, u.uy);
 
-	    if (!touch_artifact(obj, &youmonst, FALSE)) {
+	    if (!touch_artifact(obj, &youmonst, 0)) {
 		obj_extract_self(obj);	/* remove it from the floor */
 		dropy(obj);		/* now put it back again :-) */
 		return obj;
@@ -787,7 +787,7 @@ have_lizard()
 	register struct obj *otmp;
 
 	for(otmp = invent; otmp; otmp = otmp->nobj)
-		if(otmp->otyp == CORPSE && (otmp->corpsenm == PM_LIZARD || otmp->corpsenm == PM_BABY_CAVE_LIZARD || PM_SMALL_CAVE_LIZARD || PM_CAVE_LIZARD || PM_LARGE_CAVE_LIZARD))
+		if(otmp->otyp == CORPSE && (otmp->corpsenm == PM_LIZARD || otmp->corpsenm == PM_BABY_CAVE_LIZARD ||  otmp->corpsenm == PM_SMALL_CAVE_LIZARD ||  otmp->corpsenm == PM_CAVE_LIZARD ||  otmp->corpsenm == PM_LARGE_CAVE_LIZARD))
 			return(TRUE);
 	return(FALSE);
 }

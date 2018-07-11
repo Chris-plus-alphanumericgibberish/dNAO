@@ -1005,7 +1005,7 @@ struct monst *mtmp;
 	boolean reflection_skip = FALSE; 
 	struct obj *helmet = which_armor(mtmp, W_ARMH);
 
-	struct monst *target = mfind_target(mtmp, TRUE);
+	struct monst *target = mfind_target(mtmp, 1);
 	
 	if(tbx == 0 && tby == 0) return FALSE; //Target is not lined up.
 	
@@ -2616,7 +2616,7 @@ const char *fmt, *str;
 	    if (fmt && str)
 	    	pline(fmt, str, "weapon");
 	    return TRUE;
-	} else if (uwep && is_lightsaber(uwep) && litsaber(uwep) && ((u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm))) || (u.fightingForm == FFORM_SHIEN) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))) {
+	} else if (uwep && is_lightsaber(uwep) && litsaber(uwep) && ((u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm))) || ((u.fightingForm == FFORM_SHIEN) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))))) {
 	    /* Due to wielded lightsaber */
 	    if (fmt && str)
 	    	pline(fmt, str, "lightsaber");
