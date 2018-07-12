@@ -4013,7 +4013,7 @@ typfnd:
 		otmp->odiluted = 1;
 
 	/* set material */
-	if(mat)
+	if(mat){
 		if(wizard) {
 			otmp->obj_material = mat;
 		}
@@ -4044,6 +4044,7 @@ typfnd:
 				}
 			}
 		}
+	}
 	
 	if (name) {
 		const char *aname;
@@ -4077,7 +4078,7 @@ typfnd:
 	if ((is_quest_artifact(otmp) //redundant failsafe.  You can't wish for ANY quest artifacts
 	     || (otmp->oartifact && rn2((int)(u.uconduct.wisharti)) > 1) //Limit artifact wishes per game
 		 || otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS //No wishing for quest artifacts, unique monster artifacts, etc.
-		 || !touch_artifact(otmp, &youmonst, 1) //Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
+		 || !touch_artifact(otmp, &youmonst, TRUE) //Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
 		 // (otmp->oartifact >= ART_ITLACHIAYAQUE && otmp->oartifact <= ART_EYE_OF_THE_AETHIOPICA) || //no wishing for quest artifacts
 		 // (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS && otmp->oartifact <= ART_SILVER_KEY) || //no wishing for alignment quest artifacts
 		 // (otmp->oartifact >= ART_SWORD_OF_ERATHAOL && otmp->oartifact <= ART_HAMMER_OF_BARQUIEL) || //no wishing for angel artifacts

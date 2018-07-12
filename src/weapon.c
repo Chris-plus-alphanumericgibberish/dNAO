@@ -1510,7 +1510,7 @@ struct monst *mtmp;
 
 	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 	    if (is_boulder(otmp)  &&
-		    (!otmp->oartifact || touch_artifact(otmp, mtmp, 0)))
+		    (!otmp->oartifact || touch_artifact(otmp, mtmp, FALSE)))
             {
 	        if (!obest ||
 		    dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(obest, 0 /*zeromonst*/,0))

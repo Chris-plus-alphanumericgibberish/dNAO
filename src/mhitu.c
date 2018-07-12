@@ -1691,7 +1691,7 @@ hitmu(mtmp, mattk)
 		newsym(mtmp->mx, mtmp->my);
 	    }
 	}
-	if(uarm && uarm->oartifact && !rn2(10)) touch_artifact(uarm, &youmonst, 0);
+	if(uarm && uarm->oartifact && !rn2(10)) touch_artifact(uarm, &youmonst, FALSE);
 
 /*	First determine the base damage done */
 	if(weaponhit && mattk->adtyp != AD_PHYS) dmg = 0;

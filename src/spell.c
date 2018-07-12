@@ -946,7 +946,7 @@ getspirit(power_no)
 	    /* we know there is at least 1 known spell */
 		
 		//put characters into lets here
-		spiritLets(lets, 1);
+		spiritLets(lets, TRUE);
 		
 	    for(;;)  {
 		Sprintf(qbuf, "Use which power? [%s ?]", lets);
@@ -963,7 +963,7 @@ getspirit(power_no)
 		    You("don't know that power.");
 		}
 	}
-	return dospiritmenu("Choose which power to use", power_no, 1);
+	return dospiritmenu("Choose which power to use", power_no, TRUE);
 }
 
 static const long spiritPOwner[NUMBER_POWERS] = {
@@ -5012,7 +5012,7 @@ reorder_spirit_powers()
 	    /* we know there is at least 1 known spell */
 		
 		//put characters into lets here
-		spiritLets(lets, 0);
+		spiritLets(lets, FALSE);
 		
 		Sprintf(qbuf, "Use which power? [%s ?]", lets);
 		ilet = yn_function(qbuf, (char *)0, '\0');
@@ -5032,7 +5032,7 @@ reorder_spirit_powers()
 		}
 	} else {
 		int power_no;
-		if(dospiritmenu("Choose which power to reorder", &power_no, 1))
+		if(dospiritmenu("Choose which power to reorder", &power_no, TRUE))
 			for(power_indx = 0; power_indx < 52; power_indx++){
 				if(power_no == u.spiritPOrder[power_indx])
 					break;

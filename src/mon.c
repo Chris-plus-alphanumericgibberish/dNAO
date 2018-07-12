@@ -1844,7 +1844,7 @@ meatmetal(mtmp)
 	    if (mtmp->data == &mons[PM_RUST_MONSTER] && !is_rustprone(otmp))
 		continue;
 	    if (is_metallic(otmp) && !obj_resists(otmp, 5, 95) &&
-		touch_artifact(otmp, mtmp, 0)) {
+		touch_artifact(otmp, mtmp, FALSE)) {
 		if (mtmp->data == &mons[PM_RUST_MONSTER] && otmp->oerodeproof) {
 		    if (canseemon(mtmp) && flags.verbose) {
 			pline("%s eats %s!",
@@ -1934,7 +1934,7 @@ meatobj(mtmp)		/* for gelatinous cubes */
 	for (otmp = level.objects[mtmp->mx][mtmp->my]; otmp; otmp = otmp2) {
 	    otmp2 = otmp->nexthere;
 	    if (is_organic(otmp) && !obj_resists(otmp, 5, 95) &&
-		    touch_artifact(otmp, mtmp, 0)) {
+		    touch_artifact(otmp, mtmp, FALSE)) {
 		if (otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) &&
 			!resists_ston(mtmp))
 		    continue;
@@ -2053,7 +2053,7 @@ mpickstuff(mtmp, str)
 			!touch_petrifies(&mons[otmp->corpsenm]) &&
 			otmp->corpsenm != PM_LIZARD &&
 			!acidic(&mons[otmp->corpsenm])) continue;
-		if (!touch_artifact(otmp, mtmp, 0)) continue;
+		if (!touch_artifact(otmp, mtmp, FALSE)) continue;
 		if (!can_carry(mtmp,otmp)) continue;
 		if (is_pool(mtmp->mx,mtmp->my, FALSE)) continue;
 #ifdef INVISIBLE_OBJECTS

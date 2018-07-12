@@ -5023,7 +5023,7 @@ doapply()
 
 	wasmergable = objects[obj->otyp].oc_merge; //Some functions leave a stale pointer here if they merge the item
 	
-	if (obj->oartifact && !touch_artifact(obj, &youmonst, 0))
+	if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE))
 	    return 1;	/* evading your grasp costs a turn; just be
 			   grateful that you don't drop it as well */
 
@@ -5152,7 +5152,7 @@ doapply()
 	break;
 	case BELL:
 	case BELL_OF_OPENING:
-		use_bell(&obj, 1);
+		use_bell(&obj, TRUE);
 		break;
 	case CANDELABRUM_OF_INVOCATION:
 		use_candelabrum(obj);

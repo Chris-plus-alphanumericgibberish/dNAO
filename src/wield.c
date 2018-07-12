@@ -160,7 +160,7 @@ struct obj *wep;
 		    wep->otyp == BATTLE_AXE ? "axe" : "weapon");
 	else if (wep->otyp == ARM_BLASTER && uarmg && is_metal(uarmg))
 		You("cannot fit the bracer over such bulky, rigid gloves.");
-	else if (wep->oartifact && !touch_artifact(wep, &youmonst, 0)) {
+	else if (wep->oartifact && !touch_artifact(wep, &youmonst, FALSE)) {
 	    res++;	/* takes a turn even though it doesn't get wielded */
 	} else {
 	    /* Weapon WILL be wielded after this point */

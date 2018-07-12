@@ -24,7 +24,7 @@
  *
  * God names use a leading underscore to flag goddesses.
  */
-const struct Role roles[] = {
+struct Role roles[] = {
 {	{"Archeologist", 0}, {
 	{"Digger",      0},
 	{"Field Worker",0},
@@ -1403,7 +1403,7 @@ str2role(str)
 	return ROLE_NONE;
 }
 
-const struct Role *
+struct Role *
 pm2role(tpm)
 	int tpm;
 {

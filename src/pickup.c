@@ -1327,7 +1327,7 @@ boolean telekinesis;	/* not picking it up directly by hand */
 	// }
 	if (obj == uchain) {    /* do not pick up attached chain */
 	    return 0;
-	} else if (obj->oartifact && !touch_artifact(obj, &youmonst, 0)) {
+	} else if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) {
 	    return 0;
 #ifndef GOLDOBJ
 	} else if (obj->oclass == COIN_CLASS) {
@@ -2233,7 +2233,7 @@ register struct obj *obj;
 		obj->owt = weight(obj);
 	}
 
-	if(obj->oartifact && !touch_artifact(obj, &youmonst, 0)) return 0;
+	if(obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) return 0;
 	// if(obj->oartifact && obj->oartifact == ART_PEN_OF_THE_VOID && !Role_if(PM_EXILE)) u.sealsKnown |= obj->ovar1;
 	/*Handle the pen of the void here*/
 	if(obj && obj->oartifact == ART_PEN_OF_THE_VOID){

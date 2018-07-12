@@ -447,7 +447,7 @@ const char *drop_fmt, *drop_arg, *hold_msg;
 	    /* in case touching this object turns out to be fatal */
 	    place_object(obj, u.ux, u.uy);
 
-	    if (!touch_artifact(obj, &youmonst, 0)) {
+	    if (!touch_artifact(obj, &youmonst, FALSE)) {
 		obj_extract_self(obj);	/* remove it from the floor */
 		dropy(obj);		/* now put it back again :-) */
 		return obj;

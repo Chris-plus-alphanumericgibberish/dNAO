@@ -2523,7 +2523,7 @@ boolean
 insubstantial_aware(mon, obj, you)
 struct monst *mon;
 struct obj *obj;
-boolean you;
+int you;
 {
 	struct permonst *ptr = mon->data;
 	if(you && u.sealsActive&SEAL_CHUPOCLOPS)
@@ -2891,7 +2891,7 @@ register struct attack *mattk;
 		} else if(mattk->aatyp == AT_KICK) {
 		    if(thick_skinned(mdef->data)) tmp = 0;
 		    if(insubstantial(mdef->data)) {
-			    tmp = insubstantial_damage(mdef, uarmf, tmp, 1); /* bless damage */
+			    tmp = insubstantial_damage(mdef, uarmf, tmp, TRUE); /* bless damage */
 		    }
 		}
 		break;

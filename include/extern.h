@@ -772,7 +772,7 @@ E void NDECL(makerogueghost);
 #endif
 
 /* ### files.c ### */
-
+E int FDECL(chmod, (const char *path, mode_t mode));
 E char *FDECL(fname_encode, (const char *, CHAR_P, char *, char *, int));
 E char *FDECL(fname_decode, (CHAR_P, char *, char *, int));
 E const char *FDECL(fqname, (const char *, int, int));
@@ -1482,7 +1482,7 @@ E boolean FDECL(closed_door, (int,int));
 E boolean FDECL(accessible, (int,int));
 E void FDECL(set_apparxy, (struct monst *));
 E boolean FDECL(can_ooze, (struct monst *));
-E void FDECL(remove_monster, (uchar, uchar));
+E void FDECL(remove_monster, (int, int));
 
 /* ### monst.c ### */
 
@@ -2127,7 +2127,7 @@ E const int * FDECL(god_minions, (const char *));
 E int FDECL(god_faction, (const char *));
 E struct monst * FDECL(god_priest, (const char *, int, int, int));
 E int FDECL(str2role, (char *));
-E const struct Role *FDECL(pm2role, (int));
+E struct Role *FDECL(pm2role, (int));
 E int FDECL(str2race, (char *));
 E int FDECL(str2gend, (char *));
 E int FDECL(str2align, (char *));
@@ -2349,7 +2349,7 @@ E long NDECL(somegold);
 #endif
 E void FDECL(stealgold, (struct monst *));
 E void FDECL(remove_worn_item, (struct obj *,BOOLEAN_P));
-E int FDECL(steal, (struct monst *, char *,boolean,boolean));
+E int FDECL(steal, (struct monst *, char *,int,int));
 E int FDECL(mpickobj, (struct monst *,struct obj *));
 E void FDECL(stealamulet, (struct monst *));
 E void FDECL(stealquestart, (struct monst *));
@@ -2515,7 +2515,7 @@ E int FDECL(damageum, (struct monst *,struct attack *));
 E void FDECL(missum, (struct monst *,struct attack *));
 E int FDECL(passive, (struct monst *,BOOLEAN_P,int,UCHAR_P,UCHAR_P));
 E void FDECL(passive_obj, (struct monst *,struct obj *,struct attack *));
-E boolean FDECL(insubstantial_aware, (struct monst *, struct obj *, boolean));
+E boolean FDECL(insubstantial_aware, (struct monst *, struct obj *, int));
 E int FDECL(insubstantial_damage, (struct monst *, struct obj *, int, int));
 E void FDECL(stumble_onto_mimic, (struct monst *));
 E int FDECL(flash_hits_mon, (struct monst *,struct obj *));

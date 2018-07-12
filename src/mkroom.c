@@ -4515,7 +4515,7 @@ mkriver()	/* John Harris */
 		center = rn2(ROWNO-12)+6;
 		width = rn2(4)+4;
 		for (prog = 1; prog<COLNO; prog++) {
-			edge = 1;
+			edge = TRUE;
 			for (fill=center-(width/2); fill<=center+(width/2) ; fill++) {
 				/* edge is true the first time through this loop and the last */
 				liquify(prog, fill, edge);
@@ -4538,7 +4538,7 @@ mkriver()	/* John Harris */
 		center = rn2(COLNO-14)+7;
 		width = rn2(4)+5;
 		for (prog = 1; prog<ROWNO; prog++) {
-			edge = 1;
+			edge = TRUE;
 			for (fill=center-(width/2); fill<=center+(width/2) ; fill++) {
 				liquify(fill, prog, edge);
 				edge = (fill == (center+(width/2)-1));
@@ -4568,7 +4568,7 @@ mkneuriver()	/* John Harris */
 		center = rn2(ROWNO-12)+6;
 		width = rn2(4)+4;
 		for (prog = 1; prog<COLNO; prog++) {
-			edge = 1;
+			edge = TRUE;
 			for (fill=center-(width/2); fill<=center+(width/2) ; fill++) {
 				/* edge is true the first time through this loop and the last */
 				neuliquify(prog, fill, edge);
@@ -4591,7 +4591,7 @@ mkneuriver()	/* John Harris */
 		center = rn2(COLNO-14)+7;
 		width = rn2(4)+5;
 		for (prog = 0; prog<ROWNO; prog++) {
-			edge = 1;
+			edge = TRUE;
 			for (fill=center-(width/2); fill<=center+(width/2) ; fill++) {
 				neuliquify(fill, prog, edge);
 				edge = (fill == (center+(width/2)-1));
@@ -4619,7 +4619,7 @@ mksea()	/* John Harris */
 	/*level.flags.has_river = 1;*/
 	for (x=1 ; x <= COLNO-1 ; x++) {
 		for (y=1 ; y <= ROWNO-1 ; y++) {
-			liquify(x,y, 0);
+			liquify(x,y,FALSE);
 		};
 	}
 }

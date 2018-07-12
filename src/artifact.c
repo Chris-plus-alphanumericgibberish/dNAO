@@ -3884,7 +3884,7 @@ doinvoke()
 
     obj = getobj(invoke_types, "invoke");
     if (!obj) return 0;
-    if (obj->oartifact && !touch_artifact(obj, &youmonst, 0)) return 1;
+    if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) return 1;
 	if(is_lightsaber(obj) && obj->cobj && obj->oartifact == obj->cobj->oartifact)
 		obj = obj->cobj;
     return arti_invoke(obj);
@@ -3895,7 +3895,7 @@ doparticularinvoke(obj)
     register struct obj *obj;
 {
     if (!obj) return 0;
-    if (obj->oartifact && !touch_artifact(obj, &youmonst, 0)) return 1;
+    if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) return 1;
 	if(is_lightsaber(obj) && obj->cobj && obj->oartifact == obj->cobj->oartifact)
 		obj = obj->cobj;
     return arti_invoke(obj);

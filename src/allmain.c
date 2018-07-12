@@ -653,7 +653,7 @@ moveloop()
 			///If the player no longer meets the kusanagi's requirements (ie, they lost the amulet)
 			///blast 'em and drop to the ground.
 			if (uwep && uwep->oartifact == ART_KUSANAGI_NO_TSURUGI){
-				if(!touch_artifact(uwep,&youmonst, 0)){
+				if(!touch_artifact(uwep,&youmonst, FALSE)){
 					dropx(uwep);
 				}
 			}

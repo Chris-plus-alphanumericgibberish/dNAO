@@ -629,8 +629,7 @@ init_mask_attr(np, mask)
 	struct obj *mask;
 {
 	int	i, x, tryct;
-	struct Role *mrole;
-	mrole = pm2role(mask->mp->mskrolenum);
+	struct Role *mrole = pm2role(mask->mp->mskrolenum);
 
 	for(i = 0; i < A_MAX; i++) {
 	    ABASE(i) = AMAX(i) = urole.attrbase[i];
