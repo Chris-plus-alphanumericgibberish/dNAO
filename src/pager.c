@@ -25,6 +25,7 @@ STATIC_DCL char * get_conveys_description_of_monster_type(struct monst *, char *
 STATIC_DCL char * get_mm_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mt_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mb_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_ma_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mv_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mg_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_speed_description_of_monster_type(struct monst *, char *);
@@ -1603,6 +1604,44 @@ get_mb_description_of_monster_type(struct monst * mtmp, char * description)
 	strcat(description, ". ");
 	return description;
 }
+
+char *
+get_ma_description_of_monster_type(struct monst * mtmp, char * description)
+{
+	struct permonst * ptr = mtmp->data;
+	strcat(description, "Race: ");
+	int many = 0;
+	many = append(description, (is_undead_mon(mtmp))			, "undead"				, many);
+	many = append(description, (ptr->mflagsa & MA_WERE)			, "lycanthrope"			, many);
+	many = append(description, (ptr->mflagsa & MA_HUMAN)		, "human"				, many);
+	many = append(description, (ptr->mflagsa & MA_ELF)			, "elf"					, many);
+	many = append(description, (ptr->mflagsa & MA_DROW)			, "drow"				, many);
+	many = append(description, (ptr->mflagsa & MA_DWARF)		, "dwarf"				, many);
+	many = append(description, (ptr->mflagsa & MA_GNOME)		, "gnome"				, many);
+	many = append(description, (ptr->mflagsa & MA_ORC)			, "orc"					, many);
+	many = append(description, (ptr->mflagsa & MA_VAMPIRE)		, "vampire"				, many);
+	many = append(description, (ptr->mflagsa & MA_CLOCK)		, "clockwork automaton"	, many);
+	many = append(description, (ptr->mflagsa & MA_UNLIVING)		, "not alive"			, many);
+	many = append(description, (ptr->mflagsa & MA_PLANT)		, "plant"				, many);
+	many = append(description, (ptr->mflagsa & MA_GIANT)		, "giant"				, many);
+	many = append(description, (ptr->mflagsa & MA_INSECTOID)	, "insectoid"			, many);
+	many = append(description, (ptr->mflagsa & MA_ARACHNID)		, "arachind"			, many);
+	many = append(description, (ptr->mflagsa & MA_AVIAN)		, "avian"				, many);
+	many = append(description, (ptr->mflagsa & MA_REPTILIAN)	, "reptilian"			, many);
+	many = append(description, (ptr->mflagsa & MA_ANIMAL)		, "mundane animal"		, many);
+	many = append(description, (ptr->mflagsa & MA_AQUATIC)		, "water-dweller"		, many);
+	many = append(description, (ptr->mflagsa & MA_DEMIHUMAN)	, "demihuman"			, many);
+	many = append(description, (ptr->mflagsa & MA_FEY)			, "fey"					, many);
+	many = append(description, (ptr->mflagsa & MA_ELEMENTAL)	, "elemental"			, many);
+	many = append(description, (ptr->mflagsa & MA_DRAGON)		, "dragon"				, many);
+	many = append(description, (ptr->mflagsa & MA_DEMON)		, "demon"				, many);
+	many = append(description, (ptr->mflagsa & MA_MINION)		, "minion of a deity"	, many);
+	many = append(description, (ptr->mflagsa & MA_PRIMORDIAL)	, "primordial"			, many);
+	many = append(description, (ptr->mflagsa & MA_ET)			, "alien"				, many);
+	strcat(description, ". ");
+	return description;
+}
+
 char *
 get_mv_description_of_monster_type(struct monst * mtmp, char * description)
 {
@@ -2026,6 +2065,11 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			temp_buf[0] = '\0';
 			strcat(description, "\n");
 			strcat(description, get_mg_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MA){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_ma_description_of_monster_type(mtmp, temp_buf));
 		}
 		if (iflags.pokedex & POKEDEX_SHOW_ATTACKS){
 			strcat(description, "\n");
