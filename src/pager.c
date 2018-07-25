@@ -1365,10 +1365,10 @@ generate_list_of_resistances(struct monst * mtmp, char * temp_buf, int resists)
 	many = append(temp_buf, (mr_flags & MR_STONE), "petrification", many);
 	many = append(temp_buf, (mr_flags & MR_DRAIN), "level drain", many);
 	many = append(temp_buf, (mr_flags & MR_SICK), "sickness", many);
-	many = append(temp_buf, ((mg_flags & MG_WRESIST) != 0L), "weapon attacks", many);
-	many = append(temp_buf, ((mg_flags & MG_RBLUNT) != 0L), "blunt", many);
-	many = append(temp_buf, ((mg_flags & MG_RSLASH) != 0L), "slashing", many);
-	many = append(temp_buf, ((mg_flags & MG_RPIERCE) != 0L), "piercing", many);
+	many = append(temp_buf, (((mg_flags & MG_WRESIST) != 0L) && resists == 1), "weapon attacks", many);
+	many = append(temp_buf, (((mg_flags & MG_RBLUNT ) != 0L) && resists == 1), "blunt", many);
+	many = append(temp_buf, (((mg_flags & MG_RSLASH ) != 0L) && resists == 1), "slashing", many);
+	many = append(temp_buf, (((mg_flags & MG_RPIERCE) != 0L) && resists == 1), "piercing", many);
 	//many = append(temp_buf, ((mg_flags & MG_RALL) == MG_RALL), "blunt & slashing & piercing", many);
 	return many;
 }
@@ -1651,7 +1651,7 @@ get_description_of_attack_type(uchar id)
 	case AT_BREA: return "breath";
 	case AT_EXPL: return "explosion";
 	case AT_BOOM: return "on death";
-	case AT_GAZE: return "gaze";
+	case AT_GAZE: return "targeted gaze";
 	case AT_TENT: return "tentacles";
 	case AT_ARRW: return "launch ammo";
 	case AT_WHIP: return "whip";
@@ -1667,6 +1667,7 @@ get_description_of_attack_type(uchar id)
 	case AT_BEAM: return "ranged beam";
 	case AT_DEVA: return "million-arm weapon";
 	case AT_5SQR: return "long reach touch";
+	case AT_WDGZ: return "passive gaze";
 	case AT_XWEP: return "offhand weapon";
 	case AT_WEAP: return "weapon";
 	case AT_MAGC: return "uses magic spell(s)";
