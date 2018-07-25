@@ -3195,7 +3195,7 @@ static NEARDATA const char *burdentype[] = {
 
 static NEARDATA const char *pokedexsections[] = {
 	"stats", "generation", "weight", "resists", "conveys",
-	"movement", "thinking", "biology", "mechanics", "race", "vision", "attacks", "summary"
+	"movement", "thinking", "biology", "mechanics", "race", "vision", "attacks"/*, "summary"*/
 };
 
 static NEARDATA const char *runmodes[] = {

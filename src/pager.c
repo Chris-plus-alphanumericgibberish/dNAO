@@ -18,7 +18,9 @@ STATIC_DCL int FDECL(do_look, (BOOLEAN_P));
 STATIC_DCL boolean FDECL(help_menu, (int *));
 STATIC_DCL char * get_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_generation_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_weight_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_resistance_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_conveys_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mm_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mt_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mb_description_of_monster_type(struct monst *, char *);
@@ -1397,6 +1399,16 @@ get_generation_description_of_monster_type(struct monst * mtmp, char * temp_buf)
 }
 
 char *
+get_weight_description_of_monster_type(struct monst * mtmp, char * temp_buf)
+{
+	struct permonst * ptr = mtmp->data;
+
+	sprintf(temp_buf, "Weight = %d. Nutrition = %d.", ptr->cwt, ptr->cnutrit);
+
+	return temp_buf;
+}
+
+char *
 get_resistance_description_of_monster_type(struct monst * mtmp, char * description)
 {
 	struct permonst * ptr = mtmp->data;
@@ -1411,23 +1423,30 @@ get_resistance_description_of_monster_type(struct monst * mtmp, char * descripti
 		strcat(description, temp_buf);
 		strcat(description, ".");
 	}
+	return description;
+}
 
+char *
+get_conveys_description_of_monster_type(struct monst * mtmp, char * description)
+{
+	struct permonst * ptr = mtmp->data;
+	char temp_buf[BUFSZ] = "";
 	temp_buf[0] = '\0';
-	count = generate_list_of_resistances(mtmp, temp_buf, 0);
+	int count = generate_list_of_resistances(mtmp, temp_buf, 0);
 	if ((ptr->geno & G_NOCORPSE) != 0 || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED) {
-		strcat(description, " Leaves no corpse.");
+		strcat(description, "Leaves no corpse. ");
 	}
 	else if (count == 0) {
-		strcat(description, " No conveyed resistances.");
+		strcat(description, "Corpse conveys no resistances. ");
 	}
 	else {
-		strcat(description, " Conveys ");
+		strcat(description, "Corpse conveys ");
 		strcat(description, temp_buf);
 		if (count == 1) {
-			strcat(description, " resistance.");
+			strcat(description, " resistance. ");
 		}
 		else {
-			strcat(description, " resistances.");
+			strcat(description, " resistances. ");
 		}
 	}
 
@@ -1537,7 +1556,6 @@ get_mb_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, leggedserpent(ptr)		, "animal-serpent"			, many);
 	many = append(description, (many==0)				, "unknown thing"			, many);
 	strcat(description, ". ");
-	description[0] = '\0';
 	return description;
 }
 char *
@@ -1900,117 +1918,145 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 	else if (mtmp->mfaction == CRYSTALFIED) Strcat(name, " vitrean");
 
 	temp_buf[0] = '\0';
-	sprintf(temp_buf, "Accessing Pokedex entry for %s... ", (!Upolyd || (monsternumber < NUMMONS)) ? name : "this weird creature");
-	strcat(description, temp_buf);
+	if (iflags.pokedex) {
+		sprintf(temp_buf, "Accessing Pokedex entry for %s... ", (!Upolyd || (monsternumber < NUMMONS)) ? name : "this weird creature");
+		strcat(description, temp_buf);
 
-	strcat(description, "\n");
-	strcat(description, " ");
-	strcat(description, "\n");
-	strcat(description, "Base statistics of this monster type:");
-	strcat(description, "\n");
+		strcat(description, "\n");
+		strcat(description, " ");
+		strcat(description, "\n");
+		if (iflags.pokedex & POKEDEX_SHOW_STATS){
+			strcat(description, "Base statistics of this monster type:");
+			strcat(description, "\n");
+			int ac = ptr->ac + (mtmp->mfaction == CRYSTALFIED ? -16 : mtmp->mfaction == SKELIFIED ? -6 : mtmp->mfaction == ZOMBIFIED ? -2 : 0);
+			sprintf(temp_buf, "Base level = %d. Difficulty = %d. AC = %d. MR = %d. Alignment %d. ", ptr->mlevel, monstr[monsndx(ptr)], ac, ptr->mr, ptr->maligntyp);
+			strcat(description, temp_buf);
+			temp_buf[0] = '\0';
+			strcat(description, get_speed_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_GENERATION){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_generation_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_RESISTS){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_resistance_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_CONVEYS){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_conveys_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_WEIGHT){
+			temp_buf[0] = '\0';
+			strcat(description, get_weight_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MM){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mm_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MT){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mt_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MB){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mb_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MV){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mv_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MG){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mg_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_ATTACKS){
+			strcat(description, "\n");
+			strcat(description, "Attacks:");
+			strcat(description, "\n");
+			struct attack *mattk;
+			struct attack alt_attk;
+			int sum[NATTK];
+			int i;
+			boolean derundspec = FALSE;
 
-	int ac = ptr->ac + (mtmp->mfaction == CRYSTALFIED ? -16 : mtmp->mfaction == SKELIFIED ? -6 : mtmp->mfaction == ZOMBIFIED ? -2 : 0);
-	sprintf(temp_buf, "Base level = %d. Difficulty = %d. AC = %d. MR = %d.\nAlignment %d. ", ptr->mlevel, monstr[monsndx(ptr)], ac, ptr->mr, ptr->maligntyp);
-	strcat(description, temp_buf);
-	temp_buf[0] = '\0';
-	strcat(description, get_speed_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, get_generation_description_of_monster_type(mtmp, temp_buf));
-	strcat(description, "\n");
-	temp_buf[0] = '\0';
-	strcat(description, get_resistance_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mm_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mt_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mb_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mv_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mg_description_of_monster_type(mtmp, temp_buf));
+			for (i = 0; i < NATTK; i++) {
+				sum[i] = 1;
+				mattk = getmattk(ptr, i, sum, &alt_attk);
 
-	strcat(description, "\n");
-	strcat(description, "Attacks:");
-	strcat(description, "\n");
-	struct attack *mattk;
-	struct attack alt_attk;
-	int sum[NATTK];
-	int i;
-	boolean derundspec = FALSE;
-
-	for (i = 0; i < NATTK; i++) {
-		sum[i] = 1;
-		mattk = getmattk(ptr, i, sum, &alt_attk);
-
-		if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
-			if (mattk->aatyp == AT_SPIT
-				|| mattk->aatyp == AT_BREA
-				|| mattk->aatyp == AT_GAZE
-				|| mattk->aatyp == AT_ARRW
-				|| mattk->aatyp == AT_MMGC
-				|| mattk->aatyp == AT_TNKR
-				|| mattk->aatyp == AT_SHDW
-				|| mattk->aatyp == AT_BEAM
-				|| mattk->aatyp == AT_MAGC
-				|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
-				|| (i == 0 &&
-				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) &&
-				mattk->adtyp == AD_PHYS &&
-				mattk->damn*mattk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mtmp->data->msize * 2, 4) / 2
-				)
-				|| (!derundspec && mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
-				|| (!derundspec && i == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
-				){
-				if (i == 0){
-					alt_attk.aatyp = AT_CLAW;
-					alt_attk.adtyp = AD_PHYS;
-					alt_attk.damn = mtmp->m_lev / 10 + 1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
-					alt_attk.damd = max(mtmp->data->msize * 2, 4);
-					mattk = &alt_attk;
+				if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
+					if (mattk->aatyp == AT_SPIT
+						|| mattk->aatyp == AT_BREA
+						|| mattk->aatyp == AT_GAZE
+						|| mattk->aatyp == AT_ARRW
+						|| mattk->aatyp == AT_MMGC
+						|| mattk->aatyp == AT_TNKR
+						|| mattk->aatyp == AT_SHDW
+						|| mattk->aatyp == AT_BEAM
+						|| mattk->aatyp == AT_MAGC
+						|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
+						|| (i == 0 &&
+						(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) &&
+						mattk->adtyp == AD_PHYS &&
+						mattk->damn*mattk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mtmp->data->msize * 2, 4) / 2
+						)
+						|| (!derundspec && mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
+						|| (!derundspec && i == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
+						){
+						if (i == 0){
+							alt_attk.aatyp = AT_CLAW;
+							alt_attk.adtyp = AD_PHYS;
+							alt_attk.damn = mtmp->m_lev / 10 + 1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
+							alt_attk.damd = max(mtmp->data->msize * 2, 4);
+							mattk = &alt_attk;
+						}
+						else if (!derundspec && mtmp->mfaction == SKELIFIED){
+							derundspec = TRUE;
+							alt_attk.aatyp = AT_TUCH;
+							alt_attk.adtyp = AD_SLOW;
+							alt_attk.damn = 1;
+							alt_attk.damd = max(mtmp->data->msize * 2, 4);
+							mattk = &alt_attk;
+						}
+						else if (!derundspec && mtmp->mfaction == CRYSTALFIED){
+							derundspec = TRUE;
+							alt_attk.aatyp = AT_TUCH;
+							alt_attk.adtyp = AD_ECLD;
+							alt_attk.damn = min(10, mtmp->m_lev / 3);
+							alt_attk.damd = 8;
+							mattk = &alt_attk;
+						}
+						else continue;
+					}
 				}
-				else if (!derundspec && mtmp->mfaction == SKELIFIED){
-					derundspec = TRUE;
-					alt_attk.aatyp = AT_TUCH;
-					alt_attk.adtyp = AD_SLOW;
-					alt_attk.damn = 1;
-					alt_attk.damd = max(mtmp->data->msize * 2, 4);
-					mattk = &alt_attk;
+				main_temp_buf[0] = '\0';
+				get_description_of_attack(mattk, temp_buf);
+				if (temp_buf[0] == '\0') {
+					if (i == 0) {
+#ifndef USE_TILES
+						strcat(description, "    ");
+#endif
+						strcat(description, "none");
+						strcat(description, "\n");
+					}
+					break;
 				}
-				else if (!derundspec && mtmp->mfaction == CRYSTALFIED){
-					derundspec = TRUE;
-					alt_attk.aatyp = AT_TUCH;
-					alt_attk.adtyp = AD_ECLD;
-					alt_attk.damn = min(10, mtmp->m_lev / 3);
-					alt_attk.damd = 8;
-					mattk = &alt_attk;
-				}
-				else continue;
+#ifndef USE_TILES
+				strcat(main_temp_buf, "    ");
+#endif
+				strcat(main_temp_buf, temp_buf);
+				strcat(main_temp_buf, "\n");
+				strcat(description, main_temp_buf);
 			}
 		}
-		main_temp_buf[0] = '\0';
-		get_description_of_attack(mattk, temp_buf);
-		if (temp_buf[0] == '\0') {
-			if (i == 0) {
-#ifndef USE_TILES
-				strcat(description, "    ");
-#endif
-				strcat(description, "none");
-				strcat(description, "\n");
-			}
-			break;
-		}
-#ifndef USE_TILES
-		strcat(main_temp_buf, "    ");
-#endif
-		strcat(main_temp_buf, temp_buf);
-		strcat(main_temp_buf, "\n");
-		strcat(description, main_temp_buf);
 	}
 	return description;
 }
