@@ -187,7 +187,23 @@ struct flag {
 #define ATTACK_MODE_CHAT      'c'
 #define ATTACK_MODE_ASK       'a'
 #define ATTACK_MODE_FIGHT_ALL 'f'
- 
+
+/* values for iflags.pokedex */
+#define POKEDEX_SHOW_STATS		1
+#define POKEDEX_SHOW_GENERATION 2
+#define POKEDEX_SHOW_WEIGHT		4
+#define POKEDEX_SHOW_RESISTS	8
+#define POKEDEX_SHOW_CONVEYS	16
+#define POKEDEX_SHOW_MM			32
+#define POKEDEX_SHOW_MT			64
+#define POKEDEX_SHOW_MB			128
+#define POKEDEX_SHOW_MG			256
+#define POKEDEX_SHOW_MA			512
+#define POKEDEX_SHOW_MV			1024
+#define POKEDEX_SHOW_ATTACKS	2048
+#define POKEDEX_SHOW_CRITICAL	4096
+#define POKEDEX_SHOW_DEFAULT	POKEDEX_SHOW_STATS | POKEDEX_SHOW_RESISTS | POKEDEX_SHOW_CONVEYS | POKEDEX_SHOW_MG | POKEDEX_SHOW_ATTACKS | POKEDEX_SHOW_CRITICAL
+
 struct instance_flags {
 	char attack_mode;         /* attack, refrain or ask to attack monsters */
 	boolean  cbreak;	/* in cbreak mode, rogue format */
@@ -308,6 +324,8 @@ struct instance_flags {
     boolean obscure_role_obj_names;
     boolean dnethack_start_text;
     boolean dnethack_dungeon_colors;
+
+	int pokedex;	/* default monster stats to show in the pokedex */
 /*
  * Window capability support.
  */
