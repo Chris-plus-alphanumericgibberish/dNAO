@@ -20,6 +20,7 @@ STATIC_DCL char * get_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_generation_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_weight_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_resistance_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_weakness_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_conveys_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mm_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mt_description_of_monster_type(struct monst *, char *);
@@ -1342,6 +1343,26 @@ append(char * buf, int condition, char * text, boolean many)
 	}
 	return many;
 }
+int
+appendgroup(char * buf, int condition, char * primer, char * text, boolean many, boolean group)
+{
+	if (condition) {
+		if (buf != NULL) {
+			if (group) {
+				(void)strcat(buf, "/");
+			}
+			else {
+				if (many)
+					(void)strcat(buf, ", ");
+				(void)strcat(buf, primer);
+				(void)strcat(buf, " ");
+			}
+			(void)strcat(buf, text);
+		}
+		return group + 1;
+	}
+	return group;
+}
 
 int
 generate_list_of_resistances(struct monst * mtmp, char * temp_buf, int resists)
@@ -1427,6 +1448,27 @@ get_resistance_description_of_monster_type(struct monst * mtmp, char * descripti
 }
 
 char *
+get_weakness_description_of_monster_type(struct monst * mtmp, char * description)
+{
+	struct permonst * ptr = mtmp->data;
+	char temp_buf[BUFSZ] = "";
+	temp_buf[0] = '\0';
+	int many = 0;
+
+	many = append(temp_buf, hates_holy_mon(mtmp)	, "holy"		, many);
+	many = append(temp_buf, hates_unholy(ptr)		, "unholy"		, many);
+	many = append(temp_buf, hates_silver(ptr)		, "silver"		, many);
+	many = append(temp_buf, hates_iron(ptr)			, "iron"		, many);
+
+	if (many) {
+		strcat(description, "Weak to ");
+		strcat(description, temp_buf);
+		strcat(description, ".");
+	}
+	return description;
+}
+
+char *
 get_conveys_description_of_monster_type(struct monst * mtmp, char * description)
 {
 	struct permonst * ptr = mtmp->data;
@@ -1486,33 +1528,36 @@ get_mt_description_of_monster_type(struct monst * mtmp, char * description)
 	struct permonst * ptr = mtmp->data;
 	strcat(description, "Thinking: ");
 	int many = 0;
-	many = append(description, bold(ptr)				, "resists fear"			, many);
-	many = append(description, hides_under(ptr)			, "conceals iteself"		, many);
-	many = append(description, is_hider(ptr)			, "hides itself"			, many);
-	many = append(description, notake(ptr)				, "doesn't pick up items"	, many);
-	many = append(description, mindless_mon(mtmp)		, "mindless"				, many);
-	many = append(description, is_animal(ptr)			, "animal-like"				, many);
-	many = append(description, carnivorous(ptr)			, "eats meat"				, many);
-	many = append(description, herbivorous(ptr)			, "eats veggies"			, many);
-	many = append(description, metallivorous(ptr)		, "eats metal"				, many);
-	many = append(description, magivorous(ptr)			, "eats magic"				, many);
-	many = append(description, is_domestic(ptr)			, "domestic"				, many);
-	many = append(description, is_wanderer(ptr)			, "wanders"					, many);
-	many = append(description, always_hostile_mon(mtmp)	, "usually hostile"			, many);
-	many = append(description, always_peaceful(ptr)		, "usually peaceful"		, many);
-	many = append(description, throws_rocks(ptr)		, "throws rocks"			, many);
-	many = append(description, likes_gold(ptr)			, "likes gold"				, many);
-	many = append(description, likes_gems(ptr)			, "likes gems"				, many);
-	many = append(description, likes_objs(ptr)			, "likes equipment"			, many);
-	many = append(description, likes_magic(ptr)			, "likes magic items"		, many);
-	many = append(description, wants_bell(ptr)			, "wants the bell"			, many);
-	many = append(description, wants_book(ptr)			, "wants the book"			, many);
-	many = append(description, wants_cand(ptr)			, "wants the candalabrum"	, many);
-	many = append(description, wants_qart(ptr)			, "wants your quest artifact"	, many);
-	many = append(description, wants_amul(ptr)			, "wants the amulet"		, many);
-	many = append(description, can_betray(ptr)			, "turns traitor"			, many);
-	many = append(description, levl_follower(mtmp)		, "follows you to other levels"	, many);
-	many = append(description, (many==0)				, "nothing special"			, many);
+	int eats = 0;
+	int likes = 0;
+	int wants = 0;
+
+	many = append(description, bold(ptr)				, "fearless"					, many);
+	many = append(description, hides_under(ptr)			, "hides"						, many);
+	many = append(description, is_hider(ptr)			, "camoflauged"					, many);
+	many = append(description, notake(ptr)				, "doesn't pick up items"		, many);
+	many = append(description, mindless_mon(mtmp)		, "mindless"					, many);
+	many = append(description, is_animal(ptr)			, "animal minded"				, many);
+	eats = appendgroup(description, carnivorous(ptr)	, "eats",	"meat"				, many, eats);
+	eats = appendgroup(description, herbivorous(ptr)	, "eats",	"veggies"			, many, eats);
+	eats = appendgroup(description, metallivorous(ptr)	, "eats",	"metal"				, many, eats);
+	many = appendgroup(description, magivorous(ptr)		, "eats",	"magic"				, many, eats) + many;
+	many = append(description, is_domestic(ptr)			, "domestic"					, many);
+	many = append(description, is_wanderer(ptr)			, "wanders"						, many);
+	many = append(description, always_hostile_mon(mtmp)	, "usually hostile"				, many);
+	many = append(description, always_peaceful(ptr)		, "usually peaceful"			, many);
+	many = append(description, throws_rocks(ptr)		, "throws rocks"				, many);
+	likes= appendgroup(description, likes_gold(ptr)		, "likes",	"gold"				, many, likes);
+	likes= appendgroup(description, likes_gems(ptr)		, "likes",	"gems"				, many, likes);
+	likes= appendgroup(description, likes_objs(ptr)		, "likes",	"equipment"			, many, likes);
+	many = appendgroup(description, likes_magic(ptr)	, "likes",	"magic items"		, many, likes) + many;
+	wants= appendgroup(description, wants_bell(ptr)		, "wants",	"the bell"				, many, wants);
+	wants= appendgroup(description, wants_book(ptr)		, "wants",	"the book"				, many, wants);
+	wants= appendgroup(description, wants_cand(ptr)		, "wants",	"the candalabrum"		, many, wants);
+	wants= appendgroup(description, wants_qart(ptr)		, "wants",	"your quest artifact"	, many, wants);
+	many = appendgroup(description, wants_amul(ptr)		, "wants",	"the amulet"			, many, wants) + many;
+	many = append(description, can_betray(ptr)			, "traitorous"					, many);
+	many = append(description, (many==0)				, "nothing special"				, many);
 	strcat(description, ". ");
 	return description;
 }
@@ -1595,15 +1640,13 @@ char * get_mg_description_of_monster_type(struct monst * mtmp, char * descriptio
 	many = append(description, !polyok(ptr)				, "invalid polymorph form"	, many);
 	many = append(description, is_untamable(ptr)		, "untamable"				, many);
 	many = append(description, extra_nasty(ptr)			, "nasty"					, many);
-	many = append(description, hates_unholy(ptr)		, "hates unholy"			, many);
-	many = append(description, hates_silver(ptr)		, "hates silver"			, many);
-	many = append(description, hates_iron(ptr)			, "hates iron"				, many);
-	many = append(description, nospellcooldowns(ptr)	, "spell cooldownless"		, many);
+	many = append(description, nospellcooldowns(ptr)	, "quick-caster"			, many);
 	many = append(description, is_lord(ptr)				, "lord"					, many);
 	many = append(description, is_prince(ptr)			, "prince"					, many);
 	many = append(description, opaque(ptr)				, "opaque"					, many);
 	many = append(description, regenerates(ptr)			, "regenerating"			, many);
-	many = append(description, (many==0)				, "blind"					, many);
+	many = append(description, levl_follower(mtmp)		, "stalks you"				, many);
+	many = append(description, (many==0)				, "normal"					, many);
 	strcat(description, ". ");
 	return description;
 }
@@ -1813,6 +1856,8 @@ get_description_of_damage_type(uchar id)
 	case AD_BLUD: return "Sword of Blood";
 	case AD_SURY: return "Arrows of Slaying";
 	case AD_NPDC: return "drains constitution";
+	case AD_GLSS: return "silver mirror shards";
+	case AD_MERC: return "mercury blade";
 	case AD_DUNSTAN: return "stones throw themselves at target";
 	case AD_IRIS: return "iridescent tentacles";
 	case AD_NABERIUS: return "tarnished bloody fangs";
@@ -1916,6 +1961,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 	if (mtmp->mfaction == ZOMBIFIED)		Strcat(name, " zombie");
 	else if (mtmp->mfaction == SKELIFIED)	Strcat(name, " skeleton");
 	else if (mtmp->mfaction == CRYSTALFIED) Strcat(name, " vitrean");
+	else if (mtmp->mfaction == FRACTURED)	Strcat(name, " witness");
 
 	temp_buf[0] = '\0';
 	if (iflags.pokedex) {
@@ -1943,6 +1989,9 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			temp_buf[0] = '\0';
 			strcat(description, "\n");
 			strcat(description, get_resistance_description_of_monster_type(mtmp, temp_buf));
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_weakness_description_of_monster_type(mtmp, temp_buf));
 		}
 		if (iflags.pokedex & POKEDEX_SHOW_CONVEYS){
 			temp_buf[0] = '\0';
@@ -2035,6 +2084,19 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 							mattk = &alt_attk;
 						}
 						else continue;
+					}
+				}
+				if (mtmp->mfaction == FRACTURED){
+					if ((!derundspec &&
+						mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
+						|| (mattk->aatyp == AT_CLAW && (mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE))
+						){
+						derundspec = TRUE;
+						alt_attk.aatyp = AT_CLAW;
+						alt_attk.adtyp = AD_GLSS;
+						alt_attk.damn = max(mtmp->m_lev / 10 + 1, mattk->damn);
+						alt_attk.damd = max(mtmp->data->msize * 2, max(mattk->damd, 4));
+						mattk = &alt_attk;
 					}
 				}
 				main_temp_buf[0] = '\0';
