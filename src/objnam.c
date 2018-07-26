@@ -1810,6 +1810,7 @@ static const char * const special_subjs[] = {
 	"Cyclops",
 	"Hippocrates",
 	"Pelias",
+	"lembas",
 	"aklys",
 	"amnesia",
 	"paralysis",
@@ -2395,6 +2396,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-9, "iron bars") ||
 #endif
 			   !BSTRCMPI(bp, p-5, "aklys") ||
+			   !BSTRCMPI(bp, p-6, "lembas") ||
 			   !BSTRCMPI(bp, p-5, "dress") ||
 			   !BSTRCMPI(bp, p-16, "descent of stars") ||
 			   !BSTRCMPI(bp, p-13, "dragon scales") ||
@@ -2517,6 +2519,7 @@ struct alt_spellings {
 	{ "camera", EXPENSIVE_CAMERA },
 	{ "tee shirt", T_SHIRT },
 #endif
+	{ "lembas", LEMBAS_WAFER },
 	{ "can", TIN },
 	{ "can opener", TIN_OPENER },
 	{ "kelp", KELP_FROND },
