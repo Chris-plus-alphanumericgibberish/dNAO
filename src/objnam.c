@@ -2322,6 +2322,7 @@ const char *oldstr;
 	    if (BSTRNCMPI(bp, p-3, "Eye", 3) &&
 		BSTRNCMP(bp, p-4, "boot", 4) &&
 		BSTRNCMP(bp, p-8, "gauntlet", 8) &&
+		BSTRNCMPI(bp, p-11, "Steel Scale", 11) &&
 		BSTRNCMP(bp, p-8, "Gauntlet", 8))
 		while ((*p = *(p+1)) != 0) p++;
 	    return bp;
@@ -3006,7 +3007,7 @@ boolean from_user;
 			mat = GOLD;
 		} else if (!strncmpi(bp, "platinum ", l=9)
 			&& strncmpi(bp, "platinum wand", 13) && strncmpi(bp, "Platinum Yendorian", 18)
-			&& strncmpi(bp, "Platinum Dragon", 15)
+			&& strncmpi(bp, "Platinum Dragon", 15) && strncmpi(bp, "Platinum Dragon Plate", 21)
 		) {
 			mat = PLATINUM;
 		} else if (!strncmpi(bp, "mithril ", l=8)) {
@@ -3159,6 +3160,7 @@ boolean from_user;
 	if (strncmpi(bp, "rod of lordly might", 19)) /* not the "lord" rank */
 	if (strncmpi(bp, "magenta", 7)) /* not the "mage" rank */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
+	if (strncmpi(bp, "platinum dragon plate", 22)) /* not a "dragon" */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
 	    (mntmp = name_to_mon(bp)) >= LOW_PM) {
 		int mntmptoo, mntmplen;	/* double check for rank title */
@@ -3183,7 +3185,7 @@ boolean from_user;
 			Strcpy(bp, sng);
 		}
 	}
-
+	
 	/* Alternate spellings (pick-ax, silver sabre, &c) */
     {
 	struct alt_spellings *as = spellings;
