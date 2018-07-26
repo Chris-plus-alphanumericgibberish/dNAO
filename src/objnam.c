@@ -2530,6 +2530,7 @@ struct alt_spellings {
 	{ "bazooka", ROCKET_LAUNCHER },
 	{ "hand grenade", FRAG_GRENADE },
 	{ "dynamite", STICK_OF_DYNAMITE },
+	{ "ampule", HYPOSPRAY_AMPULE },
 //#endif
 	{ "rum", POT_BOOZE },
 	{ "sea biscuit", CRAM_RATION },
@@ -2612,7 +2613,7 @@ boolean from_user;
 	register struct obj *otmp;
 	int cnt, spe, spesgn, typ, very, rechrg;
 	int blessed, uncursed, iscursed, ispoisoned, isgreased, isdrained, stolen;
-	int moonphase = -1, viperheads = -1, mat = 0;
+	int moonphase = -1, viperheads = -1, ampule = -1, mat = 0;
 	int eroded, eroded2, eroded3, erodeproof;
 #ifdef INVISIBLE_OBJECTS
 	int isinvisible;
@@ -2901,6 +2902,34 @@ boolean from_user;
 			moonphase = GIBBOUS_MOON;
 		} else if (!strncmpi(bp, "full ", l=5) && strncmpi(bp, "full healing", 12)) {
 			moonphase = FULL_MOON;
+		} else if (!strncmpi(bp, "gain ability ", l=13) && strstri(bp, " ampule")) {
+			ampule = POT_GAIN_ABILITY;
+		} else if (!strncmpi(bp, "restore ability ", l=16) && strstri(bp, " ampule")) {
+			ampule = POT_RESTORE_ABILITY;
+		} else if (!strncmpi(bp, "blindness ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_BLINDNESS;
+		} else if (!strncmpi(bp, "confusion ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_CONFUSION;
+		} else if (!strncmpi(bp, "paralysis ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_PARALYSIS;
+		} else if (!strncmpi(bp, "speed ", l=6) && strstri(bp, " ampule")) {
+			ampule = POT_SPEED;
+		} else if (!strncmpi(bp, "hallucination ", l=14) && strstri(bp, " ampule")) {
+			ampule = POT_HALLUCINATION;
+		} else if (!strncmpi(bp, "healing ", l=8) && strstri(bp, " ampule")) {
+			ampule = POT_HEALING;
+		} else if (!strncmpi(bp, "extra healing ", l=14) && strstri(bp, " ampule")) {
+			ampule = POT_EXTRA_HEALING;
+		} else if (!strncmpi(bp, "full healing ", l=13) && strstri(bp, " ampule")) {
+			ampule = POT_FULL_HEALING;
+		} else if (!strncmpi(bp, "gain energy ", l=11) && strstri(bp, " ampule")) {
+			ampule = POT_GAIN_ENERGY;
+		} else if (!strncmpi(bp, "sleeping ", l=9) && strstri(bp, " ampule")) {
+			ampule = POT_SLEEPING;
+		} else if (!strncmpi(bp, "polymorph ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_POLYMORPH;
+		} else if (!strncmpi(bp, "amnesia ", l=8) && strstri(bp, " ampule")) {
+			ampule = POT_AMNESIA;
 		} else if (!strncmpi(bp, "wax ", l=4) && strncmpi(bp, "wax candle", 10)
 			) {
 			mat = WAX;
@@ -4057,6 +4086,11 @@ typfnd:
 		if (otmp->oartifact) {
 			u.uconduct.wisharti++;	/* KMH, conduct */
 		}
+	}
+
+	/* set ampule type */
+	if(ampule != -1 && otmp->otyp == HYPOSPRAY_AMPULE){
+		otmp->ovar1 = ampule;
 	}
 
 	/* set viper heads, probability of getting what you wished for copied loosely from setting weapon/armor spe, but the minimum is 1, not 0. */
