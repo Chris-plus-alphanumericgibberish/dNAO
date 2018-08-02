@@ -2661,6 +2661,7 @@ boolean from_user;
 		sizewished = FALSE;
 	int objsize = youracedata->msize;
 	long bodytype = 0L;
+	long oproperties = 0L;
 	char oclass;
 	char *un, *dn, *actualn;
 	const char *name=0;
@@ -3024,13 +3025,16 @@ boolean from_user;
 		} else if ((!strncmpi(bp, "gemstone ", l=9) || !strncmpi(bp, "gem ", l=4))
 			) {
 			mat = GEMSTONE;
-		} else if (!strncmpi(bp, "stone ", l=6)
+		} else if ((!strncmpi(bp, "stone ", l=6) || !strncmpi(bp, "ceramic ", l=8))
 			) {
 			mat = MINERAL;
 		} else if (!strncmpi(bp, "obsidian ", l=9)
 			&& strncmpi(bp, "obsidian stone", 14) && strncmpi(bp, "obsidian gem", 12)
 			) {
 			mat = OBSIDIAN_MT;
+		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)
+			) {
+			oproperties = OPROP_WOOL;
 		} else break;
 		bp += l;
 	}
@@ -4076,6 +4080,28 @@ typfnd:
 					set_material(otmp, mat);
 			}
 	
+	/* set object properties */
+	if (oproperties && wizard) // wishing for object properties is wizard-mode only
+	{
+		if (wizard)		// wizard mode will give you what you ask for, even if it breaks things
+			otmp->oproperties = oproperties;
+		else
+			if (otmp->oclass == ARMOR_CLASS)
+			{
+				switch (oproperties)
+				{
+				case OPROP_WOOL:
+					otmp->oproperties = oproperties;
+					break;
+				default:
+					otmp->oproperties = 0L;
+					break;
+				}
+			}
+	}
+		
+
+
 	if (name) {
 		const char *aname;
 		short objtyp;
