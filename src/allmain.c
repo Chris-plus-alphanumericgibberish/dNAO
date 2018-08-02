@@ -1366,7 +1366,7 @@ karemade:
 				u.uen -= reglevel / 100;
 				u.maintained_en_debt -= reglevel / 100;
 				//Now deal with any remainder
-				if (!(moves % (100/((reglevel % 100) + 1) + 2))) {
+				if ((reglevel > 0) && !(moves % (100/((reglevel % 100) + 1) + 2))) {
 					u.uen -= 1;
 					u.maintained_en_debt -= 1;
 				}
@@ -1389,7 +1389,7 @@ karemade:
 					reglevel += uarmh->spe;
 				}
 				reglevel -= u_healing_penalty();
-				reglevel -= 10 + 2 * u.uspellprot;
+				if(u.uspellprot > 0) reglevel -= 10 + 2*u.uspellprot;
 				if(reglevel < 1) reglevel = 1;
 				//recover 1/30th energy per turn:
 				u.uen += reglevel/30;
