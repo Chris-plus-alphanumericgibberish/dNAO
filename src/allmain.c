@@ -1359,6 +1359,20 @@ karemade:
 				}
 		    }
 
+			if (u.uen > 0 || Race_if(PM_INCANTIFIER)){
+				//maintained spells accumulate an energy debt that must be paid over time
+				int reglevel = u.maintained_en_debt;
+				//pay 1/100th energy per turn:
+				u.uen -= reglevel / 100;
+				u.maintained_en_debt -= reglevel / 100;
+				//Now deal with any remainder
+				if (!(moves % (100/((reglevel % 100) + 1) + 2))) {
+					u.uen -= 1;
+					u.maintained_en_debt -= 1;
+				}
+				if (u.uen < 0 && !Race_if(PM_INCANTIFIER))  u.uen = 0;
+				flags.botl = 1;
+			}
 		    if (u.uen < u.uenmax && 
 				wtcap < MOD_ENCUMBER && 
 				!Race_if(PM_INCANTIFIER)
@@ -1375,7 +1389,7 @@ karemade:
 					reglevel += uarmh->spe;
 				}
 				reglevel -= u_healing_penalty();
-				if(u.uspellprot > 0) reglevel -= 10 + 2*u.uspellprot;
+				reglevel -= 10 + 2 * u.uspellprot;
 				if(reglevel < 1) reglevel = 1;
 				//recover 1/30th energy per turn:
 				u.uen += reglevel/30;
