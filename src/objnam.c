@@ -2369,7 +2369,8 @@ const char *oldstr;
 			    !BSTRCMP(bp, p-6, "lenses") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
-			    !BSTRCMP(bp, p-6, "scales"))
+			    !BSTRCMP(bp, p-6, "scales") ||
+				!BSTRCMPI(bp, p-10, "Lost Names")) /* book */
 				return bp;
 
 		} else if (!BSTRCMPI(bp, p-5, "boots") ||
@@ -2381,6 +2382,10 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-14, "shape changers") ||
 			   !BSTRCMPI(bp, p-15, "detect monsters") ||
 			   !BSTRCMPI(bp, p-5, "Chaos") ||
+			   !BSTRCMPI(bp, p-13, "Wand of Orcus") || /* wand */
+			   !BSTRCMPI(bp, p-12, "Gear-spirits") || /* crossbow*/
+			   !BSTRCMPI(bp, p-10, "Rod of Dis") || /* mace */
+			   !BSTRCMPI(bp, p-6, "Caress") || /* whip */
 			   !BSTRCMPI(bp, p-7, "Proteus") || /* chest */
 			   !BSTRCMPI(bp, p-11, "Aesculapius") || /* staff */
 			   !BSTRCMPI(bp, p-7, "Orpheus") || /* lyre */
@@ -2391,8 +2396,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-14, "Dwarvish Lords") || /* axe */
 			   !BSTRCMPI(bp, p-12, "Elvish Lords") || /* mace */
 			   !BSTRCMPI(bp, p-11, "Seven Parts") || /* spear */
-			   !BSTRCMPI(bp, p-10, "Lost Names") || /* book */
-			   !BSTRCMPI(bp, p-10, "Infinite Spells") || /* book */
+			   !BSTRCMPI(bp, p-15, "Infinite Spells") || /* book */
 			   !BSTRCMPI(bp, p-10, "eucalyptus") ||
 #ifdef WIZARD
 			   !BSTRCMPI(bp, p-9, "iron bars") ||
@@ -3160,6 +3164,7 @@ boolean from_user;
 	if (strncmpi(bp, "wizard lock", 11)) /* not the "wizard" monster! */
 	if (strncmpi(bp, "vampire killer", 14)) /* not the "vampire" monster! */
 	if (strncmpi(bp, "ninja-to", 8)) /* not the "ninja" rank */
+	if (strncmpi(bp, "rogue gear-spirits", 18)) /* not the "rogue" monster */
 	if (strncmpi(bp, "master key", 10)) /* not the "master" rank */
 	if (strncmpi(bp, "scroll of stinking cloud", 10)) /* not the "stinking cloud" monster */
 	if (strncmpi(bp, "rod of lordly might", 19)) /* not the "lord" rank */
@@ -3289,7 +3294,8 @@ boolean from_user;
 	   strncmpi(bp, "black dress", 11) && 
 	   strncmpi(bp, "noble's dress", 13) &&
 	   strncmpi(bp, "sceptre of lolth", 16) && 
-	   strncmpi(bp, "atma weapon", 11)
+	   strncmpi(bp, "atma weapon", 11) &&
+	   strncmpi(bp, "wand of orcus", 13)
 	)
 	for (i = 0; i < (int)(sizeof wrpsym); i++) {
 		register int j = strlen(wrp[i]);
