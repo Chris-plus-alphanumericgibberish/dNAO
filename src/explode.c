@@ -145,8 +145,8 @@ int radius;
 	if (radius == 1)
 	{	// can use simple method of creating explosions
 		int i, j;
-		for (i = -1; i < 1; i++)
-		for (j = -1; j < 1; j++)
+		for (i = -1; i <= 1; i++)
+		for (j = -1; j <= 1; j++)
 			if (isok(x + i, y + j))
 				add_location_to_explode_region(x + i, y + j, area);
 	}
