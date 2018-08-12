@@ -1821,31 +1821,31 @@ int spellnum;
 			switch(rn2(7)){
 				case 0:
 					//Physical
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 8, d(6,6), MON_EXPLODE, EXPL_RED); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 8, d(6,6), MON_EXPLODE, EXPL_RED, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 1:
 					//Fire
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 1, d(6,6), MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 1, d(6,6), MON_EXPLODE, EXPL_FIERY, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 2:
 					//Poison
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 6, d(6,6), MON_EXPLODE, EXPL_YELLOW); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 6, d(6,6), MON_EXPLODE, EXPL_YELLOW, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 3:
 					//Acid
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 7, d(6,6), MON_EXPLODE, EXPL_LIME); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 7, d(6,6), MON_EXPLODE, EXPL_LIME, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 4:
 					//Cold
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 2, d(6,6), MON_EXPLODE, EXPL_BBLUE); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 2, d(6,6), MON_EXPLODE, EXPL_BBLUE, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 5:
 					//Electricity
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 5, d(6,6), MON_EXPLODE, EXPL_MAGENTA); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 5, d(6,6), MON_EXPLODE, EXPL_MAGENTA, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 6:
 					//Disintegration
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 4, d(6,6), MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 4, d(6,6), MON_EXPLODE, EXPL_MAGICAL, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 			}
 				dx = rnd(3) - 2; 
@@ -1863,58 +1863,58 @@ int spellnum;
 	}break;
 	case ACID_BLAST:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux, mtmp->muy, 7, dmg, MON_EXPLODE, EXPL_NOXIOUS); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 7, dmg, MON_EXPLODE, EXPL_NOXIOUS, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_FIRA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux, mtmp->muy, 1, dmg, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 1, dmg, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_FIRAGA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_BLIZZARA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux, mtmp->muy, 2, dmg, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 2, dmg, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_BLIZZAGA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_THUNDARA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux, mtmp->muy, 5, dmg, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 5, dmg, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_THUNDAGA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_FLARE:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_MUDDY); //explode(x, y, type, dam, olet, expltype)
-		explode2(mtmp->mux, mtmp->muy, 8, dmg, MON_EXPLODE, EXPL_FROSTY);
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_MUDDY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 8, dmg, MON_EXPLODE, EXPL_FROSTY, 2);
 		dmg = 0;
 		stop_occupation();
 	break;
@@ -4527,31 +4527,31 @@ uspsibolt:
 			switch(rn2(7)){
 				case 0:
 					//Physical
-					explode2(mtmp->mx+dx, mtmp->my+dy, 8, d(6,6), MON_EXPLODE, EXPL_RED); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 8, d(6,6), MON_EXPLODE, EXPL_RED, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 1:
 					//Fire
-					explode2(mtmp->mx+dx, mtmp->my+dy, 1, d(6,6), MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 1, d(6,6), MON_EXPLODE, EXPL_FIERY, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 2:
 					//Poison
-					explode2(mtmp->mx+dx, mtmp->my+dy, 6, d(6,6), MON_EXPLODE, EXPL_YELLOW); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 6, d(6,6), MON_EXPLODE, EXPL_YELLOW, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 3:
 					//Acid
-					explode2(mtmp->mx+dx, mtmp->my+dy, 7, d(6,6), MON_EXPLODE, EXPL_LIME); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 7, d(6,6), MON_EXPLODE, EXPL_LIME, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 4:
 					//Cold
-					explode2(mtmp->mx+dx, mtmp->my+dy, 2, d(6,6), MON_EXPLODE, EXPL_BBLUE); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 2, d(6,6), MON_EXPLODE, EXPL_BBLUE, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 5:
 					//Electricity
-					explode2(mtmp->mx+dx, mtmp->my+dy, 5, d(6,6), MON_EXPLODE, EXPL_MAGENTA); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 5, d(6,6), MON_EXPLODE, EXPL_MAGENTA, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 6:
 					//Disintegration
-					explode2(mtmp->mx+dx, mtmp->my+dy, 4, d(6,6), MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 4, d(6,6), MON_EXPLODE, EXPL_MAGICAL, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 			}
 				dx = rnd(3) - 2;
@@ -4572,7 +4572,7 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx, mtmp->my, 7, dmg, MON_EXPLODE, EXPL_NOXIOUS); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 7, dmg, MON_EXPLODE, EXPL_NOXIOUS, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_FIRA:
@@ -4581,7 +4581,7 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx, mtmp->my, 1, dmg, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 1, dmg, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_FIRAGA:
@@ -4590,9 +4590,9 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_BLIZZARA:
@@ -4601,7 +4601,7 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx, mtmp->my, 2, dmg, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 2, dmg, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_BLIZZAGA:
@@ -4610,9 +4610,9 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_THUNDARA:
@@ -4621,7 +4621,7 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx, mtmp->my, 5, dmg, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 5, dmg, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_THUNDAGA:
@@ -4630,9 +4630,9 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_FLARE:
@@ -4641,10 +4641,10 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_MUDDY); //explode(x, y, type, dam, olet, expltype)
-		explode2(mtmp->mx, mtmp->my, 8, dmg, MON_EXPLODE, EXPL_FROSTY);
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_MUDDY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 8, dmg, MON_EXPLODE, EXPL_FROSTY, 2);
 		dmg = 0;
 	break;
 	case MON_WARP:

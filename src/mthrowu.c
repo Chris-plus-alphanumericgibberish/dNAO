@@ -186,15 +186,15 @@ int x,y;
 		}
 	} else if (obj->otyp == BLASTER_BOLT) {
 		explode(bhitpos.x, bhitpos.y, flags.mon_moving ? -8 : 8, d(3,6),
-		    0, EXPL_RED);
+		    0, EXPL_RED, 1);
 	} else if (obj->otyp == HEAVY_BLASTER_BOLT) {
 		explode(bhitpos.x, bhitpos.y, flags.mon_moving ? -8 : 8, d(3,10),
-		    0, EXPL_FIERY);
+		    0, EXPL_FIERY, 1);
 	} else if (objects[obj->otyp].oc_dir & EXPLOSION) {
 	    	if (cansee(bhitpos.x,bhitpos.y)) 
 	    		pline("%s explodes in a ball of fire!", Doname2(obj));
 		explode(bhitpos.x, bhitpos.y, flags.mon_moving ? -ZT_SPELL(ZT_FIRE) : ZT_SPELL(ZT_FIRE), d(3,8),
-		    WEAPON_CLASS, EXPL_FIERY);
+		    WEAPON_CLASS, EXPL_FIERY, 1);
 	}
 //#endif
 	// if (create && !((mtmp = m_at(x, y)) && (mtmp->mtrapped) &&

@@ -1737,7 +1737,7 @@ struct obj	*sobj;
 		    burn_away_slime();
 		}
 		explode(u.ux, u.uy, 11, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_FIERY);
+							SCROLL_CLASS, EXPL_FIERY, 1);
 		return(1);
 	}
 	case SCR_EARTH:
@@ -2058,7 +2058,7 @@ struct obj	*sobj;
 				sy = u.uy;
 			}
 			explode(sx, sy, 11, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_FIERY);
+							SCROLL_CLASS, EXPL_FIERY, 1);
 			sx = u.ux+rnd(3)-2; 
 			sy = u.uy+rnd(3)-2;
 			if (!isok(sx,sy) ||
@@ -2068,7 +2068,7 @@ struct obj	*sobj;
 				sy = u.uy;
 			}
 			explode(sx, sy, 12, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_FROSTY);
+							SCROLL_CLASS, EXPL_FROSTY, 1);
 			sx = u.ux+rnd(3)-2; 
 			sy = u.uy+rnd(3)-2;
 			if (!isok(sx,sy) ||
@@ -2078,7 +2078,7 @@ struct obj	*sobj;
 				sy = u.uy;
 			}
 			explode(sx, sy, 15, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_MAGICAL);
+							SCROLL_CLASS, EXPL_MAGICAL, 1);
 			sx = u.ux+rnd(3)-2; 
 			sy = u.uy+rnd(3)-2;
 			if (!isok(sx,sy) ||
@@ -2088,7 +2088,7 @@ struct obj	*sobj;
 				sy = u.uy;
 			}
 			explode(sx, sy, 17, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_NOXIOUS);
+							SCROLL_CLASS, EXPL_NOXIOUS, 1);
 	break;
 		}
 		long rturns = sobj->blessed ? 5000L : sobj->cursed ? 5L : 250L;

@@ -2203,7 +2203,7 @@ boolean ordinary;
 
 		case SPE_FIREBALL:
 		    You("explode a fireball on top of yourself!");
-		    explode(u.ux, u.uy, 11, d(6,6), WAND_CLASS, EXPL_FIERY);
+		    explode(u.ux, u.uy, 11, d(6,6), WAND_CLASS, EXPL_FIERY, 1);
 		    break;
 		case WAN_FIRE:
 		    makeknown(WAN_FIRE);
@@ -2243,7 +2243,7 @@ boolean ordinary;
 		    break;
 		case SPE_ACID_BLAST:
 		    You("explode an acid blast on top of yourself!");
-		    explode(u.ux, u.uy, 17, d(6,6), WAND_CLASS, EXPL_NOXIOUS);
+		    explode(u.ux, u.uy, 17, d(6,6), WAND_CLASS, EXPL_NOXIOUS, 1);
 		    break;
 
 		case WAN_MAGIC_MISSILE:
@@ -4277,16 +4277,12 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 	////////////////////////////////////////////////////////////////////////////////////////
 	if(redrawneeded) doredraw();
     tmp_at(DISP_END,0);
-	if(!flags.mon_moving && Double_spell_size){
+	{
+		int bonus = (!flags.mon_moving && Double_spell_size) * 6;
 		if (type == ZT_SPELL(ZT_FIRE))
-			explode2(sx, sy, type, flat ? flat : d(18,6), 0, EXPL_FIERY);
+			explode(sx, sy, type, flat ? flat : d(12 + bonus, 6), 0, EXPL_FIERY, 1 + !!bonus);
 		else if (type == ZT_SPELL(ZT_ACID))
-			explode2(sx, sy, type, flat ? flat : d(18,6), 0, EXPL_NOXIOUS);
-	} else {
-		if (type == ZT_SPELL(ZT_FIRE))
-			explode(sx, sy, type, flat ? flat : d(12,6), 0, EXPL_FIERY);
-		else if (type == ZT_SPELL(ZT_ACID))
-			explode(sx, sy, type, flat ? flat : d(12,6), 0, EXPL_NOXIOUS);
+			explode(sx, sy, type, flat ? flat : d(12 + bonus, 6), 0, EXPL_NOXIOUS, 1 + !!bonus);
 	}
     if (shopdamage)
 	pay_for_damage(abstype == ZT_FIRE ?  "burn away" :

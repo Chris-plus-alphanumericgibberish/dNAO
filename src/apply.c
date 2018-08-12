@@ -3966,7 +3966,7 @@ do_break_wand(obj)
     case WAN_MAGIC_MISSILE:
     wanexpl:
 	explode(u.ux, u.uy,
-		(obj->otyp - WAN_MAGIC_MISSILE), dmg, WAND_CLASS, expltype);
+		(obj->otyp - WAN_MAGIC_MISSILE), dmg, WAND_CLASS, expltype, 1);
 	makeknown(obj->otyp);	/* explode described the effect */
 	/* make magic trap if you broke a wand of magic missile */
 	if ((obj->spe > 2) && rn2(obj->spe - 2) && !u.uswallow &&
@@ -4070,7 +4070,7 @@ do_break_wand(obj)
     }
 
     /* magical explosion and its visual effect occur before specific effects */
-    explode(obj->ox, obj->oy, 0, rnd(dmg), WAND_CLASS, EXPL_MAGICAL);
+    explode(obj->ox, obj->oy, 0, rnd(dmg), WAND_CLASS, EXPL_MAGICAL, 1);
 
     /* this makes it hit us last, so that we can see the action first */
     for (i = 0; i <= 8; i++) {

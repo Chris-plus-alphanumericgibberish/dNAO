@@ -1804,8 +1804,7 @@ spiriteffects(power, atme)
 			sy = u.uy;
 			if (!getdir((char *)0) || !(u.dx || u.dy)) return(0);
 			if(u.uswallow){
-				if(Double_spell_size) explode2(u.ux,u.uy,5/*Electrical*/, d(range,dsize)*1.5, WAND_CLASS, EXPL_MAGICAL);
-				else explode(u.ux,u.uy,5/*Electrical*/, d(range,dsize), WAND_CLASS, EXPL_MAGICAL);
+				explode(u.ux, u.uy, 5/*Electrical*/, d(range, dsize) * (Double_spell_size ? 3 : 2) / 2, WAND_CLASS, EXPL_MAGICAL, 1 + !!Double_spell_size);
 			} else {
 				while(--range >= 0){
 					lsx = sx; sx += u.dx;
@@ -1814,15 +1813,13 @@ spiriteffects(power, atme)
 						mon = m_at(sx, sy);
 						if(mon){
 							dmg = d(range+1,dsize); //Damage decreases with range
-							if(Double_spell_size) explode2(sx, sy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
-							else explode(sx, sy, 5/*Electrical*/, dmg, WAND_CLASS, EXPL_MAGICAL);
+							explode(sx, sy, 5/*Electrical*/, dmg * (Double_spell_size ? 3 : 2) / 2, WAND_CLASS, EXPL_MAGICAL, 1 + !!Double_spell_size);
 							break;//break loop
 						}
 					} else {
 						if(range < 4) range++;
 						dmg = d(range+1,dsize); //Damage decreases with range
-						if(Double_spell_size) explode2(lsx, lsy, 5/*Electrical*/, dmg*1.5, WAND_CLASS, EXPL_MAGICAL);
-						else explode(lsx, lsy, 5/*Electrical*/, dmg, WAND_CLASS, EXPL_MAGICAL);
+						explode(lsx, lsy, 5/*Electrical*/, dmg * (Double_spell_size ? 3 : 2) / 2, WAND_CLASS, EXPL_MAGICAL, 1 + !!Double_spell_size);
 						break;//break loop
 					}
 				}
@@ -2681,8 +2678,7 @@ spiriteffects(power, atme)
 				if (throwspell()) {
 					if(uwep->age < 500) uwep->age = 0;
 					else uwep->age -= 500;
-					if(Double_spell_size) explode2(u.dx,u.dy,1/*Fire*/, d(rnd(5),dsize)*1.5, WAND_CLASS, EXPL_FIERY);
-					explode(u.dx,u.dy,1/*Fire*/, d(rnd(5),dsize), WAND_CLASS, EXPL_FIERY);
+					explode(u.dx, u.dy, 1/*Fire*/, d(rnd(5), dsize)* (Double_spell_size ? 3 : 2) / 2, WAND_CLASS, EXPL_FIERY, 1 + !!Double_spell_size);
 					end_burn(uwep, TRUE);
 					begin_burn(uwep, FALSE);
 				} else return 0;
@@ -3479,8 +3475,8 @@ spiriteffects(power, atme)
 			//else
 			useup(umirror);
 			if(u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH,TRUE);
-			explode(u.ux,u.uy,8/*Phys*/, d(5,dsize), TOOL_CLASS, HI_SILVER);
-			explode(sx,sy,8/*Phys*/, d(5,dsize), TOOL_CLASS, HI_SILVER);
+			explode(u.ux,u.uy,8/*Phys*/, d(5,dsize), TOOL_CLASS, HI_SILVER, 1);
+			explode(sx,sy,8/*Phys*/, d(5,dsize), TOOL_CLASS, HI_SILVER, 1);
 			
 			while(sx != u.ux && sy != u.uy){
 				sx -= u.dx;
@@ -3832,7 +3828,7 @@ boolean atme;
 					}
 				}
 				else {
-					if (Double_spell_size) explode2(u.dx, u.dy,
+					explode(u.dx, u.dy,
 						pseudo->otyp - SPE_LIGHT + 10,
 						u.ulevel / 2 + 1 + spell_damage_bonus(), 0,
 						(pseudo->otyp == SPE_FROST_STORM) ?
@@ -3841,17 +3837,8 @@ boolean atme;
 							EXPL_MAGICAL :
 											(pseudo->otyp == SPE_ACID_STORM) ?
 										EXPL_NOXIOUS :
-													EXPL_FIERY);
-					else explode(u.dx, u.dy,
-						pseudo->otyp - SPE_LIGHT + 10,
-						u.ulevel / 2 + 1 + spell_damage_bonus(), 0,
-						(pseudo->otyp == SPE_FROST_STORM) ?
-					EXPL_FROSTY :
-								(pseudo->otyp == SPE_LIGHTNING_STORM) ?
-							EXPL_MAGICAL :
-											(pseudo->otyp == SPE_ACID_STORM) ?
-										EXPL_NOXIOUS :
-													EXPL_FIERY);
+													EXPL_FIERY,
+													1 + !!Double_spell_size);
 				}
 				u.dx = cc.x + rnd(3) - 2; u.dy = cc.y + rnd(3) - 2;
 				if (!isok(u.dx, u.dy) || !cansee(u.dx, u.dy) ||

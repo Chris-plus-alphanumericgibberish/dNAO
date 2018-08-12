@@ -2845,7 +2845,7 @@ dodip()
 		if(!obj->lamplit)
 			begin_burn(obj, FALSE);
 		useup(potion);
-		explode(u.ux, u.uy, 11, d(6,6), 0, EXPL_FIERY);
+		explode(u.ux, u.uy, 11, d(6,6), 0, EXPL_FIERY, 1);
 		exercise(A_WIS, FALSE);
 		return 1;
 	} else if((obj->otyp == SUNROD)
@@ -2882,7 +2882,7 @@ dodip()
 	    /* Turn off engine before fueling, turn off fuel too :-)  */
 	    if (obj->lamplit || potion->lamplit) {
 		useup(potion);
-		explode(u.ux, u.uy, 11, d(6,6), 0, EXPL_FIERY);
+		explode(u.ux, u.uy, 11, d(6,6), 0, EXPL_FIERY, 1);
 		exercise(A_WIS, FALSE);
 		return 1;
 	    }
