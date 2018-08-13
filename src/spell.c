@@ -515,6 +515,35 @@ learn()
 			break;
 		}
 	}
+
+	if (booktype = further_study(book->otyp))
+	{
+		You("are able to apply the writings of the book to learn another spell.");
+		Sprintf(splname, objects[booktype].oc_name_known ?
+			"\"%s\"" : "the \"%s\" spell",
+			OBJ_NAME(objects[booktype]));
+		for (i = 0; i < MAXSPELL; i++)  {
+			if (spellid(i) == booktype)  {
+				if (spellknow(i) <= 1000) {
+					Your("knowledge of %s is keener.", splname);
+					incrnknow(i);
+					exercise(A_WIS, TRUE);       /* extra study */
+				}
+				else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+					You("know %s quite well already.", splname);
+				}
+				break;
+			}
+			else if (spellid(i) == NO_SPELL)  {
+				spl_book[i].sp_id = booktype;
+				spl_book[i].sp_lev = objects[booktype].oc_level;
+				incrnknow(i);
+				You("add %s to your repertoire.", splname);
+				break;
+			}
+		}
+	}
+
 	if (i == MAXSPELL) impossible("Too many spells memorized!");
 
 	if (book->cursed) {	/* maybe a demon cursed it */
@@ -527,6 +556,39 @@ learn()
 	if (costly) check_unpaid(book);
 	book = 0;
 	return(0);
+}
+
+int
+further_study(booktype) /* if the player is skilled enough in the book's spell school, they can learn another spell from the orginial tome */
+int booktype;
+{
+	int skill = P_SKILL(spell_skilltype(booktype));
+	int related = 0;
+	int skillmin = 0;
+
+#define set_related(spell) if(!related) related = spell
+	switch (booktype)
+	{
+	case SPE_FINGER_OF_DEATH:	set_related(SPE_DRAIN_LIFE);
+		skillmin = P_BASIC;
+		break;
+	case SPE_FIREBALL:			set_related(SPE_FIRE_STORM);
+	case SPE_CONE_OF_COLD:		set_related(SPE_FROST_STORM);
+	case SPE_FIRE_STORM:		set_related(SPE_FIREBALL);
+	case SPE_FROST_STORM:		set_related(SPE_CONE_OF_COLD);
+	case SPE_LIGHTNING_STORM:	set_related(SPE_LIGHTNING_BOLT);
+	case SPE_ACID_STORM:		set_related(SPE_ACID_BLAST);
+	case SPE_EXTRA_HEALING:		set_related(SPE_HEALING);
+		skillmin = P_SKILLED;
+		break;
+	case SPE_ACID_BLAST:		set_related(SPE_ACID_STORM);
+	case SPE_LIGHTNING_BOLT:	set_related(SPE_LIGHTNING_STORM);
+	case SPE_HEALING:			set_related(SPE_EXTRA_HEALING);
+	case SPE_DRAIN_LIFE:		set_related(SPE_FINGER_OF_DEATH);
+		skillmin = P_EXPERT;
+		break;
+	}
+	return (related && skill >= skillmin) ? related : 0;
 }
 
 int
@@ -544,6 +606,7 @@ struct obj *spellbook;
 			return 1;					//which should never be reached, and only catches books of secrets anyway.
 		} else {
 			int i;
+			boolean read_book = FALSE;
 			Sprintf(splname, objects[spellbook->ovar1].oc_name_known ?
 					"\"%s\"" : "the \"%s\" spell",
 				OBJ_NAME(objects[spellbook->ovar1]));
@@ -553,11 +616,8 @@ struct obj *spellbook;
 					if (spellknow(i) <= 1000) {
 						Your("knowledge of %s is keener.", splname);
 						incrnknow(i);
+						read_book = TRUE;
 						exercise(A_WIS,TRUE);       /* extra study */
-						if(!rn2(20)){
-							spellbook->ovar1 = rn2(SPE_BLANK_PAPER - SPE_DIG) + SPE_DIG;
-							pline("The endless pages of the book turn themselves. They settle on a section describing %s.",OBJ_NAME(objects[spellbook->ovar1]));
-						}
 					} else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
 						You("know %s quite well already.", splname);
 					}
@@ -566,14 +626,44 @@ struct obj *spellbook;
 					spl_book[i].sp_id = spellbook->ovar1;
 					spl_book[i].sp_lev = objects[spellbook->ovar1].oc_level;
 					incrnknow(i);
+					read_book = TRUE;
 					pline("The endless pages of the book cover the material of a spellbook of %s in exhaustive detail.",OBJ_NAME(objects[spellbook->ovar1]));
 					pline("Using the instructions on the pages, you easily learn to cast the spell!");
-					if(!rn2(20)){
-						spellbook->ovar1 = rn2(SPE_BLANK_PAPER - SPE_DIG) + SPE_DIG;
-						pline("The endless pages of the book turn themselves. They settle on a section describing %s.",OBJ_NAME(objects[spellbook->ovar1]));
-					}
 					break;
 				}
+			}
+			int booktype;
+			if (booktype = further_study(spellbook->ovar1)){
+				You("understand the material thoroughly, and can see a way to cast another spell.");
+				Sprintf(splname, objects[booktype].oc_name_known ?
+					"\"%s\"" : "the \"%s\" spell",
+					OBJ_NAME(objects[booktype]));
+				for (i = 0; i < MAXSPELL; i++)  {
+					if (spellid(i) == booktype)  {
+						if (spellknow(i) <= 1000) {
+							Your("knowledge of %s is keener.", splname);
+							incrnknow(i);
+							exercise(A_WIS, TRUE);       /* extra study */
+							read_book = TRUE;
+						}
+						else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+							You("know %s quite well already.", splname);
+						}
+						break;
+					}
+					else if (spellid(i) == NO_SPELL)  {
+						spl_book[i].sp_id = booktype;
+						spl_book[i].sp_lev = objects[booktype].oc_level;
+						incrnknow(i);
+						You("add %s to your repertoire.", splname);
+						read_book = TRUE;
+						break;
+					}
+				}
+			}
+			if (read_book && !rn2(20)){
+				spellbook->ovar1 = rn2(SPE_BLANK_PAPER - SPE_DIG) + SPE_DIG;
+				pline("The endless pages of the book turn themselves. They settle on a section describing %s.", OBJ_NAME(objects[spellbook->ovar1]));
 			}
 			if (i == MAXSPELL) impossible("Too many spells memorized!");
 			return 1;
@@ -1172,19 +1262,11 @@ docast()
 	return 0;
 }
 
-/* allow the player to conditionally cast advanced spells like fire storm */
+/* allow the player to conditionally cast spells via equipped artifacts */
 void
 update_alternate_spells()
 {
-	int i, j, k;
-	int basespell[] = { SPE_LIGHTNING_BOLT,
-						SPE_CONE_OF_COLD,
-						SPE_FIREBALL,
-						SPE_ACID_BLAST };
-	int altspell[] = {  SPE_LIGHTNING_STORM,
-						SPE_FROST_STORM,
-						SPE_FIRE_STORM,
-						SPE_ACID_STORM };
+	int i;
 
 	// for artifacts
 	if (uarmh && uarmh->oartifact == ART_STORMHELM){
@@ -1227,30 +1309,6 @@ update_alternate_spells()
 			}
 		}
 	}
-
-	// for advanced offensive spells
-#define ADVANCED(x) (P_SKILL(x) + Spellboost >= P_SKILLED)
-	for (k = 0; k < 4; k++){
-		for (i = 0; i < MAXSPELL; i++) {
-			if (spellid(i) == basespell[k]) {
-				for (j = 0; j < MAXSPELL; j++) {
-					if (ADVANCED(spell_skilltype(basespell[k]))) {
-						if (spellid(j) == altspell[k]) {
-							spl_book[j].sp_know = max(spl_book[i].sp_know, spl_book[j].sp_know);
-							j = MAXSPELL;
-						}
-						if (spellid(j) == NO_SPELL) {
-							spl_book[j].sp_id = altspell[k];
-							spl_book[j].sp_lev = objects[altspell[k]].oc_level;
-							spl_book[j].sp_know = spl_book[i].sp_know;
-							j = MAXSPELL;
-						}
-					}
-				}
-			}
-		}
-	}
-#undef ADVANCED
 }
 
 /* the '^f' command -- fire a spirit power */
@@ -4816,17 +4874,6 @@ int spell;
 		else if(u.uz.dlevel == spire_level.dlevel-4) chance -= 20*spellev(spell);
 		else if(u.uz.dlevel == spire_level.dlevel-5) chance -= 10*spellev(spell);
 	}
-	
-	// players are unable to cast 'advanced' spells if they are not Skilled+
-	int altspell[] = {  	SPE_LIGHTNING_STORM,
-				SPE_FROST_STORM,
-				SPE_FIRE_STORM,
-				SPE_ACID_STORM };
-	int i;
-
-	for (i = 0; i < 4; i++)
-		if (spellid(spell) == altspell[i] && (P_SKILL(spell_skilltype(spellid(spell))) + Spellboost) < P_SKILLED)
-			chance = 0;
 	
 	/* Clamp to percentile */
 	if (chance > 100) chance = 100;

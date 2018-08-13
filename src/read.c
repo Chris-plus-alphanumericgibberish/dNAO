@@ -197,6 +197,29 @@ doread()
 						break;
 					}
 				}
+				if (further_study(SPE_CONE_OF_COLD))
+				{
+					for (i = 0; i < MAXSPELL; i++)  {
+						if (spellid(i) == SPE_FROST_STORM)  {
+							if (spellknow(i) <= 1000) {
+								Your("knowledge of Frost Storm is keener.");
+								spl_book[i].sp_know = 20000;
+								exercise(A_WIS, TRUE);       /* extra study */
+							}
+							else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+								You("know Frost Storm quite well already.");
+							}
+							break;
+						}
+						else if (spellid(i) == NO_SPELL)  {
+							spl_book[i].sp_id = SPE_FROST_STORM;
+							spl_book[i].sp_lev = objects[SPE_FROST_STORM].oc_level;
+							spl_book[i].sp_know = 20000;
+							You("learn to cast Frost Storm!");
+							break;
+						}
+					}
+				}
 				if (i == MAXSPELL) impossible("Too many spells memorized!");
 				return 1;
 			}
