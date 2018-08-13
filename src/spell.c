@@ -9,6 +9,8 @@ static NEARDATA struct obj *book;	/* last/current book being xscribed */
 static NEARDATA int RoSbook;		/* Read spell or Study Wards?" */
 
 /* spellmenu arguments; 0 thru n-1 used as spl_book[] index when swapping */
+#define SPELLMENU_MAINTAIN (-4)
+#define SPELLMENU_DESCRIBE (-3)
 #define SPELLMENU_CAST (-2)
 #define SPELLMENU_VIEW (-1)
 
@@ -33,11 +35,11 @@ STATIC_DCL boolean FDECL(cursed_book, (struct obj *bp));
 STATIC_DCL boolean FDECL(confused_book, (struct obj *));
 STATIC_DCL void FDECL(deadbook, (struct obj *));
 STATIC_PTR int NDECL(learn);
-STATIC_DCL boolean FDECL(getspell, (int *));
+STATIC_DCL boolean FDECL(getspell, (int *, int));
 STATIC_DCL boolean FDECL(getspirit, (int *));
 STATIC_DCL boolean FDECL(spiritLets, (char *, boolean));
 STATIC_DCL int FDECL(dospiritmenu, (const char *, int *, boolean));
-STATIC_DCL boolean FDECL(dospellmenu, (const char *,int,int *, boolean));
+STATIC_DCL boolean FDECL(dospellmenu, (int,int *));
 STATIC_DCL void FDECL(describe_spell, (int));
 STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
@@ -49,6 +51,7 @@ STATIC_DCL const char *FDECL(spelltypemnemonic, (int));
 STATIC_DCL int FDECL(spellhunger, (int));
 STATIC_DCL int FDECL(isqrt, (int));
 STATIC_DCL boolean FDECL(run_maintained_spell, (int));
+STATIC_DCL boolean FDECL(can_maintain_spell, (int));
 STATIC_DCL void NDECL(update_alternate_spells);
 
 long FDECL(doreadstudy, (const char *));
@@ -885,6 +888,25 @@ run_maintained_spells()
 	}
 }
 
+STATIC_DCL boolean
+can_maintain_spell(spell)
+int spell;
+{
+	switch (spell)
+	{
+	case SPE_DETECT_MONSTERS:
+		if (P_SKILL(spell_skilltype(SPE_DETECT_MONSTERS)) < P_SKILLED)
+			break;
+	case SPE_HASTE_SELF:
+	case SPE_LEVITATION:
+	case SPE_INVISIBILITY:
+	case SPE_DETECT_UNSEEN:
+	case SPE_PROTECTION:
+		return TRUE;
+	}
+	return FALSE;
+}
+
 STATIC_OVL boolean
 run_maintained_spell(spell)
 int spell;
@@ -988,8 +1010,9 @@ age_spells()
  * parameter.  Otherwise return FALSE.
  */
 STATIC_OVL boolean
-getspell(spell_no)
-	int *spell_no;
+getspell(spell_no, menutype)
+int *spell_no;
+int menutype;
 {
 	int nspells, idx;
 	char ilet, lets[BUFSZ], qbuf[QBUFSZ];
@@ -1025,8 +1048,7 @@ getspell(spell_no)
 			You("don't know that spell.");
 		}
 	}
-	return dospellmenu("Choose which spell to cast",
-				SPELLMENU_CAST, spell_no, FALSE);
+	return dospellmenu(menutype, spell_no);
 }
 /*
  * Return TRUE if a spell was picked, with the spell index in the return
@@ -1257,7 +1279,7 @@ int
 docast()
 {
 	int spell_no;
-	if (getspell(&spell_no))
+	if (getspell(&spell_no, SPELLMENU_CAST))
 					return spelleffects(spell_no, FALSE, 0);
 	return 0;
 }
@@ -3760,12 +3782,6 @@ boolean atme;
 	
 
 	if(!spelltyp){
-		if (spell_maintained(spellid(spell))) {
-			spell_unmaintain(spellid(spell));
-			pline("Spell no longer maintained.");
-
-			return 0;
-		}
 		/*
 		 * Spell casting no longer affects knowledge of the spell. A
 		 * decrement of spell knowledge is done every turn.
@@ -4025,27 +4041,6 @@ boolean atme;
 		return(0);
 	}
 	
-	switch(pseudo->otyp){
-    /* These spells can be toggled for whether or not to maintain it */
-    case SPE_HASTE_SELF:
-    case SPE_DETECT_MONSTERS:
-    case SPE_LEVITATION:
-    case SPE_INVISIBILITY:
-    case SPE_DETECT_UNSEEN:
-    // case SPE_PHASE:
-    case SPE_PROTECTION:
-        /* Detect monsters isn't useful to maintain on a lower level */
-        if (pseudo->otyp == SPE_DETECT_MONSTERS && role_skill < P_SKILLED)
-            break;
-        if (yn("Maintain the spell?") == 'y')
-			spell_maintain(pseudo->otyp);
-		else
-			spell_unmaintain(pseudo->otyp);
-
-	default:
-	break;
-	}
-	
 	/* gain skill for successful cast */
 	use_skill(skill, spellev(spell));
 	u.lastcast = monstermoves + spellev(spell);
@@ -4139,24 +4134,9 @@ losespells(howmuch)
 int
 dovspell()
 {
-	char qbuf[QBUFSZ];
-	int splnum, othnum;
-	struct spell spl_tmp;
-
-	if (spellid(0) == NO_SPELL)
-	    You("don't know any spells right now.");
-	else {
-	    while (dospellmenu("Currently known spells",
-			       SPELLMENU_VIEW, &splnum, FALSE)) {
-		Sprintf(qbuf, "Reordering spells; swap '%c' with",
-			spellet(splnum));
-		if (!dospellmenu(qbuf, splnum, &othnum, FALSE)) break;
-
-		spl_tmp = spl_book[splnum];
-		spl_book[splnum] = spl_book[othnum];
-		spl_book[othnum] = spl_tmp;
-	    }
-	}
+	int spell_no;
+	if (getspell(&spell_no, SPELLMENU_VIEW))
+		return spelleffects(spell_no, FALSE, 0);
 	return 0;
 }
 
@@ -4239,15 +4219,15 @@ boolean respect_timeout;
 }
 
 STATIC_OVL boolean
-dospellmenu(prompt, splaction, spell_no, describe)
-const char *prompt;
-int splaction;	/* SPELLMENU_CAST, SPELLMENU_VIEW, or spl_book[] index */
+dospellmenu(splaction, spell_no)
+int splaction;	/* SPELLMENU_CAST, SPELLMENU_VIEW, SPELLMENU_DESCRIBE, SPELLMENU_MAINTAIN, or spl_book[] index */
 int *spell_no;
-boolean describe;
 {
 	winid tmpwin;
 	int i, n, how;
+	int maintainable = 0;
 	char buf[BUFSZ];
+	char buf2[BUFSZ];
 	menu_item *selected;
 	anything any;
 
@@ -4272,9 +4252,18 @@ boolean describe;
 		Sprintf(buf, "Name\tLevel\tCategory\tFail\tMemory");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
+
+		if (can_maintain_spell(spellid(i))){
+			maintainable += 1;
+		}
+		else {
+			if (splaction == SPELLMENU_MAINTAIN)
+				continue;
+		}
+		Sprintf(buf2, "%s%s", spellname(i), spell_maintained(spellid(i)) ? " [M]" : "");
 		Sprintf(buf, iflags.menu_tab_sep ?
-			"%s\t%-d%s\t%s\t%-d%%\t%-d%%" : "%-20s  %2d%s   %-12s %3d%%     %3d%%",
-			spellname(i), spellev(i),
+			"%s\t%-d%s\t%s\t%-d%%\t%-d%%\t" : "%-20s  %2d%s   %-12s %3d%%     %3d%%",
+			buf2, spellev(i),
 			spellknow(i) ? " " : "*",
 			spelltypemnemonic(spell_skilltype(spellid(i))),
 			100 - percent_success(i),
@@ -4286,52 +4275,107 @@ boolean describe;
 			 spellet(i), 0, ATR_NONE, buf,
 			 (i == splaction) ? MENU_SELECTED : MENU_UNSELECTED);
 	}
-	if (!describe){
-		// Describe a spell
-		Sprintf(buf, "Describe a spell instead");
-		any.a_int = -1;					/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'?', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	else {
-		Sprintf(buf, splaction == SPELLMENU_VIEW ? "Rearrange spells instead" : "Cast a spell instead");
-		any.a_int = -1;					/* must be non-zero */
+	if (splaction != SPELLMENU_CAST && splaction < 0) {
+		Sprintf(buf, "Cast a spell instead");
+		any.a_int = SPELLMENU_CAST;
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'!', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-		
-	end_menu(tmpwin, describe ? "Choose spell to describe:" : prompt);
+	if (splaction != SPELLMENU_MAINTAIN && splaction < 0 && maintainable){
+		// Maintain a spell
+		Sprintf(buf, "Maintain a spell instead");
+		any.a_int = SPELLMENU_MAINTAIN;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'#', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	if (splaction != SPELLMENU_DESCRIBE && splaction < 0){
+		// Describe a spell
+		Sprintf(buf, "Describe a spell instead");
+		any.a_int = SPELLMENU_DESCRIBE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'?', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	if (splaction != SPELLMENU_VIEW && splaction < 0 && spellid(1) != NO_SPELL){
+		// Describe a spell
+		Sprintf(buf, "Rearrange spells instead");
+		any.a_int = SPELLMENU_VIEW;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'+', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	switch (splaction)
+	{
+	case SPELLMENU_VIEW:
+		Sprintf(buf, "Choose which spell to reorder");
+		break;
+	case SPELLMENU_CAST:
+		Sprintf(buf, "Choose which spell to cast");
+		break;
+	case SPELLMENU_MAINTAIN:
+		Sprintf(buf, "Choose which spell to maintain");
+		break;
+	case SPELLMENU_DESCRIBE:
+		Sprintf(buf, "Choose which spell to describe");
+		break;
+	default:
+		Sprintf(buf, "Reordering spells; swap '%c' with", spellet(splaction));
+		break;
+	}
+	end_menu(tmpwin, buf);
 
 	how = PICK_ONE;
 	if (splaction == SPELLMENU_VIEW && spellid(1) == NO_SPELL)
 	    how = PICK_NONE;	/* only one spell => nothing to swap with */
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	if (n > 0 && selected[0].item.a_int == -1){
-		return dospellmenu(prompt, splaction, spell_no, !describe);
-	}
-	if (n > 0 && describe){
-		describe_spell(selected[0].item.a_int - 1);
-		return dospellmenu(prompt, splaction, spell_no, describe);
-	}
-	if (n > 0) {
-		*spell_no = selected[0].item.a_int - 1;
-		/* menu selection for `PICK_ONE' does not
-		   de-select any preselected entry */
-		if (n > 1 && *spell_no == splaction)
-		    *spell_no = selected[1].item.a_int - 1;
-		free((genericptr_t)selected);
-		/* default selection of preselected spell means that
-		   user chose not to swap it with anything */
-		if (*spell_no == splaction) return FALSE;
-		return TRUE;
-	} else if (splaction >= 0) {
-	    /* explicit de-selection of preselected spell means that
-	       user is still swapping but not for the current spell */
-	    *spell_no = splaction;
-	    return TRUE;
+
+	if (n > 0){
+		int s_no = selected[0].item.a_int - 1;
+
+		if (selected[0].item.a_int < 0){
+			return dospellmenu(selected[0].item.a_int, spell_no);
+		}
+		else {
+			switch (splaction)
+			{
+			case SPELLMENU_VIEW:
+				*spell_no = s_no;
+				return dospellmenu(s_no, spell_no);
+
+			case SPELLMENU_CAST:
+				*spell_no = s_no;
+				return TRUE;
+
+			case SPELLMENU_MAINTAIN:
+				if (!spell_maintained(spellid(s_no)))
+				{
+					spell_maintain(spellid(s_no));
+					You("begin maintaining %s.", spellname(s_no));
+				}
+				else
+				{
+					spell_unmaintain(spellid(s_no));
+					You("stop maintaining %s.", spellname(s_no));
+				}
+				return FALSE;
+
+			case SPELLMENU_DESCRIBE:
+				describe_spell(s_no);
+				return dospellmenu(splaction, spell_no);
+
+			default:
+			{
+				struct spell spl_tmp;
+				spl_tmp = spl_book[*spell_no];
+				spl_book[*spell_no] = spl_book[s_no];
+				spl_book[s_no] = spl_tmp;
+				return dospellmenu(SPELLMENU_VIEW, spell_no);
+			}
+			}
+		}
 	}
 	return FALSE;
 }
