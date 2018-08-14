@@ -200,20 +200,20 @@ doread()
 				if (further_study(SPE_CONE_OF_COLD))
 				{
 					for (i = 0; i < MAXSPELL; i++)  {
-						if (spellid(i) == SPE_FROST_STORM)  {
+						if (spellid(i) == SPE_BLIZZARD)  {
 							if (spellknow(i) <= 1000) {
-								Your("knowledge of Frost Storm is keener.");
+								Your("knowledge of Blizzard is keener.");
 								spl_book[i].sp_know = 20000;
 								exercise(A_WIS, TRUE);       /* extra study */
 							}
 							else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
-								You("know Frost Storm quite well already.");
+								You("know Blizzard quite well already.");
 							}
 							break;
 						}
 						else if (spellid(i) == NO_SPELL)  {
-							spl_book[i].sp_id = SPE_FROST_STORM;
-							spl_book[i].sp_lev = objects[SPE_FROST_STORM].oc_level;
+							spl_book[i].sp_id = SPE_BLIZZARD;
+							spl_book[i].sp_lev = objects[SPE_BLIZZARD].oc_level;
 							spl_book[i].sp_know = 20000;
 							You("learn to cast Frost Storm!");
 							break;
@@ -1534,6 +1534,7 @@ struct obj	*sobj;
 				       sobj->blessed ? rnd(3-uwep->spe/3) : 1);
 		break;
 	case SCR_TAMING:
+	case SPE_PACIFY_MONSTER:
 	case SPE_CHARM_MONSTER:
 		if (u.uswallow) {
 		    maybe_tame(u.ustuck, sobj);
@@ -2033,7 +2034,9 @@ struct obj	*sobj;
 						8+4*bcsign(sobj));
 		break;
 	}
+	case SPE_ANTIMAGIC_SHIELD:
 	case SCR_ANTIMAGIC:{
+		int amt = (sobj->otyp == SPE_ANTIMAGIC_SHIELD) ? 50 : 400;
 		if(confused && sobj->cursed){
 			//Confused
 			pline("Shimmering sparks shoot into your body!");
@@ -2059,8 +2062,8 @@ struct obj	*sobj;
 		}
 		if(!Nullmagic) pline("A shimmering film surrounds you!");
 		else pline("The shimmering film grows brighter!");
-		if( (HNullmagic & TIMEOUT) + 400L < TIMEOUT) {
-			long timer = (HNullmagic & TIMEOUT) + 400L;
+		if ((HNullmagic & TIMEOUT) + amt < TIMEOUT) {
+			long timer = (HNullmagic & TIMEOUT) + amt;
 			HNullmagic &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
 			HNullmagic |= timer; //set new timer
 		}

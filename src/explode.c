@@ -142,7 +142,12 @@ int radius;
 {
 	ExplodeRegion *area;
 	area = create_explode_region();
-	if (radius == 1)
+	if (radius == 0)
+	{
+		if (isok(x, y))
+			add_location_to_explode_region(x, y, area);
+	}
+	else if (radius == 1)
 	{	// can use simple method of creating explosions
 		int i, j;
 		for (i = -1; i <= 1; i++)
@@ -153,6 +158,44 @@ int radius;
 	else
 	{	// use circles
 		do_clear_area(x, y, radius, add_location_to_explode_region, (genericptr_t)(area));
+	}
+
+	do_explode(x, y, area, type, dam, olet, expltype, 0, !flags.mon_moving);
+	free_explode_region(area);
+}
+
+void
+splash(x, y, dx, dy, type, dam, olet, expltype)
+int x, y, dx, dy;
+int type;
+int dam;
+char olet;
+int expltype;
+{
+	/*
+	Splash pattern:
+	.....  .....
+	...XX  .....
+	..@OX  ..@X.
+	...XX  ..XOX
+	.....  ...XX
+	O is located at (x,y)
+	@->O gives dx and dy
+	*/
+	ExplodeRegion *area;
+	int i, j;
+	boolean diag = ((!!dx + !!dy) / 2);
+	area = create_explode_region();
+
+	if (isok(x, y))
+		add_location_to_explode_region(x, y, area);
+
+	if (ZAP_POS(levl[x][y].typ))
+	{
+		for (i = -1; i <= 1; i++)
+		for (j = -1; j <= 1; j++)
+		if (isok(x + i, y + j) && ((!i && dx) || (!j && dy) || ((!dx || i == dx) & (!dy || j == dy)))) // it looks strange, but it works
+			add_location_to_explode_region(x + i, y + j, area);
 	}
 
 	do_explode(x, y, area, type, dam, olet, expltype, 0, !flags.mon_moving);

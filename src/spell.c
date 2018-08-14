@@ -17,7 +17,7 @@ static NEARDATA int RoSbook;		/* Read spell or Study Wards?" */
 #define KEEN 20000
 #define READ_SPELL 1
 #define STUDY_WARD 2
-#define MAINTAINED_SPELL_PW_MULTIPLIER 1
+#define MAINTAINED_SPELL_PW_MULTIPLIER 3
 #define MAINTAINED_SPELL_HUNGER_MULTIPLIER 1
 #define incrnknow(spell)        spl_book[spell].sp_know = KEEN
 #define ndecrnknow(spell, knw)        spl_book[spell].sp_know = max(0, spl_book[spell].sp_know - (KEEN*knw)/100)
@@ -576,22 +576,25 @@ int booktype;
 		skillmin = P_BASIC;
 		break;
 	case SPE_FIREBALL:			set_related(SPE_FIRE_STORM);
-	case SPE_CONE_OF_COLD:		set_related(SPE_FROST_STORM);
+	case SPE_CONE_OF_COLD:		set_related(SPE_BLIZZARD);
 	case SPE_FIRE_STORM:		set_related(SPE_FIREBALL);
-	case SPE_FROST_STORM:		set_related(SPE_CONE_OF_COLD);
+	case SPE_BLIZZARD:		set_related(SPE_CONE_OF_COLD);
 	case SPE_LIGHTNING_STORM:	set_related(SPE_LIGHTNING_BOLT);
-	case SPE_ACID_STORM:		set_related(SPE_ACID_BLAST);
 	case SPE_EXTRA_HEALING:		set_related(SPE_HEALING);
+	case SPE_CHARM_MONSTER:		set_related(SPE_PACIFY_MONSTER);
 		skillmin = P_SKILLED;
 		break;
-	case SPE_ACID_BLAST:		set_related(SPE_ACID_STORM);
 	case SPE_LIGHTNING_BOLT:	set_related(SPE_LIGHTNING_STORM);
 	case SPE_HEALING:			set_related(SPE_EXTRA_HEALING);
 	case SPE_DRAIN_LIFE:		set_related(SPE_FINGER_OF_DEATH);
+	case SPE_CREATE_MONSTER:	set_related(SPE_CREATE_FAMILIAR);
+	case SPE_CREATE_FAMILIAR:	set_related(SPE_CREATE_MONSTER);
+	case SPE_PACIFY_MONSTER:	set_related(SPE_CHARM_MONSTER);
 		skillmin = P_EXPERT;
 		break;
 	}
 	return (related && skill >= skillmin) ? related : 0;
+#undef set_related
 }
 
 int
@@ -902,6 +905,7 @@ int spell;
 	case SPE_INVISIBILITY:
 	case SPE_DETECT_UNSEEN:
 	case SPE_PROTECTION:
+	case SPE_ANTIMAGIC_SHIELD:
 		return TRUE;
 	}
 	return FALSE;
@@ -961,6 +965,12 @@ int spell;
 			cast = TRUE;
 		}
         break;
+	case SPE_ANTIMAGIC_SHIELD:
+		if ((HNullmagic&TIMEOUT) < 10) {
+			incr_itimeout(&HNullmagic, 100);
+			cast = TRUE;
+		}
+		break;
     default:
         impossible("player maintaining an unmaintainable spell? (%d)", spell);
         spell_unmaintain(spell);
@@ -1293,13 +1303,13 @@ update_alternate_spells()
 	// for artifacts
 	if (uarmh && uarmh->oartifact == ART_STORMHELM){
 		for (i = 0; i < MAXSPELL; i++) {
-			if (spellid(i) == SPE_LIGHTNING_BOLT) {
+			if (spellid(i) == SPE_LIGHTNING_STORM) {
 				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
 				break;
 			}
 			if (spellid(i) == NO_SPELL)  {
-				spl_book[i].sp_id = SPE_LIGHTNING_BOLT;
-				spl_book[i].sp_lev = objects[SPE_LIGHTNING_BOLT].oc_level;
+				spl_book[i].sp_id = SPE_LIGHTNING_STORM;
+				spl_book[i].sp_lev = objects[SPE_LIGHTNING_STORM].oc_level;
 				spl_book[i].sp_know = 1;
 				break;
 			}
@@ -3884,54 +3894,88 @@ boolean atme;
 	 * effects, e.g. more damage, further distance, and so on, without
 	 * additional cost to the spellcaster.
 	 */
-	// split advanced spells from regular spells
-	case SPE_LIGHTNING_STORM:
-	case SPE_FROST_STORM:
-	case SPE_FIRE_STORM:
-	case SPE_ACID_STORM:
+		{
+		int expl_type = 0;
+		int inacc = 0;
+		boolean miss = FALSE;
+		int dam = 0;
+		int rad = 0;
+		n = 0;
+	case SPE_LIGHTNING_STORM:	expl_type = EXPL_MAGICAL;
+								n = rnd(6) + 6;
+								dam = u.ulevel + spell_damage_bonus();
+								rad = 0;
+								inacc = 3;
+								goto dothrowspell;
+	case SPE_BLIZZARD:			expl_type = EXPL_FROSTY;
+								n = rnd(3) + 1;
+								dam = u.ulevel + spell_damage_bonus();
+								rad = 1;
+								inacc = 1;
+								goto dothrowspell;
+	case SPE_FIRE_STORM:		expl_type = EXPL_FIERY;
+								n = 1;
+								dam = rnd(u.ulevel) + rnd(u.ulevel) + u.ulevel + spell_damage_bonus();
+								rad = 2;
+								inacc = 1;
+								goto dothrowspell;
+dothrowspell:
+		if (Double_spell_size){
+			n = n * 3 / 2;
+			if (rad)
+				rad += 1;
+			else
+				n += 2;
+		}
+
 		if (throwspell()) {
 			cc.x = u.dx; cc.y = u.dy;
-			n = rnd(8) + 1;
-			if (Double_spell_size) n *= 1.5;
 			while (n--) {
-				if (!u.dx && !u.dy && !u.dz) {
-					if ((damage = zapyourself(pseudo, TRUE)) != 0) {
-						char buf[BUFSZ];
-						Sprintf(buf, "zapped %sself with a spell", uhim());
-						losehp(damage, buf, NO_KILLER_PREFIX);
-					}
-				}
-				else {
-					explode(u.dx, u.dy,
-						pseudo->otyp - SPE_LIGHT + 10,
-						u.ulevel / 2 + 1 + spell_damage_bonus(), 0,
-						(pseudo->otyp == SPE_FROST_STORM) ?
-					EXPL_FROSTY :
-								(pseudo->otyp == SPE_LIGHTNING_STORM) ?
-							EXPL_MAGICAL :
-											(pseudo->otyp == SPE_ACID_STORM) ?
-										EXPL_NOXIOUS :
-													EXPL_FIERY,
-													1 + !!Double_spell_size);
-				}
-				u.dx = cc.x + rnd(3) - 2; u.dy = cc.y + rnd(3) - 2;
-				if (!isok(u.dx, u.dy) || !cansee(u.dx, u.dy) ||
-					IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
-					/* Spell is reflected back to center */
+				// aim
+				miss = FALSE;
+				if (u.uswallow){
 					u.dx = cc.x;
 					u.dy = cc.y;
+				}
+				else
+				{
+					boolean once = TRUE;
+					while (once || !isok(u.dx, u.dy) || !cansee(u.dx, u.dy) || IS_STWALL(levl[u.dx][u.dy].typ)) {
+						if (pseudo->otyp == SPE_LIGHTNING_STORM && !rn2(10))
+							miss = TRUE;	//lightning storm is more accurate out in the open
+						u.dx = cc.x + rnd(1 + inacc * 2) - inacc - 1; u.dy = cc.y + rnd(1 + inacc * 2) - inacc - 1;
+						once = FALSE;
+					}
+				}
+				if (pseudo->otyp == SPE_LIGHTNING_STORM && !miss && !(m_at(u.dx, u.dy) || (u.dx == u.ux && u.dy == u.uy && !(uarmh && uarmh->oartifact == ART_STORMHELM))) && rn2(250))
+				{ //lightning storm prefers to hit creatures (including you)
+					n++;
+				}
+				else
+				{
+					// fire
+					if (!u.dx && !u.dy && !u.dz) {
+						if ((damage = zapyourself(pseudo, TRUE)) != 0) {
+							char buf[BUFSZ];
+							Sprintf(buf, "zapped %sself with a spell", uhim());
+							losehp(damage, buf, NO_KILLER_PREFIX);
+						}
+					}
+					else {
+						explode(u.dx, u.dy,
+							pseudo->otyp - SPE_LIGHT + 10,
+							dam, 0, expl_type, rad);
+					}
 				}
 			}
 		}
 		break;
+		}
+	/* these spells are handled in zap.c */
 	case SPE_LIGHTNING_BOLT:
 	case SPE_CONE_OF_COLD:
 	case SPE_FIREBALL:
-	case SPE_ACID_BLAST:
-		if (role_skill >= P_SKILLED) //if you're skilled, you can do meteor storm version of spells
-			if (!spelltyp) u.uen += energy / 2;	//and for some reason that makes the basic versions cheaper to cast
-		// and fall through
-	/* these spells are all duplicates of wand effects */
+	case SPE_ACID_SPLASH:
 	case SPE_HASTE_SELF:
 	case SPE_FORCE_BOLT:
 	case SPE_SLEEP:
@@ -3979,10 +4023,12 @@ boolean atme;
 		/* high skill yields effect equivalent to blessed scroll */
 		if (role_skill >= P_SKILLED) pseudo->blessed = 1;
 		/* fall through */
+	case SPE_PACIFY_MONSTER:
 	case SPE_CHARM_MONSTER:
 	case SPE_MAGIC_MAPPING:
 	case SPE_CREATE_MONSTER:
 	case SPE_IDENTIFY:
+	case SPE_ANTIMAGIC_SHIELD:
 		(void) seffects(pseudo);
 		break;
 
@@ -4315,7 +4361,7 @@ int *spell_no;
 		Sprintf(buf, "Choose which spell to cast");
 		break;
 	case SPELLMENU_MAINTAIN:
-		Sprintf(buf, "Choose which spell to maintain");
+		Sprintf(buf, "Choose which spell to (un)maintain");
 		break;
 	case SPELLMENU_DESCRIBE:
 		Sprintf(buf, "Choose which spell to describe");
@@ -4423,40 +4469,34 @@ int spellID;
 		strcat(desc3, "Deals no damage to fire-resistant creatures.");
 		strcat(desc4, "");
 		break;
-	case SPE_ACID_BLAST:
-		strcat(desc1, "Launches a directed blast of acid that explodes on hitting something.");
+	case SPE_ACID_SPLASH:
+		strcat(desc1, "Splashes acid in an area next to you.");
 		strcat(desc2, "The acid can boil potions and wet other items.");
 		strcat(desc3, "Deals no damage to acid-resistant creatures.");
 		strcat(desc4, "");
 		break;
 	case SPE_LIGHTNING_STORM:
-		strcat(desc1, "Creates a series of lightning explosions centered around a target.");
+		strcat(desc1, "Causes many lightning strikes in a large area around a target.");
 		strcat(desc2, "The electric shock can damage wands.");
-		strcat(desc3, "Deals no damage to shock-resistant creatures.");
-		strcat(desc4, "");
+		strcat(desc3, "Confined spaces are detrimental to the spell\'s accuracy.");
+		strcat(desc4, "Deals no damage to shock-resistant creatures.");
 		break;
-	case SPE_FROST_STORM:
+	case SPE_BLIZZARD:
 		strcat(desc1, "Creates a series of cold explosions centered around a target.");
 		strcat(desc2, "The chill can freeze potions, shattering them.");
 		strcat(desc3, "Deals no damage to cold-resistant creatures.");
 		strcat(desc4, "");
 		break;
 	case SPE_FIRE_STORM:
-		strcat(desc1, "Creates a series of fire explosions centered around a target.");
+		strcat(desc1, "Creates a large firey explosion nearby a target.");
 		strcat(desc2, "The fire can boil potions and burn other flammable items.");
 		strcat(desc3, "Worn armor is also damaged.");
 		strcat(desc4, "Deals no damage to fire-resistant creatures.");
 		break;
-	case SPE_ACID_STORM:
-		strcat(desc1, "Creates a series of acid explosions centered around a target.");
-		strcat(desc2, "The acid can boil potions and wet other items.");
-		strcat(desc3, "Deals no damage to acid-resistant creatures.");
-		strcat(desc4, "");
-		break;
 	case SPE_HASTE_SELF:
 		strcat(desc1, "You temporarily move very quickly.");
 		strcat(desc2, "Casting while already very fast increase the duration of your haste.");
-		strcat(desc3, "");
+		strcat(desc3, "Can be maintained.");
 		strcat(desc4, "");
 		break;
 	case SPE_FORCE_BOLT:
@@ -4547,7 +4587,7 @@ int spellID;
 		strcat(desc1, "Detects unseen things in an area around you.");
 		strcat(desc2, "The location of monsters are shown.");
 		strcat(desc3, "Traps and secret doors become visible.");
-		strcat(desc4, "");
+		strcat(desc4, "Can be maintained to grant see invisible.");
 		break;
 	case SPE_HEALING:
 		strcat(desc1, "Creates a directed ray of healing magic.");
@@ -4597,6 +4637,12 @@ int spellID;
 		strcat(desc3, "");
 		strcat(desc4, "");
 		break;
+	case SPE_PACIFY_MONSTER:
+		strcat(desc1, "Attempts to pacify an adjacent creature.");
+		strcat(desc2, "Creatures can roll to resist the effect.");
+		strcat(desc3, "");
+		strcat(desc4, "");
+		break;
 	case SPE_CHARM_MONSTER:
 		strcat(desc1, "Attempts to charm an adjacent creature.");
 		strcat(desc2, "Untamable creatures become peaceful.");
@@ -4630,13 +4676,13 @@ int spellID;
 	case SPE_DETECT_MONSTERS:
 		strcat(desc1, "Detects all monsters on the level.");
 		strcat(desc2, "At Skilled or better, you continue detecting monsters for a time.");
-		strcat(desc3, "");
+		strcat(desc3, "Can be maintained at Skilled or better.");
 		strcat(desc4, "");
 		break;
 	case SPE_LEVITATION:
 		strcat(desc1, "You start levitating for a time.");
 		strcat(desc2, "At Skilled or better, you can descend at will.");
-		strcat(desc3, "");
+		strcat(desc3, "Can be maintained.");
 		strcat(desc4, "");
 		break;
 	case SPE_RESTORE_ABILITY:
@@ -4647,7 +4693,7 @@ int spellID;
 		break;
 	case SPE_INVISIBILITY:
 		strcat(desc1, "You turn invisible for a time.");
-		strcat(desc2, "");
+		strcat(desc2, "Can be maintained.");
 		strcat(desc3, "");
 		strcat(desc4, "");
 		break;
@@ -4665,8 +4711,8 @@ int spellID;
 		break;
 	case SPE_CREATE_FAMILIAR:
 		strcat(desc1, "Creates a tame creature.");
-		strcat(desc2, "1/3 of the time, you summon a tame domestic pet.");
-		strcat(desc3, "2/3 of the time, you summon a tame random monster.");
+		strcat(desc2, "1/3 of the time, the summoned creature is a tame domestic pet.");
+		strcat(desc3, "2/3 of the time, the summoned creature is a tame random monster.");
 		strcat(desc4, "");
 		break;
 	case SPE_CLAIRVOYANCE:
@@ -4675,11 +4721,16 @@ int spellID;
 		strcat(desc3, "");
 		strcat(desc4, "");
 		break;
+	case SPE_ANTIMAGIC_SHIELD:
+		strcat(desc1, "Temporarily protects you from magic.");
+		strcat(desc2, "While active, you cannot cast any spell but this.");
+		strcat(desc3, "Recasting increases the duration of the effect.");
+		strcat(desc4, "Can be maintained.");
 	case SPE_PROTECTION:
 		strcat(desc1, "Temporarily improves your AC. AC from this spell is better than normal.");
-		strcat(desc2, "The effect decays over time and can be restored by recasting.");
+		strcat(desc2, "While active, it reduces your magic power recovery.");
 		strcat(desc3, "The strength and duration of the effect is improved with casting skill.");
-		strcat(desc4, "While active, reduces magic power recovery.");
+		strcat(desc4, "Can be maintained.");
 		break;
 	case SPE_JUMPING:
 		strcat(desc1, "You make a magically-boosted jump.");
@@ -4764,7 +4815,7 @@ int spell;
 	int difficulty;
 	int skill;
 	
-	if(Nullmagic) return 0;
+	if(Nullmagic && spellid(spell)!=SPE_ANTIMAGIC_SHIELD) return 0;
 	
 	if(
 		((spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE) && 
@@ -4807,6 +4858,9 @@ int spell;
 		else if(uarmc->otyp == SMOKY_VIOLET_FACELESS_ROBE)
 			splcaster -= 4;
 	}
+
+	if (uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM)
+		splcaster -= 10;
 	
 	// if((spell_skilltype(spellid(spell)) == P_CLERIC_SPELL || Role_if(PM_PRIEST) || Role_if(PM_MONK)) 
 		// && uwep && uwep->otyp == KHAKKHARA
