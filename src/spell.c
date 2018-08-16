@@ -4842,56 +4842,103 @@ int spell;
 			statused = ACURR(A_CHA);
 		else statused = ACURR(urole.spelstat);
 	}
-
-	if (uarm && (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE) ){
-	    splcaster += (uarmc && uarmc->otyp == ROBE) ?
-			uarmc->oartifact ? 0 : urole.spelarmr/2 : urole.spelarmr;
-	} else if (uarmc && uarmc->otyp == ROBE){
-		splcaster -= uarmc->oartifact ? 2*urole.spelarmr : urole.spelarmr;
-	}
-	
-	if(uarmc){
-		if(uarmc->otyp == WHITE_FACELESS_ROBE)
-			splcaster -= 1;
-		else if(uarmc->otyp == BLACK_FACELESS_ROBE)
-			splcaster -= 2;
-		else if(uarmc->otyp == SMOKY_VIOLET_FACELESS_ROBE)
-			splcaster -= 4;
-	}
-
-	if (uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM)
-		splcaster -= 10;
-	
-	// if((spell_skilltype(spellid(spell)) == P_CLERIC_SPELL || Role_if(PM_PRIEST) || Role_if(PM_MONK)) 
-		// && uwep && uwep->otyp == KHAKKHARA
-	// ) splcaster -= urole.spelarmr;
 	
 	if(uwep){
+		int cast_bon;
+		// powerful channeling artifacts
 		if(uwep->oartifact == ART_TENTACLE_ROD
 			|| uwep->oartifact == ART_ARYFAERN_KERYM
 			|| uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC
 			|| uwep->oartifact == ART_PROFANED_GREATSCYTHE
 			|| uwep->oartifact == ART_GARNET_ROD
 		) splcaster -= urole.spelarmr;
-		else if(uwep->otyp == KHAKKHARA) splcaster -= uwep->oartifact ? 2*urole.spelarmr : urole.spelarmr;
+
+		if (uwep->otyp == KHAKKHARA) {	// a priestly channeling tool
+			cast_bon = 1;
+			if (spell_skilltype(spellid(spell)) == P_CLERIC_SPELL || Role_if(PM_PRIEST) || Role_if(PM_MONK))
+				cast_bon += 1;
+			if (uwep->oartifact)
+				cast_bon *= 2;
+			splcaster -= urole.spelarmr * cast_bon / 3;
+		}
+
+		if (uwep->otyp == QUARTERSTAFF) {	// a sorcerous channeling tool
+			cast_bon = 0;
+			if (spell_skilltype(spellid(spell)) == P_ATTACK_SPELL || spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
+				cast_bon += 1;
+			if (spell_skilltype(spellid(spell)) == P_HEALING_SPELL && Role_if(PM_HEALER))	// healers also use quarterstaves
+				cast_bon += 1;
+			if (uwep->oartifact)
+				cast_bon *= 2;
+			splcaster -= urole.spelarmr * cast_bon / 3;
+		}
+
+		if (uwep->otyp == ATHAME) {	// a lesser sorecerous channeling tool
+			cast_bon = 0;
+			if (spell_skilltype(spellid(spell)) == P_ATTACK_SPELL || spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
+				cast_bon += 1;
+			if (uwep->oartifact && !(uwep->oartifact == ART_PEN_OF_THE_VOID && !mvitals[PM_ACERERAK].died > 0))
+				cast_bon *= 2;
+			splcaster -= cast_bon;
+		}
+	}
+
+	if (uarm){
+		if (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)
+			splcaster += urole.spelarmr;
+
+		if (uarm->otyp == DROVEN_CHAIN_MAIL)
+			splcaster -= urole.spelarmr;
 	}
 	
+	if (uarmc){
+		if (uarmc->otyp == WHITE_FACELESS_ROBE)
+			splcaster -= 1;
+		if (uarmc->otyp == BLACK_FACELESS_ROBE)
+			splcaster -= 2;
+		if (uarmc->otyp == SMOKY_VIOLET_FACELESS_ROBE)
+			splcaster -= 4;
+		if (uarmc->otyp == ROBE)
+			splcaster -= (urole.spelarmr
+			* ((uarmc->oartifact) ? 2 : 1)
+			/ ((uarm && (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)) ? 2 : 1));
+	}
+
+	if (uarmh) {
+		if (is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE)
+			splcaster += uarmhbon;
+
+		if (uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM)
+			splcaster -= urole.spelarmr;
+	}
+
+	if (uarmg) {
+		if (is_metallic(uarmg))
+			splcaster += uarmgbon;
+	}
+
+	if (uarmf) {
+		if (is_metallic(uarmf))
+			splcaster += uarmfbon;
+	}
+
+	if (uarms) {
+		if (Is_dragon_shield(uarms))	// using a "tiny <colour> dragon scale shield" has a spellcasting penalty despite being lightweight
+			splcaster += urole.spelshld * 3;
+		
+		if (is_metallic(uarms))
+			splcaster += urole.spelarmr;
+
+		splcaster += urole.spelshld;
+	}
+
 	if(u.sealsActive&SEAL_PAIMON) splcaster -= urole.spelarmr;
 	
-	if(uarm && uarm->otyp == DROVEN_CHAIN_MAIL) splcaster -= urole.spelarmr/2;
-	
-	if(uarms) splcaster += urole.spelshld;
-
-	if(uarmh && is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE)
-		splcaster += uarmhbon;
-	if(uarmg && is_metallic(uarmg)) splcaster += uarmgbon;
-	if(uarmf && is_metallic(uarmf)) splcaster += uarmfbon;
-
 	if(Race_if(PM_INCANTIFIER))
 		splcaster += max(-3*urole.spelarmr,urole.spelsbon);
+
 	if(spellid(spell) == urole.spelspec)
 		splcaster += urole.spelsbon;
-
 
 	/* `healing spell' bonus */
 	if(spellid(spell) == SPE_HEALING ||
@@ -4949,9 +4996,9 @@ int spell;
 	 */
 	if (uarms && (is_metallic(uarms) || weight(uarms) > (int) objects[BUCKLER].oc_weight)) {
 		if (spellid(spell) == urole.spelspec) {
-			chance /= 2;
+			chance = chance * 4 / 5;
 		} else {
-			chance /= 4;
+			chance = chance * 3 / 5;
 		}
 	}
 
