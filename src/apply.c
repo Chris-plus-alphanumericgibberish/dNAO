@@ -3989,6 +3989,7 @@ do_break_wand(obj)
 	/* we want this before the explosion instead of at the very end */
 	pline("A wall of force smashes down around you!");
 	dmg = d(1 + obj->spe,6);	/* normally 2d12 */
+	break;
     case WAN_TELEPORTATION:
 		/* WAC make tele trap if you broke a wand of teleport */
 		/* But make sure the spot is valid! */
@@ -4009,7 +4010,8 @@ do_break_wand(obj)
 			}
 		}
 	affects_objects = TRUE;
-    case WAN_POLYMORPH:
+	break;
+	case WAN_POLYMORPH:
 	/* make poly trap if you broke a wand of polymorph */
 	if ((obj->spe > 2) && rn2(obj->spe - 2) && !u.uswallow &&
 	    !On_stairs(u.ux, u.uy) && (!IS_FURNITURE(levl[u.ux][u.uy].typ) &&
@@ -4027,7 +4029,8 @@ do_break_wand(obj)
 		    }
 	}
 	affects_objects = TRUE;
-    case WAN_SLEEP:
+	break;
+	case WAN_SLEEP:
 	/* make sleeping gas trap if you broke a wand of sleep */
 	if ((obj->spe > 2) && rn2(obj->spe - 2) && !u.uswallow &&
 	    !On_stairs(u.ux, u.uy) && (!IS_FURNITURE(levl[u.ux][u.uy].typ) &&
@@ -4044,6 +4047,7 @@ do_break_wand(obj)
 			    }
 		    }
 	}
+	break;
     case WAN_CANCELLATION:
 	/* make anti-magic trap if you broke a wand of cancellation */
 	if ((obj->spe > 2) && rn2(obj->spe - 2) && !u.uswallow &&
@@ -4062,6 +4066,7 @@ do_break_wand(obj)
 		    }
 	}
 	affects_objects = TRUE;
+	break;
     case WAN_UNDEAD_TURNING:
 	affects_objects = TRUE;
 	break;
