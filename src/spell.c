@@ -4923,12 +4923,6 @@ int spell;
 	}
 
 	if (uarms) {
-		if (Is_dragon_shield(uarms))	// using a "tiny <colour> dragon scale shield" has a spellcasting penalty despite being lightweight
-			splcaster += urole.spelshld * 3;
-		
-		if (is_metallic(uarms))
-			splcaster += urole.spelarmr;
-
 		splcaster += urole.spelshld;
 	}
 
@@ -4996,9 +4990,9 @@ int spell;
 	 */
 	if (uarms && (is_metallic(uarms) || weight(uarms) > (int) objects[BUCKLER].oc_weight)) {
 		if (spellid(spell) == urole.spelspec) {
-			chance = chance * 4 / 5;
+			chance /= 2;
 		} else {
-			chance = chance * 3 / 5;
+			chance /= 4;
 		}
 	}
 
