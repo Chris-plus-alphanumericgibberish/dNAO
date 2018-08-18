@@ -190,13 +190,10 @@ int expltype;
 	if (isok(x, y))
 		add_location_to_explode_region(x, y, area);
 
-	if (ZAP_POS(levl[x][y].typ))
-	{
-		for (i = -1; i <= 1; i++)
-		for (j = -1; j <= 1; j++)
-		if (isok(x + i, y + j) && ((!i && dx) || (!j && dy) || ((!dx || i == dx) & (!dy || j == dy)))) // it looks strange, but it works
-			add_location_to_explode_region(x + i, y + j, area);
-	}
+	for (i = -1; i <= 1; i++)
+	for (j = -1; j <= 1; j++)
+	if (isok(x + i, y + j) && ((!i && dx) || (!j && dy) || ((!dx || i == dx) & (!dy || j == dy))) && ((ZAP_POS(levl[x][y].typ) || distmin(x - dx, y - dy, x + i, y + j) == 1) || ZAP_POS(levl[x - dx + i][y - dy + j].typ))) // it looks strange, but it works
+		add_location_to_explode_region(x + i, y + j, area);
 
 	do_explode(x, y, area, type, dam, olet, expltype, 0, !flags.mon_moving);
 	free_explode_region(area);

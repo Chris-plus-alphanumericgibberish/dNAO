@@ -4242,10 +4242,13 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 				}
 				if(shopdoor || shopwall) pay_for_damage(shopdoor ? "destroy" : "dig into", FALSE);
 			} else {
-				if (type == ZT_SPELL(ZT_FIRE) || type == ZT_SPELL(ZT_ACID) || type == ZT_SPELL(ZT_POISON_GAS)) {
+				if (type == ZT_SPELL(ZT_FIRE) || type == ZT_SPELL(ZT_POISON_GAS)) {
 				sx = lsx;
 				sy = lsy;
 				break; /* fireballs explode before the wall */
+				}
+				if (type == ZT_SPELL(ZT_ACID)) {
+					break;	/* acid splashes explode onto the wall */
 				}
 				bounce = 0;
 				range--;
