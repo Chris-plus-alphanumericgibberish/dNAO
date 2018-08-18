@@ -4284,7 +4284,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 	if(redrawneeded) doredraw();
     tmp_at(DISP_END,0);
 	{
-		int bonus = (!flags.mon_moving && Double_spell_size;
+		int bonus = (!flags.mon_moving && Double_spell_size);
 		if (type == ZT_SPELL(ZT_FIRE))
 			explode(sx, sy, type, flat ? flat : d(12 * (bonus + 2) / 2, 6), 0, EXPL_FIERY, 1 + !!bonus);
 		else if (type == ZT_SPELL(ZT_ACID))
