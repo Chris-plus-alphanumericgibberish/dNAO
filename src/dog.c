@@ -1067,6 +1067,11 @@ struct obj *obj;
 		mtmp->mtraitor  = 0;	/* No longer a traitor */
 		set_malign(mtmp);
 	}
+
+	/* pacify monster cannot tame */
+	if (obj->otyp == SPE_PACIFY_MONSTER)
+		return((struct monst *)0);
+
 	if(flags.moonphase == FULL_MOON && night() && rn2(6) && obj && !is_instrument(obj)
 		&& obj->oclass != SPBOOK_CLASS && obj->oclass != SCROLL_CLASS
 		&& mtmp->data->mlet == S_DOG

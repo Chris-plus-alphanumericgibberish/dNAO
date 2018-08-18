@@ -312,7 +312,7 @@ const struct Role roles[] = {
 	/* Init   Lower  Higher */
 	{ 12, 0,  0, 4,  1, 0 },	/* Hit points */
 	{  4, 3,  0, 2,  0, 2 },10,	/* Energy */
-	0, 3,-2, 2, 10, A_WIS, SPE_REMOVE_CURSE,    -7
+	0, 3,-2, 1, 10, A_WIS, SPE_REMOVE_CURSE,    -7
 },
 {	{"Pirate", 0}, {
 	{"Landlubber",    	0},

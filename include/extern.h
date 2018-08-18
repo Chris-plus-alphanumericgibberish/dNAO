@@ -753,9 +753,8 @@ E long FDECL(rndexp, (BOOLEAN_P));
 
 /* ### explode.c ### */
 
-E void FDECL(explode, (int,int,int,int,CHAR_P,int));
-E void FDECL(explode2, (int,int,int,int,CHAR_P,int));
-E void FDECL(big_explode, (int,int,int,int,CHAR_P,int,int));
+E void FDECL(explode, (int,int,int,int,CHAR_P,int,int));
+E void FDECL(splash, (int,int,int,int,int,int,CHAR_P,int));
 E long FDECL(scatter, (int, int, int, unsigned int, struct obj *));
 E void FDECL(splatter_burning_oil, (int, int));
 //#ifdef FIREARMS
@@ -2316,6 +2315,7 @@ E boolean FDECL(load_special, (const char *));
 E int NDECL(learn);
 #endif
 E int FDECL(study_book, (struct obj *));
+E int FDECL(further_study, (int));
 E boolean FDECL(spell_maintained, (int));
 E void FDECL(spell_maintain, (int));
 E void FDECL(spell_unmaintain, (int));

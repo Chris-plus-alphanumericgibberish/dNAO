@@ -3718,11 +3718,7 @@ typfnd:
 
 	if((typ == SPE_LIGHTNING_BOLT ||
 		typ == SPE_POISON_SPRAY ||
-		typ == SPE_ACID_BLAST ||
 		typ == SPE_LIGHTNING_STORM ||
-		typ == SPE_FIRE_STORM ||
-		typ == SPE_FROST_STORM ||
-		typ == SPE_ACID_STORM ||
 		typ == SCR_CONSECRATION ||
 		(typ >= HANDGUN && typ <= HEAVY_GUN) ||
 		((
