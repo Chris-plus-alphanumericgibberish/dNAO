@@ -24,7 +24,7 @@
  *
  * God names use a leading underscore to flag goddesses.
  */
-const struct Role roles[] = {
+struct Role roles[] = {
 {	{"Archeologist", 0}, {
 	{"Digger",      0},
 	{"Field Worker",0},
@@ -1234,7 +1234,7 @@ struct monst *
 god_priest(gptr, sx, sy, sanctum)
 	int sx, sy;
 	const char *gptr;
-	boolean sanctum;   /* is it the seat of the high priest? */
+	int sanctum;   /* is it the seat of the high priest? */
 {
 	struct monst *priest;
 	
@@ -1403,7 +1403,7 @@ str2role(str)
 	return ROLE_NONE;
 }
 
-const struct Role *
+struct Role *
 pm2role(tpm)
 	int tpm;
 {

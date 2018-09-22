@@ -3525,7 +3525,7 @@ random_unknown_ward()
 
 int
 pick_ward(describe)
-boolean describe;
+int describe;
 {
 	winid tmpwin;
 	int n, how;

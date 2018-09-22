@@ -560,7 +560,7 @@ moveloop()
 				oldLightBlind = !!LightBlind;
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-			if (!oldCon != ACURR(A_CON)) {
+			if (!(oldCon != ACURR(A_CON))) {
 				if(conplus(oldCon) > 0) u.uhpmax -= conplus(oldCon)*u.ulevel;
 				else u.uhpmax -= conplus(oldCon)*u.ulevel;
 				
@@ -572,7 +572,7 @@ moveloop()
 				oldCon = ACURR(A_CON);
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-			if (!oldWisBon != ACURR(A_WIS)/4) {
+			if (!(oldWisBon != ACURR(A_WIS)/4)) {
 				u.uenmax += u.ulevel*(ACURR(A_WIS)/4 - oldWisBon);
 				if(u.uenmax < 0) u.uenmax = 0;
 				if(u.uen > u.uenmax) u.uen = u.uenmax;
@@ -1688,7 +1688,7 @@ karemade:
 	}
 	oldLightBlind = !!LightBlind;
 ////////////////////////////////////////////////////////////////////////////////////////////////
-	if (!oldCon != ACURR(A_CON)) {
+	if (!(oldCon != ACURR(A_CON))) {
 		int condif = conplus(ACURR(A_CON)) - conplus(oldCon);
 		if(condif != 0) u.uhpmax += u.ulevel*condif;
 		if(u.uhpmax < 1) u.uhpmax = 1;
@@ -1696,7 +1696,7 @@ karemade:
 		oldCon = ACURR(A_CON);
 	}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-	if (!oldWisBon != ACURR(A_WIS)/4) {
+	if (!(oldWisBon != ACURR(A_WIS)/4)) {
 		u.uenmax += u.ulevel*(ACURR(A_WIS)/4 - oldWisBon);
 		if(u.uenmax < 0) u.uenmax = 0;
 		if(u.uen > u.uenmax) u.uen = u.uenmax;

@@ -37,8 +37,8 @@ STATIC_DCL void FDECL(deadbook, (struct obj *));
 STATIC_PTR int NDECL(learn);
 STATIC_DCL boolean FDECL(getspell, (int *, int));
 STATIC_DCL boolean FDECL(getspirit, (int *));
-STATIC_DCL boolean FDECL(spiritLets, (char *, boolean));
-STATIC_DCL int FDECL(dospiritmenu, (const char *, int *, boolean));
+STATIC_DCL boolean FDECL(spiritLets, (char *, int));
+STATIC_DCL int FDECL(dospiritmenu, (const char *, int *, int));
 STATIC_DCL boolean FDECL(dospellmenu, (int,int *));
 STATIC_DCL void FDECL(describe_spell, (int));
 STATIC_DCL int FDECL(percent_success, (int));
@@ -1259,7 +1259,7 @@ pick_gnosis_seal()
 STATIC_OVL boolean
 spiritLets(lets, respect_timeout)
 	char *lets;
-	boolean respect_timeout;
+	int respect_timeout;
 {
 	int i,s;
 	if(flags.timeoutOrder){
@@ -4190,7 +4190,7 @@ int
 dospiritmenu(prompt, power_no, respect_timeout)
 const char *prompt;
 int *power_no;
-boolean respect_timeout;
+int respect_timeout;
 {
 	winid tmpwin;
 	int n, how;
@@ -5213,7 +5213,7 @@ reorder_spirit_powers()
 		}
 	} else {
 		int power_no;
-		if(dospiritmenu("Choose which power to reorder", &power_no, FALSE))
+		if(dospiritmenu("Choose which power to reorder", &power_no, TRUE))
 			for(power_indx = 0; power_indx < 52; power_indx++){
 				if(power_no == u.spiritPOrder[power_indx])
 					break;

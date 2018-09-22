@@ -562,6 +562,7 @@ qt_montype()
 			return (mkclass(urole.enemy2sym, G_NOHELL|G_HELL));
 		}
 	}
+	return &mons[PM_GNOME];
 }
 
 struct permonst *
@@ -725,7 +726,7 @@ neutral_montype()
 			return (struct permonst *)0;
 		switch(rn2(5)){
 			case 0:
-				if(rn2(2)) &mons[PM_HORSE];
+				if(rn2(2)) return &mons[PM_HORSE];
 				else return mkclass(S_QUADRUPED, G_NOHELL);
 			break;
 			case 1:

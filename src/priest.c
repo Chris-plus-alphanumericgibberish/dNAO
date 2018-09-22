@@ -202,7 +202,7 @@ priestini(lvl, sroom, sx, sy, sanctum)
 d_level	*lvl;
 struct mkroom *sroom;
 int sx, sy;
-boolean sanctum;   /* is it the seat of the high priest? */
+int sanctum;   /* is it the seat of the high priest? */
 {
 	struct monst *priest;
 	struct obj *otmp;

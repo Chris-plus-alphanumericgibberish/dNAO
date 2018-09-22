@@ -2,6 +2,8 @@
 /* Copyright (c) Dean Luick, 1994					*/
 /* NetHack may be freely redistributed.  See license for details.	*/
 
+#pragma clang diagnostic ignored "-Wint-to-void-pointer-cast"
+
 #include "hack.h"
 #include "lev.h"	/* for checking save modes */
 
@@ -90,7 +92,7 @@ void
 del_light_source(type, id, silent)
     int type;
     genericptr_t id;
-	boolean silent;
+	int silent;
 {
     light_source *curr, *prev;
     genericptr_t tmp_id;

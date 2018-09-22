@@ -1291,7 +1291,7 @@ lightsaber_form_sdie:
 	    if (bonus > 1 && otmp->oartifact && spec_dbon(otmp, mon, 100) >= 100)
 		bonus = (bonus + 1) / 2;
 		
-		if(mon && ((resists_all(ptr) && !narrow_spec_applies(otmp, mon))) || resist_attacks(ptr)){
+		if(mon && (((resists_all(ptr) && !narrow_spec_applies(otmp, mon))) || resist_attacks(ptr))){
 			tmp /= 4;
 			if(!flags.mon_moving && !youdefend && warnedptr != ptr){
 				pline("Weapons are ineffective against %s.", mon_nam(mon));
@@ -1473,7 +1473,7 @@ int spot;
 			/* never offhand artifacts (unless you are the Bastard) */
 			(!otmp->oartifact || spot != W_SWAPWEP || mtmp->data == &mons[PM_BASTARD_OF_THE_BOREAL_VALLEY]) &&
 			/* never untouchable artifacts */
-		    (!otmp->oartifact || touch_artifact(otmp, mtmp, FALSE)) &&
+		    (!otmp->oartifact || touch_artifact(otmp, mtmp, 0)) &&
 			/* never unsuitable for mainhand wielding */
 			(spot!=W_WEP || (!bimanual(otmp, mtmp->data) || ((mtmp->misc_worn_check & W_ARMS) == 0 && !MON_SWEP(mtmp) && strongmonst(mtmp->data)))) &&
 			/* never unsuitable for offhand wielding */
@@ -1891,7 +1891,7 @@ register struct monst *mtmp;
 			 || otmp->otyp == KAMEREL_VAJRA
             ) &&
 			/* never untouchable artifacts */
-			(touch_artifact(otmp, mtmp, FALSE)) &&
+			(touch_artifact(otmp, mtmp, 0)) &&
 			/* never too-large for available hands */
 			(!bimanual(otmp, mtmp->data) || ((mtmp->misc_worn_check & W_ARMS) == 0 && strongmonst(mtmp->data))) &&
 			/* never a hated weapon */

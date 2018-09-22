@@ -4055,10 +4055,11 @@ typfnd:
 		otmp->odiluted = 1;
 
 	/* set material */
-	if(mat)
-		if(wizard)
+	if(mat){
+		if(wizard) {
 			otmp->obj_material = mat;
-		else
+		}
+		else {
 			if(otmp->oclass == WEAPON_CLASS && !otmp->oartifact){
 				if(		// flexible materials
 						((otmp->obj_material == CLOTH
@@ -4080,9 +4081,12 @@ typfnd:
 						|| mat == OBSIDIAN_MT
 						|| mat == MINERAL)
 						)
-					)
+					){
 					set_material(otmp, mat);
+				}
 			}
+		}
+	}
 	
 	/* set object properties */
 	if (oproperties && wizard) // wishing for object properties is wizard-mode only

@@ -2377,8 +2377,8 @@ struct monst *mtmp;
 
 void
 remove_monster(x, y)
-uchar x;
-uchar y;
+int x;
+int y;
 {
 	struct monst * mtmp = level.monsters[x][y];
 	

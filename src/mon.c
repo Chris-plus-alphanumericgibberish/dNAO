@@ -2275,6 +2275,7 @@ mon_can_see_mon(looker, lookie)
 			}
 		}
 	}
+	return FALSE;
 }
 
 boolean
@@ -2423,6 +2424,7 @@ mon_can_see_you(looker)
 			}
 		}
 	}
+	return FALSE;
 }
 
 STATIC_DCL int
@@ -3899,11 +3901,11 @@ boolean was_swallowed;			/* digestion */
 			int hpgain = 0;
 			int lvlgain = 0;
 			int lvls = 0;
-			if((mdat==&mons[PM_DEEP_ONE])){
+			if(mdat==&mons[PM_DEEP_ONE]){
 				hpgain = 2;
-			} else if((mdat==&mons[PM_DEEPER_ONE])){
+			} else if(mdat==&mons[PM_DEEPER_ONE]){
 				hpgain = 4;
-			} else if((mdat==&mons[PM_DEEPEST_ONE])){
+			} else if(mdat==&mons[PM_DEEPEST_ONE]){
 				hpgain = 8;
 			} else { //arcadian avenger
 				lvlgain = 1;
@@ -3917,9 +3919,16 @@ boolean was_swallowed;			/* digestion */
 							if(mtmp->mhp > 0){
 								if(lvlgain) for(lvls = lvlgain; lvls > 0; lvls--) grow_up(mtmp, 0);
 								if(hpgain){
-									mtmp->mhpmax += hpgain-1;
-									mtmp->mhp += hpgain-1;
-									grow_up(mtmp, mtmp); //gain last HP and grow up if needed
+									if (mtmp->mhpmax < 300){
+										mtmp->mhpmax += hpgain-1;
+										mtmp->mhp += hpgain-1;
+										grow_up(mtmp, mtmp); //gain last HP and grow up if needed
+									}
+									else {
+										mtmp->mhpmax += 1;
+										mtmp->mhp += 1;
+										grow_up(mtmp, mtmp); //gain last HP and grow up if needed
+									}
 								}
 							}
 					}
@@ -5108,7 +5117,7 @@ register struct monst *mtmp;
 void
 wakeup(mtmp, anger)
 register struct monst *mtmp;
-boolean anger;
+int anger;
 {
 	mtmp->msleeping = 0;
 	mtmp->meating = 0;	/* assume there's no salvagable food left */

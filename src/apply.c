@@ -1060,7 +1060,7 @@ struct obj *obj;
 void
 use_bell(optr, spiritseal)
 struct obj **optr;
-boolean spiritseal;
+int spiritseal;
 {
 	register struct obj *obj = *optr;
 	struct monst *mtmp;
@@ -5157,7 +5157,7 @@ doapply()
 	break;
 	case BELL:
 	case BELL_OF_OPENING:
-		use_bell(&obj, FALSE);
+		use_bell(&obj, TRUE);
 		break;
 	case CANDELABRUM_OF_INVOCATION:
 		use_candelabrum(obj);
