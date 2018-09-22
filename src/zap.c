@@ -2181,6 +2181,7 @@ boolean ordinary;
 		case WAN_LIGHTNING:
 		    makeknown(WAN_LIGHTNING);
 		case SPE_LIGHTNING_BOLT:
+		case SPE_LIGHTNING_STORM:
 		    if (!Shock_resistance) {
 				You("shock yourself!");
 				damage = d(12,6);
@@ -2200,10 +2201,10 @@ boolean ordinary;
 			    if (!Blind) Your1(vision_clears);
 		    }
 		    break;
-
 		case SPE_FIREBALL:
+		case SPE_FIRE_STORM:
 		    You("explode a fireball on top of yourself!");
-		    explode(u.ux, u.uy, 11, d(6,6), WAND_CLASS, EXPL_FIERY);
+		    explode(u.ux, u.uy, 11, d(6,6), WAND_CLASS, EXPL_FIERY, 1);
 		    break;
 		case WAN_FIRE:
 		    makeknown(WAN_FIRE);
@@ -2228,6 +2229,7 @@ boolean ordinary;
 		case WAN_COLD:
 		    makeknown(WAN_COLD);
 		case SPE_CONE_OF_COLD:
+		case SPE_BLIZZARD:
 		case FROST_HORN:
 		    if (Cold_resistance) {
 				shieldeff(u.ux, u.uy);
@@ -2241,9 +2243,9 @@ boolean ordinary;
 				destroy_item(POTION_CLASS, AD_COLD);
 			}
 		    break;
-		case SPE_ACID_BLAST:
-		    You("explode an acid blast on top of yourself!");
-		    explode(u.ux, u.uy, 17, d(6,6), WAND_CLASS, EXPL_NOXIOUS);
+		case SPE_ACID_SPLASH:
+		    You("splash acid on top of yourself!");
+		    explode(u.ux, u.uy, 17, d(6,6), WAND_CLASS, EXPL_NOXIOUS, 1);
 		    break;
 
 		case WAN_MAGIC_MISSILE:
@@ -2858,7 +2860,7 @@ register struct	obj	*obj;
 		
 	    if (otyp == WAN_DIGGING || otyp == SPE_DIG)
 			zap_dig(-1,-1,-1);//-1-1-1 = "use defaults"
-	    else if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_ACID_BLAST){
+	    else if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_ACID_SPLASH){
 			buzz(otyp - SPE_MAGIC_MISSILE + 10,
 				 u.ulevel / 2 + 1,
 				 u.ux, u.uy, u.dx, u.dy,0,0);
@@ -3931,6 +3933,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 		flat *= 1.5;
 		nd *= 1.5;
 	}
+	if (type == ZT_SPELL(ZT_ACID)) range = 1;
     if(dx == 0 && dy == 0) range = 1;
     save_bhitpos = bhitpos;
 
@@ -4239,10 +4242,13 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 				}
 				if(shopdoor || shopwall) pay_for_damage(shopdoor ? "destroy" : "dig into", FALSE);
 			} else {
-				if (type == ZT_SPELL(ZT_FIRE) || type == ZT_SPELL(ZT_ACID) || type == ZT_SPELL(ZT_POISON_GAS)) {
+				if (type == ZT_SPELL(ZT_FIRE) || type == ZT_SPELL(ZT_POISON_GAS)) {
 				sx = lsx;
 				sy = lsy;
 				break; /* fireballs explode before the wall */
+				}
+				if (type == ZT_SPELL(ZT_ACID)) {
+					break;	/* acid splashes explode onto the wall */
 				}
 				bounce = 0;
 				range--;
@@ -4277,16 +4283,12 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 	////////////////////////////////////////////////////////////////////////////////////////
 	if(redrawneeded) doredraw();
     tmp_at(DISP_END,0);
-	if(!flags.mon_moving && Double_spell_size){
+	{
+		int bonus = (!flags.mon_moving && Double_spell_size);
 		if (type == ZT_SPELL(ZT_FIRE))
-			explode2(sx, sy, type, flat ? flat : d(18,6), 0, EXPL_FIERY);
+			explode(sx, sy, type, flat ? flat : d(12 * (bonus + 2) / 2, 6), 0, EXPL_FIERY, 1 + !!bonus);
 		else if (type == ZT_SPELL(ZT_ACID))
-			explode2(sx, sy, type, flat ? flat : d(18,6), 0, EXPL_NOXIOUS);
-	} else {
-		if (type == ZT_SPELL(ZT_FIRE))
-			explode(sx, sy, type, flat ? flat : d(12,6), 0, EXPL_FIERY);
-		else if (type == ZT_SPELL(ZT_ACID))
-			explode(sx, sy, type, flat ? flat : d(12,6), 0, EXPL_NOXIOUS);
+			splash(sx, sy, dx, dy, type, flat ? flat : d(8 * (bonus + 2) / 2, 6), 0, EXPL_NOXIOUS);
 	}
     if (shopdamage)
 	pay_for_damage(abstype == ZT_FIRE ?  "burn away" :

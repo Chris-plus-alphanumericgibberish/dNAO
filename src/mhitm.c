@@ -1223,10 +1223,10 @@ explmm(magr, mdef, mattk)
 	if(!is_fern_spore(magr->data)) result = mdamagem(magr, mdef, mattk);
 	else{
 		mondead(magr);
-		if(magr->data==&mons[PM_SWAMP_FERN_SPORE]) explode(magr->mx, magr->my, 9, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_MAGICAL);
+		if(magr->data==&mons[PM_SWAMP_FERN_SPORE]) explode(magr->mx, magr->my, 9, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_MAGICAL, 1);
 		else if(magr->data==&mons[PM_BURNING_FERN_SPORE])
-			explode(magr->mx, magr->my, 8, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_YELLOW);
-		else explode(magr->mx, magr->my, 7, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_NOXIOUS);
+			explode(magr->mx, magr->my, 8, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_YELLOW, 1);
+		else explode(magr->mx, magr->my, 7, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_NOXIOUS, 1);
 		if (magr->mhp > 0) return result;
 		else return result | MM_AGR_DIED;
 	}
@@ -2372,7 +2372,7 @@ physical:{
 			for (i = rn2(3)+2; i > 0; i--) {
 				x = rn2(3)-1;
 				y = rn2(3)-1;
-				explode(magr->mx+x, magr->my+y, 8, tmp, -1, rn2(EXPL_MAX));		//-1 is unspecified source. 8 is physical
+				explode(magr->mx+x, magr->my+y, 8, tmp, -1, rn2(EXPL_MAX), 1);		//-1 is unspecified source. 8 is physical
 			}
 			if(DEADMONSTER(magr))
 				return MM_AGR_DIED;

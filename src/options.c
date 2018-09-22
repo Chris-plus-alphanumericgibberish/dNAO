@@ -409,6 +409,8 @@ static struct Comp_Opt
 						MAXOCLASSES, SET_IN_GAME },
 	{ "player_selection", "choose character via dialog or prompts",
 						12, DISP_IN_GAME },
+	{ "pokedex", "default details shown in the pokedex",
+						32, SET_IN_GAME },
 	{ "race",     "your starting race (e.g., Human, Elf)",
 						PL_CSIZ, DISP_IN_GAME },
 #ifdef CONVICT
@@ -628,6 +630,7 @@ initoptions()
 	flags.end_top = 3;
 	flags.end_around = 2;
 	iflags.runmode = RUN_LEAP;
+	iflags.pokedex = POKEDEX_SHOW_DEFAULT;
 	iflags.msg_history = 20;
 #ifdef TTY_GRAPHICS
 	iflags.prevmsg_window = 's';
@@ -1745,6 +1748,52 @@ boolean tinitial, tfrom_file;
 		}
 		return;
 	}
+
+	fullname = "pokedex";
+	if (match_optname(opts, fullname, 3, TRUE)) {
+		boolean negative = FALSE;
+		if (negated) {
+			iflags.pokedex = POKEDEX_SHOW_DEFAULT;
+		}
+		else if ((op = string_for_opt(opts, FALSE)) != 0) {
+			if (op[0] == '!') {
+				negative = TRUE;
+				op++;
+			}
+#define ADD_REMOVE_SECTION(section)	if (!negative) iflags.pokedex |= (section); else iflags.pokedex &= ~(section)
+			if (!strncmpi(op, "stats", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_STATS);
+			else if (!strncmpi(op, "generation", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_GENERATION);
+			else if (!strncmpi(op, "weight", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_WEIGHT);
+			else if (!strncmpi(op, "resists", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_RESISTS);
+			else if (!strncmpi(op, "conveys", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_CONVEYS);
+			else if (!strncmpi(op, "movement", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_MM);
+			else if (!strncmpi(op, "thinking", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_MT);
+			else if (!strncmpi(op, "biology", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_MB);
+			else if (!strncmpi(op, "mechanics", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_MG);
+			else if (!strncmpi(op, "race", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_MA);
+			else if (!strncmpi(op, "vision", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_MV);
+			else if (!strncmpi(op, "attacks", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_ATTACKS);
+			else if (!strncmpi(op, "summary", strlen(op)))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_CRITICAL);
+			else
+				badoption(opts);
+#undef ADD_REMOVE_SECTION
+		}
+		return;
+	}
+		
 
 	fullname = "pettype";
 	if (match_optname(opts, fullname, 3, TRUE)) {
@@ -3144,6 +3193,11 @@ static NEARDATA const char *burdentype[] = {
 	"strained", "overtaxed", "overloaded"
 };
 
+static NEARDATA const char *pokedexsections[] = {
+	"stats", "generation", "weight", "resists", "conveys",
+	"movement", "thinking", "biology", "mechanics", "race", "vision", "attacks"/*, "summary"*/
+};
+
 static NEARDATA const char *runmodes[] = {
 	"teleport", "run", "walk", "crawl"
 };
@@ -3438,7 +3492,7 @@ boolean setinitial,setfromfile;
     
     /* Special handling of menustyle, pickup_burden, pickup_types,
      * disclose, runmode, msg_window, menu_headings, number_pad and sortloot
-	 * attack_mode,
+	 * attack_mode, pokedex
 #ifdef AUTOPICKUP_EXCEPTIONS
      * Also takes care of interactive autopickup_exception_handling changes.
 #endif
@@ -3573,7 +3627,31 @@ boolean setinitial,setfromfile;
 			}
 		}
 		retval = TRUE;
-    } else if (!strcmp("runmode", optname)) {
+    } else if (!strcmp("pokedex", optname)) {
+		const char *mode_name;
+		menu_item *mode_pick = (menu_item *)0;
+		boolean done = FALSE;
+
+		while (!done){
+			tmpwin = create_nhwindow(NHW_MENU);
+			start_menu(tmpwin);
+			for (i = 0; i < SIZE(pokedexsections); i++) {
+				mode_name = pokedexsections[i];
+				any.a_int = i + 1;
+				add_menu(tmpwin, NO_GLYPH, &any, (char)((int)'a' + i), 0,
+					ATR_NONE, mode_name, (iflags.pokedex & (1 << i)) ? MENU_SELECTED : MENU_UNSELECTED);
+			}
+			end_menu(tmpwin, "Toggle pokedex sections on/off:");
+			if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
+				iflags.pokedex ^= (1 << mode_pick->item.a_int - 1);
+			}
+			else
+				done = TRUE;
+			free((genericptr_t)mode_pick);
+			destroy_nhwindow(tmpwin);
+		}
+		retval = TRUE;
+	} else if (!strcmp("runmode", optname)) {
 		const char *mode_name;
 		menu_item *mode_pick = (menu_item *)0;
 		tmpwin = create_nhwindow(NHW_MENU);
@@ -4008,6 +4086,8 @@ char *buf;
 		Sprintf(buf, "%s", (preferred_pet == 'c') ? "cat" :
 				(preferred_pet == 'd') ? "dog" :
 				(preferred_pet == 'n') ? "none" : "random");
+	else if (!strcmp(optname, "pokedex"))
+		Sprintf(buf, "%d", iflags.pokedex);
 	else if (!strcmp(optname, "pickup_burden"))
 		Sprintf(buf, "%s", burdentype[flags.pickup_burden] );
 	else if (!strcmp(optname, "pickup_types")) {

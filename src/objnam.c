@@ -1810,6 +1810,7 @@ static const char * const special_subjs[] = {
 	"Cyclops",
 	"Hippocrates",
 	"Pelias",
+	"lembas",
 	"aklys",
 	"amnesia",
 	"paralysis",
@@ -2321,6 +2322,7 @@ const char *oldstr;
 	    if (BSTRNCMPI(bp, p-3, "Eye", 3) &&
 		BSTRNCMP(bp, p-4, "boot", 4) &&
 		BSTRNCMP(bp, p-8, "gauntlet", 8) &&
+		BSTRNCMPI(bp, p-11, "Steel Scale", 11) &&
 		BSTRNCMP(bp, p-8, "Gauntlet", 8))
 		while ((*p = *(p+1)) != 0) p++;
 	    return bp;
@@ -2367,7 +2369,8 @@ const char *oldstr;
 			    !BSTRCMP(bp, p-6, "lenses") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
-			    !BSTRCMP(bp, p-6, "scales"))
+			    !BSTRCMP(bp, p-6, "scales") ||
+				!BSTRCMPI(bp, p-10, "Lost Names")) /* book */
 				return bp;
 
 		} else if (!BSTRCMPI(bp, p-5, "boots") ||
@@ -2379,22 +2382,28 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-14, "shape changers") ||
 			   !BSTRCMPI(bp, p-15, "detect monsters") ||
 			   !BSTRCMPI(bp, p-5, "Chaos") ||
+			   !BSTRCMPI(bp, p-13, "Wand of Orcus") || /* wand */
+			   !BSTRCMPI(bp, p-12, "Gear-spirits") || /* crossbow*/
+			   !BSTRCMPI(bp, p-10, "Rod of Dis") || /* mace */
+			   !BSTRCMPI(bp, p-6, "Caress") || /* whip */
+			   !BSTRCMPI(bp, p-7, "Proteus") || /* chest */
 			   !BSTRCMPI(bp, p-11, "Aesculapius") || /* staff */
 			   !BSTRCMPI(bp, p-7, "Orpheus") || /* lyre */
 			   !BSTRCMPI(bp, p-7, "Annulus") || /* Ring */
+			   !BSTRCMPI(bp, p-5, "Aegis") || 	/* shield */
 			   !BSTRCMPI(bp, p-8, "Longinus") || 	/* spear */
 			   !BSTRCMPI(bp, p-14, "Twelve Mirrors") || 	/* staff */
 			   !BSTRCMPI(bp, p-13, "Water Flowers") || 	/* boots */
 			   !BSTRCMPI(bp, p-14, "Dwarvish Lords") || /* axe */
 			   !BSTRCMPI(bp, p-12, "Elvish Lords") || /* mace */
 			   !BSTRCMPI(bp, p-11, "Seven Parts") || /* spear */
-			   !BSTRCMPI(bp, p-10, "Lost Names") || /* book */
-			   !BSTRCMPI(bp, p-10, "Infinite Spells") || /* book */
+			   !BSTRCMPI(bp, p-15, "Infinite Spells") || /* book */
 			   !BSTRCMPI(bp, p-10, "eucalyptus") ||
 #ifdef WIZARD
 			   !BSTRCMPI(bp, p-9, "iron bars") ||
 #endif
 			   !BSTRCMPI(bp, p-5, "aklys") ||
+			   !BSTRCMPI(bp, p-6, "lembas") ||
 			   !BSTRCMPI(bp, p-5, "dress") ||
 			   !BSTRCMPI(bp, p-16, "descent of stars") ||
 			   !BSTRCMPI(bp, p-13, "dragon scales") ||
@@ -2517,6 +2526,7 @@ struct alt_spellings {
 	{ "camera", EXPENSIVE_CAMERA },
 	{ "tee shirt", T_SHIRT },
 #endif
+	{ "lembas", LEMBAS_WAFER },
 	{ "can", TIN },
 	{ "can opener", TIN_OPENER },
 	{ "kelp", KELP_FROND },
@@ -2530,6 +2540,7 @@ struct alt_spellings {
 	{ "bazooka", ROCKET_LAUNCHER },
 	{ "hand grenade", FRAG_GRENADE },
 	{ "dynamite", STICK_OF_DYNAMITE },
+	{ "ampule", HYPOSPRAY_AMPULE },
 //#endif
 	{ "rum", POT_BOOZE },
 	{ "sea biscuit", CRAM_RATION },
@@ -2612,7 +2623,7 @@ boolean from_user;
 	register struct obj *otmp;
 	int cnt, spe, spesgn, typ, very, rechrg;
 	int blessed, uncursed, iscursed, ispoisoned, isgreased, isdrained, stolen;
-	int moonphase = -1, viperheads = -1, mat = 0;
+	int moonphase = -1, viperheads = -1, ampule = -1, mat = 0;
 	int eroded, eroded2, eroded3, erodeproof;
 #ifdef INVISIBLE_OBJECTS
 	int isinvisible;
@@ -2656,6 +2667,7 @@ boolean from_user;
 		sizewished = FALSE;
 	int objsize = youracedata->msize;
 	long bodytype = 0L;
+	long oproperties = 0L;
 	char oclass;
 	char *un, *dn, *actualn;
 	const char *name=0;
@@ -2901,6 +2913,34 @@ boolean from_user;
 			moonphase = GIBBOUS_MOON;
 		} else if (!strncmpi(bp, "full ", l=5) && strncmpi(bp, "full healing", 12)) {
 			moonphase = FULL_MOON;
+		} else if (!strncmpi(bp, "gain ability ", l=13) && strstri(bp, " ampule")) {
+			ampule = POT_GAIN_ABILITY;
+		} else if (!strncmpi(bp, "restore ability ", l=16) && strstri(bp, " ampule")) {
+			ampule = POT_RESTORE_ABILITY;
+		} else if (!strncmpi(bp, "blindness ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_BLINDNESS;
+		} else if (!strncmpi(bp, "confusion ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_CONFUSION;
+		} else if (!strncmpi(bp, "paralysis ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_PARALYSIS;
+		} else if (!strncmpi(bp, "speed ", l=6) && strstri(bp, " ampule")) {
+			ampule = POT_SPEED;
+		} else if (!strncmpi(bp, "hallucination ", l=14) && strstri(bp, " ampule")) {
+			ampule = POT_HALLUCINATION;
+		} else if (!strncmpi(bp, "healing ", l=8) && strstri(bp, " ampule")) {
+			ampule = POT_HEALING;
+		} else if (!strncmpi(bp, "extra healing ", l=14) && strstri(bp, " ampule")) {
+			ampule = POT_EXTRA_HEALING;
+		} else if (!strncmpi(bp, "full healing ", l=13) && strstri(bp, " ampule")) {
+			ampule = POT_FULL_HEALING;
+		} else if (!strncmpi(bp, "gain energy ", l=11) && strstri(bp, " ampule")) {
+			ampule = POT_GAIN_ENERGY;
+		} else if (!strncmpi(bp, "sleeping ", l=9) && strstri(bp, " ampule")) {
+			ampule = POT_SLEEPING;
+		} else if (!strncmpi(bp, "polymorph ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_POLYMORPH;
+		} else if (!strncmpi(bp, "amnesia ", l=8) && strstri(bp, " ampule")) {
+			ampule = POT_AMNESIA;
 		} else if (!strncmpi(bp, "wax ", l=4) && strncmpi(bp, "wax candle", 10)
 			) {
 			mat = WAX;
@@ -2974,7 +3014,7 @@ boolean from_user;
 			mat = GOLD;
 		} else if (!strncmpi(bp, "platinum ", l=9)
 			&& strncmpi(bp, "platinum wand", 13) && strncmpi(bp, "Platinum Yendorian", 18)
-			&& strncmpi(bp, "Platinum Dragon", 15)
+			&& strncmpi(bp, "Platinum Dragon", 15) && strncmpi(bp, "Platinum Dragon Plate", 21)
 		) {
 			mat = PLATINUM;
 		} else if (!strncmpi(bp, "mithril ", l=8)) {
@@ -2991,13 +3031,16 @@ boolean from_user;
 		} else if ((!strncmpi(bp, "gemstone ", l=9) || !strncmpi(bp, "gem ", l=4))
 			) {
 			mat = GEMSTONE;
-		} else if (!strncmpi(bp, "stone ", l=6)
+		} else if ((!strncmpi(bp, "stone ", l=6) || !strncmpi(bp, "ceramic ", l=8))
 			) {
 			mat = MINERAL;
 		} else if (!strncmpi(bp, "obsidian ", l=9)
 			&& strncmpi(bp, "obsidian stone", 14) && strncmpi(bp, "obsidian gem", 12)
 			) {
 			mat = OBSIDIAN_MT;
+		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)
+			) {
+			oproperties = OPROP_WOOL;
 		} else break;
 		bp += l;
 	}
@@ -3122,11 +3165,13 @@ boolean from_user;
 	if (strncmpi(bp, "wizard lock", 11)) /* not the "wizard" monster! */
 	if (strncmpi(bp, "vampire killer", 14)) /* not the "vampire" monster! */
 	if (strncmpi(bp, "ninja-to", 8)) /* not the "ninja" rank */
+	if (strncmpi(bp, "rogue gear-spirits", 18)) /* not the "rogue" monster */
 	if (strncmpi(bp, "master key", 10)) /* not the "master" rank */
 	if (strncmpi(bp, "scroll of stinking cloud", 10)) /* not the "stinking cloud" monster */
 	if (strncmpi(bp, "rod of lordly might", 19)) /* not the "lord" rank */
 	if (strncmpi(bp, "magenta", 7)) /* not the "mage" rank */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
+	if (strncmpi(bp, "platinum dragon plate", 22)) /* not a "dragon" */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
 	    (mntmp = name_to_mon(bp)) >= LOW_PM) {
 		int mntmptoo, mntmplen;	/* double check for rank title */
@@ -3151,7 +3196,7 @@ boolean from_user;
 			Strcpy(bp, sng);
 		}
 	}
-
+	
 	/* Alternate spellings (pick-ax, silver sabre, &c) */
     {
 	struct alt_spellings *as = spellings;
@@ -3250,7 +3295,8 @@ boolean from_user;
 	   strncmpi(bp, "black dress", 11) && 
 	   strncmpi(bp, "noble's dress", 13) &&
 	   strncmpi(bp, "sceptre of lolth", 16) && 
-	   strncmpi(bp, "atma weapon", 11)
+	   strncmpi(bp, "atma weapon", 11) &&
+	   strncmpi(bp, "wand of orcus", 13)
 	)
 	for (i = 0; i < (int)(sizeof wrpsym); i++) {
 		register int j = strlen(wrp[i]);
@@ -3672,11 +3718,7 @@ typfnd:
 
 	if((typ == SPE_LIGHTNING_BOLT ||
 		typ == SPE_POISON_SPRAY ||
-		typ == SPE_ACID_BLAST ||
 		typ == SPE_LIGHTNING_STORM ||
-		typ == SPE_FIRE_STORM ||
-		typ == SPE_FROST_STORM ||
-		typ == SPE_ACID_STORM ||
 		typ == SCR_CONSECRATION ||
 		(typ >= HANDGUN && typ <= HEAVY_GUN) ||
 		((
@@ -4046,6 +4088,28 @@ typfnd:
 		}
 	}
 	
+	/* set object properties */
+	if (oproperties && wizard) // wishing for object properties is wizard-mode only
+	{
+		if (wizard)		// wizard mode will give you what you ask for, even if it breaks things
+			otmp->oproperties = oproperties;
+		else
+			if (otmp->oclass == ARMOR_CLASS)
+			{
+				switch (oproperties)
+				{
+				case OPROP_WOOL:
+					otmp->oproperties = oproperties;
+					break;
+				default:
+					otmp->oproperties = 0L;
+					break;
+				}
+			}
+	}
+		
+
+
 	if (name) {
 		const char *aname;
 		short objtyp;
@@ -4061,6 +4125,11 @@ typfnd:
 		if (otmp->oartifact) {
 			u.uconduct.wisharti++;	/* KMH, conduct */
 		}
+	}
+
+	/* set ampule type */
+	if(ampule != -1 && otmp->otyp == HYPOSPRAY_AMPULE){
+		otmp->ovar1 = ampule;
 	}
 
 	/* set viper heads, probability of getting what you wished for copied loosely from setting weapon/armor spe, but the minimum is 1, not 0. */
