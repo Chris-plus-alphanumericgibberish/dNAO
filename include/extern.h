@@ -517,7 +517,7 @@ E void FDECL(wary_dog, (struct monst *, BOOLEAN_P));
 
 /* ### dogmove.c ### */
 
-E boolean FDECL(could_use_item, (struct monst *,struct obj *,BOOLEAN_P));
+E boolean FDECL(could_use_item, (struct monst *, struct obj *,BOOLEAN_P));
 E boolean FDECL(acceptable_pet_target, (struct monst *,struct monst *,BOOLEAN_P));
 E boolean FDECL(betrayed, (struct monst *));
 E int FDECL(dog_nutrition, (struct monst *,struct obj *));
@@ -1406,7 +1406,6 @@ E void FDECL(golemeffects, (struct monst *,int,int));
 E boolean FDECL(angry_guards, (BOOLEAN_P));
 E void NDECL(pacify_guards);
 E void FDECL(removeMonster,(int,int));
-/*E void FDECL(remove_monster, (int, int)); The hell ?:S */
 
 /* ### mondata.c ### */
 
@@ -2729,6 +2728,7 @@ E int FDECL(weapon_type, (struct obj *));
 E int NDECL(uwep_skill_type);
 E int FDECL(weapon_hit_bonus, (struct obj *));
 E int FDECL(weapon_dam_bonus, (struct obj *));
+E int FDECL(skill_dam_bonus, (int));
 E void FDECL(skill_init, (const struct def_skill *));
 E void FDECL(skill_add, (const struct def_skill *));
 
