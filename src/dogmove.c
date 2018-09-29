@@ -87,14 +87,14 @@ register struct obj *otmp;
 	if (!obj->owornmask) continue;
 
 	if (best &&
-	     (arm_bonus(obj) +  extra_pref(mtmp,obj) >=
-	      arm_bonus(best) + extra_pref(mtmp,best)))
+	     (arm_total_bonus(obj) +  extra_pref(mtmp,obj) >=
+	      arm_total_bonus(best) + extra_pref(mtmp,best)))
 	     best = obj;
     }
     
     return ((best == (struct obj *)0) ||
-	    (arm_bonus(otmp) + extra_pref(mtmp,otmp) >
-	     arm_bonus(best) + extra_pref(mtmp,best)));
+	    (arm_total_bonus(otmp) + extra_pref(mtmp,otmp) >
+	     arm_total_bonus(best) + extra_pref(mtmp,best)));
 }
 
 /*
