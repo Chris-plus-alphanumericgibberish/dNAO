@@ -5240,9 +5240,11 @@ register int	x, y;
 register int	mmflags;
 register int	undeadtype;
 {
+	struct monst *mtmp = 0;
 	undeadfaction = undeadtype;
-	makemon(ptr, x, y, mmflags);
+	mtmp = makemon(ptr, x, y, mmflags);
 	undeadfaction = 0;
+	return mtmp;
 }
 /*
  * called with [x,y] = coordinates;

@@ -428,7 +428,7 @@ mattackm(magr, mdef)
 		case AT_MARI: /* weapon attacks */
 #define MAINHAND (mattk->aatyp != AT_XWEP && mattk->aatyp != AT_MARI)
 
-		if (!mattk->aatyp == AT_XWEP && magr->misc_worn_check & W_ARMS) {
+		if (!(mattk->aatyp == AT_XWEP) && magr->misc_worn_check & W_ARMS) {
 			// Offhand attacks cannot be made while wearing a shield
 			break;
 		}
@@ -1227,10 +1227,10 @@ explmm(magr, mdef, mattk)
 	if(!is_fern_spore(magr->data)) result = mdamagem(magr, mdef, mattk);
 	else{
 		mondead(magr);
-		if(magr->data==&mons[PM_SWAMP_FERN_SPORE]) explode(magr->mx, magr->my, 9, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_MAGICAL);
+		if(magr->data==&mons[PM_SWAMP_FERN_SPORE]) explode(magr->mx, magr->my, 9, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_MAGICAL, 1);
 		else if(magr->data==&mons[PM_BURNING_FERN_SPORE])
-			explode(magr->mx, magr->my, 8, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_YELLOW);
-		else explode(magr->mx, magr->my, 7, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_NOXIOUS);
+			explode(magr->mx, magr->my, 8, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_YELLOW, 1);
+		else explode(magr->mx, magr->my, 7, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_NOXIOUS, 1);
 		if (magr->mhp > 0) return result;
 		else return result | MM_AGR_DIED;
 	}
@@ -2376,7 +2376,7 @@ physical:{
 			for (i = rn2(3)+2; i > 0; i--) {
 				x = rn2(3)-1;
 				y = rn2(3)-1;
-				explode(magr->mx+x, magr->my+y, 8, tmp, -1, rn2(EXPL_MAX));		//-1 is unspecified source. 8 is physical
+				explode(magr->mx+x, magr->my+y, 8, tmp, -1, rn2(EXPL_MAX), 1);		//-1 is unspecified source. 8 is physical
 			}
 			if(DEADMONSTER(magr))
 				return MM_AGR_DIED;
@@ -2741,7 +2741,7 @@ struct attack *mattk;
 		
 		if(mdef->data == &mons[PM_LEGION]){
 			int n = rnd(4);
-			for(n; n>0; n--) rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mdef->mx, mdef->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
+			for(; n>0; n--) rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mdef->mx, mdef->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
 									  makemon(&mons[PM_LEGIONNAIRE], mdef->mx, mdef->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 		} else {
 			if(mdef->mhp > .75*mdef->mhpmax) makemon(&mons[PM_LEMURE], mdef->mx, mdef->my, MM_ADJACENTOK);

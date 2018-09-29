@@ -2523,7 +2523,7 @@ boolean
 insubstantial_aware(mon, obj, you)
 struct monst *mon;
 struct obj *obj;
-boolean you;
+int you;
 {
 	struct permonst *ptr = mon->data;
 	if(you && u.sealsActive&SEAL_CHUPOCLOPS)
@@ -2559,7 +2559,7 @@ insubstantial_damage(mon, obj, dmg, you)
 struct monst *mon;
 struct obj *obj;
 int dmg;
-boolean you;
+int you;
 {
 	struct permonst *ptr = mon->data;
 	if(you && u.sealsActive&SEAL_CHUPOCLOPS)
@@ -3551,7 +3551,7 @@ register struct attack *mattk;
 			for(i = rn2(3)+2; i > 0; i--){
 				x = rn2(3)-1;
 				y = rn2(3)-1;
-				explode(u.ux+x, u.uy+y, 8, tmp, -1, rn2(7));		//-1 is unspecified source. 8 is physical
+				explode(u.ux+x, u.uy+y, 8, tmp, -1, rn2(7), 1);		//-1 is unspecified source. 8 is physical
 			}
 			tmp=0;
 		} break;
@@ -4710,7 +4710,7 @@ dobpois:
 	    if(!mhit) break; //didn't draw blood, forget it.
 		if(mon->data == &mons[PM_LEGION]){
 			int n = rnd(4);
-			for(n; n>0; n--) rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
+			for(; n>0; n--) rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
 									  makemon(&mons[PM_LEGIONNAIRE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 		} else {
 			if(mon->mhp > .75*mon->mhpmax) makemon(&mons[PM_LEMURE], mon->mx, mon->my, MM_ADJACENTOK);

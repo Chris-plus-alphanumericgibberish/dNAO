@@ -872,7 +872,7 @@ static const short grownups[][2] = {
 int
 little_to_big(montype, female)
 int montype;
-boolean female;
+int female;
 {
 #ifndef AIXPS2_BUG
 	register int i;

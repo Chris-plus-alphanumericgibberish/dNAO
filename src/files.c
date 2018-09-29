@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "dlb.h"
+#include "system.h"
 
 #ifdef TTY_GRAPHICS
 #include "wintty.h" /* more() */
@@ -627,7 +628,7 @@ touch_whereis()
   else Sprintf(questcode,"%s", urole.filecode);
   Sprintf(whereis_file,"%s",dump_format_str(WHEREIS_FILE));
   Sprintf(whereis_work,
-	  "depth=%d:dnum=%d:hp=%d:maxhp=%d:turns=%d:score=%ld:role=%s:race=%s:gender=%s:align=%s:conduct=0x%lx:amulet=%d\n",
+	  "depth=%d:dnum=%d:hp=%d:maxhp=%d:turns=%ld:score=%ld:role=%s:race=%s:gender=%s:align=%s:conduct=0x%lx:amulet=%d\n",
 	  depth(&u.uz),
 	  u.uz.dnum,
 	  u.uhp,
@@ -2519,7 +2520,7 @@ const char *reason;	/* explanation */
 		lfile = fopen_datafile(PANICLOG, "a", TROUBLEPREFIX);
 		if (lfile) {
 		    (void) fprintf(lfile, "%ld %s: %s %s\n",
-				   u.ubirthday, (plname ? plname : "(none)"),
+				   u.ubirthday, plname,
 				   type, reason);
 		    (void) fclose(lfile);
 		}
