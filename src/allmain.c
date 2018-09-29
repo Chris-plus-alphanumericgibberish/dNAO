@@ -1644,7 +1644,7 @@ karemade:
 		case 0:
 			break;
 		case 1:
-			if (!Hallucination) {
+			if (!Hallucination){
 				You_feel("%s.", (healing_penalty) ? "itchier" : "itchy");
 			}
 			else {
