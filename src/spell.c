@@ -3652,6 +3652,7 @@ spiriteffects(power, atme)
 		}break;
 		default:
 			pline("BANG! That's not going to kill TOO many people, is it...? (Unknown power %d.)", power);
+			//Note: Eddie Izzard joke
 		break;
 	}
 	u.spiritPColdowns[power] = monstermoves + 25;
