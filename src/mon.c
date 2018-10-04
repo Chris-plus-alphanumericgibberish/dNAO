@@ -5228,10 +5228,10 @@ register int x, y, distance;
 			if(sensitive_ears(mtmp->data) && !is_deaf(mtmp) &&
 			 dist2(mtmp->mx, mtmp->my, x, y) < distance
 			){
-			mtmp->mstun = 1;
-			mtmp->mconf = 1;
-			mtmp->mcanhear = 0;
-			mtmp->mdeafened = distance - dist2(mtmp->mx, mtmp->my, x, y);
+				mtmp->mstun = 1;
+				mtmp->mconf = 1;
+				mtmp->mcanhear = 0;
+				mtmp->mdeafened = distance - dist2(mtmp->mx, mtmp->my, x, y);
 			}
 			if(mtmp->data == &mons[PM_ECHO]){
 				struct monst *tmpm;
