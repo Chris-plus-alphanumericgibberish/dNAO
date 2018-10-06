@@ -4,6 +4,7 @@
 #include "hack.h"
 #include "wincurs.h"
 #include "cursmisc.h"
+#include "cursstat.h"
 #include "func_tab.h"
 #include "dlb.h"
 
