@@ -3792,6 +3792,11 @@ boolean atme;
 	boolean confused = (Confusion != 0);
 	struct obj *pseudo;
 	coord cc;
+	int expl_type = 0;
+	int inacc = 0;
+	boolean miss = FALSE;
+	int dam = 0;
+	int rad = 0;
 	
 
 	if(!spelltyp){
@@ -3890,6 +3895,7 @@ boolean atme;
 	role_skill = P_SKILL(skill);
 	if(Spellboost) role_skill++;
 	
+	n = 0;
 	switch(pseudo->otyp)  {
 	/*
 	 * At first spells act as expected.  As the hero increases in skill
@@ -3897,13 +3903,6 @@ boolean atme;
 	 * effects, e.g. more damage, further distance, and so on, without
 	 * additional cost to the spellcaster.
 	 */
-		{
-		int expl_type = 0;
-		int inacc = 0;
-		boolean miss = FALSE;
-		int dam = 0;
-		int rad = 0;
-		n = 0;
 	case SPE_LIGHTNING_STORM:	expl_type = EXPL_MAGICAL;
 								n = rnd(6) + 6;
 								dam = u.ulevel + spell_damage_bonus();
@@ -3973,7 +3972,6 @@ dothrowspell:
 			}
 		}
 		break;
-		}
 	/* these spells are handled in zap.c */
 	case SPE_LIGHTNING_BOLT:
 	case SPE_CONE_OF_COLD:
