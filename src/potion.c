@@ -2351,9 +2351,16 @@ dodip()
 		pline("That is a potion bottle, not a Klein bottle!");
 		return 0;
 	}
-	//from Slashem
-	if(potion->otyp != POT_WATER && obj->otyp == POT_WATER) {
-	  /* swap roles, to ensure symmetry */
+	//from Slashem, modified
+	if(!(potion->otyp == POT_WATER || potion->otyp == POT_ACID || potion->otyp == POT_POLYMORPH ||
+		(potion->otyp == POT_BLOOD && 
+			(potion->corpsenm == PM_CHAMELEON ||
+			 potion->corpsenm == PM_SMALL_MIMIC ||
+			 potion->corpsenm == PM_LARGE_MIMIC ||
+			 potion->corpsenm == PM_GIANT_MIMIC
+			)
+		)) && obj->otyp == POT_WATER) {
+	  /* swap roles, to ensure symmetry, but don't if the potion is polymorph or acid */
 	  struct obj *otmp = potion;
 	  potion = obj;
 	  obj = otmp;
