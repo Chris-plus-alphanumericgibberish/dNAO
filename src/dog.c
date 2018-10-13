@@ -1071,7 +1071,7 @@ struct obj *obj;
 	}
 
 	/* pacify monster cannot tame */
-	if (obj->otyp == SPE_PACIFY_MONSTER)
+	if (obj && obj->otyp == SPE_PACIFY_MONSTER)
 		return((struct monst *)0);
 
 	if(flags.moonphase == FULL_MOON && night() && rn2(6) && obj && !is_instrument(obj)
