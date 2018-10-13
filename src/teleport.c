@@ -62,20 +62,20 @@ unsigned gpflags;
 				return FALSE;
 			if (mtmp == &youmonst)
 				return !!(Amphibious);
-			else return (is_swimmer(mdat) || breathless_mon(mtmp) || amphibious(mdat));
+			else return (is_swimmer(mdat) || breathless_mon(mtmp) || amphibious_mon(mtmp));
 	    } else if (is_pool(x,y, FALSE) && !ignorewater) {
 			if(mtmp == &youmonst && level.flags.lethe)
-				return FALSE;
+				return !!(Levitation || Flying || Wwalking);
 			if (mtmp == &youmonst)
-				return !!(HLevitation || Flying || Wwalking ||
+				return !!(Levitation || Flying || Wwalking ||
 						Swimming || Amphibious);
 			else	return (is_flyer(mdat) || breathless_mon(mtmp) || is_swimmer(mdat) ||
-								is_clinger(mdat) || amphibious(mdat));
+								is_clinger(mdat) || amphibious_mon(mtmp));
 	    } else if (mdat->mlet == S_EEL && !ignorewater) {
 			return FALSE;
 	    } else if (is_lava(x,y)) {
 			if (mtmp == &youmonst)
-				return !!HLevitation;
+				return !!(Levitation || Flying);
 			else
 				return (is_flyer(mdat) || likes_lava(mdat));
 	    }
