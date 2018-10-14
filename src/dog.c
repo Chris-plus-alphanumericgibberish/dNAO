@@ -60,8 +60,10 @@ pet_type()
 		else 
 			return (rn2(3) ? PM_CAVE_SPIDER : PM_BABY_CAVE_LIZARD);
 	}
-	else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend)
+	else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN))
 		return (PM_UNDEAD_KNIGHT);
+		// if(flags.initgend)
+		// else
 	else if(Race_if(PM_CHIROPTERAN))
 		return PM_GIANT_BAT;
 	else if (urole.petnum != NON_PM && urole.petnum != PM_LITTLE_DOG && urole.petnum != PM_KITTEN && urole.petnum != PM_PONY)
@@ -1116,7 +1118,7 @@ struct obj *obj;
 	}
 
 	/* pacify monster cannot tame */
-	if (obj->otyp == SPE_PACIFY_MONSTER)
+	if (obj && obj->otyp == SPE_PACIFY_MONSTER)
 		return((struct monst *)0);
 
 	if(flags.moonphase == FULL_MOON && night() && rn2(6) && obj && !is_instrument(obj)
