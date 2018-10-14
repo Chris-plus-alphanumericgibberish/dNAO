@@ -60,11 +60,9 @@ pet_type()
 		else 
 			return (rn2(3) ? PM_CAVE_SPIDER : PM_BABY_CAVE_LIZARD);
 	}
-	else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN)){
+	else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend)
 		return (PM_UNDEAD_KNIGHT);
-		// if(flags.initgend) 
-		// else 
-	} else if(Race_if(PM_CHIROPTERAN))
+	else if(Race_if(PM_CHIROPTERAN))
 		return PM_GIANT_BAT;
 	else if (urole.petnum != NON_PM && urole.petnum != PM_LITTLE_DOG && urole.petnum != PM_KITTEN && urole.petnum != PM_PONY)
 	    return (urole.petnum);
@@ -1051,13 +1049,60 @@ rock:
 #endif /* OVL1 */
 #ifdef OVLB
 
+void
+enough_dogs()
+{
+	// finds weakest pet, and if there's more than 6 pets that count towards your limit
+	// it sets the weakest friendly
+	struct monst *curmon, *weakdog;
+	int numdogs;
+	for(curmon = fmon; curmon; curmon = curmon->nmon){
+			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !is_suicidal(curmon->data)
+				&& !curmon->mspiritual && curmon->mvanishes < 0
+			){
+				numdogs++;
+				if(!weakdog) weakdog = curmon;
+				if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
+				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
+				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
+				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
+			}
+		}
+
+	if(weakdog && numdogs > (ACURR(A_CHA)/3)) EDOG(weakdog)->friend = 1;
+}
+
+void
+vanish_dogs()
+{
+	// if there's a spiritual pet that isn't already marked for vanishing,
+	// give it 5 turns before it disappears.
+	struct monst *weakdog, *curmon;
+	int numdogs;
+	do {
+		weakdog = (struct monst *)0;
+		numdogs = 0;
+		for(curmon = fmon; curmon; curmon = curmon->nmon){
+			if(curmon->mspiritual && curmon->mvanishes < 0){
+				numdogs++;
+				if(!weakdog) weakdog = curmon;
+				if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
+				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
+				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
+				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
+			}
+		}
+		if(weakdog && numdogs > (ACURR(A_CHA)/3) ) weakdog->mvanishes = 5;
+	} while(weakdog && numdogs > (ACURR(A_CHA)/3));
+}
+
+
 struct monst *
 tamedog(mtmp, obj)
 struct monst *mtmp;
 struct obj *obj;
 {
 	struct monst *mtmp2, *curmon, *weakdog = (struct monst *) 0;
-	int numdogs = 0;
 	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. || mtmp->data == &mons[PM_MEDUSA] */
 	if (is_untamable(mtmp->data) || mtmp->notame || mtmp->iswiz
 		|| (&mons[urole.neminum] == mtmp->data)
@@ -1071,7 +1116,7 @@ struct obj *obj;
 	}
 
 	/* pacify monster cannot tame */
-	if (obj && obj->otyp == SPE_PACIFY_MONSTER)
+	if (obj->otyp == SPE_PACIFY_MONSTER)
 		return((struct monst *)0);
 
 	if(flags.moonphase == FULL_MOON && night() && rn2(6) && obj && !is_instrument(obj)
@@ -1151,20 +1196,7 @@ struct obj *obj;
 
 	/* before officially taming the target, check how many pets there are and untame one if there are too many */
 	if(!(obj && obj->oclass == SCROLL_CLASS && obj->oclass == SPBOOK_CLASS && Confusion)){
-		for(curmon = fmon; curmon; curmon = curmon->nmon){
-			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !is_suicidal(curmon->data)
-				&& !curmon->mspiritual && curmon->mvanishes < 0
-			){
-				numdogs++;
-				if(!weakdog) weakdog = curmon;
-				if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
-				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-			}
-		}
-		
-		if(weakdog && numdogs > (ACURR(A_CHA)/3) ) EDOG(weakdog)->friend = 1;
+		enough_dogs();
 	}
 	
 	/* make a new monster which has the pet extension */
@@ -1213,6 +1245,7 @@ aligntyp alignment;
     mtmp2->mpeaceful = 1;
     set_malign(mtmp2);
     mtmp2->mtame = 10;
+    EDOG(mtmp2)->loyal = 1;
     /* this section names the creature "of ______" */
     if (mons[mnum].pxlth == 0) {
 		mtmp2->isminion = TRUE;
