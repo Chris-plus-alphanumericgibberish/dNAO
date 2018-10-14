@@ -1052,12 +1052,12 @@ rock:
 #ifdef OVLB
 
 void
-enough_dogs()
+enough_dogs(numdogs)
+int numdogs;
 {
 	// finds weakest pet, and if there's more than 6 pets that count towards your limit
 	// it sets the weakest friendly
 	struct monst *curmon, *weakdog;
-	int numdogs;
 	for(curmon = fmon; curmon; curmon = curmon->nmon){
 			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !is_suicidal(curmon->data)
 				&& !curmon->mspiritual && curmon->mvanishes < 0
@@ -1198,7 +1198,7 @@ struct obj *obj;
 
 	/* before officially taming the target, check how many pets there are and untame one if there are too many */
 	if(!(obj && obj->oclass == SCROLL_CLASS && obj->oclass == SPBOOK_CLASS && Confusion)){
-		enough_dogs();
+		enough_dogs(1);
 	}
 	
 	/* make a new monster which has the pet extension */
