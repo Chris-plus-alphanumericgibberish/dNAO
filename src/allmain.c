@@ -1128,7 +1128,7 @@ karemade:
 			{
 				// finds weakest pet, and if there's more than 6 pets that count towards your limit
 				// it sets the weakest one friendly - dog.c
-				enough_dogs();
+				enough_dogs(0);
 				
 				// if there's a spiritual pet that isn't already marked for vanishing,
 				// give it 5 turns before it disappears. - dog.c
