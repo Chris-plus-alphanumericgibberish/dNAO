@@ -1126,41 +1126,13 @@ karemade:
 			}
 			/* If the player has too many pets, untame them untill that is no longer the case */
 			{
-				struct monst *curmon, *weakdog;
-				int numdogs;
-				do {
-					numdogs = 0;
-					weakdog = (struct monst *)0;
-					for(curmon = fmon; curmon; curmon = curmon->nmon){
-						if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && 
-							!is_suicidal(curmon->data) && !curmon->mspiritual && curmon->mvanishes < 0
-						){
-							numdogs++;
-							if(!weakdog) weakdog = curmon;
-							if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-						}
-					}
-					if(weakdog && numdogs > (ACURR(A_CHA)/3) ) EDOG(weakdog)->friend = 1;
-				} while(weakdog && numdogs > (ACURR(A_CHA)/3));
+				// finds weakest pet, and if there's more than 6 pets that count towards your limit
+				// it sets the weakest one friendly - dog.c
+				enough_dogs();
 				
-				do {
-					weakdog = (struct monst *)0;
-					numdogs = 0;
-					for(curmon = fmon; curmon; curmon = curmon->nmon){
-						if(curmon->mspiritual && curmon->mvanishes < 0){
-							numdogs++;
-							if(!weakdog) weakdog = curmon;
-							if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-						}
-					}
-					if(weakdog && numdogs > (ACURR(A_CHA)/3) ) weakdog->mvanishes = 5;
-				} while(weakdog && numdogs > (ACURR(A_CHA)/3));
+				// if there's a spiritual pet that isn't already marked for vanishing,
+				// give it 5 turns before it disappears. - dog.c
+				vanish_dogs();
 			}
 			
 			if(u.petattacked){
