@@ -568,6 +568,24 @@ unsigned int type;
 				return CURE_SELF;
 		}
 	break;
+	case PM_HALF_STONE_DRAGON:
+		switch (rn2(mtmp->m_lev)) {
+			default:/* 10 -> 29*/
+				return LIGHTNING;
+			case 9:
+			case 8:
+			case 7:
+			case 6:
+			case 5:
+				return MASS_CURE_CLOSE;
+			case 4:
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
 	case PM_ELF_LADY:
 	case PM_ELVENQUEEN:
 		switch (rnd(6)) {
@@ -645,8 +663,18 @@ unsigned int type;
 		return SOLID_FOG;
 	break;
 	case PM_FERRUMACH_RILMANI:
-		if(rn2(4)) return ICE_STORM;
+		if(rn2(4)) return HAIL_FLURY;
 		return SOLID_FOG;
+	break;
+	case PM_STANNUMACH_RILMANI:
+		switch(rn2(6)){
+			case 0: return ICE_STORM;
+			case 1: return SOLID_FOG;
+			case 2: return DISAPPEAR;
+			case 3: return MAKE_VISIBLE;
+			case 4: return MASS_CURE_FAR;
+			case 5: return MON_PROTECTION;
+		}
 	break;
 	case PM_CUPRILACH_RILMANI:
 		switch(rn2(6)){
@@ -1275,11 +1303,8 @@ cold_spell:
 		dmg /= 2;
 		drain_en(dmg);
 		if(hates_silver(youracedata)) dmg += d(dmn,20);
+		dmg -= roll_udr(mtmp);
 		if(Half_physical_damage) dmg /= 2;
-		if(u.uac < 0){
-			if(u.sealsActive&SEAL_BALAM) dmg -= min_ints(rnd(-u.uac),rnd(-u.uac));
-			else dmg -= rnd(-u.uac);
-		}
 		if(dmg < 1) dmg = 1;
 		stop_occupation();
 		break;
@@ -1591,9 +1616,8 @@ int spellnum;
 	pline("Chunks of ice pummel you from all sides!");
 	dmg = d(4, 8);
 	
-	if(u.uac < 0){
-		if(u.sealsActive&SEAL_BALAM) dmg -= min_ints(rnd(-u.uac),rnd(-u.uac));
-		else dmg -= rnd(-u.uac);
+	if(u.udr > 0){
+		dmg -= u.udr;//Use average: this is attacking with many chunks of ice all at once
 	}
 	
 	if (dmg < 1) dmg = 1;
@@ -1610,35 +1634,61 @@ int spellnum;
 	}
 	stop_occupation();
 	break;
+    case HAIL_FLURY:{
+		int hfdmg;
+		pline("Hailstones pummel you from all sides!");
+		if(dmg > 60)
+			dmg = 60;
+		hfdmg = dmg;
+		dmg = hfdmg;
+		
+		if(u.udr > 0){
+			dmg -= u.udr;//Use average: this is attacking with many chunks of ice all at once
+		}
+		
+		if (dmg < 1) dmg = 1;
+		
+		if (Half_physical_damage) dmg = (dmg + 1) / 2;
+			
+		if (Cold_resistance) {
+			shieldeff(u.ux, u.uy);
+		} else {
+			dmg += Half_spell_damage ? (hfdmg+1)/2 : hfdmg;
+		}
+		if (!ECold_resistance) {
+			if(hfdmg > rnd(20)) destroy_item(POTION_CLASS, AD_COLD);
+		}
+		stop_occupation();
+	}break;
     case LIGHTNING:
-    if (mtmp && !dmgtype(mtmp->data, AD_CLRC)) {
-       zap = AD_ELEC;
-       goto ray;
-    } else {
-	boolean reflects;
+		if (mtmp && !dmgtype(mtmp->data, AD_CLRC)) {
+		   zap = AD_ELEC;
+		   goto ray;
+		} else {
+			boolean reflects;
 
-	pline("A bolt of lightning strikes down at you from above!");
-	reflects = ureflects("It bounces off your %s%s.", "");
-	if (reflects || Shock_resistance) {
-	    shieldeff(u.ux, u.uy);
-	    dmg = 0;
-	    if (reflects) break;
-	} else {
-	    dmg = d(8, 6);
-	}
-	if (!(reflects || EShock_resistance)) {
-		destroy_item(WAND_CLASS, AD_ELEC);
-		destroy_item(RING_CLASS, AD_ELEC);
-	}
-	if (Half_spell_damage) dmg = (dmg + 1) / 2;
-       if (!resists_blnd(&youmonst)) {
-           You("are blinded by the flash!");
-           make_blinded((long)rnd(100),FALSE);
-           if (!Blind) Your1(vision_clears);
-        }
-	   stop_occupation();
-       break;
-    }
+			pline("A bolt of lightning strikes down at you from above!");
+			reflects = ureflects("It bounces off your %s%s.", "");
+			if (reflects || Shock_resistance) {
+				shieldeff(u.ux, u.uy);
+				dmg = 0;
+				if (reflects) break;
+			} else {
+				dmg = d(8, 6);
+			}
+			if (!(reflects || EShock_resistance)) {
+				destroy_item(WAND_CLASS, AD_ELEC);
+				destroy_item(RING_CLASS, AD_ELEC);
+			}
+			if (Half_spell_damage) dmg = (dmg + 1) / 2;
+			if (!resists_blnd(&youmonst)) {
+			   You("are blinded by the flash!");
+			   make_blinded((long)rnd(100),FALSE);
+			   if (!Blind) Your1(vision_clears);
+			}
+			stop_occupation();
+			break;
+		}
 	case SILVER_RAYS:{
 		int n = 0;
 		char * rays;
@@ -1696,16 +1746,14 @@ int spellnum;
 		} else {
 			You("are pierced by %s of silver light!", rays);
 			dmg = 0;
-			if(u.uac < 0){
-				dmg += rnd(20) + AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
-				if(dmg < 1)
-					dmg = 1;
-				if(n == 2){
-					dmg += rnd(20) + AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
-					if(dmg < 2)
-						dmg = 2;
-				}
-			} else dmg = d(n, 20);
+			dmg += rnd(20) - roll_udr(mtmp);
+			if(dmg < 1)
+				dmg = 1;
+			if(n == 2){
+				dmg += rnd(20) - roll_udr(mtmp);
+				if(dmg < 2)
+					dmg = 2;
+			}
 		}
 	}break;
 	case GOLDEN_WAVE:
@@ -1751,46 +1799,44 @@ int spellnum;
 		} else {
 			You("are slashed by golden light!");
 			dmg = 0;
-			if(u.uac < 0){
-				dmg += d(2,12) + AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
-				if(dmg < 1)
-					dmg = 1;
-			} else dmg = d(2, 12);
+			dmg += d(2,12) - roll_udr(mtmp);
+			if(dmg < 1)
+				dmg = 1;
 		}
 	break;
 	case PRISMATIC_SPRAY:{
 		int dx = 0, dy = 0;
 		dmg /= 10;
 		if(dmg > 7) dmg = 7;
-		for(dmg; dmg; dmg--){
+		for(; dmg; dmg--){
 			switch(rn2(7)){
 				case 0:
 					//Physical
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 8, d(6,6), MON_EXPLODE, EXPL_RED); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 8, d(6,6), MON_EXPLODE, EXPL_RED, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 1:
 					//Fire
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 1, d(6,6), MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 1, d(6,6), MON_EXPLODE, EXPL_FIERY, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 2:
 					//Poison
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 6, d(6,6), MON_EXPLODE, EXPL_YELLOW); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 6, d(6,6), MON_EXPLODE, EXPL_YELLOW, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 3:
 					//Acid
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 7, d(6,6), MON_EXPLODE, EXPL_LIME); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 7, d(6,6), MON_EXPLODE, EXPL_LIME, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 4:
 					//Cold
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 2, d(6,6), MON_EXPLODE, EXPL_BBLUE); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 2, d(6,6), MON_EXPLODE, EXPL_BBLUE, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 5:
 					//Electricity
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 5, d(6,6), MON_EXPLODE, EXPL_MAGENTA); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 5, d(6,6), MON_EXPLODE, EXPL_MAGENTA, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 				case 6:
 					//Disintegration
-					explode2(mtmp->mux+dx, mtmp->muy+dy, 4, d(6,6), MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mux+dx, mtmp->muy+dy, 4, d(6,6), MON_EXPLODE, EXPL_MAGICAL, 2); //explode(x, y, type, dam, olet, expltype, radius)
 				break;
 			}
 				dx = rnd(3) - 2; 
@@ -1808,58 +1854,58 @@ int spellnum;
 	}break;
 	case ACID_BLAST:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux, mtmp->muy, 7, dmg, MON_EXPLODE, EXPL_NOXIOUS); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 7, dmg, MON_EXPLODE, EXPL_NOXIOUS, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_FIRA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux, mtmp->muy, 1, dmg, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 1, dmg, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_FIRAGA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_BLIZZARA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux, mtmp->muy, 2, dmg, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 2, dmg, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_BLIZZAGA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_THUNDARA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux, mtmp->muy, 5, dmg, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 5, dmg, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_THUNDAGA:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 		stop_occupation();
 	break;
 	case MON_FLARE:
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_MUDDY); //explode(x, y, type, dam, olet, expltype)
-		explode2(mtmp->mux, mtmp->muy, 8, dmg, MON_EXPLODE, EXPL_FROSTY);
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux+rn2(3)-1, mtmp->muy+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_MUDDY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mux, mtmp->muy, 8, dmg, MON_EXPLODE, EXPL_FROSTY, 2);
 		dmg = 0;
 		stop_occupation();
 	break;
@@ -1973,6 +2019,10 @@ summon_alien:
     {
 	int count;
 	if(!mtmp || u.summonMonster) goto psibolt;
+	
+	if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))
+		break;
+	
 	u.summonMonster = TRUE;
 	count = nasty(mtmp);	/* summon something nasty */
 	if (mtmp->iswiz)
@@ -2133,10 +2183,8 @@ summon_alien:
 				shienCount++;
 				tdmg = 0;
 			} else tdmg = dmgval(otmp, &youmonst, 0);
-			if (tdmg && u.uac < 0) {
-				if(u.sealsActive&SEAL_BALAM) tdmg -= max_ints(rnd(-u.uac),rnd(-u.uac));
-				else tdmg -= rnd(-u.uac);
-				
+			if (tdmg){
+				tdmg -= roll_udr(mtmp);
 				if (tdmg < 1) tdmg = 1;
 				
 			}
@@ -2484,7 +2532,7 @@ ray:
 	} else {
 	    boolean oldprop = !!Confusion;
 
-	    dmg = rnd(10) + mtmp ? rnd((int)mtmp->m_lev) : rnd(30);
+	    dmg = rnd(10) + (mtmp ? rnd((int)mtmp->m_lev) : rnd(30));
 	    if (Half_spell_damage) dmg = (dmg + 1) / 2;
 	    make_confused(HConfusion + dmg, TRUE);
 	    if (Hallucination)
@@ -2829,6 +2877,7 @@ struct monst *mtmp;
 int spellnum;
 {
 	int wardAt = ward_at(mtmp->mux,mtmp->muy);
+	struct monst *tmpm;
     /* Some spells don't require the player to really be there and can be cast
      * by the monster when you're invisible, yet still shouldn't be cast when
      * the monster doesn't even think you're there.
@@ -2843,6 +2892,12 @@ int spellnum;
 	
 	if(spellnum == DEATH_TOUCH && (wardAt == CIRCLE_OF_ACHERON || wardAt == HEPTAGRAM || wardAt == HEXAGRAM))
 		return TRUE;
+	
+	//Nothing to come
+	if((Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) 
+		&& (spellnum == SUMMON_MONS || spellnum == SUMMON_ALIEN || spellnum == SUMMON_ANGEL || spellnum == SUMMON_DEVIL)
+	) return TRUE;
+		
 	
 	if(is_drow(mtmp->data) && !(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))){
 		if(!Race_if(PM_DROW)){
@@ -2936,6 +2991,36 @@ int spellnum;
 	/* healing when already healed */
 	if (mtmp->mhp == mtmp->mhpmax && spellnum == CURE_SELF)
 	    return TRUE;
+	if (mtmp->mhp == mtmp->mhpmax && (spellnum == MASS_CURE_CLOSE || spellnum == MASS_CURE_FAR)){
+		if(mtmp->mtame && (Upolyd ? (u.mh < u.mhmax) : (u.uhp < u.uhpmax)))
+			return FALSE;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if((mtmp->mtame == tmpm->mtame || mtmp->mpeaceful == tmpm->mpeaceful)
+			&& !mm_aggression(mtmp, tmpm)
+			&& tmpm->mhp < tmpm->mhpmax
+			) return FALSE;
+		}
+		return TRUE;
+	}
+	/* protection when no foes are nearby and not weakened */
+	if (spellnum == MON_PROTECTION){
+		if(mtmp->mhp < mtmp->mhpmax)
+			return FALSE;
+		if(!mtmp->mtame && !mtmp->mpeaceful)
+			return FALSE;
+		if(mtmp->mtame && (Upolyd ? (u.mh < u.mhmax) : (u.uhp < u.uhpmax)) && dist2(u.ux,u.uy,mtmp->mx,mtmp->my) <= 3*3+1)
+			return FALSE;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(mtmp->mtame == tmpm->mtame || mtmp->mpeaceful == tmpm->mpeaceful){
+				if( !mm_aggression(mtmp, tmpm)
+				&& tmpm->mhp < tmpm->mhpmax
+				&& dist2(u.ux,u.uy,mtmp->mx,mtmp->my) <= 3*3+1
+				) return FALSE;
+			} else if(mtmp->mtame != tmpm->mtame && mtmp->mpeaceful != tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) <= 5)
+				return FALSE;
+		}
+		return TRUE;
+	}
 	/* healing when stats are ok */
 	if (spellnum == RECOVER && !(mtmp->mcan || mtmp->mcrazed || 
 								!mtmp->mcansee || !mtmp->mcanmove || 
@@ -3174,6 +3259,7 @@ struct monst *mdef;
 int spellnum;
 {
 	int wardAt = ward_at(mdef->mx, mdef->my);
+	struct monst *tmpm;
 	
 	/*Don't cast at warded spaces*/
 	if(onscary(mdef->mx, mdef->my, mtmp) && !is_undirected_spell(spellnum))
@@ -3201,6 +3287,17 @@ int spellnum;
 	/* healing when already healed */
 	if (mtmp->mhp == mtmp->mhpmax && spellnum == CURE_SELF)
 	    return TRUE;
+	if (mtmp->mhp == mtmp->mhpmax && (spellnum == MASS_CURE_CLOSE || spellnum == MASS_CURE_FAR)){
+		if(mtmp->mtame && (Upolyd ? (u.mh < u.mhmax) : (u.uhp < u.uhpmax)))
+			return FALSE;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if((mtmp->mtame == tmpm->mtame || mtmp->mpeaceful == tmpm->mpeaceful)
+			&& !mm_aggression(mtmp, tmpm)
+			&& tmpm->mhp < tmpm->mhpmax
+			) return FALSE;
+		}
+		return TRUE;
+	}
 	/* healing when stats are ok */
 	if (spellnum == RECOVER && !(mtmp->mcan || mtmp->mcrazed || 
 								!mtmp->mcansee || !mtmp->mcanmove || 
@@ -3232,6 +3329,7 @@ uspell_would_be_useless(mdef, spellnum)
 struct monst *mdef;
 int spellnum;
 {
+	struct monst *tmpm;
 	/* do not check for wards on target if given no target */
 	if (mdef)
 	{
@@ -3259,8 +3357,16 @@ int spellnum;
 	/* healing when already healed */
 	if (u.mh == u.mhmax && spellnum == CURE_SELF)
 	    return TRUE;
+	if (u.mh == u.mhmax && (spellnum == MASS_CURE_CLOSE || spellnum == MASS_CURE_FAR)){
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(tmpm->mtame
+			&& tmpm->mhp < tmpm->mhpmax
+			) return FALSE;
+		}
+		return TRUE;
+	}
 #ifndef TAME_SUMMONING
-        if (spellnum == SUMMON_MONS)
+	if (spellnum == SUMMON_MONS)
 	    return TRUE;
 #endif
     return FALSE;
@@ -3660,7 +3766,7 @@ int spellnum;
        long old;
 	   if(!mtmp) break;
        pline("A cascade of filth pours onto %s!", mon_nam(mtmp));
-       if (otmp = MON_WEP(mtmp)) {
+       if ((otmp = MON_WEP(mtmp))) {
 			if(!rn2(20)){
 				if(canseemon(mtmp)) pline("%s %s is coated in gunk!", s_suffix(Monnam(mtmp)), xname(otmp));
 				if(is_poisonable(otmp)){
@@ -3785,7 +3891,10 @@ int spellnum;
     {
 	int count = 0;
         register struct monst *mpet;
-
+		
+		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))
+			break;
+		
         if (!rn2(10) && Inhell) {
 			if (yours) demonpet();
 			else msummon(mattk);
@@ -4159,6 +4268,9 @@ uspsibolt:
 	    impossible("psibolt spell with no mtmp");
 	    return;
 	}
+	
+	if(dmg > 50) dmg = 50;
+	
 	if (resists_magm(mtmp) || resist(mtmp, 0, 0, FALSE)) { 
 	    shieldeff(mtmp->mx, mtmp->my);
 	    dmg = (dmg + 1) / 2;
@@ -4400,35 +4512,35 @@ uspsibolt:
 		}
 		dmg /= 10;
 		if(dmg > 7) dmg = 7;
-		for(dmg; dmg; dmg--){
+		for(; dmg; dmg--){
 			switch(rn2(7)){
 				case 0:
 					//Physical
-					explode2(mtmp->mx+dx, mtmp->my+dy, 8, d(6,6), MON_EXPLODE, EXPL_RED); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 8, d(6,6), MON_EXPLODE, EXPL_RED, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 1:
 					//Fire
-					explode2(mtmp->mx+dx, mtmp->my+dy, 1, d(6,6), MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 1, d(6,6), MON_EXPLODE, EXPL_FIERY, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 2:
 					//Poison
-					explode2(mtmp->mx+dx, mtmp->my+dy, 6, d(6,6), MON_EXPLODE, EXPL_YELLOW); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 6, d(6,6), MON_EXPLODE, EXPL_YELLOW, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 3:
 					//Acid
-					explode2(mtmp->mx+dx, mtmp->my+dy, 7, d(6,6), MON_EXPLODE, EXPL_LIME); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 7, d(6,6), MON_EXPLODE, EXPL_LIME, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 4:
 					//Cold
-					explode2(mtmp->mx+dx, mtmp->my+dy, 2, d(6,6), MON_EXPLODE, EXPL_BBLUE); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 2, d(6,6), MON_EXPLODE, EXPL_BBLUE, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 5:
 					//Electricity
-					explode2(mtmp->mx+dx, mtmp->my+dy, 5, d(6,6), MON_EXPLODE, EXPL_MAGENTA); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 5, d(6,6), MON_EXPLODE, EXPL_MAGENTA, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 				case 6:
 					//Disintegration
-					explode2(mtmp->mx+dx, mtmp->my+dy, 4, d(6,6), MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+					explode(mtmp->mx+dx, mtmp->my+dy, 4, d(6,6), MON_EXPLODE, EXPL_MAGICAL, 2); //explode(x, y, type, dam, olet, expltype)
 				break;
 			}
 				dx = rnd(3) - 2;
@@ -4449,7 +4561,7 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx, mtmp->my, 7, dmg, MON_EXPLODE, EXPL_NOXIOUS); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 7, dmg, MON_EXPLODE, EXPL_NOXIOUS, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_FIRA:
@@ -4458,7 +4570,7 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx, mtmp->my, 1, dmg, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 1, dmg, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_FIRAGA:
@@ -4467,9 +4579,9 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 1, dmg/2, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_BLIZZARA:
@@ -4478,7 +4590,7 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx, mtmp->my, 2, dmg, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 2, dmg, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_BLIZZAGA:
@@ -4487,9 +4599,9 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 2, dmg/2, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_THUNDARA:
@@ -4498,7 +4610,7 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx, mtmp->my, 5, dmg, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 5, dmg, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_THUNDAGA:
@@ -4507,9 +4619,9 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 5, dmg/2, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
 		dmg = 0;
 	break;
 	case MON_FLARE:
@@ -4518,10 +4630,10 @@ uspsibolt:
 			return;
 		}
 		if(dmg > 60) dmg = 60;
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FROSTY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
-		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_MUDDY); //explode(x, y, type, dam, olet, expltype)
-		explode2(mtmp->mx, mtmp->my, 8, dmg, MON_EXPLODE, EXPL_FROSTY);
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FROSTY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, 8, dmg/3, MON_EXPLODE, EXPL_MUDDY, 1); //explode(x, y, type, dam, olet, expltype)
+		explode(mtmp->mx, mtmp->my, 8, dmg, MON_EXPLODE, EXPL_FROSTY, 2);
 		dmg = 0;
 	break;
 	case MON_WARP:
@@ -4704,6 +4816,7 @@ uspsibolt:
 	    impossible("wound spell with no mtmp");
 	    return;
 	}
+	if( dmg > 60) dmg = 60;
 	if (resists_magm(mtmp) || resist(mtmp, 0, 0, FALSE)) { 
 	    shieldeff(mtmp->mx, mtmp->my);
 	    dmg = (dmg + 1) / 2;

@@ -28,6 +28,7 @@ STATIC_DCL int FDECL(use_mirror, (struct obj *));
 STATIC_DCL void FDECL(use_candelabrum, (struct obj *));
 STATIC_DCL void FDECL(use_candle, (struct obj **));
 STATIC_DCL void FDECL(use_lamp, (struct obj *));
+STATIC_DCL int FDECL(swap_aegis, (struct obj *));
 STATIC_DCL void FDECL(light_cocktail, (struct obj *));
 STATIC_DCL void FDECL(light_torch, (struct obj *));
 STATIC_DCL void FDECL(use_tinning_kit, (struct obj *));
@@ -45,6 +46,7 @@ STATIC_DCL int FDECL(use_whip, (struct obj *));
 STATIC_DCL int FDECL(use_pole, (struct obj *));
 STATIC_DCL int FDECL(use_cream_pie, (struct obj *));
 STATIC_DCL int FDECL(use_grapple, (struct obj *));
+STATIC_DCL int FDECL(use_crook, (struct obj *));
 STATIC_DCL int FDECL(do_break_wand, (struct obj *));
 STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
 STATIC_DCL boolean FDECL(figurine_location_checks,
@@ -111,7 +113,7 @@ do_present_ring(obj)
 
 	if(!getdir((char *)0)) return 0;
 	
-	if(obj->ovar1 == 0 && !(obj->ohaluengr)){
+	if(obj->oward == 0 && !(obj->ohaluengr)){
 		exercise(A_WIS, FALSE);
 		return 0;
 	}
@@ -151,15 +153,15 @@ do_present_ring(obj)
 					make_engr_at(u.ux, u.uy,	"", (moves - multi), DUST); /* absense of text =  dust */
 					engrHere = engr_at(u.ux,u.uy); /*note: make_engr_at does not return the engraving it made, it returns void instead*/
 				}
-				if(obj->ohaluengr == engrHere->halu_ward && obj->ovar1 == engrHere->ward_id){
+				if(obj->ohaluengr == engrHere->halu_ward && obj->oward == engrHere->ward_id){
 					pline("the engraving tumbles off the ring to join it's fellows.");
 					engrHere->complete_wards += engrHere->halu_ward ? 0 : get_num_wards_added(engrHere->ward_id,engrHere->complete_wards);
 					obj->ohaluengr = FALSE;
-					obj->ovar1 = FALSE;
+					obj->oward = FALSE;
 				}
 				else{
 					pline("the engraving tumbles off the ring%s.", engrHere->ward_id ? "and covers the existing drawing" : "");
-					engrHere->ward_id = obj->ovar1;
+					engrHere->ward_id = obj->oward;
 					engrHere->halu_ward = obj->ohaluengr;
 					engrHere->complete_wards = engrHere->halu_ward ? 1 : get_num_wards_added(engrHere->ward_id,0);
 					engrHere->ward_type = obj->blessed ? BURN : obj->cursed ? DUST : ENGRAVE;
@@ -168,20 +170,20 @@ do_present_ring(obj)
 						u.wardsknown |= get_wardID(engrHere->ward_id);
 					}
 					obj->ohaluengr = FALSE;
-					obj->ovar1 = FALSE;
+					obj->oward = FALSE;
 				}
 			}
 		}
 	} else if (!u.dx && !u.dy) {
 		if(!(obj->ohaluengr)){
-			pline("A %s is engraved on the ring.",wardDecode[obj->ovar1]);
-			if( !(u.wardsknown & get_wardID(obj->ovar1)) ){
+			pline("A %s is engraved on the ring.",wardDecode[obj->oward]);
+			if( !(u.wardsknown & get_wardID(obj->oward)) ){
 				You("have learned a new warding sign!");
-				u.wardsknown |= get_wardID(obj->ovar1);
+				u.wardsknown |= get_wardID(obj->oward);
 			}
 		}
 		else{
-			pline("There is %s engraved on the ring.",fetchHaluWard((int)obj->ovar1));
+			pline("There is %s engraved on the ring.",fetchHaluWard((int)obj->oward));
 		}
 		return(1);
 	} else if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0) {
@@ -190,90 +192,90 @@ do_present_ring(obj)
 			pline("But the ring's engraving is fogged over!");
 			return 1;
 		}
-		if(!(obj->ohaluengr) || obj->ovar1 == CERULEAN_SIGN){
+		if(!(obj->ohaluengr) || obj->oward == CERULEAN_SIGN){
 			if(
-				(obj->ovar1 == HEPTAGRAM && scaryHept(1, mtmp)) ||
-				(obj->ovar1 == GORGONEION && scaryGorg(1, mtmp)) ||
-				(obj->ovar1 == CIRCLE_OF_ACHERON && scaryCircle(1, mtmp)) ||
-				(obj->ovar1 == PENTAGRAM && scaryPent(1, mtmp)) ||
-				(obj->ovar1 == HEXAGRAM && scaryHex(1, mtmp)) ||
-				(obj->ovar1 == HAMSA && scaryHam(1, mtmp)) ||
-				( (obj->ovar1 == ELDER_SIGN || obj->ovar1 == CERULEAN_SIGN) && scarySign(1, mtmp)) ||
-				(obj->ovar1 == ELDER_ELEMENTAL_EYE && scaryEye(1, mtmp)) ||
-				(obj->ovar1 == SIGN_OF_THE_SCION_QUEEN && scaryQueen(1, mtmp)) ||
-				(obj->ovar1 == CARTOUCHE_OF_THE_CAT_LORD && scaryCat(1, mtmp)) ||
-				(obj->ovar1 == WINGS_OF_GARUDA && scaryWings(1, mtmp)) ||
-/*				(obj->ovar1 == SIGIL_OF_CTHUGHA && (1, mtmp)) ||
-				(obj->ovar1 == BRAND_OF_ITHAQUA && (1, mtmp)) ||
-				(obj->ovar1 == TRACERY_OF_KARAKAL && (1, mtmp)) || These wards curently don't have scaryX functions. */
-				(obj->ovar1 == YELLOW_SIGN && scaryYellow(1, mtmp)) ||
-				(obj->ovar1 == TOUSTEFNA && scaryTou(mtmp)) ||
-				(obj->ovar1 == DREPRUN && scaryDre(mtmp)) ||
-/*				(obj->ovar1 == OTTASTAFUR && (mtmp)) ||
-				(obj->ovar1 == KAUPALOKI && (mtmp)) || Unimplemented runes. */
-				(obj->ovar1 == VEIOISTAFUR && scaryVei(mtmp)) ||
-				(obj->ovar1 == THJOFASTAFUR && scaryThj(mtmp))
+				(obj->oward == HEPTAGRAM && scaryHept(1, mtmp)) ||
+				(obj->oward == GORGONEION && scaryGorg(1, mtmp)) ||
+				(obj->oward == CIRCLE_OF_ACHERON && scaryCircle(1, mtmp)) ||
+				(obj->oward == PENTAGRAM && scaryPent(1, mtmp)) ||
+				(obj->oward == HEXAGRAM && scaryHex(1, mtmp)) ||
+				(obj->oward == HAMSA && scaryHam(1, mtmp)) ||
+				( (obj->oward == ELDER_SIGN || obj->oward == CERULEAN_SIGN) && scarySign(1, mtmp)) ||
+				(obj->oward == ELDER_ELEMENTAL_EYE && scaryEye(1, mtmp)) ||
+				(obj->oward == SIGN_OF_THE_SCION_QUEEN && scaryQueen(1, mtmp)) ||
+				(obj->oward == CARTOUCHE_OF_THE_CAT_LORD && scaryCat(1, mtmp)) ||
+				(obj->oward == WINGS_OF_GARUDA && scaryWings(1, mtmp)) ||
+/*				(obj->oward == SIGIL_OF_CTHUGHA && (1, mtmp)) ||
+				(obj->oward == BRAND_OF_ITHAQUA && (1, mtmp)) ||
+				(obj->oward == TRACERY_OF_KARAKAL && (1, mtmp)) || These wards curently don't have scaryX functions. */
+				(obj->oward == YELLOW_SIGN && scaryYellow(1, mtmp)) ||
+				(obj->oward == TOUSTEFNA && scaryTou(mtmp)) ||
+				(obj->oward == DREPRUN && scaryDre(mtmp)) ||
+/*				(obj->oward == OTTASTAFUR && (mtmp)) ||
+				(obj->oward == KAUPALOKI && (mtmp)) || Unimplemented runes. */
+				(obj->oward == VEIOISTAFUR && scaryVei(mtmp)) ||
+				(obj->oward == THJOFASTAFUR && scaryThj(mtmp))
 			){
 				if (rn2(7))
 					monflee(mtmp, rnd(10), TRUE, TRUE);
 				else
 					monflee(mtmp, rnd(100), TRUE, TRUE);
 			}
-		} else if(obj->ohaluengr && obj->ovar1 >= FIRST_DROW_SYM && obj->ovar1 <= LAST_DROW_SYM && 
+		} else if(obj->ohaluengr && obj->oward >= FIRST_DROW_SYM && obj->oward <= LAST_DROW_SYM && 
 			(is_elf(mtmp->data) || is_drow(mtmp->data) || mtmp->data == &mons[PM_EDDERKOP])
 		){
 			if(flags.stag && 
 				(mtmp->mfaction == u.start_house || allied_faction(mtmp->mfaction,u.start_house)) && 
-				obj->ovar1 == EDDER_SYMBOL && 
+				obj->oward == EDDER_SYMBOL && 
 				!(mtmp->female)
 			){
 				verbalize("The revolution has begun!");
 				for(tm = fmon; tm; tm = tm->nmon){
-					if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
-						((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+					if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
+						((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
 						((tm->mfaction == u.start_house || allied_faction(tm->mfaction,u.start_house)) && 
-							obj->ovar1 == EDDER_SYMBOL && !(tm->female))
+							obj->oward == EDDER_SYMBOL && !(tm->female))
 					){
 						if(is_drow(tm->data)) tm->mfaction = EDDER_SYMBOL;
 						tm->housealert = 1;
 						tm->mpeaceful = 1;
-					} else if(is_drow(tm->data) && !(obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction)) && mtmp->female){
+					} else if(is_drow(tm->data) && !(obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction)) && mtmp->female){
 						tm->housealert = 1;
 						tm->mpeaceful = 0;
 					}
 				}
-			} else if((obj->ovar1 == mtmp->mfaction || allied_faction(obj->ovar1, mtmp->mfaction)) || 
-				(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(mtmp->data)) || 
-				((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  mtmp->data == &mons[PM_EDDERKOP])
+			} else if((obj->oward == mtmp->mfaction || allied_faction(obj->oward, mtmp->mfaction)) || 
+				(obj->oward == EILISTRAEE_SYMBOL && is_elf(mtmp->data)) || 
+				((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  mtmp->data == &mons[PM_EDDERKOP])
 			){
 				if(mtmp->housealert && !(mtmp->mpeaceful)){
 					verbalize("Die, spy!");
 					for(tm = fmon; tm; tm = tm->nmon){
-						if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
-							((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
-							(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+						if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
+							((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+							(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 						){
 							tm->housealert = 1;
 							tm->mpeaceful = 0;
 						}
 					}
 				} else if(flags.female){
-					if((obj->ovar1 == XAXOX && uarm && uarm->ovar1 && uarm->ovar1 == obj->ovar1) ||
-					   (obj->ovar1 == EDDER_SYMBOL && uarm && uarm->ovar1 && uarm->ovar1 == obj->ovar1) ||
-						!(uarm) || !(uarm->ovar1) || uarm->ovar1 == obj->ovar1 ||
+					if((obj->oward == XAXOX && uarm && uarm->oward && uarm->oward == obj->oward) ||
+					   (obj->oward == EDDER_SYMBOL && uarm && uarm->oward && uarm->oward == obj->oward) ||
+						!(uarm) || !(uarm->oward) || uarm->oward == obj->oward ||
 						(
-						 uarm->ovar1 == LOLTH_SYMBOL && 
-						 obj->ovar1 != EILISTRAEE_SYMBOL &&   
-						 obj->ovar1 != XAXOX &&   
-						 obj->ovar1 != EDDER_SYMBOL
+						 uarm->oward == LOLTH_SYMBOL && 
+						 obj->oward != EILISTRAEE_SYMBOL &&   
+						 obj->oward != XAXOX &&   
+						 obj->oward != EDDER_SYMBOL
 						)
 					){
 						verbalize("She's one of ours!");
-						if(obj->ovar1 != XAXOX && obj->ovar1 != EDDER_SYMBOL) verbalize("Apologies, my lady!");
+						if(obj->oward != XAXOX && obj->oward != EDDER_SYMBOL) verbalize("Apologies, my lady!");
 						for(tm = fmon; tm; tm = tm->nmon){
-							if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
-								((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
-								(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+							if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
+								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 							){
 								tm->housealert = 1;
 								tm->mpeaceful = 1;
@@ -282,9 +284,9 @@ do_present_ring(obj)
 					} else {
 						verbalize("Die, spy!");
 						for(tm = fmon; tm; tm = tm->nmon){
-							if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
-								((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
-								(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+							if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
+								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 							){
 								tm->housealert = 1;
 								tm->mpeaceful = 0;
@@ -292,21 +294,21 @@ do_present_ring(obj)
 						}
 					}
 				} else {
-					if(((obj->ovar1 <= LAST_TOWER && obj->ovar1 >= FIRST_TOWER) && 
-						(!(uarm) || !(uarm->ovar1) || uarm->ovar1 == obj->ovar1 || allied_faction(uarm->ovar1,obj->ovar1))) ||
-					   ((obj->ovar1 == EDDER_SYMBOL || 
-					     obj->ovar1 == XAXOX || 
-					     obj->ovar1 == GHAUNADAUR_SYMBOL || 
-					     obj->ovar1 == LAST_BASTION_SYMBOL || 
-						 obj->ovar1 == EILISTRAEE_SYMBOL) && (!(uarm) || !(uarm->ovar1) || uarm->ovar1 == obj->ovar1 || allied_faction(uarm->ovar1,obj->ovar1))) ||
-					   (uarm && uarm->ovar1 && uarm->ovar1 == obj->ovar1)
+					if(((obj->oward <= LAST_TOWER && obj->oward >= FIRST_TOWER) && 
+						(!(uarm) || !(uarm->oward) || uarm->oward == obj->oward || allied_faction(uarm->oward,obj->oward))) ||
+					   ((obj->oward == EDDER_SYMBOL || 
+					     obj->oward == XAXOX || 
+					     obj->oward == GHAUNADAUR_SYMBOL || 
+					     obj->oward == LAST_BASTION_SYMBOL || 
+						 obj->oward == EILISTRAEE_SYMBOL) && (!(uarm) || !(uarm->oward) || uarm->oward == obj->oward || allied_faction(uarm->oward,obj->oward))) ||
+					   (uarm && uarm->oward && uarm->oward == obj->oward)
 					){
 						verbalize("He's one of ours!");
 						verbalize("Move along, sir.");
 						for(tm = fmon; tm; tm = tm->nmon){
-							if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
-								((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
-								(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+							if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
+								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 							){
 								tm->mpeaceful = 1;
 							}
@@ -314,9 +316,9 @@ do_present_ring(obj)
 					} else {
 						verbalize("Die, spy!");
 						for(tm = fmon; tm; tm = tm->nmon){
-							if((is_drow(tm->data) && (obj->ovar1 == tm->mfaction || allied_faction(obj->ovar1, tm->mfaction))) || 
-								((obj->ovar1 == EDDER_SYMBOL || obj->ovar1 == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
-								(obj->ovar1 == EILISTRAEE_SYMBOL && is_elf(tm->data))
+							if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
+								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 							){
 								tm->housealert = 1;
 								tm->mpeaceful = 0;
@@ -1059,7 +1061,7 @@ struct obj *obj;
 void
 use_bell(optr, spiritseal)
 struct obj **optr;
-boolean spiritseal;
+int spiritseal;
 {
 	register struct obj *obj = *optr;
 	struct monst *mtmp;
@@ -1393,6 +1395,27 @@ struct obj *obj;
 	    return TRUE;
 	}
 	return FALSE;
+}
+
+STATIC_OVL int
+swap_aegis(obj)
+struct obj *obj;
+{
+	if(obj->owornmask){
+		You("must take %s off to modify it.", the(xname(obj)));
+		return 0;
+	} else if(obj->otyp == LEATHER_CLOAK){
+		You("wrap %s up, making a serviceable shield.", the(xname(obj)));
+		obj->otyp = ROUNDSHIELD;
+		return 1;
+	} else if(obj->otyp == ROUNDSHIELD){
+		You("unwrap %s, making a cloak.", the(xname(obj)));
+		obj->otyp = LEATHER_CLOAK;
+		return 1;
+	} else {
+		pline("Aegis in unexpected state?");
+		return 0;
+	}
 }
 
 STATIC_OVL void
@@ -2787,6 +2810,10 @@ struct obj *hypo;
 			break;
 		}
 	} else {
+		if(amp->spe <= 0){
+			pline("The ampule is empty!");
+			return 1;
+		}
 		switch(amp->ovar1){
 			case POT_GAIN_ABILITY:
 				if(amp->cursed) {
@@ -2808,9 +2835,6 @@ struct obj *hypo;
 			break;
 			case POT_RESTORE_ABILITY:
 				if (amp->blessed && u.ulevel < u.ulevelmax) {
-					///* when multiple levels have been lost, drinking
-					//   multiple potions will only get half of them back */
-					// u.ulevelmax -= 1;
 					pluslvl(FALSE);
 				}
 				if(amp->cursed) {
@@ -3682,7 +3706,7 @@ use_grapple (obj)
 		newsym(cc.x, cc.y);
 		return (1);
 	    }
-	    break;
+	break;
 	case 2:	/* Monster */
 	    if ((mtmp = m_at(cc.x, cc.y)) == (struct monst *)0) break;
 	    if (verysmall(mtmp->data) && !rn2(4) &&
@@ -3713,6 +3737,153 @@ use_grapple (obj)
 		return (1);
 	    }
 	    break;
+	}
+	pline("%s", nothing_happens);
+	return (1);
+}
+
+STATIC_OVL int
+use_crook (obj)
+	struct obj *obj;
+{
+	int res = 0, typ, max_range = 4, tohit;
+	coord cc;
+	struct monst *mtmp;
+	struct obj *otmp;
+
+	/* Are you allowed to use the crook? */
+	if (u.uswallow) {
+	    pline("%s", not_enough_room);
+	    return (0);
+	}
+	if (obj != uwep) {
+	    if (!wield_tool(obj, "hook")) return 0;
+	    else res = 1;
+	}
+     /* assert(obj == uwep); */
+
+	/* Prompt for a location */
+	pline("%s", where_to_hit);
+	cc.x = u.ux;
+	cc.y = u.uy;
+	if (getpos(&cc, TRUE, "the spot to hook") < 0)
+	    return 0;	/* user pressed ESC */
+
+	/* Calculate range */
+	typ = uwep_skill_type();
+	max_range = 8;
+	if (distu(cc.x, cc.y) > max_range) {
+	    pline("Too far!");
+	    return (res);
+	} else if (!cansee(cc.x, cc.y)) {
+	    You(cant_see_spot);
+	    return (res);
+	} else if (!couldsee(cc.x, cc.y)) { /* Eyes of the Overworld */
+	    You(cant_reach);
+	    return res;
+	}
+
+	/* What do you want to hit? */
+	{
+	    winid tmpwin = create_nhwindow(NHW_MENU);
+	    anything any;
+	    char buf[BUFSZ];
+	    menu_item *selected;
+
+	    any.a_void = 0;	/* set all bits to zero */
+	    any.a_int = 1;	/* use index+1 (cant use 0) as identifier */
+	    start_menu(tmpwin);
+			any.a_int++;
+			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE,
+				"hit a monster", MENU_UNSELECTED);
+			
+			any.a_int++;
+			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE,
+				"pull a monster", MENU_UNSELECTED);
+			
+			any.a_int++;
+			Sprintf(buf, "pull an object on the %s", surface(cc.x, cc.y));
+			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE,
+				 buf, MENU_UNSELECTED);
+	    end_menu(tmpwin, "Aim for what?");
+	    if (select_menu(tmpwin, PICK_ONE, &selected) > 0)
+			tohit = selected[0].item.a_int - 1;
+		else return 0;
+	    free((genericptr_t)selected);
+	    destroy_nhwindow(tmpwin);
+	}
+
+	/* What did you hit? */
+	switch (tohit) {
+	case 0:	/* Trap */
+	    /* FIXME -- untrap needs to deal with non-adjacent traps */
+	    break;
+	case 1:	/*Hit Monster */
+	    if ((mtmp = m_at(cc.x, cc.y)) == (struct monst *)0) break;
+		(void) thitmonst(mtmp, uwep, 0);
+		return (1);
+	break;
+	case 2:	/*Hook Monster */
+	    if ((mtmp = m_at(cc.x, cc.y)) == (struct monst *)0) break;
+		if(mtmp->mpeaceful){
+			if (!bigmonst(mtmp->data) &&
+				enexto(&cc, u.ux, u.uy, (struct permonst *)0)
+			) {
+				You("pull in %s!", mon_nam(mtmp));
+				mtmp->mundetected = 0;
+				mtmp->movement = max(0, mtmp->movement - 12);
+				rloc_to(mtmp, cc.x, cc.y);
+				return (1);
+			} else {
+				You("pull yourself toward %s!", mon_nam(mtmp));
+				hurtle(sgn(mtmp->mx-u.ux), sgn(mtmp->my-u.uy), 1, FALSE);
+				spoteffects(TRUE);
+				return (1);
+			}
+		} else {
+			if (!bigmonst(mtmp->data) && !strongmonst(mtmp->data) && rn2(P_SKILL(typ)) &&
+				enexto(&cc, u.ux, u.uy, (struct permonst *)0)
+			) {
+				You("pull in %s!", mon_nam(mtmp));
+				mtmp->mundetected = 0;
+				mtmp->movement = max(0, mtmp->movement - 12);
+				rloc_to(mtmp, cc.x, cc.y);
+				return (1);
+			} else if ((!bigmonst(mtmp->data) && !strongmonst(mtmp->data)) ||
+				   rn2(P_SKILL(typ))
+			) {
+				(void) thitmonst(mtmp, uwep, 0);
+				return (1);
+			} else {
+				You("are yanked toward %s!", mon_nam(mtmp));
+				hurtle(sgn(mtmp->mx-u.ux), sgn(mtmp->my-u.uy), 1, FALSE);
+				spoteffects(TRUE);
+				return (1);
+			}
+		}
+	break;
+	case 3:	/* Object */
+	    if ((otmp = level.objects[cc.x][cc.y]) != 0) {
+			You("snag an object from the %s!", surface(cc.x, cc.y));
+			(void) pickup_object(otmp, 1L, FALSE);
+			/* If pickup fails, leave it alone */
+			newsym(cc.x, cc.y);
+			return (1);
+	    }
+	    break;
+	// case 3:	/* Surface */
+	    // if (IS_AIR(levl[cc.x][cc.y].typ) || is_pool(cc.x, cc.y, TRUE))
+			// pline_The("hook slices through the %s.", surface(cc.x, cc.y));
+	    // else {
+			// You("are yanked toward the %s!", surface(cc.x, cc.y));
+			// hurtle(sgn(cc.x-u.ux), sgn(cc.y-u.uy), 1, FALSE);
+			// spoteffects(TRUE);
+	    // }
+	    // return (1);
+	// break;
+	default:
+		pline("Invalid target for crook-hook");
+	break;
 	}
 	pline("%s", nothing_happens);
 	return (1);
@@ -3817,7 +3988,7 @@ do_break_wand(obj)
     case WAN_MAGIC_MISSILE:
     wanexpl:
 	explode(u.ux, u.uy,
-		(obj->otyp - WAN_MAGIC_MISSILE), dmg, WAND_CLASS, expltype);
+		(obj->otyp - WAN_MAGIC_MISSILE), dmg, WAND_CLASS, expltype, 1);
 	makeknown(obj->otyp);	/* explode described the effect */
 	/* make magic trap if you broke a wand of magic missile */
 	if ((obj->spe > 2) && rn2(obj->spe - 2) && !u.uswallow &&
@@ -3840,6 +4011,7 @@ do_break_wand(obj)
 	/* we want this before the explosion instead of at the very end */
 	pline("A wall of force smashes down around you!");
 	dmg = d(1 + obj->spe,6);	/* normally 2d12 */
+	break;
     case WAN_TELEPORTATION:
 		/* WAC make tele trap if you broke a wand of teleport */
 		/* But make sure the spot is valid! */
@@ -3860,7 +4032,8 @@ do_break_wand(obj)
 			}
 		}
 	affects_objects = TRUE;
-    case WAN_POLYMORPH:
+	break;
+	case WAN_POLYMORPH:
 	/* make poly trap if you broke a wand of polymorph */
 	if ((obj->spe > 2) && rn2(obj->spe - 2) && !u.uswallow &&
 	    !On_stairs(u.ux, u.uy) && (!IS_FURNITURE(levl[u.ux][u.uy].typ) &&
@@ -3878,7 +4051,8 @@ do_break_wand(obj)
 		    }
 	}
 	affects_objects = TRUE;
-    case WAN_SLEEP:
+	break;
+	case WAN_SLEEP:
 	/* make sleeping gas trap if you broke a wand of sleep */
 	if ((obj->spe > 2) && rn2(obj->spe - 2) && !u.uswallow &&
 	    !On_stairs(u.ux, u.uy) && (!IS_FURNITURE(levl[u.ux][u.uy].typ) &&
@@ -3895,6 +4069,7 @@ do_break_wand(obj)
 			    }
 		    }
 	}
+	break;
     case WAN_CANCELLATION:
 	/* make anti-magic trap if you broke a wand of cancellation */
 	if ((obj->spe > 2) && rn2(obj->spe - 2) && !u.uswallow &&
@@ -3913,6 +4088,7 @@ do_break_wand(obj)
 		    }
 	}
 	affects_objects = TRUE;
+	break;
     case WAN_UNDEAD_TURNING:
 	affects_objects = TRUE;
 	break;
@@ -3921,7 +4097,7 @@ do_break_wand(obj)
     }
 
     /* magical explosion and its visual effect occur before specific effects */
-    explode(obj->ox, obj->oy, 0, rnd(dmg), WAND_CLASS, EXPL_MAGICAL);
+    explode(obj->ox, obj->oy, 0, rnd(dmg), WAND_CLASS, EXPL_MAGICAL, 1);
 
     /* this makes it hit us last, so that we can see the action first */
     for (i = 0; i <= 8; i++) {
@@ -4103,7 +4279,7 @@ struct obj *obj;
 		pline("The %s is too dull to cut into the %s.", xname(obj), xname(carvee));
 		return 0;
 	}
-	if(carvee->ovar1 != 0 ){
+	if(carvee->oward != 0 ){
 		You("chip off the existing rune.");
 		multi-=1;
 		if(carvee->oartifact) pline("The wood heals like the rune was never there.");
@@ -4116,8 +4292,8 @@ struct obj *obj;
 	}
 	multi -= carveTurns[rune-FIRST_RUNE];
 	nomovemsg = "You finish carving.";;
-	carvee->ovar1 = get_wardID(rune);
-	You("carve a %s into the %s.",wardDecode[decode_wardID(carvee->ovar1)],xname(carvee));
+	carvee->oward = get_wardID(rune);
+	You("carve a %s into the %s.",wardDecode[decode_wardID(carvee->oward)],xname(carvee));
     u.uconduct.wardless++;
 	see_monsters(); //Some magic staves grant detection, so recheck that now.
 	return 1;
@@ -4853,6 +5029,7 @@ doapply()
 {
 	struct obj *obj;
 	register int res = 1;
+	int wasmergable = FALSE;
 	char class_list[MAXOCLASSES+2];
 
 	if(check_capacity((char *)0)) return (0);
@@ -4864,13 +5041,15 @@ doapply()
 	if (carrying(CREAM_PIE) || carrying(EUCALYPTUS_LEAF))
 		add_class(class_list, FOOD_CLASS);
 	if (carrying(DWARVISH_HELM) || carrying(GNOMISH_POINTY_HAT) 
-		|| carrying(DROVEN_CLOAK))
+		|| carrying(DROVEN_CLOAK) || carrying_art(ART_AEGIS))
 		add_class(class_list, ARMOR_CLASS);
 
 
 	obj = getobj(class_list, "use or apply");
 	if(!obj) return 0;
 
+	wasmergable = objects[obj->otyp].oc_merge; //Some functions leave a stale pointer here if they merge the item
+	
 	if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE))
 	    return 1;	/* evading your grasp costs a turn; just be
 			   grateful that you don't drop it as well */
@@ -4885,8 +5064,9 @@ doapply()
 	    return do_present_ring(obj);
 	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_MARIONETTE)) return do_carve_obj(obj);
 	
-	if(obj->oartifact == ART_SILVER_STARLIGHT) do_play_instrument(obj);
-	if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) use_lamp(obj);
+	if(obj->oartifact == ART_SILVER_STARLIGHT) res = do_play_instrument(obj);
+	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) use_lamp(obj);
+	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
 	else switch(obj->otyp){
 	case BLINDFOLD:
 	case LENSES:
@@ -4910,6 +5090,9 @@ doapply()
 		break;
 	case GRAPPLING_HOOK:
 		res = use_grapple(obj);
+		break;
+	case SHEPHERD_S_CROOK:
+		res = use_crook(obj);
 		break;
 	case BOX:
 	case CHEST:
@@ -4997,7 +5180,7 @@ doapply()
 	break;
 	case BELL:
 	case BELL_OF_OPENING:
-		use_bell(&obj, FALSE);
+		use_bell(&obj, TRUE);
 		break;
 	case CANDELABRUM_OF_INVOCATION:
 		use_candelabrum(obj);
@@ -5255,7 +5438,7 @@ doapply()
 			if(Blind) pline("The effigy grows and turns to stone!");
 			else pline("The effigy becomes a weeping angel!");
 		} else {
-			u.wimage = 0; //Sub-critial images are removed anyway.
+			u.wimage = 0; //Sub-critical images are removed anyway.
 			if(Blind) pline("The effigy bursts into flames!");
 			else pline("The effigy burns with sickly flames!");
 		}
@@ -5421,7 +5604,7 @@ doapply()
 		nomul(0, NULL);
 		return 0;
 	}
-	if (res && obj && obj->oartifact) arti_speak(obj);
+	if (res && !wasmergable && obj && obj->oartifact) arti_speak(obj);
 xit2:
 	nomul(0, NULL);
 	return res;

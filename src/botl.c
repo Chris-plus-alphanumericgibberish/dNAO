@@ -522,6 +522,7 @@ bot2()
 #endif
         Sprintf(nb = eos(nb), " Br:%d", u.divetimer);
         Sprintf(nb = eos(nb), " AC:%-2d", (u.uac + u.ustdy));
+        Sprintf(nb = eos(nb), " DR:%-2d", u.udr);
 	if (Upolyd)
 		Sprintf(nb = eos(nb), " HD:%d", mons[u.umonnum].mlevel);
 #ifdef EXP_ON_BOTL

@@ -908,7 +908,7 @@ peffects(otmp)
 		You_feel("better.");
         enhanced = uarm && uarm->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
 		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 4),
-		       ((enhanced ? 2 : 1) * !otmp->cursed ? 1 : 0), !!otmp->blessed, !otmp->cursed);
+		       ((enhanced ? 2 : 1) * (!otmp->cursed ? 1 : 0)), !!otmp->blessed, !otmp->cursed);
 		exercise(A_CON, TRUE);
 		break;
 	case POT_EXTRA_HEALING:
@@ -1109,10 +1109,10 @@ healup(nhp, nxtra, curesick, cureblind)
 	if (nhp) {
 		if (Upolyd) {
 			u.mh += nhp;
-			if (u.mh > u.mhmax) u.mh = (u.mhmax += nxtra);
+			if (u.mh > u.mhmax) u.mh = (u.mhmax = max(u.mhmax, min(u.mhmax + nxtra, 40+u.ulevel*(10+conplus(ACURR(A_CON))))));
 		} else {
 			u.uhp += nhp;
-			if(u.uhp > u.uhpmax) u.uhp = (u.uhpmax += nxtra);
+			if(u.uhp > u.uhpmax) u.uhp = (u.uhpmax = max(u.uhpmax, min(u.uhpmax + nxtra, 40+u.ulevel*(10+conplus(ACURR(A_CON))))));
 		}
 	}
 	if(cureblind)	make_blinded(0L,TRUE);
@@ -2154,7 +2154,7 @@ boolean amnesia;
 			}
 			obj->otyp = SCR_BLANK_PAPER;
 			obj->spe = 0;
-			obj->ovar1 = 0;
+			obj->oward = 0;
 			used = TRUE;
 		} 
 		break;
@@ -2586,11 +2586,43 @@ dodip()
 		goto poof;
 	}
 #endif
-
+	
+	if( (potion->otyp == POT_ACID || 
+			(potion->otyp == POT_BLOOD && acidic(&mons[potion->corpsenm]))) 
+		&& (!(obj->opoisoned & OPOISON_ACID) || obj->otyp == VIPERWHIP)
+	){
+		if(is_corrodeable(obj) && obj->oeroded2 < MAX_ERODE){
+			int poofit = 1;
+			if(obj->greased)
+				poofit = 0;
+			erode_obj(obj, TRUE, FALSE);
+			if(poofit)
+				goto poof;
+		} else if(is_poisonable(obj)){
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			if(obj->otyp != VIPERWHIP) obj->opoisoned = 0;
+			if(obj->otyp == VIPERWHIP) pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			else pline("%s forms a coating on %s.",
+				  buf, the(xname(obj)));
+			if(obj->otyp == VIPERWHIP){
+				if(obj->opoisonchrgs && obj->opoisoned == OPOISON_ACID) obj->opoisonchrgs += 2;
+				else obj->opoisonchrgs = 1;
+			}
+			obj->opoisoned = OPOISON_ACID;
+			goto poof;
+		}
+	}
+	
 	if(is_poisonable(obj)) {
 	    if( (potion->otyp == POT_SICKNESS || 
 				(potion->otyp == POT_BLOOD && poisonous(&mons[potion->corpsenm]))) 
-			&& (!(obj->opoisoned & OPOISON_BASIC) || obj->otyp == VIPERWHIP)) {
+			&& (!(obj->opoisoned & OPOISON_BASIC) || obj->otyp == VIPERWHIP)
+		){
 			char buf[BUFSZ];
 			if (potion->quan > 1L)
 				Sprintf(buf, "One of %s", the(xname(potion)));
@@ -2718,6 +2750,20 @@ dodip()
 			obj->opoisoned = OPOISON_PARAL;
 			obj->opoisonchrgs = 30;
 			goto poof;
+	    } else if((potion->otyp == POT_ACID ||
+				(potion->otyp == POT_BLOOD && acidic(&mons[potion->corpsenm]))
+			) && (!obj->opoisoned || obj->opoisoned & OPOISON_ACID)) {
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			obj->opoisoned = 0;
+			pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			obj->opoisoned = OPOISON_ACID;
+			obj->opoisonchrgs = 30;
+			goto poof;
 	    }
 	}
 
@@ -2799,7 +2845,7 @@ dodip()
 		if(!obj->lamplit)
 			begin_burn(obj, FALSE);
 		useup(potion);
-		explode(u.ux, u.uy, 11, d(6,6), 0, EXPL_FIERY);
+		explode(u.ux, u.uy, 11, d(6,6), 0, EXPL_FIERY, 1);
 		exercise(A_WIS, FALSE);
 		return 1;
 	} else if((obj->otyp == SUNROD)
@@ -2836,7 +2882,7 @@ dodip()
 	    /* Turn off engine before fueling, turn off fuel too :-)  */
 	    if (obj->lamplit || potion->lamplit) {
 		useup(potion);
-		explode(u.ux, u.uy, 11, d(6,6), 0, EXPL_FIERY);
+		explode(u.ux, u.uy, 11, d(6,6), 0, EXPL_FIERY, 1);
 		exercise(A_WIS, FALSE);
 		return 1;
 	    }

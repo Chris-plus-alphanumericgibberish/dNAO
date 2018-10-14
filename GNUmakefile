@@ -2,7 +2,7 @@ GAMEDIR = dnethackdir
 
 CFLAGS = -g
 
-GAMELIBS = -lncurses
+GAMELIBS = -lncurses -lm
 
 -include local.mk
 

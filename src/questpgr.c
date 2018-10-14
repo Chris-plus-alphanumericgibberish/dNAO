@@ -562,6 +562,7 @@ qt_montype()
 			return (mkclass(urole.enemy2sym, G_NOHELL|G_HELL));
 		}
 	}
+	return &mons[PM_GNOME];
 }
 
 struct permonst *
@@ -721,9 +722,11 @@ neutral_montype()
 	if(u.uz.dnum == neutral_dnum && u.uz.dlevel < sum_of_all_level.dlevel){
 		int chance = rn2(100);
 		int diff = (u.ulevel+level_difficulty())/2;
+		if(Is_gatetown(&u.uz))
+			return (struct permonst *)0;
 		switch(rn2(5)){
 			case 0:
-				if(rn2(2)) &mons[PM_HORSE];
+				if(rn2(2)) return &mons[PM_HORSE];
 				else return mkclass(S_QUADRUPED, G_NOHELL);
 			break;
 			case 1:
@@ -743,7 +746,7 @@ neutral_montype()
 				return &mons[PM_AMM_KAMEREL];
 			break;
 			case 3:
-				if(rn2(4)) return (struct permonst *)0;
+				if(rn2(4)) return mkclass(S_QUADRUPED, G_NOHELL);
 				return &mons[PM_SHATTERED_ZIGGURAT_CULTIST];
 			break;
 			case 4:

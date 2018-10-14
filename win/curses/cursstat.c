@@ -92,7 +92,7 @@ static const struct statcolor default_colors[] = {
     {"Ill", CLR_BRIGHT_MAGENTA},
     {"FoodPois", CLR_BRIGHT_MAGENTA},
     {"Slime", CLR_BRIGHT_MAGENTA},
-    {NULL, NULL, NO_COLOR},
+    {NULL, NO_COLOR},
 };
 
 static attr_t

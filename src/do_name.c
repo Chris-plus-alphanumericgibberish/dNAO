@@ -583,7 +583,8 @@ const char *name;
 		
 		if(obj->oartifact == ART_WAR_MASK_OF_DURIN) obj->corpsenm = PM_DWARF;
 		
-		if(obj->oartifact == ART_LIFEHUNT_SCYTHE) obj->objsize = MZ_LARGE;
+		if(obj->oartifact == ART_GARNET_ROD) obj->objsize = MZ_LARGE;
+		else if(obj->oartifact == ART_LIFEHUNT_SCYTHE) obj->objsize = MZ_LARGE;
 		else if(obj->oartifact == ART_PROFANED_GREATSCYTHE) obj->objsize = MZ_HUGE;
 		else if(obj->oartifact == ART_FRIEDE_S_SCYTHE) obj->objsize = MZ_SMALL;
 		else if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS) obj->objsize = MZ_SMALL;
@@ -608,7 +609,10 @@ const char *name;
 		else if(obj->oartifact == ART_DEMONBANE) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_WEREBANE) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_VAMPIRE_KILLER) obj->obj_material = METAL;
+		else if(obj->oartifact == ART_SCEPTRE_OF_MIGHT) obj->obj_material = BONE;
 		else if(obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) obj->obj_material = GOLD;
+		else if(obj->oartifact == ART_AEGIS) obj->obj_material = LEATHER;
+		else if(obj->oartifact == ART_HERMES_S_SANDALS) obj->obj_material = GOLD;
 		else if(obj->oartifact == ART_GRAYSWANDIR) obj->obj_material = SILVER;
 		else if(obj->oartifact == ART_SANSARA_MIRROR) obj->obj_material = GOLD;
 		else if(obj->oartifact == ART_MIRROR_BRAND) obj->obj_material = SILVER;
@@ -637,6 +641,7 @@ const char *name;
 		else if(obj->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO) obj->obj_material = METAL;
 		else if(obj->oartifact == ART_SCOURGE_OF_LOLTH) obj->obj_material = SILVER;
 		else if(obj->oartifact >= ART_SWORD_OF_ERATHAOL && obj->oartifact <= ART_HAMMER_OF_BARQUIEL) obj->obj_material = SILVER;
+		else if(obj->oartifact == ART_ITLACHIAYAQUE) obj->obj_material = OBSIDIAN_MT;
 		else if(obj->oartifact == ART_SOL_VALTIVA) obj->obj_material = OBSIDIAN_MT;
 		else if(obj->otyp == SABER) obj->obj_material = SILVER;
 		else if(obj->otyp == KHAKKHARA) obj->obj_material = SILVER;
@@ -647,6 +652,10 @@ const char *name;
 		else if(obj->otyp == find_gcirclet()) obj->obj_material = GOLD;
 		else if(obj->otyp == ARMORED_BOOTS) obj->obj_material = COPPER;
 		else if(obj->otyp == ROUNDSHIELD) obj->obj_material = COPPER;
+		else if(obj->otyp == LIGHTSABER) obj->obj_material = SILVER;
+		else if(obj->otyp == BEAMSWORD) obj->obj_material = GOLD;
+		else if(obj->otyp == KAMEREL_VAJRA) obj->obj_material = GOLD;
+		else if(obj->otyp == DOUBLE_LIGHTSABER) obj->obj_material = PLATINUM;
 		else if(is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR); //keep current/default material
 		else obj->obj_material = objects[obj->otyp].oc_material;
 		
@@ -791,17 +800,17 @@ rndghostname()
 
 /* Monster naming functions:
  * x_monnam is the generic monster-naming function.
- *		  seen	      unseen	   detected		  named
- * mon_nam:	the newt	it	the invisible orc	Fido
- * noit_mon_nam:the newt (as if detected) the invisible orc	Fido
- * l_monnam:	newt		it	invisible orc		dog called fido
- * Monnam:	The newt	It	The invisible orc	Fido
- * noit_Monnam: The newt (as if detected) The invisible orc	Fido
- * Adjmonnam:	The poor newt	It	The poor invisible orc	The poor Fido
- * Amonnam:	A newt		It	An invisible orc	Fido
- * a_monnam:	a newt		it	an invisible orc	Fido
- * m_monnam:	newt		xan	orc			Fido
- * y_monnam:	your newt     your xan	your invisible orc	Fido
+ *		  		seen		unseen			detected		  named
+ * mon_nam:		the newt	it				the invisible orc	Fido
+ * noit_mon_nam:the newt 	(as if detected)the invisible orc	Fido
+ * l_monnam:	newt		it				invisible orc		dog called fido
+ * Monnam:		The newt	It				The invisible orc	Fido
+ * noit_Monnam: The newt 	(as if detected)The invisible orc	Fido
+ * Adjmonnam:	The poor newt	It			The poor invisible orc	The poor Fido
+ * Amonnam:		A newt		It				An invisible orc	Fido
+ * a_monnam:	a newt		it				an invisible orc	Fido
+ * m_monnam:	newt		xan				orc					Fido
+ * y_monnam:	your newt   your xan		your invisible orc	Fido
  */
 
 /* Bug: if the monster is a priest or shopkeeper, not every one of these
@@ -902,7 +911,7 @@ boolean called;
 			name_at_start = FALSE;
 		}
 		if (
-			(u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) 
+			((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp)))) 
 			&& !DEADMONSTER(mtmp)
 		){
 			if(mtmp->mhp == mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
@@ -918,7 +927,7 @@ boolean called;
 			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 				if ((otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT) 
 					&& otmp->owornmask & mtmp->misc_worn_check){
-						Sprintf(eos(buf), "%s ", getDrowHouse(otmp->ovar1));
+						Sprintf(eos(buf), "%s ", getDrowHouse(otmp->oward));
 						name_at_start = FALSE;
 					}
 			}
@@ -982,7 +991,7 @@ boolean called;
 				for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 					if ((otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT) 
 						&& otmp->owornmask & mtmp->misc_worn_check){
-							Sprintf(eos(buf), "%s ", getDrowHouse(otmp->ovar1));
+							Sprintf(eos(buf), "%s ", getDrowHouse(otmp->oward));
 							name_at_start = FALSE;
 						}
 				}
@@ -1050,7 +1059,7 @@ boolean called;
 			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 				if ((otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT) 
 					&& otmp->owornmask & mtmp->misc_worn_check){
-						Sprintf(eos(buf), "%s ", getDrowHouse(otmp->ovar1));
+						Sprintf(eos(buf), "%s ", getDrowHouse(otmp->oward));
 						name_at_start = FALSE;
 					}
 			}

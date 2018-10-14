@@ -2,6 +2,8 @@
 /* Copyright (c) Dean Luick, 1994					*/
 /* NetHack may be freely redistributed.  See license for details.	*/
 
+#pragma clang diagnostic ignored "-Wint-to-void-pointer-cast"
+
 #include "hack.h"
 #include "lev.h"	/* for checking save modes */
 
@@ -90,7 +92,7 @@ void
 del_light_source(type, id, silent)
     int type;
     genericptr_t id;
-	boolean silent;
+	int silent;
 {
     light_source *curr, *prev;
     genericptr_t tmp_id;
@@ -99,9 +101,9 @@ del_light_source(type, id, silent)
        has only been partially restored during a level change
        (in particular: chameleon vs prot. from shape changers) */
     switch (type) {
-    case LS_OBJECT:	tmp_id = (genericptr_t)(((struct obj *)id)->o_id);
+    case LS_OBJECT:	tmp_id = (genericptr_t)(intptr_t)(((struct obj *)id)->o_id);
 			break;
-    case LS_MONSTER:	tmp_id = (genericptr_t)(((struct monst *)id)->m_id);
+    case LS_MONSTER:	tmp_id = (genericptr_t)(intptr_t)(((struct monst *)id)->m_id);
 			break;
     default:		tmp_id = 0;
 			break;
@@ -165,11 +167,11 @@ do_light_sources(cs_rows)
            effects */
 
 	if (ls->type == LS_OBJECT) {
-            struct obj *otmp = (struct obj *) ls->id;
-            if (Is_candle(otmp)) {
-		ls->range = candle_light_range(otmp);
-            }
-        }
+		struct obj *otmp = (struct obj *) ls->id;
+		if (Is_candle(otmp)) {
+			ls->range = candle_light_range(otmp);
+		}
+    }
 
 	if ((ls->flags & LSF_SHOW) && ls->range > 0) {
 		if((ls->type == LS_OBJECT && Is_darklight_source(((struct obj *)(ls->id)))) ||
@@ -493,10 +495,10 @@ relink_light_sources(ghostly)
 	if (ls->flags & LSF_NEEDS_FIXUP) {
 	    if (ls->type == LS_OBJECT || ls->type == LS_MONSTER) {
 		if (ghostly) {
-		    if (!lookup_id_mapping((unsigned)ls->id, &nid))
+		    if (!lookup_id_mapping((unsigned)(intptr_t)ls->id, &nid))
 			impossible("relink_light_sources: no id mapping");
 		} else
-		    nid = (unsigned) ls->id;
+		    nid = (unsigned)(intptr_t)ls->id;
 		if (ls->type == LS_OBJECT) {
 		    which = 'o';
 		    ls->id = (genericptr_t) find_oid(nid);
@@ -574,16 +576,16 @@ write_ls(fd, ls)
 	    arg_save = ls->id;
 	    if (ls->type == LS_OBJECT) {
 		otmp = (struct obj *)ls->id;
-		ls->id = (genericptr_t)otmp->o_id;
+		ls->id = (genericptr_t)(intptr_t)otmp->o_id;
 #ifdef DEBUG
-		if (find_oid((unsigned)ls->id) != otmp)
-		    panic("write_ls: can't find obj #%u!", (unsigned)ls->id);
+		if (find_oid((unsigned)(intptr_t)ls->id) != otmp)
+		    panic("write_ls: can't find obj #%u!", (unsigned)(intptr_t)ls->id);
 #endif
 	    } else { /* ls->type == LS_MONSTER */
 		mtmp = (struct monst *)ls->id;
-		ls->id = (genericptr_t)mtmp->m_id;
+		ls->id = (genericptr_t)(intptr_t)(intptr_t)mtmp->m_id;
 #ifdef DEBUG
-		if (find_mid((unsigned)ls->id, FM_EVERYWHERE) != mtmp)
+		if (find_mid((unsigned)(intptr_t)ls->id, FM_EVERYWHERE) != mtmp)
 		    panic("write_ls: can't find mon #%u!", (unsigned)ls->id);
 #endif
 	    }

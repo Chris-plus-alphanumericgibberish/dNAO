@@ -329,10 +329,14 @@ mattackm(magr, mdef)
     /* Now perform all attacks for the monster. */
     for (i = 0; i < NATTK; i++) {
         int tmphp = mdef->mhp;
+	
+	if(DEADMONSTER(mdef) || DEADMONSTER(magr))
+		break;
 	res[i] = MM_MISS;
 	mattk = getmattk(pa, i, res, &alt_attk);
 	otmp = (struct obj *)0;
 	attk = 1;
+	
 	
 	if (magr->data == &mons[PM_GRUE] && (i >= 2) && !((!levl[magr->mx][magr->my].lit && !(viz_array[magr->my][magr->mx] & TEMP_LIT1 && !(viz_array[magr->my][magr->mx] & TEMP_DRK1)))
 		|| (levl[magr->mx][magr->my].lit && (viz_array[magr->my][magr->mx] & TEMP_DRK1 && !(viz_array[magr->my][magr->mx] & TEMP_LIT1)))))
@@ -424,7 +428,7 @@ mattackm(magr, mdef)
 		case AT_MARI: /* weapon attacks */
 #define MAINHAND (mattk->aatyp != AT_XWEP && mattk->aatyp != AT_MARI)
 
-		if (!mattk->aatyp == AT_XWEP && magr->misc_worn_check & W_ARMS) {
+		if (mattk->aatyp == AT_XWEP && (magr->misc_worn_check & W_ARMS)) {
 			// Offhand attacks cannot be made while wearing a shield
 			break;
 		}
@@ -437,6 +441,7 @@ mattackm(magr, mdef)
 					res[i] = MM_HIT;
 					if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 				} else res[i] = MM_MISS;
+				mon_ranged_gazeonly = 0;
 				if (mdef->mhp < 1) res[i] = MM_DEF_DIED;
 				if (magr->mhp < 1) res[i] = MM_AGR_DIED;
 				break;
@@ -460,6 +465,7 @@ mattackm(magr, mdef)
 						res[i] = MM_HIT;
 						if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 					} else res[i] = MM_MISS;
+					mon_ranged_gazeonly = 0;
 					if (mdef->mhp < 1) res[i] = MM_DEF_DIED;
 					if (magr->mhp < 1) res[i] = MM_AGR_DIED;
 					break;
@@ -590,6 +596,7 @@ meleeattack:
 		}
 		if (strike) {
 		    res[i] = hitmm(magr, mdef, mattk);
+			mon_ranged_gazeonly = 0;
 			if(res[i] && magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 		    if((mdef->data == &mons[PM_BLACK_PUDDING] || mdef->data == &mons[PM_BROWN_PUDDING])
 		       && otmp && otmp->obj_material == IRON
@@ -607,6 +614,7 @@ meleeattack:
 			if(mattk->aatyp == AT_DEVA && !DEADMONSTER(mdef)){
 				int deva = 1;
 				while(!DEADMONSTER(mdef) && tmp > (dieroll = rnd(20+i+(deva++)*2))) res[i] = hitmm(magr, mdef, mattk);
+				mon_ranged_gazeonly = 0;
 			}
 		} else
 		    missmm(magr, mdef, mattk);
@@ -614,6 +622,7 @@ meleeattack:
 			if(tmp > rnd(20 + i*2)){
 				struct attack rend = {AT_HUGS, AD_WRAP, magr->data == &mons[PM_SHAKTARI] ? 8 : 4, 6};
 				// res[i] = hitmm(magr, mdef, &rend);
+				mon_ranged_gazeonly = 0;
 			}
 		}
 		break;
@@ -623,6 +632,7 @@ meleeattack:
 		if (strike){
 		    res[i] = hitmm(magr, mdef, mattk);
 //			if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
+			mon_ranged_gazeonly = 0;
 		}
 		break;
 
@@ -640,6 +650,7 @@ meleeattack:
 			res[i] = MM_HIT;
 			if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 		} else res[i] = MM_MISS;
+		mon_ranged_gazeonly = 0;
 		if (mdef->mhp < 1) res[i] = MM_DEF_DIED;
 		if (magr->mhp < 1) res[i] = MM_AGR_DIED;
 		break;
@@ -650,6 +661,7 @@ meleeattack:
 			res[i] = MM_HIT;
 			if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 		} else res[i] = MM_MISS;
+		mon_ranged_gazeonly = 0;
 		if (mdef->mhp < 1) res[i] = MM_DEF_DIED;
 		if (magr->mhp < 1) res[i] = MM_AGR_DIED;
 		break;
@@ -666,6 +678,7 @@ meleeattack:
 						if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 					} else res[i] = MM_MISS;
 				}
+				mon_ranged_gazeonly = 0;
 				if (mdef->mhp < 1){
 					res[i] = MM_DEF_DIED;
 					break;
@@ -710,6 +723,10 @@ meleeattack:
 			res[i] = MM_MISS;
 			break;
 		}
+		if(!mon_can_see_mon(magr, mdef)){
+			res[i] = MM_MISS;
+			continue;
+		}
 		res[i] = gazemm(magr, mdef, mattk);
 		if(res[i] && magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 		break;
@@ -717,6 +734,7 @@ meleeattack:
 	    case AT_EXPL:
 		if (distmin(magr->mx,magr->my,mdef->mx,mdef->my) > 1) break;
 		res[i] = explmm(magr, mdef, mattk);
+		mon_ranged_gazeonly = 0;
 		if(res[i] && magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 		if (is_fern_spore(magr->data)) spore_dies(magr);
 		if (res[i] == MM_MISS) { /* cancelled--no attack */
@@ -742,6 +760,7 @@ meleeattack:
 		else {
 		    if ((strike = (tmp > rnd(20+i)))){
 				res[i] = gulpmm(magr, mdef, mattk);
+				mon_ranged_gazeonly = 0;
 				if(magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 		    } else
 				missmm(magr, mdef, mattk);
@@ -771,6 +790,7 @@ meleeattack:
 				else {
 					res[i] = castmm(magr, mdef, mattk);
 				}
+				mon_ranged_gazeonly = 0;
 				if(res[i] && magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 				if (res[i] & MM_DEF_DIED)
 				if( pa == &mons[PM_ASMODEUS] && !rn2(3) ) return 3;
@@ -788,7 +808,7 @@ meleeattack:
 	if (attk && !(res[i] & MM_AGR_DIED) &&
 	    dist2(magr->mx, magr->my, mdef->mx, mdef->my) < 3)
 	    res[i] = passivemm(magr, mdef, strike, res[i] & MM_DEF_DIED, mattk);
-
+	
 	if(res[i] && magr->mtame && canseemon(magr)) u.petattacked = TRUE;
 	if (res[i] & MM_DEF_DIED) return res[i];
 
@@ -853,6 +873,8 @@ struct monst *mdef;
 			!m_cansee(magr, mdef->mx, mdef->my))
 	    	return MM_MISS;	/* Out of range, or intervening wall */
 
+		mon_ranged_gazeonly = 0;
+	
 		if (vis) {
 			onm = xname(otmp);
 			pline("%s %s %s.", Monnam(magr), otmp->otyp == AKLYS ? "throws" : "thrusts",
@@ -873,6 +895,8 @@ struct monst *mdef;
 	if (!mlined_up(magr, mdef, FALSE))
 	    return MM_MISS;
 
+	mon_ranged_gazeonly = 0;
+	
 	skill = objects[otmp->otyp].oc_skill;
 	mwep = MON_WEP(magr);		/* wielded weapon */
 
@@ -1078,7 +1102,8 @@ gazemm(magr, mdef, mattk)
 {
 	char buf[BUFSZ];
 
-	if(magr->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(magr->data->maligntyp < 0 && Is_illregrd(&u.uz)) return MM_MISS;
+	
 	if(vis) {
 		/* the gaze attack of weeping (arch)angels isn't active like others */
 		if (is_weeping(magr->data)) {
@@ -1091,7 +1116,7 @@ gazemm(magr, mdef, mattk)
 		}
 	}
 
-	if (magr->mcan || is_blind(magr) ||
+	if (magr->mcan || 
 	    (magr->minvis && !perceives(mdef->data)) ||
 	    is_blind(mdef) || mdef->msleeping) {
 	    // if(vis && !is_weeping(magr->data)) pline("but nothing happens.");
@@ -1101,18 +1126,18 @@ gazemm(magr, mdef, mattk)
 	if (magr->data == &mons[PM_MEDUSA] && mon_reflects(mdef, (char *)0)) {
 	    if (canseemon(mdef))
 		(void) mon_reflects(mdef,
-				    "The gaze is reflected away by %s %s.");
+				    "The image is reflected away by %s %s.");
 //	    if (!is_blind(mdef)) {
 		if(mdef->mfaction != FRACTURED || !rn2(8)){
 			if (mon_reflects(magr, (char *)0)) {
 				if (canseemon(magr))
 				(void) mon_reflects(magr,
-						"The gaze is reflected away by %s %s.");
+						"The image is reflected away by %s %s.");
 				return (MM_MISS);
 			}
-			if (mdef->minvis && !perceives(magr->data)) {
+			if (mdef->minvis && (!perceives(magr->data) || is_blind(magr))) {
 				if (canseemon(magr)) {
-				pline("%s doesn't seem to notice that %s gaze was reflected.",
+				pline("%s doesn't seem to notice that %s image was reflected.",
 					  Monnam(magr), mhis(magr));
 				}
 				return (MM_MISS);
@@ -1123,6 +1148,10 @@ gazemm(magr, mdef, mattk)
 			if (magr->mhp > 0) return (MM_MISS);
 			return (MM_AGR_DIED);
 	    }
+	}
+	if (magr->data != &mons[PM_MEDUSA] && is_blind(magr)) {
+	    // if(vis && !is_weeping(magr->data)) pline("but nothing happens.");
+	    return(MM_MISS);
 	}
 
 	return(mdamagem(magr, mdef, mattk));
@@ -1214,10 +1243,10 @@ explmm(magr, mdef, mattk)
 	if(!is_fern_spore(magr->data)) result = mdamagem(magr, mdef, mattk);
 	else{
 		mondead(magr);
-		if(magr->data==&mons[PM_SWAMP_FERN_SPORE]) explode(magr->mx, magr->my, 9, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_MAGICAL);
+		if(magr->data==&mons[PM_SWAMP_FERN_SPORE]) explode(magr->mx, magr->my, 9, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_MAGICAL, 1);
 		else if(magr->data==&mons[PM_BURNING_FERN_SPORE])
-			explode(magr->mx, magr->my, 8, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_YELLOW);
-		else explode(magr->mx, magr->my, 7, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_NOXIOUS);
+			explode(magr->mx, magr->my, 8, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_YELLOW, 1);
+		else explode(magr->mx, magr->my, 7, d((int)mattk->damn, (int)mattk->damd), MON_EXPLODE, EXPL_NOXIOUS, 1);
 		if (magr->mhp > 0) return result;
 		else return result | MM_AGR_DIED;
 	}
@@ -1345,9 +1374,11 @@ mdamagem(magr, mdef, mattk)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	    case AD_STUN:
 		if (magr->mcan) break;
-		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
-			Sprintf(buf,"%s gazes at", Monnam(magr));
-			pline("%s %s...", buf, mon_nam(mdef));
+		if(mattk->aatyp == AT_GAZE){
+			if(canseemon(magr)){
+				Sprintf(buf,"%s gazes at", Monnam(magr));
+				pline("%s %s...", buf, mon_nam(mdef));
+			}
 			tmp = 0;
 		}
 		if (canseemon(mdef))
@@ -1393,92 +1424,108 @@ physical:{
 		    tmp = 0;
 		} else if(weaponhit) {
 		    if(otmp) {
-			if (otmp->otyp == CORPSE &&
-				touch_petrifies(&mons[otmp->corpsenm]))
-			    goto do_stone;
-			/* WAC -- Real weapon?
-			 * Could be stuck with a cursed bow/polearm it wielded
-			 */
-			if (/* if you strike with a bow... */
-			    is_launcher(otmp) ||
-			    /* or strike with a missile in your hand... */
-			    ((is_missile(otmp) || is_ammo(otmp)) &&
-					!(otmp->otyp == CHAKRAM)
-				) ||
-				/* houchou not thrown */
-				(otmp->oartifact == ART_HOUCHOU) ||
-			    /* lightsaber that isn't lit ;) */
-			    (is_lightsaber(otmp) && !litsaber(otmp)) ||
-			    /* WAC -- or using a pole at short range... */
-			    (is_pole(otmp) &&
-					otmp->otyp != AKLYS && 
-					otmp->otyp != FORCE_PIKE && 
-					otmp->oartifact != ART_WEBWEAVER_S_CROOK && 
-					otmp->oartifact != ART_HEARTCLEAVER && 
-					otmp->oartifact != ART_SOL_VALTIVA && 
-					otmp->oartifact != ART_SHADOWLOCK && 
-					otmp->oartifact != ART_PEN_OF_THE_VOID
-			)) {
-			    /* then do only 1-2 points of damage */
-			    if (insubstantial(mdef->data) && !insubstantial_aware(mdef, otmp, FALSE)) tmp = 0;
-				else if(otmp->oartifact == ART_LIECLEAVER)
-					tmp = 2*(rnd(12) + rnd(10) + otmp->spe);
-				else if(otmp->oartifact == ART_ROGUE_GEAR_SPIRITS)
-					tmp = 2*(rnd(bigmonst(mdef->data) ? 2 : 5) + otmp->spe);
-				else tmp = rnd(2);
+				if (otmp->otyp == CORPSE &&
+					touch_petrifies(&mons[otmp->corpsenm]))
+					goto do_stone;
+				/* WAC -- Real weapon?
+				 * Could be stuck with a cursed bow/polearm it wielded
+				 */
+				if (/* if you strike with a bow... */
+					is_launcher(otmp) ||
+					/* or strike with a missile in your hand... */
+					((is_missile(otmp) || is_ammo(otmp)) &&
+						!(otmp->otyp == CHAKRAM)
+					) ||
+					/* houchou not thrown */
+					(otmp->oartifact == ART_HOUCHOU) ||
+					/* lightsaber that isn't lit ;) */
+					(is_lightsaber(otmp) && !litsaber(otmp)) ||
+					/* WAC -- or using a pole at short range... */
+					(is_pole(otmp) &&
+						otmp->otyp != AKLYS && 
+						otmp->otyp != FORCE_PIKE && 
+						otmp->otyp != NAGINATA && 
+						otmp->oartifact != ART_WEBWEAVER_S_CROOK && 
+						otmp->oartifact != ART_SILENCE_GLAIVE && 
+						otmp->oartifact != ART_HEARTCLEAVER && 
+						otmp->oartifact != ART_SOL_VALTIVA && 
+						otmp->oartifact != ART_SHADOWLOCK && 
+						otmp->oartifact != ART_PEN_OF_THE_VOID
+				)) {
+					/* then do only 1-2 points of damage */
+					if (insubstantial(mdef->data) && !insubstantial_aware(mdef, otmp, FALSE)) tmp = 0;
+					else if(otmp->oartifact == ART_LIECLEAVER)
+						tmp = 2*(rnd(12) + rnd(10) + otmp->spe);
+					else if(otmp->oartifact == ART_ROGUE_GEAR_SPIRITS)
+						tmp = 2*(rnd(bigmonst(mdef->data) ? 2 : 5) + otmp->spe);
+					else tmp = rnd(2);
+					
+					if(otmp && (otmp->obj_material == SILVER || arti_silvered(otmp)) && hates_silver(pd) &&
+						!(is_lightsaber(otmp) && litsaber(otmp))
+					)
+						tmp += rnd(20);
+					if(otmp && (otmp->obj_material == IRON) && hates_iron(pd) &&
+						!(is_lightsaber(otmp) && litsaber(otmp))
+					)
+						tmp += rnd(mdef->m_lev);
+					if(otmp && is_unholy(otmp) && hates_unholy(pd))
+						tmp += rnd(9);
+				} else {
+					tmp += dmgval(otmp, mdef, 0);
+					if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))) phasearmor = TRUE;
+				}
 				
+				if(magr->data == &mons[PM_DANCING_BLADE])
+					tmp += 7;
+				
+				if(resist_attacks(mdef->data))
+					tmp = 0;
+				/* WAC Weres get seared */
 				if(otmp && (otmp->obj_material == SILVER || arti_silvered(otmp)) && hates_silver(pd) &&
 					!(is_lightsaber(otmp) && litsaber(otmp))
-				)
-					tmp += rnd(20);
+				) {
+					if (vis) pline("The silver sears %s!", mon_nam(mdef));
+				}
 				if(otmp && (otmp->obj_material == IRON) && hates_iron(pd) &&
 					!(is_lightsaber(otmp) && litsaber(otmp))
-				)
-					tmp += rnd(mdef->m_lev);
-				if(otmp && is_unholy(otmp) && hates_unholy(pd))
-					tmp += rnd(9);
-			} else {
-				tmp += dmgval(otmp, mdef, 0);
-				if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))) phasearmor = TRUE;
+				) {
+					if (vis) pline("The cold-iron sears %s!", mon_nam(mdef));
+				}
+				if(otmp && is_unholy(otmp) && hates_unholy(pd)) {
+					if (vis) pline("The curse sears %s!", mon_nam(mdef));
+				}
+				if(oarm && tmp && oarm->otyp == GAUNTLETS_OF_POWER){
+					tmp += 8;
+					if(otmp && bimanual(otmp,magr->data)) tmp += 4;
+				}
+				if (otmp) {
+					int basedamage = tmp;
+					int newdamage = tmp;
+					if(otmp->oartifact){
+						(void)artifact_hit(magr,mdef, otmp, &newdamage, dieroll);
+						if (mdef->mhp <= 0 || migrating_mons == mdef)
+						return (MM_DEF_DIED |
+							(grow_up(magr,mdef) ? 0 : MM_AGR_DIED));
+						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
+					}
+					if(otmp->oproperties){
+						(void)oproperty_hit(magr,mdef, otmp, &newdamage, dieroll);
+						tmp += (newdamage - basedamage);
+					}
+				}
+				if (otmp && tmp)
+					mrustm(magr, mdef, otmp);
+		    } else if(magr->data == &mons[PM_FORMIAN_CRUSHER]){
+				tmp += d(3*((int)mattk->damn), (int)mattk->damd);
 			}
-			
-			if(magr->data == &mons[PM_DANCING_BLADE])
-				tmp += 7;
-			
-			if(resist_attacks(mdef->data))
-				tmp = 0;
-            /* WAC Weres get seared */
-            if(otmp && (otmp->obj_material == SILVER || arti_silvered(otmp)) && hates_silver(pd) &&
-				!(is_lightsaber(otmp) && litsaber(otmp))
-			) {
-            	if (vis) pline("The silver sears %s!", mon_nam(mdef));
-            }
-            if(otmp && (otmp->obj_material == IRON) && hates_iron(pd) &&
-				!(is_lightsaber(otmp) && litsaber(otmp))
-			) {
-            	if (vis) pline("The cold-iron sears %s!", mon_nam(mdef));
-            }
-            if(otmp && is_unholy(otmp) && hates_unholy(pd)) {
-            	if (vis) pline("The curse sears %s!", mon_nam(mdef));
-            }
-			if(oarm && tmp && oarm->otyp == GAUNTLETS_OF_POWER){
-				tmp += 8;
-				if(otmp && bimanual(otmp,magr->data)) tmp += 4;
-			}
-			if (otmp && otmp->oartifact) {
-			    (void)artifact_hit(magr,mdef, otmp, &tmp, dieroll);
-			    if (mdef->mhp <= 0 || migrating_mons == mdef)
-				return (MM_DEF_DIED |
-					(grow_up(magr,mdef) ? 0 : MM_AGR_DIED));
-			}
-			if (otmp && tmp)
-				mrustm(magr, mdef, otmp);
-		    }
 			// tack on bonus elemental damage, if applicable
 			if (mattk->adtyp != AD_PHYS){
 				alt_attk.aatyp = AT_NONE;
 				if(mattk->adtyp == AD_OONA)
 					alt_attk.adtyp = u.oonaenergy;
+				else if(mattk->adtyp == AD_HDRG)
+					alt_attk.adtyp = magr->mvar1;
 				else if(mattk->adtyp == AD_RBRE){
 					switch(rn2(3)){
 						case 0:
@@ -1492,31 +1539,33 @@ physical:{
 						break;
 					}
 				} else alt_attk.adtyp = mattk->adtyp;
-				switch (alt_attk.adtyp)
-				{
-				case AD_FIRE:
-				case AD_COLD:
-				case AD_ELEC:
-				case AD_ACID:
-					alt_attk.damn = 4;
-					alt_attk.damd = 6;
-					break;
-				case AD_EFIR:
-				case AD_ECLD:
-				case AD_EELC:
-				case AD_EACD:
-					alt_attk.damn = 3;
-					alt_attk.damd = 7;
-					break;
-				case AD_STUN:
-					alt_attk.damn = 1;
-					alt_attk.damd = 4;
-					break;
-				default:
-					alt_attk.damn = 0;
-					alt_attk.damd = 0;
-					break;
-				}
+				alt_attk.damn = mattk->damn;
+				alt_attk.damd = mattk->damd;
+				// switch (alt_attk.adtyp)
+				// {
+				// case AD_FIRE:
+				// case AD_COLD:
+				// case AD_ELEC:
+				// case AD_ACID:
+					// alt_attk.damn = 4;
+					// alt_attk.damd = 6;
+					// break;
+				// case AD_EFIR:
+				// case AD_ECLD:
+				// case AD_EELC:
+				// case AD_EACD:
+					// alt_attk.damn = 3;
+					// alt_attk.damd = 7;
+					// break;
+				// case AD_STUN:
+					// alt_attk.damn = 1;
+					// alt_attk.damd = 4;
+					// break;
+				// default:
+					// alt_attk.damn = 0;
+					// alt_attk.damd = 0;
+					// break;
+				// }
 				mdamagem(magr, mdef, &alt_attk);
 				if (DEADMONSTER(mdef))
 					return (MM_DEF_DIED | (grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
@@ -1845,9 +1894,11 @@ physical:{
 	    case AD_SLEE:
 		if (!cancelled && !mdef->msleeping &&
 			sleep_monst(mdef, rnd(10), -1)) {
-			if(canseemon(magr) && mattk->aatyp == AT_GAZE){
-				Sprintf(buf,"%s gazes at", Monnam(magr));
-				pline("%s %s...", buf, mon_nam(mdef));
+			if(mattk->aatyp == AT_GAZE){
+				if(canseemon(magr)){
+					Sprintf(buf,"%s gazes at", Monnam(magr));
+					pline("%s %s...", buf, mon_nam(mdef));
+				}
 				tmp = 0;
 			}
 			else if(mattk->aatyp == AT_WDGZ){
@@ -1866,9 +1917,11 @@ physical:{
 		    tmp = 0;
 		    break;
 		}
-		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
-			Sprintf(buf,"%s gazes at", Monnam(magr));
-			pline("%s %s...", buf, mon_nam(mdef));
+		if(mattk->aatyp == AT_GAZE){
+			if(canseemon(magr)){
+				Sprintf(buf,"%s gazes at", Monnam(magr));
+				pline("%s %s...", buf, mon_nam(mdef));
+			}
 			tmp = 0;
 		}
 		else if(mattk->aatyp == AT_WDGZ){
@@ -1904,9 +1957,11 @@ physical:{
 		    tmp = 0;
 		    break;
 		}
-		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
-			Sprintf(buf,"%s gazes at", Monnam(magr));
-			pline("%s %s...", buf, mon_nam(mdef));
+		if(mattk->aatyp == AT_GAZE){
+			if(canseemon(magr)){
+				Sprintf(buf,"%s gazes at", Monnam(magr));
+				pline("%s %s...", buf, mon_nam(mdef));
+			}
 			tmp = 0;
 		}
 		else if(mattk->aatyp == AT_WDGZ){
@@ -1929,9 +1984,11 @@ physical:{
 		 * limit, setting spec_used would not really be right (though
 		 * we still should check for it).
 		 */
-		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
-			Sprintf(buf,"%s gazes at", Monnam(magr));
-			pline("%s %s...", buf, mon_nam(mdef));
+		if(mattk->aatyp == AT_GAZE){
+			if(canseemon(magr)){
+				Sprintf(buf,"%s gazes at", Monnam(magr));
+				pline("%s %s...", buf, mon_nam(mdef));
+			}
 			tmp = 0;
 		}
 		else if(mattk->aatyp == AT_WDGZ){
@@ -1944,9 +2001,11 @@ physical:{
 		}
 		break;
 	    case AD_BLND:
-		if(canseemon(magr) && mattk->aatyp == AT_GAZE){
-			Sprintf(buf,"%s gazes at", Monnam(magr));
-			pline("%s %s...", buf, mon_nam(mdef));
+		if(mattk->aatyp == AT_GAZE){
+			if(canseemon(magr)){
+				Sprintf(buf,"%s gazes at", Monnam(magr));
+				pline("%s %s...", buf, mon_nam(mdef));
+			}
 			tmp = 0;
 		}
 		else if(mattk->aatyp == AT_WDGZ){
@@ -1980,9 +2039,11 @@ physical:{
 		break;
 	    case AD_HALU:
 		if (!magr->mcan && haseyes(pd) && !is_blind(mdef)) {
-			if(canseemon(magr) && mattk->aatyp == AT_GAZE){
-				Sprintf(buf,"%s gazes at", Monnam(magr));
-				pline("%s %s...", buf, mon_nam(mdef));
+			if(mattk->aatyp == AT_GAZE){
+				if(canseemon(magr)){
+					Sprintf(buf,"%s gazes at", Monnam(magr));
+					pline("%s %s...", buf, mon_nam(mdef));
+				}
 				tmp = 0;
 			}
 		    if (vis) pline("%s looks %sconfused.",
@@ -2341,7 +2402,7 @@ physical:{
 			for (i = rn2(3)+2; i > 0; i--) {
 				x = rn2(3)-1;
 				y = rn2(3)-1;
-				explode(magr->mx+x, magr->my+y, 8, tmp, -1, rn2(EXPL_MAX));		//-1 is unspecified source. 8 is physical
+				explode(magr->mx+x, magr->my+y, 8, tmp, -1, rn2(EXPL_MAX), 1);		//-1 is unspecified source. 8 is physical
 			}
 			if(DEADMONSTER(magr))
 				return MM_AGR_DIED;
@@ -2382,7 +2443,7 @@ physical:{
 	
 	if(magr->data == &mons[PM_LONG_WORM] && magr->wormno && mattk->aatyp == AT_BITE){
 		if(wormline(magr, mdef->mx, mdef->my))
-			tmp *= 2;
+			tmp += d(2,4);//Adds segment damage
 	}
 	
    if(mdef->data == &mons[PM_GIANT_TURTLE] && mdef->mflee) tmp=tmp/2; 
@@ -2406,18 +2467,18 @@ physical:{
 	}
 	
 	if(tmp && mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
-		int mac = full_marmorac(mdef);
-		if(mac < 0){
-			tmp += MONSTER_AC_VALUE(mac);
-			if(tmp < 1) tmp = 1;
-		}
+		tmp -= roll_mdr(mdef, magr);
+		if(tmp < 1) tmp = 1;
 	}
 	
 	if((magr->mfaction == ZOMBIFIED || (magr->mfaction == SKELIFIED && !rn2(20))) && can_undead_mon(mdef)){
 		mdef->zombify = 1;
 	}
 	
-	if((magr->data == &mons[PM_UNDEAD_KNIGHT] || magr->data == &mons[PM_DREAD_SERAPH]) && can_undead_mon(mdef)){
+	if((magr->data == &mons[PM_UNDEAD_KNIGHT]
+		|| magr->data == &mons[PM_WARRIOR_OF_SUNLIGHT]
+		|| magr->data == &mons[PM_DREAD_SERAPH]
+	) && can_undead_mon(mdef)){
 		mdef->zombify = 1;
 	}
 	
@@ -2703,7 +2764,7 @@ struct attack *mattk;
 		
 		if(mdef->data == &mons[PM_LEGION]){
 			int n = rnd(4);
-			for(n; n>0; n--) rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mdef->mx, mdef->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
+			for(; n>0; n--) rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mdef->mx, mdef->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
 									  makemon(&mons[PM_LEGIONNAIRE], mdef->mx, mdef->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 		} else {
 			if(mdef->mhp > .75*mdef->mhpmax) makemon(&mons[PM_LEMURE], mdef->mx, mdef->my, MM_ADJACENTOK);

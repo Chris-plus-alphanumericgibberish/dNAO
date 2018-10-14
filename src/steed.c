@@ -300,7 +300,7 @@ mount_steed(mtmp, force)
 	    return (FALSE);
 	}
 	
-	if (!force && !Role_if(PM_KNIGHT) && !mtmp->isminion && !(--mtmp->mtame)) {
+	if (!force && !(Role_if(PM_KNIGHT) || Role_if(PM_NOBLEMAN)) && !mtmp->isminion && !(--mtmp->mtame)) {
 	    /* no longer tame */
 	    newsym(mtmp->mx, mtmp->my);
 	    pline("%s resists%s!", Monnam(mtmp),
@@ -587,7 +587,7 @@ dismount_steed(reason)
 			if (!Underwater)
 			    pline("%s falls into the %s!", Monnam(mtmp),
 							surface(u.ux, u.uy));
-			if (!is_swimmer(mdat) && !amphibious(mdat)) {
+			if (!is_swimmer(mdat) && !amphibious_mon(mtmp)) {
 			    killed(mtmp);
 			    adjalign(-1);
 			}

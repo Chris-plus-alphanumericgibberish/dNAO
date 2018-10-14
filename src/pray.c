@@ -810,6 +810,12 @@ gcrownu()
 		already_exists = exist_artifact(LONG_SWORD, artiname(ART_CLARENT));
 		verbalize("I crown thee...  King of the Angles!");
 		livelog_write_string("crowned King of the Angles");
+	} else if(Pantheon_if(PM_HEALER) || Role_if(PM_HEALER)){
+		u.uevent.uhand_of_elbereth = 34;
+		in_hand = FALSE;
+		already_exists = exist_artifact(ROUNDSHIELD, artiname(ART_AEGIS));
+		verbalize("I dub thee...  The Arm of Athena!");
+		livelog_write_string("became the Arm of Athena");
 	} else if(Pantheon_if(PM_MONK) || Role_if(PM_MONK)){
 		u.uevent.uhand_of_elbereth = 4;
 		in_hand = FALSE;
@@ -906,6 +912,12 @@ gcrownu()
 		already_exists = exist_artifact(AMBER, artiname(ART_GLITTERSTONE));
 		verbalize("I dub thee...  Thane of Garl Glittergold!");
 		livelog_write_string("became the Thane of Garl Glittergold");
+	} else if(Pantheon_if(PM_HEALER) || Role_if(PM_HEALER)){
+		u.uevent.uhand_of_elbereth = 35;
+		in_hand = FALSE;
+		already_exists = exist_artifact(FLYING_BOOTS, artiname(ART_HERMES_S_SANDALS));
+		verbalize("I dub thee... Messenger of Hermes!");
+		livelog_write_string("became the Messenger of Hermes");
 	} else if(Pantheon_if(PM_MONK) || Role_if(PM_MONK)){
 		u.uevent.uhand_of_elbereth = 5;
 		in_hand = FALSE;
@@ -991,6 +1003,12 @@ gcrownu()
 		already_exists = exist_artifact(GAUNTLETS_OF_POWER, artiname(ART_GREAT_CLAWS_OF_URDLEN));
 		verbalize("Thou art chosen to rend the Earth in My Name!");
 		livelog_write_string("chosen by Urdlen");
+	} else if(Pantheon_if(PM_HEALER) || Role_if(PM_HEALER)){
+		u.uevent.uhand_of_elbereth = 36;
+		in_hand = FALSE;
+		already_exists = exist_artifact(TRIDENT, artiname(ART_POSEIDON_S_TRIDENT));
+		verbalize("I dub thee... Glory of Poseidon!");
+		livelog_write_string("became the Glory of Poseidon");
 	} else if(Pantheon_if(PM_MONK) || Role_if(PM_MONK)){
 		u.uevent.uhand_of_elbereth = 6;
 		in_hand = FALSE;
@@ -1060,7 +1078,10 @@ gcrownu()
 				gm_weapon_skill(P_BARE_HANDED_COMBAT);
 				u.umartial = TRUE;
 			} else if(u.ualign.type == A_LAWFUL){
-				if(Role_if(PM_NOBLEMAN)) expert_weapon_skill(P_CROSSBOW);
+				if(Role_if(PM_NOBLEMAN)){
+					expert_weapon_skill(P_CROSSBOW);
+					expert_weapon_skill(P_SCIMITAR);
+				}
 				else expert_weapon_skill(P_HARVEST);
 			}
 		} else { /*male*/
@@ -1270,6 +1291,36 @@ gcrownu()
 		}
 		expert_weapon_skill(P_LONG_SWORD);
 		expert_weapon_skill(P_BEAST_MASTERY);
+	} else if(Pantheon_if(PM_HEALER) || Role_if(PM_HEALER)){
+		if (class_gift != STRANGE_OBJECT) {
+			;		/* already got bonus above for some reason */
+		} else if (!already_exists) {
+			if(u.ualign.type == A_CHAOTIC){
+				obj = mksobj(TRIDENT, FALSE, FALSE);
+				obj = oname(obj, artiname(ART_POSEIDON_S_TRIDENT));
+				discover_artifact(ART_POSEIDON_S_TRIDENT);
+				expert_weapon_skill(P_TRIDENT);
+				HSwimming |= INTRINSIC;
+				obj->spe = 3;
+				at_your_feet("A trident");
+			} else if(u.ualign.type == A_NEUTRAL) {
+				obj = mksobj(FLYING_BOOTS, FALSE, FALSE);
+				obj = oname(obj, artiname(ART_HERMES_S_SANDALS));
+				discover_artifact(ART_HERMES_S_SANDALS);
+				expert_weapon_skill(P_LONG_SWORD);
+				obj->spe = 1;
+				at_your_feet("A pair of golden shoes");
+			} else {
+				obj = mksobj(ROUNDSHIELD, FALSE, FALSE);
+				obj = oname(obj, artiname(ART_AEGIS));
+				discover_artifact(ART_AEGIS);
+				expert_weapon_skill(P_SPEAR);
+				obj->spe = 1;
+				at_your_feet("A shield");
+			}
+			dropy(obj);
+			u.ugifts++;
+		}
 	} else if (Pantheon_if(PM_MONK) || Role_if(PM_MONK)) {
 		if (class_gift != STRANGE_OBJECT) {
 			;		/* already got bonus above for some reason */

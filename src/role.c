@@ -24,7 +24,7 @@
  *
  * God names use a leading underscore to flag goddesses.
  */
-const struct Role roles[] = {
+struct Role roles[] = {
 {	{"Archeologist", 0}, {
 	{"Digger",      0},
 	{"Field Worker",0},
@@ -278,7 +278,7 @@ const struct Role roles[] = {
 	PM_OLD_GYPSY_WOMAN, PM_SERVANT, PM_REBEL_RINGLEADER,
 	PM_SOLDIER, PM_PEASANT, S_HUMANOID, S_HUMAN,
 	ART_MANTLE_OF_HEAVEN,
-	MA_DWARF|MA_ELF|MA_HUMAN|MA_VAMPIRE, ROLE_MALE|ROLE_FEMALE |
+	MA_DWARF|MA_ELF|MA_HUMAN|MA_VAMPIRE|MA_DRAGON, ROLE_MALE|ROLE_FEMALE |
 	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{   10,10,  7, 10,  7,  7 },
@@ -312,7 +312,7 @@ const struct Role roles[] = {
 	/* Init   Lower  Higher */
 	{ 12, 0,  0, 4,  1, 0 },	/* Hit points */
 	{  4, 3,  0, 2,  0, 2 },10,	/* Energy */
-	0, 3,-2, 2, 10, A_WIS, SPE_REMOVE_CURSE,    -7
+	0, 3,-2, 1, 10, A_WIS, SPE_REMOVE_CURSE,    -7
 },
 {	{"Pirate", 0}, {
 	{"Landlubber",    	0},
@@ -674,9 +674,9 @@ const char *GnomeLgod = "Kurtulmak",
 		   *GnomeNgod = "Garl Glittergold",
 		   *GnomeCgod = "Urdlen"; /* Gnomish */
 
-const char *HDFemLgod = "Gwyn, Lord of Sunlight",
-		   *HDFemNgod = "_Gwynevere, Princess of Sunlight",
-		   *HDFemCgod = "_Velka, Goddess of Sin"; /* Dark Souls */
+const char *Gwyngod = "Gwyn, Lord of Sunlight",
+		   *Gwyneveregoddess = "_Gwynevere, Princess of Sunlight",
+		   *Gwyndolingod = "Dark Sun Gwyndolin"; /* Dark Souls */
 
 const char *OrcLgod = "Ilneval",
 		   *OrcNgod = "_Luthic",
@@ -1033,6 +1033,10 @@ const int NHolashner[] = {PM_ROCK_MOLE,PM_MIND_FLAYER,PM_PURPLE_WORM,NON_PM};
 const int NGnome[] = {PM_ARCADIAN_AVENGER,PM_MOVANIC_DEVA,PM_MONADIC_DEVA,PM_ASTRAL_DEVA,PM_GRAHA_DEVA,PM_SURYA_DEVA,PM_MAHADEVA,NON_PM};
 const int CGnome[] = {PM_ROCK_MOLE,PM_LONG_WORM,PM_EARTH_ELEMENTAL,PM_PURPLE_WORM,NON_PM};
 
+const int GwynServants[] = {PM_UNDEAD_KNIGHT,PM_WARRIOR_OF_SUNLIGHT};
+const int GwynevereServants[] = {PM_UNDEAD_KNIGHT,PM_WARRIOR_OF_SUNLIGHT};
+const int GwyndolinServants[] = {PM_SNAKE, PM_PYTHON, PM_GARGOYLE,PM_WINGED_GARGOYLE};
+
 const int MChaos[] = {PM_GOBLIN,PM_WATER_ELEMENTAL,PM_FIRE_ELEMENTAL,PM_EARTH_ELEMENTAL,PM_AIR_ELEMENTAL,PM_MIND_FLAYER,PM_VAMPIRE,PM_PURPLE_WORM,NON_PM};
 const int MChaosDeep[] = {PM_LICH,PM_MARILITH,PM_KRAKEN,PM_GREEN_DRAGON,NON_PM};
 const int Onone[] = {NON_PM};
@@ -1192,6 +1196,10 @@ god_minions(gptr)
 	if(gptr == GnomeNgod) return NGnome;
 	if(gptr == GnomeCgod) return CGnome;
 	
+	if(gptr == Gwyngod) return GwynServants;
+	if(gptr == Gwyneveregoddess) return GwynevereServants;
+	if(gptr == Gwyndolingod) return GwyndolinServants;
+	
 	if(gptr == Chaos) return MChaos;
 	if(gptr == DeepChaos) return MChaosDeep;
 	if(gptr == Other) return Onone;
@@ -1226,7 +1234,7 @@ struct monst *
 god_priest(gptr, sx, sy, sanctum)
 	int sx, sy;
 	const char *gptr;
-	boolean sanctum;   /* is it the seat of the high priest? */
+	int sanctum;   /* is it the seat of the high priest? */
 {
 	struct monst *priest;
 	
@@ -1255,9 +1263,18 @@ god_priest(gptr, sx, sy, sanctum)
 			return priest;
 		}
 		
-		if(gptr == ElfRangerLgod) 
-		if(gptr == ElfRangerNgod) 
-		if(gptr == ElfRangerCgod) 
+		if(gptr == ElfRangerLgod){
+			priest->female = FALSE;
+			return priest;
+		}
+		if(gptr == ElfRangerNgod){
+			priest->female = TRUE;
+			return priest;
+		}
+		if(gptr == ElfRangerCgod){
+			priest->female = FALSE;
+			return priest;
+		} 
 		
 		if(gptr == ElfPriestessLgod){
 			priest->female = TRUE;
@@ -1288,29 +1305,42 @@ god_priest(gptr, sx, sy, sanctum)
 		
 		if(gptr == DrowMaleLgodKnown || gptr == DrowMaleLgodUknwn){
 			priest->female = FALSE;
-			if(!sanctum) newcham(priest,&mons[PM_DROW_ALIENIST],FALSE,FALSE);
+			if(!sanctum){
+				newcham(priest,&mons[PM_DROW_ALIENIST],FALSE,FALSE);
+				priest->mfaction = XAXOX;
+			}
 			return priest;
 		}
 		if(gptr == DrowMaleNgod){
 			priest->female = FALSE;
-			if(!sanctum) newcham(priest,&mons[PM_HEDROW_BLADEMASTER],FALSE,FALSE);
+			if(!sanctum){
+				newcham(priest,&mons[PM_HEDROW_BLADEMASTER],FALSE,FALSE);
+				priest->mfaction = LOLTH_SYMBOL;
+			}
 			return priest;
 		}
 		if(gptr == DrowMaleCgod){
 			priest->female = FALSE;
-			if(!sanctum) newcham(priest,&mons[PM_DROW_MATRON],FALSE,FALSE);
+			if(!sanctum){
+				newcham(priest,&mons[PM_DROW_MATRON],FALSE,FALSE);
+				priest->mfaction = LOLTH_SYMBOL;
+			}
 			return priest;
 		}
 		
 		if(gptr == DrowNobMaleNgod){
 			priest->female = FALSE;
-			if(!sanctum) newcham(priest,&mons[PM_HEDROW_WIZARD],FALSE,FALSE);
+			if(!sanctum){
+				newcham(priest,&mons[PM_HEDROW_WIZARD],FALSE,FALSE);
+				priest->mfaction = LOLTH_SYMBOL;
+			}
 			return priest;
 		}
 		if(gptr == DrowNobMaleCgod){
 			if(!sanctum){
 				if(priest->female) newcham(priest,&mons[PM_PRIESTESS_OF_GHAUNADAUR],FALSE,FALSE);
 				else newcham(priest,&mons[PM_PRIEST_OF_GHAUNADAUR],FALSE,FALSE);
+				priest->mfaction = GHAUNADAUR_SYMBOL;
 			}
 			return priest;
 		}
@@ -1373,7 +1403,7 @@ str2role(str)
 	return ROLE_NONE;
 }
 
-const struct Role *
+struct Role *
 pm2role(tpm)
 	int tpm;
 {
@@ -2592,27 +2622,58 @@ role_init()
 		// urole.enemy2num = PM_MASTODON;
 		// urole.enemy1sym = S_QUADRUPED;
 		// urole.enemy2sym = S_LAW_ANGEL;
-	} else if (Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend) {
-		flags.racial_pantheon = PM_GNOME;
-		urole.filecode = "Hdf";
-		urole.petnum = PM_UNDEAD_KNIGHT;
-		
-		urole.homebase = "the forlorn settlement";
-		urole.intermed = "the Cathedral of Velka";
-		urole.questarti = ART_FRIEDE_S_SCYTHE;
-		
-		urole.ldrnum = 0;//PM_CROW_WINGED_HALF_DRAGON;
-		urole.guardnum = PM_CORVIAN;
-		urole.neminum = PM_BASTARD_OF_THE_BOREAL_VALLEY;
-		
-		urole.lgod = HDFemLgod;
-		urole.ngod = HDFemNgod;
-		urole.cgod = HDFemCgod;
-		
-		urole.enemy1num = PM_ZOMBIE;
-		urole.enemy2num = PM_CORVIAN_KNIGHT;
-		urole.enemy1sym = S_ZOMBIE;
-		urole.enemy2sym = S_GOLEM;
+	} else if (Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN)) {
+		if(flags.initgend){
+			flags.racial_pantheon = PM_HALF_DRAGON;
+			urole.filecode = "Hdf";
+			urole.petnum = PM_UNDEAD_KNIGHT;
+			
+			urole.homebase = "the forlorn settlement";
+			urole.intermed = "the Cathedral of Velka";
+			urole.questarti = ART_FRIEDE_S_SCYTHE;
+			
+			urole.ldrnum = NON_PM;//PM_CROW_WINGED_HALF_DRAGON;
+			urole.guardnum = PM_CORVIAN;
+			urole.neminum = PM_BASTARD_OF_THE_BOREAL_VALLEY;
+			
+			urole.lgod = Gwyngod;
+			urole.ngod = Gwyneveregoddess;
+			urole.cgod = Gwyndolingod;
+			
+			urole.enemy1num = PM_ZOMBIE;
+			urole.enemy2num = PM_CORVIAN_KNIGHT;
+			urole.enemy1sym = S_ZOMBIE;
+			urole.enemy2sym = S_GOLEM;
+			
+			urace.attrmax[A_STR] = STR19(20);
+			urace.attrmax[A_DEX] = 20;
+			urace.attrmax[A_CON] = 18;
+		} else {
+			flags.racial_pantheon = PM_HALF_DRAGON;
+			urole.filecode = "Hdm";
+			urole.petnum = PM_UNDEAD_KNIGHT;
+			
+			urole.homebase = "the lost towertop";
+			urole.intermed = "the Archdragon Caves";
+			urole.questarti = ART_DRAGON_S_HEART_STONE;
+			
+			urole.ldrnum = PM_ADVENTURESS_ZARIA;
+			urole.guardnum = NON_PM;
+			urole.neminum = PM_VECHERNYAYA_THE_SUN_S_GRAVE_KEEPER;
+			
+			urole.lgod = Gwyngod;
+			urole.ngod = Gwyneveregoddess;
+			urole.cgod = Gwyndolingod;
+			
+			urole.enemy1num = PM_MAN_SERPENT_SOLDIER;
+			urole.enemy2num = PM_MAN_SERPENT_MAGE;
+			urole.enemy1sym = S_SNAKE;
+			urole.enemy2sym = S_LIZARD;
+			
+			urace.attrmax[A_STR] = STR19(20);
+			urace.attrmax[A_DEX] = 18;
+			urace.attrmax[A_CON] = 20;
+		}
 	} else if (!urole.lgod) {
 	    urole.lgod = roles[flags.pantheon].lgod;
 	    urole.ngod = roles[flags.pantheon].ngod;

@@ -153,6 +153,15 @@ doread()
 				pline("\"Take me up\"");
 			}
 			return(1);
+		} else if(scroll->oartifact == ART_ITLACHIAYAQUE){
+			if (Blind) {
+				You_cant("see the mirror!");
+				return 0;
+			} else {
+				pline("You see the nearby terrain reflected in the smoky depths of the mirror.");
+				do_vicinity_map(u.ux,u.uy);
+			}
+			return(1);
 		} else if(scroll->oartifact == ART_GLAMDRING){
 			if (Blind) {
 				You_cant("see the blade!");
@@ -186,6 +195,29 @@ doread()
 						spl_book[i].sp_know = 20000;
 						You("learn to cast Cone of Cold!");
 						break;
+					}
+				}
+				if (further_study(SPE_CONE_OF_COLD))
+				{
+					for (i = 0; i < MAXSPELL; i++)  {
+						if (spellid(i) == SPE_BLIZZARD)  {
+							if (spellknow(i) <= 1000) {
+								Your("knowledge of Blizzard is keener.");
+								spl_book[i].sp_know = 20000;
+								exercise(A_WIS, TRUE);       /* extra study */
+							}
+							else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+								You("know Blizzard quite well already.");
+							}
+							break;
+						}
+						else if (spellid(i) == NO_SPELL)  {
+							spl_book[i].sp_id = SPE_BLIZZARD;
+							spl_book[i].sp_lev = objects[SPE_BLIZZARD].oc_level;
+							spl_book[i].sp_know = 20000;
+							You("learn to cast Frost Storm!");
+							break;
+						}
 					}
 				}
 				if (i == MAXSPELL) impossible("Too many spells memorized!");
@@ -224,24 +256,24 @@ doread()
         You("study the pages of %s, but you already can recognize that.", xname(scroll));
       }
       return 1;
-	} else if(scroll->oclass == WEAPON_CLASS && (scroll)->obj_material == WOOD && scroll->otyp != MOON_AXE && scroll->ovar1 != 0){
-		pline("A %s is carved into the wood.",wardDecode[decode_wardID(scroll->ovar1)]);
-		if(! (u.wardsknown & scroll->ovar1) ){
+	} else if(scroll->oclass == WEAPON_CLASS && (scroll)->obj_material == WOOD && scroll->oward != 0){
+		pline("A %s is carved into the wood.",wardDecode[decode_wardID(scroll->oward)]);
+		if(! (u.wardsknown & scroll->oward) ){
 			You("have learned a new warding stave!");
-			u.wardsknown |= scroll->ovar1;
+			u.wardsknown |= scroll->oward;
 		}
 		return(1);
 	}
-	else if(scroll->oclass == RING_CLASS && (isEngrRing((scroll)->otyp)||isSignetRing((scroll)->otyp)) && scroll->ovar1){
+	else if(scroll->oclass == RING_CLASS && (isEngrRing((scroll)->otyp)||isSignetRing((scroll)->otyp)) && scroll->oward){
 		if(!(scroll->ohaluengr)){
-			pline("A %s is engraved on the ring.",wardDecode[scroll->ovar1]);
-			if( !(u.wardsknown & get_wardID(scroll->ovar1)) ){
+			pline("A %s is engraved on the ring.",wardDecode[scroll->oward]);
+			if( !(u.wardsknown & get_wardID(scroll->oward)) ){
 				You("have learned a new warding sign!");
-				u.wardsknown |= get_wardID(scroll->ovar1);
+				u.wardsknown |= get_wardID(scroll->oward);
 			}
 		}
 		else{
-			pline("There is %s engraved on the ring.",fetchHaluWard((int)scroll->ovar1));
+			pline("There is %s engraved on the ring.",fetchHaluWard((int)scroll->oward));
 		}
 		return(1);
 	}
@@ -257,13 +289,13 @@ doread()
 #ifdef TOURIST
 	} else if(scroll->oclass == ARMOR_CLASS
 		&& scroll->ohaluengr
-		&& scroll->ovar1
+		&& scroll->oward
 		&& (scroll->otyp == DROVEN_PLATE_MAIL
 			|| scroll->otyp == DROVEN_CHAIN_MAIL
 			|| scroll->otyp == CONSORT_S_SUIT
 		)
 	){
-		pline("There is %s engraved on the armor.",fetchHaluWard((int)scroll->ovar1));
+		pline("There is %s engraved on the armor.",fetchHaluWard((int)scroll->oward));
 		return(1);
 	}else if (scroll->otyp == T_SHIRT) {
 	    static const char *shirt_msgs[] = { /* Scott Bigham */
@@ -1089,7 +1121,7 @@ struct obj *sobj;
 			if(Spellboost) role_skill++;
 			if(role_skill < 1) role_skill = 1;
 			
-			for(role_skill; role_skill; role_skill--)
+			for(; role_skill; role_skill--)
 				if(!resist(mtmp, sobj->oclass, 0, NOTELL)){
 					(void) tamedog(mtmp, sobj);
 					return;
@@ -1197,8 +1229,6 @@ struct obj	*sobj;
 			otmp->otyp == CRYSTAL_SHIELD ||
 			otmp->otyp == CRYSTAL_GAUNTLETS ||
 			otmp->otyp == CRYSTAL_BOOTS ||
-			otmp->otyp == PLATE_MAIL || /*plate mails have finer manufacturing and can be more highly enchanted*/
-			otmp->otyp == BRONZE_PLATE_MAIL ||
 			otmp->otyp == CLOAK_OF_PROTECTION;//Cloaks of protection are specialized defensive items.
 		if (sobj->cursed)
 		    same_color =
@@ -1502,6 +1532,7 @@ struct obj	*sobj;
 				       sobj->blessed ? rnd(3-uwep->spe/3) : 1);
 		break;
 	case SCR_TAMING:
+	case SPE_PACIFY_MONSTER:
 	case SPE_CHARM_MONSTER:
 		if (u.uswallow) {
 		    maybe_tame(u.ustuck, sobj);
@@ -1728,7 +1759,7 @@ struct obj	*sobj;
 		    burn_away_slime();
 		}
 		explode(u.ux, u.uy, 11, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_FIERY);
+							SCROLL_CLASS, EXPL_FIERY, 1);
 		return(1);
 	}
 	case SCR_EARTH:
@@ -1887,7 +1918,7 @@ struct obj	*sobj;
 		pline("The %s shifts beneath you,%sengraving a %s ward.", 
 			surface(u.ux,u.uy),
 			engrHere ? " wiping away the existing engraving and " : " ",
-			wardDecode[sobj->ovar1]
+			wardDecode[sobj->oward]
 		);
 		known = TRUE;
 		del_engr_ward_at(u.ux,u.uy);
@@ -1902,7 +1933,7 @@ struct obj	*sobj;
 	break;
 		}
 		else{
-			engrHere->ward_id = sobj->ovar1;
+			engrHere->ward_id = sobj->oward;
 			if(sobj->cursed){
 				if(is_pool(u.ux, u.uy, TRUE)){
 					pline("The lines of blood quickly disperse into the water.");
@@ -1911,11 +1942,11 @@ struct obj	*sobj;
 				engrHere->ward_type = ENGR_BLOOD;
 			} else engrHere->ward_type = ENGRAVE;
 			engrHere->complete_wards = sobj->blessed ? 
-										wardMax[sobj->ovar1] : 
+										wardMax[sobj->oward] : 
 										get_num_wards_added(engrHere->ward_id,0);
-			if( !(u.wardsknown & get_wardID(sobj->ovar1)) ){
+			if( !(u.wardsknown & get_wardID(sobj->oward)) ){
 				You("have learned a new warding sign!");
-				u.wardsknown |= get_wardID(sobj->ovar1);
+				u.wardsknown |= get_wardID(sobj->oward);
 			}
 		}
 	break;}
@@ -2001,7 +2032,9 @@ struct obj	*sobj;
 						8+4*bcsign(sobj));
 		break;
 	}
+	case SPE_ANTIMAGIC_SHIELD:
 	case SCR_ANTIMAGIC:{
+		int amt = (sobj->otyp == SPE_ANTIMAGIC_SHIELD) ? 50 : 400;
 		if(confused && sobj->cursed){
 			//Confused
 			pline("Shimmering sparks shoot into your body!");
@@ -2027,8 +2060,8 @@ struct obj	*sobj;
 		}
 		if(!Nullmagic) pline("A shimmering film surrounds you!");
 		else pline("The shimmering film grows brighter!");
-		if( (HNullmagic & TIMEOUT) + 400L < TIMEOUT) {
-			long timer = (HNullmagic & TIMEOUT) + 400L;
+		if ((HNullmagic & TIMEOUT) + amt < TIMEOUT) {
+			long timer = (HNullmagic & TIMEOUT) + amt;
 			HNullmagic &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
 			HNullmagic |= timer; //set new timer
 		}
@@ -2049,7 +2082,7 @@ struct obj	*sobj;
 				sy = u.uy;
 			}
 			explode(sx, sy, 11, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_FIERY);
+							SCROLL_CLASS, EXPL_FIERY, 1);
 			sx = u.ux+rnd(3)-2; 
 			sy = u.uy+rnd(3)-2;
 			if (!isok(sx,sy) ||
@@ -2059,7 +2092,7 @@ struct obj	*sobj;
 				sy = u.uy;
 			}
 			explode(sx, sy, 12, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_FROSTY);
+							SCROLL_CLASS, EXPL_FROSTY, 1);
 			sx = u.ux+rnd(3)-2; 
 			sy = u.uy+rnd(3)-2;
 			if (!isok(sx,sy) ||
@@ -2069,7 +2102,7 @@ struct obj	*sobj;
 				sy = u.uy;
 			}
 			explode(sx, sy, 15, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_MAGICAL);
+							SCROLL_CLASS, EXPL_MAGICAL, 1);
 			sx = u.ux+rnd(3)-2; 
 			sy = u.uy+rnd(3)-2;
 			if (!isok(sx,sy) ||
@@ -2079,7 +2112,7 @@ struct obj	*sobj;
 				sy = u.uy;
 			}
 			explode(sx, sy, 17, (2*(rn1(damlevel, damlevel) - (damlevel-1) * cval) + 1)/3,
-							SCROLL_CLASS, EXPL_NOXIOUS);
+							SCROLL_CLASS, EXPL_NOXIOUS, 1);
 	break;
 		}
 		long rturns = sobj->blessed ? 5000L : sobj->cursed ? 5L : 250L;

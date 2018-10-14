@@ -17,6 +17,7 @@ const static int BLUE_RES[] = {FAST};
 const static int BLACK_RES[] = {DRAIN_RES};
 const static int WHITE_RES[] = {MAGICAL_BREATHING,SWIMMING};
 const static int GRAY_RES[] = {HALF_SPDAM};
+const static int SHIM_RES[] = {SEE_INVIS};
 
 const static int CHROMATIC_RES[] = {FIRE_RES, COLD_RES, DISINT_RES, DRAIN_RES, SHOCK_RES, POISON_RES, SICK_RES, ACID_RES, STONE_RES};
 const static int PLATINUM_RES[] = {FIRE_RES, COLD_RES, DISINT_RES, SHOCK_RES, SLEEP_RES, FREE_ACTION};
@@ -24,6 +25,15 @@ const static int KURTULMAK_RES[] = {FIRE_RES, FREE_ACTION};
 const static int EREBOR_RES[] = {FIRE_RES, COLD_RES};
 const static int DURIN_RES[] = {FIRE_RES, ACID_RES, POISON_RES};
 const static int REV_PROPS[] = {COLD_RES, REGENERATION, FIXED_ABIL, POISON_RES, SEE_INVIS};
+const static int HERMES_PROPS[] = {FAST};
+
+const static int FLY_PROPS[] = {DETECT_MONSTERS};
+
+const static int FIRE_PROP[] = {FIRE_RES};
+const static int COLD_PROP[] = {COLD_RES};
+const static int ELEC_PROP[] = {SHOCK_RES};
+const static int ACID_PROP[] = {ACID_RES};
+const static int MAGC_PROP[] = {ANTIMAGIC};
 
 const struct worn {
 	long w_mask;
@@ -122,6 +132,24 @@ long mask;
 				for(p = 0; p < SIZE(WHITE_RES); p++) u.uprops[WHITE_RES[p]].extrinsic = u.uprops[WHITE_RES[p]].extrinsic & ~wp->w_mask;
 			} else if(oobj->otyp == GRAY_DRAGON_SCALES || oobj->otyp == GRAY_DRAGON_SCALE_MAIL || oobj->otyp == GRAY_DRAGON_SCALE_SHIELD){
 				for(p = 0; p < SIZE(GRAY_RES); p++) u.uprops[GRAY_RES[p]].extrinsic = u.uprops[GRAY_RES[p]].extrinsic & ~wp->w_mask;
+			} else if(oobj->otyp == SHIMMERING_DRAGON_SCALES || oobj->otyp == SHIMMERING_DRAGON_SCALE_MAIL || oobj->otyp == SHIMMERING_DRAGON_SCALE_SHIELD){
+				for(p = 0; p < SIZE(SHIM_RES); p++) u.uprops[SHIM_RES[p]].extrinsic = u.uprops[SHIM_RES[p]].extrinsic & ~wp->w_mask;
+			}
+			
+			if(oobj->oproperties&OPROP_FIRE){
+				for(p = 0; p < SIZE(FIRE_PROP); p++) u.uprops[FIRE_PROP[p]].extrinsic = u.uprops[FIRE_PROP[p]].extrinsic & ~wp->w_mask;
+			}
+			if(oobj->oproperties&OPROP_COLD){
+				for(p = 0; p < SIZE(COLD_PROP); p++) u.uprops[COLD_PROP[p]].extrinsic = u.uprops[COLD_PROP[p]].extrinsic & ~wp->w_mask;
+			}
+			if(oobj->oproperties&OPROP_ELEC){
+				for(p = 0; p < SIZE(ELEC_PROP); p++) u.uprops[ELEC_PROP[p]].extrinsic = u.uprops[ELEC_PROP[p]].extrinsic & ~wp->w_mask;
+			}
+			if(oobj->oproperties&OPROP_ACID){
+				for(p = 0; p < SIZE(ACID_PROP); p++) u.uprops[ACID_PROP[p]].extrinsic = u.uprops[ACID_PROP[p]].extrinsic & ~wp->w_mask;
+			}
+			if(oobj->oproperties&OPROP_MAGC){
+				for(p = 0; p < SIZE(MAGC_PROP); p++) u.uprops[MAGC_PROP[p]].extrinsic = u.uprops[MAGC_PROP[p]].extrinsic & ~wp->w_mask;
 			}
 			
 			if(oobj->oartifact == ART_CHROMATIC_DRAGON_SCALES){
@@ -136,6 +164,10 @@ long mask;
 				for(p = 0; p < SIZE(EREBOR_RES); p++) u.uprops[EREBOR_RES[p]].extrinsic = u.uprops[EREBOR_RES[p]].extrinsic & ~wp->w_mask;
 			} else if(oobj->oartifact == ART_CLAWS_OF_THE_REVENANCER){
 				for(p = 0; p < SIZE(REV_PROPS); p++) u.uprops[REV_PROPS[p]].extrinsic = u.uprops[REV_PROPS[p]].extrinsic & ~wp->w_mask;
+			} else if(oobj->oartifact == ART_HERMES_S_SANDALS){
+				for(p = 0; p < SIZE(HERMES_PROPS); p++) u.uprops[HERMES_PROPS[p]].extrinsic = u.uprops[HERMES_PROPS[p]].extrinsic & ~wp->w_mask;
+			} else if(oobj->oartifact == ART_ALL_SEEING_EYE_OF_THE_FLY){
+				for(p = 0; p < SIZE(FLY_PROPS); p++) u.uprops[FLY_PROPS[p]].extrinsic = u.uprops[FLY_PROPS[p]].extrinsic & ~wp->w_mask;
 			}
 			
 			if ((p = w_blocks(oobj,mask)) != 0)
@@ -173,6 +205,24 @@ long mask;
 					for(p = 0; p < SIZE(WHITE_RES); p++) u.uprops[WHITE_RES[p]].extrinsic = u.uprops[WHITE_RES[p]].extrinsic | wp->w_mask;
 				} else if(obj->otyp == GRAY_DRAGON_SCALES || obj->otyp == GRAY_DRAGON_SCALE_MAIL || obj->otyp == GRAY_DRAGON_SCALE_SHIELD){
 					for(p = 0; p < SIZE(GRAY_RES); p++) u.uprops[GRAY_RES[p]].extrinsic = u.uprops[GRAY_RES[p]].extrinsic | wp->w_mask;
+				} else if(obj->otyp == SHIMMERING_DRAGON_SCALES || obj->otyp == SHIMMERING_DRAGON_SCALE_MAIL || obj->otyp == SHIMMERING_DRAGON_SCALE_SHIELD){
+					for(p = 0; p < SIZE(SHIM_RES); p++) u.uprops[SHIM_RES[p]].extrinsic = u.uprops[SHIM_RES[p]].extrinsic | wp->w_mask;
+				}
+				
+				if(obj->oproperties&OPROP_FIRE){
+					for(p = 0; p < SIZE(FIRE_PROP); p++) u.uprops[FIRE_PROP[p]].extrinsic = u.uprops[FIRE_PROP[p]].extrinsic | wp->w_mask;
+				}
+				if(obj->oproperties&OPROP_COLD){
+					for(p = 0; p < SIZE(COLD_PROP); p++) u.uprops[COLD_PROP[p]].extrinsic = u.uprops[COLD_PROP[p]].extrinsic | wp->w_mask;
+				}
+				if(obj->oproperties&OPROP_ELEC){
+					for(p = 0; p < SIZE(ELEC_PROP); p++) u.uprops[ELEC_PROP[p]].extrinsic = u.uprops[ELEC_PROP[p]].extrinsic | wp->w_mask;
+				}
+				if(obj->oproperties&OPROP_ACID){
+					for(p = 0; p < SIZE(ACID_PROP); p++) u.uprops[ACID_PROP[p]].extrinsic = u.uprops[ACID_PROP[p]].extrinsic | wp->w_mask;
+				}
+				if(obj->oproperties&OPROP_MAGC){
+					for(p = 0; p < SIZE(MAGC_PROP); p++) u.uprops[MAGC_PROP[p]].extrinsic = u.uprops[MAGC_PROP[p]].extrinsic | wp->w_mask;
 				}
 				
 				if(obj->oartifact == ART_CHROMATIC_DRAGON_SCALES){
@@ -187,6 +237,10 @@ long mask;
 					for(p = 0; p < SIZE(EREBOR_RES); p++) u.uprops[EREBOR_RES[p]].extrinsic = u.uprops[EREBOR_RES[p]].extrinsic | wp->w_mask;
 				} else if(obj->oartifact == ART_CLAWS_OF_THE_REVENANCER){
 					for(p = 0; p < SIZE(REV_PROPS); p++) u.uprops[REV_PROPS[p]].extrinsic = u.uprops[REV_PROPS[p]].extrinsic | wp->w_mask;
+				} else if(obj->oartifact == ART_HERMES_S_SANDALS){
+					for(p = 0; p < SIZE(HERMES_PROPS); p++) u.uprops[HERMES_PROPS[p]].extrinsic = u.uprops[HERMES_PROPS[p]].extrinsic | wp->w_mask;
+				} else if(obj->oartifact == ART_ALL_SEEING_EYE_OF_THE_FLY){
+					for(p = 0; p < SIZE(FLY_PROPS); p++) u.uprops[FLY_PROPS[p]].extrinsic = u.uprops[FLY_PROPS[p]].extrinsic | wp->w_mask;
 				}
 				
 			    if ((p = w_blocks(obj, mask)) != 0)
@@ -239,6 +293,24 @@ register struct obj *obj;
 			for(p = 0; p < SIZE(WHITE_RES); p++) u.uprops[WHITE_RES[p]].extrinsic = u.uprops[WHITE_RES[p]].extrinsic & ~wp->w_mask;
 		} else if(obj->otyp == GRAY_DRAGON_SCALES || obj->otyp == GRAY_DRAGON_SCALE_MAIL || obj->otyp == GRAY_DRAGON_SCALE_SHIELD){
 			for(p = 0; p < SIZE(GRAY_RES); p++) u.uprops[GRAY_RES[p]].extrinsic = u.uprops[GRAY_RES[p]].extrinsic & ~wp->w_mask;
+		} else if(obj->otyp == SHIMMERING_DRAGON_SCALES || obj->otyp == SHIMMERING_DRAGON_SCALE_MAIL || obj->otyp == SHIMMERING_DRAGON_SCALE_SHIELD){
+			for(p = 0; p < SIZE(SHIM_RES); p++) u.uprops[SHIM_RES[p]].extrinsic = u.uprops[SHIM_RES[p]].extrinsic & ~wp->w_mask;
+		}
+		
+		if(obj->oproperties&OPROP_FIRE){
+			for(p = 0; p < SIZE(FIRE_PROP); p++) u.uprops[FIRE_PROP[p]].extrinsic = u.uprops[FIRE_PROP[p]].extrinsic & ~wp->w_mask;
+		}
+		if(obj->oproperties&OPROP_COLD){
+			for(p = 0; p < SIZE(COLD_PROP); p++) u.uprops[COLD_PROP[p]].extrinsic = u.uprops[COLD_PROP[p]].extrinsic & ~wp->w_mask;
+		}
+		if(obj->oproperties&OPROP_ELEC){
+			for(p = 0; p < SIZE(ELEC_PROP); p++) u.uprops[ELEC_PROP[p]].extrinsic = u.uprops[ELEC_PROP[p]].extrinsic & ~wp->w_mask;
+		}
+		if(obj->oproperties&OPROP_ACID){
+			for(p = 0; p < SIZE(ACID_PROP); p++) u.uprops[ACID_PROP[p]].extrinsic = u.uprops[ACID_PROP[p]].extrinsic & ~wp->w_mask;
+		}
+		if(obj->oproperties&OPROP_MAGC){
+			for(p = 0; p < SIZE(MAGC_PROP); p++) u.uprops[MAGC_PROP[p]].extrinsic = u.uprops[MAGC_PROP[p]].extrinsic & ~wp->w_mask;
 		}
 		
 		if(obj->oartifact == ART_CHROMATIC_DRAGON_SCALES){
@@ -253,6 +325,10 @@ register struct obj *obj;
 			for(p = 0; p < SIZE(EREBOR_RES); p++) u.uprops[EREBOR_RES[p]].extrinsic = u.uprops[EREBOR_RES[p]].extrinsic & ~wp->w_mask;
 		} else if(obj->oartifact == ART_CLAWS_OF_THE_REVENANCER){
 			for(p = 0; p < SIZE(REV_PROPS); p++) u.uprops[REV_PROPS[p]].extrinsic = u.uprops[REV_PROPS[p]].extrinsic & ~wp->w_mask;
+		} else if(obj->oartifact == ART_HERMES_S_SANDALS){
+			for(p = 0; p < SIZE(HERMES_PROPS); p++) u.uprops[HERMES_PROPS[p]].extrinsic = u.uprops[HERMES_PROPS[p]].extrinsic & ~wp->w_mask;
+		} else if(obj->oartifact == ART_ALL_SEEING_EYE_OF_THE_FLY){
+			for(p = 0; p < SIZE(FLY_PROPS); p++) u.uprops[FLY_PROPS[p]].extrinsic = u.uprops[FLY_PROPS[p]].extrinsic & ~wp->w_mask;
 		}
 		
 		if(obj->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER){
@@ -277,7 +353,7 @@ struct monst *mon;
 	if (!mon->invis_blkd) {
 	    mon->minvis = 1;
 	    if (opaque(mon->data) && !See_invisible(mon->mx, mon->my))
-		unblock_point(mon->mx, mon->my);
+			unblock_point(mon->mx, mon->my);
 	    newsym(mon->mx, mon->my);		/* make it disappear */
 	    if (mon->wormno) see_wsegs(mon);	/* and any tail too */
 	}
@@ -469,6 +545,24 @@ boolean on, silently;
 		for(which = 0; which < SIZE(WHITE_RES); which++) update_mon_intrinsic(mon, obj, WHITE_RES[which], on, silently);
 	} else if(obj->otyp == GRAY_DRAGON_SCALES || obj->otyp == GRAY_DRAGON_SCALE_MAIL || obj->otyp == GRAY_DRAGON_SCALE_SHIELD){
 		for(which = 0; which < SIZE(GRAY_RES); which++) update_mon_intrinsic(mon, obj, GRAY_RES[which], on, silently);
+	} else if(obj->otyp == SHIMMERING_DRAGON_SCALES || obj->otyp == SHIMMERING_DRAGON_SCALE_MAIL || obj->otyp == SHIMMERING_DRAGON_SCALE_SHIELD){
+		for(which = 0; which < SIZE(SHIM_RES); which++) update_mon_intrinsic(mon, obj, SHIM_RES[which], on, silently);
+	}
+	
+	if(obj->oproperties&OPROP_FIRE){
+		for(which = 0; which < SIZE(FIRE_PROP); which++) update_mon_intrinsic(mon, obj, FIRE_PROP[which], on, silently);
+	}
+	if(obj->oproperties&OPROP_COLD){
+		for(which = 0; which < SIZE(COLD_PROP); which++) update_mon_intrinsic(mon, obj, COLD_PROP[which], on, silently);
+	}
+	if(obj->oproperties&OPROP_ELEC){
+		for(which = 0; which < SIZE(ELEC_PROP); which++) update_mon_intrinsic(mon, obj, ELEC_PROP[which], on, silently);
+	}
+	if(obj->oproperties&OPROP_ACID){
+		for(which = 0; which < SIZE(ACID_PROP); which++) update_mon_intrinsic(mon, obj, ACID_PROP[which], on, silently);
+	}
+	if(obj->oproperties&OPROP_MAGC){
+		for(which = 0; which < SIZE(MAGC_PROP); which++) update_mon_intrinsic(mon, obj, MAGC_PROP[which], on, silently);
 	}
 	
 	if(obj->oartifact == ART_CHROMATIC_DRAGON_SCALES){
@@ -483,6 +577,10 @@ boolean on, silently;
 		for(which = 0; which < SIZE(EREBOR_RES); which++) update_mon_intrinsic(mon, obj, EREBOR_RES[which], on, silently);
 	} else if(obj->oartifact == ART_CLAWS_OF_THE_REVENANCER){
 		for(which = 0; which < SIZE(REV_PROPS); which++) update_mon_intrinsic(mon, obj, REV_PROPS[which], on, silently);
+	} else if(obj->oartifact == ART_HERMES_S_SANDALS){
+		for(which = 0; which < SIZE(HERMES_PROPS); which++) update_mon_intrinsic(mon, obj, HERMES_PROPS[which], on, silently);
+	} else if(obj->oartifact == ART_ALL_SEEING_EYE_OF_THE_FLY){
+		for(which = 0; which < SIZE(FLY_PROPS); which++) update_mon_intrinsic(mon, obj, FLY_PROPS[which], on, silently);
 	}
 
  maybe_blocks:
@@ -531,37 +629,14 @@ struct monst *mon;
 		if(mon->mvar2 & 0x4L) base = -125; //Fully Quantum Locked
 		if(mon->mvar2 & 0x2L) base = -20; //Partial Quantum Lock
 	}
-	else if(mon != &youmonst &&
-		(mon->data == &mons[PM_MARILITH] 
-		|| mon->data == &mons[PM_SHAKTARI]
-		|| mon->data == &mons[PM_CATHEZAR]
-	)){
-		int wcount = 0;
-		struct obj *otmp;
-		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-			if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-				|| (otmp->otyp == IRON_CHAIN && mon->data == &mons[PM_CATHEZAR])
-				) && !otmp->oartifact
-				&& otmp != MON_WEP(mon) && otmp != MON_SWEP(mon)
-				&& !otmp->owornmask
-				&& ++wcount >= 4
-			) break;
-		}
-		if(MON_WEP(mon))
-			wcount++;
-		if(MON_SWEP(mon))
-			wcount++;
-		if(rn2(6) < wcount){
-			base -= rnd(20);
-		}
-	}
-	
 	if(mon->mfaction == ZOMBIFIED) base += 2;
 	if(mon->mfaction == SKELIFIED) base -= 2;
 	if(mon->mfaction == CRYSTALFIED) base -= 6;
 	
-	if(mon->mtame) base -= rnd(def_beastmastery());
-	if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
+	if(mon->mtame){
+		base -= rnd(def_beastmastery());
+		if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
+	}
 	
 	return base;
 }
@@ -571,28 +646,16 @@ find_mac(mon)
 struct monst *mon;
 {
 	struct obj *obj;
-	int base = mon->data->ac, armac = 0;
+	int base, armac = 0;
 	long mwflags = mon->misc_worn_check;
 	
-	if(mon->data == &mons[PM_ASMODEUS] && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
-	else if(mon->data == &mons[PM_PALE_NIGHT] && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
-	else if(mon->data == &mons[PM_BAALPHEGOR] && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
-	else if(mon->data == &mons[PM_ZAPHKIEL] && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
-	else if(mon->data == &mons[PM_QUEEN_OF_STARS] && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
-	else if(mon->data == &mons[PM_ETERNAL_LIGHT] && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
-	else if(mon->data == &mons[PM_STRANGE_CORPSE] && base < -5) base = -5 + MONSTER_AC_VALUE(base+5);
-	else if(mon->data == &mons[PM_ANCIENT_OF_DEATH] && base < -4) base = -4 + MONSTER_AC_VALUE(base+4);
-	else if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH]){
-		base -= u.chokhmah;
-	}
-	else if(is_weeping(mon->data)){
-		if(mon->mvar2 & 0x4L) base = -125; //Fully Quantum Locked
-		if(mon->mvar2 & 0x2L) base = -20; //Partial Quantum Lock
-	}
-	else if(mon->data == &mons[PM_GIANT_TURTLE] && mon->mflee){
+	base = base_mac(mon);
+	
+	if(mon->data == &mons[PM_GIANT_TURTLE] && mon->mflee){
 		base -= 15;
 	}
-	else if(mon != &youmonst &&
+	//Block attack with weapon
+	if(mon != &youmonst &&
 		(mon->data == &mons[PM_MARILITH] 
 		|| mon->data == &mons[PM_SHAKTARI]
 		|| mon->data == &mons[PM_CATHEZAR]
@@ -617,36 +680,34 @@ struct monst *mon;
 		}
 	}
 	
-	if(mon->mfaction == ZOMBIFIED) base -= 2;
-	if(mon->mfaction == SKELIFIED) base -= 6;
-	if(mon->mfaction == CRYSTALFIED) base -= 16;
+	if(mon->mfaction == ZOMBIFIED) base -= 4;
+	if(mon->mfaction == CRYSTALFIED) base -= 10;
 	
 	if(mon->mtame){
-		base -= rnd(def_beastmastery());
 		if(u.specialSealsActive&SEAL_COSMOS) base -= spiritDsize();
-		if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
 	}
 	
+	//armor AC
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
-		if(uarm) armac += arm_bonus(uarm);
-		if(uarmf) armac += arm_bonus(uarmf);
-		if(uarmg) armac += arm_bonus(uarmg);
-		if(uarmu) armac += arm_bonus(uarmu);
-		if(uarms) armac += arm_bonus(uarms);
-		if(uarmh) armac += arm_bonus(uarmh);
-		if(uarmc) armac += arm_bonus(uarmc);
+		if(uarm) armac += arm_ac_bonus(uarm);
+		if(uarmf) armac += arm_ac_bonus(uarmf);
+		if(uarmg) armac += arm_ac_bonus(uarmg);
+		if(uarmu) armac += arm_ac_bonus(uarmu);
+		if(uarms) armac += arm_ac_bonus(uarms);
+		if(uarmh) armac += arm_ac_bonus(uarmh);
+		if(uarmc) armac += arm_ac_bonus(uarmc);
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
-			armac += arm_bonus(obj);
+			armac += arm_ac_bonus(obj);
 			if(is_shield(obj)) armac += max(0, obj->objsize - mon->data->msize);
 		}
 	}
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
 
 	base -= armac;
-	/* since arm_bonus is positive, subtracting it increases AC */
+	/* since arm_ac_bonus is positive, subtracting it increases AC */
 	return base;
 }
 
@@ -696,23 +757,23 @@ struct monst *mon;
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
-		if(uarm) armac += arm_bonus(uarm);
-		if(uarmf) armac += arm_bonus(uarmf);
-		if(uarmg) armac += arm_bonus(uarmg);
-		if(uarmu) armac += arm_bonus(uarmu);
-		if(uarms) armac += arm_bonus(uarms);
-		if(uarmh) armac += arm_bonus(uarmh);
-		if(uarmc) armac += arm_bonus(uarmc);
+		if(uarm) armac += arm_ac_bonus(uarm);
+		if(uarmf) armac += arm_ac_bonus(uarmf);
+		if(uarmg) armac += arm_ac_bonus(uarmg);
+		if(uarmu) armac += arm_ac_bonus(uarmu);
+		if(uarms) armac += arm_ac_bonus(uarms);
+		if(uarmh) armac += arm_ac_bonus(uarmh);
+		if(uarmc) armac += arm_ac_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags)
-		armac += arm_bonus(obj);
+		armac += arm_ac_bonus(obj);
 	}
 
 	base -= armac;
-	/* since arm_bonus is positive, subtracting it increases AC */
+	/* since arm_ac_bonus is positive, subtracting it increases AC */
 	return base;
 }
 
@@ -733,22 +794,234 @@ struct monst *mon;
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
-		if(uarm) armac += arm_bonus(uarm);
-		if(uarmf) armac += arm_bonus(uarmf);
-		if(uarmg) armac += arm_bonus(uarmg);
-		if(uarmu) armac += arm_bonus(uarmu);
-		if(uarms) armac += arm_bonus(uarms);
-		if(uarmh) armac += arm_bonus(uarmh);
-		if(uarmc) armac += arm_bonus(uarmc);
+		if(uarm) armac += arm_ac_bonus(uarm);
+		if(uarmf) armac += arm_ac_bonus(uarmf);
+		if(uarmg) armac += arm_ac_bonus(uarmg);
+		if(uarmu) armac += arm_ac_bonus(uarmu);
+		if(uarms) armac += arm_ac_bonus(uarms);
+		if(uarmh) armac += arm_ac_bonus(uarmh);
+		if(uarmc) armac += arm_ac_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags)
-		armac += arm_bonus(obj);
+		armac += arm_ac_bonus(obj);
 	}
 
 	return 10 - armac;
+}
+
+int 
+base_mdr(mon)
+struct monst *mon;
+{
+	int base = 0, armac = 0;
+	
+	if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH]){
+		base += u.chokhmah;
+	}
+	if(is_weeping(mon->data)){
+		if(mon->mvar2 & 0x4L) base = +125; //Fully Quantum Locked
+		if(mon->mvar2 & 0x2L) base = +5; //Partial Quantum Lock
+	}
+	if(mon->data == &mons[PM_SON_OF_TYPHON]){
+		base += 5;
+	}
+	if(mon->data == &mons[PM_CLOCKWORK_AUTOMATON]){
+		base += 1;
+	}
+	if(is_true_dragon(mon->data)){
+		base += 4;
+	}
+	if(mon->mfaction == ZOMBIFIED) base += 2;
+	if(mon->mfaction == CRYSTALFIED) base += 8;
+	
+	return base;
+}
+
+int
+roll_mdr(mon, magr)
+struct monst *mon;
+struct monst *magr;
+{
+	struct obj *obj;
+	int base, armac = 0;
+	int agralign = 0;
+	if(magr)
+		agralign = (magr == &youmonst) ? sgn(u.ualign.type) : sgn(magr->data->maligntyp);
+	
+	base = base_mdr(mon);
+	
+	if(mon->data == &mons[PM_GIANT_TURTLE]){
+		if(mon->mflee || rn2(2))
+			base += 5;
+	}
+	
+	if(mon->mtame){
+		if(u.specialSealsActive&SEAL_COSMOS) base += rnd(spiritDsize());
+	}
+	
+	//armor AC
+	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
+		if (uarmc){
+			armac += arm_dr_bonus(uarmc);
+			if(magr && is_harmonium_armor(uarmc)){
+				if(agralign == 0) armac += 1;
+				else if(agralign < 0) armac += 2;
+			}
+		} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
+			armac += max( 1 + (uwep->spe+1)/2,0);
+		}
+		
+		if(uarmu && uarmu->otyp == BODYGLOVE)
+			armac += arm_dr_bonus(uarmu);
+		if(uarm && uarm->otyp == JUMPSUIT)
+			armac += arm_dr_bonus(uarm);
+		
+		//Note: Bias this somehow?
+		switch(rn2(5)){
+			case 0:
+				//Note: upper body (shirt plus torso armor)
+				if (uarmu){
+					if(uarmu->otyp != BODYGLOVE)	armac += arm_dr_bonus(uarmu);
+					if(magr && is_harmonium_armor(uarmu)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				}
+			case 1:
+				//Note: lower body (torso armor only)
+				if (uarm){
+					if(uarm->otyp != JUMPSUIT)
+						armac += arm_dr_bonus(uarm);
+					if(magr && is_harmonium_armor(uarm)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
+					armac += max( 1 + (uwep->spe+1)/2,0);
+				}
+			break;
+			case 2:
+				if (uarmh){
+					armac += arm_dr_bonus(uarmh);
+					if(magr && is_harmonium_armor(uarmh)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				}
+			break;
+			case 3:
+				if (uarmf){
+					armac += arm_dr_bonus(uarmf);
+					if(magr && is_harmonium_armor(uarmf)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
+					armac += max( 1 + (uwep->spe+1)/2,0);
+				}
+			break;
+			case 4:
+				if (uarmg){
+					armac += arm_dr_bonus(uarmg);
+					if(magr && is_harmonium_armor(uarmg)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
+					armac += max( 1 + (uwep->spe+1)/2,0);
+				}
+			break;
+		}
+		if(armac < 0) armac *= -1;
+	} else {
+		struct obj *curarm;
+		
+		if (which_armor(mon, W_ARMC)){
+			curarm = which_armor(mon, W_ARMC);
+			armac += arm_dr_bonus(curarm);
+			if(magr && is_harmonium_armor(curarm)){
+				if(agralign == 0) armac += 1;
+				else if(agralign < 0) armac += 2;
+			}
+		} else if(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU){
+			armac += max( 1 + (MON_WEP(mon)->spe+1)/2,0);
+		}
+		
+		if(which_armor(mon, W_ARMU) && which_armor(mon, W_ARMU)->otyp == BODYGLOVE)
+			armac += arm_dr_bonus(which_armor(mon, W_ARMU));
+		if(which_armor(mon, W_ARM) && which_armor(mon, W_ARM)->otyp == JUMPSUIT)
+			armac += arm_dr_bonus(which_armor(mon, W_ARM));
+		
+		//Note: Bias this somehow?
+		switch(rn2(5)){
+			case 0:
+				//Note: upper body (shirt plus torso armor)
+				if (which_armor(mon, W_ARMU)){
+					curarm = which_armor(mon, W_ARMU);
+					if(curarm->otyp != BODYGLOVE)	armac += arm_dr_bonus(curarm);
+					if(magr && is_harmonium_armor(curarm)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				}
+			case 1:
+				//Note: lower body (torso armor only)
+				if (which_armor(mon, W_ARM)){
+					curarm = which_armor(mon, W_ARM);
+					if(curarm->otyp != JUMPSUIT)
+						armac += arm_dr_bonus(curarm);
+					if(magr && is_harmonium_armor(curarm)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				} else if(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU){
+					armac += max( 1 + (MON_WEP(mon)->spe+1)/2,0);
+				}
+			break;
+			case 2:
+				if (which_armor(mon, W_ARMH)){
+					curarm = which_armor(mon, W_ARMH);
+					armac += arm_dr_bonus(curarm);
+					if(magr && is_harmonium_armor(curarm)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				}
+			break;
+			case 3:
+				if (which_armor(mon, W_ARMF)){
+					curarm = which_armor(mon, W_ARMF);
+					armac += arm_dr_bonus(curarm);
+					if(magr && is_harmonium_armor(curarm)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				} else if(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU){
+					armac += max( 1 + (MON_WEP(mon)->spe+1)/2,0);
+				}
+			break;
+			case 4:
+				if (which_armor(mon, W_ARMG)){
+					curarm = which_armor(mon, W_ARMG);
+					armac += arm_dr_bonus(curarm);
+					if(magr && is_harmonium_armor(curarm)){
+						if(agralign == 0) armac += 1;
+						else if(agralign < 0) armac += 2;
+					}
+				} else if(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU){
+					armac += max( 1 + (MON_WEP(mon)->spe+1)/2,0);
+				}
+			break;
+		}
+	}
+	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor dr values act like player ac values */
+
+	base += armac;
+	/* since arm_ac_bonus is positive, subtracting it increases AC */
+	return base;
 }
 
 /* weapons are handled separately; rings and eyewear aren't used by monsters */
@@ -766,6 +1039,20 @@ struct monst *mon;
  * players to influence what gets worn.  Putting on a shirt underneath
  * already worn body armor is too obviously buggy...
  */
+
+int m_wearing_white_DSA(mon)
+struct monst *mon;
+{
+	struct obj *cur;
+	cur = which_armor(mon, W_ARM);
+	if(cur && (cur->otyp == WHITE_DRAGON_SCALES || cur->otyp == WHITE_DRAGON_SCALE_MAIL))
+		return TRUE;
+	cur = which_armor(mon, W_ARMS);
+	if(cur && (cur->otyp == WHITE_DRAGON_SCALE_SHIELD))
+		return TRUE;
+	return FALSE;
+}
+
 void
 m_dowear(mon, creation)
 register struct monst *mon;
@@ -870,13 +1157,13 @@ boolean racialexception;
 		    break;
 	    }
 	    if (obj->owornmask) continue;
-	    /* I'd like to define a VISIBLE_arm_bonus which doesn't assume the
+	    /* I'd like to define a VISIBLE_arm_ac_bonus which doesn't assume the
 	     * monster knows obj->spe, but if I did that, a monster would keep
 	     * switching forever between two -2 caps since when it took off one
 	     * it would forget spe and once again think the object is better
 	     * than what it already has.
 	     */
-	    if (best && (arm_bonus(best) + extra_pref(mon,best) >= arm_bonus(obj) + extra_pref(mon,obj)))
+	    if (best && (arm_total_bonus(best) + extra_pref(mon,best) >= arm_total_bonus(obj) + extra_pref(mon,obj)))
 		continue;
 	    best = obj;
 	}

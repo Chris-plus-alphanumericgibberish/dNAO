@@ -148,7 +148,7 @@ struct Role {
 	/* dictionary entries (dat/data.bas) */
 };
 
-extern const struct Role roles[];	/* table of available roles */
+extern struct Role roles[];	/* table of available roles */
 extern struct Role urole;
 #define Role_if(X)	(urole.malenum == (X))
 #define Pantheon_if(X)	(flags.racial_pantheon != 0 ? flags.racial_pantheon == (X) : roles[flags.pantheon].malenum == (X))
@@ -444,18 +444,21 @@ struct you {
 	int		ucarinc;		/* bonus carrying capacity */
 	schar	uacinc;			/* bonus AC (not spell/divine) */
 	schar	uac;
+	schar	udr;
 	uchar	uspellprot;		/* protection by SPE_PROTECTION */
 	uchar	udrunken;		/* drunkeness level (based on total number of potions of booze drunk) */
 	uchar	usptime;		/* #moves until uspellprot-- */
 	uchar	uspmtime;		/* #moves between uspellprot-- */
 	uchar	sowdisc;		/* sowing discord (spirit special attack) */
 	unsigned long long int spells_maintained;
+	int maintained_en_debt;
 	int	uhp,uhpmax,uhp_real,uhpmax_real;
 	int	uen,uenmax,uen_real,uenmax_real;		/* magical energy - M. Stephenson */
 	int ugangr[GA_NUM];			/* if the gods are angry at you */
 	int ugifts;			/* number of artifacts bestowed */
 	int ublessed, ublesscnt;	/* blessing/duration from #pray */
 	long lastprayed;
+	int regen_blocked;
 	uchar lastprayresult, reconciled;
 #define	PRAY_NONE	0
 #define	PRAY_GOOD	1
@@ -497,6 +500,8 @@ struct you {
 	struct skills weapon_skills[P_NUM_SKILLS];
 	boolean twoweap;		/* KMH -- Using two-weapon combat */
 	int divetimer;			/* how long you can stay under water */
+
+	int role_variant;	/*Records what variant of your role you are.*/
 
 	long	wardsknown;	/* known wards */
 #define	WARD_ELBERETH		0x0000001L

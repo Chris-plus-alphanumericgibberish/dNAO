@@ -112,7 +112,9 @@ register struct obj *obj;
 #endif
 				&& obj->otyp != AKLYS
 				&& obj->otyp != FORCE_PIKE
+				&& obj->otyp != NAGINATA
 				&& obj->oartifact != ART_WEBWEAVER_S_CROOK
+				&& obj->oartifact != ART_SILENCE_GLAIVE
 				&& obj->oartifact != ART_HEARTCLEAVER
 				&& obj->oartifact != ART_SOL_VALTIVA
 				&& obj->oartifact != ART_SHADOWLOCK
@@ -541,8 +543,8 @@ test_twoweapon()
 		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep))
 		) && 
 		!(uwep && uswapwep &&
-		  (uwep->oartifact == ART_PROFANED_GREATSCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE) ||
-		  (uwep->oartifact == ART_LIFEHUNT_SCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE))
+		  ((uwep->oartifact == ART_PROFANED_GREATSCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE) ||
+		  (uwep->oartifact == ART_LIFEHUNT_SCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)))
 	) {
 		otmp = bimanual(uwep,youracedata) ? uwep : uswapwep;
 		pline("%s isn't one-handed.", Yname2(otmp));

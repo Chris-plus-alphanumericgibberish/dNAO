@@ -699,7 +699,7 @@ register int x, y;
 	register struct obj *otmp;
 
 	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
-		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && otmp->otyp != MOON_AXE && (otmp->ovar1 & WARD_TOUSTEFNA))
+		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && (otmp->oward & WARD_TOUSTEFNA))
 		    return(otmp);
 	return((struct obj *)0);
 }
@@ -711,7 +711,7 @@ register int x, y;
 	register struct obj *otmp;
 
 	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
-		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && otmp->otyp != MOON_AXE && (otmp->ovar1 & WARD_DREPRUN))
+		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && (otmp->oward & WARD_DREPRUN))
 		    return(otmp);
 	return((struct obj *)0);
 }
@@ -723,7 +723,7 @@ register int x, y;
 	register struct obj *otmp;
 
 	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
-		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && otmp->otyp != MOON_AXE && (otmp->ovar1 & WARD_VEIOISTAFUR))
+		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && (otmp->oward & WARD_VEIOISTAFUR))
 		    return(otmp);
 	return((struct obj *)0);
 }
@@ -735,7 +735,7 @@ register int x, y;
 	register struct obj *otmp;
 
 	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
-		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && otmp->otyp != MOON_AXE && (otmp->ovar1 & WARD_THJOFASTAFUR))
+		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && (otmp->oward & WARD_THJOFASTAFUR))
 		    return(otmp);
 	return((struct obj *)0);
 }
@@ -773,6 +773,18 @@ register int type;
 	return((struct obj *) 0);
 }
 
+struct obj *
+carrying_art(artnum)
+register int artnum;
+{
+	register struct obj *otmp;
+
+	for(otmp = invent; otmp; otmp = otmp->nobj)
+		if(otmp->oartifact == artnum)
+			return(otmp);
+	return((struct obj *) 0);
+}
+
 const char *
 currency(amount)
 long amount;
@@ -787,7 +799,7 @@ have_lizard()
 	register struct obj *otmp;
 
 	for(otmp = invent; otmp; otmp = otmp->nobj)
-		if(otmp->otyp == CORPSE && (otmp->corpsenm == PM_LIZARD || otmp->corpsenm == PM_BABY_CAVE_LIZARD || PM_SMALL_CAVE_LIZARD || PM_CAVE_LIZARD || PM_LARGE_CAVE_LIZARD))
+		if(otmp->otyp == CORPSE && (otmp->corpsenm == PM_LIZARD || otmp->corpsenm == PM_BABY_CAVE_LIZARD ||  otmp->corpsenm == PM_SMALL_CAVE_LIZARD ||  otmp->corpsenm == PM_CAVE_LIZARD ||  otmp->corpsenm == PM_LARGE_CAVE_LIZARD))
 			return(TRUE);
 	return(FALSE);
 }
@@ -1090,14 +1102,16 @@ register const char *let,*word;
 //endif
 		      !is_axe(otmp) && !is_pole(otmp) && otyp != BULLWHIP &&
 			  !is_knife(otmp) && otmp->oartifact != ART_SILVER_STARLIGHT &&
-			  otmp->oartifact != ART_HOLY_MOONLIGHT_SWORD) ||
+			  otmp->oartifact != ART_HOLY_MOONLIGHT_SWORD
+			 ) ||
 			 (otmp->oclass == CHAIN_CLASS && 
 				(otyp == IRON_CHAIN || otyp == SHEAF_OF_HAY)
 			 ) ||
 		     (otmp->oclass == POTION_CLASS &&
 		     /* only applicable potion is oil, and it will only
 			be offered as a choice when already discovered */
-		     (otyp != POT_OIL || !otmp->dknown ||
+		     ((otyp != POT_OIL &&
+			 otyp != POT_WATER) || !otmp->dknown ||
 		      !objects[POT_OIL].oc_name_known)) ||
 		     (otmp->oclass == FOOD_CLASS &&
 		      otyp != CREAM_PIE && otyp != EUCALYPTUS_LEAF) ||
@@ -1105,7 +1119,9 @@ register const char *let,*word;
 		     (otmp->oclass == ARMOR_CLASS &&
 		      otyp != DWARVISH_HELM &&
 		      otyp != DROVEN_CLOAK &&
-			  otyp != GNOMISH_POINTY_HAT) || 
+			  otyp != GNOMISH_POINTY_HAT &&
+			  otmp->oartifact != ART_AEGIS
+			  ) || 
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp))))
 		|| (!strcmp(word, "invoke") &&
 		    (!otmp->oartifact && !objects[otyp].oc_unique &&
@@ -1167,6 +1183,7 @@ register const char *let,*word;
 		if (otmp->oartifact && 
 			(otmp->oartifact == ART_EXCALIBUR || 
 			 otmp->oartifact == ART_GLAMDRING || 
+			 otmp->oartifact == ART_ITLACHIAYAQUE || 
 			 otmp->oartifact == ART_ROD_OF_SEVEN_PARTS ||
 			 otmp->oartifact == ART_BOW_OF_SKADI ||
 			 otmp->oartifact == ART_PEN_OF_THE_VOID
@@ -1176,24 +1193,24 @@ register const char *let,*word;
 			allowall = TRUE;//for whatever reason, must allow all in order to get message other than "silly"
 		}
 		//Make exceptions for wooden weapons that have been engraved
-		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && otmp->otyp != MOON_AXE && otmp->ovar1 && !strcmp(word, "read")){
+		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && otmp->oward && !strcmp(word, "read")){
 			bp[foo++] = otmp->invlet;
 			allowall = TRUE;
 		}
 		//Make exceptions for armors that have been engraved
 		if(otmp->oclass == ARMOR_CLASS
 			&& otmp->ohaluengr
-			&& otmp->ovar1
+			&& otmp->oward
 			&& (   otmp->otyp == DROVEN_PLATE_MAIL 
 				|| otmp->otyp == DROVEN_CHAIN_MAIL
 				|| otmp->otyp == CONSORT_S_SUIT)
-			&& otmp->ovar1 && !strcmp(word, "read")
+			&& !strcmp(word, "read")
 		){
 			bp[foo++] = otmp->invlet;
 			allowall = TRUE;
 		}
 		//Make exceptions for rings that have been engraved
-		if(otmp->oclass == RING_CLASS && (isEngrRing((otmp)->otyp) || isSignetRing((otmp)->otyp)) && otmp->ovar1 && (!strcmp(word, "read") || !strcmp(word, "use or apply"))){
+		if(otmp->oclass == RING_CLASS && (isEngrRing((otmp)->otyp) || isSignetRing((otmp)->otyp)) && otmp->oward && (!strcmp(word, "read") || !strcmp(word, "use or apply"))){
 			bp[foo++] = otmp->invlet;
 			allowall = TRUE;
 		}
@@ -3163,6 +3180,7 @@ mergable(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 		obj->ostolen != otmp->ostolen ||
 		(obj->ostolen && obj->sknown != otmp->sknown) ||
 		(obj->ovar1 != otmp->ovar1 && obj->otyp != CORPSE) ||
+		(obj->oward != otmp->oward) ||
 	    obj->spe != otmp->spe || obj->dknown != otmp->dknown ||
 	    (obj->bknown != otmp->bknown && !Role_if(PM_PRIEST)) ||
 	    obj->cursed != otmp->cursed || obj->blessed != otmp->blessed ||

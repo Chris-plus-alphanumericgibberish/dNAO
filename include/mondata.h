@@ -69,6 +69,7 @@
 #define is_suicidal(ptr)	(is_fern_spore(ptr) || ptr == &mons[PM_FREEZING_SPHERE] || ptr == &mons[PM_FLAMING_SPHERE] || ptr == &mons[PM_SHOCKING_SPHERE])
 #define breathless(ptr)		(((ptr)->mflagsm & MM_BREATHLESS) != 0L)
 #define breathless_mon(mon)		(breathless((mon)->data) || is_derived_undead_mon(mon))
+#define amphibious_mon(mon)		(m_wearing_white_DSA(mon) || amphibious((mon)->data))
 #define amphibious(ptr)		(((ptr)->mflagsm & (MM_AMPHIBIOUS | MM_BREATHLESS)) != 0L)
 #define passes_walls(ptr)	(((ptr)->mflagsm & MM_WALLWALK) != 0L)
 #define amorphous(ptr)		(((ptr)->mflagsm & MM_AMORPHOUS) != 0L)
@@ -247,10 +248,12 @@
 							 (ptr) == &mons[PM_DEMONIC_BLACK_WIDOW])
 #define is_vampire(ptr)		(((ptr)->mflagsa & MA_VAMPIRE) != 0L)
 #define is_half_dragon(ptr)		attacktype_fordmg(ptr, AT_BREA, AD_HDRG)
+#define is_boreal_dragoon(ptr)		(attacktype_fordmg(ptr, AT_WEAP, AD_HDRG) || attacktype_fordmg(ptr, AT_XWEP, AD_HDRG))
 #define is_elf(ptr)			(((ptr)->mflagsa & MA_ELF) != 0L && !is_drow(ptr))
 #define is_drow(ptr)		(((ptr)->mflagsa & MA_DROW) != 0L)
 #define is_dwarf(ptr)		(((ptr)->mflagsa & MA_DWARF) != 0L)
 #define is_gnome(ptr)		(((ptr)->mflagsa & MA_GNOME) != 0L)
+#define is_gizmo(ptr)		((ptr)->mlet == S_GNOME && is_clockwork(ptr))
 #define is_szcultist(ptr)		((ptr) == &mons[PM_SHATTERED_ZIGGURAT_CULTIST] \
 								|| (ptr) == &mons[PM_SHATTERED_ZIGGURAT_KNIGHT] \
 								|| (ptr) == &mons[PM_SHATTERED_ZIGGURAT_WIZARD])
@@ -344,6 +347,7 @@
 							  || (ptr) == &mons[PM_RAZORVINE]\
 							)
 #define is_mercenary(ptr)	(((ptr)->mflagsg & MG_MERC) != 0L)
+#define is_army_pm(pm)		(pm == PM_CAPTAIN || pm == PM_LIEUTENANT || pm == PM_SERGEANT || pm == PM_SOLDIER)
 #define is_bardmon(ptr)		((ptr) == &mons[PM_LILLEND] || (ptr) == &mons[PM_RHYMER] || (ptr) == &mons[PM_BARD])
 #define is_male(ptr)		(((ptr)->mflagsb & MB_MALE) != 0L)
 #define is_female(ptr)		(((ptr)->mflagsb & MB_FEMALE) != 0L)
@@ -524,7 +528,9 @@
 
 #define nonliving_mon(mon)	(mon && (nonliving((mon)->data) || is_undead_mon(mon)))
 
-#define is_unalive(ptr)		(on_level(&valley_level, &u.uz) || (((ptr)->mflagsa & MA_UNLIVING)) )
+#define is_unalive(ptr)		(on_level(&valley_level, &u.uz) || is_naturally_unalive(ptr))
+
+#define is_naturally_unalive(ptr)		(((ptr)->mflagsa & MA_UNLIVING))
 
 #define is_elemental(ptr)		( (ptr->mflagsa & MA_ELEMENTAL) )
 
@@ -545,6 +551,9 @@
 				 (ptr)->mlet == S_VORTEX ||           \
 				 (ptr)->mlet == S_LIGHT ||            \
 				 (ptr)->mlet == S_PLANT ||            \
+				 is_gizmo(ptr) ||                     \
+				 (is_clockwork(ptr) &&                \
+					is_naturally_unalive(ptr)) ||     \
 				((ptr)->mlet == S_ELEMENTAL &&        \
 				 (ptr) != &mons[PM_STALKER]) ||       \
 				((ptr)->mlet == S_GOLEM &&            \

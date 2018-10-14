@@ -832,8 +832,10 @@ struct attack *uattk;
 	    malive = hmon(mon, uwep, 0);
 	    /* this assumes that Stormbringer was uwep not uswapwep */ 
 	    if (malive && (u.twoweap && !(uwep && uwep->otyp == STILETTOS)) && !override_confirmation &&
-		    m_at(x, y) == mon)
-		malive = hmon(mon, uswapwep, 0);
+		    m_at(x, y) == mon
+		) {
+			malive = hmon(mon, uswapwep, 0);
+		}
 	    if (malive) {
 		/* monster still alive */
 		if(((!rn2(25) && mon->mhp < mon->mhpmax/2) || mon->data == &mons[PM_QUIVERING_BLOB])
@@ -930,7 +932,8 @@ int thrown;
 	boolean hittxt = FALSE, destroyed = FALSE, already_killed = FALSE;
 	boolean get_dmg_bonus = TRUE;
 	int ispoisoned = 0;
-	boolean needpoismsg = FALSE, needfilthmsg = FALSE, needdrugmsg = FALSE, needsamnesiamsg = FALSE, poiskilled = FALSE, 
+	boolean needpoismsg = FALSE, needfilthmsg = FALSE, needdrugmsg = FALSE, needsamnesiamsg = FALSE, 
+			needacidmsg = FALSE, poiskilled = FALSE, 
 			filthkilled = FALSE, druggedmon = FALSE, poisblindmon = FALSE, amnesiamon = FALSE;
 	boolean silvermsg = FALSE,  ironmsg = FALSE,  unholymsg = FALSE, sunmsg = FALSE,
 	silverobj = FALSE, ironobj = FALSE, unholyobj = FALSE, lightmsg = FALSE;
@@ -1008,13 +1011,23 @@ int thrown;
 					tmp += rnd(9);
 					unholymsg = TRUE;
 			}
-			if(uarmg->oartifact && 
-			   artifact_hit(&youmonst, mon, uarmg, &tmp, rnd(20)) ){
-				if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
-					return FALSE;
-				if (tmp == 0) return TRUE;
-				hittxt = TRUE;
-			}
+			{ //artifact block
+				int basedamage = tmp;
+				int newdamage = tmp;
+				int dieroll = rnd(20);
+				if(uarmg->oartifact){
+					hittxt = artifact_hit(&youmonst, mon, uarmg, &newdamage, dieroll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return FALSE;
+					if (newdamage == 0) return TRUE;
+					tmp += (newdamage - basedamage);
+					newdamage = basedamage;
+				}
+				if(uarmg->oproperties){
+					(void)oproperty_hit(&youmonst, mon, uarmg, &newdamage, dieroll);
+					tmp += (newdamage - basedamage);
+				}
+			} //artifact block
 		}
 	    if (!uarmg || uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER) {
 			/* So do silver rings.  Note: rings are worn under gloves, so you
@@ -1025,7 +1038,7 @@ int thrown;
 					|| arti_silvered(uleft) 
 					|| (uleft->ohaluengr
 						&& (isEngrRing(uleft->otyp) || isSignetRing(uleft->otyp))
-						&& uleft->ovar1 >= LOLTH_SYMBOL && uleft->ovar1 <= LOST_HOUSE
+						&& uleft->oward >= LOLTH_SYMBOL && uleft->oward <= LOST_HOUSE
 					   )
 				)
 			) barehand_silver_rings++;
@@ -1035,7 +1048,7 @@ int thrown;
 					|| arti_silvered(uright)
 					|| (uright->ohaluengr
 						&& (isEngrRing(uright->otyp) || isSignetRing(uright->otyp))
-						&& uright->ovar1 >= LOLTH_SYMBOL && uright->ovar1 <= LOST_HOUSE
+						&& uright->oward >= LOLTH_SYMBOL && uright->oward <= LOST_HOUSE
 					   )
 				)
 			) barehand_silver_rings++;
@@ -1078,12 +1091,12 @@ int thrown;
 			if (uleft 
 				&& uleft->ohaluengr
 				&& (isEngrRing(uleft->otyp) || isSignetRing(uleft->otyp))
-				&& uleft->ovar1 == EDDER_SYMBOL
+				&& uleft->oward == EDDER_SYMBOL
 			) tmp += 5;
 			if (uright 
 				&& uright->ohaluengr
 				&& (isEngrRing(uright->otyp) || isSignetRing(uright->otyp))
-				&& uright->ovar1 == EDDER_SYMBOL
+				&& uright->oward == EDDER_SYMBOL
 			) tmp += 5;
 			
 			if (uleft && uleft->otyp == jadeRing)
@@ -1111,9 +1124,9 @@ int thrown;
 					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
 				}
 				if(uright->opoisoned & OPOISON_SLEEP && !rn2(5)){
-					if (resists_poison(mon) || resists_sleep(mon))
+					if (resists_sleep(mon))
 						needdrugmsg = TRUE;
-					else if(!rn2(5) && sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
+					else if(sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
 					
 					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
 				}
@@ -1127,20 +1140,22 @@ int thrown;
 					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
 				}
 				if(uright->opoisoned & OPOISON_PARAL && !rn2(8)){
-					if (resists_poison(mon))
-						needpoismsg = TRUE;
-					 else {
 						if (mon->mcanmove) {
 							mon->mcanmove = 0;
 							mon->mfrozen = rnd(25);
 						}
-					}
 					
 					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
 				}
 				if(uright->opoisoned & OPOISON_AMNES && !rn2(10)){
 					if(mindless_mon(mon)) needsamnesiamsg = TRUE;
 					else amnesiamon = TRUE;
+					
+					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
+				}
+				if(uright->opoisoned & OPOISON_ACID){
+					if(resists_acid(mon)) needacidmsg = TRUE;
+					else tmp += rnd(10);
 					
 					if(uright->opoisonchrgs-- <= 0) uright->opoisoned = OPOISON_NONE;
 				}
@@ -1161,9 +1176,9 @@ int thrown;
 					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
 				}
 				if(uleft->opoisoned & OPOISON_SLEEP && !rn2(5)){
-					if (resists_poison(mon) || resists_sleep(mon))
+					if (resists_sleep(mon))
 						needdrugmsg = TRUE;
-					else if(!rn2(5) && sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
+					else if(sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
 					
 					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
 				}
@@ -1177,20 +1192,22 @@ int thrown;
 					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
 				}
 				if(uleft->opoisoned & OPOISON_PARAL && !rn2(8)){
-					if (resists_poison(mon))
-						needpoismsg = TRUE;
-					 else {
 						if (mon->mcanmove) {
 							mon->mcanmove = 0;
 							mon->mfrozen = rnd(25);
 						}
-					}
 					
 					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
 				}
 				if(uleft->opoisoned & OPOISON_AMNES && !rn2(10)){
 					if(mindless_mon(mon)) needsamnesiamsg = TRUE;
 					else amnesiamon = TRUE;
+					
+					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
+				}
+				if(uleft->opoisoned & OPOISON_ACID){
+					if(resists_acid(mon)) needacidmsg = TRUE;
+					else tmp += rnd(10);
 					
 					if(uleft->opoisonchrgs-- <= 0) uleft->opoisoned = OPOISON_NONE;
 				}
@@ -1238,7 +1255,9 @@ int thrown;
 				is_pole(obj) && 
 				obj->otyp != AKLYS && 
 				obj->otyp != FORCE_PIKE && 
+				obj->otyp != NAGINATA && 
 				obj->oartifact != ART_WEBWEAVER_S_CROOK && 
+				obj->oartifact != ART_SILENCE_GLAIVE && 
 				obj->oartifact != ART_HEARTCLEAVER && 
 				obj->oartifact != ART_SOL_VALTIVA && 
 				obj->oartifact != ART_SHADOWLOCK && 
@@ -1258,11 +1277,11 @@ int thrown;
 		    /* then do only 1-2 points of damage */
 		    if (insubstantial(mdat) && !insubstantial_aware(mon, obj, TRUE))
 				tmp = 0;
-		    else if(obj->oartifact == ART_LIECLEAVER) tmp = 2*(rnd(12) + rnd(10) + obj->spe);
-		    else if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS) tmp = 2*(rnd(bigmonst(mon->data) ? 2 : 4) + obj->spe);
+		    else if(obj->oartifact == ART_LIECLEAVER) tmp = 2*(rnd(12) + rnd(10) + obj->spe) + skill_dam_bonus(P_SCIMITAR);
+		    else if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS) tmp = 2*(rnd(bigmonst(mon->data) ? 2 : 4) + obj->spe) + skill_dam_bonus(P_PICK_AXE);
 			
 		    else if((obj->oartifact == ART_INFINITY_S_MIRRORED_ARC && !litsaber(obj))) tmp = d(1,6) + obj->spe + weapon_dam_bonus(0); //martial arts aid
-		    else if((obj->otyp == KAMEREL_VAJRA && !litsaber(obj))) tmp = d(1,4) + (bigmonst(mdat) ? 0 : 1) + obj->spe + weapon_dam_bonus(0); //small mace
+		    else if((obj->otyp == KAMEREL_VAJRA && !litsaber(obj))) tmp = d(1,4) + (bigmonst(mdat) ? 0 : 1) + obj->spe + skill_dam_bonus(P_MACE); //small mace
 		    else if((is_lightsaber(obj) && !litsaber(obj))) tmp = d(1,4) + obj->spe + weapon_dam_bonus(0); //martial arts aid
 
 			else tmp = rnd(2);
@@ -1296,8 +1315,18 @@ int thrown;
 					warnedptr = mdat;
 				}
 			} else {
-				if(warnedptr != mdat){
-					warnedptr = 0;
+				warnedptr = 0;
+			}
+			
+			if(tmp > 1){
+				if(obj->oartifact == ART_LIECLEAVER){
+					use_skill(P_SCIMITAR,1);
+				} else if(obj->oartifact == ART_ROGUE_GEAR_SPIRITS){
+					use_skill(P_PICK_AXE,1);
+				} else if(obj->otyp == KAMEREL_VAJRA && !litsaber(obj)){
+					use_skill(P_MACE,1);
+				} else if(is_lightsaber(obj) && !litsaber(obj)){
+					use_skill(P_BARE_HANDED_COMBAT,1);
 				}
 			}
 		    // if (tmp && obj->oartifact &&
@@ -1520,13 +1549,26 @@ int thrown;
 					hittxt = TRUE;
 				}
 			}
-		    if (obj->oartifact &&
-				artifact_hit(&youmonst, mon, obj, &tmp, dieroll)) {
-				if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
-				    return FALSE;
-				if (tmp == 0) return TRUE;
-				hittxt = TRUE;
-			}
+			// if(uarm && uarm->otyp <= YELLOW_DRAGON_SCALES && uarm->otyp >= GRAY_DRAGON_SCALE_MAIL){
+				// dragon_hit(mon, uarm, uarm->otyp, &tmp, &needpoismsg, &poiskilled, &druggedmon);
+			// }
+			{ //artifact block
+				int basedamage = tmp;
+				int newdamage = tmp;
+				if (obj->oartifact) {
+					hittxt = artifact_hit(&youmonst, mon, obj, &newdamage, dieroll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return FALSE;
+					if (newdamage == 0) return TRUE;
+					tmp += (newdamage - basedamage);
+					newdamage = basedamage;
+				}
+				if(obj->oproperties){
+					(void)oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+					tmp += (newdamage - basedamage);
+				}
+			} //artifact block
+			pline("damage = %d", tmp);
 			if((monwep = MON_WEP(mon)) != 0 && monwep->oartifact != ART_GLAMDRING &&
 				(arti_disarm(obj) || (obj->otyp == RANSEUR && 
 										(wtype = uwep_skill_type()) != P_NONE && 
@@ -1618,27 +1660,51 @@ int thrown;
 				     obj->otyp == ELVEN_ARROW &&
 				     uwep->otyp == ELVEN_BOW)
 							tmp++;
-					if(uwep->oartifact &&
-						artifact_hit(&youmonst, mon, uwep, &tmp, dieroll)){
+					
+					{//Artifact block
+					int basedamage = tmp;
+					int newdamage = tmp;
+					if(uwep->oartifact){
+						hittxt = artifact_hit(&youmonst, mon, uwep, &newdamage, dieroll);
 						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
-						if (tmp == 0) return TRUE; /* NOTE: ditto */
-						hittxt = TRUE;
+						if (newdamage == 0) return TRUE; /* NOTE: ditto */
+						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
 					}
-					if(obj->oartifact &&
-						artifact_hit(&youmonst, mon, obj, &tmp, dieroll)){
+					if(uwep->oproperties){
+						(void)oproperty_hit(&youmonst, mon, uwep, &newdamage, dieroll);
+						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
+					}
+					if(obj->oartifact){
+						hittxt = artifact_hit(&youmonst, mon, obj, &newdamage, dieroll);
 						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
-						if (tmp == 0) return TRUE; /* NOTE: ditto */
-						hittxt = TRUE;
+						if (newdamage == 0) return TRUE; /* NOTE: ditto */
+						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
 					}
-					if(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER &&
-						artifact_hit(&youmonst, mon, uarmh, &tmp, dieroll)){
+					if(obj->oproperties){
+						(void)oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
+					}
+					if(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER){
+						hittxt = artifact_hit(&youmonst, mon, uarmh, &newdamage, dieroll);
 						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
-						if (tmp == 0) return TRUE; /* NOTE: ditto */
-						hittxt = TRUE;
+						if (newdamage == 0) return TRUE; /* NOTE: ditto */
+						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
 					}
+					if(uarmh && uarmh->oartifact 
+					&& uarmh->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER && uarmh->oproperties
+					){
+						(void)oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+						tmp += (newdamage - basedamage);
+					}
+					}//Artifact block
 				}
 			}
 		}
@@ -1895,12 +1961,19 @@ defaultvalue:
 				}
 			}
 			if(obj){/*may have broken*/
-				if (obj->oartifact &&
-					artifact_hit(&youmonst, mon, obj, &tmp, dieroll)) {
+				int basedamage = tmp;
+				int newdamage = tmp;
+				if (obj->oartifact) {
+					hittxt = artifact_hit(&youmonst, mon, obj, &newdamage, dieroll);
 					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 						return FALSE;
-					if (tmp == 0) return TRUE;
-					hittxt = TRUE;
+					if (newdamage == 0) return TRUE;
+					tmp += (newdamage - basedamage);
+					newdamage = basedamage;
+				}
+				if(obj->oproperties){
+					(void)oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+					tmp += (newdamage - basedamage);
 				}
 				if(u.sealsActive&SEAL_PAIMON && mon && !DEADMONSTER(mon) && 
 					!resists_drli(mon) && obj->oclass == SPBOOK_CLASS && 
@@ -1931,12 +2004,6 @@ defaultvalue:
 	if(resist_attacks(mdat)){
 		tmp = 0;
 		valid_weapon_attack = 0;
-	} else {
-		int mac = full_marmorac(mon);
-		if(mac < 0){
-			tmp += MONSTER_AC_VALUE(mac);
-			if(tmp < 1) tmp = 1;
-		}
 	}
 	
 	/****** NOTE: perhaps obj is undefined!! (if !thrown && BOOMERANG)
@@ -2049,7 +2116,7 @@ defaultvalue:
 				else filthkilled = TRUE;
 			}
 			if(obj && (obj->opoisoned & OPOISON_SLEEP || obj->oartifact == ART_WEBWEAVER_S_CROOK || obj->oartifact == ART_MOONBEAM)){
-				if (resists_poison(mon) || resists_sleep(mon))
+				if (resists_sleep(mon))
 					needdrugmsg = TRUE;
 				else if((obj->oartifact == ART_MOONBEAM || !rn2(5)) && 
 					sleep_monst(mon, rnd(12), POTION_CLASS)) druggedmon = TRUE;
@@ -2065,9 +2132,7 @@ defaultvalue:
 				}
 			}
 			if(obj && (obj->opoisoned & OPOISON_PARAL || obj->oartifact == ART_WEBWEAVER_S_CROOK)){
-				if (resists_poison(mon))
-					needpoismsg = TRUE;
-				else if (rn2(8))
+				if (rn2(8))
 					tmp += rnd(6);
 				else {
 					tmp += 6;
@@ -2080,6 +2145,11 @@ defaultvalue:
 			if(obj && obj->opoisoned & OPOISON_AMNES){
 				if(mindless_mon(mon)) needsamnesiamsg = TRUE;
 				else if(!rn2(10)) amnesiamon = TRUE;
+			}
+			if(obj && (obj->opoisoned & OPOISON_ACID)){
+				if (resists_acid(mon))
+					needacidmsg = TRUE;
+				else tmp += rnd(10);
 			}
 			
 			if (obj && !rn2(20) && obj->opoisoned) {
@@ -2128,18 +2198,41 @@ defaultvalue:
 	    }
 	}
 
-	if (unarmed && !thrown && !obj && !Upolyd) {
+	if (unarmed && !thrown && !obj && !Upolyd && !(u.sealsActive&SEAL_EURYNOME)) {//Eurynome makes your attacks monster attacks!
+		int resistmask = 0;
+		int weaponmask = 0;
+		static int warnedotyp = 0;
 		static struct permonst *warnedptr = 0;
-		if((resist_blunt(mdat) || (mon->mfaction == ZOMBIFIED)) && !(uarmg && narrow_spec_applies(uarmg, mon))){
+		if(uarmg && (uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN || uarmg->oartifact == ART_SHIELD_OF_THE_RESOLUTE_HEA || uarmg->oartifact == ART_PREMIUM_HEART)){
+			//Digging claws, or heart-shaped bit
+			weaponmask |= PIERCE;
+		}
+		if(uarmg && (uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN || uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)){
+			weaponmask |= SLASH;
+		} else if(!Upolyd && Race_if(PM_HALF_DRAGON)){
+			weaponmask |= SLASH;
+		}
+		//Can always whack someone
+		weaponmask |= WHACK;
+		
+		if(resist_blunt(mdat) || (mon->mfaction == ZOMBIFIED)){
+			resistmask |= WHACK;
+		}
+		if(resist_pierce(mdat) || (mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED)){
+			resistmask |= PIERCE;
+		}
+		if(resist_slash(mdat) || (mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED)){
+			resistmask |= SLASH;
+		}
+		
+		if((weaponmask & ~(resistmask)) == 0L && !(uarmg && narrow_spec_applies(uarmg, mon))){
 			tmp /= 4;
 			if(warnedptr != mdat){
 				Your("%s are ineffective against %s.", makeplural(body_part(HAND)), mon_nam(mon));
 				warnedptr = mdat;
 			}
 		} else {
-			if(warnedptr != mdat){
-				warnedptr = 0;
-			}
+			warnedptr = 0;
 		}
 	}
 	
@@ -2218,12 +2311,13 @@ defaultvalue:
 	/*Now apply damage*/
 	// pline("Damage: %d",tmp);
 	
-	if(tmp && !phasearmor){
-		int mac = full_marmorac(mon);
-		if(mac < 0){
-			tmp += MONSTER_AC_VALUE(mac);
-			if(tmp < 1) tmp = 1;
+	if(tmp){
+		if(phasearmor){
+			tmp -= base_mdr(mon);
+		} else {
+			tmp -= roll_mdr(mon, &youmonst);
 		}
+		if(tmp < 1) tmp = 1;
 	}
 	
 	if (!already_killed){
@@ -2422,6 +2516,8 @@ defaultvalue:
 		pline_The("drug doesn't seem to affect %s.", mon_nam(mon));
 	if (needsamnesiamsg)
 		pline_The("lethe-rust doesn't seem to affect %s.", mon_nam(mon));
+	if (needacidmsg)
+		pline_The("acid-coating doesn't seem to affect %s.", mon_nam(mon));
 	if (druggedmon){
 		pline("%s falls asleep.", Monnam(mon));
 		slept_monst(mon);
@@ -2476,7 +2572,7 @@ boolean
 insubstantial_aware(mon, obj, you)
 struct monst *mon;
 struct obj *obj;
-boolean you;
+int you;
 {
 	struct permonst *ptr = mon->data;
 	if(you && u.sealsActive&SEAL_CHUPOCLOPS)
@@ -2512,7 +2608,7 @@ insubstantial_damage(mon, obj, dmg, you)
 struct monst *mon;
 struct obj *obj;
 int dmg;
-boolean you;
+int you;
 {
 	struct permonst *ptr = mon->data;
 	if(you && u.sealsActive&SEAL_CHUPOCLOPS)
@@ -2795,6 +2891,8 @@ register struct attack *mattk;
 				alt_attk.aatyp = AT_NONE;
 				if(mattk->adtyp == AD_OONA)
 					alt_attk.adtyp = u.oonaenergy;
+				else if(mattk->adtyp == AD_HDRG)
+					alt_attk.adtyp = AD_COLD; //Go with the classic
 				else if(mattk->adtyp == AD_RBRE){
 					switch(rn2(3)){
 						case 0:
@@ -2808,31 +2906,33 @@ register struct attack *mattk;
 						break;
 					}
 				} else alt_attk.adtyp = mattk->adtyp;
-				switch (alt_attk.adtyp)
-				{
-				case AD_FIRE:
-				case AD_COLD:
-				case AD_ELEC:
-				case AD_ACID:
-					alt_attk.damn = 4;
-					alt_attk.damd = 6;
-					break;
-				case AD_EFIR:
-				case AD_ECLD:
-				case AD_EELC:
-				case AD_EACD:
-					alt_attk.damn = 3;
-					alt_attk.damd = 7;
-					break;
-				case AD_STUN:
-					alt_attk.damn = 1;
-					alt_attk.damd = 4;
-					break;
-				default:
-					alt_attk.damn = 0;
-					alt_attk.damd = 0;
-					break;
-				}
+				alt_attk.damn = mattk->damn;
+				alt_attk.damd = mattk->damd;
+				// switch (alt_attk.adtyp)
+				// {
+				// case AD_FIRE:
+				// case AD_COLD:
+				// case AD_ELEC:
+				// case AD_ACID:
+					// alt_attk.damn = 4;
+					// alt_attk.damd = 6;
+					// break;
+				// case AD_EFIR:
+				// case AD_ECLD:
+				// case AD_EELC:
+				// case AD_EACD:
+					// alt_attk.damn = 3;
+					// alt_attk.damd = 7;
+					// break;
+				// case AD_STUN:
+					// alt_attk.damn = 1;
+					// alt_attk.damd = 4;
+					// break;
+				// default:
+					// alt_attk.damn = 0;
+					// alt_attk.damd = 0;
+					// break;
+				// }
 				damageum(mdef, &alt_attk);
 				if (DEADMONSTER(mdef))
 					return 2;
@@ -3260,7 +3360,7 @@ register struct attack *mattk;
 		    } else if(u.ustuck == mdef) {
 			/* Monsters don't wear amulets of magical breathing */
 			if (is_pool(u.ux,u.uy, FALSE) && !is_swimmer(mdef->data) &&
-			    !amphibious(mdef->data)) {
+			    !amphibious_mon(mdef)) {
 			    You("drown %s...", mon_nam(mdef));
 			    tmp = mdef->mhp;
 			} else if(mattk->aatyp == AT_HUGS)
@@ -3500,7 +3600,7 @@ register struct attack *mattk;
 			for(i = rn2(3)+2; i > 0; i--){
 				x = rn2(3)-1;
 				y = rn2(3)-1;
-				explode(u.ux+x, u.uy+y, 8, tmp, -1, rn2(7));		//-1 is unspecified source. 8 is physical
+				explode(u.ux+x, u.uy+y, 8, tmp, -1, rn2(7), 1);		//-1 is unspecified source. 8 is physical
 			}
 			tmp=0;
 		} break;
@@ -3533,11 +3633,18 @@ register struct attack *mattk;
 		// else if(!otmp || otmp != uwep) tmp /= 2;
 	// }
 	
-	if(tmp && mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
-		int mac = full_marmorac(mdef);
-		if(mac < 0){
-			tmp += MONSTER_AC_VALUE(mac);
-			if(tmp < 1) tmp = 1;
+	if(tmp){
+		if(mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
+			tmp -= roll_mdr(mdef, &youmonst);
+		} else {
+			tmp -= base_mdr(mdef);
+		}
+		if(tmp < 1) tmp = 1;
+	}
+	
+	if(tmp > 1){
+		if(mattk->adtyp == AD_SHDW){
+			use_skill(P_BARE_HANDED_COMBAT,1);
 		}
 	}
 	
@@ -3759,7 +3866,7 @@ register struct attack *mattk;
 			if (youracedata == &mons[PM_FOG_CLOUD]) {
 			    pline("%s is laden with your moisture.",
 				  Monnam(mdef));
-			    if (amphibious(mdef->data) &&
+			    if (amphibious_mon(mdef) &&
 				!flaming(mdef->data)) {
 				dam = 0;
 				pline("%s seems unharmed.", Monnam(mdef));
@@ -4179,7 +4286,7 @@ wisp_shdw_dhit:
 	    else {
 		(void) passive(mon, sum[i], 1, mattk->aatyp, mattk->adtyp);
 		if (DEADMONSTER(mon))
-			return TRUE;
+			return FALSE;
 		nsum |= sum[i];
 	    }
 	    if (Upolyd != Old_Upolyd)
@@ -4187,7 +4294,7 @@ wisp_shdw_dhit:
 	    if (multi < 0)
 		break; /* If paralyzed while attacking, i.e. floating eye */
 	}
-	return((boolean)(nsum != 0));
+	return(!DEADMONSTER(mon));
 }
 
 boolean
@@ -4438,7 +4545,7 @@ wisp_shdw_dhit2:
 	else {
 		(void) passive(mon, sum[i], 1, mattk->aatyp, mattk->adtyp);
 		if (DEADMONSTER(mon))
-			return TRUE;
+			return FALSE;
 		nsum |= sum[i];
 	}
 	if (Upolyd != Old_Upolyd)
@@ -4446,7 +4553,7 @@ wisp_shdw_dhit2:
 	if (multi < 0)
 		break; /* If paralyzed while attacking, i.e. floating eye */
 	}
-	return((boolean)(nsum != 0));
+	return(!DEADMONSTER(mon));
 }
 
 /*	Special (passive) attacks on you by monsters done here.		*/
@@ -4501,10 +4608,8 @@ uchar aatyp, adtyp;
 	  case AD_BARB:
 		if(ptr == &mons[PM_RAZORVINE]) You("are hit by the springing vines!");
 		else You("are hit by %s barbs!", s_suffix(mon_nam(mon)));
-		if (tmp && u.uac < 0) {
-			if(u.sealsActive&SEAL_BALAM) tmp -= min_ints(rnd(-u.uac),rnd(-u.uac));
-			else tmp -= rnd(-u.uac);
-			
+		if (tmp) {
+			tmp -= roll_udr(mon);
 			if (tmp < 1) tmp = 1;
 		}
 		mdamageu(mon, tmp);
@@ -4655,7 +4760,7 @@ dobpois:
 	    if(!mhit) break; //didn't draw blood, forget it.
 		if(mon->data == &mons[PM_LEGION]){
 			int n = rnd(4);
-			for(n; n>0; n--) rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
+			for(; n>0; n--) rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
 									  makemon(&mons[PM_LEGIONNAIRE], mon->mx, mon->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 		} else {
 			if(mon->mhp > .75*mon->mhpmax) makemon(&mons[PM_LEMURE], mon->mx, mon->my, MM_ADJACENTOK);

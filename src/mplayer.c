@@ -333,7 +333,7 @@ register boolean special;
 		    shield = STRANGE_OBJECT;
 		break;
 		default:
-			pline("Recieved %d.",monsndx(ptr));
+			pline("Received %d.",monsndx(ptr));
 			impossible("bad mplayer monster");
 		    weapon = 0;
 		    break;
@@ -436,7 +436,7 @@ register int num;
 boolean special;
 {
 	int pm, x, y;
-	struct monst fakemon;
+	struct monst fakemon = {0};
 
 	while(num) {
 		int tryct = 0;

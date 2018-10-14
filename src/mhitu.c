@@ -611,10 +611,6 @@ mattacku(mtmp)
 		tmp += u.chokhmah;
 		tchtmp += u.chokhmah;
 	}
-	if(multi < 0){
-		tmp += 4;
-		tchtmp += 4;
-	}
 	if((Invis && !perceives(mdat)) || is_blind(mtmp)){
 		tmp -= 2;
 		tchtmp -= 2;
@@ -717,6 +713,9 @@ mattacku(mtmp)
 	}
 	for(i = 0; i < NATTK; i++) {
 
+		if(DEADMONSTER(mtmp))
+			break;
+		
 	    sum[i] = 0;
 	    mattk = getmattk(mdat, i, sum, &alt_attk);
 	    if (u.uswallow && (mattk->aatyp != AT_ENGL && mattk->aatyp != AT_ILUR))
@@ -831,12 +830,14 @@ mattacku(mtmp)
 				    missmu(mtmp, (tmp == j), mattk);
 			    } else
 				wildmiss(mtmp, mattk);
+				mon_ranged_gazeonly = 0;
 			}
 			if(mdat == &mons[PM_DEMOGORGON] && sum[i]){
 				mtmp->mvar2 = mtmp->mvar2+1;
 				if(!range2 && mtmp->mvar2>=2){
 					struct attack rend = {AT_HUGS, AD_SHRD, 3, 12};
 					sum[i] = hitmu(mtmp, &rend);
+					mon_ranged_gazeonly = 0;
 					mtmp->mvar2=0;
 				}
 			}
@@ -855,12 +856,14 @@ mattacku(mtmp)
 				    missmu(mtmp, (tchtmp == j), mattk);
 			    } else
 				wildmiss(mtmp, mattk);
+				mon_ranged_gazeonly = 0;
 			}
 			if(mdat == &mons[PM_DEMOGORGON] && sum[i]){
 				mtmp->mvar2 = mtmp->mvar2+1;
 				if(!range2 && mtmp->mvar2>=2){
 					struct attack rend = {AT_HUGS, AD_SHRD, 3, 12};
 					sum[i] = hitmu(mtmp, &rend);
+					mon_ranged_gazeonly = 0;
 					mtmp->mvar2=0;
 				}
 			}
@@ -877,12 +880,14 @@ mattacku(mtmp)
 				    missmu(mtmp, (tchtmp == j), mattk);
 			    } else
 					wildmiss(mtmp, mattk);
+				mon_ranged_gazeonly = 0;
 			}
 			if(mdat == &mons[PM_DEMOGORGON] && sum[i]){
 				mtmp->mvar2 = mtmp->mvar2+1;
 				if(!range2 && mtmp->mvar2>=2){
 					struct attack rend = {AT_HUGS, AD_SHRD, 3, 12};
 					sum[i] = hitmu(mtmp, &rend);
+					mon_ranged_gazeonly = 0;
 					mtmp->mvar2=0;
 				}
 			}
@@ -891,8 +896,10 @@ mattacku(mtmp)
 		case AT_HUGS:	/* automatic if prev two attacks succeed */
 			/* Note: if displaced, prev attacks never succeeded */
 			if((!range2 && i>=2 && sum[i-1] && sum[i-2])
-							|| mtmp == u.ustuck)
-				sum[i]= hitmu(mtmp, mattk);
+							|| mtmp == u.ustuck){
+				sum[i] = hitmu(mtmp, mattk);
+				mon_ranged_gazeonly = 0;
+			}
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 		case AT_WDGZ:	/* can affect you either ranged or not */
@@ -923,7 +930,10 @@ mattacku(mtmp)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 		case AT_EXPL:	/* automatic hit if next to, and aimed at you */
-			if(!range2) sum[i] = explmu(mtmp, mattk, foundyou);
+			if(!range2){
+				sum[i] = explmu(mtmp, mattk, foundyou);
+				mon_ranged_gazeonly = 0;
+			}
 			if (is_fern_spore(mdat)) spore_dies(mtmp);
 		break;
 
@@ -952,6 +962,7 @@ mattacku(mtmp)
 					     is_whirly(mtmp->data) ?
 						"rushing noise" : "splat");
 			   }
+				mon_ranged_gazeonly = 0;
 			}
 			break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -980,6 +991,7 @@ mattacku(mtmp)
 					     is_whirly(mtmp->data) ?
 						"rushing noise" : "splat");
 			   }
+				mon_ranged_gazeonly = 0;
 			}
 			break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -990,7 +1002,10 @@ mattacku(mtmp)
 				|| (mdat == &mons[PM_CERBERUS])
 			) flags.drgn_brth = 1;
 			if(mdat == &mons[PM_MAMMON]) flags.mamn_brth = 1;
-			if(range2) sum[i] = breamu(mtmp, mattk);
+			if(range2){
+				sum[i] = breamu(mtmp, mattk);
+				mon_ranged_gazeonly = 0;
+			}
 			flags.drgn_brth = 0;
 			flags.mamn_brth = 0;
 			/* Note: breamu takes care of displacement */
@@ -1000,7 +1015,10 @@ mattacku(mtmp)
 		case AT_SPIT:
 			if(mdat == &mons[PM_MOTHER_LILITH])
 				if(mtmp->mcan) mtmp->mcan=0;
-			if(range2) sum[i] = spitmu(mtmp, mattk);
+			if(range2){
+				sum[i] = spitmu(mtmp, mattk);
+				mon_ranged_gazeonly = 0;
+			}
 			/* Note: spitmu takes care of displacement */
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1010,6 +1028,7 @@ mattacku(mtmp)
 			if((mattk->adtyp != AD_SHDW || range2) && lined_up(mtmp)){
 				if (canseemon(mtmp)) pline("%s shoots at you!", Monnam(mtmp));
 				for(n = d(mattk->damn, mattk->damd); n > 0; n--) sum[i] = firemu(mtmp, mattk);
+				mon_ranged_gazeonly = 0;
 			/* Note: firemu takes care of displacement */
 			}
 		} break;
@@ -1047,6 +1066,7 @@ mattacku(mtmp)
 			if(lined_up(mtmp) && dist2(mtmp->mx,mtmp->my,mtmp->mux,mtmp->muy) <= BOLT_LIM*BOLT_LIM){
 				if (foundyou) sum[i] = hitmu(mtmp, mattk);
 				else wildmiss(mtmp, mattk);
+				mon_ranged_gazeonly = 0;
 			}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 		case AT_LNCK:
@@ -1062,12 +1082,14 @@ mattacku(mtmp)
 							missmu(mtmp, (tmp == j), mattk);
 					} else
 						wildmiss(mtmp, mattk);
+					mon_ranged_gazeonly = 0;
 				}
 				if(mdat == &mons[PM_DEMOGORGON] && sum[i]){
 					mtmp->mvar2 = mtmp->mvar2+1;
 					if(!range2 && mtmp->mvar2>=2){
 						struct attack rend = {AT_HUGS, AD_SHRD, 3, 12};
 						sum[i] = hitmu(mtmp, &rend);
+						mon_ranged_gazeonly = 0;
 						mtmp->mvar2=0;
 					}
 				}
@@ -1075,9 +1097,12 @@ mattacku(mtmp)
 		}break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 		case AT_5SQR:
-			if(distmin(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 5 && (!MON_WEP(mtmp) || mtmp->mconf || Conflict || 
+			if(distmin(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 5 
+				&& (!MON_WEP(mtmp) || mtmp->mconf || Conflict || 
 					mattk->adtyp == AD_STAR || mattk->adtyp == AD_BLUD || mattk->adtyp == AD_SHDW || 
-					!touch_petrifies(youracedata))) {
+					!touch_petrifies(youracedata))
+				&& couldsee(mtmp->mx, mtmp->my)
+			) {
 			    if (foundyou) {
 				if(tchtmp > (j = rnd(20+i*2))) {
 				    if (mattk->aatyp != AT_KICK ||
@@ -1086,13 +1111,15 @@ mattacku(mtmp)
 				} else
 				    missmu(mtmp, (tchtmp == j), mattk);
 			    } else
-				wildmiss(mtmp, mattk);
+					wildmiss(mtmp, mattk);
+				mon_ranged_gazeonly = 0;
 			}
 			if(mdat == &mons[PM_DEMOGORGON] && sum[i]){
 				mtmp->mvar2 = mtmp->mvar2+1;
 				if(!range2 && mtmp->mvar2>=2){
 					struct attack rend = {AT_HUGS, AD_SHRD, 3, 12};
 					sum[i] = hitmu(mtmp, &rend);
+					mon_ranged_gazeonly = 0;
 					mtmp->mvar2=0;
 				}
 			}
@@ -1134,6 +1161,7 @@ mattacku(mtmp)
 					if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))){
 						if(tchtmp > (j = dieroll = rnd(20+i*2))){
 							sum[i] = hitmu(mtmp, mattk);
+							mon_ranged_gazeonly = 0;
 							if(mattk->aatyp == AT_DEVA && sum[i]){
 								deva = 1;
 								while(tchtmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
@@ -1142,6 +1170,7 @@ mattacku(mtmp)
 					} else {
 						if(tmp > (j = dieroll = rnd(20+i*2))){
 							sum[i] = hitmu(mtmp, mattk);
+							mon_ranged_gazeonly = 0;
 							if(mattk->aatyp == AT_DEVA && sum[i]){
 								deva = 1;
 								while(tmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
@@ -1198,10 +1227,12 @@ mattacku(mtmp)
 						if(tchtmp > (j = dieroll = rnd(20+i*2))){
 							sum[i] = hitmu(mtmp, mattk);
 						} else missmu(mtmp, (tchtmp == j), mattk);
+						mon_ranged_gazeonly = 0;
 					} else {
 						if(tmp > (j = dieroll = rnd(20+i*2))){
 							sum[i] = hitmu(mtmp, mattk);
 						} else missmu(mtmp, (tmp == j), mattk);
+						mon_ranged_gazeonly = 0;
 					}
 					/* KMH -- Don't accumulate to-hit bonuses */
 					if (otmp){
@@ -1257,6 +1288,7 @@ mattacku(mtmp)
 					if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))){
 						if(tchtmp > (j = dieroll = rnd(20+i*2))){
 							sum[i] = hitmu(mtmp, mattk);
+							mon_ranged_gazeonly = 0;
 							if(mattk->aatyp == AT_DEVA && sum[i]){
 								deva = 1;
 								while(tchtmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
@@ -1265,6 +1297,7 @@ mattacku(mtmp)
 					} else {
 						if(tmp > (j = dieroll = rnd(20+i*2))){
 							sum[i] = hitmu(mtmp, mattk);
+							mon_ranged_gazeonly = 0;
 							if(mattk->aatyp == AT_DEVA && sum[i]){
 								deva = 1;
 								while(tmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
@@ -1284,6 +1317,7 @@ mattacku(mtmp)
 						/*Mariliths get a wrap attack if their first two attacks hit*/
 						struct attack rend = {AT_HUGS, AD_WRAP, mdat == &mons[PM_SHAKTARI] ? 8 : 4, 6};
 						sum[i] = hitmu(mtmp, &rend);
+						mon_ranged_gazeonly = 0;
 					}
 			    } else
 					wildmiss(mtmp, mattk);
@@ -1354,15 +1388,15 @@ mattacku(mtmp)
 	    if(flags.botl) bot();
 	/* give player a chance of waking up before dying -kaa */
 	    if(sum[i] == 1) {	    /* successful attack */
-		if (u.usleep && u.usleep < monstermoves && rn2(20) < ACURR(A_WIS)) {
-		    multi = -1;
-		    nomovemsg = "The combat suddenly awakens you.";
-		}
+			if (u.usleep && u.usleep < monstermoves && rn2(20) < ACURR(A_WIS)) {
+				multi = -1;
+				nomovemsg = "The combat suddenly awakens you.";
+			}
 	    }
 	    if(sum[i] == 2) return 1;		/* attacker dead */
 	    if(sum[i] == 3) break;  /* attacker teleported, no more attacks */
 		
-		if(uwep && is_lightsaber(uwep) && litsaber(uwep)){
+		if(uwep && is_lightsaber(uwep) && litsaber(uwep) && !DEADMONSTER(mtmp)){
 			if(u.fightingForm == FFORM_SHIEN && multi >= 0 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) == 1 && (!uarm || is_light_armor(uarm))){
 				switch(min(P_SKILL(FFORM_SHIEN), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:
@@ -1370,6 +1404,8 @@ mattacku(mtmp)
 							You("counterattack!");
 							use_skill(FFORM_SHIEN,1);
 							flags.forcefight = TRUE;
+							u.dy = sgn(mtmp->my - u.uy);
+							u.dx = sgn(mtmp->mx - u.ux);
 							attack(mtmp);
 							flags.forcefight = FALSE;
 							if(DEADMONSTER(mtmp)) return 1;		/* attacker dead */
@@ -1380,6 +1416,8 @@ mattacku(mtmp)
 							You("counterattack!");
 							use_skill(FFORM_SHIEN,1);
 							flags.forcefight = TRUE;
+							u.dy = sgn(mtmp->my - u.uy);
+							u.dx = sgn(mtmp->mx - u.ux);
 							attack(mtmp);
 							flags.forcefight = FALSE;
 							if(DEADMONSTER(mtmp)) return 1;		/* attacker dead */
@@ -1390,6 +1428,8 @@ mattacku(mtmp)
 							You("counterattack!");
 							use_skill(FFORM_SHIEN,1);
 							flags.forcefight = TRUE;
+							u.dy = sgn(mtmp->my - u.uy);
+							u.dx = sgn(mtmp->mx - u.ux);
 							attack(mtmp);
 							flags.forcefight = FALSE;
 							if(DEADMONSTER(mtmp)) return 1;		/* attacker dead */
@@ -1404,6 +1444,8 @@ mattacku(mtmp)
 						if(rn2(100) < 10){
 							You("counterattack!");
 							flags.forcefight = TRUE;
+							u.dy = sgn(mtmp->my - u.uy);
+							u.dx = sgn(mtmp->mx - u.ux);
 							attack(mtmp);
 							flags.forcefight = FALSE;
 							use_skill(FFORM_SORESU,1);
@@ -1414,6 +1456,8 @@ mattacku(mtmp)
 						if(rn2(100) < 15){
 							You("counterattack!");
 							flags.forcefight = TRUE;
+							u.dy = sgn(mtmp->my - u.uy);
+							u.dx = sgn(mtmp->mx - u.ux);
 							attack(mtmp);
 							flags.forcefight = FALSE;
 							use_skill(FFORM_SORESU,1);
@@ -1424,6 +1468,8 @@ mattacku(mtmp)
 						if(rn2(100) < 25){
 							You("counterattack!");
 							flags.forcefight = TRUE;
+							u.dy = sgn(mtmp->my - u.uy);
+							u.dx = sgn(mtmp->mx - u.ux);
 							attack(mtmp);
 							flags.forcefight = FALSE;
 							use_skill(FFORM_SORESU,1);
@@ -1725,7 +1771,9 @@ hitmu(mtmp, mattk)
 				(is_pole(uwep) && 
 					uwep->otyp != AKLYS && 
 					uwep->otyp != FORCE_PIKE && 
+					uwep->otyp != NAGINATA && 
 					uwep->oartifact != ART_WEBWEAVER_S_CROOK && 
+					uwep->oartifact != ART_SILENCE_GLAIVE && 
 					uwep->oartifact != ART_HEARTCLEAVER && 
 					uwep->oartifact != ART_SOL_VALTIVA && 
 					uwep->oartifact != ART_SHADOWLOCK && 
@@ -1768,18 +1816,30 @@ hitmu(mtmp, mattk)
 			}
 			
 			if (dmg <= 0) dmg = 1;
-			if (!(uwep->oartifact &&
-				artifact_hit(mtmp, &youmonst, uwep, &dmg,dieroll)))
-			     hitmsg(mtmp, mattk);
+			//Artifact damage block:
+			{
+				int basedamage = dmg;
+				int newdamage = dmg;
+				if(otmp->oproperties){
+					(void)oproperty_hit(mtmp, &youmonst, uwep, &newdamage,dieroll);
+				}
+				dmg += (newdamage - basedamage);
+				newdamage = basedamage;
+				if (!(uwep->oartifact &&
+					artifact_hit(mtmp, &youmonst, uwep, &newdamage,dieroll)))
+					 hitmsg(mtmp, mattk);
+				dmg += (newdamage - basedamage);
+			}
+			//End artifact damage block:
 			if (!dmg) break;
-			if (u.mh > 1 && u.mh > ((u.uac>=0) ? dmg : dmg+AC_VALUE(u.uac+u.uspellprot)-u.uspellprot) &&
+			if (u.mh > 1 && u.mh > (dmg-roll_udr(mtmp)) &&
 				   uwep->obj_material == IRON &&
 					(u.umonnum==PM_BLACK_PUDDING
 					|| u.umonnum==PM_BROWN_PUDDING)) {
 			    /* This redundancy necessary because you have to
 			     * take the damage _before_ being cloned.
 			     */
-			    if (u.uac < 0) dmg += AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
+			    dmg -= roll_udr(mtmp);
 			    if (dmg < 1) dmg = 1;
 			    if (dmg > 1) exercise(A_STR, FALSE);
 			    u.mh -= dmg;
@@ -1911,14 +1971,14 @@ hitmu(mtmp, mattk)
 				artifact_hit(mtmp, &youmonst, otmp, &dmg,dieroll)))
 			     hitmsg(mtmp, mattk);
 			if (!dmg) break;
-			if (u.mh > 1 && u.mh > ((u.uac>=0) ? dmg : dmg+AC_VALUE(u.uac+u.uspellprot)-u.uspellprot) &&
+			if (u.mh > 1 && u.mh > (dmg-roll_udr(mtmp)) &&
 				   otmp->obj_material == IRON &&
 					(u.umonnum==PM_BLACK_PUDDING
 					|| u.umonnum==PM_BROWN_PUDDING)) {
 			    /* This redundancy necessary because you have to
 			     * take the damage _before_ being cloned.
 			     */
-			    if (u.uac < 0) dmg += AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
+			    dmg -= roll_udr(mtmp);
 			    if (dmg < 1) dmg = 1;
 			    if (dmg > 1) exercise(A_STR, FALSE);
 			    u.mh -= dmg;
@@ -1928,17 +1988,23 @@ hitmu(mtmp, mattk)
 			    You("divide as %s hits you!",mon_nam(mtmp));
 			}
 			urustm(mtmp, otmp);
-		    } else if (mattk->aatyp != AT_TUCH || dmg != 0 ||
+		    } else if (mattk->aatyp != AT_TUCH && dmg != 0 &&
 				mtmp != u.ustuck
 			){
 				if(oarm && dmg && oarm->otyp == GAUNTLETS_OF_POWER) dmg += 8;
 				hitmsg(mtmp, mattk);
 			}
+			
+		    if(mtmp->data == &mons[PM_FORMIAN_CRUSHER] && weaponhit && !otmp)
+				dmg += d(3*((int)mattk->damn), (int)mattk->damd);
+			
 			// tack on bonus elemental damage, if applicable
 			if (mattk->adtyp != AD_PHYS){
 				alt_attk.aatyp = AT_NONE;
 				if(mattk->adtyp == AD_OONA)
 					alt_attk.adtyp = u.oonaenergy;
+				else if(mattk->adtyp == AD_HDRG)
+					alt_attk.adtyp = mtmp->mvar1;
 				else if(mattk->adtyp == AD_RBRE){
 					switch(rn2(3)){
 						case 0:
@@ -1952,31 +2018,33 @@ hitmu(mtmp, mattk)
 						break;
 					}
 				} else alt_attk.adtyp = mattk->adtyp;
-				switch (alt_attk.adtyp)
-				{
-				case AD_FIRE:
-				case AD_COLD:
-				case AD_ELEC:
-				case AD_ACID:
-					alt_attk.damn = 4;
-					alt_attk.damd = 6;
-					break;
-				case AD_EFIR:
-				case AD_ECLD:
-				case AD_EELC:
-				case AD_EACD:
-					alt_attk.damn = 3;
-					alt_attk.damd = 7;
-					break;
-				case AD_STUN:
-					alt_attk.damn = 1;
-					alt_attk.damd = 4;
-					break;
-				default:
-					alt_attk.damn = 0;
-					alt_attk.damd = 0;
-					break;
-				}
+				alt_attk.damn = mattk->damn;
+				alt_attk.damd = mattk->damd;
+				// switch (alt_attk.adtyp)
+				// {
+				// case AD_FIRE:
+				// case AD_COLD:
+				// case AD_ELEC:
+				// case AD_ACID:
+					// alt_attk.damn = 4;
+					// alt_attk.damd = 6;
+					// break;
+				// case AD_EFIR:
+				// case AD_ECLD:
+				// case AD_EELC:
+				// case AD_EACD:
+					// alt_attk.damn = 3;
+					// alt_attk.damd = 7;
+					// break;
+				// case AD_STUN:
+					// alt_attk.damn = 1;
+					// alt_attk.damd = 4;
+					// break;
+				// default:
+					// alt_attk.damn = 0;
+					// alt_attk.damd = 0;
+					// break;
+				// }
 				hitmu(mtmp, &alt_attk);
 			}
 		}
@@ -3502,7 +3570,7 @@ dopois:
 			for (i = rn2(3)+2; i > 0; i--) {
 				x = rn2(3)-1;
 				y = rn2(3)-1;
-				explode(mtmp->mx+x, mtmp->my+y, 8, dmg, -1, rn2(EXPL_MAX));		//-1 is unspecified source. 8 is physical
+				explode(mtmp->mx+x, mtmp->my+y, 8, dmg, -1, rn2(EXPL_MAX), 1);		//-1 is unspecified source. 8 is physical
 			}
 			if(DEADMONSTER(mtmp))
 				return 2;
@@ -3546,13 +3614,9 @@ dopois:
 
 	if(mtmp->data == &mons[PM_LONG_WORM] && mtmp->wormno && mattk->aatyp == AT_BITE){
 		if(wormline(mtmp, u.ux, u.uy))
-			dmg *= 2;
+			dmg += d(2,4); //Add segment damage
 	}
 	
-	if(dmg && u.ustdy){
-		dmg += u.ustdy;
-		u.ustdy -= 1;
-	}
 	
 	if(attacktype_fordmg(youracedata, AT_NONE, AD_STAR)){
 		if(otmp && otmp == MON_WEP(mtmp) && !otmp->oartifact && otmp->spe <= 0) dmg = 0;
@@ -3563,14 +3627,12 @@ dopois:
  *	against hits.  The bladed shadows of the black web pierce your armor.
  */
 	if (dmg){
-		if(u.uac < 0) {
-			if(mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
-				dmg += AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
-				if (dmg < 1) dmg = 1;
-			} else if(base_uac() < 0){
-				dmg += AC_VALUE(base_uac()+u.uspellprot)-u.uspellprot;
-				if (dmg < 1) dmg = 1;
-			}
+		if(mattk->adtyp != AD_SHDW && mattk->adtyp != AD_STAR && !phasearmor){
+			dmg -= roll_udr(mtmp);
+			if (dmg < 1) dmg = 1;
+		} else {
+			dmg -= base_udr();
+			if (dmg < 1) dmg = 1;
 		}
 	}
 	
@@ -4050,10 +4112,10 @@ boolean ufound;
 		case AD_FNEX:
 			mondead(mtmp);
 			if(mtmp->data==&mons[PM_SWAMP_FERN_SPORE]) 
-				explode(mtmp->mx, mtmp->my, 9, tmp, MON_EXPLODE, EXPL_MAGICAL);
+				explode(mtmp->mx, mtmp->my, 9, tmp, MON_EXPLODE, EXPL_MAGICAL, 1);
 			else if(mtmp->data==&mons[PM_BURNING_FERN_SPORE])
-				explode(mtmp->mx, mtmp->my, 8, tmp, MON_EXPLODE, EXPL_YELLOW);
-			else explode(mtmp->mx, mtmp->my, 7, tmp, MON_EXPLODE, EXPL_NOXIOUS);
+				explode(mtmp->mx, mtmp->my, 8, tmp, MON_EXPLODE, EXPL_YELLOW, 1);
+			else explode(mtmp->mx, mtmp->my, 7, tmp, MON_EXPLODE, EXPL_NOXIOUS, 1);
 			return 2;
 		break;
 		
@@ -4358,41 +4420,55 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 			}
 		break;
 	    case AD_STON:
-		if (mtmp->mcan || is_blind(mtmp)) {
+		if(mtmp->data == &mons[PM_MEDUSA]){
+			if(mtmp->mcan){
+				if (!canseemon(mtmp)) break;	/* silently */
+				pline("%s doesn't look all that ugly.", Monnam(mtmp));
+				break;
+			}
+			else if (Reflecting && couldsee(mtmp->mx, mtmp->my)) {
+				/* hero has line of sight to Medusa and she's not blind */
+				boolean useeit = canseemon(mtmp);
+
+				if (useeit)
+				(void) ureflects("%s image is reflected by your %s.",
+						 s_suffix(Monnam(mtmp)));
+				if (mon_reflects(mtmp, !useeit ? (char *)0 :
+						 "The image is reflected away by %s %s!"))
+				break;
+				if (!m_canseeu(mtmp) || is_blind(mtmp)) { /* probably you're invisible */
+					if (useeit)
+						pline(
+					  "%s doesn't seem to notice that %s image was reflected.",
+						  Monnam(mtmp), mhis(mtmp));
+					break;
+				}
+				if (useeit)
+					pline("%s is turned to stone!", Monnam(mtmp));
+				stoned = TRUE;
+				killed(mtmp);
+
+				if (mtmp->mhp > 0) break;
+				return 2;
+			}
+			if (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) &&
+				!Stone_resistance
+			) {
+				You("see %s.", mon_nam(mtmp));
+				stop_occupation();
+				if(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
+				You("turn to stone...");
+				killer_format = KILLED_BY;
+				killer = "Poseidon's curse";
+				done(STONING);
+			}
+		}
+		else if (mtmp->mcan || is_blind(mtmp)) {
 		    if (!canseemon(mtmp)) break;	/* silently */
-		    pline("%s %s.", Monnam(mtmp),
-			  (mtmp->data == &mons[PM_MEDUSA] && mtmp->mcan) ?
-				"doesn't look all that ugly" :
-				"gazes ineffectually");
+		    pline("%s gazes ineffectually.", Monnam(mtmp));
 		    break;
 		}
-		if (Reflecting && couldsee(mtmp->mx, mtmp->my) &&
-			mtmp->data == &mons[PM_MEDUSA]) {
-		    /* hero has line of sight to Medusa and she's not blind */
-		    boolean useeit = canseemon(mtmp);
-
-		    if (useeit)
-			(void) ureflects("%s gaze is reflected by your %s.",
-					 s_suffix(Monnam(mtmp)));
-		    if (mon_reflects(mtmp, !useeit ? (char *)0 :
-				     "The gaze is reflected away by %s %s!"))
-			break;
-		    if (!m_canseeu(mtmp)) { /* probably you're invisible */
-			if (useeit)
-			    pline(
-		      "%s doesn't seem to notice that %s gaze was reflected.",
-				  Monnam(mtmp), mhis(mtmp));
-			break;
-		    }
-		    if (useeit)
-			pline("%s is turned to stone!", Monnam(mtmp));
-		    stoned = TRUE;
-		    killed(mtmp);
-
-		    if (mtmp->mhp > 0) break;
-		    return 2;
-		}
-		if(mtmp->data == &mons[PM_PALE_NIGHT]){
+		else if(mtmp->data == &mons[PM_PALE_NIGHT]){
 			if(canseemon(mtmp)) pline("%s parts her shroud!", Monnam(mtmp));
 			if (mtmp->mcan || Stone_resistance) {
 				if (!canseemon(mtmp)) break;	/* silently */
@@ -4430,24 +4506,29 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 			}
 			return 0;
 		}
-		if (mtmp->data == &mons[PM_BEHOLDER] && canseemon(mtmp) && couldsee(mtmp->mx, mtmp->my) &&
-		    !Stone_resistance) {
-		    You("meet %s gaze.", s_suffix(mon_nam(mtmp)));
-		    stop_occupation();
-		    if(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
-			Stoned = 5;
-			delayed_killer = "a beholder's eye of petrification.";
-			killer_format = KILLED_BY;
-		}
-		else if (canseemon(mtmp) && couldsee(mtmp->mx, mtmp->my) &&
-		    !Stone_resistance) {
-		    You("meet %s gaze.", s_suffix(mon_nam(mtmp)));
-		    stop_occupation();
-		    if(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
-		    You("turn to stone...");
-		    killer_format = KILLED_BY;
-		    killer = mtmp->data->mname;
-		    done(STONING);
+		else if (mtmp->data == &mons[PM_BEHOLDER]){
+			if(canseemon(mtmp) && couldsee(mtmp->mx, mtmp->my) &&
+				!Stone_resistance
+			) {
+				You("meet %s gaze.", s_suffix(mon_nam(mtmp)));
+				stop_occupation();
+				if(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
+				Stoned = 5;
+				delayed_killer = "a beholder's eye of petrification.";
+				killer_format = KILLED_BY;
+			}
+		} else {
+			if (canseemon(mtmp) && couldsee(mtmp->mx, mtmp->my) &&
+				!Stone_resistance
+			) {
+				You("meet %s gaze.", s_suffix(mon_nam(mtmp)));
+				stop_occupation();
+				if(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
+				You("turn to stone...");
+				killer_format = KILLED_BY;
+				killer = mtmp->data->mname;
+				done(STONING);
+			}
 		}
 		break;
 	    case AD_CONF:
@@ -4548,7 +4629,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		}
 		break;
 	    case AD_FIRE:
-		if (!mtmp->mcan && canseemon(mtmp) &&
+		if (!mtmp->mcan && 
 			couldsee(mtmp->mx, mtmp->my) &&
 			!is_blind(mtmp) && !mtmp->mspec_used && rn2(5)) {
 //		    int dmg = d(2,6);
@@ -4575,7 +4656,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		}
 		break;
 		case AD_COLD:
-		if (!mtmp->mcan && canseemon(mtmp) &&
+		if (!mtmp->mcan && 
 			couldsee(mtmp->mx, mtmp->my) &&
 			!is_blind(mtmp) && !mtmp->mspec_used && rn2(5)) {
 //		    int dmg = d(2,6);
@@ -4597,7 +4678,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		}
 		break;
 		case AD_ELEC:
-		if (!mtmp->mcan && canseemon(mtmp) &&
+		if (!mtmp->mcan && 
 			couldsee(mtmp->mx, mtmp->my) &&
 			!is_blind(mtmp) && !mtmp->mspec_used && rn2(5)) {
 //		    int dmg = d(2,6);
@@ -4852,14 +4933,15 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 		case AD_STDY:
-			if (!mtmp->mcan && canseemon(mtmp) &&
+			if (!mtmp->mcan &&
 				couldsee(mtmp->mx, mtmp->my) &&
 				!is_blind(mtmp)
 			) {
 				int dmg = d((int)mattk->damn, (int)mattk->damd);
 				if(is_orc(mtmp->data)) pline("%s curses and urges %s followers on.", Monnam(mtmp), mhis(mtmp));
 				else if(mtmp->data == &mons[PM_LEGION] || mtmp->data == &mons[PM_LEGIONNAIRE]); //no message
-				else pline("%s studies you with a level stare.", Monnam(mtmp));
+				else if(canseemon(mtmp)) pline("%s studies you with a level stare.", Monnam(mtmp));
+				//else no message
 				u.ustdy = max(dmg,u.ustdy);
 				dmg = 0;
 			}
@@ -7843,7 +7925,10 @@ register struct monst *mtmp;
 register struct attack *mattk;
 {
 	int i, tmp;
-
+	
+	if(DEADMONSTER(mtmp))
+		return 1;
+	
 	for (i = 0; ; i++) {
 	    if (i >= NATTK) return 1;
 	    if (olduasmon->mattk[i].aatyp == AT_NONE ||
@@ -8103,13 +8188,6 @@ register struct attack *mattk;
       }
     }
 	
-	if(uwep && uwep->oartifact == ART_SANSARA_MIRROR && multi >= 0 && rn2(2)){
-		You("counterattack!");
-		flags.forcefight = TRUE;
-		attack(mtmp);
-		flags.forcefight = FALSE;
-		if(DEADMONSTER(mtmp)) return 2;
-	}
 	if(u.specialSealsActive&SEAL_BLACK_WEB && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves+20){
 		static struct attack webattack[] = 
 		{
@@ -8149,6 +8227,8 @@ register struct attack *mattk;
 		if(u.sealsActive&SEAL_EURYNOME && multi >= 0 && !rn2(5)){
 			You("counterattack!");
 			flags.forcefight = TRUE;
+			u.dy = sgn(mtmp->my - u.uy);
+			u.dx = sgn(mtmp->mx - u.ux);
 			attack(mtmp);
 			flags.forcefight = FALSE;
 			if(DEADMONSTER(mtmp)) return 2;
@@ -8169,6 +8249,8 @@ register struct attack *mattk;
 						You("counterattack!");
 						use_skill(FFORM_DJEM_SO,1);
 						flags.forcefight = TRUE;
+						u.dy = sgn(mtmp->my - u.uy);
+						u.dx = sgn(mtmp->mx - u.ux);
 						attack(mtmp);
 						flags.forcefight = FALSE;
 						if(DEADMONSTER(mtmp)) return 2;
@@ -8179,6 +8261,8 @@ register struct attack *mattk;
 						You("counterattack!");
 						use_skill(FFORM_DJEM_SO,1);
 						flags.forcefight = TRUE;
+						u.dy = sgn(mtmp->my - u.uy);
+						u.dx = sgn(mtmp->mx - u.ux);
 						attack(mtmp);
 						flags.forcefight = FALSE;
 						if(DEADMONSTER(mtmp)) return 2;
@@ -8189,6 +8273,8 @@ register struct attack *mattk;
 						You("counterattack!");
 						use_skill(FFORM_DJEM_SO,1);
 						flags.forcefight = TRUE;
+						u.dy = sgn(mtmp->my - u.uy);
+						u.dx = sgn(mtmp->mx - u.ux);
 						attack(mtmp);
 						flags.forcefight = FALSE;
 						if(DEADMONSTER(mtmp)) return 2;
@@ -8197,12 +8283,23 @@ register struct attack *mattk;
 			}
 		}
 	}
+	if(uwep && uwep->oartifact == ART_SANSARA_MIRROR && multi >= 0 && rn2(2)){
+		You("counterattack!");
+		flags.forcefight = TRUE;
+		u.dy = sgn(mtmp->my - u.uy);
+		u.dx = sgn(mtmp->mx - u.ux);
+		attack(mtmp);
+		flags.forcefight = FALSE;
+		if(DEADMONSTER(mtmp)) return 2;
+	}
 	if( uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && 
 		uwep->ovar1&SEAL_EURYNOME && multi >= 0 && 
 		!rn2((quest_status.killed_nemesis && Role_if(PM_EXILE)) ? 10 : 20)
 	){
 		You("counterattack!");
 		flags.forcefight = TRUE;
+		u.dy = sgn(mtmp->my - u.uy);
+		u.dx = sgn(mtmp->mx - u.ux);
 		attack(mtmp);
 		flags.forcefight = FALSE;
 		if(DEADMONSTER(mtmp)) return 2;

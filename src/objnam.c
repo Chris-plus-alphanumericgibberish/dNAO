@@ -158,7 +158,6 @@ STATIC_OVL struct Jitem ObscureJapanese_items[] = {
 	{ WAR_HAT, "jingasa" },
 	{ GAUNTLETS_OF_FUMBLING, "kote of fumbling" },
 	{ GAUNTLETS_OF_POWER, "kote of power" },
-	{ GLAIVE, "naginata" },
 	{ GUISARME, "kamayari" },
 	{ HALBERD, "bisento" },
 	{ HELMET, "kabuto" },
@@ -194,7 +193,6 @@ STATIC_OVL struct Jitem Japanese_items[] = {
 	{ WAR_HAT, "jingasa" },
 	{ GAUNTLETS_OF_FUMBLING, "kote of fumbling" },
 	{ GAUNTLETS_OF_POWER, "kote of power" },
-	{ GLAIVE, "naginata" },
 	{ HELMET, "kabuto" },
 	{ KNIFE, "shito" },
 	{ GLOVES, "yugake" },
@@ -328,7 +326,7 @@ register int otyp;
 	if (Role_if(PM_SAMURAI) && iflags.role_obj_names && Alternate_item_name(otyp,Japanese_items))
 		actualn = Alternate_item_name(otyp,Japanese_items);
 	if (Role_if(PM_SAMURAI) && iflags.obscure_role_obj_names && Alternate_item_name(otyp,ObscureJapanese_items))
-		actualn = Alternate_item_name(otyp,Japanese_items);
+		actualn = Alternate_item_name(otyp,ObscureJapanese_items);
 	if (Role_if(PM_PIRATE) && iflags.role_obj_names && Alternate_item_name(otyp,Pirate_items))
 		actualn = Alternate_item_name(otyp,Pirate_items);
 	switch(ocl->oc_class) {
@@ -484,6 +482,8 @@ boolean ignore_oquan;
 	buf = nextobuf() + PREFIX;	/* leave room for "17 -3 " */
 	if (Role_if(PM_SAMURAI) && iflags.role_obj_names && Alternate_item_name(typ,Japanese_items))
 		actualn = Alternate_item_name(typ,Japanese_items);
+	if (Role_if(PM_SAMURAI) && iflags.obscure_role_obj_names && Alternate_item_name(typ,ObscureJapanese_items))
+		actualn = Alternate_item_name(typ,ObscureJapanese_items);
 	if (Role_if(PM_PIRATE) && iflags.role_obj_names && Alternate_item_name(typ,Pirate_items))
 		actualn = Alternate_item_name(typ,Pirate_items);
 
@@ -527,7 +527,10 @@ boolean ignore_oquan;
 				Strcat(buf, "paper ");
 			break;
 			case CLOTH:
-				Strcat(buf, "cloth ");
+				if((obj->oproperties&OPROP_WOOL) == OPROP_WOOL)
+					Strcat(buf, "woolen ");
+				else
+					Strcat(buf, "cloth ");
 			break;
 			case LEATHER:
 				Strcat(buf, "leather ");
@@ -574,7 +577,7 @@ boolean ignore_oquan;
 				Strcat(buf, "gem ");
 			break;
 			case MINERAL:
-				Strcat(buf, "stone ");
+				obj->oclass == ARMOR_CLASS ? Strcat(buf, "ceramic ") : Strcat(buf, "stone ");
 			break;
 			case OBSIDIAN_MT:
 				Strcat(buf, "obsidian ");
@@ -583,6 +586,30 @@ boolean ignore_oquan;
 				Strcat(buf, "black ");
 			break;
 		}
+	}
+	if((obj->oproperties&OPROP_WOOL) == OPROP_WOOL && !(obj->obj_material != objects[obj->otyp].oc_material && obj->obj_material == CLOTH)){
+		if(obj->obj_material == CLOTH)
+			Strcat(buf, "woolen ");
+		else
+			Strcat(buf, "wool-lined ");
+	}
+	if(obj->oproperties){
+		if(obj->oproperties&OPROP_FIREW)
+			Strcat(buf, "flaming ");
+		if(obj->oproperties&OPROP_COLDW)
+			Strcat(buf, "freezing ");
+		if(obj->oproperties&OPROP_ELECW)
+			Strcat(buf, "shocking ");
+		if(obj->oproperties&OPROP_ACIDW)
+			Strcat(buf, "sizzling ");
+		if(obj->oproperties&OPROP_MAGCW)
+			Strcat(buf, "sparkling ");
+		if(obj->oproperties&OPROP_ANARW)
+			Strcat(buf, "anarchic ");
+		if(obj->oproperties&OPROP_CONCW)
+			Strcat(buf, "concordant ");
+		if(obj->oproperties&OPROP_AXIOW)
+			Strcat(buf, "axiomatic ");
 	}
 	if(is_lightsaber(obj) && litsaber(obj)){
 		Strcat(buf, lightsaber_colorText(obj));
@@ -611,6 +638,7 @@ boolean ignore_oquan;
 			if(obj->opoisoned & OPOISON_BLIND) Strcat(buf, "stained ");
 			if(obj->opoisoned & OPOISON_PARAL) Strcat(buf, "envenomed ");
 			if(obj->opoisoned & OPOISON_AMNES) Strcat(buf, "lethe-rusted ");
+			if(obj->opoisoned & OPOISON_ACID)  Strcat(buf, "acid-coated ");
 			if(obj->otyp == VIPERWHIP && obj->opoisonchrgs) Sprintf(eos(buf), "(%d coatings) ", (int)(obj->opoisonchrgs+1));
 		}
 		if(obj->otyp == VIPERWHIP && obj->ovar1){
@@ -625,7 +653,7 @@ boolean ignore_oquan;
 				case 8: Strcat(buf, "eight-headed "); break;
 			}
 		}
-		if((obj)->obj_material == WOOD && obj->otyp != MOON_AXE && obj->ovar1) Strcat(buf, "carved ");
+		if((obj)->obj_material == WOOD && obj->oward) Strcat(buf, "carved ");
 		if(obj->otyp == MOON_AXE && nn){
 			switch(obj->ovar1){
 				case ECLIPSE_MOON:
@@ -765,6 +793,11 @@ boolean ignore_oquan;
 			break;
 		}
 
+		if (typ == EYEBALL && obj->known) {
+		    if (obj->corpsenm != NON_PM)
+				Sprintf(eos(buf), "%s ", mons[obj->corpsenm].mname);
+		}
+		
 		Strcat(buf, actualn);
 		if (typ == TIN && obj->known) {
 		    if(obj->spe > 0)
@@ -839,7 +872,7 @@ boolean ignore_oquan;
 		if(nn) {
 			Strcat(buf, " of ");
 			if(obj->otyp != SCR_WARD) Strcat(buf, actualn);
-			else Strcat(buf, wardDecode[obj->ovar1]);
+			else Strcat(buf, wardDecode[obj->oward]);
 		} else if(un) {
 			Strcat(buf, " called ");
 			Strcat(buf, un);
@@ -1031,6 +1064,10 @@ boolean with_price;
 	 * combining both into one function taking a parameter.
 	 */
 	/* must check opoisoned--someone can have a weirdly-named fruit */
+	if (!strncmp(bp, "acid-coated ", 12) && obj->opoisoned & OPOISON_ACID) {
+		bp += 12;
+		ispoisoned = OPOISON_ACID;
+	}
 	if (!strncmp(bp, "lethe-rusted ", 13) && obj->opoisoned & OPOISON_AMNES) {
 		bp += 13;
 		ispoisoned = OPOISON_AMNES;
@@ -1043,7 +1080,7 @@ boolean with_price;
 		bp += 8;
 		ispoisoned = OPOISON_BLIND;
 	}
-	if (!strncmp(bp, "drug-coated ", 12) && obj->opoisoned & OPOISON_BASIC) {
+	if (!strncmp(bp, "drug-coated ", 12) && obj->opoisoned & OPOISON_SLEEP) {
 		bp += 12;
 		ispoisoned = OPOISON_SLEEP;
 	}
@@ -1123,6 +1160,8 @@ boolean with_price;
 			Strcat(prefix, "drug-coated ");
 		if(ispoisoned & OPOISON_AMNES)
 			Strcat(prefix, "lethe-rusted ");
+		if(ispoisoned & OPOISON_ACID)
+			Strcat(prefix, "acid-coated ");
 		if(obj->otyp == MOON_AXE && obj->known && obj->oartifact){
 			switch(obj->ovar1){
 				case ECLIPSE_MOON:
@@ -1151,7 +1190,26 @@ plus:
 			if(obj->opoisoned & OPOISON_BLIND) Strcat(prefix, "stained ");
 			if(obj->opoisoned & OPOISON_PARAL) Strcat(prefix, "envenomed ");
 			if(obj->opoisoned & OPOISON_AMNES) Strcat(prefix, "lethe-rusted ");
+			if(obj->opoisoned & OPOISON_ACID) Strcat(prefix,  "acid-coated ");
 			if(obj->otyp == VIPERWHIP && obj->opoisonchrgs) Sprintf(eos(prefix), "(%d coatings) ", (int)(obj->opoisonchrgs+1));
+		}
+		if(obj->oproperties){
+			if(obj->oproperties&OPROP_FIREW)
+				Strcat(prefix, "flaming ");
+			if(obj->oproperties&OPROP_COLDW)
+				Strcat(prefix, "freezing ");
+			if(obj->oproperties&OPROP_ELECW)
+				Strcat(prefix, "shocking ");
+			if(obj->oproperties&OPROP_ACIDW)
+				Strcat(prefix, "sizzling ");
+			if(obj->oproperties&OPROP_MAGCW)
+				Strcat(prefix, "sparkling ");
+			if(obj->oproperties&OPROP_ANARW)
+				Strcat(prefix, "anarchic ");
+			if(obj->oproperties&OPROP_CONCW)
+				Strcat(prefix, "concordant ");
+			if(obj->oproperties&OPROP_AXIOW)
+				Strcat(prefix, "axiomatic ");
 		}
 		add_erosion_words(obj, prefix);
 		if(obj->known || Race_if(PM_INCANTIFIER)) {
@@ -1344,7 +1402,7 @@ charges:
 	case RING_CLASS:
 		add_erosion_words(obj, prefix);
 ring:
-		if(obj->ovar1 && (isEngrRing(obj->otyp))) Strcat(prefix, "engraved ");
+		if(obj->oward && (isEngrRing(obj->otyp))) Strcat(prefix, "engraved ");
 		if(obj->owornmask & W_RINGR) Strcat(bp, " (on right ");
 		if(obj->owornmask & W_RINGL) Strcat(bp, " (on left ");
 		if(obj->owornmask & W_RING) {
@@ -1356,6 +1414,7 @@ ring:
 				if(obj->opoisoned & OPOISON_BLIND) Strcat(bp, ", eyebite injecting");
 				if(obj->opoisoned & OPOISON_PARAL) Strcat(bp, ", venom injecting");
 				if(obj->opoisoned & OPOISON_AMNES) Strcat(bp, ", lethe injecting");
+				if(obj->opoisoned & OPOISON_ACID) Strcat(bp,  ", acid injecting");
 			}
 		    Strcat(bp, ")");
 		} else if(isSignetRing(obj->otyp)){
@@ -1365,6 +1424,7 @@ ring:
 				if(obj->opoisoned & OPOISON_BLIND) Strcat(bp, " (eyebite injecting)");
 				if(obj->opoisoned & OPOISON_PARAL) Strcat(bp, " (venom injecting)");
 				if(obj->opoisoned & OPOISON_AMNES) Strcat(bp, " (lethe injecting)");
+				if(obj->opoisoned & OPOISON_ACID)  Strcat(bp, " (acid injecting)");
 		}
 		if((obj->known || Race_if(PM_INCANTIFIER)) && objects[obj->otyp].oc_charged) {
 			Strcat(prefix, sitoa((obj->otyp == CRYSTAL_PLATE_MAIL || obj->otyp == CRYSTAL_SWORD) ? obj->spe*2 : obj->spe));
@@ -1788,6 +1848,7 @@ static const char * const special_subjs[] = {
 	"Cyclops",
 	"Hippocrates",
 	"Pelias",
+	"lembas",
 	"aklys",
 	"amnesia",
 	"paralysis",
@@ -2299,6 +2360,7 @@ const char *oldstr;
 	    if (BSTRNCMPI(bp, p-3, "Eye", 3) &&
 		BSTRNCMP(bp, p-4, "boot", 4) &&
 		BSTRNCMP(bp, p-8, "gauntlet", 8) &&
+		BSTRNCMPI(bp, p-11, "Steel Scale", 11) &&
 		BSTRNCMP(bp, p-8, "Gauntlet", 8))
 		while ((*p = *(p+1)) != 0) p++;
 	    return bp;
@@ -2345,7 +2407,8 @@ const char *oldstr;
 			    !BSTRCMP(bp, p-6, "lenses") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
-			    !BSTRCMP(bp, p-6, "scales"))
+			    !BSTRCMP(bp, p-6, "scales") ||
+				!BSTRCMPI(bp, p-10, "Lost Names")) /* book */
 				return bp;
 
 		} else if (!BSTRCMPI(bp, p-5, "boots") ||
@@ -2357,22 +2420,28 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-14, "shape changers") ||
 			   !BSTRCMPI(bp, p-15, "detect monsters") ||
 			   !BSTRCMPI(bp, p-5, "Chaos") ||
+			   !BSTRCMPI(bp, p-13, "Wand of Orcus") || /* wand */
+			   !BSTRCMPI(bp, p-12, "Gear-spirits") || /* crossbow*/
+			   !BSTRCMPI(bp, p-10, "Rod of Dis") || /* mace */
+			   !BSTRCMPI(bp, p-6, "Caress") || /* whip */
+			   !BSTRCMPI(bp, p-7, "Proteus") || /* chest */
 			   !BSTRCMPI(bp, p-11, "Aesculapius") || /* staff */
 			   !BSTRCMPI(bp, p-7, "Orpheus") || /* lyre */
 			   !BSTRCMPI(bp, p-7, "Annulus") || /* Ring */
+			   !BSTRCMPI(bp, p-5, "Aegis") || 	/* shield */
 			   !BSTRCMPI(bp, p-8, "Longinus") || 	/* spear */
 			   !BSTRCMPI(bp, p-14, "Twelve Mirrors") || 	/* staff */
 			   !BSTRCMPI(bp, p-13, "Water Flowers") || 	/* boots */
 			   !BSTRCMPI(bp, p-14, "Dwarvish Lords") || /* axe */
 			   !BSTRCMPI(bp, p-12, "Elvish Lords") || /* mace */
 			   !BSTRCMPI(bp, p-11, "Seven Parts") || /* spear */
-			   !BSTRCMPI(bp, p-10, "Lost Names") || /* book */
-			   !BSTRCMPI(bp, p-10, "Infinite Spells") || /* book */
+			   !BSTRCMPI(bp, p-15, "Infinite Spells") || /* book */
 			   !BSTRCMPI(bp, p-10, "eucalyptus") ||
 #ifdef WIZARD
 			   !BSTRCMPI(bp, p-9, "iron bars") ||
 #endif
 			   !BSTRCMPI(bp, p-5, "aklys") ||
+			   !BSTRCMPI(bp, p-6, "lembas") ||
 			   !BSTRCMPI(bp, p-5, "dress") ||
 			   !BSTRCMPI(bp, p-16, "descent of stars") ||
 			   !BSTRCMPI(bp, p-13, "dragon scales") ||
@@ -2495,6 +2564,7 @@ struct alt_spellings {
 	{ "camera", EXPENSIVE_CAMERA },
 	{ "tee shirt", T_SHIRT },
 #endif
+	{ "lembas", LEMBAS_WAFER },
 	{ "can", TIN },
 	{ "can opener", TIN_OPENER },
 	{ "kelp", KELP_FROND },
@@ -2508,6 +2578,7 @@ struct alt_spellings {
 	{ "bazooka", ROCKET_LAUNCHER },
 	{ "hand grenade", FRAG_GRENADE },
 	{ "dynamite", STICK_OF_DYNAMITE },
+	{ "ampule", HYPOSPRAY_AMPULE },
 //#endif
 	{ "rum", POT_BOOZE },
 	{ "sea biscuit", CRAM_RATION },
@@ -2528,7 +2599,6 @@ struct alt_spellings {
 	{ "gunyoki", FOOD_RATION },
 	{ "kote of fumbling", GAUNTLETS_OF_FUMBLING },
 	{ "kote of power", GAUNTLETS_OF_POWER },
-	{ "naginata", GLAIVE },
 	{ "kamayari", GUISARME },
 	{ "bisento", HALBERD },
 	{ "kabuto", HELMET },
@@ -2591,7 +2661,7 @@ boolean from_user;
 	register struct obj *otmp;
 	int cnt, spe, spesgn, typ, very, rechrg;
 	int blessed, uncursed, iscursed, ispoisoned, isgreased, isdrained, stolen;
-	int moonphase = -1, viperheads = -1, mat = 0;
+	int moonphase = -1, viperheads = -1, ampule = -1, mat = 0;
 	int eroded, eroded2, eroded3, erodeproof;
 #ifdef INVISIBLE_OBJECTS
 	int isinvisible;
@@ -2635,6 +2705,7 @@ boolean from_user;
 		sizewished = FALSE;
 	int objsize = youracedata->msize;
 	long bodytype = 0L;
+	long oproperties = 0L;
 	char oclass;
 	char *un, *dn, *actualn;
 	const char *name=0;
@@ -2818,6 +2889,8 @@ boolean from_user;
 			ispoisoned=OPOISON_PARAL;
 		} else if(!strncmpi(bp, "lethe-rusted ",l=13)) {
 			ispoisoned=OPOISON_AMNES;
+		} else if(!strncmpi(bp, "acid-coated ",l=12)) {
+			ispoisoned=OPOISON_ACID;
 		} else if(!strncmpi(bp, "greased ",l=8)) {
 			isgreased=1;
 		} else if (!strncmpi(bp, "very ", l=5)) {
@@ -2878,6 +2951,34 @@ boolean from_user;
 			moonphase = GIBBOUS_MOON;
 		} else if (!strncmpi(bp, "full ", l=5) && strncmpi(bp, "full healing", 12)) {
 			moonphase = FULL_MOON;
+		} else if (!strncmpi(bp, "gain ability ", l=13) && strstri(bp, " ampule")) {
+			ampule = POT_GAIN_ABILITY;
+		} else if (!strncmpi(bp, "restore ability ", l=16) && strstri(bp, " ampule")) {
+			ampule = POT_RESTORE_ABILITY;
+		} else if (!strncmpi(bp, "blindness ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_BLINDNESS;
+		} else if (!strncmpi(bp, "confusion ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_CONFUSION;
+		} else if (!strncmpi(bp, "paralysis ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_PARALYSIS;
+		} else if (!strncmpi(bp, "speed ", l=6) && strstri(bp, " ampule")) {
+			ampule = POT_SPEED;
+		} else if (!strncmpi(bp, "hallucination ", l=14) && strstri(bp, " ampule")) {
+			ampule = POT_HALLUCINATION;
+		} else if (!strncmpi(bp, "healing ", l=8) && strstri(bp, " ampule")) {
+			ampule = POT_HEALING;
+		} else if (!strncmpi(bp, "extra healing ", l=14) && strstri(bp, " ampule")) {
+			ampule = POT_EXTRA_HEALING;
+		} else if (!strncmpi(bp, "full healing ", l=13) && strstri(bp, " ampule")) {
+			ampule = POT_FULL_HEALING;
+		} else if (!strncmpi(bp, "gain energy ", l=11) && strstri(bp, " ampule")) {
+			ampule = POT_GAIN_ENERGY;
+		} else if (!strncmpi(bp, "sleeping ", l=9) && strstri(bp, " ampule")) {
+			ampule = POT_SLEEPING;
+		} else if (!strncmpi(bp, "polymorph ", l=10) && strstri(bp, " ampule")) {
+			ampule = POT_POLYMORPH;
+		} else if (!strncmpi(bp, "amnesia ", l=8) && strstri(bp, " ampule")) {
+			ampule = POT_AMNESIA;
 		} else if (!strncmpi(bp, "wax ", l=4) && strncmpi(bp, "wax candle", 10)
 			) {
 			mat = WAX;
@@ -2951,7 +3052,7 @@ boolean from_user;
 			mat = GOLD;
 		} else if (!strncmpi(bp, "platinum ", l=9)
 			&& strncmpi(bp, "platinum wand", 13) && strncmpi(bp, "Platinum Yendorian", 18)
-			&& strncmpi(bp, "Platinum Dragon", 15)
+			&& strncmpi(bp, "Platinum Dragon", 15) && strncmpi(bp, "Platinum Dragon Plate", 21)
 		) {
 			mat = PLATINUM;
 		} else if (!strncmpi(bp, "mithril ", l=8)) {
@@ -2968,13 +3069,16 @@ boolean from_user;
 		} else if ((!strncmpi(bp, "gemstone ", l=9) || !strncmpi(bp, "gem ", l=4))
 			) {
 			mat = GEMSTONE;
-		} else if (!strncmpi(bp, "stone ", l=6)
+		} else if ((!strncmpi(bp, "stone ", l=6) || !strncmpi(bp, "ceramic ", l=8))
 			) {
 			mat = MINERAL;
 		} else if (!strncmpi(bp, "obsidian ", l=9)
 			&& strncmpi(bp, "obsidian stone", 14) && strncmpi(bp, "obsidian gem", 12)
 			) {
 			mat = OBSIDIAN_MT;
+		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)
+			) {
+			oproperties = OPROP_WOOL;
 		} else break;
 		bp += l;
 	}
@@ -3097,12 +3201,15 @@ boolean from_user;
 	/* Find corpse type w/o "of" (red dragon scale mail, yeti corpse) */
 	if (strncmpi(bp, "samurai sword", 13)) /* not the "samurai" monster! */
 	if (strncmpi(bp, "wizard lock", 11)) /* not the "wizard" monster! */
+	if (strncmpi(bp, "vampire killer", 14)) /* not the "vampire" monster! */
 	if (strncmpi(bp, "ninja-to", 8)) /* not the "ninja" rank */
+	if (strncmpi(bp, "rogue gear-spirits", 18)) /* not the "rogue" monster */
 	if (strncmpi(bp, "master key", 10)) /* not the "master" rank */
 	if (strncmpi(bp, "scroll of stinking cloud", 10)) /* not the "stinking cloud" monster */
 	if (strncmpi(bp, "rod of lordly might", 19)) /* not the "lord" rank */
 	if (strncmpi(bp, "magenta", 7)) /* not the "mage" rank */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
+	if (strncmpi(bp, "platinum dragon plate", 22)) /* not a "dragon" */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
 	    (mntmp = name_to_mon(bp)) >= LOW_PM) {
 		int mntmptoo, mntmplen;	/* double check for rank title */
@@ -3127,7 +3234,7 @@ boolean from_user;
 			Strcpy(bp, sng);
 		}
 	}
-
+	
 	/* Alternate spellings (pick-ax, silver sabre, &c) */
     {
 	struct alt_spellings *as = spellings;
@@ -3226,7 +3333,8 @@ boolean from_user;
 	   strncmpi(bp, "black dress", 11) && 
 	   strncmpi(bp, "noble's dress", 13) &&
 	   strncmpi(bp, "sceptre of lolth", 16) && 
-	   strncmpi(bp, "atma weapon", 11)
+	   strncmpi(bp, "atma weapon", 11) &&
+	   strncmpi(bp, "wand of orcus", 13)
 	)
 	for (i = 0; i < (int)(sizeof wrpsym); i++) {
 		register int j = strlen(wrp[i]);
@@ -3322,7 +3430,7 @@ srch:
 		i++;
 	}
 	if (actualn) {
-		struct Jitem *j[] = {Japanese_items,Pirate_items};
+		struct Jitem *j[] = {Japanese_items,ObscureJapanese_items,Pirate_items};
 		for(i=0;i<sizeof(j)/sizeof(j[0]);i++)
 		{
 		while(j[i]->item) {
@@ -3648,11 +3756,7 @@ typfnd:
 
 	if((typ == SPE_LIGHTNING_BOLT ||
 		typ == SPE_POISON_SPRAY ||
-		typ == SPE_ACID_BLAST ||
 		typ == SPE_LIGHTNING_STORM ||
-		typ == SPE_FIRE_STORM ||
-		typ == SPE_FROST_STORM ||
-		typ == SPE_ACID_STORM ||
 		typ == SCR_CONSECRATION ||
 		(typ >= HANDGUN && typ <= HEAVY_GUN) ||
 		((
@@ -3660,6 +3764,7 @@ typfnd:
 			typ == BEAMSWORD ||
 			typ == DOUBLE_LIGHTSABER ||
 			typ == VIBROBLADE ||
+			typ == SEISMIC_HAMMER ||
 			typ == FORCE_PIKE ||
 			(typ >= PISTOL && typ <= RAYGUN) || 
 			(typ >= SHOTGUN_SHELL && typ <= LASER_BEAM) ||
@@ -3869,46 +3974,46 @@ typfnd:
 		
 	}
 	
-	if(otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && (wizard || (otmp->ovar1 && !(otmp->ohaluengr)))){
-		if(heptagram && wizard)			otmp->ovar1 = HEPTAGRAM;  /*can't be wished for*/
-		else if(gorgoneion && wizard)   otmp->ovar1 = GORGONEION;/*can't be wished for*/
-		else if(acheron)				otmp->ovar1 = CIRCLE_OF_ACHERON;
-		else if(pentagram)				otmp->ovar1 = PENTAGRAM; /*not found randomly, but can be wished for*/
-		else if(hexagram && wizard) 	otmp->ovar1 = HEXAGRAM;/*can't be wished for*/
-		else if(hamsa)					otmp->ovar1 = HAMSA;
-		else if(sign)					otmp->ovar1 = ELDER_SIGN;
-		else if(eye)					otmp->ovar1 = ELDER_ELEMENTAL_EYE;
-		else if(queen)					otmp->ovar1 = SIGN_OF_THE_SCION_QUEEN;
-		else if(cartouche)				otmp->ovar1 = CARTOUCHE_OF_THE_CAT_LORD;
-		else if(garuda)					otmp->ovar1 = WINGS_OF_GARUDA;
-		else if(toustefna && wizard)	otmp->ovar1 = TOUSTEFNA;/*can't be wished for*/
-		else if(dreprun && wizard)		otmp->ovar1 = DREPRUN;/*can't be wished for*/
-		else if(veioistafur && wizard)	otmp->ovar1 = VEIOISTAFUR;/*can't be wished for*/
-		else if(thjofastafur && wizard)	otmp->ovar1 = THJOFASTAFUR; /*can't be wished for*/
+	if(otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && (wizard || (otmp->oward && !(otmp->ohaluengr)))){
+		if(heptagram && wizard)			otmp->oward = HEPTAGRAM;  /*can't be wished for*/
+		else if(gorgoneion && wizard)   otmp->oward = GORGONEION;/*can't be wished for*/
+		else if(acheron)				otmp->oward = CIRCLE_OF_ACHERON;
+		else if(pentagram)				otmp->oward = PENTAGRAM; /*not found randomly, but can be wished for*/
+		else if(hexagram && wizard) 	otmp->oward = HEXAGRAM;/*can't be wished for*/
+		else if(hamsa)					otmp->oward = HAMSA;
+		else if(sign)					otmp->oward = ELDER_SIGN;
+		else if(eye)					otmp->oward = ELDER_ELEMENTAL_EYE;
+		else if(queen)					otmp->oward = SIGN_OF_THE_SCION_QUEEN;
+		else if(cartouche)				otmp->oward = CARTOUCHE_OF_THE_CAT_LORD;
+		else if(garuda)					otmp->oward = WINGS_OF_GARUDA;
+		else if(toustefna && wizard)	otmp->oward = TOUSTEFNA;/*can't be wished for*/
+		else if(dreprun && wizard)		otmp->oward = DREPRUN;/*can't be wished for*/
+		else if(veioistafur && wizard)	otmp->oward = VEIOISTAFUR;/*can't be wished for*/
+		else if(thjofastafur && wizard)	otmp->oward = THJOFASTAFUR; /*can't be wished for*/
 	}
 
 	
 	if(otmp->otyp == SCR_WARD){
 		/* Can wish for a scroll of any ward, including heptagram. You are spending a wish, after all.*/
-		if(heptagram) otmp->ovar1 = HEPTAGRAM;
-		else if(gorgoneion) otmp->ovar1 = GORGONEION;
-		else if(acheron) otmp->ovar1 = CIRCLE_OF_ACHERON;
-		else if(pentagram) otmp->ovar1 = PENTAGRAM;
-		else if(hexagram) otmp->ovar1 = HEXAGRAM;
-		else if(hamsa) otmp->ovar1 = HAMSA;
-		else if(sign) otmp->ovar1 = ELDER_SIGN;
-		else if(eye) otmp->ovar1 = ELDER_ELEMENTAL_EYE;
-		else if(queen) otmp->ovar1 = SIGN_OF_THE_SCION_QUEEN;
-		else if(cartouche) otmp->ovar1 = CARTOUCHE_OF_THE_CAT_LORD;
-		else if(garuda) otmp->ovar1 = WINGS_OF_GARUDA;
+		if(heptagram) otmp->oward = HEPTAGRAM;
+		else if(gorgoneion) otmp->oward = GORGONEION;
+		else if(acheron) otmp->oward = CIRCLE_OF_ACHERON;
+		else if(pentagram) otmp->oward = PENTAGRAM;
+		else if(hexagram) otmp->oward = HEXAGRAM;
+		else if(hamsa) otmp->oward = HAMSA;
+		else if(sign) otmp->oward = ELDER_SIGN;
+		else if(eye) otmp->oward = ELDER_ELEMENTAL_EYE;
+		else if(queen) otmp->oward = SIGN_OF_THE_SCION_QUEEN;
+		else if(cartouche) otmp->oward = CARTOUCHE_OF_THE_CAT_LORD;
+		else if(garuda) otmp->oward = WINGS_OF_GARUDA;
 	}
 	
 	/*You're spending a wish, you can get whatever stave you ask for*/
 	if(otmp->oclass == WEAPON_CLASS && objects[(otmp)->otyp].oc_material == WOOD){
-		if(toustefna) otmp->ovar1 = WARD_TOUSTEFNA; 
-		else if(dreprun) otmp->ovar1 = WARD_DREPRUN;
-		else if(veioistafur) otmp->ovar1 = WARD_VEIOISTAFUR;
-		else if(thjofastafur) otmp->ovar1 = WARD_THJOFASTAFUR;
+		if(toustefna) otmp->oward = WARD_TOUSTEFNA; 
+		else if(dreprun) otmp->oward = WARD_DREPRUN;
+		else if(veioistafur) otmp->oward = WARD_VEIOISTAFUR;
+		else if(thjofastafur) otmp->oward = WARD_THJOFASTAFUR;
 	}
 	/* set blessed/cursed -- setting the fields directly is safe
 	 * since weight() is called below and addinv() will take care
@@ -3988,10 +4093,11 @@ typfnd:
 		otmp->odiluted = 1;
 
 	/* set material */
-	if(mat)
-		if(wizard)
+	if(mat){
+		if(wizard) {
 			otmp->obj_material = mat;
-		else
+		}
+		else {
 			if(otmp->oclass == WEAPON_CLASS && !otmp->oartifact){
 				if(		// flexible materials
 						((otmp->obj_material == CLOTH
@@ -4013,10 +4119,35 @@ typfnd:
 						|| mat == OBSIDIAN_MT
 						|| mat == MINERAL)
 						)
-					)
+					){
 					set_material(otmp, mat);
+				}
 			}
+		}
+	}
 	
+	/* set object properties */
+	if (oproperties && wizard) // wishing for object properties is wizard-mode only
+	{
+		if (wizard)		// wizard mode will give you what you ask for, even if it breaks things
+			otmp->oproperties = oproperties;
+		else
+			if (otmp->oclass == ARMOR_CLASS)
+			{
+				switch (oproperties)
+				{
+				case OPROP_WOOL:
+					otmp->oproperties = oproperties;
+					break;
+				default:
+					otmp->oproperties = 0L;
+					break;
+				}
+			}
+	}
+		
+
+
 	if (name) {
 		const char *aname;
 		short objtyp;
@@ -4032,6 +4163,11 @@ typfnd:
 		if (otmp->oartifact) {
 			u.uconduct.wisharti++;	/* KMH, conduct */
 		}
+	}
+
+	/* set ampule type */
+	if(ampule != -1 && otmp->otyp == HYPOSPRAY_AMPULE){
+		otmp->ovar1 = ampule;
 	}
 
 	/* set viper heads, probability of getting what you wished for copied loosely from setting weapon/armor spe, but the minimum is 1, not 0. */

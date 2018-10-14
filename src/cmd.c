@@ -1087,7 +1087,7 @@ dounmaintain()
 		if (!spell_maintained(spell))
 			continue;
 		
-		Sprintf(buf,	OBJ_NAME(objects[spell]));
+		Sprintf(buf,	"%s", OBJ_NAME(objects[spell]));
 		any.a_int = spell;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
@@ -1201,10 +1201,19 @@ wiz_map()
 {
 	if (wizard) {
 	    struct trap *t;
+		int zx, zy;
 	    long save_Hconf = HConfusion,
 		 save_Hhallu = HHallucination;
 
 	    HConfusion = HHallucination = 0L;
+		for(zx = 0; zx < COLNO; zx++) for(zy = 0; zy < ROWNO; zy++)
+			if (glyph_is_trap(levl[zx][zy].glyph)) {
+				/* Zonk all memory of this location. */
+				levl[zx][zy].seenv = 0;
+				levl[zx][zy].waslit = 0;
+				levl[zx][zy].glyph = cmap_to_glyph(S_stone);
+				levl[zx][zy].styp = STONE;
+			}
 	    for (t = ftrap; t != 0; t = t->ntrap) {
 		t->tseen = 1;
 		map_trap(t, TRUE);
@@ -1521,7 +1530,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	putstr(en_win, 0, "");
 
 	if (u.uevent.uhand_of_elbereth) {
-	    static const char * const hofe_titles[33] = {
+	    static const char * const hofe_titles[36] = {
 				/* Default */
 				"the Arm of the Law",		 /*01*/
 				"the Envoy of Balance",		 /*02*/
@@ -1566,18 +1575,22 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 				"the Great Slave-Vassal of Kurtulmak",	 /*31*/
 				"the Thane of Garl Glittergold",	 /*32*/
 				"the Claw of Urdlen",	 	 /*33*/
+				/* Gonome Ranger */
+				"the Hand of Athena",		 /*34*/
+				"the Messenger of Hermes",	 /*35*/
+				"the Glory of Poseidon",	 /*36*/
 				
 				/* uhand_of_elbereth max == 63 */
 	    };
 		
 	    if(Role_if(PM_EXILE)) you_are("the Emissary of Elements");
 	    else if(Pantheon_if(PM_PIRATE) || Role_if(PM_PIRATE)) you_are("the Pirate King");
-	    else if((Pantheon_if(PM_KNIGHT) || Role_if(PM_KNIGHT)) && u.uevent.uhand_of_elbereth == 1) you_are("the King of the Angles");
 	    else if((Pantheon_if(PM_VALKYRIE) || Role_if(PM_VALKYRIE)) && flags.initgend) you_are("the Daughter of Skadi");
 	    else if(Race_if(PM_DWARF) && (urole.ldrnum == PM_THORIN_II_OAKENSHIELD || urole.ldrnum == PM_DAIN_II_IRONFOOT)){
 			if(urole.ldrnum == PM_THORIN_II_OAKENSHIELD) you_are("King under the Mountain");
 			else if(urole.ldrnum == PM_DAIN_II_IRONFOOT) you_are("Lord of Moria");
-	    } else if((Pantheon_if(PM_SAMURAI) || Role_if(PM_SAMURAI)) && u.uevent.uhand_of_elbereth == 1){
+	    } else if((Pantheon_if(PM_KNIGHT) || Role_if(PM_KNIGHT)) && u.uevent.uhand_of_elbereth == 1) you_are("the King of the Angles");
+	    else if((Pantheon_if(PM_SAMURAI) || Role_if(PM_SAMURAI)) && u.uevent.uhand_of_elbereth == 1){
 			strcpy(buf, "Nasu no ");
 			strcat(buf, plname);
 			you_are(buf);
@@ -3059,7 +3072,7 @@ signs_enlightenment()
 		if(levl[u.ux][u.uy].lit != 0){
 			putstr(en_win, 0, "Your shadow is that of a dancing nymph.");
 			message = TRUE;
-		} else if(viz_array[u.uy][u.ux]&TEMP_LIT1 && !viz_array[u.uy][u.ux]&TEMP_DRK3){
+		} else if(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)){
 			putstr(en_win, 0, "It's a bit hard to see, but your shadow is a dancing nymph.");
 			message = TRUE;
 		}
@@ -3148,7 +3161,7 @@ signs_enlightenment()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_TENEBROUS && !Invis){
-		if(!(levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !viz_array[u.uy][u.ux]&TEMP_DRK3))){
+		if(!(levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)))){
 			putstr(en_win, 0, "Your shadow is deep black and pools unnaturally close to you.");
 			message = TRUE;
 		}
@@ -3259,7 +3272,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ANDROMALIUS && !NoBInvis){
-		if((levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !viz_array[u.uy][u.ux]&TEMP_DRK3)))
+		if((levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3))))
 			putstr(en_win, 0, "Your features have taken on the rigidity of a cheap disguise.");
 		else putstr(en_win, 0, "Your rigid features can't be seen in the dark.");
 		message = TRUE;

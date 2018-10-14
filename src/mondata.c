@@ -55,6 +55,23 @@ int flag;
 					mon->mintrinsics[(ACID_RES-1)/32] |= (1 << (ACID_RES-1)%32);
 				break;
 			}
+		} else if(is_boreal_dragoon(ptr)){
+			switch(rnd(4)){
+				case 1:
+					mon->mvar1 = AD_COLD;
+					mon->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
+				break;
+				case 2:
+					mon->mvar1 = AD_FIRE;
+					mon->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
+				break;
+				case 3:
+					// mon->mvar1 = AD_MAGM;
+				// break;
+				case 4:
+					mon->mvar1 = AD_PHYS;
+				break;
+			}
 		}
 	}
     return;
@@ -284,6 +301,8 @@ struct monst *mon;
 	if (dmgtype(ptr, AD_MAGM) || ptr == &mons[PM_BABY_GRAY_DRAGON] ||
 		(dmgtype(ptr, AD_RBRE) && ptr != &mons[PM_SHIMMERING_DRAGON]))	/* Chromatic Dragon, Platinum Dragon, mortai, flux slime, tulani */
 	    return TRUE;
+	if (is_boreal_dragoon(ptr) && mon->mvar1 == AD_MAGM)
+	    return TRUE;
 	/* check for magic resistance granted by wielded weapon */
 	o = (mon == &youmonst) ? uwep : MON_WEP(mon);
 	if (o && o->oartifact && defends(AD_MAGM, o))
@@ -292,6 +311,7 @@ struct monst *mon;
 	o = (mon == &youmonst) ? invent : mon->minvent;
 	for ( ; o; o = o->nobj)
 	    if ((o->owornmask && objects[o->otyp].oc_oprop == ANTIMAGIC) ||
+		    (o->owornmask && objects[o->otyp].oc_oprop == NULLMAGIC) ||
 		    (o->oartifact && protects(AD_MAGM, o)))
 		return TRUE;
 	return FALSE;
@@ -769,6 +789,8 @@ static const short grownups[][2] = {
 	{PM_HELL_HOUND_PUP, PM_HELL_HOUND},
 	{PM_WINTER_WOLF_CUB, PM_WINTER_WOLF},
 	{PM_KITTEN, PM_HOUSECAT}, {PM_HOUSECAT, PM_LARGE_CAT},
+	{PM_LAMB, PM_SHEEP},
+	{PM_MUMAK_CALF, PM_MUMAK},
 	{PM_TINY_PSEUDODRAGON, PM_PSEUDODRAGON}, {PM_PSEUDODRAGON, PM_RIDING_PSEUDODRAGON}, {PM_RIDING_PSEUDODRAGON, PM_LARGE_PSEUDODRAGON}, 
 		{PM_LARGE_PSEUDODRAGON, PM_WINGED_PSEUDODRAGON}, {PM_WINGED_PSEUDODRAGON, PM_HUGE_PSEUDODRAGON}, {PM_HUGE_PSEUDODRAGON, PM_GIGANTIC_PSEUDODRAGON},
 	{PM_PONY, PM_HORSE}, {PM_HORSE, PM_WARHORSE},
@@ -826,9 +848,9 @@ static const short grownups[][2] = {
 	{PM_BABY_PURPLE_WORM, PM_PURPLE_WORM},
 	{PM_BABY_CROCODILE, PM_CROCODILE},
 	{PM_BABY_CAVE_LIZARD,PM_SMALL_CAVE_LIZARD}, {PM_SMALL_CAVE_LIZARD, PM_CAVE_LIZARD}, {PM_CAVE_LIZARD, PM_LARGE_CAVE_LIZARD},
-	{PM_SOLDIER, PM_SERGEANT},
-	{PM_SERGEANT, PM_LIEUTENANT},
-	{PM_LIEUTENANT, PM_CAPTAIN},
+	{PM_SOLDIER, PM_SERGEANT}, {PM_SERGEANT, PM_LIEUTENANT}, {PM_LIEUTENANT, PM_CAPTAIN},
+	{PM_MYRMIDON_HOPLITE, PM_MYRMIDON_LOCHIAS}, {PM_MYRMIDON_LOCHIAS, PM_MYRMIDON_YPOLOCHAGOS}, 
+		{PM_MYRMIDON_YPOLOCHAGOS, PM_MYRMIDON_LOCHAGOS},
 	{PM_WATCHMAN, PM_WATCH_CAPTAIN},
 	{PM_ALIGNED_PRIEST, PM_HIGH_PRIEST},
 	{PM_STUDENT, PM_ARCHEOLOGIST},
@@ -850,7 +872,7 @@ static const short grownups[][2] = {
 int
 little_to_big(montype, female)
 int montype;
-boolean female;
+int female;
 {
 #ifndef AIXPS2_BUG
 	register int i;
@@ -858,6 +880,7 @@ boolean female;
 	for (i = 0; grownups[i][0] >= LOW_PM; i++)
 		if(montype == grownups[i][0] && (
 			!((mons[grownups[i][1]].mflagsb)&(MB_FEMALE|MB_MALE)) ||
+			!((mons[grownups[i][0]].mflagsb)&(MB_FEMALE|MB_MALE)) ||
 			(female && ((mons[grownups[i][1]].mflagsb)&(MB_FEMALE))) ||
 			(!female && ((mons[grownups[i][1]].mflagsb)&(MB_MALE)))
 		)) return grownups[i][1];
@@ -875,6 +898,7 @@ boolean female;
 	for (i = 0; grownups[i][0] >= LOW_PM; i++)
 		if(montype == grownups[i][0] && (
 			!((mons[grownups[i][1]].mflagsb)&(MB_FEMALE|MB_MALE)) ||
+			!((mons[grownups[i][0]].mflagsb)&(MB_FEMALE|MB_MALE)) ||
 			(female && ((mons[grownups[i][1]].mflagsb)&(MB_FEMALE))) ||
 			(!female && ((mons[grownups[i][1]].mflagsb)&(MB_MALE)))
 		)) monvalue = grownups[i][1];

@@ -98,13 +98,22 @@ register boolean clumsy;
 		if (martial()) {
 		    if (dmg > 1) kick_skill = P_MARTIAL_ARTS;
 		    dmg += rn2(ACURR(A_DEX)/2 + 1);
-			if(uarmf && 
-			   uarmf->oartifact && 
-			   artifact_hit(&youmonst, mon, uarmf, &dmg, d(1,20)) 
-			  ){
-				if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
-					return;
-				if (dmg == 0) return;
+			if(uarmf){
+				int basedamage = dmg;
+				int newdamage = dmg;
+				int roll = d(1,20);
+				if(uarmf->oartifact){
+					artifact_hit(&youmonst, mon, uarmf, &newdamage, roll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return;
+					if (newdamage == 0) return;
+					dmg += newdamage - basedamage;
+					newdamage = basedamage;
+				}
+				if(uarmf->oproperties){
+					(void)oproperty_hit(&youmonst, mon, uarmf, &newdamage, roll);
+					dmg += (newdamage - basedamage);
+				}
 			}
 		}
 		/* a good kick exercises your dex */
@@ -1171,8 +1180,8 @@ dokick()
 					maploc->looted = 0; /* don't leave loose ends.. */
 					unblock_point(x,y);	/* vision */
 					if (!Blind) newsym(x,y);
-				    if (mtmp = makemon(&mons[PM_DRYAD],
-						       mm.x, mm.y, MM_ANGRY)
+				    if ((mtmp = makemon(&mons[PM_DRYAD],
+						       mm.x, mm.y, MM_ANGRY))
 					) made++;
 					if ( made )
 					    pline("You've woken the tree's spirit!");

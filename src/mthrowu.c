@@ -91,9 +91,8 @@ boolean burn;
 		else You("are almost hit by %s.", onm);
 		return(0);
 	} else {
-		
-		if(bypassDR && base_uac() < 0) dam -= AC_VALUE(base_uac()+u.uspellprot)-u.uspellprot;
-		else if(!bypassDR && u.uac < 0) dam -= AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
+		if(bypassDR) dam -= base_udr();
+		else dam -= roll_udr((struct monst *) 0);
 		
 		if(dam < 1) dam = 1;
 		
@@ -186,15 +185,15 @@ int x,y;
 		}
 	} else if (obj->otyp == BLASTER_BOLT) {
 		explode(bhitpos.x, bhitpos.y, flags.mon_moving ? -8 : 8, d(3,6),
-		    0, EXPL_RED);
+		    0, EXPL_RED, 1);
 	} else if (obj->otyp == HEAVY_BLASTER_BOLT) {
 		explode(bhitpos.x, bhitpos.y, flags.mon_moving ? -8 : 8, d(3,10),
-		    0, EXPL_FIERY);
+		    0, EXPL_FIERY, 1);
 	} else if (objects[obj->otyp].oc_dir & EXPLOSION) {
 	    	if (cansee(bhitpos.x,bhitpos.y)) 
 	    		pline("%s explodes in a ball of fire!", Doname2(obj));
 		explode(bhitpos.x, bhitpos.y, flags.mon_moving ? -ZT_SPELL(ZT_FIRE) : ZT_SPELL(ZT_FIRE), d(3,8),
-		    WEAPON_CLASS, EXPL_FIERY);
+		    WEAPON_CLASS, EXPL_FIERY, 1);
 	}
 //#endif
 	// if (create && !((mtmp = m_at(x, y)) && (mtmp->mtrapped) &&
@@ -383,6 +382,18 @@ boolean verbose;  /* give message(s) even when you can't see what happened */
 				if(!rn2(20)){
 					if(otmp->otyp == VIPERWHIP && otmp->opoisonchrgs) otmp->opoisonchrgs--;
 					else otmp->opoisoned &= ~OPOISON_AMNES;
+				}
+			}
+			if(otmp->opoisoned & OPOISON_ACID){
+				if (resists_acid(mtmp)) {
+					if (vis) pline_The("acid coating doesn't seem to affect %s.",
+						   mon_nam(mtmp));
+				} else {
+					damage += rnd(10);
+				}
+				if(!rn2(20)){
+					if(otmp->otyp == VIPERWHIP && otmp->opoisonchrgs) otmp->opoisonchrgs--;
+					else otmp->opoisoned &= ~OPOISON_ACID;
 				}
 			}
 	    }
@@ -718,7 +729,8 @@ m_throw(mon, x, y, dx, dy, range, obj, verbose)
 			    if(hitu>0) break;
 			default:
 			    dam = dmgval(singleobj, &youmonst, 0);
-				if(!bypassDR && u.uac<0) dam += AC_VALUE(u.uac+u.uspellprot)-u.uspellprot;
+				if(bypassDR) dam -= base_udr(); 
+				else dam -= roll_udr(mon);
 			    hitv = 3 - distmin(u.ux,u.uy, mon->mx,mon->my);
 			    if (hitv < -4) hitv = (hitv+4)/2-4;
 			    if (hitv < -8) hitv = (hitv+8)*2/3-8;
@@ -1028,6 +1040,8 @@ struct monst *mtmp;
 		    !couldsee(mtmp->mx, mtmp->my))
 		return;	/* Out of range, or intervening wall */
 		
+		mon_ranged_gazeonly = 0;
+		
 		if(mtmp->mux != u.ux || mtmp->muy != u.uy){
 			if(canseemon(mtmp)){
 				onm = xname(otmp);
@@ -1072,6 +1086,8 @@ struct monst *mtmp;
 			rn2(BOLT_LIM - distmin(x,y,mtmp->mux,mtmp->muy))))
 	    return;
 
+	mon_ranged_gazeonly = 0;
+	
 	skill = objects[otmp->otyp].oc_skill;
 	mwep = MON_WEP(mtmp);		/* wielded weapon */
 
@@ -1204,7 +1220,7 @@ extern int monstr[];
 struct monst *
 mfind_target(mtmp, force_linedup)
 struct monst *mtmp;
-boolean force_linedup;
+int force_linedup;
 {
     int dir, origdir = -1;
     int x, y, dx, dy;
@@ -1655,10 +1671,12 @@ register struct attack *mattk;
 		    case AD_PLYS:
 				ammo_type = SPIKE;
 				qvr = mksobj(ammo_type, TRUE, FALSE);
+			    qvr->obj_material = BONE;
 			    qvr->blessed = 0;
 			    qvr->cursed = 0;
 			    qvr->quan = 1;
 				qvr->opoisoned = (OPOISON_PARAL);
+				fix_object(qvr);
 			break;
 		    case AD_SOLR:
 				ammo_type = SILVER_ARROW;

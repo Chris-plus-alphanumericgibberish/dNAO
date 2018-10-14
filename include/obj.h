@@ -152,19 +152,41 @@ struct obj {
 #define spestudied	corpsenm	/* # of times a spellbook has been studied */
 //define fromsink  corpsenm	/* a potion from a sink */
 #define opoisonchrgs corpsenm	/* number of poison doses left */
-	
-	int opoisoned; /* poisons smeared on the weapon*/
-#define OPOISON_NONE	 0
-#define OPOISON_BASIC	 1 /* Deadly Poison */
-#define OPOISON_FILTH	 2 /* Deadly Sickness */
-#define OPOISON_SLEEP	 4 /* Sleeping Poison */
-#define OPOISON_BLIND	 8 /* Blinding Poison */
-#define OPOISON_PARAL	16 /* Paralysis Poison */
-#define OPOISON_AMNES	32 /* Amnesia Poison */
-
 #ifdef RECORD_ACHIEVE
 #define record_achieve_special corpsenm
 #endif
+	
+	int opoisoned; /* poisons smeared on the weapon*/
+#define OPOISON_NONE	0x00
+#define OPOISON_BASIC	0x01 /* Deadly Poison */
+#define OPOISON_FILTH	0x02 /* Deadly Sickness */
+#define OPOISON_SLEEP	0x04 /* Sleeping Poison */
+#define OPOISON_BLIND	0x08 /* Blinding Poison */
+#define OPOISON_PARAL	0x10 /* Paralysis Poison */
+#define OPOISON_AMNES	0x20 /* Amnesia Poison */
+#define OPOISON_ACID	0x40 /* Acid coating */
+#define OPOISON_SILVER	0x80 /* Silver coating */
+
+	long	oproperties;/* special properties */
+#define OPROP_NONE		0x0000000000000000
+#define OPROP_FIRE		0x0000000000000001
+#define OPROP_COLD		0x0000000000000002
+#define OPROP_WOOL		(OPROP_COLD|OPROP_FIRE)
+#define OPROP_ELEC		0x0000000000000004
+#define OPROP_ACID		0x0000000000000008
+#define OPROP_MAGC		0x0000000000000010
+#define OPROP_ANAR		0x0000000000000020
+#define OPROP_CONC		0x0000000000000040
+#define OPROP_AXIO		0x0000000000000080
+#define OPROP_FIREW		0x0000000000000100
+#define OPROP_COLDW		0x0000000000000200
+#define OPROP_ELECW		0x0000000000000400
+#define OPROP_ACIDW		0x0000000000000800
+#define OPROP_MAGCW		0x0000000000001000
+#define OPROP_ANARW		0x0000000000002000
+#define OPROP_CONCW		0x0000000000004000
+#define OPROP_AXIOW		0x0000000000008000
+#define OPROP_LESSW		0x0000000000010000
 
 	unsigned oeaten;	/* nutrition left in food, if partly eaten */
 	long age;		/* creation date */
@@ -174,17 +196,19 @@ struct obj {
 	/* in order to prevent alignment problems oextra should
 	   be (or follow) a long int */
 	long owornmask;
-	long ovar1;		/* extra variable. Specifies: */
-			/*Records the contents of Books of Secrets*/
+	long oward;
 			/*Records the warding sign of spellbooks. */
 			/*Records the warding sign of scrolls of ward. */
 			/*Records the warding sign of rings. */
+			/*Records runes for wooden weapons */
+			
+	long ovar1;		/* extra variable. Specifies: */
+			/*Records the contents of Books of Secrets*/
 			/*Records the tatteredness level of droven cloaks. */
 			/*Records the cracked level of masks. */
 			/*Records special features for weapons. */
-			/* 	Records runes for wooden weapons */
 			/* 	Records moon phase for moon axes */
-			/* 	Records theft type for stealing artifacts (reaver (scimitar) and averice (shortsword) */
+			/* 	Records theft type for stealing artifacts (reaver (scimitar) and avarice (shortsword) */
 			/* 	Records remaining ammo for blasters and force pikes */
 			/* 	Records the hilt-type for lightsabers */
 			/* 	Records the ema of damage taken for gloves of the berserker */
@@ -261,7 +285,10 @@ struct obj {
  *	#define is_multigen(otyp) (otyp <= SHURIKEN)
  *	#define is_poisonable(otyp) (otyp <= BEC_DE_CORBIN)
  */
-#define artitypematch(a, o) (( (a)->otyp ) == BEAMSWORD ? ((o)->otyp==BROADSWORD) : (a)->otyp == (o)->otyp)
+#define artitypematch(a, o) (( (a)->otyp ) == BEAMSWORD ? ((o)->otyp==BROADSWORD) : \
+							( (a)->otyp ) == UNIVERSAL_KEY ? ((o)->otyp==SKELETON_KEY) : \
+							( (a)->otyp ) == ROUNDSHIELD ? ((o)->otyp==DWARVISH_ROUNDSHIELD) : \
+							(a)->otyp == (o)->otyp)
 #define is_blade(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill >= P_DAGGER && \
 			 objects[otmp->otyp].oc_skill <= P_SABER)
@@ -397,11 +424,16 @@ struct obj {
 			 objects[otmp->otyp].oc_armcat == ARM_SHIRT)
 #define is_suit(otmp)	(otmp->oclass == ARMOR_CLASS && \
 			 objects[otmp->otyp].oc_armcat == ARM_SUIT)
+#define is_harmonium_armor(otmp)	((otmp)->otyp == HARMONIUM_HELM || (otmp)->otyp == HARMONIUM_PLATE\
+								|| (otmp)->otyp == HARMONIUM_SCALE_MAIL || (otmp)->otyp == HARMONIUM_GAUNTLETS\
+								|| (otmp)->otyp == HARMONIUM_BOOTS)
 #define is_light_armor(otmp)	((otmp)->otyp == DWARVISH_MITHRIL_COAT || (otmp)->otyp == ELVEN_MITHRIL_COAT || \
-			(otmp)->otyp == JUMPSUIT || (otmp)->otyp == LEATHER_JACKET || (otmp)->otyp == ELVEN_TOGA || (otmp)->otyp == BLACK_DRESS)
+			(otmp)->otyp == JUMPSUIT || (otmp)->otyp == LEATHER_JACKET || (otmp)->otyp == ELVEN_TOGA || \
+			(otmp)->otyp == BLACK_DRESS)
 #define is_medium_armor(otmp)	((otmp)->otyp == BRONZE_PLATE_MAIL || (otmp)->otyp == DROVEN_CHAIN_MAIL || \
 			(otmp)->otyp == CHAIN_MAIL || (otmp)->otyp == SCALE_MAIL || (otmp)->otyp == STUDDED_LEATHER_ARMOR || \
 			(otmp)->otyp == LEATHER_ARMOR || (otmp)->otyp == BANDED_MAIL || (otmp)->otyp == NOBLE_S_DRESS || \
+			(otmp)->otyp == HARMONIUM_SCALE_MAIL || \
 			(otmp)->otyp == PLASTEEL_ARMOR || (otmp)->otyp == HIGH_ELVEN_PLATE || Is_dragon_mail(otmp))
 #define is_elven_armor(otmp)	((otmp)->otyp == ELVEN_HELM\
 				|| (otmp)->otyp == HIGH_ELVEN_HELM\

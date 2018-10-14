@@ -1863,7 +1863,7 @@ boolean *prev_loot;
     /* 	*passed_info is set to TRUE if a loot query was given.               */
     /*	*prev_loot is set to TRUE if something was actually acquired in here. */
 	if(mtmp && mtmp != u.usteed && mtmp->mtame){
-	if(otmp = pick_creatures_armor(mtmp, passed_info)){
+	if((otmp = pick_creatures_armor(mtmp, passed_info))){
 	long unwornmask;
 		if (nolimbs(youracedata)) {
 		    You_cant("do that without limbs."); /* not body_part(HAND) */
@@ -1938,7 +1938,7 @@ dopetequip()
 	/* Get a copy of monster's name before altering its visibility */
 	Strcpy(nambuf, See_invisible(mtmp->mx,mtmp->my) ? Monnam(mtmp) : mon_nam(mtmp));
 	
-	if(otmp = pick_armor_for_creature(mtmp)){
+	if((otmp = pick_armor_for_creature(mtmp))){
 		if (nolimbs(youracedata)) {
 		    You_cant("do that without limbs."); /* not body_part(HAND) */
 		    return (0);

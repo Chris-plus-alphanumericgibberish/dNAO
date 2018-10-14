@@ -18,10 +18,14 @@ STATIC_DCL int FDECL(do_look, (BOOLEAN_P));
 STATIC_DCL boolean FDECL(help_menu, (int *));
 STATIC_DCL char * get_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_generation_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_weight_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_resistance_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_weakness_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_conveys_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mm_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mt_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mb_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_ma_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mv_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mg_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_speed_description_of_monster_type(struct monst *, char *);
@@ -66,6 +70,44 @@ append_str(buf, new_str)
     return 1;
 }
 
+static const char * const sizeStr[] = {
+	"fine",
+	"gnat-sized",
+	"diminutive",
+	"tiny",
+	"cat-sized",
+	"bigger-than-a-breadbox",
+	"small",
+	"human-sized",
+	"large",
+	"gigantic",
+	"colossal",
+	"cosmically-huge"
+};
+
+static const char * const headStr[] = {
+	"",
+	"",
+	"",
+	"",
+	"",
+	" snouted",
+	" flat-faced",
+	" short-necked",
+	" inverted-faced",
+	" long-necked"
+};
+
+static const char * const bodyStr[] = {
+	" animal",
+	" ophidian",
+	" squigglenoid",
+	" insectoid",
+	" humanoid",
+	" snake-legged humanoid",
+	" snake-backed animal",
+	" centauroid"
+};
 /*
  * Return the name of the glyph found at (x,y).
  * If not hallucinating and the glyph is a monster, also monster data.
@@ -156,7 +198,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 				? "tail of " : "tail of a ") : "",
 		    (mtmp->mtame && accurate) ? 
 #ifdef BARD
-		    (EDOG(mtmp)->friend ? "friendly " : "tame ") :
+		    (((EDOG(mtmp)->friend) && !(EDOG(mtmp)->loyal))? "friendly " : "tame ") :
 #else
 		    "tame " :
 #endif
@@ -290,7 +332,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 				if(u.sealsActive&SEAL_ANDROMALIUS && is_thief((mtmp)->data)) ways_seen++;
 				if(u.sealsActive&SEAL_TENEBROUS && !nonliving_mon(mtmp)) ways_seen++;
 				if(u.specialSealsActive&SEAL_ACERERAK && is_undead_mon(mtmp)) ways_seen++;
-				if(uwep && ((uwep->ovar1 & WARD_THJOFASTAFUR) && 
+				if(uwep && ((uwep->oward & WARD_THJOFASTAFUR) && 
 					((mtmp)->data->mlet == S_LEPRECHAUN || (mtmp)->data->mlet == S_NYMPH || is_thief((mtmp)->data)))) ways_seen++;
 				if(youracedata == &mons[PM_SHARK] && has_blood_mon(mtmp) &&
 						(mtmp)->mhp < (mtmp)->mhpmax && is_pool(u.ux, u.uy, TRUE) && is_pool((mtmp)->mx, (mtmp)->my, TRUE)) ways_seen++;
@@ -309,7 +351,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
 					}
-					if(uwep && (uwep->ovar1 & WARD_THJOFASTAFUR) && ((mtmp)->data->mlet == S_LEPRECHAUN || (mtmp)->data->mlet == S_NYMPH || is_thief((mtmp)->data))){
+					if(uwep && (uwep->oward & WARD_THJOFASTAFUR) && ((mtmp)->data->mlet == S_LEPRECHAUN || (mtmp)->data->mlet == S_NYMPH || is_thief((mtmp)->data))){
 					Sprintf(wbuf, "warned of leprechauns, nymphs, and item thieves");
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
@@ -335,24 +377,28 @@ lookat(x, y, buf, monbuf, shapebuff)
 			}
 		}
 	    }
-		if(mtmp->data->msize == MZ_TINY) Sprintf(shapebuff, "a tiny");
-		else if(mtmp->data->msize == MZ_SMALL) Sprintf(shapebuff, "a small");
-		else if(mtmp->data->msize == MZ_HUMAN) Sprintf(shapebuff, "a human-sized");
-		else if(mtmp->data->msize == MZ_LARGE) Sprintf(shapebuff, "a large");
-		else if(mtmp->data->msize == MZ_HUGE) Sprintf(shapebuff, "a huge");
-		else if(mtmp->data->msize == MZ_GIGANTIC) Sprintf(shapebuff, "a gigantic");
-		else Sprintf(shapebuff, "an odd-sized");
-		
-		if((mtmp->data->mflagsb&MB_HEADMODIMASK) == MB_LONGHEAD) Strcat(shapebuff, ", snouted");
-		else if((mtmp->data->mflagsb&MB_HEADMODIMASK) == MB_LONGNECK) Strcat(shapebuff, ", long-necked");
-		
-		if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == MB_ANIMAL) Strcat(shapebuff, " animal");
-		else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == MB_SLITHY) Strcat(shapebuff, " ophidian");
-		else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == MB_HUMANOID) Strcat(shapebuff, " humanoid");
-		else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == (MB_HUMANOID|MB_ANIMAL)) Strcat(shapebuff, " centauroid");
-		else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == (MB_HUMANOID|MB_SLITHY)) Strcat(shapebuff, " snake-legged humanoid");
-		else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == (MB_ANIMAL|MB_SLITHY)) Strcat(shapebuff, " snake-backed animal");
-		else Strcat(shapebuff, " thing");
+		if(!Hallucination){
+			if(mtmp->data->msize == MZ_TINY) Sprintf(shapebuff, "a tiny");
+			else if(mtmp->data->msize == MZ_SMALL) Sprintf(shapebuff, "a small");
+			else if(mtmp->data->msize == MZ_HUMAN) Sprintf(shapebuff, "a human-sized");
+			else if(mtmp->data->msize == MZ_LARGE) Sprintf(shapebuff, "a large");
+			else if(mtmp->data->msize == MZ_HUGE) Sprintf(shapebuff, "a huge");
+			else if(mtmp->data->msize == MZ_GIGANTIC) Sprintf(shapebuff, "a gigantic");
+			else Sprintf(shapebuff, "an odd-sized");
+			
+			if((mtmp->data->mflagsb&MB_HEADMODIMASK) == MB_LONGHEAD) Strcat(shapebuff, " snouted");
+			else if((mtmp->data->mflagsb&MB_HEADMODIMASK) == MB_LONGNECK) Strcat(shapebuff, " long-necked");
+			
+			if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == MB_ANIMAL) Strcat(shapebuff, " animal");
+			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == MB_SLITHY) Strcat(shapebuff, " ophidian");
+			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == MB_HUMANOID) Strcat(shapebuff, " humanoid");
+			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == (MB_HUMANOID|MB_ANIMAL)) Strcat(shapebuff, " centauroid");
+			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == (MB_HUMANOID|MB_SLITHY)) Strcat(shapebuff, " snake-legged humanoid");
+			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == (MB_ANIMAL|MB_SLITHY)) Strcat(shapebuff, " snake-backed animal");
+			else Strcat(shapebuff, " thing");
+		} else {
+			Sprintf(shapebuff, "%s%s%s", an(sizeStr[rn2(SIZE(sizeStr))]), headStr[rn2(SIZE(headStr))], bodyStr[rn2(SIZE(bodyStr))]);
+		}
 	}
     }
     else if (glyph_is_object(glyph)) {
@@ -1340,6 +1386,26 @@ append(char * buf, int condition, char * text, boolean many)
 	}
 	return many;
 }
+int
+appendgroup(char * buf, int condition, char * primer, char * text, boolean many, boolean group)
+{
+	if (condition) {
+		if (buf != NULL) {
+			if (group) {
+				(void)strcat(buf, "/");
+			}
+			else {
+				if (many)
+					(void)strcat(buf, ", ");
+				(void)strcat(buf, primer);
+				(void)strcat(buf, " ");
+			}
+			(void)strcat(buf, text);
+		}
+		return group + 1;
+	}
+	return group;
+}
 
 int
 generate_list_of_resistances(struct monst * mtmp, char * temp_buf, int resists)
@@ -1365,10 +1431,10 @@ generate_list_of_resistances(struct monst * mtmp, char * temp_buf, int resists)
 	many = append(temp_buf, (mr_flags & MR_STONE), "petrification", many);
 	many = append(temp_buf, (mr_flags & MR_DRAIN), "level drain", many);
 	many = append(temp_buf, (mr_flags & MR_SICK), "sickness", many);
-	many = append(temp_buf, ((mg_flags & MG_WRESIST) != 0L), "weapon attacks", many);
-	many = append(temp_buf, ((mg_flags & MG_RBLUNT) != 0L), "blunt", many);
-	many = append(temp_buf, ((mg_flags & MG_RSLASH) != 0L), "slashing", many);
-	many = append(temp_buf, ((mg_flags & MG_RPIERCE) != 0L), "piercing", many);
+	many = append(temp_buf, (((mg_flags & MG_WRESIST) != 0L) && resists == 1), "weapon attacks", many);
+	many = append(temp_buf, (((mg_flags & MG_RBLUNT ) != 0L) && resists == 1), "blunt", many);
+	many = append(temp_buf, (((mg_flags & MG_RSLASH ) != 0L) && resists == 1), "slashing", many);
+	many = append(temp_buf, (((mg_flags & MG_RPIERCE) != 0L) && resists == 1), "piercing", many);
 	//many = append(temp_buf, ((mg_flags & MG_RALL) == MG_RALL), "blunt & slashing & piercing", many);
 	return many;
 }
@@ -1397,6 +1463,16 @@ get_generation_description_of_monster_type(struct monst * mtmp, char * temp_buf)
 }
 
 char *
+get_weight_description_of_monster_type(struct monst * mtmp, char * temp_buf)
+{
+	struct permonst * ptr = mtmp->data;
+
+	sprintf(temp_buf, "Weight = %d. Nutrition = %d.", ptr->cwt, ptr->cnutrit);
+
+	return temp_buf;
+}
+
+char *
 get_resistance_description_of_monster_type(struct monst * mtmp, char * description)
 {
 	struct permonst * ptr = mtmp->data;
@@ -1411,23 +1487,51 @@ get_resistance_description_of_monster_type(struct monst * mtmp, char * descripti
 		strcat(description, temp_buf);
 		strcat(description, ".");
 	}
+	return description;
+}
 
+char *
+get_weakness_description_of_monster_type(struct monst * mtmp, char * description)
+{
+	struct permonst * ptr = mtmp->data;
+	char temp_buf[BUFSZ] = "";
 	temp_buf[0] = '\0';
-	count = generate_list_of_resistances(mtmp, temp_buf, 0);
+	int many = 0;
+
+	many = append(temp_buf, hates_holy_mon(mtmp)	, "holy"		, many);
+	many = append(temp_buf, hates_unholy(ptr)		, "unholy"		, many);
+	many = append(temp_buf, hates_silver(ptr)		, "silver"		, many);
+	many = append(temp_buf, hates_iron(ptr)			, "iron"		, many);
+
+	if (many) {
+		strcat(description, "Weak to ");
+		strcat(description, temp_buf);
+		strcat(description, ".");
+	}
+	return description;
+}
+
+char *
+get_conveys_description_of_monster_type(struct monst * mtmp, char * description)
+{
+	struct permonst * ptr = mtmp->data;
+	char temp_buf[BUFSZ] = "";
+	temp_buf[0] = '\0';
+	int count = generate_list_of_resistances(mtmp, temp_buf, 0);
 	if ((ptr->geno & G_NOCORPSE) != 0 || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED) {
-		strcat(description, " Leaves no corpse.");
+		strcat(description, "Leaves no corpse. ");
 	}
 	else if (count == 0) {
-		strcat(description, " No conveyed resistances.");
+		strcat(description, "Corpse conveys no resistances. ");
 	}
 	else {
-		strcat(description, " Conveys ");
+		strcat(description, "Corpse conveys ");
 		strcat(description, temp_buf);
 		if (count == 1) {
-			strcat(description, " resistance.");
+			strcat(description, " resistance. ");
 		}
 		else {
-			strcat(description, " resistances.");
+			strcat(description, " resistances. ");
 		}
 	}
 
@@ -1467,33 +1571,36 @@ get_mt_description_of_monster_type(struct monst * mtmp, char * description)
 	struct permonst * ptr = mtmp->data;
 	strcat(description, "Thinking: ");
 	int many = 0;
-	many = append(description, bold(ptr)				, "resists fear"			, many);
-	many = append(description, hides_under(ptr)			, "conceals iteself"		, many);
-	many = append(description, is_hider(ptr)			, "hides itself"			, many);
-	many = append(description, notake(ptr)				, "doesn't pick up items"	, many);
-	many = append(description, mindless_mon(mtmp)		, "mindless"				, many);
-	many = append(description, is_animal(ptr)			, "animal-like"				, many);
-	many = append(description, carnivorous(ptr)			, "eats meat"				, many);
-	many = append(description, herbivorous(ptr)			, "eats veggies"			, many);
-	many = append(description, metallivorous(ptr)		, "eats metal"				, many);
-	many = append(description, magivorous(ptr)			, "eats magic"				, many);
-	many = append(description, is_domestic(ptr)			, "domestic"				, many);
-	many = append(description, is_wanderer(ptr)			, "wanders"					, many);
-	many = append(description, always_hostile_mon(mtmp)	, "usually hostile"			, many);
-	many = append(description, always_peaceful(ptr)		, "usually peaceful"		, many);
-	many = append(description, throws_rocks(ptr)		, "throws rocks"			, many);
-	many = append(description, likes_gold(ptr)			, "likes gold"				, many);
-	many = append(description, likes_gems(ptr)			, "likes gems"				, many);
-	many = append(description, likes_objs(ptr)			, "likes equipment"			, many);
-	many = append(description, likes_magic(ptr)			, "likes magic items"		, many);
-	many = append(description, wants_bell(ptr)			, "wants the bell"			, many);
-	many = append(description, wants_book(ptr)			, "wants the book"			, many);
-	many = append(description, wants_cand(ptr)			, "wants the candalabrum"	, many);
-	many = append(description, wants_qart(ptr)			, "wants your quest artifact"	, many);
-	many = append(description, wants_amul(ptr)			, "wants the amulet"		, many);
-	many = append(description, can_betray(ptr)			, "turns traitor"			, many);
-	many = append(description, levl_follower(mtmp)		, "follows you to other levels"	, many);
-	many = append(description, (many==0)				, "nothing special"			, many);
+	int eats = 0;
+	int likes = 0;
+	int wants = 0;
+
+	many = append(description, bold(ptr)				, "fearless"					, many);
+	many = append(description, hides_under(ptr)			, "hides"						, many);
+	many = append(description, is_hider(ptr)			, "camoflauged"					, many);
+	many = append(description, notake(ptr)				, "doesn't pick up items"		, many);
+	many = append(description, mindless_mon(mtmp)		, "mindless"					, many);
+	many = append(description, is_animal(ptr)			, "animal minded"				, many);
+	eats = appendgroup(description, carnivorous(ptr)	, "eats",	"meat"				, many, eats);
+	eats = appendgroup(description, herbivorous(ptr)	, "eats",	"veggies"			, many, eats);
+	eats = appendgroup(description, metallivorous(ptr)	, "eats",	"metal"				, many, eats);
+	many = appendgroup(description, magivorous(ptr)		, "eats",	"magic"				, many, eats) + many;
+	many = append(description, is_domestic(ptr)			, "domestic"					, many);
+	many = append(description, is_wanderer(ptr)			, "wanders"						, many);
+	many = append(description, always_hostile_mon(mtmp)	, "usually hostile"				, many);
+	many = append(description, always_peaceful(ptr)		, "usually peaceful"			, many);
+	many = append(description, throws_rocks(ptr)		, "throws rocks"				, many);
+	likes= appendgroup(description, likes_gold(ptr)		, "likes",	"gold"				, many, likes);
+	likes= appendgroup(description, likes_gems(ptr)		, "likes",	"gems"				, many, likes);
+	likes= appendgroup(description, likes_objs(ptr)		, "likes",	"equipment"			, many, likes);
+	many = appendgroup(description, likes_magic(ptr)	, "likes",	"magic items"		, many, likes) + many;
+	wants= appendgroup(description, wants_bell(ptr)		, "wants",	"the bell"				, many, wants);
+	wants= appendgroup(description, wants_book(ptr)		, "wants",	"the book"				, many, wants);
+	wants= appendgroup(description, wants_cand(ptr)		, "wants",	"the candalabrum"		, many, wants);
+	wants= appendgroup(description, wants_qart(ptr)		, "wants",	"your quest artifact"	, many, wants);
+	many = appendgroup(description, wants_amul(ptr)		, "wants",	"the amulet"			, many, wants) + many;
+	many = append(description, can_betray(ptr)			, "traitorous"					, many);
+	many = append(description, (many==0)				, "nothing special"				, many);
 	strcat(description, ". ");
 	return description;
 }
@@ -1537,9 +1644,46 @@ get_mb_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, leggedserpent(ptr)		, "animal-serpent"			, many);
 	many = append(description, (many==0)				, "unknown thing"			, many);
 	strcat(description, ". ");
-	description[0] = '\0';
 	return description;
 }
+
+char *
+get_ma_description_of_monster_type(struct monst * mtmp, char * description)
+{
+	struct permonst * ptr = mtmp->data;
+	strcat(description, "Race: ");
+	int many = 0;
+	many = append(description, (is_undead_mon(mtmp))			, "undead"				, many);
+	many = append(description, (ptr->mflagsa & MA_WERE)			, "lycanthrope"			, many);
+	many = append(description, (ptr->mflagsa & MA_HUMAN)		, "human"				, many);
+	many = append(description, (ptr->mflagsa & MA_ELF)			, "elf"					, many);
+	many = append(description, (ptr->mflagsa & MA_DROW)			, "drow"				, many);
+	many = append(description, (ptr->mflagsa & MA_DWARF)		, "dwarf"				, many);
+	many = append(description, (ptr->mflagsa & MA_GNOME)		, "gnome"				, many);
+	many = append(description, (ptr->mflagsa & MA_ORC)			, "orc"					, many);
+	many = append(description, (ptr->mflagsa & MA_VAMPIRE)		, "vampire"				, many);
+	many = append(description, (ptr->mflagsa & MA_CLOCK)		, "clockwork automaton"	, many);
+	many = append(description, (ptr->mflagsa & MA_UNLIVING)		, "not alive"			, many);
+	many = append(description, (ptr->mflagsa & MA_PLANT)		, "plant"				, many);
+	many = append(description, (ptr->mflagsa & MA_GIANT)		, "giant"				, many);
+	many = append(description, (ptr->mflagsa & MA_INSECTOID)	, "insectoid"			, many);
+	many = append(description, (ptr->mflagsa & MA_ARACHNID)		, "arachind"			, many);
+	many = append(description, (ptr->mflagsa & MA_AVIAN)		, "avian"				, many);
+	many = append(description, (ptr->mflagsa & MA_REPTILIAN)	, "reptilian"			, many);
+	many = append(description, (ptr->mflagsa & MA_ANIMAL)		, "mundane animal"		, many);
+	many = append(description, (ptr->mflagsa & MA_AQUATIC)		, "water-dweller"		, many);
+	many = append(description, (ptr->mflagsa & MA_DEMIHUMAN)	, "demihuman"			, many);
+	many = append(description, (ptr->mflagsa & MA_FEY)			, "fey"					, many);
+	many = append(description, (ptr->mflagsa & MA_ELEMENTAL)	, "elemental"			, many);
+	many = append(description, (ptr->mflagsa & MA_DRAGON)		, "dragon"				, many);
+	many = append(description, (ptr->mflagsa & MA_DEMON)		, "demon"				, many);
+	many = append(description, (ptr->mflagsa & MA_MINION)		, "minion of a deity"	, many);
+	many = append(description, (ptr->mflagsa & MA_PRIMORDIAL)	, "primordial"			, many);
+	many = append(description, (ptr->mflagsa & MA_ET)			, "alien"				, many);
+	strcat(description, ". ");
+	return description;
+}
+
 char *
 get_mv_description_of_monster_type(struct monst * mtmp, char * description)
 {
@@ -1577,15 +1721,13 @@ char * get_mg_description_of_monster_type(struct monst * mtmp, char * descriptio
 	many = append(description, !polyok(ptr)				, "invalid polymorph form"	, many);
 	many = append(description, is_untamable(ptr)		, "untamable"				, many);
 	many = append(description, extra_nasty(ptr)			, "nasty"					, many);
-	many = append(description, hates_unholy(ptr)		, "hates unholy"			, many);
-	many = append(description, hates_silver(ptr)		, "hates silver"			, many);
-	many = append(description, hates_iron(ptr)			, "hates iron"				, many);
-	many = append(description, nospellcooldowns(ptr)	, "spell cooldownless"		, many);
+	many = append(description, nospellcooldowns(ptr)	, "quick-caster"			, many);
 	many = append(description, is_lord(ptr)				, "lord"					, many);
 	many = append(description, is_prince(ptr)			, "prince"					, many);
 	many = append(description, opaque(ptr)				, "opaque"					, many);
 	many = append(description, regenerates(ptr)			, "regenerating"			, many);
-	many = append(description, (many==0)				, "blind"					, many);
+	many = append(description, levl_follower(mtmp)		, "stalks you"				, many);
+	many = append(description, (many==0)				, "normal"					, many);
 	strcat(description, ". ");
 	return description;
 }
@@ -1651,7 +1793,7 @@ get_description_of_attack_type(uchar id)
 	case AT_BREA: return "breath";
 	case AT_EXPL: return "explosion";
 	case AT_BOOM: return "on death";
-	case AT_GAZE: return "gaze";
+	case AT_GAZE: return "targeted gaze";
 	case AT_TENT: return "tentacles";
 	case AT_ARRW: return "launch ammo";
 	case AT_WHIP: return "whip";
@@ -1667,6 +1809,7 @@ get_description_of_attack_type(uchar id)
 	case AT_BEAM: return "ranged beam";
 	case AT_DEVA: return "million-arm weapon";
 	case AT_5SQR: return "long reach touch";
+	case AT_WDGZ: return "passive gaze";
 	case AT_XWEP: return "offhand weapon";
 	case AT_WEAP: return "weapon";
 	case AT_MAGC: return "uses magic spell(s)";
@@ -1794,6 +1937,8 @@ get_description_of_damage_type(uchar id)
 	case AD_BLUD: return "Sword of Blood";
 	case AD_SURY: return "Arrows of Slaying";
 	case AD_NPDC: return "drains constitution";
+	case AD_GLSS: return "silver mirror shards";
+	case AD_MERC: return "mercury blade";
 	case AD_DUNSTAN: return "stones throw themselves at target";
 	case AD_IRIS: return "iridescent tentacles";
 	case AD_NABERIUS: return "tarnished bloody fangs";
@@ -1897,119 +2042,169 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 	if (mtmp->mfaction == ZOMBIFIED)		Strcat(name, " zombie");
 	else if (mtmp->mfaction == SKELIFIED)	Strcat(name, " skeleton");
 	else if (mtmp->mfaction == CRYSTALFIED) Strcat(name, " vitrean");
+	else if (mtmp->mfaction == FRACTURED)	Strcat(name, " witness");
 
 	temp_buf[0] = '\0';
-	sprintf(temp_buf, "Accessing Pokedex entry for %s... ", (!Upolyd || (monsternumber < NUMMONS)) ? name : "this weird creature");
-	strcat(description, temp_buf);
+	if (iflags.pokedex) {
+		sprintf(temp_buf, "Accessing Pokedex entry for %s... ", (!Upolyd || (monsternumber < NUMMONS)) ? name : "this weird creature");
+		strcat(description, temp_buf);
 
-	strcat(description, "\n");
-	strcat(description, " ");
-	strcat(description, "\n");
-	strcat(description, "Base statistics of this monster type:");
-	strcat(description, "\n");
+		strcat(description, "\n");
+		strcat(description, " ");
+		strcat(description, "\n");
+		if (iflags.pokedex & POKEDEX_SHOW_STATS){
+			strcat(description, "Base statistics of this monster type:");
+			strcat(description, "\n");
+			int ac = ptr->ac + (mtmp->mfaction == CRYSTALFIED ? -16 : mtmp->mfaction == SKELIFIED ? -6 : mtmp->mfaction == ZOMBIFIED ? -2 : 0);
+			sprintf(temp_buf, "Base level = %d. Difficulty = %d. AC = %d. MR = %d. Alignment %d. ", ptr->mlevel, monstr[monsndx(ptr)], ac, ptr->mr, ptr->maligntyp);
+			strcat(description, temp_buf);
+			temp_buf[0] = '\0';
+			strcat(description, get_speed_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_GENERATION){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_generation_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_RESISTS){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_resistance_description_of_monster_type(mtmp, temp_buf));
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_weakness_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_CONVEYS){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_conveys_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_WEIGHT){
+			temp_buf[0] = '\0';
+			strcat(description, get_weight_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MM){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mm_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MT){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mt_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MB){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mb_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MV){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mv_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MG){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mg_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_MA){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_ma_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_ATTACKS){
+			strcat(description, "\n");
+			strcat(description, "Attacks:");
+			strcat(description, "\n");
+			struct attack *mattk;
+			struct attack alt_attk;
+			int sum[NATTK];
+			int i;
+			boolean derundspec = FALSE;
 
-	int ac = ptr->ac + (mtmp->mfaction == CRYSTALFIED ? -16 : mtmp->mfaction == SKELIFIED ? -6 : mtmp->mfaction == ZOMBIFIED ? -2 : 0);
-	sprintf(temp_buf, "Base level = %d. Difficulty = %d. AC = %d. MR = %d.\nAlignment %d. ", ptr->mlevel, monstr[monsndx(ptr)], ac, ptr->mr, ptr->maligntyp);
-	strcat(description, temp_buf);
-	temp_buf[0] = '\0';
-	strcat(description, get_speed_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, get_generation_description_of_monster_type(mtmp, temp_buf));
-	strcat(description, "\n");
-	temp_buf[0] = '\0';
-	strcat(description, get_resistance_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mm_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mt_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mb_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mv_description_of_monster_type(mtmp, temp_buf));
-	temp_buf[0] = '\0';
-	strcat(description, "\n");
-	strcat(description, get_mg_description_of_monster_type(mtmp, temp_buf));
+			for (i = 0; i < NATTK; i++) {
+				sum[i] = 1;
+				mattk = getmattk(ptr, i, sum, &alt_attk);
 
-	strcat(description, "\n");
-	strcat(description, "Attacks:");
-	strcat(description, "\n");
-	struct attack *mattk;
-	struct attack alt_attk;
-	int sum[NATTK];
-	int i;
-	boolean derundspec = FALSE;
-
-	for (i = 0; i < NATTK; i++) {
-		sum[i] = 1;
-		mattk = getmattk(ptr, i, sum, &alt_attk);
-
-		if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
-			if (mattk->aatyp == AT_SPIT
-				|| mattk->aatyp == AT_BREA
-				|| mattk->aatyp == AT_GAZE
-				|| mattk->aatyp == AT_ARRW
-				|| mattk->aatyp == AT_MMGC
-				|| mattk->aatyp == AT_TNKR
-				|| mattk->aatyp == AT_SHDW
-				|| mattk->aatyp == AT_BEAM
-				|| mattk->aatyp == AT_MAGC
-				|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
-				|| (i == 0 &&
-				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) &&
-				mattk->adtyp == AD_PHYS &&
-				mattk->damn*mattk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mtmp->data->msize * 2, 4) / 2
-				)
-				|| (!derundspec && mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
-				|| (!derundspec && i == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
-				){
-				if (i == 0){
-					alt_attk.aatyp = AT_CLAW;
-					alt_attk.adtyp = AD_PHYS;
-					alt_attk.damn = mtmp->m_lev / 10 + 1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
-					alt_attk.damd = max(mtmp->data->msize * 2, 4);
-					mattk = &alt_attk;
+				if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
+					if (mattk->aatyp == AT_SPIT
+						|| mattk->aatyp == AT_BREA
+						|| mattk->aatyp == AT_GAZE
+						|| mattk->aatyp == AT_ARRW
+						|| mattk->aatyp == AT_MMGC
+						|| mattk->aatyp == AT_TNKR
+						|| mattk->aatyp == AT_SHDW
+						|| mattk->aatyp == AT_BEAM
+						|| mattk->aatyp == AT_MAGC
+						|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
+						|| (i == 0 &&
+						(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) &&
+						mattk->adtyp == AD_PHYS &&
+						mattk->damn*mattk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mtmp->data->msize * 2, 4) / 2
+						)
+						|| (!derundspec && mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
+						|| (!derundspec && i == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
+						){
+						if (i == 0){
+							alt_attk.aatyp = AT_CLAW;
+							alt_attk.adtyp = AD_PHYS;
+							alt_attk.damn = mtmp->m_lev / 10 + 1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
+							alt_attk.damd = max(mtmp->data->msize * 2, 4);
+							mattk = &alt_attk;
+						}
+						else if (!derundspec && mtmp->mfaction == SKELIFIED){
+							derundspec = TRUE;
+							alt_attk.aatyp = AT_TUCH;
+							alt_attk.adtyp = AD_SLOW;
+							alt_attk.damn = 1;
+							alt_attk.damd = max(mtmp->data->msize * 2, 4);
+							mattk = &alt_attk;
+						}
+						else if (!derundspec && mtmp->mfaction == CRYSTALFIED){
+							derundspec = TRUE;
+							alt_attk.aatyp = AT_TUCH;
+							alt_attk.adtyp = AD_ECLD;
+							alt_attk.damn = min(10, mtmp->m_lev / 3);
+							alt_attk.damd = 8;
+							mattk = &alt_attk;
+						}
+						else continue;
+					}
 				}
-				else if (!derundspec && mtmp->mfaction == SKELIFIED){
-					derundspec = TRUE;
-					alt_attk.aatyp = AT_TUCH;
-					alt_attk.adtyp = AD_SLOW;
-					alt_attk.damn = 1;
-					alt_attk.damd = max(mtmp->data->msize * 2, 4);
-					mattk = &alt_attk;
+				if (mtmp->mfaction == FRACTURED){
+					if ((!derundspec &&
+						mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
+						|| (mattk->aatyp == AT_CLAW && (mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE))
+						){
+						derundspec = TRUE;
+						alt_attk.aatyp = AT_CLAW;
+						alt_attk.adtyp = AD_GLSS;
+						alt_attk.damn = max(mtmp->m_lev / 10 + 1, mattk->damn);
+						alt_attk.damd = max(mtmp->data->msize * 2, max(mattk->damd, 4));
+						mattk = &alt_attk;
+					}
 				}
-				else if (!derundspec && mtmp->mfaction == CRYSTALFIED){
-					derundspec = TRUE;
-					alt_attk.aatyp = AT_TUCH;
-					alt_attk.adtyp = AD_ECLD;
-					alt_attk.damn = min(10, mtmp->m_lev / 3);
-					alt_attk.damd = 8;
-					mattk = &alt_attk;
+				main_temp_buf[0] = '\0';
+				get_description_of_attack(mattk, temp_buf);
+				if (temp_buf[0] == '\0') {
+					if (i == 0) {
+#ifndef USE_TILES
+						strcat(description, "    ");
+#endif
+						strcat(description, "none");
+						strcat(description, "\n");
+					}
+					break;
 				}
-				else continue;
+#ifndef USE_TILES
+				strcat(main_temp_buf, "    ");
+#endif
+				strcat(main_temp_buf, temp_buf);
+				strcat(main_temp_buf, "\n");
+				strcat(description, main_temp_buf);
 			}
 		}
-		main_temp_buf[0] = '\0';
-		get_description_of_attack(mattk, temp_buf);
-		if (temp_buf[0] == '\0') {
-			if (i == 0) {
-#ifndef USE_TILES
-				strcat(description, "    ");
-#endif
-				strcat(description, "none");
-				strcat(description, "\n");
-			}
-			break;
-		}
-#ifndef USE_TILES
-		strcat(main_temp_buf, "    ");
-#endif
-		strcat(main_temp_buf, temp_buf);
-		strcat(main_temp_buf, "\n");
-		strcat(description, main_temp_buf);
 	}
 	return description;
 }

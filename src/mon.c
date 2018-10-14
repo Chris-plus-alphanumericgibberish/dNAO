@@ -7,13 +7,15 @@
 #define MKROOM_H
 #endif
 
+ //Note: math.h must be included before hack.h bc it contains a yn() macro that is incompatible with the one in hack
+#include <math.h>
+
 #include "hack.h"
 #include "mfndpos.h"
 #include "edog.h"
 #include "artifact.h"
 #include <ctype.h>
 #include <stdlib.h>
-//include <math.h> //Incompatible with nethack!
 
 
 STATIC_DCL boolean FDECL(restrap,(struct monst *));
@@ -60,21 +62,7 @@ STATIC_DCL struct obj *FDECL(make_corpse,(struct monst *));
 STATIC_DCL void FDECL(m_detach, (struct monst *, struct permonst *));
 STATIC_DCL void FDECL(lifesaved_monster, (struct monst *));
 
-STATIC_DCL double FDECL(pow, (double x, size_t n));
 STATIC_DCL double FDECL(atanGerald, (double x));
-
-STATIC_OVL double 
-pow(x, n)
-double x;
-size_t n;
-{
-	if (n == 0)
-		return 1;
-	else if (n % 2 == 0)
-		return pow(x * x, n >> 1);
-	else
-	return x * pow(x * x, n >> 1);
-}
 
 STATIC_OVL double 
 atanGerald(x)
@@ -213,6 +201,8 @@ STATIC_VAR int cham_to_pm[] = {
 			 is_reviver((mon)->data) ||			\
 			 ((mon)->mfaction == ZOMBIFIED) ||			\
 			 ((mon)->zombify) ||			\
+			 ((mon)->data == &mons[PM_UNDEAD_KNIGHT]) ||			\
+			 ((mon)->data == &mons[PM_WARRIOR_OF_SUNLIGHT]) ||			\
 			 /* normally leader the will be unique, */	\
 			 /* but he might have been polymorphed  */	\
 			 (mon)->m_id == quest_status.leader_m_id ||	\
@@ -220,6 +210,22 @@ STATIC_VAR int cham_to_pm[] = {
 			 (dmgtype((mon)->data, AD_SEDU) ||		\
 			  dmgtype((mon)->data, AD_SSEX)))
 
+			  
+const int humanoid_eyes[] = {
+	PM_HOBBIT,
+	PM_DWARF,
+	PM_ORC,
+	PM_GNOME,
+	PM_APE,
+	PM_HUMAN,
+	PM_ELF,
+	PM_MYRKALFR,
+	PM_HALF_DRAGON,
+	PM_SHEEP,
+	PM_HOUSECAT,
+	PM_DOG,
+	PM_HORSE
+};
 /* Creates a monster corpse, a "special" corpse, or nothing if it doesn't
  * leave corpses.  Monsters which leave "special" corpses should have
  * G_NOCORPSE set in order to prevent wishing for one, finding tins of one,
@@ -720,12 +726,21 @@ register struct monst *mtmp;
 			flags.cth_attk=TRUE;//state machine stuff.
 			create_gas_cloud(x, y, 4, rnd(3)+1);
 			flags.cth_attk=FALSE;
+			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj->corpsenm = humanoid_eyes[rn2(SIZE(humanoid_eyes))];
+			obj->quan = 2;
+			obj->owt = weight(obj);
 		goto default_1;
 		break;
 	    case PM_WARRIOR_CHANGED:
 			flags.cth_attk=TRUE;//state machine stuff.
 			create_gas_cloud(x, y, 5, rnd(3)+1);
 			flags.cth_attk=FALSE;
+			num = rn1(10,10);
+			while (num--){
+				obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+				obj->corpsenm = humanoid_eyes[rn2(SIZE(humanoid_eyes))];
+			}
 		goto default_1;
 		break;
 	    default_1:
@@ -919,13 +934,13 @@ register struct monst *mtmp;
 	 * be handled here.  Swimmers are able to protect their stuff...
 	 */
 	if (!is_clinger(mtmp->data)
-	    && !is_swimmer(mtmp->data) && !amphibious(mtmp->data)) {
+	    && !is_swimmer(mtmp->data) && !amphibious_mon(mtmp)) {
 	    if (cansee(mtmp->mx,mtmp->my)) {
 		    if(mtmp->data == &mons[PM_ACID_PARAELEMENTAL]){
 				int tx = mtmp->mx, ty = mtmp->my, dn = mtmp->m_lev;
 				pline("%s explodes.", Monnam(mtmp));
 				mondead(mtmp);
-				explode(tx, ty, 7, d(dn, 10), MON_EXPLODE, EXPL_NOXIOUS);
+				explode(tx, ty, 7, d(dn, 10), MON_EXPLODE, EXPL_NOXIOUS, 1);
 			} else pline("%s drowns.", Monnam(mtmp));
 	    }
 	    if (u.ustuck && u.uswallow && u.ustuck == mtmp) {
@@ -2285,6 +2300,7 @@ mon_can_see_mon(looker, lookie)
 			}
 		}
 	}
+	return FALSE;
 }
 
 boolean
@@ -2433,6 +2449,7 @@ mon_can_see_you(looker)
 			}
 		}
 	}
+	return FALSE;
 }
 
 STATIC_DCL int
@@ -2536,7 +2553,7 @@ mfndpos(mon, poss, info, flag)
 
 	nodiag = (mdat == &mons[PM_GRID_BUG]) || (mdat == &mons[PM_BEBELITH]);
 	wantpool = mdat->mlet == S_EEL;
-	cubewaterok = (is_swimmer(mdat) || breathless_mon(mon) || amphibious(mdat));
+	cubewaterok = (is_swimmer(mdat) || breathless_mon(mon) || amphibious_mon(mon));
 	poolok = is_flyer(mdat) || is_clinger(mdat) ||
 		 (is_swimmer(mdat) && !wantpool);
 	lavaok = is_flyer(mdat) || is_clinger(mdat) || likes_lava(mdat);
@@ -2799,6 +2816,13 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 		if(isdark(mdef->mx, mdef->my)) return ALLOW_M|ALLOW_TM;
 	}
 	
+	if((ma == &mons[PM_OONA] || ma == &mons[PM_OONA])
+		&& sgn(ma->maligntyp) == -1*sgn(md->maligntyp) //"Oona grudges on chaotics, but not on neutrals"
+		&& !(magr->mtame || mdef->mtame) //Normal pet-vs-monster logic should take precidence over this
+	){
+		return ALLOW_M|ALLOW_TM;
+	}
+	
 	
 	/* In the anachrononaut quest, all peaceful monsters are at threat from all hostile monsters.
 		The leader IS in serious danger */
@@ -2893,11 +2917,13 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 		return ALLOW_M|ALLOW_TM;
 
 	/* undead vs civs */
-	if(is_undead_mon(magr) && (!always_hostile_mon(mdef) && !is_undead_mon(mdef) && !(is_animal(md) && !is_domestic(md)) && !mindless_mon(mdef)))
-		return ALLOW_M|ALLOW_TM;
-	if((!always_hostile_mon(magr) && !is_undead_mon(magr) && !(is_animal(ma) && !is_domestic(ma)) && !mindless_mon(magr)) && is_undead_mon(mdef))
-		return ALLOW_M|ALLOW_TM;
-
+	if(!(In_quest(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || In_cha(&u.uz) || Is_rogue_level(&u.uz) || Inhell)){
+		if(is_undead_mon(magr) && (!always_hostile_mon(mdef) && !is_undead_mon(mdef) && !(is_animal(md) && !is_domestic(md)) && !mindless_mon(mdef)))
+			return ALLOW_M|ALLOW_TM;
+		if((!always_hostile_mon(magr) && !is_undead_mon(magr) && !(is_animal(ma) && !is_domestic(ma)) && !mindless_mon(magr)) && is_undead_mon(mdef))
+			return ALLOW_M|ALLOW_TM;
+	}
+	
 	/* drow vs. other drow */
 	/* Note that factions may be different than the displayed house name, 
 		as faction is set during generation and displayed house name goes by equipment! */
@@ -3380,7 +3406,11 @@ register struct monst *mtmp;
 	else if(mtmp->data == &mons[PM_DEMOGORGON]){
 		achieve.killed_demogorgon = 1;
 	}
-	else if (mtmp->data == &mons[PM_MEDUSA] || mtmp->data == &mons[PM_GRUE]) {
+	else if (mtmp->data == &mons[PM_MEDUSA]
+	|| mtmp->data == &mons[PM_GRUE]
+	|| mtmp->data == &mons[PM_ECHO]
+	|| mtmp->data == &mons[PM_SYNAISTHESIA]
+	) {
 		achieve.killed_challenge = 1;
 	}
 #endif
@@ -3559,23 +3589,23 @@ boolean was_swallowed;			/* digestion */
 	    	killer = killer_buf;
 	    	killer_format = KILLED_BY_AN;
 			if(mdat==&mons[PM_GAS_SPORE] || mdat==&mons[PM_DUNGEON_FERN_SPORE]){
-	    	  explode(mon->mx, mon->my, 7, tmp, MON_EXPLODE, EXPL_NOXIOUS); //explode(x, y, type, dam, olet, expltype)
+	    	  explode(mon->mx, mon->my, 7, tmp, MON_EXPLODE, EXPL_NOXIOUS, 1); //explode(x, y, type, dam, olet, expltype)
 			}
 			else if(mdat==&mons[PM_SWAMP_FERN_SPORE]){
-	    	  explode(mon->mx, mon->my, 9, tmp, MON_EXPLODE, EXPL_MAGICAL); //explode(x, y, type, dam, olet, expltype)
+	    	  explode(mon->mx, mon->my, 9, tmp, MON_EXPLODE, EXPL_MAGICAL, 1); //explode(x, y, type, dam, olet, expltype)
 			}
 			else if(mdat==&mons[PM_BURNING_FERN_SPORE]){
-	    	  explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, EXPL_FIERY); //explode(x, y, type, dam, olet, expltype)
+	    	  explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, EXPL_FIERY, 1); //explode(x, y, type, dam, olet, expltype)
 			}
 			else if(mdat->mattk[i].adtyp == AD_PHYS){
-				if(mdat == &mons[PM_FABERGE_SPHERE]) explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, rn2(7));
-				else explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, EXPL_MUDDY);
+				if(mdat == &mons[PM_FABERGE_SPHERE]) explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, rn2(7), 1);
+				else explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, EXPL_MUDDY, 1);
 			} else if(mdat->mattk[i].adtyp == AD_FIRE){
 				//mdat == &mons[PM_BALROG] || mdat == &mons[PM_MEPHISTOPHELES] || mdat == &mons[PM_FLAMING_SPHERE]){
-				explode(mon->mx, mon->my, 1, tmp, MON_EXPLODE, EXPL_FIERY);
+				explode(mon->mx, mon->my, 1, tmp, MON_EXPLODE, EXPL_FIERY, 1);
 			}
 			else if(mdat->mattk[i].adtyp == AD_JAILER){
-				explode(mon->mx, mon->my, 1, tmp, MON_EXPLODE, EXPL_FIERY);
+				explode(mon->mx, mon->my, 1, tmp, MON_EXPLODE, EXPL_FIERY, 1);
 				u.uevent.ukilled_apollyon = 1;
 			}
 			else if(mdat->mattk[i].adtyp == AD_GARO){
@@ -3584,7 +3614,7 @@ boolean was_swallowed;			/* digestion */
 				outrumor(rn2(2), BY_OTHER); //either true (3/4) or false (1/4), no mechanism specified.
 				pline("Belief or disbelief rests with you.");
 				pline("To die without leaving a corpse....\"");
-				explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, EXPL_MUDDY);
+				explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, EXPL_MUDDY, 1);
 				pline("\"That is the way of us Garo.\"");
 			}
 			else if(mdat->mattk[i].adtyp == AD_GARO_MASTER){
@@ -3594,29 +3624,29 @@ boolean was_swallowed;			/* digestion */
 				outgmaster(); //Gives out a major consultation. Does not set the consultation flags.
 				pline("Do not forget these words...");
 				pline("Die I shall, leaving no corpse.\"");
-				explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, EXPL_MUDDY);
+				explode(mon->mx, mon->my, 8, tmp, MON_EXPLODE, EXPL_MUDDY, 1);
 				pline("\"That is the law of us Garo.\"");
 			}
 			else if(mdat->mattk[i].adtyp == AD_COLD){
 			//mdat == &mons[PM_BAALPHEGOR] || mdat == &mons[PM_ANCIENT_OF_ICE] || mdat == &mons[PM_FREEZING_SPHERE]){
-			  explode(mon->mx, mon->my, 2, tmp, MON_EXPLODE, EXPL_FROSTY);
+			  explode(mon->mx, mon->my, 2, tmp, MON_EXPLODE, EXPL_FROSTY, 1);
 			}
 			else if(mdat->mattk[i].adtyp == AD_ELEC){//mdat == &mons[PM_SHOCKING_SPHERE]){
-				explode(mon->mx, mon->my, 5, tmp, MON_EXPLODE, EXPL_MAGICAL);
+				explode(mon->mx, mon->my, 5, tmp, MON_EXPLODE, EXPL_MAGICAL, 1);
 			}
 			else if(mdat->mattk[i].adtyp == AD_FRWK){
 				int x, y, i;
 				for(i = rn2(3)+2; i > 0; i--){
 					x = rn2(7)-3;
 					y = rn2(7)-3;
-					explode(mon->mx+x, mon->my+y, 8, tmp, -1, rn2(7));		//-1 is unspecified source. 8 is physical
+					explode(mon->mx+x, mon->my+y, 8, tmp, -1, rn2(7), 1);		//-1 is unspecified source. 8 is physical
 				}
 				tmp=0;
 			} else if(mdat->mattk[i].adtyp == AD_SPNL){
-				explode(mon->mx, mon->my, 2, tmp, MON_EXPLODE, EXPL_WET);
+				explode(mon->mx, mon->my, 2, tmp, MON_EXPLODE, EXPL_WET, 1);
 				makemon(rn2(2) ? &mons[PM_LEVIATHAN] : &mons[PM_LEVISTUS], mon->mx, mon->my, MM_ADJACENTOK);
 			} else if(mdat == &mons[PM_ANCIENT_OF_DEATH]){
-				if(!(u.sealsActive&SEAL_OSE)) explode(mon->mx, mon->my, 0, tmp, MON_EXPLODE, EXPL_DARK);
+				if(!(u.sealsActive&SEAL_OSE)) explode(mon->mx, mon->my, 0, tmp, MON_EXPLODE, EXPL_DARK, 1);
 			} else if(mdat->mattk[i].adtyp == AD_WTCH){
 				struct monst *mtmp, *mtmp2;
 				for (mtmp = fmon; mtmp; mtmp = mtmp2){
@@ -3658,7 +3688,7 @@ boolean was_swallowed;			/* digestion */
 				} else shieldeff(u.ux,u.uy);
 			}
 			else{
-			  explode(mon->mx, mon->my, 0, tmp, MON_EXPLODE, EXPL_MAGICAL);
+			  explode(mon->mx, mon->my, 0, tmp, MON_EXPLODE, EXPL_MAGICAL, 1);
 			}
 	    	if(mdat == &mons[PM_GARO_MASTER] || mdat == &mons[PM_GARO]) return (TRUE);
 			else return (FALSE);
@@ -3720,7 +3750,7 @@ boolean was_swallowed;			/* digestion */
 	    	Sprintf(killer_buf, "%s explosion", s_suffix(mdat->mname));
 	    	killer = killer_buf;
 	    	killer_format = KILLED_BY_AN;
-			explode(mon->mx, mon->my, -1, d(8,8), MON_EXPLODE, EXPL_NOXIOUS);
+			explode(mon->mx, mon->my, -1, d(8,8), MON_EXPLODE, EXPL_NOXIOUS, 1);
 			if(mdat==&mons[PM_GREAT_CTHULHU]){
 				flags.cth_attk=TRUE;//state machine stuff.
 				create_gas_cloud(mon->mx, mon->my, 2, 30);
@@ -3907,11 +3937,11 @@ boolean was_swallowed;			/* digestion */
 			int hpgain = 0;
 			int lvlgain = 0;
 			int lvls = 0;
-			if((mdat==&mons[PM_DEEP_ONE])){
+			if(mdat==&mons[PM_DEEP_ONE]){
 				hpgain = 2;
-			} else if((mdat==&mons[PM_DEEPER_ONE])){
+			} else if(mdat==&mons[PM_DEEPER_ONE]){
 				hpgain = 4;
-			} else if((mdat==&mons[PM_DEEPEST_ONE])){
+			} else if(mdat==&mons[PM_DEEPEST_ONE]){
 				hpgain = 8;
 			} else { //arcadian avenger
 				lvlgain = 1;
@@ -3925,9 +3955,16 @@ boolean was_swallowed;			/* digestion */
 							if(mtmp->mhp > 0){
 								if(lvlgain) for(lvls = lvlgain; lvls > 0; lvls--) grow_up(mtmp, 0);
 								if(hpgain){
-									mtmp->mhpmax += hpgain-1;
-									mtmp->mhp += hpgain-1;
-									grow_up(mtmp, mtmp); //gain last HP and grow up if needed
+									if (mtmp->mhpmax < 300){
+										mtmp->mhpmax += hpgain-1;
+										mtmp->mhp += hpgain-1;
+										grow_up(mtmp, mtmp); //gain last HP and grow up if needed
+									}
+									else {
+										mtmp->mhpmax += 1;
+										mtmp->mhp += 1;
+										grow_up(mtmp, mtmp); //gain last HP and grow up if needed
+									}
 								}
 							}
 					}
@@ -3961,6 +3998,9 @@ boolean was_swallowed;			/* digestion */
 	if (is_golem(mdat)
 		   || is_mplayer(mdat)
 		   || is_rider(mdat)
+		   || mdat == &mons[PM_UNDEAD_KNIGHT]
+		   || mdat == &mons[PM_WARRIOR_OF_SUNLIGHT]
+		   || mdat == &mons[PM_CROW_WINGED_HALF_DRAGON]
 		   || mdat == &mons[PM_SEYLL_AUZKOVYN]
 		   || mdat == &mons[PM_DARUTH_XAXOX]
 		   || mdat == &mons[PM_ORION]
@@ -4627,7 +4667,8 @@ xkilled(mtmp, dest)
 	if(redisp) newsym(x,y);
 cleanup:
 	/* punish bad behaviour */
-	if(is_human(mdat) && !(u.sealsActive&SEAL_MALPHAS) && (!always_hostile_mon(mtmp) && mtmp->malign <= 0) &&
+	if(is_human(mdat) && !is_derived_undead_mon(mtmp) && 
+	  !(u.sealsActive&SEAL_MALPHAS) && (!always_hostile_mon(mtmp) && mtmp->malign <= 0) &&
 	   (mndx < PM_ARCHEOLOGIST || mndx > PM_WIZARD) &&
 	   u.ualign.type != A_CHAOTIC) {
 		HTelepat &= ~INTRINSIC;
@@ -4640,6 +4681,7 @@ cleanup:
 	}
 	if((mtmp->mpeaceful && !rn2(2)) || mtmp->mtame)	change_luck(-1);
 	if (is_unicorn(mdat) &&
+	   !is_derived_undead_mon(mtmp) &&
 		sgn(u.ualign.type) == sgn(mdat->maligntyp) && 
 		u.ualign.type != A_VOID
 	) {
@@ -4654,7 +4696,7 @@ cleanup:
 	newexplevel();		/* will decide if you go up */
 
 	/* adjust alignment points */
-	if (mtmp->m_id == quest_status.leader_m_id) {
+	if (mtmp->m_id == quest_status.leader_m_id && !is_derived_undead_mon(mtmp)) {
 		if(flags.leader_backstab){ /* They attacked you! */
 			adjalign((int)(ALIGNLIM/4));
 			// pline("That was %sa bad idea...",
@@ -4668,12 +4710,12 @@ cleanup:
 	} else if (mdat->msound == MS_NEMESIS){	/* Real good! */
 	    adjalign((int)(ALIGNLIM/4));
 		u.hod = max(u.hod-10,0);
-	} else if (mdat->msound == MS_GUARDIAN && mdat != &mons[PM_THUG]) {	/* Bad *//*nobody cares if you kill thugs*/
+	} else if (mdat->msound == MS_GUARDIAN && mdat != &mons[PM_THUG] && !is_derived_undead_mon(mtmp)) {	/* Bad *//*nobody cares if you kill thugs*/
 	    adjalign(-(int)(ALIGNLIM/8));											/*what's a little murder amongst rogues?*/
 		u.hod += 10;
 	    if (!Hallucination) pline("That was probably a bad idea...");
 	    else pline("Whoopsie-daisy!");
-	}else if (mtmp->ispriest) {
+	}else if (mtmp->ispriest && !is_derived_undead_mon(mtmp)) {
 		adjalign((p_coaligned(mtmp)) ? -2 : 2);
 		/* cancel divine protection for killing your priest */
 		if (p_coaligned(mtmp)) u.ublessed = 0;
@@ -4880,43 +4922,42 @@ int  typ, fatal, opoistype;
 		if(Poison_resistance) {
 			if(!strcmp(string, "blast")) shieldeff(u.ux, u.uy);
 			pline_The("poison doesn't seem to affect you.");
-			return;
-		}
-		/* suppress killer prefix if it already has one */
-		if ((i = name_to_mon(pname)) >= LOW_PM && mons[i].geno & G_UNIQ) {
-			kprefix = KILLED_BY;
-			if (!type_is_pname(&mons[i])) pname = the(pname);
-		} else if (!strncmpi(pname, "the ", 4) ||
-			!strncmpi(pname, "an ", 3) ||
-			!strncmpi(pname, "a ", 2)) {
-			/*[ does this need a plural check too? ]*/
-			kprefix = KILLED_BY;
-		}
-		i = rn2(fatal + 20*thrown_weapon);
-		if(i == 0 && typ != A_CHA) {
-			if (adjattrib(A_CON, typ==A_CON ? -2 : -rn1(3,3), 1))
-				pline_The("poison was quite debilitating...");
-		} else if(i <= 5) {
-			/* Check that a stat change was made */
-			if (adjattrib(typ, thrown_weapon ? -1 : -rn1(3,3), 1))
-				pline("You%s!", poiseff[typ]);
 		} else {
-			i = thrown_weapon ? rnd(6) : rn1(10,6);
-			if(Half_physical_damage) i = (i+1) / 2;
-			losehp(i, pname, kprefix);
+			/* suppress killer prefix if it already has one */
+			if ((i = name_to_mon(pname)) >= LOW_PM && mons[i].geno & G_UNIQ) {
+				kprefix = KILLED_BY;
+				if (!type_is_pname(&mons[i])) pname = the(pname);
+			} else if (!strncmpi(pname, "the ", 4) ||
+				!strncmpi(pname, "an ", 3) ||
+				!strncmpi(pname, "a ", 2)) {
+				/*[ does this need a plural check too? ]*/
+				kprefix = KILLED_BY;
+			}
+			i = rn2(fatal + 20*thrown_weapon);
+			if(i == 0 && typ != A_CHA) {
+				if (adjattrib(A_CON, typ==A_CON ? -2 : -rn1(3,3), 1))
+					pline_The("poison was quite debilitating...");
+			} else if(i <= 5) {
+				/* Check that a stat change was made */
+				if (adjattrib(typ, thrown_weapon ? -1 : -rn1(3,3), 1))
+					pline("You%s!", poiseff[typ]);
+			} else {
+				i = thrown_weapon ? rnd(6) : rn1(10,6);
+				if(Half_physical_damage) i = (i+1) / 2;
+				losehp(i, pname, kprefix);
+			}
+			if(u.uhp < 1) {
+				killer_format = kprefix;
+				killer = pname;
+				/* "Poisoned by a poisoned ___" is redundant */
+				done(strstri(pname, "poison") ? DIED : POISONING);
+			}
+			(void) encumber_msg();
 		}
-		if(u.uhp < 1) {
-			killer_format = kprefix;
-			killer = pname;
-			/* "Poisoned by a poisoned ___" is redundant */
-			done(strstri(pname, "poison") ? DIED : POISONING);
-		}
-		(void) encumber_msg();
 	}
-	else if(opoistype & OPOISON_FILTH){
+	if(opoistype & OPOISON_FILTH){
 		if(Sick_resistance) {
 			pline_The("tainted filth doesn't seem to affect you.");
-			return;
 		} else {
 			long sick_time;
 
@@ -4927,19 +4968,17 @@ int  typ, fatal, opoistype;
 			make_sick(sick_time, string, TRUE, SICK_NONVOMITABLE);
 		}
 	}
-	else if(opoistype & OPOISON_SLEEP){
-		if(Poison_resistance || Sleep_resistance) {
+	if(opoistype & OPOISON_SLEEP){
+		if(Sleep_resistance) {
 			pline_The("drug doesn't seem to affect you.");
-			return;
 		} else if(!rn2(20*thrown_weapon)){
 			You("suddenly fall asleep!");
 			fall_asleep(-rn1(2, 6), TRUE);
 		}
 	}
-	else if(opoistype & OPOISON_BLIND){
+	if(opoistype & OPOISON_BLIND){
 		if(Poison_resistance) {
 			pline_The("poison doesn't seem to affect you.");
-			return;
 		} else if(!rn2(20*thrown_weapon)){
 			i = thrown_weapon ? 3 : 8;
 			if(Half_physical_damage) i = (i+1) / 2;
@@ -4952,10 +4991,9 @@ int  typ, fatal, opoistype;
 			losehp(i, pname, kprefix);
 		}
 	}
-	else if(opoistype & OPOISON_PARAL){
-		if(Poison_resistance || Free_action) {
+	if(opoistype & OPOISON_PARAL){
+		if(Free_action) {
 			pline_The("poison doesn't seem to affect you.");
-			return;
 		} else if(!rn2(20*thrown_weapon)){
 			i = thrown_weapon ? 6 : 16;
 			if(Half_physical_damage) i = (i+1) / 2;
@@ -4967,12 +5005,35 @@ int  typ, fatal, opoistype;
 			losehp(i, pname, kprefix);
 		}
 	}
-	else if(opoistype & OPOISON_AMNES){
+	if(opoistype & OPOISON_AMNES){
 		if(u.sealsActive&SEAL_HUGINN_MUNINN){
 			unbind(SEAL_HUGINN_MUNINN,TRUE);
 		} else {
 			forget(1);	/* lose 1% of memory per point lost*/
 			forget_traps();		/* lose memory of all traps*/
+		}
+	}
+	if(opoistype & OPOISON_ACID){
+		if(Poison_resistance) {
+			pline_The("acidic coating doesn't seem to affect you.");
+		} else {
+			/* suppress killer prefix if it already has one */
+			if ((i = name_to_mon(pname)) >= LOW_PM && mons[i].geno & G_UNIQ) {
+				kprefix = KILLED_BY;
+				if (!type_is_pname(&mons[i])) pname = the(pname);
+			} else if (!strncmpi(pname, "the ", 4) ||
+				!strncmpi(pname, "an ", 3) ||
+				!strncmpi(pname, "a ", 2)) {
+				/*[ does this need a plural check too? ]*/
+				kprefix = KILLED_BY;
+			}
+			i = thrown_weapon ? rnd(10) : rn1(10,10);
+			losehp(i, pname, kprefix);
+			if(u.uhp < 1) {
+				killer_format = kprefix;
+				killer = pname;
+				done(DIED);
+			}
 		}
 	}
 }
@@ -5031,6 +5092,7 @@ register struct monst *mtmp;
 	if(!mtmp->mpeaceful) return;
 	if(mtmp->mtame) return;
 	mtmp->mpeaceful = 0;
+	newsym(mtmp->mx, mtmp->my);
 	if(mtmp->ispriest) {
 		if(p_coaligned(mtmp)) adjalign(-5); /* very bad */
 		else adjalign(2);
@@ -5092,7 +5154,7 @@ register struct monst *mtmp;
 void
 wakeup(mtmp, anger)
 register struct monst *mtmp;
-boolean anger;
+int anger;
 {
 	mtmp->msleeping = 0;
 	mtmp->meating = 0;	/* assume there's no salvagable food left */
@@ -5162,12 +5224,78 @@ register int x, y, distance;
 	wake_nearto(x,y,distance);
 	distance /= 3;
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-	    if (!DEADMONSTER(mtmp) && sensitive_ears(mtmp->data) && !is_deaf(mtmp) &&
-				 dist2(mtmp->mx, mtmp->my, x, y) < distance){
-			mtmp->mstun = 1;
-			mtmp->mconf = 1;
-			mtmp->mcanhear = 0;
-			mtmp->mdeafened = distance - dist2(mtmp->mx, mtmp->my, x, y);
+	    if (!DEADMONSTER(mtmp)){
+			if(sensitive_ears(mtmp->data) && !is_deaf(mtmp) &&
+			 dist2(mtmp->mx, mtmp->my, x, y) < distance
+			){
+				mtmp->mstun = 1;
+				mtmp->mconf = 1;
+				mtmp->mcanhear = 0;
+				mtmp->mdeafened = distance - dist2(mtmp->mx, mtmp->my, x, y);
+			}
+			if(mtmp->data == &mons[PM_ECHO]){
+				struct monst *tmpm;
+				int targets = 0, damage = 0;
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
+						&& tmpm->mpeaceful != mtmp->mpeaceful
+						&& tmpm->mtame != mtmp->mtame
+						&& !nonliving_mon(tmpm)
+						&& !resists_drain(tmpm)
+						&& !DEADMONSTER(tmpm)
+					) targets++;
+				}
+				if(dist2(u.ux,u.uy,mtmp->mx,mtmp->my) <= distance
+					&& !mtmp->mpeaceful
+					&& !mtmp->mtame
+					&& !nonliving(youracedata)
+				) targets++;
+				targets = rnd(targets);
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(dist2(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= distance
+						&& tmpm->mpeaceful != mtmp->mpeaceful
+						&& tmpm->mtame != mtmp->mtame
+						&& !nonliving_mon(tmpm)
+						&& !resists_drain(tmpm)
+						&& !DEADMONSTER(tmpm)
+					) targets--;
+					if(!targets) break;
+				}
+				if(tmpm){
+					if(canseemon(tmpm)){
+						pline("Powerful reverberations shake %s to %s soul!", mon_nam(tmpm), hisherits(tmpm));
+					}
+					tmpm->mconf = 1;
+					tmpm->mcanhear = 0;
+					tmpm->mdeafened = distance - dist2(tmpm->mx, tmpm->my, x, y);
+					damage = tmpm->m_lev/2+1;
+					if(damage > 0){
+						tmpm->mhp -= 8*damage;
+						tmpm->mhpmax -= 8*damage;
+						tmpm->m_lev -= damage;
+						if(tmpm->mhp < 1
+						|| tmpm->mhpmax < 1
+						|| tmpm->m_lev < 0
+						){
+							grow_up(mtmp,tmpm);
+							mondied(tmpm);
+						}
+					}
+				} else if(targets > 0
+					&& dist2(u.ux,u.uy,mtmp->mx,mtmp->my) <= distance
+					&& !mtmp->mpeaceful
+					&& !mtmp->mtame
+					&& !Drain_resistance
+					&& !nonliving(youracedata)
+				){
+					pline("Powerful reverberations shake you to your soul!");
+					damage = u.ulevel/2+1;
+					while(--damage)
+						losexp("soul echoes",FALSE,TRUE,TRUE);
+					losexp("soul echoes",TRUE,TRUE,TRUE);
+					losehp(8, "soul echoes", KILLED_BY); //might kill you before you hit level 0;
+				}
+			}
 		}
 	}
 }

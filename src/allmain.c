@@ -410,6 +410,7 @@ moveloop()
 
     u.uz0.dlevel = u.uz.dlevel;
     youmonst.movement = NORMAL_SPEED;	/* give the hero some movement points */
+	flags.move = FALSE; /* From nethack 3.6.2 */
     prev_hp_notify = uhp();
 
 	oldCon = ACURR(A_CON);
@@ -437,6 +438,18 @@ moveloop()
 		} else {
 			youmonst.movement -= NORMAL_SPEED;
 		}
+		
+		  /**************************************************/
+		 /*monsters that respond to the player turn go here*/
+		/**************************************************/
+		for (mtmp = fmon; mtmp; mtmp = nxtmon){
+			nxtmon = mtmp->nmon;
+			if ((mtmp->data == &mons[PM_MEDUSA] || mtmp->data == &mons[PM_GREAT_CTHULHU])
+				&& couldsee(mtmp->mx, mtmp->my)
+				&& ((rn2(3) >= magic_negation(mtmp)))
+			) m_respond(mtmp);
+		}
+		
 	    do { /* hero can't move this turn loop */
 		wtcap = encumber_msg();
 
@@ -560,7 +573,7 @@ moveloop()
 				oldLightBlind = !!LightBlind;
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-			if (!oldCon != ACURR(A_CON)) {
+			if (!(oldCon != ACURR(A_CON))) {
 				if(conplus(oldCon) > 0) u.uhpmax -= conplus(oldCon)*u.ulevel;
 				else u.uhpmax -= conplus(oldCon)*u.ulevel;
 				
@@ -572,7 +585,7 @@ moveloop()
 				oldCon = ACURR(A_CON);
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-			if (!oldWisBon != ACURR(A_WIS)/4) {
+			if (!(oldWisBon != ACURR(A_WIS)/4)) {
 				u.uenmax += u.ulevel*(ACURR(A_WIS)/4 - oldWisBon);
 				if(u.uenmax < 0) u.uenmax = 0;
 				if(u.uen > u.uenmax) u.uen = u.uenmax;
@@ -745,7 +758,7 @@ moveloop()
 				if(mtmp->data == &mons[PM_GOLD_GOLEM]){
 					int golds = u.goldkamcount_tame + level.flags.goldkamcount_peace + level.flags.goldkamcount_hostile;
 					if(golds > 0){
-						if(canseemon(mtmp)){
+						if(canseemon_eyes(mtmp)){
 							pline("%s blossoms into a swirl of mirrored arcs!", Monnam(mtmp));
 							You("see the image of %s reflected in the golden mirrors!", an(mons[PM_ARA_KAMEREL].mname));
 						}
@@ -881,7 +894,7 @@ karemade:
 			
 		    if(!(Is_illregrd(&u.uz) && u.ualign.type == A_LAWFUL && !u.uevent.uaxus_foe) && /*Turn off random generation on axus's level if lawful*/
 				!rn2(u.uevent.udemigod ? 25 :
-				(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) ? 35 :
+				(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !Is_qstart(&u.uz)) ? 35 :
 			    (depth(&u.uz) > depth(&stronghold_level)) ? 50 : 70)
 			){
 				if (u.uevent.udemigod && xupstair && rn2(10)) {
@@ -890,6 +903,9 @@ karemade:
 				if(In_sokoban(&u.uz)){
 					if(u.uz.dlevel != 1 && u.uz.dlevel != 4) makemon((struct permonst *)0, xupstair, yupstair, MM_ADJACENTSTRICT|MM_ADJACENTOK);
 				} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
+					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
+					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 				}
 				else (void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
@@ -924,7 +940,7 @@ karemade:
 #endif
 		    {
 			moveamt = youmonst.data->mmove;
-			if(!Upolyd && Race_if(PM_HALF_DRAGON)) moveamt = (moveamt*2)/3;
+			if(!Upolyd && Race_if(PM_HALF_DRAGON) && !(Role_if(PM_NOBLEMAN) && flags.initgend)) moveamt = (moveamt*2)/3;
 			if(uarmf && uarmf->otyp == STILETTOS && !Flying && !Levitation) moveamt = (moveamt*5)/6;
 			
 			if(u.sealsActive&SEAL_EURYNOME && IS_PUDDLE_OR_POOL(levl[u.ux][u.uy].typ)){
@@ -1110,41 +1126,13 @@ karemade:
 			}
 			/* If the player has too many pets, untame them untill that is no longer the case */
 			{
-				struct monst *curmon, *weakdog;
-				int numdogs;
-				do {
-					numdogs = 0;
-					weakdog = (struct monst *)0;
-					for(curmon = fmon; curmon; curmon = curmon->nmon){
-						if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && 
-							!is_suicidal(curmon->data) && !curmon->mspiritual && curmon->mvanishes < 0
-						){
-							numdogs++;
-							if(!weakdog) weakdog = curmon;
-							if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-						}
-					}
-					if(weakdog && numdogs > (ACURR(A_CHA)/3) ) EDOG(weakdog)->friend = 1;
-				} while(weakdog && numdogs > (ACURR(A_CHA)/3));
+				// finds weakest pet, and if there's more than 6 pets that count towards your limit
+				// it sets the weakest one friendly - dog.c
+				enough_dogs();
 				
-				do {
-					weakdog = (struct monst *)0;
-					numdogs = 0;
-					for(curmon = fmon; curmon; curmon = curmon->nmon){
-						if(curmon->mspiritual && curmon->mvanishes < 0){
-							numdogs++;
-							if(!weakdog) weakdog = curmon;
-							if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-							else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-						}
-					}
-					if(weakdog && numdogs > (ACURR(A_CHA)/3) ) weakdog->mvanishes = 5;
-				} while(weakdog && numdogs > (ACURR(A_CHA)/3));
+				// if there's a spiritual pet that isn't already marked for vanishing,
+				// give it 5 turns before it disappears. - dog.c
+				vanish_dogs();
 			}
 			
 			if(u.petattacked){
@@ -1262,7 +1250,9 @@ karemade:
 							flags.botl = 1;
 							u.mh++;
 						}
-						if(!nonliving(youracedata) && !Race_if(PM_INCANTIFIER) && (wtcap < MOD_ENCUMBER || !u.umoved) && 
+						if(u.regen_blocked){
+							u.regen_blocked--;
+						} else if(!nonliving(youracedata) && !Race_if(PM_INCANTIFIER) && (wtcap < MOD_ENCUMBER || !u.umoved) && 
 							(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4))
 						){
 							flags.botl = 1;
@@ -1278,7 +1268,9 @@ karemade:
 						flags.botl = 1;
 						u.uhp++;
 					}
-					if(!nonliving(youracedata) && !Race_if(PM_INCANTIFIER) && (wtcap < MOD_ENCUMBER || !u.umoved) && 
+					if(u.regen_blocked){
+						u.regen_blocked--;
+					} else if(!nonliving(youracedata) && !Race_if(PM_INCANTIFIER) && (wtcap < MOD_ENCUMBER || !u.umoved) && 
 						(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4))
 					){
 						int reglevel = u.ulevel + (((int) ACURR(A_CON)) - 10)/2;
@@ -1356,6 +1348,20 @@ karemade:
 				}
 		    }
 
+			if (u.uen > 0 || Race_if(PM_INCANTIFIER)){
+				//maintained spells accumulate an energy debt that must be paid over time
+				int reglevel = u.maintained_en_debt;
+				//pay 1/100th energy per turn:
+				u.uen -= reglevel / 100;
+				u.maintained_en_debt -= reglevel / 100;
+				//Now deal with any remainder
+				if ((reglevel > 0) && !(moves % (100/((reglevel % 100) + 1) + 2))) {
+					u.uen -= 1;
+					u.maintained_en_debt -= 1;
+				}
+				if (u.uen < 0 && !Race_if(PM_INCANTIFIER))  u.uen = 0;
+				flags.botl = 1;
+			}
 		    if (u.uen < u.uenmax && 
 				wtcap < MOD_ENCUMBER && 
 				!Race_if(PM_INCANTIFIER)
@@ -1495,14 +1501,6 @@ karemade:
 	    /******************************************/
 		if(u.ustdy > 0) u.ustdy -= 1;
 		
-		for (mtmp = fmon; mtmp; mtmp = nxtmon){
-			nxtmon = mtmp->nmon;
-			if ((mtmp->data == &mons[PM_MEDUSA] || mtmp->data == &mons[PM_GREAT_CTHULHU])
-				&& couldsee(mtmp->mx, mtmp->my)
-				&& ((rn2(3) >= magic_negation(mtmp)))
-			) m_respond(mtmp);
-		}
-		
 		if(Echolocation){
 			for(i=1; i<COLNO; i++)
 				for(j=0; j<ROWNO; j++)
@@ -1553,7 +1551,7 @@ karemade:
 			uarmg->ovar1 = next;
 			//if(diff) adj_abon(uarmg, diff);
 		}
-
+		didmove = FALSE;
 	} /* actual time passed */
 
 	/****************************************/
@@ -1618,7 +1616,7 @@ karemade:
 		case 0:
 			break;
 		case 1:
-			if (!Hallucination) {
+			if (!Hallucination){
 				You_feel("%s.", (healing_penalty) ? "itchier" : "itchy");
 			}
 			else {
@@ -1671,7 +1669,7 @@ karemade:
 	}
 	oldLightBlind = !!LightBlind;
 ////////////////////////////////////////////////////////////////////////////////////////////////
-	if (!oldCon != ACURR(A_CON)) {
+	if (!(oldCon != ACURR(A_CON))) {
 		int condif = conplus(ACURR(A_CON)) - conplus(oldCon);
 		if(condif != 0) u.uhpmax += u.ulevel*condif;
 		if(u.uhpmax < 1) u.uhpmax = 1;
@@ -1679,7 +1677,7 @@ karemade:
 		oldCon = ACURR(A_CON);
 	}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-	if (!oldWisBon != ACURR(A_WIS)/4) {
+	if (!(oldWisBon != ACURR(A_WIS)/4)) {
 		u.uenmax += u.ulevel*(ACURR(A_WIS)/4 - oldWisBon);
 		if(u.uenmax < 0) u.uenmax = 0;
 		if(u.uen > u.uenmax) u.uen = u.uenmax;

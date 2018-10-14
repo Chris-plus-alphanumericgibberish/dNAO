@@ -1398,9 +1398,7 @@ domove()
 				You("phase through the bear trap.");
 				u.utrap = 0;
 		    } else if(uwep && 
-				(uwep->oartifact == ART_STING || uwep->oartifact == ART_LIECLEAVER || 
-					(is_lightsaber(uwep) && litsaber(uwep))
-				)
+				(is_lightsaber(uwep) && litsaber(uwep))
 			){
 				trap = t_at(u.ux,u.uy);
 				u.utrap = 0;
@@ -1793,7 +1791,7 @@ stillinwater:;
 	            // pline_The("water burns your flesh!");
 		    // losehp(dam,"contact with water",KILLED_BY);
 		}
-		if (verysmall(youmonst.data)) water_damage(invent, FALSE,FALSE,FALSE,FALSE);
+		if (verysmall(youmonst.data)) water_damage(invent, FALSE,FALSE,FALSE,(struct monst *) 0);
 #ifdef STEED
 		if (!u.usteed)
 #endif
@@ -2553,21 +2551,20 @@ weight_cap()
 		mdat = u.usteed->data;
 	}
 #endif
-	
-	if (!youracedata->cwt)
-		maxcap = (maxcap * (long)youracedata->msize) / MZ_HUMAN;
-	else if (!strongmonst(youracedata)
-		|| (strongmonst(youracedata) && (youracedata->cwt > WT_HUMAN)))
-		maxcap = (maxcap * (long)youracedata->cwt / WT_HUMAN);
+	if (!mdat->cwt)
+		maxcap = (maxcap * (long)mdat->msize) / MZ_HUMAN;
+	else if (!strongmonst(mdat)
+		|| (strongmonst(mdat) && (mdat->cwt > WT_HUMAN)))
+		maxcap = (maxcap * (long)mdat->cwt / WT_HUMAN);
 
 	/* consistent with can_carry() in mon.c */
-	if (youracedata->mlet == S_NYMPH)
+	if (mdat->mlet == S_NYMPH)
 		carrcap = maxcap;
-	else if (!youracedata->cwt)
-		carrcap = (carrcap * (long)youracedata->msize) / MZ_HUMAN;
-	else if (!strongmonst(youracedata)
-		|| (strongmonst(youracedata) && (youracedata->cwt > WT_HUMAN)))
-		carrcap = (carrcap * (long)youracedata->cwt / WT_HUMAN);
+	else if (!mdat->cwt)
+		carrcap = (carrcap * (long)mdat->msize) / MZ_HUMAN;
+	else if (!strongmonst(mdat)
+		|| (strongmonst(mdat) && (mdat->cwt > WT_HUMAN)))
+		carrcap = (carrcap * (long)mdat->cwt / WT_HUMAN);
 
 	if (Levitation || Weightless    /* pugh@cornell */
 	)
@@ -2650,6 +2647,16 @@ inv_weight()
 			wt += 24*otmp->owt; /* Same as loadstone by default. Only affects fake amulets in open inventory */
 		otmp = otmp->nobj;
 	}
+	
+	if(u.usteed){
+		otmp = u.usteed->minvent;
+		while (otmp){
+			if(otmp->oartifact) otmp->owt = weight(otmp);
+			wt += otmp->owt;
+			otmp = otmp->nobj;
+		}
+	}
+	
 	wc = weight_cap();
 	return (wt - wc);
 }

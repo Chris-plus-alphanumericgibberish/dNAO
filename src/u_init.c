@@ -30,6 +30,7 @@ static struct trobj Archeologist[] = {
 	{ BULLWHIP, 2, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ LEATHER_JACKET, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ FEDORA, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ FOOD_RATION, 0, FOOD_CLASS, 3, 0 },
 	{ PICK_AXE, UNDEF_SPE, TOOL_CLASS, 1, UNDEF_BLESS },
 	{ TINNING_KIT, UNDEF_SPE, TOOL_CLASS, 1, UNDEF_BLESS },
@@ -42,24 +43,24 @@ static struct trobj Anachrononaut_Hu[] = {
 	{ ARM_BLASTER, 0, WEAPON_CLASS, 1, 0 },
 	{ FORCE_PIKE,  0, WEAPON_CLASS, 1, 0 },
 	{ HAND_BLASTER, 0, WEAPON_CLASS, 1, 0 },
-	{ PLASTEEL_ARMOR, 0, ARMOR_CLASS, 1, 0 },
+	{ PLASTEEL_ARMOR, 1, ARMOR_CLASS, 1, 0 },
 	{ BODYGLOVE, 0, ARMOR_CLASS, 1, 0 },
-	{ PLASTEEL_HELM, 0, ARMOR_CLASS, 1, 0 },
-	{ PLASTEEL_GAUNTLETS, 0, ARMOR_CLASS, 1, 0 },
-	{ PLASTEEL_BOOTS, 0, ARMOR_CLASS, 1, 0 },
+	{ PLASTEEL_HELM, 1, ARMOR_CLASS, 1, 0 },
+	{ PLASTEEL_GAUNTLETS, 1, ARMOR_CLASS, 1, 0 },
+	{ PLASTEEL_BOOTS, 1, ARMOR_CLASS, 1, 0 },
 	{ CLOAK_OF_MAGIC_RESISTANCE, 0, ARMOR_CLASS, 1, 0 },
 	{ POWER_PACK, 0, TOOL_CLASS, 5, 0 },
 	{ PROTEIN_PILL, 0, FOOD_CLASS, 10, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Anachrononaut_Hlf[] = {
-	{ AUTO_SHOTGUN,  0, WEAPON_CLASS, 1, 0 },
+	{ AUTO_SHOTGUN,  3, WEAPON_CLASS, 1, 0 },
 	{ SHOTGUN_SHELL, 3, WEAPON_CLASS, 100, 0 },
 	{ SCALE_MAIL, 0, ARMOR_CLASS, 1, 0 },
 	{ BRONZE_HELM, 0, ARMOR_CLASS, 1, 0 },
 	{ GAUNTLETS, 0, ARMOR_CLASS, 1, 0 },
 	{ ARMORED_BOOTS, 0, ARMOR_CLASS, 1, 0 },
-	{ CLOAK_OF_PROTECTION, 0, ARMOR_CLASS, 1, 0 },
+	{ CLOAK_OF_PROTECTION, 3, ARMOR_CLASS, 1, 0 },
 	{ BULLET_FABBER, 0, TOOL_CLASS, 1, 0 },
 	{ CUTTING_LASER,  0, WEAPON_CLASS, 1, 0 },
 	{ POWER_PACK, 0, TOOL_CLASS, 5, 0 },
@@ -71,11 +72,11 @@ static struct trobj Anachrononaut_Dw[] = {
 	{ PISTOL, 1, WEAPON_CLASS, 1, 0 },
 	{ SEISMIC_HAMMER, 0, WEAPON_CLASS, 1, 0 },
 	{ STICK_OF_DYNAMITE, 0, TOOL_CLASS, 15, 0 },
-	{ HIGH_ELVEN_PLATE, 0, ARMOR_CLASS, 1, 0 },
+	{ HIGH_ELVEN_PLATE, 1, ARMOR_CLASS, 1, 0 },
 	{ BODYGLOVE, 0, ARMOR_CLASS, 1, 0 },
-	{ HIGH_ELVEN_HELM, 0, ARMOR_CLASS, 1, 0 },
-	{ HIGH_ELVEN_GAUNTLETS, 0, ARMOR_CLASS, 1, 0 },
-	{ ELVEN_BOOTS, 0, ARMOR_CLASS, 1, 0 },
+	{ HIGH_ELVEN_HELM, 1, ARMOR_CLASS, 1, 0 },
+	{ HIGH_ELVEN_GAUNTLETS, 1, ARMOR_CLASS, 1, 0 },
+	{ ELVEN_BOOTS, 1, ARMOR_CLASS, 1, 0 },
 	{ AMULET_OF_NULLIFY_MAGIC, 0, AMULET_CLASS, 1, 0 },
 	{ BULLET, 3, WEAPON_CLASS, 100, 0 },
 	{ BULLET_FABBER, 0, TOOL_CLASS, 1, 0 },
@@ -86,10 +87,10 @@ static struct trobj Anachrononaut_Inc[] = {
 	{ LIGHTSABER,  3, WEAPON_CLASS, 1, 0 },
 	{ ELVEN_TOGA, 1, ARMOR_CLASS, 1, 0 },
 	{ BODYGLOVE, 0, ARMOR_CLASS, 1, 0 },
-	{ GLOVES, 0, ARMOR_CLASS, 1, 0 },
+	{ GLOVES, 1, ARMOR_CLASS, 1, 0 },
 	{ ROBE, 1, ARMOR_CLASS, 1, 0 },
-	{ SEDGE_HAT, 0, ARMOR_CLASS, 1, 0 },
-	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, 0 },
+	{ SEDGE_HAT, 1, ARMOR_CLASS, 1, 0 },
+	{ HIGH_BOOTS, 1, ARMOR_CLASS, 1, 0 },
 	{ POWER_PACK, 0, TOOL_CLASS, 5, 0 },
 	{ SPE_DETECT_MONSTERS, 0, SPBOOK_CLASS, 1, 0 },
 	{ SPE_JUMPING, 0, SPBOOK_CLASS, 1, 0 },
@@ -100,11 +101,11 @@ static struct trobj Anachrononaut_Vam[] = {
 	{ SUBMACHINE_GUN, 4, WEAPON_CLASS, 1, 0 },
 	{ VIBROBLADE,  0, WEAPON_CLASS, 1, 0 },
 	{ CUTTING_LASER,  0, WEAPON_CLASS, 1, 0 },
-	{ STUDDED_LEATHER_ARMOR, 0, ARMOR_CLASS, 1, 0 },
+	{ STUDDED_LEATHER_ARMOR, 1, ARMOR_CLASS, 1, 0 },
 	{ BODYGLOVE, 0, ARMOR_CLASS, 1, 0 },
-	{ GLOVES, 0, ARMOR_CLASS, 1, 0 },
+	{ GLOVES, 1, ARMOR_CLASS, 1, 0 },
 	{ CLOAK_OF_DISPLACEMENT, 0, ARMOR_CLASS, 1, 0 },
-	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, 0 },
+	{ HIGH_BOOTS, 1, ARMOR_CLASS, 1, 0 },
 	{ POWER_PACK, 0, TOOL_CLASS,  5, 0 },
 	{ BULLET, 0, WEAPON_CLASS, 200, 0 },
 	{ SILVER_BULLET, 0, WEAPON_CLASS, 50, 0 },
@@ -130,12 +131,12 @@ static struct trobj Anachrononaut_Dro[] = {
 	{ SNIPER_RIFLE, 4, WEAPON_CLASS, 1, 0 },
 	{ VIBROBLADE,  0, WEAPON_CLASS, 1, 0 },
 	{ CUTTING_LASER,  0, WEAPON_CLASS, 1, 0 },
-	{ PLASTEEL_ARMOR, 0, ARMOR_CLASS, 1, 0 },
+	{ PLASTEEL_ARMOR, 1, ARMOR_CLASS, 1, 0 },
 	{ BODYGLOVE, 0, ARMOR_CLASS, 1, 0 },
-	{ PLASTEEL_HELM, 0, ARMOR_CLASS, 1, 0 },
-	{ ORIHALCYON_GAUNTLETS, 0, ARMOR_CLASS, 1, 0 },
+	{ PLASTEEL_HELM, 1, ARMOR_CLASS, 1, 0 },
+	{ ORIHALCYON_GAUNTLETS, 1, ARMOR_CLASS, 1, 0 },
 	{ CLOAK_OF_INVISIBILITY, 0, ARMOR_CLASS, 1, 0 },
-	{ ELVEN_BOOTS, 0, ARMOR_CLASS, 1, 0 },
+	{ ELVEN_BOOTS, 1, ARMOR_CLASS, 1, 0 },
 	{ POWER_PACK, 0, TOOL_CLASS,  5, 0 },
 	{ BULLET, 0, WEAPON_CLASS, 60, 0 },
 	{ SILVER_BULLET, 0, WEAPON_CLASS, 30, 0 },
@@ -146,7 +147,8 @@ static struct trobj Anachrononaut_Dro[] = {
 static struct trobj Anachrononaut_Elf[] = {
 	{ RAYGUN,  0, WEAPON_CLASS, 1, 0 },
 	{ SENSOR_PACK,  25, WEAPON_CLASS, 1, 0 },
-	{ JUMPSUIT, 5, ARMOR_CLASS, 1, 0 },
+	{ JUMPSUIT, 2, ARMOR_CLASS, 1, 0 },
+	{ BODYGLOVE, 0, ARMOR_CLASS, 1, 0 },
 	{ JUMPING_BOOTS, 0, ARMOR_CLASS, 1, 0 },
 	{ POWER_PACK, 0, TOOL_CLASS, 10, 0 },
 	{ LEMBAS_WAFER, 0, FOOD_CLASS, 3, 0 },
@@ -160,10 +162,11 @@ static struct trobj Anachrononaut_Elf[] = {
 };
 static struct trobj Barbarian[] = {
 #define B_MAJOR	0	/* two-handed sword or battle-axe  */
-#define B_MINOR	1	/* matched with axe or short sword */
 	{ TWO_HANDED_SWORD, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
+#define B_MINOR	1	/* matched with axe or short sword */
 	{ AXE, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ RING_MAIL, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ FOOD_RATION, 0, FOOD_CLASS, 1, 0 },
 	{ TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
@@ -171,21 +174,22 @@ static struct trobj Barbarian[] = {
 #ifdef BARD
 static struct trobj Bard[] = {
 #define BARD_INSTR 0
-#define BARD_CLOAK 1
-#define BARD_BOOZE 4
-#define BARD_WHISTLE 5
 	{ WOODEN_HARP, UNDEF_SPE, TOOL_CLASS, 1, UNDEF_BLESS },
+#define BARD_CLOAK 1
 	{ LEATHER_CLOAK, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ APPLE, 0, FOOD_CLASS, 3, 0 },
 	{ ORANGE, 0, FOOD_CLASS, 3, 0 },
+#define BARD_BOOZE 5
 	{ POT_BOOZE, 0, POTION_CLASS, 1, UNDEF_BLESS },
+#define BARD_WHISTLE 6
 	{ TIN_WHISTLE, 0, TOOL_CLASS, 1, UNDEF_BLESS },
 	{ 0, 0, 0, 0, 0 }
 };
 #endif
 static struct trobj Binder[] = {
+	{ SHEPHERD_S_CROOK, 0, WEAPON_CLASS, 1, 0 },
 	{ KNIFE, 0, WEAPON_CLASS, 1, 0 },
-	{ VOULGE, 0, WEAPON_CLASS, 1, 0 },
 	{ SICKLE, 0, WEAPON_CLASS, 1, 0 },
 	{ ROCK, 0, GEM_CLASS, 5, 0 }, 
 	{ FLINT, 0, GEM_CLASS, 1, 0 },
@@ -206,9 +210,9 @@ long sealKey[34] = {SEAL_AHAZU, SEAL_AMON, SEAL_ANDREALPHUS, SEAL_ANDROMALIUS, S
 				 SEAL_PAIMON, SEAL_SIMURGH, SEAL_TENEBROUS, SEAL_YMIR, SEAL_SPECIAL|SEAL_DAHLVER_NAR, SEAL_SPECIAL|SEAL_ACERERAK, SEAL_SPECIAL|SEAL_NUMINA
 				};
 static struct trobj Cave_man[] = {
-#define C_AMMO	2
 	{ CLUB, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ SLING, 2, WEAPON_CLASS, 1, UNDEF_BLESS },
+#define C_AMMO	2
 	{ FLINT, 0, GEM_CLASS, 15, UNDEF_BLESS },	/* quan is variable */
 	{ ROCK, 0, GEM_CLASS, 3, 0 },			/* yields 18..33 */
 	{ LEATHER_ARMOR, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
@@ -226,8 +230,9 @@ static struct trobj Convict[] = {
 static struct trobj Healer[] = {
 	{ SCALPEL, 0, WEAPON_CLASS, 1, 1 },
 	{ QUARTERSTAFF, 0, WEAPON_CLASS, 1, 1 },
-	{ GLOVES, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ GLOVES, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ HEALER_UNIFORM, 0, ARMOR_CLASS, 1, 1 },
+	{ LOW_BOOTS, 0, ARMOR_CLASS, 1, 1 },
 	{ STETHOSCOPE, 0, TOOL_CLASS, 1, 0 },
 	{ POT_HEALING, 0, POTION_CLASS, 4, UNDEF_BLESS },
 	{ POT_EXTRA_HEALING, 0, POTION_CLASS, 4, UNDEF_BLESS },
@@ -243,18 +248,20 @@ static struct trobj Healer[] = {
 static struct trobj Knight[] = {
 	{ LONG_SWORD, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ LANCE, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
-	{ RING_MAIL, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ CHAIN_MAIL, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ HELMET, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
-	{ BUCKLER, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ KITE_SHIELD, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ GLOVES, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ APPLE, 0, FOOD_CLASS, 10, 0 },
 	{ CARROT, 0, FOOD_CLASS, 10, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
+
 static struct trobj Monk[] = {
-#define M_BOOK		2
 	{ GLOVES, 2, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ ROBE, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+#define M_BOOK		2
 	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 1 },
 	{ UNDEF_TYP, UNDEF_SPE, SCROLL_CLASS, 1, UNDEF_BLESS },
 	{ POT_HEALING, 0, POTION_CLASS, 3, UNDEF_BLESS },
@@ -288,12 +295,13 @@ static struct trobj DNoble[] = {
 	{ NOBLE_S_DRESS, 2, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ DROVEN_HELM, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ GLOVES, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ LEATHER_CLOAK, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ BOW, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ UNDEF_TYP, UNDEF_SPE, RING_CLASS, 1, UNDEF_BLESS },
-#define DNB_TWO_ARROWS	8
+#define DNB_TWO_ARROWS	9
 	{ ARROW, 2, WEAPON_CLASS, 50, UNDEF_BLESS },
-#define DNB_ZERO_ARROWS	9
+#define DNB_ZERO_ARROWS	10
 	{ ARROW, 0, WEAPON_CLASS, 30, UNDEF_BLESS },
 	{ APPLE, 0, FOOD_CLASS, 10, 0 },
 	{ FOOD_RATION, 0, FOOD_CLASS, 3, 0 },
@@ -302,45 +310,57 @@ static struct trobj DNoble[] = {
 };
 static struct trobj DwarfNoble[] = {
 	{ BATTLE_AXE, 2, WEAPON_CLASS, 1, UNDEF_BLESS },
-	{ CHAIN_MAIL, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ CHAIN_MAIL, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ GLOVES, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ LEATHER_CLOAK, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ UNDEF_TYP, UNDEF_SPE, RING_CLASS, 1, UNDEF_BLESS },
 	{ TRIPE_RATION, 0, FOOD_CLASS, 3, 0 },
 	{ FOOD_RATION, 0, FOOD_CLASS, 3, 0 },
 	{ TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
-static struct trobj HDNoble[] = {
- 	{ SPEAR,  2, WEAPON_CLASS, 1, UNDEF_BLESS },
- 	{ SICKLE, 2, WEAPON_CLASS, 1, UNDEF_BLESS },
+static struct trobj HDNobleF[] = {
+ 	{ SPEAR,  1, WEAPON_CLASS, 1, 1 },
+ 	{ BELL, 0, TOOL_CLASS, 1, 1 },
 	{ BUCKLER, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
-	{ LEATHER_ARMOR, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ LEATHER_HELM, 1, ARMOR_CLASS, 1, 1 },
+	{ CHAIN_MAIL, 1, ARMOR_CLASS, 1, 1 },
 	{ GLOVES, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
-	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ LEATHER_CLOAK, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
-	{ APPLE, 0, FOOD_CLASS, 3, 0 },
+	{ SPE_HEALING, 0, SPBOOK_CLASS, 1, 1 },
+	{ FOOD_RATION, 0, FOOD_CLASS, 3, 0 },
+	{ TORCH, 0, TOOL_CLASS, 3, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
+static struct trobj HDNobleM[] = {
+	{ BROADSWORD, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
+	{ BRONZE_PLATE_MAIL, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ BRONZE_HELM, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ ROUNDSHIELD, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ GLOVES, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ FOOD_RATION, 0, FOOD_CLASS, 3, 0 },
 	{ TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Pirate[] = {
-#define PIR_KNIVES	2
-#define PIR_SNACK 6
-#define PIR_JEWELRY 8
-#define PIR_TOOL 9
-#define PIR_BULLETS 10
 	{ SCIMITAR, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ FLINTLOCK, 0, WEAPON_CLASS, 1, 0 },
+#define PIR_KNIVES	2
 	{ KNIFE, 0, WEAPON_CLASS, 1, 0 },
+	{ CRAM_RATION, 0, FOOD_CLASS, 2, UNDEF_BLESS },
 	{ LEATHER_JACKET, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
-	{ CRAM_RATION, 0, FOOD_CLASS, 2, UNDEF_BLESS },
+#define PIR_SNACK 6
 	{ BANANA, 0, FOOD_CLASS, 3, 0 },
 	{ POT_BOOZE, 0, POTION_CLASS, 3, UNDEF_BLESS },
+#define PIR_JEWELRY 8
 	{ UNDEF_TYP, UNDEF_SPE, RING_CLASS, 1, UNDEF_BLESS },
+	{ GRAPPLING_HOOK, 0, TOOL_CLASS, 1, 0 },
 	{ PICK_AXE, 0, TOOL_CLASS, 1, 0 },
 	{ OILSKIN_SACK, 0, TOOL_CLASS, 1, 0 },
+#define PIR_BULLETS 10
 	{ BULLET,  0, WEAPON_CLASS, 20, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
@@ -361,6 +381,7 @@ static struct trobj DPriest[] = {
 	{ BULLWHIP, 2, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ ROBE, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ BUCKLER, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ POT_WATER, 0, POTION_CLASS, 4, 1 },	/* holy water */
 	{ CLOVE_OF_GARLIC, 0, FOOD_CLASS, 1, 0 },
 	{ SPRIG_OF_WOLFSBANE, 0, FOOD_CLASS, 1, 0 },
@@ -368,23 +389,25 @@ static struct trobj DPriest[] = {
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Ranger[] = {
-#define RAN_BOW			1
-#define RAN_TWO_ARROWS	2
-#define RAN_ZERO_ARROWS	3
 	{ DAGGER, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
+#define RAN_BOW			1
 	{ BOW, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
+#define RAN_TWO_ARROWS	2
 	{ ARROW, 2, WEAPON_CLASS, 50, UNDEF_BLESS },
+#define RAN_ZERO_ARROWS	3
 	{ ARROW, 0, WEAPON_CLASS, 30, UNDEF_BLESS },
 	{ CLOAK_OF_DISPLACEMENT, 2, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ CRAM_RATION, 0, FOOD_CLASS, 4, 0 },
 	{ TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Rogue[] = {
-#define R_DAGGERS	1
 	{ SHORT_SWORD, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
+#define R_DAGGERS	1
 	{ DAGGER, 0, WEAPON_CLASS, 10, 0 },	/* quan is variable */
 	{ LEATHER_ARMOR, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ LOW_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ POT_SICKNESS, 0, POTION_CLASS, 1, 0 },
 	{ LOCK_PICK, 9, TOOL_CLASS, 1, 0 },
 	{ SACK, 0, TOOL_CLASS, 1, 0 },
@@ -394,13 +417,14 @@ static struct trobj Rogue[] = {
 };
 static struct trobj Samurai[] = {
 #define S_WEAPON	0
-#define S_SECOND	1
-#define S_ARROWS	3
 	{ KATANA, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
+#define S_SECOND	1
 	{ SHORT_SWORD, 0, WEAPON_CLASS, 1, UNDEF_BLESS }, /* wakizashi */
+#define S_ARROWS	3
 	{ YUMI, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ YA, 0, WEAPON_CLASS, 25, UNDEF_BLESS }, /* variable quan */
 	{ SPLINT_MAIL, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ SEDGE_HAT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ 0, 0, 0, 0, 0 }
 };
@@ -413,6 +437,7 @@ static struct trobj Tourist[] = {
 	{ SCR_MAGIC_MAPPING, 0, SCROLL_CLASS, 4, UNDEF_BLESS },
 	{ HAWAIIAN_SHIRT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 /*	{ HAWAIIAN_SHORTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },*/
+	{ LOW_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ EXPENSIVE_CAMERA, UNDEF_SPE, TOOL_CLASS, 1, 0 },
 	{ CREDIT_CARD, 0, TOOL_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
@@ -422,21 +447,24 @@ static struct trobj Valkyrie[] = {
 	{ SPEAR, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ BOW, 	 1, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ ARROW, 0, WEAPON_CLASS,15, UNDEF_BLESS },
-	{ BUCKLER, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ BUCKLER, 3, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ GLOVES, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ LEATHER_ARMOR, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ FOOD_RATION, 0, FOOD_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Wizard[] = {
 #define W_WEAPON	0
-#define W_MULTSTART	2
-#define W_MULTEND	6
 	{ QUARTERSTAFF, 1, WEAPON_CLASS, 1, 0 },
 	{ ATHAME, -1, WEAPON_CLASS, 1, 0 },
+#define W_MULTSTART	2
 	{ CLOAK_OF_MAGIC_RESISTANCE, 0, ARMOR_CLASS, 1, 0 },
+	{ LOW_BOOTS, 0, ARMOR_CLASS, 1, 0 },
 	{ UNDEF_TYP, UNDEF_SPE, RING_CLASS, 2, UNDEF_BLESS },
 	{ UNDEF_TYP, UNDEF_SPE, SCROLL_CLASS, 3, 0 },
 	{ SPE_FORCE_BOLT, 0, SPBOOK_CLASS, 1, 0 },
+#define W_MULTEND	6
 	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 0 },
 	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 0 },
 	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 0 },
@@ -579,110 +607,113 @@ static struct trobj Money[] = {
    the weaker cloak for elven rangers is intentional--they shoot better */
 static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     // Elf substitutions
-    { PM_ELF, ATHAME,                 ELVEN_DAGGER                },
-    { PM_ELF, DAGGER,                 ELVEN_DAGGER                },
-    { PM_ELF, KNIFE,                  ELVEN_DAGGER                },
-    { PM_ELF, SPEAR,                  ELVEN_SPEAR                 },
-    { PM_ELF, SHORT_SWORD,            ELVEN_SHORT_SWORD           },
-    { PM_ELF, BOW,                    ELVEN_BOW                   },
-    { PM_ELF, ARROW,                  ELVEN_ARROW                 },
-    { PM_ELF, HELMET,                 ELVEN_HELM                  },
-    { PM_ELF, BUCKLER,                ELVEN_SHIELD                },
-    { PM_ELF, CLOAK_OF_DISPLACEMENT,  ELVEN_CLOAK                 },
-    { PM_ELF, LEATHER_CLOAK,          ELVEN_CLOAK                 },
-    { PM_ELF, CRAM_RATION,            LEMBAS_WAFER                },
-    { PM_ELF, FOOD_RATION,            LEMBAS_WAFER                },
-    { PM_ELF, GENTLEWOMAN_S_DRESS,    ELVEN_TOGA                  },
-    { PM_ELF, GENTLEMAN_S_SUIT,       ELVEN_TOGA                  },
-    { PM_ELF, VICTORIAN_UNDERWEAR,    ELVEN_SHIELD                },
-    { PM_ELF, RUFFLED_SHIRT,          ELVEN_SHIELD                },
-    { PM_ELF, RAPIER,                 ELVEN_SPEAR                 },
+    { PM_ELF,	ATHAME,					ELVEN_DAGGER	      },
+    { PM_ELF,	DAGGER,					ELVEN_DAGGER	      },
+    { PM_ELF,	KNIFE,					ELVEN_DAGGER	      },
+    { PM_ELF,	SPEAR,					ELVEN_SPEAR	      },
+    { PM_ELF,	SHORT_SWORD,			ELVEN_SHORT_SWORD     },
+    { PM_ELF,	BOW,					ELVEN_BOW	      },
+    { PM_ELF,	ARROW,					ELVEN_ARROW	      },
+    { PM_ELF,	HELMET,					ELVEN_HELM    },
+	{ PM_ELF,	BUCKLER,				ELVEN_SHIELD	      },
+	{ PM_ELF,	KITE_SHIELD,			ELVEN_SHIELD	      },
+    { PM_ELF,	CLOAK_OF_DISPLACEMENT,	ELVEN_CLOAK	      },
+    { PM_ELF,	LEATHER_CLOAK,			ELVEN_CLOAK	      },
+    { PM_ELF,	CRAM_RATION,			LEMBAS_WAFER	      },
+    { PM_ELF,	FOOD_RATION,			LEMBAS_WAFER	      },
+    { PM_ELF,	GENTLEWOMAN_S_DRESS,	ELVEN_TOGA  },
+    { PM_ELF,	GENTLEMAN_S_SUIT,		ELVEN_TOGA  },
+    { PM_ELF,	VICTORIAN_UNDERWEAR,	ELVEN_SHIELD  },
+    { PM_ELF,	RUFFLED_SHIRT,			ELVEN_SHIELD  },
+    { PM_ELF,	RAPIER,					ELVEN_SPEAR  },
     // Orc substitutions
-    { PM_ORC, ATHAME,                 ORCISH_DAGGER               },
-    { PM_ORC, DAGGER,                 ORCISH_DAGGER               },
-    { PM_ORC, KNIFE,                  ORCISH_DAGGER               },
-    { PM_ORC, SPEAR,                  ORCISH_SPEAR                },
-    { PM_ORC, SHORT_SWORD,            ORCISH_SHORT_SWORD          },
-    { PM_ORC, BOW,                    ORCISH_BOW                  },
-    { PM_ORC, ARROW,                  ORCISH_ARROW                },
-    { PM_ORC, HELMET,                 ORCISH_HELM                 },
-    { PM_ORC, BUCKLER,                ORCISH_SHIELD               },
-    { PM_ORC, RING_MAIL,              ORCISH_RING_MAIL            },
-    { PM_ORC, CHAIN_MAIL,             ORCISH_CHAIN_MAIL           },
+    { PM_ORC,	ATHAME,			ORCISH_DAGGER	      },
+    { PM_ORC,	DAGGER,			ORCISH_DAGGER	      },
+    { PM_ORC,	KNIFE,			ORCISH_DAGGER	      },
+    { PM_ORC,	SPEAR,			ORCISH_SPEAR	      },
+    { PM_ORC,	SHORT_SWORD,	ORCISH_SHORT_SWORD    },
+    { PM_ORC,	BOW,			ORCISH_BOW	      },
+    { PM_ORC,	ARROW,			ORCISH_ARROW	      },
+    { PM_ORC,	HELMET,			ORCISH_HELM	      },
+    { PM_ORC,	BUCKLER,		ORCISH_SHIELD	      },
+    { PM_ORC,	KITE_SHIELD,	ORCISH_SHIELD	      },
+    { PM_ORC,	RING_MAIL,		ORCISH_RING_MAIL      },
+    { PM_ORC,	CHAIN_MAIL,		ORCISH_CHAIN_MAIL     },
     // Dwarf substitutions
-    { PM_DWARF, KNIFE,                DAGGER                      },
-    { PM_DWARF, SPEAR,                DWARVISH_SPEAR              },
-    { PM_DWARF, SHORT_SWORD,          DWARVISH_SHORT_SWORD        },
-    { PM_DWARF, HELMET,               DWARVISH_HELM               },
-    { PM_DWARF, BUCKLER,              DWARVISH_ROUNDSHIELD        },
-    { PM_DWARF, PICK_AXE,             DWARVISH_MATTOCK            },
-    { PM_DWARF, TWO_HANDED_SWORD,     BATTLE_AXE                  },
-    { PM_DWARF, LEATHER_CLOAK,        DWARVISH_CLOAK              },
-    { PM_GNOME, FEDORA,               GNOMISH_POINTY_HAT          },
-    { PM_GNOME, BULLWHIP,             AKLYS                       },
-    { PM_GNOME, CLUB,                 AKLYS                       },
-    { PM_GNOME, BOW,                  CROSSBOW                    },
-    { PM_GNOME, ARROW,                CROSSBOW_BOLT               },
+    { PM_DWARF,	KNIFE,				DAGGER	      		  },
+    { PM_DWARF, SPEAR,				DWARVISH_SPEAR	      },
+    { PM_DWARF, SHORT_SWORD,		DWARVISH_SHORT_SWORD  },
+    { PM_DWARF, HELMET,				DWARVISH_HELM    },
+	{ PM_DWARF, BUCKLER,			DWARVISH_ROUNDSHIELD  }, 
+	{ PM_DWARF, KITE_SHIELD,		DWARVISH_ROUNDSHIELD  }, 
+    { PM_DWARF, PICK_AXE,			DWARVISH_MATTOCK      },
+    { PM_DWARF, TWO_HANDED_SWORD,	BATTLE_AXE    },
+    { PM_DWARF,	LEATHER_CLOAK,		DWARVISH_CLOAK  },
+    { PM_GNOME, FEDORA,			GNOMISH_POINTY_HAT    },
+    { PM_GNOME, BULLWHIP,		AKLYS    },
+    { PM_GNOME, CLUB,			AKLYS    },
+    { PM_GNOME, BOW,			CROSSBOW	      },
+    { PM_GNOME, ARROW,			CROSSBOW_BOLT	      },
     // Drow substitutions
-    { PM_DROW, CLOAK_OF_DISPLACEMENT,        DROVEN_PLATE_MAIL    },
-    { PM_DROW, CLOAK_OF_MAGIC_RESISTANCE,    DROVEN_CHAIN_MAIL    },
-    { PM_DROW, LEATHER_ARMOR,                DROVEN_CHAIN_MAIL    },
-    { PM_DROW, ROBE,                         DROVEN_PLATE_MAIL    },
-    { PM_DROW, ATHAME,                       DROVEN_DAGGER        },
-    { PM_DROW, DAGGER,                       DROVEN_DAGGER        },
-    { PM_DROW, KNIFE,                        DROVEN_DAGGER        },
-    { PM_DROW, SPEAR,                        DROVEN_SHORT_SWORD   },
-    { PM_DROW, SHORT_SWORD,                  DROVEN_SHORT_SWORD   },
-    { PM_DROW, BOW,                          DROVEN_CROSSBOW      },
-    { PM_DROW, ARROW,                        DROVEN_BOLT          },
-    { PM_DROW, LEATHER_CLOAK,                DROVEN_CLOAK         },
-    { PM_DROW, MACE,                         KHAKKHARA            },
-    { PM_DROW, BUCKLER,                      DROVEN_HELM          },
-    { PM_DROW, GENTLEWOMAN_S_DRESS,          NOBLE_S_DRESS        },
-    { PM_DROW, GENTLEMAN_S_SUIT,             CONSORT_S_SUIT       },
-//  { PM_DROW, SCIMITAR,                     DROVEN_SPEAR         },
-    { PM_DROW, APPLE,                        TRIPE_RATION         },
-    { PM_DROW,	TORCH,						 SHADOWLANDER_S_TORCH  },
-    { PM_DROW,	SUNROD,						 SHADOWLANDER_S_TORCH  },
+    { PM_DROW,	CLOAK_OF_DISPLACEMENT,		DROVEN_PLATE_MAIL  },
+    { PM_DROW,	CLOAK_OF_MAGIC_RESISTANCE,	DROVEN_CHAIN_MAIL  },
+    { PM_DROW,	LEATHER_ARMOR,				DROVEN_CHAIN_MAIL  },
+    { PM_DROW,	ROBE,						DROVEN_PLATE_MAIL  },
+    { PM_DROW,	ATHAME,						DROVEN_DAGGER	      },
+    { PM_DROW,	DAGGER,						DROVEN_DAGGER	      },
+    { PM_DROW,	KNIFE,						DROVEN_DAGGER	      },
+    { PM_DROW,	SPEAR,						DROVEN_SHORT_SWORD	      },
+    { PM_DROW,	SHORT_SWORD,				DROVEN_SHORT_SWORD     },
+    { PM_DROW,	BOW,						DROVEN_CROSSBOW	      },
+    { PM_DROW,	ARROW,						DROVEN_BOLT	      },
+    { PM_DROW,	LEATHER_CLOAK,				DROVEN_CLOAK  },
+    { PM_DROW,	MACE,						KHAKKHARA  },
+    { PM_DROW,	BUCKLER,					DROVEN_HELM  },
+    { PM_DROW,	GENTLEWOMAN_S_DRESS,		NOBLE_S_DRESS  },
+    { PM_DROW,	GENTLEMAN_S_SUIT,			CONSORT_S_SUIT  },
+    // { PM_DROW,	SCIMITAR,				DROVEN_SPEAR  },
+    { PM_DROW,	APPLE,						TRIPE_RATION  },
+    { PM_DROW,	TORCH,						SHADOWLANDER_S_TORCH  },
+    { PM_DROW,	SUNROD,						SHADOWLANDER_S_TORCH  },
     // Half-dragon substitutions
-    { PM_HALF_DRAGON, APPLE,                 TRIPE_RATION         },
-    { PM_HALF_DRAGON, CARROT,                TRIPE_RATION         },
+    { PM_HALF_DRAGON,	APPLE,		TRIPE_RATION  },
+    { PM_HALF_DRAGON,	CARROT,		TRIPE_RATION  },
     // Incantifier substitutions
-    { PM_INCANTIFIER, CLOAK_OF_MAGIC_RESISTANCE,    ROBE          },
-    { PM_INCANTIFIER, CLOAK_OF_DISPLACEMENT,        ROBE          },
-    { PM_INCANTIFIER, LEATHER_ARMOR,                ROBE          },
-    { PM_INCANTIFIER, LEATHER_JACKET,               ROBE          },
-    { PM_INCANTIFIER, RING_MAIL,                    ROBE          },
-    { PM_INCANTIFIER, SPLINT_MAIL,                  ROBE          },
-    { PM_INCANTIFIER, FOOD_RATION,        SCR_FOOD_DETECTION      },
-    { PM_INCANTIFIER, CRAM_RATION,        SCR_FOOD_DETECTION      },
-    { PM_INCANTIFIER, POT_FRUIT_JUICE,    SCR_FOOD_DETECTION      },
-    { PM_INCANTIFIER, TRIPE_RATION,       SCR_FOOD_DETECTION      },
-    { PM_INCANTIFIER, BANANA,             SCR_FOOD_DETECTION      },
-    { PM_INCANTIFIER, ORANGE,             SCR_FOOD_DETECTION      },
-    { PM_INCANTIFIER, POT_BOOZE,          SCR_FOOD_DETECTION      },
+    { PM_INCANTIFIER, CLOAK_OF_MAGIC_RESISTANCE,		ROBE  },
+    { PM_INCANTIFIER, CLOAK_OF_DISPLACEMENT,			ROBE  },
+    { PM_INCANTIFIER,	LEATHER_ARMOR,				ROBE  },
+    { PM_INCANTIFIER,	LEATHER_JACKET,				ROBE  },
+    { PM_INCANTIFIER,	RING_MAIL,					ROBE  },
+    { PM_INCANTIFIER,	SPLINT_MAIL,				ROBE  },
+    { PM_INCANTIFIER,	FOOD_RATION,				SCR_FOOD_DETECTION    	  },
+    { PM_INCANTIFIER,	CRAM_RATION,				SCR_FOOD_DETECTION    	  },
+    { PM_INCANTIFIER,	POT_FRUIT_JUICE,			SCR_FOOD_DETECTION	      },
+    { PM_INCANTIFIER,	TRIPE_RATION,				SCR_FOOD_DETECTION    	  },
+    { PM_INCANTIFIER,	BANANA,						SCR_FOOD_DETECTION    	  },
+    { PM_INCANTIFIER,	ORANGE,						SCR_FOOD_DETECTION    	  },
+    { PM_INCANTIFIER,	POT_BOOZE,					SCR_FOOD_DETECTION   	  },
     // Vampire substitutions
-    { PM_VAMPIRE, ATHAME,             DAGGER                      },
-    { PM_VAMPIRE, FOOD_RATION,        POT_BLOOD                   },
-    { PM_VAMPIRE, CRAM_RATION,        POT_BLOOD                   },
-    { PM_VAMPIRE, POT_FRUIT_JUICE,    POT_BLOOD                   },
-    { PM_VAMPIRE, TRIPE_RATION,       POT_BLOOD                   },
-    { PM_VAMPIRE, BANANA,             POT_BLOOD                   },
-    { PM_VAMPIRE, ORANGE,             POT_BLOOD                   },
-    { PM_VAMPIRE, POT_BOOZE,          POT_BLOOD                   },
+    { PM_VAMPIRE,	ATHAME,				DAGGER    	  },
+    { PM_VAMPIRE,	FOOD_RATION,		POT_BLOOD    	  },
+    { PM_VAMPIRE,	CRAM_RATION,		POT_BLOOD    	  },
+    { PM_VAMPIRE,	POT_FRUIT_JUICE,	POT_BLOOD	      },
+    { PM_VAMPIRE,	TRIPE_RATION,		POT_BLOOD    	  },
+    { PM_VAMPIRE,	BANANA,				POT_BLOOD    	  },
+    { PM_VAMPIRE,	ORANGE,				POT_BLOOD    	  },
+    { PM_VAMPIRE,	POT_BOOZE,			POT_BLOOD    	  },
     // Clockwork automaton substitutions
-    { PM_CLOCKWORK_AUTOMATON, FOOD_RATION,        POT_OIL         },
-    { PM_CLOCKWORK_AUTOMATON, CRAM_RATION,        POT_OIL         },
-    { PM_CLOCKWORK_AUTOMATON, POT_FRUIT_JUICE,    POT_OIL         },
-    { PM_CLOCKWORK_AUTOMATON, TRIPE_RATION,       POT_OIL         },
-    { PM_CLOCKWORK_AUTOMATON, BANANA,             POT_OIL         },
-    { PM_CLOCKWORK_AUTOMATON, ORANGE,             POT_OIL         },
-    { PM_CLOCKWORK_AUTOMATON, POT_BOOZE,          POT_OIL         },
+    { PM_CLOCKWORK_AUTOMATON,	FOOD_RATION, 		POT_OIL },
+    { PM_CLOCKWORK_AUTOMATON,	CRAM_RATION, 		POT_OIL },
+    { PM_CLOCKWORK_AUTOMATON,	POT_FRUIT_JUICE,	POT_OIL	      },
+    { PM_CLOCKWORK_AUTOMATON,	TRIPE_RATION,		POT_OIL    	  },
+    { PM_CLOCKWORK_AUTOMATON,	BANANA,				POT_OIL    	  },
+    { PM_CLOCKWORK_AUTOMATON,	ORANGE,				POT_OIL    	  },
+    { PM_CLOCKWORK_AUTOMATON,	POT_BOOZE,			POT_OIL    	  },
     // Yuki-onna substitutions
     { PM_YUKI_ONNA,           RING_MAIL,   STUDDED_LEATHER_ARMOR  },
     { PM_YUKI_ONNA,           SPLINT_MAIL, STUDDED_LEATHER_ARMOR  },
     { PM_YUKI_ONNA,           HELMET,                  SEDGE_HAT  },
-    { NON_PM,                 STRANGE_OBJECT,     STRANGE_OBJECT  }
+    { NON_PM,	STRANGE_OBJECT,		STRANGE_OBJECT	      }
 };
 
 static const struct def_skill Skill_A[] = {
@@ -1548,6 +1579,8 @@ u_init()
 	u.hod = 0;
 	u.daat = 0;
 	u.wardsknown = 0;
+	u.spells_maintained = 0;
+	u.maintained_en_debt = 0;
 	//u.wardsknown = ~0; //~0 should be all 1s, and is therefore debug mode.
 
 #if 0	/* documentation of more zero values as desirable */
@@ -1593,6 +1626,8 @@ u_init()
 	u.ukinghill = 0;
 	u.protean = 0;
 	u.divetimer = (ACURR(A_CON))/3;
+	
+	u.role_variant = 0;
 	
 	u.uhouse = 0;
 	u.start_house = 0;
@@ -1802,7 +1837,9 @@ u_init()
 		skill_add(Skill_All_Ana);
 	break;
 	case PM_BARBARIAN:
+		u.role_variant = TWO_HANDED_SWORD;
 		if (rn2(100) >= 50) {	/* see above comment */
+			u.role_variant = BATTLE_AXE;
 		    Barbarian[B_MAJOR].trotyp = BATTLE_AXE;
 		    Barbarian[B_MINOR].trotyp = SHORT_SWORD;
 		}
@@ -1851,6 +1888,7 @@ u_init()
 		ini_inv(Binder);
 		skill_init(Skill_N);
 		knows_object(FLINT);
+		knows_object(SHEPHERD_S_CROOK);
 		if(Race_if(PM_INCANTIFIER)){
 			knows_object(SPE_HEALING);
 			knows_object(SPE_FORCE_BOLT);
@@ -1921,26 +1959,34 @@ u_init()
 		skill_init(Skill_Mon);
 		break;
 	case PM_NOBLEMAN:
-		if(flags.female && !Race_if(PM_DROW)){
-			Noble[NOB_SHIRT].trotyp = VICTORIAN_UNDERWEAR;
-			Noble[NOB_SHIRT].trspe = 1;
-			Noble[NOB_SUIT].trotyp = GENTLEWOMAN_S_DRESS;
-			Noble[NOB_SUIT].trspe = 1;
-			Noble[NOB_SHOES].trotyp = STILETTOS;
-			Noble[NOB_SHOES].trspe = 1;
-		} else if(!flags.female && Race_if(PM_DROW)){
-			Noble[NOB_SHOES].trotyp = STILETTOS;
-			Noble[NOB_SHOES].trspe = 1;
-		}
 		if(Race_if(PM_DWARF)) ini_inv(DwarfNoble);
-		if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend) 
-			ini_inv(HDNoble);
+		else if(Race_if(PM_HALF_DRAGON)){
+			if(flags.initgend){
+				ini_inv(HDNobleF);
+			} else {
+				ini_inv(HDNobleM);
+			}
+		}
 		else if(Race_if(PM_DROW) && flags.female){
 			DNoble[DNB_TWO_ARROWS].trquan = rn1(10, 50);
 			DNoble[DNB_ZERO_ARROWS].trquan = rn1(10, 30);
 			ini_inv(DNoble);
 			ini_inv(DarkWand);
-		} else ini_inv(Noble);
+		} else{
+			if(flags.female && !Race_if(PM_DROW)){
+				Noble[NOB_SHIRT].trotyp = VICTORIAN_UNDERWEAR;
+				Noble[NOB_SHIRT].trspe = 1;
+				Noble[NOB_SUIT].trotyp = GENTLEWOMAN_S_DRESS;
+				Noble[NOB_SUIT].trspe = 1;
+				Noble[NOB_SHOES].trotyp = STILETTOS;
+				Noble[NOB_SHOES].trspe = 1;
+			} else if(!flags.female && Race_if(PM_DROW)){
+				Noble[NOB_SHOES].trotyp = STILETTOS;
+				Noble[NOB_SHOES].trspe = 1;
+			}
+			ini_inv(Noble);
+		}
+		
 		if(Race_if(PM_ELF)){
 			ini_inv(Phial);
 		} else if(Race_if(PM_DROW) && !flags.female){
@@ -1966,7 +2012,6 @@ u_init()
 		Pirate[PIR_SNACK].trquan += rn2(4);
 		Pirate[PIR_BULLETS].trquan += rn2(Pirate[PIR_BULLETS].trquan/2);
 		if(rn2(100)<50)	Pirate[PIR_JEWELRY].trotyp = RIN_ADORNMENT;
-		if(rn2(100)<50)	Pirate[PIR_TOOL].trotyp = GRAPPLING_HOOK;
 		ini_inv(Pirate);
 		if(Race_if(PM_DROW)){
 			struct obj *otmp;
@@ -2040,7 +2085,7 @@ u_init()
 		u.umartial = TRUE;
 		Samurai[S_ARROWS].trquan = rn1(20, 26);
 		if(flags.female){
-			Samurai[S_WEAPON].trotyp = GLAIVE;
+			Samurai[S_WEAPON].trotyp = NAGINATA;
 			Samurai[S_SECOND].trotyp = KNIFE;
 		}
 		ini_inv(Samurai);
@@ -2110,6 +2155,7 @@ u_init()
 		else ini_inv(ExtraBook);
 		if(Role_if(PM_ANACHRONONAUT)){
 			u.umartial = TRUE;
+			HTelepat |= FROMOUTSIDE;
 			skill_add(Skill_Elf_Ana);
 		}
     break;
@@ -2134,6 +2180,7 @@ u_init()
 #endif
 		if(Role_if(PM_ANACHRONONAUT)){
 			u.umartial = TRUE;
+			HTelepat |= FROMOUTSIDE;
 			skill_add(Skill_Elf_Ana);
 		}
 	    /* Elves can recognize all elvish objects */
@@ -2180,6 +2227,8 @@ u_init()
 					u.ualign.type = A_NEUTRAL; /* Males are neutral */
 				flags.initalign = 1; // 1 == neutral
 			}
+		} else if(Role_if(PM_ANACHRONONAUT)){
+			u.umartial = TRUE;
 		}
 	    /* Drow can recognize all droven objects */
 	    knows_object(DROVEN_SHORT_SWORD);
@@ -2206,13 +2255,13 @@ u_init()
 				pobj->otyp == CONSORT_S_SUIT ||
 				pobj->otyp == DROVEN_PLATE_MAIL){
 					pobj->ohaluengr = TRUE;
-					pobj->ovar1 = !flags.female ? 
+					pobj->oward = !flags.female ? 
 						u.uhouse :
 						LOLTH_SYMBOL;
 			}
 			else if(isSignetRing(pobj->otyp)){
 				pobj->ohaluengr = TRUE;
-				pobj->ovar1 = u.uhouse;
+				pobj->oward = u.uhouse;
 				pobj->opoisoned = OPOISON_SLEEP;
 				pobj->opoisonchrgs = 30;
 			}
@@ -2553,8 +2602,10 @@ u_init()
 
 	u.oonaenergy = !rn2(3) ? AD_FIRE : rn2(2) ? AD_COLD : AD_ELEC;
 	dungeon_topology.alt_tower = !rn2(8);
-	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend){
-		flags.HDbreath = AD_COLD;
+	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN)){
+		if(flags.initgend)
+			flags.HDbreath = AD_COLD;
+		else flags.HDbreath = AD_FIRE;
 	} else switch(rnd(6)){
 		case 1:
 			flags.HDbreath = AD_COLD;
@@ -2665,7 +2716,7 @@ register struct trobj *trop;
 				fix_object(obj);
 			}
 			if(obj->otyp == SCALE_MAIL && Role_if(PM_ANACHRONONAUT)){
-				obj->obj_material = COPPER; // which is actually bronze nice one Chris
+				obj->obj_material = COPPER;
 				fix_object(obj);
 			}
 			if(obj->otyp == GAUNTLETS && Role_if(PM_ANACHRONONAUT)){
@@ -2817,9 +2868,9 @@ register struct trobj *trop;
 			) obj->oerodeproof = 1;
 			if (obj->opoisoned && u.ualign.type != A_CHAOTIC)
 			    obj->opoisoned = 0;
-			if (obj->ovar1){
-				if(obj->oclass == WEAPON_CLASS && (obj)->obj_material == WOOD) u.wardsknown |= obj->ovar1;
-				else if(obj->oclass == RING_CLASS && isEngrRing((obj)->otyp) && !(obj->ohaluengr)) u.wardsknown |= get_wardID(obj->ovar1);
+			if (obj->oward){
+				if(obj->oclass == WEAPON_CLASS && (obj)->obj_material == WOOD) u.wardsknown |= obj->oward;
+				else if(obj->oclass == RING_CLASS && isEngrRing((obj)->otyp) && !(obj->ohaluengr)) u.wardsknown |= get_wardID(obj->oward);
 			}
 			if (obj->oclass == WEAPON_CLASS ||
 				obj->oclass == TOOL_CLASS) {
@@ -2859,7 +2910,6 @@ register struct trobj *trop;
 		if(obj->oclass == ARMOR_CLASS){
 			if (is_shield(obj) && !uarms) {
 				setworn(obj, W_ARMS);
-				if (uswapwep) setuswapwep((struct obj *) 0);
 			} else if (is_helmet(obj) && !uarmh)
 				setworn(obj, W_ARMH);
 			else if (is_gloves(obj) && !uarmg)
@@ -2877,11 +2927,13 @@ register struct trobj *trop;
 		}
 
 		if (obj->oclass == WEAPON_CLASS || is_weptool(obj) ||
-			otyp == TIN_OPENER || otyp == FLINT || otyp == ROCK) {
+			otyp == TIN_OPENER || otyp == BELL || otyp == FLINT || otyp == ROCK) {
 		    if (is_ammo(obj) || is_missile(obj)) {
-			if (!uquiver) setuqwep(obj);
+				if (!uquiver) setuqwep(obj);
 		    } else if (!uwep) setuwep(obj);
-		    else if (!uswapwep) setuswapwep(obj);
+		    else if (!uswapwep){
+				setuswapwep(obj);
+			}
 		}
 		if (obj->oclass == SPBOOK_CLASS &&
 				obj->otyp != SPE_BLANK_PAPER){

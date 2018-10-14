@@ -763,12 +763,19 @@ register char *enterstring;
 	} else if (seenSeals) {
 	    verbalize("I don't sell to your kind.");
 	} else {
-		verbalize("%s, %s!  Welcome%s to %s %s!",
-			  Hello(shkp), plname,
-			  eshkp->visitct++ ? " again" : "",
-			  s_suffix(shkname(shkp)),
-			  shtypes[rt - SHOPBASE].name);
-		verbalize("Feel free to browse my wares, or chat with me about other services!");
+		if(In_law(&u.uz)){
+			verbalize("%s, %s!  Welcome%s to my outpost!",
+				  Hello(shkp), plname,
+				  eshkp->visitct++ ? " again" : "");
+			verbalize("Feel free to browse my wares, or chat with me about other services!");
+		} else {
+			verbalize("%s, %s!  Welcome%s to %s %s!",
+				  Hello(shkp), plname,
+				  eshkp->visitct++ ? " again" : "",
+				  s_suffix(shkname(shkp)),
+				  shtypes[rt - SHOPBASE].name);
+			verbalize("Feel free to browse my wares, or chat with me about other services!");
+		}
 	}
 	/* can't do anything about blocking if teleported in */
 	if (!inside_shop(u.ux, u.uy)) {
@@ -2595,7 +2602,11 @@ register struct obj *unp_obj;	/* known to be unpaid */
 	    if ((bp = onbill(unp_obj, shkp, TRUE)) != 0) break;
 
 	/* onbill() gave no message if unexpected problem occurred */
-	if(!bp) impossible("unpaid_cost: object wasn't on any bill!");
+	if(!bp){
+		impossible("unpaid_cost: object wasn't on any bill!");
+		unp_obj->unpaid = 0;
+		unp_obj->ostolen = 1;
+	}
 
 	return bp ? unp_obj->quan * bp->price : 0L;
 }
@@ -3402,7 +3413,7 @@ boolean shk_buying;
 			else if(obj->obj_material == MITHRIL) tmp *= (MiV/AgV);
 			else /*treat it as if it's steel*/ tmp *= (FeV/AgV);
 		} else if(objects[obj->otyp].oc_material == GOLD){
-			if(obj->obj_material == SILVER) tmp = tmp *= (AgV/AuV);
+			if(obj->obj_material == SILVER) tmp *= (AgV/AuV);
 			else if(obj->obj_material == PLATINUM) tmp *= (PtV/AuV);
 			else if(obj->obj_material == MITHRIL) tmp *= (MiV/AuV);
 			else /*treat it as if it's steel*/ tmp *= (FeV/AuV);
@@ -3780,10 +3791,13 @@ register struct monst *shkp;
 	register struct eshk *eshkp = ESHK(shkp);
 	int z;
 	boolean uondoor = FALSE, satdoor, avoid = FALSE, badinv;
+	int tempbanned;
 
 	omx = shkp->mx;
 	omy = shkp->my;
-
+	
+	tempbanned = ((countFarSigns(shkp) > 0) && (strcmp(shkname(shkp), "Izchak") != 0));
+	
 	if (inhishop(shkp))
 	    remove_damage(shkp, FALSE);
 
@@ -3862,7 +3876,7 @@ register struct monst *shkp;
 		    uondoor = (u.ux == eshkp->shd.x && u.uy == eshkp->shd.y);
 		    if(uondoor) {
 			badinv = (carrying(PICK_AXE) || carrying(DWARVISH_MATTOCK) ||
-            eshkp->pbanned ||
+            eshkp->pbanned || tempbanned ||
 				  (Fast && (sobj_at(PICK_AXE, u.ux, u.uy) ||
 				  sobj_at(DWARVISH_MATTOCK, u.ux, u.uy))));
 			if(satdoor && badinv)
@@ -4301,7 +4315,7 @@ const char *Izchak_speaks[]={
     "%s says: 'These shopping malls give me a headache.'",
     "%s says: 'Slow down.  Think clearly.'",
     "%s says: 'You need to take things one at a time.'",
-    "%s says: 'I don't like poofy coffee... give me Columbian Supremo.'",
+    /* "%s says: 'I don't like poofy coffee... give me Columbian Supremo.'",*/ /*Note: Apparently, "poofy" is (now?) considered a suprisingly homophobic slur in at least some parts of the world.  The most straitforward response to this feedback is to just cut this line.*/
     "%s says that getting the devteam's agreement on anything is difficult.",
     "%s says that he has noticed those who serve their deity will prosper.",
     "%s says: 'Don't try to steal from me - I have friends in high places!'",

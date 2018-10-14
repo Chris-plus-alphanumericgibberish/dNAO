@@ -989,7 +989,9 @@ menu_display_page(nhmenu *menu, WINDOW * win, int page_num)
         }
         if (menu_item_ptr->glyph != NO_GLYPH && iflags.use_menu_glyphs) {
             unsigned special;   /*notused */
-            mapglyph(menu_item_ptr->glyph, &curletter, &color, &special, u.ux, u.uy);
+			glyph_t curglyph = (glyph_t)curletter;//Note: a glyph is a long int
+            mapglyph(menu_item_ptr->glyph, &curglyph, &color, &special, u.ux, u.uy);
+			curletter = (int)curglyph;//This seems bad, but it makes explicit what this code was always doing...
             curses_toggle_color_attr(win, color, NONE, ON);
             mvwaddch(win, menu_item_ptr->line_num + 1, start_col, curletter);
             curses_toggle_color_attr(win, color, NONE, OFF);

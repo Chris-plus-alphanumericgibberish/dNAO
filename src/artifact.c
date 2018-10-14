@@ -162,6 +162,15 @@ hack_artifacts()
 	artilist[ART_CROWN_OF_THE_SAINT_KING].otyp = gcircletsa;
 	artilist[ART_HELM_OF_THE_DARK_LORD].otyp = find_vhelm();
 	
+	/* Remove Barbarian flag from the non-matching first gift */
+	if(Role_if(PM_BARBARIAN)){
+		if(u.role_variant == TWO_HANDED_SWORD){
+			artilist[ART_CLEAVER].role = NON_PM;
+		} else {
+			artilist[ART_ATLANTEAN_ROYAL_SWORD].role = NON_PM;
+		}
+	}
+	
 	/* Fix up the crown */
 	if(gcircletsa == HELMET){
 		obj_descr[HELMET].oc_name = "circlet";
@@ -1011,7 +1020,7 @@ int
 touch_artifact(obj, mon, hypothetical)
     struct obj *obj;
     struct monst *mon;
-	boolean hypothetical;
+	int hypothetical;
 {
     register const struct artifact *oart = get_artifact(obj);
     boolean badclass=0, badalign=0, self_willed=0, yours, forceEvade = FALSE;
@@ -1289,6 +1298,8 @@ struct monst *mtmp;
 			return TRUE;
 		} else if (weap->mflagsg != 0L && ((ptr->mflagsg & weap->mflagsg) != 0L)) {
 			return TRUE;
+			if(yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0))
+				return TRUE;
 		} else if (weap->mflagsv != 0L && ((ptr->mflagsv & weap->mflagsv) != 0L)) {
 			return TRUE;
 		} else if (weap->mflagsa != 0L){
@@ -1319,7 +1330,9 @@ struct monst *mtmp;
 			return FALSE;
 		} else if (weap->mflagsb != 0L && !((ptr->mflagsb & weap->mflagsb) != 0L)) {
 			return FALSE;
-		} else if (weap->mflagsg != 0L && !((ptr->mflagsg & weap->mflagsg) != 0L)) {
+		} else if (weap->mflagsg != 0L && !(((ptr->mflagsg & weap->mflagsg) != 0L)
+			|| (yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0)))
+		) {
 			return FALSE;
 		} else if (weap->mflagsv != 0L && !((ptr->mflagsv & weap->mflagsv) != 0L)) {
 			return FALSE;
@@ -1425,6 +1438,8 @@ struct monst *mtmp;
 			return TRUE;
 		} else if (weap->mflagsg != 0L && ((ptr->mflagsg & weap->mflagsg) != 0L)) {
 			return TRUE;
+			if(yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0))
+				return TRUE;
 		} else if (weap->mflagsv != 0L && ((ptr->mflagsv & weap->mflagsv) != 0L)) {
 			return TRUE;
 		} else if (weap->mflagsa != 0L){
@@ -1454,7 +1469,9 @@ struct monst *mtmp;
 			return FALSE;
 		} else if (weap->mflagsb != 0L && !((ptr->mflagsb & weap->mflagsb) != 0L)) {
 			return FALSE;
-		} else if (weap->mflagsg != 0L && !((ptr->mflagsg & weap->mflagsg) != 0L)) {
+		} else if (weap->mflagsg != 0L && !(((ptr->mflagsg & weap->mflagsg) != 0L)
+			|| (yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0)))
+		) {
 			return FALSE;
 		} else if (weap->mflagsv != 0L && !((ptr->mflagsv & weap->mflagsv) != 0L)) {
 			return FALSE;
@@ -1625,7 +1642,11 @@ int tmp;
 			if(Fumbling) multiplier++;
 			if(Wounded_legs) multiplier++;
 			return damd ? d(multiplier, damd) : max(multiplier*tmp,multiplier);
-		} else if(otmp && (otmp->oartifact == ART_LIMITED_MOON || otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS)){
+		} else if(otmp && 
+			(otmp->oartifact == ART_LIMITED_MOON
+			|| otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS
+			|| otmp->oartifact == ART_POSEIDON_S_TRIDENT
+		)){
 			return 2*(damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1));
 		} else return damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1);
 	}
@@ -2244,7 +2265,7 @@ char *type;			/* blade, staff, etc */
        INCREASE overall likelihood of the assorted special effects 
 	   this is Magic BANE, after all, it is stronger the less 
 	   magical it is */
-    if (!spec_dbon_applies) dieroll -= 2;
+    if (mb->oartifact == ART_MAGICBANE && !spec_dbon_applies) dieroll -= 2;
 
     /* might stun even when attempting a more severe effect, but
        in that case it will only happen if the other effect fails;
@@ -2254,7 +2275,7 @@ char *type;			/* blade, staff, etc */
 
 	if(mb->oartifact == ART_MAGICBANE){
 		if (!spec_dbon_applies){
-			//Equal to a fireball, makes +2 MB good vs magic resistant creatures (avg damage same for +0,+1,+2), +7 MB least bad vs magic sensitives
+			//Equal to a fireball, makes +0 MB good vs magic resistant creatures (avg damage is almost equal for +0,+1,+2), +7 MB least bad vs magic sensitives
 			dnum = 6;
 			dsize = 6;
 		}
@@ -2287,7 +2308,7 @@ char *type;			/* blade, staff, etc */
 					u_slow_down();
 				}
 				if(u.ustdy >= 20){
-					*dmgptr += d(6,6);
+					*dmgptr += d(12,6);
 					u.ustdy -= 20;
 				}
 			}
@@ -2305,7 +2326,7 @@ char *type;			/* blade, staff, etc */
 					mdef->permspeed = MSLOW;
 				}
 				if(mdef->mstdy >= 20){
-					*dmgptr += d(6,6);
+					*dmgptr += d(12,6);
 					mdef->mstdy -= 20;
 				}
 			}
@@ -2454,6 +2475,83 @@ char *type;			/* blade, staff, etc */
 
     return result;
 }
+
+
+boolean
+oproperty_hit(magr, mdef, otmp, dmgptr, dieroll)
+struct monst *magr, *mdef;
+struct obj *otmp;
+int *dmgptr;
+int dieroll; /* needed for Magicbane and vorpal blades */
+{
+	boolean youattack = (magr == &youmonst);
+	boolean youdefend = (mdef == &youmonst);
+	boolean vis = (!youattack && magr && cansee(magr->mx, magr->my))
+	    || (!youdefend && cansee(mdef->mx, mdef->my))
+	    || (youattack && u.uswallow && mdef == u.ustuck && !Blind);
+	static const char you[] = "you";
+	char hittee[BUFSZ];
+	int basedmg = *dmgptr;
+	
+	Strcpy(hittee, youdefend ? you : mon_nam(mdef));
+	
+	if(otmp->oproperties&OPROP_FIREW){
+		if(youdefend ? (!Fire_resistance) : resists_fire(mdef)){
+			if(OPROP_LESSW) *dmgptr += d(1,6);
+			else *dmgptr += basedmg;
+			if (!rn2(4)) (void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+			if (!rn2(4)) (void) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
+			if (!rn2(7)) (void) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
+		}
+	}
+	if(otmp->oproperties&OPROP_COLDW){
+		if(youdefend ? (!Cold_resistance) : resists_cold(mdef)){
+			if(OPROP_LESSW) *dmgptr += d(1,6);
+			else *dmgptr += basedmg;
+			if (!rn2(4)) (void) destroy_mitem(mdef, POTION_CLASS, AD_COLD);
+		}
+	}
+	if(otmp->oproperties&OPROP_ELECW){
+		if(youdefend ? (!Shock_resistance) : resists_elec(mdef)){
+			if(OPROP_LESSW) *dmgptr += d(1,6);
+			else *dmgptr += basedmg;
+			if (!rn2(5)) (void) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
+			if (!rn2(5)) (void) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
+		}
+	}
+	if(otmp->oproperties&OPROP_ACIDW){
+		if(youdefend ? (!Acid_resistance) : resists_acid(mdef)){
+			if(OPROP_LESSW) *dmgptr += d(1,6);
+			else *dmgptr += basedmg;
+			if (!rn2(2)) (void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+		}
+	}
+	if(otmp->oproperties&OPROP_MAGCW){
+		if(youdefend ? (!Antimagic) : resists_magm(mdef)){
+			if(OPROP_LESSW) *dmgptr += d(1,6);
+			else *dmgptr += basedmg;
+		}
+	}
+	if(otmp->oproperties&OPROP_ANARW){
+		if(youdefend ? (u.ualign.type != A_CHAOTIC) : (sgn(mdef->data->maligntyp) >= 0)){
+			if(OPROP_LESSW) *dmgptr += d(1,6);
+			else *dmgptr += basedmg;
+		}
+	}
+	if(otmp->oproperties&OPROP_CONCW){
+		if(youdefend ? (u.ualign.type != A_NEUTRAL) : (sgn(mdef->data->maligntyp) != 0)){
+			if(OPROP_LESSW) *dmgptr += d(1,6);
+			else *dmgptr += basedmg;
+		}
+	}
+	if(otmp->oproperties&OPROP_AXIOW){
+		if(youdefend ? (u.ualign.type != A_LAWFUL) : (sgn(mdef->data->maligntyp) <= 0)){
+			if(OPROP_LESSW) *dmgptr += d(1,6);
+			else *dmgptr += basedmg;
+		}
+	}
+	return FALSE;
+}
   
 /* Function used when someone attacks someone else with an artifact
  * weapon.  Only adds the special (artifact) damage, and returns a 1 if it
@@ -2540,19 +2638,19 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			explode(mdef->mx, mdef->my,
 				1, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 				d(6,6), 0,
-				EXPL_FIERY);
+				EXPL_FIERY, 1);
 		}
 		else if(youdefend){
 			explode(u.ux, u.uy,
 				31, //1 = AD_FIRE, monster's attack explode uses nonstandard damage type flags...
 				d(6,6), 0,
-				EXPL_FIERY);
+				EXPL_FIERY, 1);
 		}
 		else{
 			explode(mdef->mx, mdef->my,
 				31, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 				d(6,6), 0,
-				EXPL_FIERY);
+				EXPL_FIERY, 1);
 		}
 	}
 	if(otmp->oartifact == ART_GENOCIDE){
@@ -2570,13 +2668,13 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 							explode(tmpm->mx, tmpm->my,
 								1, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 								d(4,4), 0,
-								EXPL_FIERY);
+								EXPL_FIERY, 1);
 						}
 						else{
 							explode(tmpm->mx, tmpm->my,
 								31, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 								d(4,4), 0,
-								EXPL_FIERY);
+								EXPL_FIERY, 1);
 						}
 					} else tmpm->mhp -= genoburn;
 				}
@@ -2588,13 +2686,13 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 						explode(mdef->mx, mdef->my,
 							1, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 							d(4,4), 0,
-							EXPL_FIERY);
+							EXPL_FIERY, 1);
 					}
 					else{
 						explode(mdef->mx, mdef->my,
 							31, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 							d(4,4), 0,
-							EXPL_FIERY);
+							EXPL_FIERY, 1);
 					}
 				}
 			}
@@ -2607,13 +2705,13 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 						explode(u.ux, u.uy,
 							1, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 							d(4,4), 0,
-							EXPL_FIERY);
+							EXPL_FIERY, 1);
 					}
 					else{
 						explode(u.ux, u.uy,
 							31, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 							d(4,4), 0,
-							EXPL_FIERY);
+							EXPL_FIERY, 1);
 					}
 				} else losehp(genoburn, "burning from within", KILLED_BY);
 			}
@@ -2629,13 +2727,13 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 							explode(tmpm->mx, tmpm->my,
 								1, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 								d(4,4), 0,
-								EXPL_FIERY);
+								EXPL_FIERY, 1);
 						}
 						else{
 							explode(tmpm->mx, tmpm->my,
 								31, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 								d(4,4), 0,
-								EXPL_FIERY);
+								EXPL_FIERY, 1);
 						}
 					} else tmpm->mhp -= genoburn;
 				}
@@ -2649,13 +2747,13 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 						explode(u.ux, u.uy,
 							1, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 							d(4,4), 0,
-							EXPL_FIERY);
+							EXPL_FIERY, 1);
 					}
 					else{
 						explode(u.ux, u.uy,
 							31, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 							d(4,4), 0,
-							EXPL_FIERY);
+							EXPL_FIERY, 1);
 					}
 				} else losehp(genoburn, "burning from within", KILLED_BY);
 			}
@@ -2666,19 +2764,19 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			explode(mdef->mx, mdef->my,
 				2, //1 = AD_COLD, explode uses nonstandard damage type flags...
 				d(6,6), 0,
-				EXPL_FROSTY);
+				EXPL_FROSTY, 1);
 		}
 		else if(youdefend){
 			explode(u.ux, u.uy,
 				32, //1 = AD_COLD, monster's attack explode uses nonstandard damage type flags...
 				d(6,6), 0,
-				EXPL_FROSTY);
+				EXPL_FROSTY, 1);
 		}
 		else{
 			explode(mdef->mx, mdef->my,
 				32, //1 = AD_COLD, explode uses nonstandard damage type flags...
 				d(6,6), 0,
-				EXPL_FROSTY);
+				EXPL_FROSTY, 1);
 		}
 	}
 	if( ((spec_ability2(otmp, SPFX2_ELEC) || (uarmh && spec_ability2(uarmh, SPFX2_ELEC))) && !rn2(4)) || spec_ability2(otmp, SPFX2_ELEC2)){
@@ -2691,7 +2789,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				explode(mdef->mx, mdef->my,
 					WAN_LIGHTNING - WAN_MAGIC_MISSILE,
 					d(6,6), 0,
-					EXPL_MAGICAL);
+					EXPL_MAGICAL, 1);
 			}
 			else{
 				deltax = deltax > 1 ? 1 : deltax < -1 ? -1 : deltax;
@@ -2707,7 +2805,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				explode(u.ux, u.uy,
 					-30 - (WAN_LIGHTNING - WAN_MAGIC_MISSILE),
 					d(6,6), 0,
-					EXPL_MAGICAL);
+					EXPL_MAGICAL, 1);
 			}
 			else{
 				deltax = deltax > 1 ? 1 : deltax < -1 ? -1 : deltax;
@@ -2723,7 +2821,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				explode(mdef->mx, mdef->my,
 					-30 - WAN_LIGHTNING - WAN_MAGIC_MISSILE,
 					d(6,6), 0,
-					EXPL_MAGICAL);
+					EXPL_MAGICAL, 1);
 			}
 			else{
 				deltax = deltax > 1 ? 1 : deltax < -1 ? -1 : deltax;
@@ -2735,8 +2833,8 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	}
 	if(youattack && otmp->oartifact == ART_SHADOWLOCK && u.specialSealsActive&SEAL_NUDZIRATH && !rn2(4)){
 		int dsize = spiritDsize();
-		explode(mdef->mx, mdef->my,8/*Phys*/, d(5,dsize), WEAPON_CLASS, EXPL_DARK); //Obsidian Glass
-		explode(u.ux, u.uy,8/*Phys*/, d(5,dsize), WEAPON_CLASS, EXPL_DARK); //Obsidian Glass
+		explode(mdef->mx, mdef->my,8/*Phys*/, d(5,dsize), WEAPON_CLASS, EXPL_DARK, 1); //Obsidian Glass
+		explode(u.ux, u.uy,8/*Phys*/, d(5,dsize), WEAPON_CLASS, EXPL_DARK, 1); //Obsidian Glass
 	}
 	if(youattack && mdef->mhp <= 0) return TRUE; //killed it.
 	/* the four basic attacks: fire, cold, shock and missiles */
@@ -3844,7 +3942,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			if(otmp->oartifact == ART_STORMBRINGER && dieroll <= 2){
 				int drains = (*dmgptr)/4+1;
 				*dmgptr = 1; /*Scratch damage; main damage delt by losexp*/
-				for(drains; drains > 0; drains--){
+				for(; drains > 0; drains--){
 					losexp("life drainage",FALSE,FALSE,FALSE);
 					if (magr && magr->mhp < magr->mhpmax) {
 						magr->mhp += (oldhpmax - u.uhpmax)/2;
@@ -4291,6 +4389,89 @@ arti_invoke(obj)
 			}
 		}
 	break;
+	case AEGIS:
+		{
+			if (mvitals[PM_MEDUSA].died < 1
+			&& mvitals[PM_GRUE].died < 1
+			&& mvitals[PM_ECHO].died < 1
+			&& mvitals[PM_SYNAISTHESIA].died < 1
+			) {
+				pline("It would seem that the Aegis is incomplete.");
+				obj->age = 0;
+				break;
+			}
+			if (!getdir((char *)0)) { //Oh, getdir must set the .d_ variables below.
+			    /* getdir canceled */
+				obj->age = 0;
+				break;
+			} else if(u.dx || u.dy) {
+				if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0 && mtmp->mcansee && mon_can_see_you(mtmp)) {
+					boolean youattack = mtmp == &youmonst;
+					if(obj->otyp == ROUNDSHIELD) You("display the shield's device to %s.", mon_nam(mtmp));
+					else if(obj->otyp == LEATHER_CLOAK) You("display the cloak's clasp to %s.", mon_nam(mtmp));
+					else You("display it to %s.", mon_nam(mtmp)); //Shouldn't be used
+					
+					if (!resists_ston(mtmp) && (rn2(100)>(mtmp->data->mr/2))){
+						minstapetrify(mtmp, youattack);
+					}
+					else {
+						monflee(mtmp, rnd(100), TRUE, TRUE);
+						if (!obj->cursed) mtmp->mcrazed = 1;
+					}
+				}
+			} else if(u.dz > 0){
+				struct engr *engrHere = engr_at(u.ux,u.uy);
+				if(!engrHere){
+					make_engr_at(u.ux, u.uy,	"", (moves - multi), DUST); 
+					engrHere = engr_at(u.ux,u.uy); 
+				}
+				engrHere->ward_type = BURN;
+				engrHere->ward_id = GORGONEION;
+				engrHere->complete_wards = obj->blessed ? 3 : (obj->cursed ? 1 : 2);
+			} else{
+				obj->age = 0;
+			}
+		}
+	break;
+	case WATER:
+		{
+			if ( !(uwep && uwep == obj) ) {
+				You_feel("that you should be wielding %s.", the(xname(obj)));
+				obj->age = 0;
+				break;
+			}
+			if (!getdir((char *)0)) { //Oh, getdir must set the .d_ variables below.
+			    /* getdir canceled */
+				obj->age = 0;
+				break;
+			} else if(u.dx || u.dy) {
+				int x = u.ux+u.dx, y = u.uy+u.dy;
+				if (isok(x, y) && ACCESSIBLE(levl[x][y].typ)) {
+					You("strike the %s with %s, and water springs forth!", surface(u.ux, u.uy), xname(obj));
+					levl[x][y].typ = POOL;
+					newsym(x, y);
+					if(m_at(x,y))
+						minliquid(m_at(x,y));
+				} else {
+					pline("Not enough room to strike the ground!");
+					obj->age = 0;
+				}
+			} else if(u.dz > 0){
+				int x = u.ux+u.dx, y = u.uy+u.dy;
+				if (isok(x, y) && ACCESSIBLE(levl[x][y].typ)) {
+					You("strike the %s with %s, and water springs forth!", surface(u.ux, u.uy), xname(obj));
+					levl[x][y].typ = POOL;
+					newsym(x, y);
+					spoteffects(FALSE);
+				} else {
+					pline("Not enough room to strike the ground!");
+					obj->age = 0;
+				}
+			} else {
+				obj->age = 0;
+			}
+		}
+	break;
  	case SPEED_BANKAI:
 		{
 			if ( !(uwep && uwep == obj) ) {
@@ -4399,7 +4580,7 @@ arti_invoke(obj)
 						explode(u.dx, u.dy,
 							2, //2 = AD_COLD, explode uses nonstandard damage type flags...
 							(u.ulevel + obj->spe + spell_damage_bonus())*3, 0,
-							EXPL_FROSTY);
+							EXPL_FROSTY, 1);
 					nomul(-1, "performing a sword dance");//both the first and the second dance leave you momentarily exposed.
 				}
 			}
@@ -4483,7 +4664,7 @@ arti_invoke(obj)
 							    explode(u.dx, u.dy,
 								    pseudo->otyp - SPE_MAGIC_MISSILE + 10,
 								    u.ulevel/2 + 10 + obj->spe, 0,
-									EXPL_FIERY);
+									EXPL_FIERY, 1);
 							}
 							u.dx = cc.x+rnd(5)-3; u.dy = cc.y+rnd(5)-3;
 							if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
@@ -4665,7 +4846,7 @@ arti_invoke(obj)
 						explode(u.dx, u.dy,
 							1, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 							u.ulevel + 10 + spell_damage_bonus(), 0,
-							EXPL_FIERY);
+							EXPL_FIERY, 1);
 						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
 							IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
@@ -4685,7 +4866,7 @@ arti_invoke(obj)
 						explode(u.dx, u.dy,
 							2, //2 = AD_COLD, explode uses nonstandard damage type flags...
 							u.ulevel + 10 + spell_damage_bonus(), 0,
-							EXPL_FROSTY);
+							EXPL_FROSTY, 1);
 						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
 							IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
@@ -4703,9 +4884,9 @@ arti_invoke(obj)
 					n=3;
 					while(n--) {
 						explode(u.dx, u.dy,
-							5, //2 = AD_ELEC, explode uses nonstandard damage type flags...
+							5, //5 = AD_ELEC, explode uses nonstandard damage type flags...
 							u.ulevel + 10 + spell_damage_bonus(), 0,
-							EXPL_MAGICAL);
+							EXPL_MAGICAL, 1);
 						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
 							IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
@@ -4734,22 +4915,29 @@ arti_invoke(obj)
 	break;
 	case FALLING_STARS:{
 		int starfall = rnd(u.ulevel/10+1), x, y, n;
+		int tries = 0;
 		coord cc;
 		verbalize("Even Stars Fall");
 		for (; starfall > 0; starfall--){
 			x = rn2(COLNO-2)+1;
 			y = rn2(ROWNO-2)+1;
+			if(!isok(x,y) || !ACCESSIBLE(levl[x][y].typ)){
+				if(tries++ < 1000){
+					starfall++;
+					continue;
+				}
+			}
 			cc.x=x;cc.y=y;
-			n=rnd(4)+1;
+			n=rnd(8)+1;
 			explode(x, y,
 				8, //8 = AD_PHYS, explode uses nonstandard damage type flags...
 				d(6,6), 0,
-				EXPL_MUDDY);
+				EXPL_MUDDY, 1);
 			while(n--) {
 				explode(x, y,
 					1, //1 = AD_FIRE, explode uses nonstandard damage type flags...
 					d(6,6), 0,
-					EXPL_FIERY);
+					EXPL_FIERY, 1);
 				
 				x = cc.x+rnd(3)-1; y = cc.y+rnd(3)-1;
 				if (!isok(x,y)) {
@@ -4779,7 +4967,7 @@ arti_invoke(obj)
 				explode(u.dx, u.dy,
 					4, //4 = AD_DISN, explode uses nonstandard damage type flags...
 					u.ulevel + 10 + spell_damage_bonus(), 0,
-					EXPL_DARK);
+					EXPL_DARK, 1);
 				u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 				if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
 					IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
@@ -4989,7 +5177,7 @@ arti_invoke(obj)
 						explode(u.dx, u.dy,
 							elements[type],
 							u.ulevel/2 + 1 + spell_damage_bonus(), 0,
-							explType[type]);
+							explType[type], 1);
 						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
 							IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
@@ -6151,7 +6339,7 @@ arti_invoke(obj)
                     onxt = ocur->nexthere;
                     if (ocur->otyp != EGG){
                       revive(ocur);
-                      if(mtmp = m_at(u.ux+u.dx,u.uy+u.dy)){
+                      if((mtmp = m_at(u.ux+u.dx,u.uy+u.dy))){
                         pline("%s resurrects!", Monnam(mtmp));
                         obj->ovar1 = COMMAND_DEATH;
                         break;
@@ -6943,7 +7131,7 @@ struct obj *obj;
 	}
 
 	if(obj->ovar1 < monstermoves){
-		if((obj->otyp == KHAKKHARA)){
+		if(obj->otyp == KHAKKHARA){
 			Sprintf(buf, "Ring Out");
 			any.a_int = COMMAND_BELL;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -6951,7 +7139,7 @@ struct obj *obj;
 				MENU_UNSELECTED);
 		}
 		
-		if((obj->otyp == BFG)){
+		if(obj->otyp == BFG){
 			Sprintf(buf, "Create Bullets");
 			any.a_int = COMMAND_BULLETS;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -6968,7 +7156,7 @@ struct obj *obj;
 				'F', 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
-		if((obj->otyp == CHAKRAM)){
+		if(obj->otyp == CHAKRAM){
 			Sprintf(buf, "Annul");
 			any.a_int = COMMAND_ANNUL;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -6976,7 +7164,7 @@ struct obj *obj;
 				MENU_UNSELECTED);
 		}
 		
-		if((obj->otyp == LIGHTSABER)){
+		if(obj->otyp == LIGHTSABER){
 			Sprintf(buf, "Recharge");
 			any.a_int = COMMAND_CHARGE;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -7245,8 +7433,10 @@ read_necro(VOID_ARGS)
 				if(u.uen > 30){
 					pm = &mons[PM_SHOGGOTH];
 					mtmp = makemon(pm, u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_ADJACENTOK);
-					mtmp->mcrazed = 1;
-					mtmp->msleeping = 1;
+					if(mtmp){
+						mtmp->mcrazed = 1;
+						mtmp->msleeping = 1;
+					}
 				}
 			break;
 			case SELECT_OOZE:

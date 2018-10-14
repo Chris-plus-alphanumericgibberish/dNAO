@@ -39,6 +39,7 @@ STATIC_DCL int FDECL(spell_hit_bonus, (int));
 
 #define is_hero_spell(type)	((type) >= 10 && (type) < 20)
 #define wand_damage_die(skill)	(((skill) > 1) ? (2*(skill) + 4) : 6)
+#define fblt_damage_die(skill)	((skill)+1)
 #define wandlevel(otyp)	(otyp == WAN_MAGIC_MISSILE ? 1 : otyp == WAN_SLEEP ? 1 : otyp == WAN_STRIKING ? 2 : otyp == WAN_FIRE ? 4 : otyp == WAN_COLD ? 4 : otyp == WAN_LIGHTNING ? 5 : otyp == WAN_DEATH ? 7 : 1)
 
 #ifndef OVLB
@@ -137,9 +138,9 @@ struct obj *otmp;
 		if (resists_magm(mtmp)) {	/* match effect on player */
 			shieldeff(mtmp->mx, mtmp->my);
 			break;	/* skip makeknown */
-		} else if (u.uswallow || otyp == WAN_STRIKING || rnd(20) < 10 + find_mac(mtmp)) {
+		} else if (u.uswallow || otyp == WAN_STRIKING || rnd(20) < 10 + find_mac(mtmp) + 2*P_SKILL(P_ATTACK_SPELL)) {
 			if(otyp == WAN_STRIKING) dmg = d(wand_damage_die(P_SKILL(P_WAND_POWER))-4,12);
-			else dmg = d(wand_damage_die(P_SKILL(P_ATTACK_SPELL))-4,12);
+			else dmg = d(fblt_damage_die(P_SKILL(P_ATTACK_SPELL)),12);
 			if (!flags.mon_moving && otyp == SPE_FORCE_BOLT && (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM))
 				dmg += d((u.ulevel+1)/2, 12);
 			if(dbldam) dmg *= 2;
@@ -962,13 +963,15 @@ register struct obj *obj;
 		if (obj->otyp == SCR_GOLD_SCROLL_OF_LAW) break;	//no cancelling these
 		obj->otyp = SCR_BLANK_PAPER;
 		obj->spe = 0;
-		obj->ovar1 = 0;
+		obj->oward = 0;
 		break;
 	      case SPBOOK_CLASS:
 		if (obj->otyp != SPE_CANCELLATION &&
 			obj->otyp != SPE_BOOK_OF_THE_DEAD) {
 		    costly_cancel(obj);
 		    obj->otyp = SPE_BLANK_PAPER;
+			obj->spe = 0;
+			obj->oward = 0;
 		}
 		break;
 	      case POTION_CLASS:
@@ -1382,15 +1385,35 @@ poly_obj(obj, id)
 	if (obj->otyp == BOULDER && In_sokoban(&u.uz))
 	    change_luck(-1);	/* Sokoban guilt, boulders only */
 	if (id == STRANGE_OBJECT) { /* preserve symbol */
-	    int try_limit = 3;
-	    /* Try up to 3 times to make the magic-or-not status of
-	       the new item be the same as it was for the old one. */
-	    otmp = (struct obj *)0;
-	    do {
-		if (otmp) delobj(otmp);
-		otmp = mkobj(obj->oclass, FALSE);
-	    } while (--try_limit > 0 &&
-		  objects[obj->otyp].oc_magic != objects[otmp->otyp].oc_magic);
+		if(obj->otyp == SPE_BLANK_PAPER || obj->otyp == SCR_BLANK_PAPER){
+			otmp = mksobj(rn2(2) ? SPE_BLANK_PAPER : SCR_BLANK_PAPER, FALSE, FALSE);
+		} else if(obj->otyp == POT_BLOOD){
+			otmp = mksobj(POT_BLOOD, FALSE, FALSE);
+		} else if(obj->otyp == POT_WATER){
+			if(!rn2(3)){
+				obj->blessed = 0;
+				obj->cursed = 1;
+			} else if(rn2(2)){
+				obj->cursed = 0;
+				obj->blessed = 1;
+			} else {
+				obj->blessed = 0;
+				obj->cursed = 0;
+			}
+			return obj;
+		} else if(obj->otyp == HYPOSPRAY_AMPULE){
+			otmp = mksobj(HYPOSPRAY_AMPULE, FALSE, FALSE);
+		} else {
+			int try_limit = 3;
+			/* Try up to 3 times to make the magic-or-not status of
+			   the new item be the same as it was for the old one. */
+			otmp = (struct obj *)0;
+			do {
+			if (otmp) delobj(otmp);
+			otmp = mkobj(obj->oclass, FALSE);
+			} while (--try_limit > 0 &&
+			  objects[obj->otyp].oc_magic != objects[otmp->otyp].oc_magic);
+		}
 	} else {
 	    /* literally replace obj with this new thing */
 	    otmp = mksobj(id, FALSE, FALSE);
@@ -1527,7 +1550,9 @@ poly_obj(obj, id)
 	    while (otmp->otyp == SPE_POLYMORPH)
 		otmp->otyp = rnd_class(SPE_DIG, SPE_BLANK_PAPER);
 	    /* reduce spellbook abuse */
-	    otmp->spestudied = obj->spestudied + 1;
+		if(otmp->spestudied > MAX_SPELL_STUDY)
+			otmp->otyp = SPE_BLANK_PAPER;
+	    else otmp->spestudied = obj->spestudied + 1;
 	    break;
 
 	case GEM_CLASS:
@@ -2156,6 +2181,7 @@ boolean ordinary;
 		case WAN_LIGHTNING:
 		    makeknown(WAN_LIGHTNING);
 		case SPE_LIGHTNING_BOLT:
+		case SPE_LIGHTNING_STORM:
 		    if (!Shock_resistance) {
 				You("shock yourself!");
 				damage = d(12,6);
@@ -2175,10 +2201,10 @@ boolean ordinary;
 			    if (!Blind) Your1(vision_clears);
 		    }
 		    break;
-
 		case SPE_FIREBALL:
+		case SPE_FIRE_STORM:
 		    You("explode a fireball on top of yourself!");
-		    explode(u.ux, u.uy, 11, d(6,6), WAND_CLASS, EXPL_FIERY);
+		    explode(u.ux, u.uy, 11, d(6,6), WAND_CLASS, EXPL_FIERY, 1);
 		    break;
 		case WAN_FIRE:
 		    makeknown(WAN_FIRE);
@@ -2203,6 +2229,7 @@ boolean ordinary;
 		case WAN_COLD:
 		    makeknown(WAN_COLD);
 		case SPE_CONE_OF_COLD:
+		case SPE_BLIZZARD:
 		case FROST_HORN:
 		    if (Cold_resistance) {
 				shieldeff(u.ux, u.uy);
@@ -2216,9 +2243,9 @@ boolean ordinary;
 				destroy_item(POTION_CLASS, AD_COLD);
 			}
 		    break;
-		case SPE_ACID_BLAST:
-		    You("explode an acid blast on top of yourself!");
-		    explode(u.ux, u.uy, 17, d(6,6), WAND_CLASS, EXPL_NOXIOUS);
+		case SPE_ACID_SPLASH:
+		    You("splash acid on top of yourself!");
+		    explode(u.ux, u.uy, 17, d(6,6), WAND_CLASS, EXPL_NOXIOUS, 1);
 		    break;
 
 		case WAN_MAGIC_MISSILE:
@@ -2828,18 +2855,20 @@ register struct	obj	*obj;
 	} else {
 	    /* neither immediate nor directionless */
 
+		if(u.sealsActive&SEAL_BUER && (otyp == SPE_FINGER_OF_DEATH || otyp == WAN_DEATH ))
+			unbind(SEAL_BUER,TRUE);
+		
 	    if (otyp == WAN_DIGGING || otyp == SPE_DIG)
-		zap_dig(-1,-1,-1);//-1-1-1 = "use defaults"
-	    else if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_ACID_BLAST){
-		if(u.sealsActive&SEAL_BUER && (otyp == SPE_FINGER_OF_DEATH || otyp == WAN_DEATH )) unbind(SEAL_BUER,TRUE);
-		buzz(otyp - SPE_MAGIC_MISSILE + 10,
-		     u.ulevel / 2 + 1,
-		     u.ux, u.uy, u.dx, u.dy,0,0);
+			zap_dig(-1,-1,-1);//-1-1-1 = "use defaults"
+	    else if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_ACID_SPLASH){
+			buzz(otyp - SPE_MAGIC_MISSILE + 10,
+				 u.ulevel / 2 + 1,
+				 u.ux, u.uy, u.dx, u.dy,0,0);
 	    } else if (otyp >= WAN_MAGIC_MISSILE && otyp <= WAN_LIGHTNING){
-		use_skill(P_WAND_POWER, wandlevel(otyp));
-		buzz(otyp - WAN_MAGIC_MISSILE,
-		     wand_damage_die(P_SKILL(P_WAND_POWER))/((otyp == WAN_MAGIC_MISSILE) ? 2 : 1),
-		     u.ux, u.uy, u.dx, u.dy,0,0);
+			use_skill(P_WAND_POWER, wandlevel(otyp));
+			buzz(otyp - WAN_MAGIC_MISSILE,
+				 wand_damage_die(P_SKILL(P_WAND_POWER))/((otyp == WAN_MAGIC_MISSILE) ? 2 : 1),
+				 u.ux, u.uy, u.dx, u.dy,0,0);
 	    } else
 		impossible("weffects: unexpected spell or wand");
 	    disclose = TRUE;
@@ -3904,6 +3933,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 		flat *= 1.5;
 		nd *= 1.5;
 	}
+	if (type == ZT_SPELL(ZT_ACID)) range = 1;
     if(dx == 0 && dy == 0) range = 1;
     save_bhitpos = bhitpos;
 
@@ -4101,7 +4131,7 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 						) ||
 						(uwep && uwep->oartifact == ART_STAFF_OF_TWELVE_MIRRORS) ||
 						(uarm && (uarm->otyp == SILVER_DRAGON_SCALE_MAIL || uarm->otyp == SILVER_DRAGON_SCALES || uarm->otyp == JUMPSUIT)) ||
-						(uarms && (uarms->otyp == SILVER_DRAGON_SCALE_SHIELD)) ||
+						(uarms && (uarms->otyp == SILVER_DRAGON_SCALE_SHIELD || uarms->oartifact == ART_ITLACHIAYAQUE)) ||
 						(uwep && uwep->oartifact == ART_DRAGONLANCE)
 				)) {
 					if (!Blind) {
@@ -4212,10 +4242,13 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 				}
 				if(shopdoor || shopwall) pay_for_damage(shopdoor ? "destroy" : "dig into", FALSE);
 			} else {
-				if (type == ZT_SPELL(ZT_FIRE) || type == ZT_SPELL(ZT_ACID) || type == ZT_SPELL(ZT_POISON_GAS)) {
+				if (type == ZT_SPELL(ZT_FIRE) || type == ZT_SPELL(ZT_POISON_GAS)) {
 				sx = lsx;
 				sy = lsy;
 				break; /* fireballs explode before the wall */
+				}
+				if (type == ZT_SPELL(ZT_ACID)) {
+					break;	/* acid splashes explode onto the wall */
 				}
 				bounce = 0;
 				range--;
@@ -4250,16 +4283,12 @@ buzz(type,nd,sx,sy,dx,dy,range,flat)
 	////////////////////////////////////////////////////////////////////////////////////////
 	if(redrawneeded) doredraw();
     tmp_at(DISP_END,0);
-	if(!flags.mon_moving && Double_spell_size){
+	{
+		int bonus = (!flags.mon_moving && Double_spell_size);
 		if (type == ZT_SPELL(ZT_FIRE))
-			explode2(sx, sy, type, flat ? flat : d(18,6), 0, EXPL_FIERY);
+			explode(sx, sy, type, flat ? flat : d(12 * (bonus + 2) / 2, 6), 0, EXPL_FIERY, 1 + !!bonus);
 		else if (type == ZT_SPELL(ZT_ACID))
-			explode2(sx, sy, type, flat ? flat : d(18,6), 0, EXPL_NOXIOUS);
-	} else {
-		if (type == ZT_SPELL(ZT_FIRE))
-			explode(sx, sy, type, flat ? flat : d(12,6), 0, EXPL_FIERY);
-		else if (type == ZT_SPELL(ZT_ACID))
-			explode(sx, sy, type, flat ? flat : d(12,6), 0, EXPL_NOXIOUS);
+			splash(sx, sy, dx, dy, type, flat ? flat : d(8 * (bonus + 2) / 2, 6), 0, EXPL_NOXIOUS);
 	}
     if (shopdamage)
 	pay_for_damage(abstype == ZT_FIRE ?  "burn away" :
