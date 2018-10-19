@@ -56,6 +56,7 @@ static nhstat prevau;
 static nhstat prevlevel;
 static nhstat prevdive;
 static nhstat prevac;
+static nhstat prevdr;
 static nhstat prevexp;
 static nhstat prevtime;
 
@@ -574,7 +575,8 @@ draw_horizontal(int x, int y, int hp, int hpmax)
     wattroff(win, pwattr);
 
     print_statdiff(" Br:", &prevdive, u.divetimer, STAT_OTHER);
-    print_statdiff(" AC:", &prevac, u.uac, STAT_AC);
+	print_statdiff(" AC:", &prevac, (u.uac + u.ustdy), STAT_AC);
+	print_statdiff(" DR:", &prevdr, u.udr, STAT_OTHER);
 
     if (Upolyd)
         print_statdiff(" HD:", &prevlevel, mons[u.umonnum].mlevel, STAT_OTHER);
@@ -622,6 +624,7 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
     wprintw(win, "HP:");
     draw_bar(TRUE, hp, hpmax, NULL);
     print_statdiff(" AC:", &prevac, u.uac, STAT_AC);
+	print_statdiff(" DR:", &prevdr, u.udr, STAT_OTHER);
     if (Upolyd)
         print_statdiff(" HD:", &prevlevel, mons[u.umonnum].mlevel, STAT_OTHER);
 #ifdef EXP_ON_BOTL
@@ -825,6 +828,8 @@ draw_vertical(int x, int y, int hp, int hpmax)
     wmove(win, y++, x);
     print_statdiff("Armor Class:   ", &prevac, u.uac, STAT_AC);
     wmove(win, y++, x);
+	print_statdiff("Damage Resist: ", &prevdr, u.udr, STAT_OTHER);
+	wmove(win, y++, x);
 
     if (Upolyd)
         print_statdiff("Hit Dice:      ", &prevlevel, mons[u.umonnum].mlevel, STAT_OTHER);
@@ -964,6 +969,7 @@ curses_decrement_highlights(boolean zero)
     unhighlight |= decrement_highlight(&prevlevel, zero);
     unhighlight |= decrement_highlight(&prevdive, zero);
     unhighlight |= decrement_highlight(&prevac, zero);
+	unhighlight |= decrement_highlight(&prevdr, zero);
 #ifdef EXP_ON_BOTL
     unhighlight |= decrement_highlight(&prevexp, zero);
 #endif
