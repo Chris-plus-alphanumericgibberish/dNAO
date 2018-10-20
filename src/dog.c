@@ -1247,7 +1247,6 @@ aligntyp alignment;
     mtmp2->mpeaceful = 1;
     set_malign(mtmp2);
     mtmp2->mtame = 10;
-    EDOG(mtmp2)->loyal = 1;
     /* this section names the creature "of ______" */
     if (mons[mnum].pxlth == 0) {
 		mtmp2->isminion = TRUE;
