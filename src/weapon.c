@@ -1793,6 +1793,7 @@ static const NEARDATA short hwep[] = {
 	  DWARVISH_MATTOCK/*1d12/1d8*/, 
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
 	  KATANA/*1d10/1d12*/,
+	  HIGH_ELVEN_WARSWORD/*1d10/1d10*/,
 	  CRYSKNIFE/*1d10/1d10*/, 
 	  DROVEN_SHORT_SWORD/*1d9/1d9*/, 
 	  DWARVISH_SPEAR/*1d9/1d9*/, 
