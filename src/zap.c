@@ -2611,10 +2611,12 @@ int gaze_cancel;
 			invsize = 0;
 			for (otmp = (youdefend ? invent : mdef->minvent);
 					otmp; otmp = otmp->nobj) invsize++;
-			otmp = (youdefend ? invent : mdef->minvent);
-			for(j=rn2(invsize);j>=0;j--){
-				otmp=otmp->nobj;
-				if(!j) cancel_item(otmp);
+			if (invsize){
+				otmp = (youdefend ? invent : mdef->minvent);
+				for (j = rn2(invsize); j >= 0; j--){
+					if (!j) cancel_item(otmp);
+					otmp = otmp->nobj;
+				}
 			}
 		}
 		

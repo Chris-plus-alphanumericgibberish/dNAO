@@ -1000,10 +1000,11 @@ register struct monst *mtmp;
 					) && (dmgtype_fromattack(mtmp->data, AD_CONF, AT_WDGZ)
 						|| dmgtype_fromattack(mtmp->data, AD_WISD, AT_WDGZ)
 					)) continue;
+					/*
 					if(canseemon(mtmp) && canseemon(gazemon)){
 						Sprintf(buf,"%s can see", Monnam(mtmp));
 						pline("%s %s...", buf, mon_nam(gazemon));
-					}
+					}*/
 					(void) gazemm(gazemon, mtmp, &gazemon->data->mattk[i]);
 					break;
 				 }
