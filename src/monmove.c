@@ -988,8 +988,8 @@ register struct monst *mtmp;
 				(rn2(3) < magic_negation(gazemon))
 			) continue;
 			
-			if((is_angel(gazemon->data) || is_auton(gazemon->data))
-			&& (gazemon->mpeaceful == mtmp->mpeaceful || gazemon->mtame == mtmp->mtame)
+			if (controlledwidegaze(gazemon->data)
+				&& !mm_aggression(gazemon, mtmp)
 			) continue;
 			
 			for(i = 0; i < NATTK; i++)

@@ -444,8 +444,9 @@ moveloop()
 		/**************************************************/
 		for (mtmp = fmon; mtmp; mtmp = nxtmon){
 			nxtmon = mtmp->nmon;
-			if (!(involuntarywidegaze(mtmp->data) || (rn2(3) > magic_negation(mtmp)))
-				&& attacktype(mtmp->data, AT_WDGZ)
+			if (attacktype(mtmp->data, AT_WDGZ)
+				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
+				&& !(involuntarywidegaze(mtmp->data) || (rn2(3) > magic_negation(mtmp)))
 				&& couldsee(mtmp->mx, mtmp->my)
 			) m_respond(mtmp);
 		}

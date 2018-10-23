@@ -188,6 +188,7 @@
 							 freezing(ptr) || burning(ptr))
 #define involuntarywidegaze(ptr)	(ptr == &mons[PM_MEDUSA] || ptr == &mons[PM_GREAT_CTHULHU] || ptr == &mons[PM_DAGON] ||\
 									ptr == &mons[PM_PALE_NIGHT] || ptr == &mons[PM_OBOX_OB] || ptr == &mons[PM_UVUUDAUM])
+#define controlledwidegaze(ptr)		(is_angel(ptr) || is_auton(ptr))
 #define acidic(ptr)			(((ptr)->mflagsb & MB_ACID) != 0L)
 #define poisonous(ptr)		(((ptr)->mflagsb & MB_POIS) != 0L)
 #define freezing(ptr)		(((ptr)->mflagsb & MB_CHILL) != 0L)
