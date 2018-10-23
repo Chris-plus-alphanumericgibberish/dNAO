@@ -186,6 +186,8 @@
 #define is_armed(ptr)		(attacktype(ptr, AT_WEAP) || attacktype(ptr, AT_XWEP) || attacktype(ptr, AT_MARI) || attacktype(ptr, AT_DEVA))
 #define crpsdanger(ptr)		(acidic(ptr) || poisonous(ptr) ||\
 							 freezing(ptr) || burning(ptr))
+#define involuntarywidegaze(ptr)	(ptr == &mons[PM_MEDUSA] || ptr == &mons[PM_GREAT_CTHULHU] || ptr == &mons[PM_DAGON] ||\
+									ptr == &mons[PM_PALE_NIGHT] || ptr == &mons[PM_OBOX_OB] || ptr == &mons[PM_UVUUDAUM])
 #define acidic(ptr)			(((ptr)->mflagsb & MB_ACID) != 0L)
 #define poisonous(ptr)		(((ptr)->mflagsb & MB_POIS) != 0L)
 #define freezing(ptr)		(((ptr)->mflagsb & MB_CHILL) != 0L)

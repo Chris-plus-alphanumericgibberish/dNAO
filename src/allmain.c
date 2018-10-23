@@ -444,9 +444,9 @@ moveloop()
 		/**************************************************/
 		for (mtmp = fmon; mtmp; mtmp = nxtmon){
 			nxtmon = mtmp->nmon;
-			if ((mtmp->data == &mons[PM_MEDUSA] || mtmp->data == &mons[PM_GREAT_CTHULHU])
+			if (!(involuntarywidegaze(mtmp->data) || (rn2(3) > magic_negation(mtmp)))
+				&& attacktype(mtmp->data, AT_WDGZ)
 				&& couldsee(mtmp->mx, mtmp->my)
-				&& ((rn2(3) >= magic_negation(mtmp)))
 			) m_respond(mtmp);
 		}
 		

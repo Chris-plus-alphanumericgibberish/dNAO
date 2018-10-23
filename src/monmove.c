@@ -981,11 +981,10 @@ register struct monst *mtmp;
 			&& clear_path(mtmp->mx, mtmp->my, gazemon->mx, gazemon->my)
 		){
 			int i;
-			if(gazemon->data == &mons[PM_MEDUSA] && (resists_ston(mtmp) || 
-				((rn2(3) < magic_negation(gazemon))))
+			if(gazemon->data == &mons[PM_MEDUSA] && resists_ston(mtmp)
 			) continue;
 			
-			if(gazemon->data == &mons[PM_UVUUDAUM] &&
+			if (involuntarywidegaze(gazemon->data) &&
 				(rn2(3) < magic_negation(gazemon))
 			) continue;
 			
