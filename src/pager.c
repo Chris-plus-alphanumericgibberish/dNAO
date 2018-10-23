@@ -1810,6 +1810,7 @@ get_description_of_attack_type(uchar id)
 	case AT_DEVA: return "million-arm weapon";
 	case AT_5SQR: return "long reach touch";
 	case AT_WDGZ: return "passive gaze";
+	case AT_MARI: return "carried weapon";
 	case AT_XWEP: return "offhand weapon";
 	case AT_WEAP: return "weapon";
 	case AT_MAGC: return "uses magic spell(s)";

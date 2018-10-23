@@ -2897,17 +2897,21 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	}
 
 	/* elves vs. orcs */
-	if(is_elf(ma) && (is_orc(md) || is_ogre(md) || is_undead_mon(mdef)) && !is_undead_mon(magr))
+	if(is_elf(ma) && (is_orc(md) || is_ogre(md) || is_undead_mon(mdef))
+				&&	!(is_orc(ma) || is_ogre(ma) || is_undead_mon(magr)))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
-	if(is_elf(md) && (is_orc(ma) || is_ogre(ma) || is_undead_mon(magr)) && !is_undead_mon(mdef))
+	if(is_elf(md) && (is_orc(ma) || is_ogre(ma) || is_undead_mon(magr))
+				&&	!(is_orc(md) || is_ogre(md) || is_undead_mon(mdef)))
 		return ALLOW_M|ALLOW_TM;
 
 	/* dwarves vs. orcs */
-	if(is_dwarf(ma) && (is_orc(md) || is_ogre(md) || is_troll(md)) && !is_undead_mon(magr))
+	if(is_dwarf(ma) && (is_orc(md) || is_ogre(md) || is_troll(md))
+					&&!(is_orc(ma) || is_ogre(ma) || is_troll(ma) || is_undead_mon(magr)))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
-	if(is_dwarf(md) && (is_orc(ma) || is_ogre(ma) || is_troll(ma)) && !is_undead_mon(mdef))
+	if(is_dwarf(md) && (is_orc(ma) || is_ogre(ma) || is_troll(ma))
+					&&!(is_orc(md) || is_ogre(md) || is_troll(md) || is_undead_mon(mdef)))
 		return ALLOW_M|ALLOW_TM;
 
 	/* elves vs. drow */
@@ -5072,7 +5076,8 @@ register struct monst *mtmp;
     }
 	for(i = 0; i < NATTK; i++)
 		 if(mtmp->data->mattk[i].aatyp == AT_WDGZ) {
-			 (void) gazemu(mtmp, &mtmp->data->mattk[i]);
+			 if (!(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD))	// the Eyes of the Overworld protect you from whatever you might see
+				(void) gazemu(mtmp, &mtmp->data->mattk[i]);
 		 }
     if(is_weeping(mtmp->data)) {
 		for(i = 0; i < NATTK; i++)

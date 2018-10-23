@@ -623,7 +623,7 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
     wmove(win, y, x);
     wprintw(win, "HP:");
     draw_bar(TRUE, hp, hpmax, NULL);
-    print_statdiff(" AC:", &prevac, u.uac, STAT_AC);
+	print_statdiff(" AC:", &prevac, (u.uac + u.ustdy), STAT_AC);
 	print_statdiff(" DR:", &prevdr, u.udr, STAT_OTHER);
     if (Upolyd)
         print_statdiff(" HD:", &prevlevel, mons[u.umonnum].mlevel, STAT_OTHER);

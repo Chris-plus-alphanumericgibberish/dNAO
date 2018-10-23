@@ -981,16 +981,15 @@ register struct monst *mtmp;
 			&& clear_path(mtmp->mx, mtmp->my, gazemon->mx, gazemon->my)
 		){
 			int i;
-			if(gazemon->data == &mons[PM_MEDUSA] && (resists_ston(mtmp) || 
-				((rn2(3) < magic_negation(gazemon))))
+			if(gazemon->data == &mons[PM_MEDUSA] && resists_ston(mtmp)
 			) continue;
 			
-			if(gazemon->data == &mons[PM_UVUUDAUM] &&
+			if (hideablewidegaze(gazemon->data) &&
 				(rn2(3) < magic_negation(gazemon))
 			) continue;
 			
-			if((is_angel(gazemon->data) || is_auton(gazemon->data))
-			&& (gazemon->mpeaceful == mtmp->mpeaceful || gazemon->mtame == mtmp->mtame)
+			if (controlledwidegaze(gazemon->data)
+				&& !mm_aggression(gazemon, mtmp)
 			) continue;
 			
 			for(i = 0; i < NATTK; i++)
@@ -1000,10 +999,11 @@ register struct monst *mtmp;
 					) && (dmgtype_fromattack(mtmp->data, AD_CONF, AT_WDGZ)
 						|| dmgtype_fromattack(mtmp->data, AD_WISD, AT_WDGZ)
 					)) continue;
+					/*
 					if(canseemon(mtmp) && canseemon(gazemon)){
 						Sprintf(buf,"%s can see", Monnam(mtmp));
 						pline("%s %s...", buf, mon_nam(gazemon));
-					}
+					}*/
 					(void) gazemm(gazemon, mtmp, &gazemon->data->mattk[i]);
 					break;
 				 }

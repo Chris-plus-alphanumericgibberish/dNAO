@@ -1189,6 +1189,8 @@ E int FDECL(mattacku, (struct monst *));
 E int FDECL(hitmu, (struct monst *,struct attack *));
 E int FDECL(passiveum, (struct permonst *,struct monst *,struct attack *));
 E int FDECL(magic_negation, (struct monst *));
+E int NDECL(randomgaze);
+E int NDECL(elementalgaze);
 E int FDECL(gazemu, (struct monst *,struct attack *));
 E void FDECL(mdamageu, (struct monst *,int));
 E int FDECL(could_seduce, (struct monst *,struct monst *,struct attack *));
