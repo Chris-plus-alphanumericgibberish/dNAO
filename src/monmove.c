@@ -984,7 +984,7 @@ register struct monst *mtmp;
 			if(gazemon->data == &mons[PM_MEDUSA] && resists_ston(mtmp)
 			) continue;
 			
-			if (involuntarywidegaze(gazemon->data) &&
+			if (hideablewidegaze(gazemon->data) &&
 				(rn2(3) < magic_negation(gazemon))
 			) continue;
 			

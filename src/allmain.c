@@ -446,7 +446,7 @@ moveloop()
 			nxtmon = mtmp->nmon;
 			if (attacktype(mtmp->data, AT_WDGZ)
 				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
-				&& !(involuntarywidegaze(mtmp->data) || (rn2(3) > magic_negation(mtmp)))
+				&& !(hideablewidegaze(mtmp->data) || (rn2(3) > magic_negation(mtmp)))
 				&& couldsee(mtmp->mx, mtmp->my)
 			) m_respond(mtmp);
 		}
