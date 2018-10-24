@@ -2388,7 +2388,10 @@ struct obj *otmp;
 	if(otmp){
 		if((bimanual(otmp,youracedata) ||
 			(otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
-		)) bonus *= 2;
+		) && !uarms && !u.twoweap
+		) bonus *= 2;
+		else if(otmp->otyp == KATANA && !uarms && !u.twoweap)
+			bonus *= 1.5;
 		
 		if(otmp==uwep 
 		&& (otmp->otyp==RAPIER 
