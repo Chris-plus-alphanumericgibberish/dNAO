@@ -4908,8 +4908,7 @@ boolean
 roleSkill(p_skill)
 int p_skill;
 {
-	if(p_skill == P_POLEARMS) return (Role_if(PM_SAMURAI) && uwep && uwep->otyp == NAGINATA);
-	else return FALSE;
+	return FALSE;
 }
 
 boolean
