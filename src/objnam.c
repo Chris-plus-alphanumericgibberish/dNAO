@@ -595,7 +595,7 @@ boolean ignore_oquan;
 		else
 			Strcat(buf, "wool-lined ");
 	}
-	if(obj->oproperties){
+	if(obj->oproperties && obj->oartifact == 0){
 		if(obj->oproperties&OPROP_FIREW)
 			Strcat(buf, "flaming ");
 		if(obj->oproperties&OPROP_COLDW)
@@ -1199,7 +1199,7 @@ plus:
 			if(obj->opoisoned & OPOISON_ACID) Strcat(prefix,  "acid-coated ");
 			if(obj->otyp == VIPERWHIP && obj->opoisonchrgs) Sprintf(eos(prefix), "(%d coatings) ", (int)(obj->opoisonchrgs+1));
 		}
-		if(obj->oproperties){
+		if(obj->oproperties && obj->oartifact){
 			if(obj->oproperties&OPROP_FIREW)
 				Strcat(prefix, "flaming ");
 			if(obj->oproperties&OPROP_COLDW)
