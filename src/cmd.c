@@ -4232,6 +4232,7 @@ init_bind_list(void)
 	bind_key('A',    "takeoffall" );
 	bind_key(M('a'), "adjust" );
 	/*       'b', 'B' : go sw */
+	bind_key('B',    "domonability" );
 	bind_key('c',    "close" );
 	bind_key('C',    "call" );
 	bind_key(M('c'), "chat" );
