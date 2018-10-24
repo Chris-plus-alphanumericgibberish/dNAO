@@ -38,6 +38,8 @@ STATIC_DCL void NDECL(mkferrutower);
 STATIC_DCL void NDECL(mkinvertzigg);
 STATIC_DCL void FDECL(mkmch, (int));
 STATIC_DCL void FDECL(mkwrk, (int));
+STATIC_DCL void FDECL(mklostitem, (int));
+STATIC_DCL void FDECL(mklawfossil, (int));
 STATIC_DCL void FDECL(mkcamp, (int));
 STATIC_DCL void NDECL(mklolthsepulcher);
 STATIC_DCL void NDECL(mkmivaultlolth);
@@ -3484,6 +3486,56 @@ int typ;
 	}
 }
 
+STATIC_OVL
+void
+mklostitem(typ)
+int typ;
+{
+	int x, y, tries = 0, good = FALSE;
+	struct obj *otmp;
+	while(!good && tries < 500){
+		x = rn2(COLNO)+1;
+		y = rn2(ROWNO);
+		tries++;
+		if(isok(x,y) && levl[x][y].typ == typ)
+			good = TRUE;
+		else continue;
+		
+		switch(rn2(2)){
+			case 0:
+				mkobj_at(WEAPON_CLASS, x, y, TRUE);
+			break;
+			case 1:
+				mkobj_at(ARMOR_CLASS, x, y, TRUE);
+			break;
+			case 2:
+				mkobj_at(TOOL_CLASS, x, y, TRUE);
+			break;
+		}
+	}
+}
+
+void
+mklawfossil(typ)
+int typ;
+{
+	int x, y, tries = 0, good = FALSE;
+	struct obj *otmp;
+	while(!good && tries < 500){
+		x = rn2(COLNO)+1;
+		y = rn2(ROWNO);
+		tries++;
+		if(isok(x,y) && levl[x][y].typ == typ)
+			good = TRUE;
+		else continue;
+		
+		otmp = mksobj(FOSSIL, TRUE, FALSE);
+		otmp->corpsenm = PM_ANCIENT_NUPPERIBO;
+		fix_object(otmp);
+		place_object(otmp, x, y);
+	}
+}
+	
 void
 place_lolth_vaults()
 {
@@ -3565,25 +3617,37 @@ place_neutral_features()
 void
 place_law_features()
 {
+	int n;
 	if(Is_path(&u.uz)){
 		if(!rn2(10)){
 		// if(1){
-			int n = 10-int_sqrt(rnd(99));
+			n = 10-int_sqrt(rnd(99));
 			for(; n > 0; n--)
 				mkmch(ROOM);
 		} else if(!rn2(10)){
-			int n = 10-int_sqrt(rnd(99));
+			n = 10-int_sqrt(rnd(99));
 			for(; n > 0; n--)
 				mkmch(STONE);
 		} else if(!rn2(4)){
-			int n = 5 - int_sqrt(rnd(24));
+			n = 5 - int_sqrt(rnd(24));
 			for(; n > 0; n--)
 				mkwrk(ROOM);
 		} else {
-			int n = 5 - int_sqrt(rnd(24));
+			n = 5 - int_sqrt(rnd(24));
 			for(; n > 0; n--)
 				mkwrk(STONE);
 		}
+		n = rn2(3)+rn2(3);
+		for(; n > 0; n--)
+			mklostitem(STONE);
+		
+		if(!rn2(4)){
+		// if(1){
+			n = 5 - int_sqrt(rnd(24));
+			for(; n > 0; n--)
+				mklawfossil(STONE);
+		}
+		
 	} else if(Is_arcadia_woods(&u.uz)){
 		if(!rn2(4))
 			mkcamp(VALAVI_CAMP);
