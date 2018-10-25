@@ -1623,13 +1623,15 @@ physical:{
 		    tmp = 0;
 		    break;
 		}
-		if(canseemon(magr)){
-			Sprintf(buf, "%s", Monnam(magr));
+		if(vis){
 			if (mattk->aatyp == AT_GAZE){
+				Sprintf(buf, "%s", Monnam(magr));
 				pline("%s gazes at %s...", buf, mon_nam(mdef));
 			}
-			else if (mattk->aatyp == AT_WDGZ)
+			else if (mattk->aatyp == AT_WDGZ){
+				Sprintf(buf, "%s", Monnam(mdef));
 				pline("%s can see %s...", buf, mon_nam(magr));
+			}
 		}
 		if (vis)
 		    pline("%s is %s!", Monnam(mdef),
@@ -1689,13 +1691,15 @@ physical:{
 		    tmp = 0;
 		    break;
 		}
-		if (canseemon(magr)){
-			Sprintf(buf, "%s", Monnam(magr));
+		if (vis){
 			if (mattk->aatyp == AT_GAZE){
+				Sprintf(buf, "%s", Monnam(magr));
 				pline("%s gazes at %s...", buf, mon_nam(mdef));
 			}
-			else if (mattk->aatyp == AT_WDGZ)
+			else if (mattk->aatyp == AT_WDGZ){
+				Sprintf(buf, "%s", Monnam(mdef));
 				pline("%s can see %s...", buf, mon_nam(magr));
+			}
 		}
 		if (vis) pline("%s is covered in frost!", Monnam(mdef));
 		if (resists_cold(mdef)) {
@@ -1714,13 +1718,15 @@ physical:{
 		    tmp = 0;
 		    break;
 		}
-		if (canseemon(magr)){
-			Sprintf(buf, "%s", Monnam(magr));
+		if (vis){
 			if (mattk->aatyp == AT_GAZE){
+				Sprintf(buf, "%s", Monnam(magr));
 				pline("%s gazes at %s...", buf, mon_nam(mdef));
 			}
-			else if (mattk->aatyp == AT_WDGZ)
+			else if (mattk->aatyp == AT_WDGZ){
+				Sprintf(buf, "%s", Monnam(mdef));
 				pline("%s can see %s...", buf, mon_nam(magr));
+			}
 		}
 		if (vis) pline("%s gets zapped!", Monnam(mdef));
 		tmp += destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
@@ -1810,13 +1816,15 @@ physical:{
 		    tmp = 0;
 		    break;
 		}
-		if (canseemon(magr)){
-			Sprintf(buf, "%s", Monnam(magr));
+		if (vis){
 			if (mattk->aatyp == AT_GAZE){
+				Sprintf(buf, "%s", Monnam(magr));
 				pline("%s gazes at %s...", buf, mon_nam(mdef));
 			}
-			else if (mattk->aatyp == AT_WDGZ)
+			else if (mattk->aatyp == AT_WDGZ){
+				Sprintf(buf, "%s", Monnam(mdef));
 				pline("%s can see %s...", buf, mon_nam(magr));
+			}
 		}
 		if (resists_acid(mdef)) {
 		    if (vis)
