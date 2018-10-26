@@ -1106,13 +1106,23 @@ healup(nhp, nxtra, curesick, cureblind)
 	int nhp, nxtra;
 	register boolean curesick, cureblind;
 {
+	int * hpmax;
+	int * hp;
+	int hpcap;
 	if (nhp) {
 		if (Upolyd) {
-			u.mh += nhp;
-			if (u.mh > u.mhmax) u.mh = (u.mhmax = max(u.mhmax, min(u.mhmax + nxtra, 40+u.ulevel*(10+conplus(ACURR(A_CON))))));
+			hp = &u.mh;
+			hpmax = &u.mhmax;
+			hpcap = 40 + mons[u.umonnum].mlevel*(8 + conplus(ACURR(A_CON)) + urole.hpadv.hirnd);
 		} else {
-			u.uhp += nhp;
-			if(u.uhp > u.uhpmax) u.uhp = (u.uhpmax = max(u.uhpmax, min(u.uhpmax + nxtra, 40+u.ulevel*(10+conplus(ACURR(A_CON))))));
+			hp = &u.uhp;
+			hpmax = &u.uhpmax;
+			hpcap = 40 + u.ulevel*(8 + conplus(ACURR(A_CON)) + urole.hpadv.hirnd + urace.hpadv.hirnd);
+		}
+		*hp += nhp;
+		if (*hp > *hpmax){
+			*hpmax += min(nxtra, max(0, 6*nxtra/5 - 6*nxtra*(*hpmax)*(*hpmax)/(5*hpcap*hpcap)));
+			*hp = *hpmax;
 		}
 	}
 	if(cureblind)	make_blinded(0L,TRUE);
