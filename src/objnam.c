@@ -3084,8 +3084,33 @@ boolean from_user;
 			mat = OBSIDIAN_MT;
 		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)
 			) {
-			oproperties = OPROP_WOOL;
-		} else break;
+			oproperties |= OPROP_WOOL;
+		} else if (!strncmpi(bp, "flaming ", l=8)
+			) {
+			oproperties |= OPROP_FIREW;
+		} else if (!strncmpi(bp, "freezing ", l=9)
+			) {
+			oproperties |= OPROP_COLDW;
+		} else if (!strncmpi(bp, "shocking ", l=9)
+			) {
+			oproperties |= OPROP_ELECW;
+		} else if (!strncmpi(bp, "sizzling ", l=9)
+			) {
+			oproperties |= OPROP_ACIDW;
+		} else if (!strncmpi(bp, "sparkling ", l=10) && strncmpi(bp, "sparkling potion", 16)
+			) {
+			oproperties |= OPROP_MAGCW;
+		} else if (!strncmpi(bp, "anarchic ", l=9)
+			) {
+			oproperties |= OPROP_ANARW;
+		} else if (!strncmpi(bp, "concordant ", l=11)
+			) {
+			oproperties |= OPROP_CONCW;
+		} else if (!strncmpi(bp, "axiomatic ", l=9)
+			) {
+			oproperties |= OPROP_AXIOW;
+		} else
+			break;
 		bp += l;
 	}
 	if(!cnt) cnt = 1;		/* %% what with "gems" etc. ? */
@@ -4140,18 +4165,25 @@ typfnd:
 		if (wizard)		// wizard mode will give you what you ask for, even if it breaks things
 			otmp->oproperties = oproperties;
 		else
-			if (otmp->oclass == ARMOR_CLASS)
+		{	// limit granted properties to what is realistic for the item class
+			switch (otmp->oclass)
 			{
-				switch (oproperties)
-				{
-				case OPROP_WOOL:
-					otmp->oproperties = oproperties;
+			case TOOL_CLASS:
+				if (is_weptool(otmp))
+					;	// fall through to weapon_class
+				else
 					break;
-				default:
-					otmp->oproperties = 0L;
-					break;
-				}
+			case WEAPON_CLASS:
+				oproperties &= (OPROP_FIREW | OPROP_COLDW | OPROP_ELECW | OPROP_ACIDW | OPROP_MAGCW | OPROP_ANARW | OPROP_CONCW | OPROP_AXIOW | OPROP_LESSW);
+				break;
+			case ARMOR_CLASS:
+				oproperties &= (OPROP_FIRE | OPROP_COLD | OPROP_ELEC | OPROP_ACID | OPROP_MAGC | OPROP_ANAR | OPROP_CONC | OPROP_AXIO);
+				break;
+			default:
+				oproperties = 0;
 			}
+			otmp->oproperties = oproperties;
+		}
 	}
 		
 
