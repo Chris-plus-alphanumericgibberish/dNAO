@@ -1949,6 +1949,8 @@ permon_in_command_chain(follower, commander)
 int follower;
 int commander;
 {
+	int i;
+
 	switch (commander)	// for special cases
 	{
 	case PM_LEGION:
@@ -1957,7 +1959,7 @@ int commander;
 		return FALSE;
 
 	default:
-		for (int i = 0; command_chain[i][0] >= LOW_PM; i++)
+		for (i = 0; command_chain[i][0] >= LOW_PM; i++)
 		if (follower == command_chain[i][0])
 			if (commander == command_chain[i][1])
 				return TRUE;
