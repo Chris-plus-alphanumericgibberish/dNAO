@@ -290,7 +290,7 @@ mattackm(magr, mdef)
 	
 	tmp += magr->encouraged;
 	tchtmp += magr->encouraged;
-	if (wizard && magr->encouraged)
+	if (wizard && magr->encouraged && ublindf && ublindf->otyp == LENSES)
 		pline("[%s +%d]", Monnam(magr), magr->encouraged);
 	
     /* undetect monsters become un-hidden if they are attacked */
