@@ -2077,7 +2077,7 @@ struct monst * commander;
 			case PM_RAZIEL:
 			case PM_BAEL:
 				// only messages for large groups
-				if (inrange > 4 && (affected > 4 || !rn2(5 - affected))){
+				if (inrange > 4 && (affected > 4 || !rn2(5 - affected)) && distmin(commander->mx, commander->my, u.ux, u.uy) < BOLT_LIM){
 					if (affected == inrange)
 						You_hear((!Hallucination) ? "a call to battle!" : "a call to the table!");
 					else
@@ -2090,7 +2090,7 @@ struct monst * commander;
 				break;
 			default:
 				// hide message when few monsters are affected
-				if (affected > 4 || !rn2(5 - affected) || affected == inrange){
+				if ((affected > 4 || !rn2(5 - affected) || affected == inrange) && distmin(commander->mx, commander->my, u.ux, u.uy) < BOLT_LIM){
 					if (is_orc(commander->data) || is_demon(commander->data) || is_drow(commander->data))
 						You_hear((!Hallucination) ? "something cursing." : "mean words.");
 					else if (is_mercenary(commander->data))
