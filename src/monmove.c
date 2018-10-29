@@ -962,7 +962,7 @@ register struct monst *mtmp;
 		}
 	}
 
-	if (is_commander(mdat) && (mfind_target(mtmp, FALSE) != mtmp))
+	if (is_commander(mdat) && mfind_target(mtmp, FALSE))
 		m_command(mtmp);
 	
 	if ((mdat->msound == MS_SHRIEK && !um_dist(mtmp->mx, mtmp->my, 1)) || 
