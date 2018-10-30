@@ -594,7 +594,7 @@ mattacku(mtmp)
 	}
 //ifdef BARD
 	tmp += mtmp->encouraged;
-	if (wizard && mtmp->encouraged)
+	if (wizard && mtmp->encouraged && ublindf && ublindf->otyp==LENSES)
 		pline("[%s +%d]", Monnam(mtmp), mtmp->encouraged);
 //endif
 	if(mtmp->data == &mons[PM_UVUUDAUM]){
