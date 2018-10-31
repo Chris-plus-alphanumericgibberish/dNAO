@@ -1262,6 +1262,7 @@ int force_linedup;
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_OONA) )
 				&& mlined_up(mtmp, mtmp2, FALSE)
 			  )
+			|| (is_commander(mtmp->data) && distmin(mtmp2->mx, mtmp2->my, mtmp->mx, mtmp->my) < BOLT_LIM)
 			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 6)
@@ -1303,6 +1304,7 @@ int force_linedup;
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_OONA) )
 				&& lined_up(mtmp)
 			  )
+			|| (is_commander(mtmp->data) && distmin(mtmp->mux, mtmp->muy, mtmp->mx, mtmp->my) < BOLT_LIM)
 			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 6)
@@ -1371,6 +1373,7 @@ int force_linedup;
 			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_OONA) )
 				&& lined_up(mtmp)
 			  )
+			|| (is_commander(mtmp->data) && distmin(mtmp->mux, mtmp->muy, mtmp->mx, mtmp->my) < BOLT_LIM)
 			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < 6)
@@ -1464,7 +1467,8 @@ int force_linedup;
     	if ((!!mtmp->mtame != !!mtmp2->mtame || conflicted || (mm_aggression(mtmp, mtmp2) & ALLOW_M)) &&
 			!mlined_up(mtmp, mtmp2, FALSE) && //Note: must be something we don't want to hit in the way.
 			(
-			   (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 2)
+			   (is_commander(mtmp->data) && distmin(mtmp2->mx, mtmp2->my, mtmp->mx, mtmp->my) < BOLT_LIM)
+			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 2)
 			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < 6)
 			|| (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)

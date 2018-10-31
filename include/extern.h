@@ -2287,6 +2287,7 @@ E void FDECL(growl, (struct monst *));
 E void FDECL(yelp, (struct monst *));
 E void FDECL(whimper, (struct monst *));
 E void FDECL(beg, (struct monst *));
+E void FDECL(m_command, (struct monst *));
 E int NDECL(dotalk);
 E int FDECL(dochat, (BOOLEAN_P, int, int, int));
 E void FDECL(councilspirit, (int));
