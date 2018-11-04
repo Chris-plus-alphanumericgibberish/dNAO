@@ -1066,8 +1066,7 @@ int numdogs;
 			){
 				numdogs++;
 				if(weakdog == (struct monst *)0) weakdog = curmon;
-				if((weakdog->m_lev) 
-					> (curmon->m_lev)) weakdog = curmon;
+				if((weakdog->m_lev) > (curmon->m_lev)) weakdog = curmon;
 				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
 				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
 				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
@@ -1092,7 +1091,7 @@ vanish_dogs()
 			if(curmon->mspiritual && curmon->mvanishes < 0){
 				numdogs++;
 				if(!weakdog) weakdog = curmon;
-				if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
+				if((weakdog->m_lev) > (curmon->m_lev)) weakdog = curmon;
 				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
 				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
 				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
