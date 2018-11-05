@@ -626,6 +626,7 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_ELF,	VICTORIAN_UNDERWEAR,	ELVEN_SHIELD  },
     { PM_ELF,	RUFFLED_SHIRT,			ELVEN_SHIELD  },
     { PM_ELF,	RAPIER,					ELVEN_SPEAR  },
+    { PM_ELF,	STILETTOS,				ELVEN_BOOTS  },
     // Orc substitutions
     { PM_ORC,	ATHAME,			ORCISH_DAGGER	      },
     { PM_ORC,	DAGGER,			ORCISH_DAGGER	      },
