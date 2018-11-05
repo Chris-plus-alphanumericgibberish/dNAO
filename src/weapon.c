@@ -2950,10 +2950,10 @@ struct obj *obj;
 			else type = P_SPEAR;
 		}
 		else if(obj->otyp == DOUBLE_LIGHTSABER && !obj->altmode){
-			if(P_SKILL(P_BROAD_SWORD) > P_SKILL(P_QUARTERSTAFF))
-				type = P_BROAD_SWORD;
-			else if(P_MAX_SKILL(P_BROAD_SWORD) > P_MAX_SKILL(P_QUARTERSTAFF))
-				type = P_BROAD_SWORD;
+			if(P_SKILL(P_TWO_HANDED_SWORD) > P_SKILL(P_QUARTERSTAFF))
+				type = P_TWO_HANDED_SWORD;
+			else if(P_MAX_SKILL(P_TWO_HANDED_SWORD) > P_MAX_SKILL(P_QUARTERSTAFF))
+				type = P_TWO_HANDED_SWORD;
 			else type = P_QUARTERSTAFF;
 		}
 		else if(obj->oartifact == ART_TORCH_OF_ORIGINS){
