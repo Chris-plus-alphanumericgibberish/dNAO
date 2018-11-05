@@ -1968,7 +1968,7 @@ then fill new spaces with our spawn!
 	
     MON("Justice Archon", S_LAW_ANGEL,//
 	LVL(7, 7, 7, 77, 7), (G_PLANES|G_NOCORPSE|1),
-	A(ATTK(AT_WEAP, AD_PHYS, 1, 7), ATTK(AT_WEAP, AD_PHYS, 1, 7),
+	A(ATTK(AT_WEAP, AD_PHYS, 1, 7), ATTK(AT_XWEP, AD_PHYS, 1, 7),
 	  NO_ATTK, NO_ATTK,
 	  NO_ATTK, NO_ATTK),
 	SIZ(WT_HUMAN, 400, 0, MS_CUSS, MZ_HUMAN),
