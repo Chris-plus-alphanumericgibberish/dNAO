@@ -1057,7 +1057,7 @@ int numdogs;
 {
 	// finds weakest pet, and if there's more than 6 pets that count towards your limit
 	// it sets the weakest friendly
-	struct monst *curmon, *weakdog;
+	struct monst *curmon = 0, *weakdog = 0;
 	for(curmon = fmon; curmon; curmon = curmon->nmon){
 			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !is_suicidal(curmon->data)
 				&& !curmon->mspiritual && curmon->mvanishes < 0

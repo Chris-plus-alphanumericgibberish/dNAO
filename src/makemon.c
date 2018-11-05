@@ -2857,13 +2857,13 @@ register struct monst *mtmp;
 					otmp->oproperties = OPROP_AXIOW|OPROP_LESSW;
 					switch(u.oonaenergy){
 						case AD_COLD:
-							otmp->oproperties |= OPROP_ELECW; //superconducting?
+							otmp->oproperties |= OPROP_FIREW;
 						break;
 						case AD_FIRE:
-							otmp->oproperties |= OPROP_COLDW;
+							otmp->oproperties |= OPROP_ELECW;
 						break;
 						case AD_ELEC:
-							otmp->oproperties |= OPROP_FIREW;
+							otmp->oproperties |= OPROP_COLDW;
 						break;
 					}
 					otmp->obj_material = METAL;
@@ -6225,7 +6225,27 @@ register int	mmflags;
 	} else if (mndx == PM_VLAD_THE_IMPALER) {
 		mitem = CANDELABRUM_OF_INVOCATION;
 	} else if (mndx == PM_CROESUS) {
-		mitem = TWO_HANDED_SWORD;
+		struct obj *otmp;
+		otmp = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
+		otmp->obj_material = GOLD;
+		fix_object(otmp);
+		(void) mpickobj(mtmp,otmp);
+		otmp = mksobj(PLATE_MAIL, TRUE, FALSE);
+		otmp->obj_material = GOLD;
+		fix_object(otmp);
+		(void) mpickobj(mtmp,otmp);
+		otmp = mksobj(GAUNTLETS, TRUE, FALSE);
+		otmp->obj_material = GOLD;
+		fix_object(otmp);
+		(void) mpickobj(mtmp,otmp);
+		otmp = mksobj(LOW_BOOTS, TRUE, FALSE);
+		otmp->obj_material = GOLD;
+		fix_object(otmp);
+		(void) mpickobj(mtmp,otmp);
+		otmp = mksobj(AMULET_OF_REFLECTION, TRUE, FALSE);
+		otmp->obj_material = GOLD;
+		fix_object(otmp);
+		(void) mpickobj(mtmp,otmp);
 	} else if (ptr->msound == MS_NEMESIS && !(Race_if(PM_DROW) && !Role_if(PM_NOBLEMAN)) ) {
 		flags.made_bell = TRUE;
 		mitem = BELL_OF_OPENING;

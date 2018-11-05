@@ -626,6 +626,7 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_ELF,	VICTORIAN_UNDERWEAR,	ELVEN_SHIELD  },
     { PM_ELF,	RUFFLED_SHIRT,			ELVEN_SHIELD  },
     { PM_ELF,	RAPIER,					ELVEN_SPEAR  },
+    { PM_ELF,	STILETTOS,				ELVEN_BOOTS  },
     // Orc substitutions
     { PM_ORC,	ATHAME,			ORCISH_DAGGER	      },
     { PM_ORC,	DAGGER,			ORCISH_DAGGER	      },
@@ -1863,7 +1864,7 @@ u_init()
 			ini_inv(BlackTorches);
 		}
 		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
-			u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] = u.ualign.type = A_NEUTRAL; /* Troubadores can't be lawful, so lets bump CAs down to Neutral */
+			u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] = u.ualign.type = A_LAWFUL;
 		}
 		/* This depends on the order in objects.c */
 		for (i = TIN_WHISTLE; i <= DRUM_OF_EARTHQUAKE; i++)
