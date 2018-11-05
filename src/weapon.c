@@ -1067,7 +1067,7 @@ lightsaber_form_sdie:
 	}
 	
 	if (Is_weapon || (otmp && (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1 == -P_FIREARM))) {
-		int multiplier;
+		int multiplier = 0;
 		if(is_lightsaber(otmp)) {
 			if(otmp->oartifact == ART_ATMA_WEAPON){
 				if(otmp == uwep &&
