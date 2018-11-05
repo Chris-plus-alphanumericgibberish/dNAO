@@ -2504,7 +2504,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	
 	if(otmp->oproperties&OPROP_FIREW){
 		if(youdefend ? (!Fire_resistance) : (!resists_fire(mdef))){
-			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 6);
+			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 8);
 			else *dmgptr += basedmg;
 			if (!rn2(4)) (void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
 			if (!rn2(4)) (void) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
@@ -2513,14 +2513,14 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	}
 	if(otmp->oproperties&OPROP_COLDW){
 		if(youdefend ? (!Cold_resistance) : (!resists_cold(mdef))){
-			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 6);
+			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 8);
 			else *dmgptr += basedmg;
 			if (!rn2(4)) (void) destroy_mitem(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
 	if(otmp->oproperties&OPROP_ELECW){
 		if(youdefend ? (!Shock_resistance) : (!resists_elec(mdef))){
-			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 6);
+			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 8);
 			else *dmgptr += basedmg;
 			if (!rn2(5)) (void) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
 			if (!rn2(5)) (void) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
@@ -2528,32 +2528,32 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	}
 	if(otmp->oproperties&OPROP_ACIDW){
 		if(youdefend ? (!Acid_resistance) : (!resists_acid(mdef))){
-			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 6);
+			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 8);
 			else *dmgptr += basedmg;
 			if (!rn2(2)) (void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
 		}
 	}
 	if(otmp->oproperties&OPROP_MAGCW){
 		if(youdefend ? (!Antimagic) : (!resists_magm(mdef))){
-			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 6);
+			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 8);
 			else *dmgptr += basedmg;
 		}
 	}
 	if(otmp->oproperties&OPROP_ANARW){
 		if(youdefend ? (u.ualign.type != A_CHAOTIC) : (sgn(mdef->data->maligntyp) >= 0)){
-			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 6);
+			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 8);
 			else *dmgptr += basedmg;
 		}
 	}
 	if(otmp->oproperties&OPROP_CONCW){
 		if(youdefend ? (u.ualign.type != A_NEUTRAL) : (sgn(mdef->data->maligntyp) != 0)){
-			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 6);
+			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 8);
 			else *dmgptr += basedmg;
 		}
 	}
 	if(otmp->oproperties&OPROP_AXIOW){
 		if(youdefend ? (u.ualign.type != A_LAWFUL) : (sgn(mdef->data->maligntyp) <= 0)){
-			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 6);
+			if (otmp->oproperties&OPROP_LESSW) *dmgptr += d(1, 8);
 			else *dmgptr += basedmg;
 		}
 	}
