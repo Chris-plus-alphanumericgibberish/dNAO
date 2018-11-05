@@ -174,7 +174,7 @@ hack_artifacts()
 		if(u.role_variant == NAGINATA){
 			artilist[ART_KIKU_ICHIMONJI].role = NON_PM;
 		} else {
-			artilist[ART_KIKU_ICHIMONJI].role = NON_PM;
+			artilist[ART_JINJA_NAGINATA].role = NON_PM;
 		}
 	}
 	
