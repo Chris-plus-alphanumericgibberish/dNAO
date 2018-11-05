@@ -1138,7 +1138,9 @@ touch_artifact(obj, mon, hypothetical)
     } else {    /* an M3_WANTSxxx monster or a fake player */
 		/* special monsters trying to take the Amulet, invocation tools or
 		   quest item can touch anything except for `spec_applies' artifacts */
-		badclass = badalign = FALSE;
+		if(mon->data == &mons[PM_WARDEN_ARIANNA] && obj->oartifact != ART_IRON_SPOON_OF_LIBERATION)
+			badclass = badalign = TRUE;
+		else badclass = badalign = FALSE;
     }
     /* weapons which attack specific categories of monsters are
        bad for them even if their alignments happen to match */
