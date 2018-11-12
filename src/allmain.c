@@ -444,7 +444,8 @@ moveloop()
 		/**************************************************/
 		for (mtmp = fmon; mtmp; mtmp = nxtmon){
 			nxtmon = mtmp->nmon;
-			if (attacktype(mtmp->data, AT_WDGZ)
+			if (!DEADMONSTER(mtmp)
+				&& attacktype(mtmp->data, AT_WDGZ)
 				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
 				&& !(hideablewidegaze(mtmp->data) && (rn2(3) < magic_negation(mtmp)))
 				&& couldsee(mtmp->mx, mtmp->my)
