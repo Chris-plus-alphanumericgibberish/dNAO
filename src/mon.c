@@ -1042,7 +1042,7 @@ mcalcdistress()
 	    if (minliquid(mtmp)) continue;
 	}
 
-	if(mtmp->data == &mons[PM_HEZROU]){
+	if(mtmp->data == &mons[PM_HEZROU] && !Is_illregrd(&u.uz)){
 		flags.cth_attk=TRUE;//state machine stuff.
 		create_gas_cloud(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, rnd(3), rnd(3)+1);
 		flags.cth_attk=FALSE;
