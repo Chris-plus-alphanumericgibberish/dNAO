@@ -6074,8 +6074,11 @@ register int	mmflags;
 //			}
 		break;
 		case S_UMBER:
-			if (mndx == PM_UVUUDAUM){
-				mtmp->mhpmax = 3*mtmp->mhpmax;
+			if(mndx == PM_UVUUDAUM){
+				mtmp->m_lev = 38;
+				mtmp->mhpmax = d(38, 8);
+				if(mtmp->mhpmax < 38*4.5)
+					mtmp->mhpmax = (int)(38*4.5);
 				mtmp->mhp = mtmp->mhpmax;
 			}
 		break;

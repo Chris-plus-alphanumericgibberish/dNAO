@@ -1565,6 +1565,16 @@ mcalcdistress()
 	/* regenerate hit points */
 	mon_regen(mtmp, FALSE);
 	
+	timeout_problems(mtmp);
+	
+	/* FIXME: mtmp->mlstmv ought to be updated here */
+    }
+}
+
+void
+timeout_problems(mtmp)
+struct monst *mtmp;
+{
 	if(bold(mtmp->data) && mtmp->mflee){
 		if(mtmp->mfleetim > 4) mtmp->mfleetim /= 4;
 		else {
@@ -1595,9 +1605,6 @@ mcalcdistress()
 	    mtmp->mcanmove = 1;
 	if (mtmp->mfleetim && !--mtmp->mfleetim)
 	    mtmp->mflee = 0;
-
-	/* FIXME: mtmp->mlstmv ought to be updated here */
-    }
 }
 
 
@@ -3228,7 +3235,45 @@ struct monst *mtmp;
 {
 	struct obj *lifesave = mlifesaver(mtmp);
 
-	if (lifesave) {
+	if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(mtmp->mpeaceful) && !rn2(20)){
+		if (cansee(mtmp->mx, mtmp->my)) {
+			pline("But wait...");
+			if (attacktype(mtmp->data, AT_EXPL)
+			    || attacktype(mtmp->data, AT_BOOM))
+				pline("%s reappears, looking much better!", Monnam(mtmp));
+			else
+				pline("%s flickers, then reappears looking much better!", Monnam(mtmp));
+		}
+		mtmp->mcanmove = 1;
+		mtmp->mfrozen = 0;
+		if (mtmp->mtame && !mtmp->isminion) {
+			wary_dog(mtmp, FALSE);
+		}
+		if (mtmp->mhpmax <= 9) mtmp->mhpmax = 10;
+		mtmp->mhp = mtmp->mhpmax;
+		return;
+	} else if(mtmp->mspec_used == 0 && mtmp->data == &mons[PM_UVUUDAUM]){
+		if (cansee(mtmp->mx, mtmp->my)) {
+			pline("But wait...");
+			pline("A glowing halo forms over %s!",
+				mon_nam(mtmp));
+			if (attacktype(mtmp->data, AT_EXPL)
+			    || attacktype(mtmp->data, AT_BOOM))
+				pline("%s reconstitutes!", Monnam(mtmp));
+			else
+				pline("%s looks much better!", Monnam(mtmp));
+		}
+		mtmp->mcanmove = 1;
+		mtmp->mfrozen = 0;
+		if (mtmp->mtame && !mtmp->isminion) {
+			wary_dog(mtmp, FALSE);
+		}
+		if (mtmp->m_lev < 38) mtmp->m_lev = 38;
+		if (mtmp->mhpmax <= 38*4.5) mtmp->mhpmax = (int)(38*4.5);
+		mtmp->mhp = mtmp->mhpmax;
+		mtmp->mspec_used = mtmp->mhpmax/5;
+		return;
+	} else if (lifesave) {
 		/* not canseemon; amulets are on the head, so you don't want */
 		/* to show this for a long worm with only a tail visible. */
 		/* Nor do you check invisibility, because glowing and disinte- */
@@ -3259,25 +3304,9 @@ struct monst *mtmp;
 				mon_nam(mtmp));
 		} else
 			return;
-	} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(mtmp->mpeaceful) && !rn2(20)){
-		if (cansee(mtmp->mx, mtmp->my)) {
-			pline("But wait...");
-			if (attacktype(mtmp->data, AT_EXPL)
-			    || attacktype(mtmp->data, AT_BOOM))
-				pline("%s reappears, looking much better!", Monnam(mtmp));
-			else
-				pline("%s flickers, then reappears looking much better!", Monnam(mtmp));
-		}
-		mtmp->mcanmove = 1;
-		mtmp->mfrozen = 0;
-		if (mtmp->mtame && !mtmp->isminion) {
-			wary_dog(mtmp, FALSE);
-		}
-		if (mtmp->mhpmax <= 9) mtmp->mhpmax = 10;
-		mtmp->mhp = mtmp->mhpmax;
-		return;
+		/*Under this point, the only resurrection effects should be those affecting undead, or that the monster wouldn't WANT to trigger*/
 	} else if(mtmp->mfaction == FRACTURED && !rn2(2)){
-		if (cansee(mtmp->mx, mtmp->my)) {
+		if (couldsee(mtmp->mx, mtmp->my)) {
 			pline("But wait...");
 			if(canseemon(mtmp))
 				pline("%s fractures further%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
@@ -3293,7 +3322,7 @@ struct monst *mtmp;
 		mtmp->mhp = mtmp->mhpmax;
 		return;
 	} else if(mtmp->zombify && is_kamerel(mtmp->data)){
-		if (cansee(mtmp->mx, mtmp->my)) {
+		if (couldsee(mtmp->mx, mtmp->my)) {
 			pline("But wait...");
 			if(canseemon(mtmp))
 				pline("%s fractures%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");

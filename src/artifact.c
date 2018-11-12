@@ -4387,8 +4387,14 @@ arti_invoke(obj)
 				obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 			}
 			else if(u.dz < 0 && (yn("This is a forbidden technique.  Do you wish to use it anyway?") == 'y')){
+				struct monst *mtmp;
 				pline("Time Stop!");
 				youmonst.movement += NORMAL_SPEED*10;
+				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+					if(mtmp->data == &mons[PM_UVUUDAUM] && !DEADMONSTER(mtmp)){
+						mtmp->movement += NORMAL_SPEED*10;
+					}
+				}
 				Stoned = 9;
 				delayed_killer = "termination of personal timeline.";
 				killer_format = KILLED_BY;

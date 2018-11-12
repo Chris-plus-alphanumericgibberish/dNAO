@@ -707,6 +707,18 @@ unsigned int type;
 			case 6: return PRISMATIC_SPRAY;
 		}
 	break;
+	case PM_UVUUDAUM:
+		switch(rn2(8)){
+			case 0: return PSI_BOLT;
+			case 1: return MON_WARP;
+			case 2: return STUN_YOU;
+			case 3: return PARALYZE;
+			case 4: return MON_TIME_STOP;
+			case 5: return TIME_DUPLICATE;
+			case 6: return NAIL_TO_THE_SKY;
+			case 7: return PRISMATIC_SPRAY;
+		}
+	break;
 	case PM_GREAT_HIGH_SHAMAN_OF_KURTULMAK:
 		return SUMMON_DEVIL; 
 	case PM_LICH__THE_FIEND_OF_EARTH:
@@ -1943,6 +1955,74 @@ int spellnum;
 		dmg = 0;
 		stop_occupation();
 	break;
+	case MON_TIME_STOP:{
+		int extraturns = d(1,4)+1, i;
+		struct monst *tmpm;
+		if(!mtmp || u.summonMonster)
+			goto psibolt;
+		// if(canseemon(mtmp))
+			// pline("%s blurs with speed!", Monnam(mtmp));
+		// mtmp->movement += (extraturns)*12;
+		// for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			// if(tmpm->data == &mons[PM_UVUUDAUM] && tmpm != mtmp){
+				// tmpm->movement += (extraturns)*12;
+				// if(canseemon(tmpm))
+					// pline("%s blurs with speed!", Monnam(tmpm));
+			// }
+		// }
+		// u.summonMonster = TRUE;//Not exactly a summoning, but don't stack this too aggressively.
+		//Note: 1-4 free turns is too strong.  Just give that much healing instead.
+		if(canseemon(mtmp))
+			pline("%s blurs with speed!", Monnam(mtmp));
+			for(i= extraturns; i > 0; i--){
+				mon_regen(mtmp, TRUE);
+				timeout_problems(mtmp);
+			}
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(tmpm->data == &mons[PM_UVUUDAUM] && tmpm != mtmp && !DEADMONSTER(tmpm)){
+				if(canseemon(tmpm))
+					pline("%s blurs with speed!", Monnam(tmpm));
+				for(i= extraturns; i > 0; i--){
+					mon_regen(tmpm, TRUE);
+					timeout_problems(tmpm);
+				}
+			}
+		}
+		dmg = 0;
+	}break;
+	case TIME_DUPLICATE:{
+		struct monst *tmpm;
+		if(!mtmp) goto psibolt;
+		tmpm = makemon(mtmp->data, mtmp->mux, mtmp->muy, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
+		tmpm->mvanishes = d(1,4)+1;
+		tmpm->mclone = 1;
+		dmg = 0;
+	}break;
+	case NAIL_TO_THE_SKY:{
+		HLevitation &= ~I_SPECIAL;
+		if(!Levitation) {
+			/* kludge to ensure proper operation of float_up() */
+			HLevitation = 1;
+			float_up();
+			/* reverse kludge */
+			HLevitation = 0;
+			if (!Is_waterlevel(&u.uz)) {
+				if((u.ux != xupstair || u.uy != yupstair)
+				   && (u.ux != sstairs.sx || u.uy != sstairs.sy || !sstairs.up)
+				   && (!xupladder || u.ux != xupladder || u.uy != yupladder)
+				) {
+					You("hit your %s on the %s.",
+						body_part(HEAD),
+						ceiling(u.ux,u.uy));
+					losehp(uarmh ? 1 : rnd(10),
+						"colliding with the ceiling",
+						KILLED_BY);
+				} else (void) doup();
+			}
+		}
+		incr_itimeout(&HLevitation, (d(1,4)+1)*100);
+		spoteffects(FALSE);	/* for sinks */
+	}break;
     case SUMMON_ANGEL: /* cleric only */
     {
        struct monst *mtmp2;
@@ -3714,6 +3794,7 @@ int spellnum;
 	else if(spellnum == SUMMON_ANGEL) spellnum = CURE_SELF;
 	else if(spellnum == SUMMON_ALIEN) spellnum = CURE_SELF;
 	else if(spellnum == SUMMON_DEVIL) spellnum = CURE_SELF;
+	else if(spellnum == TIME_DUPLICATE) spellnum = MON_TIME_STOP;
 	else if(spellnum == INSECTS) spellnum = CURE_SELF;
     switch (spellnum) {
     case DEATH_TOUCH:
