@@ -426,7 +426,7 @@ mattacku(mtmp)
 	if(mtmp->mhp <= 0 || (Underwater && !is_swimmer(mtmp->data)))
 	    return(0);
 	
-	if(!(u.uevent.udemigod) && is_weeping(mtmp->data)) mtmp->movement = 0; /*Only attack once per turn*/
+	if(!(u.uevent.invoked) && is_weeping(mtmp->data)) mtmp->movement = 0; /*Only attack once per turn*/
 	
 	/* If swallowed, can only be affected by u.ustuck */
 	if(u.uswallow) {
@@ -2984,7 +2984,7 @@ dopois:
 	    case AD_WEEP: /*Weeping Angel's attack*/
 		hitmsg(mtmp, mattk);
 		if (uncancelled) {
-			if(!u.uevent.udemigod){
+			if(!u.uevent.invoked){
 				if (Teleport_control || Drain_resistance) {
 					if(flags.verbose) You("feel like you could have lost some potential.");
 				} else {

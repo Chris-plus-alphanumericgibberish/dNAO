@@ -3292,7 +3292,7 @@ spiriteffects(power, atme)
 			}
 		break;
 		case PWR_HOOK_IN_THE_SKY:
-			if(!u.uevent.udemigod){
+			if(!u.uevent.invoked){
 				if((ledger_no(&u.uz) == 1 && u.uhave.amulet) ||
 					Can_rise_up(u.ux, u.uy, &u.uz)) {
 					const char *riseup ="are yanked up, through the %s!";

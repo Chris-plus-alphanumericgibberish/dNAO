@@ -1932,8 +1932,8 @@ physical:{
 		    char mdef_Monnam[BUFSZ];
 		    if (vis) Strcpy(mdef_Monnam, Monnam(mdef));
 		    mdef->mstrategy &= ~STRAT_WAITFORU;
-		    if (u.uevent.udemigod) {
-		    /* Once the player kills Rodney or performs the Invocation, weeping angels will 
+		    if (u.uevent.invoked) {
+		    /* Once the player performs the Invocation, weeping angels will 
 		       be too interested in your potential to feed off the potential of monsters */
 			if (vis && canspotmon(magr) && flags.verbose)
 			    pline("%s is glancing at you with a hungry stare.", Monnam(magr));
