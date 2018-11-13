@@ -1349,7 +1349,6 @@ mattacku(mtmp)
 		case AT_MMGC:{
 			int temp=0;
 			if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) break;
-			if(nospellcooldowns(mdat)) mtmp->mspec_used = 0;
 			
 			if( mdat == &mons[PM_DEMOGORGON] && !range2 && !mtmp->mflee && rn2(6)) break; //cast spells more rarely if he's in melee range
 			if (range2 && mattk->adtyp != AD_SPEL && mattk->adtyp != AD_CLRC && mattk->adtyp != AD_STAR)
