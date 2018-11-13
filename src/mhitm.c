@@ -2535,7 +2535,7 @@ physical:{
 		tmp *= 2;
 	}
 	
-	if ( is_backstabber(magr->data) &&
+	if ( tmp > 0 && is_backstabber(magr->data) &&
 		!(noncorporeal(mdef->data) || amorphous(mdef->data) || 
 			((stationary(mdef->data) || sessile(mdef->data)) && (mdef->data->mlet == S_FUNGUS || mdef->data->mlet == S_PLANT))
 		 ) && (
@@ -2549,7 +2549,7 @@ physical:{
 	}
 	
 	
-	if(magr->data == &mons[PM_LONG_WORM] && magr->wormno && mattk->aatyp == AT_BITE){
+	if(tmp > 0 && magr->data == &mons[PM_LONG_WORM] && magr->wormno && mattk->aatyp == AT_BITE){
 		if(wormline(magr, mdef->mx, mdef->my))
 			tmp += d(2,4);//Adds segment damage
 	}
