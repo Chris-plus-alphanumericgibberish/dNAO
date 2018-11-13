@@ -1797,7 +1797,7 @@ int thrown;
 									obj->dknown ? the(mons[obj->corpsenm].mname) :
 									an(mons[obj->corpsenm].mname),
 									(obj->quan > 1) ? makeplural(withwhat) : withwhat);
-								if (!munstone(mon, TRUE))
+								if (!resists_ston(mon) && !munstone(mon, TRUE))
 									minstapetrify(mon, TRUE);
 								if (resists_ston(mon)) break;
 								/* note: hp may be <= 0 even if munstoned==TRUE */
@@ -1839,7 +1839,7 @@ int thrown;
 								plur(cnt));
 							obj->known = 1;	/* (not much point...) */
 							useup_eggs(obj);
-							if (!munstone(mon, TRUE))
+							if (!resists_ston(mon) && !munstone(mon, TRUE))
 								minstapetrify(mon, TRUE);
 							if (resists_ston(mon)) break;
 							return (boolean) (mon->mhp > 0);
@@ -3117,7 +3117,7 @@ register struct attack *mattk;
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////
 	    case AD_STON:
-		if (!munstone(mdef, TRUE))
+		if (!resists_ston(mdef) && !munstone(mdef, TRUE))
 		    minstapetrify(mdef, TRUE);
 		tmp = 0;
 		break;
