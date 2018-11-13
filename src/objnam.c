@@ -2415,6 +2415,7 @@ const char *oldstr;
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
 			    !BSTRCMP(bp, p-6, "scales") ||
+				!BSTRCMP(bp, p-6, "wishes") ||	/* ring */
 				!BSTRCMPI(bp, p-10, "Lost Names")) /* book */
 				return bp;
 
