@@ -4692,7 +4692,7 @@ uchar aatyp, adtyp;
 			  pline("%s collapses into a puddle of water!", Monnam(mon));
 			  if(malive){
 				killed(mon);
-				// malive = 0;
+				malive = 0;
 				// mon->mhp = 0;
 			  }
 		  } else break;
