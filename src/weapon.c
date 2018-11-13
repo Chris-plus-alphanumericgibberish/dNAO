@@ -3377,7 +3377,7 @@ struct obj *weapon;
 				case P_SKILLED:			bonus = +1; break;
 				case P_EXPERT:			bonus = +2; break;
 				case P_MASTER:			bonus = +3; break;
-				case P_GRAND_MASTER:	bonus = +4; break;
+				case P_GRAND_MASTER:	bonus = +5; break;
 			}
 		}
     }
@@ -3544,7 +3544,7 @@ int type;
 				case P_SKILLED:			bonus = +1; break;
 				case P_EXPERT:			bonus = +2; break;
 				case P_MASTER:			bonus = +3; break;
-				case P_GRAND_MASTER:	bonus = +4; break;
+				case P_GRAND_MASTER:	bonus = +5; break;
 			}
 		}
     }
