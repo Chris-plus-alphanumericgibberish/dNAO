@@ -4679,7 +4679,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 	    case AD_FIRE:
 		if (!mtmp->mcan && 
 			couldsee(mtmp->mx, mtmp->my) &&
-			!is_blind(mtmp) && !mtmp->mspec_used && rn2(5)) {
+			!is_blind(mtmp) && rn2(5)) {
 //		    int dmg = d(2,6);
 			int dmg = d((int)mattk->damn, (int)mattk->damd);
 
@@ -4706,7 +4706,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		case AD_COLD:
 		if (!mtmp->mcan && 
 			couldsee(mtmp->mx, mtmp->my) &&
-			!is_blind(mtmp) && !mtmp->mspec_used && rn2(5)) {
+			!is_blind(mtmp) && rn2(5)) {
 //		    int dmg = d(2,6);
 			int dmg = d((int)mattk->damn, (int)mattk->damd);
 
@@ -4728,7 +4728,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		case AD_ELEC:
 		if (!mtmp->mcan && 
 			couldsee(mtmp->mx, mtmp->my) &&
-			!is_blind(mtmp) && !mtmp->mspec_used && rn2(5)) {
+			!is_blind(mtmp) && rn2(5)) {
 //		    int dmg = d(2,6);
 			int dmg = d((int)mattk->damn, (int)mattk->damd);
 
@@ -4782,7 +4782,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		break;
 		case AD_HALU:
 		if (!mtmp->mcan && umetgaze(mtmp) &&
-			!is_blind(mtmp) && !mtmp->mspec_used && rn2(5)) {
+			!is_blind(mtmp) && rn2(5)) {
 			boolean not_affected=0;
 			//int tmp = rn2(12);
 			int tmp = d((int)mattk->damn, (int)mattk->damd);
