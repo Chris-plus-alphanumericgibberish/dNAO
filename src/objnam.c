@@ -1383,7 +1383,7 @@ plus:
 			|| obj->otyp == BRASS_LANTERN || Is_candle(obj) || obj->otyp == SHADOWLANDER_S_TORCH
 			|| obj->otyp == TORCH || obj->otyp == SUNROD
 		) {
-			if (Is_candle(obj) &&
+			if (Is_candle(obj) && obj->otyp != CANDLE_OF_INVOCATION && 
 			    obj->age < 20L * (long)objects[obj->otyp].oc_cost)
 				Strcat(prefix, "partly used ");
 			if(obj->lamplit)
@@ -1409,6 +1409,7 @@ charges:
 		add_erosion_words(obj, prefix);
 ring:
 		if(obj->oward && (isEngrRing(obj->otyp))) Strcat(prefix, "engraved ");
+		if(obj->otyp == RIN_WISHES) Sprintf(eos(bp), " (%d remaining)", obj->spe);
 		if(obj->owornmask & W_RINGR) Strcat(bp, " (on right ");
 		if(obj->owornmask & W_RINGL) Strcat(bp, " (on left ");
 		if(obj->owornmask & W_RING) {
@@ -1432,8 +1433,8 @@ ring:
 				if(obj->opoisoned & OPOISON_AMNES) Strcat(bp, " (lethe injecting)");
 				if(obj->opoisoned & OPOISON_ACID)  Strcat(bp, " (acid injecting)");
 		}
-		if((obj->known || Race_if(PM_INCANTIFIER)) && objects[obj->otyp].oc_charged) {
-			Strcat(prefix, sitoa((obj->otyp == CRYSTAL_PLATE_MAIL || obj->otyp == CRYSTAL_SWORD) ? obj->spe*2 : obj->spe));
+		if((obj->known || Race_if(PM_INCANTIFIER)) && objects[obj->otyp].oc_charged && obj->otyp != RIN_WISHES) {
+			Strcat(prefix, sitoa(obj->spe));
 			Strcat(prefix, " ");
 		}
 		break;
@@ -2302,7 +2303,7 @@ STATIC_DCL const struct o_range o_ranges[];
 STATIC_OVL NEARDATA const struct o_range o_ranges[] = {
 	{ "bag",	TOOL_CLASS,   SACK,	      BAG_OF_TRICKS },
 	{ "lamp",	TOOL_CLASS,   OIL_LAMP,	      MAGIC_LAMP },
-	{ "candle",	TOOL_CLASS,   TALLOW_CANDLE,  WAX_CANDLE },
+	{ "candle",	TOOL_CLASS,   TALLOW_CANDLE,  CANDLE_OF_INVOCATION },
 	{ "horn",	TOOL_CLASS,   TOOLED_HORN,    HORN_OF_PLENTY },
 	{ "shield",	ARMOR_CLASS,  BUCKLER,   SHIELD_OF_REFLECTION },
 	{ "helm",	ARMOR_CLASS,  LEATHER_HELM, HELM_OF_TELEPATHY },
@@ -3785,6 +3786,9 @@ typfnd:
 						)
 	    typ = OIL_LAMP;
 
+	if (typ == CANDLE_OF_INVOCATION && !wizard)
+		typ = WAX_CANDLE;
+
 	if((typ == SPE_LIGHTNING_BOLT ||
 		typ == SPE_POISON_SPRAY ||
 		typ == SPE_LIGHTNING_STORM ||
@@ -3885,6 +3889,7 @@ typfnd:
 #ifdef MAIL
 		case SCR_MAIL: otmp->spe = 1; break;
 #endif
+		case RIN_WISHES:
 		case WAN_WISHING:
 #ifdef WIZARD
 			if (!wizard) {

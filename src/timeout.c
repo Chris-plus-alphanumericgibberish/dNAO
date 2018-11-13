@@ -1861,6 +1861,7 @@ begin_burn(obj, already_lit)
 
 	if (obj->age == 0 && 
 		obj->otyp != MAGIC_LAMP && 
+		obj->otyp != CANDLE_OF_INVOCATION &&
 		obj->otyp != POT_STARLIGHT && 
 		obj->otyp != CHUNK_OF_FOSSIL_DARK && 
 		!artifact_light(obj) && 
@@ -1874,6 +1875,10 @@ begin_burn(obj, already_lit)
 		radius = 1;
 	} else switch (obj->otyp) {
 	    case MAGIC_LAMP:
+		obj->lamplit = 1;
+		do_timer = FALSE;
+		break;
+	    case CANDLE_OF_INVOCATION:
 		obj->lamplit = 1;
 		do_timer = FALSE;
 		break;

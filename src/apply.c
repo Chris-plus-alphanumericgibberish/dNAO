@@ -1264,7 +1264,7 @@ struct obj **optr;
 	}
 
 	otmp = carrying(CANDELABRUM_OF_INVOCATION);
-	if(!otmp || obj->otyp==GNOMISH_POINTY_HAT || otmp->spe == 7) {
+	if(!otmp || obj->otyp==GNOMISH_POINTY_HAT || obj->otyp==CANDLE_OF_INVOCATION || otmp->spe == 7) {
 		use_lamp(obj);
 		return;
 	}
@@ -5187,6 +5187,7 @@ doapply()
 		break;
 	case WAX_CANDLE:
 	case TALLOW_CANDLE:
+	case CANDLE_OF_INVOCATION:
 	case GNOMISH_POINTY_HAT:
 		use_candle(&obj);
 	break;

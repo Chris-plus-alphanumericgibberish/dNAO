@@ -191,8 +191,10 @@ shuffle_all()
 
 			if (oclass == POTION_CLASS)
 			    j -= 4;  /* water, starlight, amnesia, and blood have fixed descriptions */
+			if (oclass == RING_CLASS)
+				first += 1;	/* three wishes has a fixed description */
 			if (oclass == WAND_CLASS)
-			    first += 2;  /* light and darkness have fixed descriptions */
+			    first += 3;  /* light, darkness, and wishing have fixed descriptions */
 			else if (oclass == AMULET_CLASS ||
 				 oclass == SCROLL_CLASS ||
 				 oclass == SPBOOK_CLASS) {
