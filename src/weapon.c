@@ -1872,6 +1872,8 @@ struct obj *otmp;
         if (wep == otmp) return TRUE;
     
         if (wep->oartifact) return FALSE;
+		
+        if (wep->oproperties) return FALSE;
 
         if (is_giant(mtmp->data) &&  wep->otyp == CLUB) return FALSE;
         if (is_giant(mtmp->data) && otmp->otyp == CLUB) return TRUE;
@@ -1908,8 +1910,8 @@ register struct monst *mtmp;
 			(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
 			|| otmp->otyp == IRON_CHAIN || otmp->otyp == HEAVY_IRON_BALL
 			) &&
-			/* an artifact */
-			otmp->oartifact &&
+			/* an artifact or other special weapon*/
+			(otmp->oartifact || otmp->oproperties) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
 			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC

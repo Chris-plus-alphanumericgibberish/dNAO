@@ -2831,25 +2831,7 @@ register struct monst *mtmp;
 				(void)mongets(mtmp, SCIMITAR);
 			} else if(ptr == &mons[PM_OONA]){
 					//Note: Adjustments to how Oona's melee attacks were handled made her very weak without a weapon
-					otmp = mksobj(LONG_SWORD, FALSE, FALSE);
-					otmp->spe = 3;
-					otmp->blessed = TRUE;
-					otmp->cursed = FALSE;
-					otmp->oproperties = OPROP_AXIOW|OPROP_LESSW;
-					switch(u.oonaenergy){
-						case AD_COLD:
-							otmp->oproperties |= OPROP_ELECW; //superconducting?
-						break;
-						case AD_FIRE:
-							otmp->oproperties |= OPROP_COLDW;
-						break;
-						case AD_ELEC:
-							otmp->oproperties |= OPROP_FIREW;
-						break;
-					}
-					otmp->obj_material = METAL;
-					fix_object(otmp);
-					(void) mpickobj(mtmp, otmp);
+					//Also note: monster inventories are last-in-first-out, and oproperty weapons are favored, so the offhand weapon needs to be first
 					otmp = mksobj(STILETTO, FALSE, FALSE);
 					otmp->spe = 3;
 					otmp->blessed = TRUE;
@@ -2864,6 +2846,25 @@ register struct monst *mtmp;
 						break;
 						case AD_ELEC:
 							otmp->oproperties |= OPROP_COLDW;
+						break;
+					}
+					otmp->obj_material = METAL;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+					otmp = mksobj(LONG_SWORD, FALSE, FALSE);
+					otmp->spe = 3;
+					otmp->blessed = TRUE;
+					otmp->cursed = FALSE;
+					otmp->oproperties = OPROP_AXIOW|OPROP_LESSW;
+					switch(u.oonaenergy){
+						case AD_COLD:
+							otmp->oproperties |= OPROP_ELECW; //superconducting?
+						break;
+						case AD_FIRE:
+							otmp->oproperties |= OPROP_COLDW;
+						break;
+						case AD_ELEC:
+							otmp->oproperties |= OPROP_FIREW;
 						break;
 					}
 					otmp->obj_material = METAL;
