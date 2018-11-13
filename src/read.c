@@ -2850,10 +2850,17 @@ boolean revival;
  * than a mimic; this behavior quirk is useful so don't "fix" it...
  */
 boolean
-create_particular()
+create_particular(specify_attitude, specify_derivation, allow_multi, ma_restrict, mg_restrict, gen_restrict)
+boolean specify_attitude;
+boolean specify_derivation;
+boolean allow_multi;
+unsigned long ma_restrict;
+unsigned long mg_restrict;
+unsigned short gen_restrict;
 {
-	char buf[BUFSZ], *bufp, monclass = MAXMCLASSES;
+	char buf[BUFSZ], *bufp, *p, monclass = MAXMCLASSES;
 	int which, tries, i;
+	int undeadtype = 0;
 	struct permonst *whichpm;
 	struct monst *mtmp;
 	boolean madeany = FALSE;
@@ -2867,36 +2874,95 @@ create_particular()
 		   buf);
 	    bufp = mungspaces(buf);
 	    if (*bufp == '\033') return FALSE;
-	    /* allow the initial disposition to be specified */
-	    if (!strncmpi(bufp, "tame ", 5)) {
-		bufp += 5;
-		maketame = TRUE;
-	    } else if (!strncmpi(bufp, "peaceful ", 9)) {
-		bufp += 9;
-		makepeaceful = TRUE;
-	    } else if (!strncmpi(bufp, "hostile ", 8)) {
-		bufp += 8;
-		makehostile = TRUE;
-	    }
-	    /* decide whether a valid monster was chosen */
-	    if (strlen(bufp) == 1) {
-		monclass = def_char_to_monclass(*bufp);
-		if (monclass != MAXMCLASSES) break;	/* got one */
-	    } else {
-		which = name_to_mon(bufp);
-		if (which >= LOW_PM) break;		/* got one */
-	    }
-	    /* no good; try again... */
-	    pline("I've never heard of such monsters.");
+	    /* possibly allow the initial disposition to be specified */
+		if (specify_attitude){
+			if (!strncmpi(bufp, "tame ", 5)) {
+				bufp += 5;
+				maketame = TRUE;
+			}
+			else if (!strncmpi(bufp, "peaceful ", 9)) {
+				bufp += 9;
+				makepeaceful = TRUE;
+			}
+			else if (!strncmpi(bufp, "hostile ", 8)) {
+				bufp += 8;
+				makehostile = TRUE;
+			}
+		}
+		if (specify_derivation){
+			if ((p = rindex(bufp, ' ')) != 0){
+				if (p > bufp && p[-1] == ' ') p[-1] = 0;
+				else *p = 0;
+				p++;
+				if (!strcmpi(p, "zombie"))
+					undeadtype = ZOMBIFIED;
+				else if (!strcmpi(p, "skeleton"))
+					undeadtype = SKELIFIED;
+				else if (!strcmpi(p, "vitrean"))
+					undeadtype = CRYSTALFIED;
+				else if (!strcmpi(p, "witness"))
+					undeadtype = FRACTURED;
+				else
+				{
+					// no undead suffix was used, undo the split
+					p--[-1] = ' ';
+				}
+			}
+		}
+
+		/* decide whether a valid monster was chosen */
+		if (strlen(bufp) == 1) {
+			monclass = def_char_to_monclass(*bufp);
+			if (monclass == MAXMCLASSES)
+			{
+				pline("I've never heard of such monsters.");
+				continue;	//try again
+			}
+			whichpm = mkclass(monclass, Inhell ? G_HELL : G_NOHELL);
+		}
+		else {
+			which = name_to_mon(bufp);
+			if (which < LOW_PM)
+			{
+				pline("I've never heard of such monsters.");
+				continue;	//try again
+			}
+			(void)cant_create(&which, FALSE);
+			whichpm = &mons[which];
+		}
+		// validate that the creature falls within the restrictions placed on it
+		if (ma_restrict || mg_restrict || gen_restrict){
+			i = 0;
+			if (monclass != MAXMCLASSES)
+				while ((whichpm->mflagsa & ma_restrict ||
+						whichpm->mflagsg & mg_restrict ||
+						whichpm->geno & gen_restrict) && i < 100)
+					{
+					whichpm = mkclass(monclass, Inhell ? G_HELL : G_NOHELL);
+					i++;
+					}
+			else
+			{
+				if (whichpm->mflagsa & ma_restrict ||
+					whichpm->mflagsg & mg_restrict ||
+					whichpm->geno & gen_restrict)
+					i = 100;
+			}
+
+			if (i = 100){
+				pline("That monster cannot be summoned.");
+				continue;	// try again
+			}
+		}
+		/* if it didn't hit a continue at this point, we're good */
+		break;
 	} while (++tries < 5);
 
 	if (tries == 5) {
 	    pline1(thats_enough_tries);
 	} else {
-	    (void) cant_create(&which, FALSE);
-	    whichpm = &mons[which];
-	    for (i = 0; i <= multi; i++) {
-		if (monclass != MAXMCLASSES)
+	    for (i = 0; i <= (allow_multi ? multi : 0); i++) {
+		if (monclass != MAXMCLASSES && !(ma_restrict || mg_restrict || gen_restrict))
 		    whichpm = mkclass(monclass, Inhell ? G_HELL : G_NOHELL);
 		if (maketame) {
 		    mtmp = makemon(whichpm, u.ux, u.uy, MM_EDOG);
@@ -2911,6 +2977,17 @@ create_particular()
 			mtmp->mpeaceful = makepeaceful ? 1 : 0;
 			set_malign(mtmp);
 		    }
+		}
+		if (specify_derivation){
+			if (!mtmp->mfaction && (
+				undeadtype == ZOMBIFIED ? can_undead_mon(mtmp) :
+				undeadtype == SKELIFIED ? can_undead_mon(mtmp) :
+				undeadtype == CRYSTALFIED ? (mtmp->data->geno & G_HELL) == 0 :
+				undeadtype == FRACTURED ? is_kamerel(mtmp->data) : 0
+				))
+			{
+				mtmp->mfaction = undeadtype;
+			}
 		}
 		if (mtmp) madeany = TRUE;
 	    }

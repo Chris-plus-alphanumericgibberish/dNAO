@@ -1230,7 +1230,7 @@ wiz_map()
 STATIC_PTR int
 wiz_genesis()
 {
-	if (wizard)	(void) create_particular();
+	if (wizard)	(void) create_particular(TRUE, TRUE, TRUE, 0, 0, 0);
 	else		pline("Unavailable command '^G'.");
 	return 0;
 }
