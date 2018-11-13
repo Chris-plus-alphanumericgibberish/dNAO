@@ -2908,6 +2908,7 @@ int spellnum;
 	switch (spellnum) {
 	case CLONE_WIZ:
 	case RAISE_DEAD:
+	case MON_TIME_STOP:
 	case SUMMON_ANGEL:
 	case SUMMON_ALIEN:
 	case SUMMON_DEVIL:
@@ -2977,7 +2978,10 @@ int spellnum;
 	
 	//Nothing to come
 	if((Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) 
-		&& (spellnum == SUMMON_MONS || spellnum == SUMMON_ALIEN || spellnum == SUMMON_ANGEL || spellnum == SUMMON_DEVIL)
+		&& (spellnum == SUMMON_MONS
+			|| spellnum == SUMMON_ANGEL
+			|| spellnum == SUMMON_DEVIL
+		)
 	) return TRUE;
 		
 	
