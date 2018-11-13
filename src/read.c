@@ -574,7 +574,7 @@ struct obj *obj;
 	/* known && !uname is possible after amnesia/mind flayer */
 	if (obj->oclass == RING_CLASS)
 	    return (boolean)(objects[obj->otyp].oc_charged &&
-			(obj->known || objects[obj->otyp].oc_uname));
+			(obj->known || objects[obj->otyp].oc_uname) && obj->otyp != RIN_WISHES);
 	if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)
 	    return TRUE;
 //#ifdef FIREARMS
@@ -653,7 +653,7 @@ int curse_bless;
 	    }
 
 	} else if (obj->oclass == RING_CLASS &&
-					objects[obj->otyp].oc_charged) {
+					objects[obj->otyp].oc_charged && obj->otyp != RIN_WISHES) {
 	    /* charging does not affect ring's curse/bless status */
 	    int s = is_blessed ? rnd(3) : is_cursed ? -rnd(2) : 1;
 	    boolean is_on = (obj == uleft || obj == uright);

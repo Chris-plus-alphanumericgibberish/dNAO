@@ -3889,6 +3889,80 @@ use_crook (obj)
 	return (1);
 }
 
+boolean
+use_ring_of_wishes(obj)
+struct obj *obj;
+{
+	boolean madewish = FALSE;
+
+	if (obj->otyp != RIN_WISHES)
+	{
+		impossible("object other than ring of wishes passed to use_ring_of_wishes");
+		return FALSE;
+	}
+	if (obj->cursed || (Luck + rn2(5) < 0)){	// to be less cruel, it doesn't use up a charge
+		pline1(nothing_happens);
+		return FALSE;
+	}
+	if (obj->spe <= 0){
+		pline1(nothing_happens);
+		pline("The ring crumbles to dust!");
+		useupall(obj);
+		return FALSE;
+	}
+	if (!(obj->owornmask & W_RING)) {
+		if (objects[RIN_WISHES].oc_name_known)
+			You_feel("that you should be wearing %s.", the(xname(obj)));
+		else
+			pline1(nothing_happens);
+		return FALSE;
+	}
+
+	if (obj->spe > 0)
+	{
+		makewish(0);
+		obj->spe--;
+		madewish = TRUE;
+		if (!objects[RIN_WISHES].oc_name_known) {
+			makeknown(RIN_WISHES);
+			more_experienced(0, 10);
+		}
+	}
+	else
+	{
+		pline1(nothing_happens);
+	}
+	if (obj->spe <= 0)
+	{
+		pline("The ring crumbles to dust!");
+		useupall(obj);
+	}
+	return madewish;
+}
+
+boolean
+use_candle_of_invocation(obj)	// incomplete, currently only grants a wish
+struct obj *obj;
+{
+	if (obj->otyp != CANDLE_OF_INVOCATION)
+	{
+		impossible("object other than candle of invocation passed to use_candle_of_invocation");
+		return FALSE;
+	}
+	if (!obj->lamplit) {
+		pline1(nothing_happens);
+		return FALSE;
+	}
+	
+	makewish(0);
+	pline("The %s is suddenly consumed by its flame!", xname(obj));
+	useupall(obj);
+	if (!objects[CANDLE_OF_INVOCATION].oc_name_known) {
+		makeknown(CANDLE_OF_INVOCATION);
+		more_experienced(0, 10);
+	}
+	return TRUE;
+}
 
 #define BY_OBJECT	((struct monst *)0)
 
