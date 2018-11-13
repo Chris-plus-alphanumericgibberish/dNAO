@@ -2594,8 +2594,10 @@ ray:
     case PARALYZE:
 	if (Antimagic || Free_action) {
 	    shieldeff(u.ux, u.uy);
-	    if (multi >= 0) You("stiffen briefly.");
-	    if(!Free_action) nomul(-1, "paralyzed by a monster");
+	    if (multi >= 0){
+			You("stiffen briefly.");
+			if(!Free_action) nomul(-1, "paralyzed by a monster");
+		}
 	} else {
 	    if (multi >= 0) You("are frozen in place!");
 	    dmg = min_ints(rnd(4), mtmp ? rnd((int)mtmp->m_lev) : rnd(30));
