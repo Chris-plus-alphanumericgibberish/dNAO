@@ -1903,15 +1903,15 @@ register struct attack *mattk;
 				if(mattk->adtyp == AD_SHDW){
 					struct trap *ttmp2;
 					m_throw(mtmp, mdef->mx + (-sgn(tbx)) + xadj, mdef->my + (-sgn(tby)) + yadj, sgn(tbx), sgn(tby),
-						1, qvr,TRUE);
+						1, qvr,FALSE);
 					ttmp2 = maketrap(mdef->mx, mdef->my, WEB);
 					if (ttmp2) mintrap(mdef);
 				} else if(mattk->adtyp == AD_PEST){
 					m_throw(mtmp, mdef->mx + (-sgn(tbx)) + xadj, mdef->my + (-sgn(tby)) + yadj, sgn(tbx), sgn(tby),
-						1, qvr,TRUE);
+						1, qvr, FALSE);
 				} else {
 					m_throw(mtmp, mtmp->mx + xadj, mtmp->my + yadj, sgn(tbx), sgn(tby),
-						BOLT_LIM + rngmod, qvr,TRUE);
+						BOLT_LIM + rngmod, qvr, FALSE);
 				}
 			    nomul(0, NULL);
 			destroy_thrown = 0;  //state variable referenced in drop_throw
