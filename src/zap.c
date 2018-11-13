@@ -2086,7 +2086,7 @@ register struct obj *obj;
 				pline("Unfortunately, nothing happens.");
 				break;
 			}
-			makewish();
+			makewish(0);
 		break;
 		case WAN_ENLIGHTENMENT:
 			known = TRUE;
@@ -4992,7 +4992,8 @@ int damage, tell;
 }
 
 void
-makewish()
+makewish(wishflags)
+int wishflags;		// flags to change messages / effects
 {
 	char buf[BUFSZ];
 	char bufcpy[BUFSZ];
@@ -5011,12 +5012,12 @@ retry:
 	 *  value to remain distinct.
 	 */
 	strcpy(bufcpy, buf);
-	otmp = readobjnam(buf, &nothing, TRUE);
+	otmp = readobjnam(buf, &nothing, wishflags);
 	if (!otmp) {
 	    pline("Nothing fitting that description exists in the game.");
 	    if (++tries < 5) goto retry;
 	    pline1(thats_enough_tries);
-	    otmp = readobjnam((char *)0, (struct obj *)0, TRUE);
+		otmp = readobjnam((char *)0, (struct obj *)0, wishflags);
 	    if (!otmp) return;	/* for safety; should never happen */
 	} else if (otmp == &nothing) {
 	    /* explicitly wished for "nothing", presumeably attempting

@@ -1751,7 +1751,7 @@ E char *FDECL(ysimple_name, (struct obj *));
 E char *FDECL(Ysimple_name2, (struct obj *));
 E char *FDECL(makeplural, (const char *));
 E char *FDECL(makesingular, (const char *));
-E struct obj *FDECL(readobjnam, (char *,struct obj *,BOOLEAN_P));
+E struct obj *FDECL(readobjnam, (char *,struct obj *,int));
 E int FDECL(rnd_class, (int,int));
 E const char *FDECL(cloak_simple_name, (struct obj *));
 E const char *FDECL(mimic_obj_name, (struct monst *));
@@ -2884,7 +2884,7 @@ E boolean FDECL(break_crate, (struct obj *));
 E void FDECL(destroy_item, (int,int));
 E int FDECL(destroy_mitem, (struct monst *,int,int));
 E int FDECL(resist, (struct monst *,CHAR_P,int,int));
-E void NDECL(makewish);
+E void FDECL(makewish, (int));
 E void FDECL(costly_cancel, (struct obj *));
 E void FDECL(revive_egg, (struct obj *));
 

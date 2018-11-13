@@ -200,7 +200,7 @@ dosit()
 					levl[u.ux][u.uy].looted |= NOBLE_PETS;
 				}break;
 				case NOBLE_WISH:{
-					makewish();
+					makewish(0);
 					levl[u.ux][u.uy].looted |= NOBLE_WISH;
 				}break;
 				default:
@@ -251,7 +251,7 @@ dosit()
 				if(u.uluck + rn2(5) < 0) {
 					You_feel("your luck is changing.");
 					change_luck(1);
-				} else	    makewish();
+				} else	    makewish(0);
 				break;
 				case 7:
 				{

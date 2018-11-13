@@ -2658,10 +2658,10 @@ struct alt_spellings {
  * If from_user is false, we're reading from the wizkit, nothing was typed in.
  */
 struct obj *
-readobjnam(bp, no_wish, from_user)
+readobjnam(bp, no_wish, wishflags)
 register char *bp;
 struct obj *no_wish;
-boolean from_user;
+int wishflags;
 {
 	register char *p;
 	register int i;
@@ -2673,6 +2673,8 @@ boolean from_user;
 #ifdef INVISIBLE_OBJECTS
 	int isinvisible;
 #endif
+	boolean from_user = !(wishflags & WISH_QUIET);
+	boolean wizwish = !!(wishflags & WISH_WIZARD);
 	int halfeaten, halfdrained, mntmp, contents;
 	int islit, unlabeled, ishistoric, isdiluted;
 	struct fruit *f;
@@ -2880,10 +2882,7 @@ boolean from_user;
 			   !strncmpi(bp,"unlabelled ", l=11) ||
 			   !strncmpi(bp,"blank ", l=6)) {
 			unlabeled = 1;
-		} else if(!strncmpi(bp, "poisoned ",l=9)
-#ifdef WIZARD
-			|| (wizard && !strncmpi(bp, "trapped ",l=8))
-#endif
+		} else if(!strncmpi(bp, "poisoned ",l=9) || (wizwish && !strncmpi(bp, "trapped ",l=8))
 			) {
 			ispoisoned=OPOISON_BASIC;
 		} else if(!strncmpi(bp, "filth-crusted ",l=14) || !strncmpi(bp, "filthy ",l=7)) {
@@ -3316,11 +3315,7 @@ boolean from_user;
 	if(!BSTRCMPI(bp, p-10, "gold piece") || !BSTRCMPI(bp, p-7, "zorkmid") ||
 	   !strcmpi(bp, "gold") || !strcmpi(bp, "money") ||
 	   !strcmpi(bp, "coin") || *bp == GOLD_SYM) {
-			if (cnt > 5000
-#ifdef WIZARD
-					&& !wizard
-#endif
-						) cnt=5000;
+			if (cnt > 5000 && !wizwish) cnt=5000;
 		if (cnt < 1) cnt=1;
 #ifndef GOLDOBJ
 		if (from_user)
@@ -3338,11 +3333,8 @@ boolean from_user;
 	}
 	if (strlen(bp) == 1 &&
 	   (i = def_char_to_objclass(*bp)) < MAXOCLASSES && i > ILLOBJ_CLASS
-#ifdef WIZARD
-	    && (wizard || i != VENOM_CLASS)
-#else
+	    && (wizwish || i != VENOM_CLASS)
 	    && i != VENOM_CLASS
-#endif
 	    ) {
 		oclass = i;
 		goto any;
@@ -3609,12 +3601,11 @@ srch:
 			goto typfnd;
 	    }
 	}
-#ifdef WIZARD
 	/* Let wizards wish for traps --KAA */
 	/* must come after objects check so wizards can still wish for
 	 * trap objects like beartraps
 	 */
-	if (wizard && from_user) {
+	if (wizwish && from_user) {
 		int trap;
 
 		for (trap = NO_TRAP+1; trap < TRAPNUM; trap++) {
@@ -3739,7 +3730,6 @@ srch:
 		    return &zeroobj;
 		}
 	}
-#endif
 	if(!oclass) return((struct obj *)0);
 any:
 	if(!oclass) oclass = wrpsym[rn2((int)sizeof(wrpsym))];
@@ -3748,11 +3738,9 @@ typfnd:
 
 	/* check for some objects that are not allowed */
 	if (typ && objects[typ].oc_unique) {
-#ifdef WIZARD
-	    if (wizard)
+		if (wizwish)
 		;	/* allow unique objects */
 	    else
-#endif
 	    switch (typ) {
 		case AMULET_OF_YENDOR:
 		    typ = FAKE_AMULET_OF_YENDOR;
@@ -3770,23 +3758,15 @@ typfnd:
 	}
 
 	/* catch any other non-wishable objects */
-	if (objects[typ].oc_nowish
-#ifdef WIZARD
-	    && !wizard
-#endif
-	    )
+	if (objects[typ].oc_nowish && !wizwish)
 	    return((struct obj *)0);
 
 	/* convert magic lamps to regular lamps before lighting them or setting
 	   the charges */
-	if (typ == MAGIC_LAMP
-#ifdef WIZARD
-				&& !wizard
-#endif
-						)
+	if (typ == MAGIC_LAMP && !wizwish)
 	    typ = OIL_LAMP;
 
-	if (typ == CANDLE_OF_INVOCATION && !wizard)
+	if (typ == CANDLE_OF_INVOCATION && !wizwish)
 		typ = WAX_CANDLE;
 
 	if((typ == SPE_LIGHTNING_BOLT ||
@@ -3814,10 +3794,7 @@ typfnd:
 			typ == BULLET_FABBER ||
 			typ == PROTEIN_PILL
 		) && !Role_if(PM_TOURIST) && !isartifact)
-		)
-#ifdef WIZARD
-				&& !wizard
-#endif
+		) && !wizwish
 	) return (struct obj *)0;
 	
 	if(typ) {
@@ -3836,24 +3813,17 @@ typfnd:
 	}
 
 	if(cnt > 0 && objects[typ].oc_merge && oclass != SPBOOK_CLASS &&
-		(cnt < rnd(6) ||
-#ifdef WIZARD
-		wizard ||
-#endif
+		(cnt < rnd(6) || wizwish ||
 		 (cnt <= 7 && Is_candle(otmp)) ||
 		 (cnt <= 20 &&
 		  ((oclass == WEAPON_CLASS && is_ammo(otmp))
 				|| typ == ROCK || is_missile(otmp)))))
 			otmp->quan = (long) cnt;
 
-#ifdef WIZARD
 	if (oclass == VENOM_CLASS) otmp->spe = 1;
-#endif
 
 	if (spesgn == 0) spe = otmp->spe;
-#ifdef WIZARD
-	else if (wizard) /* no alteration to spe */ ;
-#endif
+	else if (wizwish) /* no alteration to spe */;
 	else if (oclass == ARMOR_CLASS || oclass == WEAPON_CLASS ||
 		 is_weptool(otmp) ||
 			(oclass==RING_CLASS && objects[typ].oc_charged)) {
@@ -3891,15 +3861,11 @@ typfnd:
 #endif
 		case RIN_WISHES:
 		case WAN_WISHING:
-#ifdef WIZARD
-			if (!wizard) {
-#endif
+			if (!wizwish) {
 				otmp->spe = (rn2(10) ? -1 : 0);
 				break;
-#ifdef WIZARD
 			}
 			/* fall through, if wizard */
-#endif
 		default: otmp->spe = spe;
 	}
 
@@ -4012,22 +3978,22 @@ typfnd:
 		
 	}
 	
-	if(otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && (wizard || (otmp->oward && !(otmp->ohaluengr)))){
-		if(heptagram && wizard)			otmp->oward = HEPTAGRAM;  /*can't be wished for*/
-		else if(gorgoneion && wizard)   otmp->oward = GORGONEION;/*can't be wished for*/
-		else if(acheron)				otmp->oward = CIRCLE_OF_ACHERON;
-		else if(pentagram)				otmp->oward = PENTAGRAM; /*not found randomly, but can be wished for*/
-		else if(hexagram && wizard) 	otmp->oward = HEXAGRAM;/*can't be wished for*/
-		else if(hamsa)					otmp->oward = HAMSA;
-		else if(sign)					otmp->oward = ELDER_SIGN;
-		else if(eye)					otmp->oward = ELDER_ELEMENTAL_EYE;
-		else if(queen)					otmp->oward = SIGN_OF_THE_SCION_QUEEN;
-		else if(cartouche)				otmp->oward = CARTOUCHE_OF_THE_CAT_LORD;
-		else if(garuda)					otmp->oward = WINGS_OF_GARUDA;
-		else if(toustefna && wizard)	otmp->oward = TOUSTEFNA;/*can't be wished for*/
-		else if(dreprun && wizard)		otmp->oward = DREPRUN;/*can't be wished for*/
-		else if(veioistafur && wizard)	otmp->oward = VEIOISTAFUR;/*can't be wished for*/
-		else if(thjofastafur && wizard)	otmp->oward = THJOFASTAFUR; /*can't be wished for*/
+	if(otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && (wizwish || (otmp->oward && !(otmp->ohaluengr)))){
+		if(heptagram && wizwish)			otmp->oward = HEPTAGRAM;  /*can't be wished for*/
+		else if(gorgoneion && wizwish)		otmp->oward = GORGONEION;/*can't be wished for*/
+		else if(acheron)					otmp->oward = CIRCLE_OF_ACHERON;
+		else if(pentagram)					otmp->oward = PENTAGRAM; /*not found randomly, but can be wished for*/
+		else if(hexagram && wizwish) 		otmp->oward = HEXAGRAM;/*can't be wished for*/
+		else if(hamsa)						otmp->oward = HAMSA;
+		else if(sign)						otmp->oward = ELDER_SIGN;
+		else if(eye)						otmp->oward = ELDER_ELEMENTAL_EYE;
+		else if(queen)						otmp->oward = SIGN_OF_THE_SCION_QUEEN;
+		else if(cartouche)					otmp->oward = CARTOUCHE_OF_THE_CAT_LORD;
+		else if(garuda)						otmp->oward = WINGS_OF_GARUDA;
+		else if(toustefna && wizwish)		otmp->oward = TOUSTEFNA;/*can't be wished for*/
+		else if(dreprun && wizwish)			otmp->oward = DREPRUN;/*can't be wished for*/
+		else if(veioistafur && wizwish)		otmp->oward = VEIOISTAFUR;/*can't be wished for*/
+		else if(thjofastafur && wizwish)	otmp->oward = THJOFASTAFUR; /*can't be wished for*/
 	}
 
 	
@@ -4060,22 +4026,10 @@ typfnd:
 		curse(otmp);
 	} else if (uncursed) {
 		otmp->blessed = 0;
-		otmp->cursed = (Luck < 0
-#ifdef WIZARD
-					 && !wizard
-#endif
-							);
+		otmp->cursed = (Luck < 0 && !wizwish);
 	} else if (blessed) {
-		otmp->blessed = (Luck >= 0
-#ifdef WIZARD
-					 || wizard
-#endif
-							);
-		otmp->cursed = (Luck < 0
-#ifdef WIZARD
-					 && !wizard
-#endif
-							);
+		otmp->blessed = (Luck >= 0 || wizwish);
+		otmp->cursed = (Luck < 0 && !wizwish);
 	} else if (spesgn < 0) {
 		curse(otmp);
 	}
@@ -4095,21 +4049,14 @@ typfnd:
 
 	    /* set erodeproof */
 	    if (erodeproof && !eroded && !eroded2)
-		    otmp->oerodeproof = (Luck >= 0
-#ifdef WIZARD
-					     || wizard
-#endif
-					);
+			otmp->oerodeproof = (Luck >= 0 || wizwish);
 	}
 
 	/* set otmp->recharged */
 	if (oclass == WAND_CLASS) {
 	    /* prevent wishing abuse */
-	    if (otmp->otyp == WAN_WISHING
-#ifdef WIZARD
-		    && !wizard
-#endif
-		) rechrg = 1;
+		if (otmp->otyp == WAN_WISHING && !wizwish)
+			rechrg = 1;
 	    otmp->recharged = (unsigned)rechrg;
 	}
 
@@ -4132,7 +4079,7 @@ typfnd:
 
 	/* set material */
 	if(mat){
-		if(wizard) {
+		if (wizwish) {
 			otmp->obj_material = mat;
 		}
 		else {
@@ -4165,9 +4112,9 @@ typfnd:
 	}
 	
 	/* set object properties */
-	if (oproperties && wizard) // wishing for object properties is wizard-mode only
+	if (oproperties && wizwish) // wishing for object properties is wizard-mode only
 	{
-		if (wizard)		// wizard mode will give you what you ask for, even if it breaks things
+		if (wizwish)		// wizard mode will give you what you ask for, even if it breaks things
 			otmp->oproperties = oproperties;
 		else
 		{	// limit granted properties to what is realistic for the item class
@@ -4217,7 +4164,7 @@ typfnd:
 
 	/* set viper heads, probability of getting what you wished for copied loosely from setting weapon/armor spe, but the minimum is 1, not 0. */
 	if(viperheads != -1 && otmp->otyp == VIPERWHIP){
-		otmp->ovar1 = (viperheads > rnd(5) && viperheads > otmp->ovar1 && !wizard) ? 1 : viperheads;
+		otmp->ovar1 = (viperheads > rnd(5) && viperheads > otmp->ovar1 && !wizwish) ? 1 : viperheads;
 	}
 	
 	/* set moon phase */
@@ -4236,9 +4183,7 @@ typfnd:
 		 // (otmp->oartifact >= ART_SWORD_OF_ERATHAOL && otmp->oartifact <= ART_HAMMER_OF_BARQUIEL) || //no wishing for angel artifacts
 		 // (otmp->oartifact >= ART_GENOCIDE && otmp->oartifact <= ART_DOOMSCREAMER) || //no wishing for demon artifacts
 		 // (otmp->oartifact >= ART_STAFF_OF_THE_ARCHMAGI && otmp->oartifact <= ART_SNICKERSNEE)
-#ifdef WIZARD
-	    ) && !wizard
-#endif
+	    ) && !wizwish
 	    ) {
 	    artifact_exists(otmp, ONAME(otmp), FALSE);
 		u.uconduct.wisharti--;
