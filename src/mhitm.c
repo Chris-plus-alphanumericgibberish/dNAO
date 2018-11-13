@@ -2063,7 +2063,7 @@ physical:{
 		 */
 		if (mattk->aatyp == AT_GAZE || mattk->aatyp == AT_WDGZ)
 			tmp = 0;
-		if (magr->mcan || mdef->mconf || magr->mspec_used || ((mattk->aatyp == AT_GAZE || mattk->aatyp == AT_WDGZ) && !mmetgaze(magr, mdef)))
+		if (magr->mcan || mdef->mconf || (magr->mspec_used && magr->data != &mons[PM_UVUUDAUM]) || ((mattk->aatyp == AT_GAZE || mattk->aatyp == AT_WDGZ) && !mmetgaze(magr, mdef)))
 			break;
 		
 		if (canseemon(magr)) {

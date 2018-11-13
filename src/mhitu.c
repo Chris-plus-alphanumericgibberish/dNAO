@@ -4564,7 +4564,21 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		}
 		break;
 	    case AD_CONF:
-		if(!mtmp->mcan && umetgaze(mtmp) &&
+		if(mtmp->data == &mons[PM_UVUUDAUM]){
+			if(!mtmp->mcan && umetgaze(mtmp) && rn2(5)){
+				int conf;
+				if((int)mattk->damn == 0 || (int)mattk->damd == 0) 
+					conf = d(3,4);
+				else conf = d((int)mattk->damn, (int)mattk->damd);
+
+				if(!Confusion)
+				pline("%s from confuses you!", s_suffix(Monnam(mtmp)));
+				else You("are getting more and more confused.");
+				make_confused(HConfusion + conf, FALSE);
+				stop_occupation();
+				succeeded=1;
+			}
+		} else if(!mtmp->mcan && umetgaze(mtmp) &&
 		   !is_blind(mtmp) && !mtmp->mspec_used && rn2(5)) {
 		    int conf;
 			if((int)mattk->damn == 0 || (int)mattk->damd == 0) 
