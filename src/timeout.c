@@ -2054,6 +2054,7 @@ end_burn(obj, timer_attached)
 	}
 
 	if (obj->otyp == MAGIC_LAMP 
+		|| obj->otyp == CANDLE_OF_INVOCATION
 		|| obj->otyp == POT_STARLIGHT
 		|| obj->otyp == CHUNK_OF_FOSSIL_DARK
 		|| artifact_light(obj)

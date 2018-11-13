@@ -2063,7 +2063,7 @@ E void FDECL(punish, (struct obj *));
 E void NDECL(unpunish);
 E boolean FDECL(cant_create, (int *, BOOLEAN_P));
 #ifdef WIZARD
-E boolean FDECL(create_particular, (boolean, boolean, boolean, unsigned long, unsigned long, unsigned short));
+E struct monst * FDECL(create_particular, (unsigned long, int, boolean, unsigned long, unsigned long, unsigned short));
 #endif
 
 /* ### rect.c ### */

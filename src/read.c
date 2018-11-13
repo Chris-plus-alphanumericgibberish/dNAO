@@ -2849,10 +2849,10 @@ boolean revival;
  * "strange object" (']') symbol produces a random monster rather
  * than a mimic; this behavior quirk is useful so don't "fix" it...
  */
-boolean
+struct monst *
 create_particular(specify_attitude, specify_derivation, allow_multi, ma_restrict, mg_restrict, gen_restrict)
-boolean specify_attitude;
-boolean specify_derivation;
+unsigned long specify_attitude;		// -1 -> true; 0 -> false; >0 -> as given
+int specify_derivation;				// -1 -> true; 0 -> false; >0 -> as given
 boolean allow_multi;
 unsigned long ma_restrict;
 unsigned long mg_restrict;
@@ -2873,9 +2873,11 @@ unsigned short gen_restrict;
 	    getlin("Create what kind of monster? [type the name or symbol]",
 		   buf);
 	    bufp = mungspaces(buf);
-	    if (*bufp == '\033') return FALSE;
+	    if (*bufp == '\033') return (struct monst *)0;
 	    /* possibly allow the initial disposition to be specified */
-		if (specify_attitude){
+		switch (specify_attitude)
+		{
+		case -1:
 			if (!strncmpi(bufp, "tame ", 5)) {
 				bufp += 5;
 				maketame = TRUE;
@@ -2888,8 +2890,21 @@ unsigned short gen_restrict;
 				bufp += 8;
 				makehostile = TRUE;
 			}
+			break;
+		case MT_DOMESTIC:
+			maketame = TRUE;
+			break;
+		case MT_PEACEFUL:
+			makepeaceful = TRUE;
+			break;
+		case MT_HOSTILE:
+			makehostile = TRUE;
+			break;
 		}
-		if (specify_derivation){
+
+		switch (specify_derivation)
+		{
+		case -1:
 			if ((p = rindex(bufp, ' ')) != 0){
 				if (p > bufp && p[-1] == ' ') p[-1] = 0;
 				else *p = 0;
@@ -2908,6 +2923,13 @@ unsigned short gen_restrict;
 					p--[-1] = ' ';
 				}
 			}
+			break;
+		case ZOMBIFIED:
+		case SKELIFIED:
+		case CRYSTALFIED:
+		case FRACTURED:
+			undeadtype = specify_derivation;
+			break;
 		}
 
 		/* decide whether a valid monster was chosen */
@@ -2934,23 +2956,24 @@ unsigned short gen_restrict;
 		if (ma_restrict || mg_restrict || gen_restrict){
 			i = 0;
 			if (monclass != MAXMCLASSES)
-				while ((whichpm->mflagsa & ma_restrict ||
-						whichpm->mflagsg & mg_restrict ||
-						whichpm->geno & gen_restrict) && i < 100)
+				while (((whichpm->mflagsa & ma_restrict) ||
+						(whichpm->mflagsg & mg_restrict) ||
+						(whichpm->geno & gen_restrict)) && i < 100)
 					{
 					whichpm = mkclass(monclass, Inhell ? G_HELL : G_NOHELL);
 					i++;
 					}
 			else
 			{
-				if (whichpm->mflagsa & ma_restrict ||
-					whichpm->mflagsg & mg_restrict ||
-					whichpm->geno & gen_restrict)
+				if ((whichpm->mflagsa & ma_restrict) ||
+					(whichpm->mflagsg & mg_restrict) ||
+					(whichpm->geno & gen_restrict))
+				{
 					i = 100;
+				}
 			}
-
-			if (i = 100){
-				pline("That monster cannot be summoned.");
+			if (i == 100){
+				pline("That %s cannot be summoned.", (is_angel(whichpm) ? "being" : "monster"));
 				continue;	// try again
 			}
 		}
@@ -2982,7 +3005,7 @@ unsigned short gen_restrict;
 			if (!mtmp->mfaction && (
 				undeadtype == ZOMBIFIED ? can_undead_mon(mtmp) :
 				undeadtype == SKELIFIED ? can_undead_mon(mtmp) :
-				undeadtype == CRYSTALFIED ? (mtmp->data->geno & G_HELL) == 0 :
+				undeadtype == CRYSTALFIED ? TRUE :
 				undeadtype == FRACTURED ? is_kamerel(mtmp->data) : 0
 				))
 			{
@@ -2992,7 +3015,7 @@ unsigned short gen_restrict;
 		if (mtmp) madeany = TRUE;
 	    }
 	}
-	return madeany;
+	return mtmp;
 }
 #endif /* WIZARD */
 
