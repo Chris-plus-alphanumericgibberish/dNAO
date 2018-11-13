@@ -40,8 +40,8 @@ static struct trobj Archeologist[] = {
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Anachrononaut_Hu[] = {
-	{ ARM_BLASTER, 0, WEAPON_CLASS, 1, 0 },
 	{ FORCE_PIKE,  0, WEAPON_CLASS, 1, 0 },
+	{ ARM_BLASTER, 0, WEAPON_CLASS, 1, 0 },
 	{ HAND_BLASTER, 0, WEAPON_CLASS, 1, 0 },
 	{ PLASTEEL_ARMOR, 1, ARMOR_CLASS, 1, 0 },
 	{ BODYGLOVE, 0, ARMOR_CLASS, 1, 0 },
