@@ -4079,7 +4079,7 @@ struct obj *obj;
 		mongone(mtmp);
 		break;
 	case SUMMON_SERVANT:
-		mtmp = create_particular(MT_DOMESTIC, 0, FALSE, 0, MG_NOWISH, G_UNIQ);
+		mtmp = create_particular(MT_DOMESTIC, 0, FALSE, MA_MINION|MA_DEMON|MA_FEY|MA_PRIMORDIAL, MG_NOWISH|MG_NOTAME, G_UNIQ);
 		if (mtmp)
 			pline("The gate closes as %s passes through.", a_monnam(mtmp));
 		else

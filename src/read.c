@@ -2850,11 +2850,11 @@ boolean revival;
  * than a mimic; this behavior quirk is useful so don't "fix" it...
  */
 struct monst *
-create_particular(specify_attitude, specify_derivation, allow_multi, ma_restrict, mg_restrict, gen_restrict)
+create_particular(specify_attitude, specify_derivation, allow_multi, ma_require, mg_restrict, gen_restrict)
 unsigned long specify_attitude;		// -1 -> true; 0 -> false; >0 -> as given
 int specify_derivation;				// -1 -> true; 0 -> false; >0 -> as given
 boolean allow_multi;
-unsigned long ma_restrict;
+unsigned long ma_require;
 unsigned long mg_restrict;
 unsigned short gen_restrict;
 {
@@ -2862,7 +2862,7 @@ unsigned short gen_restrict;
 	int which, tries, i;
 	int undeadtype = 0;
 	struct permonst *whichpm;
-	struct monst *mtmp;
+	struct monst *mtmp = (struct monst *)0;
 	boolean madeany = FALSE;
 	boolean maketame, makepeaceful, makehostile;
 
@@ -2934,13 +2934,23 @@ unsigned short gen_restrict;
 
 		/* decide whether a valid monster was chosen */
 		if (strlen(bufp) == 1) {
+			monclass = MAXMCLASSES;
 			monclass = def_char_to_monclass(*bufp);
 			if (monclass == MAXMCLASSES)
 			{
 				pline("I've never heard of such monsters.");
 				continue;	//try again
 			}
-			whichpm = mkclass(monclass, Inhell ? G_HELL : G_NOHELL);
+			if (monclass == S_MIMIC_DEF && !(ma_require || mg_restrict || gen_restrict))	// bugfeature made feature
+			{
+				whichpm = mkclass(monclass, Inhell ? G_HELL : G_NOHELL);
+				goto createmon;	// skip past the section which needs whichpm to exist
+			}
+			if(!(whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES)))
+			{
+				pline("You ask too generally for creatures so uncommon.");
+				continue;
+			}
 		}
 		else {
 			which = name_to_mon(bufp);
@@ -2953,19 +2963,21 @@ unsigned short gen_restrict;
 			whichpm = &mons[which];
 		}
 		// validate that the creature falls within the restrictions placed on it
-		if (ma_restrict || mg_restrict || gen_restrict){
+		if (ma_require || mg_restrict || gen_restrict){
 			i = 0;
 			if (monclass != MAXMCLASSES)
-				while (((whichpm->mflagsa & ma_restrict) ||
+				while ((!(ma_require && (whichpm->mflagsa & ma_require)) ||
 						(whichpm->mflagsg & mg_restrict) ||
 						(whichpm->geno & gen_restrict)) && i < 100)
 					{
-					whichpm = mkclass(monclass, Inhell ? G_HELL : G_NOHELL);
-					i++;
+					if (whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES))
+						i++;
+					else
+						i = 100;
 					}
 			else
 			{
-				if ((whichpm->mflagsa & ma_restrict) ||
+				if (!(ma_require && (whichpm->mflagsa & ma_require)) ||
 					(whichpm->mflagsg & mg_restrict) ||
 					(whichpm->geno & gen_restrict))
 				{
@@ -2973,7 +2985,10 @@ unsigned short gen_restrict;
 				}
 			}
 			if (i == 100){
-				pline("That %s cannot be summoned.", (is_angel(whichpm) ? "being" : "monster"));
+				pline("%s %s%s cannot be summoned.",
+					(monclass == MAXMCLASSES) ? "That" : "Those",
+					(is_angel(whichpm)) ? "being" : "monster",
+					(monclass == MAXMCLASSES) ? "" : "s");
 				continue;	// try again
 			}
 		}
@@ -2984,9 +2999,10 @@ unsigned short gen_restrict;
 	if (tries == 5) {
 	    pline1(thats_enough_tries);
 	} else {
+createmon:
 	    for (i = 0; i <= (allow_multi ? multi : 0); i++) {
-		if (monclass != MAXMCLASSES && !(ma_restrict || mg_restrict || gen_restrict))
-		    whichpm = mkclass(monclass, Inhell ? G_HELL : G_NOHELL);
+		if (monclass != MAXMCLASSES && !(ma_require || mg_restrict || gen_restrict))
+			whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES);
 		if (maketame) {
 		    mtmp = makemon(whichpm, u.ux, u.uy, MM_EDOG);
 		    if (mtmp) {
