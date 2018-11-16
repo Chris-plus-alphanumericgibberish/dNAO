@@ -2764,6 +2764,7 @@ register struct trobj *trop;
 			else obj = mkobj(trop->trclass, FALSE);
 			otyp = obj->otyp;
 			while (otyp == WAN_WISHING
+				|| otyp == RIN_WISHES
 				|| otyp == nocreate
 				|| otyp == nocreate2
 				|| otyp == nocreate3
