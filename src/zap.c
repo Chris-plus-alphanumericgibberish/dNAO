@@ -1528,7 +1528,11 @@ poly_obj(obj, id)
 	switch (otmp->oclass) {
 
 	case TOOL_CLASS:
-	    if (otmp->otyp == MAGIC_LAMP) {
+		if (otmp->otyp == CANDLE_OF_INVOCATION) {
+		otmp->otyp = WAX_CANDLE;
+		otmp->age = 400L;
+		}
+	    else if (otmp->otyp == MAGIC_LAMP) {
 		otmp->otyp = OIL_LAMP;
 		otmp->age = 1500L;	/* "best" oil lamp possible */
 	    } else if (otmp->otyp == MAGIC_MARKER) {
@@ -1559,6 +1563,11 @@ poly_obj(obj, id)
 			otmp->otyp = SPE_BLANK_PAPER;
 	    else otmp->spestudied = obj->spestudied + 1;
 	    break;
+
+	case RING_CLASS:
+		while (otmp->otyp == RIN_WISHES)
+		otmp->otyp = rnd_class(RIN_WISHES, RIN_PROTECTION_FROM_SHAPE_CHAN);
+		break;
 
 	case GEM_CLASS:
 	    if (otmp->quan > (long) rnd(4) &&
