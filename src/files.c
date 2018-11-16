@@ -2397,7 +2397,8 @@ read_wizkit()
 		else *ep = '\0';		/* remove newline */
 
 		if (buf[0]) {
-			otmp = readobjnam(buf, (struct obj *)0, WISH_QUIET|WISH_WIZARD);
+			int temp = 0;
+			otmp = readobjnam(buf, &temp, WISH_QUIET|WISH_WIZARD);
 			if (otmp) {
 			    if (otmp != &zeroobj)
 				otmp = addinv(otmp);

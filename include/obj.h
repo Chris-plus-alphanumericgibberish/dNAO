@@ -270,9 +270,19 @@ struct obj {
 #define SPEC_DESTRUCTOR	0x0000080L
 #define SPEC_MARIONETTE	0x0000100L
 
-// flags for calling readobjnam()
+// flags for use with readobjnam()
 #define WISH_QUIET      0x0000001L
 #define WISH_WIZARD     0x0000002L
+#define WISH_VERBOSE	0x0000004L
+#define WISH_ARTALLOW	0x0000008L
+
+#define WISH_NOTHING	0x0000100L
+#define WISH_SUCCESS	0x0000200L
+#define WISH_FAILURE	0x0000400L
+#define WISH_DENIED		0x0000800L
+
+
+
 
 #define newobj(xl)	(struct obj *)alloc((unsigned)(xl) + sizeof(struct obj))
 #define ONAME(otmp)	(((char *)(otmp)->oextra) + (otmp)->oxlth)

@@ -3935,7 +3935,7 @@ struct obj *obj;
 				pline("%s speaks.", Something);
 			}
 			verbalize("You have summoned me.  I will grant one wish!");
-			makewish(0);
+			makewish(allow_artwish()|WISH_VERBOSE);
 			mongone(mtmp);
 			obj->spe--;
 			madewish = TRUE;
@@ -4075,7 +4075,7 @@ struct obj *obj;
 			pline("%s speaks.", Something);
 		}
 		verbalize("You have summoned me.  I will grant one wish!");
-		makewish(0);
+		makewish(allow_artwish()|WISH_VERBOSE);
 		mongone(mtmp);
 		break;
 	case SUMMON_SERVANT:
