@@ -2858,13 +2858,13 @@ register struct monst *mtmp;
 					otmp->oproperties = OPROP_AXIOW|OPROP_LESSW;
 					switch(u.oonaenergy){
 						case AD_COLD:
-							otmp->oproperties |= OPROP_ELECW; //superconducting?
+							otmp->oproperties |= OPROP_FIREW;
 						break;
 						case AD_FIRE:
-							otmp->oproperties |= OPROP_COLDW;
+							otmp->oproperties |= OPROP_ELECW;
 						break;
 						case AD_ELEC:
-							otmp->oproperties |= OPROP_FIREW;
+							otmp->oproperties |= OPROP_COLDW;
 						break;
 					}
 					otmp->obj_material = METAL;
@@ -6411,7 +6411,7 @@ struct permonst *mptr;		/* usually null; used for confused reading */
 	while (cnt--) {
 #ifdef WIZARD
 	    if (ask) {
-		if (create_particular()) {
+		if (create_particular(-1, -1, TRUE, 0, 0, 0)) {
 		    known = TRUE;
 		    continue;
 		}
