@@ -455,23 +455,25 @@ boolean phasing;
 #define ATTK_NABERIUS	3
 #define ATTK_OTIAX		4
 #define ATTK_SIMURGH	5
-#define ATTK_MISKA_ARMS	6
+#define ATTK_MISKA_ARM	6
 #define ATTK_MISKA_WOLF	7
-#define SPIRIT_NATTKS	(8+7+5+1)
-//+7 for up to seven extra iris attacks, +1 for second wolf head
+#define SPIRIT_NATTKS	(8+7+5+2)
+//+7 for up to seven extra iris attacks, +2 for second wolf head and second arm
 /**/
 static struct attack spiritattack[] = 
 {
-	{AT_BUTT,AD_PHYS,1,8},
+	{AT_BUTT,AD_PHYS,1,9},
 	{AT_BITE,AD_DRST,2,4},
 	{AT_TENT,AD_IRIS,1,4},
 	{AT_BITE,AD_NABERIUS,1,6},
 	{AT_WISP,AD_OTIAX,1,5},
 	{AT_CLAW,AD_SIMURGH,1,6},
-	{AT_WEAP, AD_PHYS, 2, 8},
+	{AT_MARI, AD_PHYS, 1, 8},
 	{AT_BITE, AD_DRST, 2, 4}
 };
 struct attack curspiritattacks[SPIRIT_NATTKS];
+int mari;
+
 /* try to attack; return FALSE if monster evaded */
 /* u.dx and u.dy must be set */
 boolean
@@ -482,7 +484,10 @@ register struct monst *mtmp;
 	boolean keepattacking;
 	register struct permonst *mdat = mtmp->data;
 	int x = mtmp->mx, y = mtmp->my, attacklimit, attacksmade;
-
+	
+	//Reset multi-arm count to zero
+	mari = 0;
+	
 	/*
 	 * Since some characters attack multiple times in one turn,
 	 * allow user to specify a count prefix for 'F' to limit
@@ -704,7 +709,10 @@ register struct monst *mtmp;
 		static int nspiritattacks;
 		nspiritattacks = 0;
 		if(u.specialSealsActive&SEAL_MISKA){
-			if(u.ulevel >= 26) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_MISKA_ARMS];
+			if(u.ulevel >= 26){
+				curspiritattacks[nspiritattacks++] = spiritattack[ATTK_MISKA_ARM];
+				curspiritattacks[nspiritattacks++] = spiritattack[ATTK_MISKA_ARM];
+			}
 			if(u.ulevel >= 18) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_MISKA_WOLF];
 			if(u.ulevel >= 10) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_MISKA_WOLF];
 		}
@@ -719,12 +727,10 @@ register struct monst *mtmp;
 			}
 		}
 		if(youracedata == &mons[PM_MARILITH]){
-				curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
-				curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
-				if(u.twoweap || (uwep && bimanual(uwep,youracedata))){
-					curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
-					curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
-				}
+			curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+			curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+			curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
+			curspiritattacks[nspiritattacks++] = spiritattack[ATTK_IRIS];
 		}
 		if(u.sealsActive&SEAL_NABERIUS) curspiritattacks[nspiritattacks++] = spiritattack[ATTK_NABERIUS];
 		if(u.sealsActive&SEAL_OTIAX){
@@ -839,7 +845,9 @@ struct attack *uattk;
 	    if (malive) {
 		/* monster still alive */
 		if(((!rn2(25) && mon->mhp < mon->mhpmax/2) || mon->data == &mons[PM_QUIVERING_BLOB])
-			    && !(u.uswallow && mon == u.ustuck)) {
+			    && !(u.uswallow && mon == u.ustuck)
+			    && !mindless_mon(mon)
+		) {
 		    /* maybe should regurgitate if swallowed? */
 		    if(!rn2(3)) {
 			monflee(mon, rnd(100), FALSE, TRUE);
@@ -859,6 +867,76 @@ struct attack *uattk;
 		}
 		if (mon->wormno && *mhit)
 		    cutworm(mon, x, y, uwep);
+	    }
+	}
+	return(malive);
+}
+
+STATIC_OVL boolean
+known_hitum_wepi(mon, mhit, uattk, i)	/* returns TRUE if monster still lives */
+register struct monst *mon;
+register int *mhit;
+struct attack *uattk;
+int i;
+{
+	register boolean malive = TRUE;
+
+	if (override_confirmation) {
+	    /* this may need to be generalized if weapons other than
+	       Stormbringer acquire similar anti-social behavior... */
+	    if (flags.verbose) Your("bloodthirsty weapon attacks!");
+	}
+
+	if(!*mhit) {
+	    missum(mon, uattk);
+	} else {
+	    int oldhp = mon->mhp, count=0,
+		x = u.ux + u.dx, y = u.uy + u.dy;
+		struct obj *marweap = 0;
+		
+		for(marweap = invent; marweap; marweap = marweap->nobj){
+			if(((marweap->oclass == WEAPON_CLASS || is_weptool(marweap)) && !bimanual(marweap,youracedata)) 
+				&& (marweap != uwep) && (marweap != uswapwep || !u.twoweap)
+			) count++;
+			if(count == i)
+				break;
+		}
+		
+	    /* KMH, conduct */
+	    if (marweap && (marweap->oclass == WEAPON_CLASS || is_weptool(marweap)))
+			u.uconduct.weaphit++;
+
+	    /* we hit the monster; be careful: it might die or
+	       be knocked into a different location */
+	    notonhead = (mon->mx != x || mon->my != y);
+	    malive = hmon(mon, marweap, 0);
+	    if (malive) {
+		/* monster still alive */
+		if(((!rn2(25) && mon->mhp < mon->mhpmax/2) || mon->data == &mons[PM_QUIVERING_BLOB])
+			    && !(u.uswallow && mon == u.ustuck)
+			    && !mindless_mon(mon)
+		) {
+		    /* maybe should regurgitate if swallowed? */
+		    if(!rn2(3)) {
+			monflee(mon, rnd(100), FALSE, TRUE);
+		    } else monflee(mon, 0, FALSE, TRUE);
+
+		    if(u.ustuck == mon && !u.uswallow && !sticks(youracedata))
+			u.ustuck = 0;
+		}
+		/* Vorpal Blade hit converted to miss */
+		/* could be headless monster or worm tail */
+		if (mon->mhp == oldhp) {
+		    *mhit = 0;
+		    /* a miss does not break conduct */
+		    if (marweap &&
+			(marweap->oclass == WEAPON_CLASS || is_weptool(marweap)))
+			--u.uconduct.weaphit;
+		} else {
+			if((oldhp - mon->mhp) > 1) use_skill(weapon_type(marweap),1);
+		}
+		if (mon->wormno && *mhit)
+		    cutworm(mon, x, y, marweap);
 	    }
 	}
 	return(malive);
@@ -3481,7 +3559,7 @@ register struct attack *mattk;
 					shieldeff(mdef->mx, mdef->my);
 					break;
 				}
-				pline("%s shrivels at the touch of your irridescent tentacles!", Monnam(mdef));
+				pline("%s shrivels at the touch of your iridescent tentacles!", Monnam(mdef));
 				tmp2 = tmp+d(5,spiritDsize());
 				tmp = min(tmp2,mdef->mhp);
 				healup(tmp, 0, FALSE, FALSE);
@@ -4117,8 +4195,33 @@ use_weapon:
 				/* might be a worm that gets cut in half */
 			}
 		break;
+		case AT_MARI:{
+		mari++;
+		dhit = (weptmp > (dieroll = rnd(20)) || u.uswallow);
+		/* Enemy dead, before any special abilities used */
+		if (!known_hitum_wepi(mon,&dhit,mattk,mari)) {
+			    sum[i] = 2;
+		} else {
+				sum[i] = dhit;
+			/* might be a worm that gets cut in half */
+			if (m_at(u.ux+u.dx, u.uy+u.dy) != mon) return((boolean)(nsum != 0));
+			/* Do not print "You hit" message, since known_hitum
+			 * already did it.
+			 */
+			if (dhit && mattk->adtyp != AD_SPEL
+				&& mattk->adtyp != AD_PHYS)
+				sum[i] = damageum(mon,mattk);
+		}
+		if(u.sealsActive&SEAL_MARIONETTE && uwep && mattk->adtyp == AD_PHYS){
+			struct monst *m2 = m_at(mon->mx+u.dx,mon->my+u.dy);
+			if(!m2 || DEADMONSTER(m2) || m2==mon) break;
+			dhit = (weptmp > (dieroll = rnd(20)) || u.uswallow);
+			/* Enemy dead, before any special abilities used */
+			known_hitum_wepi(m2,&dhit,mattk,mari);
+			/* might be a worm that gets cut in half */
+		}
+		}break;
 		case AT_CLAW:
-		case AT_MARI: /*Note: Player mariliths can't use extra weapons at the moment */
 		case AT_LRCH: /*Note: long reach attacks are being treated as melee only for polymorph purposes*/
 			if (i==0 && uwep && !cantwield(mas)) goto use_weapon;
 #ifdef SEDUCE
@@ -4381,6 +4484,32 @@ use_weapon:
 			/* might be a worm that gets cut in half */
 		}
 	break;
+	case AT_MARI:{
+	mari++;
+	dhit = (weptmp > (dieroll = rnd(20)) || u.uswallow);
+	/* Enemy dead, before any special abilities used */
+	if (!known_hitum_wepi(mon,&dhit,mattk,mari)) {
+			sum[i] = 2;
+	} else {
+			sum[i] = dhit;
+		/* might be a worm that gets cut in half */
+		if (m_at(u.ux+u.dx, u.uy+u.dy) != mon) return((boolean)(nsum != 0));
+		/* Do not print "You hit" message, since known_hitum
+		 * already did it.
+		 */
+		if (dhit && mattk->adtyp != AD_SPEL
+			&& mattk->adtyp != AD_PHYS)
+			sum[i] = damageum(mon,mattk);
+	}
+	if(u.sealsActive&SEAL_MARIONETTE && uwep && mattk->adtyp == AD_PHYS){
+		struct monst *m2 = m_at(mon->mx+u.dx,mon->my+u.dy);
+		if(!m2 || DEADMONSTER(m2) || m2==mon) break;
+		dhit = (weptmp > (dieroll = rnd(20)) || u.uswallow);
+		/* Enemy dead, before any special abilities used */
+		known_hitum_wepi(m2,&dhit,mattk,mari);
+		/* might be a worm that gets cut in half */
+	}
+	}break;
 	case AT_CLAW:
 	case AT_LRCH: /*Note: long reach attacks are being treated as melee only for polymorph purposes*/
 		// if (i==0 && uwep && !cantwield(youracedata)) goto use_weapon;
