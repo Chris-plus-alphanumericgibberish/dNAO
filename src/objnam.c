@@ -2303,7 +2303,7 @@ STATIC_DCL const struct o_range o_ranges[];
 STATIC_OVL NEARDATA const struct o_range o_ranges[] = {
 	{ "bag",	TOOL_CLASS,   SACK,	      BAG_OF_TRICKS },
 	{ "lamp",	TOOL_CLASS,   OIL_LAMP,	      MAGIC_LAMP },
-	{ "candle",	TOOL_CLASS,   TALLOW_CANDLE,  CANDLE_OF_INVOCATION },
+	{ "candle",	TOOL_CLASS,   TALLOW_CANDLE,  WAX_CANDLE },
 	{ "horn",	TOOL_CLASS,   TOOLED_HORN,    HORN_OF_PLENTY },
 	{ "shield",	ARMOR_CLASS,  BUCKLER,   SHIELD_OF_REFLECTION },
 	{ "helm",	ARMOR_CLASS,  LEATHER_HELM, HELM_OF_TELEPATHY },
