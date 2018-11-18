@@ -257,6 +257,14 @@ doread()
         You("study the pages of %s, but you already can recognize that.", xname(scroll));
       }
       return 1;
+	} else if(scroll->otyp == CANDLE_OF_INVOCATION ){
+		if (Blind) {
+			You_cant("see the candle!");
+			return 0;
+		} else {
+			pline("The candel is carved with many pictograms, including %s", fetchHaluWard(FIRST_PLANE_SYMBOL+rn2(LAST_PLANE_SYMBOL-FIRST_PLANE_SYMBOL+1)));
+		}
+		return(1);
 	} else if(scroll->oclass == WEAPON_CLASS && (scroll)->obj_material == WOOD && scroll->oward != 0){
 		pline("A %s is carved into the wood.",wardDecode[decode_wardID(scroll->oward)]);
 		if(! (u.wardsknown & scroll->oward) ){

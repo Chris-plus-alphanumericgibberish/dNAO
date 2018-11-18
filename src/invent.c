@@ -1216,6 +1216,11 @@ register const char *let,*word;
 			bp[foo++] = otmp->invlet;
 			allowall = TRUE;
 		}
+		//Make exceptions for runed candles
+		if(otmp->otyp == CANDLE_OF_INVOCATION && !strcmp(word, "read")){
+			bp[foo++] = otmp->invlet;
+			allowall = TRUE;
+		}
 
 	    if(ilet == 'z') ilet = 'A'; else ilet++;
 	}
