@@ -668,7 +668,7 @@ boolean allowmsg;
 			change_luck(-rn1(4,2));		/* -5..-2 */
 		} else if (Role_if(PM_CAVEMAN)) {
 			adjalign(sgn(u.ualign.type));
-			You("honour the dead.");
+			You("honor the dead.");
 		} else {
 			adjalign(-sgn(u.ualign.type));
 			You_feel("evil and fiendish!");
