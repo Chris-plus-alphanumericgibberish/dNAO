@@ -496,6 +496,7 @@ qt_montype()
 			break;
 		}
 	} else if(Role_if(PM_CAVEMAN)){
+		//Very placeholdery
 		switch(rnd(12)){
 			case 1:
 				return &mons[PM_SABER_TOOTHED_CAT];
