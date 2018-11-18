@@ -885,6 +885,7 @@ struct monst *magr;
 		//Note: Bias this somehow?
 		switch(rn2(5)){
 			case 0:
+uppertorso:
 				//Note: upper body (shirt plus torso armor)
 				if (uarmu){
 					if(uarmu->otyp != BODYGLOVE)	armac += arm_dr_bonus(uarmu);
@@ -894,6 +895,7 @@ struct monst *magr;
 					}
 				}
 			case 1:
+lowertorso:
 				//Note: lower body (torso armor only)
 				if (uarm){
 					if(uarm->otyp != JUMPSUIT)
@@ -907,6 +909,7 @@ struct monst *magr;
 				}
 			break;
 			case 2:
+				if(!has_head(mon->data)) goto uppertorso;
 				if (uarmh){
 					armac += arm_dr_bonus(uarmh);
 					if(magr && is_harmonium_armor(uarmh)){
@@ -916,6 +919,7 @@ struct monst *magr;
 				}
 			break;
 			case 3:
+				if(!can_wear_boots(mon->data)) goto lowertorso;
 				if (uarmf){
 					armac += arm_dr_bonus(uarmf);
 					if(magr && is_harmonium_armor(uarmf)){
@@ -927,6 +931,7 @@ struct monst *magr;
 				}
 			break;
 			case 4:
+				if(!can_wear_gloves(mon->data)) goto uppertorso;
 				if (uarmg){
 					armac += arm_dr_bonus(uarmg);
 					if(magr && is_harmonium_armor(uarmg)){
@@ -961,6 +966,7 @@ struct monst *magr;
 		//Note: Bias this somehow?
 		switch(rn2(5)){
 			case 0:
+mon_uppertorso:
 				//Note: upper body (shirt plus torso armor)
 				if (which_armor(mon, W_ARMU)){
 					curarm = which_armor(mon, W_ARMU);
@@ -971,6 +977,7 @@ struct monst *magr;
 					}
 				}
 			case 1:
+mon_lowertorso:
 				//Note: lower body (torso armor only)
 				if (which_armor(mon, W_ARM)){
 					curarm = which_armor(mon, W_ARM);
@@ -985,6 +992,7 @@ struct monst *magr;
 				}
 			break;
 			case 2:
+				if(!has_head(mon->data)) goto mon_uppertorso;
 				if (which_armor(mon, W_ARMH)){
 					curarm = which_armor(mon, W_ARMH);
 					armac += arm_dr_bonus(curarm);
@@ -995,6 +1003,7 @@ struct monst *magr;
 				}
 			break;
 			case 3:
+				if(!can_wear_boots(mon->data)) goto mon_lowertorso;
 				if (which_armor(mon, W_ARMF)){
 					curarm = which_armor(mon, W_ARMF);
 					armac += arm_dr_bonus(curarm);
@@ -1007,6 +1016,7 @@ struct monst *magr;
 				}
 			break;
 			case 4:
+				if(!can_wear_gloves(mon->data)) goto mon_uppertorso;
 				if (which_armor(mon, W_ARMG)){
 					curarm = which_armor(mon, W_ARMG);
 					armac += arm_dr_bonus(curarm);
