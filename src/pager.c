@@ -1431,6 +1431,7 @@ generate_list_of_resistances(struct monst * mtmp, char * temp_buf, int resists)
 	many = append(temp_buf, (mr_flags & MR_STONE), "petrification", many);
 	many = append(temp_buf, (mr_flags & MR_DRAIN), "level drain", many);
 	many = append(temp_buf, (mr_flags & MR_SICK), "sickness", many);
+	many = append(temp_buf, (mr_flags & MR_MAGIC), "magic", many);
 	many = append(temp_buf, (((mg_flags & MG_WRESIST) != 0L) && resists == 1), "weapon attacks", many);
 	many = append(temp_buf, (((mg_flags & MG_RBLUNT ) != 0L) && resists == 1), "blunt", many);
 	many = append(temp_buf, (((mg_flags & MG_RSLASH ) != 0L) && resists == 1), "slashing", many);
@@ -1479,6 +1480,10 @@ get_resistance_description_of_monster_type(struct monst * mtmp, char * descripti
 	char temp_buf[BUFSZ] = "";
 	temp_buf[0] = '\0';
 	int count = generate_list_of_resistances(mtmp, temp_buf, 1);
+
+	if (species_reflects(mtmp))
+		strcat(description, "Reflects. ");
+
 	if (count == 0) {
 		strcat(description, "No resistances.");
 	}
