@@ -285,7 +285,7 @@ MONSTER: 'q', "titanothere", random, hostile
 MONSTER: 'q', "titanothere", random, hostile
 MONSTER: 'q', "titanothere", random, hostile
 MONSTER: 'q', "titanothere", random, hostile
-MONSTER: 'h', "mastodon", random, hostile
+MONSTER: 'q', "mastodon", random, hostile
 MONSTER: 'f', "saber-toothed cat", random, hostile
 
 MAZE: "Cav-filb" , ' '
