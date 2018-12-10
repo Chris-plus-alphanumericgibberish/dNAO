@@ -1245,10 +1245,10 @@ plus:
 		}
 //#endif	/* FIREARMS */
 		if(obj->otyp == RAYGUN){
-			if(obj->altmode == ZT_SLEEP) Strcat(bp, " (stun)");
-			else if(obj->altmode == ZT_FIRE) Strcat(bp, " (heat)");
-			else if(obj->altmode == ZT_DEATH) Strcat(bp, " (kill)");
-			else if(obj->altmode == ZT_LIGHTNING) Strcat(bp, " (disintegrate)");
+			if(obj->altmode == AD_SLEE) Strcat(bp, " (stun)");
+			else if(obj->altmode == AD_FIRE) Strcat(bp, " (heat)");
+			else if(obj->altmode == AD_DEAD) Strcat(bp, " (kill)");
+			else if(obj->altmode == AD_DISN) Strcat(bp, " (disintegrate)");
 		} else if(obj->otyp == ARM_BLASTER ||
 				  obj->otyp == ASSAULT_RIFLE ||
 				  obj->otyp == BFG ||

@@ -762,8 +762,8 @@ E long FDECL(rndexp, (BOOLEAN_P));
 
 /* ### explode.c ### */
 
-E void FDECL(explode, (int,int,int,int,CHAR_P,int,int));
-E void FDECL(splash, (int,int,int,int,int,int,CHAR_P,int));
+E void FDECL(explode, (int,int,int,int,int,int,int));
+E void FDECL(splash, (int,int,int,int,int,int,int,int));
 E long FDECL(scatter, (int, int, int, unsigned int, struct obj *));
 E void FDECL(splatter_burning_oil, (int, int));
 //#ifdef FIREARMS
@@ -2340,6 +2340,8 @@ E int NDECL(docast);
 E boolean FDECL(tt_findadjacent, (coord *, struct monst *));
 E int NDECL(spiritDsize);
 E int NDECL(dospirit);
+E int FDECL(spell_skill_from_adtype, (int));
+E int FDECL(spell_adtype, (int));
 E int FDECL(spell_skilltype, (int));
 E int FDECL(spiriteffects, (int,BOOLEAN_P));
 E int FDECL(spelleffects, (int,BOOLEAN_P,int));
@@ -2845,6 +2847,9 @@ E int FDECL(dowrite, (struct obj *));
 
 /* ### zap.c ### */
 
+E char * FDECL(flash_type, (int,int));
+E int FDECL(zap_glyph_color, (int));
+E int FDECL(wand_adtype, (int));
 E int FDECL(zap_hit, (struct monst *,int, BOOLEAN_P));
 E int FDECL(bhitm, (struct monst *,struct obj *));
 E void FDECL(probe_monster, (struct monst *));
@@ -2878,9 +2883,9 @@ E struct monst *FDECL(bhit, (int,int,int,int,int (*)(MONST_P,OBJ_P),
 			     int (*)(OBJ_P,OBJ_P),struct obj *, boolean *));
 E struct monst *FDECL(boomhit, (struct obj *,int,int));
 E int FDECL(burn_floor_paper, (int,int,BOOLEAN_P,BOOLEAN_P));
-E void FDECL(buzz, (int,int,XCHAR_P,XCHAR_P,int,int,int,int));
+E void FDECL(buzz, (int,int,boolean,int,XCHAR_P,XCHAR_P,int,int,int,int));
 E void FDECL(melt_ice, (XCHAR_P,XCHAR_P));
-E int FDECL(zap_over_floor, (XCHAR_P,XCHAR_P,int,boolean *));
+E int FDECL(zap_over_floor, (XCHAR_P,XCHAR_P,int,int,boolean,boolean *));
 E void FDECL(fracture_rock, (struct obj *));
 E boolean FDECL(break_statue, (struct obj *));
 E boolean FDECL(break_crate, (struct obj *));

@@ -1945,6 +1945,7 @@ get_description_of_damage_type(uchar id)
 	case AD_NPDC: return "drains constitution";
 	case AD_GLSS: return "silver mirror shards";
 	case AD_MERC: return "mercury blade";
+	case AD_GOLD: return "turns victim to gold";
 	case AD_DUNSTAN: return "stones throw themselves at target";
 	case AD_IRIS: return "iridescent tentacles";
 	case AD_NABERIUS: return "tarnished bloody fangs";

@@ -1415,7 +1415,7 @@ struct monst *mtmp;
 		otmp->spe--;
 		if (oseen) makeknown(otmp->otyp);
 		m_using = TRUE;
-		buzz((int)(-30 - (otmp->otyp - WAN_MAGIC_MISSILE)),
+		buzz(wand_adtype(otmp->otyp), WAND_CLASS, FALSE,
 			(otmp->otyp == WAN_MAGIC_MISSILE) ? 2 : 6,
 			mtmp->mx, mtmp->my,
 			sgn(tbx), sgn(tby),0,0);
@@ -1433,7 +1433,7 @@ struct monst *mtmp;
 			You_hear("a horn being played.");
 		otmp->spe--;
 		m_using = TRUE;
-		buzz(-30 - ((otmp->otyp==FROST_HORN) ? AD_COLD-1 : AD_FIRE-1),
+		buzz(((otmp->otyp==FROST_HORN) ? AD_COLD : AD_FIRE), WAND_CLASS, FALSE,
 			rn1(6,6), mtmp->mx, mtmp->my,
 			sgn(tbx), sgn(tby),0,0);
 		m_using = FALSE;

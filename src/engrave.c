@@ -2194,7 +2194,7 @@ doengrave()
 		    else
 			Your("%s too dull for engraving.", aobjnam(otmp,"are"));
 		} else if(otmp->otyp == RAYGUN){
-			if(otmp->altmode == ZT_LIGHTNING && otmp->ovar1 >= 15){
+			if(otmp->altmode == AD_DISN && otmp->ovar1 >= 15){
 				otmp->ovar1 -= 15;
 				if (dighole(FALSE)){
 					Your("raygun disintegrated the floor!");
@@ -2213,7 +2213,7 @@ doengrave()
 						doblind = TRUE;
 					}
 				}
-			} else if(otmp->altmode == ZT_DEATH && otmp->ovar1 >= 10){
+			} else if(otmp->altmode == AD_DEAD && otmp->ovar1 >= 10){
 				otmp->ovar1 -= 10;
 				ptext = TRUE;
 				if (!Blind) {
@@ -2221,7 +2221,7 @@ doengrave()
 					   "The bugs on the %s stop moving!",
 					   surface(u.ux, u.uy));
 				}
-			} else if(otmp->altmode == ZT_FIRE && otmp->ovar1 >= 2){
+			} else if(otmp->altmode == AD_FIRE && otmp->ovar1 >= 2){
 				otmp->ovar1 -= 2;
 				ptext = TRUE;
 				type  = BURN;
@@ -2995,7 +2995,7 @@ doward()
 		    else
 			Your("%s too dull for drawing.", aobjnam(otmp,"are"));
 		} else if(otmp->otyp == RAYGUN){
-			if(otmp->altmode == ZT_LIGHTNING && otmp->ovar1 >= 15){
+			if(otmp->altmode == AD_DISN && otmp->ovar1 >= 15){
 				otmp->ovar1 -= 15;
 				if (dighole(FALSE)){
 					Your("raygun disintegrated the floor!");
@@ -3014,7 +3014,7 @@ doward()
 						doblind = TRUE;
 					}
 				}
-			} else if(otmp->altmode == ZT_DEATH && otmp->ovar1 >= 10){
+			} else if(otmp->altmode == AD_DEAD && otmp->ovar1 >= 10){
 				otmp->ovar1 -= 10;
 				ptext = TRUE;
 				if (!Blind) {
@@ -3022,7 +3022,7 @@ doward()
 					   "The bugs on the %s stop moving!",
 					   surface(u.ux, u.uy));
 				}
-			} else if(otmp->altmode == ZT_FIRE && otmp->ovar1 >= 2){
+			} else if(otmp->altmode == AD_FIRE && otmp->ovar1 >= 2){
 				otmp->ovar1 -= 2;
 				ptext = TRUE;
 				type  = BURN;
@@ -4377,7 +4377,7 @@ doseal()
 		    else
 			Your("%s too dull for drawing.", aobjnam(otmp,"are"));
 		} else if(otmp->otyp == RAYGUN){
-			if(otmp->altmode == ZT_LIGHTNING && otmp->ovar1 >= 15){
+			if(otmp->altmode == AD_DISN && otmp->ovar1 >= 15){
 				otmp->ovar1 -= 15;
 				if (dighole(FALSE)){
 					Your("raygun disintegrated the floor!");
@@ -4396,7 +4396,7 @@ doseal()
 						doblind = TRUE;
 					}
 				}
-			} else if(otmp->altmode == ZT_DEATH && otmp->ovar1 >= 10){
+			} else if(otmp->altmode == AD_DEAD && otmp->ovar1 >= 10){
 				otmp->ovar1 -= 10;
 				ptext = TRUE;
 				if (!Blind) {
@@ -4404,7 +4404,7 @@ doseal()
 					   "The bugs on the %s stop moving!",
 					   surface(u.ux, u.uy));
 				}
-			} else if(otmp->altmode == ZT_FIRE && otmp->ovar1 >= 2){
+			} else if(otmp->altmode == AD_FIRE && otmp->ovar1 >= 2){
 				otmp->ovar1 -= 2;
 				ptext = TRUE;
 				type  = BURN;
