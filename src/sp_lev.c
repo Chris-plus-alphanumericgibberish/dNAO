@@ -56,8 +56,8 @@ STATIC_DCL boolean FDECL(create_subroom, (struct mkroom *, XCHAR_P, XCHAR_P,
 
 #define sq(x) ((x)*(x))
 
-#define XLIM	4
-#define YLIM	3
+#define XLIM	0
+#define YLIM	0
 
 #define Fread	(void)dlb_fread
 #define Fgetc	(schar)dlb_fgetc
@@ -419,38 +419,39 @@ xchar	rtype, rlit;
 			lx = r1->lx;
 			ly = r1->ly;
 			if (vault)
-			    dx = dy = 1;
+			    dx = dy = 1;							// vaults are always a 2x2 interior
 			else {
-				dx = 2 + rn2((hx-lx > 28) ? 12 : 8);
-				dy = 2 + rn2(4);
+				dx = 2 + rn2((hx-lx > 28) ? 12 : 8);	// width of the room interior -1
+				dy = 2 + rn2(4);						// height o the room interior -1
 				if(dx*dy > 50)
-				    dy = 50/dx;
+				    dy = 50/dx;							// very wide rooms cannot also be super tall
 			}
-			xborder = (lx > 0 && hx < COLNO -1) ? 2*xlim : xlim+1;
-			yborder = (ly > 0 && hy < ROWNO -1) ? 2*ylim : ylim+1;
-			if(hx-lx < dx + 3 + xborder ||
-			   hy-ly < dy + 3 + yborder) {
+			xborder = (lx > 0 && hx < COLNO -1) ? 2*xlim : xlim+1;	// xlim = 4 by default; COLNO = 80 by default; xborder is larger (8 vs 5) if the rndrect isn't the full screen
+			yborder = (ly > 0 && hy < ROWNO -1) ? 2*ylim : ylim+1;	// ylim = 3 by default; ROWNO = 21 by default; yborder is larger (6 vs 4) if the rndrect isn't the full screen
+			if(hx-lx < dx + 3 + xborder ||	// if the width of the rndrect is smaller than [11-21] (depending on room size)
+			   hy-ly < dy + 3 + yborder) {	// or the height o the rndrect is smaller than [ 9-14] (depending on room size)
 				r1 = 0;
-				continue;
+				continue;					// then room creation fails
 			}
-			xabs = lx + (lx > 0 ? xlim : 3)
-			    + rn2(hx - (lx>0?lx : 3) - dx - xborder + 1);
-			yabs = ly + (ly > 0 ? ylim : 2)
-			    + rn2(hy - (ly>0?ly : 2) - dy - yborder + 1);
-			if (ly == 0 && hy >= (ROWNO-1) &&
-			    (!nroom || !rn2(nroom)) && (yabs+dy > ROWNO/2)) {
-			    yabs = rn1(3, 2);
-			    if(nroom < 4 && dy>1) dy--;
+			xabs = lx + (lx > 0 ? xlim : 3)						// place the top-left corner of the room at:
+			    + rn2(hx - (lx>0?lx : 3) - dx - xborder + 1);	// lower bound + small increment + rn2(upper bound - small decrement - room width - border + off-by-one-corrector)
+			yabs = ly + (ly > 0 ? ylim : 2)						// 
+			    + rn2(hy - (ly>0?ly : 2) - dy - yborder + 1);	// 
+			if (ly == 0 && hy >= (ROWNO-1) &&						// if the rndrect stretches from top-to-bottom
+			    (!nroom || !rn2(nroom)) && (yabs+dy > ROWNO/2)) {	// and it's one of the first rooms, and it would stretch into the bottom half of the screen
+			    yabs = rn1(3, 2);									// then move it to the top of the screen
+				if (nroom < 4 && dy>1)								// and maybe make it less tall
+					dy--;
 		        }
-			if (!check_room(&xabs, &dx, &yabs, &dy, vault)) {
+			if (!check_room(&xabs, &dx, &yabs, &dy, vault)) {	// check to make sure the room is in an okay spot
 				r1 = 0;
 				continue;
 			}
-			wtmp = dx+1;
-			htmp = dy+1;
-			r2.lx = xabs-1; r2.ly = yabs-1;
-			r2.hx = xabs + wtmp;
-			r2.hy = yabs + htmp;
+			wtmp = dx+1;						// increase width by 1
+			htmp = dy+1;						// increase height by 1
+			r2.lx = xabs-1; r2.ly = yabs-1;		// set the top-left corner of the room to be @ (xabs-1 ,yabs-1)
+			r2.hx = xabs + wtmp;				// set the bottom-right corner's x position
+			r2.hy = yabs + htmp;				// set the bottom-right corner's y position
 		} else {	/* Only some parameters are random */
 			int rndpos = 0;
 			if (xtmp < 0 && ytmp < 0) { /* Position is RANDOM */

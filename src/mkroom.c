@@ -3781,11 +3781,11 @@ gottype:
 		if(sroom->rtype != OROOM) continue;
 		if(has_dnstairs(sroom) || has_upstairs(sroom))
 			continue;
-		if(
+		if (sroom->rtype != JOINEDROOM && (
 #ifdef WIZARD
 		   (wizard && ep && sroom->doorct != 0) ||
 #endif
-			sroom->doorct == 1) break;
+			sroom->doorct == 1)) break;
 	}
 	if (!sroom->rlit) {
 		int x, y;
@@ -3825,7 +3825,7 @@ gottype:
 struct mkroom *
 pick_room(strict)
 register boolean strict;
-/* pick an unused room, preferably with only one door */
+/* pick an unused room, preferably with few doors */
 {
 	register struct mkroom *sroom;
 	register int i = nroom;
@@ -3841,7 +3841,7 @@ register boolean strict;
 			continue;
 		} else if(has_upstairs(sroom) || has_dnstairs(sroom))
 			continue;
-		if(sroom->doorct == 1 || !rn2(5)
+		if(sroom->doorct == 1 || !rn2(sroom->doorct)
 #ifdef WIZARD
 						|| wizard
 #endif

@@ -234,7 +234,7 @@ makerooms()
 	/* rnd_rect() will returns 0 if no more rects are available... */
 	wantanmivault = !rn2(8);
 	wantasepulcher = (depth(&u.uz) > 12 && !rn2(8));
-	while(nroom < MAXNROFROOMS && rnd_rect()) {
+	while(nroom < MAXNROFROOMS && rnd_rect() && (nroom<6 || rn2(12-nroom))) {
 		if(nroom >= (MAXNROFROOMS/6) && rn2(2) && !tried_vault && !wantanmivault && !wantasepulcher) {
 			tried_vault = TRUE;
 			if (create_vault()) {
@@ -301,6 +301,35 @@ boolean nxcor;
 	ty = tt.y - dy;
 	if(nxcor && levl[xx+dx][yy+dy].typ)
 		return;
+	if (IS_WALL(levl[xx + dx][yy + dy].typ))	// prevent trying to open corridors into adjacent rooms
+		return;
+	if (IS_ROOM(levl[xx + dx][yy + dy].typ))	// make a doorway into a room where the wall is shared
+	{
+		// brutishly find the room we are connecting to
+		int i;
+		for (i = 0; i < nroom; i++){
+			if (   (rooms[i].lx < xx + dx)
+				&& (rooms[i].hx > xx + dx)
+				&& (rooms[i].ly < yy + dy)
+				&& (rooms[i].hy > yy + dy)
+				)
+				break;
+		}
+		if (i == nroom)
+			return;	// it isn't a room?
+		else
+			troom = &rooms[i];
+		// add the door
+		if (okdoor(xx, yy) || !nxcor)
+			dodoor(xx, yy, (rn2(2)) ? croom : troom);
+		// note the connection
+		if (smeq[a] < smeq[i])
+			smeq[i] = smeq[a];
+		else
+			smeq[a] = smeq[i];
+		return;
+	}
+
 	if (okdoor(xx,yy) || !nxcor)
 	    dodoor(xx,yy,croom);
 
@@ -321,6 +350,89 @@ boolean nxcor;
 		smeq[a] = smeq[b];
 }
 
+/* 
+ * Merges rooms that have adjacent walls (but not overlapping walls)
+ */
+void
+merge_adj_rooms()
+{
+	int i, j;
+	int f, g;
+	struct mkroom *a, *b;
+	boolean xadj, yadj;
+	int minx, maxx, miny, maxy;
+
+	for (i = 0; i < nroom - 1; i++)
+	{
+		a = &rooms[i];
+		for (j = i + 1; j < nroom; j++)
+		{
+			b = &rooms[j];
+			// 1st condition: both rooms must be ordinary or joined rooms
+			if (!((a->rtype == OROOM || a->rtype == JOINEDROOM)
+				&&(b->rtype == OROOM || b->rtype == JOINEDROOM)
+				))
+				continue;
+			// Determine the wall overlap distance
+			minx = max(a->lx, b->lx);
+			maxx = min(a->hx, b->hx);
+			miny = max(a->ly, b->ly);
+			maxy = min(a->hy, b->hy);
+			// 2nd condition: the rooms must be adjacent in either x or y
+			xadj = abs(minx-maxx) == 3;
+			yadj = abs(miny-maxy) == 3;
+			if (xadj){
+				if (maxy - miny < 0)
+					xadj = FALSE;
+			}
+			if (yadj){
+				if (maxx - minx < 0)
+					yadj = FALSE;
+			}
+			if (!(xadj || yadj))
+				continue;
+			// merge the rooms by replacing the walls
+			if (yadj){
+				for (f = minx; f <= maxx; f++)
+				for (g = maxy + 1; g <= miny - 1; g++)
+					levl[f][g].typ = ROOM;
+			}
+			if (xadj){
+				for (g = miny; g <= maxy; g++)
+				for (f = maxx + 1; f <= minx - 1; f++)
+					levl[f][g].typ = ROOM;
+			}
+			// I now pronounce you... one room for pathing purposes.
+			if (smeq[i] < smeq[j])
+				smeq[j] = smeq[i];
+			else
+				smeq[i] = smeq[j];
+			// make the lighting consistent between the rooms -- this will fail sometimes when merging already-merged rooms, but this isn't critical
+			if (a->rlit != b->rlit)
+			{
+				int lit = 0;
+				struct rm *lev;
+				struct mkroom *tmp;
+
+				if (((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM)
+					tmp = b;
+				else
+					tmp = a;
+
+				for (f = tmp->lx - 1; f <= tmp->hx + 1; f++) {
+					lev = &levl[f][max(tmp->ly - 1, 0)];
+					for (g = tmp->ly - 1; g <= tmp->hy + 1; g++)
+						lev++->lit = !tmp->rlit;
+				}
+			}
+			// change the room types
+			a->rtype = JOINEDROOM;
+			b->rtype = JOINEDROOM;
+		}
+	}
+	return;
+}
+
 void
 makecorridors()
 {
@@ -328,18 +440,26 @@ makecorridors()
 	boolean any = TRUE;
 
 	for(a = 0; a < nroom-1; a++) {
+		if ((rooms[a].rtype == JOINEDROOM || rooms[a + 1].rtype == JOINEDROOM) && rn2(7))
+			continue;
 		join(a, a+1, FALSE);
 		if(!rn2(50)) break; /* allow some randomness */
 	}
-	for(a = 0; a < nroom-2; a++)
-	    if(smeq[a] != smeq[a+2])
-		join(a, a+2, FALSE);
+	for (a = 0; a < nroom - 2; a++)
+	{
+		if (smeq[a] != smeq[a + 2])
+			join(a, a + 2, FALSE);
+	}
 	for(a = 0; any && a < nroom; a++) {
 	    any = FALSE;
-	    for(b = 0; b < nroom; b++)
-		if(smeq[a] != smeq[b]) {
-		    join(a, b, FALSE);
-		    any = TRUE;
+		for (b = 0; b < nroom; b++)
+		{
+			if ((rooms[a].rtype == JOINEDROOM || rooms[b].rtype == JOINEDROOM) && rn2(7))
+				continue;
+			if (smeq[a] != smeq[b]) {
+				join(a, b, FALSE);
+				any = TRUE;
+			}
 		}
 	}
 	if(nroom > 2)
@@ -347,6 +467,8 @@ makecorridors()
 		a = rn2(nroom);
 		b = rn2(nroom-2);
 		if(b >= a) b += 2;
+		if ((rooms[a].rtype == JOINEDROOM || rooms[b].rtype == JOINEDROOM) && rn2(7))
+			continue;
 		join(a, b, TRUE);
 	    }
 }
@@ -703,7 +825,7 @@ makelevel()
 		makerogueghost();
 	} else
 #endif
-		makerooms();
+	makerooms();
 	sort_rooms();
 
 	/* construct stairs (up and down in different rooms if possible) */
@@ -731,8 +853,17 @@ makelevel()
 #ifdef REINCARNATION
 	if (Is_rogue_level(&u.uz)) goto skip0;
 #endif
+
+	merge_adj_rooms();
 	makecorridors();
 	make_niches();
+
+	/* fix up room walls, which may have been broken by having overlapping or joined rooms */
+	for (tryct = 0; tryct < nroom; tryct++)
+	{
+		croom = &rooms[tryct];
+		wallification(croom->lx - 1, croom->ly - 1, croom->hx + 1, croom->hy + 1);
+	}
 
 	/* make a secret treasure vault, not connected to the rest */
 	if(do_vault()) {
@@ -788,7 +919,7 @@ makelevel()
 	if (u_depth > 1 &&
 	    u_depth < depth(&challenge_level) &&
 	    nroom >= room_threshold &&
-	    rn2(u_depth) < 3) mkroom(SHOPBASE);
+		rn2(u_depth) < 4) mkroom(SHOPBASE);	// small increase to shop spawnrate (3->4) to compensate for there being, in general, more rooms and thus fewer eligible shops
 
 	/* Zoos */
 	if (u_depth > 4 && !rn2(8)) mkroom(COURT);
@@ -826,7 +957,7 @@ makelevel()
 			walking boots, I'm allowing Islands+rivers. */
 	if (u_depth > 3 && !rn2(4) &&
 		!level.flags.has_vault) mkroom(RIVER);
-	
+
 		/* Part four: very late modifications */
 	if (wantasepulcher &&
 		!level.flags.has_vault){

@@ -14,8 +14,8 @@ static boolean FDECL(intersect, (NhRect *,NhRect *,NhRect *));
      */
 
 #define MAXRECT	50
-#define XLIM	4
-#define YLIM	3
+#define XLIM	0
+#define YLIM	0
 
 static NhRect rect[MAXRECT+1];
 static int rect_cnt;

@@ -73,7 +73,8 @@ extern NEARDATA struct door doors[DOORMAX];
 #define ISLAND 		18 /* ringed by water, contains items */
 #define RIVER 		19 /* "room" is really a river running through the level*/
 #define POOLROOM	20	/*  */
-#define SHOPBASE	21	/* everything above this is a shop */
+#define JOINEDROOM	21  /* is actually 2+ ordinary rooms joined together, and should have fewer corridors leading to it */
+#define SHOPBASE	22	/* everything above this is a shop */
 #define ARMORSHOP	SHOPBASE+1	/* specific shop defines for level compiler */
 #define SCROLLSHOP	SHOPBASE+2
 #define POTIONSHOP	SHOPBASE+3
