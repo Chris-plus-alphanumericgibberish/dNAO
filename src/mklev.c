@@ -613,7 +613,7 @@ int trap_type;
 	if(doorindex < DOORMAX)
 	  while(vct--) {
 	    aroom = &rooms[rn2(nroom)];
-	    if(aroom->rtype != OROOM) continue;	/* not an ordinary room */
+	    if(aroom->rtype != OROOM && aroom->rtype != JOINEDROOM) continue;	/* not an ordinary room */
 	    if(aroom->doorct == 1 && rn2(5)) continue;
 	    if(!place_niche(aroom,&dy,&xx,&yy)) continue;
 
@@ -980,7 +980,7 @@ skip0:
 
 	/* for each room: put things inside */
 	for(croom = rooms; croom->hx > 0; croom++) {
-		if(croom->rtype != OROOM) continue;
+		if(croom->rtype != OROOM && croom->rtype != JOINEDROOM) continue;
 
 		/* put a sleeping monster inside */
 		/* Note: monster may be on the stairs. This cannot be
@@ -1362,7 +1362,7 @@ find_branch_room(mp)
 	    do
 		croom = &rooms[rn2(nroom)];
 	    while((croom == dnstairs_room || croom == upstairs_room ||
-		  croom->rtype != OROOM) && (++tryct < 100));
+		  (croom->rtype != OROOM && croom->rtype != JOINEDROOM)) && (++tryct < 100));
 	} else
 	    croom = &rooms[rn2(nroom)];
 
@@ -1705,7 +1705,7 @@ register struct mkroom *croom;
 	register int tryct = 0;
 	aligntyp al;
 
-	if (croom->rtype != OROOM) return;
+	if (croom->rtype != OROOM && croom->rtype != JOINEDROOM) return;
 
 	do {
 	    if(++tryct > 200) return;
@@ -1769,7 +1769,7 @@ struct mkroom *croom;
 	boolean dobell = !rn2(20);
 
 
-	if(croom->rtype != OROOM) return;
+	if(croom->rtype != OROOM && croom->rtype != JOINEDROOM) return;
 
 	do {
 	    if(++tryct > 200) return;
