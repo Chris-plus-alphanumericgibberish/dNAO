@@ -414,15 +414,17 @@ merge_adj_rooms()
 				struct rm *lev;
 				struct mkroom *tmp;
 
-				if (((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM)
+				if ((((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM) && b->rtype != JOINEDROOM)
 					tmp = b;
 				else
 					tmp = a;
 
+				tmp->rlit = !tmp->rlit;
+
 				for (f = tmp->lx - 1; f <= tmp->hx + 1; f++) {
 					lev = &levl[f][max(tmp->ly - 1, 0)];
 					for (g = tmp->ly - 1; g <= tmp->hy + 1; g++)
-						lev++->lit = !tmp->rlit;
+						lev++->lit = tmp->rlit;
 				}
 			}
 			// change the room types
