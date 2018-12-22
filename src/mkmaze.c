@@ -330,6 +330,14 @@ d_level *lev;
 
 static boolean was_waterlevel; /* ugh... this shouldn't be needed */
 
+static const int angelnums[] = {PM_JUSTICE_ARCHON, PM_SWORD_ARCHON, PM_SHIELD_ARCHON, PM_TRUMPET_ARCHON, PM_WARDEN_ARCHON, PM_THRONE_ARCHON, PM_LIGHT_ARCHON, 
+						  PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, PM_GRAHA_DEVA, PM_SURYA_DEVA, PM_MAHADEVA, 
+						  PM_LILLEND,
+						  PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN, 
+						  PM_DAUGHTER_OF_BEDLAM, PM_MARILITH,
+						  PM_ERINYS, PM_FALLEN_ANGEL, PM_ANCIENT_OF_ICE, PM_ANCIENT_OF_DEATH
+						 };
+
 /* this is special stuff that the level compiler cannot (yet) handle */
 STATIC_OVL void
 fixup_special()
@@ -407,15 +415,30 @@ fixup_special()
 	place_lregion(0,0,0,0,0,0,0,0,LR_BRANCH,(d_level *)0);
     }
 
+	/* MAIN AREAS */
 	/* KMH -- Sokoban levels */
 	if(In_sokoban(&u.uz))
 		sokoban_detect();
 
-    /* Still need to add some stuff to level file */
+	/* FORT KNOX: fill vault */
+	if (Is_knox(&u.uz)) {
+		/* using an unfilled morgue for rm id */
+		croom = search_special(MORGUE);
+		/* avoid inappropriate morgue-related messages */
+		level.flags.graveyard = level.flags.has_morgue = 0;
+		croom->rtype = OROOM;	/* perhaps it should be set to VAULT? */
+		/* stock the main vault */
+		for (x = croom->lx; x <= croom->hx; x++)
+		for (y = croom->ly; y <= croom->hy; y++) {
+			(void)mkgold((long)rn1(300, 600), x, y);
+			if (!rn2(3) && !is_pool(x, y, TRUE))
+				(void)maketrap(x, y, rn2(3) ? LANDMINE : SPIKED_PIT);
+		}
+	}
+    /* MEDUSA'S FLOOR: add statues */
     if (Is_medusa_level(&u.uz)) {
 	struct obj *otmp;
 	int tryct;
-
 	croom = &rooms[0]; /* only one room on the medusa level */
 	for (tryct = rnd(4); tryct; tryct--) {
 	    x = somex(croom); y = somey(croom);
@@ -428,7 +451,6 @@ fixup_special()
 		}
 	    }
 	}
-
 	if (rn2(2))
 	    otmp = mk_tt_object(STATUE, somex(croom), somey(croom));
 	else /* Medusa statues don't contain books */
@@ -441,75 +463,171 @@ fixup_special()
 		otmp->owt = weight(otmp);
 	    }
 	}
-    } else if(Is_wiz1_level(&u.uz)) {
+    }
+	/* CASTLE: make graveyard */
+	if (Is_stronghold(&u.uz)) {
+		level.flags.graveyard = 1;
+	}
+	/* WIZARD'S TOWER: add secret door */
+	if(Is_wiz1_level(&u.uz)) {
 	croom = search_special(MORGUE);
-
 	create_secret_door(croom, W_SOUTH|W_EAST|W_WEST);
-    } else if(Is_knox(&u.uz)) {
-	/* using an unfilled morgue for rm id */
-	croom = search_special(MORGUE);
-	/* avoid inappropriate morgue-related messages */
-	level.flags.graveyard = level.flags.has_morgue = 0;
-	croom->rtype = OROOM;	/* perhaps it should be set to VAULT? */
-	/* stock the main vault */
-	for(x = croom->lx; x <= croom->hx; x++)
-	    for(y = croom->ly; y <= croom->hy; y++) {
-		(void) mkgold((long) rn1(300, 600), x, y);
-		if (!rn2(3) && !is_pool(x,y, TRUE))
-		    (void)maketrap(x, y, rn2(3) ? LANDMINE : SPIKED_PIT);
-	    }
-    } else if(urole.neminum == PM_BOLG && In_quest(&u.uz) && Is_qlocate(&u.uz)) {
-	int rmn, piled, disty, distx;
-	/* using an unfilled morgue for rm id */
-	croom = search_special(MORGUE);
-	disty = croom->hy - croom->ly;
-	distx = croom->hx - croom->lx;
-	rmn = (croom - rooms) + ROOMOFFSET;
-	/* avoid inappropriate morgue-related messages */
-	level.flags.graveyard = level.flags.has_morgue = 0;
-	croom->rtype = OROOM;	/* perhaps it should be set to VAULT? */
-	/* stock the main vault */
-	for(x = croom->lx; x <= croom->hx; x++)
-	    for(y = croom->ly; y <= croom->hy; y++) {
-		    if (!levl[x][y].edge &&
-			    (int) levl[x][y].roomno == rmn){
-				piled = 1;
-				if(y < croom->ly+disty*1/3 && x > croom->lx+distx*1/5 && x < croom->lx+distx*4/5) piled++;
-				if(y < croom->ly+disty*2/3 && x > croom->lx+distx*2/5 && x < croom->lx+distx*3/5) piled++;
-				for(; piled > 0; piled--){
-					if(rn2(2)) mkobj_at(WEAPON_CLASS, x, y, FALSE);
-					if(rn2(2)) mkobj_at(ARMOR_CLASS, x, y, FALSE);
-					if(rn2(6)) mkobj_at(RING_CLASS, x, y, FALSE);
-					if(!rn2(3))mkobj_at(TOOL_CLASS, x, y, FALSE);
-					if(rn2(6)) mkobj_at(SCROLL_CLASS, x, y, FALSE);
-					if(!rn2(4))mkobj_at(GEM_CLASS, x, y, FALSE);
-					if(!rn2(3))mkobj_at(GEM_CLASS, x, y, FALSE);
-					if(!rn2(2))mkobj_at(GEM_CLASS, x, y, FALSE);
-					if(!rn2(4))mksobj_at(SILVER_SLINGSTONE, x, y, TRUE, FALSE);
-					if(rn2(3)) mkobj_at(GEM_CLASS, x, y, FALSE);
-					if(rn2(4)) mkobj_at(GEM_CLASS, x, y, FALSE);
+    }
+	/* SANCTUM: add sdoor to temple*/
+	if (Is_sanctum(&u.uz)) {
+		croom = search_special(TEMPLE);
+
+		create_secret_door(croom, W_ANY);
+	}
+	/* ALIGNMENT QUESTS */
+	/* LAW QUEST: features */
+	if (In_law(&u.uz)){
+		place_law_features();
+	}
+	/* NEUTRAL QUEST: various features */
+	if (In_outlands(&u.uz)){
+		if (!(u.uz.dlevel == spire_level.dlevel || Is_gatetown(&u.uz) || Is_sumall(&u.uz)))
+			place_neutral_features();
+		if (u.uz.dlevel < gatetown_level.dlevel + 4){
+			for (x = 0; x<COLNO; x++){
+				for (y = 0; y<ROWNO; y++){
+					if (levl[x][y].typ == TREE) levl[x][y].lit = TRUE;
 				}
-				(void) mkgold((long) rn1(1000, 100), x, y);
 			}
 		}
-	} else if (Role_if(PM_PRIEST) && In_quest(&u.uz)) {
-	/* less chance for undead corpses (lured from lower morgues) */
-	level.flags.graveyard = 1;
-    } else if (Is_stronghold(&u.uz)) {
-	level.flags.graveyard = 1;
-    } else if(Is_sanctum(&u.uz)) {
-	croom = search_special(TEMPLE);
+		if (u.uz.dlevel == spire_level.dlevel){
+			for (x = 2; x <= x_maze_max; x++)
+			for (y = 2; y <= y_maze_max; y++){
+				if (m_at(x, y) && !ACCESSIBLE(levl[x][y].typ))
+					rloc(m_at(x, y), FALSE);
+			}
+		}
+		if (Is_sumall(&u.uz)){
+			for (x = 2; x <= x_maze_max; x++)
+			for (y = 2; y <= y_maze_max; y++){
+				if (levl[x][y].typ == STONE) levl[x][y].typ = HWALL;
+				if (levl[x][y].typ == ROOM) levl[x][y].lit = TRUE;
+				if (m_at(x, y)) rloc(m_at(x, y), FALSE);
+			}
+			wallification(1, 1, COLNO - 1, ROWNO - 1);
+		}
+	}
+	/* DEMON LAIRS */
+	/* ORCUS'S FLOOR: remove shopkeepers*/
+	if (on_level(&u.uz, &orcus_level)) {
+		register struct monst *mtmp, *mtmp2;
 
-	create_secret_door(croom, W_ANY);
-    } else if(on_level(&u.uz, &orcus_level)) {
-	   register struct monst *mtmp, *mtmp2;
+		/* it's a ghost town, get rid of shopkeepers */
+		for (mtmp = fmon; mtmp; mtmp = mtmp2) {
+			mtmp2 = mtmp->nmon;
+			if (mtmp->isshk) mongone(mtmp);
+		}
+	}
+	/* LOLTH'S FLOOR: vaults and webs */
+	if (Is_lolth_level(&u.uz)){
+		int x, y;
+		place_lolth_vaults();
+		for (x = 0; x<COLNO; x++){
+			for (y = 0; y<ROWNO; y++){
+				if (levl[x][y].typ == ROOM) maketrap(x, y, WEB);
+			}
+		}
+	}
+	/* DISPATER'S FLOOR: place crazed angel statues in the iron bar walls*/
+	if (Is_dis_level(&u.uz)){
+		for (x = 0; x<COLNO; x++){
+			for (y = 0; y<ROWNO; y++){
+				if (levl[x][y].typ == IRONBARS){
+					struct monst *angel;
+					angel = makemon(&mons[angelnums[rn2(SIZE(angelnums))]], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
+					if (angel){
+						initedog(angel);
+						angel->m_lev = min(30, 3 * (int)(angel->data->mlevel / 2));
+						angel->mhpmax = (angel->m_lev * 8) - 4;
+						angel->mhp = angel->mhpmax;
+						angel->female = TRUE;
+						angel->mtame = 10;
+						angel->mpeaceful = 1;
+						angel->mcrazed = 1;
+					}
+					mkcorpstat(STATUE, angel, (struct permonst *)0, x, y, FALSE);
+					mongone(angel);
+				}
+			}
+		}
+	}
+	/* PLAYER QUESTS */
+	/* DWARF KNIGHT QUEST: add stuff to the locate level */
+	if (urole.neminum == PM_BOLG && In_quest(&u.uz) && Is_qlocate(&u.uz)) {
+		int rmn, piled, disty, distx;
+		/* using an unfilled morgue for rm id */
+		croom = search_special(MORGUE);
+		disty = croom->hy - croom->ly;
+		distx = croom->hx - croom->lx;
+		rmn = (croom - rooms) + ROOMOFFSET;
+		/* avoid inappropriate morgue-related messages */
+		level.flags.graveyard = level.flags.has_morgue = 0;
+		croom->rtype = OROOM;	/* perhaps it should be set to VAULT? */
+		/* stock the main vault */
+		for (x = croom->lx; x <= croom->hx; x++)
+		for (y = croom->ly; y <= croom->hy; y++) {
+			if (!levl[x][y].edge &&
+				(int)levl[x][y].roomno == rmn){
+				piled = 1;
+				if (y < croom->ly + disty * 1 / 3 && x > croom->lx + distx * 1 / 5 && x < croom->lx + distx * 4 / 5) piled++;
+				if (y < croom->ly + disty * 2 / 3 && x > croom->lx + distx * 2 / 5 && x < croom->lx + distx * 3 / 5) piled++;
+				for (; piled > 0; piled--){
+					if (rn2(2)) mkobj_at(WEAPON_CLASS, x, y, FALSE);
+					if (rn2(2)) mkobj_at(ARMOR_CLASS, x, y, FALSE);
+					if (rn2(6)) mkobj_at(RING_CLASS, x, y, FALSE);
+					if (!rn2(3))mkobj_at(TOOL_CLASS, x, y, FALSE);
+					if (rn2(6)) mkobj_at(SCROLL_CLASS, x, y, FALSE);
+					if (!rn2(4))mkobj_at(GEM_CLASS, x, y, FALSE);
+					if (!rn2(3))mkobj_at(GEM_CLASS, x, y, FALSE);
+					if (!rn2(2))mkobj_at(GEM_CLASS, x, y, FALSE);
+					if (!rn2(4))mksobj_at(SILVER_SLINGSTONE, x, y, TRUE, FALSE);
+					if (rn2(3)) mkobj_at(GEM_CLASS, x, y, FALSE);
+					if (rn2(4)) mkobj_at(GEM_CLASS, x, y, FALSE);
+				}
+				(void)mkgold((long)rn1(1000, 100), x, y);
+			}
+		}
+	}
+	/* PRIEST QUEST: make graveyard */
+	if (Role_if(PM_PRIEST) && In_quest(&u.uz)) {
+		/* less chance for undead corpses (lured from lower morgues) */
+		level.flags.graveyard = 1;
+	}
+	/* KNIGHT QUEST: convert half the swamp to a forest on the knight locate level*/
+	if (Role_if(PM_KNIGHT) &&
+		In_quest(&u.uz) &&
+		Is_qlocate(&u.uz)
+		){
+		int x, y;
+		for (x = 0; x<COLNO / 2; x++){
+			for (y = 0; y<ROWNO; y++){
+				if (levl[x][y].typ == POOL) levl[x][y].typ = TREE;
+			}
+		}
+	}
+	/* GNOME RANGER QUEST: add ladder to quest*/
+	if (Role_if(PM_RANGER) && Race_if(PM_GNOME) && on_level(&u.uz, &minetown_level)){
+		int x, y, good = FALSE;
+		while (!good){
+			x = rn2(COLNO) + 1;
+			y = rn2(ROWNO);
+			if (isok(x, y) && levl[x][y].typ == ROOM && !costly_spot(x, y))
+				good = TRUE;
+			else continue;
 
-	   /* it's a ghost town, get rid of shopkeepers */
-	    for(mtmp = fmon; mtmp; mtmp = mtmp2) {
-		    mtmp2 = mtmp->nmon;
-		    if(mtmp->isshk) mongone(mtmp);
-	    }
-    }
+			levl[x][y].typ = STAIRS;
+			levl[x][y].ladder = LA_DOWN;
+			sstairs.sx = x;
+			sstairs.sy = y;
+			sstairs.up = 0;
+			assign_level(&sstairs.tolev, &qstart_level);
+		}
+	}
 
     if(lev_message) {
 	char *str, *nl;
@@ -528,13 +646,6 @@ fixup_special()
     num_lregions = 0;
 }
 
-static const int angelnums[] = {PM_JUSTICE_ARCHON, PM_SWORD_ARCHON, PM_SHIELD_ARCHON, PM_TRUMPET_ARCHON, PM_WARDEN_ARCHON, PM_THRONE_ARCHON, PM_LIGHT_ARCHON, 
-						  PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, PM_GRAHA_DEVA, PM_SURYA_DEVA, PM_MAHADEVA, 
-						  PM_LILLEND,
-						  PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN, 
-						  PM_DAUGHTER_OF_BEDLAM, PM_MARILITH,
-						  PM_ERINYS, PM_FALLEN_ANGEL, PM_ANCIENT_OF_ICE, PM_ANCIENT_OF_DEATH
-						 };
 void
 makemaz(s)
 register const char *s;
@@ -628,96 +739,6 @@ register const char *s;
 		/* some levels can end up with monsters
 		   on dead mon list, including light source monsters */
 		dmonsfree();
-		/*Post-level-loading modification, convert half the swamp to a forest on the knight locate level*/
-		if(Role_if(PM_KNIGHT) && 
-			In_quest(&u.uz) && 
-			Is_qlocate(&u.uz)
-		){
-			int x, y;
-			for(x = 0; x<COLNO/2; x++){
-				for(y = 0; y<ROWNO; y++){
-					if(levl[x][y].typ == POOL) levl[x][y].typ = TREE;
-				}
-			}
-		}
-		if(Role_if(PM_RANGER) && Race_if(PM_GNOME) && on_level(&u.uz, &minetown_level)){
-			int x, y, good = FALSE;
-			while(!good){
-				x = rn2(COLNO)+1;
-				y = rn2(ROWNO);
-				if(isok(x,y) && levl[x][y].typ == ROOM && !costly_spot(x, y))
-					good = TRUE;
-				else continue;
-				
-				levl[x][y].typ = STAIRS;
-				levl[x][y].ladder = LA_DOWN;
-				sstairs.sx = x;
-				sstairs.sy = y;
-				sstairs.up = 0;
-				assign_level(&sstairs.tolev, &qstart_level);
-			}
-		}
-		if(In_outlands(&u.uz)){
-			if(!(u.uz.dlevel == spire_level.dlevel || Is_gatetown(&u.uz) || Is_sumall(&u.uz)))
-				place_neutral_features();
-			if(u.uz.dlevel < gatetown_level.dlevel + 4){
-				for(x = 0; x<COLNO; x++){
-					for(y = 0; y<ROWNO; y++){
-						if(levl[x][y].typ == TREE) levl[x][y].lit = TRUE;
-					}
-				}
-			}
-			if(u.uz.dlevel == spire_level.dlevel){
-				for(x = 2; x <= x_maze_max; x++)
-					for(y = 2; y <= y_maze_max; y++){
-						if(m_at(x,y) && !ACCESSIBLE(levl[x][y].typ)) 
-							rloc(m_at(x,y), FALSE);
-					}
-			}
-			if(Is_sumall(&u.uz)){
-				for(x = 2; x <= x_maze_max; x++)
-					for(y = 2; y <= y_maze_max; y++){
-						if(levl[x][y].typ == STONE) levl[x][y].typ = HWALL;
-						if(levl[x][y].typ == ROOM) levl[x][y].lit = TRUE;
-						if(m_at(x,y)) rloc(m_at(x,y), FALSE);
-					}
-				wallification(1, 1, COLNO-1, ROWNO-1);
-			}
-		}
-		if(In_law(&u.uz)){
-			place_law_features();
-		}
-		if(Is_lolth_level(&u.uz)){
-			int x, y;
-			place_lolth_vaults();
-			for(x = 0; x<COLNO; x++){
-				for(y = 0; y<ROWNO; y++){
-					if(levl[x][y].typ == ROOM) maketrap(x,y,WEB);
-				}
-			}
-		}
-		if(Is_dis_level(&u.uz)){
-			for(x = 0; x<COLNO; x++){
-				for(y = 0; y<ROWNO; y++){
-					if(levl[x][y].typ == IRONBARS){
-						struct monst *angel;
-						angel = makemon(&mons[angelnums[rn2(SIZE(angelnums))]], x, y, MM_EDOG|MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
-						if(angel){
-							initedog(angel);
-							angel->m_lev = min(30, 3 * (int)(angel->data->mlevel / 2));
-							angel->mhpmax = (angel->m_lev * 8) - 4;
-							angel->mhp =  angel->mhpmax;
-							angel->female =  TRUE;
-							angel->mtame = 10;
-							angel->mpeaceful = 1;
-							angel->mcrazed = 1;
-						}
-						mkcorpstat(STATUE, angel, (struct permonst *)0, x, y, FALSE);
-						mongone(angel);
-					}
-				}
-			}
-		}
 		return;	/* no mazification right now */
 	    }
 	    impossible("Couldn't load \"%s\" - making a maze.", protofile);
