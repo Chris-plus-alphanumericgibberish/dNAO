@@ -414,15 +414,17 @@ merge_adj_rooms()
 				struct rm *lev;
 				struct mkroom *tmp;
 
-				if (((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM)
+				if ((((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM) && b->rtype != JOINEDROOM)
 					tmp = b;
 				else
 					tmp = a;
 
+				tmp->rlit = !tmp->rlit;
+
 				for (f = tmp->lx - 1; f <= tmp->hx + 1; f++) {
 					lev = &levl[f][max(tmp->ly - 1, 0)];
 					for (g = tmp->ly - 1; g <= tmp->hy + 1; g++)
-						lev++->lit = !tmp->rlit;
+						lev++->lit = tmp->rlit;
 				}
 			}
 			// change the room types
@@ -613,7 +615,7 @@ int trap_type;
 	if(doorindex < DOORMAX)
 	  while(vct--) {
 	    aroom = &rooms[rn2(nroom)];
-	    if(aroom->rtype != OROOM) continue;	/* not an ordinary room */
+	    if(aroom->rtype != OROOM && aroom->rtype != JOINEDROOM) continue;	/* not an ordinary room */
 	    if(aroom->doorct == 1 && rn2(5)) continue;
 	    if(!place_niche(aroom,&dy,&xx,&yy)) continue;
 
@@ -776,6 +778,7 @@ makelevel()
 	if(wiz1_level.dlevel == 0) init_dungeons();
 	oinit();	/* assign level dependent obj probabilities */
 	clear_level_structures();
+	flags.makelev_closerooms = FALSE;
 	
 	if(Is_minetown_level(&u.uz)) livelog_write_string("entered Minetown for the first time");
 
@@ -825,6 +828,9 @@ makelevel()
 		makerogueghost();
 	} else
 #endif
+	/* probably use the 'claustrophobic' room generation, since we aren't doing a special level */
+	if (rn2(7))
+		flags.makelev_closerooms = TRUE;
 	makerooms();
 	sort_rooms();
 
@@ -980,7 +986,7 @@ skip0:
 
 	/* for each room: put things inside */
 	for(croom = rooms; croom->hx > 0; croom++) {
-		if(croom->rtype != OROOM) continue;
+		if(croom->rtype != OROOM && croom->rtype != JOINEDROOM) continue;
 
 		/* put a sleeping monster inside */
 		/* Note: monster may be on the stairs. This cannot be
@@ -1070,6 +1076,8 @@ skip0:
 		    }
 		}
 	}
+	if (flags.makelev_closerooms)			
+		flags.makelev_closerooms = FALSE;
 }
 
 /*
@@ -1362,7 +1370,7 @@ find_branch_room(mp)
 	    do
 		croom = &rooms[rn2(nroom)];
 	    while((croom == dnstairs_room || croom == upstairs_room ||
-		  croom->rtype != OROOM) && (++tryct < 100));
+		  (croom->rtype != OROOM && croom->rtype != JOINEDROOM)) && (++tryct < 100));
 	} else
 	    croom = &rooms[rn2(nroom)];
 
@@ -1705,7 +1713,7 @@ register struct mkroom *croom;
 	register int tryct = 0;
 	aligntyp al;
 
-	if (croom->rtype != OROOM) return;
+	if (croom->rtype != OROOM && croom->rtype != JOINEDROOM) return;
 
 	do {
 	    if(++tryct > 200) return;
@@ -1769,7 +1777,7 @@ struct mkroom *croom;
 	boolean dobell = !rn2(20);
 
 
-	if(croom->rtype != OROOM) return;
+	if(croom->rtype != OROOM && croom->rtype != JOINEDROOM) return;
 
 	do {
 	    if(++tryct > 200) return;

@@ -56,8 +56,8 @@ STATIC_DCL boolean FDECL(create_subroom, (struct mkroom *, XCHAR_P, XCHAR_P,
 
 #define sq(x) ((x)*(x))
 
-#define XLIM	0
-#define YLIM	0
+#define XLIM	4
+#define YLIM	3
 
 #define Fread	(void)dlb_fread
 #define Fgetc	(schar)dlb_fgetc
@@ -314,8 +314,8 @@ boolean vault;
 	register struct rm *lev;
 	int xlim, ylim, ymax;
 
-	xlim = XLIM + (vault ? 1 : 0);
-	ylim = YLIM + (vault ? 1 : 0);
+	xlim = (flags.makelev_closerooms ? 0 : XLIM) + (vault ? 1 : 0);
+	ylim = (flags.makelev_closerooms ? 0 : YLIM) + (vault ? 1 : 0);
 
 	if (*lowx < 3)		*lowx = 3;
 	if (*lowy < 2)		*lowy = 2;
@@ -372,7 +372,8 @@ xchar	rtype, rlit;
 	NhRect	*r1 = 0, r2;
 	int	trycnt = 0;
 	boolean	vault = FALSE;
-	int	xlim = XLIM, ylim = YLIM;
+	int	xlim = flags.makelev_closerooms ? 0 : XLIM;
+	int ylim = flags.makelev_closerooms ? 0 : YLIM;
 
 	if (rtype == -1)	/* Is the type random ? */
 	    rtype = OROOM;
