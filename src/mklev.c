@@ -1827,7 +1827,6 @@ struct mkroom *croom;
 			otmp->oy = m.y;
 			add_to_buried(otmp);
 		}
-
 		/* Leave a bell, in case we accidentally buried someone alive */
 		if (tmp) (void)mksobj_at(BELL, m.x, m.y, TRUE, FALSE);
 		break;
