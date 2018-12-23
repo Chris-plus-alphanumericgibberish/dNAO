@@ -296,17 +296,15 @@ boolean nxcor;
 	ty = tt.y - dy;
 	if(nxcor && levl[xx+dx][yy+dy].typ)
 		return;
-	if (IS_WALL(levl[xx + dx][yy + dy].typ))	// prevent trying to open corridors into adjacent rooms
-		return;
-	if (IS_ROOM(levl[xx + dx][yy + dy].typ))	// make a doorway into a room where the wall is shared
+	if (IS_WALL(levl[xx][yy].typ) && IS_ROOM(levl[xx + dx][yy + dy].typ))	// make a doorway into a room where the wall is shared
 	{
 		// brutishly find the room we are connecting to
 		int i;
 		for (i = 0; i < nroom; i++){
-			if (   (rooms[i].lx < xx + dx)
-				&& (rooms[i].hx > xx + dx)
-				&& (rooms[i].ly < yy + dy)
-				&& (rooms[i].hy > yy + dy)
+			if (   (rooms[i].lx <= xx + dx)
+				&& (rooms[i].hx >= xx + dx)
+				&& (rooms[i].ly <= yy + dy)
+				&& (rooms[i].hy >= yy + dy)
 				)
 				break;
 		}
@@ -314,9 +312,16 @@ boolean nxcor;
 			return;	// it isn't a room?
 		else
 			troom = &rooms[i];
+		// disallow adding extra doors to shops
+		if (troom->rtype >= SHOPBASE)
+			return;
+
 		// add the door
 		if (okdoor(xx, yy) || !nxcor)
-			dodoor(xx, yy, (rn2(2)) ? croom : troom);
+		{
+			dodoor(xx, yy, croom);
+			add_door(xx, yy, troom);
+		}
 		// note the connection
 		if (smeq[a] < smeq[i])
 			smeq[i] = smeq[a];
@@ -324,6 +329,8 @@ boolean nxcor;
 			smeq[a] = smeq[i];
 		return;
 	}
+	if (IS_WALL(levl[xx + dx][yy + dy].typ) || IS_ROOM(levl[xx + dx][yy + dy].typ))	// prevent trying to open corridors into adjacent rooms
+		return;
 
 	if (okdoor(xx,yy) || !nxcor)
 	    dodoor(xx,yy,croom);
@@ -386,16 +393,86 @@ merge_adj_rooms()
 			}
 			if (!(xadj || yadj))
 				continue;
-			// merge the rooms by replacing the walls
-			if (yadj){
-				for (f = minx; f <= maxx; f++)
-				for (g = maxy + 1; g <= miny - 1; g++)
-					levl[f][g].typ = ROOM;
-			}
-			if (xadj){
-				for (g = miny; g <= maxy; g++)
-				for (f = maxx + 1; f <= minx - 1; f++)
-					levl[f][g].typ = ROOM;
+			// preferred option: merge the rooms by expanding one room so that they share a wall, and add a door along the shared wall
+			{
+				boolean okay = TRUE;
+				int dp = 0;
+				schar *p;
+				struct mkroom *t, *u;
+				// determine which room is smaller; only attempt to expand that room
+				t = ((a->hx - a->lx)*(a->hy - a->ly) < (b->hx - b->lx)*(b->hy - b->ly)) ? a : b;
+				u = (t == a) ? b : a;
+
+				// determine which of t's corners has to move, and in which direction
+				if (xadj){
+					dp = (t->hx < u->lx) ? 1 : -1;
+					p = (t->hx < u->lx) ? &(t->hx) : &(t->lx);
+				}
+				if (yadj){
+					dp = (t->hy < u->ly) ? 1 : -1;
+					p = (t->hx < u->lx) ? &(t->hy) : &(t->ly);
+				}
+
+				// check that it is okay to expand in that direction
+				if (xadj){
+					for (g = t->ly - 1; g <= t->hy + 1; g++)
+					if (!IS_STWALL(levl[*p+dp][g].typ))
+						okay = FALSE;
+				}
+				if (yadj){
+					for (f = t->lx - 1; f <= t->hx + 1; f++)
+					if (!IS_STWALL(levl[f][*p+dp].typ))
+						okay = FALSE;
+				}
+				if (okay && rn2(4))	// use this method most of the time, but the oddly-shaped rooms are fun too
+				{
+					// expand the room
+					if (xadj){
+						for (g = t->ly - 1; g <= t->hy + 1; g++)
+							levl[*p + dp*2][g].typ = VWALL;
+						for (g = t->ly; g <= t->hy; g++)
+							levl[*p + dp*1][g].typ = ROOM;
+					}
+					if (yadj){
+						for (f = t->lx - 1; f <= t->hx + 1; f++)
+							levl[f][*p + dp*2].typ = HWALL;
+						for (f = t->lx; f <= t->hx; f++)
+							levl[f][*p + dp*1].typ = ROOM;
+					}
+					*p += dp;
+					// attempt to add a door over the shared length
+					if (xadj){
+						f = *p + dp;
+						g = rn2(maxy - miny + 1) + miny;
+					}
+					if (yadj){
+						f = rn2(maxx - minx + 1) + minx;
+						g = *p + dp;
+					}
+
+					if (okdoor(f, g))
+					{
+						dodoor(f, g, t);
+						add_door(f, g, u);
+					}
+					else
+					{
+						continue;	// it failed to connect the rooms, but it's too late to go to the fallback
+					}
+				}
+				else {
+					// fallback option: merge the rooms by replacing the walls
+					if (xadj){
+						for (g = miny; g <= maxy; g++)
+						for (f = maxx + 1; f <= minx - 1; f++)
+							levl[f][g].typ = ROOM;
+					}
+					if (yadj){
+						for (f = minx; f <= maxx; f++)
+						for (g = maxy + 1; g <= miny - 1; g++)
+							levl[f][g].typ = ROOM;
+					}
+				}
 			}
 			// I now pronounce you... one room for pathing purposes.
 			if (smeq[i] < smeq[j])
