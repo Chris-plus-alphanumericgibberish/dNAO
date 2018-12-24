@@ -2680,8 +2680,8 @@ dlb *fd;
 	    dir = walklist[nwalk].dir;
 
 		/* adding rooms may have placed a room overtop of the wallwalk start */
-		if (levl[x][y].roomno != NO_ROOM)
-			maze_remove_room(levl[x][y].roomno);
+		if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
+			maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 
 	    /* don't use move() - it doesn't use W_NORTH, etc. */
 	    switch (dir) {
@@ -2728,7 +2728,7 @@ dlb *fd;
 		    y--;
 	    }
 
-	    walkfrom(x, y);
+	    walkfrom(x, y, 0);
     }
 
 	/* add special rooms, dungeon features */

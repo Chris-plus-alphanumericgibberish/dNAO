@@ -15,11 +15,12 @@ STATIC_DCL boolean FDECL(iswall,(int,int));
 STATIC_DCL boolean FDECL(iswall_or_stone,(int,int));
 STATIC_DCL boolean FDECL(is_solid,(int,int));
 STATIC_DCL int FDECL(extend_spine, (int [3][3], int, int, int));
-STATIC_DCL boolean FDECL(okay,(int,int,int));
+STATIC_DCL boolean FDECL(okay,(int,int,int,int));
 STATIC_DCL void FDECL(maze0xy,(coord *));
 STATIC_DCL boolean FDECL(put_lregion_here,(XCHAR_P,XCHAR_P,XCHAR_P,
 	XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,BOOLEAN_P,d_level *));
 STATIC_DCL void NDECL(fixup_special);
+STATIC_DCL boolean FDECL(maze_inbounds, (XCHAR_P, XCHAR_P));
 STATIC_DCL void FDECL(move, (int *,int *,int));
 STATIC_DCL void NDECL(setup_waterlevel);
 STATIC_DCL void NDECL(unsetup_waterlevel);
@@ -195,13 +196,18 @@ int x1, y1, x2, y2;
 }
 
 STATIC_OVL boolean
-okay(x,y,dir)
+okay(x,y,dir,depth)
 int x,y;
 register int dir;
+int depth;
 {
 	move(&x,&y,dir);
 	move(&x,&y,dir);
-	if(x<3 || y<3 || x>x_maze_max || y>y_maze_max || levl[x][y].typ != 0)
+	if(!maze_inbounds(x, y))
+		return(FALSE);
+	if((depth < 5) && (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom))	/* if we're early, we can bust through randomly-placed rooms */
+		return(TRUE);
+	if(levl[x][y].typ != 0)
 		return(FALSE);
 	return(TRUE);
 }
@@ -662,8 +668,7 @@ boolean
 maze_inbounds(x, y)
 xchar x, y;
 {
-	return (x >= 2 && y >= 2
-		&& x < x_maze_max && y < y_maze_max && isok(x, y));
+	return (x >= 2 && y >= 2 && x < x_maze_max && y < y_maze_max && isok(x, y));
 }
 
 /* 
@@ -986,8 +991,8 @@ int room_index;
 	{
 		levl[x][y].typ = ((x % 2) && (y % 2)) ? STONE : HWALL;
 		levl[x][y].flags = 0;
+		levl[x][y].roomno = NO_ROOM;
 	}
-
 	remove_room(room_index);
 
 	return;
@@ -1011,7 +1016,7 @@ create_maze()
 
 	/* perform mazewalk */
 	maze0xy(&mm);
-	walkfrom((int)mm.x, (int)mm.y);
+	walkfrom((int)mm.x, (int)mm.y, 0);
 
 	/* remove dead ends */
 	maze_remove_deadends(ROOM);
@@ -1212,8 +1217,8 @@ register const char *s;
  * that is totally safe.
  */
 void
-walkfrom(x,y)
-int x,y;
+walkfrom(x,y,depth)
+int x,y,depth;
 {
 #define CELLS (ROWNO * COLNO) / 4		/* a maze cell is 4 squares */
 	char mazex[CELLS + 1], mazey[CELLS + 1];	/* char's are OK */
@@ -1237,7 +1242,7 @@ int x,y;
 		}
 		q = 0;
 		for (a = 0; a < 4; a++)
-			if(okay(x, y, a)) dirs[q++]= a;
+			if(okay(x, y, a, depth)) dirs[q++]= a;
 		if (!q)
 			pos--;
 		else {
@@ -1249,6 +1254,8 @@ int x,y;
 			levl[x][y].typ = ROOM;
 #endif
 			move(&x, &y, dir);
+			if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
+				maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 			pos++;
 			if (pos > CELLS)
 				panic("Overflow in walkfrom");
@@ -1260,8 +1267,8 @@ int x,y;
 #else
 
 void
-walkfrom(x,y)
-int x,y;
+walkfrom(x,y,depth)
+int x,y,depth;
 {
 	register int q,a,dir;
 	int dirs[4];
@@ -1279,17 +1286,20 @@ int x,y;
 	while(1) {
 		q = 0;
 		for(a = 0; a < 4; a++)
-			if(okay(x,y,a)) dirs[q++]= a;
+			if(okay(x,y,a,depth))
+				dirs[q++]= a;
 		if(!q) return;
 		dir = dirs[rn2(q)];
 		move(&x,&y,dir);
+		if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
+			maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 #ifndef WALLIFIED_MAZE
 		levl[x][y].typ = CORR;
 #else
 		levl[x][y].typ = ROOM;
 #endif
 		move(&x,&y,dir);
-		walkfrom(x,y);
+		walkfrom(x,y,depth+1);
 	}
 }
 #endif /* MICRO */

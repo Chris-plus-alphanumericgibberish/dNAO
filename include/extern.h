@@ -1259,7 +1259,7 @@ void FDECL(remove_room, (unsigned));
 /* ### mkmaze.c ### */
 
 E void FDECL(wallification, (int,int,int,int));
-E void FDECL(walkfrom, (int,int));
+E void FDECL(walkfrom, (int,int,int));
 E void FDECL(makemaz, (const char *));
 E void FDECL(mazexy, (coord *));
 E void NDECL(bound_digging);
