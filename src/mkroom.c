@@ -3981,8 +3981,8 @@ struct mkroom *sroom;
 			};
 			
 			do ctype = kingnums[rn2(SIZE(kingnums))];
-			while(tooweak(ctype, minmlev) || toostrong(ctype,maxmlev) || tries++ > 40);
-			if(tries <= 40){
+			while((tooweak(ctype, minmlev) || toostrong(ctype,maxmlev)) && tries++ < 40);
+			if(tries < 40){
 				mon = makemon(&mons[ctype], tx, ty, NO_MM_FLAGS|MM_NOCOUNTBIRTH);
 				if(mon) {
 					mon->msleeping = 1;
