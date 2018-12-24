@@ -23,7 +23,6 @@ extern const int monstr[];
 #ifdef OVLB
 STATIC_DCL boolean FDECL(isbig, (struct mkroom *));
 STATIC_DCL int FDECL(int_sqrt, (int));
-STATIC_DCL boolean FDECL(isspacious, (struct mkroom *));
 STATIC_DCL boolean FDECL(issemispacious, (struct mkroom *));
 STATIC_DCL void NDECL(mkshop), FDECL(mkzoo,(int)), NDECL(mkswamp);
 STATIC_DCL void NDECL(mktemple);
@@ -89,7 +88,7 @@ int num;
 }
 
 /* Returns true if room has both an X and Y size of at least five. */
-STATIC_OVL boolean
+boolean
 isspacious(sroom)
 register struct mkroom *sroom;
 {
@@ -3772,7 +3771,7 @@ mkshop()
 gottype:
 #endif
 #endif
-	for(sroom = &rooms[0]; ; sroom++){
+	for(sroom = &rooms[level.flags.sp_lev_nroom]; ; sroom++){
 		if(sroom->hx < 0) return;
 		if(sroom - rooms >= nroom) {
 			pline("rooms not closed by -1?");
@@ -3823,32 +3822,63 @@ gottype:
 }
 
 struct mkroom *
-pick_room(strict)
-register boolean strict;
+pick_room(nostairs, fullwalls)
+register boolean nostairs, fullwalls;
 /* pick an unused room, preferably with few doors */
 {
 	register struct mkroom *sroom;
 	register int i = nroom;
 
-	for(sroom = &rooms[rn2(nroom)]; i--; sroom++) {
+	int minroom = level.flags.sp_lev_nroom;
+
+	if (nroom == minroom)
+		return (struct mkroom *)0;
+
+	for(sroom = &rooms[minroom + rn2(nroom - minroom)]; i--; sroom++) {
+		/* loop through rooms if needed */
 		if(sroom == &rooms[nroom])
-			sroom = &rooms[0];
+			sroom = &rooms[minroom + 1];
+		/* if its not a room at all, end */
 		if(sroom->hx < 0)
 			return (struct mkroom *)0;
-		if(sroom->rtype != OROOM)	continue;
-		if(!strict) {
-		    if(has_upstairs(sroom) || (has_dnstairs(sroom) && rn2(3)))
+		/* if full walls are required, it must be an OROOM and not a JOINEDROOM */
+		if(!(sroom->rtype == OROOM) && !(sroom->rtype == JOINEDROOM && !fullwalls))
 			continue;
-		} else if(has_upstairs(sroom) || has_dnstairs(sroom))
+		/* if no stairs are required, it cannot have downstairs */
+		if (has_upstairs(sroom) ||
+			(has_dnstairs(sroom) && (nostairs || rn2(3)))) {
 			continue;
-		if(sroom->doorct == 1 || !rn2(sroom->doorct)
-#ifdef WIZARD
-						|| wizard
-#endif
-							)
+		}
+		/* prefer rooms with only one door */
+		if (sroom->doorct == 1 || !rn2(sroom->doorct) || wizard)
 			return sroom;
+		else
+			i += !rn2(3);	// 1/3 chance of +1 attempt
 	}
 	return (struct mkroom *)0;
+}
+
+/*
+ * Some special rooms can be made in places that don't have full walls.
+ */
+boolean
+special_room_requires_full_walls(type)
+int type;
+{
+	switch (type)
+	{
+	case OROOM:
+	case SWAMP:
+	case MORGUE:
+	case ARMORY:
+	case BARRACKS:
+	case RIVER:
+	case POOLROOM:
+	case JOINEDROOM:
+		return FALSE;
+	default:
+		return TRUE;
+	}
 }
 
 STATIC_OVL void
@@ -3856,8 +3886,9 @@ mkzoo(type)
 int type;
 {
 	register struct mkroom *sroom;
+	boolean fullwalls = special_room_requires_full_walls(type);
 
-	if ((sroom = pick_room(FALSE)) != 0) {
+	if ((sroom = pick_room(FALSE,fullwalls)) != 0) {
 		sroom->rtype = type;
 		fill_zoo(sroom);
 	}
@@ -4820,7 +4851,7 @@ mkisland() /* John Harris, modified from mktemple & mkshop,
 		From level twelve down, we may use lava instead of water.
 		Note: this code depends on the room being rectangular.
 	*/
-	for(sroom = &rooms[0]; ; sroom++){
+	for(sroom = &rooms[level.flags.sp_lev_nroom]; ; sroom++){
 		if(sroom->hx < 0) return;  /* from mkshop: Signifies out of rooms? */
 		if(sroom - rooms >= nroom) {
 			pline("rooms not closed by -1?");
@@ -4921,7 +4952,7 @@ mkpoolroom()
 	struct mkroom *sroom;
 	int x, y;
 	int u_depth = depth(&u.uz);
-	for(sroom = &rooms[0]; ; sroom++){
+	for(sroom = &rooms[level.flags.sp_lev_nroom]; ; sroom++){
 		if(sroom->hx < 0) return;  /* from mkshop: Signifies out of rooms? */
 		if(sroom - rooms >= nroom) {
 			pline("rooms not closed by -1?");
@@ -4979,7 +5010,7 @@ mksgarden()
 {
 	register struct mkroom *sroom;
 	register int x, y;
-	for(sroom = &rooms[0]; ; sroom++){
+	for(sroom = &rooms[level.flags.sp_lev_nroom]; ; sroom++){
 		if(sroom->hx < 0) return;  /* from mkshop: Signifies out of rooms? */
 		if(sroom - rooms >= nroom) {
 			pline("rooms not closed by -1?");
@@ -5018,7 +5049,7 @@ mktemple()
 	coord *shrine_spot;
 	register struct rm *lev;
 
-	if(!(sroom = pick_room(TRUE))) return;
+	if(!(sroom = pick_room(TRUE, TRUE))) return;
 
 	/* set up Priest and shrine */
 	sroom->rtype = TEMPLE;

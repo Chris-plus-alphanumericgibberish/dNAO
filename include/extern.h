@@ -1233,7 +1233,7 @@ E void FDECL(add_subroom, (struct mkroom *,int,int,int,int,
 			   BOOLEAN_P,SCHAR_P,BOOLEAN_P));
 E void NDECL(makecorridors);
 E int FDECL(add_door, (int,int,struct mkroom *));
-E int NDECL(rand_roomtype);
+E int NDECL(random_special_room);
 E void NDECL(mkpoolroom);
 E void NDECL(mklev);
 #ifdef SPECIALIZATION
@@ -1254,6 +1254,7 @@ E void NDECL(mkinvokearea);
 
 void FDECL(flood_fill_rm, (int,int,int,BOOLEAN_P,BOOLEAN_P));
 void FDECL(remove_rooms, (int,int,int,int));
+void FDECL(remove_room, (unsigned));
 
 /* ### mkmaze.c ### */
 
@@ -1267,6 +1268,9 @@ E boolean FDECL(bad_location, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P))
 E void FDECL(place_lregion, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,
 			     XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,
 			     XCHAR_P,d_level *));
+E void FDECL(maze_add_rooms, (int, int));
+E void FDECL(maze_touchup_rooms, (int));
+E void FDECL(maze_remove_room, (int));
 E void NDECL(movebubbles);
 E void NDECL(water_friction);
 E void FDECL(save_waterlevel, (int,int));
@@ -1325,13 +1329,15 @@ E void NDECL(obj_sanity_check);
 
 /* ### mkroom.c ### */
 
+E boolean FDECL(isspacious, (struct mkroom *));
 E void NDECL(mksepulcher);
 E void NDECL(mkmivault);
 E void FDECL(mkmivaultitem,(struct obj *));
 E void NDECL(place_lolth_vaults);
 E void NDECL(place_law_features);
 E void NDECL(place_neutral_features);
-E struct mkroom * FDECL(pick_room,(BOOLEAN_P));
+E struct mkroom * FDECL(pick_room,(BOOLEAN_P, BOOLEAN_P));
+E boolean FDECL(special_room_requires_full_walls, (int));
 E void FDECL(mkroom, (int));
 E void FDECL(fill_zoo, (struct mkroom *));
 E boolean FDECL(nexttodoor, (int,int));

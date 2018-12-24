@@ -2154,6 +2154,8 @@ dlb *fd;
 
 	free_rooms(tmproom, nrooms);
 
+	level.flags.sp_lev_nroom = nroom;
+
 	/* read the corridors */
 
 	Fread((genericptr_t) &ncorr, sizeof(ncorr), 1, fd);
@@ -2472,6 +2474,7 @@ dlb *fd;
 #endif
 		}
 	}
+	level.flags.sp_lev_nroom = nroom;
 
 	Fread((genericptr_t) &n, 1, sizeof(n), fd);
 						/* Number of doors */
@@ -2667,11 +2670,18 @@ dlb *fd;
 
     }		/* numpart loop */
 
+	/* insert rooms into the wallwalk sections prior to doing the mazewalk */
+	maze_add_rooms(10, -1);
+
     nwalk_sav = nwalk;
     while(nwalk--) {
 	    x = (xchar) walklist[nwalk].x;
 	    y = (xchar) walklist[nwalk].y;
 	    dir = walklist[nwalk].dir;
+
+		/* adding rooms may have placed a room overtop of the wallwalk start */
+		if (levl[x][y].roomno != NO_ROOM)
+			maze_remove_room(levl[x][y].roomno);
 
 	    /* don't use move() - it doesn't use W_NORTH, etc. */
 	    switch (dir) {
@@ -2720,6 +2730,10 @@ dlb *fd;
 
 	    walkfrom(x, y);
     }
+
+	/* add special rooms, dungeon features */
+	maze_touchup_rooms(rnd(3));
+
     wallification(1, 0, COLNO-1, ROWNO-1);
 
     /*

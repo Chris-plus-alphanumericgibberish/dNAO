@@ -210,8 +210,13 @@ STATIC_OVL void
 maze0xy(cc)	/* find random starting point for maze generation */
 	coord	*cc;
 {
-	cc->x = 3 + 2*rn2((x_maze_max>>1) - 1);
-	cc->y = 3 + 2*rn2((y_maze_max>>1) - 1);
+	int tryct = 200;
+	do{
+		cc->x = 3 + 2 * rn2((x_maze_max >> 1) - 1);
+		cc->y = 3 + 2 * rn2((y_maze_max >> 1) - 1);
+	} while (levl[cc->x][cc->y].roomno != NO_ROOM && tryct-->0);
+	if (tryct == 0)
+		impossible("Could not place starting point for maze generation");
 	return;
 }
 
@@ -803,72 +808,10 @@ int maxsize;
 		if (no_doors_made >= 100) {
 			impossible("maze_add_rooms: couldn't place a door?");
 		}
-		
-		/* walls can be destroyed if:
-		* - the room is not lit
-		* - and the room is not very large
-		*/
-		if (!r->rlit && rn2(7) && ((hx - lx)*(hy - ly) < d(11,11)))
-		{/* destroy some walls */
-			xchar x, y;
-			xchar xs, ys, xm, ym, xf, yf;
-			int wallsgone = rn2(256);	// bitfield
-
-			if ((hx - lx)*(hy - ly) < d(7, 7))
-				wallsgone |= rn2(256);	// more likely to have walls marked for removal
-
-			/* for small rooms, do not destroy walls by halves */
-			if (hx - lx <= 5){
-				wallsgone &= ~(2 + 8);
-				wallsgone |= (wallsgone & (1 + 4)) << 1;
-			}
-			if (hy - ly <= 5){
-				wallsgone &= ~(32 + 128);
-				wallsgone |= (wallsgone & (16 + 64)) << 1;
-			}
-			
-			xs = r->lx - 1;						// left wall
-			ys = r->ly - 1;						// top wall
-			xm = r->lx + (r->hx - r->lx) / 2;	// horizontal center
-			ym = r->ly + (r->hy - r->ly) / 2;	// vertical center
-			xf = r->hx + 1;						// right wall
-			yf = r->hy + 1;						// bottom wall
-
-			/* destroy walls */
-			for (x = xs + 1; x <= xm - 1; ++x) {
-				if (wallsgone &   1) destroy_wall(x, ys);	// top left
-				if (wallsgone &   2) destroy_wall(x, yf);	// bottom left
-			}
-			for (x = xm + 1; x <= xf - 1; ++x) {
-				if (wallsgone &   4) destroy_wall(x, ys);	// top right
-				if (wallsgone &   8) destroy_wall(x, yf);	// bottom right
-			}
-			for (y = ys + 1; y <= ym - 1; ++y) {
-				if (wallsgone &  16) destroy_wall(xs, y);	// left top
-				if (wallsgone &  32) destroy_wall(xf, y);	// right top
-			}
-			for (y = ym + 1; y <= yf - 1; ++y) {
-				if (wallsgone &  64) destroy_wall(xs, y);	// left bottom
-				if (wallsgone & 128) destroy_wall(xf, y);	// right bottom
-			}
-			/* corners and middles are destroyed if the wall sections they connected were destroyed */
-			if ((wallsgone &  16) && (wallsgone &   1)) destroy_wall(xs, ys);
-			if ((wallsgone &   1) && (wallsgone &   4)) destroy_wall(xm, ys);
-			if ((wallsgone &   4) && (wallsgone &  32)) destroy_wall(xf, ys);
-			if ((wallsgone &  32) && (wallsgone & 128)) destroy_wall(xf, ym);
-			if ((wallsgone & 128) && (wallsgone &   8)) destroy_wall(xf, yf);
-			if ((wallsgone &   8) && (wallsgone &   2)) destroy_wall(xm, yf);
-			if ((wallsgone &   2) && (wallsgone &  64)) destroy_wall(xs, yf);
-			if ((wallsgone &  64) && (wallsgone &  16)) destroy_wall(xs, ym);
-
-			/* note that r is not fully enclosed by walls anymore */
-			if (wallsgone)
-				r->rtype = JOINEDROOM;
-		}
-
 		/* set roomno so mazewalk and other maze generation ignore it */
 		topologize(r);
 	}
+	return;
 }
 
 void
@@ -918,6 +861,136 @@ int floortyp;
 			}
 		}
 	}
+	return;
+}
+
+/* Postprocessing after most of the rest of the level has been created
+ * (including stairs), and some rooms exist.
+ * Select attempts rooms to be converted into special rooms, then possibly
+ * place some other furniture inside the room.
+ */
+void
+maze_touchup_rooms(attempts)
+int attempts;
+{
+	struct mkroom *r;
+	if (nroom == 0)
+		return;
+
+	int i;
+	for (; attempts > 0; attempts--) {
+		if (wizard && nh_getenv("SHOPTYPE")) {
+			/* full manual override */
+			mkroom(SHOPBASE);
+		}
+		else {
+			i = random_special_room();
+			if (i)
+				mkroom(i);
+		}
+	}
+	for (i = 0; i < nroom; ++i) {
+		r = &rooms[i];
+		if (r->rtype != OROOM && r->rtype != JOINEDROOM) /* is it already special? */
+			continue;
+		/* probabilities here are deflated from makelevel() */
+		if (!rn2(20))
+			mkfeature(FOUNTAIN, FALSE, r);
+		if (!rn2(80))
+			mkfeature(SINK, FALSE, r);
+		if (!rn2(100))
+			mkfeature(GRAVE, FALSE, r);
+		if (!rn2(100))
+			mkfeature(ALTAR, FALSE, r);
+
+		/* 
+		 * Maybe destroy the walls of the room
+		 * walls can be destroyed if:
+		 * - it was not created from sp_lev
+		 * - it is not a special room
+		 * - the room is not lit
+		 * - and the room is not very large
+		 */
+		if (i > level.flags.sp_lev_nroom && !special_room_requires_full_walls(r->rtype) && !r->rlit && rn2(7) && (!rn2(3) || !isspacious(r)))
+		{/* destroy some walls */
+			xchar x, y;
+			xchar xs, ys, xm, ym, xf, yf;
+			int wallsgone = rn2(256);	// bitfield
+
+			xs = r->lx - 1;						// left wall
+			ys = r->ly - 1;						// top wall
+			xm = r->lx + (r->hx - r->lx) / 2;	// horizontal center
+			ym = r->ly + (r->hy - r->ly) / 2;	// vertical center
+			xf = r->hx + 1;						// right wall
+			yf = r->hy + 1;						// bottom wall
+
+			if ((xf - xs)*(yf - ys) < d(7, 7))
+				wallsgone |= rn2(256);	// more likely to have walls marked for removal
+
+			/* for small rooms, do not destroy walls by halves */
+			if (xf - xs <= 5){
+				wallsgone &= ~(2 + 8);
+				wallsgone |= (wallsgone & (1 + 4)) << 1;
+			}
+			if (yf - ys <= 5){
+				wallsgone &= ~(32 + 128);
+				wallsgone |= (wallsgone & (16 + 64)) << 1;
+			}
+
+			/* destroy walls */
+			for (x = xs + 1; x <= xm - 1; ++x) {
+				if (wallsgone & 1) destroy_wall(x, ys);	// top left
+				if (wallsgone & 2) destroy_wall(x, yf);	// bottom left
+			}
+			for (x = xm + 1; x <= xf - 1; ++x) {
+				if (wallsgone & 4) destroy_wall(x, ys);	// top right
+				if (wallsgone & 8) destroy_wall(x, yf);	// bottom right
+			}
+			for (y = ys + 1; y <= ym - 1; ++y) {
+				if (wallsgone & 16) destroy_wall(xs, y);	// left top
+				if (wallsgone & 32) destroy_wall(xf, y);	// right top
+			}
+			for (y = ym + 1; y <= yf - 1; ++y) {
+				if (wallsgone & 64) destroy_wall(xs, y);	// left bottom
+				if (wallsgone & 128) destroy_wall(xf, y);	// right bottom
+			}
+			/* corners and middles are destroyed if the wall sections they connected were destroyed */
+			if ((wallsgone &  16) && (wallsgone &   1)) destroy_wall(xs, ys);
+			if ((wallsgone &   1) && (wallsgone &   4)) destroy_wall(xm, ys);
+			if ((wallsgone &   4) && (wallsgone &  32)) destroy_wall(xf, ys);
+			if ((wallsgone &  32) && (wallsgone & 128)) destroy_wall(xf, ym);
+			if ((wallsgone & 128) && (wallsgone &   8)) destroy_wall(xf, yf);
+			if ((wallsgone &   8) && (wallsgone &   2)) destroy_wall(xm, yf);
+			if ((wallsgone &   2) && (wallsgone &  64)) destroy_wall(xs, yf);
+			if ((wallsgone &  64) && (wallsgone &  16)) destroy_wall(xs, ym);
+
+			/* note that r is not quite ordinary anymore */
+			if (wallsgone && r->rtype == OROOM)
+				r->rtype = JOINEDROOM;
+		}
+	}
+}
+
+/*
+ * Removes the given room, replacing its contents with pre-wallwalk fill
+ */
+void
+maze_remove_room(room_index)
+int room_index;
+{
+	int x, y;
+	struct mkroom *troom = &rooms[room_index];
+
+	for (x = troom->lx - 1; x <= troom->hx + 1; x++)
+	for (y = troom->ly - 1; y <= troom->hy + 1; y++)
+	{
+		levl[x][y].typ = ((x % 2) && (y % 2)) ? STONE : HWALL;
+		levl[x][y].flags = 0;
+	}
+
+	remove_room(room_index);
+
+	return;
 }
 
 void
@@ -947,6 +1020,8 @@ create_maze()
 	(void)mksobj_at(BOULDER, (int)mm.x, (int)mm.y, TRUE, FALSE);
 
 	wallification(2, 2, x_maze_max, y_maze_max);
+
+	return;
 }
 
 void
@@ -1102,6 +1177,9 @@ register const char *s;
 
 	/* place branch stair or portal */
 	place_branch(Is_branchlev(&u.uz), 0, 0);
+
+	/* add special rooms, dungeon features */
+	maze_touchup_rooms(rnd(3));
 
 	for(x = rn1(8,11); x; x--) {
 		mazexy(&mm);

@@ -18,7 +18,6 @@
 /* conversion of result to int is reasonable */
 
 STATIC_DCL void NDECL(makevtele);
-STATIC_DCL int NDECL(random_special_room);
 STATIC_DCL void NDECL(clear_level_structures);
 STATIC_DCL void NDECL(makelevel);
 STATIC_DCL void NDECL(mineralize);
@@ -752,12 +751,13 @@ int
 random_special_room()
 {
 #define mnotgone(x) !(mvitals[(x)].mvflags & G_GONE && !In_quest(&u.uz))
-	if (FALSE) return 0;
-	else if (depth(&u.uz) >  4 && !rn2( 8))                              return COURT;
+	/* STANDARD FARE */
+	if (!Inhell && !level.flags.is_maze_lev){
+	     if (depth(&u.uz) >  4 && !rn2( 8))                              return COURT;
 	else if (depth(&u.uz) > 16 && !rn2(10) && mnotgone(  PM_COCKATRICE)) return COCKNEST;
 	else if (depth(&u.uz) > 15 && !rn2(10))                              return POOLROOM;
 	else if (depth(&u.uz) > 14 && !rn2( 6) && mnotgone(     PM_SOLDIER)) return BARRACKS;
-	else if (depth(&u.uz) > 14 && !rn2(12) && mnotgone(PM_RUST_MONSTER)) return ARMORY;
+	else if (depth(&u.uz) <=14 && !rn2(12) && mnotgone(PM_RUST_MONSTER)) return ARMORY;
 	else if (depth(&u.uz) > 12 && !rn2(10))                              return ANTHOLE;
 	else if (depth(&u.uz) > 11 && !rn2( 8))                              return MORGUE;
 	else if (depth(&u.uz) >  9 && !rn2( 7) && mnotgone(  PM_KILLER_BEE)) return BEEHIVE;
@@ -767,7 +767,39 @@ random_special_room()
 	else if (depth(&u.uz) >  5 && !rn2(10) && mnotgone(  PM_LEPRECHAUN)) return LEPREHALL;
 	else if (depth(&u.uz) >  1 && !rn2(20))                              return STATUEGRDN;
 	else                                                                 return 0;
+	/* NON-HELL MAZE */
+	} else if (!Inhell){
+	     if (depth(&u.uz) >  4 && !rn2( 8))                              return COURT;
+	else if (depth(&u.uz) > 16 && !rn2(10) && mnotgone(  PM_COCKATRICE)) return COCKNEST;
+	else if (depth(&u.uz) > 15 && !rn2(10))                              return POOLROOM;
+	else if (depth(&u.uz) > 14 && !rn2( 6) && mnotgone(     PM_SOLDIER)) return BARRACKS;
+	else if (depth(&u.uz) <=14 && !rn2(12) && mnotgone(PM_RUST_MONSTER)) return ARMORY;
+	else if (depth(&u.uz) > 11 && !rn2( 8))                              return MORGUE;
+	else if (depth(&u.uz) >  5 && !rn2(10) && mnotgone(  PM_LEPRECHAUN)) return LEPREHALL;
+	else if (depth(&u.uz) >  1 && !rn2(20))                              return STATUEGRDN;
+	else                                                                 return 0;
+	/* GEHENNOM */
+	/* BAEL */
+	} else if (Is_bael_level(&u.uz)){
+	     if (!rn2(2))                                                    return BARRACKS;
+	/* ORCUS */
+	} else if (Is_orcus_level(&u.uz)){
+		 if (!rn2(2))                                                    return MORGUE;
+	/* STANDARD GEHENNOM */
+	} else{
+	     if (depth(&u.uz) >  4 && !rn2( 8))                              return COURT;
+	else if (depth(&u.uz) > 16 && !rn2(10) && mnotgone(  PM_COCKATRICE)) return COCKNEST;
+	else if (depth(&u.uz) > 15 && !rn2(10))                              return POOLROOM;
+	else if (depth(&u.uz) > 14 && !rn2( 6) && mnotgone(     PM_SOLDIER)) return BARRACKS;
+	else if (depth(&u.uz) <=14 && !rn2(12) && mnotgone(PM_RUST_MONSTER)) return ARMORY;
+	else if (depth(&u.uz) > 11 && !rn2( 8))                              return MORGUE;
+	else if (depth(&u.uz) >  5 && !rn2(10) && mnotgone(  PM_LEPRECHAUN)) return LEPREHALL;
+	else if (depth(&u.uz) >  1 && !rn2(20))                              return STATUEGRDN;
+	else                                                                 return 0;
+	}
+	/* BAEL */
 #undef mnotgone
+	return 0;
 }
 
 /* clear out various globals that keep information on the current level.
@@ -807,6 +839,8 @@ clear_level_structures()
 	
 	level.flags.goldkamcount_hostile = 0;
 	level.flags.goldkamcount_peace = 0;
+
+	level.flags.sp_lev_nroom = 0;
 	
 	level.flags.has_shop = 0;
 	level.flags.has_vault = 0;
