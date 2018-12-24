@@ -17,8 +17,6 @@
 /* croom->lx etc are schar (width <= int), so % arith ensures that */
 /* conversion of result to int is reasonable */
 
-
-STATIC_DCL boolean FDECL(mkfeature,(int,int,struct mkroom *));
 STATIC_DCL void NDECL(makevtele);
 STATIC_DCL int NDECL(random_special_room);
 STATIC_DCL void NDECL(clear_level_structures);
@@ -1092,27 +1090,27 @@ skip0:
 		/* greater chance of puddles if a water source is nearby */
 		x = 40;
 		if(!rn2(10)) {
-		    if(mkfeature(FOUNTAIN, 0, croom))
+		    if(mkfeature(FOUNTAIN, FALSE, croom))
 				x -= 20;
 		}
 #ifdef SINKS
 		if(!rn2(60)) {
-		    if(mkfeature(SINK, 0, croom))
+		    if(mkfeature(SINK, FALSE, croom))
 				x -= 20;
 		}
 
 		if (x < 2) x = 2;
 #endif
 		if(!rn2(x))
-			mkfeature(PUDDLE, 0, croom);
+			mkfeature(PUDDLE, FALSE, croom);
 
 		if(!rn2(60))
-			mkfeature(ALTAR, 0, croom);
+			mkfeature(ALTAR, FALSE, croom);
 
 		x = 80 - (depth(&u.uz) * 2);
 		if (x < 2) x = 2;
 		if(!rn2(x))
-			mkfeature(GRAVE, 0, croom);
+			mkfeature(GRAVE, FALSE, croom);
 
 		/* put statues inside */
 		if(!rn2(20))
@@ -1742,7 +1740,7 @@ struct mkroom *croom;
 boolean
 mkfeature(typ, mazeflag, croom)
 int typ;
-int mazeflag;
+boolean mazeflag;
 struct mkroom *croom;
 {
 	coord m;

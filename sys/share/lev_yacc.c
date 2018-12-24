@@ -1326,9 +1326,9 @@ case 42:
 break;
 case 43:
 {
-			if ( yyvsp[-3].i < 1 || yyvsp[-3].i > 5 ||
-			    yyvsp[-1].i < 1 || yyvsp[-1].i > 5 ) {
-			    yyerror("Room position should be between 1 & 5!");
+			if ((yyvsp[-3].i <= 0 || yyvsp[-3].i >= 80) ||
+			    (yyvsp[-1].i <= 0 && yyvsp[-1].i >= 20)) {
+			    yyerror("Room position must be in bounds!");
 			} else {
 			    current_coord.x = yyvsp[-3].i;
 			    current_coord.y = yyvsp[-1].i;

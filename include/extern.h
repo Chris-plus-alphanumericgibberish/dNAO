@@ -1233,6 +1233,7 @@ E void FDECL(add_subroom, (struct mkroom *,int,int,int,int,
 			   BOOLEAN_P,SCHAR_P,BOOLEAN_P));
 E void NDECL(makecorridors);
 E int FDECL(add_door, (int,int,struct mkroom *));
+E int NDECL(rand_roomtype);
 E void NDECL(mkpoolroom);
 E void NDECL(mklev);
 #ifdef SPECIALIZATION
@@ -1246,6 +1247,7 @@ E int FDECL(okdoor, (XCHAR_P,XCHAR_P));
 E void FDECL(dodoor, (int,int,struct mkroom *));
 E void FDECL(mktrap, (int,int,struct mkroom *,coord*));
 E void FDECL(mkstairs, (XCHAR_P,XCHAR_P,CHAR_P,struct mkroom *));
+E boolean FDECL(mkfeature, (int, boolean, struct mkroom *));
 E void NDECL(mkinvokearea);
 
 /* ### mkmap.c ### */

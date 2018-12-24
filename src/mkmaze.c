@@ -646,6 +646,309 @@ fixup_special()
     num_lregions = 0;
 }
 
+/* ROOMS IN MAZE FUNCTIONS
+ * Many thanks to aosdict's xnethack, which was consulted (read: copied) in making this
+ */
+
+/* 
+ * Returns true if the (x,y) location given falls withing the allowable bounds for mazes
+ */
+boolean
+maze_inbounds(x, y)
+xchar x, y;
+{
+	return (x >= 2 && y >= 2
+		&& x < x_maze_max && y < y_maze_max && isok(x, y));
+}
+
+/* 
+ * Returns true if the entire rectangle defined by its top-left and bottom-right corners
+ * is overtop of a mazewalk-textured area.
+ */
+boolean
+rectangle_in_mazewalk_area(lx, ly, hx, hy)
+xchar lx, ly, hx, hy;
+{
+	int x, y;
+
+	for (x = lx; x <= hx; x++)
+	for (y = ly; y <= hy; y++)
+	{
+		if (levl[x][y].typ != (((x % 2) && (y % 2)) ? STONE : HWALL))
+			return FALSE;
+	}
+	return TRUE;
+}
+
+
+/*
+ * Utility function to destroy a wall at the given spot.
+ */
+void
+destroy_wall(x, y)
+xchar x, y;
+{
+	/* don't destroy walls of the maze border */
+	if (   !maze_inbounds(x + 1, y + 0)
+		|| !maze_inbounds(x - 1, y - 0)
+		|| !maze_inbounds(x + 0, y + 1)
+		|| !maze_inbounds(x - 0, y - 1)
+		)
+		return;
+	if (IS_WALL(levl[x][y].typ) || IS_DOOR(levl[x][y].typ)) {
+		levl[x][y].typ = ROOM;
+		levl[x][y].flags = 0; /* clear door mask */
+	}
+	return;
+}
+
+/*
+ * Attempts to add rooms to the yet-unwalked mazewalk sections of a maze
+ */
+void
+maze_add_rooms(attempts, maxsize)
+int attempts;
+int maxsize;
+{
+	xchar x, y;
+
+	/* Ineligible maze levels for rooms */
+	if (Invocation_lev(&u.uz))
+		return;
+
+	for (; attempts > 0; attempts--) {
+		int roomidx;
+		coord roompos;
+		xchar lx, ly, hx, hy, width, height;
+		boolean intersect = FALSE;
+		int door_attempts = 3;
+		int no_doors_made = 0;
+
+		/* room must fit nicely in the maze; that is, its corner spaces should
+		* all be valid maze0xy() locations. Thus, it should have odd
+		* dimensions. */
+		if (maxsize == -1)
+			maxsize = rn2(4);
+		width = 2 * rn2(maxsize+1) + 3;
+		height = 2 * rn2(maxsize+1) + 3;
+
+		/* Pick a corner location. Which directions the room points out from
+		* this corner are randomized so that we don't have a bias towards any
+		* edge of the map. */
+		maze0xy(&roompos);
+		if (rn2(2)) {
+			/* original roompos is a bottom corner */
+			roompos.y -= (height - 1);
+		}
+		if (rn2(2)) {
+			/* original roompos is a right corner */
+			roompos.x -= (width - 1);
+		}
+		/* these variables are the boundaries including walls */
+		lx = roompos.x - 1;
+		ly = roompos.y - 1;
+		hx = roompos.x + width;
+		hy = roompos.y + height;
+
+		if (!rectangle_in_mazewalk_area(lx, ly, hx, hy))	{
+			/* can't place, out of bounds */
+			continue;
+		}
+
+		/* pick a suitable place in the maze to add a room */
+		if (!create_room(roompos.x, roompos.y, width, height,
+			1, 1, OROOM, -1))
+			continue;
+		
+		struct mkroom *r = &rooms[nroom - 1];
+
+		/* more door attempts for large rooms */
+		for (; door_attempts < (hx - lx)*(hy - ly) / 8; door_attempts++);
+		/* put in some doors */
+		for (; door_attempts > 0; door_attempts--) {
+			/* don't use finddpos - it'll bias doors towards the top left of
+			* the room */
+			xchar doorx, doory;
+			boolean horiz = rn2(2) ? TRUE : FALSE;
+			if (horiz) {
+				doorx = rn1(hx - lx + 1, lx);
+				doory = rn2(2) ? ly : hy;
+			}
+			else {
+				doorx = rn2(2) ? hx : lx;
+				doory = rn1(hy - ly + 1, ly);
+			}
+			/* Don't generate doors where the space outside of them is blocked.
+			* Shouldn't need okdoor() - with this rule, doors can't be next to
+			* each other and they should always be on walls */
+			if (((doorx % 2 == 0) && (doory % 2 == 0))
+				|| !maze_inbounds(doorx + !horiz, doory + horiz)
+				|| !maze_inbounds(doorx - !horiz, doory - horiz)
+				|| IS_WALL(levl[doorx + !horiz][doory + horiz].typ)
+				|| IS_WALL(levl[doorx - !horiz][doory - horiz].typ)
+				)
+			{
+				if (door_attempts == 1) {
+					door_attempts++; /* try again */
+					no_doors_made++;
+					if (no_doors_made == 200) {
+						impossible("maze_add_rooms: can't place a door!");
+						break;
+					}
+				}
+				continue;
+			}
+			dodoor(doorx, doory, r);
+		}
+		if (no_doors_made >= 100) {
+			impossible("maze_add_rooms: couldn't place a door?");
+		}
+		
+		/* walls can be destroyed if:
+		* - the room is not lit
+		* - and the room is not very large
+		*/
+		if (!r->rlit && rn2(7) && ((hx - lx)*(hy - ly) < d(11,11)))
+		{/* destroy some walls */
+			xchar x, y;
+			xchar xs, ys, xm, ym, xf, yf;
+			int wallsgone = rn2(256);	// bitfield
+
+			if ((hx - lx)*(hy - ly) < d(7, 7))
+				wallsgone |= rn2(256);	// more likely to have walls marked for removal
+
+			/* for small rooms, do not destroy walls by halves */
+			if (hx - lx <= 5){
+				wallsgone &= ~(2 + 8);
+				wallsgone |= (wallsgone & (1 + 4)) << 1;
+			}
+			if (hy - ly <= 5){
+				wallsgone &= ~(32 + 128);
+				wallsgone |= (wallsgone & (16 + 64)) << 1;
+			}
+			
+			xs = r->lx - 1;						// left wall
+			ys = r->ly - 1;						// top wall
+			xm = r->lx + (r->hx - r->lx) / 2;	// horizontal center
+			ym = r->ly + (r->hy - r->ly) / 2;	// vertical center
+			xf = r->hx + 1;						// right wall
+			yf = r->hy + 1;						// bottom wall
+
+			/* destroy walls */
+			for (x = xs + 1; x <= xm - 1; ++x) {
+				if (wallsgone &   1) destroy_wall(x, ys);	// top left
+				if (wallsgone &   2) destroy_wall(x, yf);	// bottom left
+			}
+			for (x = xm + 1; x <= xf - 1; ++x) {
+				if (wallsgone &   4) destroy_wall(x, ys);	// top right
+				if (wallsgone &   8) destroy_wall(x, yf);	// bottom right
+			}
+			for (y = ys + 1; y <= ym - 1; ++y) {
+				if (wallsgone &  16) destroy_wall(xs, y);	// left top
+				if (wallsgone &  32) destroy_wall(xf, y);	// right top
+			}
+			for (y = ym + 1; y <= yf - 1; ++y) {
+				if (wallsgone &  64) destroy_wall(xs, y);	// left bottom
+				if (wallsgone & 128) destroy_wall(xf, y);	// right bottom
+			}
+			/* corners and middles are destroyed if the wall sections they connected were destroyed */
+			if ((wallsgone &  16) && (wallsgone &   1)) destroy_wall(xs, ys);
+			if ((wallsgone &   1) && (wallsgone &   4)) destroy_wall(xm, ys);
+			if ((wallsgone &   4) && (wallsgone &  32)) destroy_wall(xf, ys);
+			if ((wallsgone &  32) && (wallsgone & 128)) destroy_wall(xf, ym);
+			if ((wallsgone & 128) && (wallsgone &   8)) destroy_wall(xf, yf);
+			if ((wallsgone &   8) && (wallsgone &   2)) destroy_wall(xm, yf);
+			if ((wallsgone &   2) && (wallsgone &  64)) destroy_wall(xs, yf);
+			if ((wallsgone &  64) && (wallsgone &  16)) destroy_wall(xs, ym);
+
+			/* note that r is not fully enclosed by walls anymore */
+			if (wallsgone)
+				r->rtype = JOINEDROOM;
+		}
+
+		/* set roomno so mazewalk and other maze generation ignore it */
+		topologize(r);
+	}
+}
+
+void
+maze_remove_deadends(floortyp)
+int floortyp;
+{
+	char dirok[4];
+	int x, y, dir, idx, idx2, dx, dy, dx2, dy2;
+
+	dirok[0] = 0; /* lint suppression */
+	for (x = 2; x < x_maze_max; x++)
+	for (y = 2; y < y_maze_max; y++)
+	if ((levl[x][y].typ == floortyp) && (x % 2) && (y % 2)) {
+		idx = idx2 = 0;
+		for (dir = 0; dir < 4; dir++) {
+			dx = dx2 = x;
+			dy = dy2 = y;
+			move(&dx, &dy, dir);
+			if (!maze_inbounds(dx, dy)) {
+				idx2++;
+				continue;
+			}
+			move(&dx2, &dy2, dir);
+			move(&dx2, &dy2, dir);
+			if (!maze_inbounds(dx2, dy2)) {
+				idx2++;
+				continue;
+			}
+			if (IS_WALL(levl[dx][dy].typ)
+				&& (levl[dx2][dy2].typ == floortyp)) {
+				dirok[idx++] = dir;
+				idx2++;
+			}
+		}
+		if (idx2 >= 3 && idx > 0) {
+			dx = dx2 = x;
+			dy = dy2 = y;
+			dir = dirok[rn2(idx)];
+			move(&dx, &dy, dir);
+			move(&dx2, &dy2, dir);
+			move(&dx2, &dy2, dir);
+			if (levl[dx2][dy2].roomno != NO_ROOM) {
+				dodoor(dx, dy, &rooms[levl[dx2][dy2].roomno]);
+			}
+			else {
+				levl[dx][dy].typ = floortyp;
+			}
+		}
+	}
+}
+
+void
+create_maze()
+{
+	int x, y;
+	coord mm;
+
+	/* make maze base */
+	for (x = 2; x <= x_maze_max; x++)
+	for (y = 2; y <= y_maze_max; y++)
+		levl[x][y].typ = ((x % 2) && (y % 2)) ? STONE : HWALL;
+
+	/* add rooms */
+	maze_add_rooms( 5,-1);
+	maze_add_rooms(10, 3);
+	maze_add_rooms( 5, 0);
+
+	/* perform mazewalk */
+	maze0xy(&mm);
+	walkfrom((int)mm.x, (int)mm.y);
+
+	/* remove dead ends */
+	maze_remove_deadends(ROOM);
+
+	/* put a boulder at the maze center */
+	(void)mksobj_at(BOULDER, (int)mm.x, (int)mm.y, TRUE, FALSE);
+
+	wallification(2, 2, x_maze_max, y_maze_max);
+}
+
 void
 makemaz(s)
 register const char *s;
@@ -746,24 +1049,8 @@ register const char *s;
 
 	level.flags.is_maze_lev = TRUE;
 
-#ifndef WALLIFIED_MAZE
-	for(x = 2; x < x_maze_max; x++)
-		for(y = 2; y < y_maze_max; y++)
-			levl[x][y].typ = STONE;
-#else
-	for(x = 2; x <= x_maze_max; x++)
-		for(y = 2; y <= y_maze_max; y++)
-			levl[x][y].typ = ((x % 2) && (y % 2)) ? STONE : HWALL;
-#endif
+	create_maze();
 
-	maze0xy(&mm);
-	walkfrom((int) mm.x, (int) mm.y);
-	/* put a boulder at the maze center */
-	(void) mksobj_at(BOULDER, (int) mm.x, (int) mm.y, TRUE, FALSE);
-
-#ifdef WALLIFIED_MAZE
-	wallification(2, 2, x_maze_max, y_maze_max);
-#endif
 	mazexy(&mm);
 	mkstairs(mm.x, mm.y, 1, (struct mkroom *)0);		/* up */
 	if (!Invocation_lev(&u.uz)) {
