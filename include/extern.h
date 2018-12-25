@@ -1246,6 +1246,7 @@ E boolean FDECL(occupied, (XCHAR_P,XCHAR_P));
 E int FDECL(okdoor, (XCHAR_P,XCHAR_P));
 E void FDECL(dodoor, (int,int,struct mkroom *));
 E void FDECL(mktrap, (int,int,struct mkroom *,coord*));
+E struct mkroom *FDECL(room_at, (XCHAR_P, XCHAR_P));
 E void FDECL(mkstairs, (XCHAR_P,XCHAR_P,CHAR_P,struct mkroom *));
 E boolean FDECL(mkfeature, (int, boolean, struct mkroom *));
 E void NDECL(mkinvokearea);
@@ -1269,6 +1270,8 @@ E void FDECL(place_lregion, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,
 			     XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,
 			     XCHAR_P,d_level *));
 E void FDECL(maze_add_rooms, (int, int));
+E void FDECL(maze_add_openings, (int));
+E void FDECL(maze_remove_deadends, (int, boolean));
 E void FDECL(maze_touchup_rooms, (int));
 E void FDECL(maze_remove_room, (int));
 E void NDECL(movebubbles);

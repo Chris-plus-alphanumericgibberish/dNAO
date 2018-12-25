@@ -2607,7 +2607,7 @@ dlb *fd;
 		} while(prevstair.x && xi++ < 100 &&
 			distmin(x,y,prevstair.x,prevstair.y) <= 8);
 		if ((badtrap = t_at(x,y)) != 0) deltrap(badtrap);
-		mkstairs(x, y, (char)tmpstair.up, (struct mkroom *)0);
+		mkstairs(x, y, (char)tmpstair.up, room_at(x,y));
 		prevstair.x = x;
 		prevstair.y = y;
 	}
@@ -2672,6 +2672,7 @@ dlb *fd;
 
 	/* insert rooms into the wallwalk sections prior to doing the mazewalk */
 	maze_add_rooms(10, -1);
+	maze_add_openings(5);
 
     nwalk_sav = nwalk;
     while(nwalk--) {
@@ -2680,7 +2681,7 @@ dlb *fd;
 	    dir = walklist[nwalk].dir;
 
 		/* adding rooms may have placed a room overtop of the wallwalk start */
-		if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
+		if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
 			maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 
 	    /* don't use move() - it doesn't use W_NORTH, etc. */
@@ -2730,6 +2731,8 @@ dlb *fd;
 
 	    walkfrom(x, y, 0);
     }
+	/* remove a few dead ends */
+	maze_remove_deadends(ROOM, TRUE);
 
 	/* add special rooms, dungeon features */
 	maze_touchup_rooms(rnd(3));

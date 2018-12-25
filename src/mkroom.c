@@ -554,6 +554,7 @@ mklolthgnoll()
 			rooms[nroom].fdoor = 0;
 			rooms[nroom].nsubrooms = 0;
 			rooms[nroom].irregular = FALSE;
+			rooms[nroom].solidwall = 0;
 			nroom++;
 			
 			for(i = 2; i < 8; i++) for(j = 2; j < 8; j++){
@@ -689,6 +690,7 @@ mklolthgarden()
 			rooms[nroom].fdoor = 0;
 			rooms[nroom].nsubrooms = 0;
 			rooms[nroom].irregular = FALSE;
+			rooms[nroom].solidwall = 0;
 			mkgarden(&rooms[nroom]);
 			nroom++;
 			
@@ -3871,7 +3873,6 @@ int type;
 	case SWAMP:
 	case MORGUE:
 	case ARMORY:
-	case BARRACKS:
 	case RIVER:
 	case POOLROOM:
 	case JOINEDROOM:

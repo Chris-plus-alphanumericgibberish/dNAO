@@ -84,6 +84,7 @@ enum {
 #define IS_CORNER(typ)	((typ) >= TLCORNER && (typ) <= TRWALL)
 #define IS_ROCK(typ)	((typ) < POOL)		/* absolutely nonaccessible */
 #define IS_DOOR(typ)	((typ) == DOOR)
+#define IS_SDOOR(typ)	((typ) == SDOOR)
 #define IS_TREE(typ)	((typ) == TREE || \
 			(level.flags.arboreal && (typ) == STONE))
 #define IS_DEADTREE(typ) ((typ) == DEADTREE)

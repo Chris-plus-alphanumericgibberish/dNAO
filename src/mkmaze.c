@@ -205,7 +205,7 @@ int depth;
 	move(&x,&y,dir);
 	if(!maze_inbounds(x, y))
 		return(FALSE);
-	if((depth < 5) && (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom))	/* if we're early, we can bust through randomly-placed rooms */
+	if((depth < 3) && (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom))	/* if we're early, we can bust through randomly-placed rooms */
 		return(TRUE);
 	if(levl[x][y].typ != 0)
 		return(FALSE);
@@ -330,7 +330,7 @@ d_level *lev;
 	break;
     case LR_DOWNSTAIR:
     case LR_UPSTAIR:
-	mkstairs(x, y, (char)rtype, (struct mkroom *)0);
+	mkstairs(x, y, (char)rtype, room_at(x,y));
 	break;
     case LR_BRANCH:
 	place_branch(Is_branchlev(&u.uz), x, y);
@@ -690,6 +690,84 @@ xchar lx, ly, hx, hy;
 	return TRUE;
 }
 
+/* 
+ * The sophisticated and classy cousin of rectangle_in_mazewalk_area().
+ * Determines if a cutting out a rectangle would immediately separate sections of mazewalk from each other
+ */
+boolean
+maze_rectangle_border_is_okay(lx, ly, hx, hy)
+xchar lx, ly, hx, hy;
+{
+	int x = lx-1;	// we want to be on the [stone] part of the mazewalk fill
+	int y = ly-1;
+	int dx = 2;
+	int dy = 0;
+	boolean prev_okay = (isok(x, y) && !levl[x][y].typ);
+	int changes = 0;
+
+	do{
+		/* record if whether or not */
+		if (prev_okay != (isok(x,y) && !levl[x][y].typ)){
+			changes++;
+			prev_okay = (isok(x,y) && !levl[x][y].typ);
+		}
+		/* move to next spot */
+		x += dx;
+		y += dy;
+
+		if (dx && (x - 1 == hx || x + 1 == lx))
+		{
+			dy = dx;
+			dx = 0;
+		}
+		else if (dy && (y - 1 == hy || y + 1 == ly))
+		{
+			dx = -dy;
+			dy = 0;
+		}
+	} while ((x != lx - 1) || (y != ly - 1));
+
+	if (changes > 2)
+	{
+		return FALSE;
+	}
+	else
+		return TRUE;
+}
+
+/*
+ * Sets the solidwall parameters for rand maze room walls for the given room
+ */
+void
+maze_room_set_destructible_flags(r)
+struct mkroom * r;
+{
+	xchar rlx, rly, rhx, rhy;	// rectangles to check for mazewalk-ness
+	
+	int i;
+	int side = 0;
+
+	for (i = 0; i < 4; i++)
+	{
+		side = 1 << i;
+		rlx = r->lx;
+		rly = r->ly;
+		rhx = r->hx;
+		rhy = r->hy;
+		switch (side)
+		{
+		case W_NORTH: rly -= 2; rhy = rly;	break;
+		case W_SOUTH: rhy += 2; rly = rhy;	break;
+		case W_EAST:  rhx -= 2; rlx = rhx;	break;
+		case W_WEST:  rlx += 2; rhx = rlx;	break;
+		}
+		if (!rectangle_in_mazewalk_area(rlx, rly, rhx, rhy))
+		{
+			r->solidwall |= side;
+		}
+	}
+	return;
+}
 
 /*
  * Utility function to destroy a wall at the given spot.
@@ -705,7 +783,7 @@ xchar x, y;
 		|| !maze_inbounds(x - 0, y - 1)
 		)
 		return;
-	if (IS_WALL(levl[x][y].typ) || IS_DOOR(levl[x][y].typ)) {
+	if (IS_WALL(levl[x][y].typ) || IS_DOOR(levl[x][y].typ) || IS_SDOOR(levl[x][y].typ)) {
 		levl[x][y].typ = ROOM;
 		levl[x][y].flags = 0; /* clear door mask */
 	}
@@ -730,7 +808,6 @@ int maxsize;
 		int roomidx;
 		coord roompos;
 		xchar lx, ly, hx, hy, width, height;
-		boolean intersect = FALSE;
 		int door_attempts = 3;
 		int no_doors_made = 0;
 
@@ -760,49 +837,62 @@ int maxsize;
 		hx = roompos.x + width;
 		hy = roompos.y + height;
 
+		/* validate location */
 		if (!rectangle_in_mazewalk_area(lx, ly, hx, hy))	{
 			/* can't place, out of bounds */
 			continue;
 		}
+		if (!maze_rectangle_border_is_okay(lx, ly, hx, hy))	{
+			/* can't place, the room would probably cut the map in two */
+			continue;
+		}
 
-		/* pick a suitable place in the maze to add a room */
+		/* place the room into the the maze */
 		if (!create_room(roompos.x, roompos.y, width, height,
 			1, 1, OROOM, -1))
 			continue;
-		
 		struct mkroom *r = &rooms[nroom - 1];
 
-		/* more door attempts for large rooms */
-		for (; door_attempts < (hx - lx)*(hy - ly) / 8; door_attempts++);
+		/* determine which walls border mazewalk area (so they are permeable at levelgen) */
+		maze_room_set_destructible_flags(r);
+
+
 		/* put in some doors */
+		/* more door attempts for large rooms */
+		for (; door_attempts < ((hx - lx)+(hy - ly))/4; door_attempts++);
+		/* try to add the doors */
 		for (; door_attempts > 0; door_attempts--) {
 			/* don't use finddpos - it'll bias doors towards the top left of
 			* the room */
 			xchar doorx, doory;
 			boolean horiz = rn2(2) ? TRUE : FALSE;
 			if (horiz) {
-				doorx = rn1(hx - lx + 1, lx);
+				doorx = rn2(hx - lx) / 2 * 2 + 1 + lx;
 				doory = rn2(2) ? ly : hy;
 			}
 			else {
 				doorx = rn2(2) ? hx : lx;
-				doory = rn1(hy - ly + 1, ly);
+				doory = rn2(hy - ly) / 2 * 2 + 1 + ly;
 			}
 			/* Don't generate doors where the space outside of them is blocked.
-			* Shouldn't need okdoor() - with this rule, doors can't be next to
-			* each other and they should always be on walls */
-			if (((doorx % 2 == 0) && (doory % 2 == 0))
-				|| !maze_inbounds(doorx + !horiz, doory + horiz)
-				|| !maze_inbounds(doorx - !horiz, doory - horiz)
-				|| IS_WALL(levl[doorx + !horiz][doory + horiz].typ)
-				|| IS_WALL(levl[doorx - !horiz][doory - horiz].typ)
+			 * Shouldn't need okdoor() - with previous location generation, doors can't be next to
+			 * each other and they should always be on walls
+			 */
+			if (   !maze_inbounds(doorx + !horiz, doory + horiz)	// cannot be on the maze edge
+				|| !maze_inbounds(doorx - !horiz, doory - horiz)	// cannot be on the maze edge
+				//|| IS_WALL(levl[doorx + !horiz][doory + horiz].typ)	// cannot be blocked by walls
+				//|| IS_WALL(levl[doorx - !horiz][doory - horiz].typ)	// cannot be blocked by walls
+				|| (r->solidwall & (((doory == ly)*W_NORTH) +
+									((doory == hy)*W_SOUTH) +
+									((doorx == lx)*W_WEST)  +
+									((doorx == hx)*W_EAST)))		// cannot be on a solid wall
 				)
 			{
 				if (door_attempts == 1) {
 					door_attempts++; /* try again */
 					no_doors_made++;
 					if (no_doors_made == 200) {
-						impossible("maze_add_rooms: can't place a door!");
+						impossible("maze_add_rooms: can't place a door on rectangle (%d,%d ; %d,%d)", lx,ly,hx,hy);
 						break;
 					}
 				}
@@ -810,18 +900,67 @@ int maxsize;
 			}
 			dodoor(doorx, doory, r);
 		}
-		if (no_doors_made >= 100) {
-			impossible("maze_add_rooms: couldn't place a door?");
-		}
 		/* set roomno so mazewalk and other maze generation ignore it */
 		topologize(r);
 	}
 	return;
 }
 
+/*
+* Attempts to add rooms to the yet-unwalked mazewalk sections of a maze
+*/
 void
-maze_remove_deadends(floortyp)
+maze_add_openings(attempts)
+int attempts;
+{
+	xchar x, y;
+
+	/* Ineligible maze levels for rooms */
+	if (Invocation_lev(&u.uz))
+		return;
+
+	for (; attempts > 0; attempts--) {
+		coord roompos;
+		xchar lx, ly, hx, hy;
+		xchar x, y;
+
+		/* Pick the location. */
+		maze0xy(&roompos);
+
+		/* area around the center location */
+		lx = roompos.x - 1;
+		ly = roompos.y - 1;
+		hx = roompos.x + 1;
+		hy = roompos.y + 1;
+
+		/* validate location */
+		if (!rectangle_in_mazewalk_area(lx - 1, ly - 1, hx + 1, hy + 1))	{
+			/* can't place, close to out of bounds or actually out of bounds */
+			continue;
+		}
+		if (!maze_rectangle_border_is_okay(lx, ly, hx, hy))	{
+			/* can't place, the space would probably cut the map in two */
+			continue;
+		}
+		/* place the opening into the the maze */
+		for (x = lx; x <= hx; x++)
+		for (y = ly; y <= hy; y++)
+		{
+			if (!((x - roompos.x) && (y - roompos.y)))
+				levl[x][y].typ = ROOM;
+		}
+	}
+	return;
+}
+
+/*
+ * Attempts to make the maze more livable by remove simple dead ends from the maze
+ * If called with careful = TRUE, it will only remove dead ends into places it is certain are not part of sp_lev generation
+ */
+void
+maze_remove_deadends(floortyp, careful)
 int floortyp;
+boolean careful;
 {
 	char dirok[4];
 	int x, y, dir, idx, idx2, dx, dy, dx2, dy2;
@@ -847,8 +986,21 @@ int floortyp;
 			}
 			if (IS_WALL(levl[dx][dy].typ)
 				&& (levl[dx2][dy2].typ == floortyp)) {
-				dirok[idx++] = dir;
+				if (!careful)
+				{
+					dirok[idx++] = dir;
+				}
+				else
+				{// will only make paths into rooms that were randomly placed prior to mazewalking
+					if (levl[dx2][dy2].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
+						dirok[idx++] = dir;
+				}
 				idx2++;
+				continue;
+			}
+			if (IS_WALL(levl[dx][dy].typ)) {
+				idx2++;
+				continue;
 			}
 		}
 		if (idx2 >= 3 && idx > 0) {
@@ -894,80 +1046,77 @@ int attempts;
 				mkroom(i);
 		}
 	}
-	for (i = 0; i < nroom; ++i) {
+	for (i = level.flags.sp_lev_nroom; i < nroom; ++i) {
+		/* set r */
 		r = &rooms[i];
-		if (r->rtype != OROOM && r->rtype != JOINEDROOM) /* is it already special? */
-			continue;
-		/* probabilities here are deflated from makelevel() */
-		if (!rn2(20))
-			mkfeature(FOUNTAIN, FALSE, r);
-		if (!rn2(80))
-			mkfeature(SINK, FALSE, r);
-		if (!rn2(100))
-			mkfeature(GRAVE, FALSE, r);
-		if (!rn2(100))
-			mkfeature(ALTAR, FALSE, r);
+
+		/* add furniture to simple rooms */
+		if (r->rtype == OROOM || r->rtype == JOINEDROOM)
+		{
+			/* probabilities here are deflated from makelevel() */
+			if (!rn2(20))
+				mkfeature(FOUNTAIN, FALSE, r);
+			if (!rn2(80))
+				mkfeature(SINK, FALSE, r);
+			if (!rn2(100))
+				mkfeature(GRAVE, FALSE, r);
+			if (!rn2(100))
+				mkfeature(ALTAR, FALSE, r);
+		}
 
 		/* 
 		 * Maybe destroy the walls of the room
 		 * walls can be destroyed if:
-		 * - it was not created from sp_lev
-		 * - it is not a special room
+		 * - it is not a special room that wants full walls
 		 * - the room is not lit
-		 * - and the room is not very large
+		 * 6/7 probability
 		 */
-		if (i > level.flags.sp_lev_nroom && !special_room_requires_full_walls(r->rtype) && !r->rlit && rn2(7) && (!rn2(3) || !isspacious(r)))
-		{/* destroy some walls */
+		
+		if (!special_room_requires_full_walls(r->rtype) && !r->rlit && rn2(7))
+		{
 			xchar x, y;
-			xchar xs, ys, xm, ym, xf, yf;
-			int wallsgone = rn2(256);	// bitfield
+			xchar lx, ly, mx, my, hx, hy;
+			int wallsgone = 1+2+4+8;	// 4-bit bitfield
+			int i;
 
-			xs = r->lx - 1;						// left wall
-			ys = r->ly - 1;						// top wall
-			xm = r->lx + (r->hx - r->lx) / 2;	// horizontal center
-			ym = r->ly + (r->hy - r->ly) / 2;	// vertical center
-			xf = r->hx + 1;						// right wall
-			yf = r->hy + 1;						// bottom wall
+			lx = r->lx - 1;	// left wall
+			ly = r->ly - 1;	// top wall
+			hx = r->hx + 1;	// right wall
+			hy = r->hy + 1;	// bottom wall
 
-			if ((xf - xs)*(yf - ys) < d(7, 7))
-				wallsgone |= rn2(256);	// more likely to have walls marked for removal
+			/* large rooms are less likely to lose walls */
+			for (i = (hx - lx) / 4; i > 0; i--)
+				wallsgone &= (((rn2(16) | rn2(16)) & (W_NORTH | W_SOUTH)) | W_EAST | W_WEST);
+			for (i = (hy - ly) / 4; i > 0; i--)
+				wallsgone &= (((rn2(16) | rn2(16)) & (W_EAST | W_WEST)) | W_NORTH | W_SOUTH);
 
-			/* for small rooms, do not destroy walls by halves */
-			if (xf - xs <= 5){
-				wallsgone &= ~(2 + 8);
-				wallsgone |= (wallsgone & (1 + 4)) << 1;
-			}
-			if (yf - ys <= 5){
-				wallsgone &= ~(32 + 128);
-				wallsgone |= (wallsgone & (16 + 64)) << 1;
-			}
+			/* "solid" walls that don't border maze filler cannot be destroyed in this manner */
+			wallsgone &= ~r->solidwall;
 
-			/* destroy walls */
-			for (x = xs + 1; x <= xm - 1; ++x) {
-				if (wallsgone & 1) destroy_wall(x, ys);	// top left
-				if (wallsgone & 2) destroy_wall(x, yf);	// bottom left
+			/* do not remove walls bording the edge of the maze */
+			if (ly == 2)			wallsgone &= ~W_NORTH;
+			if (hy == y_maze_max)	wallsgone &= ~W_SOUTH;
+			if (hx == x_maze_max)	wallsgone &= ~W_EAST;
+			if (lx == 2)			wallsgone &= ~W_WEST;
+
+			/* actually destroy walls */
+			for (x = lx + 1; x <= hx - 1; ++x) {
+				if (wallsgone & W_NORTH) destroy_wall(x, ly);	// top
+				if (wallsgone & W_SOUTH) destroy_wall(x, hy);	// bottom
 			}
-			for (x = xm + 1; x <= xf - 1; ++x) {
-				if (wallsgone & 4) destroy_wall(x, ys);	// top right
-				if (wallsgone & 8) destroy_wall(x, yf);	// bottom right
-			}
-			for (y = ys + 1; y <= ym - 1; ++y) {
-				if (wallsgone & 16) destroy_wall(xs, y);	// left top
-				if (wallsgone & 32) destroy_wall(xf, y);	// right top
-			}
-			for (y = ym + 1; y <= yf - 1; ++y) {
-				if (wallsgone & 64) destroy_wall(xs, y);	// left bottom
-				if (wallsgone & 128) destroy_wall(xf, y);	// right bottom
+			for (y = ly + 1; y <= my - 1; ++y) {
+				if (wallsgone & W_EAST) destroy_wall(hx, y);	// right
+				if (wallsgone & W_WEST) destroy_wall(lx, y);	// left
 			}
 			/* corners and middles are destroyed if the wall sections they connected were destroyed */
-			if ((wallsgone &  16) && (wallsgone &   1)) destroy_wall(xs, ys);
-			if ((wallsgone &   1) && (wallsgone &   4)) destroy_wall(xm, ys);
-			if ((wallsgone &   4) && (wallsgone &  32)) destroy_wall(xf, ys);
-			if ((wallsgone &  32) && (wallsgone & 128)) destroy_wall(xf, ym);
-			if ((wallsgone & 128) && (wallsgone &   8)) destroy_wall(xf, yf);
-			if ((wallsgone &   8) && (wallsgone &   2)) destroy_wall(xm, yf);
-			if ((wallsgone &   2) && (wallsgone &  64)) destroy_wall(xs, yf);
-			if ((wallsgone &  64) && (wallsgone &  16)) destroy_wall(xs, ym);
+			if ((wallsgone & W_NORTH) && (wallsgone & W_WEST)) destroy_wall(lx, ly);
+			if ((wallsgone & W_NORTH) && (wallsgone & W_EAST)) destroy_wall(hx, ly);
+			if ((wallsgone & W_SOUTH) && (wallsgone & W_EAST)) destroy_wall(hx, hy);
+			if ((wallsgone & W_SOUTH) && (wallsgone & W_WEST)) destroy_wall(lx, hy);
+
+			/* re-draw walls*/
+			if (wallsgone)
+				wallification(lx, ly, hx, hy);
 
 			/* note that r is not quite ordinary anymore */
 			if (wallsgone && r->rtype == OROOM)
@@ -1014,12 +1163,15 @@ create_maze()
 	maze_add_rooms(10, 3);
 	maze_add_rooms( 5, 0);
 
+	/* add maze openings */
+	maze_add_openings(5);
+
 	/* perform mazewalk */
 	maze0xy(&mm);
 	walkfrom((int)mm.x, (int)mm.y, 0);
 
 	/* remove dead ends */
-	maze_remove_deadends(ROOM);
+	maze_remove_deadends(ROOM, FALSE);
 
 	/* put a boulder at the maze center */
 	(void)mksobj_at(BOULDER, (int)mm.x, (int)mm.y, TRUE, FALSE);
@@ -1132,10 +1284,11 @@ register const char *s;
 	create_maze();
 
 	mazexy(&mm);
-	mkstairs(mm.x, mm.y, 1, (struct mkroom *)0);		/* up */
+	mkstairs(mm.x, mm.y, 1, room_at(mm.x,mm.y));		/* up */
+
 	if (!Invocation_lev(&u.uz)) {
 	    mazexy(&mm);
-	    mkstairs(mm.x, mm.y, 0, (struct mkroom *)0);	/* down */
+	    mkstairs(mm.x, mm.y, 0, room_at(mm.x,mm.y));	/* down */
 	} else {	/* choose "vibrating square" location */
 #define x_maze_min 2
 #define y_maze_min 2
@@ -1254,7 +1407,7 @@ int x,y,depth;
 			levl[x][y].typ = ROOM;
 #endif
 			move(&x, &y, dir);
-			if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
+			if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
 				maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 			pos++;
 			if (pos > CELLS)
@@ -1291,7 +1444,7 @@ int x,y,depth;
 		if(!q) return;
 		dir = dirs[rn2(q)];
 		move(&x,&y,dir);
-		if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
+		if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
 			maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 #ifndef WALLIFIED_MAZE
 		levl[x][y].typ = CORR;

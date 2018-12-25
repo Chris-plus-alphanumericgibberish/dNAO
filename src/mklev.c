@@ -150,7 +150,7 @@ do_room_or_subroom(croom, lowx, lowy, hix, hiy, lit, rtype, special, is_room)
 	 */
 	croom->fdoor = doorindex;
 	croom->irregular = FALSE;
-
+	croom->solidwall = 0;
 	croom->nsubrooms = 0;
 	croom->sbrooms[0] = (struct mkroom *) 0;
 	if (!special) {
@@ -1725,6 +1725,16 @@ coord *tm;
 	(void) maketrap(m.x, m.y, kind);
 	if (kind == WEB) (void) makemon(&mons[PM_GIANT_SPIDER],
 						m.x, m.y, NO_MM_FLAGS);
+}
+
+struct mkroom*
+room_at(x, y)
+xchar x, y;
+{
+	if (levl[x][y].roomno)
+		return &rooms[levl[x][y].roomno - ROOMOFFSET];
+	else
+		return (struct mkroom *)0;
 }
 
 void
