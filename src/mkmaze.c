@@ -702,14 +702,14 @@ xchar lx, ly, hx, hy;
 	int y = ly-1;
 	int dx = 2;
 	int dy = 0;
-	boolean prev_okay = (isok(x, y) && !levl[x][y].typ);
+	boolean prev_okay = (maze_inbounds(x, y) && !levl[x][y].typ);
 	int changes = 0;
 
 	do{
 		/* record if whether or not */
-		if (prev_okay != (isok(x,y) && !levl[x][y].typ)){
+		if (prev_okay != (maze_inbounds(x, y) && !levl[x][y].typ)){
 			changes++;
-			prev_okay = (isok(x,y) && !levl[x][y].typ);
+			prev_okay = (maze_inbounds(x, y) && !levl[x][y].typ);
 		}
 		/* move to next spot */
 		x += dx;
