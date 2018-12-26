@@ -59,8 +59,7 @@ STATIC_DCL void FDECL(liquify, (int,int,int));
 STATIC_DCL void FDECL(neuliquify, (int, int, int));
 STATIC_DCL struct permonst * NDECL(morguemon);
 STATIC_DCL struct permonst * NDECL(antholemon);
-STATIC_DCL struct permonst * NDECL(squadmon);
-STATIC_DCL struct permonst * NDECL(neu_squadmon);
+STATIC_DCL struct permonst * FDECL(squadmon, (struct d_level *));
 STATIC_DCL void FDECL(save_room, (int,struct mkroom *));
 STATIC_DCL void FDECL(rest_room, (int,struct mkroom *));
 #endif /* OVLB */
@@ -4050,7 +4049,7 @@ struct mkroom *sroom;
 		if(!(Role_if(PM_NOBLEMAN) && In_quest(&u.uz) )){
 		mon = makemon(
 		    (type == COURT) ? courtmon(ctype) :
-		    (type == BARRACKS) ? (In_outlands(&u.uz) ? neu_squadmon() : squadmon()) :
+			(type == BARRACKS) ? squadmon(&u.uz) :
 		    (type == MORGUE) ? morguemon() :
 		    (type == BEEHIVE) ?
 			(sx == tx && sy == ty ? &mons[PM_QUEEN_BEE] :
@@ -5676,60 +5675,48 @@ mivaultmon()
 	return &mons[PM_SHOGGOTH];
 }
 
-#define NSTYPES (PM_CAPTAIN - PM_SOLDIER + 1)
-
-static struct {
+static struct soldier_squad_probabilities {
     unsigned	pm;
     unsigned	prob;
-} squadprob[NSTYPES] = {
+} squadprob[] = {
     {PM_SOLDIER, 80}, {PM_SERGEANT, 15}, {PM_LIEUTENANT, 4}, {PM_CAPTAIN, 1}
-}, neu_squadprob[NSTYPES] = {
+}, neu_squadprob[] = {
     {PM_FERRUMACH_RILMANI, 80}, {PM_IRON_GOLEM, 15}, {PM_ARGENTUM_GOLEM, 4}, {PM_CUPRILACH_RILMANI, 1}
+}, hell_squadprob[] = {
+	{ PM_LEGION_DEVIL_GRUNT, 80 }, { PM_LEGION_DEVIL_SOLDIER, 15 }, { PM_LEGION_DEVIL_SERGEANT, 4 }, { PM_LEGION_DEVIL_CAPTAIN, 1 }
 };
 
 STATIC_OVL struct permonst *
-squadmon()		/* return soldier types. */
+squadmon(lev)		/* return soldier types appropriate for the current branch. */
+d_level *lev;
 {
 	int sel_prob, i, cpro, mndx;
+	struct soldier_squad_probabilities *squadies;
+
+	if (In_outlands(lev))
+		squadies = neu_squadprob;
+	else if (In_hell(lev))
+		squadies = hell_squadprob;
+	else
+		squadies = squadprob;
 
 	sel_prob = rnd(80+level_difficulty());
 
 	cpro = 0;
-	for (i = 0; i < NSTYPES; i++) {
-	    cpro += squadprob[i].prob;
+	for (i = 0; i < SIZE(squadies); i++) {
+		cpro += squadies[i].prob;
 	    if (cpro > sel_prob) {
-		mndx = squadprob[i].pm;
+			mndx = squadies[i].pm;
 		goto gotone;
 	    }
 	}
-	mndx = squadprob[rn2(NSTYPES)].pm;
+	mndx = squadies[rn2(SIZE(squadies))].pm;
 gotone:
 //	if (!(mvitals[mndx].mvflags & G_GONE && !In_quest(&u.uz))) return(&mons[mndx]);
 	if (!(mvitals[mndx].mvflags & G_GENOD && !In_quest(&u.uz))) return(&mons[mndx]);//empty if genocided
 	else			    return((struct permonst *) 0);
 }
 
-STATIC_OVL struct permonst *
-neu_squadmon()		/* return soldier types. */
-{
-	int sel_prob, i, cpro, mndx;
-
-	sel_prob = rnd(80+level_difficulty());
-
-	cpro = 0;
-	for (i = 0; i < NSTYPES; i++) {
-	    cpro += neu_squadprob[i].prob;
-	    if (cpro > sel_prob) {
-		mndx = neu_squadprob[i].pm;
-		goto gotone;
-	    }
-	}
-	mndx = neu_squadprob[rn2(NSTYPES)].pm;
-gotone:
-//	if (!(mvitals[mndx].mvflags & G_GONE && !In_quest(&u.uz))) return(&mons[mndx]);
-	if (!(mvitals[mndx].mvflags & G_GENOD && !In_quest(&u.uz))) return(&mons[mndx]);//empty if genocided
-	else			    return((struct permonst *) 0);
-}
 
 /*
  * save_room : A recursive function that saves a room and its subrooms
