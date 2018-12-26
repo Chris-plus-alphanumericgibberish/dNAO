@@ -5683,11 +5683,11 @@ mivaultmon()
 static struct soldier_squad_probabilities {
     unsigned	pm;
     unsigned	prob;
-} squadprob[SQUADSIZE] = {
+} squadprob[] = {
     {PM_SOLDIER, 80}, {PM_SERGEANT, 15}, {PM_LIEUTENANT, 4}, {PM_CAPTAIN, 1}
-}, neu_squadprob[SQUADSIZE] = {
+}, neu_squadprob[] = {
     {PM_FERRUMACH_RILMANI, 80}, {PM_IRON_GOLEM, 15}, {PM_ARGENTUM_GOLEM, 4}, {PM_CUPRILACH_RILMANI, 1}
-}, hell_squadprob[SQUADSIZE] = {
+}, hell_squadprob[] = {
 	{ PM_LEGION_DEVIL_GRUNT, 80 }, { PM_LEGION_DEVIL_SOLDIER, 15 }, { PM_LEGION_DEVIL_SERGEANT, 4 }, { PM_LEGION_DEVIL_CAPTAIN, 1 }
 };
 
@@ -5716,7 +5716,7 @@ d_level *lev;
 	    }
 	}
 	mndx = squadies[rn2(SQUADSIZE)].pm;
-	
+
 gotone:
 //	if (!(mvitals[mndx].mvflags & G_GONE && !In_quest(&u.uz))) return(&mons[mndx]);
 	if (!(mvitals[mndx].mvflags & G_GENOD && !In_quest(&u.uz))) return(&mons[mndx]);//empty if genocided
