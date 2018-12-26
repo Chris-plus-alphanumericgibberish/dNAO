@@ -5060,7 +5060,10 @@ mktemple()
 	shrine_spot = shrine_pos((sroom - rooms) + ROOMOFFSET);
 	lev = &levl[shrine_spot->x][shrine_spot->y];
 	lev->typ = ALTAR;
-	lev->altarmask = induced_align(80);
+	if (In_hell(&u.uz))
+		lev->altarmask = Align2amask(A_NONE);	/* in gehennom, all altars are to moloch */
+	else
+		lev->altarmask = induced_align(80);
 	priestini(&u.uz, sroom, shrine_spot->x, shrine_spot->y, FALSE);
 	lev->altarmask |= AM_SHRINE;
 	level.flags.has_temple = 1;

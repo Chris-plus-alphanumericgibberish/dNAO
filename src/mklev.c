@@ -750,56 +750,117 @@ makevtele()
 int
 random_special_room()
 {
+	int total_prob = 0;
+	int i = 0;
+
+	struct {
+		int type;
+		int prob;
+	} special_rooms[MAXRTYPE];
+
 #define mnotgone(x) !(mvitals[(x)].mvflags & G_GONE && !In_quest(&u.uz))
-	/* STANDARD FARE */
-	if (!Inhell && !level.flags.is_maze_lev){
-	     if (depth(&u.uz) >  4 && !rn2( 8))                              return COURT;
-	else if (depth(&u.uz) > 16 && !rn2(10) && mnotgone(  PM_COCKATRICE)) return COCKNEST;
-	else if (depth(&u.uz) > 15 && !rn2(10))                              return POOLROOM;
-	else if (depth(&u.uz) > 14 && !rn2( 6) && mnotgone(     PM_SOLDIER)) return BARRACKS;
-	else if (depth(&u.uz) <=14 && !rn2(12) && mnotgone(PM_RUST_MONSTER)) return ARMORY;
-	else if (depth(&u.uz) > 12 && !rn2(10))                              return ANTHOLE;
-	else if (depth(&u.uz) > 11 && !rn2( 8))                              return MORGUE;
-	else if (depth(&u.uz) >  9 && !rn2( 7) && mnotgone(  PM_KILLER_BEE)) return BEEHIVE;
-	else if (depth(&u.uz) >  8 && !rn2( 8))                              return LIBRARY;
-	else if (depth(&u.uz) >  7 && !rn2( 8))                              return GARDEN;
-	else if (depth(&u.uz) >  6 && !rn2( 9))                              return ZOO;
-	else if (depth(&u.uz) >  5 && !rn2(10) && mnotgone(  PM_LEPRECHAUN)) return LEPREHALL;
-	else if (depth(&u.uz) >  1 && !rn2(20))                              return STATUEGRDN;
-	else                                                                 return 0;
-	/* NON-HELL MAZE */
-	} else if (!Inhell){
-	     if (depth(&u.uz) >  4 && !rn2( 8))                              return COURT;
-	else if (depth(&u.uz) > 16 && !rn2(10) && mnotgone(  PM_COCKATRICE)) return COCKNEST;
-	else if (depth(&u.uz) > 15 && !rn2(10))                              return POOLROOM;
-	else if (depth(&u.uz) > 14 && !rn2( 6) && mnotgone(     PM_SOLDIER)) return BARRACKS;
-	else if (depth(&u.uz) <=14 && !rn2(12) && mnotgone(PM_RUST_MONSTER)) return ARMORY;
-	else if (depth(&u.uz) > 11 && !rn2( 8))                              return MORGUE;
-	else if (depth(&u.uz) >  5 && !rn2(10) && mnotgone(  PM_LEPRECHAUN)) return LEPREHALL;
-	else if (depth(&u.uz) >  1 && !rn2(20))                              return STATUEGRDN;
-	else                                                                 return 0;
-	/* GEHENNOM */
-	/* BAEL */
-	} else if (Is_bael_level(&u.uz)){
-	     if (!rn2(2))                                                    return BARRACKS;
-	/* ORCUS */
-	} else if (Is_orcus_level(&u.uz)){
-		 if (!rn2(2))                                                    return MORGUE;
-	/* STANDARD GEHENNOM */
-	} else{
-	     if (depth(&u.uz) >  4 && !rn2( 8))                              return COURT;
-	else if (depth(&u.uz) > 16 && !rn2(10) && mnotgone(  PM_COCKATRICE)) return COCKNEST;
-	else if (depth(&u.uz) > 15 && !rn2(10))                              return POOLROOM;
-	else if (depth(&u.uz) > 14 && !rn2( 6) && mnotgone(     PM_SOLDIER)) return BARRACKS;
-	else if (depth(&u.uz) <=14 && !rn2(12) && mnotgone(PM_RUST_MONSTER)) return ARMORY;
-	else if (depth(&u.uz) > 11 && !rn2( 8))                              return MORGUE;
-	else if (depth(&u.uz) >  5 && !rn2(10) && mnotgone(  PM_LEPRECHAUN)) return LEPREHALL;
-	else if (depth(&u.uz) >  1 && !rn2(20))                              return STATUEGRDN;
-	else                                                                 return 0;
+#define add_rspec_room(t, p, c) if(c) {special_rooms[i].type = (t); special_rooms[i].prob = (p); total_prob += (p); i++;} else
+#define udepth depth(&u.uz)
+
+	/* -------- GEHENNOM -------- */
+	if (In_hell(&u.uz))
+	{
+		if (Is_bael_level(&u.uz)){
+			/* BAEL */
+			add_rspec_room(TEMPLE		,  1, !level.flags.has_temple);
+			add_rspec_room(POOLROOM		, 15, TRUE);
+			add_rspec_room(BARRACKS		, 50, mnotgone(PM_LEGION_DEVIL_GRUNT));
+			add_rspec_room(0			, 50, TRUE);
+		} else if (Is_orcus_level(&u.uz)){
+			/* ORCUS */
+			add_rspec_room(MORGUE		, 95, TRUE);
+			add_rspec_room(0			, 50, TRUE);
+		} else{
+			/* STANDARD GEHENNOM */
+			add_rspec_room(COURT		, 18, TRUE);
+			add_rspec_room(COCKNEST		, 10, mnotgone(PM_COCKATRICE));
+			add_rspec_room(POOLROOM		, 22, TRUE);
+			add_rspec_room(BARRACKS		, 18, mnotgone(PM_LEGION_DEVIL_GRUNT));
+			add_rspec_room(MORGUE		, 32, TRUE);
+			add_rspec_room(LEPREHALL	,  8, mnotgone(PM_LEPRECHAUN));
+			add_rspec_room(STATUEGRDN	,  2, TRUE);
+			add_rspec_room(TEMPLE		,  5, !level.flags.has_temple);
+			add_rspec_room(SHOPBASE		,  1, !rn2(3));
+			add_rspec_room(0			, 50, TRUE);
+		}
 	}
-	/* BAEL */
+	/* -------- NEUTRAL QUEST OUTLANDS -------- */
+	else if (In_outlands(&u.uz))
+	{
+		add_rspec_room(COURT			, 20, TRUE);
+		add_rspec_room(BARRACKS			, 40, mnotgone(PM_FERRUMACH_RILMANI));
+		add_rspec_room(0				, 50, TRUE);
+	}
+	/* -------- ROLE QUESTS -------- */
+	else if (In_quest(&u.uz))
+	{
+		/* INCREDIBLY INCOMPLETE*/
+		switch (Role_switch)
+		{
+		case PM_ANACHRONONAUT:
+			add_rspec_room(0			, 50, TRUE);
+			break;
+		default:
+			goto random_special_room_default_room_and_corridors;	/* <insert sad face> */
+		}
+	}
+	/* -------- DEFAULT -------- */
+	else
+	{	
+		if (level.flags.is_maze_lev){
+			/* MAZE */
+			add_rspec_room(COURT		, 15, udepth >  4);
+			add_rspec_room(COCKNEST		,  9, udepth > 16 && mnotgone(PM_COCKATRICE));
+			add_rspec_room(POOLROOM		, 30, udepth > 15);
+			add_rspec_room(BARRACKS		, 18, udepth > 14 && mnotgone(PM_SOLDIER));
+			add_rspec_room(ARMORY		,  8, udepth <=14 && mnotgone(PM_RUST_MONSTER));
+			add_rspec_room(MORGUE		, 10, udepth > 11);
+			add_rspec_room(LEPREHALL	, 10, udepth >  4 && mnotgone(PM_LEPRECHAUN));
+			add_rspec_room(STATUEGRDN	,  2, udepth >  1);
+			add_rspec_room(TEMPLE		,  5, !level.flags.has_temple);
+			add_rspec_room(SHOPBASE		,  5, TRUE);
+			add_rspec_room(0			, 50, TRUE);
+		} else {
+			/* ROOM-AND-CORRIDORS */
+random_special_room_default_room_and_corridors:
+			/* temples and shops are assumed to be generated separately from this case */
+			add_rspec_room(COURT		, 21, udepth >  4);
+			add_rspec_room(COCKNEST		, 16, udepth > 16 && mnotgone(PM_COCKATRICE));
+			add_rspec_room(POOLROOM		, 15, udepth > 15);
+			add_rspec_room(BARRACKS		, 17, udepth > 14 && mnotgone(PM_SOLDIER));
+			add_rspec_room(ARMORY		,  8, udepth <=14 && mnotgone(PM_RUST_MONSTER));
+			add_rspec_room(ANTHOLE		, 14, udepth > 12);
+			add_rspec_room(MORGUE		, 18, udepth > 11);
+			add_rspec_room(BEEHIVE		,  8, udepth >  9 && mnotgone(PM_KILLER_BEE));
+			add_rspec_room(LIBRARY		,  6, udepth >  8);
+			add_rspec_room(GARDEN		, 13, udepth >  7);
+			add_rspec_room(ZOO       	, 12, udepth >  6);
+			add_rspec_room(LEPREHALL	, 10, udepth >  4 && mnotgone(PM_LEPRECHAUN));
+			add_rspec_room(STATUEGRDN	,  2, udepth >  1);
+			add_rspec_room(0			, 50, TRUE);
+		}
+	}
+#undef uz
+#undef add_rspec_room
 #undef mnotgone
-	return 0;
+
+	/* pick a room */
+	total_prob = rnd(total_prob);
+	while (total_prob > 0)
+	{
+		i--;
+		total_prob -= special_rooms[i].prob;
+	}
+
+	if (i >= 0)
+		return special_rooms[i].type;
+	else
+		return 0;	// should never happen?
 }
 
 /* clear out various globals that keep information on the current level.
