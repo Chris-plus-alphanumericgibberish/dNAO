@@ -1272,6 +1272,7 @@ E void FDECL(place_lregion, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,
 E void FDECL(maze_add_rooms, (int, int));
 E void FDECL(maze_add_openings, (int));
 E void FDECL(maze_remove_deadends, (int, boolean));
+E void FDECL(maze_damage_rooms, (int));
 E void FDECL(maze_touchup_rooms, (int));
 E void FDECL(maze_remove_room, (int));
 E void NDECL(movebubbles);

@@ -2735,7 +2735,9 @@ dlb *fd;
 	maze_remove_deadends(ROOM, TRUE);
 
 	/* add special rooms, dungeon features */
-	maze_touchup_rooms(rnd(3));
+	if (!In_quest(&u.uz))
+		maze_touchup_rooms(rnd(3));
+	maze_damage_rooms(85);
 
     wallification(1, 0, COLNO-1, ROWNO-1);
 

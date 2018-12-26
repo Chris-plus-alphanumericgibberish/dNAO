@@ -1021,6 +1021,75 @@ boolean careful;
 	return;
 }
 
+/*
+* Maybe destroy the walls of the room
+* walls can be destroyed if:
+* - it is not a special room that wants full walls
+* - the room is not lit
+* chance/100 probability
+*/
+void
+maze_damage_rooms(chance)
+int chance;
+{
+	xchar x, y;
+	xchar lx, ly, hx, hy;
+	int wallsgone;		// bitfield
+	int i;
+	struct mkroom * r;
+
+	for (r = &rooms[level.flags.sp_lev_nroom]; r != &rooms[nroom]; r++)
+	{
+		if (!special_room_requires_full_walls(r->rtype) && !r->rlit && (rn2(100) < chance))
+		{
+			wallsgone = 0x15;
+
+			lx = r->lx - 1;	// left wall
+			ly = r->ly - 1;	// top wall
+			hx = r->hx + 1;	// right wall
+			hy = r->hy + 1;	// bottom wall
+
+			/* large rooms are less likely to lose walls */
+			for (i = (hx - lx) / 4; i > 0; i--)
+				wallsgone &= (((rn2(16) | rn2(16)) & (W_NORTH | W_SOUTH)) | W_EAST | W_WEST);
+			for (i = (hy - ly) / 4; i > 0; i--)
+				wallsgone &= (((rn2(16) | rn2(16)) & (W_EAST | W_WEST)) | W_NORTH | W_SOUTH);
+
+			/* "solid" walls that don't border maze filler cannot be destroyed in this manner */
+			wallsgone &= ~r->solidwall;
+
+			/* do not remove walls bording the edge of the maze */
+			if (ly == 2)			wallsgone &= ~W_NORTH;
+			if (hy == y_maze_max)	wallsgone &= ~W_SOUTH;
+			if (hx == x_maze_max)	wallsgone &= ~W_EAST;
+			if (lx == 2)			wallsgone &= ~W_WEST;
+
+			/* actually destroy walls */
+			for (x = lx + 1; x <= hx - 1; ++x) {
+				if (wallsgone & W_NORTH) destroy_wall(x, ly);	// top
+				if (wallsgone & W_SOUTH) destroy_wall(x, hy);	// bottom
+			}
+			for (y = ly + 1; y <= hy - 1; ++y) {
+				if (wallsgone & W_EAST) destroy_wall(hx, y);	// right
+				if (wallsgone & W_WEST) destroy_wall(lx, y);	// left
+			}
+			/* corners and middles are destroyed if the wall sections they connected were destroyed */
+			if ((wallsgone & W_NORTH) && (wallsgone & W_WEST)) destroy_wall(lx, ly);
+			if ((wallsgone & W_NORTH) && (wallsgone & W_EAST)) destroy_wall(hx, ly);
+			if ((wallsgone & W_SOUTH) && (wallsgone & W_EAST)) destroy_wall(hx, hy);
+			if ((wallsgone & W_SOUTH) && (wallsgone & W_WEST)) destroy_wall(lx, hy);
+
+			/* re-draw walls*/
+			if (wallsgone)
+				wallification(lx, ly, hx, hy);
+
+			/* note that r is not quite ordinary anymore */
+			if (wallsgone && r->rtype == OROOM)
+				r->rtype = JOINEDROOM;
+		}
+	}
+}
+
 /* Postprocessing after most of the rest of the level has been created
  * (including stairs), and some rooms exist.
  * Select attempts rooms to be converted into special rooms, then possibly
@@ -1062,65 +1131,6 @@ int attempts;
 				mkfeature(GRAVE, FALSE, r);
 			if (!rn2(100))
 				mkfeature(ALTAR, FALSE, r);
-		}
-
-		/* 
-		 * Maybe destroy the walls of the room
-		 * walls can be destroyed if:
-		 * - it is not a special room that wants full walls
-		 * - the room is not lit
-		 * 6/7 probability
-		 */
-		
-		if (!special_room_requires_full_walls(r->rtype) && !r->rlit && rn2(7))
-		{
-			xchar x, y;
-			xchar lx, ly, mx, my, hx, hy;
-			int wallsgone = 1+2+4+8;	// 4-bit bitfield
-			int i;
-
-			lx = r->lx - 1;	// left wall
-			ly = r->ly - 1;	// top wall
-			hx = r->hx + 1;	// right wall
-			hy = r->hy + 1;	// bottom wall
-
-			/* large rooms are less likely to lose walls */
-			for (i = (hx - lx) / 4; i > 0; i--)
-				wallsgone &= (((rn2(16) | rn2(16)) & (W_NORTH | W_SOUTH)) | W_EAST | W_WEST);
-			for (i = (hy - ly) / 4; i > 0; i--)
-				wallsgone &= (((rn2(16) | rn2(16)) & (W_EAST | W_WEST)) | W_NORTH | W_SOUTH);
-
-			/* "solid" walls that don't border maze filler cannot be destroyed in this manner */
-			wallsgone &= ~r->solidwall;
-
-			/* do not remove walls bording the edge of the maze */
-			if (ly == 2)			wallsgone &= ~W_NORTH;
-			if (hy == y_maze_max)	wallsgone &= ~W_SOUTH;
-			if (hx == x_maze_max)	wallsgone &= ~W_EAST;
-			if (lx == 2)			wallsgone &= ~W_WEST;
-
-			/* actually destroy walls */
-			for (x = lx + 1; x <= hx - 1; ++x) {
-				if (wallsgone & W_NORTH) destroy_wall(x, ly);	// top
-				if (wallsgone & W_SOUTH) destroy_wall(x, hy);	// bottom
-			}
-			for (y = ly + 1; y <= my - 1; ++y) {
-				if (wallsgone & W_EAST) destroy_wall(hx, y);	// right
-				if (wallsgone & W_WEST) destroy_wall(lx, y);	// left
-			}
-			/* corners and middles are destroyed if the wall sections they connected were destroyed */
-			if ((wallsgone & W_NORTH) && (wallsgone & W_WEST)) destroy_wall(lx, ly);
-			if ((wallsgone & W_NORTH) && (wallsgone & W_EAST)) destroy_wall(hx, ly);
-			if ((wallsgone & W_SOUTH) && (wallsgone & W_EAST)) destroy_wall(hx, hy);
-			if ((wallsgone & W_SOUTH) && (wallsgone & W_WEST)) destroy_wall(lx, hy);
-
-			/* re-draw walls*/
-			if (wallsgone)
-				wallification(lx, ly, hx, hy);
-
-			/* note that r is not quite ordinary anymore */
-			if (wallsgone && r->rtype == OROOM)
-				r->rtype = JOINEDROOM;
 		}
 	}
 }
@@ -1337,7 +1347,9 @@ register const char *s;
 	place_branch(Is_branchlev(&u.uz), 0, 0);
 
 	/* add special rooms, dungeon features */
-	maze_touchup_rooms(rnd(3));
+	if (!In_quest(&u.uz))
+		maze_touchup_rooms(rnd(3));
+	maze_damage_rooms(85);
 
 	for(x = rn1(8,11); x; x--) {
 		mazexy(&mm);
