@@ -758,8 +758,8 @@ struct mkroom * r;
 		{
 		case W_NORTH: rly -= 2; rhy = rly;	break;
 		case W_SOUTH: rhy += 2; rly = rhy;	break;
-		case W_EAST:  rhx -= 2; rlx = rhx;	break;
-		case W_WEST:  rlx += 2; rhx = rlx;	break;
+		case W_EAST:  rhx += 2; rlx = rhx;	break;
+		case W_WEST:  rlx -= 2; rhx = rlx;	break;
 		}
 		if (!rectangle_in_mazewalk_area(rlx, rly, rhx, rhy))
 		{
