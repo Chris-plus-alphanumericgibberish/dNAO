@@ -845,7 +845,7 @@ random_special_room_default_room_and_corridors:
 			add_rspec_room(0			, 50, TRUE);
 		}
 	}
-#undef uz
+#undef udepth
 #undef add_rspec_room
 #undef mnotgone
 
