@@ -17,14 +17,6 @@
 /* croom->lx etc are schar (width <= int), so % arith ensures that */
 /* conversion of result to int is reasonable */
 
-
-STATIC_DCL void FDECL(mkfount,(int,struct mkroom *));
-#ifdef SINKS
-STATIC_DCL void FDECL(mksink,(struct mkroom *));
-#endif
-STATIC_DCL void FDECL(mkaltar,(struct mkroom *));
-STATIC_DCL void FDECL(mkgrave,(struct mkroom *));
-STATIC_DCL void FDECL(mkpuddles,(struct mkroom *));
 STATIC_DCL void NDECL(makevtele);
 STATIC_DCL void NDECL(clear_level_structures);
 STATIC_DCL void NDECL(makelevel);
@@ -158,7 +150,7 @@ do_room_or_subroom(croom, lowx, lowy, hix, hiy, lit, rtype, special, is_room)
 	 */
 	croom->fdoor = doorindex;
 	croom->irregular = FALSE;
-
+	croom->solidwall = 0;
 	croom->nsubrooms = 0;
 	croom->sbrooms[0] = (struct mkroom *) 0;
 	if (!special) {
@@ -301,17 +293,15 @@ boolean nxcor;
 	ty = tt.y - dy;
 	if(nxcor && levl[xx+dx][yy+dy].typ)
 		return;
-	if (IS_WALL(levl[xx + dx][yy + dy].typ))	// prevent trying to open corridors into adjacent rooms
-		return;
-	if (IS_ROOM(levl[xx + dx][yy + dy].typ))	// make a doorway into a room where the wall is shared
+	if (IS_WALL(levl[xx][yy].typ) && IS_ROOM(levl[xx + dx][yy + dy].typ))	// make a doorway into a room where the wall is shared
 	{
 		// brutishly find the room we are connecting to
 		int i;
 		for (i = 0; i < nroom; i++){
-			if (   (rooms[i].lx < xx + dx)
-				&& (rooms[i].hx > xx + dx)
-				&& (rooms[i].ly < yy + dy)
-				&& (rooms[i].hy > yy + dy)
+			if (   (rooms[i].lx <= xx + dx)
+				&& (rooms[i].hx >= xx + dx)
+				&& (rooms[i].ly <= yy + dy)
+				&& (rooms[i].hy >= yy + dy)
 				)
 				break;
 		}
@@ -319,9 +309,16 @@ boolean nxcor;
 			return;	// it isn't a room?
 		else
 			troom = &rooms[i];
+		// disallow adding extra doors to shops
+		if (troom->rtype >= SHOPBASE)
+			return;
+
 		// add the door
 		if (okdoor(xx, yy) || !nxcor)
-			dodoor(xx, yy, (rn2(2)) ? croom : troom);
+		{
+			dodoor(xx, yy, croom);
+			add_door(xx, yy, troom);
+		}
 		// note the connection
 		if (smeq[a] < smeq[i])
 			smeq[i] = smeq[a];
@@ -329,6 +326,8 @@ boolean nxcor;
 			smeq[a] = smeq[i];
 		return;
 	}
+	if (IS_WALL(levl[xx + dx][yy + dy].typ) || IS_ROOM(levl[xx + dx][yy + dy].typ))	// prevent trying to open corridors into adjacent rooms
+		return;
 
 	if (okdoor(xx,yy) || !nxcor)
 	    dodoor(xx,yy,croom);
@@ -391,16 +390,86 @@ merge_adj_rooms()
 			}
 			if (!(xadj || yadj))
 				continue;
-			// merge the rooms by replacing the walls
-			if (yadj){
-				for (f = minx; f <= maxx; f++)
-				for (g = maxy + 1; g <= miny - 1; g++)
-					levl[f][g].typ = ROOM;
-			}
-			if (xadj){
-				for (g = miny; g <= maxy; g++)
-				for (f = maxx + 1; f <= minx - 1; f++)
-					levl[f][g].typ = ROOM;
+			// preferred option: merge the rooms by expanding one room so that they share a wall, and add a door along the shared wall
+			{
+				boolean okay = TRUE;
+				int dp = 0;
+				schar *p;
+				struct mkroom *t, *u;
+				// determine which room is smaller; only attempt to expand that room
+				t = ((a->hx - a->lx)*(a->hy - a->ly) < (b->hx - b->lx)*(b->hy - b->ly)) ? a : b;
+				u = (t == a) ? b : a;
+
+				// determine which of t's corners has to move, and in which direction
+				if (xadj){
+					dp = (t->hx < u->lx) ? 1 : -1;
+					p = (t->hx < u->lx) ? &(t->hx) : &(t->lx);
+				}
+				if (yadj){
+					dp = (t->hy < u->ly) ? 1 : -1;
+					p = (t->hx < u->lx) ? &(t->hy) : &(t->ly);
+				}
+
+				// check that it is okay to expand in that direction
+				if (xadj){
+					for (g = t->ly - 1; g <= t->hy + 1; g++)
+					if (!IS_STWALL(levl[*p+dp][g].typ))
+						okay = FALSE;
+				}
+				if (yadj){
+					for (f = t->lx - 1; f <= t->hx + 1; f++)
+					if (!IS_STWALL(levl[f][*p+dp].typ))
+						okay = FALSE;
+				}
+				if (okay && rn2(4))	// use this method most of the time, but the oddly-shaped rooms are fun too
+				{
+					// expand the room
+					if (xadj){
+						for (g = t->ly - 1; g <= t->hy + 1; g++)
+							levl[*p + dp*2][g].typ = VWALL;
+						for (g = t->ly; g <= t->hy; g++)
+							levl[*p + dp*1][g].typ = ROOM;
+					}
+					if (yadj){
+						for (f = t->lx - 1; f <= t->hx + 1; f++)
+							levl[f][*p + dp*2].typ = HWALL;
+						for (f = t->lx; f <= t->hx; f++)
+							levl[f][*p + dp*1].typ = ROOM;
+					}
+					*p += dp;
+					// attempt to add a door over the shared length
+					if (xadj){
+						f = *p + dp;
+						g = rn2(maxy - miny + 1) + miny;
+					}
+					if (yadj){
+						f = rn2(maxx - minx + 1) + minx;
+						g = *p + dp;
+					}
+
+					if (okdoor(f, g))
+					{
+						dodoor(f, g, t);
+						add_door(f, g, u);
+					}
+					else
+					{
+						continue;	// it failed to connect the rooms, but it's too late to go to the fallback
+					}
+				}
+				else {
+					// fallback option: merge the rooms by replacing the walls
+					if (xadj){
+						for (g = miny; g <= maxy; g++)
+						for (f = maxx + 1; f <= minx - 1; f++)
+							levl[f][g].typ = ROOM;
+					}
+					if (yadj){
+						for (f = minx; f <= maxx; f++)
+						for (g = maxy + 1; g <= miny - 1; g++)
+							levl[f][g].typ = ROOM;
+					}
+				}
 			}
 			// I now pronounce you... one room for pathing purposes.
 			if (smeq[i] < smeq[j])
@@ -414,15 +483,17 @@ merge_adj_rooms()
 				struct rm *lev;
 				struct mkroom *tmp;
 
-				if (((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM)
+				if ((((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM) && b->rtype != JOINEDROOM)
 					tmp = b;
 				else
 					tmp = a;
 
+				tmp->rlit = !tmp->rlit;
+
 				for (f = tmp->lx - 1; f <= tmp->hx + 1; f++) {
 					lev = &levl[f][max(tmp->ly - 1, 0)];
 					for (g = tmp->ly - 1; g <= tmp->hy + 1; g++)
-						lev++->lit = !tmp->rlit;
+						lev++->lit = tmp->rlit;
 				}
 			}
 			// change the room types
@@ -613,7 +684,7 @@ int trap_type;
 	if(doorindex < DOORMAX)
 	  while(vct--) {
 	    aroom = &rooms[rn2(nroom)];
-	    if(aroom->rtype != OROOM) continue;	/* not an ordinary room */
+	    if(aroom->rtype != OROOM && aroom->rtype != JOINEDROOM) continue;	/* not an ordinary room */
 	    if(aroom->doorct == 1 && rn2(5)) continue;
 	    if(!place_niche(aroom,&dy,&xx,&yy)) continue;
 
@@ -676,6 +747,122 @@ makevtele()
 	makeniche(TELEP_TRAP);
 }
 
+int
+random_special_room()
+{
+	int total_prob = 0;
+	int i = 0;
+
+	struct {
+		int type;
+		int prob;
+	} special_rooms[MAXRTYPE];
+
+#define mnotgone(x) !(mvitals[(x)].mvflags & G_GONE && !In_quest(&u.uz))
+#define add_rspec_room(t, p, c) if(c) {special_rooms[i].type = (t); special_rooms[i].prob = (p); total_prob += (p); i++;} else
+#define udepth depth(&u.uz)
+
+	/* -------- GEHENNOM -------- */
+	if (In_hell(&u.uz))
+	{
+		if (Is_bael_level(&u.uz)){
+			/* BAEL */
+			add_rspec_room(TEMPLE		,  1, !level.flags.has_temple);
+			add_rspec_room(POOLROOM		, 15, TRUE);
+			add_rspec_room(BARRACKS		, 50, mnotgone(PM_LEGION_DEVIL_GRUNT));
+			add_rspec_room(0			, 50, TRUE);
+		} else if (Is_orcus_level(&u.uz)){
+			/* ORCUS */
+			add_rspec_room(MORGUE		, 95, TRUE);
+			add_rspec_room(0			, 50, TRUE);
+		} else{
+			/* STANDARD GEHENNOM */
+			add_rspec_room(COURT		, 18, TRUE);
+			add_rspec_room(COCKNEST		, 10, mnotgone(PM_COCKATRICE));
+			add_rspec_room(POOLROOM		, 22, TRUE);
+			add_rspec_room(BARRACKS		, 18, mnotgone(PM_LEGION_DEVIL_GRUNT));
+			add_rspec_room(MORGUE		, 32, TRUE);
+			add_rspec_room(LEPREHALL	,  8, mnotgone(PM_LEPRECHAUN));
+			add_rspec_room(STATUEGRDN	,  2, TRUE);
+			add_rspec_room(TEMPLE		,  5, !level.flags.has_temple);
+			add_rspec_room(SHOPBASE		,  1, !rn2(3));
+			add_rspec_room(0			, 50, TRUE);
+		}
+	}
+	/* -------- NEUTRAL QUEST OUTLANDS -------- */
+	else if (In_outlands(&u.uz))
+	{
+		add_rspec_room(COURT			, 20, TRUE);
+		add_rspec_room(BARRACKS			, 40, mnotgone(PM_FERRUMACH_RILMANI));
+		add_rspec_room(0				, 50, TRUE);
+	}
+	/* -------- ROLE QUESTS -------- */
+	else if (In_quest(&u.uz))
+	{
+		/* INCREDIBLY INCOMPLETE*/
+		switch (Role_switch)
+		{
+		case PM_ANACHRONONAUT:
+			add_rspec_room(0			, 50, TRUE);
+			break;
+		default:
+			goto random_special_room_default_room_and_corridors;	/* <insert sad face> */
+		}
+	}
+	/* -------- DEFAULT -------- */
+	else
+	{	
+		if (level.flags.is_maze_lev){
+			/* MAZE */
+			add_rspec_room(COURT		, 15, udepth >  4);
+			add_rspec_room(COCKNEST		,  9, udepth > 16 && mnotgone(PM_COCKATRICE));
+			add_rspec_room(POOLROOM		, 30, udepth > 15);
+			add_rspec_room(BARRACKS		, 18, udepth > 14 && mnotgone(PM_SOLDIER));
+			add_rspec_room(ARMORY		,  8, udepth <=14 && mnotgone(PM_RUST_MONSTER));
+			add_rspec_room(MORGUE		, 10, udepth > 11);
+			add_rspec_room(LEPREHALL	, 10, udepth >  4 && mnotgone(PM_LEPRECHAUN));
+			add_rspec_room(STATUEGRDN	,  2, udepth >  1);
+			add_rspec_room(TEMPLE		,  5, !level.flags.has_temple);
+			add_rspec_room(SHOPBASE		,  5, TRUE);
+			add_rspec_room(0			, 50, TRUE);
+		} else {
+			/* ROOM-AND-CORRIDORS */
+random_special_room_default_room_and_corridors:
+			/* temples and shops are assumed to be generated separately from this case */
+			add_rspec_room(COURT		, 21, udepth >  4);
+			add_rspec_room(COCKNEST		, 16, udepth > 16 && mnotgone(PM_COCKATRICE));
+			add_rspec_room(POOLROOM		, 15, udepth > 15);
+			add_rspec_room(BARRACKS		, 17, udepth > 14 && mnotgone(PM_SOLDIER));
+			add_rspec_room(ARMORY		,  8, udepth <=14 && mnotgone(PM_RUST_MONSTER));
+			add_rspec_room(ANTHOLE		, 14, udepth > 12);
+			add_rspec_room(MORGUE		, 18, udepth > 11);
+			add_rspec_room(BEEHIVE		,  8, udepth >  9 && mnotgone(PM_KILLER_BEE));
+			add_rspec_room(LIBRARY		,  6, udepth >  8);
+			add_rspec_room(GARDEN		, 13, udepth >  7);
+			add_rspec_room(ZOO       	, 12, udepth >  6);
+			add_rspec_room(LEPREHALL	, 10, udepth >  4 && mnotgone(PM_LEPRECHAUN));
+			add_rspec_room(STATUEGRDN	,  2, udepth >  1);
+			add_rspec_room(0			, 50, TRUE);
+		}
+	}
+#undef udepth
+#undef add_rspec_room
+#undef mnotgone
+
+	/* pick a room */
+	total_prob = rnd(total_prob);
+	while (total_prob > 0)
+	{
+		i--;
+		total_prob -= special_rooms[i].prob;
+	}
+
+	if (i >= 0)
+		return special_rooms[i].type;
+	else
+		return 0;	// should never happen?
+}
+
 /* clear out various globals that keep information on the current level.
  * some of this is only necessary for some types of levels (maze, normal,
  * special) but it's easier to put it all in one place than make sure
@@ -713,6 +900,8 @@ clear_level_structures()
 	
 	level.flags.goldkamcount_hostile = 0;
 	level.flags.goldkamcount_peace = 0;
+
+	level.flags.sp_lev_nroom = 0;
 	
 	level.flags.has_shop = 0;
 	level.flags.has_vault = 0;
@@ -776,6 +965,7 @@ makelevel()
 	if(wiz1_level.dlevel == 0) init_dungeons();
 	oinit();	/* assign level dependent obj probabilities */
 	clear_level_structures();
+	flags.makelev_closerooms = FALSE;
 	
 	if(Is_minetown_level(&u.uz)) livelog_write_string("entered Minetown for the first time");
 
@@ -825,6 +1015,9 @@ makelevel()
 		makerogueghost();
 	} else
 #endif
+	/* probably use the 'claustrophobic' room generation, since we aren't doing a special level */
+	if (rn2(7))
+		flags.makelev_closerooms = TRUE;
 	makerooms();
 	sort_rooms();
 
@@ -922,28 +1115,11 @@ makelevel()
 		rn2(u_depth) < 4) mkroom(SHOPBASE);	// small increase to shop spawnrate (3->4) to compensate for there being, in general, more rooms and thus fewer eligible shops
 
 	/* Zoos */
-	if (u_depth > 4 && !rn2(8)) mkroom(COURT);
-	else if (u_depth > 16 && !rn2(10) &&
-	   !(mvitals[PM_COCKATRICE].mvflags & G_GONE && !In_quest(&u.uz))) mkroom(COCKNEST);
-	else if (u_depth > 15 && !rn2(10) && !In_quest(&u.uz)) mkroom(POOLROOM);
-	else if (u_depth > 14 && !rn2(6) &&
-	   !(mvitals[PM_SOLDIER].mvflags & G_GONE && !In_quest(&u.uz))
-	) mkroom(BARRACKS);
-	else if (u_depth <= 14 && u_depth > 1 && !rn2(12) &&
-	   !(mvitals[PM_RUST_MONSTER].mvflags & G_GONE && !In_quest(&u.uz))
-	) mkroom(ARMORY);
-	else if (u_depth > 12 && !rn2(10)) mkroom(ANTHOLE);
-	else if (u_depth > 11 && !rn2(8)) mkroom(MORGUE);
-	else if (u_depth > 9 && !rn2(7) &&
-	   !(mvitals[PM_KILLER_BEE].mvflags & G_GONE && !In_quest(&u.uz))
-	) mkroom(BEEHIVE);
-	else if (u_depth > 8 && !rn2(8)) mkroom(LIBRARY);
-	else if (u_depth > 7 && !rn2(8)) mkroom(GARDEN);
-	else if (u_depth > 6 && !rn2(9)) mkroom(ZOO);
-	else if (u_depth > 5 && !rn2(10) &&
-	   !(mvitals[PM_LEPRECHAUN].mvflags & G_GONE && !In_quest(&u.uz))
-	) mkroom(LEPREHALL);
-	else if (u_depth > 1 && !rn2(20)) mkroom(STATUEGRDN);
+	{
+	int zootype;
+	if (zootype = random_special_room())
+		mkroom(zootype);
+	}
 
 	/* Terrain */
 	if (u_depth > 2 && !rn2(8)) mkroom(ISLAND);
@@ -980,7 +1156,7 @@ skip0:
 
 	/* for each room: put things inside */
 	for(croom = rooms; croom->hx > 0; croom++) {
-		if(croom->rtype != OROOM) continue;
+		if(croom->rtype != OROOM && croom->rtype != JOINEDROOM) continue;
 
 		/* put a sleeping monster inside */
 		/* Note: monster may be on the stairs. This cannot be
@@ -1009,23 +1185,27 @@ skip0:
 		/* greater chance of puddles if a water source is nearby */
 		x = 40;
 		if(!rn2(10)) {
-		    mkfount(0,croom);
-		    x -= 20;
+		    if(mkfeature(FOUNTAIN, FALSE, croom))
+				x -= 20;
 		}
 #ifdef SINKS
 		if(!rn2(60)) {
-		    mksink(croom);
-		    x -= 20;
+		    if(mkfeature(SINK, FALSE, croom))
+				x -= 20;
 		}
 
 		if (x < 2) x = 2;
 #endif
-		if(!rn2(x)) mkpuddles(croom);
+		if(!rn2(x))
+			mkfeature(PUDDLE, FALSE, croom);
 
-		if(!rn2(60)) mkaltar(croom);
+		if(!rn2(60))
+			mkfeature(ALTAR, FALSE, croom);
+
 		x = 80 - (depth(&u.uz) * 2);
 		if (x < 2) x = 2;
-		if(!rn2(x)) mkgrave(croom);
+		if(!rn2(x))
+			mkfeature(GRAVE, FALSE, croom);
 
 		/* put statues inside */
 		if(!rn2(20))
@@ -1070,6 +1250,8 @@ skip0:
 		    }
 		}
 	}
+	if (flags.makelev_closerooms)			
+		flags.makelev_closerooms = FALSE;
 }
 
 /*
@@ -1362,7 +1544,7 @@ find_branch_room(mp)
 	    do
 		croom = &rooms[rn2(nroom)];
 	    while((croom == dnstairs_room || croom == upstairs_room ||
-		  croom->rtype != OROOM) && (++tryct < 100));
+		  (croom->rtype != OROOM && croom->rtype != JOINEDROOM)) && (++tryct < 100));
 	} else
 	    croom = &rooms[rn2(nroom)];
 
@@ -1503,6 +1685,7 @@ register xchar x, y;
 {
 	return((boolean)(t_at(x, y)
 		|| IS_FURNITURE(levl[x][y].typ)
+		|| IS_ROCK(levl[x][y].typ)
 		|| is_lava(x,y)
 		|| (is_pool(x,y, FALSE) && (!Is_waterlevel(&u.uz) || is_3dwater(x,y)))
 		|| invocation_pos(x,y)
@@ -1605,6 +1788,16 @@ coord *tm;
 						m.x, m.y, NO_MM_FLAGS);
 }
 
+struct mkroom*
+room_at(x, y)
+xchar x, y;
+{
+	if (levl[x][y].roomno)
+		return &rooms[levl[x][y].roomno - ROOMOFFSET];
+	else
+		return (struct mkroom *)0;
+}
+
 void
 mkstairs(x, y, up, croom)
 xchar x, y;
@@ -1649,153 +1842,100 @@ struct mkroom *croom;
 	levl[x][y].ladder = up ? LA_UP : LA_DOWN;
 }
 
-STATIC_OVL
-void
-mkfount(mazeflag,croom)
-register int mazeflag;
-register struct mkroom *croom;
-{
-	coord m;
-	register int tryct = 0;
-
-	do {
-	    if(++tryct > 200) return;
-	    if(mazeflag)
-		mazexy(&m);
-	    else
-		if (!somexy(croom, &m))
-		    return;
-	} while(occupied(m.x, m.y) || bydoor(m.x, m.y));
-
-	/* Put a fountain at m.x, m.y */
-	levl[m.x][m.y].typ = FOUNTAIN;
-	/* Is it a "blessed" fountain? (affects drinking from fountain) */
-	if(!rn2(7)) levl[m.x][m.y].blessedftn = 1;
-
-	level.flags.nfountains++;
-}
-
-#ifdef SINKS
-STATIC_OVL void
-mksink(croom)
-register struct mkroom *croom;
-{
-	coord m;
-	register int tryct = 0;
-
-	do {
-	    if(++tryct > 200) return;
-	    if (!somexy(croom, &m))
-		return;
-	} while(occupied(m.x, m.y) || bydoor(m.x, m.y));
-
-	/* Put a sink at m.x, m.y */
-	levl[m.x][m.y].typ = SINK;
-
-	level.flags.nsinks++;
-}
-#endif /* SINKS */
-
-
-STATIC_OVL void
-mkaltar(croom)
-register struct mkroom *croom;
-{
-	coord m;
-	register int tryct = 0;
-	aligntyp al;
-
-	if (croom->rtype != OROOM) return;
-
-	do {
-	    if(++tryct > 200) return;
-	    if (!somexy(croom, &m))
-		return;
-	} while (occupied(m.x, m.y) || bydoor(m.x, m.y));
-
-	/* Put an altar at m.x, m.y */
-	levl[m.x][m.y].typ = ALTAR;
-
-	/* -1 - A_CHAOTIC, 0 - A_NEUTRAL, 1 - A_LAWFUL */
-	al = rn2((int)A_LAWFUL+2) - 1;
-	levl[m.x][m.y].altarmask = Align2amask( al );
-}
-
-/* make connected spots of shallow water (or pools) and add sea monsters */
-STATIC_OVL void
-mkpuddles(croom)
-register struct mkroom *croom;
-{
-	coord m;
-	register int tryct = 0;
-	register int puddles = 0; /* how many spaces have we altered? */
-	
-	do {
-	    if(++tryct > 200) return;
-	    if (!somexy(croom, &m))
-		return;
-	} while(occupied(m.x, m.y));
-	
-	do {
-	   if (levl[m.x][m.y].typ != PUDDLE && levl[m.x][m.y].typ != POOL) {
-		puddles++;
-	   	levl[m.x][m.y].typ = (depth(&u.uz) > 9 && !rn2(4) ?
-				      POOL : PUDDLE);
-	   } 
-	   if (puddles > 4 && depth(&u.uz) > 4) {
-		(void)makemon(levl[m.x][m.y].typ == POOL ? mkclass(S_EEL,0) :
-				&mons[PM_PIRANHA],m.x,m.y,NO_MM_FLAGS);
-		puddles -= 2; /* puddles created should always exceed piranhas */
-	   }
-	   tryct = 0;
-	   do {
-	       m.x += sgn(rn2(3)-1);
-	       m.y += sgn(rn2(3)-1);
-	   } while ((occupied(m.x, m.y) ||
-		m.x < croom->lx || m.x > croom->hx ||
-		m.y < croom->ly || m.y > croom->hy)
-			&& (++tryct <= 27));
-	} while(tryct <= 27);
-}
-
- 
-static void
-mkgrave(croom)
+boolean
+mkfeature(typ, mazeflag, croom)
+int typ;
+boolean mazeflag;
 struct mkroom *croom;
 {
 	coord m;
-	register int tryct = 0;
-	register struct obj *otmp;
-	boolean dobell = !rn2(20);
-
-
-	if(croom->rtype != OROOM) return;
+	int tryct = 0;
+	int tmp = 0;
 
 	do {
-	    if(++tryct > 200) return;
-	    if (!somexy(croom, &m))
-		return;
+		if (++tryct > 200)
+			return FALSE;
+		if (mazeflag)
+			mazexy(&m);
+		else
+		if (!somexy(croom, &m))
+			return FALSE;
 	} while (occupied(m.x, m.y) || bydoor(m.x, m.y));
 
-	/* Put a grave at m.x, m.y */
-	make_grave(m.x, m.y, dobell ? "Saved by the bell!" : (char *) 0);
+	switch (typ)
+	{
+	case FOUNTAIN:
+		/* Put a fountain at m.x, m.y */
+		levl[m.x][m.y].typ = FOUNTAIN;
+		/* Is it a "blessed" fountain? (affects drinking from fountain) */
+		if (!rn2(7)) levl[m.x][m.y].blessedftn = 1;
+		level.flags.nfountains++;
+		break;
+	case SINK:
+		/* Put a sink at m.x, m.y */
+		levl[m.x][m.y].typ = SINK;
+		level.flags.nsinks++;
+		break;
+	case ALTAR:
+		if (croom && croom->rtype != OROOM && croom->rtype != JOINEDROOM)
+			return FALSE;
+		/* Put an altar at m.x, m.y */
+		levl[m.x][m.y].typ = ALTAR;
 
-	/* Possibly fill it with objects */
-	if (!rn2(3)) (void) mkgold(0L, m.x, m.y);
-	for (tryct = rn2(5); tryct; tryct--) {
-	    otmp = mkobj(RANDOM_CLASS, TRUE);
-	    if (!otmp) return;
-	    curse(otmp);
-	    otmp->ox = m.x;
-	    otmp->oy = m.y;
-	    add_to_buried(otmp);
+		/* -1 - A_CHAOTIC, 0 - A_NEUTRAL, 1 - A_LAWFUL */
+		tmp = (Inhell ? A_NONE : rn2(3)-1);
+		levl[m.x][m.y].altarmask = Align2amask(tmp);
+		break;
+	case PUDDLE:
+		tmp = 0;	// number of puddles made
+		do {
+			// make puddles
+			if (levl[m.x][m.y].typ != PUDDLE && levl[m.x][m.y].typ != POOL) {
+				tmp++;
+				levl[m.x][m.y].typ = (depth(&u.uz) > 9 && !rn2(4) ?
+				POOL : PUDDLE);
+			}
+			// also make sea creatures
+			if (tmp > 4 && depth(&u.uz) > 4) {
+				(void)makemon(levl[m.x][m.y].typ == POOL ? mkclass(S_EEL, 0) :
+					&mons[PM_PIRANHA], m.x, m.y, NO_MM_FLAGS);
+				tmp -= 2; /* puddles created should always exceed piranhas */
+			}
+			tryct = 0;
+			do {
+				m.x += sgn(rn2(3) - 1);
+				m.y += sgn(rn2(3) - 1);
+			} while ((occupied(m.x, m.y) ||
+				(croom && (
+				m.x < croom->lx || m.x > croom->hx ||
+				m.y < croom->ly || m.y > croom->hy)))
+				&& (++tryct <= 27));
+		} while (tryct <= 27);
+		break;
+	case GRAVE:
+		if (croom && croom->rtype != OROOM && croom->rtype != JOINEDROOM)
+			return FALSE;
+		tmp = !rn2(20);
+		/* Put a grave at m.x, m.y */
+		make_grave(m.x, m.y, tmp ? "Saved by the bell!" : (char *)0);
+
+		/* Possibly fill it with objects */
+		if (!rn2(3)) (void)mkgold(0L, m.x, m.y);
+		for (tryct = rn2(5); tryct; tryct--) {
+			struct obj *otmp = mkobj(RANDOM_CLASS, TRUE);
+			if (!otmp)
+				continue;
+			curse(otmp);
+			otmp->ox = m.x;
+			otmp->oy = m.y;
+			add_to_buried(otmp);
+		}
+		/* Leave a bell, in case we accidentally buried someone alive */
+		if (tmp) (void)mksobj_at(BELL, m.x, m.y, TRUE, FALSE);
+		break;
 	}
-
-	/* Leave a bell, in case we accidentally buried someone alive */
-	if (dobell) (void) mksobj_at(BELL, m.x, m.y, TRUE, FALSE);
-	return;
+	return TRUE;
 }
-
 
 /* maze levels have slightly different constraints from normal levels */
 #define x_maze_min 2

@@ -15,6 +15,7 @@ struct mkroom {
 	schar fdoor;		/* index for the first door of the room */
 	schar nsubrooms;	/* number of subrooms */
 	boolean irregular;	/* true if room is non-rectangular */
+	Bitfield(solidwall, 4);	/* use with W_NORTH etc; signifies not to let random level gen put doors/connections in the wall */
 	struct mkroom *sbrooms[MAX_SUBROOMS];  /* Subrooms pointers */
 	struct monst *resident; /* priest/shopkeeper/guard for this room */
 };
