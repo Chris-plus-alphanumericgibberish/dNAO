@@ -518,6 +518,8 @@ E struct monst *FDECL(tamedog, (struct monst *,struct obj *));
 E struct monst *FDECL(make_pet_minion, (int,ALIGNTYP_P));
 E void FDECL(abuse_dog, (struct monst *));
 E void FDECL(wary_dog, (struct monst *, BOOLEAN_P));
+E void FDECL(enough_dogs, (int));
+E void NDECL(vanish_dogs);
 
 /* ### dogmove.c ### */
 
@@ -2588,7 +2590,7 @@ E int FDECL(child, (int));
 /* ### unixres.c ### */
 
 #ifdef UNIX
-# ifdef GNOME_GRAPHICS 
+# ifdef GNOME_GRAPHICS
 E int FDECL(hide_privileges, (BOOLEAN_P));
 # endif
 #endif /* UNIX */
