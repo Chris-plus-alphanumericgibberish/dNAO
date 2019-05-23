@@ -575,7 +575,7 @@ moveloop()
 				oldLightBlind = !!LightBlind;
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-			if (!(oldCon != ACURR(A_CON))) {
+			if (oldCon != ACURR(A_CON)) {
 				if(conplus(oldCon) > 0) u.uhpmax -= conplus(oldCon)*u.ulevel;
 				else u.uhpmax -= conplus(oldCon)*u.ulevel;
 				
