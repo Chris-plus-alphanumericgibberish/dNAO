@@ -1799,6 +1799,7 @@ int different;
 		impossible("revive_corpse: lost corpse @ %d", where);
 		break;
 	}
+	newsym(mtmp->mx,mtmp->my);
 	return TRUE;
     }
     return FALSE;
