@@ -2734,12 +2734,12 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				nmon = tmpm->nmon;
 				if(DEADMONSTER(tmpm) || resists_fire(tmpm)) continue;
 				if((mdef->data->mflagsa & tmpm->data->mflagsa) != 0 || mdef->data == tmpm->data){
-					genoburn = d(4,4);
-					if(tmpm->mhp < genoburn+4){
+					genoburn = d(6,6);
+					if(tmpm->mhp < genoburn+6){
 						tmpm->mhp = 1;
 						explode(tmpm->mx, tmpm->my,
 							AD_FIRE, 0,
-							d(4,4),
+							d(6,6),
 							EXPL_FIERY, 1);
 					} else tmpm->mhp -= genoburn;
 				}
@@ -2749,18 +2749,18 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 					mdef->mhp = 1;
 					explode(mdef->mx, mdef->my,
 						AD_FIRE, 0,
-						d(4,4),
+						d(6,6),
 						EXPL_FIERY, 1);
 				}
 			}
 			if((your_race(mdef->data) || mdef->data == youracedata) && !Fire_resistance){
-				genoburn = d(4,4);
-				if(Upolyd ? (u.mh < genoburn+4) : (u.uhp < genoburn+4)){
+				genoburn = d(6,6);
+				if(Upolyd ? (u.mh < genoburn+6) : (u.uhp < genoburn+6)){
 					if(Upolyd) u.mh = 1;
 					else u.uhp = 1;
 					explode(u.ux, u.uy,
 						AD_FIRE, 0,
-						d(4,4),
+						d(6,6),
 						EXPL_FIERY, 1);
 				} else losehp(genoburn, "burning from within", KILLED_BY);
 			}
@@ -2769,24 +2769,24 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				nmon = tmpm->nmon;
 				if(DEADMONSTER(tmpm) || resists_fire(tmpm)) continue;
 				if(your_race(tmpm->data) || tmpm->data == youracedata){
-					genoburn = d(4,4);
-					if(tmpm->mhp < genoburn+4){
+					genoburn = d(6,6);
+					if(tmpm->mhp < genoburn+6){
 						tmpm->mhp = 1;
 						explode(tmpm->mx, tmpm->my,
 							AD_FIRE, 0,
-							d(4,4),
+							d(6,6),
 							EXPL_FIERY, 1);
 					} else tmpm->mhp -= genoburn;
 				}
 			}
 			if(!Fire_resistance){
-				genoburn = d(4,4);
-				if(Upolyd ? (u.mh < *dmgptr+genoburn+4) : (u.uhp < *dmgptr+genoburn+4)){
+				genoburn = d(6,6);
+				if(Upolyd ? (u.mh < *dmgptr+genoburn+6) : (u.uhp < *dmgptr+genoburn+6)){
 					if(Upolyd) u.mh = 1;
 					else u.uhp = 1;
 					explode(u.ux, u.uy,
 						AD_FIRE, 0,
-						d(4,4),
+						d(6,6),
 						EXPL_FIERY, 1);
 				} else losehp(genoburn, "burning from within", KILLED_BY);
 			}
