@@ -552,7 +552,7 @@ boolean ignore_oquan;
 				else Strcat(buf, "iron ");
 			break;
 			case METAL:
-				Strcat(buf, "metallic ");
+				if(!(obj->oproperties&OPROP_LESSW && obj->known)) Strcat(buf, "metallic ");
 			break;
 			case COPPER:
 				Strcat(buf, "bronze ");
@@ -596,22 +596,41 @@ boolean ignore_oquan;
 			Strcat(buf, "wool-lined ");
 	}
 	if(obj->oproperties && obj->oartifact == 0){
-		if(obj->oproperties&OPROP_FIREW)
-			Strcat(buf, "flaming ");
-		if(obj->oproperties&OPROP_COLDW)
-			Strcat(buf, "freezing ");
-		if(obj->oproperties&OPROP_ELECW)
-			Strcat(buf, "shocking ");
-		if(obj->oproperties&OPROP_ACIDW)
-			Strcat(buf, "sizzling ");
-		if(obj->oproperties&OPROP_MAGCW)
-			Strcat(buf, "sparkling ");
-		if(obj->oproperties&OPROP_ANARW)
-			Strcat(buf, "anarchic ");
-		if(obj->oproperties&OPROP_CONCW)
-			Strcat(buf, "concordant ");
-		if(obj->oproperties&OPROP_AXIOW)
-			Strcat(buf, "axiomatic ");
+		if(obj->oproperties&OPROP_LESSW && obj->known){
+			if(obj->oproperties&OPROP_FIREW)
+				Strcat(buf, "forge-hot ");
+			if(obj->oproperties&OPROP_COLDW)
+				Strcat(buf, "crystalline ");
+			if(obj->oproperties&OPROP_ELECW)
+				Strcat(buf, "arcing ");
+		} else {
+			if(obj->oproperties&OPROP_FIREW)
+				if(obj->oproperties&OPROP_LESSW){
+					Strcat(buf, "red-hot ");
+				} else {
+					Strcat(buf, "flaming ");
+				}
+			if(obj->oproperties&OPROP_COLDW)
+				Strcat(buf, "freezing ");
+			if(obj->oproperties&OPROP_WATRW)
+				Strcat(buf, "misty ");
+			if(obj->oproperties&OPROP_ELECW)
+				Strcat(buf, "shocking ");
+			if(obj->oproperties&OPROP_ACIDW)
+				Strcat(buf, "sizzling ");
+			if(obj->oproperties&OPROP_MAGCW)
+				Strcat(buf, "sparkling ");
+			if(obj->oproperties&OPROP_ANARW && obj->known)
+				Strcat(buf, "anarchic ");
+			if(obj->oproperties&OPROP_CONCW && obj->known)
+				Strcat(buf, "concordant ");
+			if(obj->oproperties&OPROP_AXIOW && obj->known)
+				Strcat(buf, "axiomatic ");
+			if(obj->oproperties&OPROP_HOLYW && obj->known)
+				Strcat(buf, "holy ");
+			if(obj->oproperties&OPROP_UNHYW && obj->known)
+				Strcat(buf, "unholy ");
+		}
 	}
 	if(is_lightsaber(obj) && litsaber(obj)){
 		Strcat(buf, lightsaber_colorText(obj));
@@ -1200,22 +1219,37 @@ plus:
 			if(obj->otyp == VIPERWHIP && obj->opoisonchrgs) Sprintf(eos(prefix), "(%d coatings) ", (int)(obj->opoisonchrgs+1));
 		}
 		if(obj->oproperties && obj->oartifact){
-			if(obj->oproperties&OPROP_FIREW)
-				Strcat(prefix, "flaming ");
-			if(obj->oproperties&OPROP_COLDW)
-				Strcat(prefix, "freezing ");
-			if(obj->oproperties&OPROP_ELECW)
-				Strcat(prefix, "shocking ");
-			if(obj->oproperties&OPROP_ACIDW)
-				Strcat(prefix, "sizzling ");
-			if(obj->oproperties&OPROP_MAGCW)
-				Strcat(prefix, "sparkling ");
-			if(obj->oproperties&OPROP_ANARW)
-				Strcat(prefix, "anarchic ");
-			if(obj->oproperties&OPROP_CONCW)
-				Strcat(prefix, "concordant ");
-			if(obj->oproperties&OPROP_AXIOW)
-				Strcat(prefix, "axiomatic ");
+			if(obj->oproperties&OPROP_LESSW && obj->known){
+				if(obj->oproperties&OPROP_FIREW)
+					Strcat(prefix, "forge-hot ");
+				if(obj->oproperties&OPROP_COLDW)
+					Strcat(prefix, "crystalline ");
+				if(obj->oproperties&OPROP_ELECW)
+					Strcat(prefix, "arcing ");
+			} else {
+				if(obj->oproperties&OPROP_FIREW)
+					Strcat(prefix, "flaming ");
+				if(obj->oproperties&OPROP_COLDW)
+					Strcat(prefix, "freezing ");
+				if(obj->oproperties&OPROP_WATRW)
+					Strcat(prefix, "misty ");
+				if(obj->oproperties&OPROP_ELECW)
+					Strcat(prefix, "shocking ");
+				if(obj->oproperties&OPROP_ACIDW)
+					Strcat(prefix, "sizzling ");
+				if(obj->oproperties&OPROP_MAGCW)
+					Strcat(prefix, "sparkling ");
+				if(obj->oproperties&OPROP_ANARW && obj->known)
+					Strcat(prefix, "anarchic ");
+				if(obj->oproperties&OPROP_CONCW && obj->known)
+					Strcat(prefix, "concordant ");
+				if(obj->oproperties&OPROP_AXIOW && obj->known)
+					Strcat(prefix, "axiomatic ");
+				if(obj->oproperties&OPROP_HOLYW && obj->known)
+					Strcat(prefix, "holy ");
+				if(obj->oproperties&OPROP_UNHYW && obj->known)
+					Strcat(prefix, "unholy ");
+			}
 		}
 		add_erosion_words(obj, prefix);
 		if(obj->known || Race_if(PM_INCANTIFIER)) {
@@ -3097,6 +3131,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "freezing ", l=9)
 			) {
 			oproperties |= OPROP_COLDW;
+		} else if (!strncmpi(bp, "misty ", l=6)
+			) {
+			oproperties |= OPROP_WATRW;
 		} else if (!strncmpi(bp, "shocking ", l=9)
 			) {
 			oproperties |= OPROP_ELECW;
@@ -3112,9 +3149,15 @@ int wishflags;
 		} else if (!strncmpi(bp, "concordant ", l=11)
 			) {
 			oproperties |= OPROP_CONCW;
-		} else if (!strncmpi(bp, "axiomatic ", l=9)
+		} else if (!strncmpi(bp, "axiomatic ", l=10)
 			) {
 			oproperties |= OPROP_AXIOW;
+		} else if (!strncmpi(bp, "holy ", l=5)
+			) {
+			oproperties |= OPROP_HOLYW;
+		} else if (!strncmpi(bp, "unholy ", l=7)
+			) {
+			oproperties |= OPROP_UNHYW;
 		} else
 			break;
 		bp += l;
@@ -4134,7 +4177,7 @@ typfnd:
 				else
 					break;
 			case WEAPON_CLASS:
-				oproperties &= (OPROP_FIREW | OPROP_COLDW | OPROP_ELECW | OPROP_ACIDW | OPROP_MAGCW | OPROP_ANARW | OPROP_CONCW | OPROP_AXIOW | OPROP_LESSW);
+				oproperties &= (OPROP_FIREW | OPROP_COLDW | OPROP_WATRW | OPROP_ELECW | OPROP_ACIDW | OPROP_MAGCW | OPROP_ANARW | OPROP_CONCW | OPROP_AXIOW | OPROP_LESSW);
 				break;
 			case ARMOR_CLASS:
 				oproperties &= (OPROP_FIRE | OPROP_COLD | OPROP_ELEC | OPROP_ACID | OPROP_MAGC | OPROP_ANAR | OPROP_CONC | OPROP_AXIO);
