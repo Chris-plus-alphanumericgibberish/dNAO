@@ -3619,6 +3619,10 @@ dopois:
 			dmg += d(2,4); //Add segment damage
 	}
 	
+	if(dmg && u.ustdy){
+		dmg += u.ustdy;
+		u.ustdy -= 1;
+	}
 	
 	if(attacktype_fordmg(youracedata, AT_NONE, AD_STAR)){
 		if(otmp && otmp == MON_WEP(mtmp) && !otmp->oartifact && otmp->spe <= 0) dmg = 0;
