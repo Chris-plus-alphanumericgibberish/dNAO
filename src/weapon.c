@@ -3015,6 +3015,9 @@ struct obj *weapon;
 			case P_BASIC:       bonus =  0; break;
 			case P_SKILLED:     bonus =  2; break;
 			case P_EXPERT:      bonus =  5; break;
+			//For use with martial-arts
+			case P_MASTER:		bonus =  7; break;
+			case P_GRAND_MASTER: bonus = 9; break;
 		}
     } else if (type == P_TWO_WEAPON_COMBAT) {
 		skill = P_SKILL(P_TWO_WEAPON_COMBAT);
@@ -3309,6 +3312,9 @@ struct obj *weapon;
 			case P_BASIC:	bonus =  0; break;
 			case P_SKILLED:	bonus =  2; break;
 			case P_EXPERT:	bonus =  5; break;
+			//For use with martial-arts
+			case P_MASTER:		bonus =  7; break;
+			case P_GRAND_MASTER: bonus = 9; break;
 		}
 	} else if (type == P_TWO_WEAPON_COMBAT) {
 		skill = P_SKILL(P_TWO_WEAPON_COMBAT);
