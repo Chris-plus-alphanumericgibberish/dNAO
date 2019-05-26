@@ -1390,12 +1390,12 @@ mattacku(mtmp)
 	    if(sum[i] == 3) break;  /* attacker teleported, no more attacks */
 		
 		if(uwep && is_lightsaber(uwep) && litsaber(uwep) && !DEADMONSTER(mtmp)){
-			if(u.fightingForm == FFORM_SHIEN && multi >= 0 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) == 1 && (!uarm || is_light_armor(uarm))){
-				switch(min(P_SKILL(FFORM_SHIEN), P_SKILL(weapon_type(uwep)))){
+			if(u.fightingForm == FFORM_DJEM_SO && multi >= 0 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) == 1 && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+				switch(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:
 						if(rn2(100) < 5){
 							You("counterattack!");
-							use_skill(FFORM_SHIEN,1);
+							use_skill(FFORM_DJEM_SO,1);
 							flags.forcefight = TRUE;
 							u.dy = sgn(mtmp->my - u.uy);
 							u.dx = sgn(mtmp->mx - u.ux);
@@ -1407,7 +1407,7 @@ mattacku(mtmp)
 					case P_SKILLED:
 						if(rn2(100) < 10){
 							You("counterattack!");
-							use_skill(FFORM_SHIEN,1);
+							use_skill(FFORM_DJEM_SO,1);
 							flags.forcefight = TRUE;
 							u.dy = sgn(mtmp->my - u.uy);
 							u.dx = sgn(mtmp->mx - u.ux);
@@ -1419,7 +1419,7 @@ mattacku(mtmp)
 					case P_EXPERT:
 						if(rn2(100) < 20){
 							You("counterattack!");
-							use_skill(FFORM_SHIEN,1);
+							use_skill(FFORM_DJEM_SO,1);
 							flags.forcefight = TRUE;
 							u.dy = sgn(mtmp->my - u.uy);
 							u.dx = sgn(mtmp->mx - u.ux);
@@ -8281,7 +8281,7 @@ register struct attack *mattk;
 				tmp += rnd(20);
 			}
 		}
-		if(u.sealsActive&SEAL_EURYNOME && multi >= 0 && !rn2(5)){
+		if(u.sealsActive&SEAL_EURYNOME && multi >= 0 && !rn2(5) && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) == 1){
 			You("counterattack!");
 			flags.forcefight = TRUE;
 			u.dy = sgn(mtmp->my - u.uy);
@@ -8299,12 +8299,12 @@ register struct attack *mattk;
 				) use_skill(FFORM_SORESU,1);
 			}
 		}
-		if(u.fightingForm == FFORM_DJEM_SO && multi >= 0 && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-			switch(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(uwep)))){
+		if(u.fightingForm == FFORM_SHIEN && multi >= 0 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) == 1 && (!uarm || is_light_armor(uarm))){
+			switch(min(P_SKILL(FFORM_SHIEN), P_SKILL(weapon_type(uwep)))){
 				case P_BASIC:
 					if(rn2(100) < 5){
 						You("counterattack!");
-						use_skill(FFORM_DJEM_SO,1);
+						use_skill(FFORM_SHIEN,1);
 						flags.forcefight = TRUE;
 						u.dy = sgn(mtmp->my - u.uy);
 						u.dx = sgn(mtmp->mx - u.ux);
@@ -8316,7 +8316,7 @@ register struct attack *mattk;
 				case P_SKILLED:
 					if(rn2(100) < 10){
 						You("counterattack!");
-						use_skill(FFORM_DJEM_SO,1);
+						use_skill(FFORM_SHIEN,1);
 						flags.forcefight = TRUE;
 						u.dy = sgn(mtmp->my - u.uy);
 						u.dx = sgn(mtmp->mx - u.ux);
@@ -8328,7 +8328,7 @@ register struct attack *mattk;
 				case P_EXPERT:
 					if(rn2(100) < 20){
 						You("counterattack!");
-						use_skill(FFORM_DJEM_SO,1);
+						use_skill(FFORM_SHIEN,1);
 						flags.forcefight = TRUE;
 						u.dy = sgn(mtmp->my - u.uy);
 						u.dx = sgn(mtmp->mx - u.ux);
@@ -8340,7 +8340,7 @@ register struct attack *mattk;
 			}
 		}
 	}
-	if(uwep && uwep->oartifact == ART_SANSARA_MIRROR && multi >= 0 && rn2(2)){
+	if(uwep && uwep->oartifact == ART_SANSARA_MIRROR && multi >= 0 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) == 1 && rn2(2)){
 		You("counterattack!");
 		flags.forcefight = TRUE;
 		u.dy = sgn(mtmp->my - u.uy);
@@ -8350,7 +8350,7 @@ register struct attack *mattk;
 		if(DEADMONSTER(mtmp)) return 2;
 	}
 	if( uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && 
-		uwep->ovar1&SEAL_EURYNOME && multi >= 0 && 
+		uwep->ovar1&SEAL_EURYNOME && multi >= 0 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) == 1 && 
 		!rn2((quest_status.killed_nemesis && Role_if(PM_EXILE)) ? 10 : 20)
 	){
 		You("counterattack!");
