@@ -5386,3 +5386,8 @@ struct obj *otmp;	/* source of flash */
 
 /*uhitm.c*/
 
+void
+reset_udieroll()
+{
+	dieroll = 10;
+}
