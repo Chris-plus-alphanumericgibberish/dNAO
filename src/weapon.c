@@ -1882,7 +1882,7 @@ struct obj *otmp;
     
         if (wep->oartifact) return FALSE;
 		
-        if (wep->oproperties) return FALSE;
+        if (wep->oproperties && !otmp->oproperties) return FALSE;
 
         if (is_giant(mtmp->data) &&  wep->otyp == CLUB) return FALSE;
         if (is_giant(mtmp->data) && otmp->otyp == CLUB) return TRUE;
