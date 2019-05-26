@@ -1411,6 +1411,7 @@ struct obj	*sobj;
 
 		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 		    if (DEADMONSTER(mtmp)) continue;
+		    if (mindless_mon(mtmp)) continue;
 		    if(cansee(mtmp->mx,mtmp->my)) {
 			if(confused || sobj->cursed) {
 			    mtmp->mflee = mtmp->mfrozen = mtmp->msleeping = 0;
