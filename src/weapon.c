@@ -2787,11 +2787,9 @@ int enhance_skill(boolean want_dump)
 
 	    Strcpy(buf, (to_advance > 0) ? "Pick a skill to advance:" :
 					   "Current skills:");
-#ifdef WIZARD
-	    if (wizard && !speedy)
+	    if (!speedy)
 		Sprintf(eos(buf), "  (%d slot%s available)",
 			u.weapon_slots, plur(u.weapon_slots));
-#endif
 #ifdef DUMP_LOG
 	    if (want_dump) {
 		dump("","");
