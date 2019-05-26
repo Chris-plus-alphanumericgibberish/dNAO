@@ -2672,7 +2672,7 @@ defaultvalue:
 	} else if (destroyed) {
 		if (!already_killed)
 		    killed(mon);	/* takes care of most messages */
-	} else if(u.umconf && !thrown) {
+	} else if(u.umconf) {
 		nohandglow(mon);
 		if (!mon->mconf && !resist(mon, SPBOOK_CLASS, 0, NOTELL)) {
 			mon->mconf = 1;
