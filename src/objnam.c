@@ -604,16 +604,21 @@ boolean ignore_oquan;
 			if(obj->oproperties&OPROP_ELECW)
 				Strcat(buf, "arcing ");
 		} else {
-			if(obj->oproperties&OPROP_FIREW)
-				if(obj->oproperties&OPROP_LESSW){
-					Strcat(buf, "red-hot ");
-				} else {
-					Strcat(buf, "flaming ");
-				}
-			if(obj->oproperties&OPROP_COLDW)
-				Strcat(buf, "freezing ");
+			if(obj->oproperties&OPROP_PSIOW){
+				if(obj->known) Strcat(buf, "psionic ");
+				else if(Blind_telepat) Strcat(buf, "whispering ");
+			}
+			if(obj->oproperties&OPROP_DEEPW){
+				if(Blind_telepat && obj->spe < 8) Strcat(buf, "mumbling ");
+			}
 			if(obj->oproperties&OPROP_WATRW)
 				Strcat(buf, "misty ");
+			if(obj->oproperties&OPROP_FIREW){
+				if(obj->oproperties&OPROP_LESSW) Strcat(buf, "red-hot ");
+				else Strcat(buf, "flaming ");
+			}
+			if(obj->oproperties&OPROP_COLDW)
+				Strcat(buf, "freezing ");
 			if(obj->oproperties&OPROP_ELECW)
 				Strcat(buf, "shocking ");
 			if(obj->oproperties&OPROP_ACIDW)
@@ -630,6 +635,8 @@ boolean ignore_oquan;
 				Strcat(buf, "holy ");
 			if(obj->oproperties&OPROP_UNHYW && obj->known)
 				Strcat(buf, "unholy ");
+			if(obj->oproperties&OPROP_VORPW && obj->known)
+				Strcat(buf, "vorpal ");
 		}
 	}
 	if(is_lightsaber(obj) && litsaber(obj)){
@@ -1227,12 +1234,19 @@ plus:
 				if(obj->oproperties&OPROP_ELECW)
 					Strcat(prefix, "arcing ");
 			} else {
+				if(obj->oproperties&OPROP_PSIOW){
+					if(obj->known) Strcat(prefix, "psionic ");
+					else if(Blind_telepat) Strcat(prefix, "whispering ");
+				}
+				if(obj->oproperties&OPROP_DEEPW){
+					if(Blind_telepat && obj->spe < 8) Strcat(prefix, "mumbling ");
+				}
+				if(obj->oproperties&OPROP_WATRW)
+					Strcat(prefix, "misty ");
 				if(obj->oproperties&OPROP_FIREW)
 					Strcat(prefix, "flaming ");
 				if(obj->oproperties&OPROP_COLDW)
 					Strcat(prefix, "freezing ");
-				if(obj->oproperties&OPROP_WATRW)
-					Strcat(prefix, "misty ");
 				if(obj->oproperties&OPROP_ELECW)
 					Strcat(prefix, "shocking ");
 				if(obj->oproperties&OPROP_ACIDW)
@@ -1249,6 +1263,8 @@ plus:
 					Strcat(prefix, "holy ");
 				if(obj->oproperties&OPROP_UNHYW && obj->known)
 					Strcat(prefix, "unholy ");
+				if(obj->oproperties&OPROP_VORPW && obj->known)
+					Strcat(prefix, "vorpal ");
 			}
 		}
 		add_erosion_words(obj, prefix);
@@ -3134,6 +3150,12 @@ int wishflags;
 		} else if (!strncmpi(bp, "misty ", l=6)
 			) {
 			oproperties |= OPROP_WATRW;
+		} else if (!strncmpi(bp, "psionic ", l=8) || !strncmpi(bp, "whispering ", l=11)
+			) {
+			oproperties |= OPROP_PSIOW;
+		} else if (!strncmpi(bp, "deep ", l=5) || !strncmpi(bp, "mumbling ", l=9)
+			) {
+			oproperties |= OPROP_DEEPW;
 		} else if (!strncmpi(bp, "shocking ", l=9)
 			) {
 			oproperties |= OPROP_ELECW;
@@ -3158,6 +3180,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "unholy ", l=7)
 			) {
 			oproperties |= OPROP_UNHYW;
+		} else if (!strncmpi(bp, "vorpal ", l=7) && strncmpi(bp, "Vorpal Blade", 12)
+			) {
+			oproperties |= OPROP_VORPW;
 		} else
 			break;
 		bp += l;
@@ -4177,7 +4202,8 @@ typfnd:
 				else
 					break;
 			case WEAPON_CLASS:
-				oproperties &= (OPROP_FIREW | OPROP_COLDW | OPROP_WATRW | OPROP_ELECW | OPROP_ACIDW | OPROP_MAGCW | OPROP_ANARW | OPROP_CONCW | OPROP_AXIOW | OPROP_LESSW);
+				oproperties &= (OPROP_FIREW | OPROP_COLDW | OPROP_PSIOW | OPROP_DEEPW | OPROP_WATRW | OPROP_ELECW | OPROP_ACIDW | OPROP_MAGCW 
+								| OPROP_ANARW | OPROP_CONCW | OPROP_AXIOW | OPROP_HOLYW | OPROP_UNHYW | OPROP_VORPW | OPROP_LESSW);
 				break;
 			case ARMOR_CLASS:
 				oproperties &= (OPROP_FIRE | OPROP_COLD | OPROP_ELEC | OPROP_ACID | OPROP_MAGC | OPROP_ANAR | OPROP_CONC | OPROP_AXIO);

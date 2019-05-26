@@ -1667,7 +1667,10 @@ int thrown;
 					newdamage = basedamage;
 				}
 				if(obj->oproperties){
-					(void)oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+					hittxt |= oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return FALSE;
+					if (newdamage == 0) return TRUE;
 					tmp += (newdamage - basedamage);
 				}
 			} //artifact block
@@ -1676,7 +1679,7 @@ int thrown;
 										(wtype = uwep_skill_type()) != P_NONE && 
 										P_SKILL(wtype) >= P_BASIC && 
 										!rn2(20 - 5*P_SKILL(wtype))) /*Need to be separate from dieroll, */
-				)){														/*	since Ranseurs are bimanual!*/
+				)){													/*	since Ranseurs are bimanual!*/
 				if(monwep->quan > 1L){
 					monwep = splitobj(monwep, 1L);
 					obj_extract_self(monwep); //wornmask is cleared by splitobj
@@ -1775,7 +1778,10 @@ int thrown;
 						newdamage = basedamage;
 					}
 					if(uwep->oproperties){
-						(void)oproperty_hit(&youmonst, mon, uwep, &newdamage, dieroll);
+						hittxt |= oproperty_hit(&youmonst, mon, uwep, &newdamage, dieroll);
+						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
+						if (newdamage == 0) return TRUE; /* NOTE: ditto */
 						tmp += (newdamage - basedamage);
 						newdamage = basedamage;
 					}
@@ -1788,7 +1794,10 @@ int thrown;
 						newdamage = basedamage;
 					}
 					if(obj->oproperties){
-						(void)oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+						hittxt |= oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
+						if (newdamage == 0) return TRUE; /* NOTE: ditto */
 						tmp += (newdamage - basedamage);
 						newdamage = basedamage;
 					}
@@ -1803,7 +1812,10 @@ int thrown;
 					if(uarmh && uarmh->oartifact 
 					&& uarmh->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER && uarmh->oproperties
 					){
-						(void)oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+						hittxt |= oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
+						if (newdamage == 0) return TRUE; /* NOTE: ditto */
 						tmp += (newdamage - basedamage);
 					}
 					}//Artifact block
