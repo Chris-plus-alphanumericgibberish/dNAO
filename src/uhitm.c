@@ -6,6 +6,7 @@
 #include "artifact.h"
 
 STATIC_DCL boolean FDECL(known_hitum, (struct monst *,int *,struct attack *));
+STATIC_DCL boolean FDECL(known_hitum_wepi, (struct monst *,int *,struct attack *, int));
 STATIC_DCL boolean FDECL(pacifist_attack_checks, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(steal_it, (struct monst *, struct attack *));
 STATIC_DCL boolean FDECL(hitum, (struct monst *,int,struct attack *));
@@ -1102,7 +1103,10 @@ int thrown;
 					newdamage = basedamage;
 				}
 				if(uarmg->oproperties){
-					(void)oproperty_hit(&youmonst, mon, uarmg, &newdamage, dieroll);
+					hittxt |= oproperty_hit(&youmonst, mon, uarmg, &newdamage, dieroll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return FALSE;
+					if (newdamage == 0) return TRUE;
 					tmp += (newdamage - basedamage);
 				}
 			} //artifact block
@@ -1467,7 +1471,7 @@ int thrown;
 				if (!(noncorporeal(mdat) || amorphous(mdat) || ((stationary(mdat) || sessile(mdat)) && (mdat->mlet == S_FUNGUS || mdat->mlet == S_PLANT)) || u.uswallow) && (
 						((mon->mflee && mon->data != &mons[PM_BANDERSNATCH]) || is_blind(mon) || !mon->mcanmove || !mon->mnotlaugh || 
 							mon->mstun || mon->mconf || mon->mtrapped || mon->msleeping || (mon->mux == 0 && mon->muy == 0) ||
-								(sgn(mon->mx - u.ux) != sgn(mon->mx - mon->mux) 
+								(sgn(mon->mx - u.ux) != sgn(mon->mx - mon->mux)
 								&& sgn(mon->my - u.uy) != sgn(mon->my - mon->muy)) ||
 								((mon->mux != u.ux || mon->muy != u.uy) && 
 									((obj == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && has_head(mon->data) && !is_unalive(mon->data))
@@ -2087,7 +2091,10 @@ defaultvalue:
 					newdamage = basedamage;
 				}
 				if(obj->oproperties){
-					(void)oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+					hittxt |= oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return FALSE;
+					if (newdamage == 0) return TRUE;
 					tmp += (newdamage - basedamage);
 				}
 				if(u.sealsActive&SEAL_PAIMON && mon && !DEADMONSTER(mon) && 
