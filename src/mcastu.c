@@ -3395,6 +3395,7 @@ int spellnum;
 			return TRUE;
 	/* don't summon monsters if it doesn't think you're around */
 #ifndef TAME_SUMMONING
+	if(mtmp->mtame){
         if (spellnum == SUMMON_MONS)
 	    return TRUE;
         if (spellnum == SUMMON_ANGEL)
@@ -3405,6 +3406,7 @@ int spellnum;
 	    return TRUE;
         if (spellnum == INSECTS)
 	    return TRUE;
+	}
 #endif
 	/* blindness spell on blinded player */
 	if ((!haseyes(mdef->data) || mdef->mblinded) && spellnum == BLIND_YOU)
