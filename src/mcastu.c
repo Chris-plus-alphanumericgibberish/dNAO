@@ -2981,6 +2981,10 @@ int spellnum;
 			|| spellnum == SUMMON_DEVIL
 		)
 	) return TRUE;
+	
+	//Raised dead would be hostile to the player
+	if(mtmp->mtame && spellnum == RAISE_DEAD) 
+		return TRUE;
 		
 	
 	if(is_drow(mtmp->data) && !(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))){
