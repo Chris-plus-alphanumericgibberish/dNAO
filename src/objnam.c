@@ -552,13 +552,17 @@ add_size_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	// TO-DO: show size if it is different from the item's base, rather than different from Medium (ie for use with artifacts)
-	if (obj->objsize != MZ_MEDIUM){
-		if (obj->objsize == MZ_TINY) Strcat(buf, "tiny ");
-		else if (obj->objsize == MZ_SMALL) Strcat(buf, "small ");
-		else if (obj->objsize == MZ_LARGE) Strcat(buf, "large ");
-		else if (obj->objsize == MZ_HUGE) Strcat(buf, "huge ");
-		else if (obj->objsize == MZ_GIGANTIC) Strcat(buf, "gigantic ");
+	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size && obj->known) ? artilist[obj->oartifact].size : MZ_MEDIUM))
+	{
+		switch (obj->objsize)
+		{
+		case MZ_TINY:     Strcat(buf, "tiny ");     break;
+		case MZ_SMALL:    Strcat(buf, "small ");    break;
+		case MZ_MEDIUM:   Strcat(buf, "medium ");   break;
+		case MZ_LARGE:    Strcat(buf, "large ");    break;
+		case MZ_HUGE:     Strcat(buf, "huge ");     break;
+		case MZ_GIGANTIC: Strcat(buf, "gigantic "); break;
+		}
 	}
 }
 
@@ -833,8 +837,8 @@ add_material_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	// TO-DO: show artifact material if it is different from its default (which may be different than the base item's default material)
-	if (obj->obj_material != objects[obj->otyp].oc_material && !(obj->oartifact && obj->known) && !(is_lightsaber(obj) && litsaber(obj))){
+	if ((obj->obj_material != ((obj->oartifact && artilist[obj->oartifact].material && obj->known) ? artilist[obj->oartifact].material : objects[obj->otyp].oc_material))
+		&& !(is_lightsaber(obj) && litsaber(obj))){
 		if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
 			Strcat(buf, "pale moonlight ");
 		}
