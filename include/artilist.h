@@ -1497,7 +1497,7 @@ A("The Kusanagi no Tsurugi",	LONG_SWORD, 			0,			0,/*Needs encyc entry*/
  /*//Few of these count, since they are boss treasure//*/
 /*////////////////////////////////////////////////////*/
 
-A("The Platinum Dragon Plate",	SILVER_DRAGON_SCALE_MAIL,			PLATINUM,	0,/*heavier than normal, and causes spell penalties*/
+A("The Platinum Dragon Plate",	SILVER_DRAGON_SCALE_MAIL,			0,			0,/*heavier than normal, and causes spell penalties*/
 	(SPFX_NOGEN|SPFX_RESTR),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/, /*Needs encyc entry*/
 	NO_ATTK,	DFNS(AD_MAGM),	NO_CARY,
