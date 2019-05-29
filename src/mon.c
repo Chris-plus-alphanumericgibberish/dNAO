@@ -892,7 +892,7 @@ register struct monst *mtmp;
 			return (1);
 		}
 	}
-	if(inpool) water_damage(which_armor(mtmp, W_ARMF), FALSE, FALSE, level.flags.lethe, mtmp);
+	if(inshallow) water_damage(which_armor(mtmp, W_ARMF), FALSE, FALSE, level.flags.lethe, mtmp);
 	else water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
 	return (0);
     }
@@ -960,8 +960,12 @@ register struct monst *mtmp;
     } else {
 	/* but eels have a difficult time outside */
 	if (mtmp->data->mlet == S_EEL && !Is_waterlevel(&u.uz)) {
-	    if(mtmp->mhp > 1) mtmp->mhp--;
-	    monflee(mtmp, 2, FALSE, FALSE);
+		/* Puddles can sustain a tiny sea creature, or lessen the burdens of a larger one */
+		if (!(inshallow && mtmp->data->msize == MZ_TINY))
+		{
+			if (mtmp->mhp > 1 && rn2(mtmp->data->msize)) mtmp->mhp--;
+			monflee(mtmp, 2, FALSE, FALSE);
+		}
 	}
     }
     return (0);
@@ -2550,7 +2554,7 @@ mfndpos(mon, poss, info, flag)
 	register int cnt = 0;
 	register uchar ntyp;
 	uchar nowtyp;
-	boolean wantpool,poolok,cubewaterok,lavaok,nodiag,quantumlock;
+	boolean wantpool,wantpuddle,poolok,cubewaterok,lavaok,nodiag,quantumlock;
 	boolean rockok = FALSE, treeok = FALSE, thrudoor;
 	int maxx, maxy;
 	
@@ -2574,6 +2578,7 @@ mfndpos(mon, poss, info, flag)
 
 	nodiag = (mdat == &mons[PM_GRID_BUG]) || (mdat == &mons[PM_BEBELITH]);
 	wantpool = mdat->mlet == S_EEL;
+	wantpuddle = wantpool && mdat->msize == MZ_TINY;
 	cubewaterok = (is_swimmer(mdat) || breathless_mon(mon) || amphibious_mon(mon));
 	poolok = is_flyer(mdat) || is_clinger(mdat) ||
 		 (is_swimmer(mdat) && !wantpool);
@@ -2665,7 +2670,7 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 		//Weeping angels should avoid stepping into corredors, where they can be forced into a standoff.
 		if(quantumlock && IS_ROOM(levl[mon->mx][mon->my].typ) && !IS_ROOM(ntyp) ) continue;
 		
-		if((is_pool(nx,ny, FALSE) == wantpool || poolok) &&
+		if((is_pool(nx,ny, wantpuddle) == wantpool || poolok) &&
 			(cubewaterok || !is_3dwater(nx,ny)) && 
 			(lavaok || !is_lava(nx,ny))) {
 		int dispx, dispy;
@@ -2799,7 +2804,7 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 		cnt++;
 	    }
 	}
-	if(!cnt && wantpool && !is_pool(x,y, FALSE)) {
+	if(!cnt && wantpool && !is_pool(x,y, wantpuddle)) {
 		wantpool = FALSE;
 		goto nexttry;
 	}
