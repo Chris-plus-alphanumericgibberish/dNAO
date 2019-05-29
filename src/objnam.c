@@ -2967,11 +2967,9 @@ int wishflags;
 			bodytype = (MB_ANIMAL|MB_SLITHY);
 		} else if(!strncmpi(bp, "snakeneck ", l=10)){
 			bodytype = MB_LONGNECK;
-		} else if (!strncmpi(bp, "blessed ", l=8) ||
-			   (!strncmpi(bp, "holy ", l=5) && strncmpi(bp, "holy moonlight sword", l=20))) {
+		} else if (!strncmpi(bp, "blessed ", l=8)){
 			blessed = 1;
-		} else if (!strncmpi(bp, "cursed ", l=7) ||
-			   !strncmpi(bp, "unholy ", l=7)) {
+		} else if (!strncmpi(bp, "cursed ", l=7)){
 			iscursed = 1;
 		} else if (!strncmpi(bp, "uncursed ", l=9)) {
 			uncursed = 1;
@@ -3233,11 +3231,13 @@ int wishflags;
 		} else if (!strncmpi(bp, "axiomatic ", l=10)
 			) {
 			oproperties |= OPROP_AXIOW;
-		} else if (!strncmpi(bp, "holy ", l=5)
+		} else if (!strncmpi(bp, "holy ", l=5) && strncmpi(bp, "holy moonlight sword", 20)
 			) {
+			blessed = !(uncursed + iscursed);
 			oproperties |= OPROP_HOLYW;
 		} else if (!strncmpi(bp, "unholy ", l=7)
 			) {
+			iscursed = !(uncursed + blessed);
 			oproperties |= OPROP_UNHYW;
 		} else if (!strncmpi(bp, "vorpal ", l=7) && strncmpi(bp, "Vorpal Blade", 12)
 			) {
