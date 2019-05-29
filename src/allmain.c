@@ -495,12 +495,17 @@ moveloop()
 						mtmp->perminvis = FALSE;
 						newsym(mtmp->mx,mtmp->my);
 					}
-				} 
+				}
 				if (mtmp->minvis){
 					newsym(mtmp->mx, mtmp->my);
 				}
 				if (Blind && Bloodsense && has_blood_mon(mtmp)){
 					newsym(mtmp->mx, mtmp->my);
+				}
+				if(uwep && uwep->oartifact == ART_SINGING_SWORD && !is_deaf(mtmp)){
+					//quite noisy
+					mtmp->mux = u.ux;
+					mtmp->muy = u.uy;
 				}
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -971,6 +976,10 @@ karemade:
 				}
 			}
 			
+			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HASTE){
+				moveamt += 2;
+			}
+			
 			if(u.specialSealsActive&SEAL_BLACK_WEB && u.utrap && u.utraptype == TT_WEB)
 				moveamt += 8;
 			
@@ -1149,6 +1158,12 @@ karemade:
 				u.pethped = FALSE;
 				more_experienced(u.ulevel,0);
 				newexplevel();
+			}
+			if (u.uencouraged && (!rn2(4))) {
+				if(u.uencouraged > 0) u.uencouraged--;
+				else u.uencouraged++;
+				if (!(u.uencouraged)) 
+					You_feel("calm again.");
 			}
 			
 		    if (flags.bypasses) clear_bypasses();
@@ -1906,6 +1921,8 @@ newgame()
 	init_artifacts();	/* before u_init() in case $WIZKIT specifies
 				 * any artifacts */
 	u_init();
+	
+	hack_artifacts();	/* recall after u_init() to fix up role specific artifacts */
 
 #ifndef NO_SIGNAL
 	(void) signal(SIGINT, (SIG_RET_TYPE) done1);

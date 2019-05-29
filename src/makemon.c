@@ -4989,34 +4989,6 @@ register struct	monst	*mtmp;
 			if (otmp->spe < 2) otmp->spe = rnd(3);
 			if (!rn2(4)) otmp->oerodeproof = 1;
 			(void) mpickobj(mtmp, otmp);
-		} else if(ptr == &mons[PM_PHARAOH]){
-			otmp = mksobj(FLAIL, TRUE, FALSE);
-			if (otmp->spe < 2) otmp->spe = rnd(3);
-			otmp->obj_material = GOLD;
-			fix_object(otmp);
-			curse(otmp);
-			(void) mpickobj(mtmp, otmp);
-			
-			otmp = mksobj(SHEPHERD_S_CROOK, TRUE, FALSE);
-			if (otmp->spe < 2) otmp->spe = rnd(3);
-			otmp->obj_material = GOLD;
-			otmp->objsize = MZ_SMALL;
-			fix_object(otmp);
-			curse(otmp);
-			(void) mpickobj(mtmp, otmp);
-			
-			otmp = mksobj(MASK, TRUE, FALSE);
-			otmp->corpsenm = PM_PHARAOH;
-			otmp->obj_material = GOLD;
-			fix_object(otmp);
-			curse(otmp);
-			(void) mpickobj(mtmp, otmp);
-			
-			otmp = mksobj(rnd_good_amulet(), TRUE, FALSE);
-			otmp->obj_material = GOLD;
-			fix_object(otmp);
-			curse(otmp);
-			(void) mpickobj(mtmp, otmp);
 		} else if(ptr == &mons[PM_ALHOON]){
 			struct obj *otmp = mksobj(SKELETON_KEY, TRUE, FALSE);
 			otmp = oname(otmp, artiname(ART_SECOND_KEY_OF_NEUTRALITY));
@@ -5089,6 +5061,34 @@ register struct	monst	*mtmp;
 				otmp->oward = mtmp->mfaction;
 				(void) mpickobj(mtmp, otmp);
 			}
+		} else if(ptr == &mons[PM_PHARAOH]){
+			otmp = mksobj(FLAIL, TRUE, FALSE);
+			if (otmp->spe < 2) otmp->spe = rnd(3);
+			otmp->obj_material = GOLD;
+			fix_object(otmp);
+			curse(otmp);
+			(void) mpickobj(mtmp, otmp);
+			
+			otmp = mksobj(SHEPHERD_S_CROOK, TRUE, FALSE);
+			if (otmp->spe < 2) otmp->spe = rnd(3);
+			otmp->obj_material = GOLD;
+			otmp->objsize = MZ_SMALL;
+			fix_object(otmp);
+			curse(otmp);
+			(void) mpickobj(mtmp, otmp);
+			
+			otmp = mksobj(MASK, TRUE, FALSE);
+			otmp->corpsenm = PM_PHARAOH;
+			otmp->obj_material = GOLD;
+			fix_object(otmp);
+			curse(otmp);
+			(void) mpickobj(mtmp, otmp);
+			
+			otmp = mksobj(rnd_good_amulet(), TRUE, FALSE);
+			otmp->obj_material = GOLD;
+			fix_object(otmp);
+			curse(otmp);
+			(void) mpickobj(mtmp, otmp);
 		}
 		break;
 		case S_ZOMBIE:
@@ -7728,7 +7728,6 @@ struct monst *mtmp, *victim;
 			ptr == &mons[PM_DURIN_S_BANE] ||
 			ptr == &mons[PM_CHROMATIC_DRAGON] ||
 			ptr == &mons[PM_BOLG] ||
-			ptr == &mons[PM_UVUUDAUM] ||
 			ptr == &mons[PM_PRIEST_OF_GHAUNADAUR] ||
 			ptr == &mons[PM_SHOGGOTH]
 		) hp_threshold *= 3;
@@ -7786,7 +7785,7 @@ struct monst *mtmp, *victim;
 	|| ptr == &mons[PM_FORMIAN_CRUSHER]
 	|| ptr == &mons[PM_DRIDER] || ptr == &mons[PM_SPROW]
 	|| ptr == &mons[PM_DROW_MATRON] || ptr == &mons[PM_DROW_MATRON_MOTHER]
-	|| ptr == &mons[PM_ELVENKING] || ptr == &mons[PM_ELVENKING]
+	|| ptr == &mons[PM_ELVENKING] || ptr == &mons[PM_ELVENQUEEN]
 	|| ptr == &mons[PM_CUPRILACH_RILMANI] || ptr == &mons[PM_STANNUMACH_RILMANI]
 	|| ptr == &mons[PM_ARGENACH_RILMANI] || ptr == &mons[PM_AURUMACH_RILMANI]
 	) lev_limit = 30;	/* same as player */

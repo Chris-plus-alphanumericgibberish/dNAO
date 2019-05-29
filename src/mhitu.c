@@ -594,9 +594,16 @@ mattacku(mtmp)
 	}
 //ifdef BARD
 	tmp += mtmp->encouraged;
+	tchtmp += mtmp->encouraged;
 	if (wizard && mtmp->encouraged && ublindf && ublindf->otyp==LENSES)
 		pline("[%s +%d]", Monnam(mtmp), mtmp->encouraged);
 //endif
+	if(uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(mtmp) && !is_deaf(mtmp)){
+		if(uwep->osinging == OSING_DIRGE && !mtmp->mtame){
+			tmp -= uwep->spe+1;
+			tchtmp -= uwep->spe+1;
+		}
+	}
 	if(mtmp->data == &mons[PM_UVUUDAUM]){
 		tmp += 20;
 		tchtmp += 20;
@@ -3149,7 +3156,7 @@ dopois:
 	    case AD_EACD:
 		hitmsg(mtmp, mattk);
 		if (Acid_resistance) {
-			pline("You're covered in acid, but it seems harmless.");
+			pline("You're covered in acid, but it only stings.");
 			dmg /= 2;
 		} else {
 			pline("You're covered in acid! It burns!");
@@ -5064,10 +5071,12 @@ register int n;
 //ifdef BARD
 	if(n > 0){
 		n += mtmp->encouraged;
+		if(uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(mtmp) && !is_deaf(mtmp)){
+			if(uwep->osinging == OSING_DIRGE && !mtmp->mtame){
+				n -= uwep->spe+1;
+			}
+		}
 		if(n < 0) n = 0;
-	} else {
-		n -= mtmp->encouraged;
-		if(n > 0) n = 0;
 	}
 //endif
 	if(n > 0) mtmp->mhurtu = TRUE;

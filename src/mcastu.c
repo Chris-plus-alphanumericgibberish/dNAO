@@ -2981,6 +2981,10 @@ int spellnum;
 			|| spellnum == SUMMON_DEVIL
 		)
 	) return TRUE;
+	
+	//Raised dead would be hostile to the player
+	if(mtmp->mtame && spellnum == RAISE_DEAD) 
+		return TRUE;
 		
 	
 	if(is_drow(mtmp->data) && !(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))){
@@ -3316,10 +3320,11 @@ cold_mm:
 	    /*aggravation is a special case;*/
 		/*it's undirected but should still target the*/
 		/*victim so as to aggravate you*/
-	        if (is_undirected_spell(spellnum)
-		&& (spellnum != AGGRAVATION &&
-		      spellnum != SUMMON_MONS))
-		    cast_spell(mtmp, dmg, spellnum);
+		if (is_undirected_spell(spellnum)
+			&& (spellnum != AGGRAVATION &&
+		      spellnum != SUMMON_MONS)
+		)
+		   cast_spell(mtmp, dmg, spellnum);
 		else
 		    ucast_spell(mtmp, mdef, dmg, spellnum);
 		dmg = 0; /* done by the spell casting functions */
@@ -3387,8 +3392,10 @@ int spellnum;
 								!mtmp->mcansee || !mtmp->mcanmove || 
 								!mtmp->msleeping || mtmp->mstun || 
 								mtmp->mconf || mtmp->permspeed == MSLOW))
+			return TRUE;
 	/* don't summon monsters if it doesn't think you're around */
 #ifndef TAME_SUMMONING
+	if(mtmp->mtame){
         if (spellnum == SUMMON_MONS)
 	    return TRUE;
         if (spellnum == SUMMON_ANGEL)
@@ -3399,6 +3406,7 @@ int spellnum;
 	    return TRUE;
         if (spellnum == INSECTS)
 	    return TRUE;
+	}
 #endif
 	/* blindness spell on blinded player */
 	if ((!haseyes(mdef->data) || mdef->mblinded) && spellnum == BLIND_YOU)

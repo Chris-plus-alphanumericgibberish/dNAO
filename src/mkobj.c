@@ -187,6 +187,7 @@ struct obj *box;
 		    otmp->owt = weight(otmp);
 		} else while (otmp->otyp == ROCK) {
 		    otmp->otyp = rnd_class(DILITHIUM_CRYSTAL, LOADSTONE);
+			otmp->obj_material = objects[otmp->otyp].oc_material;
 		    if (otmp->quan > 2L) otmp->quan = 1L;
 		    otmp->owt = weight(otmp);
 		}
@@ -1227,7 +1228,9 @@ start_corpse_timeout(body)
 		when = when/10 + 1;
 	}
 
-	if (is_rider(&mons[body->corpsenm])) {
+	if (is_rider(&mons[body->corpsenm])
+		|| (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && attchmon && attchmon->mtame)
+		) {
 		/*
 		 * Riders always revive.  They have a 1/3 chance per turn
 		 * of reviving after 12 turns.  Always revive by 500.
