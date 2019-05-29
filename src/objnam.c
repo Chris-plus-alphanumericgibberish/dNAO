@@ -1579,7 +1579,7 @@ boolean with_price;
 		// fix "a" -> "an"
 		if (!strncmp(buf, "a ", 2) &&
 			index(vowels, *(buf + 2)) &&
-			(*(buf + 2) || (strncmp(buf + 2, "uranium", 7) && strncmp(buf + 2, "unicorn", 7) && strncmp(buf + 2, "eucalyptus", 10))))
+			(strncmp(buf + 2, "uranium", 7) && strncmp(buf + 2, "unicorn", 7) && strncmp(buf + 2, "eucalyptus", 10)))
 		{
 			buf = strprepend(buf + 2, "an ");
 		}
