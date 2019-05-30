@@ -1418,6 +1418,8 @@ mdamagem(magr, mdef, mattk)
 				Sprintf(buf, "from %s gaze", s_suffix(mon_nam(magr)));	// gaze stun is assumed to be eye-contact
 			else if (mattk->aatyp == AT_WDGZ)
 				Sprintf(buf, "under %s gaze", s_suffix(mon_nam(magr)));	// gaze stun is assumed to be eye-contact
+			else
+				Sprintf(buf, "for a moment");
 		}
 		else
 			Sprintf(buf, "for a moment");
@@ -1545,16 +1547,16 @@ physical:{
 				if (otmp) {
 					int basedamage = tmp;
 					int newdamage = tmp;
-					if(otmp->oartifact){
-						(void)artifact_hit(magr,mdef, otmp, &newdamage, dieroll);
+					if(otmp->oproperties){
+						(void)oproperty_hit(magr,mdef, otmp, &newdamage, dieroll);
 						if (mdef->mhp <= 0 || migrating_mons == mdef)
 						return (MM_DEF_DIED |
 							(grow_up(magr,mdef) ? 0 : MM_AGR_DIED));
 						tmp += (newdamage - basedamage);
 						newdamage = basedamage;
 					}
-					if(otmp->oproperties){
-						(void)oproperty_hit(magr,mdef, otmp, &newdamage, dieroll);
+					if(otmp->oartifact){
+						(void)artifact_hit(magr,mdef, otmp, &newdamage, dieroll);
 						if (mdef->mhp <= 0 || migrating_mons == mdef)
 						return (MM_DEF_DIED |
 							(grow_up(magr,mdef) ? 0 : MM_AGR_DIED));
