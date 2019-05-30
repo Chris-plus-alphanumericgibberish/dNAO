@@ -1880,10 +1880,13 @@ boolean *prev_loot;
 		obj_extract_self(otmp);
 		if ((unwornmask = otmp->owornmask) != 0L) {
 		    mtmp->misc_worn_check &= ~unwornmask;
-			if (otmp->owornmask & W_WEP || otmp->owornmask & W_SWAPWEP)
-			{
-				setmnotwielded(mtmp, otmp);
-				mtmp->weapon_check = NEED_WEAPON;
+		    if (otmp->owornmask & W_WEP){
+				setmnotwielded(mtmp,otmp);
+				MON_NOWEP(mtmp);
+			}
+		    if (otmp->owornmask & W_SWAPWEP){
+				setmnotwielded(mtmp,otmp);
+				MON_NOSWEP(mtmp);
 			}
 		    otmp->owornmask = 0L;
 		    update_mon_intrinsics(mtmp, otmp, FALSE, FALSE);

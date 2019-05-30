@@ -4228,8 +4228,14 @@ register struct monst *mdef;
 		    if (obj->owornmask)
 			update_mon_intrinsics(mdef, obj, FALSE, TRUE);
 		    obj_no_longer_held(obj);
-		    if (obj->owornmask & W_WEP)
-			setmnotwielded(mdef,obj);
+		    if (obj->owornmask & W_WEP){
+				setmnotwielded(mdef,obj);
+				MON_NOWEP(mdef);
+			}
+		    if (obj->owornmask & W_SWAPWEP){
+				setmnotwielded(mdef,obj);
+				MON_NOSWEP(mdef);
+			}
 		    obj->owornmask = 0L;
 		    if (is_boulder(obj) ||
 #if 0				/* monsters don't carry statues */
@@ -4314,8 +4320,14 @@ register struct monst *mdef;
 		    if (obj->owornmask)
 			update_mon_intrinsics(mdef, obj, FALSE, TRUE);
 		    obj_no_longer_held(obj);
-		    if (obj->owornmask & W_WEP)
-			setmnotwielded(mdef,obj);
+		    if (obj->owornmask & W_WEP){
+				setmnotwielded(mdef,obj);
+				MON_NOWEP(mdef);
+			}
+		    if (obj->owornmask & W_SWAPWEP){
+				setmnotwielded(mdef,obj);
+				MON_NOSWEP(mdef);
+			}
 		    obj->owornmask = 0L;
 		    if (is_boulder(obj) ||
 #if 0				/* monsters don't carry statues */
@@ -4364,8 +4376,14 @@ register struct monst *mdef;
 		    if (obj->owornmask)
 			update_mon_intrinsics(mdef, obj, FALSE, TRUE);
 		    obj_no_longer_held(obj);
-		    if (obj->owornmask & W_WEP)
-			setmnotwielded(mdef,obj);
+		    if (obj->owornmask & W_WEP){
+				setmnotwielded(mdef,obj);
+				MON_NOWEP(mdef);
+			}
+		    if (obj->owornmask & W_SWAPWEP){
+				setmnotwielded(mdef,obj);
+				MON_NOSWEP(mdef);
+			}
 		    obj->owornmask = 0L;
 		    if (is_boulder(obj) ||
 #if 0				/* monsters don't carry statues */
@@ -4434,8 +4452,14 @@ register struct monst *mdef;
 		    if (obj->owornmask)
 			update_mon_intrinsics(mdef, obj, FALSE, TRUE);
 		    obj_no_longer_held(obj);
-		    if (obj->owornmask & W_WEP)
-			setmnotwielded(mdef,obj);
+		    if (obj->owornmask & W_WEP){
+				setmnotwielded(mdef,obj);
+				MON_NOWEP(mdef);
+			}
+		    if (obj->owornmask & W_SWAPWEP){
+				setmnotwielded(mdef,obj);
+				MON_NOSWEP(mdef);
+			}
 		    obj->owornmask = 0L;
 		    if (is_boulder(obj) ||
 #if 0				/* monsters don't carry statues */
@@ -4483,8 +4507,14 @@ register struct monst *mdef;
 		    if (obj->owornmask)
 			update_mon_intrinsics(mdef, obj, FALSE, TRUE);
 		    obj_no_longer_held(obj);
-		    if (obj->owornmask & W_WEP)
-			setmnotwielded(mdef,obj);
+		    if (obj->owornmask & W_WEP){
+				setmnotwielded(mdef,obj);
+				MON_NOWEP(mdef);
+			}
+		    if (obj->owornmask & W_SWAPWEP){
+				setmnotwielded(mdef,obj);
+				MON_NOSWEP(mdef);
+			}
 		    obj->owornmask = 0L;
 		    if (is_boulder(obj) ||
 #if 0				/* monsters don't carry statues */
