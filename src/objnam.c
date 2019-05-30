@@ -780,6 +780,8 @@ boolean dofull;
 				Strcat(buf, "unholy ");
 			if (obj->oproperties&OPROP_VORPW && obj->known)
 				Strcat(buf, "vorpal ");
+			if (obj->oproperties&OPROP_MORGW && obj->known)
+				Strcat(buf, "morgul ");
 		}
 	}
 }
@@ -3237,6 +3239,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "vorpal ", l=7) && strncmpi(bp, "Vorpal Blade", 12)
 			) {
 			oproperties |= OPROP_VORPW;
+		} else if (!strncmpi(bp, "morgul ", l=7)
+			) {
+			oproperties |= OPROP_MORGW;
 		} else
 			break;
 		bp += l;
@@ -4257,7 +4262,7 @@ typfnd:
 					break;
 			case WEAPON_CLASS:
 				oproperties &= (OPROP_FIREW | OPROP_COLDW | OPROP_PSIOW | OPROP_DEEPW | OPROP_WATRW | OPROP_ELECW | OPROP_ACIDW | OPROP_MAGCW 
-								| OPROP_ANARW | OPROP_CONCW | OPROP_AXIOW | OPROP_HOLYW | OPROP_UNHYW | OPROP_VORPW | OPROP_LESSW);
+								| OPROP_ANARW | OPROP_CONCW | OPROP_AXIOW | OPROP_HOLYW | OPROP_UNHYW | OPROP_VORPW | OPROP_MORGW | OPROP_LESSW);
 				break;
 			case ARMOR_CLASS:
 				oproperties &= (OPROP_FIRE | OPROP_COLD | OPROP_ELEC | OPROP_ACID | OPROP_MAGC | OPROP_ANAR | OPROP_CONC | OPROP_AXIO);
