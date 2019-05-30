@@ -738,7 +738,11 @@ boolean dofull;
 	}
 
 	if (obj->oproperties && (obj->oartifact == 0 || dofull)){
-		if (obj->oproperties&OPROP_LESSW && obj->known){
+		if(obj->oproperties&OPROP_LESSW 
+			&& obj->oproperties&OPROP_AXIOW 
+			&& obj->oproperties&(OPROP_FIREW|OPROP_COLDW|OPROP_ELECW)
+			&& obj->known
+		){
 			if (obj->oproperties&OPROP_FIREW)
 				Strcat(buf, "forge-hot ");
 			if (obj->oproperties&OPROP_COLDW)
@@ -747,6 +751,8 @@ boolean dofull;
 				Strcat(buf, "arcing ");
 		}
 		else {
+			if(obj->oproperties&OPROP_LESSW && obj->known)
+				Strcat(prefix, "lesser ");
 			if (obj->oproperties&OPROP_PSIOW){
 				if (obj->known) Strcat(buf, "psionic ");
 				else if (Blind_telepat) Strcat(buf, "whispering ");
@@ -884,7 +890,11 @@ char *buf;
 			else Strcat(buf, "iron ");
 			break;
 		case METAL:
-			if (!(obj->oproperties&OPROP_LESSW && obj->known)) Strcat(buf, "metallic ");
+			if(!(obj->oproperties&OPROP_LESSW 
+				&& obj->oproperties&OPROP_AXIOW 
+				&& obj->oproperties&(OPROP_FIREW|OPROP_COLDW|OPROP_ELECW)
+				&& obj->known
+			)) Strcat(buf, "metallic ");
 			break;
 		case COPPER:
 			Strcat(buf, "bronze ");
@@ -3195,6 +3205,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)
 			) {
 			oproperties |= OPROP_WOOL;
+		} else if (!strncmpi(bp, "lesser ", l=7)
+			) {
+			oproperties |= OPROP_LESSW;
 		} else if (!strncmpi(bp, "flaming ", l=8)
 			) {
 			oproperties |= OPROP_FIREW;
