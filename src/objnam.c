@@ -1478,7 +1478,7 @@ boolean with_price;
 					Strcat(buf, " (lit)");
 				break;
 			}
-			if (objects[obj->otyp].oc_charged)
+			if (objects[obj->otyp].oc_charged && !is_weptool(obj))
 				goto charges;
 			break;
 		case WAND_CLASS:
