@@ -1418,6 +1418,8 @@ mdamagem(magr, mdef, mattk)
 				Sprintf(buf, "from %s gaze", s_suffix(mon_nam(magr)));	// gaze stun is assumed to be eye-contact
 			else if (mattk->aatyp == AT_WDGZ)
 				Sprintf(buf, "under %s gaze", s_suffix(mon_nam(magr)));	// gaze stun is assumed to be eye-contact
+			else
+				Sprintf(buf, "for a moment");
 		}
 		else
 			Sprintf(buf, "for a moment");
