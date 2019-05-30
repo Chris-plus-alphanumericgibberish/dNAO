@@ -752,7 +752,7 @@ boolean dofull;
 		}
 		else {
 			if(obj->oproperties&OPROP_LESSW && obj->known)
-				Strcat(prefix, "lesser ");
+				Strcat(buf, "lesser ");
 			if (obj->oproperties&OPROP_PSIOW){
 				if (obj->known) Strcat(buf, "psionic ");
 				else if (Blind_telepat) Strcat(buf, "whispering ");
