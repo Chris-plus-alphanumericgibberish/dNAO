@@ -3037,7 +3037,11 @@ createmon:
 				mtmp->mfaction = undeadtype;
 			}
 		}
-		if (mtmp) madeany = TRUE;
+		if (mtmp)
+		{
+			madeany = TRUE;
+			newsym(mtmp->mx, mtmp->my);
+		}
 	    }
 	}
 	return mtmp;
