@@ -520,9 +520,9 @@ char *buf;
 		/* allow 'blessed clear potion' if we don't know it's holy water;
 		* always allow "uncursed potion of water"
 		*/
-		if (obj->cursed)
+		if (obj->cursed && !(obj->oproperties&OPROP_UNHYW))
 			Strcat(buf, "cursed ");
-		else if (obj->blessed)
+		else if (obj->blessed && !(obj->oproperties&OPROP_HOLYW))
 			Strcat(buf, "blessed ");
 		else if (iflags.show_buc || ((!obj->known || !objects[obj->otyp].oc_charged ||
 			(obj->oclass == ARMOR_CLASS ||
@@ -738,7 +738,11 @@ boolean dofull;
 	}
 
 	if (obj->oproperties && (obj->oartifact == 0 || dofull)){
-		if (obj->oproperties&OPROP_LESSW && obj->known){
+		if(obj->oproperties&OPROP_LESSW 
+			&& obj->oproperties&OPROP_AXIOW 
+			&& obj->oproperties&(OPROP_FIREW|OPROP_COLDW|OPROP_ELECW)
+			&& obj->known
+		){
 			if (obj->oproperties&OPROP_FIREW)
 				Strcat(buf, "forge-hot ");
 			if (obj->oproperties&OPROP_COLDW)
@@ -747,6 +751,8 @@ boolean dofull;
 				Strcat(buf, "arcing ");
 		}
 		else {
+			if(obj->oproperties&OPROP_LESSW && obj->known)
+				Strcat(buf, "lesser ");
 			if (obj->oproperties&OPROP_PSIOW){
 				if (obj->known) Strcat(buf, "psionic ");
 				else if (Blind_telepat) Strcat(buf, "whispering ");
@@ -774,13 +780,13 @@ boolean dofull;
 				Strcat(buf, "concordant ");
 			if (obj->oproperties&OPROP_AXIOW && obj->known)
 				Strcat(buf, "axiomatic ");
-			if (obj->oproperties&OPROP_HOLYW && obj->known)
+			if (obj->oproperties&OPROP_HOLYW && obj->known && obj->blessed)
 				Strcat(buf, "holy ");
-			if (obj->oproperties&OPROP_UNHYW && obj->known)
+			if (obj->oproperties&OPROP_UNHYW && obj->known && obj->cursed)
 				Strcat(buf, "unholy ");
 			if (obj->oproperties&OPROP_VORPW && obj->known)
 				Strcat(buf, "vorpal ");
-			if (obj->oproperties&OPROP_MORGW && obj->known)
+			if (obj->oproperties&OPROP_MORGW && obj->known && obj->cursed)
 				Strcat(buf, "morgul ");
 		}
 	}
@@ -884,7 +890,11 @@ char *buf;
 			else Strcat(buf, "iron ");
 			break;
 		case METAL:
-			if (!(obj->oproperties&OPROP_LESSW && obj->known)) Strcat(buf, "metallic ");
+			if(!(obj->oproperties&OPROP_LESSW 
+				&& obj->oproperties&OPROP_AXIOW 
+				&& obj->oproperties&(OPROP_FIREW|OPROP_COLDW|OPROP_ELECW)
+				&& obj->known
+			)) Strcat(buf, "metallic ");
 			break;
 		case COPPER:
 			Strcat(buf, "bronze ");
@@ -3195,6 +3205,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)
 			) {
 			oproperties |= OPROP_WOOL;
+		} else if (!strncmpi(bp, "lesser ", l=7)
+			) {
+			oproperties |= OPROP_LESSW;
 		} else if (!strncmpi(bp, "flaming ", l=8)
 			) {
 			oproperties |= OPROP_FIREW;

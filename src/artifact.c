@@ -2717,13 +2717,13 @@ int basedmg;
 			else bonus += basedmg;
 		}
 	}
-	if(otmp->oproperties&OPROP_HOLYW){
+	if(otmp->oproperties&OPROP_HOLYW && otmp->blessed){
 		if(youdefend ? (hates_holy(youracedata)) : (hates_holy_mon(mdef))){
 			if (otmp->oproperties&OPROP_LESSW) bonus += d(1, 8);
 			else bonus += basedmg;
 		}
 	}
-	if(otmp->oproperties&OPROP_UNHYW){
+	if(otmp->oproperties&OPROP_UNHYW && otmp->cursed){
 		if(youdefend ? (hates_unholy(youracedata)) : (hates_unholy(mdef->data))){
 			if (otmp->oproperties&OPROP_LESSW) bonus += d(1, 8);
 			else bonus += basedmg;
@@ -2883,7 +2883,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			}
 		}
 	}
-	if(otmp->oproperties&OPROP_MORGW){
+	if(otmp->oproperties&OPROP_MORGW && otmp->cursed){
 		int bonus = 0;
 		if(youdefend){
 			if(!(otmp->oproperties&OPROP_LESSW))
@@ -2891,8 +2891,8 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			else u.umorgul = max(1, u.umorgul);
 			bonus = u.umorgul;
 		} else {
-			if (otmp->oproperties&OPROP_LESSW) bonus += d(1, 4);
-			else bonus += d(4,4);
+			if (otmp->oproperties&OPROP_LESSW) bonus += 1;
+			else bonus += d(1,4);
 			mdef->mhpmax -= bonus;
 			if(mdef->mhpmax < 1) mdef->mhpmax = 1;
 			mdef->mhp = min(mdef->mhp, mdef->mhpmax);
