@@ -520,10 +520,10 @@ char *buf;
 		/* allow 'blessed clear potion' if we don't know it's holy water;
 		* always allow "uncursed potion of water"
 		*/
-		if (obj->cursed && !(obj->oproperties&OPROP_UNHYW))
-			Strcat(buf, "cursed ");
-		else if (obj->blessed && !(obj->oproperties&OPROP_HOLYW))
-			Strcat(buf, "blessed ");
+		if (obj->cursed)
+			Strcat(buf, (obj->known && obj->oproperties&OPROP_UNHYW) ? "unholy " : "cursed ");
+		else if (obj->blessed)
+			Strcat(buf, (obj->known && obj->oproperties&OPROP_HOLYW) ? "holy " : "blessed ");
 		else if (iflags.show_buc || ((!obj->known || !objects[obj->otyp].oc_charged ||
 			(obj->oclass == ARMOR_CLASS ||
 			obj->oclass == RING_CLASS))
@@ -780,14 +780,11 @@ boolean dofull;
 				Strcat(buf, "concordant ");
 			if (obj->oproperties&OPROP_AXIOW && obj->known)
 				Strcat(buf, "axiomatic ");
-			if (obj->oproperties&OPROP_HOLYW && obj->known && obj->blessed)
-				Strcat(buf, "holy ");
-			if (obj->oproperties&OPROP_UNHYW && obj->known && obj->cursed)
-				Strcat(buf, "unholy ");
 			if (obj->oproperties&OPROP_VORPW && obj->known)
 				Strcat(buf, "vorpal ");
 			if (obj->oproperties&OPROP_MORGW && obj->known && obj->cursed)
 				Strcat(buf, "morgul ");
+			/* note: "holy" and "unholy" properties are shown in the BUC part of the name, as they replace "blessed" and "cursed". */
 		}
 	}
 }
