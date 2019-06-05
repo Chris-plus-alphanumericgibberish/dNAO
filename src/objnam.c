@@ -1222,6 +1222,11 @@ boolean with_price;
 			}
 			break;
 		case SCROLL_CLASS:
+			if (obj->dknown && !un && !ocl->oc_magic)
+			{
+				Strcat(buf, dn);
+				Strcat(buf, " ");
+			}
 			Strcat(buf, "scroll");
 			if (!obj->dknown) break;
 			if (nn) {
@@ -1238,8 +1243,8 @@ boolean with_price;
 				Strcat(buf, dn);
 			}
 			else {
-				Strcpy(buf, dn);
-				Strcat(buf, " scroll");
+				// "unlabeled scroll" should be the only case, and is already handled above.
+				;
 			}
 			break;
 		case WAND_CLASS:
