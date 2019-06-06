@@ -298,7 +298,7 @@ register struct obj *obj;
 		if (obj->spe > 0)
 		{
 			struct monst * mtmp;
-			if (mtmp = makemon(&mons[PM_WERERAT], u.ux, u.uy, NO_MM_FLAGS))
+			if ((mtmp = makemon(&mons[PM_WERERAT], u.ux, u.uy, NO_MM_FLAGS)))
 			{
 				if (!Blind)
 					You_hear("something from the pipes wish it was a real boy, and %s scuttles out of the sink!", a_monnam(mtmp));

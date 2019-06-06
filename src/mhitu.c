@@ -254,7 +254,7 @@ wildmiss(mtmp, mattk)		/* monster attacked your displaced image */
 		case 1: pline("%s attacks a spot beside you.", Monnam(mtmp));
 		    break;
 		case 2: pline("%s strikes at %s!", Monnam(mtmp),
-				levl[mtmp->mux][mtmp->muy].typ == WATER
+				((int)levl[mtmp->mux][mtmp->muy].typ) == WATER
 				    ? "empty water" : "thin air");
 		    break;
 		default:pline("%s %s wildly!", Monnam(mtmp), swings);
@@ -2755,9 +2755,10 @@ dopois:
 		    } else if(u.ustuck == mtmp) {
 				if (is_pool(mtmp->mx,mtmp->my, FALSE) && !Swimming
 					&& !Breathless) {
-					boolean moat =
-					(levl[mtmp->mx][mtmp->my].typ != POOL) &&
-					(levl[mtmp->mx][mtmp->my].typ != WATER) &&
+					int ltyp = levl[mtmp->mx][mtmp->my].typ;
+					boolean moat = 
+					(ltyp != POOL) &&
+					(ltyp != WATER) &&
 					!Is_medusa_level(&u.uz) &&
 					!Is_waterlevel(&u.uz);
 					
@@ -4137,7 +4138,7 @@ boolean ufound;
     if (!ufound)
 	pline("%s explodes at a spot in %s!",
 	    canseemon(mtmp) ? Monnam(mtmp) : "It",
-	    levl[mtmp->mux][mtmp->muy].typ == WATER
+	    ((int)levl[mtmp->mux][mtmp->muy].typ) == WATER
 		? "empty water" : "thin air");
     else {
 	register int tmp = d((int)mattk->damn, (int)mattk->damd);

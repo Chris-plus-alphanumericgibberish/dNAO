@@ -2955,7 +2955,7 @@ unsigned short gen_restrict;
 				whichpm = mkclass(monclass, Inhell ? G_HELL : G_NOHELL);
 				goto createmon;	// skip past the section which needs whichpm to exist
 			}
-			if(!(whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES)))
+			if(!((whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES))))
 			{
 				pline("You ask too generally for creatures so uncommon.");
 				continue;
@@ -2979,7 +2979,7 @@ unsigned short gen_restrict;
 						(whichpm->mflagsg & mg_restrict) ||
 						(whichpm->geno & gen_restrict)) && i < 100)
 					{
-					if (whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES))
+					if ((whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES)))
 						i++;
 					else
 						i = 100;
