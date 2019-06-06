@@ -901,7 +901,7 @@ clear_level_structures()
 	
 	level.flags.goldkamcount_hostile = 0;
 	level.flags.goldkamcount_peace = 0;
-
+	
 	level.flags.sp_lev_nroom = 0;
 	
 	level.flags.has_shop = 0;
@@ -1035,8 +1035,8 @@ makelevel()
 	if (u.uz.dlevel != 1) {
 	    xchar sx, sy;
 	    do {
-		sx = somex(croom);
-		sy = somey(croom);
+			sx = somex(croom);
+			sy = somey(croom);
 	    } while(occupied(sx, sy));
 	    mkstairs(sx, sy, 1, croom);	/* up */
 	}
@@ -1534,13 +1534,14 @@ find_branch_room(mp)
     coord *mp;
 {
     struct mkroom *croom = 0;
+	int tryct = 0;
 
     if (nroom == 0) {
 	mazexy(mp);		/* already verifies location */
     } else {
 	/* not perfect - there may be only one stairway */
 	if(nroom > 2) {
-	    int tryct = 0;
+	    tryct = 0;
 
 	    do
 		croom = &rooms[rn2(nroom)];
@@ -1548,12 +1549,17 @@ find_branch_room(mp)
 		  (croom->rtype != OROOM && croom->rtype != JOINEDROOM)) && (++tryct < 100));
 	} else
 	    croom = &rooms[rn2(nroom)];
-
+	
+	tryct = 0;
 	do {
 	    if (!somexy(croom, mp))
 		impossible("Can't place branch!");
 	} while(occupied(mp->x, mp->y) ||
-	    (levl[mp->x][mp->y].typ != CORR && levl[mp->x][mp->y].typ != ROOM));
+	    (levl[mp->x][mp->y].typ != CORR 
+		&& levl[mp->x][mp->y].typ != ROOM
+		&& levl[mp->x][mp->y].typ != GRASS
+		&& levl[mp->x][mp->y].typ != PUDDLE) ||
+		tryct++ > 1000);
     }
     return croom;
 }
@@ -1774,12 +1780,12 @@ coord *tm;
 				     kind == TRAPDOOR || kind == HOLE);
 
 	    do {
-		if (++tryct > 200)
-		    return;
-		if (mazeflag)
-		    mazexy(&m);
-		else if (!somexy(croom,&m))
-		    return;
+			if (++tryct > 200)
+				return;
+			if (mazeflag)
+				mazexy(&m);
+			else if (!somexy(croom,&m))
+				return;
 	    } while (occupied(m.x, m.y) ||
 			(avoid_boulder && boulder_at(m.x, m.y)));
 	}
