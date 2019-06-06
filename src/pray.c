@@ -719,6 +719,7 @@ gcrownu()
     short class_gift;
     int sp_no;
 #define ok_wep(o) ((o) && ((o)->oclass == WEAPON_CLASS || is_weptool(o)))
+#define ok_arm(o) ((o) && ((o)->oclass == ARMOR_CLASS))
 	
 	if(!Role_if(PM_EXILE)){
 		HSee_invisible |= FROMOUTSIDE;
@@ -1496,14 +1497,16 @@ gcrownu()
 	}
 
     /* enhance weapon regardless of alignment or artifact status */
-    if (ok_wep(obj)) {
+    if (ok_wep(obj) || ok_arm(obj)) {
 		bless(obj);
 		obj->oeroded = obj->oeroded2 = 0;
 		obj->oerodeproof = TRUE;
 		obj->bknown = obj->rknown = TRUE;
 		if (obj->spe < 1) obj->spe = 1;
 		/* acquire skill in this weapon */
-		unrestrict_weapon_skill(weapon_type(obj));
+		if (ok_wep(obj)) {
+			unrestrict_weapon_skill(weapon_type(obj));
+		}
     } else if (class_gift == STRANGE_OBJECT) {
 		/* opportunity knocked, but there was nobody home... */
 		You_feel("unworthy.");
