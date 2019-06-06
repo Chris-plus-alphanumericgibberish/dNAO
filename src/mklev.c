@@ -1117,7 +1117,7 @@ makelevel()
 	/* Zoos */
 	{
 	int zootype;
-	if (zootype = random_special_room())
+	if ((zootype = random_special_room()))
 		mkroom(zootype);
 	}
 
