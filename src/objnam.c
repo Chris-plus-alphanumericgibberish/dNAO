@@ -842,7 +842,7 @@ add_material_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (!((id_for_material(obj)) ^ (obj->known)) &&
+	if (id_for_material(obj) ||
 		((obj->obj_material != ((obj->oartifact && artilist[obj->oartifact].material && obj->known) ? artilist[obj->oartifact].material : objects[obj->otyp].oc_material))
 		&& !(is_lightsaber(obj) && litsaber(obj)))){
 		if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
@@ -1222,6 +1222,11 @@ boolean with_price;
 			}
 			break;
 		case SCROLL_CLASS:
+			if (obj->dknown && !un && !ocl->oc_magic)
+			{
+				Strcat(buf, dn);
+				Strcat(buf, " ");
+			}
 			Strcat(buf, "scroll");
 			if (!obj->dknown) break;
 			if (nn) {
@@ -1238,8 +1243,8 @@ boolean with_price;
 				Strcat(buf, dn);
 			}
 			else {
-				Strcpy(buf, dn);
-				Strcat(buf, " scroll");
+				// "unlabeled scroll" should be the only case, and is already handled above.
+				;
 			}
 			break;
 		case WAND_CLASS:
