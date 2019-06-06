@@ -842,7 +842,7 @@ add_material_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (!((id_for_material(obj)) ^ (obj->known)) &&
+	if (id_for_material(obj) ||
 		((obj->obj_material != ((obj->oartifact && artilist[obj->oartifact].material && obj->known) ? artilist[obj->oartifact].material : objects[obj->otyp].oc_material))
 		&& !(is_lightsaber(obj) && litsaber(obj)))){
 		if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
