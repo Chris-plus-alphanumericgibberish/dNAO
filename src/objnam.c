@@ -1304,16 +1304,16 @@ boolean with_price;
 		if (!ignore_oquan)
 #endif
 		if (obj->quan != 1L) Strcpy(buf, makeplural(buf));
-	}//endif obj_is_pname
+	}//endif !obj_is_pname(obj)
 
-	if ((obj->onamelth && obj->dknown)) {
-		if (!(obj_is_pname(obj) || the_unique_obj(obj)) || !obj->known) Strcat(buf, " named ");
-		if ((obj_is_pname(obj) || the_unique_obj(obj)) && obj->known && !strcmp(ONAME(obj), "Fluorite Octahedron")){
+	if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
+		if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
+		if (obj_is_pname(obj) && obj->known && !strcmp(ONAME(obj), "Fluorite Octahedron")){
 			if (obj->quan == 8) Strcat(buf, "Fluorite Octet");
 			else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
 			else Strcat(buf, "Fluorite Octahedron");
 		}
-		else if ((obj_is_pname(obj) || the_unique_obj(obj)) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
+		else if (obj_is_pname(obj) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
 			Strcat(buf, ONAME(obj)+4);
 		else 
 			Strcat(buf, ONAME(obj));
