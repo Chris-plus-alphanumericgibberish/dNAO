@@ -1308,7 +1308,7 @@ boolean with_price;
 
 	if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
 		if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
-		if (obj_is_pname(obj) && obj->known && !strcmp(ONAME(obj), "Fluorite Octahedron")){
+		if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_FLUORITE_OCTAHEDRON)){
 			if (obj->quan == 8) Strcat(buf, "Fluorite Octet");
 			else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
 			else Strcat(buf, "Fluorite Octahedron");
