@@ -1845,7 +1845,7 @@ struct mkroom *croom;
 boolean
 mkfeature(typ, mazeflag, croom)
 int typ;
-boolean mazeflag;
+int mazeflag;
 struct mkroom *croom;
 {
 	coord m;
