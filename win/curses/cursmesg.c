@@ -160,7 +160,7 @@ curses_block(boolean noscroll)
         curses_clear_unhighlight_message_window();
     } else {
         mvwprintw(win, my, mx, "      ");
-        if (noscroll) {
+        if (!noscroll) {
             scroll_window(MESSAGE_WIN);
             turn_lines = 1;
         }
