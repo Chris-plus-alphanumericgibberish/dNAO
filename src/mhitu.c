@@ -316,13 +316,16 @@ boolean message;
 
 /* select a monster's next attack, possibly substituting for its usual one */
 struct attack *
-getmattk(mptr, indx, prev_result, alt_attk_buf)
-struct permonst *mptr;
+getmattk(mtmp, indx, prev_result, alt_attk_buf)
+struct monst *mtmp;
 int indx, prev_result[];
 struct attack *alt_attk_buf;
 {
     struct attack *attk;
-	static int subout = 0;
+	struct permonst *mptr = mtmp->data;
+	static int subout;
+	static boolean derundspec;
+
 	if(indx < NATTK){
 		attk = &mptr->mattk[indx];
 	} else {
@@ -332,7 +335,105 @@ struct attack *alt_attk_buf;
 		attk->damn = 0;
 		attk->damd = 0;
 	}
+
+	// Sanity: reset static variables every time indx == 0
+	if (indx == 0)
+	{
+		subout = 0;
+		derundspec = FALSE;
+	}
 	
+	// Derived undead
+	if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
+		if (attk->aatyp == AT_SPIT
+			|| attk->aatyp == AT_BREA
+			|| attk->aatyp == AT_GAZE
+			|| attk->aatyp == AT_ARRW
+			|| attk->aatyp == AT_MMGC
+			|| attk->aatyp == AT_TNKR
+			|| attk->aatyp == AT_SHDW
+			|| attk->aatyp == AT_BEAM
+			|| attk->aatyp == AT_MAGC
+			|| (attk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
+			|| (indx == 0 &&
+			(attk->aatyp == AT_CLAW || attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI) &&
+			attk->adtyp == AD_PHYS &&
+			attk->damn*attk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mptr->msize * 2, 4) / 2
+			)
+			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+			|| (!derundspec && indx == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
+			){
+			// yes, replace the current attack
+			*alt_attk_buf = *attk;
+			attk = alt_attk_buf;
+
+			if (indx == 0){
+				attk->aatyp = AT_CLAW;
+				attk->adtyp = AD_PHYS;
+				attk->damn = mtmp->m_lev / 10 + 1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
+				attk->damd = max(mptr->msize * 2, 4);
+			}
+			else if (!derundspec && mtmp->mfaction == SKELIFIED){
+				derundspec = TRUE;
+				attk->aatyp = AT_TUCH;
+				attk->adtyp = AD_SLOW;
+				attk->damn = 1;
+				attk->damd = max(mtmp->data->msize * 2, 4);
+			}
+			else if (!derundspec && mtmp->mfaction == CRYSTALFIED){
+				derundspec = TRUE;
+				attk->aatyp = AT_TUCH;
+				attk->adtyp = AD_ECLD;
+				attk->damn = min(10, mtmp->m_lev / 3);
+				attk->damd = 8;
+			}
+			else {
+				// remove the disallowed attack
+				attk->aatyp = 0;
+				attk->adtyp = 0;
+				attk->damn = 0;
+				attk->damd = 0;
+			}
+		}
+	}
+	if (mtmp->mfaction == FRACTURED){
+		// no gazes allowed
+		if (attk->aatyp == AT_GAZE)
+		{
+			*alt_attk_buf = *attk;
+			attk = alt_attk_buf;
+
+			attk->aatyp = 0;
+			attk->adtyp = 0;
+			attk->damn = 0;
+			attk->damd = 0;
+		}
+		// replace first blank spot with a bonus claw
+		if (!derundspec &&
+			attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+		{
+			*alt_attk_buf = *attk;
+			attk = alt_attk_buf;
+
+			derundspec = TRUE;		// only one
+			attk->aatyp = AT_CLAW;
+			attk->adtyp = AD_GLSS;
+			attk->damn = max(mtmp->m_lev / 10 + 1, attk->damn);
+			attk->damd = max(mptr->msize * 2, max(attk->damd, 4));
+		}
+		// change some existing claws' damage types
+		if (attk->aatyp == AT_CLAW && (attk->adtyp == AD_PHYS || attk->adtyp == AD_SAMU || attk->adtyp == AD_SQUE))
+		{
+			*alt_attk_buf = *attk;
+			attk = alt_attk_buf;
+
+			attk->aatyp = AT_CLAW;
+			attk->adtyp = AD_GLSS;
+			attk->damn = attk->damn;
+			attk->damd = attk->damd;
+		}
+	}
+
 	//Five fiends' spellcasting routines
 	if(
 		(mptr == &mons[PM_LICH__THE_FIEND_OF_EARTH]) ||
@@ -359,7 +460,7 @@ struct attack *alt_attk_buf;
 				attk->damd = 0;
 			} else subout = 0;
 		}
-		else if(subout){	// other indices are nulled out IF spellcasting
+		else if(subout){	// other indices than the first are nulled out IF spellcasting
 			*alt_attk_buf = *attk;
 			attk = alt_attk_buf;
 			attk->aatyp = 0;
@@ -761,7 +862,7 @@ mattacku(mtmp)
 			break;
 		
 	    sum[i] = 0;
-	    mattk = getmattk(mdat, i, sum, &alt_attk);
+	    mattk = getmattk(mtmp, i, sum, &alt_attk);
 	    if (u.uswallow && (mattk->aatyp != AT_ENGL && mattk->aatyp != AT_ILUR))
 			continue;
 		
@@ -769,64 +870,7 @@ mattacku(mtmp)
 			|| (levl[mtmp->mx][mtmp->my].lit && (viz_array[mtmp->my][mtmp->mx] & TEMP_DRK1 && !(viz_array[mtmp->my][mtmp->mx] & TEMP_LIT1)))))
 			continue;
 		
-		if(mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
-			if(mattk->aatyp == AT_SPIT 
-				|| mattk->aatyp == AT_BREA 
-				|| mattk->aatyp == AT_GAZE 
-				|| mattk->aatyp == AT_ARRW 
-				|| mattk->aatyp == AT_MMGC 
-				|| mattk->aatyp == AT_TNKR 
-				|| mattk->aatyp == AT_SHDW 
-				|| mattk->aatyp == AT_BEAM 
-				|| mattk->aatyp == AT_MAGC
-				|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
-				|| (i == 0 && 
-					(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_MARI) && 
-					mattk->adtyp == AD_PHYS && 
-					mattk->damn*mattk->damd/2 < (mtmp->m_lev/10+1)*max(mtmp->data->msize*2, 4)/2
-				   )
-				|| (!derundspec && mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
-				|| (!derundspec && i == NATTK-1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
-			){
-				if(i == 0){
-					alt_attk.aatyp = AT_CLAW;
-					alt_attk.adtyp = AD_PHYS;
-					alt_attk.damn = mtmp->m_lev/10+1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
-					alt_attk.damd = max(mtmp->data->msize*2, 4);
-					mattk = &alt_attk;
-				}
-				else if(!derundspec && mtmp->mfaction == SKELIFIED){
-					derundspec = TRUE;
-					alt_attk.aatyp = AT_TUCH;
-					alt_attk.adtyp = AD_SLOW;
-					alt_attk.damn = 1;
-					alt_attk.damd = max(mtmp->data->msize*2, 4);
-					mattk = &alt_attk;
-				}
-				else if(!derundspec && mtmp->mfaction == CRYSTALFIED){
-					derundspec = TRUE;
-					alt_attk.aatyp = AT_TUCH;
-					alt_attk.adtyp = AD_ECLD;
-					alt_attk.damn = min(10,mtmp->m_lev/3);
-					alt_attk.damd = 8;
-					mattk = &alt_attk;
-				}
-				else continue;
-			}
-		}
-		if(mtmp->mfaction == FRACTURED){
-			if((!derundspec && 
-				mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
-				|| (mattk->aatyp == AT_CLAW && (mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE))
-			){
-				derundspec = TRUE;
-				alt_attk.aatyp = AT_CLAW;
-				alt_attk.adtyp = AD_GLSS;
-				alt_attk.damn = max(mtmp->m_lev/10+1, mattk->damn);
-				alt_attk.damd = max(mtmp->data->msize*2, max(mattk->damd, 4));
-				mattk = &alt_attk;
-			}
-		}
+		
 		
 		/*Plasteel helms cover the face and prevent bite attacks*/
 		if(mtmp->misc_worn_check & W_ARMH){
