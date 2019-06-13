@@ -2561,9 +2561,6 @@ physical:{
 	    default:	tmp = 0;
 			break;
 	}
-	if(magr->mfaction == ZOMBIFIED){
-		tmp *= 2;
-	}
 	if(magr->data == &mons[PM_UVUUDAUM] && !weaponhit){
 		if(hates_unholy(mdef->data)){
 			if (vis) pline("%s's glory sears %s!", Monnam(magr), mon_nam(mdef));

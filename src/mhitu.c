@@ -328,6 +328,7 @@ struct attack *alt_attk_buf;
 
 	if(indx < NATTK){
 		attk = &mptr->mattk[indx];
+		*alt_attk_buf = *attk;
 	} else {
 		attk = alt_attk_buf;
 		attk->aatyp = 0;
@@ -342,7 +343,7 @@ struct attack *alt_attk_buf;
 		subout = 0;
 		derundspec = FALSE;
 	}
-	
+
 	// Derived undead
 	if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
 		if (attk->aatyp == AT_SPIT
@@ -364,7 +365,6 @@ struct attack *alt_attk_buf;
 			|| (!derundspec && indx == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
 			){
 			// yes, replace the current attack
-			*alt_attk_buf = *attk;
 			attk = alt_attk_buf;
 
 			if (indx == 0){
@@ -400,7 +400,6 @@ struct attack *alt_attk_buf;
 		// no gazes allowed
 		if (attk->aatyp == AT_GAZE)
 		{
-			*alt_attk_buf = *attk;
 			attk = alt_attk_buf;
 
 			attk->aatyp = 0;
@@ -412,7 +411,6 @@ struct attack *alt_attk_buf;
 		if (!derundspec &&
 			attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
 		{
-			*alt_attk_buf = *attk;
 			attk = alt_attk_buf;
 
 			derundspec = TRUE;		// only one
@@ -424,13 +422,8 @@ struct attack *alt_attk_buf;
 		// change some existing claws' damage types
 		if (attk->aatyp == AT_CLAW && (attk->adtyp == AD_PHYS || attk->adtyp == AD_SAMU || attk->adtyp == AD_SQUE))
 		{
-			*alt_attk_buf = *attk;
 			attk = alt_attk_buf;
-
-			attk->aatyp = AT_CLAW;
 			attk->adtyp = AD_GLSS;
-			attk->damn = attk->damn;
-			attk->damd = attk->damd;
 		}
 	}
 
@@ -452,7 +445,6 @@ struct attack *alt_attk_buf;
 				(mptr == &mons[PM_CHAOS] && rn2(3))
 			){
 				subout = 1;
-				*alt_attk_buf = *attk;
 				attk = alt_attk_buf;
 				attk->aatyp = AT_MAGC;
 				attk->adtyp = AD_SPEL;
@@ -461,7 +453,6 @@ struct attack *alt_attk_buf;
 			} else subout = 0;
 		}
 		else if(subout){	// other indices than the first are nulled out IF spellcasting
-			*alt_attk_buf = *attk;
 			attk = alt_attk_buf;
 			attk->aatyp = 0;
 			attk->adtyp = 0;
@@ -505,10 +496,25 @@ struct attack *alt_attk_buf;
 		}
 	}
 
+	/* Undead damage multipliers -- note that these must be after actual replacements are done */
+	/* zombies deal double damage */
+	if (mtmp->mfaction == ZOMBIFIED)
+	{
+		attk = alt_attk_buf;
+		attk->damn *= 2;
+	}
+
+	/* all undead deal double damage at midnight (Q for Chris: should this really stack with zombie double damage?) */
+	if (is_undead_mon(mtmp) && midnight())
+	{
+		attk = alt_attk_buf;
+		attk->damn *= 2;
+	}
+
+
 	/* twoweapon symmetry -- if the previous attack missed, do not make an offhand attack */
 	if (indx > 0 && prev_result[indx - 1] <= 0 && attk->aatyp == AT_XWEP)
 	{
-		*alt_attk_buf = *attk;
 		attk = alt_attk_buf;
 		attk->aatyp = 0;
 		attk->adtyp = 0;
@@ -527,7 +533,6 @@ struct attack *alt_attk_buf;
 		mptr == &mons[PM_ASTRAL_DEVA]) &&
 	    attk->adtyp == mptr->mattk[indx - 1].adtyp
 	) {
-		*alt_attk_buf = *attk;
 		attk = alt_attk_buf;
 		attk->adtyp = AD_STUN;
     }
@@ -1812,8 +1817,6 @@ hitmu(mtmp, mattk)
 	if(weaponhit && mattk->adtyp != AD_PHYS) dmg = 0;
 	else if(mtmp->mflee && mdat == &mons[PM_BANDERSNATCH]) dmg = d((int)mattk->damn, 2*(int)mattk->damd);
 	else dmg = d((int)mattk->damn, (int)mattk->damd);
-	if(is_undead_mon(mtmp) && midnight())
-		dmg += d((int)mattk->damn, (int)mattk->damd); /* extra damage */
 
 /*	Next a cancellation factor	*/
 /*	Use uncancelled when the cancellation factor takes into account certain
@@ -3705,9 +3708,6 @@ dopois:
 	}
 	if(u.uhp < 1) done_in_by(mtmp);
 
-	if(mtmp->mfaction == ZOMBIFIED){
-		dmg *= 2;
-	}
 	if(mtmp->data == &mons[PM_UVUUDAUM] && !weaponhit){
 		if(hates_unholy(youracedata)){
 			pline("%s's glory sears you!", Monnam(mtmp));
