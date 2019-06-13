@@ -341,6 +341,7 @@ struct attack *alt_attk_buf;
 		(mptr == &mons[PM_TIAMAT__THE_FIEND_OF_WIND]) ||
 		(mptr == &mons[PM_CHAOS])
 	){
+		// first index -- determing if using the alternate attack set (solo spellcasting)
 		if(indx==0){
 			if(
 				(mptr == &mons[PM_LICH__THE_FIEND_OF_EARTH] && rn2(4)) ||
@@ -358,7 +359,7 @@ struct attack *alt_attk_buf;
 				attk->damd = 0;
 			} else subout = 0;
 		}
-		if(subout){
+		else if(subout){	// other indices are nulled out IF spellcasting
 			*alt_attk_buf = *attk;
 			attk = alt_attk_buf;
 			attk->aatyp = 0;
@@ -385,13 +386,15 @@ struct attack *alt_attk_buf;
 			{AT_GAZE, AD_STDY, 1,9},
 			{0, 0, 0,0},
 		};
+		// first index -- determine which attack form
 		if(indx==0){
-			if(!rn2(7)){
+			if(!rn2(7)){		// 1/7 of marilith
 				subout = 1;
-			} else if(!rn2(6)){
+			} else if(!rn2(6)){	// 1/7 of sword archon
 				subout = 2;
-			} else subout = 0;
+			} else subout = 0;	// 5/7 of normal
 		}
+		// If using marilith or sword archon, sub out entire attack chain
 		if(subout == 1){
 			*alt_attk_buf = swordArchon[indx];
 			attk = alt_attk_buf;
