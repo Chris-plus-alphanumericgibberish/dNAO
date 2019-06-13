@@ -329,6 +329,7 @@ struct attack *alt_attk_buf;
 	if(indx < NATTK){
 		attk = &mptr->mattk[indx];
 		*alt_attk_buf = *attk;
+		attk = alt_attk_buf;		// by default, use the buffer space
 	} else {
 		attk = alt_attk_buf;
 		attk->aatyp = 0;
@@ -365,8 +366,6 @@ struct attack *alt_attk_buf;
 			|| (!derundspec && indx == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
 			){
 			// yes, replace the current attack
-			attk = alt_attk_buf;
-
 			if (indx == 0){
 				attk->aatyp = AT_CLAW;
 				attk->adtyp = AD_PHYS;
@@ -400,8 +399,6 @@ struct attack *alt_attk_buf;
 		// no gazes allowed
 		if (attk->aatyp == AT_GAZE)
 		{
-			attk = alt_attk_buf;
-
 			attk->aatyp = 0;
 			attk->adtyp = 0;
 			attk->damn = 0;
@@ -411,8 +408,6 @@ struct attack *alt_attk_buf;
 		if (!derundspec &&
 			attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
 		{
-			attk = alt_attk_buf;
-
 			derundspec = TRUE;		// only one
 			attk->aatyp = AT_CLAW;
 			attk->adtyp = AD_GLSS;
@@ -422,7 +417,6 @@ struct attack *alt_attk_buf;
 		// change some existing claws' damage types
 		if (attk->aatyp == AT_CLAW && (attk->adtyp == AD_PHYS || attk->adtyp == AD_SAMU || attk->adtyp == AD_SQUE))
 		{
-			attk = alt_attk_buf;
 			attk->adtyp = AD_GLSS;
 		}
 	}
@@ -445,7 +439,6 @@ struct attack *alt_attk_buf;
 				(mptr == &mons[PM_CHAOS] && rn2(3))
 			){
 				subout = 1;
-				attk = alt_attk_buf;
 				attk->aatyp = AT_MAGC;
 				attk->adtyp = AD_SPEL;
 				attk->damn = 0;
@@ -453,7 +446,6 @@ struct attack *alt_attk_buf;
 			} else subout = 0;
 		}
 		else if(subout){	// other indices than the first are nulled out IF spellcasting
-			attk = alt_attk_buf;
 			attk->aatyp = 0;
 			attk->adtyp = 0;
 			attk->damn = 0;
@@ -499,23 +491,15 @@ struct attack *alt_attk_buf;
 	/* Undead damage multipliers -- note that these must be after actual replacements are done */
 	/* zombies deal double damage */
 	if (mtmp->mfaction == ZOMBIFIED)
-	{
-		attk = alt_attk_buf;
 		attk->damn *= 2;
-	}
 
 	/* all undead deal double damage at midnight (Q for Chris: should this really stack with zombie double damage?) */
 	if (is_undead_mon(mtmp) && midnight())
-	{
-		attk = alt_attk_buf;
 		attk->damn *= 2;
-	}
-
 
 	/* twoweapon symmetry -- if the previous attack missed, do not make an offhand attack */
 	if (indx > 0 && prev_result[indx - 1] <= 0 && attk->aatyp == AT_XWEP)
 	{
-		attk = alt_attk_buf;
 		attk->aatyp = 0;
 		attk->adtyp = 0;
 		attk->damn = 0;
@@ -533,7 +517,6 @@ struct attack *alt_attk_buf;
 		mptr == &mons[PM_ASTRAL_DEVA]) &&
 	    attk->adtyp == mptr->mattk[indx - 1].adtyp
 	) {
-		attk = alt_attk_buf;
 		attk->adtyp = AD_STUN;
     }
     return attk;
