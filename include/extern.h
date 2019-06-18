@@ -2368,6 +2368,7 @@ E int NDECL(spiritDsize);
 E int NDECL(dospirit);
 E int FDECL(spell_skill_from_adtype, (int));
 E int FDECL(spell_adtype, (int));
+E const char *FDECL(spelltypemnemonic, (int));
 E int FDECL(spell_skilltype, (int));
 E int FDECL(spiriteffects, (int,BOOLEAN_P));
 E int FDECL(spelleffects, (int,BOOLEAN_P,int));
