@@ -2053,7 +2053,7 @@ struct obj *obj;
 			carrying(CANDELABRUM_OF_INVOCATION))
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Attach this candle to the candelabrum", MENU_UNSELECTED);
-	else if (obj->otyp == WAX_CANDLE || obj->otyp == TALLOW_CANDLE)
+	else if (obj->otyp == WAX_CANDLE || obj->otyp == TALLOW_CANDLE || obj->otyp == CANDLE_OF_INVOCATION)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this candle", MENU_UNSELECTED);
 	else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
@@ -2106,6 +2106,40 @@ struct obj *obj;
 	else if (obj->oclass == WAND_CLASS)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Break this wand", MENU_UNSELECTED);
+	else if (obj->otyp == UPGRADE_KIT)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Use the upgrade kit", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_DARKWEAVER_S_CLOAK)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Release or absorb darkness", MENU_UNSELECTED);
+	else if (obj->otyp == DROVEN_CLOAK)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Spin out or sweep up a web", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_AEGIS)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Change Aegis' form", MENU_UNSELECTED);
+	else if (obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER || obj->otyp == RAKUYO_DAGGER)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Latch or unlatch your rakuyo", MENU_UNSELECTED);
+	else if (obj->otyp == TORCH || obj->otyp == SHADOWLANDER_S_TORCH)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Light or snuff this torch", MENU_UNSELECTED);
+	else if (obj->otyp == SUNROD && !obj->lamplit)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Light this sunrod", MENU_UNSELECTED);
+	else if (obj->otyp == SENSOR_PACK)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Use this sensor pack", MENU_UNSELECTED);
+	else if (obj->otyp == HYPOSPRAY)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Inject an ampule with this hypospray", MENU_UNSELECTED);
+	else if ((is_knife(obj) && !(obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_MARIONETTE))
+		&& (u.wardsknown & (WARD_TOUSTEFNA | WARD_DREPRUN | WARD_OTTASTAFUR | WARD_KAUPALOKI | WARD_VEIOISTAFUR | WARD_THJOFASTAFUR)))
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Carve a stave with this knife", MENU_UNSELECTED);
+	else if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Ignite or deactivate this lightsaber", MENU_UNSELECTED);
 	/* d: drop item, works on everything */
 	any.a_void = (genericptr_t)dodrop;
 	add_menu(win, NO_GLYPH, &any, 'd', 0, ATR_NONE,
@@ -2168,6 +2202,19 @@ struct obj *obj;
 	else if (obj->oclass == SPBOOK_CLASS)
 		add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Study this spellbook", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_EXCALIBUR || obj->oartifact == ART_GLAMDRING || obj->oartifact == ART_ROD_OF_SEVEN_PARTS)
+				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+				"Read the inscription on this weapon", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_BOW_OF_SKADI)
+				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+				"Study the runes on this bow", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_ITLACHIAYAQUE)
+				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+				"Read into the smoky depths of this shield", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_PEN_OF_THE_VOID)
+				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+				"Inspect this weapon", MENU_UNSELECTED);
+	/* R: rub */
 	any.a_void = (genericptr_t)dorub;
 	if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP)
 		add_menu(win, NO_GLYPH, &any, 'R', 0, ATR_NONE,
@@ -2197,6 +2244,8 @@ struct obj *obj;
 	any.a_void = (genericptr_t)doinvoke;
 	if ((obj->otyp == FAKE_AMULET_OF_YENDOR && !obj->known) ||
 			obj->oartifact || objects[obj->otyp].oc_unique ||
+			(obj->otyp == RIN_WISHES && objects[obj->otyp].oc_name_known && (obj->owornmask & W_RING)) ||
+			(obj->otyp == CANDLE_OF_INVOCATION && obj->lamplit) ||
 			obj->otyp == MIRROR) /* wtf NetHack devteam? */
 		add_menu(win, NO_GLYPH, &any, 'V', 0, ATR_NONE,
 				"Try to invoke a unique power of this object", MENU_UNSELECTED);
@@ -2205,8 +2254,7 @@ struct obj *obj;
 	   wielded */
 	any.a_void = (genericptr_t)dowield;
 	if (obj == uwep) {}
-	else if (obj->oclass == WEAPON_CLASS || obj->otyp == PICK_AXE ||
-			obj->otyp == UNICORN_HORN)
+	else if (obj->oclass == WEAPON_CLASS || is_weptool(obj))
 		add_menu(win, NO_GLYPH, &any, 'w', 0, ATR_NONE,
 				"Wield this as your weapon", MENU_UNSELECTED);
 	else if (obj->otyp == TIN_OPENER)
@@ -2229,7 +2277,7 @@ struct obj *obj;
 		any.a_void = (genericptr_t)doputon;
 		add_menu(win, NO_GLYPH, &any, 'W', 0, ATR_NONE,
 				"Put this amulet on", MENU_UNSELECTED);
-	    } else if (obj->otyp == TOWEL || obj->otyp == BLINDFOLD) {
+	    } else if (obj->otyp == TOWEL || obj->otyp == BLINDFOLD || obj->otyp == R_LYEHIAN_FACEPLATE) {
 		any.a_void = (genericptr_t)doputon;
 		add_menu(win, NO_GLYPH, &any, 'W', 0, ATR_NONE,
 				"Use this to blindfold yourself", MENU_UNSELECTED);
