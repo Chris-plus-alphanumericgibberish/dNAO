@@ -2337,7 +2337,10 @@ struct obj *obj;
 	/* dotypeinv() means that we want the item described. Just do it
 	   directly rather than fighting with a multiselect menu. */
 	if (feedback_fn == dotypeinv) {
-		checkfile(xname(obj), 0, TRUE, TRUE);
+		winid datawin = create_nhwindow(NHW_MENU);
+		if(checkfile(xname(obj), 0, FALSE, TRUE, &datawin))
+			display_nhwindow(datawin, TRUE);
+		destroy_nhwindow(datawin);
 		return 0;
 	}
 	/* In most cases, we can just set getobj's result directly.
