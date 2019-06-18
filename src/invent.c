@@ -2168,10 +2168,11 @@ struct obj *obj;
 			obj->oclass == GEM_CLASS || obj->oclass == RING_CLASS)
 		add_menu(win, NO_GLYPH, &any, 'E', 0, ATR_NONE,
 				"Write on the floor with this object", MENU_UNSELECTED);
-	/* I: describe item, works on everything */
+	/* I: describe item, works on any items whose actual name is known */
 	any.a_void = (genericptr_t)dotypeinv;
-	add_menu(win, NO_GLYPH, &any, 'I', 0, ATR_NONE,
-			"Describe this item", MENU_UNSELECTED);
+	if (objects[obj->otyp].oc_name_known)
+		add_menu(win, NO_GLYPH, &any, 'I', 0, ATR_NONE,
+				"Describe this item", MENU_UNSELECTED);
 	/* p: pay for unpaid items */
 	any.a_void = (genericptr_t)dopay;
 	if ((mtmp = shop_keeper(*in_rooms(u.ux, u.uy, SHOPBASE))) &&
@@ -2357,7 +2358,9 @@ struct obj *obj;
 /* 
  * describe_item()
  * 
- * Prints lines describing the given item to the passed nhwindow reference
+ * Prints lines describing the given object to the passed nhwindow reference
+ * Assumes that the player knows the name of the object (ie, objects[obj->otyp].oc_name_known == TRUE)
+ * Requires an actual object to be passed, as many object-related functions require an obj pointer
  */
 void
 describe_item(obj, datawin)
@@ -2381,11 +2384,14 @@ winid *datawin;
 	}
 
 	/* Object classes currently with no special messages here: amulets. */
-	boolean weptool = (olet == TOOL_CLASS && oc.oc_skill != P_NONE);
-	if (olet == WEAPON_CLASS || weptool) {
+	if (olet == WEAPON_CLASS || is_weptool(obj)) {
 		if (oc.oc_skill >= 0) {
-			Sprintf(buf, "%s-handed weapon%s.",
-				(oc.oc_bimanual ? "Two" : "Single"), (weptool ? "-tool" : ""));
+			Sprintf(buf, "%s-handed weapon%s%s",
+				(oc.oc_bimanual ? "Two" : "Single"), (is_weptool(obj) ? "-tool" : ""),
+				(oc.oc_bimanual == bimanual(obj, youmonst.data) ? "." :
+				bimanual(obj, youmonst.data) ? ", but large enough you actually need two hands."
+											 : ", but you can wield it one-handed.")
+				);
 		}
 		else if (oc.oc_skill <= -P_BOW && oc.oc_skill >= -P_CROSSBOW) {
 			Strcpy(buf, "Ammunition.");
@@ -2396,6 +2402,7 @@ winid *datawin;
 		OBJPUTSTR(buf);
 		/* Ugh. Can we just get rid of dmgval() and put its damage bonuses into
 		* the object class? */
+		/* Nero's note: dnh makes this problem so much worse; everything should be in dmgval() - TODO sometime */
 		const char* sdambon = "";
 		const char* ldambon = "";
 		switch (otyp) {
@@ -2461,35 +2468,93 @@ winid *datawin;
 			"Damage: 1d%d%s versus small and 1d%d%s versus large monsters.",
 			oc.oc_wsdam, sdambon, oc.oc_wldam, ldambon);
 		OBJPUTSTR(buf);
-		Sprintf(buf, "Has a %s%d %s to hit.", (oc.oc_hitbon >= 0 ? "+" : ""),
-			oc.oc_hitbon, (oc.oc_hitbon >= 0 ? "bonus" : "penalty"));
-		OBJPUTSTR(buf);
+		if (oc.oc_hitbon != 0)
+		{
+			Sprintf(buf, "Has a %s%d %s to hit.", (oc.oc_hitbon >= 0 ? "+" : ""),
+				oc.oc_hitbon, (oc.oc_hitbon >= 0 ? "bonus" : "penalty"));
+			OBJPUTSTR(buf);
+		}
 	}
 	if (olet == ARMOR_CLASS) {
+		/* Armor type */
 		/* Indexes here correspond to ARM_SHIELD, etc; not the W_* masks.
 		* Expects ARM_SUIT = 0, all the way up to ARM_SHIRT = 6. */
 		const char* armorslots[] = {
 			"torso", "shield", "helm", "gloves", "boots", "cloak", "shirt"
 		};
 		Sprintf(buf, "%s, worn in the %s slot.",
-			(oc.oc_bulky ? "Bulky armor" : "Armor"),
+			(oc.oc_armcat != ARM_SUIT ? "Armor" :
+			is_light_armor(obj) ?		"Light armor" :
+			is_medium_armor(obj) ?		"Medium armor" :
+										"Heavy armor"),
 			armorslots[oc.oc_armcat]);
-
 		OBJPUTSTR(buf);
-		Sprintf(buf, "Base AC %d, magic cancellation %d.",
-			oc.a_ac, oc.a_can);
+		/* Defense */
+		if (obj->known) {// calculate the actual AC and DR this armor gives
+			Sprintf(buf, "Is worth %d AC and %d DR.",
+				arm_ac_bonus(obj), arm_dr_bonus(obj));
+		} else {// say what the base stats are
+			Sprintf(buf, "Base %d AC and %d DR.",
+				oc.a_ac, oc.a_dr);
+		}
 		OBJPUTSTR(buf);
+		/* Magic cancellation */
+		if (oc.a_can > 0)
+		{
+			Sprintf(buf, "Grants magic cancellation, level %d.", oc.a_can);
+			OBJPUTSTR(buf);
+		}
+		/* Don/Doff time */
 		Sprintf(buf, "Takes %d turn%s to put on or remove.",
 			oc.oc_delay, (oc.oc_delay == 1 ? "" : "s"));
 	}
 	if (olet == FOOD_CLASS) {
-		if (otyp == TIN || otyp == CORPSE) {
-			OBJPUTSTR("Comestible providing varied nutrition.");
+		if (otyp == TIN) {
+			if (obj->known)
+			{
+				if (obj->spe > 0)
+				{ // spinach
+					OBJPUTSTR("Comestible providing 600 nutrition.");
+					OBJPUTSTR("Takes various amounts of turns to open and eat.");
+					OBJPUTSTR("Is vegan.");
+				}
+				else if (obj->corpsenm == NON_PM)
+				{ // empty
+					OBJPUTSTR("Comestible providing no nutrition.");
+					OBJPUTSTR("Takes various amounts of turns to open.");
+				}
+				else
+				{ // contains a monster
+					OBJPUTSTR("Comestible providing varied nutrition.");
+					OBJPUTSTR("Takes various amounts of turns to eat.");
+					if (vegan(&mons[obj->corpsenm]))
+						OBJPUTSTR("Is vegan.");
+					else if (vegetarian(&mons[obj->corpsenm]))
+						OBJPUTSTR("Is vegetarian but not vegan.");
+					else 
+						OBJPUTSTR("Is not vegetarian.");
+				}
+			}
+			else
+			{
+				OBJPUTSTR("Comestible providing varied nutrition.");
+				OBJPUTSTR("Takes various amounts of turns to eat.");
+				OBJPUTSTR("May or may not be vegetarian.");
+			}
+		}
+		else if (otyp == CORPSE) {
+			Sprintf(buf, "Comestible providing %d nutrition%s.", mons[obj->corpsenm].cnutrit, obj->oeaten ? " when eaten whole" : "");
+			OBJPUTSTR(buf);
 			OBJPUTSTR("Takes various amounts of turns to eat.");
-			OBJPUTSTR("May or may not be vegetarian.");
+			if (vegan(&mons[obj->corpsenm]))
+				OBJPUTSTR("Is vegan.");
+			else if (vegetarian(&mons[obj->corpsenm]))
+				OBJPUTSTR("Is vegetarian but not vegan.");
+			else
+				OBJPUTSTR("Is not vegetarian.");
 		}
 		else {
-			Sprintf(buf, "Comestible providing %d nutrition.", oc.oc_nutrition);
+			Sprintf(buf, "Comestible providing %d nutrition%s.", oc.oc_nutrition - obj->oeaten, obj->oeaten ? " when eaten whole" : "");
 			OBJPUTSTR(buf);
 			Sprintf(buf, "Takes %d turn%s to eat.", oc.oc_delay,
 				(oc.oc_delay == 1 ? "" : "s"));
@@ -2521,25 +2586,28 @@ winid *datawin;
 		OBJPUTSTR("Potion.");
 	}
 	if (olet == SCROLL_CLASS) {
-		/* nothing special (ink is covered below) */
+		/* nothing special */
 		OBJPUTSTR("Scroll.");
 	}
 	if (olet == SPBOOK_CLASS) {
-		Sprintf(buf, "Level %d spellbook, in the %s school. %s spell.",
-			oc.oc_level, spelltypemnemonic(oc.oc_skill), dir);
-		OBJPUTSTR(buf);
-		Sprintf(buf, "Takes %d actions to read.", oc.oc_delay);
-		OBJPUTSTR(buf);
+		if (!obj->oartifact)
+		{
+			Sprintf(buf, "Level %d spellbook, in the %s school. %s spell.",
+				oc.oc_level, spelltypemnemonic(oc.oc_skill), dir);
+			OBJPUTSTR(buf);
+		}
+		else
+		{
+			OBJPUTSTR("Ancient tome.");
+		}
 	}
 	if (olet == WAND_CLASS) {
 		Sprintf(buf, "%s wand.", dir);
 		OBJPUTSTR(buf);
 	}
 	if (olet == RING_CLASS) {
-		OBJPUTSTR(oc.oc_charged ? "Chargeable ring." : "Ring.");
-		/* see material comment below; only show toughness status if this
-		* particular ring is already identified... */
-		if (oc.oc_tough && oc.oc_name_known) {
+		OBJPUTSTR((oc.oc_charged && otyp != RIN_WISHES) ? "Chargeable ring." : "Ring.");
+		if (oc.oc_tough) {
 			OBJPUTSTR("Is made of a hard material.");
 		}
 	}
@@ -2553,16 +2621,17 @@ winid *datawin;
 		else {
 			OBJPUTSTR("Precious gem.");
 		}
-		/* can do unconditionally, these aren't randomized */
 		if (oc.oc_tough) {
 			OBJPUTSTR("Is made of a hard material.");
 		}
 	}
-	if (olet == TOOL_CLASS && !weptool) {
+	if (olet == TOOL_CLASS && !is_weptool(obj)) {
 		const char* subclass = "tool";
 		switch (otyp) {
 		case BOX:
 		case CHEST:
+		case MAGIC_CHEST:
+		case MASSIVE_STONE_CRATE:
 		case ICE_BOX:
 		case SACK:
 		case OILSKIN_SACK:
@@ -2570,16 +2639,24 @@ winid *datawin;
 			subclass = "container";
 			break;
 		case SKELETON_KEY:
+		case UNIVERSAL_KEY:
 		case LOCK_PICK:
 		case CREDIT_CARD:
 			subclass = "unlocking tool";
 			break;
 		case TALLOW_CANDLE:
 		case WAX_CANDLE:
+		case CANDLE_OF_INVOCATION:
+		case TORCH:
+		case SUNROD:
 		case BRASS_LANTERN:
 		case OIL_LAMP:
 		case MAGIC_LAMP:
+		case CANDELABRUM_OF_INVOCATION:
 			subclass = "light source";
+			break;
+		case SHADOWLANDER_S_TORCH:
+			subclass = "dark source";
 			break;
 		case LAND_MINE:
 		case BEARTRAP:
@@ -2588,6 +2665,7 @@ winid *datawin;
 		case TIN_WHISTLE:
 		case MAGIC_WHISTLE:
 		case BELL:
+		case BELL_OF_OPENING:
 		case LEATHER_DRUM:
 		case DRUM_OF_EARTHQUAKE:
 			subclass = "atonal instrument";
@@ -2602,6 +2680,12 @@ winid *datawin;
 		case MAGIC_HARP:
 			subclass = "tonal instrument";
 			break;
+		case HYPOSPRAY:
+		case SENSOR_PACK:
+		case POWER_PACK:
+		case BULLET_FABBER:
+			subclass = "future-tech tool";
+			break;
 		}
 		Sprintf(buf, "%s%s.", (oc.oc_charged ? "chargeable " : ""), subclass);
 		/* capitalize first letter of buf */
@@ -2610,18 +2694,10 @@ winid *datawin;
 	}
 
 	/* cost, wt should go next */
-	Sprintf(buf, "Base cost %d, weighs %d aum.", oc.oc_cost, oc.oc_weight);
+	Sprintf(buf, "Base cost %d. Weighs %d aum.", oc.oc_cost, weight(obj));
 	OBJPUTSTR(buf);
 
-//	Not a function in dnh
-//	/* Scrolls or spellbooks: ink cost */
-//	if (olet == SCROLL_CLASS || olet == SPBOOK_CLASS) {
-//		Sprintf(buf, "Takes %d to %d ink to write.",
-//			ink_cost(otyp) / 2, ink_cost(otyp) - 1);
-//		OBJPUTSTR(buf);
-//	}
-
-//	dnh doesn't have a nice helpful list of names for properties
+//	dnh doesn't have a nice helpful list of names for properties - TODO!
 //	/* power conferred */
 //	extern const struct propname {
 //		int prop_num;
@@ -2700,32 +2776,23 @@ winid *datawin;
 	* subject to description shuffling that includes materials. If the player
 	* has already discovered this object, though, then it's fine to show the
 	* material.
-	* Object classes where this may matter: rings, wands. All randomized tools
-	* share materials, and all scrolls and potions are the same material. */
-	if (!(olet == RING_CLASS || olet == WAND_CLASS) || oc.oc_name_known) {
-		/* char array converting materials to strings; if this is ever needed
-		* anywhere else it should be externified. Corresponds exactly to the
-		* materials defined in objclass.h.
-		* This is very similar to materialnm[], but the slight difference is
-		* that this is always the noun form whereas materialnm uses adjective
-		* forms; most materials have the same noun and adjective forms but two
-		* (wood/wooden, vegetable matter/organic) don't */
-		const char* mat_str = materialnm[oc.oc_material];
-		/* Two exceptions to materialnm, which uses adjectival forms: most of
-		* these work fine as nouns but two don't. */
-		if (oc.oc_material == WOOD) {
-			mat_str = "wood";
-		}
-		else if (oc.oc_material == VEGGY) {
-			mat_str = "vegetable matter";
-		}
-
-		Sprintf(buf, "Normally made of %s.", mat_str);
-		OBJPUTSTR(buf);
+	* Edit by Nero: dnh is assuming that oc_name_known == TRUE if this function is called. */
+	/* 
+	* This is very similar to materialnm[], but the slight difference is
+	* that this is always the noun form whereas materialnm uses adjective
+	* forms; most materials have the same noun and adjective forms but two
+	* (wood/wooden, vegetable matter/organic) don't */
+	Strcpy(buf2, materialnm[obj->obj_material]);
+	/* Two exceptions to materialnm, which uses adjectival forms: most of
+	* these work fine as nouns but two don't. */
+	if (obj->obj_material == WOOD) {
+		Sprintf(buf2, "wood");
 	}
-
-	/* TODO: prevent obj lookup from displaying with monster database entry
-	* (e.g. scroll of light gives "light" monster database) */
+	else if (obj->obj_material == VEGGY) {
+		Sprintf(buf2, "vegetable matter");
+	}
+	Sprintf(buf, "Made of %s.", buf2);
+	OBJPUTSTR(buf);
 
 	/* Full-line remarks */
 	if (oc.oc_merge) {
