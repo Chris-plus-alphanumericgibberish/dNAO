@@ -544,6 +544,207 @@ register boolean mod;
 	return;
 }
 
+/*
+ * Returns a pointer to a TEMPORARY array of all the properties (that are in prop.h) an artifact has (either while equiped or while carried)
+ * If while_carried == TRUE, do not list properties that require the artifact to be wielded / worn
+ * 
+ * The array that is returned only stores the most recent query for each of carried/equiped.
+ */
+int *
+art_property_list(obj, while_carried)
+struct obj* obj;
+boolean while_carried;
+{
+	static int equiped_property_list[LAST_PROP];	// the temporary list of properties for while equiped
+	static int carried_property_list[LAST_PROP];	// the temporary list of properties for while carried
+	int * property_list = (while_carried ? carried_property_list : equiped_property_list);
+	int cur_prop, i;
+	register const struct artifact *oart = get_artifact(obj);
+	boolean got_prop;
+
+	if (!oart)
+	{
+		property_list[0] = 0;
+		return property_list;
+	}
+
+	const static int NO_RES[] = { 0 };
+	// artifact properties while equiped
+	const static int CHROMATIC_RES[] = { FIRE_RES, COLD_RES, DISINT_RES, DRAIN_RES, SHOCK_RES, POISON_RES, SICK_RES, ACID_RES, STONE_RES, 0 };
+	const static int PLATINUM_RES[] = { FIRE_RES, COLD_RES, DISINT_RES, SHOCK_RES, SLEEP_RES, FREE_ACTION, 0 };
+	const static int KURTULMAK_RES[] = { FIRE_RES, FREE_ACTION, 0 };
+	const static int EREBOR_RES[] = { FIRE_RES, COLD_RES, 0 };
+	const static int DURIN_RES[] = { FIRE_RES, ACID_RES, POISON_RES, 0 };
+	const static int REV_PROPS[] = { COLD_RES, REGENERATION, FIXED_ABIL, POISON_RES, SEE_INVIS, 0 };
+	const static int HERMES_PROPS[] = { FAST, 0 };
+	const static int FLY_PROPS[] = { DETECT_MONSTERS, 0 };
+	// artifact properties while carried
+	const static int AHRIMAN_PROPS[] = { FIRE_RES, DRAIN_RES, POISON_RES, 0 };
+
+	i = 0;
+	for (cur_prop = 0; cur_prop < LAST_PROP; cur_prop++)
+	{
+		got_prop = FALSE;
+		
+		// defn/cary resistances
+		switch (while_carried ? oart->cary.adtyp : oart->defn.adtyp)
+		{
+		case AD_FIRE:
+			if (cur_prop == FIRE_RES) got_prop = TRUE;
+			break;
+		case AD_COLD:
+			if (cur_prop == COLD_RES) got_prop = TRUE; 
+			break;
+		case AD_ELEC:
+			if (cur_prop == SHOCK_RES) got_prop = TRUE; 
+			break;
+		case AD_ACID:
+			if (cur_prop == ACID_RES) got_prop = TRUE; 
+			break;
+		case AD_MAGM:
+			if (cur_prop == ANTIMAGIC) got_prop = TRUE; 
+			break;
+		case AD_PLYS:
+			if (cur_prop == FREE_ACTION) got_prop = TRUE; 
+			break;
+		case AD_DISN:
+			if (cur_prop == DISINT_RES) got_prop = TRUE; 
+			break;
+		case AD_DRST:
+			if (cur_prop == POISON_RES) got_prop = TRUE; 
+			break;
+		case AD_DRLI:
+			if (cur_prop == DRAIN_RES) got_prop = TRUE; 
+			break;
+		case AD_SLEE:
+			if (cur_prop == SLEEP_RES) got_prop = TRUE; 
+			break;
+		}
+
+		// SPFX properties
+		if (!got_prop)
+		{
+			long spfx, spfx2, spfx3, wpfx;
+
+			spfx = (!while_carried) ? oart->spfx : oart->cspfx;
+			spfx2 = (!while_carried) ? oart->spfx2 : 0;
+			spfx3 = (!while_carried) ? 0 : oart->cspfx3;
+			wpfx = (!while_carried) ? oart->wpfx : 0;
+
+			switch (cur_prop)
+			{
+			case SEARCHING:
+				if (spfx & SPFX_SEARCH) got_prop = TRUE;
+				break;
+			case HALLUC_RES:
+				if (spfx & SPFX_HALRES) got_prop = TRUE;
+				break;
+			case TELEPAT:
+				if (spfx & SPFX_ESP) got_prop = TRUE;
+				break;
+			case DISPLACED:
+				if (spfx & SPFX_DISPL) got_prop = TRUE;
+				break;
+			case REGENERATION:
+				if (spfx & SPFX_REGEN) got_prop = TRUE;
+				break;
+			case TELEPORT_CONTROL:
+				if (spfx & SPFX_TCTRL) got_prop = TRUE;
+				break;
+			case ENERGY_REGENERATION:
+				if (spfx & SPFX_EREGEN) got_prop = TRUE;
+				break;
+			case HALF_SPDAM:
+				if (spfx & SPFX_HSPDAM) got_prop = TRUE;
+				break;
+			case HALF_PHDAM:
+				if (spfx & SPFX_HPHDAM) got_prop = TRUE;
+				break;
+			case REFLECTING:
+				if (spfx & SPFX_REFLECT) got_prop = TRUE;
+				break;
+			case CONFLICT:
+				if (spfx & SPFX_CONFL) got_prop = TRUE;
+				break;
+			case AGGRAVATE_MONSTER:
+				if (spfx & SPFX_AGGRM) got_prop = TRUE;
+				break;
+			case STEALTH:
+				if (spfx2 & SPFX2_STLTH) got_prop = TRUE;
+				break;
+			case SPELLBOOST:
+				if (spfx2 & SPFX2_SPELLUP) got_prop = TRUE;
+				break;
+			case POLYMORPH_CONTROL:
+				if (spfx3 & SPFX3_PCTRL) got_prop = TRUE;
+				break;
+			case FREE_ACTION:
+				if (wpfx & WSFX_FREEACT) got_prop = TRUE;
+				break;
+			}
+		}
+
+		// additional properties from yet another location
+		if (!got_prop)
+		{
+			// first, select the artifact's list of bonus properties
+			const static int * bonus_prop_list;
+			switch (obj->oartifact)
+			{
+			case ART_CHROMATIC_DRAGON_SCALES:
+				bonus_prop_list = (while_carried ? (NO_RES) : (CHROMATIC_RES));
+				break;
+			case ART_DRAGON_PLATE:
+				bonus_prop_list = (while_carried ? (NO_RES) : (PLATINUM_RES));
+				break;
+			case ART_STEEL_SCALES_OF_KURTULMAK:
+				bonus_prop_list = (while_carried ? (NO_RES) : (KURTULMAK_RES));
+				break;
+			case ART_ARMOR_OF_EREBOR:
+				bonus_prop_list = (while_carried ? (NO_RES) : (EREBOR_RES));
+				break;
+			case ART_WAR_MASK_OF_DURIN:
+				bonus_prop_list = (while_carried ? (NO_RES) : (DURIN_RES));
+				break;
+			case ART_CLAWS_OF_THE_REVENANCER:
+				bonus_prop_list = (while_carried ? (NO_RES) : (REV_PROPS));
+				break;
+			case ART_HERMES_S_SANDALS:
+				bonus_prop_list = (while_carried ? (NO_RES) : (HERMES_PROPS));
+				break;
+			case ART_ALL_SEEING_EYE_OF_THE_FLY:
+				bonus_prop_list = (while_carried ? (NO_RES) : (FLY_PROPS));
+				break;
+			case ART_HEART_OF_AHRIMAN:
+				bonus_prop_list = (AHRIMAN_PROPS);
+				break;
+			default:
+				bonus_prop_list = (NO_RES);
+				break;
+			}
+			// if it has one, then see if the current property is on the list
+			if (bonus_prop_list != (NO_RES))
+			{
+				int j;
+				for (j = 0; bonus_prop_list[j]; j++)
+				if (bonus_prop_list[j] == cur_prop)
+					got_prop = TRUE;
+			}
+		}
+		// if we've got the property, add it to the array
+		if (got_prop)
+		{
+			property_list[i] = cur_prop;
+			i++;
+		}
+	}
+	// add a terminator to the array
+	property_list[i] = 0;
+
+	// return the list
+	return property_list;
+}
+
 int
 nartifact_exist()
 {

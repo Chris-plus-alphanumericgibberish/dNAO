@@ -2340,6 +2340,7 @@ struct obj *obj;
 	   directly rather than fighting with a multiselect menu. */
 	if (feedback_fn == dotypeinv) {
 		winid datawin = create_nhwindow(NHW_MENU);
+		putstr(datawin, ATR_NONE, doname(obj));
 		describe_item(obj, &datawin);
 		checkfile(xname(obj), 0, FALSE, TRUE, &datawin);
 		display_nhwindow(datawin, TRUE);
@@ -2694,74 +2695,106 @@ winid *datawin;
 	}
 
 	/* cost, wt should go next */
-	Sprintf(buf, "Base cost %d. Weighs %d aum.", oc.oc_cost, weight(obj));
+	Sprintf(buf, "Base cost %d. Weighs %d aum.%s",
+		(int)(obj->oartifact ? artilist[obj->oartifact].cost :oc.oc_cost),
+		(int)(weight(obj) / max(1, obj->quan)),
+		((obj->quan != 1) ? " (per item)" : ""));
 	OBJPUTSTR(buf);
 
-//	dnh doesn't have a nice helpful list of names for properties - TODO!
-//	/* power conferred */
-//	extern const struct propname {
-//		int prop_num;
-//		const char* prop_name;
-//	} propertynames[]; /* located in timeout.c */
-//	if (oc.oc_oprop) {
-//		int i;
-//		for (i = 0; propertynames[i].prop_name; ++i) {
-//			/* hack for alchemy smocks because everything about alchemy smocks
-//			* is a hack */
-//			if (propertynames[i].prop_num == ACID_RES
-//				&& otyp == ALCHEMY_SMOCK) {
-//				OBJPUTSTR("Confers acid resistance.");
-//				continue;
-//			}
-//			if (oc.oc_oprop == propertynames[i].prop_num) {
-//				/* proper grammar */
-//				const char* confers = "Makes you";
-//				const char* effect = propertynames[i].prop_name;
-//				switch (propertynames[i].prop_num) {
-//					/* special overrides because prop_name is bad */
-//				case STRANGLED:
-//					effect = "choke";
-//					break;
-//				case LIFESAVED:
-//					effect = "life saving";
-//					/* FALLTHRU */
-//					/* for things that don't work with "Makes you" */
-//				case GLIB:
-//				case WOUNDED_LEGS:
-//				case DETECT_MONSTERS:
-//				case SEE_INVIS:
-//				case HUNGER:
-//				case WARNING:
-//					/* don't do special warn_of_mon */
-//				case SEARCHING:
-//				case INFRAVISION:
-//				case AGGRAVATE_MONSTER:
-//				case CONFLICT:
-//				case JUMPING:
-//				case TELEPORT_CONTROL:
-//				case SWIMMING:
-//				case SLOW_DIGESTION:
-//				case HALF_SPDAM:
-//				case HALF_PHDAM:
-//				case REGENERATION:
-//				case ENERGY_REGENERATION:
-//				case PROTECTION:
-//				case PROT_FROM_SHAPE_CHANGERS:
-//				case POLYMORPH_CONTROL:
-//				case FREE_ACTION:
-//				case FIXED_ABIL:
-//					confers = "Confers";
-//					break;
-//				default:
-//					break;
-//				}
-//				if (strstri(propertynames[i].prop_name, "resistance"))
-//					confers = "Confers";
-//				Sprintf(buf, "%s %s.", confers, effect);
-//				OBJPUTSTR(buf);
-//			}
-//		}
-//	}
+	/* powers conferred */
+	extern const struct propname {
+		int prop_num;
+		const char* prop_name;
+	} propertynames[]; /* located in timeout.c */
+	int i;
+
+	int * properties_item = item_property_list(obj);
+	int * properties_art = art_property_list(obj, FALSE);
+	int * properties_art_carried = art_property_list(obj, TRUE);
+
+	for (i = 0; propertynames[i].prop_name; i++) {
+		boolean got_prop = FALSE, while_carried = FALSE;
+		int j = 0;
+
+		if (oc.oc_oprop == propertynames[i].prop_num)
+			got_prop = TRUE;
+
+		j = 0;
+		while (properties_item[j] && !got_prop) {
+			if (properties_item[j] == propertynames[i].prop_num)
+				got_prop = TRUE;
+			j++;
+		}
+		j = 0;
+		if (obj->oartifact)
+		{
+			while (properties_art[j] && !got_prop) {
+				if (properties_art[j] == propertynames[i].prop_num)
+					got_prop = TRUE;
+				j++;
+			}
+		}
+		j = 0;
+		if (obj->oartifact)
+		{
+			while (properties_art_carried[j] && !while_carried) {
+				if (properties_art_carried[j] == propertynames[i].prop_num)
+				{
+					got_prop = TRUE;
+					while_carried = TRUE;
+				}
+				j++;
+			}
+		}
+		
+		if (got_prop) {
+			/* proper grammar */
+			const char* confers = "Makes you";
+			const char* effect = propertynames[i].prop_name;
+			switch (propertynames[i].prop_num) {
+				/* special overrides because prop_name is bad */
+			case STRANGLED:
+				effect = "choke";
+				break;
+			case LIFESAVED:
+				effect = "life saving";
+				/* FALLTHRU */
+				/* for things that don't work with "Makes you" */
+			case GLIB:
+			case WOUNDED_LEGS:
+			case DETECT_MONSTERS:
+			case SEE_INVIS:
+			case HUNGER:
+			case WARNING:
+				/* don't do special warn_of_mon */
+			case SEARCHING:
+			case INFRAVISION:
+			case AGGRAVATE_MONSTER:
+			case CONFLICT:
+			case JUMPING:
+			case TELEPORT_CONTROL:
+			case SWIMMING:
+			case SLOW_DIGESTION:
+			case HALF_SPDAM:
+			case HALF_PHDAM:
+			case REGENERATION:
+			case ENERGY_REGENERATION:
+			case PROTECTION:
+			case PROT_FROM_SHAPE_CHANGERS:
+			case POLYMORPH_CONTROL:
+			case FREE_ACTION:
+			case FIXED_ABIL:
+				confers = "Confers";
+				break;
+			default:
+				break;
+			}
+			if (strstri(propertynames[i].prop_name, "resistance"))
+				confers = "Confers";
+			Sprintf(buf, "%s %s%s.", confers, effect, (while_carried ? " while carried" : ""));
+			OBJPUTSTR(buf);
+		}
+	}
 
 	buf[0] = '\0';
 	ADDCLASSPROP(oc.oc_magic, "inherently magical");
