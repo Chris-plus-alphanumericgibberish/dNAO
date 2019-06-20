@@ -4221,7 +4221,7 @@ register int tmp, weptmp, tchtmp;
 	
 	for(i = 0; i < NATTK; i++) {
 	    sum[i] = 0;
-	    mattk = getmattk(&youmonst, i, sum, &alt_attk);
+	    mattk = getmattk(&youmonst, mas, i, sum, &alt_attk);
 		wepused = FALSE;
 		
 		if (mas == &mons[PM_GRUE] && (i>=2) && !((!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux] & TEMP_LIT1 && !(viz_array[u.uy][u.ux] & TEMP_DRK1)))

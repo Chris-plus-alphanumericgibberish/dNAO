@@ -316,13 +316,13 @@ boolean message;
 
 /* select a monster's next attack, possibly substituting for its usual one */
 struct attack *
-getmattk(mtmp, indx, prev_result, alt_attk_buf)
+getmattk(mtmp, mptr, indx, prev_result, alt_attk_buf)
 struct monst *mtmp;
+struct permonst *mptr;
 int indx, prev_result[];
 struct attack *alt_attk_buf;
 {
     struct attack *attk;
-	struct permonst *mptr = mtmp->data;
 	static int subout;
 	static boolean derundspec;
 
@@ -489,12 +489,10 @@ struct attack *alt_attk_buf;
 	}
 
 	/* Undead damage multipliers -- note that these must be after actual replacements are done */
-	/* zombies deal double damage */
-	if (mtmp->mfaction == ZOMBIFIED)
-		attk->damn *= 2;
-
-	/* all undead deal double damage at midnight (Q for Chris: should this really stack with zombie double damage?) */
-	if (is_undead_mon(mtmp) && midnight())
+	/* zombies deal double damage, and all undead deal double damage at midnight */
+	if (mtmp->mfaction == ZOMBIFIED && (is_undead_mon(mtmp) && midnight()))
+		attk->damn *= 3;
+	else if (mtmp->mfaction == ZOMBIFIED || (is_undead_mon(mtmp) && midnight()))
 		attk->damn *= 2;
 
 	/* twoweapon symmetry -- if the previous attack missed, do not make an offhand attack */
@@ -850,7 +848,7 @@ mattacku(mtmp)
 			break;
 		
 	    sum[i] = 0;
-	    mattk = getmattk(mtmp, i, sum, &alt_attk);
+	    mattk = getmattk(mtmp, mdat, i, sum, &alt_attk);
 	    if (u.uswallow && (mattk->aatyp != AT_ENGL && mattk->aatyp != AT_ILUR))
 			continue;
 		
