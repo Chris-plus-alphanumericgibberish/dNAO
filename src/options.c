@@ -676,6 +676,7 @@ initoptions()
 #ifdef SORTLOOT
 	iflags.sortloot = 'n';
 #endif
+        iflags.msg_is_alert = FALSE;
 
      /* assert( sizeof flags.inv_order == sizeof def_inv_order ); */
 	(void)memcpy((genericptr_t)flags.inv_order,
