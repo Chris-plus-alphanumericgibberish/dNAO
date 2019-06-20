@@ -344,7 +344,7 @@ mattackm(magr, mdef)
 	if(DEADMONSTER(mdef) || DEADMONSTER(magr))
 		break;
 	res[i] = MM_MISS;
-	mattk = getmattk(magr, i, res, &alt_attk);
+	mattk = getmattk(magr, pa, i, res, &alt_attk);
 	otmp = (struct obj *)0;
 	attk = 1;
 	

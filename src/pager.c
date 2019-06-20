@@ -2131,7 +2131,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 
 			for (i = 0; i < NATTK; i++) {
 				sum[i] = 1;
-				mattk = getmattk(mtmp, i, sum, &alt_attk);
+				mattk = getmattk(mtmp, ptr, i, sum, &alt_attk);
 
 				main_temp_buf[0] = '\0';
 				get_description_of_attack(mattk, temp_buf);
