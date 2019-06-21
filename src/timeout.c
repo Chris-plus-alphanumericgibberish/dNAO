@@ -94,6 +94,7 @@ const struct propname {
     { FREE_ACTION, "free action" },
     { FIXED_ABIL, "fixed abilites" },
     { LIFESAVED, "life will be saved" },
+	{ NULLMAGIC, "magic nullification" },
     {  0, 0 },
 };
 
