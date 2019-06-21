@@ -24,8 +24,6 @@ extern boolean notonhead;	/* for long worms */
 #define get_artifact(o) \
 		(((o)&&(o)->oartifact) ? &artilist[(o)->oartifact] : 0)
 
-const static int AHRIMAN_PROPS[] = {AD_FIRE, AD_DRLI, AD_DRST};
-
 //duplicates of other functions, created due to problems with the linker
 STATIC_DCL void NDECL(cast_protection);
 STATIC_DCL int NDECL(throweffect);
@@ -669,6 +667,16 @@ boolean while_carried;
 			case AGGRAVATE_MONSTER:
 				if (spfx & SPFX_AGGRM) got_prop = TRUE;
 				break;
+			case WARN_OF_MON:
+			case WARNING:
+				if (spfx & SPFX_WARN)
+				{
+					if ((spec_mm(obj) || spec_mt(obj) || spec_mb(obj) || spec_mg(obj) || spec_ma(obj) || spec_mv(obj) || spec_s(obj)))
+						got_prop = (cur_prop == WARN_OF_MON);	// specific warning (ie, showing creatures)
+					else
+						got_prop = (cur_prop == WARNING);	// non-specific warning (ie, numbers)
+				}
+				break;
 			case STEALTH:
 				if (spfx2 & SPFX2_STLTH) got_prop = TRUE;
 				break;
@@ -1057,262 +1065,129 @@ long wp_mask;
 	long exist_warntypem = 0, exist_warntypet = 0, exist_warntypeb = 0, exist_warntypeg = 0, exist_warntypea = 0, exist_warntypev = 0;
 	long long exist_montype = 0;
 	boolean exist_nonspecwarn;
-	int p = 0, r;
+	int i, j;
+	int this_art_property_list[LAST_PROP];
+	int * tmp_property_list;
 
 	if (!oart) return;
+	
+	/* get the property list (either for the slot or for slotless) */
+	tmp_property_list = art_property_list(otmp, wp_mask == W_ART);
+	/* copy it to this local array */
+	for (i = 0; tmp_property_list[i]; i++)
+		this_art_property_list[i] = tmp_property_list[i];	// set indices
+	this_art_property_list[i] = 0;							// add null terminator
 
-	/* effects from the defn field */
-	dtyp = (wp_mask != W_ART) ? oart->defn.adtyp : oart->cary.adtyp;
-	do{
-		// pline("%d: %d",p,(int)dtyp);
-		if (dtyp == AD_FIRE)
-			mask = &EFire_resistance;
-		else if (dtyp == AD_COLD)
-			mask = &ECold_resistance;
-		else if (dtyp == AD_ELEC)
-			mask = &EShock_resistance;
-		else if (dtyp == AD_ACID)
-			mask = &EAcid_resistance;
-		else if (dtyp == AD_MAGM)
-			mask = &EAntimagic;
-		else if (dtyp == AD_PLYS)
-			mask = &EFree_action;
-		else if (dtyp == AD_DISN)
-			mask = &EDisint_resistance;
-		else if (dtyp == AD_DRST)
-			mask = &EPoison_resistance;
-		else if (dtyp == AD_DRLI)
-			mask = &EDrain_resistance;
-		else if (dtyp == AD_SLEE)
-			mask = &ESleep_resistance;
-		
-		if (mask && wp_mask == W_ART && !on) {
-			/* find out if some other artifact also confers this intrinsic */
-			/* if so, leave the mask alone */
+	/* loop through all properties the artifact gives */
+	for (i = 0; this_art_property_list[i]; i++)
+	{
+		/* select property field from uprops */
+		mask = &(u.uprops[this_art_property_list[i]].extrinsic);
+
+		/* if we are removing the artifact and we are dealing with W_ART,
+		   we need to check if the property is being provided from another source in the same slot
+		   if so, we need to leave the mask alone */
+		if (mask && !on && wp_mask == W_ART)
+		{
+			boolean got_prop = FALSE;
 			register struct obj* obj;
-			for(obj = invent; obj; obj = obj->nobj)
-			if(obj != otmp && obj->oartifact) {
-				register const struct artifact *art = get_artifact(obj);
-				if(art->cary.adtyp == dtyp) {
-					mask = (long *) 0;
-			break;
-				}
-				if(obj->oartifact == ART_HEART_OF_AHRIMAN){
-					for(r=0;r<3;r++){
-						if(AHRIMAN_PROPS[r] == dtyp)
-							mask = (long *) 0;
-					break;
+			for (obj = invent; (obj && !got_prop); obj = obj->nobj)
+			if (obj != otmp && obj->oartifact) {
+				/* write over tmp_property_list with the carried artifact -- this is why we needed a copy earlier */
+				tmp_property_list = art_property_list(obj, wp_mask == W_ART);
+
+				/* specific-monster warning needs to be specially handled */
+				if (this_art_property_list[i] == WARN_OF_MON)
+				{
+					if (oart->cspfx&SPFX_WARN){
+						if (get_artifact(obj)->cspfx&SPFX_WARN){
+							exist_warntypem |= spec_mm(obj);
+							exist_warntypet |= spec_mt(obj);
+							exist_warntypeb |= spec_mb(obj);
+							exist_warntypeg |= spec_mg(obj);
+							exist_warntypea |= spec_ma(obj);
+							exist_warntypev |= spec_mv(obj);
+							exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj)));
+							// note: non-specifc warning is just a standard extrinsic
+						}
 					}
-					if(mask == 0L)
-			break;
+				}
+				/* everything else is just a standard property */
+				else
+				{
+					for (j = 0; tmp_property_list[j]; j++)
+					{
+						if (tmp_property_list[j] == this_art_property_list[i])
+							got_prop = TRUE;
+					}
 				}
 			}
+			if (got_prop)
+				continue;	// do not modify mask for this property
 		}
-		if (mask) {
+
+		/* time to modify the mask */
+		switch (this_art_property_list[i])
+		{
+		/* specific warning */
+		case WARN_OF_MON:
+			/* most specific flags */
+			/*  flag            if on  {add to mask     ; add to warning type              } else {remove from warning type unless another art fills in   } */
+			if (spec_mm(otmp)) {if(on) {*mask |= wp_mask; flags.warntypem |= spec_mm(otmp);} else {flags.warntypem &= ~(spec_mm(otmp)&(~exist_warntypem));}}
+			if (spec_mt(otmp)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mt(otmp);} else {flags.warntypet &= ~(spec_mt(otmp)&(~exist_warntypet));}}
+			if (spec_mb(otmp)) {if(on) {*mask |= wp_mask; flags.warntypeb |= spec_mb(otmp);} else {flags.warntypeb &= ~(spec_mb(otmp)&(~exist_warntypeb));}}
+			if (spec_mg(otmp)) {if(on) {*mask |= wp_mask; flags.warntypeg |= spec_mg(otmp);} else {flags.warntypeg &= ~(spec_mg(otmp)&(~exist_warntypeg));}}
+			if (spec_ma(otmp)) {if(on) {*mask |= wp_mask; flags.warntypea |= spec_ma(otmp);} else {flags.warntypea &= ~(spec_ma(otmp)&(~exist_warntypea));}}
+			if (spec_mv(otmp)) {if(on) {*mask |= wp_mask; flags.warntypev |= spec_mv(otmp);} else {flags.warntypev &= ~(spec_mv(otmp)&(~exist_warntypev));}}
+			/* monster symbol */
+			if (spec_s(otmp)) {
+				if (on) {
+					*mask |= wp_mask;
+					flags.montype |= (long long int)((long long int)1 << (int)(spec_s(otmp))); //spec_s(otmp);
+				}
+				else {
+					flags.montype &= ~((long long int)((long long int)1 << (int)(spec_s(otmp)))&(~exist_montype));
+				}
+			}
+			/* update vision */
+			see_monsters();	// it should be fine to run a vision update even if there wasn't a change
+
+			/* if there are no specific warnings remaining, toggle off the extrinsic */
+			if (!(flags.warntypem || flags.warntypet || flags.warntypeb || flags.warntypeg || flags.warntypea || flags.warntypev || flags.montype))
+				*mask &= ~wp_mask;
+			break;
+		/* hallucination */
+		case HALLUC_RES:
+			/* make_hallucinated must (re)set the mask itself to get
+			* the display right */
+			/* restoring needed because this is the only artifact intrinsic
+			* that can print a message--need to guard against being printed
+			* when restoring a game
+			*/
+			(void)make_hallucinated((long)!on, restoring ? FALSE : TRUE, wp_mask);
+			break;
+		/* needs vision update*/
+		case WARNING:
+		case TELEPAT:
 			if (on) *mask |= wp_mask;
 			else *mask &= ~wp_mask;
-		}
-		
-		if(otmp->oartifact == ART_HEART_OF_AHRIMAN && p<3) dtyp = AHRIMAN_PROPS[p++];
-		else dtyp = 255;
-	} while(dtyp != 255);
-	
-	/* intrinsics from the spfx field; there could be more than one */
-	spfx = (wp_mask != W_ART) ? oart->spfx : oart->cspfx;
-	spfx2 = (wp_mask != W_ART) ? oart->spfx2 : 0;
-	spfx3 = (wp_mask != W_ART) ? 0 : oart->cspfx3;
-	wpfx = (wp_mask != W_ART) ? oart->wpfx : 0;
-	if(spfx && wp_mask == W_ART && !on) {
-	    /* don't change any spfx also conferred by other artifacts */
-	    register struct obj* obj;
-	    for(obj = invent; obj; obj = obj->nobj)
-		if(obj != otmp && obj->oartifact) {
-		    register const struct artifact *art = get_artifact(obj);
-		    spfx &= ~(art->cspfx&(~SPFX_WARN)); //SPFX_WARN is ALWAYS going to need special handling :(
-			spfx3 &= ~(art->cspfx3);
-			if(spfx&SPFX_WARN){
-				if(art->cspfx&SPFX_WARN){
-					exist_warntypem |= spec_mm(obj);
-					exist_warntypet |= spec_mt(obj);
-					exist_warntypeb |= spec_mb(obj);
-					exist_warntypeg |= spec_mg(obj);
-					exist_warntypea |= spec_ma(obj);
-					exist_warntypev |= spec_mv(obj);
-					exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj)));
-					if(!(spec_mm(obj) || spec_mt(obj) || spec_mb(obj) || spec_mg(obj) || spec_ma(obj) || spec_mv(obj) || spec_s(obj)))
-						exist_nonspecwarn |= TRUE;
-				}
-			}
-		}
-	}
+			see_monsters();
+			break;
+		/* everything else (that are in uprops) */
+		default:
+			if (on) *mask |= wp_mask;
+			else *mask &= ~wp_mask;
+			break;
+		}//end switch
+	}//end for
 
-	if (spfx & SPFX_SEARCH) {
-	    if(on) ESearching |= wp_mask;
-	    else ESearching &= ~wp_mask;
-	}
-	if (spfx & SPFX_HALRES) {
-	    /* make_hallucinated must (re)set the mask itself to get
-	     * the display right */
-	    /* restoring needed because this is the only artifact intrinsic
-	     * that can print a message--need to guard against being printed
-	     * when restoring a game
-	     */
-	    (void) make_hallucinated((long)!on, restoring ? FALSE : TRUE, wp_mask);
-	}
-	if (spfx & SPFX_ESP) {
-	    if(on) ETelepat |= wp_mask;
-	    else ETelepat &= ~wp_mask;
-	    see_monsters();
-	}
-	if (spfx & SPFX_DISPL) { //L's Patch
-	    if (on) EDisplaced |= wp_mask;
-	    else EDisplaced &= ~wp_mask;
-	}
-	if (spfx & SPFX_REGEN) {
-	    if (on) ERegeneration |= wp_mask;
-	    else ERegeneration &= ~wp_mask;
-	}
-	if (spfx & SPFX_TCTRL) {
-	    if (on) ETeleport_control |= wp_mask;
-	    else ETeleport_control &= ~wp_mask;
-		if(otmp->oartifact == ART_SILVER_KEY){
-			if (on) EPolymorph_control |= wp_mask;
-		    else EPolymorph_control &= ~wp_mask;
-		}
-	}
-	if (spfx & SPFX_WARN) {
-		boolean specific = FALSE;
-	    if (spec_mm(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypem |= spec_mm(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypem &= ~(spec_mm(otmp)&(~exist_warntypem));
-			}
-			see_monsters();
-			specific = TRUE;
-	    } 
-	    if (spec_mt(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypet |= spec_mt(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypet &= ~(spec_mt(otmp)&(~exist_warntypet));
-			}
-			see_monsters();
-			specific = TRUE;
-	    } 
-	    if (spec_mb(otmp)){
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypeb |= spec_mb(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypeb &= ~(spec_mb(otmp)&(~exist_warntypeb));
-			}
-			see_monsters();
-			specific = TRUE;
-	    }
-	    if (spec_mg(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypeg |= spec_mg(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypeg &= ~(spec_mg(otmp)&(~exist_warntypeg));
-			}
-			see_monsters();
-			specific = TRUE;
-	    } 
-	    if (spec_ma(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypea |= spec_ma(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypea &= ~(spec_ma(otmp)&(~exist_warntypea));
-			}
-			see_monsters();
-			specific = TRUE;
-	    }
-	    if (spec_mv(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypev |= spec_mv(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypev &= ~(spec_mv(otmp)&(~exist_warntypeb));
-			}
-			see_monsters();
-			specific = TRUE;
-	    }
-		if (spec_s(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.montype |= (long long int)((long long int)1 << (int)(spec_s(otmp))); //spec_s(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.montype &= ~((long long int)((long long int)1 << (int)(spec_s(otmp)))&(~exist_montype));
-			}
-			see_monsters();
-			specific = TRUE;
-	    }
-		if(!(flags.warntypem || flags.warntypet || flags.warntypeb || flags.warntypeg || flags.warntypea || flags.warntypev || flags.montype)) EWarn_of_mon &= ~wp_mask;
-		if(!specific){
-			if (on) EWarning |= wp_mask;
-			else if(!exist_nonspecwarn) EWarning &= ~wp_mask;
-	    }
-	}
-	if (spfx & SPFX_EREGEN) {
-	    if (on) EEnergy_regeneration |= wp_mask;
-	    else EEnergy_regeneration &= ~wp_mask;
-	}
-	if (spfx & SPFX_HSPDAM) {
-	    if (on) EHalf_spell_damage |= wp_mask;
-	    else EHalf_spell_damage &= ~wp_mask;
-	}
-	if (spfx & SPFX_HPHDAM) {
-	    if (on) EHalf_physical_damage |= wp_mask;
-	    else EHalf_physical_damage &= ~wp_mask;
-	}
-	if ((spfx & SPFX_XRAY) && (otmp->oartifact != ART_AXE_OF_THE_DWARVISH_LORDS || Race_if(PM_DWARF))) {
-	    /* this assumes that no one else is using xray_range */
+	/* xray vision, surprisingly, isn't in uprops */
+		if (((wp_mask == W_ART ? oart->cspfx : oart->spfx) & SPFX_XRAY)
+			&& (otmp->oartifact != ART_AXE_OF_THE_DWARVISH_LORDS || Race_if(PM_DWARF))) {
+	    /* this assumes that no one else is using xray_range, which isn't exactly valid anymore... */
 	    if (on) u.xray_range = 3;
 	    else u.xray_range = -1;
 	    vision_full_recalc = 1;
-	}
-	if ((spfx & SPFX_REFLECT)) {
-	    if (on) EReflecting |= wp_mask;
-	    else EReflecting &= ~wp_mask;
-	}
-	if (spfx & SPFX_CONFL) {
-		if (on) EConflict |= wp_mask;
-		else EConflict &= ~wp_mask;
-	}
-	if (spfx & SPFX_AGGRM) {
-		if (on) EAggravate_monster |= wp_mask;
-		else EAggravate_monster &= ~wp_mask;
-	}
-
-	if (spfx2 & SPFX2_STLTH) {
-	    if (on) EStealth |= wp_mask;
-	    else EStealth &= ~wp_mask;
-	}
-	if (spfx2 & SPFX2_SPELLUP) {
-	    if (on) ESpellboost |= wp_mask;
-	    else ESpellboost &= ~wp_mask;
-	}
-
-	if (spfx3 & SPFX3_PCTRL) {
-		if (on) EPolymorph_control |= wp_mask;
-		else EPolymorph_control &= ~wp_mask;
-	}
-	
-	if (wpfx & WSFX_FREEACT) {
-	    if (on) u.uprops[FREE_ACTION].extrinsic |= wp_mask;
-	    else u.uprops[FREE_ACTION].extrinsic &= ~wp_mask;
 	}
 
 	if(wp_mask == W_ART && !on && oart->inv_prop) {

@@ -236,15 +236,6 @@ long mask;
 				u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic & ~wp->w_mask;
 				p++;
 			}
-			if (oobj->oartifact)
-			{
-				property_list = art_property_list(oobj, mask == W_ART);
-				p = 0;
-				while (property_list[p] != 0)	{
-					u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic & ~wp->w_mask;
-					p++;
-				}
-			}
 			
 			if ((p = w_blocks(oobj,mask)) != 0)
 			    u.uprops[p].blocked &= ~wp->w_mask;
@@ -268,15 +259,6 @@ long mask;
 				while (property_list[p] != 0)	{
 					u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic | wp->w_mask;
 					p++;
-				}
-				if (obj->oartifact)
-				{
-					property_list = art_property_list(obj, mask == W_ART);
-					p = 0;
-					while (property_list[p] != 0)	{
-						u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic | wp->w_mask;
-						p++;
-					}
 				}
 			    if ((p = w_blocks(obj, mask)) != 0)
 				u.uprops[p].blocked |= wp->w_mask;
@@ -315,15 +297,6 @@ register struct obj *obj;
 		while (property_list[p] != 0)	{
 			u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic & ~wp->w_mask;
 			p++;
-		}
-		if (obj->oartifact)
-		{
-			property_list = art_property_list(obj, wp->w_mask == W_ART);
-			p = 0;
-			while (property_list[p] != 0)	{
-				u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic & ~wp->w_mask;
-				p++;
-			}
 		}
 		
 		if(obj->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER){
