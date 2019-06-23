@@ -118,6 +118,7 @@ STATIC_PTR int NDECL(doprev_message);
 STATIC_PTR int NDECL(timed_occupation);
 STATIC_PTR int NDECL(doextcmd);
 STATIC_PTR int NDECL(domonability);
+STATIC_PTR int NDECL(domountattk);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
 # ifdef WIZARD
 STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
@@ -4173,6 +4174,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"jump", "jump to a location", dojump, !IFBURIED, AUTOCOMPLETE},
 	{"loot", "loot a box on the floor", doloot, !IFBURIED, AUTOCOMPLETE},
 	{"monster", "use a monster's special ability", domonability, IFBURIED, AUTOCOMPLETE},
+	{"mount", "order mount to attack", domountattk, !IFBURIED, AUTOCOMPLETE},
 	{"name", "name an item or type of object", do_naming_ddocall, IFBURIED, AUTOCOMPLETE},
 	{"nameold", "name an item or type of object (vanilla)", ddocall, IFBURIED},
 	{"offer", "offer a sacrifice to the gods", dosacrifice, !IFBURIED, AUTOCOMPLETE},
@@ -4314,6 +4316,7 @@ init_bind_list(void)
 #endif
 	bind_key('a',    "apply" );
 	bind_key('A',    "takeoffall" );
+	bind_key(C('a'), "mount" );
 	bind_key(M('a'), "adjust" );
 	/*       'b', 'B' : go sw */
 	bind_key('B'),    "monster" );
