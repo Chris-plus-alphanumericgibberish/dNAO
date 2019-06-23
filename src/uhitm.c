@@ -617,6 +617,10 @@ register struct monst *mtmp;
 	
 	check_caitiff(mtmp);
 	
+	if(uwep && fast_weapon(uwep) && uwep->spe >= 2){
+		youmonst.movement += 2;
+	}
+	
 	if((u.specialSealsActive&SEAL_BLACK_WEB) && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves+20){
 		static struct attack webattack[] = 
 		{
@@ -1131,6 +1135,15 @@ int thrown;
 						return FALSE;
 					if (newdamage == 0) return TRUE;
 					tmp += (newdamage - basedamage);
+					newdamage = basedamage;
+				}
+				if(spec_prop_otyp(uarmg)){
+					hittxt |= otyp_hit(&youmonst, mon, uarmg, &newdamage, dieroll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return FALSE;
+					if (newdamage == 0) return TRUE;
+					tmp += (newdamage - basedamage);
+					newdamage = basedamage;
 				}
 			} //artifact block
 		}
@@ -1359,7 +1372,7 @@ int thrown;
 #endif
 				is_pole(obj) && 
 				obj->otyp != AKLYS && 
-				obj->otyp != FORCE_PIKE && 
+				!is_vibropike(obj) && 
 				obj->otyp != NAGINATA && 
 				obj->oartifact != ART_WEBWEAVER_S_CROOK && 
 				obj->oartifact != ART_SILENCE_GLAIVE && 
@@ -1719,6 +1732,15 @@ int thrown;
 						return FALSE;
 					if (newdamage == 0) return TRUE;
 					tmp += (newdamage - basedamage);
+					newdamage = basedamage;
+				}
+				if(spec_prop_otyp(obj)){
+					hittxt |= otyp_hit(&youmonst, mon, obj, &newdamage, dieroll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return FALSE;
+					if (newdamage == 0) return TRUE;
+					tmp += (newdamage - basedamage);
+					newdamage = basedamage;
 				}
 			} //artifact block
 			if((monwep = MON_WEP(mon)) != 0 && monwep->oartifact != ART_GLAMDRING &&
@@ -1832,6 +1854,14 @@ int thrown;
 						tmp += (newdamage - basedamage);
 						newdamage = basedamage;
 					}
+					if(spec_prop_otyp(uwep)){
+						hittxt |= otyp_hit(&youmonst, mon, uwep, &newdamage, dieroll);
+						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
+						if (newdamage == 0) return TRUE; /* NOTE: ditto */
+						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
+					}
 					if(obj->oartifact){
 						hittxt = artifact_hit(&youmonst, mon, obj, &newdamage, dieroll);
 						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
@@ -1842,6 +1872,14 @@ int thrown;
 					}
 					if(obj->oproperties){
 						hittxt |= oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
+						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
+						if (newdamage == 0) return TRUE; /* NOTE: ditto */
+						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
+					}
+					if(spec_prop_otyp(obj)){
+						hittxt |= otyp_hit(&youmonst, mon, obj, &newdamage, dieroll);
 						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
 							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
 						if (newdamage == 0) return TRUE; /* NOTE: ditto */
@@ -1864,6 +1902,7 @@ int thrown;
 							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
 						if (newdamage == 0) return TRUE; /* NOTE: ditto */
 						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
 					}
 					}//Artifact block
 				}
@@ -2139,6 +2178,15 @@ defaultvalue:
 						return FALSE;
 					if (newdamage == 0) return TRUE;
 					tmp += (newdamage - basedamage);
+					newdamage = basedamage;
+				}
+				if(spec_prop_otyp(obj)){
+					hittxt |= otyp_hit(&youmonst, mon, obj, &newdamage, dieroll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return FALSE;
+					if (newdamage == 0) return TRUE;
+					tmp += (newdamage - basedamage);
+					newdamage = basedamage;
 				}
 				if(u.sealsActive&SEAL_PAIMON && mon && !DEADMONSTER(mon) && 
 					!resists_drli(mon) && obj->oclass == SPBOOK_CLASS && 
@@ -3122,10 +3170,7 @@ register struct attack *mattk;
 					return 2;
 			}
 		} else if(mattk->aatyp == AT_KICK) {
-		    if(thick_skinned(mdef->data)) tmp = 0;
-		    if(insubstantial(mdef->data)) {
-			    tmp = insubstantial_damage(mdef, uarmf, tmp, TRUE); /* bless damage */
-		    }
+		    kickdmg(mdef, FALSE);
 		}
 		break;
 	    case AD_FIRE:
