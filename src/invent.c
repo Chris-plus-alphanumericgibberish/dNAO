@@ -2454,6 +2454,137 @@ winid *datawin;
 		}
 		Strcat(buf, "large monsters.");
 		OBJPUTSTR(buf);
+		/* artifact bonus damage */
+		if (obj->oartifact && (artilist[obj->oartifact].attk.damn || artilist[obj->oartifact].attk.damd || artilist[obj->oartifact].attk.adtyp))
+		{
+			register const struct artifact *oart = &artilist[obj->oartifact];
+			/* bonus damage, or double damage? We already checked that oart->attk exists */
+			if (oart->attk.damd)
+			{// 1dX bonus damage
+				if (oart->attk.damd > 1)
+				{
+					Sprintf(buf, "Deals %dd%d bonus ",
+						((is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(obj->oartifact) ? 2 : 1),
+						oart->attk.damd);
+				}
+				else
+				{
+					Sprintf(buf, "Deals %d bonus ",
+						((is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(obj->oartifact) ? 2 : 1));
+				}
+			}
+			else
+			{// double damage (except when it's triple)
+				Sprintf(buf, "Deals %s ",
+					double_bonus_damage_artifact(obj->oartifact) ? "triple" : "double");
+			}
+
+			/* now figure out who it deals the bonus damage to */
+			switch (obj->oartifact)
+			{
+			case ART_HOLY_MOONLIGHT_SWORD:
+				Strcat(buf, "magic damage, while lit.");
+				break;
+			case ART_PEN_OF_THE_VOID:
+				/* overwrite the previous mention of how much the bonus is*/
+				if (mvitals[PM_ACERERAK].died > 0)
+				{
+					Sprintf(buf, "Deals double damage");
+					if (obj->ovar1)
+						Strcat(buf, ", and enhanced spirit bonus damage.");
+					else
+						Strcat(buf, ".");
+				}
+				else
+				{
+					if (obj->ovar1)
+						Sprintf(buf, "Deals bonus damage from the spirit bound into it.");
+					else
+						buf[0] = '\0';
+				}
+				break;
+			case ART_LIFEHUNT_SCYTHE:
+			case ART_PROFANED_GREATSCYTHE:
+				Strcat(buf, "damage to living and undead.");
+				break;
+			case ART_GIANTSLAYER:
+				Strcat(buf, "damage to large creatures.");
+				break;
+			default:
+				if (!(oart->spfx & (SPFX_DBONUS | SPFX_ATTK)))
+				{
+					if (oart->attk.adtyp == AD_PHYS)
+						Strcat(buf, "damage.");
+					else
+						buf[0] = '\0';
+				}
+				else if (oart->spfx & SPFX_ATTK)
+				{
+					switch (oart->attk.adtyp) {
+					case AD_FIRE: Strcat(buf, "fire damage."); break;
+					case AD_COLD: Strcat(buf, "cold damage."); break;
+					case AD_ELEC: Strcat(buf, "lightning damage."); break;
+					case AD_ACID: Strcat(buf, "acid damage."); break;
+					case AD_MAGM: 
+					case AD_STUN: Strcat(buf, "magic damage."); break;
+					case AD_DRST: Strcat(buf, "poison damage."); break;
+					case AD_DRLI: Strcat(buf, "life drain damage."); break;
+					case AD_STON: Strcat(buf, "petrifying damage."); break;
+						break;
+					}
+				}
+				else if (oart->spfx & SPFX_CON_OR)
+				{
+					Strcat(buf, "damage to ");
+					/* SMOP: this should be made into a list somewhere and used for specific warning messages as well,
+					 * ie, "Warned of fey and magic-item users." instead of "warned of demiliches"
+					 */
+					switch (obj->oartifact)
+					{
+					case ART_ORCRIST:					Strcat(buf, "orcs and demons.");							break;
+					case ART_STING:						Strcat(buf, "orcs and spiders.");							break;
+					case ART_GRIMTOOTH:					Strcat(buf, "humans, elves, dwarves, and angels.");			break;
+					case ART_CARNWENNAN:				Strcat(buf, "fey and magic-item users.");					break;
+					case ART_SLAVE_TO_ARMOK:			Strcat(buf, "lords, elves, orcs, and the innocent.");		break;
+					case ART_CLAIDEAMH:					Strcat(buf, "those bound by iron and ancient laws.");		break;
+					case ART_DRAGONLANCE:				Strcat(buf, "dragons.");									break;
+					case ART_NODENSFORK:				Strcat(buf, "the eldritch, the telepathic, the deep.");		break;
+					case ART_GAIA_S_FATE:				Strcat(buf, "things attuned to nature.");					break;
+					case ART_DEMONBANE:					Strcat(buf, "demons.");										break;
+					case ART_WEREBANE:					Strcat(buf, "were-beasts and demihumans.");					break;
+					case ART_GIANTSLAYER:				Strcat(buf, "giants.");										break;
+					case ART_VAMPIRE_KILLER:			Strcat(buf, "demons, were-beasts and the undead.");			break;
+					case ART_KINGSLAYER:				Strcat(buf, "lords and ladies and kings and queens.");		break;
+					case ART_PEACE_KEEPER:				Strcat(buf, "those that always seek violence.");			break;
+					case ART_OGRESMASHER:				Strcat(buf, "ogres.");										break;
+					case ART_TROLLSBANE:				Strcat(buf, "trolls and all who regenerate quickly.");		break;
+					case ART_MIRROR_BRAND:				Strcat(buf, "all lawful or chaotic");						break;
+					case ART_SUNSWORD:					Strcat(buf, "demons and the undead.");						break;
+					case ART_ATMA_WEAPON:				Strcat(buf, "worthy foes.");								break;
+					case ART_FUMA_ITTO_NO_KEN:			Strcat(buf, "cross-aligned.");								break;
+					case ART_ROD_OF_SEVEN_PARTS:		Strcat(buf, "any who stand against law.");					break;
+					case ART_WEREBUSTER:				Strcat(buf, "were-beasts.");								break;
+					case ART_BLACK_CRYSTAL:				Strcat(buf, "non-chaotics.");								break;
+					case ART_CLARENT:					Strcat(buf, "the thick-skinned");							break;
+					case ART_SCEPTRE_OF_MIGHT:			Strcat(buf, "cross-aligned.");								break;
+					case ART_IRON_BALL_OF_LEVITATION:	Strcat(buf, "cross-aligned.");								break;
+					case ART_WEB_OF_LOLTH:				Strcat(buf, "elves.");										break;
+					case ART_MITRE_OF_HOLINESS:			Strcat(buf, "undead.");										break;
+					case ART_ICONOCLAST:				Strcat(buf, "humans, elves, dwarves, and gnomes.");			break;
+					case ART_SCOURGE_OF_LOLTH:			Strcat(buf, "elves.");										break;
+					default:
+						Strcat(buf, "hated foes.");
+						break;
+					}
+				}
+				else
+					Strcat(buf, "damage.");
+				break;
+			}
+			if (buf[0] != '\0')
+				OBJPUTSTR(buf);
+		}
+		/* to-hit */
 		int hitbon = oc.oc_hitbon - 4 * max(0,(obj->objsize - youracedata->msize));
 		if (hitbon != 0)
 		{
@@ -2764,7 +2895,7 @@ winid *datawin;
 			case SEE_INVIS:
 			case HUNGER:
 			case WARNING:
-				/* don't do special warn_of_mon */
+			case WARN_OF_MON:
 			case SEARCHING:
 			case INFRAVISION:
 			case AGGRAVATE_MONSTER:

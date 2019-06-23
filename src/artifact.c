@@ -1833,13 +1833,13 @@ int tmp;
 			if(Fumbling) multiplier++;
 			if(Wounded_legs) multiplier++;
 			return damd ? d(multiplier, damd) : max(multiplier*tmp,multiplier);
-		} else if(otmp && 
-			(otmp->oartifact == ART_LIMITED_MOON
-			|| otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS
-			|| otmp->oartifact == ART_POSEIDON_S_TRIDENT
-		)){
-			return 2*(damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1));
-		} else return damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1);
+		}
+		else if(otmp && double_bonus_damage_artifact(otmp->oartifact))
+		{
+			return (damd ? d(((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1)*2, damd) : max(tmp,1)*2);
+		}
+		else
+			return damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1);
 	}
 	return 0;
 }
