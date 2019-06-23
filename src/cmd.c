@@ -4319,7 +4319,7 @@ init_bind_list(void)
 	bind_key(C('a'), "mount" );
 	bind_key(M('a'), "adjust" );
 	/*       'b', 'B' : go sw */
-	bind_key('B'),    "monster" );
+	bind_key('B',    "monster" );
 	bind_key(C('b'),    "monster" );
 	bind_key('c',    "close" );
 	bind_key('C',    "call" );
