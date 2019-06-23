@@ -2401,78 +2401,65 @@ winid *datawin;
 			Strcpy(buf, "Thrown missile.");
 		}
 		OBJPUTSTR(buf);
-		/* Ugh. Can we just get rid of dmgval() and put its damage bonuses into
-		* the object class? */
-		/* Nero's note: dnh makes this problem so much worse; everything should be in dmgval() - TODO sometime */
-		const char* sdambon = "";
-		const char* ldambon = "";
-		switch (otyp) {
-		case IRON_CHAIN:
-		case CROSSBOW_BOLT:
-		case MACE:
-		case FLAIL:
-		case SPETUM:
-		case TRIDENT:
-			sdambon = "+1";
-			break;
-		case BATTLE_AXE:
-		case BARDICHE:
-		case BILL_GUISARME:
-		case GUISARME:
-		case LUCERN_HAMMER:
-		case MORNING_STAR:
-		case RANSEUR:
-		case BROADSWORD:
-		case ELVEN_BROADSWORD:
-		case RUNESWORD:
-		case VOULGE:
-			sdambon = "+1d4";
-			break;
-		case WAR_HAMMER:
-			sdambon = "+1d6";
-			break;
-		}
-		/* and again, because /large/ damage is entirely separate. Bleah. */
-		switch (otyp) {
-		case CROSSBOW_BOLT:
-		case MORNING_STAR:
-		case PARTISAN:
-		case RUNESWORD:
-		case ELVEN_BROADSWORD:
-		case BROADSWORD:
-			ldambon = "+1";
-			break;
-		case FLAIL:
-		case RANSEUR:
-		case VOULGE:
-			ldambon = "+1d4";
-			break;
-		case HALBERD:
-		case SPETUM:
-			ldambon = "+1d6";
-			break;
-		case WAR_HAMMER:
-			ldambon = "+1d8";
-			break;
-		case BATTLE_AXE:
-		case BARDICHE:
-		case TRIDENT:
-			ldambon = "+2d4";
-			break;
-		case TSURUGI:
-		case DWARVISH_MATTOCK:
-		case TWO_HANDED_SWORD:
-			ldambon = "+2d6";
-			break;
-		}
-		Sprintf(buf,
-			"Damage: 1d%d%s versus small and 1d%d%s versus large monsters.",
-			oc.oc_wsdam, sdambon, oc.oc_wldam, ldambon);
-		OBJPUTSTR(buf);
-		if (oc.oc_hitbon != 0)
+
+		/* weapon dice! */
+		struct weapon_dice wdice;
+		(void) dmgval_core(&wdice, obj, otyp);
+
+		Sprintf(buf, "Damage: ");
+
+		if (wdice.oc[0].damn && wdice.oc[0].damd)
 		{
-			Sprintf(buf, "Has a %s%d %s to hit.", (oc.oc_hitbon >= 0 ? "+" : ""),
-				oc.oc_hitbon, (oc.oc_hitbon >= 0 ? "bonus" : "penalty"));
+			Sprintf(buf2, "%dd%d", wdice.oc[0].damn, wdice.oc[0].damd);
+			Strcat(buf, buf2);
+		}
+		if (wdice.bon[0].damn && wdice.bon[0].damd)
+		{
+			Sprintf(buf2, "+%dd%d", wdice.bon[0].damn, wdice.bon[0].damd);
+			Strcat(buf, buf2);
+		}
+		if (wdice.flat[0])
+		{
+			Sprintf(buf2, "%s", sitoa(wdice.flat[0]));
+			Strcat(buf, buf2);
+		}
+		Strcat(buf, " versus small and ");
+		/* is there a difference between large and small dice? */
+		if (wdice.oc[0].aatyp != wdice.oc[1].aatyp ||
+			wdice.oc[0].adtyp != wdice.oc[1].adtyp ||
+			wdice.oc[0].damn != wdice.oc[1].damn ||
+			wdice.oc[0].damd != wdice.oc[1].damd ||
+			wdice.bon[0].aatyp != wdice.bon[1].aatyp ||
+			wdice.bon[0].adtyp != wdice.bon[1].adtyp ||
+			wdice.bon[0].damn != wdice.bon[1].damn ||
+			wdice.bon[0].damd != wdice.bon[1].damd ||
+			wdice.flat[0] != wdice.flat[1])
+		{
+			if (wdice.oc[1].damn && wdice.oc[1].damd)
+			{
+				Sprintf(buf2, "%dd%d", wdice.oc[1].damn, wdice.oc[1].damd);
+				Strcat(buf, buf2);
+			}
+			if (wdice.bon[1].damn && wdice.bon[1].damd)
+			{
+				Sprintf(buf2, "+%dd%d", wdice.bon[1].damn, wdice.bon[1].damd);
+				Strcat(buf, buf2);
+			}
+			if (wdice.flat[1])
+			{
+				Sprintf(buf2, "%s", sitoa(wdice.flat[1]));
+				Strcat(buf, buf2);
+			}
+			Strcat(buf, " versus ");
+		}
+		Strcat(buf, "large monsters.");
+		OBJPUTSTR(buf);
+		int hitbon = oc.oc_hitbon - 4 * max(0,(obj->objsize - youracedata->msize));
+		if (hitbon != 0)
+		{
+			Sprintf(buf, "Has a %s %s to hit.",
+				sitoa(hitbon),
+				(hitbon >= 0 ? "bonus" : "penalty"));
 			OBJPUTSTR(buf);
 		}
 	}

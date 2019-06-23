@@ -309,6 +309,28 @@ struct obj {
 				   is flexible; amount for tmp gold objects.  Must be last? */
 };
 
+/*
+* structure to hold enough data about a weapon's damage dice to perform
+* any special cases that only involve the item itself
+*    ie, not including interactions with the defender, tile it's on, the wielder
+*
+* the first index is for small monsters, second index is for large -- ie, wdice.oc[bigmonst(mtmp->data)]
+*/
+struct weapon_dice {
+#ifdef PERMONST_H
+	struct attack oc[2];	/* object class dice from objects.c, modified in dmg_val_core() */
+	struct attack bon[2];	/* bonus dice assigned in dmg_val_core() */
+#endif
+	int flat[2];			/* flat damage */
+	/* dice use the following AT and AD types to signal different kinds of rolls:
+	* AT_NONE    -- normal roll			(d(n x) -- returns the sum of n rolls of 1 to x)
+	* >=AT_EXPL  -- exploding dice roll	(exploding_d(n x m) -- m is hacked in by specifying AT_EXPL+m as the aatyp)
+	* AD_PHYS    -- normal roll			(d(n x) -- returns the sum of n rolls of 1 to x)
+	* AD_LUCK    -- luck-based roll		(rnl(x) -- returns 0 to x-1, and good luck makes it tend towards 0)
+	* These can be combined:			(lucky_exploding_d(n x m) -- does what it says on the tin)
+	*/
+};
+
 //Useful items (ovar1 flags for planned cloak of useful items)
 #define USE_DAGGER	0x0000001L
 #define TWO_DAGGER	0x0000002L
