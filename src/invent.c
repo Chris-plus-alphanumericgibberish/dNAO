@@ -2584,6 +2584,65 @@ winid *datawin;
 			if (buf[0] != '\0')
 				OBJPUTSTR(buf);
 		}
+		/* offensive object properties */
+		if (obj->oproperties & OPROP_W_MASK)
+		{
+			/* holy/unholy bonus damage */
+			buf[0] = '\0';
+			ADDCLASSPROP((obj->oproperties&OPROP_HOLYW && obj->blessed), "holy");
+			ADDCLASSPROP((obj->oproperties&OPROP_UNHYW && obj->cursed), "unholy");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals %s %s damage.",
+					(obj->oproperties&OPROP_LESSW ? "1d8 bonus" : "double"),
+					buf);
+				OBJPUTSTR(buf2);
+			}
+			/* simple damage properties */
+			buf[0] = '\0';
+			ADDCLASSPROP(obj->oproperties&OPROP_FIREW, "fire");
+			ADDCLASSPROP(obj->oproperties&OPROP_COLDW, "cold");
+			ADDCLASSPROP(obj->oproperties&OPROP_WATRW, "water");
+			ADDCLASSPROP(obj->oproperties&OPROP_ELECW, "lightning");
+			ADDCLASSPROP(obj->oproperties&OPROP_ACIDW, "acid");
+			ADDCLASSPROP(obj->oproperties&OPROP_MAGCW, "magic");
+			ADDCLASSPROP(obj->oproperties&OPROP_PSIOW, "psionic");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals %s %s damage.",
+					(obj->oproperties&OPROP_LESSW ? "1d8 bonus" : "double"),
+					buf);
+				OBJPUTSTR(buf2);
+			}
+			/* alignment damage properties */
+			buf[0] = '\0';
+			ADDCLASSPROP(obj->oproperties&OPROP_ANARW, "lawful and neutral creatures");
+			ADDCLASSPROP(obj->oproperties&OPROP_CONCW, "lawful and chaotic creatures");
+			ADDCLASSPROP(obj->oproperties&OPROP_AXIOW, "neutral and chaotic creatures");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals %s damage to %s.",
+					(obj->oproperties&OPROP_LESSW ? "1d8 bonus" : "double"),
+					buf);
+				OBJPUTSTR(buf2);
+			}
+			/* other stuff
+			 * commented out because artifacts don't get any behaviours more interesting
+			 * than bonus damage (such as Vorpal Blade being vorpal)
+			 */
+//			buf[0] = '\0';
+//			ADDCLASSPROP((obj->oproperties&OPROP_DEEPW && obj->spe < 8), "telepathically lashes out");
+//			ADDCLASSPROP((obj->oproperties&OPROP_VORPW), "beheads creatures");
+//			ADDCLASSPROP((obj->oproperties&OPROP_MORGW), "inflicts unhealing wounds while cursed");
+//			ADDCLASSPROP((obj->oproperties&OPROP_FLAYW), "destroys armor");
+//			if (buf[0] != '\0')
+//			{
+//				Sprintf(buf2, "It %s.", buf);
+//				OBJPUTSTR(buf2);
+//			}
+		}
+
+
 		/* to-hit */
 		int hitbon = oc.oc_hitbon - 4 * max(0,(obj->objsize - youracedata->msize));
 		if (hitbon != 0)
