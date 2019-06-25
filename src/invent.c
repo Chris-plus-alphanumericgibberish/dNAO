@@ -1964,11 +1964,25 @@ ddoinv()
 {
 	char c;
 	struct obj *otmp;
-	c = display_inventory((char *)0, iflags.item_use_menu);
+	c = display_inventory((char *)0, TRUE);
 	if (!c) return 0;
 	for (otmp = invent; otmp; otmp = otmp->nobj)
 		if (otmp->invlet == c) break;
-	if (otmp) return itemactions(otmp);
+		if (otmp)
+		{
+			if (iflags.item_use_menu)
+				return itemactions(otmp);
+			else
+			{
+				winid datawin = create_nhwindow(NHW_MENU);
+				putstr(datawin, ATR_NONE, doname(otmp));
+				describe_item(otmp, otmp->otyp, otmp->oartifact, &datawin);
+				checkfile(xname(otmp), 0, FALSE, TRUE, &datawin);
+				display_nhwindow(datawin, TRUE);
+				destroy_nhwindow(datawin);
+				return 0;
+			}
+		}
 	return 0;
 }
 
@@ -2360,7 +2374,8 @@ struct obj *obj;
  * describe_item()
  * 
  * Prints lines describing the given object to the passed nhwindow reference
- * Assumes that the player knows the name of the object (ie, objects[obj->otyp].oc_name_known == TRUE)
+ * Requires that the player knows the name of the object (ie, objects[obj->otyp].oc_name_known == TRUE)
+ *   or that obj doesn't exist (ie we are describing what a "cloak of magic resistance" typically is like)
  * Requires an actual object to be passed, as many object-related functions require an obj pointer
  */
 void
@@ -2388,6 +2403,13 @@ winid *datawin;
 	if (cond) {							\
 	if (*buf) { Strcat(buf, ", "); }    \
 	Strcat(buf, str);                   \
+	}
+
+	/* check that we aren't giving away information about a real object here */
+	if (obj && !oc.oc_name_known)
+	{
+		OBJPUTSTR("You don't know much about this item yet.");
+		return;
 	}
 
 		/* Object classes currently with no special messages here: amulets. */
