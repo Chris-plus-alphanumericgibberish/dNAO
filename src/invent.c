@@ -2403,51 +2403,52 @@ winid *datawin;
 		OBJPUTSTR(buf);
 
 		/* weapon dice! */
-		struct weapon_dice wdice;
-		(void) dmgval_core(&wdice, obj, otyp);
+		struct weapon_dice wdice[2];
+		(void) dmgval_core(&wdice[0], FALSE, obj, otyp);	// small dice
+		(void) dmgval_core(&wdice[1], TRUE, obj, otyp);		// large dice
 
 		Sprintf(buf, "Damage: ");
 
-		if (wdice.oc[0].damn && wdice.oc[0].damd)
+		if (wdice[0].oc.damn && wdice[0].oc.damd)
 		{
-			Sprintf(buf2, "%dd%d", wdice.oc[0].damn, wdice.oc[0].damd);
+			Sprintf(buf2, "%dd%d", wdice[0].oc.damn, wdice[0].oc.damd);
 			Strcat(buf, buf2);
 		}
-		if (wdice.bon[0].damn && wdice.bon[0].damd)
+		if (wdice[0].bon.damn && wdice[0].bon.damd)
 		{
-			Sprintf(buf2, "+%dd%d", wdice.bon[0].damn, wdice.bon[0].damd);
+			Sprintf(buf2, "+%dd%d", wdice[0].bon.damn, wdice[0].bon.damd);
 			Strcat(buf, buf2);
 		}
-		if (wdice.flat[0])
+		if (wdice[0].flat)
 		{
-			Sprintf(buf2, "%s", sitoa(wdice.flat[0]));
+			Sprintf(buf2, "%s", sitoa(wdice[0].flat));
 			Strcat(buf, buf2);
 		}
 		Strcat(buf, " versus small and ");
 		/* is there a difference between large and small dice? */
-		if (wdice.oc[0].aatyp != wdice.oc[1].aatyp ||
-			wdice.oc[0].adtyp != wdice.oc[1].adtyp ||
-			wdice.oc[0].damn != wdice.oc[1].damn ||
-			wdice.oc[0].damd != wdice.oc[1].damd ||
-			wdice.bon[0].aatyp != wdice.bon[1].aatyp ||
-			wdice.bon[0].adtyp != wdice.bon[1].adtyp ||
-			wdice.bon[0].damn != wdice.bon[1].damn ||
-			wdice.bon[0].damd != wdice.bon[1].damd ||
-			wdice.flat[0] != wdice.flat[1])
+		if (wdice[0].oc.aatyp != wdice[1].oc.aatyp ||
+			wdice[0].oc.adtyp != wdice[1].oc.adtyp ||
+			wdice[0].oc.damn != wdice[1].oc.damn ||
+			wdice[0].oc.damd != wdice[1].oc.damd ||
+			wdice[0].bon.aatyp != wdice[1].bon.aatyp ||
+			wdice[0].bon.adtyp != wdice[1].bon.adtyp ||
+			wdice[0].bon.damn != wdice[1].bon.damn ||
+			wdice[0].bon.damd != wdice[1].bon.damd ||
+			wdice[0].flat != wdice[1].flat)
 		{
-			if (wdice.oc[1].damn && wdice.oc[1].damd)
+			if (wdice[1].oc.damn && wdice[1].oc.damd)
 			{
-				Sprintf(buf2, "%dd%d", wdice.oc[1].damn, wdice.oc[1].damd);
+				Sprintf(buf2, "%dd%d", wdice[1].oc.damn, wdice[1].oc.damd);
 				Strcat(buf, buf2);
 			}
-			if (wdice.bon[1].damn && wdice.bon[1].damd)
+			if (wdice[1].bon.damn && wdice[1].bon.damd)
 			{
-				Sprintf(buf2, "+%dd%d", wdice.bon[1].damn, wdice.bon[1].damd);
+				Sprintf(buf2, "+%dd%d", wdice[1].bon.damn, wdice[1].bon.damd);
 				Strcat(buf, buf2);
 			}
-			if (wdice.flat[1])
+			if (wdice[1].flat)
 			{
-				Sprintf(buf2, "%s", sitoa(wdice.flat[1]));
+				Sprintf(buf2, "%s", sitoa(wdice[1].flat));
 				Strcat(buf, buf2);
 			}
 			Strcat(buf, " versus ");

@@ -285,13 +285,13 @@ struct monst *mon;
  * typically 1, but artifacts and lightsabers affect it
  */
 int
-dmgval_core(wdice, obj, otyp)
+dmgval_core(wdice, large, obj, otyp)
 struct weapon_dice *wdice;
+boolean large;
 struct obj* obj;
 int otyp;
 {
 	int dmod = 0;						/* die size modifier */
-	int large = 0;						/* 0: small dice,   1: large dice,   2: SEGFAULT CORE DUMPED-- */
 	int spe_mult = 1;					/* multiplier for enchantment value */
 
 	/* use the otyp of the object called, if we have one */
@@ -299,142 +299,141 @@ int otyp;
 		otyp = obj->otyp;
 
 	/* a number of definitions that will clean up the code*/
-#define ocaa	(wdice->oc[large].aatyp)
-#define ocad	(wdice->oc[large].adtyp)
-#define ocn		(wdice->oc[large].damn)
-#define ocd		(wdice->oc[large].damd)
-#define bonaa	(wdice->bon[large].aatyp)
-#define bonad	(wdice->bon[large].adtyp)
-#define bonn	(wdice->bon[large].damn)
-#define bond	(wdice->bon[large].damd)
-#define flat	(wdice->flat[large])
-	for (large = 0; large < 2; large++)
+#define ocaa	(wdice->oc.aatyp)
+#define ocad	(wdice->oc.adtyp)
+#define ocn		(wdice->oc.damn)
+#define ocd		(wdice->oc.damd)
+#define bonaa	(wdice->bon.aatyp)
+#define bonad	(wdice->bon.adtyp)
+#define bonn	(wdice->bon.damn)
+#define bond	(wdice->bon.damd)
+#define flat	(wdice->flat)
+
+	/* initialize wdice */
+	ocaa = AT_WEAP;
+	ocad = AD_PHYS;
+	ocn = 1;
+	ocd = 2;
+	bonaa = AT_WEAP;
+	bonad = AD_PHYS;
+	bonn = 0;
+	bond = 0;
+	flat = 0;
+
+	/* in case we are dealing with a complete lack of a weapon (!obj, !otyp)
+		* just skip everything and only initialize wdice
+		*/
+	if (!otyp)
+		return 0;
+
+	/* grab ldie and sdie from the objclass definition */
+	ocd = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
+
+	/* set dmod, if possible*/
+	if (obj)
 	{
-		/* initialize wdice */
-		ocaa = AT_WEAP;
-		ocad = AD_PHYS;
-		ocn = 1;
-		ocd = 2;
-		bonaa = AT_WEAP;
-		bonad = AD_PHYS;
-		bonn = 0;
-		bond = 0;
-		flat = 0;
+		dmod = obj->objsize - MZ_MEDIUM;
+		if (obj->oartifact == ART_FRIEDE_S_SCYTHE)
+			dmod += 2;
+		else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
+			dmod += 2;
+	}
+	/* apply dmod to ocd */
+	ocd = max(2, ocd + dmod * 2);
 
-		/* in case we are dealing with a complete lack of a weapon (!obj, !otyp)
-		 * just skip everything and only initialize wdice
-		 */
-		if (!otyp)
-			continue;
+	/* SPECIAL CASES (beyond what is defined in objects.c) START HERE */
 
-		/* grab ldie and sdie from the objclass definition */
-		ocd = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
-
-		/* set dmod, if possible*/
-		if (obj)
+	/* Artifacts and other fun things that need obj to exist and apply for both small and large (mostly?) */
+	if (obj)
+	{
+		if (obj->oartifact == ART_VORPAL_BLADE || obj->oartifact == ART_SNICKERSNEE)
 		{
-			dmod = obj->objsize - MZ_MEDIUM;
-			if (obj->oartifact == ART_FRIEDE_S_SCYTHE)
-				dmod += 2;
-			else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
-				dmod += 2;
+			ocaa = AT_EXPL + 1;				// exploding dice, +1 damage per roll
+			ocn = 2;						// roll two oc dice
 		}
-		/* apply dmod to ocd */
-		ocd = max(2, ocd + dmod * 2);
-
-		/* SPECIAL CASES (beyond what is defined in objects.c) START HERE */
-
-		/* Artifacts and other fun things that need obj to exist and apply for both small and large (mostly?) */
-		if (obj)
+		else if (obj->oartifact == ART_SCOURGE_OF_LOLTH)
 		{
-			if (obj->oartifact == ART_VORPAL_BLADE || obj->oartifact == ART_SNICKERSNEE)
-			{
-				ocaa = AT_EXPL + 1;				// exploding dice, +1 damage per roll
-				ocn = 2;						// roll two oc dice
-			}
-			else if (obj->oartifact == ART_SCOURGE_OF_LOLTH)
-			{
-				ocaa = AT_EXPL;					// basic exploding dice
-			}
-			else if (obj->oartifact == ART_LUCK_BLADE)
-			{
-				ocad = AD_LUCK;					// luck-based dice
-			}
-			else if (obj->oartifact == ART_FLUORITE_OCTAHEDRON)
-			{
-				ocaa = AT_EXPL;					// exploding
-				ocad = AD_LUCK;					// lucky
-				ocn = obj->quan;				// 1 die per octahedron
-				ocd = 8;
-			}
-			else if (obj->oartifact == ART_GIANTSLAYER)
-			{
-				bonn = (large ? 2 : 1);
-				bond = 4;
-			}
-			else if (obj->oartifact == ART_MJOLLNIR)
-			{
-				bonn = 2;
-				bond = 4;
-				if (!large)
-					flat += 2;
-			}
-			else if (obj->oartifact == ART_DURIN_S_AXE)
-			{
-				ocn = 2;
-			}
-			else if (obj->oartifact == ART_REAVER)
+			ocaa = AT_EXPL;					// basic exploding dice
+		}
+		else if (obj->oartifact == ART_LUCK_BLADE)
+		{
+			ocad = AD_LUCK;					// luck-based dice
+		}
+		else if (obj->oartifact == ART_FLUORITE_OCTAHEDRON)
+		{
+			ocaa = AT_EXPL;					// exploding
+			ocad = AD_LUCK;					// lucky
+			ocn = obj->quan;				// 1 die per octahedron
+			ocd = 8;
+		}
+		else if (obj->oartifact == ART_GIANTSLAYER)
+		{
+			bonn = (large ? 2 : 1);
+			bond = 4;
+		}
+		else if (obj->oartifact == ART_MJOLLNIR)
+		{
+			bonn = 2;
+			bond = 4;
+			if (!large)
+				flat += 2;
+		}
+		else if (obj->oartifact == ART_DURIN_S_AXE)
+		{
+			ocn = 2;
+		}
+		else if (obj->oartifact == ART_REAVER)
+		{
+			bonn = 1;
+			bond = 8;
+		}
+		else if (obj->oartifact == ART_TOBIUME)
+		{
+			flat += (large ? -(3+dmod) : -(2+dmod));
+		}
+		else if (obj->oartifact == ART_VAMPIRE_KILLER)
+		{
+			if (large)
 			{
 				bonn = 1;
-				bond = 8;
+				bond = 10 + 2 * dmod;
 			}
-			else if (obj->oartifact == ART_TOBIUME)
+			else
 			{
-				flat += (large ? -(3+dmod) : -(2+dmod));
-			}
-			else if (obj->oartifact == ART_VAMPIRE_KILLER)
-			{
-				if (large)
-				{
-					bonn = 1;
-					bond = 10 + 2 * dmod;
-				}
-				else
-				{
-					flat += 10 + 2 * dmod;
-				}
-			}
-			else if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD){
-				int wt = (int)objects[NAGINATA].oc_weight;
-				if ((int)obj->owt > wt) {
-					bonn = 1;
-					bond = 12 * ((int)obj->owt - wt) / wt;	// deals bonus damage if it's heavier than a normal naginata
-				}
-			}
-			else if (obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA && otyp == BULLWHIP)
-			{
-				ocn = 1;
-				ocd = 2;
-				bonn = 1;
-				bond = 4;
-			}
-			else if (otyp == MOON_AXE && obj->ovar1)
-			{
-				ocn = 2;
-				ocd = ocd + 2 * (obj->ovar1 - 1);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
-				if (!large && !obj->ovar1)			// eclipse moon axe is surprisingly effective against small creatures (2d12)
-					ocd = 12;
-			}
-			else if (otyp == HEAVY_IRON_BALL) {
-				int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
-
-				if ((int)obj->owt > wt) {
-					wt = ((int)obj->owt - wt) / 160;
-					ocd += 4 * wt;
-					if (ocd > 25) ocd = 25;	/* objects[].oc_wldam */
-				}
+				flat += 10 + 2 * dmod;
 			}
 		}
+		else if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD){
+			int wt = (int)objects[NAGINATA].oc_weight;
+			if ((int)obj->owt > wt) {
+				bonn = 1;
+				bond = 12 * ((int)obj->owt - wt) / wt;	// this appears to be a constant +1d12, since I can't find any way to change its weight.
+			}
+		}
+		else if (obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA && otyp == BULLWHIP)
+		{
+			ocn = 1;
+			ocd = 2;
+			bonn = 1;
+			bond = 4;
+		}
+		else if (otyp == MOON_AXE && obj->ovar1)
+		{
+			ocn = 2;
+			ocd = ocd + 2 * (obj->ovar1 - 1);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
+			if (!large && !obj->ovar1)			// eclipse moon axe is surprisingly effective against small creatures (2d12)
+				ocd = 12;
+		}
+		else if (otyp == HEAVY_IRON_BALL) {
+			int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
+
+			if ((int)obj->owt > wt) {
+				wt = ((int)obj->owt - wt) / 160;
+				ocd += 4 * wt;
+				if (ocd > 25) ocd = 25;	/* objects[].oc_wldam */
+			}
+		}
+	}
 
 
 #define plus_base(n,x)	bonn = (n); bond = (x)
@@ -442,140 +441,139 @@ int otyp;
 #define pls(x)			plus(1, (x))
 #define add(x)			flat += max(0, (x) + dmod)
 #define chrgd			(!obj || obj->ovar1>0)
-		/* bonus dice */
-		switch (otyp)
-		{
-		case CROSSBOW_BOLT:			add(1); break;
-		case DROVEN_BOLT:			add(1); break;
-		case TRIDENT:				if(large){plus(2,4);} else {add(1);} break;
-		case BATTLE_AXE:			if(large){plus(2,4);} else {pls(4);} break;
-		case VIBROBLADE:			if(chrgd){ocn++;flat+=ocd/2;} break;
-		case MIRRORBLADE:			break;	// external special case: depends on defender's weapon
-		case RAPIER:				break;	// external special case: Silver Starlight vs plants
-		case RAKUYO:				break;	// external special case: wielded without twoweaponing
-		case BROADSWORD:			if(large){add(1);} else {pls(4);} break;
-		case ELVEN_BROADSWORD:		if(large){add(2);} else {pls(4);} break;
-		case CRYSTAL_SWORD:			if(large){pls(12);} else {pls(8);} break;
-		case TWO_HANDED_SWORD:		if(large){plus(2,6);} else {;} break;
-		case TSURUGI:				if(large){plus(2,6);} else {;} break;
-		case RUNESWORD:				if(large){add(1);} else {pls(4);} break;
-		case PARTISAN:				if(large){add(1);} else {;} break;
-		case RANSEUR:				pls(4); break;
-		case SPETUM:				if(large){pls(6);} else {add(1);} break;
-		case FORCE_PIKE:			if(chrgd){ocn+=2;flat+=ocd;} break;
-		case HALBERD:				if(large){pls(6);} else {;} break;
-		case BARDICHE:				if(large){plus(2,4);} else {pls(4);} break;
-		case VOULGE:				pls(4); break;
-		case DWARVISH_MATTOCK:		if(large){plus(2,6);} else {;} break;
-		case GUISARME:				if(large){;} else {pls(4);} break;
-		case BILL_GUISARME:			if(large){;} else {pls(4);} break;
-		case LUCERN_HAMMER:			if(large){;} else {pls(4);} break;
-		case BEC_DE_CORBIN:			if(large){;} else {;} break;
-		case SCYTHE:				if(large){pls(4);} else {pls(4);} break;
-		case MACE:					if(large){;} else {add(1);} break;
-		case ELVEN_MACE:			if(large){;} else {add(1);} break;
-		case MORNING_STAR:			if(large){add(1);} else {pls(4);} break;
-		case WAR_HAMMER:			if(large){;} else {add(1);} break;
-		case KAMEREL_VAJRA:			if(large){;} else {;} break;	// external special case: lightsaber forms
-		case FLAIL:					if(large){pls(4);} else {add(1);} break;
-		case VIPERWHIP:				if(large){;} else {;} break;	// external special case: number of heads striking
-		case BULLET:				ocn++; flat += 4; break;
-		case SILVER_BULLET:			ocn++; flat += 4; break;
-		case SHOTGUN_SHELL:			ocn++; flat += 4; break;
-		case ROCKET:				ocn++; flat += 4; break;
-		case BLASTER_BOLT:			ocn += 2; flat += ocd; break;
-		case HEAVY_BLASTER_BOLT:	ocn += 2; flat += ocd; break;
-		case LASER_BEAM:			ocn += 2; flat += 10; break;
-		case IRON_CHAIN:			add(1); break;
-		case SEISMIC_HAMMER:		if (chrgd){ ocd *= 3; } break;
-		case ACID_VENOM:			if (obj&&obj->ovar1){ ocn = 0; flat = obj->ovar1; } else{ add(6); } break;
-		case LIGHTSABER:			spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ plus(3,3); } break;		// external special case: lightsaber forms
-		case BEAMSWORD:				spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ plus(3,3); } break;		// external special case: Atma Weapon, lightsaber forms
-		case DOUBLE_LIGHTSABER:		spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ ocn+=3; } break;			// external special case: lightsaber forms
-		}
+	/* bonus dice */
+	switch (otyp)
+	{
+	case CROSSBOW_BOLT:			add(1); break;
+	case DROVEN_BOLT:			add(1); break;
+	case TRIDENT:				if(large){plus(2,4);} else {add(1);} break;
+	case BATTLE_AXE:			if(large){plus(2,4);} else {pls(4);} break;
+	case VIBROBLADE:			if(chrgd){ocn++;flat+=ocd/2;} break;
+	case MIRRORBLADE:			break;	// external special case: depends on defender's weapon
+	case RAPIER:				break;	// external special case: Silver Starlight vs plants
+	case RAKUYO:				break;	// external special case: wielded without twoweaponing
+	case BROADSWORD:			if(large){add(1);} else {pls(4);} break;
+	case ELVEN_BROADSWORD:		if(large){add(2);} else {pls(4);} break;
+	case CRYSTAL_SWORD:			if(large){pls(12);} else {pls(8);} break;
+	case TWO_HANDED_SWORD:		if(large){plus(2,6);} else {;} break;
+	case TSURUGI:				if(large){plus(2,6);} else {;} break;
+	case RUNESWORD:				if(large){add(1);} else {pls(4);} break;
+	case PARTISAN:				if(large){add(1);} else {;} break;
+	case RANSEUR:				pls(4); break;
+	case SPETUM:				if(large){pls(6);} else {add(1);} break;
+	case FORCE_PIKE:			if(chrgd){ocn+=2;flat+=ocd;} break;
+	case HALBERD:				if(large){pls(6);} else {;} break;
+	case BARDICHE:				if(large){plus(2,4);} else {pls(4);} break;
+	case VOULGE:				pls(4); break;
+	case DWARVISH_MATTOCK:		if(large){plus(2,6);} else {;} break;
+	case GUISARME:				if(large){;} else {pls(4);} break;
+	case BILL_GUISARME:			if(large){;} else {pls(4);} break;
+	case LUCERN_HAMMER:			if(large){;} else {pls(4);} break;
+	case BEC_DE_CORBIN:			if(large){;} else {;} break;
+	case SCYTHE:				if(large){pls(4);} else {pls(4);} break;
+	case MACE:					if(large){;} else {add(1);} break;
+	case ELVEN_MACE:			if(large){;} else {add(1);} break;
+	case MORNING_STAR:			if(large){add(1);} else {pls(4);} break;
+	case WAR_HAMMER:			if(large){;} else {add(1);} break;
+	case KAMEREL_VAJRA:			if(large){;} else {;} break;	// external special case: lightsaber forms
+	case FLAIL:					if(large){pls(4);} else {add(1);} break;
+	case VIPERWHIP:				if(large){;} else {;} break;	// external special case: number of heads striking
+	case BULLET:				ocn++; flat += 4; break;
+	case SILVER_BULLET:			ocn++; flat += 4; break;
+	case SHOTGUN_SHELL:			ocn++; flat += 4; break;
+	case ROCKET:				ocn++; flat += 4; break;
+	case BLASTER_BOLT:			ocn += 2; flat += ocd; break;
+	case HEAVY_BLASTER_BOLT:	ocn += 2; flat += ocd; break;
+	case LASER_BEAM:			ocn += 2; flat += 10; break;
+	case IRON_CHAIN:			add(1); break;
+	case SEISMIC_HAMMER:		if (chrgd){ ocd *= 3; } break;
+	case ACID_VENOM:			if (obj&&obj->ovar1){ ocn = 0; flat = obj->ovar1; } else{ add(6); } break;
+	case LIGHTSABER:			spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ plus(3,3); } break;		// external special case: lightsaber forms
+	case BEAMSWORD:				spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ plus(3,3); } break;		// external special case: Atma Weapon, lightsaber forms
+	case DOUBLE_LIGHTSABER:		spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ ocn+=3; } break;			// external special case: lightsaber forms
+	}
 #undef plus_base
 #undef plus
 #undef pls
 #undef add
 #undef chrgd
-		/* more special cases that wouldn't really fit into the switch above */
-		/* override for lightsaber dice if the lightsaber is turned off */
-		if (obj && (otyp == LIGHTSABER || otyp == BEAMSWORD || otyp == DOUBLE_LIGHTSABER) && !litsaber(obj))
+	/* more special cases that wouldn't really fit into the switch above */
+	/* override for lightsaber dice if the lightsaber is turned off */
+	if (obj && (otyp == LIGHTSABER || otyp == BEAMSWORD || otyp == DOUBLE_LIGHTSABER) && !litsaber(obj))
+	{
+		spe_mult = 1;
+		ocn = 1;
+		ocd = 2;
+		bonn = 0;
+		bond = 0;
+	}
+	/* kamerel vajra */
+	if (obj && otyp == KAMEREL_VAJRA && litsaber(obj))
+	{
+		if (obj->where == OBJ_MINVENT && obj->ocarry->data == &mons[PM_ARA_KAMEREL])
 		{
-			spe_mult = 1;
-			ocn = 1;
-			ocd = 2;
-			bonn = 0;
-			bond = 0;
+			spe_mult = 3;
+			ocn *= 3;
+			flat *= 3;
 		}
-		/* kamerel vajra */
-		if (obj && otyp == KAMEREL_VAJRA && litsaber(obj))
+		else
 		{
-			if (obj->where == OBJ_MINVENT && obj->ocarry->data == &mons[PM_ARA_KAMEREL])
-			{
-				spe_mult = 3;
-				ocn *= 3;
-				flat *= 3;
-			}
-			else
-			{
-				spe_mult = 2;
-				ocn *= 2;
-				flat *= 2;
-			}
+			spe_mult = 2;
+			ocn *= 2;
+			flat *= 2;
 		}
-		/* Infinity's Mirrored Arc */
-		if (obj && obj->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+	}
+	/* Infinity's Mirrored Arc */
+	if (obj && obj->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+	{
+		xchar x, y;
+		ocn = 1;
+		get_obj_location(obj, &x, &y, 0);
+		if (levl[x][y].lit &&
+			!(viz_array[y][x] & TEMP_DRK3 &&
+			!(viz_array[y][x] & TEMP_LIT1)))
 		{
-			xchar x, y;
-			ocn = 1;
-			get_obj_location(obj, &x, &y, 0);
-			if (levl[x][y].lit &&
-				!(viz_array[y][x] & TEMP_DRK3 &&
-				!(viz_array[y][x] & TEMP_LIT1)))
-			{
-				ocn += 2;
-			}
-			if (viz_array[y][x] & TEMP_LIT1 &&
-				!(viz_array[y][x] & TEMP_DRK3))
-			{
-				ocn += 1;
-			}
+			ocn += 2;
+		}
+		if (viz_array[y][x] & TEMP_LIT1 &&
+			!(viz_array[y][x] & TEMP_DRK3))
+		{
+			ocn += 1;
+		}
 
-			if (obj->altmode)
-				ocn *= 2;
-			/* set spe_mult */
-			spe_mult = ocn;
+		if (obj->altmode)
+			ocn *= 2;
+		/* set spe_mult */
+		spe_mult = ocn;
+	}
+	/* Atma Weapon */
+	if (obj && obj->oartifact == ART_ATMA_WEAPON && litsaber(obj))
+	{
+		/* note: multiplied enchantment bonus damage has to be handled in dmgval() */
+		if (obj == uwep &&	!Drain_resistance){
+			spe_mult = 3;
+			ocn = 3;
+			bonn = 1;
+			bond = u.ulevel;
 		}
-		/* Atma Weapon */
-		if (obj && obj->oartifact == ART_ATMA_WEAPON && litsaber(obj))
-		{
-			/* note: multiplied enchantment bonus damage has to be handled in dmgval() */
-			if (obj == uwep &&	!Drain_resistance){
-				spe_mult = 3;
-				ocn = 3;
-				bonn = 1;
-				bond = u.ulevel;
-			}
-			else {
-				spe_mult = 2;
-				ocn = 2;
-			}
+		else {
+			spe_mult = 2;
+			ocn = 2;
 		}
-		/* the Tentacle Rod gets no damage from enchantment */
-		if (obj && obj->oartifact == ART_TENTACLE_ROD)
-			spe_mult = 0;
-		/* if bonus dice exist, their minimum size is of a d2 */
-		if (bonn && bond < 2)
-			bond = 2;
-		/* if bonus dice are identical in size & roll to oc dice, combine them */
-		if (bonn && (ocd == bond && ocaa == bonaa && ocad == bonad))
-		{
-			ocn += bonn;
-			bonn = 0;
-			bond = 0;
-		}
-	}// loop between small and large
+	}
+	/* the Tentacle Rod gets no damage from enchantment */
+	if (obj && obj->oartifact == ART_TENTACLE_ROD)
+		spe_mult = 0;
+	/* if bonus dice exist, their minimum size is of a d2 */
+	if (bonn && bond < 2)
+		bond = 2;
+	/* if bonus dice are identical in size & roll to oc dice, combine them */
+	if (bonn && (ocd == bond && ocaa == bonaa && ocad == bonad))
+	{
+		ocn += bonn;
+		bonn = 0;
+		bond = 0;
+	}
 	/* undefine the helpers */
 #undef ocaa	
 #undef ocad	
@@ -674,7 +672,7 @@ int spec;
 	        return 9999;
 
 	/* grab the weapon dice from dmgval_core */
-	spe_mult = dmgval_core(&wdice, otmp, otyp);
+	spe_mult = dmgval_core(&wdice, bigmonst(ptr), otmp, otyp);
 
 	/* special cases of otyp not covered by dmgval_core:
 	 *  - rakuyo					- add bonus damage
@@ -699,10 +697,8 @@ int spec;
 			/* modify wdice's bonus die and apply it */
 			// bonus 1d4 vs small
 			// bonus 1d3 vs large
-			wdice.bon[0].damn = 1;
-			wdice.bon[1].damn = 1;
-			wdice.bon[0].damd = 4;
-			wdice.bon[1].damd = 3;
+			wdice.bon.damn = 1;
+			wdice.bon.damd = (bigmonst(ptr) ? 3 : 4);
 			// doubled enchantment
 			spe_mult += 1;
 		}
@@ -713,8 +709,7 @@ int spec;
 		{
 			/* modify wdice's dice */
 			// 1 additional die for every extra head striking
-			wdice.oc[0].damn += otmp->ostriking;
-			wdice.oc[1].damn += otmp->ostriking;
+			wdice.oc.damn += otmp->ostriking;
 			spe_mult += otmp->ostriking;
 		}
 		break;
@@ -722,28 +717,26 @@ int spec;
 		if ((youdefend ? uwep : MON_WEP(mon))->otyp == MIRRORBLADE)
 		{// clashing mirrorblades are quite deadly
 			// 2 dice, exploding, with a flat explosion bonus of the average of attacker's and defender's weapons
-			wdice.oc[0].aatyp = AT_EXPL + ((youdefend ? uwep : MON_WEP(mon))->spe + otmp->spe) / 2;
-			wdice.oc[1].aatyp = AT_EXPL + ((youdefend ? uwep : MON_WEP(mon))->spe + otmp->spe) / 2;
-			wdice.oc[0].damn = 2;
-			wdice.oc[1].damn = 2;
+			wdice.oc.aatyp = AT_EXPL + ((youdefend ? uwep : MON_WEP(mon))->spe + otmp->spe) / 2;
+			wdice.oc.damn = 2;
 		}
 		else
 		{// if the defender's weapon would be stronger than the mirrorblade, use that instead
 			/* calculate what the normal damage dice would be */
 			int hyp = 0;
-			hyp += weapon_dmg_roll(&(wdice.oc[bigmonst(ptr)]), youdefend);
-			hyp += weapon_dmg_roll(&(wdice.bon[bigmonst(ptr)]), youdefend);
-			hyp += wdice.flat[bigmonst(ptr)];
+			hyp += weapon_dmg_roll(&(wdice.oc), youdefend);
+			hyp += weapon_dmg_roll(&(wdice.bon), youdefend);
+			hyp += wdice.flat;
 
 			/* calculate what the mirrored damage dice would be */
 			int mir = 0;
 			struct weapon_dice mirdice;
 			/* grab the weapon dice from dmgval_core */
-			(void) dmgval_core(&mirdice, (youdefend ? uwep : MON_WEP(mon)), 0);	//note: dmgval_core handles zero weapons gracefully
+			(void) dmgval_core(&mirdice, bigmonst(ptr), (youdefend ? uwep : MON_WEP(mon)), 0);	//note: dmgval_core handles zero weapons gracefully
 			/* find the damage from those dice */
-			mir += weapon_dmg_roll(&(mirdice.oc[bigmonst(ptr)]), youdefend);
-			mir += weapon_dmg_roll(&(mirdice.bon[bigmonst(ptr)]), youdefend);
-			mir += mirdice.flat[bigmonst(ptr)];
+			mir += weapon_dmg_roll(&(mirdice.oc), youdefend);
+			mir += weapon_dmg_roll(&(mirdice.bon), youdefend);
+			mir += mirdice.flat;
 
 			/* use the better */
 			tmp += max(hyp, mir);
@@ -819,8 +812,7 @@ int spec;
 		break;
 	case CRYSTAL_SWORD:
 		// small bonus enchantment damage
-		wdice.flat[0] += otmp->spe/3;
-		wdice.flat[1] += otmp->spe/3;
+		wdice.flat += otmp->spe/3;
 		break;
 	case LIGHTSABER:
 	case BEAMSWORD:
@@ -839,8 +831,7 @@ int spec;
 		// damage die is increased by 3x the enchantment of the hammer when charged
 		if (otmp->ovar1)
 		{
-			wdice.oc[0].damd += 3 * (otmp->spe);
-			wdice.oc[0].damd += 3 * (otmp->spe);
+			wdice.oc.damd += 3 * (otmp->spe);
 			// drain charge on future-tech powered weapons
 			otmp->ovar1--;
 		}
@@ -864,20 +855,17 @@ int spec;
 			/* modify wdice */
 			// 1 additional main die
 			// plus a 1d4 bonus die
-			wdice.oc[0].damn += 1;
-			wdice.oc[1].damn += 1;
-			wdice.bon[0].damn = 1;
-			wdice.bon[1].damn = 1;
-			wdice.bon[0].damd = 4;
-			wdice.bon[1].damd = 4;
+			wdice.oc.damn += 1;
+			wdice.bon.damn = 1;
+			wdice.bon.damd = 4;
 		}
 		break;
 	case ART_ATMA_WEAPON:
 		/* damage is multiplied % of health remaining (currently only implemented for the player) */
 		/* calculate damage normally */
-		tmp += weapon_dmg_roll(&(wdice.oc[bigmonst(ptr)]), youdefend);
-		tmp += weapon_dmg_roll(&(wdice.bon[bigmonst(ptr)]), youdefend);
-		tmp += wdice.flat[bigmonst(ptr)];
+		tmp += weapon_dmg_roll(&(wdice.oc), youdefend);
+		tmp += weapon_dmg_roll(&(wdice.bon), youdefend);
+		tmp += wdice.flat;
 		/* apply the multiplier, if applicable */
 		if (otmp == uwep &&	!Drain_resistance)
 		{
@@ -894,9 +882,9 @@ int spec;
 	if (add_dice)
 	{//true, unless overridden by a special case above (mirrorblades, Atma Weapon)
 		/* find the damage from those dice */
-		tmp += weapon_dmg_roll(&(wdice.oc[bigmonst(ptr)]), youdefend);
-		tmp += weapon_dmg_roll(&(wdice.bon[bigmonst(ptr)]), youdefend);
-		tmp += wdice.flat[bigmonst(ptr)];
+		tmp += weapon_dmg_roll(&(wdice.oc), youdefend);
+		tmp += weapon_dmg_roll(&(wdice.bon), youdefend);
+		tmp += wdice.flat;
 		/* cannot be negative */
 		if (tmp < 0)
 			tmp = 0;
@@ -920,19 +908,19 @@ int spec;
 		else if (u.fightingForm == FFORM_ATARU && u.lastmoved + 1 >= monstermoves && (!uarm || is_light_armor(uarm))){
 			switch (min(P_SKILL(FFORM_ATARU), P_SKILL(weapon_type(otmp)))){
 			case P_BASIC:
-				tmp += d(2, wdice.oc[bigmonst(ptr)].damd);
+				tmp += d(2, wdice.oc.damd);
 				if (otmp->altmode){ //Probably just the Annulus
 					tmp += d(2, 3);
 				}
 				break;
 			case P_SKILLED:
-				tmp += d(4, wdice.oc[bigmonst(ptr)].damd);
+				tmp += d(4, wdice.oc.damd);
 				if (otmp->altmode){ //Probably just the Annulus
 					tmp += d(4, 3);
 				}
 				break;
 			case P_EXPERT:
-				tmp += d(6, wdice.oc[bigmonst(ptr)].damd);
+				tmp += d(6, wdice.oc.damd);
 				if (otmp->altmode){ //Probably just the Annulus
 					tmp += d(6, 3);
 				}
