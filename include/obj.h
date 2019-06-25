@@ -576,6 +576,17 @@ struct weapon_dice {
 				|| (otmp)->otyp == DWARVISH_ROUNDSHIELD)
 #define is_gnomish_armor(otmp)	((otmp)->otyp == GNOMISH_POINTY_HAT)
 
+#define is_plussev_armor(otmp)	(is_elven_armor((otmp))\
+								|| arti_plussev((otmp))\
+								|| ((otmp)->otyp == CORNUTHAUM && Role_if(PM_WIZARD))\
+								|| ((otmp)->otyp == ROBE && Role_if(PM_WIZARD) && (otmp)->oartifact == ART_ROBE_OF_THE_ARCHMAGI)\
+								|| (otmp)->otyp == CRYSTAL_HELM\
+								|| (otmp)->otyp == CRYSTAL_PLATE_MAIL\
+								|| (otmp)->otyp == CRYSTAL_SHIELD\
+								|| (otmp)->otyp == CRYSTAL_GAUNTLETS\
+								|| (otmp)->otyp == CRYSTAL_BOOTS\
+								|| (otmp)->otyp == CLOAK_OF_PROTECTION)
+
 #define is_twoweapable_artifact(otmp) ((otmp)->oartifact == ART_STING\
 				|| (otmp)->oartifact == ART_ORCRIST\
 				|| (otmp)->oartifact == ART_GRIMTOOTH\

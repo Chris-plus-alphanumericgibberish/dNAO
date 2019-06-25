@@ -38,7 +38,7 @@ STATIC_DCL char FDECL(obj_to_let,(struct obj *));
 STATIC_PTR int FDECL(u_material_next_to_skin,(int));
 STATIC_PTR int FDECL(u_bcu_next_to_skin,(int));
 STATIC_DCL int FDECL(itemactions,(struct obj *));
-STATIC_DCL void FDECL(describe_item, (struct obj *, winid *));
+STATIC_DCL void FDECL(describe_item, (struct obj *, int, int, winid *));
 
 #ifdef OVLB
 
@@ -2341,7 +2341,7 @@ struct obj *obj;
 	if (feedback_fn == dotypeinv) {
 		winid datawin = create_nhwindow(NHW_MENU);
 		putstr(datawin, ATR_NONE, doname(obj));
-		describe_item(obj, &datawin);
+		describe_item(obj, obj->otyp, obj->oartifact, &datawin);
 		checkfile(xname(obj), 0, FALSE, TRUE, &datawin);
 		display_nhwindow(datawin, TRUE);
 		destroy_nhwindow(datawin);
@@ -2364,11 +2364,17 @@ struct obj *obj;
  * Requires an actual object to be passed, as many object-related functions require an obj pointer
  */
 void
-describe_item(obj, datawin)
+describe_item(obj, otyp, oartifact, datawin)
 struct obj *obj;
+int otyp;
+int oartifact;
 winid *datawin;
 {
-	int otyp = obj->otyp;
+	if (obj)
+	{
+		otyp = obj->otyp;
+		oartifact = obj->oartifact;
+	}
 	struct objclass oc = objects[otyp];
 	char olet = oc.oc_class;
 	char buf[BUFSZ];
@@ -2385,14 +2391,20 @@ winid *datawin;
 	}
 
 		/* Object classes currently with no special messages here: amulets. */
-	if (olet == WEAPON_CLASS || is_weptool(obj)) {
+	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill)) {
 		if (oc.oc_skill >= 0) {
-			Sprintf(buf, "%s-handed weapon%s%s",
-				(oc.oc_bimanual ? "Two" : "Single"), (is_weptool(obj) ? "-tool" : ""),
-				(oc.oc_bimanual == bimanual(obj, youmonst.data) ? "." :
-				bimanual(obj, youmonst.data) ? ", but large enough you actually need two hands."
-				: ", but you can wield it one-handed.")
-				);
+			if (obj) {
+				Sprintf(buf, "%s-handed weapon%s%s",
+					(oc.oc_bimanual ? "Two" : "Single"), (is_weptool(obj) ? "-tool" : ""),
+					(oc.oc_bimanual == bimanual(obj, youmonst.data) ? "." :
+					bimanual(obj, youmonst.data) ? ", but large enough you actually need two hands."
+					: ", but you can wield it one-handed.")
+					);
+			}
+			else {
+				Sprintf(buf, "%s-handed weapon%s",
+					(oc.oc_bimanual ? "Two" : "Single"), ((olet == TOOL_CLASS && oc.oc_skill) ? "-tool" : ""));
+			}
 		}
 		else if (oc.oc_skill <= -P_BOW && oc.oc_skill >= -P_CROSSBOW) {
 			Strcpy(buf, "Ammunition.");
@@ -2403,6 +2415,7 @@ winid *datawin;
 		OBJPUTSTR(buf);
 
 		/* weapon dice! */
+		// note: dmgval_core can handle not being given an obj; it will attempt to use otyp instead
 		struct weapon_dice wdice[2];
 		(void) dmgval_core(&wdice[0], FALSE, obj, otyp);	// small dice
 		(void) dmgval_core(&wdice[1], TRUE, obj, otyp);		// large dice
@@ -2455,33 +2468,33 @@ winid *datawin;
 		}
 		Strcat(buf, "large monsters.");
 		OBJPUTSTR(buf);
-		/* artifact bonus damage */
-		if (obj->oartifact && (artilist[obj->oartifact].attk.damn || artilist[obj->oartifact].attk.damd || artilist[obj->oartifact].attk.adtyp))
+		/* artifact bonus damage (artifacts only) */
+		if (oartifact && (artilist[oartifact].attk.damn || artilist[oartifact].attk.damd || artilist[oartifact].attk.adtyp))
 		{
-			register const struct artifact *oart = &artilist[obj->oartifact];
+			register const struct artifact *oart = &artilist[oartifact];
 			/* bonus damage, or double damage? We already checked that oart->attk exists */
 			if (oart->attk.damd)
 			{// 1dX bonus damage
 				if (oart->attk.damd > 1)
 				{
 					Sprintf(buf, "Deals %dd%d bonus ",
-						((is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(obj->oartifact) ? 2 : 1),
+						((is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1),
 						oart->attk.damd);
 				}
 				else
 				{
 					Sprintf(buf, "Deals %d bonus ",
-						((is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(obj->oartifact) ? 2 : 1));
+						((is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1));
 				}
 			}
 			else
 			{// double damage (except when it's triple)
 				Sprintf(buf, "Deals %s ",
-					double_bonus_damage_artifact(obj->oartifact) ? "triple" : "double");
+					double_bonus_damage_artifact(oartifact) ? "triple" : "double");
 			}
 
 			/* now figure out who it deals the bonus damage to */
-			switch (obj->oartifact)
+			switch (oartifact)
 			{
 			case ART_HOLY_MOONLIGHT_SWORD:
 				Strcat(buf, "magic damage, while lit.");
@@ -2540,7 +2553,7 @@ winid *datawin;
 					/* SMOP: this should be made into a list somewhere and used for specific warning messages as well,
 					 * ie, "Warned of fey and magic-item users." instead of "warned of demiliches"
 					 */
-					switch (obj->oartifact)
+					switch (oartifact)
 					{
 					case ART_ORCRIST:					Strcat(buf, "orcs and demons.");							break;
 					case ART_STING:						Strcat(buf, "orcs and spiders.");							break;
@@ -2585,8 +2598,8 @@ winid *datawin;
 			if (buf[0] != '\0')
 				OBJPUTSTR(buf);
 		}
-		/* offensive object properties */
-		if (obj->oproperties & OPROP_W_MASK)
+		/* offensive object properties (objects only) */
+		if (obj && obj->oproperties & OPROP_W_MASK)
 		{
 			/* holy/unholy bonus damage */
 			buf[0] = '\0';
@@ -2645,7 +2658,7 @@ winid *datawin;
 
 
 		/* to-hit */
-		int hitbon = oc.oc_hitbon - 4 * max(0,(obj->objsize - youracedata->msize));
+		int hitbon = oc.oc_hitbon - (obj ? (4 * max(0,(obj->objsize - youracedata->msize))) : 0);
 		if (hitbon != 0)
 		{
 			Sprintf(buf, "Has a %s %s to hit.",
@@ -2661,15 +2674,26 @@ winid *datawin;
 		const char* armorslots[] = {
 			"torso", "shield", "helm", "gloves", "boots", "cloak", "shirt"
 		};
-		Sprintf(buf, "%s, worn in the %s slot.",
-			(oc.oc_armcat != ARM_SUIT ? "Armor" :
-			is_light_armor(obj) ? "Light armor" :
-			is_medium_armor(obj) ? "Medium armor" :
-			"Heavy armor"),
-			armorslots[oc.oc_armcat]);
+		if (obj) {
+			Sprintf(buf, "%s, worn in the %s slot.",
+				(oc.oc_armcat != ARM_SUIT ? "Armor" :
+				is_light_armor(obj) ? "Light armor" :
+				is_medium_armor(obj) ? "Medium armor" :
+				"Heavy armor"),
+				armorslots[oc.oc_armcat]);
+		}
+		else {
+			/* currently, the is_x_armor checks wouldn't actually need an obj,
+			 * but there's no sense in rewriting perfectly good code to fit
+			 * immediate needs and possibly prevent future changes that would
+			 * like details from the obj itself 
+			 */
+			Sprintf(buf, "Armor, worn in the %s slot.",
+				armorslots[oc.oc_armcat]);
+		}
 		OBJPUTSTR(buf);
 		/* Defense */
-		if (obj->known) {// calculate the actual AC and DR this armor gives
+		if (obj && obj->known) {// calculate the actual AC and DR this armor gives
 			Sprintf(buf, "Is worth %d AC and %d DR.",
 				arm_ac_bonus(obj), arm_dr_bonus(obj));
 		}
@@ -2686,11 +2710,16 @@ winid *datawin;
 		}
 		/* Don/Doff time */
 		Sprintf(buf, "Takes %d turn%s to put on or remove.",
-			oc.oc_delay, (oc.oc_delay == 1 ? "" : "s"));
+			max(1, oc.oc_delay), (max(1, oc.oc_delay) == 1 ? "" : "s"));
+		OBJPUTSTR(buf);
+
+		/* Enchantment limit */
+		if (obj && is_plussev_armor(obj))
+			OBJPUTSTR("Holds enchantments well.");
 	}
 	if (olet == FOOD_CLASS) {
 		if (otyp == TIN) {
-			if (obj->known)
+			if (obj && obj->known)
 			{
 				if (obj->spe > 0)
 				{ // spinach
@@ -2723,18 +2752,24 @@ winid *datawin;
 			}
 		}
 		else if (otyp == CORPSE) {
-			Sprintf(buf, "Comestible providing %d nutrition%s.", mons[obj->corpsenm].cnutrit, obj->oeaten ? " when eaten whole" : "");
+			Sprintf(buf, "Comestible providing %d nutrition%s.", mons[obj->corpsenm].cnutrit, (obj && obj->oeaten ? " when eaten whole" : ""));
 			OBJPUTSTR(buf);
 			OBJPUTSTR("Takes various amounts of turns to eat.");
-			if (vegan(&mons[obj->corpsenm]))
-				OBJPUTSTR("Is vegan.");
-			else if (vegetarian(&mons[obj->corpsenm]))
-				OBJPUTSTR("Is vegetarian but not vegan.");
-			else
-				OBJPUTSTR("Is not vegetarian.");
+			if (obj)
+			{
+				if (vegan(&mons[obj->corpsenm]))
+					OBJPUTSTR("Is vegan.");
+				else if (vegetarian(&mons[obj->corpsenm]))
+					OBJPUTSTR("Is vegetarian but not vegan.");
+				else
+					OBJPUTSTR("Is not vegetarian.");
+			}
+			else {
+				OBJPUTSTR("May or may not be vegetarian.");
+			}
 		}
 		else {
-			Sprintf(buf, "Comestible providing %d nutrition%s.", oc.oc_nutrition - obj->oeaten, obj->oeaten ? " when eaten whole" : "");
+			Sprintf(buf, "Comestible providing %d nutrition%s.", oc.oc_nutrition, (obj && obj->oeaten ? " when eaten whole" : ""));
 			OBJPUTSTR(buf);
 			Sprintf(buf, "Takes %d turn%s to eat.", oc.oc_delay,
 				(oc.oc_delay == 1 ? "" : "s"));
@@ -2770,7 +2805,7 @@ winid *datawin;
 		OBJPUTSTR("Scroll.");
 	}
 	if (olet == SPBOOK_CLASS) {
-		if (!obj->oartifact)
+		if (!(obj && oartifact))
 		{
 			Sprintf(buf, "Level %d spellbook, in the %s school. %s spell.",
 				oc.oc_level, spelltypemnemonic(oc.oc_skill), dir);
@@ -2802,7 +2837,7 @@ winid *datawin;
 			OBJPUTSTR("Precious gem.");
 		}
 	}
-	if (olet == TOOL_CLASS && !is_weptool(obj)) {
+	if (olet == TOOL_CLASS && !(olet == TOOL_CLASS && oc.oc_skill)) {
 		const char* subclass = "tool";
 		switch (otyp) {
 		case BLINDFOLD:
@@ -2879,9 +2914,9 @@ winid *datawin;
 
 	/* cost, wt should go next */
 	Sprintf(buf, "Base cost %d. Weighs %d aum.%s",
-		(int)(obj->oartifact ? artilist[obj->oartifact].cost : oc.oc_cost),
-		(int)(weight(obj) / max(1, obj->quan)),
-		((obj->quan != 1) ? " (per item)" : ""));
+		(int)((obj && oartifact) ? artilist[oartifact].cost : oc.oc_cost),
+		(int)(obj ? (weight(obj) / max(1, obj->quan)) : oc.oc_weight),
+		((obj && obj->quan != 1) ? " (per item)" : ""));
 	OBJPUTSTR(buf);
 
 	/* powers conferred */
@@ -2891,9 +2926,9 @@ winid *datawin;
 	} propertynames[]; /* located in timeout.c */
 	int i;
 
-	int * properties_item = item_property_list(obj);
-	int * properties_art = art_property_list(obj, FALSE);
-	int * properties_art_carried = art_property_list(obj, TRUE);
+	int * properties_item = item_property_list(obj, otyp);
+	int * properties_art = art_property_list(oartifact, FALSE);
+	int * properties_art_carried = art_property_list(oartifact, TRUE);
 
 	for (i = 0; propertynames[i].prop_name; i++) {
 		boolean got_prop = FALSE, while_carried = FALSE;
@@ -2909,7 +2944,7 @@ winid *datawin;
 			j++;
 		}
 		j = 0;
-		if (obj->oartifact)
+		if (oartifact)
 		{
 			while (properties_art[j] && !got_prop) {
 				if (properties_art[j] == propertynames[i].prop_num)
@@ -2918,7 +2953,7 @@ winid *datawin;
 			}
 		}
 		j = 0;
-		if (obj->oartifact)
+		if (oartifact)
 		{
 			while (properties_art_carried[j] && !while_carried) {
 				if (properties_art_carried[j] == propertynames[i].prop_num)
@@ -2985,71 +3020,71 @@ winid *datawin;
 		}
 	}
 	/* Other magical properties while worn that aren't covered by prop.h (or rather, propertynames[]) -- artifacts may cause more than one to apply, so don't if-else chain */
-	if (obj->otyp == HELM_OF_OPPOSITE_ALIGNMENT)	OBJPUTSTR("Forces an alignment change.");
-	if (obj->otyp == AMULET_OF_CHANGE)				OBJPUTSTR("Forces a change of gender.");
-	if (obj->otyp == DUNCE_CAP)						OBJPUTSTR("Greatly reduces INT.");
-	if (obj->otyp == GAUNTLETS_OF_POWER ||
-		obj->oartifact == ART_SCEPTRE_OF_MIGHT ||
-		obj->oartifact == ART_STORMBRINGER ||
-		obj->oartifact == ART_OGRESMASHER)			OBJPUTSTR("Greatly increases STR.");
-	if (obj->oartifact == ART_STORMBRINGER ||
-		obj->oartifact == ART_GREAT_CLAWS_OF_URDLEN ||
-		obj->oartifact == ART_OGRESMASHER)			OBJPUTSTR("Greatly increases CON.");
-	if (obj->oartifact == ART_PREMIUM_HEART)		OBJPUTSTR("Greatly increases DEX.");
-	if (obj->otyp == KICKING_BOOTS)					OBJPUTSTR("Improves kicking.");
-	if (obj->otyp == MUMMY_WRAPPING)				OBJPUTSTR("Prevents invisibility.");
-	if (obj->otyp == RIN_GAIN_STRENGTH)				OBJPUTSTR("Increases STR by its enchantment.");
-	if (obj->otyp == GAUNTLETS_OF_DEXTERITY)		OBJPUTSTR("Increases DEX by its enchantment.");
-	if (obj->otyp == RIN_GAIN_CONSTITUTION)			OBJPUTSTR("Increases CON by its enchantment.");
-	if (obj->otyp == HELM_OF_BRILLIANCE)			OBJPUTSTR("Increases INT and WIS by its enchantment.");
-	if (obj->otyp == RIN_INCREASE_DAMAGE)			OBJPUTSTR("Increases your weapon damage.");
-	if (obj->otyp == RIN_INCREASE_ACCURACY)			OBJPUTSTR("Increases your to-hit modifier.");
-	if (obj->otyp == AMULET_VERSUS_CURSES ||
-		obj->oartifact == ART_HELPING_HAND ||
-		obj->oartifact == ART_TREASURY_OF_PROTEUS ||
-		obj->oartifact == ART_TENTACLE_ROD ||
-		obj->oartifact == ART_MAGICBANE)			OBJPUTSTR("Protects your inventory from being cursed.");
+	if (otyp == HELM_OF_OPPOSITE_ALIGNMENT)	OBJPUTSTR("Forces an alignment change.");
+	if (otyp == AMULET_OF_CHANGE)				OBJPUTSTR("Forces a change of gender.");
+	if (otyp == DUNCE_CAP)						OBJPUTSTR("Greatly reduces INT.");
+	if (otyp == GAUNTLETS_OF_POWER ||
+		oartifact == ART_SCEPTRE_OF_MIGHT ||
+		oartifact == ART_STORMBRINGER ||
+		oartifact == ART_OGRESMASHER)			OBJPUTSTR("Greatly increases STR.");
+	if (oartifact == ART_STORMBRINGER ||
+		oartifact == ART_GREAT_CLAWS_OF_URDLEN ||
+		oartifact == ART_OGRESMASHER)			OBJPUTSTR("Greatly increases CON.");
+	if (oartifact == ART_PREMIUM_HEART)		OBJPUTSTR("Greatly increases DEX.");
+	if (otyp == KICKING_BOOTS)					OBJPUTSTR("Improves kicking.");
+	if (otyp == MUMMY_WRAPPING)				OBJPUTSTR("Prevents invisibility.");
+	if (otyp == RIN_GAIN_STRENGTH)				OBJPUTSTR("Increases STR by its enchantment.");
+	if (otyp == GAUNTLETS_OF_DEXTERITY)		OBJPUTSTR("Increases DEX by its enchantment.");
+	if (otyp == RIN_GAIN_CONSTITUTION)			OBJPUTSTR("Increases CON by its enchantment.");
+	if (otyp == HELM_OF_BRILLIANCE)			OBJPUTSTR("Increases INT and WIS by its enchantment.");
+	if (otyp == RIN_INCREASE_DAMAGE)			OBJPUTSTR("Increases your weapon damage.");
+	if (otyp == RIN_INCREASE_ACCURACY)			OBJPUTSTR("Increases your to-hit modifier.");
+	if (otyp == AMULET_VERSUS_CURSES ||
+		oartifact == ART_HELPING_HAND ||
+		oartifact == ART_TREASURY_OF_PROTEUS ||
+		oartifact == ART_TENTACLE_ROD ||
+		oartifact == ART_MAGICBANE)			OBJPUTSTR("Protects your inventory from being cursed.");
 
 	/* Effects based on the base description of the item -- only one will apply, so an if-else chain is appropriate */
 	/* randomized appearance items */
-	if      (obj->otyp == find_gcirclet())			OBJPUTSTR("Increases CHA by its enchantment.");
-//	else if (obj->otyp ==  find_ogloves())			OBJPUTSTR("Erosion resistant.");				// We don't comment on erosion-proofing elsewhere, either
-	else if (obj->otyp ==  find_tgloves())			OBJPUTSTR("Slightly increases unarmed damage.");
-//	else if (obj->otyp ==  find_pgloves())			OBJPUTSTR("Slightly increased defense.");		// Increased defensive stats are shown in the AC/DR section
-	else if (obj->otyp ==  find_fgloves())			OBJPUTSTR("Increases to-hit when fighting with a free off-hand.");
-	else if (obj->otyp ==   find_skates())			OBJPUTSTR("Prevents slipping on ice.");
-	else if (obj->otyp ==   find_cboots())			OBJPUTSTR("Slightly increases to-hit.");
-	else if (obj->otyp ==   find_mboots())			OBJPUTSTR("Protects against drowning attacks.");
-	else if (obj->otyp ==   find_hboots())			OBJPUTSTR("Increases carrying capacity.");
-	else if (obj->otyp ==   find_bboots())			OBJPUTSTR("Cannot be pulled straight off of your legs.");
-	else if (obj->otyp ==   find_jboots())			OBJPUTSTR("Reduces the severity of leg wounds.");
-	else if (obj->otyp ==    find_vhelm())			OBJPUTSTR("Protects from blinding claws and venom.");
-	else if (obj->otyp == find_engagement_ring())	OBJPUTSTR("Protects from unwanted advances.");
-	else if (isSignetRing(obj->otyp))				OBJPUTSTR("Can be poisoned.");
+	if      (otyp == find_gcirclet())			OBJPUTSTR("Increases CHA by its enchantment.");
+//	else if (otyp ==  find_ogloves())			OBJPUTSTR("Erosion resistant.");				// We don't comment on erosion-proofing elsewhere, either
+	else if (otyp ==  find_tgloves())			OBJPUTSTR("Slightly increases unarmed damage.");
+//	else if (otyp ==  find_pgloves())			OBJPUTSTR("Slightly increased defense.");		// Increased defensive stats are shown in the AC/DR section
+	else if (otyp ==  find_fgloves())			OBJPUTSTR("Increases to-hit when fighting with a free off-hand.");
+	else if (otyp ==   find_skates())			OBJPUTSTR("Prevents slipping on ice.");
+	else if (otyp ==   find_cboots())			OBJPUTSTR("Slightly increases to-hit.");
+	else if (otyp ==   find_mboots())			OBJPUTSTR("Protects against drowning attacks.");
+	else if (otyp ==   find_hboots())			OBJPUTSTR("Increases carrying capacity.");
+	else if (otyp ==   find_bboots())			OBJPUTSTR("Cannot be pulled straight off of your legs.");
+	else if (otyp ==   find_jboots())			OBJPUTSTR("Reduces the severity of leg wounds.");
+	else if (otyp ==    find_vhelm())			OBJPUTSTR("Protects from blinding claws and venom.");
+	else if (otyp == find_engagement_ring())	OBJPUTSTR("Protects from unwanted advances.");
+	else if (isSignetRing(otyp))				OBJPUTSTR("Can be poisoned.");
 	/* non-randomized appearance items */
-	else if (obj->otyp == HARMONIUM_BOOTS ||
-		obj->otyp == HARMONIUM_SCALE_MAIL ||
-		obj->otyp == HARMONIUM_PLATE ||
-		obj->otyp == HARMONIUM_GAUNTLETS ||
-		obj->otyp == HARMONIUM_HELM)				OBJPUTSTR("Slightly increased defense against non-lawfuls.");
-	else if (obj->otyp == PLASTEEL_HELM ||
-		obj->otyp == CRYSTAL_HELM ||
-		obj->otyp == PONTIFF_S_CROWN ||
-		obj->otyp == WHITE_FACELESS_ROBE ||
-		obj->otyp == BLACK_FACELESS_ROBE ||
-		obj->otyp == SMOKY_VIOLET_FACELESS_ROBE)	OBJPUTSTR("Covers the face entirely.");
-	else if (obj->otyp == DROVEN_HELM ||
-		obj->otyp == DROVEN_PLATE_MAIL ||
-		obj->otyp == DROVEN_CHAIN_MAIL)				OBJPUTSTR("Dissolves in light.");
+	else if (otyp == HARMONIUM_BOOTS ||
+		otyp == HARMONIUM_SCALE_MAIL ||
+		otyp == HARMONIUM_PLATE ||
+		otyp == HARMONIUM_GAUNTLETS ||
+		otyp == HARMONIUM_HELM)					OBJPUTSTR("Slightly increased defense against non-lawfuls.");
+	else if (otyp == PLASTEEL_HELM ||
+		otyp == CRYSTAL_HELM ||
+		otyp == PONTIFF_S_CROWN ||
+		otyp == WHITE_FACELESS_ROBE ||
+		otyp == BLACK_FACELESS_ROBE ||
+		otyp == SMOKY_VIOLET_FACELESS_ROBE)		OBJPUTSTR("Covers the face entirely.");
+	else if (otyp == DROVEN_HELM ||
+		otyp == DROVEN_PLATE_MAIL ||
+		otyp == DROVEN_CHAIN_MAIL)				OBJPUTSTR("Dissolves in light.");
 	/* and some obscure usage mechanics of fixed-appearance items */
-	else if (obj->otyp == RIN_WISHES)				OBJPUTSTR("Can be invoked while worn.");
-	else if (obj->otyp == CANDLE_OF_INVOCATION)		OBJPUTSTR("Can be invoked while lit.");
+	else if (otyp == RIN_WISHES)				OBJPUTSTR("Can be invoked while worn.");
+	else if (otyp == CANDLE_OF_INVOCATION)		OBJPUTSTR("Can be invoked while lit.");
 
 
 	buf[0] = '\0';
-	ADDCLASSPROP(obj->oartifact, "an artifact");
-	ADDCLASSPROP((oc.oc_magic && !obj->oartifact), "inherently magical");		// overkill to say an artifact is inherently magical, and makes it weird when one isn't
-	ADDCLASSPROP((oc.oc_nowish || obj->oartifact >= ART_ROD_OF_SEVEN_PARTS), "not wishable");
+	ADDCLASSPROP(oartifact, "an artifact");
+	ADDCLASSPROP((oc.oc_magic && !oartifact), "inherently magical");		// overkill to say an artifact is inherently magical, and makes it weird when one isn't
+	ADDCLASSPROP((oc.oc_nowish || oartifact >= ART_ROD_OF_SEVEN_PARTS), "not wishable");
 	if (*buf) {
 		Sprintf(buf2, "Is %s.", buf);
 		OBJPUTSTR(buf2);
@@ -3060,35 +3095,42 @@ winid *datawin;
 	* subject to description shuffling that includes materials. If the player
 	* has already discovered this object, though, then it's fine to show the
 	* material.
-	* Edit by Nero: dnh is assuming that oc_name_known == TRUE if this function is called. */
-	/* 
+	* Edit by Nero: dnh is assuming that oc_name_known == TRUE if this function is called. 
+	*
 	* This is very similar to materialnm[], but the slight difference is
 	* that this is always the noun form whereas materialnm uses adjective
 	* forms; most materials have the same noun and adjective forms but two
-	* (wood/wooden, vegetable matter/organic) don't */
-	Strcpy(buf2, materialnm[obj->obj_material]);
+	* (wood/wooden, vegetable matter/organic) don't 
+	*
+	* Finally, this requires an object. Dnethack does some funny things with a few items
+	* to show adjectives, like the default material of sabers being metal, so showing
+	* what material items are "normally" made of could be misleading.
+	*/
+	if (obj) {
+		Strcpy(buf2, materialnm[obj->obj_material]);
 
-	if (obj->obj_material == WOOD) {	// Made of wooden. No.
-		Sprintf(buf2, "wood");
+		if (obj->obj_material == WOOD) {	// Made of wooden. No.
+			Sprintf(buf2, "wood");
+		}
+		else if (obj->obj_material == VEGGY) {	// Made of organic. Also no.
+			Sprintf(buf2, "vegetable matter");
+		}
+		else if (obj->obj_material == DRAGON_HIDE)
+		{
+			if (oc.oc_material > LEATHER && oc.oc_material != DRAGON_HIDE)	// hard dragon-stuff
+				Sprintf(buf2, "dragonbone");
+			else
+				Sprintf(buf2, "dragonhide");
+		}
+		else if (obj->obj_material == GEMSTONE && oc.oc_tough) {	// Made of <hard> gemstone, when you can engrave with it
+			Sprintf(buf2, "hard gemstone");
+		}
+		Sprintf(buf, "Made of %s.", buf2);
+		OBJPUTSTR(buf);
 	}
-	else if (obj->obj_material == VEGGY) {	// Made of organic. Also no.
-		Sprintf(buf2, "vegetable matter");
-	}
-	else if (obj->obj_material == DRAGON_HIDE)
-	{
-		if (oc.oc_material > LEATHER && oc.oc_material != DRAGON_HIDE)	// hard dragon-stuff
-			Sprintf(buf2, "dragonbone");
-		else
-			Sprintf(buf2, "dragonhide");
-	}
-	else if (obj->obj_material == GEMSTONE && oc.oc_tough) {	// Made of <hard> gemstone, when you can engrave with it
-		Sprintf(buf2, "hard gemstone");
-	}
-	Sprintf(buf, "Made of %s.", buf2);
-	OBJPUTSTR(buf);
 
 	/* Full-line remarks */
-	if (oc.oc_merge && !obj->oartifact) {	// even when an artifact can merge with identical items (ie Sunbeam), it sounds really weird
+	if (oc.oc_merge && !oartifact) {	// even when an artifact can merge with identical items (ie Sunbeam), it sounds really weird
 		OBJPUTSTR("Merges with identical items.");
 	}
 	if (oc.oc_unique) {

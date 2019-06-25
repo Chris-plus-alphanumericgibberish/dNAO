@@ -53,14 +53,19 @@ const struct worn {
 /* 
  * Returns a pointer to a TEMPORARY array of all the properties (from prop.h) an item has
  * This pointer should be used immediately and discarded, since calling this function again will modify the contents of the array
+ *
+ * If called without an obj, uses otyp to give as much info as possible without knowing obj
  */
 int *
-item_property_list(obj)
+item_property_list(obj, otyp)
 struct obj* obj;
 {
 	static int property_list[LAST_PROP];	// the temporary list of properties
 	int cur_prop, i;
 	boolean got_prop;
+
+	if (obj)
+		otyp = obj->otyp;
 
 	// bonus properties some items have that cannot fit into objclass->oc_oprop
 	const static int NO_RES[] = { 0 };
@@ -79,10 +84,10 @@ struct obj* obj;
 	{
 		got_prop = FALSE;
 		// from objclass
-		if (objects[obj->otyp].oc_oprop == cur_prop)
+		if (objects[otyp].oc_oprop == cur_prop)
 			got_prop = TRUE;
 		// from object properties
-		if (!got_prop && obj->oproperties)
+		if (!got_prop && obj && obj->oproperties)
 		{
 			switch (cur_prop)
 			{
@@ -113,7 +118,7 @@ struct obj* obj;
 		{
 			// first, select the item's list of bonus properties
 			const int * bonus_prop_list;
-			switch (obj->otyp)
+			switch (otyp)
 			{
 			case ALCHEMY_SMOCK:
 				bonus_prop_list = (ALCHEMY_RES);
@@ -230,7 +235,7 @@ long mask;
 		    if (wp->w_mask & ~(W_SWAPWEP|W_QUIVER)) {
 			/* leave as "x = x <op> y", here and below, for broken
 			 * compilers */			
-			int * property_list = item_property_list(oobj);
+			int * property_list = item_property_list(oobj, oobj->otyp);
 			p = 0;
 			while (property_list[p] != 0)	{
 				u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic & ~wp->w_mask;
@@ -254,7 +259,7 @@ long mask;
 		    if (wp->w_mask & ~(W_SWAPWEP|W_QUIVER)) {
 			if (obj->oclass == WEAPON_CLASS || is_weptool(obj) ||
 					    mask != W_WEP) {
-				int * property_list = item_property_list(obj);
+				int * property_list = item_property_list(obj, obj->otyp);
 				p = 0;
 				while (property_list[p] != 0)	{
 					u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic | wp->w_mask;
@@ -292,7 +297,7 @@ register struct obj *obj;
 	for(wp = worn; wp->w_mask; wp++)
 	    if(obj == *(wp->w_obj)) {
 		*(wp->w_obj) = 0;
-		int * property_list = item_property_list(obj);
+		int * property_list = item_property_list(obj, obj->otyp);
 		p = 0;
 		while (property_list[p] != 0)	{
 			u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic & ~wp->w_mask;
@@ -495,7 +500,7 @@ boolean on, silently;
     unseen = !canseemon(mon);
     if (!which) goto maybe_blocks;
 	
-	int * property_list = item_property_list(obj);
+	int * property_list = item_property_list(obj, obj->otyp);
 	which = 0;
 	while (property_list[which] != 0)	{
 		update_mon_intrinsic(mon, obj, property_list[which], on, silently);
@@ -503,7 +508,7 @@ boolean on, silently;
 	}
 	if (obj->oartifact)
 	{
-		property_list = art_property_list(obj, FALSE);	// do not give monsters on-carry properties here
+		property_list = art_property_list(obj->oartifact, FALSE);	// do not give monsters on-carry properties here
 		which = 0;
 		while (property_list[which] != 0)	{
 			update_mon_intrinsic(mon, obj, property_list[which], on, silently);

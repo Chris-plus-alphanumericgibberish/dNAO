@@ -549,17 +549,26 @@ register boolean mod;
  * The array that is returned only stores the most recent query for each of carried/equiped.
  */
 int *
-art_property_list(obj, while_carried)
-struct obj* obj;
+art_property_list(oartifact, while_carried)
+int oartifact;
 boolean while_carried;
 {
 	static int equiped_property_list[LAST_PROP];	// the temporary list of properties for while equiped
 	static int carried_property_list[LAST_PROP];	// the temporary list of properties for while carried
 	int * property_list = (while_carried ? carried_property_list : equiped_property_list);
+
+	/* quick safety check */
+	if (oartifact < 1 || oartifact > NROFARTIFACTS)
+	{
+		property_list[0] = 0;
+		return property_list;
+	}
+
 	int cur_prop, i;
-	register const struct artifact *oart = get_artifact(obj);
+	register const struct artifact *oart = &artilist[oartifact];
 	boolean got_prop;
 
+	/* another check */
 	if (!oart)
 	{
 		property_list[0] = 0;
@@ -671,7 +680,7 @@ boolean while_carried;
 			case WARNING:
 				if (spfx & SPFX_WARN)
 				{
-					if ((spec_mm(obj) || spec_mt(obj) || spec_mb(obj) || spec_mg(obj) || spec_ma(obj) || spec_mv(obj) || spec_s(obj)))
+					if ((spec_mm(oartifact) || spec_mt(oartifact) || spec_mb(oartifact) || spec_mg(oartifact) || spec_ma(oartifact) || spec_mv(oartifact) || spec_s(oartifact)))
 						got_prop = (cur_prop == WARN_OF_MON);	// specific warning (ie, showing creatures)
 					else
 						got_prop = (cur_prop == WARNING);	// non-specific warning (ie, numbers)
@@ -697,7 +706,7 @@ boolean while_carried;
 		{
 			// first, select the artifact's list of bonus properties
 			const static int * bonus_prop_list;
-			switch (obj->oartifact)
+			switch (oartifact)
 			{
 			case ART_CHROMATIC_DRAGON_SCALES:
 				bonus_prop_list = (while_carried ? (NO_RES) : (CHROMATIC_RES));
@@ -1060,6 +1069,7 @@ long wp_mask;
 {
 	long *mask = 0;
 	register const struct artifact *oart = get_artifact(otmp);
+	int oartifact = otmp->oartifact;
 	uchar dtyp;
 	long spfx, spfx2, spfx3, wpfx;
 	long exist_warntypem = 0, exist_warntypet = 0, exist_warntypeb = 0, exist_warntypeg = 0, exist_warntypea = 0, exist_warntypev = 0;
@@ -1072,7 +1082,7 @@ long wp_mask;
 	if (!oart) return;
 	
 	/* get the property list (either for the slot or for slotless) */
-	tmp_property_list = art_property_list(otmp, wp_mask == W_ART);
+	tmp_property_list = art_property_list(oartifact, wp_mask == W_ART);
 	/* copy it to this local array */
 	for (i = 0; tmp_property_list[i]; i++)
 		this_art_property_list[i] = tmp_property_list[i];	// set indices
@@ -1094,20 +1104,20 @@ long wp_mask;
 			for (obj = invent; (obj && !got_prop); obj = obj->nobj)
 			if (obj != otmp && obj->oartifact) {
 				/* write over tmp_property_list with the carried artifact -- this is why we needed a copy earlier */
-				tmp_property_list = art_property_list(obj, wp_mask == W_ART);
+				tmp_property_list = art_property_list(obj->oartifact, wp_mask == W_ART);
 
 				/* specific-monster warning needs to be specially handled */
 				if (this_art_property_list[i] == WARN_OF_MON)
 				{
 					if (oart->cspfx&SPFX_WARN){
 						if (get_artifact(obj)->cspfx&SPFX_WARN){
-							exist_warntypem |= spec_mm(obj);
-							exist_warntypet |= spec_mt(obj);
-							exist_warntypeb |= spec_mb(obj);
-							exist_warntypeg |= spec_mg(obj);
-							exist_warntypea |= spec_ma(obj);
-							exist_warntypev |= spec_mv(obj);
-							exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj)));
+							exist_warntypem |= spec_mm(obj->oartifact);
+							exist_warntypet |= spec_mt(obj->oartifact);
+							exist_warntypeb |= spec_mb(obj->oartifact);
+							exist_warntypeg |= spec_mg(obj->oartifact);
+							exist_warntypea |= spec_ma(obj->oartifact);
+							exist_warntypev |= spec_mv(obj->oartifact);
+							exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj->oartifact)));
 							// note: non-specifc warning is just a standard extrinsic
 						}
 					}
@@ -1132,21 +1142,21 @@ long wp_mask;
 		/* specific warning */
 		case WARN_OF_MON:
 			/* most specific flags */
-			/*  flag            if on  {add to mask     ; add to warning type              } else {remove from warning type unless another art fills in   } */
-			if (spec_mm(otmp)) {if(on) {*mask |= wp_mask; flags.warntypem |= spec_mm(otmp);} else {flags.warntypem &= ~(spec_mm(otmp)&(~exist_warntypem));}}
-			if (spec_mt(otmp)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mt(otmp);} else {flags.warntypet &= ~(spec_mt(otmp)&(~exist_warntypet));}}
-			if (spec_mb(otmp)) {if(on) {*mask |= wp_mask; flags.warntypeb |= spec_mb(otmp);} else {flags.warntypeb &= ~(spec_mb(otmp)&(~exist_warntypeb));}}
-			if (spec_mg(otmp)) {if(on) {*mask |= wp_mask; flags.warntypeg |= spec_mg(otmp);} else {flags.warntypeg &= ~(spec_mg(otmp)&(~exist_warntypeg));}}
-			if (spec_ma(otmp)) {if(on) {*mask |= wp_mask; flags.warntypea |= spec_ma(otmp);} else {flags.warntypea &= ~(spec_ma(otmp)&(~exist_warntypea));}}
-			if (spec_mv(otmp)) {if(on) {*mask |= wp_mask; flags.warntypev |= spec_mv(otmp);} else {flags.warntypev &= ~(spec_mv(otmp)&(~exist_warntypev));}}
+			/*  flag                 if on  {add to mask     ; add to warning type                   } else {remove from warning type unless another art fills in         } */
+			if (spec_mm(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypem |= spec_mm(oartifact);} else {flags.warntypem &= ~(spec_mm(oartifact)&(~exist_warntypem));}}
+			if (spec_mt(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mt(oartifact);} else {flags.warntypet &= ~(spec_mt(oartifact)&(~exist_warntypet));}}
+			if (spec_mb(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeb |= spec_mb(oartifact);} else {flags.warntypeb &= ~(spec_mb(oartifact)&(~exist_warntypeb));}}
+			if (spec_mg(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeg |= spec_mg(oartifact);} else {flags.warntypeg &= ~(spec_mg(oartifact)&(~exist_warntypeg));}}
+			if (spec_ma(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypea |= spec_ma(oartifact);} else {flags.warntypea &= ~(spec_ma(oartifact)&(~exist_warntypea));}}
+			if (spec_mv(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypev |= spec_mv(oartifact);} else {flags.warntypev &= ~(spec_mv(oartifact)&(~exist_warntypev));}}
 			/* monster symbol */
-			if (spec_s(otmp)) {
+			if (spec_s(oartifact)) {
 				if (on) {
 					*mask |= wp_mask;
-					flags.montype |= (long long int)((long long int)1 << (int)(spec_s(otmp))); //spec_s(otmp);
+					flags.montype |= (long long int)((long long int)1 << (int)(spec_s(oartifact))); //spec_s(oartifact);
 				}
 				else {
-					flags.montype &= ~((long long int)((long long int)1 << (int)(spec_s(otmp)))&(~exist_montype));
+					flags.montype &= ~((long long int)((long long int)1 << (int)(spec_s(oartifact)))&(~exist_montype));
 				}
 			}
 			/* update vision */
@@ -1693,10 +1703,10 @@ struct monst *mtmp;
 
 /* return the MM flags of monster that an artifact's special attacks apply against */
 long
-spec_mm(otmp)
-struct obj *otmp;
+spec_mm(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsm)
 		return artifact->mflagsm;
 	return 0L;
@@ -1704,10 +1714,10 @@ struct obj *otmp;
 
 /* return the MT flags of monster that an artifact's special attacks apply against */
 long
-spec_mt(otmp)
-struct obj *otmp;
+spec_mt(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagst)
 		return artifact->mflagst;
 	return 0L;
@@ -1715,10 +1725,10 @@ struct obj *otmp;
 
 /* return the MB flags of monster that an artifact's special attacks apply against */
 long
-spec_mb(otmp)
-struct obj *otmp;
+spec_mb(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsb)
 		return artifact->mflagsb;
 	return 0L;
@@ -1726,10 +1736,10 @@ struct obj *otmp;
 
 /* return the MG flags of monster that an artifact's special attacks apply against */
 long
-spec_mg(otmp)
-struct obj *otmp;
+spec_mg(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsg)
 		return artifact->mflagsg;
 	return 0L;
@@ -1737,10 +1747,10 @@ struct obj *otmp;
 
 /* return the MA flags of monster that an artifact's special attacks apply against */
 long
-spec_ma(otmp)
-struct obj *otmp;
+spec_ma(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsa)
 		return artifact->mflagsa;
 	return 0L;
@@ -1748,10 +1758,10 @@ struct obj *otmp;
 
 /* return the MV flags of monster that an artifact's special attacks apply against */
 long
-spec_mv(otmp)
-struct obj *otmp;
+spec_mv(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsv)
 		return artifact->mflagsv;
 	return 0L;
@@ -1759,10 +1769,10 @@ struct obj *otmp;
 
 /* return the S number of monster that an artifact's special attacks apply against */
 long
-spec_s(otmp)
-struct obj *otmp;
+spec_s(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mtype)
 		return artifact->mtype;
 	return 0L;
