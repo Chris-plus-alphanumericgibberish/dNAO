@@ -35,3 +35,6 @@ dat/rumors
 dat/dungeon
 dat/dungeon.pdf
 dat/*.lev
+
+.DS_STORE
+dnethackdir

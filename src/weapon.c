@@ -448,7 +448,14 @@ int otyp;
 	case DROVEN_BOLT:			add(1); break;
 	case TRIDENT:				if(large){plus(2,4);} else {add(1);} break;
 	case BATTLE_AXE:			if(large){plus(2,4);} else {pls(4);} break;
-	case VIBROBLADE:			if(chrgd){ocn++;flat+=ocd/2;} break;
+	case VIBROBLADE:			
+	case WHITE_VIBROSWORD:
+	case GOLD_BLADED_VIBROSWORD:
+	case WHITE_VIBROZANBATO:
+	case GOLD_BLADED_VIBROZANBATO:
+	case WHITE_VIBROSPEAR:
+	case GOLD_BLADED_VIBROSPEAR:
+								if(chrgd){ocn++;flat+=ocd/2;} break;
 	case MIRRORBLADE:			break;	// external special case: depends on defender's weapon
 	case RAPIER:				break;	// external special case: Silver Starlight vs plants
 	case RAKUYO:				break;	// external special case: wielded without twoweaponing
@@ -461,7 +468,9 @@ int otyp;
 	case PARTISAN:				if(large){add(1);} else {;} break;
 	case RANSEUR:				pls(4); break;
 	case SPETUM:				if(large){pls(6);} else {add(1);} break;
-	case FORCE_PIKE:			if(chrgd){ocn+=2;flat+=ocd;} break;
+	case FORCE_PIKE:			
+	case RED_EYED_VIBROSWORD:
+								if(chrgd){ocn+=2;flat+=ocd;} break;
 	case HALBERD:				if(large){pls(6);} else {;} break;
 	case BARDICHE:				if(large){plus(2,4);} else {pls(4);} break;
 	case VOULGE:				pls(4); break;
@@ -750,7 +759,7 @@ int spec;
 				if (!Shock_resistance){
 					tmp += d(6, 6);
 				}
-				if (!EShock_resistance){
+				if (!InvShock_resistance){
 					if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
 					if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
 				}
@@ -782,7 +791,7 @@ int spec;
 				if (!Shock_resistance){
 					tmp += d(2, 6);
 				}
-				if (!EShock_resistance){
+				if (!InvShock_resistance){
 					if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
 					if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
 				}
@@ -791,8 +800,7 @@ int spec;
 					make_blinded((long)d(1, 50), FALSE);
 					if (!Blind) Your1(vision_clears);
 				}
-			}
-			else if (mon){
+			} else if (mon){
 				if (!resists_elec(mon)){
 					tmp += d(2, 6); //wand of lightning
 					if (!rn2(3)) (void)destroy_mitem(mon, WAND_CLASS, AD_ELEC);
@@ -837,7 +845,14 @@ int spec;
 		}
 		break;
 	case VIBROBLADE:
+	case WHITE_VIBROSWORD:
+	case GOLD_BLADED_VIBROSWORD:
+	case RED_EYED_VIBROSWORD:
+	case WHITE_VIBROZANBATO:
+	case GOLD_BLADED_VIBROZANBATO:
 	case FORCE_PIKE:
+	case WHITE_VIBROSPEAR:
+	case GOLD_BLADED_VIBROSPEAR:
 		// drain charge on future-tech powered weapons
 		if (otmp->ovar1)
 			otmp->ovar1--;
@@ -1089,7 +1104,7 @@ int spec;
 					if(species_resists_cold(&youmonst)) bonus += 1.5*(rnd(6) + otmp->spe);
 					else bonus += rnd(6) + otmp->spe;
 				}
-				if(!EFire_resistance){
+				if(!InvFire_resistance){
 					if (!rn2(3)) destroy_item(SCROLL_CLASS, AD_FIRE);
 					if (!rn2(3)) destroy_item(SPBOOK_CLASS, AD_FIRE);
 					if (!rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
@@ -1099,7 +1114,7 @@ int spec;
 					if(species_resists_fire(&youmonst)) bonus += 1.5*(rnd(6) + otmp->spe);
 					else bonus += rnd(6) + otmp->spe;
 				}
-				if(!ECold_resistance){
+				if(!InvCold_resistance){
 					if (!rn2(3)) destroy_item(POTION_CLASS, AD_COLD);
 				}
 			} else if(otmp->otyp == SUNROD && otmp->lamplit){
@@ -1108,11 +1123,11 @@ int spec;
 						bonus += 1.5*(rnd(6) + otmp->spe);
 					else bonus += rnd(6) + otmp->spe;
 				}
-				if(!EShock_resistance){
+				if(!InvShock_resistance){
 					if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
 					if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
 				}
-				if(!EAcid_resistance){
+				if(!InvAcid_resistance){
 					if (rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
 				}
 				if (!resists_blnd(&youmonst)) {
@@ -1649,9 +1664,16 @@ register struct monst *mtmp;
 static const NEARDATA short hwep[] = {
 	  CORPSE,  /* cockatrice corpse */
 	  KAMEREL_VAJRA /*quite a lot plus elect plus blindness*/,
+	  GOLD_BLADED_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
+	  WHITE_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
 	  DOUBLE_LIGHTSABER/*6d8*/, 
+	  RED_EYED_VIBROSWORD,/*2d8+8/2d12+12*/
 	  BEAMSWORD/*3d10*/,
 	  FORCE_PIKE,/*2d6+6/2d8+8*/
+	  GOLD_BLADED_VIBROSWORD,/*2d8+4/2d12+6*/
+	  WHITE_VIBROSWORD,/*2d8+4/2d12+6*/
+	  GOLD_BLADED_VIBROSPEAR,/*2d6+3/2d8+3*/
+	  WHITE_VIBROSPEAR,/*2d6+3/2d8+3*/
 	  LIGHTSABER/*3d8*/,
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
 	  HEAVY_IRON_BALL,/*1d25/1d25*/
@@ -2256,6 +2278,8 @@ struct obj *otmp;
 		) && !uarms && !u.twoweap
 		) bonus *= 2;
 		else if(otmp->otyp == KATANA && !uarms && !u.twoweap)
+			bonus *= 1.5;
+		else if(is_vibrosword(otmp) && !uarms && !u.twoweap)
 			bonus *= 1.5;
 		
 		if(otmp==uwep 

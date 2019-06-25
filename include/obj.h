@@ -200,27 +200,29 @@ struct obj {
 #define OPROP_AXIO		0x0000000000000080
 #define OPROP_HOLY		0x0000000000000100
 #define OPROP_UNHY		0x0000000000000200
-#define OPROP_DEF_MASK	0x00000000000003ff
-#define OPROP_FIREW		0x0000000000000400
-#define OPROP_COLDW		0x0000000000000800
-#define OPROP_ELECW		0x0000000000001000
-#define OPROP_ACIDW		0x0000000000002000
-#define OPROP_MAGCW		0x0000000000004000
-#define OPROP_ANARW		0x0000000000008000
-#define OPROP_CONCW		0x0000000000010000
-#define OPROP_AXIOW		0x0000000000020000
-#define OPROP_LESSW		0x0000000000040000
-#define OPROP_HOLYW		0x0000000000080000
-#define OPROP_UNHYW		0x0000000000100000
-#define OPROP_WATRW		0x0000000000200000
-#define OPROP_DEEPW		0x0000000000400000
-#define OPROP_PSIOW		0x0000000000800000
-#define OPROP_VORPW		0x0000000001000000
-#define OPROP_MORGW		0x0000000002000000
-#define OPROP_FLAYW		0x0000000004000000
+#define OPROP_REFL		0x0000000000000400
+#define OPROP_DEF_MASK	0x00000000ffffffff
+#define OPROP_FLAYW		0x0000000100000000
+#define OPROP_PHSEW		0x0000000200000000
+#define OPROP_FIREW		0x0000000400000000
+#define OPROP_COLDW		0x0000000800000000
+#define OPROP_ELECW		0x0000001000000000
+#define OPROP_ACIDW		0x0000002000000000
+#define OPROP_MAGCW		0x0000004000000000
+#define OPROP_ANARW		0x0000008000000000
+#define OPROP_CONCW		0x0000010000000000
+#define OPROP_AXIOW		0x0000020000000000
+#define OPROP_LESSW		0x0000040000000000
+#define OPROP_HOLYW		0x0000080000000000
+#define OPROP_UNHYW		0x0000100000000000
+#define OPROP_WATRW		0x0000200000000000
+#define OPROP_DEEPW		0x0000400000000000
+#define OPROP_PSIOW		0x0000800000000000
+#define OPROP_VORPW		0x0001000000000000
+#define OPROP_MORGW		0x0002000000000000
 #define OPROP_W_MASK	~OPROP_DEF_MASK
-	
-	unsigned oeaten;	/* nutrition left in food, if partly eaten */
+
+  unsigned oeaten;	/* nutrition left in food, if partly eaten */
 	long age;		/* creation date */
 
 	uchar onamelth;		/* length of name (following oxlth) */
@@ -487,6 +489,30 @@ struct weapon_dice {
 							 (otmp)->otyp == KAMEREL_VAJRA || \
 							 (otmp)->otyp == BEAMSWORD || \
 							 (otmp)->otyp == DOUBLE_LIGHTSABER)
+#define is_vibroweapon(otmp) ((otmp)->otyp == VIBROBLADE || \
+							  is_vibrosword(otmp) || \
+							  is_vibropike(otmp))
+#define is_vibrosword(otmp)	 ((otmp)->otyp == WHITE_VIBROSWORD || \
+						  (otmp)->otyp == GOLD_BLADED_VIBROSWORD || \
+						  (otmp)->otyp == WHITE_VIBROZANBATO || \
+						  (otmp)->otyp == GOLD_BLADED_VIBROZANBATO || \
+						  (otmp)->otyp == RED_EYED_VIBROSWORD)
+#define is_vibropike(otmp)	 ((otmp)->otyp ==  WHITE_VIBROSPEAR || \
+						  (otmp)->otyp == GOLD_BLADED_VIBROSPEAR || \
+						  (otmp)->otyp == FORCE_PIKE)
+#define fast_weapon(otmp)	 ((otmp)->otyp == WHITE_VIBROSWORD || \
+						  (otmp)->otyp == GOLD_BLADED_VIBROSWORD || \
+						  (otmp)->otyp == WHITE_VIBROZANBATO || \
+						  (otmp)->otyp == GOLD_BLADED_VIBROZANBATO || \
+						  (otmp)->otyp ==  WHITE_VIBROSPEAR || \
+						  (otmp)->otyp == GOLD_BLADED_VIBROSPEAR)
+#define pure_weapon(otmp)	 ((otmp)->otyp == WHITE_VIBROSWORD || \
+						  (otmp)->otyp == WHITE_VIBROZANBATO || \
+						  (otmp)->otyp ==  WHITE_VIBROSPEAR)
+#define dark_weapon(otmp)	 ((otmp)->otyp == GOLD_BLADED_VIBROSWORD || \
+						  (otmp)->otyp == GOLD_BLADED_VIBROZANBATO || \
+						  (otmp)->otyp == GOLD_BLADED_VIBROSPEAR)
+#define spec_prop_otyp(otmp)	(pure_weapon(otmp) || dark_weapon(otmp))
 #define is_multigen(otmp)	((otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill >= -P_SHURIKEN && \
 			 objects[otmp->otyp].oc_skill <= -P_BOW))

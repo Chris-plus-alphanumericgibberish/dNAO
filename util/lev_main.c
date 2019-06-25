@@ -135,6 +135,7 @@ static struct {
 	{ "magic",	MAGIC_TRAP },
 	{ "anti magic",	ANTI_MAGIC },
 	{ "polymorph",	POLY_TRAP },
+	{ "essence",	VIVI_TRAP },
 	{ 0, 0 }
 };
 
@@ -524,6 +525,7 @@ char c;
 		  case 'W'  : return(WATER);
 		  case 'w'  : return(PUDDLE);
 		  case 'T'	: return (TREE);
+		  case 't'	: return (DEADTREE);
 		  case 'F'	: return (IRONBARS);	/* Fe = iron */
 	    }
 	return(INVALID_TYPE);

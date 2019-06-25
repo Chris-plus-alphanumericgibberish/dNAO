@@ -1218,7 +1218,7 @@ do_look(quick)
 	    }
 	}
 
-#define is_cmap_trap(i) ((i) >= S_arrow_trap && (i) <= S_polymorph_trap)
+#define is_cmap_trap(i) ((i) >= S_arrow_trap && (i) <= S_essence_trap)
 #define is_cmap_drawbridge(i) ((i) >= S_vodbridge && (i) <= S_hcdbridge)
 
 	/* Now check for graphics symbols */
@@ -2135,70 +2135,11 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			struct attack alt_attk;
 			int sum[NATTK];
 			int i;
-			boolean derundspec = FALSE;
 
 			for (i = 0; i < NATTK; i++) {
 				sum[i] = 1;
-				mattk = getmattk(ptr, i, sum, &alt_attk);
+				mattk = getmattk(mtmp, ptr, i, sum, &alt_attk);
 
-				if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
-					if (mattk->aatyp == AT_SPIT
-						|| mattk->aatyp == AT_BREA
-						|| mattk->aatyp == AT_GAZE
-						|| mattk->aatyp == AT_ARRW
-						|| mattk->aatyp == AT_MMGC
-						|| mattk->aatyp == AT_TNKR
-						|| mattk->aatyp == AT_SHDW
-						|| mattk->aatyp == AT_BEAM
-						|| mattk->aatyp == AT_MAGC
-						|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
-						|| (i == 0 &&
-						(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) &&
-						mattk->adtyp == AD_PHYS &&
-						mattk->damn*mattk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mtmp->data->msize * 2, 4) / 2
-						)
-						|| (!derundspec && mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
-						|| (!derundspec && i == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
-						){
-						if (i == 0){
-							alt_attk.aatyp = AT_CLAW;
-							alt_attk.adtyp = AD_PHYS;
-							alt_attk.damn = mtmp->m_lev / 10 + 1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
-							alt_attk.damd = max(mtmp->data->msize * 2, 4);
-							mattk = &alt_attk;
-						}
-						else if (!derundspec && mtmp->mfaction == SKELIFIED){
-							derundspec = TRUE;
-							alt_attk.aatyp = AT_TUCH;
-							alt_attk.adtyp = AD_SLOW;
-							alt_attk.damn = 1;
-							alt_attk.damd = max(mtmp->data->msize * 2, 4);
-							mattk = &alt_attk;
-						}
-						else if (!derundspec && mtmp->mfaction == CRYSTALFIED){
-							derundspec = TRUE;
-							alt_attk.aatyp = AT_TUCH;
-							alt_attk.adtyp = AD_ECLD;
-							alt_attk.damn = min(10, mtmp->m_lev / 3);
-							alt_attk.damd = 8;
-							mattk = &alt_attk;
-						}
-						else continue;
-					}
-				}
-				if (mtmp->mfaction == FRACTURED){
-					if ((!derundspec &&
-						mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
-						|| (mattk->aatyp == AT_CLAW && (mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE))
-						){
-						derundspec = TRUE;
-						alt_attk.aatyp = AT_CLAW;
-						alt_attk.adtyp = AD_GLSS;
-						alt_attk.damn = max(mtmp->m_lev / 10 + 1, mattk->damn);
-						alt_attk.damd = max(mtmp->data->msize * 2, max(mattk->damd, 4));
-						mattk = &alt_attk;
-					}
-				}
 				main_temp_buf[0] = '\0';
 				get_description_of_attack(mattk, temp_buf);
 				if (temp_buf[0] == '\0') {
@@ -2209,7 +2150,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 						strcat(description, "none");
 						strcat(description, "\n");
 					}
-					break;
+					continue;
 				}
 #ifndef USE_TILES
 				strcat(main_temp_buf, "    ");

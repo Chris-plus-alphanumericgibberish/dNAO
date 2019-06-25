@@ -13,7 +13,6 @@ STATIC_DCL int FDECL(untrap_prob, (struct trap *ttmp));
 STATIC_DCL void FDECL(cnv_trap_obj, (int, int, struct trap *));
 STATIC_DCL void FDECL(move_into_trap, (struct trap *));
 STATIC_DCL int FDECL(try_disarm, (struct trap *,BOOLEAN_P));
-STATIC_DCL void FDECL(reward_untrap, (struct trap *, struct monst *));
 STATIC_DCL int FDECL(disarm_holdingtrap, (struct trap *));
 STATIC_DCL int FDECL(disarm_rust_trap, (struct trap *));
 STATIC_DCL int FDECL(disarm_fire_trap, (struct trap *));
@@ -774,9 +773,21 @@ unsigned trflags;
 			if(is_hard(uarmh)) {
 			    pline("Fortunately, you are wearing a hard helmet.");
 			    dmg = 2;
-			} else if (flags.verbose) {
-			    Your("%s does not protect you.", xname(uarmh));
-			}
+				} else if (umechanoid) {
+					pline("Fortunately, you have a very hard head!");
+					dmg = 2;
+				} else if (thick_skinned(youracedata)) {
+					pline("Fortunately, you have a thick head!");
+					dmg = 2;
+				} else if (flags.verbose) {
+				    Your("%s does not protect you.", xname(uarmh));
+				}
+			} else if (umechanoid) {
+				pline("Fortunately, you have a very hard head!");
+				dmg = 2;
+			} else if (thick_skinned(youracedata)) {
+				pline("Fortunately, you have a thick head!");
+				dmg = 2;
 		    }
 
 		    if (!Blind) otmp->dknown = 1;
@@ -802,6 +813,16 @@ unsigned trflags;
 		    pline("A board beneath you squeaks loudly.");
 		    wake_nearby_noisy();
 		}
+		break;
+
+	    case VIVI_TRAP:
+			if(trap->tseen){
+				You("shove through the delicate equipment, ruining it!");
+			} else {
+				You("blunder into some delicate equipment, ruining it!");
+			}
+			deltrap(trap);
+			newsym(u.ux,u.uy);	/* get rid of trap symbol */
 		break;
 
 	    case BEAR_TRAP:
@@ -2304,6 +2325,13 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			}
 			break;
 
+	    case VIVI_TRAP:
+			if (in_sight)
+				pline("%s smashes through the delicate equipment!",
+					  Monnam(mtmp));
+			deltrap(trap);
+			newsym(mtmp->mx, mtmp->my);
+		break;
 	    case STATUE_TRAP:
 			(void) activate_statue_trap(trap, trap->tx, trap->ty, FALSE);
 		break;
@@ -2761,7 +2789,7 @@ struct obj *box;	/* null for floor trap */
 	
 	burn_away_slime();
 
-	if (burnarmor(&youmonst) || (rn2(3) && !EFire_resistance)) {
+	if (burnarmor(&youmonst) || (rn2(3) && !InvFire_resistance)) {
 	    destroy_item(SCROLL_CLASS, AD_FIRE);
 	    destroy_item(SPBOOK_CLASS, AD_FIRE);
 	    destroy_item(POTION_CLASS, AD_FIRE);
@@ -3716,26 +3744,37 @@ boolean force_failure;
 	return 2;
 }
 
-STATIC_OVL void
+void
 reward_untrap(ttmp, mtmp)
 struct trap *ttmp;
 struct monst *mtmp;
 {
 	if (!ttmp->madeby_u) {
-	    if (rnl(100) < 80 && !mtmp->mpeaceful &&
-		    !mtmp->msleeping && !mtmp->mfrozen &&
-		    !mindless_mon(mtmp) &&
-		    mtmp->data->mlet != S_HUMAN) {
-		mtmp->mpeaceful = 1;
-		set_malign(mtmp);	/* reset alignment */
-		pline("%s is grateful.", Monnam(mtmp));
-	    }
-	    /* Helping someone out of a trap is a nice thing to do,
-	     * A lawful may be rewarded, but not too often.  */
-	    if (!rn2(3) && rnl(100) < 16 && u.ualign.type == A_LAWFUL) {
-			adjalign(1);
-			You_feel("that you did the right thing.");
-	    }
+		if(ttmp->ttyp == VIVI_TRAP && !mindless_mon(mtmp)){
+			struct monst *newmon;
+			if(canspotmon(mtmp))
+				pline("%s is incredibly grateful!", Monnam(mtmp));
+			newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+			if(newmon){
+				mtmp = newmon;
+				newsym(mtmp->mx, mtmp->my);
+			}
+		} else {
+		    if (rnl(100) < 80 && !mtmp->mpeaceful &&
+			    !mtmp->msleeping && !mtmp->mfrozen &&
+			    !mindless_mon(mtmp) &&
+			    mtmp->data->mlet != S_HUMAN) {
+			mtmp->mpeaceful = 1;
+			set_malign(mtmp);	/* reset alignment */
+			pline("%s is grateful.", Monnam(mtmp));
+		    }
+		    /* Helping someone out of a trap is a nice thing to do,
+		     * A lawful may be rewarded, but not too often.  */
+		    if (!rn2(3) && rnl(100) < 16 && u.ualign.type == A_LAWFUL) {
+				adjalign(1);
+				You_feel("that you did the right thing.");
+		    }
+		}
 	}
 }
 
@@ -4174,6 +4213,29 @@ boolean force;
 				    return 0;
 				}
 				return help_monster_out(mtmp, ttmp);
+			case VIVI_TRAP:
+				if((mtmp = m_at(x,y))){
+					if(Role_if(PM_HEALER) || u.sealsActive&SEAL_BUER){
+						You("free %s from the delicate equipment that imprisons %s, carefully tending to %s wounds as you do.", mon_nam(mtmp), himherit(mtmp), hisherits(mtmp));
+						mtmp->mtrapped = 0;
+						reward_untrap(ttmp, mtmp);
+					} else {
+						You("try to free %s from the delicate equipment that imprisons %s.", mon_nam(mtmp), himherit(mtmp));
+						pline("Unfortunately, that equipment was the only thing keeping %s %s.", himherit(mtmp), nonliving_mon(mtmp) ? "intact" : "alive");
+						// xkilled(mtmp,1); //Breaks pacifist
+						mondied(mtmp);
+					}
+					if(Is_illregrd(&u.uz)){
+						u.uevent.uaxus_foe = 1;
+						pline("An alarm sounds!");
+						aggravate();
+					}
+				} else {
+					You("smash the delicate equipment.");
+				}
+				deltrap(ttmp);
+				newsym(u.ux + u.dx, u.uy + u.dy);
+				return 1;
 			case TELEP_TRAP:
 			case LEVEL_TELEP:
 			case MAGIC_TRAP:
@@ -4445,7 +4507,7 @@ boolean disarm;
 			} else {
 			    dmg = d(4, 4);
 			}
-			if(!EShock_resistance){
+			if(!InvShock_resistance){
 				destroy_item(RING_CLASS, AD_ELEC);
 				destroy_item(WAND_CLASS, AD_ELEC);
 			}
@@ -4537,6 +4599,7 @@ register struct trap *ttmp;
 		     (ttmp->ttyp == FIRE_TRAP) ||
 		     (ttmp->ttyp == PIT) ||
 		     (ttmp->ttyp == SPIKED_PIT) ||
+		     (ttmp->ttyp == VIVI_TRAP) ||
 		     (ttmp->ttyp == HOLE) ||
 		     (ttmp->ttyp == TRAPDOOR) ||
 		     (ttmp->ttyp == TELEP_TRAP) ||
@@ -4551,6 +4614,9 @@ register struct trap *ttmp;
 		u.utraptype = 0;
 	    } else if ((mtmp = m_at(ttmp->tx, ttmp->ty)) != 0) {
 		mtmp->mtrapped = 0;
+		if(ttmp->ttyp == VIVI_TRAP){
+			mondied(mtmp);
+		}
 	    }
 	    deltrap(ttmp);
 	    return TRUE;
@@ -4728,7 +4794,7 @@ burn_stuff:
 	(void) Boots_off();
 	useup(obj);
     }
-	if(!(Wwalking || EFire_resistance)){
+	if(!(Wwalking || InvFire_resistance)){
 		destroy_item(SCROLL_CLASS, AD_FIRE);
 		destroy_item(SPBOOK_CLASS, AD_FIRE);
 		destroy_item(POTION_CLASS, AD_FIRE);

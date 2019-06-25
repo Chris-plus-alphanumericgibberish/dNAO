@@ -132,6 +132,17 @@ static const char *embracedPrisoners[] = {
 	"Why?"
 };
 
+static const char *embracedAlider[] = {
+	"Mother, help me!",
+	"I can't control my arms!",
+	"I can't stop!  Look out!!",
+	"Cut me lose, please!",
+	"It's so dark!",
+	"Free me!",
+	"Kill me!  Please, just kill me...",
+	"Why?"
+};
+
 static const char *agonePrisoner[] = {
 	"Who am I?",
 	"Where am I?",
@@ -153,6 +164,18 @@ static const char *thrallPrisoners[] = {
 	"You're suffering.",
 	"Penumbra hangs over all.",
 	"It's easier this way."
+};
+
+static const char *parasitizedDroid[] = {
+	">Motor Cortex Compromised<",
+	">Cover Opened, Warranty Void<",
+	">System Error<",
+	"Run!",
+	"I can't control my limbs!",
+	"I can't stop!  Look out!!",
+	"Free me!",
+	"You must destroy me!",
+	"Why!?"
 };
 
 /* this easily could be a macro, but it might overtax dumb compilers */
@@ -629,7 +652,7 @@ register struct monst *mtmp;
 
     /* presumably nearness and soundok checks have already been made */
     if (!is_silent_mon(mtmp) && mtmp->data->msound <= MS_ANIMAL)
-	(void) domonnoise(mtmp, FALSE);
+	(void) domonnoise(mtmp, TRUE);
     else if (mtmp->data->msound >= MS_HUMANOID) {
 	if (!canspotmon(mtmp))
 	    map_invisible(mtmp->mx, mtmp->my);
@@ -648,6 +671,14 @@ boolean chatting;
 	char verbuf[BUFSZ];
 	char class_list[MAXOCLASSES+2];
 
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
+		if(chatting && canspotmon(mtmp))
+			pline("%s is sleeping peacefully; presumably the doing of the delicate equipment that displays %s vivisected form.", 
+				Monnam(mtmp), (is_animal(mtmp->data) || mindless_mon(mtmp) ? "its" : "their")
+			);
+		return 0;
+	}
+	
     /* presumably nearness and sleep checks have already been made */
 	if (!flags.soundok) return(0);
 	if (is_silent_mon(mtmp)){
@@ -1155,7 +1186,7 @@ asGuardian:
 		struct trap *ttmp;
 		int ix, iy, i;
 		boolean inrange = FALSE;
-		if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) break;
+		if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) break;
 		if((mtmp->data == &mons[PM_INTONER] && !rn2(5)) || mtmp->data == &mons[PM_BLACK_FLOWER]){
 			if (!canspotmon(mtmp))
 				map_invisible(mtmp->mx, mtmp->my);
@@ -1635,16 +1666,18 @@ asGuardian:
 			verbl_msg = woePrisoners[rn2(SIZE(woePrisoners))];
 		} else if (ptr == &mons[PM_EMBRACED_DROWESS]) {
 			verbl_msg = embracedPrisoners[rn2(SIZE(embracedPrisoners))];
-	    } else if (mtmp->mtame) {
+	    } else if(ptr == &mons[PM_A_GONE]) verbl_msg = agonePrisoner[rn2(SIZE(agonePrisoner))];
+	    else if(ptr == &mons[PM_MINDLESS_THRALL]) verbl_msg = thrallPrisoners[rn2(SIZE(thrallPrisoners))];
+	    else if(ptr == &mons[PM_PARASITIZED_ANDROID] || ptr == &mons[PM_PARASITIZED_GYNOID]) verbl_msg = parasitizedDroid[rn2(SIZE(parasitizedDroid))];
+	    else if (mtmp->mtame) {
 			verbl_msg = "Sorry, I'm all out of wishes.";
 	    } else if (mtmp->mpeaceful) {
 			if (ptr == &mons[PM_MARID])
 				pline_msg = "gurgles.";
 			else
 				verbl_msg = "I'm free!";
-	    } else if(ptr == &mons[PM_A_GONE]) verbl_msg = agonePrisoner[rn2(SIZE(agonePrisoner))];
-	    else if(ptr == &mons[PM_MINDLESS_THRALL]) verbl_msg = thrallPrisoners[rn2(SIZE(thrallPrisoners))];
-	    else if(ptr != &mons[PM_PRISONER]) verbl_msg = "This will teach you not to disturb me!";
+		} else if(ptr != &mons[PM_PRISONER]) verbl_msg = "This will teach you not to disturb me!";
+		else verbl_msg = "I'm free!";
 	    break;
 	case MS_BOAST:	/* giants */
 	    if (!mtmp->mpeaceful) {
@@ -2281,7 +2314,7 @@ int dz;
 
 #ifdef STEED
     if (u.usteed && u.dz > 0)
-	return (domonnoise(u.usteed, FALSE));
+	return (domonnoise(u.usteed, TRUE));
 #endif
 	if (u.dz) {
 		struct engr *ep = get_head_engr();
@@ -2385,6 +2418,14 @@ int dz;
 		mtmp = m_at(tx, ty);
 	}
 	
+	if(mtmp && mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
+		if(canspotmon(mtmp))
+			pline("%s is sleeping peacefully; presumably the doing of the delicate equipment that displays %s vivisected form.", 
+				Monnam(mtmp), (is_animal(mtmp->data) || mindless_mon(mtmp) ? "its" : hisherits(mtmp))
+			);
+		return 0;
+	}
+	
     if (!mtmp || mtmp->mundetected ||
 		mtmp->m_ap_type == M_AP_FURNITURE ||
 		mtmp->m_ap_type == M_AP_OBJECT) return 0;
@@ -2454,7 +2495,7 @@ int dz;
         return 0;
     }
 #endif /* CONVICT */
-    return domonnoise(mtmp, FALSE);
+    return domonnoise(mtmp, TRUE);
 }
 
 //definition of externs in you.h

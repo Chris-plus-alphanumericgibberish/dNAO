@@ -23,7 +23,7 @@ extern boolean m_using;
 STATIC_DCL void FDECL(polyuse, (struct obj*, int, int));
 STATIC_DCL void FDECL(create_polymon, (struct obj *, int));
 STATIC_DCL boolean FDECL(zap_updown, (struct obj *));
-STATIC_DCL int FDECL(zhitm, (struct monst *,int,int,boolean,int,int,struct obj **));
+STATIC_DCL int FDECL(zhitm, (struct monst *,int,int,int,int,int,struct obj **));
 STATIC_DCL void FDECL(zhitu, (int,int,int,int,const char *,XCHAR_P,XCHAR_P));
 #ifdef STEED
 STATIC_DCL boolean FDECL(zap_steed, (struct obj *));
@@ -2339,7 +2339,7 @@ boolean ordinary;
 				You("zap yourself, but seem unharmed.");
 				ugolemeffects(AD_ELEC, d(12,6));
 		    }
-			if(!EShock_resistance){
+			if(!InvShock_resistance){
 				destroy_item(WAND_CLASS, AD_ELEC);
 				destroy_item(RING_CLASS, AD_ELEC);
 			}
@@ -2365,7 +2365,7 @@ boolean ordinary;
 				pline("You've set yourself afire!");
 				damage = d(12,6);
 		    }
-			if(!EFire_resistance){
+			if(!InvFire_resistance){
 				destroy_item(SCROLL_CLASS, AD_FIRE);
 				destroy_item(POTION_CLASS, AD_FIRE);
 				destroy_item(SPBOOK_CLASS, AD_FIRE);
@@ -2387,7 +2387,7 @@ boolean ordinary;
 				You("imitate a popsicle!");
 				damage = d(12,6);
 		    }
-			if(!ECold_resistance){
+			if(!InvCold_resistance){
 				destroy_item(POTION_CLASS, AD_COLD);
 			}
 		    break;
@@ -3199,7 +3199,7 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 
 	    typ = levl[bhitpos.x][bhitpos.y].typ;
 	    if (typ == IRONBARS){
-		 if((obj->otyp==SPE_FORCE_BOLT || obj->otyp==WAN_STRIKING) && !Is_illregrd(&u.uz)){
+		 if((obj->otyp==SPE_FORCE_BOLT || obj->otyp==WAN_STRIKING)){
 			char numbars;
 			struct obj *obj;
 			You_hear("a sharp crack!");
@@ -3207,7 +3207,10 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 			for(numbars = d(2,4)-1; numbars > 0; numbars--){
 				obj = mksobj_at(BAR, bhitpos.x, bhitpos.y, FALSE, FALSE);
 			    obj->spe = 0;
+				if(Is_illregrd(&u.uz))
+					obj->obj_material = METAL;
 			    obj->cursed = obj->blessed = FALSE;
+				fix_object(obj);
 			}
 		    newsym(bhitpos.x, bhitpos.y);
 		 }
@@ -3451,7 +3454,7 @@ STATIC_OVL int
 zhitm(mon, adtyp, olet, yours, nd, flat, ootmp)			/* returns damage to mon */
 struct monst *mon;
 int adtyp, olet;
-boolean yours;
+int yours;
 int nd, flat;
 struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 {
@@ -3723,7 +3726,7 @@ xchar sx, sy;
 			else dam = flat;
 			if(Reflecting) dam = dam/2+1;
 		}
-		if(!EFire_resistance){
+		if(!InvFire_resistance){
 			if (flags.drgn_brth || !rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
 			if (flags.drgn_brth || !rn2(3)) destroy_item(SCROLL_CLASS, AD_FIRE);
 			if (flags.drgn_brth || !rn2(5)) destroy_item(SPBOOK_CLASS, AD_FIRE);
@@ -3741,7 +3744,7 @@ xchar sx, sy;
 			else dam = flat;
 			if(Reflecting) dam = dam/2+1;
 	    }
-		if(!ECold_resistance){
+		if(!InvCold_resistance){
 			if (flags.drgn_brth || !rn2(3)) destroy_item(POTION_CLASS, AD_COLD);
 			if (flags.drgn_brth) destroy_item(POTION_CLASS, AD_COLD);
 		}
@@ -3879,7 +3882,7 @@ xchar sx, sy;
 			exercise(A_CON, FALSE);
 			if(Reflecting) dam = dam/2+1;
 	    }
-		if(!EShock_resistance){
+		if(!InvShock_resistance){
 			if (flags.drgn_brth || !rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
 			if (flags.drgn_brth || !rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
 		}
@@ -4045,7 +4048,7 @@ void
 buzz(adtyp, olet, yours, nd, sx, sy, dx, dy, range, flat)
 int adtyp, olet;
 int nd;
-boolean yours;
+int yours;
 xchar sx,sy;
 int dx, dy, range, flat;
 {
@@ -4520,7 +4523,7 @@ int
 zap_over_floor(x, y, adtyp, olet, yours, shopdamage)
 xchar x, y;
 int adtyp, olet;
-boolean yours;
+int yours;
 boolean *shopdamage;
 {
 	struct monst *mon;

@@ -118,6 +118,7 @@ STATIC_PTR int NDECL(doprev_message);
 STATIC_PTR int NDECL(timed_occupation);
 STATIC_PTR int NDECL(doextcmd);
 STATIC_PTR int NDECL(domonability);
+STATIC_PTR int NDECL(domountattk);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
 # ifdef WIZARD
 STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
@@ -544,6 +545,15 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
+	if(uandroid){
+		Sprintf(buf, "Use Android Abilities");
+		any.a_int = MATTK_DROID;	/* must be non-zero */
+		incntlet = 'd';
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		atleastone = TRUE;
+	}
 	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14){
 		Sprintf(buf, "Sing an Elemental into being");
 		any.a_int = MATTK_ELMENTAL;	/* must be non-zero */
@@ -705,6 +715,7 @@ domonability()
 	case MATTK_HIDE: return dohide();
 	case MATTK_MIND: return domindblast();
 	case MATTK_CLOCK: return doclockspeed();
+	case MATTK_DROID: return doandroid();
 	case MATTK_ELMENTAL: return doelementalbreath();
 	case MATTK_DARK: return dodarken();
 	case MATTK_REPL: {
@@ -802,6 +813,43 @@ domonability()
 	return 0;
 }
 
+/* #mount command - order mount to attack */
+STATIC_PTR int
+domountattk()
+{
+#ifdef STEED	
+	struct monst *mtmp;
+	int new_x,new_y;
+	if(!u.usteed){
+		You("don't have a mount.");
+		return 0;
+	}
+	
+	if(P_SKILL(P_RIDING) < P_EXPERT){
+		pline("Only an expert is skilled enough to direct a mount's attacks.");
+		return 0;
+	}
+	
+	if(!getdir("Attack in what direction?")){
+		pline("never mind");
+		return 0;
+	}
+	
+	for(new_x = u.ux+u.dx, new_y = u.uy+u.dy; isok(new_x,new_y); new_x += u.dx, new_y += u.dy){
+		mtmp = m_at(new_x, new_y);
+		if(mtmp && mon_can_see_mon(u.usteed, mtmp) && canspotmon(mtmp)){
+			You("direct your mount to attack %s", mon_nam(mtmp));
+			mattackm(u.usteed, mtmp);
+			return 1;
+		}
+	}
+	pline("Your mount can't find anything to attack!");
+	return 0;
+#else
+	pline("You can't ride anything!");
+#endif
+}
+
 STATIC_OVL int
 use_reach_attack()
 {
@@ -854,7 +902,7 @@ use_reach_attack()
 		
 		find_to_hit_rolls(mtmp, &tmp, &tmpw, &tmpt);
 		
-	    (void) hmonas(mtmp, youmonst.data, tmp, tmpw, tmpt);
+	    (void) hmonas(mtmp, tmp, tmpw, tmpt);
 	} else
 	    /* Now you know that nothing is there... */
 	    pline("%s", nothing_happens);
@@ -2020,6 +2068,10 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(u.ucspeed==SLOW_CLOCKSPEED) you_are("set to low clockspeed");
 		if(u.phasengn) you_are("in phase mode");
 	}
+	if (uandroid){
+		if(u.ucspeed==HIGH_CLOCKSPEED) you_are("set to emergency speed");
+		if(u.phasengn) you_are("in phase mode");
+	}
 	if (u.uhitinc)
 	    you_have(enlght_combatinc("to hit", u.uhitinc, final, buf));
 	if (u.udaminc)
@@ -2043,7 +2095,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		you_are("protected from shape changers");
 	if (Polymorph) you_are("polymorphing");
 	if (Polymorph_control) you_have("polymorph control");
-	if (u.ulycn >= LOW_PM && !uclockwork) {
+	if (u.ulycn >= LOW_PM && !umechanoid) {
 		Strcpy(buf, an(mons[u.ulycn].mname));
 		you_are(buf);
 	}
@@ -2619,6 +2671,10 @@ int final;
 		if(u.ucspeed==SLOW_CLOCKSPEED) dump(youwere, "set to low clockspeed");
 		if(u.phasengn) dump(youwere, "in phase mode");
 	}
+	if (uandroid){
+		if(u.ucspeed==HIGH_CLOCKSPEED) dump(youwere, "set to emergency speed");
+		if(u.phasengn) dump(youwere, "in phase mode");
+	}
 	if (u.uhitinc)
 	    dump(youhad,
 		enlght_combatinc("to hit", u.uhitinc, final, buf));
@@ -2746,6 +2802,10 @@ resistances_enlightenment()
 		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to high speed.");
 		if(u.ucspeed==NORM_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to normal speed.");
 		if(u.ucspeed==SLOW_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to low speed.");
+		if(u.phasengn) putstr(en_win, 0, "Your phase engine is activated.");
+	}
+	if (uandroid){
+		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "You are set to emergency speed.");
 		if(u.phasengn) putstr(en_win, 0, "Your phase engine is activated.");
 	}
 	/*** Resistances to troubles ***/
@@ -4114,6 +4174,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"jump", "jump to a location", dojump, !IFBURIED, AUTOCOMPLETE},
 	{"loot", "loot a box on the floor", doloot, !IFBURIED, AUTOCOMPLETE},
 	{"monster", "use a monster's special ability", domonability, IFBURIED, AUTOCOMPLETE},
+	{"mount", "order mount to attack", domountattk, !IFBURIED, AUTOCOMPLETE},
 	{"name", "name an item or type of object", do_naming_ddocall, IFBURIED, AUTOCOMPLETE},
 	{"nameold", "name an item or type of object (vanilla)", ddocall, IFBURIED},
 	{"offer", "offer a sacrifice to the gods", dosacrifice, !IFBURIED, AUTOCOMPLETE},
@@ -4255,8 +4316,10 @@ init_bind_list(void)
 #endif
 	bind_key('a',    "apply" );
 	bind_key('A',    "takeoffall" );
+	bind_key(C('a'), "mount" );
 	bind_key(M('a'), "adjust" );
 	/*       'b', 'B' : go sw */
+	bind_key('B',    "monster" );
 	bind_key(C('b'),    "monster" );
 	bind_key('c',    "close" );
 	bind_key('C',    "call" );

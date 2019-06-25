@@ -88,7 +88,18 @@ boolean artif;
 	struct obj *otmp;
 
 	otmp = mkobj(let, artif);
+	
+	if(In_quest(&u.uz) && !Role_if(PM_CONVICT) && in_mklev){
+		if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
+		if(otmp->oclass == ARMOR_CLASS){
+			if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+			else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
+			else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+		}
+	}
+	
 	place_object(otmp, x, y);
+	
 	return(otmp);
 }
 
@@ -100,7 +111,18 @@ boolean init, artif;
 	struct obj *otmp;
 
 	otmp = mksobj(otyp, init, artif);
+	
+	if(In_quest(&u.uz) && !Role_if(PM_CONVICT) && in_mklev){
+		if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
+		if(otmp->oclass == ARMOR_CLASS){
+			if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+			else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
+			else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+		}
+	}
+	
 	place_object(otmp, x, y);
+	
 	return(otmp);
 }
 
@@ -443,7 +465,18 @@ boolean artif;
 			otmp->spe = -rne(3);
 		} else	blessorcurse(otmp, 10);
 		
-		if(otmp->otyp == FORCE_PIKE || otmp->otyp == VIBROBLADE){
+		if(otmp->otyp == WHITE_VIBROSWORD
+		 || otmp->otyp == WHITE_VIBROSPEAR
+		 || otmp->otyp == WHITE_VIBROZANBATO
+		)
+			otmp->oproperties |= OPROP_HOLYW;
+		if(otmp->otyp == GOLD_BLADED_VIBROSWORD
+		 || otmp->otyp == GOLD_BLADED_VIBROSPEAR
+		 || otmp->otyp == GOLD_BLADED_VIBROZANBATO
+		)
+			otmp->oproperties |= OPROP_UNHYW;
+		
+		if(is_vibroweapon(otmp)){
 			otmp->ovar1 = 80L + rnd(20);
 		}
 		else if(otmp->otyp == RAYGUN){
@@ -1012,7 +1045,7 @@ boolean artif;
 		}
 		/* CM: gnomish hats have candles */
 		if (otmp->otyp == GNOMISH_POINTY_HAT) {
-		    otmp->age = (long) rn1(50,50);
+		    otmp->age = (long) rn1(900,900);//Last longer than dwarvish helms, since the radius is smaller
 		    otmp->lamplit = 0;
 		}
 		if(otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT){
@@ -2537,7 +2570,7 @@ maid_clean(mon, obj)
 			struct engr *oep = engr_at(mon->mx,mon->my);
 			if(canseemon(mon)) pline("The maid banishes the unholy object to hell.");
 			add_to_migration(obj);
-			obj->ox = valley_level.dnum;
+			obj->ox = sanctum_level.dnum;
 			obj->oy = sanctum_level.dlevel - 1; /* vs level, bottom of the accesible part of hell */
 			obj->owornmask = (long)MIGR_RANDOM;
 			if(!oep){

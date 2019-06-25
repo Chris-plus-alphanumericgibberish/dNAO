@@ -67,7 +67,7 @@ struct Role roles[] = {
 	PM_SARA__THE_LAST_ORACLE, PM_TROOPER, NON_PM,
 	NON_PM, NON_PM, NON_PM, NON_PM,
 	ART_ANNULUS,
-	MA_HUMAN|MA_DWARF|MA_ELF|MA_VAMPIRE|MA_DRAGON, ROLE_MALE|ROLE_FEMALE |
+	MA_HUMAN|MA_DWARF|MA_ELF|MA_VAMPIRE|MA_DRAGON|MA_CLOCK, ROLE_MALE|ROLE_FEMALE |
 	  ROLE_NEUTRAL|ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{  12, 10,  7, 10,  10,  7 },
@@ -626,8 +626,8 @@ const char *ElfPriestLgod = "Manwe Sulimo",
 		   *ElfPriestNgod = "Mandos",
 		   *ElfPriestCgod = "Lorien"; /* Elven */
 
-const char *AnachrononautLgod = "Ilsensine",
-		   *AnachrononautLgodEnd = "Ilsensine the Banished One";
+const char *AnachrononautLgod = "_Ilsensine",
+		   *AnachrononautLgodEnd = "_Ilsensine the Banished One";
 
 const char *getAnachrononautLgod(){return AnachrononautLgod;}
 const char *getAnachrononautLgodEnd(){return AnachrononautLgodEnd;}
@@ -906,6 +906,21 @@ struct Race myrkalfr =
 	/* Init   Lower  Higher */
 	{  1, 0,  0, 1,  1, 0 },	/* Hit points */
 	{  2, 0,  3, 0,  3, 0 },	/* Energy */
+	NO_NIGHTVISION
+};
+
+struct Race android = 
+{	"android", "android", "android-kind", "And",
+	{"android", "gynoid"},
+	PM_ANDROID, PM_GYNOID, PM_MUMMIFIED_ANDROID, PM_FLAYED_ANDROID,
+	ROLE_MALE|ROLE_FEMALE | ROLE_NEUTRAL,
+	MA_CLOCK, 0, MA_ELF|MA_ORC|MA_DROW,
+	/*  Str    Int Wis Dex Con Cha */
+	{    3,     3,  3,  3,  3,  3 },
+	{   20,    18, 16, 22, 22, 18 },
+	/* Init   Lower  Higher */
+	{  2, 0,  1, 3,  1, 0 },	/* Hit points */
+	{  1, 0,  1, 0,  1, 0 },	/* Energy */
 	NO_NIGHTVISION
 };
 
@@ -2235,7 +2250,8 @@ plnamesuffix()
  * This code also replaces quest_init().
  */
 void
-role_init()
+role_init(newgame)
+int newgame;
 {
 	int alignmnt;
 
@@ -2245,7 +2261,7 @@ role_init()
 	plnamesuffix();
 
 	/* Check for a valid role.  Try flags.initrole first. */
-	if (!validrole(flags.initrole)) {
+	if (!validrole(flags.initrole) && newgame) {
 	    /* Try the player letter second */
 	    if ((flags.initrole = str2role(pl_character)) < 0)
 	    	/* None specified; pick a random role */
@@ -2258,21 +2274,21 @@ role_init()
 	pl_character[PL_CSIZ-1] = '\0';
 
 	/* Check for a valid race */
-	if (!validrace(flags.initrole, flags.initrace))
+	if (!validrace(flags.initrole, flags.initrace) && newgame)
 	    flags.initrace = randrace(flags.initrole);
 
 	/* Check for a valid gender.  If new game, check both initgend
 	 * and female.  On restore, assume flags.female is correct. */
-	if (flags.pantheon == -1) {	/* new game */
+	if (flags.pantheon == -1 && newgame) {	/* new game */
 	    if (!validgend(flags.initrole, flags.initrace, flags.female))
 		flags.female = !flags.female;
 	}
-	if (!validgend(flags.initrole, flags.initrace, flags.initgend))
+	if (!validgend(flags.initrole, flags.initrace, flags.initgend) && newgame)
 	    /* Note that there is no way to check for an unspecified gender. */
 	    flags.initgend = flags.female;
 
 	/* Check for a valid alignment */
-	if (!validalign(flags.initrole, flags.initrace, flags.initalign))
+	if (!validalign(flags.initrole, flags.initrace, flags.initalign) && newgame)
 	    /* Pick a random alignment */
 	    flags.initalign = randalign(flags.initrole, flags.initrace);
 	alignmnt = aligns[flags.initalign].value;
@@ -2280,8 +2296,17 @@ role_init()
 	/* Initialize urole and urace */
 	urole = roles[flags.initrole];
 	urace = races[flags.initrace];
-	if(Role_if(PM_ANACHRONONAUT) && Race_if(PM_DROW)){
+	if(Role_if(PM_ANACHRONONAUT)){
+		if(Race_if(PM_DROW))
 		urace = myrkalfr;
+		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
+			urace = android;
+			urole.filecode = "And";
+			quest_status.got_quest = TRUE;
+			quest_status.leader_is_dead = TRUE;
+			flags.questprogress = 1;
+			livelog_write_string("received their quest via sticky-note");
+		}
 	}
 
 	/* Fix up the god names */

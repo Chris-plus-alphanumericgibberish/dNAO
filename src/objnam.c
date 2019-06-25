@@ -521,9 +521,9 @@ char *buf;
 		* always allow "uncursed potion of water"
 		*/
 		if (obj->cursed)
-			Strcat(buf, (obj->known && obj->oproperties&OPROP_UNHYW) ? "unholy " : "cursed ");
+			Strcat(buf, (obj->known && (obj->oproperties&OPROP_UNHYW || obj->oproperties&OPROP_UNHY)) ? "unholy " : "cursed ");
 		else if (obj->blessed)
-			Strcat(buf, (obj->known && obj->oproperties&OPROP_HOLYW) ? "holy " : "blessed ");
+			Strcat(buf, (obj->known && (obj->oproperties&OPROP_HOLYW || obj->oproperties&OPROP_HOLY)) ? "holy " : "blessed ");
 		else if (iflags.show_buc || ((!obj->known || !objects[obj->otyp].oc_charged ||
 			(obj->oclass == ARMOR_CLASS ||
 			obj->oclass == RING_CLASS))
@@ -735,6 +735,25 @@ boolean dofull;
 			Strcat(buf, "woolen ");
 		else
 			Strcat(buf, "wool-lined ");
+	} else if(obj->oproperties && (obj->oartifact == 0 || dofull)){
+		if(obj->oproperties&OPROP_ANAR && obj->known)
+			Strcat(buf, "anarchic ");
+		if(obj->oproperties&OPROP_CONC && obj->known)
+			Strcat(buf, "concordant ");
+		if(obj->oproperties&OPROP_AXIO && obj->known)
+			Strcat(buf, "axiomatic ");
+		if(obj->oproperties&OPROP_MAGC && obj->known)
+			Strcat(buf, "magic-resistant ");
+		if(obj->oproperties&OPROP_REFL)
+			Strcat(buf, "reflective ");
+		if(obj->oproperties&OPROP_FIRE && obj->known)
+			Strcat(buf, "fireproof ");
+		if(obj->oproperties&OPROP_COLD && obj->known)
+			Strcat(buf, "coldproof ");
+		if(obj->oproperties&OPROP_ELEC && obj->known)
+			Strcat(buf, "voltproof ");
+		if(obj->oproperties&OPROP_ACID && obj->known)
+			Strcat(buf, "acidproof ");
 	}
 
 	if (obj->oproperties && (obj->oartifact == 0 || dofull)){
@@ -753,6 +772,12 @@ boolean dofull;
 		else {
 			if(obj->oproperties&OPROP_LESSW && obj->known)
 				Strcat(buf, "lesser ");
+			if (obj->oproperties&OPROP_ANARW && obj->known)
+				Strcat(buf, "anarchic ");
+			if (obj->oproperties&OPROP_CONCW && obj->known)
+				Strcat(buf, "concordant ");
+			if (obj->oproperties&OPROP_AXIOW && obj->known)
+				Strcat(buf, "axiomatic ");
 			if (obj->oproperties&OPROP_PSIOW){
 				if (obj->known) Strcat(buf, "psionic ");
 				else if (Blind_telepat) Strcat(buf, "whispering ");
@@ -760,6 +785,8 @@ boolean dofull;
 			if (obj->oproperties&OPROP_DEEPW){
 				if (Blind_telepat && obj->spe < 8) Strcat(buf, "mumbling ");
 			}
+			if (obj->oproperties&OPROP_PHSEW)
+				Strcat(buf, "faded ");
 			if (obj->oproperties&OPROP_WATRW)
 				Strcat(buf, "misty ");
 			if (obj->oproperties&OPROP_FIREW){
@@ -774,16 +801,12 @@ boolean dofull;
 				Strcat(buf, "sizzling ");
 			if (obj->oproperties&OPROP_MAGCW)
 				Strcat(buf, "sparkling ");
-			if (obj->oproperties&OPROP_ANARW && obj->known)
-				Strcat(buf, "anarchic ");
-			if (obj->oproperties&OPROP_CONCW && obj->known)
-				Strcat(buf, "concordant ");
-			if (obj->oproperties&OPROP_AXIOW && obj->known)
-				Strcat(buf, "axiomatic ");
 			if (obj->oproperties&OPROP_VORPW && obj->known)
 				Strcat(buf, "vorpal ");
 			if (obj->oproperties&OPROP_MORGW && obj->known && obj->cursed)
 				Strcat(buf, "morgul ");
+			if (obj->oproperties&OPROP_FLAYW && obj->known)
+				Strcat(buf, "flaying ");
 			/* note: "holy" and "unholy" properties are shown in the BUC part of the name, as they replace "blessed" and "cursed". */
 		}
 	}
@@ -1081,13 +1104,11 @@ boolean with_price;
 				Sprintf(eos(buf), " of a%s %s",
 				index(vowels, *(mons[obj->corpsenm].mname)) ? "n" : "",
 				mons[obj->corpsenm].mname);
-			else if (is_blaster(obj) && obj->known)
+			else if (is_blaster(obj) && (obj->known || Race_if(PM_ANDROID)))
 				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
-			else if (obj->otyp == FORCE_PIKE && obj->known)
+			else if (is_vibroweapon(obj) && (obj->known || Race_if(PM_ANDROID)))
 				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
-			else if (obj->otyp == VIBROBLADE && obj->known)
-				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
-			else if (obj->otyp == SEISMIC_HAMMER && obj->known)
+			else if (obj->otyp == SEISMIC_HAMMER && (obj->known || Race_if(PM_ANDROID)))
 				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
 			break;
 		case ARMOR_CLASS:
@@ -1312,16 +1333,16 @@ boolean with_price;
 		if (!ignore_oquan)
 #endif
 		if (obj->quan != 1L) Strcpy(buf, makeplural(buf));
-	}//endif obj_is_pname
+	}//endif !obj_is_pname(obj)
 
-	if ((obj->onamelth && obj->dknown)) {
-		if (!(obj_is_pname(obj) || the_unique_obj(obj)) || !obj->known) Strcat(buf, " named ");
-		if ((obj_is_pname(obj) || the_unique_obj(obj)) && obj->known && !strcmp(ONAME(obj), "Fluorite Octahedron")){
+	if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
+		if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
+		if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_FLUORITE_OCTAHEDRON)){
 			if (obj->quan == 8) Strcat(buf, "Fluorite Octet");
 			else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
 			else Strcat(buf, "Fluorite Octahedron");
 		}
-		else if ((obj_is_pname(obj) || the_unique_obj(obj)) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
+		else if (obj_is_pname(obj) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
 			Strcat(buf, ONAME(obj)+4);
 		else 
 			Strcat(buf, ONAME(obj));
@@ -1559,7 +1580,7 @@ boolean with_price;
 			break;
 		case WAND_CLASS:
 		charges:
-			if (obj->known)
+			if (obj->known || Race_if(PM_ANDROID))
 				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, obj->spe);
 			else if (obj->spe <= 0 && Race_if(PM_INCANTIFIER))
 				Sprintf(eos(buf), " (empty)");
@@ -1939,19 +1960,47 @@ const char *str;
 	    if(((tmp = rindex(str, ' ')) || (tmp = rindex(str, '-'))) &&
 	       (tmp[1] < 'A' || tmp[1] > 'Z'))
 		insert_the = TRUE;
-	    else if (tmp && index(str, ' ') < tmp) {	/* has spaces */
-		/* it needs an article if the name contains "of" */
-		tmp = strstri(str, " of ");
-		named = strstri(str, " named ");
-		called = strstri(str, " called ");
-		if (called && (!named || called < named)) named = called;
+		else {
+//	    else if (tmp && index(str, ' ') < tmp) {	/* has spaces */
+//		/* it needs an article if the name contains "of" */
+//		tmp = strstri(str, " of ");
+//		named = strstri(str, " named ");
+//		called = strstri(str, " called ");
+//		if (called && (!named || called < named)) named = called;
+//
+//		if (tmp && (!named || tmp < named))	/* found an "of" */
+//		    insert_the = TRUE;
+//		/* stupid special case: lacks "of" but needs "the" */
+//		else if (!named && (l = strlen(str)) >= 31 &&
+//		      !strcmp(&str[l - 31], "Platinum Yendorian Express Card"))
+//		    insert_the = TRUE;
 
-		if (tmp && (!named || tmp < named))	/* found an "of" */
-		    insert_the = TRUE;
-		/* stupid special case: lacks "of" but needs "the" */
-		else if (!named && (l = strlen(str)) >= 31 &&
-		      !strcmp(&str[l - 31], "Platinum Yendorian Express Card"))
-		    insert_the = TRUE;
+			// This will catch all artifacts listed in artilist.h whose coded names begin with "The "
+			int i;
+			for (i = 1; i < NROFARTIFACTS && !insert_the; i++)
+			{
+				if (!strncmp(artilist[i].name, "The ", 4) &&
+					((l = strlen(str)) >= strlen(artilist[i].name) - 4) &&
+					!strcmp(&str[l - (strlen(artilist[i].name) - 4)], artilist[i].name + 4))
+					insert_the = TRUE;
+			}
+
+			// This will have to catch any remaining items that should start with "the "
+			// Notably, unique items fall in this category, as they are in Capital Case but are not in artilist.h
+			if (!insert_the && (
+				(strlen(str) >= 15 && (
+				!strncmp(str, "Bell of Opening", 15)
+				)) ||
+				(strlen(str) >= 16 && (
+				!strncmp(str, "Amulet of Yendor", 16) ||
+				!strncmp(str, "Book of the Dead", 16)
+				)) ||
+				(strlen(str) >= 25 && (
+				!strncmp(str, "Candelabrum of Invocation", 25)
+				))
+				))
+				insert_the = TRUE;
+
 	    }
 	}
 	if (insert_the)
@@ -3282,9 +3331,15 @@ int wishflags;
 		} else if (!strncmpi(bp, "freezing ", l=9)
 			) {
 			oproperties |= OPROP_COLDW;
+		} else if (!strncmpi(bp, "reflective ", l=11)
+			) {
+			oproperties |= OPROP_REFL;
 		} else if (!strncmpi(bp, "misty ", l=6)
 			) {
 			oproperties |= OPROP_WATRW;
+		} else if (!strncmpi(bp, "faded ", l=6)
+			) {
+			oproperties |= OPROP_PHSEW;
 		} else if (!strncmpi(bp, "psionic ", l=8) || !strncmpi(bp, "whispering ", l=11)
 			) {
 			oproperties |= OPROP_PSIOW;
@@ -3323,6 +3378,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "morgul ", l=7)
 			) {
 			oproperties |= OPROP_MORGW;
+		} else if (!strncmpi(bp, "flaying ", l=8)
+			) {
+			oproperties |= OPROP_FLAYW;
 		} else
 			break;
 		bp += l;
@@ -3989,8 +4047,15 @@ typfnd:
 		typ == BEAMSWORD ||
 		typ == DOUBLE_LIGHTSABER ||
 		typ == VIBROBLADE ||
+		typ == WHITE_VIBROSWORD ||
+		typ == GOLD_BLADED_VIBROSWORD ||
+		typ == WHITE_VIBROZANBATO ||
+		typ == GOLD_BLADED_VIBROZANBATO ||
+		typ == RED_EYED_VIBROSWORD ||
 		typ == SEISMIC_HAMMER ||
 		typ == FORCE_PIKE ||
+		typ == WHITE_VIBROSPEAR ||
+		typ == GOLD_BLADED_VIBROSPEAR ||
 		(typ >= PISTOL && typ <= RAYGUN) ||
 		(typ >= SHOTGUN_SHELL && typ <= LASER_BEAM) ||
 		typ == FLACK_HELMET ||
@@ -4351,10 +4416,10 @@ typfnd:
 			case WEAPON_CLASS:
 				oproperties &= (OPROP_FIREW | OPROP_COLDW | OPROP_PSIOW | OPROP_DEEPW | OPROP_WATRW | OPROP_ELECW | OPROP_ACIDW | OPROP_MAGCW 
 								| OPROP_ANARW | OPROP_CONCW | OPROP_AXIOW | OPROP_HOLYW | OPROP_UNHYW | OPROP_VORPW | OPROP_MORGW | OPROP_FLAYW
-								| OPROP_LESSW);
+								| OPROP_PHSEW | OPROP_LESSW);
 				break;
 			case ARMOR_CLASS:
-				oproperties &= (OPROP_FIRE | OPROP_COLD | OPROP_ELEC | OPROP_ACID | OPROP_MAGC | OPROP_ANAR | OPROP_CONC | OPROP_AXIO);
+				oproperties &= (OPROP_FIRE | OPROP_COLD | OPROP_ELEC | OPROP_ACID | OPROP_MAGC | OPROP_ANAR | OPROP_CONC | OPROP_AXIO | OPROP_REFL);
 				break;
 			default:
 				oproperties = 0;

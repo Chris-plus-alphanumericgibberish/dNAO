@@ -99,7 +99,8 @@ curses_add_inv(int y, int glyph, CHAR_P accelerator, attr_t attr,
         char str_mutable[BUFSZ];
         Strcpy(str_mutable, str);
         attr = 0;
-        get_menu_coloring(str_mutable, &color, &attr);
+        int attr_int = (int) attr;
+        get_menu_coloring(str_mutable, &color, &attr_int);
         if (color != NO_COLOR)
             attr |= curses_color_attr(color, 0);
     }
