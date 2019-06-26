@@ -310,11 +310,11 @@ int otyp;
 #define flat	(wdice->flat)
 
 	/* initialize wdice */
-	ocaa = AT_WEAP;
+	ocaa = AT_NONE;
 	ocad = AD_PHYS;
 	ocn = 1;
 	ocd = 2;
-	bonaa = AT_WEAP;
+	bonaa = AT_NONE;
 	bonad = AD_PHYS;
 	bonn = 0;
 	bond = 0;
@@ -642,7 +642,7 @@ boolean youdefend;		// required for lucky dice
 
 		if (wdie->adtyp == AD_PHYS)
 		{//exploding dice
-			exploding_d(wdie->damn, wdie->damd, m);
+			tmp += exploding_d(wdie->damn, wdie->damd, m);
 		}
 		else
 		{//lucky exploding dice
