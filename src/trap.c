@@ -71,7 +71,7 @@ struct monst *victim;
 	    item = (victim == &youmonst) ? uarmh : which_armor(victim, W_ARMH);
 	    if (item) {
 		mat_idx = item->obj_material;
-	    	Sprintf(buf,"%s helmet", materialnm[mat_idx] );
+	    	Sprintf(buf,"%s helmet", materials[mat_idx].materialnm );
 	    }
 	    if (!burn_dmg(item, item ? buf : "helmet")) continue;
 	    break;

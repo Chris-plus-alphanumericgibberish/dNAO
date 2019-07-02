@@ -141,6 +141,15 @@ struct colorTextClr {
 	const uchar colorClr;	/* displayed color */
 };
 
+struct material {
+	const int id;				/* the #define'd id that this material is for */
+	const char * materialnm;	/* the base material name; generally unused */
+	const int color;			/* default material color */
+	const int density;			/* density (from old dnh) */
+	const int cost;				/* cost multiplier (from xnethack, unused) */
+	const int defense;			/* defense modifier (from xnethack, unused) */
+};
+
 extern NEARDATA struct objclass objects[];
 extern NEARDATA struct objdescr obj_descr[];
 extern NEARDATA struct colorTextClr LightsaberColor[];

@@ -3132,7 +3132,7 @@ winid *datawin;
 	* what material items are "normally" made of could be misleading.
 	*/
 	if (obj) {
-		Strcpy(buf2, materialnm[obj->obj_material]);
+		Strcpy(buf2, materials[obj->obj_material].materialnm);
 
 		if (obj->obj_material == WOOD) {	// Made of wooden. No.
 			Sprintf(buf2, "wood");

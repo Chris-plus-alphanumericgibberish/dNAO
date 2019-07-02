@@ -1755,57 +1755,7 @@ register struct obj *obj;
 		wt =  50; /* Same as a crystal ball (ie, the Orb of Weight) */
 	} else if(obj->obj_material != objects[obj->otyp].oc_material){
 	//ie, for normal objects and non-special weight artifacts
-	static const double matDensityLookup[] = {
-//	FENCEPOST
-		0.5,
-//  LIQUID
-		1.0,
-//  WAX
-		0.9,
-//  VEGGY very aprox Alfalfa leaf?
-		0.33, 
-//  FLESH
-		1.1,
-//  PAPER
-		1.2,
-//  CLOTH cotton fibre
-		1.5,
-//  LEATHER
-		0.9,
-//  WOOD
-		0.5,
-//  BONE
-		1.7,
-//  DRAGON_HIDE
-		3.4,
-//  IRON
-		7.9,
-//  METAL		12	/* Sn, &c. */
-		7.7,
-//  COPPER		13	/* Cu - includes brass and bronze*/
-		8.9,
-//  SILVER		14	/* Ag */
-		10.5,
-//  GOLD		15	/* Au */
-		19.3,
-//  PLATINUM	16	/* Pt */
-		21.4,
-//  MITHRIL		17 alumninum
-		2.7,
-//  PLASTIC		18 High end estimate for density of old credit card plastic, http://dwb5.unl.edu/chem/smallscale/SmallScale-069.html
-		1.3,
-//  GLASS		19
-		2.4,
-//  GEMSTONE	20 Very rough aprox.
-		3.6,
-//  MINERAL		21 Very rough aprox.
-		2.7,
-//  OBSIDIAN_MT	22
-		2.6,
-//  SHADOWSTUFF	23
-		1,
-	};
-		wt = wt*matDensityLookup[obj->obj_material]/matDensityLookup[objects[obj->otyp].oc_material];
+		wt = wt * materials[obj->obj_material].density / materials[objects[obj->otyp].oc_material].density;
 	}
 	
 	if(obj->otyp == MOON_AXE && obj->oartifact != ART_SCEPTRE_OF_LOLTH){
