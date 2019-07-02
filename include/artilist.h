@@ -696,7 +696,7 @@ A("The Gauntlets of Spell Power",		GAUNTLETS_OF_POWER, 			0,			0,/*Note: it is q
 	0, A_NONE, NON_PM, NON_PM, 4000L, 
 	SPFX2_SILVERED|SPFX2_SPELLUP,0,0),
 
-A("The Premium Heart",		GAUNTLETS_OF_POWER,							0,			0,
+A("Premium Heart",		GAUNTLETS_OF_POWER,	0,			0,
 	(SPFX_RESTR),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(1,0),	NO_DFNS,	NO_CARY, /*Needs encyc entry*/
