@@ -342,6 +342,9 @@ register int otyp;
 	case SCROLL_CLASS:
 		Strcpy(buf, "scroll");
 		break;
+	case TILE_CLASS:
+		Strcpy(buf, "tile");
+		break;
 	case WAND_CLASS:
 		Strcpy(buf, "wand");
 		break;
@@ -961,6 +964,7 @@ char *buf;
 		Strcat(buf, "gem ");
 		break;
 	case MINERAL:
+		(obj->oclass == ARMOR_CLASS || obj->oclass == TILE_CLASS) ? Strcat(buf, "ceramic ") : Strcat(buf, "stone ");
 		break;
 	case OBSIDIAN_MT:
 		Strcat(buf, "obsidian ");
@@ -1082,7 +1086,8 @@ boolean with_price;
 				if (!obj->dknown); //add "ampule" below and finish
 				else if (nn) {
 					if (ptyp == POT_WATER &&
-						obj->bknown && (obj->blessed || obj->cursed)) {
+							obj->bknown && (obj->blessed || obj->cursed)
+						) {
 						Strcat(buf, obj->blessed ? "holy " : "unholy ");
 					}
 					Strcat(buf, pactualn);
@@ -1110,8 +1115,7 @@ boolean with_price;
 				Strcat(buf, " called ");
 				Strcat(buf, un);
 			}
-			else
-				Strcat(buf, dn ? dn : actualn);
+			else Strcat(buf, dn ? dn : actualn);
 			/* If we use an() here we'd have to remember never to use */
 			/* it whenever calling doname() or xname(). */
 			if (typ == FIGURINE)
@@ -1260,6 +1264,7 @@ boolean with_price;
 			}
 			break;
 		case SCROLL_CLASS:
+		if(obj->otyp < SCR_BLANK_PAPER){
 			if (obj->dknown && !un && !ocl->oc_magic)
 			{
 				Strcat(buf, dn);
@@ -1284,6 +1289,45 @@ boolean with_price;
 				// "unlabeled scroll" should be the only case, and is already handled above.
 				;
 			}
+		} else {
+			if (!obj->dknown)
+				Strcat(buf, dn ? dn : actualn);
+			else if (nn)
+				Strcat(buf, actualn);
+			else if (un) {
+				Strcat(buf, dn ? dn : actualn);
+				Strcat(buf, " called ");
+				Strcat(buf, un);
+			}
+			else Strcat(buf, dn ? dn : actualn);
+		}
+	break;
+	case TILE_CLASS:
+		if (obj->dknown && !un && !ocl->oc_magic){
+			Strcat(buf, dn);
+			Strcat(buf, " ");
+		}
+		if(ocl->oc_unique)
+			Strcat(buf, "slab");
+		else
+			Strcat(buf, "tile");
+		if (!obj->dknown) break;
+		if (nn) {
+			Strcat(buf, " bearing the ");
+			Strcat(buf, actualn);
+		}
+		else if (un){
+			Strcat(buf, " called ");
+			Strcat(buf, un);
+		}
+		else if (ocl->oc_magic){
+			Strcat(buf, " with a ");
+			Strcat(buf, dn);
+		}
+		else {
+		// "unlabeled scroll" should be the only case, and is already handled above.
+		;
+		}
 			break;
 		case WAND_CLASS:
 			if (!obj->dknown)
@@ -2270,13 +2314,13 @@ struct obj *obj;
 }
 
 static const char *wrp[] = {
-	"wand", "ring", "potion", "scroll", "gem", "amulet",
+	"wand", "ring", "potion", "scroll", "tile", "gem", "amulet",
 	"spellbook", "spell book",
 	/* for non-specific wishes */
 	"weapon", "armor", "armour", "tool", "food", "comestible",
 };
 static const char wrpsym[] = {
-	WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS, GEM_CLASS,
+	WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS, TILE_CLASS, GEM_CLASS,
 	AMULET_CLASS, SPBOOK_CLASS, SPBOOK_CLASS,
 	WEAPON_CLASS, ARMOR_CLASS, ARMOR_CLASS, TOOL_CLASS, FOOD_CLASS,
 	FOOD_CLASS
@@ -2893,6 +2937,18 @@ struct alt_spellings {
 	{ "droven dress", NOBLE_S_DRESS },
 	{ "armored boots", ARMORED_BOOTS },
 	{ "fossil dark", CHUNK_OF_FOSSIL_DARK },
+	{ "aesh", SYLLABLE_OF_STRENGTH__AESH },
+	{ "strength syllable", SYLLABLE_OF_STRENGTH__AESH },
+	{ "krau", SYLLABLE_OF_POWER__KRAU },
+	{ "power syllable", SYLLABLE_OF_POWER__KRAU },
+	{ "hoon", SYLLABLE_OF_LIFE__HOON },
+	{ "life syllable", SYLLABLE_OF_LIFE__HOON },
+	{ "uur", SYLLABLE_OF_GRACE__UUR },
+	{ "grace syllable", SYLLABLE_OF_GRACE__UUR },
+	{ "naen", SYLLABLE_OF_THOUGHT__NAEN },
+	{ "thought syllable", SYLLABLE_OF_THOUGHT__NAEN },
+	{ "vaul", SYLLABLE_OF_SPIRIT__VAUL },
+	{ "spirit syllable", SYLLABLE_OF_SPIRIT__VAUL },
 	{ (const char *)0, 0 },
 };
 
