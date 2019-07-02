@@ -683,6 +683,13 @@ int spec;
 	/* grab the weapon dice from dmgval_core */
 	spe_mult = dmgval_core(&wdice, bigmonst(ptr), otmp, otyp);
 
+	/* increase die sizes by 2 if Marionette applies*/
+	if (spec & SPEC_MARIONETTE)
+	{
+		wdice.oc.damd += 2;
+		wdice.bon.damd += 2;
+	}
+
 	/* special cases of otyp not covered by dmgval_core:
 	 *  - rakuyo					- add bonus damage
 	 *  - viperwhips				- add ostriking
@@ -706,7 +713,7 @@ int spec;
 			// bonus 1d4 vs small
 			// bonus 1d3 vs large
 			wdice.bon.damn = 1;
-			wdice.bon.damd = (bigmonst(ptr) ? 3 : 4);
+			wdice.bon.damd = max(2, ((bigmonst(ptr) ? 3 : 4) + 2 * (otmp->objsize - MZ_MEDIUM + !!(spec & SPEC_MARIONETTE))));
 			// doubled enchantment
 			spe_mult += 1;
 		}
@@ -741,6 +748,11 @@ int spec;
 			struct weapon_dice mirdice;
 			/* grab the weapon dice from dmgval_core */
 			(void) dmgval_core(&mirdice, bigmonst(ptr), (youdefend ? uwep : MON_WEP(mon)), 0);	//note: dmgval_core handles zero weapons gracefully
+			if (spec & SPEC_MARIONETTE)
+			{
+				mirdice.oc.damd += 2;
+				mirdice.bon.damd += 2;
+			}
 			/* find the damage from those dice */
 			mir += weapon_dmg_roll(&(mirdice.oc), youdefend);
 			mir += weapon_dmg_roll(&(mirdice.bon), youdefend);
@@ -748,6 +760,9 @@ int spec;
 
 			/* use the better */
 			tmp += max(hyp, mir);
+			/* cannot be negative */
+			if (tmp < 0)
+				tmp = 0;
 			/* signal to NOT add normal dice */
 			add_dice = FALSE;
 		}
@@ -822,6 +837,9 @@ int spec;
 				((float)u.mh) / u.mhmax :
 				((float)u.uhp) / u.uhpmax;
 		}
+		/* cannot be negative */
+		if (tmp < 0)
+			tmp = 0;
 		/* don't re-add the weapon dice */
 		add_dice = FALSE;
 		break;
