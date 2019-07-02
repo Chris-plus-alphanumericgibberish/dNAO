@@ -47,7 +47,8 @@ const char def_oc_syms[MAXOCLASSES] = {
 	ROCK_SYM,
 /*15*/	BALL_SYM,
 	CHAIN_SYM,
-	VENOM_SYM
+	VENOM_SYM,
+	TILE_SYM
 	/*BED_SYM*/
 };
 
@@ -939,7 +940,8 @@ static const glyph_t r_oc_syms[MAXOCLASSES] = {
 	ROCK_SYM,
 /*15*/	BALL_SYM,
 	CHAIN_SYM,
-	VENOM_SYM
+	VENOM_SYM,
+	TILE_SYM
 /*	BED_SYM*/
 };
 
@@ -983,7 +985,8 @@ static const uchar IBM_r_oc_syms[MAXOCLASSES] = {	/* a la EPYX Rogue */
 	ROCK_SYM,
 /*15*/	BALL_SYM,
 	CHAIN_SYM,
-	VENOM_SYM
+	VENOM_SYM,
+	TILE_SYM
 	/*BED_SYM*/
 };
 # endif /* ASCIIGRAPH */
