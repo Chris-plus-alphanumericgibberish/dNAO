@@ -37,7 +37,7 @@ int explcolors[] = {
 #else
 #define cmap_color(n) color = iflags.use_color ? showsymcolors[n] : NO_COLOR
 #endif
-#define obj_color(n)  color = iflags.use_color ? objects[n].oc_color : NO_COLOR
+#define obj_color(n)  color = iflags.use_color ? (offset & 0x0f) : NO_COLOR
 #define mon_color(n)  color = iflags.use_color ? mons[n].mcolor : NO_COLOR
 #define invis_color(n) color = NO_COLOR
 #define pet_color(n)  color = iflags.use_color ? mons[n].mcolor : NO_COLOR
@@ -452,19 +452,24 @@ unsigned *ospecial;
 		}
 		if (color == NO_COLOR) cmap_color(offset);
 	} else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
-		if ((offset == BOULDER || offset == MASSIVE_STONE_CRATE) && iflags.bouldersym) ch = iflags.bouldersym;
-		else ch = get_objsym(offset);
+		/* color should come first as it is in the first 4 bits*/
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color) {
-			switch(objects[offset].oc_class) {
+			switch (objects[offset >> 4].oc_class) {
 			case COIN_CLASS: color = CLR_YELLOW; break;
 			case FOOD_CLASS: color = CLR_RED; break;
 			default: color = CLR_BRIGHT_BLUE; break;
 			}
-		} else
+		}
+		else
 #endif
 			obj_color(offset);
+		/* shift out the 4 bits of color to leave the otyp */
+		offset = offset >> 4;
+		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((offset == BOULDER || offset == MASSIVE_STONE_CRATE) && iflags.bouldersym) ch = iflags.bouldersym;
+		else ch = get_objsym(offset);
+
 		if (offset != BOULDER &&
 		    level.objects[x][y] &&
 		    level.objects[x][y]->nexthere) {

@@ -293,7 +293,8 @@
  *
  * ridden	Represents all monsters being ridden.  Count: NUMMONS 
  *
- * object	One for each object.  Count: NUM_OBJECTS
+ * object	A set of 16 for each (non-rogue) color for each
+ *      object.  Count: NUM_OBJECTS*16
  *
  * cmap		One for each entry in the character map.  The character map
  *		is the dungeon features and other miscellaneous things.
@@ -328,7 +329,7 @@
 #define GLYPH_BODY_OFF		(NUMMONS	+ GLYPH_DETECT_OFF)
 #define GLYPH_RIDDEN_OFF	(NUMMONS	+ GLYPH_BODY_OFF)
 #define GLYPH_OBJ_OFF		(NUMMONS	+ GLYPH_RIDDEN_OFF)
-#define GLYPH_CMAP_OFF		(NUM_OBJECTS	+ GLYPH_OBJ_OFF)
+#define GLYPH_CMAP_OFF		((NUM_OBJECTS << 4)	+ GLYPH_OBJ_OFF)
 #define GLYPH_EXPLODE_OFF	((MAXPCHARS - MAXEXPCHARS) + GLYPH_CMAP_OFF)
 #define GLYPH_ZAP_OFF		((MAXEXPCHARS * EXPL_MAX) + GLYPH_EXPLODE_OFF)
 #define GLYPH_SWALLOW_OFF	((NUM_ZAP << 2) + GLYPH_ZAP_OFF)
@@ -353,10 +354,10 @@
     (Hallucination ?							      \
 	((otg_temp = random_object()) == CORPSE ?			      \
 	    random_monster() + GLYPH_BODY_OFF :				      \
-	    otg_temp + GLYPH_OBJ_OFF)	:				      \
+	    ((otg_temp << 4) + rn2(16)) + GLYPH_OBJ_OFF)	:				      \
 	((obj)->otyp == CORPSE ?					      \
 	    (int) (obj)->corpsenm + GLYPH_BODY_OFF :			      \
-	    (int) (obj)->otyp + GLYPH_OBJ_OFF))
+	    (int) ((obj)->otyp << 4) + object_color(obj) + GLYPH_OBJ_OFF))
 
 #define cmap_to_glyph(cmap_idx) ((int) (cmap_idx)   + GLYPH_CMAP_OFF)
 #define explosion_to_glyph(expltype,idx)	\

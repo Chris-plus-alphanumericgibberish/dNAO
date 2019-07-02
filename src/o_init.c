@@ -1478,6 +1478,34 @@ dodiscovered()				/* free after Robert Viduya */
     return 0;
 }
 
+int
+object_color(otmp)
+struct obj *otmp;
+{
+	/* should never happen */
+	if (!otmp)
+	{
+		impossible("object_color called with no object");
+		return 0;
+	}
+	/* artifacts with set colors, currently none */
+//	switch (otmp->oartifact)
+//	{
+//	case ART_BLACK_CRYSTAL:		return CLR_BLACK;
+//	}
+	/* objects with non-standard materials */
+	if (otmp->obj_material != objects[otmp->otyp].oc_material)
+	{
+		const int material_color[] = { CLR_BLACK, HI_ORGANIC, CLR_WHITE, HI_ORGANIC, CLR_RED,
+			CLR_WHITE, HI_CLOTH, HI_LEATHER, HI_WOOD, CLR_WHITE, CLR_BLACK,
+			HI_METAL, HI_METAL, HI_COPPER, HI_SILVER, HI_GOLD, CLR_WHITE, HI_SILVER,
+			CLR_WHITE, HI_GLASS, CLR_RED, CLR_GRAY, CLR_BLACK, CLR_BLACK };
+		return material_color[otmp->obj_material];
+	}
+	/* default color */
+	return objects[otmp->otyp].oc_color;
+}
+
 void
 fix_object(otmp)
 	struct obj *otmp;

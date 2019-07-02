@@ -1745,6 +1745,7 @@ E void FDECL(restnames, (int));
 E void FDECL(discover_object, (int,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(undiscover_object, (int));
 E int NDECL(dodiscovered);
+E int FDECL(object_color, (struct obj *));
 E void FDECL(fix_object, (struct obj *));
 
 /* ### objects.c ### */
