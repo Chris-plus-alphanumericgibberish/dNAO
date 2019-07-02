@@ -3786,7 +3786,7 @@ int typ;
     register struct obj *obj;
     char allowall[2];
     static NEARDATA const char callable[] = {
-	SCROLL_CLASS, POTION_CLASS, WAND_CLASS, RING_CLASS, AMULET_CLASS,
+	SCROLL_CLASS, TILE_CLASS, POTION_CLASS, WAND_CLASS, RING_CLASS, AMULET_CLASS,
 	GEM_CLASS, SPBOOK_CLASS, ARMOR_CLASS, TOOL_CLASS, 0 };
 
     if (!typ) {
