@@ -10,13 +10,6 @@ STATIC_DCL void FDECL(m_dowear_type, (struct monst *,long, BOOLEAN_P, BOOLEAN_P)
 STATIC_DCL int NDECL(def_beastmastery);
 STATIC_DCL int NDECL(def_mountedCombat);
 
-// object properties
-const static int FIRE_PROP[] = { FIRE_RES, 0 };
-const static int COLD_PROP[] = { COLD_RES, 0 };
-const static int ELEC_PROP[] = { SHOCK_RES, 0 };
-const static int ACID_PROP[] = { ACID_RES, 0 };
-const static int MAGC_PROP[] = { ANTIMAGIC, 0 };
-
 const struct worn {
 	long w_mask;
 	struct obj **w_obj;
@@ -109,6 +102,10 @@ struct obj* obj;
 				break;
 			case ANTIMAGIC:
 				if (obj->oproperties & OPROP_MAGC)
+					got_prop = TRUE;
+				break;
+			case REFLECTING:
+				if (obj->oproperties & OPROP_REFL)
 					got_prop = TRUE;
 				break;
 			}
