@@ -367,7 +367,7 @@
 			cmap_to_glyph(trap_to_defsym(what_trap((trap)->ttyp)))
 
 /* Not affected by hallucination.  Gives a generic body for CORPSE */
-#define objnum_to_glyph(onum)	((int) (onum) + GLYPH_OBJ_OFF)
+#define objnum_to_glyph(onum)	((int) ((onum) << 4) + objects[onum].oc_color + GLYPH_OBJ_OFF)
 #define monnum_to_glyph(mnum)	((int) (mnum) + GLYPH_MON_OFF)
 #define detected_monnum_to_glyph(mnum)	((int) (mnum) + GLYPH_DETECT_OFF)
 #define ridden_monnum_to_glyph(mnum)	((int) (mnum) + GLYPH_RIDDEN_OFF)
@@ -405,7 +405,7 @@
 	NO_GLYPH)
 #define glyph_to_obj(glyph)						\
 	(glyph_is_body(glyph) ? CORPSE :				\
-	glyph_is_normal_object(glyph) ? ((glyph)-GLYPH_OBJ_OFF) :	\
+	glyph_is_normal_object(glyph) ? ((glyph-GLYPH_OBJ_OFF)>>4) :	\
 	NO_GLYPH)
 #define glyph_to_trap(glyph)						\
 	(glyph_is_trap(glyph) ?						\
@@ -448,7 +448,7 @@
     ((glyph) >= GLYPH_DETECT_OFF && (glyph) < (GLYPH_DETECT_OFF+NUMMONS))
 #define glyph_is_invisible(glyph) ((glyph) == GLYPH_INVISIBLE)
 #define glyph_is_normal_object(glyph)					\
-    ((glyph) >= GLYPH_OBJ_OFF && (glyph) < (GLYPH_OBJ_OFF+NUM_OBJECTS))
+    ((glyph) >= GLYPH_OBJ_OFF && (glyph) < (GLYPH_OBJ_OFF+(NUM_OBJECTS<<4)))
 #define glyph_is_object(glyph)						\
 		(glyph_is_normal_object(glyph)				\
 		|| glyph_is_body(glyph))

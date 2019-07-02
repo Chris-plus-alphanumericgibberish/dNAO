@@ -411,6 +411,7 @@ display_monster(x, y, mon, sightflags, worm_tail)
 		obj.ox = x;
 		obj.oy = y;
 		obj.otyp = mon->mappearance;
+		obj.oclass = STRANGE_OBJECT;
 		obj.corpsenm = PM_TENGU;	/* if mimicing a corpse */
 		map_object(&obj,!sensed);
 		break;

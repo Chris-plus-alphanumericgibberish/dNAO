@@ -1488,6 +1488,15 @@ struct obj *otmp;
 		impossible("object_color called with no object");
 		return 0;
 	}
+	/* fake mimic objects use the default color 
+	 * they also have unset data in too many places
+	 */
+	if (otmp->oclass == STRANGE_OBJECT)
+	{
+		return objects[otmp->otyp].oc_color;
+	}
+
+
 	/* artifacts with set colors, currently none */
 //	switch (otmp->oartifact)
 //	{
