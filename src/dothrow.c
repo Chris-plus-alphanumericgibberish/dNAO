@@ -112,7 +112,7 @@ int thrown;
 	}
 	
 	if(obj->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
-	if((obj->oclass == POTION_CLASS || obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
+	if(breaktest(obj) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
 	if((obj->otyp == EGG) && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA, TRUE);
 	
 	u_wipe_engr(2);
@@ -1771,7 +1771,7 @@ int thrown;
 			struct monst *msmon;
 			sx = bhitpos.x;
 			sy = bhitpos.y;
-			if((obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) && u.specialSealsActive&SEAL_NUDZIRATH){
+			if(is_shatterable(obj) && !obj->oerodeproof && u.specialSealsActive&SEAL_NUDZIRATH){
 				if(obj->otyp == MIRROR){
 					if(u.spiritPColdowns[PWR_MIRROR_SHATTER] < monstermoves && !u.uswallow && uwep && uwep->otyp == MIRROR && !(uwep->oartifact)){
 						useup(uwep);
@@ -2625,8 +2625,7 @@ breaktest(obj)
 struct obj *obj;
 {
 	if (obj_resists(obj, 0, 100)) return 0;
-	if ((obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) &&
-		obj->oclass != GEM_CLASS)
+	if (is_shatterable(obj) && !obj->oerodeproof)
 	    return 1;
 	switch (obj->oclass == POTION_CLASS ? POT_WATER : obj->otyp) {
 #ifdef TOURIST

@@ -83,8 +83,12 @@ struct objclass {
 
 #define is_evaporable(otmp)	(otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == DROVEN_HELM || otmp->otyp == NOBLE_S_DRESS)
 
+/* no partial damage available, but much the same */
+#define is_shatterable(otmp) (((otmp)->obj_material == GLASS || (otmp)->obj_material == OBSIDIAN_MT) && otmp->oclass != GEM_CLASS)
+
 #define is_damageable(otmp) (is_rustprone(otmp) || is_flammable(otmp) || \
-				is_rottable(otmp) || is_corrodeable(otmp) || is_evaporable(otmp))
+				is_rottable(otmp) || is_corrodeable(otmp) || is_evaporable(otmp) || is_shatterable(otmp))
+
 
 #define is_boomerang(otmp) (objects[(otmp)->otyp].oc_skill == -P_BOOMERANG)
 

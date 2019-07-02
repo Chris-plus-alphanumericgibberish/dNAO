@@ -722,6 +722,7 @@ char *buf;
 	if (obj->rknown && obj->oerodeproof)
 		Strcat(buf,
 		(iscrys || is_evaporable(obj)) ? "fixed " :
+		(obj->oclass != POTION_CLASS && is_shatterable(obj)) ? "shatterproof " :
 		is_rustprone(obj) ? "rustproof " :
 		is_corrodeable(obj) ? "corrodeproof " :	/* "stainless"? */
 		is_flammable(obj) ? "fireproof " : "");
@@ -3175,6 +3176,7 @@ int wishflags;
 			   !strncmpi(bp, "corrodeproof ", l=13) ||
 			   !strncmpi(bp, "fixed ", l=6) ||
 			   !strncmpi(bp, "fireproof ", l=10) ||
+			   !strncmpi(bp, "shatterproof ", l=13) ||
 			   !strncmpi(bp, "rotproof ", l=9)) {
 			erodeproof = 1;
 		} else if (!strncmpi(bp,"lit ", l=4) ||
