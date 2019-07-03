@@ -7,6 +7,7 @@
 
 STATIC_DCL void FDECL(mkbox_cnts,(struct obj *));
 STATIC_DCL void FDECL(obj_timer_checks,(struct obj *, XCHAR_P, XCHAR_P, int));
+STATIC_DCL void FDECL(init_obj_material,(struct obj *));
 #ifdef OVL1
 STATIC_DCL void FDECL(container_weight, (struct obj *));
 STATIC_DCL struct obj *FDECL(save_mtraits, (struct obj *, struct monst *));
@@ -424,11 +425,7 @@ boolean artif;
 	otmp->fromsink = 0;
 	otmp->mp = (struct mask_properties *) 0;
 	
-	if(otyp == find_gcirclet()) otmp->obj_material = GOLD;
-	else if(otyp == SPEAR && !rn2(25)) otmp->obj_material = SILVER;
-	else if(otyp == DAGGER && !rn2(12)) otmp->obj_material = SILVER;
-	else if(otyp == STILETTOS && !rn2(12)) otmp->obj_material = SILVER;
-	else otmp->obj_material = objects[otyp].oc_material;
+	init_obj_material(otmp);
 	
 	if(otyp == VIPERWHIP) otmp->ovar1 = rn2(2) ? 1 : rn2(5) ? rnd(2) : rnd(5);
 	
@@ -1486,6 +1483,79 @@ register struct obj *otmp;
 
 #endif /* OVLB */
 #ifdef OVL0
+/* set the size of an object, making sure the object is proper */
+void
+set_obj_size(obj, size)
+struct obj* obj;
+int size;
+{
+	/* check bad cases */
+	if (!obj) {
+		impossible("set_obj_size called without object");
+		return;
+	}
+	/* set quantity */
+	obj->objsize = size;
+	/* update weight */
+	fix_object(obj);
+	return;
+}
+/* set the quantity of an object, making sure to update its weight */
+void
+set_obj_quan(obj, quan)
+struct obj* obj;
+int quan;
+{
+	/* check bad cases */
+	if (!obj) {
+		impossible("set_obj_quan called without object");
+		return;
+	}
+	if (!objects[obj->otyp].oc_merge) {
+		impossible("set_obj_quan called for singular quantity object");
+		return;
+	}
+	/* set quantity */
+	obj->quan = quan;
+	/* update weight */
+	fix_object(obj);
+	return;
+}
+
+/* Initialize the material field of an object */
+void
+init_obj_material(obj)
+struct obj* obj;
+{
+	int otyp = obj->otyp;
+
+	/* start by setting the material to its default */
+	obj->obj_material = objects[obj->otyp].oc_material;
+
+	/* special cases from this point down
+	 */
+#define set (obj->obj_material != objects[obj->otyp].oc_material)
+	switch (otyp)
+	{
+	case DAGGER:
+		if (!set && !rn2(12))
+			set_material(obj, SILVER);
+		break;
+	case SPEAR:
+		if (!set && !rn2(25))
+			set_material(obj, SILVER);
+		break;
+	case STILETTOS:
+		if (!set && !rn2(12))
+			set_material(obj, SILVER);
+		break;
+	}
+
+	if (!set && otyp == find_gcirclet())
+		set_material(obj, GOLD);
+#undef set
+	return;
+}
 
 void
 set_material(obj, mat)
