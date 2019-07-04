@@ -177,7 +177,7 @@ STATIC_OVL struct Jitem ObscureJapanese_items[] = {
 	{ TRIDENT, "magari yari" },
 	{ TWO_HANDED_SWORD, "no-dachi" },
 	{ WAR_HAMMER, "dai tsuchi" },
-	{ WOODEN_HARP, "koto" },
+	{ HARP, "koto" },
 	{0, "" }
 };
 
@@ -203,7 +203,7 @@ STATIC_OVL struct Jitem Japanese_items[] = {
 	{ SHORT_SWORD, "wakizashi" },
 	{ SHURIKEN, "hira-shuriken" },
 	{ SPLINT_MAIL, "dou-maru" },
-	{ WOODEN_HARP, "koto" },
+	{ HARP, "koto" },
 	{0, "" }
 };
 
@@ -938,12 +938,14 @@ boolean adjective;
 			if (obj->oproperties&OPROP_ELECW)
 				return "arcing";
 		}
+		else if (obj->otyp == WHISTLE || obj->otyp == MAGIC_WHISTLE)
+			return "tin";
 		else if (obj->otyp == ORIHALCYON_GAUNTLETS && !adjective)
 			return "orichalcum";
 		else
 			return (adjective ? "metallic" : "metal");
 	case COPPER:
-		if (obj->otyp == BRASS_LANTERN || ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "brass", 5)))
+		if (obj->otyp == LANTERN || ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "brass", 5)))
 			return "brass";
 		else if ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "copper", 6))
 			return "copper";
@@ -987,22 +989,25 @@ struct obj *obj;
 char *buf;
 {
 	/*To avoid an if statement with a massive condition, detect cases where the material should NOT be printed, and return out*/
-	/*Avoid obviating randomized appearances*/
-	if(id_for_material(obj) && !objects[obj->otyp].oc_name_known)
-		return;
 	/*Materials don't matter for lit lightsabers, and they should be described in terms of color*/
 	if(is_lightsaber(obj) && litsaber(obj))
 		return;
-	if(obj->oartifact && obj->known){
-		/*Known artifact is made from standard material*/
+	if(obj->oartifact && obj->known && artilist[obj->oartifact].material){
+		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
 			return;
 	} else {
-		/*Non-artifact is made from standard material, and isn't of a type for which the material is always shown*/
+		/*Item is made from standard material, and isn't of a type for which the material is always shown*/
 		if(objects[obj->otyp].oc_name_known && !(objects[obj->otyp].oc_showmat&IDED) && obj->obj_material == objects[obj->otyp].oc_material)
 			return;
 		/*Unknown item is made from standard material, and isn't of a type for which the material is always shown*/
 		if(!objects[obj->otyp].oc_name_known && !(objects[obj->otyp].oc_showmat&UNIDED) && obj->obj_material == objects[obj->otyp].oc_material)
+			return;
+		/*Item is of a type where material should not be shown (once known) */
+		if (objects[obj->otyp].oc_name_known && (objects[obj->otyp].oc_showmat&NIDED))
+			return;
+		/*Unknown item is of a type where material should not be shown (while unknown) */
+		if (objects[obj->otyp].oc_name_known && (objects[obj->otyp].oc_showmat&NUNIDED))
 			return;
 	}
 	/* add on the adjective form of the object's material */
@@ -1661,7 +1666,7 @@ boolean with_price;
 				break;
 			}
 			else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP
-				|| obj->otyp == BRASS_LANTERN || Is_candle(obj) || obj->otyp == SHADOWLANDER_S_TORCH
+				|| obj->otyp == LANTERN || Is_candle(obj) || obj->otyp == SHADOWLANDER_S_TORCH
 				|| obj->otyp == TORCH || obj->otyp == SUNROD
 				) {
 				if (obj->lamplit)
@@ -2889,7 +2894,7 @@ struct alt_spellings {
 	{ "chain", CHAIN },
 	{ "iron chain", CHAIN },
 	{ "iron ball", HEAVY_IRON_BALL },
-	{ "lantern", BRASS_LANTERN },
+	{ "lantern", LANTERN },
 	{ "mattock", DWARVISH_MATTOCK },
 	{ "amulet of poison resistance", AMULET_VERSUS_POISON },
 	{ "stone", ROCK },
@@ -2952,7 +2957,7 @@ struct alt_spellings {
 	{ "magari yari", TRIDENT },
 	{ "no-dachi", TWO_HANDED_SWORD },
 	{ "dai tsuchi", WAR_HAMMER },
-	{ "koto", WOODEN_HARP },
+	{ "koto", HARP },
 	{ "helmet", HELMET },
 	{ "circlet", HELMET },
 	{ "helm of brilliance", HELM_OF_BRILLIANCE },
@@ -3346,12 +3351,12 @@ int wishflags;
 			&& strncmpi(bp, "leather armor", 13) && strncmpi(bp, "leather gloves", 14)
 			&& strncmpi(bp, "leather jacket", 14) && strncmpi(bp, "leather armor", 13)
 			&& strncmpi(bp, "leather helm", 12) && strncmpi(bp, "leather hat", 11)
-			&& strncmpi(bp, "leather cloak", 13) && strncmpi(bp, "leather drum", 12)
+			&& strncmpi(bp, "leather cloak", 13) && strncmpi(bp, "drum", 12)
 			) {
 			mat = LEATHER;
 		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", 7))
-			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wooden flute", 13)
-			&& strncmpi(bp, "wooden harp", 12) && strncmpi(bp, "wood golem", 11)
+			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "flute", 13)
+			&& strncmpi(bp, "harp", 12) && strncmpi(bp, "wood golem", 11)
 			) {
 			mat = WOOD;
 		} else if ((!strncmpi(bp, "dragonhide ", l=11) || !strncmpi(bp, "dragon-hide ", l=12) || !strncmpi(bp, "dragon hide ", l=12)
@@ -4206,7 +4211,7 @@ typfnd:
 	}
 
 	if (islit &&
-		(typ == OIL_LAMP || typ == MAGIC_LAMP || typ == BRASS_LANTERN ||
+		(typ == OIL_LAMP || typ == MAGIC_LAMP || typ == LANTERN ||
 		 Is_candle(otmp) || typ == POT_OIL)) {
 	    place_object(otmp, u.ux, u.uy);  /* make it viable light source */
 	    begin_burn(otmp, FALSE);

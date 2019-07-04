@@ -611,7 +611,7 @@ boolean artif;
 					otmp->quan = 1L + ((long)(rn2(2) && !Is_grue_level(&u.uz)) ? rn2(7) : 0);
 					blessorcurse(otmp, 5);
 					break;
-		case BRASS_LANTERN:
+		case LANTERN:
 		case OIL_LAMP:		otmp->spe = 1;
 					otmp->age = (long) rn1(500,1000);
 					otmp->lamplit = 0;
@@ -2597,7 +2597,7 @@ maid_clean(mon, obj)
 		if(canseemon(mon)) pline("The maid sticks an ofuda to the offending object.");
 		obj->cursed = 0;
 	}
-	if(obj->otyp == DWARVISH_HELM || obj->otyp == OIL_LAMP || obj->otyp == BRASS_LANTERN){
+	if(obj->otyp == DWARVISH_HELM || obj->otyp == OIL_LAMP || obj->otyp == LANTERN){
 		if(obj->age < 750){
 			obj->age += 750;
 			if(canseemon(mon)) pline("The maid adds some oil.");

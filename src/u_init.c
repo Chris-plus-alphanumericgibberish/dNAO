@@ -194,7 +194,7 @@ static struct trobj Barbarian[] = {
 #ifdef BARD
 static struct trobj Bard[] = {
 #define BARD_INSTR 0
-	{ WOODEN_HARP, UNDEF_SPE, TOOL_CLASS, 1, UNDEF_BLESS },
+	{ HARP, UNDEF_SPE, TOOL_CLASS, 1, UNDEF_BLESS },
 #define BARD_CLOAK 1
 	{ LEATHER_CLOAK, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
@@ -203,7 +203,7 @@ static struct trobj Bard[] = {
 #define BARD_BOOZE 5
 	{ POT_BOOZE, 0, POTION_CLASS, 1, UNDEF_BLESS },
 #define BARD_WHISTLE 6
-	{ TIN_WHISTLE, 0, TOOL_CLASS, 1, UNDEF_BLESS },
+	{ WHISTLE, 0, TOOL_CLASS, 1, UNDEF_BLESS },
 	{ 0, 0, 0, 0, 0 }
 };
 #endif
@@ -636,7 +636,7 @@ static struct trobj Blindfold[] = {
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Instrument[] = {
-	{ WOODEN_FLUTE, 0, TOOL_CLASS, 1, 0 },
+	{ FLUTE, 0, TOOL_CLASS, 1, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj RandRing[] = {
@@ -2007,8 +2007,8 @@ u_init()
 #ifdef BARD
 	case PM_BARD:
 		if (Race_if(PM_ORC)) Bard[BARD_INSTR].trotyp = (rn2(100) >= 50) ? BUGLE : TOOLED_HORN;
-		else if (Race_if(PM_HALF_DRAGON)) Bard[BARD_INSTR].trotyp = LEATHER_DRUM;
-		else if (rn2(100) >= 50) Bard[BARD_INSTR].trotyp = WOODEN_FLUTE;
+		else if (Race_if(PM_HALF_DRAGON)) Bard[BARD_INSTR].trotyp = DRUM;
+		else if (rn2(100) >= 50) Bard[BARD_INSTR].trotyp = FLUTE;
 		if (rn2(100) >= 85) Bard[BARD_WHISTLE].trotyp = BELL;
 		if (Race_if(PM_DROW)) Bard[BARD_CLOAK].trotyp = DROVEN_CHAIN_MAIL;
 		Bard[BARD_BOOZE].trquan = rn1(2, 5);
@@ -2022,7 +2022,7 @@ u_init()
 			flags.initalign = 0; // 0 == lawful
 		}
 		/* This depends on the order in objects.c */
-		for (i = TIN_WHISTLE; i <= DRUM_OF_EARTHQUAKE; i++)
+		for (i = WHISTLE; i <= DRUM_OF_EARTHQUAKE; i++)
 			knows_object(i);
 		/* Bards know about the enchantment spellbooks, though they don't know
 		   the spells */
@@ -2343,8 +2343,8 @@ u_init()
 	     */
 	    if (Role_if(PM_PRIEST) || Role_if(PM_WIZARD)) {
 		static int trotyp[] = {
-		    WOODEN_FLUTE, TOOLED_HORN, WOODEN_HARP,
-		    BELL, BUGLE, LEATHER_DRUM
+		    FLUTE, TOOLED_HORN, HARP,
+		    BELL, BUGLE, DRUM
 		};
 		Instrument[0].trotyp = trotyp[rn2(SIZE(trotyp))];
 		ini_inv(Instrument);

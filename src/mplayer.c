@@ -205,8 +205,8 @@ register boolean special;
 		}break;
 		case PM_BARD:{
 			static int trotyp[] = {
-				WOODEN_FLUTE, TOOLED_HORN, WOODEN_HARP,
-				BELL, BUGLE, LEATHER_DRUM
+				FLUTE, TOOLED_HORN, HARP,
+				BELL, BUGLE, DRUM
 			};
 			(void)mongets(mtmp, trotyp[rn2(SIZE(trotyp))]);
 			armor = rn2(2) ? ELVEN_MITHRIL_COAT : ELVEN_TOGA;

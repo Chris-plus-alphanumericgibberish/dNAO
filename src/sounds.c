@@ -2738,7 +2738,7 @@ int tx,ty;
 						else if(otmp->otyp == DAGGER){ o1 = otmp; t1 = 4;}
 						else if(otmp->otyp == APPLE){ o1 = otmp; t1 = 5;}
 						else if(otmp->oclass == SCROLL_CLASS){ o1 = otmp; t1 = 6;}
-						else if(otmp->otyp == TIN_WHISTLE){ o1 = otmp; t1 = 7;}
+						else if(otmp->otyp == WHISTLE){ o1 = otmp; t1 = 7;}
 						else if(otmp->otyp == MIRROR){ o1 = otmp; t1 = 8;}
 						else if(otmp->otyp == EGG){ o1 = otmp; t1 = 9;}
 						else if(otmp->oclass == POTION_CLASS){ o1 = otmp; t1 = 10;}
@@ -2757,7 +2757,7 @@ int tx,ty;
 						else if(otmp->otyp == DAGGER && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 4;}
 						else if(otmp->otyp == APPLE && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 5;}
 						else if(otmp->oclass == SCROLL_CLASS && otmp->oclass != o1->oclass){ o2 = otmp; t2 = 6;}
-						else if(otmp->otyp == TIN_WHISTLE && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 7;}
+						else if(otmp->otyp == WHISTLE && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 7;}
 						else if(otmp->otyp == MIRROR && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 8;}
 						else if(otmp->otyp == EGG && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 9;}
 						else if(otmp->oclass == POTION_CLASS && otmp->oclass != o1->oclass){ o2 = otmp; t2 = 10;}
@@ -2834,7 +2834,7 @@ int tx,ty;
 								doname(otmp), (const char *)0);
 						break;
 						case 7:
-							otmp = mksobj(TIN_WHISTLE, TRUE, FALSE);
+							otmp = mksobj(WHISTLE, TRUE, FALSE);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",

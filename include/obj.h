@@ -467,7 +467,7 @@ struct weapon_dice {
 			 )
 #define is_weptool(o)	((o)->oclass == TOOL_CLASS && \
 			 objects[(o)->otyp].oc_skill != P_NONE)
-#define is_instrument(o)	((o)->otyp >= WOODEN_FLUTE && \
+#define is_instrument(o)	((o)->otyp >= FLUTE && \
 			 (o)->otyp <= DRUM_OF_EARTHQUAKE)
 #define bimanual(otmp,ptr)	(otmp && (otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == TOOL_CLASS) && \
@@ -736,7 +736,7 @@ struct weapon_dice {
 
 /* MAGIC_LAMP intentionally excluded below */
 /* age field of this is relative age rather than absolute */
-#define age_is_relative(otmp)	((otmp)->otyp == BRASS_LANTERN\
+#define age_is_relative(otmp)	((otmp)->otyp == LANTERN\
 				|| (otmp)->otyp == OIL_LAMP\
 				|| (otmp)->otyp == DWARVISH_HELM\
 				|| (otmp)->otyp == LIGHTSABER\
@@ -748,7 +748,7 @@ struct weapon_dice {
 				|| (otmp)->otyp == WAX_CANDLE\
 				|| (otmp)->otyp == POT_OIL)
 /* object can be ignited */
-#define ignitable(otmp)	((otmp)->otyp == BRASS_LANTERN\
+#define ignitable(otmp)	((otmp)->otyp == LANTERN\
 				|| (otmp)->otyp == OIL_LAMP\
  				|| (otmp)->otyp == DWARVISH_HELM\
  				|| (otmp)->otyp == GNOMISH_POINTY_HAT\
@@ -785,8 +785,6 @@ struct weapon_dice {
 							 (otmp)->obj_material == COPPER || \
 							 (otmp)->obj_material == SILVER || \
 							 (otmp)->obj_material == IRON)
-
-#define id_for_material(otmp) ((otmp)->otyp >= GLOVES && (otmp)->otyp <= GAUNTLETS_OF_DEXTERITY)
 
 /* misc */
 #define is_boulder(otmp)		((otmp)->otyp == BOULDER || (otmp)->otyp == MASSIVE_STONE_CRATE || ((otmp)->otyp == STATUE && opaque(&mons[(otmp)->corpsenm])))

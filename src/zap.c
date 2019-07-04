@@ -1838,7 +1838,7 @@ struct obj *obj, *otmp;
 	case SCR_LIGHT:
 	case SPE_LIGHT:
 		if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-			obj->otyp == BRASS_LANTERN || obj->otyp == POT_OIL ||
+			obj->otyp == LANTERN || obj->otyp == POT_OIL ||
 			obj->otyp == DWARVISH_HELM || obj->otyp == GNOMISH_POINTY_HAT ||
 			obj->otyp == TALLOW_CANDLE || obj->otyp == WAX_CANDLE) &&
 			!((!Is_candle(obj) && obj->age == 0) || (obj->otyp == MAGIC_LAMP && obj->spe == 0))
@@ -1848,7 +1848,7 @@ struct obj *obj, *otmp;
 			// Assumes the player is the only cause of this effect for purposes of shk billing
 
 			if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-				obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_HELM) {
+				obj->otyp == LANTERN || obj->otyp == DWARVISH_HELM) {
 				check_unpaid(obj);
 			}
 			else {

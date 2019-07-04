@@ -4212,7 +4212,7 @@ struct mkroom *sroom;
 						case 4:
 							switch(rn2(4)){
 								case 0:
-									otmp = mksobj(TIN_WHISTLE, FALSE, FALSE);
+									otmp = mksobj(WHISTLE, FALSE, FALSE);
 									fix_object(otmp);
 								break;
 								case 1:

@@ -1080,7 +1080,7 @@ register const char *let,*word;
 		|| (!strcmp(word, "rub") &&
 		    ((otmp->oclass == TOOL_CLASS &&
 		      otyp != OIL_LAMP && otyp != MAGIC_LAMP &&
-		      otyp != BRASS_LANTERN) ||
+		      otyp != LANTERN) ||
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp)) ||
 			(otmp->oclass == CHAIN_CLASS)))
 		|| (!strncmp(word, "rub on the stone", 16) &&
@@ -2046,7 +2046,7 @@ struct obj *obj;
 	else if (obj->otyp == SADDLE)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Place this saddle on a pet", MENU_UNSELECTED);
-	else if (obj->otyp == MAGIC_WHISTLE || obj->otyp == TIN_WHISTLE)
+	else if (obj->otyp == MAGIC_WHISTLE || obj->otyp == WHISTLE)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Blow this whistle", MENU_UNSELECTED);
 	else if (obj->otyp == EUCALYPTUS_LEAF)
@@ -2072,7 +2072,7 @@ struct obj *obj;
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this candle", MENU_UNSELECTED);
 	else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-			obj->otyp == BRASS_LANTERN)
+			obj->otyp == LANTERN)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this light source", MENU_UNSELECTED);
 	else if (obj->otyp == POT_OIL && objects[obj->otyp].oc_name_known)
@@ -2105,7 +2105,7 @@ struct obj *obj;
 	else if (obj->otyp == UNICORN_HORN)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Squeeze the unicorn horn tightly", MENU_UNSELECTED);
-	else if ((obj->otyp >= WOODEN_FLUTE && obj->otyp <= DRUM_OF_EARTHQUAKE) ||
+	else if ((obj->otyp >= FLUTE && obj->otyp <= DRUM_OF_EARTHQUAKE) ||
 			(obj->otyp == HORN_OF_PLENTY && !obj->known))
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Play this musical instrument", MENU_UNSELECTED);
@@ -2238,7 +2238,7 @@ struct obj *obj;
 	if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP)
 		add_menu(win, NO_GLYPH, &any, 'R', 0, ATR_NONE,
 				"Rub this lamp", MENU_UNSELECTED);
-	else if (obj->otyp == BRASS_LANTERN)
+	else if (obj->otyp == LANTERN)
 		add_menu(win, NO_GLYPH, &any, 'R', 0, ATR_NONE,
 				"Rub this lantern", MENU_UNSELECTED);
 #if 0 /* TODO */
@@ -2893,7 +2893,7 @@ winid *datawin;
 		case CANDLE_OF_INVOCATION:
 		case TORCH: //actually over-ridden by being a weapon-tool
 		case SUNROD: //actually over-ridden by being a weapon-tool
-		case BRASS_LANTERN:
+		case LANTERN:
 		case OIL_LAMP:
 		case MAGIC_LAMP:
 		case CANDELABRUM_OF_INVOCATION:
@@ -2906,21 +2906,21 @@ winid *datawin;
 		case BEARTRAP:
 			subclass = "trap which can be set";
 			break;
-		case TIN_WHISTLE:
+		case WHISTLE:
 		case MAGIC_WHISTLE:
 		case BELL:
 		case BELL_OF_OPENING:
-		case LEATHER_DRUM:
+		case DRUM:
 		case DRUM_OF_EARTHQUAKE:
 			subclass = "atonal instrument";
 			break;
 		case BUGLE:
 		case MAGIC_FLUTE:
-		case WOODEN_FLUTE:
+		case FLUTE:
 		case TOOLED_HORN:
 		case FIRE_HORN:
 		case FROST_HORN:
-		case WOODEN_HARP:
+		case HARP:
 		case MAGIC_HARP:
 			subclass = "tonal instrument";
 			break;
