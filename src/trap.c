@@ -815,6 +815,24 @@ unsigned trflags;
 		}
 		break;
 
+		case MUMMY_TRAP:	    /* step onto the mummy trap */
+			seetrap(trap);
+			register int cnt = rnd(3)+2;
+			pline("Mummies suddenly appear around you!");
+			if (!Free_action) {                        
+				pline("You freeze for a moment, terrified!");
+				nomul(-rnd(2), "frozen by a trap");
+				exercise(A_DEX, FALSE);
+				nomovemsg = You_can_move_again;
+			} else You("are mildly startled.");
+			
+			while(cnt--)
+				(void) makemon(mkclass(S_MUMMY, G_NOHELL), u.ux, u.uy, NO_MM_FLAGS);
+
+			deltrap(trap);
+			
+		break;
+		
 	    case VIVI_TRAP:
 			if(trap->tseen){
 				You("shove through the delicate equipment, ruining it!");
@@ -2411,7 +2429,10 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			}
 		    }
 		    break;
-
+		case MUMMY_TRAP:
+		// monsters can't activate these bad boys
+		break;
+		
 		default:
 			impossible("Some monster encountered a strange trap of type %d.", tt);
 	    }
@@ -3015,7 +3036,7 @@ struct monst *owner;
 			&& (!uarmc->cursed || rn2(3))
 		   ) || (
 			ublindf
-			&& ublindf->otyp == R_LYEHIAN_FACEPLATE
+			&& (ublindf->otyp == R_LYEHIAN_FACEPLATE || ublindf->oartifact == ART_MASK_OF_TLALOC)
 			&& (!ublindf->cursed || rn2(3))
 		   ) || (
 			uarm
@@ -4600,6 +4621,7 @@ register struct trap *ttmp;
 		     (ttmp->ttyp == PIT) ||
 		     (ttmp->ttyp == SPIKED_PIT) ||
 		     (ttmp->ttyp == VIVI_TRAP) ||
+		     (ttmp->ttyp == MUMMY_TRAP) ||
 		     (ttmp->ttyp == HOLE) ||
 		     (ttmp->ttyp == TRAPDOOR) ||
 		     (ttmp->ttyp == TELEP_TRAP) ||

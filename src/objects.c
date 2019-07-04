@@ -134,7 +134,7 @@ WEAPON("orcish spear", "crude spear",
 WEAPON("dwarvish spear", "stout spear",
 	0, 1, 0, 12, 30,  3,  9,  9, 0, P,   P_SPEAR, IRON, HI_METAL),
 WEAPON("javelin", "throwing spear",
-	0, 1, 0, 10, 20,  3,  6,  6, 0, P,   P_JAVELIN, IRON, HI_METAL),
+	0, 1, 0, 10, 20,  3,  6,  6, 0, P,   P_SPEAR, IRON, HI_METAL),
 
 WEAPON("trident", (char *)0, /*Needs encyc entry*/
 	1, 0, 0,  8, 25,  5,  6,  4, 0, P,   P_TRIDENT, IRON, HI_METAL),
@@ -153,6 +153,8 @@ WEAPON("athame", (char *)0,
 	1, 1, 0,  0, 10,  4,  4,  4, 2, S,   P_DAGGER, IRON, HI_METAL),
 WEAPON("set of crow talons", "set of three feather-etched daggers",
 	0, 0, 0,  0,  9,200,  4,  3, 2, S,   P_DAGGER, METAL, HI_METAL),
+WEAPON("tecpatl", "notched dagger",
+	0, 1, 0,  0,  5,  12,  8,  6, 4, P,   P_DAGGER, OBSIDIAN_MT, CLR_BLACK),
 WEAPON("scalpel", (char *)0,
 	1, 1, 0,  0,  5,  6,  3,  1, 3, S,   P_KNIFE, METAL, HI_METAL),
 WEAPON("knife", (char *)0,
@@ -320,6 +322,8 @@ WEAPON("war hammer", (char *)0,
 						/* +1 small */
 WEAPON("club", (char *)0,
 	1, 0, 0, 11, 30,  3,  6,  3, 0, B,   P_CLUB, WOOD, HI_WOOD),
+WEAPON("macuahuitl", "obsidian-edged club",
+	0, 0, 0,  0, 40, 10,  8,  6, 0, B|S,   P_CLUB, WOOD, HI_WOOD),
 WEAPON("quarterstaff", "staff",
 	0, 0, 1, 10, 40,  5,  6,  6, 0, B,   P_QUARTERSTAFF, WOOD, HI_WOOD),
 WEAPON("khakkhara", "monk's staff", /*Needs encyc entry*//*Needs tile*/
@@ -401,6 +405,7 @@ BOW("yumi", "long bow",			0,  0, 0, 30, 60, 0, WOOD, P_BOW, HI_WOOD),
 BOW("sling", (char *)0,			1, 0, 40,  3, 20, -1, LEATHER, P_SLING, HI_LEATHER),
 BOW("crossbow", (char *)0,		1, 0, 45, 50, 40, 1, WOOD, P_CROSSBOW, HI_WOOD),
 BOW("droven crossbow", "spider-legged crossbow",	0, 0, 0, 50, 120, 4, SILVER, P_CROSSBOW, CLR_BLACK), /*Needs encyc entry*/
+BOW("atlatl", "notched stick", 	0, 0, 0, 12, 30, 0, WOOD, P_SPEAR, HI_WOOD), /*Needs encyc entry*/
 
 #undef P
 #undef S
@@ -597,6 +602,8 @@ ARMOR("Hawaiian shirt", "flowery shirt",
 	0, 0, 0, 0,	 10, 0,	 5,   3, 10, 0, 0, ARM_SHIRT, CLOTH, CLR_MAGENTA),
 ARMOR("T-shirt", (char *)0, /*Needs encyc entry*/
 	1, 0, 0, 0,	 5, 0,	 5,   2, 10, 0, 0, ARM_SHIRT, CLOTH, CLR_WHITE),
+ARMOR("ichcahuipilli", "thick undershirt", /*Needs encyc entry*/
+	1, 0, 0, 0,	 0, 3,	 10,   2, 10, 0, 0, ARM_SHIRT, CLOTH, CLR_WHITE),
 # ifdef CONVICT
 ARMOR("striped shirt", (char *)0, /*Needs encyc entry*/
 	1, 0, 0, 0,	 0, 0,	 5,   2, 10, 0, 0, ARM_SHIRT, CLOTH, CLR_GRAY),
