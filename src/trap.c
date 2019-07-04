@@ -62,6 +62,8 @@ struct monst *victim;
     int mat_idx;
     
     if (!victim) return 0;
+	if(victim == &youmonst && InvFire_resistance) return 0;
+	if(victim != &youmonst && resists_fire(victim)) return 0;
 #define burn_dmg(obj,descr) rust_dmg(obj, descr, 0, FALSE, victim)
     while (1) {
 	switch (rn2(5)) {
@@ -122,7 +124,7 @@ int type;
 boolean print;
 struct monst *victim;
 {
-	static NEARDATA const char * const action[] = { "smoulder", "rust", "rot", "corrode" };
+	static NEARDATA const char * const action[] = { "smolder", "rust", "rot", "corrode" };
 	static NEARDATA const char * const msg[] =  { "burnt", "rusted", "rotten", "corroded" };
 	boolean vulnerable = FALSE;
 	boolean grprot = FALSE;

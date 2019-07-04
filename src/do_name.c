@@ -641,7 +641,7 @@ const char *name;
 }
 
 static NEARDATA const char callable[] = {
-	SCROLL_CLASS, POTION_CLASS, WAND_CLASS, RING_CLASS, AMULET_CLASS,
+	SCROLL_CLASS, TILE_CLASS, POTION_CLASS, WAND_CLASS, RING_CLASS, AMULET_CLASS,
 	GEM_CLASS, SPBOOK_CLASS, ARMOR_CLASS, TOOL_CLASS, 0 };
 
 int
@@ -891,6 +891,7 @@ boolean called;
 		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
 		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
 		else if(mtmp->mfaction == FRACTURED) Strcat(buf, ", Witness of the Fracture");
+		else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
 	    return buf;
 	}
 
@@ -957,11 +958,13 @@ boolean called;
 				else if(mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
 				else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
 				else if(mtmp->mfaction == FRACTURED) Strcat(buf, ", Witness of the Fracture");
+				else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
 			} else {
 				if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
 				else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
 				else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
 				else if(mtmp->mfaction == FRACTURED) Strcat(buf, " witness");
+				else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
 			}
 			Sprintf(eos(buf), " called %s", name);
 			
@@ -992,6 +995,7 @@ boolean called;
 		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
 		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
 		else if(mtmp->mfaction == FRACTURED) Strcat(buf, " witness");
+		else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
 	    name_at_start = FALSE;
 	} else {
 	    name_at_start = (boolean)type_is_pname(mdat);
@@ -1024,11 +1028,13 @@ boolean called;
 			else if(mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
 			else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
 			else if(mtmp->mfaction == FRACTURED) Strcat(buf, ", Witness of the Fracture");
+			else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
 		} else {
 			if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
 			else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
 			else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
 			else if(mtmp->mfaction == FRACTURED) Strcat(buf, " witness");
+			else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
 		}
 	}
 

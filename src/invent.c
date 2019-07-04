@@ -1055,7 +1055,7 @@ register const char *let,*word;
 			))
 		|| (!strcmp(word, "wield") &&
 		    ((otmp->oclass == TOOL_CLASS && !is_weptool(otmp)) ||
-			(otmp->oclass == CHAIN_CLASS && otmp->otyp != IRON_CHAIN)))
+			(otmp->oclass == CHAIN_CLASS && otmp->otyp != CHAIN)))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
 		|| (!strcmp(word, "inject") && !(otmp->otyp == HYPOSPRAY_AMPULE && otmp->spe > 0))
 		|| (!strcmp(word, "wind with") && ((otmp->oclass == TOOL_CLASS &&
@@ -1107,7 +1107,7 @@ register const char *let,*word;
 			  otmp->otyp != RAKUYO && otmp->otyp != RAKUYO_SABER
 			 ) ||
 			 (otmp->oclass == CHAIN_CLASS && 
-				(otyp == IRON_CHAIN || otyp == SHEAF_OF_HAY)
+				(otyp == CHAIN || otyp == SHEAF_OF_HAY)
 			 ) ||
 		     (otmp->oclass == POTION_CLASS &&
 		     /* only applicable potion is oil, and it will only
@@ -2215,6 +2215,9 @@ struct obj *obj;
 	else if (obj->oclass == SCROLL_CLASS)
 		add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Cast the spell on this scroll", MENU_UNSELECTED);
+	else if (obj->oclass == TILE_CLASS)
+		add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+				"Speak the glyph on this tile", MENU_UNSELECTED);
 	else if (obj->oclass == SPBOOK_CLASS)
 		add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Study this spellbook", MENU_UNSELECTED);
@@ -2293,7 +2296,7 @@ struct obj *obj;
 		any.a_void = (genericptr_t)doputon;
 		add_menu(win, NO_GLYPH, &any, 'W', 0, ATR_NONE,
 				"Put this amulet on", MENU_UNSELECTED);
-	    } else if (obj->otyp == TOWEL || obj->otyp == BLINDFOLD || obj->otyp == R_LYEHIAN_FACEPLATE) {
+	    } else if (obj->otyp == TOWEL || obj->otyp == BLINDFOLD || obj->otyp == R_LYEHIAN_FACEPLATE || obj->otyp == ANDROID_VISOR) {
 		any.a_void = (genericptr_t)doputon;
 		add_menu(win, NO_GLYPH, &any, 'W', 0, ATR_NONE,
 				"Use this to blindfold yourself", MENU_UNSELECTED);
@@ -4320,18 +4323,21 @@ STATIC_VAR NEARDATA const char *names[] = { 0,
 	"Illegal objects", "Weapons", "Armor", "Rings", "Amulets",
 	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
 	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
-	"Chains", "Venoms"
+	"Scrap", "Venoms", "Tiles"/*, Beds*/
 };
 
 STATIC_VAR NEARDATA const char *bogusclasses[] = {
 	"Illegal objects", "Weapons", "Armor", "Rings", "Amulets",
 	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
 	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
-	"Chains", "Venoms",
-	"Filler","Useless Objects", "Artifacts", "Ascension Kit Items",
+	"Scrap", "Venoms","Tiles",/*, Beds*/
+	"Filler","Useless objects", "Artifacts", "Ascension kit items",
 	"Staves", "Songs", "Drinks", "Grimoires", "Gears", "Cogs",
 	"Marmosets", "Bugs", "Easter Eggs", "Tiny Monuments","Consumables",
-	"Junk", "FOOs", "BARs", "Spoilers", "YANIs", "Splatbooks", "SCPs"
+	"Junk", "FOOs", "BARs", "Spoilers", "YANIs", "Splatbooks", 
+	"Chains", "Paperwork", "Pop-culture references", "Dross",
+	"Pokemon","Forgotten escape items",
+	"SCPs"
 };
 
 static NEARDATA const char oth_symbols[] = {

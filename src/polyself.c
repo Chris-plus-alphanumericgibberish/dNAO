@@ -1382,7 +1382,7 @@ doandroid()
 		return 1;
 	} else if(newspeed == SLOW_CLOCKSPEED){
 		int mult = 30/u.ulevel;
-		int duration = (u.uenmax - u.uen)*mult*2/3, i, lim;
+		int duration = (u.uenmax - u.uen)*mult*2/3+30, i, lim;
 		You("enter sleep mode.");
 		u.ucspeed = NORM_CLOCKSPEED;
 		for (i = 0; i < A_MAX; i++) {
@@ -1544,7 +1544,7 @@ doandroid()
 				if(u.ustuck && u.uswallow)
 					mon = u.ustuck;
 				else mon = m_at(u.ux+clockwisex[(i+j)%8], u.uy+clockwisey[(i+j)%8]);
-				if(mon){
+				if(mon && !mon->mtame){
 					find_to_hit_rolls(mon,&tmp,&weptmp,&tchtmp);
 					hmonwith(mon, tmp, weptmp, tchtmp, twohandercombo, 1);
 				}
@@ -1758,7 +1758,7 @@ int part;
 	    return snakeleg_humanoid_parts[part];
 	if (centauroid(mptr))
 	    return centauroid_parts[part];
-	if (is_clockwork(mptr) || (mon == &youmonst && uclockwork))
+	if ((mon != &youmonst && is_clockwork(mptr)) || (mon == &youmonst && uclockwork))
 	    return clockwork_parts[part];
 	if (humanoid(mptr))
 	    return humanoid_parts[part];
@@ -1949,7 +1949,7 @@ dodroidmenu()
 			incntlet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	} else {
-		Sprintf(buf, "Last rest began on turn %d", u.lastslept);
+		Sprintf(buf, "Last rest began on turn %ld", u.lastslept);
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, 0, buf, MENU_UNSELECTED);
 	}
 	

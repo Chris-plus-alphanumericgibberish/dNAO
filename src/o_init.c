@@ -156,7 +156,7 @@ register char oclass;
 		sum = 0;
 		for(i = first; i < last; i++) sum += objects[i].oc_prob;
 		if(sum == 0) {
-			if(objects[i].oc_class == RING_CLASS)
+			if(objects[first].oc_class == RING_CLASS)
 				first++;//Ring of wishes should remain 0
 			for(i = first; i < last; i++)
 			    objects[i].oc_prob = (1000+i-first)/(last-first);
@@ -198,9 +198,16 @@ shuffle_all()
 			if (oclass == WAND_CLASS)
 			    first += 3;  /* light, darkness, and wishing have fixed descriptions */
 			else if (oclass == AMULET_CLASS ||
-				 oclass == SCROLL_CLASS ||
-				 oclass == SPBOOK_CLASS) {
+				 oclass == TILE_CLASS ||
+				 oclass == SPBOOK_CLASS
+			){
 			    while (!objects[j].oc_magic || objects[j].oc_unique)
+				j--;
+			}
+			else if (oclass == SCROLL_CLASS){
+				j=first;
+			    while (objects[j].oc_magic) //Assumes blank scroll is the sentential
+					j++;
 				j--;
 			}
 

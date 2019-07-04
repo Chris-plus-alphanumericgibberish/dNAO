@@ -346,7 +346,19 @@ struct attack *alt_attk_buf;
 	}
 
 	// Derived undead
-	if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
+	if (mtmp->mfaction == VAMPIRIC){
+		if (attk->aatyp == AT_BITE
+			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+			|| (!derundspec && indx == NATTK - 1)
+		){
+			derundspec = TRUE;
+			attk->aatyp = AT_BITE;
+			attk->adtyp = AD_VAMP;
+			attk->damn = max(1, attk->damn);
+			attk->damd = max(4, max(mtmp->data->msize * 2, attk->damd));
+		}
+	}
+	else if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
 		if (attk->aatyp == AT_SPIT
 			|| attk->aatyp == AT_BREA
 			|| attk->aatyp == AT_GAZE
@@ -453,7 +465,7 @@ struct attack *alt_attk_buf;
 		}
 	}
 	//Bael's alternate attack forms
-	if((mptr == &mons[PM_BAEL])){
+	if(mptr == &mons[PM_BAEL]){
 		static const struct attack marilithHands[6] = {
 			{AT_MARI, AD_PHYS, 1,15},
 			{AT_MARI, AD_PHYS, 1,15},
@@ -1333,7 +1345,7 @@ mattacku(mtmp)
 			    if (foundyou) {
 					for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
 						if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-							|| (otmp->otyp == IRON_CHAIN && mtmp->data == &mons[PM_CATHEZAR])
+							|| (otmp->otyp == CHAIN && mtmp->data == &mons[PM_CATHEZAR])
 							)  && !otmp->oartifact
 							&& otmp != MON_WEP(mtmp) && otmp != MON_SWEP(mtmp)
 							&& !otmp->owornmask
@@ -1342,7 +1354,7 @@ mattacku(mtmp)
 					wcount -= marinum;
 					for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
 						if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-							|| (otmp->otyp == IRON_CHAIN && mtmp->data == &mons[PM_CATHEZAR])
+							|| (otmp->otyp == CHAIN && mtmp->data == &mons[PM_CATHEZAR])
 							)  && !otmp->oartifact
 							&& otmp != MON_WEP(mtmp) && otmp != MON_SWEP(mtmp)
 							&& !otmp->owornmask
@@ -2838,7 +2850,7 @@ dopois:
 				static int jboots1 = 0;
 				if (!jboots1) jboots1 = find_jboots();
 				if (rn2(2) && (uarmf->otyp == LOW_BOOTS ||
-							 uarmf->otyp == IRON_SHOES))
+							 uarmf->otyp == SHOES))
 					pline("%s pricks the exposed part of your %s %s!",
 					Monnam(mtmp), sidestr, body_part(LEG));
 				else if (uarmf->otyp != jboots1 && !rn2(5))
@@ -4707,6 +4719,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 		break;
 	    case AD_STON:
 		if(mtmp->data == &mons[PM_MEDUSA]){
+			static boolean tamemedusa = FALSE;
 			if(mtmp->mcan){
 				if (!canseemon(mtmp)) break;	/* silently */
 				pline("%s doesn't look all that ugly.", Monnam(mtmp));
@@ -4716,12 +4729,16 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 				/* hero has line of sight to Medusa and she's not blind */
 				boolean useeit = canseemon(mtmp);
 
-				if (useeit)
+				if (useeit){
+					if(!(tamemedusa && mtmp->mtame))
 				(void) ureflects("%s image is reflected by your %s.",
 						 s_suffix(Monnam(mtmp)));
-				if (mon_reflects(mtmp, !useeit ? (char *)0 :
-						 "The image is reflected away by %s %s!"))
+				}
+				if (mon_reflects(mtmp, (!useeit || tamemedusa) ? (char *)0 :
+						 "The image is reflected away by %s %s!")){
+					if(mtmp->mtame) tamemedusa = TRUE;
 				break;
+				}
 				if (!m_canseeu(mtmp) || is_blind(mtmp)) { /* probably you're invisible */
 					if (useeit)
 						pline(
@@ -4746,6 +4763,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 				killer = "Poseidon's curse";
 				done(STONING);
 			}
+			tamemedusa = FALSE;
 		}
 		else if (mtmp->mcan || is_blind(mtmp)) {
 		    if (!canseemon(mtmp)) break;	/* silently */

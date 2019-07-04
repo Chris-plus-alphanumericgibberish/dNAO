@@ -1931,7 +1931,7 @@ int thrown;
 					case FOSSIL:
 						if(!is_boulder(obj)) goto defaultvalue;
 					case HEAVY_IRON_BALL:	/* 1d25 */
-					case IRON_CHAIN:		/* 1d4+1 */
+					case CHAIN:		/* 1d4+1 */
 						tmp = dmgval(obj, mon, 0);
 						if(obj && ((is_lightsaber(obj) && litsaber(obj)) || arti_shining(obj))) phasearmor = TRUE;
 					break;
@@ -2321,7 +2321,7 @@ defaultvalue:
 	    } else if ((u.ualign.type == A_LAWFUL) && !Race_if(PM_ORC) &&
 				!((Race_if(PM_DROW) && !flags.initgend && 
 					(Role_if(PM_PRIEST) || Role_if(PM_ROGUE) || Role_if(PM_RANGER) || Role_if(PM_WIZARD)) ) ||
-				  ((Race_if(PM_HUMAN) || Race_if(PM_INCANTIFIER) || Race_if(PM_HALF_DRAGON)) && (Pantheon_if(PM_RANGER) || Role_if(PM_RANGER)))
+				  ((Race_if(PM_HUMAN) || Race_if(PM_INHERITOR) || Race_if(PM_INCANTIFIER) || Race_if(PM_HALF_DRAGON)) && (Pantheon_if(PM_RANGER) || Role_if(PM_RANGER)))
 				 ) && 
 			(u.ualign.record > -10)
 		) {

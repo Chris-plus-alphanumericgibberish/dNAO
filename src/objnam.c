@@ -342,6 +342,9 @@ register int otyp;
 	case SCROLL_CLASS:
 		Strcpy(buf, "scroll");
 		break;
+	case TILE_CLASS:
+		Strcpy(buf, "tile");
+		break;
 	case WAND_CLASS:
 		Strcpy(buf, "wand");
 		break;
@@ -702,7 +705,7 @@ char *buf;
 		Strcat(buf, is_corrodeable(obj) ? "corroded " :
 			"rotted ");
 	}
-	if (obj->ovar1 && obj->otyp == DROVEN_CLOAK) {
+	if (obj->oeroded3) {
 		switch (obj->ovar1) {
 		case 2:	Strcat(buf, "very "); break;
 		case 3:	Strcat(buf, "thoroughly "); break;
@@ -833,7 +836,7 @@ add_poison_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (is_poisonable(obj) && obj->opoisoned){
+	if (obj->opoisoned){
 		if (obj->opoisoned & OPOISON_BASIC) Strcat(buf, "poisoned ");
 		if (obj->opoisoned & OPOISON_FILTH) Strcat(buf, "filth-crusted ");
 		if (obj->opoisoned & OPOISON_SLEEP) Strcat(buf, "drug-coated ");
@@ -865,95 +868,110 @@ add_material_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (id_for_material(obj) ||
-		((obj->obj_material != ((obj->oartifact && artilist[obj->oartifact].material && obj->known) ? artilist[obj->oartifact].material : objects[obj->otyp].oc_material))
-		&& !(is_lightsaber(obj) && litsaber(obj)))){
-		if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
-			Strcat(buf, "pale moonlight ");
-		}
-		else switch (obj->obj_material){
-		case LIQUID: /*Wut?*/
-			Strcat(buf, "liquid ");
-			break;
-		case WAX:
-			Strcat(buf, "wax ");
-			break;
-		case VEGGY:
-			Strcat(buf, "straw ");
-			break;
-		case FLESH:
-			Strcat(buf, "flesh ");
-			break;
-		case PAPER:
-			Strcat(buf, "paper ");
-			break;
-		case CLOTH:
-			if ((obj->oproperties&OPROP_WOOL) == OPROP_WOOL)
-				Strcat(buf, "woolen ");
-			else
-				Strcat(buf, "cloth ");
-			break;
-		case LEATHER:
-			Strcat(buf, "leather ");
-			break;
-		case WOOD:
-			Strcat(buf, "wooden ");
-			break;
-		case BONE:
-			if (obj->oartifact == ART_WEBWEAVER_S_CROOK) Strcat(buf, "chitin ");
-			else Strcat(buf, "bone ");
-			break;
-		case DRAGON_HIDE:
-			if (objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE)
-				obj->oclass == WEAPON_CLASS ? Strcat(buf, "dragon-tooth ") : Strcat(buf, "dragon-bone ");
-			else
-				Strcat(buf, "dragon-scale ");
-			break;
-		case IRON:
-			if (obj->oartifact == ART_STEEL_SCALES_OF_KURTULMAK) Strcat(buf, "steel ");
-			else Strcat(buf, "iron ");
-			break;
-		case METAL:
-			if(!(obj->oproperties&OPROP_LESSW 
-				&& obj->oproperties&OPROP_AXIOW 
-				&& obj->oproperties&(OPROP_FIREW|OPROP_COLDW|OPROP_ELECW)
-				&& obj->known
-			)) Strcat(buf, "metallic ");
-			break;
-		case COPPER:
-			Strcat(buf, "bronze ");
-			break;
-		case SILVER:
-			Strcat(buf, "silver ");
-			break;
-		case GOLD:
-			Strcat(buf, "golden ");
-			break;
-		case PLATINUM:
-			Strcat(buf, "platinum ");
-			break;
-		case MITHRIL:
-			Strcat(buf, "mithril ");
-			break;
-		case PLASTIC:
-			Strcat(buf, "plastic ");
-			break;
-		case GLASS:
-			Strcat(buf, "glass ");
-			break;
-		case GEMSTONE:
-			Strcat(buf, "gem ");
-			break;
-		case MINERAL:
-			obj->oclass == ARMOR_CLASS ? Strcat(buf, "ceramic ") : Strcat(buf, "stone ");
-			break;
-		case OBSIDIAN_MT:
-			Strcat(buf, "obsidian ");
-			break;
-		case SHADOWSTUFF:
-			Strcat(buf, "black ");
-			break;
-		}
+	/*To avoid an if statement with a massive condition, detect cases where the material should NOT be printed, and return out*/
+	/*Avoid obviating randomized appearances*/
+	if(id_for_material(obj) && !obj->known)
+		return;
+	/*Materials don't matter for lit lightsabers, and they should be described in terms of color*/
+	if(is_lightsaber(obj) && litsaber(obj))
+		return;
+	if(obj->oartifact && obj->known){
+		/*Known artifact is made from standard material*/
+		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
+			return;
+	} else {
+		/*Non-artifact is made from standard material, and isn't of a type for which the material is always shown*/
+		if(obj->known && !(objects[obj->otyp].oc_showmat&IDED) && obj->obj_material == objects[obj->otyp].oc_material)
+			return;
+		/*Unknown item is made from standard material, and isn't of a type for which the material is always shown*/
+		if(!obj->known && !(objects[obj->otyp].oc_showmat&UNIDED) && obj->obj_material == objects[obj->otyp].oc_material)
+			return;
+	}
+	if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
+		Strcat(buf, "pale moonlight ");
+	}
+	else switch (obj->obj_material){
+	case LIQUID: /*Wut?*/
+		Strcat(buf, "liquid ");
+		break;
+	case WAX:
+		Strcat(buf, "wax ");
+		break;
+	case VEGGY:
+		Strcat(buf, "straw ");
+		break;
+	case FLESH:
+		Strcat(buf, "flesh ");
+		break;
+	case PAPER:
+		Strcat(buf, "paper ");
+		break;
+	case CLOTH:
+		if ((obj->oproperties&OPROP_WOOL) == OPROP_WOOL)
+			Strcat(buf, "woolen ");
+		else
+			Strcat(buf, "cloth ");
+		break;
+	case LEATHER:
+		Strcat(buf, "leather ");
+		break;
+	case WOOD:
+		Strcat(buf, "wooden ");
+		break;
+	case BONE:
+		if (obj->oartifact == ART_WEBWEAVER_S_CROOK) Strcat(buf, "chitin ");
+		else Strcat(buf, "bone ");
+		break;
+	case DRAGON_HIDE:
+		if (objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE)
+			obj->oclass == WEAPON_CLASS ? Strcat(buf, "dragon-tooth ") : Strcat(buf, "dragon-bone ");
+		else
+			Strcat(buf, "dragon-scale ");
+		break;
+	case IRON:
+		if (obj->oartifact == ART_STEEL_SCALES_OF_KURTULMAK) Strcat(buf, "steel ");
+		else Strcat(buf, "iron ");
+		break;
+	case METAL:
+		if(!(obj->oproperties&OPROP_LESSW 
+			&& obj->oproperties&OPROP_AXIOW 
+			&& obj->oproperties&(OPROP_FIREW|OPROP_COLDW|OPROP_ELECW)
+			&& obj->known
+		)) Strcat(buf, "metallic ");
+		break;
+	case COPPER:
+		Strcat(buf, "bronze ");
+		break;
+	case SILVER:
+		Strcat(buf, "silver ");
+		break;
+	case GOLD:
+		Strcat(buf, "golden ");
+		break;
+	case PLATINUM:
+		Strcat(buf, "platinum ");
+		break;
+	case MITHRIL:
+		Strcat(buf, "mithril ");
+		break;
+	case PLASTIC:
+		Strcat(buf, "plastic ");
+		break;
+	case GLASS:
+		Strcat(buf, "glass ");
+		break;
+	case GEMSTONE:
+		Strcat(buf, "gem ");
+		break;
+	case MINERAL:
+		(obj->oclass == ARMOR_CLASS || obj->oclass == TILE_CLASS) ? Strcat(buf, "ceramic ") : Strcat(buf, "stone ");
+		break;
+	case OBSIDIAN_MT:
+		Strcat(buf, "obsidian ");
+		break;
+	case SHADOWSTUFF:
+		Strcat(buf, "black ");
+		break;
 	}
 }
 
@@ -1068,7 +1086,8 @@ boolean with_price;
 				if (!obj->dknown); //add "ampule" below and finish
 				else if (nn) {
 					if (ptyp == POT_WATER &&
-						obj->bknown && (obj->blessed || obj->cursed)) {
+							obj->bknown && (obj->blessed || obj->cursed)
+						) {
 						Strcat(buf, obj->blessed ? "holy " : "unholy ");
 					}
 					Strcat(buf, pactualn);
@@ -1096,8 +1115,7 @@ boolean with_price;
 				Strcat(buf, " called ");
 				Strcat(buf, un);
 			}
-			else
-				Strcat(buf, dn ? dn : actualn);
+			else Strcat(buf, dn ? dn : actualn);
 			/* If we use an() here we'd have to remember never to use */
 			/* it whenever calling doname() or xname(). */
 			if (typ == FIGURINE)
@@ -1246,6 +1264,7 @@ boolean with_price;
 			}
 			break;
 		case SCROLL_CLASS:
+		if(obj->otyp < SCR_BLANK_PAPER){
 			if (obj->dknown && !un && !ocl->oc_magic)
 			{
 				Strcat(buf, dn);
@@ -1270,6 +1289,45 @@ boolean with_price;
 				// "unlabeled scroll" should be the only case, and is already handled above.
 				;
 			}
+		} else {
+			if (!obj->dknown)
+				Strcat(buf, dn ? dn : actualn);
+			else if (nn)
+				Strcat(buf, actualn);
+			else if (un) {
+				Strcat(buf, dn ? dn : actualn);
+				Strcat(buf, " called ");
+				Strcat(buf, un);
+			}
+			else Strcat(buf, dn ? dn : actualn);
+		}
+	break;
+	case TILE_CLASS:
+		if (obj->dknown && !un && !ocl->oc_magic){
+			Strcat(buf, dn);
+			Strcat(buf, " ");
+		}
+		if(ocl->oc_unique)
+			Strcat(buf, "slab");
+		else
+			Strcat(buf, "tile");
+		if (!obj->dknown) break;
+		if (nn) {
+			Strcat(buf, " bearing the ");
+			Strcat(buf, actualn);
+		}
+		else if (un){
+			Strcat(buf, " called ");
+			Strcat(buf, un);
+		}
+		else if (ocl->oc_magic){
+			Strcat(buf, " with a ");
+			Strcat(buf, dn);
+		}
+		else {
+		// "unlabeled scroll" should be the only case, and is already handled above.
+		;
+		}
 			break;
 		case WAND_CLASS:
 			if (!obj->dknown)
@@ -2256,13 +2314,13 @@ struct obj *obj;
 }
 
 static const char *wrp[] = {
-	"wand", "ring", "potion", "scroll", "gem", "amulet",
+	"wand", "ring", "potion", "scroll", "tile", "gem", "amulet",
 	"spellbook", "spell book",
 	/* for non-specific wishes */
 	"weapon", "armor", "armour", "tool", "food", "comestible",
 };
 static const char wrpsym[] = {
-	WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS, GEM_CLASS,
+	WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS, TILE_CLASS, GEM_CLASS,
 	AMULET_CLASS, SPBOOK_CLASS, SPBOOK_CLASS,
 	WEAPON_CLASS, ARMOR_CLASS, ARMOR_CLASS, TOOL_CLASS, FOOD_CLASS,
 	FOOD_CLASS
@@ -2539,7 +2597,7 @@ STATIC_OVL NEARDATA const struct o_range o_ranges[] = {
 	{ "helm",	ARMOR_CLASS,  LEATHER_HELM, HELM_OF_TELEPATHY },
 	{ "gauntlets",	ARMOR_CLASS,  GLOVES, GAUNTLETS_OF_DEXTERITY },
 	{ "boots",	ARMOR_CLASS,  LOW_BOOTS,      FLYING_BOOTS },
-	{ "shoes",	ARMOR_CLASS,  LOW_BOOTS,      IRON_SHOES },
+	{ "shoes",	ARMOR_CLASS,  LOW_BOOTS,      SHOES },
 	{ "cloak",	ARMOR_CLASS,  MUMMY_WRAPPING, CLOAK_OF_DISPLACEMENT },
 #ifdef TOURIST
 	{ "shirt",	ARMOR_CLASS,  HAWAIIAN_SHIRT, RUFFLED_SHIRT },
@@ -2793,8 +2851,8 @@ struct alt_spellings {
 	{ "leather armour", LEATHER_ARMOR },
 	{ "leather gloves", GLOVES },
 	{ "studded leather armour", STUDDED_LEATHER_ARMOR },
-	{ "chain", IRON_CHAIN },
-	{ "iron chain", IRON_CHAIN },
+	{ "chain", CHAIN },
+	{ "iron chain", CHAIN },
 	{ "iron ball", HEAVY_IRON_BALL },
 	{ "lantern", BRASS_LANTERN },
 	{ "mattock", DWARVISH_MATTOCK },
@@ -2879,6 +2937,18 @@ struct alt_spellings {
 	{ "droven dress", NOBLE_S_DRESS },
 	{ "armored boots", ARMORED_BOOTS },
 	{ "fossil dark", CHUNK_OF_FOSSIL_DARK },
+	{ "aesh", SYLLABLE_OF_STRENGTH__AESH },
+	{ "strength syllable", SYLLABLE_OF_STRENGTH__AESH },
+	{ "krau", SYLLABLE_OF_POWER__KRAU },
+	{ "power syllable", SYLLABLE_OF_POWER__KRAU },
+	{ "hoon", SYLLABLE_OF_LIFE__HOON },
+	{ "life syllable", SYLLABLE_OF_LIFE__HOON },
+	{ "uur", SYLLABLE_OF_GRACE__UUR },
+	{ "grace syllable", SYLLABLE_OF_GRACE__UUR },
+	{ "naen", SYLLABLE_OF_THOUGHT__NAEN },
+	{ "thought syllable", SYLLABLE_OF_THOUGHT__NAEN },
+	{ "vaul", SYLLABLE_OF_SPIRIT__VAUL },
+	{ "spirit syllable", SYLLABLE_OF_SPIRIT__VAUL },
 	{ (const char *)0, 0 },
 };
 
@@ -2948,7 +3018,7 @@ int wishflags;
 		sizewished = FALSE;
 	int objsize = youracedata->msize;
 	long bodytype = 0L;
-	long oproperties = 0L;
+	long long int oproperties = 0L;
 	char oclass;
 	char *un, *dn, *actualn;
 	const char *name=0;
@@ -4148,7 +4218,7 @@ typfnd:
 		case SLIME_MOLD: otmp->spe = ftype;
 			/* Fall through */
 		case SKELETON_KEY: case UNIVERSAL_KEY: case CHEST: case BOX:
-		case HEAVY_IRON_BALL: case IRON_CHAIN: case STATUE:
+		case HEAVY_IRON_BALL: case CHAIN: case STATUE:
 			/* otmp->cobj already done in mksobj() */
 				break;
 #ifdef MAIL
@@ -4333,7 +4403,7 @@ typfnd:
 	    if (eroded2 && (is_corrodeable(otmp) || is_rottable(otmp)))
 		    otmp->oeroded2 = eroded2;
 	    if (eroded3 && otmp->otyp == DROVEN_CLOAK)
-		    otmp->ovar1 = eroded3;
+		    otmp->oeroded3 = eroded3;
 
 	    /* set erodeproof */
 	    if (erodeproof && !eroded && !eroded2)

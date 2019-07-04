@@ -200,6 +200,7 @@ STATIC_VAR int cham_to_pm[] = {
 			 ((mon)->data->geno & G_UNIQ) ||		\
 			 is_reviver((mon)->data) ||			\
 			 ((mon)->mfaction == ZOMBIFIED) ||			\
+			 ((mon)->mfaction == VAMPIRIC) ||			\
 			 ((mon)->zombify) ||			\
 			 ((mon)->data == &mons[PM_UNDEAD_KNIGHT]) ||			\
 			 ((mon)->data == &mons[PM_WARRIOR_OF_SUNLIGHT]) ||			\
@@ -576,9 +577,9 @@ register struct monst *mtmp;
 			mtmp->mnamelth = 0;
 			num = d(2,4);
 			while (num--){
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				obj->oeroded = 3;
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				obj->oeroded = 3;
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 				obj->oeroded = 3;
@@ -599,8 +600,8 @@ register struct monst *mtmp;
 			obj->owt = weight(obj);
 			num = d(2,6);
 			while (num--){
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 			}
 			mtmp->mnamelth = 0;
@@ -660,7 +661,7 @@ register struct monst *mtmp;
 	    case PM_IRON_GOLEM:
 			num = d(2,6);
 			while (num--){
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				obj = mksobj_at(KITE_SHIELD, x, y, TRUE, FALSE);
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 			}
@@ -669,7 +670,7 @@ register struct monst *mtmp;
 	    case PM_CHAIN_GOLEM:
 			num = d(6,6);
 			while (num--){
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -813,6 +814,11 @@ register struct monst *mtmp;
 			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
 			obj->corpsenm = PM_ELF;
 			obj->quan = 2;
+			num = rn1(10,10);
+			while (num--){
+				obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+				obj->corpsenm = humanoid_eyes[rn2(SIZE(humanoid_eyes))];
+			}
 			num = rn1(10,10);
 			while (num--){
 				obj = mksobj_at(WORM_TOOTH, x, y, FALSE, FALSE);
@@ -1915,6 +1921,7 @@ movemon()
 	){
 		if(canseemon(mtmp)) pline("%s gets angry...", mon_nam(mtmp));
 		mtmp->mpeaceful = 0;
+		mtmp->mtame = 0;
 	}
 	if(mtmp->data == &mons[PM_UVUUDAUM]){
 		if(u.uevent.invoked 
@@ -2347,6 +2354,7 @@ mon_can_see_mon(looker, lookie)
 	
 	if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1 && !rn2(8)) return TRUE;
 	if((darksight(looker->data) || (catsight(looker->data) && catsightdark)) && !is_blind(looker)){
+		if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1) return TRUE;
 		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
 			if(levl[lookie->mx][lookie->my].lit){
 				if(viz_array[lookie->my][lookie->mx]&TEMP_DRK1 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT1))
@@ -4205,6 +4213,7 @@ boolean was_swallowed;			/* digestion */
 		   || mdat == &mons[PM_PLATINUM_DRAGON]
 		   || mdat == &mons[PM_CHANGED]
 		   || mdat == &mons[PM_WARRIOR_CHANGED]
+		   || mdat == &mons[PM_TWITCHING_FOUR_ARMED_CHANGED]
 		   || mdat == &mons[PM_CLAIRVOYANT_CHANGED]
 //		   || mdat == &mons[PM_PINK_UNICORN]
 		   )

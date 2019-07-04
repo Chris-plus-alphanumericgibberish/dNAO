@@ -2843,18 +2843,167 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	boolean youattack = (magr == &youmonst);
 	boolean youdefend = (mdef == &youmonst);
 	boolean vis = (!youattack && magr && cansee(magr->mx, magr->my))
-	    || (!youdefend && cansee(mdef->mx, mdef->my))
-	    || (youattack && u.uswallow && mdef == u.ustuck && !Blind);
-	boolean messaged=FALSE;
+		|| (!youdefend && cansee(mdef->mx, mdef->my))
+		|| (youattack && u.uswallow && mdef == u.ustuck && !Blind);
+	boolean messaged = FALSE;
 	static const char you[] = "you";
 	char hittee[BUFSZ];
 	int basedmg = *dmgptr;
-	
+
 	Strcpy(hittee, youdefend ? you : mon_nam(mdef));
-	
+
 	//Add the bonus damage
 	//*dmgptr += otyp_dbon(mdef, otmp, *dmgptr);
 	
+	if (otmp->otyp == TORCH && otmp->lamplit) {
+		if (youdefend) {
+			if (!Fire_resistance){
+				if (species_resists_cold(&youmonst)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+			}
+			if (!InvFire_resistance){
+				if (!rn2(3)) destroy_item(SCROLL_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_item(SPBOOK_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
+			}
+		}
+		else if (mdef){
+			if (!species_resists_fire(mdef)) {
+				if (species_resists_cold(mdef)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+				if (!rn2(3)) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+			}
+		}
+	}
+	if (otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit){
+		if (youdefend) {
+			if (!Cold_resistance){
+				if (species_resists_fire(&youmonst)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+			}
+			if (!InvCold_resistance){
+				if (!rn2(3)) destroy_item(POTION_CLASS, AD_COLD);
+			}
+		}
+		else if (mdef){
+			if (!species_resists_cold(mdef)) {
+				if (species_resists_fire(mdef)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+				if (!rn2(3)) destroy_mitem(mdef, POTION_CLASS, AD_COLD);
+			}
+		}
+	}
+	if (otmp->otyp == SUNROD && otmp->lamplit) {
+		if (youdefend) {
+			if (!(Shock_resistance && Acid_resistance)){
+				if (!(Shock_resistance || Acid_resistance)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+			}
+			if (!InvShock_resistance){
+				if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+				if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+			}
+			if (!InvAcid_resistance){
+				if (rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
+			}
+			if (!resists_blnd(&youmonst)) {
+				You("are blinded by the flash!");
+				make_blinded((long)d(1, 50), FALSE);
+				if (!Blind) Your1(vision_clears);
+			}
+		}
+		else if (mdef){
+			if (!(resists_elec(mdef) && resists_acid(mdef))) {
+				if (!(resists_elec(mdef) || resists_acid(mdef)))
+					(*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+				if (!resists_acid(mdef))
+					if (rn2(3)) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+				if (!resists_elec(mdef)){
+					if (!rn2(3)) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
+					if (!rn2(3)) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(mdef) &&
+					!(!flags.mon_moving && u.uswallow && mdef == u.ustuck)) {
+					register unsigned rnd_tmp = rnd(50);
+					mdef->mcansee = 0;
+					if ((mdef->mblinded + rnd_tmp) > 127)
+						mdef->mblinded = 127;
+					else mdef->mblinded += rnd_tmp;
+				}
+			}
+		}
+	}
+
+	if (otmp->otyp == KAMEREL_VAJRA && litsaber(otmp)) {
+		if (otmp->where == OBJ_MINVENT && otmp->ocarry->data == &mons[PM_ARA_KAMEREL]){
+			if (youdefend){
+				if (!Shock_resistance){
+					(*dmgptr) += d(6, 6);
+				}
+				if (!InvShock_resistance){
+					if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+					if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(&youmonst)) {
+					You("are blinded by the flash!");
+					make_blinded((long)d(1, 50), FALSE);
+					if (!Blind) Your1(vision_clears);
+				}
+			}
+			else if (mdef){
+				if (!resists_elec(mdef)){
+					(*dmgptr) += d(6, 6); //wand of lightning
+					if (!rn2(3)) (void)destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
+					/* not actually possible yet */
+					if (!rn2(3)) (void)destroy_mitem(mdef, RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(mdef) &&
+					!(!flags.mon_moving && u.uswallow && mdef == u.ustuck)) {
+					register unsigned rnd_tmp = rnd(50);
+					mdef->mcansee = 0;
+					if ((mdef->mblinded + rnd_tmp) > 127)
+						mdef->mblinded = 127;
+					else mdef->mblinded += rnd_tmp;
+				}
+			}
+		}
+		else {
+			if (youdefend){
+				if (!Shock_resistance){
+					(*dmgptr) += d(2, 6);
+				}
+				if (!InvShock_resistance){
+					if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+					if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(&youmonst)) {
+					You("are blinded by the flash!");
+					make_blinded((long)d(1, 50), FALSE);
+					if (!Blind) Your1(vision_clears);
+				}
+			}
+			else if (mdef){
+				if (!resists_elec(mdef)){
+					(*dmgptr) += d(2, 6); //wand of lightning
+					if (!rn2(3)) (void)destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
+					/* not actually possible yet */
+					if (!rn2(3)) (void)destroy_mitem(mdef, RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(mdef) &&
+					!(!flags.mon_moving && u.uswallow && mdef == u.ustuck)) {
+					register unsigned rnd_tmp = rnd(50);
+					mdef->mcansee = 0;
+					if ((mdef->mblinded + rnd_tmp) > 127)
+						mdef->mblinded = 127;
+					else mdef->mblinded += rnd_tmp;
+				}
+			}
+		}
+	}
+
 	if(pure_weapon(otmp) && otmp->spe >= 6){
 		if(youattack){
 			if(Upolyd && u.mh == u.mhmax)

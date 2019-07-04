@@ -3247,7 +3247,7 @@ struct obj **optr;
 	}
 	
 	if(ttmp) {
-		if(otmp->ovar1) otmp->ovar1--;
+		if(otmp->oeroded3) otmp->oeroded3--;
 		pline("The cloak sweeps up a web!");
 		if(!Is_lolth_level(&u.uz)){ //results in unlimited recharging in lolths domain, no big deal
 			deltrap(ttmp);
@@ -3256,7 +3256,7 @@ struct obj **optr;
 		if(rx==u.ux && ry==u.uy) u.utrap = 0;
 		else if(mtmp) mtmp->mtrapped = 0;
 	}
-	else if(!(otmp->oartifact) || otmp->ovar1 < 3){
+	else if(!(otmp->oartifact) || otmp->oeroded3 < 3){
 		ttmp = maketrap(rx, ry, WEB);
 		if(ttmp){
 			pline("A web spins out from the cloak!");
@@ -3269,11 +3269,11 @@ struct obj **optr;
 			if(rx==u.ux && ry==u.uy) dotrap(ttmp, NOWEBMSG);
 			else if(mtmp) mintrap(mtmp);
 		} else pline("The cloak cannot spin a web there!");
-		if(++otmp->ovar1 > 3){
+		if(otmp->oeroded3 == 3){
 			useup(otmp);
 			*optr = 0;
 			pline("The thoroughly tattered cloak falls to pieces");
-		}
+		} else otmp->oeroded3++;
 	} else {
 		pline("The cloak cannot spin any more webs.");
 		return 0;
@@ -3997,7 +3997,7 @@ struct obj *obj;
 				You("smell acrid fumes.");
 				pline("%s speaks.", Something);
 			}
-			verbalize("You have summoned me.  I will grant one wish!");
+			verbalize("I am the djinni of the ring.  I will grant one wish!");
 			makewish(allow_artwish()|WISH_VERBOSE);
 			mongone(mtmp);
 			obj->spe--;
@@ -5362,12 +5362,9 @@ doapply()
 	if(obj->oartifact == ART_SILVER_STARLIGHT) res = do_play_instrument(obj);
 	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) use_lamp(obj);
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
-	
-	if(obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER){
+	else if(obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER){
 		return use_rakuyo(obj);
-	}
-	
-	else switch(obj->otyp){
+	} else switch(obj->otyp){
 	case BLINDFOLD:
 	case ANDROID_VISOR:
 	case LENSES:

@@ -6,6 +6,13 @@
 
 #include "hack.h"
 #include "edog.h"
+#include "artifact.h"
+#ifdef OVLB
+#include "artilist.h"
+#else
+STATIC_DCL struct artifact artilist[];
+#endif
+
 
 #ifndef NO_SIGNAL
 #include <signal.h>
@@ -16,6 +23,7 @@ STATIC_DCL void NDECL(do_positionbar);
 #endif
 
 STATIC_DCL void NDECL(androidUpkeep);
+STATIC_DCL int NDECL(do_inheritor_menu);
 #ifdef OVL0
 
 extern const int monstr[];
@@ -365,12 +373,12 @@ androidUpkeep()
 		int mult = 30/u.ulevel;
 		//Possibly pass out if you begin this step with 0 energy.
 		if(u.uen == 0 && !rn2(10+u.ulevel) && moves >= u.nextsleep){
-			int t = rn1(u.uenmax*mult, u.uenmax*mult);
+			int t = rn1(u.uenmax*mult+40, u.uenmax*mult+40);
 			You("pass out from exhaustion!");
 			u.nextsleep = moves+rnz(350)+t;
 			u.lastslept = moves;
 			fall_asleep(-t, TRUE);
-			nomul(-1*u.uenmax/mult, "passed out from exhaustion");
+			nomul(-1*u.uenmax, "passed out from exhaustion");
 		}
 		if(u.phasengn){
 			u.uen -= 10;
@@ -462,7 +470,7 @@ you_regen_hp()
 	
 	// "Natural" regeneration has stricter limitations
 	if (u.regen_blocked > 0) u.regen_blocked--;		// not regen_blocked (NOTE: decremented here)
-	else if (!nonliving(youracedata) &&				// not nonliving
+	else if (!(nonliving(youracedata) && !uandroid) &&	// not nonliving, however, androids auto-repair while asleep
 		!Race_if(PM_INCANTIFIER) &&					// not incantifier (including while polymorphed)
 		(wtcap < MOD_ENCUMBER || !u.umoved) &&		// not overloaded
 		!(uwep && uwep->oartifact == ART_ATMA_WEAPON && uwep->lamplit && !Drain_resistance && rn2(4)) // 3 in 4 chance of being prevented by Atma Weapon
@@ -1254,7 +1262,7 @@ karemade:
 			
 		    if(!(Is_illregrd(&u.uz) && u.ualign.type == A_LAWFUL && !u.uevent.uaxus_foe) && /*Turn off random generation on axus's level if lawful*/
 				!rn2(u.uevent.udemigod ? 25 :
-				(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !Is_qstart(&u.uz)) ? 35 :
+				(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(Is_qstart(&u.uz) && !(quest_status.leader_is_dead))) ? 35 :
 			    (depth(&u.uz) > depth(&stronghold_level)) ? 50 : 70)
 			){
 				if (u.uevent.invoked && xupstair && rn2(10)) {
@@ -1262,7 +1270,7 @@ karemade:
 				} //TEAM ATTACKS
 				if(In_sokoban(&u.uz)){
 					if(u.uz.dlevel != 1 && u.uz.dlevel != 4) makemon((struct permonst *)0, xupstair, yupstair, MM_ADJACENTSTRICT|MM_ADJACENTOK);
-				} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+				} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
 					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
@@ -1270,7 +1278,7 @@ karemade:
 				}
 				else (void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
 			}
-			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !Is_qstart(&u.uz) && !rn2(35)){
+			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(Is_qstart(&u.uz) && !Race_if(PM_ANDROID)) && !rn2(35)){
 				struct monst* mtmp = makemon(&mons[PM_SEMBLANCE], rn1(COLNO-3,2), rn1(ROWNO-3,2), MM_ADJACENTOK);
 				//"Where stray illuminations from the Far Realm leak onto another plane, matter stirs at the beckoning of inexplicable urges before burning to ash."
 				if(mtmp && canseemon(mtmp)) pline("The base matter of the world stirs at the beckoning of inexplicable urges, dancing with a semblance of life.");
@@ -1591,7 +1599,9 @@ karemade:
 				}
 			} else if(u.utemp) u.utemp = 0;
 			
-			if(u.uinwater) u.uboiler = MAX_BOILER;
+			if(u.uinwater && !u.umoved){
+				if(uclockwork) u.uboiler = MAX_BOILER;
+			}
 			
 			if(u.ukinghill){
 				if(u.protean > 0) u.protean--;
@@ -1777,6 +1787,9 @@ karemade:
 					}
 				}
 			}
+		}
+		if(u.uinwater){//Moving around will also call this, so your stuff degrades faster if you move
+			water_damage(invent, FALSE, FALSE, level.flags.lethe, &youmonst);
 		}
 
 		hpDiff -= u.uhp;
@@ -2232,7 +2245,60 @@ newgame()
 	if(Darksight) litroom(FALSE,NULL);
 	/* Success! */
 	welcome(TRUE);
+	if(Race_if(PM_INHERITOR)){
+		int inherited;
+		struct obj *otmp;
+		do{inherited = do_inheritor_menu();}while(!inherited);
+		otmp = mksobj((int)artilist[inherited].otyp, FALSE, FALSE);
+	    otmp = oname(otmp, artilist[inherited].name);
+		expert_weapon_skill(weapon_type(otmp));
+		discover_artifact(inherited);
+		fully_identify_obj(otmp);
+	    otmp = hold_another_object(otmp, "Oops!  %s to the floor!",
+				       The(aobjnam(otmp, "slip")), (const char *)0);
+	    // otmp->oartifact = inherited;
+	}
 	return;
+}
+
+STATIC_OVL int
+do_inheritor_menu()
+{
+	winid tmpwin;
+	int n, how, i;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	for (i = 1; i<=NROFARTIFACTS; i++)
+	{
+		// if ((artilist[i].spfx2) && artilist[i].spfx && artilist[i].spfx)
+		if(artilist[i].spfx&SPFX_INHER
+		&& !Role_if(artilist[i].role)
+		&& !Pantheon_if(artilist[i].role)
+		&& (artilist[i].alignment == A_NONE
+			|| artilist[i].alignment == u.ualign.type)
+		){
+			Sprintf(buf, "%s", artilist[i].name);
+			any.a_int = i;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet == 'z') ? 'A' : (incntlet == 'Z') ? 'a' : (incntlet + 1);
+		}
+	}
+
+	end_menu(tmpwin, "Which artifact did you inherit?");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? selected[0].item.a_int : 0;
 }
 
 /* show "welcome [back] to nethack" message at program startup */

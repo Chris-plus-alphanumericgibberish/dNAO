@@ -21,7 +21,7 @@
 boolean	known;
 
 static NEARDATA const char readable[] =
-		   { ALL_CLASSES, SCROLL_CLASS, SPBOOK_CLASS, 0 };
+		   { ALL_CLASSES, SCROLL_CLASS, TILE_CLASS, SPBOOK_CLASS, 0 };
 static const char all_count[] = { ALLOW_COUNT, ALL_CLASSES, 0 };
 
 static void FDECL(wand_explode, (struct obj *));
@@ -33,6 +33,7 @@ static void FDECL(randomize,(int *, int));
 static void FDECL(forget_single_object, (int));
 static void FDECL(maybe_tame, (struct monst *,struct obj *));
 static void FDECL(ranged_set_lightsources, (int, int, genericptr_t));
+static int FDECL(read_tile, (struct obj *));
 
 int
 doread()
@@ -467,8 +468,11 @@ doread()
 			return 1;
 		}
 #endif	/* TOURIST */
+	} else if (scroll->oclass == TILE_CLASS){
+		return read_tile(scroll);
 	} else if (scroll->oclass != SCROLL_CLASS
-		&& scroll->oclass != SPBOOK_CLASS) {
+		&& scroll->oclass != SPBOOK_CLASS
+	) {
 	    pline(silly_thing_to, "read");
 	    return(0);
 	} else if (Blind) {
@@ -535,6 +539,17 @@ doread()
 		else scroll->in_use = FALSE;
 	}
 	return(1);
+}
+
+static
+int
+read_tile(scroll)
+struct obj *scroll;
+{
+	if(!scroll->known){
+		You("don't know how to pronounce the glyph!");
+		return 0;
+	}
 }
 
 static void
@@ -1366,10 +1381,11 @@ struct obj	*sobj;
 	    break;
 	case SCR_CONFUSE_MONSTER:
 	case SPE_CONFUSE_MONSTER:
-		if(youracedata->mlet != S_HUMAN || sobj->cursed) {
-			if(!HConfusion) You_feel("confused.");
-			make_confused(HConfusion + rnd(100),FALSE);
-		} else  if(confused) {
+		// if(youracedata->mlet != S_HUMAN || sobj->cursed) {
+			// if(!HConfusion) You_feel("confused.");
+			// make_confused(HConfusion + rnd(100),FALSE);
+		// } else  if(confused) {
+		if(confused) {
 		    if(!sobj->blessed) {
 			Your("%s begin to %s%s.",
 			    makeplural(body_part(HAND)),
@@ -2931,6 +2947,8 @@ int gen_restrict;
 					undeadtype = CRYSTALFIED;
 				else if (!strcmpi(p, "witness"))
 					undeadtype = FRACTURED;
+				else if (!strcmpi(p, "vampiric"))
+					undeadtype = VAMPIRIC;
 				else
 				{
 					// no undead suffix was used, undo the split
@@ -2938,6 +2956,7 @@ int gen_restrict;
 				}
 			}
 			break;
+		case VAMPIRIC:
 		case ZOMBIFIED:
 		case SKELIFIED:
 		case CRYSTALFIED:
@@ -3035,6 +3054,7 @@ createmon:
 			if (!mtmp->mfaction && (
 				undeadtype == ZOMBIFIED ? can_undead_mon(mtmp) :
 				undeadtype == SKELIFIED ? can_undead_mon(mtmp) :
+				undeadtype == VAMPIRIC ? can_undead_mon(mtmp) :
 				undeadtype == CRYSTALFIED ? TRUE :
 				undeadtype == FRACTURED ? is_kamerel(mtmp->data) : 0
 				))

@@ -424,22 +424,10 @@ boolean artif;
 	otmp->fromsink = 0;
 	otmp->mp = (struct mask_properties *) 0;
 	
-	if(otyp == SABER) otmp->obj_material = SILVER;
-	else if(otyp == KHAKKHARA) otmp->obj_material = SILVER;
-	else if(otyp == CHAKRAM) otmp->obj_material = SILVER;
-	else if(otyp == GLOVES) otmp->obj_material = LEATHER;
-	else if(otyp == BAR) otmp->obj_material = IRON;
-	else if(otyp == VIPERWHIP) otmp->obj_material = SILVER;
-	else if(otyp == find_gcirclet()) otmp->obj_material = GOLD;
+	if(otyp == find_gcirclet()) otmp->obj_material = GOLD;
 	else if(otyp == SPEAR && !rn2(25)) otmp->obj_material = SILVER;
 	else if(otyp == DAGGER && !rn2(12)) otmp->obj_material = SILVER;
 	else if(otyp == STILETTOS && !rn2(12)) otmp->obj_material = SILVER;
-	else if(otyp == ARMORED_BOOTS) otmp->obj_material = COPPER;
-	else if(otyp == ROUNDSHIELD) otmp->obj_material = COPPER;
-	else if(otyp == LIGHTSABER) otmp->obj_material = SILVER;
-	else if(otyp == BEAMSWORD) otmp->obj_material = GOLD;
-	else if(otyp == KAMEREL_VAJRA) otmp->obj_material = GOLD;
-	else if(otyp == DOUBLE_LIGHTSABER) otmp->obj_material = PLATINUM;
 	else otmp->obj_material = objects[otyp].oc_material;
 	
 	if(otyp == VIPERWHIP) otmp->ovar1 = rn2(2) ? 1 : rn2(5) ? rnd(2) : rnd(5);
@@ -1163,6 +1151,8 @@ boolean artif;
 		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
 	break;
 	case COIN_CLASS:
+	// case BED_CLASS:
+	case TILE_CLASS:
 		break;	/* do nothing */
 	default:
 		impossible("impossible mkobj %d, sym '%c'.", otmp->otyp,
@@ -1577,9 +1567,9 @@ int mat;
 			else obj->otyp = GAUNTLETS;
 		break;
 		case LOW_BOOTS:
-			if(mat == IRON) obj->otyp = IRON_SHOES;
+			if(mat == IRON) obj->otyp = SHOES;
 		break;
-		case IRON_SHOES:
+		case SHOES:
 			obj->otyp = LOW_BOOTS;
 		break;
 		case BRONZE_PLATE_MAIL:
@@ -1633,7 +1623,7 @@ int mat;
 		// case HEAVY_IRON_BALL:
 			// obj->otyp = ;
 		// break;
-		// case IRON_CHAIN:
+		// case CHAIN:
 			// obj->otyp = ;
 		// break;
 		// case IRON_BANDS:
