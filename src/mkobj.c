@@ -1016,13 +1016,7 @@ boolean artif;
 #else
 			otmp->oerodeproof = otmp->rknown = 1;
 #endif
-		}
-		if(is_evaporable(otmp)){
-			start_timer(1, TIMER_OBJECT,
-					LIGHT_DAMAGE, (genericptr_t)otmp);
-		}
-
-		
+		}		
 		/* MRKR: Mining helmets have lamps */
 		if (otmp->otyp == DWARVISH_HELM) {
 		    otmp->age = (long) rn1(300,300);//Many fewer turns than brass lanterns, as there are so many.
@@ -1554,6 +1548,11 @@ struct obj* obj;
 	if (!set && otyp == find_gcirclet())
 		set_material(obj, GOLD);
 #undef set
+	/* start the timer for shadowsteel objects */
+	if (is_evaporable(obj)){
+		start_timer(1, TIMER_OBJECT,
+			LIGHT_DAMAGE, (genericptr_t)obj);
+	}
 	return;
 }
 
@@ -1769,6 +1768,11 @@ int mat;
 	}
 	//Silver bell should resist
 	
+	/* start the timer for shadowsteel objects */
+	if (is_evaporable(obj)){
+		start_timer(1, TIMER_OBJECT,
+			LIGHT_DAMAGE, (genericptr_t)obj);
+	}
 	fix_object(obj);
 	
 	if(owner == &youmonst){

@@ -329,7 +329,7 @@ const struct material materials[] = {
 	{GEMSTONE,		CLR_RED,		 36,		500,		 7	},
 	{MINERAL,		CLR_GRAY,		 27,		 10,		 6	},
 	{OBSIDIAN_MT,	CLR_BLACK,		 26,		 10,		 4	},
-	{SHADOWSTUFF,	CLR_BLACK,		 10,		 50,		 6	}
+	{SHADOWSTEEL,	CLR_BLACK,		 27,		 50,		 6	}
 };
 
 /* Vision */

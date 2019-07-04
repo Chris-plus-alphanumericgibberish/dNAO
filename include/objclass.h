@@ -64,7 +64,7 @@ struct objclass {
 #define GEMSTONE	20
 #define MINERAL		21
 #define OBSIDIAN_MT	22
-#define SHADOWSTUFF	23
+#define SHADOWSTEEL	23
 	Bitfield(oc_showmat,4);
 #define UNIDED	1	/* always show material when base object type is unknown */
 #define IDED	2	/* always show material when base object type is known */
@@ -83,7 +83,7 @@ struct objclass {
 /* secondary damage: rot/acid/acid */
 #define is_corrodeable(otmp)	((otmp)->obj_material == COPPER || (otmp)->obj_material == IRON)
 
-#define is_evaporable(otmp)	(otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == DROVEN_HELM || otmp->otyp == NOBLE_S_DRESS)
+#define is_evaporable(otmp)	((otmp)->obj_material == SHADOWSTEEL)
 
 /* no partial damage available, but much the same */
 #define is_shatterable(otmp) (((otmp)->obj_material == GLASS || (otmp)->obj_material == OBSIDIAN_MT) && otmp->oclass != GEM_CLASS)

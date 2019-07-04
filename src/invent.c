@@ -3098,9 +3098,6 @@ winid *datawin;
 		otyp == WHITE_FACELESS_ROBE ||
 		otyp == BLACK_FACELESS_ROBE ||
 		otyp == SMOKY_VIOLET_FACELESS_ROBE)		OBJPUTSTR("Covers the face entirely.");
-	else if (otyp == DROVEN_HELM ||
-		otyp == DROVEN_PLATE_MAIL ||
-		otyp == DROVEN_CHAIN_MAIL)				OBJPUTSTR("Dissolves in light.");
 	/* and some obscure usage mechanics of fixed-appearance items */
 	else if (otyp == RIN_WISHES)				OBJPUTSTR("Can be invoked while worn.");
 	else if (otyp == CANDLE_OF_INVOCATION)		OBJPUTSTR("Can be invoked while lit.");

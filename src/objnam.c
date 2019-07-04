@@ -976,8 +976,8 @@ boolean adjective;
 		break;
 	case OBSIDIAN_MT:
 		return "obsidian";
-	case SHADOWSTUFF:
-		return (adjective ? "black" : "shadow");
+	case SHADOWSTEEL:
+		return "shadowsteel";
 	default:
 		return (adjective ? "mysterious" : "an enigma in solid form");
 	}
@@ -3434,6 +3434,8 @@ int wishflags;
 			&& strncmpi(bp, "obsidian stone", 14) && strncmpi(bp, "obsidian gem", 12)
 			) {
 			mat = OBSIDIAN_MT;
+		} else if (!strncmpi(bp, "shadowsteel ", l=12)) {
+			mat = SHADOWSTEEL;
 		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)
 			) {
 			oproperties |= OPROP_WOOL;
@@ -4484,6 +4486,13 @@ typfnd:
 	if(mat){
 		if (wizwish) {
 			otmp->obj_material = mat;
+			/* start the timer for shadowsteel objects -- this is normally done as part of set_material,
+			 * but directly setting the material like this will bypass it
+			 */
+			if (is_evaporable(otmp)){
+				start_timer(1, TIMER_OBJECT,
+					LIGHT_DAMAGE, (genericptr_t)otmp);
+			}
 		}
 		else {
 			if(otmp->oclass == WEAPON_CLASS && !otmp->oartifact){
