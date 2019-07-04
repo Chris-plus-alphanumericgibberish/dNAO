@@ -5587,7 +5587,7 @@ arti_invoke(obj)
 			if (otmp->cursed) uncurse(otmp);
 			otmp->oerodeproof = TRUE;
 			dropy(otmp);
-		    pline("An object apears at your feet");
+		    pline("An object apears at your feet!");
 		}
 	break;
 	case DANCE_DAGGER:
@@ -5598,9 +5598,31 @@ arti_invoke(obj)
 			if (otmp->cursed) uncurse(otmp);
 			otmp->oerodeproof = TRUE;
 			dropy(otmp);
-		    pline("An object apears at your feet");
+		    pline("An object apears at your feet!");
 		}	
-	break;	
+	break;
+	case SUMMON_FIRE:
+		if(!exist_artifact(SHORT_SWORD, "Fire Brand") ){
+			otmp = mksobj(SHORT_SWORD, TRUE, FALSE);
+			otmp = oname(otmp, artiname(ART_FIRE_BRAND));		
+			if (otmp->spe < 0) otmp->spe = 0;
+			if (otmp->cursed) uncurse(otmp);
+			otmp->oerodeproof = TRUE;
+			dropy(otmp);
+		    pline("An object apears at your feet!");
+		}	
+	break;
+	case SUMMON_FROST:
+		if(!exist_artifact(SHORT_SWORD, "Frost Brand") ){
+			otmp = mksobj(SHORT_SWORD, TRUE, FALSE);
+			otmp = oname(otmp, artiname(ART_FROST_BRAND));		
+			if (otmp->spe < 0) otmp->spe = 0;
+			if (otmp->cursed) uncurse(otmp);
+			otmp->oerodeproof = TRUE;
+			dropy(otmp);
+		    pline("An object apears at your feet!");
+		}
+	break;
 	case SEVENFOLD:
 //Ruat:  Fall.  Makes a pit.  One charge.
 //Coelum: Heaven.  Casts cure.  One charge.
@@ -7167,7 +7189,8 @@ arti_invoke(obj)
 				}
 			}
 			return 1;
-		}break;
+		}
+		break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
