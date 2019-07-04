@@ -1302,7 +1302,7 @@ OBJECT(OBJ("secrets", "ragged leather"), BITS(0,0,1,0,1,0,1,1,0,0,0,P_NONE,PAPER
 WAND("light",          "glass",    90, 100, 1, NODIR,     GLASS,    CLR_WHITE),/*Needs tile?*/
 WAND("darkness",       "obsidian", 10, 100, 1, NODIR,     OBSIDIAN_MT,    CLR_BLACK),/*Needs tile*/
 WAND("wishing",        "dragon-bone",
-					0, 500, 1, NODIR,     BONE,     CLR_WHITE),	/* should not exist */
+					0, 500, 1, NODIR,     DRAGON_HIDE,     CLR_WHITE),	/* should not exist */
 WAND("secret door detection", "balsa",
 				   50, 150, 1, NODIR,	  WOOD,     HI_WOOD),
 WAND("enlightenment",  "crystal",  18, 150, 1, NODIR,     GLASS,    HI_GLASS),

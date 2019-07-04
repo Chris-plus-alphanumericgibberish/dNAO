@@ -863,6 +863,123 @@ char *buf;
 		Strcat(buf, " ");
 	}
 }
+/* general function to find the best name for the material of an object, regardless of whether or not that will be visible 
+ * If adjective is true, give an adjective (ie wooden dagger). If adjective is false, give a noun (ie made of wood).
+ */
+const char *
+material_name(obj, adjective)
+struct obj* obj;
+boolean adjective;
+{
+	const char * s;
+
+	/* extra special case */
+	if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
+		return "pale moonlight";
+	}
+
+	switch (obj->obj_material){
+	case LIQUID:
+		return "liquid";
+	case WAX:
+		return "wax";
+	case VEGGY:
+		if (obj->otyp == SEDGE_HAT || obj->otyp == SHEAF_OF_HAY)
+			return "straw";
+		else
+			return (adjective ? "organic" : "organic material");
+	case FLESH:
+		if (obj->otyp == MEATBALL || obj->otyp == MEAT_STICK || obj->otyp == MEAT_RING || obj->otyp == MASSIVE_CHUNK_OF_MEAT)
+			return "meat";
+		else
+			return "flesh";
+	case PAPER:
+		return "paper";
+	case CLOTH:
+		if ((obj->oproperties&OPROP_WOOL) == OPROP_WOOL)
+			return (adjective ? "woolen" : "wool");
+		else
+			return "cloth";
+	case LEATHER:
+		return "leather";
+	case WOOD:
+		return (adjective ? "wooden" : "wood");
+	case BONE:
+		if (obj->oartifact == ART_WEBWEAVER_S_CROOK)
+			return "chitin";
+		else
+			return "bone";
+	case DRAGON_HIDE:
+		if (obj->otyp == LEO_NEMAEUS_HIDE)
+			return "lionhide";
+		else if ((objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE) ||
+			((s = OBJ_NAME(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragon-bone", 11)))
+			return (obj->oclass == WEAPON_CLASS ? (adjective ? "dragon-tooth" : "a dragon's tooth") : (adjective ? "dragon-bone" : "dragon bones"));
+		else if (objects[obj->otyp].oc_material == DRAGON_HIDE)
+			return (adjective ? "dragon-scale" : "dragon scales");
+		else
+			return "dragonhide";
+	case IRON:
+		if (obj->oartifact == ART_STEEL_SCALES_OF_KURTULMAK)
+			return "steel";
+		else
+			return "iron";
+	case METAL:
+		if (adjective
+			&& obj->oproperties&OPROP_LESSW
+			&& obj->oproperties&OPROP_AXIOW
+			&& obj->oproperties&(OPROP_FIREW | OPROP_COLDW | OPROP_ELECW)
+			&& obj->known)
+		{
+			if (obj->oproperties&OPROP_FIREW)
+				return "forge-hot";
+			if (obj->oproperties&OPROP_COLDW)
+				return "crystalline";
+			if (obj->oproperties&OPROP_ELECW)
+				return "arcing";
+		}
+		else if (obj->otyp == ORIHALCYON_GAUNTLETS && !adjective)
+			return "orichalcum";
+		else
+			return (adjective ? "metallic" : "metal");
+	case COPPER:
+		if (obj->otyp == BRASS_LANTERN || ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "brass", 5)))
+			return "brass";
+		else if ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "copper", 6))
+			return "copper";
+		else
+			return "bronze";
+	case SILVER:
+		return "silver";
+	case GOLD:
+		return (adjective ? "golden" : "gold");
+	case PLATINUM:
+		return "platinum";
+	case MITHRIL:
+		return "mithril";
+	case PLASTIC:
+		return "plastic";
+	case GLASS:
+		if (objects[obj->otyp].oc_name_known && (s = OBJ_NAME(objects[obj->otyp])) != (char *)0 && !strncmp(s, "crystal", 7))
+			return "crystal";
+		else
+			return "glass";
+	case GEMSTONE:
+		return (adjective ? "gem" : "gemstone");
+	case MINERAL:
+		if (obj->oclass == ARMOR_CLASS || obj->oclass == TILE_CLASS || ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "ceramic", 7)))
+			return "ceramic";
+		else
+			return "stone";
+		break;
+	case OBSIDIAN_MT:
+		return "obsidian";
+	case SHADOWSTUFF:
+		return (adjective ? "black" : "shadow");
+	default:
+		return (adjective ? "mysterious" : "an enigma in solid form");
+	}
+}
 
 static void
 add_material_words(obj, buf)
@@ -871,7 +988,7 @@ char *buf;
 {
 	/*To avoid an if statement with a massive condition, detect cases where the material should NOT be printed, and return out*/
 	/*Avoid obviating randomized appearances*/
-	if(id_for_material(obj) && !obj->known)
+	if(id_for_material(obj) && !objects[obj->otyp].oc_name_known)
 		return;
 	/*Materials don't matter for lit lightsabers, and they should be described in terms of color*/
 	if(is_lightsaber(obj) && litsaber(obj))
@@ -882,98 +999,15 @@ char *buf;
 			return;
 	} else {
 		/*Non-artifact is made from standard material, and isn't of a type for which the material is always shown*/
-		if(obj->known && !(objects[obj->otyp].oc_showmat&IDED) && obj->obj_material == objects[obj->otyp].oc_material)
+		if(objects[obj->otyp].oc_name_known && !(objects[obj->otyp].oc_showmat&IDED) && obj->obj_material == objects[obj->otyp].oc_material)
 			return;
 		/*Unknown item is made from standard material, and isn't of a type for which the material is always shown*/
-		if(!obj->known && !(objects[obj->otyp].oc_showmat&UNIDED) && obj->obj_material == objects[obj->otyp].oc_material)
+		if(!objects[obj->otyp].oc_name_known && !(objects[obj->otyp].oc_showmat&UNIDED) && obj->obj_material == objects[obj->otyp].oc_material)
 			return;
 	}
-	if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
-		Strcat(buf, "pale moonlight ");
-	}
-	else switch (obj->obj_material){
-	case LIQUID: /*Wut?*/
-		Strcat(buf, "liquid ");
-		break;
-	case WAX:
-		Strcat(buf, "wax ");
-		break;
-	case VEGGY:
-		Strcat(buf, "straw ");
-		break;
-	case FLESH:
-		Strcat(buf, "flesh ");
-		break;
-	case PAPER:
-		Strcat(buf, "paper ");
-		break;
-	case CLOTH:
-		if ((obj->oproperties&OPROP_WOOL) == OPROP_WOOL)
-			Strcat(buf, "woolen ");
-		else
-			Strcat(buf, "cloth ");
-		break;
-	case LEATHER:
-		Strcat(buf, "leather ");
-		break;
-	case WOOD:
-		Strcat(buf, "wooden ");
-		break;
-	case BONE:
-		if (obj->oartifact == ART_WEBWEAVER_S_CROOK) Strcat(buf, "chitin ");
-		else Strcat(buf, "bone ");
-		break;
-	case DRAGON_HIDE:
-		if (objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE)
-			obj->oclass == WEAPON_CLASS ? Strcat(buf, "dragon-tooth ") : Strcat(buf, "dragon-bone ");
-		else
-			Strcat(buf, "dragon-scale ");
-		break;
-	case IRON:
-		if (obj->oartifact == ART_STEEL_SCALES_OF_KURTULMAK) Strcat(buf, "steel ");
-		else Strcat(buf, "iron ");
-		break;
-	case METAL:
-		if(!(obj->oproperties&OPROP_LESSW 
-			&& obj->oproperties&OPROP_AXIOW 
-			&& obj->oproperties&(OPROP_FIREW|OPROP_COLDW|OPROP_ELECW)
-			&& obj->known
-		)) Strcat(buf, "metallic ");
-		break;
-	case COPPER:
-		Strcat(buf, "bronze ");
-		break;
-	case SILVER:
-		Strcat(buf, "silver ");
-		break;
-	case GOLD:
-		Strcat(buf, "golden ");
-		break;
-	case PLATINUM:
-		Strcat(buf, "platinum ");
-		break;
-	case MITHRIL:
-		Strcat(buf, "mithril ");
-		break;
-	case PLASTIC:
-		Strcat(buf, "plastic ");
-		break;
-	case GLASS:
-		Strcat(buf, "glass ");
-		break;
-	case GEMSTONE:
-		Strcat(buf, "gem ");
-		break;
-	case MINERAL:
-		(obj->oclass == ARMOR_CLASS || obj->oclass == TILE_CLASS) ? Strcat(buf, "ceramic ") : Strcat(buf, "stone ");
-		break;
-	case OBSIDIAN_MT:
-		Strcat(buf, "obsidian ");
-		break;
-	case SHADOWSTUFF:
-		Strcat(buf, "black ");
-		break;
-	}
+	/* add on the adjective form of the object's material */
+	Strcat(buf, material_name(obj, TRUE));
+	Strcat(buf, " ");
 }
 
 static void

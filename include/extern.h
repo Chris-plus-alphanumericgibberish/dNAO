@@ -1765,6 +1765,7 @@ E boolean FDECL(obj_is_pname, (struct obj *));
 E char *FDECL(distant_name, (struct obj *,char *(*)(OBJ_P)));
 E char *FDECL(fruitname, (BOOLEAN_P));
 E char *FDECL(xname, (struct obj *));
+E const char *FDECL(material_name, (struct obj *, boolean));
 E char *FDECL(mshot_xname, (struct obj *));
 E boolean FDECL(the_unique_obj, (struct obj *obj));
 E char *FDECL(doname, (struct obj *));

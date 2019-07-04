@@ -3122,34 +3122,13 @@ winid *datawin;
 	* material.
 	* Edit by Nero: dnh is assuming that oc_name_known == TRUE if this function is called. 
 	*
-	* This is very similar to materialnm[], but the slight difference is
-	* that this is always the noun form whereas materialnm uses adjective
-	* forms; most materials have the same noun and adjective forms but two
-	* (wood/wooden, vegetable matter/organic) don't 
-	*
 	* Finally, this requires an object. Dnethack does some funny things with a few items
 	* to show adjectives, like the default material of sabers being metal, so showing
 	* what material items are "normally" made of could be misleading.
 	*/
 	if (obj) {
-		Strcpy(buf2, materials[obj->obj_material].materialnm);
+		Strcpy(buf2, material_name(obj, FALSE));
 
-		if (obj->obj_material == WOOD) {	// Made of wooden. No.
-			Sprintf(buf2, "wood");
-		}
-		else if (obj->obj_material == VEGGY) {	// Made of organic. Also no.
-			Sprintf(buf2, "vegetable matter");
-		}
-		else if (obj->obj_material == DRAGON_HIDE)
-		{
-			if (oc.oc_material > LEATHER && oc.oc_material != DRAGON_HIDE)	// hard dragon-stuff
-				Sprintf(buf2, "dragonbone");
-			else
-				Sprintf(buf2, "dragonhide");
-		}
-		else if (obj->obj_material == GEMSTONE && oc.oc_tough) {	// Made of <hard> gemstone, when you can engrave with it
-			Sprintf(buf2, "hard gemstone");
-		}
 		Sprintf(buf, "Made of %s.", buf2);
 		OBJPUTSTR(buf);
 	}
