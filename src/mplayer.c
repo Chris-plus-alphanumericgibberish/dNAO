@@ -310,7 +310,7 @@ register boolean special;
 		break;
 		case PM_WORM_THAT_WALKS:
 		    weapon = ATHAME;
-			armor = BRONZE_PLATE_MAIL;
+			armor = BRONZE_HALF_PLATE;
 		    cloak = MUMMY_WRAPPING;
 		    shield = SHIELD_OF_REFLECTION;
 		break;

@@ -1617,7 +1617,7 @@ int mat;
 			obj->otyp = SCALE_MAIL;
 		break;
 		case LEATHER_ARMOR:
-			obj->otyp = PLATE_MAIL;
+			obj->otyp = HALF_PLATE;
 		break;
 		// case LEATHER_CLOAK:
 			// obj->otyp = ;
@@ -1625,7 +1625,6 @@ int mat;
 		// case ROUNDSHIELD:
 			// obj->otyp = ;
 		// break;
-		//Tin whistle, wood harp
 		case GAUNTLETS:
 			if(mat == COPPER) obj->otyp = BRONZE_GAUNTLETS;
 		break;
@@ -1642,15 +1641,14 @@ int mat;
 		case SHOES:
 			obj->otyp = LOW_BOOTS;
 		break;
-		case BRONZE_PLATE_MAIL:
+		case BRONZE_HALF_PLATE:
+			obj->otyp = HALF_PLATE;
+		break;
+		case HIGH_ELVEN_PLATE:
 			obj->otyp = PLATE_MAIL;
-		break;
-		case PLATE_MAIL:
-			if(mat == COPPER) obj->otyp = BRONZE_PLATE_MAIL;
-		break;
+			break;
 		case CRYSTAL_PLATE_MAIL:
-			if(mat == COPPER) obj->otyp = BRONZE_PLATE_MAIL;
-			else obj->otyp = PLATE_MAIL;
+			obj->otyp = PLATE_MAIL;
 			//BUT, turning plate mail to glass results in glass plate mail.  The magic is lost.
 		break;
 		// case CRYSTAL_HELM:

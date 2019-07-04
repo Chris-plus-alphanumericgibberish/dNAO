@@ -559,12 +559,14 @@ ARMOR("gentlewoman's dress", "expensive dress", /*Needs encyc entry*/
 	0, 0, 1, 0,	0, 6,150, 1000,  10, 1, 3, ARM_SUIT, BONE, CLR_RED), /*Specifically, whale bone*/
 ARMOR("crystal plate mail", (char *)0, /*Needs encyc entry*/
 	1, 0, 1, 0,	10, 5, 250, 2000,  7, 3, 0, ARM_SUIT, GLASS, CLR_CYAN), /*Best armor, AC wise*/
+ARMOR("half plate", (char *)0, /*Needs encyc entry*/
+	1, 0, 1, 0, 0, 5, 200, 400, 6, 4, 3, ARM_SUIT, IRON, HI_METAL),
 #ifdef TOURIST
-ARMOR("bronze plate mail", (char *)0, /*Needs encyc entry*/
-	1, 0, 1, 0,	20, 5, 225, 400,  6, 4, 3, ARM_SUIT, COPPER, HI_COPPER),
+ARMOR("bronze half plate", (char *)0, /*Needs encyc entry*/
+	1, 0, 1, 0,	20, 5, 200, 400,  6, 4, 3, ARM_SUIT, COPPER, HI_COPPER),
 #else
-ARMOR("bronze plate mail", (char *)0,
-	1, 0, 1, 0,	35, 5, 225, 400,  6, 4, 3, ARM_SUIT, COPPER, HI_COPPER),
+ARMOR("bronze half plate", (char *)0,
+	1, 0, 1, 0,	35, 5, 200, 400,  6, 4, 3, ARM_SUIT, COPPER, HI_COPPER),
 #endif
 ARMOR("harmonium plate", "red-lacquered bladed armor",
 	0, 0, 1, 0,	 0, 5, 225,   1,  6, 4, 3, ARM_SUIT, METAL, CLR_RED),

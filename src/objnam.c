@@ -147,7 +147,7 @@ STATIC_OVL char *SaberHilts[] = {
 STATIC_OVL struct Jitem ObscureJapanese_items[] = {
 	{ BATTLE_AXE, "ono" },
 	{ BROADSWORD, "ninja-to" },
-	{ BRONZE_PLATE_MAIL, "tanko" },
+	{ BRONZE_HALF_PLATE, "tanko" },
 	{ CLUB, "jo" },
 	{ CRYSTAL_PLATE_MAIL, "jade o-yoroi" },
 	{ DAGGER, "kunai" },
@@ -184,7 +184,7 @@ STATIC_OVL struct Jitem ObscureJapanese_items[] = {
 STATIC_OVL struct Jitem Japanese_items[] = {
 	{ BROADSWORD, "ninja-to" },
 	{ CRYSTAL_PLATE_MAIL, "crystal tanko" },
-	{ BRONZE_PLATE_MAIL, "bronze tanko" },
+	{ BRONZE_HALF_PLATE, "bronze tanko" },
 	{ PLATE_MAIL, "tanko" },
 	{ DAGGER, "kunai" },
 	{ DART, "bo-shuriken" },
@@ -2891,10 +2891,12 @@ struct alt_spellings {
 	{ "leather armour", LEATHER_ARMOR },
 	{ "leather gloves", GLOVES },
 	{ "studded leather armour", STUDDED_LEATHER_ARMOR },
+	{ "elven plate mail", HIGH_ELVEN_PLATE },
+	{ "bronze halfplate", BRONZE_HALF_PLATE },
+	{ "halfplate", HALF_PLATE },
 	{ "chain", CHAIN },
 	{ "iron chain", CHAIN },
 	{ "iron ball", HEAVY_IRON_BALL },
-	{ "lantern", LANTERN },
 	{ "mattock", DWARVISH_MATTOCK },
 	{ "amulet of poison resistance", AMULET_VERSUS_POISON },
 	{ "stone", ROCK },
@@ -2927,7 +2929,7 @@ struct alt_spellings {
 	{ "belaying pin", CLUB },
 	{ "ono", BATTLE_AXE },
 	{ "ninja-to", BROADSWORD },
-	{ "tanko", BRONZE_PLATE_MAIL },
+	{ "tanko", BRONZE_HALF_PLATE },
 	{ "jo", CLUB },
 	{ "jade o-yoroi", CRYSTAL_PLATE_MAIL },
 	{ "kunai", DAGGER },
@@ -3378,11 +3380,13 @@ int wishflags;
 			&& strncmpi(bp, "metal tube", 10)
 			) {
 			mat = METAL;
-		} else if (!strncmpi(bp, "bronze ", l=7)
-			&& strncmpi(bp, "bronze helm", 11) && strncmpi(bp, "bronze plate mail", 17)
+		} else if ((!strncmpi(bp, "bronze ", l=7) || !strncmpi(bp, "copper ", l=7) || !strncmpi(bp, "brass ", l=6))
+			&& strncmpi(bp, "bronze helm", 11) && strncmpi(bp, "bronze half plate", 17)
+			&& strncmpi(bp, "bronze half-plate", 17) && strncmpi(bp, "bronze halfplate", 16)
 			&& strncmpi(bp, "bronze roundshield", 18) && strncmpi(bp, "bronze gauntlets", 16)
-			&& strncmpi(bp, "bronze ring", 11)
-			&& strncmpi(bp, "bronze spellbook", 16)
+			&& strncmpi(bp, "bronze ring", 11) && strncmpi(bp, "copper ring", 11) && strncmpi(bp, "brass ring", 10)
+			&& strncmpi(bp, "copper wand", 11) && strncmpi(bp, "brass wand", 10)
+			&& strncmpi(bp, "bronze spellbook", 16 && strncmpi(bp, "copper spellbook", 16))
 		) {
 			mat = COPPER;
 		} else if (!strncmpi(bp, "silver ", l=7)

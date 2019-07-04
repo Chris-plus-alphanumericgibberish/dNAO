@@ -5227,7 +5227,9 @@ struct obj **optr;
 				break;
 				case ARMOR_PLATING:
 					comp = getobj(apply_armor, "upgrade your armor with");
-					if(!comp || comp->otyp != BRONZE_PLATE_MAIL){
+					if(!comp ||
+						!((comp->otyp == HALF_PLATE || comp->otyp == BRONZE_HALF_PLATE || comp->otyp == PLATE_MAIL) &&
+						(comp->obj_material == COPPER))){
 						pline("Never mind.");
 						return 0;
 					}

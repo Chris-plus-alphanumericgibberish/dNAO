@@ -2223,7 +2223,7 @@ register struct monst *mtmp;
 				otmp = mongets(mtmp, find_gcirclet());
 				set_material(otmp, COPPER);
 				
-				(void)mongets(mtmp, BRONZE_PLATE_MAIL);
+				(void)mongets(mtmp, BRONZE_HALF_PLATE);
 				(void)mongets(mtmp, BRONZE_GAUNTLETS);
 				(void)mongets(mtmp, ARMORED_BOOTS);
 				
@@ -2274,7 +2274,7 @@ register struct monst *mtmp;
 				otmp = mongets(mtmp, TWO_HANDED_SWORD);
 				set_material(otmp, COPPER);
 			    otmp->spe = 9;
-			    otmp = mongets(mtmp, BRONZE_PLATE_MAIL);
+			    otmp = mongets(mtmp, BRONZE_HALF_PLATE);
 			    otmp->spe = 7;
 			    otmp = mongets(mtmp, ARMORED_BOOTS);
 			    otmp->spe = 1;
@@ -2306,7 +2306,7 @@ register struct monst *mtmp;
 			    otmp->spe = 7;
 				otmp = mongets(mtmp, SCIMITAR);
 			    otmp->spe = 7;
-			    otmp = mongets(mtmp, BRONZE_PLATE_MAIL);
+			    otmp = mongets(mtmp, BRONZE_HALF_PLATE);
 			    otmp->spe = 7;
 			} else if(ptr == &mons[PM_COURE_ELADRIN]){
 				(void)mongets(mtmp, GLOVES);
@@ -2360,7 +2360,7 @@ register struct monst *mtmp;
 				(void)mongets(mtmp, CRYSTAL_SWORD);
 				(void)mongets(mtmp, WAN_STRIKING);
 			} else if(ptr == &mons[PM_GHAELE_ELADRIN]){
-				(void)mongets(mtmp, BRONZE_PLATE_MAIL);
+				(void)mongets(mtmp, BRONZE_HALF_PLATE);
 				(void)mongets(mtmp, ROUNDSHIELD);
 				(void)mongets(mtmp, ARMORED_BOOTS);
 				(void)mongets(mtmp, BRONZE_HELM);
@@ -2492,7 +2492,7 @@ register struct monst *mtmp;
 		} else {
 			if(mm == PM_CLOCKWORK_AUTOMATON){
 				(void) mongets(mtmp, BRONZE_HELM);
-				(void) mongets(mtmp, BRONZE_PLATE_MAIL);
+				(void) mongets(mtmp, BRONZE_HALF_PLATE);
 				(void) mongets(mtmp, BRONZE_GAUNTLETS);
 				otmp = mongets(mtmp, ARMORED_BOOTS);
 				set_material(otmp, COPPER);
@@ -2852,7 +2852,7 @@ register struct monst *mtmp;
 			otmp->blessed = FALSE;
 			otmp->cursed = FALSE;
 			
-			otmp = mongets(mtmp, BRONZE_PLATE_MAIL);
+			otmp = mongets(mtmp, BRONZE_HALF_PLATE);
 			otmp->spe = mm==PM_DEEPER_ONE ? 6 : 3;
 			otmp->blessed = FALSE;
 			otmp->cursed = TRUE;
@@ -2985,7 +2985,7 @@ register struct monst *mtmp;
 				otmp->spe = 5;
 				otmp = mongets(mtmp, BRONZE_HELM);
 				otmp->spe = 3;
-				otmp = mongets(mtmp, BRONZE_PLATE_MAIL);
+				otmp = mongets(mtmp, BRONZE_HALF_PLATE);
 				otmp->spe = 3;
 				otmp = mongets(mtmp, BRONZE_GAUNTLETS);
 				otmp->spe = 3;
@@ -2996,7 +2996,7 @@ register struct monst *mtmp;
 				set_material(otmp, SILVER);
 				otmp->oproperties = OPROP_PSIOW|OPROP_LESSW;
 				(void)mongets(mtmp, BRONZE_HELM);
-				(void)mongets(mtmp, BRONZE_PLATE_MAIL);
+				(void)mongets(mtmp, BRONZE_HALF_PLATE);
 				(void)mongets(mtmp, BRONZE_GAUNTLETS);
 				(void)mongets(mtmp, ARMORED_BOOTS);
 			}
@@ -3628,7 +3628,7 @@ register struct monst *mtmp;
 			case 4: (void) mongets(mtmp, POT_HEALING);
 			case 5: (void) mongets(mtmp, POT_EXTRA_HEALING);
 			}
-			mongets(mtmp, BRONZE_PLATE_MAIL);
+			mongets(mtmp, BRONZE_HALF_PLATE);
 			mongets(mtmp, BRONZE_GAUNTLETS);
 			mongets(mtmp, BRONZE_HELM);
 			otmp = mongets(mtmp, LANCE);
@@ -4242,7 +4242,7 @@ register struct	monst	*mtmp;
 			//Escaped war-elephant
 			if(mtmp->data == &mons[PM_MUMAK]){
 				chance = rnd(100);
-				if(chance == 100) mongets(mtmp, BRONZE_PLATE_MAIL);
+				if(chance == 100) mongets(mtmp, BRONZE_HALF_PLATE);
 				else if(chance >= 96) mongets(mtmp, ORCISH_CHAIN_MAIL);
 				else if(chance >= 90) mongets(mtmp, ORCISH_RING_MAIL);
 				if(chance == 100) mongets(mtmp, BRONZE_HELM);
@@ -4559,13 +4559,13 @@ register struct	monst	*mtmp;
 			if(ptr == &mons[PM_ANCIENT_NAGA]){
 				mongets(mtmp, LONG_SWORD);
 				mongets(mtmp, LONG_SWORD);
-				mongets(mtmp, BRONZE_PLATE_MAIL);
+				mongets(mtmp, BRONZE_HALF_PLATE);
 				mongets(mtmp, BRONZE_HELM);
 				mongets(mtmp, BRONZE_GAUNTLETS);
 			} else if(ptr == &mons[PM_GUARDIAN_NAGA] || ptr == &mons[PM_GUARDIAN_NAGA_HATCHLING]){
 				chance = rnd(10);
 				if(chance >= 7){
-					mongets(mtmp, BRONZE_PLATE_MAIL);
+					mongets(mtmp, BRONZE_HALF_PLATE);
 					mongets(mtmp, BRONZE_HELM);
 				}
 			}
