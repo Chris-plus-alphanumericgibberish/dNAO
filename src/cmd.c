@@ -1578,7 +1578,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	putstr(en_win, 0, "");
 
 	if (u.uevent.uhand_of_elbereth) {
-	    static const char * const hofe_titles[36] = {
+	    static const char * const hofe_titles[39] = {
 				/* Default */
 				"the Arm of the Law",		 /*01*/
 				"the Envoy of Balance",		 /*02*/
@@ -1604,7 +1604,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 				"the Hand of Kiaransali",	 /*17*/
 				"the Hand of Lolth",		 /*18*/
 				/* Hedrow */
-				"the Shepherd of spiders",	 /*19*/
+				"the Shepherd of Spiders",	 /*19*/
 				"the Sword of Vhaeraun",	 /*20*/
 				"the Fang of Lolth",		 /*21*/
 				/* Drow Noble */
@@ -1619,15 +1619,18 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 				"the High %s of Apollo",	 /*28*/
 				"the High %s of Latona",	 /*29*/
 				"the High %s of Diana",	 	 /*30*/
-				/* Gonome Ranger */
+				/* Gnome Ranger */
 				"the Great Slave-Vassal of Kurtulmak",	 /*31*/
 				"the Thane of Garl Glittergold",	 /*32*/
 				"the Claw of Urdlen",	 	 /*33*/
-				/* Gonome Ranger */
+				/* Gnome Ranger */
 				"the Hand of Athena",		 /*34*/
 				"the Messenger of Hermes",	 /*35*/
 				"the Glory of Poseidon",	 /*36*/
-				
+				/*Archeologist*/
+				"the Warrior of Quetzalcoatl",/*37*/
+				"the Champion of Camaxtli",	 /*38*/
+				"the Fire-bearer of Huhetotl",	 /*39*/
 				/* uhand_of_elbereth max == 63 */
 	    };
 		

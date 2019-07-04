@@ -4695,7 +4695,6 @@ bindspirit(seal_id)
 			if(u.sealTimeout[ENKI-FIRST_SEAL] < moves){
 				unrestrict_weapon_skill(P_SHORT_SWORD);
 				unrestrict_weapon_skill(P_HAMMER);
-				unrestrict_weapon_skill(P_JAVELIN);
 				unrestrict_weapon_skill(P_SLING);
 				unrestrict_weapon_skill(P_DART);
 				unrestrict_weapon_skill(P_BOOMERANG);
@@ -5294,7 +5293,6 @@ int p_skill;
 	if(p_skill == P_QUARTERSTAFF) return u.sealsActive & SEAL_NABERIUS? TRUE : FALSE;
 	if(p_skill == P_POLEARMS) return u.sealsActive & SEAL_SHIRO? TRUE : FALSE;
 	if(p_skill == P_SPEAR) return u.sealsActive & SEAL_HUGINN_MUNINN? TRUE : FALSE;
-	if(p_skill == P_JAVELIN) return u.sealsActive & SEAL_ENKI? TRUE : FALSE;
 	if(p_skill == P_TRIDENT) return u.sealsActive & SEAL_OSE? TRUE : FALSE;
 	if(p_skill == P_LANCE) return u.sealsActive & SEAL_BERITH? TRUE : FALSE;
 	if(p_skill == P_BOW) return u.sealsActive & SEAL_EVE? TRUE : (u.sealsActive & SEAL_BERITH && u.usteed)? TRUE : FALSE;
