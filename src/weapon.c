@@ -68,10 +68,9 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	TWO_HANDED_SWORD, SCIMITAR,       PN_SABER,     CLUB,
 	MACE,             MORNING_STAR,   FLAIL,
 	PN_HAMMER,        QUARTERSTAFF,   PN_POLEARMS,  SPEAR,
-	JAVELIN,          TRIDENT,        LANCE,        BOW,
-	SLING,            PN_FIREARMS,	  CROSSBOW,     DART,
-	SHURIKEN,         BOOMERANG,      PN_WHIP,      PN_HARVEST,
-	UNICORN_HORN,
+	TRIDENT,          LANCE,          BOW,          SLING,
+	PN_FIREARMS,	  CROSSBOW,       DART,         SHURIKEN,
+	BOOMERANG,        PN_WHIP,        PN_HARVEST,   UNICORN_HORN,
 	PN_ATTACK_SPELL,     PN_HEALING_SPELL,
 	PN_DIVINATION_SPELL, PN_ENCHANTMENT_SPELL,
 	PN_CLERIC_SPELL,     PN_ESCAPE_SPELL,
@@ -1038,6 +1037,8 @@ int spec;
 					bonus += 7; //Quite holy
 			else if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
 				bonus += rnd(20); //Divinity
+			else if(otmp->oartifact == ART_AMHIMITL)
+				bonus += d(3,4);
 			
 			if(otmp->otyp == KHAKKHARA) bonus += d(rnd(3),dsize);
 			else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking+1,dsize);
@@ -1088,10 +1089,17 @@ int spec;
 				bonus += 8*bdm; //Extra unholy
 			else if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
 				bonus += d(bdm, 20); //Tyranny
+			else if(otmp->oartifact == ART_AMHIMITL)
+				bonus += d(3*bdm, 4); //Tyranny
+			else if(otmp->oartifact == ART_TECPATL_OF_HUHETOTL)
+				bonus += d(bdm,4); //Somewhat unholy
 			else if(otyp == KHAKKHARA) bonus += d(rnd(3)*bdm,9);
 			else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking*bdm,9);
 			else bonus += d(bdm, 9);
 		}
+		
+		if (hates_unholy(ptr) && otmp->oartifact == ART_TECPATL_OF_HUHETOTL)
+			bonus += d(1, 4); // always counts as unholy regardless, but its' pretty weak
 		
 		if(mon && mon->isminion){
 			if(otmp->oartifact == ART_LIFEHUNT_SCYTHE)
