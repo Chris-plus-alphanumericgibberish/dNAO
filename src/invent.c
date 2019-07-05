@@ -1080,7 +1080,7 @@ register const char *let,*word;
 		|| (!strcmp(word, "rub") &&
 		    ((otmp->oclass == TOOL_CLASS &&
 		      otyp != OIL_LAMP && otyp != MAGIC_LAMP &&
-		      otyp != BRASS_LANTERN) ||
+		      otyp != LANTERN) ||
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp)) ||
 			(otmp->oclass == CHAIN_CLASS)))
 		|| (!strncmp(word, "rub on the stone", 16) &&
@@ -1147,7 +1147,7 @@ register const char *let,*word;
 		|| (!strcmp(word, "upgrade your spring with") &&
 			(otyp != CLOCKWORK_COMPONENT))
 		|| (!strcmp(word, "upgrade your armor with") &&
-		    (otyp != BRONZE_PLATE_MAIL))
+		    (otyp != BRONZE_HALF_PLATE))
 		|| (!strcmp(word, "build a phase engine with") &&
 		    (otyp != SUBETHAIC_COMPONENT))
 		|| (!strcmp(word, "build a magic furnace with") &&
@@ -1223,7 +1223,13 @@ register const char *let,*word;
 			bp[foo++] = otmp->invlet;
 			allowall = TRUE;
 		}
-
+		//Make exceptions for gemstone items made of specific gems
+		if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)
+			&& (!objects[otmp->ovar1].oc_name_known || !otmp->dknown)
+			&& !strncmp(word, "rub on the stone", 16)) {
+			bp[foo++] = otmp->invlet;
+			allowall = TRUE;
+		}
 	    if(ilet == 'z') ilet = 'A'; else ilet++;
 	}
 	bp[foo] = 0;
@@ -1777,6 +1783,8 @@ fully_identify_obj(otmp)
 struct obj *otmp;
 {
     makeknown(otmp->otyp);
+	if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
+		makeknown(otmp->ovar1);
     if (otmp->oartifact) discover_artifact(otmp->oartifact);
     otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
     if (otmp->otyp == EGG && otmp->corpsenm != NON_PM)
@@ -2046,7 +2054,7 @@ struct obj *obj;
 	else if (obj->otyp == SADDLE)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Place this saddle on a pet", MENU_UNSELECTED);
-	else if (obj->otyp == MAGIC_WHISTLE || obj->otyp == TIN_WHISTLE)
+	else if (obj->otyp == MAGIC_WHISTLE || obj->otyp == WHISTLE)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Blow this whistle", MENU_UNSELECTED);
 	else if (obj->otyp == EUCALYPTUS_LEAF)
@@ -2072,7 +2080,7 @@ struct obj *obj;
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this candle", MENU_UNSELECTED);
 	else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-			obj->otyp == BRASS_LANTERN)
+			obj->otyp == LANTERN)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this light source", MENU_UNSELECTED);
 	else if (obj->otyp == POT_OIL && objects[obj->otyp].oc_name_known)
@@ -2105,7 +2113,7 @@ struct obj *obj;
 	else if (obj->otyp == UNICORN_HORN)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Squeeze the unicorn horn tightly", MENU_UNSELECTED);
-	else if ((obj->otyp >= WOODEN_FLUTE && obj->otyp <= DRUM_OF_EARTHQUAKE) ||
+	else if ((obj->otyp >= FLUTE && obj->otyp <= DRUM_OF_EARTHQUAKE) ||
 			(obj->otyp == HORN_OF_PLENTY && !obj->known))
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Play this musical instrument", MENU_UNSELECTED);
@@ -2238,7 +2246,7 @@ struct obj *obj;
 	if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP)
 		add_menu(win, NO_GLYPH, &any, 'R', 0, ATR_NONE,
 				"Rub this lamp", MENU_UNSELECTED);
-	else if (obj->otyp == BRASS_LANTERN)
+	else if (obj->otyp == LANTERN)
 		add_menu(win, NO_GLYPH, &any, 'R', 0, ATR_NONE,
 				"Rub this lantern", MENU_UNSELECTED);
 #if 0 /* TODO */
@@ -2893,7 +2901,7 @@ winid *datawin;
 		case CANDLE_OF_INVOCATION:
 		case TORCH: //actually over-ridden by being a weapon-tool
 		case SUNROD: //actually over-ridden by being a weapon-tool
-		case BRASS_LANTERN:
+		case LANTERN:
 		case OIL_LAMP:
 		case MAGIC_LAMP:
 		case CANDELABRUM_OF_INVOCATION:
@@ -2906,21 +2914,21 @@ winid *datawin;
 		case BEARTRAP:
 			subclass = "trap which can be set";
 			break;
-		case TIN_WHISTLE:
+		case WHISTLE:
 		case MAGIC_WHISTLE:
 		case BELL:
 		case BELL_OF_OPENING:
-		case LEATHER_DRUM:
+		case DRUM:
 		case DRUM_OF_EARTHQUAKE:
 			subclass = "atonal instrument";
 			break;
 		case BUGLE:
 		case MAGIC_FLUTE:
-		case WOODEN_FLUTE:
+		case FLUTE:
 		case TOOLED_HORN:
 		case FIRE_HORN:
 		case FROST_HORN:
-		case WOODEN_HARP:
+		case HARP:
 		case MAGIC_HARP:
 			subclass = "tonal instrument";
 			break;
@@ -3098,9 +3106,6 @@ winid *datawin;
 		otyp == WHITE_FACELESS_ROBE ||
 		otyp == BLACK_FACELESS_ROBE ||
 		otyp == SMOKY_VIOLET_FACELESS_ROBE)		OBJPUTSTR("Covers the face entirely.");
-	else if (otyp == DROVEN_HELM ||
-		otyp == DROVEN_PLATE_MAIL ||
-		otyp == DROVEN_CHAIN_MAIL)				OBJPUTSTR("Dissolves in light.");
 	/* and some obscure usage mechanics of fixed-appearance items */
 	else if (otyp == RIN_WISHES)				OBJPUTSTR("Can be invoked while worn.");
 	else if (otyp == CANDLE_OF_INVOCATION)		OBJPUTSTR("Can be invoked while lit.");
@@ -3122,34 +3127,13 @@ winid *datawin;
 	* material.
 	* Edit by Nero: dnh is assuming that oc_name_known == TRUE if this function is called. 
 	*
-	* This is very similar to materialnm[], but the slight difference is
-	* that this is always the noun form whereas materialnm uses adjective
-	* forms; most materials have the same noun and adjective forms but two
-	* (wood/wooden, vegetable matter/organic) don't 
-	*
 	* Finally, this requires an object. Dnethack does some funny things with a few items
 	* to show adjectives, like the default material of sabers being metal, so showing
 	* what material items are "normally" made of could be misleading.
 	*/
 	if (obj) {
-		Strcpy(buf2, materialnm[obj->obj_material]);
+		Strcpy(buf2, material_name(obj, FALSE));
 
-		if (obj->obj_material == WOOD) {	// Made of wooden. No.
-			Sprintf(buf2, "wood");
-		}
-		else if (obj->obj_material == VEGGY) {	// Made of organic. Also no.
-			Sprintf(buf2, "vegetable matter");
-		}
-		else if (obj->obj_material == DRAGON_HIDE)
-		{
-			if (oc.oc_material > LEATHER && oc.oc_material != DRAGON_HIDE)	// hard dragon-stuff
-				Sprintf(buf2, "dragonbone");
-			else
-				Sprintf(buf2, "dragonhide");
-		}
-		else if (obj->obj_material == GEMSTONE && oc.oc_tough) {	// Made of <hard> gemstone, when you can engrave with it
-			Sprintf(buf2, "hard gemstone");
-		}
 		Sprintf(buf, "Made of %s.", buf2);
 		OBJPUTSTR(buf);
 	}

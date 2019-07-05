@@ -2492,37 +2492,25 @@ defaultvalue:
 	    hittxt = TRUE;
 	} else
 #endif
-	// if(obj && (obj->oeroded || obj->oeroded2)){
-	// if(obj && is_bludgeon(obj) && (obj->oeroded || obj->oeroded2)){
-		// int breakmod = is_wood(obj) ? 1 : 0;
-		// boolean breakwep = FALSE;
-		// switch(greatest_erosion(obj)+breakmod){
-			// case 1:
-				// //Will not break
-			// break;
-			// case 2:
-				// if(!rn2(1000)) breakwep = TRUE;
-			// break;
-			// case 3:
-				// if(!rn2(100)) breakwep = TRUE;
-			// break;
-			// case 4: //Ie, an errode 3 wooded weapon
-				// if(!rn2(10)) breakwep = TRUE;
-			// break;
-		// }
-		// if(breakwep){
-			// boolean more_than_1 = (obj->quan > 1L);
-			
-			// pline("As you hit %s, %s%s %s breaks and is ruined!",
-				  // mon_nam(mon), more_than_1 ? "one of " : "",
-				  // shk_your(yourbuf, obj), xname(obj));
-			// if (!more_than_1) uwepgone();	/* set unweapon */
-			// useup(obj);
-			// if (!more_than_1) obj = (struct obj *) 0;
-			// hittxt = TRUE;
-		// }
-	// } else if (unarmed && tmp > 1 && !thrown && !obj && !Upolyd) { 	/* VERY small chance of stunning opponent if unarmed. */
-	if (unarmed && tmp > 1 && !thrown && !obj && !Upolyd) { 	/* VERY small chance of stunning opponent if unarmed. */
+	/* glass/obsidian non-artifact weapons have a small chance to shatter when used */
+	if (obj && !unsolid(mon->data) && !obj_resists(obj, 0, 100) && is_shatterable(obj) && !obj->oerodeproof){
+		if ((!rn2(20) || !(is_slashing(obj) || is_stabbing(obj))) && (rnl(40) == (40 - 1))) {	/* bludgeoning with fragiles? bad idea */
+			boolean more_than_1 = (obj->quan > 1L);
+
+			pline("As you hit %s, %s%s %s shatters!",
+				mon_nam(mon), more_than_1 ? "one of " : "",
+				shk_your(yourbuf, obj), xname(obj));
+
+			/* note: mirrors don't trigger nudzirath's power when used as a weapon, so obsidian weapons
+			 * probably shouldn't do so either */
+
+			if (!more_than_1) uwepgone();	/* set unweapon */
+			useup(obj);
+			if (!more_than_1) obj = (struct obj *) 0;
+			hittxt = TRUE;
+		}
+	}
+	else if (unarmed && tmp > 1 && !thrown && !obj && !Upolyd) { 	/* VERY small chance of stunning opponent if unarmed. */
 	    if (!bigmonst(mdat) && !thick_skinned(mdat)) {
 			if((uarmg && uarmg->oartifact == ART_PREMIUM_HEART && rnd(20) < P_SKILL(P_BARE_HANDED_COMBAT)) || 
 				rnd(100) < P_SKILL(P_BARE_HANDED_COMBAT)){
@@ -2936,9 +2924,9 @@ struct obj *obj;	/* weapon */
     /* odds to joust are expert:80%, skilled:60%, basic:40%, unskilled:20% */
     if ((joust_dieroll = rn2(5)) < skill_rating) {
 		if (!unsolid(mon->data) && !obj_resists(obj, 0, 100)){
-			if(obj->otyp == DROVEN_LANCE && rnl(40) == (40-1)) return -1;	/* hit that breaks lance */
-			else if(joust_dieroll == 0){ /* Droven lances are especially brittle */
+			if((joust_dieroll == 0) || (is_shatterable(obj) && !obj->oerodeproof)){ /* Glass/obsidian lances are especially brittle */
 				if(obj->otyp == ELVEN_LANCE && rnl(75) == (75-1)) return -1;	/* hit that breaks lance */
+				else if (obj->otyp == DROVEN_LANCE && rnl(40) == (40 - 1)) return -1;	/* hit that breaks lance */
 				else if(rnl(50) == (50-1)) return -1;	/* hit that breaks lance */
 			}
 		}

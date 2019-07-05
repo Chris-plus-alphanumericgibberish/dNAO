@@ -70,8 +70,7 @@ struct monst *victim;
 	case 0:
 	    item = (victim == &youmonst) ? uarmh : which_armor(victim, W_ARMH);
 	    if (item) {
-		mat_idx = item->obj_material;
-	    	Sprintf(buf,"%s helmet", materialnm[mat_idx] );
+	    	Sprintf(buf,"%s helmet", material_name(item, FALSE));
 	    }
 	    if (!burn_dmg(item, item ? buf : "helmet")) continue;
 	    break;
@@ -3161,14 +3160,14 @@ struct monst *owner;
 				// obj->otyp = OIL_LAMP;
 				// break;
 			    // case MAGIC_WHISTLE:
-				// obj->otyp = TIN_WHISTLE;
+				// obj->otyp = WHISTLE;
 				// break;	
 			    // case MAGIC_FLUTE:
-				// obj->otyp = WOODEN_FLUTE;
+				// obj->otyp = FLUTE;
 				// obj->spe  = 0;
 				// break;	
 			    // case MAGIC_HARP:
-				// obj->otyp = WOODEN_HARP;
+				// obj->otyp = HARP;
 				// obj->spe  = 0;
 				// break;
 			    // case FIRE_HORN:
@@ -3178,7 +3177,7 @@ struct monst *owner;
 				// obj->spe  = 0;
 				// break;
 			    // case DRUM_OF_EARTHQUAKE:
-				// obj->otyp = LEATHER_DRUM;
+				// obj->otyp = DRUM;
 				// obj->spe  = 0;
 				// break;
 			    // }

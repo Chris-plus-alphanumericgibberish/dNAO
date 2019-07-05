@@ -1431,7 +1431,7 @@ long timeout;
 		}
 		if(obj->oeroded < 2){
 			obj->oeroded++;
-			Your("%s degrades.",xname(obj));
+			Your("%s degrade%s.",xname(obj),(obj->quan > 1L ? "" : "s"));
 			start_timer(1, TIMER_OBJECT,
 						LIGHT_DAMAGE, (genericptr_t)obj);
 			stop_occupation();

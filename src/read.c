@@ -661,7 +661,7 @@ register struct obj *obj;
 	else {
 		if (obj->spe > 0) {
 		    obj->spe = 0;
-		    if (obj->otyp == OIL_LAMP || obj->otyp == BRASS_LANTERN)
+		    if (obj->otyp == OIL_LAMP || obj->otyp == LANTERN)
 			obj->age = 0;
 		    Your("%s %s briefly.",xname(obj), otense(obj, "vibrate"));
 		} else pline1(nothing_happens);
@@ -876,7 +876,7 @@ int curse_bless;
 		break;
 	    case DWARVISH_HELM:
 	    case OIL_LAMP:
-	    case BRASS_LANTERN:
+	    case LANTERN:
 		if (is_cursed) {
 		    if (obj->otyp == DWARVISH_HELM) {
 			/* Don't affect the +/- of the helm */
