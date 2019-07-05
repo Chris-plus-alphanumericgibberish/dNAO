@@ -2783,6 +2783,7 @@ E int FDECL(weapon_dam_bonus, (struct obj *));
 E int FDECL(skill_dam_bonus, (int));
 E void FDECL(skill_init, (const struct def_skill *));
 E void FDECL(skill_add, (const struct def_skill *));
+E int NDECL(aeshbon);
 
 /* ### were.c ### */
 
@@ -2916,6 +2917,7 @@ E boolean FDECL(cancel_monst, (struct monst *,struct obj *,
 			       BOOLEAN_P,BOOLEAN_P,BOOLEAN_P,int));
 E void FDECL(weffects, (struct obj *));
 E int NDECL(spell_damage_bonus);
+E int NDECL(kraubon);
 E const char *FDECL(exclam, (int force));
 E void FDECL(hit, (const char *,struct monst *,const char *));
 E void FDECL(miss, (const char *,struct monst *));
