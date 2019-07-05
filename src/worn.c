@@ -52,6 +52,7 @@ const struct worn {
 int *
 item_property_list(obj, otyp)
 struct obj* obj;
+int otyp;
 {
 	static int property_list[LAST_PROP];	// the temporary list of properties
 	int cur_prop, i;
@@ -73,7 +74,7 @@ struct obj* obj;
 	const static int SHIM_RES[] = { SEE_INVIS, 0 };
 
 	i = 0;
-	for (cur_prop = 0; cur_prop < LAST_PROP; cur_prop++)
+	for (cur_prop = 1; cur_prop < LAST_PROP; cur_prop++)
 	{
 		got_prop = FALSE;
 		// from objclass
