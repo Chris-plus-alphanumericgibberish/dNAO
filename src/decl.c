@@ -326,9 +326,9 @@ const struct material materials[] = {
 	{MITHRIL,		HI_SILVER,		 27,		 50,		 6	},
 	{PLASTIC,		CLR_WHITE,		 13,		 10,		 3	},
 	{GLASS,			HI_GLASS,		 24,		 20,		 5	},
-	{GEMSTONE,		CLR_RED,		 36,		500,		 7	},
-	{MINERAL,		CLR_GRAY,		 27,		 10,		 6	},
-	{OBSIDIAN_MT,	CLR_BLACK,		 26,		 10,		 4	},
+	{GEMSTONE,		CLR_RED,		 36,		100,		 7	},
+	{MINERAL,		CLR_GRAY,		 27,		 15,		 6	},
+	{OBSIDIAN_MT,	CLR_BLACK,		 26,		 20,		 4	},
 	{SHADOWSTEEL,	CLR_BLACK,		 27,		 50,		 6	}
 };
 
