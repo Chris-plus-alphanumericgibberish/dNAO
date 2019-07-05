@@ -884,11 +884,13 @@ boolean adjective;
 	case WAX:
 		return "wax";
 	case VEGGY:
+		/* supposed to be made of straw or straw-like substance */
 		if (obj->otyp == SEDGE_HAT || obj->otyp == SHEAF_OF_HAY)
 			return "straw";
 		else
 			return (adjective ? "organic" : "organic material");
 	case FLESH:
+		/* meat! */
 		if (obj->otyp == MEATBALL || obj->otyp == MEAT_STICK || obj->otyp == MEAT_RING || obj->otyp == MASSIVE_CHUNK_OF_MEAT)
 			return "meat";
 		else
@@ -896,6 +898,7 @@ boolean adjective;
 	case PAPER:
 		return "paper";
 	case CLOTH:
+		/* woolen cloth equipment is just wool */
 		if ((obj->oproperties&OPROP_WOOL) == OPROP_WOOL)
 			return (adjective ? "woolen" : "wool");
 		else
@@ -903,29 +906,44 @@ boolean adjective;
 	case LEATHER:
 		return "leather";
 	case WOOD:
-		return (adjective ? "wooden" : "wood");
+		/* except for "forked" the wooden wand descriptions are materials (eg pine) */
+		if (obj->oclass == WAND_CLASS && ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && strncmpi(s, "forked", 6)))
+			return OBJ_DESCR(objects[obj->otyp]);
+		else
+			return (adjective ? "wooden" : "wood");
 	case BONE:
+		/* special case */
 		if (obj->oartifact == ART_WEBWEAVER_S_CROOK)
 			return "chitin";
 		else
 			return "bone";
 	case DRAGON_HIDE:
+		/* for some reason, this is dragonhide? */
 		if (obj->otyp == LEO_NEMAEUS_HIDE)
 			return "lionhide";
+		/* hard object made of dragonhide (or described as being dragon-bone) -> bone or tooth */
 		else if ((objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE) ||
-			((s = OBJ_NAME(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragon-bone", 11)))
+			((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragon-bone", 11)))
 			return (obj->oclass == WEAPON_CLASS ? (adjective ? "dragon-tooth" : "a dragon's tooth") : (adjective ? "dragon-bone" : "dragon bones"));
+		/* specified as dragonhide in objects.c -> scales*/
 		else if (objects[obj->otyp].oc_material == DRAGON_HIDE)
 			return (adjective ? "dragon-scale" : "dragon scales");
+		/* soft object made of dragonhide */
 		else
 			return "dragonhide";
 	case IRON:
-		if (obj->oartifact == ART_STEEL_SCALES_OF_KURTULMAK)
+		/* described as steel or otherwise in the name */
+		if ((obj->oartifact == ART_STEEL_SCALES_OF_KURTULMAK) ||
+			((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "steel", 5)))
 			return "steel";
 		else
 			return "iron";
 	case METAL:
-		if (adjective
+		/* all metal wands have interesting materials (eg uranium)*/
+		if (obj->oclass == WAND_CLASS)
+			return OBJ_DESCR(objects[obj->otyp]);
+		/* Oona's weapons */
+		else if (adjective
 			&& obj->oproperties&OPROP_LESSW
 			&& obj->oproperties&OPROP_AXIOW
 			&& obj->oproperties&(OPROP_FIREW | OPROP_COLDW | OPROP_ELECW)
@@ -938,15 +956,19 @@ boolean adjective;
 			if (obj->oproperties&OPROP_ELECW)
 				return "arcing";
 		}
+		/* whistles are made of tin */
 		else if (obj->otyp == WHISTLE || obj->otyp == MAGIC_WHISTLE)
 			return "tin";
+		/* because it wasn't hard enough to remember how to spell */
 		else if (obj->otyp == ORIHALCYON_GAUNTLETS && !adjective)
 			return "orichalcum";
 		else
 			return (adjective ? "metallic" : "metal");
 	case COPPER:
+		/* brass lantern, brass ring, brass wand */
 		if (obj->otyp == LANTERN || ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "brass", 5)))
 			return "brass";
+		/* copper ring, copper wand */
 		else if ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "copper", 6))
 			return "copper";
 		else
@@ -962,14 +984,55 @@ boolean adjective;
 	case PLASTIC:
 		return "plastic";
 	case GLASS:
-		if (objects[obj->otyp].oc_name_known && (s = OBJ_NAME(objects[obj->otyp])) != (char *)0 && !strncmp(s, "crystal", 7))
+		/* many glass objects are called "crystal" when known */
+		if ((objects[obj->otyp].oc_name_known && (s = OBJ_NAME(objects[obj->otyp])) != (char *)0 && !strncmp(s, "crystal", 7)) ||
+			((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "crystal", 7)))
 			return "crystal";
 		else
 			return "glass";
 	case GEMSTONE:
-		return (adjective ? "gem" : "gemstone");
+		/* getting any detail requires knowing what it looks like */
+		if (!obj->dknown)
+			return (adjective ? "gem" : "gemstone");
+		/* rings made of gemstones have the gem as their description */
+		else if (obj->oclass == RING_CLASS)
+			return OBJ_DESCR(objects[obj->otyp]);
+		/* items made out of specific gemstones */
+		else if ((obj->oclass == GEM_CLASS) ||
+			(obj->ovar1 && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj))
+			) {
+			int gemtype = (obj->oclass == GEM_CLASS) ? obj->otyp : obj->ovar1;
+
+			if (!objects[gemtype].oc_name_known) {
+				char str[BUFSZ];
+				char * s = str;	/* locally re-define s to be a non-const char*, to use Sprintf */
+				Sprintf(s, (adjective ? "%s gem" : "%s gemstone"), (char*)OBJ_DESCR(objects[gemtype]));
+				return (const char *)s;
+			}
+			else {
+				switch (gemtype)
+				{/* take off "crystal" from the gem name */
+				case MAGICITE_CRYSTAL:
+					return "magicite";
+				case DILITHIUM_CRYSTAL:
+					return "dilithium";
+				default:
+					return OBJ_NAME(objects[gemtype]);
+				}
+			}
+		}
+		/* default gem case is boring but safe */
+		else
+			return (adjective ? "gem" : "gemstone");
 	case MINERAL:
-		if (obj->oclass == ARMOR_CLASS || obj->oclass == TILE_CLASS || ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "ceramic", 7)))
+		/* all wands/rings made of mineral have materials as their description */
+		if (obj->oclass == WAND_CLASS || obj->oclass == RING_CLASS)
+			return OBJ_DESCR(objects[obj->otyp]);
+		/* not quite bone, not quite stone */
+		else if (obj->otyp == WORM_TOOTH || obj->otyp == CRYSKNIFE)
+			return "enamel";
+		/* ceramic wand is handled already */
+		else if (obj->oclass == ARMOR_CLASS || obj->oclass == TILE_CLASS)
 			return "ceramic";
 		else
 			return "stone";
@@ -977,7 +1040,7 @@ boolean adjective;
 	case OBSIDIAN_MT:
 		return "obsidian";
 	case SHADOWSTEEL:
-		return "shadowsteel";
+		return (adjective ? "shadowsteel" : "corporeal darkness");
 	default:
 		return (adjective ? "mysterious" : "an enigma in solid form");
 	}
@@ -1878,6 +1941,9 @@ register struct obj *otmp;
 	    !objects[otmp->otyp].oc_name_known)	/* ?redundant? */
 	return TRUE;
     if (otmp->oartifact && undiscovered_artifact(otmp->oartifact))
+	return TRUE;
+	if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)
+		&& !objects[otmp->ovar1].oc_name_known)
 	return TRUE;
     /* otmp->rknown is the only item of interest if we reach here */
        /*
@@ -2894,12 +2960,14 @@ struct alt_spellings {
 	{ "elven plate mail", HIGH_ELVEN_PLATE },
 	{ "bronze halfplate", BRONZE_HALF_PLATE },
 	{ "halfplate", HALF_PLATE },
+	{ "orichalcum gauntlets", ORIHALCYON_GAUNTLETS },
 	{ "chain", CHAIN },
 	{ "iron chain", CHAIN },
 	{ "iron ball", HEAVY_IRON_BALL },
 	{ "mattock", DWARVISH_MATTOCK },
 	{ "amulet of poison resistance", AMULET_VERSUS_POISON },
 	{ "stone", ROCK },
+	{ "crystal", ROCK },
 #ifdef TOURIST
 	{ "camera", EXPENSIVE_CAMERA },
 	{ "tee shirt", T_SHIRT },
@@ -3015,6 +3083,7 @@ int wishflags;
 	int blessed, uncursed, iscursed, ispoisoned, isgreased, isdrained, stolen;
 	int moonphase = -1, viperheads = -1, ampule = -1, mat = 0;
 	int eroded, eroded2, eroded3, erodeproof;
+	int gemtype = 0;
 #ifdef INVISIBLE_OBJECTS
 	int isinvisible;
 #endif
@@ -3353,12 +3422,11 @@ int wishflags;
 			&& strncmpi(bp, "leather armor", 13) && strncmpi(bp, "leather gloves", 14)
 			&& strncmpi(bp, "leather jacket", 14) && strncmpi(bp, "leather armor", 13)
 			&& strncmpi(bp, "leather helm", 12) && strncmpi(bp, "leather hat", 11)
-			&& strncmpi(bp, "leather cloak", 13) && strncmpi(bp, "drum", 12)
+			&& strncmpi(bp, "leather cloak", 13)
 			) {
 			mat = LEATHER;
 		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", 7))
-			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "flute", 13)
-			&& strncmpi(bp, "harp", 12) && strncmpi(bp, "wood golem", 11)
+			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wood golem", 11)
 			) {
 			mat = WOOD;
 		} else if ((!strncmpi(bp, "dragonhide ", l=11) || !strncmpi(bp, "dragon-hide ", l=12) || !strncmpi(bp, "dragon hide ", l=12)
@@ -3377,7 +3445,6 @@ int wishflags;
 			mat = IRON;
 		} else if ((!strncmpi(bp, "metal ", l=6) || !strncmpi(bp, "metallic ", l=9))
 			&& strncmpi(bp, "metal tube", 10) && strncmpi(bp, "metal gauntlets", 15)
-			&& strncmpi(bp, "metal tube", 10)
 			) {
 			mat = METAL;
 		} else if ((!strncmpi(bp, "bronze ", l=7) || !strncmpi(bp, "copper ", l=7) || !strncmpi(bp, "brass ", l=6))
@@ -3498,6 +3565,60 @@ int wishflags;
 		} else if (!strncmpi(bp, "flaying ", l=8)
 			) {
 			oproperties |= OPROP_FLAYW;
+		} else if (!strncmpi(bp, "magicite ", l=9)) {
+			mat = GEMSTONE; gemtype = MAGICITE_CRYSTAL;
+		} else if (!strncmpi(bp, "dilithium ", l=10)) {
+			mat = GEMSTONE; gemtype = DILITHIUM_CRYSTAL;
+		} else if (!strncmpi(bp, "diamond ", l=8) && strncmpi(bp, "diamond ring", 12)) {
+			mat = GEMSTONE; gemtype = DIAMOND;
+		} else if (!strncmpi(bp, "star sapphire ", l=14)) {
+			mat = GEMSTONE; gemtype = STAR_SAPPHIRE;
+		} else if (!strncmpi(bp, "ruby ", l=5) && strncmpi(bp, "ruby ring", 9)) {
+			mat = GEMSTONE; gemtype = RUBY;
+		} else if (!strncmpi(bp, "jacinth ", l=8)) {
+			mat = GEMSTONE; gemtype = JACINTH;
+		} else if (!strncmpi(bp, "sapphire ", l=9) && strncmpi(bp, "sapphire ring", 13)) {
+			mat = GEMSTONE; gemtype = SAPPHIRE;
+		} else if (!strncmpi(bp, "black opal ", l=11)) {
+			mat = GEMSTONE; gemtype = BLACK_OPAL;
+		} else if (!strncmpi(bp, "emerald ", l=8) && strncmpi(bp, "emerald ring", 12)) {
+			mat = GEMSTONE; gemtype = EMERALD;
+		} else if (!strncmpi(bp, "turquoise ", l=10)) {
+			mat = GEMSTONE; gemtype = TURQUOISE;
+		} else if (!strncmpi(bp, "morganite ", l=10)) {
+			mat = GEMSTONE; gemtype = MORGANITE;
+		} else if (!strncmpi(bp, "citrine ", l=8)) {
+			mat = GEMSTONE; gemtype = CITRINE;
+		} else if (!strncmpi(bp, "aquamarine ", l=11)) {
+			mat = GEMSTONE; gemtype = AQUAMARINE;
+		} else if (!strncmpi(bp, "amber ", l=6)) {
+			mat = GEMSTONE; gemtype = AMBER;
+		} else if (!strncmpi(bp, "topaz ", l=6) && strncmpi(bp, "topaz ring", 10)) {
+			mat = GEMSTONE; gemtype = TOPAZ;
+		} else if (!strncmpi(bp, "jet ", l=4)) {
+			mat = GEMSTONE; gemtype = JET;
+		} else if (!strncmpi(bp, "opal ", l=5) && strncmpi(bp, "opal ring", 9)) {
+			mat = GEMSTONE; gemtype = OPAL;
+		} else if (!strncmpi(bp, "chrysoberyl ", l=11)) {
+			mat = GEMSTONE; gemtype = CHRYSOBERYL;
+		} else if (!strncmpi(bp, "garnet ", l=7) && strncmpi(bp, "garnet rod", 10)) {
+			mat = GEMSTONE; gemtype = GARNET;
+		} else if (!strncmpi(bp, "amethyst ", l=9)) {
+			mat = GEMSTONE; gemtype = AMETHYST;
+		} else if (!strncmpi(bp, "jasper ", l=7)) {
+			mat = GEMSTONE; gemtype = JASPER;
+		} else if (!strncmpi(bp, "violet fluorite ", l=16)) {
+			mat = GEMSTONE; gemtype = VIOLET_FLUORITE;
+		} else if (!strncmpi(bp, "blue fluorite ", l=14)) {
+			mat = GEMSTONE; gemtype = BLUE_FLUORITE;
+		} else if (!strncmpi(bp, "white fluorite ", l=15)) {
+			mat = GEMSTONE; gemtype = WHITE_FLUORITE;
+		} else if (!strncmpi(bp, "green fluorite ", l=15)) {
+			mat = GEMSTONE; gemtype = GREEN_FLUORITE;
+		} else if (!strncmpi(bp, "agate ", l=6) && strncmpi(bp, "agate ring", 10)) {
+			mat = GEMSTONE; gemtype = AGATE;
+		} else if (!strncmpi(bp, "jade ", l=5) && strncmpi(bp, "jade ring", 9)) {
+			mat = GEMSTONE; gemtype = JADE;
 		} else
 			break;
 		bp += l;
@@ -3662,6 +3783,13 @@ int wishflags;
 	while (as->sp) {
 		if (fuzzymatch(bp, as->sp, " -", TRUE)) {
 			typ = as->ob;
+			if (typ == ROCK)
+			{
+				if (gemtype != 0)
+					typ = gemtype;
+				else if (!strncmpi(bp, "crystal", 7))
+					typ = rn2(2) ? MAGICITE_CRYSTAL : DILITHIUM_CRYSTAL;
+			}
 			goto typfnd;
 		}
 		as++;
@@ -3755,6 +3883,11 @@ int wishflags;
 		register int j = strlen(wrp[i]);
 		if(!strncmpi(bp, wrp[i], j)){
 			oclass = wrpsym[i];
+			if (oclass == GEM_CLASS && gemtype != 0) {
+				/* wished for <name> gem */
+				typ = gemtype;
+				goto typfnd;
+			}
 			if(oclass != AMULET_CLASS) {
 			    bp += j;
 			    if(!strncmpi(bp, " of ", 4)) actualn = bp+4;
@@ -3782,6 +3915,10 @@ int wishflags;
 
 	if (!BSTRCMPI(bp, p-6, " stone")) {
 		p[-6] = 0;
+		if (gemtype != 0) {
+			typ = gemtype;
+			goto typfnd;
+		}
 		oclass = GEM_CLASS;
 		dn = actualn = bp;
 		goto srch;
@@ -4485,14 +4622,9 @@ typfnd:
 	/* set material */
 	if(mat){
 		if (wizwish) {
-			otmp->obj_material = mat;
-			/* start the timer for shadowsteel objects -- this is normally done as part of set_material,
-			 * but directly setting the material like this will bypass it
-			 */
-			if (is_evaporable(otmp)){
-				start_timer(1, TIMER_OBJECT,
-					LIGHT_DAMAGE, (genericptr_t)otmp);
-			}
+			set_material(otmp, mat);
+			if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
+				otmp->ovar1 = gemtype;
 		}
 		else {
 			if(otmp->oclass == WEAPON_CLASS && !otmp->oartifact){
@@ -4518,6 +4650,8 @@ typfnd:
 						)
 					){
 					set_material(otmp, mat);
+					if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
+						otmp->ovar1 = gemtype;
 				}
 			}
 		}

@@ -1223,7 +1223,13 @@ register const char *let,*word;
 			bp[foo++] = otmp->invlet;
 			allowall = TRUE;
 		}
-
+		//Make exceptions for gemstone items made of specific gems
+		if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)
+			&& (!objects[otmp->ovar1].oc_name_known || !otmp->dknown)
+			&& !strncmp(word, "rub on the stone", 16)) {
+			bp[foo++] = otmp->invlet;
+			allowall = TRUE;
+		}
 	    if(ilet == 'z') ilet = 'A'; else ilet++;
 	}
 	bp[foo] = 0;
@@ -1777,6 +1783,8 @@ fully_identify_obj(otmp)
 struct obj *otmp;
 {
     makeknown(otmp->otyp);
+	if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
+		makeknown(otmp->ovar1);
     if (otmp->oartifact) discover_artifact(otmp->oartifact);
     otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
     if (otmp->otyp == EGG && otmp->corpsenm != NON_PM)

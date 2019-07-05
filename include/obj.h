@@ -264,19 +264,52 @@ struct obj {
 			/*Records runes for wooden weapons */
 			
 	long ovar1;		/* extra variable. Specifies: */
-			/*Records the contents of Books of Secrets*/
-			/*Records the cracked level of masks. */
-			/*Records special features for weapons. */
-			/* 	Records moon phase for moon axes */
+	/* Number of viperwhip heads */
+	/* Moon axe phase */
+	/* Acid venom non-1d6 damage */
+	/* Mask erosion (may be moved to oeroded3 at some point) */
+	/* Ammo for futuretech weapons */
+	/* Hilt engraving for lightsabers */
+	/* Ampule type for hypospray ampules */
+	/* Engraving for rings */
+#define obj_type_uses_ovar1(otmp) (\
+	   (otmp)->otyp == VIPERWHIP \
+	|| (otmp)->otyp == MOON_AXE \
+	|| (otmp)->otyp == ACID_VENOM \
+	|| (otmp)->otyp == MASK \
+	|| is_blaster((otmp)) \
+	|| (otmp)->otyp == RAYGUN \
+	|| (otmp)->otyp == SEISMIC_HAMMER \
+	|| is_vibroweapon((otmp)) \
+	|| (otmp)->otyp == LIGHTSABER \
+	|| (otmp)->otyp == BEAMSWORD \
+	|| (otmp)->otyp == DOUBLE_LIGHTSABER \
+	|| (otmp)->otyp == HYPOSPRAY_AMPULE \
+	|| (otmp)->oclass == RING_CLASS \
+	)
 #define ECLIPSE_MOON	0
 #define CRESCENT_MOON	1
 #define HALF_MOON		2
 #define GIBBOUS_MOON	3
 #define FULL_MOON	 	4
-			/* 	Records theft type for stealing artifacts (reaver (scimitar) and avarice (shortsword) */
-			/* 	Records remaining ammo for blasters and force pikes */
-			/* 	Records the hilt-type for lightsabers */
-			/*  Records songs that the Singing Sword has heard */
+
+	/* Songs that the Singing Sword has heard */
+	/* Spirits bound into the Pen of the Void */
+	/* The ema of damage taken for gloves of the berserker */
+	/* Life/Death for the scalpel of life and death */
+	/* Theft type for stealing artifacts (reaver (scimitar) and avarice (shortsword) */
+	/* Misc data for the artifact spellbooks */
+#define obj_art_uses_ovar1(otmp) (\
+	   (otmp)->oartifact == ART_SINGING_SWORD \
+	|| (otmp)->oartifact == ART_PEN_OF_THE_VOID \
+	|| (otmp)->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER \
+	|| (otmp)->oartifact == ART_SCALPEL_OF_LIFE_AND_DEATH \
+	|| (otmp)->oartifact == ART_REAVER \
+	|| (otmp)->oartifact == ART_AVARICE \
+	|| (otmp)->oartifact == ART_NECRONOMICON \
+	|| (otmp)->oartifact == ART_BOOK_OF_LOST_NAMES \
+	|| (otmp)->oartifact == ART_BOOK_OF_INFINITE_SPELLS \
+	)
 #define OHEARD_FEAR		0x0000000000000001L
 #define OHEARD_HEALING	0x0000000000000002L
 #define OHEARD_RALLY	0x0000000000000004L
@@ -294,15 +327,6 @@ struct obj {
 #define OHEARD_LIFE		0x0000000000004000L
 #define OHEARD_INSANE	0x0000000000008000L
 #define OHEARD_CANCEL	0x0000000000010000L
-			/* Gloves: special features */
-			/* 	Records the ema of damage taken for gloves of the berserker */
-			/* Rings: specifies engraving on certain rings */
-			/* Cloaks: Droven: Tattered level.  */
-			/* Acid venom: nonstandard damage amount */
-			/* Corpses: rummor */
-			/* Rocks: rummor */
-			/* Masks: fracturing level */
-
 
 	schar gifted; /*gifted is of type aligntyp.  For some reason aligntyp isn't being seen at compile*/
 	

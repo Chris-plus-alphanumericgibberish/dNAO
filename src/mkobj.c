@@ -1553,6 +1553,12 @@ struct obj* obj;
 		start_timer(1, TIMER_OBJECT,
 			LIGHT_DAMAGE, (genericptr_t)obj);
 	}
+	/* set random gemstone type for valid gemstone objects */
+	if (!obj->ovar1 && obj->oclass != GEM_CLASS && obj->obj_material == GEMSTONE && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+		do{
+			obj->ovar1 = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+		} while (obj->ovar1 == OBSIDIAN);
+	}
 	return;
 }
 
@@ -1563,7 +1569,8 @@ int mat;
 {
 	struct monst *owner = 0;
 	long mask = 0;
-	
+	int oldmat = obj->obj_material;
+
 	if(mat == obj->obj_material) return; //Already done!
 	
 	if(obj->where == OBJ_INVENT || obj->where == OBJ_MINVENT){
@@ -1760,6 +1767,10 @@ int mat;
 				if(mat == SILVER) obj->otyp = SILVER_SLINGSTONE;
 				else obj->otyp = ROCK;
 			}
+			else if (mat == GEMSTONE && oldmat == GLASS)
+				obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+			else if (mat == GLASS && oldmat == GEMSTONE)
+				obj->otyp == LAST_GEM + rnd(9);
 			obj->obj_material = mat;
 		break;
 		default:
@@ -1772,6 +1783,19 @@ int mat;
 	if (is_evaporable(obj)){
 		start_timer(1, TIMER_OBJECT,
 			LIGHT_DAMAGE, (genericptr_t)obj);
+	}
+	else if(oldmat == SHADOWSTEEL) {/* or turn it off, if the object used to be made of shadowsteel 
+									 * the asymmetry isn't nice but obj->obj_material was already changed */
+		stop_timer(LIGHT_DAMAGE, (genericptr_t)obj);
+	}
+	/* set random gemstone type for valid gemstone objects */
+	if (!obj->ovar1 && mat == GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+		do{
+			obj->ovar1 = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+		} while (obj->ovar1 == OBSIDIAN);
+	}
+	else if (obj->ovar1 && oldmat == GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+		obj->ovar1 = 0;	/* and reset if changing away from gemstone*/
 	}
 	fix_object(obj);
 	

@@ -1506,6 +1506,8 @@ struct obj *otmp;
 	if (otmp->obj_material != objects[otmp->otyp].oc_material
 		&& materials[objects[otmp->otyp].oc_material].color == objects[otmp->otyp].oc_color)
 	{
+		if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
+			return objects[otmp->ovar1].oc_color;
 		return materials[otmp->obj_material].color;
 	}
 	/* default color */

@@ -2560,6 +2560,26 @@ struct obj *tstone;
 	    do_scratch = TRUE;	/* scratching and streaks */
 	    streak_color = "silvery";
 	    break;
+	case GEMSTONE:
+		if (obj->ovar1 && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+			/* similare check as above */
+			if (tstone->otyp != TOUCHSTONE) {
+				do_scratch = TRUE;
+			}
+			else if (tstone->blessed || (!tstone->cursed &&
+				(Role_if(PM_ARCHEOLOGIST) || Race_if(PM_GNOME)))) {
+				makeknown(TOUCHSTONE);
+				makeknown(obj->ovar1);
+				prinv((char *)0, obj, 0L);
+				return;
+			}
+			/* the touchstone was not effective */
+			streak_color = c_obj_colors[objects[obj->ovar1].oc_color];
+		}
+		else {
+			do_scratch = (tstone->otyp != TOUCHSTONE);
+		}
+		break;
 	default:
 	    /* Objects passing the is_flimsy() test will not
 	       scratch a stone.  They will leave streaks on
