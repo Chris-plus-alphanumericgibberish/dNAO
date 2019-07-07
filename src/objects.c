@@ -485,7 +485,7 @@ HELM("droven helm", "spider-shaped helm", /*Needs encyc entry*//*Needs tile*/
 HELM("plasteel helm", "white skull helm", /*Needs encyc entry*//*Needs tile*/
 		0, 1,  INFRAVISION,   0, 2, 25,  50, 8, 2, 2, PLASTIC, CLR_WHITE),
 HELM_MATSPEC("crystal helm", "fish bowl", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,   0, 2,150, 300, 9, 0, 0, GLASS,UNIDED, HI_GLASS),
+		0, 0,  0,   0, 2,150, 300, 9, 2, 0, GLASS,UNIDED, HI_GLASS),
 HELM("pontiff's crown", "filigreed faceless helm", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, METAL, HI_GOLD),
 /* With shuffled appearances... */
@@ -542,9 +542,9 @@ DRGN_ARMR("yellow dragon scales", 0, ACID_RES,   500, 9, 2, CLR_YELLOW),
 ARMOR("plate mail", (char *)0, /*Needs encyc entry*/
 	1, 0, 1, 0,	44, 5, 225, 600,  5, 5, 3, ARM_SUIT, IRON, HI_METAL),
 ARMOR("high-elven plate", "runed plate mail", /*Needs encyc entry*/
-	0, 0, 1, 0,	0, 5, 110, 	1200,  5, 5, 3, ARM_SUIT, MITHRIL, HI_MITHRIL),
+	0, 0, 1, 0,	0, 5, 110, 	1200,  4, 6, 3, ARM_SUIT, MITHRIL, HI_MITHRIL),
 ARMOR("droven plate mail", "crested black plate", /*Needs encyc entry*/
-	0, 0, 1, 0,	0, 5, 85, 	2000,  5, 5, 1, ARM_SUIT, SHADOWSTEEL, CLR_BLACK),
+	0, 0, 1, 0,	0, 5, 85, 	2000,  4, 6, 1, ARM_SUIT, SHADOWSTEEL, CLR_BLACK),
 ARMOR("elven toga", (char *)0, /*Needs encyc entry*//*Needs tile*/
 	1, 0, 0, 0,	 0, 5,	 5,  100,10, 1, 2, ARM_SUIT, CLOTH, CLR_GREEN),
 ARMOR("noble's dress", "armored black dress", /*Needs encyc entry*/
@@ -558,7 +558,7 @@ ARMOR("gentleman's suit", "expensive clothes", /*Needs encyc entry*/
 ARMOR("gentlewoman's dress", "expensive dress", /*Needs encyc entry*/
 	0, 0, 1, 0,	0, 6,100, 1000,  10, 1, 3, ARM_SUIT, BONE, CLR_RED), /*Specifically, whale bone*/
 ARMOR("crystal plate mail", (char *)0, /*Needs encyc entry*/
-	1, 0, 1, 0,	10, 5, 250, 2000,  7, 3, 0, ARM_SUIT, GLASS, HI_GLASS), /*Best armor, AC wise*/
+	1, 0, 1, 0,	10, 5, 170, 2000,  5, 5, 0, ARM_SUIT, GLASS, HI_GLASS), /*Best armor, AC wise*/
 ARMOR("half plate", (char *)0, /*Needs encyc entry*/
 	1, 0, 1, 0, 0, 5, 200, 400, 6, 4, 3, ARM_SUIT, IRON, HI_METAL),
 #ifdef TOURIST
@@ -587,7 +587,7 @@ ARMOR("elven mithril-coat", (char *)0,
 ARMOR("chain mail", (char *)0,
 	1, 0, 0, 0,	72, 5, 150,  75,  8, 3, 1, ARM_SUIT, IRON, HI_METAL),
 ARMOR("droven chain mail", "crested black mail", /*Needs encyc entry*/
-	0, 0, 0, 0,	0, 5,   50,  1000,  8, 3, 2, ARM_SUIT, SHADOWSTEEL, CLR_BLACK),
+	0, 0, 0, 0,	0, 5,   50,  1000,  8, 4, 2, ARM_SUIT, SHADOWSTEEL, CLR_BLACK),
 ARMOR("orcish chain mail", "crude chain mail",
 	0, 0, 0, 0,	20, 5, 150,  75,  8, 2, 1, ARM_SUIT, IRON, CLR_BLACK),
 ARMOR("scale mail", (char *)0,
@@ -660,7 +660,7 @@ CLOAK("leather cloak", (char *)0,
 		1, 0,	0,	    8, 0, 15, 40, 10, 2, 1, LEATHER, CLR_BROWN),
 /* With shuffled appearances... */
 CLOAK("cloak of protection", "tattered cape",
-		0, 1,	PROTECTION, 9, 0, 10, 50,  7, 3, 3, CLOTH, HI_CLOTH),
+		0, 1,	PROTECTION, 9, 0, 10, 50,  9, 1, 3, CLOTH, HI_CLOTH),
 CLOAK("cloak of invisibility", "opera cloak",
 		0, 1,	INVIS,	   10, 0, 10, 60,  9, 0, 2, CLOTH, CLR_BLACK),
 CLOAK("cloak of magic resistance", "ornamental cope",
@@ -684,7 +684,7 @@ SHIELD_MATSPEC("roundshield", "round shield",
 SHIELD("dwarvish roundshield", "round shield",
 		0, 0, 0, 0,	     4, 0, 80, 10,  7, 0, 1, IRON, HI_METAL),
 SHIELD_MATSPEC("crystal shield", "shield", /*Needs encyc entry*//*Needs tile*/
-		0, 0, 0, 0,	     0, 0,300,150,  9, 0, 0, GLASS,UNIDED, HI_GLASS),
+		0, 0, 0, 0,	     0, 0, 80,150,  8, 0, 0, GLASS,UNIDED, HI_GLASS),
 SHIELD("shield of reflection", "polished shield",
 		0, 1, 0, REFLECTING, 3, 0, 60, 50,  8, 0, 0, SILVER, HI_SILVER),
 /*#define SHIELD(name,desc,kn,mgc,blk,power,prob,delay,wt,cost,ac,can,metal,c) \
@@ -711,7 +711,7 @@ DRGN_SHIELD("yellow dragon scale shield", 1, ACID_RES,   900, 7, 0, CLR_YELLOW),
 //define GLOVES(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c) \
 	ARMOR(name,desc,kn,mgc,0,power,prob,delay,wt,cost,ac,dr,can,ARM_GLOVES,metal,c)
 GLOVES_MATSPEC("crystal gauntlets", "gauntlets", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2, 50, 400,  9, 0, 0, GLASS,UNIDED, HI_GLASS),
+		0, 0,  0,	   0, 2, 20, 400,  8, 2, 0, GLASS,UNIDED, HI_GLASS),
 GLOVES_MATSPEC("gauntlets", (char *)0, /*Needs encyc entry*//*Needs tile*/
 		1, 0,  0,	   4, 2, 25, 10, 8, 2, 0, IRON,IDED|UNIDED, HI_METAL),
 GLOVES("bronze gauntlets", (char *)0, /*Needs encyc entry*//*Needs tile*/
@@ -755,7 +755,7 @@ BOOTS("high boots", "jackboots",
 BOOTS("heeled boots", "tall boots",
 		1, 0,  0,	   0, 2, 20, 12, 10, 2, 0, LEATHER, CLR_BLACK),
 BOOTS_MATSPEC("crystal boots", "boots", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2,150,300,   9, 0, 0, GLASS,UNIDED, HI_GLASS),
+		0, 0,  0,	   0, 2, 60,300,  8, 2, 0, GLASS,UNIDED, HI_GLASS),
 /* With shuffled appearances... */
 BOOTS("speed boots", "combat boots",
 		0, 1,  FAST,	  12, 2, 20, 50,  9, 0, 0, LEATHER, HI_LEATHER),

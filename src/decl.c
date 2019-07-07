@@ -312,32 +312,31 @@ struct c_common_strings c_common_strings = {
  * Instead, use arbitrary units.
  */
 const struct material materials[] = {
-/*   id             color       density                    cost    defense  */
-/*   USED           USED           USED                    USED     UNUSED  */
-	{0,				CLR_BLACK,		  5,/*old:   5*/		  0,		 0	},
-	{LIQUID,		HI_ORGANIC,		 10,/*old:  10*/		  1, 		 0	},
-	{WAX,			CLR_WHITE,		 15,/*old:   9*/		  1, 		 1	},
-	{VEGGY,			HI_ORGANIC,		 10,/*old:   3*/		  1, 		 1	},
-	{FLESH,			CLR_RED,		 10,/*old:  11*/		  3, 		 3	},
-	{PAPER,			CLR_WHITE,		 10,/*old:  12*/		  2, 		 1	},
-	{CLOTH,			HI_CLOTH,		 10,/*old:  15*/		  3, 		 2	},
-	{LEATHER,		HI_LEATHER,		 15,/*old:   9*/		  5, 		 3	},
-	{WOOD,			HI_WOOD,		 30,/*old:   5*/		  8, 		 4	},
-	{BONE,			CLR_WHITE,		 25,/*old:  17*/		 20,		 4	},
-	{DRAGON_HIDE,	CLR_WHITE,		 35,/*old:  34*/		200,		10	},	/*note: color variable */
-	{IRON,			HI_METAL,		 80,/*old:  79*/		 10,		 5	},
-	{METAL,			HI_METAL,		 70,/*old:  77*/		 10,		 5	},
-	{COPPER,		HI_COPPER,		 80,/*old:  89*/		 10,		 4	},
-	{SILVER,		HI_SILVER,		 90,/*old: 105*/		 30,		 5	},
-	{GOLD,			HI_GOLD,		120,/*old: 193*/		 60,		 3	},
-	{PLATINUM,		CLR_WHITE,		120,/*old: 214*/		 80,		 4	},
-	{MITHRIL,		HI_MITHRIL,		 40,/*old:  27*/		 50,		 6	},
-	{PLASTIC,		CLR_WHITE,		 20,/*old:  13*/		 10,		 3	},
-	{GLASS,			HI_GLASS,		 60,/*old:  24*/		 20,		 5	},
-	{GEMSTONE,		CLR_RED,		 55,/*old:  36*/		100,		 7	},	/*note: color and cost variable */
-	{MINERAL,		CLR_GRAY,		 70,/*old:  27*/		 15,		 6	},
-	{OBSIDIAN_MT,	CLR_BLACK,		 60,/*old:  26*/		 20,		 4	},
-	{SHADOWSTEEL,	CLR_BLACK,		 30,/*old:  27*/		 50,		 6	}
+/*   id             color       density                    cost   defense  */
+	{0,				CLR_BLACK,		  5,/*old:   5*/		  0,		0	},
+	{LIQUID,		HI_ORGANIC,		 10,/*old:  10*/		  1, 		1	},
+	{WAX,			CLR_WHITE,		 15,/*old:   9*/		  1, 		1	},
+	{VEGGY,			HI_ORGANIC,		 10,/*old:   3*/		  1, 		1	},
+	{FLESH,			CLR_RED,		 10,/*old:  11*/		  3, 		3	},
+	{PAPER,			CLR_WHITE,		 10,/*old:  12*/		  2, 		1	},
+	{CLOTH,			HI_CLOTH,		 10,/*old:  15*/		  3, 		2	},
+	{LEATHER,		HI_LEATHER,		 15,/*old:   9*/		  5, 		3	},
+	{WOOD,			HI_WOOD,		 30,/*old:   5*/		  8, 		4	},
+	{BONE,			CLR_WHITE,		 25,/*old:  17*/		 20,		4	},
+	{DRAGON_HIDE,	CLR_WHITE,		 35,/*old:  34*/		200,		8	},	/*note: color variable */
+	{IRON,			HI_METAL,		 80,/*old:  79*/		 10,		5	},
+	{METAL,			HI_METAL,		 70,/*old:  77*/		 10,		5	},
+	{COPPER,		HI_COPPER,		 80,/*old:  89*/		 10,		5	},
+	{SILVER,		HI_SILVER,		 90,/*old: 105*/		 30,		5	},
+	{GOLD,			HI_GOLD,		120,/*old: 193*/		 60,		3	},
+	{PLATINUM,		CLR_WHITE,		120,/*old: 214*/		 80,		4	},
+	{MITHRIL,		HI_MITHRIL,		 40,/*old:  27*/		 50,		6	},
+	{PLASTIC,		CLR_WHITE,		 20,/*old:  13*/		 10,		3	},
+	{GLASS,			HI_GLASS,		 60,/*old:  24*/		 20,		5	},
+	{GEMSTONE,		CLR_RED,		 55,/*old:  36*/		100,		7	},	/*note: color and cost variable */
+	{MINERAL,		CLR_GRAY,		 70,/*old:  27*/		 15,		6	},
+	{OBSIDIAN_MT,	CLR_BLACK,		 60,/*old:  26*/		 20,		4	},
+	{SHADOWSTEEL,	CLR_BLACK,		 30,/*old:  27*/		 50,		6	}
 };
 
 /* Vision */
