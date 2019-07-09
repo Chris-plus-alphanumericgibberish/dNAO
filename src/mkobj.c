@@ -7,7 +7,7 @@
 
 STATIC_DCL void FDECL(mkbox_cnts,(struct obj *));
 STATIC_DCL void FDECL(obj_timer_checks,(struct obj *, XCHAR_P, XCHAR_P, int));
-STATIC_DCL void FDECL(init_obj_material,(struct obj *));
+STATIC_DCL void FDECL(init_obj_material, (struct obj *));
 #ifdef OVL1
 STATIC_DCL void FDECL(container_weight, (struct obj *));
 STATIC_DCL struct obj *FDECL(save_mtraits, (struct obj *, struct monst *));
@@ -1762,7 +1762,45 @@ struct obj* obj;
     return NULL;
 }
 
-/* Initialize the material field of an object */
+/* Tries to set obj's material to mat
+ * Is limited by material lists and probabilities
+ * If check_all is true, go through the object's whole mat list;
+ *   otherwise, limited by probability
+ * Used by wishing code
+ */
+void
+maybe_set_material(obj, mat, check_all)
+struct obj *obj;
+int mat;
+boolean check_all;
+{
+	const struct icp* random_mat_list;
+
+	/* check that the item isn't currently of mat */
+	if (obj->obj_material == mat)
+		return;	// already done
+
+	/* randomized materials */
+	random_mat_list = material_list(obj);
+	/* check that the object can have a random material */
+	if (!random_mat_list)
+		return;
+
+	int i = (check_all ? 100 : rnd(100));
+	while (i > 0) {
+		if ((i <= random_mat_list->iprob) || (random_mat_list->iclass == mat))
+			break;
+		i -= random_mat_list->iprob;
+		random_mat_list++;
+	}
+	if (random_mat_list->iclass) /* a 0 indicates to use default material */
+		set_material(obj, random_mat_list->iclass);
+}
+
+/* Initialize the material field of an object
+ * Called on object creation, and can be called during
+ *   wishing to re-randomize the material of an object
+ */
 void
 init_obj_material(obj)
 struct obj* obj;

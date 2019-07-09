@@ -588,7 +588,7 @@ const char *name;
 
 		if (obj->oartifact && artilist[obj->oartifact].size)
 			obj->objsize = artilist[obj->oartifact].size;
-		else if(is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR)
+		else if(is_malleable_artifact(&artilist[obj->oartifact]))
 			;//keep current/default size
 		else
 			obj->objsize = MZ_MEDIUM;
@@ -607,11 +607,11 @@ const char *name;
 		else if (obj->otyp == BEAMSWORD)                          obj->obj_material = GOLD;
 		else if (obj->otyp == KAMEREL_VAJRA)                      obj->obj_material = GOLD;
 		else if (obj->otyp == DOUBLE_LIGHTSABER)                  obj->obj_material = PLATINUM;
-		else if (is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR);//keep current/default material
+		else if (is_malleable_artifact(&artilist[obj->oartifact]));//keep current/default material
 		else
 			obj->obj_material = objects[obj->otyp].oc_material;
 		
-		if(is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR); //keep current/default body type
+		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
 		else obj->bodytypeflag = MB_HUMANOID;
 		
 		if(obj->oartifact == ART_SCOURGE_OF_LOLTH) obj->ovar1 = 8;

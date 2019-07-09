@@ -2960,6 +2960,7 @@ struct alt_spellings {
 	{ "elven plate mail", HIGH_ELVEN_PLATE },
 	{ "bronze halfplate", BRONZE_HALF_PLATE },
 	{ "halfplate", HALF_PLATE },
+	{ "elven gauntlets", HIGH_ELVEN_GAUNTLETS },
 	{ "orichalcum gauntlets", ORIHALCYON_GAUNTLETS },
 	{ "chain", CHAIN },
 	{ "iron chain", CHAIN },
@@ -3030,6 +3031,7 @@ struct alt_spellings {
 	{ "koto", HARP },
 	{ "helmet", HELMET },
 	{ "circlet", HELMET },
+	{ "helm", HELMET },
 	{ "helm of brilliance", HELM_OF_BRILLIANCE },
 	{ "crown of cognizance", HELM_OF_BRILLIANCE },
 	{ "helm of opposite alignment", HELM_OF_OPPOSITE_ALIGNMENT },
@@ -3429,6 +3431,9 @@ int wishflags;
 			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wood golem", 11)
 			) {
 			mat = WOOD;
+		} else if ((!strncmpi(bp, "bone ", l=5))
+			) {
+			mat = BONE;
 		} else if ((!strncmpi(bp, "dragonhide ", l=11) || !strncmpi(bp, "dragon-hide ", l=12) || !strncmpi(bp, "dragon hide ", l=12)
 			|| !strncmpi(bp, "dragonscale ", l=12) || !strncmpi(bp, "dragon-scale ", l=13) || !strncmpi(bp, "dragon scale ", l=13)
 			|| !strncmpi(bp, "dragonbone ", l=11) || !strncmpi(bp, "dragon-bone ", l=12) || !strncmpi(bp, "dragon bone ", l=12)
@@ -3453,14 +3458,14 @@ int wishflags;
 			&& strncmpi(bp, "bronze roundshield", 18) && strncmpi(bp, "bronze gauntlets", 16)
 			&& strncmpi(bp, "bronze ring", 11) && strncmpi(bp, "copper ring", 11) && strncmpi(bp, "brass ring", 10)
 			&& strncmpi(bp, "copper wand", 11) && strncmpi(bp, "brass wand", 10)
-			&& strncmpi(bp, "bronze spellbook", 16 && strncmpi(bp, "copper spellbook", 16))
+			&& strncmpi(bp, "bronze spellbook", 16) && strncmpi(bp, "copper spellbook", 16)
 		) {
 			mat = COPPER;
 		} else if (!strncmpi(bp, "silver ", l=7)
 			&& strncmpi(bp, "silver arrow", 12) && strncmpi(bp, "silver bullet", 13)
 			&& strncmpi(bp, "silver pellet", 13) && strncmpi(bp, "silver dragon", 13)
 			&& strncmpi(bp, "silver clothes", 14) && strncmpi(bp, "silver ring", 11)
-			&& strncmpi(bp, "silver bell", 11) && strncmpi(bp, "silver spellbook", 16)
+			&& strncmpi(bp, "silver spellbook", 16)
 			&& strncmpi(bp, "silver wand", 11) && strncmpi(bp, "silver slingstone", 17)
 			&& strncmpi(bp, "silver stone", 12) && strncmpi(bp, "Silver Key", 10)
 			&& strncmpi(bp, "Silver Starlight", 16)
@@ -4620,41 +4625,14 @@ typfnd:
 		otmp->odiluted = 1;
 
 	/* set material */
-	if(mat){
-		if (wizwish) {
+	if (mat){
+		if (wizwish)
 			set_material(otmp, mat);
-			if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
-				otmp->ovar1 = gemtype;
-		}
-		else {
-			if(otmp->oclass == WEAPON_CLASS && !otmp->oartifact){
-				if(		// flexible materials
-						((otmp->obj_material == CLOTH
-						|| otmp->obj_material == LEATHER
-						|| otmp->obj_material == PLASTIC)
-						&&(mat == CLOTH
-						|| mat == LEATHER)
-					)
-					||	// rigid materials
-						(((otmp->obj_material >= DRAGON_HIDE && otmp->obj_material <= MITHRIL)
-						|| otmp->obj_material == GLASS
-						|| otmp->obj_material == BONE
-						|| otmp->obj_material == WOOD
-						|| otmp->obj_material == OBSIDIAN_MT
-						|| otmp->obj_material == GEMSTONE
-						|| otmp->obj_material == MINERAL)
-						&&((mat >= DRAGON_HIDE && mat <= MITHRIL)
-						|| mat == GLASS
-						|| mat == OBSIDIAN_MT
-						|| mat == MINERAL)
-						)
-					){
-					set_material(otmp, mat);
-					if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
-						otmp->ovar1 = gemtype;
-				}
-			}
-		}
+		else if (!otmp->oartifact || is_malleable_artifact(&artilist[otmp->oartifact]))
+			maybe_set_material(otmp, mat, !rn2(7));	// always limited by allowable random materials, 1/7 chance of ignoring probabilities
+		/* set gemtype, if specified and allowable*/
+		if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
+			otmp->ovar1 = gemtype;
 	}
 	
 	/* set object properties */
