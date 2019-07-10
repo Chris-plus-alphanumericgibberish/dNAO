@@ -537,7 +537,7 @@ const char *name;
       // obj->corpsenm = u.umonster*S*D*D*D*S*;
     }
 	if(!strcmp((&artilist[ART_MANTLE_OF_HEAVEN])->name,name) &&
-	   obj && obj->otyp == LEATHER_CLOAK){
+	   obj && obj->otyp == CLOAK){
 		if(!Race_if(PM_VAMPIRE)) obj = poly_obj(obj,find_cope());
 		else{
 			obj = poly_obj(obj,find_opera_cloak());
@@ -545,7 +545,7 @@ const char *name;
 		}
 	}
 	else if(!strcmp((&artilist[ART_VESTMENT_OF_HELL])->name,name) &&
-	   obj && obj->otyp == LEATHER_CLOAK){
+	   obj && obj->otyp == CLOAK){
 		if(Race_if(PM_VAMPIRE)) obj = poly_obj(obj,find_opera_cloak());
 		else{
 			obj = poly_obj(obj,find_cope());

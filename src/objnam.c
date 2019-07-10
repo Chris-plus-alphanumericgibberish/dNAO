@@ -2955,11 +2955,11 @@ struct alt_spellings {
 	{ "scroll of enchant armour", SCR_ENCHANT_ARMOR },
 	{ "scroll of destroy armour", SCR_DESTROY_ARMOR },
 	{ "leather armour", LEATHER_ARMOR },
-	{ "leather gloves", GLOVES },
 	{ "studded leather armour", STUDDED_LEATHER_ARMOR },
 	{ "elven plate mail", HIGH_ELVEN_PLATE },
 	{ "bronze halfplate", BRONZE_HALF_PLATE },
 	{ "halfplate", HALF_PLATE },
+	{ "leather gloves", GLOVES },
 	{ "elven gauntlets", HIGH_ELVEN_GAUNTLETS },
 	{ "orichalcum gauntlets", ORIHALCYON_GAUNTLETS },
 	{ "chain", CHAIN },
@@ -3421,10 +3421,8 @@ int wishflags;
 			) {
 			mat = CLOTH;
 		} else if (!strncmpi(bp, "leather ", l=8) && strncmpi(bp, "leather spellbook", 17)
-			&& strncmpi(bp, "leather armor", 13) && strncmpi(bp, "leather gloves", 14)
-			&& strncmpi(bp, "leather jacket", 14) && strncmpi(bp, "leather armor", 13)
+			&& strncmpi(bp, "leather armor", 13) && strncmpi(bp, "leather armour", 14)
 			&& strncmpi(bp, "leather helm", 12) && strncmpi(bp, "leather hat", 11)
-			&& strncmpi(bp, "leather cloak", 13)
 			) {
 			mat = LEATHER;
 		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", 7))
@@ -3914,8 +3912,15 @@ int wishflags;
 	/* "grey stone" check must be before general "stone" */
 	for (i = 0; i < SIZE(o_ranges); i++)
 	    if(!strcmpi(bp, o_ranges[i].name)) {
-		typ = rnd_class(o_ranges[i].f_o_range, o_ranges[i].l_o_range);
-		goto typfnd;
+			/* check if the player was asking for an item that is both a range and a general item 
+			 * indicated by asking for a material, eg "cloak", or "silver gauntlets" */
+			if		(mat && !strcmpi(bp, "cloak"))		typ = CLOAK;
+			else if (mat && !strcmpi(bp, "gauntlets"))	typ = GAUNTLETS;
+			else if (mat && !strcmpi(bp, "shoes"))		typ = SHOES;
+			/* otherwise, actually use the o_range */
+			else typ = rnd_class(o_ranges[i].f_o_range, o_ranges[i].l_o_range);
+
+			goto typfnd;
 	    }
 
 	if (!BSTRCMPI(bp, p-6, " stone")) {

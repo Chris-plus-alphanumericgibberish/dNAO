@@ -169,14 +169,15 @@ static const struct icp orcish_materials[] = {
 /* Reflectable items - for the shield of reflection; anything that can hold a
  * polish. Amulets also arbitrarily use this list. */
 static const struct icp shiny_materials[] = {
-	{30, SILVER },
-	{22, COPPER },
-	{12, GOLD },
-	{12, IRON }, /* stainless steel */
-	{10, GLASS },
-	{ 7, MITHRIL },
-	{ 5, METAL }, /* aluminum, or similar */
-	{ 2, PLATINUM }
+	{50, 0 }, /* use base material */
+	{15, SILVER },
+	{11, COPPER },
+	{ 6, GOLD },
+	{ 6, IRON }, /* stainless steel */
+	{ 5, GLASS },
+	{ 3, MITHRIL },
+	{ 3, METAL }, /* aluminum, or similar */
+	{ 1, PLATINUM }
 };
 
 /* for bells and other tools, especially instruments, which are normally copper
@@ -1672,9 +1673,8 @@ struct obj* obj;
 	case BULLWHIP:
 	case WORM_TOOTH:
 	case CRYSKNIFE:
-	case LEATHER_JACKET:
 	case LEATHER_ARMOR:
-	case LEATHER_CLOAK:
+	case STUDDED_LEATHER_ARMOR:
 	case YA:
 	case ORIHALCYON_GAUNTLETS:
 	case HARMONIUM_HELM:
@@ -2147,7 +2147,7 @@ register struct obj *obj;
 	else if(obj->oartifact == ART_ROD_OF_THE_ELVISH_LORDS) wt = objects[ELVEN_MACE].oc_weight;
 	else if(obj->oartifact == ART_VAMPIRE_KILLER) wt = 2*objects[BULLWHIP].oc_weight;
 	else if(obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) wt = 2*objects[SCIMITAR].oc_weight;
-	else if(obj->oartifact == ART_AEGIS) wt = objects[LEATHER_CLOAK].oc_weight;
+	else if(obj->oartifact == ART_AEGIS) wt = objects[CLOAK].oc_weight;
 	else if(obj->oartifact == ART_HERMES_S_SANDALS) wt = objects[FLYING_BOOTS].oc_weight;
 	else if(obj->oartifact == ART_EARTH_CRYSTAL){
 		wt = 160;
