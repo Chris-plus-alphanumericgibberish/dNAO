@@ -723,6 +723,10 @@ struct obj *obj;
 			&& shp->iprobs[i].itype == WEAPON_CLASS 
 			&& is_weptool(obj)
 		) return TRUE;
+
+		if (obj->obj_material == GEMSTONE
+			&& shp->iprobs[i].itype == GEM_CLASS)
+			return TRUE;
 	}
     /* not found */
     return FALSE;

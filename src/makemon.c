@@ -785,6 +785,7 @@ register struct monst *mtmp;
 					(void)mongets(mtmp, DROVEN_DAGGER);
 					(void)mongets(mtmp, DROVEN_DAGGER);
 					if (otmp = mongets(mtmp, VIPERWHIP)){
+						set_material(otmp, SILVER);
 						otmp->spe = 4;
 						otmp->opoisoned = OPOISON_FILTH;
 						otmp->opoisonchrgs = 30;
@@ -2379,29 +2380,45 @@ register struct monst *mtmp;
 				return;//no random stuff
 			} else if(ptr == &mons[PM_JUSTICE_ARCHON]){
 				(void)mongets(mtmp, GENTLEWOMAN_S_DRESS);
-				(void)mongets(mtmp, HELMET);
-				(void)mongets(mtmp, GAUNTLETS);
+				if (otmp = mongets(mtmp, HELMET)){
+					set_material(otmp, IRON);
+				}
+				if (otmp = mongets(mtmp, GAUNTLETS)){
+					set_material(otmp, IRON);
+				}
 				if (otmp = mongets(mtmp, ARMORED_BOOTS)){
 					set_material(otmp, IRON);
 				}
-
-				(void)mongets(mtmp, LONG_SWORD);
-				(void)mongets(mtmp, KITE_SHIELD);
+				if (otmp = mongets(mtmp, LONG_SWORD)){
+					set_material(otmp, IRON);
+				}
+				if (otmp = mongets(mtmp, KITE_SHIELD)){
+					set_material(otmp, IRON);
+				}
 			
 			} else if(ptr == &mons[PM_SWORD_ARCHON]){
 					//Nothing
 			} else if(ptr == &mons[PM_SHIELD_ARCHON]){
-				(void)mongets(mtmp, SCALE_MAIL);
-				(void)mongets(mtmp, HELMET);
-				(void)mongets(mtmp, GAUNTLETS);
+				if (otmp = mongets(mtmp, SCALE_MAIL)){
+					set_material(otmp, IRON);
+				}
+				if (otmp = mongets(mtmp, HELMET)){
+					set_material(otmp, IRON);
+				}
+				if (otmp = mongets(mtmp, GAUNTLETS)){
+					set_material(otmp, IRON);
+				}
 				if (otmp = mongets(mtmp, ARMORED_BOOTS)){
 					set_material(otmp, IRON);
 				}
-
-				(void)mongets(mtmp, LANCE);
-				(void)mongets(mtmp, WAR_HAMMER);
-				
+				if (otmp = mongets(mtmp, LANCE)){
+					set_material(otmp, IRON);
+				}
+				if (otmp = mongets(mtmp, WAR_HAMMER)){
+					set_material(otmp, IRON);
+				}
 				if (otmp = mongets(mtmp, KITE_SHIELD)){
+					set_material(otmp, IRON);
 					set_obj_size(otmp, MZ_LARGE);
 					otmp->spe = 3;
 				}
@@ -2433,6 +2450,7 @@ register struct monst *mtmp;
 				}
 				
 				if (otmp = mongets(mtmp, SHIELD_OF_REFLECTION)){
+					set_material(otmp, SILVER);
 					otmp->spe = 0;
 				}
 				
@@ -3964,12 +3982,14 @@ register struct monst *mtmp;
 				curse(otmp);
 			}
 			if (otmp = mongets(mtmp, LONG_SWORD)){
+				set_material(otmp, IRON);
 				otmp->oproperties = OPROP_UNHYW;
 				otmp->oeroded = 1;
 				curse(otmp);
 			}
 		} else if(mm == PM_NECROMANCER) {
 			if (otmp = mongets(mtmp, LONG_SWORD)){
+				set_material(otmp, IRON);
 				otmp->oproperties = OPROP_UNHYW | OPROP_MORGW;
 				otmp->opoisoned = OPOISON_BASIC;
 				otmp->oerodeproof = TRUE;
@@ -3994,10 +4014,12 @@ register struct monst *mtmp;
 	    case S_ZOMBIE:
 		if(mm == PM_UNDEAD_KNIGHT || mm == PM_WARRIOR_OF_SUNLIGHT){
 			if (otmp = mongets(mtmp, LONG_SWORD)){
+				set_material(otmp, IRON);
 				otmp->oeroded = 1;
 			}
 
 			if (otmp = mongets(mtmp, KITE_SHIELD)){
+				set_material(otmp, IRON);
 				otmp->oeroded = 1;
 			}
 
@@ -4007,6 +4029,7 @@ register struct monst *mtmp;
 			}
 
 			if (otmp = mongets(mtmp, SCALE_MAIL)){
+				set_material(otmp, IRON);
 				otmp->oeroded = 2;
 			}
 
@@ -4089,8 +4112,9 @@ register struct monst *mtmp;
 					if (otmp = mongets(mtmp, ARMORED_BOOTS)){
 						set_material(otmp, IRON);
 					}
-
-					(void)mongets(mtmp, LONG_SWORD);
+					if (otmp = mongets(mtmp, LONG_SWORD)){
+						set_material(otmp, IRON);
+					}
 					// mongets(mtmp, IRON_BANDS);
 				} else if(chance >= 6){
 					(void)mongets(mtmp, HELMET);
@@ -4800,6 +4824,7 @@ register struct	monst	*mtmp;
 				 }
 			
 				 if (otmp = mongets(mtmp, SHIELD_OF_REFLECTION)){
+					 set_material(otmp, COPPER);
 					 otmp->oerodeproof = 1;
 					 otmp->spe = 9;
 				 }
@@ -5183,9 +5208,15 @@ register struct	monst	*mtmp;
 			break;
 			case PM_ALRUNES:
 				if(rn2(2)){
-					(void) mongets(mtmp, HELMET);
-					(void) mongets(mtmp, PLATE_MAIL);
-					(void) mongets(mtmp, GAUNTLETS_OF_POWER);
+					if (otmp = mongets(mtmp, HELMET)){
+						set_material(otmp, IRON);
+					}
+					if (otmp = mongets(mtmp, PLATE_MAIL)){
+						set_material(otmp, IRON);
+					}
+					if (otmp = mongets(mtmp, GAUNTLETS_OF_POWER)){
+						set_material(otmp, IRON);
+					}
 					if (otmp = mongets(mtmp, ARMORED_BOOTS)){
 						set_material(otmp, IRON);
 					}

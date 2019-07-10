@@ -1949,6 +1949,10 @@ int def;
 int arm_ac_bonus(otmp)
 struct obj * otmp;
 {
+	/* no armor, no defense! */
+	if (!otmp)
+		return 0;
+
 	int def = objects[otmp->otyp].a_ac;
 	
 	// add material bonus
@@ -2017,6 +2021,10 @@ int
 arm_dr_bonus(otmp)
 struct obj * otmp;
 {
+	/* no armor, no defense! */
+	if (!otmp)
+		return 0;
+
 	int def = objects[otmp->otyp].a_dr;
 	
 	if(is_shield(otmp))

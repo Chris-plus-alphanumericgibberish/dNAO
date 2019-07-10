@@ -1676,6 +1676,14 @@ struct obj* obj;
 	case LEATHER_ARMOR:
 	case LEATHER_CLOAK:
 	case YA:
+	case ORIHALCYON_GAUNTLETS:
+	case HARMONIUM_HELM:
+	case HARMONIUM_PLATE:
+	case HARMONIUM_SCALE_MAIL:
+	case HARMONIUM_GAUNTLETS:
+	case HARMONIUM_BOOTS:
+	case ELVEN_MITHRIL_COAT:
+	case DWARVISH_MITHRIL_COAT:
 		return NULL;
 		/* Any other cases for specific object types go here. */
 	case SHIELD_OF_REFLECTION:
@@ -1980,7 +1988,6 @@ int mat;
 		case PLASTEEL_ARMOR:			/* irreversible, plastic */
 		case DROVEN_PLATE_MAIL:			/* irreversible, shadowsteel */
 		case HARMONIUM_PLATE:			/* irreversible, metal */
-		case HIGH_ELVEN_PLATE:			/* irreversible, mithril */
 										obj->otyp = PLATE_MAIL;
 			break;
 		/* long swords */
