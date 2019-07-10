@@ -1068,7 +1068,6 @@ A("Itlachiayaque", ROUNDSHIELD,							OBSIDIAN_MT,0,/*From archeologist patch*/
 	 SMOKE_CLOUD, A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, 3000L, 
 	0,0,0),
 
-
 A("The Annulus", CHAKRAM, 								SILVER,		0,/*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_DEFN), (SPFX_HSPDAM),
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
