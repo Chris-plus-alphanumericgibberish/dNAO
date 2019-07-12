@@ -1581,7 +1581,7 @@ int thrown;
 //endif
 			if (ammo_and_launcher(obj, launcher)){ 			
 				//make range of longbow of diana effectively unlimited
-				if(uwep->oartifact == ART_LONGBOW_OF_DIANA || uwep->oartifact == ART_XIUHCOATL ||\
+				if(uwep->oartifact == ART_LONGBOW_OF_DIANA || uwep->oartifact == ART_XIUHCOATL ||
 					(uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
 				) range = 1000;
 				else range++;
@@ -2228,10 +2228,12 @@ int thrown;
 		obj->oclass == GEM_CLASS
 	) {
 	    if (is_ammo(obj) || is_spear(obj)) {
-			if (ammo_and_launcher(obj, launcher)) {
-				tmp -= 4;
-			} else if (is_spear(obj) && launcher->otyp != ATLATL){
-				tmp += 2; // throwing weapon bonus
+			if (!ammo_and_launcher(obj, launcher)) {
+				if (is_spear(obj) && launcher->otyp != ATLATL){
+					tmp += 2; // throwing weapon bonus
+				} else {
+					tmp -= 4;
+				}
 			} else {
 				tmp += launcher->spe - greatest_erosion(launcher);
 				tmp += weapon_hit_bonus(launcher);
