@@ -1505,8 +1505,8 @@ int quan;
 		impossible("set_obj_quan called without object");
 		return;
 	}
-	if (!objects[obj->otyp].oc_merge) {
-		impossible("set_obj_quan called for singular quantity object");
+	if (!objects[obj->otyp].oc_merge && quan != 1) {
+		impossible("set_obj_quan (to %d) called for singular quantity object", quan);
 		return;
 	}
 	/* set quantity */
