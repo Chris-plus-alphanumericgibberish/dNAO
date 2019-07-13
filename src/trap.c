@@ -314,14 +314,14 @@ register int x, y, typ;
 		if		(Is_mammon_level(&u.uz))		ttmp->launch_mat = GOLD;
 		else if (Is_lolth_level(&u.uz))			ttmp->launch_mat = OBSIDIAN_MT;
 		else if (Is_orcus_level(&u.uz))			ttmp->launch_mat = BONE;
+		else if (Is_night_level(&u.uz))			ttmp->launch_mat = BONE;
 		// special cases: other
-		if (!rn2(3))
-		{
-			if		(Is_sunsea(&u.uz))			ttmp->launch_mat = GOLD;
-			else if (Is_knox(&u.uz))			ttmp->launch_mat = !rn2(3) ? GOLD : !rn2(2) ? PLATINUM : SILVER;
-			else if (In_moloch_temple(&u.uz))	ttmp->launch_mat = BONE;
-			else if (In_mines(&u.uz))			ttmp->launch_mat = MINERAL;
-		}
+		if		(In_outlands(&u.uz))					ttmp->launch_mat = rn2(3) ? METAL : rn2(2) ? IRON : rn2(2) ? COPPER : rn2(4) ? SILVER : GOLD;
+		else if (!rn2(3) && Is_sunsea(&u.uz))			ttmp->launch_mat = GOLD;
+		else if (!rn2(3) && Is_knox(&u.uz))				ttmp->launch_mat = !rn2(3) ? GOLD : !rn2(2) ? PLATINUM : SILVER;
+		else if (!rn2(3) && In_moloch_temple(&u.uz))	ttmp->launch_mat = BONE;
+		else if (!rn2(3) && In_mines(&u.uz))			ttmp->launch_mat = MINERAL;
+
 
 		// set the poison status to be consistent across all fired ammunition
 		ttmp->launch_pois = otmp->opoisoned;
