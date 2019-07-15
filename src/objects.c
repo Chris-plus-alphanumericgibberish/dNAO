@@ -224,7 +224,8 @@ WEAPON("two-handed sword", (char *)0,
 	1, 0, 1, 22,150, 50, 12,  6, 0, S,   P_TWO_HANDED_SWORD, IRON, FALSE, HI_METAL),
 						/* +2d6 large */
 WEAPON("droven greatsword", "two-handed sword", /*Needs encyc entry*//*Needs tile*/
-	0, 0, 1,  0,120, 50,  18, 30, 2, S,   P_TWO_HANDED_SWORD, OBSIDIAN_MT, UNIDED, CLR_BLACK),
+	0, 0, 1,  0,120, 50,  18, 10, 2, S,   P_TWO_HANDED_SWORD, OBSIDIAN_MT, UNIDED, CLR_BLACK),
+						/* +2d10 large */
 WEAPON("katana", "samurai sword",
 	0, 0, 0,  4, 40, 80, 10, 12, 1, S,   P_LONG_SWORD, IRON, FALSE, HI_METAL),
 /* special swords set up for artifacts */

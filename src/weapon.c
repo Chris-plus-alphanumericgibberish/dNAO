@@ -336,6 +336,59 @@ int otyp;
 			dmod += 2;
 		else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
 			dmod += 2;
+
+		/* material-based dmod modifiers */
+		if (obj->obj_material != objects[obj->otyp].oc_material)
+		{
+			/* if something is made of an especially effective material 
+			 * and it normally isn't, it gets a dmod bonus 
+			 */
+			int mat;	/* material being contemplated */
+			int mod;	/* mat modifier sign: -1 for base, +1 for current*/
+			for (mod = -1; mod<2; mod+=2){
+				if (mod == -1)
+					mat = objects[obj->otyp].oc_material;
+				else
+					mat = obj->obj_material;
+				switch (mat)
+				{
+				/* flimsy weapons are bad damage */
+				case LIQUID:
+				case WAX:
+				case VEGGY:
+				case FLESH:
+				case PAPER:
+				case CLOTH:
+				case LEATHER:
+					dmod -= mod;
+					break;
+				/* gold and platinum are heavy
+				 * ...regardless that the elven mace is wooden, 
+				 *   and is _better_ than a standard iron mace */
+				case GOLD:
+				case PLATINUM:
+					if (is_bludgeon(obj))
+						dmod += mod;
+					break;
+				/* glass and obsidian have sharp edges and points 
+				 * shadowsteel ??? but gameplay-wise, droven weapons
+				 *   made out of this troublesome-to-maintain material
+				 *   shouldn't be weaker than their obsidian counterparts
+				 */
+				case GLASS:
+				case OBSIDIAN_MT:
+				case SHADOWSTEEL:
+					if (is_slashing(obj) || is_stabbing(obj))
+						dmod += mod;
+					break;
+				/* dragon teeth are good at piercing */
+				case DRAGON_HIDE:
+					if (is_stabbing(obj))
+						dmod += mod;
+					break;
+				}
+			}
+		}
 	}
 	/* apply dmod to ocd */
 	ocd = max(2, ocd + dmod * 2);
@@ -363,17 +416,17 @@ int otyp;
 			ocaa = AT_EXPL;					// exploding
 			ocad = AD_LUCK;					// lucky
 			ocn = obj->quan;				// 1 die per octahedron
-			ocd = 8;
+			ocd = 8 + 2 * dmod;
 		}
 		else if (obj->oartifact == ART_GIANTSLAYER)
 		{
 			bonn = (large ? 2 : 1);
-			bond = 4;
+			bond = 4 + 2 * dmod;
 		}
 		else if (obj->oartifact == ART_MJOLLNIR)
 		{
 			bonn = 2;
-			bond = 4;
+			bond = 4 + 2 * dmod;
 			if (!large)
 				flat += 2;
 		}
@@ -384,7 +437,7 @@ int otyp;
 		else if (obj->oartifact == ART_REAVER)
 		{
 			bonn = 1;
-			bond = 8;
+			bond = 8 + 2 * dmod;
 		}
 		else if (obj->oartifact == ART_TOBIUME)
 		{
@@ -419,9 +472,9 @@ int otyp;
 		else if (otyp == MOON_AXE)
 		{
 			ocn = 2;
-			ocd = ocd + 2 * (obj->ovar1 - 1);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
-			if (!large && !obj->ovar1)			// eclipse moon axe is surprisingly effective against small creatures (2d12)
-				ocd = 12;
+			ocd = ocd + 2 * (obj->ovar1 - 1) + 2 * dmod;	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
+			if (!large && !obj->ovar1)						// eclipse moon axe is surprisingly effective against small creatures (2d12)
+				ocd = 12 + 2 * dmod;
 		}
 		else if (otyp == HEAVY_IRON_BALL) {
 			int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
@@ -462,6 +515,7 @@ int otyp;
 	case ELVEN_BROADSWORD:		if(large){add(2);} else {pls(4);} break;
 	case CRYSTAL_SWORD:			if(large){pls(12);} else {pls(8);} break;
 	case TWO_HANDED_SWORD:		if(large){plus(2,6);} else {;} break;
+	case DROVEN_GREATSWORD:		if(large){plus(2,10);} else {;} break;
 	case TSURUGI:				if(large){plus(2,6);} else {;} break;
 	case RUNESWORD:				if(large){add(1);} else {pls(4);} break;
 	case PARTISAN:				if(large){add(1);} else {;} break;
@@ -575,6 +629,15 @@ int otyp;
 	/* if bonus dice exist, their minimum size is of a d2 */
 	if (bonn && bond < 2)
 		bond = 2;
+	/* has to go after bonus dice are calculated: obsidian weapons are 1dX */
+	if (obj && obj->obj_material == OBSIDIAN_MT)
+	{
+		ocd = ocn*ocd + bonn*bond;
+		ocn = 1;
+		bonn = 0;
+		bond = 0;
+	}
+
 	/* if bonus dice are identical in size & roll to oc dice, combine them */
 	if (bonn && (ocd == bond && ocaa == bonaa && ocad == bonad))
 	{
