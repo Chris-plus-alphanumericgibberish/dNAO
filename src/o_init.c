@@ -1504,6 +1504,9 @@ struct obj *otmp;
 //	{
 //	case ART_BLACK_CRYSTAL:		return CLR_BLACK;
 //	}
+	/* gold pieces are yellow */
+	if (otmp->otyp == GOLD_PIECE)
+		return CLR_YELLOW;
 
 	/* plumed helmets and etched helmets get fancy colors, but only if their material is boring (iron/metal) */
 	if ((otmp->obj_material == IRON || otmp->obj_material == METAL)

@@ -555,6 +555,9 @@ add_size_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
+	/* gold pieces should not have their size described */
+	if (obj->otyp == GOLD_PIECE)
+		return;
 	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size && obj->known) ? artilist[obj->oartifact].size : MZ_MEDIUM))
 	{
 		switch (obj->objsize)
@@ -602,16 +605,6 @@ boolean dofull;
 
 		if ((obj)->obj_material == WOOD && obj->oward)
 			Strcat(buf, "carved ");
-
-		if (obj->otyp == MOON_AXE && objects[obj->otyp].oc_name_known){
-			switch (obj->ovar1){
-			case ECLIPSE_MOON:  Strcat(buf, "eclipse ");  break;
-			case CRESCENT_MOON: Strcat(buf, "crescent "); break;
-			case HALF_MOON:     Strcat(buf, "half ");     break;
-			case GIBBOUS_MOON:  Strcat(buf, "gibbous ");  break;
-			case FULL_MOON:     Strcat(buf, "full ");     break;
-			}
-		}
 		break;
 	case ARMOR_CLASS:
 		if ((obj->bodytypeflag&MB_BODYTYPEMASK) != MB_HUMANOID){
@@ -837,6 +830,10 @@ add_poison_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
+	/* signet rings show their poison as a suffix: (<x> injecting)
+	 * which is handled elsewhere */
+	if (obj->otyp == find_signet_ring())
+		return;
 	if (obj->opoisoned){
 		if (obj->opoisoned & OPOISON_BASIC) Strcat(buf, "poisoned ");
 		if (obj->opoisoned & OPOISON_FILTH) Strcat(buf, "filth-crusted ");
@@ -873,9 +870,12 @@ boolean adjective;
 {
 	const char * s;
 
-	/* extra special case */
+	/* extra special cases */
 	if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
 		return "pale moonlight";
+	}
+	else if (obj->otyp == GOLD_PIECE) {
+		return "gold";
 	}
 
 	switch (obj->obj_material){
@@ -901,6 +901,9 @@ boolean adjective;
 		/* woolen cloth equipment is just wool */
 		if ((obj->oproperties&OPROP_WOOL) == OPROP_WOOL)
 			return (adjective ? "woolen" : "wool");
+		/* overly fancy clothing */
+		else if (obj->otyp == GENTLEMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_DRESS)
+			return "silk";
 		else
 			return "cloth";
 	case LEATHER:
@@ -922,12 +925,13 @@ boolean adjective;
 		if (obj->otyp == LEO_NEMAEUS_HIDE)
 			return "lionhide";
 		/* hard object made of dragonhide (or described as being dragon-bone) -> bone or tooth */
-		else if ((objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE) ||
-			((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragon-bone", 11)))
-			return (obj->oclass == WEAPON_CLASS ? (adjective ? "dragon-tooth" : "a dragon's tooth") : (adjective ? "dragon-bone" : "dragon bones"));
+		else if ((objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE)
+			|| ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragonbone", 10))
+			|| ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragon-bone", 11)))
+			return (obj->oclass == WEAPON_CLASS ? (adjective ? "dragontooth" : "a dragon's tooth") : (adjective ? "dragonbone" : "dragon bones"));
 		/* specified as dragonhide in objects.c -> scales*/
 		else if (objects[obj->otyp].oc_material == DRAGON_HIDE)
-			return (adjective ? "dragon-scale" : "dragon scales");
+			return (adjective ? "dragonscale" : "dragon scales");
 		/* soft object made of dragonhide */
 		else
 			return "dragonhide";
@@ -965,11 +969,13 @@ boolean adjective;
 		else
 			return (adjective ? "metallic" : "metal");
 	case COPPER:
-		/* brass lantern, brass ring, brass wand */
-		if (obj->otyp == LANTERN || ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "brass", 5)))
+		/* brass lantern, lamps, brass ring, brass wand */
+		if (obj->otyp == LANTERN || obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP
+			|| ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "brass", 5)))
 			return "brass";
-		/* copper ring, copper wand */
-		else if ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "copper", 6))
+		/* instruments, copper ring, copper wand */
+		else if (is_instrument(obj)
+			|| (s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "copper", 6))
 			return "copper";
 		else
 			return "bronze";
@@ -1055,6 +1061,9 @@ char *buf;
 	/*Materials don't matter for lit lightsabers, and they should be described in terms of color*/
 	if(is_lightsaber(obj) && litsaber(obj))
 		return;
+	/* gold pieces should not have their material described, it's in their name */
+	if(obj->otyp == GOLD_PIECE)
+		return;
 	if(obj->oartifact && obj->known && artilist[obj->oartifact].material){
 		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
@@ -1096,6 +1105,15 @@ char *buf;
 	if (obj->otyp == EGG && obj->corpsenm >= LOW_PM && (obj->known || mvitals[obj->corpsenm].mvflags & MV_KNOWS_EGG)) {
 		Strcat(buf, mons[obj->corpsenm].mname);
 		Strcat(buf, " ");
+	}
+	if (obj->otyp == MOON_AXE && objects[obj->otyp].oc_name_known){
+		switch (obj->ovar1){
+		case ECLIPSE_MOON:  Strcat(buf, "eclipse ");  break;
+		case CRESCENT_MOON: Strcat(buf, "crescent "); break;
+		case HALF_MOON:     Strcat(buf, "half ");     break;
+		case GIBBOUS_MOON:  Strcat(buf, "gibbous ");  break;
+		case FULL_MOON:     Strcat(buf, "full ");     break;
+		}
 	}
 }
 

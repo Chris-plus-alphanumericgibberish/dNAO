@@ -416,7 +416,7 @@ int otyp;
 			bonn = 1;
 			bond = 4;
 		}
-		else if (otyp == MOON_AXE && obj->ovar1)
+		else if (otyp == MOON_AXE)
 		{
 			ocn = 2;
 			ocd = ocd + 2 * (obj->ovar1 - 1);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
