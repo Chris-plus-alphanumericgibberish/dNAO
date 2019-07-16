@@ -523,7 +523,11 @@ char *buf;
 		/* allow 'blessed clear potion' if we don't know it's holy water;
 		* always allow "uncursed potion of water"
 		*/
-		if (obj->cursed)
+		if(obj->oartifact == ART_AVENGER && obj->known){
+			if(!obj->cursed && !obj->blessed)
+				Strcat(buf, "uncursed ");
+		}
+		else if (obj->cursed)
 			Strcat(buf, (obj->known && (obj->oproperties&OPROP_UNHYW || obj->oproperties&OPROP_UNHY)) ? "unholy " : "cursed ");
 		else if (obj->blessed)
 			Strcat(buf, (obj->known && (obj->oproperties&OPROP_HOLYW || obj->oproperties&OPROP_HOLY)) ? "holy " : "blessed ");
@@ -555,6 +559,9 @@ add_size_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
+	/* gold pieces should not have their size described */
+	if (obj->otyp == GOLD_PIECE)
+		return;
 	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size && obj->known) ? artilist[obj->oartifact].size : MZ_MEDIUM))
 	{
 		switch (obj->objsize)
@@ -602,16 +609,6 @@ boolean dofull;
 
 		if ((obj)->obj_material == WOOD && obj->oward)
 			Strcat(buf, "carved ");
-
-		if (obj->otyp == MOON_AXE && objects[obj->otyp].oc_name_known){
-			switch (obj->ovar1){
-			case ECLIPSE_MOON:  Strcat(buf, "eclipse ");  break;
-			case CRESCENT_MOON: Strcat(buf, "crescent "); break;
-			case HALF_MOON:     Strcat(buf, "half ");     break;
-			case GIBBOUS_MOON:  Strcat(buf, "gibbous ");  break;
-			case FULL_MOON:     Strcat(buf, "full ");     break;
-			}
-		}
 		break;
 	case ARMOR_CLASS:
 		if ((obj->bodytypeflag&MB_BODYTYPEMASK) != MB_HUMANOID){
@@ -812,6 +809,12 @@ boolean dofull;
 			if (obj->oproperties&OPROP_FLAYW && obj->known)
 				Strcat(buf, "flaying ");
 			/* note: "holy" and "unholy" properties are shown in the BUC part of the name, as they replace "blessed" and "cursed". */
+			
+			/* note: except "Holy Avenger" and "Unholy Avenger" */
+			if (obj->oartifact == ART_AVENGER && obj->cursed && obj->known && obj->oproperties&OPROP_UNHYW)
+				Strcat(buf, "Unholy ");
+			if (obj->oartifact == ART_AVENGER && obj->blessed && obj->known && obj->oproperties&OPROP_HOLYW)
+				Strcat(buf, "Holy ");
 		}
 	}
 }
@@ -837,6 +840,10 @@ add_poison_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
+	/* signet rings show their poison as a suffix: (<x> injecting)
+	 * which is handled elsewhere */
+	if (obj->otyp == find_signet_ring())
+		return;
 	if (obj->opoisoned){
 		if (obj->opoisoned & OPOISON_BASIC) Strcat(buf, "poisoned ");
 		if (obj->opoisoned & OPOISON_FILTH) Strcat(buf, "filth-crusted ");
@@ -873,9 +880,12 @@ boolean adjective;
 {
 	const char * s;
 
-	/* extra special case */
+	/* extra special cases */
 	if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit){
 		return "pale moonlight";
+	}
+	else if (obj->otyp == GOLD_PIECE) {
+		return "gold";
 	}
 
 	switch (obj->obj_material){
@@ -901,6 +911,9 @@ boolean adjective;
 		/* woolen cloth equipment is just wool */
 		if ((obj->oproperties&OPROP_WOOL) == OPROP_WOOL)
 			return (adjective ? "woolen" : "wool");
+		/* overly fancy clothing */
+		else if (obj->otyp == GENTLEMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_DRESS)
+			return "silk";
 		else
 			return "cloth";
 	case LEATHER:
@@ -922,12 +935,13 @@ boolean adjective;
 		if (obj->otyp == LEO_NEMAEUS_HIDE)
 			return "lionhide";
 		/* hard object made of dragonhide (or described as being dragon-bone) -> bone or tooth */
-		else if ((objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE) ||
-			((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragon-bone", 11)))
-			return (obj->oclass == WEAPON_CLASS ? (adjective ? "dragon-tooth" : "a dragon's tooth") : (adjective ? "dragon-bone" : "dragon bones"));
+		else if ((objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE)
+			|| ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragonbone", 10))
+			|| ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragon-bone", 11)))
+			return (obj->oclass == WEAPON_CLASS ? (adjective ? "dragontooth" : "a dragon's tooth") : (adjective ? "dragonbone" : "dragon bones"));
 		/* specified as dragonhide in objects.c -> scales*/
 		else if (objects[obj->otyp].oc_material == DRAGON_HIDE)
-			return (adjective ? "dragon-scale" : "dragon scales");
+			return (adjective ? "dragonscale" : "dragon scales");
 		/* soft object made of dragonhide */
 		else
 			return "dragonhide";
@@ -965,11 +979,13 @@ boolean adjective;
 		else
 			return (adjective ? "metallic" : "metal");
 	case COPPER:
-		/* brass lantern, brass ring, brass wand */
-		if (obj->otyp == LANTERN || ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "brass", 5)))
+		/* brass lantern, lamps, brass ring, brass wand */
+		if (obj->otyp == LANTERN || obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP
+			|| ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "brass", 5)))
 			return "brass";
-		/* copper ring, copper wand */
-		else if ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "copper", 6))
+		/* instruments, copper ring, copper wand */
+		else if (is_instrument(obj)
+			|| (s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "copper", 6))
 			return "copper";
 		else
 			return "bronze";
@@ -1055,6 +1071,9 @@ char *buf;
 	/*Materials don't matter for lit lightsabers, and they should be described in terms of color*/
 	if(is_lightsaber(obj) && litsaber(obj))
 		return;
+	/* gold pieces should not have their material described, it's in their name */
+	if(obj->otyp == GOLD_PIECE)
+		return;
 	if(obj->oartifact && obj->known && artilist[obj->oartifact].material){
 		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
@@ -1096,6 +1115,15 @@ char *buf;
 	if (obj->otyp == EGG && obj->corpsenm >= LOW_PM && (obj->known || mvitals[obj->corpsenm].mvflags & MV_KNOWS_EGG)) {
 		Strcat(buf, mons[obj->corpsenm].mname);
 		Strcat(buf, " ");
+	}
+	if (obj->otyp == MOON_AXE && objects[obj->otyp].oc_name_known){
+		switch (obj->ovar1){
+		case ECLIPSE_MOON:  Strcat(buf, "eclipse ");  break;
+		case CRESCENT_MOON: Strcat(buf, "crescent "); break;
+		case HALF_MOON:     Strcat(buf, "half ");     break;
+		case GIBBOUS_MOON:  Strcat(buf, "gibbous ");  break;
+		case FULL_MOON:     Strcat(buf, "full ");     break;
+		}
 	}
 }
 
@@ -2072,6 +2100,7 @@ register const char *str;
 	    strcmp(str, "molten lava") &&
 	    strcmp(str, "iron bars") &&
 	    strcmp(str, "grass") &&
+	    strcmp(str, "soil") &&
 	    strcmp(str, "ice")) {
 		if (index(vowels, *str) &&
 		    strncmp(str, "one-", 4) &&
@@ -2819,6 +2848,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-9, "paralysis") ||
 			   !BSTRCMPI(bp, p-5, "glass") ||
 			   !BSTRCMPI(bp, p-5, "grass") ||
+			   !BSTRCMPI(bp, p-4, "soil") ||
 			   !BSTRCMP(bp, p-4, "ness") ||
 			   !BSTRCMPI(bp, p-14, "shape changers") ||
 			   !BSTRCMPI(bp, p-15, "detect monsters") ||
@@ -2955,11 +2985,12 @@ struct alt_spellings {
 	{ "scroll of enchant armour", SCR_ENCHANT_ARMOR },
 	{ "scroll of destroy armour", SCR_DESTROY_ARMOR },
 	{ "leather armour", LEATHER_ARMOR },
-	{ "leather gloves", GLOVES },
 	{ "studded leather armour", STUDDED_LEATHER_ARMOR },
 	{ "elven plate mail", HIGH_ELVEN_PLATE },
 	{ "bronze halfplate", BRONZE_HALF_PLATE },
 	{ "halfplate", HALF_PLATE },
+	{ "leather gloves", GLOVES },
+	{ "elven gauntlets", HIGH_ELVEN_GAUNTLETS },
 	{ "orichalcum gauntlets", ORIHALCYON_GAUNTLETS },
 	{ "chain", CHAIN },
 	{ "iron chain", CHAIN },
@@ -3030,6 +3061,7 @@ struct alt_spellings {
 	{ "koto", HARP },
 	{ "helmet", HELMET },
 	{ "circlet", HELMET },
+	{ "helm", HELMET },
 	{ "helm of brilliance", HELM_OF_BRILLIANCE },
 	{ "crown of cognizance", HELM_OF_BRILLIANCE },
 	{ "helm of opposite alignment", HELM_OF_OPPOSITE_ALIGNMENT },
@@ -3419,16 +3451,17 @@ int wishflags;
 			) {
 			mat = CLOTH;
 		} else if (!strncmpi(bp, "leather ", l=8) && strncmpi(bp, "leather spellbook", 17)
-			&& strncmpi(bp, "leather armor", 13) && strncmpi(bp, "leather gloves", 14)
-			&& strncmpi(bp, "leather jacket", 14) && strncmpi(bp, "leather armor", 13)
+			&& strncmpi(bp, "leather armor", 13) && strncmpi(bp, "leather armour", 14)
 			&& strncmpi(bp, "leather helm", 12) && strncmpi(bp, "leather hat", 11)
-			&& strncmpi(bp, "leather cloak", 13)
 			) {
 			mat = LEATHER;
 		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", 7))
 			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wood golem", 11)
 			) {
 			mat = WOOD;
+		} else if ((!strncmpi(bp, "bone ", l=5))
+			) {
+			mat = BONE;
 		} else if ((!strncmpi(bp, "dragonhide ", l=11) || !strncmpi(bp, "dragon-hide ", l=12) || !strncmpi(bp, "dragon hide ", l=12)
 			|| !strncmpi(bp, "dragonscale ", l=12) || !strncmpi(bp, "dragon-scale ", l=13) || !strncmpi(bp, "dragon scale ", l=13)
 			|| !strncmpi(bp, "dragonbone ", l=11) || !strncmpi(bp, "dragon-bone ", l=12) || !strncmpi(bp, "dragon bone ", l=12)
@@ -3453,14 +3486,14 @@ int wishflags;
 			&& strncmpi(bp, "bronze roundshield", 18) && strncmpi(bp, "bronze gauntlets", 16)
 			&& strncmpi(bp, "bronze ring", 11) && strncmpi(bp, "copper ring", 11) && strncmpi(bp, "brass ring", 10)
 			&& strncmpi(bp, "copper wand", 11) && strncmpi(bp, "brass wand", 10)
-			&& strncmpi(bp, "bronze spellbook", 16 && strncmpi(bp, "copper spellbook", 16))
+			&& strncmpi(bp, "bronze spellbook", 16) && strncmpi(bp, "copper spellbook", 16)
 		) {
 			mat = COPPER;
 		} else if (!strncmpi(bp, "silver ", l=7)
 			&& strncmpi(bp, "silver arrow", 12) && strncmpi(bp, "silver bullet", 13)
 			&& strncmpi(bp, "silver pellet", 13) && strncmpi(bp, "silver dragon", 13)
 			&& strncmpi(bp, "silver clothes", 14) && strncmpi(bp, "silver ring", 11)
-			&& strncmpi(bp, "silver bell", 11) && strncmpi(bp, "silver spellbook", 16)
+			&& strncmpi(bp, "silver spellbook", 16)
 			&& strncmpi(bp, "silver wand", 11) && strncmpi(bp, "silver slingstone", 17)
 			&& strncmpi(bp, "silver stone", 12) && strncmpi(bp, "Silver Key", 10)
 			&& strncmpi(bp, "Silver Starlight", 16)
@@ -3909,8 +3942,15 @@ int wishflags;
 	/* "grey stone" check must be before general "stone" */
 	for (i = 0; i < SIZE(o_ranges); i++)
 	    if(!strcmpi(bp, o_ranges[i].name)) {
-		typ = rnd_class(o_ranges[i].f_o_range, o_ranges[i].l_o_range);
-		goto typfnd;
+			/* check if the player was asking for an item that is both a range and a general item 
+			 * indicated by asking for a material, eg "cloak", or "silver gauntlets" */
+			if		(mat && !strcmpi(bp, "cloak"))		typ = CLOAK;
+			else if (mat && !strcmpi(bp, "gauntlets"))	typ = GAUNTLETS;
+			else if (mat && !strcmpi(bp, "shoes"))		typ = SHOES;
+			/* otherwise, actually use the o_range */
+			else typ = rnd_class(o_ranges[i].f_o_range, o_ranges[i].l_o_range);
+
+			goto typfnd;
 	    }
 
 	if (!BSTRCMPI(bp, p-6, " stone")) {
@@ -4219,6 +4259,13 @@ srch:
 		if (!BSTRCMP(bp, p-5, "grass")) {  /* also matches "wild grass" */
 			levl[u.ux][u.uy].typ = GRASS;
 			pline("A patch of grass.");
+			newsym(u.ux, u.uy);
+			*wishreturn = WISH_SUCCESS;
+			return &zeroobj;
+		}
+		if (!BSTRCMP(bp, p-5, "soil")) {
+			levl[u.ux][u.uy].typ = SOIL;
+			pline("A patch of soil.");
 			newsym(u.ux, u.uy);
 			*wishreturn = WISH_SUCCESS;
 			return &zeroobj;
@@ -4620,41 +4667,14 @@ typfnd:
 		otmp->odiluted = 1;
 
 	/* set material */
-	if(mat){
-		if (wizwish) {
+	if (mat){
+		if (wizwish)
 			set_material(otmp, mat);
-			if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
-				otmp->ovar1 = gemtype;
-		}
-		else {
-			if(otmp->oclass == WEAPON_CLASS && !otmp->oartifact){
-				if(		// flexible materials
-						((otmp->obj_material == CLOTH
-						|| otmp->obj_material == LEATHER
-						|| otmp->obj_material == PLASTIC)
-						&&(mat == CLOTH
-						|| mat == LEATHER)
-					)
-					||	// rigid materials
-						(((otmp->obj_material >= DRAGON_HIDE && otmp->obj_material <= MITHRIL)
-						|| otmp->obj_material == GLASS
-						|| otmp->obj_material == BONE
-						|| otmp->obj_material == WOOD
-						|| otmp->obj_material == OBSIDIAN_MT
-						|| otmp->obj_material == GEMSTONE
-						|| otmp->obj_material == MINERAL)
-						&&((mat >= DRAGON_HIDE && mat <= MITHRIL)
-						|| mat == GLASS
-						|| mat == OBSIDIAN_MT
-						|| mat == MINERAL)
-						)
-					){
-					set_material(otmp, mat);
-					if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
-						otmp->ovar1 = gemtype;
-				}
-			}
-		}
+		else if (!otmp->oartifact || is_malleable_artifact(&artilist[otmp->oartifact]))
+			maybe_set_material(otmp, mat, !rn2(7));	// always limited by allowable random materials, 1/7 chance of ignoring probabilities
+		/* set gemtype, if specified and allowable*/
+		if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
+			otmp->ovar1 = gemtype;
 	}
 	
 	/* set object properties */

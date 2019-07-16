@@ -1407,13 +1407,13 @@ struct obj *obj;
 	if(obj->owornmask){
 		You("must take %s off to modify it.", the(xname(obj)));
 		return 0;
-	} else if(obj->otyp == LEATHER_CLOAK){
+	} else if(obj->otyp == CLOAK){
 		You("wrap %s up, making a serviceable shield.", the(xname(obj)));
 		obj->otyp = ROUNDSHIELD;
 		return 1;
 	} else if(obj->otyp == ROUNDSHIELD){
 		You("unwrap %s, making a cloak.", the(xname(obj)));
-		obj->otyp = LEATHER_CLOAK;
+		obj->otyp = CLOAK;
 		return 1;
 	} else {
 		pline("Aegis in unexpected state?");
@@ -3652,7 +3652,7 @@ use_pole (obj)
 	    if (mtmp->mhp < oldhp)
 		u.uconduct.weaphit++;
 	} else if(levl[cc.x][cc.y].typ == GRASS){
-		   levl[cc.x][cc.y].typ = ROOM;
+		   levl[cc.x][cc.y].typ = SOIL;
 		   if(!rn2(3)) mksobj_at(SHEAF_OF_HAY,cc.x,cc.y,TRUE,FALSE);
 		   You("cut away the grass!");
 		   newsym(cc.x,cc.y);

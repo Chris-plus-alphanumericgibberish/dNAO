@@ -3364,6 +3364,16 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				EXPL_FIERY, 1);
 		}
 	}
+	if(otmp->oartifact == ART_AVENGER && dieroll <= 2){
+		if(cancel_monst(mdef, otmp, youattack, FALSE, FALSE,0)){
+			if(youattack){
+				u.uen += 10;
+			} else {
+				magr->mcan = FALSE;
+				magr->mspec_used = 0;
+			}
+		}
+	}
 	if(otmp->oartifact == ART_GENOCIDE){
 		struct monst *tmpm, *nmon;
 		int genoburn;
@@ -5190,7 +5200,7 @@ arti_invoke(obj)
 				if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0 && mtmp->mcansee && mon_can_see_you(mtmp)) {
 					boolean youattack = mtmp == &youmonst;
 					if(obj->otyp == ROUNDSHIELD) You("display the shield's device to %s.", mon_nam(mtmp));
-					else if(obj->otyp == LEATHER_CLOAK) You("display the cloak's clasp to %s.", mon_nam(mtmp));
+					else if(obj->otyp == CLOAK) You("display the cloak's clasp to %s.", mon_nam(mtmp));
 					else You("display it to %s.", mon_nam(mtmp)); //Shouldn't be used
 					
 					if (!resists_ston(mtmp) && (rn2(100)>(mtmp->data->mr/2))){

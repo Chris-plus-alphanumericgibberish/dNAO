@@ -1072,26 +1072,50 @@ int thrown;
 	if(!helpless(mon)) wake_nearto(mon->mx, mon->my, Stealth ? combatNoise(youracedata)/2 : combatNoise(youracedata)); //Nearby monsters may be awakened
 	wakeup(mon, TRUE);
 	if(!obj) {	/* attack with bare hands */
-	    if (insubstantial(mdat) && !insubstantial_aware(mon, obj, FALSE)) tmp = 0;
-		else if (martial_bonus()){
-			if(uarmc && uarmc->oartifact == ART_GRANDMASTER_S_ROBE){
-				if(u.sealsActive&SEAL_EURYNOME) tmp = rn2(2) ? 
-											exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0)
-												+exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0) : 
-											exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0);
-				else tmp = rn2(2) ? exploding_d(2,4*unarmedMult,0) : exploding_d(1,4*unarmedMult,0);
-			}
-			else{
-				tmp = u.sealsActive&SEAL_EURYNOME ? exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0) : rnd(4*unarmedMult);	/* bonus for martial arts */
-			}
-			if(uarmg && uarmg->otyp == tgloves) tmp += 2;
+		if (insubstantial(mdat) && !insubstantial_aware(mon, obj, FALSE)) {
+			/* no base damage */
+			tmp = 0;
 		}
-	    else {
-			tmp = u.sealsActive&SEAL_EURYNOME ? exploding_d(1,max_ints(2*unarmedMult,rnd(5)*2),0) : rnd(2*unarmedMult);
+		else
+		{
+			struct weapon_dice unarmed_dice;
+			/* initialize struct */
+			dmgval_core(&unarmed_dice, bigmonst(mon->data), obj, 0);
+
+			/* base unarmed dice */
+			if (martial_bonus())
+				unarmed_dice.oc.damd = 4*unarmedMult;
+			else
+				unarmed_dice.oc.damd = 2*unarmedMult;
+
+			/* Eurynome causes exploding dice, sometimes larger dice */
+			if (u.sealsActive&SEAL_EURYNOME) {
+				unarmed_dice.oc.aatyp = AT_EXPL;
+				unarmed_dice.oc.damd = max(unarmed_dice.oc.damd,
+											2*rnd(5) + (martial_bonus() ? 2*unarmedMult : 0 ));
+			}
+			/* Grandmaster's robe causes exploding dice, 50% chance of doubled dice */
+			if (uarmc && uarmc->oartifact == ART_GRANDMASTER_S_ROBE) {
+				unarmed_dice.oc.aatyp = AT_EXPL;
+				if (rn2(2)) {
+					unarmed_dice.oc.damn *= 2;
+				}
+			}
+			/* calculate dice and set tmp */
+			tmp = weapon_dmg_roll(&(unarmed_dice.oc), FALSE);
+
+			/* fighting gloves give bonus damage */
+			if (uarmg && uarmg->otyp == tgloves)
+				tmp += (martial_bonus() ? 3 : 1);
+
+			/* some artifact gloves give enchantment */
+			if (uarmg && (uarmg->oartifact == ART_PREMIUM_HEART || uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN))
+				tmp += uarmg->spe;
+
+			/* dahlver nar gives bonus damage*/
+			if (u.specialSealsActive&SEAL_DAHLVER_NAR)
+				tmp += d(2, 6) + min(u.ulevel / 2, (u.uhpmax - u.uhp) / 10);
 		}
-		if(uarmg && (uarmg->oartifact == ART_PREMIUM_HEART || uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)) tmp += uarmg->spe;
-		if(u.specialSealsActive&SEAL_DAHLVER_NAR) tmp += d(2,6)+min(u.ulevel/2,(u.uhpmax - u.uhp)/10);
-		if(uarmg && uarmg->otyp == tgloves) tmp += 1;
 	    valid_weapon_attack = (tmp > 1);
 		
 		//The Annulus is very heavy
@@ -2492,25 +2516,37 @@ defaultvalue:
 	    hittxt = TRUE;
 	} else
 #endif
-	/* glass/obsidian non-artifact weapons have a small chance to shatter when used */
-	if (obj && !unsolid(mon->data) && !obj_resists(obj, 0, 100) && is_shatterable(obj) && !obj->oerodeproof){
-		if ((!rn2(20) || !(is_slashing(obj) || is_stabbing(obj))) && (rnl(40) == (40 - 1))) {	/* bludgeoning with fragiles? bad idea */
-			boolean more_than_1 = (obj->quan > 1L);
-
-			pline("As you hit %s, %s%s %s shatters!",
-				mon_nam(mon), more_than_1 ? "one of " : "",
-				shk_your(yourbuf, obj), xname(obj));
-
-			/* note: mirrors don't trigger nudzirath's power when used as a weapon, so obsidian weapons
-			 * probably shouldn't do so either */
-
-			if (!more_than_1) uwepgone();	/* set unweapon */
-			useup(obj);
-			if (!more_than_1) obj = (struct obj *) 0;
-			hittxt = TRUE;
-		}
-	}
-	else if (unarmed && tmp > 1 && !thrown && !obj && !Upolyd) { 	/* VERY small chance of stunning opponent if unarmed. */
+	// if(obj && (obj->oeroded || obj->oeroded2)){
+	// if(obj && is_bludgeon(obj) && (obj->oeroded || obj->oeroded2)){
+		// int breakmod = is_wood(obj) ? 1 : 0;
+		// boolean breakwep = FALSE;
+		// switch(greatest_erosion(obj)+breakmod){
+			// case 1:
+				// //Will not break
+			// break;
+			// case 2:
+				// if(!rn2(1000)) breakwep = TRUE;
+			// break;
+			// case 3:
+				// if(!rn2(100)) breakwep = TRUE;
+			// break;
+			// case 4: //Ie, an errode 3 wooded weapon
+				// if(!rn2(10)) breakwep = TRUE;
+			// break;
+		// }
+		// if(breakwep){
+			// boolean more_than_1 = (obj->quan > 1L);
+			
+			// pline("As you hit %s, %s%s %s breaks and is ruined!",
+				  // mon_nam(mon), more_than_1 ? "one of " : "",
+				  // shk_your(yourbuf, obj), xname(obj));
+			// if (!more_than_1) uwepgone();	/* set unweapon */
+			// useup(obj);
+			// if (!more_than_1) obj = (struct obj *) 0;
+			// hittxt = TRUE;
+		// }
+	// } else if (unarmed && tmp > 1 && !thrown && !obj && !Upolyd) { 	/* VERY small chance of stunning opponent if unarmed. */
+	if (unarmed && tmp > 1 && !thrown && !obj && !Upolyd) { 	/* VERY small chance of stunning opponent if unarmed. */
 	    if (!bigmonst(mdat) && !thick_skinned(mdat)) {
 			if((uarmg && uarmg->oartifact == ART_PREMIUM_HEART && rnd(20) < P_SKILL(P_BARE_HANDED_COMBAT)) || 
 				rnd(100) < P_SKILL(P_BARE_HANDED_COMBAT)){
@@ -2924,9 +2960,9 @@ struct obj *obj;	/* weapon */
     /* odds to joust are expert:80%, skilled:60%, basic:40%, unskilled:20% */
     if ((joust_dieroll = rn2(5)) < skill_rating) {
 		if (!unsolid(mon->data) && !obj_resists(obj, 0, 100)){
-			if((joust_dieroll == 0) || (is_shatterable(obj) && !obj->oerodeproof)){ /* Glass/obsidian lances are especially brittle */
+			if(obj->otyp == DROVEN_LANCE && rnl(40) == (40-1)) return -1;	/* hit that breaks lance */
+			else if(joust_dieroll == 0){ /* Droven lances are especially brittle */
 				if(obj->otyp == ELVEN_LANCE && rnl(75) == (75-1)) return -1;	/* hit that breaks lance */
-				else if (obj->otyp == DROVEN_LANCE && rnl(40) == (40 - 1)) return -1;	/* hit that breaks lance */
 				else if(rnl(50) == (50-1)) return -1;	/* hit that breaks lance */
 			}
 		}
