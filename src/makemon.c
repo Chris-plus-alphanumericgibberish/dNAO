@@ -1611,7 +1611,7 @@ register struct monst *mtmp;
 					otmp->blessed = FALSE;
 					otmp->cursed = FALSE;
 					(void) mpickobj(mtmp, otmp);
-					(void)mongets(mtmp, LEATHER_CLOAK);
+					(void)mongets(mtmp, CLOAK);
 					(void)mongets(mtmp, LOW_BOOTS);
 				}
 			} else if(mm >= PM_LORD_CARNARVON && mm <= PM_NEFERET_THE_GREEN){
@@ -2571,7 +2571,7 @@ register struct monst *mtmp;
 			    (void) mpickobj(mtmp, otmp);
 				
 			} else if(ptr == &mons[PM_TRUMPET_ARCHON]){
-				otmp = mksobj(LEATHER_CLOAK, FALSE, FALSE);
+				otmp = mksobj(CLOAK, FALSE, FALSE);
 			    bless(otmp);
 				otmp->spe = 3;
 			    otmp->oerodeproof = TRUE;
@@ -4385,7 +4385,7 @@ register struct monst *mtmp;
 				otmp->oeroded = 1;
 				(void) mpickobj(mtmp, otmp);
 				
-				otmp = rn2(2) ? mksobj(HIGH_BOOTS, FALSE, FALSE) : mksobj(LEATHER_JACKET, FALSE, FALSE);
+				otmp = rn2(2) ? mksobj(HIGH_BOOTS, FALSE, FALSE) : mksobj(JACKET, FALSE, FALSE);
 				// curse(otmp);
 				otmp->oeroded2 = 1;
 				(void) mpickobj(mtmp, otmp);
