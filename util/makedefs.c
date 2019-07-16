@@ -1387,6 +1387,14 @@ struct permonst *ptr;
 /*	Hooloovoo spawn many dangerous enemies. */
 	if (!strcmp(ptr->mname, "hooloovoo")) n += 10;
 
+/*	Some monsters have nonstandard groups that increase difficulty. */
+	if (!strcmp(ptr->mname, "arcadian avenger")) n += 1;
+	
+	if (!strcmp(ptr->mname, "drow matron")) n += 2;
+	if (!strcmp(ptr->mname, "Elvenking")) n += 2;
+	if (!strcmp(ptr->mname, "Elvenqueen")) n += 2;
+	if (!strcmp(ptr->mname, "chiropteran")) n += 2;
+	
 /*	Finally, adjust the monster level  0 <= n <= 24 (approx.) */
 	if(n == 0) tmp--;
 	else if(n >= 6) tmp += ( n / 2 );
@@ -1421,10 +1429,10 @@ do_monstr()
 	SpinCursor(3);
 
 	i = mstrength(ptr);
-	Fprintf(ofp,"%2d,%c", i, (++j & 15) ? ' ' : '\n');
+	Fprintf(ofp,"/* %s */%2d,\n",ptr->mname, i);
     }
     /* might want to insert a final 0 entry here instead of just newline */
-    Fprintf(ofp,"%s};\n", (j & 15) ? "\n" : "");
+    Fprintf(ofp,"};\n");
 
     Fprintf(ofp,"\nvoid NDECL(monstr_init);\n");
     Fprintf(ofp,"\nvoid\n");

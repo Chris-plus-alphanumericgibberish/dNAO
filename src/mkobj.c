@@ -1632,6 +1632,7 @@ int size;
 	fix_object(obj);
 	return;
 }
+
 /* set the quantity of an object, making sure to update its weight */
 void
 set_obj_quan(obj, quan)

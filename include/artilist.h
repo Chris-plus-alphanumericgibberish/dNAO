@@ -1068,7 +1068,6 @@ A("Itlachiayaque", ROUNDSHIELD,							OBSIDIAN_MT,0,/*From archeologist patch*/
 	 SMOKE_CLOUD, A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, 3000L, 
 	0,0,0),
 
-
 A("The Annulus", CHAKRAM, 								SILVER,		0,/*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_DEFN), (SPFX_HSPDAM),
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
@@ -1254,6 +1253,13 @@ A("The Eyes of the Overworld",	LENSES,					0,			0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	NO_ATTK,	NO_DFNS,	CARY(AD_MAGM),
 	ENLIGHTENING,	A_NEUTRAL,	 PM_MONK, NON_PM, 2500L, 
+	0,0,0),
+
+A("Avenger",			LONG_SWORD,			0,			0,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_DEFN),0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	PHYS(1,7),	DFNS(AD_MAGM),	CARY(AD_DRLI),	//Also has holy and unholy properties
+	0, A_LAWFUL, PM_NOBLEMAN, NON_PM, 1000L,
 	0,0,0),
 
 A("The Mantle of Heaven",	CLOAK, 				0,			0,/*Actually an ornamental cope in game*/
