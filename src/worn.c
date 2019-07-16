@@ -3,7 +3,8 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-
+void FDECL(mon_block_extrinsic, (struct monst *, struct obj *, int, boolean, boolean));
+boolean FDECL(mon_gets_extrinsic, (struct monst *, int, struct obj *));
 STATIC_DCL void FDECL(update_mon_intrinsic, (struct monst *,struct obj *,int,BOOLEAN_P,BOOLEAN_P));
 STATIC_DCL void FDECL(m_lose_armor, (struct monst *,struct obj *));
 STATIC_DCL void FDECL(m_dowear_type, (struct monst *,long, BOOLEAN_P, BOOLEAN_P));
@@ -404,6 +405,96 @@ struct obj *obj;	/* item to make known if effect can be seen */
     }
 }
 
+/* update a blocked extrinsic
+ * assumes single source of each blocked extrinsic
+ */
+void
+mon_block_extrinsic(mon, obj, which, on, silently)
+struct monst *mon;
+struct obj *obj;
+int which;
+boolean on, silently;
+{
+	if (on) {
+		switch (which)
+		{
+		case INVIS:
+			if (mon->data != &mons[PM_HELLCAT]){
+				mon->invis_blkd = TRUE;
+				update_mon_intrinsic(mon, obj, which, !on, silently);
+			}
+			break;
+		default:
+			update_mon_intrinsic(mon, obj, which, !on, silently);
+			break;
+		}
+	}
+	else { /* off */
+		switch (which)
+		{
+		case INVIS:
+			if (mon->data != &mons[PM_HELLCAT]){
+				mon->invis_blkd = FALSE;
+				update_mon_intrinsic(mon, obj, which, !on, silently);
+			}
+			break;
+		default:
+			update_mon_intrinsic(mon, obj, which, !on, silently);
+			break;
+		}
+	}
+}
+
+/* find out if a monster gets a certain extrinsic from its equipment 
+ * if given an ignored_obj, does not consider it to give any extrinsics
+ */
+boolean
+mon_gets_extrinsic(mon, which, ignored_obj)
+struct monst *mon;
+int which;
+struct obj *ignored_obj;
+{
+	struct obj *otmp;			/* item in mon's inventory */
+	boolean got_prop = FALSE;	/* property to find */
+	int * tmp_property_list;	/* list of item/artifact properties */
+	int i;						/* loop counter */
+
+	for (otmp = mon->minvent; (otmp && !got_prop); otmp = otmp->nobj){
+		/* ignore one object in particular */
+		if (otmp == ignored_obj)
+			continue;
+
+		/* worn items */
+		if (otmp->owornmask) {
+			tmp_property_list = item_property_list(otmp, otmp->otyp);
+			for (i = 0; tmp_property_list[i]; i++)
+			{
+				if (tmp_property_list[i] == which)
+					got_prop = TRUE;
+			}
+		}
+		/* worn artifacts */
+		if (otmp->owornmask && otmp->oartifact){
+			tmp_property_list = art_property_list(otmp->oartifact, FALSE);
+			for (i = 0; tmp_property_list[i]; i++)
+			{
+				if (tmp_property_list[i] == which)
+					got_prop = TRUE;
+			}
+		}
+		/* carried artifacts */
+		if (otmp->oartifact){
+			tmp_property_list = art_property_list(otmp->oartifact, TRUE);
+			for (i = 0; tmp_property_list[i]; i++)
+			{
+				if (tmp_property_list[i] == which)
+					got_prop = TRUE;
+			}
+		}
+	}
+	return got_prop;
+}
+
 STATIC_OVL void
 update_mon_intrinsic(mon, obj, which, on, silently)
 struct monst *mon;
@@ -414,73 +505,53 @@ boolean on, silently;
     uchar mask;
     struct obj *otmp;
     if (on) {
-	switch (which) {
-	 case INVIS:
-	 if(mon->data != &mons[PM_HELLCAT]){
-	    mon->minvis = !mon->invis_blkd;
-	}
-	 break;
-	 case FAST:
-	  {
-	    boolean save_in_mklev = in_mklev;
-	    if (silently) in_mklev = TRUE;
-	    mon_adjust_speed(mon, 0, obj);
-	    in_mklev = save_in_mklev;
-	    break;
-	  }
-	/* properties handled elsewhere */
-	 case ANTIMAGIC:
-	 case REFLECTING:
-	    break;
-	/* properties which have no effect for monsters */
-	 // case CLAIRVOYANT:
-	 // case STEALTH:
-	 // case TELEPAT:
-	    // break;
-	/* properties which should have an effect but aren't implemented */
-	 case LEVITATION:
-	 case WWALKING:
-	    break;
-	/* properties which maybe should have an effect but don't */
-	 case DISPLACED:
-	 case FUMBLING:
-	 case JUMPING:
-	 case PROTECTION:
-	    break;
-	 default:
-		/* FIRE,COLD,SLEEP,DISINT,SHOCK,POISON,ACID,STONE */
-		mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
-	    break;
-	}
-    } else {	    /* off */
-	switch (which) {
-	 case INVIS:
-	    mon->minvis = mon->perminvis;
-	    break;
-	 case FAST:
-	  {
-	    boolean save_in_mklev = in_mklev;
-	    if (silently) in_mklev = TRUE;
-	    mon_adjust_speed(mon, 0, obj);
-	    in_mklev = save_in_mklev;
-	    break;
-	  }
-	 default:
-	    /* If the monster doesn't have this resistance intrinsically,
-	       check whether any other worn item confers it.  Note that
-	       we don't currently check for anything conferred via simply
-	       carrying an object. */
-		if(which <=10 && pm_resistance(mon->data, (uchar) (1 << (which - 1))))
+		/* some properties need special handling */
+		switch (which)
+		{
+		case INVIS:
+			if (mon->data != &mons[PM_HELLCAT]){
+				mon->minvis = !mon->invis_blkd;
+				mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			}
 			break;
-		for (otmp = mon->minvent; otmp; otmp = otmp->nobj){
-		    if (otmp->owornmask &&
-			    (int) objects[otmp->otyp].oc_oprop == which)
+		case FAST:
+			{
+			boolean save_in_mklev = in_mklev;
+			if (silently) in_mklev = TRUE;
+			mon_adjust_speed(mon, 0, obj);
+			in_mklev = save_in_mklev;
+			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			break;
+			}
+		default:
+			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
 			break;
 		}
-		if (!otmp)
-			mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
-	    break;
-	}
+    }
+	else { /* off */
+		/* we need to check that this property isn't being granted by any other equipment */
+		if (!mon_gets_extrinsic(mon, which, obj)) {
+			/* again, some properties need special handling */
+			switch (which)
+			{
+			case INVIS:
+				mon->minvis = (mon->invis_blkd ? FALSE : mon->perminvis);
+				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
+				break;
+			case FAST:
+				{
+				boolean save_in_mklev = in_mklev;
+				if (silently) in_mklev = TRUE;
+				mon_adjust_speed(mon, 0, obj);
+				in_mklev = save_in_mklev;
+				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
+				break;
+				}
+			default:
+				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
+				break;
+			}
+		}
     }
 }
 
@@ -491,12 +562,9 @@ struct monst *mon;
 struct obj *obj;
 boolean on, silently;
 {
-    int unseen;
-    int which = (int) objects[obj->otyp].oc_oprop;
+	int unseen = !canseemon(mon);
+    int which;
     long all_worn = ~0L; /* clang lint */
-	
-    unseen = !canseemon(mon);
-    if (!which) goto maybe_blocks;
 	
 	int * property_list = item_property_list(obj, obj->otyp);
 	which = 0;
@@ -506,28 +574,23 @@ boolean on, silently;
 	}
 	if (obj->oartifact)
 	{
-		property_list = art_property_list(obj->oartifact, FALSE);	// do not give monsters on-carry properties here
+		property_list = art_property_list(obj->oartifact, FALSE);
+		which = 0;
+		while (property_list[which] != 0)	{
+			update_mon_intrinsic(mon, obj, property_list[which], on, silently);
+			which++;
+		}
+		property_list = art_property_list(obj->oartifact, TRUE);
 		which = 0;
 		while (property_list[which] != 0)	{
 			update_mon_intrinsic(mon, obj, property_list[which], on, silently);
 			which++;
 		}
 	}
-
- maybe_blocks:
-    /* obj->owornmask has been cleared by this point, so we can't use it.
-       However, since monsters don't wield armor, we don't have to guard
-       against that and can get away with a blanket worn-mask value. */
-    switch (w_blocks(obj,all_worn)) {
-     case INVIS:
-	 if(mon->data != &mons[PM_HELLCAT]){
-		mon->invis_blkd = on ? 1 : 0;
-		mon->minvis = on ? 0 : mon->perminvis;
-	}
-	break;
-     default:
-	break;
-    }
+	/* if the object blocks an extrinsic, recalculate if the monster should get that extrinsic */
+	/* use all_worn because the owornmask may have been cleared already and monsters will not wield armor */
+	if (which = w_blocks(obj, all_worn))
+		mon_block_extrinsic(mon, obj, which, on, silently);
 
 #ifdef STEED
 	if (!on && mon == u.usteed && obj->otyp == SADDLE)
@@ -536,7 +599,7 @@ boolean on, silently;
 
     /* if couldn't see it but now can, or vice versa, update display */
     if (!silently && (unseen ^ !canseemon(mon)))
-	newsym(mon->mx, mon->my);
+		newsym(mon->mx, mon->my);
 }
 
 int 

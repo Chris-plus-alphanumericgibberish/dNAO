@@ -718,13 +718,12 @@ A("Stormhelm",		HELM_OF_BRILLIANCE,		0,			0,
 	0, A_CHAOTIC, NON_PM, NON_PM, 3000L, 
 	0,0,WSFX_PLUSSEV),
 
-/*	Doesn't Work...
 A("Hellrider's Saddle",			SADDLE,		0,			0,
-	(SPFX_RESTR), SPFX_REFLECT, 0,
-	NO_ATTK,	NO_DFNS,	CARY(AD_MAGM),
+	(SPFX_RESTR|SPFX_REFLECT), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	NO_ATTK,	DFNS(AD_MAGM),	NO_CARY,
 	INVIS, A_NONE, NON_PM, NON_PM, 4000L, 
-	0,0),
-	*/
+	0,0,0),
 /*
  *	The artifacts for the quest dungeon, all self-willed.
  */

@@ -975,6 +975,7 @@ E void FDECL(useup, (struct obj *));
 E void FDECL(consume_obj_charge, (struct obj *,BOOLEAN_P));
 E void FDECL(freeinv_core, (struct obj *));
 E void FDECL(freeinv, (struct obj *));
+E void FDECL(m_freeinv, (struct obj *));
 E void FDECL(delallobj, (int,int));
 E void FDECL(delobj, (struct obj *));
 E struct obj *FDECL(sobj_at, (int,int,int));

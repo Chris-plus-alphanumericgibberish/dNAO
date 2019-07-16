@@ -2761,7 +2761,7 @@ obj_extract_self(obj)
 	    freeinv(obj);
 	    break;
 	case OBJ_MINVENT:
-	    extract_nobj(obj, &obj->ocarry->minvent);
+		m_freeinv(obj);
 	    break;
 	case OBJ_MIGRATING:
 	    extract_nobj(obj, &migrating_objs);
@@ -2883,6 +2883,8 @@ add_to_minv(mon, obj)
     obj->ocarry = mon;
     obj->nobj = mon->minvent;
     mon->minvent = obj;
+	/* apply artifact on-carry properties */
+	update_mon_intrinsics(mon, obj, TRUE, TRUE);
     return 0;	/* obj on mon's inventory chain */
 }
 

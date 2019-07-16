@@ -629,6 +629,9 @@ boolean while_carried;
 		case AD_SLEE:
 			if (cur_prop == SLEEP_RES) got_prop = TRUE; 
 			break;
+		case AD_DISE:
+			if (cur_prop == SICK_RES) got_prop = TRUE;
+			break;
 		}
 
 		// SPFX properties

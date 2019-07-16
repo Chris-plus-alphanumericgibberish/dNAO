@@ -2027,6 +2027,7 @@ register struct monst *mon;
 					s_suffix(mon_nam(mon)), mbodypart(mon, HAND));
 			}
 			obj->owornmask = W_WEP;
+			update_mon_intrinsics(mon, obj, TRUE, FALSE);
 			if (is_lightsaber(obj))
 				mon_ignite_lightsaber(obj, mon);
 			time_taken = TRUE;
@@ -2067,6 +2068,7 @@ register struct monst *mon;
 							s_suffix(mon_nam(mon)), mbodypart(mon, HAND));
 					}
 					sobj->owornmask = W_SWAPWEP;
+					update_mon_intrinsics(mon, sobj, TRUE, FALSE);
 					if (is_lightsaber(sobj))
 						mon_ignite_lightsaber(sobj, mon);
 					time_taken = TRUE;
@@ -2114,6 +2116,7 @@ register struct monst *mon;
 		    begin_burn(obj, FALSE);
 		}
 		obj->owornmask = W_WEP;
+		update_mon_intrinsics(mon, obj, TRUE, FALSE);
 		if (is_lightsaber(obj))
 		    mon_ignite_lightsaber(obj, mon);
 		toreturn = 1;
@@ -2129,6 +2132,7 @@ register struct monst *mon;
 				begin_burn(sobj, FALSE);
 			}
 			sobj->owornmask = W_SWAPWEP;
+			update_mon_intrinsics(mon, sobj, TRUE, FALSE);
 			if (is_lightsaber(sobj))
 				mon_ignite_lightsaber(sobj, mon);
 			toreturn = 1;
@@ -3609,6 +3613,7 @@ register struct obj *obj;
     }
     obj->owornmask &= ~W_WEP;
 	obj->owornmask &= ~W_SWAPWEP;
+	update_mon_intrinsics(mon, obj, FALSE, FALSE);
 }
 
 int

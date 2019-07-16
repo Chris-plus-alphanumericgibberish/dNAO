@@ -21,9 +21,9 @@ int flag;
     if (flag == -1) return;		/* "don't care" */
 
     if (flag == 1)
-		mon->mintrinsics[0] |= (ptr->mresists & 0x03FF);
+		mon->mintrinsics[0] |= (ptr->mresists & MR_MASK);
     else
-		mon->mintrinsics[0] = (ptr->mresists & 0x03FF);
+		mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
 	if(is_half_dragon(ptr) && (mon->mvar1 == 0 || flag != 1)){
 		/*
 			Store half dragon breath type in mvar1
@@ -66,8 +66,9 @@ int flag;
 					mon->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
 				break;
 				case 3:
-					// mon->mvar1 = AD_MAGM;
-				// break;
+					mon->mvar1 = AD_MAGM;
+					mon->mintrinsics[(ANTIMAGIC-1)/32] |= (1 << (ANTIMAGIC-1)%32);
+				break;
 				case 4:
 					mon->mvar1 = AD_PHYS;
 				break;
@@ -253,17 +254,14 @@ resists_drli(mon)	/* returns TRUE if monster is drain-life resistant */
 struct monst *mon;
 {
 	struct permonst *ptr;
-	struct obj *wep;
 	
 	if(!mon) return FALSE;
 	ptr = mon->data;
-	wep = ((mon == &youmonst) ? uwep : MON_WEP(mon));
 
 	return (boolean)(is_undead_mon(mon) || is_demon(ptr) || is_were(ptr) ||
 			 species_resists_drain(mon) || 
 			 ptr == &mons[PM_DEATH] ||
 			 mon_resistance(mon, DRAIN_RES) ||
-			 (wep && wep->oartifact && defends(AD_DRLI, wep))  || 
 			 (mon == u.usteed && u.sealsActive&SEAL_BERITH && Drain_resistance));
 }
 
@@ -271,31 +269,10 @@ boolean
 resists_magm(mon)	/* TRUE if monster is magic-missile resistant */
 struct monst *mon;
 {
-	struct permonst *ptr;
-	struct obj *o;
-	
 	if(!mon) return FALSE;
-	ptr = mon->data;
-	
-	if(mon == u.usteed && u.sealsActive&SEAL_BERITH && Antimagic) return TRUE;
-	
-	if (species_resists_magic(mon))
-		return TRUE;
-	
-	if (is_boreal_dragoon(ptr) && mon->mvar1 == AD_MAGM)
-	    return TRUE;
-	/* check for magic resistance granted by wielded weapon */
-	o = (mon == &youmonst) ? uwep : MON_WEP(mon);
-	if (o && o->oartifact && defends(AD_MAGM, o))
-	    return TRUE;
-	/* check for magic resistance granted by worn or carried items */
-	o = (mon == &youmonst) ? invent : mon->minvent;
-	for ( ; o; o = o->nobj)
-	    if ((o->owornmask && objects[o->otyp].oc_oprop == ANTIMAGIC) ||
-		    (o->owornmask && objects[o->otyp].oc_oprop == NULLMAGIC) ||
-		    (o->oartifact && protects(AD_MAGM, o)))
-		return TRUE;
-	return FALSE;
+
+	return (species_resists_magic(mon) || mon_resistance(mon, ANTIMAGIC) ||  mon_resistance(mon, NULLMAGIC) ||
+		(mon == u.usteed && u.sealsActive&SEAL_BERITH && Antimagic));
 }
 
 boolean
@@ -303,7 +280,6 @@ resists_death(mon)	/* TRUE if monster resists death magic */
 struct monst *mon;
 {
 	struct permonst *ptr;
-	struct obj *o;
 	
 	if(!mon) return FALSE;
 	ptr = mon->data;
