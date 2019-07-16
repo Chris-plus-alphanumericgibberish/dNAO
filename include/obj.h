@@ -602,7 +602,7 @@ struct weapon_dice {
 								|| (otmp)->otyp == HARMONIUM_SCALE_MAIL || (otmp)->otyp == HARMONIUM_GAUNTLETS\
 								|| (otmp)->otyp == HARMONIUM_BOOTS)
 #define is_light_armor(otmp)	((otmp)->otyp == DWARVISH_MITHRIL_COAT || (otmp)->otyp == ELVEN_MITHRIL_COAT || \
-			(otmp)->otyp == JUMPSUIT || (otmp)->otyp == LEATHER_JACKET || (otmp)->otyp == ELVEN_TOGA || \
+			(otmp)->otyp == JUMPSUIT || (otmp)->otyp == JACKET || (otmp)->otyp == ELVEN_TOGA || \
 			(otmp)->otyp == BLACK_DRESS)
 #define is_medium_armor(otmp)	((otmp)->otyp == BRONZE_HALF_PLATE || (otmp)->otyp == HALF_PLATE || (otmp)->otyp == HIGH_ELVEN_PLATE || \
 			(otmp)->otyp == CHAIN_MAIL || (otmp)->otyp == DROVEN_CHAIN_MAIL || \
@@ -620,6 +620,11 @@ struct weapon_dice {
 				|| (otmp)->otyp == ELVEN_SHIELD\
 				|| (otmp)->otyp == ELVEN_TOGA\
 				|| (otmp)->otyp == ELVEN_BOOTS)
+#define is_droven_armor(otmp)	((otmp)->otyp == DROVEN_HELM\
+				|| (otmp)->otyp == DROVEN_PLATE_MAIL\
+				|| (otmp)->otyp == DROVEN_CHAIN_MAIL\
+				|| (otmp)->otyp == NOBLE_S_DRESS\
+				|| (otmp)->otyp == DROVEN_CLOAK)
 #define is_orcish_armor(otmp)	((otmp)->otyp == ORCISH_HELM\
 				|| (otmp)->otyp == ORCISH_CHAIN_MAIL\
 				|| (otmp)->otyp == ORCISH_RING_MAIL\
@@ -733,8 +738,21 @@ struct weapon_dice {
 				|| (otmp)->otyp == ELVEN_DAGGER\
 				|| (otmp)->otyp == ELVEN_SHORT_SWORD\
 				|| (otmp)->otyp == ELVEN_BROADSWORD\
+				|| (otmp)->otyp == ELVEN_LANCE\
 				|| (otmp)->otyp == ELVEN_BOW)
 #define is_elven_obj(otmp)	(is_elven_armor(otmp) || is_elven_weapon(otmp))
+
+/* Droven gear */
+#define is_droven_weapon(otmp) ((otmp)->otyp == DROVEN_BOLT\
+				|| (otmp)->otyp == DROVEN_CROSSBOW\
+				|| (otmp)->otyp == DROVEN_SPEAR\
+				|| (otmp)->otyp == DROVEN_DAGGER\
+				|| (otmp)->otyp == DROVEN_SHORT_SWORD\
+				|| (otmp)->otyp == DROVEN_GREATSWORD\
+				|| (otmp)->otyp == DROVEN_LANCE\
+				|| (otmp)->otyp == VIPERWHIP)
+#define is_droven_obj(otmp)	(is_droven_armor(otmp) || is_droven_weapon(otmp))
+
 
 /* Orcish gear */
 #define is_orcish_obj(otmp)	(is_orcish_armor(otmp)\
