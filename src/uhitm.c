@@ -1072,26 +1072,50 @@ int thrown;
 	if(!helpless(mon)) wake_nearto(mon->mx, mon->my, Stealth ? combatNoise(youracedata)/2 : combatNoise(youracedata)); //Nearby monsters may be awakened
 	wakeup(mon, TRUE);
 	if(!obj) {	/* attack with bare hands */
-	    if (insubstantial(mdat) && !insubstantial_aware(mon, obj, FALSE)) tmp = 0;
-		else if (martial_bonus()){
-			if(uarmc && uarmc->oartifact == ART_GRANDMASTER_S_ROBE){
-				if(u.sealsActive&SEAL_EURYNOME) tmp = rn2(2) ? 
-											exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0)
-												+exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0) : 
-											exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0);
-				else tmp = rn2(2) ? exploding_d(2,4*unarmedMult,0) : exploding_d(1,4*unarmedMult,0);
-			}
-			else{
-				tmp = u.sealsActive&SEAL_EURYNOME ? exploding_d(1,max_ints(4*unarmedMult,rnd(5)*2+2*unarmedMult),0) : rnd(4*unarmedMult);	/* bonus for martial arts */
-			}
-			if(uarmg && uarmg->otyp == tgloves) tmp += 2;
+		if (insubstantial(mdat) && !insubstantial_aware(mon, obj, FALSE)) {
+			/* no base damage */
+			tmp = 0;
 		}
-	    else {
-			tmp = u.sealsActive&SEAL_EURYNOME ? exploding_d(1,max_ints(2*unarmedMult,rnd(5)*2),0) : rnd(2*unarmedMult);
+		else
+		{
+			struct weapon_dice unarmed_dice;
+			/* initialize struct */
+			dmgval_core(&unarmed_dice, bigmonst(mon->data), obj, 0);
+
+			/* base unarmed dice */
+			if (martial_bonus())
+				unarmed_dice.oc.damd = 4*unarmedMult;
+			else
+				unarmed_dice.oc.damd = 2*unarmedMult;
+
+			/* Eurynome causes exploding dice, sometimes larger dice */
+			if (u.sealsActive&SEAL_EURYNOME) {
+				unarmed_dice.oc.aatyp = AT_EXPL;
+				unarmed_dice.oc.damd = max(unarmed_dice.oc.damd,
+											2*rnd(5) + (martial_bonus() ? 2*unarmedMult : 0 ));
+			}
+			/* Grandmaster's robe causes exploding dice, 50% chance of doubled dice */
+			if (uarmc && uarmc->oartifact == ART_GRANDMASTER_S_ROBE) {
+				unarmed_dice.oc.aatyp = AT_EXPL;
+				if (rn2(2)) {
+					unarmed_dice.oc.damn *= 2;
+				}
+			}
+			/* calculate dice and set tmp */
+			tmp = weapon_dmg_roll(&(unarmed_dice.oc), FALSE);
+
+			/* fighting gloves give bonus damage */
+			if (uarmg && uarmg->otyp == tgloves)
+				tmp += (martial_bonus() ? 3 : 1);
+
+			/* some artifact gloves give enchantment */
+			if (uarmg && (uarmg->oartifact == ART_PREMIUM_HEART || uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN))
+				tmp += uarmg->spe;
+
+			/* dahlver nar gives bonus damage*/
+			if (u.specialSealsActive&SEAL_DAHLVER_NAR)
+				tmp += d(2, 6) + min(u.ulevel / 2, (u.uhpmax - u.uhp) / 10);
 		}
-		if(uarmg && (uarmg->oartifact == ART_PREMIUM_HEART || uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)) tmp += uarmg->spe;
-		if(u.specialSealsActive&SEAL_DAHLVER_NAR) tmp += d(2,6)+min(u.ulevel/2,(u.uhpmax - u.uhp)/10);
-		if(uarmg && uarmg->otyp == tgloves) tmp += 1;
 	    valid_weapon_attack = (tmp > 1);
 		
 		//The Annulus is very heavy
