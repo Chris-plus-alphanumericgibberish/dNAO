@@ -186,6 +186,7 @@ struct obj {
 #define OPOISON_AMNES	0x20 /* Amnesia Poison */
 #define OPOISON_ACID	0x40 /* Acid coating */
 #define OPOISON_SILVER	0x80 /* Silver coating */
+#define NUM_POISONS		8	/* number of specifiable poison coatings */
 
 	long long int oproperties;/* special properties */
 #define OPROP_NONE		0x0000000000000000
