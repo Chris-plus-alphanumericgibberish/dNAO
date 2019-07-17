@@ -1499,11 +1499,11 @@ struct obj *otmp;
 	}
 
 
-	/* artifacts with set colors, currently none */
-//	switch (otmp->oartifact)
-//	{
-//	case ART_BLACK_CRYSTAL:		return CLR_BLACK;
-//	}
+	/* artifacts with set colors */
+	switch (otmp->oartifact)
+	{
+	case ART_BLACK_CRYSTAL:		return CLR_BLACK;
+	}
 	/* gold pieces are yellow */
 	if (otmp->otyp == GOLD_PIECE)
 		return CLR_YELLOW;
