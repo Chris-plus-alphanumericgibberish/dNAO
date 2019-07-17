@@ -3218,7 +3218,7 @@ spiriteffects(power, atme)
 				if (DEADMONSTER(mon)) continue;
 				if (mon->mpeaceful) continue;
 				if (mindless_mon(mon)) continue;
-				if (telepathic_mon(mon) || !rn2(5)){
+				if (mon_resistance(mon,TELEPAT) || !rn2(5)){
 					mon->mhp -= d(5,15);
 					if (mon->mhp <= 0) xkilled(mon, 1);
 					else {

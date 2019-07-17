@@ -4667,7 +4667,7 @@ boolean *shopdamage;
 			/* probably ought to do some hefty damage to any
 			   non-ice creature caught in freezing water;
 			   at a minimum, eels are forced out of hiding */
-			if (is_swimmer_mon(mon) && mon->mundetected) {
+			if (mon_resistance(mon,SWIMMING) && mon->mundetected) {
 			    mon->mundetected = 0;
 			    newsym(x,y);
 			}

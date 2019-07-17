@@ -1094,12 +1094,12 @@ gazemm(magr, mdef, mattk)
 	}
 
 	if (mattk->aatyp == AT_GAZE){
-		if ((mdef->minvis && !perceives_mon(magr))
+		if ((mdef->minvis && !mon_resistance(magr,SEE_INVIS))
 			|| is_blind(magr))
 			return MM_MISS;
 	}
 	else if (mattk->aatyp == AT_WDGZ){
-		if ((magr->minvis && !perceives_mon(mdef))
+		if ((magr->minvis && !mon_resistance(mdef,SEE_INVIS))
 			|| is_blind(mdef) || mdef->msleeping)
 			return MM_MISS;
 	}
@@ -1120,7 +1120,7 @@ gazemm(magr, mdef, mattk)
 						"The image is reflected away by %s %s.");
 				return (MM_MISS);
 			}
-			if (mdef->minvis && (!perceives_mon(magr) || is_blind(magr))) {
+			if (mdef->minvis && (!mon_resistance(magr,SEE_INVIS) || is_blind(magr))) {
 				if (canseemon(magr)) {
 				pline("%s doesn't seem to notice that %s image was reflected.",
 					  Monnam(magr), mhis(magr));
@@ -3095,7 +3095,7 @@ struct attack *mattk;
 		if (mddat == &mons[PM_FLOATING_EYE]) {
 		    if (!rn2(4)) tmp = 127;
 		    if (!is_blind(magr) && haseyes(madat) && !is_blind(mdef) &&
-			(perceives_mon(magr) || !mdef->minvis)) {
+			(mon_resistance(magr,SEE_INVIS) || !mdef->minvis)) {
 			Sprintf(buf, "%s gaze is reflected by %%s %%s.",
 				s_suffix(mon_nam(mdef)));
 			if (mon_reflects(magr,

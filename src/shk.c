@@ -3669,7 +3669,7 @@ boolean catchup;	/* restoring a level */
 		    return(0);
 	    if (x == shkp->mx && y == shkp->my)
 		return(0);
-	    if ((mtmp = m_at(x, y)) && (!passes_walls_mon(mtmp)))
+	    if ((mtmp = m_at(x, y)) && (!mon_resistance(mtmp,PASSES_WALLS)))
 		return(0);
 	}
 	if ((ttmp = t_at(x, y)) != 0) {

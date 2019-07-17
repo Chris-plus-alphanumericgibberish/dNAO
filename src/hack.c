@@ -490,7 +490,7 @@ dosinkfall()
 {
 	register struct obj *obj;
 
-	if (is_floater_mon(&youmonst) || (HLevitation & FROMOUTSIDE)) {
+	if (mon_resistance(&youmonst,LEVITATION) || (HLevitation & FROMOUTSIDE)) {
 	    You("wobble unsteadily for a moment.");
 	} else {
 	    long save_ELev = ELevitation, save_HLev = HLevitation;
@@ -566,7 +566,7 @@ register xchar x,y;
 	return((boolean) ((In_sokoban(&u.uz) && boulder_at(x,y)) ||
 	       (IS_ROCK(levl[x][y].typ)
 		    && (!tunnels(mdat) || needspick(mdat) || !may_dig(x,y))
-		    && !(passes_walls_mon(mon) && may_passwall(x,y)))));
+		    && !(mon_resistance(mon,PASSES_WALLS) && may_passwall(x,y)))));
 }
 
 boolean
@@ -1024,7 +1024,7 @@ domove()
 		    if (!skates) skates = find_skates();
 		    if ((uarmf && uarmf->otyp == skates)
 			    || resists_cold(&youmonst) || Flying
-			    || is_floater_mon(&youmonst) || is_clinger(youracedata)
+			    || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			    || is_whirly(youracedata))
 			on_ice = FALSE;
 		    else if (!rn2(Cold_resistance ? 3 : 2)) {
@@ -1192,7 +1192,7 @@ domove()
 		/* sometimes, instead of attacking, you displace it. */
 		/* Good joke, huh? */
 		/* Good joke, but players find it irritating */
-		// if (is_displacer_mon(mtmp) && !rn2(2)) displacer = TRUE;
+		// if (mon_resistance(mtmp,DISPLACED) && !rn2(2)) displacer = TRUE;
 		if(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20) displacer = TRUE;
 		/* try to attack; note that it might evade */
 		/* also, we don't attack tame when _safepet_ */
@@ -1763,8 +1763,8 @@ stillinwater:;
 	    /* limit recursive calls through teleds() */
 	    if (is_pool(u.ux, u.uy, FALSE) || is_lava(u.ux, u.uy)) {
 #ifdef STEED
-		if (u.usteed && !is_flyer_mon(u.usteed) &&
-			!is_floater_mon(u.usteed) &&
+		if (u.usteed && !mon_resistance(u.usteed,FLYING) &&
+			!mon_resistance(u.usteed,LEVITATION) &&
 			!is_clinger(u.usteed->data)) {
 		    dismount_steed(Underwater ?
 			    DISMOUNT_FELL : DISMOUNT_GENERIC);
@@ -2225,7 +2225,7 @@ dopickup()
 	    }
 	}
 	if(is_pool(u.ux, u.uy, FALSE) && !is_3dwater(u.ux, u.uy) && !Is_waterlevel(&u.uz)) {//pools (bubble interior) on water level are special
-	    if (Wwalking || is_floater_mon(&youmonst) || is_clinger(youracedata)
+	    if (Wwalking || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			|| (Flying && !Breathless)) {
 		You("cannot dive into the water to pick things up.");
 		return(0);
@@ -2236,7 +2236,7 @@ dopickup()
 	    }
 	}
 	if (is_lava(u.ux, u.uy)) {
-	    if (Wwalking || is_floater_mon(&youmonst) || is_clinger(youracedata)
+	    if (Wwalking || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			|| (Flying && !Breathless)) {
 		You_cant("reach the bottom to pick things up.");
 		return(0);

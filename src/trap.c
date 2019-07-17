@@ -2054,7 +2054,7 @@ register struct monst *mtmp;
 			break;
 
 		case SQKY_BOARD:
-			if(is_flyer_mon(mtmp)) break;
+			if(mon_resistance(mtmp,FLYING)) break;
 			/* stepped on a squeaky board */
 			if (in_sight) {
 			    pline("A board beneath %s squeaks loudly.", mon_nam(mtmp));
@@ -2067,7 +2067,7 @@ register struct monst *mtmp;
 
 		case BEAR_TRAP:
 			if(mptr->msize > MZ_SMALL &&
-				!amorphous(mptr) && !is_flyer_mon(mtmp) &&
+				!amorphous(mptr) && !mon_resistance(mtmp,FLYING) &&
 				!is_whirly(mptr) && !unsolid(mptr)) {
 			    mtmp->mtrapped = 1;
 			    if(in_sight) {
@@ -2250,13 +2250,13 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		case PIT:
 		case SPIKED_PIT:
 			fallverb = "falls";
-			if (is_flyer_mon(mtmp) || is_floater_mon(mtmp) ||
+			if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
 				(mtmp->wormno && count_wsegs(mtmp) > 5) ||
 				is_clinger(mptr)) {
 			    if (!inescapable) break;	/* avoids trap */
 			    fallverb = "is dragged";	/* sokoban pit */
 			}
-			if (!passes_walls_mon(mtmp))
+			if (!mon_resistance(mtmp,PASSES_WALLS))
 			    mtmp->mtrapped = 1;
 			if (in_sight) {
 			    pline("%s %s into %s pit!",
@@ -2296,7 +2296,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    break;	/* don't activate it after all */
 			}
 			if(mtmp->mhp <= 0) break;
-			if (is_flyer_mon(mtmp) || is_floater_mon(mtmp) ||
+			if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
 				mptr == &mons[PM_WUMPUS] ||
 				(mtmp->wormno && count_wsegs(mtmp) > 5) ||
 				mptr->msize >= MZ_HUGE) {
@@ -2446,7 +2446,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		case LANDMINE:
 			if(rn2(3))
 				break; /* monsters usually don't set it off */
-			if(is_flyer_mon(mtmp)) {
+			if(mon_resistance(mtmp,FLYING)) {
 				boolean already_seen = trap->tseen;
 				if (in_sight && !already_seen) {
 	pline("A trigger appears in a pile of soil below %s.", mon_nam(mtmp));
@@ -2492,7 +2492,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		    break;
 
 		case ROLLING_BOULDER_TRAP:
-		    if (!is_flyer_mon(mtmp)) {
+		    if (!mon_resistance(mtmp,FLYING)) {
 			int style = ROLL | (in_sight ? 0 : LAUNCH_UNSEEN);
 
 		        newsym(mtmp->mx,mtmp->my);
@@ -2679,8 +2679,8 @@ float_up()
 	else
 		You("start to float in the air!");
 #ifdef STEED
-	if (u.usteed && !is_floater_mon(u.usteed) &&
-						!is_flyer_mon(u.usteed)) {
+	if (u.usteed && !mon_resistance(u.usteed,LEVITATION) &&
+						!mon_resistance(u.usteed,FLYING)) {
 	    if (Lev_at_will)
 	    	pline("%s magically floats up!", Monnam(u.usteed));
 	    else {
@@ -3553,7 +3553,7 @@ drown()
 		return(FALSE);
 	}
 	You("are drowning!");
-	if ((Teleportation || can_teleport_mon(&youmonst)) &&
+	if ((Teleportation || mon_resistance(&youmonst,TELEPORT)) &&
 		    !u.usleep && (Teleport_control || rn2(3) < Luck+2)) {
 		You("attempt a teleport spell.");	/* utcsri!carroll */
 		if (!level.flags.noteleport) {

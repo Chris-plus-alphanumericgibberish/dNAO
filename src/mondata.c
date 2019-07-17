@@ -20,6 +20,7 @@ int flag;
     mon->data = ptr;
     if (flag == -1) return;		/* "don't care" */
 
+	/* resistances */
     if (flag == 1)
 		mon->mintrinsics[0] |= (ptr->mresists & MR_MASK);
     else
@@ -75,7 +76,23 @@ int flag;
 			}
 		}
 	}
+#define set_mintrinsic(ptr_condition, intrinsic) if((ptr_condition))\
+	{if(flag==1) mon->mintrinsics[((intrinsic)-1)/32] |= (1<<((intrinsic)-1)%32);\
+	else mon->mintrinsics[((intrinsic)-1)/32] = (1<<((intrinsic)-1)%32);}
+	/* other intrinsics */
+	set_mintrinsic(is_flyer_species(mon->data), FLYING);
+	set_mintrinsic(is_floater_species(mon->data), LEVITATION);
+	set_mintrinsic(is_swimmer_species(mon->data), SWIMMING);
+	set_mintrinsic(is_displacer_species(mon->data), DISPLACED);
+	set_mintrinsic(passes_walls_species(mon->data), PASSES_WALLS);
+	set_mintrinsic(regenerates_species(mon->data), REGENERATION);
+	set_mintrinsic(perceives_species(mon->data), SEE_INVIS);
+	set_mintrinsic(can_teleport_species(mon->data), TELEPORT);
+	set_mintrinsic(control_teleport_species(mon->data), TELEPORT_CONTROL);
+	set_mintrinsic(telepathic_species(mon->data), TELEPAT);
+#undef set_mintrinsic
     return;
+#
 }
 
 #endif /* OVLB */
@@ -446,7 +463,7 @@ struct monst *mon;
 {
 	struct permonst *mptr = mon->data;
 
-    return (boolean) (passes_walls_mon(mon) || amorphous(mptr) ||
+    return (boolean) (mon_resistance(mon,PASSES_WALLS) || amorphous(mptr) ||
 		      is_whirly(mptr) || verysmall(mptr) ||
 			  dmgtype(mptr, AD_CORR) || (dmgtype(mptr, AD_RUST) && mptr != &mons[PM_NAIAD] ) ||
 		      (slithy(mptr) && !bigmonst(mptr)));
@@ -908,9 +925,9 @@ const char *def;
 	int capitalize = (*def == highc(*def));
 	const struct permonst *ptr = mon->data;
 	return (
-		is_floater_mon(mon) ? levitate[capitalize] :
-		(is_flyer_mon(mon) && ptr->msize <= MZ_SMALL) ? flys[capitalize] :
-		(is_flyer_mon(mon) && ptr->msize > MZ_SMALL)  ? flyl[capitalize] :
+		mon_resistance(mon,LEVITATION) ? levitate[capitalize] :
+		(mon_resistance(mon,FLYING) && ptr->msize <= MZ_SMALL) ? flys[capitalize] :
+		(mon_resistance(mon,FLYING) && ptr->msize > MZ_SMALL)  ? flyl[capitalize] :
 		slithy(ptr)     ? slither[capitalize] :
 		amorphous(ptr)  ? ooze[capitalize] :
 		!ptr->mmove	? immobile[capitalize] :
@@ -928,9 +945,9 @@ const char *def;
 	int capitalize = 2 + (*def == highc(*def));
 	const struct permonst *ptr = mon->data;
 	return (
-		is_floater_mon(mon) ? levitate[capitalize] :
-		(is_flyer_mon(mon) && ptr->msize <= MZ_SMALL) ? flys[capitalize] :
-		(is_flyer_mon(mon) && ptr->msize > MZ_SMALL)  ? flyl[capitalize] :
+		mon_resistance(mon,LEVITATION) ? levitate[capitalize] :
+		(mon_resistance(mon,FLYING) && ptr->msize <= MZ_SMALL) ? flys[capitalize] :
+		(mon_resistance(mon,FLYING) && ptr->msize > MZ_SMALL)  ? flyl[capitalize] :
 		slithy(ptr)     ? slither[capitalize] :
 		amorphous(ptr)  ? ooze[capitalize] :
 		!ptr->mmove	? immobile[capitalize] :

@@ -504,7 +504,7 @@ boolean on, silently;
 {
     uchar mask;
     struct obj *otmp;
-	boolean oldprop = FALSE;
+	boolean oldprop = mon_resistance(mon, which);;
 
     if (on) {
 		/* some properties need special handling */
@@ -528,24 +528,20 @@ boolean on, silently;
 			}
 		case LEVITATION:
 		case FLYING:
-			if (which == LEVITATION) oldprop = is_floater_mon(mon);
-			else if (which == FLYING) oldprop = is_flyer_mon(mon);
 			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
-			if (!oldprop && (is_floater_mon(mon) || is_flyer_mon(mon))) {
+			if (!oldprop && (mon_resistance(mon,LEVITATION) || mon_resistance(mon,FLYING))) {
 				m_float_up(mon, silently);
 			}
 			break;
 		case DISPLACED:
-			oldprop = is_displacer_mon(mon);
 			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
-			if (!oldprop && is_displacer_mon(mon) && !silently && canseemon(mon)) {
+			if (!oldprop && mon_resistance(mon,DISPLACED) && !silently && canseemon(mon)) {
 				pline("%s outline begins shimmering!", s_suffix(Monnam(mon)));
 			}
 			break;
 		case SWIMMING:
-			oldprop = is_swimmer_mon(mon);
 			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
-			if (!oldprop && is_swimmer_mon(mon)) {
+			if (!oldprop && mon_resistance(mon,SWIMMING)) {
 				minliquid(mon);
 			}
 			break;
@@ -575,24 +571,20 @@ boolean on, silently;
 				}
 			case LEVITATION:
 			case FLYING:
-				if (which == LEVITATION) oldprop = is_floater_mon(mon);
-				else if (which == FLYING) oldprop = is_flyer_mon(mon);
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
-				if (oldprop && !is_floater_mon(mon) && !is_flyer_mon(mon)) {
+				if (oldprop && !mon_resistance(mon,LEVITATION) && !mon_resistance(mon,FLYING)) {
 					m_float_down(mon, silently);
 				}
 				break;
 			case DISPLACED:
-				oldprop = is_displacer_mon(mon);
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
-				if (oldprop && !is_displacer_mon(mon) && !silently && canseemon(mon)) {
+				if (oldprop && !mon_resistance(mon,DISPLACED) && !silently && canseemon(mon)) {
 					pline("%s outline stops shimmering.", s_suffix(Monnam(mon)));
 				}
 				break;
 			case SWIMMING:
-				oldprop = is_swimmer_mon(mon);
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
-				if (oldprop && !is_swimmer_mon(mon)) {
+				if (oldprop && !mon_resistance(mon,SWIMMING)) {
 					minliquid(mon);
 				}
 				break;

@@ -62,14 +62,14 @@ unsigned gpflags;
 				return FALSE;
 			if (mtmp == &youmonst)
 				return !!(Amphibious);
-			else return (is_swimmer_mon(mtmp) || breathless_mon(mtmp) || amphibious_mon(mtmp));
+			else return (mon_resistance(mtmp,SWIMMING) || breathless_mon(mtmp) || amphibious_mon(mtmp));
 	    } else if (is_pool(x,y, FALSE) && !(ignorewater || (mtmp == &youmonst && Is_waterlevel(&u.uz)))) {
 			if(mtmp == &youmonst && level.flags.lethe)
 				return !!(Levitation || Flying || Wwalking);
 			if (mtmp == &youmonst)
 				return !!(Levitation || Flying || Wwalking ||
 						Swimming || Amphibious);
-			else	return (is_flyer_mon(mtmp) || breathless_mon(mtmp) || is_swimmer_mon(mtmp) ||
+			else	return (mon_resistance(mtmp,FLYING) || breathless_mon(mtmp) || mon_resistance(mtmp,SWIMMING) ||
 								is_clinger(mdat) || amphibious_mon(mtmp));
 	    } else if (mdat->mlet == S_EEL && !ignorewater) {
 			if (is_pool(x, y, TRUE))
@@ -79,9 +79,9 @@ unsigned gpflags;
 			if (mtmp == &youmonst)
 				return !!(Levitation || Flying);
 			else
-				return (is_flyer_mon(mtmp) || likes_lava(mdat));
+				return (mon_resistance(mtmp,FLYING) || likes_lava(mdat));
 	    }
-	    if (passes_walls_mon(mtmp) && may_passwall(x,y)) return TRUE;
+	    if (mon_resistance(mtmp,PASSES_WALLS) && may_passwall(x,y)) return TRUE;
 	}
 	if (!ACCESSIBLE(levl[x][y].typ)) {
 		if (!(is_pool(x,y, FALSE) && ignorewater)) return FALSE;
@@ -721,7 +721,7 @@ dotele()
 	    register int sp_no = 0, energy = 0;
 
 	    if (!Teleportation || (u.ulevel < (Role_if(PM_WIZARD) ? 8 : 12)
-					&& !can_teleport_mon(&youmonst))) {
+					&& !mon_resistance(&youmonst,TELEPORT))) {
 		/* Try to use teleport away spell. */
 		if (objects[SPE_TELEPORT_AWAY].oc_name_known && !Confusion)
 		    for (sp_no = 0; sp_no < MAXSPELL; sp_no++)

@@ -277,7 +277,7 @@ nothing_to_steal:
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 	    if ((!uarm || otmp != uarmc) && otmp != uskin
 #ifdef INVISIBLE_OBJECTS
-				&& (!otmp->oinvis || perceives_mon(mtmp))
+				&& (!otmp->oinvis || mon_resistance(mtmp,SEE_INVIS))
 #endif
 				)
 		tmp += ((otmp->owornmask &
@@ -287,7 +287,7 @@ nothing_to_steal:
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 	    if ((!uarm || otmp != uarmc) && otmp != uskin
 #ifdef INVISIBLE_OBJECTS
-				&& (!otmp->oinvis || perceives_mon(mtmp))
+				&& (!otmp->oinvis || mon_resistance(mtmp,SEE_INVIS))
 #endif
 			)
 		if((tmp -= ((otmp->owornmask &
@@ -526,7 +526,7 @@ struct monst *mtmp;
 	   to steal are mergable */
 	(void) mpickobj(mtmp,otmp);	/* may merge and free otmp */
 	pline("%s stole %s!", Monnam(mtmp), doname(otmp));
-	if (can_teleport_mon(mtmp) && !tele_restrict(mtmp))
+	if (mon_resistance(mtmp,TELEPORT) && !tele_restrict(mtmp))
 	    (void) rloc(mtmp, FALSE);
     }
 }
@@ -570,7 +570,7 @@ struct monst *mtmp;
 	   to steal are mergable */
 	(void) mpickobj(mtmp,otmp);	/* may merge and free otmp */
 	pline("%s stole %s!", Monnam(mtmp), doname(otmp));
-	if (can_teleport_mon(mtmp) && !tele_restrict(mtmp))
+	if (mon_resistance(mtmp,TELEPORT) && !tele_restrict(mtmp))
 	    (void) rloc(mtmp, FALSE);
     }
 }

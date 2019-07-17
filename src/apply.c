@@ -984,7 +984,7 @@ struct obj *obj;
 	    if (vis)
 		pline ("%s doesn't have a reflection.", Monnam(mtmp));
 	} else if(obj->oartifact == ART_HAND_MIRROR_OF_CTHYLLA && obj->age < moves &&
-				(!mtmp->minvis || perceives_mon(mtmp))
+				(!mtmp->minvis || mon_resistance(mtmp,SEE_INVIS))
 	){
 		obj->age = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
 		if (vis)
@@ -1040,14 +1040,14 @@ struct obj *obj;
 			mtmp->mcanmove = 0;
 			mtmp->mfrozen = 1;
 	} else if (!is_unicorn(mtmp->data) && is_animal(mtmp->data) &&
-			(!mtmp->minvis || perceives_mon(mtmp)) && rn2(5)) {
+			(!mtmp->minvis || mon_resistance(mtmp,SEE_INVIS)) && rn2(5)) {
 		if (vis)
 		    pline("%s is frightened by its reflection.", Monnam(mtmp));
 		monflee(mtmp, d(2,4), FALSE, FALSE);
 	} else if (!Blind) {
 		if (mtmp->minvis && !See_invisible(mtmp->mx, mtmp->my))
 		    ;
-		else if ((mtmp->minvis && !perceives_mon(mtmp))
+		else if ((mtmp->minvis && !mon_resistance(mtmp,SEE_INVIS))
 			 || !haseyes(mtmp->data))
 		    pline("%s doesn't seem to notice its reflection.",
 			Monnam(mtmp));

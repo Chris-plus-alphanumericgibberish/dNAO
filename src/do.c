@@ -159,7 +159,7 @@ const char *verb;
 				vtense((const char *)0, verb),
 				(mtmp) ? "" : " with you");
 		    if (mtmp) {
-			if (!passes_walls_mon(mtmp) &&
+			if (!mon_resistance(mtmp,PASSES_WALLS) &&
 				!throws_rocks(mtmp->data)) {
 			    if (hmon(mtmp, obj, TRUE) && !is_whirly(mtmp->data))
 				return FALSE;	/* still alive */

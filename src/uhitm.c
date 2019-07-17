@@ -550,7 +550,7 @@ register struct monst *mtmp;
 
 		if (inshop || foo ||
 			(IS_ROCK(levl[u.ux][u.uy].typ) &&
-					!passes_walls_mon(mtmp))) {
+					!mon_resistance(mtmp,PASSES_WALLS))) {
 		    char buf[BUFSZ];
 
 		    monflee(mtmp, rnd(6), FALSE, FALSE);
@@ -978,7 +978,7 @@ struct attack *uattk;
 	boolean malive;
 	int mhit = (tmp > (dieroll = rnd(20)) || u.uswallow);
 	
-	if(mhit && is_displacer_mon(mon) && rn2(2)){
+	if(mhit && mon_resistance(mon,DISPLACED) && rn2(2)){
 		You("hit a displaced image!");
 		return TRUE;
 	}
@@ -3653,8 +3653,8 @@ register struct attack *mattk;
 			}
 		    } else if(u.ustuck == mdef) {
 			/* Monsters don't wear amulets of magical breathing */
-			if (is_pool(u.ux,u.uy, FALSE) && !is_swimmer_mon(mdef) &&
-			    !amphibious_mon(mdef)) {
+			if (is_pool(u.ux,u.uy, FALSE) && !mon_resistance(mdef,SWIMMING) &&
+			    !amphibious_mon(mdef) && !breathless_mon(mdef)) {
 			    You("drown %s...", mon_nam(mdef));
 			    tmp = mdef->mhp;
 			} else if(mattk->aatyp == AT_HUGS)
@@ -4354,7 +4354,7 @@ register int tmp, weptmp, tchtmp;
 	int	dhit = 0;
 	boolean Old_Upolyd = Upolyd, wepused;
 	
-	if(is_displacer_mon(mon) && rn2(2)){
+	if(mon_resistance(mon,DISPLACED) && rn2(2)){
 		You("attack a displaced image!");
 		return TRUE;
 	}
@@ -4671,7 +4671,7 @@ int nattk;
 	struct attack *mattk;
 	boolean Old_Upolyd = Upolyd;
 	
-	if(is_displacer_mon(mon) && rn2(2)){
+	if(mon_resistance(mon,DISPLACED) && rn2(2)){
 		You("attack a displaced image!");
 		return TRUE;
 	}

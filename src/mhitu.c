@@ -564,7 +564,7 @@ mattacku(mtmp)
 		/*derived undead has used its special attack*/
 	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return 0;
 	if(!ranged) nomul(0, NULL);
-	if(mtmp->mhp <= 0 || (Underwater && !is_swimmer_mon(mtmp)))
+	if(mtmp->mhp <= 0 || (Underwater && !mon_resistance(mtmp,SWIMMING)))
 	    return(0);
 	
 	if(!(u.uevent.invoked) && is_weeping(mtmp->data)) mtmp->movement = 0; /*Only attack once per turn*/
@@ -755,7 +755,7 @@ mattacku(mtmp)
 		tmp += u.chokhmah;
 		tchtmp += u.chokhmah;
 	}
-	if((Invis && !perceives_mon(mtmp)) || is_blind(mtmp)){
+	if((Invis && !mon_resistance(mtmp,SEE_INVIS)) || is_blind(mtmp)){
 		tmp -= 2;
 		tchtmp -= 2;
 	}
@@ -5275,7 +5275,7 @@ gazemu(mtmp, mattk)	/* monster gazes at you */
 	
 			    // messages not quite right if plural monsters created but
 			    // only a single monster is seen 
-			    if (Invisible && !perceives_mon(mtmp) &&
+			    if (Invisible && !mon_resistance(mtmp,SEE_INVIS) &&
 					    (mtmp->mux != u.ux || mtmp->muy != u.uy))
 				pline("%s around a spot near you!", mappear);
 			    else if (Displaced && (mtmp->mux != u.ux || mtmp->muy != u.uy))
@@ -5417,7 +5417,7 @@ struct attack *mattk;
 		defperc = (See_invisible(magr->mx,magr->my) != 0);
 		gendef = poly_gender();
 	} else {
-		defperc = perceives_mon(mdef);
+		defperc = mon_resistance(mdef,SEE_INVIS);
 		gendef = gender(mdef);
 	}
 	
@@ -8388,7 +8388,7 @@ register struct attack *mattk;
 		if (u.umonnum == PM_FLOATING_EYE) {
 		    if (!rn2(4)) tmp = 127;
 		    if (!is_blind(mtmp) && haseyes(mtmp->data) && rn2(3) &&
-				(perceives_mon(mtmp) || !Invis)) {
+				(mon_resistance(mtmp,SEE_INVIS) || !Invis)) {
 			if (Blind)
 			    pline("As a blind %s, you cannot defend yourself.",
 							youracedata->mname);

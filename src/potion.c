@@ -2354,7 +2354,7 @@ dodip()
 		    if (Levitation) {
 			floating_above(tmp);
 #ifdef STEED
-		    } else if (u.usteed && !is_swimmer_mon(u.usteed) &&
+		    } else if (u.usteed && !mon_resistance(u.usteed,SWIMMING) &&
 			    P_SKILL(P_RIDING) < P_BASIC) {
 			rider_cant_reach(); /* not skilled enough to reach */
 #endif

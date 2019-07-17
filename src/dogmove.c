@@ -832,7 +832,7 @@ boolean ranged;
 		(!ranged &&
 		 mtmp2->data == &mons[PM_FLOATING_EYE] && rn2(10) &&
 		 !is_blind(mtmp) && haseyes(mtmp->data) && !is_blind(mtmp2)
-		 && (perceives_mon(mtmp) || !mtmp2->minvis)) ||
+		 && (mon_resistance(mtmp,SEE_INVIS) || !mtmp2->minvis)) ||
 		(!ranged &&
 		 mtmp2->data==&mons[PM_GELATINOUS_CUBE] && rn2(10)) ||
 		(mtmp2->data == &mons[PM_MANDRAKE]) ||
@@ -966,7 +966,7 @@ register int after;	/* this is extra fast monster movement */
 #endif
 
 	allowflags = ALLOW_M | ALLOW_TRAPS | ALLOW_SSM | ALLOW_SANCT;
-	if (passes_walls_mon(mtmp)) allowflags |= (ALLOW_ROCK | ALLOW_WALL);
+	if (mon_resistance(mtmp,PASSES_WALLS)) allowflags |= (ALLOW_ROCK | ALLOW_WALL);
 	if (passes_bars(mtmp)  && !Is_illregrd(&u.uz) ) allowflags |= ALLOW_BARS;
 	if (throws_rocks(mtmp->data)) allowflags |= ALLOW_ROCK;
 	
@@ -1287,7 +1287,7 @@ could_reach_item(mon, nx, ny)
 struct monst *mon;
 xchar nx, ny;
 {
-    if ((!is_pool(nx,ny, FALSE) || is_swimmer_mon(mon)) &&
+    if ((!is_pool(nx,ny, FALSE) || mon_resistance(mon,SWIMMING)) &&
 	(!is_lava(nx,ny) || likes_lava(mon->data)) &&
 	(!boulder_at(nx,ny) || throws_rocks(mon->data)))
     	return TRUE;
@@ -1319,7 +1319,7 @@ xchar mx, my, fx, fy;
 		continue;
 	    if (dist2(i, j, fx, fy) >= dist)
 		continue;
-	    if (IS_ROCK(levl[i][j].typ) && !passes_walls_mon(mon) &&
+	    if (IS_ROCK(levl[i][j].typ) && !mon_resistance(mon,PASSES_WALLS) &&
 				    (!may_dig(i,j) || !tunnels(mon->data)))
 		continue;
 	    if (IS_DOOR(levl[i][j].typ) &&
