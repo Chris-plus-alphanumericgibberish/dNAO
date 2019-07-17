@@ -633,11 +633,6 @@ struct weapon_dice {
 				|| (otmp)->otyp == ELVEN_SHIELD\
 				|| (otmp)->otyp == ELVEN_TOGA\
 				|| (otmp)->otyp == ELVEN_BOOTS)
-#define is_droven_armor(otmp)	((otmp)->otyp == DROVEN_HELM\
-				|| (otmp)->otyp == DROVEN_PLATE_MAIL\
-				|| (otmp)->otyp == DROVEN_CHAIN_MAIL\
-				|| (otmp)->otyp == NOBLE_S_DRESS\
-				|| (otmp)->otyp == DROVEN_CLOAK)
 #define is_orcish_armor(otmp)	((otmp)->otyp == ORCISH_HELM\
 				|| (otmp)->otyp == ORCISH_CHAIN_MAIL\
 				|| (otmp)->otyp == ORCISH_RING_MAIL\
