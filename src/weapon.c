@@ -540,7 +540,6 @@ int otyp;
 	case ELVEN_BROADSWORD:		if(large){add(2);} else {pls(4);} break;
 	case CRYSTAL_SWORD:			if(large){pls(12);} else {pls(8);} break;
 	case TWO_HANDED_SWORD:		if(large){plus(2,6);} else {;} break;
-	case DROVEN_GREATSWORD:		if(large){plus(2,10);} else {;} break;
 	case TSURUGI:				if(large){plus(2,6);} else {;} break;
 	case RUNESWORD:				if(large){add(1);} else {pls(4);} break;
 	case PARTISAN:				if(large){add(1);} else {;} break;
@@ -651,15 +650,6 @@ int otyp;
 	/* if bonus dice exist, their minimum size is of a d2 */
 	if (bonn && bond < 2)
 		bond = 2;
-	/* has to go after bonus dice are calculated: obsidian weapons are 1dX */
-	if (obj && obj->obj_material == OBSIDIAN_MT)
-	{
-		ocd = ocn*ocd + bonn*bond;
-		ocn = 1;
-		bonn = 0;
-		bond = 0;
-	}
-
 	/* if bonus dice are identical in size & roll to oc dice, combine them */
 	if (bonn && (ocd == bond && ocaa == bonaa && ocad == bonad))
 	{
