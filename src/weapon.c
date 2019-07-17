@@ -415,7 +415,7 @@ int otyp;
 			ocaa = AT_EXPL;					// exploding
 			ocad = AD_LUCK;					// lucky
 			ocn = obj->quan;				// 1 die per octahedron
-			ocd = 8 + 2 * dmod;
+			ocd = 8;						// They are eight-sided dice
 		}
 		else if (obj->oartifact == ART_GIANTSLAYER)
 		{
