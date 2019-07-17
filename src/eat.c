@@ -914,39 +914,39 @@ register struct permonst *ptr;
 #endif
 	    case TELEPORT:
 #ifdef DEBUG
-		if (can_teleport_species(ptr)) {
+		if (species_teleports(ptr)) {
 			debugpline("can get teleport");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(can_teleport_species(ptr));
+		return(species_teleports(ptr));
 #endif
 	    case DISPLACED:
 #ifdef DEBUG
-		if (is_displacer_species(ptr)) {
+		if (species_displaces(ptr)) {
 			debugpline("can displacement");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(is_displacer_species(ptr));
+		return(species_displaces(ptr));
 #endif
 	    case TELEPORT_CONTROL:
 #ifdef DEBUG
-		if (control_teleport_species(ptr)) {
+		if (species_controls_teleports(ptr)) {
 			debugpline("can get teleport control");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(control_teleport_species(ptr));
+		return(species_controls_teleports(ptr));
 #endif
 	    case TELEPAT:
 #ifdef DEBUG
-		if (telepathic_species(ptr)) {
+		if (species_is_telepathic(ptr)) {
 			debugpline("can get telepathy");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(telepathic_species(ptr));
+		return(species_is_telepathic(ptr));
 #endif
 	    default:
 		return(FALSE);

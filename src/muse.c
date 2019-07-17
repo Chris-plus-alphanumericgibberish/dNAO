@@ -1703,7 +1703,7 @@ struct monst *mtmp;
 		case 0: {
 		    struct obj *helmet = which_armor(mtmp, W_ARMH);
 
-		    if ((helmet && is_hard(helmet)) || amorphous(pm) || passes_walls_species(pm) || noncorporeal(pm) || unsolid(pm))
+		    if ((helmet && is_hard(helmet)) || amorphous(pm) || species_passes_walls(pm) || noncorporeal(pm) || unsolid(pm))
 			return SCR_EARTH;
 		} /* fall through */
 		case 1: return WAN_MAGIC_MISSILE;

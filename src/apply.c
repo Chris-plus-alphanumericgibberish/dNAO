@@ -2314,13 +2314,13 @@ boolean quietly;
 		return FALSE;
 	}
 	if (IS_ROCK(levl[x][y].typ) &&
-	    !(passes_walls_species(&mons[obj->corpsenm]) && may_passwall(x,y))) {
+	    !(species_passes_walls(&mons[obj->corpsenm]) && may_passwall(x,y))) {
 		if (!quietly)
 		    You("cannot place a figurine in %s!",
 			IS_TREES(levl[x][y].typ) ? "a tree" : "solid rock");
 		return FALSE;
 	}
-	if (boulder_at(x,y) && !passes_walls_species(&mons[obj->corpsenm])
+	if (boulder_at(x,y) && !species_passes_walls(&mons[obj->corpsenm])
 			&& !throws_rocks(&mons[obj->corpsenm])) {
 		if (!quietly)
 			You("cannot fit the figurine on the %s.",xname(boulder_at(x,y)));
@@ -4820,13 +4820,13 @@ boolean quietly;
 		return FALSE;
 	}
 	if (IS_ROCK(levl[x][y].typ) &&
-	    !(passes_walls_species(&mons[obj->corpsenm]) && may_passwall(x,y))) {
+	    !(species_passes_walls(&mons[obj->corpsenm]) && may_passwall(x,y))) {
 		if (!quietly)
 		    You("cannot build a clockwork in %s!",
 			IS_TREES(levl[x][y].typ) ? "a tree" : "solid rock");
 		return FALSE;
 	}
-	if (boulder_at(x,y) && !passes_walls_species(&mons[obj->corpsenm])
+	if (boulder_at(x,y) && !species_passes_walls(&mons[obj->corpsenm])
 			&& !throws_rocks(&mons[obj->corpsenm])) {
 		if (!quietly)
 			You("cannot fit a clockwork under the %s.",xname(boulder_at(x,y)));

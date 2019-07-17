@@ -80,16 +80,16 @@ int flag;
 	{if(flag==1) mon->mintrinsics[((intrinsic)-1)/32] |= (1<<((intrinsic)-1)%32);\
 	else mon->mintrinsics[((intrinsic)-1)/32] = (1<<((intrinsic)-1)%32);}
 	/* other intrinsics */
-	set_mintrinsic(is_flyer_species(mon->data), FLYING);
-	set_mintrinsic(is_floater_species(mon->data), LEVITATION);
-	set_mintrinsic(is_swimmer_species(mon->data), SWIMMING);
-	set_mintrinsic(is_displacer_species(mon->data), DISPLACED);
-	set_mintrinsic(passes_walls_species(mon->data), PASSES_WALLS);
-	set_mintrinsic(regenerates_species(mon->data), REGENERATION);
-	set_mintrinsic(perceives_species(mon->data), SEE_INVIS);
-	set_mintrinsic(can_teleport_species(mon->data), TELEPORT);
-	set_mintrinsic(control_teleport_species(mon->data), TELEPORT_CONTROL);
-	set_mintrinsic(telepathic_species(mon->data), TELEPAT);
+	set_mintrinsic(species_flies(mon->data), FLYING);
+	set_mintrinsic(species_floats(mon->data), LEVITATION);
+	set_mintrinsic(species_swims(mon->data), SWIMMING);
+	set_mintrinsic(species_displaces(mon->data), DISPLACED);
+	set_mintrinsic(species_passes_walls(mon->data), PASSES_WALLS);
+	set_mintrinsic(species_regenerates(mon->data), REGENERATION);
+	set_mintrinsic(species_perceives(mon->data), SEE_INVIS);
+	set_mintrinsic(species_teleports(mon->data), TELEPORT);
+	set_mintrinsic(species_controls_teleports(mon->data), TELEPORT_CONTROL);
+	set_mintrinsic(species_is_telepathic(mon->data), TELEPAT);
 #undef set_mintrinsic
     return;
 #
