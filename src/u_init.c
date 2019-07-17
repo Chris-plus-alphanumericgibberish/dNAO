@@ -834,18 +834,20 @@ static const struct def_skill Skill_Ana[] = {
 };
 
 static const struct def_skill Skill_Droid_Ana[] = {
-    { P_DAGGER, P_SKILLED },		{ P_KNIFE,  P_SKILLED },
     { P_SHORT_SWORD, P_EXPERT },{ P_LANCE,  P_EXPERT },
-    { P_SABER, P_EXPERT },		{ P_LONG_SWORD,  P_EXPERT },
-    { P_AXE, P_EXPERT },		{ P_TWO_HANDED_SWORD,  P_EXPERT },
-    { P_CLUB, P_SKILLED },		{ P_QUARTERSTAFF, P_SKILLED },
-	{ P_BROAD_SWORD, P_SKILLED },{ P_HAMMER, P_BASIC },
-	{ P_SPEAR, P_EXPERT },
+	{ P_POLEARMS, P_EXPERT },    { P_SABER, P_EXPERT },
+	{ P_LONG_SWORD,  P_EXPERT }, { P_AXE, P_EXPERT },
+	{ P_TWO_HANDED_SWORD,  P_EXPERT }, { P_QUARTERSTAFF, P_EXPERT },
+	{ P_BROAD_SWORD, P_EXPERT }, { P_SPEAR, P_EXPERT },
+	{ P_WHIP, P_EXPERT },
+	{ P_CLUB, P_SKILLED },
+	{ P_HAMMER, P_BASIC },
 //#ifdef FIREARMS
     { P_FIREARM, P_EXPERT },
 //#endif
-    { P_DART, P_BASIC },		{ P_CROSSBOW, P_EXPERT },
-    { P_WHIP, P_SKILLED },		 { P_BOOMERANG, P_SKILLED },
+    { P_DAGGER, P_SKILLED },	 { P_KNIFE,  P_SKILLED },
+    { P_DART, P_BASIC },		{ P_CROSSBOW, P_SKILLED },
+    { P_BOOMERANG, P_SKILLED },
     { P_ATTACK_SPELL, P_SKILLED },	{ P_HEALING_SPELL, P_SKILLED },
     { P_DIVINATION_SPELL, P_SKILLED },	{ P_ENCHANTMENT_SPELL, P_SKILLED },
     { P_CLERIC_SPELL, P_SKILLED },	{ P_ESCAPE_SPELL, P_SKILLED },
@@ -1959,6 +1961,10 @@ u_init()
 		knows_object(POWER_PACK);
 		knows_object(PROTEIN_PILL);
 		knows_object(FORCE_PIKE);
+		knows_object(DOUBLE_FORCE_BLADE);
+		knows_object(FORCE_BLADE);
+		knows_object(FORCE_SWORD);
+		knows_object(FORCE_WHIP);
 		knows_object(VIBROBLADE);
 		knows_object(WHITE_VIBROSWORD);
 		knows_object(GOLD_BLADED_VIBROSWORD);
@@ -3252,30 +3258,35 @@ scatter_weapons(){
 	
 	obj = mksobj(WHITE_VIBROSPEAR, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
 	obj = mksobj(WHITE_VIBROZANBATO, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
 	obj = mksobj(GOLD_BLADED_VIBROSPEAR, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
 	obj = mksobj(GOLD_BLADED_VIBROZANBATO, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
 	obj = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->oeroded = 1;
 	obj->objsize = MZ_GIGANTIC;
 	fix_object(obj);
@@ -3285,6 +3296,7 @@ scatter_weapons(){
 	
 	obj = mksobj(SHORT_SWORD, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
 	obj->obj_material = SILVER;
 	fix_object(obj);
@@ -3294,6 +3306,7 @@ scatter_weapons(){
 	
 	obj = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
 	obj->obj_material = SILVER;
 	fix_object(obj);
@@ -3303,6 +3316,7 @@ scatter_weapons(){
 	
 	obj = mksobj(SPEAR, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
 	obj->obj_material = SILVER;
 	fix_object(obj);
@@ -3312,18 +3326,35 @@ scatter_weapons(){
 	
 	obj = mksobj(RED_EYED_VIBROSWORD, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
 	obj = mksobj(FORCE_PIKE, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
+	add_to_migration(obj);
+	obj->ox = stronghold_level.dnum;
+	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
+	
+	obj = mksobj(DOUBLE_FORCE_BLADE, TRUE, FALSE);
+	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
+	add_to_migration(obj);
+	obj->ox = stronghold_level.dnum;
+	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
+	
+	obj = mksobj(FORCE_SWORD, TRUE, FALSE);
+	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
 	obj = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
 	obj->obj_material = METAL;
 	obj->oproperties = OPROP_ELECW;
@@ -3334,6 +3365,7 @@ scatter_weapons(){
 	
 	obj = mksobj(SPEAR, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->obj_material = METAL;
 	obj->oproperties = OPROP_ELECW;
 	fix_object(obj);
@@ -3343,6 +3375,7 @@ scatter_weapons(){
 	
 	obj = mksobj(LONG_SWORD, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->obj_material = METAL;
 	obj->oproperties = OPROP_ELECW;
 	add_to_migration(obj);
@@ -3351,6 +3384,7 @@ scatter_weapons(){
 	
 	obj = mksobj(SABER, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->obj_material = METAL;
 	fix_object(obj);
 	add_to_migration(obj);
@@ -3359,6 +3393,7 @@ scatter_weapons(){
 	
 	obj = mksobj(KATANA, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->obj_material = METAL;
 	obj->oproperties = OPROP_AXIOW;
 	fix_object(obj);
@@ -3368,6 +3403,7 @@ scatter_weapons(){
 	
 	obj = mksobj(RAPIER, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->oproperties = OPROP_FLAYW;
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
@@ -3375,6 +3411,7 @@ scatter_weapons(){
 	
 	obj = mksobj(GLAIVE, TRUE, FALSE);
 	fully_identify_obj(obj);
+	obj->spe = abs(obj->spe);
 	obj->oproperties = OPROP_FLAYW;
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
