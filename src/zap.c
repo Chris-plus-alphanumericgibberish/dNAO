@@ -5255,9 +5255,9 @@ retry:
 	if (otmp != &zeroobj) {
 
 	    if (!flags.debug) {
-		char llog[BUFSZ+20];
-		Sprintf(llog, "wished for \"%s\"", mungspaces(bufcpy));
-		livelog_write_string(llog);
+			char llog[BUFSZ+20];
+			Sprintf(llog, "wished for \"%s\"", mungspaces(bufcpy));
+			livelog_write_string(llog);
 	    }
 
 	    /* The(aobjnam()) is safe since otmp is unidentified -dlc */

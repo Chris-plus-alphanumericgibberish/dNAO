@@ -777,12 +777,10 @@ unsigned trflags;
 		if (thitu(8, dmgval(otmp, &youmonst, 0), otmp, "arrow", shienuse) || shienuse) {
 		    obfree(otmp, (struct obj *)0);
 		} else {
-			if (is_shatterable(otmp))
-			{
+			if (is_shatterable(otmp)){
 				breaks(otmp, u.ux, u.uy);
 			}
-			else
-			{
+			else {
 				place_object(otmp, u.ux, u.uy);
 				if (!Blind) otmp->dknown = 1;
 				stackobj(otmp);
@@ -816,12 +814,10 @@ unsigned trflags;
 			poisoned("dart", A_CON, "little dart", -10, otmp->opoisoned);
 		    obfree(otmp, (struct obj *)0);
 		} else {
-			if (is_shatterable(otmp))
-			{
+			if (is_shatterable(otmp)){
 				breaks(otmp, u.ux, u.uy);
 			}
-			else
-			{
+			else {
 				place_object(otmp, u.ux, u.uy);
 				if (!Blind) otmp->dknown = 1;
 				stackobj(otmp);
@@ -3707,8 +3703,7 @@ struct trap *ttmp;
 {
 	struct obj *otmp = mksobj(otyp, TRUE, FALSE);
 	set_obj_quan(otmp, cnt);
-	if (ttmp->ttyp == DART_TRAP || ttmp->ttyp == ARROW_TRAP)
-	{
+	if (ttmp->ttyp == DART_TRAP || ttmp->ttyp == ARROW_TRAP){
 		set_material(otmp, ttmp->launch_mat);
 		otmp->opoisoned = ttmp->launch_pois;
 		otmp->blessed = ttmp->launch_blessed;
