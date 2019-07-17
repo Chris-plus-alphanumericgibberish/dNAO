@@ -1895,15 +1895,17 @@ int mat;
 		/* helmets */
 		case HELMET:
 		case LEATHER_HELM:
-		case BRONZE_HELM:
+		case ARCHAIC_HELM:
 		case DROVEN_HELM:				
 		case HARMONIUM_HELM:			/* irreversible, metal */
 //		case PLASTEEL_HELM:				/* has a unique function of shape -- needs a generic version? */
 //		case CRYSTAL_HELM:				/* has a unique function of shape -- needs a generic version? */
-			if		(mat == COPPER)		obj->otyp = BRONZE_HELM;
-			else if (mat == LEATHER)	obj->otyp = LEATHER_HELM;
+			if (mat == LEATHER)			obj->otyp = LEATHER_HELM;
 			else if (mat == SHADOWSTEEL)obj->otyp = DROVEN_HELM;
-			else						obj->otyp = HELMET;
+			else if (obj->otyp != HELMET
+				&& obj->otyp != ARCHAIC_HELM
+			)
+										obj->otyp = HELMET;
 			break;
 		/* gauntlets + gloves */
 		case CRYSTAL_GAUNTLETS:			/* irreversible, glass */
@@ -1913,15 +1915,17 @@ int mat;
 			else;// fall through to general gauntlets
 		case GLOVES:
 		case GAUNTLETS:
-		case BRONZE_GAUNTLETS:
+		case ARCHAIC_GAUNTLETS:
 		case PLASTEEL_GAUNTLETS:		/* irreversible, plastic */
 		case HARMONIUM_GAUNTLETS:		/* irreversible, metal */
 		case ORIHALCYON_GAUNTLETS:		/* irreversible, metal */
 			if		(mat == DRAGON_HIDE)obj->otyp = (is_hard(obj) ? GAUNTLETS : GLOVES);
 			else if	(mat == LEATHER
 				||   mat == CLOTH)		obj->otyp = GLOVES;
-			else if	(mat == COPPER)		obj->otyp = BRONZE_GAUNTLETS;
-			else						obj->otyp = GAUNTLETS;
+			else if (obj->otyp != GAUNTLETS
+				&& obj->otyp != ARCHAIC_GAUNTLETS
+			)
+										obj->otyp = GAUNTLETS;
 			break;
 		/* boots */
 		case CRYSTAL_BOOTS:				/* irreversible, glass */
@@ -1931,12 +1935,16 @@ int mat;
 			else;
 				// fall through to general boots
 		case ARMORED_BOOTS:
+		case ARCHAIC_BOOTS:
 		case HIGH_BOOTS:
 		case PLASTEEL_BOOTS:			/* irreversible, plastic */
 		case HARMONIUM_BOOTS:			/* irreversible, metal */
 			if		(mat == DRAGON_HIDE)obj->otyp = (is_hard(obj) ? ARMORED_BOOTS : HIGH_BOOTS);
-			else if	(mat >= WOOD)		obj->otyp = ARMORED_BOOTS;
-			else						obj->otyp = HIGH_BOOTS;
+			else if	(mat >= WOOD){		
+				if(obj->otyp != ARMORED_BOOTS && 
+					obj->otyp != ARCHAIC_BOOTS
+				) obj->otyp = ARMORED_BOOTS;
+			} else						obj->otyp = HIGH_BOOTS;
 			break;
 		/* shoes */
 		case SHOES:
@@ -1972,12 +1980,6 @@ int mat;
 		case STUDDED_LEATHER_ARMOR:		/* irreversible, leather */
 		case LEATHER_ARMOR:				/* irreversible, leather */
 										obj->otyp = SCALE_MAIL;
-			break;
-		/* half-plate */
-		case HALF_PLATE:
-		case BRONZE_HALF_PLATE:
-			if		(mat == COPPER)		obj->otyp = BRONZE_HALF_PLATE;
-			else						obj->otyp = HALF_PLATE;
 			break;
 		/* plate mail */
 		case CRYSTAL_PLATE_MAIL:		/* irreversible, glass */
