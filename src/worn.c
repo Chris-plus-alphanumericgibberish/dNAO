@@ -504,25 +504,51 @@ boolean on, silently;
 {
     uchar mask;
     struct obj *otmp;
+	boolean oldprop = FALSE;
+
     if (on) {
 		/* some properties need special handling */
 		switch (which)
 		{
 		case INVIS:
 			if (mon->data != &mons[PM_HELLCAT]){
-				mon->minvis = !mon->invis_blkd;
 				mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+				mon->minvis = !mon->invis_blkd;
 			}
 			break;
 		case FAST:
 			{
+			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
 			boolean save_in_mklev = in_mklev;
 			if (silently) in_mklev = TRUE;
 			mon_adjust_speed(mon, 0, obj);
 			in_mklev = save_in_mklev;
-			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			
 			break;
 			}
+		case LEVITATION:
+		case FLYING:
+			if (which == LEVITATION) oldprop = is_floater_mon(mon);
+			else if (which == FLYING) oldprop = is_flyer_mon(mon);
+			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			if (!oldprop && (is_floater_mon(mon) || is_flyer_mon(mon))) {
+				m_float_up(mon, silently);
+			}
+			break;
+		case DISPLACED:
+			oldprop = is_displacer_mon(mon);
+			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			if (!oldprop && is_displacer_mon(mon) && !silently && canseemon(mon)) {
+				pline("%s outline begins shimmering!", s_suffix(Monnam(mon)));
+			}
+			break;
+		case SWIMMING:
+			oldprop = is_swimmer_mon(mon);
+			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			if (!oldprop && is_swimmer_mon(mon)) {
+				minliquid(mon);
+			}
+			break;
 		default:
 			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
 			break;
@@ -535,24 +561,48 @@ boolean on, silently;
 			switch (which)
 			{
 			case INVIS:
-				mon->minvis = (mon->invis_blkd ? FALSE : mon->perminvis);
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
+				mon->minvis = (mon->invis_blkd ? FALSE : mon->perminvis);
 				break;
 			case FAST:
 				{
+				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
 				boolean save_in_mklev = in_mklev;
 				if (silently) in_mklev = TRUE;
 				mon_adjust_speed(mon, 0, obj);
 				in_mklev = save_in_mklev;
-				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
 				break;
 				}
+			case LEVITATION:
+			case FLYING:
+				if (which == LEVITATION) oldprop = is_floater_mon(mon);
+				else if (which == FLYING) oldprop = is_flyer_mon(mon);
+				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
+				if (oldprop && !is_floater_mon(mon) && !is_flyer_mon(mon)) {
+					m_float_down(mon, silently);
+				}
+				break;
+			case DISPLACED:
+				oldprop = is_displacer_mon(mon);
+				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
+				if (oldprop && !is_displacer_mon(mon) && !silently && canseemon(mon)) {
+					pline("%s outline stops shimmering.", s_suffix(Monnam(mon)));
+				}
+				break;
+			case SWIMMING:
+				oldprop = is_swimmer_mon(mon);
+				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
+				if (oldprop && !is_swimmer_mon(mon)) {
+					minliquid(mon);
+				}
+				break;
 			default:
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
 				break;
 			}
 		}
     }
+	return;
 }
 
 /* armor put on or taken off; might be magical variety */

@@ -1485,7 +1485,7 @@ encumber_msg()
 	case 2: You("rebalance your load.  Movement is difficult.");
 		break;
 	case 3: You("%s under your heavy load.  Movement is very hard.",
-		    stagger(youracedata, "stagger"));
+		    stagger(&youmonst, "stagger"));
 		break;
 	default: You("%s move a handspan with this load!",
 		     newcap == 4 ? "can barely" : "can't even");
@@ -1501,7 +1501,7 @@ encumber_msg()
 	case 2: You("rebalance your load.  Movement is still difficult.");
 		break;
 	case 3: You("%s under your load.  Movement is still very hard.",
-		    stagger(youracedata, "stagger"));
+		    stagger(&youmonst, "stagger"));
 		break;
 	}
 	flags.botl = 1;

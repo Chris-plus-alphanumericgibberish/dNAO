@@ -914,39 +914,39 @@ register struct permonst *ptr;
 #endif
 	    case TELEPORT:
 #ifdef DEBUG
-		if (can_teleport(ptr)) {
+		if (can_teleport_species(ptr)) {
 			debugpline("can get teleport");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(can_teleport(ptr));
+		return(can_teleport_species(ptr));
 #endif
 	    case DISPLACED:
 #ifdef DEBUG
-		if (is_displacer(ptr)) {
+		if (is_displacer_species(ptr)) {
 			debugpline("can displacement");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(is_displacer(ptr));
+		return(is_displacer_species(ptr));
 #endif
 	    case TELEPORT_CONTROL:
 #ifdef DEBUG
-		if (control_teleport(ptr)) {
+		if (control_teleport_species(ptr)) {
 			debugpline("can get teleport control");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(control_teleport(ptr));
+		return(control_teleport_species(ptr));
 #endif
 	    case TELEPAT:
 #ifdef DEBUG
-		if (telepathic(ptr)) {
+		if (telepathic_species(ptr)) {
 			debugpline("can get telepathy");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(telepathic(ptr));
+		return(telepathic_species(ptr));
 #endif
 	    default:
 		return(FALSE);
@@ -2281,7 +2281,7 @@ struct obj *otmp;
 		    set_mimic_blocking();
 		    see_monsters();
 		    if (Invis && !oldprop && !ESee_invisible &&
-				!perceives(youracedata) && !Blind) {
+				!perceives_mon(&youmonst) && !Blind) {
 			newsym(u.ux,u.uy);
 			pline("Suddenly you can see yourself.");
 			makeknown(typ);

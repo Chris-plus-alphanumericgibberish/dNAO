@@ -1247,7 +1247,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 #endif
 			
 		    Sprintf(verbbuf, "%s", Levitation ? (const char *)"float" :
-		      		locomotion(youracedata, "stumble"));
+		      		locomotion(&youmonst, "stumble"));
 		    You("%s into %s spider web!",
 			verbbuf, a_your[trap->madeby_u]);
 		}
@@ -1343,7 +1343,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 #endif
 		 Sprintf(verbbuf,"%s",
 		    Levitation ? (const char *)"float" :
-		    locomotion(youracedata, "step"));
+		    locomotion(&youmonst, "step"));
 		You("%s onto a polymorph trap!", verbbuf);
 		if(Antimagic || Unchanging) {
 		    shieldeff(u.ux, u.uy);
@@ -2054,7 +2054,7 @@ register struct monst *mtmp;
 			break;
 
 		case SQKY_BOARD:
-			if(is_flyer(mptr)) break;
+			if(is_flyer_mon(mtmp)) break;
 			/* stepped on a squeaky board */
 			if (in_sight) {
 			    pline("A board beneath %s squeaks loudly.", mon_nam(mtmp));
@@ -2067,7 +2067,7 @@ register struct monst *mtmp;
 
 		case BEAR_TRAP:
 			if(mptr->msize > MZ_SMALL &&
-				!amorphous(mptr) && !is_flyer(mptr) &&
+				!amorphous(mptr) && !is_flyer_mon(mtmp) &&
 				!is_whirly(mptr) && !unsolid(mptr)) {
 			    mtmp->mtrapped = 1;
 			    if(in_sight) {
@@ -2250,13 +2250,13 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		case PIT:
 		case SPIKED_PIT:
 			fallverb = "falls";
-			if (is_flyer(mptr) || is_floater(mptr) ||
+			if (is_flyer_mon(mtmp) || is_floater_mon(mtmp) ||
 				(mtmp->wormno && count_wsegs(mtmp) > 5) ||
 				is_clinger(mptr)) {
 			    if (!inescapable) break;	/* avoids trap */
 			    fallverb = "is dragged";	/* sokoban pit */
 			}
-			if (!passes_walls(mptr))
+			if (!passes_walls_mon(mtmp))
 			    mtmp->mtrapped = 1;
 			if (in_sight) {
 			    pline("%s %s into %s pit!",
@@ -2296,7 +2296,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    break;	/* don't activate it after all */
 			}
 			if(mtmp->mhp <= 0) break;
-			if (is_flyer(mptr) || is_floater(mptr) ||
+			if (is_flyer_mon(mtmp) || is_floater_mon(mtmp) ||
 				mptr == &mons[PM_WUMPUS] ||
 				(mtmp->wormno && count_wsegs(mtmp) > 5) ||
 				mptr->msize >= MZ_HUGE) {
@@ -2446,7 +2446,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		case LANDMINE:
 			if(rn2(3))
 				break; /* monsters usually don't set it off */
-			if(is_flyer(mptr)) {
+			if(is_flyer_mon(mtmp)) {
 				boolean already_seen = trap->tseen;
 				if (in_sight && !already_seen) {
 	pline("A trigger appears in a pile of soil below %s.", mon_nam(mtmp));
@@ -2492,7 +2492,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		    break;
 
 		case ROLLING_BOULDER_TRAP:
-		    if (!is_flyer(mptr)) {
+		    if (!is_flyer_mon(mtmp)) {
 			int style = ROLL | (in_sight ? 0 : LAUNCH_UNSEEN);
 
 		        newsym(mtmp->mx,mtmp->my);
@@ -2679,8 +2679,8 @@ float_up()
 	else
 		You("start to float in the air!");
 #ifdef STEED
-	if (u.usteed && !is_floater(u.usteed->data) &&
-						!is_flyer(u.usteed->data)) {
+	if (u.usteed && !is_floater_mon(u.usteed) &&
+						!is_flyer_mon(u.usteed)) {
 	    if (Lev_at_will)
 	    	pline("%s magically floats up!", Monnam(u.usteed));
 	    else {
@@ -2689,6 +2689,31 @@ float_up()
 	    }
 	}
 #endif
+	return;
+}
+
+void
+m_float_up(mon, silently)
+struct monst *mon;
+boolean silently;
+{
+	boolean seen = canseemon(mon);
+
+	if (mon->mtrapped) {
+		struct trap* ttmp = t_at(mon->mx, mon->my);
+		if (ttmp->ttyp == PIT || ttmp->ttyp == SPIKED_PIT) {
+			mon->mtrapped = 0;
+			if (seen && !silently)
+				pline("%s floats up, out of the pit!", Monnam(mon));
+			fill_pit(mon->mx, mon->my);
+		}
+		else if (ttmp->ttyp == BEAR_TRAP || ttmp->ttyp == WEB || ttmp->ttyp == VIVI_TRAP) {
+			if (seen && !silently)
+				pline("%s floats upward, but is still stuck.", Monnam(mon));
+		}
+	}
+	else if (seen && !silently)
+		pline("%s starts to float in the air!", Monnam(mon));
 	return;
 }
 
@@ -2837,6 +2862,45 @@ long hmask, emask;     /* might cancel timeout */
 	    (void) pickup(1);
 	return 1;
 }
+
+/* assumes that the monster is now neither flying nor levitating */
+void
+m_float_down(mon, silently)
+struct monst *mon;
+boolean silently;
+{
+	register struct trap *trap = (struct trap *)0;
+	boolean seen = canseemon(mon);
+
+	if (is_pool(mon->mx, mon->my, TRUE) || is_lava(mon->mx, mon->my))
+	{
+		if (seen && !silently)
+			pline("%s splashes down into the %s.", Monnam(mon), surface(mon->mx, mon->my));
+		silently = TRUE;	/* disable other messages from this function */
+		minliquid(mon);
+	}
+	trap = t_at(mon->mx, mon->my);
+	boolean sokoban_trap = (In_sokoban(&u.uz) && trap);
+
+	if (!sokoban_trap)
+	{
+		if (seen && !silently)
+			pline("%s floats gently to the %s.", Monnam(mon), surface(mon->mx, mon->my));
+	}
+	else {
+		if (seen && !silently)
+			pline("%s falls over.", Monnam(mon));
+		thitm(0, mon, (struct obj*)0, rnd(2), FALSE);
+		mselftouch(mon, "Falling, ", FALSE);
+	}
+
+	if (trap) {
+		mintrap(mon);
+	}
+
+	return;
+}
+
 
 STATIC_OVL void
 dofiretrap(box)
@@ -3489,7 +3553,7 @@ drown()
 		return(FALSE);
 	}
 	You("are drowning!");
-	if ((Teleportation || can_teleport(youracedata)) &&
+	if ((Teleportation || can_teleport_mon(&youmonst)) &&
 		    !u.usleep && (Teleport_control || rn2(3) < Luck+2)) {
 		You("attempt a teleport spell.");	/* utcsri!carroll */
 		if (!level.flags.noteleport) {
@@ -3788,8 +3852,8 @@ boolean force_failure;
 	}
 	/* duplicate tight-space checks from test_move */
 	if (u.dx && u.dy &&
-	    bad_rock(youracedata,u.ux,ttmp->ty) &&
-	    bad_rock(youracedata,ttmp->tx,u.uy)) {
+	    bad_rock(&youmonst,u.ux,ttmp->ty) &&
+	    bad_rock(&youmonst,ttmp->tx,u.uy)) {
 	    if ((invent && (inv_weight() + weight_cap() > 600)) ||
 		bigmonst(youracedata)) {
 		/* don't allow untrap if they can't get thru to it */
@@ -4642,10 +4706,10 @@ boolean disarm;
 				pline("What a groovy feeling!");
 			    else if (Blind)
 				You("%s and get dizzy...",
-				    stagger(youracedata, "stagger"));
+				    stagger(&youmonst, "stagger"));
 			    else
 				You("%s and your vision blurs...",
-				    stagger(youracedata, "stagger"));
+				    stagger(&youmonst, "stagger"));
 			}
 			make_stunned(HStun + rn1(7, 16),FALSE);
 			(void) make_hallucinated(HHallucination + rn1(5, 16),FALSE,0L);

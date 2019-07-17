@@ -2790,7 +2790,7 @@ int basedmg;
 			if (otmp->oproperties&OPROP_LESSW) bonus += d(1, 8);
 			else bonus += basedmg;
 		}
-		else if(!youdefend && !mindless_mon(mdef) && (telepathic(mdef->data) || !rn2(5))){
+		else if(!youdefend && !mindless_mon(mdef) && (telepathic_mon(mdef) || !rn2(5))){
 			if (otmp->oproperties&OPROP_LESSW) bonus += d(1, 8);
 			else bonus += basedmg;
 		}
@@ -2799,7 +2799,7 @@ int basedmg;
 		if(otmp->spe < 8){
 		if(youdefend && (Blind_telepat || !rn2(5)))
 			bonus += d(1,15-(otmp->spe)*2);
-		else if(!youdefend && !mindless_mon(mdef) && (telepathic(mdef->data) || !rn2(5)))
+		else if(!youdefend && !mindless_mon(mdef) && (telepathic_mon(mdef) || !rn2(5)))
 			bonus += d(1,15-(otmp->spe)*2);
 		}
 	}
@@ -4378,7 +4378,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		monAC += magr->m_lev;
 		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) monAC += u.chokhmah;
 		if(multi < 0) monAC += 4;
-		if((Invis && !perceives(magr->data)) || is_blind(magr))
+		if((Invis && !perceives_mon(magr)) || is_blind(magr))
 			monAC -= 2;
 		if(magr->mtrapped) monAC -= 2;
 		if(monAC <= 0) monAC = 1;
@@ -4487,7 +4487,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		tmp += magr->m_lev;
 		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) tmp += u.chokhmah;
 		if(multi < 0) tmp += 4;
-		if((Invis && !perceives(magr->data)) || is_blind(magr))
+		if((Invis && !perceives_mon(magr)) || is_blind(magr))
 			tmp -= 2;
 		if(magr->mtrapped) tmp -= 2;
 		if(tmp <= 0) tmp = 1;
@@ -6859,7 +6859,7 @@ arti_invoke(obj)
 							You("raise the Annulus into the %s, and it releases a rapidly-expanding ring of cerulean energy.", Underwater ? "water" : "air");
 							for(; mtmp; mtmp = ntmp){
 								ntmp = mtmp->nmon;
-								if(telepathic(mtmp->data) && couldsee(mtmp->mx,mtmp->my)){
+								if(telepathic_mon(mtmp) && couldsee(mtmp->mx,mtmp->my)){
 									if(mtmp->data == &mons[PM_LUGRIBOSSK]) maanze = TRUE;
 									killed(mtmp);
 								} else if(is_magical(mtmp->data) && couldsee(mtmp->mx,mtmp->my) 
@@ -9664,7 +9664,7 @@ int spe;
 		if(dnum >= 3){
 			for (m2 = fmon; m2; m2 = nmon2) {
 				nmon2 = m2->nmon;
-				if (!DEADMONSTER(m2) && !m2->mpeaceful && (telepathic(m2->data) || rn2(2)))
+				if (!DEADMONSTER(m2) && !m2->mpeaceful && (telepathic_mon(m2) || rn2(2)))
 				{
 					m2->msleeping = 0;
 					if (!m2->mcanmove && !rn2(5)) {
@@ -9684,7 +9684,7 @@ int spe;
 		nmon2 = m2->nmon;
 		if (DEADMONSTER(m2)) continue;
 		if (mindless_mon(m2)) continue;
-		if ((telepathic(m2->data) &&
+		if ((telepathic_mon(m2) &&
 			(rn2(2) || m2->mblinded)) || !rn2(10)) {
 			if (cansee(m2->mx, m2->my))
 				pline("It locks on to %s.", mon_nam(m2));

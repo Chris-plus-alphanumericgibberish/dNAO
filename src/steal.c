@@ -277,7 +277,7 @@ nothing_to_steal:
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 	    if ((!uarm || otmp != uarmc) && otmp != uskin
 #ifdef INVISIBLE_OBJECTS
-				&& (!otmp->oinvis || perceives(mtmp->data))
+				&& (!otmp->oinvis || perceives_mon(mtmp))
 #endif
 				)
 		tmp += ((otmp->owornmask &
@@ -287,7 +287,7 @@ nothing_to_steal:
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 	    if ((!uarm || otmp != uarmc) && otmp != uskin
 #ifdef INVISIBLE_OBJECTS
-				&& (!otmp->oinvis || perceives(mtmp->data))
+				&& (!otmp->oinvis || perceives_mon(mtmp))
 #endif
 			)
 		if((tmp -= ((otmp->owornmask &
@@ -526,7 +526,7 @@ struct monst *mtmp;
 	   to steal are mergable */
 	(void) mpickobj(mtmp,otmp);	/* may merge and free otmp */
 	pline("%s stole %s!", Monnam(mtmp), doname(otmp));
-	if (can_teleport(mtmp->data) && !tele_restrict(mtmp))
+	if (can_teleport_mon(mtmp) && !tele_restrict(mtmp))
 	    (void) rloc(mtmp, FALSE);
     }
 }
@@ -570,7 +570,7 @@ struct monst *mtmp;
 	   to steal are mergable */
 	(void) mpickobj(mtmp,otmp);	/* may merge and free otmp */
 	pline("%s stole %s!", Monnam(mtmp), doname(otmp));
-	if (can_teleport(mtmp->data) && !tele_restrict(mtmp))
+	if (can_teleport_mon(mtmp) && !tele_restrict(mtmp))
 	    (void) rloc(mtmp, FALSE);
     }
 }
@@ -591,7 +591,7 @@ boolean verbosely;
 	/* perform worn item handling if the monster is still alive */
 	if (mon->mhp > 0) {
 	    mon->misc_worn_check &= ~obj->owornmask;
-	    update_mon_intrinsics(mon, obj, FALSE, TRUE);
+	    update_mon_intrinsics(mon, obj, FALSE, FALSE);
 	 /* obj_no_longer_held(obj); -- done by place_object */
 		if (obj->owornmask & W_WEP){
 			setmnotwielded(mon,obj);

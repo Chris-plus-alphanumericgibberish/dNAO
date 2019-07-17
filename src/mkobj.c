@@ -2884,7 +2884,7 @@ add_to_minv(mon, obj)
     obj->nobj = mon->minvent;
     mon->minvent = obj;
 	/* apply artifact on-carry properties */
-	update_mon_intrinsics(mon, obj, TRUE, TRUE);
+	update_mon_intrinsics(mon, obj, TRUE, FALSE);
     return 0;	/* obj on mon's inventory chain */
 }
 

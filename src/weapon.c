@@ -224,7 +224,7 @@ struct monst *mon;
 	    ptr->mlet == S_PLANT) tmp += 6;
 
 	/* trident is highly effective against swimmers */
-	if (otmp->otyp == TRIDENT && is_swimmer(ptr)) {
+	if (otmp->otyp == TRIDENT && is_swimmer_species(ptr)) {
 	   if (is_pool(mon->mx, mon->my, FALSE)) tmp += 4;
 	   else if (ptr->mlet == S_EEL || ptr->mlet == S_SNAKE) tmp += 2;
 	}
@@ -235,11 +235,11 @@ struct monst *mon;
 	
 	/* Picks used against xorns and earth elementals */
 	if (is_pick(otmp) &&
-	   (passes_walls(ptr) && thick_skinned(ptr))) tmp += 2;
+	   (passes_walls_mon(mon) && thick_skinned(ptr))) tmp += 2;
 
 #ifdef INVISIBLE_OBJECTS
 	/* Invisible weapons against monsters who can't see invisible */
-	if (otmp->oinvis && !perceives(ptr)) tmp += 3;
+	if (otmp->oinvis && !perceives_mon(mon)) tmp += 3;
 #endif
 
 	/* Check specially named weapon "to hit" bonuses */
@@ -1273,7 +1273,7 @@ struct monst *mon;
 	}
 	if(pen->ovar1&SEAL_OSE){
 		if(youdef && (Blind_telepat || !rn2(5))) dmg += d(dnum,15);
-		else if(!youdef && !mindless_mon(mon) && (telepathic(mon->data) || !rn2(5))) dmg += d(dnum,15);
+		else if(!youdef && !mindless_mon(mon) && (telepathic_mon(mon) || !rn2(5))) dmg += d(dnum,15);
 	}
 	if(pen->ovar1&SEAL_NABERIUS){
 		if(youdef && (Upolyd ? u.mh < .25*u.mhmax : u.uhp < .25*u.uhpmax)) dmg += d(dnum,4);

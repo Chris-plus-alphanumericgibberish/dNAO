@@ -62,14 +62,14 @@ unsigned gpflags;
 				return FALSE;
 			if (mtmp == &youmonst)
 				return !!(Amphibious);
-			else return (is_swimmer(mdat) || breathless_mon(mtmp) || amphibious_mon(mtmp));
+			else return (is_swimmer_mon(mtmp) || breathless_mon(mtmp) || amphibious_mon(mtmp));
 	    } else if (is_pool(x,y, FALSE) && !(ignorewater || (mtmp == &youmonst && Is_waterlevel(&u.uz)))) {
 			if(mtmp == &youmonst && level.flags.lethe)
 				return !!(Levitation || Flying || Wwalking);
 			if (mtmp == &youmonst)
 				return !!(Levitation || Flying || Wwalking ||
 						Swimming || Amphibious);
-			else	return (is_flyer(mdat) || breathless_mon(mtmp) || is_swimmer(mdat) ||
+			else	return (is_flyer_mon(mtmp) || breathless_mon(mtmp) || is_swimmer_mon(mtmp) ||
 								is_clinger(mdat) || amphibious_mon(mtmp));
 	    } else if (mdat->mlet == S_EEL && !ignorewater) {
 			if (is_pool(x, y, TRUE))
@@ -79,9 +79,9 @@ unsigned gpflags;
 			if (mtmp == &youmonst)
 				return !!(Levitation || Flying);
 			else
-				return (is_flyer(mdat) || likes_lava(mdat));
+				return (is_flyer_mon(mtmp) || likes_lava(mdat));
 	    }
-	    if (passes_walls(mdat) && may_passwall(x,y)) return TRUE;
+	    if (passes_walls_mon(mtmp) && may_passwall(x,y)) return TRUE;
 	}
 	if (!ACCESSIBLE(levl[x][y].typ)) {
 		if (!(is_pool(x,y, FALSE) && ignorewater)) return FALSE;
@@ -714,14 +714,14 @@ dotele()
 		}
 		if (trap)
 			You("%s onto the teleportation trap.",
-			    locomotion(youracedata, "jump"));
+			    locomotion(&youmonst, "jump"));
 	}
 	if (!trap) {
 	    boolean castit = FALSE;
 	    register int sp_no = 0, energy = 0;
 
 	    if (!Teleportation || (u.ulevel < (Role_if(PM_WIZARD) ? 8 : 12)
-					&& !can_teleport(youracedata))) {
+					&& !can_teleport_mon(&youmonst))) {
 		/* Try to use teleport away spell. */
 		if (objects[SPE_TELEPORT_AWAY].oc_name_known && !Confusion)
 		    for (sp_no = 0; sp_no < MAXSPELL; sp_no++)
@@ -1152,7 +1152,7 @@ struct trap *trap;
 {
 	You("%s onto a level teleport trap!",
 		      Levitation ? (const char *)"float" :
-				  locomotion(youracedata, "step"));
+				  locomotion(&youmonst, "step"));
 	if (Antimagic) {
 	    shieldeff(u.ux, u.uy);
 	}

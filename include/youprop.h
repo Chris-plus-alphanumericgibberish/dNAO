@@ -222,13 +222,13 @@
 #define HSee_invisible		u.uprops[SEE_INVIS].intrinsic
 #define ESee_invisible		u.uprops[SEE_INVIS].extrinsic
 #define See_invisible_old	(HSee_invisible || ESee_invisible || \
-				 perceives(youracedata) || u.sealsActive&SEAL_NABERIUS)
+				 perceives_mon(&youmonst) || u.sealsActive&SEAL_NABERIUS)
 #define See_invisible(X,Y)	(ESee_invisible || (See_invisible_old && dist2(u.ux, u.uy, X, Y)<13))
 
 #define HTelepat		u.uprops[TELEPAT].intrinsic
 #define ETelepat		u.uprops[TELEPAT].extrinsic
 #define Blind_telepat		(HTelepat || ETelepat || \
-				 telepathic(youracedata) || u.sealsActive&SEAL_DANTALION)
+				 telepathic_mon(&youmonst) || u.sealsActive&SEAL_DANTALION)
 #define Unblind_telepat		(ETelepat || u.sealsActive&SEAL_DANTALION)
 
 #define HWarning		u.uprops[WARNING].intrinsic
@@ -321,7 +321,7 @@
 #define HDisplaced		u.uprops[DISPLACED].intrinsic
 #define EDisplaced		u.uprops[DISPLACED].extrinsic
 #define Displaced		(HDisplaced || EDisplaced || \
-						 is_displacer(youracedata) || u.sealsActive&SEAL_ORTHOS || u.uvaul_duration)
+						 is_displacer_mon(&youmonst) || u.sealsActive&SEAL_ORTHOS || u.uvaul_duration)
 
 #define HStealth		u.uprops[STEALTH].intrinsic
 #define EStealth		u.uprops[STEALTH].extrinsic
@@ -347,33 +347,33 @@
 #define ETeleportation		u.uprops[TELEPORT].extrinsic
 #define Teleportation		(HTeleportation || ETeleportation || \
 							 ward_at(u.ux,u.uy) == ANDREALPHUS_TRANSIT || \
-				 can_teleport(youracedata))
+				 can_teleport_mon(&youmonst))
 
 #define HTeleport_control	u.uprops[TELEPORT_CONTROL].intrinsic
 #define ETeleport_control	u.uprops[TELEPORT_CONTROL].extrinsic
 #define Teleport_control	(HTeleport_control || ETeleport_control || \
 				 u.sealsActive&SEAL_ANDREALPHUS || \
 				 ward_at(u.ux,u.uy) == ANDREALPHUS_STABILIZE || \
-				 control_teleport(youracedata))
+				 control_teleport_mon(&youmonst))
 
 #define HLevitation		u.uprops[LEVITATION].intrinsic
 #define ELevitation		u.uprops[LEVITATION].extrinsic
 #define Levitation		(HLevitation || ELevitation || \
-				 is_floater(youracedata))
+				 is_floater_mon(&youmonst))
 	/* Can't touch surface, can't go under water; overrides all others */
 #define Lev_at_will		(((HLevitation & I_SPECIAL) != 0L || \
 				 (ELevitation & W_ARTI) != 0L) && \
 				 (HLevitation & ~(I_SPECIAL|TIMEOUT)) == 0L && \
 				 (ELevitation & ~W_ARTI) == 0L && \
-				 !is_floater(youracedata))
+				 !is_floater_mon(&youmonst))
 
 #define HFlying			u.uprops[FLYING].intrinsic
 #define EFlying			u.uprops[FLYING].extrinsic
 #ifdef STEED
-# define Flying			(EFlying || HFlying || is_flyer(youracedata) || \
-				 (u.usteed && is_flyer(u.usteed->data)))
+# define Flying			(EFlying || HFlying || is_flyer_mon(&youmonst) || \
+				 (u.usteed && is_flyer_mon(u.usteed)))
 #else
-# define Flying			(EFlying || HFlying || is_flyer(youracedata))
+# define Flying			(EFlying || HFlying || is_flyer_mon(&youmonst))
 #endif
 	/* May touch surface; does not override any others */
 
@@ -390,22 +390,22 @@
 #define ESwimming		u.uprops[SWIMMING].extrinsic	/* [Tom] */
 #ifdef STEED
 # define Swimming	(((HSwimming || ESwimming || \
-				 is_swimmer(youracedata) || \
+				 is_swimmer_mon(&youmonst) || \
 				 Is_waterlevel(&u.uz) || \
 				 u.sealsActive&SEAL_ENKI) && !Punished && inv_weight() < 0) || \
-				 (u.usteed && is_swimmer(u.usteed->data)))
+				 (u.usteed && is_swimmer_mon(u.usteed)))
 # define NoburdSwimming	(((HSwimming || ESwimming || \
-				 is_swimmer(youracedata) || \
+				 is_swimmer_mon(&youmonst) || \
 				 Is_waterlevel(&u.uz) || \
 				 u.sealsActive&SEAL_ENKI) && !Punished) || \
-				 (u.usteed && is_swimmer(u.usteed->data)))
+				 (u.usteed && is_swimmer_mon(u.usteed)))
 #else
 # define Swimming	(((HSwimming || ESwimming || \
-				 is_swimmer(youracedata) || \
+				 is_swimmer_mon(&youmonst) || \
 				 u.sealsActive&SEAL_ENKI) \
 				 && !Punished && inv_weight() < 0) || Is_waterlevel(&u.uz))
 # define NoburdSwimming	(((HSwimming || ESwimming || \
-				 is_swimmer(youracedata) || \
+				 is_swimmer_mon(&youmonst) || \
 				 u.sealsActive&SEAL_ENKI) \
 				 && !Punished) || Is_waterlevel(&u.uz))
 #endif
@@ -432,7 +432,7 @@
 #define HPasses_walls		u.uprops[PASSES_WALLS].intrinsic
 #define EPasses_walls		u.uprops[PASSES_WALLS].extrinsic
 #define Passes_walls		(HPasses_walls || EPasses_walls || \
-				 (uclockwork && u.phasengn)|| passes_walls(youracedata))
+				 (uclockwork && u.phasengn)|| passes_walls_mon(&youmonst))
 #ifdef CONVICT
 # define Phasing            u.uprops[PASSES_WALLS].intrinsic
 #endif /* CONVICT */
@@ -453,7 +453,7 @@
 #define HRegeneration		u.uprops[REGENERATION].intrinsic
 #define ERegeneration		u.uprops[REGENERATION].extrinsic
 #define Regeneration		(HRegeneration || ERegeneration || \
-				 regenerates(youracedata))
+				 regenerates_mon(&youmonst))
 
 #define HEnergy_regeneration	u.uprops[ENERGY_REGENERATION].intrinsic
 #define EEnergy_regeneration	u.uprops[ENERGY_REGENERATION].extrinsic

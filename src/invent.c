@@ -612,7 +612,7 @@ m_freeinv(obj)
 struct obj* obj;
 {
 	extract_nobj(obj, &obj->ocarry->minvent);
-	update_mon_intrinsics(obj->ocarry, obj, FALSE, TRUE);
+	update_mon_intrinsics(obj->ocarry, obj, FALSE, FALSE);
 	return;
 }
 

@@ -441,10 +441,12 @@ struct permonst *ptr;
 
 /* true iff the type of monster pass through iron bars */
 boolean
-passes_bars(mptr)
-struct permonst *mptr;
+passes_bars(mon)
+struct monst *mon;
 {
-    return (boolean) (passes_walls(mptr) || amorphous(mptr) ||
+	struct permonst *mptr = mon->data;
+
+    return (boolean) (passes_walls_mon(mon) || amorphous(mptr) ||
 		      is_whirly(mptr) || verysmall(mptr) ||
 			  dmgtype(mptr, AD_CORR) || (dmgtype(mptr, AD_RUST) && mptr != &mons[PM_NAIAD] ) ||
 		      (slithy(mptr) && !bigmonst(mptr)));
@@ -899,16 +901,16 @@ static const char *immobile[4]	= { "wiggle", "Wiggle", "pulsate", "Pulsate" };
 static const char *crawl[4]	= { "crawl", "Crawl", "falter", "Falter" };
 
 const char *
-locomotion(ptr, def)
-const struct permonst *ptr;
+locomotion(mon, def)
+struct monst *mon;
 const char *def;
 {
 	int capitalize = (*def == highc(*def));
-
+	const struct permonst *ptr = mon->data;
 	return (
-		is_floater(ptr) ? levitate[capitalize] :
-		(is_flyer(ptr) && ptr->msize <= MZ_SMALL) ? flys[capitalize] :
-		(is_flyer(ptr) && ptr->msize > MZ_SMALL)  ? flyl[capitalize] :
+		is_floater_mon(mon) ? levitate[capitalize] :
+		(is_flyer_mon(mon) && ptr->msize <= MZ_SMALL) ? flys[capitalize] :
+		(is_flyer_mon(mon) && ptr->msize > MZ_SMALL)  ? flyl[capitalize] :
 		slithy(ptr)     ? slither[capitalize] :
 		amorphous(ptr)  ? ooze[capitalize] :
 		!ptr->mmove	? immobile[capitalize] :
@@ -919,16 +921,16 @@ const char *def;
 }
 
 const char *
-stagger(ptr, def)
-const struct permonst *ptr;
+stagger(mon, def)
+struct monst *mon;
 const char *def;
 {
 	int capitalize = 2 + (*def == highc(*def));
-
+	const struct permonst *ptr = mon->data;
 	return (
-		is_floater(ptr) ? levitate[capitalize] :
-		(is_flyer(ptr) && ptr->msize <= MZ_SMALL) ? flys[capitalize] :
-		(is_flyer(ptr) && ptr->msize > MZ_SMALL)  ? flyl[capitalize] :
+		is_floater_mon(mon) ? levitate[capitalize] :
+		(is_flyer_mon(mon) && ptr->msize <= MZ_SMALL) ? flys[capitalize] :
+		(is_flyer_mon(mon) && ptr->msize > MZ_SMALL)  ? flyl[capitalize] :
 		slithy(ptr)     ? slither[capitalize] :
 		amorphous(ptr)  ? ooze[capitalize] :
 		!ptr->mmove	? immobile[capitalize] :

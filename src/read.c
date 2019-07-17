@@ -1932,7 +1932,7 @@ struct obj	*sobj;
 	    	    	    /* Find the monster here (won't be player) */
 	    	    	    mtmp = m_at(x, y);
 	    	    	    if (mtmp && !amorphous(mtmp->data) &&
-	    	    	    		!passes_walls(mtmp->data) &&
+	    	    	    		!passes_walls_mon(mtmp) &&
 	    	    	    		!noncorporeal(mtmp->data) &&
 	    	    	    		!unsolid(mtmp->data)) {
 				struct obj *helmet = which_armor(mtmp, W_ARMH);
