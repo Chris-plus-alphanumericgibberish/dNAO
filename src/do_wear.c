@@ -2218,8 +2218,13 @@ int base_uac()
 		uac -= 10;
 	uac -= u.uuur/2;
 	if(u.edenshield > moves) uac -= 7;
-	if(u.specialSealsActive&SEAL_BLACK_WEB && u.utrap && u.utraptype == TT_WEB)
-		 uac -= 8;
+	if(u.specialSealsActive&SEAL_BLACK_WEB && (
+		(u.utrap && u.utraptype == TT_WEB) ||
+		(t_at(u.ux, u.uy) && t_at(u.ux, u.uy)->ttyp == WEB && 
+			(webmaker(youracedata) || u.sealsActive&SEAL_CHUPOCLOPS || (uarm && uarm->oartifact==ART_SPIDERSILK)))
+	)
+	)
+			 uac -= 8;
 	if(u.specialSealsActive&SEAL_UNKNOWN_GOD && uwep && uwep->oartifact == ART_PEN_OF_THE_VOID) uac -= 2*uwep->spe;
 	if(multi < 0){
 		dexbonus = -5;
