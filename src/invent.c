@@ -231,6 +231,7 @@ struct obj **potmp, **pobj;
 		    if (obj == MON_WEP(otmp->ocarry)) {
 			MON_WEP(otmp->ocarry) = otmp;
 			otmp->owornmask = W_WEP;
+			update_mon_intrinsics(mon, otmp, TRUE, FALSE);
 		    }
 		}
 #endif /*0*/
@@ -604,6 +605,17 @@ register struct obj *obj;
 	freeinv_core(obj);
 	update_inventory();
 }
+
+/* remove an object from a monster's inventory */
+void
+m_freeinv(obj)
+struct obj* obj;
+{
+	extract_nobj(obj, &obj->ocarry->minvent);
+	update_mon_intrinsics(obj->ocarry, obj, FALSE, FALSE);
+	return;
+}
+
 
 void
 delallobj(x, y)
