@@ -2775,10 +2775,14 @@ const char *fmt, *str;
 	    if (fmt && str)
 	    	pline(fmt, str, "scales");
 	    return TRUE;
-	} else if (u.sealsActive&SEAL_EDEN) {
+	} else if (u.sealsActive&SEAL_EDEN || species_reflects(&youmonst)) {
 	    if (fmt && str)
-	    	pline(fmt, str, "skin");
+			pline(fmt, str, mbodypart(&youmonst, BODY_SKIN));
 	    return TRUE;
+	} else if (u.usteed && u.usteed->misc_worn_check & W_SADDLE  && which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) {
+		if (fmt && str)
+			pline(fmt, str, "steed's saddle");
+		return TRUE;
 	} else if (EReflecting) {
 	    /* Catchall */
 	    if (fmt && str)
