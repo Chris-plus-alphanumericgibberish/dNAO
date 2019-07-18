@@ -2882,7 +2882,6 @@ E int FDECL(full_mac, (struct monst *));
 E int FDECL(full_marmorac, (struct monst *));
 E int FDECL(base_mdr, (struct monst *));
 E int FDECL(roll_mdr, (struct monst *, struct monst *));
-E int FDECL(m_wearing_white_DSA, (struct monst *));
 E void FDECL(m_dowear, (struct monst *,BOOLEAN_P));
 E struct obj *FDECL(which_armor, (struct monst *,long));
 E void FDECL(mon_break_armor, (struct monst *,BOOLEAN_P));
