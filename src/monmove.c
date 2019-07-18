@@ -1365,7 +1365,8 @@ toofar:
 			mon_ranged_gazeonly = 1;//State variable
 			res = (mtmp2 == &youmonst) ? mattacku(mtmp)
 		                           : mattackm(mtmp, mtmp2);
-	        if (res & MM_AGR_DIED) return 1; /* Oops. */
+			/* note: mattacku and mattackm have different returns */
+			if ((mtmp2 == &youmonst) ? (res == 1) : (res & MM_AGR_DIED)) return 1; /* Oops. */
 
 			if(!(mon_ranged_gazeonly))
 				return 0; /* that was our move for the round */
