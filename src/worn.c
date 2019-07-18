@@ -367,9 +367,18 @@ struct obj *obj;	/* item to make known if effect can be seen */
 	break;
     }
 
-    for (otmp = mon->minvent; otmp; otmp = otmp->nobj)
-	if (otmp->owornmask && objects[otmp->otyp].oc_oprop == FAST)
-	    break;
+	for (otmp = mon->minvent; otmp; otmp = otmp->nobj)
+	{
+		boolean got_prop = FALSE;
+		if (otmp->owornmask)
+		{
+			int i = 0;
+			int * property_list = item_property_list(otmp, otmp->otyp);
+			while (property_list[i] && !(got_prop = (property_list[i] == FAST))) i++;
+		}
+		if (got_prop)
+			break;
+	}
     if (otmp)		/* speed boots */
 	mon->mspeed = MFAST;
     else
