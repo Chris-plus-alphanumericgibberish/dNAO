@@ -1437,17 +1437,108 @@ boolean polyspot;
 }
 
 /* bias a monster's preferences towards armor that has special benefits. */
-/* currently only does speed boots, but might be expanded if monsters get to
-   use more armor abilities */
 int
 extra_pref(mon, obj)
 struct monst *mon;
 struct obj *obj;
 {
-    if (obj) {
-	if (obj->otyp == SPEED_BOOTS && mon->permspeed != MFAST)
-	    return 20;
-    }
+	if (!obj)
+		return 0;
+
+	/* specific item types that are more than their oc_oprop */
+	switch (obj->otyp)
+	{
+		/* gloves */
+	case GAUNTLETS_OF_POWER:
+		return 2;
+		break;
+	case GAUNTLETS_OF_DEXTERITY:
+		return (obj->spe / 2);
+		break;
+		/* cloaks */
+	case ALCHEMY_SMOCK:
+		if (!resists_acid(mon) || !resists_poison(mon))
+			return 5;
+		break;
+	case MUMMY_WRAPPING:
+		if (mon->data->mlet == S_MUMMY)
+			return 30;
+		else if (mon->mtame && mon->minvis && !See_invisible_old)
+			return 10;
+		else if (mon->minvis)
+			return -5;
+		break;
+	}
+
+	/* oc_oprop -- does not include extra properties
+	 * such as the alchemy smock or object properties */
+	switch (objects[obj->otyp].oc_oprop)
+	{
+	case ANTIMAGIC:
+		if (!resists_magm(mon))
+			return 20;
+		break;
+	case REFLECTING:
+		if (!mon_reflects(mon, (char *)0))
+			return 18;
+		break;
+	case FAST:
+		if (mon->permspeed != MFAST)
+			return 15;
+		break;
+	case FLYING:
+		if (!mon_resistance(mon, FLYING))
+			return 10;
+		break;
+	case DISPLACED:
+		if (!mon_resistance(mon, DISPLACED))
+			return 8;
+		break;
+	case STONE_RES:
+		if (!resists_ston(mon))
+			return 7;
+		break;
+	case SICK_RES:
+		if (!resists_sickness(mon))
+			return 5;
+		break;
+	case FIRE_RES:
+		if (!resists_fire(mon))
+			return 3;
+	case COLD_RES:
+		if (!resists_cold(mon))
+			return 3;
+	case SHOCK_RES:
+		if (!resists_elec(mon))
+			return 3;
+	case ACID_RES:
+		if (!resists_acid(mon))
+			return 3;
+	case POISON_RES:
+		if (!resists_poison(mon))
+			return 3;
+	case SLEEP_RES:
+		if (!resists_sleep(mon))
+			return 3;
+	case DRAIN_RES:
+		if (!resists_drli(mon))
+			return 3;
+		break;
+	case TELEPAT:
+		if (!mon_resistance(mon, TELEPAT))
+			return 1;
+		break;
+	case FUMBLING:
+		return -20;
+		break;
+	/* pets prefer not to wear items that make themselves invisible to you */
+	case INVIS:
+		if (mon->mtame && !See_invisible_old)
+			return -20;
+		else if (!mon->minvis)
+			return 5;
+		break;
+	}
     return 0;
 }
 
