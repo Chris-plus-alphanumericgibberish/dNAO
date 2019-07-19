@@ -24,6 +24,7 @@ STATIC_DCL boolean FDECL(maze_inbounds, (XCHAR_P, XCHAR_P));
 STATIC_DCL void FDECL(move, (int *,int *,int));
 STATIC_DCL void NDECL(setup_waterlevel);
 STATIC_DCL void NDECL(unsetup_waterlevel);
+STATIC_DCL void NDECL(fill_dungeon_of_ill_regard);
 
 
 STATIC_OVL boolean
@@ -239,9 +240,12 @@ bad_location(x, y, lx, ly, hx, hy)
 {
     return((boolean)(occupied(x, y) ||
 	   within_bounded_area(x,y, lx,ly, hx,hy) ||
-	   !((levl[x][y].typ == CORR && level.flags.is_maze_lev) ||
+	   !((levl[x][y].typ == CORR && (level.flags.is_maze_lev || level.flags.is_cavernous_lev)) ||
 		   (Is_waterlevel(&u.uz) && levl[x][y].typ == MOAT) ||
-	       levl[x][y].typ == ROOM || levl[x][y].typ == AIR)));
+	       levl[x][y].typ == ROOM || 
+	       levl[x][y].typ == GRASS || 
+	       levl[x][y].typ == SOIL || 
+	       levl[x][y].typ == AIR)));
 }
 
 /* pick a location in area (lx, ly, hx, hy) but not in (nlx, nly, nhx, nhy) */
@@ -493,6 +497,17 @@ fixup_special()
 	/* ALIGNMENT QUESTS */
 	/* LAW QUEST: features */
 	if (In_law(&u.uz)){
+		/*Convert the room squares left by mazewalk to grass prior to placing shops*/
+		if (Is_arcadia_woods(&u.uz)){
+			for (x = 0; x<COLNO; x++){
+				for (y = 0; y<ROWNO; y++){
+					if (levl[x][y].typ == ROOM && (x<69 || !Is_arcadia3(&u.uz))) levl[x][y].typ = GRASS;
+				}
+			}
+		}
+		if (Is_illregrd(&u.uz)){
+			fill_dungeon_of_ill_regard();
+		}
 		place_law_features();
 	}
 	/* NEUTRAL QUEST: various features */
@@ -1807,7 +1822,7 @@ water_friction()
 	if (Swimming && rn2(4))
 		return;		/* natural swimmers have advantage */
 
-    if (uarmf && uarmf->otyp == IRON_SHOES) return; /* iron boots let you walk on the seafloor (Zelda) */
+    if (uarmf && uarmf->otyp == SHOES) return; /* iron boots let you walk on the seafloor (Zelda) */
 
 	if (u.dx && !rn2(!u.dy ? 3 : 6)) {	/* 1/3 chance or half that */
 		/* cancel delta x and choose an arbitrary delta y value */
@@ -2138,8 +2153,7 @@ boolean ini;
 		    int ux0 = u.ux, uy0 = u.uy;
 
 		    /* change u.ux0 and u.uy0? */
-		    u.ux = cons->x;
-		    u.uy = cons->y;
+			u_on_newpos(cons->x, cons->y);
 		    newsym(ux0, uy0);	/* clean up old position */
 
 		    if (MON_AT(cons->x, cons->y)) {
@@ -2183,4 +2197,92 @@ boolean ini;
 	}
 }
 
+STATIC_DCL void
+fill_dungeon_of_ill_regard(){
+	int corrs = 0, all = 0, med = 0, strong = 0;
+	int i = 0, j = 0;
+	int x = 0, y = 0;
+	int *skips;
+	struct monst *mon;
+	struct trap *trap;
+	for (x = 0; x<COLNO; x++){
+		for (y = 0; y<ROWNO; y++){
+			if (isok(x,y) && levl[x][y].typ == CORR) corrs++;
+		}
+	}
+	for(i = 0; i < PM_LONG_WORM_TAIL ; i++){
+		if(mons[i].geno&(G_NOGEN|G_UNIQ) || mvitals[i].mvflags&G_GONE || mons[i].mlet == S_PLANT)
+			continue;
+		if(mons[i].maligntyp < -10)
+			strong++;
+		if(mons[i].maligntyp < -5)
+			med++;
+		if(mons[i].maligntyp < 0){
+			all++;
+			// pline("%s", mons[i].mname);
+		}
+	}
+	// pline("Cells: %d, All: %d, Medium: %d, Strong: %d", corrs, all, med-strong, strong);
+	skips = (int *)malloc(sizeof(int)*all);
+	for(i = 0; i<all; i++){
+		if(i < corrs)
+			skips[i] = 0;
+		else skips[i] = 1;
+	}
+	for(i = 0; i<all; i++){
+		j = rn2(all); //swap pos i with pos j
+		x = skips[i]; //keep old value of pos i
+		skips[i] = skips[j];
+		skips[j] = x;
+	}
+#define LOOP_BODY	\
+			if(isok(x,y) && levl[x][y].typ == CORR){\
+				while(i < PM_LONG_WORM_TAIL \
+				&& (mons[i].maligntyp >= 0 || (mons[i].geno&(G_NOGEN|G_UNIQ)) || mvitals[i].mvflags&G_GONE || mons[i].mlet == S_PLANT || skips[j])){\
+					if(mons[i].maligntyp < 0 && !(mons[i].geno&(G_NOGEN|G_UNIQ)) && !(mvitals[i].mvflags&G_GONE) && mons[i].mlet != S_PLANT) j++;\
+					i++;\
+				}\
+				if(i < PM_LONG_WORM_TAIL){\
+					mon = makemon(&mons[i], x, y, NO_MINVENT);\
+					trap = maketrap(x, y, VIVI_TRAP);\
+					trap->tseen = TRUE;\
+					if(!mon) impossible("bad monster placement at %d, %d.", x, y);\
+					else {\
+						mon->mtrapped = 1;\
+						mon->movement = 0;\
+						mon->mhp = 1;\
+					}\
+					i++;\
+					j++;\
+				} else {\
+					x = COLNO;\
+					y = ROWNO;\
+					break;\
+				}\
+			}
+
+	i = 0;
+	j = 0;
+	for (y = 0; y<ROWNO/2; y++){
+		for (x = 2*y+1; x<COLNO-2*y-1; x++){
+			LOOP_BODY
+		}
+	}
+	for (x = COLNO; x>COLNO/2; x--){
+		for (y = (COLNO-x-1); y<(ROWNO-(COLNO-x-1)); y++){
+			LOOP_BODY
+		}
+	}
+	for (y = ROWNO; y>ROWNO/2; y--){
+		for (x = COLNO-2*(ROWNO-y); x>=2*(ROWNO-y); x--){
+			LOOP_BODY
+		}
+	}
+	for (x = 0; x<COLNO/2; x++){
+		for (y = ROWNO-(x-1); y>=((x-1)); y--){
+			LOOP_BODY
+		}
+	}
+	free(skips);
+}
 /*mkmaze.c*/

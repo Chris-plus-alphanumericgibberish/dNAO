@@ -232,7 +232,7 @@ const struct shclass shtypes[] = {
 	    {{90, SPBOOK_CLASS}, {10, SCROLL_CLASS}, {0, 0}}, shkbooks},
 #ifdef BARD
 	{"music shop", TOOL_CLASS, 3, D_SHOP,
-	    {{32, -WOODEN_FLUTE}, {32, -WOODEN_HARP}, {32, -LEATHER_DRUM}, 
+	    {{32, -FLUTE}, {32, -HARP}, {32, -DRUM}, 
 	     {2, -MAGIC_HARP}, {2, -MAGIC_FLUTE}},
 	     shkmusic},
 #endif
@@ -242,7 +242,7 @@ const struct shclass shtypes[] = {
 	 */
 	{"lighting store", TOOL_CLASS, 0, D_SHOP,
 	    {{32, -WAX_CANDLE}, {50, -TALLOW_CANDLE},
-	     {5, -BRASS_LANTERN}, {10, -OIL_LAMP}, {3, -MAGIC_LAMP}}, shklight},
+	     {5, -LANTERN}, {10, -OIL_LAMP}, {3, -MAGIC_LAMP}}, shklight},
 	{(char *)0, 0, 0, 0, {{0, 0}, {0, 0}, {0, 0}}, 0}
 };
 
@@ -284,7 +284,7 @@ const int valavi_armors[] = {
 	SPLINT_MAIL,
 	BANDED_MAIL,
 	KITE_SHIELD,
-	LEATHER_CLOAK,
+	CLOAK,
 	LEATHER_ARMOR,
 	ROBE,
 	CLOAK_OF_PROTECTION,
@@ -723,6 +723,10 @@ struct obj *obj;
 			&& shp->iprobs[i].itype == WEAPON_CLASS 
 			&& is_weptool(obj)
 		) return TRUE;
+
+		if (obj->obj_material == GEMSTONE
+			&& shp->iprobs[i].itype == GEM_CLASS)
+			return TRUE;
 	}
     /* not found */
     return FALSE;

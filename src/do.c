@@ -159,7 +159,7 @@ const char *verb;
 				vtense((const char *)0, verb),
 				(mtmp) ? "" : " with you");
 		    if (mtmp) {
-			if (!passes_walls(mtmp->data) &&
+			if (!mon_resistance(mtmp,PASSES_WALLS) &&
 				!throws_rocks(mtmp->data)) {
 			    if (hmon(mtmp, obj, TRUE) && !is_whirly(mtmp->data))
 				return FALSE;	/* still alive */
@@ -877,7 +877,7 @@ dodown()
 	}
 
 	if (trap)
-	    You("%s %s.", locomotion(youracedata, "jump"),
+	    You("%s %s.", locomotion(&youmonst, "jump"),
 		trap->ttyp == HOLE ? "down the hole" : "through the trap door");
 
 	if (trap && Is_stronghold(&u.uz)) {
@@ -1787,7 +1787,7 @@ int different;
 		        Strcpy(sackname, an(xname(container)));
 	   		pline("%s %s out of %s in your pack!",
 	   			Blind ? Something : Amonnam(mtmp),
-				locomotion(mtmp->data,"writhes"),
+				locomotion(mtmp,"writhes"),
 	   			sackname);
 	   	} else if (container_where == OBJ_FLOOR && container &&
 		            cansee(mtmp->mx, mtmp->my)) {
@@ -2170,6 +2170,34 @@ donull()
 			if(u.mh == u.mhmax){
 				You("complete your repairs.");
 				lastreped = -13;
+				stop_occupation();
+				occupation = 0; /*redundant failsafe? why doesn't stop_occupation work?*/
+			}
+		} else if(u.sealsActive&SEAL_EURYNOME && ++u.eurycounts>5) unbind(SEAL_EURYNOME,TRUE);
+	} else if(uandroid){
+		if(!Upolyd && u.uhp<u.uhpmax && u.uen > 0){
+			u.uhp += u.ulevel/3+1;
+			flags.botl = 1;
+			u.uen--;
+			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
+				u.uhp++;
+			}
+			if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
+			if(u.uhp == u.uhpmax){
+				You("finish regenerating.");
+				stop_occupation();
+				occupation = 0; /*redundant failsafe? why doesn't stop_occupation work?*/
+			}
+		} else if(Upolyd && u.mh<u.mhmax && u.uen > 0){
+			u.mh += u.ulevel/3+1;
+			flags.botl = 1;
+			u.uen--;
+			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
+				u.uhp++;
+			}
+			if(u.mh > u.mhmax) u.mh = u.mhmax;
+			if(u.mh == u.mhmax){
+				You("finish regenerating.");
 				stop_occupation();
 				occupation = 0; /*redundant failsafe? why doesn't stop_occupation work?*/
 			}

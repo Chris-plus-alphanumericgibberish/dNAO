@@ -33,7 +33,7 @@ boolean undirected;
 
 	    if (undirected)
 		point_msg = "all around, then curses";
-	    else if ((Invis && !perceives(mtmp->data) &&
+	    else if ((Invis && !mon_resistance(mtmp,SEE_INVIS) &&
 			(mtmp->mux != u.ux || mtmp->muy != u.uy)) ||
 		    (youmonst.m_ap_type == M_AP_OBJECT &&
 			youmonst.mappearance == STRANGE_OBJECT) ||
@@ -1084,7 +1084,10 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	int dmd, dmn;
 	struct obj *mirror;
 
-	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(mon_resistance(mtmp, NULLMAGIC)) return 0;
+
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return 0;
+	
 	if(is_derived_undead_mon(mtmp) && mtmp->mfaction != FRACTURED) return 0;
 	/* Three cases:
 	 * -- monster is attacking you.  Search for a useful spell.
@@ -1182,7 +1185,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	    pline("%s casts a spell%s!",
 		  canspotmon(mtmp) ? Monnam(mtmp) : "Something",
 		  is_undirected_spell(spellnum) ? "" :
-		  (Invisible && !perceives(mtmp->data) && 
+		  (Invisible && !mon_resistance(mtmp,SEE_INVIS) && 
 		   (mtmp->mux != u.ux || mtmp->muy != u.uy)) ?
 		  " at a spot near you" :
 		  (Displaced && (mtmp->mux != u.ux || mtmp->muy != u.uy)) ?
@@ -1228,6 +1231,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	    dmg = d(dmn, dmd);
 	}
 	if (Half_spell_damage && !is_aoe_spell(spellnum)) dmg = (dmg+1) / 2;
+	if(u.uvaul_duration && !is_aoe_spell(spellnum)) dmg = (dmg + 1) / 2;
 
 	ret = 1;
 
@@ -1265,7 +1269,7 @@ elec_spell:
 			pline("But you resist the effects.");
 			dmg = 0;
 		}
-		if(!EShock_resistance){
+		if(!InvShock_resistance){
 			destroy_item(WAND_CLASS, AD_ELEC);
 			if(!rn2(10)) destroy_item(RING_CLASS, AD_ELEC);
 		}
@@ -1280,7 +1284,7 @@ fire_spell:
 			pline("But you resist the effects.");
 			dmg = 0;
 		}
-		if(!EFire_resistance) {
+		if(!InvFire_resistance) {
 			destroy_item(POTION_CLASS, AD_FIRE);
 			if(!rn2(6)) destroy_item(SCROLL_CLASS, AD_FIRE);
 			if(!rn2(10)) destroy_item(SPBOOK_CLASS, AD_FIRE);
@@ -1296,7 +1300,7 @@ cold_spell:
 			pline("But you resist the effects.");
 			dmg = 0;
 		}
-		if(!ECold_resistance) destroy_item(POTION_CLASS, AD_COLD);
+		if(!InvCold_resistance) destroy_item(POTION_CLASS, AD_COLD);
 		stop_occupation();
 		break;
 	    case AD_MAGM:
@@ -1315,6 +1319,7 @@ cold_spell:
 		if(hates_silver(youracedata)) dmg += d(dmn,20);
 		dmg -= roll_udr(mtmp);
 		if(Half_physical_damage) dmg /= 2;
+		if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 		if(dmg < 1) dmg = 1;
 		stop_occupation();
 		break;
@@ -1427,16 +1432,17 @@ int spellnum;
                    (old ? "even more " : ""));
            make_blinded(Blinded + (long)u.ucreamed - old, FALSE);
        }
-       You("smell putrid!%s", !uclockwork?" You gag and vomit.":"");
-		if (!uclockwork) vomit();
+       You("smell putrid!%s", !umechanoid?" You gag and vomit.":"");
+		if (!umechanoid) vomit();
 		/* same effect as "This water gives you bad breath!" */
 		for(mtmp2 = fmon; mtmp2; mtmp2 = mtmp2->nmon) {
 			if(!DEADMONSTER(mtmp2) && (mtmp2 != mtmp))
 			monflee(mtmp2, 0, FALSE, FALSE);
 		}
-		if(!Sick && !uclockwork) make_sick((long)rn1(ACURR(A_CON), 20), /* Don't make the PC more sick */
+		if(!Sick && !umechanoid) make_sick((long)rn1(ACURR(A_CON), 20), /* Don't make the PC more sick */
 								(char *)0, TRUE, SICK_NONVOMITABLE);
 		dmg = rnd(Half_physical_damage ? 5 : 10);
+		if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 		stop_occupation();
 	break;
 	}
@@ -1494,7 +1500,7 @@ int spellnum;
 	   stop_occupation();
      break;
      case PLAGUE:
-       if (!Sick_resistance && !uclockwork) {
+       if (!Sick_resistance && !umechanoid) {
           You("are afflicted with disease!");
            make_sick(Sick ? Sick/3L + 1L : (long)rn1(ACURR(A_CON), 20),
                         (char *)0, TRUE, SICK_NONVOMITABLE);
@@ -1551,7 +1557,7 @@ int spellnum;
 				pline("It feels mildly uncomfortable.");
 				dmg = 0;
 			} 
-			if (!EAcid_resistance) {
+			if (!InvAcid_resistance) {
 				destroy_item(POTION_CLASS, AD_FIRE);
 			}
 			erode_obj(uwep, TRUE, FALSE);
@@ -1600,6 +1606,7 @@ int spellnum;
 			pline("Good thing you're wearing mud boots!");
 		else water_damage(invent, FALSE, FALSE, FALSE, &youmonst);
 		if (Half_physical_damage) dmg = (dmg + 1) / 2;
+		if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 	}
 	stop_occupation();
 	}break;
@@ -1611,12 +1618,13 @@ int spellnum;
 	} else{
 	    dmg = d(8, 6);
 	}
-	if (!EFire_resistance) {
+	if (!InvFire_resistance) {
 		destroy_item(SCROLL_CLASS, AD_FIRE);
 		destroy_item(POTION_CLASS, AD_FIRE);
 		destroy_item(SPBOOK_CLASS, AD_FIRE);
 	}
 	if (Half_spell_damage) dmg = (dmg + 1) / 2;
+	if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 	burn_away_slime();
 	(void) burnarmor(&youmonst);
 	(void) burn_floor_paper(u.ux, u.uy, TRUE, FALSE);
@@ -1639,7 +1647,8 @@ int spellnum;
 	} else {
 	    dmg += Half_spell_damage ? (d(4, 8)+1)/2 : d(4, 8);
 	}
-	if (!ECold_resistance) {
+	if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+	if (!InvCold_resistance) {
 		destroy_item(POTION_CLASS, AD_COLD);
 	}
 	stop_occupation();
@@ -1665,7 +1674,8 @@ int spellnum;
 		} else {
 			dmg += Half_spell_damage ? (hfdmg+1)/2 : hfdmg;
 		}
-		if (!ECold_resistance) {
+		if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+		if (!InvCold_resistance) {
 			if(hfdmg > rnd(20)) destroy_item(POTION_CLASS, AD_COLD);
 		}
 		stop_occupation();
@@ -1686,11 +1696,12 @@ int spellnum;
 			} else {
 				dmg = d(8, 6);
 			}
-			if (!(reflects || EShock_resistance)) {
+			if (!(reflects || InvShock_resistance)) {
 				destroy_item(WAND_CLASS, AD_ELEC);
 				destroy_item(RING_CLASS, AD_ELEC);
 			}
 			if (Half_spell_damage) dmg = (dmg + 1) / 2;
+			if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 			if (!resists_blnd(&youmonst)) {
 			   You("are blinded by the flash!");
 			   make_blinded((long)rnd(100),FALSE);
@@ -1920,8 +1931,9 @@ int spellnum;
 		stop_occupation();
 	break;
 	case MON_WARP:
-		if(Half_spell_damage) dmg /= 2;
-		if(Half_physical_damage) dmg /= 2;
+		if(Half_spell_damage) dmg = (dmg + 1) / 2;
+		if(Half_physical_damage) dmg = (dmg + 1) / 2;
+		if(u.uvaul_duration) dmg = (dmg + 1) / 4;
 		if(dmg > 100) dmg = 100;
 		pline("Space warps into deadly blades!");
 		stop_occupation();
@@ -2111,7 +2123,7 @@ summon_alien:
 
 	    /* messages not quite right if plural monsters created but
 	       only a single monster is seen */
-	    if (Invisible && !perceives(mtmp->data) &&
+	    if (Invisible && !mon_resistance(mtmp,SEE_INVIS) &&
 				    (mtmp->mux != u.ux || mtmp->muy != u.uy))
 		pline("%s around a spot near you!", mappear);
 	    else if (Displaced && (mtmp->mux != u.ux || mtmp->muy != u.uy))
@@ -2184,7 +2196,7 @@ summon_alien:
 	else if (let == S_SNAKE)
 	    pline("%s transforms a clump of sticks into snakes!",
 		Monnam(mtmp));
-	else if (Invisible && !perceives(mtmp->data) &&
+	else if (Invisible && !mon_resistance(mtmp,SEE_INVIS) &&
 				(mtmp->mux != u.ux || mtmp->muy != u.uy))
 	    pline("%s summons %s around a spot near you!",
 		Monnam(mtmp), let == S_SPIDER ? "arachnids" : "insects");
@@ -2267,6 +2279,7 @@ summon_alien:
 				
 			}
 			if (Half_physical_damage) tdmg = (tdmg + 1) / 2;
+			if(u.uvaul_duration) tdmg = (tdmg + 1) / 2;
 			dmg += tdmg;
        }
 		if(shienCount < otmp->quan){
@@ -2314,6 +2327,7 @@ summon_alien:
             newsym(u.ux, u.uy);
         }
        if (Half_physical_damage) dmg = (dmg + 1) / 2;
+	    if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 	   stop_occupation();
         break;
     }
@@ -2463,6 +2477,7 @@ summon_alien:
 	    You("suddenly feel weaker!");
 	    dmg = rnd(2);
 	    if (Half_spell_damage) dmg = (dmg + 1) / 2;
+	    if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 			losestr(dmg);
 	    if (u.uhp < 1 && mtmp)
 			done_in_by(mtmp);
@@ -2484,6 +2499,7 @@ summon_alien:
           int typ = rn2(A_MAX);
            dmg = rnd(4);
            if (Half_spell_damage) dmg = (dmg + 1) / 2;
+		   if(u.uvaul_duration) dmg = (dmg + 1) / 2;
            if (dmg < 1) dmg = 1;
           /* try for a random stat */
            if (adjattrib(typ, -dmg, -1)) {
@@ -2514,6 +2530,7 @@ drainhp:
 		dmg = mtmp ? rnd((int)mtmp->m_lev) : rnd(10);
 		You_hear("%s laugh menacingly as the world blurs around you...", mtmp ? mon_nam(mtmp) : "Someone");
 		if(Antimagic||Half_spell_damage) dmg = (dmg + 1) / ((Antimagic + Half_spell_damage) * 2);
+	    if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 		make_confused(HConfusion + dmg*10, FALSE);
 		make_stunned(HStun + dmg, FALSE);
 		make_hallucinated(HHallucination + dmg*15, FALSE, 0L);
@@ -2582,7 +2599,10 @@ ray:
 	    else if (Hallucination)
 		pline("Oh, bummer!  Everything is dark!  Help!");
 	    else pline("A cloud of darkness falls upon you.");
-	    make_blinded(Half_spell_damage ? 100L : 200L, FALSE);
+		dmg = 200;
+		if(Half_spell_damage) dmg = (dmg+1)/2;
+		if(u.uvaul_duration) dmg = (dmg + 1)/2;
+	    make_blinded((long)dmg, FALSE);
 	    if (!Blind) Your1(vision_clears);
 	    dmg = 0;
 	} else
@@ -2600,6 +2620,7 @@ ray:
 	    if (multi >= 0) You("are frozen in place!");
 	    dmg = min_ints(rnd(4), mtmp ? rnd((int)mtmp->m_lev) : rnd(30));
 	    if (Half_spell_damage) dmg = (dmg + 1) / 2;
+	    if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 	    nomul(-dmg, "paralyzed by a monster");
 	}
 	dmg = 0;
@@ -2614,6 +2635,7 @@ ray:
 
 	    dmg = rnd(10) + (mtmp ? rnd((int)mtmp->m_lev) : rnd(30));
 	    if (Half_spell_damage) dmg = (dmg + 1) / 2;
+	    if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 	    make_confused(HConfusion + dmg, TRUE);
 	    if (Hallucination)
 		You_feel("%s!", oldprop ? "trippier" : "trippy");
@@ -2633,6 +2655,7 @@ ray:
            You(Stunned ? "struggle to keep your balance." : "reel...");
            dmg = d(ACURR(A_DEX) < 12 ? 2 : 1, 4);
            if (Half_spell_damage) dmg = (dmg + 1) / 2;
+		   if(u.uvaul_duration) dmg = (dmg + 1) / 2;
            make_stunned(HStun + dmg, FALSE);
        }
        dmg = 0;
@@ -3128,7 +3151,7 @@ int spellnum;
 	    return TRUE;
        /* make visible spell by spellcaster with see invisible. */
        /* also won't cast it if your invisibility isn't intrinsic. */
-	if ((!(HInvis & INTRINSIC) || perceives(mtmp->data))
+	if ((!(HInvis & INTRINSIC) || mon_resistance(mtmp,SEE_INVIS))
 		   && spellnum == MAKE_VISIBLE)
 		return TRUE;
 	/* blindness spell on blinded player */
@@ -3153,7 +3176,7 @@ castmm(mtmp, mdef, mattk)
 	int dmd, dmn;
 	struct obj *mirror;
 
-	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my)&& t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return 0;
 	
 	if ((mattk->adtyp == AD_SPEL || mattk->adtyp == AD_CLRC) && ml) {
 	    int cnt = 40;
@@ -3371,7 +3394,11 @@ int spellnum;
 	if (mtmp->permspeed == MFAST && spellnum == HASTE_SELF)
 	    return TRUE;
 	/* invisibility when already invisible */
-	if ((mtmp->minvis || mtmp->invis_blkd) && spellnum == DISAPPEAR)
+	if ((mtmp->minvis 
+			|| mtmp->invis_blkd
+			|| (mtmp->mtame && !See_invisible_old)
+		) && spellnum == DISAPPEAR
+	)
 	    return TRUE;
 	/* healing when already healed */
 	if (mtmp->mhp == mtmp->mhpmax && spellnum == CURE_SELF)

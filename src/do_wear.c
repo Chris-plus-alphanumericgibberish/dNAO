@@ -99,9 +99,11 @@ Boots_on()
 
     switch(uarmf->otyp) {
 	case LOW_BOOTS:
-	case IRON_SHOES:
+	case SHOES:
 	case ARMORED_BOOTS:
+	case ARCHAIC_BOOTS:
 	case HIGH_BOOTS:
+	case HEELED_BOOTS:
 	case PLASTEEL_BOOTS:
 	case CRYSTAL_BOOTS:
 	case JUMPING_BOOTS:
@@ -132,7 +134,7 @@ Boots_on()
 			incr_itimeout(&HFumbling, rnd(20));
 		break;
 	case FLYING_BOOTS:
-		if (!oldprop && !(is_flyer(youracedata) || (u.usteed && is_flyer(u.usteed->data))) && !HLevitation) {
+		if (!oldprop && !(mon_resistance(&youmonst,FLYING) || (u.usteed && mon_resistance(u.usteed,FLYING))) && !HLevitation) {
 			makeknown(uarmf->otyp);
 			float_up();
 			spoteffects(FALSE);
@@ -186,15 +188,17 @@ Boots_off()
 			HFumbling = EFumbling = 0;
 		break;
 	case FLYING_BOOTS:
-		if (!oldprop && !is_flyer(youracedata) && !(u.usteed && is_flyer(u.usteed->data)) && !Levitation && !cancelled_don) {
+		if (!oldprop && !mon_resistance(&youmonst,FLYING) && !(u.usteed && mon_resistance(u.usteed,FLYING)) && !Levitation && !cancelled_don) {
 			(void) float_down(0L, 0L);
 			makeknown(otyp);
 		}
 		break;
 	case LOW_BOOTS:
-	case IRON_SHOES:
+	case SHOES:
 	case ARMORED_BOOTS:
+	case ARCHAIC_BOOTS:
 	case HIGH_BOOTS:
+	case HEELED_BOOTS:
 	case PLASTEEL_BOOTS:
 	case CRYSTAL_BOOTS:
 	case JUMPING_BOOTS:
@@ -228,7 +232,7 @@ Cloak_on()
 	case DWARVISH_CLOAK:
 	case CLOAK_OF_MAGIC_RESISTANCE:
 	case ROBE:
-	case LEATHER_CLOAK:
+	case CLOAK:
 	case LEO_NEMAEUS_HIDE:
 	case WHITE_FACELESS_ROBE:
 	case BLACK_FACELESS_ROBE:
@@ -304,7 +308,7 @@ Cloak_off()
 	case CLOAK_OF_DISPLACEMENT:
 	case OILSKIN_CLOAK:
 	case ROBE:
-	case LEATHER_CLOAK:
+	case CLOAK:
 	case LEO_NEMAEUS_HIDE:
 	case WHITE_FACELESS_ROBE:
 	case BLACK_FACELESS_ROBE:
@@ -363,7 +367,7 @@ Helmet_on()
 	case SEDGE_HAT:
 	case WAR_HAT:
 	case ELVEN_HELM:
-	case BRONZE_HELM:
+	case ARCHAIC_HELM:
 	case LEATHER_HELM:
 	case HIGH_ELVEN_HELM:
 	case DWARVISH_HELM:
@@ -441,7 +445,7 @@ Helmet_off()
 	case SEDGE_HAT:
 	case WAR_HAT:
 	case ELVEN_HELM:
-	case BRONZE_HELM:
+	case ARCHAIC_HELM:
 	case LEATHER_HELM:
 	case HIGH_ELVEN_HELM:
 	case DWARVISH_HELM:
@@ -496,10 +500,11 @@ Gloves_on()
 
     switch(uarmg->otyp) {
 	case GLOVES:
+	case LONG_GLOVES:
 	case HIGH_ELVEN_GAUNTLETS:
 	case GAUNTLETS:
 	case HARMONIUM_GAUNTLETS:
-	case BRONZE_GAUNTLETS:
+	case ARCHAIC_GAUNTLETS:
 	case CRYSTAL_GAUNTLETS:
 	case PLASTEEL_GAUNTLETS:
 	case ORIHALCYON_GAUNTLETS:
@@ -530,10 +535,11 @@ Gloves_off()
 
     switch(uarmg->otyp) {
 	case GLOVES:
+	case LONG_GLOVES:
 	case HIGH_ELVEN_GAUNTLETS:
 	case GAUNTLETS:
 	case HARMONIUM_GAUNTLETS:
-	case BRONZE_GAUNTLETS:
+	case ARCHAIC_GAUNTLETS:
 	case CRYSTAL_GAUNTLETS:
 	case PLASTEEL_GAUNTLETS:
 	case ORIHALCYON_GAUNTLETS:
@@ -928,7 +934,7 @@ register struct obj *obj;
 #endif
 
 		if (Invis && !oldprop && !HSee_invisible &&
-				!perceives(youracedata) && !Blind) {
+				!mon_resistance(&youmonst,SEE_INVIS) && !Blind) {
 		    newsym(u.ux,u.uy);
 		    pline("Suddenly you are transparent, but there!");
 		    makeknown(RIN_SEE_INVISIBLE);
@@ -1869,13 +1875,13 @@ doputon()
 			if (ublindf->otyp == TOWEL)
 				Your("%s is already covered by a towel.",
 					body_part(FACE));
-			else if (ublindf->otyp == BLINDFOLD) {
+			else if (ublindf->otyp == BLINDFOLD || ublindf->otyp == ANDROID_VISOR) {
 				if (otmp->otyp == LENSES)
 					already_wearing2("lenses", "a blindfold");
 				else
 					already_wearing("a blindfold");
 			} else if (ublindf->otyp == LENSES) {
-				if (otmp->otyp == BLINDFOLD)
+				if (otmp->otyp == BLINDFOLD || otmp->otyp == ANDROID_VISOR)
 					already_wearing2("a blindfold", "some lenses");
 				else
 					already_wearing("some lenses");
@@ -1884,7 +1890,8 @@ doputon()
 			return(0);
 		}
 		if (otmp->otyp != MASK && otmp->otyp != R_LYEHIAN_FACEPLATE && 
-			otmp->otyp != BLINDFOLD && otmp->otyp != TOWEL && otmp->otyp != LENSES
+			otmp->otyp != BLINDFOLD && otmp->otyp != ANDROID_VISOR && 
+			otmp->otyp != TOWEL && otmp->otyp != LENSES
 		) {
 			You_cant("wear that!");
 			return(0);
@@ -1912,28 +1919,75 @@ struct obj * otmp;
 	return arm_ac_bonus(otmp) + arm_dr_bonus(otmp);
 }
 
+int
+greatest_erosion(otmp)
+struct obj * otmp;
+{
+	int greatest = 0;
+	if(otmp->oeroded > greatest) greatest = (int) otmp->oeroded;
+	if(otmp->oeroded2 > greatest) greatest = (int) otmp->oeroded2;
+	if(otmp->oeroded3 > greatest) greatest = (int) otmp->oeroded3;
+	
+	return greatest;
+}
+
+/* 
+ * Material defense bonuses are multiplicative to the armor's base
+ * protection. Slots other than body armor see little or no change
+ * in their effectiveness, and even body armor tends to only change
+ * by +- 1 AC and DR. Partly, this is due to most commonly-subsititable
+ * materials being very close in their defense ratings; see decl.c
+ */
+int
+material_def_bonus(otmp, def)
+struct obj * otmp;
+int def;
+{
+	int curr = materials[otmp->obj_material].defense;
+	int base = materials[objects[otmp->otyp].oc_material].defense;
+	return ((def * curr) + base / 2) / base - def;
+}
+
 int arm_ac_bonus(otmp)
 struct obj * otmp;
 {
+	/* no armor, no defense! */
+	if (!otmp)
+		return 0;
+
 	int def = objects[otmp->otyp].a_ac;
 	
-	// reduce by erosion
-	def -= min((int)greatest_erosion(otmp), objects[otmp->otyp].a_ac);
+	// add material bonus
+	def += material_def_bonus(otmp, def);
 
+	// reduce by erosion
+	def -= min((int)greatest_erosion(otmp), def);
+
+	// cloak of protection's magic is not reduced by erosion or multiplied by mat
+	if (otmp->otyp == CLOAK_OF_PROTECTION)
+		def += 2;
 	// combat boots
 	static int cbootsd = 0;
 	if (!cbootsd) cbootsd = find_cboots();
 	if (otmp->otyp == cbootsd) def += 1;
 
 	// add enchantment
-	// crystal armor bonus enchantment
-	if (otmp->otyp == CRYSTAL_PLATE_MAIL)	def += otmp->spe;
-	else if (otmp->otyp == CRYSTAL_HELM)			def += otmp->spe;
-	else if (otmp->otyp == CRYSTAL_BOOTS)		def += otmp->spe;
-	else if (otmp->otyp == CRYSTAL_SHIELD)		def += 1.5*otmp->spe;
-	else if (otmp->otyp == CRYSTAL_GAUNTLETS)	def += otmp->spe;
-	else if (is_shield(otmp)) def += otmp->spe;
-	else def += (otmp->spe)/2;
+	if (otmp->spe)
+	{
+		int spemult = 6; // out of 12
+		// shields get full enchantment to AC
+		if (is_shield(otmp))
+			spemult += 6;
+		// crystal armor bonus enchantment
+		if (otmp->otyp == CRYSTAL_PLATE_MAIL ||
+			otmp->otyp == CRYSTAL_HELM ||
+			otmp->otyp == CRYSTAL_BOOTS ||
+			otmp->otyp == CRYSTAL_SHIELD ||
+			otmp->otyp == CRYSTAL_GAUNTLETS)
+			spemult += 3;
+
+		def += (otmp->spe * spemult + 0) / 12;
+	}
 
 	// artifact bonus def
 	switch (otmp->oartifact)
@@ -1969,14 +2023,24 @@ int
 arm_dr_bonus(otmp)
 struct obj * otmp;
 {
+	/* no armor, no defense! */
+	if (!otmp)
+		return 0;
+
 	int def = objects[otmp->otyp].a_dr;
 	
 	if(is_shield(otmp))
 		return 0;
 
-	// reduce by erosion
-	def -= min((int)greatest_erosion(otmp), objects[otmp->otyp].a_dr);
+	// add material bonus
+	def += material_def_bonus(otmp, def);
 
+	// reduce by erosion
+	def -= min((int)greatest_erosion(otmp), def);
+
+	// cloak of protection's magic is not reduced by erosion or multiplied by mat
+	if (otmp->otyp == CLOAK_OF_PROTECTION)
+		def += 2;
 	// padded gloves
 	static int pgloves = 0;
 	if (!pgloves) pgloves = find_pgloves();
@@ -1996,12 +2060,21 @@ struct obj * otmp;
 
 
 	// add enchantment
-	// crystal armor bonus enchantment
-	if (otmp->otyp == CRYSTAL_PLATE_MAIL)	def += otmp->spe;
-	else if (otmp->otyp == CRYSTAL_HELM)			def += otmp->spe;
-	else if (otmp->otyp == CRYSTAL_BOOTS)		def += otmp->spe;
-	else if (otmp->otyp == CRYSTAL_GAUNTLETS)	def += otmp->spe;
-	else def += (otmp->spe+1)/2;
+	if (otmp->spe)
+	{
+		int spemult = 6; // out of 12
+		// shields get no enchantment to DR
+		if (is_shield(otmp))
+			spemult = 0;
+		// crystal armor bonus enchantment
+		if (otmp->otyp == CRYSTAL_PLATE_MAIL ||
+			otmp->otyp == CRYSTAL_HELM ||
+			otmp->otyp == CRYSTAL_BOOTS ||
+			otmp->otyp == CRYSTAL_GAUNTLETS)
+			spemult += 4;
+
+		def += (otmp->spe * spemult + 6) / 12;
+	}
 
 	// artifact bonus def
 	switch (otmp->oartifact)
@@ -2057,11 +2130,11 @@ int agrmoral;
 		if(agralign <= 0) bonus += base;
 		else bonus -= base/2+1;
 	}
-	if(arm->oproperties&OPROP_HOLY){
+	if(arm->oproperties&OPROP_HOLY && arm->blessed){
 		if(agrmoral < 0) bonus += base;
 		else if(agrmoral > 0) bonus -= base/2+1;
 	}
-	if(arm->oproperties&OPROP_UNHY){
+	if(arm->oproperties&OPROP_UNHY && arm->cursed){
 		if(agrmoral > 0) bonus += base;
 		else if(agrmoral < 0) bonus -= base/2+1;
 	}
@@ -2141,9 +2214,16 @@ int base_uac()
 	if (HProtection & INTRINSIC) uac -= (u.ublessed+1)/2;
 	uac -= u.uacinc;
 	uac -= u.spiritAC;
+	if(u.uuur_duration)
+		uac -= 10;
+	uac -= u.uuur/2;
 	if(u.edenshield > moves) uac -= 7;
-	if(u.specialSealsActive&SEAL_BLACK_WEB && u.utrap && u.utraptype == TT_WEB)
-		 uac -= 8;
+	if(u.specialSealsActive&SEAL_BLACK_WEB && (
+		(u.utrap && u.utraptype == TT_WEB) ||
+		(t_at(u.ux, u.uy) && t_at(u.ux, u.uy)->ttyp == WEB && (uarm && uarm->oartifact==ART_SPIDERSILK))
+	)
+	)
+			 uac -= 8;
 	if(u.specialSealsActive&SEAL_UNKNOWN_GOD && uwep && uwep->oartifact == ART_PEN_OF_THE_VOID) uac -= 2*uwep->spe;
 	if(multi < 0){
 		dexbonus = -5;
@@ -2187,6 +2267,7 @@ find_ac()
 	int uac;
 	
 	uac = base_uac();
+	uac -= (u.uuur+1)/2;
 	if (uarm)	uac -= arm_ac_bonus(uarm);
 	if (uarmc)	uac -= arm_ac_bonus(uarmc);
 	if (uarmh)	uac -= arm_ac_bonus(uarmh);
@@ -2225,6 +2306,7 @@ find_ac()
 	if(u.specialSealsActive&SEAL_DAHLVER_NAR && !Upolyd) uac -=  min(u.ulevel/2,(u.uhpmax - u.uhp)/10);
 	else if(u.specialSealsActive&SEAL_DAHLVER_NAR && Upolyd) uac -=  min(u.ulevel/2,(u.mhmax - u.mh)/10);
 	if(uclockwork) uac -= (u.clockworkUpgrades&ARMOR_PLATING) ? 5 : 2; /*armor bonus for automata*/
+	if(uandroid) uac -= 6; /*armor bonus for androids*/
 	if (uac < -128) uac = -128;	/* u.uac is an schar */
 	if(uac != u.uac){
 		u.uac = uac;
@@ -2292,6 +2374,7 @@ find_dr()
 		else armdr += arm_dr_bonus(uarmu);
 	}
 	
+	if(uandroid) armdr += (6*2+3*3); /*armor bonus for androids*/
 	armdr /= 5;
 	
 	udr += armdr;
@@ -2315,7 +2398,8 @@ find_dr()
 #ifdef OVLB
 
 int
-roll_udr(magr)
+slot_udr(slot, magr)
+int slot;
 struct monst *magr;
 {
 	int udr;
@@ -2325,12 +2409,19 @@ struct monst *magr;
 	int clkdr = 0;
 	
 	if(magr){
-		agralign = sgn(magr->data->maligntyp);
+		agralign = (magr == &youmonst) ? sgn(u.ualign.type) : sgn(magr->data->maligntyp);
 		
+		if(magr == &youmonst){
+			if(hates_holy(youracedata))
+				agrmoral = -1;
+			else if(hates_unholy(youracedata))
+				agrmoral = 1;
+		} else {
 		if(hates_holy_mon(magr))
 			agrmoral = -1;
 		else if(hates_unholy(magr->data))
 			agrmoral = 1;
+	}
 	}
 	
 	udr = base_udr();
@@ -2354,18 +2445,20 @@ struct monst *magr;
 	//Note: Bias this somehow?
 	if(magr && magr->data == &mons[PM_XAN])
 		goto boot_hit;
-	switch(rn2(5)){
-		case 0:
+	switch(slot){
+		case UPPER_TORSO_DR:
 uppertorso:
 			//Note: upper body (shirt plus torso armor)
+			if(uandroid) udr += 6; /*thick chest armor*/
 			if (uarmu){
 				if(uarmu->otyp != BODYGLOVE){
 					armdr += arm_dr_bonus(uarmu);
 					if(magr) armdr += properties_dr(uarmu, agralign, agrmoral);
 				}
 			}
+			udr += (u.uvaul+3)/5;
 			//Note: SHOULD fall-through here to add the torso armor bonus
-		case 1:
+		case LOWER_TORSO_DR:
 lowertorso:
 			//Note: lower body (torso armor only)
 			if (uarm){
@@ -2376,35 +2469,50 @@ lowertorso:
 			} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
 				armdr += max( 1 + (uwep->spe+1)/2,0);
 			}
+			//Lower body SPECIFIC modifiers
+			if (slot != UPPER_TORSO_DR){
+				if(uandroid) udr += 3; /*flexible torso armor*/
+				if(uarmu && (uarmu->otyp == BLACK_DRESS || uarmu->otyp == VICTORIAN_UNDERWEAR)){
+					armdr += arm_dr_bonus(uarmu);
+					if(magr) armdr += properties_dr(uarmu, agralign, agrmoral);
+				}
+				udr += (u.uvaul+1)/5;
+			}
 			armdr += clkdr;
 		break;
-		case 2:
+		case HEAD_DR:
 			if(!has_head(youracedata)) goto uppertorso;
+			if(uandroid) udr += 6; /*thick cranial armor*/
 			if (uarmh){
 				armdr += arm_dr_bonus(uarmh);
 				if(magr) armdr += properties_dr(uarmh, agralign, agrmoral);
 			}
+			udr += (u.uvaul+4)/5;
 			armdr += clkdr;
 		break;
-		case 3:
+		case LEG_DR:
 boot_hit:
 			if(!can_wear_boots(youracedata)) goto lowertorso;
+			if(uandroid) udr += 3; /*thinner leg armor*/
 			if (uarmf){
 				armdr += arm_dr_bonus(uarmf);
 				if(magr) armdr += properties_dr(uarmf, agralign, agrmoral);
 			} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
 				armdr += max( 1 + (uwep->spe+1)/2,0);
 			}
+			udr += (u.uvaul)/5;
 			armdr += clkdr;
 		break;
-		case 4:
+		case ARM_DR:
 			if(!can_wear_gloves(youracedata)) goto uppertorso;
+			if(uandroid) udr += 3; /*thinner arm armor*/
 			if (uarmg){
 				armdr += arm_dr_bonus(uarmg);
 				if(magr) armdr += properties_dr(uarmg, agralign, agrmoral);
 			} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
 				armdr += max( 1 + (uwep->spe+1)/2,0);
 			}
+			udr += (u.uvaul+2)/5;
 		break;
 	}
 	
@@ -2419,6 +2527,14 @@ boot_hit:
 	
 	if (udr > 127) udr = 127;	/* u.uac is an schar */
 	
+	return udr;
+}
+
+int
+roll_udr(magr)
+struct monst *magr;
+{
+	int udr = slot_udr(rn2(5), magr);
 	//diminishing returns after 10 points of DR.
 	if(udr > 11){
 		if(u.sealsActive&SEAL_BALAM)
@@ -2942,11 +3058,11 @@ register struct obj *atmp;
 	} else if (DESTROY_ARM(uarmu)) {
 		if((!obj_resists(otmp, 0, 100))){
 			if (donning(otmp)) cancel_don();
-			Your("shirt crumbles into tiny threads and falls apart!");
+			Your("underclothes crumble into tiny threads and fall apart!");
 			(void) Shirt_off();
 			useup(otmp);
 		} else {
-			Your("shirt resists destruction!");
+			Your("underclothes resists destruction!");
 		}
 	} else if (DESTROY_ARM(uarmh)) {
 		if((!obj_resists(otmp, 0, 100))){
@@ -2992,6 +3108,58 @@ register struct obj *atmp;
 #undef DESTROY_ARM
 	stop_occupation();
 	return(1);
+}
+
+int
+destroy_marm(mtmp, otmp)
+register struct monst *mtmp;
+register struct obj *otmp;
+{
+	long unwornmask;
+	if(!otmp || !mtmp)
+		return 0;
+	if(obj_resists(otmp, 0, 100))
+		return 0;
+	if(!otmp->owornmask)
+		return 0;
+	obj_extract_self(otmp);
+	if ((unwornmask = otmp->owornmask) != 0L) {
+		mtmp->misc_worn_check &= ~unwornmask;
+		if (otmp->owornmask & W_WEP){
+			setmnotwielded(mtmp,otmp);
+			MON_NOWEP(mtmp);
+		}
+		if (otmp->owornmask & W_SWAPWEP){
+			setmnotwielded(mtmp,otmp);
+			MON_NOSWEP(mtmp);
+		}
+		otmp->owornmask = 0L;
+		update_mon_intrinsics(mtmp, otmp, FALSE, FALSE);
+		if(unwornmask&W_ARM){
+			if(canseemon(mtmp))
+				pline("%s armor turns to dust!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMC){
+			if(canseemon(mtmp))
+				pline("%s %s crumbles and turns to dust!", s_suffix(Monnam(mtmp)), cloak_simple_name(otmp));
+		} else if(unwornmask&W_ARMH){
+			if(canseemon(mtmp))
+				pline("%s helm turns to dust and is blown away!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMS){
+			if(canseemon(mtmp))
+				pline("%s shield crumbles away!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMG){
+			if(canseemon(mtmp))
+				pline("%s gloves vanish!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMF){
+			if(canseemon(mtmp))
+				pline("%s boots disintegrate!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMU){
+			if(canseemon(mtmp))
+				pline("%s underclothes crumble into tiny threads and fall apart!", s_suffix(Monnam(mtmp)));
+		}
+		m_useup(mtmp, otmp);
+	}
+	return 1;
 }
 
 /* hit by destroy armor scroll/black dragon breath/monster spell */
@@ -3051,6 +3219,58 @@ register struct obj *atmp;
 #undef DESTROY_ARM
 	stop_occupation();
 	return(1);
+}
+
+int
+claws_destroy_marm(mtmp, otmp)
+register struct monst *mtmp;
+register struct obj *otmp;
+{
+	long unwornmask;
+	if(!otmp || !mtmp)
+		return 0;
+	if(obj_resists(otmp, 0, 100))
+		return 0;
+	if(!otmp->owornmask)
+		return 0;
+	obj_extract_self(otmp);
+	if ((unwornmask = otmp->owornmask) != 0L) {
+		mtmp->misc_worn_check &= ~unwornmask;
+		if (otmp->owornmask & W_WEP){
+			setmnotwielded(mtmp,otmp);
+			MON_NOWEP(mtmp);
+		}
+		if (otmp->owornmask & W_SWAPWEP){
+			setmnotwielded(mtmp,otmp);
+			MON_NOSWEP(mtmp);
+		}
+		otmp->owornmask = 0L;
+		update_mon_intrinsics(mtmp, otmp, FALSE, FALSE);
+		if(unwornmask&W_ARM){
+			if(canseemon(mtmp))
+				pline("%s armor rips open!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMC){
+			if(canseemon(mtmp))
+				pline("%s %s is torn to shreds!", s_suffix(Monnam(mtmp)), cloak_simple_name(otmp));
+		} else if(unwornmask&W_ARMH){
+			if(canseemon(mtmp))
+				pline("%s helm is knocked to pieces!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMS){
+			if(canseemon(mtmp))
+				pline("%s shield shatters!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMG){
+			if(canseemon(mtmp))
+				pline("%s gloves are torn off!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMF){
+			if(canseemon(mtmp))
+				pline("%s boots are ripped open!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMU){
+			if(canseemon(mtmp))
+				pline("%s underclothes are torn off!", s_suffix(Monnam(mtmp)));
+		}
+		m_useup(mtmp, otmp);
+	}
+	return 1;
 }
 
 int
@@ -3133,7 +3353,7 @@ register struct obj *atmp;
 
 	if (DESTROY_ARM(uarmc)) {
 		if (donning(otmp)) cancel_don();
-		pline("The tentacles tear your cloak to shreads!");
+		pline("The tentacles tear your cloak to shreds!");
 		(void) Cloak_off();
 		useup(otmp);
 	} else if (DESTROY_ARM(uarm)) {
@@ -3144,7 +3364,7 @@ register struct obj *atmp;
 #ifdef TOURIST
 	} else if (DESTROY_ARM(uarmu)) {
 		if (donning(otmp)) cancel_don();
-		pline("The tentacles tear your shirt to shreads!");
+		pline("The tentacles tear your shirt to shreds!");
 		(void) Shirt_off();
 		useup(otmp);
 #endif

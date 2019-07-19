@@ -6,6 +6,13 @@
 
 #include "hack.h"
 #include "edog.h"
+#include "artifact.h"
+#ifdef OVLB
+#include "artilist.h"
+#else
+STATIC_DCL struct artifact artilist[];
+#endif
+
 
 #ifndef NO_SIGNAL
 #include <signal.h>
@@ -15,6 +22,8 @@
 STATIC_DCL void NDECL(do_positionbar);
 #endif
 
+STATIC_DCL void NDECL(androidUpkeep);
+STATIC_DCL int NDECL(do_inheritor_menu);
 #ifdef OVL0
 
 extern const int monstr[];
@@ -355,7 +364,335 @@ hpnotify_format_str(char *str)
     return buf;
 }
 
+STATIC_OVL
+void
+androidUpkeep()
+{
+	//Pay unusual upkeep here, possibly pass out
+	if(uandroid && !u.usleep){
+		int mult = 30/u.ulevel;
+		//Possibly pass out if you begin this step with 0 energy.
+		if(u.uen == 0 && !rn2(10+u.ulevel) && moves >= u.nextsleep){
+			int t = rn1(u.uenmax*mult+40, u.uenmax*mult+40);
+			You("pass out from exhaustion!");
+			u.nextsleep = moves+rnz(350)+t;
+			u.lastslept = moves;
+			fall_asleep(-t, TRUE);
+			nomul(-1*u.uenmax, "passed out from exhaustion");
+		}
+		if(u.phasengn){
+			u.uen -= 10;
+			if(u.uen <= 0){
+				u.uen = 0;
+				You("can no longer maintain phase!");
+				u.phasengn = 0;
+			}
+		}
+		if(u.ucspeed == HIGH_CLOCKSPEED){
+			u.uen -= 1;
+			if(u.uen <= 0){
+				u.uen = 0;
+				You("can no longer maintain emergency speed!");
+				u.ucspeed = NORM_CLOCKSPEED;
+			}
+		}
+		//Exceeding operational time
+		static char fatigue_warning = 0;
+		if(moves >= u.nextsleep+700 && u.uen > 10 && !fatigue_warning){
+			fatigue_warning = 1;
+			You_feel("fatigued.");
+		}
+		static char e_fatigued = 0;
+		if(moves >= u.nextsleep+700 && u.uen > 1 && u.uen <= 10 && !e_fatigued){
+			e_fatigued = 1;
+			You_feel("extremely fatigued.");
+		}
+		static char pass_warning = 0;
+		if(moves >= u.nextsleep && u.uen <= 1 && !pass_warning){
+			pass_warning = 1;
+			You_feel("like you're about to pass out.");
+		}
+		if(moves > u.nextsleep+700 && u.uen > 0){
+			if(!(moves%20)) u.uen -= 1;
+		}
+	}
+}
+
 static long prev_dgl_extrainfo = 0;
+
+/* perform 1 turn's worth of time-dependent hp modification, mostly silently */
+/* NOTES: can rehumanize(), can print You("pass out from exertion!") if moving when overloaded at 1 hp */
+void
+you_regen_hp()
+{
+	int wtcap = near_capacity();
+	int per30 = 0;
+	int * hpmax;
+	int * hp;
+
+	// set hp, maxhp pointers
+	hp    = (Upolyd) ? (&u.mh)    : (&u.uhp);
+	hpmax = (Upolyd) ? (&u.mhmax) : (&u.uhpmax);
+
+	if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20) {
+		/* for the moment at least, you're in tiptop shape */
+		/* do not regenerate any health */
+		/* you also do not lose health (e.g. from being a fish out of water) */
+		return;
+	}
+
+	// Sanity check
+	if (Upolyd && (*hp < 1))
+		rehumanize();
+
+	//Androids regenerate from active Hoon, but not from other sources unless dormant
+	if(u.uhoon_duration && (*hp) < (*hpmax)){
+		flags.botl = 1;
+		
+		(*hp) += 10;
+
+		if ((*hp) > (*hpmax))
+			(*hp) = (*hpmax);
+	}
+	
+	per30 += u.uhoon;
+	
+	//Androids regenerate from active Hoon, but not from other sources unless dormant
+	// Notably, no bonus from passive Hoon
+	if(uandroid && !u.usleep)
+		return;
+	
+	// fish out of water
+	if (youracedata->mlet == S_EEL && !is_pool(u.ux, u.uy, youracedata->msize == MZ_TINY) && !Is_waterlevel(&u.uz)) {
+		if (is_pool(u.ux, u.uy, TRUE))
+			per30 -= 30 * (youracedata->msize - 1) / (youracedata->msize);
+		else
+			per30 -= 30;
+		u.regen_blocked++;
+	}
+
+	// invidiaks out of dark
+	if (youracedata == &mons[PM_INVIDIAK] && !isdark(u.ux, u.uy)) {
+		per30 -= 30;
+		u.regen_blocked++;
+	}
+	
+	// regeneration 'trinsic
+	if (Regeneration){
+		per30 += 30;
+	}
+	
+	// "Natural" regeneration has stricter limitations
+	if (u.regen_blocked > 0) u.regen_blocked--;		// not regen_blocked (NOTE: decremented here)
+	else if (!(nonliving(youracedata) && !uandroid) &&	// not nonliving, however, androids auto-repair while asleep
+		!Race_if(PM_INCANTIFIER) &&					// not incantifier (including while polymorphed)
+		(wtcap < MOD_ENCUMBER || !u.umoved) &&		// not overloaded
+		!(uwep && uwep->oartifact == ART_ATMA_WEAPON && uwep->lamplit && !Drain_resistance && rn2(4)) // 3 in 4 chance of being prevented by Atma Weapon
+			// Question for Chris: what if instead, do "reglevel /= 4;" when atma weapon is active, placed either before or after the minimum reg 1 check?
+		)
+	{
+		int reglevel = u.ulevel;
+
+		// CON bonus (while in natural form)
+		if (!Upolyd)
+			reglevel += ((int)ACURR(A_CON) - 10) / 2;
+		// minimum 1
+		if (reglevel < 1)
+			reglevel = 1;
+
+		// healer role bonus
+		if (Role_if(PM_HEALER) && !Upolyd)
+			reglevel += 10;
+
+		// penalty for being itchy
+		reglevel -= u_healing_penalty();
+
+		// minimum 1
+		if (reglevel < 1)
+			reglevel = 1;
+
+		per30 += reglevel;
+	}
+
+	// The Ring of Hygiene's Disciple
+	if (!Upolyd &&	// Question for Chris: should this be enabled to also work while polymorphed?
+		((uleft  && uleft->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE) ||
+		(uright && uright->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE))
+		){
+		per30 += 30 * min(4, (*hpmax) / max((*hp), 1));
+	}
+
+	// Buer
+	if (u.sealsActive&SEAL_BUER){
+		int dsize = spiritDsize();
+
+		if (uwep && uwep->oartifact == ART_ATMA_WEAPON && uwep->lamplit && !Drain_resistance)
+			per30 += dsize * 6 / 4;
+		else
+			per30 += dsize * 6;
+	}
+	
+	/* moving around while encumbered is hard work */
+	if (wtcap > MOD_ENCUMBER && u.umoved) {
+		if (*hp > 1)
+		{
+			if (wtcap < EXT_ENCUMBER)
+				per30 -= 1;
+			else
+				per30 -= 3;
+		}
+		else
+		{
+			You("pass out from exertion!");
+			exercise(A_CON, FALSE);
+			fall_asleep(-10, FALSE);
+		}
+	}
+
+	if (((per30 > 0) && ((*hp) < (*hpmax))) ||			// if regenerating
+		((per30 < 0))									// or dying
+		)
+	{
+		// update bottom line
+		flags.botl = 1;
+
+		// modify by 1/30th of per30 per turn:
+		*hp += per30 / 30;
+		// Now deal with any remainder
+		if (((moves)*(abs(per30) % 30)) / 30 >((moves - 1)*(abs(per30) % 30)) / 30)
+			*hp += 1 * sgn(per30);
+		// cap at maxhp
+		if ((*hp) > (*hpmax))
+			(*hp) = (*hpmax);
+
+		// check for rehumanization
+		if (Upolyd && (*hp < 1))
+			rehumanize();
+	}
+}
+
+/* perform 1 turn's worth of time-dependent power modification, silently */
+void
+you_regen_pw()
+{
+	int wtcap = near_capacity();
+	int per30 = 0;
+
+	// natural power regeneration
+	if (wtcap < MOD_ENCUMBER &&		// not overly encumbered
+		!Race_if(PM_INCANTIFIER)	// not an incantifier
+		) {
+		int reglevel = u.ulevel + (((int)ACURR(A_WIS)) - 10) / 2;
+		// level + WISmod minimum 1
+		if (reglevel < 1)
+			reglevel = 1;
+
+		// role bonuses
+		if (Role_if(PM_WIZARD))   reglevel += 10;
+		if (Role_if(PM_HEALER))   reglevel += 6;
+		if (Role_if(PM_PRIEST))   reglevel += 6;
+		if (Role_if(PM_VALKYRIE)) reglevel += 3;
+		if (Role_if(PM_MONK))     reglevel += 3;
+
+		// cornuthaum bonus for wizards (but not incantifiers, since they don't naturally regenerate power at all)
+		if (u.uen < u.uenmax && (Role_if(PM_WIZARD)) && uarmh && uarmh->otyp == CORNUTHAUM){
+			reglevel += uarmh->spe;
+		}
+		// penalty for being itchy
+		reglevel -= u_healing_penalty();
+		// penalty from spell protection interfering with natural pw regeneration
+		if (u.uspellprot > 0)
+			reglevel -= 10 + 2 * u.uspellprot;
+
+		// minimum 1
+		if (reglevel < 1)
+			reglevel = 1;
+
+		per30 += reglevel;
+	}
+
+	// external power regeneration
+	if (Energy_regeneration ||										// energy regeneration 'trinsic
+		(u.umartial && !uarmf && IS_GRASS(levl[u.ux][u.uy].typ))	// or being a bare-foot martial-artist standing on grass
+		)
+	{
+		per30 += 30;
+	}
+
+	// Unknown God
+	if (u.specialSealsActive&SEAL_UNKNOWN_GOD){
+		per30 += spiritDsize() * 6;
+	}
+
+	// power drain from maintained spells
+	if (u.maintained_en_debt > 0)
+	{
+		int reglevel = u.maintained_en_debt / 3;
+		int debtpaid = 0;
+
+		if (per30 > reglevel)
+		{// can just subtract drain from pw regeneration and still have net positive
+			per30 -= reglevel;
+			debtpaid += reglevel;
+		}
+		else
+		{// either 0 pw regen or net drain
+			// put the entirety of per30 against the debt owed
+			reglevel -= per30;
+			debtpaid += per30;
+			per30 = 0;
+			// drain further if the player has reserves to burn
+			if (u.uen > 0 || Race_if(PM_INCANTIFIER))
+			{
+				debtpaid += reglevel;
+				per30 = -reglevel;
+			}
+		}
+		// settle the payment
+		u.maintained_en_debt -= debtpaid / 30;
+		//Now deal with any remainder
+		if (((moves)*(debtpaid % 30)) / 30 >((moves - 1)*(debtpaid % 30)) / 30)
+			u.maintained_en_debt -= 1;
+		// minimum zero
+		if (u.maintained_en_debt < 0)
+			u.maintained_en_debt = 0;
+	}
+
+	//Naen fast energy regen applies to androids, too.
+	if(u.unaen_duration && (u.uen < u.uenmax)){
+		flags.botl = 1;
+		u.uen += 10;
+		if (u.uen > u.uenmax)
+			u.uen = u.uenmax;
+	}
+	
+	//Naen passive bonus only partially applies to androids
+	per30 += u.unaen;
+	
+	//Androids only regen power while asleep, but allow their rate to offset spell maintenance
+	if(uandroid && !u.usleep && per30 > 0)
+		return;
+
+	if (((per30 > 0) && (u.uen < u.uenmax)) ||							// if regenerating power
+		((per30 < 0) && ((u.uen > 0) || Race_if(PM_INCANTIFIER)))		// or draining power
+		)
+	{
+		//update bottom line
+		flags.botl = 1;
+
+		// modify by 1/30th of per30 per turn:
+		u.uen += per30 / 30;
+		// Now deal with any remainder
+		if (((moves)*(abs(per30) % 30)) / 30 >((moves - 1)*(abs(per30) % 30)) / 30)
+			u.uen += 1 * sgn(per30);
+		// cap at maxpw
+		if (u.uen > u.uenmax)
+			u.uen = u.uenmax;
+		// and at 0 (for non-incantifiers)
+		if (u.uen < 0 && !(Race_if(PM_INCANTIFIER)))
+			u.uen = 0;
+	}
+}
 
 void
 moveloop()
@@ -443,14 +780,21 @@ moveloop()
 				youmonst.movement -= 1;
 			} else if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
 				youmonst.movement -= 3;
+			} else if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
+				youmonst.movement -= 3;
 			} else if(uwep && uwep->oartifact == ART_TOBIUME){
 				youmonst.movement -= 4;
 			} else {
 				youmonst.movement -= NORMAL_SPEED;
 			}
-		} else {
-			youmonst.movement -= NORMAL_SPEED;
-		}
+		} else if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
+			if(u.umoved){
+				youmonst.movement -= 3;
+			} else {
+				u.ucspeed = NORMAL_SPEED;
+				youmonst.movement -= NORMAL_SPEED;
+			}
+		} else youmonst.movement -= NORMAL_SPEED;
 		
 		  /**************************************************/
 		 /*monsters that respond to the player turn go here*/
@@ -498,7 +842,7 @@ moveloop()
 						mtmp->perminvis = FALSE;
 						newsym(mtmp->mx,mtmp->my);
 					}
-				} else if(mtmp->data == &mons[PM_GRUE]){
+				} else if(mtmp->data == &mons[PM_GRUE] || mtmp->data == &mons[PM_INVIDIAK]){
 					if(isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
 						mtmp->minvis = TRUE;
 						mtmp->perminvis = TRUE;
@@ -723,13 +1067,6 @@ moveloop()
 			flags.shade_level=0;
 		    for (mtmp = fmon; mtmp; mtmp = nxtmon){
 				nxtmon = mtmp->nmon;
-				/* Possibly vanish */
-				if(mtmp->mvanishes>-1){
-					if(--mtmp->mvanishes == 0){
-						monvanished(mtmp);
-						continue;
-					}
-				}
 				/* check for bad swap weapons */
 				if (mtmp->msw) {
 					struct obj *obj;
@@ -745,6 +1082,28 @@ moveloop()
 				if(mtmp->mtame && !mtmp->mpeaceful){
 					impossible("Hostile+tame monster state detected (and fixed)");
 					mtmp->mpeaceful = TRUE;
+				}
+				//Remove after testing (can cause "re-trapping" of untrapped monsters)
+				if(!mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
+					impossible("Re-trapping mon %s in vivi trap",noit_mon_nam(mtmp));
+					mtmp->mtrapped = TRUE;
+				}
+				/* Possibly vanish */
+				if(mtmp->mvanishes>-1){
+					if(--mtmp->mvanishes == 0){
+						monvanished(mtmp);
+						continue;
+					}
+				}
+				/* Monsters in a essence trap can't move */
+				if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
+					mtmp->mhp = 1;
+					mtmp->movement = 0;
+					continue;
+				}
+				/* Possibly wake up */
+				if(mtmp->mtame && mtmp->mstrategy&STRAT_WAITMASK){
+					mtmp->mstrategy &= ~STRAT_WAITMASK;
 				}
 				/* Possibly become hostile */
 				if(mtmp->mpeacetime && !mtmp->mtame){
@@ -915,6 +1274,7 @@ karemade:
 				if(mtmp && !(LBbreach && moves%5)) {
 					verbalize("**EMERGENCY ALERT: hostile entities detected within Last Bastion**");
 					LBbreach = TRUE;
+					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 				} else if(!mtmp) LBbreach = FALSE;
 				
 				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) if(!mtmp->mpeaceful && mtmp->mx <= 26 && mtmp->mx > 23) break;
@@ -932,7 +1292,7 @@ karemade:
 			
 		    if(!(Is_illregrd(&u.uz) && u.ualign.type == A_LAWFUL && !u.uevent.uaxus_foe) && /*Turn off random generation on axus's level if lawful*/
 				!rn2(u.uevent.udemigod ? 25 :
-				(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !Is_qstart(&u.uz)) ? 35 :
+				(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(Is_qstart(&u.uz) && !(quest_status.leader_is_dead))) ? 35 :
 			    (depth(&u.uz) > depth(&stronghold_level)) ? 50 : 70)
 			){
 				if (u.uevent.invoked && xupstair && rn2(10)) {
@@ -940,7 +1300,7 @@ karemade:
 				} //TEAM ATTACKS
 				if(In_sokoban(&u.uz)){
 					if(u.uz.dlevel != 1 && u.uz.dlevel != 4) makemon((struct permonst *)0, xupstair, yupstair, MM_ADJACENTSTRICT|MM_ADJACENTOK);
-				} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+				} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
 					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
@@ -948,9 +1308,9 @@ karemade:
 				}
 				else (void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
 			}
-			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !Is_qstart(&u.uz) && !rn2(50)){
-				struct monst* mtmp = makemon(&mons[PM_SEMBLANCE], rn1(COLNO-3,2), rn1(ROWNO-3,2), MM_ADJACENTSTRICT|MM_ADJACENTOK);
-				//"Where stray illuminations from the Far Realm leak onto another plane, matter stirs at the beckoning of inexplicable urges before burining to ash."
+			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(Is_qstart(&u.uz) && !Race_if(PM_ANDROID)) && !rn2(35)){
+				struct monst* mtmp = makemon(&mons[PM_SEMBLANCE], rn1(COLNO-3,2), rn1(ROWNO-3,2), MM_ADJACENTOK);
+				//"Where stray illuminations from the Far Realm leak onto another plane, matter stirs at the beckoning of inexplicable urges before burning to ash."
 				if(mtmp && canseemon(mtmp)) pline("The base matter of the world stirs at the beckoning of inexplicable urges, dancing with a semblance of life.");
 			}
 
@@ -1104,6 +1464,11 @@ karemade:
 				if(u.slowclock < hungerup) morehungry(hungerup-u.slowclock);
 				else if(!(moves%(u.slowclock - hungerup + 1))) morehungry(1);
 			}
+			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
+				if (rn2(3) != 0) moveamt += NORMAL_SPEED / 2;
+			}
+			if(u.uuur_duration)
+				moveamt += 6;
 			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
 				switch(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:       moveamt = max(moveamt-6,1); break;
@@ -1266,7 +1631,9 @@ karemade:
 				}
 			} else if(u.utemp) u.utemp = 0;
 			
-			if(u.uinwater) u.uboiler = MAX_BOILER;
+			if(u.uinwater && !u.umoved){
+				if(uclockwork) u.uboiler = MAX_BOILER;
+			}
 			
 			if(u.ukinghill){
 				if(u.protean > 0) u.protean--;
@@ -1286,6 +1653,22 @@ karemade:
 				}
 			}
 
+			// Ymir's stat regeneration
+			if (u.sealsActive&SEAL_YMIR && (wtcap < MOD_ENCUMBER || !u.umoved || Regeneration)){
+				if ((u.ulevel > 9 && !(moves % 3)) ||
+					(u.ulevel <= 9 && !(moves % ((MAXULEV + 12) / (u.ulevel + 2) + 1)))
+					){
+					int val_limit, idx;
+					for (idx = 0; idx < A_MAX; idx++) {
+						val_limit = AMAX(idx);
+						/* don't recover strength lost from hunger */
+						if (idx == A_STR && u.uhs >= WEAK) val_limit--;
+
+						if (val_limit > ABASE(idx)) ABASE(idx)++;
+					}
+				}
+			}
+
 		    /* One possible result of prayer is healing.  Whether or
 		     * not you get healed depends on your current hit points.
 		     * If you are allowed to regenerate during the prayer, the
@@ -1293,175 +1676,9 @@ karemade:
 		     * Another possible result is rehumanization, which requires
 		     * that encumbrance and movement rate be recalculated.
 		     */
-		    if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20) {
-				/* for the moment at least, you're in tiptop shape */
-				wtcap = UNENCUMBERED;
-		    } else {
-				if (youracedata->mlet == S_EEL && !is_pool(u.ux,u.uy, FALSE) && !Is_waterlevel(&u.uz)) {
-					if (u.mh > 1) {
-						u.mh--;
-						flags.botl = 1;
-					} else if (u.mh < 1)
-						rehumanize();
-				} else if (Upolyd) {
-					if(u.mh < u.mhmax){
-						if (u.mh < 1)
-							rehumanize();
-						if(Regeneration){
-							flags.botl = 1;
-							u.mh++;
-						}
-						if(u.regen_blocked){
-							u.regen_blocked--;
-						} else if(!nonliving(youracedata) && !Race_if(PM_INCANTIFIER) && (wtcap < MOD_ENCUMBER || !u.umoved) && 
-							(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4))
-						){
-							flags.botl = 1;
-							//recover 1/30th hp per turn:
-							u.mh += u.ulevel/30;
-							//Now deal with any remainder
-							if(((moves)*(u.ulevel%30))/30 > ((moves-1)*(u.ulevel%30))/30) u.mh += 1;
-						}
-						if(u.mh > u.mhmax) u.mh = u.mhmax;
-					}
-				} else if (u.uhp < u.uhpmax){
-					if(Regeneration){
-						flags.botl = 1;
-						u.uhp++;
-					}
-					if(u.regen_blocked){
-						u.regen_blocked--;
-					} else if(!nonliving(youracedata) && !Race_if(PM_INCANTIFIER) && (wtcap < MOD_ENCUMBER || !u.umoved) && 
-						(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance || !rn2(4))
-					){
-						int reglevel = u.ulevel + (((int) ACURR(A_CON)) - 10)/2;
-						if(reglevel < 1) reglevel = 1;
-						if(Role_if(PM_HEALER)) reglevel += 10;
-						reglevel -= u_healing_penalty();
-						if(reglevel < 1) reglevel = 1;
-						flags.botl = 1;
-						//recover 1/30th hp per turn:
-						u.uhp += reglevel/30;
-						//Now deal with any remainder
-						if(((moves)*(reglevel%30))/30 > ((moves-1)*(reglevel%30))/30) u.uhp += 1;
-					}
-					if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
-				}
-				
-				if((uleft  && uleft->oartifact  == ART_RING_OF_HYGIENE_S_DISCIPLE)||
-				   (uright && uright->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE)
-				){
-					if(u.uhp < u.uhpmax) u.uhp++;
-					if(u.uhp < u.uhpmax / 2) u.uhp++;
-					if(u.uhp < u.uhpmax / 3) u.uhp++;
-					if(u.uhp < u.uhpmax / 4) u.uhp++;
-				}
-				if(u.sealsActive&SEAL_BUER){
-					int dsize = spiritDsize(), regenrate = dsize/5, remainderrate = dsize%5;
-					if(Upolyd && u.mh < u.mhmax){
-						if(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance){
-							if(regenrate) u.mh+=regenrate;
-							if(remainderrate && moves%5 < remainderrate) u.mh+=1;
-						} else {
-							if(regenrate && !(moves%4)) u.mh+=regenrate;
-							if(remainderrate && moves%20 < remainderrate) u.mh+=1;
-						}
-						if(u.mh > u.mhmax) u.mh = u.mhmax;
-					} else if(u.uhp < u.uhpmax){
-						if(!uwep || uwep->oartifact != ART_ATMA_WEAPON || !uwep->lamplit || Drain_resistance){
-							if(regenrate) u.uhp+=regenrate;
-							if(remainderrate && moves%5 < remainderrate) u.uhp+=1;
-						} else {
-							if(regenrate && !(moves%4)) u.uhp+=regenrate;
-							if(remainderrate && moves%20 < remainderrate) u.uhp+=1;
-						}
-						if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
-					}
-				}
-
-				if(u.sealsActive&SEAL_YMIR && (wtcap < MOD_ENCUMBER || !u.umoved || Regeneration)){
-					if((u.ulevel > 9 && !(moves % 3)) || 
-						(u.ulevel <= 9 && !(moves % ((MAXULEV+12) / (u.ulevel+2) + 1)))
-					){
-						int val_limit, idx;
-						for (idx = 0; idx < A_MAX; idx++) {
-							val_limit = AMAX(idx);
-							/* don't recover strength lost from hunger */
-							if (idx == A_STR && u.uhs >= WEAK) val_limit--;
-							
-							if (val_limit > ABASE(idx)) ABASE(idx)++;
-						}
-					}
-				}
-			}
-		    /* moving around while encumbered is hard work */
-		    if (wtcap > MOD_ENCUMBER && u.umoved) {
-				if(!(wtcap < EXT_ENCUMBER ? moves%30 : moves%10)) {
-					if (Upolyd && u.mh > 1) {
-					u.mh--;
-					} else if (!Upolyd && u.uhp > 1) {
-					u.uhp--;
-					} else {
-					You("pass out from exertion!");
-					exercise(A_CON, FALSE);
-					fall_asleep(-10, FALSE);
-					}
-				}
-		    }
-
-			if (u.uen > 0 || Race_if(PM_INCANTIFIER)){
-				//maintained spells accumulate an energy debt that must be paid over time
-				int reglevel = u.maintained_en_debt;
-				//pay 1/100th energy per turn:
-				u.uen -= reglevel / 100;
-				u.maintained_en_debt -= reglevel / 100;
-				//Now deal with any remainder
-				if ((reglevel > 0) && !(moves % (100/((reglevel % 100) + 1) + 2))) {
-					u.uen -= 1;
-					u.maintained_en_debt -= 1;
-				}
-				if (u.uen < 0 && !Race_if(PM_INCANTIFIER))  u.uen = 0;
-				flags.botl = 1;
-			}
-		    if (u.uen < u.uenmax && 
-				wtcap < MOD_ENCUMBER && 
-				!Race_if(PM_INCANTIFIER)
-			) {
-				flags.botl = 1;
-				int reglevel = u.ulevel + (((int) ACURR(A_WIS)) - 10)/2;
-				if(reglevel < 1) reglevel = 1;
-				if(Role_if(PM_WIZARD)) reglevel += 10;
-				if(Role_if(PM_HEALER)) reglevel += 6;
-				if(Role_if(PM_PRIEST)) reglevel += 6;
-				if(Role_if(PM_VALKYRIE)) reglevel += 3;
-				if(Role_if(PM_MONK)) reglevel += 3;
-				if(u.uen < u.uenmax && (Role_if(PM_WIZARD)) && uarmh && uarmh->otyp == CORNUTHAUM){
-					reglevel += uarmh->spe;
-				}
-				reglevel -= u_healing_penalty();
-				if(u.uspellprot > 0) reglevel -= 10 + 2*u.uspellprot;
-				if(reglevel < 1) reglevel = 1;
-				//recover 1/30th energy per turn:
-				u.uen += reglevel/30;
-				//Now deal with any remainder
-				if(((moves)*(reglevel%30))/30 > ((moves-1)*(reglevel%30))/30) u.uen += 1;
-				if (u.uen > u.uenmax)  u.uen = u.uenmax;
-				flags.botl = 1;
-		    }
-			if(Energy_regeneration && u.uen < u.uenmax){
-				u.uen++;
-				/*Note: at +1 per turn this never goes over max*/
-				flags.botl = 1;
-			}
-			if(u.specialSealsActive&SEAL_UNKNOWN_GOD && u.uen < u.uenmax){
-				int dsize = spiritDsize(), reglevel = 5*dsize;
-				//recover 1/30th energy per turn:
-				u.uen += reglevel/30;
-				//Now deal with any remainder
-				if(((moves)*(reglevel%30))/30 > ((moves-1)*(reglevel%30))/30) u.uen += 1;
-				if (u.uen > u.uenmax)  u.uen = u.uenmax;
-				flags.botl = 1;
-			}
+			you_regen_hp();
+			you_regen_pw();
+			androidUpkeep();
 
 		    if(!(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
 			if(Teleportation && !rn2(85) && !(
@@ -1497,7 +1714,7 @@ karemade:
 			if(Polymorph && !rn2(100))
 			    change = 1;
 			else if (u.ulycn >= LOW_PM && !Upolyd &&
-				 !uclockwork &&
+				 !umechanoid&&
 				 !rn2(80 - (20 * night())))
 			    change = 2;
 			if (change && !Unchanging) {
@@ -1603,6 +1820,9 @@ karemade:
 				}
 			}
 		}
+		if(u.uinwater){//Moving around will also call this, so your stuff degrades faster if you move
+			water_damage(invent, FALSE, FALSE, level.flags.lethe, &youmonst);
+		}
 
 		hpDiff -= u.uhp;
 		hpDiff = (hpDiff > 0) ? hpDiff : 0;
@@ -1643,7 +1863,7 @@ karemade:
 				mtmp->perminvis = FALSE;
 				newsym(mtmp->mx,mtmp->my);
 			}
-		} else if(mtmp->data == &mons[PM_GRUE]){
+		} else if(mtmp->data == &mons[PM_GRUE] || mtmp->data == &mons[PM_INVIDIAK]){
 			if(isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
 				mtmp->minvis = TRUE;
 				mtmp->perminvis = TRUE;
@@ -2011,9 +2231,16 @@ newgame()
 			com_pager(211);
 		} else if(Role_if(PM_ANACHRONONAUT)){
 			com_pager(218);
-			com_pager(219);
-			com_pager(220);
-			com_pager(221);
+			if(Race_if(PM_ANDROID)){
+				com_pager(222);
+				com_pager(223);
+				com_pager(224);
+				com_pager(225);
+			} else {
+				com_pager(219);
+				com_pager(220);
+				com_pager(221);
+			}
 		} else if(Race_if(PM_WORM_THAT_WALKS)){
 			if(Role_if(PM_CONVICT)){
 				com_pager(214);
@@ -2050,7 +2277,60 @@ newgame()
 	if(Darksight) litroom(FALSE,NULL);
 	/* Success! */
 	welcome(TRUE);
+	if(Race_if(PM_INHERITOR)){
+		int inherited;
+		struct obj *otmp;
+		do{inherited = do_inheritor_menu();}while(!inherited);
+		otmp = mksobj((int)artilist[inherited].otyp, FALSE, FALSE);
+	    otmp = oname(otmp, artilist[inherited].name);
+		expert_weapon_skill(weapon_type(otmp));
+		discover_artifact(inherited);
+		fully_identify_obj(otmp);
+	    otmp = hold_another_object(otmp, "Oops!  %s to the floor!",
+				       The(aobjnam(otmp, "slip")), (const char *)0);
+	    // otmp->oartifact = inherited;
+	}
 	return;
+}
+
+STATIC_OVL int
+do_inheritor_menu()
+{
+	winid tmpwin;
+	int n, how, i;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	for (i = 1; i<=NROFARTIFACTS; i++)
+	{
+		// if ((artilist[i].spfx2) && artilist[i].spfx && artilist[i].spfx)
+		if(artilist[i].spfx&SPFX_INHER
+		&& !Role_if(artilist[i].role)
+		&& !Pantheon_if(artilist[i].role)
+		&& (artilist[i].alignment == A_NONE
+			|| artilist[i].alignment == u.ualign.type)
+		){
+			Sprintf(buf, "%s", artilist[i].name);
+			any.a_int = i;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet == 'z') ? 'A' : (incntlet == 'Z') ? 'a' : (incntlet + 1);
+		}
+	}
+
+	end_menu(tmpwin, "Which artifact did you inherit?");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? selected[0].item.a_int : 0;
 }
 
 /* show "welcome [back] to nethack" message at program startup */
@@ -2089,15 +2369,21 @@ boolean new_game;	/* false => restoring an old game */
 		pline("#chat to a fresh seal to contact the spirit beyond.");
 		pline("Press Ctrl^F or type #power to fire active spirit powers!");
 	}
-	if(Darksight){
+	if(Race_if(PM_DROW)){
 		pline("Beware, droven armor evaporates in light!");
 		pline("Use #monster to create a patch of darkness.");
 	}
-	else if(Race_if(PM_CLOCKWORK_AUTOMATON)){
+	if(Race_if(PM_ANDROID)){
+		pline("Androids do not need to eat, but *do* need to sleep.");
+		pline("Use #monster to access your innate abilities, including sleep.");
+		pline("Use '.' to recover HP using magic energy.");
+		pline("Sleep to recover magic energy.");
+	}
+	if(Race_if(PM_CLOCKWORK_AUTOMATON)){
 		pline("Use #monster to adjust your clockspeed.");
 		You("do not heal naturally. Use '.' to attempt repairs.");
 	}
-	else if(Race_if(PM_INCANTIFIER)){
+	if(Race_if(PM_INCANTIFIER)){
 		pline("Incantifiers eat magic, not food, and do not heal naturally.");
 	}
 	}

@@ -118,6 +118,7 @@ STATIC_PTR int NDECL(doprev_message);
 STATIC_PTR int NDECL(timed_occupation);
 STATIC_PTR int NDECL(doextcmd);
 STATIC_PTR int NDECL(domonability);
+STATIC_PTR int NDECL(domountattk);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
 # ifdef WIZARD
 STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
@@ -162,6 +163,7 @@ STATIC_PTR int NDECL(doconduct); /**/
 STATIC_PTR boolean NDECL(minimal_enlightenment);
 STATIC_PTR void NDECL(resistances_enlightenment);
 STATIC_PTR void NDECL(signs_enlightenment);
+STATIC_PTR void NDECL(udr_enlightenment);
 
 static void FDECL(bind_key, (UCHAR_P, char*));
 static void NDECL(init_bind_list);
@@ -544,6 +546,15 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
+	if(uandroid){
+		Sprintf(buf, "Use Android Abilities");
+		any.a_int = MATTK_DROID;	/* must be non-zero */
+		incntlet = 'd';
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		atleastone = TRUE;
+	}
 	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14){
 		Sprintf(buf, "Sing an Elemental into being");
 		any.a_int = MATTK_ELMENTAL;	/* must be non-zero */
@@ -705,6 +716,7 @@ domonability()
 	case MATTK_HIDE: return dohide();
 	case MATTK_MIND: return domindblast();
 	case MATTK_CLOCK: return doclockspeed();
+	case MATTK_DROID: return doandroid();
 	case MATTK_ELMENTAL: return doelementalbreath();
 	case MATTK_DARK: return dodarken();
 	case MATTK_REPL: {
@@ -802,6 +814,43 @@ domonability()
 	return 0;
 }
 
+/* #mount command - order mount to attack */
+STATIC_PTR int
+domountattk()
+{
+#ifdef STEED	
+	struct monst *mtmp;
+	int new_x,new_y;
+	if(!u.usteed){
+		You("don't have a mount.");
+		return 0;
+	}
+	
+	if(P_SKILL(P_RIDING) < P_EXPERT){
+		pline("Only an expert is skilled enough to direct a mount's attacks.");
+		return 0;
+	}
+	
+	if(!getdir("Attack in what direction?")){
+		pline("never mind");
+		return 0;
+	}
+	
+	for(new_x = u.ux+u.dx, new_y = u.uy+u.dy; isok(new_x,new_y); new_x += u.dx, new_y += u.dy){
+		mtmp = m_at(new_x, new_y);
+		if(mtmp && mon_can_see_mon(u.usteed, mtmp) && canspotmon(mtmp)){
+			You("direct your mount to attack %s", mon_nam(mtmp));
+			mattackm(u.usteed, mtmp);
+			return 1;
+		}
+	}
+	pline("Your mount can't find anything to attack!");
+	return 0;
+#else
+	pline("You can't ride anything!");
+#endif
+}
+
 STATIC_OVL int
 use_reach_attack()
 {
@@ -854,7 +903,7 @@ use_reach_attack()
 		
 		find_to_hit_rolls(mtmp, &tmp, &tmpw, &tmpt);
 		
-	    (void) hmonas(mtmp, youmonst.data, tmp, tmpw, tmpt);
+	    (void) hmonas(mtmp, tmp, tmpw, tmpt);
 	} else
 	    /* Now you know that nothing is there... */
 	    pline("%s", nothing_happens);
@@ -1530,7 +1579,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	putstr(en_win, 0, "");
 
 	if (u.uevent.uhand_of_elbereth) {
-	    static const char * const hofe_titles[36] = {
+	    static const char * const hofe_titles[39] = {
 				/* Default */
 				"the Arm of the Law",		 /*01*/
 				"the Envoy of Balance",		 /*02*/
@@ -1556,7 +1605,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 				"the Hand of Kiaransali",	 /*17*/
 				"the Hand of Lolth",		 /*18*/
 				/* Hedrow */
-				"the Shepherd of spiders",	 /*19*/
+				"the Shepherd of Spiders",	 /*19*/
 				"the Sword of Vhaeraun",	 /*20*/
 				"the Fang of Lolth",		 /*21*/
 				/* Drow Noble */
@@ -1571,15 +1620,18 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 				"the High %s of Apollo",	 /*28*/
 				"the High %s of Latona",	 /*29*/
 				"the High %s of Diana",	 	 /*30*/
-				/* Gonome Ranger */
+				/* Gnome Ranger */
 				"the Great Slave-Vassal of Kurtulmak",	 /*31*/
 				"the Thane of Garl Glittergold",	 /*32*/
 				"the Claw of Urdlen",	 	 /*33*/
-				/* Gonome Ranger */
+				/* Healer */
 				"the Hand of Athena",		 /*34*/
 				"the Messenger of Hermes",	 /*35*/
 				"the Glory of Poseidon",	 /*36*/
-				
+				/*Archeologist*/
+				"the Warrior of Quetzalcoatl",/*37*/
+				"the Champion of Camaxtli",	 /*38*/
+				"the Fire-bearer of Huhetotl",	 /*39*/
 				/* uhand_of_elbereth max == 63 */
 	    };
 		
@@ -2020,6 +2072,10 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(u.ucspeed==SLOW_CLOCKSPEED) you_are("set to low clockspeed");
 		if(u.phasengn) you_are("in phase mode");
 	}
+	if (uandroid){
+		if(u.ucspeed==HIGH_CLOCKSPEED) you_are("set to emergency speed");
+		if(u.phasengn) you_are("in phase mode");
+	}
 	if (u.uhitinc)
 	    you_have(enlght_combatinc("to hit", u.uhitinc, final, buf));
 	if (u.udaminc)
@@ -2043,7 +2099,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		you_are("protected from shape changers");
 	if (Polymorph) you_are("polymorphing");
 	if (Polymorph_control) you_have("polymorph control");
-	if (u.ulycn >= LOW_PM && !uclockwork) {
+	if (u.ulycn >= LOW_PM && !umechanoid) {
 		Strcpy(buf, an(mons[u.ulycn].mname));
 		you_are(buf);
 	}
@@ -2619,6 +2675,10 @@ int final;
 		if(u.ucspeed==SLOW_CLOCKSPEED) dump(youwere, "set to low clockspeed");
 		if(u.phasengn) dump(youwere, "in phase mode");
 	}
+	if (uandroid){
+		if(u.ucspeed==HIGH_CLOCKSPEED) dump(youwere, "set to emergency speed");
+		if(u.phasengn) dump(youwere, "in phase mode");
+	}
 	if (u.uhitinc)
 	    dump(youhad,
 		enlght_combatinc("to hit", u.uhitinc, final, buf));
@@ -2733,7 +2793,7 @@ int final;
 } /* dump_enlightenment */
 #endif
 
-void
+STATIC_OVL void
 resistances_enlightenment()
 {
 	char buf[BUFSZ];
@@ -2746,6 +2806,10 @@ resistances_enlightenment()
 		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to high speed.");
 		if(u.ucspeed==NORM_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to normal speed.");
 		if(u.ucspeed==SLOW_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to low speed.");
+		if(u.phasengn) putstr(en_win, 0, "Your phase engine is activated.");
+	}
+	if (uandroid){
+		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "You are set to emergency speed.");
 		if(u.phasengn) putstr(en_win, 0, "Your phase engine is activated.");
 	}
 	/*** Resistances to troubles ***/
@@ -2960,7 +3024,52 @@ resistances_enlightenment()
 	return;
 }
 
-void
+STATIC_OVL void
+udr_enlightenment()
+{
+	int dr;
+	char mbuf[BUFSZ] = {'\0'};
+	en_win = create_nhwindow(NHW_MENU);
+	putstr(en_win, 0, "Current Damage Reduction:");
+	putstr(en_win, 0, "");
+	
+	if(!has_head(youracedata)){
+		Sprintf(mbuf, "You have no head; shots hit upper body");
+		putstr(en_win, 0, mbuf);
+	} else {
+		dr = slot_udr(HEAD_DR, (struct monst *)0);
+	Sprintf(mbuf, "Head Armor:       %s%d", (dr>11) ? "11-" : "", dr);
+		putstr(en_win, 0, mbuf);
+	}
+	dr = slot_udr(UPPER_TORSO_DR, (struct monst *)0);
+	Sprintf(mbuf, "Upper Body Armor: %s%d", (dr>11) ? "11-" : "", dr);
+	dr = slot_udr(LOWER_TORSO_DR, (struct monst *)0);
+	putstr(en_win, 0, mbuf);
+	Sprintf(mbuf, "Lower Body Armor: %s%d", (dr>11) ? "11-" : "", dr);
+	putstr(en_win, 0, mbuf);
+	if(!can_wear_gloves(youracedata)){
+		Sprintf(mbuf, "You have no hands; shots hit upper body");
+		putstr(en_win, 0, mbuf);
+	} else {
+		dr = slot_udr(ARM_DR, (struct monst *)0);
+	Sprintf(mbuf, "Hand Armor:       %s%d", (dr>11) ? "11-" : "", dr);
+		putstr(en_win, 0, mbuf);
+	}
+	if(!can_wear_boots(youracedata)){
+		Sprintf(mbuf, "You have no feet; shots hit lower body");
+		putstr(en_win, 0, mbuf);
+	} else {
+		dr = slot_udr(LEG_DR, (struct monst *)0);
+	Sprintf(mbuf, "Foot Armor:       %s%d", (dr>11) ? "11-" : "", dr);
+		putstr(en_win, 0, mbuf);
+	}
+	
+	display_nhwindow(en_win, TRUE);
+	destroy_nhwindow(en_win);
+	return;
+}
+
+STATIC_OVL void
 signs_enlightenment()
 {
 	boolean message = FALSE;
@@ -3680,7 +3789,7 @@ int typ;
     register struct obj *obj;
     char allowall[2];
     static NEARDATA const char callable[] = {
-	SCROLL_CLASS, POTION_CLASS, WAND_CLASS, RING_CLASS, AMULET_CLASS,
+	SCROLL_CLASS, TILE_CLASS, POTION_CLASS, WAND_CLASS, RING_CLASS, AMULET_CLASS,
 	GEM_CLASS, SPBOOK_CLASS, ARMOR_CLASS, TOOL_CLASS, 0 };
 
     if (!typ) {
@@ -3765,6 +3874,8 @@ doattributes()
 	if (wizard || discover)
 		enlightenment(0);
 	else resistances_enlightenment();
+	resistances_enlightenment();
+	udr_enlightenment();
 	if(u.sealsActive || u.specialSealsActive) signs_enlightenment();
 	return 0;
 }
@@ -4114,6 +4225,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"jump", "jump to a location", dojump, !IFBURIED, AUTOCOMPLETE},
 	{"loot", "loot a box on the floor", doloot, !IFBURIED, AUTOCOMPLETE},
 	{"monster", "use a monster's special ability", domonability, IFBURIED, AUTOCOMPLETE},
+	{"mount", "order mount to attack", domountattk, !IFBURIED, AUTOCOMPLETE},
 	{"name", "name an item or type of object", do_naming_ddocall, IFBURIED, AUTOCOMPLETE},
 	{"nameold", "name an item or type of object (vanilla)", ddocall, IFBURIED},
 	{"offer", "offer a sacrifice to the gods", dosacrifice, !IFBURIED, AUTOCOMPLETE},
@@ -4255,8 +4367,10 @@ init_bind_list(void)
 #endif
 	bind_key('a',    "apply" );
 	bind_key('A',    "takeoffall" );
+	bind_key(C('a'), "mount" );
 	bind_key(M('a'), "adjust" );
 	/*       'b', 'B' : go sw */
+	bind_key('B',    "monster" );
 	bind_key(C('b'),    "monster" );
 	bind_key('c',    "close" );
 	bind_key('C',    "call" );

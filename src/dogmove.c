@@ -117,7 +117,7 @@ boolean check_if_better;
 	    /* food */
             ((dogfood(mtmp, otmp) < APPORT) ||
 	    /* chains for some */
-		 ((mtmp->data == &mons[PM_CATHEZAR]) && otmp->otyp == IRON_CHAIN) ||
+		 ((mtmp->data == &mons[PM_CATHEZAR]) && otmp->otyp == CHAIN) ||
 	    /* better weapons */
 	     (is_armed(mtmp->data) &&
 	      (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && 
@@ -413,7 +413,7 @@ boolean devour;
 	    delobj(obj);
 	} else if (obj == uchain)
 	    unpunish();
-	else if (obj->quan > 1L && obj->oclass == FOOD_CLASS) {
+	else if (obj->quan > 1L && (obj->oclass == FOOD_CLASS || obj->oclass == CHAIN_CLASS)) {
 	    obj->quan--;
 	    obj->owt = weight(obj);
 	} else
@@ -473,31 +473,36 @@ register struct edog *edog;
 		if(monstermoves > edog->hungrytime + 750)
 			edog->hungrytime = monstermoves + 750;
 	}
-    if (monstermoves > edog->hungrytime)
-	{
-		/* We're hungry; check if we're carrying anything we can eat
-		   Intelligent pets should be able to carry such food */
-		register struct obj *otmp, *obest = (struct obj *)0;
-		int best_nutrit = -1; //cur_nutrit = -1,
-		int cur_food = APPORT, best_food = APPORT;
-		for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj)
-		{
-//	        cur_nutrit = dog_nutrition(mtmp, otmp);
-			cur_food = dogfood(mtmp, otmp);
-			if (cur_food < best_food) /*&& cur_nutrit > best_nutrit)*/
+	if((monstermoves + DOG_SATIATED) > edog->hungrytime){
+		if(herbivorous(mtmp->data) && !carnivorous(mtmp->data) && levl[mtmp->mx][mtmp->my].typ == GRASS){
+			if(cansee(mtmp->mx, mtmp->my))
+				pline("%s eats some grass.", mon_visible(mtmp) ? noit_Monnam(mtmp) : "It");
+			edog->hungrytime += 5*objects[FOOD_RATION].oc_nutrition;
+		} else if (monstermoves > edog->hungrytime){
+			/* We're hungry; check if we're carrying anything we can eat
+			   Intelligent pets should be able to carry such food */
+			register struct obj *otmp, *obest = (struct obj *)0;
+			int best_nutrit = -1; //cur_nutrit = -1,
+			int cur_food = APPORT, best_food = APPORT;
+			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj)
 			{
-//			    best_nutrit = cur_nutrit;
-				best_food = cur_food;
-				obest = otmp;
+	//	        cur_nutrit = dog_nutrition(mtmp, otmp);
+				cur_food = dogfood(mtmp, otmp);
+				if (cur_food < best_food) /*&& cur_nutrit > best_nutrit)*/
+				{
+	//			    best_nutrit = cur_nutrit;
+					best_food = cur_food;
+					obest = otmp;
+				}
 			}
-		}
-		if (obest != (struct obj *)0)
-		{
-			obj_extract_self(obest);
-			place_object(obest, mtmp->mx, mtmp->my);
-			if (dog_eat(mtmp, obest, mtmp->mx, mtmp->my, FALSE) == 2)
-				return(TRUE);
-			return(FALSE);
+			if (obest != (struct obj *)0)
+			{
+				obj_extract_self(obest);
+				place_object(obest, mtmp->mx, mtmp->my);
+				if (dog_eat(mtmp, obest, mtmp->mx, mtmp->my, FALSE) == 2)
+					return(TRUE);
+				return(FALSE);
+			}
 		}
 	}
 	if (monstermoves > edog->hungrytime + 500) {
@@ -827,7 +832,7 @@ boolean ranged;
 		(!ranged &&
 		 mtmp2->data == &mons[PM_FLOATING_EYE] && rn2(10) &&
 		 !is_blind(mtmp) && haseyes(mtmp->data) && !is_blind(mtmp2)
-		 && (perceives(mtmp->data) || !mtmp2->minvis)) ||
+		 && (mon_resistance(mtmp,SEE_INVIS) || !mtmp2->minvis)) ||
 		(!ranged &&
 		 mtmp2->data==&mons[PM_GELATINOUS_CUBE] && rn2(10)) ||
 		(mtmp2->data == &mons[PM_MANDRAKE]) ||
@@ -961,8 +966,8 @@ register int after;	/* this is extra fast monster movement */
 #endif
 
 	allowflags = ALLOW_M | ALLOW_TRAPS | ALLOW_SSM | ALLOW_SANCT;
-	if (passes_walls(mtmp->data)) allowflags |= (ALLOW_ROCK | ALLOW_WALL);
-	if (passes_bars(mtmp->data)  && !Is_illregrd(&u.uz) ) allowflags |= ALLOW_BARS;
+	if (mon_resistance(mtmp,PASSES_WALLS)) allowflags |= (ALLOW_ROCK | ALLOW_WALL);
+	if (passes_bars(mtmp)  && !Is_illregrd(&u.uz) ) allowflags |= ALLOW_BARS;
 	if (throws_rocks(mtmp->data)) allowflags |= ALLOW_ROCK;
 	
 	/*I'm making minions just RESIST conflict automatically, instead of becoming a swarm of hostile angels*/
@@ -1282,7 +1287,7 @@ could_reach_item(mon, nx, ny)
 struct monst *mon;
 xchar nx, ny;
 {
-    if ((!is_pool(nx,ny, FALSE) || is_swimmer(mon->data)) &&
+    if ((!is_pool(nx,ny, FALSE) || mon_resistance(mon,SWIMMING)) &&
 	(!is_lava(nx,ny) || likes_lava(mon->data)) &&
 	(!boulder_at(nx,ny) || throws_rocks(mon->data)))
     	return TRUE;
@@ -1314,7 +1319,7 @@ xchar mx, my, fx, fy;
 		continue;
 	    if (dist2(i, j, fx, fy) >= dist)
 		continue;
-	    if (IS_ROCK(levl[i][j].typ) && !passes_walls(mon->data) &&
+	    if (IS_ROCK(levl[i][j].typ) && !mon_resistance(mon,PASSES_WALLS) &&
 				    (!may_dig(i,j) || !tunnels(mon->data)))
 		continue;
 	    if (IS_DOOR(levl[i][j].typ) &&

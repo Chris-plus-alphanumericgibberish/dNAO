@@ -48,7 +48,7 @@ register xchar omx,omy,gx,gy;
 	niy = omy;
 	if (mtmp->isshk) allowflags = ALLOW_SSM;
 	else allowflags = ALLOW_SSM | ALLOW_SANCT;
-	if (passes_walls(mtmp->data)) allowflags |= (ALLOW_ROCK|ALLOW_WALL);
+	if (mon_resistance(mtmp,PASSES_WALLS)) allowflags |= (ALLOW_ROCK|ALLOW_WALL);
 	if (throws_rocks(mtmp->data)) allowflags |= ALLOW_ROCK;
 	if (tunnels(mtmp->data)) allowflags |= ALLOW_DIG;
 	if (!nohands(mtmp->data) && !verysmall(mtmp->data)) {
@@ -71,7 +71,7 @@ pick_move:
 	for(i=0; i<cnt; i++) {
 		nx = poss[i].x;
 		ny = poss[i].y;
-		if(levl[nx][ny].typ == ROOM ||
+		if((levl[nx][ny].typ == ROOM || levl[nx][ny].typ == GRASS || levl[nx][ny].typ == SOIL ) ||
 			(mtmp->ispriest &&
 			    levl[nx][ny].typ == ALTAR) ||
 			(mtmp->isshk &&
@@ -426,32 +426,29 @@ register int roomno;
 			}
 			msg2 = 0;
 			if(sanctum && Is_sanctum(&u.uz)) {
-				if(priest->mpeaceful) {
-				msg1 = "Infidel, you have entered Moloch's Sanctum!";
-				msg2 = "Be gone!";
-				priest->mpeaceful = 0;
-				set_malign(priest);
-				} else
-				msg1 = "You desecrate this place by your presence!";
+					if(priest->mpeaceful) {
+					msg1 = "Infidel, you have entered Moloch's Sanctum!";
+					msg2 = "Be gone!";
+					priest->mpeaceful = 0;
+					set_malign(priest);
+				} else msg1 = "You desecrate this place by your presence!";
 			} else if(In_quest(&u.uz) && Role_if(PM_EXILE) && u.uz.dlevel == nemesis_level.dlevel) {
 				if(priest->mpeaceful) {
-				msg1 = "Your existence is blasphemy!";
-				msg2 = "No more shall you challenge the Most High!";
-				priest->mpeaceful = 0;
-				set_malign(priest);
-				} else
-				msg1 = "You desecrate this place by your presence!";
+					msg1 = "Your existence is blasphemy!";
+					msg2 = "No more shall you challenge the Most High!";
+					priest->mpeaceful = 0;
+					set_malign(priest);
+				} else msg1 = "You desecrate this place by your presence!";
 			} else if(In_quest(&u.uz) && Role_if(PM_PRIEST) && u.uz.dlevel == qlocate_level.dlevel) {
 				if(priest->mpeaceful) {
-				msg1 = 0;
-				msg2 = 0;
-				msg1 = "You are not welcome here!";
+					msg1 = 0;
+					msg2 = 0;
+					msg1 = "You are not welcome here!";
+				} else msg1 = "You desecrate this place by your presence!";
 				if(canseemon(priest)) pline("As you approach, the priest suddenly putrefies and melts into a foul-smelling liquid mass!");
 				set_mon_data(priest, &mons[PM_DARKNESS_GIVEN_HUNGER], 0);
 				priest->mpeaceful = 0;
 				set_malign(priest);
-				} else
-				msg1 = "You desecrate this place by your presence!";
 			} else if(Is_astralevel(&u.uz) && Role_if(PM_ANACHRONONAUT) && EPRI(priest)->shralign == A_LAWFUL) {
 				if(priest->mpeaceful) {
 					priest->mpeaceful = 0;

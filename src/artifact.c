@@ -24,8 +24,6 @@ extern boolean notonhead;	/* for long worms */
 #define get_artifact(o) \
 		(((o)&&(o)->oartifact) ? &artilist[(o)->oartifact] : 0)
 
-const static int AHRIMAN_PROPS[] = {AD_FIRE, AD_DRLI, AD_DRST};
-
 //duplicates of other functions, created due to problems with the linker
 STATIC_DCL void NDECL(cast_protection);
 STATIC_DCL int NDECL(throweffect);
@@ -119,7 +117,7 @@ hack_artifacts()
 	struct artifact *art;
 	int alignmnt = flags.stag ? u.ualign.type : aligns[flags.initalign].value;
 	
-	if(Role_if(PM_EXILE)) alignmnt = A_VOID; //hack_artifacts may be called before this is propperly set
+	if(Role_if(PM_EXILE)) alignmnt = A_VOID; //hack_artifacts may be called before this is properly set
 	if((Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && !Role_if(PM_EXILE) && !Role_if(PM_CONVICT) && !flags.initgend){
 		alignmnt = A_NEUTRAL; /* Males are neutral */
 	}
@@ -133,9 +131,6 @@ hack_artifacts()
 
 	if(Race_if(PM_HALF_DRAGON) && flags.initgend){
 		int i;
-		
-
-		
 		for(i = 0; i < ART_ROD_OF_SEVEN_PARTS; i++)
 			if(artilist[i].role == Role_switch)
 				artilist[i].role = NON_PM;
@@ -159,6 +154,11 @@ hack_artifacts()
 	artilist[ART_VESTMENT_OF_HELL].otyp = find_opera_cloak();
 	artilist[ART_CROWN_OF_THE_SAINT_KING].otyp = gcircletsa;
 	artilist[ART_HELM_OF_THE_DARK_LORD].otyp = find_vhelm();
+	
+	if(Role_if(PM_ANACHRONONAUT)){
+		artilist[ART_CRESCENT_BLADE].race = NON_PM;
+		artilist[ART_CRESCENT_BLADE].alignment = A_NONE;
+	}
 	
 	/* Remove flag from the non-matching first gift */
 	if(Pantheon_if(PM_BARBARIAN)){
@@ -544,6 +544,233 @@ register boolean mod;
 	return;
 }
 
+/*
+ * Returns a pointer to a TEMPORARY array of all the properties (that are in prop.h) an artifact has (either while equiped or while carried)
+ * If while_carried == TRUE, do not list properties that require the artifact to be wielded / worn
+ * 
+ * The array that is returned only stores the most recent query for each of carried/equiped.
+ */
+int *
+art_property_list(oartifact, while_carried)
+int oartifact;
+boolean while_carried;
+{
+	static int equiped_property_list[LAST_PROP];	// the temporary list of properties for while equiped
+	static int carried_property_list[LAST_PROP];	// the temporary list of properties for while carried
+	int * property_list = (while_carried ? carried_property_list : equiped_property_list);
+
+	/* quick safety check */
+	if (oartifact < 1 || oartifact > NROFARTIFACTS)
+	{
+		property_list[0] = 0;
+		return property_list;
+	}
+
+	int cur_prop, i;
+	register const struct artifact *oart = &artilist[oartifact];
+	boolean got_prop;
+
+	/* another check */
+	if (!oart)
+	{
+		property_list[0] = 0;
+		return property_list;
+	}
+
+	const static int NO_RES[] = { 0 };
+	// artifact properties while equiped
+	const static int CHROMATIC_RES[] = { FIRE_RES, COLD_RES, DISINT_RES, DRAIN_RES, SHOCK_RES, POISON_RES, SICK_RES, ACID_RES, STONE_RES, 0 };
+	const static int PLATINUM_RES[] = { FIRE_RES, COLD_RES, DISINT_RES, SHOCK_RES, SLEEP_RES, FREE_ACTION, 0 };
+	const static int KURTULMAK_RES[] = { FIRE_RES, FREE_ACTION, 0 };
+	const static int EREBOR_RES[] = { FIRE_RES, COLD_RES, 0 };
+	const static int DURIN_RES[] = { FIRE_RES, ACID_RES, POISON_RES, 0 };
+	const static int TLALOC_RES[] = { COLD_RES, SHOCK_RES, 0 };
+	const static int REV_PROPS[] = { COLD_RES, REGENERATION, FIXED_ABIL, POISON_RES, SEE_INVIS, 0 };
+	const static int HERMES_PROPS[] = { FAST, 0 };
+	const static int FLY_PROPS[] = { DETECT_MONSTERS, 0 };
+	// artifact properties while carried
+	const static int AHRIMAN_PROPS[] = { FIRE_RES, DRAIN_RES, POISON_RES, 0 };
+
+	i = 0;
+	for (cur_prop = 0; cur_prop < LAST_PROP; cur_prop++)
+	{
+		got_prop = FALSE;
+		
+		// defn/cary resistances
+		switch (while_carried ? oart->cary.adtyp : oart->defn.adtyp)
+		{
+		case AD_FIRE:
+			if (cur_prop == FIRE_RES) got_prop = TRUE;
+			break;
+		case AD_COLD:
+			if (cur_prop == COLD_RES) got_prop = TRUE; 
+			break;
+		case AD_ELEC:
+			if (cur_prop == SHOCK_RES) got_prop = TRUE; 
+			break;
+		case AD_ACID:
+			if (cur_prop == ACID_RES) got_prop = TRUE; 
+			break;
+		case AD_MAGM:
+			if (cur_prop == ANTIMAGIC) got_prop = TRUE; 
+			break;
+		case AD_PLYS:
+			if (cur_prop == FREE_ACTION) got_prop = TRUE; 
+			break;
+		case AD_DISN:
+			if (cur_prop == DISINT_RES) got_prop = TRUE; 
+			break;
+		case AD_DRST:
+			if (cur_prop == POISON_RES) got_prop = TRUE; 
+			break;
+		case AD_DRLI:
+			if (cur_prop == DRAIN_RES) got_prop = TRUE; 
+			break;
+		case AD_SLEE:
+			if (cur_prop == SLEEP_RES) got_prop = TRUE; 
+			break;
+		case AD_DISE:
+			if (cur_prop == SICK_RES) got_prop = TRUE;
+			break;
+		}
+
+		// SPFX properties
+		if (!got_prop)
+		{
+			long spfx, spfx2, spfx3, wpfx;
+
+			spfx = (!while_carried) ? oart->spfx : oart->cspfx;
+			spfx2 = (!while_carried) ? oart->spfx2 : 0;
+			spfx3 = (!while_carried) ? 0 : oart->cspfx3;
+			wpfx = (!while_carried) ? oart->wpfx : 0;
+
+			switch (cur_prop)
+			{
+			case SEARCHING:
+				if (spfx & SPFX_SEARCH) got_prop = TRUE;
+				break;
+			case HALLUC_RES:
+				if (spfx & SPFX_HALRES) got_prop = TRUE;
+				break;
+			case TELEPAT:
+				if (spfx & SPFX_ESP) got_prop = TRUE;
+				break;
+			case DISPLACED:
+				if (spfx & SPFX_DISPL) got_prop = TRUE;
+				break;
+			case REGENERATION:
+				if (spfx & SPFX_REGEN) got_prop = TRUE;
+				break;
+			case TELEPORT_CONTROL:
+				if (spfx & SPFX_TCTRL) got_prop = TRUE;
+				break;
+			case ENERGY_REGENERATION:
+				if (spfx & SPFX_EREGEN) got_prop = TRUE;
+				break;
+			case HALF_SPDAM:
+				if (spfx & SPFX_HSPDAM) got_prop = TRUE;
+				break;
+			case HALF_PHDAM:
+				if (spfx & SPFX_HPHDAM) got_prop = TRUE;
+				break;
+			case REFLECTING:
+				if (spfx & SPFX_REFLECT) got_prop = TRUE;
+				break;
+			case CONFLICT:
+				if (spfx & SPFX_CONFL) got_prop = TRUE;
+				break;
+			case AGGRAVATE_MONSTER:
+				if (spfx & SPFX_AGGRM) got_prop = TRUE;
+				break;
+			case WARN_OF_MON:
+			case WARNING:
+				if (spfx & SPFX_WARN)
+				{
+					if ((spec_mm(oartifact) || spec_mt(oartifact) || spec_mb(oartifact) || spec_mg(oartifact) || spec_ma(oartifact) || spec_mv(oartifact) || spec_s(oartifact)))
+						got_prop = (cur_prop == WARN_OF_MON);	// specific warning (ie, showing creatures)
+					else
+						got_prop = (cur_prop == WARNING);	// non-specific warning (ie, numbers)
+				}
+				break;
+			case STEALTH:
+				if (spfx2 & SPFX2_STLTH) got_prop = TRUE;
+				break;
+			case SPELLBOOST:
+				if (spfx2 & SPFX2_SPELLUP) got_prop = TRUE;
+				break;
+			case POLYMORPH_CONTROL:
+				if (spfx3 & SPFX3_PCTRL) got_prop = TRUE;
+				break;
+			case FREE_ACTION:
+				if (wpfx & WSFX_FREEACT) got_prop = TRUE;
+				break;
+			}
+		}
+
+		// additional properties from yet another location
+		if (!got_prop)
+		{
+			// first, select the artifact's list of bonus properties
+			const static int * bonus_prop_list;
+			switch (oartifact)
+			{
+			case ART_CHROMATIC_DRAGON_SCALES:
+				bonus_prop_list = (while_carried ? (NO_RES) : (CHROMATIC_RES));
+				break;
+			case ART_DRAGON_PLATE:
+				bonus_prop_list = (while_carried ? (NO_RES) : (PLATINUM_RES));
+				break;
+			case ART_STEEL_SCALES_OF_KURTULMAK:
+				bonus_prop_list = (while_carried ? (NO_RES) : (KURTULMAK_RES));
+				break;
+			case ART_ARMOR_OF_EREBOR:
+				bonus_prop_list = (while_carried ? (NO_RES) : (EREBOR_RES));
+				break;
+			case ART_WAR_MASK_OF_DURIN:
+				bonus_prop_list = (while_carried ? (NO_RES) : (DURIN_RES));
+				break;
+			case ART_MASK_OF_TLALOC:
+				bonus_prop_list = (while_carried ? (NO_RES) : (TLALOC_RES));
+				break;
+			case ART_CLAWS_OF_THE_REVENANCER:
+				bonus_prop_list = (while_carried ? (NO_RES) : (REV_PROPS));
+				break;
+			case ART_HERMES_S_SANDALS:
+				bonus_prop_list = (while_carried ? (NO_RES) : (HERMES_PROPS));
+				break;
+			case ART_ALL_SEEING_EYE_OF_THE_FLY:
+				bonus_prop_list = (while_carried ? (NO_RES) : (FLY_PROPS));
+				break;
+			case ART_HEART_OF_AHRIMAN:
+				bonus_prop_list = (AHRIMAN_PROPS);
+				break;
+			default:
+				bonus_prop_list = (NO_RES);
+				break;
+			}
+			// if it has one, then see if the current property is on the list
+			if (bonus_prop_list != (NO_RES))
+			{
+				int j;
+				for (j = 0; bonus_prop_list[j]; j++)
+				if (bonus_prop_list[j] == cur_prop)
+					got_prop = TRUE;
+			}
+		}
+		// if we've got the property, add it to the array
+		if (got_prop)
+		{
+			property_list[i] = cur_prop;
+			i++;
+		}
+	}
+	// add a terminator to the array
+	property_list[i] = 0;
+
+	// return the list
+	return property_list;
+}
+
 int
 nartifact_exist()
 {
@@ -723,6 +950,7 @@ struct obj *obj;
     return (obj && (
 		(obj->oartifact && spec_ability2(obj, SPFX2_SHINING)) ||
 		(is_lightsaber(obj) && litsaber(obj)) ||
+		(obj->oproperties&OPROP_PHSEW) ||
 		((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && obj->lamplit)
 	));
 }
@@ -851,267 +1079,135 @@ long wp_mask;
 {
 	long *mask = 0;
 	register const struct artifact *oart = get_artifact(otmp);
+	int oartifact = otmp->oartifact;
 	uchar dtyp;
 	long spfx, spfx2, spfx3, wpfx;
 	long exist_warntypem = 0, exist_warntypet = 0, exist_warntypeb = 0, exist_warntypeg = 0, exist_warntypea = 0, exist_warntypev = 0;
 	long long exist_montype = 0;
 	boolean exist_nonspecwarn;
-	int p = 0, r;
+	int i, j;
+	int this_art_property_list[LAST_PROP];
+	int * tmp_property_list;
 
 	if (!oart) return;
+	
+	/* get the property list (either for the slot or for slotless) */
+	tmp_property_list = art_property_list(oartifact, wp_mask == W_ART);
+	/* copy it to this local array */
+	for (i = 0; tmp_property_list[i]; i++)
+		this_art_property_list[i] = tmp_property_list[i];	// set indices
+	this_art_property_list[i] = 0;							// add null terminator
 
-	/* effects from the defn field */
-	dtyp = (wp_mask != W_ART) ? oart->defn.adtyp : oart->cary.adtyp;
-	do{
-		// pline("%d: %d",p,(int)dtyp);
-		if (dtyp == AD_FIRE)
-			mask = &EFire_resistance;
-		else if (dtyp == AD_COLD)
-			mask = &ECold_resistance;
-		else if (dtyp == AD_ELEC)
-			mask = &EShock_resistance;
-		else if (dtyp == AD_ACID)
-			mask = &EAcid_resistance;
-		else if (dtyp == AD_MAGM)
-			mask = &EAntimagic;
-		else if (dtyp == AD_PLYS)
-			mask = &EFree_action;
-		else if (dtyp == AD_DISN)
-			mask = &EDisint_resistance;
-		else if (dtyp == AD_DRST)
-			mask = &EPoison_resistance;
-		else if (dtyp == AD_DRLI)
-			mask = &EDrain_resistance;
-		else if (dtyp == AD_SLEE)
-			mask = &ESleep_resistance;
-		
-		if (mask && wp_mask == W_ART && !on) {
-			/* find out if some other artifact also confers this intrinsic */
-			/* if so, leave the mask alone */
+	/* loop through all properties the artifact gives */
+	for (i = 0; this_art_property_list[i]; i++)
+	{
+		/* select property field from uprops */
+		mask = &(u.uprops[this_art_property_list[i]].extrinsic);
+
+		/* if we are removing the artifact and we are dealing with W_ART,
+		   we need to check if the property is being provided from another source in the same slot
+		   if so, we need to leave the mask alone */
+		if (mask && !on && wp_mask == W_ART)
+		{
+			boolean got_prop = FALSE;
 			register struct obj* obj;
-			for(obj = invent; obj; obj = obj->nobj)
-			if(obj != otmp && obj->oartifact) {
-				register const struct artifact *art = get_artifact(obj);
-				if(art->cary.adtyp == dtyp) {
-					mask = (long *) 0;
-			break;
-				}
-				if(obj->oartifact == ART_HEART_OF_AHRIMAN){
-					for(r=0;r<3;r++){
-						if(AHRIMAN_PROPS[r] == dtyp)
-							mask = (long *) 0;
-					break;
+			for (obj = invent; (obj && !got_prop); obj = obj->nobj)
+			if (obj != otmp && obj->oartifact) {
+				/* write over tmp_property_list with the carried artifact -- this is why we needed a copy earlier */
+				tmp_property_list = art_property_list(obj->oartifact, wp_mask == W_ART);
+
+				/* specific-monster warning needs to be specially handled */
+				if (this_art_property_list[i] == WARN_OF_MON)
+				{
+					if (oart->cspfx&SPFX_WARN){
+						if (get_artifact(obj)->cspfx&SPFX_WARN){
+							exist_warntypem |= spec_mm(obj->oartifact);
+							exist_warntypet |= spec_mt(obj->oartifact);
+							exist_warntypeb |= spec_mb(obj->oartifact);
+							exist_warntypeg |= spec_mg(obj->oartifact);
+							exist_warntypea |= spec_ma(obj->oartifact);
+							exist_warntypev |= spec_mv(obj->oartifact);
+							exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj->oartifact)));
+							// note: non-specifc warning is just a standard extrinsic
+						}
 					}
-					if(mask == 0L)
-			break;
+				}
+				/* everything else is just a standard property */
+				else
+				{
+					for (j = 0; tmp_property_list[j]; j++)
+					{
+						if (tmp_property_list[j] == this_art_property_list[i])
+							got_prop = TRUE;
+					}
 				}
 			}
+			if (got_prop)
+				continue;	// do not modify mask for this property
 		}
-		if (mask) {
+
+		/* time to modify the mask */
+		switch (this_art_property_list[i])
+		{
+		/* specific warning */
+		case WARN_OF_MON:
+			/* most specific flags */
+			/*  flag                 if on  {add to mask     ; add to warning type                   } else {remove from warning type unless another art fills in         } */
+			if (spec_mm(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypem |= spec_mm(oartifact);} else {flags.warntypem &= ~(spec_mm(oartifact)&(~exist_warntypem));}}
+			if (spec_mt(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mt(oartifact);} else {flags.warntypet &= ~(spec_mt(oartifact)&(~exist_warntypet));}}
+			if (spec_mb(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeb |= spec_mb(oartifact);} else {flags.warntypeb &= ~(spec_mb(oartifact)&(~exist_warntypeb));}}
+			if (spec_mg(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeg |= spec_mg(oartifact);} else {flags.warntypeg &= ~(spec_mg(oartifact)&(~exist_warntypeg));}}
+			if (spec_ma(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypea |= spec_ma(oartifact);} else {flags.warntypea &= ~(spec_ma(oartifact)&(~exist_warntypea));}}
+			if (spec_mv(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypev |= spec_mv(oartifact);} else {flags.warntypev &= ~(spec_mv(oartifact)&(~exist_warntypev));}}
+			/* monster symbol */
+			if (spec_s(oartifact)) {
+				if (on) {
+					*mask |= wp_mask;
+					flags.montype |= (long long int)((long long int)1 << (int)(spec_s(oartifact))); //spec_s(oartifact);
+				}
+				else {
+					flags.montype &= ~((long long int)((long long int)1 << (int)(spec_s(oartifact)))&(~exist_montype));
+				}
+			}
+			/* update vision */
+			see_monsters();	// it should be fine to run a vision update even if there wasn't a change
+
+			/* if there are no specific warnings remaining, toggle off the extrinsic */
+			if (!(flags.warntypem || flags.warntypet || flags.warntypeb || flags.warntypeg || flags.warntypea || flags.warntypev || flags.montype))
+				*mask &= ~wp_mask;
+			break;
+		/* hallucination */
+		case HALLUC_RES:
+			/* make_hallucinated must (re)set the mask itself to get
+			* the display right */
+			/* restoring needed because this is the only artifact intrinsic
+			* that can print a message--need to guard against being printed
+			* when restoring a game
+			*/
+			(void)make_hallucinated((long)!on, restoring ? FALSE : TRUE, wp_mask);
+			break;
+		/* needs vision update*/
+		case WARNING:
+		case TELEPAT:
 			if (on) *mask |= wp_mask;
 			else *mask &= ~wp_mask;
-		}
-		
-		if(otmp->oartifact == ART_HEART_OF_AHRIMAN && p<3) dtyp = AHRIMAN_PROPS[p++];
-		else dtyp = 255;
-	} while(dtyp != 255);
-	
-	/* intrinsics from the spfx field; there could be more than one */
-	spfx = (wp_mask != W_ART) ? oart->spfx : oart->cspfx;
-	spfx2 = (wp_mask != W_ART) ? oart->spfx2 : 0;
-	spfx3 = (wp_mask != W_ART) ? 0 : oart->cspfx3;
-	wpfx = (wp_mask != W_ART) ? oart->wpfx : 0;
-	if(spfx && wp_mask == W_ART && !on) {
-	    /* don't change any spfx also conferred by other artifacts */
-	    register struct obj* obj;
-	    for(obj = invent; obj; obj = obj->nobj)
-		if(obj != otmp && obj->oartifact) {
-		    register const struct artifact *art = get_artifact(obj);
-		    spfx &= ~(art->cspfx&(~SPFX_WARN)); //SPFX_WARN is ALWAYS going to need special handling :(
-			spfx3 &= ~(art->cspfx3);
-			if(spfx&SPFX_WARN){
-				if(art->cspfx&SPFX_WARN){
-					exist_warntypem |= spec_mm(obj);
-					exist_warntypet |= spec_mt(obj);
-					exist_warntypeb |= spec_mb(obj);
-					exist_warntypeg |= spec_mg(obj);
-					exist_warntypea |= spec_ma(obj);
-					exist_warntypev |= spec_mv(obj);
-					exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj)));
-					if(!(spec_mm(obj) || spec_mt(obj) || spec_mb(obj) || spec_mg(obj) || spec_ma(obj) || spec_mv(obj) || spec_s(obj)))
-						exist_nonspecwarn |= TRUE;
-				}
-			}
-		}
-	}
+			see_monsters();
+			break;
+		/* everything else (that are in uprops) */
+		default:
+			if (on) *mask |= wp_mask;
+			else *mask &= ~wp_mask;
+			break;
+		}//end switch
+	}//end for
 
-	if (spfx & SPFX_SEARCH) {
-	    if(on) ESearching |= wp_mask;
-	    else ESearching &= ~wp_mask;
-	}
-	if (spfx & SPFX_HALRES) {
-	    /* make_hallucinated must (re)set the mask itself to get
-	     * the display right */
-	    /* restoring needed because this is the only artifact intrinsic
-	     * that can print a message--need to guard against being printed
-	     * when restoring a game
-	     */
-	    (void) make_hallucinated((long)!on, restoring ? FALSE : TRUE, wp_mask);
-	}
-	if (spfx & SPFX_ESP) {
-	    if(on) ETelepat |= wp_mask;
-	    else ETelepat &= ~wp_mask;
-	    see_monsters();
-	}
-	if (spfx & SPFX_DISPL) { //L's Patch
-	    if (on) EDisplaced |= wp_mask;
-	    else EDisplaced &= ~wp_mask;
-	}
-	if (spfx & SPFX_REGEN) {
-	    if (on) ERegeneration |= wp_mask;
-	    else ERegeneration &= ~wp_mask;
-	}
-	if (spfx & SPFX_TCTRL) {
-	    if (on) ETeleport_control |= wp_mask;
-	    else ETeleport_control &= ~wp_mask;
-		if(otmp->oartifact == ART_SILVER_KEY){
-			if (on) EPolymorph_control |= wp_mask;
-		    else EPolymorph_control &= ~wp_mask;
-		}
-	}
-	if (spfx & SPFX_WARN) {
-		boolean specific = FALSE;
-	    if (spec_mm(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypem |= spec_mm(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypem &= ~(spec_mm(otmp)&(~exist_warntypem));
-			}
-			see_monsters();
-			specific = TRUE;
-	    } 
-	    if (spec_mt(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypet |= spec_mt(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypet &= ~(spec_mt(otmp)&(~exist_warntypet));
-			}
-			see_monsters();
-			specific = TRUE;
-	    } 
-	    if (spec_mb(otmp)){
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypeb |= spec_mb(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypeb &= ~(spec_mb(otmp)&(~exist_warntypeb));
-			}
-			see_monsters();
-			specific = TRUE;
-	    }
-	    if (spec_mg(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypeg |= spec_mg(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypeg &= ~(spec_mg(otmp)&(~exist_warntypeg));
-			}
-			see_monsters();
-			specific = TRUE;
-	    } 
-	    if (spec_ma(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypea |= spec_ma(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypea &= ~(spec_ma(otmp)&(~exist_warntypea));
-			}
-			see_monsters();
-			specific = TRUE;
-	    }
-	    if (spec_mv(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.warntypev |= spec_mv(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.warntypev &= ~(spec_mv(otmp)&(~exist_warntypeb));
-			}
-			see_monsters();
-			specific = TRUE;
-	    }
-		if (spec_s(otmp)) {
-	    	if (on) {
-				EWarn_of_mon |= wp_mask;
-				flags.montype |= (long long int)((long long int)1 << (int)(spec_s(otmp))); //spec_s(otmp);
-	    	} else {
-				// EWarn_of_mon &= ~wp_mask;
-				flags.montype &= ~((long long int)((long long int)1 << (int)(spec_s(otmp)))&(~exist_montype));
-			}
-			see_monsters();
-			specific = TRUE;
-	    }
-		if(!(flags.warntypem || flags.warntypet || flags.warntypeb || flags.warntypeg || flags.warntypea || flags.warntypev || flags.montype)) EWarn_of_mon &= ~wp_mask;
-		if(!specific){
-			if (on) EWarning |= wp_mask;
-			else if(!exist_nonspecwarn) EWarning &= ~wp_mask;
-	    }
-	}
-	if (spfx & SPFX_EREGEN) {
-	    if (on) EEnergy_regeneration |= wp_mask;
-	    else EEnergy_regeneration &= ~wp_mask;
-	}
-	if (spfx & SPFX_HSPDAM) {
-	    if (on) EHalf_spell_damage |= wp_mask;
-	    else EHalf_spell_damage &= ~wp_mask;
-	}
-	if (spfx & SPFX_HPHDAM) {
-	    if (on) EHalf_physical_damage |= wp_mask;
-	    else EHalf_physical_damage &= ~wp_mask;
-	}
-	if ((spfx & SPFX_XRAY) && (otmp->oartifact != ART_AXE_OF_THE_DWARVISH_LORDS || Race_if(PM_DWARF))) {
-	    /* this assumes that no one else is using xray_range */
+	/* xray vision, surprisingly, isn't in uprops */
+		if (((wp_mask == W_ART ? oart->cspfx : oart->spfx) & SPFX_XRAY)
+			&& (otmp->oartifact != ART_AXE_OF_THE_DWARVISH_LORDS || Race_if(PM_DWARF))) {
+	    /* this assumes that no one else is using xray_range, which isn't exactly valid anymore... */
 	    if (on) u.xray_range = 3;
 	    else u.xray_range = -1;
 	    vision_full_recalc = 1;
-	}
-	if ((spfx & SPFX_REFLECT)) {
-	    if (on) EReflecting |= wp_mask;
-	    else EReflecting &= ~wp_mask;
-	}
-	if (spfx & SPFX_CONFL) {
-		if (on) EConflict |= wp_mask;
-		else EConflict &= ~wp_mask;
-	}
-	if (spfx & SPFX_AGGRM) {
-		if (on) EAggravate_monster |= wp_mask;
-		else EAggravate_monster &= ~wp_mask;
-	}
-
-	if (spfx2 & SPFX2_STLTH) {
-	    if (on) EStealth |= wp_mask;
-	    else EStealth &= ~wp_mask;
-	}
-	if (spfx2 & SPFX2_SPELLUP) {
-	    if (on) ESpellboost |= wp_mask;
-	    else ESpellboost &= ~wp_mask;
-	}
-
-	if (spfx3 & SPFX3_PCTRL) {
-		if (on) EPolymorph_control |= wp_mask;
-		else EPolymorph_control &= ~wp_mask;
-	}
-	
-	if (wpfx & WSFX_FREEACT) {
-	    if (on) u.uprops[FREE_ACTION].extrinsic |= wp_mask;
-	    else u.uprops[FREE_ACTION].extrinsic &= ~wp_mask;
 	}
 
 	if(wp_mask == W_ART && !on && oart->inv_prop) {
@@ -1617,10 +1713,10 @@ struct monst *mtmp;
 
 /* return the MM flags of monster that an artifact's special attacks apply against */
 long
-spec_mm(otmp)
-struct obj *otmp;
+spec_mm(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsm)
 		return artifact->mflagsm;
 	return 0L;
@@ -1628,10 +1724,10 @@ struct obj *otmp;
 
 /* return the MT flags of monster that an artifact's special attacks apply against */
 long
-spec_mt(otmp)
-struct obj *otmp;
+spec_mt(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagst)
 		return artifact->mflagst;
 	return 0L;
@@ -1639,10 +1735,10 @@ struct obj *otmp;
 
 /* return the MB flags of monster that an artifact's special attacks apply against */
 long
-spec_mb(otmp)
-struct obj *otmp;
+spec_mb(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsb)
 		return artifact->mflagsb;
 	return 0L;
@@ -1650,10 +1746,10 @@ struct obj *otmp;
 
 /* return the MG flags of monster that an artifact's special attacks apply against */
 long
-spec_mg(otmp)
-struct obj *otmp;
+spec_mg(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsg)
 		return artifact->mflagsg;
 	return 0L;
@@ -1661,10 +1757,10 @@ struct obj *otmp;
 
 /* return the MA flags of monster that an artifact's special attacks apply against */
 long
-spec_ma(otmp)
-struct obj *otmp;
+spec_ma(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsa)
 		return artifact->mflagsa;
 	return 0L;
@@ -1672,10 +1768,10 @@ struct obj *otmp;
 
 /* return the MV flags of monster that an artifact's special attacks apply against */
 long
-spec_mv(otmp)
-struct obj *otmp;
+spec_mv(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagsv)
 		return artifact->mflagsv;
 	return 0L;
@@ -1683,10 +1779,10 @@ struct obj *otmp;
 
 /* return the S number of monster that an artifact's special attacks apply against */
 long
-spec_s(otmp)
-struct obj *otmp;
+spec_s(oartifact)
+int oartifact;
 {
-	register const struct artifact *artifact = get_artifact(otmp);
+	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mtype)
 		return artifact->mtype;
 	return 0L;
@@ -1757,14 +1853,22 @@ int tmp;
 			if(Fumbling) multiplier++;
 			if(Wounded_legs) multiplier++;
 			return damd ? d(multiplier, damd) : max(multiplier*tmp,multiplier);
-		} else if(otmp && 
-			(otmp->oartifact == ART_LIMITED_MOON
-			|| otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS
-			|| otmp->oartifact == ART_POSEIDON_S_TRIDENT
-		)){
-			return 2*(damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1));
-		} else return damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1);
-	}
+		} else if(otmp && otmp->oartifact == ART_FIRE_BRAND){
+			if(mon && species_resists_cold(mon))
+				return (damd ? d(((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1)*2, damd) : max(tmp,1)*2);
+			else
+				return damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1);				
+		} else if(otmp && otmp->oartifact == ART_FROST_BRAND){
+			if(mon && species_resists_fire(mon))
+				return (damd ? d(((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1)*2, damd) : max(tmp,1)*2);
+			else
+				return damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1);
+		} else if(otmp && double_bonus_damage_artifact(otmp->oartifact)){
+			return (damd ? d(((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1)*2, damd) : max(tmp,1)*2);
+		} else
+			return damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd) : max(tmp,1);
+	} else if(otmp && (otmp->oartifact == ART_FIRE_BRAND || otmp->oartifact == ART_FROST_BRAND))
+		return damd ? d((is_lightsaber(otmp) && litsaber(otmp)) ? 3 : 1, damd/2+1) : max(tmp/2,1);				
 	return 0;
 }
 
@@ -2694,7 +2798,7 @@ int basedmg;
 			if (otmp->oproperties&OPROP_LESSW) bonus += d(1, 8);
 			else bonus += basedmg;
 		}
-		else if(!youdefend && !mindless_mon(mdef) && (telepathic(mdef->data) || !rn2(5))){
+		else if(!youdefend && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
 			if (otmp->oproperties&OPROP_LESSW) bonus += d(1, 8);
 			else bonus += basedmg;
 		}
@@ -2703,7 +2807,7 @@ int basedmg;
 		if(otmp->spe < 8){
 		if(youdefend && (Blind_telepat || !rn2(5)))
 			bonus += d(1,15-(otmp->spe)*2);
-		else if(!youdefend && !mindless_mon(mdef) && (telepathic(mdef->data) || !rn2(5)))
+		else if(!youdefend && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5)))
 			bonus += d(1,15-(otmp->spe)*2);
 		}
 	}
@@ -2738,6 +2842,225 @@ int basedmg;
 		}
 	}
 	return bonus;
+}
+
+boolean
+otyp_hit(magr, mdef, otmp, dmgptr, dieroll)
+struct monst *magr, *mdef;
+struct obj *otmp;
+int *dmgptr;
+int dieroll; /* needed for Magicbane and vorpal blades */
+{
+	boolean youattack = (magr == &youmonst);
+	boolean youdefend = (mdef == &youmonst);
+	boolean vis = (!youattack && magr && cansee(magr->mx, magr->my))
+		|| (!youdefend && cansee(mdef->mx, mdef->my))
+		|| (youattack && u.uswallow && mdef == u.ustuck && !Blind);
+	boolean messaged = FALSE;
+	static const char you[] = "you";
+	char hittee[BUFSZ];
+	int basedmg = *dmgptr;
+
+	Strcpy(hittee, youdefend ? you : mon_nam(mdef));
+
+	//Add the bonus damage
+	//*dmgptr += otyp_dbon(mdef, otmp, *dmgptr);
+	
+	if (otmp->otyp == TORCH && otmp->lamplit) {
+		if (youdefend) {
+			if (!Fire_resistance){
+				if (species_resists_cold(&youmonst)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+			}
+			if (!InvFire_resistance){
+				if (!rn2(3)) destroy_item(SCROLL_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_item(SPBOOK_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
+			}
+		}
+		else if (mdef){
+			if (!species_resists_fire(mdef)) {
+				if (species_resists_cold(mdef)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+				if (!rn2(3)) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
+				if (!rn2(3)) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+			}
+		}
+	}
+	if (otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit){
+		if (youdefend) {
+			if (!Cold_resistance){
+				if (species_resists_fire(&youmonst)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+			}
+			if (!InvCold_resistance){
+				if (!rn2(3)) destroy_item(POTION_CLASS, AD_COLD);
+			}
+		}
+		else if (mdef){
+			if (!species_resists_cold(mdef)) {
+				if (species_resists_fire(mdef)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+				if (!rn2(3)) destroy_mitem(mdef, POTION_CLASS, AD_COLD);
+			}
+		}
+	}
+	if (otmp->otyp == SUNROD && otmp->lamplit) {
+		if (youdefend) {
+			if (!(Shock_resistance && Acid_resistance)){
+				if (!(Shock_resistance || Acid_resistance)) (*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+			}
+			if (!InvShock_resistance){
+				if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+				if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+			}
+			if (!InvAcid_resistance){
+				if (rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
+			}
+			if (!resists_blnd(&youmonst)) {
+				You("are blinded by the flash!");
+				make_blinded((long)d(1, 50), FALSE);
+				if (!Blind) Your1(vision_clears);
+			}
+		}
+		else if (mdef){
+			if (!(resists_elec(mdef) && resists_acid(mdef))) {
+				if (!(resists_elec(mdef) || resists_acid(mdef)))
+					(*dmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				else (*dmgptr) += rnd(6) + otmp->spe;
+				if (!resists_acid(mdef))
+					if (rn2(3)) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+				if (!resists_elec(mdef)){
+					if (!rn2(3)) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
+					if (!rn2(3)) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(mdef) &&
+					!(!flags.mon_moving && u.uswallow && mdef == u.ustuck)) {
+					register unsigned rnd_tmp = rnd(50);
+					mdef->mcansee = 0;
+					if ((mdef->mblinded + rnd_tmp) > 127)
+						mdef->mblinded = 127;
+					else mdef->mblinded += rnd_tmp;
+				}
+			}
+		}
+	}
+
+	if (otmp->otyp == KAMEREL_VAJRA && litsaber(otmp)) {
+		if (otmp->where == OBJ_MINVENT && otmp->ocarry->data == &mons[PM_ARA_KAMEREL]){
+			if (youdefend){
+				if (!Shock_resistance){
+					(*dmgptr) += d(6, 6);
+				}
+				if (!InvShock_resistance){
+					if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+					if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(&youmonst)) {
+					You("are blinded by the flash!");
+					make_blinded((long)d(1, 50), FALSE);
+					if (!Blind) Your1(vision_clears);
+				}
+			}
+			else if (mdef){
+				if (!resists_elec(mdef)){
+					(*dmgptr) += d(6, 6); //wand of lightning
+					if (!rn2(3)) (void)destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
+					/* not actually possible yet */
+					if (!rn2(3)) (void)destroy_mitem(mdef, RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(mdef) &&
+					!(!flags.mon_moving && u.uswallow && mdef == u.ustuck)) {
+					register unsigned rnd_tmp = rnd(50);
+					mdef->mcansee = 0;
+					if ((mdef->mblinded + rnd_tmp) > 127)
+						mdef->mblinded = 127;
+					else mdef->mblinded += rnd_tmp;
+				}
+			}
+		}
+		else {
+			if (youdefend){
+				if (!Shock_resistance){
+					(*dmgptr) += d(2, 6);
+				}
+				if (!InvShock_resistance){
+					if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
+					if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(&youmonst)) {
+					You("are blinded by the flash!");
+					make_blinded((long)d(1, 50), FALSE);
+					if (!Blind) Your1(vision_clears);
+				}
+			}
+			else if (mdef){
+				if (!resists_elec(mdef)){
+					(*dmgptr) += d(2, 6); //wand of lightning
+					if (!rn2(3)) (void)destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
+					/* not actually possible yet */
+					if (!rn2(3)) (void)destroy_mitem(mdef, RING_CLASS, AD_ELEC);
+				}
+				if (!resists_blnd(mdef) &&
+					!(!flags.mon_moving && u.uswallow && mdef == u.ustuck)) {
+					register unsigned rnd_tmp = rnd(50);
+					mdef->mcansee = 0;
+					if ((mdef->mblinded + rnd_tmp) > 127)
+						mdef->mblinded = 127;
+					else mdef->mblinded += rnd_tmp;
+				}
+			}
+		}
+	}
+
+	if(force_weapon(otmp) && otmp->ovar1){
+		int bonus = 0;
+		//Non-elemental energy attack: 1 die plus the remaining half die
+		bonus += rnd((mdef && bigmonst(mdef->data)) ? 
+						objects[otmp->otyp].oc_wldam : 
+						objects[otmp->otyp].oc_wsdam);
+		bonus += (mdef && bigmonst(mdef->data)) ? 
+					(objects[otmp->otyp].oc_wldam+1)/2 : 
+					(objects[otmp->otyp].oc_wsdam+1)/2;
+		if(otmp->otyp == FORCE_WHIP){
+			bonus += (mdef && bigmonst(mdef->data)) ? 
+							rnd(4)+2 : 
+							2;
+		}
+		if(otmp->otyp == DOUBLE_FORCE_BLADE &&
+			((otmp == uwep && !u.twoweap) || (mcarried(otmp) && otmp->owornmask&W_WEP))
+		){
+			bonus *= 2;
+		}
+		*dmgptr += bonus;
+	}
+	
+	if(pure_weapon(otmp) && otmp->spe >= 6){
+		if(youattack){
+			if(Upolyd && u.mh == u.mhmax)
+				*dmgptr += basedmg*.2;
+			else if(!Upolyd && u.uhp == u.uhpmax)
+				*dmgptr += basedmg*.2;
+		} else {
+			if(magr && magr->mhp == magr->mhpmax)
+				*dmgptr += basedmg*.2;
+		}
+	}
+	
+	if(dark_weapon(otmp) && otmp->spe >= 6){
+		if(youattack){
+			if(Upolyd && u.mh <= u.mhmax*.3)
+				*dmgptr += basedmg*.2;
+			else if(!Upolyd && u.uhp <= u.uhpmax*.3)
+				*dmgptr += basedmg*.2;
+		} else {
+			if(magr && magr->mhp <= magr->mhpmax*.3)
+				*dmgptr += basedmg*.2;
+		}
+	}
+	return FALSE;
 }
 
 boolean
@@ -2907,7 +3230,74 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		}
 		*dmgptr += bonus;
 	}
-	
+	if(otmp->oproperties&OPROP_FLAYW){
+		struct obj *obj = some_armor(mdef);
+		int i;
+		if(obj){
+			if(youdefend){
+				pline("%s slices your armor!", The(xname(otmp)));
+				i = 1;
+				if(!(otmp->oproperties&OPROP_LESSW)) i += rnd(4);
+				for(; i>0; i--){
+					if(obj->spe > -1*objects[(obj)->otyp].a_ac){
+						damage_item(obj);
+						if(!i) Your("%s less effective.", aobjnam(obj, "seem"));
+					} else if(!obj->oartifact){
+						claws_destroy_arm(obj);
+						i = 0;
+					}
+				}
+			} else {
+				i = 1;
+				pline("%s slices %s armor!", The(xname(otmp)), s_suffix(mon_nam(mdef)));
+				if(!(otmp->oproperties&OPROP_LESSW)) i += rnd(4);
+				for(; i>0; i--){
+					if(obj->spe > -1*objects[(obj)->otyp].a_ac){
+						damage_item(obj);
+						if(!i) pline("%s %s less effective.", s_suffix(Monnam(mdef)), aobjnam(obj, "seem"));
+					} else if(!obj->oartifact){
+						claws_destroy_marm(mdef, obj);
+						i = 0;
+					}
+				}
+			}
+		} else {
+			if(youdefend){
+				if(!(thick_skinned(youracedata) || u.sealsActive&SEAL_ECHIDNA || nonliving(youracedata))){
+					static long ulastscreamed = 0;
+					if(ulastscreamed < monstermoves){
+						if(!is_silent(youracedata)){
+							You("%s from the pain!", humanoid_torso(youracedata) ? "scream" : "shriek");
+						} else {
+							You("writhe in pain!");
+						}
+						ulastscreamed = monstermoves;
+					}
+					if(otmp->oproperties&OPROP_LESSW)
+						youmonst.movement = max(youmonst.movement-2, -12);
+					else youmonst.movement = max(youmonst.movement-6, -12);
+				}
+			} else {
+				if(!(thick_skinned(mdef->data) || nonliving_mon(mdef))){
+					static long lastscreamed = 0;
+					static struct monst *lastmon = 0;
+					if(lastscreamed < monstermoves || lastmon != mdef){
+						if(!is_silent_mon(mdef)){
+							if(canseemon(mdef))
+								pline("%s %s in pain!", Monnam(mdef), humanoid_torso(mdef->data) ? "screams" : "shrieks");
+							else You_hear("%s %s in pain!", mdef->mtame ? noit_mon_nam(mdef) : mon_nam(mdef), humanoid_torso(mdef->data) ? "screaming" : "shrieking");
+						} else {
+							if(canseemon(mdef))
+								pline("%s writhes in pain!", Monnam(mdef));
+						}
+						lastscreamed = monstermoves;
+						lastmon = mdef;
+					}
+					mdef->movement = -12;
+				}
+			}
+		}
+	}
 	return messaged;
 }
   
@@ -3005,6 +3395,16 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				AD_FIRE, 0,
 				d(6,6),
 				EXPL_FIERY, 1);
+		}
+	}
+	if(otmp->oartifact == ART_AVENGER && dieroll <= 2){
+		if(cancel_monst(mdef, otmp, youattack, FALSE, FALSE,0)){
+			if(youattack){
+				u.uen += 10;
+			} else {
+				magr->mcan = FALSE;
+				magr->mspec_used = 0;
+			}
 		}
 	}
 	if(otmp->oartifact == ART_GENOCIDE){
@@ -3172,7 +3572,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			if(otmp->osinging == OSING_CONFUSE)
 				mdef->mconf = 1;
 			else if(otmp->osinging == OSING_CANCEL)
-				mdef->mspec_used = max(0, mdef->mspec_used+otmp->spe);
+				mdef->mspec_used = max(0, mdef->mspec_used+otmp->spe+1);
 			else if(otmp->osinging == OSING_INSANE){
 				mdef->mconf = 1;
 				mdef->mstun = 1;
@@ -3650,6 +4050,34 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			messaged = TRUE;
 		}
 	}
+	if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL){
+		if (!youdefend) {
+			if (has_blood_mon(mdef) && !noncorporeal(mdef->data)) {
+				if (vis){
+					pline("The sacrificial blade drinks the blood of %s!", mon_nam(mdef));					
+					*dmgptr += d(2,4);
+#define MAXVALUE 24
+					if (mdef->mhp < *dmgptr){
+						extern const int monstr[];
+						int value = min(monstr[monsndx(mdef->data)] + 1,MAXVALUE);
+						if(u.ugangr[Align2gangr(u.ualign.type)]) {
+							u.ugangr[Align2gangr(u.ualign.type)] -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
+							if(u.ugangr[Align2gangr(u.ualign.type)] < 0) u.ugangr[Align2gangr(u.ualign.type)] = 0;
+						} else if(u.ualign.record < 0) {
+							if(value > MAXVALUE) value = MAXVALUE;
+							if(value > -u.ualign.record) value = -u.ualign.record;
+							adjalign(value);
+						} else if (u.ublesscnt > 0) {
+							u.ublesscnt -=
+							((value * (u.ualign.type == A_CHAOTIC ? 500 : 300)) / MAXVALUE);
+							if(u.ublesscnt < 0) u.ublesscnt = 0;
+						}
+					}
+					messaged = TRUE;
+				}
+			}
+		}
+	} 
 	if (spec_ability(otmp, SPFX_BEHEAD) && otmp->oartifact != ART_OGRESMASHER) {
 	/* We really want "on a natural 20" but Nethack does it in */
 	/* reverse from AD&D. */
@@ -3661,6 +4089,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			 "%s pierces %s heart!",
 			 "%s punctures %s heart!"
 		};
+		
 	    if (otmp->oartifact == ART_TSURUGI_OF_MURAMASA && dieroll == 1) {
 			wepdesc = "The razor-sharp blade";
 			/* not really beheading, but so close, why add another SPFX */
@@ -3979,7 +4408,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		monAC += magr->m_lev;
 		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) monAC += u.chokhmah;
 		if(multi < 0) monAC += 4;
-		if((Invis && !perceives(magr->data)) || is_blind(magr))
+		if((Invis && !mon_resistance(magr,SEE_INVIS)) || is_blind(magr))
 			monAC -= 2;
 		if(magr->mtrapped) monAC -= 2;
 		if(monAC <= 0) monAC = 1;
@@ -4088,7 +4517,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		tmp += magr->m_lev;
 		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) tmp += u.chokhmah;
 		if(multi < 0) tmp += 4;
-		if((Invis && !perceives(magr->data)) || is_blind(magr))
+		if((Invis && !mon_resistance(magr,SEE_INVIS)) || is_blind(magr))
 			tmp -= 2;
 		if(magr->mtrapped) tmp -= 2;
 		if(tmp <= 0) tmp = 1;
@@ -4378,6 +4807,8 @@ arti_invoke(obj)
 	int summons[10] = {0, PM_FOG_CLOUD, PM_DUST_VORTEX, PM_STALKER, 
 					  PM_ICE_VORTEX, PM_ENERGY_VORTEX, PM_STEAM_VORTEX, 
 					  PM_FIRE_VORTEX, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL};
+	int windpets[8] = {0, PM_FOG_CLOUD, PM_DUST_VORTEX, PM_ICE_PARAELEMENTAL, PM_ICE_VORTEX,
+					   PM_ENERGY_VORTEX, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL};
 	coord cc;
 	int n, damage;
 	struct permonst *pm;
@@ -4802,7 +5233,7 @@ arti_invoke(obj)
 				if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0 && mtmp->mcansee && mon_can_see_you(mtmp)) {
 					boolean youattack = mtmp == &youmonst;
 					if(obj->otyp == ROUNDSHIELD) You("display the shield's device to %s.", mon_nam(mtmp));
-					else if(obj->otyp == LEATHER_CLOAK) You("display the cloak's clasp to %s.", mon_nam(mtmp));
+					else if(obj->otyp == CLOAK) You("display the cloak's clasp to %s.", mon_nam(mtmp));
 					else You("display it to %s.", mon_nam(mtmp)); //Shouldn't be used
 					
 					if (!resists_ston(mtmp) && (rn2(100)>(mtmp->data->mr/2))){
@@ -4919,11 +5350,15 @@ arti_invoke(obj)
 						    destroy_drawbridge(x,y);
 
 				    if ((mtmp = m_at(bhitpos.x, bhitpos.y)) != 0) {
+						int dmg;
+						dmg = d(u.ulevel+obj->spe,12);
+						if(u.ukrau_duration) dmg *= 1.5;
+						dmg += spell_damage_bonus()*3;
 //						pline("mon found at %d, %d", bhitpos.x, bhitpos.y);
 					    if (cansee(bhitpos.x,bhitpos.y) && !canspotmon(mtmp)) {
 						    map_invisible(bhitpos.x, bhitpos.y);
 						}
-					    resist(mtmp, WEAPON_CLASS, d(u.ulevel+obj->spe,12) + spell_damage_bonus()*3, FALSE);
+					    resist(mtmp, WEAPON_CLASS, dmg, FALSE);
 					}
 					bhitpile(pseudo,bhito,bhitpos.x,bhitpos.y);
 				    if(IS_DOOR(typ) || typ == SDOOR) {
@@ -4969,11 +5404,16 @@ arti_invoke(obj)
 				    return 1;
 				}
 				else if(throweffect()){
+					int dmg;
+					dmg = u.ulevel + obj->spe;
+					if(u.ukrau_duration) dmg *= 1.5;
+					dmg += spell_damage_bonus();
+					dmg *= 3;
 					pline("Some no mai, Tsukishiro!");
 					u.SnSd1 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
 						explode(u.dx, u.dy,
 							AD_COLD, 0,
-							(u.ulevel + obj->spe + spell_damage_bonus())*3,
+							dmg,
 							EXPL_FROSTY, 1);
 					nomul(-1, "performing a sword dance");//both the first and the second dance leave you momentarily exposed.
 				}
@@ -4987,10 +5427,14 @@ arti_invoke(obj)
 				    return 1;
 				}
 				else if(getdir((char *)0) && (u.dx || u.dy)) {
+					int dmg;
+					dmg = u.ulevel + obj->spe;
+					if(u.ukrau_duration) dmg *= 1.5;
+					dmg += spell_damage_bonus();
 					pline("Tsugi no mai, Hakuren!");
 					u.SnSd2 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
 					buzz(AD_COLD, WAND_CLASS, TRUE,
-						 (u.ulevel + obj->spe + spell_damage_bonus()), u.ux, u.uy, u.dx, u.dy,7+obj->spe,0);
+						 dmg, u.ux, u.uy, u.dx, u.dy,7+obj->spe,0);
 				}
 					nomul(-1, "performing a sword dance");//both the first and the second dance leave you momentarily exposed.
 			}
@@ -5233,13 +5677,17 @@ arti_invoke(obj)
     break;
 	case FIRAGA:
 				if( (obj->spe > 0) && throweffect()){
+			int dmg;
+			dmg = u.ulevel + 10;
+			if(u.ukrau_duration) dmg *= 1.5;
+			dmg += spell_damage_bonus();
 					exercise(A_WIS, TRUE);
 					cc.x=u.dx;cc.y=u.dy;
 					n=3;
 					while(n--) {
 						explode(u.dx, u.dy,
 							AD_FIRE, 0,
-							u.ulevel + 10 + spell_damage_bonus(),
+					dmg,
 							EXPL_FIERY, 1);
 						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
@@ -5253,13 +5701,17 @@ arti_invoke(obj)
 	break;
 	case BLIZAGA:
 				if( (obj->spe > 0) && throweffect()){
+			int dmg;
+			dmg = u.ulevel + 10;
+			if(u.ukrau_duration) dmg *= 1.5;
+			dmg += spell_damage_bonus();
 					exercise(A_WIS, TRUE);
 					cc.x=u.dx;cc.y=u.dy;
 					n=3;
 					while(n--) {
 						explode(u.dx, u.dy,
 							AD_COLD, 0,
-							u.ulevel + 10 + spell_damage_bonus(),
+					dmg,
 							EXPL_FROSTY, 1);
 						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
@@ -5273,13 +5725,17 @@ arti_invoke(obj)
 	break;
 	case THUNDAGA:
 				if( (obj->spe > 0) && throweffect()){
+			int dmg;
+			dmg = u.ulevel + 10;
+			if(u.ukrau_duration) dmg *= 1.5;
+			dmg += spell_damage_bonus();
 					exercise(A_WIS, TRUE);
 					cc.x=u.dx;cc.y=u.dy;
 					n=3;
 					while(n--) {
 						explode(u.dx, u.dy,
 							AD_ELEC, 0,
-							u.ulevel + 10 + spell_damage_bonus(),
+					dmg,
 							EXPL_MAGICAL, 1);
 						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
@@ -5354,13 +5810,17 @@ arti_invoke(obj)
 	break;
 	case SHADOW_FLARE:
 		if( (obj->spe > 0) && throweffect()){
+			int dmg;
+			dmg = u.ulevel + 10;
+			if(u.ukrau_duration) dmg *= 1.5;
+			dmg += spell_damage_bonus();
 			exercise(A_WIS, TRUE);
 			cc.x=u.dx;cc.y=u.dy;
 			n=3;
 			while(n--) {
 				explode(u.dx, u.dy,
 					AD_DISN, 0,
-					u.ulevel + 10 + spell_damage_bonus(),
+					dmg,
 					EXPL_DARK, 1);
 				u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 				if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
@@ -5563,6 +6023,10 @@ arti_invoke(obj)
 						strcmp(buf, "Ruat Coelum.") == 0 ||
 						strcmp(buf, "Ruat Coelum!") == 0 ){//Ruat Coelum:  Heaven Falls.  Attack spell.  One charge.
 				if( (obj->spe > 0) && throweffect()){
+					int dmg;
+					dmg = u.ulevel/2 + 1;
+					if(u.ukrau_duration) dmg *= 1.5;
+					dmg += spell_damage_bonus();
 					exercise(A_WIS, TRUE);
 					cc.x=u.dx;cc.y=u.dy;
 					n=u.ulevel/5 + 1;
@@ -5570,7 +6034,7 @@ arti_invoke(obj)
 						int type = d(1,3);
 						explode(u.dx, u.dy,
 							elements[type], 0,
-							u.ulevel/2 + 1 + spell_damage_bonus(),
+							 dmg,
 							explType[type], 1);
 						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
@@ -5732,6 +6196,22 @@ arti_invoke(obj)
 					pline("Your weapon has become more flawed.");
 				}
 				else pline("Your weapon rattles warningly.");
+			}
+		break;
+		case WIND_PETS:
+			pline("You call upon the minions of Quetzalcoatl!");
+			int n = u.ulevel/5 + 1;
+			if (ACURR(A_CHA)/3 < n) n = ACURR(A_CHA)/3;
+			while(n--) {
+				pm = &mons[windpets[d(1,8)]];
+				mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+				if(mtmp){
+					initedog(mtmp);
+					mtmp->m_lev += 7;
+					if(u.ulevel > 12) mtmp->m_lev += u.ulevel / 3;
+					mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
+					mtmp->mhp =  mtmp->mhpmax;
+				}
 			}
 		break;
 		case PETMASTER:{
@@ -6075,6 +6555,12 @@ arti_invoke(obj)
 					break;
 					case COMMAND_WHIP:
 						uwep->otyp = BULLWHIP;
+						if (uwep->oartifact == ART_XIUHCOATL)
+							uwep->obj_material = LEATHER;
+					break;
+					case COMMAND_ATLATL:
+						uwep->otyp = ATLATL;
+						uwep->obj_material = WOOD;
 					break;
 					/*These effects are limited by timeout*/
 					case COMMAND_LADDER:
@@ -6203,6 +6689,22 @@ arti_invoke(obj)
 							mtmp->mfrozen = max(1, u.ulevel - ((int)(mtmp->m_lev)));
 							pline("%s kneels before you.",Monnam(mtmp));
 						}
+					break;
+					case COMMAND_AMMO:
+						otmp = mksobj(JAVELIN, TRUE, FALSE);
+						if (!otmp) break;
+						otmp->blessed = obj->blessed;
+						otmp->cursed = obj->cursed;
+						otmp->bknown = obj->bknown;
+						if (obj->blessed) {
+							if (otmp->spe < 0) otmp->spe = 0;
+							otmp->quan += rnd(10);
+						} else if (obj->cursed) {
+							if (otmp->spe > 0) otmp->spe = 0;
+						} else otmp->quan += rnd(5);
+						otmp->owt = weight(otmp);
+						otmp = hold_another_object(otmp, "Suddenly %s out.", 
+							aobjnam(otmp, "fall"), (const char *)0);
 					break;
 					default:
 						pline("What is this strange command!?");
@@ -6387,7 +6889,7 @@ arti_invoke(obj)
 							You("raise the Annulus into the %s, and it releases a rapidly-expanding ring of cerulean energy.", Underwater ? "water" : "air");
 							for(; mtmp; mtmp = ntmp){
 								ntmp = mtmp->nmon;
-								if(telepathic(mtmp->data) && couldsee(mtmp->mx,mtmp->my)){
+								if(mon_resistance(mtmp,TELEPAT) && couldsee(mtmp->mx,mtmp->my)){
 									if(mtmp->data == &mons[PM_LUGRIBOSSK]) maanze = TRUE;
 									killed(mtmp);
 								} else if(is_magical(mtmp->data) && couldsee(mtmp->mx,mtmp->my) 
@@ -6850,6 +7352,116 @@ arti_invoke(obj)
 			if(song == 0);//canceled
 			else obj->osinging = song;
 			obj->age = 0;
+		}break;
+		case ORACLE:{
+			char ch;
+			int oops;
+
+			if (Blind) {
+				pline("Too bad you can't see %s.", the(xname(obj)));
+				break;
+			}
+			oops = (rnd(obj->blessed ? 16 : 20) > ACURR(A_INT) || obj->cursed);
+			if (oops) {
+				switch (rnd(4)) {
+					case 1 : pline("%s too much to comprehend!", Tobjnam(obj, "are"));
+					break;
+					case 2 : pline("%s you!", Tobjnam(obj, "confuse"));
+						make_confused(HConfusion + rnd(100),FALSE);
+						break;
+					case 3 : if (!resists_blnd(&youmonst)) {
+						pline("%s your vision!", Tobjnam(obj, "damage"));
+						make_blinded(Blinded + rnd(100),FALSE);
+						if (!Blind) Your1(vision_clears);
+						} else {
+						pline("%s your vision.", Tobjnam(obj, "assault"));
+						You("are unaffected!");
+						}
+						break;
+					case 4 : pline("%s your mind!", Tobjnam(obj, "zap"));
+						(void) make_hallucinated(HHallucination + rnd(100),FALSE,0L);
+						break;
+				}
+				break;
+			}
+
+			if (Hallucination) {
+				switch(rnd(6)) {
+				case 1 : You("grok some groovy globs of incandescent lava.");
+				break;
+				case 2 : pline("Whoa!  Psychedelic colors, %s!",
+					   poly_gender() == 1 ? "babe" : "dude");
+				break;
+				case 3 : pline_The("crystal pulses with sinister %s light!",
+						hcolor((char *)0));
+				break;
+				case 4 : You("see goldfish swimming above fluorescent rocks.");
+				break;
+				case 5 : You("see tiny snowflakes spinning around a miniature farmhouse.");
+				break;
+				default: pline("Hey!  A girl with kaleidoscope eyes!");
+				break;
+				}
+			break;
+			}
+
+			/* read a single character */
+			if (flags.verbose) You("may look for an object or monster symbol.");
+			ch = yn_function("What do you look for?", (char *)0, '\0');
+			/* Don't filter out ' ' here; it has a use */
+			if ((ch != def_monsyms[S_GHOST]) && (ch != def_monsyms[S_SHADE]) && index(quitchars,ch)) { 
+			if (flags.verbose) pline1(Never_mind);
+			return 1;
+			}
+			You("peer into %s...", the(xname(obj)));
+			nomul(-rnd(obj->blessed ? 6 : 10), "peering through the Oracle's eye");
+			nomovemsg = "";
+			{
+				int class;
+				int ret = 0;
+
+				/* special case: accept ']' as synonym for mimic
+				 * we have to do this before the def_char_to_objclass check
+				 */
+				if (ch == DEF_MIMIC_DEF) ch = DEF_MIMIC;
+
+				if ((class = def_char_to_objclass(ch)) != MAXOCLASSES)
+					ret = object_detect((struct obj *)0, class);
+				else if ((class = def_char_to_monclass(ch)) != MAXMCLASSES)
+					ret = monster_detect((struct obj *)0, class);
+				else if (iflags.bouldersym && (ch == iflags.bouldersym))
+					ret = object_detect((struct obj *)0, ROCK_CLASS);
+				else switch(ch) {
+					case '^':
+						ret = trap_detect((struct obj *)0);
+						break;
+					default:
+						{
+						static const struct {
+							const char *what;
+							d_level *where;
+						} level_detects[] = {
+						  { "Delphi", &oracle_level },
+						  { "a worthy opponent", &challenge_level },
+						  { "a castle", &stronghold_level },
+						  { "the Wizard of Yendor's tower", &wiz1_level },
+						};
+						int i = rn2(SIZE(level_detects));
+						You("see %s, %s.",
+						level_detects[i].what,
+						level_distance(level_detects[i].where));
+						}
+						ret = 0;
+						break;
+				}
+
+				if (ret) {
+					if (!rn2(100))  /* make them nervous */
+					You("see the Wizard of Yendor gazing back at you.");
+					else pline_The("vision is unclear.");
+				}
+			}
+			return 1;
 		}break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
@@ -7381,6 +7993,22 @@ struct obj *obj;
 				'w', 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
+	} else if(obj->oartifact == ART_XIUHCOATL){
+		if(obj->otyp != ATLATL){
+			Sprintf(buf, "Become an atlatl");
+			any.a_int = COMMAND_ATLATL;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'a', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		
+		if(obj->otyp != BULLWHIP){
+			Sprintf(buf, "Become a flaming whip");
+			any.a_int = COMMAND_WHIP;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'w', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
 	} else {
 		if(obj->otyp != RAPIER){
 			Sprintf(buf, "Become a rapier");
@@ -7429,6 +8057,12 @@ struct obj *obj;
 			any.a_int = COMMAND_STRIKE;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
 				'S', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		} else if(obj->oartifact == ART_XIUHCOATL){
+			Sprintf(buf, "Conjure ammunition");
+			any.a_int = COMMAND_AMMO;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'c', 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		} else {
 			if((obj->otyp == MACE || obj->otyp == ELVEN_MACE || obj->otyp == KHAKKHARA) && (
@@ -9055,11 +9689,12 @@ int spe;
 			Blind_telepat ? "latent telepathy" : "mind");
 		dmg = d(dnum, dsize);
 		if (Half_spell_damage) dmg = (dmg+1) / 2;
+		if (u.uvaul_duration) dmg = (dmg+1) / 2;
 		losehp(dmg, "psychic blast", KILLED_BY_AN);
 		if(dnum >= 3){
 			for (m2 = fmon; m2; m2 = nmon2) {
 				nmon2 = m2->nmon;
-				if (!DEADMONSTER(m2) && !m2->mpeaceful && (telepathic(m2->data) || rn2(2)))
+				if (!DEADMONSTER(m2) && !m2->mpeaceful && (mon_resistance(m2,TELEPAT) || rn2(2)))
 				{
 					m2->msleeping = 0;
 					if (!m2->mcanmove && !rn2(5)) {
@@ -9079,7 +9714,7 @@ int spe;
 		nmon2 = m2->nmon;
 		if (DEADMONSTER(m2)) continue;
 		if (mindless_mon(m2)) continue;
-		if ((telepathic(m2->data) &&
+		if ((mon_resistance(m2,TELEPAT) &&
 			(rn2(2) || m2->mblinded)) || !rn2(10)) {
 			if (cansee(m2->mx, m2->my))
 				pline("It locks on to %s.", mon_nam(m2));

@@ -34,6 +34,7 @@
 #define SPFX_REFLECT 0x01000000L /* Reflection */
 #define SPFX_CONFL  0x02000000L  /* Conflict */
 #define SPFX_AGGRM  0x04000000L /* Aggravate monster */
+#define SPFX_INHER  0x08000000L /* Can be Inherited */
 /* expanded special effects*/
 #define SPFX2_NONE		0x0000000L	/* nothing special */
 #define SPFX2_DIG		0x0000001L	/* Can dig with artifact, as if it were a pick. Clarent Patch (GreyKnight)*/
@@ -197,51 +198,55 @@
 #define COMMAND_SCIMITAR		16
 #define COMMAND_WHIP			17
 
-#define COMMAND_SABER			18
-#define COMMAND_RING			19
-#define COMMAND_ARM				20
-#define COMMAND_RAY				21
-#define COMMAND_BFG				22
-#define COMMAND_ANNULUS			23
+#define COMMAND_ATLATL			18
 
-#define COMMAND_LADDER			24
-#define COMMAND_CLAIRVOYANCE	25
-#define COMMAND_FEAR			26
-#define COMMAND_LIFE			27
-#define COMMAND_KNEEL			28
+#define COMMAND_SABER			19
+#define COMMAND_RING			20
+#define COMMAND_ARM				21
+#define COMMAND_RAY				22
+#define COMMAND_BFG				23
+#define COMMAND_ANNULUS			24
 
-#define COMMAND_STRIKE			29
+#define COMMAND_LADDER			25
+#define COMMAND_CLAIRVOYANCE	26
+#define COMMAND_FEAR			27
+#define COMMAND_LIFE			28
+#define COMMAND_KNEEL			29
 
-#define COMMAND_BELL			30
-#define COMMAND_BULLETS			31
-#define COMMAND_ROCKETS			32
-#define COMMAND_BEAM			33
-#define COMMAND_ANNUL			34
-#define COMMAND_CHARGE			35
+#define COMMAND_STRIKE			30
 
-#define COMMAND_POISON			35
-#define COMMAND_DRUG  			36
-#define COMMAND_STAIN 			37
-#define COMMAND_ENVENOM			38
-#define COMMAND_FILTH 			39
+#define COMMAND_AMMO			31
 
-#define COMMAND_IMPROVE_WEP     40
-#define COMMAND_IMPROVE_ARM     41
+#define COMMAND_BELL			32
+#define COMMAND_BULLETS			33
+#define COMMAND_ROCKETS			34
+#define COMMAND_BEAM			35
+#define COMMAND_ANNUL			36
+#define COMMAND_CHARGE			37
 
-#define COMMAND_DEATH           42
+#define COMMAND_POISON			38
+#define COMMAND_DRUG  			39
+#define COMMAND_STAIN 			40
+#define COMMAND_ENVENOM			41
+#define COMMAND_FILTH 			42
 
-#define COMMAND_GRAY            43
-#define COMMAND_SILVER          44
-#define COMMAND_MERCURIAL       45
-#define COMMAND_SHIMMERING      46
-#define COMMAND_DEEP            47
-#define COMMAND_RED             48
-#define COMMAND_WHITE           49
-#define COMMAND_ORANGE          50
-#define COMMAND_BLACK           51
-#define COMMAND_BLUE            52
-#define COMMAND_GREEN           53
-#define COMMAND_YELLOW          54
+#define COMMAND_IMPROVE_WEP     43
+#define COMMAND_IMPROVE_ARM     44
+
+#define COMMAND_DEATH           45
+
+#define COMMAND_GRAY            46
+#define COMMAND_SILVER          47
+#define COMMAND_MERCURIAL       48
+#define COMMAND_SHIMMERING      49
+#define COMMAND_DEEP            50
+#define COMMAND_RED             51
+#define COMMAND_WHITE           52
+#define COMMAND_ORANGE          53
+#define COMMAND_BLACK           54
+#define COMMAND_BLUE            55
+#define COMMAND_GREEN           56
+#define COMMAND_YELLOW          57
 
 struct artifact {
 	int	    otyp;
@@ -339,6 +344,8 @@ struct artifact {
 #define AEGIS           (LAST_PROP+68)
 #define WATER           (LAST_PROP+69)
 #define SINGING         (LAST_PROP+70)
+#define WIND_PETS		(LAST_PROP+71)
+#define ORACLE          (LAST_PROP+72)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20
@@ -401,6 +408,9 @@ struct artifact {
 							||  u.ualign.type == A_CHAOTIC ) \
 				)\
 			)
+/* artifact has no specific material or size, eg "silver Grimtooth" */
+#define is_malleable_artifact(a) (is_nameable_artifact((a)) || (a) == &artilist[ART_EXCALIBUR])
+
 #define is_mastery_artifact_nameable(a) (\
             /* Mastery artifacts */\
             /* Archeologist */\
@@ -534,5 +544,11 @@ struct artifact {
 				(m) == ART_FLUORITE_OCTAHEDRON ||\
 				(m) == ART_MARAUDER_S_MAP\
 			)
+
+#define double_bonus_damage_artifact(m) (\
+	(m) == ART_LIMITED_MOON ||\
+	(m) == ART_STAFF_OF_TWELVE_MIRRORS ||\
+	(m) == ART_POSEIDON_S_TRIDENT\
+	)
 
 #endif /* ARTIFACT_H */

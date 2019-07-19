@@ -31,6 +31,7 @@
 #define Fire_resistance		(HFire_resistance || EFire_resistance || \
 				 species_resists_fire(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_FIRE) ||\
 				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA || u.sealsActive&SEAL_FAFNIR)
+#define InvFire_resistance	(EFire_resistance || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
 
 #define HCold_resistance	u.uprops[COLD_RES].intrinsic
 #define ECold_resistance	u.uprops[COLD_RES].extrinsic
@@ -38,6 +39,7 @@
 				 species_resists_cold(&youmonst) || \
 				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA || u.sealsActive&SEAL_AMON)
 #define Cold_resistance		(HCold_resistance || ECold_resistance || NCold_resistance)
+#define InvCold_resistance	(ECold_resistance || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 
 #define HSleep_resistance	u.uprops[SLEEP_RES].intrinsic
 #define ESleep_resistance	u.uprops[SLEEP_RES].extrinsic
@@ -55,6 +57,7 @@
 #define Shock_resistance	(HShock_resistance || EShock_resistance || \
 				 species_resists_elec(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_ELEC) ||\
 				 ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || u.sealsActive&SEAL_ASTAROTH)
+#define InvShock_resistance	(EShock_resistance || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (HShock_resistance&FROMRACE && Race_if(PM_ANDROID)))
 
 #define HPoison_resistance	u.uprops[POISON_RES].intrinsic
 #define EPoison_resistance	u.uprops[POISON_RES].extrinsic
@@ -67,6 +70,7 @@
 #define EAcid_resistance	u.uprops[ACID_RES].extrinsic
 #define Acid_resistance		(HAcid_resistance || EAcid_resistance || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_ACID) ||\
 							 species_resists_acid(&youmonst) || u.sealsActive&SEAL_ECHIDNA)
+#define InvAcid_resistance	(EAcid_resistance)
 
 #define HDrain_resistance	u.uprops[DRAIN_RES].intrinsic
 #define EDrain_resistance	u.uprops[DRAIN_RES].extrinsic
@@ -85,6 +89,8 @@
 #define EAntimagic		u.uprops[ANTIMAGIC].extrinsic
 #define Antimagic		(EAntimagic || HAntimagic ||\
 						(u.sealsActive&SEAL_MOTHER) ||\
+						(u.usteed && u.usteed->misc_worn_check & W_SADDLE \
+						&& which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
 						Nullmagic ||\
 				 (Upolyd && resists_magm(&youmonst)))
 
@@ -100,7 +106,6 @@
 #define HSick_resistance	u.uprops[SICK_RES].intrinsic
 #define ESick_resistance	u.uprops[SICK_RES].extrinsic
 #define Sick_resistance		(HSick_resistance || ESick_resistance || \
-				 defends(AD_DISE,uwep) || \
 				 (ward_at(u.ux,u.uy) == CARTOUCHE_OF_THE_CAT_LORD && num_wards_at(u.ux, u.uy) == 7 && \
 					!( 	(mvitals[PM_KITTEN].mvflags & G_GENOD || mvitals[PM_KITTEN].died >= 120) && \
 						(mvitals[PM_HOUSECAT].mvflags & G_GENOD || mvitals[PM_HOUSECAT].died >= 120) && \
@@ -138,7 +143,7 @@
 								!(viz_array[u.uy][u.ux]&TEMP_DRK2)\
 						&& !(ublindf && (ublindf->otyp == LENSES || ublindf->otyp == MASK)) && !Is_waterlevel(&u.uz)))))
 #define Blinded			u.uprops[BLINDED].intrinsic
-#define Blindfolded		(ublindf && ublindf->otyp != LENSES && ublindf->otyp != MASK)
+#define Blindfolded		(ublindf && ublindf->otyp != LENSES && ublindf->otyp != MASK && ublindf->otyp != ANDROID_VISOR)
 		/* ...means blind because of a cover */
 #define NoLightBlind	((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && uarm->obj_material != GLASS) || (uarmu && uarmu->obj_material != GLASS))) && \
@@ -219,13 +224,13 @@
 #define HSee_invisible		u.uprops[SEE_INVIS].intrinsic
 #define ESee_invisible		u.uprops[SEE_INVIS].extrinsic
 #define See_invisible_old	(HSee_invisible || ESee_invisible || \
-				 perceives(youracedata) || u.sealsActive&SEAL_NABERIUS)
+				 species_perceives(youracedata) || u.sealsActive&SEAL_NABERIUS)
 #define See_invisible(X,Y)	(ESee_invisible || (See_invisible_old && dist2(u.ux, u.uy, X, Y)<13))
 
 #define HTelepat		u.uprops[TELEPAT].intrinsic
 #define ETelepat		u.uprops[TELEPAT].extrinsic
 #define Blind_telepat		(HTelepat || ETelepat || \
-				 telepathic(youracedata) || u.sealsActive&SEAL_DANTALION)
+				 species_is_telepathic(youracedata) || u.sealsActive&SEAL_DANTALION)
 #define Unblind_telepat		(ETelepat || u.sealsActive&SEAL_DANTALION)
 
 #define HWarning		u.uprops[WARNING].intrinsic
@@ -289,7 +294,7 @@
 #define HWeldproof	u.uprops[WELDPROOF].intrinsic
 #define EWeldproof	u.uprops[WELDPROOF].extrinsic
 #define Weldproof	(HWeldproof || EWeldproof || \
-					 is_demon(youracedata) || is_undead(youracedata) || (u.ulycn >= LOW_PM) ||\
+					 is_demon(youracedata) || is_undead(youracedata) || (u.ulycn >= LOW_PM) || (Race_if(PM_ANDROID)) ||\
 					 (u.specialSealsActive&SEAL_ACERERAK)\
 					)
 
@@ -318,7 +323,7 @@
 #define HDisplaced		u.uprops[DISPLACED].intrinsic
 #define EDisplaced		u.uprops[DISPLACED].extrinsic
 #define Displaced		(HDisplaced || EDisplaced || \
-						 is_displacer(youracedata) || u.sealsActive&SEAL_ORTHOS)
+						 species_displaces(youracedata) || u.sealsActive&SEAL_ORTHOS || u.uvaul_duration)
 
 #define HStealth		u.uprops[STEALTH].intrinsic
 #define EStealth		u.uprops[STEALTH].extrinsic
@@ -344,33 +349,33 @@
 #define ETeleportation		u.uprops[TELEPORT].extrinsic
 #define Teleportation		(HTeleportation || ETeleportation || \
 							 ward_at(u.ux,u.uy) == ANDREALPHUS_TRANSIT || \
-				 can_teleport(youracedata))
+				 species_teleports(youracedata))
 
 #define HTeleport_control	u.uprops[TELEPORT_CONTROL].intrinsic
 #define ETeleport_control	u.uprops[TELEPORT_CONTROL].extrinsic
 #define Teleport_control	(HTeleport_control || ETeleport_control || \
 				 u.sealsActive&SEAL_ANDREALPHUS || \
 				 ward_at(u.ux,u.uy) == ANDREALPHUS_STABILIZE || \
-				 control_teleport(youracedata))
+				 species_controls_teleports(youracedata))
 
 #define HLevitation		u.uprops[LEVITATION].intrinsic
 #define ELevitation		u.uprops[LEVITATION].extrinsic
 #define Levitation		(HLevitation || ELevitation || \
-				 is_floater(youracedata))
+				 species_floats(youracedata))
 	/* Can't touch surface, can't go under water; overrides all others */
 #define Lev_at_will		(((HLevitation & I_SPECIAL) != 0L || \
 				 (ELevitation & W_ARTI) != 0L) && \
 				 (HLevitation & ~(I_SPECIAL|TIMEOUT)) == 0L && \
 				 (ELevitation & ~W_ARTI) == 0L && \
-				 !is_floater(youracedata))
+				 !species_floats(youracedata))
 
 #define HFlying			u.uprops[FLYING].intrinsic
 #define EFlying			u.uprops[FLYING].extrinsic
 #ifdef STEED
-# define Flying			(EFlying || HFlying || is_flyer(youracedata) || \
-				 (u.usteed && is_flyer(u.usteed->data)))
+# define Flying			(EFlying || HFlying || species_flies(youracedata) || \
+				 (u.usteed && mon_resistance(u.usteed,FLYING)))
 #else
-# define Flying			(EFlying || HFlying || is_flyer(youracedata))
+# define Flying			(EFlying || HFlying || species_flies(youracedata))
 #endif
 	/* May touch surface; does not override any others */
 
@@ -387,24 +392,24 @@
 #define ESwimming		u.uprops[SWIMMING].extrinsic	/* [Tom] */
 #ifdef STEED
 # define Swimming	(((HSwimming || ESwimming || \
-				 is_swimmer(youracedata) || \
+				 species_swims(youracedata) || \
 				 Is_waterlevel(&u.uz) || \
 				 u.sealsActive&SEAL_ENKI) && !Punished && inv_weight() < 0) || \
-				 (u.usteed && is_swimmer(u.usteed->data)))
+				 (u.usteed && mon_resistance(u.usteed,SWIMMING)))
 # define NoburdSwimming	(((HSwimming || ESwimming || \
-				 is_swimmer(youracedata) || \
+				 species_swims(youracedata) || \
 				 Is_waterlevel(&u.uz) || \
 				 u.sealsActive&SEAL_ENKI) && !Punished) || \
-				 (u.usteed && is_swimmer(u.usteed->data)))
+				 (u.usteed && mon_resistance(u.usteed,SWIMMING)))
 #else
-# define Swimming	((HSwimming || ESwimming || \
-				 is_swimmer(youracedata) || \
-				 Is_waterlevel(&u.uz) || \
-				 u.sealsActive&SEAL_ENKI) && !Punished && inv_weight() < 0)
-# define NoburdSwimming	((HSwimming || ESwimming || \
-				 is_swimmer(youracedata) || \
-				 Is_waterlevel(&u.uz) || \
-				 u.sealsActive&SEAL_ENKI) && !Punished)
+# define Swimming	(((HSwimming || ESwimming || \
+				 species_swims(youracedata) || \
+				 u.sealsActive&SEAL_ENKI) \
+				 && !Punished && inv_weight() < 0) || Is_waterlevel(&u.uz))
+# define NoburdSwimming	(((HSwimming || ESwimming || \
+				 species_swims(youracedata) || \
+				 u.sealsActive&SEAL_ENKI) \
+				 && !Punished) || Is_waterlevel(&u.uz))
 #endif
 	/* Get wet, don't go under water unless if amphibious */
 
@@ -429,7 +434,7 @@
 #define HPasses_walls		u.uprops[PASSES_WALLS].intrinsic
 #define EPasses_walls		u.uprops[PASSES_WALLS].extrinsic
 #define Passes_walls		(HPasses_walls || EPasses_walls || \
-				 (uclockwork && u.phasengn)|| passes_walls(youracedata))
+				 (uclockwork && u.phasengn)|| species_passes_walls(youracedata))
 #ifdef CONVICT
 # define Phasing            u.uprops[PASSES_WALLS].intrinsic
 #endif /* CONVICT */
@@ -450,7 +455,7 @@
 #define HRegeneration		u.uprops[REGENERATION].intrinsic
 #define ERegeneration		u.uprops[REGENERATION].extrinsic
 #define Regeneration		(HRegeneration || ERegeneration || \
-				 regenerates(youracedata))
+				 species_regenerates(youracedata))
 
 #define HEnergy_regeneration	u.uprops[ENERGY_REGENERATION].intrinsic
 #define EEnergy_regeneration	u.uprops[ENERGY_REGENERATION].extrinsic
@@ -493,7 +498,9 @@
 #define Reflecting		(EReflecting || \
 						 (u.sealsActive&SEAL_EDEN) || \
 						 (uwep && is_lightsaber(uwep) && uwep->lamplit && ((u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))) || (u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))))) || \
-				 (youracedata == &mons[PM_SILVER_DRAGON]))
+						 (u.usteed && u.usteed->misc_worn_check & W_SADDLE \
+						 && which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
+						species_reflects(&youmonst))
 
 #define EFree_action		u.uprops[FREE_ACTION].extrinsic
 

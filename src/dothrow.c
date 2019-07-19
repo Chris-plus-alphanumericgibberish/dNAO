@@ -112,7 +112,7 @@ int thrown;
 	}
 	
 	if(obj->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
-	if((obj->oclass == POTION_CLASS || obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
+	if(breaktest(obj) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
 	if((obj->otyp == EGG) && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA, TRUE);
 	
 	u_wipe_engr(2);
@@ -131,8 +131,8 @@ int thrown;
 	/* Multishot calculations
 	 */
 	skill = objects[obj->otyp].oc_skill;
-	if (((ammo_and_launcher(obj, launcher) && skill != -P_CROSSBOW) || (skill == P_DAGGER && !Role_if(PM_WIZARD)) ||
-			skill == -P_DART || skill == -P_SHURIKEN || skill == -P_BOOMERANG || obj->oartifact == ART_SICKLE_MOON ) &&
+	if (((ammo_and_launcher(obj, launcher) && skill != -P_CROSSBOW && launcher->otyp != ATLATL) || (skill == P_DAGGER && !Role_if(PM_WIZARD)) ||
+			skill == -P_DART || skill == -P_SHURIKEN || skill == -P_BOOMERANG || obj->oartifact == ART_SICKLE_MOON || obj->oartifact == ART_AMHIMITL) &&
 		!(Confusion || Stunned)) {
 	    /* Bonus if the player is proficient in this weapon... */
 	    switch (P_SKILL(weapon_type(obj))) {
@@ -149,46 +149,46 @@ int thrown;
 		) multishot++;
 	    /* ...or is using a special weapon for their role... */
 	    switch (Role_switch) {
-	    case PM_CAVEMAN:
-		if (skill == -P_SLING) multishot++;
-		break;
-	    case PM_RANGER:
-		multishot++;
-		if(ammo_and_launcher(obj, launcher) && launcher->oartifact == ART_LONGBOW_OF_DIANA) multishot++;//double bonus for Rangers
-		break;
-	    case PM_ROGUE:
-		if (skill == P_DAGGER) multishot++;
-		break;
-	    case PM_SAMURAI:
-		if (obj->otyp == YA && launcher && launcher->otyp == YUMI) multishot++;
-		break;
-	    default:
-		break;	/* No bonus */
-	    }
-	    /* ...or using their race's special bow */
-	    switch (Race_switch) {
-	    case PM_ELF:
-			if (obj->otyp == ELVEN_ARROW && launcher &&
-					launcher->otyp == ELVEN_BOW) multishot++;
-			if(obj->oartifact == ART_SICKLE_MOON) multishot++;
-			if(ammo_and_launcher(obj, launcher) && launcher->oartifact == ART_BELTHRONDING) multishot++;//double bonus for Elves
-		break;
-	    case PM_DROW:
-			if(obj->oartifact == ART_SICKLE_MOON) multishot++;
-		break;
-	    case PM_MYRKALFR:
-			if(obj->oartifact == ART_SICKLE_MOON) multishot++;
-		break;
-	    case PM_ORC:
-			if (obj->otyp == ORCISH_ARROW && launcher &&
-					launcher->otyp == ORCISH_BOW) multishot++;
-		break;
-	    // case PM_GNOME:
-			// if (obj->otyp == CROSSBOW_BOLT && launcher &&
-					// uwep->otyp == CROSSBOW) multishot++;
-		// break;
-	    default:
-		break;	/* No bonus */
+			case PM_CAVEMAN:
+				if (skill == -P_SLING) multishot++;
+			break;
+			case PM_RANGER:
+				multishot++;
+				if(ammo_and_launcher(obj, launcher) && launcher->oartifact == ART_LONGBOW_OF_DIANA) multishot++;//double bonus for Rangers
+			break;
+			case PM_ROGUE:
+				if (skill == P_DAGGER) multishot++;
+			break;
+			case PM_SAMURAI:
+				if (obj->otyp == YA && launcher && launcher->otyp == YUMI) multishot++;
+			break;
+			default:
+			break;	/* No bonus */
+		}
+		/* ...or using their race's special bow */
+		switch (Race_switch) {
+			case PM_ELF:
+				if (obj->otyp == ELVEN_ARROW && launcher &&
+						launcher->otyp == ELVEN_BOW) multishot++;
+				if(obj->oartifact == ART_SICKLE_MOON) multishot++;
+				if(ammo_and_launcher(obj, launcher) && launcher->oartifact == ART_BELTHRONDING) multishot++;//double bonus for Elves
+			break;
+			case PM_DROW:
+				if(obj->oartifact == ART_SICKLE_MOON) multishot++;
+			break;
+			case PM_MYRKALFR:
+				if(obj->oartifact == ART_SICKLE_MOON) multishot++;
+			break;
+			case PM_ORC:
+				if (obj->otyp == ORCISH_ARROW && launcher &&
+						launcher->otyp == ORCISH_BOW) multishot++;
+			break;
+			// case PM_GNOME:
+				// if (obj->otyp == CROSSBOW_BOLT && launcher &&
+						// uwep->otyp == CROSSBOW) multishot++;
+			// break;
+			default:
+			break;	/* No bonus */
 	    }
 	}
 	
@@ -205,7 +205,7 @@ int thrown;
 	}
 	
 	if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
-		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_DART_OF_THE_ASSASSIN
+		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_AMHIMITL && obj->oartifact != ART_DART_OF_THE_ASSASSIN 
 	) multishot = (int)obj->quan;
 	if (shotlimit > 0 && multishot > shotlimit) multishot = shotlimit;
 	
@@ -233,12 +233,13 @@ int thrown;
 	    }
 
 	    if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
-		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_DART_OF_THE_ASSASSIN)
+		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_DART_OF_THE_ASSASSIN && obj->oartifact != ART_AMHIMITL)
           multishot = (int)obj->quan;
 //#endif
 
 	if(multishot < 1) multishot = 1;
 	if(obj->oartifact == ART_FLUORITE_OCTAHEDRON && !ammo_and_launcher(obj,launcher)) multishot = 1;
+	if(launcher && launcher->otyp == ATLATL) multishot = 1;
 
 	m_shot.s = ammo_and_launcher(obj,launcher) ? TRUE : FALSE;
 	/* give a message if shooting more than one, or if player
@@ -645,13 +646,13 @@ autoquiver()
 	    } else if (otmp->oclass == GEM_CLASS) {
 		;	/* skip non-rock gems--they're ammo but
 			   player has to select them explicitly */
-	    } else if (is_ammo(otmp)) {
-		if (ammo_and_launcher(otmp, uwep))
+	    } else if (ammo_and_launcher(otmp, uwep)) {
 		    /* Ammo matched with launcher (bow and arrow, crossbow and bolt) */
 		    oammo = otmp;
-		else if (ammo_and_launcher(otmp, uswapwep))
+		} else if (ammo_and_launcher(otmp, uswapwep)) {
+			/* Ammo matched with launcher in swapwep */
 		    altammo = otmp;
-		else
+		} else if (is_ammo(otmp)) {
 		    /* Mismatched ammo (no better than an ordinary weapon) */
 		    omisc = otmp;
 	    } else if (is_missile(otmp)) {
@@ -659,7 +660,8 @@ autoquiver()
 		omissile = otmp;
 	    } else if (otmp->oclass == WEAPON_CLASS && throwing_weapon(otmp)) {
 		/* Ordinary weapon */
-		if (objects[otmp->otyp].oc_skill == P_DAGGER
+		if ((objects[otmp->otyp].oc_skill == P_DAGGER ||
+			objects[otmp->otyp].oc_skill == P_SPEAR)
 			&& !omissile) 
 		    omissile = otmp;
 		else
@@ -701,6 +703,14 @@ dofire()
 		// (uwep->oartifact == ART_SICKLE_MOON)
 		)
 	){
+		/*See below for shotlimit*/
+		shotlimit = (multi || save_cm) ? multi + 1 : 0;
+		multi = 0;		/* reset; it's been used up */
+
+		return throw_obj(uwep, shotlimit, THROW_UWEP);
+	}
+	
+	if(uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && Race_if(PM_ANDROID)){
 		/*See below for shotlimit*/
 		shotlimit = (multi || save_cm) ? multi + 1 : 0;
 		multi = 0;		/* reset; it's been used up */
@@ -1023,7 +1033,7 @@ hurtle_step(arg, x, y)
 	    return FALSE;
 	}
 	if ((u.ux - x) && (u.uy - y) &&
-		bad_rock(youracedata,u.ux,y) && bad_rock(youracedata,x,u.uy)) {
+		bad_rock(&youmonst,u.ux,y) && bad_rock(&youmonst,x,u.uy)) {
 	    boolean too_much = (invent && (inv_weight() + weight_cap() > 600));
 	    /* Move at a diagonal. */
 	    if (bigmonst(youracedata) || too_much) {
@@ -1041,7 +1051,7 @@ hurtle_step(arg, x, y)
 	return FALSE;
     }
     if ((u.ux - x) && (u.uy - y) &&
-	bad_rock(youracedata,u.ux,y) && bad_rock(youracedata,x,u.uy)) {
+	bad_rock(&youmonst,u.ux,y) && bad_rock(&youmonst,x,u.uy)) {
 	/* Move at a diagonal. */
 	if (In_sokoban(&u.uz)) {
 	    You("come to an abrupt halt!");
@@ -1322,6 +1332,12 @@ boolean hitsroof;
 	if(obj->oproperties){
 		artimsg |= oproperty_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
 		dmg += (newdamage - basedamage);
+		newdamage = basedamage;
+	}
+	if(spec_prop_otyp(obj)){
+		artimsg |= otyp_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
+		dmg += (newdamage - basedamage);
+		newdamage = basedamage;
 	}
 	
 
@@ -1336,9 +1352,11 @@ boolean hitsroof;
 	if(resist_attacks(youracedata))
 		dmg = 0;
 	if (dmg > 1 && less_damage) dmg = 1;
+	if (dmg > 0) dmg += aeshbon();
 	if (dmg > 0) dmg += u.udaminc;
 	if (dmg < 0) dmg = 0;	/* beware negative rings of increase damage */
 	if (Half_physical_damage) dmg = (dmg + 1) / 2;
+	if (u.uvaul_duration) dmg = (dmg + 1) / 2;
 
 	if (uarmh) {
 	    if (less_damage && dmg < (Upolyd ? u.mh : u.uhp)) {
@@ -1463,6 +1481,7 @@ int thrown;
 		bhitpos.y = mon->my;
 	} else if(u.dz) {
 	    if (u.dz < 0 &&  ( 
+				Race_if(PM_ANDROID) || 
 				(obj->oartifact == ART_MJOLLNIR &&
 				 Role_if(PM_VALKYRIE)) || 
 				(obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && 
@@ -1471,18 +1490,21 @@ int thrown;
 				 obj->oartifact == ART_DART_OF_THE_ASSASSIN ||
 				 obj->oartifact == ART_ANNULUS ||
 				 obj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
-				 obj->oartifact == ART_SICKLE_MOON
+				 obj->oartifact == ART_SICKLE_MOON || 
+				 obj->oartifact == ART_AMHIMITL
 			  ) && !impaired
 		) {
 			pline("%s the %s and returns to your hand!",
 				  Tobjnam(obj, "hit"), ceiling(u.ux,u.uy));
 			obj = addinv(obj);
 			(void) encumber_msg();
-			if(obj->oartifact == ART_WINDRIDER || obj->oartifact == ART_SICKLE_MOON || obj->oartifact == ART_ANNULUS){
+			if(!obj->owornmask){
+				if((obj->oartifact == ART_WINDRIDER || obj->oartifact == ART_SICKLE_MOON || obj->oartifact == ART_AMHIMITL || is_ammo(obj)) && !uquiver){
 				setuqwep(obj);
-			} else{
-				setuwep(obj);
-				u.twoweap = twoweap;
+				} else if(!uwep){
+					setuwep(obj);
+					u.twoweap = twoweap;
+				}
 			}
 			return;
 		}
@@ -1551,7 +1573,7 @@ int thrown;
 		}
 		if (range < 1) range = 1;
 
-		if (is_ammo(obj)) {
+		if (is_ammo(obj) || is_spear(obj)) {
 //ifdef FIREARMS
 			if (ammo_and_launcher(obj, launcher) && 
 					objects[(launcher->otyp)].oc_range) 
@@ -1560,11 +1582,11 @@ int thrown;
 //endif
 			if (ammo_and_launcher(obj, launcher)){ 			
 				//make range of longbow of diana effectively unlimited
-				if(uwep->oartifact == ART_LONGBOW_OF_DIANA || 
+				if(uwep->oartifact == ART_LONGBOW_OF_DIANA || uwep->oartifact == ART_XIUHCOATL ||
 					(uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
 				) range = 1000;
 				else range++;
-			} else if (obj->oclass != GEM_CLASS)
+			} else if (obj->oclass != GEM_CLASS && !is_spear(obj))
 				range /= 2;
 		}
 
@@ -1653,6 +1675,7 @@ int thrown;
 	} else {
 		/* the code following might become part of dropy() */
 		if ( ( 
+				Race_if(PM_ANDROID) ||
 				(obj->oartifact == ART_MJOLLNIR &&
 				 Role_if(PM_VALKYRIE)) || 
 				(obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && 
@@ -1661,7 +1684,8 @@ int thrown;
 				 obj->oartifact == ART_ANNULUS ||
 				 obj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
 				 obj->oartifact == ART_DART_OF_THE_ASSASSIN ||
-				 obj->oartifact == ART_WINDRIDER
+				 obj->oartifact == ART_WINDRIDER || 
+				 obj->oartifact == ART_AMHIMITL
 			  )
 		) {
 		    /* we must be wearing Gauntlets of Power to get here */
@@ -1706,11 +1730,13 @@ int thrown;
 			pline("%s to your hand!", Tobjnam(obj, "return"));
 			obj = addinv(obj);
 			(void) encumber_msg();
-			if(obj->oartifact == ART_WINDRIDER || obj->oartifact == ART_SICKLE_MOON){
+			if(!obj->owornmask){
+				if((obj->oartifact == ART_WINDRIDER || obj->oartifact == ART_SICKLE_MOON || obj->oartifact == ART_AMHIMITL || is_ammo(obj)) && !uquiver){
 				setuqwep(obj);
-			} else{
-				setuwep(obj);
-				u.twoweap = twoweap;
+				} else if(!uwep){
+					setuwep(obj);
+					u.twoweap = twoweap;
+				}
 			}
 			if(cansee(bhitpos.x, bhitpos.y))
 			    newsym(bhitpos.x,bhitpos.y);
@@ -1728,8 +1754,10 @@ int thrown;
 					"%s back toward you, hitting your %s!",
 				  Tobjnam(obj, Blind ? "hit" : "fly"),
 				  body_part(ARM));
-			    (void) artifact_hit((struct monst *)0,
-						&youmonst, obj, &dmg, 0);
+				if(obj->oartifact){
+				    (void) artifact_hit((struct monst *)0,
+							&youmonst, obj, &dmg, 0);
+				}
 			    losehp(dmg, xname(obj),
 				obj_is_pname(obj) ? KILLED_BY : KILLED_BY_AN);
 			}
@@ -1749,7 +1777,7 @@ int thrown;
 			struct monst *msmon;
 			sx = bhitpos.x;
 			sy = bhitpos.y;
-			if((obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) && u.specialSealsActive&SEAL_NUDZIRATH){
+			if(is_shatterable(obj) && !obj->oerodeproof && u.specialSealsActive&SEAL_NUDZIRATH){
 				if(obj->otyp == MIRROR){
 					if(u.spiritPColdowns[PWR_MIRROR_SHATTER] < monstermoves && !u.uswallow && uwep && uwep->otyp == MIRROR && !(uwep->oartifact)){
 						useup(uwep);
@@ -1970,6 +1998,9 @@ int thrown;
 	else tmp = -1 + Luck + find_mac(mon) + u.uhitinc + u.spiritAttk +
 			maybe_polyd(youmonst.data->mlevel, u.ulevel)*BASE_ATTACK_BONUS;
 	
+	if(u.uuur_duration)
+		tmp += 10;
+	
 	if(!launcher || objects[launcher->otyp].oc_skill == P_SLING){
 		tmp += abon();
 	} else {
@@ -2000,10 +2031,11 @@ int thrown;
 	    case GAUNTLETS_OF_FUMBLING:
 		tmp -= 3;
 		break;
-		case BRONZE_GAUNTLETS:
+		case ARCHAIC_GAUNTLETS:
 		case PLASTEEL_GAUNTLETS:
 		tmp -= 1;
 		break;
+	    case LONG_GLOVES:
 	    case GLOVES:
 	    case GAUNTLETS_OF_DEXTERITY:
 		case HIGH_ELVEN_GAUNTLETS:
@@ -2196,42 +2228,44 @@ int thrown;
 	else if (obj->oclass == WEAPON_CLASS || is_weptool(obj) ||
 		obj->oclass == GEM_CLASS
 	) {
-	    if (is_ammo(obj)) {
-		if (!ammo_and_launcher(obj, launcher)) {
-		    tmp -= 4;
-		} else {
-		    tmp += launcher->spe - greatest_erosion(launcher);
-		    tmp += weapon_hit_bonus(launcher);
-		    if (launcher->oartifact){
+		if (ammo_and_launcher(obj, launcher)) {
+			/* ammo and launcher */
+			tmp += launcher->spe - greatest_erosion(launcher);
+			tmp += weapon_hit_bonus(launcher);
+			if (launcher->oartifact){
 				tmp += spec_abon(launcher, mon);
-				if(Role_if(PM_BARD)) //legend lore
+				if (Role_if(PM_BARD)) //legend lore
 					tmp += 5;
 			}
-		    /*
-		     * Elves and Samurais are highly trained w/bows,
-		     * especially their own special types of bow.
-		     * Polymorphing won't make you a bow expert.
-		     */
-		    if ((Race_if(PM_ELF) || Role_if(PM_SAMURAI)) &&
+			/*
+			* Elves and Samurais are highly trained w/bows,
+			* especially their own special types of bow.
+			* Polymorphing won't make you a bow expert.
+			*/
+			if ((Race_if(PM_ELF) || Role_if(PM_SAMURAI)) &&
 				(!Upolyd || your_race(youmonst.data)) &&
 				objects[launcher->otyp].oc_skill == P_BOW) {
-			tmp++;
-			if (Race_if(PM_ELF) && launcher->otyp == ELVEN_BOW)
-			    tmp++;
-			else if (Role_if(PM_SAMURAI) && launcher->otyp == YUMI)
-			    tmp++;
-		    }
+				tmp++;
+				if (Race_if(PM_ELF) && launcher->otyp == ELVEN_BOW)
+					tmp++;
+				else if (Role_if(PM_SAMURAI) && launcher->otyp == YUMI)
+					tmp++;
+			}
 		}
-	    } else {
-		if (is_boomerang(obj))		/* arbitrary */
-		    tmp += 4;
-		else if (throwing_weapon(obj))	/* meant to be thrown */
-		    tmp += 2;
-		else				/* not meant to be thrown */
-		    tmp -= 2;
-		/* we know we're dealing with a weapon or weptool handled
-		   by WEAPON_SKILLS once ammo objects have been excluded */
-		tmp += weapon_hit_bonus(obj);
+		else if (is_ammo(obj)) {
+			/* ammo without a launcher */
+			tmp -= 4;
+		}
+		else {
+			if (is_boomerang(obj))		/* arbitrary */
+				tmp += 4;
+			else if (throwing_weapon(obj))	/* meant to be thrown */
+				tmp += 2;
+			else				/* not meant to be thrown */
+				tmp -= 2;
+			/* we know we're dealing with a weapon or weptool handled
+			   by WEAPON_SKILLS once ammo objects have been excluded */
+			tmp += weapon_hit_bonus(obj);
 	    }
 
 	    if (tmp >= rnd(20)) {
@@ -2602,8 +2636,7 @@ breaktest(obj)
 struct obj *obj;
 {
 	if (obj_resists(obj, 0, 100)) return 0;
-	if ((obj->obj_material == GLASS || obj->obj_material == OBSIDIAN_MT) &&
-		obj->oclass != GEM_CLASS)
+	if (is_shatterable(obj) && !obj->oerodeproof)
 	    return 1;
 	switch (obj->oclass == POTION_CLASS ? POT_WATER : obj->otyp) {
 #ifdef TOURIST

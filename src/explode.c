@@ -121,7 +121,7 @@ ExplodeRegion *reg;
 
 /* This is the "do-it-all" explosion command */
 STATIC_DCL void FDECL(do_explode,
-	(int,int,ExplodeRegion *,int,int,CHAR_P,int,int,BOOLEAN_P));
+	(int,int,ExplodeRegion *,int,int,int,int,int,BOOLEAN_P));
 
 /* Note: I had to choose one of three possible kinds of "type" when writing
  * this function: a wand type (like in zap.c), an adtyp, or an object type.
@@ -199,7 +199,7 @@ int color;
 	free_explode_region(area);
 }
 
-void
+STATIC_DCL void
 do_explode(x, y, area, adtyp, olet, dam, color, dest, yours)
 int x, y;
 ExplodeRegion *area;
@@ -544,8 +544,11 @@ boolean yours; /* is it your fault (for killing monsters) */
 		if (Invulnerable) {
 		    damu = 0;
 		    You("are unharmed!");
-		} else if (Half_physical_damage && adtyp == AD_PHYS)
+		} else {
+			if (Half_physical_damage && adtyp == AD_PHYS)
 		    damu = (damu+1) / 2;
+			if (u.uvaul_duration) damu = (damu + 1) / 2;
+		}
 		if (adtyp == AD_FIRE) (void) burnarmor(&youmonst);
 		if(uhurt == 2){
 			destroy_item(SCROLL_CLASS, (int) adtyp);

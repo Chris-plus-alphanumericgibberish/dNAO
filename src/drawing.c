@@ -47,7 +47,8 @@ const char def_oc_syms[MAXOCLASSES] = {
 	ROCK_SYM,
 /*15*/	BALL_SYM,
 	CHAIN_SYM,
-	VENOM_SYM
+	VENOM_SYM,
+	TILE_SYM
 	/*BED_SYM*/
 };
 
@@ -255,6 +256,10 @@ const struct symdef defsyms[MAXPCHARS] = {
 /*30*/	{'{', "fountain",	C(CLR_BLUE)},	/* fountain */
 	{'}', "water",		C(CLR_BLUE)},	/* pool */
 	{'.', "ice",		C(CLR_CYAN)},	/* ice */
+	{',', "grass",		C(CLR_BRIGHT_GREEN)},	/* lit grass */
+	{',', "grass",		C(CLR_GREEN)},	/* unlit grass */
+	{'.', "soil",		C(CLR_BROWN)},	/* lit soil */
+	{'.', "soil",		C(CLR_BLACK)},	/* unlit soil */
 	{'}', "molten lava",	C(CLR_RED)},	/* lava */
 	{'.', "lowered drawbridge",C(CLR_BROWN)},	/* vodbridge */
 	{'.', "lowered drawbridge",C(CLR_BROWN)},	/* hodbridge */
@@ -287,6 +292,8 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'^', "magic trap",	C(HI_ZAP)},	/* trap */
 	{'^', "anti-magic field", C(HI_ZAP)},	/* trap */
 	{'^', "polymorph trap",	C(CLR_BRIGHT_GREEN)},	/* trap */
+	{'^', "essence trap",	C(CLR_GREEN)},	/* "trap" */
+	{'^', "mummy trap",	C(CLR_YELLOW)},	/* "trap" */
 	{'|', "wall",		C(CLR_GRAY)},	/* vbeam */
 	{'-', "wall",		C(CLR_GRAY)},	/* hbeam */
 	{'\\',"wall",		C(CLR_GRAY)},	/* lslant */
@@ -371,6 +378,10 @@ static glyph_t ibm_graphics[MAXPCHARS] = {
 /*30*/	0xf4,	/* S_fountain:	meta-t, integral top half */
 	0xf7,	/* S_pool:	meta-w, approx. equals */
 	0xfa,	/* S_ice:	meta-z, centered dot */
+	0xfa,	/* S_litgrass:	meta-z, centered dot */
+	0xfa,	/* S_drkgrass:	meta-z, centered dot */
+	0xfa,	/* S_litsoil:	meta-z, centered dot */
+	0xfa,	/* S_drksoil:	meta-z, centered dot */
 	0xf7,	/* S_lava:	meta-w, approx. equals */
 	0xfa,	/* S_vodbridge:	meta-z, centered dot */
 	0xfa,	/* S_hodbridge:	meta-z, centered dot */
@@ -403,6 +414,8 @@ static glyph_t ibm_graphics[MAXPCHARS] = {
 /*60*/	g_FILLER(S_magic_trap),
 	g_FILLER(S_anti_magic_trap),
 	g_FILLER(S_polymorph_trap),
+	g_FILLER(S_essence_trap),
+	g_FILLER(S_mummy_trap),
 	0xb3,	/* S_vbeam:	meta-3, vertical rule */
 	0xc4,	/* S_hbeam:	meta-D, horizontal rule */
 	g_FILLER(S_lslant),
@@ -475,6 +488,10 @@ static glyph_t dec_graphics[MAXPCHARS] = {
 /*30*/	g_FILLER(S_fountain),	/* 0xdb, \E)3: meta-[, integral top half */
 	0xe0,	/* S_pool:	meta-\, diamond */
 	0xfe,	/* S_ice:	meta-~, centered dot */
+	0xfe,	/* S_litgrass:	meta-~, centered dot */
+	0xfe,	/* S_drkgrass:	meta-~, centered dot */
+	0xfe,	/* S_litsoil:	meta-~, centered dot */
+	0xfe,	/* S_drksoil:	meta-~, centered dot */
 	0xe0,	/* S_lava:	meta-\, diamond */
 	0xfe,	/* S_vodbridge:	meta-~, centered dot */
 	0xfe,	/* S_hodbridge:	meta-~, centered dot */
@@ -507,6 +524,8 @@ static glyph_t dec_graphics[MAXPCHARS] = {
 /*60*/	g_FILLER(S_magic_trap),
 	g_FILLER(S_anti_magic_trap),
 	g_FILLER(S_polymorph_trap),
+	g_FILLER(S_essence_trap),
+	g_FILLER(S_mummy_trap),
 	0xf8,	/* S_vbeam:	meta-x, vertical rule */
 	0xf1,	/* S_hbeam:	meta-q, horizontal rule */
 	g_FILLER(S_lslant),
@@ -577,6 +596,10 @@ static glyph_t mac_graphics[MAXPCHARS] = {
 /*30*/	g_FILLER(S_fountain),
 	0xe0,	/* S_pool */
 	g_FILLER(S_ice),
+	g_FILLER(S_litgrass),
+	g_FILLER(S_drkgrass),
+	g_FILLER(S_litsoil),
+	g_FILLER(S_drksoil),
 	g_FILLER(S_lava),
 	g_FILLER(S_vodbridge),
 	g_FILLER(S_hodbridge),
@@ -609,6 +632,8 @@ static glyph_t mac_graphics[MAXPCHARS] = {
 /*60*/	g_FILLER(S_magic_trap),
 	g_FILLER(S_anti_magic_trap),
 	g_FILLER(S_polymorph_trap),
+	g_FILLER(S_essence_trap),
+	g_FILLER(S_mummy_trap),
 	g_FILLER(S_vbeam),
 	g_FILLER(S_hbeam),
 	g_FILLER(S_lslant),
@@ -681,6 +706,10 @@ static glyph_t utf8_graphics[MAXPCHARS] = {
 	0x00b6,	/* S_fountain:	PILCROW SIGN */
 	0x224b,	/* S_pool:	TRIPLE TILDE */
 	0x00b7,	/* S_ice:	MIDDLE DOT */
+	0x00b7,	/* S_litgrass:	MIDDLE DOT */
+	0x00b7,	/* S_drkgrass:	MIDDLE DOT */
+	0x00b7,	/* S_litsoil:	MIDDLE DOT */
+	0x00b7,	/* S_drksoil:	MIDDLE DOT */
 	0x224b,	/* S_lava:	TRIPLE TILDE */
 	0x00b7,	/* S_vodbridge:	MIDDLE DOT */
 	0x00b7,	/* S_hodbridge:	MIDDLE DOT */
@@ -713,6 +742,8 @@ static glyph_t utf8_graphics[MAXPCHARS] = {
 	g_FILLER(S_magic_trap),
 	g_FILLER(S_anti_magic_trap),
 	g_FILLER(S_polymorph_trap),
+	g_FILLER(S_essence_trap),
+	g_FILLER(S_mummy_trap),
 	0x2502,	/* S_vbeam:	BOX DRAWINGS LIGHT VERTICAL */
 	0x2500,	/* S_hbeam:	BOX DRAWINGS LIGHT HORIZONTAL */
 	g_FILLER(S_lslant),
@@ -924,7 +955,8 @@ static const glyph_t r_oc_syms[MAXOCLASSES] = {
 	ROCK_SYM,
 /*15*/	BALL_SYM,
 	CHAIN_SYM,
-	VENOM_SYM
+	VENOM_SYM,
+	TILE_SYM
 /*	BED_SYM*/
 };
 
@@ -968,7 +1000,8 @@ static const uchar IBM_r_oc_syms[MAXOCLASSES] = {	/* a la EPYX Rogue */
 	ROCK_SYM,
 /*15*/	BALL_SYM,
 	CHAIN_SYM,
-	VENOM_SYM
+	VENOM_SYM,
+	TILE_SYM
 	/*BED_SYM*/
 };
 # endif /* ASCIIGRAPH */
@@ -1065,6 +1098,8 @@ boolean is_rlevel;
 	    showsyms[S_magic_trap] = 0x04;
 	    showsyms[S_anti_magic_trap] = 0x04;
 	    showsyms[S_polymorph_trap] = 0x04;
+	    showsyms[S_essence_trap] = 0x04;
+	    showsyms[S_mummy_trap] = 0x04;
 #endif
 		monsyms[S_GHOST] = showsyms[S_litroom];
 	}

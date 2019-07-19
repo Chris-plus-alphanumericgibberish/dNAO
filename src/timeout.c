@@ -22,6 +22,82 @@ STATIC_DCL void FDECL(cleanup_burn, (genericptr_t,long));
 
 #ifdef OVLB
 
+/* used by wizard mode #timeout and #wizintrinsic; order by 'interest'
+   for timeout countdown, where most won't occur in normal play */
+const struct propname {
+    int prop_num;
+    const char *prop_name;
+} propertynames[] = {
+    { INVULNERABLE, "invulnerable" },
+    { STONED, "petrifying" },
+    { SLIMED, "becoming slime" },
+    { STRANGLED, "strangling" },
+    { SICK, "fatally sick" },
+    { STUNNED, "stunned" },
+    { CONFUSION, "confused" },
+    { HALLUC, "hallucinating" },
+    { BLINDED, "blinded" },
+    { VOMITING, "vomiting" },
+    { GLIB, "slippery fingers" },
+    { WOUNDED_LEGS, "wounded legs" },
+	{ SLEEPING, "sleeping" },
+    { TELEPORT, "teleporting" },
+    { POLYMORPH, "polymorphing" },
+    { LEVITATION, "levitating" },
+    { FAST, "very fast" },
+    { CLAIRVOYANT, "clairvoyant" },
+    { DETECT_MONSTERS, "monster detection" },
+    { SEE_INVIS, "see invisible" },
+    { INVIS, "invisible" },
+    { FIRE_RES, "fire resistance" },
+    { COLD_RES, "cold resistance" },
+    { SLEEP_RES, "sleep resistance" },
+    { DISINT_RES, "disintegration resistance" },
+    { SHOCK_RES, "shock resistance" },
+    { POISON_RES, "poison resistance" },
+    { ACID_RES, "acid resistance" },
+    { STONE_RES, "stoning resistance" },
+    { DRAIN_RES, "drain resistance" },
+    { SICK_RES, "sickness resistance" },
+    { ANTIMAGIC, "magic resistance" },
+    { HALLUC_RES, "hallucination resistance" },
+    { FUMBLING, "fumbling" },
+    { HUNGER, "voracious hunger" },
+    { TELEPAT, "telepathic" },
+    { WARNING, "dangersense" },
+    { WARN_OF_MON, "warning of specific foes" },
+    { WARN_UNDEAD, "warn: undead" },
+    { SEARCHING, "searching" },
+    { INFRAVISION, "infravision" },
+    { ADORNED, "adorned (+/- Cha)" },
+    { DISPLACED, "displaced" },
+    { STEALTH, "stealthy" },
+    { AGGRAVATE_MONSTER, "monster aggravation" },
+    { CONFLICT, "conflict" },
+    { JUMPING, "jumping" },
+    { TELEPORT_CONTROL, "teleport control" },
+    { FLYING, "flying" },
+    { WWALKING, "water walking" },
+    { SWIMMING, "swimming" },
+    { MAGICAL_BREATHING, "magical breathing" },
+    { PASSES_WALLS, "pass thru walls" },
+    { SLOW_DIGESTION, "slow digestion" },
+    { HALF_SPDAM, "half spell damage" },
+    { HALF_PHDAM, "half physical damage" },
+    { REGENERATION, "HP regeneration" },
+    { ENERGY_REGENERATION, "energy regeneration" },
+    { PROTECTION, "extra protection" },
+    { PROT_FROM_SHAPE_CHANGERS, "protection from shape changers" },
+    { POLYMORPH_CONTROL, "polymorph control" },
+    { UNCHANGING, "unchanging" },
+    { REFLECTING, "reflecting" },
+    { FREE_ACTION, "free action" },
+    { FIXED_ABIL, "fixed abilites" },
+    { LIFESAVED, "life will be saved" },
+	{ NULLMAGIC, "magic nullification" },
+    {  0, 0 },
+};
+
 /* He is being petrified - dialogue by inmet!tower */
 static NEARDATA const char * const stoned_texts[] = {
 	"You are slowing down.",		/* 5 */
@@ -333,6 +409,13 @@ nh_timeout()
 	if (flags.friday13) baseluck -= 1;
 	
 	if(u.lastcast) u.lastcast--;
+	
+	if(u.uaesh_duration) u.uaesh_duration--;
+	if(u.uhoon_duration) u.uhoon_duration--;
+	if(u.ukrau_duration) u.ukrau_duration--;
+	if(u.unaen_duration) u.unaen_duration--;
+	if(u.uuur_duration) u.uuur_duration--;
+	if(u.uvaul_duration) u.uvaul_duration--;
 	
 	if (u.uluck != baseluck) {
 	    int timeout = 600;
@@ -1017,10 +1100,10 @@ long timeout;
 		    knows_egg = TRUE; /* true even if you are blind */
 		    if (!cansee_hatchspot)
 			You_feel("%s %s from your pack!", something,
-			    locomotion(mon->data, "drop"));
+			    locomotion(mon, "drop"));
 		    else
 			You("see %s %s out of your pack!",
-			    monnambuf, locomotion(mon->data, "drop"));
+			    monnambuf, locomotion(mon, "drop"));
 		    if (yours) {
 			pline("%s cries sound like \"%s%s\"",
 			    siblings ? "Their" : "Its",
@@ -1052,7 +1135,7 @@ long timeout;
 			else
 			    Strcpy(carriedby, "thin air");
 			You("see %s %s out of %s!", monnambuf,
-			    locomotion(mon->data, "drop"), carriedby);
+			    locomotion(mon, "drop"), carriedby);
 		    }
 		    break;
 #if 0
@@ -1336,14 +1419,14 @@ long timeout;
 		    break;
 
    	    case DWARVISH_HELM:
-	    case BRASS_LANTERN:
+	    case LANTERN:
 	    case OIL_LAMP:
 		switch((int)obj->age) {
 		    case 150:
 		    case 100:
 		    case 50:
 			if (canseeit) {
-			    if (obj->otyp == BRASS_LANTERN 
+			    if (obj->otyp == LANTERN 
 				|| obj->otyp == DWARVISH_HELM)
 				lantern_message(obj);
 			    else
@@ -1358,7 +1441,7 @@ long timeout;
 
 		    case 25:
 			if (canseeit) {
-			    if (obj->otyp == BRASS_LANTERN 
+			    if (obj->otyp == LANTERN 
 				|| obj->otyp == DWARVISH_HELM)
 				lantern_message(obj);
 			    else {
@@ -1387,7 +1470,7 @@ long timeout;
 			    switch (obj->where) {
 				case OBJ_INVENT:
 				case OBJ_MINVENT:
-			    if (obj->otyp == BRASS_LANTERN 
+			    if (obj->otyp == LANTERN 
 				|| obj->otyp == DWARVISH_HELM)
 					pline("%s lantern has run out of power.",
 					    whose);
@@ -1396,7 +1479,7 @@ long timeout;
 					    whose, xname(obj));
 				    break;
 				case OBJ_FLOOR:
-			    if (obj->otyp == BRASS_LANTERN 
+			    if (obj->otyp == LANTERN 
 				|| obj->otyp == DWARVISH_HELM)
 					You("see a lantern run out of power.");
 				    else
@@ -1933,7 +2016,7 @@ begin_burn(obj, already_lit)
 		break;
 		
 	    case DWARVISH_HELM:
-	    case BRASS_LANTERN:
+	    case LANTERN:
 	    case OIL_LAMP:
 		/* magic times are 150, 100, 50, 25, and 0 */
 		if (obj->age > 150L)
@@ -2298,9 +2381,13 @@ wiz_timeout_queue()
 {
     winid win;
     char buf[BUFSZ];
+    const char *propname;
+    long intrinsic;
+	int i, p, count, longestlen, ln;
 
-    win = create_nhwindow(NHW_MENU);	/* corner text window */
-    if (win == WIN_ERR) return 0;
+    win = create_nhwindow(NHW_MENU); /* corner text window */
+    if (win == WIN_ERR)
+        return 0;
 
     Sprintf(buf, "Current time = %ld.", monstermoves);
     putstr(win, 0, buf);
@@ -2309,6 +2396,40 @@ wiz_timeout_queue()
     putstr(win, 0, "");
     print_queue(win, timer_base);
 
+    /* Timed properies:
+     * check every one; the majority can't obtain temporary timeouts in
+     * normal play but those can be forced via the #wizintrinsic command.
+     */
+    count = longestlen = 0;
+    for (i = 0; (propname = propertynames[i].prop_name) != 0; ++i) {
+        p = propertynames[i].prop_num;
+        intrinsic = u.uprops[p].intrinsic;
+        if (intrinsic & TIMEOUT) {
+            ++count;
+            if ((ln = (int) strlen(propname)) > longestlen)
+                longestlen = ln;
+        }
+    }
+    putstr(win, 0, "");
+    if (!count) {
+        putstr(win, 0, "No timed properties.");
+    } else {
+        putstr(win, 0, "Timed properties:");
+        putstr(win, 0, "");
+        for (i = 0; (propname = propertynames[i].prop_name) != 0; ++i) {
+            p = propertynames[i].prop_num;
+            intrinsic = u.uprops[p].intrinsic;
+            if (intrinsic & TIMEOUT) {
+                /* timeout value can be up to 16777215 (0x00ffffff) but
+                   width of 4 digits should result in values lining up
+                   almost all the time (if/when they don't, it won't
+                   look nice but the information will still be accurate) */
+                Sprintf(buf, " %*s %4ld", -longestlen, propname,
+                        (intrinsic & TIMEOUT));
+                putstr(win, 0, buf);
+            }
+        }
+    }
     display_nhwindow(win, FALSE);
     destroy_nhwindow(win);
 

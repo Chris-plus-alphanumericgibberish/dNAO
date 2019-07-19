@@ -14,7 +14,6 @@ static NEARDATA const char *gate_str;
 
 extern boolean notonhead;	/* for long worms */
 
-STATIC_DCL void FDECL(kickdmg, (struct monst *, BOOLEAN_P));
 STATIC_DCL void FDECL(kick_monster, (XCHAR_P, XCHAR_P));
 STATIC_DCL int FDECL(kick_object, (XCHAR_P, XCHAR_P));
 STATIC_DCL char *FDECL(kickstr, (char *));
@@ -25,7 +24,7 @@ static NEARDATA struct obj *kickobj;
 
 static const char kick_passes_thru[] = "kick passes harmlessly through";
 
-STATIC_OVL void
+void
 kickdmg(mon, clumsy)
 register struct monst *mon;
 register boolean clumsy;
@@ -47,7 +46,7 @@ register boolean clumsy;
 	if (clumsy) dmg /= 2;
 
 	/* kicking a dragon or an elephant will not harm it */
-	if (thick_skinned(mon->data) && !(uarmf && (uarmf->otyp == STILETTOS || uarmf->otyp == KICKING_BOOTS))) dmg = 0;
+	if (thick_skinned(mon->data) && !(uarmf && (uarmf->otyp == STILETTOS || uarmf->otyp == HEELED_BOOTS || uarmf->otyp == KICKING_BOOTS))) dmg = 0;
 
 	if(resist_attacks(mon->data))
 		dmg = 0;
@@ -116,6 +115,15 @@ register boolean clumsy;
 						return;
 					if (newdamage == 0) return;
 					dmg += (newdamage - basedamage);
+					newdamage = basedamage;
+				}
+				if(spec_prop_otyp(uarmf)){
+					(void)otyp_hit(&youmonst, mon, uarmf, &newdamage, roll);
+					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
+						return;
+					if (newdamage == 0) return;
+					dmg += (newdamage - basedamage);
+					newdamage = basedamage;
 				}
 			}
 		}
@@ -123,7 +131,7 @@ register boolean clumsy;
 		exercise(A_DEX, TRUE);
 	}
 	
-	if(uarmf && (uarmf->otyp == STILETTOS)){
+	if(uarmf && (uarmf->otyp == STILETTOS || uarmf->otyp == HEELED_BOOTS)){
 		dmg += rnd(bigmonst(mon->data) ? 2 : 6);
 	}
 	
@@ -145,6 +153,7 @@ register boolean clumsy;
 	
 	if (uarmf) dmg += uarmf->spe;
 	dmg += u.udaminc;	/* add ring(s) of increase damage */
+	dmg += aeshbon();
 	if (dmg > 0)
 		mon->mhp -= dmg;
 	if (silvermsg) {
@@ -294,7 +303,7 @@ register xchar x, y;
 	}
 
 	if(Levitation && !rn2(3) && verysmall(mon->data) &&
-	   !is_flyer(mon->data)) {
+	   !mon_resistance(mon,FLYING)) {
 		pline("Floating in the air, you miss wildly!");
 		exercise(A_DEX, FALSE);
 		(void) passive(mon, FALSE, 1, AT_KICK, AD_PHYS);
@@ -339,9 +348,9 @@ doit:
 			    newsym(x, y);
 			}
 			pline("%s %s, %s evading your %skick.", Monnam(mon),
-				(can_teleport(mon->data) ? "teleports" :
-				 is_floater(mon->data) ? "floats" :
-				 is_flyer(mon->data) ? "swoops" :
+				(mon_resistance(mon,TELEPORT) ? "teleports" :
+				 mon_resistance(mon,LEVITATION) ? "floats" :
+				 mon_resistance(mon,FLYING) ? "swoops" :
 				 (nolimbs(mon->data) || slithy(mon->data)) ?
 					"slides" : "jumps"),
 				clumsy ? "easily" : "nimbly",
@@ -490,8 +499,7 @@ struct obj *obj;
 	    const char *result = (char *)0;
 
 	    otmp2 = otmp->nobj;
-	    if ((otmp->obj_material == GLASS || otmp->obj_material == OBSIDIAN_MT) &&
-		otmp->oclass != GEM_CLASS && !obj_resists(otmp, 33, 100)) {
+	    if (is_shatterable(otmp) && !otmp->oerodeproof && !obj_resists(otmp, 33, 100)) {
 		result = "shatter";
 	    } else if (otmp->otyp == EGG && !rn2(3)) {
 		result = "cracking";
@@ -820,7 +828,7 @@ dokick()
 	} else if (!rn2(2) && IS_PUDDLE(levl[u.ux][u.uy].typ) &&
 		    !Levitation && !Flying && !Wwalking &&
 			/* mud boots negate water resistance */
-			(!uarmf || strncmp(OBJ_DESCR(objects[uarmf->otyp]), "mud ", 4))
+			(!uarmf || uarmf->otyp == find_mboots())
 	) {
 		pline_The("water at your %s hinders your ability to kick.",
 			makeplural(body_part(FOOT)));
@@ -1757,7 +1765,7 @@ boolean shop_floor_obj;
 	if (breaktest(otmp)) {
 	    const char *result;
 
-	    if ((otmp->obj_material == GLASS || otmp->obj_material == OBSIDIAN_MT)
+		if (is_shatterable(otmp)
 #ifdef TOURIST
 		|| otmp->otyp == EXPENSIVE_CAMERA
 #endif

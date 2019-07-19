@@ -525,6 +525,7 @@ const char *name;
 	 * Also trying to create an artifact shouldn't de-artifact
 	 * it (e.g. Excalibur from prayer). In this case the object
 	 * will retain its current name. */
+	
 	if (obj->oartifact || (lth && exist_artifact(obj->otyp, name)))
 		return obj;
 	
@@ -537,7 +538,7 @@ const char *name;
       // obj->corpsenm = u.umonster*S*D*D*D*S*;
     }
 	if(!strcmp((&artilist[ART_MANTLE_OF_HEAVEN])->name,name) &&
-	   obj && obj->otyp == LEATHER_CLOAK){
+	   obj && obj->otyp == CLOAK){
 		if(!Race_if(PM_VAMPIRE)) obj = poly_obj(obj,find_cope());
 		else{
 			obj = poly_obj(obj,find_opera_cloak());
@@ -545,7 +546,7 @@ const char *name;
 		}
 	}
 	else if(!strcmp((&artilist[ART_VESTMENT_OF_HELL])->name,name) &&
-	   obj && obj->otyp == LEATHER_CLOAK){
+	   obj && obj->otyp == CLOAK){
 		if(Race_if(PM_VAMPIRE)) obj = poly_obj(obj,find_opera_cloak());
 		else{
 			obj = poly_obj(obj,find_cope());
@@ -582,13 +583,14 @@ const char *name;
 		obj->owt = weight(obj);
 		
 		if(obj->oartifact == ART_WAR_MASK_OF_DURIN) obj->corpsenm = PM_DWARF;
+		if(obj->oartifact == ART_MASK_OF_TLALOC) obj->corpsenm = PM_GOD;
 		
 		if(obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD) obj->owt = 150;
 		
 
 		if (obj->oartifact && artilist[obj->oartifact].size)
 			obj->objsize = artilist[obj->oartifact].size;
-		else if(is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR)
+		else if(is_malleable_artifact(&artilist[obj->oartifact]))
 			;//keep current/default size
 		else
 			obj->objsize = MZ_MEDIUM;
@@ -607,11 +609,11 @@ const char *name;
 		else if (obj->otyp == BEAMSWORD)                          obj->obj_material = GOLD;
 		else if (obj->otyp == KAMEREL_VAJRA)                      obj->obj_material = GOLD;
 		else if (obj->otyp == DOUBLE_LIGHTSABER)                  obj->obj_material = PLATINUM;
-		else if (is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR);//keep current/default material
+		else if (is_malleable_artifact(&artilist[obj->oartifact]));//keep current/default material
 		else
 			obj->obj_material = objects[obj->otyp].oc_material;
 		
-		if(is_nameable_artifact((&artilist[obj->oartifact])) || obj->oartifact == ART_EXCALIBUR); //keep current/default body type
+		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
 		else obj->bodytypeflag = MB_HUMANOID;
 		
 		if(obj->oartifact == ART_SCOURGE_OF_LOLTH) obj->ovar1 = 8;
@@ -639,7 +641,7 @@ const char *name;
 }
 
 static NEARDATA const char callable[] = {
-	SCROLL_CLASS, POTION_CLASS, WAND_CLASS, RING_CLASS, AMULET_CLASS,
+	SCROLL_CLASS, TILE_CLASS, POTION_CLASS, WAND_CLASS, RING_CLASS, AMULET_CLASS,
 	GEM_CLASS, SPBOOK_CLASS, ARMOR_CLASS, TOOL_CLASS, 0 };
 
 int
@@ -863,7 +865,7 @@ boolean called;
 			name_at_start = FALSE;
 		}
 		if (
-			((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp)))) 
+			((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) || ublindf->otyp == ANDROID_VISOR) 
 			&& !DEADMONSTER(mtmp)
 		){
 			if(mtmp->mhp == mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
@@ -889,6 +891,7 @@ boolean called;
 		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
 		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
 		else if(mtmp->mfaction == FRACTURED) Strcat(buf, ", Witness of the Fracture");
+		else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
 	    return buf;
 	}
 
@@ -929,7 +932,7 @@ boolean called;
 				Sprintf(eos(buf), "frumious ");
 				name_at_start = FALSE;
 			}
-			if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) ){
+			if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) || ublindf->otyp == ANDROID_VISOR ){
 				if(mtmp->mhp == mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 				else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
 				else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood_mon(mtmp)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
@@ -955,11 +958,13 @@ boolean called;
 				else if(mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
 				else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
 				else if(mtmp->mfaction == FRACTURED) Strcat(buf, ", Witness of the Fracture");
+				else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
 			} else {
 				if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
 				else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
 				else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
 				else if(mtmp->mfaction == FRACTURED) Strcat(buf, " witness");
+				else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
 			}
 			Sprintf(eos(buf), " called %s", name);
 			
@@ -990,6 +995,7 @@ boolean called;
 		else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
 		else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
 		else if(mtmp->mfaction == FRACTURED) Strcat(buf, " witness");
+		else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
 	    name_at_start = FALSE;
 	} else {
 	    name_at_start = (boolean)type_is_pname(mdat);
@@ -997,7 +1003,7 @@ boolean called;
 			Strcat(buf, "frumious ");
 			name_at_start = FALSE;
 		}
-		if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) ){
+		if ((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) || (ublindf && ublindf->otyp == ANDROID_VISOR )){
 			if(mtmp->mhp == mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 			else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
 			else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood_mon(mtmp)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
@@ -1022,11 +1028,13 @@ boolean called;
 			else if(mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
 			else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
 			else if(mtmp->mfaction == FRACTURED) Strcat(buf, ", Witness of the Fracture");
+			else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
 		} else {
 			if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
 			else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
 			else if(mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
 			else if(mtmp->mfaction == FRACTURED) Strcat(buf, " witness");
+			else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
 		}
 	}
 

@@ -66,9 +66,9 @@ STATIC_OVL NEARDATA const char comestibles[] = { FOOD_CLASS, 0 };
 
 /* Gold must come first for getobj(). */
 STATIC_OVL NEARDATA const char allobj[] = {
-	COIN_CLASS, WEAPON_CLASS, ARMOR_CLASS, POTION_CLASS, SCROLL_CLASS,
+	COIN_CLASS, WEAPON_CLASS, ARMOR_CLASS, POTION_CLASS, SCROLL_CLASS, TILE_CLASS,
 	WAND_CLASS, RING_CLASS, AMULET_CLASS, FOOD_CLASS, TOOL_CLASS,
-	GEM_CLASS, ROCK_CLASS, BALL_CLASS, CHAIN_CLASS, SPBOOK_CLASS, /*BED_CLASS,*/ 0 };
+	GEM_CLASS, ROCK_CLASS, BALL_CLASS, CHAIN_CLASS, SPBOOK_CLASS, TILE_CLASS, /*BED_CLASS,*/ 0 };
 
 STATIC_OVL boolean force_save_hs = FALSE;
 
@@ -435,8 +435,12 @@ choke(food)	/* To a full belly all food is bad. (It.) */
 			You("choke over it.");
 			killer = "quick snack";
 		}
-		You("die...");
-		done(CHOKING);
+		if (!Unchanging && Upolyd) {
+			rehumanize();
+		} else {
+			You("die...");
+			done(CHOKING);
+		}
 	 }
 	}
 }
@@ -910,39 +914,39 @@ register struct permonst *ptr;
 #endif
 	    case TELEPORT:
 #ifdef DEBUG
-		if (can_teleport(ptr)) {
+		if (species_teleports(ptr)) {
 			debugpline("can get teleport");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(can_teleport(ptr));
+		return(species_teleports(ptr));
 #endif
 	    case DISPLACED:
 #ifdef DEBUG
-		if (is_displacer(ptr)) {
+		if (species_displaces(ptr)) {
 			debugpline("can displacement");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(is_displacer(ptr));
+		return(species_displaces(ptr));
 #endif
 	    case TELEPORT_CONTROL:
 #ifdef DEBUG
-		if (control_teleport(ptr)) {
+		if (species_controls_teleports(ptr)) {
 			debugpline("can get teleport control");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(control_teleport(ptr));
+		return(species_controls_teleports(ptr));
 #endif
 	    case TELEPAT:
 #ifdef DEBUG
-		if (telepathic(ptr)) {
+		if (species_is_telepathic(ptr)) {
 			debugpline("can get telepathy");
 			return(TRUE);
 		} else  return(FALSE);
 #else
-		return(telepathic(ptr));
+		return(species_is_telepathic(ptr));
 #endif
 	    default:
 		return(FALSE);
@@ -2277,7 +2281,7 @@ struct obj *otmp;
 		    set_mimic_blocking();
 		    see_monsters();
 		    if (Invis && !oldprop && !ESee_invisible &&
-				!perceives(youracedata) && !Blind) {
+				!mon_resistance(&youmonst,SEE_INVIS) && !Blind) {
 			newsym(u.ux,u.uy);
 			pline("Suddenly you can see yourself.");
 			makeknown(typ);
@@ -2802,6 +2806,11 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	
 	boolean dont_start = FALSE;
 	
+	if(uandroid){
+		pline("Though you may look human, you run on magical energy, not food.");
+		pline("Use #monster to rest and recover.");
+		return 0;
+	}
 	if(uclockwork){
 		long uUpgrades = (u.clockworkUpgrades&(WOOD_STOVE|MAGIC_FURNACE|HELLFIRE_FURNACE|SCRAP_MAW));
 		if(!uUpgrades){
@@ -2833,6 +2842,21 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		pline("The %s covers your whole face.", xname(uarmc));
 		display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
 		return 0;
+	}
+	
+	if(herbivorous(youracedata) && !carnivorous(youracedata) && levl[u.ux][u.uy].typ == GRASS && can_reach_floor() &&
+		/* if we can't touch floor objects then use invent food only */
+#ifdef STEED
+			!u.usteed /* can't eat off floor while riding */
+#endif
+	){
+		if(yn("Eat some of the grass growing here?") == 'y'){
+			You("eat some grass.");
+			if(u.uhunger < u.uhungermax * 3/4 || yn_function("You feel awfully full, stop eating?",ynchars,'y') == 'n'){
+				lesshungry(objects[FOOD_RATION].oc_nutrition/objects[FOOD_RATION].oc_delay);
+			}
+			return 1;
+		}
 	}
 	
 	if (!(otmp = floorfood("eat", 0))) return 0;
@@ -3854,6 +3878,7 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 {
 	int hungermod = 1;
 	if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20) return;	/* you don't feel hungrier */
+	if(inediate(youracedata) && !uclockwork && !Race_if(PM_INCANTIFIER)) return;
 	
 	if(u.usleep) hungermod *= 10; /* slow metabolic rate while asleep */
 	/* Convicts can last twice as long at hungry and below */
@@ -3864,20 +3889,18 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	if(is_vampire(youracedata))
 		hungermod *= (maybe_polyd(youmonst.data->mlevel, u.ulevel)/10 + 1);
 	
-	if ((carnivorous(youracedata)
-		|| herbivorous(youracedata)
-		|| magivorous(youracedata)
-		|| Race_if(PM_INCANTIFIER)
-		|| is_vampire(youracedata))
+	if ((!inediate(youracedata) || Race_if(PM_INCANTIFIER))
 		&& !(moves % hungermod)
 		&& !( (Slow_digestion && !Race_if(PM_INCANTIFIER)) ||
-				(uclockwork) ))
-			(Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);		/* ordinary food consumption */
-	if(uwep && (
-		uwep->oartifact == ART_GARNET_ROD || (uwep->oartifact == ART_TENSA_ZANGETSU && !is_undead(youracedata)))
+				(uclockwork) )
 	){
-		if(Race_if(PM_INCANTIFIER)) u.uen -= 9;
-		else u.uhunger -= 9;
+		(Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);		/* ordinary food consumption */
+		if(uwep && (
+			uwep->oartifact == ART_GARNET_ROD || (uwep->oartifact == ART_TENSA_ZANGETSU && !is_undead(youracedata)))
+		){
+			if(Race_if(PM_INCANTIFIER)) u.uen -= 9;
+			else u.uhunger -= 9;
+		}
 	}
 	if(uclockwork){
 		if(u.ucspeed == SLOW_CLOCKSPEED){
@@ -3934,6 +3957,7 @@ void
 morehungry(num)	/* called after vomiting and after performing feats of magic */
 register int num;
 {
+	if(inediate(youracedata) && !uclockwork && !Race_if(PM_INCANTIFIER)) return;
 	if(Race_if(PM_INCANTIFIER)) u.uen -= num;
 	else u.uhunger -= num;
 	newuhs(TRUE);
@@ -3963,9 +3987,13 @@ register int num;
 			else{
 				Your("mainspring is wound too tight!");
 				Your("clockwork breaks apart!");
-				killer_format = KILLED_BY;
-				killer = "overwinding";
-				done(OVERWOUND);
+				if (!Unchanging && Upolyd) {
+					rehumanize();
+				} else {
+					killer_format = KILLED_BY;
+					killer = "overwinding";
+					done(OVERWOUND);
+				}
 				victual.piece = 0;
 				victual.mon = 0;
 				return;

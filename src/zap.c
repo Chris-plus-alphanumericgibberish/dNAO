@@ -208,8 +208,10 @@ struct obj *otmp;
 				dmg += d((u.ulevel+1)/2, 12);
 			if(dbldam) dmg *= 2;
 			if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
-			if (otyp == SPE_FORCE_BOLT)
+			if (otyp == SPE_FORCE_BOLT){
+				if(u.ukrau_duration) dmg *= 1.5;
 			    dmg += spell_damage_bonus();
+			}
 			
 			hit(zap_type_text, mtmp, exclam(dmg));
 			(void) resist(mtmp, otmp->oclass, dmg, TELL);
@@ -246,8 +248,10 @@ struct obj *otmp;
 			else dmg = rnd(8);
 			if(dbldam) dmg *= 2;
 			if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
-			if (otyp == SPE_TURN_UNDEAD)
+			if (otyp == SPE_TURN_UNDEAD){
+				if(u.ukrau_duration) dmg *= 1.5;
 				dmg += spell_damage_bonus();
+			}
 			flags.bypasses = TRUE;	/* for make_corpse() */
 			if (!resist(mtmp, otmp->oclass, dmg, TELL)) {
 			    if (mtmp->mhp > 0) monflee(mtmp, 0, FALSE, TRUE);
@@ -407,8 +411,10 @@ struct obj *otmp;
 		else dmg = rnd(8);
 		if(dbldam) dmg *= 2;
 		if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
-		if (otyp == SPE_DRAIN_LIFE)
+		if (otyp == SPE_DRAIN_LIFE){
+			if(u.ukrau_duration) dmg *= 1.5;
 			dmg += spell_damage_bonus();
+		}
 		if (resists_drli(mtmp)){
 		    shieldeff(mtmp->mx, mtmp->my);
 	break;	/* skip makeknown */
@@ -1470,7 +1476,56 @@ poly_obj(obj, id)
 			}
 			return obj;
 		} else if(obj->otyp == HYPOSPRAY_AMPULE){
+			int pick;
 			otmp = mksobj(HYPOSPRAY_AMPULE, FALSE, FALSE);
+			do{
+				switch(rn2(14)){
+					case 0:
+						pick = POT_GAIN_ABILITY;
+					break;
+					case 1:
+						pick = POT_RESTORE_ABILITY;
+					break;
+					case 2:
+						pick = POT_BLINDNESS;
+					break;
+					case 3:
+						pick = POT_CONFUSION;
+					break;
+					case 4:
+						pick = POT_PARALYSIS;
+					break;
+					case 5:
+						pick = POT_SPEED;
+					break;
+					case 6:
+						pick = POT_HALLUCINATION;
+					break;
+					case 7:
+						pick = POT_HEALING;
+					break;
+					case 8:
+						pick = POT_EXTRA_HEALING;
+					break;
+					case 9:
+						pick = POT_GAIN_ENERGY;
+					break;
+					case 10:
+						pick = POT_SLEEPING;
+					break;
+					case 11:
+						pick = POT_FULL_HEALING;
+					break;
+					case 12:
+						pick = POT_POLYMORPH;
+					break;
+					case 13:
+						pick = POT_AMNESIA;
+					break;
+				}
+			} while(pick == (int)obj->ovar1);
+			otmp->ovar1 = (long)pick;
+			otmp->spe = obj->spe;
 		} else {
 			int try_limit = 3;
 			/* Try up to 3 times to make the magic-or-not status of
@@ -1789,7 +1844,7 @@ struct obj *obj, *otmp;
 	case SCR_LIGHT:
 	case SPE_LIGHT:
 		if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-			obj->otyp == BRASS_LANTERN || obj->otyp == POT_OIL ||
+			obj->otyp == LANTERN || obj->otyp == POT_OIL ||
 			obj->otyp == DWARVISH_HELM || obj->otyp == GNOMISH_POINTY_HAT ||
 			obj->otyp == TALLOW_CANDLE || obj->otyp == WAX_CANDLE) &&
 			!((!Is_candle(obj) && obj->age == 0) || (obj->otyp == MAGIC_LAMP && obj->spe == 0))
@@ -1799,7 +1854,7 @@ struct obj *obj, *otmp;
 			// Assumes the player is the only cause of this effect for purposes of shk billing
 
 			if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-				obj->otyp == BRASS_LANTERN || obj->otyp == DWARVISH_HELM) {
+				obj->otyp == LANTERN || obj->otyp == DWARVISH_HELM) {
 				check_unpaid(obj);
 			}
 			else {
@@ -2290,7 +2345,7 @@ boolean ordinary;
 				You("zap yourself, but seem unharmed.");
 				ugolemeffects(AD_ELEC, d(12,6));
 		    }
-			if(!EShock_resistance){
+			if(!InvShock_resistance){
 				destroy_item(WAND_CLASS, AD_ELEC);
 				destroy_item(RING_CLASS, AD_ELEC);
 			}
@@ -2316,7 +2371,7 @@ boolean ordinary;
 				pline("You've set yourself afire!");
 				damage = d(12,6);
 		    }
-			if(!EFire_resistance){
+			if(!InvFire_resistance){
 				destroy_item(SCROLL_CLASS, AD_FIRE);
 				destroy_item(POTION_CLASS, AD_FIRE);
 				destroy_item(SPBOOK_CLASS, AD_FIRE);
@@ -2338,7 +2393,7 @@ boolean ordinary;
 				You("imitate a popsicle!");
 				damage = d(12,6);
 		    }
-			if(!ECold_resistance){
+			if(!InvCold_resistance){
 				destroy_item(POTION_CLASS, AD_COLD);
 			}
 		    break;
@@ -3004,7 +3059,22 @@ spell_damage_bonus()
     else		/* helm of brilliance */
 	tmp = 2;
 
+	tmp += kraubon();
+	
     return tmp;
+}
+
+int
+kraubon()
+{
+	int bonus = 0;
+	if(u.ukrau){
+		bonus += u.ukrau/3;
+		//remainder is probabilistic
+		if(rn2(3) < u.ukrau%3)
+			bonus++;
+	}
+	return bonus;
 }
 
 /*
@@ -3150,7 +3220,7 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 
 	    typ = levl[bhitpos.x][bhitpos.y].typ;
 	    if (typ == IRONBARS){
-		 if((obj->otyp==SPE_FORCE_BOLT || obj->otyp==WAN_STRIKING) && !Is_illregrd(&u.uz)){
+		 if((obj->otyp==SPE_FORCE_BOLT || obj->otyp==WAN_STRIKING)){
 			char numbars;
 			struct obj *obj;
 			You_hear("a sharp crack!");
@@ -3158,7 +3228,10 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 			for(numbars = d(2,4)-1; numbars > 0; numbars--){
 				obj = mksobj_at(BAR, bhitpos.x, bhitpos.y, FALSE, FALSE);
 			    obj->spe = 0;
+				if(Is_illregrd(&u.uz))
+					obj->obj_material = METAL;
 			    obj->cursed = obj->blessed = FALSE;
+				fix_object(obj);
 			}
 		    newsym(bhitpos.x, bhitpos.y);
 		 }
@@ -3420,8 +3493,10 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		}
 		if(!flat) tmp = d(nd,6);
 		else tmp = flat;
-		if (spellcaster)
+		if (spellcaster){
+			if(u.ukrau_duration) tmp *= 1.5;
 		    tmp += spell_damage_bonus();
+		}
 #ifdef WIZ_PATCH_DEBUG
 		if (spellcaster)
 		    pline("Damage = %d + %d", tmp-spell_damage_bonus(),
@@ -3436,8 +3511,10 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		if(!flat) tmp = d(nd,6);
 		else tmp = flat;
 		if (resists_cold(mon)) tmp *= 1.5;
-		if (spellcaster)
+		if (spellcaster){
+			if(u.ukrau_duration) tmp *= 1.5;
 		    tmp += spell_damage_bonus();
+		}
 #ifdef WIZ_PATCH_DEBUG
 		if (spellcaster)
 		    pline("Damage = %d + %d",tmp-spell_damage_bonus(),
@@ -3458,8 +3535,10 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		if(!flat) tmp = d(nd,6);
 		else tmp = flat;
 		if (resists_fire(mon)) tmp *= 1.5;
-		if (spellcaster)
+		if (spellcaster){
+			if(u.ukrau_duration) tmp *= 1.5;
 		    tmp += spell_damage_bonus();
+		}
 #ifdef WIZ_PATCH_DEBUG
 		if (spellcaster)
 		    pline("Damage = %d + %d", tmp-spell_damage_bonus(),
@@ -3578,8 +3657,10 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 			if(!flat) tmp = d(nd,6);
 			else tmp = flat;
 		}
-		if (spellcaster && tmp)
+		if (spellcaster && tmp){
+			if(u.ukrau_duration) tmp *= 1.5;
 		    tmp += spell_damage_bonus();
+		}
 #ifdef WIZ_PATCH_DEBUG
 		if (spellcaster && tmp)
 		    pline("Damage = %d + %d", tmp-spell_damage_bonus(),
@@ -3633,7 +3714,7 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		(uwep && uwep->oartifact == ART_STAFF_OF_TWELVE_MIRRORS) || 
 		Spellboost)
 	) tmp *= 2;
-	if (tmp > 0 && yours &&
+	if (tmp > 0 && yours && (adtyp != -1) &&
 		resist(mon, (olet==WAND_CLASS) ? WAND_CLASS : '\0', 0, NOTELL))
 	    tmp /= 2;
 	if (tmp < 0) tmp = 0;		/* don't allow negative damage */
@@ -3674,7 +3755,7 @@ xchar sx, sy;
 			else dam = flat;
 			if(Reflecting) dam = dam/2+1;
 		}
-		if(!EFire_resistance){
+		if(!InvFire_resistance){
 			if (flags.drgn_brth || !rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
 			if (flags.drgn_brth || !rn2(3)) destroy_item(SCROLL_CLASS, AD_FIRE);
 			if (flags.drgn_brth || !rn2(5)) destroy_item(SPBOOK_CLASS, AD_FIRE);
@@ -3692,7 +3773,7 @@ xchar sx, sy;
 			else dam = flat;
 			if(Reflecting) dam = dam/2+1;
 	    }
-		if(!ECold_resistance){
+		if(!InvCold_resistance){
 			if (flags.drgn_brth || !rn2(3)) destroy_item(POTION_CLASS, AD_COLD);
 			if (flags.drgn_brth) destroy_item(POTION_CLASS, AD_COLD);
 		}
@@ -3830,7 +3911,7 @@ xchar sx, sy;
 			exercise(A_CON, FALSE);
 			if(Reflecting) dam = dam/2+1;
 	    }
-		if(!EShock_resistance){
+		if(!InvShock_resistance){
 			if (flags.drgn_brth || !rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
 			if (flags.drgn_brth || !rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
 		}
@@ -3872,6 +3953,8 @@ xchar sx, sy;
 
 	if (Half_spell_damage && dam &&
 	   (olet != FOOD_CLASS)) /* !Breath */
+	    dam = (dam + 1) / 2;
+	if (u.uvaul_duration && dam)
 	    dam = (dam + 1) / 2;
 	losehp(dam, fltxt, KILLED_BY_AN);
 	return;
@@ -4487,6 +4570,13 @@ boolean *shopdamage;
 		(void) delfloortrap(t);
 		if (cansee(x,y)) newsym(x,y);
 	    }
+	    if(IS_GRASS(lev->typ)){
+		lev->typ = ROOM;
+		if(cansee(x,y)) {
+			pline("The grass burns away!");
+			newsym(x,y);
+		}
+	    }
 	    if(is_ice(x, y)) {
 		melt_ice(x, y);
 	    } else if(is_pool(x,y, FALSE)) {
@@ -4577,7 +4667,7 @@ boolean *shopdamage;
 			/* probably ought to do some hefty damage to any
 			   non-ice creature caught in freezing water;
 			   at a minimum, eels are forced out of hiding */
-			if (is_swimmer(mon->data) && mon->mundetected) {
+			if (mon_resistance(mon,SWIMMING) && mon->mundetected) {
 			    mon->mundetected = 0;
 			    newsym(x,y);
 			}
@@ -5165,9 +5255,9 @@ retry:
 	if (otmp != &zeroobj) {
 
 	    if (!flags.debug) {
-		char llog[BUFSZ+20];
-		Sprintf(llog, "wished for \"%s\"", mungspaces(bufcpy));
-		livelog_write_string(llog);
+			char llog[BUFSZ+20];
+			Sprintf(llog, "wished for \"%s\"", mungspaces(bufcpy));
+			livelog_write_string(llog);
 	    }
 
 	    /* The(aobjnam()) is safe since otmp is unidentified -dlc */

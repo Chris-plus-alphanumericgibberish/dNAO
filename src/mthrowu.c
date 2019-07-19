@@ -98,7 +98,10 @@ boolean burn;
 		if(bypassDR) dam -= base_udr();
 		else dam -= roll_udr((struct monst *) 0);
 		
-		if(u.ustdy) dam += u.ustdy;
+		if(dam > 0 && u.ustdy){
+			dam += u.ustdy;
+			u.ustdy /= 2;
+		}
 		
 		if(dam < 1) dam = 1;
 		
@@ -133,6 +136,7 @@ boolean burn;
 		else {
 			if (is_acid) pline("It burns!");
 			if (Half_physical_damage) dam = (dam+1) / 2;
+			if(u.uvaul_duration) dam = (dam + 1) / 2;
 			losehp(dam, knm, kprefix);
 			exercise(A_STR, FALSE);
 		}
@@ -1015,7 +1019,7 @@ struct monst *mtmp;
 	const char *onm;
 	boolean mass_pistol = FALSE;
 
-	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return;
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return;
 	if(mtmp->mux == 0 && mtmp->muy == 0) return;
 	
 	/* Rearranged beginning so monsters can use polearms not in a line */
@@ -1513,7 +1517,7 @@ register struct attack *mattk;
 {
 	register struct obj *otmp;
 
-	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return 0;
 	if(mtmp->mux == 0 && mtmp->muy == 0) return 0;
 
 	if(mtmp->mcan) {
@@ -1644,7 +1648,7 @@ register struct attack *mattk;
 	int ammo_type, autodestroy = 1;
 	
 
-	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return 0;
 	if(mtmp->mux == 0 && mtmp->muy == 0) return 0;
 	
 	if(lined_up(mtmp)) {
@@ -1931,7 +1935,7 @@ breamu(mtmp, mattk)			/* monster breathes at you (ranged) */
 	register struct attack  *mattk;
 {
 
-	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return 0;
 	if(mtmp->mux == 0 && mtmp->muy == 0) return 0;
 	
 	/* if new breath types are added, change AD_ACID to max type */
@@ -2073,7 +2077,7 @@ breamm(mtmp, mdef, mattk)		/* monster breathes at monst (ranged) */
 		} else typ = rnd(AD_ACID);
 	}
 
-	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return 0;
 	
 	if (distmin(mtmp->mx, mtmp->my, mdef->mx, mdef->my) < 3 && mtmp->data != &mons[PM_ANCIENT_OF_ICE])
 	    return 0;  /* not at close range */
@@ -2239,8 +2243,7 @@ int whodidit;	/* 1==hero, 0=other, -1==just check whether it'll pass thru */
 //#ifdef FIREARMS
 			(oskill != -P_FIREARM || obj_type == ROCKET) &&
 //#endif
-			oskill != P_SPEAR && oskill != P_JAVELIN &&
-			oskill != P_KNIFE);	/* but not dagger */
+			oskill != P_SPEAR && oskill != P_KNIFE);	/* but not dagger */
 		break;
 	    }
 	case ARMOR_CLASS:
@@ -2257,7 +2260,7 @@ int whodidit;	/* 1==hero, 0=other, -1==just check whether it'll pass thru */
 			obj_type != WAX_CANDLE &&
 			obj_type != LENSES &&
 			obj_type != R_LYEHIAN_FACEPLATE &&
-			obj_type != TIN_WHISTLE &&
+			obj_type != WHISTLE &&
 			obj_type != MAGIC_WHISTLE);
 		break;
 	case ROCK_CLASS:	/* includes boulder */

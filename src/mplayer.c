@@ -164,7 +164,7 @@ register boolean special;
 			rweapon = STRANGE_OBJECT;
 			rwammo = STRANGE_OBJECT;
 			armor = armtyp[rn2(SIZE(armtyp))];
-			cloak = rn2(8) ? STRANGE_OBJECT : LEATHER_CLOAK;
+			cloak = rn2(8) ? STRANGE_OBJECT : CLOAK;
 			helm = !rn2(4) ? STRANGE_OBJECT : hlmtyp[rn2(SIZE(hlmtyp))];
 			shield = !rn2(4) ? STRANGE_OBJECT : rnd_class(BUCKLER, CRYSTAL_SHIELD);
 		}
@@ -205,8 +205,8 @@ register boolean special;
 		}break;
 		case PM_BARD:{
 			static int trotyp[] = {
-				WOODEN_FLUTE, TOOLED_HORN, WOODEN_HARP,
-				BELL, BUGLE, LEATHER_DRUM
+				FLUTE, TOOLED_HORN, HARP,
+				BELL, BUGLE, DRUM
 			};
 			(void)mongets(mtmp, trotyp[rn2(SIZE(trotyp))]);
 			armor = rn2(2) ? ELVEN_MITHRIL_COAT : ELVEN_TOGA;
@@ -220,10 +220,6 @@ register boolean special;
 				if (helm == HELM_OF_BRILLIANCE) helm = STRANGE_OBJECT;
 			} else helm = LEATHER_HELM;
 		break;
-		case PM_CLOCKWORK_AUTOMATON:
-		    weapon = LONG_SWORD;
-		    armor = BRONZE_PLATE_MAIL;
-		break;
 #ifdef PM_CONVICT
 		case PM_CONVICT:
 		    if (rn2(4)) weapon = FLAIL;
@@ -232,7 +228,7 @@ register boolean special;
 		case PM_EXILE:
 			weapon = SCYTHE;
 			armor = ELVEN_MITHRIL_COAT;
-			cloak = LEATHER_CLOAK;
+			cloak = CLOAK;
 			shield = STRANGE_OBJECT;
 	    break;
 		case PM_HEALER:
@@ -263,13 +259,13 @@ register boolean special;
 		case PM_NOBLEMAN:
 		    weapon = special ? LONG_SWORD : RAPIER;
 		    armor = special ? NOBLE_S_DRESS : GENTLEWOMAN_S_DRESS;
-		    cloak = special ? find_opera_cloak() : LEATHER_CLOAK;
+		    cloak = special ? find_opera_cloak() : CLOAK;
 		    shield = STRANGE_OBJECT;
 		break;
 		case PM_NOBLEWOMAN:
 		    weapon = special ? RAKUYO : RAPIER;
 		    armor = special ? CRYSTAL_PLATE_MAIL : GENTLEMAN_S_SUIT;
-		    cloak = special ? find_opera_cloak() : LEATHER_CLOAK;
+		    cloak = special ? find_opera_cloak() : CLOAK;
 		    shield = STRANGE_OBJECT;
 		break;
 		case PM_PRIEST:
@@ -282,7 +278,7 @@ register boolean special;
 		break;
 		case PM_PIRATE:
 			weapon = SCIMITAR;
-			armor = LEATHER_JACKET;
+			armor = JACKET;
 			shield = BUCKLER;
 			rweapon = FLINTLOCK;
 			rwammo = BULLET;
@@ -314,7 +310,7 @@ register boolean special;
 		break;
 		case PM_WORM_THAT_WALKS:
 		    weapon = ATHAME;
-			armor = BRONZE_PLATE_MAIL;
+			armor = ARCHAIC_PLATE_MAIL;
 		    cloak = MUMMY_WRAPPING;
 		    shield = SHIELD_OF_REFLECTION;
 		break;
@@ -324,7 +320,7 @@ register boolean special;
 		    	armor = rn2(2) ? BLACK_DRAGON_SCALE_MAIL :
 		    			SILVER_DRAGON_SCALE_MAIL;
 		    }
-	    	cloak = special ? CLOAK_OF_MAGIC_RESISTANCE : LEATHER_CLOAK;
+	    	cloak = special ? CLOAK_OF_MAGIC_RESISTANCE : CLOAK;
 			if(special){
 				if (rn2(4)) helm = rn2(2) ? CORNUTHAUM : HELM_OF_BRILLIANCE;
 			} else {

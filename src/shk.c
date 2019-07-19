@@ -3401,39 +3401,35 @@ boolean shk_buying;
 {
 	register long tmp = (long) objects[obj->otyp].oc_cost;
 	
-	if(obj->obj_material != objects[obj->otyp].oc_material && obj->oclass == WEAPON_CLASS){ /*At least for now, only adjust value for weapons*/
-#define FeV		1
-#define AgV		10
-#define AuV		100
-#define PtV		100
-#define MiV		100
-		if(objects[obj->otyp].oc_material == SILVER){
-			if(obj->obj_material == GOLD) tmp *= (AuV/AgV);
-			else if(obj->obj_material == PLATINUM) tmp *= (PtV/AgV);
-			else if(obj->obj_material == MITHRIL) tmp *= (MiV/AgV);
-			else /*treat it as if it's steel*/ tmp *= (FeV/AgV);
-		} else if(objects[obj->otyp].oc_material == GOLD){
-			if(obj->obj_material == SILVER) tmp *= (AgV/AuV);
-			else if(obj->obj_material == PLATINUM) tmp *= (PtV/AuV);
-			else if(obj->obj_material == MITHRIL) tmp *= (MiV/AuV);
-			else /*treat it as if it's steel*/ tmp *= (FeV/AuV);
-		} else if(objects[obj->otyp].oc_material == PLATINUM){
-			if(obj->obj_material == SILVER) tmp *= (AgV/PtV);
-			else if(obj->obj_material == GOLD) tmp *= (AuV/PtV);
-			else if(obj->obj_material == MITHRIL) tmp *= (MiV/PtV);
-			else /*treat it as if it's steel*/ tmp *= (FeV/PtV);
-		} else if(objects[obj->otyp].oc_material == MITHRIL){
-			if(obj->obj_material == SILVER) tmp *= (AgV/MiV);
-			else if(obj->obj_material == GOLD) tmp *= (AuV/MiV);
-			else if(obj->obj_material == PLATINUM) tmp *= (PtV/MiV);
-			else /*treat it as if it's steel*/ tmp *= (FeV/MiV);
-		} else { /*treat it as if it's steel*/
-			if(obj->obj_material == SILVER) tmp *= (AgV/FeV);
-			else if(obj->obj_material == GOLD) tmp *= (AuV/FeV);
-			else if(obj->obj_material == PLATINUM) tmp *= (PtV/FeV);
-			else if(obj->obj_material == MITHRIL) tmp *= (MiV/FeV);
-			/*treat it as if it's still steel, leave it alone*/
+	/* adjust cost based on material */
+	if(obj->obj_material != objects[obj->otyp].oc_material){
+		long numerator = materials[obj->obj_material].cost;
+		long denominator = materials[objects[obj->otyp].oc_material].cost;
+
+		/* items made of specific gems use that as their material cost mod */
+		if (obj->obj_material == GEMSTONE && obj->ovar1 && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj))
+		{
+			/* costs more if the gem type is expensive */
+			if (objects[obj->ovar1].oc_cost >= 500)
+				numerator += min(4000, objects[obj->ovar1].oc_cost) / 10;	// 100 to 500
+
+			if (!objects[obj->ovar1].oc_name_known) {
+				if (shk_buying)
+					/* shopkeepers insist your gem armor is fluorite or equally inexpensive and you don't know otherwise */
+					numerator = materials[obj->obj_material].cost;	// 100
+				else
+					/* of course, *their* merchandise must be expensive stuff */
+					numerator = max(250, numerator);	// 250+
+			}
 		}
+
+		/* part of magical items' value is their magic; the material is less important */
+		if (objects[obj->otyp].oc_magic) {
+			numerator += (numerator / denominator < 10 ? denominator : 0);
+			denominator += denominator;
+		}
+
+		tmp = tmp * numerator / denominator;
 		if(tmp < 1) tmp = 1;
 	}
 	
@@ -3673,7 +3669,7 @@ boolean catchup;	/* restoring a level */
 		    return(0);
 	    if (x == shkp->mx && y == shkp->my)
 		return(0);
-	    if ((mtmp = m_at(x, y)) && (!passes_walls(mtmp->data)))
+	    if ((mtmp = m_at(x, y)) && (!mon_resistance(mtmp,PASSES_WALLS)))
 		return(0);
 	}
 	if ((ttmp = t_at(x, y)) != 0) {
@@ -4000,7 +3996,7 @@ register int fall;
 		} else
 		    pline("%s %s, and %s your backpack!",
 			  shkname(shkp),
-			  makeplural(locomotion(shkp->data,"leap")), grabs);
+			  makeplural(locomotion(shkp,"leap")), grabs);
 	    } else
 		pline("%s %s your backpack!", shkname(shkp), grabs);
 
@@ -4495,7 +4491,7 @@ boolean altusage; /* some items have an "alternate" use with different cost */
 		tmp /= 5L;
 	} else if(otmp->otyp == CRYSTAL_BALL ||		 /* 1 - 5 */
 		  otmp->otyp == OIL_LAMP ||		 /* 1 - 10 */
-		  otmp->otyp == BRASS_LANTERN ||
+		  otmp->otyp == LANTERN ||
 		 (otmp->otyp >= MAGIC_FLUTE &&
 		  otmp->otyp <= DRUM_OF_EARTHQUAKE) ||	 /* 5 - 9 */
 		  otmp->oclass == WAND_CLASS) {		 /* 3 - 11 */

@@ -46,7 +46,7 @@ A("",				STRANGE_OBJECT,			0,			0,
 //////////////////////Crowning Gifts///////////////////////////////////////
 /*Take Me Up/Cast Me Away*/
 A("Excalibur",			LONG_SWORD,			0,			0,
-	(SPFX_NOGEN|SPFX_RESTR|SPFX_SEEK|SPFX_DEFN|SPFX_INTEL|SPFX_SEARCH),0,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_SEEK|SPFX_DEFN|SPFX_INTEL|SPFX_SEARCH|SPFX_INHER),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(20,10),	DRLI(0,0),	NO_CARY,	//Excalibur is a very accurate weapon, a property that almost doesn't matter except for vs high level demons
 	0, A_LAWFUL, PM_KNIGHT, NON_PM, 4000L, //Excalibur does extra blessed damage to demons and undead, +3d7 instead of 1d4
@@ -68,7 +68,7 @@ A("Excalibur",			LONG_SWORD,			0,			0,
  */
 
 A("Stormbringer",		RUNESWORD,			0,			0,
-	(SPFX_RESTR|SPFX_ATTK|SPFX_DEFN|SPFX_INTEL|SPFX_DRLI), 0,
+	(SPFX_RESTR|SPFX_ATTK|SPFX_DEFN|SPFX_INTEL|SPFX_DRLI|SPFX_INHER), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	DRLI(5,2),	DRLI(0,0),	NO_CARY,	
 	0, A_CHAOTIC, NON_PM, NON_PM, 8000L, 
@@ -79,7 +79,7 @@ A("Stormbringer",		RUNESWORD,			0,			0,
  *	allowing those at all causes more problems than worth the effort).
  */
 A("Vorpal Blade",		LONG_SWORD,			0,			0,
-	(SPFX_RESTR|SPFX_BEHEAD), 0,
+	(SPFX_RESTR|SPFX_BEHEAD|SPFX_INHER), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(5,1),	NO_DFNS,	NO_CARY, /*Special code in weapon.c throws an extra die, so 2d8+2 vs small, 2d12+2 vs large*/	
 	0, A_NEUTRAL, NON_PM, NON_PM, 4000L, /*Vorpal Blade also uses exploading dice (roll again if maximum number is rolled)*/
@@ -87,7 +87,7 @@ A("Vorpal Blade",		LONG_SWORD,			0,			0,
 									 /*So vorpal sword is effectively 2d10+2/2d14+2*/
 
 A("The Marauder's Map", SCR_MAGIC_MAPPING,	0,			0, /*Needs encyc entry*/
-	(SPFX_RESTR), 0, 
+	(SPFX_RESTR|SPFX_INHER), 0, 
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	OBJECT_DET,	A_CHAOTIC, PM_PIRATE, NON_PM, 2000L,
@@ -247,7 +247,7 @@ A("Mjollnir",			WAR_HAMMER,			0,			0,		/* Mjo:llnir */
 	0, A_NEUTRAL, PM_VALKYRIE, NON_PM, 4000L, 
 	SPFX2_ELEC,0,0),
 
-A("the Pen of the Void",	ATHAME,			0,			0,
+A("The Pen of the Void",	ATHAME,			0,			0,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_ATTK), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(5,0),	NO_DFNS,	NO_CARY,
@@ -299,18 +299,26 @@ A("Rhongomyniad",			LANCE, 			0,			0,/*Needs encyc entry*/
 	0,0,0), 
 
 A("The Rod of Lordly Might", MACE, 			0,			0,/*Needs encyc entry*/
-	(SPFX_RESTR|SPFX_DEFN), 0,
+	(SPFX_RESTR|SPFX_DEFN|SPFX_INHER), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(3,0),	NO_DFNS,	NO_CARY,
 	LORDLY,	A_LAWFUL, PM_NOBLEMAN, NON_PM, 4000L, 
 	0,SPFX3_ENGRV,0), 
 
 A("The Singing Sword",	LONG_SWORD,			0,			0,
-	(SPFX_RESTR|SPFX_INTEL),0,
+	(SPFX_RESTR|SPFX_INTEL|SPFX_INHER),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(1,1),	NO_DFNS,	NO_CARY,
 	SINGING,		A_NONE, PM_BARD, NON_PM, 5000L,
 	0,0,0),
+
+A("Xiuhcoatl",	ATLATL,			0,			0,/*Needs encyc entry*/
+	(SPFX_RESTR|SPFX_ATTK), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	FIRE(5,10),	FIRE(0, 0),		NO_CARY,
+	LORDLY,	A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, 4000L, 
+	0,0,0), 
+
 
 /*
  *	Magicbane is a bit different!  Its magic fanfare
@@ -333,14 +341,14 @@ A("Grayswandir",		SABER,				SILVER,		0,
 	0, A_LAWFUL, NON_PM, NON_PM, 8000L, 
 	0,0,0),
 
-A("Frost Brand",		LONG_SWORD,			0,			0,
+A("Frost Brand",		LONG_SWORD,			GLASS,			0,
 	(SPFX_RESTR|SPFX_ATTK|SPFX_DEFN),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	COLD(1,0),	COLD(0,0),	NO_CARY,	
 	0, A_NONE, NON_PM, NON_PM, 3000L, 
 	0,0,0),
 
-A("Fire Brand",			LONG_SWORD,			0,			0,
+A("Fire Brand",			LONG_SWORD,			OBSIDIAN_MT,	0,
 	(SPFX_RESTR|SPFX_ATTK|SPFX_DEFN),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	FIRE(1,0),	FIRE(0,0),	NO_CARY,	
@@ -348,7 +356,7 @@ A("Fire Brand",			LONG_SWORD,			0,			0,
 	0,0,0),
 
 A("The Golden Sword of Y'ha-Talla",			SCIMITAR,			GOLD,			0,
-	(SPFX_RESTR|SPFX_ATTK|SPFX_DEFN),0,
+	(SPFX_RESTR|SPFX_ATTK|SPFX_DEFN|SPFX_INHER),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	DRST(5,0),	DRST(0,0),	NO_CARY,
 	LORDLY, A_NONE, NON_PM, NON_PM, 3000L, 
@@ -369,7 +377,7 @@ A("Mirror Brand",	LONG_SWORD,				SILVER,		0,
 	0,0,0),
 
 A("Sunsword",			LONG_SWORD,			GOLD,		0,
-	(SPFX_RESTR|SPFX_CON_OR|SPFX_SEARCH), 0,
+	(SPFX_RESTR|SPFX_CON_OR|SPFX_SEARCH|SPFX_INHER), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_UNDEAD|MA_DEMON) /*MA*/, 0 /*MV*/,
 	PHYS(1,0),	DFNS(AD_BLND),	NO_CARY,	/*also petrifies trolls, making this weapon strictly better than*/
 	0, A_LAWFUL, NON_PM, NON_PM, 1500L, 	/*trollsbane.  But trollsbane can be twoweaponed.*/
@@ -396,7 +404,7 @@ A("The Rod of the Ram",			MACE, 		0,			0,/* Wolf, Ram, and Hart? Ram demon? */
 	0, A_NEUTRAL, NON_PM, NON_PM, 3000L, 
 	SPFX2_RAM2,0,0),
 
-A("Atma Weapon", 		BEAMSWORD, 			0,			0,/*Sword whose attack power is bound to its wielder's life force*/
+A("The Atma Weapon", 		BEAMSWORD, 		0,			0,/*Sword whose attack power is bound to its wielder's life force*/
 	(SPFX_RESTR|SPFX_CON_OR), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, MG_NASTY /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(6,6),	NO_DFNS,	NO_CARY,
@@ -418,7 +426,7 @@ A("The Black Arrow",	ANCIENT_ARROW, 		0,			0,/*Needs encyc entry*/
 	0,0,0), 
 
 A("Tensa Zangetsu",		TSURUGI,			0,			0,
-	(SPFX_RESTR|SPFX_HSPDAM),0,
+	(SPFX_RESTR|SPFX_HSPDAM|SPFX_INHER),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/, /*also has a haste effect when wielded, but massively increases hunger and damages the wielder*/
 	PHYS(1,0),	NO_DFNS,	NO_CARY,
 	SPEED_BANKAI, A_NEUTRAL, NON_PM, NON_PM, 4444L,/*The invoked attack is very powerful*/
@@ -427,14 +435,14 @@ A("Tensa Zangetsu",		TSURUGI,			0,			0,
 /*//////////Other Artifacts//////////*/
 
 A("Sode no Shirayuki",		KATANA,			SILVER,		0,
-	(SPFX_RESTR|SPFX_ATTK),0,
+	(SPFX_RESTR|SPFX_ATTK|SPFX_INHER),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	COLD(1,0),	COLD(0,0),	NO_CARY,  /*Sort of intermediate between a double damage and a utility weapon,*/
 	ICE_SHIKAI, A_LAWFUL, NON_PM, NON_PM, 8000L,/*Sode no Shirayuki gains x2 ice damage after using the third dance.*/
 	0,0,0), /*however, it only keeps it for a few rounds, and the other dances are attack magic. */
 
 A("Tobiume",		LONG_SWORD,				METAL,		0,
-	(SPFX_RESTR|SPFX_ATTK),0,
+	(SPFX_RESTR|SPFX_ATTK|SPFX_INHER),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	FIRE(1,1),	FIRE(0,0),	NO_CARY,/*Tobiume is an awkward weapon.  It loses 3 damage vs large and 2 vs small*/
 	FIRE_SHIKAI, A_CHAOTIC, NON_PM, NON_PM, 8000L,
@@ -470,21 +478,21 @@ A("Release from Care",			SCYTHE, 	0,			0,/*Needs encyc entry*/
 	0,0,0),
 
 A("The Lifehunt Scythe",			SCYTHE,					DRAGON_HIDE,	MZ_LARGE,/*Needs encyc entry*/
-	(SPFX_RESTR|SPFX_DEFN|SPFX_BEHEAD),0, //Can only behead creatures that don't know where you are.
+	(SPFX_RESTR|SPFX_DEFN|SPFX_BEHEAD|SPFX_INHER),0, //Can only behead creatures that don't know where you are.
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(6,6),	DRLI(0,0),	COLD(0,0), //Actually only applies vs living or undead creatures
 	INVIS, A_CHAOTIC, NON_PM, NON_PM, 4000L, //Note: Has Str and Dex scaling for +16 max
 	SPFX2_STLTH,0,0),
 
 A("The Holy Moonlight Sword",		LONG_SWORD, 			METAL,			0,/*Needs encyc entry*/
-	(SPFX_RESTR),0, //Becomes two sizes larger when lit, likely requiring two hands
+	(SPFX_RESTR|SPFX_INHER),0, //Becomes two sizes larger when lit, likely requiring two hands
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(12,0),	NO_DFNS,	NO_CARY, //Actually only applies vs non-magic resistance and while lit
 	ENLIGHTENING, A_NONE, NON_PM, NON_PM, 4000L, 
 	0,0,0), //Also silver when NOT lit, and shining when lit
 
 A("The Silence Glaive",		GLAIVE, 		0,			0,/*Needs encyc entry*/
-	(SPFX_RESTR|SPFX_ATTK|SPFX_DEFN|SPFX_DRLI),0,
+	(SPFX_RESTR|SPFX_ATTK|SPFX_DEFN|SPFX_DRLI|SPFX_INHER),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	DRLI(1,1),	DRLI(0,0),	NO_CARY,
 	SATURN, A_NONE, NON_PM, NON_PM, 8000L, 
@@ -588,7 +596,7 @@ A("Yoichi no yumi", YUMI, 					0,			0,/*Needs encyc entry*/
 	CREATE_AMMO, A_LAWFUL, NON_PM, NON_PM, 4000L, 
 	0,0,0),
 
-A("Fluorite Octahedron", BLUE_FLUORITE, 	0,			0,/*Needs encyc entry*/
+A("The Fluorite Octahedron", BLUE_FLUORITE, 			0,			0,/*Needs encyc entry*/
 	(SPFX_RESTR),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
@@ -619,7 +627,7 @@ A("The Cloak of the Unheld One",	OILSKIN_CLOAK, 		0,			0,/*Needs encyc entry*/
 	TELEPORT_SHOES, A_NEUTRAL, NON_PM, NON_PM, 4500L, 
 	0,0,(WSFX_PLUSSEV|WSFX_FREEACT)),
 
-A("Beastmaster's Duster", LEATHER_JACKET, 	0,			0,/*Needs encyc entry*/
+A("The Beastmaster's Duster", JACKET, 			0,			0,/*Needs encyc entry*/
 	(SPFX_RESTR),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
@@ -676,7 +684,7 @@ A("Water Flowers", WATER_WALKING_BOOTS,		0,			0,
 	SPFX2_SILVERED,0,WSFX_PLUSSEV),
 
 A("Hammerfeet", KICKING_BOOTS,				0,			0,
-	(SPFX_RESTR),0,
+	(SPFX_RESTR|SPFX_INHER),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/, /*Needs encyc entry*/
 	PHYS(1,0),	NO_DFNS,	NO_CARY,
 	0, A_CHAOTIC, NON_PM, NON_PM, 4000L, 
@@ -710,21 +718,20 @@ A("Stormhelm",		HELM_OF_BRILLIANCE,		0,			0,
 	0, A_CHAOTIC, NON_PM, NON_PM, 3000L, 
 	0,0,WSFX_PLUSSEV),
 
-/*	Doesn't Work...
 A("Hellrider's Saddle",			SADDLE,		0,			0,
-	(SPFX_RESTR), SPFX_REFLECT, 0,
-	NO_ATTK,	NO_DFNS,	CARY(AD_MAGM),
+	(SPFX_RESTR|SPFX_REFLECT), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	NO_ATTK,	DFNS(AD_MAGM),	NO_CARY,
 	INVIS, A_NONE, NON_PM, NON_PM, 4000L, 
-	0,0),
-	*/
+	0,0,0),
 /*
  *	The artifacts for the quest dungeon, all self-willed.
  */
 
 /*//////////Law Quest Artifacts//////////*/
 
-A("The Rod of Seven Parts",	SPEAR, 			SILVER,		0,/*From D&D*/
-	(SPFX_NOGEN|SPFX_RESTR|SPFX_CON_OR|SPFX_INTEL|SPFX_DALIGN|SPFX_DEFN), 0,
+A("The Rod of Seven Parts",	SPEAR, 			METAL,		0,/*From D&D*/
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_CON_OR|SPFX_INTEL|SPFX_DALIGN|SPFX_DEFN|SPFX_INHER), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(7,20),	DRLI(0,0),	NO_CARY,
 	SEVENFOLD,	A_LAWFUL, NON_PM, NON_PM, 7777L, 
@@ -876,7 +883,7 @@ A("The Necronomicon", SPE_SECRETS, 						0,			0,/*from the works of HP Lovecraft
 	0,SPFX3_NOCNT,0),
 
 A("Infinity's Mirrored Arc",	DOUBLE_LIGHTSABER,		0,			0,
-	(SPFX_NOGEN|SPFX_RESTR|SPFX_REFLECT), 0,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_REFLECT|SPFX_INHER), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	NO_ATTK,	NO_DFNS,	NO_CARY,
 	ALTMODE,	A_NEUTRAL, NON_PM, NON_PM, 3000L, 
@@ -889,7 +896,7 @@ A("The Staff of Twelve Mirrors",	KHAKKHARA,			0,			0,
 	0,	A_NEUTRAL, NON_PM, NON_PM, 3000L, 
 	0,0,0),
 
-A("Sansara Mirror",	MIRRORBLADE,						GOLD,		0,
+A("The Sansara Mirror",	MIRRORBLADE,					GOLD,		0,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_REFLECT|SPFX_HPHDAM), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(8,8),	NO_DFNS,	NO_CARY,
@@ -981,7 +988,7 @@ A("Moonbeam",	SILVER_ARROW, 							0,			0,/*Needs encyc entry*/
 	0, A_CHAOTIC, PM_RANGER, NON_PM, 1000L,
 	SPFX2_BRIGHT,0,0),
 
-A("Veil of Latona",	CLOAK_OF_INVISIBILITY, 				0,			0,/*Needs encyc entry*/
+A("The Veil of Latona",	CLOAK_OF_INVISIBILITY, 			0,			0,/*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_DEFN|SPFX_REFLECT), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	NO_ATTK,	DFNS(AD_MAGM),	CARY(AD_DRLI),
@@ -1003,6 +1010,48 @@ A("Poseidon's Trident",	TRIDENT,						0,			0,
 	0,0,0),
 
 
+A("The Eye of the Oracle", EYEBALL,							0,			0,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_HSPDAM|SPFX_INTEL),0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	NO_ATTK,        NO_DFNS,        CARY(AD_MAGM),
+	ORACLE,     A_NEUTRAL, NON_PM, NON_PM, 500L,
+	0,0,0),
+
+A("The Macuahuitl of Quetzalcoatl", MACUAHUITL,				0,0,/*Arc redesign by Riker*/
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_BEHEAD), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	PHYS(5, 0), NO_DFNS, NO_CARY,
+	0, A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, 3000L, 
+	0,0,0),
+
+A("The Mask of Tlaloc",	MASK, 						0,			0,/*Arc redesign by Riker*/
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL), (SPFX_HSPDAM),
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/, /*+5 attk and damage with axes*/
+	NO_ATTK,	NO_DFNS,	CARY(AD_MAGM), //  Cold and shock resistance, water damage in addition to MR
+	0,	A_LAWFUL,	 PM_ARCHEOLOGIST, PM_DWARF, 2500L,
+	0,0,0),
+
+A("Ehecailacocozcatl", AMULET_OF_MAGICAL_BREATHING,			MINERAL,0,/*Arc redesign by Riker*/
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_REFLECT|SPFX_EREGEN), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+    NO_ATTK, NO_DFNS, NO_CARY,
+	WIND_PETS, A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, 3000L, 
+	0,0,0),
+
+A("Amhimitl", JAVELIN,			BONE,0,/*Arc redesign by Riker*/
+	(SPFX_NOGEN|SPFX_RESTR), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+    FIRE(5,8), NO_DFNS, NO_CARY,
+	0, A_NEUTRAL, PM_ARCHEOLOGIST, NON_PM, 3000L, 
+	0,0,0),
+
+A("The Tecpatl of Huhetotl", TECPATL,					BONE,0,/*Arc redesign by Riker*/
+	(SPFX_NOGEN|SPFX_RESTR), 0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+    PHYS(5, 8), NO_DFNS, CARY(AD_DRLI),
+	0, A_CHAOTIC, PM_ARCHEOLOGIST, NON_PM, 3000L, 
+	0,0,0),
+
 /*//////////Role-specific Quest Artifacts//////////*/
 /*
 A("The Orb of Detection",	CRYSTAL_BALL,
@@ -1010,6 +1059,7 @@ A("The Orb of Detection",	CRYSTAL_BALL,
 	NO_ATTK,	NO_DFNS,	CARY(AD_MAGM),
 	INVIS,		A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, 2500L ),
 */
+
 A("Itlachiayaque", ROUNDSHIELD,							OBSIDIAN_MT,0,/*From archeologist patch*/
 	(SPFX_REFLECT|SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_DEFN), (SPFX_ESP|SPFX_HSPDAM),
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
@@ -1089,7 +1139,7 @@ A("The Tentacle Rod",		FLAIL, 						0,			0,/*Needs encyc entry*/
 	0, A_NONE, NON_PM, PM_DROW, 5000L,
 	SPFX2_TENTROD,0,0),
 
-A("The Crescent Blade",		SABER, 						0,			0,/*Needs encyc entry*/
+A("The Crescent Blade",		SABER, 					SILVER,			0,/*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_ATTK|SPFX_BEHEAD), SPFX_REFLECT,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	FIRE(4,0),	NO_DFNS,	NO_CARY,
@@ -1107,10 +1157,10 @@ A("Spidersilk",	ELVEN_MITHRIL_COAT, 					0,			0,/*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	NO_ATTK,	NO_DFNS,	NO_CARY, 
-	0,	A_CHAOTIC,	 NON_PM, PM_DROW, 5000L,
+	0,	A_NONE,	 NON_PM, PM_DROW, 5000L,
 	SPFX2_SPELLUP,0,WSFX_PLUSSEV), /*Adds sleep poison to unarmed attacks*/
 
-A("Webweaver's Crook",	FAUCHARD, 						BONE,		0,/*Needs encyc entry*/
+A("The Webweaver's Crook",	FAUCHARD, 					BONE,		0,/*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(1,0),	NO_DFNS,	CARY(AD_MAGM), 
@@ -1204,14 +1254,21 @@ A("The Eyes of the Overworld",	LENSES,					0,			0,
 	ENLIGHTENING,	A_NEUTRAL,	 PM_MONK, NON_PM, 2500L, 
 	0,0,0),
 
-A("The Mantle of Heaven",	LEATHER_CLOAK, 				0,			0,/*Actually an ornamental cope in game*/
+A("Avenger",			LONG_SWORD,			0,			0,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_DEFN),0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	PHYS(1,7),	DFNS(AD_MAGM),	CARY(AD_DRLI),	//Also has holy and unholy properties
+	0, A_LAWFUL, PM_NOBLEMAN, NON_PM, 1000L,
+	0,0,0),
+
+A("The Mantle of Heaven",	CLOAK, 				0,			0,/*Actually an ornamental cope in game*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_HSPDAM),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/, /*Needs encyc entry*/
 	NO_ATTK,	ELEC(0,0),	COLD(0,0), /* Plus double AC bonus */
 	0,	A_LAWFUL,	 PM_NOBLEMAN, NON_PM, 2500L,
 	0,0,0),
 
-A("The Vestment of Hell",	LEATHER_CLOAK, 				0,			0,/*Actually an opera cloak in game*/
+A("The Vestment of Hell",	CLOAK, 				0,			0,/*Actually an opera cloak in game*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_HPHDAM),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/, /*Needs encyc entry*/
 	NO_ATTK,	ACID(0,0),	FIRE(0,0), /* Plus double AC bonus */
@@ -1304,7 +1361,7 @@ A("Yorshka's Spear",			SPEAR, 					0,			0,/*Needs encyc entry*/
 	0, A_LAWFUL, PM_NOBLEMAN, NON_PM, 4000L,//Note: Drains energy/sets special ability cooldowns 
 	0,0,0),
 
-A("Dragon's Heart-Stone",			FLINT, 				0,			0,/*Needs encyc entry*/
+A("The Dragon's Heart-Stone",			FLINT, 			0,			0,/*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_DEFN),0, //Can only behead creatures that don't know where you are.
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	NO_ATTK,	NO_DFNS,	NO_CARY,//Note: Doubles dragon attributes when carried
@@ -1346,7 +1403,7 @@ A("The Steel Scales of Kurtulmak",	GRAY_DRAGON_SCALES,	IRON,		0,/*causes spell p
 	0, A_LAWFUL, NON_PM, PM_KOBOLD, 5000L,
 	0,0,0),
 
-A("Glitterstone", AMBER,								0,			0,
+A("The Glitterstone", AMBER,							0,			0,
     (SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL), (SPFX_EREGEN),
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
     NO_ATTK, NO_DFNS, NO_CARY,
@@ -1546,7 +1603,7 @@ A("Avarice", SHORT_SWORD,								0,			MZ_LARGE, /*Needs encyc entry*/
 	THEFT_TYPE,	A_LAWFUL, NON_PM, NON_PM, 9999L, 
 	SPFX2_STEAL,SPFX3_NOCNT,0),
 
-A("Fire of Heaven", TRIDENT, 							SILVER,		0,/*Needs encyc entry*/
+A("The Fire of Heaven", TRIDENT, 						SILVER,		0,/*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_ATTK),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	FIRE(1,0),	NO_DFNS,	NO_CARY,
@@ -1588,14 +1645,14 @@ A("Unblemished Soul", UNICORN_HORN, 					0,			MZ_LARGE,/*Needs encyc entry*/
 	0,	A_LAWFUL, NON_PM, NON_PM, 3333L, 
 	SPFX2_SILVERED,SPFX3_NOCNT,0),
 
-A("Ramithane", LONG_SWORD,								0,			0, /*Needs encyc entry*/
+A("Ramithaine", LONG_SWORD,								0,			0, /*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_BEHEAD),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(6,1),	NO_DFNS,	NO_CARY,
 	0,	A_LAWFUL, NON_PM, NON_PM, 3333L, 
 	0, SPFX3_NOCNT,0),
 
-A("Wrath of Heaven", LONG_SWORD,						SILVER,		MZ_LARGE, /*Needs encyc entry*/
+A("The Wrath of Heaven", LONG_SWORD,					SILVER,		MZ_LARGE, /*Needs encyc entry*/
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_INTEL|SPFX_ATTK),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	ELEC(1,0),	NO_DFNS,	NO_CARY,
@@ -1839,7 +1896,7 @@ A("The Striped Shirt of the Falsely Accused", STRIPED_SHIRT,	0,			0,
 
 /* Healer */
 /* TODO 2x vs living */
-A("Scalpel of Life and Death",	SCALPEL,			0,			0,
+A("The Scalpel of Life and Death",	SCALPEL,					0,			0,
 	(SPFX_NOGEN|SPFX_RESTR), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	NO_ATTK,	NO_DFNS,	NO_CARY,

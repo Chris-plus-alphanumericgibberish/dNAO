@@ -1485,7 +1485,7 @@ encumber_msg()
 	case 2: You("rebalance your load.  Movement is difficult.");
 		break;
 	case 3: You("%s under your heavy load.  Movement is very hard.",
-		    stagger(youracedata, "stagger"));
+		    stagger(&youmonst, "stagger"));
 		break;
 	default: You("%s move a handspan with this load!",
 		     newcap == 4 ? "can barely" : "can't even");
@@ -1501,7 +1501,7 @@ encumber_msg()
 	case 2: You("rebalance your load.  Movement is still difficult.");
 		break;
 	case 3: You("%s under your load.  Movement is still very hard.",
-		    stagger(youracedata, "stagger"));
+		    stagger(&youmonst, "stagger"));
 		break;
 	}
 	flags.botl = 1;
@@ -1600,6 +1600,7 @@ boolean noit;
 	pline("It develops a huge set of teeth and bites you!");
 	tmp = rnd(10);
 	if (Half_physical_damage) tmp = (tmp+1) / 2;
+	if(u.uvaul_duration) tmp = (tmp + 1) / 2;
 	losehp(tmp, "carnivorous bag", KILLED_BY_AN);
 	makeknown(BAG_OF_TRICKS);
 	return 1;
@@ -1710,6 +1711,7 @@ lootcont:
 						pline("It develops a huge set of teeth and bites you!");
 						tmp = rnd(10);
 						if (Half_physical_damage) tmp = (tmp+1) / 2;
+						if(u.uvaul_duration) tmp = (tmp + 1) / 2;
 						losehp(tmp, "carnivorous bag", KILLED_BY_AN);
 						makeknown(BAG_OF_TRICKS);
 						timepassed = 1;
@@ -2565,8 +2567,14 @@ struct monst *mon;
 		if(!otmp->owornmask){
 			if(otmp->oclass == AMULET_CLASS && !(mon->misc_worn_check&W_AMUL) &&
 				can_wear_amulet(mon->data) && 
-			    (otmp->otyp == AMULET_OF_LIFE_SAVING |
-				 otmp->otyp == AMULET_OF_REFLECTION)
+				objects[otmp->otyp].oc_name_known &&
+			    (otmp->otyp == AMULET_OF_LIFE_SAVING ||
+				 otmp->otyp == AMULET_OF_REFLECTION ||
+				 otmp->otyp == AMULET_OF_NULLIFY_MAGIC ||
+				 otmp->otyp == AMULET_OF_MAGICAL_BREATHING ||
+				 otmp->otyp == AMULET_OF_DRAIN_RESISTANCE ||
+				 otmp->otyp == AMULET_OF_ESP ||
+				 otmp->otyp == AMULET_VERSUS_POISON)
 			){
 				addArmorMenuOption
 			} else if(is_shirt(otmp) && !(mon->misc_worn_check&W_ARMU) && otmp->objsize == mon->data->msize && shirt_match(mon->data,otmp)){

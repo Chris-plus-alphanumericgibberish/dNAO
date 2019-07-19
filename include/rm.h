@@ -65,6 +65,8 @@ enum {
     GRAVE,
     ALTAR,
     ICE,
+    GRASS,
+    SOIL,
     DRAWBRIDGE_DOWN,
     AIR,
     CLOUD,
@@ -102,6 +104,8 @@ enum {
 #define IS_ALTAR(typ)	((typ) == ALTAR)
 #define IS_DRAWBRIDGE(typ) ((typ) == DRAWBRIDGE_UP || (typ) == DRAWBRIDGE_DOWN)
 #define IS_FURNITURE(typ) ((typ) >= STAIRS && (typ) <= ALTAR)
+#define IS_GRASS(typ)	((typ) == GRASS)
+#define IS_SOIL(typ)	((typ) == SOIL)
 #define IS_AIR(typ)	((typ) == AIR || (typ) == CLOUD)
 #define IS_SOFT(typ)	((typ) == AIR || (typ) == CLOUD || IS_POOL(typ))
 #define IS_PUDDLE(typ)	((typ) == PUDDLE)
@@ -152,6 +156,10 @@ enum {
     S_fountain,
     S_pool,
     S_ice,
+    S_litgrass,
+    S_drkgrass,
+    S_litsoil,
+    S_drksoil,
     S_lava,
     S_vodbridge,
     S_hodbridge,
@@ -187,6 +195,8 @@ enum {
     S_magic_trap,
     S_anti_magic_trap,
     S_polymorph_trap,
+    S_essence_trap,
+    S_mummy_trap,
 
 /* end traps, begin special effects */
 
@@ -230,8 +240,8 @@ enum {
     MAXPCHARS		/* maximum number of mapped characters */
 };
 #define MAXDCHARS	(S_water+1)	/* maximum of mapped dungeon characters */
-#define MAXTCHARS	(S_polymorph_trap-S_water)	/* maximum of mapped trap characters */
-#define MAXECHARS	(S_explode9-S_polymorph_trap)	/* maximum of mapped effects characters */
+#define MAXTCHARS	(S_mummy_trap-S_water)	/* maximum of mapped trap characters */
+#define MAXECHARS	(S_explode9-S_mummy_trap)	/* maximum of mapped effects characters */
 #define MAXEXPCHARS	9	/* number of explosion characters */
 
 struct symdef {

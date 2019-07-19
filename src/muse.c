@@ -349,7 +349,7 @@ struct monst *mtmp;
 	}
 
 	if (levl[x][y].typ == STAIRS && !stuck && !immobile) {
-		if (x == xdnstair && y == ydnstair && !is_floater(mtmp->data) && mtmp->data != &mons[PM_SMAUG])
+		if (x == xdnstair && y == ydnstair && !mon_resistance(mtmp,LEVITATION) && mtmp->data != &mons[PM_SMAUG])
 			m.has_defense = MUSE_DOWNSTAIRS;
 		if (x == xupstair && y == yupstair && ledger_no(&u.uz) != 1)
 	/* Unfair to let the monsters leave the dungeon with the Amulet */
@@ -358,7 +358,7 @@ struct monst *mtmp;
 	} else if (levl[x][y].typ == LADDER && !stuck && !immobile) {
 		if (x == xupladder && y == yupladder)
 			m.has_defense = MUSE_UP_LADDER;
-		if (x == xdnladder && y == ydnladder && !is_floater(mtmp->data))
+		if (x == xdnladder && y == ydnladder && !mon_resistance(mtmp,LEVITATION))
 			m.has_defense = MUSE_DN_LADDER;
 	} else if (sstairs.sx && sstairs.sx == x && sstairs.sy == y) {
 		m.has_defense = MUSE_SSTAIRS;
@@ -380,10 +380,10 @@ struct monst *mtmp;
 		if ((xx==x && yy==y) || !level.monsters[xx][yy])
 		if ((t = t_at(xx,yy)) != 0)
 		if ((verysmall(mtmp->data) || throws_rocks(mtmp->data) ||
-		     passes_walls(mtmp->data)) || !boulder_at(xx, yy))
+		     mon_resistance(mtmp,PASSES_WALLS)) || !boulder_at(xx, yy))
 		if (!onscary(xx,yy,mtmp)) {
 			if ((t->ttyp == TRAPDOOR || t->ttyp == HOLE)
-				&& !is_floater(mtmp->data)
+				&& !mon_resistance(mtmp,LEVITATION)
 				&& !mtmp->isshk && !mtmp->isgd
 				&& !mtmp->ispriest
 				&& Can_fall_thru(&u.uz)
@@ -439,7 +439,7 @@ struct monst *mtmp;
 		if (m.has_defense == MUSE_WAN_DIGGING) break;
 		if (obj->otyp == WAN_DIGGING && obj->spe > 0 && !stuck && !t
 		    && !mtmp->isshk && !mtmp->isgd && !mtmp->ispriest
-		    && !is_floater(mtmp->data)
+		    && !mon_resistance(mtmp,LEVITATION)
 		    /* monsters digging in Sokoban can ruin things */
 		    && !In_sokoban(&u.uz)
 		    /* digging wouldn't be effective; assume they know that */
@@ -675,7 +675,7 @@ mon_tele:
 		    pline("%s has made a hole in the %s.", Monnam(mtmp),
 				surface(mtmp->mx, mtmp->my));
 		    pline("%s %s through...", Monnam(mtmp),
-			  is_flyer(mtmp->data) ? "dives" : "falls");
+			  mon_resistance(mtmp,FLYING) ? "dives" : "falls");
 		} else if (flags.soundok)
 			You_hear("%s crash through the %s.", something,
 				surface(mtmp->mx, mtmp->my));
@@ -743,7 +743,7 @@ mon_tele:
 			struct trap *t;
 			t = t_at(trapx,trapy);
 			pline("%s %s into a %s!", Monnam(mtmp),
-			makeplural(is_weeping(mtmp->data) ? "tips over" : locomotion(mtmp->data, "jump")),
+			makeplural(is_weeping(mtmp->data) ? "tips over" : locomotion(mtmp, "jump")),
 			t->ttyp == TRAPDOOR ? "trap door" : "hole");
 			if (levl[trapx][trapy].typ == SCORR) {
 			    levl[trapx][trapy].typ = CORR;
@@ -837,7 +837,7 @@ mon_tele:
 		m_flee(mtmp);
 		if (vis) {
 			pline("%s %s onto a teleport trap!", Monnam(mtmp),
-				is_weeping(mtmp->data) ? "tips over" : makeplural(locomotion(mtmp->data, "jump")));
+				is_weeping(mtmp->data) ? "tips over" : makeplural(locomotion(mtmp, "jump")));
 			if (levl[trapx][trapy].typ == SCORR) {
 			    levl[trapx][trapy].typ = CORR;
 			    unblock_point(trapx, trapy);
@@ -955,7 +955,7 @@ struct monst *mtmp;
 		case 4: return POT_EXTRA_HEALING;
 		case 5: return (mtmp->data != &mons[PM_PESTILENCE]) ?
 				POT_FULL_HEALING : POT_SICKNESS;
-		case 7: if (is_floater(pm) || mtmp->isshk || mtmp->isgd
+		case 7: if (mon_resistance(mtmp,LEVITATION) || mtmp->isshk || mtmp->isgd
 						|| mtmp->ispriest
 									)
 				return 0;
@@ -1027,7 +1027,7 @@ struct monst *mtmp;
 	
 	if(tbx == 0 && tby == 0) return FALSE; //Target is not lined up.
 	
-	if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return 0;
 	
 	if (target)
 	{
@@ -1169,7 +1169,7 @@ struct monst *mtmp;
 		if (obj->otyp == SCR_EARTH
 		       && ((helmet && is_hard(helmet)) ||
 				mtmp->mconf || amorphous(mtmp->data) ||
-				passes_walls(mtmp->data) ||
+				mon_resistance(mtmp,PASSES_WALLS) ||
 				noncorporeal(mtmp->data) ||
 				unsolid(mtmp->data) || !rn2(10))
 		       && dist2(mtmp->mx,mtmp->my,mtmp->mux,mtmp->muy) <= 2
@@ -1225,6 +1225,7 @@ register struct obj *otmp;
 			    pline_The("wand hits you!");
 			    tmp = d(2,12);
 			    if(Half_spell_damage) tmp = (tmp+1) / 2;
+				if(u.uvaul_duration) tmp = (tmp + 1) / 2;
 			    losehp(tmp, "wand", KILLED_BY_AN);
 			}
 			stop_occupation();
@@ -1365,15 +1366,18 @@ struct obj *obj;			/* 2nd arg to fhitm/fhito */
 		    if(hitanything)	range--;
 		}
 		typ = levl[bhitpos.x][bhitpos.y].typ;
-		if (typ == IRONBARS && obj->otyp==WAN_STRIKING && !Is_illregrd(&u.uz)){
+		if (typ == IRONBARS && obj->otyp==WAN_STRIKING){
 			char numbars;
 			struct obj *obj;
 			You_hear("a sharp crack!");
 		    levl[bhitpos.x][bhitpos.y].typ = CORR;
 			for(numbars = d(2,4)-1; numbars > 0; numbars--){
 				obj = mksobj_at(BAR, bhitpos.x, bhitpos.y, FALSE, FALSE);
+				if(Is_illregrd(&u.uz))
+					obj->obj_material = METAL;
 			    obj->spe = 0;
 			    obj->cursed = obj->blessed = FALSE;
+				fix_object(obj);
 			}
 		    newsym(bhitpos.x, bhitpos.y);
 		}
@@ -1519,7 +1523,7 @@ struct monst *mtmp;
 	    	    	    /* Find the monster here (might be same as mtmp) */
 	    	    	    mtmp2 = m_at(x, y);
 	    	    	    if (mtmp2 && !amorphous(mtmp2->data) &&
-	    	    	    		!passes_walls(mtmp2->data) &&
+	    	    	    		!mon_resistance(mtmp2,PASSES_WALLS) &&
 	    	    	    		!noncorporeal(mtmp2->data) &&
 	    	    	    		!unsolid(mtmp2->data)) {
 				struct obj *helmet = which_armor(mtmp2, W_ARMH);
@@ -1626,7 +1630,8 @@ struct monst *mtmp;
 			    You("are not harmed.");
 			burn_away_slime();
 			if (Half_spell_damage) num = (num+1) / 2;
-			else losehp(num, "scroll of fire", KILLED_BY_AN);
+			if(u.uvaul_duration) num = (num + 1) / 2;
+			losehp(num, "scroll of fire", KILLED_BY_AN);
 			for(mtmp2 = fmon; mtmp2; mtmp2 = mtmp2->nmon) {
 			   if(DEADMONSTER(mtmp2)) continue;
 			   if(mtmp == mtmp2) continue;
@@ -1698,7 +1703,7 @@ struct monst *mtmp;
 		case 0: {
 		    struct obj *helmet = which_armor(mtmp, W_ARMH);
 
-		    if ((helmet && is_hard(helmet)) || amorphous(pm) || passes_walls(pm) || noncorporeal(pm) || unsolid(pm))
+		    if ((helmet && is_hard(helmet)) || amorphous(pm) || species_passes_walls(pm) || noncorporeal(pm) || unsolid(pm))
 			return SCR_EARTH;
 		} /* fall through */
 		case 1: return WAN_MAGIC_MISSILE;
@@ -1896,7 +1901,7 @@ struct monst *mtmp;
 	) {
 	  boolean ignore_boulders = (verysmall(mdat) ||
 				     throws_rocks(mdat) ||
-				     passes_walls(mdat));
+				     mon_resistance(mtmp,PASSES_WALLS));
 	  for(xx = x-1; xx <= x+1; xx++)
 	    for(yy = y-1; yy <= y+1; yy++)
 		if (isok(xx,yy) && (xx != u.ux || yy != u.uy))
@@ -1944,8 +1949,10 @@ struct monst *mtmp;
 			m.has_misc = MUSE_POT_GAIN_ENERGY;
 		}
 		nomore(MUSE_BULLWHIP);
-		if(obj->otyp == BULLWHIP && (MON_WEP(mtmp) == obj || MON_SWEP(mtmp) == obj) &&
-		   distu(mtmp->mx,mtmp->my)==1 && uwep && !mtmp->mpeaceful) {
+		if((obj->otyp == BULLWHIP || obj->otyp == VIPERWHIP || obj->otyp == FORCE_WHIP) 
+			&& (MON_WEP(mtmp) == obj || MON_SWEP(mtmp) == obj) &&
+			distu(mtmp->mx,mtmp->my)==1 && uwep && !mtmp->mpeaceful
+		) {
 			m.misc = obj;
 			m.has_misc = MUSE_BULLWHIP;
 		}
@@ -2253,7 +2260,7 @@ museamnesia:
 		if (vismon)
 		    pline("%s deliberately %s onto a polymorph trap!",
 			Monnam(mtmp),
-			makeplural(locomotion(mtmp->data, "jump")));
+			makeplural(locomotion(mtmp, "jump")));
 		if (vis) seetrap(t_at(trapx,trapy));
 
 		/*  don't use rloc() due to worms */
@@ -2269,7 +2276,7 @@ museamnesia:
 	case MUSE_BULLWHIP:
 		/* attempt to disarm hero */
 		if (uwep && !rn2(5)) {
-		    const char *The_whip = vismon ? "The bullwhip" : "A whip";
+		    const char *The_whip = vismon ? "The whip" : "A whip";
 		    int where_to = rn2(4);
 		    struct obj *obj = uwep;
 		    const char *hand;
@@ -2280,7 +2287,7 @@ museamnesia:
 		    if (bimanual(obj,youracedata)) hand = makeplural(hand);
 
 		    if (vismon)
-			pline("%s flicks a bullwhip towards your %s!",
+			pline("%s flicks a whip towards your %s!",
 			      Monnam(mtmp), hand);
 		    if (obj->otyp == HEAVY_IRON_BALL) {
 			pline("%s fails to wrap around %s.",
@@ -2382,7 +2389,7 @@ struct monst *mtmp;
 	register struct monst *tmpm;
 
 	for(tmpm = fmon; tmpm; tmpm = tmpm->nmon)
-	    if (!DEADMONSTER(tmpm) && mtmp != tmpm) {
+	    if (!DEADMONSTER(tmpm) && mtmp != tmpm && mtmp->mpeaceful != tmpm->mpeaceful) {
 			tmpm->msleeping = 0;
 			if(!tmpm->mcanmove && !rn2(5)) {
 				tmpm->mfrozen = 0;
@@ -2474,7 +2481,7 @@ struct obj *obj;
 	    if (obj->spe <= 0)
 		return FALSE;
 	    if (typ == WAN_DIGGING)
-		return (boolean)(!is_floater(mon->data));
+		return (boolean)(!mon_resistance(mon,LEVITATION));
 	    if (typ == WAN_POLYMORPH)
 		return (boolean)(monstr[monsndx(mon->data)] < 6);
 	    if (objects[typ].oc_dir == RAY ||
@@ -2548,42 +2555,125 @@ const char *str;
 {
 	struct obj *orefl = which_armor(mon, W_ARMS);
 
-	if (orefl &&
-		(orefl->otyp == SHIELD_OF_REFLECTION ||
-		 orefl->otyp == SILVER_DRAGON_SCALE_SHIELD)) {
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "shield");
 		makeknown(orefl->otyp);
 	    }
 	    return TRUE;
-	} else if (arti_reflects(MON_WEP(mon))) {
+	}
+	orefl = MON_WEP(mon);
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
 	    /* due to wielded artifact weapon */
 	    if (str)
 		pline(str, s_suffix(mon_nam(mon)), "weapon");
 	    return TRUE;
-	} else if ((orefl = which_armor(mon, W_AMUL)) &&
-				orefl->otyp == AMULET_OF_REFLECTION) {
+	}
+	orefl = which_armor(mon, W_AMUL);
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "amulet");
 		makeknown(AMULET_OF_REFLECTION);
 	    }
 	    return TRUE;
-	} else if ((orefl = which_armor(mon, W_ARM)) &&
-		(orefl->otyp == SILVER_DRAGON_SCALES || orefl->otyp == SILVER_DRAGON_SCALE_MAIL)) {
+	}
+	orefl = which_armor(mon, W_ARMC);
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
+	    if (str)
+		pline(str, s_suffix(mon_nam(mon)), "cloak");
+	    return TRUE;
+	}
+	orefl = which_armor(mon, W_ARM);
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
 	    if (str)
 		pline(str, s_suffix(mon_nam(mon)), "armor");
 	    return TRUE;
-	} else if ((orefl = which_armor(mon, W_SADDLE)) &&
-				arti_reflects(orefl)) {
+	}
+	orefl = which_armor(mon, W_ARMH);
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
+	    if (str) {
+		pline(str, s_suffix(mon_nam(mon)), "helm");
+		makeknown(AMULET_OF_REFLECTION);
+	    }
+	    return TRUE;
+	}
+	orefl = which_armor(mon, W_ARMG);
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
+	    if (str) {
+		pline(str, s_suffix(mon_nam(mon)), "gauntlets");
+		makeknown(AMULET_OF_REFLECTION);
+	    }
+	    return TRUE;
+	}
+	orefl = which_armor(mon, W_ARMF);
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
+	    if (str) {
+		pline(str, s_suffix(mon_nam(mon)), "shoes");
+		makeknown(AMULET_OF_REFLECTION);
+	    }
+	    return TRUE;
+	}
+	orefl = which_armor(mon, W_ARMU);
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
+	    if (str) {
+		pline(str, s_suffix(mon_nam(mon)), "underclothes");
+		makeknown(AMULET_OF_REFLECTION);
+	    }
+	    return TRUE;
+	}
+	orefl = which_armor(mon, W_SADDLE);
+	if ((orefl) && (
+		objects[orefl->otyp].oc_oprop == REFLECTING
+		|| (orefl->oproperties&OPROP_REFL)
+		|| arti_reflects(orefl)
+	)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "saddle");
 	    }
 	    return TRUE;
-	} else if(mon->mfaction == FRACTURED){
+	}
+	if(mon->mfaction == FRACTURED){
 		if(str) 
 		pline(str, s_suffix(mon_nam(mon)), "fractured surface");
 		return TRUE;
-	} else if (species_reflects(mon)){
+	}
+	if (species_reflects(mon)){
 		if (str)
 		{
 			switch (monsndx(mon->data))
@@ -2687,10 +2777,14 @@ const char *fmt, *str;
 	    if (fmt && str)
 	    	pline(fmt, str, "scales");
 	    return TRUE;
-	} else if (u.sealsActive&SEAL_EDEN) {
+	} else if (u.sealsActive&SEAL_EDEN || species_reflects(&youmonst)) {
 	    if (fmt && str)
-	    	pline(fmt, str, "skin");
+			pline(fmt, str, mbodypart(&youmonst, BODY_SKIN));
 	    return TRUE;
+	} else if (u.usteed && u.usteed->misc_worn_check & W_SADDLE  && which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) {
+		if (fmt && str)
+			pline(fmt, str, "steed's saddle");
+		return TRUE;
 	} else if (EReflecting) {
 	    /* Catchall */
 	    if (fmt && str)

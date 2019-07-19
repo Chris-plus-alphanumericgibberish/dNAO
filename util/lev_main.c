@@ -120,6 +120,7 @@ static struct {
 	{ "bear",	BEAR_TRAP },
 	{ "land mine",	LANDMINE },
 	{ "rolling boulder",	ROLLING_BOULDER_TRAP },
+	{ "mummy trap",	MUMMY_TRAP },
 	{ "sleep gas",	SLP_GAS_TRAP },
 	{ "rust",	RUST_TRAP },
 	{ "fire",	FIRE_TRAP },
@@ -135,6 +136,7 @@ static struct {
 	{ "magic",	MAGIC_TRAP },
 	{ "anti magic",	ANTI_MAGIC },
 	{ "polymorph",	POLY_TRAP },
+	{ "essence",	VIVI_TRAP },
 	{ 0, 0 }
 };
 
@@ -517,8 +519,16 @@ char c;
 		  case 'P'  : return(POOL);
 		  case 'L'  : return(LAVAPOOL);
 		  case 'I'  : return(ICE);
+		  case ','  : 
+			      return(GRASS);
+		  case 'G'  : 
+			      return(GRASS);
+		  case 'e'  : 
+			      return(SOIL);
 		  case 'W'  : return(WATER);
+		  case 'w'  : return(PUDDLE);
 		  case 'T'	: return (TREE);
+		  case 't'	: return (DEADTREE);
 		  case 'F'	: return (IRONBARS);	/* Fe = iron */
 	    }
 	return(INVALID_TYPE);

@@ -62,14 +62,14 @@ unsigned gpflags;
 				return FALSE;
 			if (mtmp == &youmonst)
 				return !!(Amphibious);
-			else return (is_swimmer(mdat) || breathless_mon(mtmp) || amphibious_mon(mtmp));
-	    } else if (is_pool(x,y, FALSE) && !ignorewater) {
+			else return (mon_resistance(mtmp,SWIMMING) || breathless_mon(mtmp) || amphibious_mon(mtmp));
+	    } else if (is_pool(x,y, FALSE) && !(ignorewater || (mtmp == &youmonst && Is_waterlevel(&u.uz)))) {
 			if(mtmp == &youmonst && level.flags.lethe)
 				return !!(Levitation || Flying || Wwalking);
 			if (mtmp == &youmonst)
 				return !!(Levitation || Flying || Wwalking ||
 						Swimming || Amphibious);
-			else	return (is_flyer(mdat) || breathless_mon(mtmp) || is_swimmer(mdat) ||
+			else	return (mon_resistance(mtmp,FLYING) || breathless_mon(mtmp) || mon_resistance(mtmp,SWIMMING) ||
 								is_clinger(mdat) || amphibious_mon(mtmp));
 	    } else if (mdat->mlet == S_EEL && !ignorewater) {
 			if (is_pool(x, y, TRUE))
@@ -79,9 +79,9 @@ unsigned gpflags;
 			if (mtmp == &youmonst)
 				return !!(Levitation || Flying);
 			else
-				return (is_flyer(mdat) || likes_lava(mdat));
+				return (mon_resistance(mtmp,FLYING) || likes_lava(mdat));
 	    }
-	    if (passes_walls(mdat) && may_passwall(x,y)) return TRUE;
+	    if (mon_resistance(mtmp,PASSES_WALLS) && may_passwall(x,y)) return TRUE;
 	}
 	if (!ACCESSIBLE(levl[x][y].typ)) {
 		if (!(is_pool(x,y, FALSE) && ignorewater)) return FALSE;
@@ -714,14 +714,14 @@ dotele()
 		}
 		if (trap)
 			You("%s onto the teleportation trap.",
-			    locomotion(youracedata, "jump"));
+			    locomotion(&youmonst, "jump"));
 	}
 	if (!trap) {
 	    boolean castit = FALSE;
 	    register int sp_no = 0, energy = 0;
 
 	    if (!Teleportation || (u.ulevel < (Role_if(PM_WIZARD) ? 8 : 12)
-					&& !can_teleport(youracedata))) {
+					&& !mon_resistance(&youmonst,TELEPORT))) {
 		/* Try to use teleport away spell. */
 		if (objects[SPE_TELEPORT_AWAY].oc_name_known && !Confusion)
 		    for (sp_no = 0; sp_no < MAXSPELL; sp_no++)
@@ -1152,7 +1152,7 @@ struct trap *trap;
 {
 	You("%s onto a level teleport trap!",
 		      Levitation ? (const char *)"float" :
-				  locomotion(youracedata, "step"));
+				  locomotion(&youmonst, "step"));
 	if (Antimagic) {
 	    shieldeff(u.ux, u.uy);
 	}
@@ -1567,6 +1567,11 @@ struct monst *mtmp;
 boolean give_feedback;
 {
 	coord cc;
+	int illrgrd = FALSE;//teleport will be fatal to target due to ill-regard equipment)
+	
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
+		illrgrd = TRUE;
+	}
 
 	if (mtmp->ispriest && *in_rooms(mtmp->mx, mtmp->my, TEMPLE)) {
 	    if (give_feedback)
@@ -1578,10 +1583,26 @@ boolean give_feedback;
 	    unstuck(mtmp);
 	    (void) rloc(mtmp, FALSE);
 	} else if (is_rider(mtmp->data) && rn2(13) &&
-		   enexto(&cc, u.ux, u.uy, mtmp->data))
+		   enexto(&cc, u.ux, u.uy, mtmp->data)
+	){
+		if(illrgrd && canspotmon(mtmp)) pline("%s vanishes out of the equipment that imprisons %s.", Monnam(mtmp), himherit(mtmp));
 	    rloc_to(mtmp, cc.x, cc.y);
-	else
+	} else {
+		if(illrgrd && canspotmon(mtmp)) pline("%s vanishes out of the equipment that imprisons %s.", Monnam(mtmp), himherit(mtmp));
 	    (void) rloc(mtmp, FALSE);
+	}
+	
+	if(illrgrd){
+		if(Is_illregrd(&u.uz)){
+			u.uevent.uaxus_foe = 1;
+			pline("An alarm sounds!");
+			aggravate();
+		}
+		if(!DEADMONSTER(mtmp)){
+			if(canspotmon(mtmp)) pline("Unfortunately, that equipment was the only thing keeping %s %s.", himherit(mtmp), nonliving_mon(mtmp) ? "intact" : "alive");
+			mondied(mtmp);
+		}
+	}
 	return TRUE;
 }
 

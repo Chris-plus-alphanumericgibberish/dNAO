@@ -37,8 +37,8 @@
 #define resists_confusion(ptr)	(((ptr)->geno&G_UNIQ) || is_weeping(ptr) || is_yochlol(ptr))
 
 #define is_blind(mon)		(!((mon)->mcansee) || (darksight((mon)->data) && !(\
-													(!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK1)))\
-													|| (levl[u.ux][u.uy].lit &&  (viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1))))))
+													(!levl[(mon)->mx][(mon)->my].lit && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1)))\
+													|| (levl[(mon)->mx][(mon)->my].lit &&  (viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1))))))
 #define is_deaf(mon)		(!((mon)->mcanhear))
 
 #define is_molochan(ptr)	((ptr)->maligntyp == A_NONE)
@@ -62,34 +62,34 @@
 				 ((mon)->data != &mons[PM_ANGEL] || \
 				  EPRI(mon)->shralign < 0))
 
-#define notonline(ptr)		(((ptr)->mflagsm & MM_NOTONL) != 0L)
-#define fleetflee(ptr)		(((ptr)->mflagsm & MM_FLEETFLEE) != 0L)
-#define bold(ptr)			(((ptr)->mflagst & MT_BOLD) != 0L)
-#define is_flyer(ptr)		(((ptr)->mflagsm & MM_FLY) != 0L)
-#define is_displacer(ptr)	(((ptr)->mflagsg & MG_DISPLACEMENT) != 0L)
-#define is_floater(ptr)		(((ptr)->mflagsm & MM_FLOAT) != 0L)
-#define is_clinger(ptr)		(((ptr)->mflagsm & MM_CLING) != 0L)
-#define is_swimmer(ptr)		(((ptr)->mflagsm & MM_SWIM) != 0L)
-#define is_suicidal(ptr)	(is_fern_spore(ptr) || ptr == &mons[PM_FREEZING_SPHERE] || ptr == &mons[PM_FLAMING_SPHERE] || ptr == &mons[PM_SHOCKING_SPHERE])
-#define breathless(ptr)		(((ptr)->mflagsm & MM_BREATHLESS) != 0L)
-#define breathless_mon(mon)		(breathless((mon)->data) || is_derived_undead_mon(mon) || m_wearing_white_DSA(mon))
-#define amphibious_mon(mon)		(m_wearing_white_DSA(mon) || amphibious((mon)->data))
-#define amphibious(ptr)		(((ptr)->mflagsm & (MM_AMPHIBIOUS | MM_BREATHLESS)) != 0L)
-#define passes_walls(ptr)	(((ptr)->mflagsm & MM_WALLWALK) != 0L)
-#define amorphous(ptr)		(((ptr)->mflagsm & MM_AMORPHOUS) != 0L)
-#define noncorporeal(ptr)	((ptr)->mlet == S_GHOST || (ptr)->mlet == S_SHADE)
-#define insubstantial(ptr)	((ptr)->mlet == S_SHADE || (ptr) == &mons[PM_SHARAB_KAMEREL])
-#define tunnels(ptr)		(((ptr)->mflagsm & MM_TUNNEL) != 0L)
-#define needspick(ptr)		(((ptr)->mflagsm & MM_NEEDPICK) != 0L)
-#define hides_under(ptr)	(((ptr)->mflagst & MT_CONCEAL) != 0L)
-#define is_hider(ptr)		(((ptr)->mflagst & MT_HIDE) != 0L)
+#define notonline(ptr)			(((ptr)->mflagsm & MM_NOTONL) != 0L)
+#define fleetflee(ptr)			(((ptr)->mflagsm & MM_FLEETFLEE) != 0L)
+#define bold(ptr)				(((ptr)->mflagst & MT_BOLD) != 0L)
+#define is_clinger(ptr)			(((ptr)->mflagsm & MM_CLING) != 0L)
+#define species_flies(ptr)		(((ptr)->mflagsm & MM_FLY) != 0L)
+#define species_displaces(ptr)	(((ptr)->mflagsg & MG_DISPLACEMENT) != 0L)
+#define species_floats(ptr)		(((ptr)->mflagsm & MM_FLOAT) != 0L)
+#define species_swims(ptr)		(((ptr)->mflagsm & MM_SWIM) != 0L)
+#define is_suicidal(ptr)		(is_fern_spore(ptr) || ptr == &mons[PM_FREEZING_SPHERE] || ptr == &mons[PM_FLAMING_SPHERE] || ptr == &mons[PM_SHOCKING_SPHERE])
+#define breathless(ptr)			(((ptr)->mflagsm & MM_BREATHLESS) != 0L)
+#define breathless_mon(mon)		(breathless((mon)->data) || is_derived_undead_mon(mon) || mon_resistance((mon), MAGICAL_BREATHING))
+#define amphibious(ptr)			(((ptr)->mflagsm & (MM_AMPHIBIOUS | MM_BREATHLESS)) != 0L)
+#define amphibious_mon(mon)		(amphibious((mon)->data) || mon_resistance((mon), MAGICAL_BREATHING) || mon_resistance((mon), SWIMMING))
+#define species_passes_walls(ptr)	(((ptr)->mflagsm & MM_WALLWALK) != 0L)
+#define amorphous(ptr)			(((ptr)->mflagsm & MM_AMORPHOUS) != 0L)
+#define noncorporeal(ptr)		((ptr)->mlet == S_GHOST || (ptr)->mlet == S_SHADE)
+#define insubstantial(ptr)		((ptr)->mlet == S_SHADE || (ptr) == &mons[PM_SHARAB_KAMEREL])
+#define tunnels(ptr)			(((ptr)->mflagsm & MM_TUNNEL) != 0L)
+#define needspick(ptr)			(((ptr)->mflagsm & MM_NEEDPICK) != 0L)
+#define hides_under(ptr)		(((ptr)->mflagst & MT_CONCEAL) != 0L)
+#define is_hider(ptr)			(((ptr)->mflagst & MT_HIDE) != 0L)
 #define is_backstabber(ptr)		(((ptr)->mflagsg & MG_BACKSTAB) != 0L)
-#define is_commander(ptr)	(((ptr)->mflagsg & MG_COMMANDER) != 0L)
-/*#define haseyes(ptr)		(((ptr)->mflagsb & MB_NOEYES) == 0L) when did this get duplicated???*/
-#define haseyes(ptr)		(((ptr)->mflagsb & MB_NOEYES) == 0L)
-#define goodsmeller(ptr)	(((ptr)->mflagsv & MV_SCENT) != 0L)
-#define is_tracker(ptr)		(((ptr)->mflagsg & MG_TRACKER) != 0L)
-#define eyecount(ptr)		(!haseyes(ptr) ? 0 : \
+#define is_commander(ptr)		(((ptr)->mflagsg & MG_COMMANDER) != 0L)
+/*#define haseyes(ptr)			(((ptr)->mflagsb & MB_NOEYES) == 0L) when did this get duplicated???*/
+#define haseyes(ptr)			(((ptr)->mflagsb & MB_NOEYES) == 0L)
+#define goodsmeller(ptr)		(((ptr)->mflagsv & MV_SCENT) != 0L)
+#define is_tracker(ptr)			(((ptr)->mflagsg & MG_TRACKER) != 0L)
+#define eyecount(ptr)			(!haseyes(ptr) ? 0 : \
 				 ((ptr) == &mons[PM_CYCLOPS] || \
 				  (ptr) == &mons[PM_MONOTON] || \
 				  (ptr) == &mons[PM_FLOATING_EYE]) ? 1 : 2)
@@ -186,11 +186,11 @@
 #define is_wooden(ptr)		((ptr) == &mons[PM_WOOD_GOLEM] || (ptr) == &mons[PM_LIVING_LECTERN] || is_plant(ptr))
 #define thick_skinned(ptr)	(((ptr)->mflagsb & MB_THICK_HIDE) != 0L)
 #define lays_eggs(ptr)		(((ptr)->mflagsb & MB_OVIPAROUS) != 0L)
-#define regenerates(ptr)	(((ptr)->mflagsg & MG_REGEN) != 0L)
-#define perceives(ptr)		(((ptr)->mflagsv & MV_SEE_INVIS) != 0L)
-#define can_teleport(ptr)	(((ptr)->mflagsm & MM_TPORT) != 0L)
-#define control_teleport(ptr)	(((ptr)->mflagsm & MM_TPORT_CNTRL) != 0L)
-#define telepathic(ptr)		(((ptr)->mflagsv & MV_TELEPATHIC) != 0L)
+#define species_regenerates(ptr)		(((ptr)->mflagsg & MG_REGEN) != 0L)
+#define species_perceives(ptr)			(((ptr)->mflagsv & MV_SEE_INVIS) != 0L)
+#define species_teleports(ptr)			(((ptr)->mflagsm & MM_TPORT) != 0L)
+#define species_controls_teleports(ptr)	(((ptr)->mflagsm & MM_TPORT_CNTRL) != 0L)
+#define species_is_telepathic(ptr)		(((ptr)->mflagsv & MV_TELEPATHIC) != 0L)
 #define is_armed(ptr)		(attacktype(ptr, AT_WEAP) || attacktype(ptr, AT_XWEP) || attacktype(ptr, AT_MARI) || attacktype(ptr, AT_DEVA))
 #define crpsdanger(ptr)		(acidic(ptr) || poisonous(ptr) ||\
 							 freezing(ptr) || burning(ptr))
@@ -202,6 +202,7 @@
 #define freezing(ptr)		(((ptr)->mflagsb & MB_CHILL) != 0L)
 #define burning(ptr)		(((ptr)->mflagsb & MB_TOSTY) != 0L)
 #define hallucinogenic(ptr)		(((ptr)->mflagsb & MB_HALUC) != 0L)
+#define inediate(ptr)		(!(carnivorous(ptr) || herbivorous(ptr) || metallivorous(ptr) || magivorous(ptr) || is_vampire(ptr)))
 #define carnivorous(ptr)	(((ptr)->mflagst & MT_CARNIVORE) != 0L)
 #define herbivorous(ptr)	(((ptr)->mflagst & MT_HERBIVORE) != 0L)
 #define metallivorous(ptr)	(((ptr)->mflagst & MT_METALLIVORE) != 0L)
@@ -212,8 +213,8 @@
 							 ptr == &mons[PM_MILITANT_CLERIC] ||\
 							 ptr == &mons[PM_HALF_ELF_RANGER])
 #define is_undead(ptr)		(((ptr)->mflagsa & MA_UNDEAD) != 0L)
-#define is_undead_mon(mon)	(mon && (is_undead((mon)->data) || (mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED || (mon)->mfaction == FRACTURED))
-#define is_derived_undead_mon(mon)	(mon && ((mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED || (mon)->mfaction == FRACTURED))
+#define is_undead_mon(mon)	(mon && (is_undead((mon)->data) || (mon)->mfaction == VAMPIRIC || (mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED || (mon)->mfaction == FRACTURED))
+#define is_derived_undead_mon(mon)	(mon && ((mon)->mfaction == VAMPIRIC || (mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED || (mon)->mfaction == FRACTURED))
 #define	can_undead_mon(mon)	(mon && !nonliving_mon(mon) && !is_minion((mon)->data) && ((mon)->data->mlet != S_PUDDING) &&\
 								((mon)->data->mlet != S_JELLY) && ((mon)->data->mlet != S_BLOB) && !is_elemental((mon)->data) &&\
 								!is_plant((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data) && !(mvitals[monsndx((mon)->data)].mvflags&G_NOCORPSE))
@@ -435,7 +436,7 @@
 #define webmaker(ptr)		((ptr) == &mons[PM_CAVE_SPIDER] || \
 				 (ptr) == &mons[PM_GIANT_SPIDER] || (ptr) == &mons[PM_PHASE_SPIDER] || \
 				 (ptr) == &mons[PM_MIRKWOOD_SPIDER] || (ptr) == &mons[PM_MIRKWOOD_ELDER] || \
-				 (ptr) == &mons[PM_SPROW] || (ptr) == &mons[PM_DRIDER] || \
+				 (ptr) == &mons[PM_SPROW] || (ptr) == &mons[PM_DRIDER] || (ptr) == &mons[PM_ALIDER] || \
 				 (ptr) == &mons[PM_EDDERKOP] || \
 				 (ptr) == &mons[PM_AVATAR_OF_LOLTH] || (ptr) == &mons[PM_DROW_MUMMY])
 #define is_unicorn(ptr)		((ptr)->mlet == S_UNICORN && likes_gems(ptr))
@@ -547,6 +548,10 @@
 
 #define is_mind_flayer(ptr)	((ptr) == &mons[PM_MIND_FLAYER] || \
 				 (ptr) == &mons[PM_MASTER_MIND_FLAYER] || \
+				 (ptr) == &mons[PM_PARASITIZED_ANDROID] || \
+				 (ptr) == &mons[PM_PARASITIZED_GYNOID] || \
+				 (ptr) == &mons[PM_PARASITIC_MIND_FLAYER] || \
+				 (ptr) == &mons[PM_PARASITIC_MASTER_MIND_FLAYER] || \
 				 (ptr) == &mons[PM_ALHOON] || \
 				 (ptr) == &mons[PM_ELDER_BRAIN] || \
 				 (ptr) == &mons[PM_LUGRIBOSSK] || \

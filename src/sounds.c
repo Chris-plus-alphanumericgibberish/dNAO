@@ -132,6 +132,17 @@ static const char *embracedPrisoners[] = {
 	"Why?"
 };
 
+static const char *embracedAlider[] = {
+	"Mother, help me!",
+	"I can't control my arms!",
+	"I can't stop!  Look out!!",
+	"Cut me lose, please!",
+	"It's so dark!",
+	"Free me!",
+	"Kill me!  Please, just kill me...",
+	"Why?"
+};
+
 static const char *agonePrisoner[] = {
 	"Who am I?",
 	"Where am I?",
@@ -153,6 +164,18 @@ static const char *thrallPrisoners[] = {
 	"You're suffering.",
 	"Penumbra hangs over all.",
 	"It's easier this way."
+};
+
+static const char *parasitizedDroid[] = {
+	">Motor Cortex Compromised<",
+	">Cover Opened, Warranty Void<",
+	">System Error<",
+	"Run!",
+	"I can't control my limbs!",
+	"I can't stop!  Look out!!",
+	"Free me!",
+	"You must destroy me!",
+	"Why!?"
 };
 
 /* this easily could be a macro, but it might overtax dumb compilers */
@@ -306,7 +329,7 @@ dosounds()
     if (level.flags.has_beehive && !rn2(200)) {
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    if (DEADMONSTER(mtmp)) continue;
-	    if ((mtmp->data->mlet == S_ANT && is_flyer(mtmp->data)) &&
+	    if ((mtmp->data->mlet == S_ANT && mon_resistance(mtmp,FLYING)) &&
 		mon_in_room(mtmp, BEEHIVE)) {
 		switch (rn2(2)+hallu) {
 		    case 0:
@@ -629,7 +652,7 @@ register struct monst *mtmp;
 
     /* presumably nearness and soundok checks have already been made */
     if (!is_silent_mon(mtmp) && mtmp->data->msound <= MS_ANIMAL)
-	(void) domonnoise(mtmp, FALSE);
+	(void) domonnoise(mtmp, TRUE);
     else if (mtmp->data->msound >= MS_HUMANOID) {
 	if (!canspotmon(mtmp))
 	    map_invisible(mtmp->mx, mtmp->my);
@@ -648,6 +671,14 @@ boolean chatting;
 	char verbuf[BUFSZ];
 	char class_list[MAXOCLASSES+2];
 
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
+		if(chatting && canspotmon(mtmp))
+			pline("%s is sleeping peacefully; presumably the doing of the delicate equipment that displays %s vivisected form.", 
+				Monnam(mtmp), (is_animal(mtmp->data) || mindless_mon(mtmp) ? "its" : "their")
+			);
+		return 0;
+	}
+	
     /* presumably nearness and sleep checks have already been made */
 	if (!flags.soundok) return(0);
 	if (is_silent_mon(mtmp)){
@@ -1034,7 +1065,9 @@ asGuardian:
 					}
 				}
 				ix = mtmp ? rnd((int)mtmp->m_lev) : rnd(10);
-				if(Antimagic || Half_spell_damage) ix = (ix + 1) / ((Antimagic + Half_spell_damage) * 2);
+				if(Antimagic) ix = (ix + 1) / 2;
+				if(Half_spell_damage) ix = (ix+1) / 2;
+				if(u.uvaul_duration) ix = (ix + 1) / 2;
 				make_confused(HConfusion + ix*10, FALSE);
 				make_stunned(HStun + ix*5, FALSE);
 				make_hallucinated(HHallucination + ix*15, FALSE, 0L);
@@ -1155,13 +1188,14 @@ asGuardian:
 		struct trap *ttmp;
 		int ix, iy, i;
 		boolean inrange = FALSE;
-		if(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) break;
-		if((mtmp->data == &mons[PM_INTONER] && !rn2(5)) || mtmp->data == &mons[PM_BLACK_FLOWER]){
+		if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) break;
+		if((ptr == &mons[PM_INTONER] && !rn2(5)) || ptr == &mons[PM_BLACK_FLOWER]){
 			if (!canspotmon(mtmp))
 				map_invisible(mtmp->mx, mtmp->my);
 			switch(rnd(4)){
 				case 1:
-					pline("%s sings the song of broken eyes.", Monnam(mtmp));
+					if(ptr == &mons[PM_INTONER]) pline("%s screams melodiously.", Monnam(mtmp));
+					else pline("%s sings the song of broken eyes.", Monnam(mtmp));
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1180,7 +1214,8 @@ asGuardian:
 					}
 				break;
 				case 2:
-					pline("%s sings a harmless song of ruin.", Monnam(mtmp));
+					if(ptr == &mons[PM_INTONER]) pline("%s sings a resonant note.", Monnam(mtmp));
+					else pline("%s sings a harmless song of ruin.", Monnam(mtmp));
 					ix = rn2(COLNO);
 					iy = rn2(ROWNO);
 					for(i = rnd(5); i > 0; i--){
@@ -1199,7 +1234,8 @@ asGuardian:
 				break;
 				case 3:{
 					struct obj *ispe = mksobj(SPE_TURN_UNDEAD,TRUE,FALSE);
-					pline("%s sings the song of the day of repentance.", Monnam(mtmp));
+					if(ptr == &mons[PM_INTONER]) pline("%s wails deafeningly.", Monnam(mtmp));
+					else pline("%s sings the song of the day of repentance.", Monnam(mtmp));
 					//Rapture invisible creatures
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm) && mtmp->mrevived){
@@ -1232,10 +1268,11 @@ asGuardian:
 					}
 				}break;
 				case 4:
-					pline("%s sings the song of bloodied prayers.", Monnam(mtmp));
+					if(ptr == &mons[PM_INTONER]) pline("%s screams furiously.", Monnam(mtmp));
+					else pline("%s sings the song of bloodied prayers.", Monnam(mtmp));
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-						if(tmpm != mtmp && !DEADMONSTER(tmpm) && tmpm->mpeaceful == tmpm->mpeaceful){
+						if(tmpm != mtmp && !DEADMONSTER(tmpm) && mtmp->mpeaceful == tmpm->mpeaceful){
 							if(tmpm->mhp < tmpm->mhpmax){
 								for(i = (tmpm->mhpmax - tmpm->mhp); i > 0; i--) grow_up(tmpm, tmpm);
 							}
@@ -1261,7 +1298,8 @@ asGuardian:
 					if(!inrange) break;
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5)
 						map_invisible(mtmp->mx, mtmp->my);
-					pline("%s sings a song of courage.", Monnam(mtmp));
+					if(ptr == &mons[PM_INTONER]) pline("%s screeches discordantly.", Monnam(mtmp));
+					else pline("%s sings a song of courage.", Monnam(mtmp));
 					if(mtmp->data != &mons[PM_INTONER]) mtmp->mspec_used = rn1(10,10);
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1313,7 +1351,8 @@ asGuardian:
 					if(!inrange) break;
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5)
 						map_invisible(mtmp->mx, mtmp->my);
-					pline("%s sings a song of good health.", Monnam(mtmp));
+					if(ptr == &mons[PM_INTONER]) pline("%s whistles shrilly.", Monnam(mtmp));
+					else pline("%s sings a song of good health.", Monnam(mtmp));
 					if(mtmp->data != &mons[PM_INTONER]) mtmp->mspec_used = rn1(10,10);
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1370,7 +1409,8 @@ asGuardian:
 					if(!inrange) break;
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5 && !u.uinvulnerable)
 						map_invisible(mtmp->mx, mtmp->my);
-					pline("%s sings a song of haste.", Monnam(mtmp));
+					if(ptr == &mons[PM_INTONER]) pline("%s laughs frantically.", Monnam(mtmp));
+					else pline("%s sings a song of haste.", Monnam(mtmp));
 					if(mtmp->data != &mons[PM_INTONER]) mtmp->mspec_used = rn1(10,10);
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1490,6 +1530,7 @@ asGuardian:
 							break;
 						}
 						if(Half_spell_damage) dmg /= 2;
+						if(u.uvaul_duration) dmg /= 2;
 						if(dmg) dmg = min(dmg,Upolyd ? (u.mh - 1) : (u.uhp - 1));
 						if(dmg) mdamageu(mtmp,dmg);
 					}
@@ -1635,16 +1676,18 @@ asGuardian:
 			verbl_msg = woePrisoners[rn2(SIZE(woePrisoners))];
 		} else if (ptr == &mons[PM_EMBRACED_DROWESS]) {
 			verbl_msg = embracedPrisoners[rn2(SIZE(embracedPrisoners))];
-	    } else if (mtmp->mtame) {
+	    } else if(ptr == &mons[PM_A_GONE]) verbl_msg = agonePrisoner[rn2(SIZE(agonePrisoner))];
+	    else if(ptr == &mons[PM_MINDLESS_THRALL]) verbl_msg = thrallPrisoners[rn2(SIZE(thrallPrisoners))];
+	    else if(ptr == &mons[PM_PARASITIZED_ANDROID] || ptr == &mons[PM_PARASITIZED_GYNOID]) verbl_msg = parasitizedDroid[rn2(SIZE(parasitizedDroid))];
+	    else if (mtmp->mtame) {
 			verbl_msg = "Sorry, I'm all out of wishes.";
 	    } else if (mtmp->mpeaceful) {
 			if (ptr == &mons[PM_MARID])
 				pline_msg = "gurgles.";
 			else
 				verbl_msg = "I'm free!";
-	    } else if(ptr == &mons[PM_A_GONE]) verbl_msg = agonePrisoner[rn2(SIZE(agonePrisoner))];
-	    else if(ptr == &mons[PM_MINDLESS_THRALL]) verbl_msg = thrallPrisoners[rn2(SIZE(thrallPrisoners))];
-	    else if(ptr != &mons[PM_PRISONER]) verbl_msg = "This will teach you not to disturb me!";
+		} else if(ptr != &mons[PM_PRISONER]) verbl_msg = "This will teach you not to disturb me!";
+		else verbl_msg = "I'm free!";
 	    break;
 	case MS_BOAST:	/* giants */
 	    if (!mtmp->mpeaceful) {
@@ -2281,7 +2324,7 @@ int dz;
 
 #ifdef STEED
     if (u.usteed && u.dz > 0)
-	return (domonnoise(u.usteed, FALSE));
+	return (domonnoise(u.usteed, TRUE));
 #endif
 	if (u.dz) {
 		struct engr *ep = get_head_engr();
@@ -2385,6 +2428,14 @@ int dz;
 		mtmp = m_at(tx, ty);
 	}
 	
+	if(mtmp && mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
+		if(canspotmon(mtmp))
+			pline("%s is sleeping peacefully; presumably the doing of the delicate equipment that displays %s vivisected form.", 
+				Monnam(mtmp), (is_animal(mtmp->data) || mindless_mon(mtmp) ? "its" : hisherits(mtmp))
+			);
+		return 0;
+	}
+	
     if (!mtmp || mtmp->mundetected ||
 		mtmp->m_ap_type == M_AP_FURNITURE ||
 		mtmp->m_ap_type == M_AP_OBJECT) return 0;
@@ -2454,7 +2505,7 @@ int dz;
         return 0;
     }
 #endif /* CONVICT */
-    return domonnoise(mtmp, FALSE);
+    return domonnoise(mtmp, TRUE);
 }
 
 //definition of externs in you.h
@@ -2690,7 +2741,7 @@ int tx,ty;
 						else if(otmp->otyp == DAGGER){ o1 = otmp; t1 = 4;}
 						else if(otmp->otyp == APPLE){ o1 = otmp; t1 = 5;}
 						else if(otmp->oclass == SCROLL_CLASS){ o1 = otmp; t1 = 6;}
-						else if(otmp->otyp == TIN_WHISTLE){ o1 = otmp; t1 = 7;}
+						else if(otmp->otyp == WHISTLE){ o1 = otmp; t1 = 7;}
 						else if(otmp->otyp == MIRROR){ o1 = otmp; t1 = 8;}
 						else if(otmp->otyp == EGG){ o1 = otmp; t1 = 9;}
 						else if(otmp->oclass == POTION_CLASS){ o1 = otmp; t1 = 10;}
@@ -2709,7 +2760,7 @@ int tx,ty;
 						else if(otmp->otyp == DAGGER && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 4;}
 						else if(otmp->otyp == APPLE && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 5;}
 						else if(otmp->oclass == SCROLL_CLASS && otmp->oclass != o1->oclass){ o2 = otmp; t2 = 6;}
-						else if(otmp->otyp == TIN_WHISTLE && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 7;}
+						else if(otmp->otyp == WHISTLE && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 7;}
 						else if(otmp->otyp == MIRROR && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 8;}
 						else if(otmp->otyp == EGG && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 9;}
 						else if(otmp->oclass == POTION_CLASS && otmp->oclass != o1->oclass){ o2 = otmp; t2 = 10;}
@@ -2786,7 +2837,7 @@ int tx,ty;
 								doname(otmp), (const char *)0);
 						break;
 						case 7:
-							otmp = mksobj(TIN_WHISTLE, TRUE, FALSE);
+							otmp = mksobj(WHISTLE, TRUE, FALSE);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
@@ -4654,7 +4705,6 @@ bindspirit(seal_id)
 			if(u.sealTimeout[ENKI-FIRST_SEAL] < moves){
 				unrestrict_weapon_skill(P_SHORT_SWORD);
 				unrestrict_weapon_skill(P_HAMMER);
-				unrestrict_weapon_skill(P_JAVELIN);
 				unrestrict_weapon_skill(P_SLING);
 				unrestrict_weapon_skill(P_DART);
 				unrestrict_weapon_skill(P_BOOMERANG);
@@ -5253,7 +5303,6 @@ int p_skill;
 	if(p_skill == P_QUARTERSTAFF) return u.sealsActive & SEAL_NABERIUS? TRUE : FALSE;
 	if(p_skill == P_POLEARMS) return u.sealsActive & SEAL_SHIRO? TRUE : FALSE;
 	if(p_skill == P_SPEAR) return u.sealsActive & SEAL_HUGINN_MUNINN? TRUE : FALSE;
-	if(p_skill == P_JAVELIN) return u.sealsActive & SEAL_ENKI? TRUE : FALSE;
 	if(p_skill == P_TRIDENT) return u.sealsActive & SEAL_OSE? TRUE : FALSE;
 	if(p_skill == P_LANCE) return u.sealsActive & SEAL_BERITH? TRUE : FALSE;
 	if(p_skill == P_BOW) return u.sealsActive & SEAL_EVE? TRUE : (u.sealsActive & SEAL_BERITH && u.usteed)? TRUE : FALSE;

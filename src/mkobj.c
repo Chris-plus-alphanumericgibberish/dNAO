@@ -7,6 +7,7 @@
 
 STATIC_DCL void FDECL(mkbox_cnts,(struct obj *));
 STATIC_DCL void FDECL(obj_timer_checks,(struct obj *, XCHAR_P, XCHAR_P, int));
+STATIC_DCL void FDECL(init_obj_material, (struct obj *));
 #ifdef OVL1
 STATIC_DCL void FDECL(container_weight, (struct obj *));
 STATIC_DCL struct obj *FDECL(save_mtraits, (struct obj *, struct monst *));
@@ -79,6 +80,144 @@ const struct icp hellprobs[] = {
 { 4, AMULET_CLASS}
 };
 
+/* Object material probabilities.*/
+/* for objects which are normally iron or metal */
+static const struct icp metal_materials[] = {
+	{75, 0 }, /* default to base type, iron or metal */
+	{ 5, IRON },
+	{ 5, WOOD },
+	{ 5, SILVER },
+	{ 3, COPPER },
+	{ 3, MITHRIL },
+	{ 1, GOLD },
+	{ 1, BONE },
+	{ 1, GLASS },
+	{ 1, PLATINUM }
+};
+
+/* for objects which are normally wooden */
+static const struct icp wood_materials[] = {
+	{80, WOOD },
+	{10, MINERAL },
+	{ 5, IRON },
+	{ 3, BONE },
+	{ 1, COPPER },
+	{ 1, SILVER }
+};
+
+/* for objects which are normally cloth */
+static const struct icp cloth_materials[] = {
+    {80, CLOTH },
+    {20, LEATHER }
+};
+
+/* for objects which are normally leather */
+static const struct icp leather_materials[] = {
+    {75, LEATHER },
+    {24, CLOTH },
+	{ 1, DRAGON_HIDE }
+};
+
+/* for objects of dwarvish make */
+static const struct icp dwarvish_materials[] = {
+	{80, IRON },
+	{10, MITHRIL },
+	{ 5, COPPER },
+	{ 2, SILVER },
+	{ 1, GOLD },
+	{ 1, PLATINUM },
+	{ 1, GEMSTONE }
+};
+
+/* for objects of high-elven make (which is currently specified as elven equipment normally made of mithril) */
+static const struct icp high_elven_materials[] = {
+    {90, MITHRIL },
+    { 6, SILVER },
+    { 3, GOLD },
+	{ 1, GEMSTONE }
+};
+/* for armor-y objects of elven make - no iron!
+* Does not cover clothy items; those use the regular cloth probs. */
+static const struct icp elven_materials[] = {
+	{60, 0 }, /* use base material */
+	{15, COPPER },
+	{10, BONE },
+	{ 5, LEATHER },
+	{ 5, MITHRIL },
+	{ 3, SILVER },
+	{ 2, GOLD }
+};
+
+/* for weapons of droven make -- armor is all shadowsteel */
+static const struct icp droven_materials[] = {
+	{80, 0 }, /* use base material */
+	{10, SHADOWSTEEL },
+	{ 5, MITHRIL },
+	{ 5, SILVER }
+};
+
+/* for objects of orcish make */
+static const struct icp orcish_materials[] = {
+	{50, 0 }, /* use base material */
+	{20, IRON },
+	{15, BONE },
+	{10, MINERAL },
+	{ 4, OBSIDIAN_MT },
+	{ 1, GOLD }
+};
+
+/* Reflectable items - for the shield of reflection; anything that can hold a
+ * polish. Amulets also arbitrarily use this list. */
+static const struct icp shiny_materials[] = {
+	{50, 0 }, /* use base material */
+	{15, SILVER },
+	{11, COPPER },
+	{ 6, GOLD },
+	{ 6, IRON }, /* stainless steel */
+	{ 5, GLASS },
+	{ 3, MITHRIL },
+	{ 3, METAL }, /* aluminum, or similar */
+	{ 1, PLATINUM }
+};
+
+/* for bells and other tools, especially instruments, which are normally copper
+ * or metal.  Wood and glass in other lists precludes us from using those. */
+static const struct icp resonant_materials[] = {
+	{70, 0 }, /* use base material */
+	{10, COPPER },
+	{ 6, SILVER },
+	{ 5, IRON },
+	{ 5, MITHRIL },
+	{ 3, GOLD },
+	{ 1, PLATINUM }
+};
+
+/* for horns, currently. */
+static const struct icp horn_materials[] = {
+	{70, BONE },
+	{10, COPPER },
+	{ 7, MITHRIL },
+	{ 5, WOOD },
+	{ 5, SILVER },
+	{ 2, GOLD },
+	{ 1, DRAGON_HIDE }
+};
+
+/* hacks for specific objects... not great because it's a lot of data, but it's
+ * a relatively clean solution */
+static const struct icp bow_materials[] = {
+    /* assumes all bows will be wood by default, fairly safe assumption */
+    {75, WOOD },
+    { 7, IRON },
+    { 5, MITHRIL },
+    { 4, COPPER },
+    { 4, BONE },
+    { 2, SILVER },
+	{ 2, METAL },
+    { 1, GOLD }
+};
+
+
 struct obj *
 mkobj_at(let, x, y, artif)
 char let;
@@ -88,7 +227,18 @@ boolean artif;
 	struct obj *otmp;
 
 	otmp = mkobj(let, artif);
+	
+	if(In_quest(&u.uz) && !Role_if(PM_CONVICT) && in_mklev){
+		if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
+		if(otmp->oclass == ARMOR_CLASS){
+			if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+			else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
+			else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+		}
+	}
+	
 	place_object(otmp, x, y);
+	
 	return(otmp);
 }
 
@@ -100,7 +250,18 @@ boolean init, artif;
 	struct obj *otmp;
 
 	otmp = mksobj(otyp, init, artif);
+	
+	if(In_quest(&u.uz) && !Role_if(PM_CONVICT) && in_mklev){
+		if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
+		if(otmp->oclass == ARMOR_CLASS){
+			if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+			else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
+			else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+		}
+	}
+	
 	place_object(otmp, x, y);
+	
 	return(otmp);
 }
 
@@ -402,23 +563,7 @@ boolean artif;
 	otmp->fromsink = 0;
 	otmp->mp = (struct mask_properties *) 0;
 	
-	if(otyp == SABER) otmp->obj_material = SILVER;
-	else if(otyp == KHAKKHARA) otmp->obj_material = SILVER;
-	else if(otyp == CHAKRAM) otmp->obj_material = SILVER;
-	else if(otyp == GLOVES) otmp->obj_material = LEATHER;
-	else if(otyp == BAR) otmp->obj_material = IRON;
-	else if(otyp == VIPERWHIP) otmp->obj_material = SILVER;
-	else if(otyp == find_gcirclet()) otmp->obj_material = GOLD;
-	else if(otyp == SPEAR && !rn2(25)) otmp->obj_material = SILVER;
-	else if(otyp == DAGGER && !rn2(12)) otmp->obj_material = SILVER;
-	else if(otyp == STILETTOS && !rn2(12)) otmp->obj_material = SILVER;
-	else if(otyp == ARMORED_BOOTS) otmp->obj_material = COPPER;
-	else if(otyp == ROUNDSHIELD) otmp->obj_material = COPPER;
-	else if(otyp == LIGHTSABER) otmp->obj_material = SILVER;
-	else if(otyp == BEAMSWORD) otmp->obj_material = GOLD;
-	else if(otyp == KAMEREL_VAJRA) otmp->obj_material = GOLD;
-	else if(otyp == DOUBLE_LIGHTSABER) otmp->obj_material = PLATINUM;
-	else otmp->obj_material = objects[otyp].oc_material;
+	init_obj_material(otmp);
 	
 	if(otyp == VIPERWHIP) otmp->ovar1 = rn2(2) ? 1 : rn2(5) ? rnd(2) : rnd(5);
 	
@@ -443,7 +588,18 @@ boolean artif;
 			otmp->spe = -rne(3);
 		} else	blessorcurse(otmp, 10);
 		
-		if(otmp->otyp == FORCE_PIKE || otmp->otyp == VIBROBLADE){
+		if(otmp->otyp == WHITE_VIBROSWORD
+		 || otmp->otyp == WHITE_VIBROSPEAR
+		 || otmp->otyp == WHITE_VIBROZANBATO
+		)
+			otmp->oproperties |= OPROP_HOLYW;
+		if(otmp->otyp == GOLD_BLADED_VIBROSWORD
+		 || otmp->otyp == GOLD_BLADED_VIBROSPEAR
+		 || otmp->otyp == GOLD_BLADED_VIBROZANBATO
+		)
+			otmp->oproperties |= OPROP_UNHYW;
+		
+		if(is_vibroweapon(otmp)){
 			otmp->ovar1 = 80L + rnd(20);
 		}
 		else if(otmp->otyp == RAYGUN){
@@ -593,7 +749,7 @@ boolean artif;
 					otmp->quan = 1L + ((long)(rn2(2) && !Is_grue_level(&u.uz)) ? rn2(7) : 0);
 					blessorcurse(otmp, 5);
 					break;
-		case BRASS_LANTERN:
+		case LANTERN:
 		case OIL_LAMP:		otmp->spe = 1;
 					otmp->age = (long) rn1(500,1000);
 					otmp->lamplit = 0;
@@ -998,13 +1154,7 @@ boolean artif;
 #else
 			otmp->oerodeproof = otmp->rknown = 1;
 #endif
-		}
-		if(is_evaporable(otmp)){
-			start_timer(1, TIMER_OBJECT,
-					LIGHT_DAMAGE, (genericptr_t)otmp);
-		}
-
-		
+		}		
 		/* MRKR: Mining helmets have lamps */
 		if (otmp->otyp == DWARVISH_HELM) {
 		    otmp->age = (long) rn1(300,300);//Many fewer turns than brass lanterns, as there are so many.
@@ -1012,7 +1162,7 @@ boolean artif;
 		}
 		/* CM: gnomish hats have candles */
 		if (otmp->otyp == GNOMISH_POINTY_HAT) {
-		    otmp->age = (long) rn1(50,50);
+		    otmp->age = (long) rn1(900,900);//Last longer than dwarvish helms, since the radius is smaller
 		    otmp->lamplit = 0;
 		}
 		if(otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT){
@@ -1130,6 +1280,8 @@ boolean artif;
 		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
 	break;
 	case COIN_CLASS:
+	// case BED_CLASS:
+	case TILE_CLASS:
 		break;	/* do nothing */
 	default:
 		impossible("impossible mkobj %d, sym '%c'.", otmp->otyp,
@@ -1463,6 +1615,238 @@ register struct obj *otmp;
 
 #endif /* OVLB */
 #ifdef OVL0
+/* set the size of an object, making sure the object is proper */
+void
+set_obj_size(obj, size)
+struct obj* obj;
+int size;
+{
+	/* check bad cases */
+	if (!obj) {
+		impossible("set_obj_size called without object");
+		return;
+	}
+	/* set quantity */
+	obj->objsize = size;
+	/* update weight */
+	fix_object(obj);
+	return;
+}
+
+/* set the quantity of an object, making sure to update its weight */
+void
+set_obj_quan(obj, quan)
+struct obj* obj;
+int quan;
+{
+	/* check bad cases */
+	if (!obj) {
+		impossible("set_obj_quan called without object");
+		return;
+	}
+	if (!objects[obj->otyp].oc_merge) {
+		impossible("set_obj_quan called for singular quantity object");
+		return;
+	}
+	/* set quantity */
+	obj->quan = quan;
+	/* update weight */
+	fix_object(obj);
+	return;
+}
+
+/* Return the appropriate random material list for a given object,
+ * or NULL if there isn't an appropriate list. */
+const struct icp*
+material_list(obj)
+struct obj* obj;
+{
+    unsigned short otyp = obj->otyp;
+    int default_material = objects[otyp].oc_material;
+
+    /* Cases for specific object types. */
+	switch (otyp) {
+	/* Special exceptions to the whole randomized materials system - where
+	 * we ALWAYS want an object to use its base material regardless of
+	 * other cases in this function - go here.
+	 * Return NULL so that init_obj_material and valid_obj_material both
+	 * work properly. */
+	case BULLWHIP:
+	case WORM_TOOTH:
+	case CRYSKNIFE:
+	case LEATHER_ARMOR:
+	case STUDDED_LEATHER_ARMOR:
+	case YA:
+	case ORIHALCYON_GAUNTLETS:
+	case HARMONIUM_HELM:
+	case HARMONIUM_PLATE:
+	case HARMONIUM_SCALE_MAIL:
+	case HARMONIUM_GAUNTLETS:
+	case HARMONIUM_BOOTS:
+	case ELVEN_MITHRIL_COAT:
+	case DWARVISH_MITHRIL_COAT:
+		return NULL;
+		/* Any other cases for specific object types go here. */
+	case SHIELD_OF_REFLECTION:
+		return shiny_materials;
+	case BOW:
+	case ELVEN_BOW:
+	case ORCISH_BOW:
+	case YUMI:
+	case BOOMERANG: /* wooden base, similar shape */
+		return bow_materials;
+	case CHEST:
+	case BOX:
+		return wood_materials;
+	case SKELETON_KEY:
+	case LOCK_PICK:
+	case TIN_OPENER:
+		return metal_materials;
+	case BELL:
+	case BUGLE:
+	case LANTERN:
+	case OIL_LAMP:
+	case MAGIC_LAMP:
+	case MAGIC_WHISTLE:
+	case FLUTE:
+	case MAGIC_FLUTE:
+	case HARP:
+	case MAGIC_HARP:
+		return resonant_materials;
+	case TOOLED_HORN:
+	case FIRE_HORN:
+	case FROST_HORN:
+	case HORN_OF_PLENTY:
+		return horn_materials;
+	default:
+		break;
+	}
+
+    /* Otherwise, select an appropriate list, or return NULL if no appropriate
+     * list exists. */
+	if (otyp == find_gcirclet()) {
+		return shiny_materials;
+	}
+	else if (is_firearm(obj) && (default_material == IRON || default_material == METAL)) {
+		return resonant_materials;	// guns and bells are surprisingly similar (see: Wheel of Time)
+	}
+	else if (obj->oclass == WEAPON_CLASS && objects[otyp].oc_skill == -P_FIREARM) {
+		return NULL;	// do not attempt to randomize the material of bullets/shells/grenades
+	}
+    else if (is_elven_obj(obj) && default_material == MITHRIL) {
+        return high_elven_materials;
+    }
+	else if (is_elven_obj(obj) && default_material != CLOTH) {
+		return elven_materials;
+	}
+    else if (is_dwarvish_obj(obj) && default_material != CLOTH) {
+        return dwarvish_materials;
+    }
+	else if (is_droven_weapon(obj)) {
+		return droven_materials;
+	}
+	else if (is_orcish_obj(obj) && default_material != CLOTH) {
+		return orcish_materials;
+	}
+    else if (obj->oclass == AMULET_CLASS && otyp != AMULET_OF_YENDOR
+             && otyp != FAKE_AMULET_OF_YENDOR) {
+        /* could use metal_materials too */
+        return shiny_materials;
+    }
+    else if (obj->oclass == WEAPON_CLASS || is_weptool(obj)
+             || obj->oclass == ARMOR_CLASS) {
+        if (default_material == IRON || default_material == METAL) {
+            return metal_materials;
+        }
+        else if (default_material == WOOD) {
+            return wood_materials;
+        }
+        else if (default_material == CLOTH) {
+            return cloth_materials;
+        }
+		else if (default_material == LEATHER) {
+            return leather_materials;
+        }
+    }
+    return NULL;
+}
+
+/* Tries to set obj's material to mat
+ * Is limited by material lists and probabilities
+ * If check_all is true, go through the object's whole mat list;
+ *   otherwise, limited by probability
+ * Used by wishing code
+ */
+void
+maybe_set_material(obj, mat, check_all)
+struct obj *obj;
+int mat;
+boolean check_all;
+{
+	const struct icp* random_mat_list;
+
+	/* check that the item isn't currently of mat */
+	if (obj->obj_material == mat)
+		return;	// already done
+
+	/* randomized materials */
+	random_mat_list = material_list(obj);
+	/* check that the object can have a random material */
+	if (!random_mat_list)
+		return;
+
+	int i = (check_all ? 100 : rnd(100));
+	while (i > 0) {
+		if ((i <= random_mat_list->iprob) || (random_mat_list->iclass == mat))
+			break;
+		i -= random_mat_list->iprob;
+		random_mat_list++;
+	}
+	if (random_mat_list->iclass) /* a 0 indicates to use default material */
+		set_material(obj, random_mat_list->iclass);
+}
+
+/* Initialize the material field of an object
+ * Called on object creation, and can be called during
+ *   wishing to re-randomize the material of an object
+ */
+void
+init_obj_material(obj)
+struct obj* obj;
+{
+	int otyp = obj->otyp;
+	const struct icp* random_mat_list;
+
+	/* start by setting the material to its default */
+	obj->obj_material = objects[obj->otyp].oc_material;
+
+	/* randomized materials */
+	random_mat_list = material_list(obj);
+	if (random_mat_list) {
+		int i = rnd(100);
+		while (i > 0) {
+			if (i <= random_mat_list->iprob)
+				break;
+			i -= random_mat_list->iprob;
+			random_mat_list++;
+		}
+		if (random_mat_list->iclass) /* a 0 indicates to use default material */
+			set_material(obj, random_mat_list->iclass);
+	}
+
+	/* start the timer for shadowsteel objects */
+	if (is_evaporable(obj)){
+		start_timer(1, TIMER_OBJECT,
+			LIGHT_DAMAGE, (genericptr_t)obj);
+	}
+	/* set random gemstone type for valid gemstone objects */
+	if (!obj->ovar1 && obj->oclass != GEM_CLASS && obj->obj_material == GEMSTONE && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+		do{
+			obj->ovar1 = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+		} while (obj->ovar1 == OBSIDIAN);
+	}
+	return;
+}
 
 void
 set_material(obj, mat)
@@ -1471,7 +1855,8 @@ int mat;
 {
 	struct monst *owner = 0;
 	long mask = 0;
-	
+	int oldmat = obj->obj_material;
+
 	if(mat == obj->obj_material) return; //Already done!
 	
 	if(obj->where == OBJ_INVENT || obj->where == OBJ_MINVENT){
@@ -1483,130 +1868,164 @@ int mat;
 	} else if(owner && mask){
 		update_mon_intrinsics(owner, obj, FALSE, TRUE);
 	}
+	/* change otyp to be appropriate
+	 * does not set material
+	 */
 	switch(obj->otyp){
+		/* arrows */
 		case ARROW:
-			if(mat == GOLD) obj->otyp = GOLDEN_ARROW;
-			else if(mat == SILVER) obj->otyp = SILVER_ARROW;
-		break;
 		case GOLDEN_ARROW:
-			if(mat == SILVER) obj->otyp = SILVER_ARROW;
-			else obj->otyp = ARROW;
-		break;
 		case SILVER_ARROW:
-			if(mat == GOLD) obj->otyp = GOLDEN_ARROW;
-			else obj->otyp = ARROW;
-		break;
+			if		(mat == GOLD)		obj->otyp = GOLDEN_ARROW;
+			else if (mat == SILVER)		obj->otyp = SILVER_ARROW;
+			else						obj->otyp = ARROW;
+			break;
+		/* bullets */
 		case BULLET:
-			if(mat == SILVER) obj->otyp = SILVER_BULLET;
-		break;
 		case SILVER_BULLET:
-			obj->otyp = BULLET;
-		break;
-		case LEATHER_HELM:
-			if(mat == COPPER) obj->otyp = BRONZE_HELM;
-			else obj->otyp = HELMET;
-		break;
-		case BRONZE_HELM:
-			if(mat == LEATHER) obj->otyp = LEATHER_HELM;
-			else obj->otyp = HELMET;
-		break;
+			if		(mat == SILVER)		obj->otyp = SILVER_BULLET;
+			else						obj->otyp = BULLET;
+			break;
+		/* elven helmets */
+		case ELVEN_HELM:
+		case HIGH_ELVEN_HELM:
+			if		(mat >= IRON)		obj->otyp = HIGH_ELVEN_HELM;
+			else						obj->otyp = ELVEN_HELM;
+			break;
+		/* helmets */
 		case HELMET:
-			if(mat == LEATHER) obj->otyp = LEATHER_HELM;
-			else if(mat == COPPER) obj->otyp = BRONZE_HELM;
-		break;
-		case DWARVISH_MITHRIL_COAT:
-			obj->otyp = CHAIN_MAIL;
-		break;
-		case ELVEN_MITHRIL_COAT:
-			obj->otyp = CHAIN_MAIL;
-		break;
-		case STUDDED_LEATHER_ARMOR:
-			obj->otyp = SCALE_MAIL;
-		break;
-		case LEATHER_ARMOR:
-			obj->otyp = PLATE_MAIL;
-		break;
-		// case LEATHER_CLOAK:
-			// obj->otyp = ;
-		// break;
-		// case ROUNDSHIELD:
-			// obj->otyp = ;
-		// break;
-		//Tin whistle, wood harp
+		case LEATHER_HELM:
+		case ARCHAIC_HELM:
+		case DROVEN_HELM:				
+		case HARMONIUM_HELM:			/* irreversible, metal */
+//		case PLASTEEL_HELM:				/* has a unique function of shape -- needs a generic version? */
+//		case CRYSTAL_HELM:				/* has a unique function of shape -- needs a generic version? */
+			if (mat == LEATHER)			obj->otyp = LEATHER_HELM;
+			else if (mat == SHADOWSTEEL)obj->otyp = DROVEN_HELM;
+			else if (obj->otyp != HELMET
+				&& obj->otyp != ARCHAIC_HELM
+			)
+										obj->otyp = HELMET;
+			break;
+		/* gauntlets + gloves */
+		case CRYSTAL_GAUNTLETS:			/* irreversible, glass */
+			if		(mat == GLASS		
+				||   mat == OBSIDIAN_MT	
+				||   mat == GEMSTONE)	break;	// remain as crystal gauntlets
+			else;// fall through to general gauntlets
+		case GLOVES:
 		case GAUNTLETS:
-			if(mat == COPPER) obj->otyp = BRONZE_GAUNTLETS;
-		break;
-		case BRONZE_GAUNTLETS:
-			obj->otyp = GAUNTLETS;
-		break;
-		case ORIHALCYON_GAUNTLETS:
-			if(mat == COPPER) obj->otyp = BRONZE_GAUNTLETS;
-			else obj->otyp = GAUNTLETS;
-		break;
+		case ARCHAIC_GAUNTLETS:
+		case PLASTEEL_GAUNTLETS:		/* irreversible, plastic */
+		case HARMONIUM_GAUNTLETS:		/* irreversible, metal */
+		case ORIHALCYON_GAUNTLETS:		/* irreversible, metal */
+			if		(mat == DRAGON_HIDE)obj->otyp = (is_hard(obj) ? GAUNTLETS : GLOVES);
+			else if	(mat == LEATHER
+				||   mat == CLOTH)		obj->otyp = GLOVES;
+			else if (obj->otyp != GAUNTLETS
+				&& obj->otyp != ARCHAIC_GAUNTLETS
+			)
+										obj->otyp = GAUNTLETS;
+			break;
+		/* boots */
+		case CRYSTAL_BOOTS:				/* irreversible, glass */
+			if		(mat == GLASS		
+				||   mat == OBSIDIAN_MT	
+				||   mat == GEMSTONE)	break;	// remain as crystal boots
+			else;
+				// fall through to general boots
+		case ARMORED_BOOTS:
+		case ARCHAIC_BOOTS:
+		case HIGH_BOOTS:
+		case PLASTEEL_BOOTS:			/* irreversible, plastic */
+		case HARMONIUM_BOOTS:			/* irreversible, metal */
+			if		(mat == DRAGON_HIDE)obj->otyp = (is_hard(obj) ? ARMORED_BOOTS : HIGH_BOOTS);
+			else if	(mat >= WOOD){		
+				if(obj->otyp != ARMORED_BOOTS && 
+					obj->otyp != ARCHAIC_BOOTS
+				) obj->otyp = ARMORED_BOOTS;
+			} else						obj->otyp = HIGH_BOOTS;
+			break;
+		/* shoes */
+		case SHOES:
 		case LOW_BOOTS:
-			if(mat == IRON) obj->otyp = IRON_SHOES;
-		break;
-		case IRON_SHOES:
-			obj->otyp = LOW_BOOTS;
-		break;
-		case BRONZE_PLATE_MAIL:
-			obj->otyp = PLATE_MAIL;
-		break;
+			if		(mat == DRAGON_HIDE)obj->otyp = (is_hard(obj) ? SHOES : LOW_BOOTS);
+			else if (mat >= WOOD)		obj->otyp = SHOES;
+			else						obj->otyp = LOW_BOOTS;
+			break;
+		/* chain mail */
+		case CHAIN_MAIL:
+		case DROVEN_CHAIN_MAIL:			/* irreversible, shadowsteel */
+		case DWARVISH_MITHRIL_COAT:		/* irreversible, mithril */
+		case ELVEN_MITHRIL_COAT:		/* irreversible, mithril */
+										obj->otyp = CHAIN_MAIL;
+			break;
+		/* scale mail */
+//		dragon scale mail commented out for now -- metal dragons when?
+//		case GRAY_DRAGON_SCALE_MAIL:
+//		case SILVER_DRAGON_SCALE_MAIL:
+//		case SHIMMERING_DRAGON_SCALE_MAIL:
+//		case RED_DRAGON_SCALE_MAIL:
+//		case WHITE_DRAGON_SCALE_MAIL:
+//		case ORANGE_DRAGON_SCALE_MAIL:
+//		case BLACK_DRAGON_SCALE_MAIL:
+//		case BLUE_DRAGON_SCALE_MAIL:
+//		case GREEN_DRAGON_SCALE_MAIL:
+//		case YELLOW_DRAGON_SCALE_MAIL:
+//			if		(mat == DRAGON_HIDE)break;	// remain as dragon scale mail
+//			else;
+//				// fall through
+		case SCALE_MAIL:
+		case HARMONIUM_SCALE_MAIL:		/* irreversible, metal */
+		case STUDDED_LEATHER_ARMOR:		/* irreversible, leather */
+		case LEATHER_ARMOR:				/* irreversible, leather */
+										obj->otyp = SCALE_MAIL;
+			break;
+		/* plate mail */
+		case CRYSTAL_PLATE_MAIL:		/* irreversible, glass */
+			if		(mat == GLASS		
+				||   mat == OBSIDIAN_MT	
+				||   mat == GEMSTONE)	break;	// remain as crystal plate
+			else;// fall through to general plate mail
 		case PLATE_MAIL:
-			if(mat == COPPER) obj->otyp = BRONZE_PLATE_MAIL;
-		break;
-		case CRYSTAL_PLATE_MAIL:
-			if(mat == COPPER) obj->otyp = BRONZE_PLATE_MAIL;
-			else obj->otyp = PLATE_MAIL;
-			//BUT, turning plate mail to glass results in glass plate mail.  The magic is lost.
-		break;
-		// case CRYSTAL_HELM:
-			//????
-		// break;
-		case CRYSTAL_SWORD:
-			if(mat != OBSIDIAN_MT && mat != GLASS && mat != GEMSTONE) obj->otyp = LONG_SWORD;
-			//Reversing material transformation does not recover a crystal sword.  The magic is lost.
-		break;
-		// case MASSIVE_STONE_CRATE:
-			// obj->otyp = ;
-		// break;
-		// case TALLOW_CANDLE:
-			// obj->otyp = ;
-		// break;
-		// case WAX_CANDLE:
-			// obj->otyp = ;
-		// break;
+		case PLASTEEL_ARMOR:			/* irreversible, plastic */
+		case DROVEN_PLATE_MAIL:			/* irreversible, shadowsteel */
+		case HARMONIUM_PLATE:			/* irreversible, metal */
+										obj->otyp = PLATE_MAIL;
+			break;
+		/* long swords */
+		case CRYSTAL_SWORD:				/* irreversible, glass */
+			if		(mat == GLASS		
+				||   mat == OBSIDIAN_MT	
+				||   mat == GEMSTONE)	break;	// remain as crystal sword
+			else;// fall through to general long sword
+		case LONG_SWORD:
+										obj->otyp = LONG_SWORD;
+			break;
 		// case CRYSTAL_BALL:
 			// obj->otyp = ;
 		// break;
-		case ROCK:
-			if(mat == SILVER) obj->otyp = SILVER_SLINGSTONE;
-			if(mat == GLASS){
-				obj->otyp = LAST_GEM + rnd(9);
-			}
-			if(mat == GEMSTONE){
-				obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
-			}
-		break;
 		case SILVER_SLINGSTONE:
-			obj->otyp = ROCK;
-			if(mat == GLASS){
-				obj->otyp = LAST_GEM + rnd(9);
-			}
-			if(mat == GEMSTONE){
-				obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
-			}
+		case ROCK:
+			if		(mat == SILVER)		obj->otyp = SILVER_SLINGSTONE;
+			else if (mat == GLASS)		obj->otyp = LAST_GEM + rnd(9);
+			else if (mat == GEMSTONE)	obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+			else						obj->otyp = ROCK;
 		break;
 		// case HEAVY_IRON_BALL:
 			// obj->otyp = ;
 		// break;
-		// case IRON_CHAIN:
+		// case CHAIN:
 			// obj->otyp = ;
 		// break;
 		// case IRON_BANDS:
 			// obj->otyp = ;
 		// break;
 	}
+	/* switch based on class
+	 * this will actually set the material
+	 *   some exceptions exist where material purposefully not changed
+	 */
 	switch(objects[obj->otyp].oc_class){
 		case POTION_CLASS:
 			switch(mat){
@@ -1670,6 +2089,10 @@ int mat;
 				if(mat == SILVER) obj->otyp = SILVER_SLINGSTONE;
 				else obj->otyp = ROCK;
 			}
+			else if (mat == GEMSTONE && oldmat == GLASS)
+				obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+			else if (mat == GLASS && oldmat == GEMSTONE)
+				obj->otyp == LAST_GEM + rnd(9);
 			obj->obj_material = mat;
 		break;
 		default:
@@ -1678,6 +2101,24 @@ int mat;
 	}
 	//Silver bell should resist
 	
+	/* start the timer for shadowsteel objects */
+	if (is_evaporable(obj)){
+		start_timer(1, TIMER_OBJECT,
+			LIGHT_DAMAGE, (genericptr_t)obj);
+	}
+	else if(oldmat == SHADOWSTEEL) {/* or turn it off, if the object used to be made of shadowsteel 
+									 * the asymmetry isn't nice but obj->obj_material was already changed */
+		stop_timer(LIGHT_DAMAGE, (genericptr_t)obj);
+	}
+	/* set random gemstone type for valid gemstone objects */
+	if (!obj->ovar1 && mat == GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+		do{
+			obj->ovar1 = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+		} while (obj->ovar1 == OBSIDIAN);
+	}
+	else if (obj->ovar1 && oldmat == GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+		obj->ovar1 = 0;	/* and reset if changing away from gemstone*/
+	}
 	fix_object(obj);
 	
 	if(owner == &youmonst){
@@ -1709,7 +2150,7 @@ register struct obj *obj;
 	else if(obj->oartifact == ART_ROD_OF_THE_ELVISH_LORDS) wt = objects[ELVEN_MACE].oc_weight;
 	else if(obj->oartifact == ART_VAMPIRE_KILLER) wt = 2*objects[BULLWHIP].oc_weight;
 	else if(obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) wt = 2*objects[SCIMITAR].oc_weight;
-	else if(obj->oartifact == ART_AEGIS) wt = objects[LEATHER_CLOAK].oc_weight;
+	else if(obj->oartifact == ART_AEGIS) wt = objects[CLOAK].oc_weight;
 	else if(obj->oartifact == ART_HERMES_S_SANDALS) wt = objects[FLYING_BOOTS].oc_weight;
 	else if(obj->oartifact == ART_EARTH_CRYSTAL){
 		wt = 160;
@@ -1732,57 +2173,7 @@ register struct obj *obj;
 		wt =  50; /* Same as a crystal ball (ie, the Orb of Weight) */
 	} else if(obj->obj_material != objects[obj->otyp].oc_material){
 	//ie, for normal objects and non-special weight artifacts
-	static const double matDensityLookup[] = {
-//	FENCEPOST
-		0.5,
-//  LIQUID
-		1.0,
-//  WAX
-		0.9,
-//  VEGGY very aprox Alfalfa leaf?
-		0.33, 
-//  FLESH
-		1.1,
-//  PAPER
-		1.2,
-//  CLOTH cotton fibre
-		1.5,
-//  LEATHER
-		0.9,
-//  WOOD
-		0.5,
-//  BONE
-		1.7,
-//  DRAGON_HIDE
-		3.4,
-//  IRON
-		7.9,
-//  METAL		12	/* Sn, &c. */
-		7.7,
-//  COPPER		13	/* Cu - includes brass and bronze*/
-		8.9,
-//  SILVER		14	/* Ag */
-		10.5,
-//  GOLD		15	/* Au */
-		19.3,
-//  PLATINUM	16	/* Pt */
-		21.4,
-//  MITHRIL		17 alumninum
-		2.7,
-//  PLASTIC		18 High end estimate for density of old credit card plastic, http://dwb5.unl.edu/chem/smallscale/SmallScale-069.html
-		1.3,
-//  GLASS		19
-		2.4,
-//  GEMSTONE	20 Very rough aprox.
-		3.6,
-//  MINERAL		21 Very rough aprox.
-		2.7,
-//  OBSIDIAN_MT	22
-		2.6,
-//  SHADOWSTUFF	23
-		1,
-	};
-		wt = wt*matDensityLookup[obj->obj_material]/matDensityLookup[objects[obj->otyp].oc_material];
+		wt = wt * materials[obj->obj_material].density / materials[objects[obj->otyp].oc_material].density;
 	}
 	
 	if(obj->otyp == MOON_AXE && obj->oartifact != ART_SCEPTRE_OF_LOLTH){
@@ -2372,7 +2763,7 @@ obj_extract_self(obj)
 	    freeinv(obj);
 	    break;
 	case OBJ_MINVENT:
-	    extract_nobj(obj, &obj->ocarry->minvent);
+		m_freeinv(obj);
 	    break;
 	case OBJ_MIGRATING:
 	    extract_nobj(obj, &migrating_objs);
@@ -2494,6 +2885,8 @@ add_to_minv(mon, obj)
     obj->ocarry = mon;
     obj->nobj = mon->minvent;
     mon->minvent = obj;
+	/* apply artifact on-carry properties */
+	update_mon_intrinsics(mon, obj, TRUE, FALSE);
     return 0;	/* obj on mon's inventory chain */
 }
 
@@ -2537,7 +2930,7 @@ maid_clean(mon, obj)
 			struct engr *oep = engr_at(mon->mx,mon->my);
 			if(canseemon(mon)) pline("The maid banishes the unholy object to hell.");
 			add_to_migration(obj);
-			obj->ox = valley_level.dnum;
+			obj->ox = sanctum_level.dnum;
 			obj->oy = sanctum_level.dlevel - 1; /* vs level, bottom of the accesible part of hell */
 			obj->owornmask = (long)MIGR_RANDOM;
 			if(!oep){
@@ -2554,7 +2947,7 @@ maid_clean(mon, obj)
 		if(canseemon(mon)) pline("The maid sticks an ofuda to the offending object.");
 		obj->cursed = 0;
 	}
-	if(obj->otyp == DWARVISH_HELM || obj->otyp == OIL_LAMP || obj->otyp == BRASS_LANTERN){
+	if(obj->otyp == DWARVISH_HELM || obj->otyp == OIL_LAMP || obj->otyp == LANTERN){
 		if(obj->age < 750){
 			obj->age += 750;
 			if(canseemon(mon)) pline("The maid adds some oil.");

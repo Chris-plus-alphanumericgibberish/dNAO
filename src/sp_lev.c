@@ -217,9 +217,15 @@ register int humidity;
 
 	if (humidity & DRY) {
 	    typ = levl[x][y].typ;
-	    if (typ == ROOM || typ == AIR ||
-		    typ == CLOUD || typ == ICE ||
-			typ == CORR || typ == PUDDLE)
+	    if (typ == ROOM 
+			|| typ == AIR 
+			|| typ == CLOUD 
+			|| typ == ICE 
+			|| typ == CORR 
+			|| typ == PUDDLE 
+			|| typ == GRASS
+			|| typ == SOIL
+		)
 		return TRUE;
 	}
 	if (humidity & WET) {
@@ -870,7 +876,7 @@ struct mkroom	*croom;
 	if (croom)
 	    get_room_loc(&x, &y, croom);
 	else {
-	    if (!pm || !is_swimmer(pm))
+	    if (!pm || !species_swims(pm))
 			get_location(&x, &y, DRY);
 	    else if (pm->mlet == S_EEL)
 			get_location(&x, &y, WET);
@@ -1023,6 +1029,15 @@ struct mkroom	*croom;
 		otmp = mkobj_at(oclass, x, y, !named);
 	}
 
+	if(In_quest(&u.uz) && !Role_if(PM_CONVICT)){
+		if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
+		if(otmp->oclass == ARMOR_CLASS){
+			if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+			else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
+			else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (youracedata->mflagsb&MB_BODYTYPEMASK);
+		}
+	}
+	
 	if (o->spe != -127)	/* That means NOT RANDOM! */
 	    otmp->spe = (schar)o->spe;
 

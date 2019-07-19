@@ -37,7 +37,7 @@ int explcolors[] = {
 #else
 #define cmap_color(n) color = iflags.use_color ? showsymcolors[n] : NO_COLOR
 #endif
-#define obj_color(n)  color = iflags.use_color ? objects[n].oc_color : NO_COLOR
+#define obj_color(n)  color = iflags.use_color ? (offset & 0x0f) : NO_COLOR
 #define mon_color(n)  color = iflags.use_color ? mons[n].mcolor : NO_COLOR
 #define invis_color(n) color = NO_COLOR
 #define pet_color(n)  color = iflags.use_color ? mons[n].mcolor : NO_COLOR
@@ -156,7 +156,7 @@ unsigned *ospecial;
 	if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color) {
 	    if (offset >= S_vwall && offset <= S_hcdoor)
 		color = CLR_BROWN;
-	    else if (offset >= S_arrow_trap && offset <= S_polymorph_trap)
+	    else if (offset >= S_arrow_trap && offset <= S_mummy_trap)
 		color = CLR_MAGENTA;
 	    else if (offset == S_corr || offset == S_litcorr)
 		color = CLR_GRAY;
@@ -229,10 +229,6 @@ unsigned *ospecial;
 				} else if(offset >= S_litroom && offset <= S_dnladder){
 					color = CLR_YELLOW;
 				}
-			} else if(Is_sunkcity(&u.uz)){
-				if(offset >= S_drkroom && offset <= S_litcorr){
-					color = CLR_BRIGHT_GREEN;
-				}
 			} else if(Is_peanut(&u.uz)){
 				if(offset >= S_vwall && offset <= S_trwall){
 					color = CLR_BROWN;
@@ -287,7 +283,6 @@ unsigned *ospecial;
 									|| *in_rooms(x,y, BARRACKS)
 									|| *in_rooms(x,y, COURT)
 								) color = (offset == S_litroom) ? CLR_BROWN : CLR_BLACK;
-								else color = (offset == S_litroom) ? CLR_BRIGHT_GREEN : CLR_GREEN;
 							}
 						else color = (offset == S_litroom) ? CLR_BROWN : CLR_BLACK;
 					}
@@ -321,8 +316,6 @@ unsigned *ospecial;
 						else if(offset >= S_drkroom && offset <= S_dnladder){
 							if(offset == S_litcorr || offset == S_corr)
 								;
-							else
-								color = CLR_GREEN;
 							
 						}
 						if (offset >= S_vwall && offset <= S_hcdoor) {
@@ -381,10 +374,14 @@ unsigned *ospecial;
 							color = CLR_YELLOW;
 						if(offset >= S_vwall && offset <= S_hcdoor)
 							color = CLR_BROWN;
-						if (offset == S_drkroom)
+						if (offset == S_drkgrass)
 							color = CLR_BROWN;
-						if (offset == S_litroom)
+						if (offset == S_litgrass)
 							color = CLR_YELLOW;
+						if (offset == S_drkroom)
+							color = CLR_BLACK;
+						if (offset == S_litroom)
+							color = CLR_BROWN;
 						if (offset == S_tree)
 							color = CLR_BROWN;
 					}
@@ -455,19 +452,24 @@ unsigned *ospecial;
 		}
 		if (color == NO_COLOR) cmap_color(offset);
 	} else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
-		if ((offset == BOULDER || offset == MASSIVE_STONE_CRATE) && iflags.bouldersym) ch = iflags.bouldersym;
-		else ch = get_objsym(offset);
+		/* color should come first as it is in the first 4 bits*/
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color) {
-			switch(objects[offset].oc_class) {
+			switch (objects[offset >> 4].oc_class) {
 			case COIN_CLASS: color = CLR_YELLOW; break;
 			case FOOD_CLASS: color = CLR_RED; break;
 			default: color = CLR_BRIGHT_BLUE; break;
 			}
-		} else
+		}
+		else
 #endif
 			obj_color(offset);
+		/* shift out the 4 bits of color to leave the otyp */
+		offset = offset >> 4;
+		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((offset == BOULDER || offset == MASSIVE_STONE_CRATE) && iflags.bouldersym) ch = iflags.bouldersym;
+		else ch = get_objsym(offset);
+
 		if (offset != BOULDER &&
 		    level.objects[x][y] &&
 		    level.objects[x][y]->nexthere) {

@@ -532,6 +532,7 @@ struct monst *mtmp;
 long nmv;		/* number of moves */
 {
 	int imv = 0;	/* avoid zillions of casts and lint warnings */
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP) return;
 
 #if defined(DEBUG) || defined(BETA)
 	if (nmv < 0L) {			/* crash likely... */
@@ -633,7 +634,7 @@ long nmv;		/* number of moves */
 	}
 
 	/* recover lost hit points */
-	if (regenerates(mtmp->data)){
+	if (mon_resistance(mtmp,REGENERATION)){
 		if (mtmp->mhp + imv >= mtmp->mhpmax)
 			mtmp->mhp = mtmp->mhpmax;
 		else mtmp->mhp += imv;
@@ -1104,6 +1105,15 @@ tamedog(mtmp, obj)
 struct monst *mtmp;
 struct obj *obj;
 {
+	return tamedog_core(mtmp, obj, FALSE);
+}
+
+struct monst *
+tamedog_core(mtmp, obj, enhanced)
+struct monst *mtmp;
+struct obj *obj;
+int enhanced;
+{
 	struct monst *mtmp2, *curmon, *weakdog = (struct monst *) 0;
 	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. || mtmp->data == &mons[PM_MEDUSA] */
 	if (is_untamable(mtmp->data) || mtmp->notame || mtmp->iswiz
@@ -1129,7 +1139,7 @@ struct obj *obj;
 	) return((struct monst *)0);
 
 #ifdef CONVICT
-    if (Role_if(PM_CONVICT) && (is_domestic(mtmp->data) && obj && !is_instrument(obj) && obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS)) {
+    if (!enhanced && Role_if(PM_CONVICT) && (is_domestic(mtmp->data) && obj && !is_instrument(obj) && obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS)) {
         /* Domestic animals are wary of the Convict */
         pline("%s still looks wary of you.", Monnam(mtmp));
         return((struct monst *)0);
@@ -1192,7 +1202,7 @@ struct obj *obj;
 	    /* monsters with conflicting structures cannot be tamed */
 	    mtmp->isshk || mtmp->isgd || mtmp->ispriest || mtmp->isminion ||
 	    mtmp->data == &mons[urole.neminum] ||
-	    (is_demon(mtmp->data) && !is_demon(youracedata)) ||
+	    (!enhanced && is_demon(mtmp->data) && !is_demon(youracedata)) ||
 	    (obj && !is_instrument(obj) && obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS && dogfood(mtmp, obj) >= MANFOOD)) return (struct monst *)0;
 
 	if (mtmp->m_id == quest_status.leader_m_id)

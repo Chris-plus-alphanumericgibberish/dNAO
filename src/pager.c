@@ -472,24 +472,27 @@ lookat(x, y, buf, monbuf, shapebuff)
  *	 must not be changed directly, e.g. via lcase(). We want to force
  *	 lcase() for data.base lookup so that we can have a clean key.
  *	 Therefore, we create a copy of inp _just_ for data.base lookup.
+ * 
+ * Returns TRUE if it found an entry and printed to the nhwindow
  */
-void
-checkfile(inp, pm, user_typed_name, without_asking)
+boolean
+checkfile(inp, pm, user_typed_name, without_asking, printwindow)
     char *inp;
     struct permonst *pm;
     boolean user_typed_name, without_asking;
+	winid *printwindow;
 {
     dlb *fp;
     char buf[BUFSZ], newstr[BUFSZ];
     char *ep, *dbase_str;
     long txt_offset;
     int chk_skip;
-    boolean found_in_file = FALSE, skipping_entry = FALSE;
+    boolean found_in_file = FALSE, skipping_entry = FALSE, wrote = FALSE;
 
     fp = dlb_fopen(DATAFILE, "r");
     if (!fp) {
 	pline("Cannot open data file!");
-	return;
+	return FALSE;
     }
 
     /* To prevent the need for entries in data.base like *ngel to account
@@ -551,7 +554,7 @@ checkfile(inp, pm, user_typed_name, without_asking)
 	if (!dlb_fgets(buf, BUFSZ, fp) || !dlb_fgets(buf, BUFSZ, fp)) {
 	    impossible("can't read 'data' file");
 	    (void) dlb_fclose(fp);
-	    return;
+	    return FALSE;
 	} else if (sscanf(buf, "%8lx\n", &txt_offset) < 1 || txt_offset <= 0)
 	    goto bad_data_file;
 
@@ -593,31 +596,33 @@ checkfile(inp, pm, user_typed_name, without_asking)
 	if (sscanf(buf, "%ld,%d\n", &entry_offset, &entry_count) < 2) {
 bad_data_file:	impossible("'data' file in wrong format");
 		(void) dlb_fclose(fp);
-		return;
+		return FALSE;
 	}
 
 	if (user_typed_name || without_asking || yn("More info?") == 'y') {
-	    winid datawin;
 
 	    if (dlb_fseek(fp, txt_offset + entry_offset, SEEK_SET) < 0) {
 		pline("? Seek error on 'data' file!");
 		(void) dlb_fclose(fp);
-		return;
+		return FALSE;
 	    }
-	    datawin = create_nhwindow(NHW_MENU);
+		char *encyc_header = "Encyclopedia entry:";
+		putstr(*printwindow, 0, "\n");
+		putstr(*printwindow, 0, encyc_header);
+		putstr(*printwindow, 0, "\n");
 	    for (i = 0; i < entry_count; i++) {
 		if (!dlb_fgets(buf, BUFSZ, fp)) goto bad_data_file;
 		if ((ep = index(buf, '\n')) != 0) *ep = 0;
 		if (index(buf+1, '\t') != 0) (void) tabexpand(buf+1);
-		putstr(datawin, 0, buf+1);
+		putstr(*printwindow, 0, buf + 1);
+		wrote = TRUE;
 	    }
-	    display_nhwindow(datawin, FALSE);
-	    destroy_nhwindow(datawin);
 	}
     } else if (user_typed_name)
 	pline("I don't have any information on those things.");
 
     (void) dlb_fclose(fp);
+	return wrote;
 }
 
 /* getpos() return values */
@@ -732,6 +737,7 @@ static const char * const bogusobjects[] = {
        "pair of muddy boots",
        "gnomerang",
        "gnagger",
+       "hipospray ampule",
 	   
 	   "can of Greece",
 	   "can of crease",
@@ -1067,7 +1073,10 @@ do_look(quick)
 	    return 0;
 
 	if (out_str[1]) {	/* user typed in a complete string */
-	    checkfile(out_str, pm, TRUE, TRUE);
+		winid datawin = create_nhwindow(NHW_MENU);
+	    if(checkfile(out_str, pm, TRUE, TRUE, &datawin))
+			display_nhwindow(datawin, TRUE);
+		destroy_nhwindow(datawin);
 	    return 0;
 	}
 	sym = out_str[0];
@@ -1163,7 +1172,7 @@ do_look(quick)
 	if ((from_screen ?
 		(sym == monsyms[S_HUMAN] && cc.x == u.ux && cc.y == u.uy) :
 		(sym == def_monsyms[S_HUMAN] && !iflags.showrace)) &&
-	    !(Race_if(PM_HUMAN) || Race_if(PM_ELF) || Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && !Upolyd)
+	    !(Race_if(PM_HUMAN) || Race_if(PM_INHERITOR) || Race_if(PM_ELF) || Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && !Upolyd)
 	    found += append_str(out_str, "you");	/* tack on "or you" */
 
 	/*
@@ -1210,7 +1219,7 @@ do_look(quick)
 	    }
 	}
 
-#define is_cmap_trap(i) ((i) >= S_arrow_trap && (i) <= S_polymorph_trap)
+#define is_cmap_trap(i) ((i) >= S_arrow_trap && (i) <= S_mummy_trap)
 #define is_cmap_drawbridge(i) ((i) >= S_vodbridge && (i) <= S_hcdbridge)
 
 	/* Now check for graphics symbols */
@@ -1349,9 +1358,6 @@ do_look(quick)
 			putstr(datawin, 0, temp_print);
 			temp_print = strtok(NULL, "\n");
 		}
-		display_nhwindow(datawin, TRUE);
-		destroy_nhwindow(datawin);
-	    //pline("%s", out_str);
 	    /* check the data file for information about this thing */
 	    if (found == 1 && ans != LOOK_QUICK && ans != LOOK_ONCE &&
 			(ans == LOOK_VERBOSE || (flags.help && !quick))) {
@@ -1359,8 +1365,10 @@ do_look(quick)
 		Strcpy(temp_buf, level.flags.lethe //lethe
 					&& !strcmp(firstmatch, "water")?
 				"lethe" : firstmatch);
-		checkfile(temp_buf, pm, FALSE, (boolean)(ans == LOOK_VERBOSE));
+		(void)checkfile(temp_buf, pm, FALSE, (boolean)(ans == LOOK_VERBOSE), &datawin);
 	    }
+		display_nhwindow(datawin, TRUE);
+		destroy_nhwindow(datawin);
 	} else {
 	    pline("I've never heard of such things.");
 	}
@@ -1412,11 +1420,24 @@ generate_list_of_resistances(struct monst * mtmp, char * temp_buf, int resists)
 {
 	unsigned int mr_flags;
 	unsigned long mg_flags = mtmp->data->mflagsg;
-	if (resists == 1)
-	{
+	if (resists == 1){
 		mr_flags = mtmp->data->mresists;
-		if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED)
-			mr_flags = mr_flags | MR_COLD | MR_SLEEP | MR_POISON | MR_DRAIN | MG_RPIERCE | ((mtmp->mfaction == ZOMBIFIED) ? MG_RBLUNT : MG_RSLASH);
+		if(mtmp->mfaction == ZOMBIFIED){
+			mr_flags |= MR_COLD | MR_SLEEP | MR_POISON | MR_DRAIN;
+			mg_flags |= MG_RPIERCE | MG_RBLUNT;
+		}
+		if(mtmp->mfaction == SKELIFIED){
+			mr_flags |= MR_COLD | MR_SLEEP | MR_POISON | MR_DRAIN;
+			mg_flags |= MG_RPIERCE | MG_RSLASH;
+		}
+		if(mtmp->mfaction == CRYSTALFIED){
+			mr_flags |= MR_COLD | MR_SLEEP | MR_POISON | MR_DRAIN;
+			mg_flags |= MG_RPIERCE | MG_RSLASH;
+		}
+		if(mtmp->mfaction == VAMPIRIC){
+			mr_flags |= MR_SLEEP | MR_POISON | MR_DRAIN;
+			if(mtmp->m_lev > 10) mr_flags |= MR_COLD;
+		}
 	}
 	if (resists == 0)
 		mr_flags = mtmp->data->mconveys;
@@ -1551,18 +1572,18 @@ get_mm_description_of_monster_type(struct monst * mtmp, char * description)
 	int many = 0;
 	many = append(description, notonline(ptr)			, "avoids you"			, many);
 	many = append(description, fleetflee(ptr)			, "flees"				, many);
-	many = append(description, is_flyer(ptr)			, "flies"				, many);
-	many = append(description, is_floater(ptr)			, "floats"				, many);
+	many = append(description, species_flies(ptr)	, "flies"				, many);
+	many = append(description, species_floats(ptr)	, "floats"				, many);
 	many = append(description, is_clinger(ptr)			, "clings to ceilings"	, many);
-	many = append(description, is_swimmer(ptr)			, "swims"				, many);
+	many = append(description, species_swims(ptr)	, "swims"				, many);
 	many = append(description, breathless_mon(mtmp)		, "is breathless"		, many);
 	many = append(description, amphibious(ptr)			, "survives underwater"	, many);
-	many = append(description, passes_walls(ptr)		, "phases"				, many);
+	many = append(description, species_passes_walls(ptr), "phases"				, many);
 	many = append(description, amorphous(ptr)			, "squeezes in gaps"	, many);
 	many = append(description, tunnels(ptr)				, "tunnels"				, many);
 	many = append(description, needspick(ptr)			, "digs"				, many);
-	many = append(description, can_teleport(ptr)		, "teleports"			, many);
-	many = append(description, control_teleport(ptr)	, "controls teleports"	, many);
+	many = append(description, species_teleports(ptr), "teleports"			, many);
+	many = append(description, species_controls_teleports(ptr)	, "controls teleports"	, many);
 	many = append(description, mteleport(ptr)			, "teleports often"		, many);
 	many = append(description, stationary(ptr)			, "stationary"			, many);
 	many = append(description, (many==0)				, "moves normally"		, many);
@@ -1696,8 +1717,8 @@ get_mv_description_of_monster_type(struct monst * mtmp, char * description)
 	strcat(description, "Vision: ");
 	int many = 0;
 	many = append(description, goodsmeller(ptr)			, "scent"					, many);
-	many = append(description, perceives(ptr)			, "see invisible"			, many);
-	many = append(description, telepathic(ptr)			, "telepathy"				, many);
+	many = append(description, species_perceives(ptr)	, "see invisible"			, many);
+	many = append(description, species_is_telepathic(ptr)	, "telepathy"				, many);
 	many = append(description, normalvision(ptr)		, "normal vision"			, many);
 	many = append(description, darksight(ptr)			, "darksight"				, many);
 	many = append(description, catsight(ptr)			, "catsight"				, many);
@@ -1721,7 +1742,7 @@ char * get_mg_description_of_monster_type(struct monst * mtmp, char * descriptio
 	strcat(description, "Mechanics: ");
 	int many = 0;
 	many = append(description, is_tracker(ptr)			, "tracks you"				, many);
-	many = append(description, is_displacer(ptr)		, "displacing"				, many);
+	many = append(description, species_displaces(ptr), "displacing"				, many);
 	many = append(description, polyok(ptr)				, "valid polymorph form"	, many);
 	many = append(description, !polyok(ptr)				, "invalid polymorph form"	, many);
 	many = append(description, is_untamable(ptr)		, "untamable"				, many);
@@ -1730,7 +1751,7 @@ char * get_mg_description_of_monster_type(struct monst * mtmp, char * descriptio
 	many = append(description, is_lord(ptr)				, "lord"					, many);
 	many = append(description, is_prince(ptr)			, "prince"					, many);
 	many = append(description, opaque(ptr)				, "opaque"					, many);
-	many = append(description, regenerates(ptr)			, "regenerating"			, many);
+	many = append(description, species_regenerates(ptr)	, "regenerating"			, many);
 	many = append(description, levl_follower(mtmp)		, "stalks you"				, many);
 	many = append(description, (many==0)				, "normal"					, many);
 	strcat(description, ". ");
@@ -2050,6 +2071,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 	else if (mtmp->mfaction == SKELIFIED)	Strcat(name, " skeleton");
 	else if (mtmp->mfaction == CRYSTALFIED) Strcat(name, " vitrean");
 	else if (mtmp->mfaction == FRACTURED)	Strcat(name, " witness");
+	else if (mtmp->mfaction == VAMPIRIC)	Strcat(name, " vampire");
 
 	temp_buf[0] = '\0';
 	if (iflags.pokedex) {
@@ -2128,70 +2150,11 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			struct attack alt_attk;
 			int sum[NATTK];
 			int i;
-			boolean derundspec = FALSE;
 
 			for (i = 0; i < NATTK; i++) {
 				sum[i] = 1;
-				mattk = getmattk(ptr, i, sum, &alt_attk);
+				mattk = getmattk(mtmp, ptr, i, sum, &alt_attk);
 
-				if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
-					if (mattk->aatyp == AT_SPIT
-						|| mattk->aatyp == AT_BREA
-						|| mattk->aatyp == AT_GAZE
-						|| mattk->aatyp == AT_ARRW
-						|| mattk->aatyp == AT_MMGC
-						|| mattk->aatyp == AT_TNKR
-						|| mattk->aatyp == AT_SHDW
-						|| mattk->aatyp == AT_BEAM
-						|| mattk->aatyp == AT_MAGC
-						|| (mattk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
-						|| (i == 0 &&
-						(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP) &&
-						mattk->adtyp == AD_PHYS &&
-						mattk->damn*mattk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mtmp->data->msize * 2, 4) / 2
-						)
-						|| (!derundspec && mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
-						|| (!derundspec && i == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
-						){
-						if (i == 0){
-							alt_attk.aatyp = AT_CLAW;
-							alt_attk.adtyp = AD_PHYS;
-							alt_attk.damn = mtmp->m_lev / 10 + 1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
-							alt_attk.damd = max(mtmp->data->msize * 2, 4);
-							mattk = &alt_attk;
-						}
-						else if (!derundspec && mtmp->mfaction == SKELIFIED){
-							derundspec = TRUE;
-							alt_attk.aatyp = AT_TUCH;
-							alt_attk.adtyp = AD_SLOW;
-							alt_attk.damn = 1;
-							alt_attk.damd = max(mtmp->data->msize * 2, 4);
-							mattk = &alt_attk;
-						}
-						else if (!derundspec && mtmp->mfaction == CRYSTALFIED){
-							derundspec = TRUE;
-							alt_attk.aatyp = AT_TUCH;
-							alt_attk.adtyp = AD_ECLD;
-							alt_attk.damn = min(10, mtmp->m_lev / 3);
-							alt_attk.damd = 8;
-							mattk = &alt_attk;
-						}
-						else continue;
-					}
-				}
-				if (mtmp->mfaction == FRACTURED){
-					if ((!derundspec &&
-						mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
-						|| (mattk->aatyp == AT_CLAW && (mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE))
-						){
-						derundspec = TRUE;
-						alt_attk.aatyp = AT_CLAW;
-						alt_attk.adtyp = AD_GLSS;
-						alt_attk.damn = max(mtmp->m_lev / 10 + 1, mattk->damn);
-						alt_attk.damd = max(mtmp->data->msize * 2, max(mattk->damd, 4));
-						mattk = &alt_attk;
-					}
-				}
 				main_temp_buf[0] = '\0';
 				get_description_of_attack(mattk, temp_buf);
 				if (temp_buf[0] == '\0') {
@@ -2202,7 +2165,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 						strcat(description, "none");
 						strcat(description, "\n");
 					}
-					break;
+					continue;
 				}
 #ifndef USE_TILES
 				strcat(main_temp_buf, "    ");

@@ -34,6 +34,12 @@ dat/quest.dat
 dat/rumors
 dat/dungeon
 dat/dungeon.pdf
+dat/dngnch1
+dat/dngnch1.pdf
+dat/dngnch2
+dat/dngnch2.pdf
+dat/dngnch3
+dat/dngnch3.pdf
 dat/*.lev
 
 .DS_STORE

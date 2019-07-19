@@ -47,7 +47,6 @@ STATIC_DCL int NDECL(throwgaze);
 STATIC_DCL void NDECL(cast_protection);
 STATIC_DCL boolean FDECL(sightwedge, (int,int, int,int, int,int));
 STATIC_DCL void FDECL(spell_backfire, (int));
-STATIC_DCL const char *FDECL(spelltypemnemonic, (int));
 STATIC_DCL int FDECL(spellhunger, (int));
 STATIC_DCL int FDECL(isqrt, (int));
 STATIC_DCL boolean FDECL(run_maintained_spell, (int));
@@ -1441,7 +1440,7 @@ int spell;
 	}
 }
 
-STATIC_OVL const char *
+const char *
 spelltypemnemonic(skill)
 int skill;
 {
@@ -1912,7 +1911,6 @@ spiriteffects(power, atme)
 							} else{
 								You("hit %s.",mon_nam(mon));
 								setmangry(mon);
-								u_teleport_mon(mon, TRUE);
 							}
 							u_teleport_mon(mon, TRUE);
 						}
@@ -2835,7 +2833,7 @@ spiriteffects(power, atme)
 					begin_burn(uwep, FALSE);
 				} else return 0;
 			} else{
-				if(uwep && uwep->otyp == BRASS_LANTERN) pline("You need an oil lamp. These modern lamps just aren't the same!");
+				if(uwep && uwep->otyp == LANTERN) pline("You need an oil lamp. These modern lamps just aren't the same!");
 				else You("must wield a burning lamp!");
 				return 0;
 			}
@@ -3220,7 +3218,7 @@ spiriteffects(power, atme)
 				if (DEADMONSTER(mon)) continue;
 				if (mon->mpeaceful) continue;
 				if (mindless_mon(mon)) continue;
-				if (telepathic(mon->data) || !rn2(5)){
+				if (mon_resistance(mon,TELEPAT) || !rn2(5)){
 					mon->mhp -= d(5,15);
 					if (mon->mhp <= 0) xkilled(mon, 1);
 					else {
@@ -5110,6 +5108,10 @@ int spell;
 	 * and no matter how able, learning is always required.
 	 */
 	chance = chance * (20-splcaster) / 15 - splcaster;
+	
+	//While the Naen syllable is active, the only spell failure chance comes from the Spire 
+	if(u.unaen_duration)
+		chance = 100;
 	
 	if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
 		if(u.uz.dlevel == spire_level.dlevel) chance = 0;

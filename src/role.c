@@ -67,7 +67,7 @@ struct Role roles[] = {
 	PM_SARA__THE_LAST_ORACLE, PM_TROOPER, NON_PM,
 	NON_PM, NON_PM, NON_PM, NON_PM,
 	ART_ANNULUS,
-	MA_HUMAN|MA_DWARF|MA_ELF|MA_VAMPIRE|MA_DRAGON, ROLE_MALE|ROLE_FEMALE |
+	MA_HUMAN|MA_DWARF|MA_ELF|MA_VAMPIRE|MA_DRAGON|MA_CLOCK, ROLE_MALE|ROLE_FEMALE |
 	  ROLE_NEUTRAL|ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{  12, 10,  7, 10,  10,  7 },
@@ -626,8 +626,8 @@ const char *ElfPriestLgod = "Manwe Sulimo",
 		   *ElfPriestNgod = "Mandos",
 		   *ElfPriestCgod = "Lorien"; /* Elven */
 
-const char *AnachrononautLgod = "Ilsensine",
-		   *AnachrononautLgodEnd = "Ilsensine the Banished One";
+const char *AnachrononautLgod = "_Ilsensine",
+		   *AnachrononautLgodEnd = "_Ilsensine the Banished One";
 
 const char *getAnachrononautLgod(){return AnachrononautLgod;}
 const char *getAnachrononautLgodEnd(){return AnachrononautLgodEnd;}
@@ -834,6 +834,20 @@ const struct Race races[] = {
 	{  0, 0,  100, 0, 100, 0 },		/* Energy */
 	NORMALNIGHTVIS
 },
+{	"Inheritor", "human", "humanity", "Inh",
+	{"man", "woman"},
+	PM_INHERITOR, NON_PM, PM_HUMAN_MUMMY, PM_ZOMBIE,
+	ROLE_MALE|ROLE_FEMALE |
+	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
+	MA_HUMAN, 0, MA_GNOME|MA_ORC|MA_ELF,
+	/*    Str     Int Wis Dex Con Cha */
+	{      3,      3,  3,  3,  3,  3 },
+	{ STR18(100), 18, 18, 18, 18, 18 },
+	/* Init   Lower  Higher */
+	{  2, 0,  0, 2,  1, 0 },	/* Hit points */
+	{  1, 0,  2, 0,  2, 0 },		/* Energy */
+	NORMALNIGHTVIS
+},
 {	"orc", "orcish", "orcdom", "Orc",
 	{0, 0},
 	PM_ORC, NON_PM, PM_ORC_MUMMY, PM_ZOMBIE,
@@ -906,6 +920,21 @@ struct Race myrkalfr =
 	/* Init   Lower  Higher */
 	{  1, 0,  0, 1,  1, 0 },	/* Hit points */
 	{  2, 0,  3, 0,  3, 0 },	/* Energy */
+	NO_NIGHTVISION
+};
+
+struct Race android = 
+{	"android", "android", "android-kind", "And",
+	{"android", "gynoid"},
+	PM_ANDROID, PM_GYNOID, PM_MUMMIFIED_ANDROID, PM_FLAYED_ANDROID,
+	ROLE_MALE|ROLE_FEMALE | ROLE_NEUTRAL,
+	MA_CLOCK, 0, MA_ELF|MA_ORC|MA_DROW,
+	/*  Str    Int Wis Dex Con Cha */
+	{    3,     3,  3,  3,  3,  3 },
+	{   20,    18, 16, 22, 22, 18 },
+	/* Init   Lower  Higher */
+	{  2, 0,  1, 3,  1, 0 },	/* Hit points */
+	{  1, 0,  1, 0,  1, 0 },	/* Energy */
 	NO_NIGHTVISION
 };
 
@@ -2281,8 +2310,16 @@ int newgame;
 	/* Initialize urole and urace */
 	urole = roles[flags.initrole];
 	urace = races[flags.initrace];
-	if(Role_if(PM_ANACHRONONAUT) && Race_if(PM_DROW)){
+	if(Role_if(PM_ANACHRONONAUT)){
+		if(Race_if(PM_DROW))
 		urace = myrkalfr;
+		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
+			urace = android;
+			urole.filecode = "And";
+			quest_status.got_quest = TRUE;
+			quest_status.leader_is_dead = TRUE;
+			flags.questprogress = 1;
+		}
 	}
 
 	/* Fix up the god names */

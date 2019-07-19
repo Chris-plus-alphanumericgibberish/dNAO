@@ -54,8 +54,6 @@ static void FDECL(mon_ignite_lightsaber, (struct obj *, struct monst *));
 
 STATIC_DCL void FDECL(give_may_advance_msg, (int));
 
-//extern struct monst zeromonst;
-
 #ifndef OVLB
 
 STATIC_DCL NEARDATA const short skill_names_indices[];
@@ -70,10 +68,9 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	TWO_HANDED_SWORD, SCIMITAR,       PN_SABER,     CLUB,
 	MACE,             MORNING_STAR,   FLAIL,
 	PN_HAMMER,        QUARTERSTAFF,   PN_POLEARMS,  SPEAR,
-	JAVELIN,          TRIDENT,        LANCE,        BOW,
-	SLING,            PN_FIREARMS,	  CROSSBOW,     DART,
-	SHURIKEN,         BOOMERANG,      PN_WHIP,      PN_HARVEST,
-	UNICORN_HORN,
+	TRIDENT,          LANCE,          BOW,          SLING,
+	PN_FIREARMS,	  CROSSBOW,       DART,         SHURIKEN,
+	BOOMERANG,        PN_WHIP,        PN_HARVEST,   UNICORN_HORN,
 	PN_ATTACK_SPELL,     PN_HEALING_SPELL,
 	PN_DIVINATION_SPELL, PN_ENCHANTMENT_SPELL,
 	PN_CLERIC_SPELL,     PN_ESCAPE_SPELL,
@@ -227,7 +224,7 @@ struct monst *mon;
 	    ptr->mlet == S_PLANT) tmp += 6;
 
 	/* trident is highly effective against swimmers */
-	if (otmp->otyp == TRIDENT && is_swimmer(ptr)) {
+	if (otmp->otyp == TRIDENT && species_swims(ptr)) {
 	   if (is_pool(mon->mx, mon->my, FALSE)) tmp += 4;
 	   else if (ptr->mlet == S_EEL || ptr->mlet == S_SNAKE) tmp += 2;
 	}
@@ -238,11 +235,11 @@ struct monst *mon;
 	
 	/* Picks used against xorns and earth elementals */
 	if (is_pick(otmp) &&
-	   (passes_walls(ptr) && thick_skinned(ptr))) tmp += 2;
+	   (mon_resistance(mon,PASSES_WALLS) && thick_skinned(ptr))) tmp += 2;
 
 #ifdef INVISIBLE_OBJECTS
 	/* Invisible weapons against monsters who can't see invisible */
-	if (otmp->oinvis && !perceives(ptr)) tmp += 3;
+	if (otmp->oinvis && !mon_resistance(mon,SEE_INVIS)) tmp += 3;
 #endif
 
 	/* Check specially named weapon "to hit" bonuses */
@@ -277,6 +274,460 @@ struct monst *mon;
  * October 2000: It didn't.  Oh, well.
  */
 
+/* 
+ * dmg_val_core modifies a "weapon_dice" pointer, which contains enough
+ * info to (hopefully) perform 99% of the dnethack's weapon dice rolls
+ * 
+ * will ignore otyp, unless if it is called without an obj
+ *
+ * returns the enchantment multiplier for the weapon.
+ * typically 1, but artifacts and lightsabers affect it
+ */
+int
+dmgval_core(wdice, large, obj, otyp)
+struct weapon_dice *wdice;
+boolean large;
+struct obj* obj;
+int otyp;
+{
+	int dmod = 0;						/* die size modifier */
+	int spe_mult = 1;					/* multiplier for enchantment value */
+
+	/* use the otyp of the object called, if we have one */
+	if (obj)
+		otyp = obj->otyp;
+
+	/* a number of definitions that will clean up the code*/
+#define ocaa	(wdice->oc.aatyp)
+#define ocad	(wdice->oc.adtyp)
+#define ocn		(wdice->oc.damn)
+#define ocd		(wdice->oc.damd)
+#define bonaa	(wdice->bon.aatyp)
+#define bonad	(wdice->bon.adtyp)
+#define bonn	(wdice->bon.damn)
+#define bond	(wdice->bon.damd)
+#define flat	(wdice->flat)
+
+	/* initialize wdice */
+	ocaa = AT_NONE;
+	ocad = AD_PHYS;
+	ocn = 1;
+	ocd = 2;
+	bonaa = AT_NONE;
+	bonad = AD_PHYS;
+	bonn = 0;
+	bond = 0;
+	flat = 0;
+
+	/* in case we are dealing with a complete lack of a weapon (!obj, !otyp)
+		* just skip everything and only initialize wdice
+		*/
+	if (!otyp)
+		return 0;
+
+	/* grab ldie and sdie from the objclass definition */
+	ocd = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
+
+	/* set dmod, if possible*/
+	if (obj){
+		dmod = obj->objsize - MZ_MEDIUM;
+		if (obj->oartifact == ART_FRIEDE_S_SCYTHE)
+			dmod += 2;
+		else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
+			dmod += 2;
+
+		/* material-based dmod modifiers */
+		if (obj->obj_material != objects[obj->otyp].oc_material)
+		{
+			/* if something is made of an especially effective material 
+			 * and it normally isn't, it gets a dmod bonus 
+			 */
+			int mat;	/* material being contemplated */
+			int mod;	/* mat modifier sign: -1 for base, +1 for current*/
+			for (mod = -1; mod<2; mod+=2){
+				if (mod == -1)
+					mat = objects[obj->otyp].oc_material;
+				else
+					mat = obj->obj_material;
+				switch (mat)
+				{
+				/* flimsy weapons are bad damage */
+				case LIQUID:
+				case WAX:
+				case VEGGY:
+				case FLESH:
+				case PAPER:
+				case CLOTH:
+				case LEATHER:
+					dmod -= mod;
+					break;
+				/* gold and platinum are heavy
+				 * ...regardless that the elven mace is wooden, 
+				 *   and is _better_ than a standard iron mace */
+				case GOLD:
+				case PLATINUM:
+					if (is_bludgeon(obj))
+						dmod += mod;
+					break;
+				/* glass and obsidian have sharp edges and points 
+				 * shadowsteel ??? but gameplay-wise, droven weapons
+				 *   made out of this troublesome-to-maintain material
+				 *   shouldn't be weaker than their obsidian counterparts
+				 */
+				case GLASS:
+				case OBSIDIAN_MT:
+				case SHADOWSTEEL:
+					if (is_slashing(obj) || is_stabbing(obj))
+						dmod += mod;
+					break;
+				/* dragon teeth are good at piercing */
+				case DRAGON_HIDE:
+					if (is_stabbing(obj))
+						dmod += mod;
+					break;
+				}
+			}
+		}
+	}
+	/* apply dmod to ocd */
+	ocd = max(2, ocd + dmod * 2);
+
+	/* SPECIAL CASES (beyond what is defined in objects.c) START HERE */
+
+	/* Artifacts and other fun things that need obj to exist and apply for both small and large (mostly?) */
+	if (obj)
+	{
+		if (obj->oartifact == ART_VORPAL_BLADE || obj->oartifact == ART_SNICKERSNEE)
+		{
+			ocaa = AT_EXPL + 1;				// exploding dice, +1 damage per roll
+			ocn = 2;						// roll two oc dice
+		}
+		else if (obj->oartifact == ART_SCOURGE_OF_LOLTH)
+		{
+			ocaa = AT_EXPL;					// basic exploding dice
+		}
+		else if (obj->oartifact == ART_LUCK_BLADE)
+		{
+			ocad = AD_LUCK;					// luck-based dice
+		}
+		else if (obj->oartifact == ART_FLUORITE_OCTAHEDRON)
+		{
+			ocaa = AT_EXPL;					// exploding
+			ocad = AD_LUCK;					// lucky
+			ocn = obj->quan;				// 1 die per octahedron
+			ocd = 8;						// They are eight-sided dice
+		}
+		else if (obj->oartifact == ART_GIANTSLAYER)
+		{
+			bonn = (large ? 2 : 1);
+			bond = 4 + 2 * dmod;
+		}
+		else if (obj->oartifact == ART_MJOLLNIR)
+		{
+			bonn = 2;
+			bond = 4 + 2 * dmod;
+			if (!large)
+				flat += 2;
+		}
+		else if (obj->oartifact == ART_DURIN_S_AXE)
+		{
+			ocn = 2;
+		}
+		else if (obj->oartifact == ART_REAVER)
+		{
+			bonn = 1;
+			bond = 8 + 2 * dmod;
+		}
+		else if (obj->oartifact == ART_TOBIUME)
+		{
+			flat += (large ? -(3+dmod) : -(2+dmod));
+		}
+		else if (obj->oartifact == ART_VAMPIRE_KILLER)
+		{
+			if (large)
+			{
+				bonn = 1;
+				bond = 10 + 2 * dmod;
+			}
+			else
+			{
+				flat += 10 + 2 * dmod;
+			}
+		}
+		else if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD){
+			int wt = (int)objects[NAGINATA].oc_weight;
+			if ((int)obj->owt > wt) {
+				bonn = 1;
+				bond = 12 * ((int)obj->owt - wt) / wt;	// this appears to be a constant +1d12, since I can't find any way to change its weight.
+			}
+		}
+		else if (obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA && otyp == BULLWHIP)
+		{
+			ocn = 1;
+			ocd = 2;
+			bonn = 1;
+			bond = 4;
+		}
+		else if (otyp == MOON_AXE)
+		{
+			ocn = 2;
+			ocd = ocd + 2 * (obj->ovar1 - 1) + 2 * dmod;	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
+			if (!large && !obj->ovar1)						// eclipse moon axe is surprisingly effective against small creatures (2d12)
+				ocd = 12 + 2 * dmod;
+		}
+		else if (otyp == HEAVY_IRON_BALL) {
+			int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
+
+			if ((int)obj->owt > wt) {
+				wt = ((int)obj->owt - wt) / 160;
+				ocd += 4 * wt;
+				if (ocd > 25) ocd = 25;	/* objects[].oc_wldam */
+			}
+		}
+	}
+
+
+#define plus_base(n,x)	bonn = (n); bond = (x)
+#define plus(n,x)		plus_base((n), (x) + 2 * dmod)
+#define pls(x)			plus(1, (x))
+#define add(x)			flat += max(0, (x) + dmod)
+#define chrgd			(!obj || obj->ovar1>0)
+	/* bonus dice */
+	switch (otyp)
+	{
+	case CROSSBOW_BOLT:			add(1); break;
+	case DROVEN_BOLT:			add(1); break;
+	case TRIDENT:				if(large){plus(2,4);} else {add(1);} break;
+	case BATTLE_AXE:			if(large){plus(2,4);} else {pls(4);} break;
+	case VIBROBLADE:			
+	case WHITE_VIBROSWORD:
+	case GOLD_BLADED_VIBROSWORD:
+	case WHITE_VIBROZANBATO:
+	case GOLD_BLADED_VIBROZANBATO:
+	case WHITE_VIBROSPEAR:
+	case GOLD_BLADED_VIBROSPEAR:
+	case FORCE_PIKE:
+	case DOUBLE_FORCE_BLADE:// external special case: wielded without twoweaponing
+	case FORCE_BLADE:
+	case FORCE_SWORD:
+								if(chrgd){ocn++;flat+=ocd/2;} break;
+	case FORCE_WHIP:
+								if(chrgd){
+									ocn++;
+									flat+=ocd/2;
+									if(large){
+										plus(2,4);
+										add(2);
+									} else {
+										add(2); //Base
+										add(1); //Bonus (applies size mod to both)
+									}
+								} else {
+									//As flail
+									if(large){
+										pls(4);
+									} else {
+										add(1); //Base
+									}
+								}
+		break;
+	case RED_EYED_VIBROSWORD:
+								if(chrgd){ocn+=2;flat+=ocd;} break;
+	case MIRRORBLADE:			break;	// external special case: depends on defender's weapon
+	case RAPIER:				break;	// external special case: Silver Starlight vs plants
+	case RAKUYO:				break;	// external special case: wielded without twoweaponing
+	case BROADSWORD:			if(large){add(1);} else {pls(4);} break;
+	case ELVEN_BROADSWORD:		if(large){add(2);} else {pls(4);} break;
+	case CRYSTAL_SWORD:			if(large){pls(12);} else {pls(8);} break;
+	case TWO_HANDED_SWORD:		if(large){plus(2,6);} else {;} break;
+	case TSURUGI:				if(large){plus(2,6);} else {;} break;
+	case RUNESWORD:				if(large){add(1);} else {pls(4);} break;
+	case PARTISAN:				if(large){add(1);} else {;} break;
+	case RANSEUR:				pls(4); break;
+	case SPETUM:				if(large){pls(6);} else {add(1);} break;
+	case HALBERD:				if(large){pls(6);} else {;} break;
+	case BARDICHE:				if(large){plus(2,4);} else {pls(4);} break;
+	case VOULGE:				pls(4); break;
+	case DWARVISH_MATTOCK:		if(large){plus(2,6);} else {;} break;
+	case GUISARME:				if(large){;} else {pls(4);} break;
+	case BILL_GUISARME:			if(large){;} else {pls(4);} break;
+	case LUCERN_HAMMER:			if(large){;} else {pls(4);} break;
+	case BEC_DE_CORBIN:			if(large){;} else {;} break;
+	case SCYTHE:				if(large){pls(4);} else {pls(4);} break;
+	case MACE:					if(large){;} else {add(1);} break;
+	case ELVEN_MACE:			if(large){;} else {add(1);} break;
+	case MORNING_STAR:			if(large){add(1);} else {pls(4);} break;
+	case WAR_HAMMER:			if(large){;} else {add(1);} break;
+	case KAMEREL_VAJRA:			if(large){;} else {;} break;	// external special case: lightsaber forms
+	case FLAIL:					if(large){pls(4);} else {add(1);} break;
+	case VIPERWHIP:				if(large){;} else {;} break;	// external special case: number of heads striking
+	case BULLET:				ocn++; flat += 4; break;
+	case SILVER_BULLET:			ocn++; flat += 4; break;
+	case SHOTGUN_SHELL:			ocn++; flat += 4; break;
+	case ROCKET:				ocn++; flat += 4; break;
+	case BLASTER_BOLT:			ocn += 2; flat += ocd; break;
+	case HEAVY_BLASTER_BOLT:	ocn += 2; flat += ocd; break;
+	case LASER_BEAM:			ocn += 2; flat += 10; break;
+	case CHAIN:					add(1); break;
+	case SEISMIC_HAMMER:		if (chrgd){ ocd *= 3; } break;
+	case ACID_VENOM:			if (obj&&obj->ovar1){ ocn = 0; flat = obj->ovar1; } else{ add(6); } break;
+	case LIGHTSABER:			spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ plus(3,3); } break;		// external special case: lightsaber forms
+	case BEAMSWORD:				spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ plus(3,3); } break;		// external special case: Atma Weapon, lightsaber forms
+	case DOUBLE_LIGHTSABER:		spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ ocn+=3; } break;			// external special case: lightsaber forms
+	}
+#undef plus_base
+#undef plus
+#undef pls
+#undef add
+#undef chrgd
+	/* more special cases that wouldn't really fit into the switch above */
+	/* override for lightsaber dice if the lightsaber is turned off */
+	if (obj && (otyp == LIGHTSABER || otyp == BEAMSWORD || otyp == DOUBLE_LIGHTSABER) && !litsaber(obj))
+	{
+		spe_mult = 1;
+		ocn = 1;
+		ocd = 2;
+		bonn = 0;
+		bond = 0;
+	}
+	/* kamerel vajra */
+	if (obj && otyp == KAMEREL_VAJRA && litsaber(obj))
+	{
+		if (obj->where == OBJ_MINVENT && obj->ocarry->data == &mons[PM_ARA_KAMEREL])
+		{
+			spe_mult = 3;
+			ocn *= 3;
+			flat *= 3;
+		}
+		else
+		{
+			spe_mult = 2;
+			ocn *= 2;
+			flat *= 2;
+		}
+	}
+	/* Infinity's Mirrored Arc */
+	if (obj && obj->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+	{
+		xchar x, y;
+		ocn = 1;
+		get_obj_location(obj, &x, &y, 0);
+		if (levl[x][y].lit &&
+			!(viz_array[y][x] & TEMP_DRK3 &&
+			!(viz_array[y][x] & TEMP_LIT1)))
+		{
+			ocn += 2;
+		}
+		if (viz_array[y][x] & TEMP_LIT1 &&
+			!(viz_array[y][x] & TEMP_DRK3))
+		{
+			ocn += 1;
+		}
+
+		if (obj->altmode)
+			ocn *= 2;
+		/* set spe_mult */
+		spe_mult = ocn;
+	}
+	/* Atma Weapon */
+	if (obj && obj->oartifact == ART_ATMA_WEAPON && litsaber(obj))
+	{
+		/* note: multiplied enchantment bonus damage has to be handled in dmgval() */
+		if (obj == uwep &&	!Drain_resistance){
+			spe_mult = 3;
+			ocn = 3;
+			bonn = 1;
+			bond = u.ulevel;
+		}
+		else {
+			spe_mult = 2;
+			ocn = 2;
+		}
+	}
+	/* the Tentacle Rod gets no damage from enchantment */
+	if (obj && obj->oartifact == ART_TENTACLE_ROD)
+		spe_mult = 0;
+	/* if bonus dice exist, their minimum size is of a d2 */
+	if (bonn && bond < 2)
+		bond = 2;
+	/* if bonus dice are identical in size & roll to oc dice, combine them */
+	if (bonn && (ocd == bond && ocaa == bonaa && ocad == bonad))
+	{
+		ocn += bonn;
+		bonn = 0;
+		bond = 0;
+	}
+	/* undefine the helpers */
+#undef ocaa	
+#undef ocad	
+#undef ocn		
+#undef ocd		
+#undef bonaa	
+#undef bonad	
+#undef bonn	
+#undef bond	
+#undef flat
+	return spe_mult;
+}
+
+/* 
+ * calculates the die roll from a given NdX with some function
+ * as specified in the weapon_dice struct
+ * 
+ * data is received in the form of an attack struct
+ */
+int
+weapon_dmg_roll(wdie, youdefend)
+struct attack *wdie;
+boolean youdefend;		// required for lucky dice
+{
+	int tmp = 0;
+
+	/* verify there are appropriate dice to roll */
+	if (!wdie->damn)
+		return 0;
+	if (wdie->damd < 1)
+	{
+		impossible("weapon_dmg_roll called with <1 die size and non-zero die number!");
+		return 0;
+	}
+
+	/* determine function to use, and calculate the oc dice */
+	if (wdie->aatyp == AT_NONE)
+	{//normal dice
+		if (wdie->adtyp == AD_PHYS)
+		{//normal dice
+			tmp += d(wdie->damn, wdie->damd);
+		}
+		else
+		{//assumed to be lucky dice, which at this time don't have a nice NdX function
+			int n = wdie->damn;
+			for (n; n; n--)
+			{
+				tmp += youdefend ?
+					(rnl(wdie->damd) + 1) :
+					(wdie->damd - rnl(wdie->damd));
+			}
+		}
+	}
+	else
+	{//assumed to be exploding dice
+		int m = wdie->aatyp - AT_EXPL;
+
+		if (wdie->adtyp == AD_PHYS)
+		{//exploding dice
+			tmp += exploding_d(wdie->damn, wdie->damd, m);
+		}
+		else
+		{//lucky exploding dice
+			tmp = youdefend ?
+				unlucky_exploding_d(wdie->damn, wdie->damd, m) :
+				lucky_exploding_d(wdie->damn, wdie->damd, m);
+		}
+	}
+	return tmp;
+}
+
 /*
  *	dmgval returns an integer representing the damage bonuses
  *	of "otmp" against the monster.
@@ -287,10 +738,13 @@ struct obj *otmp;
 struct monst *mon;
 int spec;
 {
-	int tmp = 0, otyp = otmp->otyp, dmod, ldie, sdie;
-	struct permonst *ptr;
+	int tmp = 0;				// running damage sum
+	int otyp = otmp->otyp;		// obj's type
+	int spe_mult = 1;			// enchantment spe_mult
+	struct permonst *ptr;		// defender's permonst
+	struct weapon_dice wdice;	// weapon dice of otmp
 	boolean Is_weapon = (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)), youdefend = mon == &youmonst;
-	
+	boolean add_dice = TRUE;	// should dmgval_core() be called to add damage? Overridden (to false) by some special cases.
 	// if (!mon) ptr = &mons[NUMMONS];
 	if (!mon) ptr = &mons[PM_HUMAN];
 	else ptr = youdefend ? youracedata : mon->data;
@@ -299,853 +753,296 @@ int spec;
 	
 	if (otmp->oartifact == ART_HOUCHOU)
 	        return 9999;
-	
-	dmod = otmp->objsize - MZ_MEDIUM;
-	if(otmp->oartifact == ART_FRIEDE_S_SCYTHE) dmod += 2;
-	else if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit) dmod += 2;
-	ldie = max(2, objects[otyp].oc_wldam + 2*dmod);
-	sdie = max(2, objects[otyp].oc_wsdam + 2*dmod);
-	
-	if (bigmonst(ptr)) {
-		if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp = exploding_d(2,ldie,1);
-		else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH) tmp = exploding_d(1,ldie,0);
-		else if(otmp->oartifact == ART_LUCK_BLADE) tmp = youdefend ? 
-															rnl(ldie)+1 : 
-															ldie - rnl(ldie);
-		else if(otmp->oartifact == ART_FLUORITE_OCTAHEDRON) tmp = youdefend ? 
-															unlucky_exploding_d(otmp->quan,8,0) : 
-															lucky_exploding_d(otmp->quan,8,0);
-	    else if (otyp == MOON_AXE && otmp->ovar1) tmp = d(2,ldie + 2*(otmp->ovar1-1));
-	    else if (ldie) tmp = rnd(ldie);
-		
-		if(spec & SPEC_MARIONETTE){
-			if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp += exploding_d(2,ldie+2,1);
-			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH) tmp += exploding_d(1,ldie,0);
-			else if(otmp->oartifact == ART_LUCK_BLADE) tmp += youdefend ? 
-																rnl(ldie+2)+1 : 
-																ldie+2 - rnl(ldie+2);
-			else if(otmp->oartifact == ART_FLUORITE_OCTAHEDRON) tmp += youdefend ? 
-																unlucky_exploding_d(otmp->quan,10,0) : 
-																lucky_exploding_d(otmp->quan,10,0);
-			else if (ldie) tmp += rnd(ldie+2);
-		}
-	    switch (otyp) {
-		case ELVEN_BROADSWORD:
-			tmp += max(0,2+dmod);
-		break;
-		case IRON_CHAIN:
-		case CROSSBOW_BOLT:
-		case DROVEN_BOLT:
-		case MORNING_STAR:
-		case PARTISAN:
-		case RUNESWORD:
-		case BROADSWORD:	
-			tmp += max(0,1+dmod);
-			break;
 
-		case FLAIL:
-		case RANSEUR:
-		case SCYTHE:
-		case VOULGE:		tmp += rnd(4+2*dmod); break;
+	/* grab the weapon dice from dmgval_core */
+	spe_mult = dmgval_core(&wdice, bigmonst(ptr), otmp, otyp);
 
-		case HALBERD:
-		case SPETUM:		tmp += rnd(6+2*dmod); break;
-		case ACID_VENOM:
-			if(otmp->ovar1) tmp = otmp->ovar1;
-			else tmp += rnd(6);
-		break;
-		
-		case CRYSTAL_SWORD:	tmp += d(1,12+2*dmod)+otmp->spe/3; break;
-		
-		case AXE:
-			if(otmp->oartifact == ART_GIANTSLAYER) tmp += d(2,4+2*dmod);
-			else if(otmp->oartifact == ART_DURIN_S_AXE) tmp += d(1,ldie);
-		break;
-		case BATTLE_AXE:
-		case BARDICHE:
-		case TRIDENT:		tmp += d(2,4+2*dmod); break;
-
-		case TSURUGI:
-		case DWARVISH_MATTOCK:
-		case TWO_HANDED_SWORD:	tmp += d(2,6+2*dmod); break;
-		case SCIMITAR:
-			if(otmp->oartifact == ART_REAVER) tmp += d(1,8+2*dmod); break;
-		case LONG_SWORD:	
-			if(otmp->oartifact == ART_TOBIUME) tmp -= (3+dmod); 
-		break;
-		case BULLET:
-		case SILVER_BULLET:
-		case SHOTGUN_SHELL:
-		case ROCKET:
-			tmp += rnd(ldie)+4;
-		break;
-		case VIBROBLADE:
-			if(otmp->ovar1 && otmp->ovar1-->0) tmp += d(1, ldie)+ldie/2;
-		break;
-		case FORCE_PIKE:
-			if(otmp->ovar1 && otmp->ovar1-->0) tmp += d(2, ldie)+ldie;
-		break;
-		case SEISMIC_HAMMER:
-			if(otmp->ovar1 && otmp->ovar1-->0) tmp = rnd(3*(ldie+otmp->spe));
-		break;
-		case LASER_BEAM:
-			tmp += d(2, ldie)+10;
-		break;
-		case BLASTER_BOLT:
-		case HEAVY_BLASTER_BOLT:
-			tmp += d(2, ldie)+ldie;
-		break;
-		case MIRRORBLADE:{
-			int mirdam = 0;
-			if(youdefend){
-				if(uwep){
-					if(uwep->otyp == MIRRORBLADE){
-						mirdam = exploding_d(2, ldie, (uwep->spe+otmp->spe)/2);
-					} else mirdam = dmgval(uwep, &youmonst, 0);
-				}
-			} else {
-				if(mon && MON_WEP(mon)){
-					if(MON_WEP(mon)->otyp == MIRRORBLADE){
-						mirdam = exploding_d(2, ldie, (MON_WEP(mon)->spe+otmp->spe)/2);
-					} else mirdam = dmgval(MON_WEP(mon), &youmonst, 0);
-				}
-			}
-			if(mirdam > tmp) tmp = mirdam;
-		} break;
-		case KAMEREL_VAJRA:
-			if(otmp->where == OBJ_MINVENT && otmp->ocarry->data == &mons[PM_ARA_KAMEREL]){
-				tmp += d(2, ldie);
-				if(youdefend){
-					if(!Shock_resistance){
-						tmp += d(6,6); //wand of lightning
-					}
-					if(!EShock_resistance){
-						if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
-						if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
-					}
-					if (!resists_blnd(&youmonst)) {
-						You("are blinded by the flash!");
-						make_blinded((long)d(1,50),FALSE);
-						if (!Blind) Your1(vision_clears);
-					}
-				} else if(mon){
-					if(!resists_elec(mon)){
-						tmp += d(6,6); //wand of lightning
-						if (!rn2(3)) (void)destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-						/* not actually possible yet */
-						if (!rn2(3)) (void)destroy_mitem(mon, RING_CLASS, AD_ELEC);
-					}
-					if (!resists_blnd(mon) &&
-							!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
-						register unsigned rnd_tmp = rnd(50);
-						mon->mcansee = 0;
-						if((mon->mblinded + rnd_tmp) > 127)
-							mon->mblinded = 127;
-						else mon->mblinded += rnd_tmp;
-					}
-				}
-			} else {
-				tmp += d(1, ldie);
-				if(youdefend){
-					if(!Shock_resistance){
-						tmp += d(2,6);
-					}
-					if(!EShock_resistance){
-						if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
-						if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
-					}
-					if (!resists_blnd(&youmonst)) {
-						You("are blinded by the flash!");
-						make_blinded((long)d(1,50),FALSE);
-						if (!Blind) Your1(vision_clears);
-					}
-				} else if(mon){
-					if(!resists_elec(mon)){
-						tmp += d(2,6); //wand of lightning
-						if (!rn2(3)) (void)destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-						/* not actually possible yet */
-						if (!rn2(3)) (void)destroy_mitem(mon, RING_CLASS, AD_ELEC);
-					}
-					if (!resists_blnd(mon) &&
-							!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
-						register unsigned rnd_tmp = rnd(50);
-						mon->mcansee = 0;
-						if((mon->mblinded + rnd_tmp) > 127)
-							mon->mblinded = 127;
-						else mon->mblinded += rnd_tmp;
-					}
-				}
-			}
-			goto lightsaber_form_ldie;
-		break;
-		case LIGHTSABER:
-		case BEAMSWORD:
-			if(otmp->oartifact == ART_ATMA_WEAPON){
-				if(otmp == uwep &&
-					!Drain_resistance
-				){
-					tmp += d(2, ldie);
-					tmp += rnd(u.ulevel);
-					tmp *= Upolyd ?
-							((float)u.mh)/u.mhmax  :
-							((float)u.uhp)/u.uhpmax;
-				} else {
-					tmp += d(1, ldie);
-					otmp->age -= 100;
-				}
-			} else {
-				tmp += d(2, ldie);
-				otmp->age -= 100;
-			}
-			if(otmp->altmode){ //Probably just the Annulus
-				tmp += d(3, 3+2*dmod);
-				otmp->age -= 100;
-			}
-lightsaber_form_ldie:
-			if(otmp == uwep || (u.twoweap && otmp == uswapwep) ){
-				if(u.fightingForm == FFORM_MAKASHI && otmp == uwep && !u.twoweap && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-					switch(min(P_SKILL(FFORM_MAKASHI), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							if(mon->ustdym<5) mon->ustdym += 1;
-						break;
-						case P_SKILLED:
-							if(mon->ustdym<10) mon->ustdym += 2;
-						break;
-						case P_EXPERT:
-							if(mon->ustdym<20) mon->ustdym += 4;
-						break;
-					}
-				} else if(u.fightingForm == FFORM_ATARU && u.lastmoved + 1 >= monstermoves && (!uarm || is_light_armor(uarm))){
-					switch(min(P_SKILL(FFORM_ATARU), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp += d(2, ldie);
-							if(otmp->altmode){ //Probably just the Annulus
-								tmp += d(2, 3);
-							}
-						break;
-						case P_SKILLED:
-							tmp += d(4, ldie);
-							if(otmp->altmode){ //Probably just the Annulus
-								tmp += d(4, 3);
-							}
-						break;
-						case P_EXPERT:
-							tmp += d(6, ldie);
-							if(otmp->altmode){ //Probably just the Annulus
-								tmp += d(6, 3);
-							}
-						break;
-					}
-				} else if(u.fightingForm == FFORM_DJEM_SO && mon->mattackedu && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-					int sbon = ACURR(A_STR);
-					if(sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
-					else if(sbon > 18) sbon = 18; //remove percentile adjustment
-					//else it is fine as is.
-					sbon = (sbon+2)/3; //1-9
-					switch(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp += d(1,sbon);
-						break;
-						case P_SKILLED:
-							tmp += d(2,sbon);
-						break;
-						case P_EXPERT:
-							tmp += d(3,sbon);
-						break;
-					}
-				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
-					switch(min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp -= 2;
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ?  6 : 3,u.lastcast-monstermoves+1);
-						break;
-						case P_SKILLED:
-							tmp -= 1;
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 12 : 6,u.lastcast-monstermoves+1);
-						break;
-						case P_EXPERT:
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 18 : 9,u.lastcast-monstermoves+1);
-						break;
-					}
-				}
-			}
-		break;
-		case DOUBLE_LIGHTSABER: 
-			if(otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC){
-				xchar x, y;
-				int dnm = 0;
-				get_obj_location(otmp, &x, &y, 0);
-				if(levl[x][y].lit && 
-					!(viz_array[y][x]&TEMP_DRK3 && 
-					 !(viz_array[y][x]&TEMP_LIT1)
-					)
-				) dnm += 2;
-				if(viz_array[y][x]&TEMP_LIT1 && 
-					!(viz_array[y][x]&TEMP_DRK3)
-				) dnm += 1;
-				if(dnm > 1)
-					tmp += d(dnm-1, ldie);
-				if (otmp->altmode)
-					tmp += d(dnm, ldie);
-			} else {
-				tmp += d(2, ldie);
-				otmp->age -= 100;
-				if (otmp->altmode){
-					tmp += d(3, ldie);
-					otmp->age -= 100;
-				}
-			}
-			if(otmp == uwep){
-				if(u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-					switch(min(P_SKILL(FFORM_MAKASHI), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							if(mon->ustdym<5) mon->ustdym += 1;
-						break;
-						case P_SKILLED:
-							if(mon->ustdym<10) mon->ustdym += 2;
-						break;
-						case P_EXPERT:
-							if(mon->ustdym<20) mon->ustdym += 4;
-						break;
-					}
-				} else if(u.fightingForm == FFORM_ATARU && u.lastmoved + 1 >= monstermoves && (!uarm || is_light_armor(uarm))){
-					switch(min(P_SKILL(FFORM_ATARU), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp += d(2, ldie);
-							if(otmp->altmode){
-								tmp += d(2, ldie);
-							}
-						break;
-						case P_SKILLED:
-							tmp += d(4, ldie);
-							if(otmp->altmode){
-								tmp += d(4, ldie);
-							}
-						break;
-						case P_EXPERT:
-							tmp += d(6, ldie);
-							if(otmp->altmode){
-								tmp += d(6, ldie);
-							}
-						break;
-					}
-				} else if(u.fightingForm == FFORM_DJEM_SO && mon->mattackedu && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-					int sbon = ACURR(A_STR);
-					if(sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
-					else if(sbon > 18) sbon = 18; //remove percentile adjustment
-					//else it is fine as is.
-					sbon = (sbon+2)/3; //1-9
-					switch(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp += d(1,sbon);
-						break;
-						case P_SKILLED:
-							tmp += d(2,sbon);
-						break;
-						case P_EXPERT:
-							tmp += d(3,sbon);
-						break;
-					}
-				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
-					switch(min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp -= 2;
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 6 : 3,u.lastcast-monstermoves+1);
-						break;
-						case P_SKILLED:
-							tmp -= 1;
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 12 : 6,u.lastcast-monstermoves+1);
-						break;
-						case P_EXPERT:
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 18 : 9,u.lastcast-monstermoves+1);
-						break;
-					}
-				}
-			}
-		break;
-		case WAR_HAMMER:
-			if(otmp->oartifact == ART_MJOLLNIR) tmp += d(2,4+2*dmod); break;
-		case BULLWHIP:
-			if(otmp->oartifact == ART_VAMPIRE_KILLER) tmp += d(1,10+2*dmod);
-			else if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) tmp = d(1,2) + rnd(4);
-		break;
-		case VIPERWHIP:
-			if(otmp->ostriking > 0){
-				if(otmp->oartifact == ART_SCOURGE_OF_LOLTH)  tmp += exploding_d(otmp->ostriking,ldie,0);
-				else if(otmp->ovar1 > 1) tmp += d(otmp->ostriking, ldie);
-			}
-		break;
-		case RAPIER:
-			if(otmp->oartifact == ART_SILVER_STARLIGHT 
-			&& !(noncorporeal(ptr) || amorphous(ptr) 
-				|| ((stationary(ptr) || sessile(ptr)) && (ptr->mlet == S_FUNGUS || ptr->mlet == S_PLANT))
-			)) tmp += d(2,4+2*dmod); break;
-		break;
-		case RAKUYO:
-			if((otmp == uwep && !u.twoweap) || (mcarried(otmp) && otmp->owornmask&W_WEP))
-				tmp += rnd(3+2*dmod) + otmp->spe;
-		break;
-	    }
-	} else {
-		if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp = exploding_d(2,sdie,1);
-		else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH) tmp = exploding_d(1,sdie,0);
-		else if(otmp->oartifact == ART_LUCK_BLADE) tmp = youdefend ? 
-															rnl(sdie)+1 : 
-															sdie - rnl(sdie);
-		else if(otmp->oartifact == ART_FLUORITE_OCTAHEDRON) tmp = youdefend ? 
-															unlucky_exploding_d(otmp->quan,8,0) : 
-															lucky_exploding_d(otmp->quan,8,0);
-	    else if (otyp == MOON_AXE) tmp = d(2,otmp->ovar1 ? sdie + 2*(otmp->ovar1-1) : 12);
-	    else if (sdie) tmp = rnd(sdie);
-		
-		if(spec & SPEC_MARIONETTE){
-			if(otmp->oartifact == ART_VORPAL_BLADE || otmp->oartifact == ART_SNICKERSNEE) tmp += exploding_d(2,sdie+2,1);
-			else if(otmp->oartifact == ART_SCOURGE_OF_LOLTH) tmp += exploding_d(1,sdie,0);
-			else if(otmp->oartifact == ART_LUCK_BLADE) tmp += youdefend ? 
-																rnl(sdie+2)+1 : 
-																sdie+2 - rnl(sdie+2);
-			else if(otmp->oartifact == ART_FLUORITE_OCTAHEDRON) tmp += youdefend ? 
-																unlucky_exploding_d(otmp->quan,10,0) : 
-																lucky_exploding_d(otmp->quan,10,0);
-			else if (sdie) tmp += rnd(sdie+2);
-		}
-	    switch (otyp) {
-		case IRON_CHAIN:
-		case CROSSBOW_BOLT:
-		case DROVEN_BOLT:
-		case MACE:
-		case ELVEN_MACE:
-		case WAR_HAMMER:
-		case FLAIL:
-		case SPETUM:
-		case TRIDENT:
-			tmp++; 
-			if(otmp->oartifact == ART_MJOLLNIR) tmp += d(2,4+2*dmod)+2;
-		break;
-
-		case BULLWHIP:
-			if(otmp->oartifact == ART_VAMPIRE_KILLER) tmp += 10+2*dmod;
-			else if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) tmp = d(1,2) + rnd(4);
-		break;
-
-		case VIPERWHIP:
-			if(otmp->ostriking > 0){
-				if(otmp->oartifact == ART_SCOURGE_OF_LOLTH)  tmp += exploding_d(otmp->ostriking,sdie,0);
-				else if(otmp->ovar1 > 1) tmp += d(otmp->ostriking, sdie);
-			}
-		break;
-		
-		case LONG_SWORD:	
-			if(otmp->oartifact == ART_TOBIUME) tmp -= 2+dmod;
-		break;
-		
-		case CRYSTAL_SWORD:	tmp += d(1,8+2*dmod)+otmp->spe/3; break;
-		
-		case AXE:
-			if(otmp->oartifact == ART_GIANTSLAYER) tmp += d(1,4+2*dmod);
-			else if(otmp->oartifact == ART_DURIN_S_AXE) tmp += d(1,sdie);
-		break;
-		
-		case BATTLE_AXE:
-		case BARDICHE:
-		case BILL_GUISARME:
-		case GUISARME:
-		case LUCERN_HAMMER:
-		case MORNING_STAR:
-		case RANSEUR:
-		case BROADSWORD:
-		case ELVEN_BROADSWORD:
-		case RUNESWORD:
-		case SCYTHE:
-		case VOULGE:		
-			tmp += rnd(4+2*dmod);
-		break;
-		case BULLET:
-		case SILVER_BULLET:
-		case SHOTGUN_SHELL:
-		case ROCKET:
-			tmp += rnd(sdie)+4;
-		break;
-		case VIBROBLADE:
-			if(otmp->ovar1 && otmp->ovar1-->0) tmp += d(1, sdie)+sdie/2;
-		break;
-		case FORCE_PIKE:
-			if(otmp->ovar1 && otmp->ovar1-->0) tmp += d(2, sdie)+sdie;
-		break;
-		case SEISMIC_HAMMER:
-			if(otmp->ovar1 && otmp->ovar1-->0) tmp = rnd(3*(sdie+otmp->spe));
-		break;
-		case LASER_BEAM:
-			tmp += d(2, sdie)+10;
-		break;
-		case BLASTER_BOLT:
-		case HEAVY_BLASTER_BOLT:
-			tmp += d(2, sdie)+sdie;
-		break;
-		case MIRRORBLADE:{
-			int mirdam = 0;
-			if(youdefend){
-				if(uwep){
-					if(uwep->otyp == MIRRORBLADE){
-						mirdam = exploding_d(2, sdie, (uwep->spe+otmp->spe)/2);
-					} else mirdam = dmgval(uwep, &youmonst, 0);
-				}
-			} else {
-				if(mon && MON_WEP(mon)){
-					if(MON_WEP(mon)->otyp == MIRRORBLADE){
-						mirdam = exploding_d(2, sdie, (MON_WEP(mon)->spe+otmp->spe)/2);
-					} else mirdam = dmgval(MON_WEP(mon), &youmonst, 0);
-				}
-			}
-			if(mirdam > tmp) tmp = mirdam;
-		} break;
-		case KAMEREL_VAJRA:
-			if(otmp->where == OBJ_MINVENT && otmp->ocarry->data == &mons[PM_ARA_KAMEREL]){
-				tmp += d(2, sdie);
-				tmp += 3; //+1x3
-				if(youdefend){
-					if(!Shock_resistance){
-						tmp += d(6,6);
-					}
-					if(!EShock_resistance){
-						if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
-						if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
-					}
-					if (!resists_blnd(&youmonst)) {
-						You("are blinded by the flash!");
-						make_blinded((long)d(1,50),FALSE);
-						if (!Blind) Your1(vision_clears);
-					}
-				} else if(mon){
-					if(!resists_elec(mon)){
-						tmp += d(6,6); //wand of lightning
-						if (!rn2(3)) (void)destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-						/* not actually possible yet */
-						if (!rn2(3)) (void)destroy_mitem(mon, RING_CLASS, AD_ELEC);
-					}
-					if (!resists_blnd(mon) &&
-							!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
-						register unsigned rnd_tmp = rnd(50);
-						mon->mcansee = 0;
-						if((mon->mblinded + rnd_tmp) > 127)
-							mon->mblinded = 127;
-						else mon->mblinded += rnd_tmp;
-					}
-				}
-			} else {
-				tmp += d(1, sdie);
-				tmp += 2; //+1x2
-				if(youdefend){
-					if(!Shock_resistance){
-						tmp += d(2,6);
-					}
-					if(!EShock_resistance){
-						if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
-						if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
-					}
-					if (!resists_blnd(&youmonst)) {
-						You("are blinded by the flash!");
-						make_blinded((long)d(1,50),FALSE);
-						if (!Blind) Your1(vision_clears);
-					}
-				} else if(mon){
-					if(!resists_elec(mon)){
-						tmp += d(2,6); //wand of lightning
-						if (!rn2(3)) (void)destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-						/* not actually possible yet */
-						if (!rn2(3)) (void)destroy_mitem(mon, RING_CLASS, AD_ELEC);
-					}
-					if (!resists_blnd(mon) &&
-							!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
-						register unsigned rnd_tmp = rnd(50);
-						mon->mcansee = 0;
-						if((mon->mblinded + rnd_tmp) > 127)
-							mon->mblinded = 127;
-						else mon->mblinded += rnd_tmp;
-					}
-				}
-			}
-			goto lightsaber_form_sdie;
-		break;
-		case LIGHTSABER:
-		case BEAMSWORD:
-			if(otmp->oartifact == ART_ATMA_WEAPON){
-				if(otmp == uwep &&
-					!Drain_resistance
-				){
-					tmp += d(2, sdie);
-					tmp += rnd(u.ulevel);
-					tmp *= Upolyd ?
-							((float)u.mh)/u.mhmax  :
-							((float)u.uhp)/u.uhpmax;
-				} else {
-					tmp += d(1, sdie);
-					otmp->age -= 100;
-				}
-			} else {
-				tmp += d(2, sdie);
-				otmp->age -= 100;
-			}
-			if(otmp->altmode){ //Probably just the Annulus
-				tmp += d(3, 3+2*dmod);
-				otmp->age -= 100;
-			}
-lightsaber_form_sdie:
-			if(otmp == uwep || (u.twoweap && otmp == uswapwep) ){
-				if(u.fightingForm == FFORM_MAKASHI && otmp == uwep && !u.twoweap && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-					switch(min(P_SKILL(FFORM_MAKASHI), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							if(mon->ustdym<5) mon->ustdym += 1;
-						break;
-						case P_SKILLED:
-							if(mon->ustdym<10) mon->ustdym += 2;
-						break;
-						case P_EXPERT:
-							if(mon->ustdym<20) mon->ustdym += 4;
-						break;
-					}
-				} else if(u.fightingForm == FFORM_ATARU && u.lastmoved + 1 >= monstermoves && (!uarm || is_light_armor(uarm))){
-					switch(min(P_SKILL(FFORM_ATARU), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp += d(2, sdie);
-							if(otmp->altmode){ //Probably just the Annulus
-								tmp += d(2, 3);
-							}
-						break;
-						case P_SKILLED:
-							tmp += d(4, sdie);
-							if(otmp->altmode){ //Probably just the Annulus
-								tmp += d(4, 3);
-							}
-						break;
-						case P_EXPERT:
-							tmp += d(6, sdie);
-							if(otmp->altmode){ //Probably just the Annulus
-								tmp += d(6, 3);
-							}
-						break;
-					}
-				} else if(u.fightingForm == FFORM_DJEM_SO && mon->mattackedu && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-					int sbon = ACURR(A_STR);
-					if(sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
-					else if(sbon > 18) sbon = 18; //remove percentile adjustment
-					//else it is fine as is.
-					sbon = (sbon+2)/3; //1-9
-					switch(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp += d(1,sbon);
-						break;
-						case P_SKILLED:
-							tmp += d(2,sbon);
-						break;
-						case P_EXPERT:
-							tmp += d(3,sbon);
-						break;
-					}
-				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
-					switch(min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp -= 2;
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 6 : 3,u.lastcast-monstermoves+1);
-						break;
-						case P_SKILLED:
-							tmp -= 1;
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 12 : 6,u.lastcast-monstermoves+1);
-						break;
-						case P_EXPERT:
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 18 : 9,u.lastcast-monstermoves+1);
-						break;
-					}
-				}
-			}
-		break;
-		case DOUBLE_LIGHTSABER:
-			if(otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC){
-				xchar x, y;
-				int dnm = 0;
-				get_obj_location(otmp, &x, &y, 0);
-				if(levl[x][y].lit && 
-					!(viz_array[y][x]&TEMP_DRK3 && 
-					 !(viz_array[y][x]&TEMP_LIT1)
-					)
-				) dnm += 2;
-				if(viz_array[y][x]&TEMP_LIT1 && 
-					!(viz_array[y][x]&TEMP_DRK3)
-				) dnm += 1;
-				if(dnm > 1)
-					tmp += d(dnm-1, sdie);
-				if (otmp->altmode)
-					tmp += d(dnm, sdie);
-			} else {
-				tmp += d(2, sdie);
-				otmp->age -= 100;
-				if (otmp->altmode){
-					tmp += d(3, sdie);
-					otmp->age -= 100;
-				}
-			}
-			if(otmp == uwep){
-				if(u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-					switch(min(P_SKILL(FFORM_MAKASHI), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							if(mon->ustdym<5) mon->ustdym += 1;
-						break;
-						case P_SKILLED:
-							if(mon->ustdym<10) mon->ustdym += 2;
-						break;
-						case P_EXPERT:
-							if(mon->ustdym<20) mon->ustdym += 4;
-						break;
-					}
-				} else if(u.fightingForm == FFORM_ATARU && u.lastmoved + 1 >= monstermoves && (!uarm || is_light_armor(uarm))){
-					switch(min(P_SKILL(FFORM_ATARU), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp += d(2, sdie);
-							if(otmp->altmode){
-								tmp += d(2, sdie);
-							}
-						break;
-						case P_SKILLED:
-							tmp += d(4, sdie);
-							if(otmp->altmode){
-								tmp += d(4, sdie);
-							}
-						break;
-						case P_EXPERT:
-							tmp += d(6, sdie);
-							if(otmp->altmode){
-								tmp += d(6, sdie);
-							}
-						break;
-					}
-				} else if(u.fightingForm == FFORM_DJEM_SO && mon->mattackedu && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-					int sbon = ACURR(A_STR);
-					if(sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
-					else if(sbon > 18) sbon = 18; //remove percentile adjustment
-					//else it is fine as is.
-					sbon = (sbon+2)/3; //1-9
-					switch(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp += d(1,sbon);
-						break;
-						case P_SKILLED:
-							tmp += d(2,sbon);
-						break;
-						case P_EXPERT:
-							tmp += d(3,sbon);
-						break;
-					}
-				} else if(u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
-					switch(min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
-						case P_BASIC:
-							tmp -= 2;
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 6 : 3,u.lastcast-monstermoves+1);
-						break;
-						case P_SKILLED:
-							tmp -= 1;
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 12 : 6,u.lastcast-monstermoves+1);
-						break;
-						case P_EXPERT:
-							if(u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 18 : 9,u.lastcast-monstermoves+1);
-						break;
-					}
-				}
-			}
-			break;
-		case ACID_VENOM:
-			if(otmp->ovar1) tmp = otmp->ovar1;
-			else tmp += rnd(6);
-		break;
-		case SCIMITAR:
-			if(otmp->oartifact == ART_REAVER) tmp += d(1,8+2*dmod); break;
-		case RAPIER:
-			if(otmp->oartifact == ART_SILVER_STARLIGHT 
-			&& !(noncorporeal(ptr) || amorphous(ptr) 
-				|| ((stationary(ptr) || sessile(ptr)) && (ptr->mlet == S_FUNGUS || ptr->mlet == S_PLANT))
-			)) tmp += d(1,6+2*dmod)+d(1,4+2*dmod); break;
-		break;
-		case RAKUYO:
-			if((carried(otmp) && otmp->owornmask&W_WEP && !u.twoweap) || (mcarried(otmp) && otmp->owornmask&W_WEP))
-				tmp += rnd(4+2*dmod) + otmp->spe;
-		break;
-	    }
+	/* increase die sizes by 2 if Marionette applies*/
+	if (spec & SPEC_MARIONETTE)
+	{
+		wdice.oc.damd += 2;
+		wdice.bon.damd += 2;
 	}
-	
-	if(otmp && otmp->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD){
-	    int wt = (int)objects[NAGINATA].oc_weight;
 
-	    if ((int)otmp->owt > wt) {
-			wt = ((int)otmp->owt - wt)*3 / wt;
-			tmp += rnd(4 * wt);
-	    }
-	}
-	
-	if (Is_weapon || (otmp && (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1 == -P_FIREARM))) {
-		int multiplier = 0;
-		if(is_lightsaber(otmp)) {
-			if(otmp->oartifact == ART_ATMA_WEAPON){
-				if(otmp == uwep &&
-					!Drain_resistance
-				){
-					multiplier = 3;
-				} else {
-					multiplier = 2;
-				}
-			} else if(otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC){
-				xchar x, y;
-				get_obj_location(otmp, &x, &y, 0);
-				if(levl[x][y].lit && 
-					!(viz_array[y][x]&TEMP_DRK3 && 
-					 !(viz_array[y][x]&TEMP_LIT1)
-					)
-				) multiplier += 2;
-				if(viz_array[y][x]&TEMP_LIT1 && 
-					!(viz_array[y][x]&TEMP_DRK3)
-				) multiplier += 1;
-			} else if(otmp->otyp == KAMEREL_VAJRA){
-				if(otmp->where == OBJ_MINVENT && otmp->ocarry->data == &mons[PM_ARA_KAMEREL]){
-					multiplier = 3;
-				} else {
-					multiplier = 2;
-				}
-			} else {
-				multiplier = 3;
+	/* special cases of otyp not covered by dmgval_core:
+	 *  - rakuyo					- add bonus damage
+	 *  - double vibro blade		- double all damage
+	 *  - viperwhips				- add ostriking
+	 *  - mirrorblades				- total replacement
+	 *  - crystal sword				- bonus enchantment damage
+	 *  - seismic hammer			- damage die based on enchantment
+	 *  - charged future weapons	- drain charge
+	 * special cases of artifact not covered by dmgval_core:
+	 *  - Silvered Starlight		- add bonus damage
+	 *  - Atma Weapon				- multiply by health %
+	 * other special cases not covered by dmgval_core:
+	 *  - all lightsabers			- add lightsaber forms
+	 */
+	switch (otyp)
+	{
+	case RAKUYO:
+		// deals bonus damage when not twoweaponing
+		if ((otmp == uwep && !u.twoweap) || (mcarried(otmp) && otmp->owornmask&W_WEP))
+		{
+			/* modify wdice's bonus die and apply it */
+			// bonus 1d4 vs small
+			// bonus 1d3 vs large
+			wdice.bon.damn = 1;
+			wdice.bon.damd = max(2, ((bigmonst(ptr) ? 3 : 4) + 2 * (otmp->objsize - MZ_MEDIUM + !!(spec & SPEC_MARIONETTE))));
+			// doubled enchantment
+			spe_mult *= 2;
+		}
+		break;
+	case VIPERWHIP:
+		// extra heads means more base dice of damage
+		if (otmp->ostriking > 0)
+		{
+			/* modify wdice's dice */
+			// 1 additional die for every extra head striking
+			wdice.oc.damn += otmp->ostriking;
+			spe_mult += otmp->ostriking;
+		}
+		break;
+	case MIRRORBLADE:
+		if ((youdefend ? uwep : MON_WEP(mon))->otyp == MIRRORBLADE)
+		{// clashing mirrorblades are quite deadly
+			// 2 dice, exploding, with a flat explosion bonus of the average of attacker's and defender's weapons
+			wdice.oc.aatyp = AT_EXPL + ((youdefend ? uwep : MON_WEP(mon))->spe + otmp->spe) / 2;
+			wdice.oc.damn = 2;
+		}
+		else
+		{// if the defender's weapon would be stronger than the mirrorblade, use that instead
+			/* calculate what the normal damage dice would be */
+			int hyp = 0;
+			hyp += weapon_dmg_roll(&(wdice.oc), youdefend);
+			hyp += weapon_dmg_roll(&(wdice.bon), youdefend);
+			hyp += wdice.flat;
+
+			/* calculate what the mirrored damage dice would be */
+			int mir = 0;
+			struct weapon_dice mirdice;
+			/* grab the weapon dice from dmgval_core */
+			(void) dmgval_core(&mirdice, bigmonst(ptr), (youdefend ? uwep : MON_WEP(mon)), 0);	//note: dmgval_core handles zero weapons gracefully
+			if (spec & SPEC_MARIONETTE)
+			{
+				mirdice.oc.damd += 2;
+				mirdice.bon.damd += 2;
+			}
+			/* find the damage from those dice */
+			mir += weapon_dmg_roll(&(mirdice.oc), youdefend);
+			mir += weapon_dmg_roll(&(mirdice.bon), youdefend);
+			mir += mirdice.flat;
+
+			/* use the better */
+			tmp += max(hyp, mir);
+			/* cannot be negative */
+			if (tmp < 0)
+				tmp = 0;
+			/* signal to NOT add normal dice */
+			add_dice = FALSE;
+		}
+		break;
+	case CRYSTAL_SWORD:
+		// small bonus enchantment damage
+		wdice.flat += otmp->spe/3;
+		break;
+	case LIGHTSABER:
+	case BEAMSWORD:
+	case DOUBLE_LIGHTSABER:
+		// drain charge on lightsabers
+		if (!((otmp->oartifact == ART_ATMA_WEAPON && otmp == uwep && !Drain_resistance) ||
+			otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC))
+		{
+			otmp->age -= 100;
+			if (otmp->altmode){
+				otmp->age -= 100;
 			}
 		}
-		if(is_lightsaber(otmp)){
-			if(otmp == uwep && Race_if(PM_ORC)){
-				tmp += multiplier*max((u.ulevel+1)/3,otmp->spe);
-			} else tmp += multiplier*otmp->spe;
-		} else if(otmp->oartifact != ART_TENTACLE_ROD){
-			if(otmp == uwep && Race_if(PM_ORC)){
-				tmp += max((u.ulevel+1)/3,otmp->spe);
-			} else tmp += otmp->spe;
+		break;
+	case SEISMIC_HAMMER:
+		// damage die is increased by 3x the enchantment of the hammer when charged
+		if (otmp->ovar1)
+		{
+			wdice.oc.damd += 3 * (otmp->spe);
+			// drain charge on future-tech powered weapons
+			otmp->ovar1--;
 		}
-		
-		if (is_lightsaber(otmp) && otmp->altmode){
-			if(otmp == uwep && Race_if(PM_ORC)){
-				tmp += multiplier*max((u.ulevel+1)/3,otmp->spe);
-			} else tmp += multiplier*otmp->spe;
+		break;
+	case VIBROBLADE:
+	case WHITE_VIBROSWORD:
+	case GOLD_BLADED_VIBROSWORD:
+	case RED_EYED_VIBROSWORD:
+	case WHITE_VIBROZANBATO:
+	case GOLD_BLADED_VIBROZANBATO:
+	case WHITE_VIBROSPEAR:
+	case GOLD_BLADED_VIBROSPEAR:
+	case FORCE_PIKE:
+	case FORCE_BLADE:
+	case FORCE_SWORD:
+	case FORCE_WHIP:
+		// drain charge on future-tech powered weapons
+		if (otmp->ovar1)
+			otmp->ovar1--;
+		break;
+	case DOUBLE_FORCE_BLADE:
+		// deals bonus damage when not twoweaponing
+		if((otmp == uwep && !u.twoweap) || (mcarried(otmp) && otmp->owornmask&W_WEP))
+		{
+			// doubled
+			wdice.oc.damn *= 2;
+			wdice.oc.damd *= 2;
+			wdice.bon.damn *= 2;
+			wdice.bon.damd *= 2;
+			spe_mult *= 2;
+	    }
+		// drain charge on future-tech powered weapons
+		if (otmp->ovar1)
+			otmp->ovar1--;
+		break;
+	}
+
+	switch (otmp->oartifact)
+	{
+	case ART_SILVER_STARLIGHT:
+		// bonus damage to specific types of foes
+		if (!(noncorporeal(ptr) || amorphous(ptr)
+			|| ((stationary(ptr) || sessile(ptr)) && (ptr->mlet == S_FUNGUS || ptr->mlet == S_PLANT))
+			))
+		{
+			/* modify wdice */
+			// 1 additional main die
+			// plus a 1d4 bonus die
+			wdice.oc.damn += 1;
+			wdice.bon.damn = 1;
+			wdice.bon.damd = 4;
 		}
-		
-		/* negative enchantment mustn't produce negative damage */
-		if (tmp < 0) tmp = 0;
+		break;
+	case ART_ATMA_WEAPON:
+		/* damage is multiplied % of health remaining (currently only implemented for the player) */
+		/* calculate damage normally */
+		tmp += weapon_dmg_roll(&(wdice.oc), youdefend);
+		tmp += weapon_dmg_roll(&(wdice.bon), youdefend);
+		tmp += wdice.flat;
+		/* apply the multiplier, if applicable */
+		if (otmp == uwep &&	!Drain_resistance)
+		{
+			tmp *= Upolyd ?
+				((float)u.mh) / u.mhmax :
+				((float)u.uhp) / u.uhpmax;
+		}
+		/* cannot be negative */
+		if (tmp < 0)
+			tmp = 0;
+		/* don't re-add the weapon dice */
+		add_dice = FALSE;
+		break;
+	}
+
+	/* add the main weapon dice */
+	if (add_dice)
+	{//true, unless overridden by a special case above (mirrorblades, Atma Weapon)
+		/* find the damage from those dice */
+		tmp += weapon_dmg_roll(&(wdice.oc), youdefend);
+		tmp += weapon_dmg_roll(&(wdice.bon), youdefend);
+		tmp += wdice.flat;
+		/* cannot be negative */
+		if (tmp < 0)
+			tmp = 0;
+	}
+
+	/* lightsaber forms */
+	if (is_lightsaber(otmp) && (otmp == uwep || (u.twoweap && otmp == uswapwep))){
+		if (u.fightingForm == FFORM_MAKASHI && otmp == uwep && !u.twoweap && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+			switch (min(P_SKILL(FFORM_MAKASHI), P_SKILL(weapon_type(otmp)))){
+			case P_BASIC:
+				if (mon->ustdym<5) mon->ustdym += 1;
+				break;
+			case P_SKILLED:
+				if (mon->ustdym<10) mon->ustdym += 2;
+				break;
+			case P_EXPERT:
+				if (mon->ustdym<20) mon->ustdym += 4;
+				break;
+			}
+		}
+		else if (u.fightingForm == FFORM_ATARU && u.lastmoved + 1 >= monstermoves && (!uarm || is_light_armor(uarm))){
+			switch (min(P_SKILL(FFORM_ATARU), P_SKILL(weapon_type(otmp)))){
+			case P_BASIC:
+				tmp += d(2, wdice.oc.damd);
+				if (otmp->altmode){ //Probably just the Annulus
+					tmp += d(2, 3);
+				}
+				break;
+			case P_SKILLED:
+				tmp += d(4, wdice.oc.damd);
+				if (otmp->altmode){ //Probably just the Annulus
+					tmp += d(4, 3);
+				}
+				break;
+			case P_EXPERT:
+				tmp += d(6, wdice.oc.damd);
+				if (otmp->altmode){ //Probably just the Annulus
+					tmp += d(6, 3);
+				}
+				break;
+			}
+		}
+		else if (u.fightingForm == FFORM_DJEM_SO && mon->mattackedu && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+			int sbon = ACURR(A_STR);
+			if (sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
+			else if (sbon > 18) sbon = 18; //remove percentile adjustment
+			//else it is fine as is.
+			sbon = (sbon + 2) / 3; //1-9
+			switch (min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(otmp)))){
+			case P_BASIC:
+				tmp += d(1, sbon);
+				break;
+			case P_SKILLED:
+				tmp += d(2, sbon);
+				break;
+			case P_EXPERT:
+				tmp += d(3, sbon);
+				break;
+			}
+		}
+		else if (u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
+			switch (min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
+			case P_BASIC:
+				tmp -= 2;
+				if (u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 6 : 3, u.lastcast - monstermoves + 1);
+				break;
+			case P_SKILLED:
+				tmp -= 1;
+				if (u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 12 : 6, u.lastcast - monstermoves + 1);
+				break;
+			case P_EXPERT:
+				if (u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 18 : 9, u.lastcast - monstermoves + 1);
+				break;
+			}
+		}
+	}
+
+	/* enchantment damage */
+	if ((otmp->oclass == WEAPON_CLASS) || is_weptool(otmp) || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1 == -P_FIREARM))
+	{
+		int dambon = otmp->spe;
+		/* player orcs can use their level as their weapon's enchantment */
+		if (otmp->where == OBJ_INVENT && Race_if(PM_ORC))
+			dambon = max((u.ulevel + 1) / 3, dambon);
+
+		/* add damage */
+		tmp += spe_mult * dambon;
+		/* cannot reduce damage below 0 */
+		if (tmp < 0)
+			tmp = 0;
 	}
 
 	if (otmp->obj_material <= LEATHER && (thick_skinned(ptr) || (youdefend && u.sealsActive&SEAL_ECHIDNA)))
 		/* thick skinned/scaled creatures don't feel it */
 		tmp = 0;
 
-	/* "very heavy iron ball"; weight increase is in increments of 160 */
-	if (otyp == HEAVY_IRON_BALL && tmp > 0) {
-	    int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
-
-	    if ((int)otmp->owt > wt) {
-		wt = ((int)otmp->owt - wt) / 160;
-		tmp += rnd(4 * wt);
-		if (tmp > 25) tmp = 25;	/* objects[].oc_wldam */
-	    }
-	}
+	if (otmp->oproperties&OPROP_FLAYW && (thick_skinned(ptr) || (youdefend && u.sealsActive&SEAL_ECHIDNA) || (mon && some_armor(mon))))
+		tmp = 1;
 	
 	if(is_stabbing(otmp) && ptr == &mons[PM_SMAUG]) tmp += rnd(20);
 	if(is_farm(otmp) && ptr->mlet == S_PLANT){
@@ -1166,7 +1063,8 @@ lightsaber_form_sdie:
 		}
 		if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS 
 			&& !otmp->blessed && !otmp->cursed
-			&& (is_undead_mon(mon) || is_demon(ptr) || hates_unholy(ptr))
+			&& mon
+			&& (holy_damage(mon) || hates_unholy(ptr))
 		){
 			bonus += rnd(10);
 		}
@@ -1186,6 +1084,8 @@ lightsaber_form_sdie:
 					bonus += 7; //Quite holy
 			else if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
 				bonus += rnd(20); //Divinity
+			else if(otmp->oartifact == ART_AMHIMITL)
+				bonus += d(3,4);
 			
 			if(otmp->otyp == KHAKKHARA) bonus += d(rnd(3),dsize);
 			else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking+1,dsize);
@@ -1236,85 +1136,23 @@ lightsaber_form_sdie:
 				bonus += 8*bdm; //Extra unholy
 			else if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
 				bonus += d(bdm, 20); //Tyranny
+			else if(otmp->oartifact == ART_AMHIMITL)
+				bonus += d(3*bdm, 4); //Tyranny
+			else if(otmp->oartifact == ART_TECPATL_OF_HUHETOTL)
+				bonus += d(bdm,4); //Somewhat unholy
 			else if(otyp == KHAKKHARA) bonus += d(rnd(3)*bdm,9);
 			else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking*bdm,9);
 			else bonus += d(bdm, 9);
 		}
+		
+		if (hates_unholy(ptr) && otmp->oartifact == ART_TECPATL_OF_HUHETOTL)
+			bonus += d(1, 4); // always counts as unholy regardless, but its' pretty weak
 		
 		if(mon && mon->isminion){
 			if(otmp->oartifact == ART_LIFEHUNT_SCYTHE)
 				bonus += d(4,4) + otmp->spe; //Occult
 		}
 		
-		if(youdefend){
-			if(otmp->otyp == TORCH && otmp->lamplit){
-				if(!Fire_resistance){
-					if(species_resists_cold(&youmonst)) bonus += 1.5*(rnd(6) + otmp->spe);
-					else bonus += rnd(6) + otmp->spe;
-				}
-				if(!EFire_resistance){
-					if (!rn2(3)) destroy_item(SCROLL_CLASS, AD_FIRE);
-					if (!rn2(3)) destroy_item(SPBOOK_CLASS, AD_FIRE);
-					if (!rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
-				}
-			} else if(otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit){
-				if(!Cold_resistance){
-					if(species_resists_fire(&youmonst)) bonus += 1.5*(rnd(6) + otmp->spe);
-					else bonus += rnd(6) + otmp->spe;
-				}
-				if(!ECold_resistance){
-					if (!rn2(3)) destroy_item(POTION_CLASS, AD_COLD);
-				}
-			} else if(otmp->otyp == SUNROD && otmp->lamplit){
-				if(!(Shock_resistance && Acid_resistance)){
-					if(!(Shock_resistance || Acid_resistance))
-						bonus += 1.5*(rnd(6) + otmp->spe);
-					else bonus += rnd(6) + otmp->spe;
-				}
-				if(!EShock_resistance){
-					if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
-					if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
-				}
-				if(!EAcid_resistance){
-					if (rn2(3)) destroy_item(POTION_CLASS, AD_FIRE);
-				}
-				if (!resists_blnd(&youmonst)) {
-					You("are blinded by the flash!");
-					make_blinded((long)d(1,50),FALSE);
-					if (!Blind) Your1(vision_clears);
-				}
-			}
-		} else if(mon){
-			if(otmp->otyp == TORCH && otmp->lamplit && !resists_fire(mon)){
-				if(species_resists_cold(mon)) bonus += 1.5*(rnd(6) + otmp->spe);
-				else bonus += rnd(6) + otmp->spe;
-				if (!rn2(3)) destroy_mitem(mon, SCROLL_CLASS, AD_FIRE);
-				if (!rn2(3)) destroy_mitem(mon, SPBOOK_CLASS, AD_FIRE);
-				if (!rn2(3)) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-			} else if(otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit && !resists_cold(mon)){
-				if(species_resists_fire(mon)) bonus += 1.5*(rnd(6) + otmp->spe);
-				else bonus += rnd(6) + otmp->spe;
-				if (!rn2(3)) destroy_mitem(mon, POTION_CLASS, AD_COLD);
-			} else if(otmp->otyp == SUNROD && otmp->lamplit && !(resists_elec(mon) && resists_acid(mon))){
-				if(!(resists_elec(mon) || resists_acid(mon)))
-					bonus += 1.5*(rnd(6) + otmp->spe);
-				else bonus += rnd(6) + otmp->spe;
-				if(!resists_acid(mon))
-					if (rn2(3)) destroy_mitem(mon, POTION_CLASS, AD_FIRE);
-				if(!resists_elec(mon)){
-					if (!rn2(3)) destroy_mitem(mon, WAND_CLASS, AD_ELEC);
-					if (!rn2(3)) destroy_mitem(mon, RING_CLASS, AD_ELEC);
-				}
-				if (!resists_blnd(mon) &&
-						!(!flags.mon_moving && u.uswallow && mon == u.ustuck)) {
-					register unsigned rnd_tmp = rnd(50);
-					mon->mcansee = 0;
-					if((mon->mblinded + rnd_tmp) > 127)
-						mon->mblinded = 127;
-					else mon->mblinded += rnd_tmp;
-				}
-			}
-		}
 		
 		if(otmp->oclass == WEAPON_CLASS && otmp->obj_material == WOOD && otmp->otyp != MOON_AXE
 			&& (otmp->oward & WARD_VEIOISTAFUR) && ptr->mlet == S_EEL) bonus += rnd(20);
@@ -1352,7 +1190,11 @@ lightsaber_form_sdie:
 			if(is_slashing(otmp)){
 				weaponmask |= SLASH;
 			}
-			if(is_blasting(otmp) || otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD){
+			if(is_blasting(otmp) 
+				|| (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit)
+				|| otmp->oartifact == ART_FIRE_BRAND
+				|| otmp->oartifact == ART_FROST_BRAND
+			){
 				weaponmask |= EXPLOSION;
 			}
 			
@@ -1466,7 +1308,7 @@ struct monst *mon;
 	}
 	if(pen->ovar1&SEAL_OSE){
 		if(youdef && (Blind_telepat || !rn2(5))) dmg += d(dnum,15);
-		else if(!youdef && !mindless_mon(mon) && (telepathic(mon->data) || !rn2(5))) dmg += d(dnum,15);
+		else if(!youdef && !mindless_mon(mon) && (mon_resistance(mon,TELEPAT) || !rn2(5))) dmg += d(dnum,15);
 	}
 	if(pen->ovar1&SEAL_NABERIUS){
 		if(youdef && (Upolyd ? u.mh < .25*u.mhmax : u.uhp < .25*u.uhpmax)) dmg += d(dnum,4);
@@ -1524,7 +1366,7 @@ int spot;
 			/* never unsuitable for offhand wielding */
 			(spot!=W_SWAPWEP || (!(otmp->owornmask & (W_WEP)) && (!otmp->cursed || is_weldproof_mon(mtmp)) && !bimanual(otmp, mtmp->data) && (mtmp->misc_worn_check & W_ARMS) == 0 && 
 				( (otmp->owt <= (30 + (mtmp->m_lev/5)*5)) 
-				|| (otmp->otyp == IRON_CHAIN && mtmp->data == &mons[PM_CATHEZAR]) 
+				|| (otmp->otyp == CHAIN && mtmp->data == &mons[PM_CATHEZAR]) 
 				|| (mtmp->data == &mons[PM_BASTARD_OF_THE_BOREAL_VALLEY])
 				)
 			)) &&
@@ -1812,9 +1654,20 @@ register struct monst *mtmp;
 static const NEARDATA short hwep[] = {
 	  CORPSE,  /* cockatrice corpse */
 	  KAMEREL_VAJRA /*quite a lot plus elect plus blindness*/,
+	  GOLD_BLADED_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
+	  WHITE_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
+	  DOUBLE_FORCE_BLADE,/*6d6+12/6d4+8*/
 	  DOUBLE_LIGHTSABER/*6d8*/, 
+	  RED_EYED_VIBROSWORD,/*3d8+8/3d12+12*/
+	  FORCE_SWORD,/*3d8+8/3d6+6*/
+	  FORCE_WHIP,/*3d6+6+3/3d4+6+3d4+4*/
+	  FORCE_PIKE,/*3d6+6/3d8+8*/
+	  FORCE_BLADE,/*3d6+6/3d4+4*/
 	  BEAMSWORD/*3d10*/,
-	  FORCE_PIKE,/*2d6+6/2d8+8*/
+	  GOLD_BLADED_VIBROSWORD,/*2d8+4/2d12+6*/
+	  WHITE_VIBROSWORD,/*2d8+4/2d12+6*/
+	  GOLD_BLADED_VIBROSPEAR,/*2d6+3/2d8+3*/
+	  WHITE_VIBROSPEAR,/*2d6+3/2d8+3*/
 	  LIGHTSABER/*3d8*/,
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
 	  HEAVY_IRON_BALL,/*1d25/1d25*/
@@ -1863,7 +1716,7 @@ static const NEARDATA short hwep[] = {
 	  BULLWHIP/*1d2/1d1*/, 
 	  QUARTERSTAFF/*1d6/1d6*/,
 	  JAVELIN/*1d6/1d6*/, 
-	  IRON_CHAIN/*1d6/1d6*/, 
+	  CHAIN/*1d6/1d6*/, 
 	  WAR_HAMMER/*1d4+1/1d4*/, 
 	  AKLYS/*1d6/1d3*/, 
 	  SUNROD/*1d6/1d3*/, 
@@ -1934,7 +1787,7 @@ register struct monst *mtmp;
 	for(otmp=mtmp->minvent; otmp; otmp = otmp->nobj) {
 		if (/* valid weapon */
 			(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-			|| otmp->otyp == IRON_CHAIN || otmp->otyp == HEAVY_IRON_BALL
+			|| otmp->otyp == CHAIN || otmp->otyp == HEAVY_IRON_BALL
 			) &&
 			/* an artifact or other special weapon*/
 			(otmp->oartifact || otmp->oproperties) &&
@@ -2213,6 +2066,7 @@ register struct monst *mon;
 					s_suffix(mon_nam(mon)), mbodypart(mon, HAND));
 			}
 			obj->owornmask = W_WEP;
+			update_mon_intrinsics(mon, obj, TRUE, FALSE);
 			if (is_lightsaber(obj))
 				mon_ignite_lightsaber(obj, mon);
 			time_taken = TRUE;
@@ -2253,6 +2107,7 @@ register struct monst *mon;
 							s_suffix(mon_nam(mon)), mbodypart(mon, HAND));
 					}
 					sobj->owornmask = W_SWAPWEP;
+					update_mon_intrinsics(mon, sobj, TRUE, FALSE);
 					if (is_lightsaber(sobj))
 						mon_ignite_lightsaber(sobj, mon);
 					time_taken = TRUE;
@@ -2300,6 +2155,7 @@ register struct monst *mon;
 		    begin_burn(obj, FALSE);
 		}
 		obj->owornmask = W_WEP;
+		update_mon_intrinsics(mon, obj, TRUE, FALSE);
 		if (is_lightsaber(obj))
 		    mon_ignite_lightsaber(obj, mon);
 		toreturn = 1;
@@ -2315,6 +2171,7 @@ register struct monst *mon;
 				begin_burn(sobj, FALSE);
 			}
 			sobj->owornmask = W_SWAPWEP;
+			update_mon_intrinsics(mon, sobj, TRUE, FALSE);
 			if (is_lightsaber(sobj))
 				mon_ignite_lightsaber(sobj, mon);
 			toreturn = 1;
@@ -2420,6 +2277,10 @@ struct obj *otmp;
 		) bonus *= 2;
 		else if(otmp->otyp == KATANA && !uarms && !u.twoweap)
 			bonus *= 1.5;
+		else if(is_vibrosword(otmp) && !uarms && !u.twoweap)
+			bonus *= 1.5;
+		else if(otmp->otyp == FORCE_SWORD && !uarms && !u.twoweap)
+			bonus *= 2;
 		
 		if(otmp==uwep 
 		&& (is_rapier(otmp)
@@ -2959,7 +2820,7 @@ struct obj *obj;
     if ((obj->otyp == HEAVY_IRON_BALL) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
         return objects[obj->otyp].oc_skill;
 #endif /* CONVICT */
-    if ((obj->otyp == IRON_CHAIN) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
+    if ((obj->otyp == CHAIN) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
         return objects[obj->otyp].oc_skill;
 	if (obj->oclass != WEAPON_CLASS && obj->oclass != TOOL_CLASS &&
 	    obj->oclass != GEM_CLASS)
@@ -3793,6 +3654,22 @@ register struct obj *obj;
     }
     obj->owornmask &= ~W_WEP;
 	obj->owornmask &= ~W_SWAPWEP;
+	update_mon_intrinsics(mon, obj, FALSE, FALSE);
+}
+
+int
+aeshbon()
+{
+	int bonus = 0;
+	if(u.uaesh_duration)
+		bonus += 10;
+	if(u.uaesh){
+		bonus += u.uaesh/3;
+		//remainder is probabilistic
+		if(rn2(3) < u.uaesh%3)
+			bonus++;
+	}
+	return bonus;
 }
 
 #endif /* OVLB */

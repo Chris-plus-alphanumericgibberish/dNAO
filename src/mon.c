@@ -200,6 +200,7 @@ STATIC_VAR int cham_to_pm[] = {
 			 ((mon)->data->geno & G_UNIQ) ||		\
 			 is_reviver((mon)->data) ||			\
 			 ((mon)->mfaction == ZOMBIFIED) ||			\
+			 ((mon)->mfaction == VAMPIRIC) ||			\
 			 ((mon)->zombify) ||			\
 			 ((mon)->data == &mons[PM_UNDEAD_KNIGHT]) ||			\
 			 ((mon)->data == &mons[PM_WARRIOR_OF_SUNLIGHT]) ||			\
@@ -351,6 +352,28 @@ register struct monst *mtmp;
 		}
 		goto default_1;
 
+	    case PM_SARA__THE_LAST_ORACLE:
+		if (mtmp->mrevived) {
+			if (canseemon(mtmp))
+			   pline("%s recently returned eyes vanish once more.",
+				s_suffix(Monnam(mtmp)));
+		} else {
+			if (canseemon(mtmp))
+			   pline("%s eyes vanish.",
+				s_suffix(Monnam(mtmp)));
+		}
+		goto default_1;
+	    case PM_ORACLE:
+		if (mtmp->mrevived) {
+			if (canseemon(mtmp))
+			   pline("%s recently regrown eyes crumble to dust.",
+				s_suffix(Monnam(mtmp)));
+		} else {
+			if (canseemon(mtmp))
+			   pline("%s eyes crumble to dust.",
+				s_suffix(Monnam(mtmp)));
+		}
+		goto default_1;
 	    case PM_WHITE_UNICORN:
 	    case PM_GRAY_UNICORN:
 	    case PM_BLACK_UNICORN:
@@ -455,8 +478,10 @@ register struct monst *mtmp;
 	    case PM_ARSENAL:
 			num = d(3,6);
 			while(num--){
-				obj = mksobj_at(BRONZE_PLATE_MAIL, x, y, TRUE, FALSE);
+				obj = mksobj_at(PLATE_MAIL, x, y, TRUE, FALSE);
 				obj->spe = 3;
+				obj->obj_material = COPPER;
+				fix_object(obj);
 			}
 			num = d(2,4);
 			while(num--)
@@ -473,6 +498,8 @@ register struct monst *mtmp;
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
 			if(!mtmp->mrevived && !rn2(20)){
+				obj = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+			} else if(!mtmp->mrevived && !rn2(19)){
 				obj = mksobj_at(TINNING_KIT, x, y, TRUE, FALSE);
 			} else if(!mtmp->mrevived && !rn2(10)){
 				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
@@ -528,6 +555,8 @@ register struct monst *mtmp;
 			obj->quan = d(3,4);
 			obj->owt = weight(obj);
 			if(!rn2(20)){
+				obj = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+			} else if(!rn2(19)){
 				obj = mksobj_at(TINNING_KIT, x, y, TRUE, FALSE);
 			} else if(!rn2(10)){
 				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
@@ -550,9 +579,9 @@ register struct monst *mtmp;
 			mtmp->mnamelth = 0;
 			num = d(2,4);
 			while (num--){
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				obj->oeroded = 3;
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				obj->oeroded = 3;
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 				obj->oeroded = 3;
@@ -562,11 +591,6 @@ register struct monst *mtmp;
 				obj->oeroded = 3;
 				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
 				obj->oeroded = 3;
-			}
-			if(!rn2(20)){
-				obj = mksobj_at(TINNING_KIT, x, y, TRUE, FALSE);
-			} else if(!rn2(10)){
-				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
 			}
 		break;
 	    case PM_HELLFIRE_COLOSSUS:
@@ -578,16 +602,55 @@ register struct monst *mtmp;
 			obj->owt = weight(obj);
 			num = d(2,6);
 			while (num--){
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 			}
 			mtmp->mnamelth = 0;
-			if(!rn2(20)){
-				obj = mksobj_at(TINNING_KIT, x, y, TRUE, FALSE);
-			} else if(!rn2(10)){
-				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
-			}
+		break;
+	    case PM_ANDROID:
+			obj = mksobj_at(BROKEN_ANDROID, x, y, FALSE, FALSE);
+		break;
+	    case PM_CRUCIFIED_ANDROID:
+			obj = mksobj_at(BROKEN_ANDROID, x, y, FALSE, FALSE);
+			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+			obj->oeroded = 1;
+			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+			obj->oeroded = 1;
+		break;
+	    case PM_MUMMIFIED_ANDROID:
+			obj = mksobj_at(BROKEN_ANDROID, x, y, FALSE, FALSE);
+		break;
+	    case PM_FLAYED_ANDROID:
+			obj = mksobj_at(BROKEN_ANDROID, x, y, FALSE, FALSE);
+		break;
+	    case PM_PARASITIZED_ANDROID:
+			obj = mksobj_at(BROKEN_ANDROID, x, y, FALSE, FALSE);
+			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
+			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
+			fix_object(obj);
+		break;
+	    case PM_GYNOID:
+			obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+		break;
+	    case PM_CRUCIFIED_GYNOID:
+			obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+			obj->oeroded = 1;
+			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+			obj->oeroded = 1;
+		break;
+	    case PM_MUMMIFIED_GYNOID:
+			obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+		break;
+	    case PM_FLAYED_GYNOID:
+			obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+		break;
+	    case PM_PARASITIZED_GYNOID:
+			obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
+			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
+			fix_object(obj);
 		break;
 	    case PM_DANCING_BLADE:
 			obj = mksobj_at(TWO_HANDED_SWORD, x, y, FALSE, FALSE);
@@ -600,7 +663,7 @@ register struct monst *mtmp;
 	    case PM_IRON_GOLEM:
 			num = d(2,6);
 			while (num--){
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				obj = mksobj_at(KITE_SHIELD, x, y, TRUE, FALSE);
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 			}
@@ -609,7 +672,7 @@ register struct monst *mtmp;
 	    case PM_CHAIN_GOLEM:
 			num = d(6,6);
 			while (num--){
-				obj = mksobj_at(IRON_CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -743,6 +806,80 @@ register struct monst *mtmp;
 			}
 		goto default_1;
 		break;
+	    case PM_TWITCHING_FOUR_ARMED_CHANGED:
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_gas_cloud(x, y, 4, rnd(3)+1);
+			flags.cth_attk=FALSE;
+			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj->corpsenm = PM_MYRKALFR;
+			obj->quan = 2;
+			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj->corpsenm = PM_ELF;
+			obj->quan = 2;
+			num = rn1(10,10);
+			while (num--){
+				obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+				obj->corpsenm = humanoid_eyes[rn2(SIZE(humanoid_eyes))];
+			}
+			num = rn1(10,10);
+			while (num--){
+				obj = mksobj_at(WORM_TOOTH, x, y, FALSE, FALSE);
+				obj->oproperties = OPROP_LESSW|OPROP_FLAYW;
+			}
+		goto default_1;
+		break;
+	    case PM_CLAIRVOYANT_CHANGED:
+			flags.cth_attk=TRUE;//state machine stuff.
+			create_gas_cloud(x, y, 4, rnd(3)+1);
+			flags.cth_attk=FALSE;
+			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj->corpsenm = PM_HUMAN;
+			obj->quan = 2;
+			obj->owt = weight(obj);
+			obj->oartifact = ART_EYE_OF_THE_ORACLE;
+			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj->corpsenm = PM_HUMAN;
+			obj->quan = 14;
+			obj->owt = weight(obj);
+			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj->corpsenm = PM_HUMAN;
+			obj->quan = 4;
+			obj->owt = weight(obj);
+		goto default_1;
+		break;
+	    case PM_EMBRACED_DROWESS:{
+			struct monst *mon;
+			mon = makemon(&mons[PM_DROW_CAPTAIN], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
+			if (mon){
+				initedog(mon);
+				mon->mhpmax = (mon->m_lev * 8) - 4;
+				mon->mhp = mon->mhpmax;
+				mon->female = TRUE;
+				mon->mtame = 10;
+				mon->mpeaceful = 1;
+				mon->mfaction = ZOMBIFIED;
+			}
+			obj = mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
+			mongone(mon);
+		}break;
+	    case PM_PARASITIZED_EMBRACED_ALIDER:{
+			struct monst *mon;
+			mon = makemon(&mons[PM_ALIDER], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
+			if (mon){
+				initedog(mon);
+				mon->mhpmax = (mon->m_lev * 8) - 4;
+				mon->mhp = mon->mhpmax;
+				mon->female = TRUE;
+				mon->mtame = 10;
+				mon->mpeaceful = 1;
+				mon->mfaction = ZOMBIFIED;
+			}
+			mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
+			mongone(mon);
+			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
+			obj->corpsenm = PM_PARASITIC_MASTER_MIND_FLAYER;
+			fix_object(obj);
+		}break;
 	    default_1:
 	    default:
 		if (mvitals[mndx].mvflags & G_NOCORPSE)
@@ -853,12 +990,12 @@ register struct monst *mtmp;
 	boolean inpool, inlava, infountain, inshallow;
 
 	inpool = is_pool(mtmp->mx,mtmp->my, FALSE) &&
-	     ((!is_flyer(mtmp->data) && !is_floater(mtmp->data)) || is_3dwater(mtmp->mx,mtmp->my));
+	     ((!mon_resistance(mtmp,FLYING) && !mon_resistance(mtmp,LEVITATION)) || is_3dwater(mtmp->mx,mtmp->my));
 	inlava = is_lava(mtmp->mx,mtmp->my) &&
-	     !is_flyer(mtmp->data) && !is_floater(mtmp->data);
+	     !mon_resistance(mtmp,FLYING) && !mon_resistance(mtmp,LEVITATION);
 	infountain = IS_FOUNTAIN(levl[mtmp->mx][mtmp->my].typ);
 	inshallow = IS_PUDDLE(levl[mtmp->mx][mtmp->my].typ) &&
-	     (!is_flyer(mtmp->data) && !is_floater(mtmp->data));
+	     (!mon_resistance(mtmp,FLYING) && !mon_resistance(mtmp,LEVITATION));
 
 #ifdef STEED
 	/* Flying and levitation keeps our steed out of the liquid */
@@ -934,7 +1071,7 @@ register struct monst *mtmp;
 	 * be handled here.  Swimmers are able to protect their stuff...
 	 */
 	if (!is_clinger(mtmp->data)
-	    && !is_swimmer(mtmp->data) && !amphibious_mon(mtmp)) {
+	    && !mon_resistance(mtmp,SWIMMING) && !amphibious_mon(mtmp)) {
 	    if (cansee(mtmp->mx,mtmp->my)) {
 		    if(mtmp->data == &mons[PM_ACID_PARAELEMENTAL]){
 				int tx = mtmp->mx, ty = mtmp->my, dn = mtmp->m_lev;
@@ -1054,7 +1191,7 @@ mcalcdistress()
 	    if (minliquid(mtmp)) continue;
 	}
 
-	if(mtmp->data == &mons[PM_HEZROU] && !Is_illregrd(&u.uz)){
+	if(mtmp->data == &mons[PM_HEZROU] && !(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
 		flags.cth_attk=TRUE;//state machine stuff.
 		create_gas_cloud(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, rnd(3), rnd(3)+1);
 		flags.cth_attk=FALSE;
@@ -1786,6 +1923,7 @@ movemon()
 	){
 		if(canseemon(mtmp)) pline("%s gets angry...", mon_nam(mtmp));
 		mtmp->mpeaceful = 0;
+		mtmp->mtame = 0;
 	}
 	if(mtmp->data == &mons[PM_UVUUDAUM]){
 		if(u.uevent.invoked 
@@ -2107,7 +2245,7 @@ mpickstuff(mtmp, str)
 		if (!can_carry(mtmp,otmp)) continue;
 		if (is_pool(mtmp->mx,mtmp->my, FALSE)) continue;
 #ifdef INVISIBLE_OBJECTS
-		if (otmp->oinvis && !perceives(mtmp->data)) continue;
+		if (otmp->oinvis && !mon_resistance(mtmp,SEE_INVIS)) continue;
 #endif
 		if (cansee(mtmp->mx,mtmp->my) && flags.verbose)
 			pline("%s picks up %s.", Monnam(mtmp),
@@ -2218,7 +2356,8 @@ mon_can_see_mon(looker, lookie)
 	
 	if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1 && !rn2(8)) return TRUE;
 	if((darksight(looker->data) || (catsight(looker->data) && catsightdark)) && !is_blind(looker)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1) return TRUE;
+		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			if(levl[lookie->mx][lookie->my].lit){
 				if(viz_array[lookie->my][lookie->mx]&TEMP_DRK1 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT1))
 					return TRUE;
@@ -2229,7 +2368,7 @@ mon_can_see_mon(looker, lookie)
 		}
 	}
 	if(lowlightsight3(looker->data) && !is_blind(looker)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			if(dist2(looker->mx,looker->my,lookie->mx,lookie->my) <= 3*3) return TRUE;
 			else if(levl[lookie->mx][lookie->my].lit){
 				if(!(viz_array[lookie->my][lookie->mx]&TEMP_DRK3 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT3)))
@@ -2245,7 +2384,7 @@ mon_can_see_mon(looker, lookie)
 		}
 	}
 	if(lowlightsight2(looker->data) && !is_blind(looker)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			if(dist2(looker->mx,looker->my,lookie->mx,lookie->my) <= 2*2) return TRUE;
 			else if(levl[lookie->mx][lookie->my].lit){
 				if(!(viz_array[lookie->my][lookie->mx]&TEMP_DRK2 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT2)) &&
@@ -2261,7 +2400,7 @@ mon_can_see_mon(looker, lookie)
 		}
 	}
 	if((normalvision(looker->data) || (catsight(looker->data) && !catsightdark)) && !is_blind(looker)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1) return TRUE;
 			else if(levl[lookie->mx][lookie->my].lit){
 				if(!(viz_array[lookie->my][lookie->mx]&TEMP_DRK1 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT1)) &&
@@ -2280,34 +2419,34 @@ mon_can_see_mon(looker, lookie)
 		}
 	}
 	if(extramission(looker->data)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(infravision(looker->data) && infravisible(youracedata) && !is_blind(looker)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(bloodsense(looker->data) && has_blood(youracedata)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(lifesense(looker->data) && !nonliving(youracedata)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(senseall(looker->data)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
-	if(earthsense(looker->data) && !(is_flyer(lookie->data) || is_floater(lookie->data) || unsolid(lookie->data))){
+	if(earthsense(looker->data) && !(mon_resistance(lookie,FLYING) || mon_resistance(lookie,LEVITATION) || unsolid(lookie->data))){
 		return TRUE;
 	}
-	if(telepathic(looker->data)){
+	if(mon_resistance(looker,TELEPAT)){
 		return TRUE;
 	}
 	if(goodsmeller(looker->data) && distmin(lookie->mx, lookie->my, looker->mx, looker->my) <= 6){
@@ -2367,7 +2506,7 @@ mon_can_see_you(looker)
 	if(distmin(looker->mx,looker->my,u.ux,u.uy) <= 1 && !rn2(8)) return TRUE;
 	
 	if((darksight(looker->data) || (catsight(looker->data) && catsightdark)) && !is_blind(looker)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			if(levl[u.ux][u.uy].lit){
 				if(viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1))
 					return TRUE;
@@ -2378,7 +2517,7 @@ mon_can_see_you(looker)
 		}
 	}
 	if(lowlightsight3(looker->data) && !is_blind(looker)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			if(dist2(looker->mx,looker->my,u.ux,u.uy) <= 3*3) return TRUE;
 			else if(levl[u.ux][u.uy].lit){
 				if(!(viz_array[u.uy][u.ux]&TEMP_DRK3 && !(viz_array[u.uy][u.ux]&TEMP_LIT3)))
@@ -2394,7 +2533,7 @@ mon_can_see_you(looker)
 		}
 	}
 	if(lowlightsight2(looker->data) && !is_blind(looker)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			if(dist2(looker->mx,looker->my,u.ux,u.uy) <= 2*2) return TRUE;
 			else if(levl[u.ux][u.uy].lit){
 				if(!(viz_array[u.uy][u.ux]&TEMP_DRK2 && !(viz_array[u.uy][u.ux]&TEMP_LIT2)) &&
@@ -2410,7 +2549,7 @@ mon_can_see_you(looker)
 		}
 	}
 	if((normalvision(looker->data) || (catsight(looker->data) && !catsightdark)) && !is_blind(looker)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			if(distmin(looker->mx,looker->my,u.ux,u.uy) <= 1) return TRUE;
 			else if(levl[u.ux][u.uy].lit){
 				if(!(viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1)) &&
@@ -2429,34 +2568,34 @@ mon_can_see_you(looker)
 		}
 	}
 	if(extramission(looker->data)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(infravision(looker->data) && infravisible(youracedata) && !is_blind(looker)){
-		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(bloodsense(looker->data) && has_blood(youracedata)){
-		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(lifesense(looker->data) && !nonliving(youracedata)){
-		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(senseall(looker->data)){
-		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !perceives(looker->data) && !can_track(looker->data) && rn2(11))){
+		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(earthsense(looker->data) && !(Flying || Levitation || unsolid(youracedata) || Stealth)){
 		return TRUE;
 	}
-	if(telepathic(looker->data)){
+	if(mon_resistance(looker,TELEPAT)){
 		return TRUE;
 	}
 	if(goodsmeller(looker->data) && distmin(u.ux, u.uy, looker->mx, looker->my) <= 6){
@@ -2579,10 +2718,10 @@ mfndpos(mon, poss, info, flag)
 	nodiag = (mdat == &mons[PM_GRID_BUG]) || (mdat == &mons[PM_BEBELITH]);
 	wantpool = mdat->mlet == S_EEL;
 	wantpuddle = wantpool && mdat->msize == MZ_TINY;
-	cubewaterok = (is_swimmer(mdat) || breathless_mon(mon) || amphibious_mon(mon));
-	poolok = is_flyer(mdat) || is_clinger(mdat) ||
-		 (is_swimmer(mdat) && !wantpool);
-	lavaok = is_flyer(mdat) || is_clinger(mdat) || likes_lava(mdat);
+	cubewaterok = (mon_resistance(mon,SWIMMING) || breathless_mon(mon) || amphibious_mon(mon));
+	poolok = mon_resistance(mon,FLYING) || is_clinger(mdat) ||
+		 (mon_resistance(mon,SWIMMING) && !wantpool);
+	lavaok = mon_resistance(mon,FLYING) || is_clinger(mdat) || likes_lava(mdat);
 	quantumlock = (is_weeping(mdat) && !u.uevent.invoked);
 	thrudoor = ((flag & (ALLOW_WALL|BUSTDOOR)) != 0L);
 	if (flag & ALLOW_DIG) {
@@ -2674,7 +2813,7 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 			(cubewaterok || !is_3dwater(nx,ny)) && 
 			(lavaok || !is_lava(nx,ny))) {
 		int dispx, dispy;
-		boolean monseeu = (!is_blind(mon) && (!Invis || perceives(mdat)));
+		boolean monseeu = (!is_blind(mon) && (!Invis || mon_resistance(mon,SEE_INVIS)));
 		boolean checkobj = OBJ_AT(nx,ny);
 		
 		/* Displacement also displaces the Elbereth/scare monster,
@@ -2745,8 +2884,8 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 			if(!(flag & ALLOW_TRAPS)) continue;
 			info[cnt] |= ALLOW_TRAPS;
 		}
-		if (nx != x && ny != y && bad_rock(mdat, x, ny)
-			    && bad_rock(mdat, nx, y)
+		if (nx != x && ny != y && bad_rock(mon, x, ny)
+			    && bad_rock(mon, nx, y)
 			    && ((bigmonst(mdat) && !amorphous(mdat)) || (curr_mon_load(mon) > 600)))
 			continue;
 		/* The monster avoids a particular type of trap if it's familiar
@@ -2769,18 +2908,18 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 				    && ttmp->ttyp != SPIKED_PIT
 				    && ttmp->ttyp != TRAPDOOR
 				    && ttmp->ttyp != HOLE)
-				      || (!is_flyer(mdat)
-				    && !is_floater(mdat)
+				      || (!mon_resistance(mon,FLYING)
+				    && !mon_resistance(mon,LEVITATION)
 				    && !is_clinger(mdat))
 				      || In_sokoban(&u.uz))
 				&& (ttmp->ttyp != SLP_GAS_TRAP ||
 				    !resists_sleep(mon))
 				&& (ttmp->ttyp != BEAR_TRAP ||
 				    (mdat->msize > MZ_SMALL &&
-				     !amorphous(mdat) && !is_flyer(mdat)))
+				     !amorphous(mdat) && !mon_resistance(mon,FLYING)))
 				&& (ttmp->ttyp != FIRE_TRAP ||
 				    !resists_fire(mon) || distmin(mon->mx, mon->my, mon->mux, mon->muy) > 2) /*Cuts down on plane of fire message spam*/
-				&& (ttmp->ttyp != SQKY_BOARD || !is_flyer(mdat))
+				&& (ttmp->ttyp != SQKY_BOARD || !mon_resistance(mon,FLYING))
 				&& (ttmp->ttyp != WEB || (!amorphous(mdat) &&
 				    !(webmaker(mdat) || (Is_lolth_level(&u.uz) && !mon->mpeaceful)) && !(
 						 mdat->mlet == S_GIANT ||
@@ -2830,6 +2969,10 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	// if(magr->mpeaceful && mdef->mpeaceful && (magr->mtame || mdef->mtame)) return 0L;
 	
 	if(magr->mtame && (mdef->mtame || mdef->moccupation)){
+			return 0L;
+	}
+	
+	if(mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP){
 			return 0L;
 	}
 	
@@ -3451,6 +3594,116 @@ register struct monst *mtmp;
 	}
 	if(mtmp->iswiz) wizdead();
 	if(mtmp->data->msound == MS_NEMESIS) nemdead();        
+	//Asc items and crucial bookkeeping
+	if(Race_if(PM_DROW) && !Role_if(PM_NOBLEMAN) && mtmp->data == &mons[urole.neminum] && !flags.made_bell){
+		(void) mksobj_at(BELL_OF_OPENING, mtmp->mx, mtmp->my, TRUE, FALSE);
+		flags.made_bell = TRUE;
+	}
+	if(mtmp->data == &mons[PM_OONA]){
+		struct obj *obj;
+		obj = mksobj_at(SKELETON_KEY, mtmp->mx, mtmp->my, FALSE, FALSE);
+		obj = oname(obj, artiname(ART_THIRD_KEY_OF_LAW));
+		obj->spe = 0;
+		obj->cursed = obj->blessed = FALSE;
+	}
+	if(mtmp->data == &mons[PM_GARLAND]){
+		int x = mtmp->mx, y = mtmp->my;
+		struct obj *otmp;
+		makemon(&mons[PM_CHAOS], mtmp->mx, mtmp->my, MM_ADJACENTOK);
+	}
+	if(mtmp->data == &mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES] && !(u.uevent.ukilled_illurien)){
+		u.uevent.ukilled_illurien = 1;
+		u.ill_cnt = rn1(1000, 250);
+	}
+	if(mtmp->data == &mons[PM_ORCUS]){
+		struct engr *oep = engr_at(mtmp->mx,mtmp->my);
+		if(!oep){
+			make_engr_at(mtmp->mx, mtmp->my,
+			 "", 0L, DUST);
+			oep = engr_at(mtmp->mx,mtmp->my);
+		}
+		oep->ward_id = TENEBROUS;
+		oep->halu_ward = 0;
+		oep->ward_type = BURN;
+		oep->complete_wards = 1;
+	}
+	if(mtmp->data == &mons[PM_CHOKHMAH_SEPHIRAH]){
+		u.chokhmah++;
+		u.keter++;
+	}
+	if (mtmp->data == &mons[PM_CHAOS] && mvitals[PM_CHAOS].died == 1) {
+	} else if(mtmp->data->geno & G_UNIQ && mvitals[monsndx(mtmp->data)].died == 1){
+		char buf[BUFSZ];
+		buf[0]='\0';
+		if(nonliving(mtmp->data)) Sprintf(buf,"destroyed %s",noit_nohalu_mon_nam(mtmp));
+		else Sprintf(buf,"killed %s",noit_nohalu_mon_nam(mtmp));
+	}
+	//Remove linked hungry dead
+	if(mtmp->data == &mons[PM_BLOB_OF_PRESERVED_ORGANS]){
+		struct monst *mon, *mtmp2;
+		for (mon = fmon; mon; mon = mtmp2){
+			mtmp2 = mon->nmon;
+			if(mon->data == &mons[PM_HUNGRY_DEAD]){
+				if(mtmp->mvar1 == (long)mon->m_id){
+					if(mon->mhp > 0){
+						mon->mhp = 0;
+						mondied(mon);
+					}
+					break;
+				}
+			}
+		}
+		if(!mon){
+			for (mon = migrating_mons; mon; mon = mtmp2){
+				mtmp2 = mon->nmon;
+				if(mon->data == &mons[PM_HUNGRY_DEAD]){
+					if(mtmp->mvar1 == (long)mon->m_id){
+						mon_arrive(mon, TRUE);
+						if(mon->mhp > 0){
+							mon->mhp = 0;
+							mondied(mon);
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+	//Remove linked sword
+	if(mtmp->data == &mons[PM_SURYA_DEVA]){
+		struct monst *mon, *mtmp2;
+		for (mon = fmon; mon; mon = mtmp2){
+			mtmp2 = mon->nmon;
+			if(mon->data == &mons[PM_DANCING_BLADE] && mon->mvar1 == mtmp->m_id){
+				if (DEADMONSTER(mon)) continue;
+				mon->mhp = -10;
+				monkilled(mon,"",AD_DRLI);
+			}
+		}
+	}
+	//Remove linked tentacles
+	if(mtmp->data == &mons[PM_WATCHER_IN_THE_WATER] || mtmp->data == &mons[PM_KETO]){
+		struct monst *mon, *mtmp2;
+		for (mon = fmon; mon; mon = mtmp2){
+			mtmp2 = mon->nmon;
+			if(mon->data == &mons[PM_SWARM_OF_SNAKING_TENTACLES] || mon->data == &mons[PM_LONG_SINUOUS_TENTACLE] || mon->data == &mons[PM_WIDE_CLUBBED_TENTACLE]){
+				if (DEADMONSTER(mon)) continue;
+				mon->mhp = -10;
+				monkilled(mon,"",AD_DRLI);
+			}
+		}
+	}
+	
+	//Quest flavor
+	if(Role_if(PM_ANACHRONONAUT) && mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
+		if(mtmp->data == &mons[PM_TROOPER]){
+			verbalize("**ALERT: trooper %d vital signs terminated**", (int)(mtmp->m_id));
+		} else if(mtmp->data == &mons[PM_MYRKALFAR_WARRIOR]){
+			verbalize("**ALERT: warrior %d vital signs terminated**", (int)(mtmp->m_id));
+		} else if(mtmp->data != &mons[PM_PHANTASM]){
+			verbalize("**ALERT: citizen %d vital signs terminated**", (int)(mtmp->m_id));
+		}
+	}
 #ifdef RECORD_ACHIEVE
 	if(mtmp->data == &mons[PM_LUCIFER]){
 		achieve.killed_lucifer = 1;
@@ -3483,27 +3736,6 @@ boolean was_swallowed;			/* digestion */
 {
 	struct permonst *mdat = mon->data;
 	int i, tmp;
-	if(Race_if(PM_DROW) && !Role_if(PM_NOBLEMAN) && mdat == &mons[urole.neminum] && !flags.made_bell){
-		(void) mksobj_at(BELL_OF_OPENING, mon->mx, mon->my, TRUE, FALSE);
-		flags.made_bell = TRUE;
-		if(mdat == &mons[PM_ECLAVDRA]) return FALSE;
-	}
-	if(mdat == &mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES] && !(u.uevent.ukilled_illurien)){
-		u.uevent.ukilled_illurien = 1;
-		u.ill_cnt = rn1(1000, 250);
-	}
-	if(mdat == &mons[PM_ORCUS]){
-		struct engr *oep = engr_at(mon->mx,mon->my);
-		if(!oep){
-			make_engr_at(mon->mx, mon->my,
-			 "", 0L, DUST);
-			oep = engr_at(mon->mx,mon->my);
-		}
-		oep->ward_id = TENEBROUS;
-		oep->halu_ward = 0;
-		oep->ward_type = BURN;
-		oep->complete_wards = 1;
-	}
 	if (mdat == &mons[PM_VLAD_THE_IMPALER]) {
 		if(mvitals[PM_VLAD_THE_IMPALER].died == 1) livelog_write_string("destroyed Vlad the Impaler");
 	    if (cansee(mon->mx, mon->my) && !was_swallowed)
@@ -3520,10 +3752,9 @@ boolean was_swallowed;			/* digestion */
 			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    if(mdat != &mons[PM_VECNA] && mdat != &mons[PM_LICH__THE_FIEND_OF_EARTH]) return FALSE; /*Vecna leaves his hand or eye*/
 	}
+	else if(mdat == &mons[PM_ECLAVDRA]) return FALSE;
 	else if(mdat == &mons[PM_CHOKHMAH_SEPHIRAH]){
 		if(mvitals[PM_CHOKHMAH_SEPHIRAH].died == 1) livelog_write_string("destroyed a chokhmah sephirah");
-		u.chokhmah++;
-		u.keter++;
 		return FALSE;
 	}
 	else if (mdat == &mons[PM_CHAOS] && mvitals[PM_CHAOS].died == 1) {
@@ -3536,15 +3767,13 @@ boolean was_swallowed;			/* digestion */
 		else Sprintf(buf,"killed %s",noit_nohalu_mon_nam(mon));
 		livelog_write_string(buf);
 	}
+	//Must be done here for reasons that are obscure
 	if(Role_if(PM_ANACHRONONAUT) && mon->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
 		if(mdat == &mons[PM_TROOPER]){
-			verbalize("**ALERT: trooper %d vital signs terminated**", (int)(mon->m_id));
 			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
 		} else if(mdat == &mons[PM_MYRKALFAR_WARRIOR]){
-			verbalize("**ALERT: warrior %d vital signs terminated**", (int)(mon->m_id));
 			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
 		} else if(mdat != &mons[PM_PHANTASM]){
-			verbalize("**ALERT: citizen %d vital signs terminated**", (int)(mon->m_id));
 			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
 		}
 	}
@@ -3556,57 +3785,10 @@ boolean was_swallowed;			/* digestion */
 		mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
 		mtmp->mhp =  mtmp->mhpmax;
 	}
-	if(mdat == &mons[PM_BLOB_OF_PRESERVED_ORGANS]){
-		struct monst *mtmp, *mtmp2;
-		for (mtmp = fmon; mtmp; mtmp = mtmp2){
-			mtmp2 = mtmp->nmon;
-			if(mtmp->data == &mons[PM_HUNGRY_DEAD]){
-				if(mon->mvar1 == (long)mtmp->m_id){
-					if(mtmp->mhp > 0){
-						mtmp->mhp = 0;
-						mondied(mtmp);
-					}
-					break;
-				}
-			}
-		}
-		if(!mtmp){
-			for (mtmp = migrating_mons; mtmp; mtmp = mtmp2){
-				mtmp2 = mtmp->nmon;
-				if(mtmp->data == &mons[PM_HUNGRY_DEAD]){
-					if(mon->mvar1 == (long)mtmp->m_id){
-						mon_arrive(mtmp, TRUE);
-						if(mtmp->mhp > 0){
-							mtmp->mhp = 0;
-							mondied(mtmp);
-						}
-						break;
-					}
-				}
-			}
-		}
-	}
-	
-	if(mdat == &mons[PM_SURYA_DEVA]){
-		struct monst *mtmp, *mtmp2;
-		for (mtmp = fmon; mtmp; mtmp = mtmp2){
-			mtmp2 = mtmp->nmon;
-			if(mtmp->data == &mons[PM_DANCING_BLADE] && mtmp->mvar1 == mon->m_id){
-				if (DEADMONSTER(mtmp)) continue;
-				mtmp->mhp = -10;
-				monkilled(mtmp,"",AD_DRLI);
-			}
-		}
-	}
 	
 	/* Gas spores always explode upon death */
 	for(i = 0; i < NATTK; i++) {
 		if(mdat->mattk[i].aatyp == AT_NONE &&  mdat->mattk[i].adtyp == AD_OONA){
-			struct obj *obj;
-			obj = mksobj_at(SKELETON_KEY, mon->mx, mon->my, FALSE, FALSE);
-			obj = oname(obj, artiname(ART_THIRD_KEY_OF_LAW));
-			obj->spe = 0;
-			obj->cursed = obj->blessed = FALSE;
 			mdat->mattk[i].aatyp = AT_BOOM;
 			mdat->mattk[i].adtyp = u.oonaenergy;
 		}
@@ -3624,6 +3806,7 @@ boolean was_swallowed;			/* digestion */
 					Sprintf(killer_buf, "%s explosion",
 						s_suffix(mdat->mname));
 					if (Half_physical_damage) tmp = (tmp+1) / 2;
+					if(u.uvaul_duration) tmp = (tmp + 1) / 2;
 					losehp(tmp, killer_buf, KILLED_BY_AN);
 				} 
 				else {
@@ -3664,23 +3847,31 @@ boolean was_swallowed;			/* digestion */
 				u.uevent.ukilled_apollyon = 1;
 			}
 			else if(mdat->mattk[i].adtyp == AD_GARO){
-				pline("\"R-regrettable... Although my rival, you were spectacular.");
-				pline("I shall take my bow by opening my heart and revealing my wisdom...");
-				outrumor(rn2(2), BY_OTHER); //either true (3/4) or false (1/4), no mechanism specified.
-				pline("Belief or disbelief rests with you.");
-				pline("To die without leaving a corpse....\"");
-				explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
-				pline("\"That is the way of us Garo.\"");
+				if(couldsee(mon->mx, mon->my)){
+					pline("\"R-regrettable... Although my rival, you were spectacular.");
+					pline("I shall take my bow by opening my heart and revealing my wisdom...");
+					outrumor(rn2(2), BY_OTHER); //either true (3/4) or false (1/4), no mechanism specified.
+					pline("Belief or disbelief rests with you.");
+					pline("To die without leaving a corpse....\"");
+					explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
+					pline("\"That is the way of us Garo.\"");
+				} else {
+					explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
+				}
 			}
 			else if(mdat->mattk[i].adtyp == AD_GARO_MASTER){
-				pline("\"To think thou couldst defeat me...");
-				pline("Though my rival, thou were't spectacular.");
-				pline("I shall take my bow by opening my heart and revealing my wisdom...");
-				outgmaster(); //Gives out a major consultation. Does not set the consultation flags.
-				pline("Do not forget these words...");
-				pline("Die I shall, leaving no corpse.\"");
-				explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
-				pline("\"That is the law of us Garo.\"");
+				if(couldsee(mon->mx, mon->my)){
+					pline("\"To think thou couldst defeat me...");
+					pline("Though my rival, thou were't spectacular.");
+					pline("I shall take my bow by opening my heart and revealing my wisdom...");
+					outgmaster(); //Gives out a major consultation. Does not set the consultation flags.
+					pline("Do not forget these words...");
+					pline("Die I shall, leaving no corpse.\"");
+					explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
+					pline("\"That is the law of us Garo.\"");
+				} else {
+					explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
+				}
 			}
 			else if(mdat->mattk[i].adtyp == AD_COLD){
 			//mdat == &mons[PM_BAALPHEGOR] || mdat == &mons[PM_ANCIENT_OF_ICE] || mdat == &mons[PM_FREEZING_SPHERE]){
@@ -3702,16 +3893,6 @@ boolean was_swallowed;			/* digestion */
 				makemon(rn2(2) ? &mons[PM_LEVIATHAN] : &mons[PM_LEVISTUS], mon->mx, mon->my, MM_ADJACENTOK);
 			} else if(mdat == &mons[PM_ANCIENT_OF_DEATH]){
 				if(!(u.sealsActive&SEAL_OSE)) explode(mon->mx, mon->my, AD_MAGM, MON_EXPLODE, tmp, EXPL_DARK, 1);
-			} else if(mdat->mattk[i].adtyp == AD_WTCH){
-				struct monst *mtmp, *mtmp2;
-				for (mtmp = fmon; mtmp; mtmp = mtmp2){
-					mtmp2 = mtmp->nmon;
-					if(mtmp->data == &mons[PM_SWARM_OF_SNAKING_TENTACLES] || mtmp->data == &mons[PM_LONG_SINUOUS_TENTACLE] || mtmp->data == &mons[PM_WIDE_CLUBBED_TENTACLE]){
-						if (DEADMONSTER(mtmp)) continue;
-						mtmp->mhp = -10;
-						monkilled(mtmp,"",AD_DRLI);
-					}
-				}
 			} else if(mdat->mattk[i].adtyp == AD_MAND){
 				struct monst *mtmp, *mtmp2;
 				if(mon->mcan){
@@ -3764,40 +3945,6 @@ boolean was_swallowed;			/* digestion */
 			for(i = 0; i<18; i++) makemon(&mons[PM_HORNED_DEVIL], mon->mx, mon->my, MM_ADJACENTOK);
 			for(i = 0; i<30; i++) makemon(&mons[PM_LEMURE], mon->mx, mon->my, MM_ADJACENTOK);
 	    	return (FALSE);
-		}
-		else if(mdat->mattk[i].adtyp == AD_KAOS){
-			int x = mon->mx, y = mon->my;
-			struct obj *otmp;
-			makemon(&mons[PM_CHAOS], mon->mx, mon->my, MM_ADJACENTOK);
-			// if(mvitals[PM_TIAMAT__THE_FIEND_OF_WIND].died){
-				// otmp = mksobj_at(CRYSTAL_BALL, x, y, FALSE, FALSE);
-				// otmp = oname(otmp, artiname(ART_AIR_CRYSTAL));		
-				// curse(otmp);
-				// otmp->oerodeproof = TRUE;
-				// // rloco(otmp);
-			// }
-			// if(mvitals[PM_KRAKEN__THE_FIEND_OF_WATER].died){
-				// otmp = mksobj_at(CRYSTAL_BALL, x, y, FALSE, FALSE);
-				// otmp = oname(otmp, artiname(ART_WATER_CRYSTAL));		
-				// curse(otmp);
-				// otmp->oerodeproof = TRUE;
-				// // rloco(otmp);
-			// }
-			// if(mvitals[PM_KARY__THE_FIEND_OF_FIRE].died){
-				// otmp = mksobj_at(CRYSTAL_BALL, x, y, FALSE, FALSE);
-				// otmp = oname(otmp, artiname(ART_FIRE_CRYSTAL));
-				// curse(otmp);
-				// otmp->oerodeproof = TRUE;
-				// // rloco(otmp);
-			// }
-			// if(mvitals[PM_LICH__THE_FIEND_OF_EARTH].died){
-				// otmp = mksobj_at(CRYSTAL_BALL, x, y, FALSE, FALSE);
-				// otmp = oname(otmp, artiname(ART_EARTH_CRYSTAL));		
-				// curse(otmp);
-				// otmp->oerodeproof = TRUE;
-				// // rloco(otmp);
-			// }
-			return (FALSE);
 		}
   		else if(	( (mdat->mattk[i].aatyp == AT_NONE && mdat==&mons[PM_GREAT_CTHULHU])
 					 || mdat->mattk[i].aatyp == AT_BOOM) 
@@ -4053,6 +4200,8 @@ boolean was_swallowed;			/* digestion */
 	if (is_golem(mdat)
 		   || is_mplayer(mdat)
 		   || is_rider(mdat)
+		   || mon->m_id == quest_status.leader_m_id
+		   || mon->data->msound == MS_NEMESIS
 		   || (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mon->mtame)
 		   || mdat == &mons[PM_UNDEAD_KNIGHT]
 		   || mdat == &mons[PM_WARRIOR_OF_SUNLIGHT]
@@ -4065,6 +4214,10 @@ boolean was_swallowed;			/* digestion */
 		   || mdat == &mons[PM_NIGHTMARE]
 		   || mdat == &mons[PM_CHROMATIC_DRAGON]
 		   || mdat == &mons[PM_PLATINUM_DRAGON]
+		   || mdat == &mons[PM_CHANGED]
+		   || mdat == &mons[PM_WARRIOR_CHANGED]
+		   || mdat == &mons[PM_TWITCHING_FOUR_ARMED_CHANGED]
+		   || mdat == &mons[PM_CLAIRVOYANT_CHANGED]
 //		   || mdat == &mons[PM_PINK_UNICORN]
 		   )
 		return TRUE;
@@ -4288,7 +4441,7 @@ register struct monst *mdef;
 	if (wasinside) {
 		if (is_animal(mdef->data))
 			You("%s through an opening in the new %s.",
-				locomotion(youracedata, "jump"),
+				locomotion(&youmonst, "jump"),
 				xname(otmp));
 	}
 }
@@ -4420,7 +4573,7 @@ register struct monst *mdef;
 	if (wasinside) {
 		if (is_animal(mdef->data))
 			You("%s through an opening in the new %s.",
-				locomotion(youracedata, "jump"),
+				locomotion(&youmonst, "jump"),
 				xname(otmp));
 	}
 }
@@ -4550,7 +4703,7 @@ register struct monst *mdef;
 	if (wasinside) {
 		if (is_animal(mdef->data))
 			You("%s through an opening in the new %s.",
-				locomotion(youracedata, "jump"),
+				locomotion(&youmonst, "jump"),
 				xname(otmp));
 	}
 }
@@ -4575,7 +4728,7 @@ int how;
 	    be_sad = (mdef->mtame != 0);
 
 	/* no corpses if digested or disintegrated */
-	if(how == AD_DGST || how == -AD_RBRE)
+	if(how == AD_DGST || how == -AD_RBRE || how == AD_DISN)
 	    mondead(mdef);
 	else
 	    mondied(mdef);
@@ -4627,7 +4780,7 @@ xkilled(mtmp, dest)
 	int mndx;
 	register struct obj *otmp;
 	register struct trap *t;
-	boolean redisp = FALSE;
+	boolean redisp = FALSE, illalarm = FALSE;
 	boolean wasinside = u.uswallow && (u.ustuck == mtmp);
 
 
@@ -4651,6 +4804,11 @@ xkilled(mtmp, dest)
 	    }
 	}
 
+	if(Is_illregrd(&u.uz)){
+		if(mtmp->mtrapped && t_at(x, y) && t_at(x, y)->ttyp == VIVI_TRAP){
+			illalarm = TRUE;
+		}
+	}
 	if (mtmp->mtrapped && (t = t_at(x, y)) != 0 &&
 		(t->ttyp == PIT || t->ttyp == SPIKED_PIT) &&
 		boulder_at(x, y))
@@ -4730,7 +4888,17 @@ xkilled(mtmp, dest)
 		) {
 			int typ;
 
+			/*Death Drop*/
 			otmp = mkobj_at(RANDOM_CLASS, x, y, TRUE);
+			if(In_quest(&u.uz) && !Role_if(PM_CONVICT)){
+				if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
+				if(otmp->oclass == ARMOR_CLASS){
+					if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+					else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
+					else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+				}
+			}
+			
 			/* Don't create large objects from small monsters */
 			typ = otmp->otyp;
 			if (mdat->msize < MZ_HUMAN && typ != FOOD_RATION
@@ -4777,7 +4945,12 @@ cleanup:
 		u.hod += 10;
 		You_feel("guilty...");
 	}
-	
+	/*Killing the specimens in the Dungeon of Ill-Regard angers the autons*/
+	if(illalarm){
+		u.uevent.uaxus_foe = 1;
+		pline("An alarm sounds!");
+		aggravate();
+	}
 	/* give experience points */
 	tmp = experience(mtmp, (int)mvitals[mndx].died + 1);
 	more_experienced(tmp, 0);
@@ -5032,6 +5205,7 @@ int  typ, fatal, opoistype;
 			} else {
 				i = thrown_weapon ? rnd(6) : rn1(10,6);
 				if(Half_physical_damage) i = (i+1) / 2;
+				if(u.uvaul_duration) i = (i + 1) / 2;
 				losehp(i, pname, kprefix);
 			}
 			if(u.uhp < 1) {
@@ -5070,12 +5244,14 @@ int  typ, fatal, opoistype;
 		} else if(!rn2((fatal/3) + 20*thrown_weapon)){
 			i = thrown_weapon ? 3 : 8;
 			if(Half_physical_damage) i = (i+1) / 2;
+			if(u.uvaul_duration) i = (i + 1) / 2;
 			losehp(i, pname, kprefix);
 			make_blinded(rn1(20, 25),
 					 (boolean)!Blind);
 		} else{
 			i = thrown_weapon ? rnd(3) : rn1(5,3);
 			if(Half_physical_damage) i = (i+1) / 2;
+			if(u.uvaul_duration) i = (i + 1) / 2;
 			losehp(i, pname, kprefix);
 		}
 	}
@@ -5085,11 +5261,13 @@ int  typ, fatal, opoistype;
 		} else if(!rn2((fatal) + 20*thrown_weapon)){
 			i = thrown_weapon ? 6 : 16;
 			if(Half_physical_damage) i = (i+1) / 2;
+			if(u.uvaul_duration) i = (i + 1) / 2;
 			losehp(i, pname, kprefix);
 			nomul(-(rn1(5, 12 - 6)), "immobilized by paralysis venom");
 		} else{
 			i = thrown_weapon ? rnd(6) : rn1(10,6);
 			if(Half_physical_damage) i = (i+1) / 2;
+			if(u.uvaul_duration) i = (i + 1) / 2;
 			losehp(i, pname, kprefix);
 		}
 	}

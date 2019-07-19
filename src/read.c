@@ -21,7 +21,7 @@
 boolean	known;
 
 static NEARDATA const char readable[] =
-		   { ALL_CLASSES, SCROLL_CLASS, SPBOOK_CLASS, 0 };
+		   { ALL_CLASSES, SCROLL_CLASS, TILE_CLASS, SPBOOK_CLASS, 0 };
 static const char all_count[] = { ALLOW_COUNT, ALL_CLASSES, 0 };
 
 static void FDECL(wand_explode, (struct obj *));
@@ -33,6 +33,7 @@ static void FDECL(randomize,(int *, int));
 static void FDECL(forget_single_object, (int));
 static void FDECL(maybe_tame, (struct monst *,struct obj *));
 static void FDECL(ranged_set_lightsources, (int, int, genericptr_t));
+static int FDECL(read_tile, (struct obj *));
 
 int
 doread()
@@ -467,8 +468,11 @@ doread()
 			return 1;
 		}
 #endif	/* TOURIST */
+	} else if (scroll->oclass == TILE_CLASS){
+		return read_tile(scroll);
 	} else if (scroll->oclass != SCROLL_CLASS
-		&& scroll->oclass != SPBOOK_CLASS) {
+		&& scroll->oclass != SPBOOK_CLASS
+	) {
 	    pline(silly_thing_to, "read");
 	    return(0);
 	} else if (Blind) {
@@ -537,6 +541,118 @@ doread()
 	return(1);
 }
 
+static
+int
+read_tile(scroll)
+struct obj *scroll;
+{
+	static long last_used_move = -1;
+	static short last_used_movement = 0;
+	int res;
+	int duration;
+	//Speak one word of power per move free.
+	res = (moves == last_used_move) &&
+	      (youmonst.movement == last_used_movement);
+	last_used_move = moves;
+	last_used_movement = youmonst.movement;
+	
+	if(!scroll->dknown){
+		You("have never seen it!");
+		return 0;
+	}
+	if(!objects[scroll->otyp].oc_name_known){
+		You("don't know how to pronounce the glyph!");
+		return 0;
+	}
+	if(scroll->otyp == SYLLABLE_OF_STRENGTH__AESH){
+		if(scroll->cursed){
+			pline("\"Aesh!\" The shard's glyph resonates and turns black while the shard turns to dust.");
+			duration = 40;
+			//Note: 4x duration, no permanent bonus
+		} else if(scroll->blessed){
+			pline("\"Aesh!\" The shard's glyph resonates and glows brightly while the shard turns to dust.");
+			duration = 15; //150%
+		} else {
+			pline("\"Aesh!\" The shard's glyph resonates and begins to glow while the shard turns to dust.");
+			duration = 10;
+		}
+		u.uaesh_duration += duration;
+		if(!scroll->cursed) u.uaesh++;
+	} else if(scroll->otyp == SYLLABLE_OF_POWER__KRAU){
+		if(scroll->cursed){
+			pline("\"Krau!\" The shard's glyph resonates and turns black while the shard turns to dust.");
+			duration = 40;
+			//Note: 4x duration, no permanent bonus
+		} else if(scroll->blessed){
+			pline("\"Krau!\" The shard's glyph resonates and glows brightly while the shard turns to dust.");
+			duration = 15; //150%
+		} else {
+			pline("\"Krau!\" The shard's glyph resonates and begins to glow while the shard turns to dust.");
+			duration = 10;
+		}
+		u.ukrau_duration += duration;
+		if(!scroll->cursed) u.ukrau++;
+	} else if(scroll->otyp == SYLLABLE_OF_LIFE__HOON){
+		if(scroll->cursed){
+			pline("\"Hoon!\" The shard's glyph resonates and turns black while the shard turns to dust.");
+			duration = 40;
+			//Note: 4x duration, no permanent bonus
+		} else if(scroll->blessed){
+			pline("\"Hoon!\" The shard's glyph resonates and glows brightly while the shard turns to dust.");
+			duration = 15; //150%
+		} else {
+			pline("\"Hoon!\" The shard's glyph resonates and begins to glow while the shard turns to dust.");
+			duration = 10;
+		}
+		u.uhoon_duration += duration;
+		if(!scroll->cursed) u.uhoon++;
+	} else if(scroll->otyp == SYLLABLE_OF_GRACE__UUR){
+		if(scroll->cursed){
+			pline("\"Uur!\" The shard's glyph resonates and turns black while the shard turns to dust.");
+			duration = 40;
+			//Note: 4x duration, no permanent bonus
+		} else if(scroll->blessed){
+			pline("\"Uur!\" The shard's glyph resonates and glows brightly while the shard turns to dust.");
+			duration = 15; //150%
+		} else {
+			pline("\"Uur!\" The shard's glyph resonates and begins to glow while the shard turns to dust.");
+			duration = 10;
+		}
+		u.uuur_duration += duration;
+		if(!scroll->cursed) u.uuur++;
+	} else if(scroll->otyp == SYLLABLE_OF_THOUGHT__NAEN){
+		if(scroll->cursed){
+			pline("\"Naen!\" The shard's glyph resonates and turns black while the shard turns to dust.");
+			duration = 40;
+			//Note: 4x duration, no permanent bonus
+		} else if(scroll->blessed){
+			pline("\"Naen!\" The shard's glyph resonates and glows brightly while the shard turns to dust.");
+			duration = 15; //150%
+		} else {
+			pline("\"Naen!\" The shard's glyph resonates and begins to glow while the shard turns to dust.");
+			duration = 10;
+		}
+		u.unaen_duration += duration;
+		if(!scroll->cursed) u.unaen++;
+	} else if(scroll->otyp == SYLLABLE_OF_SPIRIT__VAUL){
+		if(scroll->cursed){
+			pline("\"Vaul!\" The shard's glyph resonates and turns black while the shard turns to dust.");
+			duration = 40;
+			//Note: 4x duration, no permanent bonus
+		} else if(scroll->blessed){
+			pline("\"Vaul!\" The shard's glyph resonates and glows brightly while the shard turns to dust.");
+			duration = 15; //150%
+		} else {
+			pline("\"Vaul!\" The shard's glyph resonates and begins to glow while the shard turns to dust.");
+			duration = 10;
+		}
+		u.uvaul_duration += duration;
+		if(!scroll->cursed) u.uvaul++;
+	}
+	useup(scroll);
+	return res;
+}
+
 static void
 stripspe(obj)
 register struct obj *obj;
@@ -545,7 +661,7 @@ register struct obj *obj;
 	else {
 		if (obj->spe > 0) {
 		    obj->spe = 0;
-		    if (obj->otyp == OIL_LAMP || obj->otyp == BRASS_LANTERN)
+		    if (obj->otyp == OIL_LAMP || obj->otyp == LANTERN)
 			obj->age = 0;
 		    Your("%s %s briefly.",xname(obj), otense(obj, "vibrate"));
 		} else pline1(nothing_happens);
@@ -588,7 +704,7 @@ struct obj *obj;
 //#ifdef FIREARMS
 	if (is_blaster(obj) && (obj->recharged < 4 || (obj->otyp != HAND_BLASTER && obj->otyp != ARM_BLASTER)))
 	    return TRUE;
-	if ((obj->otyp == FORCE_PIKE || obj->otyp == VIBROBLADE || obj->otyp == SEISMIC_HAMMER))
+	if (is_vibroweapon(obj) || obj->otyp == SEISMIC_HAMMER)
 	    return TRUE;
 //#endif
 	if (is_weptool(obj))	/* specific check before general tools */
@@ -601,8 +717,10 @@ struct obj *obj;
 /*
  * recharge an object; curse_bless is -1 if the recharging implement
  * was cursed, +1 if blessed, 0 otherwise.
+ *
+ * Returns 1 if the item is destroyed
  */
-void
+int
 recharge(obj, curse_bless)
 struct obj *obj;
 int curse_bless;
@@ -635,7 +753,7 @@ int curse_bless;
 	    if (!(obj->oartifact) && n > 0 && (obj->otyp == WAN_WISHING ||
 		    (n * n * n > rn2(7*7*7)))) {	/* recharge_limit */
 		wand_explode(obj);
-		return;
+		return 1;
 	    }
 	    /* didn't explode, so increment the recharge count */
 	    if(n < 7) obj->recharged = (unsigned)(n + 1);
@@ -654,7 +772,7 @@ int curse_bless;
 		else obj->spe++;
 		if (obj->otyp == WAN_WISHING && obj->spe > 3) {
 		    wand_explode(obj);
-		    return;
+		    return 1;
 		}
 		if (obj->spe >= lim) p_glow2(obj, NH_BLUE);
 		else p_glow1(obj);
@@ -675,6 +793,7 @@ int curse_bless;
 				s = rnd(3 * abs(obj->spe));	/* amount of damage */
 				useup(obj);
 				losehp(s, "exploding ring", KILLED_BY_AN);
+				return 1;
 			} else {
 				long mask = is_on ? (obj == uleft ? LEFT_RING :
 							 RIGHT_RING) : 0L;
@@ -700,8 +819,7 @@ int curse_bless;
 	    }
 
 	} else if (obj->oclass == TOOL_CLASS || is_blaster(obj)
-		   || obj->otyp == DWARVISH_HELM || obj->otyp == VIBROBLADE 
-		   || obj->otyp == FORCE_PIKE || obj->otyp == SEISMIC_HAMMER) {
+		   || obj->otyp == DWARVISH_HELM || is_vibroweapon(obj)) {
 	    int rechrg = (int)obj->recharged;
 
 	    if (objects[obj->otyp].oc_charged) {
@@ -758,7 +876,7 @@ int curse_bless;
 		break;
 	    case DWARVISH_HELM:
 	    case OIL_LAMP:
-	    case BRASS_LANTERN:
+	    case LANTERN:
 		if (is_cursed) {
 		    if (obj->otyp == DWARVISH_HELM) {
 			/* Don't affect the +/- of the helm */
@@ -781,7 +899,11 @@ int curse_bless;
 		    if (obj->otyp != DWARVISH_HELM) {
 				obj->spe = 1;
 		    }
+		    obj->age += 750;
+		    if (obj->age > 150000) obj->age = 1500;
+		    p_glow1(obj);
 		}
+		break;
 //#ifdef FIREARMS
 	    case HAND_BLASTER:
 	    case ARM_BLASTER:
@@ -800,7 +922,18 @@ int curse_bless;
 		break;
 	    case CUTTING_LASER:
 	    case VIBROBLADE:
+	    case WHITE_VIBROSWORD:
+	    case GOLD_BLADED_VIBROSWORD:
+	    case WHITE_VIBROZANBATO:
+	    case GOLD_BLADED_VIBROZANBATO:
+	    case RED_EYED_VIBROSWORD:
+	    case WHITE_VIBROSPEAR:
+	    case GOLD_BLADED_VIBROSPEAR:
 	    case FORCE_PIKE:
+	    case FORCE_BLADE:
+	    case DOUBLE_FORCE_BLADE:
+	    case FORCE_SWORD:
+	    case FORCE_WHIP:
 	    case SEISMIC_HAMMER:
 			if(is_blessed) obj->ovar1 = 100L;
 			else if(is_cursed) obj->ovar1 = 10L;
@@ -899,6 +1032,7 @@ int curse_bless;
  not_chargable:
 	    You("have a feeling of loss.");
 	}
+	return 0;
 }
 
 
@@ -1229,16 +1363,7 @@ struct obj	*sobj;
 			break;
 		}
 		/* elven armor vibrates warningly when enchanted beyond a limit */
-		special_armor = is_elven_armor(otmp) ||
-			arti_plussev(otmp) || /* special artifact armors */
-			(Role_if(PM_WIZARD) && otmp->otyp == CORNUTHAUM) ||
-			(Role_if(PM_WIZARD) && otmp->otyp == ROBE && otmp->oartifact == ART_ROBE_OF_THE_ARCHMAGI) ||
-			otmp->otyp == CRYSTAL_HELM ||
-			otmp->otyp == CRYSTAL_PLATE_MAIL ||
-			otmp->otyp == CRYSTAL_SHIELD ||
-			otmp->otyp == CRYSTAL_GAUNTLETS ||
-			otmp->otyp == CRYSTAL_BOOTS ||
-			otmp->otyp == CLOAK_OF_PROTECTION;//Cloaks of protection are specialized defensive items.
+		special_armor = is_plussev_armor(otmp);
 		if (sobj->cursed)
 		    same_color =
 			(otmp->otyp == BLACK_DRAGON_SCALE_MAIL ||
@@ -1361,10 +1486,11 @@ struct obj	*sobj;
 	    break;
 	case SCR_CONFUSE_MONSTER:
 	case SPE_CONFUSE_MONSTER:
-		if(youracedata->mlet != S_HUMAN || sobj->cursed) {
-			if(!HConfusion) You_feel("confused.");
-			make_confused(HConfusion + rnd(100),FALSE);
-		} else  if(confused) {
+		// if(youracedata->mlet != S_HUMAN || sobj->cursed) {
+			// if(!HConfusion) You_feel("confused.");
+			// make_confused(HConfusion + rnd(100),FALSE);
+		// } else  if(confused) {
+		if(confused) {
 		    if(!sobj->blessed) {
 			Your("%s begin to %s%s.",
 			    makeplural(body_part(HAND)),
@@ -1810,7 +1936,7 @@ struct obj	*sobj;
 	    	    	    /* Find the monster here (won't be player) */
 	    	    	    mtmp = m_at(x, y);
 	    	    	    if (mtmp && !amorphous(mtmp->data) &&
-	    	    	    		!passes_walls(mtmp->data) &&
+	    	    	    		!mon_resistance(mtmp,PASSES_WALLS) &&
 	    	    	    		!noncorporeal(mtmp->data) &&
 	    	    	    		!unsolid(mtmp->data)) {
 				struct obj *helmet = which_armor(mtmp, W_ARMH);
@@ -2926,6 +3052,8 @@ int gen_restrict;
 					undeadtype = CRYSTALFIED;
 				else if (!strcmpi(p, "witness"))
 					undeadtype = FRACTURED;
+				else if (!strcmpi(p, "vampiric"))
+					undeadtype = VAMPIRIC;
 				else
 				{
 					// no undead suffix was used, undo the split
@@ -2933,6 +3061,7 @@ int gen_restrict;
 				}
 			}
 			break;
+		case VAMPIRIC:
 		case ZOMBIFIED:
 		case SKELIFIED:
 		case CRYSTALFIED:
@@ -3030,6 +3159,7 @@ createmon:
 			if (!mtmp->mfaction && (
 				undeadtype == ZOMBIFIED ? can_undead_mon(mtmp) :
 				undeadtype == SKELIFIED ? can_undead_mon(mtmp) :
+				undeadtype == VAMPIRIC ? can_undead_mon(mtmp) :
 				undeadtype == CRYSTALFIED ? TRUE :
 				undeadtype == FRACTURED ? is_kamerel(mtmp->data) : 0
 				))

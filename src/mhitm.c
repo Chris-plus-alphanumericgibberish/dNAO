@@ -213,11 +213,14 @@ mattackm(magr, mdef)
 		    strike = 0,	/* hit this attack (default to 0) */
 		    attk,	/* attack attempted this time */
 		    struck = 0,	/* hit at least once */
+			marinum = 0, /* number of mari weapons used */
 		    res[NATTK];	/* results of all attacks */
     struct attack   *mattk, alt_attk;
     struct permonst *pa, *pd;
 	struct obj *oarmor;
 	boolean derundspec = 0;
+	
+	if(magr->mtrapped && t_at(magr->mx, magr->my) && t_at(magr->mx, magr->my)->ttyp == VIVI_TRAP) return 0;
 	
     if (!magr || !mdef) return(MM_MISS);		/* mike@genat */
     if (!magr->mcanmove || magr->msleeping) return(MM_MISS);
@@ -258,7 +261,7 @@ mattackm(magr, mdef)
 			tchtmp += oarmor->spe;
 		}
 	}
-	if(magr->data == &mons[PM_UVUUDAUM]){
+	if(magr->data == &mons[PM_UVUUDAUM] || magr->data == &mons[PM_CLAIRVOYANT_CHANGED]){
 		tmp += 20;
 		tchtmp += 20;
 	}
@@ -343,7 +346,7 @@ mattackm(magr, mdef)
 	if(DEADMONSTER(mdef) || DEADMONSTER(magr))
 		break;
 	res[i] = MM_MISS;
-	mattk = getmattk(pa, i, res, &alt_attk);
+	mattk = getmattk(magr, pa, i, res, &alt_attk);
 	otmp = (struct obj *)0;
 	attk = 1;
 	
@@ -351,75 +354,6 @@ mattackm(magr, mdef)
 	if (magr->data == &mons[PM_GRUE] && (i >= 2) && !((!levl[magr->mx][magr->my].lit && !(viz_array[magr->my][magr->mx] & TEMP_LIT1 && !(viz_array[magr->my][magr->mx] & TEMP_DRK1)))
 		|| (levl[magr->mx][magr->my].lit && (viz_array[magr->my][magr->mx] & TEMP_DRK1 && !(viz_array[magr->my][magr->mx] & TEMP_LIT1)))))
 		continue;
-	    
-	if(magr->mfaction == ZOMBIFIED || magr->mfaction == SKELIFIED || magr->mfaction == CRYSTALFIED){
-		if(mattk->aatyp == AT_SPIT 
-			|| mattk->aatyp == AT_BREA 
-			|| mattk->aatyp == AT_GAZE 
-			|| mattk->aatyp == AT_ARRW 
-			|| mattk->aatyp == AT_MMGC 
-			|| mattk->aatyp == AT_TNKR 
-			|| mattk->aatyp == AT_SHDW 
-			|| mattk->aatyp == AT_BEAM 
-			|| mattk->aatyp == AT_MAGC
-			|| (mattk->aatyp == AT_TENT && magr->mfaction == SKELIFIED)
-			|| (i == 0 && 
-				(mattk->aatyp == AT_CLAW || mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_MARI) && 
-				mattk->adtyp == AD_PHYS && 
-				mattk->damn*mattk->damd/2 < (magr->m_lev/10+1)*max(magr->data->msize*2, 4)/2
-			   )
-			|| (!derundspec && mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0)
-			|| (!derundspec && i == NATTK-1 && (magr->mfaction == CRYSTALFIED || magr->mfaction == SKELIFIED))
-		){
-			if(i == 0){
-				alt_attk.aatyp = AT_CLAW;
-				alt_attk.adtyp = AD_PHYS;
-				alt_attk.damn = magr->m_lev/10+1 + (magr->mfaction != ZOMBIFIED ? 1 : 0);
-				alt_attk.damd = max(magr->data->msize*2, 4);
-				mattk = &alt_attk;
-			}
-			else if(!derundspec && magr->mfaction == SKELIFIED){
-				derundspec = TRUE;
-				alt_attk.aatyp = AT_TUCH;
-				alt_attk.adtyp = AD_SLOW;
-				alt_attk.damn = 1;
-				alt_attk.damd = max(magr->data->msize*2, 4);
-				mattk = &alt_attk;
-			}
-			else if(!derundspec && magr->mfaction == CRYSTALFIED){
-				derundspec = TRUE;
-				alt_attk.aatyp = AT_TUCH;
-				alt_attk.adtyp = AD_ECLD;
-				alt_attk.damn = min(10,magr->m_lev/3);
-				alt_attk.damd = 8;
-				mattk = &alt_attk;
-			}
-			else continue;
-		}
-	}
-	if(magr->mfaction == FRACTURED){
-			if(!derundspec && 
-				mattk->aatyp == 0 && mattk->adtyp == 0 && mattk->damn == 0 && mattk->damd == 0
-			){
-				derundspec = TRUE;
-				alt_attk.aatyp = AT_CLAW;
-				alt_attk.adtyp = AD_GLSS;
-				alt_attk.damn = max(magr->m_lev/10+1, mattk->damn);
-				alt_attk.damd = max(magr->data->msize*2, max(mattk->damd, 4));
-				mattk = &alt_attk;
-			}
-			if(mattk->aatyp == AT_CLAW && 
-				(mattk->adtyp == AD_PHYS || mattk->adtyp == AD_SAMU || mattk->adtyp == AD_SQUE)
-			){
-				alt_attk.aatyp = AT_CLAW;
-				alt_attk.adtyp = AD_GLSS;
-				alt_attk.damn = mattk->damn;
-				alt_attk.damd = mattk->damd;
-				mattk = &alt_attk;
-			}
-			if(mattk->aatyp == AT_GAZE)
-				continue;
-	}
 	
 	/*Plasteel helms cover the face and prevent bite attacks*/
 	if((magr->misc_worn_check & W_ARMH) && which_armor(magr, W_ARMH) &&
@@ -498,26 +432,23 @@ mattackm(magr, mdef)
 			int wcount = 0;
 			for(otmp = magr->minvent; otmp; otmp = otmp->nobj){
 				if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-					|| (otmp->otyp == IRON_CHAIN && magr->data == &mons[PM_CATHEZAR])
+					|| (otmp->otyp == CHAIN && magr->data == &mons[PM_CATHEZAR])
 					) && !otmp->oartifact
 					&& otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)
 					&& !otmp->owornmask
 				) wcount++;
 			}
-			wcount -= i;
-			if(MON_WEP(magr))
-				wcount++;
-			if(MON_SWEP(magr))
-				wcount++;
-			for(otmp = magr->minvent; otmp; otmp = otmp->nobj){
+			wcount -= marinum;
+			if(wcount > 0) for(otmp = magr->minvent; otmp; otmp = otmp->nobj){
 				if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-					|| (otmp->otyp == IRON_CHAIN && magr->data == &mons[PM_CATHEZAR])
+					|| (otmp->otyp == CHAIN && magr->data == &mons[PM_CATHEZAR])
 					) && !otmp->oartifact
 					&& otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)
 					&& !otmp->owornmask
 					&& --wcount <= 0
 				) break;
 			}
+			marinum++;
 		} else {
 			otmp = MON_WEP(magr);
 		}
@@ -529,6 +460,10 @@ mattackm(magr, mdef)
 			if(otmp->objsize - magr->data->msize > 0){
 				tmp += -4*(otmp->objsize - magr->data->msize);
 				tchtmp += -2*(otmp->objsize - magr->data->msize);
+			}
+			if(is_lightsaber(otmp) && (magr->data == &mons[PM_MIND_FLAYER] || magr->data == &mons[PM_MASTER_MIND_FLAYER])){
+				tmp += 12;
+				tchtmp += 12;
 			}
 		}
 		/* fall through */
@@ -551,7 +486,6 @@ mattackm(magr, mdef)
 		}
 		else goto meleeattack;
 		case AT_BEAM:
-		if(magr->data->maligntyp < 0 && Is_illregrd(&u.uz)) break;
 		if(!mlined_up(magr, mdef, FALSE) || dist2(magr->mx,magr->my,mdef->mx,mdef->my) > BOLT_LIM*BOLT_LIM){
 #ifdef TAME_RANGED_ATTACKS
                     break; /* might have more ranged attacks */
@@ -596,7 +530,9 @@ meleeattack:
 		    break;
 		}
 		dieroll = rnd(20 + i*2);
-		if(mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR || mattk->aatyp == AT_SHDW){
+		if(mattk->aatyp == AT_XWEP && i>0 && res[i-1]==MM_HIT){
+			strike = TRUE; //Don't roll twice
+		} else if(mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR || mattk->aatyp == AT_SHDW){
 			strike = (tchtmp > dieroll);
 		} else {
 			strike = (tmp > dieroll);
@@ -634,15 +570,18 @@ meleeattack:
 			}
 		} else
 		    missmm(magr, mdef, mattk);
-		if(mattk->aatyp == AT_MARI && i == 5){
-			if(tmp > rnd(20 + i*2)){
-				struct attack rend = {AT_HUGS, AD_WRAP, magr->data == &mons[PM_SHAKTARI] ? 8 : 4, 6};
-				// res[i] = hitmm(magr, mdef, &rend);
+		if(distmin(magr->mx,magr->my,mdef->mx,mdef->my) < 2 && !DEADMONSTER(mdef) && magr->data == &mons[PM_DEMOGORGON] && res[i]){
+			magr->mvar2 = magr->mvar2+1;
+			if(magr->mvar2>=2){
+				struct attack rend = {AT_REND, AD_SHRD, 3, 12};
+				res[i] = hitmm(magr, mdef, &rend);
 				mon_ranged_gazeonly = 0;
+				magr->mvar2=0;
 			}
 		}
 		break;
 
+	    case AT_REND:	/* automatic if prev two attacks succeed */
 	    case AT_HUGS:	/* automatic if prev two attacks succeed */
 		strike = (i >= 2 && res[i-1] == MM_HIT && res[i-2] == MM_HIT);
 		if (strike){
@@ -681,7 +620,6 @@ meleeattack:
 		break;
 
 	    case AT_ARRW:{
-			if(magr->data->maligntyp < 0 && Is_illregrd(&u.uz)) break;
 			if((mattk->adtyp != AD_SHDW || dist2(magr->mx,magr->my,mdef->mx,mdef->my)>2) && mlined_up(magr, mdef, FALSE)){
 				int n;
 				if (canseemon(magr)) pline("%s shoots.", Monnam(magr));
@@ -786,7 +724,6 @@ meleeattack:
             case AT_MMGC:{
 				int temp=0;
 				int range;
-				if(magr->data->maligntyp < 0 && Is_illregrd(&u.uz)) break;
 				
 				if( magr->data == &mons[PM_DEMOGORGON] && distmin(magr->mx, magr->my, mdef->mx, mdef->my) > 1 && !magr->mflee && rn2(6)) 
 					break; //cast spells more rarely if he's in melee range
@@ -797,7 +734,10 @@ meleeattack:
 				else if(magr->data == &mons[PM_CHROMATIC_DRAGON] || magr->data == &mons[PM_PLATINUM_DRAGON]) range = 2;
 				else range = (BOLT_LIM*BOLT_LIM);
 				
-				if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > range) break;
+				if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > range 
+				|| !mon_can_see_mon(magr, mdef)
+				|| !clear_path(magr->mx, magr->my, mdef->mx, mdef->my)
+				) break;
 				
 				if (dist2(magr->mx,magr->my,mdef->mx,mdef->my) > 2 && mattk->adtyp != AD_SPEL && mattk->adtyp != AD_CLRC && mattk->adtyp != AD_STAR)
 					res[i] = buzzmm(magr, mdef, mattk, magr->m_lev);
@@ -818,7 +758,6 @@ meleeattack:
 		attk = 0;
 		break;
 	}
-
 	if (attk && !(res[i] & MM_AGR_DIED) &&
 	    dist2(magr->mx, magr->my, mdef->mx, mdef->my) < 3)
 	    res[i] = passivemm(magr, mdef, strike, res[i] & MM_DEF_DIED, mattk);
@@ -838,6 +777,18 @@ meleeattack:
 	if (!magr->mcanmove || magr->msleeping) return res[i];
 	if (res[i] & MM_HIT) struck = 1;	/* at least one hit */
     }
+	if(i == NATTK && res[0] == MM_HIT && res[1] == MM_HIT){
+		if(pa == &mons[PM_MARILITH] || pa == &mons[PM_SHAKTARI] || pa == &mons[PM_KARY__THE_FIEND_OF_FIRE]){
+			/*Mariliths get a wrap attack if their first two attacks hit*/
+			struct attack rend = {AT_HUGS, AD_WRAP, magr->data == &mons[PM_SHAKTARI] ? 8 : 4, 6};
+			(void) hitmm(magr, mdef, &rend);
+			mon_ranged_gazeonly = 0;
+		}
+	}
+	if(magr->data == &mons[PM_DEMOGORGON]){ 
+		magr->mvar2 = 0;
+	}
+
 
 	if (mdef->data == &mons[PM_URANIUM_IMP] && !mdef->mcan) {
 	    /* avoid mysterious force message by not using tele_restrict() */
@@ -867,7 +818,7 @@ struct monst *mdef;
     int multishot, mhp;
 	const char *onm;
 
-	if(magr->data->maligntyp < 0 && Is_illregrd(&u.uz)) return 0;
+	if(magr->mtrapped && t_at(magr->mx, magr->my) && t_at(magr->mx, magr->my)->ttyp == VIVI_TRAP) return 0;
 	
 	/* Rearranged beginning so monsters can use polearms not in a line */
 	if (magr->weapon_check == NEED_WEAPON || !MON_WEP(magr)) {
@@ -1091,6 +1042,7 @@ hitmm(magr, mdef, mattk)
 				    Sprintf(buf,"%s squeezes", magr_name);
 				    break;
 				}
+			case AT_REND:
 			case AT_NONE:
 				break;
 			default:
@@ -1124,7 +1076,7 @@ gazemm(magr, mdef, mattk)
 {
 	char buf[BUFSZ];
 
-	if(magr->data->maligntyp < 0 && Is_illregrd(&u.uz)) return MM_MISS;
+	if(magr->mtrapped && t_at(magr->mx, magr->my) && t_at(magr->mx, magr->my)->ttyp == VIVI_TRAP) return 0;
 	
 	if (magr->mcan) return MM_MISS;
 
@@ -1142,12 +1094,12 @@ gazemm(magr, mdef, mattk)
 	}
 
 	if (mattk->aatyp == AT_GAZE){
-		if ((mdef->minvis && !perceives(magr->data))
+		if ((mdef->minvis && !mon_resistance(magr,SEE_INVIS))
 			|| is_blind(magr))
 			return MM_MISS;
 	}
 	else if (mattk->aatyp == AT_WDGZ){
-		if ((magr->minvis && !perceives(mdef->data))
+		if ((magr->minvis && !mon_resistance(mdef,SEE_INVIS))
 			|| is_blind(mdef) || mdef->msleeping)
 			return MM_MISS;
 	}
@@ -1168,7 +1120,7 @@ gazemm(magr, mdef, mattk)
 						"The image is reflected away by %s %s.");
 				return (MM_MISS);
 			}
-			if (mdef->minvis && (!perceives(magr->data) || is_blind(magr))) {
+			if (mdef->minvis && (!mon_resistance(magr,SEE_INVIS) || is_blind(magr))) {
 				if (canseemon(magr)) {
 				pline("%s doesn't seem to notice that %s image was reflected.",
 					  Monnam(magr), mhis(magr));
@@ -1308,7 +1260,7 @@ mdamagem(magr, mdef, mattk)
 	boolean phasearmor = FALSE;
 	boolean weaponhit = (mattk->aatyp == AT_WEAP || mattk->aatyp == AT_XWEP || mattk->aatyp == AT_DEVA || mattk->aatyp == AT_MARI);
 	struct attack alt_attk;
-	int attack_type = (weaponhit) ? AD_PHYS : mattk->adtyp;
+	int attack_type = ((weaponhit && mattk->adtyp != AD_HEAL)) ? AD_PHYS : mattk->adtyp;
 	int ispoisoned = 0;
 	
 	if(weaponhit && mattk->adtyp != AD_PHYS) tmp = 0;
@@ -1431,7 +1383,7 @@ mdamagem(magr, mdef, mattk)
 			Sprintf(buf, "for a moment");
 		if (canseemon(mdef))
 		    pline("%s %s %s.", Monnam(mdef),
-			  makeplural(stagger(mdef->data, "stagger")), buf);
+			  makeplural(stagger(mdef, "stagger")), buf);
 		mdef->mstun = 1;
 		goto physical;
 	    case AD_LEGS:
@@ -1455,10 +1407,10 @@ mdamagem(magr, mdef, mattk)
 			tmp += u.chokhmah;
 	    case AD_WERE:
 	    case AD_PHYS:
+		case AD_SHRD:
 			//defered special attacks
 	    case AD_VORP:
 	    case AD_TENT:
-		case AD_SHRD:
 	    case AD_HODS:
 	    case AD_CHRN:
 	    case AD_SUCK:
@@ -1492,7 +1444,7 @@ physical:{
 					/* WAC -- or using a pole at short range... */
 					(is_pole(otmp) &&
 						otmp->otyp != AKLYS && 
-						otmp->otyp != FORCE_PIKE && 
+						!is_vibropike(otmp) && 
 						otmp->otyp != NAGINATA && 
 						otmp->oartifact != ART_WEBWEAVER_S_CROOK && 
 						otmp->oartifact != ART_SILENCE_GLAIVE && 
@@ -1521,7 +1473,9 @@ physical:{
 						tmp += rnd(9);
 				} else {
 					tmp += dmgval(otmp, mdef, 0);
-					if(otmp && otmp->owornmask&W_WEP && otmp->otyp == RAKUYO){
+					if(otmp && otmp->owornmask&W_WEP 
+						&& (otmp->otyp == RAKUYO || otmp->otyp == DOUBLE_FORCE_BLADE)
+					){
 						magr->movement -= NORMAL_SPEED/4;
 					}
 					if(otmp && ((is_lightsaber(otmp) && litsaber(otmp)) || arti_shining(otmp))) phasearmor = TRUE;
@@ -1553,6 +1507,14 @@ physical:{
 				if (otmp) {
 					int basedamage = tmp;
 					int newdamage = tmp;
+					if(otmp->oartifact){
+						(void)artifact_hit(magr,mdef, otmp, &newdamage, dieroll);
+						if (mdef->mhp <= 0 || migrating_mons == mdef)
+						return (MM_DEF_DIED |
+							(grow_up(magr,mdef) ? 0 : MM_AGR_DIED));
+						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
+					}
 					if(otmp->oproperties){
 						(void)oproperty_hit(magr,mdef, otmp, &newdamage, dieroll);
 						if (mdef->mhp <= 0 || migrating_mons == mdef)
@@ -1561,12 +1523,13 @@ physical:{
 						tmp += (newdamage - basedamage);
 						newdamage = basedamage;
 					}
-					if(otmp->oartifact){
-						(void)artifact_hit(magr,mdef, otmp, &newdamage, dieroll);
+					if(spec_prop_otyp(otmp)){
+						(void)otyp_hit(magr,mdef, otmp, &newdamage, dieroll);
 						if (mdef->mhp <= 0 || migrating_mons == mdef)
 						return (MM_DEF_DIED |
 							(grow_up(magr,mdef) ? 0 : MM_AGR_DIED));
 						tmp += (newdamage - basedamage);
+						newdamage = basedamage;
 					}
 				}
 				if (otmp && tmp)
@@ -1575,7 +1538,7 @@ physical:{
 				tmp += d(3*((int)mattk->damn), (int)mattk->damd);
 			}
 			// tack on bonus elemental damage, if applicable
-			if (mattk->adtyp != AD_PHYS){
+			if (mattk->adtyp != AD_PHYS && mattk->adtyp != AD_HEAL){
 				alt_attk.aatyp = AT_NONE;
 				if(mattk->adtyp == AD_OONA)
 					alt_attk.adtyp = u.oonaenergy;
@@ -1644,9 +1607,98 @@ physical:{
 					EDOG(magr)->hungrytime += pd->cnutrit/10;  //400/10 = human nut/10
 				}
 		}
+		if(mattk->adtyp == AD_SHRD){
+			struct obj *obj = some_armor(mdef);
+			if(obj){
+				int i = 0;
+				switch (mattk->aatyp) {
+					case AT_LNCK:
+					case AT_BITE:
+						pline("%s's teeth catch on %s armor!", Monnam(magr), s_suffix(mon_nam(mdef)));
+					break;
+					case AT_STNG:
+						pline("%s's stinger catches on %s armor!", Monnam(magr), s_suffix(mon_nam(mdef)));
+					break;
+					case AT_BUTT:
+						pline("%s's horn catches on %s armor!", Monnam(magr), s_suffix(mon_nam(mdef)));
+					break;
+					case AT_TENT:
+						pline("%s's tentacles catch on %s armor!", Monnam(magr), s_suffix(mon_nam(mdef)));
+					break;
+					case AT_EXPL:
+					case AT_BOOM:
+						pline("%s's shrapnel hits %s armor!", Monnam(magr), s_suffix(mon_nam(mdef)));
+					break;
+					case AT_WEAP:
+					case AT_XWEP:
+					case AT_MARI:
+						if(otmp) pline("%s's weapon strikes %s armor!", Monnam(magr), s_suffix(mon_nam(mdef)));
+						else pline("%s's claws catch on %s armor!", Monnam(magr), s_suffix(mon_nam(mdef)));
+					break;
+					default:
+						pline("%s's claws catch on %s armor!", Monnam(magr), s_suffix(mon_nam(mdef)));
+					break;
+				}
+				i = 1;
+				if(magr->data==&mons[PM_DEMOGORGON]) i += rnd(4);
+				for(; i>0; i--){
+					if(obj->spe > -1*objects[(obj)->otyp].a_ac){
+						damage_item(obj);
+						if(!i) pline("%s %s less effective.", s_suffix(Monnam(mdef)), aobjnam(obj, "seem"));
+					}
+					else if(!obj->oartifact || (magr->data==&mons[PM_DEMOGORGON] && rn2(10)) ){
+						claws_destroy_marm(mdef, obj);
+						i = 0;
+					}
+				}
+			} else if(magr->data == &mons[PM_DEMOGORGON]) {
+				if (noncorporeal(pd) || amorphous(pd)) {
+					Sprintf(buf, "%s", Monnam(magr));
+					pline("%s tries to rip %s apart!",
+				      buf, mon_nam(mdef));
+					tmp = (int)(1.5 * tmp);
+				} else {
+					mdef->mhp = 1;
+					tmp += 400; //FATAL_DAMAGE_MODIFIER;
+					Sprintf(buf, "%s", Monnam(magr));
+					pline("%s rips %s apart!",
+						  buf, mon_nam(mdef));
+				}
+			}
+		}
 		}break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		case AD_DISN:{
+			struct obj *obj;
+			int i = 0;
+			if(vis){
+				if(magr->data == &mons[PM_SWORD_ARCHON] || magr->data == &mons[PM_BAEL]) 
+					pline("%s glows faintly blue!", Monnam(mdef));
+				else pline("%s glows sickly green!", Monnam(mdef));
+			}
+			i = tmp;
+			for(; i>0; i--){
+				obj = some_armor(mdef);
+				if(obj){
+					if(obj->spe > -1*objects[(obj)->otyp].a_ac){
+						damage_item(obj);
+					}
+					else if(!obj->oartifact){
+						destroy_marm(mdef, obj);
+					}
+				} else {
+					i = 0;
+					if(!resists_disint(mdef)){
+						pline("%s disintegrates!", Monnam(mdef));
+						monkilled(mdef,"",AD_DISN);
+						if(mdef->mhp <= 0) return MM_DEF_DIED;
+					}
+				}
+			}
+			tmp = 0;
+		}break;
 	    case AD_FIRE:
+	    case AD_EFIR:
 		if (cancelled) {
 		    tmp = 0;
 		    break;
@@ -1696,6 +1748,44 @@ physical:{
 		/* only potions damage resistant players in destroy_item */
 		tmp += destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
 		break;
+	    case AD_ACFR:{
+		int mult = 1;
+		if(!resists_fire(mdef)){
+			mult++;
+			if (vis)
+				pline("%s is %s!", Monnam(mdef),
+				  on_fire(mdef->data, mattk));
+			if (mdef->data == &mons[PM_STRAW_GOLEM] ||
+				mdef->data == &mons[PM_PAPER_GOLEM] ||
+				mdef->data == &mons[PM_SPELL_GOLEM]) {
+					(void) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
+					(void) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
+					if (vis) pline("%s burns completely!", Monnam(mdef));
+					mondied(mdef);
+					if (mdef->mhp > 0) return 0;
+					else if (mdef->mtame && !vis)
+						pline("May %s roast in peace.", mon_nam(mdef));
+					return (MM_DEF_DIED | (grow_up(magr,mdef) ?
+								0 : MM_AGR_DIED));
+			} else if (mdef->data == &mons[PM_MIGO_WORKER]) {
+					if (vis) pline("%s\'s brain melts!", Monnam(mdef));
+					mondied(mdef);
+					if (mdef->mhp > 0) return 0;
+					else if (mdef->mtame && !vis)
+						pline("May %s roast in peace.", mon_nam(mdef));
+					return (MM_DEF_DIED | (grow_up(magr,mdef) ?
+								0 : MM_AGR_DIED));
+			}
+			(void) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
+			(void) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
+			(void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+		}
+		if(hates_holy_mon(mdef)){
+			if (vis) pline("%s seared by the holy flames!", Monnam(mdef));
+			mult++;
+		}
+		tmp *= mult;
+		}break;
 /////////////////////////////////////////////////
 		case AD_STDY:
 		if (magr->mcan || is_blind(magr)){
@@ -2148,7 +2238,7 @@ physical:{
 
 		if (is_angel(magr->data) && !mdef->mstun){	// angelic blinding also stuns
 			if (canseemon(mdef))
-				pline("%s %s.", Monnam(mdef), makeplural(stagger(mdef->data, "stagger")));
+				pline("%s %s.", Monnam(mdef), makeplural(stagger(mdef, "stagger")));
 			mdef->mstun = 1;
 		}
 
@@ -2275,7 +2365,7 @@ physical:{
 					magr->mhpmax += d(1,4);
 					magr->mhp += d(1,6);
 					if(magr->mhp > magr->mhpmax) magr->mhp = magr->mhpmax;
-					if(magr->mtame){
+					if(magr->mtame && !magr->isminion){
 						EDOG(magr)->hungrytime += pd->cnutrit/4;  //400/4 = human nut/4
 					}
 			}
@@ -2560,15 +2650,18 @@ physical:{
 	    default:	tmp = 0;
 			break;
 	}
-	if(magr->mfaction == ZOMBIFIED){
-		tmp *= 2;
-	}
-	if(magr->data == &mons[PM_UVUUDAUM] && !weaponhit){
+	if(magr->data == &mons[PM_UVUUDAUM] && !weaponhit && mdef->data != &mons[PM_UVUUDAUM]){
 		if(hates_unholy(mdef->data)){
-			if (vis) pline("%s's glory sears %s!", Monnam(magr), mon_nam(mdef));
+			if (vis){
+				Strcpy(buf, Monnam(magr));
+				pline("%s's glory sears %s!", buf, mon_nam(mdef));
+			}
 			tmp += d(3,7);
-		} else if(hates_holy(mdef->data)){
-			if (vis) pline("%s's glory sears %s!", Monnam(magr), mon_nam(mdef));
+		} else if(hates_holy_mon(mdef)){
+			if (vis){
+				Strcpy(buf, Monnam(magr));
+				pline("%s's glory sears %s!", buf, mon_nam(mdef));
+			}
 			tmp += d(4,9);
 		}
 	}
@@ -2954,6 +3047,12 @@ struct attack *mattk;
 			}
 			if(mdef->mtame) initedog(omon);
 		} break;
+	    case AD_SHDW:
+		    if (canseemon(magr)){
+				Strcpy(buf, s_suffix(Monnam(mdef)));
+				pline("%s falls upon %s.", buf, mon_nam(magr));
+		    }
+		break;
 	    case AD_STAR:
 			if((otmp && otmp == MON_WEP(magr)) || !hates_silver(magr->data)) {
             	tmp = 0;
@@ -2998,7 +3097,7 @@ struct attack *mattk;
 		if (mddat == &mons[PM_FLOATING_EYE]) {
 		    if (!rn2(4)) tmp = 127;
 		    if (!is_blind(magr) && haseyes(madat) && !is_blind(mdef) &&
-			(perceives(madat) || !mdef->minvis)) {
+			(mon_resistance(magr,SEE_INVIS) || !mdef->minvis)) {
 			Sprintf(buf, "%s gaze is reflected by %%s %%s.",
 				s_suffix(mon_nam(mdef)));
 			if (mon_reflects(magr,
@@ -3042,7 +3141,7 @@ struct attack *mattk;
 		    magr->mstun = 1;
 		    if (canseemon(magr))
 			pline("%s %s...", Monnam(magr),
-			      makeplural(stagger(magr->data, "stagger")));
+			      makeplural(stagger(magr, "stagger")));
 		}
 		tmp = 0;
 		break;
@@ -3059,6 +3158,24 @@ struct attack *mattk;
 		if(canseemon(magr))
 		    pline("%s is suddenly very hot!", Monnam(magr));
 		break;
+	    case AD_ACFR:{
+		int mult = 0;
+		if (!resists_fire(magr)) {
+			mult++;
+			if(canseemon(magr))
+				pline("%s is suddenly very hot!", Monnam(magr));
+		}
+		if(hates_holy_mon(magr)){
+			mult++;
+			if(canseemon(magr))
+				pline("%s seared by the holy flames!", Monnam(magr));
+		}
+		if (!tmp) {
+		    if (canseemon(magr)) {
+				pline("%s is mildly warmed.", Monnam(magr));
+		    }
+		}
+		}break;
 	    case AD_ELEC:
 	    case AD_EELC:
 		if (resists_elec(magr)) {
@@ -3106,6 +3223,7 @@ int aatyp;
     case AT_BEAM:
     case AT_SHDW:
     case AT_WISP:
+    case AT_REND:		/* If the previous attacks were OK, this one is too */
 	w_mask = ~0L;		/* special case; no defense needed */
 	break;
     case AT_CLAW:

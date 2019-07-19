@@ -369,7 +369,7 @@ still_chewing(x,y)
 	assign_level(&digging.level, &u.uz);
 	/* solid rock takes more work & time to dig through */
 	digging.effort =
-	    (IS_ROCK(lev->typ) && !IS_TREES(lev->typ) ? 30 : 60) + u.udaminc;
+	    (IS_ROCK(lev->typ) && !IS_TREES(lev->typ) ? 30 : 60) + u.udaminc + aeshbon();
 	You("start chewing %s.",
 	    boulder ? (boulder_at(x,y))->otyp==STATUE ? "on a statue" : "on a boulder" :
 	    lev->typ == IRONBARS ? "on the iron bars" :
@@ -378,7 +378,7 @@ still_chewing(x,y)
 	    "a hole in the door");
 	watch_dig((struct monst *)0, x, y, FALSE);
 	return 1;
-    } else if ((digging.effort += (30 + u.udaminc)) <= 100)  {
+    } else if ((digging.effort += (30 + u.udaminc + aeshbon())) <= 100)  {
 	if (flags.verbose)
 	    You("%s chewing on the %s.",
 		digging.chew ? "continue" : "begin",
@@ -490,7 +490,7 @@ dosinkfall()
 {
 	register struct obj *obj;
 
-	if (is_floater(youracedata) || (HLevitation & FROMOUTSIDE)) {
+	if (mon_resistance(&youmonst,LEVITATION) || (HLevitation & FROMOUTSIDE)) {
 	    You("wobble unsteadily for a moment.");
 	} else {
 	    long save_ELev = ELevitation, save_HLev = HLevitation;
@@ -558,14 +558,15 @@ register xchar x,y;
 #ifdef OVL1
 
 boolean
-bad_rock(mdat,x,y)
-struct permonst *mdat;
+bad_rock(mon,x,y)
+struct monst *mon;
 register xchar x,y;
 {
+	struct permonst *mdat = mon->data;
 	return((boolean) ((In_sokoban(&u.uz) && boulder_at(x,y)) ||
 	       (IS_ROCK(levl[x][y].typ)
 		    && (!tunnels(mdat) || needspick(mdat) || !may_dig(x,y))
-		    && !(passes_walls(mdat) && may_passwall(x,y)))));
+		    && !(mon_resistance(mon,PASSES_WALLS) && may_passwall(x,y)))));
 }
 
 boolean
@@ -614,8 +615,10 @@ int mode;
 			dmgtype(youracedata, AD_CORR))) {
 			You("eat through the bars.");
 			dissolve_bars(x,y);
+			if(youracedata == &mons[PM_RUST_MONSTER])
+				lesshungry(objects[BAR].oc_nutrition);
 	    }
-	    if (!(Passes_walls || passes_bars(youracedata)))
+	    if (!(Passes_walls || passes_bars(&youmonst)))
 		return FALSE;
 	} else if (tunnels(youracedata) && !needspick(youracedata)) {
 	    /* Eat the rock. */
@@ -704,7 +707,7 @@ int mode;
 	}
     }
     if (dx && dy
-	    && bad_rock(youracedata,ux,y) && bad_rock(youracedata,x,uy)) {
+	    && bad_rock(&youmonst,ux,y) && bad_rock(&youmonst,x,uy)) {
 	/* Move at a diagonal. */
 	if (In_sokoban(&u.uz)) {
 	    if (mode == DO_MOVE)
@@ -1021,7 +1024,7 @@ domove()
 		    if (!skates) skates = find_skates();
 		    if ((uarmf && uarmf->otyp == skates)
 			    || resists_cold(&youmonst) || Flying
-			    || is_floater(youracedata) || is_clinger(youracedata)
+			    || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			    || is_whirly(youracedata))
 			on_ice = FALSE;
 		    else if (!rn2(Cold_resistance ? 3 : 2)) {
@@ -1046,7 +1049,7 @@ domove()
 				confdir();
 				x = u.ux + u.dx;
 				y = u.uy + u.dy;
-			} while(!isok(x, y) || bad_rock(youracedata, x, y));
+			} while(!isok(x, y) || bad_rock(&youmonst, x, y));
 		}
 		/* turbulence might alter your actual destination */
 		if (u.uinwater && !(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
@@ -1189,7 +1192,7 @@ domove()
 		/* sometimes, instead of attacking, you displace it. */
 		/* Good joke, huh? */
 		/* Good joke, but players find it irritating */
-		// if (is_displacer(mtmp->data) && !rn2(2)) displacer = TRUE;
+		// if (mon_resistance(mtmp,DISPLACED) && !rn2(2)) displacer = TRUE;
 		if(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20) displacer = TRUE;
 		/* try to attack; note that it might evade */
 		/* also, we don't attack tame when _safepet_ */
@@ -1543,8 +1546,8 @@ domove()
 		/* can't swap places with pet pinned in a pit by a boulder */
 		u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
 	    } else if (u.ux0 != x && u.uy0 != y &&
-		       bad_rock(mtmp->data, x, u.uy0) &&
-		       bad_rock(mtmp->data, u.ux0, y) &&
+		       bad_rock(mtmp, x, u.uy0) &&
+		       bad_rock(mtmp, u.ux0, y) &&
 		       (bigmonst(mtmp->data) || (curr_mon_load(mtmp) > 600))) {
 		/* can't swap places when pet won't fit thru the opening */
 		u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
@@ -1559,7 +1562,9 @@ domove()
 		place_monster(mtmp, u.ux0, u.uy0);
 
 		/* check for displacing it into pools and traps */
-		switch (minliquid(mtmp) ? 2 : mintrap(mtmp)) {
+		trap = t_at(u.ux0, u.uy0);
+		int switchcase = minliquid(mtmp) ? 2 : mintrap(mtmp);
+		switch (switchcase) {
 		case 0:
 		    You("%s %s.", mtmp->mtame ? "displaced" : "frightened",
 			pnambuf);
@@ -1567,8 +1572,10 @@ domove()
 		case 1:		/* trapped */
 		case 3:		/* changed levels */
 		    /* there's already been a trap message, reinforce it */
-		    abuse_dog(mtmp);
-		    adjalign(-3);
+			if(!(switchcase == 3 && trap->ttyp == MAGIC_PORTAL)){
+			    abuse_dog(mtmp);
+			    adjalign(-3);
+			}
 		    break;
 		case 2:
 		    /* it may have drowned or died.  that's no way to
@@ -1756,8 +1763,8 @@ stillinwater:;
 	    /* limit recursive calls through teleds() */
 	    if (is_pool(u.ux, u.uy, FALSE) || is_lava(u.ux, u.uy)) {
 #ifdef STEED
-		if (u.usteed && !is_flyer(u.usteed->data) &&
-			!is_floater(u.usteed->data) &&
+		if (u.usteed && !mon_resistance(u.usteed,FLYING) &&
+			!mon_resistance(u.usteed,LEVITATION) &&
 			!is_clinger(u.usteed->data)) {
 		    dismount_steed(Underwater ?
 			    DISMOUNT_FELL : DISMOUNT_GENERIC);
@@ -1827,6 +1834,17 @@ stillinwater:;
 				if(((mtmp->m_lev) - 8) > 0){
 				    dmg = d((mtmp->m_lev) - 5,3);
 				    if(Half_physical_damage) dmg = (dmg+1) / 2;
+					if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+				    mdamageu(mtmp, dmg);
+				}
+			}
+			else if(umechanoid){
+			    int dmg;
+			    pline("Its blow glances off your head.");
+				if(((mtmp->m_lev) - 8) > 0){
+				    dmg = d((mtmp->m_lev) - 5,3);
+				    if(Half_physical_damage) dmg = (dmg+1) / 2;
+					if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 				    mdamageu(mtmp, dmg);
 				}
 			} else if (u.uac + 3 <= rnd(20))
@@ -1838,6 +1856,7 @@ stillinwater:;
 				x_monnam(mtmp, ARTICLE_A, "falling", 0, TRUE));
 			    dmg = d(mtmp->m_lev,6);
 			    if(Half_physical_damage) dmg = (dmg+1) / 2;
+				if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 			    mdamageu(mtmp, dmg);
 			}
 			break;
@@ -2069,7 +2088,7 @@ register boolean newlev;
 	    break;
 		case MORGUE:
 		    if(midnight()) {
-				const char *run = locomotion(youracedata, "Run");
+				const char *run = locomotion(&youmonst, "Run");
 				pline("%s away!  %s away!", run, run);
 		    } else
 				You("have an uncanny feeling...");
@@ -2206,7 +2225,7 @@ dopickup()
 	    }
 	}
 	if(is_pool(u.ux, u.uy, FALSE) && !is_3dwater(u.ux, u.uy) && !Is_waterlevel(&u.uz)) {//pools (bubble interior) on water level are special
-	    if (Wwalking || is_floater(youracedata) || is_clinger(youracedata)
+	    if (Wwalking || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			|| (Flying && !Breathless)) {
 		You("cannot dive into the water to pick things up.");
 		return(0);
@@ -2217,7 +2236,7 @@ dopickup()
 	    }
 	}
 	if (is_lava(u.ux, u.uy)) {
-	    if (Wwalking || is_floater(youracedata) || is_clinger(youracedata)
+	    if (Wwalking || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			|| (Flying && !Breathless)) {
 		You_cant("reach the bottom to pick things up.");
 		return(0);
@@ -2298,8 +2317,12 @@ lookaround()
 	if (levl[x][y].typ == STONE) continue;
 	if (x == u.ux-u.dx && y == u.uy-u.dy) continue;
 
-	if (IS_ROCK(levl[x][y].typ) || (levl[x][y].typ == ROOM) ||
-	    IS_AIR(levl[x][y].typ))
+	if (IS_ROCK(levl[x][y].typ) 
+		|| (levl[x][y].typ == ROOM) 
+		|| (levl[x][y].typ == GRASS) 
+		|| (levl[x][y].typ == SOIL) 
+		|| IS_AIR(levl[x][y].typ)
+	)
 	    continue;
 	else if (closed_door(x,y) ||
 		 (mtmp && mtmp->m_ap_type == M_AP_FURNITURE &&
@@ -2310,7 +2333,10 @@ lookaround()
 	    goto bcorr;
 	} else if (levl[x][y].typ == CORR) {
 bcorr:
-	    if(levl[u.ux][u.uy].typ != ROOM) {
+	    if(levl[u.ux][u.uy].typ != ROOM
+		&& levl[u.ux][u.uy].typ != GRASS
+		&& levl[u.ux][u.uy].typ != SOIL
+		) {
 		if(flags.run == 1 || flags.run == 3 || flags.run == 8) {
 		    i = dist2(x,y,u.ux+u.dx,u.uy+u.dy);
 		    if(i > 2) continue;

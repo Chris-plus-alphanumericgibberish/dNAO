@@ -6,6 +6,7 @@
 #include "mfndpos.h"
 #include "artifact.h"
 #include "epri.h"
+#include "edog.h"
 
 extern boolean notonhead;
 
@@ -335,6 +336,11 @@ struct monst *mtmp;
 			mtmp->data == &mons[PM_BYAKHEE] ||
 			(mtmp->data == &mons[PM_HUNTING_HORROR] && complete == 6) ||
 			mtmp->data == &mons[PM_MIND_FLAYER] ||
+			mtmp->data == &mons[PM_PARASITIC_MIND_FLAYER] ||
+			mtmp->data == &mons[PM_PARASITIZED_ANDROID] ||
+			mtmp->data == &mons[PM_PARASITIZED_GYNOID] ||
+			(mtmp->data == &mons[PM_PARASITIC_MASTER_MIND_FLAYER] && complete == 6) ||
+			(mtmp->data == &mons[PM_PARASITIZED_EMBRACED_ALIDER] && complete == 6) ||
 			(mtmp->data == &mons[PM_MASTER_MIND_FLAYER] && complete == 6) ||
 			mtmp->data == &mons[PM_DEEP_ONE] ||
 			mtmp->data == &mons[PM_DEEPER_ONE] ||
@@ -593,11 +599,26 @@ mon_regen(mon, digest_meal)
 struct monst *mon;
 boolean digest_meal;
 {
+	if(mon->mtrapped && t_at(mon->mx, mon->my) && t_at(mon->mx, mon->my)->ttyp == VIVI_TRAP)
+		return;
+	
 	if(!DEADMONSTER(mon) && mon->mhp < mon->mhpmax/2 && (mon->data == &mons[PM_CHANGED] || mon->data == &mons[PM_WARRIOR_CHANGED])){
 		mon->mhp -= 1;
 		flags.cth_attk=TRUE;//state machine stuff.
 		create_gas_cloud(mon->mx+rn2(3)-1, mon->my+rn2(3)-1, rnd(3), rnd(3)+1);
 		flags.cth_attk=FALSE;
+		if(mon->mhp == 0){
+			mondied(mon);
+			return;
+		}
+		if (mon->mspec_used) mon->mspec_used--;
+		if (digest_meal) {
+			if (mon->meating) mon->meating--;
+		}
+		return;
+	}
+	if(!DEADMONSTER(mon) && mon->data == &mons[PM_INVIDIAK] && !isdark(mon->mx, mon->my)){
+		mon->mhp -= 1;
 		if(mon->mhp == 0){
 			mondied(mon);
 			return;
@@ -638,7 +659,7 @@ boolean digest_meal;
 	if(mon->data == &mons[PM_UVUUDAUM]){
 		mon->mhp += 25; //Fast healing
 	} else {
-		if(mon->mhp < mon->mhpmax && regenerates(mon->data)) mon->mhp++;
+		if(mon->mhp < mon->mhpmax && mon_resistance(mon,REGENERATION)) mon->mhp++;
 		if(!nonliving_mon(mon)){
 			if (mon->mhp < mon->mhpmax){
 				//recover 1/30th hp per turn:
@@ -777,7 +798,7 @@ int *inrange, *nearby, *scared;
 	 * running into you by accident but possibly attacking the spot
 	 * where it guesses you are.
 	 */
-	if (is_blind(mtmp) || (Invis && !perceives(mtmp->data))) {
+	if (is_blind(mtmp) || (Invis && !mon_resistance(mtmp,SEE_INVIS))) {
 		seescaryx = mtmp->mux;
 		seescaryy = mtmp->muy;
 	} else {
@@ -945,8 +966,8 @@ register struct monst *mtmp;
 	if (mtmp->mstun && !rn2(10)) mtmp->mstun = 0;
 
 	/* some monsters teleport */
-	if (can_teleport(mdat) && (mtmp->mflee || !rn2(5)) && !rn2(40) && !mtmp->iswiz &&
-	    !(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz)) &&
+	if (mon_resistance(mtmp,TELEPORT) && (mtmp->mflee || !rn2(5)) && !rn2(40) && !mtmp->iswiz &&
+	    !((mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)) &&
 	    !level.flags.noteleport) {
 		(void) rloc(mtmp, FALSE);
 		return(0);
@@ -1044,7 +1065,7 @@ register struct monst *mtmp;
 	if(is_covetous(mdat) && (mdat!=&mons[PM_DEMOGORGON] || !rn2(3)) 
 		&& mdat!=&mons[PM_ELDER_PRIEST] /*&& mdat!=&mons[PM_SHAMI_AMOURAE]*/
 		&& mdat!=&mons[PM_LEGION] /*&& mdat!=&mons[PM_SHAMI_AMOURAE]*/
-		&& !(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz))
+		&& !((mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP))
 		&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful*/
 	) (void) tactics(mtmp);
 	
@@ -1068,7 +1089,7 @@ register struct monst *mtmp;
 		&& (!mtmp->mpeaceful || Darksight)
 		&& (levl[mtmp->mx][mtmp->my].lit == 1 || viz_array[mtmp->my][mtmp->mx]&TEMP_LIT1)
 		&& !mtmp->mcan && mtmp->mspec_used < 4
-		&& !(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz))
+		&& !((mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP))
 		&& !(mindless_mon(mtmp))
 	){
 		if(cansee(mtmp->mx,mtmp->my)) pline("%s invokes the darkness.",Monnam(mtmp));
@@ -1124,6 +1145,32 @@ register struct monst *mtmp;
 	/* the watch will look around and see if you are up to no good :-) */
 	if (mdat == &mons[PM_WATCHMAN] || mdat == &mons[PM_WATCH_CAPTAIN])
 		watch_on_duty(mtmp);
+	if(mdat == &mons[PM_NURSE]){
+		int i, j;
+		struct trap *ttmp;
+		struct monst *tmon;
+		for(i=-1; i<2; i++)
+			for(j=-1; j<2; j++)
+				if(isok(mtmp->mx+i,mtmp->my+j)){
+					ttmp = t_at(mtmp->mx+i,mtmp->my+j);
+					tmon = m_at(mtmp->mx+i,mtmp->my+j);
+					if(ttmp && ttmp->ttyp == VIVI_TRAP && tmon && tmon->mtrapped){
+						if(canspotmon(mtmp))
+							pline("%s frees a vivisected prisoner from an essence trap!", Monnam(mtmp));
+						tmon->mpeaceful = mtmp->mpeaceful;
+						tmon->mtrapped = 0;
+						if(mtmp->mtame){
+							reward_untrap(ttmp, tmon);
+							u.uevent.uaxus_foe = 1;
+							pline("An alarm sounds!");
+							aggravate();
+						}
+						deltrap(ttmp);
+						newsym(mtmp->mx+i,mtmp->my+j);
+						return 1;
+					}
+				}
+	}
 	if(mdat == &mons[PM_TOVE] && !rn2(20)){
 		struct trap *ttmp = t_at(mtmp->mx, mtmp->my);
 		struct rm *lev = &levl[mtmp->mx][mtmp->my];
@@ -1197,13 +1244,14 @@ register struct monst *mtmp;
 					Blind_telepat ? "latent telepathy" : "mind");
 				dmg = (mdat == &mons[PM_GREAT_CTHULHU] || mdat == &mons[PM_LUGRIBOSSK] || mdat == &mons[PM_MAANZECORIAN]) ? d(5,15) : (mdat == &mons[PM_ELDER_BRAIN]) ? d(3,15) : rnd(15);
 				if (Half_spell_damage) dmg = (dmg+1) / 2;
+				if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 				losehp(dmg, "psychic blast", KILLED_BY_AN);
 				if(mdat == &mons[PM_SEMBLANCE]) make_hallucinated(HHallucination + dmg, FALSE, 0L);
 				if(mdat == &mons[PM_GREAT_CTHULHU]) make_stunned(HStun + dmg*10, TRUE);
 				if (mdat == &mons[PM_ELDER_BRAIN]) {
 					for (m2 = fmon; m2; m2 = nmon) {
 						nmon = m2->nmon;
-						if (!DEADMONSTER(m2) && (m2->mpeaceful == mtmp->mpeaceful) && telepathic(m2->data) && (m2!=mtmp))
+						if (!DEADMONSTER(m2) && (m2->mpeaceful == mtmp->mpeaceful) && mon_resistance(m2,TELEPAT) && (m2!=mtmp))
 						{
 							m2->msleeping = 0;
 							if (!m2->mcanmove && !rn2(5)) {
@@ -1225,7 +1273,7 @@ register struct monst *mtmp;
 			if (m2->mpeaceful == mtmp->mpeaceful) continue;
 			if (mindless_mon(m2)) continue;
 			if (m2 == mtmp) continue;
-			if ((telepathic(m2->data) &&
+			if ((mon_resistance(m2,TELEPAT) &&
 			    (rn2(2) || m2->mblinded)) || !rn2(10)) {
 				if (cansee(m2->mx, m2->my))
 				    pline("It locks on to %s.", mon_nam(m2));
@@ -1317,7 +1365,8 @@ toofar:
 			mon_ranged_gazeonly = 1;//State variable
 			res = (mtmp2 == &youmonst) ? mattacku(mtmp)
 		                           : mattackm(mtmp, mtmp2);
-	        if (res & MM_AGR_DIED) return 1; /* Oops. */
+			/* note: mattacku and mattackm have different returns */
+			if ((mtmp2 == &youmonst) ? (res == 1) : (res & MM_AGR_DIED)) return 1; /* Oops. */
 
 			if(!(mon_ranged_gazeonly))
 				return 0; /* that was our move for the round */
@@ -1582,7 +1631,7 @@ register int after;
 
 	/* teleport if that lies in our nature */
 	if(mteleport(ptr) && !rn2(5) && !mtmp->mcan &&
-	   !tele_restrict(mtmp) && !(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz))
+	   !tele_restrict(mtmp) && !((mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP))
 	) {
 	    if(mtmp->mhp < 7 || mtmp->mpeaceful || rn2(2))
 		(void) rloc(mtmp, FALSE);
@@ -1778,9 +1827,9 @@ not_special:
 	else flag |= ALLOW_U;
 	if (is_minion(ptr) || is_rider(ptr)) flag |= ALLOW_SANCT;
 	/* unicorn may not be able to avoid hero on a noteleport level */
-	if (notonline(ptr) && ((can_teleport(ptr) || is_unicorn(ptr)) && !level.flags.noteleport)) flag |= NOTONL;
-	if (passes_walls(ptr)) flag |= (ALLOW_WALL | ALLOW_ROCK);
-	if (passes_bars(ptr) && !Is_illregrd(&u.uz) ) flag |= ALLOW_BARS;
+	if (notonline(ptr) && ((mon_resistance(mtmp,TELEPORT) || is_unicorn(ptr)) && !level.flags.noteleport)) flag |= NOTONL;
+	if (mon_resistance(mtmp,PASSES_WALLS)) flag |= (ALLOW_WALL | ALLOW_ROCK);
+	if (passes_bars(mtmp) && !Is_illregrd(&u.uz) ) flag |= ALLOW_BARS;
 	if (can_tunnel) flag |= ALLOW_DIG;
 	if (is_human(ptr) || ptr == &mons[PM_MINOTAUR]) flag |= ALLOW_SSM;
 	if (is_undead_mon(mtmp) && ptr->mlet != S_GHOST && ptr->mlet != S_SHADE) flag |= NOGARLIC;
@@ -1820,25 +1869,12 @@ not_special:
 			struct monst *m2 = (struct monst *)0;
 			int distminbest = SQSRCHRADIUS;
 			for(m2=fmon; m2; m2 = m2->nmon){
-				if(m2->m_id == quest_status.leader_m_id && Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz)){
-					/*make a beeline for the leader*/
-					distminbest = min(distminbest,dist2(mtmp->mx,mtmp->my,m2->mx,m2->my));
-					leader_target = TRUE;
-					gx = m2->mx;
-					gy = m2->my;
-					appr = 1;
-					if(mon_can_see_mon(mtmp, m2)){
-						mtmp->mux = m2->mx;
-						mtmp->muy = m2->my;
-						appr = 1;
-						break;
-					}
-				} else if(dist2(mtmp->mx,mtmp->my,m2->mx,m2->my) < distminbest
+				if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < distminbest
 						&& mm_aggression(mtmp,m2)
-						&& clear_path(mtmp->mx, mtmp->my, m2->mx, m2->my)
+						&& (clear_path(mtmp->mx, mtmp->my, m2->mx, m2->my) || !rn2(10))
 						&& mon_can_see_mon(mtmp, m2)
 				){
-					distminbest = dist2(mtmp->mx,mtmp->my,m2->mx,m2->my);
+					distminbest = distmin(mtmp->mx,mtmp->my,m2->mx,m2->my);
 					leader_target = FALSE;
 					gx = m2->mx;
 					gy = m2->my;
@@ -1854,7 +1890,24 @@ not_special:
 						appr = 1;
 					}
 				}
+			}//End target closest hostile
+			
+			if(Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz)){
+				for(m2=fmon; m2; m2 = m2->nmon){
+					if(m2->m_id == quest_status.leader_m_id){
+						if(distminbest >= SQSRCHRADIUS){
+							/*make a beeline for the leader*/
+							leader_target = TRUE;
+							gx = m2->mx;
+							gy = m2->my;
+							mtmp->mux = m2->mx;
+							mtmp->muy = m2->my;
+							appr = 1;
+						}
+						break;
+					}
 			}
+			}//End target ana leader
 		}
 		if(Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
 			if(mtmp->mhp == mtmp->mhpmax && (
@@ -2043,7 +2096,7 @@ not_special:
 		}
 	} else {
 	    if(is_unicorn(ptr) && rn2(2) && !tele_restrict(mtmp) && 
-			!(mtmp->data->maligntyp < 0 && Is_illregrd(&u.uz))
+			!(mtmp->data->maligntyp < 0 && !(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP))
 		) {
 			(void) rloc(mtmp, FALSE);
 			return(1);
@@ -2064,7 +2117,7 @@ postmov:
 
 		/* open a door, or crash through it, if you can */
 		if(IS_DOOR(levl[mtmp->mx][mtmp->my].typ)
-			&& !passes_walls(ptr) /* doesn't need to open doors */
+			&& !mon_resistance(mtmp,PASSES_WALLS) /* doesn't need to open doors */
 			&& !can_tunnel /* taken care of below */
 		      ) {
 		    struct rm *here = &levl[mtmp->mx][mtmp->my];
@@ -2141,12 +2194,15 @@ postmov:
 					Monnam(mtmp)); 
 				}
 				dissolve_bars(mtmp->mx, mtmp->my);
+				if(mtmp->data == &mons[PM_RUST_MONSTER] && mtmp->mtame && mtmp->isminion){
+					EDOG(mtmp)->hungrytime += 5*objects[BAR].oc_nutrition;
+				}
 			}
 		    else if (flags.verbose && canseemon(mtmp))
 				Norep("%s %s %s the iron bars.", Monnam(mtmp),
 				  /* pluralization fakes verb conjugation */
-				  makeplural(locomotion(ptr, "pass")),
-				  passes_walls(ptr) ? "through" : "between");
+				  makeplural(locomotion(mtmp, "pass")),
+				  mon_resistance(mtmp,PASSES_WALLS) ? "through" : "between");
 		}
 
 		/* possibly dig */
@@ -2333,7 +2389,7 @@ register struct monst *mtmp;
 	    } while (!isok(mx,my)
 		  || (disp != 2 && mx == mtmp->mx && my == mtmp->my)
 		  || ((mx != u.ux || my != u.uy) &&
-		      !passes_walls(mtmp->data) &&
+		      !mon_resistance(mtmp,PASSES_WALLS) &&
 		      (!ACCESSIBLE(levl[mx][my].typ) ||
 		       (closed_door(mx, my) && !can_ooze(mtmp))))
 		  || !couldsee(mx, my));
@@ -2376,7 +2432,7 @@ struct monst *mtmp;
 		    !(typ >= DAGGER && typ <= CRYSKNIFE) &&
 		    typ != SLING &&
 		    !is_cloak(obj) && typ != FEDORA &&
-		    !is_gloves(obj) && typ != LEATHER_JACKET &&
+		    !is_gloves(obj) && typ != JACKET &&
 #ifdef TOURIST
 		    typ != CREDIT_CARD && !is_shirt(obj) &&
 #endif
@@ -2393,8 +2449,9 @@ struct monst *mtmp;
 		    typ != BAG_OF_TRICKS && !Is_candle(obj) &&
 		    typ != OILSKIN_SACK && typ != LEASH &&
 		    typ != STETHOSCOPE && typ != BLINDFOLD && 
+		    typ != ANDROID_VISOR && 
 			typ != TOWEL && typ != R_LYEHIAN_FACEPLATE &&
-		    typ != TIN_WHISTLE && typ != MAGIC_WHISTLE &&
+		    typ != WHISTLE && typ != MAGIC_WHISTLE &&
 		    typ != MAGIC_MARKER && typ != TIN_OPENER &&
 		    typ != SKELETON_KEY && typ != UNIVERSAL_KEY &&
 			typ != LOCK_PICK

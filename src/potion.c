@@ -88,7 +88,7 @@ boolean talk;
 				You("wobble in the saddle.");
 			else
 #endif
-			You("%s...", stagger(youracedata, "stagger"));
+			You("%s...", stagger(&youmonst, "stagger"));
 		}
 	}
 	if ((!xtime && old) || (xtime && !old)) flags.botl = TRUE;
@@ -623,9 +623,9 @@ peffects(otmp)
 		    make_confused(itimeout_incr(HConfusion, d(3,8)), FALSE);
 		/* the whiskey makes us feel better */
 		if (!otmp->odiluted) healup(u.ulevel, 0, FALSE, FALSE);
-		if(!Race_if(PM_INCANTIFIER) && !uclockwork) u.uhunger += 130 + 10 * (2 + bcsign(otmp));
+		if(!Race_if(PM_INCANTIFIER) && !umechanoid) u.uhunger += 130 + 10 * (2 + bcsign(otmp));
 		newuhs(FALSE);
-		if (!uclockwork){
+		if (!umechanoid){
 			if(u.uhunger > u.uhungermax){
 				u.uhunger = u.uhungermax - d(2,20);
 				vomit();
@@ -636,7 +636,7 @@ peffects(otmp)
 				You("pass out.");
 				multi = -rnd(15);
 				nomovemsg = "You awake with a headache.";
-				if (!uclockwork){
+				if (!umechanoid){
 					make_vomiting(Vomiting+15+d(5,4), TRUE);
 				}
 			}
@@ -697,7 +697,7 @@ peffects(otmp)
 			  otmp->odiluted ? "reconstituted " : "",
 			  fruitname(TRUE));
 		if (otmp->otyp == POT_FRUIT_JUICE) {
-		    if(!Race_if(PM_INCANTIFIER) && !uclockwork) u.uhunger += (otmp->odiluted ? 40 : 100) + 10 * (2 + bcsign(otmp));
+		    if(!Race_if(PM_INCANTIFIER) && !umechanoid) u.uhunger += (otmp->odiluted ? 40 : 100) + 10 * (2 + bcsign(otmp));
             if(u.uhunger > u.uhungermax) u.uhunger = u.uhungermax;
 		    newuhs(FALSE);
 		    break;
@@ -1082,23 +1082,23 @@ as_extra_healing:
 			}else{
 				violated_vegetarian();
 				u.uconduct.unvegan++;
-				if (otmp->cursed)
+				if (otmp->blessed)
 				pline("Yecch!  This %s.", Hallucination ?
 				"liquid could do with a good stir" : "blood has congealed");
 				else pline(Hallucination ?
 				  "The %s liquid stirs memories of home." :
 				  "The %s blood tastes delicious.",
 				  otmp->odiluted ? "watery" : "thick");
-				if (!otmp->cursed && !Race_if(PM_INCANTIFIER) && !uclockwork)
+				if (!otmp->blessed && !Race_if(PM_INCANTIFIER) && !umechanoid)
 					lesshungry((otmp->odiluted ? 1 : 2) *
-						(otmp->blessed ? mons[(otmp)->corpsenm].cnutrit*1.5/5 : mons[(otmp)->corpsenm].cnutrit/5 ));
+						(otmp->cursed ? mons[(otmp)->corpsenm].cnutrit*1.5/5 : mons[(otmp)->corpsenm].cnutrit/5 ));
 			}
 
 		} else {
 		    violated_vegetarian();
 			u.uconduct.unvegan++;
 		    pline("Ugh.  That was vile.");
-		    if(!uclockwork && !Race_if(PM_INCANTIFIER)){
+		    if(!umechanoid && !Race_if(PM_INCANTIFIER)){
 				make_vomiting(Vomiting+d(10,8), TRUE);
 				if (!otmp->cursed)
 				lesshungry((otmp->odiluted ? 1 : 2) *
@@ -2220,19 +2220,19 @@ boolean amnesia;
 			    downgrade_obj(obj, OIL_LAMP, &used);
 			    break;
 			case DRUM_OF_EARTHQUAKE:
-			    downgrade_obj(obj, LEATHER_DRUM, &used);
+			    downgrade_obj(obj, DRUM, &used);
 			    break;
 			case MAGIC_WHISTLE:
 			    /* Magic whistles lose their powers... */
-			    downgrade_obj(obj, TIN_WHISTLE, &used);
+			    downgrade_obj(obj, WHISTLE, &used);
 			    break;
 			case MAGIC_FLUTE:
 			    /* Magic flutes sound normal again... */
-			    downgrade_obj(obj, WOODEN_FLUTE, &used);
+			    downgrade_obj(obj, FLUTE, &used);
 			    break;
 			case MAGIC_HARP:
 			    /* Magic harps sound normal again... */
-			    downgrade_obj(obj, WOODEN_HARP, &used);
+			    downgrade_obj(obj, HARP, &used);
 			    break;
 			case FIRE_HORN:
 			case FROST_HORN:
@@ -2354,7 +2354,7 @@ dodip()
 		    if (Levitation) {
 			floating_above(tmp);
 #ifdef STEED
-		    } else if (u.usteed && !is_swimmer(u.usteed->data) &&
+		    } else if (u.usteed && !mon_resistance(u.usteed,SWIMMING) &&
 			    P_SKILL(P_RIDING) < P_BASIC) {
 			rider_cant_reach(); /* not skilled enough to reach */
 #endif
@@ -2517,7 +2517,7 @@ dodip()
 		else if (was_swapwep) setuswapwep(obj);
 		else if (was_quiver) setuqwep(obj);
 
-		if (obj->otyp != save_otyp) {
+		if (obj->otyp != save_otyp || (obj->otyp == HYPOSPRAY_AMPULE && objects[HYPOSPRAY_AMPULE].oc_name_known)) {
 			makeknown(POT_POLYMORPH);
 			useup(potion);
 			prinv((char *)0, obj, 0L);
@@ -2896,7 +2896,7 @@ dodip()
 		if(!Shock_resistance){
 			losehp(d(3,6) + 3*obj->spe, "discharging sunrod", KILLED_BY_AN);
 		}
-		if(!EShock_resistance){
+		if(!InvShock_resistance){
 			if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
 			if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
 		}

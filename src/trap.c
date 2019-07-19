@@ -13,7 +13,6 @@ STATIC_DCL int FDECL(untrap_prob, (struct trap *ttmp));
 STATIC_DCL void FDECL(cnv_trap_obj, (int, int, struct trap *));
 STATIC_DCL void FDECL(move_into_trap, (struct trap *));
 STATIC_DCL int FDECL(try_disarm, (struct trap *,BOOLEAN_P));
-STATIC_DCL void FDECL(reward_untrap, (struct trap *, struct monst *));
 STATIC_DCL int FDECL(disarm_holdingtrap, (struct trap *));
 STATIC_DCL int FDECL(disarm_rust_trap, (struct trap *));
 STATIC_DCL int FDECL(disarm_fire_trap, (struct trap *));
@@ -63,14 +62,15 @@ struct monst *victim;
     int mat_idx;
     
     if (!victim) return 0;
+	if(victim == &youmonst && InvFire_resistance) return 0;
+	if(victim != &youmonst && resists_fire(victim)) return 0;
 #define burn_dmg(obj,descr) rust_dmg(obj, descr, 0, FALSE, victim)
     while (1) {
 	switch (rn2(5)) {
 	case 0:
 	    item = (victim == &youmonst) ? uarmh : which_armor(victim, W_ARMH);
 	    if (item) {
-		mat_idx = item->obj_material;
-	    	Sprintf(buf,"%s helmet", materialnm[mat_idx] );
+	    	Sprintf(buf,"%s helmet", material_name(item, FALSE));
 	    }
 	    if (!burn_dmg(item, item ? buf : "helmet")) continue;
 	    break;
@@ -123,7 +123,7 @@ int type;
 boolean print;
 struct monst *victim;
 {
-	static NEARDATA const char * const action[] = { "smoulder", "rust", "rot", "corrode" };
+	static NEARDATA const char * const action[] = { "smolder", "rust", "rot", "corrode" };
 	static NEARDATA const char * const msg[] =  { "burnt", "rusted", "rotten", "corroded" };
 	boolean vulnerable = FALSE;
 	boolean grprot = FALSE;
@@ -283,6 +283,69 @@ register int x, y, typ;
 	    case ROLLING_BOULDER_TRAP:	/* boulder will roll towards trigger */
 		(void) mkroll_launch(ttmp, x, y, BOULDER, 1L);
 		break;
+		case DART_TRAP:
+		case ARROW_TRAP:
+		{
+		// create a fake ammo representative of what the trap holds
+		struct obj* otmp = mksobj(typ == DART_TRAP ? DART : ARROW, TRUE, FALSE);
+		// set blessed/cursed/enchanted status to be consistent across fired ammo
+		ttmp->launch_blessed = otmp->blessed;
+		ttmp->launch_cursed = otmp->cursed;
+		ttmp->launch_enchant = !!(otmp->spe);
+
+		// set the material to be consistent across all fired ammunition
+		ttmp->launch_mat = otmp->obj_material;
+		if (ttmp->launch_mat == GEMSTONE) ttmp->launch_mat = MINERAL;	// no space to store specific gem type
+		// special cases: role quests
+		if (In_quest(&u.uz))
+		{
+			if (Race_if(PM_DROW))
+				ttmp->launch_mat = OBSIDIAN_MT;
+			else if (Role_if(PM_ARCHEOLOGIST) && !Is_qstart(&u.uz))
+				ttmp->launch_mat = !rn2(3) ? BONE : rn2(2) ? OBSIDIAN_MT : MINERAL;
+			else if (Role_if(PM_ANACHRONONAUT))
+				ttmp->launch_mat = PLASTIC;
+			else if (!rn2(3) && (Race_if(PM_ELF) && (Role_if(PM_RANGER) || Role_if(PM_WIZARD) || Role_if(PM_PRIEST) || Role_if(PM_NOBLEMAN))))
+				ttmp->launch_mat = BONE;
+			else if (!rn2(3) && (Race_if(PM_GNOME) && Role_if(PM_RANGER)))
+				ttmp->launch_mat = MINERAL;
+		}
+		// special cases: demon lairs
+		if		(Is_mammon_level(&u.uz))		ttmp->launch_mat = GOLD;
+		else if (Is_lolth_level(&u.uz))			ttmp->launch_mat = OBSIDIAN_MT;
+		else if (Is_orcus_level(&u.uz))			ttmp->launch_mat = BONE;
+		else if (Is_night_level(&u.uz))			ttmp->launch_mat = BONE;
+		// special cases: other
+		if		(In_outlands(&u.uz))					ttmp->launch_mat = rn2(3) ? METAL : rn2(2) ? IRON : rn2(2) ? COPPER : rn2(4) ? SILVER : GOLD;
+		else if (!rn2(3) && Is_sunsea(&u.uz))			ttmp->launch_mat = GOLD;
+		else if (!rn2(3) && Is_knox(&u.uz))				ttmp->launch_mat = !rn2(3) ? GOLD : !rn2(2) ? PLATINUM : SILVER;
+		else if (!rn2(3) && In_moloch_temple(&u.uz))	ttmp->launch_mat = BONE;
+		else if (!rn2(3) && In_mines(&u.uz))			ttmp->launch_mat = MINERAL;
+
+
+		// set the poison status to be consistent across all fired ammunition
+		ttmp->launch_pois = otmp->opoisoned;
+		// special cases: demon lairs
+		if		(Is_juiblex_level(&u.uz))		ttmp->launch_pois = OPOISON_ACID;
+		else if (Is_zuggtmoy_level(&u.uz))		ttmp->launch_pois = OPOISON_FILTH;
+		else if (Is_baphomet_level(&u.uz))		ttmp->launch_pois = OPOISON_ACID;
+		else if (Is_grazzt_level(&u.uz))		ttmp->launch_pois = OPOISON_ACID;
+		else if (Is_malcanthet_level(&u.uz))	ttmp->launch_pois = OPOISON_BASIC;
+		else if (Is_lolth_level(&u.uz))			ttmp->launch_pois = OPOISON_SLEEP;
+		else if (Is_leviathan_level(&u.uz))		ttmp->launch_pois = OPOISON_AMNES;
+		else if (Is_lilith_level(&u.uz))		ttmp->launch_pois = OPOISON_BASIC;
+		else if (Is_baalzebub_level(&u.uz))		ttmp->launch_pois = OPOISON_BASIC;
+		else if (Is_demogorgon_level(&u.uz))	ttmp->launch_pois = OPOISON_FILTH;
+		else if (Is_lamashtu_level(&u.uz))		ttmp->launch_pois = OPOISON_FILTH;
+		// special cases: alignment quests
+		else if (Is_arcadia_woods(&u.uz))		ttmp->launch_pois = OPOISON_ACID;
+		else if (In_depths(&u.uz) && !rn2(10))	ttmp->launch_pois = OPOISON_AMNES;
+		else if (Is_rlyeh(&u.uz) && !rn2(3))	ttmp->launch_pois = OPOISON_AMNES;
+		// free the temporary object
+		obfree(otmp, (struct obj*)0);
+		}
+		break;
+
 	    case RUST_TRAP:
 		if (!rn2(4)) {
 		    del_engr_at(x, y);
@@ -364,11 +427,14 @@ boolean td;	/* td == TRUE : trap door or hole */
 	    ;	/* KMH -- You can't escape the Sokoban level traps */
 	else if(Levitation || u.ustuck || !Can_fall_thru(&u.uz)
 	   || Flying || is_clinger(youracedata)
-	   || (Role_if(PM_ARCHEOLOGIST) && uwep && uwep->otyp == BULLWHIP)
+	   || (Role_if(PM_ARCHEOLOGIST) && uwep && 
+			(uwep->otyp == BULLWHIP || uwep->otyp == VIPERWHIP || uwep->otyp == FORCE_WHIP))
 	   || (Inhell && !u.uevent.invoked &&
 					newlevel == (dunlevs_in_dungeon(&u.uz) - 1))/*seal off sanctum and square level until the invocation is performed*/
 		) {
-		if (Role_if(PM_ARCHEOLOGIST) && uwep && uwep->otyp == BULLWHIP)            
+		if (Role_if(PM_ARCHEOLOGIST) && uwep && 
+			(uwep->otyp == BULLWHIP || uwep->otyp == VIPERWHIP || uwep->otyp == FORCE_WHIP)
+		)            
 		pline("But thanks to your trusty whip ...");
 	    dont_fall = "don't fall in.";
 	} else if (youracedata->msize >= MZ_HUGE) {
@@ -698,9 +764,12 @@ unsigned trflags;
 		seetrap(trap);
 		pline("An arrow shoots out at you!");
 		otmp = mksobj(ARROW, TRUE, FALSE);
-		otmp->quan = 1L;
-		otmp->owt = weight(otmp);
-		otmp->opoisoned = 0;
+		set_obj_quan(otmp, 1);
+		set_material(otmp, trap->launch_mat);
+		otmp->opoisoned = trap->launch_pois;
+		otmp->blessed = trap->launch_blessed;
+		otmp->cursed = trap->launch_cursed;
+		otmp->spe = trap->launch_enchant * (trap->launch_cursed ? -1 : 1);
 #ifdef STEED
 		if (u.usteed && !rn2(2) && steedintrap(trap, otmp)) /* nothing */;
 		else
@@ -708,10 +777,15 @@ unsigned trflags;
 		if (thitu(8, dmgval(otmp, &youmonst, 0), otmp, "arrow", shienuse) || shienuse) {
 		    obfree(otmp, (struct obj *)0);
 		} else {
-		    place_object(otmp, u.ux, u.uy);
-		    if (!Blind) otmp->dknown = 1;
-		    stackobj(otmp);
-		    newsym(u.ux, u.uy);
+			if (is_shatterable(otmp)){
+				breaks(otmp, u.ux, u.uy);
+			}
+			else {
+				place_object(otmp, u.ux, u.uy);
+				if (!Blind) otmp->dknown = 1;
+				stackobj(otmp);
+				newsym(u.ux, u.uy);
+			}
 		}
 		break;
 	    case DART_TRAP:
@@ -725,29 +799,30 @@ unsigned trflags;
 		seetrap(trap);
 		pline("A little dart shoots out at you!");
 		otmp = mksobj(DART, TRUE, FALSE);
-		otmp->quan = 1L;
-		otmp->owt = weight(otmp);
-		if (!rn2(6)) otmp->opoisoned = rn2(4) ? OPOISON_BASIC : 
-										!rn2(3) ? OPOISON_SLEEP : 
-										rn2 (2) ? OPOISON_PARAL :
-										OPOISON_BLIND;
+		set_obj_quan(otmp, 1);
+		set_material(otmp, trap->launch_mat);
+		otmp->opoisoned = trap->launch_pois;
+		otmp->blessed = trap->launch_blessed;
+		otmp->cursed = trap->launch_cursed;
+		otmp->spe = trap->launch_enchant * (trap->launch_cursed ? -1 : 1);
 #ifdef STEED
 		if (u.usteed && !rn2(2) && steedintrap(trap, otmp)) /* nothing */;
 		else
 #endif
 		if (thitu(7, dmgval(otmp, &youmonst, 0), otmp, "little dart", shienuse) || shienuse) {
 		    if (otmp->opoisoned && !shienuse)
-			poisoned("dart", A_CON, "little dart", -10, rn2(10) ? OPOISON_BASIC :
-														!rn2(4) ? OPOISON_SLEEP :
-														!rn2(3) ? OPOISON_BLIND :
-														!rn2(2) ? OPOISON_PARAL :
-																  OPOISON_AMNES);
+			poisoned("dart", A_CON, "little dart", -10, otmp->opoisoned);
 		    obfree(otmp, (struct obj *)0);
 		} else {
-		    place_object(otmp, u.ux, u.uy);
-		    if (!Blind) otmp->dknown = 1;
-		    stackobj(otmp);
-		    newsym(u.ux, u.uy);
+			if (is_shatterable(otmp)){
+				breaks(otmp, u.ux, u.uy);
+			}
+			else {
+				place_object(otmp, u.ux, u.uy);
+				if (!Blind) otmp->dknown = 1;
+				stackobj(otmp);
+				newsym(u.ux, u.uy);
+			}
 		}
 		break;
 	    case ROCKTRAP:
@@ -774,9 +849,21 @@ unsigned trflags;
 			if(is_hard(uarmh)) {
 			    pline("Fortunately, you are wearing a hard helmet.");
 			    dmg = 2;
-			} else if (flags.verbose) {
-			    Your("%s does not protect you.", xname(uarmh));
-			}
+				} else if (umechanoid) {
+					pline("Fortunately, you have a very hard head!");
+					dmg = 2;
+				} else if (thick_skinned(youracedata)) {
+					pline("Fortunately, you have a thick head!");
+					dmg = 2;
+				} else if (flags.verbose) {
+				    Your("%s does not protect you.", xname(uarmh));
+				}
+			} else if (umechanoid) {
+				pline("Fortunately, you have a very hard head!");
+				dmg = 2;
+			} else if (thick_skinned(youracedata)) {
+				pline("Fortunately, you have a thick head!");
+				dmg = 2;
 		    }
 
 		    if (!Blind) otmp->dknown = 1;
@@ -802,6 +889,34 @@ unsigned trflags;
 		    pline("A board beneath you squeaks loudly.");
 		    wake_nearby_noisy();
 		}
+		break;
+
+		case MUMMY_TRAP:	    /* step onto the mummy trap */
+			seetrap(trap);
+			register int cnt = rnd(3)+2;
+			pline("Mummies suddenly appear around you!");
+			if (!Free_action) {                        
+				pline("You freeze for a moment, terrified!");
+				nomul(-rnd(2), "frozen by a trap");
+				exercise(A_DEX, FALSE);
+				nomovemsg = You_can_move_again;
+			} else You("are mildly startled.");
+			
+			while(cnt--)
+				(void) makemon(mkclass(S_MUMMY, G_NOHELL), u.ux, u.uy, NO_MM_FLAGS);
+
+			deltrap(trap);
+			
+		break;
+		
+	    case VIVI_TRAP:
+			if(trap->tseen){
+				You("shove through the delicate equipment, ruining it!");
+			} else {
+				You("blunder into some delicate equipment, ruining it!");
+			}
+			deltrap(trap);
+			newsym(u.ux,u.uy);	/* get rid of trap symbol */
 		break;
 
 	    case BEAR_TRAP:
@@ -870,6 +985,7 @@ unsigned trflags;
 		    pline("%s you!", A_gush_of_water_hits);
 		    You("are covered with rust!");
 		    if (Half_physical_damage) dam = (dam+1) / 2;
+			if(u.uvaul_duration) dam = (dam + 1) / 2;
 		    losehp(dam, "rusting away", KILLED_BY);
 		    break;
 		} else if (u.umonnum == PM_FLAMING_SPHERE) {
@@ -878,6 +994,7 @@ unsigned trflags;
 		    pline("%s you!", A_gush_of_water_hits);
 		    You("are extinguished!");
 		    if (Half_physical_damage) dam = (dam+1) / 2;
+			if(u.uvaul_duration) dam = (dam + 1) / 2;
 		    losehp(dam, "drenching", KILLED_BY);
 		    break;
 		} else if (u.umonnum == PM_GREMLIN && rn2(3)) {
@@ -1129,7 +1246,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 #endif
 			
 		    Sprintf(verbbuf, "%s", Levitation ? (const char *)"float" :
-		      		locomotion(youracedata, "stumble"));
+		      		locomotion(&youmonst, "stumble"));
 		    You("%s into %s spider web!",
 			verbbuf, a_your[trap->madeby_u]);
 		}
@@ -1225,7 +1342,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 #endif
 		 Sprintf(verbbuf,"%s",
 		    Levitation ? (const char *)"float" :
-		    locomotion(youracedata, "step"));
+		    locomotion(&youmonst, "step"));
 		You("%s onto a polymorph trap!", verbbuf);
 		if(Antimagic || Unchanging) {
 		    shieldeff(u.ux, u.uy);
@@ -1888,9 +2005,12 @@ register struct monst *mtmp;
 			}
 			trap->once = 1;
 			otmp = mksobj(ARROW, TRUE, FALSE);
-			otmp->quan = 1L;
-			otmp->owt = weight(otmp);
-			otmp->opoisoned = 0;
+			set_obj_quan(otmp, 1);
+			set_material(otmp, trap->launch_mat);
+			otmp->opoisoned = trap->launch_pois;
+			otmp->blessed = trap->launch_blessed;
+			otmp->cursed = trap->launch_cursed;
+			otmp->spe = trap->launch_enchant * (trap->launch_cursed ? -1 : 1);
 			if (in_sight) seetrap(trap);
 			if (thitm(8, mtmp, otmp, 0, FALSE)) trapkilled = TRUE;
 			break;
@@ -1905,12 +2025,12 @@ register struct monst *mtmp;
 			}
 			trap->once = 1;
 			otmp = mksobj(DART, TRUE, FALSE);
-			otmp->quan = 1L;
-			otmp->owt = weight(otmp);
-			if (!rn2(6)) otmp->opoisoned = rn2(4) ? OPOISON_BASIC : 
-										!rn2(3) ? OPOISON_SLEEP : 
-										rn2 (2) ? OPOISON_PARAL :
-										OPOISON_BLIND;
+			set_obj_quan(otmp, 1);
+			set_material(otmp, trap->launch_mat);
+			otmp->opoisoned = trap->launch_pois;
+			otmp->blessed = trap->launch_blessed;
+			otmp->cursed = trap->launch_cursed;
+			otmp->spe = trap->launch_enchant * (trap->launch_cursed ? -1 : 1);
 			if (in_sight) seetrap(trap);
 			if (thitm(7, mtmp, otmp, 0, FALSE)) trapkilled = TRUE;
 			break;
@@ -1933,7 +2053,7 @@ register struct monst *mtmp;
 			break;
 
 		case SQKY_BOARD:
-			if(is_flyer(mptr)) break;
+			if(mon_resistance(mtmp,FLYING)) break;
 			/* stepped on a squeaky board */
 			if (in_sight) {
 			    pline("A board beneath %s squeaks loudly.", mon_nam(mtmp));
@@ -1946,7 +2066,7 @@ register struct monst *mtmp;
 
 		case BEAR_TRAP:
 			if(mptr->msize > MZ_SMALL &&
-				!amorphous(mptr) && !is_flyer(mptr) &&
+				!amorphous(mptr) && !mon_resistance(mtmp,FLYING) &&
 				!is_whirly(mptr) && !unsolid(mptr)) {
 			    mtmp->mtrapped = 1;
 			    if(in_sight) {
@@ -2129,13 +2249,13 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		case PIT:
 		case SPIKED_PIT:
 			fallverb = "falls";
-			if (is_flyer(mptr) || is_floater(mptr) ||
+			if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
 				(mtmp->wormno && count_wsegs(mtmp) > 5) ||
 				is_clinger(mptr)) {
 			    if (!inescapable) break;	/* avoids trap */
 			    fallverb = "is dragged";	/* sokoban pit */
 			}
-			if (!passes_walls(mptr))
+			if (!mon_resistance(mtmp,PASSES_WALLS))
 			    mtmp->mtrapped = 1;
 			if (in_sight) {
 			    pline("%s %s into %s pit!",
@@ -2175,7 +2295,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    break;	/* don't activate it after all */
 			}
 			if(mtmp->mhp <= 0) break;
-			if (is_flyer(mptr) || is_floater(mptr) ||
+			if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
 				mptr == &mons[PM_WUMPUS] ||
 				(mtmp->wormno && count_wsegs(mtmp) > 5) ||
 				mptr->msize >= MZ_HUGE) {
@@ -2304,6 +2424,13 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			}
 			break;
 
+	    case VIVI_TRAP:
+			if (in_sight)
+				pline("%s smashes through the delicate equipment!",
+					  Monnam(mtmp));
+			deltrap(trap);
+			newsym(mtmp->mx, mtmp->my);
+		break;
 	    case STATUE_TRAP:
 			(void) activate_statue_trap(trap, trap->tx, trap->ty, FALSE);
 		break;
@@ -2318,7 +2445,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		case LANDMINE:
 			if(rn2(3))
 				break; /* monsters usually don't set it off */
-			if(is_flyer(mptr)) {
+			if(mon_resistance(mtmp,FLYING)) {
 				boolean already_seen = trap->tseen;
 				if (in_sight && !already_seen) {
 	pline("A trigger appears in a pile of soil below %s.", mon_nam(mtmp));
@@ -2364,7 +2491,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		    break;
 
 		case ROLLING_BOULDER_TRAP:
-		    if (!is_flyer(mptr)) {
+		    if (!mon_resistance(mtmp,FLYING)) {
 			int style = ROLL | (in_sight ? 0 : LAUNCH_UNSEEN);
 
 		        newsym(mtmp->mx,mtmp->my);
@@ -2383,7 +2510,10 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			}
 		    }
 		    break;
-
+		case MUMMY_TRAP:
+		// monsters can't activate these bad boys
+		break;
+		
 		default:
 			impossible("Some monster encountered a strange trap of type %d.", tt);
 	    }
@@ -2548,8 +2678,8 @@ float_up()
 	else
 		You("start to float in the air!");
 #ifdef STEED
-	if (u.usteed && !is_floater(u.usteed->data) &&
-						!is_flyer(u.usteed->data)) {
+	if (u.usteed && !mon_resistance(u.usteed,LEVITATION) &&
+						!mon_resistance(u.usteed,FLYING)) {
 	    if (Lev_at_will)
 	    	pline("%s magically floats up!", Monnam(u.usteed));
 	    else {
@@ -2558,6 +2688,31 @@ float_up()
 	    }
 	}
 #endif
+	return;
+}
+
+void
+m_float_up(mon, silently)
+struct monst *mon;
+boolean silently;
+{
+	boolean seen = canseemon(mon);
+
+	if (mon->mtrapped) {
+		struct trap* ttmp = t_at(mon->mx, mon->my);
+		if (ttmp->ttyp == PIT || ttmp->ttyp == SPIKED_PIT) {
+			mon->mtrapped = 0;
+			if (seen && !silently)
+				pline("%s floats up, out of the pit!", Monnam(mon));
+			fill_pit(mon->mx, mon->my);
+		}
+		else if (ttmp->ttyp == BEAR_TRAP || ttmp->ttyp == WEB || ttmp->ttyp == VIVI_TRAP) {
+			if (seen && !silently)
+				pline("%s floats upward, but is still stuck.", Monnam(mon));
+		}
+	}
+	else if (seen && !silently)
+		pline("%s starts to float in the air!", Monnam(mon));
 	return;
 }
 
@@ -2707,6 +2862,45 @@ long hmask, emask;     /* might cancel timeout */
 	return 1;
 }
 
+/* assumes that the monster is now neither flying nor levitating */
+void
+m_float_down(mon, silently)
+struct monst *mon;
+boolean silently;
+{
+	register struct trap *trap = (struct trap *)0;
+	boolean seen = canseemon(mon);
+
+	if (is_pool(mon->mx, mon->my, TRUE) || is_lava(mon->mx, mon->my))
+	{
+		if (seen && !silently)
+			pline("%s splashes down into the %s.", Monnam(mon), surface(mon->mx, mon->my));
+		silently = TRUE;	/* disable other messages from this function */
+		minliquid(mon);
+	}
+	trap = t_at(mon->mx, mon->my);
+	boolean sokoban_trap = (In_sokoban(&u.uz) && trap);
+
+	if (!sokoban_trap)
+	{
+		if (seen && !silently)
+			pline("%s floats gently to the %s.", Monnam(mon), surface(mon->mx, mon->my));
+	}
+	else {
+		if (seen && !silently)
+			pline("%s falls over.", Monnam(mon));
+		thitm(0, mon, (struct obj*)0, rnd(2), FALSE);
+		mselftouch(mon, "Falling, ", FALSE);
+	}
+
+	if (trap) {
+		mintrap(mon);
+	}
+
+	return;
+}
+
+
 STATIC_OVL void
 dofiretrap(box)
 struct obj *box;	/* null for floor trap */
@@ -2761,7 +2955,7 @@ struct obj *box;	/* null for floor trap */
 	
 	burn_away_slime();
 
-	if (burnarmor(&youmonst) || (rn2(3) && !EFire_resistance)) {
+	if (burnarmor(&youmonst) || (rn2(3) && !InvFire_resistance)) {
 	    destroy_item(SCROLL_CLASS, AD_FIRE);
 	    destroy_item(SPBOOK_CLASS, AD_FIRE);
 	    destroy_item(POTION_CLASS, AD_FIRE);
@@ -2987,7 +3181,7 @@ struct monst *owner;
 			&& (!uarmc->cursed || rn2(3))
 		   ) || (
 			ublindf
-			&& ublindf->otyp == R_LYEHIAN_FACEPLATE
+			&& (ublindf->otyp == R_LYEHIAN_FACEPLATE || ublindf->oartifact == ART_MASK_OF_TLALOC)
 			&& (!ublindf->cursed || rn2(3))
 		   ) || (
 			uarm
@@ -3129,14 +3323,14 @@ struct monst *owner;
 				// obj->otyp = OIL_LAMP;
 				// break;
 			    // case MAGIC_WHISTLE:
-				// obj->otyp = TIN_WHISTLE;
+				// obj->otyp = WHISTLE;
 				// break;	
 			    // case MAGIC_FLUTE:
-				// obj->otyp = WOODEN_FLUTE;
+				// obj->otyp = FLUTE;
 				// obj->spe  = 0;
 				// break;	
 			    // case MAGIC_HARP:
-				// obj->otyp = WOODEN_HARP;
+				// obj->otyp = HARP;
 				// obj->spe  = 0;
 				// break;
 			    // case FIRE_HORN:
@@ -3146,7 +3340,7 @@ struct monst *owner;
 				// obj->spe  = 0;
 				// break;
 			    // case DRUM_OF_EARTHQUAKE:
-				// obj->otyp = LEATHER_DRUM;
+				// obj->otyp = DRUM;
 				// obj->spe  = 0;
 				// break;
 			    // }
@@ -3358,7 +3552,7 @@ drown()
 		return(FALSE);
 	}
 	You("are drowning!");
-	if ((Teleportation || can_teleport(youracedata)) &&
+	if ((Teleportation || mon_resistance(&youmonst,TELEPORT)) &&
 		    !u.usleep && (Teleport_control || rn2(3) < Luck+2)) {
 		You("attempt a teleport spell.");	/* utcsri!carroll */
 		if (!level.flags.noteleport) {
@@ -3572,11 +3766,14 @@ int cnt;
 struct trap *ttmp;
 {
 	struct obj *otmp = mksobj(otyp, TRUE, FALSE);
-	otmp->quan=cnt;
-	otmp->owt = weight(otmp);
-	/* Only dart traps are capable of being poisonous */
-	if (otyp != DART)
-	    otmp->opoisoned = 0;
+	set_obj_quan(otmp, cnt);
+	if (ttmp->ttyp == DART_TRAP || ttmp->ttyp == ARROW_TRAP){
+		set_material(otmp, ttmp->launch_mat);
+		otmp->opoisoned = ttmp->launch_pois;
+		otmp->blessed = ttmp->launch_blessed;
+		otmp->cursed = ttmp->launch_cursed;
+		otmp->spe = ttmp->launch_enchant * (ttmp->launch_cursed ? -1 : 1);
+	}
 	place_object(otmp, ttmp->tx, ttmp->ty);
 	/* Sell your own traps only... */
 	if (ttmp->madeby_u) sellobj(otmp, ttmp->tx, ttmp->ty);
@@ -3653,8 +3850,8 @@ boolean force_failure;
 	}
 	/* duplicate tight-space checks from test_move */
 	if (u.dx && u.dy &&
-	    bad_rock(youracedata,u.ux,ttmp->ty) &&
-	    bad_rock(youracedata,ttmp->tx,u.uy)) {
+	    bad_rock(&youmonst,u.ux,ttmp->ty) &&
+	    bad_rock(&youmonst,ttmp->tx,u.uy)) {
 	    if ((invent && (inv_weight() + weight_cap() > 600)) ||
 		bigmonst(youracedata)) {
 		/* don't allow untrap if they can't get thru to it */
@@ -3716,26 +3913,37 @@ boolean force_failure;
 	return 2;
 }
 
-STATIC_OVL void
+void
 reward_untrap(ttmp, mtmp)
 struct trap *ttmp;
 struct monst *mtmp;
 {
 	if (!ttmp->madeby_u) {
-	    if (rnl(100) < 80 && !mtmp->mpeaceful &&
-		    !mtmp->msleeping && !mtmp->mfrozen &&
-		    !mindless_mon(mtmp) &&
-		    mtmp->data->mlet != S_HUMAN) {
-		mtmp->mpeaceful = 1;
-		set_malign(mtmp);	/* reset alignment */
-		pline("%s is grateful.", Monnam(mtmp));
-	    }
-	    /* Helping someone out of a trap is a nice thing to do,
-	     * A lawful may be rewarded, but not too often.  */
-	    if (!rn2(3) && rnl(100) < 16 && u.ualign.type == A_LAWFUL) {
-			adjalign(1);
-			You_feel("that you did the right thing.");
-	    }
+		if(ttmp->ttyp == VIVI_TRAP && !mindless_mon(mtmp)){
+			struct monst *newmon;
+			if(canspotmon(mtmp))
+				pline("%s is incredibly grateful!", Monnam(mtmp));
+			newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+			if(newmon){
+				mtmp = newmon;
+				newsym(mtmp->mx, mtmp->my);
+			}
+		} else {
+		    if (rnl(100) < 80 && !mtmp->mpeaceful &&
+			    !mtmp->msleeping && !mtmp->mfrozen &&
+			    !mindless_mon(mtmp) &&
+			    mtmp->data->mlet != S_HUMAN) {
+			mtmp->mpeaceful = 1;
+			set_malign(mtmp);	/* reset alignment */
+			pline("%s is grateful.", Monnam(mtmp));
+		    }
+		    /* Helping someone out of a trap is a nice thing to do,
+		     * A lawful may be rewarded, but not too often.  */
+		    if (!rn2(3) && rnl(100) < 16 && u.ualign.type == A_LAWFUL) {
+				adjalign(1);
+				You_feel("that you did the right thing.");
+		    }
+		}
 	}
 }
 
@@ -4174,6 +4382,29 @@ boolean force;
 				    return 0;
 				}
 				return help_monster_out(mtmp, ttmp);
+			case VIVI_TRAP:
+				if((mtmp = m_at(x,y))){
+					if(Role_if(PM_HEALER) || u.sealsActive&SEAL_BUER){
+						You("free %s from the delicate equipment that imprisons %s, carefully tending to %s wounds as you do.", mon_nam(mtmp), himherit(mtmp), hisherits(mtmp));
+						mtmp->mtrapped = 0;
+						reward_untrap(ttmp, mtmp);
+					} else {
+						You("try to free %s from the delicate equipment that imprisons %s.", mon_nam(mtmp), himherit(mtmp));
+						pline("Unfortunately, that equipment was the only thing keeping %s %s.", himherit(mtmp), nonliving_mon(mtmp) ? "intact" : "alive");
+						// xkilled(mtmp,1); //Breaks pacifist
+						mondied(mtmp);
+					}
+					if(Is_illregrd(&u.uz)){
+						u.uevent.uaxus_foe = 1;
+						pline("An alarm sounds!");
+						aggravate();
+					}
+				} else {
+					You("smash the delicate equipment.");
+				}
+				deltrap(ttmp);
+				newsym(u.ux + u.dx, u.uy + u.dy);
+				return 1;
 			case TELEP_TRAP:
 			case LEVEL_TELEP:
 			case MAGIC_TRAP:
@@ -4445,7 +4676,7 @@ boolean disarm;
 			} else {
 			    dmg = d(4, 4);
 			}
-			if(!EShock_resistance){
+			if(!InvShock_resistance){
 				destroy_item(RING_CLASS, AD_ELEC);
 				destroy_item(WAND_CLASS, AD_ELEC);
 			}
@@ -4473,10 +4704,10 @@ boolean disarm;
 				pline("What a groovy feeling!");
 			    else if (Blind)
 				You("%s and get dizzy...",
-				    stagger(youracedata, "stagger"));
+				    stagger(&youmonst, "stagger"));
 			    else
 				You("%s and your vision blurs...",
-				    stagger(youracedata, "stagger"));
+				    stagger(&youmonst, "stagger"));
 			}
 			make_stunned(HStun + rn1(7, 16),FALSE);
 			(void) make_hallucinated(HHallucination + rn1(5, 16),FALSE,0L);
@@ -4537,6 +4768,8 @@ register struct trap *ttmp;
 		     (ttmp->ttyp == FIRE_TRAP) ||
 		     (ttmp->ttyp == PIT) ||
 		     (ttmp->ttyp == SPIKED_PIT) ||
+		     (ttmp->ttyp == VIVI_TRAP) ||
+		     (ttmp->ttyp == MUMMY_TRAP) ||
 		     (ttmp->ttyp == HOLE) ||
 		     (ttmp->ttyp == TRAPDOOR) ||
 		     (ttmp->ttyp == TELEP_TRAP) ||
@@ -4551,6 +4784,9 @@ register struct trap *ttmp;
 		u.utraptype = 0;
 	    } else if ((mtmp = m_at(ttmp->tx, ttmp->ty)) != 0) {
 		mtmp->mtrapped = 0;
+		if(ttmp->ttyp == VIVI_TRAP){
+			mondied(mtmp);
+		}
 	    }
 	    deltrap(ttmp);
 	    return TRUE;
@@ -4728,7 +4964,7 @@ burn_stuff:
 	(void) Boots_off();
 	useup(obj);
     }
-	if(!(Wwalking || EFire_resistance)){
+	if(!(Wwalking || InvFire_resistance)){
 		destroy_item(SCROLL_CLASS, AD_FIRE);
 		destroy_item(SPBOOK_CLASS, AD_FIRE);
 		destroy_item(POTION_CLASS, AD_FIRE);
