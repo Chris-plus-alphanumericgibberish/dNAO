@@ -408,7 +408,11 @@ struct obj *otmp;
 	case WAN_DRAINING:	/* KMH */
 		reveal_invis = TRUE;
 		if(otyp == WAN_DRAINING) dmg = d((wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2,8);
-		else dmg = rnd(8);
+		else {
+			dmg = rnd(8);
+			if (uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_VHAERUN)
+				dmg += d((u.ulevel+1)/3, 4);
+		}
 		if(dbldam) dmg *= 2;
 		if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
 		if (otyp == SPE_DRAIN_LIFE){
