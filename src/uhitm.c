@@ -1111,7 +1111,13 @@ int thrown;
 			/* some artifact gloves give enchantment */
 			if (uarmg && (uarmg->oartifact == ART_PREMIUM_HEART || uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN))
 				tmp += uarmg->spe;
-
+			
+			/*Spidersilk grants sleep poisoning*/
+			if (uarm && uarm->oartifact==ART_SPIDERSILK && !rn2(5)){
+				if (resists_sleep(mon))
+					needdrugmsg = TRUE;
+				else if(sleep_monst(mon, rnd(12), ARMOR_CLASS)) druggedmon = TRUE;
+			}
 			/* dahlver nar gives bonus damage*/
 			if (u.specialSealsActive&SEAL_DAHLVER_NAR)
 				tmp += d(2, 6) + min(u.ulevel / 2, (u.uhpmax - u.uhp) / 10);
