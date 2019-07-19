@@ -228,7 +228,9 @@ hack_artifacts()
 				artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
 				artilist[ART_SCEPTRE_OF_LOLTH].spfx &= ~(SPFX_NOGEN);
 			} else {
-				artilist[ART_ROD_OF_LORDLY_MIGHT].alignment = A_NEUTRAL;
+				artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
+				artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
+				artilist[ART_DEATH_SPEAR_OF_VHAERUN].spfx &= ~(SPFX_NOGEN);
 			}
 		} else if(Race_if(PM_DWARF) && urole.ldrnum == PM_DAIN_II_IRONFOOT){
 			artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;

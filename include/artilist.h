@@ -1334,7 +1334,7 @@ A("The Web of the Chosen",	DROVEN_CLOAK, 				0,			0,/* Drow noble quest */
 	SPFX2_SILVERED,0,0),
 
 A("The Death-Spear of Vhaerun", DROVEN_SPEAR, 					0,			0,/* Hedrow noble first gift */
-	(SPFX_NOGEN|SPFX_RESTR|SPFX_DEFN|SPFX_INTEL|SPFX_DRLI),0,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_DRLI|SPFX_DEFN|SPFX_INTEL),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/, /*Needs encyc entry*/
 	PHYS(10,6),	DFNS(AD_MAGM),	NO_CARY,
 	DEATH_TCH, A_NEUTRAL, PM_NOBLEMAN, PM_DROW, 4000L, 
