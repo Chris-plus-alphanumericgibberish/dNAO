@@ -202,6 +202,7 @@ int thrown;
 	if(ammo_and_launcher(obj, launcher) && launcher->oartifact){
 		if(launcher->oartifact == ART_WRATHFUL_SPIDER) multishot += rn2(8);
 		else if(launcher->oartifact == ART_ROGUE_GEAR_SPIRITS) multishot = 2;
+		else if(launcher->oartifact == ART_PEN_OF_THE_VOID) multishot += 3;
 	}
 	
 	if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
@@ -212,10 +213,11 @@ int thrown;
 //#ifdef FIREARMS
 	    /* Rate of fire is intrinsic to the weapon - cannot be user selected
 	     * except via altmode
-	     * Only for valid launchers 
+	     * Only for firearms
 	     * (currently oc_rof conflicts with wsdam)
 	     */
-    if (launcher && ammo_and_launcher(obj,launcher)) {
+		
+    if (launcher && is_firearm(launcher) && ammo_and_launcher(obj,launcher)) {
 		if(launcher->otyp == BFG){
 			if(objects[(obj)->otyp].w_ammotyp == WP_BULLET) multishot += 2*(objects[(launcher->otyp)].oc_rof);
 			else if(objects[(obj)->otyp].w_ammotyp == WP_SHELL) multishot += 1.5*(objects[(launcher->otyp)].oc_rof);
