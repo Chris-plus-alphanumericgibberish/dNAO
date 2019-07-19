@@ -1080,6 +1080,9 @@ char *buf;
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
 			return;
 	} else {
+		/*Special case: circlets should always show their material, but oc_showmat is tied to otyp, not appearance */
+		if (obj->otyp == find_gcirclet())
+			goto force_add_material_name;
 		/*Item is made from standard material, and isn't of a type for which the material is always shown*/
 		if(objects[obj->otyp].oc_name_known && !(objects[obj->otyp].oc_showmat&IDED) && obj->obj_material == objects[obj->otyp].oc_material)
 			return;
@@ -1093,6 +1096,7 @@ char *buf;
 		if (objects[obj->otyp].oc_name_known && (objects[obj->otyp].oc_showmat&NUNIDED))
 			return;
 	}
+force_add_material_name:
 	/* add on the adjective form of the object's material */
 	Strcat(buf, material_name(obj, TRUE));
 	Strcat(buf, " ");
@@ -2844,6 +2848,7 @@ const char *oldstr;
 				return bp;
 
 		} else if (!BSTRCMPI(bp, p-5, "boots") ||
+			   !BSTRCMPI(bp, p-7, "sandals") ||
 			   !BSTRCMPI(bp, p-9, "gauntlets") ||
 			   !BSTRCMPI(bp, p-6, "tricks") ||
 			   !BSTRCMPI(bp, p-9, "paralysis") ||
@@ -3779,6 +3784,7 @@ int wishflags;
 	if (strncmpi(bp, "scroll of stinking cloud", 10)) /* not the "stinking cloud" monster */
 	if (strncmpi(bp, "rod of lordly might", 19)) /* not the "lord" rank */
 	if (strncmpi(bp, "magenta", 7)) /* not the "mage" rank */
+	if (strncmpi(bp, "band", 4)) /* not the "ban" rank */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
 	if (strncmpi(bp, "platinum dragon plate", 22)) /* not a "dragon" */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&

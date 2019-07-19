@@ -646,13 +646,13 @@ autoquiver()
 	    } else if (otmp->oclass == GEM_CLASS) {
 		;	/* skip non-rock gems--they're ammo but
 			   player has to select them explicitly */
-	    } else if (is_ammo(otmp) || is_spear(otmp)) {
-		if (ammo_and_launcher(otmp, uwep) || is_spear(otmp))
+	    } else if (ammo_and_launcher(otmp, uwep)) {
 		    /* Ammo matched with launcher (bow and arrow, crossbow and bolt) */
 		    oammo = otmp;
-		else if (ammo_and_launcher(otmp, uswapwep))
+		} else if (ammo_and_launcher(otmp, uswapwep)) {
+			/* Ammo matched with launcher in swapwep */
 		    altammo = otmp;
-		else
+		} else if (is_ammo(otmp)) {
 		    /* Mismatched ammo (no better than an ordinary weapon) */
 		    omisc = otmp;
 	    } else if (is_missile(otmp)) {
@@ -660,7 +660,8 @@ autoquiver()
 		omissile = otmp;
 	    } else if (otmp->oclass == WEAPON_CLASS && throwing_weapon(otmp)) {
 		/* Ordinary weapon */
-		if (objects[otmp->otyp].oc_skill == P_DAGGER
+		if ((objects[otmp->otyp].oc_skill == P_DAGGER ||
+			objects[otmp->otyp].oc_skill == P_SPEAR)
 			&& !omissile) 
 		    omissile = otmp;
 		else
@@ -1032,7 +1033,7 @@ hurtle_step(arg, x, y)
 	    return FALSE;
 	}
 	if ((u.ux - x) && (u.uy - y) &&
-		bad_rock(youracedata,u.ux,y) && bad_rock(youracedata,x,u.uy)) {
+		bad_rock(&youmonst,u.ux,y) && bad_rock(&youmonst,x,u.uy)) {
 	    boolean too_much = (invent && (inv_weight() + weight_cap() > 600));
 	    /* Move at a diagonal. */
 	    if (bigmonst(youracedata) || too_much) {
@@ -1050,7 +1051,7 @@ hurtle_step(arg, x, y)
 	return FALSE;
     }
     if ((u.ux - x) && (u.uy - y) &&
-	bad_rock(youracedata,u.ux,y) && bad_rock(youracedata,x,u.uy)) {
+	bad_rock(&youmonst,u.ux,y) && bad_rock(&youmonst,x,u.uy)) {
 	/* Move at a diagonal. */
 	if (In_sokoban(&u.uz)) {
 	    You("come to an abrupt halt!");
@@ -2227,37 +2228,35 @@ int thrown;
 	else if (obj->oclass == WEAPON_CLASS || is_weptool(obj) ||
 		obj->oclass == GEM_CLASS
 	) {
-	    if (is_ammo(obj) || is_spear(obj)) {
-			if (!ammo_and_launcher(obj, launcher)) {
-				if (is_spear(obj)){
-					tmp += 2; // throwing weapon bonus
-				} else {
-					tmp -= 4;
-				}
-			} else {
-				tmp += launcher->spe - greatest_erosion(launcher);
-				tmp += weapon_hit_bonus(launcher);
-				if (launcher->oartifact){
-					tmp += spec_abon(launcher, mon);
-					if(Role_if(PM_BARD)) //legend lore
-						tmp += 5;
-				}
-				/*
-				 * Elves and Samurais are highly trained w/bows,
-				 * especially their own special types of bow.
-				 * Polymorphing won't make you a bow expert.
-				 */
-				if ((Race_if(PM_ELF) || Role_if(PM_SAMURAI)) &&
-					(!Upolyd || your_race(youmonst.data)) &&
-					objects[launcher->otyp].oc_skill == P_BOW) {
-					tmp++;
-					if (Race_if(PM_ELF) && launcher->otyp == ELVEN_BOW)
-						tmp++;
-					else if (Role_if(PM_SAMURAI) && launcher->otyp == YUMI)
-						tmp++;
-		    	}
+		if (ammo_and_launcher(obj, launcher)) {
+			/* ammo and launcher */
+			tmp += launcher->spe - greatest_erosion(launcher);
+			tmp += weapon_hit_bonus(launcher);
+			if (launcher->oartifact){
+				tmp += spec_abon(launcher, mon);
+				if (Role_if(PM_BARD)) //legend lore
+					tmp += 5;
 			}
-	    } else {
+			/*
+			* Elves and Samurais are highly trained w/bows,
+			* especially their own special types of bow.
+			* Polymorphing won't make you a bow expert.
+			*/
+			if ((Race_if(PM_ELF) || Role_if(PM_SAMURAI)) &&
+				(!Upolyd || your_race(youmonst.data)) &&
+				objects[launcher->otyp].oc_skill == P_BOW) {
+				tmp++;
+				if (Race_if(PM_ELF) && launcher->otyp == ELVEN_BOW)
+					tmp++;
+				else if (Role_if(PM_SAMURAI) && launcher->otyp == YUMI)
+					tmp++;
+			}
+		}
+		else if (is_ammo(obj)) {
+			/* ammo without a launcher */
+			tmp -= 4;
+		}
+		else {
 			if (is_boomerang(obj))		/* arbitrary */
 				tmp += 4;
 			else if (throwing_weapon(obj))	/* meant to be thrown */

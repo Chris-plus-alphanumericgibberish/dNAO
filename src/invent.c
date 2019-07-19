@@ -231,6 +231,7 @@ struct obj **potmp, **pobj;
 		    if (obj == MON_WEP(otmp->ocarry)) {
 			MON_WEP(otmp->ocarry) = otmp;
 			otmp->owornmask = W_WEP;
+			update_mon_intrinsics(mon, otmp, TRUE, FALSE);
 		    }
 		}
 #endif /*0*/
@@ -604,6 +605,17 @@ register struct obj *obj;
 	freeinv_core(obj);
 	update_inventory();
 }
+
+/* remove an object from a monster's inventory */
+void
+m_freeinv(obj)
+struct obj* obj;
+{
+	extract_nobj(obj, &obj->ocarry->minvent);
+	update_mon_intrinsics(obj->ocarry, obj, FALSE, FALSE);
+	return;
+}
+
 
 void
 delallobj(x, y)
@@ -2436,18 +2448,22 @@ winid *datawin;
 
 		/* Object classes currently with no special messages here: amulets. */
 	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill)) {
+		boolean otyp_is_launcher = ((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp != ATLATL);
 		if (oc.oc_skill >= 0) {
 			if (obj) {
-				Sprintf(buf, "%s-handed weapon%s%s",
+				Sprintf(buf, "%s-handed %s%s%s",
 					(oc.oc_bimanual ? "Two" : "Single"), (is_weptool(obj) ? "-tool" : ""),
+					(otyp_is_launcher ? "launcher" : "weapon"),
 					(oc.oc_bimanual == bimanual(obj, youmonst.data) ? "." :
 					bimanual(obj, youmonst.data) ? ", but large enough you actually need two hands."
 					: ", but you can wield it one-handed.")
 					);
 			}
 			else {
-				Sprintf(buf, "%s-handed weapon%s",
-					(oc.oc_bimanual ? "Two" : "Single"), ((olet == TOOL_CLASS && oc.oc_skill) ? "-tool" : ""));
+				Sprintf(buf, "%s-handed %s%s",
+					(oc.oc_bimanual ? "Two" : "Single"),
+					(otyp_is_launcher ? "launcher" : "weapon"),
+					((olet == TOOL_CLASS && oc.oc_skill) ? "-tool" : ""));
 			}
 		}
 		else if (oc.oc_skill <= -P_BOW && oc.oc_skill >= -P_CROSSBOW) {
@@ -2459,59 +2475,64 @@ winid *datawin;
 		OBJPUTSTR(buf);
 
 		/* weapon dice! */
-		// note: dmgval_core can handle not being given an obj; it will attempt to use otyp instead
-		struct weapon_dice wdice[2];
-		(void) dmgval_core(&wdice[0], FALSE, obj, otyp);	// small dice
-		(void) dmgval_core(&wdice[1], TRUE, obj, otyp);		// large dice
+		/* Does not apply for launchers.
+		 * Liecleaver doesn't count here because its melee damage isn't in dmgval -- TODO? */
+		if (!otyp_is_launcher)
+		{
+			// note: dmgval_core can handle not being given an obj; it will attempt to use otyp instead
+			struct weapon_dice wdice[2];
+			(void)dmgval_core(&wdice[0], FALSE, obj, otyp);	// small dice
+			(void)dmgval_core(&wdice[1], TRUE, obj, otyp);		// large dice
 
-		Sprintf(buf, "Damage: ");
+			Sprintf(buf, "Damage: ");
 
-		if (wdice[0].oc.damn && wdice[0].oc.damd)
-		{
-			Sprintf(buf2, "%dd%d", wdice[0].oc.damn, wdice[0].oc.damd);
-			Strcat(buf, buf2);
-		}
-		if (wdice[0].bon.damn && wdice[0].bon.damd)
-		{
-			Sprintf(buf2, "+%dd%d", wdice[0].bon.damn, wdice[0].bon.damd);
-			Strcat(buf, buf2);
-		}
-		if (wdice[0].flat)
-		{
-			Sprintf(buf2, "%s", sitoa(wdice[0].flat));
-			Strcat(buf, buf2);
-		}
-		Strcat(buf, " versus small and ");
-		/* is there a difference between large and small dice? */
-		if (wdice[0].oc.aatyp != wdice[1].oc.aatyp ||
-			wdice[0].oc.adtyp != wdice[1].oc.adtyp ||
-			wdice[0].oc.damn != wdice[1].oc.damn ||
-			wdice[0].oc.damd != wdice[1].oc.damd ||
-			wdice[0].bon.aatyp != wdice[1].bon.aatyp ||
-			wdice[0].bon.adtyp != wdice[1].bon.adtyp ||
-			wdice[0].bon.damn != wdice[1].bon.damn ||
-			wdice[0].bon.damd != wdice[1].bon.damd ||
-			wdice[0].flat != wdice[1].flat)
-		{
-			if (wdice[1].oc.damn && wdice[1].oc.damd)
+			if (wdice[0].oc.damn && wdice[0].oc.damd)
 			{
-				Sprintf(buf2, "%dd%d", wdice[1].oc.damn, wdice[1].oc.damd);
+				Sprintf(buf2, "%dd%d", wdice[0].oc.damn, wdice[0].oc.damd);
 				Strcat(buf, buf2);
 			}
-			if (wdice[1].bon.damn && wdice[1].bon.damd)
+			if (wdice[0].bon.damn && wdice[0].bon.damd)
 			{
-				Sprintf(buf2, "+%dd%d", wdice[1].bon.damn, wdice[1].bon.damd);
+				Sprintf(buf2, "+%dd%d", wdice[0].bon.damn, wdice[0].bon.damd);
 				Strcat(buf, buf2);
 			}
-			if (wdice[1].flat)
+			if (wdice[0].flat)
 			{
-				Sprintf(buf2, "%s", sitoa(wdice[1].flat));
+				Sprintf(buf2, "%s", sitoa(wdice[0].flat));
 				Strcat(buf, buf2);
 			}
-			Strcat(buf, " versus ");
+			Strcat(buf, " versus small and ");
+			/* is there a difference between large and small dice? */
+			if (wdice[0].oc.aatyp != wdice[1].oc.aatyp ||
+				wdice[0].oc.adtyp != wdice[1].oc.adtyp ||
+				wdice[0].oc.damn != wdice[1].oc.damn ||
+				wdice[0].oc.damd != wdice[1].oc.damd ||
+				wdice[0].bon.aatyp != wdice[1].bon.aatyp ||
+				wdice[0].bon.adtyp != wdice[1].bon.adtyp ||
+				wdice[0].bon.damn != wdice[1].bon.damn ||
+				wdice[0].bon.damd != wdice[1].bon.damd ||
+				wdice[0].flat != wdice[1].flat)
+			{
+				if (wdice[1].oc.damn && wdice[1].oc.damd)
+				{
+					Sprintf(buf2, "%dd%d", wdice[1].oc.damn, wdice[1].oc.damd);
+					Strcat(buf, buf2);
+				}
+				if (wdice[1].bon.damn && wdice[1].bon.damd)
+				{
+					Sprintf(buf2, "+%dd%d", wdice[1].bon.damn, wdice[1].bon.damd);
+					Strcat(buf, buf2);
+				}
+				if (wdice[1].flat)
+				{
+					Sprintf(buf2, "%s", sitoa(wdice[1].flat));
+					Strcat(buf, buf2);
+				}
+				Strcat(buf, " versus ");
+			}
+			Strcat(buf, "large monsters.");
+			OBJPUTSTR(buf);
 		}
-		Strcat(buf, "large monsters.");
-		OBJPUTSTR(buf);
 		/* artifact bonus damage (artifacts only) */
 		if (oartifact && (artilist[oartifact].attk.damn || artilist[oartifact].attk.damd || artilist[oartifact].attk.adtyp))
 		{

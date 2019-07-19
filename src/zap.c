@@ -3714,7 +3714,7 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		(uwep && uwep->oartifact == ART_STAFF_OF_TWELVE_MIRRORS) || 
 		Spellboost)
 	) tmp *= 2;
-	if (tmp > 0 && yours &&
+	if (tmp > 0 && yours && (adtyp != -1) &&
 		resist(mon, (olet==WAND_CLASS) ? WAND_CLASS : '\0', 0, NOTELL))
 	    tmp /= 2;
 	if (tmp < 0) tmp = 0;		/* don't allow negative damage */
@@ -4667,7 +4667,7 @@ boolean *shopdamage;
 			/* probably ought to do some hefty damage to any
 			   non-ice creature caught in freezing water;
 			   at a minimum, eels are forced out of hiding */
-			if (is_swimmer(mon->data) && mon->mundetected) {
+			if (mon_resistance(mon,SWIMMING) && mon->mundetected) {
 			    mon->mundetected = 0;
 			    newsym(x,y);
 			}

@@ -70,6 +70,7 @@
 #define MR_SICK			0x0200	/* resists sickness */
 #define MR_MAGIC		0x0400	/* has player-style magic resistance */
 #define MR_REFLECT		0x0800	/* reflects */
+#define MR_MASK			0x0FFF	/* mask that covers all MR resistances */
 #define MR_ALL			(MR_STONE|MR_ACID|MR_POISON|MR_ELEC|MR_DISINT|MR_SLEEP|MR_COLD|MR_FIRE|MR_DRAIN|MR_SICK)
 /* other conveyances: teleport, teleport control, telepathy */
 
