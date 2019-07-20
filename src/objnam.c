@@ -3124,6 +3124,7 @@ int wishflags;
 	boolean from_user = !(wishflags & WISH_QUIET);
 	boolean wizwish = !!(wishflags & WISH_WIZARD);
 	boolean allow_artifact = !!(wishflags & WISH_ARTALLOW);
+	
 	int halfeaten, halfdrained, mntmp, contents;
 	int islit, unlabeled, ishistoric, isdiluted;
 	struct fruit *f;
@@ -4721,7 +4722,7 @@ typfnd:
 		}
 
 		otmp = oname(otmp, name);
-		if (otmp->oartifact) {
+		if (otmp->oartifact && from_user) {
 			u.uconduct.wisharti++;	/* KMH, conduct */
 		}
 	}
@@ -4743,7 +4744,7 @@ typfnd:
 	
 	/* more wishing abuse: don't allow wishing for certain artifacts */
 	/* and make them pay; charge them for the wish anyway! */
-	if (otmp->oartifact && !wizwish &&
+	if (otmp->oartifact && !wizwish && from_user &&
 		(is_quest_artifact(otmp) //redundant failsafe.  You can't wish for ANY quest artifacts
 		 || otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS //No wishing for quest artifacts, unique monster artifacts, etc.
 		 || !touch_artifact(otmp, &youmonst, TRUE) //Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
