@@ -228,7 +228,9 @@ hack_artifacts()
 				artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
 				artilist[ART_SCEPTRE_OF_LOLTH].spfx &= ~(SPFX_NOGEN);
 			} else {
-				artilist[ART_ROD_OF_LORDLY_MIGHT].alignment = A_NEUTRAL;
+				artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
+				artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
+				artilist[ART_DEATH_SPEAR_OF_VHAERUN].spfx &= ~(SPFX_NOGEN);
 			}
 		} else if(Race_if(PM_DWARF) && urole.ldrnum == PM_DAIN_II_IRONFOOT){
 			artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
@@ -6218,6 +6220,21 @@ arti_invoke(obj)
 					mtmp->mhp =  mtmp->mhpmax;
 				}
 			}
+		break;
+		case DEATH_TCH:
+			getdir((char *)0);
+			if (!isok(u.ux + u.dx, u.uy + u.dy)) break;
+			mtmp = m_at(u.ux + u.dx, u.uy + u.dy);
+			
+			pline("You reach out and stab at %s's very soul.", mon_nam(mtmp));
+			if (nonliving_mon(mtmp) || is_demon(mtmp->data) || is_angel(mtmp->data)) 
+				pline("... but %s seems to lack one!", mon_nam(mtmp));
+			else if (ward_at(mtmp->mx,mtmp->my) == CIRCLE_OF_ACHERON)
+				pline("But %s is already beyond Acheron.", mon_nam(mtmp));
+			else 
+				xkilled(mtmp, 1);
+			
+			 
 		break;
 		case PETMASTER:{
 			int pet_effect = 0;
