@@ -3888,7 +3888,6 @@ boolean atme;
 			return(0);
 		} else if (
 			!(spellid(spell) == SPE_LIGHTNING_BOLT && uarmh && uarmh->oartifact == ART_STORMHELM) &&
-			!(spellid(spell) == SPE_DRAIN_LIFE && uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_VHAERUN) &&
 			!((spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE) && 
 				uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
 		) {
@@ -4934,6 +4933,14 @@ int spell;
 			|| uwep->oartifact == ART_GARNET_ROD
 		) splcaster -= urole.spelarmr;
 
+		if (uwep->otyp == ART_DEATH_SPEAR_OF_VHAERUN
+			&& spell_skilltype(spellid(spell)) == P_ATTACK_SPELL
+			&& Race_if(PM_DROW)
+			&& !flags.initgend
+		) {	// Bonus to attack spells, including granted drain life
+			splcaster -= urole.spelarmr;
+		}
+
 		if (uwep->otyp == KHAKKHARA) {	// a priestly channeling tool
 			cast_bon = 0;
 			if(spell_skilltype(spellid(spell)) == P_CLERIC_SPELL
@@ -4983,7 +4990,7 @@ int spell;
 				cast_bon *= 2;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
-
+		
 		if (uwep->otyp == SHEPHERD_S_CROOK) {	// a tool for leading and manipulating things
 			cast_bon = 0;
 			if (spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)

@@ -405,18 +405,33 @@ struct obj *otmp;
 		    wake = FALSE;
 		break;
 	case SPE_DRAIN_LIFE:
-	case WAN_DRAINING:	/* KMH */
+	case WAN_DRAINING:{	/* KMH */
+		int levlost = 0;
 		reveal_invis = TRUE;
-		if(otyp == WAN_DRAINING) dmg = d((wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2,8);
-		else {
+		if(otyp == WAN_DRAINING){
+			levlost = (wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2;
+			dmg = d(levlost,8);
+		} else {
+			levlost = 1;
 			dmg = rnd(8);
-			if (uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_VHAERUN)
+			if (uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_VHAERUN){
 				dmg += d((u.ulevel+1)/3, 4);
+				levlost += (u.ulevel+1)/6;
+			}
 		}
-		if(dbldam) dmg *= 2;
-		if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
+		if(dbldam){
+			dmg *= 2;
+			levlost *= 2;
+		}
+		if(!flags.mon_moving && Double_spell_size){
+			dmg *= 1.5;
+			levlost *= 1.5;
+		}
 		if (otyp == SPE_DRAIN_LIFE){
-			if(u.ukrau_duration) dmg *= 1.5;
+			if(u.ukrau_duration){
+				dmg *= 1.5;
+				levlost *= 1.5;
+			}
 			dmg += spell_damage_bonus();
 		}
 		if (resists_drli(mtmp)){
@@ -426,17 +441,16 @@ struct obj *otmp;
 				mtmp->mhp > 0) {
 		    mtmp->mhp -= dmg;
 		    mtmp->mhpmax -= dmg;
-		    if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < ((otyp == WAN_DRAINING) ? ((wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2) : 1))
+		    if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < levlost)
 				xkilled(mtmp, 1);
 		    else {
-				if(otyp == WAN_DRAINING)  mtmp->m_lev -= (wand_damage_die(P_SKILL(P_WAND_POWER))-4)/2;
-				else mtmp->m_lev--;
+				mtmp->m_lev -= levlost;
 				if (canseemon(mtmp))
 					pline("%s suddenly seems weaker!", Monnam(mtmp));
 		    }
 		} else if(cansee(mtmp->mx,mtmp->my)) shieldeff(mtmp->mx, mtmp->my);
 		makeknown(otyp);
-	break;
+	}break;
 	default:
 		impossible("What an interesting effect (%d)", otyp);
 		break;
