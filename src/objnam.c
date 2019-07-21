@@ -3543,6 +3543,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "lesser ", l=7)
 			) {
 			oproperties |= OPROP_LESSW;
+		} else if (!strncmpi(bp, "magic-resistant ", l=16)
+			) {
+			oproperties |= OPROP_MAGC;
 		} else if (!strncmpi(bp, "flaming ", l=8)
 			) {
 			oproperties |= OPROP_FIREW;
