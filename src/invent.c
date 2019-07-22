@@ -2448,7 +2448,7 @@ winid *datawin;
 
 		/* Object classes currently with no special messages here: amulets. */
 	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill)) {
-		boolean otyp_is_launcher = ((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp != ATLATL);
+		boolean otyp_is_launcher = ((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp == ATLATL);
 		if (oc.oc_skill >= 0) {
 			if (obj) {
 				Sprintf(buf, "%s-handed %s%s%s",
