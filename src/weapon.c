@@ -804,10 +804,12 @@ int spec;
 		}
 		break;
 	case MIRRORBLADE:
-		if ((youdefend ? uwep : MON_WEP(mon))->otyp == MIRRORBLADE)
+		{//create a local scope to define otmp2 in
+		struct obj * otmp2 = (youdefend ? uwep : MON_WEP(mon));
+		if (otmp2 && otmp2->otyp == MIRRORBLADE)
 		{// clashing mirrorblades are quite deadly
 			// 2 dice, exploding, with a flat explosion bonus of the average of attacker's and defender's weapons
-			wdice.oc.aatyp = AT_EXPL + ((youdefend ? uwep : MON_WEP(mon))->spe + otmp->spe) / 2;
+			wdice.oc.aatyp = AT_EXPL + (otmp2->spe + otmp->spe) / 2;
 			wdice.oc.damn = 2;
 		}
 		else
@@ -822,7 +824,7 @@ int spec;
 			int mir = 0;
 			struct weapon_dice mirdice;
 			/* grab the weapon dice from dmgval_core */
-			(void) dmgval_core(&mirdice, bigmonst(ptr), (youdefend ? uwep : MON_WEP(mon)), 0);	//note: dmgval_core handles zero weapons gracefully
+			(void) dmgval_core(&mirdice, bigmonst(ptr), otmp2, 0);	//note: dmgval_core handles zero weapons gracefully
 			if (spec & SPEC_MARIONETTE)
 			{
 				mirdice.oc.damd += 2;
@@ -840,6 +842,7 @@ int spec;
 				tmp = 0;
 			/* signal to NOT add normal dice */
 			add_dice = FALSE;
+		}
 		}
 		break;
 	case CRYSTAL_SWORD:
