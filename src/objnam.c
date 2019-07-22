@@ -680,7 +680,7 @@ struct obj *obj;
 char *buf;
 {
 	boolean iscrys = (obj->otyp == CRYSKNIFE);
-	if (!is_damageable(obj) && !iscrys) return;
+	if (!is_damageable(obj) && !iscrys && !(obj->oclass == POTION_CLASS && obj->odiluted)) return;
 
 	/* The only cases where any of these bits do double duty are for
 	* rotted food and diluted potions, which are all not is_damageable().
@@ -690,8 +690,11 @@ char *buf;
 		case 2:	Strcat(buf, "very "); break;
 		case 3:	Strcat(buf, "thoroughly "); break;
 		}
-		Strcat(buf, is_rustprone(obj) ? "rusty " :
-			is_evaporable(obj) ? "tenuous " : "burnt ");
+		Strcat(buf, 
+			obj->oclass == POTION_CLASS ? "diluted " :
+			is_rustprone(obj) ? "rusty " :
+			is_evaporable(obj) ? "tenuous " :
+			is_flammable(obj) ? "burnt " : "eroded ");
 	}
 	if (obj->oeroded2 && !iscrys) {
 		switch (obj->oeroded2) {
@@ -1372,8 +1375,6 @@ boolean with_price;
 				(obj->owt > ocl->oc_weight) ? "very " : "");
 			break;
 		case POTION_CLASS:
-			if (obj->dknown && obj->odiluted)
-				Strcat(buf, "diluted ");
 			if (typ == POT_BLOOD && (obj->known || is_vampire(youracedata))) {
 				Strcat(buf, "potion");
 				Sprintf(eos(buf), " of %s blood", mons[obj->corpsenm].mname);
