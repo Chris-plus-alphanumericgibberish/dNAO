@@ -593,7 +593,7 @@ boolean on, silently;
 	return;
 }
 
-/* armor put on or taken off; might be magical variety */
+/* armor put on, taken off, grabbed, or dropped; might be magical variety */
 void
 update_mon_intrinsics(mon, obj, on, silently)
 struct monst *mon;
@@ -605,19 +605,26 @@ boolean on, silently;
     long all_worn = ~0L; /* clang lint */
 	
 	int * property_list = item_property_list(obj, obj->otyp);
-	which = 0;
-	while (property_list[which] != 0)	{
-		update_mon_intrinsic(mon, obj, property_list[which], on, silently);
-		which++;
-	}
-	if (obj->oartifact)
-	{
-		property_list = art_property_list(obj->oartifact, FALSE);
+	/* only turn on properties from this list if obj is worn */
+	if (!on || obj->owornmask) {
 		which = 0;
 		while (property_list[which] != 0)	{
 			update_mon_intrinsic(mon, obj, property_list[which], on, silently);
 			which++;
 		}
+	}
+	if (obj->oartifact)
+	{
+		/* only turn on properties from this list if obj is worn */
+		if (!on || obj->owornmask) {
+			property_list = art_property_list(obj->oartifact, FALSE);
+			which = 0;
+			while (property_list[which] != 0)	{
+				update_mon_intrinsic(mon, obj, property_list[which], on, silently);
+				which++;
+			}
+		}
+		/* while-carried properties */
 		property_list = art_property_list(obj->oartifact, TRUE);
 		which = 0;
 		while (property_list[which] != 0)	{
