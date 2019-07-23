@@ -290,9 +290,7 @@ OBJECT:'(',"spoon",(31,10),blessed,0,"The Iron Spoon of Liberation"
 # OBJECT:'0',"heavy iron ball",(31,10),blessed,0,"The Iron Ball of Levitation"
 # OBJECT:'0',"heavy iron ball",(31,10),blessed,0,"The Iron Ball of Liberation"
 CONTAINER:'(',"chest",(55,18),blessed,2
-#OBJECT:'[',"helmet",contained,blessed,2,"Mask of Waterdeep" #deprecated
 OBJECT:'#',"blessed iron +2 magic-resistant visored helmet named The Mask of Waterdeep",contained
-#OBJECT:'[',"cloak of magic resistance",contained,blessed,2,"Masked Lord's Cope" #deprecated
 OBJECT:'#',"blessed +2 ornamental cope named The Masked Lord's Cope",contained
 
 OBJECT:'[',"gentleman's suit",contained,blessed,2

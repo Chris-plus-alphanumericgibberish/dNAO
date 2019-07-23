@@ -9571,19 +9571,6 @@ char *name;	/* target alignment, or A_NONE */
 			break;
 		}
 	}
-	/* simple objects, now specified in the .des
-	if(!strcmp(name, "Mask of Waterdeep")){
-		otmp->otyp = find_vhelm();
-		otmp->obj_material = IRON;
-		otmp->oproperties = OPROP_MAGC;
-	}
-	if(!strcmp(name, "Masked Lord's Cope")){
-		otmp->otyp = find_cope();
-	}
-	if(!strcmp(name,  "The Sword of the Deeps")){
-		otmp->oproperties = OPROP_DEEPW;
-	}
-	*/
 	fix_object(otmp);
 	return otmp;
 }

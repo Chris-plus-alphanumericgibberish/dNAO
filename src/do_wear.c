@@ -2220,10 +2220,10 @@ int base_uac()
 	if(u.edenshield > moves) uac -= 7;
 	if(u.specialSealsActive&SEAL_BLACK_WEB && (
 		(u.utrap && u.utraptype == TT_WEB) ||
-		(t_at(u.ux, u.uy) && t_at(u.ux, u.uy)->ttyp == WEB && (uarm && uarm->oartifact==ART_SPIDERSILK))
+			(t_at(u.ux, u.uy) && t_at(u.ux, u.uy)->ttyp == WEB && (uarm && uarm->oartifact==ART_SPIDERSILK))
+		)
 	)
-	)
-			 uac -= 8;
+		uac -= 8;
 	if(u.specialSealsActive&SEAL_UNKNOWN_GOD && uwep && uwep->oartifact == ART_PEN_OF_THE_VOID) uac -= 2*uwep->spe;
 	if(multi < 0){
 		dexbonus = -5;
