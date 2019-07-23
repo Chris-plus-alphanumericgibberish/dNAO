@@ -3606,6 +3606,24 @@ register struct monst *mtmp;
 		obj->spe = 0;
 		obj->cursed = obj->blessed = FALSE;
 	}
+	if(mtmp->data == &mons[PM_ASPECT_OF_THE_SILENCE]){
+		int remaining = 0;
+		if(!flags.made_first)
+			remaining++;
+		if(!flags.made_divide)
+			remaining++;
+		if(!flags.made_life)
+			remaining++;
+		if(remaining){
+			remaining = rnd(remaining);
+			if(!flags.made_first && !(--remaining))
+				mksobj(FIRST_WORD, TRUE, FALSE);
+			else if(!flags.made_divide && !(--remaining))
+				mksobj(DIVIDING_WORD, TRUE, FALSE);
+			else if(!flags.made_life && !(--remaining))
+				mksobj(NURTURING_WORD, TRUE, FALSE);
+		}
+	}
 	if(mtmp->data == &mons[PM_GARLAND]){
 		int x = mtmp->mx, y = mtmp->my;
 		struct obj *otmp;
