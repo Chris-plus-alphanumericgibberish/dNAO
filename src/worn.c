@@ -600,6 +600,10 @@ struct monst *mon;
 struct obj *obj;
 boolean on, silently;
 {
+	/* don't bother with dead monsters -- at best nothing will happen, at worst we get bad messages */
+	if (DEADMONSTER(mon))
+		return;
+
 	int unseen = !canseemon(mon);
     int which;
     long all_worn = ~0L; /* clang lint */
