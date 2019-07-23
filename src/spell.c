@@ -5122,10 +5122,6 @@ int spell;
 			uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
 	) return 100;
 	
-	if(
-		((spellid(spell) == SPE_DRAIN_LIFE) && uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_VHAERUN)
-	) return 100;
-	
 	/* Calculate intrinsic ability (splcaster) */
 
 	splcaster = urole.spelbase;
@@ -5214,7 +5210,7 @@ int spell;
 				cast_bon *= 2;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
-		
+
 		if (uwep->otyp == SHEPHERD_S_CROOK) {	// a tool for leading and manipulating things
 			cast_bon = 0;
 			if (spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
