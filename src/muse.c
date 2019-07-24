@@ -2369,6 +2369,9 @@ museamnesia:
 			     obj->otyp == LOADSTONE) {
 			    if(mtmp->mconf) blessorcurse(obj, 2);
 			    else uncurse(obj);
+				/* the monster thinks its weapon is uncursed now, which might not be true */
+				if (obj == MON_WEP(mtmp))
+					mtmp->weapon_check = NEED_WEAPON;
 			}
 		    }
 		}
