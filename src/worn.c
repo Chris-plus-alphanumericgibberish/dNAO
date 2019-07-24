@@ -431,11 +431,15 @@ boolean on, silently;
 		case INVIS:
 			if (mon->data != &mons[PM_HELLCAT]){
 				mon->invis_blkd = FALSE;
-				update_mon_intrinsic(mon, obj, which, !on, silently);
+				if (mon_gets_extrinsic(mon, which, obj))
+					update_mon_intrinsic(mon, obj, which, !on, silently);
+				if (mon->perminvis)
+					mon->minvis = TRUE;
 			}
 			break;
 		default:
-			update_mon_intrinsic(mon, obj, which, !on, silently);
+			if (mon_gets_extrinsic(mon, which, obj))
+				update_mon_intrinsic(mon, obj, which, !on, silently);
 			break;
 		}
 	}
