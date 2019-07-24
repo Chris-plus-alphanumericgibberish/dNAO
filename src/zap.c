@@ -3238,21 +3238,9 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 
 	    typ = levl[bhitpos.x][bhitpos.y].typ;
 	    if (typ == IRONBARS){
-		 if((obj->otyp==SPE_FORCE_BOLT || obj->otyp==WAN_STRIKING)){
-			char numbars;
-			struct obj *obj;
-			You_hear("a sharp crack!");
-		    levl[bhitpos.x][bhitpos.y].typ = CORR;
-			for(numbars = d(2,4)-1; numbars > 0; numbars--){
-				obj = mksobj_at(BAR, bhitpos.x, bhitpos.y, FALSE, FALSE);
-			    obj->spe = 0;
-				if(Is_illregrd(&u.uz))
-					obj->obj_material = METAL;
-			    obj->cursed = obj->blessed = FALSE;
-				fix_object(obj);
+			if ((obj->otyp == SPE_FORCE_BOLT || obj->otyp == WAN_STRIKING)){
+				break_iron_bars(bhitpos.x, bhitpos.y, TRUE);
 			}
-		    newsym(bhitpos.x, bhitpos.y);
-		 }
 		}
 
 	    /* iron bars will block anything big enough */

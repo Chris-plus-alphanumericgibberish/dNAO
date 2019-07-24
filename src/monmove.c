@@ -2294,6 +2294,34 @@ postmov:
 #endif /* OVL0 */
 #ifdef OVL2
 
+/* break iron bars at the given location */
+void
+break_iron_bars(x, y, heard)
+int x, y;			/* coordinates of iron bars */
+boolean heard;		/* print You_hear() message? */
+{
+	int numbars;
+	struct obj *obj;
+
+	if (levl[x][y].typ != IRONBARS) {
+		impossible("Breaking non-existant iron bars @ (%d,%d)", x, y);
+		return;
+	}
+
+	if (heard)
+		You_hear("a sharp crack!");
+	levl[x][y].typ = (Is_special(&u.uz) || *in_rooms(x, y, 0)) ? ROOM : CORR;
+
+	for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
+		obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+		set_material(obj, Is_illregrd(&u.uz) ? METAL : IRON);
+		obj->spe = 0;
+		obj->cursed = obj->blessed = FALSE;
+	}
+	newsym(x, y);
+	return;
+}
+
 //Malcolm Ryan's bar eating patch
 void
 dissolve_bars(x, y)
