@@ -431,11 +431,15 @@ boolean on, silently;
 		case INVIS:
 			if (mon->data != &mons[PM_HELLCAT]){
 				mon->invis_blkd = FALSE;
-				update_mon_intrinsic(mon, obj, which, !on, silently);
+				if (mon_gets_extrinsic(mon, which, obj))
+					update_mon_intrinsic(mon, obj, which, !on, silently);
+				if (mon->perminvis)
+					mon->minvis = TRUE;
 			}
 			break;
 		default:
-			update_mon_intrinsic(mon, obj, which, !on, silently);
+			if (mon_gets_extrinsic(mon, which, obj))
+				update_mon_intrinsic(mon, obj, which, !on, silently);
 			break;
 		}
 	}
@@ -593,31 +597,42 @@ boolean on, silently;
 	return;
 }
 
-/* armor put on or taken off; might be magical variety */
+/* armor put on, taken off, grabbed, or dropped; might be magical variety */
 void
 update_mon_intrinsics(mon, obj, on, silently)
 struct monst *mon;
 struct obj *obj;
 boolean on, silently;
 {
+	/* don't bother with dead monsters -- at best nothing will happen, at worst we get bad messages */
+	if (DEADMONSTER(mon))
+		return;
+
 	int unseen = !canseemon(mon);
     int which;
     long all_worn = ~0L; /* clang lint */
 	
 	int * property_list = item_property_list(obj, obj->otyp);
-	which = 0;
-	while (property_list[which] != 0)	{
-		update_mon_intrinsic(mon, obj, property_list[which], on, silently);
-		which++;
-	}
-	if (obj->oartifact)
-	{
-		property_list = art_property_list(obj->oartifact, FALSE);
+	/* only turn on properties from this list if obj is worn */
+	if (!on || obj->owornmask) {
 		which = 0;
 		while (property_list[which] != 0)	{
 			update_mon_intrinsic(mon, obj, property_list[which], on, silently);
 			which++;
 		}
+	}
+	if (obj->oartifact)
+	{
+		/* only turn on properties from this list if obj is worn */
+		if (!on || obj->owornmask) {
+			property_list = art_property_list(obj->oartifact, FALSE);
+			which = 0;
+			while (property_list[which] != 0)	{
+				update_mon_intrinsic(mon, obj, property_list[which], on, silently);
+				which++;
+			}
+		}
+		/* while-carried properties */
 		property_list = art_property_list(obj->oartifact, TRUE);
 		which = 0;
 		while (property_list[which] != 0)	{
