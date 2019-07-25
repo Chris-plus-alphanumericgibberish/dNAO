@@ -3167,6 +3167,9 @@ winid *datawin;
 		Sprintf(buf, "Made of %s.", buf2);
 		OBJPUTSTR(buf);
 	}
+	if (obj && is_evaporable(obj)) {
+		OBJPUTSTR("Evaporates in light.");
+	}
 
 	/* Full-line remarks */
 	if (oc.oc_merge && !oartifact) {	// even when an artifact can merge with identical items (ie Sunbeam), it sounds really weird
