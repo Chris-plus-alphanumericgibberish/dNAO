@@ -2980,10 +2980,18 @@ winid *datawin;
 	}
 
 	/* cost, wt should go next */
-	Sprintf(buf, "Base cost %d. Weighs %d aum.%s",
-		(int)((obj && oartifact) ? artilist[oartifact].cost : oc.oc_cost),
-		(int)(obj ? (weight(obj) / max(1, obj->quan)) : oc.oc_weight),
-		((obj && obj->quan != 1) ? " (per item)" : ""));
+	if (obj) {
+		Sprintf(buf, "Costs %d zorkmid%s. Weighs %d aum.%s",
+			(int)getprice(obj, FALSE, FALSE),
+			(int)getprice(obj, FALSE, FALSE) != 1 ? "s" : "",
+			(int)(weight(obj) / max(1, obj->quan)),
+			((obj->quan != 1) ? " (per item)" : ""));
+	}
+	else {
+		Sprintf(buf, "Base cost %d. Base weight %d aum.",
+			(int)((oartifact) ? artilist[oartifact].cost : oc.oc_cost),
+			(int)(oc.oc_weight));
+	}
 	OBJPUTSTR(buf);
 
 	/* powers conferred */
