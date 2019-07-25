@@ -2492,6 +2492,15 @@ short func_index;
 genericptr_t arg;
 {
     timer_element *gnu;
+	timer_element *curr;
+
+	/* check that <arg> does not already have a <func_index> timer running; fail if so */
+	for (curr = timer_base; curr; curr = curr->next)
+	if (curr->arg == arg && curr->func_index == func_index) {
+		impossible("Attempted to start 2nd %s timer, aborted.",
+			timeout_funcs[func_index].name);
+		return FALSE;
+	}
 
     if (func_index < 0 || func_index >= NUM_TIME_FUNCS)
 	panic("start_timer");
@@ -2509,7 +2518,6 @@ genericptr_t arg;
     if (kind == TIMER_OBJECT)	/* increment object's timed count */
 	((struct obj *)arg)->timed++;
 
-    /* should check for duplicates and fail if any */
     return TRUE;
 }
 
