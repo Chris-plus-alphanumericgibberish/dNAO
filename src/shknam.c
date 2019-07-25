@@ -539,9 +539,9 @@ struct mkroom	*sroom;
 		newcham(shk, &mons[PM_PLUMACH_RILMANI], FALSE, FALSE);
 	else if(In_law(&u.uz)){
 		if (ESHK(shk)->shoptype == JELLYSHOP)
-			newcham(shk, &mons[PM_FORMIAN_TASKMASTER], FALSE, FALSE);
-		else if (ESHK(shk)->shoptype == ACIDSHOP)
 			newcham(shk, &mons[PM_THRIAE], FALSE, FALSE);
+		else if (ESHK(shk)->shoptype == ACIDSHOP)
+			newcham(shk, &mons[PM_FORMIAN_TASKMASTER], FALSE, FALSE);
 		else if (ESHK(shk)->shoptype == PETSHOP)
 			newcham(shk, &mons[PM_FORMIAN_TASKMASTER], FALSE, FALSE);
 		else if (ESHK(shk)->shoptype == CERAMICSHOP)
