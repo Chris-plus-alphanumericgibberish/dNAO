@@ -1696,6 +1696,8 @@ struct obj* obj;
 	case HARMONIUM_BOOTS:
 	case ELVEN_MITHRIL_COAT:
 	case DWARVISH_MITHRIL_COAT:
+	case BROKEN_ANDROID:
+	case BROKEN_GYNOID:
 		return NULL;
 		/* Any other cases for specific object types go here. */
 	case SHIELD_OF_REFLECTION:
