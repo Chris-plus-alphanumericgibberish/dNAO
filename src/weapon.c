@@ -1844,6 +1844,41 @@ register struct monst *mtmp;
 	/* failure */
 	return (struct obj *)0;
 }
+struct obj *
+select_pick(mtmp)
+struct monst *mtmp;
+{
+	struct obj * otmp;
+
+	/* preference to any artifacts (and checks for arti_digs) */
+	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+		if (is_pick(otmp) && otmp->oartifact)
+			Oselect(otmp->otyp, W_WEP);
+	}
+
+	Oselect(DWARVISH_MATTOCK, W_WEP);
+	Oselect(PICK_AXE, W_WEP);
+	/* failure */
+	return (struct obj *)0;
+}
+struct obj *
+select_axe(mtmp)
+struct monst *mtmp;
+{
+	struct obj * otmp;
+
+	/* preference to any artifacts */
+	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+		if (is_axe(otmp) && otmp->oartifact)
+			Oselect(otmp->otyp, W_WEP);
+	}
+
+	Oselect(MOON_AXE, W_WEP);
+	Oselect(BATTLE_AXE, W_WEP);
+	Oselect(AXE, W_WEP);
+	/* failure */
+	return (struct obj *)0;
+}
 
 /* Called after polymorphing a monster, robbing it, etc....  Monsters
  * otherwise never unwield stuff on their own.  Might print message.
@@ -1974,27 +2009,16 @@ register struct monst *mon;
 			obj = propellor;
 			break;
 		case NEED_PICK_AXE:
-			obj = m_carrying(mon, DWARVISH_MATTOCK);
-			if (!obj || bimanual(obj, mon->data))
-				obj = m_carrying(mon, PICK_AXE);
+			obj = select_pick(mon);
 			break;
 		case NEED_AXE:
-			/* currently, only 3 types of axe */
-			obj = m_carrying(mon, MOON_AXE);
-			if (!obj)
-				obj = m_carrying(mon, BATTLE_AXE);
-			if (!obj || bimanual(obj, mon->data))
-			    obj = m_carrying(mon, AXE);
+			obj = select_axe(mon);
 			break;
 		case NEED_PICK_OR_AXE:
 			/* prefer pick for fewer switches on most levels */
-			obj = m_carrying(mon, DWARVISH_MATTOCK);
-			if (!obj) obj = m_carrying(mon, MOON_AXE);
-			if (!obj) obj = m_carrying(mon, BATTLE_AXE);
-			if (!obj || bimanual(obj, mon->data)) {
-			    obj = m_carrying(mon, PICK_AXE);
-			    if (!obj) obj = m_carrying(mon, AXE);
-			}
+			obj = select_pick(mon);
+			if (!obj)
+				obj = select_axe(mon);
 			break;
 		default: impossible("weapon_check %d for %s?",
 				mon->weapon_check, mon_nam(mon));

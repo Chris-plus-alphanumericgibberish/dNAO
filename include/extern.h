@@ -2770,6 +2770,8 @@ E int FDECL(weapon_dmg_roll, (struct attack *, boolean));
 E int FDECL(dmgval, (struct obj *,struct monst *, int));
 E struct obj *FDECL(select_rwep, (struct monst *));
 E struct obj *FDECL(select_hwep, (struct monst *));
+E struct obj *FDECL(select_pick, (struct monst *));
+E struct obj *FDECL(select_axe, (struct monst *));
 E void FDECL(possibly_unwield, (struct monst *,BOOLEAN_P));
 E int FDECL(mon_wield_item, (struct monst *));
 E void FDECL(init_mon_wield_item, (struct monst *));
