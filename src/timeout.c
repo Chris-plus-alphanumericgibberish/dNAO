@@ -1389,7 +1389,8 @@ long timeout;
 	if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD){	
 	        if ((obj->where == OBJ_FLOOR) || 
 		    (obj->where == OBJ_MINVENT && 
-		    	(!MON_WEP(obj->ocarry) || MON_WEP(obj->ocarry) != obj)) ||
+				!((!MON_WEP(obj->ocarry) || MON_WEP(obj->ocarry) != obj)
+				|| (!MON_SWEP(obj->ocarry) || MON_SWEP(obj->ocarry) != obj))) ||
 		    (obj->where == OBJ_INVENT &&
 		    	((!uwep || uwep != obj) &&
 		    	 (!u.twoweap || !uswapwep || obj != uswapwep))))
@@ -1841,7 +1842,8 @@ long timeout;
 	        if ((obj->cursed && !rn2(250)) ||
 	            (obj->where == OBJ_FLOOR) || 
 		    (obj->where == OBJ_MINVENT && 
-		    	(!MON_WEP(obj->ocarry) || MON_WEP(obj->ocarry) != obj)) ||
+				!((!MON_WEP(obj->ocarry) || MON_WEP(obj->ocarry) != obj)
+				|| (!MON_SWEP(obj->ocarry) || MON_SWEP(obj->ocarry) != obj))) ||
 		    (obj->where == OBJ_INVENT &&
 		    	((!uwep || uwep != obj) &&
 		    	 (!u.twoweap || !uswapwep || obj != uswapwep))))

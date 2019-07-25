@@ -2766,17 +2766,13 @@ mfndpos(mon, poss, info, flag)
 	    /* need to be specific about what can currently be dug */
 	    if (!needspick(mdat)) {
 		rockok = treeok = TRUE;
-	    } else if ((mw_tmp = MON_WEP(mon)) && mw_tmp->cursed &&
+	    } else if ((mw_tmp = MON_WEP(mon)) && (mw_tmp->cursed && !is_weldproof_mon(mon)) &&
 		       mon->weapon_check == NO_WEAPON_WANTED) {
 		rockok = is_pick(mw_tmp);
 		treeok = is_axe(mw_tmp);
 	    } else {
-		rockok = (m_carrying(mon, PICK_AXE) ||
-			  (m_carrying(mon, DWARVISH_MATTOCK) &&
-			   !which_armor(mon, W_ARMS)));
-		treeok = (m_carrying(mon, AXE) ||
-			  (m_carrying(mon, BATTLE_AXE) &&
-			   !which_armor(mon, W_ARMS)));
+			rockok = (select_pick(mon) != (struct obj*)0);
+			treeok = (select_axe(mon) != (struct obj*)0);
 	    }
 	    thrudoor |= rockok || treeok;
 	}
