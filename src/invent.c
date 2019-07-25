@@ -3140,10 +3140,6 @@ winid *datawin;
 		otyp == WHITE_FACELESS_ROBE ||
 		otyp == BLACK_FACELESS_ROBE ||
 		otyp == SMOKY_VIOLET_FACELESS_ROBE)		OBJPUTSTR("Covers the face entirely.");
-	/* and some obscure usage mechanics of fixed-appearance items */
-	else if (otyp == RIN_WISHES)				OBJPUTSTR("Can be invoked while worn.");
-	else if (otyp == CANDLE_OF_INVOCATION)		OBJPUTSTR("Can be invoked while lit.");
-
 
 	buf[0] = '\0';
 	ADDCLASSPROP(oartifact, "an artifact");
