@@ -263,6 +263,7 @@ static struct Bool_Opt
         {"statuscolors", (boolean *)0, TRUE, SET_IN_GAME},
 #endif
 	{"splash_screen",     &iflags.wc_splash_screen, TRUE, DISP_IN_GAME},	/*WC*/
+	{"suppress hurtness", &flags.suppress_hurtness, FALSE, SET_IN_GAME},
 	{"tiled_map",     &iflags.wc_tiled_map, PREFER_TILED, DISP_IN_GAME},	/*WC*/
 	{"time", &flags.time, FALSE, SET_IN_GAME},
 #ifdef TIMED_DELAY
