@@ -1610,7 +1610,7 @@ struct obj *obj;
 			obj->cursed = FALSE;
 		}
 	}
-	if (obj->cursed && !rn2(2) && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
+	if (obj->cursed && (!rn2(2) || obj->otyp == CANDLE_OF_INVOCATION) && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
 		pline("%s for a moment, then %s.",
 		      Tobjnam(obj, "flicker"), otense(obj, "die"));
 	} else {
