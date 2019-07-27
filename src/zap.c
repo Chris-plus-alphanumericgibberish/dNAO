@@ -5173,16 +5173,22 @@ int damage, tell;
 	return(resisted);
 }
 
-// returns WISH_ARTALLOW if the player is eligible to wish for an artifact at this time, otherwise 0
+/* returns WISH_ARTALLOW if the player is eligible to wish for an artifact at this time, otherwise 0
+ * Although there is an ARTWISH_SPENT flag for the uevents, don't use it here -- just use how many
+ *   artifacts the player has wished for, and keep track of how many (total) have been earned.
+ */
 int
 allow_artwish()
 {
-	int n = 0;
+	int n = 1;
 	
 	// n += u.uevent.qcalled;		// reaching the main dungeon branch of the quest
-	if(u.ulevel >= 7) n++;		// enough levels to be intimidating to marids/djinni
+	//if(u.ulevel >= 7) n++;		// enough levels to be intimidating to marids/djinni
 	n += (u.uevent.utook_castle & ARTWISH_EARNED);	// sitting on the castle throne
 	n += (u.uevent.uunknowngod & ARTWISH_EARNED);	// sacrificing five artifacts to the priests of the unknown god
+
+	if (Race_if(PM_INHERITOR))	// you started with an artifact, you don't get an artifact wish for free!
+		n--;
 
 	n -= u.uconduct.wisharti;	// how many artifacts the player has wished for
 
