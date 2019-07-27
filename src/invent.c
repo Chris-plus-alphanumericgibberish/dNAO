@@ -3851,6 +3851,8 @@ char *buf;
 	    cmap = S_litgrass;				/* "grass" */
 	else if (IS_SOIL(ltyp))
 	    cmap = S_litsoil;				/* "soil" */
+	else if (IS_SAND(ltyp))
+	    cmap = S_litsand;				/* "sand" */
 #ifdef SINKS
 	else if (IS_SINK(ltyp))
 	    cmap = S_sink;				/* "sink" */
