@@ -2958,7 +2958,7 @@ E boolean FDECL(break_crate, (struct obj *));
 E void FDECL(destroy_item, (int,int));
 E int FDECL(destroy_mitem, (struct monst *,int,int));
 E int FDECL(resist, (struct monst *,CHAR_P,int,int));
-E void FDECL(makewish, (int));
+E boolean FDECL(makewish, (int));
 E void FDECL(costly_cancel, (struct obj *));
 E void FDECL(revive_egg, (struct obj *));
 E int NDECL(allow_artwish);
