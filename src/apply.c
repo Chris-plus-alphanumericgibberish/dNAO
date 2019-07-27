@@ -4190,9 +4190,11 @@ do_candle_menu()
 	end_menu(tmpwin, "What creature do you wish to summon?");
 
 	how = PICK_ONE;
-	n = select_menu(tmpwin, how, &selected);
+	do{
+		n = select_menu(tmpwin, how, &selected);
+	} while (n <= 0);
 	destroy_nhwindow(tmpwin);
-	return (n > 0) ? selected[0].item.a_int : 0;
+	return selected[0].item.a_int;
 }
 
 int
@@ -4235,6 +4237,7 @@ use_candle_of_invocation(obj)	// incomplete
 struct obj *obj;
 {
 	int choice = 0;
+	boolean consumed = FALSE;
 	struct monst * mtmp = (struct monst *)0;
 
 	if (obj->otyp != CANDLE_OF_INVOCATION)
@@ -4248,86 +4251,98 @@ struct obj *obj;
 	}
 
 	pline("The %s flares, and a planar gate opens!", xname(obj));
-	choice = do_candle_menu();
-	
-	switch (choice)
-	{
-	case SUMMON_DJINNI:
-		if (!(mtmp = makemon(&mons[PM_DJINNI], u.ux, u.uy, NO_MM_FLAGS))){
-			pline("Nothing appears, and the gate snaps shut.");
-			break;
-		}
-		else {
-			struct monst *mtmp2 = (struct monst*)0;
-			struct monst *mtmp3 = (struct monst*)0;
-			if ((u.uevent.utook_castle & ARTWISH_EARNED) && !(u.uevent.utook_castle & ARTWISH_SPENT))
-				mtmp2 = makemon(&mons[PM_PSYCHOPOMP], u.ux, u.uy, NO_MM_FLAGS);
-			if ((u.uevent.uunknowngod & ARTWISH_EARNED) && !(u.uevent.uunknowngod & ARTWISH_SPENT))
-				mtmp3 = makemon(&mons[PM_PRIEST_OF_AN_UNKNOWN_GOD], u.ux, u.uy, NO_MM_FLAGS);
+	do{
+		choice = do_candle_menu();
 
-			if (!Blind) {
-				pline("%s passes through the gate in a cloud of smoke!", Amonnam(mtmp));
-				if (mtmp2 || mtmp3)
-					pline("It is accompanied by %s%s%s.",
-						mtmp2 ? a_monnam(mtmp2) : "",
-						(mtmp2 && mtmp3) ? " and " : "",
-						mtmp3 ? a_monnam(mtmp3) : "");
-				pline("%s speaks.", Monnam(mtmp));
+		switch (choice)
+		{
+		case SUMMON_DJINNI:
+			if (!(mtmp = makemon(&mons[PM_DJINNI], u.ux, u.uy, NO_MM_FLAGS))){
+				pline("Nothing responds to the call.");
+				consumed = FALSE;
+				break;
 			}
 			else {
-				You("smell acrid fumes.");
-				pline("%s speaks.", Something);
-			}
-			verbalize("You have summoned me.  I will grant one wish!");
-			int artwishes = u.uconduct.wisharti;
-			makewish(allow_artwish() | WISH_VERBOSE);
-			if (u.uconduct.wisharti > artwishes) {
-				/* made artifact wish */
-				if (mtmp2) {
-					pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
-					u.uevent.utook_castle |= ARTWISH_SPENT;
+				struct monst *mtmp2 = (struct monst*)0;
+				struct monst *mtmp3 = (struct monst*)0;
+				if ((u.uevent.utook_castle & ARTWISH_EARNED) && !(u.uevent.utook_castle & ARTWISH_SPENT))
+					mtmp2 = makemon(&mons[PM_PSYCHOPOMP], u.ux, u.uy, NO_MM_FLAGS);
+				if ((u.uevent.uunknowngod & ARTWISH_EARNED) && !(u.uevent.uunknowngod & ARTWISH_SPENT))
+					mtmp3 = makemon(&mons[PM_PRIEST_OF_AN_UNKNOWN_GOD], u.ux, u.uy, NO_MM_FLAGS);
+
+				if (!Blind) {
+					pline("%s passes through the gate in a cloud of smoke!", Amonnam(mtmp));
+					if (mtmp2 || mtmp3)
+						pline("It is accompanied by %s%s%s.",
+							mtmp2 ? a_monnam(mtmp2) : "",
+							(mtmp2 && mtmp3) ? " and " : "",
+							mtmp3 ? a_monnam(mtmp3) : "");
+					pline("%s speaks.", Monnam(mtmp));
 				}
-				else if (mtmp3) {
-					pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
-					u.uevent.uunknowngod |= ARTWISH_SPENT;
+				else {
+					You("smell acrid fumes.");
+					pline("%s speaks.", Something);
 				}
+				verbalize("You have summoned me.  I will grant one wish!");
+				int artwishes = u.uconduct.wisharti;
+				makewish(allow_artwish() | WISH_VERBOSE);
+				if (u.uconduct.wisharti > artwishes) {
+					/* made artifact wish */
+					if (mtmp2) {
+						pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
+						u.uevent.utook_castle |= ARTWISH_SPENT;
+					}
+					else if (mtmp3) {
+						pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
+						u.uevent.uunknowngod |= ARTWISH_SPENT;
+					}
+				}
+				mongone(mtmp);
+				if (mtmp2)	mongone(mtmp2);
+				if (mtmp3)	mongone(mtmp3);
+				consumed = TRUE;
 			}
-			mongone(mtmp);
-			if (mtmp2)	mongone(mtmp2);
-			if (mtmp3)	mongone(mtmp3);
-		}
-		break;
-	case SUMMON_SERVANT:
-		mtmp = create_particular(MT_DOMESTIC, 0, FALSE, MA_MINION|MA_DEMON|MA_FEY|MA_PRIMORDIAL, MG_NOWISH|MG_NOTAME, G_UNIQ);
-		if (mtmp)
-			pline("The gate closes as %s passes through.", a_monnam(mtmp));
-		else
-			pline("The gate snaps shut!");
-		break;
-	case SUMMON_DEMON_LORD:
-		choice = do_demon_lord_summon_menu();
-		if (!choice){
-			// the player didn't choose an option
-			pline("The gate snaps shut!");
+			break;
+		case SUMMON_SERVANT:
+			mtmp = create_particular(MT_DOMESTIC, 0, FALSE, MA_MINION | MA_DEMON | MA_FEY | MA_PRIMORDIAL, MG_NOWISH | MG_NOTAME, G_UNIQ);
+			if (!mtmp) {
+				pline("Perhaps try summoning something else?");
+				consumed = FALSE;
+			}
+			else {
+				pline("The gate closes as %s passes through.", a_monnam(mtmp));
+				consumed = TRUE;
+			}
+			break;
+		case SUMMON_DEMON_LORD:
+			choice = do_demon_lord_summon_menu();
+			if (!choice){
+				// the player didn't choose an option
+				consumed = FALSE;
+				break;
+			}
+			if (!(mtmp = makemon(&mons[choice], u.ux, u.uy, NO_MM_FLAGS))){
+				// the demon was already generated
+				pline("Nothing responds to the call.");
+				consumed = FALSE;
+				break;
+			}
+			else {
+				if (!Blind) {
+					pline("%s passes through the gate.", Monnam(mtmp));
+				}
+				else {
+					You_feel("a hostile presence.");
+				}
+				mtmp->mpeaceful = 0;
+				consumed = TRUE;
+			}
+			break;
+		default:
+			consumed = FALSE;
 			break;
 		}
-		if (!(mtmp = makemon(&mons[choice], u.ux, u.uy, NO_MM_FLAGS))){
-			// the demon was already generated
-			pline("Nothing appears, and the gate snaps shut.");
-			break;
-		}
-		if (!Blind) {
-			pline("%s passes through the gate.", Monnam(mtmp));
-		}
-		else {
-			You_feel("a hostile presence.");
-		}
-		mtmp->mpeaceful = 0;
-		break;
-	default:
-		pline("The gate snaps shut.");
-		break;
-	}
+	} while (!consumed);
 	pline("The %s is consumed.", xname(obj));
 	useupall(obj);
 	if (!objects[CANDLE_OF_INVOCATION].oc_name_known) {
