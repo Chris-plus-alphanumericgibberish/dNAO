@@ -5181,15 +5181,15 @@ allow_artwish()
 	
 	// n += u.uevent.qcalled;		// reaching the main dungeon branch of the quest
 	if(u.ulevel >= 7) n++;		// enough levels to be intimidating to marids/djinni
-	n += u.uevent.utook_castle;	// sitting on the castle throne
-	n += u.uevent.uunknowngod;	// sacrificing five artifacts to the priests of the unknown god
+	n += (u.uevent.utook_castle & ARTWISH_EARNED);	// sitting on the castle throne
+	n += (u.uevent.uunknowngod & ARTWISH_EARNED);	// sacrificing five artifacts to the priests of the unknown god
 
 	n -= u.uconduct.wisharti;	// how many artifacts the player has wished for
 
 	return ((n > 0) ? WISH_ARTALLOW : 0);
 }
 
-void
+boolean
 makewish(wishflags)
 int wishflags;		// flags to change messages / effects
 {
@@ -5219,7 +5219,7 @@ retry:
 		/* explicitly wished for "nothing", presumeably attempting to retain wishless conduct */
 		if (wishflags & WISH_VERBOSE)
 			verbalize("As you wish.");
-		return;
+		return FALSE;
 	}
 	if (wishreturn & WISH_FAILURE)
 	{
@@ -5252,7 +5252,7 @@ retry:
 		/* no more tries, give a random item */
 		pline1(thats_enough_tries);
 		otmp = readobjnam((char *)0, &wishreturn, wishflags);
-		if (!otmp) return;	/* for safety; should never happen */
+		if (!otmp) return TRUE;	/* for safety; should never happen */
 	}
 
 	/* KMH, conduct */
@@ -5281,6 +5281,7 @@ retry:
 				       (const char *)0);
 	    u.ublesscnt += rn1(100,50);  /* the gods take notice */
 	}
+	return TRUE;
 }
 
 #endif /*OVL2*/
