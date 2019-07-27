@@ -2298,6 +2298,7 @@ E long FDECL(stolen_value, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(sellobj_state, (int));
 E void FDECL(sellobj, (struct obj *,XCHAR_P,XCHAR_P));
 E int FDECL(doinvbill, (int));
+E long FDECL(getprice, (struct obj *, BOOLEAN_P, BOOLEAN_P));
 E struct monst *FDECL(shkcatch, (struct obj *,XCHAR_P,XCHAR_P));
 E void FDECL(add_damage, (XCHAR_P,XCHAR_P,long));
 E int FDECL(repair_damage, (struct monst *,struct damage *,BOOLEAN_P));
