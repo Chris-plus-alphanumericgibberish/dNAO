@@ -324,10 +324,11 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 				goto make_artif;	/* 'a' points to the desired one */
 			} else if (by_align && a->race != NON_PM && race_hostile(&mons[a->race])){
 				continue;	/* skip enemies' equipment */
-			} else if (by_align && a->race == PM_DROW && (
-				artifact_light(&artilist[m]) || m == ART_ARKENSTONE || m == ART_HOLY_MOONLIGHT_SWORD || 
-				(&artilist[m]->material == IRON && (u.ulevel < 7 || !rn2(2)) 
-			)))
+			} else if (by_align && a->race == PM_DROW && !(
+				artifact_light(oname(otmp, (&artilist[m])->name)) || m == ART_ARKENSTONE || m == ART_HOLY_MOONLIGHT_SWORD) && 
+				(!((artilist[m].material == IRON || (artilist[m].material == 0 && oname(otmp, (&artilist[m])->name)->obj_material == IRON))) && 
+				(u.ulevel < 7 || !rn2(2)))
+			)
 			{ 
 				continue;	// drow will never get a light-giving artifact, since that's annoying
 							// they're also blocked from iron while under level 7, and have a 1/3 of a chance otherwise
