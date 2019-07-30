@@ -3099,7 +3099,7 @@ signs_enlightenment()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ASTAROTH && !Invis){
-		if(!ublindf || ublindf->otyp == LENSES)
+		if(!ublindf || ublindf->otyp == LENSES || ublindf->otyp == LIVING_MASK)
 			putstr(en_win, 0, "A black liquid leaks from around your eyes.");
 		else if(ublindf && (ublindf->otyp == MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE))
 			putstr(en_win, 0, "The black liquid leaking from your eyes is hidden by your mask.");
@@ -3412,7 +3412,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ASTAROTH && !Invis){
-		if(!ublindf || ublindf->otyp == LENSES)
+		if(!ublindf || ublindf->otyp == LENSES || ublindf->otyp == LIVING_MASK)
 			putstr(en_win, 0, "A black liquid leaks from around your eyes.");
 		else if(ublindf && (ublindf->otyp == MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE))
 			putstr(en_win, 0, "The black liquid leaking from your eyes is hidden by your mask.");
@@ -3630,12 +3630,12 @@ signs_mirror()
 			message = TRUE;
 		}
 	}
-	if(u.specialSealsActive&SEAL_ACERERAK && !NoBInvis && !(ublindf && ublindf->otyp != LENSES)){
+	if(u.specialSealsActive&SEAL_ACERERAK && !NoBInvis && !(ublindf && ublindf->otyp != LENSES && ublindf->otyp != LIVING_MASK)){
 		putstr(en_win, 0, "You have gemstones for eyes!");
 		message = TRUE;
 	}
 	if(u.specialSealsActive&SEAL_COUNCIL && !NoBInvis){
-		if(!ublindf || ublindf->otyp == LENSES)
+		if(!ublindf || ublindf->otyp == LENSES || ublindf->otyp == LIVING_MASK)
 			putstr(en_win, 0, "Your eyes shine like stars.");
 		else if(ublindf && (ublindf->otyp == MASK))
 			putstr(en_win, 0, "Your star-like eyes shine through your mask.");
