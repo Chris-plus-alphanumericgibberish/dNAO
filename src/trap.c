@@ -366,8 +366,13 @@ register int x, y, typ;
 			       ((IS_DOOR(lev->typ) || IS_WALL(lev->typ))
 				&& !flags.mon_moving) ? 200L : 0L);
 		lev->doormask = 0;	/* subsumes altarmask, icedpool... */
-		if (IS_ROOM(lev->typ)) /* && !IS_AIR(lev->typ) */
-		    lev->typ = ROOM;
+		if (IS_ROOM(lev->typ) 
+			&& !lev->typ == SAND
+			&& !lev->typ == SOIL
+		){ /* && !IS_AIR(lev->typ) */
+			if(lev->typ == GRASS) lev->typ = SOIL;
+		    else lev->typ = ROOM;
+		}
 
 		/*
 		 * some cases which can happen when digging
@@ -527,20 +532,30 @@ int *fail_reason;
 		/* Statues of quest guardians or unique monsters
 		 * will not stone-to-flesh as the real thing.
 		 */
-		mon = makemon(&mons[PM_DOPPELGANGER], x, y,
-			NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK);
-		if (mon) {
-			/* makemon() will set mon->cham to
-			 * CHAM_ORDINARY if hero is wearing
-			 * ring of protection from shape changers
-			 * when makemon() is called, so we have to
-			 * check the field before calling newcham().
-			 */
-			if (mon->cham == CHAM_DOPPELGANGER)
-				(void) newcham(mon, mptr, FALSE, FALSE);
+		 if(statue->spe&STATUE_FACELESS){
+			mon = makeundead(&mons[PM_DOPPELGANGER], x, y,
+				NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK, ILLUMINATED);
+		 } else {
+			mon = makemon(&mons[PM_DOPPELGANGER], x, y,
+				NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK);
+		 }
+			if (mon) {
+				/* makemon() will set mon->cham to
+				 * CHAM_ORDINARY if hero is wearing
+				 * ring of protection from shape changers
+				 * when makemon() is called, so we have to
+				 * check the field before calling newcham().
+				 */
+				if (mon->cham == CHAM_DOPPELGANGER)
+					(void) newcham(mon, mptr, FALSE, FALSE);
+			}
+	    } else {
+			if(statue->spe&STATUE_FACELESS){
+				mon = makeundead(mptr, x, y, NO_MINVENT|MM_ADJACENTOK, ILLUMINATED);
+			} else {
+				mon = makemon(mptr, x, y, (NO_MINVENT | MM_ADJACENTOK));
+			}
 		}
-	    } else
-		mon = makemon(mptr, x, y, (NO_MINVENT | MM_ADJACENTOK));
 	}
 
 	if (!mon) {

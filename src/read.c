@@ -3116,6 +3116,8 @@ int gen_restrict;
 					undeadtype = CRYSTALFIED;
 				else if (!strcmpi(p, "witness"))
 					undeadtype = FRACTURED;
+				else if (!strcmpi(p, "shining one") || !strcmpi(p, "illuminated"))
+					undeadtype = ILLUMINATED;
 				else if (!strcmpi(p, "vampiric"))
 					undeadtype = VAMPIRIC;
 				else
@@ -3130,6 +3132,7 @@ int gen_restrict;
 		case SKELIFIED:
 		case CRYSTALFIED:
 		case FRACTURED:
+		case ILLUMINATED:
 			undeadtype = specify_derivation;
 			break;
 		}
@@ -3225,6 +3228,7 @@ createmon:
 				undeadtype == SKELIFIED ? can_undead_mon(mtmp) :
 				undeadtype == VAMPIRIC ? can_undead_mon(mtmp) :
 				undeadtype == CRYSTALFIED ? TRUE :
+				undeadtype == ILLUMINATED ? TRUE :
 				undeadtype == FRACTURED ? is_kamerel(mtmp->data) : 0
 				))
 			{

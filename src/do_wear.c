@@ -2421,7 +2421,7 @@ struct monst *magr;
 		} else {
 		if(hates_holy_mon(magr))
 			agrmoral = -1;
-		else if(hates_unholy(magr->data))
+			else if(hates_unholy_mon(magr))
 			agrmoral = 1;
 	}
 	}
