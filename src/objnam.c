@@ -3377,6 +3377,12 @@ int wishflags;
 		} else if (!strncmpi(bp, "tattered ", l=9)) {
 			eroded3 = 1 + very;
 			very = 0;
+		} else if (!strncmpi(bp, "cracked ", l=8)) {
+			eroded3 = 1;
+		} else if (!strncmpi(bp, "chipped ", l=8)) {
+			eroded3 = 2;
+		} else if (!strncmpi(bp, "fragmentary ", l=12)) {
+			eroded3 = 3;
 		} else if (!strncmpi(bp, "partly drained ", l=15)) {
 			isdrained = 1;
 			halfdrained = 1;
@@ -4678,6 +4684,8 @@ typfnd:
 		    otmp->oeroded2 = eroded2;
 	    if (eroded3 && otmp->otyp == DROVEN_CLOAK)
 		    otmp->oeroded3 = eroded3;
+		if (eroded3 && otmp->otyp == MASK)
+			otmp->ovar1 = eroded3;
 
 	    /* set erodeproof */
 	    if (erodeproof && !eroded && !eroded2)
