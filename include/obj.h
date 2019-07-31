@@ -744,26 +744,6 @@ struct weapon_dice {
 													Dragon_shield_to_pm(uarms) == &mons[PM_GREEN_DRAGON]\
 												))\
 											))
-#define is_ancestral_dragon_gear	(Race_If(PM_HALF_DRAGON) &&
-(((flags.HDbreath == AD_COLD) && (
-	(uarm && uarm->otyp == WHITE_DRAGON_SCALES || uarm->otyp == WHITE_DRAGON_SCALE_MAIL) ||
-	(uarms && uarms->otyp == WHITE_DRAGON_SCALE_SHIELD))) ||
-((flags.HDbreath == AD_FIRE) && (
-	(uarm && uarm->otyp == RED_DRAGON_SCALES || uarm->otyp == RED_DRAGON_SCALE_MAIL) ||
-	(uarms && uarms->otyp == RED_DRAGON_SCALE_SHIELD))) ||
-((flags.HDbreath == AD_SLEE) && (
-	(uarm && uarm->otyp == ORANGE_DRAGON_SCALES || uarm->otyp == ORANGE_DRAGON_SCALE_MAIL) ||
-	(uarms && uarms->otyp == ORANGE_DRAGON_SCALE_SHIELD))) ||
-((flags.HDbreath == AD_ELEC) && (
-	(uarm && uarm->otyp == BLUE_DRAGON_SCALES || uarm->otyp == BLUE_DRAGON_SCALE_MAIL) ||
-	(uarms && uarms->otyp == BLUE_DRAGON_SCALE_SHIELD))) ||
-((flags.HDbreath == AD_DRST) && (
-	(uarm && uarm->otyp == GREEN_DRAGON_SCALES || uarm->otyp == GREEN_DRAGON_SCALE_MAIL) ||
-	(uarms && uarms->otyp == GREEN_DRAGON_SCALE_SHIELD))) ||
-((flags.HDbreath == AD_ACID) && (
-	(uarm && uarm->otyp == YELLOW_DRAGON_SCALES || uarm->otyp == YELLOW_DRAGON_SCALE_MAIL) ||
-	(uarms && uarms->otyp == YELLOW_DRAGON_SCALE_SHIELD)))))
-	
 /* Elven gear */
 #define is_elven_weapon(otmp)	((otmp)->otyp == ELVEN_ARROW\
 				|| (otmp)->otyp == ELVEN_SPEAR\
