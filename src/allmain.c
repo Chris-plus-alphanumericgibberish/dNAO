@@ -827,6 +827,8 @@ moveloop()
 ////////////////////////////////////////////////////////////////////////////////////////////////
 			reset_mvmdieroll();
 			reset_mvudieroll();
+			if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
+				average_dogs();
 			for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 				if(mtmp->data == &mons[PM_HELLCAT]){
 					if(!isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
@@ -1532,6 +1534,8 @@ karemade:
 			if(uarm && 
 				(uarm->otyp == LIVING_ARMOR || uarm->otyp == BARNACLE_ARMOR)
 			) dosymbiotic();
+			if(u.spiritPColdowns[PWR_PSEUDONATURAL_SURGE] >= moves+20)
+				dopsuedonatural();
 			/* Clouds on Lolth's level deal damage */
 			if(Is_lolth_level(&u.uz) && levl[u.ux][u.uy].typ == CLOUD){
 				if (!(nonliving(youracedata) || Breathless)){
@@ -1798,6 +1802,9 @@ karemade:
 		reset_udieroll();
 		
 		if(u.ustdy > 0) u.ustdy -= 1;
+		
+		if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
+			average_dogs();
 		
 		//Mithardir portals
 		if(In_mithardir_quest(&u.uz)){
