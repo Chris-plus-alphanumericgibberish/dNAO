@@ -502,13 +502,15 @@ domonability()
 		Have_same_dragon_armor_and_shield &&
 		uarm->age < monstermoves && uarms->age < monstermoves
 	){
-		Sprintf(buf, "Armor's Breath Weapon");
-		any.a_int = MATTK_DSCALE;	/* must be non-zero */
-		incntlet = 'a';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+		if !(is_ancestral_dragon_gear)
+			Sprintf(buf, "Armor's Breath Weapon");
+			any.a_int = MATTK_DSCALE;	/* must be non-zero */
+			incntlet = 'a';
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			atleastone = TRUE;
+		}
 	}
 	if(is_were(youracedata)){
 		Sprintf(buf, "Summon Aid");
