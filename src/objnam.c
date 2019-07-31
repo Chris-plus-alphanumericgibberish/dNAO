@@ -3536,6 +3536,7 @@ int wishflags;
 			) {
 			mat = GEMSTONE;
 		} else if ((!strncmpi(bp, "stone ", l=6) || !strncmpi(bp, "ceramic ", l=8))
+			&& strncmpi(bp, "stone to flesh", 14)
 			) {
 			mat = MINERAL;
 		} else if (!strncmpi(bp, "obsidian ", l=9)
