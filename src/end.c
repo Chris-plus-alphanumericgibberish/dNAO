@@ -504,7 +504,11 @@ panic VA_DECL(const char *, str)
 	VA_START(str);
 	VA_INIT(str, char *);
 
-	NH_abort(); /*actually just die here*/
+	/*The actual panic code is too prone to shredding games*/
+	/* Just print out the error message and abort.*/
+	raw_print("\r\nIt seems the game has suffered a panic attack.");
+	raw_printf("Report the following error to the developer: %s", str);
+	NH_abort();
 }
 
 STATIC_OVL boolean
