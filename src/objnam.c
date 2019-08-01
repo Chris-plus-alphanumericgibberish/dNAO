@@ -916,6 +916,8 @@ boolean adjective;
 		/* overly fancy clothing */
 		else if (obj->otyp == GENTLEMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_DRESS)
 			return "silk";
+		else if (obj->oartifact == ART_SPIDERSILK)
+			return "spidersilk";
 		else
 			return "cloth";
 	case LEATHER:
