@@ -175,7 +175,7 @@ QUEST_DES = Arch.des Anachrononaut.des Android.des Barb.des Bard.des Binder.des 
             Noble.des Pirate.des Priest.des Ranger.des Rogue.des	\
             Samurai.des Tourist.des Valkyrie.des Wizard.des
 
-SPEC_DES = bigroom.des blacktemple.des castle.des chaos.des chaos2.des		\
+SPEC_DES = bigroom.des blacktemple.des castle.des chaos.des chaos2.des chaos3.des	\
            endgame.des gehennom.des knox.des labr.des law.des		\
            medusa.des grue.des mines.des neutrality.des oracle.des sokoban.des	\
            storage.des sunlesssea.des tomb.des tower.des yendor.des
