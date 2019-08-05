@@ -3080,7 +3080,7 @@ resistances_enlightenment()
 	return;
 }
 
-STATIC_OVL void
+void
 udr_enlightenment()
 {
 	int dr;

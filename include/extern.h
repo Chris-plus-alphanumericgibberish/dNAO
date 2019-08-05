@@ -254,6 +254,7 @@ E char* FDECL(key2txt, (CHAR_P, char*));
 E char* FDECL(str2txt, (char*, char*));
 E char FDECL(yn_function, (const char *, const char *, CHAR_P));
 E int NDECL(dotravel);
+E void NDECL(udr_enlightenment);
 
 /* ### dbridge.c ### */
 

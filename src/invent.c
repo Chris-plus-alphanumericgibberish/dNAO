@@ -4239,6 +4239,7 @@ doprarm()
 		lets[ct] = 0;
 		(void) display_inventory(lets, FALSE);
 	}
+	udr_enlightenment();
 	return 0;
 }
 
