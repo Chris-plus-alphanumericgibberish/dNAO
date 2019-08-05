@@ -163,7 +163,6 @@ STATIC_PTR int NDECL(doconduct); /**/
 STATIC_PTR boolean NDECL(minimal_enlightenment);
 STATIC_PTR void NDECL(resistances_enlightenment);
 STATIC_PTR void NDECL(signs_enlightenment);
-STATIC_PTR void NDECL(udr_enlightenment);
 
 static void FDECL(bind_key, (UCHAR_P, char*));
 static void NDECL(init_bind_list);
