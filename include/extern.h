@@ -2352,8 +2352,8 @@ E int FDECL(get_shop_item, (int));
 
 E void NDECL(take_gold);
 E int NDECL(dosit);
-E void NDECL(rndcurse);
-E void FDECL(mrndcurse, (struct monst *));
+E boolean NDECL(rndcurse);
+E boolean FDECL(mrndcurse, (struct monst *));
 E void NDECL(attrcurse);
 
 /* ### sounds.c ### */
