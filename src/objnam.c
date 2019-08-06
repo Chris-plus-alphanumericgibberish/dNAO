@@ -3135,7 +3135,7 @@ int wishflags;
 	boolean allow_artifact = !!(wishflags & WISH_ARTALLOW);
 	
 	int halfeaten, halfdrained, mntmp, contents;
-	int islit, unlabeled, ishistoric, isdiluted;
+	int islit, unlabeled, ishistoric, ispetrified, isdiluted;
 	struct fruit *f;
 	int ftype = current_fruit;
 	char fruitbuf[BUFSZ];
@@ -3395,6 +3395,8 @@ int wishflags;
 			halfeaten = 1;
 		} else if (!strncmpi(bp, "historic ", l=9)) {
 			ishistoric = 1;
+		} else if (!strncmpi(bp, "petrified ", l=10)) {
+			ispetrified = 1;
 		} else if (!strncmpi(bp, "diluted ", l=8)) {
 			isdiluted = 1;
 		} else if(!strncmpi(bp, "empty ", l=6)) {
@@ -4792,6 +4794,24 @@ typfnd:
 	/* set moon phase */
 	if(moonphase != -1 && otmp->otyp == MOON_AXE){
 		otmp->ovar1 = moonphase;
+	}
+
+	/* attach creature of the item's permonst type */
+	if(ispetrified && wizwish && otmp->corpsenm != NON_PM){
+		struct monst * mon;
+		struct obj * otmp2;
+		mon = makemon(&mons[otmp->corpsenm], 0, 0, NO_MINVENT);
+		otmp2 = save_mtraits(otmp, mon);
+		mongone(mon);
+		if (otmp2){
+			otmp = otmp2;
+		}
+		else {
+			//something went wrong
+			impossible("bad petrified statue?");
+			*wishreturn = WISH_FAILURE;
+			return &zeroobj;
+		}
 	}
 	
 	/* more wishing abuse: don't allow wishing for certain artifacts */
