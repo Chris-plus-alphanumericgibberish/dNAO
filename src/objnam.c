@@ -1794,7 +1794,8 @@ boolean with_price;
 			if (obj->owornmask & W_RINGR) Strcat(buf, " (on right ");
 			if (obj->owornmask & W_RINGL) Strcat(buf, " (on left ");
 			if (obj->owornmask & W_RING) {
-				Strcat(buf, body_part(HAND));
+				const char *hand_s = obj->where == OBJ_MINVENT ? mbodypart(obj->ocarry, HAND) : body_part(HAND);
+				Strcat(buf, hand_s);
 				if (isSignetRing(obj->otyp)){
 					if (obj->opoisoned & OPOISON_BASIC) Strcat(buf, ", poison injecting");
 					if (obj->opoisoned & OPOISON_FILTH) Strcat(buf, ", filth injecting");
@@ -1839,7 +1840,7 @@ boolean with_price;
 				Strcat(buf, " (wielded)");
 			}
 			else {
-				const char *hand_s = body_part(HAND);
+				const char *hand_s = obj->where == OBJ_MINVENT ? mbodypart(obj->ocarry, HAND) : body_part(HAND);
 
 				if ((bimanual(obj, youracedata)
 					&& !(u.twoweap && (obj->oartifact == ART_PROFANED_GREATSCYTHE || obj->oartifact == ART_LIFEHUNT_SCYTHE)))
@@ -1849,9 +1850,10 @@ boolean with_price;
 			}
 		}
 		if (obj->owornmask & W_SWAPWEP) {
+			const char *hand_s = obj->where == OBJ_MINVENT ? mbodypart(obj->ocarry, HAND) : body_part(HAND);
 			if (mcarried(obj) || (u.twoweap && !(uwep && uwep->otyp == STILETTOS)))	// Monsters twoweaponing stilettos would give a bad message, but they can't even wield stilettos right now...
 				Sprintf(eos(buf), " (wielded in other %s)",
-				body_part(HAND));
+				hand_s);
 			else
 				Strcat(buf, " (alternate weapon; not wielded)");
 		}
