@@ -2849,6 +2849,7 @@ const char *oldstr;
 			if (!BSTRCMP(bp, p-6, "gloves") ||
 			    !BSTRCMP(bp, p-6, "lenses") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
+				!BSTRCMPI(bp, p-9, "vs curses") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
 			    !BSTRCMP(bp, p-6, "scales") ||
 				!BSTRCMP(bp, p-6, "wishes") ||	/* ring */
@@ -3010,6 +3011,9 @@ struct alt_spellings {
 	{ "iron ball", HEAVY_IRON_BALL },
 	{ "mattock", DWARVISH_MATTOCK },
 	{ "amulet of poison resistance", AMULET_VERSUS_POISON },
+	{ "amulet of curse resistance", AMULET_VERSUS_CURSES },
+	{ "amulet vs poison", AMULET_VERSUS_POISON },
+	{ "amulet vs curses", AMULET_VERSUS_CURSES },
 	{ "stone", ROCK },
 	{ "crystal", ROCK },
 #ifdef TOURIST
