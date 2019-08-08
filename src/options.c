@@ -3644,7 +3644,7 @@ boolean setinitial,setfromfile;
 			}
 			end_menu(tmpwin, "Toggle pokedex sections on/off:");
 			if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
-				iflags.pokedex ^= ((1 << mode_pick->item.a_int) - 1);
+				iflags.pokedex ^= (1 << (mode_pick->item.a_int - 1));
 			}
 			else
 				done = TRUE;
