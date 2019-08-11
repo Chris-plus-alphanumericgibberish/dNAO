@@ -1911,8 +1911,9 @@ boolean polyspot;
 		mon->weapon_check = NEED_WEAPON;
 	}
 
-	/* monster can no longer wield any weapons */
-	if (!attacktype(mon->data, AT_WEAP)) {
+	/* monster can no longer wield any mainhand weapons */
+	if (!attacktype(mon->data, AT_WEAP) &&
+		!attacktype(mon->data, AT_DEVA)) {
 		if (mw_tmp) {
 			setmnotwielded(mon, mw_tmp);
 			MON_NOWEP(mon);
