@@ -1674,6 +1674,8 @@ E boolean FDECL(ureflects, (const char *,const char *));
 E boolean FDECL(munstone, (struct monst *,BOOLEAN_P));
 E int FDECL(mbreak_entanglement, (struct monst *));
 E int FDECL(mescape_entanglement, (struct monst *));
+E int FDECL(entangle_material, (struct monst *, int));
+E int FDECL(entangle_beatitude, (struct monst *, int));
 
 /* ### music.c ### */
 
