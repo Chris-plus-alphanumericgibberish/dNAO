@@ -83,138 +83,137 @@ const struct icp hellprobs[] = {
 /* Object material probabilities.*/
 /* for objects which are normally iron or metal */
 static const struct icp metal_materials[] = {
-	{75, 0 }, /* default to base type, iron or metal */
-	{ 5, IRON },
-	{ 5, WOOD },
-	{ 5, SILVER },
-	{ 3, COPPER },
-	{ 3, MITHRIL },
-	{ 1, GOLD },
-	{ 1, BONE },
-	{ 1, GLASS },
-	{ 1, PLATINUM }
+	{975, 0 }, /* default to base type, iron or metal */
+	{  5, IRON },
+	{  5, WOOD },
+	{  5, SILVER },
+	{  3, COPPER },
+	{  3, MITHRIL },
+	{  1, GOLD },
+	{  1, BONE },
+	{  1, GLASS },
+	{  1, PLATINUM }
 };
 
 /* for objects which are normally wooden */
 static const struct icp wood_materials[] = {
-	{80, WOOD },
-	{10, MINERAL },
-	{ 5, IRON },
-	{ 3, BONE },
-	{ 1, COPPER },
-	{ 1, SILVER }
+	{980, WOOD },
+	{ 10, MINERAL },
+	{  5, IRON },
+	{  3, BONE },
+	{  1, COPPER },
+	{  1, SILVER }
 };
 
 /* for objects which are normally cloth */
 static const struct icp cloth_materials[] = {
-    {80, CLOTH },
-    {20, LEATHER }
+    {800, CLOTH },
+    {199, LEATHER },
+	{  1, DRAGON_HIDE }
 };
 
 /* for objects which are normally leather */
 static const struct icp leather_materials[] = {
-    {75, LEATHER },
-    {24, CLOTH },
-	{ 1, DRAGON_HIDE }
+    {750, LEATHER },
+    {240, CLOTH },
+	{ 10, DRAGON_HIDE }
 };
 
 /* for objects of dwarvish make */
 static const struct icp dwarvish_materials[] = {
-	{80, IRON },
-	{10, MITHRIL },
-	{ 5, COPPER },
-	{ 2, SILVER },
-	{ 1, GOLD },
-	{ 1, PLATINUM },
-	{ 1, GEMSTONE }
+	{800, IRON },
+	{100, MITHRIL },
+	{ 50, COPPER },
+	{ 20, SILVER },
+	{ 15, GOLD },
+	{ 10, PLATINUM },
+	{  5, GEMSTONE }
 };
 
 /* for objects of high-elven make (which is currently specified as elven equipment normally made of mithril) */
 static const struct icp high_elven_materials[] = {
-    {90, MITHRIL },
-    { 6, SILVER },
-    { 3, GOLD },
-	{ 1, GEMSTONE }
+    {900, MITHRIL },
+    { 60, SILVER },
+    { 30, GOLD },
+	{ 10, GEMSTONE }
 };
 /* for armor-y objects of elven make - no iron!
 * Does not cover clothy items; those use the regular cloth probs. */
 static const struct icp elven_materials[] = {
-	{60, 0 }, /* use base material */
-	{15, COPPER },
-	{10, BONE },
-	{ 5, LEATHER },
-	{ 5, MITHRIL },
-	{ 3, SILVER },
-	{ 2, GOLD }
+	{900, 0 }, /* use base material */
+	{ 50, MITHRIL },
+	{ 25, SILVER },
+	{ 15, COPPER },
+	{  5, BONE },
+	{  5, GOLD }
 };
 
 /* for weapons of droven make -- armor is all shadowsteel */
 static const struct icp droven_materials[] = {
-	{80, 0 }, /* use base material */
-	{10, SHADOWSTEEL },
-	{ 5, MITHRIL },
-	{ 5, SILVER }
+	{900, 0 }, /* use base material */
+	{ 45, MITHRIL },
+	{ 45, SILVER },
+	{ 10, SHADOWSTEEL } /* shadowsteel was intended to be quite bad for weapons, at least given the techniques the drow know */
 };
 
 /* for objects of orcish make */
 static const struct icp orcish_materials[] = {
-	{50, 0 }, /* use base material */
-	{20, IRON },
-	{15, BONE },
-	{10, MINERAL },
-	{ 4, OBSIDIAN_MT },
-	{ 1, GOLD }
+	{550, 0 }, /* use base material */
+	{250, IRON },
+	{180, BONE },
+	{ 15, GOLD },
+	{  5, OBSIDIAN_MT }
 };
 
 /* Reflectable items - for the shield of reflection; anything that can hold a
  * polish. Amulets also arbitrarily use this list. */
 static const struct icp shiny_materials[] = {
-	{50, 0 }, /* use base material */
-	{15, SILVER },
-	{11, COPPER },
-	{ 6, GOLD },
-	{ 6, IRON }, /* stainless steel */
-	{ 5, GLASS },
-	{ 3, MITHRIL },
-	{ 3, METAL }, /* aluminum, or similar */
-	{ 1, PLATINUM }
+	{950, 0 }, /* use base material */
+	{ 15, SILVER },
+	{ 11, COPPER },
+	{  6, GOLD },
+	{  6, IRON }, /* stainless steel */
+	{  5, GLASS },
+	{  3, MITHRIL },
+	{  3, METAL }, /* aluminum, or similar */
+	{  1, PLATINUM }
 };
 
 /* for bells and other tools, especially instruments, which are normally copper
  * or metal.  Wood and glass in other lists precludes us from using those. */
 static const struct icp resonant_materials[] = {
-	{70, 0 }, /* use base material */
-	{10, COPPER },
-	{ 6, SILVER },
-	{ 5, IRON },
-	{ 5, MITHRIL },
-	{ 3, GOLD },
-	{ 1, PLATINUM }
+	{700, 0 }, /* use base material */
+	{100, COPPER },
+	{ 60, SILVER },
+	{ 50, IRON },
+	{ 50, MITHRIL },
+	{ 30, GOLD },
+	{ 10, PLATINUM }
 };
 
 /* for horns, currently. */
 static const struct icp horn_materials[] = {
-	{70, BONE },
-	{10, COPPER },
-	{ 7, MITHRIL },
-	{ 5, WOOD },
-	{ 5, SILVER },
-	{ 2, GOLD },
-	{ 1, DRAGON_HIDE }
+	{700, BONE },
+	{100, COPPER },
+	{ 70, MITHRIL },
+	{ 50, WOOD },
+	{ 50, SILVER },
+	{ 20, GOLD },
+	{ 10, DRAGON_HIDE }
 };
 
 /* hacks for specific objects... not great because it's a lot of data, but it's
  * a relatively clean solution */
 static const struct icp bow_materials[] = {
     /* assumes all bows will be wood by default, fairly safe assumption */
-    {75, WOOD },
-    { 7, IRON },
-    { 5, MITHRIL },
-    { 4, COPPER },
-    { 4, BONE },
-    { 2, SILVER },
-	{ 2, METAL },
-    { 1, GOLD }
+    {975, WOOD },
+    {  7, IRON },
+    {  5, MITHRIL },
+    {  4, COPPER },
+    {  4, BONE },
+    {  2, SILVER },
+	{  2, METAL },
+    {  1, GOLD }
 };
 
 
@@ -1154,7 +1153,7 @@ boolean artif;
 #else
 			otmp->oerodeproof = otmp->rknown = 1;
 #endif
-		}		
+		}
 		/* MRKR: Mining helmets have lamps */
 		if (otmp->otyp == DWARVISH_HELM) {
 		    otmp->age = (long) rn1(300,300);//Many fewer turns than brass lanterns, as there are so many.
@@ -1814,7 +1813,7 @@ boolean check_all;
 	if (!random_mat_list)
 		return;
 
-	int i = (check_all ? 100 : rnd(100));
+	int i = (check_all ? 1000 : rnd(1000));
 	while (i > 0) {
 		if ((i <= random_mat_list->iprob) || (random_mat_list->iclass == mat))
 			break;
@@ -1917,27 +1916,27 @@ int mat;
 		case ARROW:
 		case GOLDEN_ARROW:
 		case SILVER_ARROW:
-			if		(mat == GOLD)		obj->otyp = GOLDEN_ARROW;
+			if(mat == GOLD) obj->otyp = GOLDEN_ARROW;
 			else if (mat == SILVER)		obj->otyp = SILVER_ARROW;
-			else						obj->otyp = ARROW;
-			break;
+			else obj->otyp = ARROW;
+		break;
 		/* bullets */
 		case BULLET:
 		case SILVER_BULLET:
-			if		(mat == SILVER)		obj->otyp = SILVER_BULLET;
+			if (mat == SILVER)			obj->otyp = SILVER_BULLET;
 			else						obj->otyp = BULLET;
-			break;
+		break;
 		/* elven helmets */
 		case ELVEN_HELM:
 		case HIGH_ELVEN_HELM:
 			if		(mat >= IRON)		obj->otyp = HIGH_ELVEN_HELM;
 			else						obj->otyp = ELVEN_HELM;
-			break;
+		break;
 		/* helmets */
 		case HELMET:
 		case LEATHER_HELM:
 		case ARCHAIC_HELM:
-		case DROVEN_HELM:				
+		case DROVEN_HELM:
 		case HARMONIUM_HELM:			/* irreversible, metal */
 //		case PLASTEEL_HELM:				/* has a unique function of shape -- needs a generic version? */
 //		case CRYSTAL_HELM:				/* has a unique function of shape -- needs a generic version? */
@@ -1986,7 +1985,7 @@ int mat;
 					obj->otyp != ARCHAIC_BOOTS
 				) obj->otyp = ARMORED_BOOTS;
 			} else						obj->otyp = HIGH_BOOTS;
-			break;
+		break;
 		/* shoes */
 		case SHOES:
 		case LOW_BOOTS:
@@ -1999,8 +1998,8 @@ int mat;
 		case DROVEN_CHAIN_MAIL:			/* irreversible, shadowsteel */
 		case DWARVISH_MITHRIL_COAT:		/* irreversible, mithril */
 		case ELVEN_MITHRIL_COAT:		/* irreversible, mithril */
-										obj->otyp = CHAIN_MAIL;
-			break;
+			obj->otyp = CHAIN_MAIL;
+		break;
 		/* scale mail */
 //		dragon scale mail commented out for now -- metal dragons when?
 //		case GRAY_DRAGON_SCALE_MAIL:
@@ -2020,8 +2019,8 @@ int mat;
 		case HARMONIUM_SCALE_MAIL:		/* irreversible, metal */
 		case STUDDED_LEATHER_ARMOR:		/* irreversible, leather */
 		case LEATHER_ARMOR:				/* irreversible, leather */
-										obj->otyp = SCALE_MAIL;
-			break;
+			obj->otyp = SCALE_MAIL;
+		break;
 		/* plate mail */
 		case CRYSTAL_PLATE_MAIL:		/* irreversible, glass */
 			if		(mat == GLASS		
@@ -2032,8 +2031,8 @@ int mat;
 		case PLASTEEL_ARMOR:			/* irreversible, plastic */
 		case DROVEN_PLATE_MAIL:			/* irreversible, shadowsteel */
 		case HARMONIUM_PLATE:			/* irreversible, metal */
-										obj->otyp = PLATE_MAIL;
-			break;
+			obj->otyp = PLATE_MAIL;
+		break;
 		/* long swords */
 		case CRYSTAL_SWORD:				/* irreversible, glass */
 			if		(mat == GLASS		
@@ -2042,13 +2041,13 @@ int mat;
 			else;// fall through to general long sword
 		case LONG_SWORD:
 										obj->otyp = LONG_SWORD;
-			break;
+		break;
 		// case CRYSTAL_BALL:
 			// obj->otyp = ;
 		// break;
 		case SILVER_SLINGSTONE:
 		case ROCK:
-			if		(mat == SILVER)		obj->otyp = SILVER_SLINGSTONE;
+			if(mat == SILVER) obj->otyp = SILVER_SLINGSTONE;
 			else if (mat == GLASS)		obj->otyp = LAST_GEM + rnd(9);
 			else if (mat == GEMSTONE)	obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
 			else						obj->otyp = ROCK;
