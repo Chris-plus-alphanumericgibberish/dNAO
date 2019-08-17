@@ -225,7 +225,7 @@ struct obj {
 #define OPROP_VORPW		0x0001000000000000
 #define OPROP_MORGW		0x0002000000000000
 #define OPROP_WRTHW		0x0004000000000000
-#define OPROP_W_MASK	~OPROP_DEF_MASK
+#define OPROP_W_MASK	0xffffffff00000000
 
   unsigned oeaten;	/* nutrition left in food, if partly eaten */
 	long age;		/* creation date */
