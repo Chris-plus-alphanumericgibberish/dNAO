@@ -2862,10 +2862,10 @@ struct monst *
 create_particular(specify_attitude, specify_derivation, allow_multi, ma_require, mg_restrict, gen_restrict)
 unsigned long specify_attitude;		// -1 -> true; 0 -> false; >0 -> as given
 int specify_derivation;				// -1 -> true; 0 -> false; >0 -> as given
-boolean allow_multi;
+int allow_multi;
 unsigned long ma_require;
 unsigned long mg_restrict;
-unsigned short gen_restrict;
+int gen_restrict;
 {
 	char buf[BUFSZ], *bufp, *p, monclass = MAXMCLASSES;
 	int which, tries, i;
