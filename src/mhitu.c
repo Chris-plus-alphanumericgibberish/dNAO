@@ -1306,7 +1306,7 @@ mattacku(mtmp)
 							mon_ranged_gazeonly = 0;
 							if(mattk->aatyp == AT_DEVA && sum[i]){
 								deva = 1;
-								while(tchtmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
+								while(tchtmp > (j = dieroll = rnd(20+i*2+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
 							}
 						} else missmu(mtmp, (tchtmp == j), mattk);
 					} else {
@@ -1315,7 +1315,7 @@ mattacku(mtmp)
 							mon_ranged_gazeonly = 0;
 							if(mattk->aatyp == AT_DEVA && sum[i]){
 								deva = 1;
-								while(tmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
+								while(tmp > (j = dieroll = rnd(20+i*2+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
 							}
 						} else missmu(mtmp, (tmp == j), mattk);
 					}
@@ -1430,7 +1430,7 @@ mattacku(mtmp)
 							mon_ranged_gazeonly = 0;
 							if(mattk->aatyp == AT_DEVA && sum[i]){
 								deva = 1;
-								while(tchtmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
+								while(tchtmp > (j = dieroll = rnd(20+i*2+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
 							}
 						} else missmu(mtmp, (tchtmp == j), mattk);
 					} else {
@@ -1439,7 +1439,7 @@ mattacku(mtmp)
 							mon_ranged_gazeonly = 0;
 							if(mattk->aatyp == AT_DEVA && sum[i]){
 								deva = 1;
-								while(tmp > (j = dieroll = rnd(20+i+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
+								while(tmp > (j = dieroll = rnd(20+i*2+(deva++)*2))) sum[i] = hitmu(mtmp, mattk);
 							}
 						} else missmu(mtmp, (tmp == j), mattk);
 					}
