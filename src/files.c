@@ -1877,6 +1877,19 @@ int prefixid;
 
 #define match_varname(INP,NAM,LEN) match_optname(INP, NAM, LEN, TRUE)
 
+glyph_t *
+uchar_to_glypht(uchar_arr, len)
+uchar * uchar_arr;
+int len;
+{
+	static glyph_t buffer[MAXPCHARS];
+	int i;
+	for (i = 0; i < len; i++)
+		buffer[i] = (glyph_t)uchar_arr[i];
+
+	return buffer;
+}
+
 /*ARGSUSED*/
 int
 parse_config_line(fp, buf, tmp_ramdisk, tmp_levels)
@@ -2051,7 +2064,7 @@ char		*tmp_levels;
 	} else if (match_varname(buf, "GRAPHICS", 4)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
 			     MAXPCHARS, "GRAPHICS");
-	    assign_graphics((glyph_t *) translate, len, MAXPCHARS, 0);
+	    assign_graphics(uchar_to_glypht(translate, len), len, MAXPCHARS, 0);
         } else if (match_varname(buf, "STATUSCOLOR", 11)) {
             /* ignore statuscolor entries if not compiled in */
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
@@ -2060,15 +2073,15 @@ char		*tmp_levels;
 	} else if (match_varname(buf, "DUNGEON", 4)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
 			     MAXDCHARS, "DUNGEON");
-	    assign_graphics((glyph_t *) translate, len, MAXDCHARS, 0);
+	    assign_graphics(uchar_to_glypht(translate, len), len, MAXDCHARS, 0);
 	} else if (match_varname(buf, "TRAPS", 4)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
 			     MAXTCHARS, "TRAPS");
-	    assign_graphics((glyph_t *) translate, len, MAXTCHARS, MAXDCHARS);
+	    assign_graphics(uchar_to_glypht(translate, len), len, MAXTCHARS, MAXDCHARS);
 	} else if (match_varname(buf, "EFFECTS", 4)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
 			     MAXECHARS, "EFFECTS");
-	    assign_graphics((glyph_t *)translate, len, MAXECHARS, MAXDCHARS+MAXTCHARS);
+	    assign_graphics(uchar_to_glypht(translate, len), len, MAXECHARS, MAXDCHARS+MAXTCHARS);
 #ifdef USER_DUNGEONCOLOR
 	} else if (match_varname(buf, "DUNGEONCOLOR", 10)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
