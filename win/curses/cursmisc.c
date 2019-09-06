@@ -452,6 +452,8 @@ curses_convert_glyph(int ch, int glyph)
         return ACS_LTEE;
     case S_tree:
         return ACS_PLMINUS;
+	case S_deadtree:
+		return ACS_PLMINUS;
     case S_corr:
         return ACS_CKBOARD;
     case S_litcorr:
