@@ -504,6 +504,7 @@ setrandom()
 #  endif
 # endif
 #endif
+	srand((int) time((time_t *)0)); /*The basic rand function is always used in a few places, so seed it*/
 }
 
 static struct tm *
