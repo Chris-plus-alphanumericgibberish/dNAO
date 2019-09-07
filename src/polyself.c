@@ -1208,19 +1208,20 @@ dogaze()
 	int looked = 0;
 	char qbuf[QBUFSZ];
 	int i;
+	int dmg = 0;
 	uchar adtyp = 0;
+	uchar damn = 0;
+	uchar damd = 0;
+	const int elementalgaze[] = {AD_FIRE,AD_COLD,AD_ELEC};
 
 	for (i = 0; i < NATTK; i++) {
 	    if(youracedata->mattk[i].aatyp == AT_GAZE) {
 		adtyp = youracedata->mattk[i].adtyp;
+		damn = youracedata->mattk[i].damn;
+		damd = youracedata->mattk[i].damd;
 		break;
 	    }
 	}
-	if (adtyp != AD_CONF && adtyp != AD_FIRE) {
-	    impossible("gaze attack %d?", adtyp);
-	    return 0;
-	}
-
 
 	if (Blind) {
 	    You_cant("see anything to gaze at.");
@@ -1266,29 +1267,123 @@ dogaze()
 		    /* No reflection check for consistency with when a monster
 		     * gazes at *you*--only medusa gaze gets reflected then.
 		     */
-		    if (adtyp == AD_CONF) {
-			if (!mtmp->mconf)
-			    Your("gaze confuses %s!", mon_nam(mtmp));
-			else
-			    pline("%s is getting more and more confused.",
-							Monnam(mtmp));
-			mtmp->mconf = 1;
-		    } else if (adtyp == AD_FIRE) {
-			int dmg = d(2,6);
-			You("attack %s with a fiery gaze!", mon_nam(mtmp));
-			if (resists_fire(mtmp)) {
-			    pline_The("fire doesn't burn %s!", mon_nam(mtmp));
-			    dmg = 0;
-			}
-			if((int) u.ulevel > rn2(20))
-			    (void) destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			if((int) u.ulevel > rn2(20))
-			    (void) destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
-			if((int) u.ulevel > rn2(25))
-			    (void) destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
-			if (dmg && !DEADMONSTER(mtmp)) mtmp->mhp -= dmg;
-			if (mtmp->mhp <= 0) killed(mtmp);
-		    }
+		    if(adtyp == AD_RETR)
+			adtyp = elementalgaze[rn2(SIZE(elementalgaze))];	//flat random member of elementalgaze
+		    switch(adtyp){
+		   	 case AD_CONF:
+		   	     if (!mtmp->mconf)
+		   	         Your("gaze confuses %s!", mon_nam(mtmp));
+		   	     else
+		   	         pline("%s is getting more and more confused.",
+		   	     				Monnam(mtmp));
+		   	     mtmp->mconf = 1;
+		   	 break;
+		   	 case AD_FIRE:
+		   	     dmg = d(damn,damd);
+		   	     You("attack %s with a fiery gaze!", mon_nam(mtmp));
+		   	     if (resists_fire(mtmp)) {
+		   	         pline_The("fire doesn't burn %s!", mon_nam(mtmp));
+		   	         dmg = 0;
+		   	     }
+		   	     if((int) u.ulevel > rn2(20))
+		   	         (void) destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
+		   	     if((int) u.ulevel > rn2(20))
+		   	         (void) destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+		   	     if((int) u.ulevel > rn2(25))
+		   	         (void) destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+		   	 break;
+		   	 case AD_COLD:
+		   	     dmg = d(damn,damd);
+		   	     You("attack %s with a cold gaze!", mon_nam(mtmp));
+		   	     if (resists_cold(mtmp)) {
+		   	         pline_The("cold doesn't freeze %s!", mon_nam(mtmp));
+		   	         dmg = 0;
+		   	     }
+		   	     if((int) u.ulevel > rn2(20))
+		   	         (void) destroy_mitem(mtmp, POTION_CLASS, AD_COLD);
+		   	 break;
+		   	 case AD_ELEC:
+		   	     dmg = d(damn,damd);
+		   	     You("attack %s with an electrifying gaze!", mon_nam(mtmp));
+		   	     if (resists_elec(mtmp)) {
+		   	         pline_The("electricity doesn't shock %s!", mon_nam(mtmp));
+		   	         dmg = 0;
+		   	     }
+		   	 break;
+			 case AD_STDY:
+				You("study %s carefully.",mon_nam(mtmp));
+				mtmp->mstdy = max(d(damn,damd),mtmp->mstdy);
+			 break;
+			 case AD_PLYS:{
+				int plys;
+				if(damn == 0 || damd == 0) 
+					plys = rnd(10);
+				else plys = d(damn, damd);
+		    		mtmp->mcanmove = 0;
+		    		mtmp->mfrozen = plys;
+				You("mesmerize %s!", mon_nam(mtmp));
+			     }
+			 break;
+			 case AD_SPOR:
+			 case AD_MIST:{
+				int n;
+				int mndx;
+				struct monst *mtmp2;
+				struct monst *mtmp3;
+				if(youracedata ==  &mons[PM_MIGO_PHILOSOPHER]){
+					n = rnd(4);
+					pline("Whirling snow swirls out from around you.");
+					mndx = PM_ICE_VORTEX;
+				} else if(youracedata == &mons[PM_MIGO_QUEEN]){
+					n = rnd(2);
+					pline("Scalding steam swirls out from around you.");
+					mndx = PM_STEAM_VORTEX;
+				} else if(youracedata == &mons[PM_SWAMP_FERN]){
+					n = 1;
+					You("release a spore.");
+					mndx = PM_SWAMP_FERN_SPORE;
+				} else if(youracedata == &mons[PM_BURNING_FERN]){
+					n = 1;
+					You("release a spore.");
+					mndx = PM_BURNING_FERN_SPORE;
+				} else if(adtyp == AD_SPOR){
+					n = 1;
+					You("release a spore.");
+					mndx = PM_DUNGEON_FERN_SPORE;
+				} else {
+					n = rnd(4);
+					pline("fog billows out from around you.");
+					mndx = PM_FOG_CLOUD;
+				}
+				for(i=0;i<n;i++){
+					mtmp3 = makemon(&mons[mndx], u.ux, u.uy, MM_ADJACENTOK|MM_ADJACENTSTRICT);
+				 	if (mtmp3 && (mtmp2 = tamedog(mtmp3, (struct obj *)0)) != 0){
+						mtmp3 = mtmp2;
+						mtmp3->mtame = 30;
+						mtmp3->mvanishes = 10;
+					} else mongone(mtmp3);
+				}
+			 }
+			 break;
+			 case AD_BLND:{
+			 	register unsigned rnd_tmp;
+				if (!is_blind(mtmp))
+			 	   pline("%s is blinded.", Monnam(mtmp));
+				rnd_tmp = d(damn, damd);
+				pline("%d",rnd_tmp);
+				if ((rnd_tmp += mtmp->mblinded) > 127) rnd_tmp = 127;
+				mtmp->mblinded = rnd_tmp;
+				mtmp->mcansee = 0;
+				mtmp->mstrategy &= ~STRAT_WAITFORU;
+			 }
+			 break;
+			 default:
+	    			impossible("gaze attack %d?", adtyp);
+	    			return 0;
+			 break;
+		     }
+ 		    if (dmg && !DEADMONSTER(mtmp)) mtmp->mhp -= dmg;
+		    if (mtmp->mhp <= 0) killed(mtmp);
 		    /* For consistency with passive() in uhitm.c, this only
 		     * affects you if the monster is still alive.
 		     */
