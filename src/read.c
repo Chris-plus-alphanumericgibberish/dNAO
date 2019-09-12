@@ -1296,6 +1296,23 @@ int howmuch;
 	if (howmuch && !rn2(3)) forget_objects(howmuch);
 
 	if (howmuch) losespells(howmuch);
+	
+	if(howmuch){
+		if(u.usanity < 100){
+			int loss = 100 - u.usanity;
+			loss = loss*howmuch/100;
+			if(loss == 0) loss = 1;
+			
+			u.usanity += loss;
+		}
+		if(u.uinsight > 0){
+			int loss = u.uinsight;
+			loss = loss*howmuch/100;
+			if(loss == 0) loss = 1;
+			
+			u.uinsight -= loss;
+		}
+	}
 	/*
 	 * Make sure that what was seen is restored correctly.  To do this,
 	 * we need to go blind for an instant --- turn off the display,
@@ -3122,6 +3139,10 @@ int gen_restrict;
 					undeadtype = PSEUDONATURAL;
 				else if (!strcmpi(p, "tomb herd"))
 					undeadtype = TOMB_HERD;
+				else if (!strcmpi(p, "yith"))
+					undeadtype = YITH;
+				else if (!strcmpi(p, "cranium"))
+					undeadtype = CRANIUM_RAT;
 				else
 				{
 					// no undead suffix was used, undo the split
@@ -3137,6 +3158,8 @@ int gen_restrict;
 		case ILLUMINATED:
 		case PSEUDONATURAL:
 		case TOMB_HERD:
+		case YITH:
+		case CRANIUM_RAT:
 			undeadtype = specify_derivation;
 			break;
 		}
@@ -3235,6 +3258,8 @@ createmon:
 				undeadtype == ILLUMINATED ? TRUE :
 				undeadtype == PSEUDONATURAL ? TRUE :
 				undeadtype == TOMB_HERD ? TRUE :
+				undeadtype == YITH ? TRUE :
+				undeadtype == CRANIUM_RAT ? is_rat(mtmp->data) :
 				undeadtype == FRACTURED ? is_kamerel(mtmp->data) : 0
 				))
 			{
