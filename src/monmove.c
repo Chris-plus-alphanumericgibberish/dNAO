@@ -332,6 +332,11 @@ struct monst *mtmp;
 			mtmp->data->mlet == S_PUDDING ||
 			mtmp->data->mlet == S_UMBER ||
 			mtmp->data->mlet == S_EEL ||
+			mtmp->data == &mons[PM_GUG] ||
+			mtmp->data == &mons[PM_MIGO_WORKER] ||
+			mtmp->data == &mons[PM_MIGO_SOLDIER] ||
+			mtmp->data == &mons[PM_MIGO_PHILOSOPHER] ||
+			mtmp->data == &mons[PM_MIGO_QUEEN] ||
 			mtmp->data == &mons[PM_TRAPPER] ||
 			mtmp->data == &mons[PM_LURKER_ABOVE] ||
 			mtmp->data == &mons[PM_NIGHTGAUNT] ||
@@ -355,7 +360,10 @@ struct monst *mtmp;
 			(mtmp->data == &mons[PM_BLACK_FLOWER] && complete == 6) ||
 			mtmp->data == &mons[PM_DARK_YOUNG] ||
 			mtmp->data == &mons[PM_WEEPING_ANGEL] ||
+			mtmp->data == &mons[PM_ANCIENT_OF_ICE] ||
+			(mtmp->data == &mons[PM_ANCIENT_OF_DEATH] && complete == 6) ||
 			(mtmp->data == &mons[PM_JUIBLEX] && complete == 6) ||
+			(mtmp->data == &mons[PM_MASKED_QUEEN] && complete == 6) ||
 			(mtmp->data == &mons[PM_PALE_NIGHT] && complete == 6) ||
 			(mtmp->data == &mons[PM_LEVIATHAN] && complete == 6) ||
 			(mtmp->data == &mons[PM_BAALPHEGOR] && complete == 6) ||
