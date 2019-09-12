@@ -1506,6 +1506,8 @@ int thrown;
 				} else if(!uwep){
 					setuwep(obj);
 					u.twoweap = twoweap;
+				} else if(!uquiver){
+					setuqwep(obj);
 				}
 			}
 			return;
