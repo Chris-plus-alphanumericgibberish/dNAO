@@ -4140,11 +4140,6 @@ boolean atme;
 	int dam = 0;
 	int rad = 0;
 	
-	if(spell > MAXSPELL || (!spell && spelltyp > MAXSPELL)){
-		if(spell) return wordeffects(spell);
-		else if(spelltyp) return wordeffects(spell);
-	}
-
 	if(!spelltyp){
 		/*
 		 * Spell casting no longer affects knowledge of the spell. A
@@ -4156,14 +4151,14 @@ boolean atme;
 			spell_backfire(spell);
 			return(0);
 		} else if (
-			!(spellid(spell) == SPE_LIGHTNING_BOLT && uarmh && uarmh->oartifact == ART_STORMHELM) &&
+			!(spellid(spell) == SPE_LIGHTNING_STORM && uarmh && uarmh->oartifact == ART_STORMHELM) &&
 			!((spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE) && 
 				uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
 		) {
 			if(spellknow(spell) <= 200) { /* 1% */
 				You("strain to recall the spell.");
 			} else if (spellknow(spell) <= 1000 && 
-				!(spellid(spell) == SPE_LIGHTNING_BOLT || !uarmh || uarmh->oartifact != ART_STORMHELM)
+				!(spellid(spell) == SPE_LIGHTNING_STORM || !uarmh || uarmh->oartifact != ART_STORMHELM)
 			) { /* 5% */
 				Your("knowledge of this spell is growing faint.");
 			}

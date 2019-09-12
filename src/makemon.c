@@ -943,6 +943,7 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 					/*Helm*/
 					otmp = mksobj(DROVEN_HELM, TRUE, FALSE);
+					set_material(otmp, SILVER);
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					otmp->oerodeproof = TRUE;
@@ -950,6 +951,7 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 					/*boots*/
 					otmp = mksobj(SHOES, TRUE, FALSE);
+					set_material(otmp, SILVER);
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					otmp->oerodeproof = TRUE;
@@ -3406,7 +3408,6 @@ register struct monst *mtmp;
 					rn2(2) ? mongets(mtmp, LOW_BOOTS) : rn2(2) ? mongets(mtmp, HIGH_BOOTS) : mongets(mtmp, HEELED_BOOTS);
 					break;
 				}
-				(void) mongets(mtmp, ANDROID_VISOR);
 			} else if(mm == PM_PARASITIZED_ANDROID){
 				switch(rn2(6)){
 					case 0:
@@ -3456,7 +3457,6 @@ register struct monst *mtmp;
 				}
 				(void) mongets(mtmp, GLOVES);
 				(void) mongets(mtmp, HIGH_BOOTS);
-				(void) mongets(mtmp, ANDROID_VISOR);
 			}
 		}
 

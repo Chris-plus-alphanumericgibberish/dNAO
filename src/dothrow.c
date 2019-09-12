@@ -131,7 +131,7 @@ int thrown;
 	/* Multishot calculations
 	 */
 	skill = objects[obj->otyp].oc_skill;
-	if (((ammo_and_launcher(obj, launcher) && skill != -P_CROSSBOW && launcher->otyp != ATLATL) || (skill == P_DAGGER && !Role_if(PM_WIZARD)) ||
+	if (((ammo_and_launcher(obj, launcher) && skill != -P_CROSSBOW) || (skill == P_DAGGER && !Role_if(PM_WIZARD)) ||
 			skill == -P_DART || skill == -P_SHURIKEN || skill == -P_BOOMERANG || obj->oartifact == ART_SICKLE_MOON || obj->oartifact == ART_AMHIMITL) &&
 		!(Confusion || Stunned)) {
 	    /* Bonus if the player is proficient in this weapon... */
@@ -241,7 +241,7 @@ int thrown;
 
 	if(multishot < 1) multishot = 1;
 	if(obj->oartifact == ART_FLUORITE_OCTAHEDRON && !ammo_and_launcher(obj,launcher)) multishot = 1;
-	if(launcher && launcher->otyp == ATLATL) multishot = 1;
+
 
 	m_shot.s = ammo_and_launcher(obj,launcher) ? TRUE : FALSE;
 	/* give a message if shooting more than one, or if player
@@ -712,7 +712,7 @@ dofire()
 		return throw_obj(uwep, shotlimit, THROW_UWEP);
 	}
 	
-	if(uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && Race_if(PM_ANDROID)){
+	if(uwep && !is_blaster(uwep) && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && Race_if(PM_ANDROID)){
 		/*See below for shotlimit*/
 		shotlimit = (multi || save_cm) ? multi + 1 : 0;
 		multi = 0;		/* reset; it's been used up */
@@ -1506,6 +1506,8 @@ int thrown;
 				} else if(!uwep){
 					setuwep(obj);
 					u.twoweap = twoweap;
+				} else if(!uquiver){
+					setuqwep(obj);
 				}
 			}
 			return;
@@ -2153,7 +2155,7 @@ int thrown;
 						yn("Do you wish to take Spidersilk, instead of this?") == 'y'
 					){
 						obfree(obj, (struct obj *)0);
-						obj = mksobj(ELVEN_MITHRIL_COAT, TRUE, FALSE);
+						obj = mksobj(DROVEN_CHAIN_MAIL, TRUE, FALSE);
 						obj = oname(obj, artiname(ART_SPIDERSILK));
 						obj->oerodeproof = TRUE;
 						obj->blessed = TRUE;

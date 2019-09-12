@@ -2102,10 +2102,15 @@ int spellnum;
 	case TIME_DUPLICATE:{
 		struct monst *tmpm;
 		if(!mtmp) goto psibolt;
-		tmpm = makemon(mtmp->data, mtmp->mux, mtmp->muy, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
-		tmpm->mvanishes = d(1,4)+1;
-		tmpm->mclone = 1;
-		dmg = 0;
+		if(clear_path(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy))
+			tmpm = makemon(mtmp->data, mtmp->mux, mtmp->muy, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
+		else
+			tmpm = makemon(mtmp->data, mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
+		if(tmpm){
+			tmpm->mvanishes = d(1,4)+1;
+			tmpm->mclone = 1;
+			dmg = 0;
+		} else goto psibolt;
 	}break;
 	case NAIL_TO_THE_SKY:{
 		HLevitation &= ~I_SPECIAL;
@@ -2137,8 +2142,12 @@ int spellnum;
        struct monst *mtmp2;
 	   if(!mtmp) goto psibolt;
 	   if(is_alienist(mtmp->data)) goto summon_alien;
+	   if(clear_path(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy))
 	   mtmp2 = mk_roamer(&mons[PM_ANGEL],
                sgn(mtmp->data->maligntyp), mtmp->mux, mtmp->muy, FALSE);
+		else
+		   mtmp2 = mk_roamer(&mons[PM_ANGEL],
+				   sgn(mtmp->data->maligntyp), mtmp->mx, mtmp->my, FALSE);
        if (mtmp2) {
            if (canspotmon(mtmp2))
                pline("%s %s!",
@@ -2148,7 +2157,7 @@ int spellnum;
            else
                You("sense the arrival of %s.",
                        an(Hallucination ? rndmonnam() : "hostile angel"));
-       }
+       } else goto psibolt;
        dmg = 0;
 	   stop_occupation();
        break;
@@ -2170,7 +2179,10 @@ summon_alien:
 									&mons[PM_UVUUDAUM]};
 	   if(!mtmp) goto psibolt;
 	   do {
+		if(clear_path(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy))
 	       mtmp2 = makemon(aliens[rn2(SIZE(aliens))], mtmp->mux, mtmp->muy, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+		else
+	       mtmp2 = makemon(aliens[rn2(SIZE(aliens))], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 	   } while (!mtmp2 && tries++ < 10);
        if (mtmp2) {
            if (canspotmon(mtmp2))
@@ -2179,7 +2191,7 @@ summon_alien:
            else
                You("sense the arrival of %s.",
                        an(Hallucination ? rndmonnam() : "alien"));
-       }
+       } else goto psibolt;
        dmg = 0;
 	   stop_occupation();
        break;
@@ -2251,7 +2263,7 @@ summon_alien:
 	if(is_drow(mdat)){
 		j = 0;
 		do pm = mkclass(S_SPIDER, G_NOHELL|G_HELL);
-		while(!is_spider(pm) && j++ < 30);
+		while(pm && !is_spider(pm) && j++ < 30);
 		let = (pm ? S_SPIDER : S_SNAKE);
 	} else{
 		pm = mkclass(S_ANT,G_NOHELL|G_HELL);
@@ -2264,12 +2276,10 @@ summon_alien:
 	    if (!enexto(&bypos, mtmp->mux, mtmp->muy, mtmp->data)) break;
 		if(is_drow(mdat)){
 			j = 0;
-			do pm = mkclass(S_SPIDER, G_NOHELL|G_HELL);
-			while(!is_spider(pm) && j++ < 30);
-			let = (pm ? S_SPIDER : S_SNAKE);
+			do pm = mkclass(let, G_NOHELL|G_HELL);
+			while(pm && !is_spider(pm) && pm->mlet != S_SNAKE && j++ < 30);
 		} else{
-			pm = mkclass(S_ANT,G_NOHELL|G_HELL);
-			let = (pm ? S_ANT : S_SNAKE);
+			pm = mkclass(let,G_NOHELL|G_HELL);
 		}
 	    if (pm != 0 && (mtmp2 = makemon(pm, bypos.x, bypos.y, NO_MM_FLAGS)) != 0) {
 			success = TRUE;
@@ -4899,7 +4909,7 @@ uspsibolt:
 	){ /*summoning is determined by your actual race*/\
 		j = 0;
 		do pm = mkclass(S_SPIDER, G_NOHELL|G_HELL);
-		while(!is_spider(pm) && j++ < 30);
+		while(pm && !is_spider(pm) && j++ < 30);
 		let = (pm ? S_SPIDER : S_SNAKE);
 	} else {
 		pm = mkclass(S_ANT,G_NOHELL|G_HELL);
@@ -4917,12 +4927,10 @@ uspsibolt:
 			(!yours && is_drow((mattk->data)) )
 		){ /*summoning is determined by your actual race*/\
 			j = 0;
-			do pm = mkclass(S_SPIDER, G_NOHELL|G_HELL);
-			while(!is_spider(pm) && j++ < 30);
-			let = (pm ? S_SPIDER : S_SNAKE);
+			do pm = mkclass(let, G_NOHELL|G_HELL);
+			while(pm && !is_spider(pm) && pm->mlet != S_SNAKE && j++ < 30);
 		} else {
-			pm = mkclass(S_ANT,G_NOHELL|G_HELL);
-			let = (pm ? S_ANT : S_SNAKE);
+			pm = mkclass(let,G_NOHELL|G_HELL);
 		}
 	    if (pm && (mtmp2 = makemon(pm, bypos.x, bypos.y, NO_MM_FLAGS)) != 0) {
 		success = TRUE;
