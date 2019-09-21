@@ -452,7 +452,7 @@ register struct monst *mtmp;
 			&& !is_rider(mtmp->data) 
 			&& !(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mtmp->mtame)
 		) //u.uevent.invoked || 
-			return (struct obj *)0;
+			break;
 		num = undead_to_corpse(mndx);
 		obj = mkcorpstat(CORPSE, mtmp, &mons[num], x, y, TRUE);
 		obj->age -= 100;		/* this is an *OLD* corpse */
@@ -489,7 +489,7 @@ register struct monst *mtmp;
 			&& !is_rider(mtmp->data) 
 			&& !(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mtmp->mtame)
 		) //u.uevent.invoked || 
-			return (struct obj *)0;
+			break;
 		num = undead_to_corpse(mndx);
 		obj = mkcorpstat(CORPSE, mtmp, &mons[num], x, y, TRUE);
 		break;
@@ -657,7 +657,7 @@ register struct monst *mtmp;
 			if((In_hell(&u.uz) || In_endgame(&u.uz)) 
 				&& !is_rider(mtmp->data) 
 			) //u.uevent.invoked || 
-				return (struct obj *)0;
+				break;
 			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
 			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
 			fix_object(obj);
@@ -685,7 +685,7 @@ register struct monst *mtmp;
 			if((In_hell(&u.uz) || In_endgame(&u.uz)) 
 				&& !is_rider(mtmp->data) 
 			) //u.uevent.invoked || 
-				return (struct obj *)0;
+				break;
 			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
 			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
 			fix_object(obj);
@@ -904,7 +904,7 @@ register struct monst *mtmp;
 				&& !is_rider(mtmp->data) 
 				&& !(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mtmp->mtame)
 			) //u.uevent.invoked || 
-				return (struct obj *)0;
+				break;
 			mon = makemon(&mons[PM_DROW_CAPTAIN], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 			if (mon){
 				initedog(mon);
@@ -924,7 +924,7 @@ register struct monst *mtmp;
 				&& !is_rider(mtmp->data) 
 				&& !(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mtmp->mtame)
 			) //u.uevent.invoked || 
-				return (struct obj *)0;
+				break;
 			mon = makemon(&mons[PM_ALIDER], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 			if (mon){
 				initedog(mon);
@@ -940,7 +940,7 @@ register struct monst *mtmp;
 			if((In_hell(&u.uz) || In_endgame(&u.uz)) 
 				&& !is_rider(mtmp->data) 
 			) //u.uevent.invoked || 
-				return (struct obj *)0;
+				break;
 			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
 			obj->corpsenm = PM_PARASITIC_MASTER_MIND_FLAYER;
 			fix_object(obj);
@@ -953,7 +953,7 @@ register struct monst *mtmp;
 			&& !is_rider(mtmp->data) 
 			&& !(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mtmp->mtame)
 		) //u.uevent.invoked || 
-			return (struct obj *)0;
+			break;
 		else if(u.sealsActive&SEAL_BERITH && !(mvitals[mndx].mvflags & G_UNIQ) 
 				&& mtmp->m_lev > u.ulevel && !KEEPTRAITS(mtmp)
 		){
