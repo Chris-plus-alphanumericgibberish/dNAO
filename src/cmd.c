@@ -601,6 +601,15 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
+	if(attacktype(youracedata, AT_TNKR)){
+		Sprintf(buf, "Tinker");
+		any.a_int = MATTK_TNKR;	/* must be non-zero */
+		incntlet = 't';
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		atleastone = TRUE;
+	}
 	if(is_hider(youracedata)){
 		Sprintf(buf, "Hide");
 		any.a_int = MATTK_HIDE;	/* must be non-zero */
@@ -740,6 +749,7 @@ domonability()
 			                         AT_MAGC,AD_ANY)]);
 	case MATTK_REMV: return doremove();
 	case MATTK_GAZE: return dogaze();
+	case MATTK_TNKR: return dotinker();
 	case MATTK_SUMM: return dosummon();
 	case MATTK_WEBS: return dospinweb();
 	case MATTK_HIDE: return dohide();

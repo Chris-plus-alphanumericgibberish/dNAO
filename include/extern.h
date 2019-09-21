@@ -2001,6 +2001,7 @@ E int NDECL(dospit);
 E int NDECL(doremove);
 E int NDECL(dospinweb);
 E int NDECL(dosummon);
+E int NDECL(dotinker);
 E int NDECL(dogaze);
 E int NDECL(dohide);
 E int NDECL(domindblast);
