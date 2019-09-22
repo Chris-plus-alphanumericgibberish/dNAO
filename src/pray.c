@@ -1926,6 +1926,7 @@ gods_upset(g_align)
 		u.ugangr[Align2gangr(u.ualign.type)]--;
 		u.ugangr[Align2gangr(g_align)]++;
 	}
+	else u.ugangr[Align2gangr(g_align)]++;
 	angrygods(g_align);
 }
 
