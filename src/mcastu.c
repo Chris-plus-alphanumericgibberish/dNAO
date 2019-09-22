@@ -3447,6 +3447,7 @@ cold_mm:
 		/*victim so as to aggravate you*/
 		if (is_undirected_spell(spellnum)
 			&& (spellnum != AGGRAVATION &&
+			  spellnum != INSECTS &&
 		      spellnum != SUMMON_MONS)
 		)
 		   cast_spell(mtmp, dmg, spellnum);
