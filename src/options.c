@@ -3060,7 +3060,7 @@ goodfruit:
 			 if (iflags.debug_fuzzer && !initial) {
                 		/* don't randomly toggle this/these */
                 		if (boolopt[i].addr == &flags.silent)
-                    			return TRUE;
+                    			return;
        			  }
 		
 	
