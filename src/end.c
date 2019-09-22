@@ -300,6 +300,8 @@ int sig_unused;
 int
 done2()
 {
+	if (iflags.debug_fuzzer)
+		return 0;
 #ifdef PARANOID
 	char buf[BUFSZ];
 	int really_quit = FALSE;
@@ -503,7 +505,6 @@ void
 panic VA_DECL(const char *, str)
 	VA_START(str);
 	VA_INIT(str, char *);
-
 	/*The actual panic code is too prone to shredding games*/
 	/* Just print out the error message and abort.*/
 	raw_print("\r\nIt seems the game has suffered a fatal panic attack.");
@@ -514,7 +515,7 @@ panic VA_DECL(const char *, str)
 	    raw_print(buf);
 	    paniclog("panic", buf);
 	}
-	NH_abort();
+	NH_abort(); /*actually just die here*/
 }
 
 STATIC_OVL boolean
@@ -807,6 +808,28 @@ int how;
 	    }
 #endif
 	}
+		
+	if (iflags.debug_fuzzer) {
+	        if (!(program_state.panicking || how == PANICKED)) {
+	            savelife(how);
+	            /* periodically restore characteristics and lost exp levels
+	               or cure lycanthropy */
+	            if (!rn2(10)) {
+	                struct obj *potion = mksobj((u.ulycn > LOW_PM && !rn2(3))
+	                                            ? POT_WATER : POT_RESTORE_ABILITY,
+	                                            TRUE, FALSE);
+	
+	                bless(potion);
+	                (void) peffects(potion); /* always -1 for restore ability */
+	                /* not useup(); we haven't put this potion into inventory */
+	                obfree(potion, (struct obj *) 0);
+	            }
+	            killer = '\0';
+	            killer_format = 0;
+	            return;
+	        }
+	    } else
+
 
 	/* kilbuf: used to copy killer in case it comes from something like
 	 *	xname(), which would otherwise get overwritten when we call

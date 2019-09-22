@@ -211,6 +211,7 @@ struct flag {
 #define POKEDEX_SHOW_DEFAULT	POKEDEX_SHOW_STATS | POKEDEX_SHOW_RESISTS | POKEDEX_SHOW_CONVEYS | POKEDEX_SHOW_MG | POKEDEX_SHOW_ATTACKS | POKEDEX_SHOW_CRITICAL
 
 struct instance_flags {
+	boolean debug_fuzzer;  /* fuzz testing */
 	char attack_mode;         /* attack, refrain or ask to attack monsters */
 	boolean  cbreak;	/* in cbreak mode, rogue format */
 #ifdef CURSES_GRAPHICS

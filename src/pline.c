@@ -346,6 +346,8 @@ impossible VA_DECL(const char *, s)
 	Vsprintf(pbuf,s,VA_ARGS);
 	pbuf[BUFSZ-1] = '\0';
 	paniclog("impossible", pbuf);
+	if (iflags.debug_fuzzer)
+		panic("%s", pbuf);
 	pline("%s", pbuf);
 	pline("Program in disorder - you should probably S)ave and reload the game.");
 	program_state.in_impossible = 0;
