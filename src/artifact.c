@@ -1613,7 +1613,6 @@ struct monst *mtmp;
 	    return FALSE;
 	
 	if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit) return !((mtmp == &youmonst) ? Antimagic : resists_magm(mtmp));
-	//HMS's to-hit bonus always applies in one-hander mode
 	
 	yours = (mtmp == &youmonst);
 	if(yours) ptr = youracedata;
@@ -3100,21 +3099,6 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		} else {
 			if(magr && magr->mhp <= magr->mhpmax*.3)
 				*dmgptr += basedmg*.2;
-		}
-	}
-	
-	if(otmp->otyp == CROW_QUILL){
-		if(youdefend){
-			u.ustdy += 4;
-		} else if(mdef){
-			mdef->mstdy += 4;
-		}
-	}
-	if(otmp->otyp == SET_OF_CROW_TALONS){
-		if(youdefend){
-			u.ustdy += 3*otmp->ostriking + 3;
-		} else if(mdef){
-			mdef->mstdy += 3*otmp->ostriking + 3;
 		}
 	}
 	return FALSE;
@@ -5824,13 +5808,13 @@ arti_invoke(obj)
 		int starfall = rnd(u.ulevel/10+1), x, y, n;
 		int tries = 0;
 		coord cc;
-		verbalize("Even Stars Fall");
 		if (throweffect()){
 			x = u.dx, y = u.dy;
 		} else {
 			x = rn2(COLNO-2)+1;
 			y = rn2(ROWNO-2)+1;
 		}
+		verbalize("Even Stars Fall");
 		for (; starfall > 0; starfall--){
 			if(!isok(x,y) || !ACCESSIBLE(levl[x][y].typ)){
 				if(tries++ < 1000){
@@ -8901,19 +8885,12 @@ read_necro(VOID_ARGS)
 				chance = d(1,6);
 			}
 		}
-		if(chance > 0){
-			u.uinsight++;
-			if(u.usanity < 100 && rnd(30) < ACURR(A_WIS))
-				u.usanity++;
-		}
 		switch(chance){
 			case 0:
 				You("fail.");
 				exercise(A_WIS, FALSE);
 				exercise(A_WIS, FALSE);
 				exercise(A_INT, FALSE);
-				if(rn2(100) < u.usanity)
-					u.usanity--;
 			break;
 			case 1:
 				if(!(artiptr->ovar1 & S_OOZE)){
@@ -9330,18 +9307,12 @@ read_lost(VOID_ARGS)
 
 		i = rn2(31);
 		putativeSeal = 1L << i;
-		if(artiptr->ovar1 & putativeSeal){
-			losexp("getting lost in a book",TRUE,TRUE,TRUE);
-			if(rn2(100) < u.usanity)
-				u.usanity--;
-		} else {
+		if(artiptr->ovar1 & putativeSeal) losexp("getting lost in a book",TRUE,TRUE,TRUE);
+		else{
 			u.sealsKnown |= putativeSeal;
 			artiptr->ovar1 |= putativeSeal;
 			You("learn the name \"%s\" while studying the book.",sealNames[i]);
 			artiptr->spestudied++;
-			u.uinsight++;
-			if(u.usanity < 100 && rnd(30) < ACURR(A_WIS))
-				u.usanity++;
 		}
 	}
 	else{
@@ -9664,7 +9635,7 @@ void
 mind_blast_items()
 {
 	struct monst *mtmp, *nmon = (struct monst *)0;
-	struct obj *obj, *nobj;
+	struct obj *obj;
 	struct blast_element *blast_list = 0, *nblast = 0;
 	int whisper = 0;
 	if(u.uinvulnerable)
@@ -9793,24 +9764,6 @@ mind_blast_items()
 		free(nblast);
 	}
 
-	for (obj = fobj; obj; obj = nobj) {
-		nobj = obj->nobj;
-		if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe) && u.uinsight > rn2(INSIGHT_RATE)){
-		// if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe)){
-			mtmp = animate_statue(obj, obj->ox, obj->oy, ANIMATE_NORMAL, (int *) 0);
-			if(mtmp){
-				mtmp->mfaction = TOMB_HERD;
-				mtmp->m_lev += 4;
-				mtmp->mhpmax += d(4, 8);
-				mtmp->mhp = mtmp->mhpmax;
-				// mtmp->m_ap_type = M_AP_OBJECT;
-				// mtmp->mappearance = STATUE;
-				// mtmp->m_ap_type = M_AP_MONSTER;
-				// mtmp->mappearance = PM_STONE_GOLEM;
-				newsym(mtmp->mx, mtmp->my);
-			}
-		}
-	}
 }
 
 STATIC_OVL void
@@ -9950,9 +9903,6 @@ struct monst *mon;
 				return 1;
 		} else if(mon->mfaction == VAMPIRIC){
 			if((otmp->wrathdata >> 2) == PM_VAMPIRE)
-				return 1;
-		} else if(mon->mfaction == PSEUDONATURAL){
-			if((otmp->wrathdata >> 2) == PM_MIND_FLAYER)
 				return 1;
 		} else {
 			if(&mons[(otmp->wrathdata >> 2)] == mon->data)
