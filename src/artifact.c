@@ -5825,9 +5825,13 @@ arti_invoke(obj)
 		int tries = 0;
 		coord cc;
 		verbalize("Even Stars Fall");
-		for (; starfall > 0; starfall--){
+		if (throweffect()){
+			x = u.dx, y = u.dy;
+		} else {
 			x = rn2(COLNO-2)+1;
 			y = rn2(ROWNO-2)+1;
+		}
+		for (; starfall > 0; starfall--){
 			if(!isok(x,y) || !ACCESSIBLE(levl[x][y].typ)){
 				if(tries++ < 1000){
 					starfall++;
@@ -5855,6 +5859,8 @@ arti_invoke(obj)
 			}
 			do_earthquake(cc.x, cc.y, 6, 3, FALSE, &youmonst);
 			do_earthquake(cc.x, cc.y, 3, 5, FALSE, &youmonst);
+			x = rn2(COLNO-2)+1;
+			y = rn2(ROWNO-2)+1;
 		}
 		awaken_monsters(ROWNO * COLNO);
 	} break;
