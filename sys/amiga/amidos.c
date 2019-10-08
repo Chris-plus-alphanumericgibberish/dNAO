@@ -82,6 +82,8 @@ dosh()
     int i;
     char buf[ BUFSZ ];
     extern struct ExecBase *SysBase;
+    if(iflags.debug_fuzzer)
+	    return 0;
 
     /* Only under 2.0 and later ROMs do we have System() */
     if( SysBase->LibNode.lib_Version >= 37 && !amibbs)

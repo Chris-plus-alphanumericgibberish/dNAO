@@ -809,6 +809,8 @@ level_tele()
 	const char *escape_by_flying = 0;	/* when surviving dest of -N */
 	char buf[BUFSZ];
 	boolean force_dest = FALSE;
+	if (iflags.debug_fuzzer)
+		goto random_levtport;
 
 	if ((u.uhave.amulet || In_endgame(&u.uz) || In_sokoban(&u.uz))
 #ifdef WIZARD
@@ -993,7 +995,10 @@ level_tele()
 #endif
 
 	killer = 0;		/* still alive, so far... */
-		
+	
+	if (iflags.debug_fuzzer && newlev < 0)
+       		goto random_levtport;
+	
 	if (newlev < 0 && dungeons[u.uz.dnum].depth_start-1 > newlev && !force_dest) {
 		if (*u.ushops0) {
 		    /* take unpaid inventory items off of shop bills */

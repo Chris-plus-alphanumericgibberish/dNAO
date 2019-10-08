@@ -350,6 +350,8 @@ tgetch()
 	coord cc;
 	DWORD count;
 	really_move_cursor();
+	if (iflags.debug_fuzzer)
+        	return randomkey();
 	return pCheckInput(hConIn, &ir, &count, iflags.num_pad, 0, &mod, &cc);
 }
 
@@ -361,6 +363,8 @@ int *x, *y, *mod;
 	coord cc;
 	DWORD count;
 	really_move_cursor();
+	if (iflags.debug_fuzzer)
+        	return randomkey();
 	ch = pCheckInput(hConIn, &ir, &count, iflags.num_pad, 1, mod, &cc);
 	if (!ch) {
 		*x = cc.x;
@@ -554,7 +558,7 @@ cl_eos()
 void
 tty_nhbell()
 {
-	if (flags.silent) return;
+	if (flags.silent || iflags.debug_fuzzer) return;
 	Beep(8000,500);
 }
 
@@ -566,6 +570,8 @@ tty_delay_output()
 	/* delay 50 ms - uses ANSI C clock() function now */
 	clock_t goal;
 	int k;
+	if (iflags.debug_fuzzer)
+        	return;
 
 	goal = 50 + clock();
 	while (goal > clock()) {

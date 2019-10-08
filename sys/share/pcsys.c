@@ -86,6 +86,8 @@ dosh()
 #if defined(MSDOS) && defined(NO_TERMS)
 	int grmode = iflags.grmode;
 #endif
+	if(iflags.debug_fuzzer)
+		return 0;
 	if ((comspec = getcomspec())) {
 #  ifndef TOS	/* TOS has a variety of shells */
 		suspend_nhwindows("To return to NetHack, enter \"exit\" at the system prompt.\n");

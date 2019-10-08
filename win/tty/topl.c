@@ -180,6 +180,8 @@ more()
     /* avoid recursion -- only happens from interrupts */
     if(ttyDisplay->inmore++)
 	return;
+    if (iflags.debug_fuzzer)
+	return;
 
     if(ttyDisplay->toplin) {
 	tty_curs(BASE_WINDOW, cw->curx+1, cw->cury);
