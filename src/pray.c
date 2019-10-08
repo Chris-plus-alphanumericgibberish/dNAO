@@ -1126,16 +1126,21 @@ gcrownu()
 						obj = oname(obj, artiname(ART_RUINOUS_DESCENT_OF_STARS));
 						discover_artifact(ART_RUINOUS_DESCENT_OF_STARS);
 					} else if(u.ualign.type == A_NEUTRAL){
-						obj = mksobj(GAUNTLETS_OF_DEXTERITY, FALSE, FALSE);
-						obj = oname(obj, artiname(ART_CLAWS_OF_THE_REVENANCER));
-						discover_artifact(ART_CLAWS_OF_THE_REVENANCER);
+						obj = mksobj(DROVEN_SHORT_SWORD, FALSE, FALSE);
+						obj = oname(obj, artiname(ART_LOLTH_S_FANG));
+						discover_artifact(ART_LOLTH_S_FANG);
 					} else if(u.ualign.type == A_LAWFUL){
 						obj = mksobj(DROVEN_CROSSBOW, FALSE, FALSE);
 						obj = oname(obj, artiname(ART_LIECLEAVER));
 						discover_artifact(ART_LIECLEAVER);
 					}
 				}
-			} else if (!already_exists) {
+				obj->spe = 1;
+				at_your_feet("An object");
+				dropy(obj);
+				u.ugifts++;
+			}
+			else if (!already_exists){
 				obj = mksobj(DROVEN_SHORT_SWORD, FALSE, FALSE);
 				obj = oname(obj, artiname(ART_LOLTH_S_FANG));
 				discover_artifact(ART_LOLTH_S_FANG);
