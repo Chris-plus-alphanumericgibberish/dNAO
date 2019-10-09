@@ -1155,6 +1155,8 @@ int thrown;
 				int basedamage = tmp;
 				int newdamage = tmp;
 				int dieroll = rnd(20);
+				if(active_glyph(GUIDANCE))
+					doguidance(mon, tmp);
 				if(uarmg->oartifact){
 					hittxt = artifact_hit(&youmonst, mon, uarmg, &newdamage, dieroll);
 					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
@@ -1471,6 +1473,8 @@ int thrown;
 				}
 			} else {
 				warnedptr = 0;
+				if(vulnerable_mask(resistmask) && !(weaponmask|EXPLOSION))
+					tmp *= 2;
 			}
 			
 			if(tmp > 1){
@@ -1582,6 +1586,15 @@ int thrown;
 					if(Role_if(PM_ROGUE) &&!Upolyd) tmp += rnd(u.ulevel + ((obj == uwep && uwep->oartifact == ART_SILVER_STARLIGHT ? u.ulevel/2 : 0)));
 					if(u.sealsActive&SEAL_ANDROMALIUS) tmp += rnd(u.ulevel + ((obj == uwep && uwep->oartifact == ART_SILVER_STARLIGHT ? u.ulevel/2 : 0)));
 					if(Role_if(PM_CONVICT) && !Upolyd && obj == uwep && uwep->otyp == SPOON) tmp += rnd(u.ulevel);
+					if(active_glyph(CLAWMARK))
+						tmp *= 1.3;
+					if(active_glyph(BLOOD_RAPTURE))
+						healup(30, 0, FALSE, FALSE);
+					if(active_glyph(WRITHE)){
+						u.uen += 30;
+						if(u.uen > u.uenmax)
+							u.uen = u.uenmax;
+					}
 					hittxt = TRUE;
 				}
 				if(obj == uwep && is_lightsaber(uwep) && litsaber(uwep)){
@@ -1755,6 +1768,8 @@ int thrown;
 			{ //artifact block
 				int basedamage = tmp;
 				int newdamage = tmp;
+				if(obj == uwep && active_glyph(GUIDANCE))
+					doguidance(mon, tmp);
 				if (obj->oartifact) {
 					hittxt = artifact_hit(&youmonst, mon, obj, &newdamage, dieroll);
 					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
@@ -2201,6 +2216,8 @@ defaultvalue:
 			if(obj){/*may have broken*/
 				int basedamage = tmp;
 				int newdamage = tmp;
+				if(obj == uwep && active_glyph(GUIDANCE))
+					doguidance(mon, tmp);
 				if (obj->oartifact) {
 					hittxt = artifact_hit(&youmonst, mon, obj, &newdamage, dieroll);
 					if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
@@ -2505,6 +2522,8 @@ defaultvalue:
 			}
 		} else {
 			warnedptr = 0;
+			if(vulnerable_mask(resistmask) && !(weaponmask|EXPLOSION))
+				tmp *= 2;
 		}
 	}
 	
