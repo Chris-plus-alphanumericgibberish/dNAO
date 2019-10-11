@@ -507,6 +507,7 @@ const char *verb;	/* "rub",&c */
 
 /*Contains those parts of can_twoweapon() that DON'T change the game state.  Can be called anywhere the code needs to know if the player is capable of wielding two weapons*/
 #define NOT_WEAPON(obj) (obj && !is_weptool(obj) && obj->oclass != WEAPON_CLASS)
+#define NO_WEP_IS_OK (u.umartial || u.specialSealsActive&SEAL_BLACK_WEB)
 int
 test_twoweapon()
 {
@@ -531,7 +532,7 @@ test_twoweapon()
 		    pline("%s aren't able to use two weapons at once.",
 			  makeplural((flags.female && urole.name.f) ?
 				     urole.name.f : urole.name.m));
-	} else if ((!uwep || !uswapwep) && !u.umartial && !((u.specialSealsActive&SEAL_BLACK_WEB) && !uswapwep))
+	} else if ((!uwep || !uswapwep) && !(NO_WEP_IS_OK && !uswapwep))
 		Your("%s%s%s empty.", uwep ? "off " : uswapwep ? "main " : "",
 			body_part(HAND), (!uwep && !uswapwep) ? "s are" : " is");
 	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep)) && !(uwep && (uwep->otyp == STILETTOS))) {
@@ -539,8 +540,8 @@ test_twoweapon()
 		pline("%s %s.", Yname2(otmp),
 		    is_plural(otmp) ? "aren't weapons" : "isn't a weapon");
 	} else if ((
-		(uwep && bimanual(uwep,youracedata) && !(u.umartial && !uswapwep)) || 
-		(uswapwep && bimanual(uswapwep,youracedata) && !(u.umartial && !uwep)) || 
+		(uwep && bimanual(uwep,youracedata) && !(NO_WEP_IS_OK && !uswapwep)) || 
+		(uswapwep && bimanual(uswapwep,youracedata) && !(NO_WEP_IS_OK && !uwep)) || 
 		(uwep && is_launcher(uwep) && !is_firearm(uwep)) || 
 		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep))
 		) && 
