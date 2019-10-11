@@ -516,7 +516,7 @@ test_twoweapon()
 	if (!could_twoweap(youmonst.data) && 
 		!(!Upolyd && Role_if(PM_ANACHRONONAUT)) && 
 		!(u.specialSealsActive&SEAL_MISKA) && 
-		!(u.specialSealsActive&SEAL_BLACK_WEB && !uswapwep) && 
+		!(u.specialSealsActive&SEAL_BLACK_WEB && (!uwep || !uswapwep)) && 
 		!(!Upolyd && uwep && uswapwep && 
 			((artilist[uwep->oartifact].inv_prop == DANCE_DAGGER && artilist[uswapwep->oartifact].inv_prop == SING_SPEAR) ||
 			 (artilist[uswapwep->oartifact].inv_prop == DANCE_DAGGER && artilist[uwep->oartifact].inv_prop == SING_SPEAR))
@@ -532,7 +532,7 @@ test_twoweapon()
 		    pline("%s aren't able to use two weapons at once.",
 			  makeplural((flags.female && urole.name.f) ?
 				     urole.name.f : urole.name.m));
-	} else if ((!uwep || !uswapwep) && !(NO_WEP_IS_OK && !uswapwep))
+	} else if ((!uwep || !uswapwep) && !NO_WEP_IS_OK)
 		Your("%s%s%s empty.", uwep ? "off " : uswapwep ? "main " : "",
 			body_part(HAND), (!uwep && !uswapwep) ? "s are" : " is");
 	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep)) && !(uwep && (uwep->otyp == STILETTOS))) {
@@ -541,7 +541,7 @@ test_twoweapon()
 		    is_plural(otmp) ? "aren't weapons" : "isn't a weapon");
 	} else if ((
 		(uwep && bimanual(uwep,youracedata) && !(NO_WEP_IS_OK && !uswapwep)) || 
-		(uswapwep && bimanual(uswapwep,youracedata) && !(NO_WEP_IS_OK && !uwep)) || 
+		(uswapwep && bimanual(uswapwep,youracedata)) || 
 		(uwep && is_launcher(uwep) && !is_firearm(uwep)) || 
 		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep))
 		) && 
@@ -563,6 +563,7 @@ test_twoweapon()
 		return (TRUE);
 	return (FALSE);
 }
+
 
 /*Contains those parts of can_twoweapon() that CAN change the game state.  Should only be called when the player commits to wielding two weapons*/
 int
