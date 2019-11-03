@@ -146,7 +146,6 @@ STATIC_DCL boolean FDECL(can_advance, (int, BOOLEAN_P));
 STATIC_DCL boolean FDECL(could_advance, (int));
 STATIC_DCL boolean FDECL(peaked_skill, (int));
 STATIC_DCL int FDECL(slots_required, (int));
-STATIC_DCL int FDECL(pendamage, (struct obj *,struct monst *));
 
 #ifdef OVL1
 
@@ -1064,9 +1063,6 @@ int spec;
 		static int warnedotyp = 0;
 		static struct permonst *warnedptr = 0;
 		
-		if(otmp->oartifact == ART_PEN_OF_THE_VOID){
-			tmp += pendamage(otmp, mon);
-		}
 		if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS 
 			&& !otmp->blessed && !otmp->cursed
 			&& mon
@@ -1261,92 +1257,6 @@ int spec;
 	return(tmp);
 }
 
-STATIC_OVL
-int
-pendamage(pen, mon)
-struct obj *pen;
-struct monst *mon;
-{
-	boolean youdef = mon == &youmonst;
-	int dmg = 0;
-	int dnum = (Role_if(PM_EXILE) && quest_status.killed_nemesis) ? 2 : 1;
-	
-	if(u.specialSealsActive&SEAL_COSMOS || u.specialSealsActive&SEAL_LIVING_CRYSTAL || u.specialSealsActive&SEAL_TWO_TREES){
-		if(mon->data->maligntyp == A_CHAOTIC) dmg += d(2*dnum,4);
-		else if(mon->data->maligntyp == A_NEUTRAL) dmg += d(dnum,4);
-	} else if(u.specialSealsActive&SEAL_MISKA){
-		if(mon->data->maligntyp == A_LAWFUL) dmg += d(2*dnum,4);
-		else if(mon->data->maligntyp == A_NEUTRAL) dmg += d(dnum,4);
-	} else if(u.specialSealsActive&SEAL_NUDZIRATH){
-		if(mon->data->maligntyp != A_NEUTRAL) dmg += d(dnum,6);
-	} else if(u.specialSealsActive&SEAL_ALIGNMENT_THING){
-		if(rn2(3)) dmg += d(rnd(2)*dnum,4);
-	} else if(u.specialSealsActive&SEAL_UNKNOWN_GOD){
-		dmg -= pen->spe;
-	}
-	
-	if(pen->ovar1&SEAL_AMON){
-		if(youdef && !Fire_resistance) dmg += d(dnum,4);
-		else if(!youdef && !resists_fire(mon)) dmg += d(resists_cold(mon) ? 2*dnum : dnum,4);
-	}
-	if(pen->ovar1&SEAL_ASTAROTH){
-		if(youdef && !Shock_resistance) dmg += d(dnum,4);
-		else if(!youdef && !resists_elec(mon)) dmg += d(dnum,4);
-	}
-	if(pen->ovar1&SEAL_BALAM){
-		if(youdef && !Cold_resistance) dmg += d(dnum,4);
-		else if(!youdef && !resists_cold(mon)) dmg += d(resists_fire(mon) ? 2*dnum : dnum,4);
-	}
-	if(pen->ovar1&SEAL_ECHIDNA){
-		if(youdef && !Acid_resistance) dmg += d(dnum,4);
-		else if(!youdef && !resists_acid(mon)) dmg += d(dnum,4);
-	}
-	if(pen->ovar1&SEAL_FAFNIR){
-		if(youdef){
-			if(is_golem(youracedata)) dmg += d(2*dnum,4);
-			else if(nonliving(youracedata)) dmg += d(dnum,4);
-		}
-		else {
-			if(is_golem(mon->data)) dmg += d(2*dnum,4);
-			else if(nonliving_mon(mon)) dmg += d(dnum,4);
-		}
-	}
-	if(pen->ovar1&SEAL_IRIS){
-		if(youdef && !(nonliving(youracedata) || is_anhydrous(youracedata))) dmg += d(dnum,4);
-		else if(!youdef && !(nonliving_mon(mon) || is_anhydrous(mon->data))) dmg += d(dnum,4);
-	}
-	if(pen->ovar1&SEAL_ENKI){
-		if(youdef && !(nonliving(youracedata) || amphibious(youracedata))) dmg += d(dnum,4);
-		else if(!youdef && !(nonliving_mon(mon) || amphibious_mon(mon))) dmg += d(dnum,4);
-	}
-	if(pen->ovar1&SEAL_OSE){
-		if(youdef && (Blind_telepat || !rn2(5))) dmg += d(dnum,15);
-		else if(!youdef && !mindless_mon(mon) && (mon_resistance(mon,TELEPAT) || !rn2(5))) dmg += d(dnum,15);
-	}
-	if(pen->ovar1&SEAL_NABERIUS){
-		if(youdef && (Upolyd ? u.mh < .25*u.mhmax : u.uhp < .25*u.uhpmax)) dmg += d(dnum,4);
-		else if(!youdef){
-			if(mon->mflee) dmg += d(dnum,4);
-			if(mon->mpeaceful) dmg += d(dnum,4);
-		}
-	}
-	if(pen->ovar1&SEAL_HUGINN_MUNINN){
-		if(youdef){
-			if(!Blind){
-				make_blinded(Blinded+1L,FALSE);
-				dmg += d(dnum,4);
-			}
-		}
-		else if(!youdef){
-			if(mon->mcansee && haseyes(mon->data)){
-				dmg += d(dnum,4);
-				mon->mcansee = 0;
-				mon->mblinded = 1;
-			}
-		}
-	}
-	return dmg;
-}
 
 #endif /* OVLB */
 #ifdef OVL0
