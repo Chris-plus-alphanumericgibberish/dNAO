@@ -339,7 +339,7 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 			){ 
 				continue; // no silver gifts if you're an vampire - game-able by selfpoly still
 							
-			} else if (by_align && Race_if(PM_DROW) && (m == ART_ARKENSTONE || m == ART_HOLY_MOONLIGHT_SWORD)){
+			} else if (by_align && Race_if(PM_DROW) && (m == ART_ARKENSTONE || m == ART_ATMA_WEAPON || m == ART_HOLY_MOONLIGHT_SWORD)){
 				continue; // no light-giving artis for drow (artifact_light should be unnecessary)
 			
 			} else if(by_align && Role_if(PM_PIRATE)) 
