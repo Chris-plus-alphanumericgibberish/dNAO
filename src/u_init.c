@@ -1005,12 +1005,6 @@ static const struct def_skill Skill_Drow_Unarmed[] = {
     { P_NONE, 0 }
 };
 
-static const struct def_skill Skill_DP[] = {
-    { P_ATTACK_SPELL, P_EXPERT },
-    { P_BEAST_MASTERY, P_BASIC },
-    { P_NONE, 0 }
-};
-
 static const struct def_skill Skill_DW[] = {
     { P_CLERIC_SPELL, P_EXPERT },
     { P_FLAIL, P_EXPERT },
@@ -1227,9 +1221,9 @@ static const struct def_skill Skill_Dro_F_P[] = {
     { P_LANCE, P_BASIC },		{ P_BOW, P_BASIC },
     { P_SLING, P_BASIC },		{ P_CROSSBOW, P_EXPERT },
     { P_DART, P_BASIC },		{ P_SHURIKEN, P_BASIC },
-    { P_UNICORN_HORN, P_SKILLED },
+    { P_UNICORN_HORN, P_SKILLED },	{ P_ATTACK_SPELL, P_EXPERT },
     { P_HEALING_SPELL, P_EXPERT },	{ P_DIVINATION_SPELL, P_EXPERT },
-    { P_CLERIC_SPELL, P_EXPERT },
+    { P_CLERIC_SPELL, P_EXPERT },	{ P_BEAST_MASTERY, P_BASIC },
     { P_BARE_HANDED_COMBAT, P_BASIC },
     { P_NONE, 0 }
 };
@@ -2264,13 +2258,13 @@ u_init()
 		// else if(!rn2(10)) ini_inv(Lamp);
 		knows_object(POT_WATER);
 		if(Race_if(PM_DROW)){
-			if(!flags.female) skill_init(Skill_Dro_M_P);
-			else skill_init(Skill_Dro_F_P);
+			if(!flags.female) {
+				skill_init(Skill_Dro_M_P);
+			} else {
+				skill_init(Skill_Dro_F_P);
+				ini_inv(ExtraBook);
+			}
 		} else skill_init(Skill_P);
-		if(Race_if(PM_DROW) && flags.female){
-			skill_add(Skill_DP);
-			ini_inv(ExtraBook);
-		}
 		/* KMH, conduct --
 		 * Some may claim that this isn't agnostic, since they
 		 * are literally "priests" and they have holy water.
