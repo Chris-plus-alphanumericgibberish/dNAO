@@ -1008,13 +1008,27 @@ static const struct def_skill Skill_Drow_Unarmed[] = {
 static const struct def_skill Skill_DP[] = {
     { P_ATTACK_SPELL, P_EXPERT },
     { P_BEAST_MASTERY, P_BASIC },
-    { P_FLAIL, P_EXPERT },
     { P_NONE, 0 }
 };
 
 static const struct def_skill Skill_DW[] = {
     { P_CLERIC_SPELL, P_EXPERT },
     { P_FLAIL, P_EXPERT },
+	{ P_SABER, P_EXPERT },
+	{ P_CROSSBOW, P_EXPERT },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_HD_S[] = {
+    { P_FLAIL, P_EXPERT },
+    { P_POLEARMS, P_EXPERT },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_D_S[] = {
+    { P_FLAIL, P_EXPERT },
+    { P_SABER, P_EXPERT },
+    { P_CROSSBOW, P_EXPERT },
     { P_NONE, 0 }
 };
 
@@ -1191,8 +1205,8 @@ static const struct def_skill Skill_Dro_M_P[] = {
     { P_DAGGER, P_EXPERT },		{ P_KNIFE, P_EXPERT },
     { P_PICK_AXE, P_SKILLED },	{ P_SHORT_SWORD, P_EXPERT },
     { P_BROAD_SWORD, P_EXPERT },		{ P_LONG_SWORD, P_EXPERT },
-    { P_TWO_HANDED_SWORD, P_SKILLED },
-    { P_POLEARMS, P_SKILLED },		{ P_SPEAR, P_SKILLED },
+    { P_TWO_HANDED_SWORD, P_SKILLED }, { P_FLAIL, P_EXPERT},
+    { P_POLEARMS, P_EXPERT },		{ P_SPEAR, P_SKILLED },
 	{ P_TRIDENT, P_SKILLED },
     { P_LANCE, P_BASIC },		{ P_BOW, P_BASIC },
     { P_SLING, P_BASIC },		{ P_CROSSBOW, P_BASIC },
@@ -1207,11 +1221,11 @@ static const struct def_skill Skill_Dro_M_P[] = {
 static const struct def_skill Skill_Dro_F_P[] = {
     { P_WHIP, P_EXPERT },		{ P_MACE, P_SKILLED },
     { P_MORNING_STAR, P_EXPERT },	{ P_FLAIL, P_EXPERT },
-    { P_QUARTERSTAFF, P_EXPERT },
+    { P_QUARTERSTAFF, P_EXPERT },	{ P_SABER, P_EXPERT },
     { P_POLEARMS, P_SKILLED },		{ P_SPEAR, P_SKILLED },
     { P_TRIDENT, P_SKILLED },
     { P_LANCE, P_BASIC },		{ P_BOW, P_BASIC },
-    { P_SLING, P_BASIC },		{ P_CROSSBOW, P_SKILLED },
+    { P_SLING, P_BASIC },		{ P_CROSSBOW, P_EXPERT },
     { P_DART, P_BASIC },		{ P_SHURIKEN, P_BASIC },
     { P_UNICORN_HORN, P_SKILLED },
     { P_HEALING_SPELL, P_EXPERT },	{ P_DIVINATION_SPELL, P_EXPERT },
@@ -2272,6 +2286,8 @@ u_init()
 		skill_init(Skill_Ran);
 		if(Race_if(PM_DROW)){
 			ini_inv(BlackTorches);
+			if (flags.female) skill_add(Skill_D_S);
+			else skill_add(Skill_HD_S);
 		}
 		break;
 	case PM_ROGUE:
@@ -2285,6 +2301,11 @@ u_init()
 		ini_inv(Blindfold);
 		knows_object(SACK);
 		skill_init(Skill_R);
+		
+		if (Race_if(PM_DROW)){
+			if (flags.female) skill_add(Skill_D_S);
+			else skill_add(Skill_HD_S);
+		}
 		break;
 	case PM_SAMURAI:
 		u.umartial = TRUE;
@@ -2336,7 +2357,10 @@ u_init()
 			ini_inv(DarkWand);
 		}
 		skill_init(Skill_W);
-		if(Race_if(PM_DROW) && flags.female) skill_add(Skill_DW);
+		if(Race_if(PM_DROW)){
+			if (flags.female) skill_add(Skill_DW);
+			else skill_add(Skill_HD_S);
+		}
 		break;
 
 	default:	/* impossible */
