@@ -18,6 +18,16 @@ E char *FDECL(fmt_ptr, (const genericptr,char *));
  * interrupted only occasionally to pick up specific functions as needed. */
 #if !defined(MAKEDEFS_C) && !defined(LEV_LEX_C)
 
+/* crap testing zone */
+E void FDECL(hurtarmor, (int));							/* from mhitu.c */
+E int FDECL(dololthseduce, (struct monst *));				/* from mhitu.c */
+E int FDECL(dobelialseduce, (struct monst *));				/* from mhitu.c */
+E int FDECL(dograzseduce, (struct monst *));				/* from mhitu.c */
+E void FDECL(steal_it, (struct monst *, struct attack *));	/* from uhitm.c */
+E int FDECL(joust, (struct monst *, struct obj *));		/* from uhitm.c */
+E boolean FDECL(attack2, (struct monst *));
+E int FDECL(xattacky, (struct monst *, struct monst *));
+
 /* ### allmain.c ### */
 
 E void NDECL(moveloop);

@@ -14,9 +14,9 @@ STATIC_DCL void FDECL(urustm, (struct monst *, struct obj *));
 STATIC_DCL boolean FDECL(u_slip_free, (struct monst *,struct attack *));
 # endif /* OVL1 */
 
-STATIC_DCL int FDECL(dololthseduce, (struct monst *));
-STATIC_DCL int FDECL(dobelialseduce, (struct monst *));
-STATIC_DCL int FDECL(dograzseduce, (struct monst *));
+//STATIC_DCL int FDECL(dololthseduce, (struct monst *));
+//STATIC_DCL int FDECL(dobelialseduce, (struct monst *));
+//STATIC_DCL int FDECL(dograzseduce, (struct monst *));
 
 #ifdef OVLB
 # ifdef SEDUCE
@@ -34,7 +34,7 @@ STATIC_DCL void FDECL(missmu,(struct monst *,BOOLEAN_P,struct attack *));
 STATIC_DCL void FDECL(mswings,(struct monst *,struct obj *));
 STATIC_DCL void FDECL(wildmiss, (struct monst *,struct attack *));
 
-STATIC_DCL void FDECL(hurtarmor,(int));
+//STATIC_DCL void FDECL(hurtarmor,(int));
 STATIC_DCL void FDECL(hitmsg,(struct monst *,struct attack *));
 STATIC_DCL boolean FDECL(umetgaze, (struct monst *));
 
@@ -644,6 +644,9 @@ int
 mattacku(mtmp)
 	register struct monst *mtmp;
 {
+	if (wizard && !u.uhave.bell)
+	return xattacky(mtmp, &youmonst);
+
 	struct	attack	*mattk, alt_attk;
 	int	i, j, tmp, marinum = 0, tchtmp, sum[NATTK];
 	int deva;
@@ -1707,7 +1710,7 @@ mattacku(mtmp)
  * helper function for some compilers that have trouble with hitmu
  */
 
-STATIC_OVL void
+void
 hurtarmor(attk)
 int attk;
 {
@@ -6620,7 +6623,7 @@ pay:
 	return 1;
 }
 
-STATIC_OVL int
+ int
 dobelialseduce(mon)
 struct monst *mon;
 {
@@ -7203,7 +7206,7 @@ pay:
 	return 1;
 }
 
-STATIC_OVL int
+int
 dograzseduce(mon)
 register struct monst *mon;
 {

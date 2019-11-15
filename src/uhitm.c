@@ -8,11 +8,11 @@
 STATIC_DCL boolean FDECL(known_hitum, (struct monst *,int *,struct attack *));
 STATIC_DCL boolean FDECL(known_hitum_wepi, (struct monst *,int *,struct attack *, int));
 STATIC_DCL boolean FDECL(pacifist_attack_checks, (struct monst *, struct obj *));
-STATIC_DCL void FDECL(steal_it, (struct monst *, struct attack *));
+//STATIC_DCL void FDECL(steal_it, (struct monst *, struct attack *));
 STATIC_DCL boolean FDECL(hitum, (struct monst *,int,struct attack *));
 STATIC_DCL boolean FDECL(hmon_hitmon, (struct monst *,struct obj *,int));
 #ifdef STEED
-STATIC_DCL int FDECL(joust, (struct monst *,struct obj *));
+//STATIC_DCL int FDECL(joust, (struct monst *,struct obj *));
 #endif
 void NDECL(demonpet);
 STATIC_DCL boolean FDECL(m_slips_free, (struct monst *mtmp,struct attack *mattk));
@@ -3036,7 +3036,7 @@ struct attack *mattk;
 }
 
 /* used when hitting a monster with a lance while mounted */
-STATIC_OVL int	/* 1: joust hit; 0: ordinary hit; -1: joust but break lance */
+int	/* 1: joust hit; 0: ordinary hit; -1: joust but break lance */
 joust(mon, obj)
 struct monst *mon;	/* target */
 struct obj *obj;	/* weapon */
@@ -3105,7 +3105,7 @@ demonpet()
  * If that ever changes, the check for touching a cockatrice corpse
  * will need to be smarter about whether to break out of the theft loop.
  */
-STATIC_OVL void
+void
 steal_it(mdef, mattk)
 struct monst *mdef;
 struct attack *mattk;

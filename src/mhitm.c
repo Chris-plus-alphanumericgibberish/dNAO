@@ -207,6 +207,10 @@ int
 mattackm(magr, mdef)
     register struct monst *magr,*mdef;
 {
+	/* testing short circuit */
+	if (wizard && !u.uhave.bell)
+	return xattacky(magr, mdef);
+
     int		    i,		/* loop counter */
 		    tmp,	/* amour class difference */
 		    tchtmp,	/* touch amour class difference */

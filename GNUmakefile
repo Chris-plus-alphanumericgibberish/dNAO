@@ -2,6 +2,8 @@ GAMEDIR = dnethackdir
 
 CFLAGS = -g
 
+LDFLAGS += -no-pie
+
 GAMELIBS = -lncurses -lm
 
 -include local.mk
@@ -46,7 +48,7 @@ SRCOBJ = allmain.o alloc.o apply.o artifact.o attrib.o ball.o bones.o	\
          shknam.o sit.o sounds.o sp_lev.o spell.o steal.o steed.o	\
          teleport.o tile.o timeout.o topten.o track.o trap.o u_init.o	\
          uhitm.o unicode.o vault.o version.o vision.o weapon.o were.o	\
-         wield.o windows.o wizard.o worm.o worn.o write.o zap.o
+         wield.o windows.o wizard.o worm.o worn.o write.o xhity.o zap.o
 SYSUNIXOBJ = unixmain.o unixres.o unixunix.o
 SYSSHAREOBJ = ioctl.o unixtty.o
 WINTTYOBJ = getline.o termcap.o topl.o wintty.o
