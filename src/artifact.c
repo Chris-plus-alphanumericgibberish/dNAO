@@ -129,15 +129,6 @@ hack_artifacts()
 	    if ((art->role == Role_switch || Pantheon_if(art->role)) && (art->alignment != A_NONE || Role_if(PM_BARD)))
 			art->alignment = alignmnt;
 
-	if(Race_if(PM_HALF_DRAGON) && flags.initgend){
-		int i;
-		for(i = 0; i < ART_ROD_OF_SEVEN_PARTS; i++)
-			if(artilist[i].role == Role_switch)
-				artilist[i].role = NON_PM;
-		
-		artilist[ART_LIFEHUNT_SCYTHE].role = Role_switch;
-		artilist[ART_LIFEHUNT_SCYTHE].alignment = alignmnt;
-	}
 
 	/* Excalibur can be used by any lawful character, not just knights */
 	if (!Role_if(PM_KNIGHT)){
@@ -199,6 +190,16 @@ hack_artifacts()
 				artilist[ART_KIKU_ICHIMONJI].role = PM_SAMURAI;
 			}
 		}
+	}
+	
+	if(Race_if(PM_HALF_DRAGON) && flags.initgend){
+		int i;
+		for(i = 0; i < ART_ROD_OF_SEVEN_PARTS; i++)
+			if(artilist[i].role == Role_switch)
+				artilist[i].role = NON_PM;
+		
+		artilist[ART_LIFEHUNT_SCYTHE].role = Role_switch;
+		artilist[ART_LIFEHUNT_SCYTHE].alignment = alignmnt;
 	}
 	
 	/* Fix up the crown */
