@@ -423,12 +423,12 @@ int otyp;
 		else if (obj->oartifact == ART_GIANTSLAYER)
 		{
 			bonn = (large ? 2 : 1);
-			bond = 4 + 2 * dmod;
+			bond = min(4 + 2 * dmod, 2);
 		}
 		else if (obj->oartifact == ART_MJOLLNIR)
 		{
 			bonn = 2;
-			bond = 4 + 2 * dmod;
+			bond = min(4 + 2 * dmod, 2);
 			if (!large)
 				flat += 2;
 		}
@@ -439,7 +439,7 @@ int otyp;
 		else if (obj->oartifact == ART_REAVER)
 		{
 			bonn = 1;
-			bond = 8 + 2 * dmod;
+			bond = min(8 + 2 * dmod, 2);
 		}
 		else if (obj->oartifact == ART_TOBIUME)
 		{
@@ -450,22 +450,23 @@ int otyp;
 			if (large)
 			{
 				bonn = 1;
-				bond = 10 + 2 * dmod;
+				bond = min(10 + 2 * dmod, 2);
 			}
 			else
 			{
-				flat += 10 + 2 * dmod;
+				flat += min(10 + 2 * dmod, 2);
 			}
 		}
 		else if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD){
 			int wt = (int)objects[NAGINATA].oc_weight;
 			if ((int)obj->owt > wt) {
 				bonn = 1;
-				bond = 12 * ((int)obj->owt - wt) / wt;	// this appears to be a constant +1d12, since I can't find any way to change its weight.
+				bond = min(12 + 2 * dmod, 2) * ((int)obj->owt - wt) / wt;	// this appears to be a constant +1d12, since I can't find any way to change its weight.
 			}
 		}
 		else if (obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA && otyp == BULLWHIP)
 		{
+			// supposed to be like a monster scorpion's sting; not affected by dmod
 			ocn = 1;
 			ocd = 2;
 			bonn = 1;
@@ -473,10 +474,17 @@ int otyp;
 		}
 		else if (otyp == MOON_AXE)
 		{
+			/*
+			ECLIPSE_MOON	0  -  2d4 v small, 2d12 v large
+			CRESCENT_MOON	1  -  2d6
+			HALF_MOON		2  -  2d8
+			GIBBOUS_MOON	3  - 2d10
+			FULL_MOON	 	4  - 2d12 
+			 */
 			ocn = 2;
-			ocd = ocd + 2 * (obj->ovar1 - 1) + 2 * dmod;	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
-			if (!large && !obj->ovar1)						// eclipse moon axe is surprisingly effective against small creatures (2d12)
-				ocd = 12 + 2 * dmod;
+			ocd = min(4 + 2 * obj->ovar1 + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
+			if (!large && obj->ovar1 == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
+				ocd = min(12 + 2 * dmod, 2);
 		}
 		else if (otyp == HEAVY_IRON_BALL) {
 			int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
@@ -490,7 +498,7 @@ int otyp;
 	}
 
 
-#define plus_base(n,x)	bonn = (n); bond = (x)
+#define plus_base(n,x)	bonn = (n); bond = min((x),2)
 #define plus(n,x)		plus_base((n), (x) + 2 * dmod)
 #define pls(x)			plus(1, (x))
 #define add(x)			flat += max(0, (x) + dmod)
@@ -650,9 +658,6 @@ int otyp;
 	/* the Tentacle Rod gets no damage from enchantment */
 	if (obj && obj->oartifact == ART_TENTACLE_ROD)
 		spe_mult = 0;
-	/* if bonus dice exist, their minimum size is of a d2 */
-	if (bonn && bond < 2)
-		bond = 2;
 	/* if bonus dice are identical in size & roll to oc dice, combine them */
 	if (bonn && (ocd == bond && ocaa == bonaa && ocad == bonad))
 	{
