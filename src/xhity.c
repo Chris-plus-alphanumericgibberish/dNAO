@@ -2,6 +2,7 @@
 #include "artifact.h"
 #include "monflag.h"
 #include "edog.h"
+#include "xhity.h"
 
 /* current TODO: none */
 
@@ -35,13 +36,11 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, boolean, int, boolean, int));
-STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, boolean, int, boolean, int));
+STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, boolean, int, boolean, int, int *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL void FDECL(weave_black_web, (struct monst *));
 STATIC_DCL int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
-STATIC_DCL void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
 
 extern const char * const destroy_strings[];					/* from zap.c */
 /* TODO: either move the whole functions or put these in extern.h? */
@@ -60,72 +59,6 @@ static const int Soresu_counterattack[] = { 10, 15, 25 };
 /* Misc attacks */
 static struct attack noattack = { 0, 0, 0, 0 };
 static struct attack basicattack  = { AT_WEAP, AD_PHYS, 1, 4 };
-
-/* macros to unify player and monster */
-#define x(mon)				((mon)==&youmonst ? u.ux : (mon)->mx)
-#define y(mon)				((mon)==&youmonst ? u.uy : (mon)->my)
-#define trapped(mon)		((mon)==&youmonst ? u.utrap : (mon)->mtrapped)
-#define cantmove(mon)		((mon)==&youmonst ? (multi<0 || u.usleep) : helpless((mon)))
-#define mlev(mon)			((mon)==&youmonst ? (Upolyd ? mons[u.umonnum].mlevel : u.ulevel) : (mon)->m_lev)
-#define hp(mon)				((mon)==&youmonst ? (Upolyd ? &(u.mh) : &(u.uhp)) : &((mon)->mhp))
-#define hpmax(mon)			((mon)==&youmonst ? (Upolyd ? &(u.mhmax) : &(u.uhpmax)) : &((mon)->mhpmax))
-#define Fire_res(mon)		((mon)==&youmonst ? Fire_resistance : resists_fire((mon)))
-#define InvFire_res(mon)	(((mon)==&youmonst ? EFire_resistance : resists_fire((mon))) || ward_at(x((mon)),y((mon))) == SIGIL_OF_CTHUGHA)
-#define Cold_res(mon)		((mon)==&youmonst ? Cold_resistance : resists_cold((mon)))
-#define InvCold_res(mon)	(((mon)==&youmonst ? ECold_resistance : resists_cold((mon))) || ward_at(x((mon)),y((mon))) == BRAND_OF_ITHAQUA)
-#define Shock_res(mon)		((mon)==&youmonst ? Shock_resistance : resists_elec((mon)))
-#define InvShock_res(mon)	(((mon)==&youmonst ? EShock_resistance : resists_elec((mon))) || ward_at(x((mon)),y((mon))) == TRACERY_OF_KARAKAL)
-#define Acid_res(mon)		((mon)==&youmonst ? Acid_resistance : resists_acid((mon)))
-#define InvAcid_res(mon)	((mon)==&youmonst ? EAcid_resistance : resists_acid((mon)))
-#define Sleep_res(mon)		((mon)==&youmonst ? Sleep_resistance : resists_sleep((mon)))
-#define Disint_res(mon)		((mon)==&youmonst ? Disint_resistance : resists_disint((mon)))
-#define Poison_res(mon)		((mon)==&youmonst ? Poison_resistance : resists_poison((mon)))
-#define Drain_res(mon)		((mon)==&youmonst ? Drain_resistance : resists_drli((mon)))
-#define Sick_res(mon)		((mon)==&youmonst ? Sick_resistance : resists_sickness((mon)))
-#define Stone_res(mon)		((mon)==&youmonst ? Stone_resistance : resists_ston((mon)))
-#define Magic_res(mon)		((mon)==&youmonst ? Antimagic : resists_magm((mon)))
-#define Half_phys(mon)		((mon)==&youmonst ? Half_physical_damage : mon_resistance((mon), HALF_PHDAM))
-#define Change_res(mon)		((mon)==&youmonst ? Unchanging : mon_resistance((mon), UNCHANGING))
-#define is_null_attk(attk)	((attk) && ((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0))
-
-#define FATAL_DAMAGE_MODIFIER 9001
-
-#define VIS_MAGR	0x01	/* aggressor is clearly visible */
-#define VIS_MDEF	0x02	/* defender is clearly visible */
-#define VIS_NONE	0x04	/* you are aware of at least one of magr and mdef */
-
-#define ATTACKCHECK_NONE		0x00	/* do not attack */
-#define ATTACKCHECK_ATTACK		0x01	/* attack normally */
-#define ATTACKCHECK_BLDTHRST	0x02	/* attack against the player's will */
-
-/* TODO: put these in their specified header files */
-/* prop.h */
-#define W_SKIN	I_SPECIAL
-/* monattk.h */
-#define MM_AGR_STOP 0x08	/* aggressor stopped attacking for some reason other than being fully dead */
-#define MM_DEF_LSVD 0x10	/* defender died and was lifesaved */
-/* monflags.h */
-/* additional TODO: add these to monsters in monst.c */
-#define MB_IRON				0x01000000L
-#define MB_SILVER			0x02000000L
-/* mondata.h */
-#define is_iron_mon(mon)	(((mon)->data->mflagsb & MB_IRON) != 0L)
-#define is_silver_mon(mon)	(((mon)->data->mflagsb & MB_SILVER) != 0L || ((mon)==&youmonst && u.sealsActive&SEAL_EDEN))
-#define is_holy_mon(mon)	(is_uvuudaum((mon)->data) || ((mon)->mfaction == ILLUMINATED))
-#define is_unholy_mon(mon)	((mon)->data == &mons[PM_UVUUDAUM])
-/* obj. h*/
-#define multistriking(otmp)	(!(otmp) ? 0 :											\
-								(otmp)->otyp == KHAKKHARA ? 2 :						\
-								(otmp)->otyp == VIPERWHIP ? ((otmp)->ovar1 - 1) :	\
-								arti_threeHead((otmp)) ? 2 :						\
-								arti_tentRod((otmp)) ? 6 :							\
-								0)
-#define martial_aid(otmp)	(is_lightsaber((otmp)) && !litsaber((otmp)) && (otmp)->otyp != KAMEREL_VAJRA)
-#define valid_weapon(otmp)		((otmp)->oclass == WEAPON_CLASS || \
-								is_weptool((otmp)) || \
-								(otmp)->otyp == HEAVY_IRON_BALL || \
-								(otmp)->otyp == CHAIN || \
-								(otmp)->oclass == GEM_CLASS)
 
 
 /* attack_checks2()
@@ -923,6 +856,9 @@ struct monst * mdef;
 			}
 			else {
 				/* make ranged attack */;
+				/* thrwmu(), for monsters making ranged attacks at the player; returns nothing */
+				/* thrwmm(), for monsters making ranged attacks at each other; returns MM_MISS, MM_HIT, MM_DEF_DIED */
+				/* players should not make ranged attacks here, they need to specifically decide to make a ranged attack */
 				/* TODO */
 			}
 			break;
@@ -3008,6 +2944,332 @@ int vis;
 	return MM_HIT;
 }
 
+/*
+ * tohitval()
+ *
+ * Very general to-hit-bonus finding function.
+ * 
+ *
+ */
+int
+tohitval(magr, mdef, attk, weapon, launcher, thrown, flat_acc)
+struct monst * magr;
+struct monst * mdef;
+struct attack * attk;
+struct obj * weapon;
+struct obj * launcher;
+int thrown;					/* 0: not thrown  1: thrown properly 2: thrown improperly (like arrows thrown by hand) */
+int flat_acc;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pd = youdef ? youracedata : mdef->data;
+	struct obj * otmp;
+	boolean fired = ((is_ammo(weapon) || launcher) && thrown == 1);
+
+	/* partial accuracy counters */
+	int base_acc = 0;	/* accuracy from leveling up */
+	int bons_acc = 0;	/* attacker's misc accuracy bonuses */
+	int rang_acc = 0;	/* ranged-attack specific accuracy bonuses */
+	int stdy_acc = 0;	/* defender's study amount */
+	int vdef_acc = 0;	/* accuracy bonuses versus that specific defender */
+	int wepn_acc = 0;	/* accuracy of the weapon -- dependent on attk */
+	int defn_acc = 0;	/* defender's defense -- dependent on attk */
+	int totl_acc = 0;	/* sum of above partial accuracy counters */
+
+	/* base accuracy due to level */
+	/* Some player roles have better ranged accuracy with certain weapons than their BAB */
+	if (youagr && thrown && weapon &&
+		(Role_if(PM_RANGER) ||
+		(u.sealsActive&SEAL_EVE) ||
+		(weapon->otyp == DAGGER && Role_if(PM_ROGUE)) ||
+		(weapon->otyp == DART && Role_if(PM_TOURIST)) ||
+		(weapon->otyp == HEAVY_IRON_BALL && Role_if(PM_CONVICT))
+		)) {
+		base_acc = mlev(magr);
+	}
+	else {
+		base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS : thrown ? 0.25 : 0.67);
+	}
+	/* player-only accuracy bonuses */
+	if (youagr) {
+		/* base +1/-1 for no reason */
+		bons_acc += (thrown ? -1 : +1);
+		/* Stat (DEX, STR) */
+		if (!thrown || !launcher || objects[launcher->otyp].oc_skill == P_SLING){
+			/* firing ranged attacks without a laucher (ex manticore tail spikes) can use STR */
+			bons_acc += abon();
+		}
+		else {
+			if (ACURR(A_DEX) < 4)			bons_acc -= 3;
+			else if (ACURR(A_DEX) < 6)		bons_acc -= 2;
+			else if (ACURR(A_DEX) < 8)		bons_acc -= 1;
+			else if (ACURR(A_DEX) >= 14)	bons_acc += (ACURR(A_DEX) - 14);
+		}
+		/* Stat (INT) (from Dantalion vs telepathically sensed enemies) */
+		if (u.sealsActive&SEAL_DANTALION && tp_sensemon(mdef))
+			bons_acc += max(0, (ACURR(A_INT) - 10) / 2);
+		/* intrinsic accuracy bonuses */
+		bons_acc += u.uhitinc;
+		/* Malphas' bonus accuracy from having nearby crows -- btw Chris this is horribly named */
+		bons_acc += u.spiritAttk;
+		/* Uur (active) */
+		if (u.uuur_duration)
+			bons_acc += 10;
+		/* luck */
+		if (Luck)
+			bons_acc += sgn(Luck)*rnd(abs(Luck));
+		/* Bard */
+		bons_acc += u.uencouraged;
+		/* Singing Sword */
+		if (uwep && uwep->oartifact == ART_SINGING_SWORD){
+			if (uwep->osinging == OSING_LIFE){
+				bons_acc += uwep->spe + 1;
+			}
+		}
+		/* carrying too much */
+		if (near_capacity())
+			bons_acc -= ((near_capacity() * 2) - 1);
+		/* trapped */
+		if (u.utrap)
+			bons_acc -= 3;
+		/* swallowed */
+		if (u.uswallow && u.ustuck == mdef)
+			bons_acc += 1000;
+	}
+	/* monster-only accuracy bonuses */
+	else {
+		/* high-rank foes are accurate */
+		if (is_lord(pa))
+			bons_acc += 2;
+		if (is_prince(pa))
+			bons_acc += 5;
+		/* these guys are extra accurate */
+		if (is_uvuudaum(pa) || pa == &mons[PM_CLAIRVOYANT_CHANGED])
+			bons_acc += 20;
+		if (pa == &mons[PM_DANCING_BLADE])
+			bons_acc += 7;
+		if (pa == &mons[PM_CHOKHMAH_SEPHIRAH])
+			bons_acc += u.chokhmah;
+		/* Bard */
+		bons_acc += magr->encouraged;
+		/* Singing Sword */
+		if (uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(magr) && !is_deaf(magr)){
+			if (uwep->osinging == OSING_DIRGE && !magr->mtame){
+				bons_acc -= uwep->spe + 1;
+			}
+		}
+		/* trapped */
+		if (magr->mtrapped)
+			bons_acc -= 2;
+	}
+	/* ranged-specific accuracy modifiers */
+	if (thrown)
+	{
+		/* accuracy is reduced by range (or increased, for sniper rifles) */
+		int dist_penalty = max(-4, distmin(x(magr), y(magr), x(mdef), y(mdef)) - 3);
+		if (launcher && launcher->otyp == SNIPER_RIFLE)
+			rang_acc += dist_penalty;
+		else
+			rang_acc -= dist_penalty;
+
+		/* gloves are a hinderance to proper use of bows */
+		if (launcher && objects[launcher->otyp].oc_skill == P_BOW) {
+			struct obj * gloves;
+			gloves = (youagr ? uarmg : which_armor(magr, W_ARMG));
+			if (gloves){
+				switch (uarmg->otyp) {
+				case ORIHALCYON_GAUNTLETS:    /* metal */
+				case GAUNTLETS_OF_POWER:    /* metal */
+				case GAUNTLETS:
+				case CRYSTAL_GAUNTLETS:
+					rang_acc -= 2;
+					break;
+				case GAUNTLETS_OF_FUMBLING:
+					rang_acc -= 3;
+					break;
+				case ARCHAIC_GAUNTLETS:
+				case PLASTEEL_GAUNTLETS:
+					rang_acc -= 1;
+					break;
+				case LONG_GLOVES:
+				case GLOVES:
+				case GAUNTLETS_OF_DEXTERITY:
+				case HIGH_ELVEN_GAUNTLETS:
+					break;
+				default:
+					impossible("Unknown type of gloves (%d)", uarmg->otyp);
+					break;
+				}
+			}
+		}
+		/* balls of webbing should always miss */
+		if (weapon->otyp == BALL_OF_WEBBING)
+			rang_acc -= 2000;
+	}
+
+	/* study */
+	if (youdef)
+		stdy_acc += u.ustdy;
+	if (!youdef)
+		stdy_acc += mdef->mstdy;
+	if (youagr)
+		stdy_acc += mdef->ustdym;
+
+	/* Adjust vs defender state; do not modify */
+	if (youdef ? Stunned : mdef->mstun)
+		vdef_acc += 2;
+	if (youdef ? u.usleep : mdef->msleeping)
+		vdef_acc += 2;
+	if (youdef ||
+		!(pd == &mons[PM_GIANT_TURTLE] && mdef->mflee && !mdef->mcanmove)) {	// don't penalize enshelled turtles
+		if (youdef ? FALSE : mdef->mflee)
+			vdef_acc += 2;
+		if (youdef ? multi < 0 : !mdef->mcanmove)
+			vdef_acc += 4;
+	}
+	/* Elves hate orcs, and the devs like elves. */
+	if (is_orc(pd) && is_elf(pa))
+		vdef_acc += 1;
+	/* ranged attacks are affected by target size */
+	if (thrown)
+	{
+		vdef_acc += (pd->msize - MZ_MEDIUM);
+	}
+	/* Smaug is vulnerable to stabbings */
+	if (pd == &mons[PM_SMAUG] && fired && weapon && launcher &&
+		is_stabbing(weapon) && is_ammo(weapon))
+	{
+		vdef_acc += 20;
+	}
+
+	/* weapon accuracy -- only applies for a weapon attack OR a properly-thrown object */
+	if ((attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI || attk->aatyp == AT_DEVA || attk->aatyp == AT_HODS)
+		|| fired)
+	{
+		if (weapon) {
+			/* specific bonuses of weapon vs mdef */
+			wepn_acc += hitval(weapon, mdef);
+			/* -4 accuracy per weapon size too large */
+			if (weapon->objsize - pa->msize > 0){
+				wepn_acc += -4 * (weapon->objsize - pa->msize);
+			}
+			/* ranged attacks also get their launcher's accuracy */
+			if (fired && launcher) {
+				/* enchantment, erosion */
+				wepn_acc += launcher->spe;
+				wepn_acc -= greatest_erosion(launcher);
+				/* artifact bonus */
+				if (launcher->oartifact){
+					wepn_acc += spec_abon(launcher, mdef);
+					if (youagr && Role_if(PM_BARD)) //legend lore
+						wepn_acc += 5;
+				}
+				/*
+				 * Elves and Samurais are highly trained w/bows,
+				 * especially their own special types of bow.
+				 * Polymorphing won't make you a bow expert.
+				 */
+				if ((Race_if(PM_ELF) || Role_if(PM_SAMURAI)) &&
+					(!Upolyd || your_race(youmonst.data)) &&
+					objects[launcher->otyp].oc_skill == P_BOW) {
+					wepn_acc++;
+					if (Race_if(PM_ELF) && launcher->otyp == ELVEN_BOW)
+						wepn_acc++;
+					else if (Role_if(PM_SAMURAI) && launcher->otyp == YUMI)
+						wepn_acc++;
+				}
+			}
+			/* mis-used ammo */
+			if (thrown == 2) {
+				wepn_acc -= 4;
+			}
+			/* other thrown (but not fired) things */
+			if (thrown == 1 && !fired)
+			{
+				if (is_boomerang(weapon))			/* arbitrary */
+					wepn_acc += 4;
+				else if (throwing_weapon(weapon))	/* meant to be thrown */
+					wepn_acc += 2;
+				else								/* not meant to be thrown at all */
+					wepn_acc -= 2;
+			}
+
+			/* Shii Cho lightsaber form is not meant for fighting other lightsaber users */
+			if (youagr && is_lightsaber(weapon) && litsaber(weapon)){
+				if (u.fightingForm == FFORM_SHII_CHO && MON_WEP(mdef) && is_lightsaber(MON_WEP(mdef)) && litsaber(MON_WEP(mdef))){
+					wepn_acc -= 5;
+				}
+			}
+		}
+		/* skill bonus (player-only; applies without a weapon as well) */
+		if (youagr) {
+			if (fired && launcher)
+				wepn_acc += weapon_hit_bonus(launcher);
+			else if (!thrown || thrown == 1)
+				wepn_acc += weapon_hit_bonus(weapon);
+		}
+		/* monk accuracy bonus/penalty (player-only) (melee) */
+		if (youagr && !thrown && Role_if(PM_MONK) && !Upolyd) {
+			static boolean armmessage = TRUE;
+			if (uarm) {
+				if (armmessage) Your("armor is rather cumbersome...");
+				armmessage = FALSE;
+				wepn_acc -= 20; /*flat -20 for monks in armor*/
+			}
+			else {
+				if (!armmessage) armmessage = TRUE;
+				if (!uwep && !uarms) {
+					wepn_acc += (u.ulevel / 3) + 2;
+				}
+			}
+		}
+	}
+	/* combat boots increase accuracy */
+	static int cbootsa = 0;
+	if (!cbootsa) cbootsa = find_cboots();
+	otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
+	if (otmp && otmp->otyp == cbootsa)
+		wepn_acc++;
+
+
+	/* find defender's AC */
+	/* ignore worn armor? */
+	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && !thrown) ||
+		(weapon && arti_shining(weapon)) ||
+		(!thrown && attk->aatyp == AT_TUCH) ||
+		(!thrown && attk->aatyp == AT_SHDW)) {
+		if (youdef) {
+			defn_acc += AC_VALUE(base_uac() + u.uspellprot) + 10 - u.uspellprot;
+		}
+		else {
+			defn_acc += base_mac(mdef);
+		}
+	}
+	/* do not ignore worn armor */
+	else {
+		if (youdef){
+			defn_acc += AC_VALUE(u.uac + u.uspellprot) + 10 - u.uspellprot;
+		}
+		else {
+			defn_acc += find_mac(mdef);
+		}
+	}
+
+	/* determine if the attack hits */
+	totl_acc = base_acc
+		+ bons_acc
+		+ stdy_acc
+		+ vdef_acc
+		+ wepn_acc
+		+ defn_acc
+		+ flat_acc;
+
+	/* return our to-hit -- if this is greater than a d20, it hits */
+	return totl_acc;
+}
+
 /* xmeleehity()
  * 
  * Called when a creature attempts to attack another creature with a specific melee attack.
@@ -3043,18 +3305,10 @@ int flat_acc;
 		(attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_DEVA || attk->aatyp == AT_MARI || attk->aatyp == AT_HODS));
 
 	int dieroll;				/* rolled accuracy */
+	int accuracy;				/* accuracy of attack; if this is less than dieroll, the attack hits */
 	boolean hit = FALSE;		/* whether or not the attack hit */
 	boolean miss = FALSE;		/* counterpart to hit */
 	boolean domissmsg = TRUE;	/* FALSE if a message has already been printed about a miss */
-
-	/* partial accuracy counters */
-	int base_acc = 0;	/* accuracy from leveling up */
-	int bons_acc = 0;	/* attacker's misc accuracy bonuses */
-	int stdy_acc = 0;	/* defender's study amount */
-	int vdef_acc = 0;	/* accuracy bonuses versus that specific defender */
-	int wepn_acc = 0;	/* accuracy of the weapon */
-	int defn_acc = 0;	/* defender's defense */
-	int totl_acc = 0;	/* sum of above partial accuracy counters */
 
 	/* if it is the player's pet attacking and it is in LoS, set flag to train Beast Mastery skill */
 	if (!youagr && magr->mtame && canseemon(magr)) {
@@ -3173,91 +3427,11 @@ int flat_acc;
 		miss = TRUE;
 	}
 
-	/* Find accuracy modifiers that are universal to all aatyps */
-	/* base accuracy due to level */
-	base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS : 0.67);
-	/* player-only accuracy bonuses */
-	if (youagr) {
-		/* +1 for no reason */
-		bons_acc += 1;
-		/* Stat (DEX, STR) */
-		bons_acc += abon();
-		/* Stat (INT) (from Dantalion vs telepathically sensed enemies) */
-		if (u.sealsActive&SEAL_DANTALION && tp_sensemon(mdef))
-			bons_acc += max(0, (ACURR(A_INT) - 10) / 2);
-		/* intrinsic accuracy bonuses */
-		bons_acc += u.uhitinc;
-		/* Malphas' bonus accuracy from having nearby crows -- btw Chris this is horribly named */
-		bons_acc += u.spiritAttk;
-		/* Uur (active) */
-		if (u.uuur_duration)
-			bons_acc += 10;
-		/* luck */
-		if (Luck)
-			bons_acc += sgn(Luck)*rnd(abs(Luck));
-		/* Bard */
-		bons_acc += u.uencouraged;
-		/* Singing Sword */
-		if (uwep && uwep->oartifact == ART_SINGING_SWORD){
-			if (uwep->osinging == OSING_LIFE){
-				bons_acc += uwep->spe + 1;
-			}
-		}
-		/* carrying too much */
-		if (near_capacity())
-			bons_acc -= ((near_capacity() * 2) - 1);
-		/* trapped */
-		if (u.utrap)
-			bons_acc -= 3;
-	}
-	/* monster-only accuracy bonuses */
-	else {
-		/* high-rank foes are accurate */
-		if (is_lord(pa))
-			bons_acc += 2;
-		if (is_prince(pa))
-			bons_acc += 5;
-		/* these guys are extra accurate */
-		if (is_uvuudaum(pa) || pa == &mons[PM_CLAIRVOYANT_CHANGED])
-			bons_acc += 20;
-		if (pa == &mons[PM_DANCING_BLADE])
-			bons_acc += 7;
-		if (pa == &mons[PM_CHOKHMAH_SEPHIRAH])
-			bons_acc += u.chokhmah;
-		/* Bard */
-		bons_acc += magr->encouraged;
-		/* Singing Sword */
-		if (uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(magr) && !is_deaf(magr)){
-			if (uwep->osinging == OSING_DIRGE && !magr->mtame){
-				bons_acc -= uwep->spe + 1;
-			}
-		}
-		/* trapped */
-		if (magr->mtrapped)
-			bons_acc -= 2;
-	}
-	/* study */
-	if (youdef)
-		stdy_acc += u.ustdy;
-	if (!youdef)
-		stdy_acc += mdef->mstdy;
-	if (youagr)
-		stdy_acc += mdef->ustdym;
-	/* Adjust vs defender state; do not modify */
-	if (youdef ? Stunned : mdef->mstun)
-		vdef_acc += 2;
-	if (youdef ? u.usleep : mdef->msleeping)
-		vdef_acc += 2;
-	if (youdef ||
-		!(pd == &mons[PM_GIANT_TURTLE] && mdef->mflee && !mdef->mcanmove)) {	// don't penalize enshelled turtles
-		if (youdef ? FALSE : mdef->mflee)
-			vdef_acc += 2;
-		if (youdef ? multi < 0 : !mdef->mcanmove)
-			vdef_acc += 4;
-	}
-	/* Elves hate orcs, and the devs like elves. */
-	if (is_orc(pd) && is_elf(pa))
-		vdef_acc += 1;
+	/* get accuracy of attack */
+	if (miss)
+		accuracy = 0;
+	else
+		accuracy = tohitval(magr, mdef, attk, weapon, (struct obj *)0, 0, flat_acc);
 
 	/* roll to-hit die */
 	dieroll = rnd(20);
@@ -3274,90 +3448,20 @@ int flat_acc;
 	case AT_XWEP:
 	case AT_MARI:
 	case AT_HODS:
-		/* we now need to calculate weptmp, our weapon accuracy */
-		if (weapon) {
-			/* specific bonuses of weapon vs mdef */
-			wepn_acc += hitval(weapon, mdef);
-			/* -4 accuracy per weapon size too large */
-			if (weapon->objsize - pa->msize > 0){
-				wepn_acc += -4 * (weapon->objsize - pa->msize);
-			}
-			/* Shii Cho lightsaber form is not meant for fighting other lightsaber users */
-			if (youagr && is_lightsaber(weapon) && litsaber(weapon)){
-				if (u.fightingForm == FFORM_SHII_CHO && MON_WEP(mdef) && is_lightsaber(MON_WEP(mdef)) && litsaber(MON_WEP(mdef))){
-					wepn_acc -= 5;
-				}
-			}
-		}
-		/* skill bonus (player-only; applies without a weapon as well) */
-		if (youagr) {
-			wepn_acc += weapon_hit_bonus(weapon);
-		}
-		/* monk accuracy bonus/penalty (player-only) */
-		if (youagr && Role_if(PM_MONK) && !Upolyd && !miss) {
-			static boolean armmessage = TRUE;
-			if (uarm) {
-				if (armmessage) Your("armor is rather cumbersome...");
-				armmessage = FALSE;
-				wepn_acc -= 20; /*flat -20 for monks in armor*/
-			}
-			else {
-				if (!armmessage) armmessage = TRUE;
-				if (!uwep && !uarms) {
-					wepn_acc += (u.ulevel / 3) + 2;
-				}
-			}
-		}
-		/* combat boots increase accuracy */
-		static int cbootsa = 0;
-		if (!cbootsa) cbootsa = find_cboots();
-		otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
-		if (otmp && otmp->otyp == cbootsa)
-			wepn_acc++;
-
-		/* find defender's AC */
-		/* ignore worn armor? */
-		if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
-			(weapon && arti_shining(weapon))
-			) {
-			if (youdef) {
-				defn_acc += AC_VALUE(base_uac() + u.uspellprot) + 10 - u.uspellprot;
-			}
-			else {
-				defn_acc += base_mac(mdef);
-			}
-		}
-		/* do not ignore worn armor */
-		else {
-			if (youdef){
-				defn_acc += AC_VALUE(u.uac + u.uspellprot) + 10 - u.uspellprot;
-			}
-			else {
-				defn_acc += find_mac(mdef);
-			}
-		}
+		
 		/* if the player is attacking while swallowed, guaranteed hit */
 		if (youagr && u.uswallow && !miss) {
 			hit = TRUE;
 		}
-
-		/* determine if the attack hits */
-		totl_acc = base_acc
-			+ bons_acc
-			+ stdy_acc
-			+ vdef_acc
-			+ wepn_acc
-			+ defn_acc
-			+ flat_acc;
 		
-		if (totl_acc > dieroll && !miss) {
+		if ((accuracy > dieroll) && !miss) {
 			hit = TRUE;
 		}
 		/* multistriking weapons need to determine how many hit, and set ostriking */
 		if (weapon && multistriking(weapon) && !miss) {
 			int attempts = rn2(multistriking(weapon));
 			for (; attempts; attempts--) {
-				if (totl_acc > rnd(20))
+				if (accuracy > rnd(20))
 					weapon->ostriking++;
 			}
 			/* if [dieroll] was not high enough to hit, reduce ostriking by 1 and make [hit] true */
@@ -3387,43 +3491,11 @@ int flat_acc;
 	case AT_5SBT:
 	case AT_LRCH:
 	case AT_5SQR:
-	
-		/* find defender's AC */
-		/* ignore worn armor? */
-		if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
-			attk->aatyp == AT_TUCH ||
-			attk->aatyp == AT_SHDW) {
-			if (youdef) {
-				defn_acc += AC_VALUE(base_uac() + u.uspellprot) + 10 - u.uspellprot;
-			}
-			else {
-				defn_acc += base_mac(mdef);
-			}
-		}
-		/* do not ignore worn armor */
-		else {
-			if (youdef){
-				defn_acc += AC_VALUE(u.uac + u.uspellprot) + 10 - u.uspellprot;
-			}
-			else {
-				defn_acc += find_mac(mdef);
-			}
-		}
-
 		/* determine if the attack hits */
 		if (attk->aatyp == AT_HITS && !miss) {
 			hit = TRUE;
 		}
-
-		totl_acc = base_acc
-			+ bons_acc
-			+ stdy_acc
-			+ vdef_acc
-			+ wepn_acc	/* should be 0 */
-			+ defn_acc
-			+ flat_acc;
-
-		if (totl_acc > dieroll && !miss) {
+		if ((accuracy > dieroll) && !miss) {
 			hit = TRUE;
 		}
 		break;
@@ -3453,7 +3525,7 @@ int flat_acc;
 		domissmsg = FALSE;
 	/* print a "miss" message */
 	if (miss && domissmsg) {
-		xymissmsg(magr, mdef, attk, vis, (totl_acc == dieroll));
+		xymissmsg(magr, mdef, attk, vis, (accuracy == dieroll));
 	}
 
 	/* misc after-attack things to deal with */
@@ -3678,13 +3750,13 @@ int vis;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, weapon, FALSE, dmg, dohitmsg, dieroll, FALSE, vis);
+		result = hmon2point0(magr, mdef, attk, weapon, FALSE, dmg, dohitmsg, dieroll, FALSE, vis, (boolean *)0);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, weapon, FALSE, 0, FALSE, dieroll, TRUE, vis);
+				result = hmon2point0(magr, mdef, attk, weapon, FALSE, 1, FALSE, dieroll, TRUE, vis, (boolean *)0);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -7679,6 +7751,7 @@ int vis;
 	/* Non-standard (and non-star???) spell types */
 	if (attk->adtyp != AD_SPEL &&
 		attk->adtyp != AD_CLRC &&
+		attk->adtyp != AD_PSON &&
 		attk->adtyp != AD_STAR)
 	{
 		/* needs a target */
@@ -7775,7 +7848,7 @@ int vis;
 		}
 		/* needs a target */
 	}
-	/* standard spell damage types: AD_MAGC, AD_CLRC, and for some reason, AD_STAR */
+	/* standard spell damage types: AD_MAGC, AD_CLRC, AD_PSON, and for some reason, AD_STAR */
 	else {
 		/* farm out to old existing spellcasting functions */
 		if (youdef) {
@@ -9081,17 +9154,19 @@ boolean * hittxt;
  * are called after the player hits, while letting hmoncore have messy returns wherever it wants
  */
 int
-hmon2point0(magr, mdef, attk, weapon, thrown, monsdmg, dohitmsg, dieroll, recursed, vis)
+hmon2point0(magr, mdef, attk, weapon, launcher, thrown, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
 struct monst * magr;	/* attacker */
 struct monst * mdef;	/* defender */
 struct attack * attk;	/* attack structure to use */
 struct obj * weapon;	/* weapon to hit with */
-int thrown;				/* was [weapon] thrown or thrust? 0:No  1:thrown or fired from mainhand launcher 2:fired from offhand launcher 3:fired without launcher*/
+struct obj * launcher;	/* launcher weapon was fired with */
+int thrown;				/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
 int monsdmg;			/* flat damage amount to add onto other effects -- for monster attacks */
 boolean dohitmsg;		/* print hit message? */
 int dieroll;			/* 1-20 accuracy dieroll, used for special effects */
 boolean recursed;		/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
 int vis;				/* True if action is at all visible to the player */
+boolean * wepgone;		/* used to return an additional result: was [weapon] destroyed? */
 {
 	int result;
 	boolean u_anger_guards;
@@ -9106,7 +9181,7 @@ int vis;				/* True if action is at all visible to the player */
 	else
 		u_anger_guards = FALSE;
 
-	result = hmoncore(magr, mdef, attk, weapon, thrown, monsdmg, dohitmsg, dieroll, recursed, vis);
+	result = hmoncore(magr, mdef, attk, weapon, launcher, thrown, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone);
 
 	if (mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
@@ -9117,17 +9192,19 @@ int vis;				/* True if action is at all visible to the player */
 }
 
 int
-hmoncore(magr, mdef, attk, weapon, thrown, monsdmg, dohitmsg, dieroll, recursed, vis)
+hmoncore(magr, mdef, attk, weapon, launcher, thrown, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
 struct monst * magr;	/* attacker */
 struct monst * mdef;	/* defender */
 struct attack * attk;	/* attack structure to use */
 struct obj * weapon;	/* weapon to hit with */
-int thrown;				/* was [weapon] thrown or thrust? 0:No  1:thrown or fired from mainhand launcher 2:fired from offhand launcher 3:fired without launcher*/
+struct obj * launcher;	/* launcher weapon was fired with */
+int thrown;				/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
 int monsdmg;			/* flat damage amount to add onto other effects -- for monster attacks */
 boolean dohitmsg;		/* print hit message? */
 int dieroll;			/* 1-20 accuracy dieroll, used for special effects */
 boolean recursed;		/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
 int vis;				/* True if action is at all visible to the player */
+boolean * wepgone;		/* used to return an additional result: was [weapon] destroyed? */
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -9183,26 +9260,9 @@ int vis;				/* True if action is at all visible to the player */
 	boolean hittxt = FALSE;
 	boolean lethaldamage = FALSE;
 
-	struct obj * launcher;	/* launcher for thrown objects */
-	boolean fired = FALSE;	/* true if we are properly firing ammo (which may actually not use a launcher, eg monster AT_ARRW) */
-	if (thrown == 1 && ammo_and_launcher(weapon, (youagr ? uwep : MON_WEP(magr)))) {
-		launcher = (youagr ? uwep : MON_WEP(magr));
-		fired = TRUE;
-	}
-	else if (thrown == 2 && ammo_and_launcher(weapon, (youagr ? uswapwep : MON_SWEP(magr)))) {
-		launcher = (youagr ? uswapwep : MON_SWEP(magr));
-		fired = TRUE;
-	}
-	else if (thrown == 3) {
-		launcher = (struct obj *)0;
-		fired = TRUE;
-	}
-	else {
-		launcher = (struct obj *)0;
-		fired = FALSE;
-	}
-
-	struct obj * otmp;		/* generic object pointer -- variable */
+	boolean fired = ((is_ammo(weapon) || launcher) && thrown == 1);	/* true if we are properly firing ammo (which may actually not use a launcher, eg monster AT_ARRW) */
+	
+	struct obj * otmp;	/* generic object pointer -- variable */
 	long slot = 0L;		/* slot, either the weapon pointer (W_WEP) or armor -- variable */
 	long rslot = 0L;	/* slot, dedicated to rings (left and right) -- set at start, should not be reset */
 
@@ -9336,7 +9396,7 @@ int vis;				/* True if action is at all visible to the player */
 			/* isn't an unthrown Houchou */
 			!(weapon->oartifact == ART_HOUCHOU && !thrown) &&
 			/* isn't unthrowable ammo (ie, any ammo but rocks) being thrown but not fired*/
-			!(is_ammo(weapon) && !(fired || weapon->oclass == GEM_CLASS))
+			!(thrown == 2)
 			)
 		{
 			/* unlit lightsabers are martial arts aids, not weapons */
@@ -9345,7 +9405,7 @@ int vis;				/* True if action is at all visible to the player */
 			else
 				valid_weapon_attack = TRUE;
 
-			if (youagr && is_lightsaber(weapon) && litsaber(weapon))
+			if (youagr && is_lightsaber(weapon) && litsaber(weapon) && !thrown)
 				ulightsaberhit = TRUE;
 		}
 		else
@@ -9357,16 +9417,16 @@ int vis;				/* True if action is at all visible to the player */
 			/* not thrown (how could this happen?) */
 			!thrown)
 			unarmed_punch = TRUE;
-		else if (attk->aatyp == AT_KICK)
+		else if (attk->aatyp == AT_KICK && !thrown)
 			unarmed_kick = TRUE;
-		else if (attk->aatyp == AT_TUCH && (attk->adtyp == AD_SHDW || attk->adtyp == AD_STAR || attk->adtyp == AD_BLUD || attk->adtyp == AD_MERC))
+		else if (attk->aatyp == AT_TUCH && (attk->adtyp == AD_SHDW || attk->adtyp == AD_STAR || attk->adtyp == AD_BLUD || attk->adtyp == AD_MERC) && !thrown)
 			fake_valid_weapon_attack = TRUE;
 		else
 			natural_strike = TRUE;
 	}
 	/* precision multiplier */
-	if (thrown && fired && launcher &&						// Firing ammo from a launcher
-		(objects[launcher->otyp].oc_skill == P_CROSSBOW ||	// from a REAL crossbow (not the Pen of the Void or the BFG)
+	if (fired && launcher &&								// Firing ammo from a launcher (fired implies thrown)
+		(objects[launcher->otyp].oc_skill == P_CROSSBOW ||	// from a REAL crossbow (but not the Pen of the Void or the BFG, those would be brokenly strong)
 		launcher->otyp == SNIPER_RIFLE)						// or a sniper rifle
 		&& !(noncorporeal(pd) || amorphous(pd) || ((stationary(pd) || sessile(pd)) && (pd->mlet == S_FUNGUS || pd->mlet == S_PLANT)))	// versus vulnerable targets
 		){
@@ -9952,7 +10012,7 @@ int vis;				/* True if action is at all visible to the player */
 			basedmg = dmgval(weapon, mdef, 0);
 
 		/* Liecleaver adds 1d10 damage to fired bolts */
-		if (launcher && launcher->oartifact == ART_LIECLEAVER)
+		if (fired && launcher && launcher->oartifact == ART_LIECLEAVER)
 			basedmg += rnd(10);
 
 		/* axes deal more damage to wooden foes */
@@ -10104,8 +10164,6 @@ int vis;				/* True if action is at all visible to the player */
 				basedmg = 1;/* nominal physical damage */
 				real_attack = FALSE;
 
-				destroy_all_magr_weapon = TRUE;
-
 				/* luck penalty for killing your own eggs */
 				if (youagr && weapon->spe && weapon->corpsenm >= LOW_PM) {
 					if (cnt < 5)
@@ -10141,6 +10199,8 @@ int vis;				/* True if action is at all visible to the player */
 							useupall(weapon);
 						else for (; cnt; cnt--)
 							m_useup(magr, weapon);
+						if (wepgone)
+							*wepgone = TRUE;
 						/* return */
 						return result;
 					}
@@ -10597,13 +10657,13 @@ int vis;				/* True if action is at all visible to the player */
 				return returnvalue;
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
-		if (thrown && valid_weapon_attack) {
+		if (thrown && fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
 				return returnvalue;
 		}
 		/* ranged weapon attacks also proc effects of The Helm of the Arcane Archer */
-		if (thrown && valid_weapon_attack &&
+		if (thrown && fired && launcher && valid_weapon_attack &&
 			((otmp = (youagr ? uarmh : which_armor(magr, W_ARMH))) &&
 			otmp->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER)) {
 			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
@@ -11394,8 +11454,11 @@ int vis;				/* True if action is at all visible to the player */
 			else
 				impossible("used up weapon is not in monster's inventory or free (%d)", weapon->where);
 		}
-		if (deallocweapon)
+		if (deallocweapon) {
+			if (wepgone)
+				*wepgone = TRUE;
 			weapon = (struct obj *)0;
+		}
 	}
 	
 	/* Deal Damage */

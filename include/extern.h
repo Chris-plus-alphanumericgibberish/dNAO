@@ -27,6 +27,8 @@ E void FDECL(steal_it, (struct monst *, struct attack *));	/* from uhitm.c */
 E int FDECL(joust, (struct monst *, struct obj *));		/* from uhitm.c */
 E boolean FDECL(attack2, (struct monst *));
 E int FDECL(xattacky, (struct monst *, struct monst *));
+E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
+E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, boolean, int, boolean, int, int *));
 
 /* ### allmain.c ### */
 
