@@ -296,37 +296,35 @@ int otyp;
 	int dmod = 0;						/* die size modifier */
 	int spe_mult = 1;					/* multiplier for enchantment value */
 
+	int ocaa = AT_NONE;
+	int ocad = AD_PHYS;
+	int ocn = 1;
+	int ocd = 2;
+	int bonaa = AT_NONE;
+	int bonad = AD_PHYS;
+	int bonn = 0;
+	int bond = 0;
+	int flat = 0;
+
 	/* use the otyp of the object called, if we have one */
 	if (obj)
 		otyp = obj->otyp;
 
-	/* a number of definitions that will clean up the code*/
-#define ocaa	(wdice->oc.aatyp)
-#define ocad	(wdice->oc.adtyp)
-#define ocn		(wdice->oc.damn)
-#define ocd		(wdice->oc.damd)
-#define bonaa	(wdice->bon.aatyp)
-#define bonad	(wdice->bon.adtyp)
-#define bonn	(wdice->bon.damn)
-#define bond	(wdice->bon.damd)
-#define flat	(wdice->flat)
-
-	/* initialize wdice */
-	ocaa = AT_NONE;
-	ocad = AD_PHYS;
-	ocn = 1;
-	ocd = 2;
-	bonaa = AT_NONE;
-	bonad = AD_PHYS;
-	bonn = 0;
-	bond = 0;
-	flat = 0;
-
 	/* in case we are dealing with a complete lack of a weapon (!obj, !otyp)
-		* just skip everything and only initialize wdice
-		*/
-	if (!otyp)
+	 * just skip everything and only initialize wdice
+	 */
+	if (!otyp) {
+		(wdice->oc.aatyp) = ocaa;
+		(wdice->oc.adtyp) = ocad;
+		(wdice->oc.damn) = ocn;
+		(wdice->oc.damd) = ocd;
+		(wdice->bon.aatyp) = bonaa;
+		(wdice->bon.adtyp) = bonad;
+		(wdice->bon.damn) = bonn;
+		(wdice->bon.damd) = bond;
+		(wdice->flat) = flat;
 		return 0;
+	}
 
 	/* grab ldie and sdie from the objclass definition */
 	ocd = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
@@ -658,6 +656,23 @@ int otyp;
 	/* the Tentacle Rod gets no damage from enchantment */
 	if (obj && obj->oartifact == ART_TENTACLE_ROD)
 		spe_mult = 0;
+
+	/* safety checks */
+	/* we need at least one main die */
+	if (ocn < 1) {
+		ocn = 1;
+	}
+	/* main dice have a minimum size of d2 */
+	if (ocd < 2)
+		ocd = 2;
+	/* if bonus dice do not exist, clear bonn and bond */
+	if (bonn < 1) {
+		bonn = 0; 
+		bond = 0;
+	}
+	/* if bonus dice do exist, their minimum size is of a d2 */
+	if (bonn && bond < 2)
+		bond = 2;
 	/* if bonus dice are identical in size & roll to oc dice, combine them */
 	if (bonn && (ocd == bond && ocaa == bonaa && ocad == bonad))
 	{
@@ -665,16 +680,17 @@ int otyp;
 		bonn = 0;
 		bond = 0;
 	}
-	/* undefine the helpers */
-#undef ocaa	
-#undef ocad	
-#undef ocn		
-#undef ocd		
-#undef bonaa	
-#undef bonad	
-#undef bonn	
-#undef bond	
-#undef flat
+
+	/* plug everything into wdice */
+	(wdice->oc.aatyp)	= ocaa;
+	(wdice->oc.adtyp)	= ocad;
+	(wdice->oc.damn)	= ocn;
+	(wdice->oc.damd)	= ocd;
+	(wdice->bon.aatyp)	= bonaa;
+	(wdice->bon.adtyp)	= bonad;
+	(wdice->bon.damn)	= bonn;
+	(wdice->bon.damd)	= bond;
+	(wdice->flat)		= flat;
 	return spe_mult;
 }
 
