@@ -373,7 +373,20 @@ mount_steed(mtmp, force)
 	    You("mount %s.", mon_nam(mtmp));
 	}
 	/* setuwep handles polearms differently when you're mounted */
-	if (uwep && is_pole(uwep)) unweapon = FALSE;
+	if (uwep && (
+		is_pole(obj) && 
+		obj->otyp != AKLYS && 
+		!is_vibropike(obj) && 
+		obj->otyp != NAGINATA && 
+		obj->oartifact != ART_WEBWEAVER_S_CROOK && 
+		obj->oartifact != ART_SILENCE_GLAIVE && 
+		obj->oartifact != ART_HEARTCLEAVER && 
+		obj->oartifact != ART_SOL_VALTIVA && 
+		obj->oartifact != ART_DEATH_SPEAR_OF_VHAERUN && 
+		obj->oartifact != ART_SHADOWLOCK && 
+		obj->oartifact != ART_PEN_OF_THE_VOID
+	)) unweapon = FALSE;
+	
 	u.usteed = mtmp;
 	remove_monster(mtmp->mx, mtmp->my);
 	teleds(mtmp->mx, mtmp->my, TRUE);
