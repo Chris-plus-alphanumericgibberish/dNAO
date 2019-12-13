@@ -4,8 +4,6 @@
 #include "edog.h"
 #include "xhity.h"
 
-/* current TODO: none */
-
 STATIC_DCL int FDECL(attack_checks2, (struct monst *, struct obj *));
 //STATIC_DCL boolean FDECL(attack2, (struct monst *));
 //STATIC_DCL int FDECL(xattacky, (struct monst *, struct monst *));
@@ -36,7 +34,7 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, boolean, int, boolean, int, int *));
+STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, boolean, int, boolean, int, boolean *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL void FDECL(weave_black_web, (struct monst *));
 STATIC_DCL int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
@@ -133,7 +131,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 				u.ustuck = mdef;
 		}
 		if (!mdef->mpeaceful)
-			wakeup(mdef, TRUE); /* always necessary; also un-mimics mimics */
+			wakeup2(mdef, TRUE); /* always necessary; also un-mimics mimics */
 		return ATTACKCHECK_NONE;
 	}
 
@@ -180,7 +178,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 	*/
 	if ((mdef->mundetected || mdef->m_ap_type) && sensemon(mdef)) {
 		mdef->mundetected = 0;
-		wakeup(mdef, TRUE);
+		wakeup2(mdef, TRUE);
 	}
 
 	/* generally, don't attack peaceful monsters */
@@ -851,8 +849,8 @@ struct monst * mdef;
 
 				dopassive_local = TRUE;
 				/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
-				if (!youdef && !(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove)))
-					wakeup(mdef, youagr);
+				if (youdef ||(!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
+					wakeup2(mdef, youagr);
 			}
 			else {
 				/* make ranged attack */;
@@ -889,8 +887,8 @@ struct monst * mdef;
 			result = xmeleehity(magr, mdef, attk, (struct obj *)0, vis, tohitmod);
 			dopassive_local = TRUE;
 			/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
-			if (!youdef && !(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove)))
-				wakeup(mdef, youagr);
+			if (youdef || (!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
+				wakeup2(mdef, youagr);
 			break;
 
 			/* engulfing attacks */
@@ -952,8 +950,8 @@ struct monst * mdef;
 			if (distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1)
 				dopassive_local = TRUE;
 			/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
-			if (!youdef && !(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove)))
-				wakeup(mdef, youagr);
+			if (youdef || (!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
+				wakeup2(mdef, youagr);
 			break;
 
 			/* targeted gazes */
@@ -2949,6 +2947,7 @@ int vis;
  *
  * Very general to-hit-bonus finding function.
  * 
+ * [magr] might not exist!
  *
  */
 int
@@ -2963,10 +2962,10 @@ int flat_acc;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pa = (magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0);
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 	struct obj * otmp;
-	boolean fired = ((is_ammo(weapon) || launcher) && thrown == 1);
+	boolean fired = (weapon && (is_ammo(weapon) || launcher) && thrown == 1);
 
 	/* partial accuracy counters */
 	int base_acc = 0;	/* accuracy from leveling up */
@@ -2978,104 +2977,112 @@ int flat_acc;
 	int defn_acc = 0;	/* defender's defense -- dependent on attk */
 	int totl_acc = 0;	/* sum of above partial accuracy counters */
 
-	/* base accuracy due to level */
-	/* Some player roles have better ranged accuracy with certain weapons than their BAB */
-	if (youagr && thrown && weapon &&
-		(Role_if(PM_RANGER) ||
-		(u.sealsActive&SEAL_EVE) ||
-		(weapon->otyp == DAGGER && Role_if(PM_ROGUE)) ||
-		(weapon->otyp == DART && Role_if(PM_TOURIST)) ||
-		(weapon->otyp == HEAVY_IRON_BALL && Role_if(PM_CONVICT))
-		)) {
-		base_acc = mlev(magr);
-	}
-	else {
-		base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS : thrown ? 0.25 : 0.67);
-	}
-	/* player-only accuracy bonuses */
-	if (youagr) {
-		/* base +1/-1 for no reason */
-		bons_acc += (thrown ? -1 : +1);
-		/* Stat (DEX, STR) */
-		if (!thrown || !launcher || objects[launcher->otyp].oc_skill == P_SLING){
-			/* firing ranged attacks without a laucher (ex manticore tail spikes) can use STR */
-			bons_acc += abon();
+	/* base accuracy due to level -- requires attacker */
+	if (magr) {
+		/* Some player roles have better ranged accuracy with certain weapons than their BAB */
+		if (youagr && thrown && weapon &&
+			(Role_if(PM_RANGER) ||
+			(u.sealsActive&SEAL_EVE) ||
+			(weapon->otyp == DAGGER && Role_if(PM_ROGUE)) ||
+			(weapon->otyp == DART && Role_if(PM_TOURIST)) ||
+			(weapon->otyp == HEAVY_IRON_BALL && Role_if(PM_CONVICT))
+			)) {
+			base_acc = mlev(magr);
 		}
 		else {
-			if (ACURR(A_DEX) < 4)			bons_acc -= 3;
-			else if (ACURR(A_DEX) < 6)		bons_acc -= 2;
-			else if (ACURR(A_DEX) < 8)		bons_acc -= 1;
-			else if (ACURR(A_DEX) >= 14)	bons_acc += (ACURR(A_DEX) - 14);
+			base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS : thrown ? 0.25 : 0.67);
 		}
-		/* Stat (INT) (from Dantalion vs telepathically sensed enemies) */
-		if (u.sealsActive&SEAL_DANTALION && tp_sensemon(mdef))
-			bons_acc += max(0, (ACURR(A_INT) - 10) / 2);
-		/* intrinsic accuracy bonuses */
-		bons_acc += u.uhitinc;
-		/* Malphas' bonus accuracy from having nearby crows -- btw Chris this is horribly named */
-		bons_acc += u.spiritAttk;
-		/* Uur (active) */
-		if (u.uuur_duration)
-			bons_acc += 10;
-		/* luck */
-		if (Luck)
-			bons_acc += sgn(Luck)*rnd(abs(Luck));
-		/* Bard */
-		bons_acc += u.uencouraged;
-		/* Singing Sword */
-		if (uwep && uwep->oartifact == ART_SINGING_SWORD){
-			if (uwep->osinging == OSING_LIFE){
-				bons_acc += uwep->spe + 1;
-			}
-		}
-		/* carrying too much */
-		if (near_capacity())
-			bons_acc -= ((near_capacity() * 2) - 1);
-		/* trapped */
-		if (u.utrap)
-			bons_acc -= 3;
-		/* swallowed */
-		if (u.uswallow && u.ustuck == mdef)
-			bons_acc += 1000;
 	}
-	/* monster-only accuracy bonuses */
-	else {
-		/* high-rank foes are accurate */
-		if (is_lord(pa))
-			bons_acc += 2;
-		if (is_prince(pa))
-			bons_acc += 5;
-		/* these guys are extra accurate */
-		if (is_uvuudaum(pa) || pa == &mons[PM_CLAIRVOYANT_CHANGED])
-			bons_acc += 20;
-		if (pa == &mons[PM_DANCING_BLADE])
-			bons_acc += 7;
-		if (pa == &mons[PM_CHOKHMAH_SEPHIRAH])
-			bons_acc += u.chokhmah;
-		/* Bard */
-		bons_acc += magr->encouraged;
-		/* Singing Sword */
-		if (uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(magr) && !is_deaf(magr)){
-			if (uwep->osinging == OSING_DIRGE && !magr->mtame){
-				bons_acc -= uwep->spe + 1;
+	/* other attacker-related accuracy bonuses */
+	if (magr) {
+		/* player-only accuracy bonuses */
+		if (youagr) {
+			/* base +1/-1 for no reason */
+			bons_acc += (thrown ? -1 : +1);
+			/* Stat (DEX, STR) */
+			if (!thrown || !launcher || objects[launcher->otyp].oc_skill == P_SLING){
+				/* firing ranged attacks without a laucher (ex manticore tail spikes) can use STR */
+				bons_acc += abon();
 			}
+			else {
+				if (ACURR(A_DEX) < 4)			bons_acc -= 3;
+				else if (ACURR(A_DEX) < 6)		bons_acc -= 2;
+				else if (ACURR(A_DEX) < 8)		bons_acc -= 1;
+				else if (ACURR(A_DEX) >= 14)	bons_acc += (ACURR(A_DEX) - 14);
+			}
+			/* Stat (INT) (from Dantalion vs telepathically sensed enemies) */
+			if (u.sealsActive&SEAL_DANTALION && tp_sensemon(mdef))
+				bons_acc += max(0, (ACURR(A_INT) - 10) / 2);
+			/* intrinsic accuracy bonuses */
+			bons_acc += u.uhitinc;
+			/* Malphas' bonus accuracy from having nearby crows -- btw Chris this is horribly named */
+			bons_acc += u.spiritAttk;
+			/* Uur (active) */
+			if (u.uuur_duration)
+				bons_acc += 10;
+			/* luck */
+			if (Luck)
+				bons_acc += sgn(Luck)*rnd(abs(Luck));
+			/* Bard */
+			bons_acc += u.uencouraged;
+			/* Singing Sword */
+			if (uwep && uwep->oartifact == ART_SINGING_SWORD){
+				if (uwep->osinging == OSING_LIFE){
+					bons_acc += uwep->spe + 1;
+				}
+			}
+			/* carrying too much */
+			if (near_capacity())
+				bons_acc -= ((near_capacity() * 2) - 1);
+			/* trapped */
+			if (u.utrap)
+				bons_acc -= 3;
+			/* swallowed */
+			if (u.uswallow && u.ustuck == mdef)
+				bons_acc += 1000;
 		}
-		/* trapped */
-		if (magr->mtrapped)
-			bons_acc -= 2;
+		/* monster-only accuracy bonuses */
+		else {
+			/* high-rank foes are accurate */
+			if (is_lord(pa))
+				bons_acc += 2;
+			if (is_prince(pa))
+				bons_acc += 5;
+			/* these guys are extra accurate */
+			if (is_uvuudaum(pa) || pa == &mons[PM_CLAIRVOYANT_CHANGED])
+				bons_acc += 20;
+			if (pa == &mons[PM_DANCING_BLADE])
+				bons_acc += 7;
+			if (pa == &mons[PM_CHOKHMAH_SEPHIRAH])
+				bons_acc += u.chokhmah;
+			/* Bard */
+			bons_acc += magr->encouraged;
+			/* Singing Sword */
+			if (uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(magr) && !is_deaf(magr)){
+				if (uwep->osinging == OSING_DIRGE && !magr->mtame){
+					bons_acc -= uwep->spe + 1;
+				}
+			}
+			/* trapped */
+			if (magr->mtrapped)
+				bons_acc -= 2;
+		}
 	}
+
 	/* ranged-specific accuracy modifiers */
 	if (thrown)
 	{
-		/* accuracy is reduced by range (or increased, for sniper rifles) */
-		int dist_penalty = max(-4, distmin(x(magr), y(magr), x(mdef), y(mdef)) - 3);
-		if (launcher && launcher->otyp == SNIPER_RIFLE)
-			rang_acc += dist_penalty;
-		else
-			rang_acc -= dist_penalty;
+		if (magr) {
+			/* accuracy is reduced by range (or increased, for sniper rifles) */
+			int dist_penalty = max(-4, distmin(x(magr), y(magr), x(mdef), y(mdef)) - 3);
+			if (launcher && launcher->otyp == SNIPER_RIFLE)
+				rang_acc += dist_penalty;
+			else
+				rang_acc -= dist_penalty;
+		}
 
 		/* gloves are a hinderance to proper use of bows */
-		if (launcher && objects[launcher->otyp].oc_skill == P_BOW) {
+		if (magr && launcher && objects[launcher->otyp].oc_skill == P_BOW) {
 			struct obj * gloves;
 			gloves = (youagr ? uarmg : which_armor(magr, W_ARMG));
 			if (gloves){
@@ -3104,9 +3111,24 @@ int flat_acc;
 				}
 			}
 		}
-		/* balls of webbing should always miss */
-		if (weapon->otyp == BALL_OF_WEBBING)
+		/* some objects are more likely to hit than others */
+		switch (weapon->otyp) {
+		case HEAVY_IRON_BALL:
+			if (weapon != uball)
+				rang_acc += 2;
+			break;
+		case BOULDER:
+			rang_acc += 6;
+			break;
+		case STATUE:
+			if (is_boulder(weapon))
+				rang_acc += 6;
+			break;
+		case BALL_OF_WEBBING:
+			/* balls of webbing should always miss */
 			rang_acc -= 2000;
+			break;
+		}
 	}
 
 	/* study */
@@ -3130,7 +3152,7 @@ int flat_acc;
 			vdef_acc += 4;
 	}
 	/* Elves hate orcs, and the devs like elves. */
-	if (is_orc(pd) && is_elf(pa))
+	if (magr && is_orc(pd) && is_elf(pa))
 		vdef_acc += 1;
 	/* ranged attacks are affected by target size */
 	if (thrown)
@@ -3171,7 +3193,7 @@ int flat_acc;
 				 * especially their own special types of bow.
 				 * Polymorphing won't make you a bow expert.
 				 */
-				if ((Race_if(PM_ELF) || Role_if(PM_SAMURAI)) &&
+				if (youagr && (Race_if(PM_ELF) || Role_if(PM_SAMURAI)) &&
 					(!Upolyd || your_race(youmonst.data)) &&
 					objects[launcher->otyp].oc_skill == P_BOW) {
 					wepn_acc++;
@@ -3226,12 +3248,15 @@ int flat_acc;
 			}
 		}
 	}
+
 	/* combat boots increase accuracy */
-	static int cbootsa = 0;
-	if (!cbootsa) cbootsa = find_cboots();
-	otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
-	if (otmp && otmp->otyp == cbootsa)
-		wepn_acc++;
+	if (magr) {
+		static int cbootsa = 0;
+		if (!cbootsa) cbootsa = find_cboots();
+		otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
+		if (otmp && otmp->otyp == cbootsa)
+			wepn_acc++;
+	}
 
 
 	/* find defender's AC */
@@ -3575,8 +3600,8 @@ int flat_acc;
 	}
 
 	/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
-	if (!youdef && (hit || (!mdef->msleeping && mdef->mcanmove)))
-		wakeup(mdef, youagr);
+	if (youdef || (hit || (!mdef->msleeping && mdef->mcanmove)))
+		wakeup2(mdef, youagr);
 
 	return result;
 }
@@ -3750,13 +3775,13 @@ int vis;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, weapon, FALSE, dmg, dohitmsg, dieroll, FALSE, vis, (boolean *)0);
+		result = hmon2point0(magr, mdef, attk, weapon, FALSE, FALSE, dmg, dohitmsg, dieroll, FALSE, vis, (boolean *)0);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, weapon, FALSE, 1, FALSE, dieroll, TRUE, vis, (boolean *)0);
+				result = hmon2point0(magr, mdef, attk, weapon, FALSE, FALSE, 1, FALSE, dieroll, TRUE, vis, (boolean *)0);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -9260,7 +9285,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	boolean hittxt = FALSE;
 	boolean lethaldamage = FALSE;
 
-	boolean fired = ((is_ammo(weapon) || launcher) && thrown == 1);	/* true if we are properly firing ammo (which may actually not use a launcher, eg monster AT_ARRW) */
+	boolean fired = (weapon && (is_ammo(weapon) || launcher) && thrown == 1);	/* true if we are properly firing ammo (which may actually not use a launcher, eg monster AT_ARRW) */
 	
 	struct obj * otmp;	/* generic object pointer -- variable */
 	long slot = 0L;		/* slot, either the weapon pointer (W_WEP) or armor -- variable */
@@ -10825,17 +10850,51 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	/* Final sum of damage */
 	totldmg = subtotl + seardmg + heatdmg + poisdmg + specdmg;
 	lethaldamage = (totldmg >= *hp(mdef));
+
+	if (wizard && youagr && ublindf && ublindf->otyp == LENSES) {
+		pline("dmg = (%d + %d + %d + %d + %d + %d - defense) = %d; + %d + %d + %d + %d = %d",
+			basedmg,
+			artidmg,
+			bonsdmg,
+			((youagr && !natural_strike) ? 0 : monsdmg),	/* only add monsdmg for monsters or a player making a monster attack */
+			snekdmg,
+			jostdmg,
+			subtotl,
+			seardmg,
+			heatdmg,
+			poisdmg,
+			specdmg,
+			totldmg
+			);
+	}
 	
 	/* PRINT HIT MESSAGE. MAYBE. */
-	if (dohitmsg &&
-		vis &&
-		!hittxt &&
-		!jousting &&
-		!staggering_strike &&
-		!(youagr && lethaldamage) &&
-		!(youagr && sneak_attack))
-	{
-		xyhitmsg(magr, mdef, attk);
+	if (dohitmsg && vis){
+		if (thrown)
+		{
+			if (youdef) {
+				pline("%s %s you!", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"));
+			}
+			else if ((!lethaldamage || (m_shot.n > 1 && m_shot.o == weapon->otyp))
+				) {
+				if ((!cansee(bhitpos.x, bhitpos.y) && !canspotmon(mdef) &&
+					!(u.uswallow && mdef == u.ustuck))
+					|| !flags.verbose)
+					pline("%s %s it.", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"));
+				else pline("%s %s %s%s", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"),
+					mon_nam(mdef), exclam(totldmg));
+			}
+		}
+		else {
+			if (!hittxt &&
+				!jousting &&
+				!staggering_strike &&
+				!(youagr && lethaldamage) &&
+				!(youagr && sneak_attack))
+			{
+				xyhitmsg(magr, mdef, attk);
+			}
+		}
 	}
 
 	/* Print additional messages and do more effects */
@@ -12686,5 +12745,24 @@ struct attack * passive;	/* specific passive attack being used */
 
 	if (carried(otmp))
 		update_inventory();
+	return;
+}
+
+void
+wakeup2(mdef, your_fault)
+struct monst * mdef;
+boolean your_fault;
+{
+	if (mdef == &youmonst)
+	{
+		if (u.usleep && u.usleep < monstermoves && rn2(20) < ACURR(A_WIS)) {
+			multi = -1;
+			nomovemsg = "The combat suddenly awakens you.";
+		}
+	}
+	else
+	{
+		wakeup(mdef, your_fault);
+	}
 	return;
 }

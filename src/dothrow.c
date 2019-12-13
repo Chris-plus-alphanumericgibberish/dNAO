@@ -9,17 +9,17 @@
 
 STATIC_DCL int FDECL(fire_blaster, (struct obj *, int));
 STATIC_DCL void NDECL(autoquiver);
-STATIC_DCL int FDECL(gem_accept, (struct monst *, struct obj *));
+extern int FDECL(gem_accept, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(tmiss, (struct obj *, struct monst *));
 STATIC_DCL int FDECL(throw_gold, (struct obj *));
-STATIC_DCL void FDECL(check_shop_obj, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P));
-STATIC_DCL void FDECL(breakobj, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P,BOOLEAN_P));
-STATIC_DCL void FDECL(breakmsg, (struct obj *,BOOLEAN_P));
+extern void FDECL(check_shop_obj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P));
+extern void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
+extern void FDECL(breakmsg, (struct obj *, BOOLEAN_P));
 STATIC_DCL boolean FDECL(toss_up,(struct obj *, BOOLEAN_P));
 STATIC_DCL boolean FDECL(throwing_weapon, (struct obj *));
 STATIC_DCL void FDECL(sho_obj_return_to_u, (struct obj *obj, int, int));
 STATIC_DCL boolean FDECL(mhurtle_step, (genericptr_t,int,int));
-STATIC_DCL boolean FDECL(quest_arti_hits_leader, (struct obj *,struct monst *));
+extern boolean FDECL(quest_arti_hits_leader, (struct obj *, struct monst *));
 
 
 static NEARDATA const char toss_objs[] =
@@ -91,6 +91,11 @@ int ask;
         */
 	if(obj->oclass == COIN_CLASS && obj != uquiver) return(throw_gold(obj));
 #endif
+	/* TEMPORARY SHORT_CIRCUIT FOR TESTING PROJECTILE>C */
+	if (wizard && !u.uhave.bell) {
+		(void)projectile(&youmonst, obj, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, FALSE);
+		return 1;
+	}
 
 	if(!canletgo(obj,"throw"))
 		return(0);
@@ -1262,7 +1267,7 @@ mhurtle(mon, dx, dy, range)
 	return;
 }
 
-STATIC_OVL void
+void
 check_shop_obj(obj, x, y, broken)
 register struct obj *obj;
 register xchar x, y;
@@ -1442,7 +1447,7 @@ struct obj *obj;
 }
 
 /* the currently thrown object is returning to you (not for boomerangs) */
-STATIC_OVL void
+void
 sho_obj_return_to_u(obj, destx, desty)
 struct obj *obj;
 int destx;
@@ -1984,7 +1989,6 @@ struct monst *mon;
 }
 
 
-STATIC_OVL
 boolean
 quest_arti_hits_leader(obj,mon)
 struct obj *obj;
@@ -2482,7 +2486,7 @@ int thrown;
 	return 0;
 }
 
-STATIC_OVL int
+int
 gem_accept(mon, obj)
 register struct monst *mon;
 register struct obj *obj;
@@ -2627,7 +2631,7 @@ xchar x, y;		/* object location (ox, oy may not be right) */
  * Unconditionally break an object. Assumes all resistance checks
  * and break messages have been delivered prior to getting here.
  */
-STATIC_OVL void
+void
 breakobj(obj, x, y, hero_caused, from_invent)
 struct obj *obj;
 xchar x, y;		/* object location (ox, oy may not be right) */
@@ -2728,7 +2732,7 @@ struct obj *obj;
 	}
 }
 
-STATIC_OVL void
+void
 breakmsg(obj, in_view)
 struct obj *obj;
 boolean in_view;
