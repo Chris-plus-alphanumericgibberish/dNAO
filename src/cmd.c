@@ -17,6 +17,10 @@
 #endif
 
 #define CMD_TRAVEL (char)0x90
+#define DOATTRIB_RESISTS	1
+#define DOATTRIB_ARMOR		2
+#define DOATTRIB_ENLIGHTEN	3
+#define DOATTRIB_SPIRITS	4
 
 #ifdef DEBUG
 /*
@@ -160,7 +164,7 @@ STATIC_DCL int NDECL(wiz_port_debug);
 STATIC_PTR int NDECL(enter_explore_mode);
 STATIC_PTR int NDECL(doattributes);
 STATIC_PTR int NDECL(doconduct); /**/
-STATIC_PTR boolean NDECL(minimal_enlightenment);
+STATIC_PTR int NDECL(minimal_enlightenment);
 STATIC_PTR void NDECL(resistances_enlightenment);
 STATIC_PTR void NDECL(signs_enlightenment);
 
@@ -3852,7 +3856,7 @@ signs_mirror()
  * to help refresh them about who/what they are.
  * Returns FALSE if menu cancelled (dismissed with ESC), TRUE otherwise.
  */
-STATIC_OVL boolean
+STATIC_OVL int
 minimal_enlightenment()
 {
 	winid tmpwin;
@@ -3948,10 +3952,47 @@ minimal_enlightenment()
 	else Sprintf(buf, fmtstr, "Lawful", buf2);
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
+	/* Menu options */
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", FALSE);
+	if (TRUE) {
+		Sprintf(buf, "Describe how you feel.");
+		any.a_int = DOATTRIB_RESISTS;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'a', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		//resistances_enlightenment();
+	}
+
+	if (TRUE) {
+		Sprintf(buf, "Show your armor's damage reduction.");
+		any.a_int = DOATTRIB_ARMOR;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'b', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		//udr_enlightenment();
+	}
+
+	if (wizard || discover) {
+		Sprintf(buf, "Perform full enlightenment.");
+		any.a_int = DOATTRIB_ENLIGHTEN;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'c', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		//enlightenment(0);
+	}
+	if (u.sealsActive || u.specialSealsActive) {
+		Sprintf(buf, "Describe your binding marks.");
+		any.a_int = DOATTRIB_SPIRITS;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'd', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		//signs_enlightenment();
+	}
+
 	end_menu(tmpwin, "Base Attributes");
-	n = select_menu(tmpwin, PICK_NONE, &selected);
+	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
-	return (n != -1);
+	return (n>0 ? selected[0].item.a_int : 0);
 }
 
 int
@@ -4045,13 +4086,29 @@ do_naming_ddocall()
 STATIC_PTR int
 doattributes()
 {
-	if (!minimal_enlightenment())
-		return 0;
-	resistances_enlightenment();
-	if (wizard || discover)
-		enlightenment(0);
-	udr_enlightenment();
-	if(u.sealsActive || u.specialSealsActive) signs_enlightenment();
+	int choice;
+	
+	/* ends via return */
+	while (TRUE) {
+		choice = minimal_enlightenment();
+		switch (choice)
+		{
+		case DOATTRIB_RESISTS:
+			resistances_enlightenment();
+			break;
+		case DOATTRIB_ARMOR:
+			udr_enlightenment();
+			break;
+		case DOATTRIB_ENLIGHTEN:
+			enlightenment(0);
+			break;
+		case DOATTRIB_SPIRITS:
+			signs_enlightenment();
+			break;
+		default:
+			return 0;
+		}
+	}
 	return 0;
 }
 
