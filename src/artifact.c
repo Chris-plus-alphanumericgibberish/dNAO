@@ -6362,17 +6362,23 @@ arti_invoke(obj)
 		case DEATH_TCH:
 			getdir((char *)0);
 			if (!isok(u.ux + u.dx, u.uy + u.dy)) break;
-			mtmp = m_at(u.ux + u.dx, u.uy + u.dy);
 			
-			pline("You reach out and stab at %s's very soul.", mon_nam(mtmp));
-			if (nonliving_mon(mtmp) || is_demon(mtmp->data) || is_angel(mtmp->data)) 
-				pline("... but %s seems to lack one!", mon_nam(mtmp));
-			else if (ward_at(mtmp->mx,mtmp->my) == CIRCLE_OF_ACHERON)
-				pline("But %s is already beyond Acheron.", mon_nam(mtmp));
-			else 
-				xkilled(mtmp, 1);
-			
-			 
+			if (mtmp = m_at(u.ux + u.dx, u.uy + u.dy)) {
+				/* message */
+				pline("You reach out and stab at %s very soul.", s_suffix(mon_nam(mtmp)));
+				/* nonliving, demons, angels are immune */
+				if (nonliving_mon(mtmp) || is_demon(mtmp->data) || is_angel(mtmp->data))
+					pline("... but %s seems to lack one!", mon_nam(mtmp));
+				/* circle of acheron provides protection */
+				else if (ward_at(mtmp->mx, mtmp->my) == CIRCLE_OF_ACHERON)
+					pline("But %s is already beyond Acheron.", mon_nam(mtmp));
+				else
+					xkilled(mtmp, 1);
+			}
+			else {
+				/* reset timeout; we didn't actually use the invoke */
+				obj->age = monstermoves;
+			}
 		break;
 		case PETMASTER:{
 			int pet_effect = 0;
