@@ -34,7 +34,7 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, boolean, int, boolean, int, boolean *));
+STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL void FDECL(weave_black_web, (struct monst *));
 STATIC_DCL int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
@@ -3644,6 +3644,7 @@ int vis;
 			armuncancel = FALSE;	// if armor is responsible for cancelling attack specials
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
+	boolean wepgone = FALSE;
 	boolean spec = FALSE;			// general-purpose special flag
 	struct attack alt_attk = *attk;	// buffer space to modify attacks in 
 	struct permonst * pa = youagr ? youracedata : magr->data;
@@ -3775,13 +3776,13 @@ int vis;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, weapon, FALSE, FALSE, dmg, dohitmsg, dieroll, FALSE, vis, (boolean *)0);
+		result = hmon2point0(magr, mdef, attk, weapon, FALSE, FALSE, 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, weapon, FALSE, FALSE, 1, FALSE, dieroll, TRUE, vis, (boolean *)0);
+				result = hmon2point0(magr, mdef, attk, weapon, FALSE, FALSE, 0, 0, FALSE, dieroll, TRUE, vis, &wepgone);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -9179,13 +9180,14 @@ boolean * hittxt;
  * are called after the player hits, while letting hmoncore have messy returns wherever it wants
  */
 int
-hmon2point0(magr, mdef, attk, weapon, launcher, thrown, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
+hmon2point0(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
 struct monst * magr;	/* attacker */
 struct monst * mdef;	/* defender */
 struct attack * attk;	/* attack structure to use */
 struct obj * weapon;	/* weapon to hit with */
 struct obj * launcher;	/* launcher weapon was fired with */
 int thrown;				/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
+int flatbasedmg;		/* if >0, REPLACE basedmg with this value -- typically used for unusual weapon hits like throwing something upwards */
 int monsdmg;			/* flat damage amount to add onto other effects -- for monster attacks */
 boolean dohitmsg;		/* print hit message? */
 int dieroll;			/* 1-20 accuracy dieroll, used for special effects */
@@ -9206,7 +9208,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	else
 		u_anger_guards = FALSE;
 
-	result = hmoncore(magr, mdef, attk, weapon, launcher, thrown, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone);
+	result = hmoncore(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone);
 
 	if (mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
@@ -9217,13 +9219,14 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 }
 
 int
-hmoncore(magr, mdef, attk, weapon, launcher, thrown, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
+hmoncore(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
 struct monst * magr;	/* attacker */
 struct monst * mdef;	/* defender */
 struct attack * attk;	/* attack structure to use */
 struct obj * weapon;	/* weapon to hit with */
 struct obj * launcher;	/* launcher weapon was fired with */
 int thrown;				/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
+int flatbasedmg;		/* if >0, REPLACE basedmg with this value -- typically used for unusual weapon hits like throwing something upwards */
 int monsdmg;			/* flat damage amount to add onto other effects -- for monster attacks */
 boolean dohitmsg;		/* print hit message? */
 int dieroll;			/* 1-20 accuracy dieroll, used for special effects */
@@ -9280,13 +9283,14 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	boolean destroy_one_magr_weapon = FALSE;	/* destroy one of magr's weapons */
 	boolean destroy_all_magr_weapon = FALSE;	/* destroy all of magr's weapon */
 
-	boolean real_attack = (monsdmg > 0);	/* if called with a 0d0 attack, this shouldn't get standard damage bonuses or have min 1 damage */
+	boolean real_attack = (attk->damn > 0 || attk->damd > 0);
 
 	boolean hittxt = FALSE;
 	boolean lethaldamage = FALSE;
 
 	boolean fired = (weapon && (is_ammo(weapon) || launcher) && thrown == 1);	/* true if we are properly firing ammo (which may actually not use a launcher, eg monster AT_ARRW) */
 	
+	struct obj tempwep;	/* used to save the data of an object before it gets destroyed, for things like naming */
 	struct obj * otmp;	/* generic object pointer -- variable */
 	long slot = 0L;		/* slot, either the weapon pointer (W_WEP) or armor -- variable */
 	long rslot = 0L;	/* slot, dedicated to rings (left and right) -- set at start, should not be reset */
@@ -10057,14 +10061,24 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 				otmp = weapon;
 				weapon = (struct obj *)0;
 			}
-			if (youagr)
-				freeinv(otmp);
-			else
-				m_freeinv(otmp);
+			if (otmp->where != OBJ_FREE) {
+				if (youagr)
+					freeinv(otmp);
+				else
+					m_freeinv(otmp);
+			}
+
+			if (!weapon) {
+				/* remember stuff about the potion so weapon can be used for xname() and such
+				 * after potionhit() is called */
+				weapon = &tempwep;
+				*weapon = *otmp;
+			}
 
 			/* do the potion effects */
 			/* note: if player is defending, this assumes the potion was thrown */
 			potionhit(mdef, otmp, youagr);
+			*wepgone = TRUE;
 			/* check if defender was killed */
 			if (*hp(mdef) < 1)
 				return MM_DEF_DIED;
@@ -10739,7 +10753,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		int resistmask = 0;
 
 		/* get attackmask */
-		if (valid_weapon_attack || invalid_weapon_attack) {
+		if (weapon && (valid_weapon_attack || invalid_weapon_attack)) {
 			otmp = weapon;
 
 			if (is_bludgeon(otmp)
@@ -10789,10 +10803,9 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			attackmask |= WHACK;
 		}
 		else {
-			/* SHOULD NOT HAPPEN CURRENTLY -- NATURAL ATTACKS DO NOT ENTER THIS attackmask/resistmask CODEBLOCK */
-			/* a creature's natural attack */
+			/* something odd -- maybe it was a weapon attack and the weapon was destroyed earlier than usual? */
 			otmp = (struct obj *)0;
-			/* for some reason, ignores resistances instead of determining what the AT_TYPE would do */
+			/* lets just ignore resistances */
 			attackmask |= (WHACK | SLASH | PIERCE);
 		}
 

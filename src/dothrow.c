@@ -8,10 +8,10 @@
 #include "edog.h"
 
 STATIC_DCL int FDECL(fire_blaster, (struct obj *, int));
-STATIC_DCL void NDECL(autoquiver);
+extern void NDECL(autoquiver);
 extern int FDECL(gem_accept, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(tmiss, (struct obj *, struct monst *));
-STATIC_DCL int FDECL(throw_gold, (struct obj *));
+extern int FDECL(throw_gold, (struct obj *));
 extern void FDECL(check_shop_obj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P));
 extern void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
 extern void FDECL(breakmsg, (struct obj *, BOOLEAN_P));
@@ -627,10 +627,9 @@ dothrow()
     return (result);
 }
 
-
 /* KMH -- Automatically fill quiver */
 /* Suggested by Jeffrey Bay <jbay@convex.hp.com> */
-static void
+void
 autoquiver()
 {
 	struct obj *otmp, *oammo = 0, *omissile = 0, *omisc = 0, *altammo = 0;
@@ -911,7 +910,6 @@ int ask;
 	
 	return result;
 }
-
 
 /*
  * Object hits floor at hero's feet.  Called from drop() and throwit().
@@ -2766,7 +2764,7 @@ boolean in_view;
 	}
 }
 
-STATIC_OVL int
+int
 throw_gold(obj)
 struct obj *obj;
 {
