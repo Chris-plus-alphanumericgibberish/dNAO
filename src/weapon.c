@@ -417,10 +417,8 @@ int otyp;
 		{
 			ocaa = AT_EXPL;					// exploding
 			ocad = AD_LUCK;					// lucky
-			if (obj->oclass == GEM_CLASS) {	// the following dice rules are not for a lightsaber
-				ocn = obj->quan;			// 1 die per octahedron
-				ocd = 8;					// They are eight-sided dice
-			}
+			ocn = obj->quan;				// 1 die per octahedron
+			ocd = 8;						// They are eight-sided dice
 		}
 		else if (obj->oartifact == ART_GIANTSLAYER)
 		{
@@ -590,8 +588,12 @@ int otyp;
 	if (obj && (otyp == LIGHTSABER || otyp == BEAMSWORD || otyp == DOUBLE_LIGHTSABER) && !litsaber(obj))
 	{
 		spe_mult = 1;
+		ocaa = AT_NONE;
+		ocad = AD_PHYS;
 		ocn = 1;
 		ocd = 2;
+		bonaa = AT_NONE;
+		bonad = AD_PHYS;
 		bonn = 0;
 		bond = 0;
 	}
