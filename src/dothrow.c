@@ -1577,21 +1577,29 @@ int thrown;
 		}
 		if (range < 1) range = 1;
 
+		/* launched projectiles get increased range */
 		if (is_ammo(obj) || is_spear(obj)) {
-//ifdef FIREARMS
-			if (ammo_and_launcher(obj, launcher) && 
-					objects[(launcher->otyp)].oc_range) 
-				range = objects[(launcher->otyp)].oc_range;
-		    else
-//endif
-			if (ammo_and_launcher(obj, launcher)){ 			
-				//make range of longbow of diana effectively unlimited
-				if(uwep->oartifact == ART_LONGBOW_OF_DIANA || uwep->oartifact == ART_XIUHCOATL ||
-					(uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
-				) range = 1000;
-				else range++;
-			} else if (obj->oclass != GEM_CLASS && !is_spear(obj))
+			if (ammo_and_launcher(obj, launcher)) {
+				/* some things maximize range */
+				if ((launcher->oartifact == ART_LONGBOW_OF_DIANA) ||
+					(launcher->oartifact == ART_XIUHCOATL) ||
+					(launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
+					) {
+					range = 1000;
+				}
+				else if (objects[(launcher->otyp)].oc_range) {
+					/* some launchers specify range (firearms specifically) */
+					range = objects[(launcher->otyp)].oc_range;
+				}
+				else {
+					/* other launchers give a small range boost */
+					range += 1;
+				}
+			}
+			else if (obj->oclass != GEM_CLASS && !is_spear(obj)) {
+				/* non-rock non-spear ammo is poorly thrown */
 				range /= 2;
+			}
 		}
 
 		if (Weightless || Levitation) {
