@@ -246,7 +246,7 @@ int thrown;
 	m_shot.s = ammo_and_launcher(obj,launcher) ? TRUE : FALSE;
 	/* give a message if shooting more than one, or if player
 	   attempted to specify a count */
-	if(obj->oartifact == ART_FLUORITE_OCTAHEDRON){
+	if(obj->oartifact == ART_FLUORITE_OCTAHEDRON && obj->oclass == GEM_CLASS){
 		if(!ammo_and_launcher(obj,launcher)){
 			if(shotlimit && shotlimit < obj->quan) You("throw %d Fluorite %s.", shotlimit, shotlimit > 1 ? "Octahedra" : "Octahedron");
 			else if(obj->quan == 8) You("throw the Fluorite Octet.");
