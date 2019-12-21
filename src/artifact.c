@@ -2420,7 +2420,10 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		and = TRUE;
 	} // nvPh - drain res
 	
-	pline("The %s blade hits %s.", buf, hittee);	
+	
+	if (buf[0] != '\0')
+		pline("The %s blade hits %s.", buf, hittee);
+	
 	return (and || vis); // vis should be redundant, but it's not a bad idea since riker can be a dumb bitch
 }
 
