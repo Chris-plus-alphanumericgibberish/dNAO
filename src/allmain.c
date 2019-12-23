@@ -1940,6 +1940,7 @@ karemade:
 							}
 							if(yields_insight(mtmp->data)){
 								change_uinsight(u_insight_gain(mtmp));
+								change_usanity(u_sanity_gain(mtmp));
 							}
 						}
 					}
