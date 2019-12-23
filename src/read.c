@@ -3137,6 +3137,9 @@ int gen_restrict;
 			else if (!strncmpi(bufp, "cranium ", l = 8)) {
 				undeadtype = CRANIUM_RAT;
 			}
+			else if (!strncmpi(bufp, "mistweaver ", l = 11)) {
+				undeadtype = MISTWEAVER;
+			}
 			else
 				break;
 
@@ -3177,6 +3180,8 @@ int gen_restrict;
 				undeadtype = YITH;
 			else if (!strncmpi(p, "cranium",	7))
 				undeadtype = CRANIUM_RAT;
+			else if (!strncmpi(p, "mistweaver", 10))
+				undeadtype = MISTWEAVER;
 			else
 			{
 				/* no suffix was used, undo the split made to search for suffixes */
@@ -3303,6 +3308,7 @@ createmon:
 				undeadtype == PSEUDONATURAL ? TRUE :
 				undeadtype == TOMB_HERD ? TRUE :
 				undeadtype == YITH ? TRUE :
+				undeadtype == MISTWEAVER ? TRUE :
 				undeadtype == CRANIUM_RAT ? is_rat(mtmp->data) :
 				undeadtype == FRACTURED ? is_kamerel(mtmp->data) : 0
 				))
