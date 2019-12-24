@@ -11,7 +11,9 @@ STATIC_DCL void FDECL(return_thrownobj, (struct monst *, struct obj *));
 STATIC_DCL boolean FDECL(toss_up2, (struct obj *));
 STATIC_DCL int FDECL(calc_multishot, (struct monst *, struct obj *, struct obj *, int));
 STATIC_DCL int FDECL(calc_range, (struct monst *, struct obj *, struct obj *, int *));
-STATIC_DCL int FDECL(uthrow, (struct obj *, struct obj *, int, boolean));
+STATIC_DCL boolean FDECL(uthrow, (struct obj *, struct obj *, int, boolean));
+STATIC_DCL int FDECL(mthrow, (struct monst *, struct obj *, struct obj *, int, int, boolean));
+STATIC_DCL struct obj * FDECL(blaster_ammo, (struct obj *));
 
 /* grab some functions from dothrow.c */
 extern boolean FDECL(quest_arti_hits_leader, (struct obj *, struct monst *));
@@ -21,6 +23,8 @@ extern void FDECL(breakmsg, (struct obj *, BOOLEAN_P));
 extern void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
 extern int FDECL(throw_gold, (struct obj *));
 extern void NDECL(autoquiver);
+/* from mthrowu.c */
+extern char* FDECL(breathwep, (int));
 
 /* some damn global variables because passing these as parameters would be a lot to add for something so rarely used.
  * The player threw an object, these save what the player's state was just prior to throwing so it can be restored */
@@ -423,14 +427,16 @@ boolean verbose;				/* TRUE if messages should be printed even if the player can
 
 		/* projectile is on a sink (it "sinks" down) or is on a non-allowable square */
 		if ((range != initrange) &&
-			(!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ)) || (IS_SINK(levl[bhitpos.x][bhitpos.y].typ)))
+			(!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ)) ||
+			closed_door(bhitpos.x, bhitpos.y) ||
+			(IS_SINK(levl[bhitpos.x][bhitpos.y].typ)))
 		{
 			range = 0;
 		}
 
 		/* space ahead has wall and no monster */
 		if (!isok(bhitpos.x + dx, bhitpos.y + dy) ||
-			(!ZAP_POS(levl[bhitpos.x+dx][bhitpos.y+dy].typ) &&
+			((!ZAP_POS(levl[bhitpos.x + dx][bhitpos.y + dy].typ) || closed_door(bhitpos.x + dx, bhitpos.y + dy)) &&
 			!m_at(bhitpos.x+dx, bhitpos.y+dy)))
 		{
 			do_digging_projectile(magr, thrownobj, dx, dy);
@@ -496,7 +502,7 @@ boolean verbose;				/* TRUE if messages should be printed even if the player can
 			bhitpos.x += dx;
 			bhitpos.y += dy;
 			tmp_at(bhitpos.x, bhitpos.y);
-			if (couldsee(bhitpos.x, bhitpos.y))
+			if (cansee(bhitpos.x, bhitpos.y))
 				delay_output();
 		}
 	}
@@ -1333,8 +1339,11 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			!index(in_rooms(mdef->mx, mdef->my, SHOPBASE), *u.ushops)))
 			hot_pursuit(mdef);
 			
-		/* cause projectile to fall onto the floor */
-		*prange = *prange2 = 0;
+		/* cause projectile to fall onto the floor -- not for blaster bolts */
+		if (thrownobj->otyp != BLASTER_BOLT &&
+			thrownobj->otyp != HEAVY_BLASTER_BOLT &&
+			thrownobj->otyp != LASER_BEAM)
+			*prange = *prange2 = 0;
 		return MM_MISS;
 	}
 
@@ -1799,7 +1808,7 @@ int shotlimit;
 			break;
 		case PM_RANGER:
 			multishot++;
-			if (ammo_and_launcher(ammo, launcher) && launcher->oartifact == ART_LONGBOW_OF_DIANA) multishot++;//double bonus for Rangers
+			if (launcher && launcher->oartifact == ART_LONGBOW_OF_DIANA) multishot++;//double bonus for Rangers
 			break;
 		case PM_ROGUE:
 			if (skill == P_DAGGER) multishot++;
@@ -1847,7 +1856,7 @@ int shotlimit;
 		)) multishot *= 2;
 
 	/* Crossbow artifact bonuses that are inconsistently applied after most other adjustments. Grr. */
-	if (ammo_and_launcher(ammo, launcher) && launcher->oartifact){
+	if (launcher && launcher->oartifact){
 		if (launcher->oartifact == ART_WRATHFUL_SPIDER) multishot += rn2(8);
 		else if (launcher->oartifact == ART_ROGUE_GEAR_SPIRITS) multishot = 2;
 	}
@@ -1860,7 +1869,7 @@ int shotlimit;
 	 * Rate of fire is intrinsic to the weapon - cannot be user selected except via altmode
 	 * (currently oc_rof conflicts with wsdam)
 	 */
-	if (launcher && is_firearm(launcher) && ammo_and_launcher(ammo, launcher)) {
+	if (launcher && is_firearm(launcher)) {
 		if (launcher->otyp == BFG){
 			if (objects[(ammo)->otyp].w_ammotyp == WP_BULLET)       multishot += 2 * (objects[(launcher->otyp)].oc_rof);
 			else if (objects[(ammo)->otyp].w_ammotyp == WP_SHELL)   multishot += 1.5*(objects[(launcher->otyp)].oc_rof);
@@ -1884,9 +1893,15 @@ int shotlimit;
 		ammo->oartifact == ART_SICKLE_MOON ||
 		ammo->oartifact == ART_ANNULUS ||
 		ammo->oartifact == ART_AMHIMITL ||
-		ammo->oartifact == ART_DART_OF_THE_ASSASSIN
+		ammo->oartifact == ART_DART_OF_THE_ASSASSIN ||
+		(launcher && is_blaster(launcher))
 		))
 		multishot = (int)ammo->quan;
+
+	/* Blasters limit multishot to charge */
+	if (launcher && is_blaster(launcher) &&
+		multishot > launcher->ovar1)
+		multishot = launcher->ovar1;
 
 	/* minimum multishot of 1*/
 	if (multishot < 1)
@@ -1919,15 +1934,16 @@ int * hurtle_dist;
 	/* Even for crossbows, for some reason. */
 	if (youagr) {
 		urange = (int)(ACURRSTR) / 2;
+		int heaviness = (weight(ammo) / ammo->quan);	/* we want the weight of 1 projectile */
 		/* balls are easy to throw or at least roll */
 		/* also, this ensures the maximum range of a ball is greater
 		* than 1, so the effects from throwing attached balls are
 		* actually possible
 		*/
 		if (ammo->otyp == HEAVY_IRON_BALL)
-			range = urange - (int)(ammo->owt / 100);
+			range = urange - (heaviness / 100);
 		else
-			range = urange - (int)(ammo->owt / 40);
+			range = urange - (heaviness / 40);
 		if (ammo == uball) {
 			if (u.ustuck)
 				range = 1;
@@ -1943,28 +1959,26 @@ int * hurtle_dist;
 	}
 
 	/* launched projectiles get increased range */
-	if (is_ammo(ammo) || is_spear(ammo)) {
-		if (ammo_and_launcher(ammo, launcher)) {
-			/* some things maximize range */
-			if ((launcher->oartifact == ART_LONGBOW_OF_DIANA) ||
-				(launcher->oartifact == ART_XIUHCOATL) ||
-				(launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
-				) {
-				range = 1000;
-			}
-			else if (objects[(launcher->otyp)].oc_range) {
-				/* some launchers specify range (firearms specifically) */
-				range = objects[(launcher->otyp)].oc_range;
-			}
-			else {
-				/* other launchers give a small range boost */
-				range += 1;
-			}
+	if (launcher) {
+		/* some things maximize range */
+		if ((launcher->oartifact == ART_LONGBOW_OF_DIANA) ||
+			(launcher->oartifact == ART_XIUHCOATL) ||
+			(launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
+			) {
+			range = 1000;
 		}
-		else if (ammo->oclass != GEM_CLASS && !is_spear(ammo)) {
-			/* non-rock non-spear ammo is poorly thrown */
-			range /= 2;
+		else if (objects[(launcher->otyp)].oc_range) {
+			/* some launchers specify range (firearms specifically) */
+			range = objects[(launcher->otyp)].oc_range;
 		}
+		else {
+			/* other launchers give a small range boost */
+			range += 1;
+		}
+	}
+	else if (is_ammo(ammo) && ammo->oclass != GEM_CLASS && !is_grenade(ammo)) {
+		/* non-rock non-spear non-grenade ammo is poorly thrown */
+		range /= 2;
 	}
 
 	/* Monsters don't hurtle */
@@ -2069,7 +2083,7 @@ dofire()
 	int shotlimit = 0;
 	char *oldsave_cm = save_cm;
 
-	if (notake(youracedata)) {
+	if (notake(youracedata)) {	/* this will need adjusting when 'f' automatically does AT_SPIT etc */
 		You("are physically incapable of doing that.");
 		return 0;
 	}
@@ -2125,23 +2139,14 @@ dofire()
 				else {
 					switch (launcher->otyp) {
 					case CUTTING_LASER:
-						ammo = mksobj(LASER_BEAM, FALSE, FALSE);
 					case HAND_BLASTER:
-						ammo = mksobj(BLASTER_BOLT, FALSE, FALSE);
-						break;
 					case ARM_BLASTER:
-						ammo = mksobj(HEAVY_BLASTER_BOLT, FALSE, FALSE);
-						break;
 					case MASS_SHADOW_PISTOL:
-						/* note: does not copy cobj->oartifact */
-						if (launcher->cobj)
-							ammo = mksobj(launcher->cobj->otyp, FALSE, FALSE);
-						else
-							ammo = mksobj(ROCK, FALSE, FALSE);
+						ammo = blaster_ammo(launcher);
 						break;
 					case RAYGUN:
 						/* create fake ammo in order to calculate multishot correctly */
-						ammo = mksobj(LASER_BEAM, FALSE, FALSE);
+						ammo = blaster_ammo(launcher);
 						if (!getdir((char *)0))
 							result += zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
 						/* TODO: */
@@ -2173,7 +2178,7 @@ dofire()
 	}
 
 	/* Throw quivered throwing weapons */
-	if (throwing_weapon(uquiver)) {
+	if (uquiver && throwing_weapon(uquiver)) {
 		return uthrow(uquiver, (struct obj *)0, shotlimit, FALSE);
 	}
 
@@ -2278,7 +2283,7 @@ dofire()
 	}
 
 	/* Fire now-loaded launchers. We can ignore blasters, because that would have been caught above and didn't care about uquiver */
-	if ((uwep && (uquiver && ammo_and_launcher(uquiver, uwep))) ||
+	if ((uwep     && (uquiver && ammo_and_launcher(uquiver, uwep    ))) ||
 		(uswapwep && (uquiver && ammo_and_launcher(uquiver, uswapwep)))
 		)
 	{
@@ -2314,17 +2319,58 @@ dofire()
 }
 
 /* 
+ * blaster_ammo()
+ * 
+ * Creates appropriate ammo for blaster
+ */
+struct obj *
+blaster_ammo(blaster)
+struct obj * blaster;
+{
+	struct obj * ammo = (struct obj *)0;
+
+	switch (blaster->otyp) {
+	case CUTTING_LASER:
+		ammo = mksobj(LASER_BEAM, FALSE, FALSE);
+		break;
+	case HAND_BLASTER:
+		ammo = mksobj(BLASTER_BOLT, FALSE, FALSE);
+		break;
+	case ARM_BLASTER:
+		ammo = mksobj(HEAVY_BLASTER_BOLT, FALSE, FALSE);
+		break;
+	case MASS_SHADOW_PISTOL:
+		/* note: does not copy cobj->oartifact */
+		if (blaster->cobj)
+			ammo = mksobj(blaster->cobj->otyp, FALSE, FALSE);
+		else
+			ammo = mksobj(ROCK, FALSE, FALSE);
+		break;
+	case RAYGUN:
+		/* create fake ammo in order to calculate multishot correctly */
+		ammo = mksobj(LASER_BEAM, FALSE, FALSE);
+		break;
+	default:
+		impossible("Unhandled blaster %d!", blaster->otyp);
+		break;
+	}
+
+	return ammo;
+}
+
+
+/* 
  * uthrow()
  * 
  * Get firing direction from player, calculate multishot,
  * call projectile().
  */
-int
-uthrow(ammo, launcher, shotlimit, force_destroy)
+boolean
+uthrow(ammo, launcher, shotlimit, forcedestroy)
 struct obj * ammo;
 struct obj * launcher;
 int shotlimit;
-boolean force_destroy;
+boolean forcedestroy;
 {
 	int multishot;
 	int hurtle_dist = 0;
@@ -2399,13 +2445,13 @@ boolean force_destroy;
 	/* get multishot calculation */
 	multishot = calc_multishot(&youmonst, ammo, launcher, shotlimit);
 
-	m_shot.s = ammo_and_launcher(ammo, launcher) ? TRUE : FALSE;
+	m_shot.s = (launcher) ? TRUE : FALSE;
 	m_shot.o = ammo->otyp;
 	m_shot.n = multishot;
 	
 	/* give a message if shooting more than one, or if player attempted to specify a count */
 	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON){
-		if (!ammo_and_launcher(ammo, launcher)){
+		if (!m_shot.s){
 			if (shotlimit && shotlimit < ammo->quan) You("throw %d Fluorite %s.", shotlimit, shotlimit > 1 ? "Octahedra" : "Octahedron");
 			else if (ammo->quan == 8) You("throw the Fluorite Octet.");
 			else You("throw %ld Fluorite %s.", ammo->quan, ammo->quan > 1 ? "Octahedra" : "Octahedron");
@@ -2439,7 +2485,7 @@ boolean force_destroy;
 	/* call projectile() to shoot n times */
 	for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
 		/* note: we actually don't care if the projectile hit anything */
-		(void)projectile(&youmonst, ammo, launcher, m_shot.s, u.ux, u.uy, u.dx, u.dy, u.dz, range, FALSE, TRUE);
+		(void)projectile(&youmonst, ammo, launcher, m_shot.s, u.ux, u.uy, u.dx, u.dy, u.dz, range, forcedestroy, TRUE);
 		if (Weightless || Levitation)
 			hurtle(-u.dx, -u.dy, hurtle_dist, TRUE);
 	}
@@ -2449,4 +2495,621 @@ boolean force_destroy;
 	m_shot.o = STRANGE_OBJECT;
 	m_shot.s = FALSE;
 	return 1;	/* this took time */
+}
+
+/* 
+ * onlinetohit()
+ * 
+ * returns TRUE if magr has a clear line of fire to (tarx,tary)
+ * 
+ * if called with SAFE, tries not to hit friendlies
+ * if called with mdef and stoponhit, returns FALSE if a creature other than mdef will take the hit
+ */
+boolean
+m_online(magr, mdef, tarx, tary, safe, stoponhit)
+struct monst * magr;
+struct monst * mdef;
+int tarx;
+int tary;
+boolean safe;
+boolean stoponhit;
+{
+	boolean youagr = (magr == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
+
+	/* First -- target must be on direct line with magr */
+	if (!online2(x(magr), y(magr), tarx, tary))
+		return FALSE;
+
+	/* Second -- the points cannot be identical */
+	if (x(magr) == tarx && y(magr) == tary)
+		return FALSE;
+
+	/* Third -- clear path; can cheat by using couldsee() if player is target or targeter */
+	if ((youagr || (tarx == u.ux && tary == u.uy)) &&
+		(!couldsee(x(magr), y(magr))))
+		return FALSE;
+	else if (!(clear_path(x(magr), y(magr), tarx, tary)))
+		return FALSE;
+	
+	/* at this point, yes, it is on a line */
+
+	if (safe || stoponhit) {
+		/* try not to hit friendlies */
+		int dx = sgn(tarx - x(magr)),
+			dy = sgn(tary - y(magr));
+		int x = x(magr);
+		int y = y(magr);
+		int range = BOLT_LIM; /* arbitrary */
+		struct monst * mtmp;
+
+		/* Check for creatures in the line of fire. */
+		while(--range > 0)
+		{
+			x += dx;
+			y += dy;
+			if (!isok(x, y))
+				break;
+
+			/* pets don't hit player */
+			if (x == u.ux && y == u.uy && magr->mtame && safe)
+				return FALSE;
+
+			/* monsters don't hit things of equal tameness (if trying to be safe) */
+			mtmp = m_at(x, y);
+			if (mtmp)
+			{
+				/* maybe we don't need to check beyond first target hit */
+				if (stoponhit) {
+					if (mdef && mtmp != mdef)
+						return FALSE;
+					else
+						return TRUE;
+				}
+				/* Don't hit friendlies */
+				if (safe && (
+					(mtmp->mtame && magr->mtame) ||
+					(always_peaceful(mtmp->data) && magr->mtame) ||
+					(!mtmp->mtame && !magr->mtame)))
+					return FALSE;
+			}
+
+		}
+	}
+	/* made it through, we're good to go */
+	return TRUE;
+}
+
+/*
+ * xbreathey() 
+ * 
+ * magr is breathing at (tarx, tary)
+ * 
+ * The player's version is fairly separate, and is in polyself.c
+ * TODO: make #monster use this function; add additional functionality to make that possible
+ * TODO: make sure ancient of ice does its breath attack correctly in mon.c
+ */
+boolean
+xbreathey(magr, attk, tarx, tary)
+struct monst * magr;
+struct attack * attk;
+int tarx;
+int tary;
+{
+	boolean youagr = (magr == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
+	int typ = attk->adtyp;
+	int mult = 1;
+	static const int chromatic_dragon_breaths[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_DRST, AD_DISN, AD_ACID };
+	static const int platinum_dragon_breaths[] = { AD_FIRE, AD_DISN, AD_SLEE, AD_ELEC };
+	static const int random_breaths[] = { AD_MAGM, AD_FIRE, AD_COLD, AD_SLEE, AD_DISN, AD_ELEC, AD_DRST, AD_ACID };
+
+	/* Random breath attacks */
+	if (typ == AD_RBRE){
+		if (pa == &mons[PM_CHROMATIC_DRAGON])
+			typ = chromatic_dragon_breaths[rn2(SIZE(chromatic_dragon_breaths))];
+		else if (pa == &mons[PM_PLATINUM_DRAGON])
+			typ = platinum_dragon_breaths[rn2(SIZE(platinum_dragon_breaths))];
+		else 
+			typ = random_breaths[rn2(SIZE(random_breaths))];
+	}
+	/* Halfdragon breath attack */
+	if (typ == AD_HDRG) {
+		if (youagr && Race_if(PM_HALF_DRAGON))
+			typ = flags.HDbreath;
+		else if (is_half_dragon(pa))
+			typ = magr->mvar1;
+		else
+			typ = AD_COLD;
+
+		if (typ == AD_SLEE)
+			mult = 4;	/* increased duration */
+	}
+
+	/* if cancelled, (or the player is strangled) can't use breath attack */
+	if (youagr ? Strangled : magr->mcan) {
+		if (youagr) {
+			You_cant("breathe.  Sorry.");
+			return FALSE;	/* took no time */
+		}
+		else if (flags.soundok) {
+			if (canseemon(magr))
+				pline("%s coughs.", Monnam(magr));
+			else
+				You_hear("a cough.");
+			return TRUE;	/* did take time */
+		}
+	}
+
+	/* message */
+	if (youagr) {
+		You("breathe %s!", breathwep(typ));
+	}
+	else if (canseemon(magr)) {
+		pline("%s breathes %s!", Monnam(magr), breathwep(typ));
+	}
+	
+	/* do the beam */
+	buzz(typ, FOOD_CLASS, FALSE, (int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)),
+		x(magr), y(magr), sgn(tbx), sgn(tby), 0, attk->damd ? (d((int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)), (int)attk->damd)*mult) : 0);
+	
+	/* interrupt player if they were targetted */
+	if (tarx == u.ux && tary == u.uy)
+		nomul(0, NULL);
+
+	/* breath runs out sometimes. */ 
+	if (!youagr) {
+		if (!rn2(3))
+			magr->mspec_used = 10 + rn2(20);
+
+		/* if the player was targeted with sleep, greater cooldown */
+		if ((tarx == u.ux && tary == u.uy) && typ == AD_SLEE && !Sleep_resistance)
+			magr->mspec_used += rnd(20);
+	}
+
+	/* this took time */
+	return TRUE;
+}
+
+/* 
+ * xspity() 
+ * 
+ * magr is spitting at (tarx, tary)
+ *
+ * TODO: make #monster use this function
+ * TODO: make 'f'ire use this function
+ */
+boolean
+xspity(magr, attk, tarx, tary)
+struct monst * magr;
+struct attack * attk;
+int tarx;
+int tary;
+{
+	struct obj * otmp;
+	boolean youagr = (magr == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
+	int typ = attk->adtyp;
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+
+	/* cancelled monsters can't spit */
+	if (!youagr && magr->mcan) {
+		/* except for Zeta metroids, which uncancel themselves */
+		if (magr->data == &mons[PM_ZETA_METROID]) //|| mtmp->data==&mons[PM_CRAZY_CHEMIST]) 
+			magr->mcan = FALSE;
+		else {
+			if (flags.soundok)
+				pline("A dry rattle comes from %s throat.",
+				s_suffix(mon_nam(magr)));
+			return TRUE;	/* took time */
+		}
+	}
+
+	/* get otmp to spit */
+	switch (typ) {
+	case AD_WEBS:
+		if (!youagr)
+			magr->mspec_used = d(2, 6);
+		otmp = mksobj(BALL_OF_WEBBING, TRUE, FALSE);
+		break;
+	case AD_BLND:
+	case AD_DRST:
+		otmp = mksobj(BLINDING_VENOM, TRUE, FALSE);
+		break;
+	default:
+		impossible("bad attack type in xspity (%d)", typ);
+		/* fall through to acid venom */
+	case AD_ACID:
+		otmp = mksobj(ACID_VENOM, TRUE, FALSE);
+		if (attk->damn && attk->damd)
+			otmp->ovar1 = d(attk->damn, attk->damd);
+		break;
+	}
+
+	/* message */
+	if (youagr) {
+		You("spit %s!", typ == AD_WEBS ? "webbing" : "venom");
+	}
+	else if (canseemon(magr)) {
+		pline("%s spits %s!", Monnam(magr), typ == AD_WEBS ? "webbing" : "venom");
+	}
+
+	/* shoot otmp */
+	projectile(magr, otmp, (struct obj *)0, FALSE,
+		x(magr), y(magr), dx, dy, 0,
+		BOLT_LIM, TRUE, youagr);
+
+	/* interrupt player if they were targetted */
+	if (tarx == u.ux && tary == u.uy)
+		nomul(0, NULL);
+
+	/* this took time */
+	return TRUE;
+}
+
+/* 
+ * xfirey()
+ *
+ * magr is inherently shooting at (tarx, tary)
+ *
+ * TODO: make 'f'ire use this function
+ */
+boolean
+xfirey(magr, attk, tarx, tary)		/* monster fires arrows at you */
+struct monst * magr;
+struct attack * attk;
+int tarx;
+int tary;
+{
+	struct obj * qvr;				/* quiver of projectiles to use */
+	boolean youagr = (magr == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
+	int typ = attk->adtyp;
+	int xadj = 0;
+	int yadj = 0;
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+	int rngmod = 0;
+	boolean portal_projectile = FALSE;		/* if TRUE, teleports projectile directly to target */
+	int ammo_type;
+
+	switch (typ) {
+	case AD_SHDW:
+		/* special: do not fire at warded squares */
+		if (!youagr && onscary(tarx, tary, magr)) return FALSE; //Warded; did not fire
+		ammo_type = SPIKE;
+		qvr = mksobj(ammo_type, FALSE, FALSE);
+		set_material(qvr, SHADOWSTEEL);
+		qvr->quan = 1;
+		qvr->spe = 8;
+		qvr->opoisoned = (OPOISON_BASIC | OPOISON_BLIND);
+		qvr->oproperties = (OPROP_PHSEW);
+		portal_projectile = TRUE;
+		/* also webs target hit. done in the function. */
+		break;
+	case AD_PEST:
+		ammo_type = ARROW;
+		qvr = mksobj(ammo_type, FALSE, FALSE);
+		qvr->quan = 1;
+		qvr->spe = d(7, 8) + 1; //same as touch
+		qvr->opoisoned = OPOISON_FILTH;
+		qvr->oproperties = OPROP_PHSEW;
+		portal_projectile = TRUE;
+		break;
+	case AD_PLYS:
+		ammo_type = SPIKE;
+		qvr = mksobj(ammo_type, FALSE, FALSE);
+		set_material(qvr, BONE);
+		qvr->quan = 1;
+		qvr->opoisoned = (OPOISON_PARAL);
+		break;
+	case AD_SOLR:
+		ammo_type = SILVER_ARROW;
+		qvr = mksobj(ammo_type, TRUE, FALSE);
+		qvr->blessed = 1;
+		qvr->quan = 1;
+		qvr->spe = 7;
+		qvr->oproperties = OPROP_PHSEW;
+		//portal_projectile = TRUE;
+		rngmod = 1000; /* Fly until it strikes something */
+		break;
+	case AD_SURY:
+		ammo_type = SILVER_ARROW;
+		qvr = mksobj(ammo_type, TRUE, FALSE);
+		// qvr->oartifact = ART_ARROW_OF_SLAYING;
+		qvr->blessed = 1;
+		qvr->quan = 1;
+		qvr->spe = 7 + 50; //Arrows of slaying actually just get +50 damage anyway :/
+		qvr->oproperties = OPROP_PHSEW;
+		//portal_projectile = TRUE;
+		rngmod = 1000; /* Fly until it strikes something */
+		break;
+	case AD_SLVR:
+		ammo_type = SILVER_ARROW;
+		break;
+	case AD_BALL:
+		ammo_type = HEAVY_IRON_BALL;
+		qvr = mksobj(ammo_type, FALSE, FALSE);
+		rngmod = 8;
+		break;
+	case AD_LOAD:
+		ammo_type = LOADSTONE;
+		qvr = mksobj(ammo_type, FALSE, FALSE);
+		qvr->cursed = 1;
+		rngmod = 8;
+		break;
+	case AD_BLDR:
+		ammo_type = BOULDER;
+		qvr = mksobj(ammo_type, FALSE, FALSE);
+		rngmod = 8;
+		break;
+	case AD_VBLD:
+		ammo_type = HEAVY_IRON_BALL;
+		qvr = mksobj(ammo_type, FALSE, FALSE);
+		rngmod = 8;
+		/* volley -- inaccurate */
+		if		(tary == y(magr))
+			yadj = d(1, 3) - 2;
+		else if (tarx == x(magr))
+			xadj = d(1, 3) - 2;
+		else if (tarx - x(magr) == tary - y(magr)){
+			xadj = d(1, 3) - 2;
+			yadj = -1 * xadj;
+		}
+		else
+			xadj = yadj = d(1, 3) - 2;
+		break;
+	default:
+		ammo_type = ARROW;
+		/* quiver from inventory */
+		for (qvr = (youagr ? invent : magr->minvent); qvr; qvr = qvr->nobj){
+			if (qvr->otyp == ammo_type) break;
+		}
+		break;
+	}
+
+	if (!qvr){
+		/* No ammo of the right type found, nothing happened, took no time */
+		return FALSE; 
+	}
+
+	/* check that attacker is in range of target */
+	if (BOLT_LIM + rngmod < distmin(x(magr), y(magr), tarx, tary))
+		return FALSE;
+
+	/* generic message */
+	if (youagr) {
+		You("shoot!");
+	}
+	else if (canseemon(magr)) {
+		pline("%s shoots!", Monnam(magr));
+	}
+
+	/* Fire the projectile */
+	if (portal_projectile) {
+		/* start the projectile adjacent to the target */
+		projectile(magr, qvr, (struct obj *)0, TRUE,
+			tarx-dx, tary-dy, dx, dy, 0,
+			1, TRUE, youagr);
+	}
+	else {
+		/* start the projectile at magr's location, modified by xadj and yadj */
+		projectile(magr, qvr, (struct obj *)0, TRUE,
+			x(magr)+xadj, y(magr)+yadj, dx, dy, 0,
+			BOLT_LIM+rngmod, TRUE, youagr);
+	}
+
+	/* shadow bolts web the target hit */
+	if (typ == AD_SHDW) {
+		struct trap *ttmp2;
+		ttmp2 = maketrap(bhitpos.x, bhitpos.y, WEB);
+		if (bhitpos.x == u.ux && bhitpos.y == u.uy && ttmp2) {
+			pline_The("webbing sticks to you. You're caught!");
+			dotrap(ttmp2, NOWEBMSG);
+#ifdef STEED
+			if (u.usteed && u.utrap) {
+				/* you, not steed, are trapped */
+				dismount_steed(DISMOUNT_FELL);
+			}
+#endif
+		}
+		else if (ttmp2) {
+			struct monst * mdef = m_at(bhitpos.x, bhitpos.y);
+			if (mdef)
+				mintrap(mdef);
+		}
+	}
+
+	/* interrupt player if they were targetted */
+	if (tarx == u.ux && tary == u.uy)
+		nomul(0, NULL);
+	/* this took time */
+	return TRUE;
+}
+
+//#if 0
+/* 
+ * mdofire()
+ *
+ * Monster attepts a ranged weapon attack against either the player or a monster
+ *
+ * Includes guns, blasters, thrown and fired objects
+ * NOT polearms.
+ */ 
+boolean
+mdofire(magr, mdef, tarx, tary)
+struct monst * magr;
+struct monst * mdef;
+int tarx;
+int tary;
+{
+	boolean youdef = (mdef && mdef == &youmonst);
+	struct obj * thrownobj;
+	struct obj * launcher;
+	int x = x(magr);
+	int y = y(magr);
+	int multishot;
+	const char *onm;
+	boolean mass_pistol = FALSE;
+	int result;
+
+	/* AI: If target is you and you are coming toward the monster, the monster
+	 * should try to soften you up with missiles.  If you are
+	 * going away, you are probably hurt or running.  Give
+	 * chase, but if you are getting too far away, throw.
+	 * If we have already made a ranged attack this turn, we aren't chasing. Throw.
+	 */
+	if (youdef && (distmin(u.ux, u.uy, x, y) > distmin(u.ux0, u.uy0, x, y)) &&
+		rn2(BOLT_LIM - distmin(x, y, tarx, tary)) && mon_ranged_gazeonly)
+		return FALSE;	/* choose not to attack */
+	/* Select ranged weapon to throw -- polearm, blaster, ammo, throwable */
+	thrownobj = select_rwep(magr);
+	if (!thrownobj)
+		return FALSE;	/* didn't find an appropriate object */
+	/* polearms are handled in xattacky as melee attacks -- if we got here, we were too far away to use it. */
+	if (is_pole(thrownobj)) {
+		return FALSE;
+	}
+	/* if we picked a blaster, fix up launcher/thrownobj confusion */
+	if (is_blaster(thrownobj)) {
+		launcher = thrownobj;
+		thrownobj = blaster_ammo(launcher);
+	}
+
+	/* If we picked a blaster, or ammo for a wielded launcher, fire all */
+	if ((MON_WEP(magr)  && ((ammo_and_launcher(thrownobj, MON_WEP(magr) )) || (MON_WEP(magr)  == thrownobj && is_blaster(thrownobj)))) ||
+		(MON_SWEP(magr) && ((ammo_and_launcher(thrownobj, MON_SWEP(magr))) || (MON_SWEP(magr) == thrownobj && is_blaster(thrownobj))))
+		)
+	{
+		struct obj * launcher;
+		int hand;
+		/* do mainhand, then offhand */
+		for (hand = 0; hand < 2; hand++) {
+			launcher = (!hand ? MON_WEP(magr) : MON_SWEP(magr));
+			if (!launcher || !((ammo_and_launcher(thrownobj, launcher)) || (launcher == thrownobj && is_blaster(launcher))))
+				continue;
+
+			if (ammo_and_launcher(thrownobj, launcher)) {
+				/* simply fire from the launcher */
+				result |= mthrow(magr, thrownobj, launcher, tarx, tary, FALSE);
+			}
+			else if (is_blaster(launcher)) {
+				/* blasters need to generate their ammo on the fly, but that was generated earlier, when fixing launcher/thrownobj confusion */
+
+				/* do we have enough charge to fire? */
+				if (!launcher->ovar1) {
+					/* nothing happens */
+					magr->weapon_check = NEED_WEAPON;	/* magr figures out it needs new weapons */
+				}
+				else {
+					switch (launcher->otyp) {
+					case CUTTING_LASER:
+					case HAND_BLASTER:
+					case ARM_BLASTER:
+					case MASS_SHADOW_PISTOL:
+						/* no special changes required */
+						break;
+					case RAYGUN:
+						// TODO: monster raygun function
+						//if (!getdir((char *)0))
+						//	result |= zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
+						obfree(thrownobj, 0);
+						thrownobj = (struct obj *)0;
+						break;
+					default:
+						impossible("Unhandled blaster %d!", launcher->otyp);
+						break;
+					}
+					/* always destroy ammo fired from a blaster */
+					if (thrownobj) {
+						result |= mthrow(magr, thrownobj, launcher, tarx, tary, TRUE);
+						/* and now delete thrownobj, which was generated from a blaster */
+						obfree(thrownobj, 0);
+					}
+				}
+			}
+		}
+	}
+	/* Otherwise, we will throw thrownobj -- if it's not an arrow/bolt/bullet etc, which are dumb to throw */
+	else if (is_ammo(thrownobj) && thrownobj->oclass != GEM_CLASS && !is_grenade(thrownobj))
+	{
+		result |= mthrow(magr, thrownobj, (struct obj *)0, tarx, tary, FALSE);
+	}
+	return (result > 0);
+}
+//#endif
+
+/*
+ * mthrow()
+ *
+ * Monster attepts a ranged weapon attack against either the player or a monster
+ * Monster's equivalent to uthrow(), which is to say generally the same but without a lot of player interaction
+ *
+ * Actually returns MM_HIT/MISS etc markers.
+ */
+int
+mthrow(magr, ammo, launcher, tarx, tary, forcedestroy)
+struct monst * magr;
+struct obj * ammo;
+struct obj * launcher;
+int tarx;
+int tary;
+boolean forcedestroy;
+{
+	int result;
+	int multishot;
+	int hurtle_dist = 0;	/* not used at the moment, but needed for range calculation */
+	int dx, dy;
+
+	/* figure out dx and dy */
+	dx = sgn(tarx - x(magr));
+	dy = sgn(tary - y(magr));
+
+	/* get multishot calculation */
+	multishot = calc_multishot(magr, ammo, launcher, 999);
+
+	m_shot.s = (launcher) ? TRUE : FALSE;
+	m_shot.o = ammo->otyp;
+	m_shot.n = multishot;
+
+	/* message (TODO: check if working correctly) */
+	if (canseemon(magr)) {
+		char onmbuf[BUFSZ];
+		const char * onm;
+
+		if (multishot > 1) {
+			/* "N arrows"; multishot > 1 implies otmp->quan > 1, so
+			xname()'s result will already be pluralized */
+			Sprintf(onmbuf, "%d %s", multishot, xname(ammo));
+			onm = onmbuf;
+		}
+		else {
+			/* "an arrow" */
+			onm = singular(ammo, xname);
+			onm = obj_is_pname(ammo) ? the(onm) : an(onm);
+		}
+		pline("%s %s %s!", Monnam(magr),
+			m_shot.s ? is_bullet(ammo) ? "fires" : "shoots" : "throws",
+			onm);
+	}
+	else {
+		m_shot.o = STRANGE_OBJECT;	/* don't give multishot feedback */
+	}
+
+	/* get range calculation */
+	int range = calc_range(magr, ammo, launcher, &hurtle_dist);
+
+	/* call projectile() to shoot n times */
+	for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
+		/* note: we actually don't care if the projectile hit anything */
+		result = projectile(magr, ammo, launcher, m_shot.s, x(magr), y(magr), dx, dy, 0, range, forcedestroy, FALSE);
+		/* monsters don't hurtle like the player does at the moment */
+	}
+
+	/* end */
+	m_shot.n = m_shot.i = 0;
+	m_shot.o = STRANGE_OBJECT;
+	m_shot.s = FALSE;
+	return result;
 }

@@ -645,7 +645,7 @@ mattacku(mtmp)
 	register struct monst *mtmp;
 {
 	if (wizard && !u.uhave.bell)
-	return xattacky(mtmp, &youmonst);
+	return xattacky(mtmp, &youmonst, mtmp->mux, mtmp->muy);
 
 	struct	attack	*mattk, alt_attk;
 	int	i, j, tmp, marinum = 0, tchtmp, sum[NATTK];

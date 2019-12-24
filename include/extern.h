@@ -26,12 +26,17 @@ E int FDECL(dograzseduce, (struct monst *));				/* from mhitu.c */
 E void FDECL(steal_it, (struct monst *, struct attack *));	/* from uhitm.c */
 E int FDECL(joust, (struct monst *, struct obj *));		/* from uhitm.c */
 E boolean FDECL(attack2, (struct monst *));
-E int FDECL(xattacky, (struct monst *, struct monst *));
+E int FDECL(xattacky, (struct monst *, struct monst *, int, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
 E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 E void FDECL(wakeup2, (struct monst *, boolean));
 E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int);
 E int FDECL(projectile, (struct monst *, struct obj *, struct obj *, boolean, int, int, int, int, int, int, boolean, boolean));
+E boolean FDECL(xbreathey, (struct monst *, struct attack *, int, int));
+E boolean FDECL(xspity, (struct monst *, struct attack *, int, int));
+E boolean FDECL(xfirey, (struct monst *, struct attack *, int, int));
+E boolean FDECL(m_online, (struct monst *, struct monst *, int, int, boolean, boolean));
+E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
 
 /* ### allmain.c ### */
 

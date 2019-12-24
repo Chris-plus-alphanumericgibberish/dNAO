@@ -7,6 +7,7 @@
 STATIC_DCL int FDECL(attack_checks2, (struct monst *, struct obj *));
 //STATIC_DCL boolean FDECL(attack2, (struct monst *));
 //STATIC_DCL int FDECL(xattacky, (struct monst *, struct monst *));
+STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *));
 STATIC_DCL boolean FDECL(badtouch, (struct monst *, struct monst *, struct attack *, struct obj *));
 STATIC_DCL boolean FDECL(safe_attack, (struct monst *, struct monst *, struct attack *, struct obj *, struct permonst *, struct permonst *));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
@@ -267,14 +268,14 @@ struct monst * mdef;
 	register struct permonst *pd = mdef->data;
 
 	/* This section of code provides protection against accidentally
-	* hitting peaceful (like '@') and tame (like 'd') monsters.
-	* Protection is provided as long as player is not: blind, confused,
-	* hallucinating or stunned.
-	* changes by wwp 5/16/85
-	* More changes 12/90, -dkh-. if its tame and safepet, (and protected
-	* 07/92) then we assume that you're not trying to attack. Instead,
-	* you'll usually just swap places if this is a movement command
-	*/
+	 * hitting peaceful (like '@') and tame (like 'd') monsters.
+	 * Protection is provided as long as player is not: blind, confused,
+	 * hallucinating or stunned.
+	 * changes by wwp 5/16/85
+	 * More changes 12/90, -dkh-. if its tame and safepet, (and protected
+	 * 07/92) then we assume that you're not trying to attack. Instead,
+	 * you'll usually just swap places if this is a movement command
+	 */
 	/* Intelligent chaotic weapons (Stormbringer) want blood */
 	if (is_safepet(mdef) && !flags.forcefight) {
 		if (!uwep || !spec_ability2(uwep, SPFX2_BLDTHRST)) {
@@ -381,7 +382,7 @@ struct monst * mdef;
 		result = xmeleehity(&youmonst, mdef, &basicattack, uwep, VIS_MAGR, 0);
 	}
 	else {
-		result = xattacky(&youmonst, mdef);
+		result = xattacky(&youmonst, mdef, u.ux + u.dx, u.uy + u.dy);
 
 		if (!DEADMONSTER(mdef) && u.sealsActive&SEAL_SHIRO){
 			int i, dx, dy;
@@ -515,6 +516,10 @@ struct permonst * pd;
 	long slot = attk_protection(attk->aatyp);
 	boolean youagr = (magr == &youmonst);
 
+	/* if there is no defender, it's safe */
+	if (!mdef)
+		return TRUE;
+
 	/* Touching is fatal */
 	if (touch_petrifies(pd) && !(Stone_res(magr))
 		&& badtouch(magr, mdef, attk, weapon)
@@ -566,11 +571,13 @@ struct permonst * pd;
  * different effects than AT_CLAW attacks, even when with the same adtype.
  */
 int
-xattacky(magr, mdef)
+xattacky(magr, mdef, tarx, tary)
 struct monst * magr;
 struct monst * mdef;
+int tarx;
+int tary;
 {
-	/* either the attacker or defender doesn't exist -- must be checked right away */
+	/* if attacker doesn't exist or is trying to attack something that doesn't exist -- must be checked right away */
 	if (!magr || !mdef)
 		return(MM_MISS);		/* mike@genat */
 
@@ -590,12 +597,12 @@ struct monst * mdef;
 	int vis = 0;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	boolean missedyou = (!youagr && youdef && (magr->mux != u.ux || magr->muy != u.uy));	/* monster tried to attack you, but it got your location wrong */
-	boolean range2 = youagr ? FALSE : !monnear(magr, x(mdef), y(mdef));	/* the player is assumed to be always melee in this function */
+	boolean missedyou = (!youagr && youdef && (tarx != u.ux || tary != u.uy));	/* monster tried to attack you, but it got your location wrong */
+	boolean ranged = (youagr ? FALSE : !monnear(magr, tarx, tary));	/* is magr near its target? (The player is assumed to always be melee in this function) */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !canseemon(mdef)) :
-		(magr->mconf || magr->mstun || magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef))));
+	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !canseemon(mdef)) :
+		(magr->mconf || magr->mstun || magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
 
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
@@ -629,7 +636,7 @@ struct monst * mdef;
 	/* some creatures are limited in *where* they can attack */
 	/* Grid bugs and Bebeliths cannot attack at an angle. */
 	if ((pa == &mons[PM_GRID_BUG] || pa == &mons[PM_BEBELITH])
-		&& x(magr) != x(mdef) && y(magr) != y(mdef))
+		&& x(magr) != tarx && y(magr) != tary)
 		return MM_MISS;
 
 	/* limited attack angles (monster-agressor only) */
@@ -638,28 +645,53 @@ struct monst * mdef;
 		pa == &mons[PM_FABERGE_SPHERE] || pa == &mons[PM_FIREWORK_CART] ||
 		pa == &mons[PM_JUGGERNAUT] || pa == &mons[PM_ID_JUGGERNAUT]))
 	{
-		if (x(magr) + xdir[(int)magr->mvar1] != x(mdef) ||
-			y(magr) + ydir[(int)magr->mvar1] != y(mdef))
+		if (x(magr) + xdir[(int)magr->mvar1] != tarx ||
+			y(magr) + ydir[(int)magr->mvar1] != tary)
 			return MM_MISS;
 	}
 
+	/* Monsters can't attack a player that's underwater unless the monster can swim; asymetric */
+	if (youdef && Underwater && !mon_resistance(magr, SWIMMING))
+		return MM_MISS;
+
+	/* Monsters can't attack a player that's swallowed unless the monster *is* u.ustuck */
+	if (youdef && u.uswallow) {
+		if (magr != u.ustuck)
+			return MM_MISS;
+		/* they also know exactly where you are */
+		u.ustuck->mux = u.ux;
+		u.ustuck->muy = u.uy;
+
+		/* if you're invulnerable, you're fine though */
+		if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)
+			return MM_MISS; /* stomachs can't hurt you! */
+	}
+
 	/* Set up the visibility of action */
-	if (youagr || youdef || (cansee(x(magr), y(magr)) && cansee(x(mdef), y(mdef))))
+	if (youagr || youdef || (cansee(x(magr), y(magr)) && cansee(tarx, tary)))
 	{
 		if (youagr || (cansee(x(magr), y(magr)) && canseemon(magr)))
 			vis |= VIS_MAGR;
-		if (youdef || (cansee(x(mdef), y(mdef)) && canseemon(mdef)))
+		if (youdef || (cansee(tarx, tary) && canseemon(mdef)))
 			vis |= VIS_MDEF;
 		if (youagr || youdef || canspotmon(magr) || canspotmon(mdef))
 			vis |= VIS_NONE;
 	}
 
 	/*	Set flag indicating monster has moved this turn.  Necessary since a
-	*	monster might get an attack out of sequence (i.e. before its move) in
-	*	some cases, in which case this still counts as its move for the round
-	*	and it shouldn't move again.
-	*/
+	 *	monster might get an attack out of sequence (i.e. before its move) in
+	 *	some cases, in which case this still counts as its move for the round
+	 *	and it shouldn't move again.
+	 */
 	if(!youagr) magr->mlstmv = monstermoves;
+
+	/* Weeping angels (pre-invocation) can only attack once per global turn */
+	if (!(u.uevent.invoked) && is_weeping(pa))
+		magr->movement = 0;
+
+	///* */
+	//if (youdef && !ranged) {
+	//}
 
 	/* lillends (that aren't you) can use masks */
 	if (pa == &mons[PM_LILLEND]
@@ -733,19 +765,30 @@ struct monst * mdef;
 			/* various weapon attacks */
 		case AT_WEAP:	// mainhand
 		case AT_DEVA:	// mainhand; can attack many times
-		case AT_XWEP:	// no ranged (currently?); offhand
+		case AT_XWEP:	// no ranged (is done concurrently with AT_WEAP for offhanded blasters); offhand
 		case AT_MARI:	// no ranged; from inventory
 		case AT_HODS:	// no ranged; opponent's mainhand weapon
 
 			/* there are cases where we can't attack at all */
-			/* 1: Has no weapon. Supposedly rare but not impossible. */
-			if (!youagr && !range2 &&						// monster attacking in close range
-				(magr->weapon_check == NEED_WEAPON)) {		// needs a weapon
-				magr->weapon_check = NEED_HTH_WEAPON;		// tell it it needs a hand-to-hand weapon
+			/* 1: Wielding a weapon */
+			if (!youagr &&												// monster attacking
+				(aatyp == AT_WEAP || aatyp == AT_DEVA) &&				// using a primary weapon attack
+				(magr->weapon_check == NEED_WEAPON || !MON_WEP(magr))	// needs a weapon
+				){
+				/* pick appropriate weapon based on range to target */
+				if (dist2(x(magr), y(magr), tarx, tary) <= 8) {
+					/* melee or polearm range */
+					magr->combat_mode = HNDHND_MODE;
+					magr->weapon_check = NEED_HTH_WEAPON;
+				}
+				else {
+					/* long range */
+					magr->combat_mode = RANGED_MODE;
+					magr->weapon_check = NEED_RANGED_WEAPON;
+				}
 				if (mon_wield_item(magr) != 0)				// and try to wield something (did it take time?)
 				{
-					continue;								// it took time, don't attack
-															// we won't end the whole attack chain though
+					continue;								// it took time, don't attack using this action
 				}
 			}
 			/* 2: Offhand attack when not allowed */
@@ -757,7 +800,7 @@ struct monst * mdef;
 				continue;									// not allowed, don't attack
 			}
 			/*3: ranged attack with incorrect aatyp */
-			if (!youagr && range2 && (						// monster's ranged attack
+			if (!youagr && ranged && (						// monster's ranged attack
 				aatyp == AT_XWEP ||							// subject to change; may later allow monsters to fire guns from their offhand
 				aatyp == AT_MARI ||
 				aatyp == AT_HODS)
@@ -785,7 +828,8 @@ struct monst * mdef;
 						//&& !otmp->oartifact												// non-artifact
 						&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
 						&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
-						&& !otmp->owornmask)												// or worn
+						&& !(is_ammo(otmp) || is_pole(otmp) || throwing_weapon(otmp))		// not unsuitable for melee (ammo, throwable, polearm)
+						&& !otmp->owornmask)												// not worn
 					{
 						/* we have a potential weapon */
 						if (wcount == marinum) {
@@ -804,13 +848,21 @@ struct monst * mdef;
 				/* defender's mainhand weapon */
 				otmp = (youdef) ? uwep : MON_WEP(mdef);
 			}
-			/* don't make self-fatal attacks */
-			if (be_safe && !safe_attack(magr, mdef, attk, otmp, pa, pd))
+			/* don't make self-fatal attacks -- being at a range implies safety */
+			if (be_safe && !ranged && !safe_attack(magr, mdef, attk, otmp, pa, pd))
 				continue;
 
 			/* make the attack */
-			if (!range2) {
+			/* melee -- if attacking an adjacent square or thrusting a polearm */
+			if (!ranged ||
+				(otmp && is_pole(otmp) && dist2(x(magr), y(magr), tarx, tary) < 8)) {
+				/* check for wild misses */
+				if (missedyou) {
+					wildmiss(magr, attk);
+					continue;
+				}
 				/* print message for magr swinging weapon (m only in function) */
+				/* TODO: appropriate thrust/throw message for polearms at range */
 				if (vis)
 					xswingsy(magr, mdef, otmp);
 				/* do{}while(); loop for AT_DEVA */
@@ -819,18 +871,18 @@ struct monst * mdef;
 					result = xmeleehity(magr, mdef, attk, otmp, vis, tohitmod);
 					/* Marionette causes an additional weapon strike to a monster behind the original target */
 					/* this can attack peaceful/tame creatures without warning */
-					if (youagr && u.sealsActive&SEAL_MARIONETTE && (result != MM_MISS))
+					if (youagr && !ranged && u.sealsActive&SEAL_MARIONETTE && (result != MM_MISS))
 					{
 						/* try to find direction (u.dx and u.dy may be incorrect) */
-						int dx = sgn(x(mdef) - x(magr));
-						int dy = sgn(y(mdef) - y(magr));
-						if (isok(x(mdef) + dx, y(mdef) + dy) &&
-							isok(x(mdef) - dx, y(mdef) - dy) &&
-							u.ux == x(mdef) - dx &&
-							u.uy == y(mdef) - dy
+						int dx = sgn(tarx - x(magr));
+						int dy = sgn(tary - y(magr));
+						if (isok(tarx + dx, tary + dy) &&
+							isok(tarx - dx, tary - dy) &&
+							u.ux == tarx - dx &&
+							u.uy == tary - dy
 							)
 						{
-							struct monst *mdef2 = m_at(x(mdef) + dx, y(mdef) + dy);
+							struct monst *mdef2 = m_at(tarx + dx, tary + dy);
 							if (mdef2 && (mdef2 != mdef)) {
 								int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
 								(void)xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod);
@@ -853,11 +905,26 @@ struct monst * mdef;
 					wakeup2(mdef, youagr);
 			}
 			else {
-				/* make ranged attack */;
-				/* thrwmu(), for monsters making ranged attacks at the player; returns nothing */
-				/* thrwmm(), for monsters making ranged attacks at each other; returns MM_MISS, MM_HIT, MM_DEF_DIED */
-				/* players should not make ranged attacks here, they need to specifically decide to make a ranged attack */
-				/* TODO */
+				/* make ranged attack */
+				/* players should not make ranged attacks here */
+				if (m_online(magr, mdef, tarx, tary, (magr->mtame && !magr->mconf), TRUE) &&
+					distmin(x(magr), y(magr), tarx, tary) <= BOLT_LIM) {
+					if (mdofire(magr, mdef, tarx, tary)) {
+						/* they did do a ranged attack */
+						mon_ranged_gazeonly = FALSE;
+						/* monsters figure out they don't know where you are */
+						if (missedyou) {
+							magr->mux = magr->muy = 0;
+						}
+						/* note: can't tell if mdef lifesaved */
+						if (*hp(mdef) < 0)
+							result |= MM_DEF_DIED;
+
+						/* if the attack was made, defender can wake up (reduced chance vs melee) */
+						if ((youdef || (!(result&MM_DEF_DIED) && result)) && !rn2(3))
+							wakeup2(mdef, youagr);
+					}
+				}
 			}
 			break;
 //////////////////////////////////////////////////////////////
@@ -878,11 +945,16 @@ struct monst * mdef;
 		case AT_REND:	// hits if previous 2 attacks hit
 		case AT_HUGS:	// hits if previous 2 attacks hit, or if magr and mdef are stuck together
 			/* not in range */
-			if (range2)
+			if (ranged)
 				continue;
 			/* don't make self-fatal attacks */
 			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
 				continue;
+			/* check for wild misses */
+			if (missedyou) {
+				wildmiss(magr, attk);
+				continue;
+			}
 			/* make the attack */
 			result = xmeleehity(magr, mdef, attk, (struct obj *)0, vis, tohitmod);
 			dopassive_local = TRUE;
@@ -902,6 +974,11 @@ struct monst * mdef;
 			/* cannot swallow huge or larger */
 			if (pd->msize >= MZ_HUGE)
 				continue;
+			/* check for wild misses */
+			if (missedyou) {
+				wildmiss(magr, attk);
+				continue;
+			}
 			/* make the attack */
 			result = xengulfhity(magr, mdef, attk, vis);
 			break;
@@ -909,11 +986,12 @@ struct monst * mdef;
 			/* explodes, killing itself */
 		case AT_EXPL:
 			/* not in range */
-			if (range2)
+			if (ranged)
 				continue;
 			/* a monster exploding must not be cancelled */
 			if (!youagr && magr->mcan)
 				continue;
+			/* explode -- this function handles wild misses */
 			result = xexplodey(magr, mdef, attk, vis);
 			break;
 
@@ -927,7 +1005,73 @@ struct monst * mdef;
 						// Maybe should be axed and rolled into AT_BREA; only uses AD_WET and AD_DRLI
 		case AT_SPIT:	// spit venom
 		case AT_ARRW:	// fire an arrow/boulder/etc; can be fired in close quarters (except for AD_SHDW bolts)
-			/* TODO */
+			/* these are all monster only -- players can activate these via #monster or 'f'iring with an empty quiver */
+			if (youagr)
+				continue;
+
+			/* check line of fire to target -- this includes being on line, line of sight, and friendly fire */
+			if (!m_online(magr, mdef, tarx, tary,
+					(magr->mtame && !magr->mconf),		/* pets try to be safe with ranged attacks if they aren't confused */
+					(aatyp == AT_BREA ? FALSE : TRUE)))	/* breath attacks overpenetrate targets */
+				continue;
+			
+			switch (aatyp) {
+			case AT_BREA:
+				if (ranged && !magr->mspec_used && (distmin(x(magr), y(magr), tarx, tary) <= BOLT_LIM) && rn2(3)) {	// not in melee, 2/3 chance when ready
+					if (result = xbreathey(magr, attk, tarx, tary)) {
+						/* they did do a breath attack */
+						mon_ranged_gazeonly = FALSE;
+						/* monsters figure out they don't know where you are */
+						if (missedyou) {
+							magr->mux = magr->muy = 0;
+						}
+					}
+				}
+				break;
+			case AT_BEAM:
+				/* lowest effort ranged attack -- goes straight to melee damage */
+				if (ranged && (distmin(x(magr), y(magr), tarx, tary) <= BOLT_LIM)) {
+					mon_ranged_gazeonly = FALSE;
+					result = xmeleehurty(magr, mdef, attk, (struct obj *)0, TRUE, -1, rn1(18, 2), vis);
+				}
+				break;
+			case AT_SPIT:
+				if (!magr->mspec_used && !rn2(BOLT_LIM - distmin(x(magr), y(magr), tarx, tary))) {	// distance in 8 chance when ready
+					if (result = xspity(magr, attk, tarx, tary)) {
+						/* they did spit */
+						mon_ranged_gazeonly = FALSE;
+						/* monsters figure out they don't know where you are */
+						if (missedyou) {
+							magr->mux = magr->muy = 0;
+						}
+					}
+				}
+				break;
+			case AT_ARRW:
+				if ((adtyp != AD_SHDW || ranged)) {	// can be used in melee range, except for shadow
+					int n;
+					/* fire d(n,d) projectiles */
+					for (n = d(attk->damn, attk->damd); n > 0; n--)
+						result |= xfirey(magr, attk, tarx, tary);
+					if (result) {
+						/* they did fire at least one projectile */
+						mon_ranged_gazeonly = FALSE;
+						/* monsters figure out they don't know where you are */
+						if (missedyou) {
+							magr->mux = magr->muy = 0;
+						}
+					}
+				}
+				break;
+			}
+
+			/* note: can't tell if mdef lifesaved */
+			if (*hp(mdef) < 0)
+				result |= MM_DEF_DIED;
+
+			/* if the attack was made, defender can wake up (reduced chance vs melee) */
+			if ((youdef || (!(result&MM_DEF_DIED) && result)) && !rn2(3))
+				wakeup2(mdef, youagr);
 			break;
 
 			/* ranged maybe-not-on-line attacks */
@@ -939,15 +1083,20 @@ struct monst * mdef;
 			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
 				continue;
 			/* requires a clear path */
-			if (!clear_path(x(magr), y(magr), x(mdef), y(mdef)))
+			if (!clear_path(x(magr), y(magr), tarx, tary))
 				continue;
 			/* must be in range */
-			if (distmin(x(magr), y(magr), x(mdef), y(mdef)) > 
+			if (distmin(x(magr), y(magr), tarx, tary) > 
 				((aatyp == AT_5SBT || aatyp == AT_5SQR) ? 5 : 2))
 				continue;
+			/* check for wild misses */
+			if (missedyou) {
+				wildmiss(magr, attk);
+				continue;
+			}
 			/* make the attack */
 			result = xmeleehity(magr, mdef, attk, (struct obj *)0, vis, tohitmod);
-			if (distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1)
+			if (distmin(x(magr), y(magr), tarx, tary) == 1)
 				dopassive_local = TRUE;
 			/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
 			if (youdef || (!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
@@ -968,7 +1117,7 @@ struct monst * mdef;
 			/* farmed out to the existing gazeXX functions */
 			else if (youdef) {
 				/* magr must actually know where you are */
-				if (magr->mux != u.ux || magr->muy != u.uy)
+				if (missedyou)
 					continue;
 
 				/* gazemu returns: 0(nothing happened), 1(gaze used), 2(gazer died), 3(gazer's turn ends) */
@@ -1002,7 +1151,7 @@ struct monst * mdef;
 			if (youagr)
 				continue;
 			/* must be done at a range */
-			if (!range2)
+			if (!ranged)
 				continue;
 			/* do the tinkering */
 			result = xtinkery(magr, mdef, attk, vis);
@@ -1014,7 +1163,7 @@ struct monst * mdef;
 			if (youagr && aatyp == AT_MMGC)
 				continue;
 			/* Demogorgon casts spells less frequently in melee range */
-			if (pa == &mons[PM_DEMOGORGON] && !range2 && rn2(6) && !(youagr || magr->mflee))
+			if (pa == &mons[PM_DEMOGORGON] && !ranged && rn2(6) && !(youagr || magr->mflee))
 				continue;
 
 			result = xcasty(magr, mdef, attk, vis);
@@ -1071,6 +1220,84 @@ struct monst * mdef;
 	return result;
 }// xattacky
 
+/*
+ * wildmiss()
+ *
+ * Monster is trying to attack player (with a melee attack) but doesn't know exactly where they are.
+ * Prints a message
+ */
+void
+wildmiss(magr, attk)
+struct monst * magr;
+struct attack * attk;
+{
+	boolean compat = (attk->adtyp == AD_SEDU || attk->adtyp == AD_SSEX || attk->adtyp == AD_LSEX) && could_seduce(magr, &youmonst, (struct attack *)0);
+	
+	/* verbose message */
+	if (!flags.verbose)
+		return;
+
+	/* Print message */
+	if (Displaced) {
+		if (compat) {
+			pline("%s smiles %s at your %sdisplaced image...",
+				Monnam(magr),
+				compat == 2 ? "engagingly" : "seductively",
+				Invis ? "invisible " : "");
+		}
+		else {
+			pline("%s strikes at your %sdisplaced image and misses you!",
+				/* Note: if you're both invisible and displaced,
+				 * only monsters which see invisible will attack your
+				 * displaced image, since the displaced image is also
+				 * invisible.
+				 */
+				Monnam(magr),
+				Invis ? "invisible " : "");
+		}
+	}
+	else if (Underwater) {
+		/* monsters may miss especially on water level where
+		bubbles shake the player here and there */
+		if (compat) {
+			pline("%s reaches towards your distorted image.", Monnam(magr));
+		}
+		else {
+			pline("%s is fooled by water reflections and misses!", Monnam(magr));
+		}
+	}
+	else if (magr->mcrazed) {
+		pline("%s flails around randomly.", Monnam(magr));
+	}
+	else {
+		const char *swings =
+			attk->aatyp == AT_BITE || attk->aatyp == AT_LNCK || attk->aatyp == AT_5SBT ? "snaps" :
+			attk->aatyp == AT_KICK ? "kicks" :
+			(attk->aatyp == AT_STNG ||
+			attk->aatyp == AT_BUTT ||
+			nolimbs(magr->data)) ? "lunges" : "swings";
+
+		if (compat) {
+			pline("%s tries to touch you and misses!", Monnam(magr));
+		}
+		else {
+			switch (rn2(3)) {
+			case 0: pline("%s %s wildly and misses!", Monnam(magr),
+				swings);
+				break;
+			case 1: pline("%s attacks a spot beside you.", Monnam(magr));
+				break;
+			case 2: pline("%s strikes at %s!", Monnam(magr),
+				((int)levl[magr->mux][magr->muy].typ) == WATER
+				? "empty water" : "thin air");
+				break;
+			default:pline("%s %s wildly!", Monnam(magr), swings);
+				break;
+			}
+		}
+	}
+	return;
+}
 
 /* getnextspiritattack()
  *
@@ -3341,76 +3568,6 @@ int flat_acc;
 	}
 	
 	/* Some things cause immediate misses */
-	/* mhitu, monster not knowing where you are */
-	if (youdef &&
-		(magr->mux != u.ux || magr->muy != u.uy)
-		){
-		miss = TRUE;
-		domissmsg = FALSE;
-		boolean compat = (attk->adtyp == AD_SEDU || attk->adtyp == AD_SSEX || attk->adtyp == AD_LSEX) &&
-			could_seduce(magr, mdef, (struct attack *)0);
-		/* message */
-		if (flags.verbose) {
-			if (Displaced) {
-				if (compat) {
-					pline("%s smiles %s at your %sdisplaced image...",
-						Monnam(magr),
-						compat == 2 ? "engagingly" : "seductively",
-						Invis ? "invisible " : "");
-				}
-				else {
-					pline("%s strikes at your %sdisplaced image and misses you!",
-						/* Note: if you're both invisible and displaced,
-						* only monsters which see invisible will attack your
-						* displaced image, since the displaced image is also
-						* invisible.
-						*/
-						Monnam(magr),
-						Invis ? "invisible " : "");
-				}
-			}
-			else if (Underwater) {
-				/* monsters may miss especially on water level where
-				bubbles shake the player here and there */
-				if (compat) {
-					pline("%s reaches towards your distorted image.", Monnam(magr));
-				}
-				else {
-					pline("%s is fooled by water reflections and misses!", Monnam(magr));
-				}
-			}
-			else if (magr->mcrazed) {
-				pline("%s flails around randomly.", Monnam(magr));
-			}
-			else {
-				const char *swings =
-					attk->aatyp == AT_BITE || attk->aatyp == AT_LNCK || attk->aatyp == AT_5SBT ? "snaps" :
-					attk->aatyp == AT_KICK ? "kicks" :
-					(attk->aatyp == AT_STNG ||
-					attk->aatyp == AT_BUTT ||
-					nolimbs(magr->data)) ? "lunges" : "swings";
-
-				if (compat) {
-					pline("%s tries to touch you and misses!", Monnam(magr));
-				}
-				else {
-					switch (rn2(3)) {
-					case 0: pline("%s %s wildly and misses!", Monnam(magr),
-						swings);
-						break;
-					case 1: pline("%s attacks a spot beside you.", Monnam(magr));
-						break;
-					case 2: pline("%s strikes at %s!", Monnam(magr),
-						((int)levl[magr->mux][magr->muy].typ) == WATER
-						? "empty water" : "thin air");
-						break;
-					default:pline("%s %s wildly!", Monnam(magr), swings);
-						break;
-					}
-				}
-			}
-		}
-	}
 	/* monster displacement */
 	if (!youdef &&
 		mon_resistance(mdef, DISPLACED) &&
@@ -7623,7 +7780,7 @@ int vis;
 			for (tmpm = fmon; tmpm; tmpm = nmon){
 				nmon = tmpm->nmon;
 				if (!DEADMONSTER(tmpm) && tmpm != mdef && tmpm != magr)
-					result = xattacky(tmpm, mdef);
+					result = xattacky(tmpm, mdef, x(mdef), y(mdef));
 				/* possibly return early if def died */
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 				{
