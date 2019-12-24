@@ -1617,7 +1617,7 @@ doandroid()
 	} else if(newspeed == ANDROID_COMBO){
 		struct monst *mon;
 		int tmp, weptmp, tchtmp;
-		if(!uwep){
+		if(!uwep || (is_lightsaber(uwep) && !litsaber(uwep))){
 			static struct attack unarmedcombo[] = 
 			{
 				{AT_WEAP,AD_PHYS,0,0},
@@ -1661,6 +1661,60 @@ doandroid()
 					else {
 						find_to_hit_rolls(mon,&tmp,&weptmp,&tchtmp);
 						hmonwith(mon, tmp, weptmp, tchtmp, unarmedcombo, 4);
+					}
+				}
+			}
+			return 1;
+		} else if(is_lightsaber(uwep) && litsaber(uwep)){ //!uwep handled above
+			static struct attack lightsabercombo[] = 
+			{
+				{AT_WEAP,AD_PHYS,0,0},
+				{AT_WEAP,AD_PHYS,0,0},
+				{0,0,0,0}
+			};
+			if(!getdir((char *)0)) return 0;
+			if(u.ustuck && u.uswallow)
+				mon = u.ustuck;
+			else mon = m_at(u.ux+u.dx, u.uy+u.dy);
+			if(fast_weapon(uwep)) youmonst.movement+=2;
+			if(!mon) dofire_core(FALSE);
+			else {
+				find_to_hit_rolls(mon,&tmp,&weptmp,&tchtmp);
+				hmonwith(mon, tmp, weptmp, tchtmp, lightsabercombo, 2);
+			}
+			u.uen--;
+			if(uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+				int a = getdir((char *)0);
+				int k;
+				if(a){
+					if(u.ustuck && u.uswallow)
+						mon = u.ustuck;
+					else mon = m_at(u.ux+u.dx, u.uy+u.dy);
+					if(fast_weapon(uwep)) youmonst.movement+=2;
+					if(!mon) dofire_core(FALSE);
+					else {
+						find_to_hit_rolls(mon,&tmp,&weptmp,&tchtmp);
+						hmonwith(mon, tmp, weptmp, tchtmp, lightsabercombo, 1);
+					}
+				}
+				k = dokick();
+				if(a || k){
+					u.uen--;
+				} else return 1;
+			}
+			if(uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+				int j = jump(1);
+				int d = getdir((char *)0);
+				if(!j && !d) return 1;
+				u.uen--;
+				if(d){
+					if(u.ustuck && u.uswallow)
+						mon = u.ustuck;
+					else mon = m_at(u.ux+u.dx, u.uy+u.dy);
+					if(!mon) dofire_core(FALSE);
+					else {
+						find_to_hit_rolls(mon,&tmp,&weptmp,&tchtmp);
+						hmonwith(mon, tmp, weptmp, tchtmp, lightsabercombo, 2);
 					}
 				}
 			}
@@ -1879,19 +1933,19 @@ int splaction;
 
 	Sprintf(buf, "Words of Power");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	if(splaction == SPELLMENU_DESCRIBE || (u.ufirst_light && u.ufirst_light_timeout <= moves)){
+	if(u.ufirst_light && (splaction == SPELLMENU_DESCRIBE || u.ufirst_light_timeout <= moves)){
 		Sprintf(buf, "speak the First Word");
 		any.a_int = FIRST_LIGHT+1;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			 'q', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
-	if(splaction == SPELLMENU_DESCRIBE || (u.ufirst_sky && u.ufirst_sky_timeout <= moves)){
+	if(u.ufirst_sky && (splaction == SPELLMENU_DESCRIBE || u.ufirst_sky_timeout <= moves)){
 		Sprintf(buf, "speak the Dividing Word");
 		any.a_int = PART_WATER+1;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			 'w', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
-	if(splaction == SPELLMENU_DESCRIBE || (u.ufirst_life && u.ufirst_life_timeout <= moves)){
+	if(u.ufirst_life && (splaction == SPELLMENU_DESCRIBE || u.ufirst_life_timeout <= moves)){
 		Sprintf(buf, "speak the Nurturing Word");
 		any.a_int = OVERGROW+1;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -2035,7 +2089,7 @@ int part;
 	*clockwork_parts[] = { "arm", "photoreceptor", "face", "grasping digit",
 		"digit-tip", "foot", "manipulator", "manipulatored", "head", "leg",
 		"addled", "neck", "chassis", "toe", "doll-hair",
-		"blood", "gear", "chemoreceptor", "keyhole","mainspring","metal skin",
+		"oil", "gear", "chemoreceptor", "keyhole","mainspring","metal skin",
 		"brass structure","tick","rods","phonoreceptor","creak","bend"},
 	*jelly_parts[] = { "pseudopod", "dark spot", "front",
 		"pseudopod extension", "pseudopod extremity",

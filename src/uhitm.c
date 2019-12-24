@@ -871,6 +871,7 @@ struct attack *uattk;
 			)
 			    && !(u.uswallow && mon == u.ustuck)
 			    && !mindless_mon(mon)
+			    && !(mon->data == &mons[PM_ASPECT_OF_THE_SILENCE])
 		) {
 		    /* maybe should regurgitate if swallowed? */
 		    if(!rn2(3)) {
@@ -1473,7 +1474,7 @@ int thrown;
 				}
 			} else {
 				warnedptr = 0;
-				if(vulnerable_mask(resistmask) && !(weaponmask|EXPLOSION))
+				if(vulnerable_mask(resistmask) && !(weaponmask&EXPLOSION))
 					tmp *= 2;
 			}
 			
@@ -1551,7 +1552,7 @@ int thrown;
 								(sgn(mon->mx - u.ux) != sgn(mon->mx - mon->mux)
 								&& sgn(mon->my - u.uy) != sgn(mon->my - mon->muy)) ||
 								((mon->mux != u.ux || mon->muy != u.uy) && 
-									((obj == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && has_head(mon->data) && !is_unalive(mon->data))
+									((obj == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && has_head_mon(mon) && !is_unalive(mon->data))
 										|| distmin(u.ux, u.uy, mon->mx, mon->my) > BOLT_LIM)
 								)
 						) && 
@@ -1565,7 +1566,7 @@ int thrown;
 					if((mon->mux != u.ux || mon->muy != u.uy) && distmin(u.ux, u.uy, mon->mx, mon->my) > BOLT_LIM)
 						You("snipe the flat-footed %s!", l_monnam(mon));
 					else if((mon->mux != u.ux || mon->muy != u.uy) && 
-						(obj == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && !is_unalive(mon->data) && has_head(mon->data))
+						(obj == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && !is_unalive(mon->data) && has_head_mon(mon))
 					){
 						//Lifehunt scythe triggers sneak attack, but you have to actually HAVE sneak attack
 						You("strike the flat-footed %s!", l_monnam(mon));
@@ -1914,30 +1915,7 @@ int thrown;
 						tmp += (newdamage - basedamage);
 						newdamage = basedamage;
 					}
-					if(obj->oartifact){
-						hittxt = artifact_hit(&youmonst, mon, obj, &newdamage, dieroll);
-						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
-							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
-						if (newdamage == 0) return TRUE; /* NOTE: ditto */
-						tmp += (newdamage - basedamage);
-						newdamage = basedamage;
-					}
-					if(obj->oproperties){
-						hittxt |= oproperty_hit(&youmonst, mon, obj, &newdamage, dieroll);
-						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
-							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
-						if (newdamage == 0) return TRUE; /* NOTE: ditto */
-						tmp += (newdamage - basedamage);
-						newdamage = basedamage;
-					}
-					if(spec_prop_otyp(obj)){
-						hittxt |= otyp_hit(&youmonst, mon, obj, &newdamage, dieroll);
-						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
-							return FALSE; /* NOTE: worried this might cause crash from improperly handled arrows */
-						if (newdamage == 0) return TRUE; /* NOTE: ditto */
-						tmp += (newdamage - basedamage);
-						newdamage = basedamage;
-					}
+					//Note: obj itself was done above.
 					if(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER){
 						hittxt = artifact_hit(&youmonst, mon, uarmh, &newdamage, dieroll);
 						if(mon->mhp <= 0 || migrating_mons == mon) /* artifact killed or levelported monster */
@@ -2250,10 +2228,14 @@ defaultvalue:
 					int dmg = rnd(8);
 					pline("%s seems weaker.",Monnam(mon));
 					mon->mhpmax -= dmg;
+					if(mon->mhpmax < 1) mon->mhpmax = 1;
 					tmp += dmg;
+					if (!mon->m_lev) {
+						pline("%s dies!", Monnam(mon));
+						xkilled(mon,0);
+					} else
 					mon->m_lev--;
 					if(obj->spestudied>0) obj->spestudied--;
-					if(mon->mhpmax < 1) mon->mhpmax = 1;
 				}
 			}
 	    }
@@ -2370,10 +2352,12 @@ defaultvalue:
 		int viperheads;
 	    if Role_if(PM_SAMURAI) {
           if(!(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_NINJA)){
-			You("dishonorably use a poisoned weapon!");
 			adjalign(-sgn(u.ualign.type)*5); //stiffer penalty
-			u.ualign.sins++;
-			u.hod++;
+			if(sgn(u.ualign.type) >= 0){
+				You("dishonorably use a poisoned weapon!");
+				u.ualign.sins++;
+				u.hod++;
+			}
           } else {
 			You("dishonorably use a poisoned weapon!");
 			adjalign(5);
@@ -2522,7 +2506,7 @@ defaultvalue:
 			}
 		} else {
 			warnedptr = 0;
-			if(vulnerable_mask(resistmask) && !(weaponmask|EXPLOSION))
+			if(vulnerable_mask(resistmask) && !(weaponmask&EXPLOSION))
 				tmp *= 2;
 		}
 	}
@@ -3635,7 +3619,7 @@ register struct attack *mattk;
 			tmp += rnd(10);
 		break;
 	    case AD_DRIN:
-		if (notonhead || !has_head(mdef->data)) {
+		if (notonhead || !has_head_mon(mdef)) {
 		    pline("%s doesn't seem harmed.", Monnam(mdef));
 		    tmp = 0;
 		    if (!Unchanging && mdef->data == &mons[PM_GREEN_SLIME] && mdef->data == &mons[PM_FLUX_SLIME]) {

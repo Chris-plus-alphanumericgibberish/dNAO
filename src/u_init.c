@@ -337,8 +337,8 @@ static struct trobj Knight[] = {
 
 static struct trobj Monk[] = {
 	{ GLOVES, 2, ARMOR_CLASS, 1, UNDEF_BLESS },
-	{ ROBE, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
-	{ SEDGE_HAT, 1, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ ROBE, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ SEDGE_HAT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 #define M_BOOK		3
 	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 1 },
 	{ UNDEF_TYP, UNDEF_SPE, SCROLL_CLASS, 1, UNDEF_BLESS },
@@ -792,6 +792,9 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_CLOCKWORK_AUTOMATON,	POT_BOOZE,			POT_OIL    	  },
     // Yuki-onna substitutions
     { PM_YUKI_ONNA,           RING_MAIL,   STUDDED_LEATHER_ARMOR  },
+    // Chiropteran substitutions
+    { PM_CHIROPTERAN,           HIGH_BOOTS,   GAUNTLETS  },
+    { PM_CHIROPTERAN,           LOW_BOOTS,    GLOVES  },
     { NON_PM,	STRANGE_OBJECT,		STRANGE_OBJECT	      }
 };
 
@@ -1902,6 +1905,7 @@ u_init()
 	u.uen = u.uenmax;
 	u.uspellprot = 0;
 	u.usanity = 100;
+	u.umadness = 0L;
 	u.uinsight = 0;
 	u.sowdisc = 0;
 	u.voidChime = 0;
@@ -2626,7 +2630,61 @@ u_init()
 		/* what a horrible night to have a curse */
 		horrors[j]->mlevel = 1;							/* low starting level so difficulty is based on other things*/
 		horrors[j]->mmove = rn2(7) * 2 + 6;				/* slow to very fast */
-		horrors[j]->ac = rn2(21) + (rn2(3) ? -10 : -20);/* any AC */
+		switch(rn2(4)){
+			case 0:
+				horrors[j]->nac = rn2(21) + (rn2(3) ? 0 : +10);/* any AC */
+				horrors[j]->dac = 0;
+				horrors[j]->pac = 0;
+			break;
+			case 1:
+				horrors[j]->nac = 0;
+				horrors[j]->dac = rn2(21) + (rn2(3) ? 0 : +10);/* any AC */
+				horrors[j]->pac = 0;
+			break;
+			case 2:
+				horrors[j]->nac = 0;
+				horrors[j]->dac = 0;
+				horrors[j]->pac = rn2(21) + (rn2(3) ? 0 : +10);/* any AC */
+			break;
+			case 3:
+				/* any AC (combo is slightly better) */
+				horrors[j]->nac = rn2(8) + (rn2(9) ? 0 : +5);
+				horrors[j]->dac = rn2(8) + (rn2(9) ? 0 : +5);
+				horrors[j]->pac = rn2(8) + (rn2(9) ? 0 : +5);
+			break;
+		}
+		switch(rn2(4)){
+			case 0:
+				horrors[j]->hdr = 0;
+				horrors[j]->bdr = 0;
+				horrors[j]->gdr = 0;
+				horrors[j]->ldr = 0;
+				horrors[j]->fdr = 0;
+			break;
+			case 1:{
+				schar dr = rnd(3);
+				horrors[j]->hdr = dr;
+				horrors[j]->bdr = dr;
+				horrors[j]->gdr = dr;
+				horrors[j]->ldr = dr;
+				horrors[j]->fdr = dr;
+			}break;
+			case 2:{
+				schar dr = rnd(6);
+				horrors[j]->hdr = dr;
+				horrors[j]->bdr = dr;
+				horrors[j]->gdr = dr;
+				horrors[j]->ldr = dr;
+				horrors[j]->fdr = dr;
+			}break;
+			case 3:
+				horrors[j]->hdr = rn2(10);
+				horrors[j]->bdr = rn2(10);
+				horrors[j]->gdr = rn2(10);
+				horrors[j]->ldr = rn2(10);
+				horrors[j]->fdr = rn2(10);
+			break;
+		}
 		horrors[j]->mr = rn2(11) * 10;				/* varying amounts of MR */
 		horrors[j]->maligntyp = d(2, 9) - 10;			/* any alignment */
 
@@ -2949,6 +3007,10 @@ register struct trobj *trop;
 			}
 			if(obj->otyp == GAUNTLETS && Role_if(PM_ANACHRONONAUT)){
 				set_material(obj, COPPER);
+			}
+			if(obj->otyp == GAUNTLETS && Race_if(PM_CHIROPTERAN)){
+				obj->obj_material = LEATHER;
+				fix_object(obj);
 			}
 			if(obj->otyp == PISTOL && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
 				set_material(obj, MITHRIL);

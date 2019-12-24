@@ -235,19 +235,21 @@ makerooms()
 			(In_mithardir_quest(&u.uz) ? (nroom<9 || rn2(MAXNROFROOMS-nroom)) : (nroom<6 || rn2(12-nroom)))
 	){
 	// while(nroom < MAXNROFROOMS && rnd_rect() && (nroom<6 || )) {
-		if(nroom >= (MAXNROFROOMS/6) && rn2(2) && !tried_vault && !wantanmivault && !wantasepulcher) {
+		if(In_mithardir_quest(&u.uz)){
+			if (!create_room(-1, -1, 2+rnd(4), 2+rnd(4), -1, -1, OROOM, -1))
+				continue;
+		}
+		else if(nroom >= (MAXNROFROOMS/6) && rn2(3) && !tried_vault && !wantanmivault && !wantasepulcher) {
 			tried_vault = TRUE;
 			if (create_vault()) {
 				vault_x = rooms[nroom].lx;
 				vault_y = rooms[nroom].ly;
 				rooms[nroom].hx = -1;
 			}
-		} else if(In_mithardir_quest(&u.uz)){
-			 if (!create_room(-1, -1, 2+rnd(4), 2+rnd(4), -1, -1, OROOM, -1))
-				continue;
-		} else
+		} else {
 		    if (!create_room(-1, -1, -1, -1, -1, -1, OROOM, -1))
 			return;
+		}
 	}
 	return;
 }
@@ -857,10 +859,10 @@ random_special_room()
 			add_rspec_room(COCKNEST		,  9, udepth > 16 && mnotgone(PM_COCKATRICE));
 			add_rspec_room(POOLROOM		, 30, udepth > 15);
 			add_rspec_room(BARRACKS		, 18, udepth > 14 && mnotgone(PM_SOLDIER));
-			add_rspec_room(ARMORY		,  8, udepth <=14 && mnotgone(PM_RUST_MONSTER));
+			add_rspec_room(ARMORY		,  8, udepth <=14 && udepth > 1 && mnotgone(PM_RUST_MONSTER));
 			add_rspec_room(MORGUE		, 10, udepth > 11);
 			add_rspec_room(LEPREHALL	, 10, udepth >  4 && mnotgone(PM_LEPRECHAUN));
-			add_rspec_room(STATUEGRDN	,  2, udepth >  1);
+			add_rspec_room(STATUEGRDN	,  2, udepth >  2);
 			add_rspec_room(TEMPLE		,  5, !level.flags.has_temple);
 			add_rspec_room(SHOPBASE		,  5, TRUE);
 			add_rspec_room(0			, 50, TRUE);
@@ -1379,7 +1381,7 @@ mineralize()
 	gemprob = goldprob / 4;
 	silverprob = gemprob * 2;
 	fossilprob = gemprob / 2;
-	darkprob = gemprob / 10;
+	darkprob = gemprob / 5;
 
 	/* mines have ***MORE*** goodies - otherwise why mine? */
 	if (In_mines_quest(&u.uz)) {

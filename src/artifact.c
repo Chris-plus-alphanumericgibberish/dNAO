@@ -1994,7 +1994,6 @@ static const char * const mb_verb[2][4] = {
 #define MB_INDEX_CANCEL		3
 
 /* called when someone is being hit by the pen of the void */
-/* called when someone is being hit by the pen of the void */
 STATIC_OVL boolean
 voidPen_hit(magr, mdef, pen, dmgptr, dieroll, vis, hittee)
 struct monst *magr, *mdef;	/* attacker and defender */
@@ -3323,7 +3322,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			messaged = FALSE;
 
 		if (!youdefend) {
-			if (!has_head(mdef->data) || notonhead || u.uswallow) {
+			if (!has_head_mon(mdef) || notonhead || u.uswallow) {
 				if (youattack)
 					pline("Somehow, you miss %s wildly.",
 						mon_nam(mdef));
@@ -4113,7 +4112,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		}
 	  }
 	 }
-	 else if(youdefend && !(u.sealsActive|SEAL_ANDROMALIUS)){
+	 else if(youdefend && !(u.sealsActive&SEAL_ANDROMALIUS)){
 		char buf[BUFSZ];
 		buf[0] = '\0';
 		steal(magr, buf, TRUE, FALSE);
@@ -4312,7 +4311,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 					messaged = FALSE;
 
 				if (bigmonst(mdef->data)) {
-					if (!has_head(mdef->data) || notonhead || u.uswallow) {
+					if (!has_head_mon(mdef) || notonhead || u.uswallow) {
 						if (youattack)
 							You("slice deeply into %s!",
 								mon_nam(mdef));
@@ -4393,10 +4392,10 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 						((mdef->mflee && mdef->data != &mons[PM_BANDERSNATCH]) || is_blind(mdef) || !mdef->mcanmove || !mdef->mnotlaugh || 
 							mdef->mstun || mdef->mconf || mdef->mtrapped || mdef->msleeping || (mdef->mux == 0 && mdef->muy == 0) ||
 							((mdef->mux != u.ux || mdef->muy != u.uy) && 
-								(otmp->oartifact == ART_LIFEHUNT_SCYTHE && has_head(mdef->data) && !is_unalive(mdef->data))
+								(otmp->oartifact == ART_LIFEHUNT_SCYTHE && has_head_mon(mdef) && !is_unalive(mdef->data))
 							)
 						)
-					) && has_head(mdef->data) && dieroll == 1 && otmp == uwep
+					) && has_head_mon(mdef) && dieroll == 1 && otmp == uwep
 				) {
 					if (notonhead) {
 						pline("Somehow, you miss %s wildly.",
@@ -4436,7 +4435,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 						((mdef->mflee && mdef->data != &mons[PM_BANDERSNATCH]) || is_blind(mdef) || !mdef->mcanmove || !mdef->mnotlaugh || 
 							mdef->mstun || mdef->mconf || mdef->mtrapped || mdef->msleeping
 						)
-					) && has_head(mdef->data) && dieroll == 1
+					) && has_head_mon(mdef) && dieroll == 1
 				) {
 					if (notonhead) {
 						pline("Somehow, %s misses %s wildly.",
@@ -4498,7 +4497,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				messaged = FALSE;
 			wepdesc = artilist[otmp->oartifact].name;
 			if (!youdefend) {
-				if (!has_head(mdef->data) || notonhead || u.uswallow) {
+				if (!has_head_mon(mdef) || notonhead || u.uswallow) {
 					if (youattack)
 						pline("Somehow, you miss %s wildly.",
 							mon_nam(mdef));
@@ -6366,7 +6365,7 @@ arti_invoke(obj)
 			getdir((char *)0);
 			if (!isok(u.ux + u.dx, u.uy + u.dy)) break;
 			
-			if (mtmp = m_at(u.ux + u.dx, u.uy + u.dy)) {
+			if ((mtmp = m_at(u.ux + u.dx, u.uy + u.dy))) {
 				/* message */
 				pline("You reach out and stab at %s very soul.", s_suffix(mon_nam(mtmp)));
 				/* nonliving, demons, angels are immune */
@@ -9425,7 +9424,7 @@ read_lost(VOID_ARGS)
 		if(artiptr->ovar1 & putativeSeal){
 			losexp("getting lost in a book",TRUE,TRUE,TRUE);
 			if(rn2(100) < u.usanity)
-				change_usanity(1);
+				change_usanity(-1);
 		} else {
 			u.sealsKnown |= putativeSeal;
 			artiptr->ovar1 |= putativeSeal;
@@ -9887,7 +9886,7 @@ mind_blast_items()
 
 	for (obj = fobj; obj; obj = nobj) {
 		nobj = obj->nobj;
-		if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe) && u.uinsight > rn2(INSIGHT_RATE)){
+		if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe) && u.uinsight > rn2(INSIGHT_RATE*70)){
 		// if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe)){
 			mtmp = animate_statue(obj, obj->ox, obj->oy, ANIMATE_NORMAL, (int *) 0);
 			if(mtmp){

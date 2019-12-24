@@ -398,12 +398,12 @@ androidUpkeep()
 		}
 		//Exceeding operational time
 		static char fatigue_warning = 0;
-		if(moves >= u.nextsleep+700 && u.uen > 10 && !fatigue_warning){
+		if(moves >= u.nextsleep+1400 && u.uen > 10 && !fatigue_warning){
 			fatigue_warning = 1;
 			You_feel("fatigued.");
 		}
 		static char e_fatigued = 0;
-		if(moves >= u.nextsleep+700 && u.uen > 1 && u.uen <= 10 && !e_fatigued){
+		if(moves >= u.nextsleep+1400 && u.uen > 1 && u.uen <= 10 && !e_fatigued){
 			e_fatigued = 1;
 			You_feel("extremely fatigued.");
 		}
@@ -412,7 +412,7 @@ androidUpkeep()
 			pass_warning = 1;
 			You_feel("like you're about to pass out.");
 		}
-		if(moves > u.nextsleep+700 && u.uen > 0){
+		if(moves > u.nextsleep+1400 && u.uen > 0){
 			if(!(moves%20)) u.uen -= 1;
 		}
 	}
@@ -1015,6 +1015,12 @@ moveloop()
 					if(u.orthocounts == 1) pline("It is now pitch black. You are likely to be eaten by a grue.");
 					else pline("You are likely to be eaten by a grue.");
 				} else You_feel("increasingly panicked about being in the dark!");
+			    if (multi >= 0) {
+					if (occupation)
+						stop_occupation();
+					else
+						nomul(0, NULL);
+				}
 			}
 			if(u.sealsActive&SEAL_NABERIUS && u.udrunken < u.ulevel/3) unbind(SEAL_NABERIUS,TRUE);
 			if(u.specialSealsActive&SEAL_NUMINA && u.ulevel<30) unbind(SEAL_SPECIAL|SEAL_NUMINA,TRUE);
@@ -1431,10 +1437,10 @@ karemade:
 				nmonsclose = nmonsnear = 0;
 				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 					if(mtmp->mpeaceful) continue;
-					if(um_dist(u.ux,u.uy,1)){
+					if(distmin(u.ux, u.uy, mtmp->mx,mtmp->my) <= 1){
 						nmonsclose++;
 						nmonsnear++;
-					} else if(um_dist(u.ux,u.uy,2)){
+					} else if(distmin(u.ux, u.uy, mtmp->mx,mtmp->my) <= 2){
 						nmonsnear++;
 					}
 				}
@@ -1683,7 +1689,7 @@ karemade:
 					if(u.uboiler){
 						int steam = min(10,min(u.ustove,u.uboiler));
 						lesshungry(steam);
-						u.ustove-=steam;
+						u.ustove -= min(10,u.ustove);
 						u.uboiler-=steam;
 						flags.cth_attk=TRUE;//state machine stuff.
 						create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(3));
@@ -1700,7 +1706,7 @@ karemade:
 						flags.cth_attk=TRUE;//state machine stuff.
 						create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(6)); //Longer-lived smoke
 						flags.cth_attk=FALSE;
-						u.ustove--;
+						u.ustove -= min(10,u.ustove);
 					}
 				} else if(u.utemp) u.utemp--;
 				if(u.utemp > BURNING_HOT){
@@ -1934,6 +1940,7 @@ karemade:
 							}
 							if(yields_insight(mtmp->data)){
 								change_uinsight(u_insight_gain(mtmp));
+								change_usanity(u_sanity_gain(mtmp));
 							}
 						}
 					}

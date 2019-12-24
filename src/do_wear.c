@@ -2053,7 +2053,7 @@ struct obj * otmp;
 	case ART_VESTMENT_OF_HELL:
 	case ART_WEB_OF_THE_CHOSEN:
 	case ART_CLOAK_OF_THE_CONSORT:
-		def *= 1.5;
+		def *= 2;
 		break;
 	case ART_ARMOR_OF_EREBOR:
 		def += 5;
@@ -2143,7 +2143,7 @@ struct obj * otmp;
 	case ART_VESTMENT_OF_HELL:
 	case ART_WEB_OF_THE_CHOSEN:
 	case ART_CLOAK_OF_THE_CONSORT:
-		def *= 1.5;
+		def *= 2;
 		break;
 	case ART_ARMOR_OF_EREBOR:
 		def += 5;
@@ -2205,7 +2205,14 @@ int agrmoral;
 int base_uac()
 {
 	int dexbonus = 0;
-	int uac = mons[u.umonnum].ac;
+	int uac = 10-mons[u.umonnum].nac;
+	
+	if(multi > 0)
+		uac -= mons[u.umonnum].dac;
+	
+	if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
+		uac += 6;
+	}
 
 	if(uwep){
 		if((is_rapier(uwep) && arti_shining(uwep)) || 
@@ -2380,6 +2387,10 @@ int base_udr()
 {
 	int udr = 0;
 
+	if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
+		udr += 3;
+	}
+	
 	if(uwep){
 		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) udr += max((uwep->spe)/2,0);
 	}
@@ -2394,9 +2405,12 @@ int base_udr()
 			udr += (u.ulevel)/3;
 		else udr += (u.ulevel)/6;
 	}
+	
+	if(u.sealsActive&SEAL_ECHIDNA)
+		udr += 2;
 	if(u.specialSealsActive&SEAL_COSMOS) udr += (spiritDsize()+1)/2;
 	if(u.sealsActive&SEAL_ECHIDNA) udr += max((ACURR(A_CON)-9)/4, 0);
-	if(uclockwork) udr += (u.clockworkUpgrades&ARMOR_PLATING) ? 5 : 1; /*armor bonus for automata*/
+	if(uclockwork && u.clockworkUpgrades&ARMOR_PLATING) udr += 4; /*armor bonus for automata (stacks with the 1 natural DR)*/
 	
 	if (udr > 127) udr = 127;	/* u.uac is an schar */
 	return udr;
@@ -2472,7 +2486,8 @@ struct monst *magr;
 		case UPPER_TORSO_DR:
 uppertorso:
 			//Note: upper body (shirt plus torso armor)
-			if(uandroid) udr += 6; /*thick chest armor*/
+			if(!Race_if(PM_HALF_DRAGON))
+				udr += youracedata->bdr;
 			if (uarmu){
 				if(uarmu->otyp != BODYGLOVE){
 					armdr += arm_dr_bonus(uarmu);
@@ -2493,8 +2508,9 @@ lowertorso:
 				armdr += max( 1 + (uwep->spe+1)/2,0);
 			}
 			//Lower body SPECIFIC modifiers
-			if (slot != UPPER_TORSO_DR){
-				if(uandroid) udr += 3; /*flexible torso armor*/
+			if (slot == LOWER_TORSO_DR){
+				if(!Race_if(PM_HALF_DRAGON))
+					udr += youracedata->ldr;
 				if(uarmu && (uarmu->otyp == BLACK_DRESS || uarmu->otyp == VICTORIAN_UNDERWEAR)){
 					armdr += arm_dr_bonus(uarmu);
 					if(magr) armdr += properties_dr(uarmu, agralign, agrmoral);
@@ -2504,19 +2520,30 @@ lowertorso:
 			armdr += clkdr;
 		break;
 		case HEAD_DR:
-			if(!has_head(youracedata)) goto uppertorso;
-			if(uandroid) udr += 6; /*thick cranial armor*/
+			if(!has_head(youracedata)){
+				slot = UPPER_TORSO_DR;
+				goto uppertorso;
+			}
+			if(!Race_if(PM_HALF_DRAGON))
+				udr += youracedata->hdr;
 			if (uarmh){
 				armdr += arm_dr_bonus(uarmh);
 				if(magr) armdr += properties_dr(uarmh, agralign, agrmoral);
+			}
+			if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
+				udr += 3;
 			}
 			udr += (u.uvaul+4)/5;
 			armdr += clkdr;
 		break;
 		case LEG_DR:
 boot_hit:
-			if(!can_wear_boots(youracedata)) goto lowertorso;
-			if(uandroid) udr += 3; /*thinner leg armor*/
+			if(!can_wear_boots(youracedata)){
+				slot = LOWER_TORSO_DR;
+				goto lowertorso;
+			}
+			if(!Race_if(PM_HALF_DRAGON))
+				udr += youracedata->fdr;
 			if (uarmf){
 				armdr += arm_dr_bonus(uarmf);
 				if(magr) armdr += properties_dr(uarmf, agralign, agrmoral);
@@ -2527,13 +2554,20 @@ boot_hit:
 			armdr += clkdr;
 		break;
 		case ARM_DR:
-			if(!can_wear_gloves(youracedata)) goto uppertorso;
-			if(uandroid) udr += 3; /*thinner arm armor*/
+			if(!can_wear_gloves(youracedata)){
+				slot = UPPER_TORSO_DR;
+				goto uppertorso;
+			}
+			if(!Race_if(PM_HALF_DRAGON))
+				udr += youracedata->gdr;
 			if (uarmg){
 				armdr += arm_dr_bonus(uarmg);
 				if(magr) armdr += properties_dr(uarmg, agralign, agrmoral);
 			} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
 				armdr += max( 1 + (uwep->spe+1)/2,0);
+			}
+			if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
+				udr += 3;
 			}
 			udr += (u.uvaul+2)/5;
 		break;
@@ -3435,44 +3469,84 @@ register schar delta;
 	static int gcircletsa = 0;
 	if(!gcircletsa) gcircletsa = find_gcirclet();
 	
-	if (uarmg && uarmg == otmp && otmp->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER) {
-		if (delta) {
-			ABON(A_DEX) += (delta);
-			ABON(A_STR) += (delta);
-			ABON(A_CON) += (delta);
-			ABON(A_INT) -= (delta);
-			ABON(A_WIS) -= (delta);
+	if (uarmh && uarmh == otmp) {
+		if(otmp->otyp == HELM_OF_BRILLIANCE){
+			if (delta) {
+				makeknown(uarmh->otyp);
+				ABON(A_INT) += (delta);
+				ABON(A_WIS) += (delta);
+				flags.botl = 1;
+			}
 		}
-		flags.botl = 1;
-	}
-	if (uarmg && uarmg == otmp && otmp->otyp == GAUNTLETS_OF_DEXTERITY) {
-		if (delta) {
-			makeknown(uarmg->otyp);
-			ABON(A_DEX) += (delta);
+		if(otmp->otyp == gcircletsa){
+			if (delta) {
+				ABON(A_CHA) += (delta);
+				flags.botl = 1;
+			}
 		}
-		flags.botl = 1;
 	}
-	if (uarmh && uarmh == otmp && otmp->otyp == HELM_OF_BRILLIANCE) {
-		if (delta) {
-			makeknown(uarmh->otyp);
-			ABON(A_INT) += (delta);
-			ABON(A_WIS) += (delta);
+	if (uarmc && uarmc == otmp) {
+		if(otmp->otyp == SMOKY_VIOLET_FACELESS_ROBE){
+			if (delta) {
+				makeknown(uarmh->otyp);
+				ABON(A_CON) += (delta);
+				ABON(A_CHA) += (delta);
+				flags.botl = 1;
+			}
 		}
-		flags.botl = 1;
 	}
-	if (uarmc && uarmc == otmp && otmp->otyp == SMOKY_VIOLET_FACELESS_ROBE) {
-		if (delta) {
-			makeknown(uarmh->otyp);
-			ABON(A_CON) += (delta);
-			ABON(A_CHA) += (delta);
+	if(uarm && uarm == otmp){
+		if(otmp->otyp == BLACK_DRESS){
+			if (delta) {
+				ABON(A_CHA) += (delta);
+				flags.botl = 1;
+			}
 		}
-		flags.botl = 1;
+		if(otmp->otyp == CONSORT_S_SUIT){
+			if (delta) {
+				ABON(A_CHA) += (delta);
+				flags.botl = 1;
+			}
+		}
+		if(otmp->otyp == NOBLE_S_DRESS || otmp->otyp == GENTLEMAN_S_SUIT){
+			if (delta) {
+				ABON(A_CHA) += 2*(delta);
+				flags.botl = 1;
+			}
+		}
 	}
-	if(uarmh && uarmh == otmp && 
-		(otmp->otyp == gcircletsa)
-	){
-		if (delta) ABON(A_CHA) += (delta);
-		flags.botl = 1;
+	if(uarmu && uarmu == otmp){
+		if(otmp->otyp == BLACK_DRESS){
+			if (delta) {
+				ABON(A_CHA) += (delta);
+				flags.botl = 1;
+			}
+		}
+		if(otmp->otyp == VICTORIAN_UNDERWEAR){
+			if (delta) {
+				ABON(A_CHA) += 2*(delta);
+				flags.botl = 1;
+			}
+		}
+	}
+	if (uarmg && uarmg == otmp) {
+		if(otmp->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER){
+			if (delta) {
+				ABON(A_DEX) += (delta);
+				ABON(A_STR) += (delta);
+				ABON(A_CON) += (delta);
+				ABON(A_INT) -= (delta);
+				ABON(A_WIS) -= (delta);
+				flags.botl = 1;
+			}
+		}
+		if(otmp->otyp == GAUNTLETS_OF_DEXTERITY){
+			if (delta) {
+				makeknown(uarmg->otyp);
+				ABON(A_DEX) += (delta);
+			flags.botl = 1;
+			}
+		}
 	}
 }
 

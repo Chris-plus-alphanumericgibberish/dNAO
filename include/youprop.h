@@ -175,6 +175,8 @@
 				 (Upolyd && dmgtype(youmonst.data, AD_HALU)))
 #define Hallucination		(HHallucination && !Halluc_resistance)
 
+#define Delusion(mon)	((mon) && (u.umadness&MAD_DELUSIONS || u.umadness&MAD_REAL_DELUSIONS) && (mon)->m_san_level < u.usanity)
+
 /* Timeout, plus a worn mask */
 #define HFumbling		u.uprops[FUMBLING].intrinsic
 #define EFumbling		u.uprops[FUMBLING].extrinsic
@@ -492,6 +494,11 @@
 #define ESpellboost		u.uprops[SPELLBOOST].extrinsic
 #define Spellboost		(HSpellboost || ESpellboost || u.specialSealsActive&SEAL_NUDZIRATH)
 
+#define HSterile	u.uprops[STERILE].intrinsic
+#define ESterile	u.uprops[STERILE].extrinsic
+#define Sterile		(HSterile || ESterile)
+
+
 #define HFast			u.uprops[FAST].intrinsic
 #define EFast			u.uprops[FAST].extrinsic
 #define Fast			(HFast || EFast)
@@ -511,7 +518,7 @@
 
 #define Fixed_abil		(u.uprops[FIXED_ABIL].extrinsic || u.specialSealsActive&SEAL_DAHLVER_NAR)	/* KMH */
 
-#define Lifesaved		(u.uprops[LIFESAVED].extrinsic || u.sealsActive&SEAL_JACK)
+#define Lifesaved		(u.uprops[LIFESAVED].extrinsic || u.sealsActive&SEAL_JACK || (uleft && uleft->otyp == RIN_WISHES && uleft->spe > 0) || (uright && uright->otyp == RIN_WISHES && uright->spe > 0)) /*Note: the rings only give life saving when charged, so it can't be a normal property*/
 
 #define Necrospellboost	(u.uprops[NECROSPELLS].extrinsic)
 

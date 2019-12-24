@@ -10,10 +10,17 @@
 # endif
 #endif
 
+#define 	BLESS_CURSES	1
+#define 	BLESS_LUCK		2
+#define 	BLESS_WEP		3
+#define 	UNSTERILIZE		5
+#define 	SANCTIFY_WEP	4
+
 #ifdef OVLB
 
 static const char *FDECL(DantalionRace,(int));
 int FDECL(dobinding,(int, int));
+static int NDECL(doblessmenu);
 
 static const char tools[] = { TOOL_CLASS, 0 };
 
@@ -193,8 +200,9 @@ int
 count_glyphs(){
 	int i, count = 0;
 	for(i=0; i<32;i++){
-		if(((u.thoughts>>i)&1) == 1) count++;
+		if(((u.thoughts>>i)&1L) == 1L) count++;
 	}
+	return count;
 }
 
 int
@@ -389,7 +397,7 @@ int
 active_glyph(thought)
 long int thought;
 {
-	int insightlevel = 0, sanlevel = 100;
+	int insightlevel = 0, sanlevel = 0;
 	if(!(u.thoughts&thought))
 		return 0;
 	switch(thought){
@@ -413,11 +421,9 @@ long int thought;
 		break;
 		case BLOOD_RAPTURE:
 			insightlevel = 14;
-			sanlevel = 90;
 		break;
 		case CLAWMARK:
 			insightlevel = 16;
-			sanlevel = 90;
 		break;
 		case CLEAR_DEEPS:
 			insightlevel = 10;
@@ -430,7 +436,6 @@ long int thought;
 		break;
 		case CORRUPTION:
 			insightlevel = 15;
-			sanlevel = 80;
 		break;
 		case EYE_THOUGHT:
 			insightlevel = 17;
@@ -443,14 +448,12 @@ long int thought;
 		break;
 		case IMPURITY:
 			insightlevel = 5;
-			sanlevel = 80;
 		break;
 		case MOON:
 			insightlevel = 10;
 		break;
 		case WRITHE:
 			insightlevel = 14;
-			sanlevel = 90;
 		break;
 		case RADIANCE:
 			insightlevel = 12;
@@ -460,7 +463,7 @@ long int thought;
 			return 0;
 		break;
 	}
-	if(u.uinsight >= insightlevel)
+	if(u.uinsight >= insightlevel && u.usanity <= sanlevel)
 		return 1;
 	else return 0;
 	return 0;
@@ -2745,6 +2748,124 @@ int dz;
 		}
 	}
 	
+	if(mtmp && mtmp->data->msound == MS_UNCURSE){
+		int gold, blessing;
+#ifndef GOLDOBJ
+		gold = u.ugold;
+#else
+		gold = money_cnt(invent);
+#endif
+		blessing = doblessmenu();
+		if(blessing){
+			struct obj *optr;
+			int cost;
+			switch(blessing){
+				case BLESS_CURSES:
+					cost = 7;
+					if(gold < cost){
+						pline("Not enough gold!");
+						return 0;
+					}
+					if(yn("That costs 7 gold.  Pay?") != 'y'){
+						return 0;
+					}
+#ifndef GOLDOBJ
+					u.ugold -= cost;
+#else
+					money2none(cost);
+#endif
+					if (Hallucination)
+						You_feel("in touch with the Universal Oneness.");
+					else
+						You_feel("like someone is helping you.");
+					for (optr = invent; optr; optr = optr->nobj) {
+						uncurse(optr);
+					}
+					if(Punished) unpunish();
+				break;
+				case BLESS_LUCK:
+					cost = 70;
+					if(gold < cost){
+						pline("Not enough gold!");
+						return 0;
+					}
+					if(yn("That costs 70 gold.  Pay?") != 'y'){
+						return 0;
+					}
+#ifndef GOLDOBJ
+					u.ugold -= cost;
+#else
+					money2none(cost);
+#endif
+					change_luck(2*LUCKMAX);
+				break;
+				case BLESS_WEP:
+					cost = 700;
+					if(gold < cost){
+						pline("Not enough gold!");
+						return 0;
+					}
+					if(yn("That costs 700 gold.  Pay?") != 'y'){
+						return 0;
+					}
+					if(!uwep){
+						impossible("Your weapon vanished between the menu and the blessing?");
+					}
+#ifndef GOLDOBJ
+					u.ugold -= cost;
+#else
+					money2none(cost);
+#endif
+					bless(uwep);
+					if(uwep->spe < 3)
+						uwep->spe++;
+				break;
+				case UNSTERILIZE:
+					cost = 7000;
+					if(gold < cost){
+						pline("Not enough gold!");
+						return 0;
+					}
+					if(yn("That costs 7,000 gold.  Pay?") != 'y'){
+						return 0;
+					}
+#ifndef GOLDOBJ
+					u.ugold -= cost;
+#else
+					money2none(cost);
+#endif
+					HSterile = 0L;
+				break;
+				case SANCTIFY_WEP:
+					cost = 70000;
+					if(gold < cost){
+						pline("Not enough gold!");
+						return 0;
+					}
+					if(yn("That costs 70,000 gold.  Pay?") != 'y'){
+						return 0;
+					}
+					if(!uwep){
+						impossible("Your weapon vanished between the menu and the blessing?");
+					}
+#ifndef GOLDOBJ
+					u.ugold -= cost;
+#else
+					money2none(cost);
+#endif
+					bless(uwep);
+					uwep->oproperties |= OPROP_HOLYW;
+					if(uwep->spe < 3)
+						uwep->spe = 3;
+					mongone(mtmp);
+				break;
+			}
+			update_inventory();
+			return 1;
+		}
+		return 0;
+	}
+	
     if ( (!mtmp || mtmp->mundetected ||
 		mtmp->m_ap_type == M_AP_FURNITURE ||
 		mtmp->m_ap_type == M_AP_OBJECT) && levl[tx][ty].typ == IRONBARS
@@ -4025,6 +4146,7 @@ int tx,ty;
 			if(check_stinking_cloud_region((xchar)tx,(xchar)ty)
 				|| check_solid_fog_region((xchar)tx,(xchar)ty)
 				|| check_dust_cloud_region((xchar)tx,(xchar)ty)
+				|| levl[tx][ty].typ == CLOUD
 			){ 
 				You("catch a glimpse of something moving in the%s cloud....", 
 					check_solid_fog_region((xchar)tx,(xchar)ty) ? " fog" : 
@@ -4792,8 +4914,8 @@ int tx,ty;
 						pline("In the shadow of the white plume you see an ancient battlefield.");
 						pline("Members of every race and species you have ever seen fight in the battle,");
 						pline("some on one side, some on the other, along with many more races and species you have never seen.");
-						pline("In the heart of the conflict, a onyx skinned man drives a silver spear into the heart of a demon of wolves and spiders.");
-						pline("There is a flash, and the plume of white smoke is blown appart.");
+						pline("In the heart of the conflict, a onyx skinned man drives a metallic spear into the heart of a demon of wolves and spiders.");
+						pline("There is a flash, and the plume of white smoke is blown apart.");
 					} else {
 						pline("There is a percussion and a gust of wind.");
 					}
@@ -5597,6 +5719,31 @@ gnosisspirit(seal_id)
 	doredraw();
 }
 
+void
+scatter_seals()
+{
+	struct engr *oep = engr_at(u.ux,u.uy);
+	int i;
+	long seal_flag = 0x1L;
+	
+	for(i = 0; i < (QUEST_SPIRITS-FIRST_SEAL); i++){
+		seal_flag = 0x1L << i;
+		if(u.sealsActive&seal_flag){
+			if(!oep){
+				make_engr_at(u.ux, u.uy,
+				 "", 0L, DUST);
+				oep = engr_at(u.ux,u.uy);
+			}
+			oep->ward_id = (i+FIRST_SEAL);
+			oep->halu_ward = 0;
+			oep->ward_type = BURN;
+			oep->complete_wards = 1;
+			rloc_engr(oep);
+			oep = engr_at(u.ux,u.uy);
+		}
+	}
+}
+
 static
 const char *
 DantalionRace(pmon)
@@ -5902,6 +6049,72 @@ const char* msg;
 }
 
 #endif /* USER_SOUNDS */
+
+STATIC_OVL int
+doblessmenu()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Ask for blessing?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	incntlet = 'a';
+	
+	Sprintf(buf, "Drive out curses");
+	any.a_int = BLESS_CURSES;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet++;
+	
+	Sprintf(buf, "Blessing of good fortune");
+	any.a_int = BLESS_LUCK;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet++;
+	
+	if(uwep){
+		Sprintf(buf, "Bless wielded item");
+		any.a_int = BLESS_WEP;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++; //Advance anyway
+	if(Sterile){
+		Sprintf(buf, "Lift sterility curse");
+		any.a_int = UNSTERILIZE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++; //Advance anyway
+	if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !(uwep->oproperties&OPROP_HOLYW)){
+		Sprintf(buf, "Sanctify your weapon");
+		any.a_int = SANCTIFY_WEP;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++; //Advance anyway
+	
+	end_menu(tmpwin, "Select blessing");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? (int)selected[0].item.a_int : 0;
+}
 
 #endif /* OVLB */
 

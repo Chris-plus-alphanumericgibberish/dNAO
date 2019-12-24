@@ -1746,6 +1746,7 @@ struct obj* obj;
 	case MAGIC_FLUTE:
 	case HARP:
 	case MAGIC_HARP:
+	case KHAKKHARA:
 		return resonant_materials;
 	case TOOLED_HORN:
 	case FIRE_HORN:
@@ -1891,7 +1892,7 @@ struct obj* obj;
 	/* randomized materials */
 	random_mat_list = material_list(obj);
 	if (random_mat_list) {
-		int i = rnd(100);
+		int i = rnd(1000);
 		while (i > 0) {
 			if (i <= random_mat_list->iprob)
 				break;
@@ -2402,7 +2403,7 @@ boolean init;
 {
 	register struct obj *otmp;
 
-	if (objtype != CORPSE && objtype != STATUE)
+	if (objtype != CORPSE && objtype != STATUE && objtype != BROKEN_ANDROID && objtype != BROKEN_GYNOID)
 	    impossible("making corpstat type %d", objtype);
 	if (x == 0 && y == 0) {		/* special case - random placement */
 		otmp = mksobj(objtype, init, FALSE);

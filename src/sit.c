@@ -413,6 +413,7 @@ dosit()
 			{
 				u.uevent.utook_castle = 1;
 				You_feel("worthy.");
+				return 1;
 			}
 			else if (is_prince(youracedata) || Role_if(PM_NOBLEMAN))
 				You_feel("very comfortable here.");
@@ -447,7 +448,9 @@ dosit()
 		uegg->owt = weight(uegg);
 		uegg->corpsenm = egg_type_from_parent(u.umonnum, FALSE);
 		uegg->known = uegg->dknown = 1;
-		attach_egg_hatch_timeout(uegg);
+		if(!Sterile){
+			attach_egg_hatch_timeout(uegg);
+		}
 		You("lay an egg.");
 		dropy(uegg);
 		stackobj(uegg);

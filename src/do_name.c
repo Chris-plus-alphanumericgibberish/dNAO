@@ -823,7 +823,7 @@ boolean called;
 	if (article == ARTICLE_YOUR && !mtmp->mtame)
 	    article = ARTICLE_THE;
 
-	do_hallu = (Hallucination || (mtmp && u.usanity < mtmp->m_san_level)) && !(suppress & SUPPRESS_HALLUCINATION);
+	do_hallu = (Hallucination || Delusion(mtmp)) && !(suppress & SUPPRESS_HALLUCINATION);
 	do_invis = mtmp->minvis && !(suppress & SUPPRESS_INVISIBLE);
 	do_it = !canspotmon(mtmp) && 
 	    article != ARTICLE_YOUR &&
@@ -922,6 +922,10 @@ boolean called;
 		else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
 		else if(mtmp->mfaction == PSEUDONATURAL) Strcat(buf, "the Pseudonatural");
 		else if(mtmp->mfaction == TOMB_HERD) Strcat(buf, "of the Herd");
+		else if(mtmp->mfaction == MISTWEAVER){
+			if(mtmp->female) Strcat(buf, ", Daughter of the Black Goat");
+			else Strcat(buf, ", Child of the Black Goat");
+		}
 	    return buf;
 	}
 
@@ -1000,6 +1004,10 @@ boolean called;
 				else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
 				else if(mtmp->mfaction == PSEUDONATURAL) Strcat(buf, "the Pseudonatural");
 				else if(mtmp->mfaction == TOMB_HERD) Strcat(buf, "of the Herd");
+				else if(mtmp->mfaction == MISTWEAVER){
+					if(mtmp->female) Strcat(buf, ", Daughter of the Black Goat");
+					else Strcat(buf, ", Child of the Black Goat");
+				}
 			} else {
 				if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
 				else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
@@ -1009,6 +1017,10 @@ boolean called;
 				else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
 				else if(mtmp->mfaction == PSEUDONATURAL) Strcat(buf, " pseudonatural");
 				else if(mtmp->mfaction == TOMB_HERD) Strcat(buf, " herd");
+				else if(mtmp->mfaction == MISTWEAVER){
+					if(mtmp->female) Strcat(buf, " dark daughter");
+					else Strcat(buf, " dark child");
+				}
 			}
 			Sprintf(eos(buf), " called %s", name);
 			
@@ -1043,6 +1055,10 @@ boolean called;
 		else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
 		else if(mtmp->mfaction == PSEUDONATURAL) Strcat(buf, " pseudonatural");
 		else if(mtmp->mfaction == TOMB_HERD) Strcat(buf, " herd");
+		else if(mtmp->mfaction == MISTWEAVER){
+			if(mtmp->female) Strcat(buf, " dark daughter");
+			else Strcat(buf, " dark child");
+		}
 	    name_at_start = FALSE;
 	} else {
 	    name_at_start = (boolean)type_is_pname(mdat);
@@ -1050,8 +1066,8 @@ boolean called;
 			Strcat(buf, "frumious ");
 			name_at_start = FALSE;
 		}
-		if (((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) || (ublindf && ublindf->otyp == ANDROID_VISOR)
-			&& !flags.suppress_hurtness)){
+		if (((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) || (ublindf && ublindf->otyp == ANDROID_VISOR))
+			&& !flags.suppress_hurtness){
 			if(mtmp->mhp == mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 			else if(mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
 			else if(mtmp->mhp >= .5*mtmp->mhpmax) (has_blood_mon(mtmp)) ?  Strcat(buf, "bruised ") : Strcat(buf, "dented ");
@@ -1087,6 +1103,10 @@ boolean called;
 			else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
 			else if(mtmp->mfaction == PSEUDONATURAL) Strcat(buf, "the Pseudonatural");
 			else if(mtmp->mfaction == TOMB_HERD) Strcat(buf, "of the Herd");
+			else if(mtmp->mfaction == MISTWEAVER){
+				if(mtmp->female) Strcat(buf, ", Daughter of the Black Goat");
+				else Strcat(buf, ", Child of the Black Goat");
+			}
 		} else {
 			if(mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
 			else if(mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
@@ -1096,6 +1116,10 @@ boolean called;
 			else if(mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
 			else if(mtmp->mfaction == PSEUDONATURAL) Strcat(buf, " pseudonatural");
 			else if(mtmp->mfaction == TOMB_HERD) Strcat(buf, " herd");
+			else if(mtmp->mfaction == MISTWEAVER){
+				if(mtmp->female) Strcat(buf, " dark daughter");
+				else Strcat(buf, " dark child");
+			}
 		}
 	}
 
@@ -1376,7 +1400,7 @@ char *outbuf;
     /* high priest(ess)'s identity is concealed on the Astral Plane,
        unless you're adjacent (overridden for hallucination which does
        its own obfuscation) */
-    if ( (mon->data == &mons[PM_HIGH_PRIEST] || mon->data == &mons[PM_ELDER_PRIEST]) && !(Hallucination || (mon && mon->m_san_level < u.usanity)) &&
+    if ( (mon->data == &mons[PM_HIGH_PRIEST] || mon->data == &mons[PM_ELDER_PRIEST]) && !(Hallucination || Delusion(mon)) &&
 	    Is_astralevel(&u.uz) && distu(mon->mx, mon->my) > 2) {
 	Strcpy(outbuf, article == ARTICLE_THE ? "the " : "");
 	Strcat(outbuf, mon->female ? "high priestess" : "high priest");
@@ -1479,6 +1503,7 @@ static const char * const bogusmons[] = {
 	"Euryale", "Stheno", /* Medusa's elder sisters. Oddly enough "The X" works for them,
 							as their names can be interpreted as titles. */
 	"demi lichen", "master lichen", "arch-lichen", /* lich lichens */
+	"demiwitch",
 	"priest of a well-known god", /* Not very mysterious */
 	"shallow one", /* Not very deep */
 	"fungi from your-sock", /* Not from very far away */

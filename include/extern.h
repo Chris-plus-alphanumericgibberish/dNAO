@@ -579,10 +579,11 @@ E void FDECL(impact_drop, (struct obj *,XCHAR_P,XCHAR_P,XCHAR_P));
 
 /* ### dothrow.c ### */
 
-E int FDECL(throw_obj, (struct obj *,int, int));
+E int FDECL(throw_obj, (struct obj *,int, int, int));
 E int FDECL(zap_raygun, (struct obj *,int, int));
 E int NDECL(dothrow);
 E int NDECL(dofire);
+E int FDECL(dofire_core, (int));
 E void FDECL(hitfloor, (struct obj *));
 E void FDECL(hurtle, (int,int,int,BOOLEAN_P));
 E void FDECL(mhurtle, (struct monst *,int,int,int));
@@ -2386,6 +2387,7 @@ E int NDECL(dotalk);
 E int FDECL(dochat, (BOOLEAN_P, int, int, int));
 E void FDECL(councilspirit, (int));
 E void FDECL(gnosisspirit, (int));
+E void NDECL(scatter_seals);
 E int FDECL(P_MAX_SKILL, (int));
 E int FDECL(P_SKILL, (int));
 E int FDECL(P_RESTRICTED, (int));

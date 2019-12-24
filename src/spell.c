@@ -2203,7 +2203,7 @@ spiriteffects(power, atme)
 				if (resists_cold(mon) || is_anhydrous(mon->data)) {	/* match effect on player */
 					shieldeff(mon->mx, mon->my);
 				} else {
-					if(rn2(10) || !has_head(mon->data)){
+					if(rn2(10) || !has_head_mon(mon)){
 						dmg = d(5,dsize);
 					} else {
 						pline("An icicle grows on %s head.", s_suffix(mon_nam(mon)));
@@ -2299,7 +2299,7 @@ spiriteffects(power, atme)
 								continue;
 							} else You("hit %s.", mon_nam(mon));
 							setmangry(mon);
-						} You("don't have enough gold on hand.");
+						} else You("don't have enough gold on hand.");
 					}
 				} else break;
 			}
@@ -2692,7 +2692,7 @@ spiriteffects(power, atme)
 			You("get ready to fire a barrage.");
 			if(uquiver){
 				barage = TRUE; //state variable
-				throw_obj(uquiver, 0, 1);
+				throw_obj(uquiver, 0, 1, TRUE);
 				barage = FALSE;
 			} else {
 				You("have nothing quivered.");
@@ -3580,8 +3580,11 @@ spiriteffects(power, atme)
 			if(!getdir((char *)0) || (!u.dx && !u.dy)) return 0;
 			mon = m_at(u.ux+u.dx,u.uy+u.dy);
 			if(!mon) return 0;
-			if(resists_drli(mon) || nonliving_mon(mon) || mon->m_lev > u.ulevel){
+			if(resists_drli(mon) || nonliving_mon(mon)){
 				pline("You can't swallow the soul of %s.", mon_nam(mon));
+				shieldeff(mon->mx, mon->my);
+			} else if(mon->m_lev > u.ulevel){
+				pline("%s is too powerful for you to swallow their soul.", Monnam(mon));
 				shieldeff(mon->mx, mon->my);
 			} else {
 				You("suck out %s's soul.", mon_nam(mon));
@@ -3891,13 +3894,13 @@ spiriteffects(power, atme)
 			for(ttmp = ftrap; ttmp; ttmp = ttmp->ntrap) {
 				if(ttmp->ttyp == MAGIC_PORTAL) {/*may be more than one portal on some levels*/
 					du = min(du, distu(ttmp->tx, ttmp->ty));
+					if (du <= 9)
+					You_feel("%s path under your feet!", In_endgame(&u.uz) ? "the":"a");
+					else if (du <= 64)
+					You_feel("%s path nearby.", In_endgame(&u.uz) ? "the":"a");
+					else if (du <= 144)
+					You_feel("%s path in the distance.", In_endgame(&u.uz) ? "the":"a");
 				}
-				if (du <= 9)
-				You_feel("%s path under your feet!", In_endgame(&u.uz) ? "the":"a");
-				else if (du <= 64)
-				You_feel("%s path nearby.", In_endgame(&u.uz) ? "the":"a");
-				else if (du <= 144)
-				You_feel("%s path in the distance.", In_endgame(&u.uz) ? "the":"a");
 			}
 		}break;
 		case PWR_GNOSIS_PREMONITION:{

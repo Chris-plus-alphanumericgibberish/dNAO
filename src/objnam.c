@@ -1448,30 +1448,30 @@ boolean with_price;
 		}
 	break;
 	case TILE_CLASS:
-		if (obj->dknown && !un && !ocl->oc_magic){
-			Strcat(buf, dn);
-			Strcat(buf, " ");
-		}
 		if(ocl->oc_unique)
 			Strcat(buf, "slab");
 		else
 			Strcat(buf, "shard");
 		if (!obj->dknown) break;
 		if (nn) {
-			Strcat(buf, " bearing the ");
+			if(obj->obj_material == BONE){
+				Strcat(buf, " scrimshawed with the ");
+			} else {
+				Strcat(buf, " bearing the ");
+			}
 			Strcat(buf, actualn);
 		}
 		else if (un){
 			Strcat(buf, " called ");
 			Strcat(buf, un);
 		}
-		else if (ocl->oc_magic){
-			Strcat(buf, " with a ");
-			Strcat(buf, dn);
-		}
 		else {
-		// "unlabeled scroll" should be the only case, and is already handled above.
-		;
+			if(obj->obj_material == BONE){
+				Strcat(buf, " scrimshawed with ");
+			} else {
+				Strcat(buf, " with a ");
+			}
+			Strcat(buf, dn);
 		}
 			break;
 		case WAND_CLASS:
@@ -1936,6 +1936,8 @@ register struct obj *obj;
 	return FALSE;
     else if (obj->otyp == FAKE_AMULET_OF_YENDOR && !obj->known)
 	return TRUE;		/* lie */
+    else if (obj->oclass == TILE_CLASS)
+	return FALSE;		/* what's on it is unique, not the slab itself */
     else
 	return (boolean)(objects[obj->otyp].oc_unique &&
 			 (obj->known || obj->otyp == AMULET_OF_YENDOR));
@@ -2534,6 +2536,8 @@ const char *oldstr;
 				|| !strncmp(spot, " on ", 4)
 				|| !strncmp(spot, " a la ", 6)
 				|| !strncmp(spot, " with", 5)	/* " with "? */
+				|| !strncmp(spot, " bearing", 8)	/* " bearing "- */
+				|| !strncmp(spot, " scrimshawed", 12)	/* " scrimshawed "- */
 				|| !strncmp(spot, " de ", 4)
 				|| !strncmp(spot, " d'", 3)
 				|| !strncmp(spot, " du ", 4)) {
@@ -4405,6 +4409,13 @@ srch:
 			*wishreturn = WISH_SUCCESS;
 		    return &zeroobj;
 		}
+		if(!BSTRCMP(bp, p-5, "cloud")) {
+		    levl[u.ux][u.uy].typ = CLOUD;
+		    pline("Cloud.");
+		    newsym(u.ux, u.uy);
+			*wishreturn = WISH_SUCCESS;
+		    return &zeroobj;
+		}
 	}
 	if (!oclass)
 	{
@@ -4429,6 +4440,9 @@ typfnd:
 		typ == RED_EYED_VIBROSWORD ||
 		typ == SEISMIC_HAMMER ||
 		typ == FORCE_PIKE ||
+		typ == DOUBLE_FORCE_BLADE ||
+		typ == FORCE_BLADE ||
+		typ == FORCE_SWORD ||
 		typ == WHITE_VIBROSPEAR ||
 		typ == GOLD_BLADED_VIBROSPEAR ||
 		(typ >= PISTOL && typ <= RAYGUN) ||

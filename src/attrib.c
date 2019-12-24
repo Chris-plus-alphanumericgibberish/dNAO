@@ -1086,8 +1086,10 @@ calc_total_maxhp()
 		rawmax = *hprolled + ulev*conplus(ACURR(A_CON));
 		
 		/*Calculate Metamorphosis *before* the max bonus is determined*/
-		if(active_glyph(CLOCKWISE_METAMORPHOSIS))
+		if(active_glyph(CLOCKWISE_METAMORPHOSIS)){
 			rawmax *= 1.3;
+			hpcap *= 1.3;
+		}
 		
 		maxbonus = hpcap - rawmax;
 		
@@ -1104,8 +1106,10 @@ calc_total_maxhp()
 	} else {
 		rawmax = *hprolled + ulev*conplus(ACURR(A_CON));
 		
-		if(active_glyph(CLOCKWISE_METAMORPHOSIS))
+		if(active_glyph(CLOCKWISE_METAMORPHOSIS)){
 			rawmax *= 1.3;
+			hpcap *= 1.3;
+		}
 		
 		if(u.uhpmultiplier)
 			rawmax = rawmax + (rawmax * u.uhpmultiplier / 10); /*Multiplier is in units of tenths*/
@@ -1152,6 +1156,16 @@ int x;
 {
 	register int tmp = (u.abon.a[x] + u.atemp.a[x] + u.acurr.a[x]);
 
+	if(u.ufirst_light)
+		tmp++;
+	if(u.ufirst_sky)
+		tmp++;
+	if(u.ufirst_life)
+		tmp++;
+	if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
+		tmp += 6;
+	}
+	
 	if(x ==A_CHA && uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
 		tmp += uwep->spe;
 	}

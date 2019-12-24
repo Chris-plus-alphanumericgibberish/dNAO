@@ -511,15 +511,35 @@ int otyp;
 	case VIBROBLADE:			
 	case WHITE_VIBROSWORD:
 	case GOLD_BLADED_VIBROSWORD:
-	case WHITE_VIBROZANBATO:
-	case GOLD_BLADED_VIBROZANBATO:
 	case WHITE_VIBROSPEAR:
 	case GOLD_BLADED_VIBROSPEAR:
 	case FORCE_PIKE:
 	case DOUBLE_FORCE_BLADE:// external special case: wielded without twoweaponing
 	case FORCE_BLADE:
 	case FORCE_SWORD:
-								if(chrgd){ocn++;flat+=ocd/2;} break;
+								if(chrgd){
+									ocn++;
+									flat+=ocd/2;
+								} break;
+	case WHITE_VIBROZANBATO:
+	case GOLD_BLADED_VIBROZANBATO:
+								if(chrgd){
+									ocn++;
+									flat+=ocd/2;
+									if(large){
+										plus(4,6);
+										flat+=bond;
+									}
+									else {;} 
+									break;
+								}
+								else {
+									if(large){
+										plus(2,6);
+									} else {;} 
+									break;
+								}
+								break;
 	case FORCE_WHIP:
 								if(chrgd){
 									ocn++;
@@ -594,10 +614,15 @@ int otyp;
 	if (obj && (otyp == LIGHTSABER || otyp == BEAMSWORD || otyp == DOUBLE_LIGHTSABER) && !litsaber(obj))
 	{
 		spe_mult = 1;
-		ocaa = AT_NONE;
-		ocad = AD_PHYS;
-		ocn = 1;
-		ocd = 2;
+		if(obj->oartifact == ART_FLUORITE_OCTAHEDRON){
+			ocn = 1;
+			ocd = 8;
+		} else {
+			ocaa = AT_NONE;
+			ocad = AD_PHYS;
+			ocn = 1;
+			ocd = 2;
+		}
 		bonaa = AT_NONE;
 		bonad = AD_PHYS;
 		bonn = 0;
@@ -1144,8 +1169,8 @@ int spec;
 				else bonus += rnd(u.ulevel);
 			} else {
 				if(otyp == KHAKKHARA) bonus += d(rnd(3),mon->m_lev);
-				else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking,mon->m_lev);
-				else if(otmp->otyp == SET_OF_CROW_TALONS) bonus += d(otmp->ostriking,mon->m_lev);
+				else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking+1,mon->m_lev);
+				else if(otmp->otyp == SET_OF_CROW_TALONS) bonus += d(otmp->ostriking+1,mon->m_lev);
 				else bonus += rnd(mon->m_lev);
 			}
 		}
@@ -1170,15 +1195,15 @@ int spec;
 			else if(otmp->oartifact == ART_AMHIMITL)
 				bonus += d(3*bdm, 4); //Tyranny
 			else if(otmp->oartifact == ART_TECPATL_OF_HUHETOTL)
-				bonus += d(bdm,4); //Somewhat unholy
+				bonus += d(2*bdm,4); //Quite unholy
 			else if(otyp == KHAKKHARA) bonus += d(rnd(3)*bdm,9);
-			else if(otmp->otyp == VIPERWHIP) bonus += d(otmp->ostriking*bdm,9);
-			else if(otmp->otyp == SET_OF_CROW_TALONS) bonus += d(otmp->ostriking*bdm,9);
+			else if(otmp->otyp == VIPERWHIP) bonus += d((otmp->ostriking+1)*bdm,9);
+			else if(otmp->otyp == SET_OF_CROW_TALONS) bonus += d((otmp->ostriking+1)*bdm,9);
 			else bonus += d(bdm, 9);
 		}
 		
 		if (mon && hates_unholy_mon(mon) && otmp->oartifact == ART_TECPATL_OF_HUHETOTL)
-			bonus += d(1, 4); // always counts as unholy regardless, but its' pretty weak
+			bonus += d(2, 4); // always counts as unholy regardless (Blood?)
 		
 		if(mon && mon->isminion){
 			if(otmp->oartifact == ART_LIFEHUNT_SCYTHE)
@@ -1251,7 +1276,7 @@ int spec;
 				if(!flags.mon_moving && !youdefend && (warnedotyp != otmp->otyp || warnedptr != ptr)){
 					warnedotyp = 0;
 					warnedptr = 0;
-					if(vulnerable_mask(resistmask) && !(weaponmask|EXPLOSION))
+					if(vulnerable_mask(resistmask) && !(weaponmask&EXPLOSION))
 						tmp *= 2;
 				}
 			}
