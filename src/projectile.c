@@ -32,8 +32,7 @@ static boolean u_was_twoweap;
 static boolean u_was_swallowed;
 static long old_wep_mask;
 
-/* 
- * projectile()
+/* projectile()
  * 
  * Omnibus projectile firing function
  * 
@@ -41,6 +40,8 @@ static long old_wep_mask;
  * 
  * Weightlessness/hurtling must be dealt with outside of this function;
  * it does not assume magr is actually firing the projectile themselves
+ *
+ * TODO: slips/misfires should NOT be here
  */
 int
 projectile(magr, ammo, launcher, fired, initx, inity, dx, dy, dz, initrange, forcedestroy, verbose)
@@ -1207,7 +1208,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 
 	/* Determine if the projectile hits */
 	dieroll = rnd(20);
-	struct attack dummy = { AT_WEAP, AD_PHYS, 1, 1 };
+	struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0 };
 	accuracy = tohitval(magr, mdef, &dummy, thrownobj, launcher, (misfired ? 2 : 1), 0);
 
 	if (accuracy > dieroll)
@@ -2878,13 +2879,7 @@ int tary;
 	if (BOLT_LIM + rngmod < distmin(x(magr), y(magr), tarx, tary))
 		return FALSE;
 
-	/* generic message */
-	if (youagr) {
-		You("shoot!");
-	}
-	else if (canseemon(magr)) {
-		pline("%s shoots!", Monnam(magr));
-	}
+	/* don't message here , because this function is often called several times :( */
 
 	/* Fire the projectile */
 	if (portal_projectile) {
@@ -2928,9 +2923,7 @@ int tary;
 	return TRUE;
 }
 
-//#if 0
-/* 
- * mdofire()
+/* mdofire()
  *
  * Monster attepts a ranged weapon attack against either the player or a monster
  *
@@ -3038,10 +3031,8 @@ int tary;
 	}
 	return (result > 0);
 }
-//#endif
 
-/*
- * mthrow()
+/* mthrow()
  *
  * Monster attepts a ranged weapon attack against either the player or a monster
  * Monster's equivalent to uthrow(), which is to say generally the same but without a lot of player interaction

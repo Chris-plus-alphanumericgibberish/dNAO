@@ -7,14 +7,15 @@
 STATIC_DCL int FDECL(attack_checks2, (struct monst *, struct obj *));
 //STATIC_DCL boolean FDECL(attack2, (struct monst *));
 //STATIC_DCL int FDECL(xattacky, (struct monst *, struct monst *));
-STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *));
+STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
+STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL boolean FDECL(badtouch, (struct monst *, struct monst *, struct attack *, struct obj *));
 STATIC_DCL boolean FDECL(safe_attack, (struct monst *, struct monst *, struct attack *, struct obj *, struct permonst *, struct permonst *));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
 STATIC_DCL struct attack * FDECL(getattk, (struct monst *, int *, int *, struct attack *, boolean, int *, int *));
 STATIC_DCL int FDECL(destroy_item2, (struct monst *, int, int, boolean));
 STATIC_DCL char * FDECL(mon_nam_too, (struct monst *, struct monst *));	/* TODO: move to do_name.c */
-STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *));
+STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *, boolean));
 STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *));
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
@@ -359,7 +360,7 @@ struct monst * mdef;
 
 	check_caitiff(mdef);
 
-	/* TODO: remove this, replace with u.actioncost */
+	/* SCOPECREEP: remove this, replace with u.actioncost */
 	if (uwep && fast_weapon(uwep) && uwep->spe >= 2){
 		youmonst.movement += NORMAL_SPEED / 6;
 	}
@@ -394,15 +395,10 @@ struct monst * mdef;
 				otmp->blessed = 0;
 				otmp->cursed = 0;
 				if ((dx || dy) && !DEADMONSTER(mdef)){
-					set_destroy_thrown(1); //state variable referenced in drop_throw
-					m_throw(&youmonst, mdef->mx + dx, mdef->my + dy, -dx, -dy,
-						1, otmp, TRUE);
-					set_destroy_thrown(0);  //state variable referenced in drop_throw
+					projectile(&youmonst, otmp, (struct obj *)0, TRUE, x(mdef) + dx, y(mdef) + dy, -dx, -dy, 0, 1, TRUE, FALSE);
 				}
 				else {
-					set_destroy_thrown(1); //state variable referenced in drop_throw
-					m_throw(&youmonst, u.ux, u.uy, u.dx, u.dy, 1, otmp, TRUE);
-					set_destroy_thrown(0);  //state variable referenced in drop_throw
+					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, 1, TRUE, FALSE);
 				}
 			}
 		}
@@ -661,7 +657,6 @@ int tary;
 		/* they also know exactly where you are */
 		u.ustuck->mux = u.ux;
 		u.ustuck->muy = u.uy;
-
 		/* if you're invulnerable, you're fine though */
 		if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)
 			return MM_MISS; /* stomachs can't hurt you! */
@@ -689,9 +684,11 @@ int tary;
 	if (!(u.uevent.invoked) && is_weeping(pa))
 		magr->movement = 0;
 
-	///* */
-	//if (youdef && !ranged) {
-	//}
+	/* monsters may be in for a surprise if attacking a hidden player */
+	if (youdef && !ranged && !missedyou && !u.uswallow) {
+		if (u_surprise(magr, canseemon(magr)))
+			return MM_MISS;	/* they can't attack this turn */
+	}
 
 	/* lillends (that aren't you) can use masks */
 	if (pa == &mons[PM_LILLEND]
@@ -825,7 +822,7 @@ int tary;
 					if ((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
 						|| (otmp->otyp == CHAIN && pa == &mons[PM_CATHEZAR])
 						)																	// valid weapon
-						//&& !otmp->oartifact												// non-artifact
+						//&& !otmp->oartifact												// ~~non-artifact~~
 						&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
 						&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
 						&& !(is_ammo(otmp) || is_pole(otmp) || throwing_weapon(otmp))		// not unsuitable for melee (ammo, throwable, polearm)
@@ -858,13 +855,13 @@ int tary;
 				(otmp && is_pole(otmp) && dist2(x(magr), y(magr), tarx, tary) < 8)) {
 				/* check for wild misses */
 				if (missedyou) {
-					wildmiss(magr, attk);
+					wildmiss(magr, attk, otmp, ranged);
 					continue;
 				}
 				/* print message for magr swinging weapon (m only in function) */
 				/* TODO: appropriate thrust/throw message for polearms at range */
 				if (vis)
-					xswingsy(magr, mdef, otmp);
+					xswingsy(magr, mdef, otmp, ranged);
 				/* do{}while(); loop for AT_DEVA */
 				boolean devaloop = (aatyp == AT_DEVA);
 				do {
@@ -952,7 +949,7 @@ int tary;
 				continue;
 			/* check for wild misses */
 			if (missedyou) {
-				wildmiss(magr, attk);
+				wildmiss(magr, attk, otmp, ranged);
 				continue;
 			}
 			/* make the attack */
@@ -976,7 +973,7 @@ int tary;
 				continue;
 			/* check for wild misses */
 			if (missedyou) {
-				wildmiss(magr, attk);
+				wildmiss(magr, attk, otmp, ranged);
 				continue;
 			}
 			/* make the attack */
@@ -1050,6 +1047,11 @@ int tary;
 			case AT_ARRW:
 				if ((adtyp != AD_SHDW || ranged)) {	// can be used in melee range, except for shadow
 					int n;
+					/* message -- done outside of xfirey to only print 1 message for d(n,d) function calls */
+					/* potential change: pass a domessage variable to xfirey */
+					if (canseemon(magr)) {
+						pline("%s shoots!", Monnam(magr));
+					}
 					/* fire d(n,d) projectiles */
 					for (n = d(attk->damn, attk->damd); n > 0; n--)
 						result |= xfirey(magr, attk, tarx, tary);
@@ -1091,7 +1093,7 @@ int tary;
 				continue;
 			/* check for wild misses */
 			if (missedyou) {
-				wildmiss(magr, attk);
+				wildmiss(magr, attk, otmp, ranged);
 				continue;
 			}
 			/* make the attack */
@@ -1227,14 +1229,20 @@ int tary;
  * Prints a message
  */
 void
-wildmiss(magr, attk)
+wildmiss(magr, attk, otmp, ranged)
 struct monst * magr;
 struct attack * attk;
+struct obj * otmp;
+boolean ranged;
 {
 	boolean compat = (attk->adtyp == AD_SEDU || attk->adtyp == AD_SSEX || attk->adtyp == AD_LSEX) && could_seduce(magr, &youmonst, (struct attack *)0);
 	
 	/* verbose message */
 	if (!flags.verbose)
+		return;
+
+	/* you have to be able to see magr */
+	if (!canseemon(magr))
 		return;
 
 	/* Print message */
@@ -1269,6 +1277,10 @@ struct attack * attk;
 	else if (magr->mcrazed) {
 		pline("%s flails around randomly.", Monnam(magr));
 	}
+	else if (ranged && otmp) {
+		pline("%s %s %s wildly.", Monnam(magr), otmp->otyp == AKLYS ? "throws" : "thrusts",
+			obj_is_pname(otmp) ? the(xname(otmp)) : an(xname(otmp)));
+	}
 	else {
 		const char *swings =
 			attk->aatyp == AT_BITE || attk->aatyp == AT_LNCK || attk->aatyp == AT_5SBT ? "snaps" :
@@ -1298,6 +1310,132 @@ struct attack * attk;
 	}
 	return;
 }
+
+
+/*
+ * u_surprise()
+ *
+ * A monster tried to move onto your square while you were hidden there! Surprise!
+ */
+boolean
+u_surprise(mtmp, youseeit)
+struct monst * mtmp;
+boolean youseeit;
+{
+	if (u.uundetected) {
+		u.uundetected = 0;
+		if (is_hider(youracedata)) {
+			coord cc; /* maybe we need a unexto() function? */
+			struct obj *obj;
+
+			You("fall from the %s!", ceiling(u.ux, u.uy));
+			if (enexto(&cc, u.ux, u.uy, youracedata)) {
+				remove_monster(mtmp->mx, mtmp->my);
+				newsym(mtmp->mx, mtmp->my);
+				place_monster(mtmp, u.ux, u.uy);
+				if (mtmp->wormno) worm_move(mtmp);
+				teleds(cc.x, cc.y, TRUE);
+				set_apparxy(mtmp);
+				newsym(u.ux, u.uy);
+			}
+			else {
+				pline("%s is killed by a falling %s (you)!",
+					Monnam(mtmp), youracedata->mname);
+				killed(mtmp);
+				newsym(u.ux, u.uy);
+				if (mtmp->mhp > 0) return 0;
+				else return 1;
+			}
+			if (youracedata->mlet != S_PIERCER)
+				return(0);	/* trappers don't attack */
+
+			obj = which_armor(mtmp, WORN_HELMET);
+			if (obj && is_hard(obj)) {
+				Your("blow glances off %s helmet.",
+					s_suffix(mon_nam(mtmp)));
+			}
+			else {
+				if (3 + find_mac(mtmp) <= rnd(20)) {
+					pline("%s is hit by a falling piercer (you)!",
+						Monnam(mtmp));
+					if ((mtmp->mhp -= d(3, 6)) < 1)
+						killed(mtmp);
+				}
+				else
+					pline("%s is almost hit by a falling piercer (you)!",
+					Monnam(mtmp));
+			}
+		}
+		else {
+			if (!youseeit)
+				pline("It tries to move where you are hiding.");
+			else {
+				/* Ugly kludge for eggs.  The message is phrased so as
+				* to be directed at the monster, not the player,
+				* which makes "laid by you" wrong.  For the
+				* parallelism to work, we can't rephrase it, so we
+				* zap the "laid by you" momentarily instead.
+				*/
+				struct obj *obj = level.objects[u.ux][u.uy];
+
+				if (obj ||
+					(youracedata->mlet == S_EEL && is_pool(u.ux, u.uy, FALSE))) {
+					int save_spe = 0; /* suppress warning */
+					if (obj) {
+						save_spe = obj->spe;
+						if (obj->otyp == EGG) obj->spe = 0;
+					}
+					if (youracedata->mlet == S_EEL)
+						pline("Wait, %s!  There's a hidden %s named %s there!",
+						m_monnam(mtmp), youracedata->mname, plname);
+					else
+						pline("Wait, %s!  There's a %s named %s hiding under %s!",
+						m_monnam(mtmp), youracedata->mname, plname,
+						doname(level.objects[u.ux][u.uy]));
+					if (obj) obj->spe = save_spe;
+				}
+				else
+					impossible("hiding under nothing?");
+			}
+			newsym(u.ux, u.uy);
+		}
+		return(0);
+	}
+
+	/* mimicry */
+	if (youracedata->mlet == S_MIMIC && youmonst.m_ap_type) {
+		if (!youseeit) pline("It gets stuck on you.");
+		else pline("Wait, %s!  That's a %s named %s!",
+			m_monnam(mtmp), youracedata->mname, plname);
+		u.ustuck = mtmp;
+		youmonst.m_ap_type = M_AP_NOTHING;
+		youmonst.mappearance = 0;
+		newsym(u.ux, u.uy);
+		return(0);
+	}
+
+	/* player might be mimicking an object (without being a proper mimic) */
+	if (youmonst.m_ap_type == M_AP_OBJECT) {
+		if (!youseeit)
+			pline("%s %s!", Something,
+			(likes_gold(mtmp->data) && youmonst.mappearance == GOLD_PIECE) ?
+			"tries to pick you up" : "disturbs you");
+		else pline("Wait, %s!  That %s is really %s named %s!",
+			m_monnam(mtmp),
+			mimic_obj_name(&youmonst),
+			an(mons[u.umonnum].mname),
+			plname);
+		if (multi < 0) {	/* this should always be the case */
+			char buf[BUFSZ];
+			Sprintf(buf, "You appear to be %s again.",
+				Upolyd ? (const char *)an(youracedata->mname) :
+				(const char *) "yourself");
+			unmul(buf);	/* immediately stop mimicking */
+		}
+		return 0;
+	}
+}
+
 
 /* getnextspiritattack()
  *
@@ -2369,9 +2507,10 @@ struct attack *attk;
 }
 
 void
-xswingsy(magr, mdef, otmp)
+xswingsy(magr, mdef, otmp, ranged)
 struct monst *magr, *mdef;
 struct obj *otmp;
+boolean ranged;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -2383,19 +2522,26 @@ struct obj *otmp;
 	/* don't message if there is no weapon */
 	if (!otmp)
 		return;
-	/* don't message if you're blind */
-	if (Blind)
+	/* don't message if you're blind or can't see magr (Nero asks: why the blind check?) */
+	if (Blind || !canseemon(magr))
 		return;
-	/* don't message if we are not being verbose about combat */
-	if (!flags.verbose)
+	/* don't message if we are not being verbose about combat, unless it's a thrust polearm */
+	if (!flags.verbose && !ranged)
 		return;
 
-	Sprintf(buf, "%s %s %s %s",
-		Monnam(magr),
-		(objects[otmp->otyp].oc_dir & PIERCE && weapon_type(otmp) != P_PICK_AXE) ? "thrusts" : "swings",
-		mhis(magr),
-		singular(otmp, xname)
-		);
+	if (!ranged) {
+		Sprintf(buf, "%s %s %s %s",
+			Monnam(magr),
+			(objects[otmp->otyp].oc_dir & PIERCE && weapon_type(otmp) != P_PICK_AXE) ? "thrusts" : "swings",
+			mhis(magr),
+			singular(otmp, xname)
+			);
+	}
+	else {
+		Sprintf(buf, "%s %s %s", Monnam(magr), otmp->otyp == AKLYS ? "throws" : "thrusts",
+			obj_is_pname(otmp) ? the(xname(otmp)) : an(xname(otmp)));
+	}
+
 	if (youdef) {
 		Sprintf(buf, "%s!", buf);
 	}
@@ -2688,7 +2834,7 @@ struct obj * otmp;
 			diesize = 20;
 		else if (otmp->oartifact == ART_AMHIMITL)
 		{	ndice = 3; diesize = 4; }
-		else if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL) /* TODO: add ART_TECPATL_OF_HUHETOTL to is_unholy() macro */
+		else if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL) /* SCOPECREEP: add ART_TECPATL_OF_HUHETOTL to is_unholy() macro */
 		{	ndice = (otmp->cursed ? 2 : 1); diesize = 4; }
 		/* gold has a particular affinity to blessings and curses */
 		if (otmp->obj_material == GOLD) {
@@ -8291,7 +8437,7 @@ int vis;
 		/* visually move the agressor over defender */
 		if (youagr ? (!Invisible) : canspotmon(magr)) {
 			map_location(x(magr), y(magr), TRUE);
-			/* TODO: get the correct glyph for pets/peacefuls/zombies/detected/etc */
+			/* SCOPECREEP: get the correct glyph for pets/peacefuls/zombies/detected/etc */
 			tmp_at(DISP_FLASH, mon_to_glyph(magr));
 			tmp_at(x(mdef), y(mdef));
 			delay_output();
@@ -9433,14 +9579,14 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	boolean fake_valid_weapon_attack = FALSE;
 	boolean invalid_weapon_attack = FALSE;
 	boolean unarmed_punch = FALSE;
-	boolean unarmed_kick = FALSE;		/* minor TODO, work in progress -- might eventually replace kickdmg() */
+	boolean unarmed_kick = FALSE;		/* SCOPECREEP: eventually replace kickdmg() */
 	boolean natural_strike = FALSE;
 	boolean ulightsaberhit = FALSE;
 
 	boolean destroy_one_magr_weapon = FALSE;	/* destroy one of magr's weapons */
 	boolean destroy_all_magr_weapon = FALSE;	/* destroy all of magr's weapon */
 
-	boolean real_attack = (attk->damn > 0 || attk->damd > 0);
+	boolean real_attack = (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->damn > 0 || attk->damd > 0);
 
 	boolean hittxt = FALSE;
 	boolean lethaldamage = FALSE;
@@ -9499,7 +9645,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	 *     - base damage
 	 *  - Set Phasing
 	 *  - ARTIFACT HIT - THIS PRINTS MESSAGES IN MANY CASES AND UNFORTUNATELY CAN'T BE SUPPRESSED
-	 *     - add to base damage [TODO: make elemental bonus damage artifacts/items perform xmeleehurty() with an AT_NONE AD_ELEM attack]
+	 *     - add to base damage
 	 *     - check if creature is still alive at this point
 	 *  - Bonus Reducable Damage
 	 *     - sneak attack
@@ -9680,7 +9826,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 				|| distmin(u.ux, u.uy, mdef->mx, mdef->my) > BOLT_LIM)))
 				sneak_attack |= SNEAK_HIDDEN;
 			if (ulightsaberhit && u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm)))
-				sneak_attack |= SNEAK_JUYO;
+				sneak_attack |= SNEAK_JUYO;	/* modifies a sneak attack; not sufficient on its own */
 		}
 		else if (youdef) {
 			if (u.ustuck || u.utrap)
@@ -9707,7 +9853,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 				sneak_attack |= SNEAK_HELPLESS;
 		}
 	}
-	if (sneak_attack && sneak_dice && !recursed)	/* do not multiply sneak damage in multihits */
+	if ((sneak_attack&~SNEAK_JUYO) && sneak_dice && !recursed)	/* do not multiply sneak damage in multihits */
 	{
 		int snekdie = mlev(magr);
 		/* some things increase sneak attack die size */
@@ -9732,7 +9878,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 
 	/* jousting */
 #ifdef STEED
-	if (youagr && !recursed) {	/* do not joust in multihits */
+	if (youagr && !thrown && !recursed) {	/* do not joust in multihits */
 		if (u.usteed && weapon &&
 			(weapon_type(weapon) == P_LANCE ||
 			(weapon->oartifact == ART_ROD_OF_SEVEN_PARTS) ||
@@ -10204,6 +10350,12 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		/* axes deal more damage to wooden foes */
 		if (is_axe(weapon) && is_wooden(mdef->data))
 			basedmg += rnd(4);
+
+		/* TODO: add proper damage dice for these to dmgval */
+		/* skill damage has already been handled */
+		//if (obj->oartifact == ART_LIECLEAVER) tmp = 2 * (rnd(12) + rnd(10) + obj->spe);
+		//if (obj->oartifact == ART_ROGUE_GEAR_SPIRITS) tmp = 2 * (rnd(bigmonst(mon->data) ? 2 : 4) + obj->spe);
+		//if ((obj->otyp == KAMEREL_VAJRA && !litsaber(obj))) tmp = d(1, 4) + (bigmonst(mdat) ? 0 : 1) + obj->spe; //small mace
 	}
 	else if (invalid_weapon_attack) {
 		long cnt = weapon->quan;
@@ -10767,6 +10919,8 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 				wtype = P_SCIMITAR;
 			else if (weapon && weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
 				wtype = P_PICK_AXE;
+			else if (weapon && weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
+				wtype = P_MACE;
 			else
 				wtype = weapon_type(weapon);
 			
@@ -10793,11 +10947,8 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			}
 			/* melee weapons */
 			else {
-				/* some launchers use different skills in melee */
-				if	(weapon && (
-					weapon->oartifact == ART_LIECLEAVER ||
-					weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
-					)
+				/* some weapons use contextually-specific skills */
+				if (wtype != P_TWO_WEAPON_COMBAT && wtype != weapon_type(weapon))
 					skill_damage = skill_dam_bonus(wtype);
 				/* general case */
 				else
@@ -11208,8 +11359,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 				getdir((char *)0);
 				if (u.dx || u.dy){
 					You("toss it away.");
-					m_throw(&youmonst, u.ux, u.uy, u.dx, u.dy,
-						(int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), otmp, TRUE);
+					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, (int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), FALSE, FALSE);
 				}
 				else{
 					You("drop it at your feet.");
@@ -11510,7 +11660,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			/* using poisoned() from mon.c */
 			char buf[BUFSZ];
 			Sprintf(buf, "%s %s", s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-			/* TODO: the "fatal" field (30) is inconsistent. Preferrably, this should use the same major/minor effect system set up in this function */
+			/* SCOPECREEP: the "fatal" field (30) is inconsistent. Preferrably, this should use the same major/minor effect system set up in this function */
 			/* also, this spams messages when recursed */
 			poisoned(buf, A_CON, pa->mname, 30, (poisons_majoreff | poisons_minoreff));
 		}
@@ -11843,7 +11993,7 @@ struct monst * mexclude;
  * This may seem backwards in this function, but it keeps [magr] and [mdef] consistent
  *
  * Does not include AT_BOOM effects, which are handled in mon.c for monsters.
- * TODO: handle AT_BOOM effects for players somewhere/somehow.
+ * SCOPECREEP: handle AT_BOOM effects for players somewhere/somehow.
  */
 int
 xpassivey(magr, mdef, attk, weapon, vis, result, pd, endofchain)
@@ -12935,4 +13085,324 @@ boolean your_fault;
 		wakeup(mdef, your_fault);
 	}
 	return;
+}
+
+/* android_combo()
+ *
+ * Perform's the player's android weapon combo dependent on their mainhand weapon
+ *
+ * Returns FALSE if this was cancelled before doing anything.
+ */
+boolean
+android_combo()
+{
+	struct monst * mdef;
+	int vis;
+
+	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+	static struct attack kickattack =	{ AT_KICK, AD_PHYS, 1, 2 };
+
+	/* unarmed */
+	if (!uwep){
+		if (!getdir((char *)0))
+			return FALSE;
+		if (u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else
+			mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+
+		if (!mdef)
+			You("swing wildly!");
+		else {
+			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+			xmeleehity(&youmonst, mdef, &weaponhit, (struct obj *)0, vis, 0);
+			xmeleehity(&youmonst, mdef, &weaponhit, (struct obj *)0, vis, 0);
+		}
+		u.uen--;
+		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_SKILLED && u.uen > 0){
+			if (dokick()){
+				u.uen--;
+			}
+			else return TRUE;
+		}
+		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT && u.uen > 0){
+			int j = jump(1);
+			int k = dokick();
+			if (j || k){
+				u.uen--;
+			}
+			else return TRUE;
+		}
+		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_MASTER && u.uen > 0){
+			int j = jump(1);
+			int d = getdir((char *)0);
+			if (!j && !d) return TRUE;
+			u.uen--;
+			if (d){
+				if (u.ustuck && u.uswallow)
+					mdef = u.ustuck;
+				else
+					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+				if (!mdef)
+					You("swing wildly!");
+				else {
+					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, (struct obj *)0, vis, 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, (struct obj *)0, vis, 0);
+					xmeleehity(&youmonst, mdef, &kickattack, (struct obj *)0, vis, 0);
+					xmeleehity(&youmonst, mdef, &kickattack, (struct obj *)0, vis, 0);
+				}
+			}
+		}
+		return TRUE;
+	}
+	else if (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_LANCE){ //!uwep handled above
+		boolean attacked = FALSE;
+		int n = 1;
+		
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED)
+			n++;
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT)
+			n++;
+
+		while (n > 0 && u.uen > 0){
+			/* get direction of attack; if first time, cancelling will take no time */
+			if (!getdir((char *)0))
+				return attacked;
+			/* things that only occur in the first 'attack' of the combo */
+			if (!attacked) {
+				if (fast_weapon(uwep))
+					youmonst.movement += 2;
+			}
+			/* get defender */
+			if (u.ustuck && u.uswallow)
+				mdef = u.ustuck;
+			else
+				mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+			/* attack */
+			if (!mdef)
+				You("stab wildly!");
+			else {
+				vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+			}
+			n--;
+			u.uen--;
+			attacked = TRUE;
+		}
+		return TRUE;
+	}
+	else if (objects[uwep->otyp].oc_skill == P_WHIP){ //!uwep handled above
+		/* get direction of attack */
+		if (!getdir((char *)0))
+			return FALSE;
+		/* fast weapons give you speed */
+		if (fast_weapon(uwep))
+			youmonst.movement += 2;
+		/* get defender */
+		if (u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else
+			mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+		/* attack (twice) */
+		if (!mdef)
+			You("swing wildly!");
+		else {
+			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+		}
+		u.uen--;
+
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+			/* get direction AND do whip things */
+			if (!use_whip(uwep) || !uwep)
+				return TRUE;
+			/* get defender */
+			if (u.ustuck && u.uswallow)
+				mdef = u.ustuck;
+			else
+				mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+			/* attack (once) */
+			if (!mdef)
+				You("swing wildly!");
+			else {
+				vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+			}
+			u.uen--;
+		}
+
+
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+			/* get direction AND do whip things */
+			if (!use_whip(uwep) || !uwep)
+				return TRUE;
+			if (uwep->otyp == FORCE_WHIP){
+				/* turn it into a sword */
+				use_force_sword(uwep);
+				/* get defender */
+				if (u.ustuck && u.uswallow)
+					mdef = u.ustuck;
+				else
+					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+				/* attack (twice) */
+				if (!mdef)
+					You("swing wildly!");
+				else {
+					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+				}
+			}
+			else {
+				/* get defender */
+				if (u.ustuck && u.uswallow)
+					mdef = u.ustuck;
+				else
+					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+				/* attack (once) */
+				if (!mdef)
+					You("swing wildly!");
+				else {
+					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+				}
+			}
+			u.uen--;
+		}
+		return TRUE;
+	}
+	else if (!bimanual(uwep, youracedata)){ //!uwep handled above
+		/* get direction of attack */
+		if (!getdir((char *)0))
+			return FALSE;
+		/* fast weapons give you speed */
+		if (fast_weapon(uwep))
+			youmonst.movement += 2;
+		/* get defender */
+		if (u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else
+			mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+		/* attack (twice) */
+		if (!mdef)
+			You("swing wildly!");
+		else {
+			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+		}
+		u.uen--;
+
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+			if (dofire()){
+				u.uen--;
+			}
+			else return TRUE;
+		}
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+			if (dofire()){
+				u.uen--;
+				if (uwep){
+					/* get defender */
+					if (u.ustuck && u.uswallow)
+						mdef = u.ustuck;
+					else
+						mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+					/* attack (once) (no message for no defender) */
+					if (mdef) {
+						vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+						xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+					}
+				}
+			}
+			else return TRUE;
+		}
+		return TRUE;
+	}
+	else if (bimanual(uwep, youracedata)){ //!uwep handled above
+		int clockwisex[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+		int clockwisey[8] = { -1, -1, 0, 1, 1, 1, 0, -1 };
+		int i, j;
+		static struct attack twohandercombo[] =
+		{
+			{ AT_WEAP, AD_PHYS, 0, 0 },
+			{ 0, 0, 0, 0 }
+		};
+		/* get direction of attack */
+		if (!getdir((char *)0))
+			return FALSE;
+		/* fast weapons give you speed */
+		if (fast_weapon(uwep))
+			youmonst.movement += 2;
+		
+		if (u.dz) {
+			/* if getdir() was gived u.dz != 0, we will just pick a random direction to start hitting */
+			i = rn2(8);
+		}
+		else {
+			/* get your targetted direction's index */
+			for (i = 0; i < 8; i++)
+			if (xdir[i] == u.dx && ydir[i] == u.dy)
+				break;
+		}
+		/* attack counterclockwise, hitting first direction twice (first and last hits) */
+		for (j = 8; j >= 0; j--){
+			if (u.ustuck && u.uswallow)
+				mdef = u.ustuck;
+			else
+				mdef = m_at(u.ux + xdir[(i + j) % 8], u.uy + ydir[(i + j) % 8]);
+			/* isn't that nice, we don't attack pets (even when confused?) */
+			if (mdef && !mdef->mtame){
+				vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+			}
+		}
+		u.uen--;
+		youmonst.movement -= 3;
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+			/* use a kick to get direction */
+			if (!dokick())
+				return TRUE;
+			/* get your targetted direction's index */
+			for (i = 0; i < 8; i++)
+			if (xdir[i] == u.dx && ydir[i] == u.dy)
+				break;
+			/* attack counterclockwise, hitting first direction twice (first and last hits) */
+			for (j = 8; j >= 0; j--){
+				if (u.ustuck && u.uswallow)
+					mdef = u.ustuck;
+				else
+					mdef = m_at(u.ux + xdir[(i + j) % 8], u.uy + ydir[(i + j) % 8]);
+				/* isn't that nice, we don't attack pets (even when confused?) */
+				if (mdef && !mdef->mtame){
+					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+				}
+			}
+			u.uen--;
+			youmonst.movement -= 3;
+		}
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+			if (dofire()){
+				u.uen--;
+				/* get defender */
+				if (u.ustuck && u.uswallow)
+					mdef = u.ustuck;
+				else
+					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+				/* attack (once) */
+				if (mdef) {
+					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+				}
+			}
+			else return TRUE;
+		}
+		return TRUE;
+	}
+	/* This should never be reached */
+	return FALSE;
 }
