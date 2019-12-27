@@ -13420,14 +13420,7 @@ android_combo()
 		return TRUE;
 	}
 	else if (bimanual(uwep, youracedata)){ //!uwep handled above
-		int clockwisex[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-		int clockwisey[8] = { -1, -1, 0, 1, 1, 1, 0, -1 };
 		int i, j;
-		static struct attack twohandercombo[] =
-		{
-			{ AT_WEAP, AD_PHYS, 0, 0 },
-			{ 0, 0, 0, 0 }
-		};
 		/* get direction of attack */
 		if (!getdir((char *)0))
 			return FALSE;
