@@ -1067,7 +1067,7 @@ int tary;
 			}
 
 			/* note: can't tell if mdef lifesaved */
-			if (*hp(mdef) < 0)
+			if (*hp(mdef) < 1)
 				result |= MM_DEF_DIED;
 
 			/* if the attack was made, defender can wake up (reduced chance vs melee) */
@@ -1194,6 +1194,10 @@ int tary;
 			dopassive = TRUE;
 			result = xpassivey(magr, mdef, attk, otmp, vis, result, pd, FALSE);
 		}
+
+		/* double check MM_DEF_DIED */
+		if (*hp(mdef) < 1)
+			result |= MM_DEF_DIED;
 
 		/* increment number of attacks made */
 		attacksmade++;

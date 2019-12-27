@@ -1194,6 +1194,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			}
 			m_dowear(mdef, FALSE);
 			newsym(x(mdef), y(mdef));
+			*wepgone = TRUE;
 			return MM_HIT;
 		}
 	}
