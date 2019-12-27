@@ -859,7 +859,6 @@ int tary;
 					continue;
 				}
 				/* print message for magr swinging weapon (m only in function) */
-				/* TODO: appropriate thrust/throw message for polearms at range */
 				if (vis)
 					xswingsy(magr, mdef, otmp, ranged);
 				/* do{}while(); loop for AT_DEVA */
@@ -1593,8 +1592,6 @@ boolean fresh;
  * Uses a lot of int pointers because there is no guarantee that successive calls of getattk() will be made
  * by the same attacker -- counterattacks specifically cause this, which prevents the use of static variables
  * inside the function
- * 
- * TODO: make unpolyd vampire, yuki-onna, chiropteran player get correct attacks (polyself.c)
  */
 struct attack *
 getattk(magr, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod)
@@ -1642,6 +1639,32 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk = prev_and_buf;
 		*attk = noattack;
 		fromlist = FALSE;
+	}
+
+	/* unpolymorphed players get changes */
+	if (youagr && !Upolyd && fromlist) {
+		/* do NOT get permonst-inherent attacks, except for: */
+		if (!is_null_attk(attk) && !(
+			(attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP) ||			/* "normal" attacks */
+			(Race_if(PM_YUKI_ONNA) && (!uwep || attk->aatyp == AT_NONE)) ||	/* yuki-onna get their additional attacks when unarmed, and their passive always */
+			(Race_if(PM_VAMPIRE)) ||
+			(Race_if(PM_CHIROPTERAN))
+			)){
+			/* just get the next attack */
+			*indexnum += 1;
+			*prev_and_buf = prev_attack;
+			fromlist = TRUE;
+			return getattk(magr, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
+		}
+
+		/* if twoweaponing, make an xwep attack after each weap attack, if it isn't in the inherent attack chain */
+		if (!by_the_book && *indexnum > 0 && (prev_res[1] != MM_MISS) && prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP && u.twoweap) {
+			fromlist = FALSE;
+			attk->aatyp = AT_XWEP;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 1;
+			attk->damd = 4;
+		}
 	}
 
 	/* players sub out monster claw attacks for weapon attacks */
