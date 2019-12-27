@@ -2014,7 +2014,7 @@ int * hurtle_dist;
 
 	return range;
 }
-
+#if 0
 /*
  * dothrow()
  *
@@ -2318,7 +2318,7 @@ dofire()
 	/* Fall through: we did nothing */
 	return 0;
 }
-
+#endif
 /* 
  * blaster_ammo()
  * 

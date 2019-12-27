@@ -13156,6 +13156,80 @@ android_combo()
 		}
 		return TRUE;
 	}
+	else if (is_lightsaber(uwep) && litsaber(uwep)){ //!uwep handled above
+		/* get direction of attack */
+		if (!getdir((char *)0))
+			return FALSE;
+		/* fast weapons give you speed */
+		if (fast_weapon(uwep))
+			youmonst.movement += 2;
+		/* get defender */
+		if (u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else
+			mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+
+		/* attack (melee twice OR throw lightsaber) */
+		if (!mdef) {
+			projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE);
+		}
+		else {
+			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+		}
+		u.uen--;
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+			int a;
+			int k;
+			/* get direction */
+			a = getdir((char *)0);
+			if (a){
+				/* get defender */
+				if (u.ustuck && u.uswallow)
+					mdef = u.ustuck;
+				else
+					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+				/* attack (melee once OR throw lightsaber) */
+				if (!mdef) {
+					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE);
+				}
+				else {
+					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+				}
+			}
+			k = dokick();
+			if (a || k){
+				u.uen--;
+			}
+			else return TRUE;
+		}
+		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+			int j = jump(1);
+			int d = getdir((char *)0);
+			if (!j && !d)
+				return TRUE;
+			u.uen--;
+			if (d){
+				/* get defender */
+				if (u.ustuck && u.uswallow)
+					mdef = u.ustuck;
+				else
+					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+				/* attack (melee twice OR throw lightsaber) */
+				if (!mdef) {
+					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE);
+				}
+				else {
+					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0);
+				}
+			}
+		}
+		return TRUE;
+	}
 	else if (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_LANCE){ //!uwep handled above
 		boolean attacked = FALSE;
 		int n = 1;
