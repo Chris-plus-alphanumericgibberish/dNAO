@@ -39,274 +39,274 @@ boolean barage=FALSE;
 boolean break_thrown = FALSE; /*state variable, if TRUE thrown object always breaks.*/
 
 /* Throw the selected object, maybe asking for direction */
-int
-throw_obj(obj, shotlimit, thrown, ask)
-struct obj *obj;
-int shotlimit;
-int thrown;
-int ask;
-{
-	struct obj *otmp;
-	struct obj *launcher;
-	int multishot = 1;
-	schar skill;
-	long wep_mask;
-	boolean twoweap;
-
-	multi = 0;		/* reset; it's been used up */
-	
-	if (thrown == 1 && uwep && ammo_and_launcher(obj, uwep)) 
-		launcher = uwep;
-	else if (thrown == 2 && uswapwep && ammo_and_launcher(obj, uswapwep))
-		launcher = uswapwep;
-	else launcher = (struct obj *)0;
-
-	/* ask "in what direction?" */
-#ifndef GOLDOBJ
-	if (ask && !getdir((char *)0)) {
-		if (obj->oclass == COIN_CLASS) {
-		    u.ugold += obj->quan;
-		    flags.botl = 1;
-		    dealloc_obj(obj);
-		}
-		return(0);
-	}
-
-	if(obj->oclass == COIN_CLASS) return(throw_gold(obj));
-#else
-	if (ask && !getdir((char *)0)) {
-	    /* obj might need to be merged back into the singular gold object */
-	    freeinv(obj);
-	    addinv(obj);
-	    return(0);
-	}
-
-        /*
-	  Throwing money is usually for getting rid of it when
-          a leprechaun approaches, or for bribing an oncoming 
-          angry monster.  So throw the whole object.
-
-          If the money is in quiver, throw one coin at a time,
-          possibly using a sling.
-        */
-	if(obj->oclass == COIN_CLASS && obj != uquiver) return(throw_gold(obj));
-#endif
-	/* TEMPORARY SHORT_CIRCUIT FOR TESTING PROJECTILE>C */
-	if (wizard && !u.uhave.bell) {
-		(void)projectile(&youmonst, obj, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, FALSE);
-		return 1;
-	}
-
-	if(!canletgo(obj,"throw"))
-		return(0);
-	if ( (obj->oartifact == ART_MJOLLNIR || 
-			obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS) && 
-			obj != uwep) {
-	    pline("%s must be wielded before it can be thrown.",
-		The(xname(obj)));
-		return(0);
-	}
-	if (((obj->oartifact == ART_MJOLLNIR ||
-			obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS) && ACURR(A_STR) < STR19(25))
-	   || (is_boulder(obj) && !throws_rocks(youracedata) && !(u.sealsActive&SEAL_YMIR))) {
-		pline("It's too heavy.");
-		return(1);
-	}
-	if(!u.dx && !u.dy && !u.dz) {
-		You("cannot throw an object at yourself.");
-		return(0);
-	}
-	
-	if(obj->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
-	if(breaktest(obj) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
-	if((obj->otyp == EGG) && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA, TRUE);
-	
-	u_wipe_engr(2);
-	if (!uarmg && !Stone_resistance && (obj->otyp == CORPSE &&
-		    touch_petrifies(&mons[obj->corpsenm]))) {
-		You("throw the %s corpse with your bare %s.",
-		    mons[obj->corpsenm].mname, body_part(HAND));
-		Sprintf(killer_buf, "%s corpse", an(mons[obj->corpsenm].mname));
-		instapetrify(killer_buf);
-	}
-	if (welded(obj)) {
-		weldmsg(obj);
-		return 1;
-	}
-
-	/* Multishot calculations
-	 */
-	skill = objects[obj->otyp].oc_skill;
-	if (((ammo_and_launcher(obj, launcher) && skill != -P_CROSSBOW) || (skill == P_DAGGER && !Role_if(PM_WIZARD)) ||
-			skill == -P_DART || skill == -P_SHURIKEN || skill == -P_BOOMERANG || obj->oartifact == ART_SICKLE_MOON || obj->oartifact == ART_AMHIMITL) &&
-		!(Confusion || Stunned)) {
-	    /* Bonus if the player is proficient in this weapon... */
-	    switch (P_SKILL(weapon_type(obj))) {
-	    default:	break; /* No bonus */
-	    case P_SKILLED:	multishot++; break;
-	    case P_EXPERT:	multishot += 2; break;
-	    }
-		/*Increase skill related rof for heavy machine gun*/
-		if(launcher && launcher->otyp == HEAVY_MACHINE_GUN) multishot *= 2;
-		
-	    /* ...or is using the legendary Longbow... */
-		if(ammo_and_launcher(obj, launcher)
-			&& (launcher->oartifact == ART_LONGBOW_OF_DIANA || uwep->oartifact == ART_BELTHRONDING)
-		) multishot++;
-	    /* ...or is using a special weapon for their role... */
-	    switch (Role_switch) {
-			case PM_CAVEMAN:
-				if (skill == -P_SLING) multishot++;
-			break;
-			case PM_RANGER:
-				multishot++;
-				if(ammo_and_launcher(obj, launcher) && launcher->oartifact == ART_LONGBOW_OF_DIANA) multishot++;//double bonus for Rangers
-			break;
-			case PM_ROGUE:
-				if (skill == P_DAGGER) multishot++;
-			break;
-			case PM_SAMURAI:
-				if (obj->otyp == YA && launcher && launcher->otyp == YUMI) multishot++;
-			break;
-			default:
-			break;	/* No bonus */
-		}
-		/* ...or using their race's special bow */
-		switch (Race_switch) {
-			case PM_ELF:
-				if (obj->otyp == ELVEN_ARROW && launcher &&
-						launcher->otyp == ELVEN_BOW) multishot++;
-				if(obj->oartifact == ART_SICKLE_MOON) multishot++;
-				if(ammo_and_launcher(obj, launcher) && launcher->oartifact == ART_BELTHRONDING) multishot++;//double bonus for Elves
-			break;
-			case PM_DROW:
-				if(obj->oartifact == ART_SICKLE_MOON) multishot++;
-			break;
-			case PM_MYRKALFR:
-				if(obj->oartifact == ART_SICKLE_MOON) multishot++;
-			break;
-			case PM_ORC:
-				if (obj->otyp == ORCISH_ARROW && launcher &&
-						launcher->otyp == ORCISH_BOW) multishot++;
-			break;
-			// case PM_GNOME:
-				// if (obj->otyp == CROSSBOW_BOLT && launcher &&
-						// uwep->otyp == CROSSBOW) multishot++;
-			// break;
-			default:
-			break;	/* No bonus */
-	    }
-	}
-	
-	if(!barage) multishot = rnd(multishot);
-	else multishot += u.ulevel/10+1; //state variable, we are doing a spirit power barrage
-	
-	if((uwep && uwep->oartifact == ART_SANSARA_MIRROR)
-		|| (uswapwep && uswapwep->oartifact == ART_SANSARA_MIRROR)
-	) multishot *= 2;
-	
-	if(ammo_and_launcher(obj, launcher) && launcher->oartifact){
-		if(launcher->oartifact == ART_WRATHFUL_SPIDER) multishot += rn2(8);
-		else if(launcher->oartifact == ART_ROGUE_GEAR_SPIRITS) multishot = 2;
-		else if(launcher->oartifact == ART_PEN_OF_THE_VOID) multishot += 3;
-	}
-	
-	if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
-		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_AMHIMITL && obj->oartifact != ART_DART_OF_THE_ASSASSIN 
-	) multishot = (int)obj->quan;
-	if (shotlimit > 0 && multishot > shotlimit) multishot = shotlimit;
-	
-//#ifdef FIREARMS
-	    /* Rate of fire is intrinsic to the weapon - cannot be user selected
-	     * except via altmode
-	     * Only for firearms
-	     * (currently oc_rof conflicts with wsdam)
-	     */
-		
-    if (launcher && is_firearm(launcher) && ammo_and_launcher(obj,launcher)) {
-		if(launcher->otyp == BFG){
-			if(objects[(obj)->otyp].w_ammotyp == WP_BULLET) multishot += 2*(objects[(launcher->otyp)].oc_rof);
-			else if(objects[(obj)->otyp].w_ammotyp == WP_SHELL) multishot += 1.5*(objects[(launcher->otyp)].oc_rof);
-			else if(objects[(obj)->otyp].w_ammotyp == WP_GRENADE) multishot += 1*(objects[(launcher->otyp)].oc_rof);
-			else if(objects[(obj)->otyp].w_ammotyp == WP_ROCKET) multishot += .5*(objects[(launcher->otyp)].oc_rof);
-			else multishot += (objects[(launcher->otyp)].oc_rof);
-		} else if (objects[(launcher->otyp)].oc_rof)
-		    multishot += (objects[(launcher->otyp)].oc_rof - 1);
-		if (launcher->altmode == WP_MODE_SINGLE)
-		  /* weapons switchable b/w full/semi auto */
-		    multishot = 1;
-		else if (launcher->altmode == WP_MODE_BURST)
-		    multishot = ((multishot > 5) ? (multishot / 3) : 1);
-		/* else it is auto == no change */
-	    }
-
-	    if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
-		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_DART_OF_THE_ASSASSIN && obj->oartifact != ART_AMHIMITL)
-          multishot = (int)obj->quan;
+//int
+//throw_obj(obj, shotlimit, thrown, ask)
+//struct obj *obj;
+//int shotlimit;
+//int thrown;
+//int ask;
+//{
+//	struct obj *otmp;
+//	struct obj *launcher;
+//	int multishot = 1;
+//	schar skill;
+//	long wep_mask;
+//	boolean twoweap;
+//
+//	multi = 0;		/* reset; it's been used up */
+//	
+//	if (thrown == 1 && uwep && ammo_and_launcher(obj, uwep)) 
+//		launcher = uwep;
+//	else if (thrown == 2 && uswapwep && ammo_and_launcher(obj, uswapwep))
+//		launcher = uswapwep;
+//	else launcher = (struct obj *)0;
+//
+//	/* ask "in what direction?" */
+//#ifndef GOLDOBJ
+//	if (ask && !getdir((char *)0)) {
+//		if (obj->oclass == COIN_CLASS) {
+//		    u.ugold += obj->quan;
+//		    flags.botl = 1;
+//		    dealloc_obj(obj);
+//		}
+//		return(0);
+//	}
+//
+//	if(obj->oclass == COIN_CLASS) return(throw_gold(obj));
+//#else
+//	if (ask && !getdir((char *)0)) {
+//	    /* obj might need to be merged back into the singular gold object */
+//	    freeinv(obj);
+//	    addinv(obj);
+//	    return(0);
+//	}
+//
+//        /*
+//	  Throwing money is usually for getting rid of it when
+//          a leprechaun approaches, or for bribing an oncoming 
+//          angry monster.  So throw the whole object.
+//
+//          If the money is in quiver, throw one coin at a time,
+//          possibly using a sling.
+//        */
+//	if(obj->oclass == COIN_CLASS && obj != uquiver) return(throw_gold(obj));
 //#endif
-
-	if(multishot < 1) multishot = 1;
-	if(obj->oartifact == ART_FLUORITE_OCTAHEDRON && !ammo_and_launcher(obj,launcher)) multishot = 1;
-
-
-	m_shot.s = ammo_and_launcher(obj,launcher) ? TRUE : FALSE;
-	/* give a message if shooting more than one, or if player
-	   attempted to specify a count */
-	if(obj->oartifact == ART_FLUORITE_OCTAHEDRON && obj->oclass == GEM_CLASS){
-		if(!ammo_and_launcher(obj,launcher)){
-			if(shotlimit && shotlimit < obj->quan) You("throw %d Fluorite %s.", shotlimit, shotlimit > 1 ? "Octahedra" : "Octahedron");
-			else if(obj->quan == 8) You("throw the Fluorite Octet.");
-			else You("throw %ld Fluorite %s.", obj->quan, obj->quan > 1 ? "Octahedra" : "Octahedron");
-		} else if (multishot > 1 || shotlimit > 0) {
-			if(obj->quan > 1) You("shoot %d Fluorite %s.",
-			multishot,	/* (might be 1 if player gave shotlimit) */
-			(multishot == 1) ? "Octahedron" : "Octahedra");
-		}
-	} else if (multishot > 1 || shotlimit > 0) {
-	    /* "You shoot N arrows." or "You throw N daggers." */
-		if(obj->quan > 1) You("%s %d %s.",
-		m_shot.s ? "shoot" : "throw",
-		multishot,	/* (might be 1 if player gave shotlimit) */
-		(multishot == 1) ? singular(obj, xname) : xname(obj));
-		else if(multishot>1 || shotlimit > 0) You("%s %s %d times.",
-		m_shot.s ? "shoot" : "throw",
-		the(xname(obj)),
-		multishot);	/* (might be 1 if player gave shotlimit) */
-	}
-
-	wep_mask = obj->owornmask;
-	m_shot.o = obj->otyp;
-	m_shot.n = multishot;
-	for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
-		if(!obj || 
-			(obj->where != OBJ_INVENT && !(launcher && launcher->oartifact == ART_ROGUE_GEAR_SPIRITS))
-		) break; //Weapon lost
-	    twoweap = u.twoweap;
-	    /* split this object off from its slot if necessary */
-		if(obj->oartifact == ART_FLUORITE_OCTAHEDRON && !ammo_and_launcher(obj,launcher)){
-			if(!shotlimit || obj->quan <= shotlimit){
-				otmp = obj;
-				if (otmp->owornmask)
-					remove_worn_item(otmp, FALSE);
-			} else {
-				otmp = splitobj(obj, shotlimit > 0 ? ((long)shotlimit) : 1L);
-			}
-	    } else if (obj->quan > 1L) {
-			otmp = splitobj(obj, 1L);
-	    } else {
-			otmp = obj;
-			if (otmp->owornmask)
-				remove_worn_item(otmp, FALSE);
-	    }
-	    if(obj->where == OBJ_INVENT) freeinv(otmp);
-	    throwit(otmp, wep_mask, twoweap, thrown);
-	}
-	m_shot.n = m_shot.i = 0;
-	m_shot.o = STRANGE_OBJECT;
-	m_shot.s = FALSE;
-
-	return 1;
-}
+//	/* TEMPORARY SHORT_CIRCUIT FOR TESTING PROJECTILE>C */
+//	if (wizard && !u.uhave.bell) {
+//		(void)projectile(&youmonst, obj, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, FALSE);
+//		return 1;
+//	}
+//
+//	if(!canletgo(obj,"throw"))
+//		return(0);
+//	if ( (obj->oartifact == ART_MJOLLNIR || 
+//			obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS) && 
+//			obj != uwep) {
+//	    pline("%s must be wielded before it can be thrown.",
+//		The(xname(obj)));
+//		return(0);
+//	}
+//	if (((obj->oartifact == ART_MJOLLNIR ||
+//			obj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS) && ACURR(A_STR) < STR19(25))
+//	   || (is_boulder(obj) && !throws_rocks(youracedata) && !(u.sealsActive&SEAL_YMIR))) {
+//		pline("It's too heavy.");
+//		return(1);
+//	}
+//	if(!u.dx && !u.dy && !u.dz) {
+//		You("cannot throw an object at yourself.");
+//		return(0);
+//	}
+//	
+//	if(obj->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
+//	if(breaktest(obj) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
+//	if((obj->otyp == EGG) && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA, TRUE);
+//	
+//	u_wipe_engr(2);
+//	if (!uarmg && !Stone_resistance && (obj->otyp == CORPSE &&
+//		    touch_petrifies(&mons[obj->corpsenm]))) {
+//		You("throw the %s corpse with your bare %s.",
+//		    mons[obj->corpsenm].mname, body_part(HAND));
+//		Sprintf(killer_buf, "%s corpse", an(mons[obj->corpsenm].mname));
+//		instapetrify(killer_buf);
+//	}
+//	if (welded(obj)) {
+//		weldmsg(obj);
+//		return 1;
+//	}
+//
+//	/* Multishot calculations
+//	 */
+//	skill = objects[obj->otyp].oc_skill;
+//	if (((ammo_and_launcher(obj, launcher) && skill != -P_CROSSBOW) || (skill == P_DAGGER && !Role_if(PM_WIZARD)) ||
+//			skill == -P_DART || skill == -P_SHURIKEN || skill == -P_BOOMERANG || obj->oartifact == ART_SICKLE_MOON || obj->oartifact == ART_AMHIMITL) &&
+//		!(Confusion || Stunned)) {
+//	    /* Bonus if the player is proficient in this weapon... */
+//	    switch (P_SKILL(weapon_type(obj))) {
+//	    default:	break; /* No bonus */
+//	    case P_SKILLED:	multishot++; break;
+//	    case P_EXPERT:	multishot += 2; break;
+//	    }
+//		/*Increase skill related rof for heavy machine gun*/
+//		if(launcher && launcher->otyp == HEAVY_MACHINE_GUN) multishot *= 2;
+//		
+//	    /* ...or is using the legendary Longbow... */
+//		if(ammo_and_launcher(obj, launcher)
+//			&& (launcher->oartifact == ART_LONGBOW_OF_DIANA || uwep->oartifact == ART_BELTHRONDING)
+//		) multishot++;
+//	    /* ...or is using a special weapon for their role... */
+//	    switch (Role_switch) {
+//			case PM_CAVEMAN:
+//				if (skill == -P_SLING) multishot++;
+//			break;
+//			case PM_RANGER:
+//				multishot++;
+//				if(ammo_and_launcher(obj, launcher) && launcher->oartifact == ART_LONGBOW_OF_DIANA) multishot++;//double bonus for Rangers
+//			break;
+//			case PM_ROGUE:
+//				if (skill == P_DAGGER) multishot++;
+//			break;
+//			case PM_SAMURAI:
+//				if (obj->otyp == YA && launcher && launcher->otyp == YUMI) multishot++;
+//			break;
+//			default:
+//			break;	/* No bonus */
+//		}
+//		/* ...or using their race's special bow */
+//		switch (Race_switch) {
+//			case PM_ELF:
+//				if (obj->otyp == ELVEN_ARROW && launcher &&
+//						launcher->otyp == ELVEN_BOW) multishot++;
+//				if(obj->oartifact == ART_SICKLE_MOON) multishot++;
+//				if(ammo_and_launcher(obj, launcher) && launcher->oartifact == ART_BELTHRONDING) multishot++;//double bonus for Elves
+//			break;
+//			case PM_DROW:
+//				if(obj->oartifact == ART_SICKLE_MOON) multishot++;
+//			break;
+//			case PM_MYRKALFR:
+//				if(obj->oartifact == ART_SICKLE_MOON) multishot++;
+//			break;
+//			case PM_ORC:
+//				if (obj->otyp == ORCISH_ARROW && launcher &&
+//						launcher->otyp == ORCISH_BOW) multishot++;
+//			break;
+//			// case PM_GNOME:
+//				// if (obj->otyp == CROSSBOW_BOLT && launcher &&
+//						// uwep->otyp == CROSSBOW) multishot++;
+//			// break;
+//			default:
+//			break;	/* No bonus */
+//	    }
+//	}
+//	
+//	if(!barage) multishot = rnd(multishot);
+//	else multishot += u.ulevel/10+1; //state variable, we are doing a spirit power barrage
+//	
+//	if((uwep && uwep->oartifact == ART_SANSARA_MIRROR)
+//		|| (uswapwep && uswapwep->oartifact == ART_SANSARA_MIRROR)
+//	) multishot *= 2;
+//	
+//	if(ammo_and_launcher(obj, launcher) && launcher->oartifact){
+//		if(launcher->oartifact == ART_WRATHFUL_SPIDER) multishot += rn2(8);
+//		else if(launcher->oartifact == ART_ROGUE_GEAR_SPIRITS) multishot = 2;
+//		else if(launcher->oartifact == ART_PEN_OF_THE_VOID) multishot += 3;
+//	}
+//	
+//	if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
+//		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_AMHIMITL && obj->oartifact != ART_DART_OF_THE_ASSASSIN 
+//	) multishot = (int)obj->quan;
+//	if (shotlimit > 0 && multishot > shotlimit) multishot = shotlimit;
+//	
+////#ifdef FIREARMS
+//	    /* Rate of fire is intrinsic to the weapon - cannot be user selected
+//	     * except via altmode
+//	     * Only for firearms
+//	     * (currently oc_rof conflicts with wsdam)
+//	     */
+//		
+//    if (launcher && is_firearm(launcher) && ammo_and_launcher(obj,launcher)) {
+//		if(launcher->otyp == BFG){
+//			if(objects[(obj)->otyp].w_ammotyp == WP_BULLET) multishot += 2*(objects[(launcher->otyp)].oc_rof);
+//			else if(objects[(obj)->otyp].w_ammotyp == WP_SHELL) multishot += 1.5*(objects[(launcher->otyp)].oc_rof);
+//			else if(objects[(obj)->otyp].w_ammotyp == WP_GRENADE) multishot += 1*(objects[(launcher->otyp)].oc_rof);
+//			else if(objects[(obj)->otyp].w_ammotyp == WP_ROCKET) multishot += .5*(objects[(launcher->otyp)].oc_rof);
+//			else multishot += (objects[(launcher->otyp)].oc_rof);
+//		} else if (objects[(launcher->otyp)].oc_rof)
+//		    multishot += (objects[(launcher->otyp)].oc_rof - 1);
+//		if (launcher->altmode == WP_MODE_SINGLE)
+//		  /* weapons switchable b/w full/semi auto */
+//		    multishot = 1;
+//		else if (launcher->altmode == WP_MODE_BURST)
+//		    multishot = ((multishot > 5) ? (multishot / 3) : 1);
+//		/* else it is auto == no change */
+//	    }
+//
+//	    if ((long)multishot > obj->quan && obj->oartifact != ART_WINDRIDER 
+//		&& obj->oartifact != ART_SICKLE_MOON && obj->oartifact != ART_ANNULUS && obj->oartifact != ART_DART_OF_THE_ASSASSIN && obj->oartifact != ART_AMHIMITL)
+//          multishot = (int)obj->quan;
+////#endif
+//
+//	if(multishot < 1) multishot = 1;
+//	if(obj->oartifact == ART_FLUORITE_OCTAHEDRON && !ammo_and_launcher(obj,launcher)) multishot = 1;
+//
+//
+//	m_shot.s = ammo_and_launcher(obj,launcher) ? TRUE : FALSE;
+//	/* give a message if shooting more than one, or if player
+//	   attempted to specify a count */
+//	if(obj->oartifact == ART_FLUORITE_OCTAHEDRON && obj->oclass == GEM_CLASS){
+//		if(!ammo_and_launcher(obj,launcher)){
+//			if(shotlimit && shotlimit < obj->quan) You("throw %d Fluorite %s.", shotlimit, shotlimit > 1 ? "Octahedra" : "Octahedron");
+//			else if(obj->quan == 8) You("throw the Fluorite Octet.");
+//			else You("throw %ld Fluorite %s.", obj->quan, obj->quan > 1 ? "Octahedra" : "Octahedron");
+//		} else if (multishot > 1 || shotlimit > 0) {
+//			if(obj->quan > 1) You("shoot %d Fluorite %s.",
+//			multishot,	/* (might be 1 if player gave shotlimit) */
+//			(multishot == 1) ? "Octahedron" : "Octahedra");
+//		}
+//	} else if (multishot > 1 || shotlimit > 0) {
+//	    /* "You shoot N arrows." or "You throw N daggers." */
+//		if(obj->quan > 1) You("%s %d %s.",
+//		m_shot.s ? "shoot" : "throw",
+//		multishot,	/* (might be 1 if player gave shotlimit) */
+//		(multishot == 1) ? singular(obj, xname) : xname(obj));
+//		else if(multishot>1 || shotlimit > 0) You("%s %s %d times.",
+//		m_shot.s ? "shoot" : "throw",
+//		the(xname(obj)),
+//		multishot);	/* (might be 1 if player gave shotlimit) */
+//	}
+//
+//	wep_mask = obj->owornmask;
+//	m_shot.o = obj->otyp;
+//	m_shot.n = multishot;
+//	for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
+//		if(!obj || 
+//			(obj->where != OBJ_INVENT && !(launcher && launcher->oartifact == ART_ROGUE_GEAR_SPIRITS))
+//		) break; //Weapon lost
+//	    twoweap = u.twoweap;
+//	    /* split this object off from its slot if necessary */
+//		if(obj->oartifact == ART_FLUORITE_OCTAHEDRON && !ammo_and_launcher(obj,launcher)){
+//			if(!shotlimit || obj->quan <= shotlimit){
+//				otmp = obj;
+//				if (otmp->owornmask)
+//					remove_worn_item(otmp, FALSE);
+//			} else {
+//				otmp = splitobj(obj, shotlimit > 0 ? ((long)shotlimit) : 1L);
+//			}
+//	    } else if (obj->quan > 1L) {
+//			otmp = splitobj(obj, 1L);
+//	    } else {
+//			otmp = obj;
+//			if (otmp->owornmask)
+//				remove_worn_item(otmp, FALSE);
+//	    }
+//	    if(obj->where == OBJ_INVENT) freeinv(otmp);
+//	    throwit(otmp, wep_mask, twoweap, thrown);
+//	}
+//	m_shot.n = m_shot.i = 0;
+//	m_shot.o = STRANGE_OBJECT;
+//	m_shot.s = FALSE;
+//
+//	return 1;
+//}
 
 
 STATIC_OVL const char * const Ronnie_ray_gun[] = {
@@ -575,57 +575,54 @@ int shotlimit;
 }
 
 //endif
-
-int
-dothrow()
-{
-	register struct obj *obj;
-	int oldmulti = multi, result, shotlimit;
-	char *oldsave_cm = save_cm;
-
-	/*
-	 * Since some characters shoot multiple missiles at one time,
-	 * allow user to specify a count prefix for 'f' or or select 
-	 * a number of items in the item selection for 't' to limit
-	 * number of items thrown (to avoid possibly hitting something
-	 * behind target after killing it, or perhaps to conserve ammo).
-	 *
-	 * Nethack 3.3.0 uses prefixes for all - should this revert to that?
-	 *
-	 * Prior to 3.3.0, command ``3t'' meant ``t(shoot) t(shoot) t(shoot)''
-	 * and took 3 turns.  Now it means ``t(shoot at most 3 missiles)''.
-	 */
-
-	if (notake(youracedata)) {
-	    You("are physically incapable of throwing anything.");
-	    return 0;
-	}
-
-	if(check_capacity((char *)0)) return(0);
-	obj = getobj(uslinging() ? bullets : toss_objs, "throw");
-	/* it is also possible to throw food */
-	/* (or jewels, or iron balls... ) */
-
-	if (!obj) return(0);
-
-	/* kludge to work around parse()'s pre-decrement of 'multi' */
-	shotlimit = (multi || save_cm) ? multi + 1 : 0;
-
-	result = throw_obj(obj, shotlimit, THROW_UWEP, TRUE);
-        
-	/*
-	 * [ALI] Bug fix: Temporary paralysis (eg., from hurtle) cancels
-	 * any count for the throw command.
-	 */
-	// if (multi >= 0)
-	    // multi = oldmulti;
-    save_cm = oldsave_cm;
-	if(result && roll_madness(MAD_TALONS)){
-		You("panic after giving up your property!");
-		nomul(-1*rnd(6),"panic");
-	}
-    return (result);
-}
+#if 0
+//int
+//dothrow()
+//{
+//	register struct obj *obj;
+//	int oldmulti = multi, result, shotlimit;
+//	char *oldsave_cm = save_cm;
+//
+//	/*
+//	 * Since some characters shoot multiple missiles at one time,
+//	 * allow user to specify a count prefix for 'f' or or select 
+//	 * a number of items in the item selection for 't' to limit
+//	 * number of items thrown (to avoid possibly hitting something
+//	 * behind target after killing it, or perhaps to conserve ammo).
+//	 *
+//	 * Nethack 3.3.0 uses prefixes for all - should this revert to that?
+//	 *
+//	 * Prior to 3.3.0, command ``3t'' meant ``t(shoot) t(shoot) t(shoot)''
+//	 * and took 3 turns.  Now it means ``t(shoot at most 3 missiles)''.
+//	 */
+//
+//	if (notake(youracedata)) {
+//	    You("are physically incapable of throwing anything.");
+//	    return 0;
+//	}
+//
+//	if(check_capacity((char *)0)) return(0);
+//	obj = getobj(uslinging() ? bullets : toss_objs, "throw");
+//	/* it is also possible to throw food */
+//	/* (or jewels, or iron balls... ) */
+//
+//	if (!obj) return(0);
+//
+//	/* kludge to work around parse()'s pre-decrement of 'multi' */
+//	shotlimit = (multi || save_cm) ? multi + 1 : 0;
+//
+//	result = throw_obj(obj, shotlimit, THROW_UWEP, TRUE);
+//        
+//	/*
+//	 * [ALI] Bug fix: Temporary paralysis (eg., from hurtle) cancels
+//	 * any count for the throw command.
+//	 */
+//	// if (multi >= 0)
+//	    // multi = oldmulti;
+//    save_cm = oldsave_cm;
+//    return (result);
+//}
+#endif
 
 /* KMH -- Automatically fill quiver */
 /* Suggested by Jeffrey Bay <jbay@convex.hp.com> */
@@ -693,224 +690,192 @@ autoquiver()
 	return;
 }
 
-
-/* Throw from the quiver */
-int
-dofire()
-{
-	return dofire_core(TRUE);
-}
-
-int
-dofire_core(ask)
-int ask;
-{
-	int result, shotlimit;
-
-	if (notake(youracedata)) {
-	    You("are physically incapable of doing that.");
-	    return 0;
-	}
-	
-	if(uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && uwep->oartifact && 
-		(
-        (uwep->oartifact == ART_KHAKKHARA_OF_THE_MONKEY) ||
-		(uwep->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE) && ACURR(A_STR) == STR19(25)) ||
-		(uwep->oartifact == ART_ANNULUS && (uwep->otyp == CHAKRAM || uwep->otyp == LIGHTSABER)) ||
-		(uwep->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && Race_if(PM_DWARF) && ACURR(A_STR) == STR19(25))
-		// (uwep->oartifact == ART_SICKLE_MOON)
-		)
-	){
-		/*See below for shotlimit*/
-		shotlimit = (multi || save_cm) ? multi + 1 : 0;
-		multi = 0;		/* reset; it's been used up */
-
-		result = throw_obj(uwep, shotlimit, THROW_UWEP, ask);
-		
-		if(result && roll_madness(MAD_TALONS)){
-			You("panic after throwing your property!");
-			nomul(-1*rnd(6),"panic");
-		}
-		
-		return result;
-	}
-	
-	if(uwep && !is_blaster(uwep) && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && Race_if(PM_ANDROID)){
-		/*See below for shotlimit*/
-		shotlimit = (multi || save_cm) ? multi + 1 : 0;
-		multi = 0;		/* reset; it's been used up */
-
-		result = throw_obj(uwep, shotlimit, THROW_UWEP, ask);
-
-		if(result && roll_madness(MAD_TALONS)){
-			You("panic after throwing your property!");
-			nomul(-1*rnd(6),"panic");
-		}
-		
-		return result;
-	}
-	
-	if(uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep)))  && uwep->oartifact == ART_ROGUE_GEAR_SPIRITS){
-		struct obj *bolt = mksobj(CROSSBOW_BOLT, FALSE, FALSE);
-		bolt->spe = min(0,uwep->spe);
-		bolt->blessed = uwep->blessed;
-		bolt->cursed = uwep->cursed;
-		bolt->objsize = MZ_SMALL;
-		fix_object(bolt);
-		/*See below for shotlimit*/
-		shotlimit = (multi || save_cm) ? multi + 1 : 0;
-		multi = 0;		/* reset; it's been used up */
-		
-		if(shotlimit > 0) bolt->quan = min(2,shotlimit); /* Make exactly enough, so that they are destroyed by throwing. */
-		break_thrown = TRUE; /* state variable, always destroy thrown */
-		result = throw_obj(bolt, shotlimit, THROW_UWEP, ask);
-		break_thrown = FALSE; /* state variable, always destroy thrown */
-		//Doesn't trigger talons, didn't exist before being fired
-		return result;
-	}
-	
-	if(uwep && is_blaster(uwep)){
-		shotlimit = (multi || save_cm) ? multi + 1 : 0;
-		multi = 0;		/* reset; it's been used up */
-		if (u.twoweap) {
-			if (!test_twoweapon()) untwoweapon();
-			else if (uswapwep && (is_blaster(uswapwep) || (uquiver && ammo_and_launcher(uquiver, uswapwep)))){
-				result = fire_blaster(uwep, shotlimit);
-				if((result == 1) && is_blaster(uswapwep))
-					result = fire_blaster(uswapwep, shotlimit);
-				else if ((result == 1) && uquiver)
-					result += throw_obj(uquiver, shotlimit, THROW_USWAPWEP, ask);
-				if (result > 1) result--;
-				return(result);
-			}
-		}
-		result = fire_blaster(uwep, shotlimit);
-		
-		return result;
-	} else if(uwep && uwep->oartifact == ART_HOLY_MOONLIGHT_SWORD && uwep->lamplit && u.uen >= 25){
-		int dmg;
-		int range = (Double_spell_size) ? 6 : 3;
-		xchar lsx, lsy, sx, sy;
-		struct monst *mon;
-		sx = u.ux;
-		sy = u.uy;
-		if (!getdir((char *)0) || !(u.dx || u.dy)) return 0;
-		u.uen -= 25;
-		flags.forcefight = 1;
-		domove();
-		flags.forcefight = 0;
-		if(u.uswallow){
-			explode(u.ux,u.uy,AD_MAGM, WAND_CLASS, (d(2,12)+2*uwep->spe) * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
-		} else {
-			while(--range >= 0){
-				lsx = sx; sx += u.dx;
-				lsy = sy; sy += u.dy;
-				if(isok(sx,sy) && isok(lsx,lsy) && !IS_STWALL(levl[sx][sy].typ)) {
-					mon = m_at(sx, sy);
-					if(mon){
-						dmg = d(2,12)+2*uwep->spe;
-						explode(sx, sy, AD_MAGM, WAND_CLASS, dmg * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
-						break;//break loop
-					} else {
-						tmp_at(DISP_BEAM, cmap_to_glyph(S_digbeam));
-						tmp_at(sx, sy);
-						if(cansee(sx, sy)) delay_output();
-						tmp_at(DISP_END, 0);
-					}
-				} else {
-					dmg = d(2,12)+2*uwep->spe;
-					explode(lsx, lsy, AD_MAGM, WAND_CLASS, dmg * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
-					break;//break loop
-				}
-			}
-			return 1;
-		}
-	} else if(u.twoweap && uswapwep && is_blaster(uswapwep) && !(uquiver && ammo_and_launcher(uquiver, uwep))){
-		shotlimit = (multi || save_cm) ? multi + 1 : 0;
-		multi = 0;		/* reset; it's been used up */
-		if (!test_twoweapon()) untwoweapon();
-		else {
-			result = fire_blaster(uswapwep, shotlimit);
-			return(result);
-		}
-	}
-	
-	if(check_capacity((char *)0)) return(0);
-	if (!uquiver) {
-		if (!flags.autoquiver) {
-			/* Don't automatically fill the quiver */
-			You("have no ammunition readied!");
-			if (iflags.quiver_fired)
-			  dowieldquiver(); /* quiver_fired */
-			if (!uquiver)
-			  return(dothrow());
-		} else {
-		  autoquiver();
-		  if (!uquiver) {
-			You("have nothing appropriate for your quiver!");
-			return(dothrow());
-		  } else {
-			You("fill your quiver:");
-			prinv((char *)0, uquiver, 0L);
-		  }
-		}
-	}
-
-	/*
-	 * Since some characters shoot multiple missiles at one time,
-	 * allow user to specify a count prefix for 'f' or 't' to limit
-	 * number of items thrown (to avoid possibly hitting something
-	 * behind target after killing it, or perhaps to conserve ammo).
-	 *
-	 * The number specified can never increase the number of missiles.
-	 * Using ``5f'' when the shooting skill (plus RNG) dictates launch
-	 * of 3 projectiles will result in 3 being shot, not 5.
-	 */
-	/* kludge to work around parse()'s pre-decrement of `multi' */
-	shotlimit = (multi || save_cm) ? multi + 1 : 0;
-	multi = 0;		/* reset; it's been used up */
-
-	if (u.twoweap) {
-		if (!test_twoweapon()) untwoweapon();
-		else if (ammo_and_launcher(uquiver,uwep) 
-		    && ammo_and_launcher(uquiver, uswapwep)){
-			result = throw_obj(uquiver, shotlimit, THROW_UWEP, ask);
-			if((result == 1) && is_blaster(uswapwep))
-				result = fire_blaster(uswapwep, shotlimit);
-			else if ((result == 1) && uquiver)
-			    result += throw_obj(uquiver, shotlimit, THROW_USWAPWEP, ask);
-			if (result > 1) result--;
-			if(result && roll_madness(MAD_TALONS)){
-				You("panic after giving up your property!");
-				nomul(-1*rnd(6),"panic");
-			}
-			return(result);
-		} else if(ammo_and_launcher(uquiver,uwep)){
-			result = throw_obj(uquiver, shotlimit, THROW_UWEP, ask);
-			if(result && roll_madness(MAD_TALONS)){
-				You("panic after giving up your property!");
-				nomul(-1*rnd(6),"panic");
-			}
-			return(result);
-		} else if(ammo_and_launcher(uquiver, uswapwep)){
-			result = throw_obj(uquiver, shotlimit, THROW_USWAPWEP, ask);
-			if(result && roll_madness(MAD_TALONS)){
-				You("panic after giving up your property!");
-				nomul(-1*rnd(6),"panic");
-			}
-			return(result);
-		}
-	}
-	result = (throw_obj(uquiver, shotlimit, THROW_UWEP, ask));
-	
-	if(result && roll_madness(MAD_TALONS)){
-		You("panic after throwing your property!");
-		nomul(-1*rnd(6),"panic");
-	}
-	
-	return result;
-}
-
+#if 0
+///* Throw from the quiver */
+//int
+//dofire()
+//{
+//	return dofire_core(TRUE);
+//}
+//
+//int
+//dofire_core(ask)
+//int ask;
+//{
+//	int result, shotlimit;
+//
+//	if (notake(youracedata)) {
+//	    You("are physically incapable of doing that.");
+//	    return 0;
+//	}
+//	
+//	if(uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && uwep->oartifact && 
+//		(
+//        (uwep->oartifact == ART_KHAKKHARA_OF_THE_MONKEY) ||
+//		(uwep->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE) && ACURR(A_STR) == STR19(25)) ||
+//		(uwep->oartifact == ART_ANNULUS && (uwep->otyp == CHAKRAM || uwep->otyp == LIGHTSABER)) ||
+//		(uwep->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && Race_if(PM_DWARF) && ACURR(A_STR) == STR19(25))
+//		// (uwep->oartifact == ART_SICKLE_MOON)
+//		)
+//	){
+//		/*See below for shotlimit*/
+//		shotlimit = (multi || save_cm) ? multi + 1 : 0;
+//		multi = 0;		/* reset; it's been used up */
+//
+//		return throw_obj(uwep, shotlimit, THROW_UWEP, ask);
+//	}
+//	
+//	if(uwep && !is_blaster(uwep) && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && Race_if(PM_ANDROID)){
+//		/*See below for shotlimit*/
+//		shotlimit = (multi || save_cm) ? multi + 1 : 0;
+//		multi = 0;		/* reset; it's been used up */
+//
+//		return throw_obj(uwep, shotlimit, THROW_UWEP, ask);
+//	}
+//	
+//	if(uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep)))  && uwep->oartifact == ART_ROGUE_GEAR_SPIRITS){
+//		struct obj *bolt = mksobj(CROSSBOW_BOLT, FALSE, FALSE);
+//		int result;
+//		bolt->spe = min(0,uwep->spe);
+//		bolt->blessed = uwep->blessed;
+//		bolt->cursed = uwep->cursed;
+//		bolt->objsize = MZ_SMALL;
+//		fix_object(bolt);
+//		/*See below for shotlimit*/
+//		shotlimit = (multi || save_cm) ? multi + 1 : 0;
+//		multi = 0;		/* reset; it's been used up */
+//		
+//		if(shotlimit > 0) bolt->quan = min(2,shotlimit); /* Make exactly enough, so that they are destroyed by throwing. */
+//		break_thrown = TRUE; /* state variable, always destroy thrown */
+//		result = throw_obj(bolt, shotlimit, THROW_UWEP, ask);
+//		break_thrown = FALSE; /* state variable, always destroy thrown */
+//		return result;
+//	}
+//	
+//	if(uwep && is_blaster(uwep)){
+//		shotlimit = (multi || save_cm) ? multi + 1 : 0;
+//		multi = 0;		/* reset; it's been used up */
+//		if (u.twoweap) {
+//			if (!test_twoweapon()) untwoweapon();
+//			else if (uswapwep && (is_blaster(uswapwep) || (uquiver && ammo_and_launcher(uquiver, uswapwep)))){
+//				result = fire_blaster(uwep, shotlimit);
+//				if((result == 1) && is_blaster(uswapwep))
+//					result = fire_blaster(uswapwep, shotlimit);
+//				else if ((result == 1) && uquiver)
+//					result += throw_obj(uquiver, shotlimit, THROW_USWAPWEP, ask);
+//				if (result > 1) result--;
+//				return(result);
+//			}
+//		}
+//		result = fire_blaster(uwep, shotlimit);
+//		
+//		return result;
+//	} else if(uwep && uwep->oartifact == ART_HOLY_MOONLIGHT_SWORD && uwep->lamplit && u.uen >= 25){
+//		int dmg;
+//		int range = (Double_spell_size) ? 6 : 3;
+//		xchar lsx, lsy, sx, sy;
+//		struct monst *mon;
+//		sx = u.ux;
+//		sy = u.uy;
+//		if (!getdir((char *)0) || !(u.dx || u.dy)) return 0;
+//		u.uen -= 25;
+//		flags.forcefight = 1;
+//		domove();
+//		flags.forcefight = 0;
+//		if(u.uswallow){
+//			explode(u.ux,u.uy,AD_MAGM, WAND_CLASS, (d(2,12)+2*uwep->spe) * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
+//		} else {
+//			while(--range >= 0){
+//				lsx = sx; sx += u.dx;
+//				lsy = sy; sy += u.dy;
+//				if(isok(sx,sy) && isok(lsx,lsy) && !IS_STWALL(levl[sx][sy].typ)) {
+//					mon = m_at(sx, sy);
+//					if(mon){
+//						dmg = d(2,12)+2*uwep->spe;
+//						explode(sx, sy, AD_MAGM, WAND_CLASS, dmg * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
+//						break;//break loop
+//					} else {
+//						tmp_at(DISP_BEAM, cmap_to_glyph(S_digbeam));
+//						tmp_at(sx, sy);
+//						if(cansee(sx, sy)) delay_output();
+//						tmp_at(DISP_END, 0);
+//					}
+//				} else {
+//					dmg = d(2,12)+2*uwep->spe;
+//					explode(lsx, lsy, AD_MAGM, WAND_CLASS, dmg * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
+//					break;//break loop
+//				}
+//			}
+//			return 1;
+//		}
+//	} else if(u.twoweap && uswapwep && is_blaster(uswapwep) && !(uquiver && ammo_and_launcher(uquiver, uwep))){
+//		shotlimit = (multi || save_cm) ? multi + 1 : 0;
+//		multi = 0;		/* reset; it's been used up */
+//		if (!test_twoweapon()) untwoweapon();
+//		else {
+//			result = fire_blaster(uswapwep, shotlimit);
+//			return(result);
+//		}
+//	}
+//	
+//	if(check_capacity((char *)0)) return(0);
+//	if (!uquiver) {
+//		if (!flags.autoquiver) {
+//			/* Don't automatically fill the quiver */
+//			You("have no ammunition readied!");
+//			if (iflags.quiver_fired)
+//			  dowieldquiver(); /* quiver_fired */
+//			if (!uquiver)
+//			  return(dothrow());
+//		} else {
+//		  autoquiver();
+//		  if (!uquiver) {
+//			You("have nothing appropriate for your quiver!");
+//			return(dothrow());
+//		  } else {
+//			You("fill your quiver:");
+//			prinv((char *)0, uquiver, 0L);
+//		  }
+//		}
+//	}
+//
+//	/*
+//	 * Since some characters shoot multiple missiles at one time,
+//	 * allow user to specify a count prefix for 'f' or 't' to limit
+//	 * number of items thrown (to avoid possibly hitting something
+//	 * behind target after killing it, or perhaps to conserve ammo).
+//	 *
+//	 * The number specified can never increase the number of missiles.
+//	 * Using ``5f'' when the shooting skill (plus RNG) dictates launch
+//	 * of 3 projectiles will result in 3 being shot, not 5.
+//	 */
+//	/* kludge to work around parse()'s pre-decrement of `multi' */
+//	shotlimit = (multi || save_cm) ? multi + 1 : 0;
+//	multi = 0;		/* reset; it's been used up */
+//
+//	if (u.twoweap) {
+//		if (!test_twoweapon()) untwoweapon();
+//		else if (ammo_and_launcher(uquiver,uwep) 
+//		    && ammo_and_launcher(uquiver, uswapwep)){
+//			result = throw_obj(uquiver, shotlimit, THROW_UWEP, ask);
+//			if((result == 1) && is_blaster(uswapwep))
+//				result = fire_blaster(uswapwep, shotlimit);
+//			else if ((result == 1) && uquiver)
+//			    result += throw_obj(uquiver, shotlimit, THROW_USWAPWEP, ask);
+//			if (result > 1) result--;
+//			return(result);
+//		} else if(ammo_and_launcher(uquiver,uwep)){
+//			result = throw_obj(uquiver, shotlimit, THROW_UWEP, ask);
+//			return(result);
+//		} else if(ammo_and_launcher(uquiver, uswapwep)){
+//			result = throw_obj(uquiver, shotlimit, THROW_USWAPWEP, ask);
+//			return(result);
+//		}
+//	}
+//	result = (throw_obj(uquiver, shotlimit, THROW_UWEP, ask));
+//	
+//	return result;
+//}
 /*
  * Object hits floor at hero's feet.  Called from drop() and throwit().
  */

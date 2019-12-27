@@ -59,11 +59,12 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 boolean verbose;				/* TRUE if messages should be printed even if the player can't see what happened */
 {
 	boolean youagr = (magr && magr == &youmonst);
-	struct obj * thrownobj;		/* singular fired/thrown object */
-	boolean onlyone;			/* if ammo only consists of thrownobj */
-	boolean wepgone = FALSE;	/* TRUE if thrownobj is destroyed */
-	boolean impaired = FALSE;	/* TRUE if throwing/firing slipped OR magr is confused/stunned/etc */
-	boolean returning;			/* TRUE if projectile should magically return to magr (like Mjollnir) */
+	struct obj * thrownobj;				/* singular fired/thrown object */
+	boolean onlyone;					/* if ammo only consists of thrownobj */
+	boolean wepgone = FALSE;			/* TRUE if thrownobj is destroyed */
+	boolean impaired = FALSE;			/* TRUE if throwing/firing slipped OR magr is confused/stunned/etc */
+	boolean returning;					/* TRUE if projectile should magically return to magr (like Mjollnir) */
+	boolean takenfromyourinv = FALSE;	/* tracks if a projectile originated in your pack. used to track MAD_TALONS */
 	struct monst * mdef = (struct monst *)0;
 	int result = 0;
 	int range = initrange;
@@ -131,6 +132,7 @@ boolean verbose;				/* TRUE if messages should be printed even if the player can
 		obj_extract_self(thrownobj);
 		break;
 	case OBJ_INVENT:	/* object in the hero's inventory */
+		takenfromyourinv = TRUE;
 		if (onlyone) {
 			if (thrownobj->owornmask)
 				remove_worn_item(thrownobj, FALSE);
@@ -234,6 +236,12 @@ boolean verbose;				/* TRUE if messages should be printed even if the player can
 			impaired |= (Confusion || Stunned || Blind || Hallucination || Fumbling);
 		else
 			impaired |= (magr->mconf || magr->mstun || magr->mblinded);
+	}
+
+	/* madness on losing an object */
+	if (takenfromyourinv && roll_madness(MAD_TALONS) {
+		You("panic after throwing your property!");
+		nomul(-1 * rnd(6), "panic");
 	}
 
 	/* determine if thrownobj should return (like Mjollnir) */
@@ -2014,7 +2022,7 @@ int * hurtle_dist;
 
 	return range;
 }
-#if 0
+
 /*
  * dothrow()
  *
@@ -2318,7 +2326,7 @@ dofire()
 	/* Fall through: we did nothing */
 	return 0;
 }
-#endif
+
 /* 
  * blaster_ammo()
  * 
