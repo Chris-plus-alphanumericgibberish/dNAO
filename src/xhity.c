@@ -1654,7 +1654,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if (youagr && !Upolyd && fromlist) {
 		/* do NOT get permonst-inherent attacks, except for: */
 		if (!is_null_attk(attk) && !(
-			(attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP) ||			/* "normal" attacks */
+			(*indexnum == 0) ||												/* first attack, HOPEFULLY a weapon attack! */
 			(Race_if(PM_YUKI_ONNA) && (!uwep || attk->aatyp == AT_NONE)) ||	/* yuki-onna get their additional attacks when unarmed, and their passive always */
 			(Race_if(PM_VAMPIRE)) ||
 			(Race_if(PM_CHIROPTERAN))
