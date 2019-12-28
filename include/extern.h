@@ -109,6 +109,7 @@ E boolean FDECL(arti_shattering, (struct obj *));
 E boolean FDECL(arti_disarm, (struct obj *));
 E boolean FDECL(arti_steal, (struct obj *));
 E boolean FDECL(arti_tentRod, (struct obj *));
+E boolean FDECL(arti_threeHead, (struct obj *));
 E boolean FDECL(arti_shining, (struct obj *));
 E boolean FDECL(arti_mandala, (struct obj *));
 E boolean FDECL(arti_lighten, (struct obj *));
@@ -1244,6 +1245,7 @@ E void FDECL(mapglyph, (int, glyph_t *, int *, unsigned *, int, int));
 
 /* ### mcastu.c ### */
 
+E void FDECL(cursetxt, (struct monst *, BOOLEAN_P));
 E int FDECL(castmu, (struct monst *,struct attack *,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(buzzmu, (struct monst *,struct attack *, int));
 E int FDECL(buzzmm, (struct monst *,struct monst *,struct attack *, int));
@@ -1272,6 +1274,7 @@ E struct monst *NDECL(cloneu);
 E void FDECL(expels, (struct monst *,struct permonst *,BOOLEAN_P));
 E struct attack *FDECL(getmattk, (struct monst *, struct permonst *, int,int *,struct attack *));
 E int FDECL(mattacku, (struct monst *));
+E void FDECL(hurtarmor,(int));
 E int FDECL(hitmu, (struct monst *,struct attack *));
 E int FDECL(passiveum, (struct permonst *,struct monst *,struct attack *));
 E int FDECL(magic_negation, (struct monst *));
@@ -1282,8 +1285,11 @@ E void FDECL(mdamageu, (struct monst *,int));
 E int FDECL(could_seduce, (struct monst *,struct monst *,struct attack *));
 #ifdef SEDUCE
 E int FDECL(doseduce, (struct monst *));
+E int FDECL(dololthseduce, (struct monst *));
 E int FDECL(dolilithseduce, (struct monst *));
+E int FDECL(dobelialseduce, (struct monst *));
 E int FDECL(domlcseduce, (struct monst *));
+E int FDECL(dograzseduce, (struct monst *));
 E int FDECL(dosflseduce, (struct monst *));
 E int FDECL(dopaleseduce, (struct monst *));
 E int FDECL(dotent, (struct monst *, int));
@@ -2663,6 +2669,8 @@ E void FDECL(find_to_hit_rolls, (struct monst *,int *,int *,int *));
 E int FDECL(find_roll_to_hit, (struct monst *,BOOLEAN_P));
 E boolean FDECL(attack, (struct monst *));
 E boolean FDECL(hmon, (struct monst *,struct obj *,int));
+E int FDECL(joust, (struct monst *, struct obj *));
+E void FDECL(steal_it, (struct monst *, struct attack *));
 E int FDECL(damageum, (struct monst *,struct attack *));
 E void FDECL(missum, (struct monst *,struct attack *));
 E int FDECL(passive, (struct monst *,BOOLEAN_P,int,UCHAR_P,UCHAR_P));

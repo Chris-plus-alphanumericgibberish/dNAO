@@ -8,11 +8,9 @@
 STATIC_DCL boolean FDECL(known_hitum, (struct monst *,int *,struct attack *));
 STATIC_DCL boolean FDECL(known_hitum_wepi, (struct monst *,int *,struct attack *, int));
 STATIC_DCL boolean FDECL(pacifist_attack_checks, (struct monst *, struct obj *));
-//STATIC_DCL void FDECL(steal_it, (struct monst *, struct attack *));
 STATIC_DCL boolean FDECL(hitum, (struct monst *,int,struct attack *));
 STATIC_DCL boolean FDECL(hmon_hitmon, (struct monst *,struct obj *,int));
 #ifdef STEED
-//STATIC_DCL int FDECL(joust, (struct monst *,struct obj *));
 #endif
 void NDECL(demonpet);
 STATIC_DCL boolean FDECL(m_slips_free, (struct monst *mtmp,struct attack *mattk));

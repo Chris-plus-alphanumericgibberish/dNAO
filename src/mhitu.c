@@ -14,10 +14,6 @@ STATIC_DCL void FDECL(urustm, (struct monst *, struct obj *));
 STATIC_DCL boolean FDECL(u_slip_free, (struct monst *,struct attack *));
 # endif /* OVL1 */
 
-//STATIC_DCL int FDECL(dololthseduce, (struct monst *));
-//STATIC_DCL int FDECL(dobelialseduce, (struct monst *));
-//STATIC_DCL int FDECL(dograzseduce, (struct monst *));
-
 #ifdef OVLB
 # ifdef SEDUCE
 STATIC_DCL void FDECL(mayberem, (struct obj *, const char *));
@@ -34,7 +30,6 @@ STATIC_DCL void FDECL(missmu,(struct monst *,BOOLEAN_P,struct attack *));
 STATIC_DCL void FDECL(mswings,(struct monst *,struct obj *));
 STATIC_DCL void FDECL(wildmiss, (struct monst *,struct attack *));
 
-//STATIC_DCL void FDECL(hurtarmor,(int));
 STATIC_DCL void FDECL(hitmsg,(struct monst *,struct attack *));
 STATIC_DCL boolean FDECL(umetgaze, (struct monst *));
 

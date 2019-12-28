@@ -41,15 +41,8 @@ STATIC_DCL void FDECL(weave_black_web, (struct monst *));
 STATIC_DCL int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 
-extern const char * const destroy_strings[];					/* from zap.c */
-/* TODO: either move the whole functions or put these in extern.h? */
-extern void FDECL(hurtarmor, (int));							/* from mhitu.c */
-extern int FDECL(dololthseduce, (struct monst *));				/* from mhitu.c */
-extern int FDECL(dobelialseduce, (struct monst *));				/* from mhitu.c */
-extern int FDECL(dograzseduce, (struct monst *));				/* from mhitu.c */
-extern void FDECL(steal_it, (struct monst *, struct attack *));	/* from uhitm.c */
-extern int FDECL(joust, (struct monst *, struct obj *));		/* from uhitm.c */
-extern boolean FDECL(arti_threeHead, (struct obj *));			/* from artifact.c */
+/* item destruction strings from zap.c */
+extern const char * const destroy_strings[];
 
 /* Counterattack chance at skill level....  B:  S:  E:  */
 static const int DjemSo_counterattack[] = {  5, 10, 20 };
@@ -58,7 +51,6 @@ static const int Soresu_counterattack[] = { 10, 15, 25 };
 /* Misc attacks */
 static struct attack noattack = { 0, 0, 0, 0 };
 static struct attack basicattack  = { AT_WEAP, AD_PHYS, 1, 4 };
-
 
 /* attack_checks2()
  * TODO: find all instances of the original function (attackchecks) and use attackchecks2 instead, then rename.
@@ -8039,8 +8031,7 @@ int vis;
 
 	/* cancelled monsters can't cast spells -- return early */
 	if (!youagr && magr->mcan) {
-		/* TODO: cursetxt is currently local to mcastu.c */
-		//cursetxt(magr, FALSE);
+		cursetxt(magr, FALSE);
 		return MM_MISS;
 	}
 
@@ -13479,7 +13470,6 @@ int
 u_pole_pound(mdef)
 struct monst * mdef;
 {
-	struct attack dummy = { AT_WEAP, AD_PHYS, 1, 4 };
 	int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
-	return xmeleehity(&youmonst, mdef, &dummy, uwep, vis, 0, TRUE);
+	return xmeleehity(&youmonst, mdef, &basicattack, uwep, vis, 0, TRUE);
 }

@@ -9,7 +9,6 @@ extern void demonpet();
 
 extern void you_aggravate(struct monst *);
 
-STATIC_DCL void FDECL(cursetxt,(struct monst *,BOOLEAN_P));
 STATIC_DCL int FDECL(choose_magic_spell, (int,int,boolean));
 STATIC_DCL int FDECL(choose_clerical_spell, (int,int,boolean));
 STATIC_DCL int FDECL(choose_psionic_spell, (int,int,boolean));
@@ -23,7 +22,6 @@ STATIC_DCL void FDECL(ucast_spell,(struct monst *,struct monst *,int,int));
 #ifdef OVL0
 
 /* feedback when frustrated monster couldn't cast a spell */
-STATIC_OVL
 void
 cursetxt(mtmp, undirected)
 struct monst *mtmp;
