@@ -380,6 +380,7 @@ struct monst * mdef;
 		int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 		/* assumes the bloodthirst is caused by your mainhand weapon */
 		Your("bloodthirsty weapon attacks!");
+		bhitpos.x = u.ux + u.dx; bhitpos.y = u.uy + u.dy;
 		result = xmeleehity(&youmonst, mdef, &basicattack, uwep, VIS_MAGR, 0, FALSE);
 	}
 	else {
@@ -864,6 +865,7 @@ int tary;
 				/* do{}while(); loop for AT_DEVA */
 				boolean devaloop = (aatyp == AT_DEVA);
 				do {
+					bhitpos.x = tarx; bhitpos.y = tary;
 					result = xmeleehity(magr, mdef, attk, otmp, vis, tohitmod, ranged);
 					/* Marionette causes an additional weapon strike to a monster behind the original target */
 					/* this can attack peaceful/tame creatures without warning */
@@ -881,6 +883,7 @@ int tary;
 							struct monst *mdef2 = m_at(tarx + dx, tary + dy);
 							if (mdef2 && (mdef2 != mdef)) {
 								int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
+								bhitpos.x = tarx; bhitpos.y = tary;
 								(void)xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
 								/* we aren't handling MM_AGR_DIED or MM_AGR_STOP; hopefully the attacker being a player covers those cases well enough */
 							}
@@ -952,6 +955,7 @@ int tary;
 				continue;
 			}
 			/* make the attack */
+			bhitpos.x = tarx; bhitpos.y = tary;
 			result = xmeleehity(magr, mdef, attk, (struct obj *)0, vis, tohitmod, ranged);
 			dopassive_local = TRUE;
 			/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
@@ -1096,6 +1100,7 @@ int tary;
 				continue;
 			}
 			/* make the attack */
+			bhitpos.x = tarx; bhitpos.y = tary;
 			result = xmeleehity(magr, mdef, attk, (struct obj *)0, vis, tohitmod, ranged);
 			if (distmin(x(magr), y(magr), tarx, tary) == 1)
 				dopassive_local = TRUE;
@@ -11940,9 +11945,9 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		}
 	}
 
-	/* worm cutting -- kludged to hell */
-	if (youagr && mdef->wormno && !flags.mon_moving && m_at(u.ux + u.dx, u.uy + u.dy) == mdef) {
-		cutworm(mdef, u.ux + u.dx, u.uy + u.dy, weapon);
+	/* worm cutting -- assumes bhitpos is set! */
+	if (isok(bhitpos.x, bhitpos.y) && m_at(bhitpos.x, bhitpos.y) == mdef) {
+		cutworm(mdef, bhitpos.x, bhitpos.y, weapon);
 	}
 
 	/* uranium imp warping -- not implemented for the player defending */
