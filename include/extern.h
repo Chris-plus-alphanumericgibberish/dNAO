@@ -484,6 +484,7 @@ E char *FDECL(y_monnam, (struct monst *));
 E char *FDECL(Adjmonnam, (struct monst *,const char *));
 E char *FDECL(Amonnam, (struct monst *));
 E char *FDECL(a_monnam, (struct monst *));
+E char *FDECL(mon_nam_too, (struct monst *, struct monst *));
 E char *FDECL(getDrowHouse, (long));
 E char *FDECL(distant_monnam, (struct monst *,int,char *));
 E const char *NDECL(rndmonnam);

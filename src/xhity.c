@@ -14,7 +14,6 @@ STATIC_DCL boolean FDECL(safe_attack, (struct monst *, struct monst *, struct at
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
 STATIC_DCL struct attack * FDECL(getattk, (struct monst *, int *, int *, struct attack *, boolean, int *, int *));
 STATIC_DCL int FDECL(destroy_item2, (struct monst *, int, int, boolean));
-STATIC_DCL char * FDECL(mon_nam_too, (struct monst *, struct monst *));	/* TODO: move to do_name.c */
 STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *, boolean));
 STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *));
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
@@ -2293,35 +2292,6 @@ boolean allow_lethal;
 	}
 	/* return if anything was destroyed */
 	return (any_destroyed ? MM_HIT : MM_MISS);
-}
-
-
-/* mon_nam_too
- * Should be moved to do_name.c; remove version of this in mhitm.c
- *
- * returns mon_nam(mon) relative to other_mon; normal name unless they're
- * the same, in which case the reference is to {him|her|it} self
- */
-char *
-mon_nam_too(mon, other_mon)
-struct monst *mon;
-struct monst *other_mon;
-{
-	if (mon == other_mon) {
-		if (mon == &youmonst)
-			return "yourself";
-		else {
-			switch (pronoun_gender(mon)) {
-			case 0:		return "himself";
-			case 1:		return "herself";
-			default:	return "itself";
-			}
-		}
-	}
-	// default case; mon != other_mon
-	if (mon == &youmonst)
-		return "you";
-	return mon_nam(mon);
 }
 
 /* noises()

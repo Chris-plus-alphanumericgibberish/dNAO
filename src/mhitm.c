@@ -18,7 +18,6 @@ static NEARDATA struct obj *otmp;
 static const char brief_feeling[] =
 	"have a %s feeling for a moment, then it passes.";
 
-STATIC_DCL char *FDECL(mon_nam_too, (char *,struct monst *,struct monst *));
 STATIC_DCL void FDECL(mrustm, (struct monst *, struct monst *, struct obj *));
 STATIC_DCL int FDECL(hitmm, (struct monst *,struct monst *,struct attack *));
 STATIC_DCL int FDECL(gulpmm, (struct monst *,struct monst *,struct attack *));
@@ -36,23 +35,6 @@ STATIC_DCL int NDECL(mountedCombat);
  * instead of a global variable.
  */
 static int dieroll;
-
-/* returns mon_nam(mon) relative to other_mon; normal name unless they're
-   the same, in which case the reference is to {him|her|it} self */
-STATIC_OVL char *
-mon_nam_too(outbuf, mon, other_mon)
-char *outbuf;
-struct monst *mon, *other_mon;
-{
-	Strcpy(outbuf, mon_nam(mon));
-	if (mon == other_mon)
-	    switch (pronoun_gender(mon)) {
-	    case 0:	Strcpy(outbuf, "himself");  break;
-	    case 1:	Strcpy(outbuf, "herself");  break;
-	    default:	Strcpy(outbuf, "itself"); break;
-	    }
-	return outbuf;
-}
 
 STATIC_OVL void
 noises(magr, mattk)
@@ -89,7 +71,7 @@ missmm(magr, mdef, mattk)
 		fmt = (could_seduce(magr,mdef,mattk) && !magr->mcan) ?
 			"%s pretends to be friendly to" : "%s misses";
 		Sprintf(buf, fmt, Monnam(magr));
-		pline("%s %s.", buf, mon_nam_too(mdef_name, mdef, magr));
+		pline("%s %s.", buf, mon_nam_too(mdef, magr));
 	} else  noises(magr, mattk);
 }
 
@@ -1070,7 +1052,7 @@ defaultmmhit:
 				}
 				break;
 		    }
-		    pline("%s %s.", buf, mon_nam_too(mdef_name, mdef, magr));
+		    pline("%s %s.", buf, mon_nam_too(mdef, magr));
 		}
 	} else  noises(magr, mattk);
 	return(mdamagem(magr, mdef, mattk));
