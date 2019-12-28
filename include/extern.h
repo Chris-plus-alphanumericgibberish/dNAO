@@ -38,6 +38,7 @@ E boolean FDECL(xfirey, (struct monst *, struct attack *, int, int));
 E boolean FDECL(m_online, (struct monst *, struct monst *, int, int, boolean, boolean));
 E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
 E boolean NDECL(android_combo);
+E int FDECL(u_pole_pound, (struct monst *));
 
 /* ### allmain.c ### */
 

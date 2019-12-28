@@ -2954,7 +2954,7 @@ int tary;
 	int multishot;
 	const char *onm;
 	boolean mass_pistol = FALSE;
-	int result;
+	int result = 0;
 
 	/* AI: If target is you and you are coming toward the monster, the monster
 	 * should try to soften you up with missiles.  If you are
@@ -3034,7 +3034,7 @@ int tary;
 		}
 	}
 	/* Otherwise, we will throw thrownobj -- if it's not an arrow/bolt/bullet etc, which are dumb to throw */
-	else if (is_ammo(thrownobj) && thrownobj->oclass != GEM_CLASS && !is_grenade(thrownobj))
+	else if (!is_ammo(thrownobj) || thrownobj->oclass == GEM_CLASS || is_grenade(thrownobj))
 	{
 		result |= mthrow(magr, thrownobj, (struct obj *)0, tarx, tary, FALSE);
 	}
