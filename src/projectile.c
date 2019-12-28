@@ -12,6 +12,7 @@ STATIC_DCL boolean FDECL(toss_up2, (struct obj *));
 STATIC_DCL int FDECL(calc_multishot, (struct monst *, struct obj *, struct obj *, int));
 STATIC_DCL int FDECL(calc_range, (struct monst *, struct obj *, struct obj *, int *));
 STATIC_DCL boolean FDECL(uthrow, (struct obj *, struct obj *, int, boolean));
+STATIC_DCL boolean FDECL(misthrow, (struct monst *, struct obj *, struct obj *, boolean, int *, int *, int *));
 STATIC_DCL int FDECL(mthrow, (struct monst *, struct obj *, struct obj *, int, int, boolean));
 STATIC_DCL struct obj * FDECL(blaster_ammo, (struct obj *));
 
@@ -28,6 +29,7 @@ extern char* FDECL(breathwep, (int));
 
 /* some damn global variables because passing these as parameters would be a lot to add for something so rarely used.
  * The player threw an object, these save what the player's state was just prior to throwing so it can be restored */
+static boolean takenfromyourinv = FALSE;	/* tracks if a projectile originated in your pack. used to track MAD_TALONS */
 static boolean u_was_twoweap;
 static boolean u_was_swallowed;
 static long old_wep_mask;
@@ -44,7 +46,7 @@ static long old_wep_mask;
  * TODO: slips/misfires should NOT be here
  */
 int
-projectile(magr, ammo, launcher, fired, initx, inity, dx, dy, dz, initrange, forcedestroy, verbose)
+projectile(magr, ammo, launcher, fired, initx, inity, dx, dy, dz, initrange, forcedestroy, verbose, impaired)
 struct monst * magr;			/* Creature responsible for the projectile. Can be non-existant. */
 struct obj * ammo;				/* Projectile object. Must exist. May be in an inventory, or free, or anywhere. */
 struct obj * launcher;			/* Launcher for the projectile. Can be non-existant. Implies "fired" is true. */
@@ -57,14 +59,13 @@ int dz;							/* z; Direction of projectile's movement */
 int initrange;					/* Maximum range for projectile */
 boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed at the end */
 boolean verbose;				/* TRUE if messages should be printed even if the player can't see what happened */
+boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stunned/etc */
 {
 	boolean youagr = (magr && magr == &youmonst);
 	struct obj * thrownobj;				/* singular fired/thrown object */
 	boolean onlyone;					/* if ammo only consists of thrownobj */
 	boolean wepgone = FALSE;			/* TRUE if thrownobj is destroyed */
-	boolean impaired = FALSE;			/* TRUE if throwing/firing slipped OR magr is confused/stunned/etc */
 	boolean returning;					/* TRUE if projectile should magically return to magr (like Mjollnir) */
-	boolean takenfromyourinv = FALSE;	/* tracks if a projectile originated in your pack. used to track MAD_TALONS */
 	struct monst * mdef = (struct monst *)0;
 	int result = 0;
 	int range = initrange;
@@ -160,88 +161,10 @@ boolean verbose;				/* TRUE if messages should be printed even if the player can
 		impossible("unhandled where of thrown item, %d", thrownobj->where);
 		break;
 	}
-	thrownobj->owornmask = 0;
+	thrownobj->owornmask &= ~(W_CHAIN|W_BALL);	/* balls and chains are still attached, other objects aren't*/
 	/* set that it was thrown... if the player threw it */
 	if (youagr) {
 		thrownobj->was_thrown = TRUE;
-	}
-
-	/* mis-throw/fire can change the direction of the projectile */
-	if (/* needs a creature to be involved in throwing the projectile */
-		magr && (
-		/* cursed thrownobj */
-		(thrownobj->cursed && !((magr == &youmonst) ? is_weldproof(youracedata) : is_weldproof_mon(magr)))
-		||
-		/* or flintlock */
-		(fired && launcher && launcher->otyp == FLINTLOCK)
-		||
-		/* or greased */
-		(thrownobj->greased)
-		)
-		&&
-		/* at a 1/7 chance */
-		(dx || dy) && !rn2(7)
-		) {
-		boolean slipok = TRUE;
-		/* misfires */
-		if (fired) {
-			if (youagr)
-				Your("weapon misfires!");
-			else if (canseemon(magr) && flags.verbose)
-				pline("%s misfires!", Monnam(magr));
-		}
-		/* slips */
-		else {
-			/* only greased items and proper throwing weapons can slip */
-			/* only slip if it's greased or meant to be thrown */
-			if (thrownobj->greased || throwing_weapon(thrownobj)) {
-				/* BUG: this message is grammatically incorrect if obj has
-				a plural name; greased gloves or boots for instance. */
-				if (youagr)
-					pline("%s as you throw it!", Tobjnam(thrownobj, "slip"));
-				else if (canseemon(magr) && flags.verbose)
-					pline("%s as %s throws it!", Tobjnam(thrownobj, "slip"), mon_nam(magr));
-			}
-			else {
-				/* don't slip */
-				slipok = FALSE;
-			}
-		}
-		if (slipok) {
-			/* new direction */
-			dx = rn2(3) - 1;
-			dy = rn2(3) - 1;
-			if (!dx && !dy) {
-				dz = 1;
-			}
-			impaired = TRUE;
-		}
-	}
-	/* you might be too weak to throw it */
-	if (youagr &&
-		(u.dx || u.dy || (u.dz < 1)) &&
-		calc_capacity((int)thrownobj->owt) > SLT_ENCUMBER &&
-		(*hp(magr) < (Upolyd ? 5 : 10) && *hp(magr) != *hpmax(magr)) &&
-		thrownobj->owt > (*hp(magr)*2) &&
-		!Weightless) {
-		You("have so little stamina, %s drops from your grasp.",
-			the(xname(thrownobj)));
-		exercise(A_CON, FALSE);
-		dx = dy = 0;
-		dz = 1;
-	}
-	/* check other sources of impairment */
-	if (magr) {
-		if (youagr)
-			impaired |= (Confusion || Stunned || Blind || Hallucination || Fumbling);
-		else
-			impaired |= (magr->mconf || magr->mstun || magr->mblinded);
-	}
-
-	/* madness on losing an object */
-	if (takenfromyourinv && roll_madness(MAD_TALONS) {
-		You("panic after throwing your property!");
-		nomul(-1 * rnd(6), "panic");
 	}
 
 	/* determine if thrownobj should return (like Mjollnir) */
@@ -958,8 +881,10 @@ boolean * wepgone;				/* TRUE if projectile is already destroyed */
 	stackobj(thrownobj);
 
 	/* ball-related stuff */
-	if (thrownobj == uball)
+	if (thrownobj == uball) {
+		thrownobj->owornmask = old_wep_mask;
 		drop_ball(bhitpos.x, bhitpos.y);
+	}
 
 	/* update screen to see the new location of thrownobj */
 	if (cansee(bhitpos.x, bhitpos.y))
@@ -1778,7 +1703,7 @@ int shotlimit;
 	}
 	else if (
 		(ammo_and_launcher(ammo, launcher) && skill != -P_CROSSBOW) ||
-		(skill == P_DAGGER && !Role_if(PM_WIZARD)) ||
+		(skill == P_DAGGER) ||
 		(skill == -P_DART) ||
 		(skill == -P_SHURIKEN) ||
 		(skill == -P_BOOMERANG) ||
@@ -1827,6 +1752,8 @@ int shotlimit;
 		case PM_SAMURAI:
 			if (ammo->otyp == YA && launcher && launcher->otyp == YUMI) multishot++;
 			break;
+		case PM_WIZARD:
+			if (skill == P_DAGGER) multishot -= 3;	/* very bad at throwing daggers */
 		default:
 			break;	/* No bonus */
 		}
@@ -2435,13 +2362,25 @@ boolean forcedestroy;
 		return 1;
 	}
 
-	/* unbind seals if we break taboos */
-	if (ammo->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
-	if (breaktest(ammo) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
-	if ((ammo->otyp == EGG) && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA, TRUE);
-
-	/* degrade engravings on this spot */
-	u_wipe_engr(2);
+	/* blasters */
+	if (launcher && is_blaster(launcher)) {
+		/* we're using charge */
+		check_unpaid(launcher);
+		/* unbind seals if we break taboos */
+		if (launcher->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
+		/* degrade engravings on this spot (less) */
+		u_wipe_engr(1);
+	}
+	/* non-blasters */
+	else
+	{
+		/* unbind seals if we break taboos */
+		if (ammo->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
+		if (breaktest(ammo) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
+		if ((ammo->otyp == EGG) && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA, TRUE);
+		/* degrade engravings on this spot */
+		u_wipe_engr(2);
+	}
 
 	/* you touch the rubber chicken */
 	if (!uarmg && !Stone_resistance && (ammo->otyp == CORPSE &&
@@ -2494,8 +2433,10 @@ boolean forcedestroy;
 
 	/* call projectile() to shoot n times */
 	for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
+		int dx = u.dx, dy = u.dy, dz = u.dz;
+		boolean impaired = misthrow(&youmonst, ammo, launcher, m_shot.s, &dx, &dy, &dz);
 		/* note: we actually don't care if the projectile hit anything */
-		(void)projectile(&youmonst, ammo, launcher, m_shot.s, u.ux, u.uy, u.dx, u.dy, u.dz, range, forcedestroy, TRUE);
+		(void)projectile(&youmonst, ammo, launcher, m_shot.s, u.ux, u.uy, dx, dy, dz, range, forcedestroy, TRUE, impaired);
 		if (Weightless || Levitation)
 			hurtle(-u.dx, -u.dy, hurtle_dist, TRUE);
 	}
@@ -2504,7 +2445,108 @@ boolean forcedestroy;
 	m_shot.n = m_shot.i = 0;
 	m_shot.o = STRANGE_OBJECT;
 	m_shot.s = FALSE;
+	/* madness on losing an object */
+	if (takenfromyourinv && roll_madness(MAD_TALONS)) {
+		You("panic after throwing your property!");
+		nomul(-1 * rnd(6), "panic");
+	}
 	return 1;	/* this took time */
+}
+
+/* misthrow()
+ *
+ * Sometimes, creatures don't throw their projectiles where they want
+ * 
+ * This function makes that happen by adjusting dx/dy/dz.
+ *
+ * returns TRUE if throw is impaired.
+ */
+boolean
+misthrow(magr, ammo, launcher, fired, dx, dy, dz)
+struct monst * magr;
+struct obj * ammo;
+struct obj * launcher;
+boolean fired;
+int * dx;
+int * dy;
+int * dz;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean impaired = FALSE;
+
+	/* mis-throw/fire can change the direction of the projectile */
+	if (/* needs a creature to be involved in throwing the projectile */
+		magr && (
+		/* cursed ammo */
+		(ammo->cursed && !(youagr ? is_weldproof(youracedata) : is_weldproof_mon(magr)))
+		||
+		/* or flintlock */
+		(fired && launcher && launcher->otyp == FLINTLOCK)
+		||
+		/* or greased */
+		(ammo->greased)
+		)
+		&&
+		/* at a 1/7 chance */
+		(*dx || *dy) && !rn2(7)
+		) {
+		boolean slipok = TRUE;
+		/* misfires */
+		if (fired) {
+			if (youagr)
+				Your("weapon misfires!");
+			else if (canseemon(magr) && flags.verbose)
+				pline("%s misfires!", Monnam(magr));
+		}
+		/* slips */
+		else {
+			/* only greased items and proper throwing weapons can slip */
+			/* only slip if it's greased or meant to be thrown */
+			if (ammo->greased || throwing_weapon(ammo)) {
+				/* BUG: this message is grammatically incorrect if obj has
+				a plural name; greased gloves or boots for instance. */
+				if (youagr)
+					pline("%s as you throw it!", Tobjnam(ammo, "slip"));
+				else if (canseemon(magr) && flags.verbose)
+					pline("%s as %s throws it!", Tobjnam(ammo, "slip"), mon_nam(magr));
+			}
+			else {
+				/* don't slip */
+				slipok = FALSE;
+			}
+		}
+		if (slipok) {
+			/* new direction */
+			*dx = rn2(3) - 1;
+			*dy = rn2(3) - 1;
+			if (!*dx && !*dy) {
+				*dz = 1;
+			}
+			impaired = TRUE;
+		}
+	}
+	/* you might be too weak to throw it */
+	if (youagr &&
+		(u.dx || u.dy || (u.dz < 1)) &&
+		calc_capacity((int)ammo->owt) > SLT_ENCUMBER &&
+		(*hp(magr) < (Upolyd ? 5 : 10) && *hp(magr) != *hpmax(magr)) &&
+		ammo->owt > (*hp(magr) * 2) &&
+		!Weightless) {
+		You("have so little stamina, %s drops from your grasp.",
+			the(xname(ammo)));
+		exercise(A_CON, FALSE);
+		*dx = *dy = 0;
+		*dz = 1;
+	}
+	/* check other sources of impairment */
+	if (magr) {
+		if (youagr)
+			impaired |= (Confusion || Stunned || Blind || Hallucination || Fumbling);
+		else
+			impaired |= (magr->mconf || magr->mstun || magr->mblinded);
+	}
+
+	return impaired;
 }
 
 /* 
@@ -2748,7 +2790,7 @@ int tary;
 	/* shoot otmp */
 	projectile(magr, otmp, (struct obj *)0, FALSE,
 		x(magr), y(magr), dx, dy, 0,
-		BOLT_LIM, TRUE, youagr);
+		BOLT_LIM, TRUE, youagr, FALSE);
 
 	/* interrupt player if they were targetted */
 	if (tarx == u.ux && tary == u.uy)
@@ -2895,13 +2937,13 @@ int tary;
 		/* start the projectile adjacent to the target */
 		projectile(magr, qvr, (struct obj *)0, TRUE,
 			tarx-dx, tary-dy, dx, dy, 0,
-			1, TRUE, youagr);
+			1, TRUE, youagr, FALSE);
 	}
 	else {
 		/* start the projectile at magr's location, modified by xadj and yadj */
 		projectile(magr, qvr, (struct obj *)0, TRUE,
 			x(magr)+xadj, y(magr)+yadj, dx, dy, 0,
-			BOLT_LIM+rngmod, TRUE, youagr);
+			BOLT_LIM+rngmod, TRUE, youagr, FALSE);
 	}
 
 	/* shadow bolts web the target hit */
@@ -3060,11 +3102,11 @@ boolean forcedestroy;
 	int result;
 	int multishot;
 	int hurtle_dist = 0;	/* not used at the moment, but needed for range calculation */
-	int dx, dy;
+	int odx, ody;
 
 	/* figure out dx and dy */
-	dx = sgn(tarx - x(magr));
-	dy = sgn(tary - y(magr));
+	odx = sgn(tarx - x(magr));
+	ody = sgn(tary - y(magr));
 
 	/* get multishot calculation */
 	multishot = calc_multishot(magr, ammo, launcher, 999);
@@ -3102,8 +3144,10 @@ boolean forcedestroy;
 
 	/* call projectile() to shoot n times */
 	for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
+		int dx = odx, dy = ody, dz = 0;
+		boolean impaired = misthrow(magr, ammo, launcher, m_shot.s, &dx, &dy, &dz);
 		/* note: we actually don't care if the projectile hit anything */
-		result = projectile(magr, ammo, launcher, m_shot.s, x(magr), y(magr), dx, dy, 0, range, forcedestroy, FALSE);
+		result = projectile(magr, ammo, launcher, m_shot.s, x(magr), y(magr), dx, dy, dz, range, forcedestroy, FALSE, impaired);
 		/* monsters don't hurtle like the player does at the moment */
 	}
 

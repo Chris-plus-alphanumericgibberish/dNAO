@@ -31,7 +31,7 @@ E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct
 E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 E void FDECL(wakeup2, (struct monst *, boolean));
 E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int);
-E int FDECL(projectile, (struct monst *, struct obj *, struct obj *, boolean, int, int, int, int, int, int, boolean, boolean));
+E int FDECL(projectile, (struct monst *, struct obj *, struct obj *, boolean, int, int, int, int, int, int, boolean, boolean, boolean));
 E boolean FDECL(xbreathey, (struct monst *, struct attack *, int, int));
 E boolean FDECL(xspity, (struct monst *, struct attack *, int, int));
 E boolean FDECL(xfirey, (struct monst *, struct attack *, int, int));

@@ -387,10 +387,10 @@ struct monst * mdef;
 				otmp->blessed = 0;
 				otmp->cursed = 0;
 				if ((dx || dy) && !DEADMONSTER(mdef)){
-					projectile(&youmonst, otmp, (struct obj *)0, TRUE, x(mdef) + dx, y(mdef) + dy, -dx, -dy, 0, 1, TRUE, FALSE);
+					projectile(&youmonst, otmp, (struct obj *)0, TRUE, x(mdef) + dx, y(mdef) + dy, -dx, -dy, 0, 1, TRUE, FALSE, FALSE);
 				}
 				else {
-					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, 1, TRUE, FALSE);
+					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, 1, TRUE, FALSE, FALSE);
 				}
 			}
 		}
@@ -11057,17 +11057,24 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		/* get attackmask */
 		if (weapon && (valid_weapon_attack || invalid_weapon_attack)) {
 			otmp = weapon;
-
 			if (is_bludgeon(otmp)
 				|| otmp->oartifact == ART_YORSHKA_S_SPEAR
 				|| otmp->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD
+				|| otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
+				|| (otmp->otyp == KAMEREL_VAJRA && !litsaber(otmp))
 				){
 				attackmask |= WHACK;
 			}
-			if (is_stabbing(otmp)){
+			if (is_stabbing(otmp)
+				|| otmp->oartifact == ART_ROGUE_GEAR_SPIRITS
+				|| (otmp->otyp == KAMEREL_VAJRA && !litsaber(otmp))
+				){
 				attackmask |= PIERCE;
 			}
-			if (is_slashing(otmp)){
+			if (is_slashing(otmp)
+				|| otmp->oartifact == ART_LIECLEAVER
+				|| otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
+				){
 				attackmask |= SLASH;
 			}
 			if (is_blasting(otmp)
@@ -11077,6 +11084,9 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 				){
 				attackmask |= EXPLOSION;
 			}
+			/* if it's not any of the above, we're just smacking things with it */
+			if (!attackmask)
+				attackmask = WHACK;
 		}
 		else if (unarmed_punch) {
 			//Can always whack someone
@@ -11353,7 +11363,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 				getdir((char *)0);
 				if (u.dx || u.dy){
 					You("toss it away.");
-					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, (int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), FALSE, FALSE);
+					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, (int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), FALSE, FALSE, FALSE);
 				}
 				else{
 					You("drop it at your feet.");
@@ -13166,7 +13176,7 @@ android_combo()
 
 		/* attack (melee twice OR throw lightsaber) */
 		if (!mdef) {
-			projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE);
+			projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 		}
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -13187,7 +13197,7 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee once OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE);
+					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -13214,7 +13224,7 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee twice OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE);
+					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
