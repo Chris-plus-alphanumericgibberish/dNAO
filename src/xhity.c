@@ -738,6 +738,13 @@ int tary;
 				)
 				continue;
 		}
+
+		/* Illurien can only engulf the player, and only if she is stuck to you */
+		if (pa == &mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES] && aatyp == AT_ENGL &&
+			(!youdef || u.ustuck != magr)) {
+			continue;
+		}
+
 		/* based on the attack type... */
 		switch (aatyp)
 		{
@@ -4077,13 +4084,13 @@ boolean ranged;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, ranged, 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone);
+		result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, (weapon && ranged), 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, ranged, 0, 0, FALSE, dieroll, TRUE, vis, &wepgone);
+				result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, (weapon && ranged), 0, 0, FALSE, dieroll, TRUE, vis, &wepgone);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
