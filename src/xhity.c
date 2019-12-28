@@ -2681,10 +2681,6 @@ int amnt;
 		flags.botl = 1;
 	return;
 }
-
-/* TODO: remove searing damage from dmgval() */
-/* TODO: move all the other vs-type damage from dmgval into hmon2point0 */
-
 /* obj_silver_searing()
  *
  * returns TRUE if object sears silver-haters
@@ -2867,7 +2863,7 @@ struct obj * otmp;
 		else if (otmp->oartifact == ART_AMHIMITL)
 		{	ndice = 3; diesize = 4; }
 		else if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL) /* SCOPECREEP: add ART_TECPATL_OF_HUHETOTL to is_unholy() macro */
-		{	ndice = (otmp->cursed ? 2 : 1); diesize = 4; }
+		{	ndice = (otmp->cursed ? 4 : 2); diesize = 4; }
 		/* gold has a particular affinity to blessings and curses */
 		if (otmp->obj_material == GOLD) {
 			ndice *= 2;
@@ -2893,6 +2889,12 @@ struct obj * otmp;
 	if (otmp->obj_material == WOOD && otmp->otyp != MOON_AXE
 		&& (otmp->oward & WARD_VEIOISTAFUR) && pd->mlet == S_EEL) {
 		dmg += rnd(20);	
+	}
+
+	/* The Lifehunt Scythe is occult */
+	if (mdef && mdef->isminion){
+		if (otmp->oartifact == ART_LIFEHUNT_SCYTHE)
+			dmg += d(4, 4) + otmp->spe;
 	}
 
 	return dmg;
@@ -10380,16 +10382,6 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		/* Liecleaver adds 1d10 damage to fired bolts */
 		if (fired && launcher && launcher->oartifact == ART_LIECLEAVER)
 			basedmg += rnd(10);
-
-		/* axes deal more damage to wooden foes */
-		if (is_axe(weapon) && is_wooden(mdef->data))
-			basedmg += rnd(4);
-
-		/* TODO: add proper damage dice for these to dmgval */
-		/* skill damage has already been handled */
-		//if (obj->oartifact == ART_LIECLEAVER) tmp = 2 * (rnd(12) + rnd(10) + obj->spe);
-		//if (obj->oartifact == ART_ROGUE_GEAR_SPIRITS) tmp = 2 * (rnd(bigmonst(mon->data) ? 2 : 4) + obj->spe);
-		//if ((obj->otyp == KAMEREL_VAJRA && !litsaber(obj))) tmp = d(1, 4) + (bigmonst(mdat) ? 0 : 1) + obj->spe; //small mace
 	}
 	else if (invalid_weapon_attack) {
 		long cnt = weapon->quan;
@@ -11170,6 +11162,10 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			if (subtotl < 1)
 				subtotl = 1;
 		}
+		else if (subtotl > 0 && vulnerable_mask(resistmask) && !(attackmask & EXPLOSION)) {
+			/* 2x damage for attacking a vulnerability */
+			subtotl *= 2;
+		}
 	}
 
 	/* Half Physical Damage -- does not stack with damage-type resistance */
@@ -11207,18 +11203,14 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	lethaldamage = (totldmg >= *hp(mdef));
 
 	if (wizard && youagr && ublindf && ublindf->otyp == LENSES) {
-		pline("dmg = (%d + %d + %d + %d + %d + %d - defense) = %d; + %d + %d + %d + %d = %d",
+		pline("dmg = (%d + %d + %d + %d + %d - defense) = %d; + %d = %d",
 			basedmg,
 			artidmg,
 			bonsdmg,
 			((youagr && !natural_strike) ? 0 : monsdmg),	/* only add monsdmg for monsters or a player making a monster attack */
-			snekdmg,
-			jostdmg,
+			snekdmg + jostdmg,
 			subtotl,
-			seardmg,
-			heatdmg,
-			poisdmg,
-			specdmg,
+			seardmg + heatdmg + poisdmg + specdmg,
 			totldmg
 			);
 	}

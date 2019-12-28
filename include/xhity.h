@@ -57,6 +57,7 @@
 /* obj. h*/
 #define multistriking(otmp)	(!(otmp) ? 0 : \
 	(otmp)->otyp == KHAKKHARA ? 2 : \
+	(otmp)->otyp == SET_OF_CROW_TALONS ? 2 : \
 	(otmp)->otyp == VIPERWHIP ? ((otmp)->ovar1 - 1) : \
 	arti_threeHead((otmp)) ? 2 : \
 	arti_tentRod((otmp)) ? 6 : \
