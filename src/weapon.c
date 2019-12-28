@@ -471,14 +471,13 @@ int otyp;
 			bond = 4;
 		}
 		else if (obj->oartifact == ART_LIECLEAVER) {
-			/* note: also a 2x damage melee weapon */
-			ocn = 1;
+			ocn = 1;	/* plus another 1d10 from being an artifact */
 			ocd = 10;
-			bonn = 1;
+			bonn = 2;
 			bond = 12;
+			spe_mult = 2;
 		}
 		else if (obj->oartifact == ART_ROGUE_GEAR_SPIRITS) {
-			/* note: also a 2x damage melee weapon */
 			ocn = 1;
 			ocd = (large ? 2 : 4);
 		}
