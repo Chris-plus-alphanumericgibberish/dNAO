@@ -35,6 +35,7 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
+STATIC_DCL int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL void FDECL(weave_black_web, (struct monst *));
@@ -43,6 +44,9 @@ STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attac
 
 /* item destruction strings from zap.c */
 extern const char * const destroy_strings[];
+
+extern boolean FDECL(umetgaze, (struct monst *));
+extern boolean FDECL(mmetgaze, (struct monst *, struct monst *));
 
 /* Counterattack chance at skill level....  B:  S:  E:  */
 static const int DjemSo_counterattack[] = {  5, 10, 20 };
@@ -1118,31 +1122,8 @@ int tary;
 				/* not done as part of the player's attack chain, use #monster */
 				continue;
 			}
-			/* farmed out to the existing gazeXX functions */
-			else if (youdef) {
-				/* magr must actually know where you are */
-				if (missedyou)
-					continue;
-
-				/* gazemu returns: 0(nothing happened), 1(gaze used), 2(gazer died), 3(gazer's turn ends) */
-				result = gazemu(magr, attk);
-				switch (result){
-				case 0: result = MM_MISS;		break;
-				case 1: result = MM_HIT;		break;
-				case 2: result = MM_AGR_DIED;	break;
-				case 3: result = MM_AGR_STOP;	break;
-				default:
-					impossible("Oops, gazemu() return value (%d) not supported!", result);
-					break;
-				}
-			}
 			else {
-				/* magr must be able to see mdef */
-				if (!mon_can_see_mon(magr, mdef)){
-					result = MM_MISS;
-					continue;
-				}
-				result = gazemm(magr, mdef, attk);
+				result = xgazey(magr, mdef, attk, vis);
 			}
 			break;
 			/* wide (passive) gaze */
@@ -2393,6 +2374,7 @@ struct attack *attk;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
 	int compat;
 
 	/* AT_NONE is silent */
@@ -2464,9 +2446,11 @@ struct attack *attk;
 					specify_you = TRUE;
 			}
 			/* print the message */
-			pline("%s %s%s%s%s",
+			pline("%s %s%s%s%s%s%s",
 				(youagr ? "You" : Monnam(magr)),
-				(youagr ? verb : makeplural(verb)),
+				(is_weeping(pa) && !youagr ? "is " : ""),
+				(youagr && !is_weeping(pa) ? verb : makeplural(verb)),
+				(is_weeping(pa) && !youagr ? "ing" : ""),
 				((youdef && !youagr && !specify_you) ? "" : " "),
 				((youdef && !youagr && !specify_you) ? "" : mon_nam_too(mdef, magr)),
 				ending
@@ -3000,7 +2984,6 @@ struct obj * weapon;
  * Rewards [magr] as appropriate.
  * 
  * Returns:
- * MM_MISS		0x00	(possible) aggressor missed (caused by lifesaved defender)
  * MM_HIT		0x01	(possible) aggressor hit defender (usually, except when defender lifesaved)
  * MM_DEF_DIED	0x02	(possible) defender died (defender died and was not lifesaved)
  * MM_AGR_DIED	0x04	(never) aggressor died
@@ -3990,10 +3973,13 @@ boolean ranged;
 
 	/*	Next a cancellation factor	*/
 	/*	Use uncancelled when the cancellation factor takes into account certain
-	*	armor's special magic protection.  Otherwise just use !mtmp->mcan.
-	*/
+	 *	armor's special magic protection.  Otherwise just use !mtmp->mcan.
+	 */
 	armpro = magic_negation(mdef);
 	armuncancel = ((rn2(3) >= armpro) || !rn2(50));
+	/* hack: elemental gaze attacks call this function with their AT_GAZE; we want that to ignore armor cancellation */
+	if (attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ)
+		armuncancel = TRUE;
 	notmcan = (youagr || !magr->mcan);
 	uncancelled = notmcan && armuncancel;
 	
@@ -4036,7 +4022,7 @@ boolean ranged;
 	 */
 
 	/* intercept attacks dealing elemental damage to split them apart */
-	if (attk->aatyp != AT_NONE) {
+	if (attk->aatyp != AT_NONE && attk->aatyp != AT_GAZE && attk->aatyp != AT_WDGZ) {
 		switch (attk->adtyp)
 		{
 		case AD_MAGM:
@@ -4611,7 +4597,7 @@ boolean ranged;
 			}
 			else
 			{
-				if (canseemon(mdef)) {
+				if (vis&VIS_MDEF) {
 					pline("%s %s for a moment.",
 						Monnam(mdef),
 						makeplural(stagger(mdef, "stagger")));
@@ -4643,7 +4629,7 @@ boolean ranged;
 			}
 			else
 			{
-				if (canseemon(mdef))
+				if (vis&VIS_MDEF)
 					pline("%s looks confused.", Monnam(mdef));
 
 				mdef->mconf = 1;
@@ -4676,7 +4662,7 @@ boolean ranged;
 			}
 			/* monsters get confused by AD_HALU */
 			else {
-				if (canseemon(mdef))
+				if (vis&VIS_MDEF)
 					pline("%s looks confused.", Monnam(mdef));
 
 				mdef->mconf = 1;
@@ -5032,9 +5018,9 @@ boolean ranged;
 					Your("%s less effective.",
 						aobjnam(otmp, "seem"));
 				}
-				else if (vis) {
-					pline("%s's %s less effective.",
-						Monnam(mdef),
+				else if (vis&VIS_MDEF) {
+					pline("%s %s less effective.",
+						s_suffix(Monnam(mdef)),
 						aobjnam(otmp, "seem"));
 				}
 			}
@@ -5173,7 +5159,7 @@ boolean ranged;
 			}
 			else {
 				/* print message first -- this should happen before the victim is drained/dies */
-				if (vis)
+				if (vis&VIS_MDEF)
 					pline("%s suddenly seems weaker!", Monnam(mdef));
 
 				/* for monsters, we need to make something up -- drain 2d6 maxhp, 1 level */
@@ -9449,6 +9435,1341 @@ expl_common:
 	return result;
 }
 
+/* xgazey()
+ * 
+ * A creature uses its gaze attack (either active or passive) on another.
+ *
+ * Returns MM_MISS if this failed and took no time (though a player attempting to #monster gaze still used their turn)
+ *
+ * Otherwise returns MM hitflags as usual.
+ */
+int
+xgazey(magr, mdef, attk, vis)
+struct monst * magr;
+struct monst * mdef;
+struct attack * attk;
+int vis;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct permonst * pa = (youagr ? youracedata : magr->data);
+	struct permonst * pd = (youdef ? youracedata : mdef->data);
+
+	boolean needs_magr_eyes = TRUE;		/* when TRUE, mdef is protected if magr is blind */
+	boolean needs_mdef_eyes = TRUE;		/* when TRUE, mdef is protected by being blind */
+	boolean needs_uncancelled = TRUE;	/* when TRUE, attack cannot happen when cancelled */
+	boolean maybe_not = (!youagr);		/* when TRUE, occasionally doesn't use gaze attack at all */
+
+	char buf[BUFSZ];
+	struct attack alt_attk;
+
+	int result = MM_MISS;
+	int adtyp = attk->adtyp;
+	int dmg = d((int)attk->damn, (int)attk->damd);
+	int fulldmg = dmg;			/* original unreduced damage */
+
+	/* Hamsa ward protects from gazes */
+	if (ward_at(x(mdef), y(mdef) == HAMSA))
+		return MM_MISS;
+	/* at the very least, all gaze attacks need a clear line of sight */
+	if (!clear_path(x(magr), y(magr), x(mdef), y(mdef)))
+		return MM_MISS;
+
+	/* fix up adtyps for some gazes */
+	switch (adtyp)
+	{
+	case AD_RGAZ:
+		adtyp = randomgaze();
+		break;
+	case AD_RBRE:
+	case AD_RETR:
+		adtyp = elementalgaze();
+		break;
+	case AD_WISD:
+		if (!youdef)
+			adtyp = AD_CONF;
+		break;
+	}
+	/* figure out if gaze requires eye-contact or not */
+	switch (adtyp)
+	{
+		/* meeting the gaze of the monster is dangerous */
+	case AD_DEAD:
+	case AD_PLYS:
+	case AD_STON:
+	case AD_LUCK:
+	case AD_CONF:
+	case AD_SLOW:
+	case AD_STUN:
+	case AD_HALU:
+	case AD_SLEE:
+	case AD_BLNK:
+	case AD_SSEX:
+	case AD_SEDU:
+	case AD_VAMP:
+	case AD_WISD:
+		needs_magr_eyes = TRUE;
+		needs_mdef_eyes = TRUE;
+		break;
+		/* the monster staring *at* something is dangerous */
+	case AD_FIRE:
+	case AD_COLD:
+	case AD_ELEC:
+	case AD_DRLI:
+	case AD_CNCL:
+	case AD_ENCH:
+	case AD_SSUN:
+	case AD_STDY:
+	case AD_BLAS:
+		needs_magr_eyes = TRUE;
+		needs_mdef_eyes = FALSE;
+		break;
+		/* these adtyps are just using gaze as a convenient way of causing something non-gaze-y to happen */
+	case AD_WTCH:
+	case AD_MIST:
+	case AD_SPOR:
+		needs_magr_eyes = FALSE;
+		needs_mdef_eyes = FALSE;
+		needs_uncancelled = FALSE;
+		maybe_not = FALSE;
+		/* these are just straight copy-pasted from originals at the moment, and only are coded for monster vs player */
+		if (!youdef)
+			return MM_MISS;
+		break;
+	default:
+		impossible("unhandled gaze type %d", adtyp);
+		break;
+	}
+	/* special cases */
+	if (pa == &mons[PM_MEDUSA] && adtyp == AD_STON) {	// Medusa's petrification curse
+		needs_magr_eyes = FALSE;
+		maybe_not = FALSE;
+	}
+	/* actually, right now, all stoning gazes are a straight copy-paste, so do this for now. */
+	if (adtyp == AD_STON) {
+		needs_magr_eyes = needs_mdef_eyes = maybe_not = needs_uncancelled = FALSE;
+	}
+	if (is_angel(pa) && adtyp == AD_BLND) {				// Angels' blinding radiance
+		needs_magr_eyes = FALSE;
+		maybe_not = FALSE;
+	}
+	if (is_uvuudaum(pa) && adtyp == AD_CONF) {			// Uvuudaum's form 
+		needs_magr_eyes = FALSE;
+		needs_uncancelled = FALSE;
+		maybe_not = FALSE;
+	}
+	if (pa == &mons[PM_DEMOGORGON]) {					// Demogorgon is special
+		needs_mdef_eyes = TRUE;
+		needs_uncancelled = FALSE;
+		maybe_not = FALSE;
+	}
+	if (attk->adtyp == AD_WISD) {						// Obox-Ob, Great Cthulhu special
+		needs_magr_eyes = FALSE;
+		needs_uncancelled = FALSE;
+		maybe_not = FALSE;
+	}
+
+	if ((needs_magr_eyes && (
+		(youagr && Blind) ||
+		(!youagr && is_blind(magr))
+		))
+		||
+		(needs_mdef_eyes && (
+		(youdef && !umetgaze(magr)) ||
+		(youagr && !umetgaze(mdef)) ||
+		(!youagr && !youdef && !mmetgaze(magr, mdef))
+		))){
+		/* gaze fails because the appropriate gazer/gazee eye (contact?) is not available */
+		return MM_MISS;
+	}
+	if (needs_uncancelled && !(
+		youagr ||
+		!magr->mcan
+		)) {
+		/* gaze fails because magr is cancelled */
+		return MM_MISS;
+	}
+		
+	/* Do the appropriate stuff -- function often returns in this switch statement */
+	switch (adtyp)
+	{
+		/* elemental gazes */
+	case AD_FIRE:
+	case AD_COLD:
+	case AD_ELEC:
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* message */
+		if (vis&VIS_MAGR) {
+			switch (adtyp) {
+			case AD_FIRE:	Sprintf(buf, "fiery");		break;
+			case AD_COLD:	Sprintf(buf, "icy");		break;
+			case AD_ELEC:	Sprintf(buf, "shocking");	break;
+			}
+			pline("%s attack%s %s with a %s stare.",
+				(youagr ? "You" : Monnam(magr)),
+				(youagr ? "" : "s"),
+				(youdef ? "you" : mon_nam(mdef)),
+				buf
+				);
+		}
+		/* re-use xmeleehurty -- it will print a "X is on fire"-esque message, deal damage, and all other good stuff */
+		alt_attk = *attk;
+		//alt_attk.aatyp = AT_NONE;
+		return xmeleehurty(magr, mdef, &alt_attk, (struct obj *)0, FALSE, dmg, 0, vis, FALSE);
+		break;
+
+		/* lifedrain gazes */
+	case AD_VAMP:
+	case AD_DRLI:
+		/* Demogorgon's gaze is special, of course*/
+		if (youdef && pa == &mons[PM_DEMOGORGON]){
+			if (!Drain_resistance || !rn2(3)){
+				You("meet the gaze of Hethradiah, right head of Demogorgon!");
+				You("feel a primal darkness fall upon your soul!");
+				losexp("primal darkness", FALSE, !rn2(3), FALSE);
+				losexp("primal darkness", FALSE, !rn2(3), FALSE);
+				losexp("primal darkness", TRUE, TRUE, FALSE);
+				if (u.sealsActive&SEAL_HUGINN_MUNINN){
+					unbind(SEAL_HUGINN_MUNINN, TRUE);
+				}
+				else {
+					forget(13);
+				}
+			}
+			else
+				You("avoid the gaze of the right head of Demogorgon!");
+		}
+		else {
+			/* 1/3 chance to succeed */
+			if (maybe_not && rn2(3))
+				return MM_MISS;
+
+			/* Don't waste turns trying to drain the life from a resistant target */
+			if (Drain_res(mdef))
+				return MM_MISS;
+
+			/* message */
+			if (youdef) {
+				if (vis&VIS_MAGR) {
+					if (adtyp == AD_VAMP)
+						pline("%s feeds on your life force!", Monnam(magr));
+					else
+						You("feel your life force wither before the gaze of %s!", mon_nam(magr));
+				}
+				else
+					You("feel your life force wither!");
+			}
+			else if (vis&VIS_MAGR && vis&VIS_MDEF) {
+				pline("%s %s%s%s %s life force!",
+					(youagr ? "You" : Monnam(magr)),
+					(adtyp == AD_VAMP ? "feed" : "wither"),
+					(youagr ? "" : "s"),
+					(adtyp == AD_VAMP ? " on" : ""),
+					s_suffix(mon_nam(mdef))
+					);
+			}
+			/* drain life! */
+			if (youdef) {
+				/* the player has a handy level-drain function */
+				losexp("life force drain", TRUE, FALSE, FALSE);
+			}
+			else {
+				/* print message first -- this should happen before the victim is drained/dies */
+				if (vis&VIS_MDEF)
+					pline("%s suddenly seems weaker!", Monnam(mdef));
+
+				/* for monsters, we need to make something up -- drain 2d6 maxhp, 1 level */
+				dmg = d(2, 6);
+
+				/* kill if this will level-drain below 0 m_lev, or lifedrain below 1 maxhp */
+				if (mlev(mdef) == 0 || *hpmax(mdef) <= dmg) {
+					/* clean up the maybe-dead monster, return early */
+					if (youagr)
+						killed(mdef);
+					else
+						monkilled(mdef, "", attk->adtyp);
+					/* is it dead, or was it lifesaved? */
+					if (mdef->mhp > 0)
+						return MM_DEF_LSVD;	/* lifesaved */
+					else
+						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
+				}
+				else {
+					/* drain stats */
+					mdef->m_lev--;
+					mdef->mhpmax -= dmg;
+				}
+			}
+		}
+		break;
+	case AD_SSUN:
+		/* requires reflectable light */
+		if (!levl[x(magr)][y(magr)].lit)
+			return MM_MISS;
+
+		/* message and blind */
+		if (youdef) {
+			pline("%s attacks you with a beam of reflected light!", Monnam(magr));
+			stop_occupation();
+
+			if (canseemon(magr) && !resists_blnd(&youmonst)) {
+				You("are blinded by %s beam!", s_suffix(mon_nam(magr)));
+				make_blinded((long)dmg, FALSE);
+			}
+			if (Fire_resistance) {
+				pline_The("beam doesn't feel hot!");
+				dmg = 0;
+			}
+			else if (Reflecting){
+				if (canseemon(magr)) ureflects("%s beam is reflected by your %s.", s_suffix(Monnam(magr)));
+				dmg = 0;
+			}
+		}
+		else {
+			if (vis&VIS_MAGR && vis&VIS_MDEF) {
+				pline("%s attack%s %s with a beam of reflected light!",
+					(youagr ? "You" : Monnam(magr)),
+					(youagr ? "" : "s"),
+					mon_nam(mdef)
+					);
+			}
+			if (can_blnd(magr, mdef, attk->aatyp, (struct obj *)0)) {
+				if (vis&VIS_MDEF)
+					pline("%s is blinded!", Monnam(mdef));
+				mdef->mblinded = dmg;
+				mdef->mcansee = 0;
+			}
+			if (Fire_res(mdef))
+				dmg = 0;
+			else if (mon_reflects(mdef, "The beam is reflected by %s %s!"))
+				dmg = 0;
+		}
+		/* damage inventory */
+		if (!InvFire_res(mdef) && !(youdef ? Reflecting : mon_resistance(mdef, REFLECTING))) {
+			if ((int)mlev(magr) > rn2(20))
+				destroy_item2(mdef, SCROLL_CLASS, AD_FIRE, youdef);
+			if ((int)mlev(magr) > rn2(20))
+				destroy_item2(mdef, POTION_CLASS, AD_FIRE, youdef);
+			if ((int)mlev(magr) > rn2(25))
+				destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE, youdef);
+		}
+
+		if (youdef)
+			burn_away_slime();
+
+		if (dmg)
+			return xdamagey(magr, mdef, attk, dmg);
+		break;
+		/* deathgaze */
+	case AD_DEAD:
+		/* message */
+		if (youdef) {
+			pline("Oh no, you meet %s gaze of death!",
+				s_suffix(mon_nam(magr)));
+		}
+		else if (vis&VIS_MDEF && vis&VIS_MAGR) {
+			pline("%s meets %s gaze of death!",
+				Monnam(mdef),
+				(youagr ? "your" : s_suffix(mon_nam(magr)))
+				);
+		}
+		/* effect */
+		if (youdef) {
+			if (nonliving(pd) || is_demon(pd)) {
+				You("seem no deader than before.");
+			}
+			else if (Magic_res(mdef) || (u.sealsActive&SEAL_OSE)) {
+				if (Magic_res(mdef))
+					shieldeff(u.ux, u.uy);
+				pline("Lucky for you, it didn't work!");
+			}
+			else {
+				if (Hallucination) {
+					You("have an out of body experience.");
+				}
+				else {
+					killer_format = KILLED_BY_AN;
+					killer = "gaze of death";
+					done(DIED);
+
+					if (*hp(mdef) > 0)
+						return MM_DEF_LSVD;				/* you lifesaved */
+					else
+						return (MM_HIT | MM_DEF_DIED);	/* moot */
+				}
+			}
+		}
+		else {
+			if (nonliving_mon(mdef) || is_demon(pd)) {
+				if (vis&VIS_MDEF && vis&VIS_MAGR) {
+					pline("%s seems no deader than before.",
+						Monnam(mdef));
+				}
+			}
+			else if (Magic_res(mdef)) {
+				if (vis&VIS_MDEF && vis&VIS_MAGR) {
+					pline("It didn't seem to work.");
+				}
+			}
+			else {
+				/* no hallucination protection for monsters */
+				/* instakill */
+				*hp(mdef) = 0;
+				if (youagr)
+					killed(mdef);
+				else
+					monkilled(mdef, "", AD_DETH);
+
+				if (*hp(mdef) > 0)
+					return MM_DEF_LSVD; /* mdef lifesaved */
+				else
+					return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
+			}
+		}
+		break;
+		/* stonegaze */
+	case AD_STON:
+		/* STRAIGHT COPY-PASTE FROM ORIGINAL. */
+		if (youdef) {
+			if (pa == &mons[PM_MEDUSA]){
+				static boolean tamemedusa = FALSE;
+				if (magr->mcan){
+					if (!canseemon(magr)) break;	/* silently */
+					pline("%s doesn't look all that ugly.", Monnam(magr));
+					break;
+				}
+				else if (Reflecting && couldsee(magr->mx, magr->my)) {
+					/* hero has line of sight to Medusa and she's not blind */
+					boolean useeit = canseemon(magr);
+
+					if (useeit){
+						if (!(tamemedusa && magr->mtame))
+							(void)ureflects("%s image is reflected by your %s.",
+							s_suffix(Monnam(magr)));
+					}
+					if (mon_reflects(magr, (!useeit || tamemedusa) ? (char *)0 :
+						"The image is reflected away by %s %s!")){
+						if (magr->mtame) tamemedusa = TRUE;
+						break;
+					}
+					if (!m_canseeu(magr) || is_blind(magr)) { /* probably you're invisible */
+						if (useeit)
+							pline(
+							"%s doesn't seem to notice that %s image was reflected.",
+							Monnam(magr), mhis(magr));
+						break;
+					}
+					if (useeit)
+						pline("%s is turned to stone!", Monnam(magr));
+					stoned = TRUE;
+					killed(magr);
+
+					if (magr->mhp > 0) break;
+					return 2;
+				}
+				if (umetgaze(magr) && !Stone_resistance) {
+					You("see %s.", mon_nam(magr));
+					stop_occupation();
+					if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
+					You("turn to stone...");
+					killer_format = KILLED_BY;
+					killer = "Poseidon's curse";
+					done(STONING);
+				}
+				tamemedusa = FALSE;
+			}
+			else if (magr->mcan || is_blind(magr)) {
+				if (!canseemon(magr)) break;	/* silently */
+				pline("%s gazes ineffectually.", Monnam(magr));
+				break;
+			}
+			else if (pa == &mons[PM_PALE_NIGHT]){
+				if (canseemon(magr)) pline("%s parts her shroud!", Monnam(magr));
+				if (magr->mcan || Stone_resistance) {
+					if (!canseemon(magr)) break;	/* silently */
+					pline("%s %s.", Monnam(magr),
+						"doesn't look all that ugly");
+					break;
+				}
+				if (Reflecting && couldsee(magr->mx, magr->my)) {
+					boolean useeit = canseemon(magr);
+					if (useeit)
+						(void)ureflects("%s image is reflected by your %s.",
+						s_suffix(Monnam(magr)));
+					if (mon_reflects(magr, !useeit ? (char *)0 :
+						"The image is reflected away by %s %s!"))
+						break;
+					if (!m_canseeu(magr)) { /* probably you're invisible */
+						if (useeit)
+							pline(
+							"%s doesn't seem to notice that %s image was reflected.",
+							Monnam(magr), mhis(magr));
+						break;
+					}
+					return 0;
+				}
+				if (couldsee(magr->mx, magr->my) &&
+					!Stone_resistance) {
+					if (ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) {
+						Your("lenses block out your sight!");
+						break;
+					}
+					You("see the truth behind the veil!");
+					stop_occupation();
+					if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))
+						break;
+					You("turn to stone...");
+					killer_format = KILLED_BY;
+					killer = pa->mname;
+					done(STONING);
+				}
+				return 0;
+			}
+			else if (pa == &mons[PM_BEHOLDER]){
+				if (umetgaze(magr) && !Stone_resistance) {
+					You("meet %s gaze.", s_suffix(mon_nam(magr)));
+					stop_occupation();
+					if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
+					Stoned = 5;
+					delayed_killer = "a beholder's eye of petrification.";
+					killer_format = KILLED_BY;
+				}
+			}
+			else {
+				if (umetgaze(magr) && !Stone_resistance) {
+					You("meet %s gaze.", s_suffix(mon_nam(magr)));
+					stop_occupation();
+					if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
+					You("turn to stone...");
+					killer_format = KILLED_BY;
+					killer = pa->mname;
+					done(STONING);
+				}
+			}
+		}
+		else if (!youagr) {
+			if (magr->mcan || !mmetgaze(magr, mdef))
+				return MM_MISS;
+			if (canseemon(magr)){
+				if (attk->aatyp == AT_GAZE){
+					Sprintf(buf, "%s", Monnam(magr));
+					pline("%s gazes at %s...", buf, mon_nam(mdef));
+				}
+				else if (attk->aatyp == AT_WDGZ){
+					Sprintf(buf, "%s", Monnam(mdef));
+					pline("%s can see %s...", buf, mon_nam(magr));
+				}
+			}
+			/* may die from the acid if it eats a stone-curing corpse */
+			if (!resists_ston(mdef) && munstone(mdef, FALSE))
+				goto post_stone;
+			if (poly_when_stoned(pd)) {
+				mon_to_stone(mdef);
+				break;
+			}
+			if (!resists_ston(mdef)) {
+				if (vis)
+					pline("%s turns to stone!", Monnam(mdef));
+				monstone(mdef);
+			post_stone:
+				if (mdef->mhp > 0)
+					return MM_HIT;
+				else if (mdef->mtame && !vis)
+					You("have a peculiarly sad feeling for a moment, then it passes.");
+
+				return (MM_DEF_DIED | (grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
+			}
+			break;
+		}
+		else {
+			/* youagr */
+			/* NOT IMPLEMENTED YET */;
+		}
+		break;
+		/* confusion */
+	case AD_CONF:
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* default confusion time: 3d4 */
+		if (!dmg)
+			dmg = d(3, 4);
+		/* put on cooldown */
+		if (!youagr && !(is_uvuudaum(pa) || attk->adtyp == AD_WISD)) {
+			if (magr->mspec_used)
+				return MM_MISS;
+			else
+				magr->mspec_used = (dmg + rn2(6));
+		}
+
+		if (youdef) {
+			if (Confusion) {
+				You("are getting more and more confused.");
+				/* if magr is confusing us every turn, let's not stack confusion too high */
+				if (!magr->mspec_used && (HConfusion > 0))
+					dmg = min(dmg*dmg / HConfusion, dmg);
+			}
+			else {
+				pline("%s %s confuses you!",
+					s_suffix(Monnam(magr)),
+					((is_uvuudaum(pa) || attk->adtyp == AD_WISD) ? "form" : "gaze")
+					);
+			}
+			make_confused(HConfusion + dmg, FALSE);
+			stop_occupation();
+		}
+		else
+		{
+			if (!mdef->mconf) {
+				if (vis&VIS_MDEF)
+					pline("%s looks confused.", Monnam(mdef));
+				mdef->mconf = 1;
+				mdef->mstrategy &= ~STRAT_WAITFORU;
+			}
+		}
+		break;
+		/* paralysis */
+	case AD_PLYS:
+		/* Demogorgon's gaze is special, of course*/
+		if (youdef && pa == &mons[PM_DEMOGORGON]){
+			if ((!Free_action || rn2(2)) && (!Sleep_resistance || rn2(4))){
+				You("meet the gaze of Aameul, left head of Demogorgon!");
+				You("are mesmerized!");
+				nomovemsg = 0;	/* default: "you can move again" */
+				if (!Free_action && !Sleep_resistance) nomul(-rn1(5, 2), "mesmerized by Aameul");
+				else if (!Free_action || !Sleep_resistance) nomul(-1, "mesmerized by Aameul");
+				else youmonst.movement -= 6;
+				exercise(A_DEX, FALSE);
+			}
+			else
+				You("avoid the gaze of the left head of Demogorgon!");
+		}
+		else {
+			/* 1/3 chance to succeed */
+			if (maybe_not && rn2(3))
+				return MM_MISS;
+
+			/* calc max paralysis time, and default time is 1d10 */
+			int maxdmg = attk->damn * attk->damd;
+			if (!dmg) {
+				dmg = rnd(10);
+				maxdmg = 10;
+			}
+			/* put on cooldown */
+			if (!youagr) {
+				if (magr->mspec_used)
+					return MM_MISS;
+				else
+					magr->mspec_used = maxdmg;
+			}
+
+			/* split between player and monster */
+			if (youdef) {
+				if (Free_action) {
+					You("momentarily stiffen.");
+				}
+				else{
+					You("are mesmerized by %s!", mon_nam(magr));
+					nomovemsg = 0;	/* default: "you can move again" */
+					nomul(-dmg, "mesmerized by a monster");
+					exercise(A_DEX, FALSE);
+				}
+			}
+			else {
+				if (mon_resistance(mdef, FREE_ACTION)) {
+					if (vis&VIS_MDEF) {
+						pline("%s momentarily stiffens.", Monnam(mdef));
+					}
+				}
+				else {
+					if (vis&VIS_MDEF) {
+						pline("%s freezes!", Monnam(mdef));
+					}
+					mdef->mcanmove = 0;
+					mdef->mfrozen = dmg;
+					mdef->mstrategy &= ~STRAT_WAITFORU;
+				}
+			}
+		}
+		break;
+
+	case AD_ENCH:
+		if (youdef && pa == &mons[PM_DEMOGORGON]){		/* has this been depricated? */
+			struct obj *obj = some_armor(&youmonst);
+			if (drain_item(obj)) {
+				You("meet Demogorgon's gaze!");
+				Your("%s less effective.", aobjnam(obj, "seem"));
+			}
+		}
+		else {
+			/* 1/4 chance to succeed */
+			if (maybe_not && rn2(4))
+				return MM_MISS;
+
+			struct obj * otmp = some_armor(mdef);
+
+			if (youagr)
+				You("stare at %s.", mon_nam(mdef));
+
+			if (drain_item(otmp)) {
+				if (youdef) {
+					if (vis&VIS_MAGR)
+						pline("%s stares at you.", Monnam(magr));
+					else
+						You_feel("watched.");
+					Your("%s less effective.",
+						aobjnam(otmp, "seem"));
+				}
+				else if (vis&VIS_MDEF) {
+					pline("%s %s less effective.",
+						s_suffix(Monnam(mdef)),
+						aobjnam(otmp, "seem"));
+				}
+			}
+		}
+		break;
+		/* slow */
+	case AD_SLOW:
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* set cooldown */
+		if (!youagr) {
+			if (magr->mspec_used)
+				return MM_MISS;
+			else
+				magr->mspec_used = rn2(12);
+		}
+
+		if (youdef) {
+			if (vis&VIS_MAGR)
+				pline("%s stares piercingly at you!", Monnam(magr));
+			else
+				You_feel("watched.");
+			u_slow_down();
+			stop_occupation();
+		}
+		else {
+			unsigned int oldspeed = mdef->mspeed;
+
+			if (vis&VIS_MAGR && vis&VIS_MDEF)
+				pline("%s stare%s piercingly at %s!",
+				(youagr ? "You" : Monnam(magr)),
+				(youagr ? "" : "s"),
+				mon_nam(mdef)
+				);
+
+			mon_adjust_speed(mdef, -1, (struct obj *)0);
+			mdef->mstrategy &= ~STRAT_WAITFORU;
+			if (mdef->mspeed != oldspeed && vis&VIS_MDEF)
+				pline("%s slows down.", Monnam(mdef));
+		}
+		break;
+		/* stun */
+	case AD_STUN:
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* default stun time: 2d6 */
+		if (!dmg)
+			dmg = d(2, 6);
+		/* put on cooldown */
+		if (!youagr) {
+			if (magr->mspec_used)
+				return MM_MISS;
+			else
+				magr->mspec_used = (dmg + rn2(6));
+		}
+
+		if (youdef) {
+			if (vis&VIS_MAGR)
+				pline("%s stares piercingly at you!", Monnam(magr));
+			else
+				You_feel("watched.");
+			make_stunned(HStun + dmg, TRUE);
+			stop_occupation();
+		}
+		else {
+			if (vis&VIS_MAGR && vis&VIS_MDEF)
+				pline("%s stare%s piercingly at %s!",
+				(youagr ? "You" : Monnam(magr)),
+				(youagr ? "" : "s"),
+				mon_nam(mdef)
+				);
+			if (vis&VIS_MDEF) {
+				pline("%s %s for a moment.",
+					Monnam(mdef),
+					makeplural(stagger(mdef, "stagger")));
+			}
+			mdef->mstun = 1;
+		}
+		break;
+		/* blinding (radiance and gaze) */
+	case AD_BLND:
+		/* there is an existing can-blind check, yay! */
+		if (!can_blnd(magr, mdef, attk->aatyp, (struct obj *)0))
+			return MM_MISS;
+
+		/* assumes that angels with AD_BLND have a blinding radiance, which is limited range and stunning */
+		if (is_angel(pa)) {
+			if (dist2(x(magr), y(magr), x(mdef), y(mdef)) > BOLT_LIM*BOLT_LIM)
+				return MM_MISS;
+			if (youdef) {
+				You("are blinded by %s radiance!", s_suffix(mon_nam(magr)));
+				make_blinded((long)dmg, FALSE);
+				stop_occupation();
+				make_stunned((long)d(1, 3), TRUE);
+			}
+			else {
+				if (vis&VIS_MDEF && vis&VIS_MAGR) {
+					pline("%s is blinded by %s radiance!",
+						Monnam(mdef),
+						(youagr ? "your" : s_suffix(mon_nam(magr)))
+						);
+				}
+
+
+				if (vis&VIS_MDEF) {
+					pline("%s %s for a moment.",
+						Monnam(mdef),
+						makeplural(stagger(mdef, "stagger")));
+				}
+				mdef->mstun = 1;
+			}
+		}
+		/* any other blinding gazes */
+		else {
+			/* 4/5 chance to succeed */
+			if (maybe_not && !rn2(5))
+				return MM_MISS;
+			/* default blind time: 2d6 */
+			if (!dmg)
+				dmg = d(2, 6);
+			/* put on cooldown */
+			if (!youagr) {
+				if (magr->mspec_used)
+					return MM_MISS;
+				else
+					magr->mspec_used = (dmg + rn2(6));
+			}
+
+			if (youdef)
+			{
+				You("are blinded by %s gaze!", s_suffix(mon_nam(magr)));
+				make_blinded((long)dmg, FALSE);
+				stop_occupation();
+			}
+			else {
+				if (vis&VIS_MDEF && vis&VIS_MAGR) {
+					pline("%s is blinded by %s gaze!",
+						Monnam(mdef),
+						(youagr ? "your" : s_suffix(mon_nam(magr)))
+						);
+				}
+				mdef->mblinded = dmg;
+				mdef->mcansee = 0;
+			}
+		}
+		break;
+
+		/* hallucination */
+	case AD_HALU:
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* default hallu time: 1d12 */
+		if (!dmg)
+			dmg = rnd(12);
+		/* put on cooldown */
+		if (!youagr) {
+			if (magr->mspec_used)
+				return MM_MISS;
+			else
+				magr->mspec_used = (dmg + rn2(6));
+		}
+
+		if (youdef) {
+			if (!hallucinogenic(pd)) {
+				boolean chg;
+				if (vis&VIS_MAGR)
+					pline("%s attacks you with a kaleidoscopic gaze!", Monnam(magr));
+				else if (!Hallucination)
+					Your("mind is filled with kaleidoscopic light!");
+				chg = make_hallucinated(HHallucination + (long)dmg, FALSE, 0L);
+				You("%s.", chg ? "are freaked out" : "seem unaffected");
+			}
+		}
+		/* monsters get confused by AD_HALU */
+		else {
+			if (vis&VIS_MDEF)
+				pline("%s looks confused.", Monnam(mdef));
+
+			mdef->mconf = 1;
+			mdef->mstrategy &= ~STRAT_WAITFORU;
+		}
+		break;
+		/* sleep */
+	case AD_SLEE:
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* no effect on sleeping or immune targets */
+		if (Sleep_res(mdef) || (youdef ? multi >= 0 : mdef->msleeping))
+			return MM_MISS;
+		/* default sleep time: 1d10 */
+		if (!dmg)
+			dmg = rnd(10);
+		/* put on cooldown */
+		if (!youagr) {
+			if (magr->mspec_used)
+				return MM_MISS;
+			else
+				magr->mspec_used = (dmg + rn2(6));
+		}
+		if (youdef) {
+			pline("%s gaze makes you very sleepy...",
+				s_suffix(Monnam(magr)));
+			fall_asleep(-dmg, TRUE);
+		}
+		else if (sleep_monst(mdef, dmg, -1)) {
+			if (vis&VIS_MAGR) {
+				if (attk->aatyp == AT_GAZE)
+					Sprintf(buf, "is put to sleep by %s gaze.",
+					(youagr ? "your" : s_suffix(mon_nam(magr))));
+				else if (attk->aatyp == AT_WDGZ)
+					Sprintf(buf, "is put to sleep under %s gaze.",
+					(youagr ? "your" : s_suffix(mon_nam(magr))));
+			}
+			else
+				Sprintf(buf, "falls asleep!");
+			if (vis&VIS_MDEF) {
+				pline("%s %s", Monnam(mdef), buf);
+			}
+			mdef->mstrategy &= ~STRAT_WAITFORU;
+			slept_monst(mdef);
+		}
+		break;
+
+		/* cancellation */
+	case AD_CNCL:
+		if (cancel_monst(mdef, mksobj(SPE_CANCELLATION, FALSE, FALSE), FALSE, TRUE, FALSE, !rn2(4) ? rnd(mlev(magr)) : 0)) {
+			if (youdef) {
+				if (vis&VIS_MAGR)
+				{
+					pline("%s stares at you.", Monnam(magr));
+					pline("Your magic fades.");
+				}
+				else
+					You_feel("your magic fade.");
+			}
+			else {
+				/* no message for monsters being cancelled??*/;
+			}
+		}
+		break;
+
+		/* study */
+	case AD_STDY:
+		if (!youagr) {
+			int * study = (youdef ? &(u.ustdy) : &(mdef->mstdy));
+
+			if (dmg > *study) {	// reduce message spam by only showing when study is actually increased
+				if (is_orc(pa))
+					pline("%s curses and urges %s followers on.", Monnam(magr), mhis(magr));
+				else if (pa == &mons[PM_LEGION] || pa == &mons[PM_LEGIONNAIRE])
+					/* no message */;
+				else if (vis&VIS_MAGR) {
+					pline("%s studies %s with a level stare.",
+						Monnam(magr),
+						(youdef ? "you" : mon_nam(mdef))
+						);
+				}
+				//else no message
+				/* add to study */
+				*study = dmg;
+			}
+		}
+		else if (vis&VIS_MDEF) {	/* how can you study something if you can't see it? */
+			/* assumed that you studying a monster is *not* something that can or will be spammed all the time */
+			You("study %s intently.", mon_nam(mdef));
+			mdef->mstdy = max(mdef->mstdy, dmg);
+		}
+		else
+			return MM_MISS;
+		break;
+
+		/* luck drain */
+	case AD_LUCK:
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* no effect on monsters */
+		if (!youdef)
+			return MM_MISS;
+		/* put on cooldown */
+		if (!youagr) {
+			if (magr->mspec_used)
+				return MM_MISS;
+			else
+				magr->mspec_used = d(2, 6);
+		}
+		/* assumes you are defending */
+		pline("%s glares ominously at you!", Monnam(magr));
+
+		/* misc protections */
+		if (uwep && uwep->otyp == MIRROR && uwep->blessed) {
+			pline("%s sees its own glare in your mirror.",
+				Monnam(magr));
+			pline("%s is cancelled!", Monnam(magr));
+			magr->mcan = 1;
+			monflee(magr, 0, FALSE, TRUE);
+		}
+		else if ((uwep && !uwep->cursed && confers_luck(uwep)) ||
+			(stone_luck(TRUE) > 0 && rn2(4))) {
+			pline("Luckily, you are not affected.");
+		}
+		else {
+			You_feel("your luck running out.");
+			change_luck(-1 * dmg);
+		}
+		stop_occupation();
+		break;
+
+		/* weeping angel gaze */
+	case AD_BLNK:
+		/* special case: Weeping angels using their gaze attack on each other has unfortunate effects for both of them */
+		if (is_weeping(pd)) {
+			if (vis&VIS_MAGR && vis&VIS_MDEF) {
+				pline("%s and %s are permanently quantum-locked!", Monnam(mdef), mon_nam(magr));
+			}
+			monstone(mdef);
+			monstone(magr);
+			return (MM_DEF_DIED | MM_AGR_DIED);
+		}
+		/* otherwise, weeping angels' gazes only affect the player */
+		if (!youdef)
+			return MM_MISS;
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* put on cooldown */
+		/* In practice, this will be zeroed when a new movement ration is handed out, and acts to make sure Blink can only be used once per round. */
+		if (!youagr) {
+			if (magr->mspec_used)
+				return MM_MISS;
+			else
+				magr->mspec_used = 10;
+		}
+
+		dmg = d(1, 4);
+		if (!Reflecting) {
+			pline("%s reflection in your mind weakens you.", s_suffix(Monnam(magr)));
+			stop_occupation();
+			exercise(A_INT, TRUE);
+			exercise(A_WIS, FALSE);
+		}
+		else {
+			static long lastverbed = 0L;
+			if (flags.verbose && lastverbed + 10 < moves)
+				/* Since this message means the player is unaffected, limit
+				its occurence to preserve flavor but avoid message spam */
+				pline("%s is covering its face.", Monnam(magr));
+			lastverbed = moves;
+			dmg = 0;
+		}
+		if (dmg) {
+			int temparise = u.ugrave_arise;
+			u.wimage += dmg;
+			if (u.wimage > 10) u.wimage = 10;
+			u.ugrave_arise = PM_WEEPING_ANGEL;
+			int result = xdamagey(magr, mdef, attk, dmg);
+			/*If the player surived the gaze attack, restore the value of arise*/
+			u.ugrave_arise = temparise;
+			return result;
+		}
+		break;
+
+	case AD_WISD:
+		/* cancels if no damage? */
+		if (!dmg)
+			return MM_MISS;
+		/* non-players should get hit by a basic confusion gaze */
+		/* that swap should have happened already */
+		if (!youdef) {
+			impossible("AD_WISD gaze not being swapped out vs non-player?");
+			return MM_MISS;
+		}
+		/* put on cooldown */
+		/* In practice, this will be zeroed when a new movement ration is handed out, and acts to make sure this can only be used once per round. */
+		if (!youagr) {
+			if (magr->mspec_used)
+				return MM_MISS;
+			else
+				magr->mspec_used = 4;
+		}
+
+		/* assumes only player defending now */
+		pline("Blasphemous geometries assault your sanity!");
+		if (u.sealsActive&SEAL_HUGINN_MUNINN){
+			unbind(SEAL_HUGINN_MUNINN, TRUE);
+		}
+		else {
+			while (!(ABASE(A_WIS) <= ATTRMIN(A_WIS)) && dmg > 0) {
+				dmg--;
+				(void)adjattrib(A_WIS, -1, TRUE);
+				forget(10);	/* lose 10% of memory per point lost*/
+				exercise(A_WIS, FALSE);
+				/* Great Cthulhu permanently drains wisdom */
+				if ((pa == &mons[PM_GREAT_CTHULHU]) && (AMAX(A_WIS) > ATTRMIN(A_WIS)))
+					AMAX(A_WIS) -= 1;
+			}
+			if (dmg > 0) {
+				You("tear at yourself in horror!"); //assume always able to damage self
+				xdamagey(magr, mdef, attk, dmg*10);
+			}
+		}
+		break;
+
+	case AD_SEDU:
+		if (!youdef)
+			return MM_MISS;
+		/* STRAIGHT COPY-PASTE FROM ORIGINAL */
+		else {
+			static int engagering5 = 0;
+			boolean engring = FALSE;
+			if (!engagering5) engagering5 = find_engagement_ring();
+			if ((uleft && uleft->otyp == engagering5) || (uright && uright->otyp == engagering5)) engring = TRUE;
+			if (u.sealsActive&SEAL_ANDROMALIUS) break;
+			if (distu(magr->mx, magr->my) > 1 ||
+				magr->mcan ||
+				!umetgaze(magr) ||
+				is_blind(magr)
+				) return MM_MISS;//fail
+			//else
+			if (pa == &mons[PM_DEMOGORGON]){
+				buf[0] = '\0';
+				steal(magr, buf, FALSE, FALSE);
+				m_dowear(magr, FALSE);
+				return MM_HIT;
+			}
+			if ((pa == &mons[PM_FIERNA] || pa == &mons[PM_PALE_NIGHT]) && rnd(20) < 15) return MM_HIT;
+			if (pa == &mons[PM_ALRUNES]){
+				if (MON_WEP(magr) && rn2(20)) return MM_HIT;
+			}
+			if (is_animal(pa)) {
+				xyhitmsg(magr, mdef, attk);
+				if (magr->mcan) break;
+				/* Continue below */
+			}
+			else if (dmgtype(youracedata, AD_SEDU)
+#ifdef SEDUCE
+				|| dmgtype(youracedata, AD_SSEX) || dmgtype(youracedata, AD_LSEX)
+#endif
+				) {
+				pline("%s %s.", Monnam(magr), magr->minvent ?
+					"brags about the goods some dungeon explorer provided" :
+					"makes some remarks about how difficult theft is lately");
+				if (!tele_restrict(magr)) (void)rloc(magr, FALSE);
+				return MM_AGR_STOP;
+			}
+			else if (magr->mcan || engring) {
+				if (!Blind) {
+					pline("%s tries to %s you, but you seem %s.",
+						Adjmonnam(magr, "plain"),
+						(is_neuter(pa) || flags.female == magr->female) ? "charm" : "seduce",
+						(is_neuter(pa) || flags.female == magr->female) ? "unaffected" : "uninterested");
+				}
+				if (rn2(3)) {
+					if (!tele_restrict(magr)) (void)rloc(magr, FALSE);
+					return MM_AGR_STOP;
+				}
+				break;
+			}
+			buf[0] = '\0';
+			switch (steal(magr, buf, FALSE, FALSE)) {
+			case -1:
+				return MM_AGR_DIED;
+			case 0:
+				break;
+			default:
+				if (!is_animal(pa) && !tele_restrict(magr))
+					(void)rloc(magr, FALSE);
+				if (is_animal(pa) && *buf) {
+					if (canseemon(magr))
+						pline("%s tries to %s away with %s.",
+						Monnam(magr),
+						locomotion(magr, "run"),
+						buf);
+				}
+				monflee(magr, 0, FALSE, FALSE);
+				return MM_AGR_STOP;
+			}
+			m_dowear(magr, FALSE);
+		}
+		break;
+	case AD_SSEX:
+		if (!youdef)
+			return MM_MISS;
+		/* STRAIGHT COPY-PASTE FROM ORIGINAL */
+		else {
+			static int engagering2 = 0;
+			if (!engagering2) engagering2 = find_engagement_ring();
+			if ((uleft && uleft->otyp == engagering2) || (uright && uright->otyp == engagering2))
+				break;
+			if (could_seduce(magr, &youmonst, attk) == 1
+				&& !magr->mcan
+				&& !is_blind(magr)
+				&& umetgaze(magr)
+				&& distu(magr->mx, magr->my) == 1)
+			if (doseduce(magr))
+				return MM_AGR_STOP;
+		}
+		break;
+
+	case AD_BLAS:
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* put on cooldown */
+		/* In practice, this will be zeroed when a new movement ration is handed out, and acts to make sure it can only be used once per round. */
+		if (!youagr) {
+			if (magr->mspec_used)
+				return MM_MISS;
+			else
+				magr->mspec_used = 7;
+		}
+		/* only affects the player */
+		if (!youdef)
+			return MM_MISS;
+		else {
+			int angrygod = A_CHAOTIC + rn2(3); //Note: -1 to +1
+			u.ualign.record -= rnd(20);
+			u.ualign.sins++;
+			u.hod += rnd(20);
+			u.ugangr[Align2gangr(angrygod)]++;
+			angrygods(angrygod);
+		}
+		break;
+
+		/* misc */
+
+
+
+	case AD_MIST:  // mi-go mist projector
+		if (rn2(20) > 15){
+			int i = 0;
+			int n = 0;
+			if (pa == &mons[PM_MIGO_SOLDIER]){
+				n = rn2(4);
+				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
+				for (i = 0; i<n; i++) makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+			}
+			else if (pa == &mons[PM_MIGO_PHILOSOPHER]){
+				n = rn2(4);
+				if (cansee(magr->mx, magr->my)) You("see whirling snow swirl out from around %s.", mon_nam(magr));
+				for (i = 0; i<n; i++) makemon(&mons[PM_ICE_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+			}
+			else if (pa == &mons[PM_MIGO_QUEEN]){
+				n = rn2(2);
+				if (cansee(magr->mx, magr->my)) You("see scalding steam swirl out from around %s.", mon_nam(magr));
+				for (i = 0; i<n; i++) makemon(&mons[PM_STEAM_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+			}
+			else if (pa == &mons[PM_ANCIENT_TEMPEST]){
+				switch (rnd(4)){
+				case 1:
+					if (cansee(magr->mx, magr->my)) You("see a whisp of cloud swirl out from %s.", mon_nam(magr));
+					makemon(&mons[PM_AIR_ELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+					break;
+				case 2:
+					if (cansee(magr->mx, magr->my)) You("see rain coalesce and stride out from %s.", mon_nam(magr));
+					makemon(&mons[PM_WATER_ELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+					break;
+				case 3:
+					if (cansee(magr->mx, magr->my)) You("see lightning coalesce and strike out from %s.", mon_nam(magr));
+					makemon(&mons[PM_LIGHTNING_PARAELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+					break;
+				case 4:
+					if (cansee(magr->mx, magr->my)) You("see hail coalesce and stride out from %s.", mon_nam(magr));
+					makemon(&mons[PM_ICE_PARAELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+					break;
+				}
+			}
+			else{
+				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
+				makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+			}
+			return 3; // if a mi-go fires a mist projector, it can take no further actions that turn
+		}
+		break;
+	case AD_SPOR:
+		/* release a spore if the player is nearby */
+		if (is_fern(pa) && !magr->mcan && distu(magr->mx, magr->my) <= 96 &&
+			!is_fern_sprout(pa) ? !rn2(2) : !rn2(4)) {
+			coord mm;
+			mm.x = magr->mx; mm.y = magr->my;
+			enexto(&mm, mm.x, mm.y, &mons[PM_DUNGEON_FERN_SPORE]);
+			if (pa == &mons[PM_DUNGEON_FERN] ||
+				pa == &mons[PM_DUNGEON_FERN_SPROUT]
+				) {
+				makemon(&mons[PM_DUNGEON_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			}
+			else if (pa == &mons[PM_SWAMP_FERN] ||
+				pa == &mons[PM_SWAMP_FERN_SPROUT]
+				) {
+				makemon(&mons[PM_SWAMP_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			}
+			else if (pa == &mons[PM_BURNING_FERN] ||
+				pa == &mons[PM_BURNING_FERN_SPROUT]
+				) {
+				makemon(&mons[PM_BURNING_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			}
+			else { /* currently these should not be generated */
+				makemon(&mons[PM_DUNGEON_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			}
+			if (canseemon(magr)) pline("%s releases a spore!", Monnam(magr));
+		}
+		break;
+	case AD_WTCH:{
+					 //Watcher in the Water's tentacle spawn and retreat behavior
+					 int ltnt = 0, stnt = 0;
+					 struct monst *tmon;
+					 if (distmin(u.ux, u.uy, magr->mx, magr->my) <= 2 && !(magr->mflee)){
+						 magr->mflee = 1;
+						 magr->mfleetim = 2;
+					 }
+					 for (tmon = fmon; tmon; tmon = tmon->nmon){
+						 if (pa == &mons[PM_WATCHER_IN_THE_WATER]){
+							 if (tmon->data == &mons[PM_SWARM_OF_SNAKING_TENTACLES]) stnt++;
+							 else if (tmon->data == &mons[PM_LONG_SINUOUS_TENTACLE]) ltnt++;
+						 }
+						 else if (pa == &mons[PM_KETO]){
+							 if (tmon->data == &mons[PM_WIDE_CLUBBED_TENTACLE]) ltnt++;
+						 }
+					 }
+					 if (pa == &mons[PM_WATCHER_IN_THE_WATER]){
+						 if (stnt<6){
+							 makemon(&mons[PM_SWARM_OF_SNAKING_TENTACLES], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT | MM_NOCOUNTBIRTH);
+						 }
+						 else if (ltnt<2){
+							 makemon(&mons[PM_LONG_SINUOUS_TENTACLE], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT | MM_NOCOUNTBIRTH);
+						 }
+					 }
+					 else if (pa == &mons[PM_KETO]){
+						 if (ltnt<2){
+							 makemon(&mons[PM_WIDE_CLUBBED_TENTACLE], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT | MM_NOCOUNTBIRTH);
+						 }
+					 }
+	}break;
+
+
+		break;
+	default:
+		impossible("unhandled gaze type %d", adtyp);
+	}
+	return MM_HIT;
+}
 
 boolean
 apply_hit_effects(magr, mdef, otmp, basedmg, dmgptr, dieroll, returnvalue, hittxt)
