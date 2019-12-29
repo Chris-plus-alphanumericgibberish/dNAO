@@ -288,11 +288,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			}
 			return MM_MISS;
 		}
-
-		/* end projectile*/
-		end_projectile(magr, mdef, thrownobj, launcher, fired, forcedestroy, &wepgone);
-
-		/* specific effects in addition to end_projectile, if thrownobj still exists */
+		/* specific effects before end_projectile, if thrownobj still exists */
 		if (!wepgone && youagr) {
 			if (IS_ALTAR(levl[bhitpos.x][bhitpos.y].typ))
 				doaltarobj(thrownobj);
@@ -300,6 +296,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 				pline("%s hit%s the %s.", Doname2(thrownobj),
 				(thrownobj->quan == 1L) ? "s" : "", surface(bhitpos.x, bhitpos.y));
 		}
+		/* end projectile*/
+		end_projectile(magr, mdef, thrownobj, launcher, fired, forcedestroy, &wepgone);
 		return MM_MISS;
 	}
 
@@ -2655,6 +2653,18 @@ int tary;
 	static const int chromatic_dragon_breaths[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_DRST, AD_DISN, AD_ACID };
 	static const int platinum_dragon_breaths[] = { AD_FIRE, AD_DISN, AD_SLEE, AD_ELEC };
 	static const int random_breaths[] = { AD_MAGM, AD_FIRE, AD_COLD, AD_SLEE, AD_DISN, AD_ELEC, AD_DRST, AD_ACID };
+	int dx, dy, dz;
+
+	if (tarx || tary) {
+		dx = sgn(tarx - x(magr));
+		dy = sgn(tary - y(magr));
+		dz = 0;
+	}
+	else {
+		dx = u.dx;
+		dy = u.dy;
+		dz = u.dz;
+	}
 
 	/* Random breath attacks */
 	if (typ == AD_RBRE){
@@ -2701,9 +2711,9 @@ int tary;
 		pline("%s breathes %s!", Monnam(magr), breathwep(typ));
 	}
 	
-	/* do the beam */
+	/* do the beam (sadly buzz doesn't do dz) */
 	buzz(typ, FOOD_CLASS, FALSE, (int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)),
-		x(magr), y(magr), sgn(tbx), sgn(tby), 0, attk->damd ? (d((int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)), (int)attk->damd)*mult) : 0);
+		x(magr), y(magr), dx, dy, 0, attk->damd ? (d((int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)), (int)attk->damd)*mult) : 0);
 	
 	/* interrupt player if they were targetted */
 	if (tarx == u.ux && tary == u.uy)
@@ -2742,8 +2752,18 @@ int tary;
 	boolean youagr = (magr == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
 	int typ = attk->adtyp;
-	int dx = sgn(tarx - x(magr));
-	int dy = sgn(tary - y(magr));
+	int dx, dy, dz;
+
+	if (tarx || tary) {
+		dx = sgn(tarx - x(magr));
+		dy = sgn(tary - y(magr));
+		dz = 0;
+	}
+	else {
+		dx = u.dx;
+		dy = u.dy;
+		dz = u.dz;
+	}
 
 	/* cancelled monsters can't spit */
 	if (!youagr && magr->mcan) {
@@ -2786,10 +2806,12 @@ int tary;
 	else if (canseemon(magr)) {
 		pline("%s spits %s!", Monnam(magr), typ == AD_WEBS ? "webbing" : "venom");
 	}
-
+	/* there is an old convention to set spe to 1 to indicate that the venom/webbing is yours -- not sure if still needed */
+	if (youagr)
+		otmp->spe = 1;
 	/* shoot otmp */
 	projectile(magr, otmp, (struct obj *)0, FALSE,
-		x(magr), y(magr), dx, dy, 0,
+		x(magr), y(magr), dx, dy, dz,
 		BOLT_LIM, TRUE, youagr, FALSE);
 
 	/* interrupt player if they were targetted */
@@ -2820,11 +2842,21 @@ int tary;
 	int typ = attk->adtyp;
 	int xadj = 0;
 	int yadj = 0;
-	int dx = sgn(tarx - x(magr));
-	int dy = sgn(tary - y(magr));
 	int rngmod = 0;
 	boolean portal_projectile = FALSE;		/* if TRUE, teleports projectile directly to target */
 	int ammo_type;
+	int dx, dy, dz;
+
+	if (tarx || tary) {
+		dx = sgn(tarx - x(magr));
+		dy = sgn(tary - y(magr));
+		dz = 0;
+	}
+	else {
+		dx = u.dx;
+		dy = u.dy;
+		dz = u.dz;
+	}
 
 	switch (typ) {
 	case AD_SHDW:
@@ -2936,13 +2968,13 @@ int tary;
 	if (portal_projectile) {
 		/* start the projectile adjacent to the target */
 		projectile(magr, qvr, (struct obj *)0, TRUE,
-			tarx-dx, tary-dy, dx, dy, 0,
+			tarx-dx, tary-dy, dx, dy, dz,
 			1, TRUE, youagr, FALSE);
 	}
 	else {
 		/* start the projectile at magr's location, modified by xadj and yadj */
 		projectile(magr, qvr, (struct obj *)0, TRUE,
-			x(magr)+xadj, y(magr)+yadj, dx, dy, 0,
+			x(magr)+xadj, y(magr)+yadj, dx, dy, dz,
 			BOLT_LIM+rngmod, TRUE, youagr, FALSE);
 	}
 

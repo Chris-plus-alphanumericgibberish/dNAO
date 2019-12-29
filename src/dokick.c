@@ -713,9 +713,13 @@ xchar x, y;
 		    kickobj->where == OBJ_MINVENT && kickobj->ocarry == mon)
 		return 1;	/* alert shk caught it */
 	    notonhead = (mon->mx != bhitpos.x || mon->my != bhitpos.y);
-	    if (isgold ? ghitm(mon, kickobj) :	/* caught? */
-		    thitmonst(mon, kickobj, 0))	/* hit && used up? */
-		return(1);
+		boolean gone = FALSE;
+		if (isgold)
+			gone = ghitm(mon, kickobj);
+		else
+			(void)hmon2point0(&youmonst, mon, (struct attack *)0, kickobj, (struct obj *)0, 2, 0, 0, TRUE, rn1(18, 2), FALSE, TRUE, &gone);
+		if (gone)
+			return(1);
 	}
 
 	/* the object might have fallen down a hole */

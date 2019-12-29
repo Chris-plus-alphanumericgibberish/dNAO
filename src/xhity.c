@@ -2889,7 +2889,7 @@ struct obj * weapon;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pa = (magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0);
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 
 	/* if the defender isn't insubstantial, full damage */
@@ -2904,8 +2904,8 @@ struct obj * weapon;
 	if (!weapon) {
 		/* some worn armor may be involved depending on the attack type */
 		struct obj * otmp;
-		long slot = attk_equip_slot(attk->aatyp);
-		switch (slot)
+		long slot = attk_equip_slot(attk ? attk->aatyp : 0);
+		switch (magr ? slot : 0L)
 		{
 		case W_ARMG:
 			otmp = (youagr ? uarmg : which_armor(magr, slot));
@@ -2924,18 +2924,18 @@ struct obj * weapon;
 			return 2;
 
 		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
-			(attk->adtyp == AD_STAR)
+			(attk && attk->adtyp == AD_STAR)
 			))
 			return 2;
 
 		if (has_blood_mon(mdef) &&
-			attk->adtyp == AD_BLUD)
+			attk && attk->adtyp == AD_BLUD)
 			return 2;
 
 		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
 			(youagr && u.sealsActive&SEAL_EDEN) ||
-			(attk->adtyp == AD_GLSS) ||
-			is_silver_mon(magr) ||
+			(attk && attk->adtyp == AD_GLSS) ||
+			(magr && is_silver_mon(magr)) ||
 			obj_silver_searing(otmp) ||
 			(youagr && slot == W_ARMG && uright && obj_silver_searing(uright)) ||
 			(youagr && slot == W_ARMG && uleft && obj_silver_searing(uleft))
@@ -2943,8 +2943,8 @@ struct obj * weapon;
 			return 1;
 
 		if (hates_iron(pd) && (
-			(attk->adtyp == AD_SIMURGH) ||
-			is_iron_mon(magr) ||
+			(attk && attk->adtyp == AD_SIMURGH) ||
+			(magr && is_iron_mon(magr)) ||
 			(otmp && otmp->obj_material == IRON) ||
 			(youagr && slot == W_ARMG && uright && uright->obj_material == IRON) ||
 			(youagr && slot == W_ARMG && uleft && uleft->obj_material == IRON)
@@ -2953,7 +2953,7 @@ struct obj * weapon;
 
 		if (hates_holy_mon(mdef) && (
 			(attk->adtyp == AD_ACFR) ||
-			is_holy_mon(magr) ||
+			(magr && is_holy_mon(magr)) ||
 			(otmp && otmp->blessed) ||
 			(youagr && slot == W_ARMG && uright && uright->blessed) ||
 			(youagr && slot == W_ARMG && uleft && uleft->blessed)
@@ -2961,7 +2961,7 @@ struct obj * weapon;
 			return 1;
 
 		if (hates_unholy_mon(mdef) && (
-			is_unholy_mon(magr) ||
+			(magr && is_unholy_mon(magr)) ||
 			(otmp && is_unholy(otmp)) ||
 			(youagr && slot == W_ARMG && uright && is_unholy(uright)) ||
 			(youagr && slot == W_ARMG && uleft && is_unholy(uleft))
@@ -3033,14 +3033,16 @@ int dmg;
 	/* mhitu */
 	if (youdef) {
 		flags.botl = 1;
-		if (dmg > 0)
+		if (dmg > 0 && magr)
 			magr->mhurtu = TRUE;
 
 		if (*hp(mdef) < 1) {
 			if (Upolyd)
 				rehumanize();
-			else
+			else if (magr)
 				done_in_by(magr);
+			else
+				done(DIED);
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD;	/* you lifesaved or rehumanized */
 			else
@@ -3086,7 +3088,7 @@ int dmg;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD; /* mdef lifesaved */
 			else
-				return (MM_HIT | MM_DEF_DIED | (grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
+				return (MM_HIT | MM_DEF_DIED | (!magr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
 		}
 	}
 	return MM_HIT;
@@ -3341,7 +3343,7 @@ int flat_acc;
 	struct permonst * pa = (magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0);
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 	struct obj * otmp;
-	boolean fired = (weapon && (is_ammo(weapon) || launcher) && thrown == 1);
+	boolean fired = (weapon && thrown == 1);
 
 	/* partial accuracy counters */
 	int base_acc = 0;	/* accuracy from leveling up */
@@ -3494,8 +3496,6 @@ int flat_acc;
 				rang_acc += 2;
 			break;
 		case BOULDER:
-			rang_acc += 6;
-			break;
 		case STATUE:
 			if (is_boulder(weapon))
 				rang_acc += 6;
@@ -3543,14 +3543,14 @@ int flat_acc;
 	}
 
 	/* weapon accuracy -- only applies for a weapon attack OR a properly-thrown object */
-	if ((attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI || attk->aatyp == AT_DEVA || attk->aatyp == AT_HODS)
+	if ((attk && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI || attk->aatyp == AT_DEVA || attk->aatyp == AT_HODS))
 		|| fired)
 	{
 		if (weapon) {
 			/* specific bonuses of weapon vs mdef */
 			wepn_acc += hitval(weapon, mdef);
-			/* -4 accuracy per weapon size too large */
-			if (weapon->objsize - pa->msize > 0){
+			/* -4 accuracy per weapon size too large (not for thrown objects) */
+			if (!thrown && weapon->objsize - pa->msize > 0){
 				wepn_acc += -4 * (weapon->objsize - pa->msize);
 			}
 			/* ranged attacks also get their launcher's accuracy */
@@ -3580,11 +3580,11 @@ int flat_acc;
 				}
 			}
 			/* mis-used ammo */
-			if (thrown == 2) {
+			else if (thrown == 2) {
 				wepn_acc -= 4;
 			}
-			/* other thrown (but not fired) things */
-			if (thrown == 1 && !fired)
+			/* other thrown things */
+			else if (thrown == 1)
 			{
 				if (is_boomerang(weapon))			/* arbitrary */
 					wepn_acc += 4;
@@ -3660,12 +3660,28 @@ int flat_acc;
 
 	/* determine if the attack hits */
 	totl_acc = base_acc
+		+ rang_acc
 		+ bons_acc
 		+ stdy_acc
 		+ vdef_acc
 		+ wepn_acc
 		+ defn_acc
 		+ flat_acc;
+	/*
+	if (wizard && !youdef && ublindf && ublindf->otyp == LENSES) {
+		pline("Accuracy = %d+%d+%d+%d+%d+%d+%d+%d=%d",
+			base_acc,
+			rang_acc,
+			bons_acc,
+			stdy_acc,
+			vdef_acc,
+			wepn_acc,
+			defn_acc,
+			flat_acc,
+			totl_acc
+			);
+	}
+	*/
 
 	/* return our to-hit -- if this is greater than a d20, it hits */
 	return totl_acc;
@@ -9533,7 +9549,7 @@ struct attack * attk;	/* attack structure to use */
 struct obj * weapon;	/* weapon to hit with */
 struct obj * launcher;	/* launcher weapon was fired with */
 int thrown;				/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
-int flatbasedmg;		/* if >0, REPLACE basedmg with this value -- typically used for unusual weapon hits like throwing something upwards */
+int flatbasedmg;		/* if >0, REPLACE basedmg with this value -- currently unused. SCOPECREEP: use hmon for things like throwing an object upwards */
 int monsdmg;			/* flat damage amount to add onto other effects -- for monster attacks */
 boolean dohitmsg;		/* print hit message? */
 int dieroll;			/* 1-20 accuracy dieroll, used for special effects */
@@ -9543,7 +9559,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pa = (magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0);
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 
 	boolean staggering_strike = FALSE;
@@ -9590,7 +9606,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	boolean destroy_one_magr_weapon = FALSE;	/* destroy one of magr's weapons */
 	boolean destroy_all_magr_weapon = FALSE;	/* destroy all of magr's weapon */
 
-	boolean real_attack = (attk && attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->damn > 0 || attk->damd > 0);
+	boolean real_attack = (attk && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->damn > 0 || attk->damd > 0));
 
 	boolean hittxt = FALSE;
 	boolean lethaldamage = FALSE;
@@ -9603,7 +9619,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	long rslot = 0L;	/* slot, dedicated to rings (left and right) -- set at start, should not be reset */
 
 	/* pick the most correct ring slot */
-	rslot = (attk && attk->aatyp == AT_MARI) ? 0L	/* marilith -- some other hand -- not a ring-hand */
+	rslot = (!attk || !magr || attk->aatyp == AT_MARI) ? 0L	/* no attack, or no attacker, or marilith: not a ring-hand */
 		//: (attk->aatyp == AT_WEAP || attk->aatyp == AT_DEVA || attk->aatyp == AT_HODS) ? W_RINGR /* mainhand */
 		//: (attk->aatyp == AT_XWEP) ? W_RINGL	/* offhand */
 		: ((youagr ? uarms : which_armor(magr, W_ARMS)) || !rn2(2)) ? W_RINGR : W_RINGL;	/* either hand, but not offhand if wearing a shield */
@@ -9772,10 +9788,10 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			precision_mult += max(P_SKILL(objects[launcher->otyp].oc_skill) - 2, 0);
 		}
 		/* gnomes get bonus +1 mult */
-		if (youagr ? Race_if(PM_GNOME) : is_gnome(pa))
+		if (magr && (youagr ? Race_if(PM_GNOME) : is_gnome(pa)))
 			precision_mult += 1;
 		/* drow get bonus +1 mult for droven crossbows */
-		if ((youagr ? Race_if(PM_DROW) : is_drow(pa)) &&
+		if (magr && (youagr ? Race_if(PM_DROW) : is_drow(pa)) &&
 			(launcher->otyp == DROVEN_CROSSBOW))
 			precision_mult += 1;
 
@@ -9798,7 +9814,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		if (ulightsaberhit && u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm)))
 			sneak_dice++;
 	}
-	if (is_backstabber(pa))
+	if (magr && is_backstabber(pa))
 		sneak_dice++;
 	if (weapon && weapon->owornmask && weapon->oartifact == ART_SPINESEEKER)
 		sneak_dice++;
@@ -10860,7 +10876,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		/* Bardic Encouragement */
 		if (youagr)
 			bonsdmg += u.uencouraged;
-		else
+		else if (magr)
 			bonsdmg += magr->encouraged;
 		/* Singing Sword -- only works when the player is wielding it >_> */
 		if (uwep && uwep->oartifact == ART_SINGING_SWORD) {
@@ -11180,7 +11196,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	totldmg = subtotl + seardmg + heatdmg + poisdmg + specdmg;
 	lethaldamage = (totldmg >= *hp(mdef));
 
-	if (wizard && youagr && ublindf && ublindf->otyp == LENSES) {
+	if (wizard && !youdef && ublindf && ublindf->otyp == LENSES) {
 		pline("dmg = (%d + %d + %d + %d + %d - defense) = %d; + %d = %d",
 			basedmg,
 			artidmg,
@@ -11470,7 +11486,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		 * Your silver small silver quarterstaff sears Foo's flesh! >_>
 		 */
 		/* Attacker */
-		Sprintf(buf, "%s ", (youagr ? "Your" : s_suffix(Monnam(magr))));
+		Sprintf(buf, "%s ", (magr ? (youagr ? "Your" : s_suffix(Monnam(magr))) : "The"));
 		/* skin / simurgh claws */
 		slot = W_SKIN;
 		if (active_slots & slot) {

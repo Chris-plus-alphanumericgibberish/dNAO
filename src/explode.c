@@ -759,9 +759,15 @@ struct obj *obj;			/* only scatter this obj        */
 			} else if ((mtmp = m_at(bhitpos.x, bhitpos.y)) != 0) {
 				if (scflags & MAY_HITMON) {
 				    stmp->range--;
-				    if (ohitmon((struct monst *) 0, mtmp, stmp->obj, 1, FALSE)) {
-					stmp->obj = (struct obj *)0;
-					stmp->stopped = TRUE;
+					boolean used_up = FALSE;
+					int dieroll = rnd(20);
+					if (tohitval((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (struct obj *)0, 1, 0) >= dieroll)
+						(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (struct obj *)0, TRUE, 0, 0, TRUE, dieroll, FALSE, canseemon(mtmp), &used_up);
+					else
+						miss(xname(stmp->obj), mtmp);
+					if (used_up) {
+						stmp->obj = (struct obj *)0;
+						stmp->stopped = TRUE;
 				    }
 				}
 			} else if (bhitpos.x==u.ux && bhitpos.y==u.uy) {

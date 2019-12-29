@@ -2404,9 +2404,7 @@ spiriteffects(power, atme)
 				otmp->cursed = 0;
 				otmp->spe = 1; /* to indicate it's yours */
 				otmp->ovar1 = 1 + u.ulevel/10;
-				throwit(otmp, 0L, FALSE, 0);
-				// m_throw(&youmonst, u.ux, u.uy, u.dx, u.dy,
-					// rn1(5,5), otmp,TRUE);
+				projectile(&youmonst, otmp, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, 0, rn1(5,5), TRUE, TRUE, FALSE);
 				nomul(0, NULL);
 			} else return 0;
 		break;

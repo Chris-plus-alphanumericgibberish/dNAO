@@ -1703,11 +1703,14 @@ int style;
 				break;
 			    }
 			}
-			if (ohitmon((struct monst *)0,mtmp,singleobj,
-					(style==ROLL) ? -1 : dist, FALSE)) {
-				used_up = TRUE;
+			/* boulder may hit creature */
+			int dieroll = rnd(20);
+			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, (struct obj *)0, 1, 0) >= dieroll)
+				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, singleobj, (struct obj *)0, TRUE, 0, 0, TRUE, dieroll, FALSE, canseemon(mtmp), &used_up);
+			else if (cansee(bhitpos.x, bhitpos.y))
+				miss(xname(singleobj), mtmp);
+			if (used_up)
 				break;
-			}
 		} else if (bhitpos.x == u.ux && bhitpos.y == u.uy) {
 			if (multi) nomul(0, NULL);
 			if (!u.uinvulnerable && thitu(9 + singleobj->spe,

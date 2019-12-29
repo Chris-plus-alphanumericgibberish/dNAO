@@ -4029,11 +4029,11 @@ use_grapple (obj)
 		mtmp->mundetected = 0;
 		rloc_to(mtmp, cc.x, cc.y);
 		return (1);
-	    } else if ((!bigmonst(mtmp->data) && !strongmonst(mtmp->data)) ||
-		       rn2(4)) {
-		(void) thitmonst(mtmp, uwep, 0);
-		return (1);
-	    }
+		}
+		else if ((!bigmonst(mtmp->data) && !strongmonst(mtmp->data)) || rn2(4)) {
+			u_pole_pound(mtmp);
+			return (1);
+		}
 	    /* FALL THROUGH */
 	case 3:	/* Surface */
 	    if (IS_AIR(levl[cc.x][cc.y].typ) || is_pool(cc.x, cc.y, TRUE))
@@ -4134,7 +4134,9 @@ use_crook (obj)
 	    break;
 	case 1:	/*Hit Monster */
 	    if ((mtmp = m_at(cc.x, cc.y)) == (struct monst *)0) break;
-		(void) thitmonst(mtmp, uwep, 0);
+		else {
+			u_pole_pound(mtmp);
+		}
 		return (1);
 	break;
 	case 2:	/*Hook Monster */
@@ -4166,7 +4168,7 @@ use_crook (obj)
 			} else if ((!bigmonst(mtmp->data) && !strongmonst(mtmp->data)) ||
 				   rn2(P_SKILL(typ))
 			) {
-				(void) thitmonst(mtmp, uwep, 0);
+				u_pole_pound(mtmp);
 				return (1);
 			} else {
 				You("are yanked toward %s!", mon_nam(mtmp));
