@@ -839,7 +839,7 @@ moveloop()
 			 /*once-per-monster-moving things go here*/
 			/****************************************/
 ////////////////////////////////////////////////////////////////////////////////////////////////
-			reset_mvmdieroll();
+			//reset_mvmdieroll();
 			reset_mvudieroll();
 			if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
 				average_dogs();

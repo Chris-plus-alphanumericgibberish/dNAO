@@ -41,6 +41,8 @@ STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL void FDECL(weave_black_web, (struct monst *));
 STATIC_DCL int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
+STATIC_DCL int NDECL(beastmastery);
+STATIC_DCL int NDECL(mountedCombat);
 
 /* item destruction strings from zap.c */
 extern const char * const destroy_strings[];
@@ -3447,6 +3449,12 @@ int flat_acc;
 				bons_acc += 7;
 			if (pa == &mons[PM_CHOKHMAH_SEPHIRAH])
 				bons_acc += u.chokhmah;
+			/* Your steed gets a skill-based boost */
+			if (magr == u.usteed)
+				bons_acc += mountedCombat();
+			/* All of your pets get a skill-based boost */
+			if (magr->mtame)
+				bons_acc += beastmastery();
 			/* Bard */
 			bons_acc += magr->encouraged;
 			/* Singing Sword */
@@ -14899,4 +14907,37 @@ struct monst * mdef;
 {
 	int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 	return xmeleehity(&youmonst, mdef, &basicattack, uwep, vis, 0, TRUE);
+}
+/* beastmastery()
+ * mountedCombat()
+ *
+ * returns the accuracy bonus a pet/mount gets from the player's skill
+ */
+STATIC_OVL int
+beastmastery()
+{
+	int bm;
+	switch (P_SKILL(P_BEAST_MASTERY)) {
+	case P_ISRESTRICTED: bm = 0; break;
+	case P_UNSKILLED:    bm = 0; break;
+	case P_BASIC:        bm = 2; break;
+	case P_SKILLED:      bm = 5; break;
+	case P_EXPERT:       bm = 10; break;
+	}
+	if ((uwep && uwep->oartifact == ART_CLARENT) || (uswapwep && uswapwep->oartifact == ART_CLARENT))
+		bm *= 2;
+	return bm;
+}
+STATIC_OVL int
+mountedCombat()
+{
+	int bm;
+	switch (P_SKILL(P_RIDING)) {
+	case P_ISRESTRICTED: bm = 0; break;
+	case P_UNSKILLED:    bm = 0; break;
+	case P_BASIC:        bm = 2; break;
+	case P_SKILLED:      bm = 5; break;
+	case P_EXPERT:       bm = 10; break;
+	}
+	return bm;
 }
