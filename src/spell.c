@@ -41,7 +41,6 @@ STATIC_DCL boolean FDECL(dospellmenu, (int,int *));
 STATIC_DCL void FDECL(describe_spell, (int));
 STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
-STATIC_DCL int NDECL(throwgaze);
 STATIC_DCL void NDECL(cast_protection);
 STATIC_DCL boolean FDECL(sightwedge, (int,int, int,int, int,int));
 STATIC_DCL void FDECL(spell_backfire, (int));
@@ -4479,7 +4478,7 @@ throwspell()
 }
 
 /* Choose location where spell takes effect. */
-STATIC_OVL int
+int
 throwgaze()
 {
 	coord cc;

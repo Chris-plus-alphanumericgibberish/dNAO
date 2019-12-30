@@ -27,6 +27,7 @@ E void FDECL(steal_it, (struct monst *, struct attack *));	/* from uhitm.c */
 E int FDECL(joust, (struct monst *, struct obj *));		/* from uhitm.c */
 E boolean FDECL(attack2, (struct monst *));
 E int FDECL(xattacky, (struct monst *, struct monst *, int, int));
+E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
 E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 E void FDECL(wakeup2, (struct monst *, boolean));
@@ -39,6 +40,8 @@ E boolean FDECL(m_online, (struct monst *, struct monst *, int, int, boolean, bo
 E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
 E boolean NDECL(android_combo);
 E int FDECL(u_pole_pound, (struct monst *));
+E boolean FDECL(umetgaze, (struct monst *));
+E boolean FDECL(mmetgaze, (struct monst *, struct monst *));
 
 /* ### allmain.c ### */
 
@@ -2482,6 +2485,7 @@ E int FDECL(spiriteffects, (int,BOOLEAN_P));
 E int FDECL(spelleffects, (int,BOOLEAN_P,int));
 E int FDECL(wordeffects, (int));
 E void FDECL(losespells, (int));
+E int NDECL(throwgaze);
 E int NDECL(dovspell);
 E void FDECL(initialspell, (struct obj *));
 E void FDECL(initialward, (struct obj *));

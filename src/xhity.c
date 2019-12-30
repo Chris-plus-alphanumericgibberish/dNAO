@@ -4,6 +4,7 @@
 #include "edog.h"
 #include "xhity.h"
 
+STATIC_DCL int FDECL(getvis, (struct monst *, struct monst *, int, int));
 STATIC_DCL int FDECL(attack_checks2, (struct monst *, struct obj *));
 //STATIC_DCL boolean FDECL(attack2, (struct monst *));
 //STATIC_DCL int FDECL(xattacky, (struct monst *, struct monst *));
@@ -35,7 +36,6 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL void FDECL(weave_black_web, (struct monst *));
@@ -45,9 +45,6 @@ STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attac
 /* item destruction strings from zap.c */
 extern const char * const destroy_strings[];
 
-extern boolean FDECL(umetgaze, (struct monst *));
-extern boolean FDECL(mmetgaze, (struct monst *, struct monst *));
-
 /* Counterattack chance at skill level....  B:  S:  E:  */
 static const int DjemSo_counterattack[] = {  5, 10, 20 };
 static const int Shien_counterattack[]  = {  5, 10, 20 };
@@ -55,6 +52,40 @@ static const int Soresu_counterattack[] = { 10, 15, 25 };
 /* Misc attacks */
 static struct attack noattack = { 0, 0, 0, 0 };
 static struct attack basicattack  = { AT_WEAP, AD_PHYS, 1, 4 };
+
+/* getvis()
+ * 
+ * determines vis if needed.
+ */
+int
+getvis(magr, mdef, tarx, tary)
+struct monst * magr;
+struct monst * mdef;
+int tarx;
+int tary;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	int vis;
+	
+	if (!tarx && !tary) {
+		tarx = x(mdef);
+		tary = y(mdef);
+	}
+
+	if (youagr || youdef || (cansee(x(magr), y(magr)) && cansee(tarx, tary)))
+	{
+		if (youagr || (cansee(x(magr), y(magr)) && canseemon(magr)))
+			vis |= VIS_MAGR;
+		if (youdef || (cansee(tarx, tary) && canseemon(mdef)))
+			vis |= VIS_MDEF;
+		if (youagr || youdef || canspotmon(magr) || canspotmon(mdef))
+			vis |= VIS_NONE;
+	}
+	else
+		vis = 0;
+	return vis;
+}
 
 /* attack_checks2()
  * TODO: find all instances of the original function (attackchecks) and use attackchecks2 instead, then rename.
@@ -6814,7 +6845,7 @@ boolean ranged;
 			&& rn2(20)) {
 			/* make physical attack */
 			alt_attk.adtyp = AD_PHYS;
-			result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+			return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 		else {
 			/* do the AD_DRIN attack, noting that we aren't eating brains */
@@ -9435,6 +9466,21 @@ expl_common:
 	return result;
 }
 
+boolean
+umetgaze(mtmp)
+struct monst *mtmp;
+{
+	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD));
+}
+
+boolean
+mmetgaze(looker, lookie)
+struct monst *looker;
+struct monst *lookie;
+{
+	return (mon_can_see_mon(looker, lookie) && !(is_blind(looker) || is_blind(lookie)) && !(looker->msleeping || lookie->msleeping));
+}
+
 /* xgazey()
  * 
  * A creature uses its gaze attack (either active or passive) on another.
@@ -9468,6 +9514,9 @@ int vis;
 	int dmg = d((int)attk->damn, (int)attk->damd);
 	int fulldmg = dmg;			/* original unreduced damage */
 
+	if (vis == -1)
+		vis = getvis(magr, mdef, 0, 0);
+
 	/* Hamsa ward protects from gazes */
 	if (ward_at(x(mdef), y(mdef) == HAMSA))
 		return MM_MISS;
@@ -9498,6 +9547,7 @@ int vis;
 	case AD_PLYS:
 	case AD_STON:
 	case AD_LUCK:
+	case AD_BLND:
 	case AD_CONF:
 	case AD_SLOW:
 	case AD_STUN:
@@ -9531,7 +9581,6 @@ int vis;
 		needs_magr_eyes = FALSE;
 		needs_mdef_eyes = FALSE;
 		needs_uncancelled = FALSE;
-		maybe_not = FALSE;
 		/* these are just straight copy-pasted from originals at the moment, and only are coded for monster vs player */
 		if (!youdef)
 			return MM_MISS;
@@ -9570,14 +9619,14 @@ int vis;
 	}
 
 	if ((needs_magr_eyes && (
-		(youagr && Blind) ||
-		(!youagr && is_blind(magr))
+		(youagr  && (Blind)) ||
+		(!youagr && (is_blind(magr)))
 		))
 		||
 		(needs_mdef_eyes && (
-		(youdef && !umetgaze(magr)) ||
-		(youagr && !umetgaze(mdef)) ||
-		(!youagr && !youdef && !mmetgaze(magr, mdef))
+		(youdef  && (!umetgaze(magr) || multi >= 0)) ||
+		(youagr  && (mon_can_see_you(mdef))) ||
+		(!youagr && !youdef && (!mmetgaze(magr, mdef)))
 		))){
 		/* gaze fails because the appropriate gazer/gazee eye (contact?) is not available */
 		return MM_MISS;
@@ -9616,8 +9665,10 @@ int vis;
 		}
 		/* re-use xmeleehurty -- it will print a "X is on fire"-esque message, deal damage, and all other good stuff */
 		alt_attk = *attk;
-		//alt_attk.aatyp = AT_NONE;
-		return xmeleehurty(magr, mdef, &alt_attk, (struct obj *)0, FALSE, dmg, 0, vis, FALSE);
+		alt_attk.aatyp = AT_GAZE;
+		alt_attk.adtyp = adtyp;
+		result = xmeleehurty(magr, mdef, &alt_attk, (struct obj *)0, FALSE, dmg, 0, vis, FALSE);
+		wakeup2(mdef, youagr);
 		break;
 
 		/* lifedrain gazes */
@@ -9654,7 +9705,7 @@ int vis;
 			if (youdef) {
 				if (vis&VIS_MAGR) {
 					if (adtyp == AD_VAMP)
-						pline("%s feeds on your life force!", Monnam(magr));
+						pline("%s hungry eyes feed on your life force!", Monnam(magr));
 					else
 						You("feel your life force wither before the gaze of %s!", mon_nam(magr));
 				}
@@ -9662,12 +9713,11 @@ int vis;
 					You("feel your life force wither!");
 			}
 			else if (vis&VIS_MAGR && vis&VIS_MDEF) {
-				pline("%s %s%s%s %s life force!",
-					(youagr ? "You" : Monnam(magr)),
+				pline("%s gaze %ss%s %s's life force!",
+					(youagr ? "Your" : s_suffix(Monnam(magr))),
 					(adtyp == AD_VAMP ? "feed" : "wither"),
-					(youagr ? "" : "s"),
 					(adtyp == AD_VAMP ? " on" : ""),
-					s_suffix(mon_nam(mdef))
+					mon_nam(mdef)	/* note: cannot use two s_suffix() calls in same pline. Grr. */
 					);
 			}
 			/* drain life! */
@@ -9703,6 +9753,8 @@ int vis;
 				}
 			}
 		}
+		if (*hp(mdef) > 0)
+			wakeup2(mdef, youagr);
 		break;
 	case AD_SSUN:
 		/* requires reflectable light */
@@ -9760,7 +9812,10 @@ int vis;
 			burn_away_slime();
 
 		if (dmg)
-			return xdamagey(magr, mdef, attk, dmg);
+			result = xdamagey(magr, mdef, attk, dmg);
+
+		if (*hp(mdef) > 0)
+			wakeup2(mdef, youagr);
 		break;
 		/* deathgaze */
 	case AD_DEAD:
@@ -10023,8 +10078,16 @@ int vis;
 		else
 		{
 			if (!mdef->mconf) {
-				if (vis&VIS_MDEF)
+				if (vis&VIS_MDEF && vis&VIS_MAGR) {
+					pline("%s looks confused by %s %s.",
+						Monnam(mdef),
+						(youagr ? "your" : s_suffix(mon_nam(magr))),
+						((is_uvuudaum(pa) || attk->adtyp == AD_WISD) ? "form" : "gaze")
+						);
+				}
+				else if (vis&VIS_MDEF) {
 					pline("%s looks confused.", Monnam(mdef));
+				}
 				mdef->mconf = 1;
 				mdef->mstrategy &= ~STRAT_WAITFORU;
 			}
@@ -10303,8 +10366,15 @@ int vis;
 		}
 		/* monsters get confused by AD_HALU */
 		else {
-			if (vis&VIS_MDEF)
+			if (vis&VIS_MDEF && vis&VIS_MAGR) {
+				pline("%s looks confused by %s gaze.",
+					Monnam(mdef),
+					(youagr ? "your" : s_suffix(mon_nam(magr)))
+					);
+			}
+			else if (vis&VIS_MDEF) {
 				pline("%s looks confused.", Monnam(mdef));
+			}
 
 			mdef->mconf = 1;
 			mdef->mstrategy &= ~STRAT_WAITFORU;
@@ -10653,28 +10723,29 @@ int vis;
 		}
 		break;
 
-		/* misc */
-
-
+		/* MONSTER GENERATING GAZES, MVU ONLY */
 
 	case AD_MIST:  // mi-go mist projector
-		if (rn2(20) > 15){
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		else {
 			int i = 0;
 			int n = 0;
 			if (pa == &mons[PM_MIGO_SOLDIER]){
 				n = rn2(4);
 				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
-				for (i = 0; i<n; i++) makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+				for (i = 0; i < n; i++) makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
 			}
 			else if (pa == &mons[PM_MIGO_PHILOSOPHER]){
 				n = rn2(4);
 				if (cansee(magr->mx, magr->my)) You("see whirling snow swirl out from around %s.", mon_nam(magr));
-				for (i = 0; i<n; i++) makemon(&mons[PM_ICE_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+				for (i = 0; i < n; i++) makemon(&mons[PM_ICE_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
 			}
 			else if (pa == &mons[PM_MIGO_QUEEN]){
 				n = rn2(2);
 				if (cansee(magr->mx, magr->my)) You("see scalding steam swirl out from around %s.", mon_nam(magr));
-				for (i = 0; i<n; i++) makemon(&mons[PM_STEAM_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+				for (i = 0; i < n; i++) makemon(&mons[PM_STEAM_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
 			}
 			else if (pa == &mons[PM_ANCIENT_TEMPEST]){
 				switch (rnd(4)){
@@ -10700,7 +10771,7 @@ int vis;
 				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
 				makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
 			}
-			return 3; // if a mi-go fires a mist projector, it can take no further actions that turn
+			return MM_AGR_STOP; // if a mi-go fires a mist projector, it can take no further actions that turn
 		}
 		break;
 	case AD_SPOR:
@@ -10768,7 +10839,9 @@ int vis;
 	default:
 		impossible("unhandled gaze type %d", adtyp);
 	}
-	return MM_HIT;
+	/* if we got to the end, we didn't abort early, which means something should have happened */
+	result |= MM_HIT;
+	return result;
 }
 
 boolean

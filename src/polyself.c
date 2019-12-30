@@ -1222,6 +1222,78 @@ int
 dogaze()
 {
 	register struct monst *mtmp;
+	struct attack * attk = attacktype_fordmg(youracedata, AT_GAZE, AD_ANY);
+	int result;
+
+	if (Blind) {
+		You_cant("see anything to gaze at.");
+		return 0;
+	}
+	if (u.uen < 15) {
+		You("lack the energy to use your special gaze!");
+		return(0);
+	}
+	if (!throwgaze()) {
+		/* player cancelled targetting or picked a not-allowed location */
+		return 0;
+	}
+	else {
+		u.uen -= 15;
+		flags.botl = 1;
+
+		if ((mtmp = m_at(u.dx, u.dy)) && canseemon(mtmp)) {
+			result = xgazey(&youmonst, mtmp, attk, -1);
+
+			if (!result) {
+				pline("%s seemed not to notice.", Monnam(mtmp));
+			}
+
+
+			/* deliberately gazing at some things is dangerous. This is inconsistent with monster agr gazes, but whatever */
+
+			/* For consistency with passive() in uhitm.c, this only
+			* affects you if the monster is still alive.
+			*/
+			if (!DEADMONSTER(mtmp) &&
+				(mtmp->data == &mons[PM_FLOATING_EYE]) && !mtmp->mcan) {
+				if (!Free_action) {
+					You("are frozen by %s gaze!",
+						s_suffix(mon_nam(mtmp)));
+					nomul((u.ulevel > 6 || rn2(4)) ?
+						-d((int)mtmp->m_lev + 1,
+						(int)mtmp->data->mattk[0].damd)
+						: -200, "frozen by a monster's gaze");
+					return 1;
+				}
+				else
+					You("stiffen momentarily under %s gaze.",
+					s_suffix(mon_nam(mtmp)));
+			}
+			/* Technically this one shouldn't affect you at all because
+			* the Medusa gaze is an active monster attack that only
+			* works on the monster's turn, but for it to *not* have an
+			* effect would be too weird.
+			*/
+			if (!DEADMONSTER(mtmp) &&
+				(mtmp->data == &mons[PM_MEDUSA]) && !mtmp->mcan) {
+				pline(
+					"Gazing at the awake %s is not a very good idea.",
+					l_monnam(mtmp));
+				/* as if gazing at a sleeping anything is fruitful... */
+				You("turn to stone...");
+				killer_format = KILLED_BY;
+				killer = "deliberately meeting Medusa's gaze";
+				done(STONING);
+			}
+		}
+		else {
+			You("gaze at empty space.");
+		}
+	}
+}
+#if 0
+{
+	register struct monst *mtmp;
 	int looked = 0;
 	char qbuf[QBUFSZ];
 	int i;
@@ -1440,6 +1512,7 @@ dogaze()
 	if (!looked) You("gaze at no place in particular.");
 	return 1;
 }
+#endif
 
 int
 dohide()

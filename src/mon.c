@@ -5726,12 +5726,12 @@ register struct monst *mtmp;
 	for(i = 0; i < NATTK; i++)
 		 if(mtmp->data->mattk[i].aatyp == AT_WDGZ) {
 			 if (!(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD))	// the Eyes of the Overworld protect you from whatever you might see
-				(void) gazemu(mtmp, &mtmp->data->mattk[i]);
+				(void) xgazey(mtmp, &youmonst, &mtmp->data->mattk[i], -1);
 		 }
     if(is_weeping(mtmp->data)) {
 		for(i = 0; i < NATTK; i++)
 			 if(mtmp->data->mattk[i].aatyp == AT_GAZE) {
-			 (void) gazemu(mtmp, &mtmp->data->mattk[i]);
+			 (void) xgazey(mtmp, &youmonst, &mtmp->data->mattk[i], -1);
 			 break;
 			 }
     }

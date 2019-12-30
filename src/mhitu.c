@@ -31,7 +31,6 @@ STATIC_DCL void FDECL(mswings,(struct monst *,struct obj *));
 STATIC_DCL void FDECL(wildmiss, (struct monst *,struct attack *));
 
 STATIC_DCL void FDECL(hitmsg,(struct monst *,struct attack *));
-boolean FDECL(umetgaze, (struct monst *));
 
 /* See comment in mhitm.c.  If we use this a lot it probably should be */
 /* changed to a parameter to mhitu. */
@@ -4828,13 +4827,6 @@ elementalgaze()
 {
 	static const int gazeattacks[] = { AD_FIRE, AD_COLD, AD_ELEC };
 	return gazeattacks[rn2(SIZE(gazeattacks))];	//flat random member of gazeattacks
-}
-
-boolean
-umetgaze(mtmp)
-struct monst *mtmp;
-{
-	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD));
 }
 
 int

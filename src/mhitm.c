@@ -1057,14 +1057,6 @@ register struct monst *magr, *mdef;
 //	return(mdamagem(magr, mdef, mattk));
 //}
 
-boolean
-mmetgaze(looker, lookie)
-struct monst *looker;
-struct monst *lookie;
-{
-	return (mon_can_see_mon(looker, lookie) && !(is_blind(looker) || is_blind(lookie)) && !(looker->msleeping || lookie->msleeping));
-}
-
 /* Returns the same values as mdamagem(). */
 int
 gazemm(magr, mdef, mattk)

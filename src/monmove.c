@@ -1192,7 +1192,7 @@ register struct monst *mtmp;
 						Sprintf(buf,"%s can see", Monnam(mtmp));
 						pline("%s %s...", buf, mon_nam(gazemon));
 					}*/
-					(void) gazemm(gazemon, mtmp, &gazemon->data->mattk[i]);
+					(void) xgazey(gazemon, mtmp, &gazemon->data->mattk[i], -1);
 					break;
 				 }
 		}
