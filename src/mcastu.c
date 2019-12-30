@@ -2574,7 +2574,8 @@ summon_alien:
     case EVIL_EYE:
 		if(mtmp){
 			struct attack evilEye = {AT_GAZE, AD_LUCK, 1, 4};
-			gazemu(mtmp, &evilEye);
+			(void)xgazey(mtmp, &youmonst, &evilEye, -1);
+			//gazemu(mtmp, &evilEye);
 		}
 		else{
 			You_feel("your luck running out.");

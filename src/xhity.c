@@ -13,7 +13,6 @@ STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL boolean FDECL(badtouch, (struct monst *, struct monst *, struct attack *, struct obj *));
 STATIC_DCL boolean FDECL(safe_attack, (struct monst *, struct monst *, struct attack *, struct obj *, struct permonst *, struct permonst *));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
-STATIC_DCL struct attack * FDECL(getattk, (struct monst *, int *, int *, struct attack *, boolean, int *, int *));
 STATIC_DCL int FDECL(destroy_item2, (struct monst *, int, int, boolean));
 STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *, boolean));
 STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *));
@@ -29,7 +28,6 @@ STATIC_DCL int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct
 STATIC_DCL int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
-STATIC_DCL int FDECL(xmeleehity, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, boolean));
 STATIC_DCL int FDECL(xmeleehurty, (struct monst *, struct monst *, struct attack *, struct obj *, boolean, int, int, int, boolean));
 STATIC_DCL int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
@@ -782,6 +780,15 @@ int tary;
 			continue;
 		}
 
+		/* Rend attacks only happen if the previous two attacks hit */
+		/* Hugs attacks are similar, but also happen if magr and mdef are stuck together */
+		if ((res[1] == MM_MISS || res[2] == MM_MISS) && (
+			(attk->aatyp == AT_REND) ||
+			(attk->aatyp == AT_HUGS && !((youdef && u.ustuck == magr) || (youagr && u.ustuck == mdef)))
+			)) {
+			continue;
+		}
+
 		/* based on the attack type... */
 		switch (aatyp)
 		{
@@ -933,7 +940,8 @@ int tary;
 					}
 				} while (devaloop);
 
-				dopassive_local = TRUE;
+				if (!ranged)
+					dopassive_local = TRUE;
 				/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
 				if (youdef ||(!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
 					wakeup2(mdef, youagr);
@@ -1817,7 +1825,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	/* Demogorgon gets additional shred and steal attacks, which puts him over 6 attacks */
 	if (pa == &mons[PM_DEMOGORGON]) {
 		/* rend */
-		if (*indexnum == 2 && fromlist && !subout&SUBOUT_DEMO1) {
+		if (*indexnum == 2 && fromlist && !(*subout&SUBOUT_DEMO1)) {
 			*subout |= SUBOUT_DEMO1;
 			attk->aatyp = AT_REND;
 			attk->adtyp = AD_SHRD;
@@ -1826,7 +1834,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			fromlist = FALSE;
 		}
 		/* steal */
-		if (*indexnum == 4 && fromlist && !subout&SUBOUT_DEMO2) {
+		if (*indexnum == 4 && fromlist && !(*subout&SUBOUT_DEMO2)) {
 			*subout |= SUBOUT_DEMO2;
 			attk->aatyp = AT_REND;
 			attk->adtyp = AD_SEDU;
@@ -3048,6 +3056,7 @@ int dmg;
 
 	/* mhitu */
 	if (youdef) {
+		stop_occupation();
 		flags.botl = 1;
 		if (dmg > 0 && magr)
 			magr->mhurtu = TRUE;
@@ -3754,6 +3763,9 @@ boolean ranged;
 	if (!youagr && magr->mtame && canseemon(magr)) {
 		u.petattacked = TRUE;
 	}
+
+	if (vis == -1)
+		vis = getvis(magr, mdef, 0, 0);
 	
 	/* Some things cause immediate misses */
 	/* monster displacement */
@@ -4008,6 +4020,67 @@ boolean ranged;
 	}
 	else {
 		dmg = 0;
+	}
+	/* worms get increased damage on their bite if they are lined up with momentum */
+	if(!youagr && pa == &mons[PM_LONG_WORM] && magr->wormno && attk->aatyp == AT_BITE){
+		if(wormline(magr, bhitpos.x, bhitpos.y))
+			dmg += d(2,4); //Add segment damage
+	}
+	/* madness can make the player take more damage */
+	if (youdef) {
+		if (u.umadness&MAD_SUICIDAL){
+			dmg += ((100 - u.usanity)*u.ulevel) / 200;
+		}
+
+		if ((pa->mlet == S_SNAKE
+			|| pa->mlet == S_NAGA
+			|| pa == &mons[PM_COUATL]
+			|| pa == &mons[PM_LILLEND]
+			|| pa == &mons[PM_MEDUSA]
+			|| pa == &mons[PM_MARILITH]
+			|| pa == &mons[PM_MAMMON]
+			|| pa == &mons[PM_SHAKTARI]
+			|| pa == &mons[PM_DEMOGORGON]
+			|| pa == &mons[PM_GIANT_EEL]
+			|| pa == &mons[PM_ELECTRIC_EEL]
+			|| pa == &mons[PM_KRAKEN]
+			|| pa == &mons[PM_SALAMANDER]
+			|| pa == &mons[PM_KARY__THE_FIEND_OF_FIRE]
+			|| pa == &mons[PM_CATHEZAR]
+			) && u.umadness&MAD_OPHIDIOPHOBIA && u.usanity < 100){
+			dmg += (100 - u.usanity) / 5;
+		}
+
+		if ((pa->mlet == S_WORM
+			|| attacktype(pa, AT_TENT)
+			) && u.umadness&MAD_HELMINTHOPHOBIA && u.usanity < 100){
+			dmg += (100 - u.usanity) / 5;
+		}
+
+		if (!magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARGENT_SHEEN && u.usanity < 100){
+			dmg += (100 - u.usanity) / 5;
+		}
+
+		if ((is_insectoid(pa) || is_arachnid(pa)) && u.umadness&MAD_ENTOMOPHOBIA && u.usanity < 100){
+			dmg += (100 - u.usanity) / 5;
+		}
+
+		if (is_aquatic(pa) && u.umadness&MAD_THALASSOPHOBIA && u.usanity < 100){
+			dmg += (100 - u.usanity) / 5;
+		}
+
+		if ((is_spider(pa)
+			|| pa == &mons[PM_SPROW]
+			|| pa == &mons[PM_DRIDER]
+			|| pa == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
+			|| pa == &mons[PM_AVATAR_OF_LOLTH]
+			) && u.umadness&MAD_ARACHNOPHOBIA && u.usanity < 100){
+			dmg += (100 - u.usanity) / 5;
+		}
+
+		if (magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARACHNOPHOBIA && u.usanity < 100){
+			dmg += (100 - u.usanity) / 5;
+		}
 	}
 
 	/*	Next a cancellation factor	*/
@@ -4329,7 +4402,9 @@ boolean ranged;
 					(youdef ? "You" : Monnam(mdef)),
 					(youdef ? "'re" : " is"));
 			}
-
+			/* madness: cold */
+			if (youdef)
+				roll_frigophobia();
 			/* destory items in inventory */
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvCold_res(mdef)){
@@ -5744,6 +5819,10 @@ boolean ranged;
 								uwepgone();
 								freeinv(otmp);
 								(void)dropy(otmp);
+								if (roll_madness(MAD_TALONS)){
+									You("panic after having dropping your weapon!");
+									nomul(-1 * rnd(6), "panic");
+								}
 							}
 							else{
 								You("keep a tight grip on your %s!", u.twoweap ? "weapons" : "weapon");
@@ -5760,6 +5839,10 @@ boolean ranged;
 						(void)Cloak_off();
 						freeinv(otmp);
 						(void)dropy(otmp);
+						if (roll_madness(MAD_TALONS)){
+							You("panic after having your cloak taken!");
+							nomul(-1 * rnd(6), "panic");
+						}
 					}
 				}
 				else if (uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
@@ -5773,6 +5856,10 @@ boolean ranged;
 							setuswapwep((struct obj *)0);
 							freeinv(otmp);
 							(void)mpickobj(magr, otmp);
+							if (roll_madness(MAD_TALONS)){
+								You("panic after having your property stolen!");
+								nomul(-1 * rnd(6), "panic");
+							}
 						}
 					}
 					else if (uarm){
@@ -5784,6 +5871,10 @@ boolean ranged;
 							(void)Armor_gone();
 							freeinv(otmp);
 							(void)dropy(otmp);
+							if (roll_madness(MAD_TALONS)){
+								You("panic after having your armor taken!");
+								nomul(-1 * rnd(6), "panic");
+							}
 						}
 					}
 				}
@@ -6145,6 +6236,7 @@ boolean ranged;
 #ifdef SEDUCE
 			dotent(magr, dmg);
 #endif
+			change_usanity(u_sanity_loss(magr));
 		}
 		/* Might be technically incorrect to make the player also take an AT_TENT AD_PHYS attack afterwards
 		 * but it really simplifies the flow to use the standard behaviour of [special effects] -> [basic damage]
@@ -6877,6 +6969,10 @@ boolean ranged;
 					(youdef ? "seem" : "seems")
 					);
 			}
+			if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
+				You("panic anyway!");
+				nomul(-1 * rnd(3), "panicking");
+			}
 			/* don't do any further damage or anything, but do trigger retaliation attacks */
 			return MM_HIT;
 		}
@@ -6963,6 +7059,10 @@ boolean ranged;
 						done(DIED);
 						lifesaved++;
 					}
+				}
+				if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
+					You("panic from the burrowing tentacles!");
+					nomul(-1 * rnd(6), "panicking");
 				}
 				/* if a migo scooped out your brain, it stops attacking */
 				if (pa == &mons[PM_MIGO_PHILOSOPHER] || pa == &mons[PM_MIGO_QUEEN])
@@ -9301,6 +9401,8 @@ int vis;
 						You("are caught in a blast of kaleidoscopic light!");
 					chg = make_hallucinated(HHallucination + (long)dmg, FALSE, 0L);
 					You("%s.", chg ? "are freaked out" : "seem unaffected");
+					if (chg && Hallucination && magr->data == &mons[PM_DAUGHTER_OF_BEDLAM])
+						u.umadness |= MAD_DELUSIONS;
 				}
 				else {
 					if (youagr && vis&VIS_MDEF) {
@@ -9404,6 +9506,7 @@ expl_common:
 					switch (attk->adtyp) {
 					case AD_COLD:
 					case AD_ECLD:
+						roll_frigophobia();
 						golem_ad = AD_COLD;
 						break;
 					case AD_FIRE:
@@ -9697,8 +9800,10 @@ int vis;
 					forget(13);
 				}
 			}
-			else
+			else {
 				You("avoid the gaze of the right head of Demogorgon!");
+				return MM_MISS;
+			}
 		}
 		else {
 			/* 1/3 chance to succeed */
@@ -10114,8 +10219,10 @@ int vis;
 				else youmonst.movement -= 6;
 				exercise(A_DEX, FALSE);
 			}
-			else
+			else {
 				You("avoid the gaze of the left head of Demogorgon!");
+				return MM_MISS;
+			}
 		}
 		else {
 			/* 1/3 chance to succeed */
@@ -11936,7 +12043,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 				if (touch_petrifies(&mons[weapon->corpsenm])) {
 					/*learn_egg_type(obj->corpsenm);*/
 					if (vis) {
-						pline("Splat! %s hit%s %s with %s %s egg%s!",
+						pline("%s hit%s %s with %s %s egg%s!",
 							(youagr ? "You" : Monnam(magr)),
 							(youagr ? "" : "s"),
 							(youdef ? "you" : mon_nam(mdef)),
@@ -11946,22 +12053,25 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 							);
 						hittxt = TRUE;
 					}
+					if (vis)
+						pline("Splat!");
 					weapon->known = 1;	/* (not much point...) */
 					destroy_all_magr_weapon = TRUE;
 
 					result = xstoney(magr, mdef);
-					if (result&(MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_DIED))
-					{
-						/* we need to clean up the eggs before returning the result */
-						if (thrown)
-							obfree(weapon, (struct obj *)0);
-						else if (youagr)
+					/* clean up the eggs right now, if not thrown */
+					/* if they were, thrown, the throwing function will clean them up */
+					if (!thrown) {
+						if (youagr)
 							useupall(weapon);
 						else for (; cnt; cnt--)
 							m_useup(magr, weapon);
 						if (wepgone)
 							*wepgone = TRUE;
-						/* return */
+					}
+					/* return if we had a significant result from xstoney */
+					if (result&(MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_DIED))
+					{	
 						return result;
 					}
 				}
@@ -11989,14 +12099,16 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 								(cnt == 1L) ? "isn't" : "aren't");
 						}
 						if (weapon->timed) obj_stop_timers(weapon);
-						weapon->otyp = ROCK;
-						weapon->oclass = GEM_CLASS;
+						weapon = poly_obj(weapon, ROCK);
 						weapon->oartifact = 0;
 						weapon->spe = 0;
 						weapon->known = weapon->dknown = weapon->bknown = 0;
 						weapon->owt = weight(weapon);
-						if (thrown)
+						if (thrown) {
 							place_object(weapon, x(mdef), y(mdef));
+							if (wepgone)
+								*wepgone = TRUE;
+						}
 					}
 					else {
 						if (vis) {
@@ -12124,7 +12236,8 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 					}
 					basedmg = dmgval(weapon, mdef, 0);
 				}
-				destroy_all_magr_weapon = TRUE;
+				/* projectile should take care of it */
+				//destroy_all_magr_weapon = TRUE;
 				real_attack = FALSE;
 				break;
 
@@ -12613,10 +12726,15 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	
 	/* PRINT HIT MESSAGE. MAYBE. */
 	if (dohitmsg && vis){
-		if (thrown)
+		if (thrown && !hittxt)
 		{
 			if (youdef) {
-				pline("%s %s you!", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"));
+				if (!Blind) {
+					pline("%s %s you!", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"));
+				}
+				else {
+					pline("You are hit!");
+				}
 			}
 			else if ((!lethaldamage || (m_shot.n > 1 && m_shot.o == weapon->otyp))
 				) {

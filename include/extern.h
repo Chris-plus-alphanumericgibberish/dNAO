@@ -27,6 +27,8 @@ E void FDECL(steal_it, (struct monst *, struct attack *));	/* from uhitm.c */
 E int FDECL(joust, (struct monst *, struct obj *));		/* from uhitm.c */
 E boolean FDECL(attack2, (struct monst *));
 E int FDECL(xattacky, (struct monst *, struct monst *, int, int));
+E int FDECL(xmeleehity, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, boolean));
+E struct attack * FDECL(getattk, (struct monst *, int *, int *, struct attack *, boolean, int *, int *));
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
 E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
@@ -1278,12 +1280,12 @@ E void FDECL(expels, (struct monst *,struct permonst *,BOOLEAN_P));
 E struct attack *FDECL(getmattk, (struct monst *, struct permonst *, int,int *,struct attack *));
 E int FDECL(mattacku, (struct monst *));
 E void FDECL(hurtarmor,(int));
-E int FDECL(hitmu, (struct monst *,struct attack *));
-E int FDECL(passiveum, (struct permonst *,struct monst *,struct attack *));
+//E int FDECL(hitmu, (struct monst *,struct attack *));
+//E int FDECL(passiveum, (struct permonst *,struct monst *,struct attack *));
 E int FDECL(magic_negation, (struct monst *));
 E int NDECL(randomgaze);
 E int NDECL(elementalgaze);
-E int FDECL(gazemu, (struct monst *,struct attack *));
+//E int FDECL(gazemu, (struct monst *,struct attack *));
 E void FDECL(mdamageu, (struct monst *,int));
 E int FDECL(could_seduce, (struct monst *,struct monst *,struct attack *));
 #ifdef SEDUCE
@@ -1297,7 +1299,7 @@ E int FDECL(dosflseduce, (struct monst *));
 E int FDECL(dopaleseduce, (struct monst *));
 E int FDECL(dotent, (struct monst *, int));
 #endif
-E void NDECL(reset_mvudieroll);
+//E void NDECL(reset_mvudieroll);
 
 /* ### minion.c ### */
 

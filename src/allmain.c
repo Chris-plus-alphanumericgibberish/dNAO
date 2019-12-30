@@ -840,7 +840,7 @@ moveloop()
 			/****************************************/
 ////////////////////////////////////////////////////////////////////////////////////////////////
 			//reset_mvmdieroll();
-			reset_mvudieroll();
+			//reset_mvudieroll();
 			if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
 				average_dogs();
 			for (mtmp = fmon; mtmp; mtmp = nxtmon){

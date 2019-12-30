@@ -722,11 +722,28 @@ boolean * wepgone;				/* TRUE if projectile is already destroyed */
 		return;
 	}
 
-	/* projectiles that should always be destroyed, regardless of fired */
+	/* projectiles that should always be destroyed, regardless of fired or whether or not they hit a "soft" surface */
 	if (forcedestroy ||
-		thrownobj->otyp == LASER_BEAM)
+		thrownobj->otyp == LASER_BEAM ||
+		thrownobj->otyp == ACID_VENOM ||
+		thrownobj->otyp == BLINDING_VENOM ||
+		thrownobj->otyp == CREAM_PIE ||
+		thrownobj->otyp == EGG
+		)
 	{
-		destroy_projectile(magr, thrownobj);
+		/* prefer to destroy via breaktest, if possible */
+		if (breaktest(thrownobj)) {
+			tmp_at(DISP_FLASH, obj_to_glyph(thrownobj));
+			tmp_at(bhitpos.x, bhitpos.y);
+			if (cansee(bhitpos.x, bhitpos.y))
+				delay_output();
+			tmp_at(DISP_END, 0);
+			breakmsg(thrownobj, cansee(bhitpos.x, bhitpos.y));
+			breakobj(thrownobj, bhitpos.x, bhitpos.y, youagr, TRUE);
+		}
+		else {
+			destroy_projectile(magr, thrownobj);
+		}
 		*wepgone = TRUE;
 		return;
 	}
