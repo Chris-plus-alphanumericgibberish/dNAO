@@ -1050,6 +1050,13 @@ struct attack *uattk;
 		return TRUE;
 	}
 	
+	if((mon->data->mlet == S_WORM
+		|| attacktype(mon->data, AT_TENT)
+	) && roll_madness(MAD_HELMINTHOPHOBIA)){
+		pline("You're afraid to go near that wormy thing!");
+		return TRUE;
+	}
+	
 	if(mhit && mon_resistance(mon,DISPLACED) && rn2(2)){
 		if(has_passthrough_displacement(mon->data)){
 			Your("attack passes harmlessly through %s!", mon_nam(mon));
@@ -4555,6 +4562,13 @@ register int tmp, weptmp, tchtmp;
 		return TRUE;
 	}
 	
+	if((mon->data->mlet == S_WORM
+		|| attacktype(mon->data, AT_TENT)
+	) && roll_madness(MAD_HELMINTHOPHOBIA)){
+		pline("You're afraid to go near that wormy thing!");
+		return TRUE;
+	}
+	
 	if(mon_resistance(mon,DISPLACED) && rn2(2)){
 		if(has_passthrough_displacement(mon->data)){
 			Your("attack passes harmlessly through %s!", mon_nam(mon));
@@ -4930,6 +4944,13 @@ int nattk;
 	
 	if(u.umadness&MAD_PARANOIA && u.usanity < rnd(100)){
 		You("attack %s's hallucinatory twin!", mon_nam(mon));
+		return TRUE;
+	}
+	
+	if((mon->data->mlet == S_WORM
+		|| attacktype(mon->data, AT_TENT)
+	) && roll_madness(MAD_HELMINTHOPHOBIA)){
+		pline("You're afraid to go near that wormy thing!");
 		return TRUE;
 	}
 	
