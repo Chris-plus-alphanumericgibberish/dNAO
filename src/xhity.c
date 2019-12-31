@@ -2880,6 +2880,8 @@ struct obj * otmp;
 			ndice = 2;
 		else if (otmp->oartifact == ART_SILVER_STARLIGHT)
 			ndice = 2;
+		else if(otmp->otyp == KHAKKHARA)
+			ndice = rnd(3);
 		/* calculate */
 		dmg += d(ndice, diesize);
 	}
@@ -2888,6 +2890,9 @@ struct obj * otmp;
 		/* default: 1d(XL) */
 		ndice = 1;
 		diesize = mlev(mdef);
+		/* special cases */
+		if (otmp->otyp == KHAKKHARA)
+			ndice = rnd(3);
 		/* calculate */
 		dmg += d(ndice, diesize);
 	}
@@ -2911,6 +2916,8 @@ struct obj * otmp;
 		/* special cases that do affect dice */
 		else if (otmp->oartifact == ART_AMHIMITL)
 			ndice = 3;
+		else if (otmp->otyp == KHAKKHARA)
+			ndice = rnd(3);
 		/* gold has a particular affinity to blessings and curses */
 		if (otmp->obj_material == GOLD) {
 			diesize = 20;
@@ -2936,12 +2943,15 @@ struct obj * otmp;
 		{	ndice = 3; diesize = 4; }
 		else if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL) /* SCOPECREEP: add ART_TECPATL_OF_HUHETOTL to is_unholy() macro */
 		{	ndice = (otmp->cursed ? 4 : 2); diesize = 4; }
+		else if (otmp->otyp == KHAKKHARA)
+			ndice = rnd(3);
 		/* gold has a particular affinity to blessings and curses */
 		if (otmp->obj_material == GOLD) {
 			ndice *= 2;
 		}
 		/* calculate */
-		dmg += d(ndice, diesize);
+		if (ndice)
+			dmg += d(ndice, diesize);
 	}
 
 	/* the Rod of Seven Parts gets a bonus vs holy and unholy when uncursed */
@@ -11066,7 +11076,7 @@ int dieroll;
 int * returnvalue;
 boolean * hittxt;
 {
-	if (otmp->oartifact && !multistriking(otmp)) {		// artifact
+	if (otmp->oartifact) {		// artifact
 		int tmp = basedmg;
 		*hittxt = artifact_hit(magr, mdef, otmp, &tmp, dieroll);
 		if (*hp(mdef) <= 0)

@@ -56,7 +56,6 @@
 #define is_unholy_mon(mon)	((mon)->data == &mons[PM_UVUUDAUM])
 /* obj. h*/
 #define multistriking(otmp)	(!(otmp) ? 0 : \
-	(otmp)->otyp == KHAKKHARA ? 2 : \
 	(otmp)->otyp == SET_OF_CROW_TALONS ? 2 : \
 	(otmp)->otyp == VIPERWHIP ? ((otmp)->ovar1 - 1) : \
 	arti_threeHead((otmp)) ? 2 : \
