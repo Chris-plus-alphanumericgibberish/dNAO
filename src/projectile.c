@@ -344,7 +344,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		}
 
 		/* projectile is on a creature */
-		if ((range != initrange) &&
+		if ((range != initrange || initrange == 0) &&
 			(mdef = creature_at(bhitpos.x, bhitpos.y)))
 		{
 			result = projectile_attack(magr, mdef, thrownobj, launcher, fired, &dx, &dy, &range, &initrange, forcedestroy, &wepgone);
@@ -356,7 +356,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		}
 
 		/* projectile is on a sink (it "sinks" down) or is on a non-allowable square */
-		if ((range != initrange) &&
+		if ((range != initrange || initrange == 0) &&
 			(!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ)) ||
 			closed_door(bhitpos.x, bhitpos.y) ||
 			(IS_SINK(levl[bhitpos.x][bhitpos.y].typ)))
@@ -1556,7 +1556,7 @@ struct obj * thrownobj;
  *
  * Returns FALSE if the object is gone.
  *
- * As much as I'd like to use hmon2, that would definitely be scope creep
+ * SCOPECREEP: use hmon2point0 and clean up the old crap
  */
 STATIC_OVL boolean
 toss_up2(obj)
@@ -1582,113 +1582,118 @@ struct obj *obj;
 			Sprintf(buf, "almost hits the %s", ceiling(u.ux, u.uy));
 		}
 	}
-	pline("%s %s, then falls back on top of your %s.",
-		Doname2(obj), buf, body_part(HEAD));
-
-	/* object now hits you */
-
-	if (obj->oclass == POTION_CLASS) {
-		potionhit(&youmonst, obj, TRUE);
-		return FALSE;
-	}
-	else if (breaktest(obj)) {
-		int otyp = obj->otyp, ocorpsenm = obj->corpsenm;
-		int blindinc;
-
-		/* need to check for blindness result prior to destroying obj */
-		blindinc = (otyp == CREAM_PIE || otyp == BLINDING_VENOM) &&
-			/* AT_WEAP is ok here even if attack type was AT_SPIT */
-			can_blnd(&youmonst, &youmonst, AT_WEAP, obj) ? rnd(25) : 0;
-
-		breakmsg(obj, !Blind);
-		breakobj(obj, u.ux, u.uy, TRUE, TRUE);
-		obj = 0;	/* it's now gone */
-		switch (otyp) {
-		case EGG:
-			if (touch_petrifies(&mons[ocorpsenm]) &&
-				!uarmh && !Stone_resistance &&
-				!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)))
-				goto petrify;
-		case CREAM_PIE:
-		case BLINDING_VENOM:
-			pline("You've got it all over your %s!", body_part(FACE));
-			if (blindinc) {
-				if (otyp == BLINDING_VENOM && !Blind)
-					pline("It blinds you!");
-				u.ucreamed += blindinc;
-				make_blinded(Blinded + (long)blindinc, FALSE);
-				if (!Blind) Your1(vision_clears);
-			}
-			break;
-		default:
-			break;
-		}
-		return FALSE;
-	}
-	else {		/* neither potion nor other breaking object */
-		boolean less_damage = uarmh && is_hard(uarmh), artimsg = FALSE;
-		int dmg = dmgval(obj, &youmonst, 0);
-		int basedamage = dmg;
-		int newdamage = dmg;
-		int dieroll = rn1(18, 2);  /* need a fake die roll here; rn1(18,2) avoids 1 and 20 */
-
-		if (obj->oartifact){
-			artimsg = artifact_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
-			dmg += (newdamage - basedamage);
-			newdamage = basedamage;
-		}
-		if (obj->oproperties){
-			artimsg |= oproperty_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
-			dmg += (newdamage - basedamage);
-			newdamage = basedamage;
-		}
-		if (spec_prop_otyp(obj)){
-			artimsg |= otyp_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
-			dmg += (newdamage - basedamage);
-			newdamage = basedamage;
-		}
-
-
-		if (!dmg) {	/* probably wasn't a weapon; base damage on weight */
-			dmg = (int)obj->owt / 100;
-			if (dmg < 1) dmg = 1;
-			else if (dmg > 6) dmg = 6;
-			if (insubstantial(youracedata) &&
-				!insubstantial_aware(&youmonst, obj, FALSE)
-				) dmg = 0;
-		}
-		if (resist_attacks(youracedata))
-			dmg = 0;
-		if (dmg > 1 && less_damage) dmg = 1;
-		if (dmg > 0) dmg += aeshbon();
-		if (dmg > 0) dmg += u.udaminc;
-		if (dmg < 0) dmg = 0;	/* beware negative rings of increase damage */
-		if (Half_physical_damage) dmg = (dmg + 1) / 2;
-		if (u.uvaul_duration) dmg = (dmg + 1) / 2;
-
-		if (uarmh) {
-			if (less_damage && dmg < (Upolyd ? u.mh : u.uhp)) {
-				if (!artimsg && (is_hard(uarmh)))
-					pline("Fortunately, you are wearing a hard helmet.");
-			}
-			else if (flags.verbose &&
-				!(obj->otyp == CORPSE && touch_petrifies(&mons[obj->corpsenm])))
-				Your("%s does not protect you.", xname(uarmh));
-		}
-		else if (obj->otyp == CORPSE && touch_petrifies(&mons[obj->corpsenm])) {
-			if (!Stone_resistance &&
-				!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
-			petrify:
-				killer_format = KILLED_BY;
-				killer = "elementary physics";	/* "what goes up..." */
-				You("turn to stone.");
-				if (obj) dropy(obj);	/* bypass most of hitfloor() */
-				done(STONING);
-				return obj ? TRUE : FALSE;
-			}
-		}
+	if (!hits_insubstantial((struct monst *)0, &youmonst, (struct attack *)0, obj)) {
+		pline("%s %s, then falls back down through you.", Doname2(obj), buf);
 		hitfloor(obj);
-		losehp(dmg, "falling object", KILLED_BY_AN);
+	}
+	else {
+		pline("%s %s, then falls back on top of your %s.",
+			Doname2(obj), buf, body_part(HEAD));
+
+		/* object now hits you */
+
+		if (obj->oclass == POTION_CLASS) {
+			potionhit(&youmonst, obj, TRUE);
+			return FALSE;
+		}
+		else if (breaktest(obj)) {
+			int otyp = obj->otyp, ocorpsenm = obj->corpsenm;
+			int blindinc;
+
+			/* need to check for blindness result prior to destroying obj */
+			blindinc = (otyp == CREAM_PIE || otyp == BLINDING_VENOM) &&
+				/* AT_WEAP is ok here even if attack type was AT_SPIT */
+				can_blnd(&youmonst, &youmonst, AT_WEAP, obj) ? rnd(25) : 0;
+
+			breakmsg(obj, !Blind);
+			breakobj(obj, u.ux, u.uy, TRUE, TRUE);
+			obj = 0;	/* it's now gone */
+			switch (otyp) {
+			case EGG:
+				if (touch_petrifies(&mons[ocorpsenm]) &&
+					!uarmh && !Stone_resistance &&
+					!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)))
+					goto petrify;
+			case CREAM_PIE:
+			case BLINDING_VENOM:
+				pline("You've got it all over your %s!", body_part(FACE));
+				if (blindinc) {
+					if (otyp == BLINDING_VENOM && !Blind)
+						pline("It blinds you!");
+					u.ucreamed += blindinc;
+					make_blinded(Blinded + (long)blindinc, FALSE);
+					if (!Blind) Your1(vision_clears);
+				}
+				break;
+			default:
+				break;
+			}
+			return FALSE;
+		}
+		else {		/* neither potion nor other breaking object */
+			boolean less_damage = uarmh && is_hard(uarmh), artimsg = FALSE;
+			int dmg = dmgval(obj, &youmonst, 0);
+			int basedamage = dmg;
+			int newdamage = dmg;
+			int dieroll = rn1(18, 2);  /* need a fake die roll here; rn1(18,2) avoids 1 and 20 */
+
+			if (obj->oartifact){
+				artimsg = artifact_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
+				dmg += (newdamage - basedamage);
+				newdamage = basedamage;
+			}
+			if (obj->oproperties){
+				artimsg |= oproperty_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
+				dmg += (newdamage - basedamage);
+				newdamage = basedamage;
+			}
+			if (spec_prop_otyp(obj)){
+				artimsg |= otyp_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
+				dmg += (newdamage - basedamage);
+				newdamage = basedamage;
+			}
+
+
+			if (!dmg) {	/* probably wasn't a weapon; base damage on weight */
+				dmg = (int)obj->owt / 100;
+				if (dmg < 1) dmg = 1;
+				else if (dmg > 6) dmg = 6;
+				if (hits_insubstantial((struct monst *)0, &youmonst, (struct attack *)0, obj) != 2)	/* 2: full damage object (like sunsword) */
+					dmg = 0;
+			}
+			if (resist_attacks(youracedata))
+				dmg = 0;
+			if (dmg > 1 && less_damage) dmg = 1;
+			if (dmg > 0) dmg += aeshbon();
+			if (dmg > 0) dmg += u.udaminc;
+			if (dmg < 0) dmg = 0;	/* beware negative rings of increase damage */
+			if (Half_physical_damage) dmg = (dmg + 1) / 2;
+			if (u.uvaul_duration) dmg = (dmg + 1) / 2;
+
+			if (uarmh) {
+				if (less_damage && dmg < (Upolyd ? u.mh : u.uhp)) {
+					if (!artimsg && (is_hard(uarmh)))
+						pline("Fortunately, you are wearing a hard helmet.");
+				}
+				else if (flags.verbose &&
+					!(obj->otyp == CORPSE && touch_petrifies(&mons[obj->corpsenm])))
+					Your("%s does not protect you.", xname(uarmh));
+			}
+			else if (obj->otyp == CORPSE && touch_petrifies(&mons[obj->corpsenm])) {
+				if (!Stone_resistance &&
+					!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
+				petrify:
+					killer_format = KILLED_BY;
+					killer = "elementary physics";	/* "what goes up..." */
+					You("turn to stone.");
+					if (obj) dropy(obj);	/* bypass most of hitfloor() */
+					done(STONING);
+					return obj ? TRUE : FALSE;
+				}
+			}
+			hitfloor(obj);
+			losehp(dmg, "falling object", KILLED_BY_AN);
+		}
 	}
 	return TRUE;
 }

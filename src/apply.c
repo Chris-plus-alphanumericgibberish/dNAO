@@ -3601,7 +3601,7 @@ struct obj *obj;
     if (proficient > 3) proficient = 3;
     if (proficient < 0) proficient = 0;
 
-    if (u.uswallow && attack(u.ustuck)) {
+    if (u.uswallow && attack2(u.ustuck)) {
 	There("is not enough room to flick your whip.");
 
     } else if (Underwater) {
@@ -3676,7 +3676,7 @@ struct obj *obj;
 			if (bigmonst(mtmp->data)) {
 			wrapped_what = strcpy(buf, mon_nam(mtmp));
 			} else if (proficient) {
-			if (attack(mtmp)) return 1;
+			if (attack2(mtmp)) return 1;
 			else pline("%s", msg_snap);
 			}
 		}
@@ -3803,7 +3803,7 @@ struct obj *obj;
 			stumble_onto_mimic(mtmp);
 			else You("flick your whip towards %s.", mon_nam(mtmp));
 			if (proficient) {
-			if (attack(mtmp)) return 1;
+			if (attack2(mtmp)) return 1;
 			else pline("%s", msg_snap);
 			}
 		}

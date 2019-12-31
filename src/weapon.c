@@ -1110,12 +1110,8 @@ int spec;
 		if (tmp < 0)
 			tmp = 0;
 	}
-
-	/* thick skinned/scaled creatures don't feel flimsy weapons */
-	if (otmp->obj_material <= LEATHER && (thick_skinned(ptr) || (youdefend && u.sealsActive&SEAL_ECHIDNA)) && !(is_lightsaber(otmp) && litsaber(otmp)))
-		tmp = 0;
 	/* Flaying weapons don't damage armored foes */
-	if (otmp->oproperties&OPROP_FLAYW && (thick_skinned(ptr) || (youdefend && u.sealsActive&SEAL_ECHIDNA) || (mon && some_armor(mon))))
+	if (otmp->oproperties&OPROP_FLAYW && mon && some_armor(mon))
 		tmp = 1;
 	/* Smaug gets stabbed */
 	if(is_stabbing(otmp) && ptr == &mons[PM_SMAUG])

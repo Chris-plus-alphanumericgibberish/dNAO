@@ -4,10 +4,18 @@
 #include "edog.h"
 #include "xhity.h"
 
+/* TODO LIST
+demon gating (u, m)
+artifact hitmesages?
+"active_glyph"s
+Claws of the Revenancer w/ rings?
+*/
+
 STATIC_DCL int FDECL(getvis, (struct monst *, struct monst *, int, int));
 STATIC_DCL int FDECL(attack_checks2, (struct monst *, struct obj *));
 //STATIC_DCL boolean FDECL(attack2, (struct monst *));
 //STATIC_DCL int FDECL(xattacky, (struct monst *, struct monst *));
+STATIC_DCL boolean FDECL(madness_cant_attack, (struct monst *));
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL boolean FDECL(badtouch, (struct monst *, struct monst *, struct attack *, struct obj *));
@@ -24,7 +32,6 @@ STATIC_DCL boolean FDECL(obj_silver_searing, (struct obj *));
 STATIC_DCL boolean FDECL(obj_jade_searing, (struct obj *));
 STATIC_DCL long FDECL(attk_equip_slot, (int));
 STATIC_DCL int FDECL(hatesobjdmg, (struct monst *, struct obj *));
-STATIC_DCL int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
 STATIC_DCL int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
@@ -36,7 +43,6 @@ STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attac
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
-STATIC_DCL void FDECL(weave_black_web, (struct monst *));
 STATIC_DCL int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 STATIC_DCL int NDECL(beastmastery);
@@ -567,6 +573,78 @@ struct permonst * pd;
 	return TRUE;
 }
 
+/* madness_cant_attack()
+ * 
+ * returns TRUE if because of the player's madness, they cannot attack mon.
+ */
+boolean
+madness_cant_attack(mon)
+struct monst * mon;
+{
+	if (mon->female && humanoid_torso(mon->data) && roll_madness(MAD_SANCTITY)){
+		You("can't bring yourself to strike %s!", mon_nam(mon));
+		return TRUE;
+	}
+
+	if ((mon->data->mlet == S_SNAKE
+		|| mon->data->mlet == S_NAGA
+		|| mon->data == &mons[PM_COUATL]
+		|| mon->data == &mons[PM_LILLEND]
+		|| mon->data == &mons[PM_MEDUSA]
+		|| mon->data == &mons[PM_MARILITH]
+		|| mon->data == &mons[PM_MAMMON]
+		|| mon->data == &mons[PM_SHAKTARI]
+		|| mon->data == &mons[PM_DEMOGORGON]
+		|| mon->data == &mons[PM_GIANT_EEL]
+		|| mon->data == &mons[PM_ELECTRIC_EEL]
+		|| mon->data == &mons[PM_KRAKEN]
+		|| mon->data == &mons[PM_SALAMANDER]
+		|| mon->data == &mons[PM_KARY__THE_FIEND_OF_FIRE]
+		|| mon->data == &mons[PM_CATHEZAR]
+		) && roll_madness(MAD_OPHIDIOPHOBIA)){
+		pline("You're afraid to go near that horrid serpent!");
+		return TRUE;
+	}
+
+	if ((is_insectoid(mon->data) || is_arachnid(mon->data)) && roll_madness(MAD_ENTOMOPHOBIA)){
+		pline("You're afraid to go near that frightful bug!");
+		return TRUE;
+	}
+
+	if ((is_spider(mon->data)
+		|| mon->data == &mons[PM_SPROW]
+		|| mon->data == &mons[PM_DRIDER]
+		|| mon->data == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
+		|| mon->data == &mons[PM_AVATAR_OF_LOLTH]
+		) && roll_madness(MAD_ARACHNOPHOBIA)){
+		pline("You're afraid to go near that terrifying spider!");
+		return TRUE;
+	}
+
+	if (mon->female && humanoid_upperbody(mon->data) && roll_madness(MAD_ARACHNOPHOBIA)){
+		You("can't bring yourself to strike %s!", mon_nam(mon));
+		return TRUE;
+	}
+
+	if (is_aquatic(mon->data) && roll_madness(MAD_THALASSOPHOBIA)){
+		pline("You're afraid to go near that sea monster!");
+		return TRUE;
+	}
+
+	if (u.umadness&MAD_PARANOIA && u.usanity < rnd(100)){
+		You("attack %s's hallucinatory twin!", mon_nam(mon));
+		return TRUE;
+	}
+
+	if ((mon->data->mlet == S_WORM
+		|| attacktype(mon->data, AT_TENT)
+		) && roll_madness(MAD_HELMINTHOPHOBIA)){
+		pline("You're afraid to go near that wormy thing!");
+		return TRUE;
+	}
+	return FALSE;
+}
+
 /* xattacky()
  * 
  * Harmonized function for when a creature attempts to attack another creature.
@@ -621,7 +699,7 @@ int tary;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	boolean missedyou = (!youagr && youdef && (tarx != u.ux || tary != u.uy));	/* monster tried to attack you, but it got your location wrong */
-	boolean ranged = (youagr ? FALSE : !monnear(magr, tarx, tary));	/* is magr near its target? (The player is assumed to always be melee in this function) */
+	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
 	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !canseemon(mdef)) :
@@ -654,6 +732,9 @@ int tary;
 	/* cases where the agressor cannot make any attacks at all */
 	/* agr can't attack */
 	if (cantmove(magr))
+		return MM_MISS;
+
+	if (youagr && madness_cant_attack(mdef))
 		return MM_MISS;
 
 	/* some creatures are limited in *where* they can attack */
@@ -690,15 +771,7 @@ int tary;
 	}
 
 	/* Set up the visibility of action */
-	if (youagr || youdef || (cansee(x(magr), y(magr)) && cansee(tarx, tary)))
-	{
-		if (youagr || (cansee(x(magr), y(magr)) && canseemon(magr)))
-			vis |= VIS_MAGR;
-		if (youdef || (cansee(tarx, tary) && canseemon(mdef)))
-			vis |= VIS_MDEF;
-		if (youagr || youdef || canspotmon(magr) || canspotmon(mdef))
-			vis |= VIS_NONE;
-	}
+	vis = getvis(magr, mdef, tarx, tary);
 
 	/*	Set flag indicating monster has moved this turn.  Necessary since a
 	 *	monster might get an attack out of sequence (i.e. before its move) in
@@ -788,6 +861,11 @@ int tary;
 			)) {
 			continue;
 		}
+
+		/* If the player was using 'k' to kick, they are only performing kick attacks */
+		/* onlykicks is a state variable defined in dokick.c */
+		if (youagr && onlykicks && attk->aatyp != AT_KICK)
+			continue;
 
 		/* based on the attack type... */
 		switch (aatyp)
@@ -949,7 +1027,9 @@ int tary;
 			else {
 				/* make ranged attack */
 				/* players should not make ranged attacks here */
-				if (m_online(magr, mdef, tarx, tary, (magr->mtame && !magr->mconf), TRUE) &&
+				if (youagr)
+					continue;
+				else if (m_online(magr, mdef, tarx, tary, (magr->mtame && !magr->mconf), TRUE) &&
 					distmin(x(magr), y(magr), tarx, tary) <= BOLT_LIM) {
 					if (mdofire(magr, mdef, tarx, tary)) {
 						/* they did do a ranged attack */
@@ -3651,6 +3731,23 @@ int flat_acc;
 				if (!armmessage) armmessage = TRUE;
 				if (!uwep && !uarms) {
 					wepn_acc += (u.ulevel / 3) + 2;
+				}
+			}
+		}
+		/* nudist accuracy bonus/penalty (player-only) (melee) */
+		if (youagr && u.umadness&MAD_NUDIST && u.usanity < 100){
+			int delta = 100 - u.usanity;
+			int discomfort = u_clothing_discomfort();
+			static boolean clothmessage = TRUE;
+			if (discomfort) {
+				if (clothmessage) Your("clothing is rather uncomfortable...");
+				clothmessage = FALSE;
+				wepn_acc -= (discomfort * delta) / 10;
+			}
+			else {
+				if (!clothmessage) clothmessage = TRUE;
+				if (!uwep && !uarms) {
+					wepn_acc += delta / 10;
 				}
 			}
 		}
@@ -11278,7 +11375,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			/* not thrown (how could this happen?) */
 			!thrown)
 			unarmed_punch = TRUE;
-		else if (attk->aatyp == AT_KICK && !thrown)
+		else if (attk->aatyp == AT_KICK && !thrown)	/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
 			unarmed_kick = TRUE;
 		else if (attk->aatyp == AT_TUCH && (attk->adtyp == AD_SHDW || attk->adtyp == AD_STAR || attk->adtyp == AD_BLUD || attk->adtyp == AD_MERC) && !thrown)
 			fake_valid_weapon_attack = TRUE;
@@ -12325,7 +12422,35 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			basedmg += otmp->spe;
 	}
 	else if (unarmed_kick) {
-		basedmg = rnd(2);
+		/* If a proper monster-style attack is being used, no stat-based damage! */
+		if (monsdmg == 0) {
+			/* Do monsters ever kick for 0 monsdmg? */
+			if (youagr)
+				basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON)) / 15);
+			else
+				basedmg = 1;
+			/* martial players are much better at kicking */
+			if (youagr && (martial_bonus() || (youracedata == &mons[PM_SASQUATCH]) || (uarmf && uarmf->otyp == KICKING_BOOTS)))
+				basedmg += rn2(ACURR(A_DEX)/2 + 1);
+		}
+
+		/* boots can increase kicking damage */
+		otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
+		if (otmp) {
+			basedmg += otmp->spe;
+			if (otmp->otyp == KICKING_BOOTS)
+				basedmg += rnd(6) + rnd(5) + (bigmonst(pd) ? 0 : 1);
+			if (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS){
+				basedmg += rnd(bigmonst(pd) ? 2 : 6);
+			}
+
+			basedmg = max(basedmg, 1);
+		}
+
+
+		/* we are using monsdmg == -1 to signify a 'clumsy' kick that deals half damage */
+		if (monsdmg == -1)
+			basedmg /= 2;
 	}
 	else {
 		basedmg = 0;
@@ -12431,7 +12556,8 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			bonsdmg += bon_damage;
 		}
 		/* skill damage bonus */
-		if (youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick)) {
+		if (youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch)) {
+			/* note: unarmed kicks do not get skill bonus damage */
 			int skill_damage = 0;
 			int wtype;
 
@@ -12581,7 +12707,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		}
 	}
 	/* other creatures resist specific types of attacks */
-	if (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack) {
+	else if (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack) {
 		int attackmask = 0;
 		int resistmask = 0;
 
@@ -12663,6 +12789,15 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			resistmask |= SLASH;
 		}
 
+		if ((thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA)) && (
+			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS))) || 
+			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !arti_shining(otmp)) ||
+			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->oproperties&OPROP_FLAYW))
+			)){
+			/* damage entirely mitigated */
+			subtotl = 0;
+			resisted_attack_type = TRUE;
+		}
 		if ((attackmask & ~(resistmask)) == 0L && !(otmp && narrow_spec_applies(otmp, mdef)) && (subtotl > 0)) {
 			/* damage reduced by 75% */
 			subtotl /= 4;
@@ -12683,6 +12818,11 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		/* can only reduce damage to 1 */
 		if (subtotl < 1)
 			subtotl = 1;
+	}
+
+	/* thalassophobic players can deal greatly reduced damage to sea creatures */
+	if (youagr && is_aquatic(pd) && roll_madness(MAD_THALASSOPHOBIA)){
+		subtotl = (subtotl + 9)/10;
 	}
 	
 	/* Apply DR */
@@ -13618,6 +13758,14 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 			){
 			unbind(SEAL_IRIS, TRUE);
 			result |= MM_AGR_STOP;	/* your attack was interrupted! */
+		}
+		/* Argent Sheen madness can make you stop at reflecting monsters */
+		else if (youagr && !Blind && canseemon(mdef) && !Invisible
+			&& !is_vampire(youracedata)
+			&& roll_madness(MAD_ARGENT_SHEEN)
+			&& mon_reflects(mdef, "You admire your reflection in %s %s.")
+			){
+			nomul(-1 * rnd(6), "posing in front of a mirror.");
 		}
 		/* Vampires biting a deadly creature die. */
 		if ((result&MM_HIT) && attk->aatyp == AT_BITE && is_vampire(pa)) {

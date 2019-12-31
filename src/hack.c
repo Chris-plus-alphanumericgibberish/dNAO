@@ -1196,7 +1196,7 @@ domove()
 		if(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20) displacer = TRUE;
 		/* try to attack; note that it might evade */
 		/* also, we don't attack tame when _safepet_ */
-		else if ((wizard && !u.uhave.bell) ? attack2(mtmp) : attack(mtmp)){
+		else if (attack2(mtmp)){
 			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && u.fightingForm == FFORM_ATARU && (!uarm || is_light_armor(uarm))){
 				coord cc;
 				if(!u.utrap && tt_findadjacent(&cc, mtmp) && (cc.x != u.ux || cc.y != u.uy)){
@@ -1442,7 +1442,7 @@ domove()
 	     * If a monster attempted to displace us but failed
 	     * then we are entitled to our normal attack.
 	     */
-	    if (!attack(mtmp)) {
+	    if (!attack2(mtmp)) {
 		flags.move = 0;
 		nomul(0, NULL);
 	    }
@@ -1467,7 +1467,7 @@ domove()
 	    /* [ALI] This can't happen at present, but if it did we would
 	     * also need to worry about the call to drag_ball above.
 	     */
-	    if (displacer) (void)attack(mtmp);
+	    if (displacer) (void)attack2(mtmp);
 #endif
 	    return;
 	}
@@ -1642,22 +1642,7 @@ domove()
 	spoteffects(TRUE);
 	
 	if(u.specialSealsActive&SEAL_BLACK_WEB && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves+20){
-		static struct attack webattack[] = 
-		{
-			{AT_SHDW,AD_SHDW,4,8},
-			{0,0,0,0}
-		};
-		struct monst *mon;
-		int i, tmp, weptmp, tchtmp;
-		for(i=0; i<8;i++){
-			if(isok(u.ux+xdir[i],u.uy+ydir[i])){
-				mon = m_at(u.ux+xdir[i],u.uy+ydir[i]);
-				if(mon && !mon->mpeaceful){
-					find_to_hit_rolls(mon,&tmp,&weptmp,&tchtmp);
-					hmonwith(mon, tmp, weptmp, tchtmp, webattack, 1);
-				}
-			}
-		}
+		weave_black_web((struct monst *)0);
 	}
 	
 	/* delay next move because of ball dragging */

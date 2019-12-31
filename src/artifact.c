@@ -2368,12 +2368,8 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 	} // nvPh - !cancelled
 	if (pen->ovar1&SEAL_SHIRO){
 		struct obj *otmp;
-		otmp = mksobj((mvitals[PM_ACERERAK].died > 0) ? BOULDER : ROCK, TRUE, FALSE);
-		otmp->blessed = 0;
-		otmp->cursed = 0;
-		set_destroy_thrown(1); //state variable referenced in drop_throw
-			m_throw(magr, magr->mx, magr->my, mdef->mx-magr->mx, mdef->my-magr->my, 1, otmp,TRUE);
-		set_destroy_thrown(0);  //state variable referenced in drop_throw
+		otmp = mksobj((mvitals[PM_ACERERAK].died > 0) ? BOULDER : ROCK, FALSE, FALSE);
+		projectile(magr, otmp, (struct obj *)0, FALSE, mdef->mx, mdef->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);
 		if(mdef->mhp <= 0) return vis;//Monster was killed by throw and we should stop.
 	} // nvPh potential - invisible?
 	if (pen->ovar1&SEAL_SIMURGH){
@@ -4087,8 +4083,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 					getdir((char *)0);
 					if(u.dx || u.dy){
 						You("toss it away.");
-						m_throw(&youmonst, u.ux, u.uy, u.dx, u.dy,
-								(int)((ACURRSTR)/2 - otmp2->owt/40), otmp2,TRUE);
+						projectile(&youmonst, otmp2, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, (int)((ACURRSTR) / 2 - otmp2->owt / 40), FALSE, TRUE, FALSE);
 					}
 					else{
 						You("drop it at your feet.");
@@ -5814,11 +5809,8 @@ arti_invoke(obj)
 					int dd = d(1,3)-2;
 					xadj = yadj = dd;
 				}
-				set_destroy_thrown(1); //state variable referenced in drop_throw
-					m_throw(&youmonst, u.ux + xadj, u.uy + yadj, u.dx, u.dy,
-						2*BOLT_LIM, otmp,TRUE);
-					nomul(0, NULL);
-				set_destroy_thrown(0);  //state variable referenced in drop_throw
+				projectile(&youmonst, otmp, (struct obj *)0, FALSE, u.ux + xadj, u.uy + yadj, u.dx, u.dy, 0, 2*BOLT_LIM, TRUE, FALSE, FALSE);
+				nomul(0, NULL);
 			}
 		}
     break;

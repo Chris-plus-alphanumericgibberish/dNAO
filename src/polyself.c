@@ -634,8 +634,8 @@ int	mntmp;
 		pline(use_thec,monsterc,"scream");
 	    if (youmonst.data == &mons[PM_TOVE])
 		pline(use_thec,monsterc,"gimble a hole in the ground");
-	    if (youmonst.data == &mons[PM_BANDERSNATCH])
-		pline(use_thec,monsterc,"snap at a distant target");
+		if (attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH))
+		pline(use_thec,monsterc,"attack a distant target");
 	    if (lays_eggs(youmonst.data) && flags.female)
 		pline(use_thec,"sit","lay an egg");
 	}

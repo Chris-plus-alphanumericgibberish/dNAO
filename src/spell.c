@@ -2085,14 +2085,11 @@ spiriteffects(power, atme)
 					if(rn2(5)) i++;
 					continue;
 				}
-				otmp = mksobj(SHURIKEN, TRUE, FALSE);
+				otmp = mksobj(SHURIKEN, FALSE, FALSE);
 			    otmp->blessed = 0;
 			    otmp->cursed = 0;
-				set_destroy_thrown(1); //state variable referenced in drop_throw
-					m_throw(&youmonst, u.ux + xadj, u.uy + yadj, u.dx, u.dy,
-						rn1(5,5), otmp,TRUE);
-					nomul(0, NULL);
-				set_destroy_thrown(0);  //state variable referenced in drop_throw
+				projectile(&youmonst, otmp, (struct obj *)0, FALSE, u.ux+xadj, u.uy+yadj, u.dx, u.dy, 0, rn1(5,5), TRUE, FALSE, FALSE);
+				nomul(0, NULL);
 			}
 			losehp(dsize, "little shards of metal ripping out of your body", KILLED_BY);
 		}
@@ -2446,8 +2443,8 @@ spiriteffects(power, atme)
 				struct obj *otmp;
 				You("ask the earth to open.");
 				digfarhole(TRUE, u.ux+u.dx, u.uy+u.dy);
-				otmp = mksobj(BOULDER, TRUE, FALSE);
-				m_throw(&youmonst, u.ux, u.uy, u.dx, u.dy, 1, otmp,TRUE);
+				otmp = mksobj(BOULDER, FALSE, FALSE);
+				projectile(&youmonst, otmp, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
 				nomul(0, NULL);
 			} else break;
 		}break;
@@ -2458,8 +2455,7 @@ spiriteffects(power, atme)
 			otmp->spe = 1; /* to indicate it's yours */
 			otmp->ovar1 = d(5,dsize); /* save the damge this should do */
 			You("spit venom.");
-			m_throw(&youmonst, u.ux, u.uy, u.dx, u.dy, 10, otmp,TRUE);
-			// throwit(otmp, 0L, FALSE, 0);
+			projectile(&youmonst, otmp, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, 0, 10, TRUE, FALSE, FALSE);
 		}break;
 		case PWR_SUCKLE_MONSTER:{
 			struct monst *mon;
@@ -3848,36 +3844,17 @@ spiriteffects(power, atme)
 			qvr->spe = d(5,dsize) + 8;
 			qvr->obj_material = SHADOWSTEEL;
 			qvr->opoisoned = (OPOISON_BASIC|OPOISON_BLIND);
-			set_bypassDR(1);  //state variable referenced in drop_throw
-			set_destroy_thrown(1); //state variable referenced in drop_throw
-				m_throw(&youmonst, mon->mx + (-u.dx), mon->my + (-u.dy), u.dx, u.dy,
-					1, qvr,TRUE);
-				if(!DEADMONSTER(mon) && mon_can_see_you(mon)) // and mon_can_see_you(mon)?
-					setmangry(mon);
-				ttmp2 = maketrap(mon->mx, mon->my, WEB);
-				if (ttmp2 && !DEADMONSTER(mon)) mintrap(mon);
-			set_destroy_thrown(0);  //state variable referenced in drop_throw
-			set_bypassDR(0);  //state variable referenced in drop_throw
+			qvr->oproperties = OPROP_PHSEW;
+			projectile(&youmonst, qvr, (struct obj *)0, FALSE, mon->mx, mon->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);
+			if(!DEADMONSTER(mon) && mon_can_see_you(mon)) // and mon_can_see_you(mon)?
+				setmangry(mon);
+			ttmp2 = maketrap(mon->mx, mon->my, WEB);
+			if (ttmp2 && !DEADMONSTER(mon)) mintrap(mon);
 		}break;
-		case PWR_WEAVE_BLACK_WEB:{
+		case PWR_WEAVE_BLACK_WEB:
 		    pline("The poison shadow of the Black Web flows in your wake.");
-			static struct attack webattack[] = 
-			{
-				{AT_SHDW,AD_SHDW,4,8},
-				{0,0,0,0}
-			};
-			struct monst *mon;
-			int i, tmp, weptmp, tchtmp;
-			for(i=0; i<8;i++){
-				if(isok(u.ux+xdir[i],u.uy+ydir[i])){
-					mon = m_at(u.ux+xdir[i],u.uy+ydir[i]);
-					if(mon && !mon->mpeaceful){
-						find_to_hit_rolls(mon,&tmp,&weptmp,&tchtmp);
-						hmonwith(mon, tmp, weptmp, tchtmp, webattack, 1);
-					}
-				}
-			}
-		} break;
+			weave_black_web((struct monst *)0);
+			break;
 		case PWR_IDENTIFY_INVENTORY:
 		    identify_pack(0);
 		break;
@@ -5681,11 +5658,7 @@ dopseudonatural()
 {
 	struct monst *mon, *nmon;
 	int tmp, weptmp, tchtmp;
-	struct attack symbiote[] = 
-	{
-		{AT_TENT,AD_PHYS,5,spiritDsize()},
-		{0,0,0,0}
-	};
+	struct attack symbiote = { AT_TENT, AD_PHYS, 5, spiritDsize() };
 	for(mon = fmon;mon;mon = nmon){
 		nmon = mon->nmon;
 		if(!mon || mon->mtame || !rn2(5))
@@ -5698,8 +5671,7 @@ dopseudonatural()
 		) continue;
 		
 		if(mon){
-			find_to_hit_rolls(mon,&tmp,&weptmp,&tchtmp);
-			hmonwith(mon, tmp, weptmp, tchtmp, symbiote, 1);
+			xmeleehity(&youmonst, mon, &symbiote, (struct obj *)0, -1, 0, FALSE);
 		}
 	}
 }
