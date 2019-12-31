@@ -25,6 +25,7 @@ E int FDECL(dobelialseduce, (struct monst *));				/* from mhitu.c */
 E int FDECL(dograzseduce, (struct monst *));				/* from mhitu.c */
 E void FDECL(steal_it, (struct monst *, struct attack *));	/* from uhitm.c */
 E int FDECL(joust, (struct monst *, struct obj *));		/* from uhitm.c */
+E int FDECL(attack_checks2, (struct monst *, struct obj *));
 E boolean FDECL(attack2, (struct monst *));
 E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
 E int FDECL(xattacky, (struct monst *, struct monst *, int, int));
@@ -34,6 +35,7 @@ E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
 E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 E void FDECL(wakeup2, (struct monst *, boolean));
+E int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int);
 E void FDECL(weave_black_web, (struct monst *));
 E int FDECL(projectile, (struct monst *, struct obj *, struct obj *, boolean, int, int, int, int, int, int, boolean, boolean, boolean));

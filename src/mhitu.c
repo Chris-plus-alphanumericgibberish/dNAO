@@ -312,317 +312,317 @@ boolean message;
 #ifdef OVL0
 
 /* select a monster's next attack, possibly substituting for its usual one */
-struct attack *
-getmattk(mtmp, mptr, indx, prev_result, alt_attk_buf)
-struct monst *mtmp;
-struct permonst *mptr;
-int indx, prev_result[];
-struct attack *alt_attk_buf;
-{
-    struct attack *attk;
-	static int subout;
-	static boolean derundspec;
-
-	if(indx < NATTK){
-		attk = &mptr->mattk[indx];
-		*alt_attk_buf = *attk;
-		attk = alt_attk_buf;		// by default, use the buffer space
-	} else {
-		attk = alt_attk_buf;
-		attk->aatyp = 0;
-		attk->adtyp = 0;
-		attk->damn = 0;
-		attk->damd = 0;
-	}
-
-	// Sanity: reset static variables every time indx == 0
-	if (indx == 0)
-	{
-		subout = 0;
-		derundspec = FALSE;
-	}
-
-	// Derived undead
-	if (mtmp->mfaction == VAMPIRIC){
-		if (attk->aatyp == AT_BITE
-			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
-			|| (!derundspec && indx == NATTK - 1)
-		){
-			derundspec = TRUE;
-			attk->aatyp = AT_BITE;
-			attk->adtyp = AD_VAMP;
-			attk->damn = max(1, attk->damn);
-			attk->damd = max(4, max(mtmp->data->msize * 2, attk->damd));
-		}
-	}
-	else if (mtmp->mfaction == PSEUDONATURAL){
-		//Note Pseudo types: tentacles, shadow/spiders, others?
-		if (attk->aatyp == AT_BITE
-			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
-			|| (!derundspec && indx == NATTK - 1)
-		){
-			derundspec = TRUE;
-			attk->aatyp = AT_TENT;
-			attk->adtyp = AD_DRIN;
-			attk->damd = 4;
-			attk->damn = 1;
-		}
-		if(attk->aatyp == AT_CLAW && (mtmp->m_id+indx)%4 == 0){
-			attk->aatyp = AT_TENT;
-			if(attk->damn < 3)
-				attk->damd += 2;
-			else attk->damn++;
-		}
-	}
-	else if (mtmp->mfaction == TOMB_HERD){
-		if(attk->aatyp || attk->adtyp || attk->damn || attk->damd){
-			if(attk->damn < 3)
-				attk->damd += 2;
-			else attk->damn++;
-		}
-		if ((!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
-			|| (!derundspec && indx == NATTK - 1)
-		){
-			derundspec = TRUE;
-			attk->aatyp = AT_TUCH;
-			attk->adtyp = AD_ABDC;
-			attk->damd = 1;
-			attk->damn = 1;
-		}
-	}
-	else if (mtmp->mfaction == YITH){
-		if ((!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
-			|| (!derundspec && indx == NATTK - 1)
-		){
-			derundspec = TRUE;
-			attk->aatyp = AT_MAGC;
-			attk->adtyp = AD_SPEL;
-			attk->damd = 2;
-			attk->damn = 6;
-		}
-	}
-	else if (mtmp->mfaction == CRANIUM_RAT){
-		if ((!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
-			|| (!derundspec && indx == NATTK - 1)
-		){
-			derundspec = TRUE;
-			attk->aatyp = AT_MAGC;
-			attk->adtyp = AD_PSON;
-			attk->damd = 0;
-			attk->damn = 15;
-		}
-	}
-	else if (mtmp->mfaction == MISTWEAVER){
-		//Note: No head
-		if (attk->aatyp == AT_BITE || attk->aatyp == AT_BUTT
-			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
-			|| (!derundspec && indx == NATTK - 1)
-		){
-			derundspec = TRUE;
-			attk->aatyp = AT_TENT;
-			attk->adtyp = AD_DRST;
-			attk->damd = 4;
-			attk->damn = 4;
-		}
-	}
-	else if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
-		if (attk->aatyp == AT_SPIT
-			|| attk->aatyp == AT_BREA
-			|| attk->aatyp == AT_GAZE
-			|| attk->aatyp == AT_ARRW
-			|| attk->aatyp == AT_MMGC
-			|| attk->aatyp == AT_TNKR
-			|| attk->aatyp == AT_SHDW
-			|| attk->aatyp == AT_BEAM
-			|| attk->aatyp == AT_MAGC
-			|| (attk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
-			|| (indx == 0 &&
-			(attk->aatyp == AT_CLAW || attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI) &&
-			attk->adtyp == AD_PHYS &&
-			attk->damn*attk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mptr->msize * 2, 4) / 2
-			)
-			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
-			|| (!derundspec && indx == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
-			){
-			// yes, replace the current attack
-			if (indx == 0){
-				attk->aatyp = AT_CLAW;
-				attk->adtyp = AD_PHYS;
-				attk->damn = mtmp->m_lev / 10 + 1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
-				attk->damd = max(mptr->msize * 2, 4);
-			}
-			else if (!derundspec && mtmp->mfaction == SKELIFIED){
-				derundspec = TRUE;
-				attk->aatyp = AT_TUCH;
-				attk->adtyp = AD_SLOW;
-				attk->damn = 1;
-				attk->damd = max(mtmp->data->msize * 2, 4);
-			}
-			else if (!derundspec && mtmp->mfaction == CRYSTALFIED){
-				derundspec = TRUE;
-				attk->aatyp = AT_TUCH;
-				attk->adtyp = AD_ECLD;
-				attk->damn = min(10, mtmp->m_lev / 3);
-				attk->damd = 8;
-			}
-			else {
-				// remove the disallowed attack
-				attk->aatyp = 0;
-				attk->adtyp = 0;
-				attk->damn = 0;
-				attk->damd = 0;
-			}
-		}
-	}
-	else if (mtmp->mfaction == FRACTURED){
-		// no gazes allowed
-		if (attk->aatyp == AT_GAZE)
-		{
-			attk->aatyp = 0;
-			attk->adtyp = 0;
-			attk->damn = 0;
-			attk->damd = 0;
-		}
-		// replace first blank spot with a bonus claw
-		if (!derundspec &&
-			attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
-		{
-			derundspec = TRUE;		// only one
-			attk->aatyp = AT_CLAW;
-			attk->adtyp = AD_GLSS;
-			attk->damn = max(mtmp->m_lev / 10 + 1, attk->damn);
-			attk->damd = max(mptr->msize * 2, max(attk->damd, 4));
-		}
-		// change some existing claws' damage types
-		if (attk->aatyp == AT_CLAW && (attk->adtyp == AD_PHYS || attk->adtyp == AD_SAMU || attk->adtyp == AD_SQUE))
-		{
-			attk->adtyp = AD_GLSS;
-		}
-	}
-
-	// Alabaster mummies: Spell glyphs result in spellcasting,
-	//  physical glyphs result in melee, non-specific glyphs result in random choice
-	if (indx==1 && is_alabaster_mummy(mtmp->data) && mtmp->mvar1){
-		switch(mtmp->mvar1){
-			case SYLLABLE_OF_STRENGTH__AESH:
-			case SYLLABLE_OF_GRACE__UUR:
-				//default
-			break;
-			case SYLLABLE_OF_POWER__KRAU:
-			case SYLLABLE_OF_THOUGHT__NAEN:
-				attk->aatyp = AT_MAGC;
-				attk->adtyp = AD_SPEL;
-				attk->damn = 0;
-				attk->damd = 4;
-			break;
-			default:
-				if(mtmp->m_id%2){
-					attk->aatyp = AT_MAGC;
-					attk->adtyp = AD_SPEL;
-					attk->damn = 0;
-					attk->damd = 4;
-				}
-			break;
-		}
-	}
-	//Five fiends' spellcasting routines
-	if(
-		(mptr == &mons[PM_LICH__THE_FIEND_OF_EARTH]) ||
-		(mptr == &mons[PM_KARY__THE_FIEND_OF_FIRE]) ||
-		(mptr == &mons[PM_KRAKEN__THE_FIEND_OF_WATER]) ||
-		(mptr == &mons[PM_TIAMAT__THE_FIEND_OF_WIND]) ||
-		(mptr == &mons[PM_CHAOS])
-	){
-		// first index -- determing if using the alternate attack set (solo spellcasting)
-		if(indx==0){
-			if(
-				(mptr == &mons[PM_LICH__THE_FIEND_OF_EARTH] && rn2(4)) ||
-				(mptr == &mons[PM_KARY__THE_FIEND_OF_FIRE] && rn2(100)<37) ||
-				(mptr == &mons[PM_KRAKEN__THE_FIEND_OF_WATER] && rn2(100)<52) ||
-				(mptr == &mons[PM_TIAMAT__THE_FIEND_OF_WIND] && !rn2(4)) ||
-				(mptr == &mons[PM_CHAOS] && rn2(3))
-			){
-				subout = 1;
-				attk->aatyp = AT_MAGC;
-				attk->adtyp = AD_SPEL;
-				attk->damn = 0;
-				attk->damd = 0;
-			} else subout = 0;
-		}
-		else if(subout){	// other indices than the first are nulled out IF spellcasting
-			attk->aatyp = 0;
-			attk->adtyp = 0;
-			attk->damn = 0;
-			attk->damd = 0;
-		}
-	}
-	//Bael's alternate attack forms
-	if(mptr == &mons[PM_BAEL]){
-		static const struct attack marilithHands[6] = {
-			{AT_MARI, AD_PHYS, 1,15},
-			{AT_MARI, AD_PHYS, 1,15},
-			{AT_MARI, AD_PHYS, 1,15},
-			{AT_MARI, AD_PHYS, 1,15},
-			{AT_MARI, AD_PHYS, 1,15},
-			{AT_MARI, AD_PHYS, 1,15}
-		};
-		static const struct attack swordArchon[6] = {
-			{AT_CLAW, AD_ACFR, 3,7},
-			{AT_CLAW, AD_ACFR, 3,7},
-			{AT_REND, AD_DISN, 7,1},
-			{AT_BUTT, AD_EFIR, 9,1},
-			{AT_BITE, AD_POSN, 9,1},
-			{AT_GAZE, AD_STDY, 1,9}
-		};
-		// first index -- determine which attack form
-		if(indx==0){
-			if(!rn2(7)){		// 1/7 of marilith
-				subout = 1;
-			} else if(!rn2(6)){	// 1/7 of sword archon
-				subout = 2;
-			} else subout = 0;	// 5/7 of normal
-		}
-		// If using marilith or sword archon, sub out entire attack chain
-		if(subout == 1){
-			*alt_attk_buf = swordArchon[indx];
-			attk = alt_attk_buf;
-		} else if(subout == 2){
-			*alt_attk_buf = marilithHands[indx];
-			attk = alt_attk_buf;
-		}
-	}
-
-	/* Undead damage multipliers -- note that these must be after actual replacements are done */
-	/* zombies deal double damage, and all undead deal double damage at midnight */
-	if (mtmp->mfaction == ZOMBIFIED && (is_undead_mon(mtmp) && midnight()))
-		attk->damn *= 3;
-	else if (mtmp->mfaction == ZOMBIFIED || (is_undead_mon(mtmp) && midnight()))
-		attk->damn *= 2;
-
-	/* twoweapon symmetry -- if the previous attack missed, do not make an offhand attack */
-	if (indx > 0 && prev_result[indx - 1] <= 0 && attk->aatyp == AT_XWEP)
-	{
-		attk->aatyp = 0;
-		attk->adtyp = 0;
-		attk->damn = 0;
-		attk->damd = 0;
-		return attk;
-	}
-
-    /* prevent a monster with two consecutive disease or hunger attacks
-       from hitting with both of them on the same turn; if the first has
-       already hit, switch to a stun attack for the second */
-    if (indx > 0 && prev_result[indx - 1] > 0 &&
-	    (attk->adtyp == AD_DISE ||
-		// attk->adtyp == AD_PEST ||
-		// attk->adtyp == AD_FAMN ||
-		mptr == &mons[PM_ASTRAL_DEVA]) &&
-	    attk->adtyp == mptr->mattk[indx - 1].adtyp
-	) {
-		attk->adtyp = AD_STUN;
-    }
-    return attk;
-}
+//struct attack *
+//getmattk(mtmp, mptr, indx, prev_result, alt_attk_buf)
+//struct monst *mtmp;
+//struct permonst *mptr;
+//int indx, prev_result[];
+//struct attack *alt_attk_buf;
+//{
+//    struct attack *attk;
+//	static int subout;
+//	static boolean derundspec;
+//
+//	if(indx < NATTK){
+//		attk = &mptr->mattk[indx];
+//		*alt_attk_buf = *attk;
+//		attk = alt_attk_buf;		// by default, use the buffer space
+//	} else {
+//		attk = alt_attk_buf;
+//		attk->aatyp = 0;
+//		attk->adtyp = 0;
+//		attk->damn = 0;
+//		attk->damd = 0;
+//	}
+//
+//	// Sanity: reset static variables every time indx == 0
+//	if (indx == 0)
+//	{
+//		subout = 0;
+//		derundspec = FALSE;
+//	}
+//
+//	// Derived undead
+//	if (mtmp->mfaction == VAMPIRIC){
+//		if (attk->aatyp == AT_BITE
+//			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+//			|| (!derundspec && indx == NATTK - 1)
+//		){
+//			derundspec = TRUE;
+//			attk->aatyp = AT_BITE;
+//			attk->adtyp = AD_VAMP;
+//			attk->damn = max(1, attk->damn);
+//			attk->damd = max(4, max(mtmp->data->msize * 2, attk->damd));
+//		}
+//	}
+//	else if (mtmp->mfaction == PSEUDONATURAL){
+//		//Note Pseudo types: tentacles, shadow/spiders, others?
+//		if (attk->aatyp == AT_BITE
+//			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+//			|| (!derundspec && indx == NATTK - 1)
+//		){
+//			derundspec = TRUE;
+//			attk->aatyp = AT_TENT;
+//			attk->adtyp = AD_DRIN;
+//			attk->damd = 4;
+//			attk->damn = 1;
+//		}
+//		if(attk->aatyp == AT_CLAW && (mtmp->m_id+indx)%4 == 0){
+//			attk->aatyp = AT_TENT;
+//			if(attk->damn < 3)
+//				attk->damd += 2;
+//			else attk->damn++;
+//		}
+//	}
+//	else if (mtmp->mfaction == TOMB_HERD){
+//		if(attk->aatyp || attk->adtyp || attk->damn || attk->damd){
+//			if(attk->damn < 3)
+//				attk->damd += 2;
+//			else attk->damn++;
+//		}
+//		if ((!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+//			|| (!derundspec && indx == NATTK - 1)
+//		){
+//			derundspec = TRUE;
+//			attk->aatyp = AT_TUCH;
+//			attk->adtyp = AD_ABDC;
+//			attk->damd = 1;
+//			attk->damn = 1;
+//		}
+//	}
+//	else if (mtmp->mfaction == YITH){
+//		if ((!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+//			|| (!derundspec && indx == NATTK - 1)
+//		){
+//			derundspec = TRUE;
+//			attk->aatyp = AT_MAGC;
+//			attk->adtyp = AD_SPEL;
+//			attk->damd = 2;
+//			attk->damn = 6;
+//		}
+//	}
+//	else if (mtmp->mfaction == CRANIUM_RAT){
+//		if ((!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+//			|| (!derundspec && indx == NATTK - 1)
+//		){
+//			derundspec = TRUE;
+//			attk->aatyp = AT_MAGC;
+//			attk->adtyp = AD_PSON;
+//			attk->damd = 0;
+//			attk->damn = 15;
+//		}
+//	}
+//	else if (mtmp->mfaction == MISTWEAVER){
+//		//Note: No head
+//		if (attk->aatyp == AT_BITE || attk->aatyp == AT_BUTT
+//			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+//			|| (!derundspec && indx == NATTK - 1)
+//		){
+//			derundspec = TRUE;
+//			attk->aatyp = AT_TENT;
+//			attk->adtyp = AD_DRST;
+//			attk->damd = 4;
+//			attk->damn = 4;
+//		}
+//	}
+//	else if (mtmp->mfaction == ZOMBIFIED || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED){
+//		if (attk->aatyp == AT_SPIT
+//			|| attk->aatyp == AT_BREA
+//			|| attk->aatyp == AT_GAZE
+//			|| attk->aatyp == AT_ARRW
+//			|| attk->aatyp == AT_MMGC
+//			|| attk->aatyp == AT_TNKR
+//			|| attk->aatyp == AT_SHDW
+//			|| attk->aatyp == AT_BEAM
+//			|| attk->aatyp == AT_MAGC
+//			|| (attk->aatyp == AT_TENT && mtmp->mfaction == SKELIFIED)
+//			|| (indx == 0 &&
+//			(attk->aatyp == AT_CLAW || attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI) &&
+//			attk->adtyp == AD_PHYS &&
+//			attk->damn*attk->damd / 2 < (mtmp->m_lev / 10 + 1)*max(mptr->msize * 2, 4) / 2
+//			)
+//			|| (!derundspec && attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+//			|| (!derundspec && indx == NATTK - 1 && (mtmp->mfaction == CRYSTALFIED || mtmp->mfaction == SKELIFIED))
+//			){
+//			// yes, replace the current attack
+//			if (indx == 0){
+//				attk->aatyp = AT_CLAW;
+//				attk->adtyp = AD_PHYS;
+//				attk->damn = mtmp->m_lev / 10 + 1 + (mtmp->mfaction != ZOMBIFIED ? 1 : 0);
+//				attk->damd = max(mptr->msize * 2, 4);
+//			}
+//			else if (!derundspec && mtmp->mfaction == SKELIFIED){
+//				derundspec = TRUE;
+//				attk->aatyp = AT_TUCH;
+//				attk->adtyp = AD_SLOW;
+//				attk->damn = 1;
+//				attk->damd = max(mtmp->data->msize * 2, 4);
+//			}
+//			else if (!derundspec && mtmp->mfaction == CRYSTALFIED){
+//				derundspec = TRUE;
+//				attk->aatyp = AT_TUCH;
+//				attk->adtyp = AD_ECLD;
+//				attk->damn = min(10, mtmp->m_lev / 3);
+//				attk->damd = 8;
+//			}
+//			else {
+//				// remove the disallowed attack
+//				attk->aatyp = 0;
+//				attk->adtyp = 0;
+//				attk->damn = 0;
+//				attk->damd = 0;
+//			}
+//		}
+//	}
+//	else if (mtmp->mfaction == FRACTURED){
+//		// no gazes allowed
+//		if (attk->aatyp == AT_GAZE)
+//		{
+//			attk->aatyp = 0;
+//			attk->adtyp = 0;
+//			attk->damn = 0;
+//			attk->damd = 0;
+//		}
+//		// replace first blank spot with a bonus claw
+//		if (!derundspec &&
+//			attk->aatyp == 0 && attk->adtyp == 0 && attk->damn == 0 && attk->damd == 0)
+//		{
+//			derundspec = TRUE;		// only one
+//			attk->aatyp = AT_CLAW;
+//			attk->adtyp = AD_GLSS;
+//			attk->damn = max(mtmp->m_lev / 10 + 1, attk->damn);
+//			attk->damd = max(mptr->msize * 2, max(attk->damd, 4));
+//		}
+//		// change some existing claws' damage types
+//		if (attk->aatyp == AT_CLAW && (attk->adtyp == AD_PHYS || attk->adtyp == AD_SAMU || attk->adtyp == AD_SQUE))
+//		{
+//			attk->adtyp = AD_GLSS;
+//		}
+//	}
+//
+//	// Alabaster mummies: Spell glyphs result in spellcasting,
+//	//  physical glyphs result in melee, non-specific glyphs result in random choice
+//	if (indx==1 && is_alabaster_mummy(mtmp->data) && mtmp->mvar1){
+//		switch(mtmp->mvar1){
+//			case SYLLABLE_OF_STRENGTH__AESH:
+//			case SYLLABLE_OF_GRACE__UUR:
+//				//default
+//			break;
+//			case SYLLABLE_OF_POWER__KRAU:
+//			case SYLLABLE_OF_THOUGHT__NAEN:
+//				attk->aatyp = AT_MAGC;
+//				attk->adtyp = AD_SPEL;
+//				attk->damn = 0;
+//				attk->damd = 4;
+//			break;
+//			default:
+//				if(mtmp->m_id%2){
+//					attk->aatyp = AT_MAGC;
+//					attk->adtyp = AD_SPEL;
+//					attk->damn = 0;
+//					attk->damd = 4;
+//				}
+//			break;
+//		}
+//	}
+//	//Five fiends' spellcasting routines
+//	if(
+//		(mptr == &mons[PM_LICH__THE_FIEND_OF_EARTH]) ||
+//		(mptr == &mons[PM_KARY__THE_FIEND_OF_FIRE]) ||
+//		(mptr == &mons[PM_KRAKEN__THE_FIEND_OF_WATER]) ||
+//		(mptr == &mons[PM_TIAMAT__THE_FIEND_OF_WIND]) ||
+//		(mptr == &mons[PM_CHAOS])
+//	){
+//		// first index -- determing if using the alternate attack set (solo spellcasting)
+//		if(indx==0){
+//			if(
+//				(mptr == &mons[PM_LICH__THE_FIEND_OF_EARTH] && rn2(4)) ||
+//				(mptr == &mons[PM_KARY__THE_FIEND_OF_FIRE] && rn2(100)<37) ||
+//				(mptr == &mons[PM_KRAKEN__THE_FIEND_OF_WATER] && rn2(100)<52) ||
+//				(mptr == &mons[PM_TIAMAT__THE_FIEND_OF_WIND] && !rn2(4)) ||
+//				(mptr == &mons[PM_CHAOS] && rn2(3))
+//			){
+//				subout = 1;
+//				attk->aatyp = AT_MAGC;
+//				attk->adtyp = AD_SPEL;
+//				attk->damn = 0;
+//				attk->damd = 0;
+//			} else subout = 0;
+//		}
+//		else if(subout){	// other indices than the first are nulled out IF spellcasting
+//			attk->aatyp = 0;
+//			attk->adtyp = 0;
+//			attk->damn = 0;
+//			attk->damd = 0;
+//		}
+//	}
+//	//Bael's alternate attack forms
+//	if(mptr == &mons[PM_BAEL]){
+//		static const struct attack marilithHands[6] = {
+//			{AT_MARI, AD_PHYS, 1,15},
+//			{AT_MARI, AD_PHYS, 1,15},
+//			{AT_MARI, AD_PHYS, 1,15},
+//			{AT_MARI, AD_PHYS, 1,15},
+//			{AT_MARI, AD_PHYS, 1,15},
+//			{AT_MARI, AD_PHYS, 1,15}
+//		};
+//		static const struct attack swordArchon[6] = {
+//			{AT_CLAW, AD_ACFR, 3,7},
+//			{AT_CLAW, AD_ACFR, 3,7},
+//			{AT_REND, AD_DISN, 7,1},
+//			{AT_BUTT, AD_EFIR, 9,1},
+//			{AT_BITE, AD_POSN, 9,1},
+//			{AT_GAZE, AD_STDY, 1,9}
+//		};
+//		// first index -- determine which attack form
+//		if(indx==0){
+//			if(!rn2(7)){		// 1/7 of marilith
+//				subout = 1;
+//			} else if(!rn2(6)){	// 1/7 of sword archon
+//				subout = 2;
+//			} else subout = 0;	// 5/7 of normal
+//		}
+//		// If using marilith or sword archon, sub out entire attack chain
+//		if(subout == 1){
+//			*alt_attk_buf = swordArchon[indx];
+//			attk = alt_attk_buf;
+//		} else if(subout == 2){
+//			*alt_attk_buf = marilithHands[indx];
+//			attk = alt_attk_buf;
+//		}
+//	}
+//
+//	/* Undead damage multipliers -- note that these must be after actual replacements are done */
+//	/* zombies deal double damage, and all undead deal double damage at midnight */
+//	if (mtmp->mfaction == ZOMBIFIED && (is_undead_mon(mtmp) && midnight()))
+//		attk->damn *= 3;
+//	else if (mtmp->mfaction == ZOMBIFIED || (is_undead_mon(mtmp) && midnight()))
+//		attk->damn *= 2;
+//
+//	/* twoweapon symmetry -- if the previous attack missed, do not make an offhand attack */
+//	if (indx > 0 && prev_result[indx - 1] <= 0 && attk->aatyp == AT_XWEP)
+//	{
+//		attk->aatyp = 0;
+//		attk->adtyp = 0;
+//		attk->damn = 0;
+//		attk->damd = 0;
+//		return attk;
+//	}
+//
+//    /* prevent a monster with two consecutive disease or hunger attacks
+//       from hitting with both of them on the same turn; if the first has
+//       already hit, switch to a stun attack for the second */
+//    if (indx > 0 && prev_result[indx - 1] > 0 &&
+//	    (attk->adtyp == AD_DISE ||
+//		// attk->adtyp == AD_PEST ||
+//		// attk->adtyp == AD_FAMN ||
+//		mptr == &mons[PM_ASTRAL_DEVA]) &&
+//	    attk->adtyp == mptr->mattk[indx - 1].adtyp
+//	) {
+//		attk->adtyp = AD_STUN;
+//    }
+//    return attk;
+//}
 
 /*
  * mattacku: monster attacks you

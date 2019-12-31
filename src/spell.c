@@ -2191,8 +2191,8 @@ spiriteffects(power, atme)
 					You("need a free hand to make a touch attack!");
 					return 0;
 				}
-				find_to_hit_rolls(mon, &tmp, &weptmp, &tchtmp);
-				if(tchtmp <= rnd(20)){
+				struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0 };
+				if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (struct obj *)0, 0, 0) <= rnd(20)){
 					You("miss.");
 					break;
 				}
@@ -2537,8 +2537,8 @@ spiriteffects(power, atme)
 				if(mon){
 					struct obj* boots;
 					boots = which_armor(mon, W_ARMF);
-					find_to_hit_rolls(mon, &tmp, &weptmp, &tchtmp);
-					if(tmp <= rnd(20)){
+					struct attack basichit = { AT_CLAW, AD_PHYS, 0, 0 };
+					if (tohitval(&youmonst, mon, &basichit, (struct obj *)0, (struct obj *)0, 0, 0) <= rnd(20)){
 						if(boots && boots->otyp == WATER_WALKING_BOOTS){
 							pline("A sudden geyser from the abzu washes under %s's feet!", mon_nam(mon));
 							if(canseemon(mon)) makeknown(boots->otyp);
@@ -3278,8 +3278,11 @@ spiriteffects(power, atme)
 					if(!opennewdoor(u.ux+u.dx, u.uy+u.dy) && !masterDoorBox(u.ux+u.dx,u.uy+u.dy)) return 0;
 					else break;
 				} 
-				find_to_hit_rolls(mon, &tmp, &weptmp, &tchtmp);
-				if((((uarmg && arti_shining(uarmg)) || u.sealsActive&SEAL_CHUPOCLOPS) ? tchtmp : tmp) <= rnd(20)){
+				struct attack basicattack = {
+					((uarmg && arti_shining(uarmg)) || u.sealsActive&SEAL_CHUPOCLOPS) ? AT_TUCH : AT_CLAW,
+					AD_PHYS, 0, 0 };
+				
+				if (tohitval(&youmonst, mon, &basicattack, (struct obj *)0, (struct obj *)0, 0, 0) <= rnd(20)){
 					You("miss.");
 					break;
 				} else if(unsolid(mon->data)){
@@ -3433,8 +3436,8 @@ spiriteffects(power, atme)
 				You("need a free hand to make a touch attack!");
 				return 0;
 			}
-			find_to_hit_rolls(mon, &tmp, &weptmp, &tchtmp);
-			if(tchtmp <= rnd(20)){
+			struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0 };
+			if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (struct obj *)0, 0, 0) <= rnd(20)){
 				You("miss.");
 				break;
 			}

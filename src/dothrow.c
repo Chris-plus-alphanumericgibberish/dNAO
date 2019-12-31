@@ -690,7 +690,6 @@ autoquiver()
 	return;
 }
 
-#if 0
 ///* Throw from the quiver */
 //int
 //dofire()

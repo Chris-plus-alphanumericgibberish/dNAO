@@ -5,16 +5,15 @@
 #include "xhity.h"
 
 /* TODO LIST
+monsters targeting your steed (and your steed counterattacking)
 demon gating (u, m)
+lycanthrope summoning
 artifact hitmesages?
 "active_glyph"s
 Claws of the Revenancer w/ rings?
 */
 
 STATIC_DCL int FDECL(getvis, (struct monst *, struct monst *, int, int));
-STATIC_DCL int FDECL(attack_checks2, (struct monst *, struct obj *));
-//STATIC_DCL boolean FDECL(attack2, (struct monst *));
-//STATIC_DCL int FDECL(xattacky, (struct monst *, struct monst *));
 STATIC_DCL boolean FDECL(madness_cant_attack, (struct monst *));
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
@@ -43,7 +42,6 @@ STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attac
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
-STATIC_DCL int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 STATIC_DCL int NDECL(beastmastery);
 STATIC_DCL int NDECL(mountedCombat);
@@ -3938,6 +3936,7 @@ boolean ranged;
 		}
 		/* multistriking weapons need to determine how many hit, and set ostriking */
 		if (weapon && multistriking(weapon) && !miss) {
+			weapon->ostriking = 0;
 			int attempts = rn2(multistriking(weapon));
 			for (; attempts; attempts--) {
 				if (accuracy > rnd(20))
@@ -13705,6 +13704,9 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
 
+	if (vis == -1)
+		vis = getvis(magr, mdef, 0, 0);
+
 	/* Lillends can use masks to counterattack (but only at the end of the chain) */
 	if (!youdef && pd == &mons[PM_LILLEND] && !(mdef->mfaction == ZOMBIFIED || mdef->mfaction == SKELIFIED) && rn2(2) && endofchain){
 		pd = find_mask(mdef);
@@ -14574,6 +14576,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					else {
 						if (youagr) {
 							You("are suddenly very cold!");
+							roll_frigophobia();
 						}
 						else if canseemon(magr) {
 							pline("%s is suddenly very cold!",

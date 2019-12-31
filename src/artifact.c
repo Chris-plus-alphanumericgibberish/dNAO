@@ -4537,44 +4537,45 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			}
 	    }
 	}
-	if(arti_threeHead(otmp) && !youdefend){
-		int extrahits = 2;
-		int monAC, extrahit=1;
-		while(extrahits--){
-			monAC = find_roll_to_hit(mdef,(uwep && arti_shining(uwep)) || u.sealsActive&SEAL_CHUPOCLOPS)-2*extrahits-2;
-			if(u.uswallow || monAC > rnd(20)){
-				*dmgptr += dmgval(otmp, mdef, 0);
-				extrahit++;
-			}
-		}
-		if(extrahit == 3){
-			if (realizes_damage) pline("%s staggers!", Monnam(mdef));
-			mdef->mconf = 1;
-			mdef->mstun = 1;
-		}
-	} else if(arti_threeHead(otmp) && youdefend){
-		int extrahits = 2;
-		int monAC, extrahit=1;
-		monAC = AC_VALUE(u.uac+u.uspellprot) + 10 - u.uspellprot;		/* monAC ~= 0 - 20 */
-		monAC += magr->m_lev;
-		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) monAC += u.chokhmah;
-		if(multi < 0) monAC += 4;
-		if((Invis && !mon_resistance(magr,SEE_INVIS)) || is_blind(magr))
-			monAC -= 2;
-		if(magr->mtrapped) monAC -= 2;
-		if(monAC <= 0) monAC = 1;
-
-		while(extrahits--){
-			if(u.uswallow || monAC > rnd(20)){
-				*dmgptr += dmgval(otmp, mdef, 0);
-				extrahit++;
-			}
-		}
-		if(extrahit == 3){
-			You("stagger!");
-			make_stunned((HStun)+d(3,3),FALSE);
-		}
-	}
+//ARTI_THREEHEAD done by xhity.c as a multistriking weapon (like a viperwhip)
+//	if(arti_threeHead(otmp) && !youdefend){
+//		int extrahits = 2;
+//		int monAC, extrahit=1;
+//		while(extrahits--){
+//			monAC = find_roll_to_hit(mdef,(uwep && arti_shining(uwep)) || u.sealsActive&SEAL_CHUPOCLOPS)-2*extrahits-2;
+//			if(u.uswallow || monAC > rnd(20)){
+//				*dmgptr += dmgval(otmp, mdef, 0);
+//				extrahit++;
+//			}
+//		}
+//		if(extrahit == 3){
+//			if (realizes_damage) pline("%s staggers!", Monnam(mdef));
+//			mdef->mconf = 1;
+//			mdef->mstun = 1;
+//		}
+//	} else if(arti_threeHead(otmp) && youdefend){
+//		int extrahits = 2;
+//		int monAC, extrahit=1;
+//		monAC = AC_VALUE(u.uac+u.uspellprot) + 10 - u.uspellprot;		/* monAC ~= 0 - 20 */
+//		monAC += magr->m_lev;
+//		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) monAC += u.chokhmah;
+//		if(multi < 0) monAC += 4;
+//		if((Invis && !mon_resistance(magr,SEE_INVIS)) || is_blind(magr))
+//			monAC -= 2;
+//		if(magr->mtrapped) monAC -= 2;
+//		if(monAC <= 0) monAC = 1;
+//
+//		while(extrahits--){
+//			if(u.uswallow || monAC > rnd(20)){
+//				*dmgptr += dmgval(otmp, mdef, 0);
+//				extrahit++;
+//			}
+//		}
+//		if(extrahit == 3){
+//			You("stagger!");
+//			make_stunned((HStun)+d(3,3),FALSE);
+//		}
+//	}
 	if(arti_webweaver(otmp)){
 		if(!youdefend){
 			struct trap *ttmp2 = maketrap(mdef->mx, mdef->my, WEB);
@@ -4593,136 +4594,137 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			}
 		}
 	}
-	if(arti_tentRod(otmp) && !youdefend){
-		int extrahits = rn2(7);
-		int monAC, extrahit=1;
-		while(extrahits--){
-			monAC = find_roll_to_hit(mdef,(arti_shining(otmp)) || u.sealsActive&SEAL_CHUPOCLOPS)-2*extrahits-2;
-			monAC += hitval(otmp, mdef);
-			monAC += weapon_hit_bonus(otmp);
-			if(otmp){
-				if(youattack && otmp->objsize - youracedata->msize > 0){
-					monAC += -4*(otmp->objsize - youracedata->msize);
-				} else if(!youattack && otmp->objsize - magr->data->msize > 0){
-					monAC += -4*(otmp->objsize - magr->data->msize);
-				}
-			}
-			
-			if(u.uswallow || monAC > rnd(20)){
-				*dmgptr += dmgval(otmp, mdef, 0);
-				extrahit++;
-			}
-		}
-		if (realizes_damage) pline_The("%s hits %s %d time%s%s", artilist[otmp->oartifact].name,
-			hittee, extrahit, extrahit>1 ? "s" : "", extrahit<3 ? "." : extrahit<7 ? "!" : "!!");
-		messaged = realizes_damage;
-		if(extrahit >= 3){
-			switch(rn2(3)){
-			case 0:
-				if (realizes_damage) pline("%s goes blind!", Monnam(mdef));
-				mdef->mcansee = 0;
-				mdef->mblinded = d(3,3);
-			break;
-			case 1:
-				if (realizes_damage) pline("%s is stunned!", Monnam(mdef));
-				mdef->mstun = 1;
-			break;
-			case 2:
-				if (realizes_damage) pline("%s staggers!", Monnam(mdef));
-				mdef->mconf = 1;
-			break;
-			}
-		}
-		if(extrahit >= 6){
-			switch(rn2(3)){
-			case 0:
-				if (realizes_damage) pline("%s slows down!", Monnam(mdef));
-				mdef->mspeed = MSLOW;
-				mdef->permspeed = MSLOW;
-			break;
-			case 1:
-				if (realizes_damage) pline("%s is frozen!", Monnam(mdef));
-				mdef->mcanmove = 0;
-				mdef->mfrozen = d(1,6);
-			break;
-			case 2:
-				if (realizes_damage) pline("%s goes insane!", Monnam(mdef));
-				mdef->mcrazed = 1;
-			break;
-			}
-		}
-		if(extrahit == 7){
-			if (realizes_damage) pline_The("%s hits %s with a storm of energy!", artilist[otmp->oartifact].name, hittee);
-			if(!(resists_fire(mdef) && resists_cold(mdef))) 
-				*dmgptr += d(2, 7);
-			if(!resists_elec(mdef)) *dmgptr += d(1, 7);
-			if(!resists_acid(mdef)) *dmgptr += d(1, 7);
-			if(!resists_magm(mdef)) *dmgptr += d(1, 7);
-			if(!resists_poison(mdef)) *dmgptr += d(1, 7);
-			if(!resists_drli(mdef)) *dmgptr += d(1, 7);
-		}
-	} else if(arti_tentRod(otmp) && youdefend){
-		int extrahits = rn2(7);
-		int extrahit = 1, tmp;
-		tmp = AC_VALUE(u.uac+u.uspellprot) + 10 - u.uspellprot;		/* tmp ~= 0 - 20 */
-		tmp += magr->m_lev;
-		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) tmp += u.chokhmah;
-		if(multi < 0) tmp += 4;
-		if((Invis && !mon_resistance(magr,SEE_INVIS)) || is_blind(magr))
-			tmp -= 2;
-		if(magr->mtrapped) tmp -= 2;
-		if(tmp <= 0) tmp = 1;
-		while(extrahits--){
-			if(u.uswallow || tmp > rnd(20)){
-				*dmgptr += dmgval(otmp, mdef, 0);
-				extrahit++;
-			}
-		}
-		pline_The("%s hits %s %d time%s%s", artilist[otmp->oartifact].name,
-			hittee, extrahit, extrahit>1 ? "s" : "", extrahit<3 ? "." : extrahit<7 ? "!" : "!!");
-		messaged = TRUE;
-		if(extrahit >= 3){
-			switch(rn2(3)){
-			case 0:
-				You("go blind!");
-				make_blinded(Blinded+d(3,3), FALSE);
-			break;
-			case 1:
-				You("stagger!");
-				make_stunned((HStun)+d(3,3),FALSE);
-			break;
-			case 2:
-				You("are confused!");
-				make_confused(HConfusion+d(3,3),FALSE);
-			break;
-			}
-		}
-		if(extrahit >= 6){
-			switch(rn2(3)){
-			case 0:
-				u_slow_down();
-			break;
-			case 1:
-				You("can't move!");
-				nomul(-1*d(3,3), "paralyzed by the Tentacle Rod.");
-			break;
-			case 2:
-				You("go insane!");
-				make_confused(10000,FALSE); //very large value representing insanity
-			break;
-			}
-		}
-		if(extrahit == 7){
-			if (realizes_damage) pline_The("%s hits %s with a storm of energy!", artilist[otmp->oartifact].name, hittee);
-			if(!Fire_resistance) *dmgptr += d(1, 7);
-			if(!Cold_resistance) *dmgptr += d(1, 7);
-			if(!Shock_resistance) *dmgptr += d(1, 7);
-			if(!Acid_resistance) *dmgptr += d(1, 7);
-			if(!Antimagic) *dmgptr += d(1, 7);
-			if(!Poison_resistance) *dmgptr += d(1, 7);
-			if(!Drain_resistance) *dmgptr += d(1, 7);
-		}
-	}
+//ARTI_TENTROD done by xhity.c as a multistriking weapon(like a viperwhip)
+//	if(arti_tentRod(otmp) && !youdefend){
+//		int extrahits = rn2(7);
+//		int monAC, extrahit=1;
+//		while(extrahits--){
+//			monAC = find_roll_to_hit(mdef,(arti_shining(otmp)) || u.sealsActive&SEAL_CHUPOCLOPS)-2*extrahits-2;
+//			monAC += hitval(otmp, mdef);
+//			monAC += weapon_hit_bonus(otmp);
+//			if(otmp){
+//				if(youattack && otmp->objsize - youracedata->msize > 0){
+//					monAC += -4*(otmp->objsize - youracedata->msize);
+//				} else if(!youattack && otmp->objsize - magr->data->msize > 0){
+//					monAC += -4*(otmp->objsize - magr->data->msize);
+//				}
+//			}
+//			
+//			if(u.uswallow || monAC > rnd(20)){
+//				*dmgptr += dmgval(otmp, mdef, 0);
+//				extrahit++;
+//			}
+//		}
+//		if (realizes_damage) pline_The("%s hits %s %d time%s%s", artilist[otmp->oartifact].name,
+//			hittee, extrahit, extrahit>1 ? "s" : "", extrahit<3 ? "." : extrahit<7 ? "!" : "!!");
+//		messaged = realizes_damage;
+//		if(extrahit >= 3){
+//			switch(rn2(3)){
+//			case 0:
+//				if (realizes_damage) pline("%s goes blind!", Monnam(mdef));
+//				mdef->mcansee = 0;
+//				mdef->mblinded = d(3,3);
+//			break;
+//			case 1:
+//				if (realizes_damage) pline("%s is stunned!", Monnam(mdef));
+//				mdef->mstun = 1;
+//			break;
+//			case 2:
+//				if (realizes_damage) pline("%s staggers!", Monnam(mdef));
+//				mdef->mconf = 1;
+//			break;
+//			}
+//		}
+//		if(extrahit >= 6){
+//			switch(rn2(3)){
+//			case 0:
+//				if (realizes_damage) pline("%s slows down!", Monnam(mdef));
+//				mdef->mspeed = MSLOW;
+//				mdef->permspeed = MSLOW;
+//			break;
+//			case 1:
+//				if (realizes_damage) pline("%s is frozen!", Monnam(mdef));
+//				mdef->mcanmove = 0;
+//				mdef->mfrozen = d(1,6);
+//			break;
+//			case 2:
+//				if (realizes_damage) pline("%s goes insane!", Monnam(mdef));
+//				mdef->mcrazed = 1;
+//			break;
+//			}
+//		}
+//		if(extrahit == 7){
+//			if (realizes_damage) pline_The("%s hits %s with a storm of energy!", artilist[otmp->oartifact].name, hittee);
+//			if(!(resists_fire(mdef) && resists_cold(mdef))) 
+//				*dmgptr += d(2, 7);
+//			if(!resists_elec(mdef)) *dmgptr += d(1, 7);
+//			if(!resists_acid(mdef)) *dmgptr += d(1, 7);
+//			if(!resists_magm(mdef)) *dmgptr += d(1, 7);
+//			if(!resists_poison(mdef)) *dmgptr += d(1, 7);
+//			if(!resists_drli(mdef)) *dmgptr += d(1, 7);
+//		}
+//	} else if(arti_tentRod(otmp) && youdefend){
+//		int extrahits = rn2(7);
+//		int extrahit = 1, tmp;
+//		tmp = AC_VALUE(u.uac+u.uspellprot) + 10 - u.uspellprot;		/* tmp ~= 0 - 20 */
+//		tmp += magr->m_lev;
+//		if(magr->data == &mons[PM_CHOKHMAH_SEPHIRAH]) tmp += u.chokhmah;
+//		if(multi < 0) tmp += 4;
+//		if((Invis && !mon_resistance(magr,SEE_INVIS)) || is_blind(magr))
+//			tmp -= 2;
+//		if(magr->mtrapped) tmp -= 2;
+//		if(tmp <= 0) tmp = 1;
+//		while(extrahits--){
+//			if(u.uswallow || tmp > rnd(20)){
+//				*dmgptr += dmgval(otmp, mdef, 0);
+//				extrahit++;
+//			}
+//		}
+//		pline_The("%s hits %s %d time%s%s", artilist[otmp->oartifact].name,
+//			hittee, extrahit, extrahit>1 ? "s" : "", extrahit<3 ? "." : extrahit<7 ? "!" : "!!");
+//		messaged = TRUE;
+//		if(extrahit >= 3){
+//			switch(rn2(3)){
+//			case 0:
+//				You("go blind!");
+//				make_blinded(Blinded+d(3,3), FALSE);
+//			break;
+//			case 1:
+//				You("stagger!");
+//				make_stunned((HStun)+d(3,3),FALSE);
+//			break;
+//			case 2:
+//				You("are confused!");
+//				make_confused(HConfusion+d(3,3),FALSE);
+//			break;
+//			}
+//		}
+//		if(extrahit >= 6){
+//			switch(rn2(3)){
+//			case 0:
+//				u_slow_down();
+//			break;
+//			case 1:
+//				You("can't move!");
+//				nomul(-1*d(3,3), "paralyzed by the Tentacle Rod.");
+//			break;
+//			case 2:
+//				You("go insane!");
+//				make_confused(10000,FALSE); //very large value representing insanity
+//			break;
+//			}
+//		}
+//		if(extrahit == 7){
+//			if (realizes_damage) pline_The("%s hits %s with a storm of energy!", artilist[otmp->oartifact].name, hittee);
+//			if(!Fire_resistance) *dmgptr += d(1, 7);
+//			if(!Cold_resistance) *dmgptr += d(1, 7);
+//			if(!Shock_resistance) *dmgptr += d(1, 7);
+//			if(!Acid_resistance) *dmgptr += d(1, 7);
+//			if(!Antimagic) *dmgptr += d(1, 7);
+//			if(!Poison_resistance) *dmgptr += d(1, 7);
+//			if(!Drain_resistance) *dmgptr += d(1, 7);
+//		}
+//	}
     if(otmp->oartifact == ART_TORCH_OF_ORIGINS && !resists_fire(mdef) && !rn2(10)){
       pline("An ancient inferno flows from %s.", xname(otmp));
       /* TODO don't leave corpse */

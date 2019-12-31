@@ -22,6 +22,8 @@ STATIC_DCL void FDECL(drop_to, (coord *,SCHAR_P));
 
 static NEARDATA struct obj *kickobj;
 
+static struct attack basickick = { AT_KICK, AD_PHYS, 0, 0 };
+
 //definition of an extern in you.h
 boolean onlykicks = FALSE;
 
@@ -32,7 +34,6 @@ register boolean clumsy;
 {
 	int mdx, mdy;
 	struct permonst *mdat = mon->data;
-	struct attack basickick = { AT_KICK, AD_PHYS, 0, 0 };
 	int kick_skill = (martial() ? P_MARTIAL_ARTS : P_NONE);
 	boolean trapkilled = FALSE;
 	int result;
@@ -41,7 +42,7 @@ register boolean clumsy;
 	check_caitiff(mon);
 
 	result = xmeleehity(&youmonst, mon, &basickick, (struct obj *)0, -1, 0, FALSE);
-	(void)passive(mon, TRUE, !DEADMONSTER(mon), AT_KICK, AD_PHYS);
+	result = xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, result, mdat, TRUE);
 
 	if (result) {
 		/* a good kick exercises your dex */
@@ -81,7 +82,7 @@ register xchar x, y;
 
 	bhitpos.x = x;
 	bhitpos.y = y;
-	if (attack_checks(mon, (struct obj *)0)) return;
+	if (!attack_checks2(mon, (struct obj *)0)) return;
 	setmangry(mon);
 
 	/* Kick attacks by kicking monsters are normal attacks, not special.
@@ -102,7 +103,7 @@ register xchar x, y;
 	   !mon_resistance(mon,FLYING)) {
 		pline("Floating in the air, you miss wildly!");
 		exercise(A_DEX, FALSE);
-		(void) passive(mon, FALSE, 1, AT_KICK, AD_PHYS);
+		xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
 		return;
 	}
 
@@ -113,7 +114,7 @@ register xchar x, y;
 		if(!rn2((i < j/10) ? 2 : (i < j/5) ? 3 : 4)) {
 			if(martial() && !rn2(2)) goto doit;
 			Your("clumsy kick does no damage.");
-			(void) passive(mon, FALSE, 1, AT_KICK, AD_PHYS);
+			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
 			return;
 		}
 		if(i < j/10) clumsy = TRUE;
@@ -134,7 +135,7 @@ doit:
 		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3)) {
 		    pline("%s blocks your %skick.", Monnam(mon),
 				clumsy ? "clumsy " : "");
-		    (void) passive(mon, FALSE, 1, AT_KICK, AD_PHYS);
+			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
 		    return;
 		} else {
 		    mnexto(mon);
@@ -151,7 +152,7 @@ doit:
 					"slides" : "jumps"),
 				clumsy ? "easily" : "nimbly",
 				clumsy ? "clumsy " : "");
-			(void) passive(mon, FALSE, 1, AT_KICK, AD_PHYS);
+			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
 			return;
 		    }
 		}

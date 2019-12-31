@@ -421,12 +421,12 @@ int otyp;
 		else if (obj->oartifact == ART_GIANTSLAYER)
 		{
 			bonn = (large ? 2 : 1);
-			bond = min(4 + 2 * dmod, 2);
+			bond = max(4 + 2 * dmod, 2);
 		}
 		else if (obj->oartifact == ART_MJOLLNIR)
 		{
 			bonn = 2;
-			bond = min(4 + 2 * dmod, 2);
+			bond = max(4 + 2 * dmod, 2);
 			if (!large)
 				flat += 2;
 		}
@@ -437,7 +437,7 @@ int otyp;
 		else if (obj->oartifact == ART_REAVER)
 		{
 			bonn = 1;
-			bond = min(8 + 2 * dmod, 2);
+			bond = max(8 + 2 * dmod, 2);
 		}
 		else if (obj->oartifact == ART_TOBIUME)
 		{
@@ -448,18 +448,18 @@ int otyp;
 			if (large)
 			{
 				bonn = 1;
-				bond = min(10 + 2 * dmod, 2);
+				bond = max(10 + 2 * dmod, 2);
 			}
 			else
 			{
-				flat += min(10 + 2 * dmod, 2);
+				flat += max(10 + 2 * dmod, 2);
 			}
 		}
 		else if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD){
 			int wt = (int)objects[NAGINATA].oc_weight;
 			if ((int)obj->owt > wt) {
 				bonn = 1;
-				bond = min(12 + 2 * dmod, 2) * ((int)obj->owt - wt) / wt;	// this appears to be a constant +1d12, since I can't find any way to change its weight.
+				bond = max(12 + 2 * dmod, 2) * ((int)obj->owt - wt) / wt;	// this appears to be a constant +1d12, since I can't find any way to change its weight.
 			}
 		}
 		else if (obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA && otyp == BULLWHIP)
@@ -491,9 +491,9 @@ int otyp;
 			FULL_MOON	 	4  - 2d12 
 			 */
 			ocn = 2;
-			ocd = min(4 + 2 * obj->ovar1 + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
+			ocd = max(4 + 2 * obj->ovar1 + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
 			if (!large && obj->ovar1 == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
-				ocd = min(12 + 2 * dmod, 2);
+				ocd = max(12 + 2 * dmod, 2);
 		}
 		else if (otyp == HEAVY_IRON_BALL) {
 			int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
