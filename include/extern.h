@@ -589,17 +589,9 @@ E void FDECL(impact_drop, (struct obj *,XCHAR_P,XCHAR_P,XCHAR_P));
 
 /* ### dothrow.c ### */
 
-//E int FDECL(throw_obj, (struct obj *,int, int, int));
 E int FDECL(zap_raygun, (struct obj *,int, int));
-E int NDECL(dothrow);
-E int NDECL(dofire);
-//E int FDECL(dofire_core, (int));
-//E void FDECL(hitfloor, (struct obj *));
 E void FDECL(hurtle, (int,int,int,BOOLEAN_P));
 E void FDECL(mhurtle, (struct monst *,int,int,int));
-//E void FDECL(throwit, (struct obj *,long,BOOLEAN_P,int));
-//E int FDECL(omon_adj, (struct monst *,struct obj *,BOOLEAN_P));
-//E int FDECL(thitmonst, (struct monst *,struct obj *,int));
 E int FDECL(hero_breaks, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E int FDECL(breaks, (struct obj *,XCHAR_P,XCHAR_P));
 E boolean FDECL(breaktest, (struct obj *));
@@ -2084,6 +2076,8 @@ E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
 E boolean NDECL(android_combo);
 E boolean FDECL(umetgaze, (struct monst *));
 E boolean FDECL(mmetgaze, (struct monst *, struct monst *));
+E int NDECL(dothrow);
+E int NDECL(dofire);
 
 /* ### quest.c ### */
 
