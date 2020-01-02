@@ -40,12 +40,6 @@
 #define ATTACKCHECK_BLDTHRST	0x02	/* attack against the player's will */
 
 /* TODO: put these in their specified header files */
-/* prop.h */
-#define W_SKIN	I_SPECIAL
-/* monattk.h */
-#define MM_AGR_STOP 0x08	/* aggressor stopped attacking for some reason other than being fully dead */
-#define MM_DEF_LSVD 0x10	/* defender died and was lifesaved */
-/* monflags.h */
 /* additional TODO: add these to monsters in monst.c */
 #define MB_IRON				0x01000000L
 #define MB_SILVER			0x02000000L

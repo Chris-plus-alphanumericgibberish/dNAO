@@ -18,38 +18,6 @@ E char *FDECL(fmt_ptr, (const genericptr,char *));
  * interrupted only occasionally to pick up specific functions as needed. */
 #if !defined(MAKEDEFS_C) && !defined(LEV_LEX_C)
 
-/* crap testing zone */
-E void FDECL(hurtarmor, (int));							/* from mhitu.c */
-E int FDECL(dololthseduce, (struct monst *));				/* from mhitu.c */
-E int FDECL(dobelialseduce, (struct monst *));				/* from mhitu.c */
-E int FDECL(dograzseduce, (struct monst *));				/* from mhitu.c */
-E void FDECL(steal_it, (struct monst *, struct attack *));	/* from uhitm.c */
-E int FDECL(joust, (struct monst *, struct obj *));		/* from uhitm.c */
-E int FDECL(attack_checks2, (struct monst *, struct obj *));
-E boolean FDECL(attack2, (struct monst *));
-E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
-E int FDECL(xattacky, (struct monst *, struct monst *, int, int));
-E int FDECL(xmeleehity, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, boolean));
-E struct attack * FDECL(getattk, (struct monst *, int *, int *, struct attack *, boolean, int *, int *));
-E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
-E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
-E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
-E void FDECL(wakeup2, (struct monst *, boolean));
-E int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
-E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int);
-E void FDECL(weave_black_web, (struct monst *));
-E int FDECL(projectile, (struct monst *, struct obj *, struct obj *, boolean, int, int, int, int, int, int, boolean, boolean, boolean));
-E void FDECL(hitfloor2, (struct monst *, struct obj *, struct obj *, boolean, boolean, boolean *));
-E boolean FDECL(xbreathey, (struct monst *, struct attack *, int, int));
-E boolean FDECL(xspity, (struct monst *, struct attack *, int, int));
-E boolean FDECL(xfirey, (struct monst *, struct attack *, int, int));
-E boolean FDECL(m_online, (struct monst *, struct monst *, int, int, boolean, boolean));
-E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
-E boolean NDECL(android_combo);
-E int FDECL(u_pole_pound, (struct monst *));
-E boolean FDECL(umetgaze, (struct monst *));
-E boolean FDECL(mmetgaze, (struct monst *, struct monst *));
-
 /* ### allmain.c ### */
 
 E void NDECL(moveloop);
@@ -1278,6 +1246,7 @@ E long FDECL(attk_protection, (int));
 
 /* ### mhitu.c ### */
 
+E void FDECL(hurtarmor, (int));
 E boolean FDECL(diseasemu, (struct permonst *));
 E const char *FDECL(mpoisons_subj, (struct monst *,struct attack *));
 E void NDECL(u_slow_down);
@@ -1303,6 +1272,9 @@ E int FDECL(domlcseduce, (struct monst *));
 E int FDECL(dograzseduce, (struct monst *));
 E int FDECL(dosflseduce, (struct monst *));
 E int FDECL(dopaleseduce, (struct monst *));
+E int FDECL(dololthseduce, (struct monst *));
+E int FDECL(dobelialseduce, (struct monst *));
+E int FDECL(dograzseduce, (struct monst *));
 E int FDECL(dotent, (struct monst *, int));
 #endif
 //E void NDECL(reset_mvudieroll);
@@ -2143,6 +2115,19 @@ E void FDECL(ghod_hitsu, (struct monst *));
 E void NDECL(angry_priest);
 E void NDECL(clearpriests);
 E void FDECL(restpriest, (struct monst *,BOOLEAN_P));
+
+/* ### projectile.c ### */
+
+E int FDECL(projectile, (struct monst *, struct obj *, struct obj *, boolean, int, int, int, int, int, int, boolean, boolean, boolean));
+E void FDECL(hitfloor2, (struct monst *, struct obj *, struct obj *, boolean, boolean, boolean *));
+E boolean FDECL(xbreathey, (struct monst *, struct attack *, int, int));
+E boolean FDECL(xspity, (struct monst *, struct attack *, int, int));
+E boolean FDECL(xfirey, (struct monst *, struct attack *, int, int));
+E boolean FDECL(m_online, (struct monst *, struct monst *, int, int, boolean, boolean));
+E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
+E boolean NDECL(android_combo);
+E boolean FDECL(umetgaze, (struct monst *));
+E boolean FDECL(mmetgaze, (struct monst *, struct monst *));
 
 /* ### quest.c ### */
 
@@ -3010,6 +2995,23 @@ E void FDECL(light_damage, (genericptr_t, long));
 /* ### write.c ### */
 
 E int FDECL(dowrite, (struct obj *));
+
+/* ### xhity.c ### */
+
+E int FDECL(attack_checks2, (struct monst *, struct obj *));
+E boolean FDECL(attack2, (struct monst *));
+E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
+E int FDECL(xattacky, (struct monst *, struct monst *, int, int));
+E int FDECL(xmeleehity, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, boolean));
+E struct attack * FDECL(getattk, (struct monst *, int *, int *, struct attack *, boolean, int *, int *));
+E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
+E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
+E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
+E void FDECL(wakeup2, (struct monst *, boolean));
+E int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
+E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int);
+E void FDECL(weave_black_web, (struct monst *));
+E int FDECL(u_pole_pound, (struct monst *));
 
 /* ### zap.c ### */
 
