@@ -3753,14 +3753,17 @@ struct obj *obj;
 				/* proficient with whip, but maybe not
 				   so proficient at catching weapons */
 				int hitu, hitvalu;
-
-				hitvalu = 8 + otmp->spe;
-				hitu = thitu(hitvalu,
-						 dmgval(otmp, &youmonst, 0),
-						 otmp, (char *)0, FALSE);
-				if (hitu) {
-					pline_The("%s hits you as you try to snatch it!",
-					the(onambuf));
+				int dieroll;
+				hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, otmp, (struct obj *)0, TRUE, 8);
+				if(hitvalu > (dieroll = rnd(20))) {
+					boolean wepgone = FALSE;
+					pline_The("%s hits you as you try to snatch it!" the(onambuf));
+					hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, otmp, (struct obj *)0, TRUE,
+						0, 0, FALSE, dieroll, FALSE, -1, &wepgone);
+				}
+				else {
+					if(Blind || !flags.verbose) pline("It misses.");
+					else You("are almost hit by %s.", the(onambuf));
 				}
 				place_object(otmp, u.ux, u.uy);
 				stackobj(otmp);

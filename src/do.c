@@ -556,7 +556,8 @@ register struct obj *obj;
 		if (obj->oclass == COIN_CLASS) flags.botl = 1;
 		freeinv(obj);
 #endif
-		hitfloor(obj);
+		boolean wepgone = FALSE;
+		hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
 		return(1);
 	    }
 	    if (!IS_ALTAR(levl[u.ux][u.uy].typ) && flags.verbose)

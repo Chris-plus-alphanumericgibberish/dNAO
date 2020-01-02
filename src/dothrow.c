@@ -6,18 +6,19 @@
 
 #include "hack.h"
 #include "edog.h"
+#include "xhity.h"
 
-STATIC_DCL int FDECL(fire_blaster, (struct obj *, int));
+//STATIC_DCL int FDECL(fire_blaster, (struct obj *, int));
 extern void NDECL(autoquiver);
 extern int FDECL(gem_accept, (struct monst *, struct obj *));
-STATIC_DCL void FDECL(tmiss, (struct obj *, struct monst *));
+//STATIC_DCL void FDECL(tmiss, (struct obj *, struct monst *));
 extern int FDECL(throw_gold, (struct obj *));
 extern void FDECL(check_shop_obj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P));
 extern void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
 extern void FDECL(breakmsg, (struct obj *, BOOLEAN_P));
-STATIC_DCL boolean FDECL(toss_up,(struct obj *, BOOLEAN_P));
-STATIC_DCL boolean FDECL(throwing_weapon, (struct obj *));
-STATIC_DCL void FDECL(sho_obj_return_to_u, (struct obj *obj, int, int));
+//STATIC_DCL boolean FDECL(toss_up,(struct obj *, BOOLEAN_P));
+//STATIC_DCL boolean FDECL(throwing_weapon, (struct obj *));
+//STATIC_DCL void FDECL(sho_obj_return_to_u, (struct obj *obj, int, int));
 STATIC_DCL boolean FDECL(mhurtle_step, (genericptr_t,int,int));
 extern boolean FDECL(quest_arti_hits_leader, (struct obj *, struct monst *));
 
@@ -28,15 +29,15 @@ static NEARDATA const char toss_objs[] =
 static NEARDATA const char bullets[] =
 	{ ALLOW_COUNT, COIN_CLASS, ALL_CLASSES, GEM_CLASS, 0 };
 
-struct obj *thrownobj = 0;	/* tracks an object until it lands */
+//struct obj *thrownobj = 0;	/* tracks an object until it lands */
 
-extern boolean notonhead;	/* for long worms */
+//extern boolean notonhead;	/* for long worms */
 //definition of an extern in you.h
 boolean barage=FALSE;
 #define THROW_UWEP 	1
 #define THROW_USWAPWEP 	2
 
-boolean break_thrown = FALSE; /*state variable, if TRUE thrown object always breaks.*/
+//boolean break_thrown = FALSE; /*state variable, if TRUE thrown object always breaks.*/
 
 /* Throw the selected object, maybe asking for direction */
 //int
@@ -431,7 +432,7 @@ int shots, shotlimit;
 		}
 	}
 	
-	if ((shots > 1 || shotlimit > 0) && !Hallucination) {
+	if (shots > 0 && (shots > 1 || shotlimit > 0) && !Hallucination) {
 		You("fire %d %s.",
 		shots,	/* (might be 1 if player gave shotlimit) */
 		(shots == 1) ? "ray" : "rays");
@@ -878,31 +879,31 @@ autoquiver()
 /*
  * Object hits floor at hero's feet.  Called from drop() and throwit().
  */
-void
-hitfloor(obj)
-register struct obj *obj;
-{
-	if(break_thrown){
-	    check_shop_obj(obj, u.ux,u.uy, TRUE);
-	    obfree(obj, (struct obj *)0);
-	    return;
-	}
-	
-	if (IS_SOFT(levl[u.ux][u.uy].typ) || u.uinwater) {
-		dropy(obj);
-		return;
-	}
-	if (IS_ALTAR(levl[u.ux][u.uy].typ))
-		doaltarobj(obj);
-	else
-		pline("%s hit%s the %s.", Doname2(obj),
-		      (obj->quan == 1L) ? "s" : "", surface(u.ux,u.uy));
-
-	if (hero_breaks(obj, u.ux, u.uy, TRUE)) return;
-	if (ship_object(obj, u.ux, u.uy, FALSE)) return;
-	dropy(obj);
-	if (!u.uswallow) container_impact_dmg(obj);
-}
+//void
+//hitfloor(obj)
+//register struct obj *obj;
+//{
+//	if(break_thrown){
+//	    check_shop_obj(obj, u.ux,u.uy, TRUE);
+//	    obfree(obj, (struct obj *)0);
+//	    return;
+//	}
+//	
+//	if (IS_SOFT(levl[u.ux][u.uy].typ) || u.uinwater) {
+//		dropy(obj);
+//		return;
+//	}
+//	if (IS_ALTAR(levl[u.ux][u.uy].typ))
+//		doaltarobj(obj);
+//	else
+//		pline("%s hit%s the %s.", Doname2(obj),
+//		      (obj->quan == 1L) ? "s" : "", surface(u.ux,u.uy));
+//
+//	if (hero_breaks(obj, u.ux, u.uy, TRUE)) return;
+//	if (ship_object(obj, u.ux, u.uy, FALSE)) return;
+//	dropy(obj);
+//	if (!u.uswallow) container_impact_dmg(obj);
+//}
 
 /*
  * Walk a path from src_cc to dest_cc, calling a proc for each location
@@ -1396,17 +1397,17 @@ register boolean broken;
 //}
 
 /* return true for weapon meant to be thrown; excludes ammo */
-STATIC_OVL boolean
-throwing_weapon(obj)
-struct obj *obj;
-{
-	return (is_missile(obj) || is_spear(obj) ||
-		/* daggers and knife (excludes scalpel) */
-		(is_blade(obj) && !is_sword(obj) &&
-		 (objects[obj->otyp].oc_dir & PIERCE)) ||
-		/* special cases [might want to add AXE] */
-		obj->otyp == WAR_HAMMER || obj->otyp == AKLYS);
-}
+//STATIC_OVL boolean
+//throwing_weapon(obj)
+//struct obj *obj;
+//{
+//	return (is_missile(obj) || is_spear(obj) ||
+//		/* daggers and knife (excludes scalpel) */
+//		(is_blade(obj) && !is_sword(obj) &&
+//		 (objects[obj->otyp].oc_dir & PIERCE)) ||
+//		/* special cases [might want to add AXE] */
+//		obj->otyp == WAR_HAMMER || obj->otyp == AKLYS);
+//}
 
 /* the currently thrown object is returning to you (not for boomerangs) */
 //void

@@ -42,8 +42,6 @@ static long old_wep_mask;
  * 
  * Weightlessness/hurtling must be dealt with outside of this function;
  * it does not assume magr is actually firing the projectile themselves
- *
- * TODO: slips/misfires should NOT be here
  */
 int
 projectile(magr, ammo, launcher, fired, initx, inity, dx, dy, dz, initrange, forcedestroy, verbose, impaired)
@@ -288,16 +286,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			}
 			return MM_MISS;
 		}
-		/* specific effects before end_projectile, if thrownobj still exists */
-		if (!wepgone && youagr) {
-			if (IS_ALTAR(levl[bhitpos.x][bhitpos.y].typ))
-				doaltarobj(thrownobj);
-			else
-				pline("%s hit%s the %s.", Doname2(thrownobj),
-				(thrownobj->quan == 1L) ? "s" : "", surface(bhitpos.x, bhitpos.y));
-		}
-		/* end projectile*/
-		end_projectile(magr, mdef, thrownobj, launcher, fired, forcedestroy, &wepgone);
+		/* Projectile hits floor. This calls end_projectile() */
+		hitfloor2(magr, thrownobj, launcher, fired, forcedestroy, &wepgone);
 		return MM_MISS;
 	}
 
@@ -915,6 +905,36 @@ boolean * wepgone;				/* TRUE if projectile is already destroyed */
 
 	return;
 }
+
+/* hitfloor2()
+ * 
+ * 
+ * 
+ */
+void
+hitfloor2(magr, obj, launcher, fired, forcedestroy, wepgone)
+struct monst * magr;
+struct obj * obj;
+struct obj * launcher;
+boolean fired;
+boolean forcedestroy;
+boolean * wepgone;
+{
+	boolean youagr = (magr == &youmonst);
+
+	/* specific effects before end_projectile, if thrownobj still exists */
+	if (!(*wepgone) && youagr) {
+		if (IS_ALTAR(levl[bhitpos.x][bhitpos.y].typ))
+			doaltarobj(obj);
+		else
+			pline("%s hit%s the %s.", Doname2(obj),
+			(obj->quan == 1L) ? "s" : "", surface(bhitpos.x, bhitpos.y));
+	}
+	/* end projectile*/
+	end_projectile(magr, (struct monst *)0, obj, launcher, fired, forcedestroy, wepgone);
+	return;
+}
+
 
 /* 
  * projectile_attack()
@@ -1563,6 +1583,7 @@ toss_up2(obj)
 struct obj *obj;
 {
 	char buf[BUFSZ];
+	boolean wepgone = FALSE;
 	/* note: obj->quan == 1 */
 
 	if (In_outdoors(&u.uz)) {
@@ -1584,7 +1605,7 @@ struct obj *obj;
 	}
 	if (!hits_insubstantial((struct monst *)0, &youmonst, (struct attack *)0, obj)) {
 		pline("%s %s, then falls back down through you.", Doname2(obj), buf);
-		hitfloor(obj);
+		hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
 	}
 	else {
 		pline("%s %s, then falls back on top of your %s.",
@@ -1691,7 +1712,7 @@ struct obj *obj;
 					return obj ? TRUE : FALSE;
 				}
 			}
-			hitfloor(obj);
+			hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
 			losehp(dmg, "falling object", KILLED_BY_AN);
 		}
 	}
@@ -2659,7 +2680,6 @@ boolean stoponhit;
  * 
  * The player's version is fairly separate, and is in polyself.c
  * TODO: make #monster use this function; add additional functionality to make that possible
- * TODO: make sure ancient of ice does its breath attack correctly in mon.c
  */
 boolean
 xbreathey(magr, attk, tarx, tary)
@@ -2760,7 +2780,6 @@ int tary;
  * 
  * magr is spitting at (tarx, tary)
  *
- * TODO: make #monster use this function
  * TODO: make 'f'ire use this function
  */
 boolean

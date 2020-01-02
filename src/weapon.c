@@ -191,16 +191,7 @@ struct monst *mon;
 	}
 
 /*	Put weapon specific "to hit" bonuses in below:		*/
-	if(otmp->otyp == VIPERWHIP){
-		//Note: ostriking uses only 8 bits
-		otmp->ostriking = min(7,rn2(otmp->ovar1));
-		tmp += (1+otmp->ostriking) * objects[otmp->otyp].oc_hitbon;
-	} else if(otmp->otyp == SET_OF_CROW_TALONS){
-		//Note: ostriking uses only 8 bits
-		otmp->ostriking = min(7,rn2(3));
-	} else {
-		tmp += objects[otmp->otyp].oc_hitbon;
-	}
+	tmp += objects[otmp->otyp].oc_hitbon;
 	
 	if (is_lightsaber(otmp) && otmp->altmode) tmp += objects[otmp->otyp].oc_hitbon;
 	//But DON'T double the to hit bonus from spe for double lightsabers in dual bladed mode. It gets harder to use, not easier.
@@ -839,7 +830,6 @@ int spec;
 	/* special cases of otyp not covered by dmgval_core:
 	 *  - rakuyo					- add bonus damage
 	 *  - double vibro blade		- double all damage
-	 *  - viperwhips				- add ostriking
 	 *  - mirrorblades				- total replacement
 	 *  - crystal sword				- bonus enchantment damage
 	 *  - seismic hammer			- damage die based on enchantment
@@ -863,17 +853,6 @@ int spec;
 			wdice.bon.damd = max(2, ((bigmonst(ptr) ? 3 : 4) + 2 * (otmp->objsize - MZ_MEDIUM + !!(spec & SPEC_MARIONETTE))));
 			// doubled enchantment
 			spe_mult *= 2;
-		}
-		break;
-	case SET_OF_CROW_TALONS:
-	case VIPERWHIP:
-		// extra heads means more base dice of damage
-		if (otmp->ostriking > 0)
-		{
-			/* modify wdice's dice */
-			// 1 additional die for every extra head striking
-			wdice.oc.damn += otmp->ostriking;
-			spe_mult += otmp->ostriking;
 		}
 		break;
 	case MIRRORBLADE:{

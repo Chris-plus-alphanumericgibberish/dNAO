@@ -5,7 +5,6 @@
 #include "hack.h"
 
 #ifdef OVL1
-STATIC_DCL void NDECL(maybe_wail);
 #endif /*OVL1*/
 STATIC_DCL int NDECL(moverock);
 STATIC_DCL int FDECL(still_chewing,(XCHAR_P,XCHAR_P));
@@ -2461,7 +2460,7 @@ const char *msg_override;
 #endif /* OVL2 */
 #ifdef OVL1
 
-STATIC_OVL void
+void
 maybe_wail()
 {
     static short powers[] = { TELEPORT, SEE_INVIS, POISON_RES, COLD_RES,

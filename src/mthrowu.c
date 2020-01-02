@@ -15,10 +15,10 @@ extern char* FDECL(breathwep, (int));
 static const int dirx[8] = {0, 1, 1,  1,  0, -1, -1, -1},
 				 diry[8] = {1, 1, 0, -1, -1, -1,  0,  1};
 
-int destroy_thrown = 0; /*state variable, if nonzero drop_throw always destroys object.  This is necessary 
-						 because the throw code doesn't report the identity of the thrown object, so it can only
-						 be destroyed in the throw code itself */
-int bypassDR = 0;
+//int destroy_thrown = 0; /*state variable, if nonzero drop_throw always destroys object.  This is necessary 
+//						 because the throw code doesn't report the identity of the thrown object, so it can only
+//						 be destroyed in the throw code itself */
+//int bypassDR = 0;
 
 /* 
  * replace the old char*breathwep[] array
@@ -47,111 +47,107 @@ int atype;
 }
 
 /* hero is hit by something other than a monster */
-int
-thitu(tlev, dam, obj, name, burn)
-int tlev, dam;
-struct obj *obj;
-const char *name;	/* if null, then format `obj' */
-boolean burn;
-{
-	const char *onm, *knm;
-	boolean is_acid;
-	int kprefix = KILLED_BY_AN;
-	char onmbuf[BUFSZ], knmbuf[BUFSZ];
-
-	if (!name) {
-	    if (!obj) panic("thitu: name & obj both null?");
-	    name = strcpy(onmbuf,
-			 (obj->quan > 1L) ? doname(obj) : mshot_xname(obj));
-	    knm = strcpy(knmbuf, killer_xname(obj));
-	    kprefix = KILLED_BY;  /* killer_name supplies "an" if warranted */
-	} else {
-	    knm = name;
-	    /* [perhaps ought to check for plural here to] */
-	    if (!strncmpi(name, "the ", 4) ||
-		    !strncmpi(name, "an ", 3) ||
-		    !strncmpi(name, "a ", 2)) kprefix = KILLED_BY;
-	}
-	onm = (obj && obj_is_pname(obj)) ? the(name) :
-			    (obj && obj->quan > 1L) ? name : an(name);
-	is_acid = (obj && obj->otyp == ACID_VENOM);
-
-	if(uwep && is_lightsaber(uwep) && litsaber(uwep) && P_SKILL(weapon_type(uwep)) >= P_BASIC){
-		if(P_SKILL(FFORM_SHII_CHO) >= P_BASIC){
-			if(u.fightingForm == FFORM_SHII_CHO || 
-				(u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm)))
-			) use_skill(FFORM_SHIEN,1);
-		}
-	}
-	
-	if(burn){
-		You("burn %s out of the %s!", onm, (Underwater || Is_waterlevel(&u.uz)) ? "water" : "air");
-		return 0;
-	}
-	if(uwep && uwep->oartifact == ART_SANSARA_MIRROR && rn2(2)){
-		pline("Sansara twists and reflects.");
-		return -1;
-	}
-	
-	if((bypassDR && (AC_VALUE(base_uac()+u.uspellprot) - u.uspellprot + tlev <= rnd(20))) || 
-	   (!bypassDR && (AC_VALUE(u.uac+u.uspellprot)-u.uspellprot + tlev <= rnd(20)))
-	){
-		if(Blind || !flags.verbose) pline("It misses.");
-		else You("are almost hit by %s.", onm);
-		return(0);
-	} else {
-		if(bypassDR) dam -= base_udr();
-		else dam -= roll_udr((struct monst *) 0);
-		
-		if(dam > 0 && u.ustdy){
-			dam += u.ustdy;
-			u.ustdy /= 2;
-		}
-		
-		if(u.umadness&MAD_SUICIDAL){
-			dam += ((100 - u.usanity)*u.ulevel)/200;
-		}
-		
-		if(dam < 1) dam = 1;
-		
-		if(Blind || !flags.verbose) You("are hit!");
-		else You("are hit by %s%s", onm, exclam(dam));
-		
-		if(Reflecting && (obj->otyp == BLASTER_BOLT || obj->otyp == HEAVY_BLASTER_BOLT || obj->otyp == LASER_BEAM)){
-			(void) ureflects("But %s reflects from your %s!", "it");
-			return -1;
-		}
-
-		if (obj && (obj->obj_material == SILVER || arti_silvered(obj)) &&
-				!(is_lightsaber(obj) && litsaber(obj)) &&
-				!(u.sealsActive&SEAL_EDEN)
-				&& hates_silver(youracedata)) {
-			pline_The("silver sears your flesh!");
-			exercise(A_CON, FALSE);
-		}
-		if (obj && (obj->obj_material == IRON) &&
-				!(is_lightsaber(obj) && litsaber(obj))
-				&& hates_iron(youracedata)) {
-			pline_The("cold-iron sears your flesh!");
-			exercise(A_CON, FALSE);
-		}
-		if (obj && is_unholy(obj)
-				&& hates_unholy(youracedata)) {
-			pline_The("curse sears your flesh!");
-			exercise(A_CON, FALSE);
-		}
-		if (is_acid && Acid_resistance)
-			pline("It doesn't seem to hurt you.");
-		else {
-			if (is_acid) pline("It burns!");
-			if (Half_physical_damage) dam = (dam+1) / 2;
-			if(u.uvaul_duration) dam = (dam + 1) / 2;
-			losehp(dam, knm, kprefix);
-			exercise(A_STR, FALSE);
-		}
-		return(1);
-	}
-}
+//int
+//thitu(tlev, dam, obj, name, burn)
+//int tlev, dam;
+//struct obj *obj;
+//const char *name;	/* if null, then format `obj' */
+//boolean burn;
+//{
+//	const char *onm, *knm;
+//	boolean is_acid;
+//	int kprefix = KILLED_BY_AN;
+//	char onmbuf[BUFSZ], knmbuf[BUFSZ];
+//
+//	if (!name) {
+//	    if (!obj) panic("thitu: name & obj both null?");
+//	    name = strcpy(onmbuf,
+//			 (obj->quan > 1L) ? doname(obj) : mshot_xname(obj));
+//	    knm = strcpy(knmbuf, killer_xname(obj));
+//	    kprefix = KILLED_BY;  /* killer_name supplies "an" if warranted */
+//	} else {
+//	    knm = name;
+//	    /* [perhaps ought to check for plural here to] */
+//	    if (!strncmpi(name, "the ", 4) ||
+//		    !strncmpi(name, "an ", 3) ||
+//		    !strncmpi(name, "a ", 2)) kprefix = KILLED_BY;
+//	}
+//	onm = (obj && obj_is_pname(obj)) ? the(name) :
+//			    (obj && obj->quan > 1L) ? name : an(name);
+//	is_acid = (obj && obj->otyp == ACID_VENOM);
+//
+//	if(uwep && is_lightsaber(uwep) && litsaber(uwep) && P_SKILL(weapon_type(uwep)) >= P_BASIC){
+//		if(P_SKILL(FFORM_SHII_CHO) >= P_BASIC){
+//			if(u.fightingForm == FFORM_SHII_CHO || 
+//				(u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm)))
+//			) use_skill(FFORM_SHIEN,1);
+//		}
+//	}
+//	
+//	if(burn){
+//		You("burn %s out of the %s!", onm, (Underwater || Is_waterlevel(&u.uz)) ? "water" : "air");
+//		return 0;
+//	}
+//	if(uwep && uwep->oartifact == ART_SANSARA_MIRROR && rn2(2)){
+//		pline("Sansara twists and reflects.");
+//		return -1;
+//	}
+//	
+//	if((bypassDR && (AC_VALUE(base_uac()+u.uspellprot) - u.uspellprot + tlev <= rnd(20))) || 
+//	   (!bypassDR && (AC_VALUE(u.uac+u.uspellprot)-u.uspellprot + tlev <= rnd(20)))
+//	){
+//		if(Blind || !flags.verbose) pline("It misses.");
+//		else You("are almost hit by %s.", onm);
+//		return(0);
+//	} else {
+//		if(bypassDR) dam -= base_udr();
+//		else dam -= roll_udr((struct monst *) 0);
+//		
+//		if(dam > 0 && u.ustdy){
+//			dam += u.ustdy;
+//			u.ustdy /= 2;
+//		}
+//		
+//		if(dam < 1) dam = 1;
+//		
+//		if(Blind || !flags.verbose) You("are hit!");
+//		else You("are hit by %s%s", onm, exclam(dam));
+//		
+//		if(Reflecting && (obj->otyp == BLASTER_BOLT || obj->otyp == HEAVY_BLASTER_BOLT || obj->otyp == LASER_BEAM)){
+//			(void) ureflects("But %s reflects from your %s!", "it");
+//			return -1;
+//		}
+//
+//		if (obj && (obj->obj_material == SILVER || arti_silvered(obj)) &&
+//				!(is_lightsaber(obj) && litsaber(obj)) &&
+//				!(u.sealsActive&SEAL_EDEN)
+//				&& hates_silver(youracedata)) {
+//			pline_The("silver sears your flesh!");
+//			exercise(A_CON, FALSE);
+//		}
+//		if (obj && (obj->obj_material == IRON) &&
+//				!(is_lightsaber(obj) && litsaber(obj))
+//				&& hates_iron(youracedata)) {
+//			pline_The("cold-iron sears your flesh!");
+//			exercise(A_CON, FALSE);
+//		}
+//		if (obj && is_unholy(obj)
+//				&& hates_unholy(youracedata)) {
+//			pline_The("curse sears your flesh!");
+//			exercise(A_CON, FALSE);
+//		}
+//		if (is_acid && Acid_resistance)
+//			pline("It doesn't seem to hurt you.");
+//		else {
+//			if (is_acid) pline("It burns!");
+//			if (Half_physical_damage) dam = (dam+1) / 2;
+//			if(u.uvaul_duration) dam = (dam + 1) / 2;
+//			losehp(dam, knm, kprefix);
+//			exercise(A_STR, FALSE);
+//		}
+//		return(1);
+//	}
+//}
 
 /* Be sure this corresponds with what happens to player-thrown objects in
  * dothrow.c (for consistency). --KAA
@@ -1635,19 +1631,19 @@ int force_linedup;
 //	return 0;
 //}
 
-int set_destroy_thrown(value)
-int value;
-{
-	destroy_thrown = value;
-	return destroy_thrown;
-}
+//int set_destroy_thrown(value)
+//int value;
+//{
+//	destroy_thrown = value;
+//	return destroy_thrown;
+//}
 
-int set_bypassDR(value)
-int value;
-{
-	bypassDR = value;
-	return bypassDR;
-}
+//int set_bypassDR(value)
+//int value;
+//{
+//	bypassDR = value;
+//	return bypassDR;
+//}
 
 //int
 //spitmm(mtmp, mdef, mattk)	/* monster spits substance at monster */

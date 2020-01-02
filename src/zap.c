@@ -3431,68 +3431,68 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 	return (struct monst *)0;
 }
 
-struct monst *
-boomhit(obj, dx, dy)
-struct obj *obj;
-int dx, dy;
-{
-	register int i, ct;
-	int boom = S_boomleft;	/* showsym[] index  */
-	struct monst *mtmp;
-
-	bhitpos.x = u.ux;
-	bhitpos.y = u.uy;
-
-	for (i = 0; i < 8; i++) if (xdir[i] == dx && ydir[i] == dy) break;
-	tmp_at(DISP_FLASH, cmap_to_glyph(boom));
-	for (ct = 0; ct < 10; ct++) {
-		if(i == 8) i = 0;
-		boom = (boom == S_boomleft) ? S_boomright : S_boomleft;
-		tmp_at(DISP_CHANGE, cmap_to_glyph(boom));/* change glyph */
-		dx = xdir[i];
-		dy = ydir[i];
-		bhitpos.x += dx;
-		bhitpos.y += dy;
-		if (!isok(bhitpos.x, bhitpos.y)) {
-			bhitpos.x -= dx;
-			bhitpos.y -= dy;
-			break;
-		}
-		if(MON_AT(bhitpos.x, bhitpos.y)) {
-			mtmp = m_at(bhitpos.x,bhitpos.y);
-			m_respond(mtmp);
-			tmp_at(DISP_END, 0);
-			return(mtmp);
-		}
-		if(!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ) ||
-		   closed_door(bhitpos.x, bhitpos.y)) {
-			bhitpos.x -= dx;
-			bhitpos.y -= dy;
-			break;
-		}
-		if(bhitpos.x == u.ux && bhitpos.y == u.uy) { /* ct == 9 */
-			if(Fumbling || (!obj->oartifact && rn2(18) >= ACURR(A_DEX))) {
-				/* we hit ourselves */
-				(void) thitu(10, rnd(10), (struct obj *)0,
-					"boomerang", FALSE);
-				break;
-			} else {	/* we catch it */
-				tmp_at(DISP_END, 0);
-				You("skillfully catch the boomerang.");
-				return(&youmonst);
-			}
-		}
-		tmp_at(bhitpos.x, bhitpos.y);
-		delay_output();
-		if(ct % 5 != 0) i++;
-#ifdef SINKS
-		if(IS_SINK(levl[bhitpos.x][bhitpos.y].typ))
-			break;	/* boomerang falls on sink */
-#endif
-	}
-	tmp_at(DISP_END, 0);	/* do not leave last symbol */
-	return (struct monst *)0;
-}
+//struct monst *
+//boomhit(obj, dx, dy)
+//struct obj *obj;
+//int dx, dy;
+//{
+//	register int i, ct;
+//	int boom = S_boomleft;	/* showsym[] index  */
+//	struct monst *mtmp;
+//
+//	bhitpos.x = u.ux;
+//	bhitpos.y = u.uy;
+//
+//	for (i = 0; i < 8; i++) if (xdir[i] == dx && ydir[i] == dy) break;
+//	tmp_at(DISP_FLASH, cmap_to_glyph(boom));
+//	for (ct = 0; ct < 10; ct++) {
+//		if(i == 8) i = 0;
+//		boom = (boom == S_boomleft) ? S_boomright : S_boomleft;
+//		tmp_at(DISP_CHANGE, cmap_to_glyph(boom));/* change glyph */
+//		dx = xdir[i];
+//		dy = ydir[i];
+//		bhitpos.x += dx;
+//		bhitpos.y += dy;
+//		if (!isok(bhitpos.x, bhitpos.y)) {
+//			bhitpos.x -= dx;
+//			bhitpos.y -= dy;
+//			break;
+//		}
+//		if(MON_AT(bhitpos.x, bhitpos.y)) {
+//			mtmp = m_at(bhitpos.x,bhitpos.y);
+//			m_respond(mtmp);
+//			tmp_at(DISP_END, 0);
+//			return(mtmp);
+//		}
+//		if(!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ) ||
+//		   closed_door(bhitpos.x, bhitpos.y)) {
+//			bhitpos.x -= dx;
+//			bhitpos.y -= dy;
+//			break;
+//		}
+//		if(bhitpos.x == u.ux && bhitpos.y == u.uy) { /* ct == 9 */
+//			if(Fumbling || (!obj->oartifact && rn2(18) >= ACURR(A_DEX))) {
+//				/* we hit ourselves */
+//				(void) thitu(10, rnd(10), (struct obj *)0,
+//					"boomerang", FALSE);
+//				break;
+//			} else {	/* we catch it */
+//				tmp_at(DISP_END, 0);
+//				You("skillfully catch the boomerang.");
+//				return(&youmonst);
+//			}
+//		}
+//		tmp_at(bhitpos.x, bhitpos.y);
+//		delay_output();
+//		if(ct % 5 != 0) i++;
+//#ifdef SINKS
+//		if(IS_SINK(levl[bhitpos.x][bhitpos.y].typ))
+//			break;	/* boomerang falls on sink */
+//#endif
+//	}
+//	tmp_at(DISP_END, 0);	/* do not leave last symbol */
+//	return (struct monst *)0;
+//}
 
 STATIC_OVL int
 zhitm(mon, adtyp, olet, yours, nd, flat, ootmp)			/* returns damage to mon */

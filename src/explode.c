@@ -772,18 +772,21 @@ struct obj *obj;			/* only scatter this obj        */
 				}
 			} else if (bhitpos.x==u.ux && bhitpos.y==u.uy) {
 				if (scflags & MAY_HITYOU) {
-				    int hitvalu, hitu;
-
 				    if (multi) nomul(0, NULL);
-				    hitvalu = 8 + stmp->obj->spe;
-				    if (bigmonst(youracedata)) hitvalu++;
-				    hitu = thitu(hitvalu,
-						 dmgval(stmp->obj, &youmonst, 0),
-						 stmp->obj, (char *)0, FALSE);
-				    if (hitu) {
-					stmp->range -= 3;
-					stop_occupation();
-				    }
+					int hitu, hitvalu;
+					int dieroll;
+					hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, stmp->obj, (struct obj *)0, TRUE, 8);
+					if (hitvalu > (dieroll = rnd(20))) {
+						boolean wepgone = FALSE;
+						hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, stmp->obj, (struct obj *)0, TRUE,
+							0, 0, TRUE, dieroll, FALSE, -1, &wepgone);
+						stmp->range -= 3;
+						stop_occupation();
+					}
+					else {
+						if (Blind || !flags.verbose) pline("It misses.");
+						else You("are almost hit by %s.", the(xname(stmp->obj)));
+					}
 				}
 			} else {
 				if (scflags & VIS_EFFECTS) {
