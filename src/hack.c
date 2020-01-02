@@ -2537,6 +2537,34 @@ boolean k_format;
 	}
 }
 
+void
+mdamageu(mtmp, n)	/* mtmp hits you for n points damage */
+register struct monst *mtmp;
+register int n;
+{
+	flags.botl = 1;
+	//ifdef BARD
+	if (n > 0){
+		n += mtmp->encouraged;
+		if (uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(mtmp) && !is_deaf(mtmp)){
+			if (uwep->osinging == OSING_DIRGE && !mtmp->mtame){
+				n -= uwep->spe + 1;
+			}
+		}
+		if (n < 0) n = 0;
+	}
+	//endif
+	if (n > 0) mtmp->mhurtu = TRUE;
+	if (Upolyd) {
+		u.mh -= n;
+		if (u.mh < 1) rehumanize();
+	}
+	else {
+		u.uhp -= n;
+		if (u.uhp < 1) done_in_by(mtmp);
+	}
+}
+
 int
 weight_cap()
 {

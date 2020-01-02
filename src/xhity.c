@@ -14,23 +14,16 @@ Claws of the Revenancer w/ rings
 */
 
 STATIC_DCL int FDECL(getvis, (struct monst *, struct monst *, int, int));
-STATIC_DCL boolean FDECL(madness_cant_attack, (struct monst *));
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
-STATIC_DCL boolean FDECL(badtouch, (struct monst *, struct monst *, struct attack *, struct obj *));
-STATIC_DCL boolean FDECL(safe_attack, (struct monst *, struct monst *, struct attack *, struct obj *, struct permonst *, struct permonst *));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
 STATIC_DCL int FDECL(destroy_item2, (struct monst *, int, int, boolean));
 STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *, boolean));
 STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *));
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
-STATIC_DCL boolean FDECL(slips_free, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL void FDECL(heal, (struct monst *, int));
-STATIC_DCL boolean FDECL(obj_silver_searing, (struct obj *));
-STATIC_DCL boolean FDECL(obj_jade_searing, (struct obj *));
-STATIC_DCL long FDECL(attk_equip_slot, (int));
-STATIC_DCL int FDECL(hatesobjdmg, (struct monst *, struct obj *));
+
 STATIC_DCL int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
@@ -43,16 +36,12 @@ STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
-STATIC_DCL int NDECL(beastmastery);
-STATIC_DCL int NDECL(mountedCombat);
 
 /* item destruction strings from zap.c */
 extern const char * const destroy_strings[];
 
 /* for long worms */
 extern boolean notonhead;
-
-extern void NDECL(demonpet);
 
 /* Counterattack chance at skill level....  B:  S:  E:  */
 static const int DjemSo_counterattack[] = {  5, 10, 20 };
@@ -94,198 +83,6 @@ int tary;
 	else
 		vis = 0;
 	return vis;
-}
-
-/* attack_checks2()
- * TODO: find all instances of the original function (attackchecks) and use attackchecks2 instead, then rename.
- * 
- * the player is attempting to attack [mdef]
- * 
- * old behaviour: FALSE means it's OK to attack
- * 
- * new behaviour: returns
- * 0 : can not attack
- * 1 : attack normally
- * 2 : bloodthirsty forced attack (a la Stormbringer, not 'F')
- */
-int
-attack_checks2(mdef, wep)
-struct monst * mdef;
-struct obj * wep;	/* uwep for attack(), null for kick_monster() */
-{
-	/* if you're close enough to attack, alert any waiting monster */
-	mdef->mstrategy &= ~STRAT_WAITMASK;
-
-	/* if you're overtaxed (or worse), you cannot attack */
-	if (check_capacity("You cannot fight while so heavily loaded."))
-		return ATTACKCHECK_NONE;
-
-	/* certain "pacifist" monsters don't attack */
-	if (Upolyd && noattacks(youracedata)) {
-		You("have no way to attack monsters physically.");
-		return ATTACKCHECK_NONE;
-	}
-
-	/* if you are swallowed, you can attack */
-	if (u.uswallow && mdef == u.ustuck)
-		return ATTACKCHECK_ATTACK;
-
-	if (flags.forcefight) {
-		/* Do this in the caller, after we checked that the monster
-		* didn't die from the blow.  Reason: putting the 'I' there
-		* causes the hero to forget the square's contents since
-		* both 'I' and remembered contents are stored in .glyph.
-		* If the monster dies immediately from the blow, the 'I' will
-		* not stay there, so the player will have suddenly forgotten
-		* the square's contents for no apparent reason.
-		if (!canspotmon(mdef) &&
-		!glyph_is_invisible(levl[u.ux+u.dx][u.uy+u.dy].glyph))
-		map_invisible(u.ux+u.dx, u.uy+u.dy);
-		*/
-		return ATTACKCHECK_ATTACK;
-	}
-
-	/* Put up an invisible monster marker, but with exceptions for
-	* monsters that hide and monsters you've been warned about.
-	* The former already prints a warning message and
-	* prevents you from hitting the monster just via the hidden monster
-	* code below; if we also did that here, similar behavior would be
-	* happening two turns in a row.  The latter shows a glyph on
-	* the screen, so you know something is there.
-	*/
-	if (!canspotmon(mdef) &&
-		!glyph_is_warning(glyph_at(u.ux + u.dx, u.uy + u.dy)) &&
-		!glyph_is_invisible(levl[u.ux + u.dx][u.uy + u.dy].glyph) &&
-		!(!Blind && mdef->mundetected && hides_under(mdef->data))) {
-		pline("Wait!  There's %s there you can't see!",
-			something);
-		map_invisible(u.ux + u.dx, u.uy + u.dy);
-		/* if it was an invisible mimic, treat it as if we stumbled
-		* onto a visible mimic
-		*/
-		if (mdef->m_ap_type && !Protection_from_shape_changers) {
-			if (!u.ustuck && !mdef->mflee && dmgtype(mdef->data, AD_STCK))
-				u.ustuck = mdef;
-		}
-		if (!mdef->mpeaceful)
-			wakeup2(mdef, TRUE); /* always necessary; also un-mimics mimics */
-		return ATTACKCHECK_NONE;
-	}
-
-	if (mdef->m_ap_type && !Protection_from_shape_changers &&
-		!sensemon(mdef) &&
-		!glyph_is_warning(glyph_at(u.ux + u.dx, u.uy + u.dy))) {
-		/* If a hidden mimic was in a square where a player remembers
-		* some (probably different) unseen monster, the player is in
-		* luck--he attacks it even though it's hidden.
-		*/
-		if (glyph_is_invisible(levl[mdef->mx][mdef->my].glyph)) {
-			seemimic(mdef);
-			return ATTACKCHECK_ATTACK;
-		}
-		stumble_onto_mimic(mdef);
-		return ATTACKCHECK_NONE;
-	}
-
-	if (mdef->mundetected && !canseemon(mdef) && !sensemon(mdef) &&
-		!glyph_is_warning(glyph_at(u.ux + u.dx, u.uy + u.dy)) &&
-		!MATCH_WARN_OF_MON(mdef) &&
-		(hides_under(mdef->data) || mdef->data->mlet == S_EEL)) {
-		mdef->mundetected = mdef->msleeping = 0;
-		newsym(mdef->mx, mdef->my);
-		if (glyph_is_invisible(levl[mdef->mx][mdef->my].glyph)) {
-			seemimic(mdef);
-			return ATTACKCHECK_ATTACK;
-		}
-		if (!(Blind ? Blind_telepat : Unblind_telepat)) {
-			struct obj *obj;
-
-			if (Blind || (is_pool(mdef->mx, mdef->my, FALSE) && !Underwater))
-				pline("Wait!  There's a hidden monster there!");
-			else if ((obj = level.objects[mdef->mx][mdef->my]) != 0)
-				pline("Wait!  There's %s hiding under %s!",
-				an(l_monnam(mdef)), doname(obj));
-			return ATTACKCHECK_NONE;
-		}
-	}
-
-	/*
-	* make sure to wake up a monster from the above cases if the
-	* hero can sense that the monster is there.
-	*/
-	if ((mdef->mundetected || mdef->m_ap_type) && sensemon(mdef)) {
-		mdef->mundetected = 0;
-		wakeup2(mdef, TRUE);
-	}
-
-	/* generally, don't attack peaceful monsters */
-	if (mdef->mpeaceful && !Confusion && !Hallucination && !Stunned) {
-		/* Intelligent chaotic weapons (Stormbringer) want blood */
-		/* NOTE:  now generalized to a flag, also, more lawful weapons than chaotic weps have it now :) */
-		if (wep && spec_ability2(wep, SPFX2_BLDTHRST)) {
-			/* Don't show Stormbringer's message if attack is intended. */
-			if (iflags.attack_mode != ATTACK_MODE_FIGHT_ALL)
-				return ATTACKCHECK_BLDTHRST;
-			else
-				return ATTACKCHECK_ATTACK;
-		}
-		if (canspotmon(mdef)) {
-			if (iflags.attack_mode == ATTACK_MODE_CHAT
-				|| iflags.attack_mode == ATTACK_MODE_PACIFIST) {
-				if (mdef->ispriest) {
-					/* Prevent accidental donation prompt. */
-					pline("%s mutters a prayer.", Monnam(mdef));
-				}
-				else if (!dochat(FALSE, u.dx, u.dy, 0)) {
-					flags.move = 0;
-				}
-				return ATTACKCHECK_NONE;
-			}
-			else if (iflags.attack_mode == ATTACK_MODE_ASK){
-				char qbuf[QBUFSZ];
-#ifdef PARANOID
-				char buf[BUFSZ];
-				if (iflags.paranoid_hit) {
-					Sprintf(qbuf, "Really attack %s? [no/yes]",
-						mon_nam(mdef));
-					getlin(qbuf, buf);
-					(void)lcase(buf);
-					if (strcmp(buf, "yes")) {
-						flags.move = 0;
-						return ATTACKCHECK_NONE;
-					}
-				}
-				else {
-#endif
-					Sprintf(qbuf, "Really attack %s?", mon_nam(mdef));
-					if (yn(qbuf) != 'y') {
-						flags.move = 0;
-						return ATTACKCHECK_NONE;
-					}
-#ifdef PARANOID
-				}
-#endif
-			}
-		}
-	}
-
-	/* attack checks specific to the pacifist attack mode */
-	if (iflags.attack_mode == ATTACK_MODE_PACIFIST) {
-		/* Being not in full control of yourself causes you to attack */
-		if (Confusion || Hallucination || Stunned)
-			return ATTACKCHECK_ATTACK;
-		/* Some weapons just want blood */
-		if (wep && spec_ability2(wep, SPFX2_BLDTHRST))
-			return ATTACKCHECK_BLDTHRST;
-		/* Otherwise, be a pacifist. */
-		You("stop for %s.", mon_nam(mdef));
-		flags.move = 0;
-		return ATTACKCHECK_NONE;
-	}
-
-	/* default case: you can attack */
-	return ATTACKCHECK_ATTACK;
-
 }
 
 /* attack2()
@@ -352,8 +149,8 @@ struct monst * mdef;
 		}
 	}
 
-	/* attack_checks2 returns a truthy value if we can attack */
-	if (!(attack_type = attack_checks2(mdef, uwep))) {
+	/* attack_checks returns a truthy value if we can attack */
+	if (!(attack_type = attack_checks(mdef, uwep))) {
 		return TRUE;
 	}
 
@@ -474,8 +271,8 @@ struct monst * mdef;
 	}
 
 atk_done:
-	/* see comment in attack_checks2() */
-	/* we only need to check for this if we did an attack_checks2()
+	/* see comment in attack_checks() */
+	/* we only need to check for this if we did an attack_checks()
 	* and it returned non-0 (it's okay to attack), and the monster didn't
 	* evade.
 	*/
@@ -485,170 +282,6 @@ atk_done:
 		map_invisible(u.ux + u.dx, u.uy + u.dy);
 
 	return(TRUE);
-}
-
-/* badtouch()
- * returns TRUE if [attk] will touch [mdef]
- */
-boolean
-badtouch(magr, mdef, attk, weapon)
-struct monst * magr;
-struct monst * mdef;
-struct attack * attk;
-struct obj * weapon;
-{
-	long slot = attk_protection(attk->aatyp);
-	boolean youagr = (magr == &youmonst);
-
-	if (/* not using a weapon -- assumes weapons will only be passed if making a weapon attack */
-		(!weapon)
-		&&
-		/* slots aren't covered */
-		(!slot || (slot != ~0L) && (
-		/* player */
-		(youagr && (
-		((slot & W_ARM) && !uarm) ||
-		((slot & W_ARMC) && !uarmc) ||
-		((slot & W_ARMH) && !uarmh) ||
-		((slot & W_ARMS) && !uarms) ||
-		((slot & W_ARMG) && !uarmg) ||
-		((slot & W_ARMF) && !uarmf) ||
-		((slot & W_ARMU) && !uarmu)))
-		||
-		/* monster */
-		(!youagr && (slot & ~(magr->misc_worn_check)))
-		))
-		/* not a damage type that doesn't actually contact */
-		&& !(
-		attk->adtyp == AD_SHDW ||
-		attk->adtyp == AD_BLUD ||
-		attk->adtyp == AD_MERC ||
-		attk->adtyp == AD_STAR
-		)
-		)
-		return TRUE;	// will touch
-
-	/* else won't touch */
-	return FALSE;
-}
-
-/* safe_attack()
- * 
- * returns FALSE if [attk] will result in death for [magr]
- * due to:
- *  - cockatrice stoning
- *  - eating a fatal corpse
- */
-boolean
-safe_attack(magr, mdef, attk, weapon, pa, pd)
-struct monst * magr;
-struct monst * mdef;
-struct attack * attk;
-struct obj * weapon;
-struct permonst * pa;
-struct permonst * pd;
-{
-	long slot = attk_protection(attk->aatyp);
-	boolean youagr = (magr == &youmonst);
-
-	/* if there is no defender, it's safe */
-	if (!mdef)
-		return TRUE;
-
-	/* Touching is fatal */
-	if (touch_petrifies(pd) && !(Stone_res(magr))
-		&& badtouch(magr, mdef, attk, weapon)
-		)
-		return FALSE;	// don't attack
-
-	/* consuming the defender is fatal */
-	if ((is_deadly(pd) || 
-		((pd == &mons[PM_GREEN_SLIME] || pd == &mons[PM_FLUX_SLIME]) &&
-			!(Change_res(magr)
-			|| pa == &mons[PM_GREEN_SLIME]
-			|| pa == &mons[PM_FLUX_SLIME]
-			|| is_rider(pa)
-			|| resists_poly(pa)))
-		) && (
-		((attk->aatyp == AT_BITE || attk->aatyp == AT_LNCK || attk->aatyp == AT_5SBT) && is_vampire(pa)) ||
-		(attk->aatyp == AT_ENGL && attk->adtyp == AD_DGST)
-		))
-		return FALSE;	// don't attack
-
-	/* otherwise, it is safe(ish) to attack */
-	return TRUE;
-}
-
-/* madness_cant_attack()
- * 
- * returns TRUE if because of the player's madness, they cannot attack mon.
- */
-boolean
-madness_cant_attack(mon)
-struct monst * mon;
-{
-	if (mon->female && humanoid_torso(mon->data) && roll_madness(MAD_SANCTITY)){
-		You("can't bring yourself to strike %s!", mon_nam(mon));
-		return TRUE;
-	}
-
-	if ((mon->data->mlet == S_SNAKE
-		|| mon->data->mlet == S_NAGA
-		|| mon->data == &mons[PM_COUATL]
-		|| mon->data == &mons[PM_LILLEND]
-		|| mon->data == &mons[PM_MEDUSA]
-		|| mon->data == &mons[PM_MARILITH]
-		|| mon->data == &mons[PM_MAMMON]
-		|| mon->data == &mons[PM_SHAKTARI]
-		|| mon->data == &mons[PM_DEMOGORGON]
-		|| mon->data == &mons[PM_GIANT_EEL]
-		|| mon->data == &mons[PM_ELECTRIC_EEL]
-		|| mon->data == &mons[PM_KRAKEN]
-		|| mon->data == &mons[PM_SALAMANDER]
-		|| mon->data == &mons[PM_KARY__THE_FIEND_OF_FIRE]
-		|| mon->data == &mons[PM_CATHEZAR]
-		) && roll_madness(MAD_OPHIDIOPHOBIA)){
-		pline("You're afraid to go near that horrid serpent!");
-		return TRUE;
-	}
-
-	if ((is_insectoid(mon->data) || is_arachnid(mon->data)) && roll_madness(MAD_ENTOMOPHOBIA)){
-		pline("You're afraid to go near that frightful bug!");
-		return TRUE;
-	}
-
-	if ((is_spider(mon->data)
-		|| mon->data == &mons[PM_SPROW]
-		|| mon->data == &mons[PM_DRIDER]
-		|| mon->data == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
-		|| mon->data == &mons[PM_AVATAR_OF_LOLTH]
-		) && roll_madness(MAD_ARACHNOPHOBIA)){
-		pline("You're afraid to go near that terrifying spider!");
-		return TRUE;
-	}
-
-	if (mon->female && humanoid_upperbody(mon->data) && roll_madness(MAD_ARACHNOPHOBIA)){
-		You("can't bring yourself to strike %s!", mon_nam(mon));
-		return TRUE;
-	}
-
-	if (is_aquatic(mon->data) && roll_madness(MAD_THALASSOPHOBIA)){
-		pline("You're afraid to go near that sea monster!");
-		return TRUE;
-	}
-
-	if (u.umadness&MAD_PARANOIA && u.usanity < rnd(100)){
-		You("attack %s's hallucinatory twin!", mon_nam(mon));
-		return TRUE;
-	}
-
-	if ((mon->data->mlet == S_WORM
-		|| attacktype(mon->data, AT_TENT)
-		) && roll_madness(MAD_HELMINTHOPHOBIA)){
-		pline("You're afraid to go near that wormy thing!");
-		return TRUE;
-	}
-	return FALSE;
 }
 
 /* xattacky()
@@ -2809,6 +2442,9 @@ int vis;
 	boolean youdef = (mdef == &youmonst);
 	struct obj *obj = (struct obj *)0;
 
+	if (vis == -1)
+		vis = getvis(magr, mdef, 0, 0);
+
 	static int mboots1 = 0;
 	if (!mboots1) mboots1 = find_mboots();
 
@@ -2888,357 +2524,6 @@ int amnt;
 		flags.botl = 1;
 	return;
 }
-/* obj_silver_searing()
- *
- * returns TRUE if object sears silver-haters
- * 
- * This includes only silver items, not jade
- */
-boolean
-obj_silver_searing(obj)
-struct obj * obj;
-{
-	if (!obj)
-		return FALSE;
-
-	if (is_lightsaber(obj) && litsaber(obj))
-		return FALSE;
-
-	if ((obj->obj_material == SILVER) ||
-		(obj->oclass == RING_CLASS && obj->ohaluengr
-		&& (isEngrRing(obj->otyp) || isSignetRing(obj->otyp))
-		&& obj->oward >= LOLTH_SYMBOL && obj->oward <= LOST_HOUSE) ||
-		(arti_silvered(obj)) ||
-		(obj->otyp == SHURIKEN && !flags.mon_moving && uwep && uwep->oartifact == ART_SILVER_STARLIGHT)	// THIS IS BAD AND SHOULD BE DONE DIFFERENTLY
-		)
-		return TRUE;
-
-	return FALSE;
-}
-/* obj_jade_searing()
- *
- * returns TRUE if object sears silver-haters
- * 
- * This includes only jade items, not silver
- */
-boolean
-obj_jade_searing(obj)
-struct obj * obj;
-{
-	if (!obj)
-		return FALSE;
-
-	static short jadeRing = 0;
-	if (!jadeRing) jadeRing = find_jade_ring();
-
-	if (is_lightsaber(obj) && litsaber(obj))
-		return FALSE;
-
-	if (
-		(obj->oclass == RING_CLASS && obj->otyp == jadeRing) ||
-		(obj->obj_material == GEMSTONE && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj) && obj->ovar1 == JADE)
-		)
-		return TRUE;
-
-	return FALSE;
-}
-
-/* attk_equip_slot()
- * The offensive version of attk_protection() (from mhitm.c)
- * Returns equipment slot that would be hitting the defender
- *   ex) silver gloves make punches do silver-searing damage
- */
-long
-attk_equip_slot(aatyp)
-int aatyp;
-{
-	/* some worn armor may be involved depending on the attack type */
-	long slot = 0L;
-	switch (aatyp)
-	{
-		/* gloves */
-		/* caller needs to check for weapons */
-	case AT_CLAW:
-	case AT_HODS:
-	case AT_DEVA:
-	case AT_REND:
-	case AT_WEAP:
-	case AT_XWEP:
-	case AT_MARI:
-		slot = W_ARMG;
-		break;
-		/* boots */
-	case AT_KICK:
-		slot = W_ARMF;
-		break;
-		/* helm */
-	case AT_BUTT:
-		slot = W_ARMH;
-		break;
-	}
-	return slot;
-}
-
-
-/* hatesobjdmg()
- * 
- * Calculates a damage roll from [mdef] being seared by [otmp]
- * Counts silver, jade, iron, holy, unholy
- * Does not print messages
- * 
- */
-int
-hatesobjdmg(mdef, otmp)
-struct monst * mdef;
-struct obj * otmp;
-{
-	//boolean youagr = (magr == &youmonst);
-	boolean youdef = (mdef == &youmonst);
-	//struct permonst * pa = youagr ? youracedata : magr->data;
-	struct permonst * pd = youdef ? youracedata : mdef->data;
-
-	int diesize;
-	int ndice;
-
-	int dmg = 0;
-
-	if (!otmp || !mdef)
-		return 0;
-
-	if (hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)
-		&& (obj_silver_searing(otmp) || obj_jade_searing(otmp))) {
-		/* default: 1d20 */
-		ndice = 1;
-		diesize = 20;
-		/* special cases */
-		if (otmp->oartifact == ART_PEN_OF_THE_VOID && mvitals[PM_ACERERAK].died > 0)
-			ndice = 2;
-		else if (otmp->oartifact == ART_SILVER_STARLIGHT)
-			ndice = 2;
-		else if(otmp->otyp == KHAKKHARA)
-			ndice = rnd(3);
-		/* calculate */
-		dmg += d(ndice, diesize);
-	}
-	if (hates_iron(pd) &&
-		otmp->obj_material == IRON) {
-		/* default: 1d(XL) */
-		ndice = 1;
-		diesize = mlev(mdef);
-		/* special cases */
-		if (otmp->otyp == KHAKKHARA)
-			ndice = rnd(3);
-		/* calculate */
-		dmg += d(ndice, diesize);
-	}
-	if (hates_holy_mon(mdef) &&
-		otmp->blessed) {
-		/* default: 1d4 */
-		ndice = 1;
-		diesize = 4;
-		/* special cases that don't affect dice */
-		if (otmp->oartifact == ART_EXCALIBUR ||
-			otmp->oartifact == ART_LANCE_OF_LONGINUS)
-			dmg += d(3, 7);
-		else if (otmp->oartifact == ART_JINJA_NAGINATA)
-			dmg += d(1, 12);
-		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
-			dmg += d(1, 20);
-		else if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)
-			dmg += d(1, 10) + otmp->spe;
-		else if (otmp->oartifact == ART_VAMPIRE_KILLER)
-			dmg += 7;
-		/* special cases that do affect dice */
-		else if (otmp->oartifact == ART_AMHIMITL)
-			ndice = 3;
-		else if (otmp->otyp == KHAKKHARA)
-			ndice = rnd(3);
-		/* gold has a particular affinity to blessings and curses */
-		if (otmp->obj_material == GOLD) {
-			diesize = 20;
-		}
-		/* calculate dice */
-		dmg += d(ndice, diesize);
-	}
-	if (hates_unholy_mon(mdef) &&
-		is_unholy(otmp)) {
-		/* default: 1d9 */
-		ndice = 1;
-		diesize = 9;
-		/* special cases */
-		if (otmp->oartifact == ART_STORMBRINGER)
-			ndice = 4; //Extra unholy (4d9 vs excal's 3d7)
-		else if (otmp->oartifact == ART_LANCE_OF_LONGINUS)
-			ndice = 3;
-		else if (otmp->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO)
-		{	ndice = 0; dmg += 8; } // add directly; no dice rolled
-		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
-			diesize = 20;
-		else if (otmp->oartifact == ART_AMHIMITL)
-		{	ndice = 3; diesize = 4; }
-		else if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL) /* SCOPECREEP: add ART_TECPATL_OF_HUHETOTL to is_unholy() macro */
-		{	ndice = (otmp->cursed ? 4 : 2); diesize = 4; }
-		else if (otmp->otyp == KHAKKHARA)
-			ndice = rnd(3);
-		/* gold has a particular affinity to blessings and curses */
-		if (otmp->obj_material == GOLD) {
-			ndice *= 2;
-		}
-		/* calculate */
-		if (ndice)
-			dmg += d(ndice, diesize);
-	}
-
-	/* the Rod of Seven Parts gets a bonus vs holy and unholy when uncursed */
-	if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS
-		&& !otmp->blessed && !otmp->cursed
-		&& (hates_holy_mon(mdef) || hates_unholy_mon(mdef))
-		){
-		dmg += d(1, 10);
-	}
-
-	/* Glamdring sears orcs and demons */
-	if (otmp->oartifact == ART_GLAMDRING &&
-		(is_orc(pd) || is_demon(pd)))
-		dmg += rnd(20);
-
-	/* The Veioistafur stave hurts sea creatures */
-	if (otmp->obj_material == WOOD && otmp->otyp != MOON_AXE
-		&& (otmp->oward & WARD_VEIOISTAFUR) && pd->mlet == S_EEL) {
-		dmg += rnd(20);	
-	}
-
-	/* The Lifehunt Scythe is occult */
-	if (mdef && mdef->isminion){
-		if (otmp->oartifact == ART_LIFEHUNT_SCYTHE)
-			dmg += d(4, 4) + otmp->spe;
-	}
-
-	return dmg;
-}
-
-/* hits_insubstantial()
- * 
- * returns non-zero if [magr] attacking [mdef] with [attk] hits,
- * specifically in the case of [mdef] being insubstantial (as a shade)
- * 
- * returns 1 if the attack should only do on-hit-effects for damage
- * (like silver-hating)
- * 
- * returns 2 if the attack should do full damage
- * (like Sunsword)
- */
-int
-hits_insubstantial(magr, mdef, attk, weapon)
-struct monst * magr;
-struct monst * mdef;
-struct attack * attk;
-struct obj * weapon;
-{
-	boolean youagr = (magr == &youmonst);
-	boolean youdef = (mdef == &youmonst);
-	struct permonst * pa = (magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0);
-	struct permonst * pd = youdef ? youracedata : mdef->data;
-
-	/* if the defender isn't insubstantial, full damage */
-	if (!insubstantial(pd))
-		return 2;
-
-	/* Chupoclops makes all your attacks ethereal */
-	if (youagr && u.sealsActive&SEAL_CHUPOCLOPS)
-		return 2;
-
-	/* no weapon */
-	if (!weapon) {
-		/* some worn armor may be involved depending on the attack type */
-		struct obj * otmp;
-		long slot = attk_equip_slot(attk ? attk->aatyp : 0);
-		switch (magr ? slot : 0L)
-		{
-		case W_ARMG:
-			otmp = (youagr ? uarmg : which_armor(magr, slot));
-			break;
-		case W_ARMF:
-			otmp = (youagr ? uarmf : which_armor(magr, slot));
-			break;
-		case W_ARMH:
-			otmp = (youagr ? uarmh : which_armor(magr, slot));
-			break;
-		default:
-			otmp = (struct obj *)0;
-			break;
-		}
-		if (otmp && arti_shining(otmp))
-			return 2;
-
-		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
-			(attk && attk->adtyp == AD_STAR)
-			))
-			return 2;
-
-		if (has_blood_mon(mdef) &&
-			attk && attk->adtyp == AD_BLUD)
-			return 2;
-
-		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
-			(youagr && u.sealsActive&SEAL_EDEN) ||
-			(attk && attk->adtyp == AD_GLSS) ||
-			(magr && is_silver_mon(magr)) ||
-			obj_silver_searing(otmp) ||
-			(youagr && slot == W_ARMG && uright && obj_silver_searing(uright)) ||
-			(youagr && slot == W_ARMG && uleft && obj_silver_searing(uleft))
-			))
-			return 1;
-
-		if (hates_iron(pd) && (
-			(attk && attk->adtyp == AD_SIMURGH) ||
-			(magr && is_iron_mon(magr)) ||
-			(otmp && otmp->obj_material == IRON) ||
-			(youagr && slot == W_ARMG && uright && uright->obj_material == IRON) ||
-			(youagr && slot == W_ARMG && uleft && uleft->obj_material == IRON)
-			))
-			return 1;
-
-		if (hates_holy_mon(mdef) && (
-			(attk->adtyp == AD_ACFR) ||
-			(magr && is_holy_mon(magr)) ||
-			(otmp && otmp->blessed) ||
-			(youagr && slot == W_ARMG && uright && uright->blessed) ||
-			(youagr && slot == W_ARMG && uleft && uleft->blessed)
-			))
-			return 1;
-
-		if (hates_unholy_mon(mdef) && (
-			(magr && is_unholy_mon(magr)) ||
-			(otmp && is_unholy(otmp)) ||
-			(youagr && slot == W_ARMG && uright && is_unholy(uright)) ||
-			(youagr && slot == W_ARMG && uleft && is_unholy(uleft))
-			))
-			return 1;
-
-		return 0;
-	}
-	/* weapon */
-	else {
-		if (arti_shining(weapon))	/* why is this used for more things than artifacts? >_> */
-			return 2;
-
-		if (hatesobjdmg(mdef, weapon))
-			return 1;
-
-		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
-			weapon->otyp == MIRROR ||
-			weapon->otyp == POT_STARLIGHT
-			))
-			return 1;
-
-		if (is_undead_mon(mdef) && (
-			(weapon->otyp == CLOVE_OF_GARLIC)	/* causes shades to flee */
-			))
-			return 1;
-	}
-	return 0;
-}
 
 
 /* xdamagey()
@@ -3246,6 +2531,8 @@ struct obj * weapon;
  * Deals [dmg] damage to [mdef].
  *
  * Rewards [magr] as appropriate.
+ * 
+ * If called with killerset==TRUE, will use the currently set killer and killer_format if the player dies
  * 
  * Returns:
  * MM_HIT		0x01	(possible) aggressor hit defender (usually, except when defender lifesaved)
@@ -9866,6 +9153,11 @@ int vis;
 	boolean needs_uncancelled = TRUE;	/* when TRUE, attack cannot happen when cancelled */
 	boolean maybe_not = (!youagr);		/* when TRUE, occasionally doesn't use gaze attack at all */
 
+	static const int randomgazeattacks[] = { AD_DEAD, AD_CNCL, AD_PLYS, AD_DRLI, AD_ENCH, AD_STON, AD_LUCK,
+		AD_CONF, AD_SLOW, AD_STUN, AD_BLND, AD_FIRE, AD_FIRE,
+		AD_COLD, AD_COLD, AD_ELEC, AD_ELEC, AD_HALU, AD_SLEE };
+	static const int elementalgazeattacks[] = { AD_FIRE, AD_COLD, AD_ELEC };
+
 	char buf[BUFSZ];
 	struct attack alt_attk;
 
@@ -9888,11 +9180,11 @@ int vis;
 	switch (adtyp)
 	{
 	case AD_RGAZ:
-		adtyp = randomgaze();
+		adtyp = randomgazeattacks[rn2(SIZE(randomgazeattacks))];
 		break;
 	case AD_RBRE:
 	case AD_RETR:
-		adtyp = elementalgaze();
+		adtyp = elementalgazeattacks[rn2(SIZE(elementalgazeattacks))];
 		break;
 	case AD_WISD:
 		if (!youdef)
@@ -11675,9 +10967,38 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			(weapon->oartifact == ART_ROD_OF_SEVEN_PARTS) ||
 			(weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_BERITH)
 			) &&
-			mdef != u.ustuck)
+			mdef != u.ustuck &&
+			!Fumbling &&
+			!Stunned &&
+			(weapon == uwep || (weapon == uswapwep && u.twoweap)))
 		{
-			jousting = joust(mdef, weapon);
+			/* if using two weapons, use worse of lance and two-weapon skills */
+			jousting = 0;
+			int joust_dieroll;
+			int skill_rating = P_SKILL(weapon_type(weapon));	/* lance skill */
+			if (u.twoweap && P_SKILL(P_TWO_WEAPON_COMBAT) < skill_rating)
+				skill_rating = P_SKILL(P_TWO_WEAPON_COMBAT);
+			if (skill_rating == P_ISRESTRICTED)
+				skill_rating = P_UNSKILLED; /* 0=>1 */
+
+			/* odds to joust are expert:80%, skilled:60%, basic:40%, unskilled:20% */
+			if ((joust_dieroll = rn2(5)) < skill_rating) {
+				if (!unsolid(pd) && !obj_resists(weapon, 0, 100)){
+					if (weapon->otyp == DROVEN_LANCE && rnl(40) == (40 - 1))
+						jousting = -1;	/* hit that breaks lance */
+					else if (joust_dieroll == 0){ /* Droven lances are especially brittle */
+						if (weapon->otyp == ELVEN_LANCE && rnl(75) == (75 - 1))
+							jousting = -1;	/* hit that breaks lance */
+						else if (rnl(50) == (50 - 1))
+							jousting = -1;	/* hit that breaks lance */
+					}
+				}
+				if (jousting != -1)
+					jousting = 1;	/* successful joust */
+			}
+			else {
+				jousting = 0;	/* did not joust */
+			}
 			/* exercise skill even for minimal damage hits */
 			if (jousting) valid_weapon_attack = TRUE;
 		}
@@ -15351,37 +14672,4 @@ struct monst * mdef;
 	int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 	return xmeleehity(&youmonst, mdef, &basicattack, uwep, vis, 0, TRUE);
-}
-/* beastmastery()
- * mountedCombat()
- *
- * returns the accuracy bonus a pet/mount gets from the player's skill
- */
-STATIC_OVL int
-beastmastery()
-{
-	int bm;
-	switch (P_SKILL(P_BEAST_MASTERY)) {
-	case P_ISRESTRICTED: bm = 0; break;
-	case P_UNSKILLED:    bm = 0; break;
-	case P_BASIC:        bm = 2; break;
-	case P_SKILLED:      bm = 5; break;
-	case P_EXPERT:       bm = 10; break;
-	}
-	if ((uwep && uwep->oartifact == ART_CLARENT) || (uswapwep && uswapwep->oartifact == ART_CLARENT))
-		bm *= 2;
-	return bm;
-}
-STATIC_OVL int
-mountedCombat()
-{
-	int bm;
-	switch (P_SKILL(P_RIDING)) {
-	case P_ISRESTRICTED: bm = 0; break;
-	case P_UNSKILLED:    bm = 0; break;
-	case P_BASIC:        bm = 2; break;
-	case P_SKILLED:      bm = 5; break;
-	case P_EXPERT:       bm = 10; break;
-	}
-	return bm;
 }

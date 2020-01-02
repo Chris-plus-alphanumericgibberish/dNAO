@@ -82,7 +82,7 @@ register xchar x, y;
 
 	bhitpos.x = x;
 	bhitpos.y = y;
-	if (!attack_checks2(mon, (struct obj *)0)) return;
+	if (!attack_checks(mon, (struct obj *)0)) return;
 	setmangry(mon);
 
 	/* Kick attacks by kicking monsters are normal attacks, not special.
