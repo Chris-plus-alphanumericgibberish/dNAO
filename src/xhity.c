@@ -23,7 +23,6 @@ STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL void FDECL(heal, (struct monst *, int));
-
 STATIC_DCL int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
@@ -71,7 +70,7 @@ int tary;
 		tary = y(mdef);
 	}
 
-	if (youagr || youdef || (cansee(x(magr), y(magr)) && cansee(tarx, tary)))
+	if (youagr || youdef || cansee(x(magr), y(magr)) || cansee(tarx, tary))
 	{
 		if (youagr || (cansee(x(magr), y(magr)) && canseemon(magr)))
 			vis |= VIS_MAGR;
@@ -2319,10 +2318,10 @@ struct attack *attk;
 			if (!verb) {
 				if ((attk->adtyp == AD_SHDW) || (attk->adtyp == AD_STAR) || (attk->adtyp == AD_BLUD)) {
 					verb = "slash";
-					ending = (attk->adtyp == AD_SHDW) ? "with bladed shadows!" :
-						(attk->adtyp == AD_STAR) ? "with a starlight rapier!" :
-						(attk->adtyp == AD_MERC) ? "with a blade of mercury!" :
-						(attk->adtyp == AD_BLUD) ? "with a blade of blood!" : "!";
+					ending = (attk->adtyp == AD_SHDW) ? " with bladed shadows!" :
+						(attk->adtyp == AD_STAR) ? " with a starlight rapier!" :
+						(attk->adtyp == AD_MERC) ? " with a blade of mercury!" :
+						(attk->adtyp == AD_BLUD) ? " with a blade of blood!" : "!";
 				}
 				else {
 					verb = "touch";
@@ -7841,6 +7840,7 @@ int vis;
 					if (youdef && foundyou)
 						nomul(0, NULL);
 					/* do the zap */
+					/* FIXME: this prints a message even if you can't see magr or mdef */
 					buzz(type, SPBOOK_CLASS, FALSE, dmn,
 						x(magr), y(magr), dx, dy, 0, 0);
 					/* figure out who died */
