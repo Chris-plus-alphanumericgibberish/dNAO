@@ -12,7 +12,7 @@ STATIC_DCL boolean FDECL(hitum, (struct monst *,int,struct attack *));
 STATIC_DCL boolean FDECL(hmon_hitmon, (struct monst *,struct obj *,int));
 #ifdef STEED
 #endif
-void NDECL(demonpet);
+extern void NDECL(demonpet);
 STATIC_DCL boolean FDECL(m_slips_free, (struct monst *mtmp,struct attack *mattk));
 STATIC_DCL int FDECL(explum, (struct monst *,struct attack *));
 STATIC_DCL void FDECL(start_engulf, (struct monst *));
@@ -2911,7 +2911,7 @@ struct obj *obj;	/* weapon */
  * (DR4 and DR4.5) screws up with an internal error 5 "Expression Too Complex."
  * Pulling it out makes it work.
  */
-void
+extern void
 demonpet()
 {
 	int i;

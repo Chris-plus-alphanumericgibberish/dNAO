@@ -7,16 +7,8 @@
 /* TODO LIST
 
 MAJOR:
-bugfix: recheck range before every attack
-monsters targeting your steed (and your steed counterattacking)
-invlunerability
-demon gating (u, m)
-lycanthrope summoning
-"active_glyph"s
-replace thitu everywhere
 
 MINOR:
-set notonhead as required
 artifact hitmesages
 Claws of the Revenancer w/ rings
 */
@@ -56,6 +48,11 @@ STATIC_DCL int NDECL(mountedCombat);
 
 /* item destruction strings from zap.c */
 extern const char * const destroy_strings[];
+
+/* for long worms */
+extern boolean notonhead;
+
+extern void NDECL(demonpet);
 
 /* Counterattack chance at skill level....  B:  S:  E:  */
 static const int DjemSo_counterattack[] = {  5, 10, 20 };
@@ -419,9 +416,12 @@ struct monst * mdef;
 		/* assumes the bloodthirst is caused by your mainhand weapon */
 		Your("bloodthirsty weapon attacks!");
 		bhitpos.x = u.ux + u.dx; bhitpos.y = u.uy + u.dy;
+		notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 		result = xmeleehity(&youmonst, mdef, &basicattack, uwep, VIS_MAGR, 0, FALSE);
 	}
 	else {
+		bhitpos.x = u.ux + u.dx; bhitpos.y = u.uy + u.dy;
+		notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 		result = xattacky(&youmonst, mdef, u.ux + u.dx, u.uy + u.dy);
 
 		if (!DEADMONSTER(mdef) && u.sealsActive&SEAL_SHIRO){
@@ -717,6 +717,10 @@ int tary;
 	int result = 0;		/* result from current attack */
 	int allres = 0;		/* cumulative results from all attacks; needed for passives */
 	long slot;
+
+	/* set notonhead */
+	notonhead = (tarx != x(mdef) || tary != y(mdef));
+
 	/*
 	* Since some characters attack multiple times in one turn,
 	* allow user to specify a count prefix for 'F' to limit
@@ -736,6 +740,21 @@ int tary;
 	}
 
 	/* cases where the agressor cannot make any attacks at all */
+	/* player is invincible*/
+	if(youdef && (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
+	    /* monsters won't attack you */
+	    if(magr == u.ustuck)
+			pline("%s loosens its grip slightly.", Monnam(magr));
+	    else if(!ranged) {
+		if (canseemon(magr) || sensemon(magr))
+		    pline("%s starts to attack you, but pulls back.",
+			  Monnam(magr));
+		else
+		    You_feel("%s move nearby.", something);
+	    }
+	    return MM_MISS;
+	}
+
 	/* agr can't attack */
 	if (cantmove(magr))
 		return MM_MISS;
@@ -796,6 +815,103 @@ int tary;
 			return MM_MISS;	/* they can't attack this turn */
 	}
 
+	/*	Special demon/minion handling code */
+	if (youdef && !magr->cham && (is_demon(pa) || is_minion(pa)) && !ranged
+		&& pa != &mons[PM_OONA]
+		&& pa != &mons[PM_BALROG]
+		&& pa != &mons[PM_DURIN_S_BANE]
+		&& pa != &mons[PM_SUCCUBUS]
+		&& pa != &mons[PM_INCUBUS]
+		) {
+		if (!magr->mcan && !rn2(13))
+			msummon(magr);
+		return MM_MISS;
+	}
+	if (youagr && is_demon(youracedata) && !rn2(13) && !uwep
+		&& u.umonnum != PM_SUCCUBUS
+		&& u.umonnum != PM_INCUBUS
+		&& u.umonnum != PM_BALROG) {
+	    demonpet();
+		return MM_MISS;
+	}
+	/*	Special lycanthrope handling code */
+	if(youdef && !magr->cham && is_were(pa) && !ranged) {
+
+	    if(is_human(pa)) {
+			if(!rn2(5 - (night() * 2)) && !magr->mcan) new_were(magr);
+	    } else if(!rn2(30) && !magr->mcan) new_were(magr);
+	    pa = magr->data;
+
+	    if(!rn2(10) && !magr->mcan) {
+	    	int numseen, numhelp;
+		char buf[BUFSZ], genericwere[BUFSZ];
+
+		Strcpy(genericwere, "creature");
+		numhelp = were_summon(pa, FALSE, &numseen, genericwere);
+		if (vis&VIS_MAGR) {
+			pline("%s summons help!", Monnam(magr));
+			if (numhelp > 0) {
+			    if (numseen == 0)
+				You_feel("hemmed in.");
+			} else pline("But none comes.");
+		} else {
+			const char *from_nowhere;
+
+			if (flags.soundok) {
+				pline("%s %s!", Something,
+					makeplural(growl_sound(magr)));
+				from_nowhere = "";
+			} else from_nowhere = " from nowhere";
+			if (numhelp > 0) {
+			    if (numseen < 1) You_feel("hemmed in.");
+			    else {
+				if (numseen == 1)
+			    		Sprintf(buf, "%s appears",
+							an(genericwere));
+			    	else
+			    		Sprintf(buf, "%s appear",
+							makeplural(genericwere));
+				pline("%s%s!", upstart(buf), from_nowhere);
+			    }
+				/* help came, that was their action */
+				return MM_MISS;
+			} /* else no help came; but you didn't know it tried */
+		}
+	    }
+	}
+	if (uarmg) {
+		/* monsters may target your steed */
+		if (youdef && u.usteed && !missedyou) {
+			if (magr == u.usteed)
+				/* Your steed won't attack you */
+				return MM_MISS;
+			/* Orcs like to steal and eat horses and the like */
+			if (!rn2(is_orc(magr->data) ? 2 : 4) &&
+				distu(x(magr), y(magr)) <= 2) {
+				/* Attack your steed instead */
+				result = xattacky(magr, u.usteed, u.ux, u.uy);
+				if (result != MM_MISS) {	/* needs to have made at least 1 attack */
+					if (result & MM_AGR_DIED)
+						return MM_AGR_DIED;
+					if ((result & MM_DEF_DIED) || u.umoved)
+						return MM_AGR_STOP;
+					/* Let your steed maybe retaliate */
+					if (u.usteed->movement >= NORMAL_SPEED) {
+						int res2 = xattacky(u.usteed, magr, x(magr), y(magr));
+						if (res2) {
+							if (res2 & MM_DEF_DIED)
+								result |= MM_AGR_DIED;
+							if (res2 & MM_AGR_DIED)
+								result |= MM_AGR_STOP;
+							u.usteed->movement -= NORMAL_SPEED;
+						}
+					}
+				}
+				return result;
+			}
+		}
+	}
+
 	/* lillends (that aren't you) can use masks */
 	if (pa == &mons[PM_LILLEND]
 		&& !youagr
@@ -829,6 +945,12 @@ int tary;
 		/* set aatyp, adtyp */
 		aatyp = attk->aatyp;
 		adtyp = attk->adtyp;
+		/* maybe end (mdef may have been forcibly moved!)*/
+		if (((youdef || mdef==u.usteed) && !missedyou && (tarx != u.ux || tary != u.uy)) ||
+			(!(youdef || mdef == u.usteed) && m_at(tarx, tary) != mdef)) {
+			result = MM_AGR_STOP;
+			continue;
+		}
 		
 		/* if you are the target and are engulfed, you are only targettable by engulf attacks */
 		if (youdef && u.uswallow && (aatyp != AT_ENGL && aatyp != AT_ILUR))
@@ -1096,9 +1218,7 @@ int tary;
 
 			/* engulfing attacks */
 		case AT_ENGL:
-		case AT_ILUR:	// should be rolled into AT_ENGL by changing Illurien
-						// does a sticky hit if not stuck to you, otherwise engulfs
-						// give her AT_ENGL AD_ILUR, AT_CLAW AD_STCK; and in getattk leave out the AT_ENGL if she isn't stuck to something
+		case AT_ILUR:	/* deprecated */
 			/* don't make self-fatal attacks */
 			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
 				continue;
@@ -1337,7 +1457,10 @@ int tary;
 	if (!youagr && pa == &mons[PM_LILLEND])
 		magr->mvar2 = 0;
 
-	return result;
+	if (attacksmade > 0)
+		allres |= MM_HIT;		/* signifies that the attack action was indeed taken, even if no attacks hit */
+
+	return allres;
 }// xattacky
 
 /*
@@ -11522,6 +11645,19 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		if (weapon && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_ANDROMALIUS && (mvitals[PM_ACERERAK].died > 0))
 			sneak_dice++;
 
+		/* some of the player's glyphs proc on sneak attacks */
+		if (youagr) {
+			if (active_glyph(CLAWMARK))
+				snekdie = snekdie * 13 / 10;
+			if (active_glyph(BLOOD_RAPTURE))
+				heal(&youmonst, 30);
+			if (active_glyph(WRITHE)){
+				u.uen += 30;
+				if (u.uen > u.uenmax)
+					u.uen = u.uenmax;
+			}
+		}
+
 		/* calculate snekdmg */
 		snekdmg = d(sneak_dice, snekdie);
 	}
@@ -12682,6 +12818,9 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	if (valid_weapon_attack || unarmed_punch || unarmed_kick)
 	{
 		int returnvalue = 0;
+		/* use guidance glyph */
+		if (youagr && !thrown && active_glyph(GUIDANCE))
+			doguidance(mdef, basedmg);
 		/* hits with a valid weapon proc effects of the weapon */
 		if (valid_weapon_attack) {
 			otmp = weapon;
@@ -15210,6 +15349,7 @@ u_pole_pound(mdef)
 struct monst * mdef;
 {
 	int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 	return xmeleehity(&youmonst, mdef, &basicattack, uwep, vis, 0, TRUE);
 }
 /* beastmastery()
