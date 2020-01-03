@@ -2,6 +2,8 @@ GAMEDIR = dnethackdir
 
 CFLAGS = -g
 
+LDFLAGS += -no-pie
+
 GAMELIBS = -lncurses -lm
 
 -include local.mk
@@ -36,17 +38,18 @@ SRCOBJ = allmain.o alloc.o apply.o artifact.o attrib.o ball.o bones.o	\
          do.o do_name.o do_wear.o dog.o dogmove.o dokick.o dothrow.o	\
          drawing.o dungeon.o eat.o end.o engrave.o exper.o explode.o	\
          extralev.o files.o fountain.o hack.o hacklib.o invent.o	\
-         light.o lock.o mail.o makemon.o mapglyph.o mcastu.o mhitm.o	\
-         mhitu.o minion.o mklev.o mkmap.o mkmaze.o mkobj.o mkroom.o	\
+         light.o lock.o mail.o makemon.o mapglyph.o mcastu.o 		\
+         minion.o mklev.o mkmap.o mkmaze.o mkobj.o mkroom.o		\
          mon.o mondata.o monmove.o monst.o monstr.o mplayer.o		\
          mthrowu.o muse.o music.o o_init.o objects.o objnam.o		\
          options.o pager.o pickup.o pline.o polyself.o potion.o		\
-         pray.o priest.o quest.o questpgr.o read.o recover.o rect.o	\
-         region.o restore.o rip.o rnd.o role.o rumors.o save.o shk.o	\
-         shknam.o sit.o sounds.o sp_lev.o spell.o steal.o steed.o	\
-         teleport.o tile.o timeout.o topten.o track.o trap.o u_init.o	\
-         uhitm.o unicode.o vault.o version.o vision.o weapon.o were.o	\
-         wield.o windows.o wizard.o worm.o worn.o write.o zap.o
+         pray.o priest.o projectile.o quest.o questpgr.o read.o 	\
+         recover.o rect.o region.o restore.o rip.o rnd.o role.o 	\
+         rumors.o save.o seduce.o shk.o shknam.o sit.o sounds.o 	\
+         sp_lev.o spell.o steal.o steed.o teleport.o tile.o timeout.o	\
+         topten.o track.o trap.o u_init.o unicode.o vault.o 		\
+         version.o vision.o weapon.o were.o wield.o windows.o 		\
+         wizard.o worm.o worn.o write.o xhity.o xhityhelpers.o zap.o 
 SYSUNIXOBJ = unixmain.o unixres.o unixunix.o
 SYSSHAREOBJ = ioctl.o unixtty.o
 WINTTYOBJ = getline.o termcap.o topl.o wintty.o
