@@ -12553,7 +12553,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		static long lastwarning = 0;
 
 		if (lastwarning < moves) {
-			if (warnedotyp != (otmp ? otmp->otyp : 0) || warnedptr != pd) {
+			if (warnedotyp != (weapon ? weapon->otyp : 0) || warnedptr != pd) {
 				lastwarning = moves;
 				/* warn the player that their attacks are futile */
 				if (resisted_weapon_attacks || resisted_attack_type) {
@@ -12563,8 +12563,8 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 					}
 					else if (valid_weapon_attack || invalid_weapon_attack) {
 						pline("%s %s ineffective against %s.",
-							The(xname(otmp)),
-							(otmp->quan > 1L ? "are" : "is"),
+							The(xname(weapon)),
+							(weapon->quan > 1L ? "are" : "is"),
 							mon_nam(mdef)
 							);
 					}
@@ -12580,7 +12580,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 							mon_nam(mdef)
 							);
 					}
-					warnedotyp = (otmp ? otmp->otyp : 0);
+					warnedotyp = (weapon ? weapon->otyp : 0);
 					warnedptr = pd;
 				}
 				else {
