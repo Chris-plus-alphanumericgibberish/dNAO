@@ -2970,6 +2970,15 @@ int flat_acc;
 				bons_acc += 7;
 			if (pa == &mons[PM_CHOKHMAH_SEPHIRAH])
 				bons_acc += u.chokhmah;
+			/* simulate accuracy from stat bonuses from gloves */
+			if (otmp = which_armor(magr, W_ARMG)) {
+				if (otmp->oartifact == ART_PREMIUM_HEART)
+					bons_acc += 14;
+				else if (otmp->otyp == GAUNTLETS_OF_DEXTERITY)
+					bons_acc += otmp->spe;
+				else if (otmp->otyp == GAUNTLETS_OF_POWER)
+					bons_acc += 3;
+			}
 			/* Your steed gets a skill-based boost */
 			if (magr == u.usteed)
 				bons_acc += mountedCombat();
@@ -3000,6 +3009,20 @@ int flat_acc;
 				rang_acc += dist_penalty;
 			else
 				rang_acc -= dist_penalty;
+
+			/* elves are especially accurate with bows, as are samurai */
+			if ((launcher && objects[launcher->otyp].oc_skill == P_BOW) && 
+				(youagr ?
+					((Race_if(PM_ELF) || Role_if(PM_SAMURAI)) && (!Upolyd || your_race(youmonst.data))) :
+					(is_elf(pa) || pa == &mons[PM_SAMURAI]))
+				)
+			{
+				rang_acc++;
+				/* even more so with their special bow */
+				if (((youagr ? (Race_if(PM_ELF)) : is_elf(pa)) && launcher->otyp == ELVEN_BOW) ||
+					((youagr ? Role_if(PM_SAMURAI) : pa == &mons[PM_SAMURAI]) && launcher->otyp == YUMI))
+					rang_acc++;
+			}
 		}
 
 		/* gloves are a hinderance to proper use of bows */
@@ -12022,26 +12045,46 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		if (youagr && unarmed_punch && u.specialSealsActive&SEAL_DAHLVER_NAR) {
 			bonsdmg += d(2, 6) + min(u.ulevel / 2, (u.uhpmax - u.uhp) / 10);
 		}
-		/* general damage bonus -- player attacks only */
-		if (youagr && real_attack && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick)) {
+		/* general damage bonus -- valid attacks only */
+		if (real_attack && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick)) {
 			int bon_damage = 0;
 
-			bon_damage += u.udaminc;
-			bon_damage += aeshbon();
-			/* If you throw using a propellor, you don't get a strength
-			* bonus but you do get an increase-damage bonus.
-			*/
-			if (!thrown)
-				bon_damage += dbon(weapon);
-			else{ //thrown
-				if (!fired)
-					bon_damage += dbon(weapon); // thrown by hand, get strength bonus
-				else if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-					bon_damage += dbon(launcher); // fired by a sling, get strength bonus
-				else if (launcher && launcher->otyp == ATLATL)
-					bon_damage += dbon(launcher) * 2; // fired by an atlatl, get 2x strength bonus
-				//else no bonus
+			if (youagr) {
+				bon_damage += u.udaminc;
+				bon_damage += aeshbon();
+				/* If you throw using a propellor, you don't get a strength
+				* bonus but you do get an increase-damage bonus.
+				*/
+				if (!thrown)
+					bon_damage += dbon(weapon);
+				else{ //thrown
+					if (!fired)
+						bon_damage += dbon(weapon); // thrown by hand, get strength bonus
+					else if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
+						bon_damage += dbon(launcher); // fired by a sling, get strength bonus
+					else if (launcher && launcher->otyp == ATLATL)
+						bon_damage += dbon(launcher) * 2; // fired by an atlatl, get 2x strength bonus
+					//else no bonus
+				}
 			}
+			else {
+				/* monsters very awkwardly simulate bonus damage from stat-boosting items */
+				if ((!fired || (launcher && (objects[launcher->otyp].oc_skill == P_SLING) || launcher->otyp == ATLATL)) &&
+					((otmp = which_armor(magr, W_ARMG) && otmp->otyp == GAUNTLETS_OF_POWER) ||
+					((otmp = MON_WEP(magr)) && (otmp->oartifact == ART_STORMBRINGER || otmp->oartifact == ART_OGRESMASHER)))
+					){
+					bon_damage += 8;
+					if (weapon && bimanual(weapon, pa))
+						bon_damage += 4;
+				}
+			}
+
+			/* shared: elves get +1 damage shooting elven arrows */
+			if (fired && weapon && launcher && weapon->otyp == ELVEN_ARROW && launcher->otyp == ELVEN_BOW &&
+				(youagr ? Race_if(PM_ELF) : is_elf(pa))) {
+				bon_damage++;
+			}
+
 			bonsdmg += bon_damage;
 		}
 		/* skill damage bonus */
