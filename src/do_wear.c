@@ -3646,7 +3646,7 @@ register schar delta;
 	if (uarmc && uarmc == otmp) {
 		if(otmp->otyp == SMOKY_VIOLET_FACELESS_ROBE){
 			if (delta) {
-				makeknown(uarmh->otyp);
+				makeknown(uarmc->otyp);
 				ABON(A_CON) += (delta);
 				ABON(A_CHA) += (delta);
 				flags.botl = 1;
