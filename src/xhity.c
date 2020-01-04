@@ -12067,10 +12067,10 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 					//else no bonus
 				}
 			}
-			else {
+			else if (magr) {
 				/* monsters very awkwardly simulate bonus damage from stat-boosting items */
 				if ((!fired || (launcher && (objects[launcher->otyp].oc_skill == P_SLING) || launcher->otyp == ATLATL)) &&
-					((otmp = which_armor(magr, W_ARMG) && otmp->otyp == GAUNTLETS_OF_POWER) ||
+					(((otmp = which_armor(magr, W_ARMG)) && otmp->otyp == GAUNTLETS_OF_POWER) ||
 					((otmp = MON_WEP(magr)) && (otmp->oartifact == ART_STORMBRINGER || otmp->oartifact == ART_OGRESMASHER)))
 					){
 					bon_damage += 8;
@@ -12080,7 +12080,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 			}
 
 			/* shared: elves get +1 damage shooting elven arrows */
-			if (fired && weapon && launcher && weapon->otyp == ELVEN_ARROW && launcher->otyp == ELVEN_BOW &&
+			if (magr && fired && weapon && launcher && weapon->otyp == ELVEN_ARROW && launcher->otyp == ELVEN_BOW &&
 				(youagr ? Race_if(PM_ELF) : is_elf(pa))) {
 				bon_damage++;
 			}
