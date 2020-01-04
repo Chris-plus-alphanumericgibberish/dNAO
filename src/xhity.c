@@ -12806,7 +12806,10 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		}
 
 		/* gloves/boots/helmet -- assumes only one of the three will be used. */
-		slot = attk_equip_slot(attk ? attk->aatyp : 0L);
+		if (magr && attk && !weapon)
+			slot = attk_equip_slot(attk->aatyp);
+		else
+			slot = 0L;
 		switch (slot)
 		{
 		case W_ARMG:
