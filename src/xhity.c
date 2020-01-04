@@ -32,7 +32,7 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
+STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *, boolean));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 
@@ -3754,13 +3754,13 @@ boolean ranged;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, (weapon && ranged), 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone);
+		result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, (weapon && ranged), 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone, FALSE);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, (weapon && ranged), 0, 0, FALSE, dieroll, TRUE, vis, &wepgone);
+				result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, (weapon && ranged), 0, 0, FALSE, dieroll, TRUE, vis, &wepgone, FALSE);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -5161,7 +5161,10 @@ boolean ranged;
 							);
 					}
 					/* kill */
-					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, FALSE);
+					Sprintf(buf, "decapitated by %s", mon_nam(magr));
+					killer = buf;
+					killer_format = NO_KILLER_PREFIX;
+					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, TRUE);
 				}
 				else {
 					/* destroy the helmet */
@@ -5294,7 +5297,9 @@ boolean ranged;
 							);
 					}
 					/* kill */
-					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, FALSE);
+					killer = "ripped apart by Demogorgon";
+					killer_format = NO_KILLER_PREFIX;
+					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, TRUE);
 				}
 			}
 		}
@@ -5480,7 +5485,9 @@ boolean ranged;
 						);
 				}
 				/* kill */
-				return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, FALSE);
+				killer = "forcible head removal";
+				killer_format = KILLED_BY;
+				return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, TRUE);
 			}
 			/* most commonly, this path is taken */
 			else {
@@ -5724,7 +5731,10 @@ boolean ranged;
 							);
 					}
 					/* kill */
-					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, FALSE);
+					Sprintf(buf, "%s headspike", s_suffix(mon_nam(magr)));
+					killer = buf;
+					killer_format = KILLED_BY_AN;
+					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, TRUE);
 				}
 				else {
 					/* helmet protected */
@@ -9664,7 +9674,6 @@ int vis;
 					if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
 					Stoned = 5;
 					delayed_killer = "a beholder's eye of petrification.";
-					killer_format = KILLED_BY;
 				}
 			}
 			else {
@@ -10231,7 +10240,9 @@ int vis;
 			u.wimage += dmg;
 			if (u.wimage > 10) u.wimage = 10;
 			u.ugrave_arise = PM_WEEPING_ANGEL;
-			int result = xdamagey(magr, mdef, attk, dmg, FALSE);
+			killer = "the sight of a weeping angel";
+			killer_format = KILLED_BY;
+			int result = xdamagey(magr, mdef, attk, dmg, TRUE);
 			/*If the player surived the gaze attack, restore the value of arise*/
 			u.ugrave_arise = temparise;
 			return result;
@@ -10574,7 +10585,7 @@ boolean * hittxt;
  * are called after the player hits, while letting hmoncore have messy returns wherever it wants
  */
 int
-hmon2point0(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
+hmon2point0(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
 struct monst * magr;	/* attacker */
 struct monst * mdef;	/* defender */
 struct attack * attk;	/* attack structure to use -- if this does not exist, we MUST have a weapon */
@@ -10588,6 +10599,7 @@ int dieroll;			/* 1-20 accuracy dieroll, used for special effects */
 boolean recursed;		/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
 int vis;				/* True if action is at all visible to the player */
 boolean * wepgone;		/* used to return an additional result: was [weapon] destroyed? */
+boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 {
 	int result;
 	boolean u_anger_guards;
@@ -10602,7 +10614,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	else
 		u_anger_guards = FALSE;
 
-	result = hmoncore(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone);
+	result = hmoncore(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset);
 
 	if (mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
@@ -10613,7 +10625,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 }
 
 int
-hmoncore(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
+hmoncore(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
 struct monst * magr;	/* attacker */
 struct monst * mdef;	/* defender */
 struct attack * attk;	/* attack structure to use */
@@ -10627,6 +10639,7 @@ int dieroll;			/* 1-20 accuracy dieroll, used for special effects */
 boolean recursed;		/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
 int vis;				/* True if action is at all visible to the player */
 boolean * wepgone;		/* used to return an additional result: was [weapon] destroyed? */
+boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -10787,6 +10800,28 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	 *  - uranium imp warping
 	 *  - cutting worm tails
 	 */
+
+	/* set killer, if needed */
+	if (!killerset && (
+		(!magr) ||				/* no attacker -- we really need a specific killer to avoid "killed by a died" */
+		(thrown && weapon)		/* prefer "killed by an arrow" to "killed by a plains centaur" */
+		)) {
+		/* "killed by (a) <weapon> */
+		if (thrown && weapon) {
+			killerset = TRUE;
+			killer = xname(weapon);
+			if (obj_is_pname(weapon))
+				killer_format = KILLED_BY;
+			else
+				killer_format = KILLED_BY_AN;
+		}
+		/* nothing to work with, give basic message */
+		else {
+			killerset = TRUE;
+			killer = "died";
+			killer_format = NO_KILLER_PREFIX;
+		}
+	}
 
 	/* FIGURE OUT WHAT APPLIES */
 	/* what kind of attack is being made? */
@@ -11929,8 +11964,8 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 		if (otmp && otmp->otyp == tgloves)
 			basedmg += ((youagr && martial_bonus()) ? 3 : 1);
 
-		/* some artifact gloves give enchantment */
-		if (otmp && (otmp->oartifact == ART_PREMIUM_HEART || otmp->oartifact == ART_GREAT_CLAWS_OF_URDLEN))
+		/* gloves give enchantment */
+		if (otmp)
 			basedmg += otmp->spe;
 	}
 	else if (unarmed_kick) {
@@ -13060,7 +13095,7 @@ boolean * wepgone;		/* used to return an additional result: was [weapon] destroy
 	
 	/* Deal Damage */
 	/* this can possibly kill, returning immediately */
-	result = xdamagey(magr, mdef, attk, totldmg, FALSE);
+	result = xdamagey(magr, mdef, attk, totldmg, killerset);
 	if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 		return result;
 
@@ -13317,7 +13352,13 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 			else {
 				if (is_deadly(pd)) {
 					/* kill */
-					newres = xdamagey(mdef, magr, &noattack, 9999, FALSE);
+					if (youagr)
+						pline("Draining from %s is instantly fatal.", mon_nam(mdef));
+					char buf[BUFSZ];
+					Sprintf(buf, "unwisely drained %s", pd->mname);
+					killer = buf;
+					killer_format = NO_KILLER_PREFIX;
+					newres = xdamagey(mdef, magr, &noattack, 9999, TRUE);
 					if (newres&MM_DEF_DIED)
 						result |= MM_AGR_DIED;	/* attacker died */
 					if (newres&MM_DEF_LSVD)
@@ -13389,7 +13430,9 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 		if (youdef && uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_DIVINE_DI && !rn2(4)){
 			if (!Shock_res(magr)) {
 				pline("A bolt of divine energy strikes %s from the heavens!", mon_nam(magr));
-				newres = xdamagey(mdef, magr, passive, d(2, 12), FALSE);
+				killer = "bolt of divine energy";
+				killer_format = KILLED_BY_AN;
+				newres = xdamagey(mdef, magr, passive, d(2, 12), TRUE);
 				if (newres&MM_DEF_DIED)
 					result |= MM_AGR_DIED;	/* attacker died */
 				if (newres&MM_DEF_LSVD)
