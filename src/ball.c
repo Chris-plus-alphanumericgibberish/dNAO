@@ -833,8 +833,7 @@ bc_sanity_check()
                   || (uball->where != OBJ_FLOOR
                       && uball->where != OBJ_INVENT
                       && uball->where != OBJ_FREE)
-                  || (uball->owornmask & W_BALL) == 0L
-                  || (uball->owornmask & ~(W_BALL)) != 0L
+                  || (uball->owornmask & W_BALL) == 0L	/* note: ball could be wielded, quivered; cannot use == W_BALL */
 	)) {
         otyp = uball->otyp;
         if (otyp < STRANGE_OBJECT || otyp >= NUM_OBJECTS
@@ -853,9 +852,8 @@ bc_sanity_check()
     if (uchain && (uchain->otyp != CHAIN
                    || (uchain->where != OBJ_FLOOR
                        && uchain->where != OBJ_FREE)
-                   /* [could simplify this to owornmask != W_CHAIN] */
                    || (uchain->owornmask & W_CHAIN) == 0L
-                   || (uchain->owornmask & ~W_CHAIN) != 0L)) {
+				   )) {
         otyp = uchain->otyp;
         if (otyp < STRANGE_OBJECT || otyp >= NUM_OBJECTS
             || !OBJ_NAME(objects[otyp])) {
