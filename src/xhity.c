@@ -7779,11 +7779,9 @@ int vis;
 		can_target = FALSE;
 
 	/* determine if magr and mdef are lined up (or magr thinks they are) */
-	if (x(magr) == tarx ||
-		y(magr) == tary	)
-		on_line = TRUE;
-	else
-		on_line = FALSE;
+	/* also checks for direct friendly fire */
+	on_line = m_online(magr, mdef, tarx, tary, (youagr ? FALSE : (magr->mtame && !magr->mconf)), FALSE);
+
 	/* determine if monster is actually aiming at player, if youdef */
 	if (youdef && tarx == u.ux && tary == u.uy)
 		foundyou = TRUE;
