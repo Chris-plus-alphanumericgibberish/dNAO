@@ -455,9 +455,9 @@ int tary;
 		&& pa != &mons[PM_SUCCUBUS]
 		&& pa != &mons[PM_INCUBUS]
 		) {
-		if (!magr->mcan && !rn2(13))
+		if (!magr->mcan && !rn2(13)) {
 			msummon(magr);
-		return MM_MISS;
+		}
 	}
 	if (youagr && is_demon(youracedata) && !rn2(13) && !uwep
 		&& u.umonnum != PM_SUCCUBUS
