@@ -732,6 +732,8 @@ int tary;
 			/* melee -- if attacking an adjacent square or thrusting a polearm */
 			if (!ranged ||
 				(otmp && is_pole(otmp) && dist2(x(magr), y(magr), tarx, tary) < 8)) {
+				/* they did do an attack */
+				mon_ranged_gazeonly = FALSE;
 				/* check for wild misses */
 				if (missedyou) {
 					wildmiss(magr, attk, otmp, ranged);
