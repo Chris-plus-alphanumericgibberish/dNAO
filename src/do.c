@@ -1730,6 +1730,9 @@ int different;
 	if(different==REVIVE_ZOMBIE){
 		mtmp->mfaction = ZOMBIFIED;
 		mtmp->zombify = 0;
+		if(mtmp->mpeaceful && !mtmp->mtame){
+			mtmp->mpeaceful = 0;
+		}
 	}
 	switch (where) {
 	    case OBJ_INVENT:
