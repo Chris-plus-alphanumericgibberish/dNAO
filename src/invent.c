@@ -2457,17 +2457,14 @@ winid *datawin;
 
 		/* Object classes currently with no special messages here: amulets. */
 	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill)) {
-		boolean otyp_is_launcher = (((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp == ATLATL) &&
-			(otyp != HAND_BLASTER && otyp != ARM_BLASTER && otyp != MASS_SHADOW_PISTOL && otyp != CUTTING_LASER && otyp != RAYGUN));
+		boolean otyp_is_blaster = (otyp == HAND_BLASTER || otyp == ARM_BLASTER || otyp == MASS_SHADOW_PISTOL || otyp == CUTTING_LASER || otyp == RAYGUN);
+		boolean otyp_is_launcher = (((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp == ATLATL) && !otyp_is_blaster);
 		if (oc.oc_skill >= 0) {
 			if (obj) {
-				Sprintf(buf, "%s-handed %s%s%s",
-					(oc.oc_bimanual ? "Two" : "Single"), 
-					(otyp_is_launcher ? "launcher" : "weapon"),
-					(is_weptool(obj) && !otyp_is_launcher ? "-tool" : ""),
-					(oc.oc_bimanual == bimanual(obj, youmonst.data) ? "." :
-					bimanual(obj, youmonst.data) ? ", but large enough you actually need two hands."
-					: ", but you can wield it one-handed.")
+				Sprintf(buf, "%s-handed %s%s.", 
+					((obj ? bimanual(obj, youmonst.data) : oc.oc_bimanual) ? "Two" : "One"),
+					(otyp_is_blaster ? "blaster" : otyp_is_launcher ? "launcher" : "weapon"),
+					((obj && is_weptool(obj)) && !otyp_is_launcher ? "-tool" : "")
 					);
 			}
 			else {
@@ -2486,9 +2483,12 @@ winid *datawin;
 		OBJPUTSTR(buf);
 
 		/* weapon dice! */
-		/* Does not apply for launchers.
-		 * Liecleaver doesn't count here because its melee damage isn't in dmgval -- TODO? */
-		if (!otyp_is_launcher)
+		/* Does not apply for launchers. */
+		/* the melee-weapon artifact launchers need obj to exist because dmgval_core needs obj to find artifact. */
+		if ((!otyp_is_launcher && !otyp_is_blaster) || (
+			(obj && oartifact == ART_LIECLEAVER) ||
+			(obj && oartifact == ART_ROGUE_GEAR_SPIRITS)
+			))
 		{
 			// note: dmgval_core can handle not being given an obj; it will attempt to use otyp instead
 			struct weapon_dice wdice[2];

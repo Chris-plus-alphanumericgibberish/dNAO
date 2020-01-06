@@ -123,7 +123,7 @@ register xchar x, y;
 
 	if(Fumbling) clumsy = TRUE;
 
-	else if(uarm && objects[uarm->otyp].oc_bulky && ACURR(A_DEX) < rnd(25))
+	else if(uarm && !is_light_armor(uarm) && !is_medium_armor(uarm) && ACURR(A_DEX) < rnd(25))
 		clumsy = TRUE;
 doit:
 	//You("kick %s.", mon_nam(mon));
