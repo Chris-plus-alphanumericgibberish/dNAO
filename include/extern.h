@@ -2952,7 +2952,7 @@ E struct attack * FDECL(getattk, (struct monst *, int *, int *, struct attack *,
 E boolean FDECL(slips_free, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
-E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *));
+E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *, boolean));
 E void FDECL(wakeup2, (struct monst *, boolean));
 E int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int);

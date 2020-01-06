@@ -8209,6 +8209,9 @@ register int	mmflags;
 	    if (mtmp->minvent) discard_minvent(mtmp);
 	    mtmp->minvent = (struct obj *)0;    /* caller expects this */
 	}
+	/* set weaponcheck for weapon-toting monsters */
+	if (is_armed(ptr))
+		mtmp->weapon_check = NEED_WEAPON;
 	if(zombiepm >= 0){
 		//wasn't used
 		zombiepm = -1;

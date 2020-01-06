@@ -1164,6 +1164,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 		(mdef->mtame && dogfood(mdef, thrownobj) <= 2)) {	/* 2 <=> ACCFOOD */
 		if (tamedog(mdef, thrownobj))
 		{
+			*wepgone = TRUE;
 			return MM_HIT;           	/* obj is gone */
 		}
 		else {
@@ -1188,7 +1189,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			exercise(A_DEX, TRUE);
 		/* call hmon to make the projectile hit */
 		/* hmon will do hitmsg */
-		result = hmon2point0(magr, mdef, &dummy, thrownobj, launcher, (misfired ? 2 : 1), 0, 0, TRUE, dieroll, FALSE, vis, wepgone);
+		result = hmon2point0(magr, mdef, &dummy, thrownobj, launcher, (misfired ? 2 : 1), 0, 0, TRUE, dieroll, FALSE, vis, wepgone, FALSE);
 
 		/* wake up defender */
 		wakeup2(mdef, youagr);
