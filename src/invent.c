@@ -3293,20 +3293,42 @@ winid *datawin;
 	}
 
 	/* Material.
-	* Note that we should not show the material of certain objects if they are
-	* subject to description shuffling that includes materials. If the player
-	* has already discovered this object, though, then it's fine to show the
-	* material.
-	* Edit by Nero: dnh is assuming that oc_name_known == TRUE if this function is called. 
-	*
-	* Finally, this requires an object. Dnethack does some funny things with a few items
-	* to show adjectives, like the default material of sabers being metal, so showing
-	* what material items are "normally" made of could be misleading.
-	*/
+	 * Note that we should not show the material of certain objects if they are
+	 * subject to description shuffling that includes materials. If the player
+	 * has already discovered this object, though, then it's fine to show the
+	 * material.
+	 * Edit by Nero: dnh is assuming that oc_name_known == TRUE if this function is called. 
+	 *
+	 * Finally, this requires an object. Dnethack does some funny things with a few items
+	 * to show adjectives, like the default material of sabers being metal, so showing
+	 * what material items are "normally" made of could be misleading.
+	 */
 	if (obj) {
 		Strcpy(buf2, material_name(obj, FALSE));
 
 		Sprintf(buf, "Made of %s.", buf2);
+		OBJPUTSTR(buf);
+	}
+	/* Approximate size */
+	if (obj) {
+		static const char * sizestrings[] = {
+			"tiny",				/* index 0; size 0.0 */
+			"very small",		/* index 1; size 0.5 */
+			"small",			/* index 2; size 1.0 */
+			"somewhat small",	/* index 3; size 1.5 */
+			"medium-sized",		/* index 4; size 2.0 */
+			"somewhat large",	/* index 5; size 2.5 */
+			"large",			/* index 6; size 3.0 */
+			"very large",		/* index 7; size 3.5 */
+			"huge",				/* index 8; size 4.0 */
+			"gigantic"			/* index 9; size 7.0 */
+		};
+		int sz = max(0, obj->objsize * 2 + (oc.oc_size - 2));
+		if (sz >= 14)
+			sz = 9;
+		else if (sz > 8)
+			sz = 8;
+		Sprintf(buf, "Is a %s item.", sizestrings[sz]);
 		OBJPUTSTR(buf);
 	}
 	if (obj && is_evaporable(obj)) {
