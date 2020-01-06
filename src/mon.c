@@ -201,13 +201,7 @@ STATIC_VAR int cham_to_pm[] = {
 #define KEEPTRAITS(mon)	((mon)->isshk || (mon)->mtame ||		\
 			 ((mon)->data->geno & G_UNIQ) ||		\
 			 is_reviver((mon)->data) ||			\
-			 ((mon)->mfaction == ZOMBIFIED) ||			\
-			 ((mon)->mfaction == VAMPIRIC) ||			\
-			 ((mon)->mfaction == PSEUDONATURAL) ||			\
-			 ((mon)->mfaction == TOMB_HERD) ||			\
-			 ((mon)->mfaction == YITH) ||			\
-			 ((mon)->mfaction == CRANIUM_RAT) ||			\
-			 ((mon)->mfaction == MISTWEAVER) ||			\
+			 ((mon)->mfaction) ||			\
 			 ((mon)->zombify) ||			\
 			 ((mon)->data == &mons[PM_UNDEAD_KNIGHT]) ||			\
 			 ((mon)->data == &mons[PM_WARRIOR_OF_SUNLIGHT]) ||			\
@@ -6337,7 +6331,6 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	if (!(mtmp->misc_worn_check & W_ARMG))
 	    mselftouch(mtmp, "No longer petrify-resistant, ",
 			!flags.mon_moving);
-	m_dowear(mtmp, FALSE);
 
 	/* This ought to re-test can_carry() on each item in the inventory
 	 * rather than just checking ex-giants & boulders, but that'd be

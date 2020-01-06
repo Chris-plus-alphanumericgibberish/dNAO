@@ -2818,6 +2818,7 @@ E void FDECL(setmnotwielded, (struct monst *, struct obj *));
 E void FDECL(init_mon_wield_item, (struct monst *));
 E int NDECL(abon);
 E int FDECL(dbon, (struct obj *));
+E int FDECL(m_dbon, (struct monst *, struct obj *));
 E int FDECL(dtypbon, (int));
 E int NDECL(enhance_weapon_skill);
 E void FDECL(expert_weapon_skill, (int));

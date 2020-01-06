@@ -824,7 +824,7 @@ int tary;
 		case AT_WISP:	// 
 		case AT_HITS:	// always hits
 		case AT_TUCH:	// uses touch accuracy
-		case AT_SHDW:	// should be removed, replaced by AT_TUCH
+		case AT_SRPR:	// uses touch accuracy
 		case AT_REND:	// hits if previous 2 attacks hit
 		case AT_HUGS:	// hits if previous 2 attacks hit, or if magr and mdef are stuck together
 			/* not in range */
@@ -1092,6 +1092,11 @@ int tary;
 	if (attacksmade > 0)
 		allres |= MM_HIT;		/* signifies that the attack action was indeed taken, even if no attacks hit */
 
+	if(youdef && is_aquatic(magr->data) && roll_madness(MAD_THALASSOPHOBIA)){
+		You("panic after being attacked by a sea monster!");
+		nomul(-1*rnd(6), "panicking");
+	}
+	
 	return allres;
 }// xattacky
 
@@ -1481,11 +1486,10 @@ int * subout;					/* records what attacks have been subbed out */
 #define SUBOUT_BAEL2	0x0008	/* Bael's marilith-hands attack chain */
 #define SUBOUT_DEMO1	0x0010	/* Demogorgon's shredding rend */
 #define SUBOUT_DEMO2	0x0020	/* Demogorgon's item steal */
-#define SUBOUT_MARIWRAP	0x0040	/* Marilith's wrap */
-#define SUBOUT_SPIRITS	0x0080	/* Player's bound spirits */
-#define SUBOUT_BARB1	0x0100	/* 1st bit of barbarian bonus attacks */
-#define SUBOUT_BARB2	0x0200	/* 2nd bit of barbarian bonus attacks, must directly precede the 1st bit */
-#define SUBOUT_MAINWEPB	0x0400	/* Bonus attack caused by the wielded *mainhand* weapon */
+#define SUBOUT_SPIRITS	0x0040	/* Player's bound spirits */
+#define SUBOUT_BARB1	0x0080	/* 1st bit of barbarian bonus attacks */
+#define SUBOUT_BARB2	0x0100	/* 2nd bit of barbarian bonus attacks, must directly precede the 1st bit */
+#define SUBOUT_MAINWEPB	0x0200	/* Bonus attack caused by the wielded *mainhand* weapon */
 #define SUBOUT_XWEP		0x1000	/* when giving additional attacks, whether or not to use AT_XWEP or AT_WEAP this call */
 int * tohitmod;					/* some attacks are made with decreased accuracy */
 {
@@ -1588,18 +1592,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			}
 			break;
 		}
-	}
-	/* Mariliths (and family) get a wrap attack after their mainhand and offhand hits, before their marilith-hand attacks */
-	if (*indexnum == 2 && fromlist &&
-		!(*subout&SUBOUT_MARIWRAP) &&
-		(pa == &mons[PM_MARILITH] || pa == &mons[PM_SHAKTARI] || pa == &mons[PM_KARY__THE_FIEND_OF_FIRE])
-		){
-		*subout |= SUBOUT_MARIWRAP;
-		attk->aatyp = AT_HUGS;
-		attk->adtyp = AD_WRAP;
-		attk->damn = (pa == &mons[PM_SHAKTARI] ? 8 : 4);
-		attk->damd = 6;
-		fromlist = FALSE;
 	}
 
 	/* the Five Fiends spellcasting -- not shown in pokedex */
@@ -1749,7 +1741,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		if ((attk->aatyp == AT_WEAP && !uwep) ||
 			(attk->aatyp == AT_XWEP && !uswapwep && u.twoweap)) {
 			/* replace the attack */
-			attk->aatyp = AT_TUCH;
+			attk->aatyp = AT_SRPR;
 			attk->adtyp = AD_SHDW;
 			attk->damn = 4;
 			attk->damd = 8;
@@ -1781,7 +1773,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->aatyp == AT_ARRW ||
 		attk->aatyp == AT_MMGC ||
 		attk->aatyp == AT_TNKR ||
-		attk->aatyp == AT_SHDW ||
+		attk->aatyp == AT_SRPR ||
 		attk->aatyp == AT_BEAM ||
 		attk->aatyp == AT_MAGC ||
 		(attk->aatyp == AT_TENT && magr->mfaction == SKELIFIED))
@@ -1963,7 +1955,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 #undef SUBOUT_BAEL2
 #undef SUBOUT_DEMO1
 #undef SUBOUT_DEMO2
-#undef SUBOUT_MARIWRAP
 #undef SUBOUT_SPIRITS
 #undef SUBOUT_BARB1
 #undef SUBOUT_BARB2
@@ -2315,19 +2306,22 @@ struct attack *attk;
 		case AT_BUTT:
 			if (!verb) verb = "butt";
 			// fall through
+		case AT_SRPR:
+				if (!verb){
+					verb = "slash";
+					if ((attk->adtyp == AD_SHDW) || (attk->adtyp == AD_STAR) || (attk->adtyp == AD_BLUD)) {
+						ending = (attk->adtyp == AD_SHDW) ? " with bladed shadows!" :
+							(attk->adtyp == AD_STAR) ? " with a starlight rapier!" :
+							(attk->adtyp == AD_MERC) ? " with a blade of mercury!" :
+							(attk->adtyp == AD_BLUD) ? " with a blade of blood!" : "!";
+					}
+					if (youdef)
+						specify_you = TRUE;
+				}
 		case AT_5SQR:
 		case AT_TUCH:
 			if (!verb) {
-				if ((attk->adtyp == AD_SHDW) || (attk->adtyp == AD_STAR) || (attk->adtyp == AD_BLUD)) {
-					verb = "slash";
-					ending = (attk->adtyp == AD_SHDW) ? " with bladed shadows!" :
-						(attk->adtyp == AD_STAR) ? " with a starlight rapier!" :
-						(attk->adtyp == AD_MERC) ? " with a blade of mercury!" :
-						(attk->adtyp == AD_BLUD) ? " with a blade of blood!" : "!";
-				}
-				else {
-					verb = "touch";
-				}
+				verb = "touch";
 				if (youdef)
 					specify_you = TRUE;
 			}
@@ -3228,7 +3222,7 @@ int flat_acc;
 	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && !thrown) ||
 		(weapon && arti_shining(weapon)) ||
 		(!thrown && attk->aatyp == AT_TUCH) ||
-		(!thrown && attk->aatyp == AT_SHDW)) {
+		(!thrown && attk->aatyp == AT_SRPR)) {
 		if (youdef) {
 			defn_acc += AC_VALUE(base_uac() + u.uspellprot) + 10 - u.uspellprot;
 		}
@@ -3425,7 +3419,7 @@ boolean ranged;
 	case AT_WISP:
 	case AT_HITS:	// always hits
 	case AT_TUCH:	// uses touch accuracy
-	case AT_SHDW:	// should be removed, replaced by AT_TUCH
+	case AT_SRPR:	// uses touch accuracy
 	/* ranged attack types that are also melee */
 	case AT_LNCK:
 	case AT_5SBT:
@@ -4779,8 +4773,8 @@ boolean ranged;
 			xyhitmsg(magr, mdef, attk);
 		}
 
-		/* biting to drain blood */
-		if (attk->aatyp == AT_BITE
+		/* Vampiric attacks drain blood, even if those that aren't bites */
+		if (attk->adtyp == AD_VAMP
 			&& has_blood_mon(mdef)
 			&& !(pa == &mons[PM_VAMPIRE_BAT] && !(youdef ? u.usleep : mdef->msleeping))	/* vampire bats need sleeping victims */
 			) {
@@ -4796,7 +4790,7 @@ boolean ranged;
 			}
 
 			/* tame vampires gain nutrition */
-			if (uncancelled && !youagr && magr->mtame && !magr->isminion && is_vampire(pa))
+			if (uncancelled && !youagr && magr->mtame && !magr->isminion)
 				EDOG(magr)->hungrytime += ((int)((mdef->data)->cnutrit / 20) + 1);
 		}
 		/* level-draining effect doesn't actually need blood, it drains life force */
@@ -4814,14 +4808,14 @@ boolean ranged;
 			if (!youagr && is_metroid(pa)) {
 				*hpmax(magr) += d(1, 4);
 				heal(magr, d(1, 6));
-				/* tame metroids gain nutrition (does not stack with for-vampires above) */
+				/* tame metroids gain nutrition (does not stack with for-vampires above, since they have lifedrain instead of bloodsuck attacks) */
 				if (magr->mtame && !magr->isminion){
 					EDOG(magr)->hungrytime += pd->cnutrit / 4;  //400/4 = human nut/4
 				}
 			}
 
 			/* this line should NOT be displayed in addition to "your blood is being drained" */
-			if (youdef && !(attk->aatyp == AT_BITE && has_blood_mon(mdef)))
+			if (youdef && !(attk->adtyp == AD_VAMP && has_blood_mon(mdef)))
 				pline("%s feeds on your life force!", Monnam(magr));
 
 			/* drain life! */
@@ -4858,7 +4852,7 @@ boolean ranged;
 			}
 		}
 
-		/* wraithworms have poisonous vampiric bites */
+		/* wraithworms have poisonous negative-energy bites */
 		if ((pa == &mons[PM_WRAITHWORM]
 			|| pa == &mons[PM_FIRST_WRAITHWORM])) {
 			alt_attk.adtyp = AD_DRST;
@@ -5895,7 +5889,7 @@ boolean ranged;
 			/* spaghetti code alert: many paths of code in here return early */
 			switch (attk->adtyp) {
 			case AD_SITM:
-				if (!u.sealsActive&SEAL_ANDROMALIUS
+				if (!(u.sealsActive&SEAL_ANDROMALIUS)
 					&& notmcan){
 					switch (steal(magr, buf, FALSE, TRUE))
 					{
@@ -6096,11 +6090,13 @@ boolean ranged;
 			return result;
 
 		/* youdef vs youagr vs mvm are all separate */
-		if (youdef) {
-			if (notmcan
+		if(youdef){
+			if(notmcan
 				&& !(pd->mlet == pa->mlet)
-				&& !u.sealsActive&SEAL_ANDROMALIUS)
+				&& !(u.sealsActive&SEAL_ANDROMALIUS)
+			){
 				stealgold(magr);
+			}
 		}
 		else if (youagr) {
 #ifndef GOLDOBJ
@@ -12006,7 +12002,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 	basedmg *= (precision_mult ? precision_mult : 1);
 
 	/* fakewep: Sword of Blood bonus damage */
-	if (attk && attk->adtyp == AD_BLUD)
+	if (attk->aatyp == AT_SRPR && attk->adtyp == AD_BLUD)
 	{
 		if (has_blood(pd)) {
 			specdmg += mlev(mdef);
@@ -12037,8 +12033,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 	phase_armor = (
 		(weapon && arti_shining(weapon)) ||
 		(youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
-		(attk && attk->adtyp == AD_STAR) ||
-		(attk && attk->adtyp == AD_SHDW) ||
+		(attk && attk->aatyp == AT_SRPR && attk->aatyp != AD_BLUD) ||
 		(swordofblood) /* this touch adtyp is only conditionally phasing */
 		);
 
@@ -12080,17 +12075,20 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 		if (youagr && unarmed_punch && u.specialSealsActive&SEAL_DAHLVER_NAR) {
 			bonsdmg += d(2, 6) + min(u.ulevel / 2, (u.uhpmax - u.uhp) / 10);
 		}
-		/* general damage bonus -- valid attacks only */
-		if (real_attack && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick)) {
-			int bon_damage = 0;
+		/* general damage bonus */
+		if(real_attack){
+			/* The player has by-far the most detailed attacks */
+			if (youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick || natural_strike)) {
+				int bon_damage = 0;
 
-			if (youagr) {
 				bon_damage += u.udaminc;
 				bon_damage += aeshbon();
 				/* If you throw using a propellor, you don't get a strength
 				* bonus but you do get an increase-damage bonus.
 				*/
-				if (!thrown)
+				if(natural_strike)
+					bon_damage += dbon((struct obj *)0);
+				else if (!thrown)
 					bon_damage += dbon(weapon);
 				else{ //thrown
 					if (!fired)
@@ -12101,29 +12099,29 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 						bon_damage += dbon(launcher) * 2; // fired by an atlatl, get 2x strength bonus
 					//else no bonus
 				}
-			}
-			else if (magr) {
-				/* monsters very awkwardly simulate bonus damage from stat-boosting items */
-				if ((!fired || (launcher && (objects[launcher->otyp].oc_skill == P_SLING) || launcher->otyp == ATLATL)) &&
-					(((otmp = which_armor(magr, W_ARMG)) && otmp->otyp == GAUNTLETS_OF_POWER) ||
-					((otmp = MON_WEP(magr)) && (otmp->oartifact == ART_STORMBRINGER || otmp->oartifact == ART_OGRESMASHER)))
-					){
-					bon_damage += 8;
-					if (weapon && bimanual(weapon, pa))
-						bon_damage += 4;
+				bonsdmg += bon_damage;
+			} else if(!youagr){
+				int bon_damage = 0;
+
+				/* 
+				* Monsters don't actually have anything other than a str bonus, and then only from items.
+				*/
+				if (!thrown)
+					bon_damage += m_dbon(magr, weapon);
+				else{ //thrown
+					if (!fired)
+						bon_damage += m_dbon(magr, weapon); // thrown by hand, get strength bonus
+					else if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
+						bon_damage += m_dbon(magr, launcher); // fired by a sling, get strength bonus
+					else if (launcher && launcher->otyp == ATLATL)
+						bon_damage += m_dbon(magr, launcher) * 2; // fired by an atlatl, get 2x strength bonus
+					//else no bonus
 				}
+				bonsdmg += bon_damage;
 			}
-
-			/* shared: elves get +1 damage shooting elven arrows */
-			if (magr && fired && weapon && launcher && weapon->otyp == ELVEN_ARROW && launcher->otyp == ELVEN_BOW &&
-				(youagr ? Race_if(PM_ELF) : is_elf(pa))) {
-				bon_damage++;
-			}
-
-			bonsdmg += bon_damage;
 		}
 		/* skill damage bonus */
-		if (youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch)) {
+		if(youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch)){
 			/* note: unarmed kicks do not get skill bonus damage */
 			int skill_damage = 0;
 			int wtype;
@@ -12398,7 +12396,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 	/* Apply DR */
 	if (subtotl > 0){
 		if (phase_armor){
-			subtotl -= (youdef ? base_udr() : base_mdr(mdef));
+			subtotl -= (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
 		}
 		else {
 			subtotl -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
@@ -12421,8 +12419,8 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 	totldmg = subtotl + seardmg + heatdmg + poisdmg + specdmg;
 	lethaldamage = (totldmg >= *hp(mdef));
 
-	if (wizard && ublindf && ublindf->otyp == LENSES) {
-		pline("dmg = (%d + %d + %d + %d + %d - defense) = %d; + %d = %d",
+	if (wizard && ublindf && (ublindf->otyp == LENSES || ublindf->otyp == ANDROID_VISOR)) {
+		pline("dmg = (b:%d + art:%d + bon:%d + mon:%d + s/j:%d - defense) = %d; + add:%d = %d",
 			basedmg,
 			artidmg,
 			bonsdmg,
@@ -13204,7 +13202,7 @@ int
 shadow_strike(mdef)
 struct monst * mdef;
 {
-	static struct attack shadowblade = { AT_TUCH, AD_SHDW, 4, 8 };
+	static struct attack shadowblade = { AT_SRPR, AD_SHDW, 4, 8 };
 	int tohitmod = 0;	/* necessary to call xmeleehity */
 
 	if (mdef){
@@ -14375,6 +14373,7 @@ android_combo()
 
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
 	static struct attack kickattack =	{ AT_KICK, AD_PHYS, 1, 2 };
+	static struct attack finisher =		{ AT_CLAW, AD_PHYS,16, 8 };
 
 	/* unarmed */
 	if (!uwep){
@@ -14426,6 +14425,19 @@ android_combo()
 					xmeleehity(&youmonst, mdef, &kickattack, (struct obj *)0, vis, 0, FALSE);
 					xmeleehity(&youmonst, mdef, &kickattack, (struct obj *)0, vis, 0, FALSE);
 				}
+			}
+		}
+		if(P_SKILL(P_BARE_HANDED_COMBAT) >= P_GRAND_MASTER && u.uen > 0){
+			if(!getdir((char *)0)) return 1;
+			u.uen--;
+			if (u.ustuck && u.uswallow)
+				mdef = u.ustuck;
+			else
+				mdef = m_at(u.ux + u.dx, u.uy + u.dy);
+			if (!mdef)
+				You("swing wildly!");
+			else {
+				xmeleehity(&youmonst, mdef, &finisher,   (struct obj *)0, vis, 0, FALSE);
 			}
 		}
 		return TRUE;
