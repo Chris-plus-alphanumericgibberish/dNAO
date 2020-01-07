@@ -1913,7 +1913,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	/* zombies deal double damage, and all undead deal double damage at midnight (the midnight multiplier is not shown in the pokedex) */
 	if (!youagr && magr->mfaction == ZOMBIFIED && (is_undead_mon(magr) && midnight() && !by_the_book))
 		attk->damn *= 3;
-	else if ((!youagr && magr->mfaction == ZOMBIFIED) || (is_undead_mon(magr) && midnight() && !by_the_book))
+	else if (!youagr && ((magr->mfaction == ZOMBIFIED) || (is_undead_mon(magr) && midnight() && !by_the_book)))
 		attk->damn *= 2;
 
 	/* Bandersnatches become frumious instead of fleeing, dealing double damage -- not shown in the pokedex */
