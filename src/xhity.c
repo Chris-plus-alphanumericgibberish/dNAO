@@ -70,13 +70,13 @@ int tary;
 		tary = y(mdef);
 	}
 
-	if (youagr || youdef || cansee(x(magr), y(magr)) || cansee(tarx, tary))
+	if (youagr || youdef || (magr && cansee(x(magr), y(magr))) || cansee(tarx, tary))
 	{
-		if (youagr || (cansee(x(magr), y(magr)) && canseemon(magr)))
+		if (youagr || (magr && cansee(x(magr), y(magr)) && canseemon(magr)))
 			vis |= VIS_MAGR;
 		if (youdef || (cansee(tarx, tary) && canseemon(mdef)))
 			vis |= VIS_MDEF;
-		if (youagr || youdef || canspotmon(magr) || canspotmon(mdef))
+		if (youagr || youdef || (magr && canspotmon(magr)) || canspotmon(mdef))
 			vis |= VIS_NONE;
 	}
 	else
@@ -10715,6 +10715,9 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 		: ((youagr ? uarms : which_armor(magr, W_ARMS)) || !rn2(2)) ? W_RINGR : W_RINGL;	/* either hand, but not offhand if wearing a shield */
 
 	int precision_mult = 0;	/* damage multiplier for precision weapons */
+
+	if (vis == -1)
+		vis = getvis(magr, mdef, 0, 0);
 
 	/* partial damage counters */
 	int basedmg = 0;	/* base weapon/unarmed damage */
