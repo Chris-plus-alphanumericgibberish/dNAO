@@ -12012,7 +12012,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 	basedmg *= (precision_mult ? precision_mult : 1);
 
 	/* fakewep: Sword of Blood bonus damage */
-	if (attk->aatyp == AT_SRPR && attk->adtyp == AD_BLUD)
+	if (attk && attk->aatyp == AT_SRPR && attk->adtyp == AD_BLUD)
 	{
 		if (has_blood(pd)) {
 			specdmg += mlev(mdef);
