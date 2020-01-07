@@ -1036,6 +1036,10 @@ int tary;
 
 			result = xcasty(magr, mdef, attk, vis);
 
+			/* if the spell was successful, the defender may wake up (MM_MISS -> no spell cast, no chance to wake) */
+			if (result)
+				wakeup2(mdef, youagr);
+
 			/* Asmodeus randomly stops his casting early? */
 			if (pa == &mons[PM_ASMODEUS] && !rn2(3))
 				result |= MM_AGR_STOP;
@@ -14367,7 +14371,8 @@ boolean your_fault;
 	}
 	else
 	{
-		wakeup(mdef, your_fault);
+		if (mdef && !DEADMONSTER(mdef))
+			wakeup(mdef, your_fault);
 	}
 	return;
 }
