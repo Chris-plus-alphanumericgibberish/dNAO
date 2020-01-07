@@ -3129,20 +3129,6 @@ int flat_acc;
 					if (youagr && Role_if(PM_BARD)) //legend lore
 						wepn_acc += 5;
 				}
-				/*
-				 * Elves and Samurais are highly trained w/bows,
-				 * especially their own special types of bow.
-				 * Polymorphing won't make you a bow expert.
-				 */
-				if (youagr && (Race_if(PM_ELF) || Role_if(PM_SAMURAI)) &&
-					(!Upolyd || your_race(youmonst.data)) &&
-					objects[launcher->otyp].oc_skill == P_BOW) {
-					wepn_acc++;
-					if (Race_if(PM_ELF) && launcher->otyp == ELVEN_BOW)
-						wepn_acc++;
-					else if (Role_if(PM_SAMURAI) && launcher->otyp == YUMI)
-						wepn_acc++;
-				}
 			}
 			/* mis-used ammo */
 			else if (thrown == 2) {
