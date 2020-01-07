@@ -2547,6 +2547,8 @@ boolean killerset;		/* for custom killer() for players dying */
 
 	/* if defender is already dead, avoid re-killing them; just note that they are dead */
 	if (*hp(mdef) < 1) {
+		/* reset killer */
+		killer = 0;
 		return MM_DEF_DIED;
 	}
 
@@ -2576,6 +2578,8 @@ boolean killerset;		/* for custom killer() for players dying */
 				You("die...");
 				done(DIED);
 			}
+			/* reset killer */
+			killer = 0;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD;	/* you lifesaved or rehumanized */
 			else
@@ -2608,6 +2612,8 @@ boolean killerset;		/* for custom killer() for players dying */
 					if (dmg) killed(mdef);
 				}
 			}
+			/* reset killer */
+			killer = 0;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD; /* mdef lifesaved */
 			else
@@ -2618,12 +2624,16 @@ boolean killerset;		/* for custom killer() for players dying */
 	else {
 		if (*hp(mdef)< 1) {
 			monkilled(mdef, "", attk ? (int)attk->adtyp : 0);
+			/* reset killer */
+			killer = 0;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD; /* mdef lifesaved */
 			else
 				return (MM_HIT | MM_DEF_DIED | (!magr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
 		}
 	}
+	/* reset killer */
+	killer = 0;
 	return MM_HIT;
 }
 
