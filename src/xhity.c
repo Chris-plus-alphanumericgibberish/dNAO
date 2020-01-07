@@ -13855,9 +13855,9 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 
 			case AD_WEBS:
 			{
-				struct trap *ttmp2 = maketrap(x(mdef), y(mdef), WEB);
+				struct trap *ttmp2 = maketrap(x(magr), y(magr), WEB);
 				if (ttmp2) {
-					if (youdef) {
+					if (youagr) {
 						pline_The("webbing sticks to you. You're caught!");
 						dotrap(ttmp2, NOWEBMSG);
 #ifdef STEED
@@ -13868,7 +13868,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 #endif
 					}
 					else {
-						mintrap(mdef);
+						mintrap(magr);
 					}
 				}
 			}
