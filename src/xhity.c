@@ -12110,7 +12110,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 					//else no bonus
 				}
 				bonsdmg += bon_damage;
-			} else if(!youagr){
+			} else if(!youagr && magr){
 				int bon_damage = 0;
 
 				/* 
