@@ -2878,7 +2878,7 @@ struct attack * attk;
 int tarx;
 int tary;
 {
-	struct obj * qvr;				/* quiver of projectiles to use */
+	struct obj * qvr = (struct obj *)0;				/* quiver of projectiles to use */
 	boolean youagr = (magr == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
 	int typ = attk->adtyp;
@@ -2988,16 +2988,17 @@ int tary;
 		break;
 	default:
 		ammo_type = ARROW;
-		/* quiver from inventory */
-		for (qvr = (youagr ? invent : magr->minvent); qvr; qvr = qvr->nobj){
-			if (qvr->otyp == ammo_type) break;
-		}
 		break;
 	}
 
 	if (!qvr){
+		/* quiver from inventory */
+		for (qvr = (youagr ? invent : magr->minvent); qvr; qvr = qvr->nobj){
+			if (qvr->otyp == ammo_type) break;
+		}
 		/* No ammo of the right type found, nothing happened, took no time */
-		return FALSE; 
+		if (!qvr)
+			return FALSE; 
 	}
 
 	/* check that attacker is in range of target */
