@@ -26,7 +26,7 @@ STATIC_DCL void FDECL(heal, (struct monst *, int));
 STATIC_DCL int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
-STATIC_DCL int FDECL(xmeleehurty, (struct monst *, struct monst *, struct attack *, struct obj *, boolean, int, int, int, boolean));
+STATIC_DCL int FDECL(xmeleehurty, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, boolean, int, int, int, boolean));
 STATIC_DCL int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
@@ -916,7 +916,7 @@ int tary;
 				/* lowest effort ranged attack -- goes straight to melee damage */
 				if (ranged && (distmin(x(magr), y(magr), tarx, tary) <= BOLT_LIM)) {
 					mon_ranged_gazeonly = FALSE;
-					result = xmeleehurty(magr, mdef, attk, (struct obj *)0, TRUE, -1, rn1(18, 2), vis, ranged);
+					result = xmeleehurty(magr, mdef, attk, attk, (struct obj *)0, TRUE, -1, rn1(18, 2), vis, ranged);
 				}
 				break;
 			case AT_SPIT:
@@ -3504,7 +3504,7 @@ boolean ranged;
 	/* if we hit... */
 	if (hit) {
 		/* DEAL THE DAMAGE */
-		result = xmeleehurty(magr, mdef, attk, weapon, TRUE, -1, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, attk, attk, weapon, TRUE, -1, dieroll, vis, ranged);
 	}
 	else {
 		result = MM_MISS;
@@ -3536,10 +3536,11 @@ boolean ranged;
  * what damage was dealt and who survived.
  */
 int
-xmeleehurty(magr, mdef, attk, weapon, dohitmsg, flatdmg, dieroll, vis, ranged)
+xmeleehurty(magr, mdef, attk, originalattk, weapon, dohitmsg, flatdmg, dieroll, vis, ranged)
 struct monst * magr;
 struct monst * mdef;
 struct attack * attk;
+struct attack * originalattk;
 struct obj * weapon;
 boolean dohitmsg;
 int flatdmg;
@@ -3707,13 +3708,13 @@ boolean ranged;
 			 */
 			alt_attk.aatyp = attk->aatyp;
 			alt_attk.adtyp = AD_PHYS;
-			result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, 0, dieroll, vis, ranged);
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, 0, dieroll, vis, ranged);
 			/* return early if cannot continue the attack */
 			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 			/* then, make the elemental attack */
 			alt_attk = *attk;
 			alt_attk.aatyp = AT_NONE;
-			return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 		default:
 			break;
 		}
@@ -4227,7 +4228,7 @@ boolean ranged;
 	case AD_BLND:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4254,7 +4255,7 @@ boolean ranged;
 	case AD_STUN:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4278,7 +4279,7 @@ boolean ranged;
 	case AD_CONF:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4309,7 +4310,7 @@ boolean ranged;
 	case AD_HALU:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4342,7 +4343,7 @@ boolean ranged;
 	case AD_SLOW:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4369,7 +4370,7 @@ boolean ranged;
 	case AD_SLEE:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4397,7 +4398,7 @@ boolean ranged;
 	case AD_PLYS:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4436,7 +4437,7 @@ boolean ranged;
 	case AD_STCK:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4466,7 +4467,7 @@ boolean ranged;
 	case AD_WERE:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4493,7 +4494,7 @@ boolean ranged;
 	case AD_POLY:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4521,7 +4522,7 @@ boolean ranged;
 	case AD_DREN:
 		/* we do NOT want to make a physical attack with these damage dice -- they tend to be quite large! */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, 0, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, 0, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -4588,7 +4589,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_DCAY:
 		/* print hitmessage */
@@ -4637,7 +4638,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_CORR:
 		/* print hitmessage */
@@ -4654,7 +4655,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_WET:
 	case AD_LETHE:
@@ -4670,7 +4671,7 @@ boolean ranged;
 		water_damage((youdef ? invent : mdef->minvent), FALSE, FALSE, (attk->adtyp == AD_LETHE ? TRUE : FALSE), mdef);
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_ENCH:
 		/* print hitmessage */
@@ -4695,7 +4696,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 		/* various poisons */
 	case AD_DRST:
@@ -4766,7 +4767,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_VAMP:
 	case AD_DRLI:
@@ -4864,7 +4865,7 @@ boolean ranged;
 		}
 
 		/* make attack without hitmsg */
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 
 	case AD_DESC:
@@ -4894,7 +4895,7 @@ boolean ranged;
 		}
 		/* make attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_STON:
 		/* print a basic hit message */
@@ -4940,7 +4941,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_SLIM:
 		/* print a basic hit message */
@@ -4999,7 +5000,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_WISD:
 		/* print a basic hit message */
@@ -5023,7 +5024,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_NPDC:
 		/* print a basic hit message */
@@ -5047,7 +5048,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_CURS:
 		/* print a basic hit message */
@@ -5105,7 +5106,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_VORP:
 		/* do NOT immediately print a basic hit message -- vorpality can cause a miss */
@@ -5180,7 +5181,7 @@ boolean ranged;
 
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_SHRD:
 		/* get a piece of worn armor */
@@ -5264,7 +5265,7 @@ boolean ranged;
 			}
 			/* make a physical attack without hitmsg */
 			alt_attk.adtyp = AD_PHYS;
-			return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 		}
 		/* no armor */
 		else {
@@ -5283,7 +5284,7 @@ boolean ranged;
 					dmg *= 2;
 					/* make a physical attack without hitmsg */
 					alt_attk.adtyp = AD_PHYS;
-					return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+					return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 				}
 				else {
 					/* custom hit message */
@@ -5303,7 +5304,7 @@ boolean ranged;
 		}
 		/* make physical attack WITH hitmsg, since none of the cases above applied */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 	case AD_MALK:
 		/* print a basic hit message */
@@ -5333,14 +5334,14 @@ boolean ranged;
 			int old_aatyp = alt_attk.aatyp;	/* save aatyp to put back after making ELEC attack */
 			alt_attk.aatyp = AT_NONE;
 			alt_attk.adtyp = AD_ELEC;
-			result = xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 			if (result&(MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_DIED))
 				return result;
 			alt_attk.aatyp = old_aatyp;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 
 	case AD_TCKL:
@@ -5456,7 +5457,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_SUCK:
 		/* does nothing at all to noncorporeal or amoprhous creatures */
@@ -5685,7 +5686,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_UVUU:
 		/* print a basic hit message */
@@ -5787,7 +5788,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_TENT:
 		/* print a basic hit message */
@@ -5807,7 +5808,7 @@ boolean ranged;
 		 */
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_WEBS:
 		/* print a basic hit message */
@@ -5834,7 +5835,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_STDY:
 		/* study before doing the attack */
@@ -5863,7 +5864,7 @@ boolean ranged;
 		}
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 
 //////////////////////////////////////////////////////////////
@@ -5878,7 +5879,7 @@ boolean ranged;
 #endif
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -6086,7 +6087,7 @@ boolean ranged;
 	case AD_SGLD:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -6175,7 +6176,7 @@ boolean ranged;
 			if (!rn2(20)) stealamulet(magr);
 		}
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_SQUE:
 		/* print a basic hit message */
@@ -6191,7 +6192,7 @@ boolean ranged;
 			if (!rn2(10)) stealquestart(magr);
 		}
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_STTP:
 		/* print a basic hit message */
@@ -6205,7 +6206,7 @@ boolean ranged;
 				teleport_arm(otmp);
 		}
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 //////////////////////////////////////////////////////////////
 // TELEPORTING ATTACKS
@@ -6218,7 +6219,7 @@ boolean ranged;
 	case AD_ABDC:
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -6287,7 +6288,7 @@ boolean ranged;
 	case AD_WEEP:	/* significantly different when targeting player */
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
@@ -6385,7 +6386,7 @@ boolean ranged;
 			alt_attk.adtyp = AD_PHYS;
 
 			/* do this new attack */
-			return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 		else {
 			long side = rn2(2) ? RIGHT_SIDE : LEFT_SIDE;
@@ -6438,7 +6439,7 @@ boolean ranged;
 
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_DISN:
 		/* print a basic hit message */
@@ -6511,7 +6512,7 @@ boolean ranged;
 			&& rn2(20)) {
 			/* make physical attack */
 			alt_attk.adtyp = AD_PHYS;
-			return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 		else {
 			/* do the AD_DRIN attack, noting that we aren't eating brains */
@@ -6732,7 +6733,7 @@ boolean ranged;
 			(magr->mpeaceful != mdef->mpeaceful)) {
 			/* make physical attack */
 			alt_attk.adtyp = AD_PHYS;
-			result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 		else {
 			/* don't print a basic hitmessage */
@@ -6806,7 +6807,7 @@ boolean ranged;
 			|| (sticks(pd))){
 			/* make physical attack */
 			alt_attk.adtyp = AD_PHYS;
-			return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 		else {
 			/* figure out who the other creature is */
@@ -6940,7 +6941,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_CHKH:
 		/* make modified physical attack */
@@ -6952,7 +6953,7 @@ boolean ranged;
 			dmg += u.chokhmah;
 		}
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 
 	case AD_CHRN:
@@ -7015,7 +7016,7 @@ boolean ranged;
 				break;
 			}
 		}
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_TELE:
 		/* hitter tries to teleport without making an attack */
@@ -7036,7 +7037,7 @@ boolean ranged;
 		}
 		/* if that failed, make a physical attack instead */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 	case AD_AXUS:
 		/* fancy hitmsg */
@@ -7048,13 +7049,13 @@ boolean ranged;
 		alt_attk.aatyp = AT_NONE;
 
 		alt_attk.adtyp = AD_ELEC;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* elec damage */
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* elec damage */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 		alt_attk.adtyp = AD_FIRE;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* fire damage */
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* fire damage */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 		alt_attk.adtyp = AD_STUN;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, 3, dieroll, vis, ranged);		/* 3 turn stun, minor physical damage */
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 3, dieroll, vis, ranged);		/* 3 turn stun, minor physical damage */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 
 		/* but wait, there's more! */
@@ -7065,10 +7066,10 @@ boolean ranged;
 		/* cold / drain combo */
 		alt_attk.aatyp = AT_NONE;
 		alt_attk.adtyp = AD_COLD;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* cold damage */
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* cold damage */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 		alt_attk.adtyp = AD_DRLI;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, 0, dieroll, vis, ranged);		/* level drain */
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 0, dieroll, vis, ranged);		/* level drain */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 
 		return result;
@@ -7076,13 +7077,13 @@ boolean ranged;
 	case AD_ACFR:
 		/* make a physical attack */
 		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 		alt_attk.aatyp = AT_NONE;
 		/* add fire damage, if not resistant */
 		if (!Fire_res(mdef)) {
 			alt_attk.adtyp = AD_FIRE;
-			result = xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 		}
 		/* add holy damage */
@@ -7125,7 +7126,7 @@ boolean ranged;
 	case AD_OONA:
 		/* use correct damage type */
 		alt_attk.adtyp = u.oonaenergy;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 	case AD_HDRG:
 		/* use halfdragon's breath type */
@@ -7135,7 +7136,7 @@ boolean ranged;
 			alt_attk.adtyp = magr->mvar1;
 		else
 			alt_attk.adtyp = AD_COLD;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 	case AD_RBRE:	/* should actually be breath-only */
 	case AD_RETR:
@@ -7146,7 +7147,7 @@ boolean ranged;
 		case 1: alt_attk.adtyp = AD_COLD; break;
 		case 2: alt_attk.adtyp = AD_ELEC; break;
 		}
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 //////////////////////////////////////////////////////////////
 // BINDER SPIRIT ATTACKS
@@ -7185,7 +7186,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_NABERIUS:
 		/* print a basic hit message */
@@ -7220,7 +7221,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_OTIAX:
 		/* print a basic hit message */
@@ -7286,7 +7287,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_SIMURGH:
 		/* print a basic hit message */
@@ -7374,7 +7375,7 @@ boolean ranged;
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 	
 //////////////////////////////////////////////////////////////
 // THE RIDERS' ATTACKS
@@ -7515,7 +7516,7 @@ boolean ranged;
 			}
 		}
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_PEST:
 		/* fancy hitmsg */
@@ -7548,7 +7549,7 @@ boolean ranged;
 			}
 		}
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_FAMN:
 		/* fancy hitmsg */
@@ -7606,7 +7607,7 @@ boolean ranged;
 			}
 		}
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_CNFT:
 		{
@@ -7616,7 +7617,7 @@ boolean ranged;
 		{
 			/* avoid infinite loops; make a basic melee attack */
 			alt_attk.adtyp = AD_PHYS;
-			return xmeleehurty(magr, mdef, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 		else
 		{
@@ -7650,7 +7651,7 @@ boolean ranged;
 		}
 		}// close scope for in_conflict
 		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, weapon, FALSE, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 		break;
 //////////////////////////////////////////////////////////////
 // NOT IMPLEMENTED FOR XMELEEHURTY
@@ -9359,7 +9360,7 @@ int vis;
 		alt_attk = *attk;
 		alt_attk.aatyp = AT_GAZE;
 		alt_attk.adtyp = adtyp;
-		result = xmeleehurty(magr, mdef, &alt_attk, (struct obj *)0, FALSE, dmg, 0, vis, FALSE);
+		result = xmeleehurty(magr, mdef, &alt_attk, attk, (struct obj *)0, FALSE, dmg, 0, vis, FALSE);
 		wakeup2(mdef, youagr);
 		break;
 
