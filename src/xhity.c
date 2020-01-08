@@ -9158,7 +9158,7 @@ boolean
 umetgaze(mtmp)
 struct monst *mtmp;
 {
-	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD));
+	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) && !(multi < 0));
 }
 
 boolean
@@ -9317,9 +9317,9 @@ int vis;
 		))
 		||
 		(needs_mdef_eyes && (
-		(youdef  && (!umetgaze(magr) || multi >= 0)) ||
-		(youagr  && (mon_can_see_you(mdef))) ||
-		(!youagr && !youdef && (!mmetgaze(magr, mdef)))
+		(youdef  && !umetgaze(magr)) ||
+		(youagr  && mon_can_see_you(mdef)) ||
+		(!youagr && !youdef && !mmetgaze(magr, mdef))
 		))){
 		/* gaze fails because the appropriate gazer/gazee eye (contact?) is not available */
 		return MM_MISS;
