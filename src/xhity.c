@@ -70,13 +70,13 @@ int tary;
 		tary = y(mdef);
 	}
 
-	if (youagr || youdef || cansee(x(magr), y(magr)) || cansee(tarx, tary))
+	if (youagr || youdef || (magr && cansee(x(magr), y(magr))) || cansee(tarx, tary))
 	{
-		if (youagr || (cansee(x(magr), y(magr)) && canseemon(magr)))
+		if (youagr || (magr && cansee(x(magr), y(magr)) && canseemon(magr)))
 			vis |= VIS_MAGR;
 		if (youdef || (cansee(tarx, tary) && canseemon(mdef)))
 			vis |= VIS_MDEF;
-		if (youagr || youdef || canspotmon(magr) || canspotmon(mdef))
+		if (youagr || youdef || (magr && canspotmon(magr)) || canspotmon(mdef))
 			vis |= VIS_NONE;
 	}
 	else
@@ -1035,6 +1035,10 @@ int tary;
 				continue;
 
 			result = xcasty(magr, mdef, attk, vis);
+
+			/* if the spell was successful, the defender may wake up (MM_MISS -> no spell cast, no chance to wake) */
+			if (result)
+				wakeup2(mdef, youagr);
 
 			/* Asmodeus randomly stops his casting early? */
 			if (pa == &mons[PM_ASMODEUS] && !rn2(3))
@@ -2549,6 +2553,8 @@ boolean killerset;		/* for custom killer() for players dying */
 
 	/* if defender is already dead, avoid re-killing them; just note that they are dead */
 	if (*hp(mdef) < 1) {
+		/* reset killer */
+		killer = 0;
 		return MM_DEF_DIED;
 	}
 
@@ -2578,6 +2584,8 @@ boolean killerset;		/* for custom killer() for players dying */
 				You("die...");
 				done(DIED);
 			}
+			/* reset killer */
+			killer = 0;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD;	/* you lifesaved or rehumanized */
 			else
@@ -2610,6 +2618,8 @@ boolean killerset;		/* for custom killer() for players dying */
 					if (dmg) killed(mdef);
 				}
 			}
+			/* reset killer */
+			killer = 0;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD; /* mdef lifesaved */
 			else
@@ -2620,12 +2630,16 @@ boolean killerset;		/* for custom killer() for players dying */
 	else {
 		if (*hp(mdef)< 1) {
 			monkilled(mdef, "", attk ? (int)attk->adtyp : 0);
+			/* reset killer */
+			killer = 0;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD; /* mdef lifesaved */
 			else
 				return (MM_HIT | MM_DEF_DIED | (!magr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
 		}
 	}
+	/* reset killer */
+	killer = 0;
 	return MM_HIT;
 }
 
@@ -10705,6 +10719,9 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 
 	int precision_mult = 0;	/* damage multiplier for precision weapons */
 
+	if (vis == -1)
+		vis = getvis(magr, mdef, 0, 0);
+
 	/* partial damage counters */
 	int basedmg = 0;	/* base weapon/unarmed damage */
 	int artidmg = 0;	/* bonus damage from ARTIFACT HIT block */
@@ -12001,7 +12018,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 	basedmg *= (precision_mult ? precision_mult : 1);
 
 	/* fakewep: Sword of Blood bonus damage */
-	if (attk->aatyp == AT_SRPR && attk->adtyp == AD_BLUD)
+	if (attk && attk->aatyp == AT_SRPR && attk->adtyp == AD_BLUD)
 	{
 		if (has_blood(pd)) {
 			specdmg += mlev(mdef);
@@ -12099,7 +12116,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 					//else no bonus
 				}
 				bonsdmg += bon_damage;
-			} else if(!youagr){
+			} else if(!youagr && magr){
 				int bon_damage = 0;
 
 				/* 
@@ -13844,9 +13861,9 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 
 			case AD_WEBS:
 			{
-				struct trap *ttmp2 = maketrap(x(mdef), y(mdef), WEB);
+				struct trap *ttmp2 = maketrap(x(magr), y(magr), WEB);
 				if (ttmp2) {
-					if (youdef) {
+					if (youagr) {
 						pline_The("webbing sticks to you. You're caught!");
 						dotrap(ttmp2, NOWEBMSG);
 #ifdef STEED
@@ -13857,7 +13874,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 #endif
 					}
 					else {
-						mintrap(mdef);
+						mintrap(magr);
 					}
 				}
 			}
@@ -14353,7 +14370,8 @@ boolean your_fault;
 	}
 	else
 	{
-		wakeup(mdef, your_fault);
+		if (mdef && !DEADMONSTER(mdef))
+			wakeup(mdef, your_fault);
 	}
 	return;
 }
