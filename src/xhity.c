@@ -902,7 +902,7 @@ int tary;
 			switch (aatyp) {
 			case AT_BREA:
 				if (ranged && !magr->mspec_used && (distmin(x(magr), y(magr), tarx, tary) <= BOLT_LIM) && rn2(3)) {	// not in melee, 2/3 chance when ready
-					if (result = xbreathey(magr, attk, tarx, tary)) {
+					if ((result = xbreathey(magr, attk, tarx, tary))) {
 						/* they did do a breath attack */
 						mon_ranged_gazeonly = FALSE;
 						/* monsters figure out they don't know where you are */
@@ -921,7 +921,7 @@ int tary;
 				break;
 			case AT_SPIT:
 				if (!magr->mspec_used && !rn2(BOLT_LIM - distmin(x(magr), y(magr), tarx, tary))) {	// distance in 8 chance when ready
-					if (result = xspity(magr, attk, tarx, tary)) {
+					if ((result = xspity(magr, attk, tarx, tary))) {
 						/* they did spit */
 						mon_ranged_gazeonly = FALSE;
 						/* monsters figure out they don't know where you are */
@@ -1312,6 +1312,8 @@ boolean youseeit;
 		}
 		return 0;
 	}
+	
+	return 0;
 }
 
 
@@ -1911,7 +1913,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	/* zombies deal double damage, and all undead deal double damage at midnight (the midnight multiplier is not shown in the pokedex) */
 	if (!youagr && magr->mfaction == ZOMBIFIED && (is_undead_mon(magr) && midnight() && !by_the_book))
 		attk->damn *= 3;
-	else if (!youagr && magr->mfaction == ZOMBIFIED || (is_undead_mon(magr) && midnight() && !by_the_book))
+	else if (!youagr && ((magr->mfaction == ZOMBIFIED) || (is_undead_mon(magr) && midnight() && !by_the_book)))
 		attk->damn *= 2;
 
 	/* Bandersnatches become frumious instead of fleeing, dealing double damage -- not shown in the pokedex */
@@ -2152,7 +2154,7 @@ boolean allow_lethal;
 }
 
 /* noises()
-/* prints noises from mvm combat
+ * prints noises from mvm combat
  */
 void
 noises(magr, attk)
@@ -2191,7 +2193,7 @@ boolean nearmiss;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	boolean compat = (could_seduce(magr, mdef, attk) && (youagr || !magr->mcan && !magr->mspec_used));
+	boolean compat = (could_seduce(magr, mdef, attk) && (youagr || (!magr->mcan && !magr->mspec_used)));
 
 	if (youagr) {
 		if (compat)
@@ -2967,7 +2969,7 @@ int flat_acc;
 			if (pa == &mons[PM_CHOKHMAH_SEPHIRAH])
 				bons_acc += u.chokhmah;
 			/* simulate accuracy from stat bonuses from gloves */
-			if (otmp = which_armor(magr, W_ARMG)) {
+			if ((otmp = which_armor(magr, W_ARMG))) {
 				if (otmp->oartifact == ART_PREMIUM_HEART)
 					bons_acc += 14;
 				else if (otmp->otyp == GAUNTLETS_OF_DEXTERITY)
@@ -5038,7 +5040,7 @@ boolean ranged;
 		if (vis && dohitmsg) {
 			xyhitmsg(magr, mdef, attk);
 		}
-		if ((notmcan && !rn2(10) || pa == &mons[PM_PALE_NIGHT])
+		if ((notmcan && (!rn2(10) || pa == &mons[PM_PALE_NIGHT]))
 			&& !(pa == &mons[PM_GREMLIN] && !night())
 			)
 		{
@@ -11920,8 +11922,8 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 		/* yes, this can be redoubled by artifact gloves */
 		/* it's so strong, its damage applies no matter which hand is punching */
 		if (youagr) {	// only the player wears rings
-			if ((otmp = uright) && otmp->oartifact == ART_ANNULUS ||
-				(otmp = uleft) && otmp->oartifact == ART_ANNULUS)
+			if (((otmp = uright) && otmp->oartifact == ART_ANNULUS) ||
+				((otmp = uleft) && otmp->oartifact == ART_ANNULUS))
 			{
 				basedmg += weapon_dmg_roll(&(unarmed_dice.oc), FALSE);
 				basedmg += otmp->spe * 2;
@@ -13726,7 +13728,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				if (newres&MM_DEF_LSVD)
 					result |= MM_AGR_STOP;	/* attacker lifesaved */
 
-				if (!rn2(8) && !result&(MM_AGR_DIED | MM_AGR_STOP))
+				if (!rn2(8) && !(result&(MM_AGR_DIED | MM_AGR_STOP)))
 				{
 					if (youdef) {
 						char buf[BUFSZ];
