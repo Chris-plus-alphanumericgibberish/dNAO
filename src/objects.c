@@ -878,9 +878,10 @@ AMULET("amulet of ESP",           "circular",   TELEPAT,    130),
 AMULET("amulet of life saving",   "spherical",  LIFESAVED,   70),
 AMULET("amulet of strangulation", "oval",       STRANGLED,  100),
 AMULET("amulet of restful sleep", "triangular", SLEEPING,   100),
-AMULET("amulet versus poison",    "pyramidal",  POISON_RES, 140),
-AMULET("amulet of change",        "square",     0,          120),
-AMULET("amulet versus curses",    "convex",     0,           60),/*Needs tile*/
+AMULET("amulet versus poison",    "pyramidal",  POISON_RES, 130),
+AMULET("amulet versus sickness",    "teardrop",  SICK_RES, 	 25),
+AMULET("amulet of change",        "square",     0,          110),
+AMULET("amulet versus curses",    "convex",     0,           55),/*Needs tile*/
 						/* POLYMORPH */
 AMULET("amulet of unchanging",    "concave",    UNCHANGING,	 45),
 AMULET("amulet of nullify magic", "pentagonal",  NULLMAGIC,  45),/*Needs tile*/
