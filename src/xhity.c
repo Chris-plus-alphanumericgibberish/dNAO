@@ -10626,7 +10626,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 
 	result = hmoncore(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset);
 
-	if (mdef->ispriest && !rn2(2))
+	if (magr == &youmonst && mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
 	if (u_anger_guards)
 		(void)angry_guards(!flags.soundok);
