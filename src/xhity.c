@@ -8850,6 +8850,17 @@ int vis;
 		result = xdamagey(magr, mdef, attk, dmg, FALSE);
 		break;
 	case AD_DISE:	/* damage/effect ? */
+		if (youdef) {
+			diseasemu(pa);
+			result = MM_HIT;
+		}
+		else {
+			if (!Sick_res(mdef)) {
+				if (vis&VIS_MDEF)
+					pline("%s is afflicted by disease!", Monnam(mdef));
+				result = xdamagey(magr, mdef, attk, dmg, FALSE);
+			}
+		}
 		break;
 	}
 	return result;
