@@ -3406,7 +3406,7 @@ struct obj *otmp;
 		if (!rn2(3))
 			verbalize("If you hurt somebody, it's not my fault!");
 		bill_dummy_object(otmp);
-	} else {
+	} else if (costly_spot(u.ux, u.uy)) {
 		verbalize("Don't hurt my customers!");
 	}
 	
