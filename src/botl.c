@@ -620,6 +620,12 @@ bot2()
 #else
   Strcat(nb = eos(nb), " Slime");
 #endif
+  if(FrozenAir || Strangled)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Sufct", newbot2);
+#else
+	Sprintf(nb = eos(nb), " Sufct");
+#endif
   if(cap > UNENCUMBERED)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text(enc_stat[cap], newbot2);
