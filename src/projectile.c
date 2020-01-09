@@ -2127,7 +2127,7 @@ dofire()
 					case RAYGUN:
 						/* create fake ammo in order to calculate multishot correctly */
 						ammo = blaster_ammo(launcher);
-						if (!getdir((char *)0))
+						if (getdir((char *)0))
 							result += zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
 						/* TODO: */
 						// find in zap_raygun() in dothrow:
