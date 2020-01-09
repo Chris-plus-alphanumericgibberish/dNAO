@@ -32,7 +32,7 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *, boolean));
+STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *, boolean));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 
@@ -2291,11 +2291,9 @@ struct attack *attk;
 		pline("%s %s %s %s.",
 			(youagr ? "You" : Monnam(magr)),
 			(youagr ?
-				((is_silent_mon(magr)) ? "smile at" :
-				(is_blind(mdef)) ? "talk to" : "move near")
+				(!is_blind(mdef) ? "smile at" : !is_silent_mon(magr) ? "talk to" : "motion at")
 				:
-				((is_silent_mon(magr)) ? "smiles at" :
-				(is_blind(mdef)) ? "talks to" : "moves near")
+				(!is_blind(mdef) ? "smiles at" : !is_silent_mon(magr) ? "talks to" : "motions at")
 				),
 			((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr)),
 			compat == 2 ? "engagingly" : "seductively");
@@ -3786,13 +3784,13 @@ boolean ranged;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, (weapon && ranged), 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone, FALSE);
+		result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged), 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone, FALSE);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, weapon, (struct obj *)0, (weapon && ranged), 0, 0, FALSE, dieroll, TRUE, vis, &wepgone, FALSE);
+				result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged), 0, 0, FALSE, dieroll, TRUE, vis, &wepgone, FALSE);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -3811,7 +3809,7 @@ boolean ranged;
 	case AD_MAGM:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* does it do anything? Nullmagic gives utter and total immunity. MR gives immunity to the damage. */
 		if (uncancelled
@@ -3848,7 +3846,7 @@ boolean ranged;
 	case AD_FIRE:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* does it do anything? */
 		if (uncancelled || attk->adtyp == AD_EFIR)
@@ -3979,7 +3977,7 @@ boolean ranged;
 	case AD_COLD:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* does it do anything? */
 		if (uncancelled || attk->adtyp == AD_ECLD)
@@ -4056,7 +4054,7 @@ boolean ranged;
 	case AD_ELEC:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* does it do anything? */
 		if (uncancelled || attk->adtyp == AD_EELC)
@@ -4131,7 +4129,7 @@ boolean ranged;
 	case AD_ACID:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* active? */
 		if ((notmcan && !rn2(3)) || attk->adtyp == AD_EACD) {
@@ -4194,7 +4192,7 @@ boolean ranged;
 	case AD_DISE:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* asymetric: diseasemu prints out messages, applies sickness to player*/
 		if (youdef) {
@@ -4223,7 +4221,7 @@ boolean ranged;
 	case AD_POSN:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 
 		if (Poison_res(mdef)){
@@ -4573,7 +4571,7 @@ boolean ranged;
 	case AD_POLN:
 		/* make physical attack */
 		if (vis && dohitmsg){
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
@@ -4614,7 +4612,7 @@ boolean ranged;
 	case AD_RUST:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 
 		/* no special effect if cancelled */
@@ -4661,7 +4659,7 @@ boolean ranged;
 	case AD_DCAY:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 
 		/* no special effect if cancelled */
@@ -4710,7 +4708,7 @@ boolean ranged;
 	case AD_CORR:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* corrode armor */
 		if (youdef) {
@@ -4728,7 +4726,7 @@ boolean ranged;
 	case AD_LETHE:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 			if (youdef)
 				You("are soaking wet!");
 			else if (vis&VIS_MDEF)
@@ -4743,7 +4741,7 @@ boolean ranged;
 	case AD_ENCH:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* disenchant */
 		if (uncancelled) {
@@ -4781,7 +4779,7 @@ boolean ranged;
 		}
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* only activates 1/8 times even when uncancelled */
 		if (uncancelled && !rn2(8)) {
@@ -4840,7 +4838,7 @@ boolean ranged;
 	case AD_DRLI:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 
 		/* Vampiric attacks drain blood, even if those that aren't bites */
@@ -4949,7 +4947,7 @@ boolean ranged;
 	case AD_DESC:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		if (nonliving(pd) || is_anhydrous(pd)){
 			if (vis) {
@@ -4978,7 +4976,7 @@ boolean ranged;
 	case AD_STON:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 
 		/* 1/3 chance of special effects */
@@ -5024,7 +5022,7 @@ boolean ranged;
 	case AD_SLIM:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		if (uncancelled) {
 			/* flaming immunity to slime */
@@ -5083,7 +5081,7 @@ boolean ranged;
 	case AD_WISD:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* maybe drain WIS */
 		if (uncancelled && !rn2(8)) {
@@ -5107,7 +5105,7 @@ boolean ranged;
 	case AD_NPDC:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* maybe drain CON */
 		if (uncancelled) {
@@ -5131,7 +5129,7 @@ boolean ranged;
 	case AD_CURS:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		if ((notmcan && (!rn2(10) || pa == &mons[PM_PALE_NIGHT]))
 			&& !(pa == &mons[PM_GREMLIN] && !night())
@@ -5207,7 +5205,7 @@ boolean ranged;
 		else {
 			/* print basic hit message */
 			if (vis && dohitmsg) {
-				xyhitmsg(magr, mdef, attk);
+				xyhitmsg(magr, mdef, originalattk);
 			}
 		}
 
@@ -5393,7 +5391,7 @@ boolean ranged;
 	case AD_MALK:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* attempt to stick */
 		if ((youagr || youdef)					/* the player must be involved in a sticking situation (gameplay limitation) */
@@ -5431,7 +5429,7 @@ boolean ranged;
 	case AD_TCKL:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* weeping angels are entirely immune to the special effects */
 		if (!is_weeping(pd)) {
@@ -5580,7 +5578,7 @@ boolean ranged;
 						mon_nam(magr));
 				}
 				else if (vis && dohitmsg) {
-					xyhitmsg(magr, mdef, attk);
+					xyhitmsg(magr, mdef, originalattk);
 				}
 				/* 1/10 chance to twist legs (player-only) */
 				if (youdef && !rn2(10)) {
@@ -5775,7 +5773,7 @@ boolean ranged;
 	case AD_UVUU:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* chance for vorpal-esque headsmashing */
 		if (!rn2(20)){
@@ -5877,7 +5875,7 @@ boolean ranged;
 	case AD_TENT:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* the tentacle attack is only implemented vs the player */
 		if (youdef) {
@@ -5897,7 +5895,7 @@ boolean ranged;
 	case AD_WEBS:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		if (TRUE) {
 			struct trap *ttmp2 = maketrap(x(mdef), y(mdef), WEB);
@@ -6249,7 +6247,7 @@ boolean ranged;
 	case AD_SAMU:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* only special vs the player */
 		if (youdef) {
@@ -6265,7 +6263,7 @@ boolean ranged;
 	case AD_SQUE:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* only special vs the player */
 		if (youdef) {
@@ -6281,7 +6279,7 @@ boolean ranged;
 	case AD_STTP:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* only implemented vs player */
 		if (youdef) {
@@ -6528,7 +6526,7 @@ boolean ranged;
 	case AD_DISN:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* maybe print glowy message */
 		if (!Blind && (youdef || canseemon(mdef))){
@@ -6605,7 +6603,7 @@ boolean ranged;
 
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 
 		/* entirely unharmed */
@@ -7043,7 +7041,7 @@ boolean ranged;
 	case AD_CHRN:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* vs player, do special effects like as a unicorn horn */
 		if (youdef) {
@@ -7209,10 +7207,13 @@ boolean ranged;
 //////////////////////////////////////////////////////////////
 	case AD_OONA:
 		/* use correct damage type */
+		/* note: replaces originalattk */
 		alt_attk.adtyp = u.oonaenergy;
-		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 	case AD_SESN:
+		/* use random damage type */
+		/* note: replaces originalattk */
 		switch(rnd(4)){
 			case 1:
 				//Winter: Frozen
@@ -7231,28 +7232,30 @@ boolean ranged;
 				alt_attk.adtyp = AD_DRLI;
 			break;
 		}
-		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 	case AD_HDRG:
 		/* use halfdragon's breath type */
+		/* note: replaces originalattk */
 		if (youagr && Race_if(PM_HALF_DRAGON))
 			alt_attk.adtyp = flags.HDbreath;
 		else if (is_half_dragon(pa))
 			alt_attk.adtyp = magr->mvar1;
 		else
 			alt_attk.adtyp = AD_COLD;
-		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 	case AD_RBRE:	/* should actually be breath-only */
 	case AD_RETR:
 		/* random between fire/cold/elec damage */
+		/* note: replaces originalattk */
 		switch (rn2(3))
 		{
 		case 0: alt_attk.adtyp = AD_FIRE; break;
 		case 1: alt_attk.adtyp = AD_COLD; break;
 		case 2: alt_attk.adtyp = AD_ELEC; break;
 		}
-		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 
 //////////////////////////////////////////////////////////////
 // BINDER SPIRIT ATTACKS
@@ -7260,7 +7263,7 @@ boolean ranged;
 	case AD_IRIS:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* note when the player last made an Iris attack */
 		if (youagr) {
@@ -7296,7 +7299,7 @@ boolean ranged;
 	case AD_NABERIUS:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		if (!youdef && mdef->mflee) {	/* what would be an acceptable condition for the player to be affected? */
 			if ((*hp(magr) < *hpmax(magr)) && vis) {
@@ -7331,7 +7334,7 @@ boolean ranged;
 	case AD_OTIAX:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* note when the player last made an Otiax attack */
 		if (youagr) {
@@ -7397,7 +7400,7 @@ boolean ranged;
 	case AD_SIMURGH:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, attk);
+			xyhitmsg(magr, mdef, originalattk);
 		}
 
 		/* 4/5 chance of just iron-hating damage */
@@ -10704,21 +10707,22 @@ boolean * hittxt;
  * are called after the player hits, while letting hmoncore have messy returns wherever it wants
  */
 int
-hmon2point0(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
-struct monst * magr;	/* attacker */
-struct monst * mdef;	/* defender */
-struct attack * attk;	/* attack structure to use -- if this does not exist, we MUST have a weapon */
-struct obj * weapon;	/* weapon to hit with */
-struct obj * launcher;	/* launcher weapon was fired with */
-int thrown;				/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
-int flatbasedmg;		/* if >0, REPLACE basedmg with this value -- typically used for unusual weapon hits like throwing something upwards */
-int monsdmg;			/* flat damage amount to add onto other effects -- for monster attacks */
-boolean dohitmsg;		/* print hit message? */
-int dieroll;			/* 1-20 accuracy dieroll, used for special effects */
-boolean recursed;		/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
-int vis;				/* True if action is at all visible to the player */
-boolean * wepgone;		/* used to return an additional result: was [weapon] destroyed? */
-boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
+hmon2point0(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
+struct monst * magr;			/* attacker */
+struct monst * mdef;			/* defender */
+struct attack * attk;			/* attack structure to use -- if this does not exist, we MUST have a weapon */
+struct attack * originalattk;	/* original attack structure, used for messages */
+struct obj * weapon;			/* weapon to hit with */
+struct obj * launcher;			/* launcher weapon was fired with */
+int thrown;						/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
+int flatbasedmg;				/* if >0, REPLACE basedmg with this value -- typically used for unusual weapon hits like throwing something upwards */
+int monsdmg;					/* flat damage amount to add onto other effects -- for monster attacks */
+boolean dohitmsg;				/* print hit message? */
+int dieroll;					/* 1-20 accuracy dieroll, used for special effects */
+boolean recursed;				/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
+int vis;						/* True if action is at all visible to the player */
+boolean * wepgone;				/* used to return an additional result: was [weapon] destroyed? */
+boolean killerset;				/* if TRUE, use the already-set killer if the player dies */
 {
 	int result;
 	boolean u_anger_guards;
@@ -10733,7 +10737,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 	else
 		u_anger_guards = FALSE;
 
-	result = hmoncore(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset);
+	result = hmoncore(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset);
 
 	if (mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
@@ -10744,21 +10748,22 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 }
 
 int
-hmoncore(magr, mdef, attk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
-struct monst * magr;	/* attacker */
-struct monst * mdef;	/* defender */
-struct attack * attk;	/* attack structure to use */
-struct obj * weapon;	/* weapon to hit with */
-struct obj * launcher;	/* launcher weapon was fired with */
-int thrown;				/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
-int flatbasedmg;		/* if >0, REPLACE basedmg with this value -- currently unused. SCOPECREEP: use hmon for things like throwing an object upwards */
-int monsdmg;			/* flat damage amount to add onto other effects -- for monster attacks */
-boolean dohitmsg;		/* print hit message? */
-int dieroll;			/* 1-20 accuracy dieroll, used for special effects */
-boolean recursed;		/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
-int vis;				/* True if action is at all visible to the player */
-boolean * wepgone;		/* used to return an additional result: was [weapon] destroyed? */
-boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
+hmoncore(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
+struct monst * magr;			/* attacker */
+struct monst * mdef;			/* defender */
+struct attack * attk;			/* attack structure to use */
+struct attack * originalattk;	/* original attack structure, used for messages */
+struct obj * weapon;			/* weapon to hit with */
+struct obj * launcher;			/* launcher weapon was fired with */
+int thrown;						/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
+int flatbasedmg;				/* if >0, REPLACE basedmg with this value -- currently unused. SCOPECREEP: use hmon for things like throwing an object upwards */
+int monsdmg;					/* flat damage amount to add onto other effects -- for monster attacks */
+boolean dohitmsg;				/* print hit message? */
+int dieroll;					/* 1-20 accuracy dieroll, used for special effects */
+boolean recursed;				/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
+int vis;						/* True if action is at all visible to the player */
+boolean * wepgone;				/* used to return an additional result: was [weapon] destroyed? */
+boolean killerset;				/* if TRUE, use the already-set killer if the player dies */
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -12587,7 +12592,7 @@ boolean killerset;		/* if TRUE, use the already-set killer if the player dies */
 				!(youagr && lethaldamage) &&
 				!(youagr && sneak_attack))
 			{
-				xyhitmsg(magr, mdef, attk);
+				xyhitmsg(magr, mdef, originalattk);
 			}
 		}
 	}
