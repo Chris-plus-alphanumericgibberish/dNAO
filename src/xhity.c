@@ -571,7 +571,7 @@ int tary;
 		res[1] = res[0];
 		res[0] = MM_MISS;
 		/* get next attack */
-		attk = getattk(magr, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
+		attk = getattk(magr, mdef, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
 		/* set aatyp, adtyp */
 		aatyp = attk->aatyp;
 		adtyp = attk->adtyp;
@@ -581,11 +581,6 @@ int tary;
 			result = MM_AGR_STOP;
 			continue;
 		}
-		
-		/* if you are the target and are engulfed, you are only targettable by engulf attacks */
-		if (youdef && u.uswallow && (aatyp != AT_ENGL && aatyp != AT_ILUR))
-			continue;
-
 		/* Some armor completely covers the face and prevents bite attacks*/
 		if (aatyp == AT_BITE || aatyp == AT_LNCK || aatyp == AT_5SBT ||
 			(aatyp == AT_ENGL && !(youdef && u.uswallow)) ||
@@ -604,27 +599,6 @@ int tary;
 				)
 				continue;
 		}
-
-		/* Illurien can only engulf the player, and only if she is stuck to you */
-		if (pa == &mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES] && aatyp == AT_ENGL &&
-			(!youdef || u.ustuck != magr)) {
-			continue;
-		}
-
-		/* Rend attacks only happen if the previous two attacks hit */
-		/* Hugs attacks are similar, but also happen if magr and mdef are stuck together */
-		if ((res[1] == MM_MISS || res[2] == MM_MISS) && (
-			(attk->aatyp == AT_REND) ||
-			(attk->aatyp == AT_HUGS && !((youdef && u.ustuck == magr) || (youagr && u.ustuck == mdef)))
-			)) {
-			continue;
-		}
-
-		/* If the player was using 'k' to kick, they are only performing kick attacks */
-		/* onlykicks is a state variable defined in dokick.c */
-		if (youagr && onlykicks && attk->aatyp != AT_KICK)
-			continue;
-
 		/* based on the attack type... */
 		switch (aatyp)
 		{
@@ -1480,8 +1454,9 @@ boolean fresh;
  * inside the function
  */
 struct attack *
-getattk(magr, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod)
+getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod)
 struct monst * magr;			/* attacking monster */
+struct monst * mdef;			/* defending monster -- OPTIONAL */
 int * prev_res;					/* results of previous attacks; ignored if by_the_book is true */
 int * indexnum;					/* index number to use, incremented HERE (if actually pulling the attack from the monster's index) */
 struct attack * prev_and_buf;	/* double-duty pointer: 1st, is the previous attack; 2nd, is a pointer to allocated memory */
@@ -1503,6 +1478,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	struct attack * attk;
 	struct attack prev_attack = *prev_and_buf;
 	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
 	boolean fromlist;
 	struct permonst * pa = youagr ? youracedata : magr->data;
 
@@ -1539,7 +1515,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			*indexnum += 1;
 			*prev_and_buf = prev_attack;
 			fromlist = TRUE;
-			return getattk(magr, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
+			return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
 		}
 
 		/* if twoweaponing, make an xwep attack after each weap attack, if it isn't in the inherent attack chain */
@@ -1812,7 +1788,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		*indexnum += 1;
 		*prev_and_buf = prev_attack;
 		fromlist = TRUE;
-		return getattk(magr, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
+		return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
 	}
 	/* derived undead modify some attacks, and add attacks to the end of their attack chain */
 	if (!youagr) {
@@ -1944,17 +1920,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if (!youagr && magr->mflee && pa == &mons[PM_BANDERSNATCH] && !by_the_book)
 		attk->damn *= 2;
 
-	/* twoweapon symmetry -- if the previous attack missed, do not make an offhand attack -- obviously not shown in the pokedex */
-	if (!by_the_book && *indexnum > 0 && prev_res[1] == MM_MISS && attk->aatyp == AT_XWEP)
-	{
-		/* just get the next attack */
-		if (fromlist) {
-			*indexnum += 1;
-		}
-		*prev_and_buf = prev_attack;
-		return getattk(magr, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
-	}
-
 	/* prevent a monster with two consecutive disease or hunger attacks
 	from hitting with both of them on the same turn; if the first has
 	already hit, switch to a stun attack for the second */
@@ -1966,6 +1931,30 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp == prev_attack.adtyp
 		) {
 		attk->adtyp = AD_STUN;
+	}
+	/* Specific cases that prevent attacks */
+	if (!by_the_book && (
+		/* twoweapon symmetry -- if the previous attack missed, do not make an offhand attack*/
+		(*indexnum > 0 && prev_res[1] == MM_MISS && attk->aatyp == AT_XWEP) ||
+		/* If player is the target and is engulfed, only targetable by engulf attacks */
+		(youdef && u.uswallow && (attk->aatyp != AT_ENGL && attk->aatyp != AT_ILUR)) ||
+		/* If player was using 'k' to kick, they are only performing kick attacks (onlykicks is a state variable defined in dokick.c) */
+		(youagr && onlykicks && attk->aatyp != AT_KICK) ||
+		/* Illurien can only engulf targets she is stuck to */
+		(youdef && mdef && pa == &mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES] && attk->aatyp == AT_ENGL && (u.ustuck != magr)) ||
+		/* Rend attacks only happen if the previous two attacks hit */
+		(attk->aatyp == AT_REND && (prev_res[1] == MM_MISS || prev_res[2] == MM_MISS)) ||
+		/* Hugs attacks are similar, but will still happen if magr and mdef are stuck together */
+		(attk->aatyp == AT_HUGS && (prev_res[1] == MM_MISS || prev_res[2] == MM_MISS)
+			&& !(mdef && ((youdef && u.ustuck == magr) || (youagr && u.ustuck == mdef))))
+		))
+	{
+		/* just get the next attack */
+		if (fromlist) {
+			*indexnum += 1;
+		}
+		*prev_and_buf = prev_attack;
+		return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
 	}
 
 	/* possibly increment indexnum, if we want to move on in the monster's attack list 
@@ -13429,7 +13418,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 		res[1] = res[0];
 		res[0] = MM_MISS;
 		/* get next attack */
-		passive = getattk(mdef, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
+		passive = getattk(mdef, magr, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
 		/* if we don't have a passive attack, continue */
 		if (is_null_attk(passive) || passive->aatyp != AT_NONE)
 			continue;
@@ -13611,7 +13600,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 				/* grab the first weapon attack mdef has, or else use a basic 1d4 attack */
 				do {
 					/* we'll ignore res[], tohitmod, and prev_attk, resusing them from earlier */
-					counter = getattk(mdef, res, &indexnum2, &prev_attk, FALSE, &subout2, &tohitmod);
+					counter = getattk(mdef, magr, res, &indexnum2, &prev_attk, FALSE, &subout2, &tohitmod);
 				} while (counter->aatyp != AT_WEAP && !is_null_attk(counter));
 				if (is_null_attk(counter))
 					counter = &basicattack;

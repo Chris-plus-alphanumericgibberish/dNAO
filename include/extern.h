@@ -2952,7 +2952,7 @@ E int FDECL(dowrite, (struct obj *));
 E boolean FDECL(attack2, (struct monst *));
 E int FDECL(xattacky, (struct monst *, struct monst *, int, int));
 E int FDECL(xmeleehity, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, boolean));
-E struct attack * FDECL(getattk, (struct monst *, int *, int *, struct attack *, boolean, int *, int *));
+E struct attack * FDECL(getattk, (struct monst *, struct monst *, int *, int *, struct attack *, boolean, int *, int *));
 E boolean FDECL(slips_free, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
