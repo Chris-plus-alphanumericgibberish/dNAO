@@ -2332,11 +2332,12 @@ struct attack *attk;
 					specify_you = TRUE;
 			}
 			/* print the message */
+			/* weeping angels are present tense "The weeping angel is touching foo" only if you are neither magr nor mdef */
 			pline("%s %s%s%s%s%s%s",
 				(youagr ? "You" : Monnam(magr)),
-				(is_weeping(pa) && !youagr ? "is " : ""),
-				(youagr && !is_weeping(pa) ? verb : makeplural(verb)),
-				(is_weeping(pa) && !youagr ? "ing" : ""),
+				(is_weeping(pa) && !youagr && !youdef ? "is " : ""),
+				(youagr || (is_weeping(pa) && !youdef) ? verb : makeplural(verb)),
+				(is_weeping(pa) && !youagr && !youdef ? "ing" : ""),
 				((youdef && !youagr && !specify_you) ? "" : " "),
 				((youdef && !youagr && !specify_you) ? "" : mon_nam_too(mdef, magr)),
 				ending
