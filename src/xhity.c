@@ -2089,7 +2089,7 @@ boolean allow_lethal;
 			else							mult = "One of ";
 			pline("%s%s %s %s!",
 				mult,
-				(youdef) ? ((mult) ? "your" : "Your") : ((mult) ? s_suffix(mon_nam(mtmp)) : s_suffix(Monnam(mtmp))),
+				(youdef) ? ((mult != "") ? "your" : "Your") : ((mult != "") ? s_suffix(mon_nam(mtmp)) : s_suffix(Monnam(mtmp))),
 				xname(obj),
 				(cnt > 1L) ? destroy_strings[dindx * 3 + 1]
 				: destroy_strings[dindx * 3]);
@@ -9158,7 +9158,7 @@ boolean
 umetgaze(mtmp)
 struct monst *mtmp;
 {
-	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) && !(multi < 0));
+	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD));
 }
 
 boolean
@@ -9317,9 +9317,9 @@ int vis;
 		))
 		||
 		(needs_mdef_eyes && (
-		(youdef  && !umetgaze(magr)) ||
-		(youagr  && mon_can_see_you(mdef)) ||
-		(!youagr && !youdef && !mmetgaze(magr, mdef))
+		(youdef  && (!umetgaze(magr) || multi >= 0)) ||
+		(youagr  && (mon_can_see_you(mdef))) ||
+		(!youagr && !youdef && (!mmetgaze(magr, mdef)))
 		))){
 		/* gaze fails because the appropriate gazer/gazee eye (contact?) is not available */
 		return MM_MISS;
