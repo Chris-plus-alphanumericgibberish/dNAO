@@ -329,7 +329,8 @@ int tary;
 		marinum = 0,/* number of AT_MARI weapons used */
 		subout = 0,	/* remembers what attack substitutions have been made for [magr]'s attack chain */
 		res[3];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
-	int attacklimit, attacksmade;
+	int attacklimit = 0;
+	int attacksmade = 0;
 	struct attack *attk;
 	struct attack prev_attk = noattack;
 	struct obj *otmp;
@@ -758,6 +759,8 @@ int tary;
 				/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
 				if (youdef ||(!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
 					wakeup2(mdef, youagr);
+				/* increment number of attacks made */
+				attacksmade++;
 			}
 			else {
 				/* make ranged attack */
@@ -780,6 +783,8 @@ int tary;
 						/* if the attack was made, defender can wake up (reduced chance vs melee) */
 						if ((youdef || (!(result&MM_DEF_DIED) && result)) && !rn2(3))
 							wakeup2(mdef, youagr);
+						/* increment number of attacks made */
+						attacksmade++;
 					}
 				}
 			}
@@ -811,6 +816,7 @@ int tary;
 			/* check for wild misses */
 			if (missedyou) {
 				wildmiss(magr, attk, otmp, ranged);
+				attacksmade++;
 				result |= MM_AGR_STOP;	/* it knows you aren't there */
 				continue;
 			}
@@ -821,6 +827,8 @@ int tary;
 			/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
 			if (youdef || (!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
 				wakeup2(mdef, youagr);
+			/* increment number of attacks made */
+			attacksmade++;
 			break;
 
 			/* engulfing attacks */
@@ -835,11 +843,14 @@ int tary;
 			/* check for wild misses */
 			if (missedyou) {
 				wildmiss(magr, attk, otmp, ranged);
+				attacksmade++;
 				result |= MM_AGR_STOP;	/* it knows you aren't there */
 				continue;
 			}
 			/* make the attack */
 			result = xengulfhity(magr, mdef, attk, vis);
+			/* increment number of attacks made */
+			attacksmade++;
 			break;
 
 			/* explodes, killing itself */
@@ -852,6 +863,8 @@ int tary;
 				continue;
 			/* explode -- this function handles wild misses */
 			result = xexplodey(magr, mdef, attk, vis);
+			/* increment number of attacks made */
+			attacksmade++;
 			break;
 
 //////////////////////////////////////////////////////////////
@@ -929,13 +942,17 @@ int tary;
 				break;
 			}
 
-			/* note: can't tell if mdef lifesaved */
-			if (*hp(mdef) < 1)
-				result |= MM_DEF_DIED;
+			if (result) {
+				/* increment number of attacks made */
+				attacksmade++;
+				/* note: can't tell if mdef lifesaved */
+				if (*hp(mdef) < 1)
+					result |= MM_DEF_DIED;
+				/* defender can wake up (reduced chance vs melee) */
+				if ((youdef || !(result&MM_DEF_DIED)) && !rn2(3))
+					wakeup2(mdef, youagr);
+			}
 
-			/* if the attack was made, defender can wake up (reduced chance vs melee) */
-			if ((youdef || (!(result&MM_DEF_DIED) && result)) && !rn2(3))
-				wakeup2(mdef, youagr);
 			break;
 
 			/* ranged maybe-not-on-line attacks */
@@ -956,6 +973,7 @@ int tary;
 			/* check for wild misses */
 			if (missedyou) {
 				wildmiss(magr, attk, otmp, ranged);
+				attacksmade++;
 				result |= MM_AGR_STOP;	/* it knows you aren't there */
 				continue;
 			}
@@ -967,6 +985,8 @@ int tary;
 			/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
 			if (youdef || (!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
 				wakeup2(mdef, youagr);
+			/* increment number of attacks made */
+			attacksmade++;
 			break;
 
 			/* targeted gazes */
@@ -982,6 +1002,10 @@ int tary;
 			}
 			else {
 				result = xgazey(magr, mdef, attk, vis);
+				if (result) {
+					/* increment number of attacks made */
+					attacksmade++;
+				}
 			}
 			break;
 			/* wide (passive) gaze */
@@ -998,6 +1022,8 @@ int tary;
 				continue;
 			/* do the tinkering */
 			result = xtinkery(magr, mdef, attk, vis);
+			/* increment number of attacks made */
+			attacksmade++;
 			break;
 			/* magic */
 		case AT_MAGC:
@@ -1011,13 +1037,15 @@ int tary;
 
 			result = xcasty(magr, mdef, attk, vis);
 
-			/* if the spell was successful, the defender may wake up (MM_MISS -> no spell cast, no chance to wake) */
-			if (result)
+			if (result) {
+				/* if the spell was successful, the defender may wake up (MM_MISS -> no spell cast, no chance to wake) */
 				wakeup2(mdef, youagr);
-
-			/* Asmodeus randomly stops his casting early? */
-			if (pa == &mons[PM_ASMODEUS] && !rn2(3))
-				result |= MM_AGR_STOP;
+				/* increment number of attacks made */
+				attacksmade++;
+				/* Asmodeus randomly stops his casting early? */
+				if (pa == &mons[PM_ASMODEUS] && !rn2(3))
+					result |= MM_AGR_STOP;
+			}
 			break;
 		}//switch (aatyp)
 
@@ -1045,8 +1073,6 @@ int tary;
 		if (*hp(mdef) < 1)
 			result |= MM_DEF_DIED;
 
-		/* increment number of attacks made */
-		attacksmade++;
 		/* save result to res, allres */
 		res[0] = result;
 		allres |= result;
@@ -1068,12 +1094,18 @@ int tary;
 	if (!youagr && pa == &mons[PM_LILLEND])
 		magr->mvar2 = 0;
 
-	if (attacksmade > 0)
-		allres |= MM_HIT;		/* signifies that the attack action was indeed taken, even if no attacks hit */
-
-	if(youdef && is_aquatic(magr->data) && roll_madness(MAD_THALASSOPHOBIA)){
-		You("panic after being attacked by a sea monster!");
-		nomul(-1*rnd(6), "panicking");
+	/* do some things only if attacks were made */
+	if (attacksmade > 0) {
+		/* signify that the attack action was indeed taken, even if no attacks hit */
+		allres |= MM_HIT;
+		/* player multi-tile movements are interrupted */
+		if (youdef)
+			nomul(0, NULL);
+		/* player panics after being attacked by a sea creature */
+		if (youdef && is_aquatic(magr->data) && roll_madness(MAD_THALASSOPHOBIA)){
+			You("panic after being attacked by a sea monster!");
+			nomul(-1 * rnd(6), "panicking");
+		}
 	}
 	
 	return allres;
