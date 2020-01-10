@@ -2130,7 +2130,7 @@ boolean allow_lethal;
 			else							mult = "One of ";
 			pline("%s%s %s %s!",
 				mult,
-				(youdef) ? ((mult) ? "your" : "Your") : ((mult) ? s_suffix(mon_nam(mtmp)) : s_suffix(Monnam(mtmp))),
+				(youdef) ? ((mult != "") ? "your" : "Your") : ((mult != "") ? s_suffix(mon_nam(mtmp)) : s_suffix(Monnam(mtmp))),
 				xname(obj),
 				(cnt > 1L) ? destroy_strings[dindx * 3 + 1]
 				: destroy_strings[dindx * 3]);
@@ -2382,11 +2382,12 @@ struct attack *attk;
 					specify_you = TRUE;
 			}
 			/* print the message */
+			/* weeping angels are present tense "The weeping angel is touching foo" only if you are neither magr nor mdef */
 			pline("%s %s%s%s%s%s%s",
 				(youagr ? "You" : Monnam(magr)),
-				(is_weeping(pa) && !youagr ? "is " : ""),
-				(youagr && !is_weeping(pa) ? verb : makeplural(verb)),
-				(is_weeping(pa) && !youagr ? "ing" : ""),
+				(is_weeping(pa) && !youagr && !youdef ? "is " : ""),
+				(youagr || (is_weeping(pa) && !youdef) ? verb : makeplural(verb)),
+				(is_weeping(pa) && !youagr && !youdef ? "ing" : ""),
 				((youdef && !youagr && !specify_you) ? "" : " "),
 				((youdef && !youagr && !specify_you) ? "" : mon_nam_too(mdef, magr)),
 				ending
@@ -9289,7 +9290,7 @@ boolean
 umetgaze(mtmp)
 struct monst *mtmp;
 {
-	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) && !(multi < 0));
+	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD));
 }
 
 boolean
@@ -9448,9 +9449,9 @@ int vis;
 		))
 		||
 		(needs_mdef_eyes && (
-		(youdef  && !umetgaze(magr)) ||
-		(youagr  && mon_can_see_you(mdef)) ||
-		(!youagr && !youdef && !mmetgaze(magr, mdef))
+		(youdef  && (!umetgaze(magr) || multi >= 0)) ||
+		(youagr  && (mon_can_see_you(mdef))) ||
+		(!youagr && !youdef && (!mmetgaze(magr, mdef)))
 		))){
 		/* gaze fails because the appropriate gazer/gazee eye (contact?) is not available */
 		return MM_MISS;
@@ -10760,7 +10761,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 
 	result = hmoncore(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset);
 
-	if (mdef->ispriest && !rn2(2))
+	if (magr == &youmonst && mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
 	if (u_anger_guards)
 		(void)angry_guards(!flags.soundok);
