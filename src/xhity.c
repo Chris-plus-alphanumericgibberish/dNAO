@@ -1965,7 +1965,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_STUN;
 	}
 	/* Specific cases that prevent attacks */
-	if (!by_the_book && (
+	if (!by_the_book && !is_null_attk(attk) && (
 		/* twoweapon symmetry -- if the previous attack missed, do not make an offhand attack*/
 		(*indexnum > 0 && prev_res[1] == MM_MISS && attk->aatyp == AT_XWEP) ||
 		/* If player is the target and is engulfed, only targetable by engulf attacks */
