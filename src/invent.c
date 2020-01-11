@@ -1175,6 +1175,8 @@ register const char *let,*word;
 		    (otyp != HELLFIRE_COMPONENT))
 		|| (!strcmp(word, "build a scrap maw with") &&
 		    (otyp != SCRAP))
+		|| (!strcmp(word, "feed blood to") &&
+		    !(otyp == CORPSE && otmp->odrained && (peek_at_iced_corpse_age(otmp) + 20) >= monstermoves))
 		    )
 			foo--;
 		/* ugly check for unworn armor that can't be worn */
