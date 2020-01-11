@@ -2862,6 +2862,7 @@ E void FDECL(setuswapwep, (struct obj *));
 E int NDECL(dowield);
 E int NDECL(doswapweapon);
 E int NDECL(dowieldquiver);
+E void FDECL(rewield, (struct obj *, long));
 E boolean FDECL(wield_tool, (struct obj *,const char *));
 E int NDECL(test_twoweapon);
 E int NDECL(starting_twoweapon);
