@@ -595,6 +595,14 @@ A("Fuma-itto no Ken",		BROADSWORD,		0,			0, /*Needs encyc entry*/
  *  Nethack Samurai call broadswords "Ninja-to," which is the steriotypical ninja sword.
  *  Aparently, there was no such thing as an actual Ninja-to, it's something Hollywood made up!
  */
+
+A("Callandor", 		CRYSTAL_SWORD, 			0,			0,/*Crystal sword whose use comes with a price of your sanity */
+	(SPFX_RESTR|SPFX_EREGEN|SPFX_HSPDAM)	,0,
+	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
+	NO_ATTK,	NO_DFNS,	NO_CARY, /*Needs encyc entry*/
+	0, A_LAWFUL, NON_PM, NON_PM, 6660L, 
+	SPFX2_SPELLUP,0,0),
+
 A("Yoichi no yumi", YUMI, 					0,			0,/*Needs encyc entry*/
 	(SPFX_RESTR),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,

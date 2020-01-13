@@ -4195,6 +4195,9 @@ boolean atme;
 		u.uen -= energy;
 		flags.botl = 1;
 		exercise(A_WIS, TRUE);
+		if (uwep && uwep->oartifact == ART_CALLANDOR && !flags.initgend && rn2(20)){
+			change_usanity(-rnd(spellev(spell)));
+		}
 		/* pseudo is a temporary "false" object containing the spell stats */
 		pseudo = mksobj(spellid(spell), FALSE, FALSE);
 		pseudo->blessed = pseudo->cursed = 0;

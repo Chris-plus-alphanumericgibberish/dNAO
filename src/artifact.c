@@ -688,10 +688,10 @@ boolean while_carried;
 				if (spfx & SPFX_TCTRL) got_prop = TRUE;
 				break;
 			case ENERGY_REGENERATION:
-				if (spfx & SPFX_EREGEN) got_prop = TRUE;
+				if (spfx & SPFX_EREGEN && !(oartifact == ART_CALLANDOR && flags.initgend)) got_prop = TRUE;
 				break;
 			case HALF_SPDAM:
-				if (spfx & SPFX_HSPDAM) got_prop = TRUE;
+				if (spfx & SPFX_HSPDAM && !(oartifact == ART_CALLANDOR && flags.initgend)) got_prop = TRUE;
 				break;
 			case HALF_PHDAM:
 				if (spfx & SPFX_HPHDAM) got_prop = TRUE;
@@ -719,7 +719,7 @@ boolean while_carried;
 				if (spfx2 & SPFX2_STLTH) got_prop = TRUE;
 				break;
 			case SPELLBOOST:
-				if (spfx2 & SPFX2_SPELLUP) got_prop = TRUE;
+				if (spfx2 & SPFX2_SPELLUP && !(oartifact == ART_CALLANDOR && flags.initgend)) got_prop = TRUE;
 				break;
 			case POLYMORPH_CONTROL:
 				if (spfx3 & SPFX3_PCTRL) got_prop = TRUE;
