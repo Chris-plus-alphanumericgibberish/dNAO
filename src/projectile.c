@@ -1782,12 +1782,12 @@ int shotlimit;
 		/* Race-based RoF bonus */
 		if ((youagr ? Race_if(PM_ELF) : is_elf(magr->data)) && (
 			(ammo->otyp == ELVEN_ARROW && launcher && launcher->otyp == ELVEN_BOW) ||
-			(ammo->oartifact == ART_SICKLE_MOON) ||
+			(ammo->oartifact == ART_SICKLE_MOON && !launcher) ||
 			(launcher && launcher->oartifact == ART_BELTHRONDING) //double bonus for Elves
 			))
 			multishot++;
 		if ((youagr ? (Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) : is_drow(magr->data)) && (
-			(ammo->oartifact == ART_SICKLE_MOON)
+			(ammo->oartifact == ART_SICKLE_MOON && !launcher)
 			))
 			multishot++;
 		if ((youagr ? Race_if(PM_ORC) : is_orc(magr->data)) && (
