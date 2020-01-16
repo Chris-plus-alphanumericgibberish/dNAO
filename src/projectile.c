@@ -1926,6 +1926,10 @@ int * hurtle_dist;
 			) {
 			range = 1000;
 		}
+		else if (launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1&SEAL_EVE) {
+			/* the pen, being an athame, has a conflict between oc_range and oc_wsdam */
+			range = 8;	/* arbitrary */
+		}
 		else if (objects[(launcher->otyp)].oc_range) {
 			/* some launchers specify range (firearms specifically) */
 			range = objects[(launcher->otyp)].oc_range;
