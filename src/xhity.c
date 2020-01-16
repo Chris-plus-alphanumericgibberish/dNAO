@@ -13822,7 +13822,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 	if (passive->damn)
 		dmg = d(passive->damn, passive->damd);
 	else if (passive->damd)
-		dmg = d(mlev(mdef) + 1, passive->damd);
+		dmg = d(pd->mlevel + 1, passive->damd);
 	else
 		dmg = 0;
 
