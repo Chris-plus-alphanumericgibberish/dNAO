@@ -319,6 +319,9 @@ int tary;
 	/* if attacker doesn't exist or is trying to attack something that doesn't exist -- must be checked right away */
 	if (!magr || !mdef)
 		return(MM_MISS);		/* mike@genat */
+	if ((magr != &youmonst && DEADMONSTER(magr)) ||
+		(mdef != &youmonst && DEADMONSTER(mdef)))
+		return MM_MISS;
 
 	int	indexnum = 0,	/* loop counter */
 		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
@@ -13523,6 +13526,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
 
+	/* check that magr is still alive */
+	if (!youagr && DEADMONSTER(magr))
+		return result;
+
 	if (vis == -1)
 		vis = getvis(magr, mdef, 0, 0);
 
@@ -13561,10 +13568,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 		result |= res[0];
 
 	} while (!(
-		res[0] & MM_DEF_DIED ||		/* attacker died */
-		res[0] & MM_DEF_LSVD ||		/* attacker lifesaved */
-		res[0] & MM_AGR_DIED ||		/* defender died */
-		res[0] & MM_AGR_STOP ||		/* defender stopped for some other reason */
+		(res[0] & MM_DEF_DIED) ||	/* attacker died */
+		(res[0] & MM_DEF_LSVD) ||	/* attacker lifesaved */
+		(res[0] & MM_AGR_DIED) ||	/* defender died */
+		(res[0] & MM_AGR_STOP) ||	/* defender stopped for some other reason */
 		is_null_attk(passive)		/* no more attacks */
 		));
 	
