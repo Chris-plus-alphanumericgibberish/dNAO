@@ -1097,7 +1097,7 @@ int tary;
 
 	/* make per-round counterattacks -- note that these cannot use otmp or attk, as those are per-attack */
 	if (dopassive)
-		result = xpassivey(magr, mdef, (struct attack *)0, (struct obj *)0, vis, allres, pd, TRUE);
+		allres = xpassivey(magr, mdef, (struct attack *)0, (struct obj *)0, vis, allres, pd, TRUE);
 	
 	/* reset lillend mask usage */
 	if (!youagr && pa == &mons[PM_LILLEND])
