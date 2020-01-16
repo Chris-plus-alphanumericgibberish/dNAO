@@ -342,6 +342,9 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 							
 			} else if (by_align && Race_if(PM_DROW) && (m == ART_ARKENSTONE || m == ART_HOLY_MOONLIGHT_SWORD)){
 				continue; // no light-giving artis for drow (artifact_light should be unnecessary)
+
+			} else if (by_align && m == ART_CALLANDOR && flags.initgend){
+				continue; // callandor is saidin only
 			
 			} else if(by_align && Role_if(PM_PIRATE)) 
 				continue; /* pirates are not gifted artifacts */
