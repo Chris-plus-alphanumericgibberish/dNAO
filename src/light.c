@@ -654,8 +654,8 @@ struct obj *obj;
 {
 	return (
 		obj_is_burning(obj) ||						/* standard lightsources that must be lit */
-		arti_light(obj) ||							/* different from artifact_light: should always be active */
-		(artifact_light(obj) && obj->lamplit) ||	/* has to be lit (via wielding) */
+		arti_light(obj) ||							/* always active artifact lightsource */
+		(artifact_light(obj) && obj->lamplit) ||	/* sometimes active artifact lightsource */
 		obj->otyp == POT_STARLIGHT ||				/* always lit potion */
 		obj->otyp == CHUNK_OF_FOSSIL_DARK			/* always dark rock */
 		);
@@ -667,10 +667,12 @@ obj_is_burning(obj)
     struct obj *obj;
 {
     return (obj->lamplit &&
-		 (	obj->otyp == MAGIC_LAMP
-		 || ignitable(obj)
-		 ||	(is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)
-		 ||	obj->oartifact == ART_HOLY_MOONLIGHT_SWORD));
+		 (	ignitable(obj)					/* lightsource uses a flame */
+		 || obj->otyp == SUNROD				/* chemical reaction */
+		 || obj->otyp == LANTERN			/* electric */
+		 || obj->otyp == DWARVISH_HELM		/* electric */
+		 || (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)	/* future-electric */
+		 || obj->oartifact == ART_HOLY_MOONLIGHT_SWORD));	/* magical fire */
 }
 
 boolean
