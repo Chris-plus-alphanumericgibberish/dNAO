@@ -1522,7 +1522,7 @@ register struct obj *otmp;
 	    set_moreluck();
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
-	else if (artifact_light(otmp) && otmp->lamplit)
+	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
 		begin_burn(otmp, TRUE);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
 		(void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
@@ -1538,7 +1538,7 @@ register struct obj *otmp;
 	    set_moreluck();
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
-	else if (artifact_light(otmp) && otmp->lamplit)
+	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
 		begin_burn(otmp, TRUE);
 
 }
@@ -1573,7 +1573,7 @@ register struct obj *otmp;
 	    set_moreluck();
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
-	else if (artifact_light(otmp) && otmp->lamplit) 
+	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit) 
 		begin_burn(otmp, TRUE);
 	else if (otmp->otyp == FIGURINE) {
 		if (otmp->corpsenm != NON_PM
@@ -1595,7 +1595,7 @@ register struct obj *otmp;
 	    otmp->owt = weight(otmp);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
 	    (void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
-	else if (artifact_light(otmp) && otmp->lamplit)
+	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
 		begin_burn(otmp, TRUE);
 
 	return;
