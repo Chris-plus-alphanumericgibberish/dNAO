@@ -486,9 +486,6 @@ register struct obj *otmp;
 					pline("%s out.", Tobjnam(otmp, "go"));
 				end_burn(otmp, otmp->otyp != MAGIC_LAMP);
 			}
-//			else if (mtmp->data == &mons[PM_MAID]){
-//				snuff_otmp = TRUE;
-//			}
 		}
 
 		/* add_to_minv() might free otmp [if merged with something else],

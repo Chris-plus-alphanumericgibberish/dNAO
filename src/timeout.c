@@ -2186,8 +2186,6 @@ begin_burn(obj, already_lit)
 		obj->age -= turns;
 		if (carried(obj) && !already_lit)
 		    update_inventory();
-	    } else {
-		obj->lamplit = 0;
 	    }
 	} else {
 	    if (carried(obj) && !already_lit)
@@ -2196,15 +2194,14 @@ begin_burn(obj, already_lit)
 
 	if (obj->lamplit) {
 	    xchar x, y;
-
+		if (already_lit)
+			del_light_source(LS_OBJECT, (genericptr_t)obj, TRUE);
 		if (get_obj_location(obj, &x, &y, CONTAINED_TOO | BURIED_TOO)) {
-			if (already_lit)
-				del_light_source(LS_OBJECT, (genericptr_t)obj, TRUE);
 			new_light_source(x, y, radius, LS_OBJECT, (genericptr_t)obj);
 		}
 	    else{
-			impossible("begin_burn: can't get obj position");
-			obj_stop_timers(obj);
+			/* make the new light source at (0,0) since we can't get its position */
+			new_light_source(0, 0, radius, LS_OBJECT, (genericptr_t)obj);
 		}
 	}
 }
