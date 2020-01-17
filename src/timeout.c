@@ -2228,6 +2228,7 @@ end_burn(obj, timer_attached)
 		|| obj->otyp == POT_STARLIGHT
 		|| obj->otyp == CHUNK_OF_FOSSIL_DARK
 		|| artifact_light(obj)
+		|| arti_light(obj)
 	) timer_attached = FALSE;
 
 	if (!timer_attached) {

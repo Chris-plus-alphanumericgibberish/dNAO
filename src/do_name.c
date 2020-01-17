@@ -632,7 +632,11 @@ const char *name;
 		if(obj->oartifact == ART_SCOURGE_OF_LOLTH) obj->ovar1 = 8;
 		
 		fix_object(obj);
-		
+
+		/* light always-lit artifacts */
+		if (arti_light(obj))
+			obj->lamplit = TRUE;
+
 	    /* can't dual-wield with artifact as secondary weapon */
 	    if (obj == uswapwep) untwoweapon();
 	    /* activate warning if you've just named your weapon "Sting" */

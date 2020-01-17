@@ -654,7 +654,7 @@ struct obj *obj;
 {
 	return (
 		obj_is_burning(obj) ||						/* standard lightsources that must be lit */
-		arti_light(obj) ||							/* always active artifact lightsource */
+		(arti_light(obj) && obj->lamplit) ||		/* artifact lightsource -- not lit when in something's stomach */
 		(artifact_light(obj) && obj->lamplit) ||	/* sometimes active artifact lightsource */
 		obj->otyp == POT_STARLIGHT ||				/* always lit potion */
 		obj->otyp == CHUNK_OF_FOSSIL_DARK			/* always dark rock */
