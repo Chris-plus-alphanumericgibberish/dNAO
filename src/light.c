@@ -641,25 +641,24 @@ snuff_light_source(x, y)
 		if (ls->type == LS_OBJECT && ls->x == x && ls->y == y) {
 			obj = (struct obj *) ls->id;
 			if (obj_is_burning(obj)) {
-				/* The only way to snuff Sunsword is to unwield it.  Darkness
-				 * scrolls won't affect it.  (If we got here because it was
-				 * dropped or thrown inside a monster, this won't matter anyway
-				 * because it will go out when dropped.)
-				 */
-				if (artifact_light(obj) || obj->otyp == POT_STARLIGHT || obj->otyp == CHUNK_OF_FOSSIL_DARK) continue;
 				end_burn(obj, obj->otyp != MAGIC_LAMP);
 			}
 		}
 	}
 }
 
-/* Return TRUE if object sheds any light at all. */
+/* Return TRUE if object sheds any light or darkness at all. */
 boolean
 obj_sheds_light(obj)
-    struct obj *obj;
+struct obj *obj;
 {
-    /* so far, only burning objects shed light */
-    return obj_is_burning(obj);
+	return (
+		obj_is_burning(obj) ||						/* standard lightsources that must be lit */
+		arti_light(obj) ||							/* different from artifact_light: should always be active */
+		(artifact_light(obj) && obj->lamplit) ||	/* has to be lit (via wielding) */
+		obj->otyp == POT_STARLIGHT ||				/* always lit potion */
+		obj->otyp == CHUNK_OF_FOSSIL_DARK			/* always dark rock */
+		);
 }
 
 /* Return TRUE if sheds light AND will be snuffed by end_burn(). */
@@ -671,8 +670,7 @@ obj_is_burning(obj)
 		 (	obj->otyp == MAGIC_LAMP
 		 || ignitable(obj)
 		 ||	(is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)
-		 ||	obj->oartifact == ART_HOLY_MOONLIGHT_SWORD
-		 ||	artifact_light(obj)));
+		 ||	obj->oartifact == ART_HOLY_MOONLIGHT_SWORD));
 }
 
 boolean
@@ -778,9 +776,8 @@ struct obj *obj;
 	} while (n > 0L);
 	radius += candle_on_altar(obj);
     } else {
-	/* we're only called for lit candelabrum or candles */
-     /* impossible("candlelight for %d?", obj->otyp); */
-	radius = 3;		/* lamp's value */
+	/* get the lightradius -- very important that we catch all candles and the candelabraum before this */
+	radius = lightsource_radius(obj);
     }
     return radius;
 }
