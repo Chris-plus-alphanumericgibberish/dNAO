@@ -328,21 +328,23 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 				continue;	/* skip enemies' equipment */
 			} else if (by_align && hates_iron(youracedata) &&  
 				((artilist[m].material == IRON || 
-					(artilist[m].material == 0 && objects[(int)((&artilist[m])->otyp)].oc_material == IRON)
+					(artilist[m].material == 0 && objects[artilist[m].otyp].oc_material == IRON)
 				) && (u.ugifts < 2 || !rn2(2)))
 			){ 
-				continue; // no iron gifts if you're an elf/drow - game-able by selfpoly but eh
-							
+				continue; // no iron gifts if you're an elf/drow/yuki - game-able by selfpoly but eh
 			} else if (by_align && hates_silver(youracedata) &&  
 				((artilist[m].material == SILVER || 
-					(artilist[m].material == 0 && objects[(int)((&artilist[m])->otyp)].oc_material == SILVER)
+					(artilist[m].material == 0 && objects[artilist[m].otyp].oc_material == SILVER)
 				) && (u.ugifts < 2 || !rn2(2)))
 			){ 
 				continue; // no silver gifts if you're an vampire - game-able by selfpoly still
-							
+			} else if (by_align && Race_if(PM_CHIROPTERAN) && 
+				(objects[artilist[m].otyp].oc_class == ARMOR_CLASS && objects[artilist[m].otyp].oc_armcat == ARM_BOOTS)
+				&& (u.ugifts < 2 || !rn2(2))
+			){ 
+				continue; // no boots for bats
 			} else if (by_align && Race_if(PM_DROW) && (m == ART_ARKENSTONE || m == ART_HOLY_MOONLIGHT_SWORD)){
 				continue; // no light-giving artis for drow (artifact_light should be unnecessary)
-			
 			} else if(by_align && Role_if(PM_PIRATE)) 
 				continue; /* pirates are not gifted artifacts */
 			else if(by_align && Role_if(PM_MONK) && !is_monk_safe_artifact(m) && (!(u.uconduct.weaphit) || rn2(20)))
