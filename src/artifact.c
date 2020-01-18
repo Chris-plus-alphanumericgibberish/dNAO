@@ -2417,11 +2417,12 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		and = TRUE;
 	} // nvPh - drain res
 	
-	
-	if (buf[0] != '\0')
+	if (buf[0] != '\0'){
 		pline("The %s blade hits %s.", buf, hittee);
+		return (and || vis);
+	}
 	
-	return (and || vis); // vis should be redundant, but it's not a bad idea since riker can be a dumb bitch
+	return FALSE;
 }
 
 /* called when someone is being hit by the pen of the void */
