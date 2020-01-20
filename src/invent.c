@@ -2735,7 +2735,7 @@ winid *datawin;
 //				OBJPUTSTR(buf2);
 //			}
 		}
-
+		/* other weapon special effects */
 		if(obj){
 			if(obj->otyp == TORCH){
 				Sprintf(buf2, "Deals 1d6 bonus fire damage when lit.");
@@ -2790,7 +2790,47 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 		}
+		/* poison */
+		if (obj) {
+			int poisons = obj->opoisoned;
+			//int artipoisons = 0;
+			if (arti_poisoned(obj))
+				poisons |= OPOISON_BASIC;
+			if (oartifact == ART_WEBWEAVER_S_CROOK)
+				poisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
+			if (oartifact == ART_SUNBEAM)
+				poisons |= OPOISON_FILTH;
+			if (oartifact == ART_MOONBEAM)
+				poisons |= OPOISON_SLEEP;
 
+			if (poisons) {
+				/* special cases */
+				if (poisons == OPOISON_BASIC) {
+					OBJPUTSTR("Coated with poison.");
+				}
+				else if (poisons == OPOISON_ACID) {
+					OBJPUTSTR("Coated in acid.");
+				}
+				else if (poisons == OPOISON_SILVER) {
+					OBJPUTSTR("Coated with silver.");
+				}
+				/* general mash-em-together poison */
+				else {
+					buf[0] = '\0';
+					if (poisons&OPOISON_BASIC)  {Sprintf(buf, "%sharmful "     , buf);}
+					if (poisons&OPOISON_FILTH)  {Sprintf(buf, "%ssickening "   , buf);}
+					if (poisons&OPOISON_SLEEP)  {Sprintf(buf, "%ssleeping "    , buf);}
+					if (poisons&OPOISON_BLIND)  {Sprintf(buf, "%sblinding "    , buf);}
+					if (poisons&OPOISON_PARAL)  {Sprintf(buf, "%sparalytic "   , buf);}
+					if (poisons&OPOISON_AMNES)  {Sprintf(buf, "%samnesiac "    , buf);}
+					if (poisons&OPOISON_ACID)   {Sprintf(buf, "%sacidic "      , buf);}
+					if (poisons&OPOISON_SILVER) {Sprintf(buf, "%ssilver "      , buf);}
+					
+					Sprintf(buf2, "Coated with %spoison.", an(buf));
+					OBJPUTSTR(buf2);
+				}
+			}
+		}
 
 		/* to-hit */
 		int hitbon = oc.oc_hitbon - (obj ? (4 * max(0,(obj->objsize - youracedata->msize))) : 0);
