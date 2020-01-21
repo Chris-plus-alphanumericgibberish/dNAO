@@ -1752,41 +1752,47 @@ boolean tinitial, tfrom_file;
 
 	fullname = "pokedex";
 	if (match_optname(opts, fullname, 3, TRUE)) {
+		int l = 0;
 		boolean negative = FALSE;
 		if (negated) {
 			iflags.pokedex = POKEDEX_SHOW_DEFAULT;
 		}
-		else if ((op = string_for_opt(opts, FALSE)) != 0) {
+		else for (op = string_for_opt(opts, FALSE); op && *op; op += l) {
+			while (*op == ' ' || *op == ',')
+				op++;
 			if (op[0] == '!') {
 				negative = TRUE;
 				op++;
 			}
+			else {
+				negative = FALSE;
+			}
 #define ADD_REMOVE_SECTION(section)	if (!negative) iflags.pokedex |= (section); else iflags.pokedex &= ~(section)
-			if (!strncmpi(op, "stats", strlen(op)))
+			if      (!strncmpi(op, "stats",      l= 5))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_STATS);
-			else if (!strncmpi(op, "generation", strlen(op)))
+			else if (!strncmpi(op, "generation", l=10))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_GENERATION);
-			else if (!strncmpi(op, "weight", strlen(op)))
+			else if (!strncmpi(op, "weight",     l= 6))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_WEIGHT);
-			else if (!strncmpi(op, "resists", strlen(op)))
+			else if (!strncmpi(op, "resists",    l= 7))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_RESISTS);
-			else if (!strncmpi(op, "conveys", strlen(op)))
+			else if (!strncmpi(op, "conveys",    l= 7))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_CONVEYS);
-			else if (!strncmpi(op, "movement", strlen(op)))
+			else if (!strncmpi(op, "movement",   l= 8))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_MM);
-			else if (!strncmpi(op, "thinking", strlen(op)))
+			else if (!strncmpi(op, "thinking",   l= 8))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_MT);
-			else if (!strncmpi(op, "biology", strlen(op)))
+			else if (!strncmpi(op, "biology",    l= 7))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_MB);
-			else if (!strncmpi(op, "mechanics", strlen(op)))
+			else if (!strncmpi(op, "mechanics",  l= 9))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_MG);
-			else if (!strncmpi(op, "race", strlen(op)))
+			else if (!strncmpi(op, "race",       l= 4))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_MA);
-			else if (!strncmpi(op, "vision", strlen(op)))
+			else if (!strncmpi(op, "vision",     l= 6))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_MV);
-			else if (!strncmpi(op, "attacks", strlen(op)))
+			else if (!strncmpi(op, "attacks",    l= 7))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_ATTACKS);
-			else if (!strncmpi(op, "summary", strlen(op)))
+			else if (!strncmpi(op, "summary",    l= 7))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_CRITICAL);
 			else
 				badoption(opts);
