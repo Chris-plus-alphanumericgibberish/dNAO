@@ -558,12 +558,7 @@ register boolean mod;
 				otmp->ovar1 = rn2(SPE_BLANK_PAPER - SPE_DIG) + SPE_DIG;
 			}
 			if( arti_light(otmp) ){
-				if (otmp->where == OBJ_FREE){
-					place_object(otmp, u.ux, u.uy);  /* make it viable light source */
-					begin_burn(otmp, FALSE);
-					obj_extract_self(otmp);	 /* now release it for caller's use */
-				}
-				else begin_burn(otmp, FALSE);
+				begin_burn(otmp, FALSE);
 			}
 		    break;
 		}

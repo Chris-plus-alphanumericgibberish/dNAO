@@ -420,6 +420,9 @@ struct obj *obj;
 			attach_fig_transform_timeout(obj);
 		    }
 	}
+	/* relight artifacts */
+	if (arti_light(obj) && !obj->lamplit)
+		begin_burn(obj, FALSE);
 }
 
 #endif /* OVL1 */

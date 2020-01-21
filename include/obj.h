@@ -795,14 +795,16 @@ struct weapon_dice {
 				|| (otmp)->otyp == TALLOW_CANDLE\
 				|| (otmp)->otyp == WAX_CANDLE\
 				|| (otmp)->otyp == POT_OIL)
-/* object can be ignited */
-#define ignitable(otmp)	((otmp)->otyp == LANTERN\
-				|| (otmp)->otyp == OIL_LAMP\
- 				|| (otmp)->otyp == DWARVISH_HELM\
+/* object can be ignited -- lightsources that should be inadvertantly lit by fire damage */
+#define ignitable(otmp)	(\
+				   (otmp)->otyp == OIL_LAMP\
+				|| (otmp)->otyp == MAGIC_LAMP\
  				|| (otmp)->otyp == GNOMISH_POINTY_HAT\
 				|| (otmp)->otyp == CANDELABRUM_OF_INVOCATION\
 				|| (otmp)->otyp == TALLOW_CANDLE\
 				|| (otmp)->otyp == WAX_CANDLE\
+				|| (otmp)->otyp == TORCH\
+				|| (otmp)->otyp == SHADOWLANDER_S_TORCH\
 				|| (otmp)->otyp == CANDLE_OF_INVOCATION\
 				|| (otmp)->otyp == POT_OIL)
 
