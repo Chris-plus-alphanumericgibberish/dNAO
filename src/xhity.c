@@ -319,6 +319,9 @@ int tary;
 	/* if attacker doesn't exist or is trying to attack something that doesn't exist -- must be checked right away */
 	if (!magr || !mdef)
 		return(MM_MISS);		/* mike@genat */
+	if ((magr != &youmonst && DEADMONSTER(magr)) ||
+		(mdef != &youmonst && DEADMONSTER(mdef)))
+		return MM_MISS;
 
 	int	indexnum = 0,	/* loop counter */
 		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
@@ -1094,7 +1097,7 @@ int tary;
 
 	/* make per-round counterattacks -- note that these cannot use otmp or attk, as those are per-attack */
 	if (dopassive)
-		result = xpassivey(magr, mdef, (struct attack *)0, (struct obj *)0, vis, allres, pd, TRUE);
+		allres = xpassivey(magr, mdef, (struct attack *)0, (struct obj *)0, vis, allres, pd, TRUE);
 	
 	/* reset lillend mask usage */
 	if (!youagr && pa == &mons[PM_LILLEND])
@@ -13523,6 +13526,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
 
+	/* check that magr is still alive */
+	if (!youagr && DEADMONSTER(magr))
+		return result;
+
 	if (vis == -1)
 		vis = getvis(magr, mdef, 0, 0);
 
@@ -13561,10 +13568,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 		result |= res[0];
 
 	} while (!(
-		res[0] & MM_DEF_DIED ||		/* attacker died */
-		res[0] & MM_DEF_LSVD ||		/* attacker lifesaved */
-		res[0] & MM_AGR_DIED ||		/* defender died */
-		res[0] & MM_AGR_STOP ||		/* defender stopped for some other reason */
+		(res[0] & MM_DEF_DIED) ||	/* attacker died */
+		(res[0] & MM_DEF_LSVD) ||	/* attacker lifesaved */
+		(res[0] & MM_AGR_DIED) ||	/* defender died */
+		(res[0] & MM_AGR_STOP) ||	/* defender stopped for some other reason */
 		is_null_attk(passive)		/* no more attacks */
 		));
 	
@@ -13815,7 +13822,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 	if (passive->damn)
 		dmg = d(passive->damn, passive->damd);
 	else if (passive->damd)
-		dmg = d(mlev(mdef) + 1, passive->damd);
+		dmg = d(pd->mlevel + 1, passive->damd);
 	else
 		dmg = 0;
 
