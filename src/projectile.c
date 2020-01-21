@@ -1782,12 +1782,12 @@ int shotlimit;
 		/* Race-based RoF bonus */
 		if ((youagr ? Race_if(PM_ELF) : is_elf(magr->data)) && (
 			(ammo->otyp == ELVEN_ARROW && launcher && launcher->otyp == ELVEN_BOW) ||
-			(ammo->oartifact == ART_SICKLE_MOON) ||
+			(ammo->oartifact == ART_SICKLE_MOON && !launcher) ||
 			(launcher && launcher->oartifact == ART_BELTHRONDING) //double bonus for Elves
 			))
 			multishot++;
 		if ((youagr ? (Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) : is_drow(magr->data)) && (
-			(ammo->oartifact == ART_SICKLE_MOON)
+			(ammo->oartifact == ART_SICKLE_MOON && !launcher)
 			))
 			multishot++;
 		if ((youagr ? Race_if(PM_ORC) : is_orc(magr->data)) && (
@@ -1925,6 +1925,10 @@ int * hurtle_dist;
 			(launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
 			) {
 			range = 1000;
+		}
+		else if (launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1&SEAL_EVE) {
+			/* the pen, being an athame, has a conflict between oc_range and oc_wsdam */
+			range = 8;	/* arbitrary */
 		}
 		else if (objects[(launcher->otyp)].oc_range) {
 			/* some launchers specify range (firearms specifically) */
