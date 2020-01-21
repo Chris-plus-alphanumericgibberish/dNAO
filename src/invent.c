@@ -1213,7 +1213,8 @@ register const char *let,*word;
 			 otmp->oartifact == ART_ITLACHIAYAQUE || 
 			 otmp->oartifact == ART_ROD_OF_SEVEN_PARTS ||
 			 otmp->oartifact == ART_BOW_OF_SKADI ||
-			 otmp->oartifact == ART_PEN_OF_THE_VOID
+			 otmp->oartifact == ART_PEN_OF_THE_VOID ||
+			 otmp->oartifact == ART_STAFF_OF_NECROMANCY
 			) && !strcmp(word, "read")
 		){
 			bp[foo++] = otmp->invlet;

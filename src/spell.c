@@ -5243,6 +5243,11 @@ int spell;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 
+		/* if (uwep->otyp == ART_STAFF_OF_NECROMANCY && spellid(spell) == SPE_DRAIN_LIFE) {
+			// Bonus to drain life
+			splcaster -= urole.spelarmr;
+		} The staff is already +4 to all attack spells, a bonus to drain life is probably overkill */
+
 		if (uwep->otyp == SHEPHERD_S_CROOK) {	// a tool for leading and manipulating things
 			cast_bon = 0;
 			if (spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)

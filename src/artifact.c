@@ -5265,7 +5265,7 @@ arti_invoke(obj)
 
 	case SATURN:
 		{
-			if ( !(uwep && uwep == obj) ) {
+			if (!(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = 0;
 				break;
@@ -5337,7 +5337,7 @@ arti_invoke(obj)
 	break;
  	case PLUTO:
 		{
-			if ( !(uwep && uwep == obj) ) {
+			if (!(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = 0;
 				break;
@@ -5419,7 +5419,7 @@ arti_invoke(obj)
 	break;
 	case WATER:
 		{
-			if ( !(uwep && uwep == obj) ) {
+			if (!(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = 0;
 				break;
@@ -5458,7 +5458,7 @@ arti_invoke(obj)
 	break;
  	case SPEED_BANKAI:
 		{
-			if ( !(uwep && uwep == obj) ) {
+			if ( !(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = 0;
 				break;
@@ -6362,7 +6362,7 @@ arti_invoke(obj)
 			}
 		break;
 		case DEATH_TCH:
-			if (uwep && uwep != obj){
+			if ((!uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;
 				obj->age = monstermoves;
 				return(0);
@@ -6389,7 +6389,7 @@ arti_invoke(obj)
 		break;
 		case SKELETAL_MINION:
 		{
-			if (uwep && uwep != obj){
+			if ((!uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;
 				obj->age = monstermoves;
 				return(0);
@@ -7392,7 +7392,7 @@ arti_invoke(obj)
           } else You_feel("like you should be wearing %s.", The(xname(obj)));
         } break;
         case TOWEL_ITEMS:{
-          if(uwep == obj){
+          if(uwep && uwep == obj){
             struct obj *otmp;
             switch(rn2(5)){
               case 0:
@@ -7451,7 +7451,7 @@ arti_invoke(obj)
           /* TODO */
         } break;
         case LIFE_DEATH:{
-          if(uwep == obj){
+          if(uwep && uwep == obj){
             if(!getdir((char *)0))
               break;
             switch(obj->ovar1){
