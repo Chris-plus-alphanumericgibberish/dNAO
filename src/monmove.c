@@ -923,6 +923,33 @@ register struct monst *mtmp;
 		rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
 				 makemon(&mons[PM_LEGIONNAIRE], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 	}
+	if(needs_familiar(mtmp) && !mtmp->mspec_used){
+		if((mdat == &mons[PM_COVEN_LEADER] && !rn2(4))
+			|| (mdat == &mons[PM_WITCH] && !rn2(20))
+		){
+			struct monst *familliar;
+			if(canseemon(mtmp))
+				pline("%s concentrates.", Monnam(mtmp));
+			familliar = makemon(&mons[PM_WITCH_S_FAMILIAR], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+			if(familliar){
+				//Heal up
+				mtmp->mhp += mtmp->m_lev;
+				if(mtmp->mhp > mtmp->mhpmax)
+					mtmp->mhp = mtmp->mhpmax;
+				//Sync new familiar
+				familliar->m_lev = mtmp->m_lev;
+				familliar->mhp = mtmp->mhp;
+				familliar->mhpmax = mtmp->mhpmax;
+				familliar->mvar1 = (long)mtmp->m_id;
+				familliar->mpeaceful = mtmp->mpeaceful;
+				//Stop running
+				if(mtmp->mflee && mtmp->mhp > mtmp->mhpmax/2){
+					mtmp->mflee = 0;
+					mtmp->mfleetim = 0;
+				}
+			}
+		}
+	}
 	if (mtmp->mstrategy & STRAT_ARRIVE) {
 	    int res = m_arrival(mtmp);
 	    if (res >= 0) return res;
@@ -1252,7 +1279,7 @@ register struct monst *mtmp;
 	){
 		if(cansee(mtmp->mx,mtmp->my)) pline("%s invokes the darkness.",Monnam(mtmp));
 	    do_clear_area(mtmp->mx,mtmp->my, 5, set_lit, (genericptr_t)0);
-		doredraw();
+		vision_full_recalc = 1;
 	    if(mtmp->data == &mons[PM_HEDROW_WARRIOR]) mtmp->mspec_used += d(4,4);
 		else mtmp->mspec_used += max(10 - mtmp->m_lev,2);
 	}

@@ -4195,6 +4195,9 @@ boolean atme;
 		u.uen -= energy;
 		flags.botl = 1;
 		exercise(A_WIS, TRUE);
+		if (uwep && uwep->oartifact == ART_CALLANDOR && !flags.initgend && rn2(20)){
+			change_usanity(-rnd(spellev(spell)));
+		}
 		/* pseudo is a temporary "false" object containing the spell stats */
 		pseudo = mksobj(spellid(spell), FALSE, FALSE);
 		pseudo->blessed = pseudo->cursed = 0;
@@ -5240,6 +5243,11 @@ int spell;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 
+		/* if (uwep->otyp == ART_STAFF_OF_NECROMANCY && spellid(spell) == SPE_DRAIN_LIFE) {
+			// Bonus to drain life
+			splcaster -= urole.spelarmr;
+		} The staff is already +4 to all attack spells, a bonus to drain life is probably overkill */
+
 		if (uwep->otyp == SHEPHERD_S_CROOK) {	// a tool for leading and manipulating things
 			cast_bon = 0;
 			if (spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
@@ -5256,6 +5264,11 @@ int spell;
 			if (uwep->oartifact && !(uwep->oartifact == ART_PEN_OF_THE_VOID && !(mvitals[PM_ACERERAK].died > 0)))
 				cast_bon *= 2;
 			splcaster -= cast_bon;
+		}
+		
+		if(uwep && uwep->oartifact == ART_CALLANDOR && !flags.initgend){	// sa'angreal
+			cast_bon = 2;
+			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 		
 		if(Role_if(PM_WIZARD) && uwep->oclass == WAND_CLASS) {	// a tool of spellweaving

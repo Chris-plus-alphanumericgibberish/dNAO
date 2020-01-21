@@ -345,6 +345,8 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 				continue; // no boots for bats
 			} else if (by_align && Race_if(PM_DROW) && (m == ART_ARKENSTONE || m == ART_HOLY_MOONLIGHT_SWORD)){
 				continue; // no light-giving artis for drow (artifact_light should be unnecessary)
+			} else if (by_align && m == ART_CALLANDOR && flags.initgend){
+				continue; // callandor is saidin only
 			} else if(by_align && Role_if(PM_PIRATE)) 
 				continue; /* pirates are not gifted artifacts */
 			else if(by_align && Role_if(PM_MONK) && !is_monk_safe_artifact(m) && (!(u.uconduct.weaphit) || rn2(20)))
@@ -557,12 +559,7 @@ register boolean mod;
 				otmp->ovar1 = rn2(SPE_BLANK_PAPER - SPE_DIG) + SPE_DIG;
 			}
 			if( arti_light(otmp) ){
-				if (otmp->where == OBJ_FREE){
-					place_object(otmp, u.ux, u.uy);  /* make it viable light source */
-					begin_burn(otmp, FALSE);
-					obj_extract_self(otmp);	 /* now release it for caller's use */
-				}
-				else begin_burn(otmp, FALSE);
+				begin_burn(otmp, FALSE);
 			}
 		    break;
 		}
@@ -690,10 +687,10 @@ boolean while_carried;
 				if (spfx & SPFX_TCTRL) got_prop = TRUE;
 				break;
 			case ENERGY_REGENERATION:
-				if (spfx & SPFX_EREGEN) got_prop = TRUE;
+				if (spfx & SPFX_EREGEN && !(oartifact == ART_CALLANDOR && flags.initgend)) got_prop = TRUE;
 				break;
 			case HALF_SPDAM:
-				if (spfx & SPFX_HSPDAM) got_prop = TRUE;
+				if (spfx & SPFX_HSPDAM && !(oartifact == ART_CALLANDOR && flags.initgend)) got_prop = TRUE;
 				break;
 			case HALF_PHDAM:
 				if (spfx & SPFX_HPHDAM) got_prop = TRUE;
@@ -721,7 +718,7 @@ boolean while_carried;
 				if (spfx2 & SPFX2_STLTH) got_prop = TRUE;
 				break;
 			case SPELLBOOST:
-				if (spfx2 & SPFX2_SPELLUP) got_prop = TRUE;
+				if (spfx2 & SPFX2_SPELLUP && !(oartifact == ART_CALLANDOR && flags.initgend)) got_prop = TRUE;
 				break;
 			case POLYMORPH_CONTROL:
 				if (spfx3 & SPFX3_PCTRL) got_prop = TRUE;
@@ -2419,11 +2416,12 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		and = TRUE;
 	} // nvPh - drain res
 	
-	
-	if (buf[0] != '\0')
+	if (buf[0] != '\0'){
 		pline("The %s blade hits %s.", buf, hittee);
+		return (and || vis);
+	}
 	
-	return (and || vis); // vis should be redundant, but it's not a bad idea since riker can be a dumb bitch
+	return FALSE;
 }
 
 /* called when someone is being hit by the pen of the void */
@@ -5264,7 +5262,7 @@ arti_invoke(obj)
 
 	case SATURN:
 		{
-			if ( !(uwep && uwep == obj) ) {
+			if (!(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = 0;
 				break;
@@ -5336,7 +5334,7 @@ arti_invoke(obj)
 	break;
  	case PLUTO:
 		{
-			if ( !(uwep && uwep == obj) ) {
+			if (!(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = 0;
 				break;
@@ -5418,7 +5416,7 @@ arti_invoke(obj)
 	break;
 	case WATER:
 		{
-			if ( !(uwep && uwep == obj) ) {
+			if (!(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = 0;
 				break;
@@ -5457,7 +5455,7 @@ arti_invoke(obj)
 	break;
  	case SPEED_BANKAI:
 		{
-			if ( !(uwep && uwep == obj) ) {
+			if ( !(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = 0;
 				break;
@@ -6361,7 +6359,7 @@ arti_invoke(obj)
 			}
 		break;
 		case DEATH_TCH:
-			if (uwep && uwep != obj){
+			if ((!uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;
 				obj->age = monstermoves;
 				return(0);
@@ -6388,7 +6386,7 @@ arti_invoke(obj)
 		break;
 		case SKELETAL_MINION:
 		{
-			if (uwep && uwep != obj){
+			if ((!uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;
 				obj->age = monstermoves;
 				return(0);
@@ -7391,7 +7389,7 @@ arti_invoke(obj)
           } else You_feel("like you should be wearing %s.", The(xname(obj)));
         } break;
         case TOWEL_ITEMS:{
-          if(uwep == obj){
+          if(uwep && uwep == obj){
             struct obj *otmp;
             switch(rn2(5)){
               case 0:
@@ -7450,7 +7448,7 @@ arti_invoke(obj)
           /* TODO */
         } break;
         case LIFE_DEATH:{
-          if(uwep == obj){
+          if(uwep && uwep == obj){
             if(!getdir((char *)0))
               break;
             switch(obj->ovar1){

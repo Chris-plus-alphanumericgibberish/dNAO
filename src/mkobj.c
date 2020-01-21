@@ -1394,7 +1394,7 @@ start_corpse_timeout(body)
 	when += (long)(rnz(rot_adjust) - rot_adjust);
 	
 //	pline("corpse type: %d, %c",mons[body->corpsenm].mlet,def_monsyms[mons[body->corpsenm].mlet]);
-	if(is_migo(&mons[body->corpsenm])){
+	if(is_migo(&mons[body->corpsenm]) || body->corpsenm == PM_DEEP_DWELLER){
 		when = when/10 + 1;
 	}
 
@@ -1522,8 +1522,8 @@ register struct obj *otmp;
 	    set_moreluck();
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
-	else if (artifact_light(otmp) && otmp->lamplit)
-		begin_burn(otmp, FALSE);
+	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
+		begin_burn(otmp, TRUE);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
 		(void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
 	return;
@@ -1538,8 +1538,8 @@ register struct obj *otmp;
 	    set_moreluck();
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
-	else if (artifact_light(otmp) && otmp->lamplit)
-		begin_burn(otmp, FALSE);
+	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
+		begin_burn(otmp, TRUE);
 
 }
 
@@ -1573,8 +1573,8 @@ register struct obj *otmp;
 	    set_moreluck();
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
-	else if (artifact_light(otmp) && otmp->lamplit) 
-		begin_burn(otmp, FALSE);
+	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit) 
+		begin_burn(otmp, TRUE);
 	else if (otmp->otyp == FIGURINE) {
 		if (otmp->corpsenm != NON_PM
 		    && !dead_species(otmp->corpsenm,TRUE)
@@ -1595,8 +1595,8 @@ register struct obj *otmp;
 	    otmp->owt = weight(otmp);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
 	    (void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
-	else if (artifact_light(otmp) && otmp->lamplit)
-		begin_burn(otmp, FALSE);
+	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
+		begin_burn(otmp, TRUE);
 
 	return;
 }
@@ -2622,6 +2622,9 @@ int x, y;
     otmp->nobj = fobj;
     fobj = otmp;
     if (otmp->timed) obj_timer_checks(otmp, x, y, 0);
+	/* relight artifacts */
+	if (arti_light(otmp) && !otmp->lamplit)
+		begin_burn(otmp, FALSE);
 }
 
 #define ON_ICE(a) ((a)->recharged)

@@ -2811,14 +2811,17 @@ const char *oldstr;
 	while (*bp == ' ') bp++;
 	/* find "cloves of garlic", "worthless pieces of blue glass" */
 	if ((p = strstri(bp, "s of ")) != 0) {
-	    /* but don't singularize "gauntlets", "boots", "Eyes of the.." */
-	    if (BSTRNCMPI(bp, p-3, "Eye", 3) &&
-		BSTRNCMP(bp, p-4, "boot", 4) &&
-		BSTRNCMP(bp, p-8, "gauntlet", 8) &&
-		BSTRNCMPI(bp, p-11, "Steel Scale", 11) &&
-		BSTRNCMP(bp, p-8, "Gauntlet", 8))
-		while ((*p = *(p+1)) != 0) p++;
-	    return bp;
+		/* don't singularize these: */
+		if (!BSTRNCMPI(bp, p- 3, "Eyes of the Overworld", 21) || 
+			!BSTRNCMPI(bp, p-11, "Steel Scales of Kurtulmak", 25))
+			return bp;
+		else {
+			/* make a fake string of the start */
+			p[1] = '\0';
+			Strcpy(bp, makesingular(bp));
+			Sprintf(bp, "%s %s", bp, &p[2]);
+			return bp;
+		}
 	}
 
 	/* remove -s or -es (boxes) or -ies (rubies) */
@@ -2843,6 +2846,10 @@ const char *oldstr;
 				return bp;
 			}
 			if (!BSTRCMPI(bp, p-6, "leaves")) {
+				Strcpy(p-3, "f");
+				return bp;
+			}
+			if (!BSTRCMPI(bp, p-7, "sheaves")) {
 				Strcpy(p-3, "f");
 				return bp;
 			}

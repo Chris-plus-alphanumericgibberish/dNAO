@@ -1385,7 +1385,7 @@ struct obj *obj;
 {
 	xchar x, y;
 
-	if (!obj->lamplit && (obj->otyp == MAGIC_LAMP || ignitable(obj))) {
+	if (!obj->lamplit && ignitable(obj)) {
 	    if ((obj->otyp == MAGIC_LAMP ||
 		 obj->otyp == CANDELABRUM_OF_INVOCATION) &&
 		obj->spe == 0)

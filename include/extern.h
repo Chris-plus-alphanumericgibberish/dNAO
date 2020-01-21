@@ -1227,6 +1227,7 @@ E int FDECL(buzzmm, (struct monst *,struct monst *,struct attack *, int));
 E int FDECL(castmm, (struct monst *,struct monst *,struct attack *));
 E int FDECL(castum, (struct monst *,struct attack *));
 E void FDECL(cast_spell, (struct monst *, int,int));
+E int FDECL(needs_familiar, (struct monst *));
 
 /* ### minion.c ### */
 
@@ -1444,6 +1445,7 @@ E void NDECL(restartcham);
 E void FDECL(restore_cham, (struct monst *));
 E void FDECL(mon_animal_list, (BOOLEAN_P));
 E int FDECL(newcham, (struct monst *,struct permonst *,BOOLEAN_P,BOOLEAN_P));
+E int FDECL(select_newcham_form, (struct monst *));
 E int FDECL(can_be_hatched, (int));
 E int FDECL(egg_type_from_parent, (int,BOOLEAN_P));
 E boolean FDECL(dead_species, (int,BOOLEAN_P));
@@ -2543,6 +2545,9 @@ E void FDECL(kill_egg, (struct obj *));
 E void FDECL(hatch_egg, (genericptr_t, long));
 E void FDECL(learn_egg_type, (int));
 E void FDECL(burn_object, (genericptr_t, long));
+E int FDECL(lightsource_radius, (struct obj *));
+E long FDECL(lightsource_turns, (struct obj *));
+E boolean FDECL(lightsource_timed, (struct obj *));
 E void FDECL(begin_burn, (struct obj *, BOOLEAN_P));
 E void FDECL(end_burn, (struct obj *, BOOLEAN_P));
 E void FDECL(lightsaber_deactivate, (struct obj *, BOOLEAN_P));
