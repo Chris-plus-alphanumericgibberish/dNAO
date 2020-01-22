@@ -4950,7 +4950,7 @@ shk_uncurse(slang, shkp)
 	else if (Confusion)
 	{
 		/* Curse the item! */
-		You("accidentally ask for the item to be cursed");
+		You("accidentally ask for the item to be cursed!");
 		curse(obj);
 	}
 	else if (Hallucination)

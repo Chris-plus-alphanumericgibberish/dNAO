@@ -692,6 +692,7 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_ELF,	KNIFE,					ELVEN_DAGGER	      },
     { PM_ELF,	SPEAR,					ELVEN_SPEAR	      },
     { PM_ELF,	SHORT_SWORD,			ELVEN_SHORT_SWORD     },
+    { PM_ELF,	MACE,					ELVEN_MACE     },
     { PM_ELF,	BOW,					ELVEN_BOW	      },
     { PM_ELF,	ARROW,					ELVEN_ARROW	      },
     { PM_ELF,	HELMET,					ELVEN_HELM    },
