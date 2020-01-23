@@ -6688,15 +6688,16 @@ boolean ranged;
 		/* Special case for Migo.
 		 * Migo only scoop out brains some of the time (1/20)
 		 * Otherwise, they do a basic physical attack */
-		if ((pa == &mons[PM_MIGO_PHILOSOPHER] || pa == &mons[PM_MIGO_QUEEN])
-			&& rn2(20)) {
-			/* make physical attack */
-			alt_attk.adtyp = AD_PHYS;
-			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
-		}
-		else {
-			/* do the AD_DRIN attack, noting that we aren't eating brains */
-			spec = TRUE;
+		if (pa == &mons[PM_MIGO_PHILOSOPHER] || pa == &mons[PM_MIGO_QUEEN]) {
+			if (rn2(20)) {
+				/* make physical attack */
+				alt_attk.adtyp = AD_PHYS;
+				return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+			}
+			else {
+				/* do the AD_DRIN attack, noting that we aren't eating brains */
+				spec = TRUE;
+			}
 		}
 
 		/* print a basic hit message */
