@@ -13428,14 +13428,15 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 		}
 		if (!level.flags.noteleport) {
 			coord cc;
-			if (youdef) {
+			if (youagr) {
 				tele();
 			}
 			else {
 				rloc(magr, FALSE);
 			}
-			enexto(&cc, x(mdef), y(mdef), &mons[PM_URANIUM_IMP]);
-			rloc_to(mdef, cc.x, cc.y);
+			if (enexto(&cc, x(magr), y(magr), &mons[PM_URANIUM_IMP])) {
+				rloc_to(mdef, cc.x, cc.y);
+			}
 			
 			return MM_AGR_STOP;
 		}
