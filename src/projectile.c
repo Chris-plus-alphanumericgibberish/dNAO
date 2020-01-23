@@ -1058,8 +1058,9 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 	/* the player has a chance to burn some projectiles (not blaster bolts or laser beams) out of the air with a lightsaber */
 	else if (!(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT)
 		&& youdef && uwep && is_lightsaber(uwep) && litsaber(uwep)
-		&& ((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) ||
-		(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+		&& (
+		((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) ||
+		(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))))
 		&& 
 		rn2(3) < max((min(P_SKILL(u.fightingForm), P_SKILL(weapon_type(uwep))))-1,1))
 		)
