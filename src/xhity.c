@@ -10639,8 +10639,8 @@ int vis;
 		/* MONSTER GENERATING GAZES, MVU ONLY */
 
 	case AD_MIST:  // mi-go mist projector
-		/* 4/5 chance to succeed */
-		if (maybe_not && !rn2(5))
+		/* 1/5 chance to succeed */
+		if (maybe_not && rn2(5))
 			return MM_MISS;
 		else {
 			int i = 0;
