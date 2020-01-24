@@ -398,6 +398,39 @@ register int otyp;
 	return(buf);
 }
 
+/* fairly verbose description of the item's appearance
+ */
+char *
+obj_descname(obj)
+struct obj * obj;
+{
+	char *buf = nextobuf();
+	int saved_known =  obj->known;                       /* exact nature known */
+	int saved_bknown = obj->bknown;                      /* blessing or curse known */
+	int saved_rknown = obj->rknown;                      /* rustproof or not known */
+	int saved_sknown = obj->sknown;                      /* stolen or not known */
+	int saved_nknown = objects[obj->otyp].oc_name_known; /* type name known */
+	int saved_lamplit = obj->lamplit;
+	obj->known  = 0;
+	obj->bknown = 0;
+	obj->rknown = 0;
+	obj->sknown = 0;
+	/* careful -- some objects have null descriptions and always must be known */
+	if (OBJ_DESCR(objects[obj->otyp]) != (char *)0)	
+		objects[obj->otyp].oc_name_known = 0;
+	/* temporarily snuff lightsabers */
+	if (is_lightsaber(obj) && litsaber(obj))
+		obj->lamplit = 0;
+	buf = makesingular(xname(obj));
+	obj->known  = saved_known;
+	obj->bknown = saved_bknown; 
+	obj->rknown = saved_rknown; 
+	obj->sknown = saved_sknown;
+	objects[obj->otyp].oc_name_known = saved_nknown;
+	obj->lamplit = saved_lamplit;
+	return buf;
+}
+
 /* less verbose result than obj_typename(); either the actual name
    or the description (but not both); user-assigned name is ignored */
 char *
@@ -865,6 +898,8 @@ char *buf;
 #endif
 	if (is_lightsaber(obj) && litsaber(obj)){
 		Strcat(buf, lightsaber_colorText(obj));
+		if (!objects[obj->otyp].oc_name_known && strncmpi(eos(buf)-7, " bladed", 7))
+			Strcat(buf, " bladed");
 		Strcat(buf, " ");
 	}
 }
@@ -2810,16 +2845,18 @@ const char *oldstr;
 
 	while (*bp == ' ') bp++;
 	/* find "cloves of garlic", "worthless pieces of blue glass" */
-	if ((p = strstri(bp, "s of ")) != 0) {
+	if ((p = strstri(bp, " of ")) != 0 ||
+		(p = strstri(bp, " labelled ")) != 0 ||
+		(p = strstri(bp, " called ")) != 0) {
 		/* don't singularize these: */
-		if (!BSTRNCMPI(bp, p- 3, "Eyes of the Overworld", 21) || 
-			!BSTRNCMPI(bp, p-11, "Steel Scales of Kurtulmak", 25))
+		if (!BSTRNCMPI(bp, p- 4, "Eyes of the Overworld", 21) || 
+			!BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25))
 			return bp;
 		else {
 			/* make a fake string of the start */
-			p[1] = '\0';
+			p[0] = '\0';
 			Strcpy(bp, makesingular(bp));
-			Sprintf(bp, "%s %s", bp, &p[2]);
+			Sprintf(bp, "%s %s", bp, &p[1]);
 			return bp;
 		}
 	}

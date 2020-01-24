@@ -2463,6 +2463,12 @@ winid *datawin;
 		return;
 	}
 
+	/* type name */
+	if (obj) {
+		Sprintf(buf, "(%s)", obj_descname(obj));
+		OBJPUTSTR(buf);
+	}
+
 		/* Object classes currently with no special messages here: amulets. */
 	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill)) {
 		boolean otyp_is_blaster = (otyp == HAND_BLASTER || otyp == ARM_BLASTER || otyp == MASS_SHADOW_PISTOL || otyp == CUTTING_LASER || otyp == RAYGUN);

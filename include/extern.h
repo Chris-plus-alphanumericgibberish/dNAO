@@ -1778,6 +1778,7 @@ E const char *FDECL(lightsaber_colorText, (struct obj *));
 E char *FDECL(lightsaber_hiltText, (struct obj *));
 E int NDECL(random_saber_hilt);
 E char *FDECL(obj_typename, (int));
+E char *FDECL(obj_descname, (struct obj *));
 E char *FDECL(simple_typename, (int));
 E boolean FDECL(obj_is_pname, (struct obj *));
 E char *FDECL(distant_name, (struct obj *,char *(*)(OBJ_P)));
