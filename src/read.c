@@ -3505,47 +3505,32 @@ int gen_restrict;
 	    pline1(thats_enough_tries);
 	} else {
 createmon:
-	    for (i = 0; i <= (allow_multi ? multi : 0); i++) {
-		if (monclass != MAXMCLASSES && !(ma_require || mg_restrict || gen_restrict))
-			whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES);
-		if (maketame) {
-		    mtmp = makemon(whichpm, u.ux, u.uy, MM_EDOG);
-		    if (mtmp) {
-			initedog(mtmp);
-			set_malign(mtmp);
-		    }
-		} else {
-		    mtmp = makemon(whichpm, u.ux, u.uy, NO_MM_FLAGS);
-		    if ((makepeaceful || makehostile) && mtmp) {
-			mtmp->mtame = 0;	/* sanity precaution */
-			mtmp->mpeaceful = makepeaceful ? 1 : 0;
-			set_malign(mtmp);
-		    }
-		}
-		if (specify_derivation){
-			if (mtmp && !mtmp->mfaction && (
-				undeadtype == ZOMBIFIED ? can_undead_mon(mtmp) :
-				undeadtype == SKELIFIED ? can_undead_mon(mtmp) :
-				undeadtype == VAMPIRIC ? can_undead_mon(mtmp) :
-				undeadtype == CRYSTALFIED ? TRUE :
-				undeadtype == ILLUMINATED ? TRUE :
-				undeadtype == PSEUDONATURAL ? TRUE :
-				undeadtype == TOMB_HERD ? TRUE :
-				undeadtype == YITH ? TRUE :
-				undeadtype == MISTWEAVER ? TRUE :
-				undeadtype == CRANIUM_RAT ? is_rat(mtmp->data) :
-				undeadtype == FRACTURED ? is_kamerel(mtmp->data) : 0
-				))
-			{
-				mtmp->mfaction = undeadtype;
+		for (i = 0; i <= (allow_multi ? multi : 0); i++) {
+			if (monclass != MAXMCLASSES && !(ma_require || mg_restrict || gen_restrict))
+				whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES);
+
+			int mm_flags = NO_MM_FLAGS;
+			if (maketame)
+				mm_flags |= MM_EDOG;
+
+			if (undeadtype)
+				mtmp = makeundead(whichpm, u.ux, u.uy, mm_flags, undeadtype);
+			else
+				mtmp = makemon(whichpm, u.ux, u.uy, mm_flags);
+
+			if (mtmp) {
+				if (maketame)
+					initedog(mtmp);
+				else if (makepeaceful)
+					mtmp->mpeaceful = 1;
+				else if (makehostile)
+					mtmp->mpeaceful = 0;
+				set_malign(mtmp);
+
+				madeany = TRUE;
+				newsym(mtmp->mx, mtmp->my);
 			}
 		}
-		if (mtmp)
-		{
-			madeany = TRUE;
-			newsym(mtmp->mx, mtmp->my);
-		}
-	    }
 	}
 	return mtmp;
 }
