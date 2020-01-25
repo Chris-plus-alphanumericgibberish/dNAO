@@ -5143,10 +5143,12 @@ int spell;
 	
 	if(Nullmagic && spellid(spell)!=SPE_ANTIMAGIC_SHIELD) return 0;
 	
-	if(
-		((spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE) && 
-			uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
-	) return 100;
+	if ((uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM) ||
+		(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM && (
+		(spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE)))
+		) {
+		return 100;
+	}
 	
 	/* Calculate intrinsic ability (splcaster) */
 
@@ -5299,7 +5301,7 @@ int spell;
 			splcaster += uarmhbon;
 
 		if (uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM)
-			splcaster -= urole.spelarmr;
+			splcaster -= (u.ulevel + 20);
 	}
 
 	if (uarmg) {
