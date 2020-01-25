@@ -2155,11 +2155,9 @@ begin_burn(obj, already_lit)
 
 	/* some things need to set lamplit on their own here */
 	if (obj->otyp == MAGIC_LAMP ||
-		obj->otyp == POT_STARLIGHT ||
-		obj->otyp == CHUNK_OF_FOSSIL_DARK ||
 		obj->otyp == CANDLE_OF_INVOCATION ||
 		artifact_light(obj) ||
-		arti_light(obj))
+		obj_eternal_light(obj))
 		obj->lamplit = TRUE;
 	/* lightsaber charge and Atma Weapon special */
 	if (obj->otyp == DOUBLE_LIGHTSABER ||

@@ -420,8 +420,8 @@ struct obj *obj;
 			attach_fig_transform_timeout(obj);
 		    }
 	}
-	/* relight artifacts */
-	if (arti_light(obj) && !obj->lamplit)
+	/* relight lightsources that should always be lit */
+	if (obj_eternal_light(obj) && !obj->lamplit)
 		begin_burn(obj, FALSE);
 }
 

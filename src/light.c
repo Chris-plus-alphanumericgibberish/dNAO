@@ -652,10 +652,20 @@ boolean
 obj_sheds_light(obj)
 struct obj *obj;
 {
-	return (
+	return (obj->lamplit && (						/* lamplit is sometimes off for even eternal lightsources */
 		obj_is_burning(obj) ||						/* standard lightsources that must be lit */
-		(arti_light(obj) && obj->lamplit) ||		/* artifact lightsource -- not lit when in something's stomach */
-		(artifact_light(obj) && obj->lamplit) ||	/* sometimes active artifact lightsource */
+		artifact_light(obj) ||						/* sometimes active artifact lightsource */
+		obj_eternal_light(obj)						/* object should always be shedding light (except when occluded) */
+		));
+}
+/* Return TRUE if object's light should in theory never go out */
+/* it is still temporarily extinguished when in a monster's stomach */
+boolean
+obj_eternal_light(obj)
+struct obj * obj;
+{
+	return (
+		arti_light(obj) ||							/* artifact lightsource */
 		obj->otyp == POT_STARLIGHT ||				/* always lit potion */
 		obj->otyp == CHUNK_OF_FOSSIL_DARK			/* always dark rock */
 		);
