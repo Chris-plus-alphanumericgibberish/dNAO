@@ -4225,7 +4225,7 @@ boolean atme;
 	n = 0;
 	switch(pseudo->otyp)  {
 	case SPE_LIGHTNING_STORM:	color = EXPL_MAGICAL;
-								n = rnd(6) + 3;
+								n = rnd(6) + 2;
 								dam = rnd(u.ulevel) + d(6,6) + spell_damage_bonus();
 								rad = 1;
 								inacc = 3;
