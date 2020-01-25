@@ -2468,6 +2468,10 @@ winid *datawin;
 		Sprintf(buf, "(%s)", obj_descname(obj));
 		OBJPUTSTR(buf);
 	}
+	else {
+		Sprintf(buf, "(%s)", obj_typename(otyp));
+		OBJPUTSTR(buf);
+	}
 
 		/* Object classes currently with no special messages here: amulets. */
 	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill)) {
@@ -2982,12 +2986,10 @@ winid *datawin;
 		}
 	}
 	if (olet == POTION_CLASS) {
-		/* nothing special */
-		OBJPUTSTR("Potion.");
+		/* nothing special */;
 	}
 	if (olet == SCROLL_CLASS) {
-		/* nothing special */
-		OBJPUTSTR("Scroll.");
+		/* nothing special */;
 	}
 	if (olet == TILE_CLASS) {
 		switch (otyp) {
@@ -3075,7 +3077,8 @@ winid *datawin;
 		OBJPUTSTR(buf);
 	}
 	if (olet == RING_CLASS) {
-		OBJPUTSTR((oc.oc_charged && otyp != RIN_WISHES) ? "Chargeable ring." : "Ring.");
+		if (oc.oc_charged && otyp != RIN_WISHES)
+			OBJPUTSTR("Chargeable.");
 		if (oc.oc_tough) {
 			OBJPUTSTR("Is made of a hard material.");
 		}
