@@ -5299,9 +5299,6 @@ int spell;
 	if (uarmh) {
 		if (is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE)
 			splcaster += uarmhbon;
-
-		if (uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM)
-			splcaster -= (u.ulevel + 20);
 	}
 
 	if (uarmg) {
