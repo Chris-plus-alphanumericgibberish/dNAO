@@ -96,6 +96,7 @@ struct obj {
 #define ohaluengr obroken	/* engraving on ring isn't a ward */
 #define odebone obroken		/* corpse has been de-boned */
 	Bitfield(otrapped,1);	/* container is trapped */
+#define obolted otrapped	/* magic chest is permanently attached to floor */
 				/* or accidental tripped rolling boulder trap */
 
 	Bitfield(recharged,3);	/* number of times it's been recharged */

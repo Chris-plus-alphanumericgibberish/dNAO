@@ -2376,7 +2376,7 @@ meatobj(mtmp)		/* for gelatinous cubes */
 		/* in case it polymorphed or died */
 		if (ptr != &mons[PM_GELATINOUS_CUBE])
 		    return !ptr ? 2 : 1;
-	    } else if (otmp->oclass != ROCK_CLASS &&
+	    } else if (otmp->oclass != ROCK_CLASS && !(otmp->otyp == MAGIC_CHEST && otmp->obolted) &&
 				    otmp != uball && otmp != uchain) {
 		++ecount;
 		if (ecount == 1) {
@@ -2852,6 +2852,8 @@ struct obj *otmp;
 	    return FALSE;
 	if (otyp == CORPSE && is_rider(&mons[otmp->corpsenm]))
 	    return FALSE;
+	if (otyp == MAGIC_CHEST && otmp->obolted)
+		return FALSE;
 	if (otmp->obj_material == SILVER && hates_silver(mdat) &&
 		(otyp != BELL_OF_OPENING || !is_covetous(mdat)))
 	    return FALSE;

@@ -816,6 +816,7 @@ boolean artif;
 					break;
 		case MAGIC_CHEST:
 			otmp->olocked = 1;
+			otmp->obolted = 0;
 		break;
 #ifdef TOURIST
 		case EXPENSIVE_CAMERA:
@@ -2187,7 +2188,8 @@ weight(obj)
 register struct obj *obj;
 {
 	int wt = objects[obj->otyp].oc_weight;
-	if(obj->oartifact == ART_ROD_OF_LORDLY_MIGHT) wt = objects[MACE].oc_weight;
+	if (obj->otyp == MAGIC_CHEST && obj->obolted) wt = 99999;	/* impossibly heavy */
+	else if(obj->oartifact == ART_ROD_OF_LORDLY_MIGHT) wt = objects[MACE].oc_weight;
 	else if(obj->oartifact == ART_ANNULUS) wt = objects[BELL_OF_OPENING].oc_weight;
 	else if(obj->oartifact == ART_SCEPTRE_OF_LOLTH) wt = 3*objects[MACE].oc_weight;
 	else if(obj->oartifact == ART_ROD_OF_THE_ELVISH_LORDS) wt = objects[ELVEN_MACE].oc_weight;
