@@ -3828,6 +3828,7 @@ int wishflags;
 	if (strncmpi(bp, "rod of lordly might", 19)) /* not the "lord" rank */
 	if (strncmpi(bp, "magenta", 7)) /* not the "mage" rank */
 	if (strncmpi(bp, "band", 4)) /* not the "ban" rank */
+	if (strncmpi(bp, "green dragon crescent blade", 27)) /* not the "green dragon" monster */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
 	if (strncmpi(bp, "platinum dragon plate", 22)) /* not a "dragon" */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
