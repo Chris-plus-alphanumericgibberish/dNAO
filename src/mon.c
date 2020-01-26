@@ -3623,182 +3623,239 @@ struct monst *mon;
 	return (struct obj *)0;
 }
 
+/* maybe kills mtmp, possibly lifesaving it */
 STATIC_OVL void
 lifesaved_monster(mtmp)
 struct monst *mtmp;
 {
 	struct obj *lifesave = mlifesaver(mtmp);
+	int lifesavers = 0;
+	int i;
+#define LSVD_ANA 0x01	/* anachrononaut quest */
+#define LSVD_UVU 0x02	/* uvuuduam + prayerful thing */
+#define LSVD_OBJ 0x04	/* lifesaving items */
+#define LSVD_ALA 0x08	/* alabaster decay */
+#define LSVD_FRC 0x10	/* fractured kamerel */
+#define LSVD_ILU 0x20	/* illuminated */
+#define LSVD_PLY 0x40	/* polypoids */
+#define LSVD_KAM 0x80	/* kamerel becoming fractured */
+#define LSVDLAST LSVD_KAM	/* last lifesaver */
 
-	if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(mtmp->mpeaceful) && !rn2(20)){
-		if (cansee(mtmp->mx, mtmp->my)) {
-			pline("But wait...");
-			if (attacktype(mtmp->data, AT_EXPL)
-			    || attacktype(mtmp->data, AT_BOOM))
-				pline("%s reappears, looking much better!", Monnam(mtmp));
-			else
-				pline("%s flickers, then reappears looking much better!", Monnam(mtmp));
-		}
-		mtmp->mcanmove = 1;
-		mtmp->mfrozen = 0;
-		if (mtmp->mtame && !mtmp->isminion) {
-			wary_dog(mtmp, FALSE);
-		}
-		if (mtmp->mhpmax <= 9) mtmp->mhpmax = 10;
-		mtmp->mhp = mtmp->mhpmax;
-		return;
-	} else if(mtmp->mspec_used == 0 && 
-		(is_uvuudaum(mtmp->data) || mtmp->data==&mons[PM_PRAYERFUL_THING])
-	){
-		if (cansee(mtmp->mx, mtmp->my)) {
-			pline("But wait...");
-			pline("A glowing halo forms over %s!",
-				mon_nam(mtmp));
-			if (attacktype(mtmp->data, AT_EXPL)
-			    || attacktype(mtmp->data, AT_BOOM))
-				pline("%s reconstitutes!", Monnam(mtmp));
-			else
-				pline("%s looks much better!", Monnam(mtmp));
-		}
-		mtmp->mcanmove = 1;
-		mtmp->mfrozen = 0;
-		if (mtmp->mtame && !mtmp->isminion) {
-			wary_dog(mtmp, FALSE);
-		}
-		if (mtmp->m_lev < 38) mtmp->m_lev = 38;
-		if (mtmp->mhpmax <= 38*4.5) mtmp->mhpmax = (int)(38*4.5);
-		mtmp->mhp = mtmp->mhpmax;
-		mtmp->mspec_used = mtmp->mhpmax/5;
-		return;
-	} else if (lifesave) {
-		/* not canseemon; amulets are on the head, so you don't want */
-		/* to show this for a long worm with only a tail visible. */
-		/* Nor do you check invisibility, because glowing and disinte- */
-		/* grating amulets are always visible. */
-		if (cansee(mtmp->mx, mtmp->my)) {
-			pline("But wait...");
-			pline("%s medallion begins to glow!",
-				s_suffix(Monnam(mtmp)));
-			makeknown(AMULET_OF_LIFE_SAVING);
-			if (attacktype(mtmp->data, AT_EXPL)
-			    || attacktype(mtmp->data, AT_BOOM))
-				pline("%s reconstitutes!", Monnam(mtmp));
-			else
-				pline("%s looks much better!", Monnam(mtmp));
-			pline_The("medallion crumbles to dust!");
-		}
-		m_useup(mtmp, lifesave);
-		mtmp->mcanmove = 1;
-		mtmp->mfrozen = 0;
-		if (mtmp->mtame && !mtmp->isminion) {
-			wary_dog(mtmp, FALSE);
-		}
-		if (mtmp->mhpmax <= 9) mtmp->mhpmax = 10;
-		mtmp->mhp = mtmp->mhpmax;
-		if (mvitals[monsndx(mtmp->data)].mvflags & G_GENOD && !In_quest(&u.uz)) {
-			if (cansee(mtmp->mx, mtmp->my))
-			    pline("Unfortunately %s is still genocided...",
-				mon_nam(mtmp));
-		} else
-			return;
-		/*Under this point, the only resurrection effects should be those affecting undead, or that the monster wouldn't WANT to trigger*/
-	} else if(!rn2(20) && (mtmp->data == &mons[PM_ALABASTER_ELF]
+	/* set to kill */
+	mtmp->mhp = 0;
+
+	/* get all lifesavers */
+	if (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(mtmp->mpeaceful) && !rn2(20))
+		lifesavers |= LSVD_ANA;
+	if (mtmp->mspec_used == 0 && (is_uvuudaum(mtmp->data) || mtmp->data == &mons[PM_PRAYERFUL_THING]))
+		lifesavers |= LSVD_UVU;
+	if (lifesave)
+		lifesavers |= LSVD_OBJ;
+	if ((!rn2(20) && (mtmp->data == &mons[PM_ALABASTER_ELF]
 		|| mtmp->data == &mons[PM_ALABASTER_ELF_ELDER]
 		|| is_alabaster_mummy(mtmp->data)
-	)){
-		if (cansee(mtmp->mx, mtmp->my)) {
-			pline("%s putrefies with impossible speed!",Monnam(mtmp));
-			mtmp->mcanmove = 1;
-			mtmp->mfrozen = 0;
-			if (mtmp->mtame && !mtmp->isminion) {
-				wary_dog(mtmp, FALSE);
+		)))
+		lifesavers |= LSVD_ALA;
+	if (mtmp->mfaction == FRACTURED && !rn2(2))
+		lifesavers |= LSVD_FRC;
+	if (mtmp->ispolyp)
+		lifesavers |= LSVD_PLY;
+	if (mtmp->mfaction == ILLUMINATED)
+		lifesavers |= LSVD_ILU;
+	if (mtmp->zombify && is_kamerel(mtmp->data))
+		lifesavers |= LSVD_KAM;
+
+	/* some lifesavers do NOT work on stone/gold/glass-ing */
+	if (stoned || golded || glassed)
+		lifesavers &= ~(LSVD_ALA | LSVD_FRC | LSVD_PLY | LSVD_ILU | LSVD_KAM);
+
+	/* some lifesavers should SILENTLY fail to protect from genocide */
+	if (mvitals[monsndx(mtmp->data)].mvflags & G_GENOD && !In_quest(&u.uz))
+		lifesavers &= ~(LSVD_FRC | LSVD_KAM);
+
+	/* quick check -- if no lifesavers, let's fail immediately */
+	if (!lifesavers) {
+		return;
+	}
+	/* perform lifesaving, preferring small-number lifesavers */
+	for (i = 1; ((i <= LSVDLAST) && (mtmp->mhp < 1)); i = i<<1) {
+		if (!(lifesavers&i)) {
+			continue;
+		}
+
+		switch (i)
+		{
+		case LSVD_ANA:
+			/* message */
+			if (cansee(mtmp->mx, mtmp->my)) {
+				pline("But wait...");
+				if (attacktype(mtmp->data, AT_EXPL)
+					|| attacktype(mtmp->data, AT_BOOM))
+					pline("%s reappears, looking much better!", Monnam(mtmp));
+				else
+					pline("%s flickers, then reappears looking much better!", Monnam(mtmp));
 			}
-			mtmp->mhp = mtmp->mhpmax;
+			break;
+
+		case LSVD_UVU:
+			/* message */
+			if (cansee(mtmp->mx, mtmp->my)) {
+				pline("But wait...");
+				pline("A glowing halo forms over %s!",
+					mon_nam(mtmp));
+				if (attacktype(mtmp->data, AT_EXPL)
+					|| attacktype(mtmp->data, AT_BOOM))
+					pline("%s reconstitutes!", Monnam(mtmp));
+				else
+					pline("%s looks much better!", Monnam(mtmp));
+			}
+			/* restore level, maxhp */
+			if (mtmp->m_lev < 38)
+				mtmp->m_lev = 38;
+			if (mtmp->mhpmax < 171)	/* 171 = 38x4.5 = avg(38d8) */
+				mtmp->mhpmax = 171;
+			/* set mspec_used */
+			mtmp->mspec_used = mtmp->mhpmax / 5;
+			break;
+		case LSVD_OBJ:
+			/* message */
+			if (cansee(mtmp->mx, mtmp->my)) {
+				pline("But wait...");
+				pline("%s medallion begins to glow!",
+					s_suffix(Monnam(mtmp)));
+				makeknown(AMULET_OF_LIFE_SAVING);
+				if (attacktype(mtmp->data, AT_EXPL)
+					|| attacktype(mtmp->data, AT_BOOM))
+					pline("%s reconstitutes!", Monnam(mtmp));
+				else
+					pline("%s looks much better!", Monnam(mtmp));
+				pline_The("medallion crumbles to dust!");
+			}
+			/* use up amulet */
+			m_useup(mtmp, lifesave);
+			break;
+		case LSVD_ALA:
+			/* message */
+			if (cansee(mtmp->mx, mtmp->my)) {
+				pline("%s putrefies with impossible speed!", Monnam(mtmp));
+			}
+			/* alabaster-specific effects */
 			mtmp->mspec_used = 0;
-			if(is_alabaster_mummy(mtmp->data) && mtmp->mvar1 >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar1 <= SYLLABLE_OF_SPIRIT__VAUL){
+			if (is_alabaster_mummy(mtmp->data) && mtmp->mvar1 >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar1 <= SYLLABLE_OF_SPIRIT__VAUL){
 				mksobj_at(mtmp->mvar1, mtmp->mx, mtmp->my, TRUE, FALSE);
-				if(mtmp->mvar1 == SYLLABLE_OF_SPIRIT__VAUL)
-					mtmp->mintrinsics[(DISPLACED-1)/32] &= ~(1 << (DISPLACED-1)%32);
+				if (mtmp->mvar1 == SYLLABLE_OF_SPIRIT__VAUL)
+					mtmp->mintrinsics[(DISPLACED - 1) / 32] &= ~(1 << (DISPLACED - 1) % 32);
 				mtmp->mvar1 = 0; //Lose the bonus if resurrected
 			}
 			newcham(mtmp, &mons[rn2(4) ? PM_ACID_BLOB : PM_BLACK_PUDDING], FALSE, FALSE);
-			return;
-		}
-	} else if(mtmp->mfaction == FRACTURED && !rn2(2)){
-		if (couldsee(mtmp->mx, mtmp->my)) {
-			pline("But wait...");
-			if(canseemon(mtmp))
-				pline("%s fractures further%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
-			else
-				You_hear("something crack%s!", !is_silent(mtmp->data) ? " with an unearthly scream" : "");
-		}
-		mtmp->mcanmove = 1;
-		mtmp->mfrozen = 0;
-		mtmp->mtame = 0;
-		mtmp->mpeaceful = 0;
-		mtmp->m_lev += 4;
-		mtmp->mhpmax = d(mtmp->m_lev, 8);
-		mtmp->mhp = mtmp->mhpmax;
-		return;
-	} else if(mtmp->ispolyp && !stoned && !golded && !glassed){
-		if(mtmp->mfaction == ILLUMINATED && rn2(3)){ /*Don't use up Illuminated status until it's all out of masks!*/
+			break;
+		case LSVD_FRC:
+			/* message */
+			if (couldsee(mtmp->mx, mtmp->my)) {
+				pline("But wait...");
+				if (canseemon(mtmp))
+					pline("%s fractures further%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
+				else
+					You_hear("something crack%s!", !is_silent(mtmp->data) ? " with an unearthly scream" : "");
+			}
+			/* make hostile */
+			mtmp->mtame = 0;
+			mtmp->mpeaceful = 0;
+			/* boost level */
+			mtmp->m_lev += 4;
+			mtmp->mhpmax += d(4, 8);
+			break;
+
+		case LSVD_ILU:
+			/* normally has only a 1/3 chance of losing its lifesaving ability */
+			if (rn2(3) && !(
+				(mvitals[monsndx(mtmp->data)].mvflags & G_GENOD && !In_quest(&u.uz))	/* genocide-death always breaks halo */
+				))
+			{
+				/* free lifesaving */;
+			}
+			/* else this revive would be its last */
+			else {
+				if (lifesavers & (LSVD_PLY)) {
+					/* we would prefer to use some lower forms of lifesaving over losing illuminated */
+					continue;
+				}
+				else {
+					/* note that we will strip illuminated status - we will handle other parts later */
+					lifesavers &= ~LSVD_ILU;
+				}
+			}
+			/* message */
 			if (couldsee(mtmp->mx, mtmp->my)) {
 				pline("But wait...");
 				pline("A glowing halo forms over %s!",
 					mon_nam(mtmp));
 			}
-			mtmp->mcanmove = 1;
-			mtmp->mfrozen = 0;
-			mtmp->mhp = mtmp->mhpmax;
-			return;
-		} else {
+			/* If marked to do so, remve illuminated status */
+			if (!(lifesavers&LSVD_ILU)){
+				mtmp->mfaction = 0;
+				del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
+				if (emits_light_mon(mtmp))
+					new_light_source(mtmp->mx, mtmp->my, emits_light_mon(mtmp),
+					LS_MONSTER, (genericptr_t)mtmp);
+			}
+			break;
+		case LSVD_PLY:
+			/* message */
 			if (couldsee(mtmp->mx, mtmp->my)){
 				pline("But wait...");
 				pline("%s's mask breaks!", Monnam(mtmp));
-				mtmp->mcanmove = 1;
-				mtmp->mfrozen = 0;
-				mtmp->mhp = mtmp->mhpmax;
-				mtmp->ispolyp = 0;
-				newcham(mtmp, &mons[PM_POLYPOID_BEING], FALSE, FALSE);
-				mtmp->m_insight_level = 40;
-				return;
 			}
+			/* turn into a polypoid */
+			mtmp->ispolyp = 0;
+			newcham(mtmp, &mons[PM_POLYPOID_BEING], FALSE, FALSE);
+			mtmp->m_insight_level = 40;
+			break;
+		case LSVD_KAM:
+			if (couldsee(mtmp->mx, mtmp->my)) {
+				pline("But wait...");
+				if (canseemon(mtmp))
+					pline("%s fractures%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
+				else
+					You_hear("something crack%s!", !is_silent(mtmp->data) ? " with an unearthly scream" : "");
+			}
+			mtmp->mfaction = FRACTURED;
+			/* make hostile */
+			mtmp->mtame = 0;
+			mtmp->mpeaceful = 0;
+			/* boost level */
+			mtmp->m_lev += 4;
+			mtmp->mhpmax += d(4, 8);
+			break;
 		}
-	} else if(mtmp->mfaction == ILLUMINATED && !stoned && !golded && !glassed){
-		if (couldsee(mtmp->mx, mtmp->my)) {
-			pline("But wait...");
-			pline("A glowing halo forms over %s!",
-				mon_nam(mtmp));
-		}
+		/* perform common lifesaving effects */
 		mtmp->mcanmove = 1;
 		mtmp->mfrozen = 0;
-		mtmp->mhp = mtmp->mhpmax;
-		if(!rn2(3)){
-			mtmp->mfaction = 0;
-			del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
-			if (emits_light_mon(mtmp))
-				new_light_source(mtmp->mx, mtmp->my, emits_light_mon(mtmp),
-						 LS_MONSTER, (genericptr_t)mtmp);
+		if (mtmp->mtame && !mtmp->isminion) {
+			wary_dog(mtmp, FALSE);
 		}
-		return;
-	} else if(mtmp->zombify && is_kamerel(mtmp->data) && !stoned && !golded && !glassed){
-		if (couldsee(mtmp->mx, mtmp->my)) {
-			pline("But wait...");
-			if(canseemon(mtmp))
-				pline("%s fractures%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
-			else
-				You_hear("something crack%s!", !is_silent(mtmp->data) ? " with an unearthly scream" : "");
-		}
-		mtmp->mfaction = FRACTURED;
-		mtmp->mcanmove = 1;
-		mtmp->mfrozen = 0;
-		mtmp->mtame = 0;
-		mtmp->mpeaceful = 0;
-		mtmp->m_lev += 4;
-		mtmp->mhpmax = d(mtmp->m_lev, 8);
+		if (mtmp->mhpmax < 10)
+			mtmp->mhpmax = 10;
 		mtmp->mhp = mtmp->mhpmax;
-		return;
+		/* genocided creatures get re-killed */
+		if (mvitals[monsndx(mtmp->data)].mvflags & G_GENOD && !In_quest(&u.uz)) {
+			if (cansee(mtmp->mx, mtmp->my)) {
+				pline("Unfortunately %s is still genocided...",
+					mon_nam(mtmp));
+			}
+			mtmp->mhp = 0;
+		}
 	}
-	mtmp->mhp = 0;
+#undef LSVD_ANA
+#undef LSVD_UVU
+#undef LSVD_OBJ
+#undef LSVD_ALA
+#undef LSVD_FRC
+#undef LSVD_ILU
+#undef LSVD_PLY
+#undef LSVD_KAM
+#undef LSVDLAST
+	return;
 }
 
 void
