@@ -2622,8 +2622,8 @@ int x, y;
     otmp->nobj = fobj;
     fobj = otmp;
     if (otmp->timed) obj_timer_checks(otmp, x, y, 0);
-	/* relight artifacts */
-	if (arti_light(otmp) && !otmp->lamplit)
+	/* relight lightsources that should always be lit */
+	if (obj_eternal_light(otmp) && !otmp->lamplit)
 		begin_burn(otmp, FALSE);
 }
 

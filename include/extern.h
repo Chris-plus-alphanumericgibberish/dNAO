@@ -1103,6 +1103,7 @@ E void FDECL(obj_move_light_source, (struct obj *, struct obj *));
 E boolean NDECL(any_light_source);
 E void FDECL(snuff_light_source, (int, int));
 E boolean FDECL(obj_sheds_light, (struct obj *));
+E boolean FDECL(obj_eternal_light, (struct obj *));
 E boolean FDECL(obj_is_burning, (struct obj *));
 E boolean FDECL(litsaber, (struct obj *));
 E void FDECL(obj_split_light_source, (struct obj *, struct obj *));
