@@ -141,6 +141,8 @@ STATIC_PTR int NDECL(wiz_show_vision);
 STATIC_PTR int NDECL(wiz_mon_polycontrol);
 STATIC_PTR int NDECL(wiz_show_wmodes);
 STATIC_PTR int NDECL(wiz_showkills);	/* showborn patch */
+STATIC_PTR int NDECL(wiz_setinsight);
+STATIC_PTR int NDECL(wiz_setsanity);
 #ifdef SHOW_BORN
 extern void FDECL(list_vanquished, (int, BOOLEAN_P)); /* showborn patch */
 #endif /* SHOW_BORN */
@@ -1553,6 +1555,45 @@ wiz_show_wmodes()
 STATIC_PTR int wiz_showkills()		/* showborn patch */
 {
 	list_vanquished('y', FALSE);
+	return 0;
+}
+
+STATIC_PTR int wiz_setinsight()
+{
+	char buf[BUFSZ];
+	int newval;
+	int ret;
+
+	getlin("Set your insight to what?", buf);
+
+	(void)mungspaces(buf);
+	if (buf[0] == '\033' || buf[0] == '\0') ret = 0;
+	else ret = sscanf(buf, "%d", &newval);
+
+	if (ret != 1) {
+		pline1(Never_mind);
+		return 0;
+	}
+	u.uinsight = max(0, min(100, newval));
+	return 0;
+}
+STATIC_PTR int wiz_setsanity()
+{
+	char buf[BUFSZ];
+	int newval;
+	int ret;
+
+	getlin("Set your sanity to what?", buf);
+
+	(void)mungspaces(buf);
+	if (buf[0] == '\033' || buf[0] == '\0') ret = 0;
+	else ret = sscanf(buf, "%d", &newval);
+
+	if (ret != 1) {
+		pline1(Never_mind);
+		return 0;
+	}
+	u.usanity = max(0, min(100, newval));
 	return 0;
 }
 
@@ -4548,6 +4589,8 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"timeout", "look at timeout queue", wiz_timeout_queue, IFBURIED, AUTOCOMPLETE},
 	{"vision", "show vision array", wiz_show_vision, IFBURIED, AUTOCOMPLETE},
 	{"showkills", "show list of monsters killed", wiz_showkills, IFBURIED, AUTOCOMPLETE},
+	{"setinsight", "sets your insight value", wiz_setinsight, IFBURIED, AUTOCOMPLETE },
+	{"setsanity", "sets your sanity value", wiz_setsanity, IFBURIED, AUTOCOMPLETE },
 	{"dump_map", "dump map glyphs into a file", wiz_mk_mapglyphdump, IFBURIED, AUTOCOMPLETE},
 #ifdef DEBUG
 	{"wizdebug", "wizard debug command", wiz_debug_cmd, IFBURIED, AUTOCOMPLETE},
