@@ -430,6 +430,11 @@ int tary;
 		if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)
 			return MM_MISS; /* stomachs can't hurt you! */
 	}
+	/* While swallowed OR stuck, you can't attack other monsters */
+	if (youagr && u.ustuck) {
+		if (mdef != u.ustuck)
+			return MM_MISS;
+	}
 
 	/* Set up the visibility of action */
 	vis = getvis(magr, mdef, tarx, tary);
@@ -843,6 +848,9 @@ int tary;
 			/* engulfing attacks */
 		case AT_ENGL:
 		case AT_ILUR:	/* deprecated */
+			/* not in range */
+			if (ranged)
+				continue;
 			/* don't make self-fatal attacks */
 			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
 				continue;
@@ -7842,6 +7850,16 @@ boolean ranged;
 			/* player-only: abuse CHA */
 			if (youdef)
 				exercise(A_CHA, FALSE);
+			/* you are made to attempt to attack the target, but only in melee (for sanity's sake) */
+			if (dist2(u.ux, u.uy, x(mdef), y(mdef)) <= 2 && !youagr && !youdef) {
+				result = xattacky(&youmonst, mdef, x(mdef), y(mdef));
+				/* possibly return early if def died */
+				if (result&(MM_DEF_DIED | MM_DEF_LSVD))
+				{
+					in_conflict = FALSE;
+					return result;
+				}
+			}
 			/* all monsters on the level attempt to attack the target */
 			for (tmpm = fmon; tmpm; tmpm = nmon){
 				nmon = tmpm->nmon;
