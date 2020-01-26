@@ -489,25 +489,22 @@ merge_adj_rooms()
 				smeq[j] = smeq[i];
 			else
 				smeq[i] = smeq[j];
-			// make the lighting consistent between the rooms -- this will fail sometimes when merging already-merged rooms, but this isn't critical
-			if (a->rlit != b->rlit)
-			{
-				int lit = 0;
-				struct rm *lev;
-				struct mkroom *tmp;
+			// make the lighting consistent in the rooms 
+			struct rm *lev;
+			struct mkroom *tmp;
+			if ((((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM) && b->rtype != JOINEDROOM) {
+				tmp = b;
+				tmp->rlit = a->rlit;
+			}
+			else {
+				tmp = a;
+				tmp->rlit = b->rlit;
+			}
 
-				if ((((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM) && b->rtype != JOINEDROOM)
-					tmp = b;
-				else
-					tmp = a;
-
-				tmp->rlit = !tmp->rlit;
-
-				for (f = tmp->lx - 1; f <= tmp->hx + 1; f++) {
-					lev = &levl[f][max(tmp->ly - 1, 0)];
-					for (g = tmp->ly - 1; g <= tmp->hy + 1; g++)
-						lev++->lit = tmp->rlit;
-				}
+			for (f = tmp->lx - 1; f <= tmp->hx + 1; f++) {
+				lev = &levl[f][max(tmp->ly - 1, 0)];
+				for (g = tmp->ly - 1; g <= tmp->hy + 1; g++)
+					lev++->lit = tmp->rlit;
 			}
 			// change the room types
 			a->rtype = JOINEDROOM;
