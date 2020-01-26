@@ -7743,8 +7743,8 @@ nothing_special:
 	}
 	switch(oart->inv_prop) {
 	case FAST:
-	    if(on) You_feel("yourself speed up%s.", (iprop ? "a bit more" : ""));
-		else You_feel("yourself slow down%s.", (iprop ? "a bit" : ""));
+	    if(on) You_feel("yourself speed up%s.", (iprop ? " a bit more" : ""));
+		else You_feel("yourself slow down%s.", (iprop ? " a bit" : ""));
 	    break;
 	case CONFLICT:
 	    if(on) You_feel("like a rabble-rouser.");
