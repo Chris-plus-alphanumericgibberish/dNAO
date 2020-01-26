@@ -438,16 +438,24 @@ merge_adj_rooms()
 				{
 					// expand the room
 					if (xadj){
-						for (g = t->ly - 1; g <= t->hy + 1; g++)
-							levl[*p + dp*2][g].typ = VWALL;
-						for (g = t->ly; g <= t->hy; g++)
-							levl[*p + dp*1][g].typ = ROOM;
+						for (g = t->ly - 1; g <= t->hy + 1; g++) {
+							levl[*p + dp * 2][g].typ = VWALL;
+							levl[*p + dp * 2][g].horizontal = 0;
+						}
+						for (g = t->ly; g <= t->hy; g++) {
+							levl[*p + dp * 1][g].typ = ROOM;
+							levl[*p + dp * 1][g].horizontal = 0;
+						}
 					}
 					if (yadj){
-						for (f = t->lx - 1; f <= t->hx + 1; f++)
-							levl[f][*p + dp*2].typ = HWALL;
-						for (f = t->lx; f <= t->hx; f++)
-							levl[f][*p + dp*1].typ = ROOM;
+						for (f = t->lx - 1; f <= t->hx + 1; f++) {
+							levl[f][*p + dp * 2].typ = HWALL;
+							levl[f][*p + dp * 2].horizontal = 1;
+						}
+						for (f = t->lx; f <= t->hx; f++) {
+							levl[f][*p + dp * 1].typ = ROOM;
+							levl[f][*p + dp * 1].horizontal = 0;
+						}
 					}
 					*p += dp;
 					// attempt to add a door over the shared length
