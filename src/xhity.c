@@ -3260,6 +3260,16 @@ int flat_acc;
 			if (!thrown && weapon->objsize - pa->msize > 0){
 				wepn_acc += -4 * (weapon->objsize - pa->msize);
 			}
+			/* fencing gloves increase weapon accuracy when you have a free off-hand */
+			if (!thrown && !bimanual(weapon, magr->data) && !which_armor(magr, W_ARMS)) {
+				static int fgloves;
+				if (!fgloves)
+					fgloves = find_fgloves();
+				struct obj * otmp = which_armor(magr, W_ARMG);
+				if (otmp && otmp->otyp == fgloves)
+					wepn_acc += 2;
+			}
+			
 			/* ranged attacks also get their launcher's accuracy */
 			if (fired && launcher) {
 				/* enchantment, erosion */
