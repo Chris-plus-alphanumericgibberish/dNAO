@@ -3768,7 +3768,7 @@ dountrap()	/* disarm a trap */
 		 makeplural(body_part(HAND)));
 	    return 0;
 	}
-	return untrap(FALSE);
+	return untrap((struct obj *)0);
 }
 #endif /* OVLB */
 #ifdef OVL2
@@ -4311,8 +4311,8 @@ struct trap *ttmp;
 }
 
 int
-untrap(force)
-boolean force;
+untrap(tool)
+struct obj * tool;
 {
 	register struct obj *otmp;
 	register boolean confused = (Confusion > 0 || Hallucination > 0);
@@ -4323,6 +4323,7 @@ boolean force;
 	boolean trap_skipped = FALSE;
 	boolean box_here = FALSE;
 	boolean deal_with_floor_trap = FALSE;
+	boolean force = (tool && tool->oartifact);
 	char the_trap[BUFSZ], qbuf[QBUFSZ];
 	int containercnt = 0;
 
@@ -4516,7 +4517,7 @@ boolean force;
 					return(0);
 				}
 #endif
-				if (!force) {
+				if (!(tool && tool->oartifact == ART_MASTER_KEY_OF_THIEVERY)) {
 					pline("The bolts are seemingly magical and impossible to budge.");
 					return(0);
 				}
