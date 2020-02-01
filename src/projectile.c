@@ -507,7 +507,7 @@ int dy;							/* */
 	boolean shopdoor = FALSE, shopwall = FALSE;
 
 	/* Projectile must be a digger */
-	if (!((thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == LASER_BEAM)))
+	if (!(thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == LASER_BEAM || thrownobj->otyp == POTION_ACID))
 		return;
 
 	/* Doors (but not artifact doors) */
@@ -599,7 +599,7 @@ int dy;							/* */
 	}
 	/* Iron Bars (laser cutter only) */
 	else if (isok(newx, newy) && (room->typ == IRONBARS) && 
-		(thrownobj->otyp == LASER_BEAM)
+		(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == POT_ACID)
 		) {
 		int numbars;
 		struct obj *otmp;
@@ -2390,7 +2390,6 @@ boolean forcedestroy;
 	{
 		/* unbind seals if we break taboos */
 		if (ammo->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
-		if (breaktest(ammo) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
 		if ((ammo->otyp == EGG) && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA, TRUE);
 		/* degrade engravings on this spot */
 		u_wipe_engr(2);
