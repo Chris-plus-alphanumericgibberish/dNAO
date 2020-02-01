@@ -372,7 +372,14 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 				/* force hit?     */ Is_illregrd(&u.uz) || ((bhitpos.x == initx && bhitpos.y == inity) ? 0 : !rn2(5)),
 				/* player caused  */ (magr == &youmonst))
 			) {
-			do_digging_projectile(magr, thrownobj, dx, dy);
+			if (!thrownobj)
+			{
+				wepgone = TRUE;
+			}
+			else
+			{
+				do_digging_projectile(magr, thrownobj, dx, dy);
+			}
 			range = 0;
 		}
 
