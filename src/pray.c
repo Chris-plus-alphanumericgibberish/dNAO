@@ -447,7 +447,6 @@ register int trouble;
 		    break;
 	    case TROUBLE_HPMOD:
 			You_feel("restored to health.");
-			//Destroy the blades.
 		    u.uhpmod = max(u.uhpmod, 0);
 		    calc_total_maxhp();
 		    break;
