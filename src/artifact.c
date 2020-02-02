@@ -5069,7 +5069,7 @@ arti_invoke(obj)
 	    break;
 	  }
 	case UNTRAP: {
-	    if(!untrap(TRUE)) {
+	    if(!untrap(obj)) {
 		obj->age = 0; /* don't charge for changing their mind */
 		return 0;
 	    }

@@ -1636,7 +1636,7 @@ poly_obj(obj, id)
 	    otmp->oerodeproof = obj->oerodeproof;
 
 	/* Keep chest/box traps and poisoned ammo if we may */
-	if (obj->otrapped && Is_box(otmp)) otmp->otrapped = TRUE;
+	if (obj->otrapped && Is_box(otmp) && otmp->otyp != MAGIC_CHEST) otmp->otrapped = TRUE;
 
 	if (obj->opoisoned && is_poisonable(otmp))
 		otmp->opoisoned = obj->opoisoned;
