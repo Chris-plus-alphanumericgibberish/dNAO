@@ -3727,7 +3727,7 @@ struct monst *mtmp;
 					s_suffix(Monnam(mtmp)));
 				makeknown(AMULET_OF_LIFE_SAVING);
 				if (attacktype(mtmp->data, AT_EXPL)
-					|| attacktype(mtmp->data, AT_BOOM))
+				    || attacktype(mtmp->data, AT_BOOM))
 					pline("%s reconstitutes!", Monnam(mtmp));
 				else
 					pline("%s looks much better!", Monnam(mtmp));
@@ -3799,7 +3799,7 @@ struct monst *mtmp;
 				del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
 				if (emits_light_mon(mtmp))
 					new_light_source(mtmp->mx, mtmp->my, emits_light_mon(mtmp),
-					LS_MONSTER, (genericptr_t)mtmp);
+							 LS_MONSTER, (genericptr_t)mtmp);
 			}
 			break;
 		case LSVD_PLY:
@@ -4032,10 +4032,13 @@ register struct monst *mtmp;
 			}
 		}
 		if(!mon){
+			struct monst **mmtmp;
+			mmtmp = &migrating_mons;
 			for (mon = migrating_mons; mon; mon = mtmp2){
 				mtmp2 = mon->nmon;
 				if(mon->data == &mons[PM_HUNGRY_DEAD]){
 					if(mtmp->mvar1 == (long)mon->m_id){
+						*mmtmp = mon->nmon;
 						mon_arrive(mon, TRUE);
 						if(mon->mhp > 0){
 							mon->mhp = 0;
@@ -4044,6 +4047,7 @@ register struct monst *mtmp;
 						break;
 					}
 				}
+				mmtmp = &(mon->nmon);
 			}
 		}
 	}
@@ -6374,7 +6378,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	    /* used to give light, now doesn't, or vice versa,
 	       or light's range has changed */
 	    if (emits_light(olddata) || mtmp->mfaction == ILLUMINATED)
-		del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
+			del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
 		if(olddata == &mons[PM_MASKED_QUEEN])
 			mtmp->mfaction = ILLUMINATED;
 	    if (emits_light_mon(mtmp))
