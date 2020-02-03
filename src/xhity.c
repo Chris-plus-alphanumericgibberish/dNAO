@@ -11177,6 +11177,10 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 		else
 			natural_strike = TRUE;
 	}
+	/* if the player is attacking with a wielded weapon, increment conduct */
+	if (youagr && valid_weapon_attack && !thrown) {
+		u.uconduct.weaphit++;
+	}
 	/* precision multiplier */
 	if (fired && launcher &&								// Firing ammo from a launcher (fired implies thrown)
 		(objects[launcher->otyp].oc_skill == P_CROSSBOW ||	// from a REAL crossbow (but not the Pen of the Void or the BFG, those would be brokenly strong)
@@ -12527,8 +12531,12 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 		/* hits with a valid weapon proc effects of the weapon */
 		if (valid_weapon_attack) {
 			otmp = weapon;
-			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
+			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt)) {
+				/* if the artifact caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
+				if (returnvalue == MM_MISS && youagr && !thrown)
+					u.uconduct.weaphit--;
 				return returnvalue;
+			}
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
 		if (thrown && fired && launcher && valid_weapon_attack) {
