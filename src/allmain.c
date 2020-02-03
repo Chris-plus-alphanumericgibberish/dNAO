@@ -26,7 +26,10 @@ STATIC_DCL void NDECL(androidUpkeep);
 STATIC_DCL int NDECL(do_inheritor_menu);
 STATIC_DCL void NDECL(see_nearby_monsters);
 STATIC_DCL void NDECL(cthulhu_mind_blast);
+STATIC_DCL void FDECL(unseen_actions, (struct monst *));
 STATIC_DCL void FDECL(blessed_spawn, (struct monst *));
+STATIC_DCL void FDECL(good_neighbor, (struct monst *));
+STATIC_DCL void FDECL(dark_pharaoh, (struct monst *));
 
 #ifdef OVL0
 
