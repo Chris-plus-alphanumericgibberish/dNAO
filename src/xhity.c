@@ -5475,7 +5475,7 @@ boolean ranged;
 				if (otmp->spe > -1 * objects[(otmp)->otyp].a_ac){
 					damage_item(otmp);
 				}
-				else if (!otmp->oartifact || (pa == &mons[PM_DEMOGORGON] && rn2(10))){
+				else if (!otmp->oartifact || (pa == &mons[PM_DEMOGORGON] && !rn2(10))){
 					if (youdef)
 						claws_destroy_arm(otmp);
 					else
