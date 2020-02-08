@@ -2282,11 +2282,11 @@ boolean allow_lethal;
 					if (xresist);	// no message, reduce spam
 					else {
 						dmg = d(cnt, dmg);
-						if (!allow_lethal && dmg > mtmp->mhp)
+						if (!allow_lethal && dmg >= mtmp->mhp)
 							dmg = min(0, mtmp->mhp - 1);
 
 						mtmp->mhp -= dmg;
-						if (mtmp->mhp < 0) {
+						if (mtmp->mhp < 1) {
 							if(vis) pline("%s dies!", Monnam(mtmp));
 							mondied(mtmp);
 							return (MM_HIT|MM_DEF_DIED);
