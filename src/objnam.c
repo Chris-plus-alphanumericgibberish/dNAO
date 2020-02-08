@@ -1184,10 +1184,10 @@ boolean with_price;
 	register char *buf;
 	register int typ = obj->otyp;
 	register struct objclass *ocl = &objects[typ];
-	register int nn = ocl->oc_name_known;
-	register const char *actualn = OBJ_NAME(*ocl);
-	register const char *dn = OBJ_DESCR(*ocl);
-	register const char *un = ocl->oc_uname;
+	register int nn = ocl->oc_name_known;			/* you know the oc name of the otyp*/
+	register const char *actualn = OBJ_NAME(*ocl);	/* the identified name of the otyp */
+	register const char *dn = OBJ_DESCR(*ocl);		/* the unidentified name of the otyp */
+	register const char *un = ocl->oc_uname;		/* what you have named the otyp */
 
 	buf = nextobuf() + PREFIX;	/* leave room for "17 -3 " */
 	if (Role_if(PM_SAMURAI) && iflags.role_obj_names && Alternate_item_name(typ, Japanese_items))
@@ -1443,43 +1443,65 @@ boolean with_price;
 			}
 			break;
 		case SCROLL_CLASS:
-		if(obj->otyp < SCR_BLANK_PAPER){
-			if (obj->dknown && !un && !ocl->oc_magic)
+		/* special-case scrolls */
+#ifdef MAIL
+		if (obj->otyp >= SCR_MAIL) {
+#else
+		if (obj->otyp >= SCR_BLANK_PAPER) {
+#endif
+			if (!obj->dknown) {
+				Strcat(buf, "scroll");
+				break;
+			}
+			if (!nn)
 			{
-				Strcat(buf, dn);
-				Strcat(buf, " ");
-			}
-			Strcat(buf, "scroll");
-			if (!obj->dknown) break;
-			if (nn) {
-				Strcat(buf, " of ");
-				if (obj->otyp != SCR_WARD) Strcat(buf, actualn);
-				else Strcat(buf, wardDecode[obj->oward]);
-			}
-			else if (un) {
-				Strcat(buf, " called ");
-				Strcat(buf, un);
-			}
-			else if (ocl->oc_magic) {
-				Strcat(buf, " labeled ");
-				Strcat(buf, dn);
-			}
-			else {
-				// "unlabeled scroll" should be the only case, and is already handled above.
-				;
-			}
-		} else {
-			if (obj->dknown && !nn)
-			{
+				/* unknown otyp */
+				/* reverse order -- "stamped"/"unlabelled"/"golden" scroll */
 				Strcat(buf, dn);
 				Strcat(buf, " ");
 				Strcat(buf, "scroll");
-				if(un){
+				if (un){
 					Strcat(buf, " called ");
 					Strcat(buf, un);
 				}
 			}
-			else Strcat(buf, actualn);
+			else {
+				/* known otyp */
+				if (obj->otyp == SCR_GOLD_SCROLL_OF_LAW) {
+					Strcat(buf, actualn);
+				}
+				else {
+					Strcat(buf, "scroll of ");
+					Strcat(buf, actualn);
+				}
+			}
+		}
+		/* standard magic scrolls */
+		else {
+			Strcat(buf, "scroll");
+			if (!obj->dknown) break;
+
+			if (nn) {
+				/* you have identified otyp */
+				Strcat(buf, " of ");
+				if (obj->otyp == SCR_WARD) Strcat(buf, wardDecode[obj->oward]);
+				else Strcat(buf, actualn);
+			}
+			else if (un) {
+				/* you have called otyp */
+				Strcat(buf, " called ");
+				Strcat(buf, un);
+			}
+			else if (ocl->oc_magic) {
+				/* unknown magic scroll */
+				Strcat(buf, " labeled ");
+				Strcat(buf, dn);
+			}
+			else {
+				/* non-magic scroll ??? */
+				Strcat(buf, " titled ");
+				Strcat(buf, dn);
+			}
 		}
 	break;
 	case TILE_CLASS:
