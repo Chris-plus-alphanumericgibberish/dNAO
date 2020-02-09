@@ -4855,7 +4855,7 @@ register struct trap *trap;
 		if (!ttmp) return;
 		ttmp->ntrap = trap->ntrap;
 	}
-	while (trap->launch_ammo) {
+	while (trapv_ammo(trap->ttyp) && trap->launch_ammo) {
 		impossible("deleting trap containing ammo?");
 		struct obj* otmp = trap->launch_ammo;
 		extract_nobj(otmp, &trap->launch_ammo);

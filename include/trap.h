@@ -44,7 +44,7 @@ extern struct trap *ftrap;
 #define dealloc_trap(trap) free((genericptr_t) (trap))
 
 /* what vl to use */
-#define trapv_ammo(ttyp)	((ttyp) == DART_TRAP || (ttyp) == ARROW_TRAP || (ttyp) == FALLING_ROCK_TRAP ||\
+#define trapv_ammo(ttyp)	((ttyp) == DART_TRAP || (ttyp) == ARROW_TRAP || (ttyp) == ROCKTRAP ||\
 								(ttyp) == BEAR_TRAP || (ttyp) == LANDMINE || (ttyp) == FIRE_TRAP)
 #define trapv_launch(ttyp)	((ttyp) == ROLLING_BOULDER_TRAP)
 #define trapv_statue(ttyp)	((ttyp) == STATUE_TRAP)

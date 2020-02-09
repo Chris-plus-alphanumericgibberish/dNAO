@@ -969,7 +969,7 @@ register struct trap *trap;
 	    trap2 = trap->ntrap;
 	    if (perform_bwrite(mode))
 		bwrite(fd, (genericptr_t) trap, sizeof(struct trap));
-		if (trap->launch_ammo)
+		if (trapv_ammo(trap->ttyp))
 			saveobjchn(fd, trap->launch_ammo, mode);
 	    if (release_data(mode))
 		dealloc_trap(trap);
