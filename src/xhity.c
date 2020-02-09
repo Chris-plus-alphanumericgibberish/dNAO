@@ -211,7 +211,7 @@ struct monst * mdef;
 		/* unintentional attacks only cause the one hit, no follow-ups */
 		int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 		/* must check that attacks are allowable */
-		if (!magr_can_attack_mdef(&youmonst, mdef, bhitpos.x, bhitpos.y, FALSE, FALSE))
+		if (!magr_can_attack_mdef(&youmonst, mdef, bhitpos.x, bhitpos.y, FALSE))
 			return FALSE;
 		/* assumes the bloodthirst is caused by your mainhand weapon */
 		Your("bloodthirsty weapon attacks!");
@@ -375,7 +375,7 @@ int tary;
 	}
 
 	/* cases where the agressor cannot make any attacks at all */
-	if (!magr_can_attack_mdef(magr, mdef, tarx, tary, ranged, TRUE))
+	if (!magr_can_attack_mdef(magr, mdef, tarx, tary, TRUE))
 		return MM_MISS;
 
 	/* Set up the visibility of action */
@@ -13449,7 +13449,7 @@ struct monst * mdef;
 	static struct attack shadowblade = { AT_SRPR, AD_SHDW, 4, 8 };
 	int tohitmod = 0;	/* necessary to call xmeleehity */
 
-	if (mdef && magr_can_attack_mdef(&youmonst, mdef, x(mdef), y(mdef), FALSE, FALSE)){
+	if (mdef && magr_can_attack_mdef(&youmonst, mdef, x(mdef), y(mdef), FALSE)){
 		return xmeleehity(&youmonst,
 			mdef,
 			&shadowblade,
@@ -13477,7 +13477,7 @@ struct monst * mexclude;
 		if (isok(u.ux + xdir[i], u.uy + ydir[i])){
 			mdef = m_at(u.ux + xdir[i], u.uy + ydir[i]);
 			if (mdef && !mdef->mpeaceful && mdef != mexclude
-				&& magr_can_attack_mdef(&youmonst, mdef, u.ux + xdir[i], u.uy + ydir[i], FALSE, FALSE)){
+				&& magr_can_attack_mdef(&youmonst, mdef, u.ux + xdir[i], u.uy + ydir[i], FALSE)){
 				(void)shadow_strike(mdef);
 			}
 		}
@@ -13632,7 +13632,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 		}
 
 		/* lightsaber form counterattack (per-attack) (player-only) */
-		if (magr_can_attack_mdef(mdef, magr, x(magr), y(magr), FALSE, FALSE)) {
+		if (magr_can_attack_mdef(mdef, magr, x(magr), y(magr), FALSE)) {
 			if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) &&			/* player with a lightsaber in their main hand */
 				(multi >= 0) &&														/* not paralyzed */
 				distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1 &&					/* in close quarters */
@@ -13689,7 +13689,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 			}
 		}
 		/* Counterattacks */
-		if (magr_can_attack_mdef(mdef, magr, x(magr), y(magr), FALSE, FALSE))
+		if (magr_can_attack_mdef(mdef, magr, x(magr), y(magr), FALSE))
 		{
 			/* get defender's weapon */
 			otmp = (youdef ? uwep : MON_WEP(mdef));

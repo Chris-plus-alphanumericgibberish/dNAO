@@ -10,12 +10,11 @@ extern boolean notonhead;
 ///////////////////////////////////////////////////////////////////////////////
 
 boolean
-magr_can_attack_mdef(magr, mdef, tarx, tary, ranged, active)
+magr_can_attack_mdef(magr, mdef, tarx, tary, active)
 struct monst * magr;
 struct monst * mdef;
 int tarx;
 int tary;
-boolean ranged;
 boolean active;
 {
 	boolean youagr = (magr == &youmonst);
@@ -31,7 +30,7 @@ boolean active;
 			/* only print messages if they were actively attacking you */
 			if (magr == u.ustuck)
 				pline("%s loosens its grip slightly.", Monnam(magr));
-			else if (!ranged) {
+			else if (distmin(x(magr), y(magr), x(mdef), y(mdef)) <= 1) {
 				if (canseemon(magr) || sensemon(magr))
 					pline("%s starts to attack you, but pulls back.",
 					Monnam(magr));
