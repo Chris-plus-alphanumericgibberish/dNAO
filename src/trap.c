@@ -259,7 +259,7 @@ register int x, y, typ;
 	    ttmp->ty = y;
 	    ttmp->launch.x = -1;	/* force error if used before set */
 	    ttmp->launch.y = -1;
-		ttmp->vl.v_ammo = 0;	/* any one is all of them*/
+		ttmp->vl.v_ammo = 0;	/* any one is all of them */
 	}
 	ttmp->ttyp = typ;
 	switch(typ) {
@@ -341,7 +341,11 @@ register int x, y, typ;
 		case LANDMINE:
 			set_trap_ammo(ttmp, mksobj(LAND_MINE, TRUE, FALSE));
 			break;
-
+		case FIRE_TRAP:
+			otmp = mksobj(POT_OIL, TRUE, FALSE);
+			otmp->quan = rnd(3);
+			set_trap_ammo(ttmp, otmp);
+			break;
 	    case RUST_TRAP:
 		if (!rn2(4)) {
 		    del_engr_at(x, y);
@@ -1042,6 +1046,22 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		break;
 
 	    case FIRE_TRAP:
+		if (!(otmp = trap->launch_ammo)) {
+			You_hear("a soft click!");
+			deltrap(trap);
+			newsym(u.ux, u.uy);
+			break;
+		}
+		if (!(Is_firelevel(&u.uz)) &&	/* never useup on plane of fire */
+			!(Inhell && rn2(5)) &&		/* useup 80% less often in gehennom */
+			!(rn2(2))) {				/* useup only 50% of the time base */
+			if (otmp->quan > 1)
+				otmp->quan--;
+			else {
+				extract_nobj(otmp, &(trap->launch_ammo));
+				delobj(otmp);
+			}
+		}
 		seetrap(trap);
 		dofiretrap((struct obj *)0);
 		break;
@@ -2154,6 +2174,23 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			break;
 		    }
 		case FIRE_TRAP:
+			if (!trap->launch_ammo) {
+				if (in_sight && see_it)
+					pline("%s triggers a trap but nothing happens.", Monnam(mtmp));
+				deltrap(trap);
+				newsym(mtmp->mx, mtmp->my);
+				break;
+			}
+			if (!(Is_firelevel(&u.uz)) &&	/* never useup on plane of fire */
+				!(Inhell && rn2(5)) &&		/* useup 80% less often in gehennom */
+				!(rn2(2))) {				/* useup only 50% of the time base */
+				if (otmp->quan > 1)
+					otmp->quan--;
+				else {
+					extract_nobj(otmp, &(trap->launch_ammo));
+					delobj(otmp);
+				}
+			}
  mfiretrap:
 			if (IS_PUDDLE(levl[mtmp->mx][mtmp->my].typ)) {
 			    if (in_sight)
@@ -4085,7 +4122,7 @@ struct trap *ttmp;
 	useup(obj);
 	makeknown(POT_WATER);
 	You("manage to extinguish the pilot light!");
-	//cnv_trap_obj(POT_OIL, 4 - rnl(4), ttmp);
+	remove_trap_ammo(ttmp);
 	more_experienced(1, 5);
 	newexplevel();
 	return 1;
