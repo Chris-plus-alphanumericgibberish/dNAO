@@ -33,7 +33,7 @@ struct trap {
 				 easy to make a monster peaceful if you could
 				 set a trap for it and then untrap it. */
 	union vlaunchinfo vl;
-#define ammo           vl.v_ammo
+#define launch_ammo    vl.v_ammo
 #define launch_otyp	   vl.v_launch_otyp
 #define launch2		   vl.v_launch2
 #define statueid       vl.v_statue_oid
@@ -42,6 +42,11 @@ struct trap {
 extern struct trap *ftrap;
 #define newtrap()	(struct trap *) alloc(sizeof(struct trap))
 #define dealloc_trap(trap) free((genericptr_t) (trap))
+
+/* what vl to use */
+#define trapv_ammo(ttyp)	((ttyp) == DART_TRAP || (ttyp) == ARROW_TRAP || (ttyp) == BEAR_TRAP || (ttyp) == LANDMINE)
+#define trapv_launch(ttyp)	((ttyp) == ROLLING_BOULDER_TRAP)
+#define trapv_statue(ttyp)	((ttyp) == STATUE_TRAP)
 
 /* reasons for statue animation */
 #define ANIMATE_NORMAL	0

@@ -893,8 +893,8 @@ boolean ghostly;
 		/* trap->ammo will either be NULL or a stale pointer from the previous
 		* game. We don't read the stale pointer, other than to see whether an
 		* object chain follows this trap. */
-		if (trap->ammo) {
-			trap->ammo = restobjchn(fd, ghostly, FALSE);
+		if (trap->launch_ammo) {
+			trap->launch_ammo = restobjchn(fd, ghostly, FALSE);
 		}
 		trap->ntrap = ftrap;
 		ftrap = trap;
