@@ -346,6 +346,11 @@ register int x, y, typ;
 			otmp->quan = rnd(3);
 			set_trap_ammo(ttmp, otmp);
 			break;
+		case ROCKTRAP:
+			otmp = mksobj(ROCK, TRUE, FALSE);
+			otmp->quan = 5 + rnd(10);
+			set_trap_ammo(ttmp, otmp);
+			break;
 	    case RUST_TRAP:
 		if (!rn2(4)) {
 		    del_engr_at(x, y);
@@ -823,7 +828,7 @@ unsigned trflags;
 		break;
 
 	    case ROCKTRAP:
-		if (trap->once && trap->tseen && !rn2(15)) {
+		if (!(otmp = trap->launch_ammo)) {
 		    pline("A trap door in %s opens, but nothing falls out!",
 			  the(ceiling(u.ux,u.uy)));
 		    deltrap(trap);
@@ -831,11 +836,11 @@ unsigned trflags;
 		} else {
 		    int dmg = d(2,6); /* should be std ROCK dmg? */
 
-		    trap->once = 1;
+			if (trap->launch_ammo->quan > 1) {
+				otmp = splitobj(trap->launch_ammo, 1);
+			}
+			extract_nobj(otmp, &trap->launch_ammo);
 		    seetrap(trap);
-		    otmp = mksobj_at(ROCK, u.ux, u.uy, TRUE, FALSE);
-		    otmp->quan = 1L;
-		    otmp->owt = weight(otmp);
 
 		    pline("A trap door in %s opens and %s falls on your %s!",
 			  the(ceiling(u.ux,u.uy)),
@@ -864,6 +869,7 @@ unsigned trflags;
 		    }
 
 		    if (!Blind) otmp->dknown = 1;
+			place_object(otmp, u.ux, u.uy);
 		    stackobj(otmp);
 		    newsym(u.ux,u.uy);	/* map the rock */
 
@@ -2038,7 +2044,7 @@ register struct monst *mtmp;
 				trapkilled = TRUE;
 			break;
 		case ROCKTRAP:
-			if (trap->once && trap->tseen && !rn2(15)) {
+			if (!(otmp = trap->launch_ammo)) {
 			    if (in_sight && see_it)
 				pline("A trap door above %s opens, but nothing falls out!",
 				      mon_nam(mtmp));
@@ -2046,10 +2052,10 @@ register struct monst *mtmp;
 			    newsym(mtmp->mx, mtmp->my);
 			    break;
 			}
-			trap->once = 1;
-			otmp = mksobj(ROCK, TRUE, FALSE);
-			otmp->quan = 1L;
-			otmp->owt = weight(otmp);
+			if (trap->launch_ammo->quan > 1) {
+				otmp = splitobj(trap->launch_ammo, 1);
+			}
+			extract_nobj(otmp, &trap->launch_ammo);
 			if (in_sight) seetrap(trap);
 			if (thitm(0, mtmp, otmp, d(2, 6), FALSE))
 			    trapkilled = TRUE;
