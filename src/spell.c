@@ -5675,7 +5675,8 @@ dopseudonatural()
 		nmon = mon->nmon;
 		if(!mon || mon->mtame || !rn2(5))
 			continue;
-		if(distmin(u.ux, u.uy, mon->mx, mon->my) > 2 || !couldsee(mon->mx, mon->my))
+		if(distmin(u.ux, u.uy, mon->mx, mon->my) > 2 || !couldsee(mon->mx, mon->my) ||
+			!(magr_can_attack_mdef(&youmonst, mon, mon->mx, mon->my, FALSE, FALSE)))
 			continue;
 		if((!Stone_resistance && (touch_petrifies(mon->data)
 		 || mon->data == &mons[PM_MEDUSA]))

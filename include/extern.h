@@ -2982,6 +2982,7 @@ E int FDECL(u_pole_pound, (struct monst *));
 
 /* ### xhityhelpers.c ### */
 
+E boolean FDECL(magr_can_attack_mdef, (struct monst *, struct monst *, int, int, boolean, boolean));
 E int FDECL(attack_checks, (struct monst *, struct obj *));
 E boolean FDECL(madness_cant_attack, (struct monst *));
 E void FDECL(stumble_onto_mimic, (struct monst *));

@@ -1946,7 +1946,8 @@ struct monst *mtmp;
 		nomore(MUSE_BULLWHIP);
 		if((obj->otyp == BULLWHIP || obj->otyp == VIPERWHIP || obj->otyp == FORCE_WHIP) 
 			&& (MON_WEP(mtmp) == obj || MON_SWEP(mtmp) == obj) &&
-			distu(mtmp->mx,mtmp->my)==1 && uwep && !mtmp->mpeaceful
+			distu(mtmp->mx,mtmp->my)==1 && uwep && !mtmp->mpeaceful &&
+			magr_can_attack_mdef(mtmp, &youmonst, u.ux, u.uy, FALSE, TRUE)
 		) {
 			m.misc = obj;
 			m.has_misc = MUSE_BULLWHIP;

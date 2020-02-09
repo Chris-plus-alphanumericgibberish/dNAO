@@ -3732,7 +3732,7 @@ dosymbiotic()
 		 || mon->data == &mons[PM_PALE_NIGHT]
 		) continue;
 		
-		if(mon && !mon->mtame){
+		if (mon && !mon->mtame && magr_can_attack_mdef(&youmonst, mon, u.ux + clockwisex[(i + j) % 8], u.uy + clockwisey[(i + j) % 8], FALSE, FALSE)){
 			xmeleehity(&youmonst, mon, &symbiote, (struct obj *)0, -1, 0, FALSE);
 			morehungry(1);
 			lim++;
