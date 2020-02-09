@@ -4867,6 +4867,12 @@ register struct trap *trap;
 		if (!ttmp) return;
 		ttmp->ntrap = trap->ntrap;
 	}
+	while (trap->ammo) {
+		impossible("deleting trap containing ammo?");
+		struct obj* otmp = trap->ammo;
+		extract_nobj(otmp, &trap->ammo);
+		obfree(otmp, (struct obj *) 0);
+	}
 	dealloc_trap(trap);
 }
 
