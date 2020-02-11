@@ -2683,7 +2683,7 @@ dodip()
 			(potion->otyp == POT_BLOOD && acidic(&mons[potion->corpsenm]))) 
 		&& (!(obj->opoisoned & OPOISON_ACID) || obj->otyp == VIPERWHIP)
 	){
-		if(is_corrodeable(obj) && obj->oeroded2 < MAX_ERODE){
+		if(is_corrodeable(obj) && !obj->oerodeproof && obj->oeroded2 < MAX_ERODE){
 			int poofit = 1;
 			if(obj->greased)
 				poofit = 0;
