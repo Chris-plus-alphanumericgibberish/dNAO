@@ -3358,14 +3358,21 @@ int tx,ty;
 		if(u.sealTimeout[ASTAROTH-FIRST_SEAL] < moves){
 			struct obj *o = 0, *otmp;
 			char prefix[32]; //thoroughly 11, corroded 9
+			boolean isdagger = FALSE;
 			boolean iscrys;
 			prefix[0] = '\0';
 			for(otmp = level.objects[tx][ty]; otmp; otmp = otmp->nexthere){
 				if(otmp->spe < 0 || otmp->oeroded || otmp->oeroded2){
 					o = otmp;
-			break;
+					if((o->oclass == WEAPON_CLASS || is_weptool(o)) && objects[o->otyp].oc_skill == P_DAGGER){
+						isdagger = TRUE;
+						break;  // should just keep the last rusty item if no daggers, otherwise stop at a dagger
+								// (for the POTV's astaroth binding, to make it easier)
+					}
 				}
 			}
+			
+			
 			//Astaroth requires that his seal be drawn on a square with a damaged item.
 			if(o && u.sealCounts < numSlots){
 				iscrys = (o->otyp == CRYSKNIFE);
@@ -3395,7 +3402,7 @@ int tx,ty;
 				if(o->oeroded2) o->oeroded2=0;
 				u.sealTimeout[ASTAROTH-FIRST_SEAL] = moves + bindingPeriod;
 			}
-			else if(uwep && (uwep->spe<0 || uwep->oeroded || uwep->oeroded2) && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
+			else if(uwep && isdagger && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){ 
 				pline("A hand of worn and broken clockwork on a rusted metal arm reaches into the seal.");
 				pline("The hand slowly stretches out towards you, then rests on the seal's surface as its unseen owner shifts his weight onto that arm.");
 				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metalic armature.");
@@ -3411,9 +3418,9 @@ int tx,ty;
 					u.spiritTineTB= moves + bindingPeriod;
 				}
 				pline("The hand catches a teardrop and anoints the Pen of the Void with the glistening oil.");
-				if(uwep->spe<0) uwep->spe=0;
-				if(uwep->oeroded) uwep->oeroded=0;
-				if(uwep->oeroded2) uwep->oeroded2=0;
+				if(o->spe<0) o->spe++;
+				if(o->oeroded) o->oeroded--;
+				if(o->oeroded2) o->oeroded2--;
 				u.sealTimeout[ASTAROTH-FIRST_SEAL] = moves + bindingPeriod;
 			}
 			else if(o || (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (uwep->spe<0 || uwep->oeroded || uwep->oeroded2))){
