@@ -247,7 +247,7 @@ A("Mjollnir",			WAR_HAMMER,			0,			0,		/* Mjo:llnir */
 	0, A_NEUTRAL, PM_VALKYRIE, NON_PM, 4000L, 
 	SPFX2_ELEC,0,0),
 
-A("The Pen of the Void",	ATHAME,			METAL,			0,
+A("The Pen of the Void",	ATHAME,			0,			0,
 	(SPFX_NOGEN|SPFX_RESTR|SPFX_ATTK), 0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	PHYS(5,0),	NO_DFNS,	NO_CARY,
