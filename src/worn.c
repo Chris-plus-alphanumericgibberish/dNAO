@@ -694,6 +694,8 @@ struct monst *mon;
 	
 	if(mon->mtame){
 		base -= rnd(def_beastmastery());
+		if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && (mon->data->mflagsa & MA_ANIMAL) != 0L)
+			base *= 2; // the duster doubles for tame animals
 		if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
 	}
 	
@@ -830,6 +832,9 @@ struct monst *mon;
 		base -= def_beastmastery();
 		if(u.specialSealsActive&SEAL_COSMOS) base -= spiritDsize();
 		if(u.usteed && mon==u.usteed) base -= def_mountedCombat();
+		
+		if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && (mon->data->mflagsa & MA_ANIMAL) != 0L)
+			base *= 2; // the duster doubles for tame animals
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
