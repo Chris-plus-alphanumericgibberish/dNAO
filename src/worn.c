@@ -692,13 +692,13 @@ struct monst *mon;
 	if(is_alabaster_mummy(mon->data) && mon->mvar1 == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
 	
-	if(mon->mtame){
+	if (mon->mtame){
 		base -= rnd(def_beastmastery());
-		if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && (mon->data->mflagsa & MA_ANIMAL) != 0L)
-			base *= 2; // the duster doubles for tame animals
+		if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && is_animal(mon->data))
+			base -= rnd(def_beastmastery()); // the duster doubles for tame animals
+		
 		if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
 	}
-	
 	if(helpless(mon))
 		base -= 5;
 	else if(which_armor(mon, W_ARM)){
@@ -756,8 +756,9 @@ struct monst *mon;
 	if(mon->mfaction == TOMB_HERD) base -= 6;
 	
 	if(mon->mtame){
-		if(u.specialSealsActive&SEAL_COSMOS) base -= spiritDsize();
+		if(u.specialSealsActive&SEAL_COSMOS) base -= spiritDsize();	
 	}
+	
 	
 	//armor AC
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
@@ -833,8 +834,8 @@ struct monst *mon;
 		if(u.specialSealsActive&SEAL_COSMOS) base -= spiritDsize();
 		if(u.usteed && mon==u.usteed) base -= def_mountedCombat();
 		
-		if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && (mon->data->mflagsa & MA_ANIMAL) != 0L)
-			base *= 2; // the duster doubles for tame animals
+		if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && is_animal(mon->data))
+			base -= def_beastmastery(); // the duster doubles for tame animals
 	}
 	
 	if(mon->data == &mons[PM_HOD_SEPHIRAH]){

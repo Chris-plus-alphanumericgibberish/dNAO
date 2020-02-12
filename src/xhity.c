@@ -3152,8 +3152,8 @@ int flat_acc;
 			/* All of your pets get a skill-based boost */
 			if (magr->mtame){
 				bons_acc += beastmastery();
-				if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && (mon->data->mflagsa & MA_ANIMAL) != 0L)
-					bons_acc += beastmaster(); // double for the beastmaster's duster
+				if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && is_animal(magr->data))
+					bons_acc += beastmastery(); // double for the beastmaster's duster
 			}
 			/* Bard */
 			bons_acc += magr->encouraged;
