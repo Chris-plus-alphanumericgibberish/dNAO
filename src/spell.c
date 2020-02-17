@@ -2839,7 +2839,7 @@ spiriteffects(power, atme)
 				You("refill %s.",the(xname(uwep)));
 				if(uwep->lamplit){
 					end_burn(uwep, TRUE);
-					begin_burn(uwep, FALSE);
+					begin_burn(uwep);
 				}
 			} else return 0;
 		break;
@@ -2850,7 +2850,7 @@ spiriteffects(power, atme)
 					else uwep->age -= 500;
 					explode(u.dx, u.dy, AD_FIRE, WAND_CLASS, d(rnd(5), dsize)* (Double_spell_size ? 3 : 2) / 2, EXPL_FIERY, 1 + !!Double_spell_size);
 					end_burn(uwep, TRUE);
-					begin_burn(uwep, FALSE);
+					begin_burn(uwep);
 				} else return 0;
 			} else{
 				if(uwep && uwep->otyp == LANTERN) pline("You need an oil lamp. These modern lamps just aren't the same!");

@@ -4543,7 +4543,7 @@ typfnd:
 		(typ == OIL_LAMP || typ == MAGIC_LAMP || typ == LANTERN ||
 		 Is_candle(otmp) || typ == POT_OIL)) {
 	    place_object(otmp, u.ux, u.uy);  /* make it viable light source */
-	    begin_burn(otmp, FALSE);
+	    begin_burn(otmp);
 	    obj_extract_self(otmp);	 /* now release it for caller's use */
 	}
 

@@ -1898,7 +1898,7 @@ struct obj *obj, *otmp;
 					bill_dummy_object(obj);
 				}
 			}
-			begin_burn(obj, FALSE);
+			begin_burn(obj);
 		}
 		res = 0;
 		break;

@@ -2258,7 +2258,7 @@ not_special:
 								breacher->age = rn1(10,10);
 								fix_object(breacher);
 								place_object(breacher, mtmp->mx+i, mtmp->my+j);
-								begin_burn(breacher, FALSE);
+								begin_burn(breacher);
 								if(canseemon(mtmp))
 									pline("%s plants a breaching charge!", Monnam(mtmp));
 							}

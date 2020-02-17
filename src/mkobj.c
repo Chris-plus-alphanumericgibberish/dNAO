@@ -738,7 +738,7 @@ boolean artif;
 		else otmp->quan = 1L;
 		if (otmp->otyp == CHUNK_OF_FOSSIL_DARK){
 			place_object(otmp, u.ux, u.uy);  /* make it viable light source */
-			begin_burn(otmp, FALSE);
+			begin_burn(otmp);
 			obj_extract_self(otmp);	 /* now release it for caller's use */
 		}
 		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
@@ -985,7 +985,7 @@ boolean artif;
 		    otmp->age = MAX_OIL_IN_FLASK;	/* amount of oil */
 		if (otmp->otyp == POT_STARLIGHT){
 			place_object(otmp, u.ux, u.uy);  /* make it viable light source */
-			begin_burn(otmp, FALSE);
+			begin_burn(otmp);
 			obj_extract_self(otmp);	 /* now release it for caller's use */
 		}
 		/* fall through */
@@ -1524,7 +1524,7 @@ register struct obj *otmp;
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
 	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
-		begin_burn(otmp, TRUE);
+		begin_burn(otmp);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
 		(void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
 	return;
@@ -1540,7 +1540,7 @@ register struct obj *otmp;
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
 	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
-		begin_burn(otmp, TRUE);
+		begin_burn(otmp);
 
 }
 
@@ -1575,7 +1575,7 @@ register struct obj *otmp;
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
 	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit) 
-		begin_burn(otmp, TRUE);
+		begin_burn(otmp);
 	else if (otmp->otyp == FIGURINE) {
 		if (otmp->corpsenm != NON_PM
 		    && !dead_species(otmp->corpsenm,TRUE)
@@ -1597,7 +1597,7 @@ register struct obj *otmp;
 	else if (otmp->otyp == FIGURINE && otmp->timed)
 	    (void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
 	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
-		begin_burn(otmp, TRUE);
+		begin_burn(otmp);
 
 	return;
 }
@@ -2637,7 +2637,7 @@ int x, y;
     if (otmp->timed) obj_timer_checks(otmp, x, y, 0);
 	/* relight lightsources that should always be lit */
 	if (obj_eternal_light(otmp) && !otmp->lamplit)
-		begin_burn(otmp, FALSE);
+		begin_burn(otmp);
 }
 
 #define ON_ICE(a) ((a)->recharged)

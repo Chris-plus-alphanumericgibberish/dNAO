@@ -2561,7 +2561,7 @@ E void FDECL(burn_object, (genericptr_t, long));
 E int FDECL(lightsource_radius, (struct obj *));
 E long FDECL(lightsource_turns, (struct obj *));
 E boolean FDECL(lightsource_timed, (struct obj *));
-E void FDECL(begin_burn, (struct obj *, BOOLEAN_P));
+E void FDECL(begin_burn, (struct obj *));
 E void FDECL(end_burn, (struct obj *, BOOLEAN_P));
 E void FDECL(lightsaber_deactivate, (struct obj *, BOOLEAN_P));
 E void NDECL(do_storms);
