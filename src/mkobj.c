@@ -736,11 +736,6 @@ boolean artif;
 		else if (otmp->otyp == ROCK) otmp->quan = (long) rn1(6,6);
 		else if (otmp->otyp != LUCKSTONE && !rn2(6)) otmp->quan = 2L;
 		else otmp->quan = 1L;
-		if (otmp->otyp == CHUNK_OF_FOSSIL_DARK){
-			place_object(otmp, u.ux, u.uy);  /* make it viable light source */
-			begin_burn(otmp);
-			obj_extract_self(otmp);	 /* now release it for caller's use */
-		}
 		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
 		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
 	break;
@@ -983,11 +978,6 @@ boolean artif;
 		}
 		if (otmp->otyp == POT_OIL)
 		    otmp->age = MAX_OIL_IN_FLASK;	/* amount of oil */
-		if (otmp->otyp == POT_STARLIGHT){
-			place_object(otmp, u.ux, u.uy);  /* make it viable light source */
-			begin_burn(otmp);
-			obj_extract_self(otmp);	 /* now release it for caller's use */
-		}
 		/* fall through */
 	case SCROLL_CLASS:
 #ifdef MAIL
@@ -1297,6 +1287,8 @@ boolean artif;
 	}
 
 	/* Some things must get done (timers) even if init = 0 */
+	if (obj_eternal_light(otmp))
+		begin_burn(otmp);
 	switch (otmp->otyp) {
 	    case CORPSE:
 		start_corpse_timeout(otmp);
