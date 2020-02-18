@@ -1681,6 +1681,7 @@ E int FDECL(do_play_instrument, (struct obj *));
 #ifdef BARD
 E int FDECL(pet_can_sing, (struct monst *,BOOLEAN_P));
 E int FDECL(mon_can_counter_sing, (struct monst *,BOOLEAN_P));
+E int FDECL(resist_song, (struct monst *, int, struct obj *));
 #endif
 
 /* ### nhlan.c ### */
@@ -2421,6 +2422,7 @@ E int FDECL(domonnoise,(struct monst *, BOOLEAN_P));
 E int FDECL(add_sound_mapping, (const char *));
 E void FDECL(play_sound_for_message, (const char *));
 #endif
+E boolean NDECL(doreinforce_binding);
 
 /* ### sys/msdos/sound.c ### */
 
@@ -2471,6 +2473,8 @@ E void FDECL(initialward, (struct obj *));
 E void FDECL(set_spirit_powers, (long));
 E int NDECL(reorder_spirit_powers);
 E void NDECL(dopseudonatural);
+E void NDECL(dodestruction);
+E boolean NDECL(doreinforce_spell);
 E void NDECL(update_alternate_spells);
 
 /* ### steal.c ### */
@@ -3068,6 +3072,7 @@ E boolean FDECL(makewish, (int));
 E void FDECL(costly_cancel, (struct obj *));
 E void FDECL(revive_egg, (struct obj *));
 E int NDECL(allow_artwish);
+E boolean NDECL(dowand_refresh);
 
 #endif /* !MAKEDEFS_C && !LEV_LEX_C */
 
