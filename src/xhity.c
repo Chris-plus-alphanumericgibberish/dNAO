@@ -205,20 +205,20 @@ struct monst * mdef;
 		weave_black_web(mdef);
 	
 	/* Do the attacks */
+	bhitpos.x = u.ux + u.dx; bhitpos.y = u.uy + u.dy;
+	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 	if (attack_type == ATTACKCHECK_BLDTHRST) {
 		/* unintentional attacks only cause the one hit, no follow-ups */
 		int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+		/* must check that attacks are allowable */
+		if (!magr_can_attack_mdef(&youmonst, mdef, bhitpos.x, bhitpos.y, FALSE))
+			return FALSE;
 		/* assumes the bloodthirst is caused by your mainhand weapon */
 		Your("bloodthirsty weapon attacks!");
-		bhitpos.x = u.ux + u.dx; bhitpos.y = u.uy + u.dy;
-		notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 		result = xmeleehity(&youmonst, mdef, &basicattack, uwep, VIS_MAGR, 0, FALSE);
 	}
 	else {
-		bhitpos.x = u.ux + u.dx; bhitpos.y = u.uy + u.dy;
-		notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
-		result = xattacky(&youmonst, mdef, u.ux + u.dx, u.uy + u.dy);
-
+		result = xattacky(&youmonst, mdef, bhitpos.x, bhitpos.y);
 		if (!DEADMONSTER(mdef) && u.sealsActive&SEAL_SHIRO){
 			int i, dx, dy;
 			struct obj *otmp;
@@ -375,65 +375,8 @@ int tary;
 	}
 
 	/* cases where the agressor cannot make any attacks at all */
-	/* player is invincible*/
-	if(youdef && (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
-	    /* monsters won't attack you */
-	    if(magr == u.ustuck)
-			pline("%s loosens its grip slightly.", Monnam(magr));
-	    else if(!ranged) {
-		if (canseemon(magr) || sensemon(magr))
-		    pline("%s starts to attack you, but pulls back.",
-			  Monnam(magr));
-		else
-		    You_feel("%s move nearby.", something);
-	    }
-	    return MM_MISS;
-	}
-
-	/* agr can't attack */
-	if (cantmove(magr))
+	if (!magr_can_attack_mdef(magr, mdef, tarx, tary, TRUE))
 		return MM_MISS;
-
-	if (youagr && madness_cant_attack(mdef))
-		return MM_MISS;
-
-	/* some creatures are limited in *where* they can attack */
-	/* Grid bugs and Bebeliths cannot attack at an angle. */
-	if ((pa == &mons[PM_GRID_BUG] || pa == &mons[PM_BEBELITH])
-		&& x(magr) != tarx && y(magr) != tary)
-		return MM_MISS;
-
-	/* limited attack angles (monster-agressor only) */
-	if (!youagr && (
-		pa == &mons[PM_CLOCKWORK_SOLDIER] || pa == &mons[PM_CLOCKWORK_DWARF] ||
-		pa == &mons[PM_FABERGE_SPHERE] || pa == &mons[PM_FIREWORK_CART] ||
-		pa == &mons[PM_JUGGERNAUT] || pa == &mons[PM_ID_JUGGERNAUT]))
-	{
-		if (x(magr) + xdir[(int)magr->mvar_vector] != tarx ||
-			y(magr) + ydir[(int)magr->mvar_vector] != tary)
-			return MM_MISS;
-	}
-
-	/* Monsters can't attack a player that's underwater unless the monster can swim; asymetric */
-	if (youdef && Underwater && !mon_resistance(magr, SWIMMING))
-		return MM_MISS;
-
-	/* Monsters can't attack a player that's swallowed unless the monster *is* u.ustuck */
-	if (youdef && u.uswallow) {
-		if (magr != u.ustuck)
-			return MM_MISS;
-		/* they also know exactly where you are */
-		u.ustuck->mux = u.ux;
-		u.ustuck->muy = u.uy;
-		/* if you're invulnerable, you're fine though */
-		if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)
-			return MM_MISS; /* stomachs can't hurt you! */
-	}
-	/* While swallowed OR stuck, you can't attack other monsters */
-	if (youagr && u.ustuck) {
-		if (mdef != u.ustuck)
-			return MM_MISS;
-	}
 
 	/* Set up the visibility of action */
 	vis = getvis(magr, mdef, tarx, tary);
@@ -13533,7 +13476,7 @@ struct monst * mdef;
 	static struct attack shadowblade = { AT_SRPR, AD_SHDW, 4, 8 };
 	int tohitmod = 0;	/* necessary to call xmeleehity */
 
-	if (mdef){
+	if (mdef && magr_can_attack_mdef(&youmonst, mdef, x(mdef), y(mdef), FALSE)){
 		return xmeleehity(&youmonst,
 			mdef,
 			&shadowblade,
@@ -13560,7 +13503,8 @@ struct monst * mexclude;
 	for (i = 0; i<8; i++){
 		if (isok(u.ux + xdir[i], u.uy + ydir[i])){
 			mdef = m_at(u.ux + xdir[i], u.uy + ydir[i]);
-			if (mdef && !mdef->mpeaceful && mdef != mexclude){
+			if (mdef && !mdef->mpeaceful && mdef != mexclude
+				&& magr_can_attack_mdef(&youmonst, mdef, u.ux + xdir[i], u.uy + ydir[i], FALSE)){
 				(void)shadow_strike(mdef);
 			}
 		}
@@ -13714,43 +13658,45 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 			}
 		}
 
-		/* lightsaber forms (per-attack) (player-only) */
-		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) &&			/* player with a lightsaber in their main hand */
-			(multi >= 0) &&														/* not paralyzed */
-			distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1 &&					/* in close quarters */
-			!(result&MM_AGR_DIED) &&											/* attacker is still alive */
-			(u.fightingForm == FFORM_DJEM_SO || u.fightingForm == FFORM_SORESU)	/* proper forms */
-			){
-			int chance = 0;
+		/* lightsaber form counterattack (per-attack) (player-only) */
+		if (magr_can_attack_mdef(mdef, magr, x(magr), y(magr), FALSE)) {
+			if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) &&			/* player with a lightsaber in their main hand */
+				(multi >= 0) &&														/* not paralyzed */
+				distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1 &&					/* in close quarters */
+				!(result&MM_AGR_DIED) &&											/* attacker is still alive */
+				(u.fightingForm == FFORM_DJEM_SO || u.fightingForm == FFORM_SORESU)	/* proper forms */
+				){
+				int chance = 0;
 
-			/* determine chance of counterattacking */
-			switch (u.fightingForm) {
-			case FFORM_DJEM_SO:
-				if (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))
-					chance = DjemSo_counterattack[(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(uwep))) - 2)];
-				break;
-			case FFORM_SORESU:
-				if (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))
-					chance = Soresu_counterattack[(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep))) - 2)];
-				break;
-			}
+				/* determine chance of counterattacking */
+				switch (u.fightingForm) {
+				case FFORM_DJEM_SO:
+					if (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))
+						chance = DjemSo_counterattack[(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(uwep))) - 2)];
+					break;
+				case FFORM_SORESU:
+					if (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))
+						chance = Soresu_counterattack[(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep))) - 2)];
+					break;
+				}
 
-			/* maybe make the counterattack */
-			if (rn2(100) < chance) {
-				int newvis = vis&VIS_NONE;
-				if (vis&VIS_MAGR)
-					newvis |= VIS_MDEF;
-				if (vis&VIS_MDEF)
-					newvis |= VIS_MAGR;
+				/* maybe make the counterattack */
+				if (rn2(100) < chance) {
+					int newvis = vis&VIS_NONE;
+					if (vis&VIS_MAGR)
+						newvis |= VIS_MDEF;
+					if (vis&VIS_MDEF)
+						newvis |= VIS_MAGR;
 
-				You("counterattack!");
-				use_skill(u.fightingForm, 1);
-				
-				newres = xmeleehity(mdef, magr, &basicattack, uwep, newvis, 0, FALSE);
-				if (newres&MM_DEF_DIED)
-					result |= MM_AGR_DIED;	/* attacker died */
-				if (newres&MM_DEF_LSVD)
-					result |= MM_AGR_STOP;	/* attacker lifesaved */
+					You("counterattack!");
+					use_skill(u.fightingForm, 1);
+
+					newres = xmeleehity(mdef, magr, &basicattack, uwep, newvis, 0, FALSE);
+					if (newres&MM_DEF_DIED)
+						result |= MM_AGR_DIED;	/* attacker died */
+					if (newres&MM_DEF_LSVD)
+						result |= MM_AGR_STOP;	/* attacker lifesaved */
+				}
 			}
 		}
 	}
@@ -13770,101 +13716,104 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 			}
 		}
 		/* Counterattacks */
-		/* get defender's weapon */
-		otmp = (youdef ? uwep : MON_WEP(mdef));
-		if (otmp &&
-			!(result&(MM_AGR_DIED | MM_DEF_DIED | MM_DEF_LSVD)) &&
-			distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1 &&
-			!cantmove(mdef)) {
-			int chance = 0;
-			/* lightsaber forms (per-round) (player-only) */
-			if (youdef &&
-				is_lightsaber(otmp) && litsaber(otmp) &&
-				u.fightingForm == FFORM_SHIEN &&
-				(!uarm || is_light_armor(uarm)))
-			{
-				chance += Shien_counterattack[(min(P_SKILL(FFORM_SHIEN), P_SKILL(weapon_type(uwep))) - 2)];
-			}
-			/* Sansara Mirror */
-			if (otmp->oartifact == ART_SANSARA_MIRROR) {
-				chance += 50;
-			}
-			/* Pen of the Void */
-			if (otmp->oartifact == ART_PEN_OF_THE_VOID &&
-				otmp->ovar1&SEAL_EURYNOME) {
-				chance += 10;
-				if (quest_status.killed_nemesis && Role_if(PM_EXILE))
+		if (magr_can_attack_mdef(mdef, magr, x(magr), y(magr), FALSE))
+		{
+			/* get defender's weapon */
+			otmp = (youdef ? uwep : MON_WEP(mdef));
+			if (otmp &&
+				!(result&(MM_AGR_DIED | MM_DEF_DIED | MM_DEF_LSVD)) &&
+				distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1 &&
+				!cantmove(mdef)) {
+				int chance = 0;
+				/* lightsaber forms (per-round) (player-only) */
+				if (youdef &&
+					is_lightsaber(otmp) && litsaber(otmp) &&
+					u.fightingForm == FFORM_SHIEN &&
+					(!uarm || is_light_armor(uarm)))
+				{
+					chance += Shien_counterattack[(min(P_SKILL(FFORM_SHIEN), P_SKILL(weapon_type(uwep))) - 2)];
+				}
+				/* Sansara Mirror */
+				if (otmp->oartifact == ART_SANSARA_MIRROR) {
+					chance += 50;
+				}
+				/* Pen of the Void */
+				if (otmp->oartifact == ART_PEN_OF_THE_VOID &&
+					otmp->ovar1&SEAL_EURYNOME) {
 					chance += 10;
-			}
-
-			/* maybe make the counterattack */
-			if (rn2(100) < chance) {
-				struct attack * counter;
-				int newvis = vis&VIS_NONE;
-				if (vis&VIS_MAGR)
-					newvis |= VIS_MDEF;
-				if (vis&VIS_MDEF)
-					newvis |= VIS_MAGR;
-
-				/* get 1st weapon attack defender has */
-				int subout2 = 0;
-				int indexnum2 = 0;
-				/* grab the first weapon attack mdef has, or else use a basic 1d4 attack */
-				do {
-					/* we'll ignore res[], tohitmod, and prev_attk, resusing them from earlier */
-					counter = getattk(mdef, magr, res, &indexnum2, &prev_attk, FALSE, &subout2, &tohitmod);
-				} while (counter->aatyp != AT_WEAP && !is_null_attk(counter));
-				if (is_null_attk(counter))
-					counter = &basicattack;
-
-				/* make the counterattack */
-				if (youdef) {
-					You("counterattack!");
+					if (quest_status.killed_nemesis && Role_if(PM_EXILE))
+						chance += 10;
 				}
-				else if (newvis&VIS_MAGR) {
-					pline("%s counterattacks!", Monnam(mdef));
-				}
-				/* train lightsaber skill if applicable */
-				if (youdef && u.fightingForm == FFORM_SHIEN)
-					use_skill(u.fightingForm, 1);
 
-				/* make the attack */
-				newres = xmeleehity(mdef, magr, counter, otmp, newvis, 0, FALSE);
-				if (newres&MM_DEF_DIED)
-					result |= MM_AGR_DIED;	/* attacker died */
-				if (newres&MM_DEF_LSVD)
-					result |= MM_AGR_STOP;	/* attacker lifesaved */
-			}
-		}
+				/* maybe make the counterattack */
+				if (rn2(100) < chance) {
+					struct attack * counter;
+					int newvis = vis&VIS_NONE;
+					if (vis&VIS_MAGR)
+						newvis |= VIS_MDEF;
+					if (vis&VIS_MDEF)
+						newvis |= VIS_MAGR;
 
-		/* Eurynome (player-only) */
-		if (youdef && u.sealsActive&SEAL_EURYNOME &&							/* player with Eurynome bound */
-			(multi >= 0) &&														/* not paralyzed */
-			distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1 &&					/* in close quarters */
-			!(result&MM_AGR_DIED)												/* attacker is still alive */
-			){
-			/* chance of counterattacking is 20% */
-			/* maybe make the counterattack */
-			if (rn2(100) < 20) {
-				int newvis = vis&VIS_NONE;
-				if (vis&VIS_MAGR)
-					newvis |= VIS_MDEF;
-				if (vis&VIS_MDEF)
-					newvis |= VIS_MAGR;
-				int i;
+					/* get 1st weapon attack defender has */
+					int subout2 = 0;
+					int indexnum2 = 0;
+					/* grab the first weapon attack mdef has, or else use a basic 1d4 attack */
+					do {
+						/* we'll ignore res[], tohitmod, and prev_attk, resusing them from earlier */
+						counter = getattk(mdef, magr, res, &indexnum2, &prev_attk, FALSE, &subout2, &tohitmod);
+					} while (counter->aatyp != AT_WEAP && !is_null_attk(counter));
+					if (is_null_attk(counter))
+						counter = &basicattack;
 
-				You("counterattack!");
+					/* make the counterattack */
+					if (youdef) {
+						You("counterattack!");
+					}
+					else if (newvis&VIS_MAGR) {
+						pline("%s counterattacks!", Monnam(mdef));
+					}
+					/* train lightsaber skill if applicable */
+					if (youdef && u.fightingForm == FFORM_SHIEN)
+						use_skill(u.fightingForm, 1);
 
-				/* counterattack with two unarmed strikes, regardless of free-hand-ed-ness */
-				for (i = 0; i < 2; i++) {
-					newres = xmeleehity(mdef, magr, &basicattack, (struct obj *)0, newvis, 0, FALSE);
+					/* make the attack */
+					newres = xmeleehity(mdef, magr, counter, otmp, newvis, 0, FALSE);
 					if (newres&MM_DEF_DIED)
 						result |= MM_AGR_DIED;	/* attacker died */
 					if (newres&MM_DEF_LSVD)
 						result |= MM_AGR_STOP;	/* attacker lifesaved */
-					/* if (original attacker) died, don't keep attacking */
-					if (result&(MM_AGR_DIED|MM_AGR_STOP))
-						break;
+				}
+			}
+
+			/* Eurynome (player-only) */
+			if (youdef && u.sealsActive&SEAL_EURYNOME &&							/* player with Eurynome bound */
+				(multi >= 0) &&														/* not paralyzed */
+				distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1 &&					/* in close quarters */
+				!(result&MM_AGR_DIED)												/* attacker is still alive */
+				){
+				/* chance of counterattacking is 20% */
+				/* maybe make the counterattack */
+				if (rn2(100) < 20) {
+					int newvis = vis&VIS_NONE;
+					if (vis&VIS_MAGR)
+						newvis |= VIS_MDEF;
+					if (vis&VIS_MDEF)
+						newvis |= VIS_MAGR;
+					int i;
+
+					You("counterattack!");
+
+					/* counterattack with two unarmed strikes, regardless of free-hand-ed-ness */
+					for (i = 0; i < 2; i++) {
+						newres = xmeleehity(mdef, magr, &basicattack, (struct obj *)0, newvis, 0, FALSE);
+						if (newres&MM_DEF_DIED)
+							result |= MM_AGR_DIED;	/* attacker died */
+						if (newres&MM_DEF_LSVD)
+							result |= MM_AGR_STOP;	/* attacker lifesaved */
+						/* if (original attacker) died, don't keep attacking */
+						if (result&(MM_AGR_DIED | MM_AGR_STOP))
+							break;
+					}
 				}
 			}
 		}

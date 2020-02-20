@@ -9,6 +9,95 @@ extern boolean notonhead;
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+boolean
+magr_can_attack_mdef(magr, mdef, tarx, tary, active)
+struct monst * magr;
+struct monst * mdef;
+int tarx;
+int tary;
+boolean active;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pd = youdef ? youracedata : mdef->data;
+
+	/* cases where the agressor cannot make any attacks at all */
+	/* player is invincible*/
+	if (youdef && (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)) {
+		/* monsters won't attack you */
+		if (active) {
+			/* only print messages if they were actively attacking you */
+			if (magr == u.ustuck)
+				pline("%s loosens its grip slightly.", Monnam(magr));
+			else if (distmin(x(magr), y(magr), x(mdef), y(mdef)) <= 1) {
+				if (canseemon(magr) || sensemon(magr))
+					pline("%s starts to attack you, but pulls back.",
+					Monnam(magr));
+				else
+					You_feel("%s move nearby.", something);
+			}
+		}
+		return FALSE;
+	}
+
+	/* agr can't attack */
+	if (cantmove(magr))
+		return FALSE;
+
+	/* madness only prevents your active attempts to hit things */
+	if (youagr && active && madness_cant_attack(mdef))
+		return FALSE;
+
+	/* some creatures are limited in *where* they can attack */
+	/* Grid bugs and Bebeliths cannot attack at an angle. */
+	if ((pa == &mons[PM_GRID_BUG] || pa == &mons[PM_BEBELITH])
+		&& x(magr) != tarx && y(magr) != tary)
+		return FALSE;
+
+	/* limited attack angles (monster-agressor only) */
+	if (!youagr && (
+		pa == &mons[PM_CLOCKWORK_SOLDIER] || pa == &mons[PM_CLOCKWORK_DWARF] ||
+		pa == &mons[PM_FABERGE_SPHERE] || pa == &mons[PM_FIREWORK_CART] ||
+		pa == &mons[PM_JUGGERNAUT] || pa == &mons[PM_ID_JUGGERNAUT]))
+	{
+		if (x(magr) + xdir[(int)magr->mvar1] != tarx ||
+			y(magr) + ydir[(int)magr->mvar1] != tary)
+			return FALSE;
+	}
+
+	/* Monsters can't attack a player that's underwater unless the monster can swim; asymetric */
+	if (youdef && Underwater && !mon_resistance(magr, SWIMMING))
+		return FALSE;
+
+	/* Monsters can't attack a player that's swallowed unless the monster *is* u.ustuck */
+	if (youdef && u.uswallow) {
+		if (magr != u.ustuck)
+			return FALSE;
+		/* they also know exactly where you are */
+		/* ...if they are making an attack action. */
+		if (active) {
+			u.ustuck->mux = u.ux;
+			u.ustuck->muy = u.uy;
+		}
+		/* if you're invulnerable, you're fine though */
+		if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)
+			return FALSE; /* stomachs can't hurt you! */
+	}
+	/* While swallowed OR stuck, you can't attack other monsters */
+	if (youagr && u.ustuck) {
+		if (mdef != u.ustuck) {
+			if (u.uswallow)		/* when swallowed, always not */
+				return FALSE;
+			else if (active)	/* when held, only active attacks aren't allowed to hit others */
+				return FALSE;
+		}
+	}
+	/* if we made it through all of that, then we can attack */
+	return TRUE;
+}
+
+
 /* attack_checks()
  * 
  * the player is attempting to attack [mdef]
