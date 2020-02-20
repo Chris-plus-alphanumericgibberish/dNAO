@@ -492,7 +492,7 @@ nh_timeout()
 	if(Golded) golded_dialogue();
 	if(Slimed) slime_dialogue();
 	if(Vomiting) vomiting_dialogue();
-	if(Strangled) choke_dialogue();
+	if(Strangled && !Breathless) choke_dialogue();
 	if(u.mtimedone && !--u.mtimedone) {
 		if (Unchanging)
 			u.mtimedone = rnd(100*youmonst.data->mlevel + 1);
@@ -818,6 +818,34 @@ nh_timeout()
 			break;
 		case NULLMAGIC:
 			pline("The shimmering film around your body pops!");
+		break;
+		case CHASTITY:
+			You_feel("less chaste.");
+		break;
+		case CLEAVING:
+			//
+		break;
+		case GOOD_HEALTH:
+			You_feel("less healthy.");
+		break;
+		case RAPID_HEALING:
+			if((!Upolyd && u.uhp < u.uhpmax) ||
+				(Upolyd && u.mh < u.mhmax)
+			)
+				pline("Your wounds stop knitting shut.");
+		break;
+		case DESTRUCTION:
+			pline("You stop radiating waves of destruction.");
+		break;
+		case PRESERVATION:
+			pline("The rubbery film around your body vanishes!");
+		break;
+		case QUICK_DRAW:
+			pline("Your %s feel less swift.", makeplural(body_part(HAND)));
+		break;
+		case CLEAR_THOUGHTS:
+			if(u.usanity < 100)
+				pline("Your mind feels less clear.");
 		break;
 		}
 		}

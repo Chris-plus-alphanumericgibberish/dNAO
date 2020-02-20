@@ -1125,8 +1125,8 @@ register int after;	/* this is extra fast monster movement */
 			    rn2(4) && mtmp2->mlstmv != monstermoves &&
 			    !onscary(mtmp->mx, mtmp->my, mtmp2) &&
 			    /* monnear check needed: long worms hit on tail */
-			    monnear(mtmp2, mtmp->mx, mtmp->my /*don't counter allied nurses*/
-				&& (mtmp->data != &mons[PM_NURSE] || mtmp->mpeaceful != mtmp2->mpeaceful))) {
+			    monnear(mtmp2, mtmp->mx, mtmp->my)
+			){
 			mstatus = mattackm(mtmp2, mtmp);  /* return attack */
 			if (mstatus & MM_DEF_DIED) return 2;
 		    }
@@ -1240,7 +1240,7 @@ newdogpos:
 		place_monster(mtmp, nix, niy);
 		if(mtmp->data == &mons[PM_SURYA_DEVA]){
 			struct monst *blade;
-			for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar1) break;
+			for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
 			if(blade){
 				int bx = blade->mx, by = blade->my;
 				remove_monster(bx, by);

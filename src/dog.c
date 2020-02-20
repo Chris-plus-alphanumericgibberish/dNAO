@@ -17,7 +17,7 @@ register struct monst *mtmp;
 {
 	if(mtmp->data == &mons[PM_SURYA_DEVA]){
 		struct monst *blade;
-		for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar1) break;
+		for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
 		if(blade && !blade->mtame) tamedog(blade, (struct obj *) 0);
 	}
 	
@@ -258,7 +258,7 @@ makedog()
 	initedog(mtmp);
 	EDOG(mtmp)->loyal = TRUE;
 	if(is_half_dragon(mtmp->data) && flags.HDbreath){
-		switch(mtmp->mvar1){
+		switch(mtmp->mvar_hdBreath){
 			case AD_COLD:
 				mtmp->mintrinsics[(COLD_RES-1)/32] &= ~(1 << (COLD_RES-1)%32);
 			break;
@@ -280,27 +280,27 @@ makedog()
 		}
 		switch(flags.HDbreath){
 			case AD_COLD:
-				mtmp->mvar1 = AD_COLD;
+				mtmp->mvar_hdBreath = AD_COLD;
 				mtmp->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
 			break;
 			case AD_FIRE:
-				mtmp->mvar1 = AD_FIRE;
+				mtmp->mvar_hdBreath = AD_FIRE;
 				mtmp->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
 			break;
 			case AD_SLEE:
-				mtmp->mvar1 = AD_SLEE;
+				mtmp->mvar_hdBreath = AD_SLEE;
 				mtmp->mintrinsics[(SLEEP_RES-1)/32] |= (1 << (SLEEP_RES-1)%32);
 			break;
 			case AD_ELEC:
-				mtmp->mvar1 = AD_ELEC;
+				mtmp->mvar_hdBreath = AD_ELEC;
 				mtmp->mintrinsics[(SHOCK_RES-1)/32] |= (1 << (SHOCK_RES-1)%32);
 			break;
 			case AD_DRST:
-				mtmp->mvar1 = AD_DRST;
+				mtmp->mvar_hdBreath = AD_DRST;
 				mtmp->mintrinsics[(POISON_RES-1)/32] |= (1 << (POISON_RES-1)%32);
 			break;
 			case AD_ACID:
-				mtmp->mvar1 = AD_ACID;
+				mtmp->mvar_hdBreath = AD_ACID;
 				mtmp->mintrinsics[(ACID_RES-1)/32] |= (1 << (ACID_RES-1)%32);
 			break;
 		}
@@ -515,7 +515,7 @@ boolean with_you;
 		if (mtmp->mgold) {
 		    if (xlocale == 0 && ylocale == 0 && corpse) {
 			(void) get_obj_location(corpse, &xlocale, &ylocale, 0);
-			(void) mkgold(mtmp->mgold, xlocale, ylocale);
+			(void) mkgold_core(mtmp->mgold, xlocale, ylocale, FALSE);
 		    }
 		    mtmp->mgold = 0L;
 		}
@@ -783,7 +783,7 @@ boolean pets_only;	/* true for ascension or final escape */
 			mydogs = mtmp;
 			if(mtmp->data == &mons[PM_SURYA_DEVA]){
 				struct monst *blade;
-				for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar1) break;
+				for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
 				if(blade) {
 					if(mtmp2 == blade) mtmp2 = mtmp2->nmon; /*mtmp2 is about to end up on the migrating mons chain*/
 					/* set minvent's obj->no_charge to 0 */
@@ -819,7 +819,7 @@ boolean pets_only;	/* true for ascension or final escape */
 			/* we want to be able to find him when his next resurrection
 			   chance comes up, but have him resume his present location
 			   if player returns to this level before that time */
-			if(mtmp->data == &mons[PM_SURYA_DEVA] && mtmp2 && mtmp2->data == &mons[PM_DANCING_BLADE] && mtmp2->mvar1 == mtmp->m_id)
+			if(mtmp->data == &mons[PM_SURYA_DEVA] && mtmp2 && mtmp2->data == &mons[PM_DANCING_BLADE] && mtmp2->mvar_suryaID == mtmp->m_id)
 				mtmp2 = mtmp2->nmon; /*mtmp2 is about to end up on the migrating mons chain*/
 			if(mtmp->data != &mons[PM_DANCING_BLADE]) migrate_to_level(mtmp, ledger_no(&u.uz),
 					 MIGR_EXACT_XY, (coord *)0);
@@ -887,7 +887,7 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	
 	if(mtmp->data == &mons[PM_SURYA_DEVA]){
 		struct monst *blade;
-		for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar1) break;
+		for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
 		if(blade) {
 			/* set minvent's obj->no_charge to 0 */
 			for(obj = blade->minvent; obj; obj = obj->nobj) {
@@ -1182,7 +1182,7 @@ int enhanced;
 	) return((struct monst *)0);
 
 	/* worst case, at least it'll be peaceful. */
-	if(!obj || !is_instrument(obj)){
+	if(!obj || (!is_instrument(obj) && obj->otyp != DOLL_OF_FRIENDSHIP)){
 		mtmp->mpeaceful = 1;
 		mtmp->mtraitor  = 0;	/* No longer a traitor */
 		set_malign(mtmp);
@@ -1194,13 +1194,17 @@ int enhanced;
 		return((struct monst *)0);
 	}
 
-	if(flags.moonphase == FULL_MOON && night() && rn2(6) && obj && !is_instrument(obj)
+	if(flags.moonphase == FULL_MOON && night() && rn2(6) && obj 
+		&& !is_instrument(obj) && obj->otyp != DOLL_OF_FRIENDSHIP
 		&& obj->oclass != SPBOOK_CLASS && obj->oclass != SCROLL_CLASS
 		&& mtmp->data->mlet == S_DOG
 	) return((struct monst *)0);
 
 #ifdef CONVICT
-    if (!enhanced && Role_if(PM_CONVICT) && (is_domestic(mtmp->data) && obj && !is_instrument(obj) && obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS)) {
+    if (!enhanced && Role_if(PM_CONVICT) && (is_domestic(mtmp->data) && obj
+		&& !is_instrument(obj) && obj->otyp != DOLL_OF_FRIENDSHIP
+		&& obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS)
+	) {
         /* Domestic animals are wary of the Convict */
         pline("%s still looks wary of you.", Monnam(mtmp));
         return((struct monst *)0);
@@ -1219,7 +1223,10 @@ int enhanced;
 	}
 
 	/* feeding it treats makes it tamer */
-	if (mtmp->mtame && obj && !is_instrument(obj) && obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS) {
+	if (mtmp->mtame && obj 
+		&& !is_instrument(obj) && obj->otyp != DOLL_OF_FRIENDSHIP
+		&& obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS
+	) {
 	    int tasty;
 
 	    if (mtmp->mcanmove && !mtmp->mconf && !mtmp->meating &&
@@ -1264,7 +1271,12 @@ int enhanced;
 	    mtmp->isshk || mtmp->isgd || mtmp->ispriest || mtmp->isminion ||
 	    mtmp->data == &mons[urole.neminum] ||
 	    (!enhanced && is_demon(mtmp->data) && !is_demon(youracedata)) ||
-	    (obj && !is_instrument(obj) && obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS && dogfood(mtmp, obj) >= MANFOOD)) return (struct monst *)0;
+	    (obj
+			&& !is_instrument(obj) && obj->otyp != DOLL_OF_FRIENDSHIP 
+			&& obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS 
+			&& dogfood(mtmp, obj) >= MANFOOD
+		)
+	) return (struct monst *)0;
 
 	if (mtmp->m_id == quest_status.leader_m_id)
 	    return((struct monst *)0);
@@ -1286,7 +1298,9 @@ int enhanced;
 	replmon(mtmp, mtmp2);
 	/* `mtmp' is now obsolete */
 
-	if (obj && !is_instrument(obj) && obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS) {		/* thrown food */
+	if (obj && !is_instrument(obj) && obj->otyp != DOLL_OF_FRIENDSHIP 
+		&& obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS
+	){		/* thrown food */
 	    /* defer eating until the edog extension has been set up */
 	    place_object(obj, mtmp2->mx, mtmp2->my);	/* put on floor */
 	    /* devour the food (might grow into larger, genocided monster) */

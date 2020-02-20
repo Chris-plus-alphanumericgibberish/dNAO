@@ -373,8 +373,8 @@ struct monst *mtmp;
 		if((mtmp->data != &mons[PM_CLOCKWORK_SOLDIER] && mtmp->data != &mons[PM_CLOCKWORK_DWARF] && 
 		   mtmp->data != &mons[PM_FABERGE_SPHERE] && mtmp->data != &mons[PM_FIREWORK_CART] && 
 		   mtmp->data != &mons[PM_JUGGERNAUT] && mtmp->data != &mons[PM_ID_JUGGERNAUT]) ||
-			(x + xdir[(int)mtmp->mvar1] == xx && 
-			   y + ydir[(int)mtmp->mvar1] == yy 
+			(x + xdir[(int)mtmp->mvar_vector] == xx && 
+			   y + ydir[(int)mtmp->mvar_vector] == yy 
 			)
 		)
 		if ((xx==x && yy==y) || !level.monsters[xx][yy])
@@ -1043,16 +1043,9 @@ struct monst *mtmp;
 	if (is_animal(mtmp->data) || mindless_mon(mtmp) ||
 	    nohands(mtmp->data))
 		return FALSE;
-	if (target == &youmonst)
-	{
-	if (u.uswallow) return FALSE;
-	if (in_your_sanctuary(mtmp, 0, 0)) return FALSE;
-	if (dmgtype(mtmp->data, AD_HEAL) && !uwep
-#ifdef TOURIST
-	    && !uarmu
-#endif
-	    && !uarm && !uarmh && !uarms && !uarmg && !uarmc && !uarmf)
-		return FALSE;
+	if (target == &youmonst){
+		if (u.uswallow) return FALSE;
+		if (in_your_sanctuary(mtmp, 0, 0)) return FALSE;
 	}
 
 	if (!ranged_stuff) return FALSE;
@@ -1899,8 +1892,8 @@ struct monst *mtmp;
 			if((mtmp->data != &mons[PM_CLOCKWORK_SOLDIER] && mtmp->data != &mons[PM_CLOCKWORK_DWARF] && 
 			   mtmp->data != &mons[PM_FABERGE_SPHERE] && mtmp->data != &mons[PM_FIREWORK_CART] && 
 			   mtmp->data != &mons[PM_JUGGERNAUT] && mtmp->data != &mons[PM_ID_JUGGERNAUT]) ||
-				(x + xdir[(int)mtmp->mvar1] == xx && 
-				   y + ydir[(int)mtmp->mvar1] == yy 
+				(x + xdir[(int)mtmp->mvar_vector] == xx && 
+				   y + ydir[(int)mtmp->mvar_vector] == yy 
 				)
 			)
 			if (/* (xx==x && yy==y) || */ !level.monsters[xx][yy])

@@ -1796,6 +1796,8 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	else you_have("transgressed");
 #ifdef WIZARD
 	if (wizard) {
+		Sprintf(buf, "%ld gold ", u.spawnedGold);
+		enl_msg(buf, "has been", "was", " created");
 		Sprintf(buf, " %d", u.ualign.record);
 		enl_msg("Your alignment ", "is", "was", buf);
 		Sprintf(buf, " %d sins", u.ualign.sins);
@@ -2091,7 +2093,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	you_have(buf);
 	
 	/*** Madnesses ***/
-	if(u.usanity < 100){
+	if(u.usanity < 100 && !ClearThoughts){
 		if (u.umadness&MAD_DELUSIONS){
 			you_have("a tendency to hallucinate, obscuring some monsters true forms");
 		}
@@ -2596,6 +2598,9 @@ int final;
 		}
 	}
 	
+	Sprintf(buf, "%ld pieces of gold created in the game", u.spawnedGold);
+	dump("  There were ", buf);
+	
 	/* note: piousness 20 matches MIN_QUEST_ALIGN (quest.h) */
 	if (u.ualign.record >= 20)
 		dump(youwere, "piously aligned");
@@ -2887,7 +2892,7 @@ int final;
 		dump("  ", "You occasionally saw things you wished you hadn't");
 	
 	/*** Madnesses ***/
-	if(u.usanity < 100){
+	if(u.usanity < 100 && !ClearThoughts){
 		if (u.umadness&MAD_DELUSIONS){
 			dump("  ", "You had a tendency to hallucinate");
 		}
@@ -3324,7 +3329,7 @@ resistances_enlightenment()
 		putstr(en_win, 0, "You occasionally see things you wish you hadn't.");
 	
 	/*** Madnesses ***/
-	if(u.usanity < 100){
+	if(u.usanity < 100 && !ClearThoughts){
 		if (u.umadness&MAD_DELUSIONS){
 			putstr(en_win, 0, "You have a tendency to hallucinate");
 		}

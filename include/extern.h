@@ -57,6 +57,8 @@ E boolean FDECL(use_ring_of_wishes, (struct obj *));
 E boolean FDECL(use_candle_of_invocation, (struct obj *));
 E void FDECL(use_magic_whistle, (struct obj *));
 E int FDECL(unfixable_trouble_count,(BOOLEAN_P));
+E void FDECL(remove_thought, (int));
+E int NDECL(dotrephination_menu);
 E int NDECL(partial_action);
 
 /* ### artifact.c ### */
@@ -705,6 +707,7 @@ E void FDECL(cpostfx, (int, BOOLEAN_P, BOOLEAN_P, BOOLEAN_P));
 E boolean FDECL(is_edible, (struct obj *));
 E void NDECL(init_uhunger);
 E void NDECL(reset_uhunger);
+E boolean NDECL(satiate_uhunger);
 E int NDECL(Hear_again);
 E void NDECL(reset_eat);
 E int NDECL(doeat);
@@ -781,6 +784,8 @@ E int FDECL(num_wards_at, (XCHAR_P,XCHAR_P));
 E void FDECL(u_wipe_engr, (int));
 E int FDECL(decode_wardID, (int));
 E int FDECL(get_wardID, (int));
+E int FDECL(decode_sealID, (long));
+E long FDECL(get_sealID, (int));
 E void FDECL(wipe_engr_at, (XCHAR_P,XCHAR_P,XCHAR_P));
 E void FDECL(read_engr_at, (int,int));
 E void FDECL(make_engr_at, (int,int,const char *,long,XCHAR_P));
@@ -935,6 +940,7 @@ E void NDECL(maybe_wail);
 E void FDECL(unmul, (const char *));
 E void FDECL(showdmg, (int, BOOLEAN_P));
 E void FDECL(losehp, (int,const char *,BOOLEAN_P));
+E void FDECL(losepw, (int));
 E void FDECL(mdamageu, (struct monst *, int));
 E int NDECL(weight_cap);
 E int NDECL(inv_weight);
@@ -1324,6 +1330,7 @@ E void FDECL(maybe_set_material, (struct obj *, int, boolean));
 E void FDECL(set_material, (struct obj *, int));
 E int FDECL(weight, (struct obj *));
 E struct obj *FDECL(mkgold, (long,int,int));
+E struct obj *FDECL(mkgold_core, (long,int,int,boolean));
 E struct obj *FDECL(mkcorpstat,
 		(int,struct monst *,struct permonst *,int,int,BOOLEAN_P));
 E struct obj *FDECL(obj_attach_mid, (struct obj *, unsigned));
@@ -1460,6 +1467,7 @@ E int NDECL(u_sanity_loss_nyar);
 E int FDECL(u_sanity_gain,(struct monst *));
 E int FDECL(u_insight_gain,(struct monst *));
 E void FDECL(repair,(struct monst *, struct monst *, int));
+E void FDECL(nurse_heal,(struct monst *, struct monst *, int));
 E void FDECL(insight_vanish,(struct monst *));
 
 /* ### mondata.c ### */
@@ -1675,6 +1683,7 @@ E int FDECL(do_play_instrument, (struct obj *));
 #ifdef BARD
 E int FDECL(pet_can_sing, (struct monst *,BOOLEAN_P));
 E int FDECL(mon_can_counter_sing, (struct monst *,BOOLEAN_P));
+E int FDECL(resist_song, (struct monst *, int, struct obj *));
 #endif
 
 /* ### nhlan.c ### */
@@ -2415,6 +2424,7 @@ E int FDECL(domonnoise,(struct monst *, BOOLEAN_P));
 E int FDECL(add_sound_mapping, (const char *));
 E void FDECL(play_sound_for_message, (const char *));
 #endif
+E boolean NDECL(doreinforce_binding);
 
 /* ### sys/msdos/sound.c ### */
 
@@ -2465,6 +2475,8 @@ E void FDECL(initialward, (struct obj *));
 E void FDECL(set_spirit_powers, (long));
 E int NDECL(reorder_spirit_powers);
 E void NDECL(dopseudonatural);
+E void NDECL(dodestruction);
+E boolean NDECL(doreinforce_spell);
 E void NDECL(update_alternate_spells);
 
 /* ### steal.c ### */
@@ -3063,6 +3075,7 @@ E boolean FDECL(makewish, (int));
 E void FDECL(costly_cancel, (struct obj *));
 E void FDECL(revive_egg, (struct obj *));
 E int NDECL(allow_artwish);
+E boolean NDECL(dowand_refresh);
 
 #endif /* !MAKEDEFS_C && !LEV_LEX_C */
 

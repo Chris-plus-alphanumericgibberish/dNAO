@@ -343,7 +343,7 @@ int tary;
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !canseemon(mdef)) :
+	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !sensemon(mdef)) :
 		(magr->mconf || magr->mstun || magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
 
 	/* set permonst pointers */
@@ -1547,8 +1547,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	 * Physical glyphs result in melee,
 	 * Non-specific glyphs result in random choice
 	 */
-	if (!youagr && *indexnum == 1 && is_alabaster_mummy(pa) && magr->mvar1){
-		switch (magr->mvar1){
+	if (!youagr && *indexnum == 1 && is_alabaster_mummy(pa) && magr->mvar_syllable){
+		switch (magr->mvar_syllable){
 		case SYLLABLE_OF_STRENGTH__AESH:
 		case SYLLABLE_OF_GRACE__UUR:
 			// no changes
@@ -1641,6 +1641,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 					|| dmgtype(pd, AD_LSEX)
 					|| magr->mcan 
 					|| engring
+					|| Chastity
 					|| !(uarm || uarmu || uarmh || uarmg || uarmf || uarmc || uwep || uswapwep)
 				))){
 					*subout |= SUBOUT_GOATSPWN;
@@ -2222,11 +2223,11 @@ boolean allow_lethal;
 					if (xresist);	// no message, reduce spam
 					else {
 						dmg = d(cnt, dmg);
-						if (!allow_lethal && dmg > mtmp->mhp)
+						if (!allow_lethal && dmg >= mtmp->mhp)
 							dmg = min(0, mtmp->mhp - 1);
 
 						mtmp->mhp -= dmg;
-						if (mtmp->mhp < 0) {
+						if (mtmp->mhp < 1) {
 							if(vis) pline("%s dies!", Monnam(mtmp));
 							mondied(mtmp);
 							return (MM_HIT|MM_DEF_DIED);
@@ -3299,7 +3300,7 @@ int flat_acc;
 			}
 		}
 		/* nudist accuracy bonus/penalty (player-only) (melee) */
-		if (youagr && u.umadness&MAD_NUDIST && u.usanity < 100){
+		if (youagr && u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
 			int delta = 100 - u.usanity;
 			int discomfort = u_clothing_discomfort();
 			static boolean clothmessage = TRUE;
@@ -3693,7 +3694,7 @@ boolean ranged;
 	}
 	/* madness can make the player take more damage */
 	if (youdef) {
-		if (u.umadness&MAD_SUICIDAL){
+		if (u.umadness&MAD_SUICIDAL && !ClearThoughts){
 			dmg += ((100 - u.usanity)*u.ulevel) / 200;
 		}
 
@@ -3712,25 +3713,25 @@ boolean ranged;
 			|| pa == &mons[PM_SALAMANDER]
 			|| pa == &mons[PM_KARY__THE_FIEND_OF_FIRE]
 			|| pa == &mons[PM_CATHEZAR]
-			) && u.umadness&MAD_OPHIDIOPHOBIA && u.usanity < 100){
+			) && u.umadness&MAD_OPHIDIOPHOBIA && !ClearThoughts && u.usanity < 100){
 			dmg += (100 - u.usanity) / 5;
 		}
 
 		if ((pa->mlet == S_WORM
 			|| attacktype(pa, AT_TENT)
-			) && u.umadness&MAD_HELMINTHOPHOBIA && u.usanity < 100){
+			) && u.umadness&MAD_HELMINTHOPHOBIA && !ClearThoughts && u.usanity < 100){
 			dmg += (100 - u.usanity) / 5;
 		}
 
-		if (!magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARGENT_SHEEN && u.usanity < 100){
+		if (!magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARGENT_SHEEN && !ClearThoughts && u.usanity < 100){
 			dmg += (100 - u.usanity) / 5;
 		}
 
-		if ((is_insectoid(pa) || is_arachnid(pa)) && u.umadness&MAD_ENTOMOPHOBIA && u.usanity < 100){
+		if ((is_insectoid(pa) || is_arachnid(pa)) && u.umadness&MAD_ENTOMOPHOBIA && !ClearThoughts && u.usanity < 100){
 			dmg += (100 - u.usanity) / 5;
 		}
 
-		if (is_aquatic(pa) && u.umadness&MAD_THALASSOPHOBIA && u.usanity < 100){
+		if (is_aquatic(pa) && u.umadness&MAD_THALASSOPHOBIA && !ClearThoughts && u.usanity < 100){
 			dmg += (100 - u.usanity) / 5;
 		}
 
@@ -3739,11 +3740,11 @@ boolean ranged;
 			|| pa == &mons[PM_DRIDER]
 			|| pa == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
 			|| pa == &mons[PM_AVATAR_OF_LOLTH]
-			) && u.umadness&MAD_ARACHNOPHOBIA && u.usanity < 100){
+			) && u.umadness&MAD_ARACHNOPHOBIA && !ClearThoughts && u.usanity < 100){
 			dmg += (100 - u.usanity) / 5;
 		}
 
-		if (magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARACHNOPHOBIA && u.usanity < 100){
+		if (magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARACHNOPHOBIA && !ClearThoughts && u.usanity < 100){
 			dmg += (100 - u.usanity) / 5;
 		}
 	}
@@ -3973,7 +3974,7 @@ boolean ranged;
 					if ((species_resists_fire(mdef))
 						|| (ward_at(x(mdef), y(mdef)) == SIGIL_OF_CTHUGHA)
 						|| (youdef && ((Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_FIRE)))
-						|| (!youdef && is_half_dragon(pd) && mdef->mvar1 == AD_FIRE)
+						|| (!youdef && is_half_dragon(pd) && mdef->mvar_hdBreath == AD_FIRE)
 						|| (youdef && u.sealsActive&SEAL_FAFNIR))
 						dmg = 0;
 				}
@@ -4094,7 +4095,7 @@ boolean ranged;
 					if ((species_resists_cold(mdef))
 						|| (ward_at(x(mdef), y(mdef)) == BRAND_OF_ITHAQUA)
 						|| (youdef && ((Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_COLD)))
-						|| (!youdef && is_half_dragon(pd) && mdef->mvar1 == AD_COLD)
+						|| (!youdef && is_half_dragon(pd) && mdef->mvar_hdBreath == AD_COLD)
 						|| (youdef && u.sealsActive&SEAL_AMON))
 						dmg = 0;
 				}
@@ -4169,7 +4170,7 @@ boolean ranged;
 					if ((species_resists_elec(mdef))
 						|| (ward_at(x(mdef), y(mdef)) == TRACERY_OF_KARAKAL)
 						|| (youdef && ((Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_ELEC)))
-						|| (!youdef && is_half_dragon(pd) && mdef->mvar1 == AD_ELEC)
+						|| (!youdef && is_half_dragon(pd) && mdef->mvar_hdBreath == AD_ELEC)
 						|| (youdef && u.sealsActive&SEAL_ASTAROTH))
 						dmg = 0;
 				}
@@ -5120,6 +5121,7 @@ boolean ranged;
 				|| pd == &mons[PM_GREEN_SLIME]
 				|| pd == &mons[PM_FLUX_SLIME]
 				|| is_rider(pd)
+				|| (youdef && GoodHealth)
 				|| resists_poly(pd)) {
 				/* only message for the player defending */
 				if (youdef) {
@@ -5415,7 +5417,7 @@ boolean ranged;
 				if (otmp->spe > -1 * objects[(otmp)->otyp].a_ac){
 					damage_item(otmp);
 				}
-				else if (!otmp->oartifact || (pa == &mons[PM_DEMOGORGON] && rn2(10))){
+				else if (!otmp->oartifact || (pa == &mons[PM_DEMOGORGON] && !rn2(10))){
 					if (youdef)
 						claws_destroy_arm(otmp);
 					else
@@ -6102,7 +6104,7 @@ boolean ranged;
 					if (!tele_restrict(magr)) (void)rloc(magr, FALSE);
 					return MM_AGR_STOP;
 				}
-				else if (magr->mcan || engring) {
+				else if (magr->mcan || engring || Chastity) {
 					if (!Blind) {
 						pline("%s tries to %s you, but you seem %s.",
 							Adjmonnam(magr, "plain"),
@@ -6136,6 +6138,8 @@ boolean ranged;
 
 #ifdef SEDUCE
 			case AD_SSEX:
+				if(Chastity)
+					break;
 				if (!engagering1) engagering1 = find_engagement_ring();
 				if ((uleft && uleft->otyp == engagering1) || (uright && uright->otyp == engagering1))
 					break;
@@ -7329,7 +7333,7 @@ boolean ranged;
 		if (youagr && Race_if(PM_HALF_DRAGON))
 			alt_attk.adtyp = flags.HDbreath;
 		else if (is_half_dragon(pa))
-			alt_attk.adtyp = magr->mvar1;
+			alt_attk.adtyp = magr->mvar_hdBreath;
 		else
 			alt_attk.adtyp = AD_COLD;
 		return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
@@ -8192,7 +8196,7 @@ int vis;
 			/* set the creation's direction */
 			if (mlocal){
 				for (i = 0; i<8; i++) if (xdir[i] == dx && ydir[i] == dy) break;
-				mlocal->mvar1 = i;
+				mlocal->mvar_vector = i;
 
 				magr->mspec_used = rnd(6);
 				result = MM_HIT;
@@ -8504,7 +8508,7 @@ int vis;
 					if (pd == &mons[PM_GREEN_SLIME] || pd == &mons[PM_FLUX_SLIME]) {
 						Sprintf(buf, "%s isn't sitting well with you.",
 							The(pd->mname));
-						if (!Unchanging) {
+						if (!Unchanging && !GoodHealth) {
 							Slimed = 5L;
 							flags.botl = 1;
 						}
@@ -10544,7 +10548,7 @@ int vis;
 				if (!tele_restrict(magr)) (void)rloc(magr, FALSE);
 				return MM_AGR_STOP;
 			}
-			else if (magr->mcan || engring) {
+			else if (magr->mcan || engring || Chastity) {
 				if (!Blind) {
 					pline("%s tries to %s you, but you seem %s.",
 						Adjmonnam(magr, "plain"),
@@ -10585,6 +10589,8 @@ int vis;
 		/* STRAIGHT COPY-PASTE FROM ORIGINAL */
 		else {
 			static int engagering2 = 0;
+			if(Chastity)
+				break;
 			if (!engagering2) engagering2 = find_engagement_ring();
 			if ((uleft && uleft->otyp == engagering2) || (uright && uright->otyp == engagering2))
 				break;
@@ -11103,6 +11109,10 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 		}
 		else
 			natural_strike = TRUE;
+	}
+	/* if the player is attacking with a wielded weapon, increment conduct */
+	if (youagr && valid_weapon_attack && !thrown) {
+		u.uconduct.weaphit++;
 	}
 	/* precision multiplier */
 	if (fired && launcher &&								// Firing ammo from a launcher (fired implies thrown)
@@ -12454,8 +12464,12 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 		/* hits with a valid weapon proc effects of the weapon */
 		if (valid_weapon_attack) {
 			otmp = weapon;
-			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
+			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt)) {
+				/* if the artifact caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
+				if (returnvalue == MM_MISS && youagr && !thrown)
+					u.uconduct.weaphit--;
 				return returnvalue;
+			}
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
 		if (thrown && fired && launcher && valid_weapon_attack) {
@@ -12506,7 +12520,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	if (resist_attacks(pd) && (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack)) {
 		if (subtotl > 0) {
 			resisted_weapon_attacks = TRUE;
-			subtotl = 0;
+			subtotl = 1;
 		}
 	}
 	/* other creatures resist specific types of attacks */
@@ -12598,7 +12612,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->oproperties&OPROP_FLAYW))
 			)){
 			/* damage entirely mitigated */
-			subtotl = 0;
+			subtotl = 1;
 			resisted_attack_type = TRUE;
 		}
 		if ((attackmask & ~(resistmask)) == 0L && !(otmp && narrow_spec_applies(otmp, mdef)) && (subtotl > 0)) {
@@ -12627,12 +12641,17 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	if (youagr && is_aquatic(pd) && roll_madness(MAD_THALASSOPHOBIA)){
 		subtotl = (subtotl + 9)/10;
 	}
-	
 	/* Apply DR */
 	if (subtotl > 0){
 		if(pd == &mons[PM_DEEP_DWELLER] && !rn2(10)){
-			//Brain struck.  Ouch.
+			/*Brain struck.  Ouch.*/
+			if(youdef)
+				pline("Your brain-organ is struck!");
+			else if(canseemon(mdef))
+				pline("%s brain-organ struck!", s_suffix(Monnam(mdef)));
 			*hp(mdef) = 1;
+			resisted_weapon_attacks = FALSE;
+			resisted_attack_type = FALSE;
 		}
 		else if (phase_armor){
 			subtotl -= (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));

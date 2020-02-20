@@ -274,6 +274,23 @@ reset_uhunger()
 	}
 }
 
+boolean
+satiate_uhunger()
+{
+	if(Race_if(PM_INCANTIFIER)){
+		if(u.uen > min(u.uen+400, u.uenmax*.55))
+			return FALSE;
+		u.uen = min(u.uen+400, u.uenmax*.55);
+		newuhs(TRUE);
+	} else {
+		if(u.uhunger > min(u.uhunger+400, u.uhungermax*.55))
+			return FALSE;
+		u.uhunger = u.uhungermax*.55;
+		u.uhs = NOT_HUNGRY;
+	}
+	return TRUE;
+}
+
 static const struct { const char *txt; int nut; } tintxts[] = {
 	{"deep fried",	 60},
 	{"pickled",	 40},
@@ -734,8 +751,10 @@ BOOLEAN_P bld, nobadeffects;
 		break;
 	    case PM_GREEN_SLIME:
 	    case PM_FLUX_SLIME:
-		if (!nobadeffects && !Slimed && !Unchanging && !flaming(youracedata) &&
-			youracedata != &mons[PM_GREEN_SLIME]) {
+		if (!nobadeffects && !Slimed && !Unchanging 
+			&& !GoodHealth && !flaming(youracedata) 
+			&& youracedata != &mons[PM_GREEN_SLIME]
+		) {
 		    You("don't feel very well.");
 		    Slimed = 10L;
 		    flags.botl = 1;
@@ -803,7 +822,8 @@ struct monst *mon;
 
 	case PM_GREEN_SLIME:
 	case PM_FLUX_SLIME:
-	    if (!Unchanging && youracedata != &mons[PM_FIRE_VORTEX] &&
+	    if (!Unchanging && !GoodHealth &&
+				youracedata != &mons[PM_FIRE_VORTEX] &&
 			    youracedata != &mons[PM_FIRE_ELEMENTAL] &&
 			    youracedata != &mons[PM_GREEN_SLIME]) {
 		You("don't feel very well.");
@@ -3921,7 +3941,7 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 		if(uwep && (
 			uwep->oartifact == ART_GARNET_ROD || (uwep->oartifact == ART_TENSA_ZANGETSU && !is_undead(youracedata)))
 		){
-			if(Race_if(PM_INCANTIFIER)) u.uen -= 9;
+			if(Race_if(PM_INCANTIFIER)) losepw(9);
 			else u.uhunger -= 9;
 		}
 	}
@@ -3929,10 +3949,11 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	if ((!inediate(youracedata) || Race_if(PM_INCANTIFIER))
 		&& !uclockwork
 		&& u.usanity < 100
+		&& !ClearThoughts
 		&& u.umadness&MAD_GLUTTONY
 	){
 		int delta = 100 - u.usanity;
-		if(Race_if(PM_INCANTIFIER)) u.uen -= delta/25;
+		if(Race_if(PM_INCANTIFIER)) losepw(delta/25);
 		else u.uhunger -= delta/25;
 		//remainder
 		delta = delta%25;
@@ -4000,7 +4021,7 @@ morehungry(num)	/* called after vomiting and after performing feats of magic */
 register int num;
 {
 	if(inediate(youracedata) && !uclockwork && !Race_if(PM_INCANTIFIER)) return;
-	if(Race_if(PM_INCANTIFIER)) u.uen -= num;
+	if(Race_if(PM_INCANTIFIER)) losepw(num);
 	else u.uhunger -= num;
 	newuhs(TRUE);
 }

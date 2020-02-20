@@ -1078,6 +1078,11 @@ register const char *let,*word;
 			(otmp->oclass == CHAIN_CLASS && otmp->otyp != CHAIN)))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
 		|| (!strcmp(word, "inject") && !(otmp->otyp == HYPOSPRAY_AMPULE && otmp->spe > 0))
+		|| (!strcmp(word, "transfer essence to") && 
+			!(otmp->otyp == BROKEN_ANDROID && otmp->ovar1 == 0) &&
+			!(otmp->otyp == BROKEN_GYNOID && otmp->ovar1 == 0) &&
+			!(otmp->otyp == LIFELESS_DOLL && otmp->ovar1 == 0)
+		)
 		|| (!strcmp(word, "wind with") && ((otmp->oclass == TOOL_CLASS &&
 		     otyp != SKELETON_KEY) ||
 			(otmp->oclass == CHAIN_CLASS)))
@@ -4976,7 +4981,7 @@ u_healing_penalty()
 	if(is_demon(youracedata) || is_undead(youracedata)){
 		penalty += (4*u_bcu_next_to_skin(1)+1)/2;
 	}
-	if(u.umadness&MAD_NUDIST && u.usanity < 100){
+	if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
 		int delta = 100 - u.usanity;
 		penalty += (u_clothing_discomfort() * delta)/10;
 	}

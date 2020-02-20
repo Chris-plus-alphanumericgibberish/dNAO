@@ -1638,7 +1638,7 @@ register struct monst *mtmp;
 					familliar->m_lev = mtmp->m_lev;
 					familliar->mhp = mtmp->mhp;
 					familliar->mhpmax = mtmp->mhpmax;
-					familliar->mvar1 = (long)mtmp->m_id;
+					familliar->mvar_witchID = (long)mtmp->m_id;
 					familliar->mpeaceful = mtmp->mpeaceful;
 				}
 				mongets(mtmp, HIGH_BOOTS);
@@ -1652,7 +1652,7 @@ register struct monst *mtmp;
 					familliar->m_lev = mtmp->m_lev;
 					familliar->mhp = mtmp->mhp;
 					familliar->mhpmax = mtmp->mhpmax;
-					familliar->mvar1 = (long)mtmp->m_id;
+					familliar->mvar_witchID = (long)mtmp->m_id;
 					familliar->mpeaceful = mtmp->mpeaceful;
 				}
 				mongets(mtmp, HIGH_BOOTS);
@@ -1668,7 +1668,7 @@ register struct monst *mtmp;
 					familliar->m_lev = mtmp->m_lev;
 					familliar->mhp = mtmp->mhp;
 					familliar->mhpmax = mtmp->mhpmax;
-					familliar->mvar1 = (long)mtmp->m_id;
+					familliar->mvar_witchID = (long)mtmp->m_id;
 					familliar->mpeaceful = mtmp->mpeaceful;
 				}
 				mongets(mtmp, HIGH_BOOTS);
@@ -3083,7 +3083,7 @@ register struct monst *mtmp;
 				struct monst *dancer;
 				dancer = makemon(&mons[PM_DANCING_BLADE], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 				if(dancer){
-					dancer->mvar1 = (long)mtmp->m_id;
+					dancer->mvar_suryaID = (long)mtmp->m_id;
 					dancer->mpeaceful = mtmp->mpeaceful;
 				}
 				
@@ -5446,6 +5446,7 @@ long amount;
 {
     struct obj *gold = mksobj(GOLD_PIECE, FALSE, FALSE);
     gold->quan = amount;
+	u.spawnedGold += gold->quan;
     add_to_minv(mtmp, gold);
 }
 #endif
@@ -6351,23 +6352,23 @@ register struct	monst	*mtmp;
 			
 			switch(rnd(6)){
 				case 1:
-					mtmp->mvar1 = SYLLABLE_OF_STRENGTH__AESH;
+					mtmp->mvar_syllable = SYLLABLE_OF_STRENGTH__AESH;
 				break;
 				case 2:
-					mtmp->mvar1 = SYLLABLE_OF_GRACE__UUR;
+					mtmp->mvar_syllable = SYLLABLE_OF_GRACE__UUR;
 				break;
 				case 3:
-					mtmp->mvar1 = SYLLABLE_OF_LIFE__HOON;
+					mtmp->mvar_syllable = SYLLABLE_OF_LIFE__HOON;
 				break;
 				case 4:
-					mtmp->mvar1 = SYLLABLE_OF_SPIRIT__VAUL;
+					mtmp->mvar_syllable = SYLLABLE_OF_SPIRIT__VAUL;
 					mtmp->mintrinsics[(DISPLACED-1)/32] |= (1 << (DISPLACED-1)%32);
 				break;
 				case 5:
-					mtmp->mvar1 = SYLLABLE_OF_POWER__KRAU;
+					mtmp->mvar_syllable = SYLLABLE_OF_POWER__KRAU;
 				break;
 				case 6:
-					mtmp->mvar1 = SYLLABLE_OF_THOUGHT__NAEN;
+					mtmp->mvar_syllable = SYLLABLE_OF_THOUGHT__NAEN;
 				break;
 			}
 		}
@@ -6383,7 +6384,7 @@ register struct	monst	*mtmp;
 				struct monst *blbtmp;
 				if (blbtmp = makemon(&mons[PM_BLOB_OF_PRESERVED_ORGANS], mtmp->mx, mtmp->my, MM_ADJACENTOK | MM_NOCOUNTBIRTH)) {
 					/* blob created, link it */
-					blbtmp->mvar1 = (long)mtmp->m_id;
+					blbtmp->mvar_huskID = (long)mtmp->m_id;
 				}
 				else {
 					/* blob creation failed; dramatically weaken this hungry dead to compensate */
@@ -7527,8 +7528,38 @@ register int	mmflags;
 		mtmp->m_insight_level = 20+rn2(21);
 	else if(mtmp->data == &mons[PM_BLASPHEMOUS_LURKER])
 		mtmp->m_insight_level = 40;
-	else if(mtmp->data == &mons[PM_LIVING_DOLL])
+	else if(mtmp->data == &mons[PM_LIVING_DOLL]){
+		int i, j;
+		long tmp;
+		long dolltypes[] = {
+			DOLLMAKER_EFFIGY,
+			DOLLMAKER_JUMPING,
+			DOLLMAKER_FRIENDSHIP,
+			DOLLMAKER_CHASTITY,
+			DOLLMAKER_CLEAVING,
+			DOLLMAKER_SATIATION,
+			DOLLMAKER_HEALTH,
+			DOLLMAKER_HEALING,
+			DOLLMAKER_DESTRUCTION,
+			DOLLMAKER_MEMORY,
+			DOLLMAKER_BINDING,
+			DOLLMAKER_PRESERVATION,
+			DOLLMAKER_QUICK_DRAW,
+			DOLLMAKER_WAND_CHARGE,
+			DOLLMAKER_STEALING,
+			DOLLMAKER_MOLLIFICATION,
+			DOLLMAKER_CLEAR_THOUGHT
+		};
+		for(i = 0; i < SIZE(dolltypes); i++){
+			j = rn2(SIZE(dolltypes));
+			tmp = dolltypes[i];
+			dolltypes[i] = dolltypes[j];
+			dolltypes[j] = tmp;
+		}
 		mtmp->m_insight_level = rnd(20);
+		for(i = rn1(3, SIZE(dolltypes)-2); i > 0; i--)
+			mtmp->mvar_dollTypes |= dolltypes[i];
+	}
 	
 	else if(mtmp->data == &mons[PM_BESTIAL_DERVISH])
 		mtmp->m_insight_level = 20+rn2(10);
@@ -7975,7 +8006,7 @@ register int	mmflags;
 			if(mndx == PM_CLOCKWORK_SOLDIER || mndx == PM_CLOCKWORK_DWARF || 
 			   mndx == PM_FABERGE_SPHERE || mndx == PM_FIREWORK_CART || 
 			   mndx == PM_JUGGERNAUT || mndx == PM_ID_JUGGERNAUT
-			) mtmp->mvar1 = rn2(8);
+			) mtmp->mvar_vector = rn2(8);
 			
 			if(mndx == PM_ID_JUGGERNAUT) {
 				mtmp->perminvis = TRUE;
@@ -8311,7 +8342,7 @@ register int	mmflags;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			else if(mndx == PM_PALE_NIGHT){
-				mtmp->mvar1 = 0;
+				mtmp->mvar_paleWarning = 0;
 			}
 			if(mndx == PM_INCUBUS){
 				if(Is_grazzt_level(&u.uz)){
@@ -9543,7 +9574,6 @@ struct monst *mtmp, *victim;
 	|| ptr == &mons[PM_ARGENACH_RILMANI] || ptr == &mons[PM_AURUMACH_RILMANI]
 	|| ptr == &mons[PM_ANDROID] || ptr == &mons[PM_GYNOID] || ptr == &mons[PM_OPERATOR] || ptr == &mons[PM_COMMANDER]
 	) lev_limit = 30;	/* same as player */
-	else if (mtmp && mtmp->ispolyp) lev_limit = max(lev_limit, 30);
 	else if (ptr == &mons[PM_PLUMACH_RILMANI] || ptr == &mons[PM_FERRUMACH_RILMANI]) lev_limit = 20;
 	else if (is_eladrin(ptr) && ptr->mlevel <= 20) lev_limit = 30;
 	else if (ptr == &mons[PM_OONA]) lev_limit = 60;
@@ -9551,6 +9581,8 @@ struct monst *mtmp, *victim;
 	else if (lev_limit < 5) lev_limit = 5;	/* arbitrary */
 	else if (lev_limit > 49) lev_limit = (ptr->mlevel > 49 ? ptr->mlevel : 49);
 
+	if (mtmp && mtmp->ispolyp) lev_limit = max(lev_limit, 30);
+	
 	if ((int)++mtmp->m_lev >= mons[newtype].mlevel && newtype != oldtype) {
 	    ptr = &mons[newtype];
 	    if (mvitals[newtype].mvflags & G_GENOD && !In_quest(&u.uz)) {	/* allow G_EXTINCT */

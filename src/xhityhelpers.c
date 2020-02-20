@@ -346,7 +346,7 @@ struct monst * mon;
 		return TRUE;
 	}
 
-	if (u.umadness&MAD_PARANOIA && u.usanity < rnd(100)){
+	if (u.umadness&MAD_PARANOIA && !ClearThoughts && u.usanity < rnd(100)){
 		You("attack %s's hallucinatory twin!", mon_nam(mon));
 		return TRUE;
 	}
@@ -562,7 +562,7 @@ struct attack *mattk;
 						   doname(otmp), "You steal: ");
 		}
 	    /* more take-away handling, after theft message */
-	    if (unwornmask & W_WEP) {		/* stole wielded weapon */
+	    if (unwornmask & W_WEP || unwornmask & W_SWAPWEP) {		/* stole wielded weapon */
 		possibly_unwield(mdef, FALSE);
 	    } else if (unwornmask & W_ARMG) {	/* stole worn gloves */
 		mselftouch(mdef, (const char *)0, TRUE);
@@ -680,7 +680,8 @@ fightm(mtmp)		/* have monsters fight each other */
 		     * to allow monsters that resist conflict to respond.
 		     */
 		    if ((result & MM_HIT) && !(result & MM_DEF_DIED) &&
-			rn2(4) && mon->movement >= NORMAL_SPEED && mtmp->data != &mons[PM_NURSE]) {
+				rn2(4) && mon->movement >= NORMAL_SPEED
+			) {
 				mon->movement -= NORMAL_SPEED;
 				notonhead = 0;
 				(void) mattackm(mon, mtmp);	/* return attack */

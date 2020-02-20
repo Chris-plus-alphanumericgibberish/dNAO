@@ -30,6 +30,7 @@ STATIC_DCL void FDECL(unseen_actions, (struct monst *));
 STATIC_DCL void FDECL(blessed_spawn, (struct monst *));
 STATIC_DCL void FDECL(good_neighbor, (struct monst *));
 STATIC_DCL void FDECL(dark_pharaoh, (struct monst *));
+STATIC_DCL void FDECL(polyp_pickup, (struct monst *));
 
 #ifdef OVL0
 
@@ -388,17 +389,15 @@ androidUpkeep()
 			nomul(-1*u.uenmax, "passed out from exhaustion");
 		}
 		if(u.phasengn){
-			u.uen -= 10;
+			losepw(10);
 			if(u.uen <= 0){
-				u.uen = 0;
 				You("can no longer maintain phase!");
 				u.phasengn = 0;
 			}
 		}
 		if(u.ucspeed == HIGH_CLOCKSPEED){
-			u.uen -= 1;
+			losepw(1);
 			if(u.uen <= 0){
-				u.uen = 0;
 				You("can no longer maintain emergency speed!");
 				u.ucspeed = NORM_CLOCKSPEED;
 			}
@@ -420,7 +419,7 @@ androidUpkeep()
 			You_feel("like you're about to pass out.");
 		}
 		if(moves > u.nextsleep+1400 && u.uen > 0){
-			if(!(moves%20)) u.uen -= 1;
+			if(!(moves%20)) losepw(1);
 		}
 	}
 }
@@ -452,12 +451,20 @@ you_regen_hp()
 	if (Upolyd && (*hp < 1))
 		rehumanize();
 
-	//Androids regenerate from active Hoon, but not from other sources unless dormant
+	//Androids regenerate from active Hoon and healing doll, 
+	////but not from other sources unless dormant
 	if(u.uhoon_duration && (*hp) < (*hpmax)){
 		flags.botl = 1;
 		
 		(*hp) += 10;
 
+		if ((*hp) > (*hpmax))
+			(*hp) = (*hpmax);
+	}
+	if(RapidHealing && (*hp) < (*hpmax)){
+		//1/5th max hp
+		(*hp) += (*hpmax)/5+1;
+		
 		if ((*hp) > (*hpmax))
 			(*hp) = (*hpmax);
 	}
@@ -1178,7 +1185,7 @@ moveloop()
 				if(mtmp->data == &mons[PM_SURYA_DEVA]){
 					struct monst *blade;
 					for(blade = fmon; blade; blade = blade->nmon)
-						if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar1) break;
+						if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
 					if(blade){
 						if(mtmp->mtame && !blade->mtame){
 							if(blade == nxtmon) nxtmon = nxtmon->nmon;
@@ -1198,9 +1205,7 @@ moveloop()
 				if(mtmp->data == &mons[PM_ARA_KAMEREL]) flags.goldka_level=1;
 				if(mtmp->data == &mons[PM_ASPECT_OF_THE_SILENCE]){
 					flags.silence_level=1;
-					u.uen -= 3;
-					if(!Race_if(PM_INCANTIFIER))
-						u.uen = max(u.uen, 0);
+					losepw(3);
 				}
 				if(mtmp->data == &mons[PM_ZUGGTMOY]) flags.spore_level=1;
 				if(mtmp->data == &mons[PM_JUIBLEX]) flags.slime_level=1;
@@ -1322,7 +1327,7 @@ karemade:
 				if(mtmp->data == &mons[PM_CLOCKWORK_SOLDIER] || mtmp->data == &mons[PM_CLOCKWORK_DWARF] || 
 				   mtmp->data == &mons[PM_FABERGE_SPHERE] || mtmp->data == &mons[PM_FIREWORK_CART] ||
 				   mtmp->data == &mons[PM_ID_JUGGERNAUT]
-				) if(rn2(2)) mtmp->mvar1 = ((int)mtmp->mvar1 + rn2(3)-1)%8;
+				) if(rn2(2)) mtmp->mvar_vector = ((int)mtmp->mvar_vector + rn2(3)-1)%8;
 				if((mtmp->data == &mons[PM_JUGGERNAUT] || mtmp->data == &mons[PM_ID_JUGGERNAUT]) && !rn2(3)){
 					int mdx=0, mdy=0, i;
 					if(mtmp->mux == 0 && mtmp->muy == 0){
@@ -1336,7 +1341,7 @@ karemade:
 						else if(mtmp->muy - mtmp->my > 0) mdy = +1;
 						for(i=0;i<8;i++) if(xdir[i] == mdx && ydir[i] == mdy) break;
 					}
-					if(mtmp->mvar1 != i){
+					if(mtmp->mvar_vector != i){
 						if(sensemon(mtmp) || (canseemon(mtmp) && !mtmp->mundetected)){
 							pline("%s turns to a new heading.", Monnam(mtmp));
 						} else if(couldsee(mtmp->mx,mtmp->my)){
@@ -1344,7 +1349,7 @@ karemade:
 						} else {
 							You_hear("scraping in the distance.");
 						}
-						mtmp->mvar1 = i;
+						mtmp->mvar_vector = i;
 						mtmp->movement = -12;
 					}
 				}
@@ -1625,7 +1630,7 @@ karemade:
 			default: break;
 		    }
 			
-			if(u.umadness&MAD_NUDIST && u.usanity < 100){
+			if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
 				int delta = 100 - u.usanity;
 				int discomfort = u_clothing_discomfort();
 				discomfort = (discomfort * delta)/100;
@@ -1732,8 +1737,9 @@ karemade:
 			/* Environment effects */
 			dust_storm();
 			/* Unseen monsters may take action */
-			for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-				unseen_actions(mtmp);
+			for(mtmp = migrating_mons; mtmp; mtmp = nxtmon){
+				nxtmon = mtmp->nmon;
+				unseen_actions(mtmp); //May cause mtmp to be removed from the migrating chain
 			}
 			
 			/* Item attacks */
@@ -1743,6 +1749,8 @@ karemade:
 			) dosymbiotic();
 			if(u.spiritPColdowns[PWR_PSEUDONATURAL_SURGE] >= moves+20)
 				dopseudonatural();
+			if(Destruction)
+				dodestruction();
 			/* Clouds on Lolth's level deal damage */
 			if(Is_lolth_level(&u.uz) && levl[u.ux][u.uy].typ == CLOUD){
 				if (!(nonliving(youracedata) || Breathless)){
@@ -2784,12 +2792,15 @@ void
 unseen_actions(mon)
 struct monst *mon;
 {
+	//Note: May cause mon to change its state, including moving to a different monster chain.
 	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_BLESSED])
 		blessed_spawn(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_THE_GOOD_NEIGHBOR])
 		good_neighbor(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_HMNYW_PHARAOH])
 		dark_pharaoh(mon);
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_POLYPOID_BEING])
+		polyp_pickup(mon);
 }
 
 static int goatkids[] = {PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN, 
@@ -2854,7 +2865,7 @@ struct monst *mon;
 						familliar->m_lev = mtmp->m_lev;
 						familliar->mhpmax = mtmp->mhpmax;
 						familliar->mhp = familliar->mhpmax;
-						familliar->mvar1 = (long)mtmp->m_id;
+						familliar->mvar_witchID = (long)mtmp->m_id;
 						familliar->mpeaceful = mtmp->mpeaceful;
 						//Stop running
 						if(mtmp->mflee && mtmp->mhp > mtmp->mhpmax/2){
@@ -2863,9 +2874,7 @@ struct monst *mon;
 						}
 					}
 				}
-				mtmp->mhp == mtmp->mhpmax;
-				if(mtmp->mhp > mtmp->mhpmax)
-					mtmp->mhp = mtmp->mhpmax;
+				mtmp->mhp = mtmp->mhpmax;
 				mtmp->mspec_used = 0;
 				mtmp->mstdy = 0;
 				mtmp->ustdym = 0;
@@ -3013,7 +3022,68 @@ struct monst *mon;
 	}
 }
 
+STATIC_OVL
+void
+polyp_pickup(mon)
+struct monst *mon;
+{
+	struct obj *otmp, *otmp2;
+	register struct monst *mtmp, *mtmp0 = 0, *mtmp2;
+	xchar xlocale, ylocale, xyloc;
+	xyloc	= mon->mtrack[0].x;
+	xlocale = mon->mtrack[1].x;
+	ylocale = mon->mtrack[1].y;
+	if(xyloc == MIGR_EXACT_XY){
+		if(m_at(xlocale, ylocale))
+			return;
+		if(xlocale == u.ux && ylocale == u.uy)
+			return;
+		if(!ZAP_POS(levl[xlocale][ylocale].typ))
+			return;
+		for(otmp = level.objects[xlocale][ylocale]; otmp; otmp = otmp2){
+			otmp2 = otmp->nexthere;
+			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ)){
+				obj_extract_self(otmp);
+				/* unblock point after extract, before pickup */
+				if (is_boulder(otmp)) /*Shouldn't be a boulder, but who knows if a huge mask will get invented*/
+					unblock_point(xlocale,ylocale);	/* vision */
+				if(otmp) (void) mpickobj(mon, otmp);	/* may merge and free otmp */
+				newsym(xlocale,ylocale);
+			}
+		}
+		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
+			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ)){
+				for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
+					mtmp2 = mtmp->nmon;
+					if (mtmp == mon) {
+						if(mtmp == migrating_mons)
+							migrating_mons = mtmp->nmon;
+						else
+							mtmp0->nmon = mtmp->nmon;
+						mon_arrive(mtmp, FALSE);
+						break;
+					} else
+						mtmp0 = mtmp;
+				}
+				if(mtmp){
+					/*mtmp and mon *should* now be the same.  However, only do the polymorph if we have successfully removed the monster from the migrating chain and placed it!*/
+					int pm = otmp->corpsenm;
+					if(canseemon(mon))
+						pline("%s puts on a mask!", Monnam(mon));
+					m_useup(mon, otmp);
+					mon->ispolyp = TRUE;
+					newcham(mon, &mons[pm], FALSE, FALSE);
+					mon->m_insight_level = 0;
+					m_dowear(mon, TRUE);
+					init_mon_wield_item(mon);
 
+					/*Break out of loop. Warning Note: otmp is stale*/
+					break;
+				}
+			}
+		}
+	}
+}
 
 #endif /* OVLB */
 

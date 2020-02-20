@@ -1248,7 +1248,7 @@ register int x, y;
 	    return "maw";
 	else if (IS_AIR(lev->typ) && Weightless)
 	    return "air";
-	else if (is_pool(x,y, TRUE))
+	else if (is_pool(x,y, FALSE))
 	    return (Underwater && !Is_waterlevel(&u.uz)) ? "bottom" : "water";
 	else if (is_ice(x,y))
 	    return "ice";
@@ -3991,33 +3991,46 @@ pick_seal()
 	return ( n > 0 ) ? selected[0].item.a_int : 0;
 }
 
-// int
-// decode_sealID(sealID)
-// int sealID;
-// {
-	// switch(sealID){
-		// case SEAL_AHAZU: return ;
-		// break;
-		// case SEAL_AMON: return ;
-		// break;
-		// case SEAL_ANDREALPHUS: return ;
-		// break;
-		// default:
-		// return 0;
-		// break;
-	// }
-// }
+int
+decode_sealID(sealID)
+long sealID;
+{
+	long offset;
+	int j;
+	int floorID = 0L;
+	if(sealID == (SEAL_SPECIAL|SEAL_NUMINA))
+		return NUMINA;
+	if(sealID&SEAL_SPECIAL){
+		offset = sealID&~SEAL_SPECIAL;
+		for(j = 0; j < 32; j++)
+			if((sealID>>j) == 1L)
+				return j+QUEST_SPIRITS;
+	} else {
+		for(j = 0; j < 32; j++)
+			if((sealID>>j) == 1L)
+				return j+FIRST_SEAL;
+	}
+	return 0;
+}
 
-// int
-// get_sealID(floorID)
-// int floorID;
-// {
-	// switch(floorID){
-		// default:
-		// return 0;
-		// break;
-	// }
-// }
+long
+get_sealID(floorID)
+int floorID;
+{
+	int i;
+	long sealID = 0L;
+	if(floorID == NUMINA)
+		return SEAL_SPECIAL|SEAL_NUMINA;
+	if(floorID < QUEST_SPIRITS){
+		i = floorID - QUEST_SPIRITS;
+		sealID = 1L << i;
+	} else {
+		i = floorID - FIRST_SEAL;
+		sealID |= SEAL_SPECIAL;
+		sealID |= 1L << (i - DAHLVER_NAR);
+	}
+	return sealID;
+}
 
 void
 save_engravings(fd, mode)

@@ -32,7 +32,6 @@ STATIC_DCL int FDECL(use_rakuyo, (struct obj *));
 STATIC_DCL int FDECL(use_force_blade, (struct obj *));
 STATIC_DCL void FDECL(light_cocktail, (struct obj *));
 STATIC_DCL void FDECL(light_torch, (struct obj *));
-STATIC_DCL void FDECL(remove_thought, (int));
 STATIC_DCL void FDECL(use_trephination_kit, (struct obj *));
 STATIC_DCL void FDECL(use_tinning_kit, (struct obj *));
 STATIC_DCL void FDECL(use_figurine, (struct obj **));
@@ -49,6 +48,7 @@ STATIC_DCL int FDECL(use_pole, (struct obj *));
 STATIC_DCL int FDECL(use_cream_pie, (struct obj *));
 STATIC_DCL int FDECL(use_grapple, (struct obj *));
 STATIC_DCL int FDECL(use_crook, (struct obj *));
+STATIC_DCL int FDECL(use_doll, (struct obj *));
 STATIC_DCL int FDECL(do_break_wand, (struct obj *));
 STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
 STATIC_DCL boolean FDECL(figurine_location_checks,
@@ -59,7 +59,6 @@ STATIC_DCL int FDECL(do_carve_obj, (struct obj *));
 STATIC_PTR int FDECL(pick_rune, (BOOLEAN_P));
 STATIC_DCL void FDECL(describe_rune, (int));
 STATIC_PTR char NDECL(pick_carvee);
-STATIC_DCL int NDECL(dotrephination_menu);
 
 
 #ifdef	AMIGA
@@ -2064,7 +2063,7 @@ struct obj *corpse;
 }
 
 
-STATIC_OVL void
+void
 remove_thought(otyp)
 int otyp;
 {
@@ -2177,6 +2176,7 @@ register struct obj *obj;
 			adjattrib(A_CON, -1, FALSE);
 		}
 		change_usanity(-10);
+		//Note: this is always the player's HP, not their polyform HP.
 		u.uhp -= u.uhp/2; //Note: chopped, so 0 to 1/2 max-HP lost.
 	} else {
 		impossible("Shard creation failed in use_trephination_kit??");
@@ -4208,6 +4208,320 @@ use_crook (obj)
 	return (1);
 }
 
+STATIC_OVL int
+use_doll(obj)
+	struct obj *obj;
+{
+	int res = 0;
+	struct monst *mtmp;
+	switch(obj->otyp){
+		case DOLL_OF_JUMPING:
+			if (jump(4)){
+				res = 1;
+				if((HJumping&TIMEOUT) + 100L < TIMEOUT){
+					long timer = (HJumping&TIMEOUT) + 100L;
+					HJumping &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+					HJumping |= timer; //set new timer
+				}
+				else{
+					HJumping |= TIMEOUT; //set timer to max value
+				}
+				if(!Blind)
+					pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+				else pline("The little doll vanishes.");
+				useup(obj);
+			}
+		break;
+		case DOLL_OF_FRIENDSHIP:
+			getdir((char *)0);
+			if(u.dx || u.dy){
+				if(u.uswallow)
+					mtmp = u.ustuck;
+				else if (!isok(u.ux + u.dx, u.uy + u.dy)) break;
+				else mtmp = m_at(u.ux + u.dx, u.uy + u.dy);
+				pline("The doll sings sweetly.");
+				if(mtmp && resist_song(mtmp, SNG_TAME, obj) >= 0){
+					if (mtmp->mtame){
+						if(mtmp->isminion || (EDOG(mtmp)->friend))
+							break;
+						if(mtmp->mtame < 16) mtmp->mtame++;
+					} else {
+						xchar waspeaceful = mtmp->mpeaceful;
+						mtmp = tamedog(mtmp, obj);
+				if(mtmp){
+							if (canseemon(mtmp) && flags.verbose && !mtmp->msleeping)
+								pline("%s seems to like the doll's song.", Monnam(mtmp));
+							mtmp->mtame = 9;
+							EDOG(mtmp)->waspeaceful = TRUE;
+							if(!waspeaceful || mtmp->mpeacetime){ /*Should it become untame, remain tame peaceful for a short period of time*/
+								mtmp->mpeacetime = max(mtmp->mpeacetime, 90);
+							}
+						}
+					}
+					res = 1;
+					if(!Blind)
+						pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+					else pline("The little doll vanishes.");
+					useup(obj);
+				}
+			}
+		break;
+		case DOLL_OF_CHASTITY:
+			res = 1;
+			pline("You feel chaste.");
+			if((HChastity&TIMEOUT) + 100L < TIMEOUT){
+				long timer = (HChastity&TIMEOUT) + 100L;
+				HChastity &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				HChastity |= timer; //set new timer
+			}
+			else{
+				HChastity |= TIMEOUT; //set timer to max value
+			}
+			if(!Blind)
+				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+			else pline("The little doll vanishes.");
+			useup(obj);
+		break;
+		case DOLL_OF_CLEAVING:
+		break;
+		case DOLL_OF_SATIATION:
+			if(satiate_uhunger()){
+				res = 1;
+				if(!Blind)
+					pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+				else pline("The little doll vanishes.");
+				useup(obj);
+			}
+		break;
+		case DOLL_OF_GOOD_HEALTH:
+			if(Slimed){
+				Slimed = 0L;
+				flags.botl = 1;
+			}
+			healup(0, 0, TRUE, FALSE);
+			if (Stoned) fix_petrification();
+			if (Golded) fix_petrification();
+			res = 1;
+			pline("You feel very healthy.");
+			if((HGoodHealth&TIMEOUT) + 100L < TIMEOUT){
+				long timer = (HGoodHealth&TIMEOUT) + 100L;
+				HGoodHealth &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				HGoodHealth |= timer; //set new timer
+			}
+			else{
+				HGoodHealth |= TIMEOUT; //set timer to max value
+			}
+			if(!Blind)
+				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+			else pline("The little doll vanishes.");
+			useup(obj);
+		break;
+		case DOLL_OF_FULL_HEALING:
+			res = 1;
+			if((!Upolyd && u.uhp < u.uhpmax) ||
+				(Upolyd && u.mh < u.mhmax)
+			)
+				pline("Your wounds begin rapidly knitting shut.");
+			if((RapidHealing&TIMEOUT) + 5L < TIMEOUT){
+				long timer = (RapidHealing&TIMEOUT) + 5L;
+				RapidHealing &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				RapidHealing |= timer; //set new timer
+			}
+			else{
+				RapidHealing |= TIMEOUT; //set timer to max value
+			}
+			if(!Blind)
+				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+			else pline("The little doll vanishes.");
+			useup(obj);
+		break;
+		case DOLL_OF_DESTRUCTION:
+			res = 1;
+			if(!Blind)
+				pline("The many-armed doll begins dancing!");
+			if((HDestruction&TIMEOUT) + 8L < TIMEOUT){
+				long timer = (HDestruction&TIMEOUT) + 8L;
+				if(!Destruction)
+					You("begin radiating waves of destruction!");
+				HDestruction &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				HDestruction |= timer; //set new timer
+			}
+			else{
+				You("begin radiating waves of destruction!");
+				if(!Destruction)
+					HDestruction |= TIMEOUT; //set timer to max value
+			}
+			if(!Blind)
+				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+			else pline("The little doll vanishes.");
+			useup(obj);
+		break;
+		case DOLL_OF_MEMORY:
+			if(doreinforce_spell()){
+				res = 1;
+				if(!Blind)
+					pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+				else pline("The little doll vanishes.");
+				useup(obj);
+			}
+		break;
+		case DOLL_OF_BINDING:
+			if(doreinforce_binding()){
+				res = 1;
+				if(!Blind)
+					pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+				else pline("The little doll vanishes.");
+				useup(obj);
+			}
+		break;
+		case DOLL_OF_PRESERVATION:
+			res = 1;
+			if(!Blind)
+				pline("The doll opens its umbrella, and a rubbery film forms around your body!");
+			if((HPreservation&TIMEOUT) + 1000L < TIMEOUT){
+				long timer = (HPreservation&TIMEOUT) + 1000L;
+				HPreservation &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				HPreservation |= timer; //set new timer
+			}
+			else{
+				HPreservation |= TIMEOUT; //set timer to max value
+			}
+			if(!Blind)
+				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+			else pline("The little doll vanishes.");
+			useup(obj);
+		break;
+		case DOLL_OF_QUICK_DRAWING:
+			res = 1;
+			if(!Blind)
+				pline("The doll draws a wand with blinding speed!");
+			if((HQuickDraw&TIMEOUT) + 100L < TIMEOUT){
+				long timer = (HQuickDraw&TIMEOUT) + 100L;
+				HQuickDraw &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				HQuickDraw |= timer; //set new timer
+			}
+			else{
+				HQuickDraw |= TIMEOUT; //set timer to max value
+			}
+			if(!Blind)
+				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+			else pline("The little doll vanishes.");
+			useup(obj);
+		break;
+		case DOLL_OF_WAND_CHARGING:
+			if(dowand_refresh()){
+				res = 1;
+				if(!Blind)
+					pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+				else pline("The little doll vanishes.");
+				useup(obj);
+			}
+		break;
+		case DOLL_OF_STEALING:
+			getdir((char *)0);
+			if(u.dx || u.dy){
+				if(u.uswallow)
+					mtmp = u.ustuck;
+				else if (!isok(u.ux + u.dx, u.uy + u.dy)) break;
+				else mtmp = m_at(u.ux + u.dx, u.uy + u.dy);
+				if(mtmp){
+					struct obj *otmp;
+					long unwornmask;
+					//Note: unlike normal theft, you are never petrified by a stolen item because the doll is doing it.
+					if(!Blind) pline("The black-clad doll steals %s possessions.", s_suffix(mon_nam(mtmp)));
+					while ((otmp = mtmp->minvent) != 0) {
+						/* take the object away from the monster */
+						obj_extract_self(otmp);
+						if ((unwornmask = otmp->owornmask) != 0L) {
+							mtmp->misc_worn_check &= ~unwornmask;
+							if (otmp->owornmask & W_WEP) {
+								setmnotwielded(mtmp,otmp);
+								MON_NOWEP(mtmp);
+							}
+							if (otmp->owornmask & W_SWAPWEP){
+								setmnotwielded(mtmp,otmp);
+								MON_NOSWEP(mtmp);
+							}
+							otmp->owornmask = 0L;
+						}
+						update_mon_intrinsics(mtmp, otmp, FALSE, FALSE);
+						if(!Blind) pline("The doll steals %s %s and drops it to the %s.",
+							  s_suffix(mon_nam(mtmp)), xname(otmp), surface(u.ux, u.uy));
+						dropy(otmp);
+						/* more take-away handling, after theft message */
+						if (unwornmask & W_WEP || unwornmask & W_SWAPWEP) {		/* stole wielded weapon */
+							possibly_unwield(mtmp, FALSE);
+						} else if (unwornmask & W_ARMG) {	/* stole worn gloves */
+							mselftouch(mtmp, (const char *)0, TRUE);
+							if (mtmp->mhp <= 0)	/* it's now a statue */
+								break;		/* can't continue stealing */
+						}
+					}
+#ifndef GOLDOBJ
+					if (mtmp->mgold){
+						struct obj *mongold = mksobj(GOLD_PIECE, FALSE, FALSE);
+						mongold->quan = mtmp->mgold;
+						mongold->owt = weight(mongold);
+						mtmp->mgold = 0;
+						if(!Blind) pline("The doll steals %s gold and drops it to the %s.", s_suffix(mon_nam(mtmp)), surface(u.ux, u.uy));
+						dropy(mongold);
+					}
+#else
+					{
+						struct obj *mongold = findgold(mtmp->minvent);
+						if (mongold) {
+							obj_extract_self(mongold);
+							if(!Blind) pline("The doll steals %s gold and drops it to the %s.", s_suffix(mon_nam(mtmp)), surface(u.ux, u.uy));
+							dropy(mongold);
+						}
+					}
+#endif
+					res = 1;
+					if(!Blind)
+						pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+					else pline("The little doll vanishes.");
+					useup(obj);
+					setmangry(mtmp);
+				}
+			}
+		break;
+		case DOLL_OF_MOLLIFICATION:
+			if(u.ugangr[Align2gangr(u.ualign.type)]) {
+				if(!Blind)
+					pline("The %s says a prayer.", OBJ_DESCR(objects[obj->otyp]));
+				pline("%s seems %s.", u_gname(),
+				  Hallucination ? "groovy" : "slightly mollified");
+				u.ugangr[Align2gangr(u.ualign.type)] = 0;
+				if ((int)u.uluck < 0) u.uluck = 0;
+				u.reconciled = REC_MOL;
+				res = 1;
+				if(!Blind)
+					pline("The little doll vanishes in a flash of moonlight.");
+				else pline("The little doll vanishes.");
+				useup(obj);
+			}
+		break;
+		case DOLL_OF_CLEAR_THINKING:
+			res = 1;
+			pline("The doll takes up your mental burdens!");
+			if((HClearThoughts&TIMEOUT) + 100L < TIMEOUT){
+				long timer = (HClearThoughts&TIMEOUT) + 100L;
+				HClearThoughts &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				HClearThoughts |= timer; //set new timer
+			}
+			else{
+				HClearThoughts |= TIMEOUT; //set timer to max value
+			}
+			if(!Blind)
+				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+			else pline("The little doll vanishes.");
+			useup(obj);
+		break;
+		default:
+		break;
+	}
+}
+
 boolean
 use_ring_of_wishes(obj)
 struct obj *obj;
@@ -5311,8 +5625,8 @@ struct obj **optr;
 				mm->data == &mons[PM_FABERGE_SPHERE] || mm->data == &mons[PM_FIREWORK_CART] || 
 				mm->data == &mons[PM_JUGGERNAUT] || mm->data == &mons[PM_ID_JUGGERNAUT])
 			){
-				mm->mvar1 = -1;
-				while(xdir[(int)(++mm->mvar1)] != u.dx || ydir[(int)mm->mvar1] != u.dy);
+				mm->mvar_vector = -1;
+				while(xdir[(int)(++mm->mvar_vector)] != u.dx || ydir[(int)mm->mvar_vector] != u.dy);
 			}
 		}
 		useup(obj);
@@ -6124,6 +6438,24 @@ doapply()
 		}
 		update_inventory();
 	} break;
+	case DOLL_OF_JUMPING:
+		case DOLL_OF_FRIENDSHIP:
+		case DOLL_OF_CHASTITY:
+		case DOLL_OF_CLEAVING:
+		case DOLL_OF_SATIATION:
+		case DOLL_OF_GOOD_HEALTH:
+		case DOLL_OF_FULL_HEALING:
+		case DOLL_OF_DESTRUCTION:
+		case DOLL_OF_MEMORY:
+		case DOLL_OF_BINDING:
+		case DOLL_OF_PRESERVATION:
+		case DOLL_OF_QUICK_DRAWING:
+		case DOLL_OF_WAND_CHARGING:
+		case DOLL_OF_STEALING:
+		case DOLL_OF_MOLLIFICATION:
+		case DOLL_OF_CLEAR_THINKING:
+			res = use_doll(obj);
+		break;
 	case UNICORN_HORN:
 		use_unicorn_horn(obj);
 	break;
@@ -6318,7 +6650,7 @@ unfixable_trouble_count(is_horn)
 	return unfixable_trbl;
 }
 
-STATIC_OVL int
+int
 dotrephination_menu()
 {
 	winid tmpwin;

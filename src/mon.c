@@ -409,6 +409,15 @@ register struct monst *mtmp;
 				s_suffix(Monnam(mtmp)));
 		}
 		goto default_1;
+	    case PM_DIRE_SHEEP:
+		if (!mtmp->mrevived && find_pcloth() > 0 && !rn2(20)) {
+			obj = mksobj_at(find_pcloth(), x, y, FALSE, FALSE);
+		    obj->spe = 0;
+		    obj->cursed = obj->blessed = FALSE;
+			obj->oproperties |= OPROP_WOOL;
+		}
+		goto default_1;
+
 	    case PM_WHITE_UNICORN:
 	    case PM_GRAY_UNICORN:
 	    case PM_BLACK_UNICORN:
@@ -513,11 +522,11 @@ register struct monst *mtmp;
 	    // case PM_GIANT_ZOMBIE:
 	    // case PM_ETTIN_ZOMBIE:
 	    case PM_ALABASTER_MUMMY:
-		if(is_alabaster_mummy(mtmp->data) && mtmp->mvar1 >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar1 <= SYLLABLE_OF_SPIRIT__VAUL){
-			mksobj_at(mtmp->mvar1, x, y, TRUE, FALSE);
-			if(mtmp->mvar1 == SYLLABLE_OF_SPIRIT__VAUL)
+		if(is_alabaster_mummy(mtmp->data) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
+			mksobj_at(mtmp->mvar_syllable, x, y, TRUE, FALSE);
+			if(mtmp->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 				mtmp->mintrinsics[(DISPLACED-1)/32] &= ~(1 << (DISPLACED-1)%32);
-			mtmp->mvar1 = 0; //Lose the bonus if resurrected
+			mtmp->mvar_syllable = 0; //Lose the bonus if resurrected
 		}
 		if((In_hell(&u.uz) || In_endgame(&u.uz)) 
 			&& !is_rider(mtmp->data) 
@@ -1423,7 +1432,7 @@ struct monst *mon;
 	}
     }
 #endif
-	if(is_alabaster_mummy(mon->data) && mon->mvar1 == SYLLABLE_OF_GRACE__UUR)
+	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		mmove += 6;
 	
 	if(u.sealsActive&SEAL_CHUPOCLOPS && distmin(mon->mx, mon->my, u.ux, u.uy) <= u.ulevel/5+1){
@@ -2022,7 +2031,7 @@ struct monst *mtmp;
 	if (mtmp->cham && !rn2(6))
 	    (void) newcham(mtmp, (struct permonst *)0, FALSE, FALSE);
 	were_change(mtmp);
-	if(u.umadness&MAD_REAL_DELUSIONS && u.usanity < mtmp->m_san_level*0.8){
+	if(u.umadness&MAD_REAL_DELUSIONS && !ClearThoughts && u.usanity < mtmp->m_san_level*0.8){
 		if(!(mtmp->data->geno&(G_UNIQ|G_NOGEN))){
 			newcham(mtmp, (struct permonst *)0, FALSE, FALSE);
 		}
@@ -2108,8 +2117,11 @@ movemon()
 				  !rn2(4)
 		){
 			struct monst *sprout = (struct monst *) 0;
-			sprout = makemon(mtmp->data,(mtmp->mx-1)+rn2(3),(mtmp->my-1)+rn2(3),MM_CHECK_GOODPOS|MM_NOCOUNTBIRTH|NO_MINVENT);
-			if(sprout) sprout->mhp = In_hell(&u.uz) ? sprout->mhp*3/4 : sprout->mhp/2;
+			int newx = (mtmp->mx-1)+rn2(3), newy = (mtmp->my-1)+rn2(3);
+			if(isok(newx,newy)){
+				sprout = makemon(mtmp->data, newx, newy, MM_CHECK_GOODPOS|MM_NOCOUNTBIRTH|NO_MINVENT);
+				if(sprout) sprout->mhp = In_hell(&u.uz) ? sprout->mhp*3/4 : sprout->mhp/2;
+			}
 		}
 	}
 	
@@ -2333,7 +2345,7 @@ meatmetal(mtmp)
 						otmp; otmp = otmp->nexthere) {
 	    if (mtmp->data == &mons[PM_RUST_MONSTER] && !is_rustprone(otmp))
 		continue;
-	    if (is_metallic(otmp) && !obj_resists(otmp, 5, 95) &&
+	    if (is_metallic(otmp) && !obj_resists(otmp, 0, 95) &&
 		touch_artifact(otmp, mtmp, FALSE)) {
 		if (mtmp->data == &mons[PM_RUST_MONSTER] && otmp->oerodeproof) {
 		    if (canseemon(mtmp) && flags.verbose) {
@@ -2423,7 +2435,7 @@ meatobj(mtmp)		/* for gelatinous cubes */
 	/* Engulfs others, except huge rocks and metal attached to player */
 	for (otmp = level.objects[mtmp->mx][mtmp->my]; otmp; otmp = otmp2) {
 	    otmp2 = otmp->nexthere;
-	    if (is_organic(otmp) && !obj_resists(otmp, 5, 95) &&
+	    if (is_organic(otmp) && !obj_resists(otmp, 0, 95) &&
 		    touch_artifact(otmp, mtmp, FALSE)) {
 		if (otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) &&
 			!resists_ston(mtmp))
@@ -2645,7 +2657,7 @@ mon_can_see_mon(looker, lookie)
 	
 	if(looker->data == &mons[PM_DANCING_BLADE]){
 		struct monst *surya;
-		for(surya = fmon; surya; surya = surya->nmon) if(surya->m_id == looker->mvar1) break;
+		for(surya = fmon; surya; surya = surya->nmon) if(surya->m_id == looker->mvar_suryaID) break;
 		if(surya){
 			looker->mux = surya->mux;
 			looker->muy = surya->muy;
@@ -2797,7 +2809,7 @@ mon_can_see_you(looker)
 	
 	if(looker->data == &mons[PM_DANCING_BLADE]){
 		struct monst *surya;
-		for(surya = fmon; surya; surya = surya->nmon) if(surya->m_id == looker->mvar1) break;
+		for(surya = fmon; surya; surya = surya->nmon) if(surya->m_id == looker->mvar_suryaID) break;
 		if(surya && mon_can_see_you(surya)) return TRUE;
 		return FALSE;
 		//can't feel target adjacent
@@ -3011,7 +3023,7 @@ mfndpos(mon, poss, info, flag)
 	
 	if(mdat == &mons[PM_DANCING_BLADE]){
 		for(madjacent = fmon; madjacent; madjacent = madjacent->nmon)
-			if(madjacent->data == &mons[PM_SURYA_DEVA] && madjacent->m_id == mon->mvar1)
+			if(madjacent->data == &mons[PM_SURYA_DEVA] && madjacent->m_id == mon->mvar_suryaID)
 				break;
 	}
 	
@@ -3087,8 +3099,8 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 		if(mdat == &mons[PM_CLOCKWORK_SOLDIER] || mdat == &mons[PM_CLOCKWORK_DWARF] || 
 		   mdat == &mons[PM_FABERGE_SPHERE] || mdat == &mons[PM_FIREWORK_CART] || 
 		   mdat == &mons[PM_JUGGERNAUT] || mdat == &mons[PM_ID_JUGGERNAUT]
-		) if(x + xdir[(int)mon->mvar1] != nx || 
-			   y + ydir[(int)mon->mvar1] != ny 
+		) if(x + xdir[(int)mon->mvar_vector] != nx || 
+			   y + ydir[(int)mon->mvar_vector] != ny 
 			) continue;
 		if((mdat == &mons[PM_GRUE]) && isdark(mon->mx, mon->my) && !isdark(nx, ny))
 				continue;
@@ -3500,10 +3512,6 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	if(ma == &mons[PM_RAVEN] && md == &mons[PM_FLOATING_EYE])
 		return ALLOW_M|ALLOW_TM;
 
-	/* nurses heal adjacent alied monsters */
-	if(ma == &mons[PM_NURSE] && mdef->mhp < mdef->mhpmax && magr->mpeaceful == mdef->mpeaceful)
-		return ALLOW_M|ALLOW_TM;
-
 	/* dungeon fern spores hate everything */
 	if(is_fern_spore(ma) && !is_vegetation(md))
 		return ALLOW_M|ALLOW_TM;
@@ -3570,21 +3578,21 @@ register int x,y;
 	if (distance==2 && (mon->data==&mons[PM_GRID_BUG] || mon->data==&mons[PM_BEBELITH])) return 0;
 	if(mon->data == &mons[PM_CLOCKWORK_SOLDIER] || mon->data == &mons[PM_CLOCKWORK_DWARF] || 
 	   mon->data == &mons[PM_FABERGE_SPHERE]
-	) if(mon->mx + xdir[(int)mon->mvar1] != x || 
-		   mon->my + ydir[(int)mon->mvar1] != y 
+	) if(mon->mx + xdir[(int)mon->mvar_vector] != x || 
+		   mon->my + ydir[(int)mon->mvar_vector] != y 
 		) return 0;
 	if(mon->data == &mons[PM_FIREWORK_CART] || 
 	   mon->data == &mons[PM_JUGGERNAUT] || 
 	   mon->data == &mons[PM_ID_JUGGERNAUT]
 	){
-		if(mon->mx + xdir[(int)mon->mvar1] == x && 
-		   mon->my + ydir[(int)mon->mvar1] == y 
+		if(mon->mx + xdir[(int)mon->mvar_vector] == x && 
+		   mon->my + ydir[(int)mon->mvar_vector] == y 
 		) return ((boolean)(distance < 3));
-		else if(rn2(2) && mon->mx + xdir[((int)mon->mvar1 + 1)%8] == x && 
-		   mon->my + ydir[((int)mon->mvar1 + 1)%8] == y 
+		else if(rn2(2) && mon->mx + xdir[((int)mon->mvar_vector + 1)%8] == x && 
+		   mon->my + ydir[((int)mon->mvar_vector + 1)%8] == y 
 		) return (!rn2(2) && (distance < 3));
-		else if(mon->mx + xdir[((int)mon->mvar1 - 1)%8] == x && 
-		   mon->my + ydir[((int)mon->mvar1 - 1)%8] == y 
+		else if(mon->mx + xdir[((int)mon->mvar_vector - 1)%8] == x && 
+		   mon->my + ydir[((int)mon->mvar_vector - 1)%8] == y 
 		) return (!rn2(2) && (distance < 3));
 		else return 0;
 	}
@@ -3873,11 +3881,11 @@ struct monst *mtmp;
 			}
 			/* alabaster-specific effects */
 			mtmp->mspec_used = 0;
-			if (is_alabaster_mummy(mtmp->data) && mtmp->mvar1 >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar1 <= SYLLABLE_OF_SPIRIT__VAUL){
-				mksobj_at(mtmp->mvar1, mtmp->mx, mtmp->my, TRUE, FALSE);
-				if (mtmp->mvar1 == SYLLABLE_OF_SPIRIT__VAUL)
+			if(is_alabaster_mummy(mtmp->data) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
+				mksobj_at(mtmp->mvar_syllable, mtmp->mx, mtmp->my, TRUE, FALSE);
+				if(mtmp->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 					mtmp->mintrinsics[(DISPLACED - 1) / 32] &= ~(1 << (DISPLACED - 1) % 32);
-				mtmp->mvar1 = 0; //Lose the bonus if resurrected
+				mtmp->mvar_syllable = 0; //Lose the bonus if resurrected
 			}
 			newcham(mtmp, &mons[rn2(4) ? PM_ACID_BLOB : PM_BLACK_PUDDING], FALSE, FALSE);
 			break;
@@ -3963,7 +3971,7 @@ struct monst *mtmp;
 			if(lifesavers&LSVD_NBW)
 				pline("%s is boiling and screaming in agony!", Monnam(mtmp));
 			else if(canseemon(mtmp))
-				pline("%s screams in agony, boats, and begins boiling violently!", Monnam(mtmp));
+				pline("%s screams in agony, bloats, and begins boiling violently!", Monnam(mtmp));
 			else
 				pline("%s screams in agony and begins boiling violently!", Monnam(mtmp));
 			
@@ -4053,7 +4061,7 @@ register struct monst *mtmp;
 		set_mon_data(mtmp, &mons[PM_ANUBITE], -1);
 
 	if(mtmp->data == &mons[PM_WITCH_S_FAMILIAR]){
-		dead_familiar(mtmp->mvar1);
+		dead_familiar(mtmp->mvar_witchID);
 	}
 
 	/* if MAXMONNO monsters of a given type have died, and it
@@ -4177,7 +4185,7 @@ register struct monst *mtmp;
 		for (mon = fmon; mon; mon = mtmp2){
 			mtmp2 = mon->nmon;
 			if(mon->data == &mons[PM_HUNGRY_DEAD]){
-				if(mtmp->mvar1 == (long)mon->m_id){
+				if(mtmp->mvar_huskID == (long)mon->m_id){
 					if(mon->mhp > 0){
 						mon->mhp = 0;
 						mondied(mon);
@@ -4192,7 +4200,7 @@ register struct monst *mtmp;
 			for (mon = migrating_mons; mon; mon = mtmp2){
 				mtmp2 = mon->nmon;
 				if(mon->data == &mons[PM_HUNGRY_DEAD]){
-					if(mtmp->mvar1 == (long)mon->m_id){
+					if(mtmp->mvar_huskID == (long)mon->m_id){
 						*mmtmp = mon->nmon;
 						mon_arrive(mon, TRUE);
 						if(mon->mhp > 0){
@@ -4211,7 +4219,7 @@ register struct monst *mtmp;
 		struct monst *mon, *mtmp2;
 		for (mon = fmon; mon; mon = mtmp2){
 			mtmp2 = mon->nmon;
-			if(mon->data == &mons[PM_DANCING_BLADE] && mon->mvar1 == mtmp->m_id){
+			if(mon->data == &mons[PM_DANCING_BLADE] && mon->mvar_suryaID == mtmp->m_id){
 				if (DEADMONSTER(mon)) continue;
 				mon->mhp = -10;
 				monkilled(mon,"",AD_DRLI);
@@ -6025,12 +6033,12 @@ register struct monst *mtmp;
 	
 	if(mtmp->data == &mons[PM_DANCING_BLADE]){
 		struct monst *surya;
-		for(surya = fmon; surya; surya = surya->nmon) if(surya->m_id == mtmp->mvar1) break;
+		for(surya = fmon; surya; surya = surya->nmon) if(surya->m_id == mtmp->mvar_suryaID) break;
 		if(surya) setmangry(surya);
 	}
 	if(mtmp->data == &mons[PM_SURYA_DEVA]){
 		struct monst *blade;
-		for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar1) break;
+		for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
 		if(blade) setmangry(blade);
 	}
 	if (couldsee(mtmp->mx, mtmp->my)) {
@@ -6983,6 +6991,45 @@ boolean verbose;
 		max = &(targ->mhpmax);
 	}
 	*hp += mech->m_lev;
+	if(*hp > *max)
+		*hp = *max;
+}
+
+void
+nurse_heal(nurse, targ, verbose)
+struct monst *nurse, *targ;
+boolean verbose;
+{
+	int *hp, *max;
+	int healing;
+	if(verbose){
+		if(nurse == targ)
+			pline("%s heals %sself.", Monnam(nurse), himherit(targ));
+		else if(targ == &youmonst)
+			pline("%s heals you.", Monnam(nurse));
+		else
+			pline("%s heals %s.", Monnam(nurse), mon_nam(targ));
+	}
+	if(targ == &youmonst){
+		if(Upolyd){
+			hp = &u.mh;
+			max = &u.mhmax;
+		} else {
+			hp = &u.uhp;
+			max = &u.uhpmax;
+		}
+	} else {
+		hp = &(targ->mhp);
+		max = &(targ->mhpmax);
+	}
+	healing += d(2+max(0, nurse->m_lev - 9)/3,6); //Note, nurses start at 11th level, healers 10th.
+	if(targ == &youmonst){
+		healing -= roll_udr(nurse);
+	} else {
+		healing -= roll_mdr(targ, nurse);
+	}
+	if(healing < 1)
+		healing = 1;
 	if(*hp > *max)
 		*hp = *max;
 }

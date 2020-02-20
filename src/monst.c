@@ -3679,7 +3679,7 @@ struct permonst _mons2[] = {
  * Keter Sephiroth
  */
     MON("malkuth sephirah", S_KETER,//7
-	LVL(5, 24, 5, 5, 5), (G_LGROUP|G_NOCORPSE|G_NOGEN),
+	LVL(5, 24, 5, 5, 5), (G_SGROUP|G_NOCORPSE|G_NOGEN),
 	A(ATTK(AT_WHIP, AD_MALK, 1, 4),
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(WT_LARGE, 0, 0, MS_ARREST, MZ_HUMAN), MR_ELEC|MR_STONE, 0, 
@@ -5145,7 +5145,7 @@ struct permonst _mons2[] = {
 	MA_ELF|MA_DROW /*MA*/,  MV_DARKSIGHT /*MV*/, CLR_GRAY),
     MON("nurse", S_HUMAN,//13 /*Needs encyc entry*/
 	LVL_DEX(11, 6, 0, 0, 5), (G_GENO|3),
-	A(ATTK(AT_WEAP, AD_HEAL, 2, 6),
+	A(ATTK(AT_WEAP, AD_PHYS, 1, 6),
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(WT_HUMAN, 400, 0, MS_NURSE, MZ_HUMAN), MR_POISON, MR_POISON,
 	0 /*MM*/, MT_OMNIVORE /*MT*/,
@@ -6683,7 +6683,7 @@ is a red right hand
 #endif	/* CONVICT */
     MON("healer", S_HUMAN,//12
 	LVL(10, 12, 10, 1, 0), G_NOGEN,
-	A(ATTK(AT_WEAP, AD_HEAL, 1, 6),
+	A(ATTK(AT_WEAP, AD_PHYS, 1, 6),
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(WT_HUMAN, 400, 0, MS_HUMANOID, MZ_HUMAN), MR_POISON, 0,
 	0 /*MM*/, MT_OMNIVORE|MT_COLLECT /*MT*/,
