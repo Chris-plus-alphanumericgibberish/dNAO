@@ -2454,6 +2454,13 @@ struct attack *attk;
 				((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr))
 				);
 			break;
+		case AT_HUGS:
+			pline("%s %s being %s.",
+				(youdef ? "You" : Monnam(mdef)),
+				(youdef ? "are" : "is"),
+				(pa == &mons[PM_ROPE_GOLEM] ? "choked" : "crushed")
+				);
+			break;
 		case AT_EXPL:
 		case AT_BOOM:
 			pline("%s %s!",
@@ -3831,6 +3838,30 @@ boolean ranged;
 			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 		default:
 			break;
+		}
+	}
+
+	/* intercept hug attacks to make them try to do a grab (if possible) */
+	if (attk->aatyp == AT_HUGS
+		&& attk->adtyp != AD_WRAP)
+	{
+		/* are grabs possible? */
+		if ((youagr || youdef)
+			&& !sticks(pd)
+			)
+		{
+			/* if we aren't already stuck, try to grab them */
+			if (!(u.ustuck && u.ustuck == (youagr ? mdef : magr))) {
+				/* make a grab at them */
+				alt_attk.adtyp = AD_WRAP;
+				return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+			}
+			/* else continue on with the grab attack */
+		}
+		/* no grabs allowed, substitute basic attack */
+		else {
+			alt_attk.aatyp = AT_CLAW;
+			return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 	}
 
@@ -7002,7 +7033,7 @@ boolean ranged;
 		/* is the player stuck to the other creature? */
 		if (notmcan || (u.ustuck == mtmp)) {
 			/* if not attached to anything, attempt to attach to the other creature*/
-			if (!u.ustuck && !rn2(10)) {
+			if (!u.ustuck && (!rn2(10) || attk->aatyp == AT_HUGS)) {
 				if (slips_free(magr, mdef, attk, vis)) {
 					/* message was printed (if visible) */
 					/* do nothing */;
@@ -7010,12 +7041,21 @@ boolean ranged;
 				else {
 					/* get stuck */
 					/* print a message (vis is assumed, since the player is involved) */
-					pline("%s swing%s %s around %s!",
-						(youagr ? "You" : Monnam(mtmp)),
-						(youagr ? "" : "s"),
-						(youagr ? "yourself" : "itself"),
-						(youagr ? mon_nam(mtmp) : "you")
-						);
+					if (attk->aatyp == AT_HUGS) {
+						pline("%s grab%s %s!",
+							(youagr ? "You" : Monnam(mtmp)),
+							(youagr ? "" : "s"),
+							(youagr ? mon_nam(mtmp) : "you")
+							);
+					}
+					else {
+						pline("%s swing%s %s around %s!",
+							(youagr ? "You" : Monnam(mtmp)),
+							(youagr ? "" : "s"),
+							(youagr ? "yourself" : "itself"),
+							(youagr ? mon_nam(mtmp) : "you")
+							);
+					}
 
 					if (pd == &mons[PM_TOVE])
 					{
