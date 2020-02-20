@@ -708,6 +708,9 @@ boolean while_carried;
 			case AGGRAVATE_MONSTER:
 				if (spfx & SPFX_AGGRM) got_prop = TRUE;
 				break;
+			case XRAY_VISION:
+				if (spfx & SPFX_XRAY) got_prop = TRUE;
+				break;
 			case WARN_OF_MON:
 			case WARNING:
 				if (spfx & SPFX_WARN)
@@ -1213,6 +1216,23 @@ long wp_mask;
 			(void)make_hallucinated((long)!on, restoring ? FALSE : TRUE, wp_mask);
 			break;
 		/* needs vision update*/
+		case XRAY_VISION:
+			if (otmp->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && !Race_if(PM_DWARF))
+				break;	/* do not modify xray vision */
+
+			if (on) *mask |= wp_mask;
+			else *mask &= ~wp_mask;
+
+			if (Xray_vision) {
+				u.xray_range = max(3, u.xray_range);
+			}
+			else {
+				/* as it turns out, this currently does not interfere with orthos, because orthos is hacked in */
+				u.xray_range = -1;
+			}
+			vision_full_recalc = 1;
+			break;
+		/* needs vision update */
 		case WARNING:
 		case TELEPAT:
 			if (on) *mask |= wp_mask;
@@ -1226,15 +1246,6 @@ long wp_mask;
 			break;
 		}//end switch
 	}//end for
-
-	/* xray vision, surprisingly, isn't in uprops */
-		if (((wp_mask == W_ART ? oart->cspfx : oart->spfx) & SPFX_XRAY)
-			&& (otmp->oartifact != ART_AXE_OF_THE_DWARVISH_LORDS || Race_if(PM_DWARF))) {
-	    /* this assumes that no one else is using xray_range, which isn't exactly valid anymore... */
-	    if (on) u.xray_range = 3;
-	    else u.xray_range = -1;
-	    vision_full_recalc = 1;
-	}
 
 	if(wp_mask == W_ART && !on && oart->inv_prop) {
 	    /* might have to turn off invoked power too */
