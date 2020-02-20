@@ -3734,6 +3734,7 @@ lifesaved_monster(mtmp)
 struct monst *mtmp;
 {
 	struct obj *lifesave = mlifesaver(mtmp);
+	boolean messaged = FALSE;
 	int lifesavers = 0;
 	int i;
 #define LSVD_ANA 0x001	/* anachrononaut quest */
@@ -3802,6 +3803,7 @@ struct monst *mtmp;
 		case LSVD_ANA:
 			/* message */
 			if (canseemon(mtmp)) {
+				messaged = TRUE;
 				pline("But wait...");
 				if (attacktype(mtmp->data, AT_EXPL)
 					|| attacktype(mtmp->data, AT_BOOM))
@@ -3814,6 +3816,7 @@ struct monst *mtmp;
 		case LSVD_NBW:
 			/* message */
 			if (canseemon(mtmp)) {
+				messaged = TRUE;
 				pline("But wait...");
 				pline("Something vast and terrible writhes beneath %s wrappings!", hisherits(mtmp));
 				pline("It's trying to escape!");
@@ -3839,7 +3842,8 @@ struct monst *mtmp;
 
 		case LSVD_UVU:
 			/* message */
-			if (cansee(mtmp->mx, mtmp->my)) {
+			if (couldsee(mtmp->mx, mtmp->my)) {
+				messaged = TRUE;
 				pline("But wait...");
 				pline("A glowing halo forms over %s!",
 					mon_nam(mtmp));
@@ -3859,7 +3863,8 @@ struct monst *mtmp;
 			break;
 		case LSVD_OBJ:
 			/* message */
-			if (cansee(mtmp->mx, mtmp->my)) {
+			if (couldsee(mtmp->mx, mtmp->my)) {
+				messaged = TRUE;
 				pline("But wait...");
 				pline("%s medallion begins to glow!",
 					s_suffix(Monnam(mtmp)));
@@ -3877,6 +3882,7 @@ struct monst *mtmp;
 		case LSVD_ALA:
 			/* message */
 			if (canseemon(mtmp)) {
+				messaged = TRUE;
 				pline("%s putrefies with impossible speed!", Monnam(mtmp));
 			}
 			/* alabaster-specific effects */
@@ -3892,6 +3898,7 @@ struct monst *mtmp;
 		case LSVD_FRC:
 			/* message */
 			if (couldsee(mtmp->mx, mtmp->my)) {
+				messaged = TRUE;
 				pline("But wait...");
 				if (canseemon(mtmp))
 					pline("%s fractures further%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
@@ -3927,6 +3934,7 @@ struct monst *mtmp;
 			}
 			/* message */
 			if (couldsee(mtmp->mx, mtmp->my)) {
+				messaged = TRUE;
 				pline("But wait...");
 				pline("A glowing halo forms over %s!",
 					mon_nam(mtmp));
@@ -3942,9 +3950,26 @@ struct monst *mtmp;
 			break;
 		case LSVD_PLY:
 			/* message */
-			if (couldsee(mtmp->mx, mtmp->my)){
+			if (canseemon(mtmp)){
+				messaged = TRUE;
 				pline("But wait...");
-				pline("%s mask breaks!", s_suffix(Monnam(mtmp)));
+				switch (u.uinsight / 10) {
+				case 0:		/* <10 insight */
+					pline("%s is suddenly gone!", Monnam(mtmp));
+					break;
+				case 1:		/* <20 insight */
+					pline("%s breaks apart!", Monnam(mtmp));
+					break;
+				case 2:		/* <30 insight */
+					pline("%s breaks like a mask!", Monnam(mtmp));
+					break;
+				case 3:		/* <40 insight */
+					pline("You catch a glimpse of something /other/ as %s breaks like a mask!", mon_nam(mtmp));
+					break;
+				default:	/* 40+ insight */
+					pline("%s mask breaks!", s_suffix(Monnam(mtmp)));
+					break;
+				}
 			}
 			/* turn into a polypoid */
 			mtmp->ispolyp = 0;
@@ -3953,6 +3978,7 @@ struct monst *mtmp;
 			break;
 		case LSVD_KAM:
 			if (couldsee(mtmp->mx, mtmp->my)) {
+				messaged = TRUE;
 				pline("But wait...");
 				if (canseemon(mtmp))
 					pline("%s fractures%s, but now looks uninjured!", Monnam(mtmp), !is_silent(mtmp->data) ? " with an unearthly scream" : "");
@@ -3974,7 +4000,7 @@ struct monst *mtmp;
 				pline("%s screams in agony, bloats, and begins boiling violently!", Monnam(mtmp));
 			else
 				pline("%s screams in agony and begins boiling violently!", Monnam(mtmp));
-			
+			messaged = TRUE;
 			if(cansee(mtmp->mx, mtmp->my)){
 				int nyar_form = rn2(SIZE(nyar_description));
 				pline("The escaping phantasmal mist condenses into %s.", nyar_description[nyar_form]);
@@ -3996,7 +4022,7 @@ struct monst *mtmp;
 		mtmp->mhp = mtmp->mhpmax;
 		/* genocided creatures get re-killed */
 		if (mvitals[monsndx(mtmp->data)].mvflags & G_GENOD && !In_quest(&u.uz)) {
-			if (cansee(mtmp->mx, mtmp->my)) {
+			if (messaged) {
 				pline("Unfortunately %s is still genocided...",
 					mon_nam(mtmp));
 			}
