@@ -13226,13 +13226,21 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	/* poison */
 	if (poisons_resisted || poisons_majoreff || poisons_minoreff || poisons_wipedoff) {
 		otmp = poisonedobj;
-		if (youdef && attk) {/* SCOPECREEP: get below scopecreep working so that the player can be poisoned by a poisoned object that isn't from an attack hitting them */
-			/* using poisoned() from mon.c */
+		if (youdef) {
 			char buf[BUFSZ];
-			Sprintf(buf, "%s %s", s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
+			if (attk && magr) {
+				/* using poisoned() from mon.c */
+				Sprintf(buf, "%s %s", s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
+			}
+			else if (otmp) {
+				Sprintf(buf, "%s", The(xname(otmp)));
+			}
+			else {
+				impossible("no name to poison you with");
+			}
 			/* SCOPECREEP: the "fatal" field (30) is inconsistent. Preferrably, this should use the same major/minor effect system set up in this function */
 			/* also, this spams messages when recursed */
-			poisoned(buf, A_CON, pa->mname, 30, (poisons_majoreff | poisons_minoreff));
+			poisoned(buf, A_CON, (magr ? pa->mname : xname(otmp)), 30, (poisons_majoreff | poisons_minoreff));
 		}
 		else {
 			int i, n;

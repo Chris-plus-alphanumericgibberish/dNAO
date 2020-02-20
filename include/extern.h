@@ -2609,6 +2609,7 @@ E boolean FDECL(burnarmor,(struct monst *));
 E boolean FDECL(rust_dmg, (struct obj *,const char *,int,BOOLEAN_P,struct monst *));
 E void FDECL(grease_protect, (struct obj *,const char *,struct monst *));
 E struct trap *FDECL(maketrap, (int,int,int));
+E void FDECL(set_trap_ammo, (struct trap *, struct obj *));
 E void FDECL(fall_through, (BOOLEAN_P));
 E struct monst *FDECL(animate_statue, (struct obj *,XCHAR_P,XCHAR_P,int,int *));
 E struct monst *FDECL(activate_statue_trap,
@@ -2635,6 +2636,7 @@ E boolean NDECL(drown);
 E int NDECL(dodeepswim);
 E void FDECL(drain_en, (int));
 E int NDECL(dountrap);
+E void FDECL(remove_trap_ammo, (struct trap *));
 E int FDECL(untrap, (struct obj *));
 E boolean FDECL(chest_trap, (struct obj *,int,BOOLEAN_P));
 E void FDECL(deltrap, (struct trap *));
