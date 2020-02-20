@@ -1255,7 +1255,7 @@ register struct obj *obj;
 		}
 		obj->known = 1;
 	}
-	begin_burn(obj, FALSE);
+	begin_burn(obj);
 }
 
 STATIC_OVL void
@@ -1410,7 +1410,7 @@ struct obj *obj;
 				Yname2(obj), obj->quan == 1 ? "itself" : "themselves");
 		bill_dummy_object(obj);
 	    }
-	    begin_burn(obj, FALSE);
+	    begin_burn(obj);
 	    return TRUE;
 	}
 	return FALSE;
@@ -1666,7 +1666,7 @@ struct obj *obj;
 			bill_dummy_object(obj);
 		    }
 		}
-		begin_burn(obj, FALSE);
+		begin_burn(obj);
 	}
 }
 
@@ -1739,14 +1739,14 @@ light_cocktail(obj)
 
 	if (obj->quan > 1L) {
 	    obj = splitobj(obj, 1L);
-	    begin_burn(obj, FALSE);	/* burn before free to get position */
+	    begin_burn(obj);	/* burn before free to get position */
 	    obj_extract_self(obj);	/* free from inv */
 
 	    /* shouldn't merge */
 	    obj = hold_another_object(obj, "You drop %s!",
 				      doname(obj), (const char *)0);
 	} else
-	    begin_burn(obj, FALSE);
+	    begin_burn(obj);
 }
 
 STATIC_OVL void
@@ -1808,14 +1808,14 @@ light_torch(obj)
 
 	if (obj->quan > 1L) {
 	    obj = splitobj(obj, 1L);
-	    begin_burn(obj, FALSE);	/* burn before free to get position */
+	    begin_burn(obj);	/* burn before free to get position */
 	    obj_extract_self(obj);	/* free from inv */
 
 	    /* shouldn't merge */
 	    obj = hold_another_object(obj, "You drop %s!",
 				      doname(obj), (const char *)0);
 	} else
-	    begin_burn(obj, FALSE);
+	    begin_burn(obj);
 }
 
 static NEARDATA const char cuddly[] = { TOOL_CLASS, GEM_CLASS, 0 };
@@ -1846,7 +1846,7 @@ dorub()
 		uwep->otyp = OIL_LAMP;
 		uwep->spe = 0; /* for safety */
 		uwep->age = rn1(500,1000);
-		if (uwep->lamplit) begin_burn(uwep, TRUE);
+		if (uwep->lamplit) begin_burn(uwep);
 		update_inventory();
 	    } else if (rn2(2) && !Blind)
 		You("see a puff of smoke.");

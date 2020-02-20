@@ -2935,7 +2935,7 @@ dodip()
 		&& (potion->otyp == POT_OIL)
 	) {
 		if(!obj->lamplit)
-			begin_burn(obj, FALSE);
+			begin_burn(obj);
 		useup(potion);
 		explode(u.ux, u.uy, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1);
 		exercise(A_WIS, FALSE);
@@ -2945,11 +2945,11 @@ dodip()
 	) {
 		obj->age = max(obj->age-100, 1);
 		if(!obj->lamplit)
-			begin_burn(obj, FALSE);
+			begin_burn(obj);
 		else {
 			//May change radius, snuff and relight
 			end_burn(obj, TRUE);
-			begin_burn(obj, FALSE);
+			begin_burn(obj);
 		}
 		useup(potion);
 		if(!Shock_resistance){

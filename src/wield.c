@@ -199,7 +199,7 @@ boolean quietly;	/* hide the basic message saying what you are now wielding */
 		if (!quietly) arti_speak(wep);
 
 	    if (artifact_light(wep) && !wep->lamplit) {
-			begin_burn(wep, FALSE);
+			begin_burn(wep);
 		if (!Blind)
 			pline("%s to %s%s!", Tobjnam(wep, "begin"),
 				(wep->blessed ? "shine very" : "glow"), (wep->cursed ? "" : " brilliantly"));

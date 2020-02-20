@@ -560,7 +560,7 @@ register boolean mod;
 				otmp->ovar1 = rn2(SPE_BLANK_PAPER - SPE_DIG) + SPE_DIG;
 			}
 			if( arti_light(otmp) ){
-				begin_burn(otmp, FALSE);
+				begin_burn(otmp);
 			}
 		    break;
 		}
@@ -7224,7 +7224,7 @@ arti_invoke(obj)
 				for(i=0;i < NUMBER_POWERS;i++){
 					u.spiritPColdowns[i] = 0;
 				}
-				if(obj == uwep && uwep->lamplit && artifact_light(obj)) begin_burn(uwep, FALSE);
+				if(obj == uwep && uwep->lamplit && artifact_light(obj)) begin_burn(uwep);
 			}
 			else pline("You strike the single-bladed athame, but nothing happens.");
 		break;
