@@ -343,7 +343,7 @@ int tary;
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !canseemon(mdef)) :
+	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !sensemon(mdef)) :
 		(magr->mconf || magr->mstun || magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
 
 	/* set permonst pointers */
@@ -2280,11 +2280,11 @@ boolean allow_lethal;
 					if (xresist);	// no message, reduce spam
 					else {
 						dmg = d(cnt, dmg);
-						if (!allow_lethal && dmg > mtmp->mhp)
+						if (!allow_lethal && dmg >= mtmp->mhp)
 							dmg = min(0, mtmp->mhp - 1);
 
 						mtmp->mhp -= dmg;
-						if (mtmp->mhp < 0) {
+						if (mtmp->mhp < 1) {
 							if(vis) pline("%s dies!", Monnam(mtmp));
 							mondied(mtmp);
 							return (MM_HIT|MM_DEF_DIED);
@@ -5474,7 +5474,7 @@ boolean ranged;
 				if (otmp->spe > -1 * objects[(otmp)->otyp].a_ac){
 					damage_item(otmp);
 				}
-				else if (!otmp->oartifact || (pa == &mons[PM_DEMOGORGON] && rn2(10))){
+				else if (!otmp->oartifact || (pa == &mons[PM_DEMOGORGON] && !rn2(10))){
 					if (youdef)
 						claws_destroy_arm(otmp);
 					else
@@ -11167,6 +11167,10 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 		else
 			natural_strike = TRUE;
 	}
+	/* if the player is attacking with a wielded weapon, increment conduct */
+	if (youagr && valid_weapon_attack && !thrown) {
+		u.uconduct.weaphit++;
+	}
 	/* precision multiplier */
 	if (fired && launcher &&								// Firing ammo from a launcher (fired implies thrown)
 		(objects[launcher->otyp].oc_skill == P_CROSSBOW ||	// from a REAL crossbow (but not the Pen of the Void or the BFG, those would be brokenly strong)
@@ -12517,8 +12521,12 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 		/* hits with a valid weapon proc effects of the weapon */
 		if (valid_weapon_attack) {
 			otmp = weapon;
-			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
+			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt)) {
+				/* if the artifact caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
+				if (returnvalue == MM_MISS && youagr && !thrown)
+					u.uconduct.weaphit--;
 				return returnvalue;
+			}
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
 		if (thrown && fired && launcher && valid_weapon_attack) {
