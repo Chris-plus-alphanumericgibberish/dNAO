@@ -1785,7 +1785,7 @@ no_unwear:
 	    addinv_core2(otmp);
 	}
 
-	if ((!carried(otmp) || obj->unpaid) &&
+	if ((!(carried(otmp) || (otmp->where == OBJ_CONTAINED && carried(otmp->ocontainer))) || obj->unpaid) &&
 		get_obj_location(otmp, &ox, &oy, BURIED_TOO|CONTAINED_TOO) &&
 		costly_spot(ox, oy)) {
 	    register struct monst *shkp =
