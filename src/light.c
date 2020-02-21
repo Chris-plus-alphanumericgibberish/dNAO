@@ -57,6 +57,7 @@ extern char circle_start[];
 
 
 /* Create a new light source.  */
+/* If a lightsource is already attached to (type, id), replace it (with a warning) */
 void
 new_light_source(x, y, range, type, id)
     xchar x, y;
@@ -64,15 +65,26 @@ new_light_source(x, y, range, type, id)
     genericptr_t id;
 {
     light_source *ls;
+	boolean duplicate = FALSE;
 
     if (range > MAX_RADIUS || range < 0) {
 	impossible("new_light_source:  illegal range %d", range);
 	return;
     }
 
-    ls = (light_source *) alloc(sizeof(light_source));
-
-    ls->next = light_base;
+	/* check that this is a unique lightsource */
+	for (ls = light_base; ls; ls = ls->next) {
+		if (ls->type == type && ls->id == id) {
+			/* Duplicate */
+			duplicate = TRUE;
+			impossible("duplicate lightsource attempting to be created, type %d", type);
+			break;
+		}
+	}
+	if (!duplicate) {
+		ls = (light_source *)alloc(sizeof(light_source));
+	}
+	ls->next = light_base;
     ls->x = x;
     ls->y = y;
     ls->range = range;
