@@ -97,8 +97,7 @@ new_light_source(x, y, range, type, id)
 }
 
 /*
- * Delete a light source. This assumes only one light source is attached
- * to an object at a time.
+ * Delete all light sources attached to (type, id). There *should* only be one.
  */
 void
 del_light_source(type, id, silent)
@@ -108,6 +107,7 @@ del_light_source(type, id, silent)
 {
     light_source *curr, *prev;
     genericptr_t tmp_id;
+	boolean found_it = FALSE;
 
     /* need to be prepared for dealing a with light source which
        has only been partially restored during a level change
@@ -131,10 +131,12 @@ del_light_source(type, id, silent)
 
 	    free((genericptr_t)curr);
 	    vision_full_recalc = 1;
-	    return;
+		if (found_it && !silent)
+			impossible("multiple ls attached to type %d, id %d", type, curr->id);
+		found_it = TRUE;
 	}
     }
-    if(!silent) impossible("del_light_source: not found type=%d, id=0x%lx", type, (long)id);
+    if(!found_it && !silent) impossible("del_light_source: not found type=%d, id=0x%lx", type, (long)id);
 }
 
 /* Mark locations that are temporarily lit via mobile light sources. */
