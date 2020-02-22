@@ -1700,7 +1700,7 @@ int style;
 			/* boulder may hit creature */
 			int dieroll = rnd(20);
 			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0) >= dieroll)
-				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, FALSE);
+				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up);
 			else if (cansee(bhitpos.x, bhitpos.y))
 				miss(xname(singleobj), mtmp);
 			if (used_up)
@@ -1714,7 +1714,7 @@ int style;
 				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0) >= dieroll) {
 					killer = "rolling boulder trap";
 					killer_format = KILLED_BY_AN;
-					(void)hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, TRUE);
+					(void)hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up);
 				}
 				else if (!Blind)
 					pline("%s missses!", The(xname(singleobj)));
