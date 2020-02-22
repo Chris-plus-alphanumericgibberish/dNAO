@@ -1198,7 +1198,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			exercise(A_DEX, TRUE);
 		/* call hmon to make the projectile hit */
 		/* hmon will do hitmsg */
-		result = hmon2point0(magr, mdef, &dummy, &dummy, thrownobj, launcher, (misfired ? 2 : 1), 0, 0, TRUE, dieroll, FALSE, vis, wepgone, FALSE);
+		result = hmon2point0(magr, mdef, &dummy, &dummy, thrownobj, launcher, (misfired ? HMON_MISTHROWN : HMON_FIRED), 0, 0, TRUE, dieroll, FALSE, vis, wepgone, FALSE);
 
 		/* wake up defender */
 		wakeup2(mdef, youagr);

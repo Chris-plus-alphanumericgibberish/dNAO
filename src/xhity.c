@@ -31,7 +31,7 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *, boolean));
+STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, void *, int, int, int, boolean, int, boolean, int, boolean *, boolean));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 
@@ -3898,13 +3898,13 @@ boolean ranged;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged), 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone, FALSE);
+		result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone, FALSE);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged), 0, 0, FALSE, dieroll, TRUE, vis, &wepgone, FALSE);
+				result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis, &wepgone, FALSE);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -10846,14 +10846,14 @@ boolean * hittxt;
  * are called after the player hits, while letting hmoncore have messy returns wherever it wants
  */
 int
-hmon2point0(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
+hmon2point0(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
 struct monst * magr;			/* attacker */
 struct monst * mdef;			/* defender */
 struct attack * attk;			/* attack structure to use -- if this does not exist, we MUST have a weapon */
 struct attack * originalattk;	/* original attack structure, used for messages */
 struct obj * weapon;			/* weapon to hit with */
-struct obj * launcher;			/* launcher weapon was fired with */
-int thrown;						/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
+void * vpointer;				/* additional /whatever/, type based on hmoncode. */
+int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
 int flatbasedmg;				/* if >0, REPLACE basedmg with this value -- typically used for unusual weapon hits like throwing something upwards */
 int monsdmg;					/* flat damage amount to add onto other effects -- for monster attacks */
 boolean dohitmsg;				/* print hit message? */
@@ -10876,7 +10876,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	else
 		u_anger_guards = FALSE;
 
-	result = hmoncore(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset);
+	result = hmoncore(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset);
 
 	if (magr == &youmonst && mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
@@ -10887,14 +10887,14 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 }
 
 int
-hmoncore(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
+hmoncore(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
 struct monst * magr;			/* attacker */
 struct monst * mdef;			/* defender */
 struct attack * attk;			/* attack structure to use */
 struct attack * originalattk;	/* original attack structure, used for messages */
 struct obj * weapon;			/* weapon to hit with */
-struct obj * launcher;			/* launcher weapon was fired with */
-int thrown;						/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
+void * vpointer;				/* additional /whatever/, type based on hmoncode. */
+int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
 int flatbasedmg;				/* if >0, REPLACE basedmg with this value -- currently unused. SCOPECREEP: use hmon for things like throwing an object upwards */
 int monsdmg;					/* flat damage amount to add onto other effects -- for monster attacks */
 boolean dohitmsg;				/* print hit message? */
@@ -10947,27 +10947,35 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	boolean fake_valid_weapon_attack = FALSE;
 	boolean invalid_weapon_attack = FALSE;
 	boolean unarmed_punch = FALSE;
-	boolean unarmed_kick = FALSE;		/* SCOPECREEP: eventually replace kickdmg() */
+	boolean unarmed_kick = FALSE;
 	boolean natural_strike = FALSE;
 	boolean ulightsaberhit = FALSE;
 
 	boolean destroy_one_magr_weapon = FALSE;	/* destroy one of magr's weapons */
 	boolean destroy_all_magr_weapon = FALSE;	/* destroy all of magr's weapon */
 
-	boolean real_attack = (attk && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->damn > 0 || attk->damd > 0));
-
 	boolean hittxt = FALSE;
 	boolean lethaldamage = FALSE;
 
-	boolean fired = (weapon && (is_ammo(weapon) || launcher) && thrown == 1);	/* true if we are properly firing ammo (which may actually not use a launcher, eg monster AT_ARRW) */
-	
+	boolean melee = (hmoncode & HMON_WHACK);
+	boolean thrust = (hmoncode & HMON_THRUST);
+	boolean misthrown = (hmoncode & HMON_MISTHROWN);
+	boolean fired = (hmoncode & HMON_FIRED);
+	boolean thrown = (misthrown || fired);
+	boolean trapped = (hmoncode & HMON_TRAP);
+
+	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);	/* trap takes precedence over launcher */
+
+	boolean real_attack = (attk && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->damn > 0 || attk->damd > 0));
+
 	struct obj tempwep;	/* used to save the data of an object before it gets destroyed, for things like naming */
 	struct obj * otmp;	/* generic object pointer -- variable */
 	long slot = 0L;		/* slot, either the weapon pointer (W_WEP) or armor -- variable */
 	long rslot = 0L;	/* slot, dedicated to rings (left and right) -- set at start, should not be reset */
 
 	/* pick the most correct ring slot */
-	rslot = (!attk || !magr || attk->aatyp == AT_MARI) ? 0L	/* no attack, or no attacker, or marilith: not a ring-hand */
+	rslot = (!melee || !attk || !magr || attk->aatyp == AT_MARI) ? 0L	/* no attack, or no attacker, or marilith: not a ring-hand */
 		//: (attk->aatyp == AT_WEAP || attk->aatyp == AT_DEVA || attk->aatyp == AT_HODS) ? W_RINGR /* mainhand */
 		//: (attk->aatyp == AT_XWEP) ? W_RINGL	/* offhand */
 		: ((youagr ? uarms : which_armor(magr, W_ARMS)) || !rn2(2)) ? W_RINGR : W_RINGL;	/* either hand, but not offhand if wearing a shield */
@@ -11070,11 +11078,17 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 
 	/* set killer, if needed */
 	if (!killerset && (
-		(!magr) ||				/* no attacker -- we really need a specific killer to avoid "killed by a died" */
-		(thrown && weapon)		/* prefer "killed by an arrow" to "killed by a plains centaur" */
+		(!magr) ||							/* no attacker -- we really need a specific killer to avoid "killed by a died" */
+		(thrown && weapon) ||	/* prefer "killed by an arrow" to "killed by a plains centaur" */
+		(trapped)							/* prefer "killed by an arrow trap" to "killed by an arrow" */
 		)) {
+		if (trap) {
+			killerset = TRUE;
+			killer = "trap";	/* TODO -- trapname() in trap.c */
+			killer_format = KILLED_BY_AN;
+		}
 		/* "killed by (a) <weapon> */
-		if (thrown && weapon) {
+		else if (thrown && weapon) {
 			killerset = TRUE;
 			killer = xname(weapon);
 			if (obj_is_pname(weapon))
@@ -11103,7 +11117,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			weapon->oartifact == ART_ROGUE_GEAR_SPIRITS) &&
 			/* isn't a misused polearm */
 			(!is_pole(weapon) ||
-			thrown ||
+			thrust ||
 			u.usteed ||
 			is_vibropike(weapon) ||
 			weapon->otyp == AKLYS ||
@@ -11119,18 +11133,18 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			/* isn't an unthrown missile */
 			!((is_missile(weapon) || is_ammo(weapon)) && weapon->otyp != CHAKRAM && !thrown) &&
 			/* isn't an unthrown Houchou */
-			!(weapon->oartifact == ART_HOUCHOU && !thrown) &&
+			!(weapon->oartifact == ART_HOUCHOU && !fired) &&
 			/* isn't unthrowable ammo (ie, any ammo but rocks) being thrown but not fired*/
-			!(thrown == 2)
+			!(misthrown)
 			)
 		{
 			/* unlit lightsabers are martial arts aids, not weapons */
-			if (martial_aid(weapon) && !thrown)
+			if (martial_aid(weapon) && melee)
 				unarmed_punch = TRUE;
 			else
 				valid_weapon_attack = TRUE;
 
-			if (youagr && is_lightsaber(weapon) && litsaber(weapon) && !thrown)
+			if (youagr && is_lightsaber(weapon) && litsaber(weapon) && melee)
 				ulightsaberhit = TRUE;
 		}
 		else
@@ -11140,13 +11154,13 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 		if (/* being made with an attack action */
 			(attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_DEVA || attk->aatyp == AT_MARI || attk->aatyp == AT_HODS) &&
 			/* not thrown (how could this happen?) */
-			!thrown)
+			melee)
 			unarmed_punch = TRUE;
-		else if (attk->aatyp == AT_KICK && !thrown)	/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
+		else if (attk->aatyp == AT_KICK && melee)	/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
 			unarmed_kick = TRUE;
-		else if (attk->adtyp == AD_MERC && !thrown)
+		else if (attk->adtyp == AD_MERC && melee)
 			fake_valid_weapon_attack = TRUE;
-		else if(attk->aatyp == AT_SRPR){
+		else if (attk->aatyp == AT_SRPR && melee){
 			natural_strike = TRUE;
 			fake_valid_weapon_attack = TRUE;
 		}
@@ -11154,11 +11168,11 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			natural_strike = TRUE;
 	}
 	/* if the player is attacking with a wielded weapon, increment conduct */
-	if (youagr && valid_weapon_attack && !thrown) {
+	if (youagr && valid_weapon_attack && (melee || thrust)) {
 		u.uconduct.weaphit++;
 	}
 	/* precision multiplier */
-	if (fired && launcher &&								// Firing ammo from a launcher (fired implies thrown)
+	if (fired && launcher &&								// Firing ammo from a launcher
 		(objects[launcher->otyp].oc_skill == P_CROSSBOW ||	// from a REAL crossbow (but not the Pen of the Void or the BFG, those would be brokenly strong)
 		launcher->otyp == SNIPER_RIFLE)						// or a sniper rifle
 		&& !(noncorporeal(pd) || amorphous(pd) || ((stationary(pd) || sessile(pd)) && (pd->mlet == S_FUNGUS || pd->mlet == S_PLANT)))	// versus vulnerable targets
@@ -11292,7 +11306,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 
 	/* jousting */
 #ifdef STEED
-	if (youagr && !thrown && !recursed) {	/* do not joust in multihits */
+	if (youagr && melee && !recursed) {	/* do not joust in multihits */
 		if (u.usteed && weapon &&
 			(weapon_type(weapon) == P_LANCE ||
 			(weapon->oartifact == ART_ROD_OF_SEVEN_PARTS) ||
@@ -11340,7 +11354,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 #endif
 	/* staggering strike */
-	if (youagr && !recursed) {
+	if (youagr && (melee || thrust) && !recursed) {
 		if (
 			// unarmed_punch (not two-weaponing)
 			(unarmed_punch && !Upolyd && !bigmonst(pd) && !thick_skinned(pd) && !(u.twoweap) && 
@@ -11364,7 +11378,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 	/* shattering strike */
 	/* note: does not consider defender's weapon here */
-	if (youagr && !recursed) {
+	if (youagr && (melee || thrust) && !recursed) {
 		if (
 			// General Shattering Strike
 			(
@@ -11390,7 +11404,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 	/* disarming strike */
 	/* note: does not consider defender's weapon here */
-	if (youagr && valid_weapon_attack && !recursed) {
+	if (youagr && valid_weapon_attack && (melee || thrust) && !recursed) {
 		if ((((weapon && weapon == uwep) &&	// needs to be done with a mainhand weapon
 			(dieroll <= (1 + P_SKILL(weapon_type(weapon))))) &&	// good roll (B:10%  S:15%  E:20%)
 			(weapon->otyp == RANSEUR) &&	// can only be done with a ranseur
@@ -11746,7 +11760,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 
 	/* Clockwork heat - player melee only */
-	if (youagr && !thrown && !recursed) {
+	if (youagr && melee && !recursed) {
 		if (uclockwork && !Fire_res(mdef) && u.utemp) {
 			int heatdie = min(u.utemp, 20);
 			int heatdice = (1 + (u.utemp >= MELTING) + (u.utemp >= MELTED));
@@ -11768,7 +11782,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 
 	/* set zombify resulting from melee mvm combat */
-	if (!youagr && !youdef && !thrown && !recursed) {
+	if (!youagr && !youdef && melee && !recursed) {
 		if ((magr->mfaction == ZOMBIFIED || (magr->mfaction == SKELIFIED && !rn2(20))) && can_undead_mon(mdef)){
 			mdef->zombify = 1;
 		}
@@ -11795,7 +11809,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	if (valid_weapon_attack) {
 		/* note: dmgval() includes enchantment and erosion of weapon */
 		if ((weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_MARIONETTE) ||
-			(youagr && !thrown && u.sealsActive&SEAL_MARIONETTE && distmin(u.ux, u.uy, mdef->mx, mdef->my) > 1))
+			(youagr && thrust && u.sealsActive&SEAL_MARIONETTE))
 			basedmg = dmgval(weapon, mdef, SPEC_MARIONETTE);
 		else
 			basedmg = dmgval(weapon, mdef, 0);
@@ -11895,7 +11909,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 
 			case BOOMERANG:
 				/* boomerangs can break when used as melee weapons */
-				if (youagr && !thrown &&
+				if (youagr && (melee || thrust) &&
 					rnl(4) == 4 - 1 && !weapon->oartifact) {
 					if (dohitmsg) {
 						pline("As you hit %s, %s%s %s breaks into splinters.",
@@ -12110,7 +12124,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 							else if (weapon->otyp == CREAM_PIE) {
 								char *whom = mon_nam(mdef);
 								char *what = The(xname(weapon));
-								if (!thrown && weapon->quan > 1)
+								if (melee && weapon->quan > 1)
 									what = An(singular(weapon, xname));
 								/* note: s_suffix returns a modifiable buffer */
 								if (haseyes(pd) && pd != &mons[PM_FLOATING_EYE])
@@ -12376,16 +12390,22 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				*/
 				if(natural_strike)
 					bon_damage += dbon((struct obj *)0);
-				else if (!thrown)
+				else if (melee || thrust)
 					bon_damage += dbon(weapon);
-				else{ //thrown
-					if (!fired)
-						bon_damage += dbon(weapon); // thrown by hand, get strength bonus
-					else if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += dbon(launcher); // fired by a sling, get strength bonus
+				else if (fired)
+				{
+					/* slings get STR bonus */
+					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
+						bon_damage += dbon(launcher);
+					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += dbon(launcher) * 2; // fired by an atlatl, get 2x strength bonus
-					//else no bonus
+						bon_damage += dbon(launcher) * 2;
+					/* other launchers get no STR bonus */
+					else if (launcher)
+						bon_damage += 0;
+					/* properly-used ranged attacks othersied get STR bonus */
+					else
+						bon_damage += dbon(weapon);
 				}
 				bonsdmg += bon_damage;
 			} else if(!youagr && magr){
@@ -12394,16 +12414,21 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				/* 
 				* Monsters don't actually have anything other than a str bonus, and then only from items.
 				*/
-				if (!thrown)
+				if (melee || thrust)
 					bon_damage += m_dbon(magr, weapon);
-				else{ //thrown
-					if (!fired)
-						bon_damage += m_dbon(magr, weapon); // thrown by hand, get strength bonus
-					else if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += m_dbon(magr, launcher); // fired by a sling, get strength bonus
+				else if (fired) {
+					/* slings get STR bonus */
+					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
+						bon_damage += m_dbon(magr, launcher);
+					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += m_dbon(magr, launcher) * 2; // fired by an atlatl, get 2x strength bonus
-					//else no bonus
+						bon_damage += m_dbon(magr, launcher) * 2;
+					/* other launchers get no STR bonus */
+					else if (launcher)
+						bon_damage += 0;
+					/* properly-used ranged attacks othersied get STR bonus */
+					else
+						bon_damage += m_dbon(magr, weapon);
 				}
 				bonsdmg += bon_damage;
 			}
@@ -12440,8 +12465,8 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				else
 					skill_damage = 0;
 			}
-			/* things thrown but not fired (ie no launcher) */
-			else if (thrown && !fired) {
+			/* things thrown with no launcher */
+			else if (fired && !launcher) {
 				/* ammo thrown without a launcher does not get skill bonuses*/
 				if (is_ammo(weapon))
 					skill_damage = 0;
@@ -12450,7 +12475,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 					skill_damage = weapon_dam_bonus(weapon);
 			}
 			/* melee weapons */
-			else {
+			else if (melee || thrust) {
 				/* some weapons use contextually-specific skills */
 				if (wtype != P_TWO_WEAPON_COMBAT && wtype != weapon_type(weapon))
 					skill_damage = skill_dam_bonus(wtype);
@@ -12469,7 +12494,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			/* now, train skills */
 			use_skill(wtype, 1);
 
-			if (!thrown && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
+			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(FFORM_SHII_CHO, 1);
 				if (P_SKILL(FFORM_SHII_CHO) >= P_BASIC || weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 					if ((u.fightingForm == FFORM_SHII_CHO ||
@@ -12502,26 +12527,26 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	{
 		int returnvalue = 0;
 		/* use guidance glyph */
-		if (youagr && !thrown && active_glyph(GUIDANCE))
+		if (youagr && melee && active_glyph(GUIDANCE))
 			doguidance(mdef, basedmg);
 		/* hits with a valid weapon proc effects of the weapon */
 		if (valid_weapon_attack) {
 			otmp = weapon;
 			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt)) {
 				/* if the artifact caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
-				if (returnvalue == MM_MISS && youagr && !thrown)
+				if (returnvalue == MM_MISS && youagr && (melee || thrust))
 					u.uconduct.weaphit--;
 				return returnvalue;
 			}
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
-		if (thrown && fired && launcher && valid_weapon_attack) {
+		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
 				return returnvalue;
 		}
 		/* ranged weapon attacks also proc effects of The Helm of the Arcane Archer */
-		if (thrown && fired && launcher && valid_weapon_attack &&
+		if (fired && launcher && valid_weapon_attack &&
 			((otmp = (youagr ? uarmh : which_armor(magr, W_ARMH))) &&
 			otmp->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER)) {
 			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
@@ -13002,7 +13027,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 
 	if(uuvuglory){
-		pline("%s's glory sears %s", Monnam(magr), youdef ? "you" : mon_nam(mdef));
+		pline("%s's glory sears %s!", Monnam(magr), youdef ? "you" : mon_nam(mdef));
 	}
 	
 	/* Searing messages */
@@ -13459,7 +13484,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	if ((pd == &mons[PM_BLACK_PUDDING] || pd == &mons[PM_BROWN_PUDDING] || pd == &mons[PM_DARKNESS_GIVEN_HUNGER])
 		&& weapon && (valid_weapon_attack || invalid_weapon_attack)
 		&& weapon->obj_material == IRON
-		&& !thrown && (youdef || !mdef->mcan)) {
+		&& melee && (youdef || !mdef->mcan)) {
 		if (youdef) {
 			if (totldmg > 1)
 				exercise(A_STR, FALSE);

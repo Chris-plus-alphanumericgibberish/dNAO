@@ -3766,7 +3766,7 @@ struct obj *obj;
 				if(hitvalu > (dieroll = rnd(20))) {
 					boolean wepgone = FALSE;
 					pline_The("%s hits you as you try to snatch it!" the(onambuf));
-					hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, otmp, (struct obj *)0, TRUE,
+					hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, otmp, (struct obj *)0, HMON_MISTHROWN,
 						0, 0, FALSE, dieroll, FALSE, -1, &wepgone);
 				}
 				else {
