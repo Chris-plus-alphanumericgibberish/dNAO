@@ -895,6 +895,7 @@ boolean ghostly;
 		* object chain follows this trap. */
 		if (trapv_ammo(trap->ttyp)) {
 			trap->launch_ammo = restobjchn(fd, ghostly, FALSE);
+			trap->launch_ammo->otrapped = trap;
 		}
 		trap->ntrap = ftrap;
 		ftrap = trap;
