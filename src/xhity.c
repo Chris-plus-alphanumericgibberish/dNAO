@@ -3007,7 +3007,8 @@ int flat_acc;
 	boolean trapped = (hmoncode & HMON_TRAP);
 
 	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
-	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);	/* trap takes precedence over launcher */
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
+	if (trap) launcher = 0; /* trap takes precedence over launcher */
 
 	/* partial accuracy counters */
 	int base_acc = 0;	/* accuracy from leveling up */
@@ -10974,7 +10975,8 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	boolean trapped = (hmoncode & HMON_TRAP);
 
 	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
-	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);	/* trap takes precedence over launcher */
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
+	if (trap) launcher = 0; /* trap takes precedence over launcher */
 
 	boolean real_attack = (attk && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->damn > 0 || attk->damd > 0));
 

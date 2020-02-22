@@ -77,8 +77,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	boolean trapped = (hmoncode & HMON_TRAP);
 
 	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
-	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);	/* trap takes precedence over launcher */
-
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
+	if (trap) launcher = 0; /* trap takes precedence over launcher */
 
 	if (!ammo) {
 		/* if we are out of ammo, can't fire */
@@ -988,7 +988,8 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 	boolean trapped = (hmoncode & HMON_TRAP);
 
 	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
-	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);	/* trap takes precedence over launcher */
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
+	if (trap) launcher = 0; /* trap takes precedence over launcher */
 
 	int result;
 	int accuracy;

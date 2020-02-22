@@ -824,7 +824,7 @@ unsigned trflags;
 		if (u.usteed && !rn2(2) && steedintrap(trap, otmp)) /* nothing */;
 		else
 #endif
-		projectile((struct monst *)0, otmp, (void *)0, HMON_FIRED, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
+		projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
 		break;
 
 	    case ROCKTRAP:
