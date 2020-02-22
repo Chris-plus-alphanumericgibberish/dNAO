@@ -1438,8 +1438,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 
 		seetrap(trap);
 		pline("Click! You trigger a rolling boulder trap!");
-		if(!launch_obj(BOULDER, trap->launch.x, trap->launch.y,
-		      trap->launch2.x, trap->launch2.y, style)) {
+		if(!launch_obj(BOULDER, trap, style)) {
 		    deltrap(trap);
 		    newsym(u.ux,u.uy);	/* get rid of trap symbol */
 		    pline("Fortunately for you, no boulder was released.");
@@ -1583,16 +1582,16 @@ struct trap *trap;
 #ifdef OVL3
 
 /*
- * Move obj from (x1,y1) to (x2,y2)
+ * Move object of type otyp from one set of trap's launch coordinates to other.
  *
  * Return 0 if no object was launched.
  *        1 if an object was launched and placed somewhere.
  *        2 if an object was launched, but used up.
  */
 int
-launch_obj(otyp, x1, y1, x2, y2, style)
+launch_obj(otyp, trap, style)
 short otyp;
-register int x1,y1,x2,y2;
+struct trap * trap;
 int style;
 {
 	register struct monst *mtmp;
@@ -1604,6 +1603,10 @@ int style;
 	int dist;
 	int tmp;
 	int delaycnt = 0;
+	int x1 = trap->launch.x,
+		x2 = trap->launch2.x,
+		y1 = trap->launch.y,
+		y2 = trap->launch2.y;
 
 	otmp = sobj_at(otyp, x1, y1);
 	/* Try the other side too, for rolling boulder traps */
@@ -1696,8 +1699,8 @@ int style;
 			}
 			/* boulder may hit creature */
 			int dieroll = rnd(20);
-			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, (void *)0, HMON_FIRED, 0) >= dieroll)
-				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, singleobj, (void *)0, HMON_FIRED, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, FALSE);
+			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0) >= dieroll)
+				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, FALSE);
 			else if (cansee(bhitpos.x, bhitpos.y))
 				miss(xname(singleobj), mtmp);
 			if (used_up)
@@ -1708,10 +1711,10 @@ int style;
 			if (!u.uinvulnerable){
 				/* boulder may hit you */
 				int dieroll = rnd(20);
-				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, (void *)0, HMON_FIRED, 0) >= dieroll) {
+				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0) >= dieroll) {
 					killer = "rolling boulder trap";
 					killer_format = KILLED_BY_AN;
-					(void)hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, singleobj, (void *)0, HMON_FIRED, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, TRUE);
+					(void)hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, TRUE);
 				}
 				else if (!Blind)
 					pline("%s missses!", The(xname(singleobj)));
@@ -2526,8 +2529,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				  trap->tseen ?
 				  "a rolling boulder trap" :
 				  something);
-			if (launch_obj(BOULDER, trap->launch.x, trap->launch.y,
-				trap->launch2.x, trap->launch2.y, style)) {
+			if (launch_obj(BOULDER, trap, style)) {
 			    if (in_sight) trap->tseen = TRUE;
 			    if (mtmp->mhp <= 0) trapkilled = TRUE;
 			} else {
