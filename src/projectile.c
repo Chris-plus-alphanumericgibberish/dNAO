@@ -2044,7 +2044,7 @@ dothrow()
 		ammo_and_launcher(ammo, uwep))
 		launcher = uwep;
 	else if (ammo != uwep && ammo != uswapwep &&
-		ammo_and_launcher(ammo, uswapwep))
+		ammo_and_launcher(ammo, uswapwep) && u.twoweap)
 		launcher = uswapwep;
 	else
 		launcher = (struct obj *)0;
@@ -2093,7 +2093,7 @@ dofire()
 
 	/* Fire loaded launchers and blasters */
 	if ((uwep     && ((uquiver && ammo_and_launcher(uquiver, uwep    )) || is_blaster(uwep    ))) ||
-		(uswapwep && ((uquiver && ammo_and_launcher(uquiver, uswapwep)) || is_blaster(uswapwep)))
+		(uswapwep && ((uquiver && ammo_and_launcher(uquiver, uswapwep)) || is_blaster(uswapwep)) && u.twoweap)
 		)
 	{
 		struct obj * launcher;
