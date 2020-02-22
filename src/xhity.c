@@ -10950,7 +10950,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	static int warnedotyp = -1;
 	static struct permonst *warnedptr = 0;
 
-	char yourbuf[BUFSZ];
+	char buf[BUFSZ];
 
 	boolean phase_armor = FALSE;
 	boolean valid_weapon_attack = FALSE;
@@ -11089,14 +11089,29 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 
 	/* set killer, if needed */
 	if (!killerset && (
-		(!magr) ||							/* no attacker -- we really need a specific killer to avoid "killed by a died" */
+		(!magr) ||				/* no attacker -- we really need a specific killer to avoid "killed by a died" */
 		(thrown && weapon) ||	/* prefer "killed by an arrow" to "killed by a plains centaur" */
-		(trapped)							/* prefer "killed by an arrow trap" to "killed by an arrow" */
+		(trapped)				/* prefer "killed by an arrow trap" to "killed by an arrow" */
 		)) {
 		if (trap) {
 			killerset = TRUE;
-			killer = "trap";	/* TODO -- trapname() in trap.c */
 			killer_format = KILLED_BY_AN;
+			switch (trap->ttyp) {
+			case ARROW_TRAP:
+			case DART_TRAP:
+				Sprintf(buf, "%s%s trap",
+					(trap->launch_ammo->opoisoned ? "poisoned " : ""),
+					simple_typename(trap->launch_ammo->otyp)
+					);
+				killer = buf;
+				break;
+			case ROLLING_BOULDER_TRAP:
+				killer = "rolling boulder trap";
+				break;
+			default:
+				killer = "trap";
+				break;
+			}
 		}
 		/* "killed by (a) <weapon> */
 		else if (thrown && weapon) {
@@ -11888,12 +11903,12 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 					if (youagr) {
 						if (u.specialSealsActive&SEAL_NUDZIRATH){
 							You("break %s mirror.  You feel a deep satisfaction!",
-								shk_your(yourbuf, weapon));
+								shk_your(buf, weapon));
 							change_luck(+2);
 						}
 						else {
 							You("break %s mirror.  That's bad luck!",
-								shk_your(yourbuf, weapon));
+								shk_your(buf, weapon));
 							change_luck(-2);
 						}
 						hittxt = TRUE;
@@ -11910,7 +11925,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				if (weapon->otyp == EXPENSIVE_CAMERA) {
 					if (youagr) {
 						You("succeed in destroying %s camera.  Congratulations!",
-							shk_your(yourbuf, weapon));
+							shk_your(buf, weapon));
 					}
 					destroy_one_magr_weapon = TRUE;
 					real_attack = FALSE;
@@ -11925,7 +11940,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 					if (dohitmsg) {
 						pline("As you hit %s, %s%s %s breaks into splinters.",
 							mon_nam(mdef), (cnt > 1L) ? "one of " : "",
-							shk_your(yourbuf, weapon), xname(weapon));
+							shk_your(buf, weapon), xname(weapon));
 
 						hittxt = TRUE;
 					}
