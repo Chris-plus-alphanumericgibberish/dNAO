@@ -229,10 +229,10 @@ struct monst * mdef;
 				otmp->blessed = 0;
 				otmp->cursed = 0;
 				if ((dx || dy) && !DEADMONSTER(mdef)){
-					projectile(&youmonst, otmp, (struct obj *)0, TRUE, x(mdef) + dx, y(mdef) + dy, -dx, -dy, 0, 1, TRUE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, x(mdef) + dx, y(mdef) + dy, -dx, -dy, 0, 1, TRUE, FALSE, FALSE);
 				}
 				else {
-					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, 1, TRUE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, TRUE, FALSE, FALSE);
 				}
 			}
 		}
@@ -2984,13 +2984,13 @@ int vis;
  *
  */
 int
-tohitval(magr, mdef, attk, weapon, launcher, thrown, flat_acc)
+tohitval(magr, mdef, attk, weapon, vpointer, hmoncode, flat_acc)
 struct monst * magr;
 struct monst * mdef;
 struct attack * attk;
 struct obj * weapon;
-struct obj * launcher;
-int thrown;					/* 0: not thrown  1: thrown properly 2: thrown improperly (like arrows thrown by hand) */
+void * vpointer;				/* additional /whatever/, type based on hmoncode. */
+int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
 int flat_acc;
 {
 	boolean youagr = (magr == &youmonst);
@@ -2998,7 +2998,16 @@ int flat_acc;
 	struct permonst * pa = (magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0);
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 	struct obj * otmp;
-	boolean fired = (weapon && thrown == 1);
+
+	boolean melee = (hmoncode & HMON_WHACK);
+	boolean thrust = (hmoncode & HMON_THRUST);
+	boolean misthrown = (hmoncode & HMON_MISTHROWN);
+	boolean fired = (hmoncode & HMON_FIRED);
+	boolean thrown = (misthrown || fired);
+	boolean trapped = (hmoncode & HMON_TRAP);
+
+	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);	/* trap takes precedence over launcher */
 
 	/* partial accuracy counters */
 	int base_acc = 0;	/* accuracy from leveling up */
@@ -3266,11 +3275,11 @@ int flat_acc;
 				}
 			}
 			/* mis-used ammo */
-			else if (thrown == 2) {
+			else if (misthrown) {
 				wepn_acc -= 4;
 			}
 			/* other thrown things */
-			else if (thrown == 1)
+			else if (fired)
 			{
 				if (is_boomerang(weapon))			/* arbitrary */
 					wepn_acc += 4;
@@ -3291,11 +3300,11 @@ int flat_acc;
 		if (youagr) {
 			if (fired && launcher)
 				wepn_acc += weapon_hit_bonus(launcher);
-			else if (!thrown || thrown == 1)
+			else if (!misthrown)
 				wepn_acc += weapon_hit_bonus(weapon);
 		}
 		/* monk accuracy bonus/penalty (player-only) (melee) */
-		if (youagr && !thrown && Role_if(PM_MONK) && !Upolyd) {
+		if (youagr && melee && Role_if(PM_MONK) && !Upolyd) {
 			static boolean armmessage = TRUE;
 			if (uarm) {
 				if (armmessage) Your("armor is rather cumbersome...");
@@ -3310,7 +3319,7 @@ int flat_acc;
 			}
 		}
 		/* nudist accuracy bonus/penalty (player-only) (melee) */
-		if (youagr && u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
+		if (youagr && melee && u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
 			int delta = 100 - u.usanity;
 			int discomfort = u_clothing_discomfort();
 			static boolean clothmessage = TRUE;
@@ -3340,11 +3349,11 @@ int flat_acc;
 
 	/* find defender's AC */
 	/* ignore worn armor? */
-	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && !thrown) ||
+	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && (melee || thrust)) ||
 		(weapon && arti_shining(weapon)) ||
-		(!thrown && attk->aatyp == AT_TUCH) ||
-		(!thrown && attk->aatyp == AT_VINE) ||
-		(!thrown && attk->aatyp == AT_SRPR)) {
+		(melee && attk->aatyp == AT_TUCH) ||
+		(melee && attk->aatyp == AT_VINE) ||
+		(melee && attk->aatyp == AT_SRPR)) {
 		if (youdef) {
 			defn_acc += AC_VALUE(base_uac() + u.uspellprot) + 10 - u.uspellprot;
 		}
@@ -3486,7 +3495,7 @@ boolean ranged;
 	if (miss)
 		accuracy = 0;
 	else
-		accuracy = tohitval(magr, mdef, attk, weapon, (struct obj *)0, 0, flat_acc);
+		accuracy = tohitval(magr, mdef, attk, weapon, (void *)0, (ranged ? HMON_THRUST : HMON_WHACK), flat_acc);
 
 	/* roll to-hit die */
 	dieroll = rnd(20);
@@ -12933,7 +12942,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				getdir((char *)0);
 				if (u.dx || u.dy){
 					You("toss it away.");
-					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, (int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), FALSE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_MISTHROWN, u.ux, u.uy, u.dx, u.dy, 0, (int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), FALSE, FALSE, FALSE);
 				}
 				else{
 					You("drop it at your feet.");
@@ -14813,7 +14822,7 @@ android_combo()
 
 		/* attack (melee twice OR throw lightsaber) */
 		if (!mdef) {
-			projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+			projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 		}
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -14834,7 +14843,7 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee once OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+					projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -14861,7 +14870,7 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee twice OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+					projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);

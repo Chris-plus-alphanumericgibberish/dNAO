@@ -824,7 +824,7 @@ unsigned trflags;
 		if (u.usteed && !rn2(2) && steedintrap(trap, otmp)) /* nothing */;
 		else
 #endif
-		projectile((struct monst *)0, otmp, (struct obj *)0, TRUE, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
+		projectile((struct monst *)0, otmp, (void *)0, HMON_FIRED, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
 		break;
 
 	    case ROCKTRAP:
@@ -1696,8 +1696,8 @@ int style;
 			}
 			/* boulder may hit creature */
 			int dieroll = rnd(20);
-			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, (struct obj *)0, 1, 0) >= dieroll)
-				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, singleobj, (struct obj *)0, HMON_FIRED, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, FALSE);
+			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, (void *)0, HMON_FIRED, 0) >= dieroll)
+				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, singleobj, (void *)0, HMON_FIRED, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, FALSE);
 			else if (cansee(bhitpos.x, bhitpos.y))
 				miss(xname(singleobj), mtmp);
 			if (used_up)
@@ -1708,10 +1708,10 @@ int style;
 			if (!u.uinvulnerable){
 				/* boulder may hit you */
 				int dieroll = rnd(20);
-				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, (struct obj *)0, 1, 0) >= dieroll) {
+				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, (void *)0, HMON_FIRED, 0) >= dieroll) {
 					killer = "rolling boulder trap";
 					killer_format = KILLED_BY_AN;
-					(void)hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, singleobj, (struct obj *)0, HMON_FIRED, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, TRUE);
+					(void)hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, singleobj, (void *)0, HMON_FIRED, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, TRUE);
 				}
 				else if (!Blind)
 					pline("%s missses!", The(xname(singleobj)));
