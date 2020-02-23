@@ -316,7 +316,9 @@ register int x, y, typ;
 			else if (!rn2(3) && In_moloch_temple(&u.uz))	set_material(otmp, BONE);
 			else if (!rn2(3) && In_mines(&u.uz))			set_material(otmp, MINERAL);
 			// poisons
-			if (typ == DART_TRAP || !rn2(3)) {
+			if (rn2(level_difficulty()) &&
+				(typ == DART_TRAP || !rn2(5)))
+			{
 				if (Is_juiblex_level(&u.uz))			otmp->opoisoned = OPOISON_ACID;
 				else if (Is_zuggtmoy_level(&u.uz))		otmp->opoisoned = OPOISON_FILTH;
 				else if (Is_baphomet_level(&u.uz))		otmp->opoisoned = OPOISON_ACID;

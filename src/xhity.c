@@ -12460,6 +12460,12 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 						bon_damage += m_dbon(magr, weapon);
 				}
 				bonsdmg += bon_damage;
+			} else if (trap){
+				/* some traps deal increased damage */
+				if (trap->ttyp == ARROW_TRAP)
+					bonsdmg += d(2, level_difficulty()/4+1);
+				if (trap->ttyp == DART_TRAP)
+					bonsdmg += d(1, level_difficulty()/8+1);
 			}
 		}
 		/* skill damage bonus */
