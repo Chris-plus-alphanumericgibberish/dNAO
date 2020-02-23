@@ -346,6 +346,16 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		if ((range != initrange || initrange == 0) &&
 			(mdef = creature_at(bhitpos.x, bhitpos.y)))
 		{
+			/* dart/arrow traps hit your steed some of the time */
+			if (trap
+				&& (mdef == &youmonst)
+				&& (u.usteed)
+				&& (trap->ttyp == DART_TRAP || trap->ttyp == ARROW_TRAP)
+				&& !rn2(2)
+				) {
+				mdef = u.usteed;
+			}
+
 			result = projectile_attack(magr, mdef, thrownobj, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy, &wepgone);
 
 			if (result)
@@ -1308,21 +1318,39 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 		/* miss */
 		/* print missmsg */
 		if (vis) {
-			/* If the target can't be seen or doesn't look like a valid target,
-			 * avoid "the arrow misses it," or worse, "the arrows misses the mimic."
-			 * An attentive player will still notice that this is different from
-			 * an arrow just landing short of any target (no message in that case),
-			 * so will realize that there is a valid target here anyway. 
-			 */
-			if (!canseemon(mdef) || (mdef->m_ap_type && mdef->m_ap_type != M_AP_MONSTER)) {
-				pline("%s %s.", (The(mshot_xname(thrownobj))), (vtense(mshot_xname(thrownobj), "miss")));
+			if (youdef) {
+				if (Blind)
+					pline("%s %s.", (The(mshot_xname(thrownobj))), (vtense(mshot_xname(thrownobj), "miss")));
+				else
+					pline("It misses.");
 			}
 			else {
-				pline("%s %s %s.",
-					(The(mshot_xname(thrownobj))),
-					(vtense(mshot_xname(thrownobj), "miss")),
-					(((cansee(bhitpos.x, bhitpos.y) || canspotmon(mdef)) && flags.verbose) ? mon_nam(mdef) : "it")
-					);
+				if (!canseemon(mdef) || (mdef->m_ap_type && mdef->m_ap_type != M_AP_MONSTER)) {
+					/* If the target can't be seen or doesn't look like a valid target,
+					* avoid "the arrow misses it," or worse, "the arrows misses the mimic."
+					* An attentive player will still notice that this is different from
+					* an arrow just landing short of any target (no message in that case),
+					* so will realize that there is a valid target here anyway.
+					*/
+					pline("%s %s.", (The(mshot_xname(thrownobj))), (vtense(mshot_xname(thrownobj), "miss")));
+				}
+				else if (trap) {
+					/* Traps are surprises! */
+					/* Grammatically, it assumes that the projectile has not been stated already.
+					   (NOT: A dart shoots out! Foo is missed by a dart!) */
+					pline("%s is %s by %s!",
+						Monnam(mdef),
+						((dieroll - accuracy) < 3 ? "almost hit" : "missed"),
+						an(mshot_xname(thrownobj))
+						);
+				}
+				else {
+					pline("%s %s %s.",
+						(The(mshot_xname(thrownobj))),
+						(vtense(mshot_xname(thrownobj), "miss")),
+						(((cansee(bhitpos.x, bhitpos.y) || canspotmon(mdef)) && flags.verbose) ? mon_nam(mdef) : "it")
+						);
+				}
 			}
 		}
 		/* possibly wake defender */

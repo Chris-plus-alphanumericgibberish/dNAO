@@ -820,10 +820,6 @@ unsigned trflags;
 		seetrap(trap);
 		pline("%s shoots out at you!", An(xname(otmp)));
 
-#ifdef STEED
-		if (u.usteed && !rn2(2) && steedintrap(trap, otmp)) /* nothing */;
-		else
-#endif
 		projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
 		break;
 
@@ -833,49 +829,19 @@ unsigned trflags;
 			  the(ceiling(u.ux,u.uy)));
 		    deltrap(trap);
 		    newsym(u.ux,u.uy);
-		} else {
-		    int dmg = d(2,6); /* should be std ROCK dmg? */
-
-			if (trap->launch_ammo->quan > 1) {
-				otmp = splitobj(trap->launch_ammo, 1);
-			}
-			extract_nobj(otmp, &trap->launch_ammo);
-		    seetrap(trap);
-
-		    pline("A trap door in %s opens and %s falls on your %s!",
-			  the(ceiling(u.ux,u.uy)),
-			  an(xname(otmp)),
-			  body_part(HEAD));
-
-		    if (uarmh) {
-			if(is_hard(uarmh)) {
-			    pline("Fortunately, you are wearing a hard helmet.");
-			    dmg = 2;
-				} else if (umechanoid) {
-					pline("Fortunately, you have a very hard head!");
-					dmg = 2;
-				} else if (thick_skinned(youracedata)) {
-					pline("Fortunately, you have a thick head!");
-					dmg = 2;
-				} else if (flags.verbose) {
-				    Your("%s does not protect you.", xname(uarmh));
-				}
-			} else if (umechanoid) {
-				pline("Fortunately, you have a very hard head!");
-				dmg = 2;
-			} else if (thick_skinned(youracedata)) {
-				pline("Fortunately, you have a thick head!");
-				dmg = 2;
-		    }
-
-		    if (!Blind) otmp->dknown = 1;
-			place_object(otmp, u.ux, u.uy);
-		    stackobj(otmp);
-		    newsym(u.ux,u.uy);	/* map the rock */
-
-		    losehp(dmg, "falling rock", KILLED_BY_AN);
-		    exercise(A_STR, FALSE);
+			break;
 		}
+		otmp = trap->launch_ammo;
+		if (trap->launch_ammo->quan > 1) {
+			otmp = splitobj(trap->launch_ammo, 1);
+		}
+		extract_nobj(otmp, &trap->launch_ammo);
+		seetrap(trap);
+		pline("A trap door in %s opens and %s falls!",
+			the(ceiling(u.ux, u.uy)),
+			an(xname(otmp))
+			);
+		projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
 		break;
 
 	    case SQKY_BOARD:	    /* stepped on a squeaky board */
@@ -1477,15 +1443,6 @@ struct obj *otmp;
 
 	in_sight = !Blind;
 	switch (tt) {
-		case DART_TRAP:
-		case ARROW_TRAP:
-			if(!otmp) {
-				impossible("steed hit by non-existant arrow/dart?");
-				return 0;
-			}
-			if (thitm(8, mtmp, otmp, 0, FALSE)) trapkilled = TRUE;
-			steedhit = TRUE;
-			break;
 		case SLP_GAS_TRAP:
 		    if (!resists_sleep(mtmp) && !breathless_mon(mtmp) &&
 				!mtmp->msleeping && mtmp->mcanmove) {
@@ -2043,7 +2000,7 @@ register struct monst *mtmp;
 			extract_nobj(otmp, &trap->launch_ammo);
 			if (in_sight)
 				seetrap(trap);
-			if (thitm(8, mtmp, otmp, 0, FALSE))
+			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE) == MM_DEF_DIED)
 				trapkilled = TRUE;
 			break;
 		case ROCKTRAP:
@@ -2060,8 +2017,9 @@ register struct monst *mtmp;
 			}
 			extract_nobj(otmp, &trap->launch_ammo);
 			if (in_sight) seetrap(trap);
-			if (thitm(0, mtmp, otmp, d(2, 6), FALSE))
-			    trapkilled = TRUE;
+
+			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE) == MM_DEF_DIED)
+				trapkilled = TRUE;
 			break;
 
 		case SQKY_BOARD:

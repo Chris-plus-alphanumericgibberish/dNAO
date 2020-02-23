@@ -3121,6 +3121,22 @@ int flat_acc;
 				bons_acc -= 2;
 		}
 	}
+	/* traps have accuracy, too */
+	else if (trap) {
+		switch (trap->ttyp)
+		{
+		case ROCKTRAP:
+			bons_acc += 1000;	/* guarantee hit */
+			break;
+		case ARROW_TRAP:
+		case DART_TRAP:
+			bons_acc += level_difficulty()/4 + 4;
+			break;
+		case ROLLING_BOULDER_TRAP:
+			bons_acc += level_difficulty()/6;
+			break;
+		}
+	}
 
 	/* ranged-specific accuracy modifiers */
 	if (thrown)
@@ -11084,21 +11100,21 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		(trapped)				/* prefer "killed by an arrow trap" to "killed by an arrow" */
 		)) {
 		if (trap) {
-			killer_format = KILLED_BY_AN;
+			killer_format = KILLED_BY;
 			switch (trap->ttyp) {
 			case ARROW_TRAP:
 			case DART_TRAP:
-				Sprintf(buf, "%s%s trap",
-					(trap->launch_ammo->opoisoned ? "poisoned " : ""),
-					simple_typename(trap->launch_ammo->otyp)
-					);
+				Sprintf(buf, "%s trap", killer_xname(weapon));	/* killer_xname() adds a/an/the */
 				killer = buf;
 				break;
+			case ROCKTRAP:
+				killer = "a falling rock trap";
+				break;
 			case ROLLING_BOULDER_TRAP:
-				killer = "rolling boulder trap";
+				killer = "a rolling boulder trap";
 				break;
 			default:
-				killer = "trap";
+				killer = "a trap";
 				break;
 			}
 		}
@@ -12783,14 +12799,22 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					pline("You are hit!");
 				}
 			}
-			else if ((!lethaldamage || (m_shot.n > 1 && m_shot.o == weapon->otyp))
-				) {
+			else {
 				if ((!cansee(bhitpos.x, bhitpos.y) && !canspotmon(mdef) &&
 					!(u.uswallow && mdef == u.ustuck))
 					|| !flags.verbose)
+				{
 					pline("%s %s it.", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"));
-				else pline("%s %s %s%s", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"),
-					mon_nam(mdef), exclam(totldmg));
+				}
+				else {
+					if (vis&VIS_MAGR) {
+						pline("%s %s %s%s", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"),
+							mon_nam(mdef), exclam(totldmg));
+					}
+					else {
+						pline("%s is hit by a %s!", Monnam(mdef), mshot_xname(weapon));
+					}
+				}
 			}
 		}
 		else {
