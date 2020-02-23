@@ -429,6 +429,7 @@ struct obj *obj;
 		panic("putting non-free object into trap");
 	}
 	obj->where = OBJ_INTRAP;
+	obj->nobj = 0;
 	trap->launch_ammo = obj;
 	return;
 }
@@ -912,10 +913,14 @@ unsigned trflags;
 		u.utraptype = TT_BEARTRAP;
 #ifdef STEED
 		if (u.usteed) {
-		    pline("%s bear trap closes on %s %s!",
-			A_Your[trap->madeby_u], s_suffix(mon_nam(u.usteed)),
-			mbodypart(u.usteed, FOOT));
-		} else
+			pline("%s bear trap closes on %s %s!",
+				A_Your[trap->madeby_u], s_suffix(mon_nam(u.usteed)),
+				mbodypart(u.usteed, FOOT));
+
+			hmon2point0((struct monst *)0, u.usteed, (struct attack *)0, (struct attack *)0, trap->launch_ammo, trap,
+				HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0);
+		}
+		else
 #endif
 		{
 		    long side = rn2(3) ? LEFT_SIDE : RIGHT_SIDE;
@@ -923,6 +928,10 @@ unsigned trflags;
 			if (!jboots5) jboots5 = find_jboots();
 		    pline("%s bear trap closes on your %s!",
 			    A_Your[trap->madeby_u], body_part(FOOT));
+
+			hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, trap->launch_ammo, trap,
+				HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0);
+
 		    if(u.umonnum == PM_OWLBEAR || u.umonnum == PM_BUGBEAR)
 			You("howl in anger!");
 	#ifdef STEED
@@ -1905,7 +1914,7 @@ schar dx,dy;
 
 int
 mintrap(mtmp)
-register struct monst *mtmp;
+struct monst *mtmp;
 {
 	register struct trap *trap = t_at(mtmp->mx, mtmp->my);
 	boolean trapkilled = FALSE;
@@ -2049,6 +2058,10 @@ register struct monst *mtmp;
 				   && flags.soundok)
 				    You_hear("the roaring of an angry bear!");
 			    }
+
+				if (hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, trap->launch_ammo, trap,
+					HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0) == MM_DEF_DIED)
+					trapkilled = TRUE;
 			}
 			break;
 

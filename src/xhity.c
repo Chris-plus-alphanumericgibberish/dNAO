@@ -10882,6 +10882,9 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 {
 	int result;
 	boolean u_anger_guards;
+	boolean fakewepgone = FALSE;
+	if (!wepgone)
+		wepgone = &fakewepgone;
 
 	if (magr == &youmonst &&
 		mdef->mpeaceful &&
@@ -10894,6 +10897,9 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		u_anger_guards = FALSE;
 
 	result = hmoncore(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone);
+
+	if (fakewepgone)
+		panic("weapon gone that was not supposed to at all!");
 
 	if (magr == &youmonst && mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
@@ -11811,7 +11817,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	}
 
 	/* set zombify resulting from melee mvm combat */
-	if (!youagr && !youdef && melee && !recursed) {
+	if (magr && !youagr && !youdef && melee && !recursed) {
 		if ((magr->mfaction == ZOMBIFIED || (magr->mfaction == SKELIFIED && !rn2(20))) && can_undead_mon(mdef)){
 			mdef->zombify = 1;
 		}
