@@ -11113,6 +11113,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				Sprintf(buf, "%s trap", killer_xname(weapon));	/* killer_xname() adds a/an/the */
 				killer = buf;
 				break;
+			case BEAR_TRAP:
+				Sprintf(buf, "%s", killer_xname(weapon));	/* killer_xname() adds a/an/the */
+				killer = buf;
+				break;
 			case ROCKTRAP:
 				killer = "a falling rock trap";
 				break;
@@ -11126,11 +11130,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		/* "killed by (a) <weapon> */
 		else if (thrown && weapon) {
-			killer = xname(weapon);
-			if (obj_is_pname(weapon))
-				killer_format = KILLED_BY;
-			else
-				killer_format = KILLED_BY_AN;
+			killer = killer_xname(weapon);
 		}
 		/* nothing to work with, give basic message */
 		else {
