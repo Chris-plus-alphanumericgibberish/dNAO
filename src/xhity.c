@@ -11130,6 +11130,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		/* "killed by (a) <weapon> */
 		else if (thrown && weapon) {
+			killer_format = KILLED_BY;	/* killer_xname() adds a/an/the */
 			killer = killer_xname(weapon);
 		}
 		/* nothing to work with, give basic message */
