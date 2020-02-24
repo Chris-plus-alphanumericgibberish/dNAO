@@ -4921,7 +4921,7 @@ boolean ranged;
 				/* rely on poisoned(), from mon.c */
 				Sprintf(buf, "%s %s",
 					s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-				poisoned(buf, ptmp, pa->mname, 30, 0);
+				poisoned(buf, ptmp, pa->mname, 30);
 			}
 			/* vs Monster */
 			else {
@@ -5968,7 +5968,7 @@ boolean ranged;
 		if (youdef) {
 			Sprintf(buf, "%s %s",
 				s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-			poisoned(buf, A_CON, pa->mname, 60, 0);
+			poisoned(buf, A_CON, pa->mname, 60);
 		}
 		/* wis-draining (player only) */
 		if (youdef) {
@@ -11733,44 +11733,41 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			poisons_wipedoff = poisons_majoreff;
 			poisons_minoreff = 0;
 		}
-		/* calculate poison damage (versus monsters only -- poisoned() is used vs player) */
-		if (!youdef)
+		/* calculate poison damage */
+		for (n = 0; n < NUM_POISONS; n++)
 		{
-			for (n = 0; n < NUM_POISONS; n++)
+			i = (1 << n);
+			boolean major = (poisons_majoreff & i);
+			boolean minor = (poisons_minoreff & i);
+			if (!major && !minor)
+				continue;
+			/* calculate poison damage */
+			switch (i)
 			{
-				i = (1 << n);
-				boolean major = (poisons_majoreff & i);
-				boolean minor = (poisons_minoreff & i);
-				if (!major && !minor)
-					continue;
-				/* calculate poison damage */
-				switch (i)
-				{
-				case OPOISON_BASIC:
-					poisdmg += (major) ? 9999 : rnd(6);
-					break;
-				case OPOISON_FILTH:
-					poisdmg += (major) ? 9999 : rnd(12);
-					break;
-				case OPOISON_SLEEP:
-					/* no damage */
-					break;
-				case OPOISON_BLIND:
-					poisdmg += (major) ? 3 : rnd(3);
-					break;
-				case OPOISON_PARAL:
-					poisdmg += (major) ? 6 : rnd(6);
-					break;
-				case OPOISON_AMNES:
-					/* no damage */
-					break;
-				case OPOISON_ACID:
-					poisdmg += rnd(10);
-					break;
-				case OPOISON_SILVER:
-					poisdmg += rnd(20);
-					break;
-				}
+			case OPOISON_BASIC:
+				poisdmg += (major) ? 9999 : rnd(6);
+				break;
+			case OPOISON_FILTH:
+				poisdmg += (major) ? 9999 : rnd(12);
+				break;
+			case OPOISON_SLEEP:
+				/* no damage */
+				break;
+			case OPOISON_BLIND:
+				poisdmg += (major) ? 3 : rnd(3);
+				break;
+			case OPOISON_PARAL:
+				poisdmg += (major) ? 6 : rnd(6);
+				break;
+			case OPOISON_AMNES:
+				/* no damage */
+				break;
+			case OPOISON_ACID:
+				poisdmg += rnd(10);
+				break;
+			case OPOISON_SILVER:
+				poisdmg += rnd(20);
+				break;
 			}
 		}
 	}
@@ -13287,81 +13284,76 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	/* poison */
 	if (poisons_resisted || poisons_majoreff || poisons_minoreff || poisons_wipedoff) {
 		otmp = poisonedobj;
-		if (youdef) {
-			char buf[BUFSZ];
-			if (attk && magr) {
-				/* using poisoned() from mon.c */
-				Sprintf(buf, "%s %s", s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-			}
-			else if (otmp) {
-				Sprintf(buf, "%s", The(xname(otmp)));
-			}
-			else {
-				impossible("no name to poison you with");
-			}
-			/* SCOPECREEP: the "fatal" field (30) is inconsistent. Preferrably, this should use the same major/minor effect system set up in this function */
-			/* also, this spams messages when recursed */
-			poisoned(buf, A_CON, (magr ? pa->mname : xname(otmp)), 30, (poisons_majoreff | poisons_minoreff));
-		}
-		else {
-			int i, n;
-			/* poison resist messages -- should only appear once, as resistivity should be constant between hits */
-			if (poisons_resisted && canseemon(mdef) && !recursed) {
-				for (n = 0; n < NUM_POISONS; n++)
-				{
-					i = (1 << n);
-					if (!(poisons_resisted & i))
-						continue;
-					switch (i)
-					{
-					case OPOISON_BASIC:
-					case OPOISON_BLIND:
-					case OPOISON_PARAL:
-						pline_The("poison doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_FILTH:
-						pline_The("filth doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_SLEEP:
-						pline_The("drug doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_AMNES:
-						pline_The("lethe-rust doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_ACID:
-						pline_The("acid-coating doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_SILVER:
-						/* no message */
-						break;
-					}
-				}
-			}
-			/* poison major effects and their messages -- can happen multiple times */
+		int i, n;
+		/* poison resist messages -- should only appear once, as resistivity should be constant between hits */
+		if (poisons_resisted && (vis&VIS_MDEF) && !recursed) {
 			for (n = 0; n < NUM_POISONS; n++)
 			{
 				i = (1 << n);
-				if (!(poisons_majoreff & i))
+				if (!(poisons_resisted & i))
 					continue;
 				switch (i)
 				{
 				case OPOISON_BASIC:
-					if (canseemon(mdef) && lethaldamage)
-						pline_The("poison was deadly...");
+				case OPOISON_BLIND:
+				case OPOISON_PARAL:
+					pline_The("poison doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
 					break;
 				case OPOISON_FILTH:
-					if (canseemon(mdef) && lethaldamage)
-						pline_The("tainted filth was deadly...");
+					pline_The("filth doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
 					break;
 				case OPOISON_SLEEP:
-					if (sleep_monst(mdef, rnd(12), POTION_CLASS)) {
-						if (canseemon(mdef))
-							pline("%s falls asleep.", Monnam(mdef));
-						slept_monst(mdef);
-					}
+					pline_The("drug doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
 					break;
-				case OPOISON_BLIND:
-					{
+				case OPOISON_AMNES:
+					pline_The("lethe-rust doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
+					break;
+				case OPOISON_ACID:
+					pline_The("acid-coating doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
+					break;
+				case OPOISON_SILVER:
+					/* no message */
+					break;
+				}
+			}
+		}
+		/* poison major effects and their messages -- can happen multiple times */
+		for (n = 0; n < NUM_POISONS; n++)
+		{
+			i = (1 << n);
+			if (!(poisons_majoreff & i))
+				continue;
+			switch (i)
+			{
+			case OPOISON_BASIC:
+				if ((vis&VIS_MDEF) && lethaldamage)
+					pline_The("poison was deadly...");
+				break;
+			case OPOISON_FILTH:
+				if ((vis&VIS_MDEF) && lethaldamage)
+					pline_The("tainted filth was deadly...");
+				break;
+			case OPOISON_SLEEP:
+				if (youdef) {
+					You("suddenly fall asleep!");
+					fall_asleep(-rn1(2, 6), TRUE);
+				}
+				else if (sleep_monst(mdef, rnd(12), POTION_CLASS)) {
+					if (canseemon(mdef))
+						pline("%s falls asleep.", Monnam(mdef));
+					slept_monst(mdef);
+				}
+				break;
+			case OPOISON_BLIND:
+				if (youdef) {
+					make_blinded(rn1(20, 25), (boolean)!Blind);
+				}
+				else {
 					if (canseemon(mdef) && !is_blind(mdef))
 						pline("It seems %s has gone blind!", mon_nam(mdef));
 
@@ -13370,29 +13362,56 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					btmp += mdef->mblinded;
 					mdef->mblinded = min(btmp, 127);
 					mdef->mcansee = 0;
-					}
-					break;
-				case OPOISON_PARAL:
+				}
+				break;
+			case OPOISON_PARAL:
+				if (youdef) {
+					nomul(-(25 - rnd(ACURR(A_CON))), "immobilized by paralysis venom");
+				}
+				else {
 					if (canseemon(mdef) && mdef->mcanmove)
 						pline("%s stops moving!", Monnam(mdef));
 					if (mdef->mcanmove) {
 						mdef->mcanmove = 0;
 						mdef->mfrozen = rnd(25);
 					}
-					break;
-				case OPOISON_AMNES:
+				}
+				break;
+			case OPOISON_AMNES:
+				if (youdef) {
+					if (u.sealsActive&SEAL_HUGINN_MUNINN){
+						unbind(SEAL_HUGINN_MUNINN, TRUE);
+					}
+					else {
+						forget(1);	/* lose 1% of memory per point lost*/
+						forget_traps();		/* lose memory of all traps*/
+					}
+				}
+				else {
 					if (canseemon(mdef) && (mdef->mtame || !mdef->mpeaceful))
 						pline("%s looks around as if awakening from a dream.", Monnam(mdef));
 					mdef->mtame = FALSE;
 					mdef->mpeaceful = TRUE;
-					break;
-				case OPOISON_ACID:
-				case OPOISON_SILVER:
-					/* no message, no additional effects */
-					break;
 				}
+				break;
+			case OPOISON_ACID:
+			case OPOISON_SILVER:
+				/* no message, no additional effects */
+				break;
 			}
 		}
+		/* ophidiophobia -- fear of snakes (and also poison, in dnethack) */
+		if (youdef && !recursed && roll_madness(MAD_OPHIDIOPHOBIA)) {
+			if (poisons_majoreff || poisons_minoreff) {
+				You("panic!");
+				nomul(-1 * rnd(6), "panicking");
+			}
+			else if (poisons_resisted) {
+				You("panic anyway!");
+				nomul(-1 * rnd(3), "panicking");
+			}
+		}
+
 		/* poisons wiped off */
 		if (otmp && poisons_wipedoff) {
 			/* rings subtract from corpsenm */
@@ -14150,7 +14169,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					if (youdef) {
 						char buf[BUFSZ];
 						Sprintf(buf, "%s shadow", s_suffix(Monnam(mdef)));
-						poisoned(buf, A_STR, pd->mname, 30, 0);
+						poisoned(buf, A_STR, pd->mname, 30);
 					}
 					else {
 						if (!Poison_res(magr)) {

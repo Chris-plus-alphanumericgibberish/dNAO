@@ -1165,7 +1165,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 					NO_KILLER_PREFIX);
 				}
 				if (!rn2(6))
-				poisoned("spikes", A_STR, "fall onto poison spikes", 8, 0);
+				poisoned("spikes", A_STR, "fall onto poison spikes", 8);
 			}
 		} else
 		    losehp(rnd(6),"fell into a pit", NO_KILLER_PREFIX);
@@ -4716,7 +4716,7 @@ boolean disarm;
 		case 17:
 			pline("A cloud of noxious gas billows from %s.",
 							the(xname(obj)));
-			poisoned("gas cloud", A_STR, "cloud of poison gas",15,0);
+			poisoned("gas cloud", A_STR, "cloud of poison gas",15);
 			exercise(A_CON, FALSE);
 			break;
 		case 16:
@@ -4724,11 +4724,7 @@ boolean disarm;
 		case 14:
 		case 13:
 			You_feel("a needle prick your %s.",body_part(bodypart));
-			poisoned("needle", A_CON, "poisoned needle",10,	rn2(10) ? OPOISON_BASIC :
-															!rn2(4) ? OPOISON_SLEEP :
-															!rn2(3) ? OPOISON_BLIND :
-															!rn2(2) ? OPOISON_PARAL :
-																	  OPOISON_AMNES);
+			poisoned("needle", A_CON, "poisoned needle",10);
 			exercise(A_CON, FALSE);
 			break;
 		case 12:
