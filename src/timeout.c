@@ -2834,6 +2834,7 @@ obj_is_local(obj)
 	case OBJ_MAGIC_CHEST:
 	case OBJ_MIGRATING:	return FALSE;
 	case OBJ_FLOOR:
+	case OBJ_INTRAP:
 	case OBJ_BURIED:	return TRUE;
 	case OBJ_CONTAINED:	return obj_is_local(obj->ocontainer);
 	case OBJ_MINVENT:	return mon_is_local(obj->ocarry);

@@ -430,6 +430,7 @@ struct obj *obj;
 	}
 	obj->where = OBJ_INTRAP;
 	obj->nobj = 0;
+	obj->otrap = trap;
 	trap->launch_ammo = obj;
 	return;
 }
@@ -3770,6 +3771,7 @@ struct trap *ttmp;
 		while (ttmp->launch_ammo) {
 			otmp = ttmp->launch_ammo;
 			extract_nobj(otmp, &ttmp->launch_ammo);
+			otmp->otrap = 0;
 			place_object(otmp, ttmp->tx, ttmp->ty);
 			/* Sell your own traps only... */
 			if (ttmp->madeby_u)
@@ -4824,11 +4826,12 @@ register struct trap *trap;
 		ttmp->ntrap = trap->ntrap;
 	}
 	while (trapv_ammo(trap->ttyp) && trap->launch_ammo) {
-		impossible("deleting trap containing ammo?");
 		struct obj* otmp = trap->launch_ammo;
 		extract_nobj(otmp, &trap->launch_ammo);
 		obfree(otmp, (struct obj *) 0);
 	}
+	if (cansee(trap->tx, trap->ty))
+		newsym(trap->tx, trap->ty);
 	dealloc_trap(trap);
 }
 
