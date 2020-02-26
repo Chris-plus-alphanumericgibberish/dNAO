@@ -10878,6 +10878,9 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 
 	result = hmoncore(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset);
 
+	/* reset killer */
+	killer = 0;
+
 	if (magr == &youmonst && mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
 	if (u_anger_guards)
