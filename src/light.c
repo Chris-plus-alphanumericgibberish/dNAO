@@ -105,7 +105,7 @@ del_light_source(type, id, silent)
     genericptr_t id;
 	int silent;
 {
-    light_source *curr, *prev;
+    light_source *curr, *prev, *next;
     genericptr_t tmp_id;
 	boolean found_it = FALSE;
 
@@ -121,21 +121,23 @@ del_light_source(type, id, silent)
 			break;
     }
 
-    for (prev = 0, curr = light_base; curr; prev = curr, curr = curr->next) {
-	if (curr->type != type) continue;
-	if (curr->id == ((curr->flags & LSF_NEEDS_FIXUP) ? tmp_id : id)) {
-	    if (prev)
-		prev->next = curr->next;
-	    else
-		light_base = curr->next;
+	for (prev = 0, curr = light_base; curr; curr = next) {
+		next = curr->next;
+		if (curr->type != type) continue;
+		if (curr->id == ((curr->flags & LSF_NEEDS_FIXUP) ? tmp_id : id)) {
+			if (prev)
+				prev->next = curr->next;
+			else
+				light_base = curr->next;
 
-	    free((genericptr_t)curr);
-	    vision_full_recalc = 1;
-		if (found_it && !silent)
-			impossible("multiple ls attached to type %d, id %d", type, curr->id);
-		found_it = TRUE;
+			free((genericptr_t)curr);
+			vision_full_recalc = 1;
+			if (found_it && !silent)
+				impossible("multiple ls attached to type %d", type);
+			found_it = TRUE;
+		}
+		prev = curr;
 	}
-    }
     if(!found_it && !silent) impossible("del_light_source: not found type=%d, id=0x%lx", type, (long)id);
 }
 
