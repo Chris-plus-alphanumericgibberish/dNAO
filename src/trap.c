@@ -418,6 +418,8 @@ set_trap_ammo(trap, obj)
 struct trap *trap;
 struct obj *obj;
 {
+	if (!trapv_ammo(trap->ttyp))
+		panic("putting ammo into non-ammo trap");
 	while (trap->launch_ammo) {
 		struct obj* oldobj = trap->launch_ammo;
 		extract_nobj(oldobj, &trap->launch_ammo);
@@ -2181,7 +2183,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			break;
 		    }
 		case FIRE_TRAP:
-			if (!trap->launch_ammo) {
+			if (!(otmp = trap->launch_ammo)) {
 				if (in_sight && see_it)
 					pline("%s triggers a trap but nothing happens.", Monnam(mtmp));
 				deltrap(trap);
