@@ -14403,7 +14403,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 									(mon_resistance(magr, SEE_INVIS) || !mdef->minvis)) {
 									char buf[BUFSZ];
 									Sprintf(buf, "%s gaze is reflected by %%s %%s.",
-										s_suffix(mon_nam(mdef)));
+										s_suffix(Monnam(mdef)));
 									if (mon_reflects(magr,
 										canseemon(magr) ? buf : (char *)0)) {
 										/* mon_reflects() prints message */;
