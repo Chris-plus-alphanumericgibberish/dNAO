@@ -418,6 +418,8 @@ set_trap_ammo(trap, obj)
 struct trap *trap;
 struct obj *obj;
 {
+	if (!trapv_ammo(trap->ttyp))
+		panic("putting ammo into non-ammo trap");
 	while (trap->launch_ammo) {
 		struct obj* oldobj = trap->launch_ammo;
 		extract_nobj(oldobj, &trap->launch_ammo);
