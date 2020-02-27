@@ -2181,7 +2181,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			break;
 		    }
 		case FIRE_TRAP:
-			if (!trap->launch_ammo) {
+			if (!(otmp = trap->launch_ammo)) {
 				if (in_sight && see_it)
 					pline("%s triggers a trap but nothing happens.", Monnam(mtmp));
 				deltrap(trap);
