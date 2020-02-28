@@ -2321,11 +2321,11 @@ museamnesia:
 				/* this monster won't want to catch a cursed
 				   weapon; drop it at hero's feet instead */
 				where_to = 2;
-		    } /*else if (where_to == 3 && hates_holy_mon(mtmp) && obj->blessed) {
-				// this is commented out because that's a reasonably strong change, since
-				// then all you have to do is bless your weapon and you've got a much better chance of keeping it
+		    } else if (where_to == 3 && hates_holy_mon(mtmp) && obj->blessed) {
+				/* this monster won't want to catch a blessed
+				   weapon; drop it at hero's feet instead */
 				where_to = 2;
-		    }*/
+		    }
 		    
 		    
 		    freeinv(obj);
