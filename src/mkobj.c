@@ -2865,6 +2865,7 @@ extract_nobj(obj, head_ptr)
 		panic("extract_nobj: object lost");
 	}
     obj->where = OBJ_FREE;
+	obj->nobj = (struct obj *)0;
 }
 
 

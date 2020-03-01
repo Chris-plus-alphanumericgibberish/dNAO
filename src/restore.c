@@ -890,12 +890,10 @@ boolean ghostly;
 	while (trap = newtrap(),
 	       mread(fd, (genericptr_t)trap, sizeof(struct trap)),
 	       trap->tx != 0) {	/* need "!= 0" to work around DICE 3.0 bug */
-		/* trap->ammo will either be NULL or a stale pointer from the previous
-		* game. We don't read the stale pointer, other than to see whether an
-		* object chain follows this trap. */
+		/* we only read ammo from certain types of traps */
 		if (trapv_ammo(trap->ttyp)) {
-			trap->launch_ammo = restobjchn(fd, ghostly, FALSE);
-			trap->launch_ammo->otrapped = trap;
+			if (trap->launch_ammo = restobjchn(fd, ghostly, FALSE))
+				trap->launch_ammo->otrap = trap;	/* only set it if we found an ammo item */
 		}
 		trap->ntrap = ftrap;
 		ftrap = trap;

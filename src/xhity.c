@@ -10901,6 +10901,9 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (fakewepgone)
 		panic("weapon gone that was not supposed to at all!");
 
+	/* reset killer */
+	killer = 0;
+
 	if (magr == &youmonst && mdef->ispriest && !rn2(2))
 		ghod_hitsu(mdef);
 	if (u_anger_guards)
@@ -14494,7 +14497,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 									(mon_resistance(magr, SEE_INVIS) || !mdef->minvis)) {
 									char buf[BUFSZ];
 									Sprintf(buf, "%s gaze is reflected by %%s %%s.",
-										s_suffix(mon_nam(mdef)));
+										s_suffix(Monnam(mdef)));
 									if (mon_reflects(magr,
 										canseemon(magr) ? buf : (char *)0)) {
 										/* mon_reflects() prints message */;

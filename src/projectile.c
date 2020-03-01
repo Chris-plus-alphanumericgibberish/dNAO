@@ -1004,7 +1004,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 	int result;
 	int accuracy;
 	int dieroll;
-	int vis;
+	int vis = 0;
 
 	/* Set up the visibility of action */
 	if (youagr || youdef || ((!magr || cansee(x(magr), y(magr))) && cansee(x(mdef), y(mdef))))
