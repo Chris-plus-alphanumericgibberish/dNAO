@@ -23,7 +23,7 @@ STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL void FDECL(heal, (struct monst *, int));
-STATIC_DCL int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int, boolean));
+STATIC_DCL int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 STATIC_DCL int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int));
@@ -31,7 +31,7 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, struct obj *, int, int, int, boolean, int, boolean, int, boolean *, boolean));
+STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, void *, int, int, int, boolean, int, boolean, int, boolean *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 
@@ -229,10 +229,10 @@ struct monst * mdef;
 				otmp->blessed = 0;
 				otmp->cursed = 0;
 				if ((dx || dy) && !DEADMONSTER(mdef)){
-					projectile(&youmonst, otmp, (struct obj *)0, TRUE, x(mdef) + dx, y(mdef) + dy, -dx, -dy, 0, 1, TRUE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, x(mdef) + dx, y(mdef) + dy, -dx, -dy, 0, 1, TRUE, FALSE, FALSE);
 				}
 				else {
-					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, 1, TRUE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, TRUE, FALSE, FALSE);
 				}
 			}
 		}
@@ -2637,8 +2637,6 @@ int amnt;
  *
  * Rewards [magr] as appropriate.
  * 
- * If called with killerset==TRUE, will use the currently set killer and killer_format if the player dies
- * 
  * Returns:
  * MM_HIT		0x01	(possible) aggressor hit defender (usually, except when defender lifesaved)
  * MM_DEF_DIED	0x02	(possible) defender died (defender died and was not lifesaved)
@@ -2647,20 +2645,20 @@ int amnt;
  * 
  */
 int
-xdamagey(magr, mdef, attk, dmg, killerset)
+xdamagey(magr, mdef, attk, dmg)
 struct monst * magr;	/* attacker (might not exist) */
 struct monst * mdef;	/* defender */
 struct attack * attk;	/* attack used to deal damage (might not exist) */
 int dmg;				/* damage to deal */
-boolean killerset;		/* for custom killer() for players dying */
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 
+	const char * oldkiller = killer;
+	killer = 0;
+
 	/* if defender is already dead, avoid re-killing them; just note that they are dead */
 	if (*hp(mdef) < 1) {
-		/* reset killer */
-		killer = 0;
 		return MM_DEF_DIED;
 	}
 
@@ -2684,14 +2682,14 @@ boolean killerset;		/* for custom killer() for players dying */
 		if (*hp(mdef) < 1) {
 			if (Upolyd && !Unchanging)
 				rehumanize();
-			else if (magr && !killerset)
+			else if (magr && !oldkiller)
 				done_in_by(magr);
 			else {
+				killer = oldkiller;
 				You("die...");
 				done(DIED);
+				killer = 0;
 			}
-			/* reset killer */
-			killer = 0;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD;	/* you lifesaved or rehumanized */
 			else
@@ -2724,8 +2722,6 @@ boolean killerset;		/* for custom killer() for players dying */
 					if (dmg) killed(mdef);
 				}
 			}
-			/* reset killer */
-			killer = 0;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD; /* mdef lifesaved */
 			else
@@ -2736,16 +2732,12 @@ boolean killerset;		/* for custom killer() for players dying */
 	else {
 		if (*hp(mdef)< 1) {
 			monkilled(mdef, "", attk ? (int)attk->adtyp : 0);
-			/* reset killer */
-			killer = 0;
 			if (*hp(mdef) > 0)
 				return MM_DEF_LSVD; /* mdef lifesaved */
 			else
 				return (MM_HIT | MM_DEF_DIED | (!magr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
 		}
 	}
-	/* reset killer */
-	killer = 0;
 	return MM_HIT;
 }
 
@@ -2959,13 +2951,13 @@ int vis;
 					mon_nam(mdef));
 			}
 			/* 1d7 bonus damage per element, checking that mdef hasn't died partway through */
-			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Fire_res(mdef))		result |= xdamagey(magr, mdef, attk, d(1, 7), FALSE);
-			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Cold_res(mdef))		result |= xdamagey(magr, mdef, attk, d(1, 7), FALSE);
-			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Shock_res(mdef))	result |= xdamagey(magr, mdef, attk, d(1, 7), FALSE);
-			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Acid_res(mdef))		result |= xdamagey(magr, mdef, attk, d(1, 7), FALSE);
-			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Magic_res(mdef))	result |= xdamagey(magr, mdef, attk, d(1, 7), FALSE);
-			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Poison_res(mdef))	result |= xdamagey(magr, mdef, attk, d(1, 7), FALSE);
-			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Drain_res(mdef))	result |= xdamagey(magr, mdef, attk, d(1, 7), FALSE);
+			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Fire_res(mdef))		result |= xdamagey(magr, mdef, attk, d(1, 7));
+			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Cold_res(mdef))		result |= xdamagey(magr, mdef, attk, d(1, 7));
+			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Shock_res(mdef))	result |= xdamagey(magr, mdef, attk, d(1, 7));
+			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Acid_res(mdef))		result |= xdamagey(magr, mdef, attk, d(1, 7));
+			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Magic_res(mdef))	result |= xdamagey(magr, mdef, attk, d(1, 7));
+			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Poison_res(mdef))	result |= xdamagey(magr, mdef, attk, d(1, 7));
+			if (!(result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) && !Drain_res(mdef))	result |= xdamagey(magr, mdef, attk, d(1, 7));
 			if (result&(MM_DEF_DIED|MM_AGR_DIED|MM_DEF_LSVD)) {
 				return result;
 			}
@@ -2984,13 +2976,13 @@ int vis;
  *
  */
 int
-tohitval(magr, mdef, attk, weapon, launcher, thrown, flat_acc)
+tohitval(magr, mdef, attk, weapon, vpointer, hmoncode, flat_acc)
 struct monst * magr;
 struct monst * mdef;
 struct attack * attk;
 struct obj * weapon;
-struct obj * launcher;
-int thrown;					/* 0: not thrown  1: thrown properly 2: thrown improperly (like arrows thrown by hand) */
+void * vpointer;				/* additional /whatever/, type based on hmoncode. */
+int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
 int flat_acc;
 {
 	boolean youagr = (magr == &youmonst);
@@ -2998,7 +2990,17 @@ int flat_acc;
 	struct permonst * pa = (magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0);
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 	struct obj * otmp;
-	boolean fired = (weapon && thrown == 1);
+
+	boolean melee = (hmoncode & HMON_WHACK);
+	boolean thrust = (hmoncode & HMON_THRUST);
+	boolean misthrown = (hmoncode & HMON_MISTHROWN);
+	boolean fired = (hmoncode & HMON_FIRED);
+	boolean thrown = (misthrown || fired);
+	boolean trapped = (hmoncode & HMON_TRAP);
+
+	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
+	if (trap) launcher = 0; /* trap takes precedence over launcher */
 
 	/* partial accuracy counters */
 	int base_acc = 0;	/* accuracy from leveling up */
@@ -3117,6 +3119,22 @@ int flat_acc;
 			/* trapped */
 			if (magr->mtrapped)
 				bons_acc -= 2;
+		}
+	}
+	/* traps have accuracy, too */
+	else if (trap) {
+		switch (trap->ttyp)
+		{
+		case ROCKTRAP:
+			bons_acc += 1000;	/* guarantee hit */
+			break;
+		case ARROW_TRAP:
+		case DART_TRAP:
+			bons_acc += level_difficulty()/4 + 4;
+			break;
+		case ROLLING_BOULDER_TRAP:
+			bons_acc += level_difficulty()/6;
+			break;
 		}
 	}
 
@@ -3266,11 +3284,11 @@ int flat_acc;
 				}
 			}
 			/* mis-used ammo */
-			else if (thrown == 2) {
+			else if (misthrown) {
 				wepn_acc -= 4;
 			}
 			/* other thrown things */
-			else if (thrown == 1)
+			else if (fired)
 			{
 				if (is_boomerang(weapon))			/* arbitrary */
 					wepn_acc += 4;
@@ -3291,11 +3309,11 @@ int flat_acc;
 		if (youagr) {
 			if (fired && launcher)
 				wepn_acc += weapon_hit_bonus(launcher);
-			else if (!thrown || thrown == 1)
+			else if (!misthrown)
 				wepn_acc += weapon_hit_bonus(weapon);
 		}
 		/* monk accuracy bonus/penalty (player-only) (melee) */
-		if (youagr && !thrown && Role_if(PM_MONK) && !Upolyd) {
+		if (youagr && melee && Role_if(PM_MONK) && !Upolyd) {
 			static boolean armmessage = TRUE;
 			if (uarm) {
 				if (armmessage) Your("armor is rather cumbersome...");
@@ -3310,7 +3328,7 @@ int flat_acc;
 			}
 		}
 		/* nudist accuracy bonus/penalty (player-only) (melee) */
-		if (youagr && u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
+		if (youagr && melee && u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
 			int delta = 100 - u.usanity;
 			int discomfort = u_clothing_discomfort();
 			static boolean clothmessage = TRUE;
@@ -3340,11 +3358,11 @@ int flat_acc;
 
 	/* find defender's AC */
 	/* ignore worn armor? */
-	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && !thrown) ||
+	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && (melee || thrust)) ||
 		(weapon && arti_shining(weapon)) ||
-		(!thrown && attk->aatyp == AT_TUCH) ||
-		(!thrown && attk->aatyp == AT_VINE) ||
-		(!thrown && attk->aatyp == AT_SRPR)) {
+		(melee && attk->aatyp == AT_TUCH) ||
+		(melee && attk->aatyp == AT_VINE) ||
+		(melee && attk->aatyp == AT_SRPR)) {
 		if (youdef) {
 			defn_acc += AC_VALUE(base_uac() + u.uspellprot) + 10 - u.uspellprot;
 		}
@@ -3486,7 +3504,7 @@ boolean ranged;
 	if (miss)
 		accuracy = 0;
 	else
-		accuracy = tohitval(magr, mdef, attk, weapon, (struct obj *)0, 0, flat_acc);
+		accuracy = tohitval(magr, mdef, attk, weapon, (void *)0, (ranged ? HMON_THRUST : HMON_WHACK), flat_acc);
 
 	/* roll to-hit die */
 	dieroll = rnd(20);
@@ -3898,13 +3916,13 @@ boolean ranged;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged), 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone, FALSE);
+		result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged), 0, 0, FALSE, dieroll, TRUE, vis, &wepgone, FALSE);
+				result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis, &wepgone);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -3954,7 +3972,7 @@ boolean ranged;
 		}
 		else
 			dmg = 0;
-		return xdamagey(magr, mdef, attk, dmg, FALSE);
+		return xdamagey(magr, mdef, attk, dmg);
 		/* fire */
 	case AD_EFIR:	/* elemental version, partially ignores resistance */
 	case AD_FIRE:
@@ -4085,7 +4103,7 @@ boolean ranged;
 		}
 		else
 			dmg = 0;
-		return xdamagey(magr, mdef, attk, dmg, FALSE);
+		return xdamagey(magr, mdef, attk, dmg);
 		/* cold */
 	case AD_ECLD:
 	case AD_COLD:
@@ -4162,7 +4180,7 @@ boolean ranged;
 		}
 		else
 			dmg = 0;
-		return xdamagey(magr, mdef, attk, dmg, FALSE);
+		return xdamagey(magr, mdef, attk, dmg);
 		/* shock */
 	case AD_EELC:
 	case AD_ELEC:
@@ -4237,7 +4255,7 @@ boolean ranged;
 		}
 		else
 			dmg = 0;
-		return xdamagey(magr, mdef, attk, dmg, FALSE);
+		return xdamagey(magr, mdef, attk, dmg);
 		/* acid */
 	case AD_EACD:
 	case AD_ACID:
@@ -4301,7 +4319,7 @@ boolean ranged;
 		}
 		else
 			dmg = 0;
-		return xdamagey(magr, mdef, attk, dmg, FALSE);
+		return xdamagey(magr, mdef, attk, dmg);
 		/* sickness damage */
 	case AD_DISE:
 		/* print a basic hit message */
@@ -4329,7 +4347,7 @@ boolean ranged;
 				}
 			}
 		}
-		return xdamagey(magr, mdef, attk, dmg, FALSE);
+		return xdamagey(magr, mdef, attk, dmg);
 		/* Only poison damage
 		 * Not to be confused with a poisonous attack that adds poison bonus damage to a physical strike */
 	case AD_POSN:
@@ -4362,7 +4380,7 @@ boolean ranged;
 					Monnam(mdef));
 			}
 		}
-		return xdamagey(magr, mdef, attk, dmg, FALSE);
+		return xdamagey(magr, mdef, attk, dmg);
 
 //////////////////////////////////////////////////////////////
 // PHYSICAL DAMAGE BEFORE NON-LETHAL SPECIAL EFFECTS
@@ -4903,7 +4921,7 @@ boolean ranged;
 				/* rely on poisoned(), from mon.c */
 				Sprintf(buf, "%s %s",
 					s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-				poisoned(buf, ptmp, pa->mname, 30, 0);
+				poisoned(buf, ptmp, pa->mname, 30);
 			}
 			/* vs Monster */
 			else {
@@ -5230,7 +5248,7 @@ boolean ranged;
 			}
 			/* monsters take d10 damage */
 			else {
-				result = xdamagey(magr, mdef, attk, rnd(10), FALSE);
+				result = xdamagey(magr, mdef, attk, rnd(10));
 				/* return early if cannot continue the attack */
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 					return result;
@@ -5354,7 +5372,7 @@ boolean ranged;
 					Sprintf(buf, "decapitated by %s", mon_nam(magr));
 					killer = buf;
 					killer_format = NO_KILLER_PREFIX;
-					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, TRUE);
+					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 				}
 				else {
 					/* destroy the helmet */
@@ -5495,7 +5513,7 @@ boolean ranged;
 					/* kill */
 					killer = "ripped apart by Demogorgon";
 					killer_format = NO_KILLER_PREFIX;
-					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, TRUE);
+					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 				}
 			}
 		}
@@ -5683,7 +5701,7 @@ boolean ranged;
 				/* kill */
 				killer = "forcible head removal";
 				killer_format = KILLED_BY;
-				return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, TRUE);
+				return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 			}
 			/* most commonly, this path is taken */
 			else {
@@ -5930,7 +5948,7 @@ boolean ranged;
 					Sprintf(buf, "%s headspike", s_suffix(mon_nam(magr)));
 					killer = buf;
 					killer_format = KILLED_BY_AN;
-					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, TRUE);
+					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 				}
 				else {
 					/* helmet protected */
@@ -5950,7 +5968,7 @@ boolean ranged;
 		if (youdef) {
 			Sprintf(buf, "%s %s",
 				s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-			poisoned(buf, A_CON, pa->mname, 60, 0);
+			poisoned(buf, A_CON, pa->mname, 60);
 		}
 		/* wis-draining (player only) */
 		if (youdef) {
@@ -7117,7 +7135,7 @@ boolean ranged;
 					else if (youagr) {
 						You("drown %s...", mon_nam(mdef));
 						/* kill */
-						return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, FALSE);
+						return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 					}
 					else {
 						impossible("Player must be youagr or youdef for drowning.");
@@ -7311,7 +7329,7 @@ boolean ranged;
 					(youdef ? "your flesh" : mon_nam(mdef))
 					);
 			}
-			result = xdamagey(magr, mdef, &alt_attk, dmg, FALSE);
+			result = xdamagey(magr, mdef, &alt_attk, dmg);
 			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 		}
 
@@ -7548,7 +7566,7 @@ boolean ranged;
 						(youagr ? "Your" : s_suffix(Monnam(magr))),
 						(youdef ? "you" : mon_nam(mdef))
 						);
-					result = xdamagey(magr, mdef, attk, d(rnd(5), (mlev(mdef) + 1) / 2), FALSE);
+					result = xdamagey(magr, mdef, attk, d(rnd(5), (mlev(mdef) + 1) / 2));
 					if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 				}
 			}
@@ -7566,7 +7584,7 @@ boolean ranged;
 					pline("The cold iron rachises sear %s.",
 						(youdef ? "you" : mon_nam(mdef)));
 				}
-				result = xdamagey(magr, mdef, attk, d(5, mlev(mdef)), FALSE);
+				result = xdamagey(magr, mdef, attk, d(5, mlev(mdef)));
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 			}
 			/* check random "resistances" */
@@ -7598,7 +7616,7 @@ boolean ranged;
 				}
 				if (hurts) {
 					/* in this case, non-players arbitrarily get a spiritDsize of 5 */
-					result = xdamagey(magr, mdef, attk, rnd((extrahurts ? 2 : 1) * (youagr ? spiritDsize() : 5)), FALSE);
+					result = xdamagey(magr, mdef, attk, rnd((extrahurts ? 2 : 1) * (youagr ? spiritDsize() : 5)));
 					if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 				}
 				else {
@@ -8479,7 +8497,7 @@ int vis;
 			}
 			else if (u.uswldtim == 0) {
 				pline("%s totally digests you!", Monnam(magr));
-				result = xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, FALSE);
+				result = xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 			}
 			else {
 				pline("%s%s digests you!", Monnam(magr),
@@ -8589,7 +8607,7 @@ int vis;
 				if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
 
 				/* kill */
-				result = xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER, FALSE);
+				result = xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 
 				/* if they survivied, by some miracle, end */
 				if (result&MM_DEF_LSVD) {
@@ -8748,7 +8766,7 @@ int vis;
 					if (perc > 0) forget(perc);
 				}
 			}
-			result = xdamagey(magr, mdef, attk, dmg, FALSE);
+			result = xdamagey(magr, mdef, attk, dmg);
 		}
 		else {
 			if (pd == &mons[PM_IRON_GOLEM] || pd == &mons[PM_CHAIN_GOLEM]) {
@@ -8802,7 +8820,7 @@ int vis;
 							pline("%s seems unharmed.", Monnam(mdef));
 					}
 				}
-				result = xdamagey(magr, mdef, attk, dmg, FALSE);
+				result = xdamagey(magr, mdef, attk, dmg);
 			}
 		}
 		/* rust armor */
@@ -8859,7 +8877,7 @@ int vis;
 			}
 		}
 		/* deal damage (which can be 0 gracefully) */
-		result = xdamagey(magr, mdef, attk, dmg, FALSE);
+		result = xdamagey(magr, mdef, attk, dmg);
 		break;
 	case AD_ACID:
 	case AD_EACD:
@@ -8894,7 +8912,7 @@ int vis;
 			}
 		}
 		/* deal damage */
-		result = xdamagey(magr, mdef, attk, dmg, FALSE);
+		result = xdamagey(magr, mdef, attk, dmg);
 		break;
 	case AD_ELEC:
 	case AD_EELC:
@@ -8937,7 +8955,7 @@ int vis;
 		else
 			dmg = 0;
 		/* deal damage */
-		result = xdamagey(magr, mdef, attk, dmg, FALSE);
+		result = xdamagey(magr, mdef, attk, dmg);
 		break;
 	case AD_COLD:
 	case AD_ECLD:
@@ -8981,7 +8999,7 @@ int vis;
 		else
 			dmg = 0;
 		/* deal damage */
-		result = xdamagey(magr, mdef, attk, dmg, FALSE);
+		result = xdamagey(magr, mdef, attk, dmg);
 		break;
 	case AD_FIRE:
 	case AD_EFIR:
@@ -9057,7 +9075,7 @@ int vis;
 		else
 			dmg = 0;
 		/* deal damage */
-		result = xdamagey(magr, mdef, attk, dmg, FALSE);
+		result = xdamagey(magr, mdef, attk, dmg);
 		}
 		break;
 	case AD_DESC:
@@ -9081,7 +9099,7 @@ int vis;
 			heal(mdef, min(*hp(mdef), dmg));
 		}
 		/* deal damage */
-		result = xdamagey(magr, mdef, attk, dmg, FALSE);
+		result = xdamagey(magr, mdef, attk, dmg);
 		break;
 	case AD_DRST:
 		/* unbreathing provides total immunity */
@@ -9118,7 +9136,7 @@ int vis;
 				mdef->mblinded = 1;
 		}
 		/* deal damage */
-		result = xdamagey(magr, mdef, attk, dmg, FALSE);
+		result = xdamagey(magr, mdef, attk, dmg);
 		break;
 	case AD_DISE:	/* damage/effect ? */
 		if (youdef) {
@@ -9129,7 +9147,7 @@ int vis;
 			if (!Sick_res(mdef)) {
 				if (vis&VIS_MDEF)
 					pline("%s is afflicted by disease!", Monnam(mdef));
-				result = xdamagey(magr, mdef, attk, dmg, FALSE);
+				result = xdamagey(magr, mdef, attk, dmg);
 			}
 		}
 		break;
@@ -9319,7 +9337,7 @@ expl_common:
 				}
 
 				/* deal damage */
-				result = xdamagey(magr, mdef, attk, dmg, FALSE);
+				result = xdamagey(magr, mdef, attk, dmg);
 			}
 			else {
 				/* damage resisted */
@@ -9767,7 +9785,7 @@ int vis;
 		}
 
 		if (dmg)
-			result = xdamagey(magr, mdef, attk, dmg, FALSE);
+			result = xdamagey(magr, mdef, attk, dmg);
 
 		if (*hp(mdef) > 0)
 			wakeup2(mdef, youagr);
@@ -10499,7 +10517,7 @@ int vis;
 			u.ugrave_arise = PM_WEEPING_ANGEL;
 			killer = "the sight of a weeping angel";
 			killer_format = KILLED_BY;
-			int result = xdamagey(magr, mdef, attk, dmg, TRUE);
+			int result = xdamagey(magr, mdef, attk, dmg);
 			/*If the player surived the gaze attack, restore the value of arise*/
 			u.ugrave_arise = temparise;
 			return result;
@@ -10542,7 +10560,7 @@ int vis;
 			}
 			if (dmg > 0) {
 				You("tear at yourself in horror!"); //assume always able to damage self
-				xdamagey(magr, mdef, attk, dmg*10, FALSE);
+				xdamagey(magr, mdef, attk, dmg*10);
 			}
 		}
 		break;
@@ -10846,14 +10864,14 @@ boolean * hittxt;
  * are called after the player hits, while letting hmoncore have messy returns wherever it wants
  */
 int
-hmon2point0(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
+hmon2point0(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
 struct monst * magr;			/* attacker */
 struct monst * mdef;			/* defender */
 struct attack * attk;			/* attack structure to use -- if this does not exist, we MUST have a weapon */
 struct attack * originalattk;	/* original attack structure, used for messages */
 struct obj * weapon;			/* weapon to hit with */
-struct obj * launcher;			/* launcher weapon was fired with */
-int thrown;						/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
+void * vpointer;				/* additional /whatever/, type based on hmoncode. */
+int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
 int flatbasedmg;				/* if >0, REPLACE basedmg with this value -- typically used for unusual weapon hits like throwing something upwards */
 int monsdmg;					/* flat damage amount to add onto other effects -- for monster attacks */
 boolean dohitmsg;				/* print hit message? */
@@ -10861,10 +10879,12 @@ int dieroll;					/* 1-20 accuracy dieroll, used for special effects */
 boolean recursed;				/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
 int vis;						/* True if action is at all visible to the player */
 boolean * wepgone;				/* used to return an additional result: was [weapon] destroyed? */
-boolean killerset;				/* if TRUE, use the already-set killer if the player dies */
 {
 	int result;
 	boolean u_anger_guards;
+	boolean fakewepgone = FALSE;
+	if (!wepgone)
+		wepgone = &fakewepgone;
 
 	if (magr == &youmonst &&
 		mdef->mpeaceful &&
@@ -10876,7 +10896,10 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	else
 		u_anger_guards = FALSE;
 
-	result = hmoncore(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset);
+	result = hmoncore(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone);
+
+	if (fakewepgone)
+		panic("weapon gone that was not supposed to at all!");
 
 	/* reset killer */
 	killer = 0;
@@ -10890,14 +10913,14 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 }
 
 int
-hmoncore(magr, mdef, attk, originalattk, weapon, launcher, thrown, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone, killerset)
+hmoncore(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
 struct monst * magr;			/* attacker */
 struct monst * mdef;			/* defender */
 struct attack * attk;			/* attack structure to use */
 struct attack * originalattk;	/* original attack structure, used for messages */
 struct obj * weapon;			/* weapon to hit with */
-struct obj * launcher;			/* launcher weapon was fired with */
-int thrown;						/* was [weapon] thrown or thrust? 0:No 1:thrown properly 2:thrown improperly*/
+void * vpointer;				/* additional /whatever/, type based on hmoncode. */
+int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
 int flatbasedmg;				/* if >0, REPLACE basedmg with this value -- currently unused. SCOPECREEP: use hmon for things like throwing an object upwards */
 int monsdmg;					/* flat damage amount to add onto other effects -- for monster attacks */
 boolean dohitmsg;				/* print hit message? */
@@ -10905,7 +10928,6 @@ int dieroll;					/* 1-20 accuracy dieroll, used for special effects */
 boolean recursed;				/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
 int vis;						/* True if action is at all visible to the player */
 boolean * wepgone;				/* used to return an additional result: was [weapon] destroyed? */
-boolean killerset;				/* if TRUE, use the already-set killer if the player dies */
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -10943,34 +10965,43 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	static int warnedotyp = -1;
 	static struct permonst *warnedptr = 0;
 
-	char yourbuf[BUFSZ];
+	char buf[BUFSZ];
 
 	boolean phase_armor = FALSE;
 	boolean valid_weapon_attack = FALSE;
 	boolean fake_valid_weapon_attack = FALSE;
 	boolean invalid_weapon_attack = FALSE;
 	boolean unarmed_punch = FALSE;
-	boolean unarmed_kick = FALSE;		/* SCOPECREEP: eventually replace kickdmg() */
+	boolean unarmed_kick = FALSE;
 	boolean natural_strike = FALSE;
 	boolean ulightsaberhit = FALSE;
 
 	boolean destroy_one_magr_weapon = FALSE;	/* destroy one of magr's weapons */
 	boolean destroy_all_magr_weapon = FALSE;	/* destroy all of magr's weapon */
 
-	boolean real_attack = (attk && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->damn > 0 || attk->damd > 0));
-
 	boolean hittxt = FALSE;
 	boolean lethaldamage = FALSE;
 
-	boolean fired = (weapon && (is_ammo(weapon) || launcher) && thrown == 1);	/* true if we are properly firing ammo (which may actually not use a launcher, eg monster AT_ARRW) */
-	
+	boolean melee = (hmoncode & HMON_WHACK);
+	boolean thrust = (hmoncode & HMON_THRUST);
+	boolean misthrown = (hmoncode & HMON_MISTHROWN);
+	boolean fired = (hmoncode & HMON_FIRED);
+	boolean thrown = (misthrown || fired);
+	boolean trapped = (hmoncode & HMON_TRAP);
+
+	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
+	if (trap) launcher = 0; /* trap takes precedence over launcher */
+
+	boolean real_attack = (attk && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->damn > 0 || attk->damd > 0));
+
 	struct obj tempwep;	/* used to save the data of an object before it gets destroyed, for things like naming */
 	struct obj * otmp;	/* generic object pointer -- variable */
 	long slot = 0L;		/* slot, either the weapon pointer (W_WEP) or armor -- variable */
 	long rslot = 0L;	/* slot, dedicated to rings (left and right) -- set at start, should not be reset */
 
 	/* pick the most correct ring slot */
-	rslot = (!attk || !magr || attk->aatyp == AT_MARI) ? 0L	/* no attack, or no attacker, or marilith: not a ring-hand */
+	rslot = (!melee || !attk || !magr || attk->aatyp == AT_MARI) ? 0L	/* no attack, or no attacker, or marilith: not a ring-hand */
 		//: (attk->aatyp == AT_WEAP || attk->aatyp == AT_DEVA || attk->aatyp == AT_HODS) ? W_RINGR /* mainhand */
 		//: (attk->aatyp == AT_XWEP) ? W_RINGL	/* offhand */
 		: ((youagr ? uarms : which_armor(magr, W_ARMS)) || !rn2(2)) ? W_RINGR : W_RINGL;	/* either hand, but not offhand if wearing a shield */
@@ -11072,22 +11103,41 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	 */
 
 	/* set killer, if needed */
-	if (!killerset && (
+	if (!killer && (
 		(!magr) ||				/* no attacker -- we really need a specific killer to avoid "killed by a died" */
-		(thrown && weapon)		/* prefer "killed by an arrow" to "killed by a plains centaur" */
+		(thrown && weapon) ||	/* prefer "killed by an arrow" to "killed by a plains centaur" */
+		(trapped)				/* prefer "killed by an arrow trap" to "killed by an arrow" */
 		)) {
+		if (trap) {
+			killer_format = KILLED_BY;
+			switch (trap->ttyp) {
+			case ARROW_TRAP:
+			case DART_TRAP:
+				Sprintf(buf, "%s trap", killer_xname(weapon));	/* killer_xname() adds a/an/the */
+				killer = buf;
+				break;
+			case BEAR_TRAP:
+				Sprintf(buf, "%s", killer_xname(weapon));	/* killer_xname() adds a/an/the */
+				killer = buf;
+				break;
+			case ROCKTRAP:
+				killer = "a falling rock trap";
+				break;
+			case ROLLING_BOULDER_TRAP:
+				killer = "a rolling boulder trap";
+				break;
+			default:
+				killer = "a trap";
+				break;
+			}
+		}
 		/* "killed by (a) <weapon> */
-		if (thrown && weapon) {
-			killerset = TRUE;
-			killer = xname(weapon);
-			if (obj_is_pname(weapon))
-				killer_format = KILLED_BY;
-			else
-				killer_format = KILLED_BY_AN;
+		else if (thrown && weapon) {
+			killer_format = KILLED_BY;	/* killer_xname() adds a/an/the */
+			killer = killer_xname(weapon);
 		}
 		/* nothing to work with, give basic message */
 		else {
-			killerset = TRUE;
 			killer = "died";
 			killer_format = NO_KILLER_PREFIX;
 		}
@@ -11106,7 +11156,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			weapon->oartifact == ART_ROGUE_GEAR_SPIRITS) &&
 			/* isn't a misused polearm */
 			(!is_pole(weapon) ||
-			thrown ||
+			thrust ||
 			u.usteed ||
 			is_vibropike(weapon) ||
 			weapon->otyp == AKLYS ||
@@ -11122,18 +11172,18 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			/* isn't an unthrown missile */
 			!((is_missile(weapon) || is_ammo(weapon)) && weapon->otyp != CHAKRAM && !thrown) &&
 			/* isn't an unthrown Houchou */
-			!(weapon->oartifact == ART_HOUCHOU && !thrown) &&
+			!(weapon->oartifact == ART_HOUCHOU && !fired) &&
 			/* isn't unthrowable ammo (ie, any ammo but rocks) being thrown but not fired*/
-			!(thrown == 2)
+			!(misthrown)
 			)
 		{
 			/* unlit lightsabers are martial arts aids, not weapons */
-			if (martial_aid(weapon) && !thrown)
+			if (martial_aid(weapon) && melee)
 				unarmed_punch = TRUE;
 			else
 				valid_weapon_attack = TRUE;
 
-			if (youagr && is_lightsaber(weapon) && litsaber(weapon) && !thrown)
+			if (youagr && is_lightsaber(weapon) && litsaber(weapon) && melee)
 				ulightsaberhit = TRUE;
 		}
 		else
@@ -11143,13 +11193,13 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 		if (/* being made with an attack action */
 			(attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_DEVA || attk->aatyp == AT_MARI || attk->aatyp == AT_HODS) &&
 			/* not thrown (how could this happen?) */
-			!thrown)
+			melee)
 			unarmed_punch = TRUE;
-		else if (attk->aatyp == AT_KICK && !thrown)	/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
+		else if (attk->aatyp == AT_KICK && melee)	/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
 			unarmed_kick = TRUE;
-		else if (attk->adtyp == AD_MERC && !thrown)
+		else if (attk->adtyp == AD_MERC && melee)
 			fake_valid_weapon_attack = TRUE;
-		else if(attk->aatyp == AT_SRPR){
+		else if (attk->aatyp == AT_SRPR && melee){
 			natural_strike = TRUE;
 			fake_valid_weapon_attack = TRUE;
 		}
@@ -11157,11 +11207,11 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			natural_strike = TRUE;
 	}
 	/* if the player is attacking with a wielded weapon, increment conduct */
-	if (youagr && valid_weapon_attack && !thrown) {
+	if (youagr && valid_weapon_attack && (melee || thrust)) {
 		u.uconduct.weaphit++;
 	}
 	/* precision multiplier */
-	if (fired && launcher &&								// Firing ammo from a launcher (fired implies thrown)
+	if (fired && launcher &&								// Firing ammo from a launcher
 		(objects[launcher->otyp].oc_skill == P_CROSSBOW ||	// from a REAL crossbow (but not the Pen of the Void or the BFG, those would be brokenly strong)
 		launcher->otyp == SNIPER_RIFLE)						// or a sniper rifle
 		&& !(noncorporeal(pd) || amorphous(pd) || ((stationary(pd) || sessile(pd)) && (pd->mlet == S_FUNGUS || pd->mlet == S_PLANT)))	// versus vulnerable targets
@@ -11295,7 +11345,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 
 	/* jousting */
 #ifdef STEED
-	if (youagr && !thrown && !recursed) {	/* do not joust in multihits */
+	if (youagr && melee && !recursed) {	/* do not joust in multihits */
 		if (u.usteed && weapon &&
 			(weapon_type(weapon) == P_LANCE ||
 			(weapon->oartifact == ART_ROD_OF_SEVEN_PARTS) ||
@@ -11343,7 +11393,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 #endif
 	/* staggering strike */
-	if (youagr && !recursed) {
+	if (youagr && (melee || thrust) && !recursed) {
 		if (
 			// unarmed_punch (not two-weaponing)
 			(unarmed_punch && !Upolyd && !bigmonst(pd) && !thick_skinned(pd) && !(u.twoweap) && 
@@ -11367,7 +11417,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 	/* shattering strike */
 	/* note: does not consider defender's weapon here */
-	if (youagr && !recursed) {
+	if (youagr && (melee || thrust) && !recursed) {
 		if (
 			// General Shattering Strike
 			(
@@ -11393,7 +11443,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 	/* disarming strike */
 	/* note: does not consider defender's weapon here */
-	if (youagr && valid_weapon_attack && !recursed) {
+	if (youagr && valid_weapon_attack && (melee || thrust) && !recursed) {
 		if ((((weapon && weapon == uwep) &&	// needs to be done with a mainhand weapon
 			(dieroll <= (1 + P_SKILL(weapon_type(weapon))))) &&	// good roll (B:10%  S:15%  E:20%)
 			(weapon->otyp == RANSEUR) &&	// can only be done with a ranseur
@@ -11686,44 +11736,41 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			poisons_wipedoff = poisons_majoreff;
 			poisons_minoreff = 0;
 		}
-		/* calculate poison damage (versus monsters only -- poisoned() is used vs player) */
-		if (!youdef)
+		/* calculate poison damage */
+		for (n = 0; n < NUM_POISONS; n++)
 		{
-			for (n = 0; n < NUM_POISONS; n++)
+			i = (1 << n);
+			boolean major = (poisons_majoreff & i);
+			boolean minor = (poisons_minoreff & i);
+			if (!major && !minor)
+				continue;
+			/* calculate poison damage */
+			switch (i)
 			{
-				i = (1 << n);
-				boolean major = (poisons_majoreff & i);
-				boolean minor = (poisons_minoreff & i);
-				if (!major && !minor)
-					continue;
-				/* calculate poison damage */
-				switch (i)
-				{
-				case OPOISON_BASIC:
-					poisdmg += (major) ? 9999 : rnd(6);
-					break;
-				case OPOISON_FILTH:
-					poisdmg += (major) ? 9999 : rnd(12);
-					break;
-				case OPOISON_SLEEP:
-					/* no damage */
-					break;
-				case OPOISON_BLIND:
-					poisdmg += (major) ? 3 : rnd(3);
-					break;
-				case OPOISON_PARAL:
-					poisdmg += (major) ? 6 : rnd(6);
-					break;
-				case OPOISON_AMNES:
-					/* no damage */
-					break;
-				case OPOISON_ACID:
-					poisdmg += rnd(10);
-					break;
-				case OPOISON_SILVER:
-					poisdmg += rnd(20);
-					break;
-				}
+			case OPOISON_BASIC:
+				poisdmg += (major) ? 9999 : rnd(6);
+				break;
+			case OPOISON_FILTH:
+				poisdmg += (major) ? 9999 : rnd(12);
+				break;
+			case OPOISON_SLEEP:
+				/* no damage */
+				break;
+			case OPOISON_BLIND:
+				poisdmg += (major) ? 3 : rnd(3);
+				break;
+			case OPOISON_PARAL:
+				poisdmg += (major) ? 6 : rnd(6);
+				break;
+			case OPOISON_AMNES:
+				/* no damage */
+				break;
+			case OPOISON_ACID:
+				poisdmg += rnd(10);
+				break;
+			case OPOISON_SILVER:
+				poisdmg += rnd(20);
+				break;
 			}
 		}
 	}
@@ -11749,7 +11796,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 
 	/* Clockwork heat - player melee only */
-	if (youagr && !thrown && !recursed) {
+	if (youagr && melee && !recursed) {
 		if (uclockwork && !Fire_res(mdef) && u.utemp) {
 			int heatdie = min(u.utemp, 20);
 			int heatdice = (1 + (u.utemp >= MELTING) + (u.utemp >= MELTED));
@@ -11771,7 +11818,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 
 	/* set zombify resulting from melee mvm combat */
-	if (!youagr && !youdef && !thrown && !recursed) {
+	if (magr && !youagr && !youdef && melee && !recursed) {
 		if ((magr->mfaction == ZOMBIFIED || (magr->mfaction == SKELIFIED && !rn2(20))) && can_undead_mon(mdef)){
 			mdef->zombify = 1;
 		}
@@ -11798,7 +11845,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	if (valid_weapon_attack) {
 		/* note: dmgval() includes enchantment and erosion of weapon */
 		if ((weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_MARIONETTE) ||
-			(youagr && !thrown && u.sealsActive&SEAL_MARIONETTE && distmin(u.ux, u.uy, mdef->mx, mdef->my) > 1))
+			(youagr && thrust && u.sealsActive&SEAL_MARIONETTE))
 			basedmg = dmgval(weapon, mdef, SPEC_MARIONETTE);
 		else
 			basedmg = dmgval(weapon, mdef, 0);
@@ -11866,12 +11913,12 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 					if (youagr) {
 						if (u.specialSealsActive&SEAL_NUDZIRATH){
 							You("break %s mirror.  You feel a deep satisfaction!",
-								shk_your(yourbuf, weapon));
+								shk_your(buf, weapon));
 							change_luck(+2);
 						}
 						else {
 							You("break %s mirror.  That's bad luck!",
-								shk_your(yourbuf, weapon));
+								shk_your(buf, weapon));
 							change_luck(-2);
 						}
 						hittxt = TRUE;
@@ -11888,7 +11935,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				if (weapon->otyp == EXPENSIVE_CAMERA) {
 					if (youagr) {
 						You("succeed in destroying %s camera.  Congratulations!",
-							shk_your(yourbuf, weapon));
+							shk_your(buf, weapon));
 					}
 					destroy_one_magr_weapon = TRUE;
 					real_attack = FALSE;
@@ -11898,12 +11945,12 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 
 			case BOOMERANG:
 				/* boomerangs can break when used as melee weapons */
-				if (youagr && !thrown &&
+				if (youagr && (melee || thrust) &&
 					rnl(4) == 4 - 1 && !weapon->oartifact) {
 					if (dohitmsg) {
 						pline("As you hit %s, %s%s %s breaks into splinters.",
 							mon_nam(mdef), (cnt > 1L) ? "one of " : "",
-							shk_your(yourbuf, weapon), xname(weapon));
+							shk_your(buf, weapon), xname(weapon));
 
 						hittxt = TRUE;
 					}
@@ -12113,7 +12160,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 							else if (weapon->otyp == CREAM_PIE) {
 								char *whom = mon_nam(mdef);
 								char *what = The(xname(weapon));
-								if (!thrown && weapon->quan > 1)
+								if (melee && weapon->quan > 1)
 									what = An(singular(weapon, xname));
 								/* note: s_suffix returns a modifiable buffer */
 								if (haseyes(pd) && pd != &mons[PM_FLOATING_EYE])
@@ -12379,16 +12426,22 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				*/
 				if(natural_strike)
 					bon_damage += dbon((struct obj *)0);
-				else if (!thrown)
+				else if (melee || thrust)
 					bon_damage += dbon(weapon);
-				else{ //thrown
-					if (!fired)
-						bon_damage += dbon(weapon); // thrown by hand, get strength bonus
-					else if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += dbon(launcher); // fired by a sling, get strength bonus
+				else if (fired)
+				{
+					/* slings get STR bonus */
+					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
+						bon_damage += dbon(launcher);
+					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += dbon(launcher) * 2; // fired by an atlatl, get 2x strength bonus
-					//else no bonus
+						bon_damage += dbon(launcher) * 2;
+					/* other launchers get no STR bonus */
+					else if (launcher)
+						bon_damage += 0;
+					/* properly-used ranged attacks othersied get STR bonus */
+					else
+						bon_damage += dbon(weapon);
 				}
 				bonsdmg += bon_damage;
 			} else if(!youagr && magr){
@@ -12397,18 +12450,29 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				/* 
 				* Monsters don't actually have anything other than a str bonus, and then only from items.
 				*/
-				if (!thrown)
+				if (melee || thrust)
 					bon_damage += m_dbon(magr, weapon);
-				else{ //thrown
-					if (!fired)
-						bon_damage += m_dbon(magr, weapon); // thrown by hand, get strength bonus
-					else if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += m_dbon(magr, launcher); // fired by a sling, get strength bonus
+				else if (fired) {
+					/* slings get STR bonus */
+					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
+						bon_damage += m_dbon(magr, launcher);
+					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += m_dbon(magr, launcher) * 2; // fired by an atlatl, get 2x strength bonus
-					//else no bonus
+						bon_damage += m_dbon(magr, launcher) * 2;
+					/* other launchers get no STR bonus */
+					else if (launcher)
+						bon_damage += 0;
+					/* properly-used ranged attacks othersied get STR bonus */
+					else
+						bon_damage += m_dbon(magr, weapon);
 				}
 				bonsdmg += bon_damage;
+			} else if (trap){
+				/* some traps deal increased damage */
+				if (trap->ttyp == ARROW_TRAP)
+					bonsdmg += d(2, level_difficulty()/4+1);
+				if (trap->ttyp == DART_TRAP)
+					bonsdmg += d(1, level_difficulty()/8+1);
 			}
 		}
 		/* skill damage bonus */
@@ -12443,8 +12507,8 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				else
 					skill_damage = 0;
 			}
-			/* things thrown but not fired (ie no launcher) */
-			else if (thrown && !fired) {
+			/* things thrown with no launcher */
+			else if (fired && !launcher) {
 				/* ammo thrown without a launcher does not get skill bonuses*/
 				if (is_ammo(weapon))
 					skill_damage = 0;
@@ -12453,7 +12517,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 					skill_damage = weapon_dam_bonus(weapon);
 			}
 			/* melee weapons */
-			else {
+			else if (melee || thrust) {
 				/* some weapons use contextually-specific skills */
 				if (wtype != P_TWO_WEAPON_COMBAT && wtype != weapon_type(weapon))
 					skill_damage = skill_dam_bonus(wtype);
@@ -12472,7 +12536,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 			/* now, train skills */
 			use_skill(wtype, 1);
 
-			if (!thrown && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
+			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(FFORM_SHII_CHO, 1);
 				if (P_SKILL(FFORM_SHII_CHO) >= P_BASIC || weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 					if ((u.fightingForm == FFORM_SHII_CHO ||
@@ -12505,26 +12569,26 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	{
 		int returnvalue = 0;
 		/* use guidance glyph */
-		if (youagr && !thrown && active_glyph(GUIDANCE))
+		if (youagr && melee && active_glyph(GUIDANCE))
 			doguidance(mdef, basedmg);
 		/* hits with a valid weapon proc effects of the weapon */
 		if (valid_weapon_attack) {
 			otmp = weapon;
 			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt)) {
 				/* if the artifact caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
-				if (returnvalue == MM_MISS && youagr && !thrown)
+				if (returnvalue == MM_MISS && youagr && (melee || thrust))
 					u.uconduct.weaphit--;
 				return returnvalue;
 			}
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
-		if (thrown && fired && launcher && valid_weapon_attack) {
+		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
 				return returnvalue;
 		}
 		/* ranged weapon attacks also proc effects of The Helm of the Arcane Archer */
-		if (thrown && fired && launcher && valid_weapon_attack &&
+		if (fired && launcher && valid_weapon_attack &&
 			((otmp = (youagr ? uarmh : which_armor(magr, W_ARMH))) &&
 			otmp->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER)) {
 			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
@@ -12748,14 +12812,22 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 					pline("You are hit!");
 				}
 			}
-			else if ((!lethaldamage || (m_shot.n > 1 && m_shot.o == weapon->otyp))
-				) {
+			else {
 				if ((!cansee(bhitpos.x, bhitpos.y) && !canspotmon(mdef) &&
 					!(u.uswallow && mdef == u.ustuck))
 					|| !flags.verbose)
+				{
 					pline("%s %s it.", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"));
-				else pline("%s %s %s%s", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"),
-					mon_nam(mdef), exclam(totldmg));
+				}
+				else {
+					if (vis&VIS_MAGR) {
+						pline("%s %s %s%s", The(mshot_xname(weapon)), vtense(mshot_xname(weapon), "hit"),
+							mon_nam(mdef), exclam(totldmg));
+					}
+					else {
+						pline("%s is hit by a %s!", Monnam(mdef), mshot_xname(weapon));
+					}
+				}
 			}
 		}
 		else {
@@ -12911,7 +12983,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 				getdir((char *)0);
 				if (u.dx || u.dy){
 					You("toss it away.");
-					projectile(&youmonst, otmp, (struct obj *)0, TRUE, u.ux, u.uy, u.dx, u.dy, 0, (int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), FALSE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_MISTHROWN, u.ux, u.uy, u.dx, u.dy, 0, (int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), FALSE, FALSE, FALSE);
 				}
 				else{
 					You("drop it at your feet.");
@@ -13005,7 +13077,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	}
 
 	if(uuvuglory){
-		pline("%s's glory sears %s", Monnam(magr), youdef ? "you" : mon_nam(mdef));
+		pline("%s's glory sears %s!", Monnam(magr), youdef ? "you" : mon_nam(mdef));
 	}
 	
 	/* Searing messages */
@@ -13215,81 +13287,76 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	/* poison */
 	if (poisons_resisted || poisons_majoreff || poisons_minoreff || poisons_wipedoff) {
 		otmp = poisonedobj;
-		if (youdef) {
-			char buf[BUFSZ];
-			if (attk && magr) {
-				/* using poisoned() from mon.c */
-				Sprintf(buf, "%s %s", s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-			}
-			else if (otmp) {
-				Sprintf(buf, "%s", The(xname(otmp)));
-			}
-			else {
-				impossible("no name to poison you with");
-			}
-			/* SCOPECREEP: the "fatal" field (30) is inconsistent. Preferrably, this should use the same major/minor effect system set up in this function */
-			/* also, this spams messages when recursed */
-			poisoned(buf, A_CON, (magr ? pa->mname : xname(otmp)), 30, (poisons_majoreff | poisons_minoreff));
-		}
-		else {
-			int i, n;
-			/* poison resist messages -- should only appear once, as resistivity should be constant between hits */
-			if (poisons_resisted && canseemon(mdef) && !recursed) {
-				for (n = 0; n < NUM_POISONS; n++)
-				{
-					i = (1 << n);
-					if (!(poisons_resisted & i))
-						continue;
-					switch (i)
-					{
-					case OPOISON_BASIC:
-					case OPOISON_BLIND:
-					case OPOISON_PARAL:
-						pline_The("poison doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_FILTH:
-						pline_The("filth doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_SLEEP:
-						pline_The("drug doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_AMNES:
-						pline_The("lethe-rust doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_ACID:
-						pline_The("acid-coating doesn't seem to affect %s.", mon_nam(mdef));
-						break;
-					case OPOISON_SILVER:
-						/* no message */
-						break;
-					}
-				}
-			}
-			/* poison major effects and their messages -- can happen multiple times */
+		int i, n;
+		/* poison resist messages -- should only appear once, as resistivity should be constant between hits */
+		if (poisons_resisted && (vis&VIS_MDEF) && !recursed) {
 			for (n = 0; n < NUM_POISONS; n++)
 			{
 				i = (1 << n);
-				if (!(poisons_majoreff & i))
+				if (!(poisons_resisted & i))
 					continue;
 				switch (i)
 				{
 				case OPOISON_BASIC:
-					if (canseemon(mdef) && lethaldamage)
-						pline_The("poison was deadly...");
+				case OPOISON_BLIND:
+				case OPOISON_PARAL:
+					pline_The("poison doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
 					break;
 				case OPOISON_FILTH:
-					if (canseemon(mdef) && lethaldamage)
-						pline_The("tainted filth was deadly...");
+					pline_The("filth doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
 					break;
 				case OPOISON_SLEEP:
-					if (sleep_monst(mdef, rnd(12), POTION_CLASS)) {
-						if (canseemon(mdef))
-							pline("%s falls asleep.", Monnam(mdef));
-						slept_monst(mdef);
-					}
+					pline_The("drug doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
 					break;
-				case OPOISON_BLIND:
-					{
+				case OPOISON_AMNES:
+					pline_The("lethe-rust doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
+					break;
+				case OPOISON_ACID:
+					pline_The("acid-coating doesn't seem to affect %s.",
+						(youdef ? "you" : mon_nam(mdef)));
+					break;
+				case OPOISON_SILVER:
+					/* no message */
+					break;
+				}
+			}
+		}
+		/* poison major effects and their messages -- can happen multiple times */
+		for (n = 0; n < NUM_POISONS; n++)
+		{
+			i = (1 << n);
+			if (!(poisons_majoreff & i))
+				continue;
+			switch (i)
+			{
+			case OPOISON_BASIC:
+				if ((vis&VIS_MDEF) && lethaldamage)
+					pline_The("poison was deadly...");
+				break;
+			case OPOISON_FILTH:
+				if ((vis&VIS_MDEF) && lethaldamage)
+					pline_The("tainted filth was deadly...");
+				break;
+			case OPOISON_SLEEP:
+				if (youdef) {
+					You("suddenly fall asleep!");
+					fall_asleep(-rn1(2, 6), TRUE);
+				}
+				else if (sleep_monst(mdef, rnd(12), POTION_CLASS)) {
+					if (canseemon(mdef))
+						pline("%s falls asleep.", Monnam(mdef));
+					slept_monst(mdef);
+				}
+				break;
+			case OPOISON_BLIND:
+				if (youdef) {
+					make_blinded(rn1(20, 25), (boolean)!Blind);
+				}
+				else {
 					if (canseemon(mdef) && !is_blind(mdef))
 						pline("It seems %s has gone blind!", mon_nam(mdef));
 
@@ -13298,29 +13365,56 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 					btmp += mdef->mblinded;
 					mdef->mblinded = min(btmp, 127);
 					mdef->mcansee = 0;
-					}
-					break;
-				case OPOISON_PARAL:
+				}
+				break;
+			case OPOISON_PARAL:
+				if (youdef) {
+					nomul(-(25 - rnd(ACURR(A_CON))), "immobilized by paralysis venom");
+				}
+				else {
 					if (canseemon(mdef) && mdef->mcanmove)
 						pline("%s stops moving!", Monnam(mdef));
 					if (mdef->mcanmove) {
 						mdef->mcanmove = 0;
 						mdef->mfrozen = rnd(25);
 					}
-					break;
-				case OPOISON_AMNES:
+				}
+				break;
+			case OPOISON_AMNES:
+				if (youdef) {
+					if (u.sealsActive&SEAL_HUGINN_MUNINN){
+						unbind(SEAL_HUGINN_MUNINN, TRUE);
+					}
+					else {
+						forget(1);	/* lose 1% of memory per point lost*/
+						forget_traps();		/* lose memory of all traps*/
+					}
+				}
+				else {
 					if (canseemon(mdef) && (mdef->mtame || !mdef->mpeaceful))
 						pline("%s looks around as if awakening from a dream.", Monnam(mdef));
 					mdef->mtame = FALSE;
 					mdef->mpeaceful = TRUE;
-					break;
-				case OPOISON_ACID:
-				case OPOISON_SILVER:
-					/* no message, no additional effects */
-					break;
 				}
+				break;
+			case OPOISON_ACID:
+			case OPOISON_SILVER:
+				/* no message, no additional effects */
+				break;
 			}
 		}
+		/* ophidiophobia -- fear of snakes (and also poison, in dnethack) */
+		if (youdef && !recursed && roll_madness(MAD_OPHIDIOPHOBIA)) {
+			if (poisons_majoreff || poisons_minoreff) {
+				You("panic!");
+				nomul(-1 * rnd(6), "panicking");
+			}
+			else if (poisons_resisted) {
+				You("panic anyway!");
+				nomul(-1 * rnd(3), "panicking");
+			}
+		}
+
 		/* poisons wiped off */
 		if (otmp && poisons_wipedoff) {
 			/* rings subtract from corpsenm */
@@ -13409,7 +13503,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	
 	/* Deal Damage */
 	/* this can possibly kill, returning immediately */
-	result = xdamagey(magr, mdef, attk, totldmg, killerset);
+	result = xdamagey(magr, mdef, attk, totldmg);
 	if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 		return result;
 
@@ -13462,7 +13556,7 @@ boolean killerset;				/* if TRUE, use the already-set killer if the player dies 
 	if ((pd == &mons[PM_BLACK_PUDDING] || pd == &mons[PM_BROWN_PUDDING] || pd == &mons[PM_DARKNESS_GIVEN_HUNGER])
 		&& weapon && (valid_weapon_attack || invalid_weapon_attack)
 		&& weapon->obj_material == IRON
-		&& !thrown && (youdef || !mdef->mcan)) {
+		&& melee && (youdef || !mdef->mcan)) {
 		if (youdef) {
 			if (totldmg > 1)
 				exercise(A_STR, FALSE);
@@ -13678,7 +13772,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 					Sprintf(buf, "unwisely drained %s", pd->mname);
 					killer = buf;
 					killer_format = NO_KILLER_PREFIX;
-					newres = xdamagey(mdef, magr, &noattack, 9999, TRUE);
+					newres = xdamagey(mdef, magr, &noattack, 9999);
 					if (newres&MM_DEF_DIED)
 						result |= MM_AGR_DIED;	/* attacker died */
 					if (newres&MM_DEF_LSVD)
@@ -13754,7 +13848,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 				pline("A bolt of divine energy strikes %s from the heavens!", mon_nam(magr));
 				killer = "bolt of divine energy";
 				killer_format = KILLED_BY_AN;
-				newres = xdamagey(mdef, magr, passive, d(2, 12), TRUE);
+				newres = xdamagey(mdef, magr, passive, d(2, 12));
 				if (newres&MM_DEF_DIED)
 					result |= MM_AGR_DIED;	/* attacker died */
 				if (newres&MM_DEF_LSVD)
@@ -13960,7 +14054,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 							s_suffix(mon_nam(mdef))
 							);
 					}
-					newres = xdamagey(mdef, magr, passive, dmg, FALSE);
+					newres = xdamagey(mdef, magr, passive, dmg);
 					if (newres&MM_DEF_DIED)
 						result |= MM_AGR_DIED;	/* attacker died */
 					if (newres&MM_DEF_LSVD)
@@ -13981,7 +14075,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 								if (canseemon(mdef))
 									pline("%s collapses into a puddle of water!", Monnam(mdef));
 								if (!(result&MM_DEF_DIED)) {
-									newres = xdamagey(magr, mdef, passive, *hp(mdef), FALSE);
+									newres = xdamagey(magr, mdef, passive, *hp(mdef));
 									if (newres&MM_DEF_DIED)
 										result |= MM_DEF_DIED;	/* defender died */
 									if (newres&MM_DEF_LSVD)
@@ -14049,7 +14143,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					else if (canseemon(magr)) {
 						pline("%s is hit by a hail of magic missiles.", Monnam(magr));
 					}
-					newres = xdamagey(mdef, magr, passive, dmg, FALSE);
+					newres = xdamagey(mdef, magr, passive, dmg);
 					if (newres&MM_DEF_DIED)
 						result |= MM_AGR_DIED;	/* attacker died */
 					if (newres&MM_DEF_LSVD)
@@ -14067,7 +14161,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				else if (vis) {
 					pline("%s's bladed shadow falls on %s!", Monnam(mdef), mon_nam(magr));
 				}
-				newres = xdamagey(mdef, magr, passive, dmg, FALSE);
+				newres = xdamagey(mdef, magr, passive, dmg);
 				if (newres&MM_DEF_DIED)
 					result |= MM_AGR_DIED;	/* attacker died */
 				if (newres&MM_DEF_LSVD)
@@ -14078,11 +14172,11 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					if (youdef) {
 						char buf[BUFSZ];
 						Sprintf(buf, "%s shadow", s_suffix(Monnam(mdef)));
-						poisoned(buf, A_STR, pd->mname, 30, 0);
+						poisoned(buf, A_STR, pd->mname, 30);
 					}
 					else {
 						if (!Poison_res(magr)) {
-							newres = xdamagey(mdef, magr, passive, rn1(10, 6), FALSE);
+							newres = xdamagey(mdef, magr, passive, rn1(10, 6));
 							if (newres&MM_DEF_DIED)
 								result |= MM_AGR_DIED;	/* attacker died */
 							if (newres&MM_DEF_LSVD)
@@ -14125,7 +14219,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				if (dmg < 1)
 					dmg = 1;
 
-				newres = xdamagey(mdef, magr, &noattack, dmg, FALSE);
+				newres = xdamagey(mdef, magr, &noattack, dmg);
 				if (newres&MM_DEF_DIED)
 					result |= MM_AGR_DIED;	/* attacker died */
 				if (newres&MM_DEF_LSVD)
@@ -14164,7 +14258,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					}
 					/* damage */
 					if (dmg) {
-						newres = xdamagey(mdef, magr, passive, dmg, FALSE);
+						newres = xdamagey(mdef, magr, passive, dmg);
 						if (newres&MM_DEF_DIED)
 							result |= MM_AGR_DIED;	/* attacker died */
 						if (newres&MM_DEF_LSVD)
@@ -14264,7 +14358,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 								if (canseemon(mdef))
 									pline("%s collapses into a puddle of noxious fluid!", Monnam(mdef));
 								if (!(result&MM_DEF_DIED)) {
-									newres = xdamagey(magr, mdef, passive, *hp(mdef), FALSE);
+									newres = xdamagey(magr, mdef, passive, *hp(mdef));
 									if (newres&MM_DEF_DIED)
 										result |= MM_DEF_DIED;	/* defender died */
 									if (newres&MM_DEF_LSVD)
@@ -14495,7 +14589,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 							pline("%s is suddenly very cold!",
 								Monnam(magr));
 						}
-						newres = xdamagey(mdef, magr, passive, dmg, FALSE);
+						newres = xdamagey(mdef, magr, passive, dmg);
 						if (newres&MM_DEF_DIED)
 							result |= MM_AGR_DIED;	/* attacker died */
 						if (newres&MM_DEF_LSVD)
@@ -14537,7 +14631,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 							pline("%s is suddenly very hot!",
 								Monnam(magr));
 						}
-						newres = xdamagey(mdef, magr, passive, dmg, FALSE);
+						newres = xdamagey(mdef, magr, passive, dmg);
 						if (newres&MM_DEF_DIED)
 							result |= MM_AGR_DIED;	/* attacker died */
 						if (newres&MM_DEF_LSVD)
@@ -14565,7 +14659,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 							pline("%s is jolted with electricity!",
 								Monnam(magr));
 						}
-						newres = xdamagey(mdef, magr, passive, dmg, FALSE);
+						newres = xdamagey(mdef, magr, passive, dmg);
 						if (newres&MM_DEF_DIED)
 							result |= MM_AGR_DIED;	/* attacker died */
 						if (newres&MM_DEF_LSVD)
@@ -14791,7 +14885,7 @@ android_combo()
 
 		/* attack (melee twice OR throw lightsaber) */
 		if (!mdef) {
-			projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+			projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 		}
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -14812,7 +14906,7 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee once OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+					projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -14839,7 +14933,7 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee twice OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (struct obj *)0, FALSE, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+					projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);

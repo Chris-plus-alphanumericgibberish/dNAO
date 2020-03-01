@@ -3961,7 +3961,7 @@ xchar sx, sy;
 			/* "Poisoned by a poisoned ___" is redundant */
 			done(POISONING);
 		} else {
-			poisoned("blast", A_DEX, "poisoned blast", 15, 0);
+			poisoned("blast", A_DEX, "poisoned blast", 15);
 		}
 	    break;
 	case AD_ACID:

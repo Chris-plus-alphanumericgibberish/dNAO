@@ -1651,7 +1651,7 @@ struct monst *mtmp;
 						singular(otmp, doname));
 		}
 		
-		projectile(mtmp, otmp, (struct obj *)0, FALSE, mtmp->mx, mtmp->my, sgn(tbx), sgn(tby), 0, distmin(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy), FALSE, FALSE, FALSE);
+		projectile(mtmp, otmp, (void *)0, HMON_FIRED, mtmp->mx, mtmp->my, sgn(tbx), sgn(tby), 0, distmin(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy), FALSE, FALSE, FALSE);
 
 		if(u.ux != mtmp->mux || u.uy != mtmp->muy){
 			mtmp->mux = mtmp->muy = 0;

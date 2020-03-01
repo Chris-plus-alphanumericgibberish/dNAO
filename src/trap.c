@@ -21,7 +21,7 @@ STATIC_DCL int FDECL(disarm_squeaky_board, (struct trap *));
 STATIC_DCL int FDECL(disarm_shooting_trap, (struct trap *));
 STATIC_DCL int FDECL(try_lift, (struct monst *, struct trap *, int, BOOLEAN_P));
 STATIC_DCL int FDECL(help_monster_out, (struct monst *, struct trap *));
-STATIC_DCL boolean FDECL(thitm, (int,struct monst *,struct obj *,int,BOOLEAN_P));
+STATIC_DCL boolean FDECL(thitm, (struct monst *,int,BOOLEAN_P));
 STATIC_DCL int FDECL(mkroll_launch,
 			(struct trap *,XCHAR_P,XCHAR_P,SHORT_P,long));
 STATIC_DCL boolean FDECL(isclearpath,(coord *, int, SCHAR_P, SCHAR_P));
@@ -316,7 +316,9 @@ register int x, y, typ;
 			else if (!rn2(3) && In_moloch_temple(&u.uz))	set_material(otmp, BONE);
 			else if (!rn2(3) && In_mines(&u.uz))			set_material(otmp, MINERAL);
 			// poisons
-			if (typ == DART_TRAP || !rn2(3)) {
+			if (rn2(level_difficulty()) &&
+				(typ == DART_TRAP || !rn2(5)))
+			{
 				if (Is_juiblex_level(&u.uz))			otmp->opoisoned = OPOISON_ACID;
 				else if (Is_zuggtmoy_level(&u.uz))		otmp->opoisoned = OPOISON_FILTH;
 				else if (Is_baphomet_level(&u.uz))		otmp->opoisoned = OPOISON_ACID;
@@ -429,6 +431,7 @@ struct obj *obj;
 		panic("putting non-free object into trap");
 	}
 	obj->where = OBJ_INTRAP;
+	obj->nobj = 0;
 	obj->otrap = trap;
 	trap->launch_ammo = obj;
 	return;
@@ -823,11 +826,7 @@ unsigned trflags;
 		seetrap(trap);
 		pline("%s shoots out at you!", An(xname(otmp)));
 
-#ifdef STEED
-		if (u.usteed && !rn2(2) && steedintrap(trap, otmp)) /* nothing */;
-		else
-#endif
-		projectile((struct monst *)0, otmp, (struct obj *)0, TRUE, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
+		projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
 		break;
 
 	    case ROCKTRAP:
@@ -836,49 +835,19 @@ unsigned trflags;
 			  the(ceiling(u.ux,u.uy)));
 		    deltrap(trap);
 		    newsym(u.ux,u.uy);
-		} else {
-		    int dmg = d(2,6); /* should be std ROCK dmg? */
-
-			if (trap->launch_ammo->quan > 1) {
-				otmp = splitobj(trap->launch_ammo, 1);
-			}
-			extract_nobj(otmp, &trap->launch_ammo);
-		    seetrap(trap);
-
-		    pline("A trap door in %s opens and %s falls on your %s!",
-			  the(ceiling(u.ux,u.uy)),
-			  an(xname(otmp)),
-			  body_part(HEAD));
-
-		    if (uarmh) {
-			if(is_hard(uarmh)) {
-			    pline("Fortunately, you are wearing a hard helmet.");
-			    dmg = 2;
-				} else if (umechanoid) {
-					pline("Fortunately, you have a very hard head!");
-					dmg = 2;
-				} else if (thick_skinned(youracedata)) {
-					pline("Fortunately, you have a thick head!");
-					dmg = 2;
-				} else if (flags.verbose) {
-				    Your("%s does not protect you.", xname(uarmh));
-				}
-			} else if (umechanoid) {
-				pline("Fortunately, you have a very hard head!");
-				dmg = 2;
-			} else if (thick_skinned(youracedata)) {
-				pline("Fortunately, you have a thick head!");
-				dmg = 2;
-		    }
-
-		    if (!Blind) otmp->dknown = 1;
-			place_object(otmp, u.ux, u.uy);
-		    stackobj(otmp);
-		    newsym(u.ux,u.uy);	/* map the rock */
-
-		    losehp(dmg, "falling rock", KILLED_BY_AN);
-		    exercise(A_STR, FALSE);
+			break;
 		}
+		otmp = trap->launch_ammo;
+		if (trap->launch_ammo->quan > 1) {
+			otmp = splitobj(trap->launch_ammo, 1);
+		}
+		extract_nobj(otmp, &trap->launch_ammo);
+		seetrap(trap);
+		pline("A trap door in %s opens and %s falls!",
+			the(ceiling(u.ux, u.uy)),
+			an(xname(otmp))
+			);
+		projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
 		break;
 
 	    case SQKY_BOARD:	    /* stepped on a squeaky board */
@@ -947,10 +916,14 @@ unsigned trflags;
 		u.utraptype = TT_BEARTRAP;
 #ifdef STEED
 		if (u.usteed) {
-		    pline("%s bear trap closes on %s %s!",
-			A_Your[trap->madeby_u], s_suffix(mon_nam(u.usteed)),
-			mbodypart(u.usteed, FOOT));
-		} else
+			pline("%s bear trap closes on %s %s!",
+				A_Your[trap->madeby_u], s_suffix(mon_nam(u.usteed)),
+				mbodypart(u.usteed, FOOT));
+
+			hmon2point0((struct monst *)0, u.usteed, (struct attack *)0, (struct attack *)0, trap->launch_ammo, trap,
+				HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0);
+		}
+		else
 #endif
 		{
 		    long side = rn2(3) ? LEFT_SIDE : RIGHT_SIDE;
@@ -958,6 +931,10 @@ unsigned trflags;
 			if (!jboots5) jboots5 = find_jboots();
 		    pline("%s bear trap closes on your %s!",
 			    A_Your[trap->madeby_u], body_part(FOOT));
+
+			hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, trap->launch_ammo, trap,
+				HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0);
+
 		    if(u.umonnum == PM_OWLBEAR || u.umonnum == PM_BUGBEAR)
 			You("howl in anger!");
 	#ifdef STEED
@@ -1191,7 +1168,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 					NO_KILLER_PREFIX);
 				}
 				if (!rn2(6))
-				poisoned("spikes", A_STR, "fall onto poison spikes", 8, 0);
+				poisoned("spikes", A_STR, "fall onto poison spikes", 8);
 			}
 		} else
 		    losehp(rnd(6),"fell into a pit", NO_KILLER_PREFIX);
@@ -1441,8 +1418,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 
 		seetrap(trap);
 		pline("Click! You trigger a rolling boulder trap!");
-		if(!launch_obj(BOULDER, trap->launch.x, trap->launch.y,
-		      trap->launch2.x, trap->launch2.y, style)) {
+		if(!launch_obj(BOULDER, trap, style)) {
 		    deltrap(trap);
 		    newsym(u.ux,u.uy);	/* get rid of trap symbol */
 		    pline("Fortunately for you, no boulder was released.");
@@ -1481,15 +1457,6 @@ struct obj *otmp;
 
 	in_sight = !Blind;
 	switch (tt) {
-		case DART_TRAP:
-		case ARROW_TRAP:
-			if(!otmp) {
-				impossible("steed hit by non-existant arrow/dart?");
-				return 0;
-			}
-			if (thitm(8, mtmp, otmp, 0, FALSE)) trapkilled = TRUE;
-			steedhit = TRUE;
-			break;
 		case SLP_GAS_TRAP:
 		    if (!resists_sleep(mtmp) && !breathless_mon(mtmp) &&
 				!mtmp->msleeping && mtmp->mcanmove) {
@@ -1503,7 +1470,7 @@ struct obj *otmp;
 			steedhit = TRUE;
 			break;
 		case LANDMINE:
-			if (thitm(0, mtmp, (struct obj *)0, rnd(16), FALSE))
+			if (thitm(mtmp, rnd(16), FALSE))
 			    trapkilled = TRUE;
 			steedhit = TRUE;
 			break;
@@ -1515,8 +1482,7 @@ struct obj *otmp;
 						mon_nam(mtmp));
 				}
 				if (mtmp->mhp <= 0 ||
-					thitm(0, mtmp, (struct obj *)0,
-						  rnd((tt == PIT) ? 6 : 12) + ((tt == SPIKED_PIT && hates_silver(mtmp->data)) ? rnd(20) : 0), FALSE))
+					thitm(mtmp, rnd((tt == PIT) ? 6 : 12) + ((tt == SPIKED_PIT && hates_silver(mtmp->data)) ? rnd(20) : 0), FALSE))
 					trapkilled = TRUE;
 				steedhit = TRUE;
 			} else {
@@ -1525,8 +1491,7 @@ struct obj *otmp;
 						mon_nam(mtmp));
 				}
 				if (mtmp->mhp <= 0 ||
-					thitm(0, mtmp, (struct obj *)0,
-						  rnd((tt == PIT) ? 6 : 10) + ((tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0), FALSE))
+					thitm(mtmp, rnd((tt == PIT) ? 6 : 10) + ((tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0), FALSE))
 					trapkilled = TRUE;
 				steedhit = TRUE;
 			}
@@ -1586,16 +1551,16 @@ struct trap *trap;
 #ifdef OVL3
 
 /*
- * Move obj from (x1,y1) to (x2,y2)
+ * Move object of type otyp from one set of trap's launch coordinates to other.
  *
  * Return 0 if no object was launched.
  *        1 if an object was launched and placed somewhere.
  *        2 if an object was launched, but used up.
  */
 int
-launch_obj(otyp, x1, y1, x2, y2, style)
+launch_obj(otyp, trap, style)
 short otyp;
-register int x1,y1,x2,y2;
+struct trap * trap;
 int style;
 {
 	register struct monst *mtmp;
@@ -1607,6 +1572,10 @@ int style;
 	int dist;
 	int tmp;
 	int delaycnt = 0;
+	int x1 = trap->launch.x,
+		x2 = trap->launch2.x,
+		y1 = trap->launch.y,
+		y2 = trap->launch2.y;
 
 	otmp = sobj_at(otyp, x1, y1);
 	/* Try the other side too, for rolling boulder traps */
@@ -1699,8 +1668,8 @@ int style;
 			}
 			/* boulder may hit creature */
 			int dieroll = rnd(20);
-			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, (struct obj *)0, 1, 0) >= dieroll)
-				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, singleobj, (struct obj *)0, TRUE, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, FALSE);
+			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0) >= dieroll)
+				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up);
 			else if (cansee(bhitpos.x, bhitpos.y))
 				miss(xname(singleobj), mtmp);
 			if (used_up)
@@ -1711,10 +1680,10 @@ int style;
 			if (!u.uinvulnerable){
 				/* boulder may hit you */
 				int dieroll = rnd(20);
-				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, (struct obj *)0, 1, 0) >= dieroll) {
+				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0) >= dieroll) {
 					killer = "rolling boulder trap";
 					killer_format = KILLED_BY_AN;
-					(void)hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, singleobj, (struct obj *)0, TRUE, 0, 0, TRUE, dieroll, FALSE, -1, &used_up, TRUE);
+					(void)hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up);
 				}
 				else if (!Blind)
 					pline("%s missses!", The(xname(singleobj)));
@@ -1948,7 +1917,7 @@ schar dx,dy;
 
 int
 mintrap(mtmp)
-register struct monst *mtmp;
+struct monst *mtmp;
 {
 	register struct trap *trap = t_at(mtmp->mx, mtmp->my);
 	boolean trapkilled = FALSE;
@@ -2043,7 +2012,7 @@ register struct monst *mtmp;
 			extract_nobj(otmp, &trap->launch_ammo);
 			if (in_sight)
 				seetrap(trap);
-			if (thitm(8, mtmp, otmp, 0, FALSE))
+			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE) == MM_DEF_DIED)
 				trapkilled = TRUE;
 			break;
 		case ROCKTRAP:
@@ -2060,7 +2029,8 @@ register struct monst *mtmp;
 			}
 			extract_nobj(otmp, &trap->launch_ammo);
 			if (in_sight) seetrap(trap);
-			if (thitm(0, mtmp, otmp, d(2, 6), FALSE))
+
+			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE) == MM_DEF_DIED)
 			    trapkilled = TRUE;
 			break;
 
@@ -2091,6 +2061,10 @@ register struct monst *mtmp;
 				   && flags.soundok)
 				    You_hear("the roaring of an angry bear!");
 			    }
+
+				if (hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, trap->launch_ammo, trap,
+					HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0) == MM_DEF_DIED)
+					trapkilled = TRUE;
 			}
 			break;
 
@@ -2216,7 +2190,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				    shieldeff(mtmp->mx,mtmp->my);
 				    pline("%s is uninjured.", Monnam(mtmp));
 				}
-			    } else if (thitm(0, mtmp, (struct obj *)0, rnd(3), FALSE))
+			    } else if (thitm(mtmp, rnd(3), FALSE))
 				trapkilled = TRUE;
 			    if (see_it) seetrap(trap);
 			    break;
@@ -2255,7 +2229,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    }
 			    if (alt > num) num = alt;
 
-			    if (thitm(0, mtmp, (struct obj *)0, num, immolate))
+			    if (thitm(mtmp, num, immolate))
 				trapkilled = TRUE;
 			    else
 				/* we know mhp is at least `num' below mhpmax,
@@ -2301,8 +2275,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				}
 				mselftouch(mtmp, "Falling, ", FALSE);
 				if (mtmp->mhp <= 0 ||
-					thitm(0, mtmp, (struct obj *)0,
-						  rnd((tt == PIT) ? 6 : 12) + ((tt == SPIKED_PIT && hates_silver(mtmp->data)) ? rnd(20) : 0), FALSE))
+					thitm(mtmp, rnd((tt == PIT) ? 6 : 12) + ((tt == SPIKED_PIT && hates_silver(mtmp->data)) ? rnd(20) : 0), FALSE))
 					trapkilled = TRUE;
 			} else {
 				if (in_sight && hates_iron(mtmp->data) && tt == SPIKED_PIT) {
@@ -2311,8 +2284,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				}
 				mselftouch(mtmp, "Falling, ", FALSE);
 				if (mtmp->mhp <= 0 ||
-					thitm(0, mtmp, (struct obj *)0,
-						  rnd((tt == PIT) ? 6 : 10) + ((tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0), FALSE))
+					thitm(mtmp, rnd((tt == PIT) ? 6 : 10) + ((tt == SPIKED_PIT && hates_iron(mtmp->data)) ? rnd(mtmp->m_lev) : 0), FALSE))
 					trapkilled = TRUE;
 			}
 			break;
@@ -2494,7 +2466,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			if (!in_sight)
 				pline("Kaablamm!  You hear an explosion in the distance!");
 			blow_up_landmine(trap);
-			if (thitm(0, mtmp, (struct obj *)0, rnd(16), FALSE))
+			if (thitm(mtmp, rnd(16), FALSE))
 				trapkilled = TRUE;
 			else {
 				/* monsters recursively fall into new pit */
@@ -2529,8 +2501,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				  trap->tseen ?
 				  "a rolling boulder trap" :
 				  something);
-			if (launch_obj(BOULDER, trap->launch.x, trap->launch.y,
-				trap->launch2.x, trap->launch2.y, style)) {
+			if (launch_obj(BOULDER, trap, style)) {
 			    if (in_sight) trap->tseen = TRUE;
 			    if (mtmp->mhp <= 0) trapkilled = TRUE;
 			} else {
@@ -2918,7 +2889,7 @@ boolean silently;
 	else {
 		if (seen && !silently)
 			pline("%s falls over.", Monnam(mon));
-		thitm(0, mon, (struct obj*)0, rnd(2), FALSE);
+		thitm(mon, rnd(2), FALSE);
 		mselftouch(mon, "Falling, ", FALSE);
 	}
 
@@ -4749,7 +4720,7 @@ boolean disarm;
 		case 17:
 			pline("A cloud of noxious gas billows from %s.",
 							the(xname(obj)));
-			poisoned("gas cloud", A_STR, "cloud of poison gas",15,0);
+			poisoned("gas cloud", A_STR, "cloud of poison gas",15);
 			exercise(A_CON, FALSE);
 			break;
 		case 16:
@@ -4757,11 +4728,7 @@ boolean disarm;
 		case 14:
 		case 13:
 			You_feel("a needle prick your %s.",body_part(bodypart));
-			poisoned("needle", A_CON, "poisoned needle",10,	rn2(10) ? OPOISON_BASIC :
-															!rn2(4) ? OPOISON_SLEEP :
-															!rn2(3) ? OPOISON_BLIND :
-															!rn2(2) ? OPOISON_PARAL :
-																	  OPOISON_AMNES);
+			poisoned("needle", A_CON, "poisoned needle",10);
 			exercise(A_CON, FALSE);
 			break;
 		case 12:
@@ -4925,55 +4892,25 @@ register int bodypart;
 	make_stunned(HStun + dmg, TRUE);
 }
 
-/* Monster is hit by trap. */
-/* Note: doesn't work if both obj and d_override are null */
+/* Monster is hit by basic-damage-dealing trap. */
 STATIC_OVL boolean
-thitm(tlev, mon, obj, d_override, nocorpse)
-int tlev;
+thitm(mon, dam, nocorpse)
 struct monst *mon;
-struct obj *obj;
-int d_override;
+int dam;
 boolean nocorpse;
 {
-	int strike;
 	boolean trapkilled = FALSE;
 
-	if (d_override) strike = 1;
-	else if (obj) strike = (find_mac(mon) + tlev + obj->spe <= rnd(20));
-	else strike = (find_mac(mon) + tlev <= rnd(20));
+	if ((mon->mhp -= dam) <= 0) {
+		int xx = mon->mx;
+		int yy = mon->my;
 
-	/* Actually more accurate than thitu, which doesn't take
-	 * obj->spe into account.
-	 */
-	if(!strike) {
-		if (obj && cansee(mon->mx, mon->my))
-		    pline("%s is almost hit by %s!", Monnam(mon), doname(obj));
-	} else {
-		int dam = 1;
-
-		if (obj && cansee(mon->mx, mon->my))
-			pline("%s is hit by %s!", Monnam(mon), doname(obj));
-		if (d_override) dam = d_override;
-		else if (obj) {
-			dam = dmgval(obj, mon, 0);
-			if (dam < 1) dam = 1;
-		}
-		if ((mon->mhp -= dam) <= 0) {
-			int xx = mon->mx;
-			int yy = mon->my;
-
-			monkilled(mon, "", nocorpse ? -AD_RBRE : AD_PHYS);
-			if (mon->mhp <= 0) {
-				newsym(xx, yy);
-				trapkilled = TRUE;
-			}
+		monkilled(mon, "", nocorpse ? -AD_RBRE : AD_PHYS);
+		if (mon->mhp <= 0) {
+			newsym(xx, yy);
+			trapkilled = TRUE;
 		}
 	}
-	if (obj && (!strike || d_override)) {
-		place_object(obj, mon->mx, mon->my);
-		stackobj(obj);
-	} else if (obj) dealloc_obj(obj);
-
 	return trapkilled;
 }
 

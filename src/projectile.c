@@ -4,7 +4,7 @@
 STATIC_DCL void FDECL(do_digging_projectile, (struct monst *, struct obj *, int, int));
 STATIC_DCL void FDECL(destroy_projectile, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(end_projectile, (struct monst *, struct monst *, struct obj *, struct obj *, boolean, boolean, boolean *));
-STATIC_DCL int FDECL(projectile_attack, (struct monst *, struct monst *, struct obj *, struct obj *, boolean, int*, int*, int*, int*, boolean, boolean*));
+STATIC_DCL int FDECL(projectile_attack, (struct monst *, struct monst *, struct obj *, void *, int, int*, int*, int*, int*, boolean, boolean*));
 STATIC_DCL void FDECL(quest_art_swap, (struct obj *, struct monst *, boolean *));
 STATIC_DCL void FDECL(sho_obj_return, (struct obj *, int, int));
 STATIC_DCL void FDECL(return_thrownobj, (struct monst *, struct obj *));
@@ -44,11 +44,11 @@ static long old_wep_mask;
  * it does not assume magr is actually firing the projectile themselves
  */
 int
-projectile(magr, ammo, launcher, fired, initx, inity, dx, dy, dz, initrange, forcedestroy, verbose, impaired)
+projectile(magr, ammo, vpointer, hmoncode, initx, inity, dx, dy, dz, initrange, forcedestroy, verbose, impaired)
 struct monst * magr;			/* Creature responsible for the projectile. Can be non-existant. */
 struct obj * ammo;				/* Projectile object. Must exist. May be in an inventory, or free, or anywhere. */
-struct obj * launcher;			/* Launcher for the projectile. Can be non-existant. Implies "fired" is true. */
-boolean fired;					/* Whether or not the projectile was fired (ex arrow from a bow). Fired without a launcher is possible (ex AT_ARRW). */
+void * vpointer;				/* additional /whatever/, type based on hmoncode. */
+int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
 int initx;						/* x; Where the projectile originates from. Does not hit this location. */
 int inity;						/* y; Where the projectile originates from. Does not hit this location. */
 int dx;							/* x; Direction of projectile's movement */
@@ -70,6 +70,15 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	int boomerang_init;
 	bhitpos.x = initx;
 	bhitpos.y = inity;
+
+	boolean misthrown = (hmoncode & HMON_MISTHROWN);
+	boolean fired = (hmoncode & HMON_FIRED);
+	boolean thrown = (misthrown || fired);
+	boolean trapped = (hmoncode & HMON_TRAP);
+
+	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
+	if (trap) launcher = 0; /* trap takes precedence over launcher */
 
 	if (!ammo) {
 		/* if we are out of ammo, can't fire */
@@ -167,7 +176,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 	/* determine if thrownobj should return (like Mjollnir) */
 	if (magr && (
-		(Race_if(PM_ANDROID) && !fired && youagr) ||	/* there's no android monster helper? */
+		(Race_if(PM_ANDROID) && !launcher && youagr) ||	/* there's no android monster helper? */
 		(thrownobj->oartifact == ART_MJOLLNIR && (youagr ? (Role_if(PM_VALKYRIE)) : magr ? (magr->data == &mons[PM_VALKYRIE]) : FALSE)) ||
 		(thrownobj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && (youagr ? (Race_if(PM_DWARF)) : magr ? (is_dwarf(magr->data)) : FALSE)) ||
 		thrownobj->oartifact == ART_SICKLE_MOON ||
@@ -184,7 +193,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	}
 
 	/* player exercises STR just be throwing heavy things */
-	if (youagr && !fired && (
+	if (youagr && !launcher && (
 		thrownobj->otyp == BOULDER ||
 		(thrownobj->otyp == STATUE && is_boulder(thrownobj)) ||
 		thrownobj->otyp == HEAVY_IRON_BALL
@@ -198,7 +207,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		mdef = u.ustuck;
 		bhitpos.x = x(mdef);
 		bhitpos.y = y(mdef);
-		result = projectile_attack(magr, mdef, thrownobj, launcher, fired, &dx, &dy, &range, &initrange, forcedestroy, &wepgone);
+		result = projectile_attack(magr, mdef, thrownobj, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy, &wepgone);
 		end_projectile(magr, mdef, thrownobj, launcher, fired, forcedestroy, &wepgone);
 		return result;
 	}
@@ -337,7 +346,17 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		if ((range != initrange || initrange == 0) &&
 			(mdef = creature_at(bhitpos.x, bhitpos.y)))
 		{
-			result = projectile_attack(magr, mdef, thrownobj, launcher, fired, &dx, &dy, &range, &initrange, forcedestroy, &wepgone);
+			/* dart/arrow traps hit your steed some of the time */
+			if (trap
+				&& (mdef == &youmonst)
+				&& (u.usteed)
+				&& (trap->ttyp == DART_TRAP || trap->ttyp == ARROW_TRAP)
+				&& !rn2(2)
+				) {
+				mdef = u.usteed;
+			}
+
+			result = projectile_attack(magr, mdef, thrownobj, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy, &wepgone);
 
 			if (result)
 			{
@@ -952,12 +971,12 @@ boolean * wepgone;
  *  
  */
 int
-projectile_attack(magr, mdef, thrownobj, launcher, fired, pdx, pdy, prange, prange2, forcedestroy, wepgone)
+projectile_attack(magr, mdef, thrownobj, vpointer, hmoncode, pdx, pdy, prange, prange2, forcedestroy, wepgone)
 struct monst * magr;			/* Creature responsible for the projectile. Can be non-existant. */
 struct monst * mdef;			/* Creature under fire. */
 struct obj * thrownobj;			/* Projectile object. Must be free. */
-struct obj * launcher;			/* Launcher for the projectile. Can be non-existant. Implies "fired" is true. */
-boolean fired;					/* Whether or not the projectile was fired (ex arrow from a bow). Fired without a launcher is possible (ex AT_ARRW). */
+void * vpointer;				/* additional /whatever/, type based on hmoncode. */
+int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
 int * pdx;						/* pointer to: x; Direction of projectile's movement */
 int * pdy;						/* pointer to: y; Direction of projectile's movement */
 int * prange;					/* pointer to: Remaining range for projectile */
@@ -973,7 +992,15 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 	boolean youdef = (mdef == &youmonst);
 	struct permonst * pa = magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0;
 	struct permonst * pd = youdef ? youracedata : mdef->data;
-	boolean misfired = (!fired && is_ammo(thrownobj) && thrownobj->oclass != GEM_CLASS);
+
+	boolean misfired = (hmoncode & HMON_MISTHROWN);
+	boolean fired = (hmoncode & HMON_FIRED);
+	boolean trapped = (hmoncode & HMON_TRAP);
+
+	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
+	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
+	if (trap) launcher = 0; /* trap takes precedence over launcher */
+
 	int result;
 	int accuracy;
 	int dieroll;
@@ -1188,7 +1215,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 	/* Determine if the projectile hits */
 	dieroll = rnd(20);
 	struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0 };
-	accuracy = tohitval(magr, mdef, &dummy, thrownobj, launcher, (misfired ? 2 : 1), 0);
+	accuracy = tohitval(magr, mdef, &dummy, thrownobj, vpointer, hmoncode, 0);
 
 	if (accuracy > dieroll)
 	{
@@ -1198,7 +1225,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			exercise(A_DEX, TRUE);
 		/* call hmon to make the projectile hit */
 		/* hmon will do hitmsg */
-		result = hmon2point0(magr, mdef, &dummy, &dummy, thrownobj, launcher, (misfired ? 2 : 1), 0, 0, TRUE, dieroll, FALSE, vis, wepgone, FALSE);
+		result = hmon2point0(magr, mdef, &dummy, &dummy, thrownobj, vpointer, hmoncode, 0, 0, TRUE, dieroll, FALSE, vis, wepgone);
 
 		/* wake up defender */
 		wakeup2(mdef, youagr);
@@ -1234,7 +1261,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			}
 			else if (forcedestroy ||
 				(launcher && fired && (launcher->oartifact == ART_HELLFIRE || launcher->oartifact == ART_BOW_OF_SKADI)) ||
-				(thrownobj->oartifact == ART_HOUCHOU) ||
+				(fired && thrownobj->oartifact == ART_HOUCHOU) ||
 				(fired && thrownobj->otyp == BULLET) || 
 				(fired && thrownobj->otyp == SILVER_BULLET) || 
 				(fired && thrownobj->otyp == SHOTGUN_SHELL) || 
@@ -1291,21 +1318,39 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 		/* miss */
 		/* print missmsg */
 		if (vis) {
-			/* If the target can't be seen or doesn't look like a valid target,
-			 * avoid "the arrow misses it," or worse, "the arrows misses the mimic."
-			 * An attentive player will still notice that this is different from
-			 * an arrow just landing short of any target (no message in that case),
-			 * so will realize that there is a valid target here anyway. 
-			 */
-			if (!canseemon(mdef) || (mdef->m_ap_type && mdef->m_ap_type != M_AP_MONSTER)) {
-				pline("%s %s.", (The(mshot_xname(thrownobj))), (vtense(mshot_xname(thrownobj), "miss")));
+			if (youdef) {
+				if (Blind)
+					pline("%s %s.", (The(mshot_xname(thrownobj))), (vtense(mshot_xname(thrownobj), "miss")));
+				else
+					pline("It misses.");
 			}
 			else {
-				pline("%s %s %s.",
-					(The(mshot_xname(thrownobj))),
-					(vtense(mshot_xname(thrownobj), "miss")),
-					(((cansee(bhitpos.x, bhitpos.y) || canspotmon(mdef)) && flags.verbose) ? mon_nam(mdef) : "it")
-					);
+				if (!canseemon(mdef) || (mdef->m_ap_type && mdef->m_ap_type != M_AP_MONSTER)) {
+					/* If the target can't be seen or doesn't look like a valid target,
+					* avoid "the arrow misses it," or worse, "the arrows misses the mimic."
+					* An attentive player will still notice that this is different from
+					* an arrow just landing short of any target (no message in that case),
+					* so will realize that there is a valid target here anyway.
+					*/
+					pline("%s %s.", (The(mshot_xname(thrownobj))), (vtense(mshot_xname(thrownobj), "miss")));
+				}
+				else if (trap) {
+					/* Traps are surprises! */
+					/* Grammatically, it assumes that the projectile has not been stated already.
+					   (NOT: A dart shoots out! Foo is missed by a dart!) */
+					pline("%s is %s by %s!",
+						Monnam(mdef),
+						((dieroll - accuracy) < 3 ? "almost hit" : "missed"),
+						an(mshot_xname(thrownobj))
+						);
+				}
+				else {
+					pline("%s %s %s.",
+						(The(mshot_xname(thrownobj))),
+						(vtense(mshot_xname(thrownobj), "miss")),
+						(((cansee(bhitpos.x, bhitpos.y) || canspotmon(mdef)) && flags.verbose) ? mon_nam(mdef) : "it")
+						);
+				}
 			}
 		}
 		/* possibly wake defender */
@@ -2028,7 +2073,7 @@ dothrow()
 		ammo_and_launcher(ammo, uwep))
 		launcher = uwep;
 	else if (ammo != uwep && ammo != uswapwep &&
-		ammo_and_launcher(ammo, uswapwep))
+		ammo_and_launcher(ammo, uswapwep) && u.twoweap)
 		launcher = uswapwep;
 	else
 		launcher = (struct obj *)0;
@@ -2077,7 +2122,7 @@ dofire()
 
 	/* Fire loaded launchers and blasters */
 	if ((uwep     && ((uquiver && ammo_and_launcher(uquiver, uwep    )) || is_blaster(uwep    ))) ||
-		(uswapwep && ((uquiver && ammo_and_launcher(uquiver, uswapwep)) || is_blaster(uswapwep)))
+		(uswapwep && ((uquiver && ammo_and_launcher(uquiver, uswapwep)) || is_blaster(uswapwep)) && u.twoweap)
 		)
 	{
 		struct obj * launcher;
@@ -2462,7 +2507,8 @@ boolean forcedestroy;
 		int dx = u.dx, dy = u.dy, dz = u.dz;
 		boolean impaired = misthrow(&youmonst, ammo, launcher, m_shot.s, &dx, &dy, &dz);
 		/* note: we actually don't care if the projectile hit anything */
-		(void)projectile(&youmonst, ammo, launcher, m_shot.s, u.ux, u.uy, dx, dy, dz, range, forcedestroy, TRUE, impaired);
+		(void)projectile(&youmonst, ammo, launcher, (m_shot.s || !is_ammo(ammo) || ammo->oclass==GEM_CLASS) ? HMON_FIRED : HMON_MISTHROWN,
+			u.ux, u.uy, dx, dy, dz, range, forcedestroy, TRUE, impaired);
 		if (Weightless || Levitation)
 			hurtle(-u.dx, -u.dy, hurtle_dist, TRUE);
 	}
@@ -2836,7 +2882,7 @@ int tary;
 	if (youagr)
 		otmp->spe = 1;
 	/* shoot otmp */
-	projectile(magr, otmp, (struct obj *)0, FALSE,
+	projectile(magr, otmp, (void *)0, HMON_FIRED,
 		x(magr), y(magr), dx, dy, dz,
 		BOLT_LIM, TRUE, youagr, FALSE);
 
@@ -2994,13 +3040,13 @@ int tary;
 	/* Fire the projectile */
 	if (portal_projectile) {
 		/* start the projectile adjacent to the target */
-		projectile(magr, qvr, (struct obj *)0, TRUE,
+		projectile(magr, qvr, (void *)0, HMON_FIRED,
 			tarx-dx, tary-dy, dx, dy, dz,
 			1, TRUE, youagr, FALSE);
 	}
 	else {
 		/* start the projectile at magr's location, modified by xadj and yadj */
-		projectile(magr, qvr, (struct obj *)0, TRUE,
+		projectile(magr, qvr, (void *)0, HMON_FIRED,
 			x(magr)+xadj, y(magr)+yadj, dx, dy, dz,
 			BOLT_LIM+rngmod, TRUE, youagr, FALSE);
 	}
@@ -3206,7 +3252,8 @@ boolean forcedestroy;
 		int dx = odx, dy = ody, dz = 0;
 		boolean impaired = misthrow(magr, ammo, launcher, m_shot.s, &dx, &dy, &dz);
 		/* note: we actually don't care if the projectile hit anything */
-		result = projectile(magr, ammo, launcher, m_shot.s, x(magr), y(magr), dx, dy, dz, range, forcedestroy, FALSE, impaired);
+		result = projectile(magr, ammo, launcher, (m_shot.s || !is_ammo(ammo) || ammo->oclass == GEM_CLASS) ? HMON_FIRED : HMON_MISTHROWN,
+			x(magr), y(magr), dx, dy, dz, range, forcedestroy, FALSE, impaired);
 		/* monsters don't hurtle like the player does at the moment */
 	}
 

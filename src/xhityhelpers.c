@@ -830,8 +830,9 @@ struct attack *mattk;
 	}
 	else {
 		return (mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR) ? "contact" :
-			(mattk->aatyp == AT_GAZE) ? "gaze" :
-			(mattk->aatyp == AT_WDGZ) ? "gaze" :
+			(mattk->aatyp == AT_GAZE || mattk->aatyp == AT_WDGZ) ? "gaze" :
+			(mattk->aatyp == AT_CLAW) ? "claws" :
+			(mattk->aatyp == AT_TENT) ? "tentacles" :
 			(mattk->aatyp == AT_ENGL) ? "vapor" :
 			(mattk->aatyp == AT_BITE || mattk->aatyp == AT_LNCK || mattk->aatyp == AT_5SBT) ? "bite" :
 			(mattk->aatyp == AT_NONE) ? "attack" :
