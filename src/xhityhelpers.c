@@ -1322,6 +1322,7 @@ struct obj * otmp;
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 
 	boolean vulnerable = insubstantial(pd);
+#define vd(n, x)	(vulnerable ? (n*x) : d(n, x))
 	int diesize;
 	int ndice;
 
@@ -1343,7 +1344,7 @@ struct obj * otmp;
 		else if(otmp->otyp == KHAKKHARA)
 			ndice = rnd(3);
 		/* calculate */
-		dmg += (vulnerable ? ndice*diesize : d(ndice, diesize));
+		dmg += vd(ndice, diesize);
 	}
 	if (hates_iron(pd) &&
 		otmp->obj_material == IRON) {
@@ -1354,7 +1355,7 @@ struct obj * otmp;
 		if (otmp->otyp == KHAKKHARA)
 			ndice = rnd(3);
 		/* calculate */
-		dmg += (vulnerable ? ndice*diesize : d(ndice, diesize));
+		dmg += vd(ndice, diesize);
 	}
 	if (hates_holy_mon(mdef) &&
 		otmp->blessed) {
@@ -1364,13 +1365,13 @@ struct obj * otmp;
 		/* special cases that don't affect dice */
 		if (otmp->oartifact == ART_EXCALIBUR ||
 			otmp->oartifact == ART_LANCE_OF_LONGINUS)
-			dmg += d(3, 7);
+			dmg += vd(3, 7);
 		else if (otmp->oartifact == ART_JINJA_NAGINATA)
-			dmg += d(1, 12);
+			dmg += vd(1, 12);
 		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
-			dmg += d(1, 20);
+			dmg += vd(1, 20);
 		else if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)
-			dmg += d(1, 10) + otmp->spe;
+			dmg += vd(1, 10) + otmp->spe;
 		else if (otmp->oartifact == ART_VAMPIRE_KILLER)
 			dmg += 7;
 		/* special cases that do affect dice */
@@ -1383,7 +1384,7 @@ struct obj * otmp;
 			diesize = 20;
 		}
 		/* calculate dice */
-		dmg += (vulnerable ? ndice*diesize : d(ndice, diesize));
+		dmg += vd(ndice, diesize);
 	}
 	if (hates_unholy_mon(mdef) &&
 		is_unholy(otmp)) {
@@ -1411,7 +1412,7 @@ struct obj * otmp;
 		}
 		/* calculate */
 		if (ndice)
-			dmg += (vulnerable ? ndice*diesize : d(ndice, diesize));
+			dmg += vd(ndice, diesize);
 	}
 
 	/* the Rod of Seven Parts gets a bonus vs holy and unholy when uncursed */
@@ -1419,26 +1420,26 @@ struct obj * otmp;
 		&& !otmp->blessed && !otmp->cursed
 		&& (hates_holy_mon(mdef) || hates_unholy_mon(mdef))
 		){
-		dmg += (vulnerable ? 10 : rnd(10));
+		dmg += vd(1, 10);
 	}
 
 	/* Glamdring sears orcs and demons */
 	if (otmp->oartifact == ART_GLAMDRING &&
 		(is_orc(pd) || is_demon(pd)))
-		dmg += (vulnerable ? 20 : rnd(20));
+		dmg += vd(1, 20);
 
 	/* The Veioistafur stave hurts sea creatures */
 	if (otmp->obj_material == WOOD && otmp->otyp != MOON_AXE
 		&& (otmp->oward & WARD_VEIOISTAFUR) && pd->mlet == S_EEL) {
-		dmg += (vulnerable ? 20 : rnd(20));
+		dmg += vd(1, 20);
 	}
 
 	/* The Lifehunt Scythe is occult */
 	if (mdef && mdef->isminion){
 		if (otmp->oartifact == ART_LIFEHUNT_SCYTHE)
-			dmg += (vulnerable ? 16 : d(4, 4)) + otmp->spe;
+			dmg += vd(4, 4) + otmp->spe;
 	}
-
+#undef vd
 	return dmg;
 }
 

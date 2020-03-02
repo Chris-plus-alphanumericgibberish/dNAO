@@ -3393,6 +3393,10 @@ claws_destroy_marm(mtmp, otmp)
 register struct monst *mtmp;
 register struct obj *otmp;
 {
+	/* call the player's version if need be */
+	if (mtmp == &youmonst)
+		return claws_destroy_arm(otmp);
+
 	long unwornmask;
 	if(!otmp || !mtmp)
 		return 0;
