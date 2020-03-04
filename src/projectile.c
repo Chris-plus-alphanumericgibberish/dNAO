@@ -8,7 +8,7 @@ STATIC_DCL int FDECL(projectile_attack, (struct monst *, struct monst *, struct 
 STATIC_DCL void FDECL(quest_art_swap, (struct obj *, struct monst *, boolean *));
 STATIC_DCL void FDECL(sho_obj_return, (struct obj *, int, int));
 STATIC_DCL void FDECL(return_thrownobj, (struct monst *, struct obj *));
-STATIC_DCL boolean FDECL(toss_up2, (struct obj *));
+STATIC_DCL void FDECL(toss_up2, (struct obj *));
 STATIC_DCL int FDECL(calc_multishot, (struct monst *, struct obj *, struct obj *, int));
 STATIC_DCL int FDECL(calc_range, (struct monst *, struct obj *, struct obj *, int *));
 STATIC_DCL boolean FDECL(uthrow, (struct obj *, struct obj *, int, boolean));
@@ -264,7 +264,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 		/* otherwise do the standard (player-only) toss upwards */
 		if (!(Weightless || Underwater || Is_waterlevel(&u.uz))) {
-			wepgone |= ~toss_up2(thrownobj);
+			toss_up2(thrownobj);
+			return MM_MISS;
 		}
 		end_projectile(magr, mdef, thrownobj, launcher, fired, forcedestroy, &wepgone);
 		return MM_MISS;
@@ -476,10 +477,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			else {
 				/* failure */
 				if (youagr) {
-					/* straight copy of old failed-catch code */
-					/* scope creep: use hmon2 */
-					int dmg = rn2(2);
-					if (!dmg) {
+					if (rn2(2)) {
 						pline(Blind ? "%s lands %s your %s." :
 							"%s back to you, landing %s your %s.",
 							Blind ? Something : Tobjnam(thrownobj, "return"),
@@ -487,17 +485,12 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 							makeplural(body_part(FOOT)));
 					}
 					else {
-						dmg += rnd(3);
 						pline(Blind ? "%s your %s!" :
 							"%s back toward you, hitting your %s!",
 							Tobjnam(thrownobj, Blind ? "hit" : "fly"),
 							body_part(ARM));
-						if (thrownobj->oartifact){
-							(void)artifact_hit((struct monst *)0,
-								&youmonst, thrownobj, &dmg, 0);
-						}
-						losehp(dmg, xname(thrownobj),
-							obj_is_pname(thrownobj) ? KILLED_BY : KILLED_BY_AN);
+						/* object now hits you -- ouch! */
+						(void)hmon2point0(magr, magr, (struct attack *)0, (struct attack *)0, thrownobj, (void *)0, HMON_FIRED, 0, 0, TRUE, 0, FALSE, -1, &wepgone);
 					}
 					/* end copy */
 				}
@@ -1607,12 +1600,8 @@ struct obj * thrownobj;
  * toss_up()
  * 
  * Hero tosses an object upwards with appropriate consequences.
- *
- * Returns FALSE if the object is gone.
- *
- * SCOPECREEP: use hmon2point0 and clean up the old crap
  */
-STATIC_OVL boolean
+STATIC_OVL void
 toss_up2(obj)
 struct obj *obj;
 {
@@ -1629,7 +1618,7 @@ struct obj *obj;
 				pline("%s hits the %s.", Doname2(obj), ceiling(u.ux, u.uy));
 				breakmsg(obj, !Blind);
 				breakobj(obj, u.ux, u.uy, TRUE, TRUE);
-				return FALSE;
+				return;
 			}
 			Sprintf(buf, "hits the %s", ceiling(u.ux, u.uy));
 		}
@@ -1642,115 +1631,13 @@ struct obj *obj;
 		hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
 	}
 	else {
-		pline("%s %s, then falls back on top of your %s.",
+		pline("%s %s, then falls back down towards your %s.",
 			Doname2(obj), buf, body_part(HEAD));
 
 		/* object now hits you */
-
-		if (obj->oclass == POTION_CLASS) {
-			potionhit(&youmonst, obj, TRUE);
-			return FALSE;
-		}
-		else if (breaktest(obj)) {
-			int otyp = obj->otyp, ocorpsenm = obj->corpsenm;
-			int blindinc;
-
-			/* need to check for blindness result prior to destroying obj */
-			blindinc = (otyp == CREAM_PIE || otyp == BLINDING_VENOM) &&
-				/* AT_WEAP is ok here even if attack type was AT_SPIT */
-				can_blnd(&youmonst, &youmonst, AT_WEAP, obj) ? rnd(25) : 0;
-
-			breakmsg(obj, !Blind);
-			breakobj(obj, u.ux, u.uy, TRUE, TRUE);
-			obj = 0;	/* it's now gone */
-			switch (otyp) {
-			case EGG:
-				if (touch_petrifies(&mons[ocorpsenm]) &&
-					!uarmh && !Stone_resistance &&
-					!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)))
-					goto petrify;
-			case CREAM_PIE:
-			case BLINDING_VENOM:
-				pline("You've got it all over your %s!", body_part(FACE));
-				if (blindinc) {
-					if (otyp == BLINDING_VENOM && !Blind)
-						pline("It blinds you!");
-					u.ucreamed += blindinc;
-					make_blinded(Blinded + (long)blindinc, FALSE);
-					if (!Blind) Your1(vision_clears);
-				}
-				break;
-			default:
-				break;
-			}
-			return FALSE;
-		}
-		else {		/* neither potion nor other breaking object */
-			boolean less_damage = uarmh && is_hard(uarmh), artimsg = FALSE;
-			int dmg = dmgval(obj, &youmonst, 0);
-			int basedamage = dmg;
-			int newdamage = dmg;
-			int dieroll = rn1(18, 2);  /* need a fake die roll here; rn1(18,2) avoids 1 and 20 */
-
-			if (obj->oartifact){
-				artimsg = artifact_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
-				dmg += (newdamage - basedamage);
-				newdamage = basedamage;
-			}
-			if (obj->oproperties){
-				artimsg |= oproperty_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
-				dmg += (newdamage - basedamage);
-				newdamage = basedamage;
-			}
-			if (spec_prop_otyp(obj)){
-				artimsg |= otyp_hit((struct monst *)0, &youmonst, obj, &newdamage, dieroll);
-				dmg += (newdamage - basedamage);
-				newdamage = basedamage;
-			}
-
-
-			if (!dmg) {	/* probably wasn't a weapon; base damage on weight */
-				dmg = (int)obj->owt / 100;
-				if (dmg < 1) dmg = 1;
-				else if (dmg > 6) dmg = 6;
-				if (hits_insubstantial((struct monst *)0, &youmonst, (struct attack *)0, obj) != 2)	/* 2: full damage object (like sunsword) */
-					dmg = 0;
-			}
-			if (resist_attacks(youracedata))
-				dmg = 0;
-			if (dmg > 1 && less_damage) dmg = 1;
-			if (dmg > 0) dmg += aeshbon();
-			if (dmg > 0) dmg += u.udaminc;
-			if (dmg < 0) dmg = 0;	/* beware negative rings of increase damage */
-			if (Half_physical_damage) dmg = (dmg + 1) / 2;
-			if (u.uvaul_duration) dmg = (dmg + 1) / 2;
-
-			if (uarmh) {
-				if (less_damage && dmg < (Upolyd ? u.mh : u.uhp)) {
-					if (!artimsg && (is_hard(uarmh)))
-						pline("Fortunately, you are wearing a hard helmet.");
-				}
-				else if (flags.verbose &&
-					!(obj->otyp == CORPSE && touch_petrifies(&mons[obj->corpsenm])))
-					Your("%s does not protect you.", xname(uarmh));
-			}
-			else if (obj->otyp == CORPSE && touch_petrifies(&mons[obj->corpsenm])) {
-				if (!Stone_resistance &&
-					!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
-				petrify:
-					killer_format = KILLED_BY;
-					killer = "elementary physics";	/* "what goes up..." */
-					You("turn to stone.");
-					if (obj) dropy(obj);	/* bypass most of hitfloor() */
-					done(STONING);
-					return obj ? TRUE : FALSE;
-				}
-			}
-			hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
-			losehp(dmg, "falling object", KILLED_BY_AN);
-		}
+		projectile((struct monst *)0, obj, (void *)0, HMON_MISTHROWN, u.ux, u.uy, 0, 0, 0, 0, FALSE, FALSE, FALSE);
+		return;
 	}
-	return TRUE;
 }
 
 /*

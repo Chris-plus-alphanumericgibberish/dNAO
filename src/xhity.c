@@ -13,7 +13,6 @@ artifact hitmesages
 Claws of the Revenancer w/ rings
 */
 
-STATIC_DCL int FDECL(getvis, (struct monst *, struct monst *, int, int));
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
@@ -23,7 +22,6 @@ STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL void FDECL(heal, (struct monst *, int));
-STATIC_DCL int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 STATIC_DCL int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int));
@@ -40,6 +38,9 @@ extern const char * const destroy_strings[];
 
 /* for long worms */
 extern boolean notonhead;
+
+/* global to help tell when something is making a sneak attack with the Lifehunt Scythe against a vulnerable target */
+boolean lifehunt_sneak_attacking = FALSE;
 
 /* Counterattack chance at skill level....  B:  S:  E:  */
 static const int DjemSo_counterattack[] = {  5, 10, 20 };
@@ -10811,51 +10812,35 @@ int vis;
 	return result;
 }
 
-boolean
-apply_hit_effects(magr, mdef, otmp, basedmg, dmgptr, dieroll, returnvalue, hittxt)
+int
+apply_hit_effects(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt)
 struct monst * magr;
 struct monst * mdef;
 struct obj * otmp;
 int basedmg;
-int * dmgptr;
+int * plusdmgptr;
+int * truedmgptr;
 int dieroll;
-int * returnvalue;
 boolean * hittxt;
 {
-	if (otmp->oartifact) {		// artifact
-		int tmp = basedmg;
-		*hittxt = artifact_hit(magr, mdef, otmp, &tmp, dieroll);
-		if (*hp(mdef) <= 0)
-			{*returnvalue = MM_DEF_DIED; return TRUE;}
-		if (migrating_mons == mdef)
-			{*returnvalue = MM_AGR_STOP; return TRUE;}
-		if (tmp == 0)
-			{*returnvalue = MM_MISS; return TRUE;}
-		*dmgptr += (tmp - basedmg);
-	}
-	if (otmp->oproperties) {	// properties
-		int tmp = basedmg;
-		*hittxt |= oproperty_hit(magr, mdef, otmp, &tmp, dieroll);
-		if (*hp(mdef) <= 0)
-			{*returnvalue = MM_DEF_DIED; return TRUE;}
-		if (migrating_mons == mdef)
-			{*returnvalue = MM_AGR_STOP; return TRUE;}
-		if (tmp == 0)
-			{*returnvalue = MM_MISS; return TRUE;}
-		*dmgptr += (tmp - basedmg);
+	int result = MM_HIT;
+	int tmpplusdmg;
+	int tmptruedmg;
+	if (otmp->oartifact || otmp->oproperties) {		// artifact and oproperties
+		tmpplusdmg = tmptruedmg = 0;
+		result = special_weapon_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
+		*plusdmgptr = tmpplusdmg;
+		*truedmgptr = tmptruedmg;
+		if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
+			return result;
 	}
 	if (spec_prop_otyp(otmp)) {	// otyp
-		int tmp = basedmg;
-		*hittxt |= otyp_hit(magr, mdef, otmp, &tmp, dieroll);
-		if (*hp(mdef) <= 0)
-			{*returnvalue = MM_DEF_DIED; return TRUE;}
-		if (migrating_mons == mdef)
-			{*returnvalue = MM_AGR_STOP; return TRUE;}
-		if (tmp == 0)
-			{*returnvalue = MM_MISS; return TRUE;}
-		*dmgptr += (tmp - basedmg);
+		tmpplusdmg = tmptruedmg = 0;
+		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
+		*plusdmgptr = tmpplusdmg;
+		*truedmgptr = tmptruedmg;
 	}
-	return FALSE;
+	return result;
 }
 
 /* hmon2point0
@@ -11021,7 +11006,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	int subtotl = 0;	/* subtotal of above damages */
 	int seardmg = 0;	/* X-hating */
 	int poisdmg = 0;	/* poisons */
-	int heatdmg = 0;	/* clockwork heat */
+	int elemdmg = 0;	/* artifacts, objproperties, and clockwork heat */
 	int specdmg = 0;	/* sword of blood; sword of mercury */
 	int totldmg = 0;	/* total of subtotal and below */
 
@@ -11336,11 +11321,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 		/* calculate snekdmg */
 		snekdmg = d(sneak_dice, snekdie);
+		lifehunt_sneak_attacking = (weapon && weapon->oartifact == ART_LIFEHUNT_SCYTHE);
 	}
 	else {
 		/* no sneak attack this time */
 		sneak_attack = 0;
 		sneak_dice = 0;
+		lifehunt_sneak_attacking = FALSE;
 	}
 
 	/* jousting */
@@ -11804,15 +11791,15 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (unarmed_punch)
 			{
 				if (u.utemp >= BURNING_HOT && (!uarmg || is_metallic(uarmg))) {
-					heatdmg += d(heatdice, heatdie);
+					elemdmg += d(heatdice, heatdie);
 				}
 				else if (u.utemp >= HOT) {
-					heatdmg += d(heatdice, heatdie / 2);
+					elemdmg += d(heatdice, heatdie / 2);
 				}
 			}
 			/* using a metallic "weapon" -- a valid weapon attack isn't necessary */
 			else if (weapon && is_metallic(weapon)) {
-				heatdmg += d(heatdice, heatdie / 2);
+				elemdmg += d(heatdice, heatdie / 2);
 			}
 		}
 	}
@@ -12574,37 +12561,51 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		/* hits with a valid weapon proc effects of the weapon */
 		if (valid_weapon_attack) {
 			otmp = weapon;
-			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt)) {
-				/* if the artifact caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
+			if (otmp) {
+				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				/* if the weapon caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
 				if (returnvalue == MM_MISS && youagr && (melee || thrust))
 					u.uconduct.weaphit--;
-				return returnvalue;
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED|MM_DEF_LSVD)))
+					return returnvalue;
 			}
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
 		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
-			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
-				return returnvalue;
+			if (otmp) {
+				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
+					return returnvalue;
+			}
 		}
 		/* ranged weapon attacks also proc effects of The Helm of the Arcane Archer */
 		if (fired && launcher && valid_weapon_attack &&
 			((otmp = (youagr ? uarmh : which_armor(magr, W_ARMH))) &&
 			otmp->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER)) {
-			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
-				return returnvalue;
+			if (otmp) {
+				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
+					return returnvalue;
+			}
 		}
 		/* unarmed punches proc effects of worn gloves */
 		if (unarmed_punch) {
 			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
-			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
-				return returnvalue;
+			if (otmp) {
+				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
+					return returnvalue;
+			}
 		}
 		/* unarmed kicks proc effects of worn boots */
 		if (unarmed_kick) {
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
-			if (otmp && apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, dieroll, &returnvalue, &hittxt))
-				return returnvalue;
+			if (otmp) {
+				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
+					return returnvalue;
+			}
 		}
 	}
 
@@ -12784,7 +12785,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		subtotl = max(*hp(mdef) - 1, 1);
 
 	/* Final sum of damage */
-	totldmg = subtotl + seardmg + heatdmg + poisdmg + specdmg;
+	totldmg = subtotl + seardmg + elemdmg + poisdmg + specdmg;
 	lethaldamage = (totldmg >= *hp(mdef));
 
 	if (wizard && ublindf && (ublindf->otyp == LENSES || ublindf->otyp == ANDROID_VISOR)) {
@@ -12795,7 +12796,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			((youagr && !natural_strike) ? 0 : monsdmg),	/* only add monsdmg for monsters or a player making a monster attack */
 			snekdmg + jostdmg,
 			subtotl,
-			seardmg + heatdmg + poisdmg + specdmg,
+			seardmg + elemdmg + poisdmg + specdmg,
 			totldmg
 			);
 	}

@@ -1904,7 +1904,7 @@ A("The Seal of the Spirits", SCR_BLANK_PAPER,		0,			0,
 /* Caveman/Cavewoman */
 /* TODO use club skill */
 A("The Torch of Origins", WAN_FIRE,					0,			0,
-	(SPFX_NOGEN|SPFX_RESTR),0,
+	(SPFX_NOGEN|SPFX_RESTR|SPFX_BEHEAD),0,
 	0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/,
 	FIRE(0,5),	DFNS(AD_FIRE),	NO_CARY,
 	0, A_NONE, PM_CAVEMAN, NON_PM, 0L,

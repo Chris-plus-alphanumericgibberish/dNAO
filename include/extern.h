@@ -104,18 +104,16 @@ E boolean FDECL(protects, (int,struct obj *));
 E void FDECL(set_artifact_intrinsic, (struct obj *,BOOLEAN_P,long));
 E int FDECL(touch_artifact, (struct obj *,struct monst *, int));
 E int FDECL(spec_abon, (struct obj *,struct monst *));
-E int FDECL(spec_dbon, (struct obj *,struct monst *,int));
-E int FDECL(oproperty_dbon, (struct monst *,struct obj *,int));
+E boolean FDECL(spec_dbon, (struct obj *,struct monst *,int,int*,int*));
+E boolean FDECL(oproperty_dbon, (struct obj *, struct monst *, int, int*, int*));
 E int FDECL(narrow_spec_applies, (struct obj *,struct monst *));
 E void FDECL(discover_artifact, (int));
 E boolean FDECL(undiscovered_artifact, (int));
 E int FDECL(disp_artifact_discoveries, (winid));
-E boolean FDECL(otyp_hit, (struct monst *,struct monst *,
-				struct obj *,int *,int));
-E boolean FDECL(oproperty_hit, (struct monst *,struct monst *,
-				struct obj *,int *,int));
-E boolean FDECL(artifact_hit, (struct monst *,struct monst *,
-				struct obj *,int *,int));
+E void FDECL(otyp_hit, (struct monst *,struct monst *,
+				struct obj *,int, int *,int*, int));
+E int FDECL(special_weapon_hit, (struct monst *,struct monst *,
+				struct obj *,int,int*,int*,int,boolean*));
 E int NDECL(doinvoke);
 E int FDECL(doparticularinvoke,(struct obj *));
 E void FDECL(arti_speak, (struct obj *));
@@ -2979,11 +2977,13 @@ E int FDECL(dowrite, (struct obj *));
 
 /* ### xhity.c ### */
 
+E int FDECL(getvis, (struct monst *, struct monst *, int, int));
 E boolean FDECL(attack2, (struct monst *));
 E int FDECL(xattacky, (struct monst *, struct monst *, int, int));
 E int FDECL(xmeleehity, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, boolean));
 E struct attack * FDECL(getattk, (struct monst *, struct monst *, int *, int *, struct attack *, boolean, int *, int *));
 E boolean FDECL(slips_free, (struct monst *, struct monst *, struct attack *, int));
+E int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xmeleehurty, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, boolean, int, int, int, boolean));
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
