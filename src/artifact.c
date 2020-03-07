@@ -3199,9 +3199,11 @@ int dieroll; /* needed for Magicbane and vorpal blades */
   
 /* returns MM_style hitdata now, and is used for both artifacts and weapon properties */
 int
-special_weapon_hit(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll, messaged)
-struct monst *magr, *mdef;
-struct obj *otmp;
+special_weapon_hit(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, messaged)
+struct monst * magr;
+struct monst * mdef;
+struct obj * otmp;
+struct obj * msgr;		/* object to describe as doing the hitting (even though otmp is causing the special effects) */
 int basedmg;
 int * plusdmgptr;
 int * truedmgptr;
@@ -3221,6 +3223,11 @@ boolean * messaged;
 	Strcpy(hittee, youdef ? you : mon_nam(mdef));
 
 	const char *wepdesc;
+
+	/* set msgr to otmp if we weren't given one */
+	/* for artifacts, we must assume they are used properly -- msgr will not override artifact-specific hitmsgs */
+	if (!msgr)
+		msgr = otmp;
 
 #define currdmg (basedmg + *plusdmgptr + *truedmgptr)
 
@@ -3484,7 +3491,7 @@ boolean * messaged;
 											 oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO ? "staff" : 
 											 oartifact == ART_WRATHFUL_WIND ? "club" : 
 											 oartifact == ART_FROST_BRAND ? "blade" : 
-											 OBJ_DESCR(objects[otmp->otyp]) ? OBJ_DESCR(objects[otmp->otyp]) : OBJ_NAME(objects[otmp->otyp]),
+											 OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]),
 				!spec_dbon_applies ? "hits" : "freezes",
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
@@ -3507,7 +3514,7 @@ boolean * messaged;
 										oartifact == ART_ARYFAERN_KERYM ? "crackling sword-shaped void" : 
 										oartifact == ART_RAMIEL ? "thundering polearm" : 
 										oartifact == ART_MJOLLNIR ? "massive hammer" :
-										OBJ_DESCR(objects[otmp->otyp]) ? OBJ_DESCR(objects[otmp->otyp]) : OBJ_NAME(objects[otmp->otyp]),
+										OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]),
 			  !spec_dbon_applies ? "" : "!  Lightning strikes",
 			  hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
@@ -4035,17 +4042,20 @@ boolean * messaged;
 			}
 		default:
 			/* hopefully it's a vorpal-property weapon at this point */
-			Sprintf(buf, "vorpal %s", simple_typename(otmp->otyp));
+			if (oproperties & OPROP_VORPW)
+				Sprintf(buf, "vorpal %s", simple_typename(msgr->otyp));
+			else
+				Sprintf(buf, simple_typename(msgr->otyp));
 			wepdesc = buf;
 			if (dieroll == 1)
 			{
-				if (is_slashing(otmp) && is_stabbing(otmp))
+				if (is_slashing(msgr) && is_stabbing(msgr))
 					behead = TRUE;
-				else if (is_slashing(otmp))
+				else if (is_slashing(msgr))
 					bisect = TRUE;
-				else if (is_stabbing(otmp))
+				else if (is_stabbing(msgr))
 					pierce = TRUE;
-				else if (is_bludgeon(otmp))
+				else if (is_bludgeon(msgr))
 					smash = TRUE;
 			}
 			break;
@@ -4308,7 +4318,7 @@ boolean * messaged;
 		int i;
 		if (obj){
 			pline("%s slices %s armor!",
-				The(xname(otmp)),
+				The(xname(msgr)),
 				(youdef ? "your" : s_suffix(mon_nam(mdef)))
 				);
 			i = 1;
@@ -4445,7 +4455,7 @@ boolean * messaged;
 				hcolor(NH_BLACK));
 			else
 				pline("%s drains your life!",
-				The(distant_name(otmp, xname)));
+				The(distant_name(msgr, xname)));
 			*messaged = TRUE;
 		}
 		else if (vis) {
@@ -4455,7 +4465,7 @@ boolean * messaged;
 				mon_nam(mdef));
 			else
 				pline("%s draws the life from %s!",
-				The(distant_name(otmp, xname)),
+				The(distant_name(msgr, xname)),
 				mon_nam(mdef));
 			*messaged = TRUE;
 		}
