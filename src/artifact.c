@@ -3460,16 +3460,38 @@ boolean * messaged;
 		}
 	}
 	/* the four basic attacks: fire, cold, shock, and missiles */
+	switch (oartifact)
+	{
+	case ART_LIMB_OF_THE_BLACK_TREE:	wepdesc = "tree-branch";					break;
+	case ART_NIGHTHORN:					wepdesc = "horn";							break;
+	case ART_PROFANED_GREATSCYTHE:		wepdesc = "greatscythe";					break;
+	case ART_LASH_OF_THE_COLD_WASTE:	wepdesc = "whip";							break;
+	case ART_WRATHFUL_WIND:				wepdesc = "club";							break;
+	case ART_CARESS:					wepdesc = "lashing whip";					break;
+	case ART_ARYFAERN_KERYM:			wepdesc = "crackling sword-shaped void";	break;
+	case ART_RAMIEL:					wepdesc = "thundering polearm";				break;
+	case ART_MJOLLNIR:					wepdesc = "massive hammer";					break;
+	case ART_STAFF_OF_WILD_MAGIC:
+	case ART_SCEPTRE_OF_THE_FROZEN_FLOO:wepdesc = "staff";							break;
+	case ART_FROST_BRAND:
+	case ART_FIRE_BRAND:
+	case ART_MIRROR_BRAND:
+	case ART_LOLTH_S_FANG:
+	case ART_DOOMSCREAMER:
+	case ART_MAGICBANE:					wepdesc = "blade";							break;
+	default:
+		wepdesc = OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]);
+		break;
+	}
+
 	if (attacks(AD_FIRE, otmp) || (oproperties&OPROP_FIREW)) {
 		if (oartifact && (vis&VIS_MAGR)) {
-			pline_The("fiery %s %s %s%c", oartifact == ART_LIMB_OF_THE_BLACK_TREE ? "tree-branch" : 
-										  oartifact == ART_NIGHTHORN ? "horn" :
-										  oartifact == ART_FIRE_BRAND ? "blade" : 
-										  oartifact == ART_PROFANED_GREATSCYTHE ? "greatscythe" : 
-										  OBJ_DESCR(objects[otmp->otyp]) ? OBJ_DESCR(objects[otmp->otyp]) : OBJ_NAME(objects[otmp->otyp]),
-				!spec_dbon_applies ? "hits" :
-				(pd == &mons[PM_WATER_ELEMENTAL] || pd == &mons[PM_LETHE_ELEMENTAL]) ?
-				"vaporizes part of" : "burns",
+			pline_The("fiery %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc,
+					!spec_dbon_applies ? "hit" :
+					is_watery(pd) ? "partly vaporize" :
+					"burn"),
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 			}
@@ -3487,12 +3509,11 @@ boolean * messaged;
 		)
 		){
 		if (oartifact && (vis&VIS_MAGR)) {
-			pline_The("ice-cold %s %s %s%c", oartifact == ART_LASH_OF_THE_COLD_WASTE ? "whip" : 
-											 oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO ? "staff" : 
-											 oartifact == ART_WRATHFUL_WIND ? "club" : 
-											 oartifact == ART_FROST_BRAND ? "blade" : 
-											 OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]),
-				!spec_dbon_applies ? "hits" : "freezes",
+			pline_The("ice-cold %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc,
+					!spec_dbon_applies ? "hit" :
+					"freeze"),
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 			}
@@ -3510,13 +3531,10 @@ boolean * messaged;
 	}
 	if (attacks(AD_ELEC, otmp) || (oproperties&OPROP_ELECW)) {
 		if (oartifact && (vis&VIS_MAGR)) {
-			pline_The("%s hits%s %s%c", oartifact == ART_CARESS ? "lashing whip" : 
-										oartifact == ART_ARYFAERN_KERYM ? "crackling sword-shaped void" : 
-										oartifact == ART_RAMIEL ? "thundering polearm" : 
-										oartifact == ART_MJOLLNIR ? "massive hammer" :
-										OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]),
-			  !spec_dbon_applies ? "" : "!  Lightning strikes",
-			  hittee, !spec_dbon_applies ? '.' : '!');
+			pline_The("%s hits%s %s%c",
+				wepdesc,
+				vtense(wepdesc, "hit"),
+				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}
 	    if (!rn2(5)) (void) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
@@ -3533,9 +3551,12 @@ boolean * messaged;
 	}
 	if (attacks(AD_ACID, otmp) || (oproperties&OPROP_ACIDW)) {
 		if (oartifact && (vis&VIS_MAGR)) {
-			pline_The("foul blade %s %s%c",
-				!spec_dbon_applies ? "hits" :
-				"burns", hittee, !spec_dbon_applies ? '.' : '!');
+			pline_The("foul %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc,
+					!spec_dbon_applies ? "hit" :
+					"burn"),
+				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}
 	    if (!rn2(2)) (void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
@@ -4045,7 +4066,7 @@ boolean * messaged;
 			if (oproperties & OPROP_VORPW)
 				Sprintf(buf, "vorpal %s", simple_typename(msgr->otyp));
 			else
-				Sprintf(buf, simple_typename(msgr->otyp));
+				Strcpy(buf, simple_typename(msgr->otyp));
 			wepdesc = buf;
 			if (dieroll == 1)
 			{
