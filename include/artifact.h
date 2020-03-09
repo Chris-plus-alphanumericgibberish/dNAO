@@ -5,84 +5,146 @@
 #ifndef ARTIFACT_H
 #define ARTIFACT_H
 
-#define SPFX_NONE   0x00000000L	/* no special effects, just a bonus */
-#define SPFX_NOGEN  0x00000001L	/* item is special, bequeathed by gods */
-#define SPFX_RESTR  0x00000002L	/* item is restricted - can't be named */
-#define SPFX_INTEL  0x00000004L	/* item is self-willed - intelligent */
-#define SPFX_SPEAK  0x00000008L	/* item can speak (not implemented) */
-#define SPFX_SEEK   0x00000010L	/* item helps you search for things, ie, adds enhancement bonus to attempts */
-#define SPFX_WARN   0x00000020L	/* item warns you of danger */
-#define SPFX_ATTK   0x00000040L	/* item has a special attack (attk) */
-#define SPFX_DEFN   0x00000080L	/* item has a special defence (defn) */
-#define SPFX_DRLI   0x00000100L	/* drains a level from monsters */
-#define SPFX_SEARCH 0x00000200L	/* automatic searching */
-#define SPFX_BEHEAD 0x00000400L	/* beheads monsters */
-#define SPFX_HALRES 0x00000800L	/* blocks hallucinations */
-#define SPFX_ESP    0x00001000L	/* ESP (like amulet of ESP) */
-#define SPFX_DISPL  0x00002000L	/* Displacement */
-#define SPFX_REGEN  0x00004000L	/* Regeneration */
-#define SPFX_EREGEN 0x00008000L	/* Energy Regeneration */
-#define SPFX_HSPDAM 0x00010000L	/* 1/2 spell damage (on player) in combat */
-#define SPFX_HPHDAM 0x00020000L	/* 1/2 physical damage (on player) in combat */
-#define SPFX_TCTRL  0x00040000L	/* Teleportation Control */
-#define SPFX_LUCK   0x00080000L	/* Increase Luck (like Luckstone) */
-#define SPFX_CON_AND 0x00100000L	/* Affects only those monsters with ALL flags specified */
-#define SPFX_CON_OR 0x00200000L	/* Affects any monster with ANY flag specified */
-#define SPFX_DALIGN 0x00400000L	/* attack bonus on non-aligned monsters  */
-#define SPFX_DBONUS (SPFX_DALIGN|SPFX_CON_OR|SPFX_CON_AND)	/* attack bonus mask */
-#define SPFX_XRAY   0x00800000L	/* gives X-RAY vision to player */
-#define SPFX_REFLECT 0x01000000L /* Reflection */
-#define SPFX_CONFL  0x02000000L  /* Conflict */
-#define SPFX_AGGRM  0x04000000L /* Aggravate monster */
-#define SPFX_INHER  0x08000000L /* Can be Inherited */
-/* expanded special effects*/
-#define SPFX2_NONE		0x0000000L	/* nothing special */
-#define SPFX2_DIG		0x0000001L	/* Can dig with artifact, as if it were a pick. Clarent Patch (GreyKnight)*/
+#define ARTG_NOGEN		0x0L /* does not randomly generate */
+#define ARTG_NOWISH		0x0L /* cannot be wished for */
+#define ARTG_NAME		0x0L /* can be #named */
+#define ARTG_GIFT		0x0L /* favoured early gift for a player */
+#define ARTG_INHER		0x0L /* allowable for an Inheritor to start with */
+#define ARTG_MAJOR		0x0L /* artifact evades the grasp of the unworthy */
+#define ARTG_NOCNT		0x0L /* should not be sacrificable to Priests of an Unknown God ??? */
 
-#define SPFX2_BLIND		0x0000004L	/* causes blindness */
 
-#define SPFX2_FIRE		0x0000010L	/* Fireball strike (1/4) */
-#define SPFX2_COLD		0x0000020L	/* Cold blast strike (1/4 */
-#define SPFX2_ELEC		0x0000040L	/* Lightning bolt strike (1/4) */
-#define SPFX2_RAM		0x0000080L	/* Causes knockback (1/4) */
-#define SPFX2_FIRE2		0x0000100L	/* Fireball strike (always) */
-#define SPFX2_COLD2		0x0000200L	/* Cold blast strike (always) */
-#define SPFX2_ELEC2		0x0000400L	/* Lightning bolt strike (always) */
-#define SPFX2_RAM2		0x0000800L	/* Always causes knockback */
-#define SPFX2_NOCALL	0x0001000L	/* Blocks Demon-minion-summoning when wielded */
-#define SPFX2_NOWERE	0x0002000L	/* Protects agains lycathropy when wielded */
-#define SPFX2_POISONED	0x0004000L	/* permanently poisoned weapon */
 
-#define SPFX2_BLDTHRST	0x0010000L	/* bloodthirsty weapon (primary wielded only) */
-#define SPFX2_BRIGHT	0x0020000L	/* turns trolls to stone, dusts gremlins */
-#define SPFX2_STEAL		0x0040000L  /* steals stuff */
-#define SPFX2_DANCER	0x0080000L	/* extra movement points for attacking */
-#define SPFX2_SILVERED	0x0100000L	/* weapon is silvered  */
-#define SPFX2_STLTH		0x0200000L	/* gives stealth when wielded or worn */
-#define SPFX2_SHATTER	0x0400000L	/* breaks opponents weapons */
-#define SPFX2_DISARM	0x0800000L	/* disarms opponents */
-#define SPFX2_SPELLUP	0x1000000L	/* increases spell power */
-#define SPFX2_TENTROD	0x2000000L	/* various effects */
-#define SPFX2_SHINING	0x4000000L	/* passes through armor */
-#define SPFX2_THREEHEAD	0x8000000L	/* 2 extra attacks plus stunning if all three hit */
+#define ARTA_HATES		0x0L	/* hates specific kinds of foes; only deals bonus damage to them (cross-aligned is a possibility too) */
+#define ARTA_CROSSA		0x0L /* artifact hates cross-aligned foes (as well as any specified monster flags) -- use with ARTA_HATES */
 
-#define SPFX3_ENGRV		0x0000001L	/* Allows fast engraving (as for Athame) */
-#define SPFX3_PCTRL		0x0000002L	/* grants polymorph control (caried or wielded) */
-#define SPFX3_FEAR		0x0000004L  /* as dropped scroll of scare monster */
-#define SPFX3_NOCNT		0x0000008L  /* doesn't count towards  created artifact total */
-#define SPFX3_MANDALA	0x0000010L	/* (r)ead object to benifit as from unihorn ONLY CHECKED FOR SHIRTS */
-#define SPFX3_LIGHT		0x0000040L	/* always lit lightsource */
+#define ARTA_DEXPL		0x0L /* weapon dice explode */
+#define ARTA_DLUCK		0x0L /* weapon dice are luck-biased -- combine with DEXPL with extreme caution! */
 
-#define	WSFX_LIGHTEN	0x0000001L	/* when worn, increases the weight you can haul. Currently only includes
-										Shirts, Cloaks, and body armor.  See do_wear.c and hack.c */
-#define	WSFX_WCATRIB	0x0000002L	/* when worn above armor, increases Cha.  Under armor, increases Wis. */
-#define	WSFX_PLUSSEV	0x0000004L	/* Enchant to +7 max. */
-#define	WSFX_FREEACT	0x0000008L	/* Grant free action when worn. */
+#define ARTA_POIS		0x0L /* permanently poisoned */
+#define ARTA_SILVER		0x0L /* deals silver damage, even though it isn't made of silver */
 
-///////////////////
-//To be implemented
-#define SPFX2_NINJA		0x0000008L	/* throws from 1-your skill level ninja stars after each attack */
-#define SPFX3_CARCAP	0x0000020L	/* increases carrying capacity when carried */
+#define ARTA_VORPAL		0x0L /* vorpal -- beheads, cleaves, crushes, or otherwise occasionally instakills foes */
+#define ARTA_TENTROD	0x0L /* does tentacle-rod bonus effects */
+#define ARTA_THREEHEAD	0x0L /* attacks 1-3x with one swing, stunning if all three hit */
+#define ARTA_MAGIC		0x0L /* does Magicbane-like bonus effects -- damage must be special cased in mb_hit */
+#define ARTA_DRAIN		0x0L /* drains levels from defender and heals attacker */
+
+#define ARTA_BRIGHT		0x0L /* turns gremlins to dust and trolls to stone */
+#define ARTA_BLIND		0x0L /* blinds defender */
+#define ARTA_SHINING	0x0L /* phases armor; can hit shades */
+#define ARTA_SHATTER	0x0L /* shatter's defender's weapon */
+#define ARTA_DISARM		0x0L /* disarms opponent */
+#define ARTA_STEAL		0x0L /* steals item from defender */
+#define ARTA_HASTE		0x0L /* hitting defender grants movement to attacker */
+
+#define ARTA_EXPLFIRE	0x0L /* fire explosion; 25% chance */
+#define ARTA_EXPLCOLD	0x0L /* cold explosion; 25% chance */
+#define ARTA_EXPLELEC	0x0L /* elec explosion; 25% chance */
+#define ARTA_KNOCKBACK	0x0L /* knockback; 25% chance */
+#define ARTA_EXPLFIREX	0x0L /* fire explosion; 100% chance*/
+#define ARTA_EXPLCOLDX	0x0L /* cold explosion; 100% chance*/
+#define ARTA_EXPLELECX	0x0L /* elec explosion; 100% chance*/
+#define ARTA_KNOCKBACKX	0x0L /* knockback; 100% chance*/
+
+
+
+#define ARTP_SEEK		0x0L /* helps you search, ie, adds enhancement bonus to attempts */
+#define ARTP_NOCALL		0x0L /* prevents demons from being gated in */
+#define ARTP_NOWERE		0x0L /* protects from lycanthropy and lycanthrope summoning */
+#define ARTP_HALLURES	0x0L /* grants hallucination resistance (which isn't a full property currently) */
+#define ARTP_BLINDRES	0x0L /* grants light-blind resistance (which isn't a full property currently) */
+#define	ARTP_LIGHTEN	0x0L /* increases the weight you can haul. Currently only includes Shirts, Cloaks, and body armor.  See do_wear.c and hack.c */
+#define	ARTP_WCATRIB	0x0L /* when worn above armor, increases Cha.  Under armor, increases Wis. */
+
+#define ARTI_ENGRAVE	0x0L /* can be used to engrave quickly like an athame */
+#define ARTI_DIG		0x0L /* can be used to dig like a pickaxe */
+#define ARTI_PERMALIGHT	0x0L /* is a permanent lightsource, even when just lying on the floor */
+#define ARTI_MANDALA	0x0L /* (r)ead object to benifit as from unihorn ONLY CHECKED FOR SHIRTS */
+#define ARTI_PLUSSEV	0x0L /* artifact armor can be enchanted to +7 easily */
+#define ARTI_FEAR		0x0L /* acts as a scroll of scare monster while on floor */
+#define ARTI_BLOODTHRST	0x0L /* wants to attack peaceful and tame creatures */
+#define ARTI_SPEAK		0x0L /* speaks rumours */
+#define ARTI_LUCK		0x0L /* acts as a luckstone */
+
+//#define SPFX_NONE   0x00000000L	/* no special effects, just a bonus */
+//#define SPFX_NOGEN  0x00000001L	/* item is special, bequeathed by gods */
+//#define SPFX_RESTR  0x00000002L	/* item is restricted - can't be named */
+//#define SPFX_INTEL  0x00000004L	/* item is self-willed - intelligent */
+//#define SPFX_SPEAK  0x00000008L	/* item can speak (not implemented) */
+//#define SPFX_SEEK   0x00000010L	/* item helps you search for things, ie, adds enhancement bonus to attempts */
+//#define SPFX_WARN   0x00000020L	/* item warns you of danger */
+//#define SPFX_ATTK   0x00000040L	/* item has a special attack (attk) */
+//#define SPFX_DEFN   0x00000080L	/* item has a special defence (defn) */
+//#define SPFX_DRLI   0x00000100L	/* drains a level from monsters */
+//#define SPFX_SEARCH 0x00000200L	/* automatic searching */
+//#define SPFX_BEHEAD 0x00000400L	/* beheads monsters */
+//#define SPFX_HALRES 0x00000800L	/* blocks hallucinations */
+//#define SPFX_ESP    0x00001000L	/* ESP (like amulet of ESP) */
+//#define SPFX_DISPL  0x00002000L	/* Displacement */
+//#define SPFX_REGEN  0x00004000L	/* Regeneration */
+//#define SPFX_EREGEN 0x00008000L	/* Energy Regeneration */
+//#define SPFX_HSPDAM 0x00010000L	/* 1/2 spell damage (on player) in combat */
+//#define SPFX_HPHDAM 0x00020000L	/* 1/2 physical damage (on player) in combat */
+//#define SPFX_TCTRL  0x00040000L	/* Teleportation Control */
+//#define SPFX_LUCK   0x00080000L	/* Increase Luck (like Luckstone) */
+//#define SPFX_CON_AND 0x00100000L	/* Affects only those monsters with ALL flags specified */
+//#define SPFX_CON_OR 0x00200000L	/* Affects any monster with ANY flag specified */
+//#define SPFX_DALIGN 0x00400000L	/* attack bonus on non-aligned monsters  */
+//#define SPFX_DBONUS (SPFX_DALIGN|SPFX_CON_OR|SPFX_CON_AND)	/* attack bonus mask */
+//#define SPFX_XRAY   0x00800000L	/* gives X-RAY vision to player */
+//#define SPFX_REFLECT 0x01000000L /* Reflection */
+//#define SPFX_CONFL  0x02000000L  /* Conflict */
+//#define SPFX_AGGRM  0x04000000L /* Aggravate monster */
+//#define SPFX_INHER  0x08000000L /* Can be Inherited */
+///* expanded special effects*/
+//#define SPFX2_NONE		0x0000000L	/* nothing special */
+//#define SPFX2_DIG		0x0000001L	/* Can dig with artifact, as if it were a pick. Clarent Patch (GreyKnight)*/
+//
+//#define SPFX2_BLIND		0x0000004L	/* causes blindness */
+//
+//#define SPFX2_FIRE		0x0000010L	/* Fireball strike (1/4) */
+//#define SPFX2_COLD		0x0000020L	/* Cold blast strike (1/4 */
+//#define SPFX2_ELEC		0x0000040L	/* Lightning bolt strike (1/4) */
+//#define SPFX2_RAM		0x0000080L	/* Causes knockback (1/4) */
+//#define SPFX2_FIRE2		0x0000100L	/* Fireball strike (always) */
+//#define SPFX2_COLD2		0x0000200L	/* Cold blast strike (always) */
+//#define SPFX2_ELEC2		0x0000400L	/* Lightning bolt strike (always) */
+//#define SPFX2_RAM2		0x0000800L	/* Always causes knockback */
+//#define SPFX2_NOCALL	0x0001000L	/* Blocks Demon-minion-summoning when wielded */
+//#define SPFX2_NOWERE	0x0002000L	/* Protects agains lycathropy when wielded */
+//#define SPFX2_POISONED	0x0004000L	/* permanently poisoned weapon */
+//
+//#define SPFX2_BLDTHRST	0x0010000L	/* bloodthirsty weapon (primary wielded only) */
+//#define SPFX2_BRIGHT	0x0020000L	/* turns trolls to stone, dusts gremlins */
+//#define SPFX2_STEAL		0x0040000L  /* steals stuff */
+//#define SPFX2_DANCER	0x0080000L	/* extra movement points for attacking */
+//#define SPFX2_SILVERED	0x0100000L	/* weapon is silvered  */
+//#define SPFX2_STLTH		0x0200000L	/* gives stealth when wielded or worn */
+//#define SPFX2_SHATTER	0x0400000L	/* breaks opponents weapons */
+//#define SPFX2_DISARM	0x0800000L	/* disarms opponents */
+//#define SPFX2_SPELLUP	0x1000000L	/* increases spell power */
+//#define SPFX2_TENTROD	0x2000000L	/* various effects */
+//#define SPFX2_SHINING	0x4000000L	/* passes through armor */
+//#define SPFX2_THREEHEAD	0x8000000L	/* 2 extra attacks plus stunning if all three hit */
+//
+//#define SPFX3_ENGRV		0x0000001L	/* Allows fast engraving (as for Athame) */
+//#define SPFX3_PCTRL		0x0000002L	/* grants polymorph control (caried or wielded) */
+//#define SPFX3_FEAR		0x0000004L  /* as dropped scroll of scare monster */
+//#define SPFX3_NOCNT		0x0000008L  /* doesn't count towards  created artifact total */
+//#define SPFX3_MANDALA	0x0000010L	/* (r)ead object to benifit as from unihorn ONLY CHECKED FOR SHIRTS */
+//#define SPFX3_LIGHT		0x0000040L	/* always lit lightsource */
+//
+//#define	WSFX_LIGHTEN	0x0000001L	/* when worn, increases the weight you can haul. Currently only includes
+//										Shirts, Cloaks, and body armor.  See do_wear.c and hack.c */
+//#define	WSFX_WCATRIB	0x0000002L	/* when worn above armor, increases Cha.  Under armor, increases Wis. */
+//#define	WSFX_PLUSSEV	0x0000004L	/* Enchant to +7 max. */
+//#define	WSFX_FREEACT	0x0000008L	/* Grant free action when worn. */
+//
+/////////////////////
+////To be implemented
+//#define SPFX2_NINJA		0x0000008L	/* throws from 1-your skill level ninja stars after each attack */
+//#define SPFX3_CARCAP	0x0000020L	/* increases carrying capacity when carried */
 
 
 /*Necronomicon flags*/
@@ -249,12 +311,22 @@
 #define COMMAND_YELLOW          57
 
 struct artifact {
-	int	    otyp;
-	const char  *name;
-	int material;	/* default material */
-	int size;		/* default size */
-	unsigned long spfx;	/* special effect from wielding/wearing */
-	unsigned long cspfx;	/* special effect just from carrying obj */
+	/* Description */
+	int otyp;			/* base artifact type */
+	const char * name;	/* artifact name */
+	int material;		/* default material */
+	int size;			/* default size */
+	int weight;			/* default weight */
+	long cost;			/* price when sold to hero (default 100 x base cost) */
+
+	/* For Whom */
+	aligntyp    alignment;	/* alignment of bequeathing gods */
+	short	    role;		/* character role associated with */
+	short	    race;		/* character race associated with */
+	short		giftval;	/* SUBJECTIVE measure of how good an artifact gift it is */
+	unsigned long gflags;	/* how it should generate */
+
+	/* Versus */
 	unsigned long mtype;	/* monster symbol */
 	unsigned long mflagsm;	/* Monster Motility boolean bitflags */
 	unsigned long mflagst;	/* Monster Thoughts and behavior boolean bitflags */
@@ -262,15 +334,22 @@ struct artifact {
 	unsigned long mflagsg;	/* Monster Game mechanics and bookkeeping boolean bitflags */
 	unsigned long mflagsa;	/* Monster rAce boolean bitflags */
 	unsigned long mflagsv;	/* Monster Vision boolean bitflags */
-	struct attack attk, defn, cary;
-	uchar	    inv_prop;	/* property obtained by invoking artifact */
-	aligntyp    alignment;	/* alignment of bequeathing gods */
-	short	    role;	/* character role associated with */
-	short	    race;	/* character race associated with */
-	long        cost;	/* price when sold to hero (default 100 x base cost) */
-	unsigned long spfx2;	/* special effect from wielding/wearing (expanded list) */
-	unsigned long cspfx3;	/* special effect just from carrying obj (expanded list)*/
-	unsigned long wpfx;		/* special effect from wearing obj (expanded list)*/
+
+	/* Offense */
+	int adtyp;				/* damage type */
+	int accuracy;			/* increased accuracy */
+	int damage;				/* damage -- positive numbers for dX damage, 0 for double damage */
+	unsigned long aflags;	/* offensive artifact properties */
+
+	/* Worn */
+	uchar equiped[8];		/* properties granted while wielded/worn */
+	unsigned long wflags;	/* special effect while wielding/wearing*/
+	/* Carried */
+	uchar carried[8];		/* properties granted while carried */
+	unsigned long cflags;	/* special effect while carrying */
+	/* Intrinsic */
+	uchar inv_prop;			/* property obtained by invoking artifact OR invokable power */
+	unsigned long iflags;	/* special effect intrinsic to the artifact */
 };
 
 /* invoked properties with special powers */
