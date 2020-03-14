@@ -11689,7 +11689,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			case OPOISON_PARAL:
 				resists = FALSE;
-				majoreff = !rn2(8);
+				majoreff = (!rn2(8) && !(youdef ? Free_action : mon_resistance(mdef, FREE_ACTION)));
 				break;
 			case OPOISON_AMNES:
 				resists = mindless_mon(mdef);
