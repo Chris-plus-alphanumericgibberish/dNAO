@@ -924,9 +924,6 @@ int tary;
 			/* don't make attacks that will kill oneself */
 			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
 				continue;
-			/* requires a clear path */
-			if (!clear_path(x(magr), y(magr), tarx, tary))
-				continue;
 			/* must be in range */
 			if (distmin(x(magr), y(magr), tarx, tary) > 
 				((aatyp == AT_5SBT || aatyp == AT_5SQR) ? 5 : 2))
