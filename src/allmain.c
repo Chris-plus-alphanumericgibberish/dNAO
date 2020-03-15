@@ -2795,7 +2795,7 @@ see_nearby_monsters()
 							change_usanity(u_sanity_loss(mtmp));
 						}
 						if(yields_insight(mtmp->data)){
-							change_uinsight(1);
+							change_uinsight(u_visible_insight(mtmp));
 						}
 						}
 					}
