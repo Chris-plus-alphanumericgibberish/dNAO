@@ -3219,15 +3219,6 @@ boolean * messaged;
 	    if (!rn2(5)) (void) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
 	    if (!rn2(5)) (void) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
 	}
-	if (attacks(AD_MAGM, otmp)) {
-		if (oartifact && (vis&VIS_MAGR)) {
-			pline_The("imaginary widget hits%s %s%c",
-				!spec_dbon_applies ? "" :
-				"!  A hail of magic missiles strikes",
-				hittee, !spec_dbon_applies ? '.' : '!');
-			*messaged = TRUE;
-		}
-	}
 	if (attacks(AD_ACID, otmp) || (oproperties&OPROP_ACIDW)) {
 		if (oartifact && (vis&VIS_MAGR)) {
 			pline_The("foul blade %s %s%c",
@@ -3239,7 +3230,7 @@ boolean * messaged;
 //	    if (!rn2(4)) (void) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
 //	    if (!rn2(7)) (void) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
 	}
-	if (attacks(AD_STUN, otmp) && dieroll <= MB_MAX_DIEROLL) {
+	if (arti_attack_prop(otmp, ARTA_MAGIC) && dieroll <= MB_MAX_DIEROLL) {
 		int dmg = basedmg;
 	    /* Magicbane's special attacks (possibly modifies hittee[]) */
 		*messaged = Mb_hit(magr, mdef, otmp, &dmg, dieroll, vis, hittee,
