@@ -2363,7 +2363,7 @@ int mode;
 			}
 			break;
 		    default:
-				if(spec_ability3(otmp, SPFX3_ENGRV)) type = ENGRAVE;
+				if(arti_is_prop(otmp, ARTI_ENGRAVE)) type = ENGRAVE;
 			break;
 		}
 		break;
@@ -2838,8 +2838,8 @@ int mode;
 	    case HEADSTONE:
 	    case ENGRAVE:
 			multi = -(len/10);
-			if ((otmp->oclass == WEAPON_CLASS || spec_ability3(otmp, SPFX3_ENGRV)) 
-				&& ((otmp->otyp != ATHAME && !spec_ability3(otmp, SPFX3_ENGRV)) || otmp->cursed)
+			if ((otmp->oclass == WEAPON_CLASS || arti_is_prop(otmp, ARTI_ENGRAVE))
+				&& ((otmp->otyp != ATHAME && !arti_is_prop(otmp, ARTI_ENGRAVE)) || otmp->cursed)
 			) {
 				if(levl[u.ux][u.uy].typ == GRASS 
 				|| levl[u.ux][u.uy].typ == SOIL

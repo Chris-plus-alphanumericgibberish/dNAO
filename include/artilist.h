@@ -151,7 +151,7 @@ A("Orcrist",			ELVEN_BROADSWORD,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ORC | MA_DEMON) /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 10, 0), (ARTA_HATES),
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 /*
@@ -166,7 +166,7 @@ A("Sting",				ELVEN_DAGGER,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ORC | MA_ARACHNID) /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 5, 0), (ARTA_HATES),
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -177,7 +177,7 @@ A("Grimtooth",			ORCISH_DAGGER,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ELF | MA_HUMAN | MA_DWARF | MA_MINION) /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 5, 0), (ARTA_HATES),
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -188,7 +188,7 @@ A("Carnwennan",			DAGGER,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, MT_MAGIC /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_FEY /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 5, 10), (ARTA_HATES),
 	PROP1(STEALTH), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	INVIS, NOFLAG
 	),
 
@@ -209,7 +209,7 @@ A("Claideamh",			LONG_SWORD,
 	A_NONE, NON_PM, NON_PM, TIER_C, (ARTG_NOGEN | ARTG_NAME),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ELF | MA_FEY | MA_GIANT | MA_ELEMENTAL | MA_PRIMORDIAL) /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 5, 0), (ARTA_HATES),
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	PROP0(), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
@@ -224,7 +224,7 @@ A("Dragonlance",		LANCE,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_DRAGON | MA_REPTILIAN /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES),
 	PROP1(REFLECTING), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -234,7 +234,7 @@ A("Nodensfork",			TRIDENT,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_PRIMORDIAL | MA_ET /*MA*/, MV_TELEPATHIC | MV_RLYEHIAN /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES|ARTA_SILVER),
 	PROP0(), NOFLAG,
-	PROP2(SHOCK_RES, WARNING), NOFLAG,
+	PROP2(SHOCK_RES, WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -246,7 +246,7 @@ A("Gaia's Fate",		SICKLE,
 		0 /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES),
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -256,7 +256,7 @@ A("Demonbane",			SABER,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_DEMON /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES),
 	PROP0(), (ARTP_NOCALL), 
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -267,7 +267,7 @@ A("Werebane",			SABER,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_WERE | MA_DEMIHUMAN /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES),
 	PROP0(), (ARTP_NOWERE),
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -279,7 +279,7 @@ A("Giantslayer",		AXE,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, MT_ROCKTHROW /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_GIANT /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES),
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -303,7 +303,7 @@ A("Kingslayer",			STILETTO,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MG_LORD | MG_PRINCE) /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES|ARTA_POIS),
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -314,7 +314,7 @@ A("Peace Keeper",		ATHAME,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, MT_HOSTILE /*MT*/, 0 /*MB*/, 0 /*MG*/, 0 /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES|ARTA_SILVER),
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -1011,7 +1011,7 @@ A("The Shield of the All-Seeing",	ORCISH_SHIELD,
 	A_NONE, NON_PM, PM_ORC, TIER_D, NOFLAG,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_ELF /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
-	PROP3(SEARCHING, WARNING, FIRE_RES), (ARTP_SEEK),
+	PROP3(SEARCHING, WARN_OF_MON, FIRE_RES), (ARTP_SEEK),
 	PROP0(), NOFLAG,
 	PROT_FROM_SHAPE_CHANGERS, (ARTI_PLUSSEV)	/* needs message for invoke */
 	),
@@ -1138,7 +1138,7 @@ A("The Field Marshal's Baton",		MACE,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, MG_MERC /*MG*/, 0 /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	CANNONADE, NOFLAG
 	),
 /*//////////Chaos Quest Artifacts//////////*/
@@ -1745,7 +1745,7 @@ A("The Web of Lolth",				ELVEN_MITHRIL_COAT,
 	A_CHAOTIC, NON_PM, PM_DROW, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_ELF /*MA*/, 0 /*MV*/),
 	NO_ATTK(), (ARTA_SILVER),
-	PROP3(WARNING, DRAIN_RES, SPELLBOOST), NOFLAG,
+	PROP3(WARN_OF_MON, DRAIN_RES, SPELLBOOST), NOFLAG,
 	PROP1(ANTIMAGIC), NOFLAG,
 	ENERGY_BOOST, (ARTI_PLUSSEV)
 	),
@@ -1950,7 +1950,7 @@ A("Glamdring",						ELVEN_BROADSWORD,
 	A_LAWFUL, PM_KNIGHT, PM_DWARF, TIER_B, (ARTG_NOGEN|ARTG_NOWISH),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ORC|MA_DEMON) /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 10, 10), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	PROP0(), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
@@ -2084,7 +2084,7 @@ A("The Mitre of Holiness",			HELM_OF_BRILLIANCE,
 	A_LAWFUL, PM_PRIEST, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_UNDEAD /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	PROP1(FIRE_RES), NOFLAG,
 	ENERGY_BOOST, (ARTI_PLUSSEV)
 	),
@@ -2622,7 +2622,7 @@ A("The Scourge of Lolth",			VIPERWHIP,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_ELF /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 1, 0), (ARTA_HATES),
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -2867,7 +2867,7 @@ A("The Shield of the Paladin",			KITE_SHIELD,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_UNDEAD|MA_DEMON) /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
 	PROP1(ANTIMAGIC), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	BURN_WARD, (ARTI_PLUSSEV)
 	),
 
@@ -2935,7 +2935,7 @@ A("The Mark of the Rightful Scion",		RIN_TELEPORT_CONTROL,/* gold */
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ORC) /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	COLLECT_TAX, NOFLAG
 	),
 
@@ -3122,7 +3122,7 @@ A("The Ring of Lolth",					RIN_PROTECTION_FROM_SHAPE_CHAN,/* black signet */
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ORC) /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
 	PROP1(FIRE_RES), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	FIRE_BLAST, NOFLAG
 	),
 
@@ -3144,7 +3144,7 @@ A("Narya",								RIN_TELEPORT_CONTROL,	/* gold */
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ORC) /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
 	PROP1(FIRE_RES), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	FIRE_BLAST, NOFLAG
 	),
 
@@ -3157,7 +3157,7 @@ A("Nenya",								RIN_TELEPORTATION,	/* silver */
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ORC) /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
 	PROP0(), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
@@ -3168,7 +3168,7 @@ A("Vilya",								RIN_AGGRAVATE_MONSTER,	/* sapphire */
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_ORC) /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
 	PROP1(SHOCK_RES), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	HEALING, NOFLAG
 	),
 
@@ -3181,7 +3181,7 @@ A("The Hat of the Giant Killer",		GNOMISH_POINTY_HAT,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROP1(HALF_PHDAM), NOFLAG,
-	PROP1(WARNING), NOFLAG,
+	PROP1(WARN_OF_MON), NOFLAG,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
@@ -3226,9 +3226,9 @@ A("The Trappings of the Grave",			AMULET_OF_RESTFUL_SLEEP,
 /*
  *  terminator; otyp must be zero
  */
-A("",					STRANGE_OBJECT,
+A((const char *)0,					STRANGE_OBJECT,
 	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_F, NOFLAG,
+	A_NONE, NON_PM, NON_PM, NO_TIER, NOFLAG,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROP0(), NOFLAG,

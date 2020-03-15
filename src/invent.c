@@ -757,20 +757,22 @@ register int x, y;
 }
 
 struct obj *
-aligned_sartprop3_at(n,x,y)
-register int n, x, y;
+fear_arti_at(x,y)
+register int x, y;
 {
 	register struct obj *otmp;
 
-	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
-		if(spec_ability3(otmp,n) 
-			&& (artilist[(int) (otmp)->oartifact].alignment == A_NONE
-				|| (artilist[(int) (otmp)->oartifact].alignment == u.ualign.type 
-					&& u.ualign.record > 0
-					)
-				)
+	for (otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere) {
+		if (arti_is_prop(otmp, ARTI_FEAR)
+			&&
+			(
+			(artilist[(int)(otmp)->oartifact].alignment == A_NONE)
+				||
+			(artilist[(int)(otmp)->oartifact].alignment == u.ualign.type && u.ualign.record > 0)
 			)
-		    return(otmp);
+			)
+			return(otmp);
+	}
 	return((struct obj *)0);
 }
 
@@ -1095,7 +1097,7 @@ register const char *let,*word;
 		    ((otmp->oclass == TOOL_CLASS &&
 		     otyp != MAGIC_MARKER && otyp != TOWEL 
 			 && otyp != LIGHTSABER && otyp != BEAMSWORD && otyp != DOUBLE_LIGHTSABER && otyp != KAMEREL_VAJRA 
-			 && !spec_ability3(otmp, SPFX3_ENGRV)) ||
+			 && !arti_is_prop(otmp, ARTI_ENGRAVE)) ||
 			(otmp->oclass == CHAIN_CLASS)))
 		|| (!strcmp(word, "tin") &&
 		    (otyp != CORPSE || !tinnable(otmp)))
@@ -2568,17 +2570,17 @@ winid *datawin;
 			OBJPUTSTR(buf);
 		}
 		/* artifact bonus damage (artifacts only) */
-		if (oartifact && (artilist[oartifact].attk.damn || artilist[oartifact].attk.damd || artilist[oartifact].attk.adtyp))
+		if (oartifact && (artilist[oartifact].adtyp || artilist[oartifact].damage || artilist[oartifact].accuracy))
 		{
 			register const struct artifact *oart = &artilist[oartifact];
 			/* bonus damage, or double damage? We already checked that oart->attk exists */
-			if (oart->attk.damd)
+			if (oart->damage)
 			{// 1dX bonus damage
-				if (oart->attk.damd > 1)
+				if (oart->damage > 1)
 				{
 					Sprintf(buf, "Deals %dd%d bonus ",
 						((is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1),
-						oart->attk.damd);
+						oart->damage);
 				}
 				else
 				{
@@ -2624,29 +2626,25 @@ winid *datawin;
 				Strcat(buf, "damage to large creatures.");
 				break;
 			default:
-				if (!(oart->spfx & (SPFX_DBONUS | SPFX_ATTK)))
+				if (oart->adtyp == AD_PHYS && !(oart->aflags&ARTA_HATES))
 				{
-					if (oart->attk.adtyp == AD_PHYS)
-						Strcat(buf, "damage.");
-					else
-						buf[0] = '\0';
+					Strcat(buf, "damage.");
 				}
-				else if (oart->spfx & SPFX_ATTK)
+				else if (oart->adtyp != AD_PHYS)
 				{
-					switch (oart->attk.adtyp) {
+					switch (oart->adtyp) {
 					case AD_FIRE: Strcat(buf, "fire damage."); break;
 					case AD_COLD: Strcat(buf, "cold damage."); break;
 					case AD_ELEC: Strcat(buf, "lightning damage."); break;
 					case AD_ACID: Strcat(buf, "acid damage."); break;
-					case AD_MAGM: 
-					case AD_STUN: Strcat(buf, "magic damage."); break;
+					case AD_MAGM: Strcat(buf, "magic damage."); break;
 					case AD_DRST: Strcat(buf, "poison damage."); break;
 					case AD_DRLI: Strcat(buf, "life drain damage."); break;
 					case AD_STON: Strcat(buf, "petrifying damage."); break;
 						break;
 					}
 				}
-				else if (oart->spfx & SPFX_CON_OR)
+				else if (oart->aflags & ARTA_HATES)
 				{
 					Strcat(buf, "damage to ");
 					/* SMOP: this should be made into a list somewhere and used for specific warning messages as well,
@@ -2690,8 +2688,9 @@ winid *datawin;
 						break;
 					}
 				}
-				else
-					Strcat(buf, "damage.");
+				else {
+					buf[0] = '\0';
+				}
 				break;
 			}
 			if (buf[0] != '\0')

@@ -281,7 +281,7 @@ Cloak_on()
 		flags.botl = 1;
     }
     /* racial armor bonus */
-	if(arti_lighten(uarmc)) inv_weight();
+	if(arti_lighten(uarmc, FALSE)) inv_weight();
 	
     return 0;
 }
@@ -292,7 +292,7 @@ Cloak_off()
     int otyp = uarmc->otyp;
 	boolean checkweight = FALSE;
     long oldprop = u.uprops[objects[otyp].oc_oprop].extrinsic & ~WORN_CLOAK;
-	if(arti_lighten(uarmc)) checkweight = TRUE;
+	if(arti_lighten(uarmc, FALSE)) checkweight = TRUE;
 	if(otyp == SMOKY_VIOLET_FACELESS_ROBE)
 		adj_abon(uarmc, -uarmc->spe);
     takeoff_mask &= ~W_ARMC;
@@ -715,7 +715,7 @@ Shirt_on()
 		ABON(A_CHA) += 1 + uarmu->spe;
 		flags.botl = 1;
 	}
-	if(arti_lighten(uarmu)) inv_weight();
+	if(arti_lighten(uarmu, FALSE)) inv_weight();
     return 0;
 }
 
@@ -724,7 +724,7 @@ Shirt_off()
 {
 	boolean checkweight = FALSE;
     takeoff_mask &= ~W_ARMU;
-	if(arti_lighten(uarmu)) checkweight = TRUE;
+	if(arti_lighten(uarmu, FALSE)) checkweight = TRUE;
 /*
     switch (uarmu->otyp) {
 	case HAWAIIAN_SHIRT:
@@ -782,7 +782,7 @@ Armor_on()
 		ABON(A_CHA) += 2*(1 + uarm->spe);
 		flags.botl = 1;
 	}
-	if(arti_lighten(uarm)) inv_weight();
+	if(arti_lighten(uarm, FALSE)) inv_weight();
     return 0;
 }
 
@@ -791,7 +791,7 @@ Armor_off()
 {
 	boolean checkweight = FALSE;
     takeoff_mask &= ~W_ARM;
-	if(arti_lighten(uarmu)) checkweight = TRUE;
+	if(arti_lighten(uarmu, FALSE)) checkweight = TRUE;
 	if((uarm->otyp == NOBLE_S_DRESS || uarm->otyp == BLACK_DRESS) && !cancelled_don) {
 		ABON(A_CHA) -= (1 + uarm->spe);
 		flags.botl = 1;

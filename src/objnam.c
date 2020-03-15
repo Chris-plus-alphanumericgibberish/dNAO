@@ -595,7 +595,7 @@ char *buf;
 	/* gold pieces should not have their size described */
 	if (obj->otyp == GOLD_PIECE)
 		return;
-	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size && obj->known) ? artilist[obj->oartifact].size : MZ_MEDIUM))
+	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT && obj->known) ? artilist[obj->oartifact].size : MZ_MEDIUM))
 	{
 		switch (obj->objsize)
 		{
@@ -1114,7 +1114,7 @@ char *buf;
 	/* gold pieces should not have their material described, it's in their name */
 	if(obj->otyp == GOLD_PIECE)
 		return;
-	if(obj->oartifact && obj->known && artilist[obj->oartifact].material){
+	if(obj->oartifact && obj->known && artilist[obj->oartifact].material != MT_DEFAULT){
 		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
 			return;

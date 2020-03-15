@@ -2553,7 +2553,7 @@ do_inheritor_menu()
 	for (i = 1; i<=NROFARTIFACTS; i++)
 	{
 		// if ((artilist[i].spfx2) && artilist[i].spfx && artilist[i].spfx)
-		if(artilist[i].spfx&SPFX_INHER
+		if(artilist[i].gflags&ARTG_INHER
 		&& !Role_if(artilist[i].role)
 		&& !Pantheon_if(artilist[i].role)
 		&& (artilist[i].alignment == A_NONE

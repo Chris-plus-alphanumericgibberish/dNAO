@@ -110,7 +110,7 @@ struct monst * mdef;
 	 */
 	/* Intelligent chaotic weapons (Stormbringer) want blood */
 	if (is_safepet(mdef) && !flags.forcefight) {
-		if (!uwep || !spec_ability2(uwep, SPFX2_BLDTHRST)) {
+		if (!uwep || !arti_is_prop(uwep, ARTI_BLOODTHRST)) {
 			/* there are some additional considerations: this won't work
 			* if in a shop or Punished or you miss a random roll or
 			* if you can walk thru walls and your pet cannot (KAA) or
@@ -4517,7 +4517,7 @@ boolean ranged;
 		if (uncancelled && !rn2(4)) {
 			/* player */
 			if (youdef){
-				if (HFast && !defends(AD_SLOW, uwep)) {
+				if (HFast) {
 					u_slow_down();
 				}
 			}
@@ -4644,7 +4644,7 @@ boolean ranged;
 			if (youdef) {
 				if (u.ulycn == NON_PM
 					&& !Protection_from_shape_changers
-					&& !spec_ability2(uwep, SPFX2_NOWERE)
+					&& !arti_worn_prop(uwep, ARTP_NOWERE)
 					&& !umechanoid
 					) {
 					You_feel("feverish.");
@@ -6753,8 +6753,7 @@ boolean ranged;
 		}
 
 		/* entirely unharmed */
-		if (defends(AD_DRIN, weapon)
-			|| !has_head(pd)
+		if (!has_head(pd)
 			|| (youdef && umechanoid)
 			/*|| notonhead*/ //damnit what
 			) {
@@ -12726,7 +12725,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			subtotl = 1;
 			resisted_attack_type = TRUE;
 		}
-		if ((attackmask & ~(resistmask)) == 0L && !(otmp && narrow_spec_applies(otmp, mdef)) && (subtotl > 0)) {
+		if ((attackmask & ~(resistmask)) == 0L && !(otmp && spec_applies(otmp, mdef, TRUE)) && (subtotl > 0)) {
 			/* damage reduced by 75% */
 			subtotl /= 4;
 			resisted_attack_type = TRUE;

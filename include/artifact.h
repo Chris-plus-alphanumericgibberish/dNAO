@@ -49,7 +49,7 @@
 
 
 
-#define ARTP_SEEK		0x0L /* helps you search, ie, adds enhancement bonus to attempts */
+#define ARTP_SEEK		0x0L /* helps you search, ie, adds enhancement bonus to attempts -- only coded for mainhand weapons */
 #define ARTP_NOCALL		0x0L /* prevents demons from being gated in */
 #define ARTP_NOWERE		0x0L /* protects from lycanthropy and lycanthrope summoning */
 #define ARTP_HALLURES	0x0L /* grants hallucination resistance (which isn't a full property currently) */
@@ -314,10 +314,10 @@ struct artifact {
 	/* Description */
 	int otyp;			/* base artifact type */
 	const char * name;	/* artifact name */
+	long cost;			/* price when sold to hero (default 100 x base cost) */
 	int material;		/* default material */
 	int size;			/* default size */
 	int weight;			/* default weight */
-	long cost;			/* price when sold to hero (default 100 x base cost) */
 
 	/* For Whom */
 	aligntyp    alignment;	/* alignment of bequeathing gods */
@@ -342,14 +342,15 @@ struct artifact {
 	unsigned long aflags;	/* offensive artifact properties */
 
 	/* Worn */
-	uchar equiped[8];		/* properties granted while wielded/worn */
-	unsigned long wflags;	/* special effect while wielding/wearing*/
+#define MAXARTPROP 8
+	uchar wprops[MAXARTPROP];	/* properties granted while wielded/worn */
+	unsigned long wflags;		/* special effect while wielding/wearing*/
 	/* Carried */
-	uchar carried[8];		/* properties granted while carried */
-	unsigned long cflags;	/* special effect while carrying */
+	uchar cprops[MAXARTPROP];	/* properties granted while carried */
+	unsigned long cflags;		/* special effect while carrying */
 	/* Intrinsic */
-	uchar inv_prop;			/* property obtained by invoking artifact OR invokable power */
-	unsigned long iflags;	/* special effect intrinsic to the artifact */
+	uchar inv_prop;				/* property obtained by invoking artifact OR invokable power */
+	unsigned long iflags;		/* special effect intrinsic to the artifact */
 };
 
 /* invoked properties with special powers */
@@ -480,7 +481,7 @@ struct artifact {
 )
 
 #define is_nameable_artifact(a) (\
-			(a->spfx & (SPFX_RESTR)) == 0\
+			(a->gflags & ARTG_NAME) != 0\
 			|| (a == &artilist[ART_SNICKERSNEE] && Role_if(PM_TOURIST) && (u.ulevel > 18 || u.uevent.qcompleted) )\
 			|| (a == &artilist[ART_KUSANAGI_NO_TSURUGI] && Role_if(PM_SAMURAI) && u.ulevel >= 22 )\
 			|| (a == &artilist[ART_GRANDMASTER_S_ROBE] && P_SKILL(P_MARTIAL_ARTS) >= P_GRAND_MASTER && u.ulevel >= 30 )\

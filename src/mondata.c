@@ -347,12 +347,12 @@ struct monst *mon;
 	)
 	    return TRUE;
 	o = is_you ? uwep : MON_WEP(mon);
-	if (o && o->oartifact && defends(AD_BLND, o))
+	if (o && arti_blindres(o, FALSE))
 	    return TRUE;
 	o = is_you ? invent : mon->minvent;
 	for ( ; o; o = o->nobj)
 	    if ((o->owornmask && objects[o->otyp].oc_oprop == BLINDED) ||
-		    (o->oartifact && protects(AD_BLND, o)))
+		    arti_blindres(o, TRUE))
 		return TRUE;
 	return FALSE;
 }

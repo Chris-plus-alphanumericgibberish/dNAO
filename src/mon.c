@@ -1908,7 +1908,7 @@ mcalcdistress()
 								if(!onum) break;
 							}
 							if (!otmp || otmp->cursed) continue;	/* next target */
-							if(otmp->oartifact && spec_ability(otmp, SPFX_INTEL) &&
+							if(otmp->oartifact && arti_gen_prop(otmp, ARTG_MAJOR) &&
 							   rn2(10) < 8) {
 								pline("%s!", Tobjnam(otmp, "resist"));
 								continue;
@@ -1987,7 +1987,7 @@ mcalcdistress()
 									if(!onum) break;
 								}
 								if (!otmp || otmp->cursed) continue;	/* next target */
-								if(otmp->oartifact && spec_ability(otmp, SPFX_INTEL) &&
+								if (otmp->oartifact && arti_gen_prop(otmp, ARTG_MAJOR) &&
 								   rn2(10) < 8) {
 									continue;
 								}

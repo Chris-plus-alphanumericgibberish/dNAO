@@ -539,7 +539,7 @@ rndcurse()			/* curse a few inventory items at random! */
 		   cursed item happens--avoid "resists" message in that case */
 		if (!otmp || otmp->cursed) continue;	/* next target */
 
-		if(otmp->oartifact && spec_ability(otmp, SPFX_INTEL) &&
+		if(otmp->oartifact && arti_gen_prop(otmp, ARTG_MAJOR) &&
 		   rn2(10) < 8) {
 		    pline("%s!", Tobjnam(otmp, "resist"));
 		    continue;
@@ -666,7 +666,7 @@ register struct monst *mtmp;
 		   cursed item happens--avoid "resists" message in that case */
 		if (!otmp || otmp->cursed) continue;	/* next target */
 
-		if(otmp->oartifact && spec_ability(otmp, SPFX_INTEL) &&
+		if(otmp->oartifact && arti_gen_prop(otmp, ARTG_MAJOR) &&
 		   rn2(10) < 8) {
 			if (visible) pline("%s!", Tobjnam(otmp, "resist"));
 		    continue;
