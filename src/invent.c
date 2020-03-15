@@ -3043,6 +3043,11 @@ winid *datawin;
 			OBJPUTSTR("Adds a new ability to the #monster powers menu.");
 			OBJPUTSTR("Permanently grants regeneration to all pets.");
 		break;
+		case WORD_OF_KNOWLEDGE:
+			OBJPUTSTR("Read to permanently learn the Word of Knowledge.");
+			OBJPUTSTR("Adds a new ability to the #monster powers menu.");
+			OBJPUTSTR("Permanently grants plus three to pet cap.");
+		break;
 		}
 	}
 	if (olet == SPBOOK_CLASS) {
@@ -3786,6 +3791,25 @@ count_unpaid(list)
 	list = list->nobj;
     }
     return count;
+}
+
+/*
+ * Checks if there is an item of matching otyp within the given list.  This includes
+ * contained objects.
+ */
+boolean
+has_object_type(list, otyp)
+struct obj *list;
+int otyp;
+{
+	while (list) {
+		if (list->otyp == otyp) return TRUE;
+		if (Has_contents(list))
+			if(has_object_type(list->cobj, otyp))
+				return TRUE;
+		list = list->nobj;
+	}
+	return FALSE;
 }
 
 /*
