@@ -2480,6 +2480,7 @@ E void FDECL(set_spirit_powers, (long));
 E int NDECL(reorder_spirit_powers);
 E void NDECL(dopseudonatural);
 E void NDECL(dodestruction);
+E void NDECL(domindblast_strong);
 E boolean NDECL(doreinforce_spell);
 E void NDECL(update_alternate_spells);
 
