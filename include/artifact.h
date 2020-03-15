@@ -228,6 +228,7 @@ struct artifact {
 	/* Description */
 	int otyp;			/* base artifact type */
 	const char * name;	/* artifact name */
+	const char * desc;	/* appearance when unknown */
 	long cost;			/* price when sold to hero (default 100 x base cost) */
 	int material;		/* default material */
 	int size;			/* default size */

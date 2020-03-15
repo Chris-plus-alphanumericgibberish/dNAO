@@ -412,6 +412,7 @@ struct obj * obj;
 	int saved_sknown = obj->sknown;                      /* stolen or not known */
 	int saved_nknown = objects[obj->otyp].oc_name_known; /* type name known */
 	int saved_lamplit = obj->lamplit;
+	int artifact_known = obj->oartifact && !undiscovered_artifact(obj->oartifact);
 	obj->known  = 0;
 	obj->bknown = 0;
 	obj->rknown = 0;
@@ -422,7 +423,13 @@ struct obj * obj;
 	/* temporarily snuff lightsabers */
 	if (is_lightsaber(obj) && litsaber(obj))
 		obj->lamplit = 0;
+	/* temporarily undiscover artifacts */
+	if (artifact_known)
+		undiscover_artifact(obj->oartifact);
 	buf = makesingular(xname(obj));
+	/* rediscover artifact */
+	if (artifact_known)
+		discover_artifact(obj->oartifact);
 	obj->known  = saved_known;
 	obj->bknown = saved_bknown; 
 	obj->rknown = saved_rknown; 
@@ -1191,6 +1198,9 @@ boolean with_price;
 	register const char *actualn = OBJ_NAME(*ocl);	/* the identified name of the otyp */
 	register const char *dn = OBJ_DESCR(*ocl);		/* the unidentified name of the otyp */
 	register const char *un = ocl->oc_uname;		/* what you have named the otyp */
+	const struct artifact *oart = 0;
+	static int getting_obj_base_desc = 0;
+	if (obj && obj->oartifact) oart = &artilist[(obj)->oartifact];
 
 	buf = nextobuf() + PREFIX;	/* leave room for "17 -3 " */
 	if (Role_if(PM_SAMURAI) && iflags.role_obj_names && Alternate_item_name(typ, Japanese_items))
@@ -1213,23 +1223,38 @@ boolean with_price;
 	if (u.sealsActive&SEAL_ANDROMALIUS) obj->sknown = TRUE;
 	//if (obj_is_pname(obj)) goto nameit;
 
-	if (dofull) add_determiner_words(obj, buf);	// quantity or "a" or "the"
-	/* general descriptors */
-	if (dofull) add_stolen_words(obj, buf);
-	if (dofull) add_buc_words(obj, buf);
-	add_size_words(obj, buf);	// TODO - hide some artifact's sizes, currently shows all
-	add_shape_words(obj, buf, dofull);		// Note: more verbose for a number of objects if dofull is true
-	if (dofull) add_erosion_words(obj, buf);
-	if (dofull) add_grease_words(obj, buf);
-	if (dofull) add_enchantment_number(obj, buf);
-	add_properties_words(obj, buf, dofull);	// Note: more verbose for artifacts if dofull is true
-	add_poison_words(obj, buf);
-	add_colours_words(obj, buf);
-	add_material_words(obj, buf);	// TODO - show some artifact's materials, currently hides all
-	if (dofull) add_type_words(obj, buf);
+	if (!getting_obj_base_desc) {
+		if (dofull) add_determiner_words(obj, buf);	// quantity or "a" or "the"
+		/* general descriptors */
+		if (dofull) add_stolen_words(obj, buf);
+		if (dofull) add_buc_words(obj, buf);
+		add_size_words(obj, buf);
+		add_shape_words(obj, buf, dofull);		// Note: more verbose for a number of objects if dofull is true
+		if (dofull) add_erosion_words(obj, buf);
+		if (dofull) add_grease_words(obj, buf);
+		if (dofull) add_enchantment_number(obj, buf);
+		add_properties_words(obj, buf, dofull);	// Note: more verbose for artifacts if dofull is true
+		add_poison_words(obj, buf);
+		add_colours_words(obj, buf);
+		add_material_words(obj, buf);	// TODO - show some artifact's materials, currently hides all
+		if (dofull) add_type_words(obj, buf);
+	}
 
 	/* finishing up xname stuff, which has a lot of special cases */
-	if (!obj_is_pname(obj))
+	
+	if (obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc && !getting_obj_base_desc) {
+		if (strstri(oart->desc, "%s")) {
+			getting_obj_base_desc = TRUE;
+			char * buf2 = nextobuf();
+			Sprintf(buf2, oart->desc, xname(obj));
+			Strcat(buf, buf2);
+			getting_obj_base_desc = FALSE;
+		}
+		else {
+			Strcat(buf, oart->desc);
+		}
+	}
+	else if (!obj_is_pname(obj))
 	{
 		switch (obj->oclass) {
 		case AMULET_CLASS:
@@ -1599,17 +1624,19 @@ boolean with_price;
 		if (obj->quan != 1L) Strcpy(buf, makeplural(buf));
 	}//endif !obj_is_pname(obj)
 
-	if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
-		if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
-		if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_FLUORITE_OCTAHEDRON)){
-			if (obj->quan == 8) Strcat(buf, "Fluorite Octet");
-			else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
-			else Strcat(buf, "Fluorite Octahedron");
+	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)) {
+		if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
+			if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
+			if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_FLUORITE_OCTAHEDRON)){
+				if (obj->quan == 8) Strcat(buf, "Fluorite Octet");
+				else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
+				else Strcat(buf, "Fluorite Octahedron");
+			}
+			else if (obj_is_pname(obj) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
+				Strcat(buf, ONAME(obj) + 4);
+			else
+				Strcat(buf, ONAME(obj));
 		}
-		else if (obj_is_pname(obj) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
-			Strcat(buf, ONAME(obj)+4);
-		else 
-			Strcat(buf, ONAME(obj));
 	}
 
 	if (!dofull && !strncmpi(buf, "the ", 4)) buf += 4;
@@ -1617,9 +1644,6 @@ boolean with_price;
 	/* Suffixes applied by dofull. From this point on, if dofull is not enabled, no changes should be made to buf */
 	if (dofull)
 	{
-		const struct artifact *oart = 0;
-		if (obj && obj->oartifact) oart = &artilist[(obj)->oartifact];
-
 		switch (obj->oclass) {
 		case AMULET_CLASS:
 			if (obj->owornmask & W_AMUL)

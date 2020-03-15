@@ -1662,6 +1662,24 @@ int m;
        end without either finding the artifact or an empty slot... */
     impossible("couldn't discover artifact (%d)", (int)m);
 }
+/* remove identifed artifact from discoveries list */
+void
+undiscover_artifact(m)
+int m;
+{
+	int i;
+	boolean found = FALSE;
+	/* look for this artifact in the discoveries list;
+       if we hit an empty slot then it's not present, so add it */
+	for (i = 0; i < NROFARTIFACTS - 1 && artidisco[i]; i++) {
+		if (artidisco[i] == m) {
+			found = TRUE;
+		}
+		if (found)
+			artidisco[i] = artidisco[i + 1];
+	}
+	artidisco[i] = 0;
+}
 
 /* used to decide whether an artifact has been fully identified */
 boolean
