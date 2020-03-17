@@ -1739,6 +1739,7 @@ karemade:
 
 		    monstermoves++;
 		    moves++;
+			nonce = rand();
 
 		      /********************************/
 		     /* once-per-turn things go here */
