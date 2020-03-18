@@ -78,7 +78,7 @@ A("",					STRANGE_OBJECT,					(const char *)0,
 /*Excalibur does extra blessed damage to demons and undead, +3d7 instead of 1d4*/
 A("Excalibur",			LONG_SWORD,						(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_LAWFUL, PM_KNIGHT, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_INHER|ARTG_MAJOR),
+	A_LAWFUL, PM_KNIGHT, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_INHER|ARTG_MAJOR),
 	NO_MONS(),
 	ATTK(AD_PHYS, 20, 10), NOFLAG,
 	PROP2(DRAIN_RES, SEARCHING), (ARTP_SEEK),
