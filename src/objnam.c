@@ -4971,10 +4971,11 @@ typfnd:
 	/* and make them pay; charge them for the wish anyway! */
 	if (otmp->oartifact && !wizwish && from_user &&
 		(is_quest_artifact(otmp) //redundant failsafe.  You can't wish for ANY quest artifacts
-		 || otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS //No wishing for quest artifacts, unique monster artifacts, etc.
+		 || (artilist[otmp->oartifact].gflags&ARTG_NOWISH) // non-wishable artifacts should be marked as such.
 		 || !touch_artifact(otmp, &youmonst, TRUE) //Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
 		 || !allow_artifact								// pre-determined if any artifact wish is allowed
 		 // depreciated criteria:
+		 // (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS) //No wishing for quest artifacts, unique monster artifacts, etc.
 		 // (otmp->oartifact && rn2((int)(u.uconduct.wisharti)) > 1) //Limit artifact wishes per game
 		 // (otmp->oartifact >= ART_ITLACHIAYAQUE && otmp->oartifact <= ART_EYE_OF_THE_AETHIOPICA) || //no wishing for quest artifacts
 		 // (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS && otmp->oartifact <= ART_SILVER_KEY) || //no wishing for alignment quest artifacts
