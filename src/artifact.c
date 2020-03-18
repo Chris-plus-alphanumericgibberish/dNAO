@@ -149,6 +149,10 @@ hack_artifacts()
 	artilist[ART_HELM_OF_THE_DARK_LORD].otyp = find_vhelm();
 	artilist[ART_SHARD_FROM_MORGOTH_S_CROWN].otyp = find_good_iring();
 	
+	if(!Role_if(PM_BARD)){
+ 	    artilist[ART_SINGING_SWORD].role = NON_PM;
+	}
+	
 	if(Role_if(PM_ANACHRONONAUT)){
 		artilist[ART_CRESCENT_BLADE].race = NON_PM;
 		artilist[ART_CRESCENT_BLADE].alignment = A_NONE;
@@ -3180,7 +3184,7 @@ boolean * messaged;
 	}
 	if ((attacks(AD_COLD, otmp) || (oproperties&OPROP_COLDW)) && !(
 		/* exceptions */
-		(get_artifact(otmp)->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)
+		(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)
 		)
 		){
 		if (oartifact && (vis&VIS_MAGR)) {
@@ -5612,7 +5616,7 @@ arti_invoke(obj)
 		case WIND_PETS:
 			pline("You call upon the minions of Quetzalcoatl!");
 			int n = u.ulevel/5 + 1;
-			if (ACURR(A_CHA)/3 < n) n = ACURR(A_CHA)/3;
+			if(dog_limit() < n) n = dog_limit();
 			while(n--) {
 				pm = &mons[windpets[d(1,8)]];
 				mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);

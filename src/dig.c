@@ -64,7 +64,7 @@ mkcavepos(x, y, dist, waslit, rockit)
 	if(IS_ROCK(lev->typ)) return;
 	if(t_at(x, y)) return; /* don't cover the portal */
 	if ((mtmp = m_at(x, y)) != 0)	/* make sure crucial monsters survive */
-	    if(!mon_resistance(mtmp,PASSES_WALLS)) (void) rloc(mtmp, FALSE);
+	    if(!mon_resistance(mtmp,PASSES_WALLS)) return;
     } else if(lev->typ == ROOM) return;
 
     unblock_point(x,y);	/* make sure vision knows this location is open */
@@ -2142,9 +2142,11 @@ bury_an_obj(otmp)
 	if (otmp->otyp == CORPSE) {
 	    ;		/* should cancel timer if under_ice */
 	} else if ((under_ice ? otmp->oclass == POTION_CLASS : is_organic(otmp))
-		&& !obj_resists(otmp, 0, 95)) {
+		&& !obj_resists(otmp, 0, 100)) {
 	    (void) start_timer((under_ice ? 0L : 250L) + (long)rnd(250),
 			       TIMER_OBJECT, ROT_ORGANIC, (genericptr_t)otmp);
+	} else if(otmp->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE){
+	    (void) start_timer(250L + (long)rnd(250), TIMER_OBJECT, ROT_ORGANIC, (genericptr_t)otmp);
 	}
 	add_to_buried(otmp);
 	return(otmp2);
@@ -2217,6 +2219,23 @@ long timeout;	/* unused */
 	       buried, so bury_an_obj's use of obj_extract_self insures
 	       that Has_contents(obj) will eventually become false. */
 	    (void)bury_an_obj(obj->cobj);
+	}
+	if(obj->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE){
+		struct engr *oep = engr_at(obj->ox, obj->oy);
+		if(!oep){
+			make_engr_at(obj->ox, obj->oy,
+			 "", 0L, DUST);
+			oep = engr_at(obj->ox, obj->oy);
+		}
+		if(oep){
+			oep->ward_id = HOOFPRINT;
+			oep->halu_ward = 1;
+			oep->ward_type = BURN;
+			oep->complete_wards = 1;
+		}
+		if(cansee(obj->ox, obj->oy))
+			pline_The("%s boils to black mist!", surface(obj->ox, obj->oy));
+		makemon(&mons[PM_MOUTH_OF_THE_GOAT], obj->ox, obj->oy, NO_MM_FLAGS);
 	}
 	obj_extract_self(obj);
 	obfree(obj, (struct obj *) 0);

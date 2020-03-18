@@ -1783,6 +1783,8 @@ u_init()
 	u.ufirst_sky_timeout = 0;
 	u.ufirst_life = FALSE;
 	u.ufirst_life_timeout = 0;
+	u.ufirst_know = FALSE;
+	u.ufirst_know_timeout = 0;
 	
 	/*Randomize spirit order*/{
 		int i,j,tmp;
@@ -1918,6 +1920,7 @@ u_init()
 	init_uhunger();
 	for (i = 0; i <= MAXSPELL; i++) spl_book[i].sp_id = NO_SPELL;
 	u.ublesscnt = 300;			/* no prayers just yet */
+	u.ugoatblesscnt = 300;			/* goat counter also starts high */
 	u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] = u.ualign.type = aligns[flags.initalign].value;
 	u.ulycn = NON_PM;
 

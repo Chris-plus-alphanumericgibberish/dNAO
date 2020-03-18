@@ -31,6 +31,7 @@ STATIC_DCL void FDECL(blessed_spawn, (struct monst *));
 STATIC_DCL void FDECL(good_neighbor, (struct monst *));
 STATIC_DCL void FDECL(dark_pharaoh, (struct monst *));
 STATIC_DCL void FDECL(polyp_pickup, (struct monst *));
+STATIC_DCL void FDECL(goat_sacrifice, (struct monst *));
 
 #ifdef OVL0
 
@@ -1227,6 +1228,14 @@ moveloop()
 					}
 				}
 				
+				if(mtmp->data == &mons[PM_DEEPEST_ONE] && !mtmp->female && u.uevent.ukilled_dagon){
+					set_mon_data(mtmp, &mons[PM_FATHER_DAGON], 0);
+					u.uevent.ukilled_dagon = 0;
+				}
+				if(mtmp->data == &mons[PM_DEEPEST_ONE] && mtmp->female && u.uevent.ukilled_hydra){
+					set_mon_data(mtmp, &mons[PM_MOTHER_HYDRA], 0);
+					u.uevent.ukilled_hydra = 0;
+				}
 				if(mtmp->data == &mons[PM_GOLD_GOLEM]){
 					int golds = u.goldkamcount_tame + level.flags.goldkamcount_peace + level.flags.goldkamcount_hostile;
 					if(golds > 0){
@@ -1730,6 +1739,7 @@ karemade:
 
 		    monstermoves++;
 		    moves++;
+			nonce = rand();
 
 		      /********************************/
 		     /* once-per-turn things go here */
@@ -1749,8 +1759,18 @@ karemade:
 			) dosymbiotic();
 			if(u.spiritPColdowns[PWR_PSEUDONATURAL_SURGE] >= moves+20)
 				dopseudonatural();
+			if(roll_madness(MAD_GOAT_RIDDEN) && adjacent_mon()){
+				pline("Lashing tentacles erupt from your brain!");
+				losehp(max(1,(Upolyd ? ((d(4,4)*u.mh)/u.mhmax) : ((d(4,4)*u.uhp)/u.uhpmax))), "the black mother's touch", KILLED_BY);
+				morehungry(d(4,4)*4);
+				if(!roll_madness(MAD_GOAT_RIDDEN) && !roll_madness(MAD_GOAT_RIDDEN))
+					change_usanity(-1*d(4,4));
+				dogoat();
+			}
 			if(Destruction)
 				dodestruction();
+			if(Mindblasting)
+				domindblast_strong();
 			/* Clouds on Lolth's level deal damage */
 			if(Is_lolth_level(&u.uz) && levl[u.ux][u.uy].typ == CLOUD){
 				if (!(nonliving(youracedata) || Breathless)){
@@ -1817,6 +1837,8 @@ karemade:
 			move_gliders();
 
 		    if (u.ublesscnt)  u.ublesscnt--;
+		    if (u.ugoatblesscnt && u.uevent.shubbie_atten && !u.ugangr[GA_MOTHER])
+				u.ugoatblesscnt--;
 		    if(flags.time && !flags.run)
 			flags.botl = 1;
 			
@@ -2778,7 +2800,7 @@ see_nearby_monsters()
 							change_usanity(u_sanity_loss(mtmp));
 						}
 						if(yields_insight(mtmp->data)){
-							change_uinsight(1);
+							change_uinsight(u_visible_insight(mtmp));
 						}
 						}
 					}
@@ -2801,6 +2823,8 @@ struct monst *mon;
 		dark_pharaoh(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_POLYPOID_BEING])
 		polyp_pickup(mon);
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_MOUTH_OF_THE_GOAT])
+		goat_sacrifice(mon);
 }
 
 static int goatkids[] = {PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN, 
@@ -3081,6 +3105,57 @@ struct monst *mon;
 					break;
 				}
 			}
+		}
+	}
+}
+
+STATIC_OVL
+void
+goat_sacrifice(mon)
+struct monst *mon;
+{
+	struct obj *otmp, *otmp2;
+	register struct monst *mtmp, *mtmp0 = 0, *mtmp2;
+	xchar xlocale, ylocale, xyloc;
+	xyloc	= mon->mtrack[0].x;
+	xlocale = mon->mtrack[1].x;
+	ylocale = mon->mtrack[1].y;
+	if(xyloc == MIGR_EXACT_XY){
+		for(otmp = level.objects[xlocale][ylocale]; otmp; otmp = otmp2){
+			otmp2 = otmp->nexthere;
+			if(otmp->otyp == CORPSE && !otmp->oartifact){
+				goat_eat(otmp); //No matter what, the this function should remove this corpse.  Either via resurrection or destruction
+				//Warning note: otmp is now stale
+				return;
+			}
+		}
+	}
+}
+
+void
+dogoat()
+{
+	struct monst *mon;
+	int tmp, weptmp, tchtmp;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j, lim=0;
+	struct attack symbiote = { AT_TENT, AD_PHYS, 4, 4 };
+	for(j=8;j>=1;j--){
+		if(u.ustuck && u.uswallow)
+			mon = u.ustuck;
+		else if(!isok(u.ux+clockwisex[(i+j)%8], u.uy+clockwisey[(i+j)%8]))
+			continue;
+		else mon = m_at(u.ux+clockwisex[(i+j)%8], u.uy+clockwisey[(i+j)%8]);
+		if(!mon || mon->mpeaceful)
+			continue;
+		if(touch_petrifies(mon->data)
+		 || mon->data == &mons[PM_MEDUSA]
+		 || mon->data == &mons[PM_PALE_NIGHT]
+		) continue;
+		
+		if(mon && !mon->mtame){
+			xmeleehity(&youmonst, mon, &symbiote, (struct obj *)0, -1, 0, FALSE);
 		}
 	}
 }
