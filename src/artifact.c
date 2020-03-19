@@ -379,37 +379,55 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 			(!(a->gflags & ARTG_NOGEN) || unique || (m==ART_PEN_OF_THE_VOID && Role_if(PM_EXILE))) && 
 			!artiexist[m]
 		) {
-			if (by_align && (Role_if(a->role) || Pantheon_if(a->role))){
-				goto make_artif;	/* 'a' points to the desired one */
-			} else if (by_align && a->race != NON_PM && race_hostile(&mons[a->race])){
-				continue;	/* skip enemies' equipment */
-			} else if (by_align && hates_iron(youracedata) &&  
-				((artilist[m].material == IRON || 
-					(artilist[m].material == 0 && objects[artilist[m].otyp].oc_material == IRON)
-				) && (u.ugifts < 2 || !rn2(2)))
-			){ 
-				continue; // no iron gifts if you're an elf/drow/yuki - game-able by selfpoly but eh
-			} else if (by_align && hates_silver(youracedata) &&  
-				((artilist[m].material == SILVER || 
-					(artilist[m].material == 0 && objects[artilist[m].otyp].oc_material == SILVER)
-				) && (u.ugifts < 2 || !rn2(2)))
-			){ 
-				continue; // no silver gifts if you're an vampire - game-able by selfpoly still
-			} else if (by_align && Race_if(PM_CHIROPTERAN) && 
-				(objects[artilist[m].otyp].oc_class == ARMOR_CLASS && objects[artilist[m].otyp].oc_armcat == ARM_BOOTS)
-				&& (u.ugifts < 2 || !rn2(2))
-			){ 
-				continue; // no boots for bats
-			} else if (by_align && Race_if(PM_DROW) && (m == ART_ARKENSTONE || m == ART_HOLY_MOONLIGHT_SWORD)){
-				continue; // no light-giving artis for drow (artifact_light should be unnecessary)
-			} else if (by_align && m == ART_CALLANDOR && flags.initgend){
-				continue; // callandor is saidin only
-			} else if(by_align && Role_if(PM_PIRATE)) 
-				continue; /* pirates are not gifted artifacts */
-			else if(by_align && Role_if(PM_MONK) && !is_monk_safe_artifact(m) && (!(u.uconduct.weaphit) || rn2(20)))
-				continue; /* monks are very restricted */
-			else
+			if (by_align) {
+				if (Role_if(a->role) || Pantheon_if(a->role)){
+					goto make_artif;	/* 'a' points to the desired one */
+				}
+				else {
+					boolean preferred = (u.ugifts < 2 || !rn2(u.uartisval / 4));
+					/* conditions that are no-good for giving this artifact */
+
+					/* go for preferred gifts */
+					if (preferred && !(a->gflags & ARTG_GIFT))
+						continue;
+					/* always skip enemies' equipment */
+					if (a->race != NON_PM && race_hostile(&mons[a->race]))
+						continue;
+					/* skip materials that hate the player */
+					if (preferred && !Upolyd && (
+						(hates_iron(youracedata)
+						&& (a->material == IRON || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == IRON)))
+						||
+						(hates_silver(youracedata)
+						&& (a->material == SILVER || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == SILVER)))
+						))
+						continue;
+					/* skip boots for chiropterans */
+					if (preferred && Race_if(PM_CHIROPTERAN) &&
+						(objects[a->otyp].oc_class == ARMOR_CLASS && objects[a->otyp].oc_armcat == ARM_BOOTS)
+						)
+						continue;
+					/* always skip lightsources for Drow */
+					/* TODO: make lightup-when-wielded part of artilist so it can be figured out for here */
+					if (Race_if(PM_DROW) && ((a->iflags & ARTI_PERMALIGHT) || (m == ART_HOLY_MOONLIGHT_SWORD)))
+						continue;
+					/* always skip Callandor for females (Saidin is only for males) */
+					if (m == ART_CALLANDOR && flags.initgend)
+						continue;
+					/* pirates get no artifacts other than the Map */
+					if (Role_if(PM_PIRATE))
+						continue;
+					/* monks are very restricted */
+					if (Role_if(PM_MONK) && !is_monk_safe_artifact(m) && (!(u.uconduct.weaphit) || rn2(20)))
+						continue;
+
+					/* if we made it through that gauntlet, we're good */
+					eligible[n++] = m;
+				}
+			}
+			else {
 				eligible[n++] = m;
+			}
 		}
 
 	if (n) {		/* found at least one candidate */
