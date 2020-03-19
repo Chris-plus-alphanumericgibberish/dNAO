@@ -321,11 +321,19 @@ struct obj * otmp;
 	if (artival == NO_TIER)
 		return 0;
 
-	/* monks get a very large bonus for offensive armor */
+	/* monks can get a bonus for some offensive armors */
 	if (otmp->oclass == ARMOR_CLASS
-		&& offensive_artifact(arti)
 		&& Role_if(PM_MONK)) {
-		artival += artival / 2;
+		switch (otmp->oartifact)
+		{
+		case ART_PREMIUM_HEART:
+		case ART_GRANDMASTER_S_ROBE:
+			artival += artival / 2;
+			break;
+		case ART_HAMMERFEET:
+			artival++;
+			break;
+		}
 	}
 	/* everyone gets a bonus for a weapon they get Expert with */
 	if (weapon_type(otmp) != P_BARE_HANDED_COMBAT

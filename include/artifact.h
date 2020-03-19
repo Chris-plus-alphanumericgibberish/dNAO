@@ -554,13 +554,6 @@ struct artifact {
 				(m) == ART_MARAUDER_S_MAP\
 			)
 
-#define offensive_artifact(arti) (\
-	(arti)->adtyp != 0 ||\
-	(arti)->accuracy != 0 ||\
-	(arti)->damage != 0 ||\
-	(arti)->aflags != 0L \
-	)
-
 #define double_bonus_damage_artifact(m) (\
 	(m) == ART_LIMITED_MOON ||\
 	(m) == ART_STAFF_OF_TWELVE_MIRRORS ||\
