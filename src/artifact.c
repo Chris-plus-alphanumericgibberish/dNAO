@@ -850,6 +850,19 @@ struct obj *obj;
 }
 
 boolean
+arti_dluck(obj)
+struct obj *obj;
+{
+    return (obj && obj->oartifact && arti_attack_prop(obj, ARTA_DLUCK));
+}
+boolean
+arti_dexpl(obj)
+struct obj *obj;
+{
+    return (obj && obj->oartifact && arti_attack_prop(obj, ARTA_DEXPL));
+}
+
+boolean
 arti_shining(obj)
 struct obj *obj;
 {

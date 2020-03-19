@@ -389,23 +389,26 @@ int otyp;
 	/* Artifacts and other fun things that need obj to exist and apply for both small and large (mostly?) */
 	if (obj)
 	{
-		if (obj->oartifact == ART_VORPAL_BLADE || obj->oartifact == ART_SNICKERSNEE)
+		/* exploding and lucky dice */
+		if (arti_dluck(obj)) {
+			ocad = AD_LUCK;
+		}
+		if (arti_dexpl(obj)) {
+			ocaa = AT_EXPL;
+			/* some artifacts are special-cased to gain extra damage when exploding */
+			if (obj->oartifact == ART_VORPAL_BLADE || obj->oartifact == ART_SNICKERSNEE)
+				ocaa++;
+		}
+
+		/* other various artifacts and objects */
+		if (obj->oartifact == ART_VORPAL_BLADE
+			|| obj->oartifact == ART_SNICKERSNEE
+			|| obj->oartifact == ART_DURIN_S_AXE)
 		{
-			ocaa = AT_EXPL + 1;				// exploding dice, +1 damage per roll
 			ocn = 2;						// roll two oc dice
-		}
-		else if (obj->oartifact == ART_SCOURGE_OF_LOLTH)
-		{
-			ocaa = AT_EXPL;					// basic exploding dice
-		}
-		else if (obj->oartifact == ART_LUCK_BLADE)
-		{
-			ocad = AD_LUCK;					// luck-based dice
 		}
 		else if (obj->oartifact == ART_FLUORITE_OCTAHEDRON)
 		{
-			ocaa = AT_EXPL;					// exploding
-			ocad = AD_LUCK;					// lucky
 			ocn = obj->quan;				// 1 die per octahedron
 			ocd = 8;						// They are eight-sided dice
 		}
@@ -420,10 +423,6 @@ int otyp;
 			bond = max(4 + 2 * dmod, 2);
 			if (!large)
 				flat += 2;
-		}
-		else if (obj->oartifact == ART_DURIN_S_AXE)
-		{
-			ocn = 2;
 		}
 		else if (obj->oartifact == ART_REAVER)
 		{
