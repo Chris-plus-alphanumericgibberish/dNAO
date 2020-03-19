@@ -304,6 +304,51 @@ int artinum;
 	return(artilist[artinum].name);
 }
 
+int
+arti_value(otmp)
+struct obj * otmp;
+{
+	struct artifact * arti = get_artifact(otmp);
+	int artival;
+	int baseartival;
+
+	if (!arti)
+		return 0;
+
+	/* start with the artifact's base value */
+	baseartival = artival = arti->giftval;
+
+	if (artival == NO_TIER)
+		return 0;
+
+	/* monks get a very large bonus for offensive armor */
+	if (otmp->oclass == ARMOR_CLASS
+		&& offensive_artifact(arti)
+		&& Role_if(PM_MONK)) {
+		artival += artival / 2;
+	}
+	/* everyone gets a bonus for a weapon they get Expert with */
+	if (weapon_type(otmp) != P_BARE_HANDED_COMBAT
+		&& P_MAX_SKILL(weapon_type(otmp)) >= P_EXPERT)
+	{
+		artival++;
+	}
+	/* as well as if they're Skilled or better and the weapon is good enough for endgame */
+	if (weapon_type(otmp) != P_BARE_HANDED_COMBAT
+		&& P_MAX_SKILL(weapon_type(otmp)) >= P_SKILLED
+		&& baseartival >= TIER_B)
+	{	
+		artival++;
+	}
+	/* and -1 if they're only Basic */
+		if (weapon_type(otmp) != P_BARE_HANDED_COMBAT
+		&& P_MAX_SKILL(weapon_type(otmp)) <= P_BASIC)
+	{	
+		artival--;
+	}
+	return artival;
+}
+
 /*
    Make an artifact.  If a specific alignment is specified, then an object of
    the appropriate alignment is created from scratch, or 0 is returned if

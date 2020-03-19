@@ -1723,6 +1723,7 @@ u_init()
 		u.ugangr[i] = 0;				/* gods not angry */
 	}
 	u.ugifts   = 0;				/* no divine gifts bestowed */
+	u.uartisval = 0;			/* no artifacts directly acquired */
 	u.ucarinc = 0;
 	u.uacinc = 0;
 // ifdef ELBERETH

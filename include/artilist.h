@@ -3,18 +3,6 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 /* we need to set these *before* makedefs.c or else it won't be getting the right number of arguments */
-#define MZ_DEFAULT	-1
-#define MT_DEFAULT	-1
-#define WT_DEFAULT	-1
-
-#define TIER_S	8	/* Is somehow superior to all others */
-#define TIER_A	6	/* Preferrable endgame artifact */
-#define TIER_B	4	/* Good enough artifact to use by endgame */
-#define TIER_C	3	/* You'll want to switch out for a better artifact if you can */
-#define TIER_D	2	/* Situationally useful; enough to carry around, at least */
-#define TIER_F	1	/* Often not worth using at all */
-#define NO_TIER	0	/* Not tierable */
-
 #define PROP0()                {0,0,0,0,0,0,0,0}
 #define PROP1(a)               {a,0,0,0,0,0,0,0}
 #define PROP2(a,b)             {a,b,0,0,0,0,0,0}

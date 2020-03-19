@@ -787,6 +787,19 @@ int ga_num;
 	return;
 }
 
+/* chance for god to give you a gift */
+/* returns TRUE if your god should give you a gift */
+boolean
+maybe_god_gives_gift()
+{
+	/* previous: 1 in (10 + (2 * gifts * (gifts+wishes))) */
+	/* Role_if(PM_PRIEST) ? !rn2(10 + (2 * u.ugifts * u.ugifts)) : !rn2(10 + (2 * u.ugifts * nartifacts)) */
+	/* the average giftable artifact has a value of 4 (TIER_B), plus any bonuses for the player being good with it */
+	/* uartisval isn't increased for priests when wishing */
+	return !rn2(10 + (u.uartisval * u.uartisval / 10));
+}
+
+
 /* helper to print "str appears at your feet", or appropriate */
 static void
 at_your_feet(str)
@@ -3166,17 +3179,12 @@ dosacrifice()
 		}
 	    }
 	} else {
-	    int nartifacts = (int)(u.uconduct.wisharti + u.ugifts);
-		//pline("looking into an artifact gift.  %d currently exist. %d gifts have been given, on level %d, and your luck %d.", nartifacts, (int)u.ugifts, u.ulevel, (int)u.uluck);
+		//pline("looking into an artifact gift.  %d gift val accumulated. %d gifts have been given, on level %d, and your luck %d.", u.uartisval, (int)u.ugifts, u.ulevel, (int)u.uluck);
 	    /* you were already in pretty good standing */
 	    /* The player can gain an artifact */
 	    /* The chance goes down as the number of artifacts goes up */
 		/* Priests now only count gifts in this calculation, found artifacts are excluded */
-	    if (u.ulevel > 2 && u.uluck >= 0 &&
-			(
-			Role_if(PM_PRIEST) ? !rn2(10 + (2 * u.ugifts * u.ugifts)) : !rn2(10 + (2 * u.ugifts * nartifacts)) 
-			)
-		) {
+		if (u.ulevel > 2 && u.uluck >= 0 && maybe_god_gives_gift()) {
 		otmp = mk_artifact((struct obj *)0, a_align(u.ux,u.uy));
 		if (otmp) {
 		    if (otmp->spe < 0) otmp->spe = 0;
@@ -3187,7 +3195,8 @@ dosacrifice()
 		    godvoice(Align2gangr(u.ualign.type), "Use my gift wisely!");
 			otmp->gifted = Align2gangr(u.ualign.type);
 			u.ugifts++;
-		    u.ublesscnt = rnz(300 + (50 * nartifacts));
+			u.uartisval += arti_value(otmp);
+		    u.ublesscnt = rnz(300 + (u.uartisval * 10));
 			u.lastprayed = moves;
 			u.reconciled = REC_NONE;
 			u.lastprayresult = PRAY_GIFT;
@@ -4214,7 +4223,6 @@ struct obj *otmp;
 		}
 	    }
 	} else if(yourinvent){
-	    int nartifacts = (int)(u.uconduct.wisharti + u.ugifts);
 		//The Black Goat is pleased
 		struct monst *mtmp;
 		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
@@ -4244,7 +4252,7 @@ struct obj *otmp;
 			}
 			return;
 		}
-		// pline("looking into goat gift.  %d currently exist. %d gifts have been given, on level %d, and your luck %d.", nartifacts, (int)u.ugifts, u.ulevel, (int)u.uluck);
+		//pline("looking into goat gift.  %d gift val accumulated. %d gifts given, on level %d, and your luck %d.", u.uartisval, (int)u.ugifts, u.ulevel, (int)u.uluck);
 	    /* you were already in pretty good standing */
 	    /* The player can gain an artifact */
 	    /* The chance goes down as the number of artifacts goes up */
@@ -4252,9 +4260,8 @@ struct obj *otmp;
 	    if(u.ulevel > 2 && u.uluck >= 0 
 		    && (!flags.made_know || 
 			 (uwep && (uwep->oartifact || uwep->oproperties || spec_prop_otyp(uwep)) && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !(uwep->oproperties&OPROP_ACIDW))
-		    ) && (
-			 Role_if(PM_PRIEST) ? !rn2(10 + (2 * u.ugifts * u.ugifts)) : !rn2(10 + (2 * u.ugifts * nartifacts)) 
-			)
+		    )
+			&& maybe_god_gives_gift()
 		){
 			if(uwep && (uwep->oartifact || uwep->oproperties || spec_prop_otyp(uwep)) && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !(uwep->oproperties&OPROP_ACIDW)){
 				if(!Blind) pline("Acid drips from your weapon!");
@@ -4263,6 +4270,7 @@ struct obj *otmp;
 				uwep->oeroded2 = 0;
 				uwep->oerodeproof = 1;
 				u.ugifts++;
+				u.uartisval += max(arti_value(uwep), TIER_B);
 			}
 			else if(!flags.made_know){
 				struct obj *otmp;
@@ -4270,6 +4278,7 @@ struct obj *otmp;
 				dropy(otmp);
 				at_your_feet("An object");
 				u.ugifts++;
+				u.uartisval += TIER_A;
 			}
 			//Note: bugs in the above blocks were making ugifts go up without giving a benefit.
 			//  I think the bugs are squashed, but keep the increment tightly associated with actual gifts.

@@ -5,6 +5,18 @@
 #ifndef ARTIFACT_H
 #define ARTIFACT_H
 
+#define MZ_DEFAULT	-1
+#define MT_DEFAULT	-1
+#define WT_DEFAULT	-1
+
+#define TIER_S	8	/* Is somehow superior to all others */
+#define TIER_A	6	/* Preferrable endgame artifact */
+#define TIER_B	4	/* Good enough artifact to use by endgame */
+#define TIER_C	3	/* You'll want to switch out for a better artifact if you can */
+#define TIER_D	2	/* Situationally useful; enough to carry around, at least */
+#define TIER_F	1	/* Often not worth using at all */
+#define NO_TIER	0	/* Not tierable */
+
 #define ARTG_NOGEN		0x0001L /* does not randomly generate */
 #define ARTG_NOWISH		0x0002L /* cannot be wished for */
 #define ARTG_NAME		0x0004L /* can be #named */
@@ -541,6 +553,13 @@ struct artifact {
 				(m) == ART_FLUORITE_OCTAHEDRON ||\
 				(m) == ART_MARAUDER_S_MAP\
 			)
+
+#define offensive_artifact(arti) (\
+	(arti)->adtyp != 0 ||\
+	(arti)->accuracy != 0 ||\
+	(arti)->damage != 0 ||\
+	(arti)->aflags != 0L \
+	)
 
 #define double_bonus_damage_artifact(m) (\
 	(m) == ART_LIMITED_MOON ||\

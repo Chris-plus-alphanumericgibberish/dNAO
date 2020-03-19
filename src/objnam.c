@@ -4929,8 +4929,48 @@ typfnd:
 		}
 
 		otmp = oname(otmp, name);
-		if (otmp->oartifact && from_user) {
+	}
+	if (otmp->oartifact && from_user) {
+		/* check that they were allowed to wish for that artifact */
+		if (!wizwish
+			&& ((is_quest_artifact(otmp)						//redundant failsafe.  You can't wish for ANY quest artifacts
+			|| (artilist[otmp->oartifact].gflags&ARTG_NOWISH)	// non-wishable artifacts should be marked as such.
+			|| !touch_artifact(otmp, &youmonst, TRUE)			//Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
+			|| !allow_artifact									// pre-determined if any artifact wish is allowed
+			)))
+			// depreciated criteria:
+			// (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS) //No wishing for quest artifacts, unique monster artifacts, etc.
+			// (otmp->oartifact && rn2((int)(u.uconduct.wisharti)) > 1) //Limit artifact wishes per game
+			// (otmp->oartifact >= ART_ITLACHIAYAQUE && otmp->oartifact <= ART_EYE_OF_THE_AETHIOPICA) || //no wishing for quest artifacts
+			// (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS && otmp->oartifact <= ART_SILVER_KEY) || //no wishing for alignment quest artifacts
+			// (otmp->oartifact >= ART_SWORD_OF_ERATHAOL && otmp->oartifact <= ART_HAMMER_OF_BARQUIEL) || //no wishing for angel artifacts
+			// (otmp->oartifact >= ART_GENOCIDE && otmp->oartifact <= ART_DOOMSCREAMER) || //no wishing for demon artifacts
+			// (otmp->oartifact >= ART_STAFF_OF_THE_ARCHMAGI && otmp->oartifact <= ART_SNICKERSNEE)
+		{
+			/* wish failed */
+			artifact_exists(otmp, ONAME(otmp), FALSE);	// Is this necessary?
+			obfree(otmp, (struct obj *) 0);		// Is this necessary?
+			otmp = &zeroobj;					// Is this necessary?
+			*wishreturn = WISH_DENIED;
+			return &zeroobj;
+		}
+		else {
+			/* they get the artifact */
 			u.uconduct.wisharti++;	/* KMH, conduct */
+			/* characters other than priests also have their god's likelyhood to grant artifacts decreased */
+			if(!Role_if(PM_PRIEST))
+				u.uartisval += arti_value(otmp);
+		}
+	}
+	/* even more wishing abuse: if we tried to create an artifact but failed (it was already generated) we may need a new otyp */
+	else if (isartifact && !otmp->oartifact) {
+		switch (otmp->otyp) {
+		case BEAMSWORD:
+			otmp = poly_obj(otmp, BROADSWORD);
+			break;
+		case UNIVERSAL_KEY:
+			otmp = poly_obj(otmp, SKELETON_KEY);
+			break;
 		}
 	}
 
@@ -4964,42 +5004,6 @@ typfnd:
 			impossible("bad petrified statue?");
 			*wishreturn = WISH_FAILURE;
 			return &zeroobj;
-		}
-	}
-	
-	/* more wishing abuse: don't allow wishing for certain artifacts */
-	/* and make them pay; charge them for the wish anyway! */
-	if (otmp->oartifact && !wizwish && from_user &&
-		(is_quest_artifact(otmp) //redundant failsafe.  You can't wish for ANY quest artifacts
-		 || (artilist[otmp->oartifact].gflags&ARTG_NOWISH) // non-wishable artifacts should be marked as such.
-		 || !touch_artifact(otmp, &youmonst, TRUE) //Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
-		 || !allow_artifact								// pre-determined if any artifact wish is allowed
-		 // depreciated criteria:
-		 // (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS) //No wishing for quest artifacts, unique monster artifacts, etc.
-		 // (otmp->oartifact && rn2((int)(u.uconduct.wisharti)) > 1) //Limit artifact wishes per game
-		 // (otmp->oartifact >= ART_ITLACHIAYAQUE && otmp->oartifact <= ART_EYE_OF_THE_AETHIOPICA) || //no wishing for quest artifacts
-		 // (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS && otmp->oartifact <= ART_SILVER_KEY) || //no wishing for alignment quest artifacts
-		 // (otmp->oartifact >= ART_SWORD_OF_ERATHAOL && otmp->oartifact <= ART_HAMMER_OF_BARQUIEL) || //no wishing for angel artifacts
-		 // (otmp->oartifact >= ART_GENOCIDE && otmp->oartifact <= ART_DOOMSCREAMER) || //no wishing for demon artifacts
-		 // (otmp->oartifact >= ART_STAFF_OF_THE_ARCHMAGI && otmp->oartifact <= ART_SNICKERSNEE)
-	    )) {
-	    artifact_exists(otmp, ONAME(otmp), FALSE);	// Is this necessary?
-		u.uconduct.wisharti--;
-	    obfree(otmp, (struct obj *) 0);		// Is this necessary?
-	    otmp = &zeroobj;					// Is this necessary?
-
-		*wishreturn = WISH_DENIED;
-		return &zeroobj;
-	}
-	/* even more wishing abuse: if we tried to create an artifact but failed (it was already generated) we may need a new otyp */
-	if (isartifact && !otmp->oartifact) {
-		switch (otmp->otyp) {
-		case BEAMSWORD:
-			otmp = poly_obj(otmp, BROADSWORD);
-			break;
-		case UNIVERSAL_KEY:
-			otmp = poly_obj(otmp, SKELETON_KEY);
-			break;
 		}
 	}
 	
