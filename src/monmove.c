@@ -778,7 +778,7 @@ boolean fleemsg;
 	if (u.ustuck == mtmp) {
 	    if (u.uswallow)
 		expels(mtmp, mtmp->data, TRUE);
-	    else if (!sticks(youracedata)) {
+	    else if (!sticks(&youmonst)) {
 		unstuck(mtmp);	/* monster lets go when fleeing */
 		You("get released!");
 	    }
@@ -1822,7 +1822,7 @@ boolean
 itsstuck(mtmp)
 register struct monst *mtmp;
 {
-	if (sticks(youracedata) && mtmp==u.ustuck && !u.uswallow) {
+	if (sticks(&youmonst) && mtmp==u.ustuck && !u.uswallow) {
 		pline("%s cannot escape from you!", Monnam(mtmp));
 		return(TRUE);
 	}

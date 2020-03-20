@@ -2335,7 +2335,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	    you_are(buf);
 	} else if (u.ustuck) {
 	    Sprintf(buf, "%s %s",
-		    (Upolyd && sticks(youracedata)) ? "holding" : "held by",
+		    (sticks(&youmonst) ? "holding" : "held by"),
 		    a_monnam(u.ustuck));
 	    you_are(buf);
 	}
@@ -3095,7 +3095,7 @@ int final;
 	    dump(youwere, buf);
 	} else if (u.ustuck) {
 	    Sprintf(buf, "%s %s",
-		    (Upolyd && sticks(youracedata)) ? "holding" : "held by",
+		    (sticks(&youmonst) ? "holding" : "held by"),
 		    a_monnam(u.ustuck));
 	    dump(youwere, buf);
 	}

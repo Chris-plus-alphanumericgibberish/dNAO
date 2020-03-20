@@ -1505,7 +1505,7 @@ E boolean FDECL(can_blnd, (struct monst *,struct monst *,UCHAR_P,struct obj *));
 E boolean FDECL(ranged_attk, (struct permonst *));
 E boolean FDECL(passes_bars, (struct monst *));
 E boolean FDECL(can_track, (struct permonst *));
-E boolean FDECL(sticks, (struct permonst *));
+E boolean FDECL(sticks, (struct monst *));
 E int FDECL(num_horns, (struct permonst *));
 /* E boolean FDECL(canseemon, (struct monst *)); */
 E struct attack *FDECL(dmgtype_fromattack, (struct permonst *,int,int));

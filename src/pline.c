@@ -505,7 +505,7 @@ register struct monst *mtmp;
 	if (mtmp->mundetected)	  Strcat(info, ", concealed");
 	if (mtmp->minvis)	  Strcat(info, ", invisible");
 	if (mtmp == u.ustuck)	  Strcat(info,
-			(sticks(youracedata)) ? ", held by you" :
+			(sticks(&youmonst)) ? ", held by you" :
 				u.uswallow ? (is_animal(u.ustuck->data) ?
 				", swallowed you" :
 				", engulfed you") :
@@ -580,7 +580,7 @@ ustatusline()
 	if (u.uundetected)	Strcat(info, ", concealed");
 	if (Invis)		Strcat(info, ", invisible");
 	if (u.ustuck) {
-	    if (sticks(youracedata))
+	    if (sticks(&youmonst))
 		Strcat(info, ", holding ");
 	    else
 		Strcat(info, ", held by ");

@@ -89,7 +89,7 @@ STATIC_OVL void
 polyman(fmt, arg)
 const char *fmt, *arg;
 {
-	boolean sticky = sticks(youmonst.data) && u.ustuck && !u.uswallow,
+	boolean sticky = sticks(&youmonst) && u.ustuck && !u.uswallow,
 		was_mimicking = (youmonst.m_ap_type == M_AP_OBJECT);
 	boolean could_pass_walls = Passes_walls;
 	boolean was_blind = !!Blind;
@@ -399,7 +399,7 @@ int
 polymon(mntmp)	/* returns 1 if polymorph successful */
 int	mntmp;
 {
-	boolean sticky = sticks(youmonst.data) && u.ustuck && !u.uswallow,
+	boolean sticky = sticks(&youmonst) && u.ustuck && !u.uswallow,
 		was_blind = !!Blind, dochange = FALSE;
 	boolean could_pass_walls = Passes_walls;
 	int mlvl;
@@ -584,8 +584,8 @@ int	mntmp;
 	}
 	newsym(u.ux,u.uy);		/* Change symbol */
 
-	if (!sticky && !u.uswallow && u.ustuck && sticks(youmonst.data)) u.ustuck = 0;
-	else if (sticky && !sticks(youmonst.data)) uunstick();
+	if (!sticky && !u.uswallow && u.ustuck && sticks(&youmonst)) u.ustuck = 0;
+	else if (sticky && !sticks(&youmonst)) uunstick();
 #ifdef STEED
 	if (u.usteed) {
 	    if (touch_petrifies(u.usteed->data) &&

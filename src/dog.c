@@ -1227,7 +1227,7 @@ int enhanced;
 	if (mtmp == u.ustuck) {
 	    if (u.uswallow)
 		expels(mtmp, mtmp->data, TRUE);
-	    else if (!(sticks(youracedata)))
+	    else if (!(sticks(&youmonst)))
 		unstuck(mtmp);
 	}
 

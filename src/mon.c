@@ -6521,7 +6521,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 				/* update swallow glyphs for new monster */
 				swallowed(0);
 			}
-		} else if (!sticks(mdat) && !sticks(youracedata))
+		} else if (!sticks(mtmp) && !sticks(&youmonst))
 			unstuck(mtmp);
 	}
 
