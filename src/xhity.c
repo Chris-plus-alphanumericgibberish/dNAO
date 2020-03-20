@@ -3865,6 +3865,10 @@ boolean ranged;
 			 */
 			alt_attk.aatyp = attk->aatyp;
 			alt_attk.adtyp = AD_PHYS;
+			/* special case: [salamanders'] fire hugs shouldn't print out a "you are being crushed" message, 
+			   as they print a "being roasted" message */
+			if (originalattk->aatyp == AT_HUGS && (originalattk->adtyp == AD_FIRE || originalattk->adtyp == AD_EFIR))
+				dohitmsg = FALSE;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, 0, dieroll, vis, ranged);
 			/* return early if cannot continue the attack */
 			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
@@ -3881,24 +3885,22 @@ boolean ranged;
 	if (attk->aatyp == AT_HUGS
 		&& attk->adtyp != AD_WRAP)
 	{
-		/* are grabs possible? */
-		if ((youagr || youdef)
-			&& !sticks(pd)
+		/* are grabs impossible? */
+		if (!(youagr || youdef)
+			|| sticks(pd)
 			)
 		{
-			/* if we aren't already stuck, try to grab them */
-			if (!(u.ustuck && u.ustuck == (youagr ? mdef : magr))) {
-				/* make a grab at them */
-				alt_attk.adtyp = AD_WRAP;
-				return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
-			}
-			/* else continue on with the grab attack */
-		}
-		/* no grabs allowed, substitute basic attack */
-		else {
+			/* no grabs allowed, substitute basic claw attack */
 			alt_attk.aatyp = AT_CLAW;
 			return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		}
+		else if (!(u.ustuck && u.ustuck == (youagr ? mdef : magr)))
+		{
+			/* if we aren't already stuck, try to grab them */
+			alt_attk.adtyp = AD_WRAP;
+			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		}
+		/* else continue on with the grab attack */
 	}
 
 	boolean weaponattk = (attk->aatyp == AT_WEAP ||
@@ -4007,7 +4009,7 @@ boolean ranged;
 				pline("%s%s%s!",
 					(youdef ? "You" : Monnam(mdef)),
 					(youdef ? "'re " : " is "),
-					on_fire(pd, attk));
+					on_fire(pd, originalattk));
 			}
 
 			/* burn away slime (player-only) */
