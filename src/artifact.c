@@ -1388,7 +1388,7 @@ boolean narrow_only;
 	boolean youdef;
 
 	/* requires some kind of offense in the artilist block */
-	if (!(weap->adtyp || weap->accuracy || weap->damage))
+	if (!weap || !(weap->adtyp || weap->accuracy || weap->damage))
 		return FALSE;
 
 	/* special cases */
@@ -3816,6 +3816,7 @@ boolean * messaged;
 				if (!Fire_res(mdef))
 					ignite = TRUE;
 			}
+			break;
 		default:
 			/* hopefully it's a vorpal-property weapon at this point */
 			Sprintf(buf, "vorpal %s", simple_typename(otmp->otyp));
