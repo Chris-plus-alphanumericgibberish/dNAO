@@ -1481,7 +1481,6 @@ int randSpecialAttackTypes[] =
 						 AT_BREA, 
 						 AT_BEAM, 
 						 AT_5SQR, 
-						 AT_DEVA, 
 						 AT_MAGC, 
 						 AT_HODS };
 
