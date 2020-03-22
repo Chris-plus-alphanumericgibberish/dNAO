@@ -2812,7 +2812,7 @@ u_init()
 				attkptr->adtyp = AD_HODS;
 				break;
 			case AT_DEVA:
-				attkptr->damd = AD_PHYS;
+				attkptr->adtyp = AD_PHYS;
 				attkptr->damn = 1;
 				break;
 			}
