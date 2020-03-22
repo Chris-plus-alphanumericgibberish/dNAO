@@ -1494,12 +1494,14 @@ int randMeleeAttackTypes[] =
 
 int randRangedAttackTypes[] =
 					{
-						AT_SPIT,
-						AT_BREA,
-						AT_BEAM,
-						AT_GAZE,
+						/* 2x */
+						AT_BREA, AT_BREA,
+						AT_SPIT, AT_SPIT,
+						AT_GAZE, AT_GAZE,
+						AT_MAGC, AT_MAGC,
+						/* 1x */
 						AT_ARRW,
-						AT_MAGC
+						AT_BEAM
 					};
 
 int randSpecialAttackTypes[] =
@@ -1543,15 +1545,23 @@ int randRapierDamageTypes[] =
 						AD_EACD
 					};
 
-int randPhysicalDamageTypes[] =
+int randRendDamageTypes[] =
 					{
-						/* 1/4 crush and drown */
+						/* 2/10 physical */
+						AD_PHYS, AD_PHYS, AD_PHYS,
+						AD_PHYS, AD_PHYS, AD_PHYS,
+						/* 4/10 elemental (2/3 of which pierce resistance) */
+						AD_FIRE, AD_EFIR, AD_EFIR,
+						AD_COLD, AD_ECLD, AD_ECLD,
+						AD_ELEC, AD_EELC, AD_EELC,
+						AD_ACID, AD_EACD, AD_EACD,
+						/* 1/10 crush and drown */
 						AD_WRAP, AD_WRAP, AD_WRAP,
-						/* 1/4 shred gear */
+						/* 1/10 shred gear */
 						AD_SHRD, AD_SHRD, AD_SHRD,
-						/* 1/4 vorpal */
+						/* 1/10 vorpal */
 						AD_VORP, AD_VORP, AD_VORP,
-						/* 1/4 physical + status effects */
+						/* 1/10 physical + status effects */
 						AD_STUN, AD_SLOW, AD_PLYS
 					};
 
@@ -2798,8 +2808,8 @@ u_init()
 
 			attkptr->aatyp = get_random_of(randWeaponAttackTypes);
 			attkptr->adtyp = get_random_of(randWeaponDamageTypes);
-			attkptr->damn = d(1, 3);		/*  1 -  3 */
-			attkptr->damd = rn2(4) * 2 + 6;	/*  6 - 12 by 2s */
+			attkptr->damn = d(1, 3);						/*  1 -  3 */
+			attkptr->damd = rn2(5-attkptr->damn) * 2 + 6;	/*  6 - 12 by 2s */
 
 			/* fixups */
 			switch (attkptr->aatyp)
@@ -2836,14 +2846,14 @@ u_init()
 			attkptr = &horrors[j]->mattk[horrorattacks];
 			if (rn2(7)) {
 				attkptr->aatyp = get_random_of(randMeleeAttackTypes);
-				attkptr->adtyp = get_random_of(randSpecialDamageTypes);
+				attkptr->adtyp = rn2(3) ? get_random_of(randSpecialDamageTypes) : get_random_of(randWeaponDamageTypes);
 			}
 			else {
 				attkptr->aatyp = (rn2(3) ? AT_TUCH : rn2(3) ? AT_LRCH : AT_5SQR);
 				attkptr->adtyp = get_random_of(randTouchDamageTypes);
 			}
 			attkptr->damn = 1 + d(1, 2) + rn2(2)*rn2(3);	/* 2 -  5, trailing right */
-			attkptr->damd = rn2(3) * 2 + 6;					/* 6 - 10, by 2s */
+			attkptr->damd = rn2(5-attkptr->damn) * 2 + 6;	/* 6 - 10, by 2s */
 
 			/* sometimes consolidate into a high-variance attack */
 			if (!rn2(4)) {
@@ -2855,21 +2865,27 @@ u_init()
 			horrorattacks++;
 		}
 		/* chance of getting special, hard-hitting melee attacks */
-		if (horrorattacks <= 2 || (!rn2(4) && horrorattacks < 5)) {
+		if (horrorattacks <= 2 || (!rn2(8) && horrorattacks < 5)) {
 			attkptr = &horrors[j]->mattk[horrorattacks];
 
 			attkptr->aatyp = get_random_of(randSpecialAttackTypes);
-			attkptr->adtyp = get_random_of(randPhysicalDamageTypes);
-			attkptr->damn = d(2,3 );			/* 2 -  6 */
-			attkptr->damd = rn2(3) * 2 + 6;		/* 6 - 12 by 2s */
+			attkptr->adtyp = get_random_of(randRendDamageTypes);
+			attkptr->damn = d(2, 3);						/* 2 -  6 */
+			attkptr->damd = rn2(5-attkptr->damn) * 2 + 6;	/* 6 - 10 by 2s */
 
 			/* fixups */
-			if (attkptr->aatyp == AT_ENGL)
+			if (attkptr->aatyp == AT_ENGL) {
 				attkptr->adtyp = get_random_of(randEngulfDamageTypes);
-			else {
+				/* engulf attacks can be stronger */
+				attkptr->damn += 2 - attkptr->damn/3;
+				attkptr->damd += 2;
+			}
+			else if ((attkptr - 1)->aatyp != AT_XWEP) {
 				/* duplicate previous attack and insert it */
 				*(attkptr + 1) = *attkptr;
 				*(attkptr) = *(attkptr - 1);
+				(attkptr-0)->damd -= 2;
+				(attkptr-1)->damd -= 2;
 				horrorattacks++;
 			}
 			horrorattacks++;
@@ -2926,6 +2942,7 @@ u_init()
 				attkptr->damn = d(1, 3);
 				attkptr->damd = d(1, 3);
 				break;
+			case AD_BLNK:
 			case AD_DEAD:
 				attkptr->damn = 0;
 				attkptr->damd = 0;
