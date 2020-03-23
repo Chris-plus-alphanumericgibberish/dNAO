@@ -14000,6 +14000,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 	boolean youdef = (mdef == &youmonst);
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
+	int maketame = ((youdef || mdef->mtame) ? MM_EDOG : 0);
 
 
 	/* Get damage of passive */
@@ -14313,12 +14314,12 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				if (pd == &mons[PM_LEGION]) {
 					int n = rnd(4);
 					for (; n > 0; n--) {
-						mtmp = (rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL | G_HELL), x(mdef), y(mdef), NO_MINVENT | MM_ADJACENTOK | MM_ADJACENTSTRICT)
-							: makemon(&mons[PM_LEGIONNAIRE], x(mdef), y(mdef), NO_MINVENT | MM_ADJACENTOK | MM_ADJACENTSTRICT));
+						mtmp = (rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL | G_HELL), x(mdef), y(mdef), NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT|maketame)
+							: makemon(&mons[PM_LEGIONNAIRE], x(mdef), y(mdef), NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT|maketame));
 						if (mtmp) {
 							/* Legion's summons don't time out */
 							/* Although this currently is impossible, we should handle tame/selfpolyd Legion */
-							if (youdef || mdef->mtame) {
+							if (maketame) {
 								initedog(mtmp);
 							}
 						}
@@ -14326,14 +14327,14 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				}
 				/* Others (Asmodeus, Verier) get Devils */
 				else {
-					if (*hp(mdef) > *hpmax(mdef) * 3 / 4)		mtmp = makemon(&mons[PM_LEMURE], x(mdef), y(mdef), MM_ADJACENTOK);
-					else if (*hp(mdef) > *hpmax(mdef) * 2 / 4)	mtmp = makemon(&mons[PM_HORNED_DEVIL], x(mdef), y(mdef), MM_ADJACENTOK);
-					else if (*hp(mdef) > *hpmax(mdef) * 1 / 4)	mtmp = makemon(&mons[PM_BARBED_DEVIL], x(mdef), y(mdef), MM_ADJACENTOK);
-					else if (*hp(mdef) > *hpmax(mdef) * 0 / 4)	mtmp = makemon(&mons[PM_PIT_FIEND], x(mdef), y(mdef), MM_ADJACENTOK);
+					if (*hp(mdef) > *hpmax(mdef) * 3 / 4)		mtmp = makemon(&mons[PM_LEMURE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else if (*hp(mdef) > *hpmax(mdef) * 2 / 4)	mtmp = makemon(&mons[PM_HORNED_DEVIL], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else if (*hp(mdef) > *hpmax(mdef) * 1 / 4)	mtmp = makemon(&mons[PM_BARBED_DEVIL], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else if (*hp(mdef) > *hpmax(mdef) * 0 / 4)	mtmp = makemon(&mons[PM_PIT_FIEND], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
 					if (mtmp) {
 						/* Asmodeus's and Verier's summons don't time out */
 						/* Although this currently is impossible, we should handle tame/selfpolyd Asmo/Verier */
-						if (youdef || mdef->mtame) {
+						if (maketame) {
 							initedog(mtmp);
 						}
 					}
@@ -14342,22 +14343,22 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 			case AD_OONA:
 				/* */
 				if (u.oonaenergy == AD_FIRE){
-					if (rn2(2)) mtmp = makemon(&mons[PM_FLAMING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK);
-					else		mtmp = makemon(&mons[PM_FIRE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK);
+					if (rn2(2)) mtmp = makemon(&mons[PM_FLAMING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else		mtmp = makemon(&mons[PM_FIRE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
 				}
 				else if (u.oonaenergy == AD_COLD){
-					if (rn2(2)) mtmp = makemon(&mons[PM_FREEZING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK);
-					else		mtmp = makemon(&mons[PM_ICE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK);
+					if (rn2(2)) mtmp = makemon(&mons[PM_FREEZING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else		mtmp = makemon(&mons[PM_ICE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
 				}
 				else if (u.oonaenergy == AD_ELEC){
-					if (rn2(2)) mtmp = makemon(&mons[PM_SHOCKING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK);
-					else		mtmp = makemon(&mons[PM_ENERGY_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK);
+					if (rn2(2)) mtmp = makemon(&mons[PM_SHOCKING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else		mtmp = makemon(&mons[PM_ENERGY_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
 				}
 				/* Oona's summons time out and vanish */
 				if (mtmp) {
 					mtmp->mvanishes = mlev(mdef) + rnd(mlev(mdef));
 					/* can be tame */
-					if (youdef || mdef->mtame) {
+					if (maketame) {
 						initedog(mtmp);
 					}
 				}
