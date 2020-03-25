@@ -3182,7 +3182,7 @@ struct monst *mon;
 						pline("A few drops of viscous liquid hit %s.", mon_nam(mtmp));
 					if (!resists_acid(mtmp)){
 						if(mtmp->data->mmove) //Not naturally inactive
-							pline("%s winces!");
+							pline("%s winces!",Monnam(mtmp));
 						mtmp->mhp -= dmg;
 						if(mtmp->mhp <= 0)
 							mondied(mtmp);
