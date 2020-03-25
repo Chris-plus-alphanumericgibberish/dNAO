@@ -5773,7 +5773,7 @@ doreinforce_binding()
 	
 	for(i=0;i<QUEST_SPIRIT && u.spirit[i];i++){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
-		Sprintf(buf, "%s, %d", sealNames[j], u.spiritT[i] - monstermoves);
+		Sprintf(buf, "%s, %ld", sealNames[j], u.spiritT[i] - monstermoves);
 		any.a_int = i+1;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
@@ -5783,7 +5783,7 @@ doreinforce_binding()
 	i = QUEST_SPIRIT;
 	if(u.spirit[i]){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
-		Sprintf(buf, "%s, %d", sealNames[j], u.spiritT[i] - monstermoves);
+		Sprintf(buf, "%s, %ld", sealNames[j], u.spiritT[i] - monstermoves);
 		any.a_int = i+1;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
@@ -5793,7 +5793,7 @@ doreinforce_binding()
 	i = ALIGN_SPIRIT;
 	if(u.spirit[i]){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
-		Sprintf(buf, "%s, %d", sealNames[j], u.spiritT[i] - monstermoves);
+		Sprintf(buf, "%s, %ld", sealNames[j], u.spiritT[i] - monstermoves);
 		any.a_int = i+1;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
