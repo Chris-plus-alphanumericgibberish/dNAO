@@ -1462,200 +1462,297 @@ know_random_obj()
 }
 #endif
 
-int randMeleeAttackTypes[] = 
-						{AT_CLAW, 
-						 AT_BITE, 
-						 AT_KICK, 
-						 AT_BUTT, 
-						 AT_TUCH, 
-						 AT_STNG, 
-						 AT_TENT, 
-						 AT_WHIP, 
-						 AT_LNCK, 
-						 AT_LRCH, 
-						 AT_WEAP };
+int randWeaponAttackTypes[] =
+					{
+						/* 6x */
+						AT_WEAP, AT_WEAP,
+						AT_WEAP, AT_WEAP,
+						AT_WEAP, AT_WEAP,
+						/* 2x */
+						AT_SRPR, AT_SRPR,
+						/* 1x */
+						AT_HODS,
+						/* 1x */
+						AT_DEVA
+					};
 
-int randSpecialAttackTypes[] = 
-						{AT_SPIT, 
-						 AT_HUGS, 
-						 AT_GAZE, 
-						 AT_ENGL, 
-						 AT_ARRW, 
-						 AT_BREA, 
-						 AT_BEAM, 
-						 AT_5SQR, 
-						 AT_DEVA, 
-						 AT_MAGC, 
-						 AT_HODS };
+int randMeleeAttackTypes[] =
+					{
+						/* normal melee (2x each) */
+						AT_CLAW, AT_CLAW,
+						AT_BITE, AT_BITE,
+						AT_KICK, AT_KICK,
+						AT_BUTT, AT_BUTT,
+						AT_STNG, AT_STNG,
+						AT_TENT, AT_TENT,
+						AT_WHIP, AT_WHIP,
+						/* extended range melee */
+						AT_LNCK,
+						/* very extended range melee */
+						AT_5SBT
+					};
 
-int randMeleeDamageTypes[] = 
-						{AD_PHYS, 
-						 AD_SHDW, 
-						 AD_STAR, 
-						 AD_BLUD, 
-						 AD_FIRE, 
-						 AD_COLD,
-						 AD_SLEE,
-						 AD_ELEC,
-						 AD_DRST,
-						 AD_ACID,
-						 AD_BLND,
-						 AD_STUN,
-						 AD_SLOW,
-						 AD_PLYS,
-						 AD_DRLI,
-						 AD_DREN,
-						 AD_LEGS,
-						 AD_STON,
-						 AD_STCK,
-						 AD_SGLD,
-						 AD_SITM,
-						 // AD_SEDU,
-						 AD_TLPT,
-						 AD_RUST,
-						 AD_CONF,
-						 // AD_DGST,
-						 // AD_HEAL,
-						 AD_WRAP,
-						 // AD_WERE,
-						 AD_DRDX,
-						 AD_DRCO,
-						 AD_DRIN,
-						 AD_NPDC,
-						 AD_DISE,
-						 // AD_SSEX,
-						 AD_HALU,
-						 // AD_,DETH
-						 // AD_FAMN,
-						 // AD_PEST,
-						 AD_SLIM,
-						 AD_ENCH,
-						 AD_CORR,
-						 AD_POSN,
-						 AD_WISD,
-						 AD_VORP,
-						 AD_SHRD,
-						 AD_TCKL,
-						 AD_WET,
-						 // AD_LETHE,
-						 AD_SUCK,
-						 AD_MALK,
-						 AD_UVUU,
-						 AD_ABDC,
-						 AD_TELE,
-						 AD_CHRN,
-						 AD_LVLT,
-						 AD_DESC,
-						 AD_WEEP };
+int randRangedAttackTypes[] =
+					{
+						/* 2x */
+						AT_BREA, AT_BREA,
+						AT_SPIT, AT_SPIT,
+						AT_GAZE, AT_GAZE,
+						AT_MAGC, AT_MAGC,
+						/* 1x */
+						AT_ARRW,
+						AT_BEAM
+					};
 
-int randBreathDamageTypes[] = 
-						{AD_RBRE, 
-						 AD_MAGM, 
-						 AD_COLD, 
-						 AD_DRST, 
-						 AD_FIRE, 
-						 AD_SLEE, 
-						 AD_ELEC, 
-						 AD_ACID, 
-						 AD_DISN };
+int randSpecialAttackTypes[] =
+					{
+						/* follow-ups */
+						AT_HUGS,
+						AT_REND,
+						/* engulf */
+						AT_ENGL
+					};
 
-int randBeamDamageTypes[] = 
-						{AD_MAGM, 
-						 AD_COLD, 
-						 AD_DRST, 
-						 AD_FIRE, 
-						 AD_SLEE, 
-						 AD_ELEC, 
-						 AD_ACID,
-						 AD_BLND,
-						 AD_STUN,
-						 AD_PLYS,
-						 AD_DRLI,
-						 AD_DREN,
-						 AD_STON,
-						 AD_SGLD,
-						 AD_SITM,
-						 AD_TLPT,
-						 AD_RUST,
-						 AD_CONF,
-						 AD_DISE,
-						 AD_DCAY,
-						 AD_HALU,
-						 AD_SLIM,
-						 AD_ENCH,
-						 AD_CORR,
-						 AD_POSN,
-						 AD_SHRD,
-						 AD_ABDC,
-						 AD_TELE,
-						 AD_POLY,
-						 AD_CHRN,
-						 AD_LVLT,
-						 AD_VAMP,
-						 AD_WEBS,
-						 AD_SHDW,
-						 AD_DESC,
-						 AD_STTP };
+int randWeaponDamageTypes[] =
+					{
+						/* 3/9 physical */
+						AD_PHYS, AD_PHYS, AD_PHYS,
+						AD_PHYS, AD_PHYS, AD_PHYS,
+						AD_PHYS, AD_PHYS, AD_PHYS,
+						/* 4/9 elemental (1/3 of which pierce resistance) */
+						AD_FIRE, AD_FIRE, AD_EFIR,
+						AD_COLD, AD_COLD, AD_ECLD,
+						AD_ELEC, AD_ELEC, AD_EELC,
+						AD_ACID, AD_ACID, AD_EACD,
+						/* 1/9 poisons */
+						AD_DRST, AD_DRDX, AD_DRCO,
+						/* 1/9 lifedrain */
+						AD_DRLI, AD_DRLI, AD_DRLI,
+						/* rarely vorpal (which is still subject to 1/20 odds per hit) */
+						AD_VORP
+					};
 
-int randSpitDamageTypes[] = 
-						{AD_BLND, 
-						 AD_ACID, 
-						 AD_DRST };
+int randRapierDamageTypes[] =
+					{
+						/* 2x */
+						AD_SHDW, AD_SHDW,
+						AD_STAR, AD_STAR,
+						AD_BLUD, AD_BLUD,
+						/* 1x */
+						AD_EFIR,
+						AD_ECLD,
+						AD_EELC,
+						AD_EACD
+					};
 
-int randGazeDamageTypes[] = 
-						{AD_STON, 
-						 AD_SITM, 
-						 AD_DEAD, 
-						 AD_CNCL, 
-						 AD_PLYS, 
-						 AD_DRLI, 
-						 AD_ENCH, 
-						 AD_CONF, 
-						 AD_SLOW, 
-						 AD_STUN, 
-						 AD_BLND, 
-						 AD_FIRE, 
-						 AD_COLD, 
-						 AD_ELEC, 
-						 AD_HALU, 
-						 AD_SLEE,
-						 AD_LUCK,
-						 AD_RGAZ,
-						 AD_MIST };
- // AT_ARRW, 
- // AT_MAGC }
-int randEngulfDamageTypes[] = 
-						{AD_DISE, 
-						 AD_ACID, 
-						 AD_DGST, 
-						 AD_PHYS, 
-						 AD_BLND, 
-						 AD_COLD, 
-						 AD_ELEC, 
-						 AD_DESC, 
-						 AD_FIRE };
+int randRendDamageTypes[] =
+					{
+						/* 2/10 physical */
+						AD_PHYS, AD_PHYS, AD_PHYS,
+						AD_PHYS, AD_PHYS, AD_PHYS,
+						/* 4/10 elemental (2/3 of which pierce resistance) */
+						AD_FIRE, AD_EFIR, AD_EFIR,
+						AD_COLD, AD_ECLD, AD_ECLD,
+						AD_ELEC, AD_EELC, AD_EELC,
+						AD_ACID, AD_EACD, AD_EACD,
+						/* 1/10 crush and drown */
+						AD_WRAP, AD_WRAP, AD_WRAP,
+						/* 1/10 shred gear */
+						AD_SHRD, AD_SHRD, AD_SHRD,
+						/* 1/10 vorpal */
+						AD_VORP, AD_VORP, AD_VORP,
+						/* 1/10 physical + status effects */
+						AD_STUN, AD_SLOW, AD_PLYS
+					};
+
+int randSpecialDamageTypes[] =
+					{
+						/* elements */
+						AD_FIRE,
+						AD_COLD,
+						AD_ELEC,
+						AD_ACID,
+						AD_DRLI,
+						AD_WET, 
+						AD_DESC,
+						/* poisons */
+						AD_DRST,
+						AD_DRDX,
+						AD_DRCO,
+						AD_POSN,
+						/* physical + status effects */
+						AD_SLEE,
+						AD_BLND,
+						AD_STUN,
+						AD_SLOW,
+						AD_PLYS,
+						AD_CONF,
+						AD_LEGS,
+						/* lethal status effects */
+						AD_STON,
+						AD_DISE,
+						/* targets your stuff */
+						AD_RUST,
+						AD_CORR,
+						AD_DCAY,
+						AD_ENCH,
+						AD_SHRD,
+						AD_SGLD,
+						AD_SITM,
+						/* misc */
+						AD_DREN,
+						AD_WEBS,
+						/* grabs */
+						AD_STCK,
+						AD_MALK,
+						/* statdrain */
+						AD_DRIN,
+						AD_WISD,
+						AD_NPDC
+					};
+
+int randTouchDamageTypes[] = 
+{
+						/* teleportation */
+						AD_TLPT,
+						AD_ABDC,
+						AD_TELE,
+						AD_LVLT,
+						AD_WEEP,
+						/* nasty status effects */
+						AD_HALU,
+						AD_CHRN,
+						AD_SLIM,
+						/* nasty not-quite-status effects*/
+						AD_TCKL,
+						AD_POLY,
+						AD_SUCK
+};
+
+int randBreathDamageTypes[] =
+					{
+						AD_RBRE,
+						AD_MAGM,
+						AD_COLD,
+						AD_DRST,
+						AD_FIRE,
+						AD_SLEE,
+						AD_ELEC,
+						AD_ACID,
+						AD_DISN
+					};
+
+int randBeamDamageTypes[] =
+					{
+						AD_MAGM,
+						AD_COLD,
+						AD_DRST,
+						AD_FIRE,
+						AD_SLEE,
+						AD_ELEC,
+						AD_ACID,
+						AD_BLND,
+						AD_STUN,
+						AD_PLYS,
+						AD_DRLI,
+						AD_DREN,
+						AD_STON,
+						AD_SGLD,
+						AD_SITM,
+						AD_TLPT,
+						AD_RUST,
+						AD_CONF,
+						AD_DISE,
+						AD_DCAY,
+						AD_HALU,
+						AD_SLIM,
+						AD_ENCH,
+						AD_CORR,
+						AD_POSN,
+						AD_SHRD,
+						AD_ABDC,
+						AD_TELE,
+						AD_POLY,
+						AD_CHRN,
+						AD_LVLT,
+						AD_VAMP,
+						AD_WEBS,
+						AD_SHDW,
+						AD_DESC,
+						AD_STTP
+					};
+
+int randSpitDamageTypes[] =
+					{
+						AD_BLND,
+						AD_ACID,
+						AD_DRST
+					};
+
+int randGazeDamageTypes[] =
+					{
+						/* random (3x) */
+						AD_RGAZ, AD_RGAZ, AD_RGAZ,
+						/* direct (2x) */
+						AD_FIRE, AD_FIRE,
+						AD_COLD, AD_COLD,
+						AD_ELEC, AD_ELEC,
+						AD_DRLI, AD_DRLI,
+						AD_CNCL, AD_CNCL,
+						AD_ENCH, AD_ENCH,
+						/* eye-contact */
+						AD_DEAD,
+						AD_PLYS,
+						AD_STON,
+						AD_LUCK,
+						AD_BLND,
+						AD_CONF,
+						AD_SLOW,
+						AD_STUN,
+						AD_HALU,
+						AD_SLEE,
+						AD_BLNK,
+						AD_VAMP,
+						AD_WISD
+					};
+int randEngulfDamageTypes[] =
+					{
+						AD_DISE,
+						AD_ACID,
+						AD_DGST,
+						AD_PHYS,
+						AD_BLND,
+						AD_COLD,
+						AD_ELEC,
+						AD_DESC,
+						AD_FIRE
+					};
 
 int randArrowDamageTypes[] = 
-						{AD_PHYS, /*Phys uses tracked arrows rather than generated ones*/
-						 AD_LOAD, 
-						 AD_VBLD, 
-						 AD_BALL, 
-						 AD_BLDR, 
-						 AD_SHDW, 
-						 AD_BLDR };
+					{
+						AD_PHYS, /*Phys uses tracked arrows rather than generated ones*/
+						AD_LOAD,
+						AD_VBLD,
+						AD_BALL,
+						AD_BLDR,
+						AD_SHDW,
+						AD_BLDR
+					};
 
  // AT_MAGC }
-int randMagicDamageTypes[] = 
-						{AD_SPEL, 
-						 AD_SPEL,
-						 AD_SPEL,
-						 AD_MAGM,
-						 AD_FIRE,
-						 AD_COLD,
-						 AD_ELEC,
-						 AD_CLRC,
-						 AD_CLRC,
-						 AD_CLRC };
+int randMagicDamageTypes[] =
+					{
+						AD_SPEL,
+						AD_SPEL,
+						AD_SPEL,
+						AD_MAGM,
+						AD_FIRE,
+						AD_COLD,
+						AD_ELEC,
+						AD_CLRC,
+						AD_CLRC,
+						AD_CLRC
+					};
 int randCorpseWeights[] = 
 						{WT_TINY,
 						 WT_SMALL,
@@ -2632,6 +2729,8 @@ u_init()
 	calc_total_maxen();
 	u.uen = u.uenmax;
 		int j;
+#define get_random_of(x) (x)[rn2(SIZE((x)))]
+
 	for (j = 0; j < SIZE(horrors); j++)
 	{
 		/* what a horrible night to have a curse */
@@ -2702,80 +2801,156 @@ u_init()
 		horrors[j]->maligntyp = d(2, 9) - 10;			/* any alignment */
 
 		/* attacks...?  */
-		horrorattacks = rnd(4);
-		for (i = 0; i < horrorattacks; i++) {
-			attkptr = &horrors[j]->mattk[i];
-			/* restrict it to certain types of attacks */
-			attkptr->aatyp = randMeleeAttackTypes[rn2(SIZE(randMeleeAttackTypes))];
-			attkptr->adtyp = randMeleeDamageTypes[rn2(SIZE(randMeleeDamageTypes))];
-			attkptr->damn = d(1, 3);			/* we're almost sure to get this wrong first time */
-			attkptr->damd = rn2(4) * 2 + 6;		/* either too high or too low */
-		}
-		horrorattacks = horrorattacks + (rnd(9) / 3) - 1; //(0),(0),0,0,0,1,1,1,2
-		for (; i < horrorattacks; i++){
-			attkptr = &horrors[j]->mattk[i];
-			/* restrict it to certain types of attacks */
-			attkptr->aatyp = randSpecialAttackTypes[rn2(SIZE(randSpecialAttackTypes))];
-			switch (attkptr->aatyp){
-			case AT_SPIT:
-				attkptr->adtyp = randSpitDamageTypes[rn2(SIZE(randSpitDamageTypes))];
-			break;
-			case AT_HUGS:
-				attkptr->adtyp = AD_PHYS;
-			break;
-			case AT_GAZE:
-				attkptr->adtyp = randGazeDamageTypes[rn2(SIZE(randGazeDamageTypes))];
-			break;
-			case AT_ENGL:
-				attkptr->adtyp = randEngulfDamageTypes[rn2(SIZE(randEngulfDamageTypes))];
-			break;
-			case AT_ARRW:
-				attkptr->adtyp = randArrowDamageTypes[rn2(SIZE(randArrowDamageTypes))];
-			break;
-			case AT_MAGC:
-				attkptr->adtyp = randMagicDamageTypes[rn2(SIZE(randMagicDamageTypes))];
-			break;
-			case AT_BREA:
-				attkptr->adtyp = randBreathDamageTypes[rn2(SIZE(randBreathDamageTypes))];
-			break;
+		horrorattacks = 0;
+		/* always start with weapon attacks... if it gets any */
+		if (!rn2(4)) {
+			attkptr = &horrors[j]->mattk[horrorattacks];
+
+			attkptr->aatyp = get_random_of(randWeaponAttackTypes);
+			attkptr->adtyp = get_random_of(randWeaponDamageTypes);
+			attkptr->damn = d(1, 3);						/*  1 -  3 */
+			attkptr->damd = rn2(5-attkptr->damn) * 2 + 6;	/*  6 - 12 by 2s */
+
+			/* fixups */
+			switch (attkptr->aatyp)
+			{
+			case AT_SRPR:
+				attkptr->adtyp = get_random_of(randRapierDamageTypes);
+				attkptr->damn += 1;
+				break;
 			case AT_HODS:
 				attkptr->adtyp = AD_HODS;
 				break;
-			case AT_BEAM:
 			case AT_DEVA:
-			case AT_5SQR:
-				attkptr->adtyp = randBeamDamageTypes[rn2(SIZE(randBeamDamageTypes))];
-			break;
-			default:
 				attkptr->adtyp = AD_PHYS;
-			break;
+				attkptr->damn = 1;
+				break;
 			}
-			if(attkptr->aatyp == AT_ARRW){
-				if(attkptr->adtyp == AD_VBLD){
-					attkptr->damn = d(1, 3);
-					attkptr->damd = rn2(3) + 1;
-				} else {
-					attkptr->damn = 1;
-					attkptr->damd = rnd(3) + rn2(3) + 1;
+			horrorattacks++;
+
+			/* possibly make more identical attacks */
+			while (!rn2(3) && horrorattacks<6) {
+				attkptr = &horrors[j]->mattk[horrorattacks];
+				*attkptr = *(attkptr - 1);
+
+				if (attkptr->aatyp == AT_WEAP)
+					attkptr->aatyp = AT_XWEP;
+				else if (attkptr->aatyp == AT_XWEP)
+					attkptr->aatyp = AT_MARI;
+
+				horrorattacks++;
+			}
+		}
+		/* get some more melee attacks in here (this will bring it up to at least 2, with 2/3 odds of at least 3) */
+		while ((!rn2(horrorattacks) || !rn2(3)) && horrorattacks<6) {
+			attkptr = &horrors[j]->mattk[horrorattacks];
+			if (rn2(7)) {
+				attkptr->aatyp = get_random_of(randMeleeAttackTypes);
+				attkptr->adtyp = rn2(3) ? get_random_of(randSpecialDamageTypes) : get_random_of(randWeaponDamageTypes);
+			}
+			else {
+				attkptr->aatyp = (rn2(3) ? AT_TUCH : rn2(3) ? AT_LRCH : AT_5SQR);
+				attkptr->adtyp = get_random_of(randTouchDamageTypes);
+			}
+			attkptr->damn = 1 + d(1, 2) + rn2(2)*rn2(3);	/* 2 -  5, trailing right */
+			attkptr->damd = rn2(5-attkptr->damn) * 2 + 6;	/* 6 - 10, by 2s */
+
+			/* sometimes consolidate into a high-variance attack */
+			if (!rn2(4)) {
+				int n = 1 + rn2(2)*rn2(2);
+				attkptr->damd = (attkptr->damn * attkptr->damd) / n;
+				attkptr->damn = n;
+			}
+
+			horrorattacks++;
+		}
+		/* chance of getting special, hard-hitting melee attacks */
+		if (horrorattacks <= 2 || (!rn2(8) && horrorattacks < 5)) {
+			attkptr = &horrors[j]->mattk[horrorattacks];
+
+			attkptr->aatyp = get_random_of(randSpecialAttackTypes);
+			attkptr->adtyp = get_random_of(randRendDamageTypes);
+			attkptr->damn = d(2, 3);						/* 2 -  6 */
+			attkptr->damd = rn2(5-attkptr->damn) * 2 + 6;	/* 6 - 10 by 2s */
+
+			/* fixups */
+			if (attkptr->aatyp == AT_ENGL) {
+				attkptr->adtyp = get_random_of(randEngulfDamageTypes);
+				/* engulf attacks can be stronger */
+				attkptr->damn += 2 - attkptr->damn/3;
+				attkptr->damd += 2;
+			}
+			else if ((attkptr - 1)->aatyp != AT_XWEP) {
+				/* duplicate previous attack and insert it */
+				*(attkptr + 1) = *attkptr;
+				*(attkptr) = *(attkptr - 1);
+				(attkptr-0)->damd -= 2;
+				(attkptr-1)->damd -= 2;
+				horrorattacks++;
+			}
+			horrorattacks++;
+		}
+		/* chance of getting ranged attacks */
+		while (!rn2(horrorattacks / 2) && horrorattacks < 6) {
+			attkptr = &horrors[j]->mattk[horrorattacks];
+
+			attkptr->aatyp = get_random_of(randRangedAttackTypes);
+			attkptr->damn = d(2, 3);			/*  2 -  6 */
+			attkptr->damd = rn2(3) * 2 + 6;		/*  6 - 10, by 2s */
+
+			switch (attkptr->aatyp) {
+			case AT_SPIT:
+				attkptr->adtyp = get_random_of(randSpitDamageTypes);
+				attkptr->damd = 6;
+				break;
+			case AT_ARRW:
+				attkptr->adtyp = get_random_of(randArrowDamageTypes);
+				attkptr->damn = 1;
+				attkptr->damd = d(2, 3);
+				break;
+			case AT_BREA:
+				attkptr->adtyp = get_random_of(randBreathDamageTypes);
+				attkptr->damn += rnd(3);
+				attkptr->damd += 2;
+				break;
+			case AT_BEAM:
+				attkptr->adtyp = get_random_of(randBeamDamageTypes);
+				break;
+			case AT_GAZE:
+				attkptr->adtyp = get_random_of(randGazeDamageTypes);
+				if (!rn2(4)) {
+					attkptr->aatyp == AT_WDGZ;	/* hahahaha */
+					attkptr->damn = rnd(3);			/* reduce to 1-3 */
+					attkptr->damd = rn2(3) * 2 + 4;	/* reduce to 4-8 by 2s */
 				}
+				break;
+			case AT_MAGC:
+				attkptr->adtyp = get_random_of(randMagicDamageTypes);
+				if (attkptr->adtyp == AD_SPEL || attkptr->adtyp == AD_CLRC) {
+					attkptr->damn = !rn2(3) ? 0 : rnd(4);
+					attkptr->damd = 6;
+				}
+				break;
 			}
-			else switch (attkptr->adtyp){
+			/* damage overrides */
+			switch (attkptr->adtyp){
 			case AD_LUCK:
 				attkptr->damn = 1;
 				attkptr->damd = rnd(13);
 				break;
-			case AD_MIST:
+			case AD_VBLD:
+				attkptr->damn = d(1, 3);
+				attkptr->damd = d(1, 3);
+				break;
+			case AD_BLNK:
 			case AD_DEAD:
 				attkptr->damn = 0;
 				attkptr->damd = 0;
 				break;
-			default:
-				attkptr->damn = d(3, 3);			/* we're almost sure to get this wrong first time */
-				attkptr->damd = rn2(3) * 2 + 8;		/* either too high or too low */
 			}
+			horrorattacks++;
 		}
 
-	
 		horrors[j]->msize = !rn2(6) ? MZ_GIGANTIC : rn2(MZ_HUGE + 1);			/* any size */
 		horrors[j]->cwt = randCorpseWeights[horrors[j]->msize];					/* probably moot as it's flagged NOCORPSE */
 		horrors[j]->cnutrit = randCorpseNut[horrors[j]->msize];					/* see above */
@@ -2831,6 +3006,7 @@ u_init()
 
 		horrors[j]->mflagsg &= ~MG_MERC;				/* no guards */
 		horrors[j]->mflagst &= ~MT_PEACEFUL;			/* no peacefuls */
+		horrors[j]->mflagst &= ~MT_COVETOUS;			/* no covetous */
 		horrors[j]->mflagsa &= ~MA_WERE;				/* no lycanthropes */
 		horrors[j]->mflagsg &= ~MG_PNAME;				/* not a proper name */
 
@@ -2877,6 +3053,7 @@ u_init()
 		if (horrors[j]->mlevel<11)	// redo if we get too weak a monster
 			j--;
 	}
+#undef get_random_of
 	// horror stuff that cannot be done in the loop easily
 	if (!rn2(10)) u.shambin = 3;
 	else if (!rn2(9)) u.shambin = 2;
