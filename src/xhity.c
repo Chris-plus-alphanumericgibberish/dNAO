@@ -7099,7 +7099,8 @@ boolean ranged;
 			if (!u.ustuck && (!rn2(10) || attk->aatyp == AT_HUGS)) {
 				if (slips_free(magr, mdef, attk, vis)) {
 					/* message was printed (if visible) */
-					/* do nothing */;
+					/* nothing happens */
+					return MM_MISS;
 				}
 				else {
 					/* get stuck */
