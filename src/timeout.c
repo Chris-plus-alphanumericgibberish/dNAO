@@ -67,7 +67,6 @@ const struct propname {
     { TELEPAT, "telepathic" },
     { WARNING, "dangersense" },
     { WARN_OF_MON, "warning of specific foes" },
-    { WARN_UNDEAD, "warn: undead" },
     { SEARCHING, "searching" },
     { INFRAVISION, "infravision" },
     { ADORNED, "adorned (+/- Cha)" },

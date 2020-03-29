@@ -261,41 +261,20 @@
 #define Extramission		(HExtramission || EExtramission || \
 				 extramission(youracedata) || u.sealsActive&SEAL_AMON)
 
+#define HXray_vision	u.uprops[XRAY_VISION].intrinsic
+#define EXray_vision	u.uprops[XRAY_VISION].extrinsic
+#define Xray_vision		(HXray_vision || EXray_vision)
+
 #define HSee_invisible		u.uprops[SEE_INVIS].intrinsic
 #define ESee_invisible		u.uprops[SEE_INVIS].extrinsic
 #define See_invisible_old	(HSee_invisible || ESee_invisible || \
 				 species_perceives(youracedata) || u.sealsActive&SEAL_NABERIUS)
 #define See_invisible(X,Y)	(ESee_invisible || (See_invisible_old && dist2(u.ux, u.uy, X, Y)<13))
 
-#define HTelepat		u.uprops[TELEPAT].intrinsic
-#define ETelepat		u.uprops[TELEPAT].extrinsic
-#define Blind_telepat		(HTelepat || ETelepat || \
-				 species_is_telepathic(youracedata) || u.sealsActive&SEAL_DANTALION)
-#define Unblind_telepat		(ETelepat || u.sealsActive&SEAL_DANTALION)
-
-#define HWarning		u.uprops[WARNING].intrinsic
-#define EWarning		u.uprops[WARNING].extrinsic
-#define Warning			(HWarning || EWarning || u.sealsActive&SEAL_HUGINN_MUNINN)
-
-/* Warning for a specific type of monster */
-#define HWarn_of_mon		u.uprops[WARN_OF_MON].intrinsic
-#define EWarn_of_mon		u.uprops[WARN_OF_MON].extrinsic
-#define Warn_of_mon		(HWarn_of_mon || EWarn_of_mon || (uwep && uwep->oclass == WEAPON_CLASS && (uwep)->obj_material == WOOD && (uwep)->otyp != MOON_AXE && \
-					(uwep->oward & WARD_THJOFASTAFUR)) || u.sealsActive&SEAL_PAIMON || u.sealsActive&SEAL_ANDREALPHUS)
-
-#define HUndead_warning		u.uprops[WARN_UNDEAD].intrinsic
-#define Undead_warning		(HUndead_warning || u.specialSealsActive&SEAL_ACERERAK)
-
-#define HSearching		u.uprops[SEARCHING].intrinsic
-#define ESearching		u.uprops[SEARCHING].extrinsic
-#define Searching		(HSearching || ESearching || u.sealsActive&SEAL_OTIAX)
-
-#define HClairvoyant		u.uprops[CLAIRVOYANT].intrinsic
-#define EClairvoyant		u.uprops[CLAIRVOYANT].extrinsic
-#define BClairvoyant		u.uprops[CLAIRVOYANT].blocked
-#define Clairvoyant		((HClairvoyant || EClairvoyant || u.sealsActive&SEAL_MOTHER || \
-							(uwep && uwep->oartifact == ART_HOLY_MOONLIGHT_SWORD && uwep->lamplit)\
-						) && !BClairvoyant)
+#define HEcholocation		u.uprops[ECHOLOCATION].intrinsic
+#define EEcholocation		u.uprops[ECHOLOCATION].extrinsic
+#define Echolocation		(HEcholocation || EEcholocation || \
+				  echolocation(youracedata))
 
 #define HInfravision		u.uprops[INFRAVISION].intrinsic
 #define EInfravision		u.uprops[INFRAVISION].extrinsic
@@ -317,19 +296,46 @@
 #define Senseall		(HSenseall || ESenseall || \
 				  senseall(youracedata))
 
+#define HOmnisense		u.uprops[OMNISENSE].intrinsic
+#define EOmnisense		u.uprops[OMNISENSE].extrinsic
+#define Omnisense		(HOmnisense || EOmnisense || \
+				  omnisense(youracedata))
+
 #define HEarthsense		u.uprops[EARTHSENSE].intrinsic
 #define EEarthsense		u.uprops[EARTHSENSE].extrinsic
 #define Earthsense		(HEarthsense || EEarthsense || \
 				  earthsense(youracedata))
 
-#define HEcholocation		u.uprops[ECHOLOCATION].intrinsic
-#define EEcholocation		u.uprops[ECHOLOCATION].extrinsic
-#define Echolocation		(HEcholocation || EEcholocation || \
-				  echolocation(youracedata))
-
 #define HDetect_monsters	u.uprops[DETECT_MONSTERS].intrinsic
 #define EDetect_monsters	u.uprops[DETECT_MONSTERS].extrinsic
 #define Detect_monsters		(HDetect_monsters || EDetect_monsters || u.specialSealsActive&SEAL_NUMINA)
+
+#define HTelepat		u.uprops[TELEPAT].intrinsic
+#define ETelepat		u.uprops[TELEPAT].extrinsic
+#define Blind_telepat		(HTelepat || ETelepat || \
+				 species_is_telepathic(youracedata) || u.sealsActive&SEAL_DANTALION)
+#define Unblind_telepat		(ETelepat || u.sealsActive&SEAL_DANTALION)
+
+#define HWarning		u.uprops[WARNING].intrinsic
+#define EWarning		u.uprops[WARNING].extrinsic
+#define Warning			(HWarning || EWarning || u.sealsActive&SEAL_HUGINN_MUNINN)
+
+/* Warning for a specific type of monster */
+#define HWarn_of_mon		u.uprops[WARN_OF_MON].intrinsic
+#define EWarn_of_mon		u.uprops[WARN_OF_MON].extrinsic
+#define Warn_of_mon		(HWarn_of_mon || EWarn_of_mon || (uwep && uwep->oclass == WEAPON_CLASS && (uwep)->obj_material == WOOD && (uwep)->otyp != MOON_AXE && \
+					(uwep->oward & WARD_THJOFASTAFUR)) || u.sealsActive&SEAL_PAIMON || u.sealsActive&SEAL_ANDREALPHUS || u.sealsActive&SEAL_ACERERAK)
+
+#define HSearching		u.uprops[SEARCHING].intrinsic
+#define ESearching		u.uprops[SEARCHING].extrinsic
+#define Searching		(HSearching || ESearching || u.sealsActive&SEAL_OTIAX)
+
+#define HClairvoyant		u.uprops[CLAIRVOYANT].intrinsic
+#define EClairvoyant		u.uprops[CLAIRVOYANT].extrinsic
+#define BClairvoyant		u.uprops[CLAIRVOYANT].blocked
+#define Clairvoyant		((HClairvoyant || EClairvoyant || u.sealsActive&SEAL_MOTHER || \
+							(uwep && uwep->oartifact == ART_HOLY_MOONLIGHT_SWORD && uwep->lamplit)\
+						) && !BClairvoyant)
 
 #define HWeldproof	u.uprops[WELDPROOF].intrinsic
 #define EWeldproof	u.uprops[WELDPROOF].extrinsic
@@ -528,10 +534,6 @@
 #define HSpellboost		u.uprops[SPELLBOOST].intrinsic
 #define ESpellboost		u.uprops[SPELLBOOST].extrinsic
 #define Spellboost		(HSpellboost || ESpellboost || u.specialSealsActive&SEAL_NUDZIRATH)
-
-#define HXray_vision	u.uprops[XRAY_VISION].intrinsic
-#define EXray_vision	u.uprops[XRAY_VISION].extrinsic
-#define Xray_vision		(HXray_vision || EXray_vision)
 
 #define HSterile	u.uprops[STERILE].intrinsic
 #define ESterile	u.uprops[STERILE].extrinsic

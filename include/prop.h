@@ -63,8 +63,7 @@
 #define HALF_PHDAM					1 + HALF_SPDAM					
 #define ADORNED						1 + HALF_PHDAM					
 #define REGENERATION				1 + ADORNED						
-#define WARN_UNDEAD					1 + REGENERATION				
-#define INVULNERABLE				1 + WARN_UNDEAD					
+#define INVULNERABLE				1 + REGENERATION
 #define FREE_ACTION					1 + INVULNERABLE				
 #define SWIMMING					1 + FREE_ACTION					
 #define SLIMED						1 + SWIMMING					
@@ -73,25 +72,27 @@
 #define UNCHANGING					1 + FLYING						
 #define PASSES_WALLS				1 + UNCHANGING					
 #define SLOW_DIGESTION				1 + PASSES_WALLS	
-/* vision */
-#define INFRAVISION					1 + SLOW_DIGESTION				
-#define NORMALVISION				1 + INFRAVISION
-#define LOWLIGHTSIGHT				1 + NORMALVISION
-#define ELFSIGHT					1 + LOWLIGHTSIGHT
-#define DARKSIGHT					1 + ELFSIGHT
-#define CATSIGHT					1 + DARKSIGHT
-#define EXTRAMISSION				1 + CATSIGHT
-#define XRAY_VISION					1 + EXTRAMISSION
+/* vision */				
+#define NORMALVISION				1 + SLOW_DIGESTION	/* see in lit LoS; x1 night vision */
+#define LOWLIGHTSIGHT				1 + NORMALVISION	/* see in lit LoS; x2 night vision */
+#define ELFSIGHT					1 + LOWLIGHTSIGHT	/* see in lit LoS; x3 night vision */
+#define DARKSIGHT					1 + ELFSIGHT		/* see in dark LoS; blinded in light; */
+#define CATSIGHT					1 + DARKSIGHT		/* see in lit LoS OR dark LoS depending on what current square is */
+#define EXTRAMISSION				1 + CATSIGHT		/* see in LoS */
+#define XRAY_VISION					1 + EXTRAMISSION	/* see in radius, ignorining LoS */
+#define ECHOLOCATION				1 + XRAY_VISION		/* supplementary vision that maps terrain, finds items, `I`s creatures */
 /* senses */
-#define WARN_OF_MON					1 + XRAY_VISION
-#define DETECT_MONSTERS				1 + WARN_OF_MON
-#define BLOODSENSE					1 + DETECT_MONSTERS
-#define LIFESENSE					1 + BLOODSENSE
-#define SENSEALL					1 + LIFESENSE
-#define EARTHSENSE					1 + SENSEALL
-#define ECHOLOCATION				1 + EARTHSENSE
+#define INFRAVISION					1 + ECHOLOCATION	/* see creatures in LoS that are infravisible */
+#define BLOODSENSE					1 + INFRAVISION		/* sense creatures in LoS that have blood */
+#define LIFESENSE					1 + BLOODSENSE		/* sense creatures in LoS that are not non-living */
+#define SENSEALL					1 + LIFESENSE		/* sense all creatures */
+#define OMNISENSE					1 + SENSEALL		/* ignore LoS requirement on above senses (but not sight) */
+#define EARTHSENSE					1 + OMNISENSE		/* sense creatures that are touching the ground */
+/* warning */
+#define WARN_OF_MON					1 + EARTHSENSE		/* sense particular monsters on level */
+#define DETECT_MONSTERS				1 + WARN_OF_MON		/* sense creatures */
 /* more misc */
-#define SPELLBOOST					1 + ECHOLOCATION
+#define SPELLBOOST					1 + DETECT_MONSTERS
 #define NECROSPELLS					1 + SPELLBOOST
 #define CARCAP						1 + NECROSPELLS
 #define WELDPROOF					1 + CARCAP

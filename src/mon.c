@@ -2767,22 +2767,22 @@ mon_can_see_mon(looker, lookie)
 		}
 	}
 	if(infravision(looker->data) && infravisible(youracedata) && !is_blind(looker)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || omnisense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(bloodsense(looker->data) && has_blood(youracedata)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || omnisense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(lifesense(looker->data) && !nonliving(youracedata)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || omnisense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(senseall(looker->data)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || ominsense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || omnisense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
@@ -2916,22 +2916,22 @@ mon_can_see_you(looker)
 		}
 	}
 	if(infravision(looker->data) && infravisible(youracedata) && !is_blind(looker)){
-		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((couldsee(looker->mx, looker->my) || omnisense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(bloodsense(looker->data) && has_blood(youracedata)){
-		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((couldsee(looker->mx, looker->my) || omnisense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(lifesense(looker->data) && !nonliving(youracedata)){
-		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((couldsee(looker->mx, looker->my) || omnisense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
 	if(senseall(looker->data)){
-		if((couldsee(looker->mx, looker->my) || ominsense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((couldsee(looker->mx, looker->my) || omnisense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
 			return TRUE;
 		}
 	}
