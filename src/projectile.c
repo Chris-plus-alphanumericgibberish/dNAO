@@ -21,7 +21,6 @@ extern int FDECL(gem_accept, (struct monst *, struct obj *));
 extern void FDECL(check_shop_obj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P));
 extern void FDECL(breakmsg, (struct obj *, BOOLEAN_P));
 extern void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
-extern int FDECL(throw_gold, (struct obj *));
 extern void NDECL(autoquiver);
 /* from mthrowu.c */
 extern char* FDECL(breathwep, (int));
@@ -97,6 +96,12 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	/* First, create thrownobj */
 	{
 		int n_to_throw = 1;
+
+		/* gold should throw the full amount; splitting was done when selsecting quan to throw */
+		if (ammo->oclass == COIN_CLASS) {
+			n_to_throw = ammo->quan;
+			m_shot.n = 1;
+		}
 
 		/* Fluorite Octahedron has obj->quan >1 possible */
 		if (m_shot.o && (m_shot.o == ammo->otyp) && (ammo->oartifact == ART_FLUORITE_OCTAHEDRON) && !m_shot.s) {
@@ -1203,6 +1208,12 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			return MM_MISS;
 		}
 	}
+	/* gold -- youdef is you throwing gold upwards and it falling back down */
+	if (!youdef && thrownobj->oclass == COIN_CLASS && !(youagr && u.uswallow))
+	{
+		*wepgone = ghitm(mdef, thrownobj);
+		return MM_HIT;
+	}
 
 	/* Determine if the projectile hits */
 	dieroll = rnd(20);
@@ -2284,15 +2295,6 @@ boolean forcedestroy;
 #endif
 		return(0);
 	}
-
-	/* if we are throwing gold, go to the function for doing that */
-#ifndef GOLDOBJ
-	if (ammo->oclass == COIN_CLASS)
-#else
-	if (ammo->oclass == COIN_CLASS && ammo != uquiver)
-#endif
-		return(throw_gold(ammo));
-
 
 	/* reasons we can't throw ammo */
 	if (!canletgo(ammo, "throw"))
