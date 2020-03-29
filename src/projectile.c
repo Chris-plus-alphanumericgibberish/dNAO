@@ -179,7 +179,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	}
 
 	/* determine if thrownobj should return (like Mjollnir) */
-	if (magr && (
+	if (magr && !(hmoncode & HMON_KICKED) && (
 		(Race_if(PM_ANDROID) && !launcher && youagr) ||	/* there's no android monster helper? */
 		(thrownobj->oartifact == ART_MJOLLNIR && (youagr ? (Role_if(PM_VALKYRIE)) : magr ? (magr->data == &mons[PM_VALKYRIE]) : FALSE)) ||
 		(thrownobj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && (youagr ? (Race_if(PM_DWARF)) : magr ? (is_dwarf(magr->data)) : FALSE)) ||
@@ -197,7 +197,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	}
 
 	/* player exercises STR just be throwing heavy things */
-	if (youagr && !launcher && (
+	if (youagr && !launcher && !(hmoncode & HMON_KICKED) && (
 		thrownobj->otyp == BOULDER ||
 		(thrownobj->otyp == STATUE && is_boulder(thrownobj)) ||
 		thrownobj->otyp == HEAVY_IRON_BALL
@@ -309,7 +309,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	tmp_at(DISP_FLASH, obj_to_glyph(thrownobj));
 
 	/* initialize boomerang thrown direction */
-	if (is_boomerang(thrownobj)) {
+	if (is_boomerang(thrownobj) && !(hmoncode & (HMON_MISTHROWN|HMON_KICKED))) {
 		for (boomerang_init = 0; boomerang_init < 8; boomerang_init++)
 		if (xdir[boomerang_init] == dx && ydir[boomerang_init] == dy)
 			break;
@@ -320,7 +320,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	while (TRUE)
 	{
 		/* boomerangs: change dx/dy to make signature circle */
-		if (is_boomerang(thrownobj)) {
+		if (is_boomerang(thrownobj) && !(hmoncode & (HMON_MISTHROWN|HMON_KICKED))) {
 			/* assumes boomerangs always start with 10 range */
 			/* don't worry about the math; it works */
 			dx = xdir[((10-range) - (10-range+4)/5 + boomerang_init) % 8];
