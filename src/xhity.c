@@ -39,6 +39,9 @@ extern const char * const destroy_strings[];
 /* for long worms */
 extern boolean notonhead;
 
+/* to make acurr() use a different value for your STR score in specific circumstances */
+extern int override_str;
+
 /* global to help tell when something is making a sneak attack with the Lifehunt Scythe against a vulnerable target */
 boolean lifehunt_sneak_attacking = FALSE;
 
@@ -3080,7 +3083,11 @@ int flat_acc;
 			/* Stat (DEX, STR) */
 			if (!thrown || !launcher || objects[launcher->otyp].oc_skill == P_SLING){
 				/* firing ranged attacks without a laucher (ex manticore tail spikes) can use STR */
+				/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
+				if (youagr && hmoncode & HMON_KICKED && uarmf && uarmf->otyp == KICKING_BOOTS)
+					override_str = 125;	/* 25 STR */
 				bons_acc += abon();
+				override_str = 0;
 			}
 			else {
 				if (ACURR(A_DEX) < 4)			bons_acc -= 3;
@@ -12471,8 +12478,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					else if (launcher)
 						bon_damage += 0;
 					/* properly-used ranged attacks othersied get STR bonus */
-					else
+					else {
+						/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
+						if (hmoncode & HMON_KICKED && uarmf && uarmf->otyp == KICKING_BOOTS)
+							override_str = 125;	/* 25 STR */
 						bon_damage += dbon(weapon);
+						override_str = 0;
+					}
 				}
 				bonsdmg += bon_damage;
 			} else if(!youagr && magr){
