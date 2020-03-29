@@ -174,7 +174,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	}
 	thrownobj->owornmask &= ~(W_CHAIN|W_BALL);	/* balls and chains are still attached, other objects aren't*/
 	/* set that it was thrown... if the player threw it */
-	if (youagr) {
+	if (youagr && !(hmoncode & HMON_KICKED)) {
 		thrownobj->was_thrown = TRUE;
 	}
 
@@ -333,6 +333,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		/* pickaxes in shops special case */
 		/* space has monster and is not initxy */
 		/* space has sink/wall and is not initxy */
+		/* space has pool/lava */
 		/* space ahead has wall and no monster */
 		/* space ahead has iron bars and no monster */
 		/* heavy iron ball specific checks */
@@ -374,6 +375,15 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			(!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ)) ||
 			closed_door(bhitpos.x, bhitpos.y) ||
 			(IS_SINK(levl[bhitpos.x][bhitpos.y].typ)))
+		{
+			range = 0;
+		}
+
+		/* projectile is over a pool/lava and was kicked */
+		if ((hmoncode & HMON_KICKED) && (
+			is_pool(bhitpos.x, bhitpos.y, TRUE) ||
+			is_lava(bhitpos.x, bhitpos.y)
+			))
 		{
 			range = 0;
 		}
