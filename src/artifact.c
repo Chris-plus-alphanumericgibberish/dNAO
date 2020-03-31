@@ -1467,8 +1467,7 @@ boolean narrow_only;
 		default:
 			impossible("Weird weapon special attack: (%d).", weap->adtyp);
 		}
-		/* if it bypassed resistances, it applies */
-		return TRUE;
+		/* if it bypassed resistances, it still needs to pass ARTA_HATES (if applicable) */
 	}
 	
 	/* if the artifact is hateful, it only applies its damage to the specific monsters it hates */
