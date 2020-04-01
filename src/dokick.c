@@ -494,51 +494,12 @@ xchar x, y;
 		  otense(kickobj, "slide"), surface(x,y));
 
 	obj_extract_self(kickobj);
-	(void) snuff_candle(kickobj);
+	addtobill(kickobj, FALSE, FALSE, TRUE);
 	newsym(x, y);
-	mon = bhit(u.dx, u.dy, range, KICKED_WEAPON,
-		   (int FDECL((*),(MONST_P,OBJ_P)))0,
-		   (int FDECL((*),(OBJ_P,OBJ_P)))0,
-		   kickobj, NULL);
+	projectile(&youmonst, kickobj, (void *)0,
+		((is_ammo(kickobj) && !kickobj->oclass == GEM_CLASS) ? HMON_MISTHROWN : HMON_FIRED)|HMON_KICKED,
+		x, y, u.dx, u.dy, 0, range, FALSE, FALSE, FALSE);
 
-	if(mon) {
-	    if (mon->isshk &&
-		    kickobj->where == OBJ_MINVENT && kickobj->ocarry == mon)
-		return 1;	/* alert shk caught it */
-	    notonhead = (mon->mx != bhitpos.x || mon->my != bhitpos.y);
-		boolean gone = FALSE;
-		if (isgold)
-			gone = ghitm(mon, kickobj);
-		else
-			(void)hmon2point0(&youmonst, mon, (struct attack *)0, (struct attack *)0, kickobj, (struct obj *)0, HMON_MISTHROWN, 0, 0, TRUE, rn1(18, 2), FALSE, TRUE, &gone);
-		if (gone)
-			return(1);
-	}
-
-	/* the object might have fallen down a hole */
-	if (kickobj->where == OBJ_MIGRATING) {
-	    if (costly) {
-		if(isgold)
-		    costly_gold(x, y, kickobj->quan);
-		else (void)stolen_value(kickobj, x, y,
-					(boolean)shkp->mpeaceful, FALSE);
-	    }
-	    return 1;
-	}
-
-	bhitroom = *in_rooms(bhitpos.x, bhitpos.y, SHOPBASE);
-	if (costly && (!costly_spot(bhitpos.x, bhitpos.y) ||
-			*in_rooms(x, y, SHOPBASE) != bhitroom)) {
-	    if(isgold)
-		costly_gold(x, y, kickobj->quan);
-	    else (void)stolen_value(kickobj, x, y,
-				    (boolean)shkp->mpeaceful, FALSE);
-	}
-
-	if(flooreffects(kickobj,bhitpos.x,bhitpos.y,"fall")) return(1);
-	place_object(kickobj, bhitpos.x, bhitpos.y);
-	stackobj(kickobj);
-	newsym(kickobj->ox, kickobj->oy);
 	return(1);
 }
 

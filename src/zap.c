@@ -3188,8 +3188,6 @@ register struct monst *mtmp;
 
 /*
  *  Called for the following distance effects:
- *	when a weapon is thrown (weapon == THROWN_WEAPON)
- *	when an object is kicked (KICKED_WEAPON)
  *	when an IMMEDIATE wand is zapped (ZAPPED_WAND)
  *	when a light beam is flashed (FLASHED_LIGHT)
  *	when a mirror is applied (INVIS_BEAM)
@@ -3216,18 +3214,8 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 	struct monst *mtmp;
 	struct trap *trap;
 	uchar typ;
-	boolean shopdoor = FALSE, point_blank = TRUE;
+	boolean shopdoor = FALSE;
 	if (obj_destroyed) { *obj_destroyed = FALSE; }
-
-	if (weapon == KICKED_WEAPON) {
-	    /* object starts one square in front of player */
-	    bhitpos.x = u.ux + ddx;
-	    bhitpos.y = u.uy + ddy;
-	    range--;
-	} else {
-	    bhitpos.x = u.ux;
-	    bhitpos.y = u.uy;
-	}
 
 	if (weapon == FLASHED_LIGHT) {
 	    tmp_at(DISP_BEAM, cmap_to_glyph(S_flashbeam));
@@ -3263,18 +3251,6 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 				break_iron_bars(bhitpos.x, bhitpos.y, TRUE);
 			}
 		}
-
-	    /* iron bars will block anything big enough */
-	    if ((weapon == THROWN_WEAPON || weapon == KICKED_WEAPON) &&
-		    typ == IRONBARS &&
-		    (Is_illregrd(&u.uz) || hits_bars(&obj, x - ddx, y - ddy,
-			      point_blank ? 0 : !rn2(5), 1))) {
-		/* caveat: obj might now be null... */
-		if (obj == NULL && obj_destroyed) { *obj_destroyed = TRUE; }
-		bhitpos.x -= ddx;
-		bhitpos.y -= ddy;
-		break;
-	    }
 
 	    if (weapon == ZAPPED_WAND && find_drawbridge(&x,&y))
 		switch (obj->otyp) {
@@ -3346,15 +3322,6 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 	    if(fhito) {
 		if(bhitpile(obj,fhito,bhitpos.x,bhitpos.y))
 		    range--;
-	    } else {
-		if(weapon == KICKED_WEAPON &&
-		      ((obj->oclass == COIN_CLASS &&
-			 OBJ_AT(bhitpos.x, bhitpos.y)) ||
-			    ship_object(obj, bhitpos.x, bhitpos.y,
-					costly_spot(bhitpos.x, bhitpos.y)))) {
-			tmp_at(DISP_END, 0);
-			return (struct monst *)0;
-		}
 	    }
 	    if(weapon == ZAPPED_WAND && (IS_DOOR(typ) || typ == SDOOR)) {
 		switch (obj->otyp) {
@@ -3392,44 +3359,7 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 		}
 		tmp_at(bhitpos.x, bhitpos.y);
 		delay_output();
-		/* kicked objects fall in pools */
-		if((weapon == KICKED_WEAPON) &&
-		   (is_pool(bhitpos.x, bhitpos.y, TRUE) ||
-		   is_lava(bhitpos.x, bhitpos.y)))
-		    break;
-#ifdef SINKS
-		if(IS_SINK(typ) && weapon != FLASHED_LIGHT)
-		    break;	/* physical objects fall onto sink */
-#endif
 	    }
-	    /* limit range of ball so hero won't make an invalid move */
-	    if (weapon == THROWN_WEAPON && range > 0 &&
-		obj->otyp == HEAVY_IRON_BALL) {
-		struct obj *bobj;
-		struct trap *t;
-		if ((bobj = boulder_at(x, y)) != 0) {
-		    if (cansee(x,y))
-			pline("%s hits %s.",
-			      The(distant_name(obj, xname)), an(xname(bobj)));
-		    range = 0;
-		} else if (obj == uball) {
-		    if (!test_move(x - ddx, y - ddy, ddx, ddy, TEST_MOVE)) {
-			/* nb: it didn't hit anything directly */
-			if (cansee(x,y))
-			    pline("%s jerks to an abrupt halt.",
-				  The(distant_name(obj, xname))); /* lame */
-			range = 0;
-		    } else if (In_sokoban(&u.uz) && (t = t_at(x, y)) != 0 &&
-			       (t->ttyp == PIT || t->ttyp == SPIKED_PIT ||
-				t->ttyp == HOLE || t->ttyp == TRAPDOOR)) {
-			/* hero falls into the trap, so ball stops */
-			range = 0;
-		    }
-		}
-	    }
-
-	    /* thrown/kicked missile has moved away from its starting spot */
-	    point_blank = FALSE;	/* affects passing through iron bars */
 	}
 
 	if (weapon != ZAPPED_WAND && weapon != INVIS_BEAM) tmp_at(DISP_END, 0);

@@ -21,7 +21,6 @@ extern int FDECL(gem_accept, (struct monst *, struct obj *));
 extern void FDECL(check_shop_obj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P));
 extern void FDECL(breakmsg, (struct obj *, BOOLEAN_P));
 extern void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
-extern int FDECL(throw_gold, (struct obj *));
 extern void NDECL(autoquiver);
 /* from mthrowu.c */
 extern char* FDECL(breathwep, (int));
@@ -98,6 +97,12 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	{
 		int n_to_throw = 1;
 
+		/* gold should throw the full amount; splitting was done when selsecting quan to throw */
+		if (ammo->oclass == COIN_CLASS) {
+			n_to_throw = ammo->quan;
+			m_shot.n = 1;
+		}
+
 		/* Fluorite Octahedron has obj->quan >1 possible */
 		if (m_shot.o && (m_shot.o == ammo->otyp) && (ammo->oartifact == ART_FLUORITE_OCTAHEDRON) && !m_shot.s) {
 			n_to_throw = m_shot.n;
@@ -169,12 +174,12 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	}
 	thrownobj->owornmask &= ~(W_CHAIN|W_BALL);	/* balls and chains are still attached, other objects aren't*/
 	/* set that it was thrown... if the player threw it */
-	if (youagr) {
+	if (youagr && !(hmoncode & HMON_KICKED)) {
 		thrownobj->was_thrown = TRUE;
 	}
 
 	/* determine if thrownobj should return (like Mjollnir) */
-	if (magr && (
+	if (magr && !(hmoncode & HMON_KICKED) && (
 		(Race_if(PM_ANDROID) && !launcher && youagr) ||	/* there's no android monster helper? */
 		(thrownobj->oartifact == ART_MJOLLNIR && (youagr ? (Role_if(PM_VALKYRIE)) : magr ? (magr->data == &mons[PM_VALKYRIE]) : FALSE)) ||
 		(thrownobj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && (youagr ? (Race_if(PM_DWARF)) : magr ? (is_dwarf(magr->data)) : FALSE)) ||
@@ -192,7 +197,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	}
 
 	/* player exercises STR just be throwing heavy things */
-	if (youagr && !launcher && (
+	if (youagr && !launcher && !(hmoncode & HMON_KICKED) && (
 		thrownobj->otyp == BOULDER ||
 		(thrownobj->otyp == STATUE && is_boulder(thrownobj)) ||
 		thrownobj->otyp == HEAVY_IRON_BALL
@@ -304,7 +309,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	tmp_at(DISP_FLASH, obj_to_glyph(thrownobj));
 
 	/* initialize boomerang thrown direction */
-	if (is_boomerang(thrownobj)) {
+	if (is_boomerang(thrownobj) && !(hmoncode & (HMON_MISTHROWN|HMON_KICKED))) {
 		for (boomerang_init = 0; boomerang_init < 8; boomerang_init++)
 		if (xdir[boomerang_init] == dx && ydir[boomerang_init] == dy)
 			break;
@@ -315,7 +320,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	while (TRUE)
 	{
 		/* boomerangs: change dx/dy to make signature circle */
-		if (is_boomerang(thrownobj)) {
+		if (is_boomerang(thrownobj) && !(hmoncode & (HMON_MISTHROWN|HMON_KICKED))) {
 			/* assumes boomerangs always start with 10 range */
 			/* don't worry about the math; it works */
 			dx = xdir[((10-range) - (10-range+4)/5 + boomerang_init) % 8];
@@ -328,6 +333,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		/* pickaxes in shops special case */
 		/* space has monster and is not initxy */
 		/* space has sink/wall and is not initxy */
+		/* space has pool/lava */
 		/* space ahead has wall and no monster */
 		/* space ahead has iron bars and no monster */
 		/* heavy iron ball specific checks */
@@ -369,6 +375,15 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			(!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ)) ||
 			closed_door(bhitpos.x, bhitpos.y) ||
 			(IS_SINK(levl[bhitpos.x][bhitpos.y].typ)))
+		{
+			range = 0;
+		}
+
+		/* projectile is over a pool/lava and was kicked */
+		if ((hmoncode & HMON_KICKED) && (
+			is_pool(bhitpos.x, bhitpos.y, TRUE) ||
+			is_lava(bhitpos.x, bhitpos.y)
+			))
 		{
 			range = 0;
 		}
@@ -1202,6 +1217,12 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			mdef->mstrategy &= ~STRAT_WAITMASK;
 			return MM_MISS;
 		}
+	}
+	/* gold -- youdef is you throwing gold upwards and it falling back down */
+	if (!youdef && thrownobj->oclass == COIN_CLASS && !(youagr && u.uswallow))
+	{
+		*wepgone = ghitm(mdef, thrownobj);
+		return MM_HIT;
 	}
 
 	/* Determine if the projectile hits */
@@ -2284,15 +2305,6 @@ boolean forcedestroy;
 #endif
 		return(0);
 	}
-
-	/* if we are throwing gold, go to the function for doing that */
-#ifndef GOLDOBJ
-	if (ammo->oclass == COIN_CLASS)
-#else
-	if (ammo->oclass == COIN_CLASS && ammo != uquiver)
-#endif
-		return(throw_gold(ammo));
-
 
 	/* reasons we can't throw ammo */
 	if (!canletgo(ammo, "throw"))

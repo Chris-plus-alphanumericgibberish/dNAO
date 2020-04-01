@@ -10,7 +10,6 @@
 
 extern void NDECL(autoquiver);
 extern int FDECL(gem_accept, (struct monst *, struct obj *));
-extern int FDECL(throw_gold, (struct obj *));
 extern void FDECL(check_shop_obj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P));
 extern void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
 extern void FDECL(breakmsg, (struct obj *, BOOLEAN_P));
@@ -900,87 +899,6 @@ boolean in_view;
 			pline("Splash!");
 		break;
 	}
-}
-
-int
-throw_gold(obj)
-struct obj *obj;
-{
-	int range, odx, ody;
-#ifndef GOLDOBJ
-	long zorks = obj->quan;
-#endif
-	register struct monst *mon;
-
-	if(!u.dx && !u.dy && !u.dz) {
-#ifndef GOLDOBJ
-		u.ugold += obj->quan;
-		flags.botl = 1;
-		dealloc_obj(obj);
-#endif
-		You("cannot throw gold at yourself.");
-		return(0);
-	}
-#ifdef GOLDOBJ
-        freeinv(obj);
-#endif
-	if(u.uswallow) {
-		pline(is_animal(u.ustuck->data) ?
-			"%s in the %s's entrails." : "%s into %s.",
-#ifndef GOLDOBJ
-			"The gold disappears", mon_nam(u.ustuck));
-		u.ustuck->mgold += zorks;
-		dealloc_obj(obj);
-#else
-			"The money disappears", mon_nam(u.ustuck));
-		add_to_minv(u.ustuck, obj);
-#endif
-		return(1);
-	}
-
-	if(u.dz) {
-		if (u.dz < 0 && !Weightless &&
-					!Underwater && !Is_waterlevel(&u.uz)) {
-	pline_The("gold hits the %s, then falls back on top of your %s.",
-		    ceiling(u.ux,u.uy), body_part(HEAD));
-		    /* some self damage? */
-		    if(uarmh) pline("Fortunately, you are wearing a helmet!");
-		}
-		bhitpos.x = u.ux;
-		bhitpos.y = u.uy;
-	} else {
-		/* consistent with range for normal objects */
-		range = (int)((ACURRSTR)/2 - obj->owt/40);
-
-		/* see if the gold has a place to move into */
-		odx = u.ux + u.dx;
-		ody = u.uy + u.dy;
-		if(!ZAP_POS(levl[odx][ody].typ) || closed_door(odx, ody)) {
-			bhitpos.x = u.ux;
-			bhitpos.y = u.uy;
-		} else {
-			mon = bhit(u.dx, u.dy, range, THROWN_WEAPON,
-				   (int FDECL((*),(MONST_P,OBJ_P)))0,
-				   (int FDECL((*),(OBJ_P,OBJ_P)))0,
-				   obj, NULL);
-			if(mon) {
-			    if (ghitm(mon, obj))	/* was it caught? */
-				return 1;
-			} else {
-			    if(ship_object(obj, bhitpos.x, bhitpos.y, FALSE))
-				return 1;
-			}
-		}
-	}
-
-	if(flooreffects(obj,bhitpos.x,bhitpos.y,"fall")) return(1);
-	if(u.dz > 0)
-		pline_The("gold hits the %s.", surface(bhitpos.x,bhitpos.y));
-	place_object(obj,bhitpos.x,bhitpos.y);
-	if(*u.ushops) sellobj(obj, bhitpos.x, bhitpos.y);
-	stackobj(obj);
-	newsym(bhitpos.x,bhitpos.y);
-	return(1);
 }
 
 /*dothrow.c*/

@@ -12,6 +12,9 @@
 
 #ifdef OVLB
 
+/* globals that let other parts of the code *temporarily* hard-set the player's stat */
+int override_str = 0;
+
 	/* part of the output on gain or loss of attribute */
 static
 const char	* const plusattr[] = {
@@ -1150,6 +1153,9 @@ acurr(x)
 int x;
 {
 	register int tmp = (u.abon.a[x] + u.atemp.a[x] + u.acurr.a[x]);
+
+	if (x == A_STR && override_str)
+		return override_str;
 
 	if(u.ufirst_light)
 		tmp++;
