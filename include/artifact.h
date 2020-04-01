@@ -544,6 +544,7 @@ struct artifact {
 				(m) == ART_WATER_FLOWERS ||\
 				(m) == ART_HAMMERFEET ||\
 				(m) == ART_SHIELD_OF_THE_RESOLUTE_HEA ||\
+				(m) == ART_GRAPPLER_S_GRASP ||\
 				(m) == ART_GAUNTLETS_OF_SPELL_POWER ||\
 				(m) == ART_PREMIUM_HEART ||\
 				(m) == ART_STORMHELM ||\
