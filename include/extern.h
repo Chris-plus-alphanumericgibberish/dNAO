@@ -118,7 +118,7 @@ E int FDECL(disp_artifact_discoveries, (winid));
 E void FDECL(otyp_hit, (struct monst *,struct monst *,
 				struct obj *,int, int *,int*, int));
 E int FDECL(special_weapon_hit, (struct monst *,struct monst *,
-				struct obj *,int,int*,int*,int,boolean*));
+				struct obj *,struct obj*,int,int*,int*,int,boolean*));
 E int NDECL(doinvoke);
 E int FDECL(doparticularinvoke,(struct obj *));
 E void FDECL(arti_speak, (struct obj *));

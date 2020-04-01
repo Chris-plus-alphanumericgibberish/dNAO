@@ -10857,10 +10857,11 @@ int vis;
 }
 
 int
-apply_hit_effects(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt)
+apply_hit_effects(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt)
 struct monst * magr;
 struct monst * mdef;
 struct obj * otmp;
+struct obj * msgr;
 int basedmg;
 int * plusdmgptr;
 int * truedmgptr;
@@ -10872,7 +10873,7 @@ boolean * hittxt;
 	int tmptruedmg;
 	if (otmp->oartifact || otmp->oproperties) {		// artifact and oproperties
 		tmpplusdmg = tmptruedmg = 0;
-		result = special_weapon_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
+		result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
 		*plusdmgptr += tmpplusdmg;
 		*truedmgptr += tmptruedmg;
 		if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
@@ -12606,7 +12607,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (valid_weapon_attack) {
 			otmp = weapon;
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				/* if the weapon caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
 				if (returnvalue == MM_MISS && youagr && (melee || thrust))
 					u.uconduct.weaphit--;
@@ -12618,7 +12619,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 			}
@@ -12628,7 +12629,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			((otmp = (youagr ? uarmh : which_armor(magr, W_ARMH))) &&
 			otmp->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER)) {
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 			}
@@ -12637,7 +12638,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (unarmed_punch) {
 			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 			}
@@ -12646,7 +12647,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (unarmed_kick) {
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 			}
