@@ -545,8 +545,7 @@
 #define lifesense(ptr)		((ptr->mflagsv & MV_LIFESENSE))
 #define earthsense(ptr)		((ptr->mflagsv & MV_EARTHSENSE))
 #define senseall(ptr)		((ptr->mflagsv & MV_DETECTION))
-
-#define ominsense(ptr)		((ptr->mflagsv & MV_OMNI))
+#define omnisense(ptr)		((ptr->mflagsv & MV_OMNI))
 
 #define can_betray(ptr)		((ptr->mflagst & MT_TRAITOR))
 #define opaque(ptr)	(((ptr)->mflagsg & MG_OPAQUE))

@@ -2272,7 +2272,6 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(flags.warntypea & MV_TELEPATHIC) you_are("aware of the presence of telepaths");
 		if(flags.warntypea & MA_WERE) you_are("aware of the presence of werecreatures");
 	}
-	if (Undead_warning) you_are("warned of undead");
 	if (Searching) you_have("automatic searching");
 	if (Clairvoyant) you_are("clairvoyant");
 	if (Infravision) you_have("infravision");
@@ -3036,7 +3035,6 @@ int final;
 			something); 
 		dump(youwere, buf);
 	}
-	if (Undead_warning) dump(youwere, "warned of undead");
 	if (Searching) dump(youhad, "automatic searching");
 	if (Clairvoyant) dump(youwere, "clairvoyant");
 	if (Infravision) dump(youhad, "infravision");
