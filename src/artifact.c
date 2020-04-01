@@ -267,6 +267,11 @@ hack_artifacts()
 		artilist[ART_CALLANDOR].wprops[1] = NO_PROP;
 		artilist[ART_CALLANDOR].wprops[2] = NO_PROP;
 	}
+	/* Fix up fire brand and frost brand */
+	if (u.brand_otyp != STRANGE_OBJECT) {
+		artilist[ART_FIRE_BRAND].otyp = u.brand_otyp;
+		artilist[ART_FROST_BRAND].otyp = u.brand_otyp;
+	}
 	artilist[ART_PEN_OF_THE_VOID].alignment = A_VOID; //something changes this??? Change it back.
 	return;
 }
@@ -436,6 +441,13 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 				}
 			}
 			else {
+				/* Fire Brand and Frost Brand can generate out of MANY otypes, so decrease their odds of being chosen at random */
+				/* if one's been generated, the other HAS to be the same otyp, so no penalty is needed */
+				if ((m == ART_FIRE_BRAND || m == ART_FROST_BRAND)
+					&& u.brand_otyp == STRANGE_OBJECT
+					&& rn2(8))
+					continue;
+
 				eligible[n++] = m;
 			}
 		}
@@ -447,7 +459,23 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 	    /* make an appropriate object if necessary, then christen it */
 make_artif: 
 		if (by_align){
-			otmp = mksobj((int)a->otyp, TRUE, FALSE);
+			int otyp = a->otyp;
+
+			if ((m == ART_FIRE_BRAND || m == ART_FROST_BRAND) && u.brand_otyp == STRANGE_OBJECT) {
+				if (Role_if(PM_MONK))
+					otyp = GAUNTLETS;
+				else
+					otyp =	!rn2(3) ? LONG_SWORD :
+							!rn2(7) ? SABER :
+							!rn2(6) ? SCIMITAR :
+							!rn2(5) ? GAUNTLETS :
+							!rn2(4) ? BROADSWORD :
+							!rn2(3) ? AXE :
+							!rn2(2) ? SHORT_SWORD :
+									  ATHAME;
+			}
+
+			otmp = mksobj(otyp, TRUE, FALSE);
 		}
 	    otmp = oname(otmp, a->name);
 	    otmp->oartifact = m;
@@ -570,7 +598,10 @@ short *otyp;
 		aname = a->name;
 		if(!strncmpi(aname, "the ", 4)) aname += 4;
 		if(!strcmpi(name, aname)) {
-			*otyp = a->otyp;
+			if (a == &artilist[ART_FIRE_BRAND] || a == &artilist[ART_FROST_BRAND])
+				*otyp = (u.brand_otyp != STRANGE_OBJECT ? u.brand_otyp : a->otyp);
+			else
+				*otyp = a->otyp;
 			return a->name;
 		}
     }

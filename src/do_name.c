@@ -571,9 +571,15 @@ const char *name;
 	else if (obj && *name) {
 		register const struct artifact *a;
 		for (a = artilist + 1; a->otyp; a++)
-		if (artitypematch(a, obj) && !strcmp(a->name, name)) {
-			if (obj->otyp != a->otyp) {
-				obj = poly_obj(obj, a->otyp);
+		if (!strcmp(a->name, name)) {
+			if (artitypematch(a, obj)) {
+				if (a == &artilist[ART_FIRE_BRAND] || a == &artilist[ART_FROST_BRAND]) {
+					u.brand_otyp = obj->otyp;
+					hack_artifacts(); /* update the artilist array -- doing so manually doesn't work for some reason */
+				}
+				else if (obj->otyp != a->otyp) {
+					obj = poly_obj(obj, a->otyp);
+				}
 			}
 		}
 	}

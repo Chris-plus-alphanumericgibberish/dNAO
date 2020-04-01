@@ -4923,12 +4923,17 @@ typfnd:
 
 		/* an artifact name might need capitalization fixing */
 		aname = artifact_name(name, &objtyp);
-		if (aname && objtyp == otmp->otyp){
-			isartifact = TRUE;
-			name = aname;
-		}
 
-		otmp = oname(otmp, name);
+		/* attempt to create an artifact with the modified name */
+		otmp = oname(otmp, aname);
+		
+		if (otmp->oartifact) {
+			isartifact = TRUE;
+		}
+		else {
+			/* unmodify name */
+			otmp = oname(otmp, name);
+		}
 	}
 	if (otmp->oartifact && from_user) {
 		/* check that they were allowed to wish for that artifact */

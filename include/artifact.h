@@ -546,6 +546,8 @@ struct artifact {
 				(m) == ART_SHIELD_OF_THE_RESOLUTE_HEA ||\
 				(m) == ART_GAUNTLETS_OF_SPELL_POWER ||\
 				(m) == ART_PREMIUM_HEART ||\
+				(m) == ART_FIRE_BRAND ||\
+				(m) == ART_FROST_BRAND ||\
 				(m) == ART_STORMHELM ||\
 				(m) == ART_HELPING_HAND ||\
 				(m) == ART_GARNET_ROD ||\
