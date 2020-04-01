@@ -141,7 +141,7 @@ onscary(x, y, mtmp)
 int x, y;
 struct monst *mtmp;
 {
-	struct obj *alignedfearobj = aligned_sartprop3_at(SPFX3_FEAR, x, y);
+	struct obj *alignedfearobj = fear_arti_at(x, y);
 	int wardAt = ward_at(x,y);
 	struct monst *mat = m_at(x,y);
 	

@@ -490,6 +490,7 @@ struct you {
 	int uen_real, uenmax_real, uenrolled_real, uenbonus_real;
 	int ugangr[GA_NUM];			/* if the gods are angry at you */
 	int ugifts;			/* number of artifacts bestowed */
+	int uartisval;		/* approximate strength of artifacts and gifts bestowed and wished for */
 	int ublessed, ublesscnt;	/* blessing/duration from #pray */
 	int ugoatblesscnt;
 	long lastprayed;

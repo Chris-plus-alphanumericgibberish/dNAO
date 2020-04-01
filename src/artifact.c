@@ -68,7 +68,6 @@ static NEARDATA	int demons[16] = {0, PM_QUASIT, PM_MANES, PM_QUASIT,
 STATIC_PTR int NDECL(read_necro);
 STATIC_PTR int NDECL(read_lost);
 
-STATIC_DCL int FDECL(spec_applies, (const struct artifact *,struct monst *));
 STATIC_DCL int FDECL(arti_invoke, (struct obj*));
 STATIC_DCL boolean FDECL(Mb_hit, (struct monst *magr,struct monst *mdef,
 				  struct obj *,int *,int,BOOLEAN_P,char *,char *));
@@ -97,7 +96,7 @@ boolean
 CountsAgainstGifts(x)
 int x;
 {
-	return (!(artilist[x].cspfx3 & SPFX3_NOCNT));
+	return (!(artilist[x].gflags & ARTG_NOCNT));
 							/*(x != ART_WATER_CRYSTAL && \
 								x != ART_FIRE_CRYSTAL && \
 								x != ART_EARTH_CRYSTAL && \
@@ -141,7 +140,7 @@ hack_artifacts()
 		artilist[ART_EXCALIBUR].role = NON_PM;
 		artilist[ART_RHONGOMYNIAD].role = NON_PM;
 		artilist[ART_CLARENT].role = NON_PM;
-		artilist[ART_GLAMDRING].spfx &= ~(SPFX_NOGEN);
+		artilist[ART_GLAMDRING].gflags &= ~(ARTG_NOGEN);
 		artilist[ART_GLAMDRING].role = PM_KNIGHT;
 	}
 	artilist[ART_MANTLE_OF_HEAVEN].otyp = find_cope();
@@ -228,23 +227,23 @@ hack_artifacts()
 			urole.questarti = ART_VESTMENT_OF_HELL;
 			artilist[ART_HELM_OF_THE_DARK_LORD].alignment = alignmnt;
 		} else if(Race_if(PM_ELF)){
-			artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
+			artilist[ART_ROD_OF_LORDLY_MIGHT].gflags |= ARTG_NOGEN;
 			artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
-			artilist[ART_ROD_OF_THE_ELVISH_LORDS].spfx &= ~(SPFX_NOGEN);
+			artilist[ART_ROD_OF_THE_ELVISH_LORDS].gflags &= ~(ARTG_NOGEN);
 		} else if(Race_if(PM_DROW)){
 			if(flags.initgend){ /* TRUE == female */
-				artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
+				artilist[ART_ROD_OF_LORDLY_MIGHT].gflags |= ARTG_NOGEN;
 				artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
-				artilist[ART_SCEPTRE_OF_LOLTH].spfx &= ~(SPFX_NOGEN);
+				artilist[ART_SCEPTRE_OF_LOLTH].gflags &= ~(ARTG_NOGEN);
 			} else {
-				artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
+				artilist[ART_ROD_OF_LORDLY_MIGHT].gflags |= ARTG_NOGEN;
 				artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
-				artilist[ART_DEATH_SPEAR_OF_VHAERUN].spfx &= ~(SPFX_NOGEN);
+				artilist[ART_DEATH_SPEAR_OF_VHAERUN].gflags &= ~(ARTG_NOGEN);
 			}
 		} else if(Race_if(PM_DWARF) && urole.ldrnum == PM_DAIN_II_IRONFOOT){
-			artilist[ART_ROD_OF_LORDLY_MIGHT].spfx |= SPFX_NOGEN;
+			artilist[ART_ROD_OF_LORDLY_MIGHT].gflags |= ARTG_NOGEN;
 			artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
-			artilist[ART_ARMOR_OF_KHAZAD_DUM].spfx &= ~(SPFX_NOGEN);
+			artilist[ART_ARMOR_OF_KHAZAD_DUM].gflags &= ~(ARTG_NOGEN);
 		} else if(alignmnt == A_NEUTRAL) {
 			artilist[ART_CROWN_OF_THE_SAINT_KING].alignment = alignmnt;
 		}
@@ -259,7 +258,13 @@ hack_artifacts()
 	    artilist[urole.questarti].role = Role_switch;
 	}
 	if(aligns[flags.initalign].value == artilist[ART_CARNWENNAN].alignment){
-		artilist[ART_CARNWENNAN].spfx &= ~(SPFX_RESTR); //SPFX_NOGEN| removed, name only
+		artilist[ART_CARNWENNAN].gflags |= (ARTG_NAME); //name only
+	}
+	/* Callandor only works for natural male players */
+	if (flags.initgend) {
+		artilist[ART_CALLANDOR].wprops[0] = NO_PROP;
+		artilist[ART_CALLANDOR].wprops[1] = NO_PROP;
+		artilist[ART_CALLANDOR].wprops[2] = NO_PROP;
 	}
 	artilist[ART_PEN_OF_THE_VOID].alignment = A_VOID; //something changes this??? Change it back.
 	return;
@@ -299,6 +304,59 @@ int artinum;
 	return(artilist[artinum].name);
 }
 
+int
+arti_value(otmp)
+struct obj * otmp;
+{
+	struct artifact * arti = get_artifact(otmp);
+	int artival;
+	int baseartival;
+
+	if (!arti)
+		return 0;
+
+	/* start with the artifact's base value */
+	baseartival = artival = arti->giftval;
+
+	if (artival == NO_TIER)
+		return 0;
+
+	/* monks can get a bonus for some offensive armors */
+	if (otmp->oclass == ARMOR_CLASS
+		&& Role_if(PM_MONK)) {
+		switch (otmp->oartifact)
+		{
+		case ART_PREMIUM_HEART:
+		case ART_GRANDMASTER_S_ROBE:
+			artival += artival / 2;
+			break;
+		case ART_HAMMERFEET:
+			artival++;
+			break;
+		}
+	}
+	/* everyone gets a bonus for a weapon they get Expert with */
+	if (weapon_type(otmp) != P_BARE_HANDED_COMBAT
+		&& P_MAX_SKILL(weapon_type(otmp)) >= P_EXPERT)
+	{
+		artival++;
+	}
+	/* as well as if they're Skilled or better and the weapon is good enough for endgame */
+	if (weapon_type(otmp) != P_BARE_HANDED_COMBAT
+		&& P_MAX_SKILL(weapon_type(otmp)) >= P_SKILLED
+		&& baseartival >= TIER_B)
+	{	
+		artival++;
+	}
+	/* and -1 if they're only Basic */
+		if (weapon_type(otmp) != P_BARE_HANDED_COMBAT
+		&& P_MAX_SKILL(weapon_type(otmp)) <= P_BASIC)
+	{	
+		artival--;
+	}
+	return artival;
+}
+
 /*
    Make an artifact.  If a specific alignment is specified, then an object of
    the appropriate alignment is created from scratch, or 0 is returned if
@@ -326,40 +384,58 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 	    if ((!by_align ? artitypematch(a, otmp) :
 				(a->alignment == alignment ||
 				(a->alignment == A_NONE && (u.ugifts > 0 || alignment == A_VOID )))) &&
-			(!(a->spfx & SPFX_NOGEN) || unique || (m==ART_PEN_OF_THE_VOID && Role_if(PM_EXILE))) && 
+			(!(a->gflags & ARTG_NOGEN) || unique || (m==ART_PEN_OF_THE_VOID && Role_if(PM_EXILE))) && 
 			!artiexist[m]
 		) {
-			if (by_align && (Role_if(a->role) || Pantheon_if(a->role))){
-				goto make_artif;	/* 'a' points to the desired one */
-			} else if (by_align && a->race != NON_PM && race_hostile(&mons[a->race])){
-				continue;	/* skip enemies' equipment */
-			} else if (by_align && hates_iron(youracedata) &&  
-				((artilist[m].material == IRON || 
-					(artilist[m].material == 0 && objects[artilist[m].otyp].oc_material == IRON)
-				) && (u.ugifts < 2 || !rn2(2)))
-			){ 
-				continue; // no iron gifts if you're an elf/drow/yuki - game-able by selfpoly but eh
-			} else if (by_align && hates_silver(youracedata) &&  
-				((artilist[m].material == SILVER || 
-					(artilist[m].material == 0 && objects[artilist[m].otyp].oc_material == SILVER)
-				) && (u.ugifts < 2 || !rn2(2)))
-			){ 
-				continue; // no silver gifts if you're an vampire - game-able by selfpoly still
-			} else if (by_align && Race_if(PM_CHIROPTERAN) && 
-				(objects[artilist[m].otyp].oc_class == ARMOR_CLASS && objects[artilist[m].otyp].oc_armcat == ARM_BOOTS)
-				&& (u.ugifts < 2 || !rn2(2))
-			){ 
-				continue; // no boots for bats
-			} else if (by_align && Race_if(PM_DROW) && (m == ART_ARKENSTONE || m == ART_HOLY_MOONLIGHT_SWORD)){
-				continue; // no light-giving artis for drow (artifact_light should be unnecessary)
-			} else if (by_align && m == ART_CALLANDOR && flags.initgend){
-				continue; // callandor is saidin only
-			} else if(by_align && Role_if(PM_PIRATE)) 
-				continue; /* pirates are not gifted artifacts */
-			else if(by_align && Role_if(PM_MONK) && !is_monk_safe_artifact(m) && (!(u.uconduct.weaphit) || rn2(20)))
-				continue; /* monks are very restricted */
-			else
+			if (by_align) {
+				if (Role_if(a->role) || Pantheon_if(a->role)){
+					goto make_artif;	/* 'a' points to the desired one */
+				}
+				else {
+					boolean preferred = (u.ugifts < 2 || !rn2(u.uartisval / 4));
+					/* conditions that are no-good for giving this artifact */
+
+					/* go for preferred gifts */
+					if (preferred && !(a->gflags & ARTG_GIFT))
+						continue;
+					/* always skip enemies' equipment */
+					if (a->race != NON_PM && race_hostile(&mons[a->race]))
+						continue;
+					/* skip materials that hate the player */
+					if (preferred && !Upolyd && (
+						(hates_iron(youracedata)
+						&& (a->material == IRON || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == IRON)))
+						||
+						(hates_silver(youracedata)
+						&& (a->material == SILVER || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == SILVER)))
+						))
+						continue;
+					/* skip boots for chiropterans */
+					if (preferred && Race_if(PM_CHIROPTERAN) &&
+						(objects[a->otyp].oc_class == ARMOR_CLASS && objects[a->otyp].oc_armcat == ARM_BOOTS)
+						)
+						continue;
+					/* always skip lightsources for Drow */
+					/* TODO: make lightup-when-wielded part of artilist so it can be figured out for here */
+					if (Race_if(PM_DROW) && ((a->iflags & ARTI_PERMALIGHT) || (m == ART_HOLY_MOONLIGHT_SWORD)))
+						continue;
+					/* always skip Callandor for females (Saidin is only for males) */
+					if (m == ART_CALLANDOR && flags.initgend)
+						continue;
+					/* pirates get no artifacts other than the Map */
+					if (Role_if(PM_PIRATE))
+						continue;
+					/* monks are very restricted */
+					if (Role_if(PM_MONK) && !is_monk_safe_artifact(m) && (!(u.uconduct.weaphit) || rn2(20)))
+						continue;
+
+					/* if we made it through that gauntlet, we're good */
+					eligible[n++] = m;
+				}
+			}
+			else {
 				eligible[n++] = m;
+			}
 		}
 
 	if (n) {		/* found at least one candidate */
@@ -595,212 +671,22 @@ boolean while_carried;
 		return property_list;
 	}
 
-	int cur_prop, i;
+	int cur_prop = NO_PROP;
+	int i = 0;
+	int j = 0;
 	register const struct artifact *oart = &artilist[oartifact];
-	boolean got_prop;
 
-	/* another check */
-	if (!oart)
+	for (i = 0; i < MAXARTPROP; i++)
 	{
-		property_list[0] = 0;
-		return property_list;
-	}
-
-	const static int NO_RES[] = { 0 };
-	// artifact properties while equiped
-	const static int CHROMATIC_RES[] = { FIRE_RES, COLD_RES, DISINT_RES, DRAIN_RES, SHOCK_RES, POISON_RES, SICK_RES, ACID_RES, STONE_RES, 0 };
-	const static int PLATINUM_RES[] = { FIRE_RES, COLD_RES, DISINT_RES, SHOCK_RES, SLEEP_RES, FREE_ACTION, 0 };
-	const static int KURTULMAK_RES[] = { FIRE_RES, FREE_ACTION, 0 };
-	const static int EREBOR_RES[] = { FIRE_RES, COLD_RES, 0 };
-	const static int DURIN_RES[] = { FIRE_RES, ACID_RES, POISON_RES, 0 };
-	const static int TLALOC_RES[] = { COLD_RES, SHOCK_RES, 0 };
-	const static int REV_PROPS[] = { COLD_RES, REGENERATION, FIXED_ABIL, POISON_RES, SEE_INVIS, 0 };
-	const static int HERMES_PROPS[] = { FAST, 0 };
-	const static int FLY_PROPS[] = { DETECT_MONSTERS, 0 };
-	// artifact properties while carried
-	const static int AHRIMAN_PROPS[] = { FIRE_RES, DRAIN_RES, POISON_RES, 0 };
-
-	i = 0;
-	for (cur_prop = 0; cur_prop < LAST_PROP; cur_prop++)
-	{
-		got_prop = FALSE;
-		
-		// defn/cary resistances
-		switch (while_carried ? oart->cary.adtyp : oart->defn.adtyp)
+		cur_prop = (while_carried ? oart->cprops[i] : oart->wprops[i]);
+		if (cur_prop != NO_PROP)
 		{
-		case AD_FIRE:
-			if (cur_prop == FIRE_RES) got_prop = TRUE;
-			break;
-		case AD_COLD:
-			if (cur_prop == COLD_RES) got_prop = TRUE; 
-			break;
-		case AD_ELEC:
-			if (cur_prop == SHOCK_RES) got_prop = TRUE; 
-			break;
-		case AD_ACID:
-			if (cur_prop == ACID_RES) got_prop = TRUE; 
-			break;
-		case AD_MAGM:
-			if (cur_prop == ANTIMAGIC) got_prop = TRUE; 
-			break;
-		case AD_SPEL:
-			if (cur_prop == NULLMAGIC) got_prop = TRUE; 
-			break;
-		case AD_PLYS:
-			if (cur_prop == FREE_ACTION) got_prop = TRUE; 
-			break;
-		case AD_DISN:
-			if (cur_prop == DISINT_RES) got_prop = TRUE; 
-			break;
-		case AD_DRST:
-			if (cur_prop == POISON_RES) got_prop = TRUE; 
-			break;
-		case AD_DRLI:
-			if (cur_prop == DRAIN_RES) got_prop = TRUE; 
-			break;
-		case AD_SLEE:
-			if (cur_prop == SLEEP_RES) got_prop = TRUE; 
-			break;
-		case AD_DISE:
-			if (cur_prop == SICK_RES) got_prop = TRUE;
-			break;
-		}
-
-		// SPFX properties
-		if (!got_prop)
-		{
-			long spfx, spfx2, spfx3, wpfx;
-
-			spfx = (!while_carried) ? oart->spfx : oart->cspfx;
-			spfx2 = (!while_carried) ? oart->spfx2 : 0;
-			spfx3 = (!while_carried) ? 0 : oart->cspfx3;
-			wpfx = (!while_carried) ? oart->wpfx : 0;
-
-			switch (cur_prop)
-			{
-			case SEARCHING:
-				if (spfx & SPFX_SEARCH) got_prop = TRUE;
-				break;
-			case HALLUC_RES:
-				if (spfx & SPFX_HALRES) got_prop = TRUE;
-				break;
-			case TELEPAT:
-				if (spfx & SPFX_ESP) got_prop = TRUE;
-				break;
-			case DISPLACED:
-				if (spfx & SPFX_DISPL) got_prop = TRUE;
-				break;
-			case REGENERATION:
-				if (spfx & SPFX_REGEN) got_prop = TRUE;
-				break;
-			case TELEPORT_CONTROL:
-				if (spfx & SPFX_TCTRL) got_prop = TRUE;
-				break;
-			case ENERGY_REGENERATION:
-				if (spfx & SPFX_EREGEN && !(oartifact == ART_CALLANDOR && flags.initgend)) got_prop = TRUE;
-				break;
-			case HALF_SPDAM:
-				if (spfx & SPFX_HSPDAM && !(oartifact == ART_CALLANDOR && flags.initgend)) got_prop = TRUE;
-				break;
-			case HALF_PHDAM:
-				if (spfx & SPFX_HPHDAM) got_prop = TRUE;
-				break;
-			case REFLECTING:
-				if (spfx & SPFX_REFLECT) got_prop = TRUE;
-				break;
-			case CONFLICT:
-				if (spfx & SPFX_CONFL) got_prop = TRUE;
-				break;
-			case AGGRAVATE_MONSTER:
-				if (spfx & SPFX_AGGRM) got_prop = TRUE;
-				break;
-			case XRAY_VISION:
-				if (spfx & SPFX_XRAY) got_prop = TRUE;
-				break;
-			case WARN_OF_MON:
-			case WARNING:
-				if (spfx & SPFX_WARN)
-				{
-					if ((spec_mm(oartifact) || spec_mt(oartifact) || spec_mb(oartifact) || spec_mg(oartifact) || spec_ma(oartifact) || spec_mv(oartifact) || spec_s(oartifact)))
-						got_prop = (cur_prop == WARN_OF_MON);	// specific warning (ie, showing creatures)
-					else
-						got_prop = (cur_prop == WARNING);	// non-specific warning (ie, numbers)
-				}
-				break;
-			case STEALTH:
-				if (spfx2 & SPFX2_STLTH) got_prop = TRUE;
-				break;
-			case SPELLBOOST:
-				if (spfx2 & SPFX2_SPELLUP && !(oartifact == ART_CALLANDOR && flags.initgend)) got_prop = TRUE;
-				break;
-			case POLYMORPH_CONTROL:
-				if (spfx3 & SPFX3_PCTRL) got_prop = TRUE;
-				break;
-			case FREE_ACTION:
-				if (wpfx & WSFX_FREEACT) got_prop = TRUE;
-				break;
-			}
-		}
-
-		// additional properties from yet another location
-		if (!got_prop)
-		{
-			// first, select the artifact's list of bonus properties
-			const static int * bonus_prop_list;
-			switch (oartifact)
-			{
-			case ART_CHROMATIC_DRAGON_SCALES:
-				bonus_prop_list = (while_carried ? (NO_RES) : (CHROMATIC_RES));
-				break;
-			case ART_DRAGON_PLATE:
-				bonus_prop_list = (while_carried ? (NO_RES) : (PLATINUM_RES));
-				break;
-			case ART_STEEL_SCALES_OF_KURTULMAK:
-				bonus_prop_list = (while_carried ? (NO_RES) : (KURTULMAK_RES));
-				break;
-			case ART_ARMOR_OF_EREBOR:
-				bonus_prop_list = (while_carried ? (NO_RES) : (EREBOR_RES));
-				break;
-			case ART_WAR_MASK_OF_DURIN:
-				bonus_prop_list = (while_carried ? (NO_RES) : (DURIN_RES));
-				break;
-			case ART_MASK_OF_TLALOC:
-				bonus_prop_list = (while_carried ? (NO_RES) : (TLALOC_RES));
-				break;
-			case ART_CLAWS_OF_THE_REVENANCER:
-				bonus_prop_list = (while_carried ? (NO_RES) : (REV_PROPS));
-				break;
-			case ART_HERMES_S_SANDALS:
-				bonus_prop_list = (while_carried ? (NO_RES) : (HERMES_PROPS));
-				break;
-			case ART_ALL_SEEING_EYE_OF_THE_FLY:
-				bonus_prop_list = (while_carried ? (NO_RES) : (FLY_PROPS));
-				break;
-			case ART_HEART_OF_AHRIMAN:
-				bonus_prop_list = (AHRIMAN_PROPS);
-				break;
-			default:
-				bonus_prop_list = (NO_RES);
-				break;
-			}
-			// if it has one, then see if the current property is on the list
-			if (bonus_prop_list != (NO_RES))
-			{
-				int j;
-				for (j = 0; bonus_prop_list[j]; j++)
-				if (bonus_prop_list[j] == cur_prop)
-					got_prop = TRUE;
-			}
-		}
-		// if we've got the property, add it to the array
-		if (got_prop)
-		{
-			property_list[i] = cur_prop;
-			i++;
+			property_list[j] = cur_prop;
+			j++;
 		}
 	}
 	// add a terminator to the array
-	property_list[i] = 0;
+	property_list[j] = 0;
 
 	// return the list
 	return property_list;
@@ -821,51 +707,44 @@ nartifact_exist()
 #ifdef OVL0
 
 boolean
-spec_ability(otmp, abil)
+arti_gen_prop(otmp, flag)
 struct obj *otmp;
-unsigned long abil;
+unsigned long flag;
 {
 	const struct artifact *arti = get_artifact(otmp);
-
-	return( 
-		(boolean)(arti && (arti->spfx & abil))
-		);
+	return((boolean)(arti && (arti->gflags & flag)));
 }
-
 boolean
-spec_ability2(otmp, abil)
+arti_worn_prop(otmp, flag)
 struct obj *otmp;
-unsigned long abil;
+unsigned long flag;
 {
 	const struct artifact *arti = get_artifact(otmp);
-
-	return( 
-		(boolean)(arti && (arti->spfx2 & abil))
-		);
+	return((boolean)(arti && (arti->wflags & flag)));
 }
-
 boolean
-spec_ability3(otmp, abil)
+arti_carry_prop(otmp, flag)
 struct obj *otmp;
-unsigned long abil;
+unsigned long flag;
 {
 	const struct artifact *arti = get_artifact(otmp);
-
-	return( 
-		(boolean)(arti && (arti->cspfx3 & abil))
-		);
+	return((boolean)(arti && (arti->cflags & flag)));
 }
-
 boolean
-spec_wability(otmp, abil)
+arti_attack_prop(otmp, flag)
 struct obj *otmp;
-unsigned long abil;
+unsigned long flag;
 {
 	const struct artifact *arti = get_artifact(otmp);
-
-	return( 
-		(boolean)(arti && (arti->wpfx & abil))
-		);
+	return((boolean)(arti && (arti->aflags & flag)));
+}
+boolean
+arti_is_prop(otmp, flag)
+struct obj *otmp;
+unsigned long flag;
+{
+	const struct artifact *arti = get_artifact(otmp);
+	return((boolean)(arti && (arti->iflags & flag)));
 }
 
 /* used so that callers don't need to known about SPFX_ codes */
@@ -876,7 +755,7 @@ struct obj *obj;
     /* might as well check for this too */
     if (obj && obj->otyp == LUCKSTONE) return TRUE;
 
-    return (obj && obj->oartifact && spec_ability(obj, SPFX_LUCK));
+    return (obj && obj->oartifact && arti_is_prop(obj, ARTI_LUCK));
 }
 
 /* used so that callers don't need to known about SPFX_ codes */
@@ -887,7 +766,7 @@ struct obj *obj;
     /* might as well check for this too */
     if (obj && (obj->oclass == WEAPON_CLASS || obj->oclass == TOOL_CLASS) && (objects[obj->otyp].oc_skill == P_PICK_AXE)) return TRUE;
 
-    return (obj && obj->oartifact && spec_ability2(obj, SPFX2_DIG));
+    return (obj && obj->oartifact && arti_is_prop(obj, ARTI_DIG));
 }
 
 
@@ -896,7 +775,7 @@ boolean
 arti_poisoned(obj)
 struct obj *obj;
 {
-    return (obj && obj->oartifact && ((spec_ability2(obj, SPFX2_POISONED)) || (obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_YMIR)));
+    return (obj && obj->oartifact && ((arti_attack_prop(obj, ARTA_POIS)) || (obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_YMIR)));
 }
 
 /* used so that callers don't need to known about SPFX_ codes */
@@ -904,7 +783,7 @@ boolean
 arti_silvered(obj)
 struct obj *obj;
 {
-    return (obj && obj->oartifact && (spec_ability2(obj, SPFX2_SILVERED) || 
+    return (obj && obj->oartifact && (arti_attack_prop(obj, ARTA_SILVER) || 
 									  (obj->oartifact == ART_PEN_OF_THE_VOID &&
 									   obj->ovar1 & SEAL_EDEN) ||
 									  ((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && !obj->lamplit))
@@ -928,7 +807,7 @@ struct obj *obj;
 			!(viz_array[y][x]&TEMP_DRK3)
 		) return !rn2(10);
 	}
-    return (obj && obj->oartifact && (spec_ability2(obj, SPFX2_BRIGHT) || 
+    return (obj && obj->oartifact && (arti_attack_prop(obj, ARTA_BRIGHT) || 
 									  (obj->oartifact == ART_PEN_OF_THE_VOID &&
 									   obj->ovar1 & SEAL_JACK)));
 }
@@ -938,7 +817,7 @@ arti_shattering(obj)
 struct obj *obj;
 {
     return (obj && (
-		(obj->oartifact && spec_ability2(obj, SPFX2_SHATTER)) ||
+		(obj->oartifact && arti_attack_prop(obj, ARTA_SHATTER)) ||
 		(is_lightsaber(obj) && litsaber(obj))
 	));
 }
@@ -947,21 +826,21 @@ boolean
 arti_disarm(obj)
 struct obj *obj;
 {
-    return (obj && obj->oartifact && spec_ability2(obj, SPFX2_DISARM));
+    return (obj && obj->oartifact && arti_attack_prop(obj, ARTA_DISARM));
 }
 
 boolean
 arti_steal(obj)
 struct obj *obj;
 {
-    return (obj && obj->oartifact && spec_ability2(obj, SPFX2_STEAL));
+    return (obj && obj->oartifact && arti_attack_prop(obj, ARTA_STEAL));
 }
 
 boolean
 arti_tentRod(obj)
 struct obj *obj;
 {
-    return (obj && obj->oartifact && spec_ability2(obj, SPFX2_TENTROD));
+    return (obj && obj->oartifact && arti_attack_prop(obj, ARTA_TENTROD));
 }
 
 boolean
@@ -975,7 +854,20 @@ boolean
 arti_threeHead(obj)
 struct obj *obj;
 {
-    return (obj && obj->oartifact && spec_ability2(obj, SPFX2_THREEHEAD));
+    return (obj && obj->oartifact && arti_attack_prop(obj, ARTA_THREEHEAD));
+}
+
+boolean
+arti_dluck(obj)
+struct obj *obj;
+{
+    return (obj && obj->oartifact && arti_attack_prop(obj, ARTA_DLUCK));
+}
+boolean
+arti_dexpl(obj)
+struct obj *obj;
+{
+    return (obj && obj->oartifact && arti_attack_prop(obj, ARTA_DEXPL));
 }
 
 boolean
@@ -983,7 +875,7 @@ arti_shining(obj)
 struct obj *obj;
 {
     return (obj && (
-		(obj->oartifact && spec_ability2(obj, SPFX2_SHINING)) ||
+		(obj->oartifact && arti_attack_prop(obj, ARTA_SHINING)) ||
 		(is_lightsaber(obj) && litsaber(obj)) ||
 		(obj->oproperties&OPROP_PHSEW) ||
 		((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && obj->lamplit)
@@ -994,44 +886,79 @@ boolean
 arti_mandala(obj)
 struct obj *obj;
 {
-    return (obj && obj->oartifact && spec_ability3(obj, SPFX3_MANDALA));
+    return (obj && obj->oartifact && arti_is_prop(obj, ARTI_MANDALA));
 }
 
 boolean
-arti_lighten(obj)
+arti_lighten(obj, while_carried)
 struct obj *obj;
+boolean while_carried;
 {
-    return (obj && obj->oartifact && spec_wability(obj, WSFX_LIGHTEN));
+	return (obj && obj->oartifact &&
+		(arti_worn_prop(obj, ARTP_LIGHTEN)
+		|| (while_carried && arti_carry_prop(obj, ARTP_LIGHTEN))));
 }
 
 boolean
-arti_chawis(obj)
-struct obj *obj;
+arti_chawis(obj, while_carried)
+struct obj * obj;
+boolean while_carried;
 {
-    return (obj && obj->oartifact && spec_wability(obj, WSFX_WCATRIB));
+	return (obj && obj->oartifact &&
+		(arti_worn_prop(obj, ARTP_WCATRIB)
+		|| (while_carried && arti_carry_prop(obj, ARTP_WCATRIB))));
+}
+
+boolean
+arti_blindres(obj, while_carried)
+struct obj * obj;
+boolean while_carried;
+{
+	return (obj && obj->oartifact &&
+		(arti_worn_prop(obj, ARTP_BLINDRES)
+		|| (while_carried && arti_carry_prop(obj, ARTP_BLINDRES))));
 }
 
 boolean
 arti_plussev(obj)
 struct obj *obj;
 {
-    return (obj && obj->oartifact && spec_wability(obj, WSFX_PLUSSEV));
+    return (obj && obj->oartifact && arti_is_prop(obj, ARTI_PLUSSEV));
 }
 
-/* used to check whether a monster is getting reflection from an artifact */
+/* used to check if a monster is getting reflection from this object */
+/* ASSUMES OBJ IS BEING WORN */
 boolean
 arti_reflects(obj)
 struct obj *obj;
 {
-    const struct artifact *arti = get_artifact(obj);
+	int i;
+	int * proplist;
 
-    if (arti) {      
-	/* while being worn */
-	if ((obj->owornmask & ~W_ART) && (arti->spfx & SPFX_REFLECT))
-	    return TRUE;
-	/* just being carried */
-	if (arti->cspfx & SPFX_REFLECT) return TRUE;
-    }
+	/* first check normal item properties */
+	i = 0;
+	proplist = item_property_list(obj, obj->otyp);
+	while (proplist[i]) {
+		if (proplist[i] == REFLECTING)
+			return TRUE;
+		i++;
+	}
+	/* then while-worn artifact properties */
+	i = 0;
+	proplist = art_property_list(obj->oartifact, FALSE);
+	while (proplist[i]) {
+		if (proplist[i] == REFLECTING)
+			return TRUE;
+		i++;
+	}
+	/* then while-carried artifact properties */
+	i = 0;
+	proplist = art_property_list(obj->oartifact, TRUE);
+	while (proplist[i]) {
+		if (proplist[i] == REFLECTING)
+			return TRUE;
+		i++;
+	}
     return FALSE;
 }
 
@@ -1066,39 +993,14 @@ register const char *name;
 }
 
 STATIC_OVL boolean
-attacks(adtyp, otmp)
-register int adtyp;
+attacks(adtype, otmp)
+register int adtype;
 register struct obj *otmp;
 {
 	register const struct artifact *weap;
 
 	if ((weap = get_artifact(otmp)) != 0)
-		return((boolean)(weap->attk.adtyp == adtyp));
-	return FALSE;
-}
-
-boolean
-defends(adtyp, otmp)
-register int adtyp;
-register struct obj *otmp;
-{
-	register const struct artifact *weap;
-
-	if ((weap = get_artifact(otmp)) != 0)
-		return((boolean)(weap->defn.adtyp == adtyp));
-	return FALSE;
-}
-
-/* used for monsters */
-boolean
-protects(adtyp, otmp)
-int adtyp;
-struct obj *otmp;
-{
-	register const struct artifact *weap;
-
-	if ((weap = get_artifact(otmp)) != 0)
-		return (boolean)(weap->cary.adtyp == adtyp);
+		return((boolean)(weap->adtyp == adtype));
 	return FALSE;
 }
 
@@ -1154,18 +1056,13 @@ long wp_mask;
 				/* specific-monster warning needs to be specially handled */
 				if (this_art_property_list[i] == WARN_OF_MON)
 				{
-					if (oart->cspfx&SPFX_WARN){
-						if (get_artifact(obj)->cspfx&SPFX_WARN){
-							exist_warntypem |= spec_mm(obj->oartifact);
-							exist_warntypet |= spec_mt(obj->oartifact);
-							exist_warntypeb |= spec_mb(obj->oartifact);
-							exist_warntypeg |= spec_mg(obj->oartifact);
-							exist_warntypea |= spec_ma(obj->oartifact);
-							exist_warntypev |= spec_mv(obj->oartifact);
-							exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj->oartifact)));
-							// note: non-specifc warning is just a standard extrinsic
-						}
-					}
+					exist_warntypem |= spec_mm(obj->oartifact);
+					exist_warntypet |= spec_mt(obj->oartifact);
+					exist_warntypeb |= spec_mb(obj->oartifact);
+					exist_warntypeg |= spec_mg(obj->oartifact);
+					exist_warntypea |= spec_ma(obj->oartifact);
+					exist_warntypev |= spec_mv(obj->oartifact);
+					exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj->oartifact)));
 				}
 				/* everything else is just a standard property */
 				else
@@ -1282,7 +1179,7 @@ touch_artifact(obj, mon, hypothetical)
     yours = (mon == &youmonst);
     /* all quest artifacts are self-willed; it this ever changes, `badclass'
        will have to be extended to explicitly include quest artifacts */
-    self_willed = ((oart->spfx & SPFX_INTEL) != 0);
+    self_willed = ((oart->gflags & ARTG_MAJOR) != 0);
     if (yours) {
 		if(Role_if(PM_EXILE) && !hypothetical){
 			if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS && !(u.specialSealsKnown&SEAL_MISKA)){
@@ -1328,7 +1225,7 @@ touch_artifact(obj, mon, hypothetical)
 		if(oart->otyp == UNICORN_HORN){
 			badclass = TRUE; //always get blasted by unicorn horns.  
 							//They've been removed from the unicorn, after all -D_E
-			badalign = (oart->spfx & SPFX_RESTR) && oart->alignment != A_NONE &&
+			badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 			   (oart->alignment == -1*u.ualign.type); //Unicorn horns blast OPOSITE alignment alignment -D_E
 														//Neutral horns blast NEUTRAL.
 		} else if(obj->oartifact == ART_CLOAK_OF_THE_CONSORT){
@@ -1342,7 +1239,7 @@ touch_artifact(obj, mon, hypothetical)
 			   (((oart->role != NON_PM && !Role_if(oart->role)) &&
 				 (oart->role != NON_PM && !Pantheon_if(oart->role))) ||
 			    (oart->race != NON_PM && !Race_if(oart->race)));
-			badalign = (oart->spfx & SPFX_RESTR) && oart->alignment != A_NONE &&
+			badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 			   ((oart->alignment != u.ualign.type && obj->otyp != HELM_OF_OPPOSITE_ALIGNMENT) || u.ualign.record < 0);
 			if(badalign && !badclass && self_willed && oart->role == NON_PM 
 				&& oart->race == NON_PM
@@ -1363,13 +1260,13 @@ touch_artifact(obj, mon, hypothetical)
 			if(mon->isminion && (mon->data == &mons[PM_ALIGNED_PRIEST]
 				|| mon->data == &mons[PM_ANGEL])
 			){
-				badalign = (oart->spfx & SPFX_RESTR) && oart->alignment != A_NONE &&
+				badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 				   (oart->alignment != sgn(EPRI(mon)->shralign));
 			} else if(mon->isminion){
-				badalign = (oart->spfx & SPFX_RESTR) && oart->alignment != A_NONE &&
+				badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 				   (oart->alignment != sgn(EMIN(mon)->min_align));
 			} else {
-				badalign = (oart->spfx & SPFX_RESTR) && oart->alignment != A_NONE &&
+				badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 				   (oart->alignment != sgn(mon->data->maligntyp));
 			}
 		}
@@ -1394,12 +1291,10 @@ touch_artifact(obj, mon, hypothetical)
     }
     /* weapons which attack specific categories of monsters are
        bad for them even if their alignments happen to match */
-    if (!badalign && (oart->spfx & SPFX_DBONUS) != 0 && (obj->oartifact != ART_WEB_OF_LOLTH || !Race_if(PM_DROW))) {
-		struct artifact tmp;
-	
-		tmp = *oart;
-		tmp.spfx &= SPFX_DBONUS;
-		badalign = !!spec_applies(&tmp, mon);
+    if (!badalign && (arti_attack_prop(obj, ARTA_HATES) != 0)) {
+		/* spec_applies for hateful artifacts should always return FALSE if mon isn't hated. */
+		/* a hateful artifact should never apply to non-hated foes */
+		badalign = spec_applies(obj, mon, TRUE);
     }
 	if(badalign && yours){
 		if(u.specialSealsActive&SEAL_ALIGNMENT_THING){
@@ -1481,283 +1376,157 @@ touch_artifact(obj, mon, hypothetical)
 #endif /* OVLB */
 #ifdef OVL1
 
-/* decide whether an artifact's special attacks apply against mtmp */
-STATIC_OVL int
-spec_applies(weap, mtmp)
-register const struct artifact *weap;
-struct monst *mtmp;
-{
-	struct permonst *ptr;
-	boolean yours;
-
-	if(weap->name == artilist[ART_PEN_OF_THE_VOID].name) return (mvitals[PM_ACERERAK].died > 0);
-	
-	if(weap->name == artilist[ART_HOLY_MOONLIGHT_SWORD].name) return !((mtmp == &youmonst) ? Antimagic : resists_magm(mtmp));
-	
-	if(!(weap->spfx & (SPFX_DBONUS | SPFX_ATTK)))
-	    return(weap->attk.adtyp == AD_PHYS);
-
-	if(!mtmp) return FALSE; //Invoked with a null monster while calculating hypothetical data (I think)
-
-	yours = (mtmp == &youmonst);
-	if(yours) ptr = youracedata;
-	else ptr = mtmp->data;
-	
-	if(weap->name == artilist[ART_LIFEHUNT_SCYTHE].name) return (!is_unalive(ptr));
-
-	if(weap->name == artilist[ART_PROFANED_GREATSCYTHE].name) return (!is_unalive(ptr));
-	
-	if(weap->name == artilist[ART_GIANTSLAYER].name && bigmonst(ptr)) return TRUE;
-	
-	if (weap->spfx & SPFX_ATTK) {
-		struct obj *defending_weapon = (yours ? uwep : MON_WEP(mtmp));
-
-		if (defending_weapon && defending_weapon->oartifact &&
-			defends((int)weap->attk.adtyp, defending_weapon))
-		return FALSE;
-		switch(weap->attk.adtyp) {
-		case AD_FIRE:
-			if((yours ? Fire_resistance : resists_fire(mtmp))) return FALSE;
-		break;
-		case AD_COLD:
-			if((yours ? Cold_resistance : resists_cold(mtmp))) return FALSE;
-		break;
-		case AD_ELEC:
-			if((yours ? Shock_resistance : resists_elec(mtmp))) return FALSE;
-		break;
-		case AD_ACID:
-			if((yours ? Acid_resistance : resists_acid(mtmp))) return FALSE;
-		break;
-		case AD_MAGM:
-		case AD_STUN:
-			if((yours ? Antimagic : (rn2(100) < ptr->mr || resists_magm(mtmp)))) return FALSE;
-		break;
-		case AD_DRST:
-			if((yours ? Poison_resistance : resists_poison(mtmp))) return FALSE;
-		break;
-		case AD_DRLI:
-			if((yours ? Drain_resistance : resists_drli(mtmp))) return FALSE;
-		break;
-		case AD_STON:
-			if((yours ? Stone_resistance : resists_ston(mtmp))) return FALSE;
-		break;
-		default:	impossible("Weird weapon special attack.");
-		}
-	}
-	
-	if(weap->spfx & SPFX_CON_OR){
-		if(weap->spfx & SPFX_ATTK) return TRUE; //Already passed resistance checks above
-		else if (weap->mtype != 0L && (weap->mtype == (unsigned long)ptr->mlet)) {
-			return TRUE;
-		} else if (weap->mflagsm != 0L && ((ptr->mflagsm & weap->mflagsm) != 0L)) {
-			return TRUE;
-		} else if (weap->mflagst != 0L && ((ptr->mflagst & weap->mflagst) != 0L)) {
-			return TRUE;
-		} else if (weap->mflagsb != 0L && ((ptr->mflagsb & weap->mflagsb) != 0L)) {
-			return TRUE;
-		} else if (weap->mflagsg != 0L && ((ptr->mflagsg & weap->mflagsg) != 0L)) {
-			return TRUE;
-			if(yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0))
-				return TRUE;
-		} else if (weap->mflagsv != 0L && ((ptr->mflagsv & weap->mflagsv) != 0L)) {
-			return TRUE;
-		} else if (weap->mflagsa != 0L){
-			if((weap->name == artilist[ART_SCOURGE_OF_LOLTH].name) && is_drow(ptr)); //skip
-			else if((weap->mflagsa & MA_UNDEAD) && is_undead_mon(mtmp)) return TRUE;
-			else if( (ptr->mflagsa & weap->mflagsa) || 
-				(yours && 
-					((!Upolyd && (urace.selfmask & weap->mflagsa)) ||
-					((weap->mflagsa & MA_WERE) && u.ulycn >= LOW_PM))
-				) ||
-				(weap->name == artilist[ART_STING].name && webmaker(ptr)) 
-			) return TRUE;
-		} else if (weap->spfx & SPFX_DALIGN && (yours ? (u.ualign.type != weap->alignment) :
-				   (ptr->maligntyp == A_NONE ||
-					sgn(ptr->maligntyp) != weap->alignment))
-		) {
-			return TRUE;
-		}
-		
-		return FALSE; //Found no reason you SHOULD affect anything
-		
-	} else if(weap->spfx & SPFX_CON_AND){
-		if (weap->mtype != 0L && !(weap->mtype == (unsigned long)ptr->mlet)) {
-			return FALSE;
-		} else if (weap->mflagsm != 0L && !((ptr->mflagsm & weap->mflagsm) != 0L)) {
-			return FALSE;
-		} else if (weap->mflagst != 0L && !((ptr->mflagst & weap->mflagst) != 0L)) {
-			return FALSE;
-		} else if (weap->mflagsb != 0L && !((ptr->mflagsb & weap->mflagsb) != 0L)) {
-			return FALSE;
-		} else if (weap->mflagsg != 0L && !(((ptr->mflagsg & weap->mflagsg) != 0L)
-			|| (yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0)))
-		) {
-			return FALSE;
-		} else if (weap->mflagsv != 0L && !((ptr->mflagsv & weap->mflagsv) != 0L)) {
-			return FALSE;
-		} else if (weap->mflagsa != 0L) {
-			if(weap->name == artilist[ART_SCOURGE_OF_LOLTH].name && is_drow(ptr)) return FALSE;
-			else if((weap->mflagsa & MA_UNDEAD) && !is_undead_mon(mtmp)) return FALSE;
-			else if(!(
-				(ptr->mflagsa & weap->mflagsa) || 
-				(yours && 
-					((!Upolyd && (urace.selfmask & weap->mflagsa)) ||
-					((weap->mflagsa & MA_WERE) && u.ulycn >= LOW_PM))
-				) ||
-				(weap->name == artilist[ART_STING].name && webmaker(ptr)) 
-			)) return FALSE;
-		} else if (weap->spfx & SPFX_DALIGN && !(yours ? (u.ualign.type != weap->alignment) :
-				   (ptr->maligntyp == A_NONE ||
-					sgn(ptr->maligntyp) != weap->alignment))
-		) {
-			return FALSE;
-		}
-	}
-	
-	return TRUE; //Made it through all checks above, so return true now
-}
-
-/* decide whether an artifact's narrow-targeted special attacks apply against mtmp */
+/* decide whether an artifact's special attacks apply against mdef */
 int
-narrow_spec_applies(otmp, mtmp)
-struct obj *otmp;
-struct monst *mtmp;
+spec_applies(otmp, mdef, narrow_only)
+struct obj * otmp;
+struct monst *mdef;
+boolean narrow_only;
 {
 	register const struct artifact *weap = get_artifact(otmp);
 	struct permonst *ptr;
-	boolean yours;
+	boolean youdef;
 
-	if(otmp->oartifact == 0) return FALSE;
-	if(!mtmp) return FALSE;
-	
-	if (weap->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)
-	    return FALSE;
-	
-	if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit) return !((mtmp == &youmonst) ? Antimagic : resists_magm(mtmp));
-	//HMS's to-hit bonus always applies in one-hander mode
-	
-	yours = (mtmp == &youmonst);
-	if(yours) ptr = youracedata;
-	else ptr = mtmp->data;
-	
-	if(weap->name == artilist[ART_LIFEHUNT_SCYTHE].name) return (!is_unalive(ptr));
-	
-	if(weap->name == artilist[ART_PROFANED_GREATSCYTHE].name) return (!is_unalive(ptr));
-	
-	if(weap->name == artilist[ART_GIANTSLAYER].name && bigmonst(ptr)) return TRUE;
-	
-	if(weap->name == artilist[ART_PEN_OF_THE_VOID].name){
-		return narrow_voidPen_hit(mtmp, otmp);
+	/* requires some kind of offense in the artilist block */
+	if (!weap || !(weap->adtyp || weap->accuracy || weap->damage))
+		return FALSE;
+
+	/* special cases */
+	if (weap->name == artilist[ART_PEN_OF_THE_VOID].name) {
+		if (narrow_only)
+			return narrow_voidPen_hit(mdef, otmp);
+		else
+			return (mvitals[PM_ACERERAK].died > 0);
 	}
 	
-	if (weap->spfx & SPFX_ATTK) {
-		struct obj *defending_weapon = (yours ? uwep : MON_WEP(mtmp));
+	
+	/* artifacts that deal physical bonus damage and aren't limited to a specific group of foes are always applicable */
+	if (weap->adtyp == AD_PHYS && !(weap->aflags&ARTA_HATES))
+		return (!narrow_only);
 
-		if (defending_weapon && defending_weapon->oartifact &&
-			defends((int)weap->attk.adtyp, defending_weapon))
-		return FALSE;
-		switch(weap->attk.adtyp) {
+	if(!mdef)
+		return FALSE; //Invoked with a null monster while calculating hypothetical data (I think)
+
+	youdef = (mdef == &youmonst);
+	if(youdef) ptr = youracedata;
+	else ptr = mdef->data;
+	
+	/* artifacts that ONLY apply to an unusual group */
+	if(weap->name == artilist[ART_LIFEHUNT_SCYTHE].name)
+		return (!is_unalive(ptr));
+	if(weap->name == artilist[ART_HOLY_MOONLIGHT_SWORD].name)
+		return !(Magic_res(mdef));
+	if(weap->name == artilist[ART_PROFANED_GREATSCYTHE].name)
+		return (!is_unalive(ptr));
+	/* artifacts that ALSO apply to an unusual group */
+	if(weap->name == artilist[ART_GIANTSLAYER].name && bigmonst(ptr))
+		return TRUE;
+	if(weap->name == artilist[ART_STING].name && webmaker(ptr))
+		return TRUE;
+	
+	/* elements can be resisted -- this block always returns if entered */
+	if (weap->adtyp != AD_PHYS) {
+		switch(weap->adtyp) 
+		{
 		case AD_FIRE:
-			if((yours ? Fire_resistance : resists_fire(mtmp))) return FALSE;
+			if (Fire_res(mdef))
+				return FALSE;
 		break;
 		case AD_COLD:
-			if((yours ? Cold_resistance : resists_cold(mtmp))) return FALSE;
+			if (Cold_res(mdef))
+				return FALSE;
 		break;
 		case AD_ELEC:
-			if((yours ? Shock_resistance : resists_elec(mtmp))) return FALSE;
+			if (Shock_res(mdef))
+				return FALSE;
 		break;
 		case AD_ACID:
-			if((yours ? Acid_resistance : resists_acid(mtmp))) return FALSE;
+			if (Acid_res(mdef))
+				return FALSE;
 		break;
 		case AD_MAGM:
-		case AD_STUN:
-			if((yours ? Antimagic : (rn2(100) < ptr->mr || resists_magm(mtmp)))) return FALSE;
+			if (Magic_res(mdef))
+				return FALSE;
+			/* monsters can save via MR against magic damage? */
+			if (mdef != &youmonst && rn2(100) < ptr->mr)
+				return FALSE;
 		break;
 		case AD_DRST:
-			if((yours ? Poison_resistance : resists_poison(mtmp))) return FALSE;
+			if (Poison_res(mdef))
+				return FALSE;
 		break;
 		case AD_DRLI:
-			if((yours ? Drain_resistance : resists_drli(mtmp))) return FALSE;
+			if (Drain_res(mdef))
+				return FALSE;
 		break;
 		case AD_STON:
-			if((yours ? Stone_resistance : resists_ston(mtmp))) return FALSE;
+			/* nothing does this */
+			if (Stone_res(mdef))
+				return FALSE;
 		break;
-		default:	impossible("Weird weapon special attack.");
+		default:
+			impossible("Weird weapon special attack: (%d).", weap->adtyp);
 		}
+		/* if it bypassed resistances, it still needs to pass ARTA_HATES (if applicable) */
 	}
 	
-	if(weap->spfx & SPFX_CON_OR){
-		if(weap->spfx & SPFX_ATTK) return TRUE; //Already passed resistance checks above
-		else if (weap->mtype != 0L && (weap->mtype == (unsigned long)ptr->mlet)) {
-			return TRUE;
-		} else if (weap->mflagsm != 0L && ((ptr->mflagsm & weap->mflagsm) != 0L)) {
-			return TRUE;
-		} else if (weap->mflagst != 0L && ((ptr->mflagst & weap->mflagst) != 0L)) {
-			return TRUE;
-		} else if (weap->mflagsb != 0L && ((ptr->mflagsb & weap->mflagsb) != 0L)) {
-			return TRUE;
-		} else if (weap->mflagsg != 0L && ((ptr->mflagsg & weap->mflagsg) != 0L)) {
-			return TRUE;
-			if(yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0))
-				return TRUE;
-		} else if (weap->mflagsv != 0L && ((ptr->mflagsv & weap->mflagsv) != 0L)) {
-			return TRUE;
-		} else if (weap->mflagsa != 0L){
-			if(weap->name == artilist[ART_SCOURGE_OF_LOLTH].name && is_drow(ptr)); //skip
-			else if((weap->mflagsa & MA_UNDEAD) && is_undead_mon(mtmp)) return TRUE;
-			else if( (ptr->mflagsa & weap->mflagsa) || 
-				(yours &&
-					((weap->mflagsa & MA_WERE) && u.ulycn >= LOW_PM)
-				) ||
-				(weap->name == artilist[ART_STING].name && webmaker(ptr)) 
-			) return TRUE;
-		} else if (weap->spfx & SPFX_DALIGN && (yours ? (u.ualign.type != weap->alignment) :
-				   (ptr->maligntyp == A_NONE ||
-					sgn(ptr->maligntyp) != weap->alignment))
-		) {
+	/* if the artifact is hateful, it only applies its damage to the specific monsters it hates */
+	/* this block always returns if entered */
+	if (weap->aflags & ARTA_HATES) {
+		/* letter */
+		if (weap->mtype != 0L && (weap->mtype == (unsigned long)ptr->mlet)) {
 			return TRUE;
 		}
-		
-		return FALSE; //Found no reason you SHOULD affect anything
-		
-	} else if(weap->spfx & SPFX_CON_AND){
-		if (weap->mtype != 0L && !(weap->mtype == (unsigned long)ptr->mlet)) {
-			return FALSE;
-		} else if (weap->mflagsm != 0L && !((ptr->mflagsm & weap->mflagsm) != 0L)) {
-			return FALSE;
-		} else if (weap->mflagst != 0L && !((ptr->mflagst & weap->mflagst) != 0L)) {
-			return FALSE;
-		} else if (weap->mflagsb != 0L && !((ptr->mflagsb & weap->mflagsb) != 0L)) {
-			return FALSE;
-		} else if (weap->mflagsg != 0L && !(((ptr->mflagsg & weap->mflagsg) != 0L)
-			|| (yours && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE|MG_LORD)) != 0)))
-		) {
-			return FALSE;
-		} else if (weap->mflagsv != 0L && !((ptr->mflagsv & weap->mflagsv) != 0L)) {
-			return FALSE;
-		} else if (weap->mflagsa != 0L) {
-			if(weap->name == artilist[ART_SCOURGE_OF_LOLTH].name && is_drow(ptr)) return FALSE;
-			else if((weap->mflagsa & MA_UNDEAD) && !is_undead_mon(mtmp)) return FALSE;
-			else if(!(
-				(ptr->mflagsa & weap->mflagsa) || 
-				(yours && 
+		/* movement */
+		if (weap->mflagsm != 0L && ((ptr->mflagsm & weap->mflagsm) != 0L)) {
+			return TRUE;
+		}
+		/* thinking */
+		if (weap->mflagst != 0L && ((ptr->mflagst & weap->mflagst) != 0L)) {
+			return TRUE;
+		}
+		/* body */
+		if (weap->mflagsb != 0L && ((ptr->mflagsb & weap->mflagsb) != 0L)) {
+			return TRUE;
+		}
+		/* game mechanics */
+		if (weap->mflagsg != 0L && ((ptr->mflagsg & weap->mflagsg) != 0L)) {
+			return TRUE;
+			if (youdef && Role_if(PM_NOBLEMAN) && ((weap->mflagsg & (MG_PRINCE | MG_LORD)) != 0))
+				return TRUE;
+		}
+		/* vision */
+		if (weap->mflagsv != 0L && ((ptr->mflagsv & weap->mflagsv) != 0L)) {
+			return TRUE;
+		}
+		/* race */
+		if (weap->mflagsa != 0L){
+			if ((weap->name == artilist[ART_SCOURGE_OF_LOLTH].name) && is_drow(ptr))
+				; // skip; the scourge of lolth hates Elves but not Drow.
+			else if ((weap->mflagsa & MA_UNDEAD) && is_undead_mon(mdef))
+				return TRUE;
+			else if (
+				(ptr->mflagsa & weap->mflagsa) ||
+				(youdef &&
 					((!Upolyd && (urace.selfmask & weap->mflagsa)) ||
 					((weap->mflagsa & MA_WERE) && u.ulycn >= LOW_PM))
-				) ||
-				(weap->name == artilist[ART_STING].name && webmaker(ptr)) 
-			)) return FALSE;
-		} else if (weap->spfx & SPFX_DALIGN && !(yours ? (u.ualign.type != weap->alignment) :
-				   (ptr->maligntyp == A_NONE ||
-					sgn(ptr->maligntyp) != weap->alignment))
-		) {
-			return FALSE;
+					)
+				)
+				return TRUE;
 		}
-		return TRUE; //Made it through all checks above, so return true now
+		/* alignment */
+		if (weap->aflags & ARTA_CROSSA && (youdef ? (u.ualign.type != weap->alignment) :
+			(ptr->maligntyp == A_NONE ||
+			sgn(ptr->maligntyp) != weap->alignment))
+			) {
+			return TRUE;
+		}
+
+		/* otherwise, no the artifact does not apply! */
+		return FALSE;
 	}
-	
-	if(weap->spfx & SPFX_ATTK) return TRUE; //Made it through all checks above, so return true now
-	
-	return FALSE; //Nothing special
+
+	return TRUE; //Made it through all checks above, so return true now
 }
 
 /* return the MM flags of monster that an artifact's special attacks apply against */
@@ -1850,10 +1619,10 @@ struct monst *mon;
 		return 1000;
 	}
 	
-	if(Role_if(PM_PRIEST)) return weap->attk.damn; //priests always get the maximum to-hit bonus.
+	if(Role_if(PM_PRIEST)) return weap->accuracy; //priests always get the maximum to-hit bonus.
 	
-	if (weap && weap->attk.damn && spec_applies(weap, mon))
-	    return rnd((int)weap->attk.damn);
+	if (weap && weap->accuracy && spec_applies(otmp, mon, FALSE))
+	    return rnd((int)weap->accuracy);
 	return 0;
 }
 
@@ -1891,14 +1660,14 @@ int * plusdmgptr;
 int * truedmgptr;
 {
 	register const struct artifact *weap = get_artifact(otmp);
-	int damd = (int)weap->attk.damd;
+	int damd = (int)weap->damage;
 	boolean goodpointers = (plusdmgptr && truedmgptr);
 	
 	/* check that we were given an artifact */
 	if (!weap)
 		return FALSE;
-	/* check for NO_ATTK on the artifact */
-	if (weap->attk.adtyp == AD_PHYS && weap->attk.damn == 0 && weap->attk.damd == 0)
+	/* check that the artifact is offensive */
+	if (!(weap->adtyp || weap->damage || weap->accuracy))
 		return FALSE;
 
 	/* The Annulus is a 2x damage artifact if it isn't a lightsaber */
@@ -1917,7 +1686,7 @@ int * truedmgptr;
 	}
 	
 	/* determine if we will apply bonus damage */
-	if ((spec_dbon_applies = (spec_applies(weap, mon)
+	if ((spec_dbon_applies = (spec_applies(otmp, mon, FALSE)
 		&& !(
 		/* additional conditions required to deal bonus damage */
 		(weap->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves) ||	/* only while invoked */
@@ -1952,7 +1721,7 @@ int * truedmgptr;
 
 		/* add the damage to the appropriate pointer, if allowable */
 		if (goodpointers) {
-			if (narrow_spec_applies(otmp, mon))
+			if (spec_applies(otmp, mon, TRUE))
 				*truedmgptr += (damd ? d(multiplier, damd) : max(dmgtomulti, 1)*multiplier);
 			else
 				*plusdmgptr += (damd ? d(multiplier, damd) : max(dmgtomulti, 1)*multiplier);
@@ -1979,6 +1748,24 @@ int m;
     /* there is one slot per artifact, so we should never reach the
        end without either finding the artifact or an empty slot... */
     impossible("couldn't discover artifact (%d)", (int)m);
+}
+/* remove identifed artifact from discoveries list */
+void
+undiscover_artifact(m)
+int m;
+{
+	int i;
+	boolean found = FALSE;
+	/* look for this artifact in the discoveries list;
+       if we hit an empty slot then it's not present, so add it */
+	for (i = 0; i < NROFARTIFACTS - 1 && artidisco[i]; i++) {
+		if (artidisco[i] == m) {
+			found = TRUE;
+		}
+		if (found)
+			artidisco[i] = artidisco[i + 1];
+	}
+	artidisco[i] = 0;
 }
 
 /* used to decide whether an artifact has been fully identified */
@@ -3240,7 +3027,7 @@ boolean * messaged;
 
 	/* EXTERNAL damage sources -- explosions and the like, primarily */
 	/* knockback effect */
-	if (((spec_ability2(otmp, SPFX2_RAM) && !rn2(4)) || spec_ability2(otmp, SPFX2_RAM2)) && !(
+	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
 		/* exclusion */
 		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6))
 		))
@@ -3260,7 +3047,7 @@ boolean * messaged;
 		/* no mvm? */
 	}
 	/* fire explosions */
-	if (((spec_ability2(otmp, SPFX2_FIRE) && !rn2(4)) || spec_ability2(otmp, SPFX2_FIRE2)) && !(
+	if (((arti_attack_prop(otmp, ARTA_EXPLFIRE) && !rn2(4)) || arti_attack_prop(otmp, ARTA_EXPLFIREX)) && !(
 		/* exclusion */
 		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6))
 		))
@@ -3271,7 +3058,7 @@ boolean * messaged;
 			EXPL_FIERY, 1);
 	}
 	/* cold explosions */
-	if ((spec_ability2(otmp, SPFX2_COLD) && !rn2(4)) || spec_ability2(otmp, SPFX2_COLD2))
+	if ((arti_attack_prop(otmp, ARTA_EXPLCOLD) && !rn2(4)) || arti_attack_prop(otmp, ARTA_EXPLCOLDX))
 	{
 		explode(x(mdef), y(mdef),
 			AD_COLD, 0,
@@ -3279,7 +3066,7 @@ boolean * messaged;
 			EXPL_FROSTY, 1);
 	}
 	/* elec explosions AND bolts */
-	if ((spec_ability2(otmp, SPFX2_ELEC) && !rn2(4)) || spec_ability2(otmp, SPFX2_ELEC2))
+	if ((arti_attack_prop(otmp, ARTA_EXPLELEC) && !rn2(4)) || arti_attack_prop(otmp, ARTA_EXPLELECX))
 	{
 		int deltax = 0;
 		int deltay = 0;
@@ -3519,15 +3306,6 @@ boolean * messaged;
 	    if (!rn2(5)) (void) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
 	    if (!rn2(5)) (void) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
 	}
-	if (attacks(AD_MAGM, otmp)) {
-		if (oartifact && (vis&VIS_MAGR)) {
-			pline_The("imaginary widget hits%s %s%c",
-				!spec_dbon_applies ? "" :
-				"!  A hail of magic missiles strikes",
-				hittee, !spec_dbon_applies ? '.' : '!');
-			*messaged = TRUE;
-		}
-	}
 	if (attacks(AD_ACID, otmp) || (oproperties&OPROP_ACIDW)) {
 		if (oartifact && (vis&VIS_MAGR)) {
 			pline_The("foul blade %s %s%c",
@@ -3539,7 +3317,7 @@ boolean * messaged;
 //	    if (!rn2(4)) (void) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
 //	    if (!rn2(7)) (void) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
 	}
-	if (attacks(AD_STUN, otmp) && dieroll <= MB_MAX_DIEROLL) {
+	if (arti_attack_prop(otmp, ARTA_MAGIC) && dieroll <= MB_MAX_DIEROLL) {
 		int dmg = basedmg;
 	    /* Magicbane's special attacks (possibly modifies hittee[]) */
 		*messaged = Mb_hit(magr, mdef, otmp, &dmg, dieroll, vis, hittee,
@@ -3622,7 +3400,7 @@ boolean * messaged;
 		if (Hallucination) You("flame the nasty troll!");  //trollsbane hits monsters that pop in to ruin your day.
 		*truedmgptr += d(2, 20) + 2 * otmp->spe; //boosts power better than demonbane hitting silver hating.
 	}
-	if (spec_ability2(otmp, SPFX2_BLIND) && !resists_blnd(mdef) && !rn2(3)) {
+	if (arti_attack_prop(otmp, ARTA_BLIND) && !resists_blnd(mdef) && !rn2(3)) {
 		long rnd_tmp;
 		wepdesc = "brilliant light";
 		if ((vis&VIS_MAGR && vis&VIS_MDEF) && mdef->mcansee)
@@ -3920,7 +3698,7 @@ boolean * messaged;
 		}
 	}
 	/* the Blade Dancers' weapons haste their wielder */
-	if(spec_ability2(otmp, SPFX2_DANCER))
+	if (arti_attack_prop(otmp, ARTA_HASTE))
 	{
 		if(!youdef && uwep == otmp) magr->movement += NORMAL_SPEED / 3;
 		else if(!youdef && uswapwep == otmp) magr->movement += NORMAL_SPEED / 6;
@@ -3964,7 +3742,7 @@ boolean * messaged;
 	} 
 
 	/* vorpal weapons */
-	if (spec_ability(otmp, SPFX_BEHEAD) || (oproperties&OPROP_VORPW)) {
+	if (arti_attack_prop(otmp, ARTA_VORPAL) || (oproperties&OPROP_VORPW)) {
 		char buf[BUFSZ];
 		/* We really want "on a natural 20" but Nethack does it in */
 		/* reverse from AD&D. */
@@ -4037,6 +3815,7 @@ boolean * messaged;
 				if (!Fire_res(mdef))
 					ignite = TRUE;
 			}
+			break;
 		default:
 			/* hopefully it's a vorpal-property weapon at this point */
 			Sprintf(buf, "vorpal %s", simple_typename(otmp->otyp));
@@ -4435,7 +4214,7 @@ boolean * messaged;
 			// }
 		}
 	}
-	if (spec_ability(otmp, SPFX_DRLI)) {
+	if (arti_attack_prop(otmp, ARTA_DRAIN)) {
 		int dlife;
 		int leveldrain = 1;
 		/* message */
@@ -9111,7 +8890,7 @@ struct obj *obj;
 boolean silent;
 {
 	 if (!obj->oartifact) return (-1);
-	 switch (artilist[(int) (obj)->oartifact].attk.adtyp) {
+	 switch (artilist[(int) (obj)->oartifact].adtyp) {
 		 case AD_FIRE:
 			 if (!silent) {
 				pline("A cloud of steam rises.");
@@ -9166,7 +8945,7 @@ arti_light(obj)
 {
 	const struct artifact *arti = get_artifact(obj);
     return	(arti && !is_lightsaber(obj) &&
-				(arti->cspfx3 & SPFX3_LIGHT)
+			arti_is_prop(obj, ARTI_PERMALIGHT)
 			);
 }
 
@@ -9181,7 +8960,7 @@ arti_speak(obj)
 
 
 	/* Is this a speaking artifact? */
-	if (!oart || !(oart->spfx & SPFX_SPEAK))
+	if (!oart || !arti_is_prop(obj, ARTI_SPEAK))
 		return;
 
 	line = getrumor(bcsign(obj), buf, TRUE);

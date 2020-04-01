@@ -601,27 +601,27 @@ const char *name;
 		if(obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD) obj->owt = 150;
 		
 
-		if (obj->oartifact && artilist[obj->oartifact].size)
+		if (obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT)
 			obj->objsize = artilist[obj->oartifact].size;
 		else if(is_malleable_artifact(&artilist[obj->oartifact]))
 			;//keep current/default size
 		else
 			obj->objsize = MZ_MEDIUM;
 		
-		if (obj->oartifact && artilist[obj->oartifact].material)  obj->obj_material = artilist[obj->oartifact].material;
-		else if (obj->otyp == SABER)                              obj->obj_material = SILVER;
-		else if (obj->otyp == KHAKKHARA)                          obj->obj_material = SILVER;
-		else if (obj->otyp == CHAKRAM)                            obj->obj_material = SILVER;
-		else if (obj->otyp == GLOVES)                             obj->obj_material = LEATHER;
-		else if (obj->otyp == BAR)                                obj->obj_material = IRON;
-		else if (obj->otyp == VIPERWHIP)                          obj->obj_material = SILVER;
-		else if (obj->otyp == find_gcirclet())                    obj->obj_material = GOLD;
-		else if (obj->otyp == ARMORED_BOOTS)                      obj->obj_material = COPPER;
-		else if (obj->otyp == ROUNDSHIELD)                        obj->obj_material = COPPER;
-		else if (obj->otyp == LIGHTSABER)                         obj->obj_material = SILVER;
-		else if (obj->otyp == BEAMSWORD)                          obj->obj_material = GOLD;
-		else if (obj->otyp == KAMEREL_VAJRA)                      obj->obj_material = GOLD;
-		else if (obj->otyp == DOUBLE_LIGHTSABER)                  obj->obj_material = PLATINUM;
+		if (obj->oartifact && artilist[obj->oartifact].material != MT_DEFAULT) obj->obj_material = artilist[obj->oartifact].material;
+		else if (obj->otyp == SABER)                                           obj->obj_material = SILVER;
+		else if (obj->otyp == KHAKKHARA)                                       obj->obj_material = SILVER;
+		else if (obj->otyp == CHAKRAM)                                         obj->obj_material = SILVER;
+		else if (obj->otyp == GLOVES)                                          obj->obj_material = LEATHER;
+		else if (obj->otyp == BAR)                                             obj->obj_material = IRON;
+		else if (obj->otyp == VIPERWHIP)                                       obj->obj_material = SILVER;
+		else if (obj->otyp == find_gcirclet())                                 obj->obj_material = GOLD;
+		else if (obj->otyp == ARMORED_BOOTS)                                   obj->obj_material = COPPER;
+		else if (obj->otyp == ROUNDSHIELD)                                     obj->obj_material = COPPER;
+		else if (obj->otyp == LIGHTSABER)                                      obj->obj_material = SILVER;
+		else if (obj->otyp == BEAMSWORD)                                       obj->obj_material = GOLD;
+		else if (obj->otyp == KAMEREL_VAJRA)                                   obj->obj_material = GOLD;
+		else if (obj->otyp == DOUBLE_LIGHTSABER)                               obj->obj_material = PLATINUM;
 		else if (is_malleable_artifact(&artilist[obj->oartifact]));//keep current/default material
 		else
 			obj->obj_material = objects[obj->otyp].oc_material;
