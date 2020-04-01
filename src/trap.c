@@ -2768,7 +2768,7 @@ long hmask, emask;     /* might cancel timeout */
 	/* check for falling into pool - added by GAN 10/20/86 */
 	if(!Flying) {
 		if (!u.uswallow && u.ustuck) {
-			if (sticks(youracedata))
+			if (sticks(&youmonst))
 				You("aren't able to maintain your hold on %s.",
 					mon_nam(u.ustuck));
 			else
@@ -3724,7 +3724,7 @@ dountrap()	/* disarm a trap */
 	if (((nohands(youracedata) || !freehand()) && !(webmaker(youracedata) || u.sealsActive&SEAL_CHUPOCLOPS || (uarm && uarm->oartifact==ART_SPIDERSILK))) || !youracedata->mmove) {
 	    pline("And just how do you expect to do that?");
 	    return 0;
-	} else if (u.ustuck && sticks(youracedata)) {
+	} else if (u.ustuck && sticks(&youmonst)) {
 	    pline("You'll have to let go of %s first.", mon_nam(u.ustuck));
 	    return 0;
 	}

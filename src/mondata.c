@@ -509,11 +509,19 @@ can_track(ptr)		/* returns TRUE if monster can track well */
 #ifdef OVL1
 
 boolean
-sticks(ptr)	/* creature sticks other creatures it hits */
-	register struct permonst *ptr;
+sticks(mtmp)	/* creature sticks other creatures it hits */
+struct monst * mtmp;
 {
-	return((boolean)(dmgtype(ptr,AD_STCK) || dmgtype(ptr,AD_WRAP) ||
-		attacktype(ptr,AT_HUGS)));
+	register struct permonst * ptr = (mtmp == &youmonst) ? youracedata : mtmp->data;
+	/* monsters that can intrinsically do so */
+	if (dmgtype(ptr, AD_STCK) || dmgtype(ptr, AD_WRAP) || attacktype(ptr, AT_HUGS))
+		return TRUE;
+	/* or if wearing the Grappler's Grasp */
+	struct obj * gloves = ((mtmp == &youmonst) ? uarmg : which_armor(mtmp, W_ARMG));
+	if (gloves && gloves->oartifact == ART_GRAPPLER_S_GRASP)
+		return TRUE;
+
+	return FALSE;
 }
 
 /* number of horns this type of monster has on its head */

@@ -883,7 +883,7 @@ slept_monst(mon)
 struct monst *mon;
 {
 	if ((mon->msleeping || !mon->mcanmove) && mon == u.ustuck &&
-		!sticks(youracedata) && !u.uswallow) {
+		!sticks(&youmonst) && !u.uswallow) {
 		pline("%s grip relaxes.", s_suffix(Monnam(mon)));
 		unstuck(mon);
 	}

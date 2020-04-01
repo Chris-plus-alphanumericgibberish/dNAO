@@ -1048,6 +1048,19 @@ A("Hammerfeet",						KICKING_BOOTS,		(const char *)0,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
+/*Needs encyc entry*/
+/* has a chance to make a bonus AT_HUGS attack on targets when hitting */
+/* by extension, protects you from being grabbed */
+A("The Grappler's Grasp",			GAUNTLETS_OF_POWER,	(const char *)0,
+	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_C, NOFLAG,
+	NO_MONS(),
+	ATTK(AD_PHYS, 1, 6), NOFLAG,
+	PROP0(), NOFLAG,
+	PROP0(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
+	),
+
 A("The Shield of the Resolute Heart",	GAUNTLETS_OF_DEXTERITY,			(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_B, NOFLAG,

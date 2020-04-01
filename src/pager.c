@@ -211,7 +211,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 		Strcat(buf, "praying ");
 		
 	    if (u.ustuck == mtmp)
-		Strcat(buf, (sticks(youracedata)) ?
+		Strcat(buf, (sticks(&youmonst)) ?
 			", being held" : ", holding you");
 	    if (mtmp->mleashed)
 		Strcat(buf, ", leashed to you");

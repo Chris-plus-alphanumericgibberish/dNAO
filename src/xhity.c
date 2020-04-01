@@ -49,6 +49,7 @@ static const int Soresu_counterattack[] = { 10, 15, 25 };
 /* Misc attacks */
 static struct attack noattack = { 0, 0, 0, 0 };
 static struct attack basicattack  = { AT_WEAP, AD_PHYS, 1, 4 };
+struct attack grapple = { AT_HUGS, AD_PHYS, 0, 6 };	/* for grappler's grasp */
 
 /* getvis()
  * 
@@ -1489,6 +1490,7 @@ int * subout;					/* records what attacks have been subbed out */
 #define SUBOUT_MAINWEPB	0x0080	/* Bonus attack caused by the wielded *mainhand* weapon */
 #define SUBOUT_XWEP		0x0100	/* when giving additional attacks, whether or not to use AT_XWEP or AT_WEAP this call */
 #define SUBOUT_GOATSPWN	0x0200	/* Goat spawn: seduction */
+#define SUBOUT_GRAPPLE	0x0400	/* Grappler's Grasp crushing damage */
 int * tohitmod;					/* some attacks are made with decreased accuracy */
 {
 	struct attack * attk;
@@ -1843,6 +1845,16 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damd = 8;
 			/* this is applied to all acceptable attacks; no subout marker is necessary */
 		}	
+	}
+
+	/* creatures wearing the Grappler's Grasp and currently grappling something get a hug attack if they don't have one already */
+	if (is_null_attk(attk) && !by_the_book && !dmgtype(pa, AT_HUGS) && !(*subout&SUBOUT_GRAPPLE)) {
+		struct obj * otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
+		if (otmp && otmp->oartifact == ART_GRAPPLER_S_GRASP) {
+			*attk = grapple;
+			attk->damn = youagr ? ((P_SKILL(P_BARE_HANDED_COMBAT) + 1) / 2 + martial_bonus()) : 2;
+			*subout |= SUBOUT_GRAPPLE;
+		}
 	}
 
 	/* players can get a whole host of spirit attacks */
@@ -3910,9 +3922,9 @@ boolean ranged;
 	if (attk->aatyp == AT_HUGS
 		&& attk->adtyp != AD_WRAP)
 	{
-		/* are grabs impossible? */
-		if (!(youagr || youdef)
-			|| sticks(pd)
+		/* are grabs possible? */
+		if ((youagr || youdef)
+			&& !sticks(mdef)
 			)
 		{
 			/* no grabs allowed, substitute basic claw attack */
@@ -4656,7 +4668,7 @@ boolean ranged;
 			&& !(result & MM_AGR_DIED)
 			&& (youagr || youdef)					/* the player must be involved in a sticking situation (gameplay limitation) */
 			&& !u.ustuck							/* can't already be stuck */
-			&& !(sticks(pa) && sticks(pd)))			/* creatures can't grab other grabbers (gameplay limitation)  */
+			&& !(sticks(magr) && sticks(mdef)))		/* creatures can't grab other grabbers (gameplay limitation)  */
 		{
 			if (pa == &mons[PM_TOVE])
 				pline("%s %s much too slithy to stick to %s!",
@@ -5574,7 +5586,7 @@ boolean ranged;
 		/* attempt to stick */
 		if ((youagr || youdef)					/* the player must be involved in a sticking situation (gameplay limitation) */
 			&& !u.ustuck						/* can't already be stuck */
-			&& !(sticks(pa) && sticks(pd))		/* grabbers can't grab other grabbers (gameplay limitation)  */
+			&& !(sticks(magr) && sticks(mdef))	/* grabbers can't grab other grabbers (gameplay limitation)  */
 			){
 			if (pd == &mons[PM_TOVE])
 			{
@@ -7075,7 +7087,7 @@ boolean ranged;
 		 * or if either creature could be the one doing the grabbing,
 		 * substitute simple physical damage */
 		if (!(youagr || youdef)
-			|| (sticks(pd))){
+			|| (sticks(mdef))){
 			/* make physical attack */
 			alt_attk.adtyp = AD_PHYS;
 			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);

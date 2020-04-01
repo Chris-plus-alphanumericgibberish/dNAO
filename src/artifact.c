@@ -22,6 +22,7 @@ STATIC_DCL struct artifact artilist[];
 
 extern boolean notonhead;	/* for long worms */
 extern boolean lifehunt_sneak_attacking;
+extern struct attack grapple;
 
 #define get_artifact(o) \
 		(((o)&&(o)->oartifact) ? &artilist[(o)->oartifact] : 0)
@@ -327,6 +328,7 @@ struct obj * otmp;
 		switch (otmp->oartifact)
 		{
 		case ART_PREMIUM_HEART:
+		case ART_GRAPPLER_S_GRASP:
 		case ART_GRANDMASTER_S_ROBE:
 			artival += artival / 2;
 			break;
@@ -2601,7 +2603,7 @@ char *type;			/* blade, staff, etc */
 	    } else {
 		nomul(-3, "being scared stiff");
 		nomovemsg = "";
-		if (magr && magr == u.ustuck && sticks(youracedata)) {
+		if (magr && magr == u.ustuck && sticks(&youmonst)) {
 		    u.ustuck = (struct monst *)0;
 		    You("release %s!", mon_nam(magr));
 		}
@@ -3142,6 +3144,19 @@ boolean * messaged;
 		int dsize = spiritDsize();
 		explode(x(magr), y(magr), AD_PHYS, WEAPON_CLASS, d(5, dsize), EXPL_DARK, 1); //Obsidian Glass
 		explode(x(mdef), y(mdef), AD_PHYS, WEAPON_CLASS, d(5, dsize), EXPL_DARK, 1); //Obsidian Glass
+	}
+
+	/* The Grappler's Grasp has a chance to begin grapples.  */
+	if (oartifact == ART_GRAPPLER_S_GRASP) {
+		/* cannot begin a grapple -- Damage is done by adding an AT_HUGS to your attack chain, NOT here. */
+		if ((youagr || youdef) && !u.ustuck)
+		{
+			int newres = xmeleehurty(magr, mdef, &grapple, &grapple, otmp, (youagr || youdef), 0, dieroll, -1, FALSE);
+
+			/* quick return in case we grabbed a cockatrice or something */
+			if (newres & (MM_AGR_DIED | MM_AGR_STOP))
+				return newres;
+		}
 	}
 
 	/* The defender was killed, by the player, by the artifact's special external damage sources */

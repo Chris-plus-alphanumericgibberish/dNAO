@@ -1080,7 +1080,7 @@ domove()
 		    if (distu(u.ustuck->mx, u.ustuck->my) > 2) {
 			/* perhaps it fled (or was teleported or ... ) */
 			u.ustuck = 0;
-		    } else if (sticks(youracedata)) {
+		    } else if (sticks(&youmonst)) {
 			/* When polymorphed into a sticking monster,
 			 * u.ustuck means it's stuck to you, not you to it.
 			 */
