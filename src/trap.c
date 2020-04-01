@@ -4423,7 +4423,7 @@ struct obj * tool;
 			mtmp->entangled = 0;
 			You("unlock the shackles imprisoning %s.", mon_nam(mtmp));
 			if(mtmp->mtame){
-				pline("\"Thank you for rescuing me!\"", Monnam(mtmp));
+				verbalize("Thank you for rescuing me!");
 			}
 			else if(rnd(20) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
 				struct monst *newmon;

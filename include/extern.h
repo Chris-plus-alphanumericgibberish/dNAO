@@ -118,7 +118,7 @@ E int FDECL(disp_artifact_discoveries, (winid));
 E void FDECL(otyp_hit, (struct monst *,struct monst *,
 				struct obj *,int, int *,int*, int));
 E int FDECL(special_weapon_hit, (struct monst *,struct monst *,
-				struct obj *,int,int*,int*,int,boolean*));
+				struct obj *,struct obj*,int,int*,int*,int,boolean*));
 E int NDECL(doinvoke);
 E int FDECL(doparticularinvoke,(struct obj *));
 E void FDECL(arti_speak, (struct obj *));
@@ -931,6 +931,7 @@ E boolean FDECL(may_passwall, (XCHAR_P,XCHAR_P));
 E boolean FDECL(bad_rock, (struct monst *,XCHAR_P,XCHAR_P));
 E boolean FDECL(invocation_pos, (XCHAR_P,XCHAR_P));
 E boolean FDECL(test_move, (int, int, int, int, int));
+E boolean NDECL(adjacent_mon);
 E void NDECL(domove);
 E void NDECL(invocation_message);
 E void FDECL(spoteffects, (BOOLEAN_P));
@@ -2057,6 +2058,7 @@ E void FDECL(gods_upset,(int));
 E void FDECL(angrygods,(int));
 E boolean NDECL(maybe_god_gives_gift);
 E int NDECL(dosacrifice);
+E int NDECL(pray_goat);
 E boolean FDECL(can_pray, (BOOLEAN_P));
 E int NDECL(dopray);
 E const char *NDECL(u_gname);
