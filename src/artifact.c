@@ -394,14 +394,18 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 					goto make_artif;	/* 'a' points to the desired one */
 				}
 				else {
-					boolean preferred = (u.ugifts < 2 || !rn2(u.uartisval / 4));
+					//boolean preferred = (u.ugifts < 2 || !rn2(u.uartisval / 4));
+					boolean preferred = (u.ugifts < 2 || !rn2(2));	// disabling u.uartisval for now
 					/* conditions that are no-good for giving this artifact */
 
-					/* go for preferred gifts */
-					if (preferred && !(a->gflags & ARTG_GIFT))
+					/* go for preferred artifacts for your first gift (if you didn't already have one specified) */
+					if (!u.ugifts && !(a->gflags & ARTG_GIFT))
 						continue;
 					/* always skip enemies' equipment */
 					if (a->race != NON_PM && race_hostile(&mons[a->race]))
+						continue;
+					/* always skip nameable artifacts */
+					if (a->gflags & ARTG_NAME)
 						continue;
 					/* skip materials that hate the player */
 					if (preferred && !Upolyd && (
