@@ -1526,7 +1526,7 @@ BOOLEAN_P tin, nobadeffects, drained;
 	    break;
 	}
 
-	if (catch_lycanthropy && spec_ability2(uwep, SPFX2_NOWERE)) {
+	if (catch_lycanthropy && arti_worn_prop(uwep, ARTP_NOWERE)) {
 	    if (!touch_artifact(uwep, &youmonst, FALSE)) {
 			dropx(uwep);
 			uwepgone();
@@ -4151,7 +4151,7 @@ int perturn;
 		if(eshkp && eshkp->credit > 0)
 			credit = eshkp->credit;
 		if (credit >= price) {
-			Your("credit of %ld %s is used to cover the bill.", credit);
+			Your("credit of %d is used to cover the bill.", credit);
 			eshkp->credit -= price;
 		}
 #ifndef GOLDOBJ
@@ -4160,7 +4160,7 @@ int perturn;
 			return 0;
 		} else {
 			if(credit){
-				Your("credit of %ld %s is used to cover part of the bill.", credit);
+				Your("credit of %d is used to cover part of the bill.", credit);
 				price -= credit;
 			}
 			You("give %s %ld %s.", mon_nam(mon), price, currency(price));
@@ -4173,7 +4173,7 @@ int perturn;
 			return 0;
 		} else {
 			if(credit){
-				Your("credit of %ld %s is used to cover part of the bill.", credit);
+				Your("credit of %d is used to cover part of the bill.", credit);
 				price -= credit;
 			}
 			You("give %s %ld %s.", mon_nam(mon), price, currency(price));

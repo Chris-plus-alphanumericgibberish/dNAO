@@ -44,7 +44,9 @@ static const char *FDECL(DantalionRace,(int));
 int FDECL(dobinding,(int, int));
 static int NDECL(doblessmenu);
 static int NDECL(donursemenu);
+static int FDECL(dodollmenu, (struct monst *));
 static boolean FDECL(nurse_services,(struct monst *));
+static boolean FDECL(buy_dolls,(struct monst *));
 
 static const char tools[] = { TOOL_CLASS, 0 };
 
@@ -960,6 +962,7 @@ boolean chatting;
 	switch (
 		(mtmp->mfaction == SKELIFIED && ptr != &mons[PM_ECHO]) ? MS_BONES : 
 		is_silent_mon(mtmp) ? MS_SILENT : 
+		(is_dollable(mtmp->data) && mtmp->m_insight_level) ? MS_STATS : 
 		mtmp->ispriest ? MS_PRIEST : 
 		mtmp->isshk ? MS_SELL : 
 		(mtmp->data == &mons[PM_RHYMER] && !mtmp->mspec_used) ? MS_SONG : 
@@ -1218,7 +1221,7 @@ asGuardian:
 				mtmp->mspec_used = 0;
 				mtmp->mcan = 0;
 				mtmp->mflee = 0; mtmp->mfleetim = 0;
-				mtmp->mcrazed = 0; mtmp->mberserk = 0;
+				mtmp->mcrazed = 0; mtmp->mberserk = 0; mtmp->mdisrobe = 0;
 				mtmp->mcansee = 1; mtmp->mblinded = 0;
 				mtmp->mcanmove = 1; mtmp->mfrozen = 0;
 				mtmp->mnotlaugh = 1; mtmp->mlaughing = 0;
@@ -1558,7 +1561,7 @@ asGuardian:
 					}
 					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !u.uinvulnerable){
 						if(u.uencouraged < BASE_DOG_ENCOURAGED_MAX) 
-						u.uencouraged = min_ints(BASE_DOG_ENCOURAGED_MAX, u.uencouraged + rnd(mtmp->m_lev/3+1));
+							u.uencouraged = min_ints(BASE_DOG_ENCOURAGED_MAX, u.uencouraged + rnd(mtmp->m_lev/3+1));
 						You_feel("%s!", u.uencouraged >= BASE_DOG_ENCOURAGED_MAX ? "berserk" : "wild");
 					}
 					if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && uwep && uwep->oartifact == ART_SINGING_SWORD){
@@ -1811,7 +1814,7 @@ asGuardian:
 					}
 					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !u.uinvulnerable){
 						if(u.uencouraged > -1*BASE_DOG_ENCOURAGED_MAX) 
-						u.uencouraged = max_ints(-1*BASE_DOG_ENCOURAGED_MAX, u.uencouraged - rnd(mtmp->m_lev/3+1));
+							u.uencouraged = max_ints(-1*BASE_DOG_ENCOURAGED_MAX, u.uencouraged - rnd(mtmp->m_lev/3+1));
 						You_feel("%s!", u.uencouraged <= -1*BASE_DOG_ENCOURAGED_MAX ? "inconsolable" : "depressed");
 					}
 					if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && uwep && uwep->oartifact == ART_SINGING_SWORD){
@@ -2184,6 +2187,33 @@ humanoid_sound:
 	    /* deliberately vague, since it's not actually casting any spell */
 	    pline_msg = "seems to mutter a cantrip.";
 	    break;
+	case MS_STATS:
+	    if (mtmp->mpeaceful && uclockwork && !mtmp->mtame && !nohands(ptr) && !is_animal(ptr) && yn("(Ask for help winding your clockwork?)") == 'y'){
+			struct obj *key;
+			int turns = 0;
+			
+			Strcpy(class_list, tools);
+			key = getobj(class_list, "wind with");
+			if (!key){
+				pline1(Never_mind);
+				break;
+			}
+			if(!mtmp->mtame) turns = ask_turns(mtmp, 0, u.ulevel/15+1);
+			else turns = ask_turns(mtmp, 0, 0);
+			if(!turns){
+				pline1(Never_mind);
+				break;
+			}
+			start_clockwinding(key, mtmp, turns);
+			break;
+		}
+		if(mtmp->mpeaceful){
+			if(buy_dolls(mtmp)){
+				return TRUE; //mtmp may now be dead
+			}
+		}
+		if (chatting) pline_msg = "does not respond.";
+	break;
 	case MS_NURSE:
 	    if (mtmp->mpeaceful && uclockwork && !mtmp->mtame && !nohands(ptr) && !is_animal(ptr) && yn("(Ask for help winding your clockwork?)") == 'y'){
 			struct obj *key;
@@ -2372,9 +2402,54 @@ struct monst * commander;
 	struct monst * mtmp;
 	struct monst * nxtmon;
 	int tmp = 0;
+	int utmp = 0;
 	int affected = 0;
 	int inrange = 0;
+	int nd=1, sd=1;
 
+	switch (monsndx(commander->data))
+	{
+	case PM_RAZIEL:
+		nd=3;
+		sd=7;
+		break;
+	case PM_BAEL:
+		nd=2;
+		sd=9;
+		break;
+	case PM_ASMODEUS:
+		nd=9;
+		sd=1;
+		break;
+	case PM_NECROMANCER:
+		nd=2;
+		sd=6;
+		break;
+	case PM_SERGEANT:
+	case PM_MYRMIDON_LOCHIAS:
+		nd=1;
+		sd=3;
+		break;
+	case PM_PIT_FIEND:
+	case PM_NESSIAN_PIT_FIEND:
+	case PM_GREEN_PIT_FIEND:
+		nd=1;
+		sd=9;
+		break;
+	case PM_MARILITH:
+		nd=1;
+		sd=6;
+		break;
+	case PM_SHAKTARI:
+		nd=6;
+		sd=1;
+		break;
+	default:
+		nd=1;
+		sd=5 + min(30, commander->m_lev)/6;
+		break;
+	}
+	
 	for (mtmp = fmon; mtmp; mtmp = nxtmon){
 		nxtmon = mtmp->nmon;
 		if (!clear_path(mtmp->mx, mtmp->my, commander->mx, commander->my)
@@ -2383,40 +2458,8 @@ struct monst * commander;
 			|| !(mtmp->mpeaceful == commander->mpeaceful && mtmp->mtame == commander->mtame))
 			continue;
 
-		switch (monsndx(commander->data))
-		{
-		case PM_RAZIEL:
-			tmp = d(3, 7);
-			break;
-		case PM_BAEL:
-			tmp = d(2, 9);
-			break;
-		case PM_ASMODEUS:
-			tmp = 9;
-			break;
-		case PM_NECROMANCER:
-			tmp = d(2, 6);
-			break;
-		case PM_SERGEANT:
-		case PM_MYRMIDON_LOCHIAS:
-			tmp = rnd(3);
-			break;
-		case PM_PIT_FIEND:
-		case PM_NESSIAN_PIT_FIEND:
-		case PM_GREEN_PIT_FIEND:
-			tmp = d(1, 9);
-			break;
-		case PM_MARILITH:
-			tmp = d(1, 6);
-			break;
-		case PM_SHAKTARI:
-			tmp = 6;
-			break;
-		default:
-			tmp = rnd(5 + min(30, commander->m_lev) / 6);
-			break;
-		}
-
+		tmp = d(nd, sd);
+		
 		inrange += 1;
 		if (tmp > mtmp->encouraged || mtmp->mflee){
 			mtmp->encouraged = max(tmp, mtmp->encouraged);
@@ -2425,7 +2468,13 @@ struct monst * commander;
 			affected += 1;
 		}
 	}
-
+	if(commander->mtame && clear_path(u.ux, u.uy, commander->mx, commander->my) && permon_in_command_chain(monsndx(youracedata), monsndx(commander->data))){
+		inrange += 1;
+		utmp = d(nd, sd);
+		if(utmp > u.uencouraged)
+			affected += 1;
+		else utmp = 0;
+	}
 	if (affected && !(is_silent_mon(commander))) {
 		if (canseemon(commander)) {
 			switch (monsndx(commander->data))
@@ -2503,6 +2552,10 @@ struct monst * commander;
 				break;
 			}
 		}
+	}
+	if(utmp){
+		You("feel inspired!");
+		u.uencouraged = utmp;
 	}
 	return;
 }
@@ -2639,7 +2692,7 @@ int dz;
 				do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != A_NONE && !Role_if(PM_EXILE)){
+				if(optr->gifted != GA_NONE && optr->gifted != GA_VOID){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
@@ -2682,7 +2735,7 @@ int dz;
 					return 1;
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != A_NONE && !Role_if(PM_EXILE)){
+				if(optr->gifted != GA_NONE && !Role_if(PM_EXILE)){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
@@ -4673,7 +4726,7 @@ int tx,ty;
 					if(!Blind)  pline("Gradually, the lighting returns to normal.");
 					// u.sealTimeout[TENEBROUS-FIRST_SEAL] = moves + bindingPeriod/10;
 				}
-			} else{
+			} else {
 				You("think briefly of the dying of the light.");
 				// u.sealTimeout[TENEBROUS-FIRST_SEAL] = moves + bindingPeriod/10;
 			}
@@ -6306,6 +6359,118 @@ struct monst *nurse;
 	if(!nurse->mtame)
 		(void) money2mon(nurse, nurseprices[service]*count/10);
 #endif
+	return TRUE;
+}
+
+int
+dodollmenu(dollmaker)
+struct monst *dollmaker;
+{
+	winid tmpwin;
+	int n, how;
+	long l;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Buy a doll?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	incntlet = 'a';
+	
+	for(l = 0x1L, n = EFFIGY; l <= MAX_DOLL_MASK; l=(l<<1), n++){
+		if(dollmaker->mvar_dollTypes&l){
+			if(objects[n].oc_name_known)
+				Sprintf(buf, "%s ($%d)", OBJ_NAME(objects[n]), 8000);
+			else
+				Sprintf(buf, "%s ($%d)", OBJ_DESCR(objects[n]), 8000);
+			any.a_int = n;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		incntlet++; //Advance anyway
+	}
+	
+	if(is_dollable(dollmaker->data)){
+		Sprintf(buf, "doll tear ($%d)", 8000);
+		any.a_int = DOLL_S_TEAR;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++; //Advance anyway
+	
+	end_menu(tmpwin, "Select doll type");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? (int)selected[0].item.a_int : 0;
+}
+
+boolean
+buy_dolls(dollmaker)
+struct monst *dollmaker;
+{
+	int dollnum, gold, count = 1, cost;
+	struct obj *doll;
+	
+	dollnum = dodollmenu(dollmaker);
+	if(!dollnum)
+		return FALSE;
+	
+#ifndef GOLDOBJ
+		gold = u.ugold;
+#else
+		gold = money_cnt(invent);
+#endif
+	if(dollnum != DOLL_S_TEAR){
+		char inbuf[BUFSZ];
+		getlin("How many?", inbuf);
+		if (*inbuf == '\033') count = 1;
+		else count = atoi(inbuf);
+		if(count < 0)
+			count = 1;
+	}
+	cost = 8000*count;
+	
+	if(gold < cost){
+		pline("You don't have enough gold!");
+		return FALSE;
+	} else {
+		pline("That will be $%d.", cost);
+		if(yn("Pay?") != 'y')
+			return FALSE;
+	}
+	
+	doll = mksobj(dollnum,FALSE,FALSE);
+	if(!doll){
+		impossible("doll creation failed?");
+		return FALSE;
+	}
+	if(dollnum == DOLL_S_TEAR){
+		doll->ovar1 = dollmaker->mvar_dollTypes;
+		doll->spe = (char)dollmaker->m_insight_level;
+		dollmaker->m_insight_level = 0;
+		mondied(dollmaker);
+	}
+	doll->quan = count;
+	doll->owt = weight(doll);
+	hold_another_object(doll, "You drop %s!",
+				doname(doll), (const char *)0);
+	
+#ifndef GOLDOBJ
+	u.ugold -= cost;
+#else
+	money2none(cost);
+#endif
+	return TRUE;
 }
 
 #endif /* OVLB */

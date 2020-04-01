@@ -1573,7 +1573,7 @@ register int aflag;
 			pline("What are you looking for?  The exit?");
 	} else {//note, was SPFX_SEARCH.  SEEK isn't anywhere, I think this was a bug -Chris
 		int fund = (uwep && uwep->oartifact &&
-			spec_ability(uwep, SPFX_SEEK)) ?
+			arti_worn_prop(uwep, ARTP_SEEK)) ?
 			uwep->spe : 0;
 		if(u.sealsActive&SEAL_OTIAX) fund += spiritDsize();
 		if (ublindf && ublindf->otyp == LENSES && !Blind)

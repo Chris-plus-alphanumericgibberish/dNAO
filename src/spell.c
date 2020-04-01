@@ -2377,6 +2377,7 @@ spiriteffects(power, atme)
 					}
 					mon->mcan = 0;
 					mon->mcrazed = 0; 
+					mon->mdisrobe = 0; 
 					mon->mcansee = 1;
 					mon->mblinded = 0;
 					mon->mcanmove = 1;
@@ -2879,7 +2880,7 @@ spiriteffects(power, atme)
 						else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
 					}
 				}
-				if(weakdog && numdogs > (ACURR(A_CHA)/3) ) mon->mvanishes = 5;
+				if(weakdog && numdogs > dog_limit()) mon->mvanishes = 5;
 				mon->mspiritual = TRUE;
 			}
 		}break;
@@ -4097,6 +4098,19 @@ int spell;
 			vision_full_recalc = 1;	/* trees may have sprouted */
 			doredraw();
 			u.ufirst_life_timeout = moves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
+		break;
+		case APPLE_WORD:
+			You("preach dreadful knowledge!");
+			for(sy = 0; sy < ROWNO; sy++){
+				for(sx = 0; sx < COLNO; sx++){
+					if(isok(sx,sy) && couldsee(sx,sy) && (mon = m_at(sx, sy))){
+						mon->mcrazed = TRUE;
+						mon->mflee = TRUE;
+						mon->mdisrobe = TRUE;
+					}
+				}
+			}
+			u.ufirst_know_timeout = moves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
 		break;
 		default:
 			pline("Unknown word of power!");
@@ -5759,7 +5773,7 @@ doreinforce_binding()
 	
 	for(i=0;i<QUEST_SPIRIT && u.spirit[i];i++){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
-		Sprintf(buf, "%s, %d", sealNames[j], u.spiritT[i] - monstermoves);
+		Sprintf(buf, "%s, %ld", sealNames[j], u.spiritT[i] - monstermoves);
 		any.a_int = i+1;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
@@ -5769,7 +5783,7 @@ doreinforce_binding()
 	i = QUEST_SPIRIT;
 	if(u.spirit[i]){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
-		Sprintf(buf, "%s, %d", sealNames[j], u.spiritT[i] - monstermoves);
+		Sprintf(buf, "%s, %ld", sealNames[j], u.spiritT[i] - monstermoves);
 		any.a_int = i+1;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
@@ -5779,7 +5793,7 @@ doreinforce_binding()
 	i = ALIGN_SPIRIT;
 	if(u.spirit[i]){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
-		Sprintf(buf, "%s, %d", sealNames[j], u.spiritT[i] - monstermoves);
+		Sprintf(buf, "%s, %ld", sealNames[j], u.spiritT[i] - monstermoves);
 		any.a_int = i+1;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,

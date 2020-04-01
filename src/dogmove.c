@@ -23,7 +23,6 @@ STATIC_DCL boolean FDECL(dog_hunger,(struct monst *,struct edog *));
 STATIC_DCL int FDECL(dog_invent,(struct monst *,struct edog *,int));
 STATIC_DCL int FDECL(dog_goal,(struct monst *,struct edog *,int,int,int));
 
-STATIC_DCL struct obj *FDECL(DROPPABLES, (struct monst *));
 STATIC_DCL boolean FDECL(can_reach_location,(struct monst *,XCHAR_P,XCHAR_P,
     XCHAR_P,XCHAR_P));
 STATIC_DCL boolean FDECL(could_reach_item,(struct monst *, XCHAR_P,XCHAR_P));
@@ -183,7 +182,7 @@ boolean check_if_better;
     return FALSE;
 }
 
-STATIC_OVL struct obj *
+struct obj *
 DROPPABLES(mon)
 register struct monst *mon;
 {
@@ -196,6 +195,7 @@ register struct monst *mon;
 		   *rwep;
 	boolean item1 = FALSE, item2 = FALSE;
 	boolean intelligent = TRUE;
+	boolean marilith = attacktype(mon->data, AT_MARI);
 
 	if(on_level(&valley_level, &u.uz))
 		return (struct obj *)0; //The Dead hold on to their possessions (prevents the "drop whole inventory" bug
@@ -217,6 +217,9 @@ register struct monst *mon;
 		if (!item2 && obj->otyp == UNICORN_HORN && !obj->cursed) {
 			item2 = TRUE;
 			continue;
+		}
+		if(marilith && (obj->oclass == WEAPON_CLASS || is_weptool(obj))){
+			continue; //Keep all weapons
 		}
 		if (!obj->owornmask && obj != wep &&
 		    (!intelligent ||

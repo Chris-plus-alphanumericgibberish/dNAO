@@ -102,7 +102,8 @@
 #define GOOD_HEALTH					1 + CLEAVING
 #define RAPID_HEALING				1 + GOOD_HEALTH
 #define DESTRUCTION					1 + RAPID_HEALING
-#define PRESERVATION				1 + DESTRUCTION
+#define MIND_BLASTS					1 + DESTRUCTION
+#define PRESERVATION				1 + MIND_BLASTS
 #define QUICK_DRAW					1 + PRESERVATION
 #define CLEAR_THOUGHTS				1 + QUICK_DRAW
 #define LAST_PROP		(CLEAR_THOUGHTS)
@@ -119,12 +120,8 @@ struct prop {
 #	define W_ARMS	    0x00000008L /* Shield */
 #	define W_ARMG	    0x00000010L /* Gloves/gauntlets */
 #	define W_ARMF	    0x00000020L /* Footwear */
-#ifdef TOURIST
 #	define W_ARMU	    0x00000040L /* Undershirt */
 #	define W_ARMOR	     (W_ARM | W_ARMC | W_ARMH | W_ARMS | W_ARMG | W_ARMF | W_ARMU)
-#else
-#	define W_ARMOR	     (W_ARM | W_ARMC | W_ARMH | W_ARMS | W_ARMG | W_ARMF)
-#endif
 	/* Weapons and artifacts */
 #	define W_WEP	    0x00000100L /* Wielded weapon */
 #	define W_QUIVER     0x00000200L /* Quiver for (f)iring ammo */

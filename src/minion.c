@@ -22,7 +22,7 @@ struct monst *mon;
 	struct monst *mtmp;
 
 	/* Wielded Demonbane prevents demons from gating in others. From Sporkhack*/
-	if (uwep && uwep->oartifact && spec_ability2(uwep, SPFX2_NOCALL) && is_demon(mon->data)) {
+	if (uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && is_demon(mon->data)) {
 		pline("%s looks puzzled for a moment.",Monnam(mon));
 		return;
 	}

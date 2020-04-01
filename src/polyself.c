@@ -604,7 +604,7 @@ int	mntmp;
 	if (flags.verbose) {
 	    static const char use_thec[] = "Use the command #%s to %s.";
 	    static const char monsterc[] = "monster";
-	    if (u.ufirst_light || u.ufirst_sky || u.ufirst_life)
+	    if (u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know)
 		pline(use_thec,monsterc,"speak a word of power");
 #ifdef YOUMONST_SPELL
 	    if (attacktype(youmonst.data, AT_MAGC))
@@ -1631,6 +1631,38 @@ domindblast()
 	return 1;
 }
 
+void
+domindblast_strong()
+{
+	struct monst *mtmp, *nmon;
+	int mfdmg;
+	
+	pline("A wave of psychic energy pours out from you.");
+	for(mtmp=fmon; mtmp; mtmp = nmon) {
+		int u_sen;
+
+		nmon = mtmp->nmon;
+		if (DEADMONSTER(mtmp))
+			continue;
+		if(mtmp->mpeaceful)
+			continue;
+		if(mindless_mon(mtmp))
+			continue;
+		u_sen = mon_resistance(mtmp,TELEPAT) && is_blind(mtmp);
+		if (u_sen || (mon_resistance(mtmp,TELEPAT) && rn2(2)) || !rn2(10)) {
+			You("lock in on %s %s.", s_suffix(mon_nam(mtmp)),
+				u_sen ? "telepathy" :
+				mon_resistance(mtmp,TELEPAT) ? "latent telepathy" :
+				"mind");
+			mfdmg = d(3,15);
+			mtmp->mhp -= mfdmg;
+			mtmp->mstdy = max(mfdmg, mtmp->mstdy);
+			if (mtmp->mhp <= 0)
+				killed(mtmp);
+		}
+	}
+}
+
 int
 dodarken()
 {
@@ -1785,6 +1817,12 @@ int splaction;
 		add_menu(tmpwin, NO_GLYPH, &any,
 			 'e', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
+	if(u.ufirst_know && (splaction == SPELLMENU_DESCRIBE || u.ufirst_know_timeout <= moves)){
+		Sprintf(buf, "speak the Word of Knowledge");
+		any.a_int = APPLE_WORD+1;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			 'q', 0, ATR_NONE, buf, MENU_UNSELECTED);
+	}
 	if (splaction != SPELLMENU_DESCRIBE && splaction < 0){
 		Sprintf(buf, "Describe a word instead");
 		any.a_int = SPELLMENU_DESCRIBE;
@@ -1851,6 +1889,12 @@ int spellID;
 		strcat(desc1, "Creates a field of rapid plant growth in your line-of-sight.");
 		strcat(desc2, "Heavily damages hostile elementals, undead, and some golems.");
 		strcat(desc3, "Destroyed enemies may leave trees behind.");
+		strcat(desc4, "Takes less than 1 turn to cast");
+		break;
+	case APPLE_WORD:
+		strcat(desc1, "Creates a field of terrible knowledge in your line-of-sight.");
+		strcat(desc2, "Causes all monsters to become crazed and begin to flee.");
+		strcat(desc3, "Intelligent enemies may also disrobe.");
 		strcat(desc4, "Takes less than 1 turn to cast");
 		break;
 	}

@@ -412,6 +412,7 @@ struct obj * obj;
 	int saved_sknown = obj->sknown;                      /* stolen or not known */
 	int saved_nknown = objects[obj->otyp].oc_name_known; /* type name known */
 	int saved_lamplit = obj->lamplit;
+	int artifact_known = obj->oartifact && !undiscovered_artifact(obj->oartifact);
 	obj->known  = 0;
 	obj->bknown = 0;
 	obj->rknown = 0;
@@ -422,7 +423,13 @@ struct obj * obj;
 	/* temporarily snuff lightsabers */
 	if (is_lightsaber(obj) && litsaber(obj))
 		obj->lamplit = 0;
+	/* temporarily undiscover artifacts */
+	if (artifact_known)
+		undiscover_artifact(obj->oartifact);
 	buf = makesingular(xname(obj));
+	/* rediscover artifact */
+	if (artifact_known)
+		discover_artifact(obj->oartifact);
 	obj->known  = saved_known;
 	obj->bknown = saved_bknown; 
 	obj->rknown = saved_rknown; 
@@ -595,7 +602,7 @@ char *buf;
 	/* gold pieces should not have their size described */
 	if (obj->otyp == GOLD_PIECE)
 		return;
-	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size && obj->known) ? artilist[obj->oartifact].size : MZ_MEDIUM))
+	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT && obj->known) ? artilist[obj->oartifact].size : MZ_MEDIUM))
 	{
 		switch (obj->objsize)
 		{
@@ -1114,7 +1121,7 @@ char *buf;
 	/* gold pieces should not have their material described, it's in their name */
 	if(obj->otyp == GOLD_PIECE)
 		return;
-	if(obj->oartifact && obj->known && artilist[obj->oartifact].material){
+	if(obj->oartifact && obj->known && artilist[obj->oartifact].material != MT_DEFAULT){
 		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
 			return;
@@ -1191,6 +1198,9 @@ boolean with_price;
 	register const char *actualn = OBJ_NAME(*ocl);	/* the identified name of the otyp */
 	register const char *dn = OBJ_DESCR(*ocl);		/* the unidentified name of the otyp */
 	register const char *un = ocl->oc_uname;		/* what you have named the otyp */
+	const struct artifact *oart = 0;
+	static int getting_obj_base_desc = 0;
+	if (obj && obj->oartifact) oart = &artilist[(obj)->oartifact];
 
 	buf = nextobuf() + PREFIX;	/* leave room for "17 -3 " */
 	if (Role_if(PM_SAMURAI) && iflags.role_obj_names && Alternate_item_name(typ, Japanese_items))
@@ -1213,23 +1223,38 @@ boolean with_price;
 	if (u.sealsActive&SEAL_ANDROMALIUS) obj->sknown = TRUE;
 	//if (obj_is_pname(obj)) goto nameit;
 
-	if (dofull) add_determiner_words(obj, buf);	// quantity or "a" or "the"
-	/* general descriptors */
-	if (dofull) add_stolen_words(obj, buf);
-	if (dofull) add_buc_words(obj, buf);
-	add_size_words(obj, buf);	// TODO - hide some artifact's sizes, currently shows all
-	add_shape_words(obj, buf, dofull);		// Note: more verbose for a number of objects if dofull is true
-	if (dofull) add_erosion_words(obj, buf);
-	if (dofull) add_grease_words(obj, buf);
-	if (dofull) add_enchantment_number(obj, buf);
-	add_properties_words(obj, buf, dofull);	// Note: more verbose for artifacts if dofull is true
-	add_poison_words(obj, buf);
-	add_colours_words(obj, buf);
-	add_material_words(obj, buf);	// TODO - show some artifact's materials, currently hides all
-	if (dofull) add_type_words(obj, buf);
+	if (!getting_obj_base_desc) {
+		if (dofull) add_determiner_words(obj, buf);	// quantity or "a" or "the"
+		/* general descriptors */
+		if (dofull) add_stolen_words(obj, buf);
+		if (dofull) add_buc_words(obj, buf);
+		add_size_words(obj, buf);
+		add_shape_words(obj, buf, dofull);		// Note: more verbose for a number of objects if dofull is true
+		if (dofull) add_erosion_words(obj, buf);
+		if (dofull) add_grease_words(obj, buf);
+		if (dofull) add_enchantment_number(obj, buf);
+		add_properties_words(obj, buf, dofull);	// Note: more verbose for artifacts if dofull is true
+		add_poison_words(obj, buf);
+		add_colours_words(obj, buf);
+		add_material_words(obj, buf);	// TODO - show some artifact's materials, currently hides all
+		if (dofull) add_type_words(obj, buf);
+	}
 
 	/* finishing up xname stuff, which has a lot of special cases */
-	if (!obj_is_pname(obj))
+	
+	if (obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc && !getting_obj_base_desc) {
+		if (strstri(oart->desc, "%s")) {
+			getting_obj_base_desc = TRUE;
+			char * buf2 = nextobuf();
+			Sprintf(buf2, oart->desc, xname(obj));
+			Strcat(buf, buf2);
+			getting_obj_base_desc = FALSE;
+		}
+		else {
+			Strcat(buf, oart->desc);
+		}
+	}
+	else if (!obj_is_pname(obj))
 	{
 		switch (obj->oclass) {
 		case AMULET_CLASS:
@@ -1599,17 +1624,19 @@ boolean with_price;
 		if (obj->quan != 1L) Strcpy(buf, makeplural(buf));
 	}//endif !obj_is_pname(obj)
 
-	if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
-		if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
-		if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_FLUORITE_OCTAHEDRON)){
-			if (obj->quan == 8) Strcat(buf, "Fluorite Octet");
-			else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
-			else Strcat(buf, "Fluorite Octahedron");
+	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)) {
+		if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
+			if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
+			if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_FLUORITE_OCTAHEDRON)){
+				if (obj->quan == 8) Strcat(buf, "Fluorite Octet");
+				else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
+				else Strcat(buf, "Fluorite Octahedron");
+			}
+			else if (obj_is_pname(obj) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
+				Strcat(buf, ONAME(obj) + 4);
+			else
+				Strcat(buf, ONAME(obj));
 		}
-		else if (obj_is_pname(obj) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
-			Strcat(buf, ONAME(obj)+4);
-		else 
-			Strcat(buf, ONAME(obj));
 	}
 
 	if (!dofull && !strncmpi(buf, "the ", 4)) buf += 4;
@@ -1617,9 +1644,6 @@ boolean with_price;
 	/* Suffixes applied by dofull. From this point on, if dofull is not enabled, no changes should be made to buf */
 	if (dofull)
 	{
-		const struct artifact *oart = 0;
-		if (obj && obj->oartifact) oart = &artilist[(obj)->oartifact];
-
 		switch (obj->oclass) {
 		case AMULET_CLASS:
 			if (obj->owornmask & W_AMUL)
@@ -4905,8 +4929,48 @@ typfnd:
 		}
 
 		otmp = oname(otmp, name);
-		if (otmp->oartifact && from_user) {
+	}
+	if (otmp->oartifact && from_user) {
+		/* check that they were allowed to wish for that artifact */
+		if (!wizwish
+			&& ((is_quest_artifact(otmp)						//redundant failsafe.  You can't wish for ANY quest artifacts
+			|| (artilist[otmp->oartifact].gflags&ARTG_NOWISH)	// non-wishable artifacts should be marked as such.
+			|| !touch_artifact(otmp, &youmonst, TRUE)			//Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
+			|| !allow_artifact									// pre-determined if any artifact wish is allowed
+			)))
+			// depreciated criteria:
+			// (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS) //No wishing for quest artifacts, unique monster artifacts, etc.
+			// (otmp->oartifact && rn2((int)(u.uconduct.wisharti)) > 1) //Limit artifact wishes per game
+			// (otmp->oartifact >= ART_ITLACHIAYAQUE && otmp->oartifact <= ART_EYE_OF_THE_AETHIOPICA) || //no wishing for quest artifacts
+			// (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS && otmp->oartifact <= ART_SILVER_KEY) || //no wishing for alignment quest artifacts
+			// (otmp->oartifact >= ART_SWORD_OF_ERATHAOL && otmp->oartifact <= ART_HAMMER_OF_BARQUIEL) || //no wishing for angel artifacts
+			// (otmp->oartifact >= ART_GENOCIDE && otmp->oartifact <= ART_DOOMSCREAMER) || //no wishing for demon artifacts
+			// (otmp->oartifact >= ART_STAFF_OF_THE_ARCHMAGI && otmp->oartifact <= ART_SNICKERSNEE)
+		{
+			/* wish failed */
+			artifact_exists(otmp, ONAME(otmp), FALSE);	// Is this necessary?
+			obfree(otmp, (struct obj *) 0);		// Is this necessary?
+			otmp = &zeroobj;					// Is this necessary?
+			*wishreturn = WISH_DENIED;
+			return &zeroobj;
+		}
+		else {
+			/* they get the artifact */
 			u.uconduct.wisharti++;	/* KMH, conduct */
+			/* characters other than priests also have their god's likelyhood to grant artifacts decreased */
+			if(!Role_if(PM_PRIEST))
+				u.uartisval += arti_value(otmp);
+		}
+	}
+	/* even more wishing abuse: if we tried to create an artifact but failed (it was already generated) we may need a new otyp */
+	else if (isartifact && !otmp->oartifact) {
+		switch (otmp->otyp) {
+		case BEAMSWORD:
+			otmp = poly_obj(otmp, BROADSWORD);
+			break;
+		case UNIVERSAL_KEY:
+			otmp = poly_obj(otmp, SKELETON_KEY);
+			break;
 		}
 	}
 
@@ -4940,41 +5004,6 @@ typfnd:
 			impossible("bad petrified statue?");
 			*wishreturn = WISH_FAILURE;
 			return &zeroobj;
-		}
-	}
-	
-	/* more wishing abuse: don't allow wishing for certain artifacts */
-	/* and make them pay; charge them for the wish anyway! */
-	if (otmp->oartifact && !wizwish && from_user &&
-		(is_quest_artifact(otmp) //redundant failsafe.  You can't wish for ANY quest artifacts
-		 || otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS //No wishing for quest artifacts, unique monster artifacts, etc.
-		 || !touch_artifact(otmp, &youmonst, TRUE) //Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
-		 || !allow_artifact								// pre-determined if any artifact wish is allowed
-		 // depreciated criteria:
-		 // (otmp->oartifact && rn2((int)(u.uconduct.wisharti)) > 1) //Limit artifact wishes per game
-		 // (otmp->oartifact >= ART_ITLACHIAYAQUE && otmp->oartifact <= ART_EYE_OF_THE_AETHIOPICA) || //no wishing for quest artifacts
-		 // (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS && otmp->oartifact <= ART_SILVER_KEY) || //no wishing for alignment quest artifacts
-		 // (otmp->oartifact >= ART_SWORD_OF_ERATHAOL && otmp->oartifact <= ART_HAMMER_OF_BARQUIEL) || //no wishing for angel artifacts
-		 // (otmp->oartifact >= ART_GENOCIDE && otmp->oartifact <= ART_DOOMSCREAMER) || //no wishing for demon artifacts
-		 // (otmp->oartifact >= ART_STAFF_OF_THE_ARCHMAGI && otmp->oartifact <= ART_SNICKERSNEE)
-	    )) {
-	    artifact_exists(otmp, ONAME(otmp), FALSE);	// Is this necessary?
-		u.uconduct.wisharti--;
-	    obfree(otmp, (struct obj *) 0);		// Is this necessary?
-	    otmp = &zeroobj;					// Is this necessary?
-
-		*wishreturn = WISH_DENIED;
-		return &zeroobj;
-	}
-	/* even more wishing abuse: if we tried to create an artifact but failed (it was already generated) we may need a new otyp */
-	if (isartifact && !otmp->oartifact) {
-		switch (otmp->otyp) {
-		case BEAMSWORD:
-			otmp = poly_obj(otmp, BROADSWORD);
-			break;
-		case UNIVERSAL_KEY:
-			otmp = poly_obj(otmp, SKELETON_KEY);
-			break;
 		}
 	}
 	

@@ -45,6 +45,10 @@ boolean active;
 	if (cantmove(magr))
 		return FALSE;
 
+	/* agr has no line of sight to def */
+	if (!clear_path(x(magr), y(magr), tarx, tary))
+		return FALSE;
+
 	/* madness only prevents your active attempts to hit things */
 	if (youagr && active && madness_cant_attack(mdef))
 		return FALSE;
@@ -223,7 +227,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 	if (mdef->mpeaceful && !Confusion && !Hallucination && !Stunned) {
 		/* Intelligent chaotic weapons (Stormbringer) want blood */
 		/* NOTE:  now generalized to a flag, also, more lawful weapons than chaotic weps have it now :) */
-		if (wep && spec_ability2(wep, SPFX2_BLDTHRST)) {
+		if (wep && arti_is_prop(wep, ARTI_BLOODTHRST)) {
 			/* Don't show Stormbringer's message if attack is intended. */
 			if (iflags.attack_mode != ATTACK_MODE_FIGHT_ALL)
 				return ATTACKCHECK_BLDTHRST;
@@ -276,7 +280,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 		if (Confusion || Hallucination || Stunned)
 			return ATTACKCHECK_ATTACK;
 		/* Some weapons just want blood */
-		if (wep && spec_ability2(wep, SPFX2_BLDTHRST))
+		if (wep && arti_is_prop(wep, ARTI_BLOODTHRST))
 			return ATTACKCHECK_BLDTHRST;
 		/* Otherwise, be a pacifist. */
 		You("stop for %s.", mon_nam(mdef));

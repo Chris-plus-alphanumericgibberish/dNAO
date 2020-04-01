@@ -49,6 +49,7 @@ STATIC_DCL int FDECL(use_cream_pie, (struct obj *));
 STATIC_DCL int FDECL(use_grapple, (struct obj *));
 STATIC_DCL int FDECL(use_crook, (struct obj *));
 STATIC_DCL int FDECL(use_doll, (struct obj *));
+STATIC_DCL int FDECL(use_doll_tear, (struct obj *));
 STATIC_DCL int FDECL(do_break_wand, (struct obj *));
 STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
 STATIC_DCL boolean FDECL(figurine_location_checks,
@@ -3087,6 +3088,7 @@ struct obj *hypo;
 						mtarg->mpeaceful = 1;
 					}
 					mtarg->mcrazed = 0;
+					mtarg->mdisrobe = 0;
 					mtarg->mberserk = 0;
 				} else {
 					if (canseemon(mtarg))
@@ -4217,6 +4219,71 @@ use_crook (obj)
 }
 
 STATIC_OVL int
+use_doll_tear(obj)
+	struct obj *obj;
+{
+	struct monst *mtmp = 0;
+	if(yn("Give doll's tear to a monster?") == 'y'){
+		getdir("Which monster?");
+		if(u.dx || u.dy){
+			if(u.uswallow)
+				mtmp = u.ustuck;
+			else if(!isok(u.ux + u.dx, u.uy + u.dy)) return 0;
+			else mtmp = m_at(u.ux + u.dx, u.uy + u.dy);
+			
+			if(!mtmp)
+				return 0;
+			
+			if(!is_dollable(mtmp->data)){
+				pline("That's not a doll.");
+				return 0;
+			}
+			
+			if(mtmp->m_insight_level){
+				pline("Nothing happens....");
+				return 0;
+			}
+			
+			mtmp->mvar_dollTypes = obj->ovar1;
+			mtmp->m_insight_level = obj->spe;
+			useup(obj);
+			return 1;
+		}
+		return 0;
+	} else {
+		struct obj *dollobj = 0;
+		dollobj = getobj(apply_all, "give the tear to");
+		if(!dollobj)
+			return 0;
+
+		if(dollobj->otyp != BROKEN_ANDROID && dollobj->otyp != BROKEN_GYNOID && dollobj->otyp != LIFELESS_DOLL){
+			pline("That's not a doll.");
+			return 0;
+		}
+		
+		if(dollobj->oxlth && (dollobj->oattached == OATTACHED_MONST))
+			mtmp = get_mtraits(dollobj, FALSE);
+		else {
+			pline("Nothing happens....");
+			return 0;
+		}
+		
+		//I don't think this is possible given the above, but I'm feeling paranoid....
+		if(!mtmp){
+			pline("Nothing happens....");
+			return 0;
+		}
+		
+		dollobj->ovar1 = (long)obj->spe;
+		mtmp->m_insight_level = (long)obj->spe;
+		mtmp->mvar_dollTypes = obj->ovar1;
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+
+STATIC_OVL int
 use_doll(obj)
 	struct obj *obj;
 {
@@ -4291,6 +4358,22 @@ use_doll(obj)
 			useup(obj);
 		break;
 		case DOLL_OF_CLEAVING:
+			res = 1;
+			if(!Blind)
+				pline("The doll swings its %s in wide arcs.", rn2(2) ? "greatsword" : "greataxe");
+			if((HCleaving&TIMEOUT) + 100L < TIMEOUT){
+				long timer = (HCleaving&TIMEOUT) + 100L;
+				HCleaving &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				HCleaving |= timer; //set new timer
+				pline("You feel ready to cleave through foes left and right!");
+			}
+			else{
+				HCleaving |= TIMEOUT; //set timer to max value
+			}
+			if(!Blind)
+				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+			else pline("The little doll vanishes.");
+			useup(obj);
 		break;
 		case DOLL_OF_SATIATION:
 			if(satiate_uhunger()){
@@ -4355,9 +4438,7 @@ use_doll(obj)
 				HDestruction |= timer; //set new timer
 			}
 			else{
-				You("begin radiating waves of destruction!");
-				if(!Destruction)
-					HDestruction |= TIMEOUT; //set timer to max value
+				HDestruction |= TIMEOUT; //set timer to max value
 			}
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
@@ -4519,6 +4600,23 @@ use_doll(obj)
 			}
 			else{
 				HClearThoughts |= TIMEOUT; //set timer to max value
+			}
+			if(!Blind)
+				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
+			else pline("The little doll vanishes.");
+			useup(obj);
+		break;
+		case DOLL_OF_MIND_BLASTING:
+			res = 1;
+			if((HMindblasting&TIMEOUT) + 8L < TIMEOUT){
+				long timer = (HMindblasting&TIMEOUT) + 8L;
+				if(!Mindblasting)
+					You("begin radiating waves of mental energy!");
+				HMindblasting &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+				HMindblasting |= timer; //set new timer
+			}
+			else{
+				HMindblasting |= TIMEOUT; //set timer to max value
 			}
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
@@ -5975,7 +6073,7 @@ doapply()
 {
 	struct obj *obj;
 	register int res = 1;
-	int wasmergable = FALSE;
+	int waslabile = FALSE;
 	char class_list[MAXOCLASSES+2];
 
 	if(check_capacity((char *)0)) return (0);
@@ -5994,7 +6092,9 @@ doapply()
 	obj = getobj(class_list, "use or apply");
 	if(!obj) return 0;
 
-	wasmergable = objects[obj->otyp].oc_merge; //Some functions leave a stale pointer here if they merge the item
+	waslabile = objects[obj->otyp].oc_merge; //Some functions leave a stale pointer here if they merge the item
+	
+	waslabile |= obj->otyp == DOLL_S_TEAR; //Not mergeable, but still consumable.
 	
 	if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE))
 	    return 1;	/* evading your grasp costs a turn; just be
@@ -6462,7 +6562,14 @@ doapply()
 		case DOLL_OF_STEALING:
 		case DOLL_OF_MOLLIFICATION:
 		case DOLL_OF_CLEAR_THINKING:
+		case DOLL_OF_MIND_BLASTING:
 			res = use_doll(obj);
+		break;
+		case DOLL_S_TEAR:
+			res = use_doll_tear(obj);
+		break;
+		case HOLY_SYMBOL_OF_THE_BLACK_MOTHE:
+			res = pray_goat();
 		break;
 	case UNICORN_HORN:
 		use_unicorn_horn(obj);
@@ -6618,7 +6725,7 @@ doapply()
 		nomul(0, NULL);
 		return 0;
 	}
-	if (res && !wasmergable && obj && obj->oartifact) arti_speak(obj);
+	if(res && !waslabile && obj && obj->oartifact) arti_speak(obj);
 xit2:
 	nomul(0, NULL);
 	return res;

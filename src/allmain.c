@@ -31,6 +31,7 @@ STATIC_DCL void FDECL(blessed_spawn, (struct monst *));
 STATIC_DCL void FDECL(good_neighbor, (struct monst *));
 STATIC_DCL void FDECL(dark_pharaoh, (struct monst *));
 STATIC_DCL void FDECL(polyp_pickup, (struct monst *));
+STATIC_DCL void FDECL(goat_sacrifice, (struct monst *));
 
 #ifdef OVL0
 
@@ -1227,6 +1228,14 @@ moveloop()
 					}
 				}
 				
+				if(mtmp->data == &mons[PM_DEEPEST_ONE] && !mtmp->female && u.uevent.ukilled_dagon){
+					set_mon_data(mtmp, &mons[PM_FATHER_DAGON], 0);
+					u.uevent.ukilled_dagon = 0;
+				}
+				if(mtmp->data == &mons[PM_DEEPEST_ONE] && mtmp->female && u.uevent.ukilled_hydra){
+					set_mon_data(mtmp, &mons[PM_MOTHER_HYDRA], 0);
+					u.uevent.ukilled_hydra = 0;
+				}
 				if(mtmp->data == &mons[PM_GOLD_GOLEM]){
 					int golds = u.goldkamcount_tame + level.flags.goldkamcount_peace + level.flags.goldkamcount_hostile;
 					if(golds > 0){
@@ -1730,6 +1739,7 @@ karemade:
 
 		    monstermoves++;
 		    moves++;
+			nonce = rand();
 
 		      /********************************/
 		     /* once-per-turn things go here */
@@ -1749,8 +1759,20 @@ karemade:
 			) dosymbiotic();
 			if(u.spiritPColdowns[PWR_PSEUDONATURAL_SURGE] >= moves+20)
 				dopseudonatural();
+			if(roll_madness(MAD_GOAT_RIDDEN) && adjacent_mon()){
+				pline("Lashing tentacles erupt from your brain!");
+				losehp(max(1,(Upolyd ? ((d(4,4)*u.mh)/u.mhmax) : ((d(4,4)*u.uhp)/u.uhpmax))), "the black mother's touch", KILLED_BY);
+				morehungry(d(4,4)*4);
+				if(u.usanity < 50)
+					change_usanity(-1);
+				else
+					change_usanity(-1*d(4,4));
+				dogoat();
+			}
 			if(Destruction)
 				dodestruction();
+			if(Mindblasting)
+				domindblast_strong();
 			/* Clouds on Lolth's level deal damage */
 			if(Is_lolth_level(&u.uz) && levl[u.ux][u.uy].typ == CLOUD){
 				if (!(nonliving(youracedata) || Breathless)){
@@ -1817,6 +1839,8 @@ karemade:
 			move_gliders();
 
 		    if (u.ublesscnt)  u.ublesscnt--;
+		    if (u.ugoatblesscnt && u.uevent.shubbie_atten && !u.ugangr[GA_MOTHER])
+				u.ugoatblesscnt--;
 		    if(flags.time && !flags.run)
 			flags.botl = 1;
 			
@@ -2553,7 +2577,7 @@ do_inheritor_menu()
 	for (i = 1; i<=NROFARTIFACTS; i++)
 	{
 		// if ((artilist[i].spfx2) && artilist[i].spfx && artilist[i].spfx)
-		if(artilist[i].spfx&SPFX_INHER
+		if(artilist[i].gflags&ARTG_INHER
 		&& !Role_if(artilist[i].role)
 		&& !Pantheon_if(artilist[i].role)
 		&& (artilist[i].alignment == A_NONE
@@ -2778,7 +2802,7 @@ see_nearby_monsters()
 							change_usanity(u_sanity_loss(mtmp));
 						}
 						if(yields_insight(mtmp->data)){
-							change_uinsight(1);
+							change_uinsight(u_visible_insight(mtmp));
 						}
 						}
 					}
@@ -2801,6 +2825,8 @@ struct monst *mon;
 		dark_pharaoh(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_POLYPOID_BEING])
 		polyp_pickup(mon);
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_MOUTH_OF_THE_GOAT])
+		goat_sacrifice(mon);
 }
 
 static int goatkids[] = {PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN, 
@@ -3081,6 +3107,126 @@ struct monst *mon;
 					break;
 				}
 			}
+		}
+	}
+}
+
+STATIC_OVL
+void
+goat_sacrifice(mon)
+struct monst *mon;
+{
+	struct obj *otmp, *otmp2;
+	register struct monst *mtmp, *mtmp0 = 0, *mtmp2;
+	xchar xlocale, ylocale, xyloc;
+	xyloc	= mon->mtrack[0].x;
+	xlocale = mon->mtrack[1].x;
+	ylocale = mon->mtrack[1].y;
+	if(xyloc == MIGR_EXACT_XY){
+		for(otmp = level.objects[xlocale][ylocale]; otmp; otmp = otmp2){
+			otmp2 = otmp->nexthere;
+			if(otmp->otyp == CORPSE && !otmp->oartifact){
+				goat_eat(otmp); //No matter what, the this function should remove this corpse.  Either via resurrection or destruction
+				//Warning note: otmp is now stale
+				return;
+			}
+		}
+		if(!isok(xlocale, ylocale))
+			return;
+		//else
+		if(xlocale == u.ux && ylocale == u.uy){
+			if(!rn2(20)) switch(rnd(3)){
+				case 1:
+					pline("The shadowy mist forms briefly into a yawning maw!");
+				break;
+				case 2:
+					pline("The dark forms into hooves and writhing tendrils!");
+				break;
+				case 3:
+					if(uarmh && uarmh->otyp == SEDGE_HAT){
+						pline("A few drops of liquid hit your wide straw hat.");
+					} else if(uarmh && uarmh->otyp == WAR_HAT) {
+						pline("A few drops of liquid hit your wide helm.");
+					} else if(uarmh && uarmh->otyp == WITCH_HAT) {
+						pline("A few drops of liquid hit your wide conical hat.");
+					} else if(magic_negation(&youmonst)){
+						pline("A few drops of liquid drip onto your clothes.");
+					} else {
+						int dmg = d(1, 3);
+						pline("A few drops of spittle drip onto you.");
+						if (!Acid_resistance) {
+							pline("It burns!");
+							losehp(dmg, "hungry goat", KILLED_BY_AN);
+						}
+					}
+				break;
+			}
+		} else if(m_at(xlocale, ylocale)){
+			struct monst *mtmp = m_at(xlocale, ylocale);
+			if(!rn2(60)){
+				if(which_armor(mtmp, W_ARMH) && which_armor(mtmp, W_ARMH)->otyp == SEDGE_HAT){
+					if(canseemon(mtmp))
+						pline("A few drops of viscous liquid hit %s wide straw hat.", s_suffix(mon_nam(mtmp)));
+				} else if(which_armor(mtmp, W_ARMH) && which_armor(mtmp, W_ARMH)->otyp == WAR_HAT) {
+					if(canseemon(mtmp))
+						pline("A few drops of viscous liquid hit %s wide helm.", s_suffix(mon_nam(mtmp)));
+				} else if(which_armor(mtmp, W_ARMH) && which_armor(mtmp, W_ARMH)->otyp == WITCH_HAT) {
+					if(canseemon(mtmp))
+						pline("A few drops of viscous liquid hit %s wide conical hat.", s_suffix(mon_nam(mtmp)));
+				} else if(magic_negation(mtmp)){
+					if(canseemon(mtmp))
+						pline("A few drops of viscous liquid hit %s clothes.", s_suffix(mon_nam(mtmp)));
+				} else {
+					int dmg = d(1, 3);
+					if(canseemon(mtmp))
+						pline("A few drops of viscous liquid hit %s.", mon_nam(mtmp));
+					if (!resists_acid(mtmp)){
+						if(mtmp->data->mmove) //Not naturally inactive
+							pline("%s winces!",Monnam(mtmp));
+						mtmp->mhp -= dmg;
+						if(mtmp->mhp <= 0)
+							mondied(mtmp);
+					}
+				}
+			}
+		} else {
+			if(!rn2(60)){
+				if(cansee(xlocale, ylocale)){
+					You("see a viscous liquid dripping onto %s.", the(surface(xlocale, ylocale)));
+					map_invisible(xlocale, ylocale);
+				}
+				else {
+					You_hear("a viscous liquid dripping onto %s.", the(surface(xlocale, ylocale)));
+				}
+			}
+		}
+	}
+}
+
+void
+dogoat()
+{
+	struct monst *mon;
+	int tmp, weptmp, tchtmp;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j, lim=0;
+	struct attack symbiote = { AT_TENT, AD_PHYS, 4, 4 };
+	for(j=8;j>=1;j--){
+		if(u.ustuck && u.uswallow)
+			mon = u.ustuck;
+		else if(!isok(u.ux+clockwisex[(i+j)%8], u.uy+clockwisey[(i+j)%8]))
+			continue;
+		else mon = m_at(u.ux+clockwisex[(i+j)%8], u.uy+clockwisey[(i+j)%8]);
+		if(!mon || mon->mpeaceful)
+			continue;
+		if(touch_petrifies(mon->data)
+		 || mon->data == &mons[PM_MEDUSA]
+		 || mon->data == &mons[PM_PALE_NIGHT]
+		) continue;
+		
+		if(mon && !mon->mtame){
+			xmeleehity(&youmonst, mon, &symbiote, (struct obj *)0, -1, 0, FALSE);
 		}
 	}
 }

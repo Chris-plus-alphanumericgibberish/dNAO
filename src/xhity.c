@@ -110,7 +110,7 @@ struct monst * mdef;
 	 */
 	/* Intelligent chaotic weapons (Stormbringer) want blood */
 	if (is_safepet(mdef) && !flags.forcefight) {
-		if (!uwep || !spec_ability2(uwep, SPFX2_BLDTHRST)) {
+		if (!uwep || !arti_is_prop(uwep, ARTI_BLOODTHRST)) {
 			/* there are some additional considerations: this won't work
 			* if in a shop or Punished or you miss a random roll or
 			* if you can walk thru walls and your pet cannot (KAA) or
@@ -634,7 +634,7 @@ int tary;
 						|| (otmp->otyp == CHAIN && pa == &mons[PM_CATHEZAR])
 						)																	// valid weapon
 						&& !(otmp->oartifact && !always_twoweapable_artifact(otmp))			// ok artifact
-						&& !bimanual(otmp, pd)												// not two-handed
+						&& (!bimanual(otmp, pa) || pa == &mons[PM_GYNOID] || pa == &mons[PM_PARASITIZED_GYNOID])// not two-handed
 						&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
 						&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
 						&& !(is_ammo(otmp) || is_pole(otmp) || throwing_weapon(otmp))		// not unsuitable for melee (ammo, throwable, polearm)
@@ -697,7 +697,32 @@ int tary;
 							struct monst *mdef2 = m_at(tarx + dx, tary + dy);
 							if (mdef2 && (mdef2 != mdef)) {
 								int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
-								bhitpos.x = tarx; bhitpos.y = tary;
+								bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+								(void)xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
+								/* we aren't handling MM_AGR_DIED or MM_AGR_STOP; hopefully the attacker being a player covers those cases well enough */
+							}
+						}
+					}
+					if (youagr && !ranged && Cleaving)
+					{
+						/* try to find direction (u.dx and u.dy may be incorrect) */
+						int dx = sgn(tarx - x(magr));
+						int dy = sgn(tary - y(magr));
+						if((monstermoves+indexnum)&1){//Odd
+							//45 degree rotation
+							dx = sgn(dx+dy);
+							dy = sgn(dy-dx);
+						} else {
+							//-45 degree rotation
+							dx = sgn(dx-dy);
+							dy = sgn(dx+dy);
+						}
+						if (isok(x(magr) + dx, y(magr) + dy))
+						{
+							struct monst *mdef2 = m_at(x(magr) + dx, y(magr) + dy);
+							if (mdef2 && (mdef2 != mdef)) {
+								int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
+								bhitpos.x = x(magr) + dx; bhitpos.y = y(magr) + dy;
 								(void)xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
 								/* we aren't handling MM_AGR_DIED or MM_AGR_STOP; hopefully the attacker being a player covers those cases well enough */
 							}
@@ -923,9 +948,6 @@ int tary;
 		case AT_5SQR:	// range 5 touch
 			/* don't make attacks that will kill oneself */
 			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
-				continue;
-			/* requires a clear path */
-			if (!clear_path(x(magr), y(magr), tarx, tary))
 				continue;
 			/* must be in range */
 			if (distmin(x(magr), y(magr), tarx, tary) > 
@@ -1674,7 +1696,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			return &noattack;
 		}
 	}
-	if(attk->aatyp == AT_BKGT){
+	if(!by_the_book && attk->aatyp == AT_BKGT){
 		switch(rnd(5)){
 			case 1:
 				attk->aatyp = AT_TUCH;
@@ -1695,6 +1717,26 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			case 5:
 				attk->aatyp = AT_GAZE;
 				attk->adtyp = AD_STDY;
+			break;
+		}
+	}
+	if(!by_the_book && attk->aatyp == AT_BKG2){
+		switch(rnd(4)){
+			case 1:
+				attk->aatyp = AT_TENT;
+				attk->adtyp = AD_DRST;
+			break;
+			case 2:
+				attk->aatyp = AT_BUTT;
+				attk->adtyp = AD_STUN;
+			break;
+			case 3:
+				attk->aatyp = AT_GAZE;
+				attk->adtyp = AD_STDY;
+			break;
+			case 4:
+				attk->aatyp = AT_CLAW;
+				attk->adtyp = AD_SEDU;
 			break;
 		}
 	}
@@ -3848,6 +3890,10 @@ boolean ranged;
 			 */
 			alt_attk.aatyp = attk->aatyp;
 			alt_attk.adtyp = AD_PHYS;
+			/* special case: [salamanders'] fire hugs shouldn't print out a "you are being crushed" message, 
+			   as they print a "being roasted" message */
+			if (originalattk->aatyp == AT_HUGS && (originalattk->adtyp == AD_FIRE || originalattk->adtyp == AD_EFIR))
+				dohitmsg = FALSE;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, 0, dieroll, vis, ranged);
 			/* return early if cannot continue the attack */
 			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
@@ -3864,24 +3910,22 @@ boolean ranged;
 	if (attk->aatyp == AT_HUGS
 		&& attk->adtyp != AD_WRAP)
 	{
-		/* are grabs possible? */
-		if ((youagr || youdef)
-			&& !sticks(pd)
+		/* are grabs impossible? */
+		if (!(youagr || youdef)
+			|| sticks(pd)
 			)
 		{
-			/* if we aren't already stuck, try to grab them */
-			if (!(u.ustuck && u.ustuck == (youagr ? mdef : magr))) {
-				/* make a grab at them */
-				alt_attk.adtyp = AD_WRAP;
-				return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
-			}
-			/* else continue on with the grab attack */
-		}
-		/* no grabs allowed, substitute basic attack */
-		else {
+			/* no grabs allowed, substitute basic claw attack */
 			alt_attk.aatyp = AT_CLAW;
 			return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
 		}
+		else if (!(u.ustuck && u.ustuck == (youagr ? mdef : magr)))
+		{
+			/* if we aren't already stuck, try to grab them */
+			alt_attk.adtyp = AD_WRAP;
+			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
+		}
+		/* else continue on with the grab attack */
 	}
 
 	boolean weaponattk = (attk->aatyp == AT_WEAP ||
@@ -3990,7 +4034,7 @@ boolean ranged;
 				pline("%s%s%s!",
 					(youdef ? "You" : Monnam(mdef)),
 					(youdef ? "'re " : " is "),
-					on_fire(pd, attk));
+					on_fire(pd, originalattk));
 			}
 
 			/* burn away slime (player-only) */
@@ -4517,7 +4561,7 @@ boolean ranged;
 		if (uncancelled && !rn2(4)) {
 			/* player */
 			if (youdef){
-				if (HFast && !defends(AD_SLOW, uwep)) {
+				if (HFast) {
 					u_slow_down();
 				}
 			}
@@ -4644,7 +4688,7 @@ boolean ranged;
 			if (youdef) {
 				if (u.ulycn == NON_PM
 					&& !Protection_from_shape_changers
-					&& !spec_ability2(uwep, SPFX2_NOWERE)
+					&& !arti_worn_prop(uwep, ARTP_NOWERE)
 					&& !umechanoid
 					) {
 					You_feel("feverish.");
@@ -6094,7 +6138,7 @@ boolean ranged;
 	case AD_SSEX:
 #endif
 	{
-		boolean goatspawn = (pa == &mons[PM_SMALL_GOAT_SPAWN] || pa == &mons[PM_GOAT_SPAWN] || pa == &mons[PM_GIANT_GOAT_SPAWN]);
+		boolean goatspawn = (pa == &mons[PM_SMALL_GOAT_SPAWN] || pa == &mons[PM_GOAT_SPAWN] || pa == &mons[PM_GIANT_GOAT_SPAWN] || pa == &mons[PM_BLESSED]);
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, dohitmsg, dmg, dieroll, vis, ranged);
@@ -6255,8 +6299,8 @@ boolean ranged;
 			if (notmcan) {
 				/* select item from defender's inventory */
 				for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-				if (!magr->mtame || !otmp->cursed)
-					break;
+					if (!magr->mtame || !otmp->cursed)
+						break;
 
 				if (otmp) {
 					char onambuf[BUFSZ], mdefnambuf[BUFSZ];
@@ -6753,8 +6797,7 @@ boolean ranged;
 		}
 
 		/* entirely unharmed */
-		if (defends(AD_DRIN, weapon)
-			|| !has_head(pd)
+		if (!has_head(pd)
 			|| (youdef && umechanoid)
 			/*|| notonhead*/ //damnit what
 			) {
@@ -7055,7 +7098,8 @@ boolean ranged;
 			if (!u.ustuck && (!rn2(10) || attk->aatyp == AT_HUGS)) {
 				if (slips_free(magr, mdef, attk, vis)) {
 					/* message was printed (if visible) */
-					/* do nothing */;
+					/* nothing happens */
+					return MM_MISS;
 				}
 				else {
 					/* get stuck */
@@ -9568,7 +9612,7 @@ int vis;
 	if (adtyp == AD_STON) {
 		needs_magr_eyes = needs_mdef_eyes = maybe_not = needs_uncancelled = FALSE;
 	}
-	if (is_angel(pa) && adtyp == AD_BLND) {				// Angels' blinding radiance
+	if ((is_angel(pa) || pa == &mons[PM_BLESSED]) && adtyp == AD_BLND) {				// Angels' blinding radiance
 		needs_magr_eyes = FALSE;
 		maybe_not = FALSE;
 	}
@@ -10251,7 +10295,7 @@ int vis;
 			return MM_MISS;
 
 		/* assumes that angels with AD_BLND have a blinding radiance, which is limited range and stunning */
-		if (is_angel(pa)) {
+		if (is_angel(pa) || pa == &mons[PM_BLESSED]) {
 			if (dist2(x(magr), y(magr), x(mdef), y(mdef)) > BOLT_LIM*BOLT_LIM)
 				return MM_MISS;
 			if (youdef) {
@@ -10830,16 +10874,16 @@ boolean * hittxt;
 	if (otmp->oartifact || otmp->oproperties) {		// artifact and oproperties
 		tmpplusdmg = tmptruedmg = 0;
 		result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
-		*plusdmgptr = tmpplusdmg;
-		*truedmgptr = tmptruedmg;
+		*plusdmgptr += tmpplusdmg;
+		*truedmgptr += tmptruedmg;
 		if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
 			return result;
 	}
 	if (spec_prop_otyp(otmp)) {	// otyp
 		tmpplusdmg = tmptruedmg = 0;
 		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
-		*plusdmgptr = tmpplusdmg;
-		*truedmgptr = tmptruedmg;
+		*plusdmgptr += tmpplusdmg;
+		*truedmgptr += tmptruedmg;
 	}
 	return result;
 }
@@ -11690,7 +11734,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			case OPOISON_PARAL:
 				resists = FALSE;
-				majoreff = !rn2(8);
+				majoreff = (!rn2(8) && !(youdef ? Free_action : mon_resistance(mdef, FREE_ACTION)));
 				break;
 			case OPOISON_AMNES:
 				resists = mindless_mon(mdef);
@@ -12727,7 +12771,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			subtotl = 1;
 			resisted_attack_type = TRUE;
 		}
-		if ((attackmask & ~(resistmask)) == 0L && !(otmp && narrow_spec_applies(otmp, mdef)) && (subtotl > 0)) {
+		if ((attackmask & ~(resistmask)) == 0L && !(otmp && spec_applies(otmp, mdef, TRUE)) && (subtotl > 0)) {
 			/* damage reduced by 75% */
 			subtotl /= 4;
 			resisted_attack_type = TRUE;
@@ -13984,6 +14028,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 	boolean youdef = (mdef == &youmonst);
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
+	int maketame = ((youdef || mdef->mtame) ? MM_EDOG : 0);
 
 
 	/* Get damage of passive */
@@ -14297,12 +14342,12 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				if (pd == &mons[PM_LEGION]) {
 					int n = rnd(4);
 					for (; n > 0; n--) {
-						mtmp = (rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL | G_HELL), x(mdef), y(mdef), NO_MINVENT | MM_ADJACENTOK | MM_ADJACENTSTRICT)
-							: makemon(&mons[PM_LEGIONNAIRE], x(mdef), y(mdef), NO_MINVENT | MM_ADJACENTOK | MM_ADJACENTSTRICT));
+						mtmp = (rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL | G_HELL), x(mdef), y(mdef), NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT|maketame)
+							: makemon(&mons[PM_LEGIONNAIRE], x(mdef), y(mdef), NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT|maketame));
 						if (mtmp) {
 							/* Legion's summons don't time out */
 							/* Although this currently is impossible, we should handle tame/selfpolyd Legion */
-							if (youdef || mdef->mtame) {
+							if (maketame) {
 								initedog(mtmp);
 							}
 						}
@@ -14310,14 +14355,14 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				}
 				/* Others (Asmodeus, Verier) get Devils */
 				else {
-					if (*hp(mdef) > *hpmax(mdef) * 3 / 4)		mtmp = makemon(&mons[PM_LEMURE], x(mdef), y(mdef), MM_ADJACENTOK);
-					else if (*hp(mdef) > *hpmax(mdef) * 2 / 4)	mtmp = makemon(&mons[PM_HORNED_DEVIL], x(mdef), y(mdef), MM_ADJACENTOK);
-					else if (*hp(mdef) > *hpmax(mdef) * 1 / 4)	mtmp = makemon(&mons[PM_BARBED_DEVIL], x(mdef), y(mdef), MM_ADJACENTOK);
-					else if (*hp(mdef) > *hpmax(mdef) * 0 / 4)	mtmp = makemon(&mons[PM_PIT_FIEND], x(mdef), y(mdef), MM_ADJACENTOK);
+					if (*hp(mdef) > *hpmax(mdef) * 3 / 4)		mtmp = makemon(&mons[PM_LEMURE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else if (*hp(mdef) > *hpmax(mdef) * 2 / 4)	mtmp = makemon(&mons[PM_HORNED_DEVIL], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else if (*hp(mdef) > *hpmax(mdef) * 1 / 4)	mtmp = makemon(&mons[PM_BARBED_DEVIL], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else if (*hp(mdef) > *hpmax(mdef) * 0 / 4)	mtmp = makemon(&mons[PM_PIT_FIEND], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
 					if (mtmp) {
 						/* Asmodeus's and Verier's summons don't time out */
 						/* Although this currently is impossible, we should handle tame/selfpolyd Asmo/Verier */
-						if (youdef || mdef->mtame) {
+						if (maketame) {
 							initedog(mtmp);
 						}
 					}
@@ -14326,22 +14371,22 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 			case AD_OONA:
 				/* */
 				if (u.oonaenergy == AD_FIRE){
-					if (rn2(2)) mtmp = makemon(&mons[PM_FLAMING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK);
-					else		mtmp = makemon(&mons[PM_FIRE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK);
+					if (rn2(2)) mtmp = makemon(&mons[PM_FLAMING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else		mtmp = makemon(&mons[PM_FIRE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
 				}
 				else if (u.oonaenergy == AD_COLD){
-					if (rn2(2)) mtmp = makemon(&mons[PM_FREEZING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK);
-					else		mtmp = makemon(&mons[PM_ICE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK);
+					if (rn2(2)) mtmp = makemon(&mons[PM_FREEZING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else		mtmp = makemon(&mons[PM_ICE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
 				}
 				else if (u.oonaenergy == AD_ELEC){
-					if (rn2(2)) mtmp = makemon(&mons[PM_SHOCKING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK);
-					else		mtmp = makemon(&mons[PM_ENERGY_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK);
+					if (rn2(2)) mtmp = makemon(&mons[PM_SHOCKING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					else		mtmp = makemon(&mons[PM_ENERGY_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
 				}
 				/* Oona's summons time out and vanish */
 				if (mtmp) {
 					mtmp->mvanishes = mlev(mdef) + rnd(mlev(mdef));
 					/* can be tame */
-					if (youdef || mdef->mtame) {
+					if (maketame) {
 						initedog(mtmp);
 					}
 				}
@@ -14819,7 +14864,8 @@ android_combo()
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			xmeleehity(&youmonst, mdef, &weaponhit, (struct obj *)0, vis, 0, FALSE);
-			xmeleehity(&youmonst, mdef, &weaponhit, (struct obj *)0, vis, 0, FALSE);
+			if(!DEADMONSTER(mdef))
+				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj *)0, vis, 0, FALSE);
 		}
 		u.uen--;
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_SKILLED && u.uen > 0){
@@ -14846,14 +14892,17 @@ android_combo()
 					mdef = u.ustuck;
 				else
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
-				if (!mdef)
+				if (!mdef || DEADMONSTER(mdef))
 					You("swing wildly!");
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 					xmeleehity(&youmonst, mdef, &weaponhit,  (struct obj *)0, vis, 0, FALSE);
-					xmeleehity(&youmonst, mdef, &weaponhit,  (struct obj *)0, vis, 0, FALSE);
-					xmeleehity(&youmonst, mdef, &kickattack, (struct obj *)0, vis, 0, FALSE);
-					xmeleehity(&youmonst, mdef, &kickattack, (struct obj *)0, vis, 0, FALSE);
+					if(!DEADMONSTER(mdef))
+						xmeleehity(&youmonst, mdef, &weaponhit,  (struct obj *)0, vis, 0, FALSE);
+					if(!DEADMONSTER(mdef))
+						xmeleehity(&youmonst, mdef, &kickattack, (struct obj *)0, vis, 0, FALSE);
+					if(!DEADMONSTER(mdef))
+						xmeleehity(&youmonst, mdef, &kickattack, (struct obj *)0, vis, 0, FALSE);
 				}
 			}
 		}
@@ -14864,7 +14913,7 @@ android_combo()
 				mdef = u.ustuck;
 			else
 				mdef = m_at(u.ux + u.dx, u.uy + u.dy);
-			if (!mdef)
+			if (!mdef || DEADMONSTER(mdef))
 				You("swing wildly!");
 			else {
 				xmeleehity(&youmonst, mdef, &finisher,   (struct obj *)0, vis, 0, FALSE);
@@ -14892,7 +14941,8 @@ android_combo()
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
-			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
+			if(!DEADMONSTER(mdef))
+				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 		}
 		u.uen--;
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
@@ -14940,7 +14990,8 @@ android_combo()
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
-					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
+					if(!DEADMONSTER(mdef))
+						xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 				}
 			}
 		}
@@ -14975,7 +15026,8 @@ android_combo()
 			else {
 				vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
-				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
+				if(!DEADMONSTER(mdef))
+					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 			}
 			n--;
 			u.uen--;
@@ -15001,7 +15053,8 @@ android_combo()
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
-			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
+			if(!DEADMONSTER(mdef))
+				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 		}
 		u.uen--;
 
@@ -15043,7 +15096,8 @@ android_combo()
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
-					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
+					if(!DEADMONSTER(mdef))
+						xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 				}
 			}
 			else {
@@ -15082,6 +15136,7 @@ android_combo()
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
+			if(!DEADMONSTER(mdef))
 			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 		}
 		u.uen--;

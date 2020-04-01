@@ -141,7 +141,7 @@ onscary(x, y, mtmp)
 int x, y;
 struct monst *mtmp;
 {
-	struct obj *alignedfearobj = aligned_sartprop3_at(SPFX3_FEAR, x, y);
+	struct obj *alignedfearobj = fear_arti_at(x, y);
 	int wardAt = ward_at(x,y);
 	struct monst *mat = m_at(x,y);
 	
@@ -1020,6 +1020,7 @@ register struct monst *mtmp;
 
 	/* berserk monsters calm down with small probability */
 	if (mtmp->mberserk && !rn2(50)) mtmp->mberserk = 0;
+	if (mtmp->mdisrobe && !rn2(50)) mtmp->mdisrobe = 0;
 
 	if (mtmp->mcrazed){
 		if(!rn2(4))mtmp->mconf = 1;
@@ -1030,6 +1031,11 @@ register struct monst *mtmp;
 			mtmp->mnotlaugh=0;
 			mtmp->mlaughing=rnd(5);
 		}
+	}
+	
+	if(mtmp->mdisrobe){
+		if(mon_remove_armor(mtmp))
+			return 0;
 	}
 	
 	if(mtmp->data == &mons[PM_MAD_SEER]){
