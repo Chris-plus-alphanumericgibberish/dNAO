@@ -3269,24 +3269,26 @@ boolean * messaged;
 	switch (oartifact)
 	{
 	case ART_LIMB_OF_THE_BLACK_TREE:	wepdesc = "tree-branch";					break;
-	case ART_NIGHTHORN:					wepdesc = "horn";							break;
 	case ART_PROFANED_GREATSCYTHE:		wepdesc = "greatscythe";					break;
 	case ART_LASH_OF_THE_COLD_WASTE:	wepdesc = "whip";							break;
-	case ART_WRATHFUL_WIND:				wepdesc = "club";							break;
+	/* shock damage seems to like having many different descriptions */
 	case ART_CARESS:					wepdesc = "lashing whip";					break;
 	case ART_ARYFAERN_KERYM:			wepdesc = "crackling sword-shaped void";	break;
 	case ART_RAMIEL:					wepdesc = "thundering polearm";				break;
 	case ART_MJOLLNIR:					wepdesc = "massive hammer";					break;
-	case ART_STAFF_OF_WILD_MAGIC:
-	case ART_SCEPTRE_OF_THE_FROZEN_FLOO:wepdesc = "staff";							break;
-	case ART_FROST_BRAND:
-	case ART_FIRE_BRAND:
-	case ART_MIRROR_BRAND:
-	case ART_LOLTH_S_FANG:
-	case ART_DOOMSCREAMER:
-	case ART_MAGICBANE:					wepdesc = "blade";							break;
+
 	default:
-		wepdesc = OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]);
+		/* try to be as vague as possible */
+		if (is_blade(msgr))
+			wepdesc = "blade";
+		else if (msgr->otyp == UNICORN_HORN)
+			wepdesc = "horn";
+		else if (msgr->otyp == QUARTERSTAFF)
+			wepdesc = "staff";
+		else if (is_grenade(msgr))
+			wepdesc = "grenade";
+		else
+			wepdesc = OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]);
 		break;
 	}
 
