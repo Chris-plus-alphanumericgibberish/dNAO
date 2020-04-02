@@ -575,7 +575,19 @@ const char *name;
 			if (artitypematch(a, obj)) {
 				if (a == &artilist[ART_FIRE_BRAND] || a == &artilist[ART_FROST_BRAND]) {
 					u.brand_otyp = obj->otyp;
+					/* blacklist and convert a few specific otypes */
+					if (u.brand_otyp == CRYSTAL_SWORD)	// too powerful
+						u.brand_otyp = LONG_SWORD;
+					if (u.brand_otyp == MIRRORBLADE)	// too powerful
+						u.brand_otyp = SHORT_SWORD;
+					if (u.brand_otyp == RUNESWORD)		// name looks weird (obsidian ember-runed runed black blade)
+						u.brand_otyp = BROADSWORD;
+					if (u.brand_otyp == RAKUYO)			// unlatching behaviour duplicates Brand as saber and dagger
+						u.brand_otyp = SABER;
+
 					hack_artifacts(); /* update the artilist array -- doing so manually doesn't work for some reason */
+					if (obj->otyp != u.brand_otyp)
+						obj = poly_obj(obj, u.brand_otyp);
 				}
 				else if (obj->otyp != a->otyp) {
 					obj = poly_obj(obj, a->otyp);
