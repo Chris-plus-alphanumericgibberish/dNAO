@@ -3111,6 +3111,8 @@ u_init()
 						 : (u.oonaenergy == AD_COLD) ? CLR_CYAN 
 						 : (u.oonaenergy == AD_ELEC) ? HI_ZAP 
 						 : CLR_WHITE;
+	/* set default Brand otyp as unset */
+	u.brand_otyp = STRANGE_OBJECT;
 	return;
 }
 

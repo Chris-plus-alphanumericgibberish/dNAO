@@ -267,6 +267,11 @@ hack_artifacts()
 		artilist[ART_CALLANDOR].wprops[1] = NO_PROP;
 		artilist[ART_CALLANDOR].wprops[2] = NO_PROP;
 	}
+	/* Fix up fire brand and frost brand */
+	if (u.brand_otyp != STRANGE_OBJECT) {
+		artilist[ART_FIRE_BRAND].otyp = u.brand_otyp;
+		artilist[ART_FROST_BRAND].otyp = u.brand_otyp;
+	}
 	artilist[ART_PEN_OF_THE_VOID].alignment = A_VOID; //something changes this??? Change it back.
 	return;
 }
@@ -440,6 +445,13 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 				}
 			}
 			else {
+				/* Fire Brand and Frost Brand can generate out of MANY otypes, so decrease their odds of being chosen at random */
+				/* if one's been generated, the other HAS to be the same otyp, so no penalty is needed */
+				if ((m == ART_FIRE_BRAND || m == ART_FROST_BRAND)
+					&& u.brand_otyp == STRANGE_OBJECT
+					&& rn2(8))
+					continue;
+
 				eligible[n++] = m;
 			}
 		}
@@ -451,7 +463,23 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 	    /* make an appropriate object if necessary, then christen it */
 make_artif: 
 		if (by_align){
-			otmp = mksobj((int)a->otyp, TRUE, FALSE);
+			int otyp = a->otyp;
+
+			if ((m == ART_FIRE_BRAND || m == ART_FROST_BRAND) && u.brand_otyp == STRANGE_OBJECT) {
+				if (Role_if(PM_MONK))
+					otyp = GAUNTLETS;
+				else
+					otyp =	!rn2(3) ? LONG_SWORD :
+							!rn2(7) ? SABER :
+							!rn2(6) ? SCIMITAR :
+							!rn2(5) ? GAUNTLETS :
+							!rn2(4) ? BROADSWORD :
+							!rn2(3) ? AXE :
+							!rn2(2) ? SHORT_SWORD :
+									  ATHAME;
+			}
+
+			otmp = mksobj(otyp, TRUE, FALSE);
 		}
 	    otmp = oname(otmp, a->name);
 	    otmp->oartifact = m;
@@ -574,7 +602,10 @@ short *otyp;
 		aname = a->name;
 		if(!strncmpi(aname, "the ", 4)) aname += 4;
 		if(!strcmpi(name, aname)) {
-			*otyp = a->otyp;
+			if (a == &artilist[ART_FIRE_BRAND] || a == &artilist[ART_FROST_BRAND])
+				*otyp = (u.brand_otyp != STRANGE_OBJECT ? u.brand_otyp : a->otyp);
+			else
+				*otyp = a->otyp;
 			return a->name;
 		}
     }
@@ -3273,24 +3304,26 @@ boolean * messaged;
 	switch (oartifact)
 	{
 	case ART_LIMB_OF_THE_BLACK_TREE:	wepdesc = "tree-branch";					break;
-	case ART_NIGHTHORN:					wepdesc = "horn";							break;
 	case ART_PROFANED_GREATSCYTHE:		wepdesc = "greatscythe";					break;
 	case ART_LASH_OF_THE_COLD_WASTE:	wepdesc = "whip";							break;
-	case ART_WRATHFUL_WIND:				wepdesc = "club";							break;
+	/* shock damage seems to like having many different descriptions */
 	case ART_CARESS:					wepdesc = "lashing whip";					break;
 	case ART_ARYFAERN_KERYM:			wepdesc = "crackling sword-shaped void";	break;
 	case ART_RAMIEL:					wepdesc = "thundering polearm";				break;
 	case ART_MJOLLNIR:					wepdesc = "massive hammer";					break;
-	case ART_STAFF_OF_WILD_MAGIC:
-	case ART_SCEPTRE_OF_THE_FROZEN_FLOO:wepdesc = "staff";							break;
-	case ART_FROST_BRAND:
-	case ART_FIRE_BRAND:
-	case ART_MIRROR_BRAND:
-	case ART_LOLTH_S_FANG:
-	case ART_DOOMSCREAMER:
-	case ART_MAGICBANE:					wepdesc = "blade";							break;
+
 	default:
-		wepdesc = OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]);
+		/* try to be as vague as possible */
+		if (is_blade(msgr))
+			wepdesc = "blade";
+		else if (msgr->otyp == UNICORN_HORN)
+			wepdesc = "horn";
+		else if (msgr->otyp == QUARTERSTAFF)
+			wepdesc = "staff";
+		else if (is_grenade(msgr))
+			wepdesc = "grenade";
+		else
+			wepdesc = OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]);
 		break;
 	}
 
