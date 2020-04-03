@@ -1053,7 +1053,7 @@ A("Hammerfeet",						KICKING_BOOTS,		(const char *)0,
 /* by extension, protects you from being grabbed */
 A("The Grappler's Grasp",			GAUNTLETS_OF_POWER,	(const char *)0,
 	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_C, NOFLAG,
+	A_NONE, NON_PM, NON_PM, TIER_C, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 6), NOFLAG,
 	PROP0(), NOFLAG,

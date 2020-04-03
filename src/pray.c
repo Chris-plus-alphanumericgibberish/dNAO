@@ -792,11 +792,16 @@ int ga_num;
 boolean
 maybe_god_gives_gift()
 {
+	int nartifacts = u.ugifts + (Role_if(PM_PRIEST) ? 0 : u.uconduct.wisharti);
 	/* previous: 1 in (10 + (2 * gifts * (gifts+wishes))) */
 	/* Role_if(PM_PRIEST) ? !rn2(10 + (2 * u.ugifts * u.ugifts)) : !rn2(10 + (2 * u.ugifts * nartifacts)) */
 	/* the average giftable artifact has a value of 4 (TIER_B), plus any bonuses for the player being good with it */
 	/* uartisval isn't increased for priests when wishing */
-	return !rn2(10 + (u.uartisval * u.uartisval / 10));
+
+//Disable while tiering and full behaviour is still under discussion
+//	return !rn2(10 + (u.uartisval * u.uartisval / 10));
+
+	return !rn2(10 + (2 * u.ugifts * (u.ugifts + nartifacts)));
 }
 
 
@@ -3197,7 +3202,8 @@ dosacrifice()
 			otmp->gifted = Align2gangr(u.ualign.type);
 			u.ugifts++;
 			u.uartisval += arti_value(otmp);
-		    u.ublesscnt = rnz(300 + (u.uartisval * 10));
+		    //u.ublesscnt = rnz(300 + (u.uartisval * 10));
+			u.ublesscnt = rnz(300 + (u.ugifts * 50));
 			u.lastprayed = moves;
 			u.reconciled = REC_NONE;
 			u.lastprayresult = PRAY_GIFT;
@@ -4271,7 +4277,7 @@ struct obj *otmp;
 				uwep->oeroded2 = 0;
 				uwep->oerodeproof = 1;
 				u.ugifts++;
-				u.uartisval += max(arti_value(uwep), TIER_B);
+				u.uartisval += TIER_S;
 			}
 			else if(!flags.made_know){
 				struct obj *otmp;
