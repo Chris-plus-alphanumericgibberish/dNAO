@@ -2703,7 +2703,10 @@ mon_can_see_mon(looker, lookie)
 		return TRUE;
 
 	clearpath = clear_path(looker->mx, looker->my, lookie->mx, lookie->my);
-	hardtosee = (lookie->minvis && !mon_resistance(looker, SEE_INVIS) && !can_track(looker->data));
+	hardtosee = (!is_tracker(looker->data) && (
+		(lookie->minvis && !mon_resistance(looker, SEE_INVIS)) ||
+		(lookie->mundetected)
+		));
 
 	/* sight -- requires looker to not be blind, have clear LoS, and notice an invisible lookie somehow */
 	if (!is_blind(looker)
@@ -2838,7 +2841,10 @@ struct monst *looker;
 		return TRUE;
 
 	clearpath = couldsee(looker->mx, looker->my);
-	hardtosee = (Invis && !mon_resistance(looker, SEE_INVIS) && !can_track(looker->data));
+	hardtosee = (!can_track(looker->data) && (
+		(Invis && !mon_resistance(looker, SEE_INVIS)) ||
+		(u.uundetected)
+		));
 
 	/* sight -- requires looker to not be blind, have clear LoS, and notice an invisible lookie somehow */
 	if (!is_blind(looker)
