@@ -3298,6 +3298,9 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	}
 	
 	if(!mon_can_see_mon(magr, mdef)) return 0L;
+
+	if(magr->mstrategy & STRAT_WAITMASK)
+		return 0L;
 	
 	if(magr->mtame && mdef->mpeaceful && !u.uevent.uaxus_foe && md == &mons[PM_AXUS])
 		return 0L;
