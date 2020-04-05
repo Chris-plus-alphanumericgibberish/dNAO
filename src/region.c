@@ -1188,18 +1188,18 @@ genericptr_t p2;
 			//Dormant spores
 			make_sick(Sick ? Sick/2L + 1L : ACURR(A_CON)*300L, //~3000 turns
 				"white spores", TRUE, SICK_NONVOMITABLE);
-			You("are covered with dust and can barely breath!");
+			You("are covered with dust and can barely breathe!");
 			losehp(rnd(dam), "dust storm", KILLED_BY_AN);
 			nomul(0, NULL);
 		} else if(!rn2(10) && !is_anhydrous(youracedata)){
 			//Salt
-			You("are covered with dust and can barely breath!");
+			You("are covered with dust and can barely breathe!");
 			pline("Salt dust burns your %s!", makeplural(body_part(LUNG)));
 			You("cough and spit blood!");
 			losehp(rnd(dam)+5, "dust storm", KILLED_BY_AN);
 			nomul(0, NULL);
 		} else {
-			You("are covered with dust and can barely breath!");
+			You("are covered with dust and can barely breathe!");
 			losehp(rnd(dam), "dust storm", KILLED_BY_AN);
 			nomul(0, NULL);
 		}
@@ -1247,7 +1247,7 @@ genericptr_t p2;
 				}
 			} else {
 				if (cansee(mtmp->mx, mtmp->my))
-					pline("%s struggles to breath!", Monnam(mtmp));
+					pline("%s struggles to breathe!", Monnam(mtmp));
 				mtmp->mhp -= rnd(dam);
 				if (mtmp->mhp <= 0) {
 					if (heros_fault(reg))
