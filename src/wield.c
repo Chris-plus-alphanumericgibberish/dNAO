@@ -746,7 +746,7 @@ boolean fade_scrolls;
 			aobjnam(target, "are"));
 		/* no message if not carried */
 	    }
-	    if (target->oerodeproof) target->rknown = TRUE;
+		if (target->oerodeproof && (acid_dmg ? is_corrodeable(target) : is_rustprone(target))) target->rknown = TRUE;
 	} else if (erosion < MAX_ERODE) {
 	    if (victim == &youmonst)
 		Your("%s%s!", aobjnam(target, acid_dmg ? "corrode" : "rust"),
