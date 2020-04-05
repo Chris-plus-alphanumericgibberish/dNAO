@@ -487,8 +487,11 @@ aligntyp alignment;
 				);
 
 			/* skip lightsources for Drow */
-			/* TODO: make lightup-when-wielded part of artilist so it can be figured out for here */
-			skip_if(Race_if(PM_DROW) && ((a->iflags & ARTI_PERMALIGHT) || (m == ART_HOLY_MOONLIGHT_SWORD)));
+			skip_if(Race_if(PM_DROW) &&
+				(  (a->iflags & ARTI_PERMALIGHT)
+				|| (a->iflags & ARTI_LIGHT)
+				|| (m == ART_HOLY_MOONLIGHT_SWORD)
+				));
 
 			/* avoid boots for chiropterans */
 			skip_if(Race_if(PM_CHIROPTERAN) && objects[a->otyp].oc_class == ARMOR_CLASS && objects[a->otyp].oc_armcat == ARM_BOOTS);
@@ -9064,19 +9067,12 @@ boolean silent;
 /* WAC return TRUE if artifact is always lit */
 boolean
 artifact_light(obj)
-    struct obj *obj;
+struct obj *obj;
 {
-    return	(get_artifact(obj) && 
-				(obj->oartifact == ART_SUNSWORD ||
-				 obj->oartifact == ART_SOL_VALTIVA ||
-				 // obj->oartifact == ART_VEIL_OF_LATONA ||
-				 (obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_JACK) ||
-				 (obj->oartifact >= ART_ARCOR_KERYM &&
-				  obj->oartifact <= ART_ARYVELAHR_KERYM) ||
-				 (obj->oartifact >= ART_SWORD_OF_ERATHAOL &&
-				  obj->oartifact <= ART_HAMMER_OF_BARQUIEL)
-				)
-			);
+
+	if (obj && obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_JACK) return TRUE;
+
+	return (obj && obj->oartifact && arti_is_prop(obj, ARTI_LIGHT));
 }
 
 /* return TRUE if artifact is permanently lit */

@@ -549,7 +549,7 @@ A("Sunsword",			LONG_SWORD,						(const char *)0,
 	ATTK(AD_PHYS, 1, 0), (ARTA_HATES | ARTA_SILVER | ARTA_BRIGHT | ARTA_BLIND | ARTA_SHINING),
 	PROP1(SEARCHING), (ARTP_BLINDRES),
 	PROP0(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_LIGHT)
 	),
 
 /*can be thrown by dwarves*/
@@ -1811,7 +1811,7 @@ A("Arcor Kerym",					LONG_SWORD,			(const char *)0,
 	ATTK(AD_PHYS, 5, 0), NOFLAG,
 	PROP1(DRAIN_RES), NOFLAG,
 	PROP0(), NOFLAG,
-	HEALING, NOFLAG
+	HEALING, (ARTI_LIGHT)
 	),
 
 /* needs encyc entry */
@@ -1823,7 +1823,7 @@ A("Aryfaern Kerym",					RUNESWORD,			(const char *)0,
 	ATTK(AD_ELEC, 5, 10), NOFLAG,
 	PROP2(SHOCK_RES, SPELLBOOST), NOFLAG,
 	PROP0(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_LIGHT)
 	),
 
 /* needs encyc entry */
@@ -1835,7 +1835,7 @@ A("Aryvelahr Kerym",				CRYSTAL_SWORD,		(const char *)0,
 	ATTK(AD_PHYS, 5, 0), (ARTA_SILVER),
 	PROP2(REFLECTING, DRAIN_RES), NOFLAG,
 	PROP0(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_LIGHT)
 	),
 
 A("The Staff of Aesculapius",		QUARTERSTAFF,		(const char *)0,
@@ -2284,7 +2284,7 @@ A("Sol Valtiva",					TWO_HANDED_SWORD,	(const char *)0,
 	ATTK(AD_FIRE, 5, 24), (ARTA_EXPLFIRE|ARTA_BLIND|ARTA_BRIGHT),
 	PROP0(), NOFLAG,
 	PROP0(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_LIGHT)
 	),
 
 A("The Eye of the Aethiopica",		AMULET_OF_ESP,		(const char *)0,
@@ -2660,7 +2660,7 @@ A((name),							(type),				(const char *)0,				\
 	ATTK(AD_PHYS, 7, 10), (ARTA_BLIND|ARTA_BRIGHT),										\
 	PROP1(SEARCHING), (ARTP_BLINDRES),													\
 	PROP0(), NOFLAG,																	\
-	NOINVOKE, NOFLAG																	\
+	NOINVOKE, (ARTI_LIGHT)																\
 	)
 ANGELIC_WEAPON("The Sword of Erathaol",		LONG_SWORD),
 ANGELIC_WEAPON("The Saber of Sabaoth",		SABER),

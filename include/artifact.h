@@ -61,13 +61,14 @@
 
 #define ARTI_ENGRAVE	0x0001L /* can be used to engrave quickly like an athame */
 #define ARTI_DIG		0x0002L /* can be used to dig like a pickaxe */
-#define ARTI_PERMALIGHT	0x0004L /* is a permanent lightsource, even when just lying on the floor */
-#define ARTI_MANDALA	0x0008L /* (r)ead object to benifit as from unihorn ONLY CHECKED FOR SHIRTS */
-#define ARTI_PLUSSEV	0x0010L /* artifact armor can be enchanted to +7 easily */
-#define ARTI_FEAR		0x0020L /* acts as a scroll of scare monster while on floor */
-#define ARTI_BLOODTHRST	0x0040L /* wants to attack peaceful and tame creatures */
-#define ARTI_SPEAK		0x0080L /* speaks rumours */
-#define ARTI_LUCK		0x0100L /* acts as a luckstone */
+#define ARTI_LIGHT		0x0004L	/* is a lightsource while wielded/worn */
+#define ARTI_PERMALIGHT	0x0008L /* is a permanent lightsource, even when just lying on the floor */
+#define ARTI_MANDALA	0x0010L /* (r)ead object to benifit as from unihorn ONLY CHECKED FOR SHIRTS */
+#define ARTI_PLUSSEV	0x0020L /* artifact armor can be enchanted to +7 easily */
+#define ARTI_FEAR		0x0040L /* acts as a scroll of scare monster while on floor */
+#define ARTI_BLOODTHRST	0x0080L /* wants to attack peaceful and tame creatures */
+#define ARTI_SPEAK		0x0100L /* speaks rumours */
+#define ARTI_LUCK		0x0200L /* acts as a luckstone */
 
 //#define SPFX2_NINJA		0x0000008L	/* throws from 1-your skill level ninja stars after each attack */
 //#define SPFX3_CARCAP	0x0000020L	/* increases carrying capacity when carried */
