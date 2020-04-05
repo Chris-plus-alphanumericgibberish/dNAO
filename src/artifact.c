@@ -446,11 +446,11 @@ aligntyp alignment;
 	if (Role_if(PM_PIRATE))
 		return (artiexist[ART_MARAUDER_S_MAP] ? 0 : ART_MARAUDER_S_MAP);
 
-	for (attempts = 0; !rn2(n - 1); attempts++) {
+	for (attempts = 1; (!n || (!rn2(n - 1) && u.ugifts)); attempts++) {
 		n = 0;
 		for (m = 1, a = artilist + 1; a->otyp; a++, m++)
 		{
-			condition = 0;
+			condition = 1;
 
 #define skip_if(x) if((attempts < ++condition) && (x)) continue
 
@@ -461,17 +461,16 @@ aligntyp alignment;
 			if (a->gflags & ARTG_NOGEN)
 				continue;
 
-			/* First priority: artifacts for that role */
-			if (Role_if(a->role) || Pantheon_if(a->role))
-				return m;
-
 			/* conditions that can be relaxed, in order of least-to-most important */
 
-			/* try to get an aligned first gift */
-			skip_if(!u.ugifts && a->alignment != alignment);
-
-			/* go for preferred artifacts for your first gift (if you didn't already have one specified) */
-			skip_if(!u.ugifts && !(a->gflags & ARTG_GIFT));
+			/* try to get a role-specific first gift -- overrides alignment, artg_gift considerations */
+			skip_if(!u.ugifts && !(Role_if(a->role) || Pantheon_if(a->role)));
+			if (attempts > 1) {
+				/* try to get an aligned first gift */
+				skip_if(!u.ugifts && a->alignment != alignment);
+				/* go for preferred artifacts for your first gift (if you didn't already have one specified) */
+				skip_if(!u.ugifts && !(a->gflags & ARTG_GIFT));
+			}
 
 			/* avoid weapons for Monks */
 			skip_if(Role_if(PM_MONK) && !is_monk_safe_artifact(m) && !u.uconduct.weaphit);
