@@ -11799,10 +11799,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			switch (i)
 			{
 			case OPOISON_BASIC:
-				poisdmg += (major) ? 9999 : rnd(6);
+				poisdmg += (major) ? (youdef ? d(3, 6) : 9999) : rnd(6);
 				break;
 			case OPOISON_FILTH:
-				poisdmg += (major) ? 9999 : rnd(12);
+				poisdmg += (major) ? (youdef ? d(3, 12) : 9999) : rnd(12);
 				break;
 			case OPOISON_SLEEP:
 				/* no damage */
@@ -13404,11 +13404,26 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			switch (i)
 			{
 			case OPOISON_BASIC:
-				if ((vis&VIS_MDEF) && lethaldamage)
+				if (youdef) {
+					int attrib = (
+						!rn2(3) ?	A_STR :
+						!rn2(2) ?	A_CON :
+									A_DEX);
+					int amnt = rnd(ACURR(attrib) / 5);
+
+					if (adjattrib(attrib, -amnt, 1))
+						pline_The("poison was quite debilitating...");
+				}
+				else if ((vis&VIS_MDEF) && lethaldamage)
 					pline_The("poison was deadly...");
 				break;
 			case OPOISON_FILTH:
-				if ((vis&VIS_MDEF) && lethaldamage)
+				if (youdef) {
+					/* resistance should have already been checked */
+					make_sick(Sick ? Sick / 2L + 1L : (long)rn1(ACURR(A_CON), 20),
+						"filth-coated weapon", TRUE, SICK_NONVOMITABLE);
+				}
+				else if ((vis&VIS_MDEF) && lethaldamage)
 					pline_The("tainted filth was deadly...");
 				break;
 			case OPOISON_SLEEP:
