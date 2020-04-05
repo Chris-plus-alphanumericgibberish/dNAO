@@ -849,8 +849,13 @@ struct monst *priest;
 {
 	int x, y, ax, ay, roomno = (int)temple_occupied(u.urooms);
 	struct mkroom *troom;
+	static long last_smite = 0L;
 
 	if (!roomno || !has_shrine(priest))
+		return;
+
+	/* max 1 smite per global turn */
+	if (last_smite >= monstermoves)
 		return;
 
 	ax = x = EPRI(priest)->shrpos.x;
@@ -901,6 +906,7 @@ struct monst *priest;
 
 	buzz(AD_ELEC, SPBOOK_CLASS, FALSE, 6, x, y, sgn(tbx), sgn(tby),0,0); /* bolt of lightning */
 	exercise(A_WIS, FALSE);
+	last_smite = monstermoves;
 }
 
 void
