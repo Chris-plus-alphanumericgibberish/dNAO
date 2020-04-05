@@ -3678,24 +3678,50 @@ boolean ranged;
 		wake_nearto(x(mdef), y(mdef),										/* call function to wake nearby monsters */
 		combatNoise(pa) / (((youagr || youdef) && Stealth) ? 2 : 1));		/* range is reduced if the player is involved and stealthy */
 
+	/* show mimics */
+	if (magr->mappearance)
+		seemimic_ambush(magr);
+	if (mdef->mappearance)
+		seemimic(mdef);
 	/* If the monster is undetected and hits you, you should know where the attack came from. */
 	if (youdef && magr->mundetected && hit && (hides_under(pa) || pa->mlet == S_EEL)) {
 		magr->mundetected = 0;
 		if (!(Blind ? Blind_telepat : Unblind_telepat)) {
-			struct obj *obj;
-			const char *what;
+			struct obj *obj = level.objects[x(magr)][y(magr)];
+			const char *what = "nothing at all";
 
-			if ((obj = level.objects[x(magr)][y(magr)]) != 0) {
-				if (Blind && !obj->dknown)
-					what = something;
-				else if (is_pool(x(magr), y(magr), TRUE) && !Underwater)
-					what = "the water";
-				else
-					what = doname(obj);
-
-				pline("%s was hidden under %s!", Amonnam(magr), what);
-			}
+			if (is_pool(x(magr), y(magr), TRUE) && !Underwater)
+				what = "the water";
+			else if (Blind && obj && obj->dknown)
+				what = something;
+			else if (obj)
+				what = doname(obj);
+			pline("%s was hidden under %s!", Amonnam(magr), what);
 			newsym(x(magr), y(magr));
+		}
+	
+	}
+	/* otherwise, if the magr OR mdef is undetected, reveal them */
+	else if (vis && hit && ((!youdef && !youagr && mdef->mundetected) || (!youagr && magr->mundetected))) {
+		if (!youdef && mdef->mundetected) {
+			mdef->mundetected = 0;
+			newsym(x(mdef), y(mdef));
+			if (canseemon(mdef) && !sensemon(mdef)) {
+				if (u.usleep) You("dream of %s.",
+					(mdef->data->geno & G_UNIQ) ?
+					a_monnam(mdef) : makeplural(m_monnam(mdef)));
+				else pline("Suddenly, you notice %s.", a_monnam(mdef));
+			}
+		}
+		if (!youagr && magr->mundetected) {
+			magr->mundetected = 0;
+			newsym(x(magr), y(magr));
+			if (canseemon(magr) && !sensemon(magr)) {
+				if (u.usleep) You("dream of %s.",
+					(magr->data->geno & G_UNIQ) ?
+					a_monnam(magr) : makeplural(m_monnam(magr)));
+				else pline("Suddenly, you notice %s.", a_monnam(magr));
+			}
 		}
 	}
 	/* blast the player sometimes if they're wearing blasty artifact body armor */

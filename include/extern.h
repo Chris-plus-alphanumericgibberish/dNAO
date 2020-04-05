@@ -1454,6 +1454,7 @@ E void NDECL(wake_nearby);
 E void NDECL(wake_nearby_noisy);
 E void FDECL(wake_nearto, (int,int,int));
 E void FDECL(wake_nearto_noisy, (int,int,int));
+E void FDECL(seemimic_ambush, (struct monst *));
 E void FDECL(seemimic, (struct monst *));
 E void NDECL(rescham);
 E void NDECL(restartcham);
