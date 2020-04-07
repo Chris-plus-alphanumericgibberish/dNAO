@@ -2163,7 +2163,7 @@ register struct obj *obj;
 			fix_object(glyph);
 		}
 		if(Race_if(PM_WORM_THAT_WALKS)){
-			glyph->obj_material = SHELL;
+			glyph->obj_material = SHELL_MAT;
 			fix_object(glyph);
 		}
 		hold_another_object(glyph, "You drop %s!", doname(glyph), (const char *)0);
