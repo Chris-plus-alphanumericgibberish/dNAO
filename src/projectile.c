@@ -2082,6 +2082,9 @@ dofire()
 					}
 					/* always destroy ammo fired from a blaster */
 					if (ammo) {
+						if (launcher->otyp == MASS_SHADOW_PISTOL)
+							ammo->ovar1 = -P_FIREARM;	/* special case to use FIREARM skill instead of SLING */
+
 						result += uthrow(ammo, launcher, shotlimit, TRUE);
 						/* and now delete the ammo object we created */
 						obfree(ammo, 0);
