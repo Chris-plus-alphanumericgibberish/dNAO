@@ -6120,6 +6120,39 @@ register struct	monst	*mtmp;
 			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
 				mtmp->mfaction = MISTWEAVER;
 			}
+		} else if(ptr == &mons[PM_LURKING_ONE]) {
+			int i;
+			long long oprop;
+			switch(rnd(20)){
+				case 1:
+					oprop = OPROP_ELECW;
+				break;
+				case 2:
+					oprop = OPROP_ACIDW;
+				break;
+				case 3:
+					oprop = OPROP_MAGCW;
+				break;
+				case 4:
+					oprop = OPROP_WATRW;
+				break;
+				case 5:
+				case 6:
+				case 7:
+					oprop = OPROP_PSIOW;
+				break;
+				default:
+					oprop = 0;
+				break;
+			}
+			for(i = 2; i > 0; i--){
+				otmp = mksobj(CLUB, FALSE, FALSE);
+				otmp->obj_material = BONE;
+				otmp->oproperties = OPROP_CCLAW|oprop;
+				otmp->objsize = mtmp->data->msize;
+				fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
+			}
 		} else if (is_giant(ptr)) {
 		    for (cnt = rn2((int)(mtmp->m_lev / 2)); cnt; cnt--) {
 			otmp = mksobj(rnd_class(DILITHIUM_CRYSTAL,LUCKSTONE-1),

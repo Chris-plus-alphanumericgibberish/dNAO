@@ -1459,12 +1459,12 @@ struct obj *obj;
 	if(obj->otyp == RAKUYO){
 		You("unlatch %s.",the(xname(obj)));
 		obj->otyp = RAKUYO_SABER;
-		fix_object(obj);
 		obj->quan += 1;
 	    dagger = splitobj(obj, 1L);
 		obj_extract_self(dagger);
 		dagger->otyp = RAKUYO_DAGGER;
 		fix_object(obj);
+		fix_object(dagger);
 		dagger = hold_another_object(dagger, "You drop %s!",
 				      doname(obj), (const char *)0); /*shouldn't merge, but may drop*/
 		if(dagger && !uswapwep && carried(dagger)){

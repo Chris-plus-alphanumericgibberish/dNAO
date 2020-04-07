@@ -210,6 +210,7 @@ struct obj {
 #define OPROP_VORPW		0x0001000000000000L
 #define OPROP_MORGW		0x0002000000000000L
 #define OPROP_WRTHW		0x0004000000000000L
+#define OPROP_CCLAW		0x0008000000000000L
 #define OPROP_W_MASK	(~OPROP_DEF_MASK)
 
   unsigned oeaten;	/* nutrition left in food, if partly eaten */
@@ -442,7 +443,7 @@ struct weapon_dice {
 			 objects[otmp->otyp].oc_skill <= P_SABER)
 #define is_rapier(otmp)	(otmp->oclass == WEAPON_CLASS && (\
 			 otmp->otyp == RAPIER || \
-			 is_rakuyo(otmp) || \
+			 otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
 			 otmp->otyp == CROW_QUILL))
 #define is_rakuyo(otmp)	(otmp->otyp == RAKUYO || \

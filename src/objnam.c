@@ -896,6 +896,25 @@ char *buf;
 }
 
 static void
+add_insight_words(obj, buf)
+struct obj *obj;
+char *buf;
+{
+	if (obj->otyp == CLUB && obj->oproperties&OPROP_CCLAW){
+		if(u.uinsight >= 30)
+			Strcat(buf, "thrashing ");
+		else if(u.uinsight >= 15)
+			Strcat(buf, "severed ");
+	}
+	if (is_rakuyo(obj)){
+		if(u.uinsight >= 40)
+			Strcat(buf, "burning ");
+		if(u.uinsight >= 20)
+			Strcat(buf, "blood-drenched ");
+	}
+}
+
+static void
 add_colours_words(obj, buf)
 struct obj *obj;
 char *buf;
@@ -1210,6 +1229,11 @@ boolean with_price;
 	if (Role_if(PM_PIRATE) && iflags.role_obj_names && Alternate_item_name(typ, Pirate_items))
 		actualn = Alternate_item_name(typ, Pirate_items);
 
+	if(obj->otyp == CLUB && obj->oproperties&OPROP_CCLAW){
+		if(u.uinsight >= 15)
+			actualn = "arm";
+	}
+	
 	buf[0] = '\0';
 	/*
 	* clean up known when it's tied to oc_name_known, eg after AD_DRIN
@@ -1235,6 +1259,7 @@ boolean with_price;
 		if (dofull) add_enchantment_number(obj, buf);
 		add_properties_words(obj, buf, dofull);	// Note: more verbose for artifacts if dofull is true
 		add_poison_words(obj, buf);
+		add_insight_words(obj, buf);
 		add_colours_words(obj, buf);
 		add_material_words(obj, buf);	// TODO - show some artifact's materials, currently hides all
 		if (dofull) add_type_words(obj, buf);
@@ -1935,8 +1960,8 @@ weapon:
 			else {
 				const char *hand_s = obj->where == OBJ_MINVENT ? mbodypart(obj->ocarry, HAND) : body_part(HAND);
 
-				if ((bimanual(obj, youracedata)
-					&& !(u.twoweap && (obj->oartifact == ART_PROFANED_GREATSCYTHE || obj->oartifact == ART_LIFEHUNT_SCYTHE)))
+				if ((bimanual(obj, obj->where == OBJ_MINVENT ? obj->ocarry->data : youracedata)
+				 && !(obj->where != OBJ_MINVENT && u.twoweap && (obj->oartifact == ART_PROFANED_GREATSCYTHE || obj->oartifact == ART_LIFEHUNT_SCYTHE)))
 					|| (u.twoweap && obj->otyp == STILETTOS))
 					hand_s = makeplural(hand_s);
 				Sprintf(eos(buf), " (weapon in %s)", hand_s);
