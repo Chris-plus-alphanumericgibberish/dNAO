@@ -263,7 +263,7 @@ struct obj *cont;
 				fix_object(otmp);
 			}
 			if(Race_if(PM_WORM_THAT_WALKS)){
-				otmp->obj_material = SHELL;
+				otmp->obj_material = SHELL_MAT;
 				fix_object(otmp);
 			}
 			if(rn2(5)) curse(otmp);

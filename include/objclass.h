@@ -53,7 +53,7 @@ struct objclass {
 #define LEATHER		7
 #define WOOD		8
 #define BONE		9
-#define SHELL		10
+#define SHELL_MAT	10
 #define DRAGON_HIDE	11	/* not leather! */
 #define IRON		12	/* Fe - includes steel */
 #define METAL		13	/* Sn, &c. */

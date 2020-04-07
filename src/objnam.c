@@ -973,7 +973,7 @@ boolean adjective;
 			return "chitin";
 		else
 			return "bone";
-		case SHELL:
+		case SHELL_MAT:
 			return "shell";
 	case DRAGON_HIDE:
 		/* for some reason, this is dragonhide? */
