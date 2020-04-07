@@ -992,7 +992,10 @@ domove()
 			u.uy = y = u.ustuck->my;
 			mtmp = u.ustuck;
 		}
-	}else if(u.ustuck && !flags.nopick && !(u.ustuck->mpeaceful && !Hallucination) && !(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)){
+	}else if(u.ustuck && !flags.nopick
+		&& !(u.ustuck->mpeaceful && !Hallucination)
+		&& !(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)
+		&& distmin(u.ux, u.uy, u.ustuck->mx, u.ustuck->my) <= 1) {
 		u.dx = u.ustuck->mx - u.ux;
 		u.dy = u.ustuck->my - u.uy;
 		x = u.ustuck->mx;
