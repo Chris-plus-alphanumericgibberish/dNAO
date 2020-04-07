@@ -8,6 +8,23 @@ extern boolean notonhead;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+/* unhide creatures, possibly with message, before they make an attack */
+void
+xmakingattack(magr, mdef, tarx, tary)
+struct monst * magr;
+struct monst * mdef;
+int tarx;
+int tary;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pd = youdef ? youracedata : mdef->data;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 boolean
 magr_can_attack_mdef(magr, mdef, tarx, tary, active)

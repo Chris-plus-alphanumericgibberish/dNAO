@@ -6032,6 +6032,7 @@ int anger;
 {
 	mtmp->msleeping = 0;
 	mtmp->meating = 0;	/* assume there's no salvagable food left */
+	mtmp->mstrategy &= ~(STRAT_WAITMASK);
 	if(anger) setmangry(mtmp);
 	if(mtmp->m_ap_type) seemimic(mtmp);
 	else if (flags.forcefight && !flags.mon_moving && mtmp->mundetected) {
@@ -6175,6 +6176,44 @@ register int x, y, distance;
 		}
 	}
 }
+
+void
+seemimic_ambush(mtmp)
+struct monst *mtmp;
+{
+	unsigned old_app = mtmp->mappearance;
+	uchar old_ap_type = mtmp->m_ap_type;
+
+	seemimic(mtmp);
+
+	if (canseemon(mtmp) && !sensemon(mtmp)) {
+		const char * app;
+		switch (old_ap_type)
+		{
+		case M_AP_OBJECT:
+			if (old_app == STRANGE_OBJECT)
+				app = "strange object";
+			else
+				app = simple_typename(old_app);
+			break;
+		case M_AP_FURNITURE:
+			app = defsyms[old_app].explanation;
+			break;
+		case M_AP_MONSTER:
+			app = mons[old_app].mname;
+			break;
+		case M_AP_NOTHING:
+			app = m_monnam(mtmp);
+			break;
+		}
+		pline("That %s was actually %s!",
+			app,
+			a_monnam(mtmp)
+			);
+	}
+	return;
+}
+
 
 /* NOTE: we must check for mimicry before calling this routine */
 void
