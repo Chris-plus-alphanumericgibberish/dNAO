@@ -9444,14 +9444,14 @@ struct obj *obj;
 	struct monst *mtmp;
 	xchar xlocale, ylocale;
 	if(get_obj_location(obj, &xlocale, &ylocale, 0)){
-	}
-	if(!rn2(70)){
-		struct permonst *pm;
-		pm = &mons[nitocrisspawns[rn2(SIZE(nitocrisspawns))]];
-		mtmp = makemon(pm, xlocale, ylocale, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
-		if(mtmp){
-			mtmp->mpeaceful = 0;
-			set_malign(mtmp);
+		if(!rn2(70)){
+			struct permonst *pm;
+			pm = &mons[nitocrisspawns[rn2(SIZE(nitocrisspawns))]];
+			mtmp = makemon(pm, xlocale, ylocale, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+			if(mtmp){
+				mtmp->mpeaceful = 0;
+				set_malign(mtmp);
+			}
 		}
 	}
 }
