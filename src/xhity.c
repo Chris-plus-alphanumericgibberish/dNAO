@@ -199,6 +199,16 @@ struct monst * mdef;
 	if (uwep && fast_weapon(uwep) && uwep->spe >= 2){
 		youmonst.movement += NORMAL_SPEED / 6;
 	}
+	
+	/* SCOPECREEP: remove this, replace with u.actioncost */
+	// note - you don't have to actually be two-weaponing, and that's intentional,
+	// but you must have another ARTA_HASTE wep offhanded (and there's only 2 so)
+	if (uwep && uwep->oartifact && arti_attack_prop(uwep, ARTA_HASTE)){
+		youmonst.movement += NORMAL_SPEED / 3;
+		if (uswapwep && uswapwep->oartifact && arti_attack_prop(uwep, ARTA_HASTE))
+			youmonst.movement += NORMAL_SPEED / 6;
+	}
+	
 	if (uwep
 		&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE)
 		&& !u.twoweap

@@ -758,24 +758,24 @@ A("Helping Hand",		GRAPPLING_HOOK,					(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("The Blade Singer's Spear",		SPEAR,				(const char *)0,
+A("The Blade Singer's Saber",		RAKUYO,				(const char *)0,
 	1500L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
-	ATTK(AD_PHYS, 6, 6), (ARTA_HASTE),
+	ATTK(AD_PHYS, 8, 8), (ARTA_HASTE),
 	PROP0(), NOFLAG,
 	PROP0(), NOFLAG,
-	DANCE_DAGGER, NOFLAG
+	BLADESONG, NOFLAG
 	),
 /*Needs encyc entry*/
-A("The Blade Dancer's Dagger",		DAGGER,				(const char *)0,
+A("The Blade Dancer's Dagger",		RAKUYO_DAGGER,				(const char *)0,
 	1500L, SILVER, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_GIFT|ARTG_NOCNT),
+	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_NOCNT|ARTG_NOGEN),
 	NO_MONS(),
 	ATTK(AD_PHYS, 4, 4), (ARTA_HASTE),
 	PROP0(), NOFLAG,
 	PROP0(), NOFLAG,
-	SING_SPEAR, NOFLAG
+	BLADESONG, NOFLAG
 	),
 
 /*Needs encyc entry*/

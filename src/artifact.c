@@ -84,7 +84,7 @@ STATIC_DCL int artidisco[NROFARTIFACTS];
 STATIC_OVL int spec_dbon_applies = 0;
 
 /* flags including which artifacts have already been created */
-static boolean artiexist[1+NROFARTIFACTS+1];
+STATIC_OVL NEARDATA artiexist[1+NROFARTIFACTS+1];
 /* and a discovery list for them (no dummy first entry here) */
 STATIC_OVL int artidisco[NROFARTIFACTS];
 
@@ -3777,13 +3777,6 @@ boolean * messaged;
 			*messaged = TRUE;
 		}
 	}
-	/* the Blade Dancers' weapons haste their wielder */
-	if (arti_attack_prop(otmp, ARTA_HASTE))
-	{
-		if(!youdef && uwep == otmp) magr->movement += NORMAL_SPEED / 3;
-		else if(!youdef && uswapwep == otmp) magr->movement += NORMAL_SPEED / 6;
-		else if(youdef) magr->movement += NORMAL_SPEED / 2;
-	}
 
 	/* the Tecpatl of Huhetotl can sacrifice low-enough-health monsters (not you, though!) */
 	if (oartifact == ART_TECPATL_OF_HUHETOTL){
@@ -5414,28 +5407,46 @@ arti_invoke(obj)
 			}
 		}
 	break;
-	case SING_SPEAR:
-		if(!exist_artifact(SPEAR, "Blade Singer's Spear") ){
-			otmp = mksobj(SPEAR, TRUE, FALSE);
-			otmp = oname(otmp, artiname(ART_BLADE_SINGER_S_SPEAR));		
-			if (otmp->spe < 0) otmp->spe = 0;
-			if (otmp->cursed) uncurse(otmp);
-			otmp->oerodeproof = TRUE;
-			dropy(otmp);
-		    pline("An object apears at your feet");
+	case BLADESONG:
+	{
+		// check whether or not you're wielding the mate, used for speed/protection
+		// intentional that the dagger is always weaker than the spear
+		int dancer = 0;	
+		if (obj->oartifact == ART_BLADE_DANCER_S_DAGGER) dancer = 1; 
+		else {
+			if (uswapwep && uswapwep->oartifact && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER) dancer = 2;
+			else dancer = 1;
 		}
+		
+		// heal you up to half of your lost hp, modified by enchantment
+		int healamt = (u.uhpmax + 1 - u.uhp) / 2;
+		healup(healamt/(10-obj->spe), 0, FALSE, FALSE);
+
+		// make you very fast for a limited time
+		incr_itimeout(&HFast, rn1(u.ulevel, 50*dancer));
+	
+		// give you some protection
+		int gain = (u.ulevel/10 + obj->spe)*dancer;
+		
+		if (gain > 0) {
+			if (!Blind) {
+			const char *hgolden = hcolor(NH_GOLDEN);
+
+			if (u.uspellprot)
+				pline_The("%s haze around you becomes more dense.", hgolden);
+			else
+				pline_The("%s around you begins to shimmer with %s haze.",
+					(Underwater || Is_waterlevel(&u.uz)) ? "water" : "air", an(hgolden));
+			}
+			u.uspellprot += gain;
+			u.uspmtime = (u.ulevel * (obj->blessed) ? 50 : ((obj->cursed) ? 10 : 30))/15;
+			
+			find_ac();
+		} else {
+			Your("skin feels warm for a moment.");
+		}
+	}
 	break;
-	case DANCE_DAGGER:
-		if(!exist_artifact(DAGGER, "Blade Dancer's Dagger") ){
-			otmp = mksobj(DAGGER, TRUE, FALSE);
-			otmp = oname(otmp, artiname(ART_BLADE_DANCER_S_DAGGER));		
-			if (otmp->spe < 0) otmp->spe = 0;
-			if (otmp->cursed) uncurse(otmp);
-			otmp->oerodeproof = TRUE;
-			dropy(otmp);
-		    pline("An object apears at your feet");
-		}	
-	break;	
 	case SEVENFOLD:
 //Ruat:  Fall.  Makes a pit.  One charge.
 //Coelum: Heaven.  Casts cure.  One charge.
