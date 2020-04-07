@@ -21,6 +21,12 @@ extern char *viz_rmax;			/* max could see indices */
 #define TEMP_DRK2  0x40		/* location is temporarily dark (lowlight 2) */
 #define TEMP_DRK3  0x80		/* location is temporarily dark (lowlight 3) */
 
+#define TEMP_LITMASK	(TEMP_LIT1|TEMP_LIT2|TEMP_LIT3)
+#define TEMP_DRKMASK	(TEMP_DRK1|TEMP_DRK2|TEMP_DRK3)
+
+#define TEMP_LITVAL(f)	(!!(f&TEMP_LIT1)+!!(f&TEMP_LIT2)+!!(f&TEMP_LIT3))
+#define TEMP_DRKVAL(f)	(!!(f&TEMP_DRK1)+!!(f&TEMP_DRK2)+!!(f&TEMP_DRK3))
+
 #define TEMP_LIT  TEMP_LIT1	/* location is temporarily lit */
 #define TEMP_DRK  TEMP_DRK1	/* location is temporarily lit */
 
@@ -38,7 +44,9 @@ extern char *viz_rmax;			/* max could see indices */
  */
 #define cansee(x,y)	(viz_array[y][x] & IN_SIGHT)
 #define couldsee(x,y)	(viz_array[y][x] & COULD_SEE)
-#define templit(x,y)	(viz_array[y][x] & TEMP_LIT)
+/* dimness function: if nvrange > dimness(x,y), square can be seen */
+#define dimness(x,y)	(3 + TEMP_DRKVAL(viz_array[y][x]) - TEMP_LITVAL(viz_array[y][x]) \
+							- levl[x][y].lit*(!(viz_array[y][x]&TEMP_DRKMASK) ? 3 : 1))
 
 #define isdark(x,y)	( (!levl[x][y].lit && !(viz_array[y][x] & TEMP_LIT1 && !(viz_array[y][x] & TEMP_DRK1))) ||\
 					   (levl[x][y].lit &&  (viz_array[y][x] & TEMP_DRK1 && !(viz_array[y][x] & TEMP_LIT1))))

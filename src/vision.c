@@ -513,7 +513,9 @@ vision_recalc(control)
     int oldxray;				/* previous xray range value */
 	struct monst *mon, *nmon, *mat;
 	boolean catsightdark;
+	boolean darksight = FALSE;
 	int i, j;
+	int nv_range;
 	
     vision_full_recalc = 0;			/* reset flag */
     if (in_mklev || !iflags.vision_inited) return;
@@ -559,8 +561,7 @@ vision_recalc(control)
 		
 		temp_array = viz_array;	/* set viz_array so newsym() will work */
 		viz_array = next_array;
-		catsightdark = (!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK1)))
-					 || (levl[u.ux][u.uy].lit &&  (viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1)));
+		catsightdark = (dimness(u.ux, u.uy) > 0);
 
 		for (row = 0; row < ROWNO; row++) {
 			old_row = temp_array[row];
@@ -582,15 +583,14 @@ vision_recalc(control)
     }
 #endif
     else {
-		// int has_night_vision = u.nv_range || (Race_if(PM_DROW) && LightBlind && !Role_if(PM_ANACHRONONAUT));	/* hero has night vision */
-		int nv_range;
+		/* determine night vision range */
+		catsightdark = (dimness(u.ux, u.uy) > 0);
+		darksight = (catsightdark || (Darksight && !LightBlind));
 		if(Elfsight) nv_range = 3;
 		else if(Lowlightsight) nv_range = 2;
-		else if(Darksight && LightBlind) nv_range = 0;
-		else if(Normalvision) nv_range = 1;
+		else if((Catsight && catsightdark) || (Darksight && LightBlind)) nv_range = 0;
+		else if(Normalvision || (Catsight && !catsightdark)) nv_range = 1;
 		else nv_range = 0;
-		
-
 		if (Underwater && !Is_waterlevel(&u.uz)) {
 			/*
 			 * The hero is under water.  Only see surrounding locations if
@@ -696,9 +696,14 @@ vision_recalc(control)
      */
     temp_array = viz_array;
     viz_array = next_array;
-	catsightdark = (!levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK1)))
-				 || (levl[u.ux][u.uy].lit && (viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1)));
-
+	/* determine night vision range */
+	catsightdark = (dimness(u.ux, u.uy) > 0);
+	darksight = (catsightdark || (Darksight && !LightBlind));
+	if(Elfsight) nv_range = 3;
+	else if(Lowlightsight) nv_range = 2;
+	else if((Catsight && catsightdark) || (Darksight && LightBlind)) nv_range = 0;
+	else if(Normalvision || (Catsight && !catsightdark)) nv_range = 1;
+	else nv_range = 0;
 	
     /*
      * The main update loop.  Here we do two things:
@@ -743,48 +748,24 @@ vision_recalc(control)
 		    newsym(col,row);
 	    }
 	    else if (
-			((u.sealsActive&SEAL_AMON) && (next_row[col] & COULD_SEE)) ||
-			(Is_waterlevel(&u.uz) && (next_row[col] & COULD_SEE)) ||
-			((Normalvision || (Catsight && !catsightdark)) && (next_row[col] & COULD_SEE) && (
-				(lev->lit &&
-					!(next_row[col]&TEMP_DRK1 && !(next_row[col]&TEMP_LIT1)) &&
-					!(next_row[col]&TEMP_DRK2) 
-				) || 
-				((next_row[col]&TEMP_LIT1) && !(next_row[col]&TEMP_DRK1))
-			)) ||
-			(Lowlightsight && (next_row[col] & COULD_SEE) && (
-				(lev->lit &&
-					!(next_row[col]&TEMP_DRK1 && !(next_row[col]&TEMP_LIT2)) &&
-					!(next_row[col]&TEMP_DRK2 && !(next_row[col]&TEMP_LIT1)) &&
-					!(next_row[col]&TEMP_DRK3)
-				) || 
-				(
-					((next_row[col]&TEMP_LIT2) && !(next_row[col]&TEMP_DRK1)) ||
-					((next_row[col]&TEMP_LIT1) && !(next_row[col]&TEMP_DRK2))
-				)
-			)) ||
-			(Elfsight && (next_row[col] & COULD_SEE) && (
-				(lev->lit &&
-					!(next_row[col]&TEMP_DRK1 && !(next_row[col]&TEMP_LIT3)) &&
-					!(next_row[col]&TEMP_DRK2 && !(next_row[col]&TEMP_LIT2)) &&
-					!(next_row[col]&TEMP_DRK3 && !(next_row[col]&TEMP_LIT1))
-				) || 
-				(
-					((next_row[col]&TEMP_LIT3) && !(next_row[col]&TEMP_DRK1)) || 
-					((next_row[col]&TEMP_LIT2) && !(next_row[col]&TEMP_DRK2)) || 
-					((next_row[col]&TEMP_LIT1) && !(next_row[col]&TEMP_DRK3))
-				)
-			)) ||
-			((Darksight || (Catsight && catsightdark)) && !LightBlind && (next_row[col] & COULD_SEE) && 
-			 ((lev->typ < CORR || lev->typ==STAIRS) || !(
-				(lev->lit &&
-					!(next_row[col]&TEMP_DRK1 && !(next_row[col]&TEMP_LIT1)) &&
-					!(next_row[col]&TEMP_DRK2) 
-				) || 
-				((next_row[col]&TEMP_LIT1) && !(next_row[col]&TEMP_DRK1))
-			))) ||
-			(Extramission && (next_row[col] & COULD_SEE))
-		) {
+			/* must be in LoS */
+			(next_row[col] & COULD_SEE) && (
+			/* Either Extramission */
+			Extramission
+			||
+			/* or being on the waterlevel */
+			Is_waterlevel(&u.uz)
+			||
+			/* or able to see despite/because of dimness */
+			(!darksight 
+				? dimness(col, row) < nv_range
+				: dimness(col, row) > -nv_range
+			)
+			||
+			/* or darksight mapping terrain */
+			(darksight && (lev->typ < CORR || lev->typ==STAIRS))
+			))
+			{
 		/*
 		 * We see this position because it is lit.
 		 */
@@ -798,41 +779,20 @@ vision_recalc(control)
 		     */
 		    dx = u.ux - col;	dx = sign(dx);
 		    flev = &(levl[col+dx][row+dy]);
-		    if ((!((Darksight || (Catsight && catsightdark)) && !Is_waterlevel(&u.uz)) && 
-				((flev->lit &&
-					!(next_array[row+dy][col+dx]&TEMP_DRK1 && !(next_array[row+dy][col+dx]&TEMP_LIT1)) &&
-					!(next_array[row+dy][col+dx]&TEMP_DRK2) 
-				) || 
-				(
-					(next_array[row+dy][col+dx]&TEMP_LIT1) && !(next_array[row+dy][col+dx]&TEMP_DRK1)
+		    if (
+				/* Either Extramission */
+				Extramission
+				||
+				/* or able to see adjacent square despite/because of dimness */
+				(!darksight 
+					? dimness(col+dx, row+dy) < nv_range
+					: dimness(col+dx, row+dy) > -nv_range
 				)
-			)) ||
-			(Lowlightsight && (
-				(flev->lit &&
-					!(next_array[row+dy][col+dx]&TEMP_DRK1 && !(next_array[row+dy][col+dx]&TEMP_LIT2)) &&
-					!(next_array[row+dy][col+dx]&TEMP_DRK2 && !(next_array[row+dy][col+dx]&TEMP_LIT1)) &&
-					!(next_array[row+dy][col+dx]&TEMP_DRK3)
-				) || 
-				(
-					((next_array[row+dy][col+dx]&TEMP_LIT2) && !(next_array[row+dy][col+dx]&TEMP_DRK1)) ||
-					((next_array[row+dy][col+dx]&TEMP_LIT1) && !(next_array[row+dy][col+dx]&TEMP_DRK2))
+				||
+				/* or with darksight we can see this kind of terrain anyways */
+				(darksight && (lev->typ < CORR || lev->typ == STAIRS))	/* not flev; we check actual terrain, not adjacent*/
 				)
-			)) ||
-			(Elfsight && (
-				(flev->lit &&
-					!(next_array[row+dy][col+dx]&TEMP_DRK1 && !(next_array[row+dy][col+dx]&TEMP_LIT3)) &&
-					!(next_array[row+dy][col+dx]&TEMP_DRK2 && !(next_array[row+dy][col+dx]&TEMP_LIT2)) &&
-					!(next_array[row+dy][col+dx]&TEMP_DRK3 && !(next_array[row+dy][col+dx]&TEMP_LIT1))
-				) || 
-				(
-					((next_array[row+dy][col+dx]&TEMP_LIT3) && !(next_array[row+dy][col+dx]&TEMP_DRK1)) || 
-					((next_array[row+dy][col+dx]&TEMP_LIT2) && !(next_array[row+dy][col+dx]&TEMP_DRK2)) || 
-					((next_array[row+dy][col+dx]&TEMP_LIT1) && !(next_array[row+dy][col+dx]&TEMP_DRK3))
-				)
-			))
-			   ||((Darksight || (Catsight && catsightdark)) && !Is_waterlevel(&u.uz))
-			   || Extramission
-			){
+			{
 				next_row[col] |= IN_SIGHT;	/* we see it */
 
 				oldseenv = lev->seenv;

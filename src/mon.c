@@ -2655,6 +2655,8 @@ mon_can_see_mon(looker, lookie)
 	struct monst *looker;
 	struct monst *lookie;
 {
+	boolean clearpath;
+	boolean hardtosee;
 	boolean catsightdark = !(levl[looker->mx][looker->my].lit || (viz_array[looker->my][looker->mx]&TEMP_LIT1 && !(viz_array[looker->my][looker->mx]&TEMP_DRK1))) ||
 							(!levl[looker->mx][looker->my].lit && !(viz_array[looker->my][looker->mx]&TEMP_DRK1 && !(viz_array[looker->my][looker->mx]&TEMP_LIT1)));
 	
@@ -2696,105 +2698,91 @@ mon_can_see_mon(looker, lookie)
 		//can't feel target adjacent
 	}
 	
-	
-	if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1 && !rn2(8)) return TRUE;
-	if((darksight(looker->data) || (catsight(looker->data) && catsightdark)) && !is_blind(looker)){
-		if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1) return TRUE;
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
-			if(levl[lookie->mx][lookie->my].lit){
-				if(viz_array[lookie->my][lookie->mx]&TEMP_DRK1 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT1))
-					return TRUE;
-			} else {
-				if(!(viz_array[lookie->my][lookie->mx]&TEMP_LIT1 && !(viz_array[lookie->my][lookie->mx]&TEMP_DRK1)))
-					return TRUE;
-			}
+	/* 1/8 chance to stumble onto adjacent targets. Ish. */
+	if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1 && !rn2(8))
+		return TRUE;
+
+	clearpath = clear_path(looker->mx, looker->my, lookie->mx, lookie->my);
+	hardtosee = (!is_tracker(looker->data) && (
+		(lookie->minvis && !mon_resistance(looker, SEE_INVIS)) ||
+		(lookie->mundetected)
+		));
+
+	/* sight -- requires looker to not be blind, have clear LoS, and notice an invisible lookie somehow */
+	if (!is_blind(looker)
+		&& clearpath
+		&& (!hardtosee || !rn2(11))) {
+		/* where can we see? */
+		int nvrange = 0;
+		boolean darksight = FALSE;
+		/* darksight */
+		if (darksight(looker->data) || (catsight(looker->data) && catsightdark)) {
+			darksight = TRUE;
+		}
+		/* normal sight */
+		if (normalvision(looker->data) || (catsight(looker->data) && !catsightdark)) {
+			nvrange = 1;
+		}
+		/* low-light vision */
+		if (lowlightsight2(looker->data)) {
+			nvrange = 2;
+		}
+		/* elfsight */
+		if (lowlightsight3(looker->data)) {
+			nvrange = 3;
+		}
+		/* nv range auto-succeeds within its distance */
+		if (nvrange > 0
+			&& dist2(looker->mx, looker->my, lookie->mx, lookie->my) <= nvrange * nvrange) {
+			return TRUE;
+		}
+		/* otherwise, check sight vs how lit/dim the square is */
+		if ((!darksight
+			? (dimness(lookie->mx, lookie->my) < nvrange)
+			: (dimness(lookie->mx, lookie->my) > -nvrange)
+			)
+			||
+			extramission(looker->data)
+			)
+		{
+			return TRUE;
 		}
 	}
-	if(lowlightsight3(looker->data) && !is_blind(looker)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
-			if(dist2(looker->mx,looker->my,lookie->mx,lookie->my) <= 3*3) return TRUE;
-			else if(levl[lookie->mx][lookie->my].lit){
-				if(!(viz_array[lookie->my][lookie->mx]&TEMP_DRK3 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT3)))
-					return TRUE;
-			} else {
-				if(viz_array[lookie->my][lookie->mx]&TEMP_LIT3 && !(viz_array[lookie->my][lookie->mx]&TEMP_DRK1))
-					return TRUE;
-				else if(viz_array[lookie->my][lookie->mx]&TEMP_LIT2 && !(viz_array[lookie->my][lookie->mx]&TEMP_DRK2))
-					return TRUE;
-				else if(viz_array[lookie->my][lookie->mx]&TEMP_LIT1 && !(viz_array[lookie->my][lookie->mx]&TEMP_DRK3))
-					return TRUE;
-			}
-		}
-	}
-	if(lowlightsight2(looker->data) && !is_blind(looker)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
-			if(dist2(looker->mx,looker->my,lookie->mx,lookie->my) <= 2*2) return TRUE;
-			else if(levl[lookie->mx][lookie->my].lit){
-				if(!(viz_array[lookie->my][lookie->mx]&TEMP_DRK2 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT2)) &&
-					!(viz_array[lookie->my][lookie->mx]&TEMP_DRK3 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT1))
-				)
-					return TRUE;
-			} else {
-				if(viz_array[lookie->my][lookie->mx]&TEMP_LIT2 && !(viz_array[lookie->my][lookie->mx]&TEMP_DRK1))
-					return TRUE;
-				else if(viz_array[lookie->my][lookie->mx]&TEMP_LIT1 && !(viz_array[lookie->my][lookie->mx]&TEMP_DRK2))
-					return TRUE;
-			}
-		}
-	}
-	if((normalvision(looker->data) || (catsight(looker->data) && !catsightdark)) && !is_blind(looker)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
-			if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1) return TRUE;
-			else if(levl[lookie->mx][lookie->my].lit){
-				if(!(viz_array[lookie->my][lookie->mx]&TEMP_DRK1 && !(viz_array[lookie->my][lookie->mx]&TEMP_LIT1)) &&
-					!(viz_array[lookie->my][lookie->mx]&TEMP_DRK2)
-				)
-					return TRUE;
-			} else {
-				if(viz_array[lookie->my][lookie->mx]&TEMP_LIT1 && !(viz_array[lookie->my][lookie->mx]&TEMP_DRK1))
-					return TRUE;
-			}
-		}
-	}
+
 	if(echolocation(looker->data) && !is_deaf(looker) && !unsolid(lookie->data)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my)){
+		if (clearpath) {
 			return TRUE;
 		}
 	}
-	if(extramission(looker->data)){
-		if(clear_path(looker->mx, looker->my, lookie->mx, lookie->my) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+	if(infravision(looker->data) && infravisible(lookie->data) && !is_blind(looker)){
+		if((clearpath || omnisense(looker->data)) && (!hardtosee || !rn2(11))){
 			return TRUE;
 		}
 	}
-	if(infravision(looker->data) && infravisible(youracedata) && !is_blind(looker)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || omnisense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+	if(bloodsense(looker->data) && has_blood(lookie->data)){
+		if((clearpath || omnisense(looker->data)) && (!hardtosee || !rn2(11))){
 			return TRUE;
 		}
 	}
-	if(bloodsense(looker->data) && has_blood(youracedata)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || omnisense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
-			return TRUE;
-		}
-	}
-	if(lifesense(looker->data) && !nonliving(youracedata)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || omnisense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+	if(lifesense(looker->data) && !nonliving(lookie->data)){
+		if((clearpath || omnisense(looker->data)) && (!hardtosee || !rn2(11))){
 			return TRUE;
 		}
 	}
 	if(senseall(looker->data)){
-		if((clear_path(looker->mx, looker->my, lookie->mx, lookie->my) || omnisense(looker->data)) && !(lookie->minvis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((clearpath || omnisense(looker->data)) && (!hardtosee || !rn2(11))){
 			return TRUE;
 		}
 	}
 	if(earthsense(looker->data) && !(mon_resistance(lookie,FLYING) || mon_resistance(lookie,LEVITATION) || unsolid(lookie->data))){
 		return TRUE;
 	}
-	if(mon_resistance(looker,TELEPAT)){
+	if(mon_resistance(looker,TELEPAT) && !mindless_mon(lookie)){
 		return TRUE;
 	}
 	if(goodsmeller(looker->data) && distmin(lookie->mx, lookie->my, looker->mx, looker->my) <= 6){
 	/*sanity check: don't bother trying to path to it if it is farther than a path can possibly exist*/
-		if(clear_path(lookie->mx, lookie->my, looker->mx, looker->my)){
+		if(clearpath){
 		/*don't running a complicated path function if there is a straight line to you*/
 			return TRUE;
 		} else {
@@ -2812,8 +2800,10 @@ mon_can_see_mon(looker, lookie)
 
 boolean
 mon_can_see_you(looker)
-	struct monst *looker;
+struct monst *looker;
 {
+	boolean clearpath;
+	boolean hardtosee;
 	boolean catsightdark = !(levl[looker->mx][looker->my].lit || (viz_array[looker->my][looker->mx]&TEMP_LIT1 && !(viz_array[looker->my][looker->mx]&TEMP_DRK1)));
 	
 	
@@ -2846,104 +2836,90 @@ mon_can_see_you(looker)
 	
 	if(Aggravate_monster) return TRUE;
 	
-	if(distmin(looker->mx,looker->my,u.ux,u.uy) <= 1 && !rn2(8)) return TRUE;
-	
-	if((darksight(looker->data) || (catsight(looker->data) && catsightdark)) && !is_blind(looker)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
-			if(levl[u.ux][u.uy].lit){
-				if(viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1))
-					return TRUE;
-			} else {
-				if(!(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK1)))
-					return TRUE;
-			}
+	/* 1/8 chance to stumble onto adjacent targets. Ish. */
+	if(distmin(looker->mx,looker->my,u.ux,u.uy) <= 1 && !rn2(8))
+		return TRUE;
+
+	clearpath = couldsee(looker->mx, looker->my);
+	hardtosee = (!can_track(looker->data) && (
+		(Invis && !mon_resistance(looker, SEE_INVIS)) ||
+		(u.uundetected)
+		));
+
+	/* sight -- requires looker to not be blind, have clear LoS, and notice an invisible lookie somehow */
+	if (!is_blind(looker)
+		&& clearpath
+		&& (!hardtosee || !rn2(11))) {
+		/* where can we see? */
+		int nvrange = 0;
+		boolean darksight = FALSE;
+		/* darksight */
+		if (darksight(looker->data) || (catsight(looker->data) && catsightdark)) {
+			darksight = TRUE;
 		}
-	}
-	if(lowlightsight3(looker->data) && !is_blind(looker)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
-			if(dist2(looker->mx,looker->my,u.ux,u.uy) <= 3*3) return TRUE;
-			else if(levl[u.ux][u.uy].lit){
-				if(!(viz_array[u.uy][u.ux]&TEMP_DRK3 && !(viz_array[u.uy][u.ux]&TEMP_LIT3)))
-					return TRUE;
-			} else {
-				if(viz_array[u.uy][u.ux]&TEMP_LIT3 && !(viz_array[u.uy][u.ux]&TEMP_DRK1))
-					return TRUE;
-				else if(viz_array[u.uy][u.ux]&TEMP_LIT2 && !(viz_array[u.uy][u.ux]&TEMP_DRK2))
-					return TRUE;
-				else if(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3))
-					return TRUE;
-			}
+		/* normal sight */
+		if (normalvision(looker->data) || (catsight(looker->data) && !catsightdark)) {
+			nvrange = 1;
 		}
-	}
-	if(lowlightsight2(looker->data) && !is_blind(looker)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
-			if(dist2(looker->mx,looker->my,u.ux,u.uy) <= 2*2) return TRUE;
-			else if(levl[u.ux][u.uy].lit){
-				if(!(viz_array[u.uy][u.ux]&TEMP_DRK2 && !(viz_array[u.uy][u.ux]&TEMP_LIT2)) &&
-					!(viz_array[u.uy][u.ux]&TEMP_DRK3 && !(viz_array[u.uy][u.ux]&TEMP_LIT1))
-				)
-					return TRUE;
-			} else {
-				if(viz_array[u.uy][u.ux]&TEMP_LIT2 && !(viz_array[u.uy][u.ux]&TEMP_DRK1))
-					return TRUE;
-				else if(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK2))
-					return TRUE;
-			}
+		/* low-light vision */
+		if (lowlightsight2(looker->data)) {
+			nvrange = 2;
 		}
-	}
-	if((normalvision(looker->data) || (catsight(looker->data) && !catsightdark)) && !is_blind(looker)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
-			if(distmin(looker->mx,looker->my,u.ux,u.uy) <= 1) return TRUE;
-			else if(levl[u.ux][u.uy].lit){
-				if(!(viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1)) &&
-					!(viz_array[u.uy][u.ux]&TEMP_DRK2)
-				)
-					return TRUE;
-			} else {
-				if(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK1))
-					return TRUE;
-			}
+		/* elfsight */
+		if (lowlightsight3(looker->data)) {
+			nvrange = 3;
 		}
-	}
-	if(echolocation(looker->data) && !is_deaf(looker) && !unsolid(youracedata)){
-		if(couldsee(looker->mx, looker->my)){
+		/* nv range auto-succeeds within its distance */
+		if (nvrange > 0
+			&& dist2(looker->mx, looker->my, u.ux, u.uy) <= nvrange * nvrange) {
+			return TRUE;
+		}
+		/* otherwise, check sight vs how lit/dim the square is */
+		if ((!darksight
+			? (dimness(u.ux, u.uy) < nvrange)
+			: (dimness(u.ux, u.uy) > -nvrange)
+			)
+			||
+			extramission(looker->data)
+			)
+		{
 			return TRUE;
 		}
 	}
-	if(extramission(looker->data)){
-		if(couldsee(looker->mx, looker->my) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+	if(echolocation(looker->data) && !is_deaf(looker) && !unsolid(youracedata)){
+		if (clearpath) {
 			return TRUE;
 		}
 	}
 	if(infravision(looker->data) && infravisible(youracedata) && !is_blind(looker)){
-		if((couldsee(looker->mx, looker->my) || omnisense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((clearpath || omnisense(looker->data)) && (!hardtosee || !rn2(11))){
 			return TRUE;
 		}
 	}
 	if(bloodsense(looker->data) && has_blood(youracedata)){
-		if((couldsee(looker->mx, looker->my) || omnisense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((clearpath || omnisense(looker->data)) && (!hardtosee || !rn2(11))){
 			return TRUE;
 		}
 	}
 	if(lifesense(looker->data) && !nonliving(youracedata)){
-		if((couldsee(looker->mx, looker->my) || omnisense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((clearpath || omnisense(looker->data)) && (!hardtosee || !rn2(11))){
 			return TRUE;
 		}
 	}
 	if(senseall(looker->data)){
-		if((couldsee(looker->mx, looker->my) || omnisense(looker->data)) && !(Invis && !mon_resistance(looker,SEE_INVIS) && !can_track(looker->data) && rn2(11))){
+		if((clearpath || omnisense(looker->data)) && (!hardtosee || !rn2(11))){
 			return TRUE;
 		}
 	}
-	if(earthsense(looker->data) && !(Flying || Levitation || unsolid(youracedata) || Stealth)){
+	if(earthsense(looker->data) && !(Flying || Levitation|| unsolid(youracedata) || Stealth)){
 		return TRUE;
 	}
-	if(mon_resistance(looker,TELEPAT)){
+	if (mon_resistance(looker, TELEPAT)) {/* player always has a mind? */
 		return TRUE;
 	}
 	if(goodsmeller(looker->data) && distmin(u.ux, u.uy, looker->mx, looker->my) <= 6){
 	/*sanity check: don't bother trying to path to it if it is farther than a path can possibly exist*/
-		if(clear_path(u.ux, u.uy, looker->mx, looker->my)){
+		if(clearpath){
 		/*don't running a complicated path function if there is a straight line to you*/
 			return TRUE;
 		} else {
@@ -3322,6 +3298,9 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	}
 	
 	if(!mon_can_see_mon(magr, mdef)) return 0L;
+
+	if(magr->mstrategy & STRAT_WAITMASK)
+		return 0L;
 	
 	if(magr->mtame && mdef->mpeaceful && !u.uevent.uaxus_foe && md == &mons[PM_AXUS])
 		return 0L;
