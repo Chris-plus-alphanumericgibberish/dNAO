@@ -6906,7 +6906,7 @@ struct monst *mtmp;
 	int insight = monstr[mndx]/10;
 	
 	//One point given for seeing it
-	if(insight > 2)
+	if(insight > 1)
 		insight--;
 	
 	return max(1, insight);
@@ -6919,7 +6919,7 @@ struct monst *mtmp;
 	int mndx = monsndx(mtmp->data);
 	int insight = monstr[mndx]/10;
 	
-	if(insight > 2)
+	if(insight > 1)
 		return 1;
 	return 0;
 }
