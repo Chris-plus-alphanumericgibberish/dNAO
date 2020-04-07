@@ -840,6 +840,10 @@ moveloop()
 				insight_vanish(mtmp);
 				continue;
 			}
+			if(mtmp->mfaction == DELOUSED){
+				delouse_tame(mtmp);
+				continue;
+			}
 			if (!DEADMONSTER(mtmp)
 				&& attacktype(mtmp->data, AT_WDGZ)
 				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
@@ -905,6 +909,10 @@ moveloop()
 				}
 				if(mtmp->m_insight_level > u.uinsight){
 					insight_vanish(mtmp);
+					continue;
+				}
+				if(mtmp->mfaction == DELOUSED){
+					delouse_tame(mtmp);
 					continue;
 				}
 				if (mtmp->minvis){
@@ -2144,6 +2152,10 @@ karemade:
 		}
 		if(mtmp->m_insight_level > u.uinsight){
 			insight_vanish(mtmp);
+			continue;
+		}
+		if(mtmp->mfaction == DELOUSED){
+			delouse_tame(mtmp);
 			continue;
 		}
 		if (mtmp->minvis){

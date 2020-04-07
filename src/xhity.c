@@ -8554,7 +8554,7 @@ int vis;
 					EDOG(magr)->hungrytime += 100;  //400/4 = human nut/4
 				}
 			}
-			if (Slow_digestion) {
+			if (Slow_digestion || is_indigestible(youracedata)) {
 				/* Messages are handled in caller */
 				u.uswldtim = 0;
 				result = MM_HIT;
@@ -8582,6 +8582,18 @@ int vis;
 				done(DIED);
 				result = MM_AGR_STOP;		/* lifesaved */
 			}
+			else if(is_indigestible(mdef->data)){
+				You("regurgitate %s.", mon_nam(mdef));
+				dmg = 0;
+				break;
+			}
+			else if(is_delouseable(mdef->data)){
+				mdef = delouse(mdef, AD_DGST);
+				You("regurgitate %s.", mon_nam(mdef));
+				dmg = 0;
+				result |= MM_AGR_STOP;
+				break;
+			}
 			else {
 				if (Slow_digestion) {
 					dmg = 0;
@@ -8595,8 +8607,8 @@ int vis;
 				if (!vegetarian(pd))
 					violated_vegetarian();
 
-				/* Use up amulet of life saving */
-				if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
+				// /* Use up amulet of life saving */
+				// if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
 
 				newuhs(FALSE);
 				xkilled(mdef, 2);
@@ -8643,7 +8655,7 @@ int vis;
 				}
 			}
 		}
-		else {
+		else { //mvm
 			/* eating a Rider or its corpse is fatal */
 			if (is_rider(mdef->data)) {
 				if (vis)
@@ -8663,12 +8675,28 @@ int vis;
 					result = MM_AGR_DIED;
 				}
 			}
+			else if(is_indigestible(mdef->data)){
+				if(canspotmon(magr) || canspotmon(mdef)){
+					pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
+				}
+				dmg = 0;
+				break;
+			}
+			else if(is_delouseable(mdef->data)){
+				mdef = delouse(mdef, AD_DGST);
+				if(canspotmon(magr) || canspotmon(mdef)){
+					pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
+				}
+				dmg = 0;
+				result |= MM_AGR_STOP;
+				break;
+			}
 			else {
 				if (flags.verbose && flags.soundok)
 					verbalize("Burrrrp!");
 
-				/* Use up amulet of life saving - no lifesaving allowed? */
-				if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
+				// /* Use up amulet of life saving - no lifesaving allowed? */
+				// if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
 
 				/* kill */
 				result = xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
