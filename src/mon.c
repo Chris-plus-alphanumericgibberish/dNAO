@@ -4768,38 +4768,39 @@ boolean was_swallowed;			/* digestion */
 			 || mdat==&mons[PM_FATHER_DAGON] || mdat==&mons[PM_MOTHER_HYDRA]
 			){
 				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+					if(DEADMONSTER(mtmp))
+						continue;
 					mdat1 = mtmp->data;
 					if( mdat1==&mons[PM_DEEP_ONE] || 
 						mdat1==&mons[PM_DEEPER_ONE] || 
-						mdat1==&mons[PM_DEEPEST_ONE] ){
-							if(mtmp->mhp > 0){
-								if(lvlgain) for(lvls = lvlgain; lvls > 0; lvls--) grow_up(mtmp, 0);
-								if(hpgain){
-									if (mtmp->mhpmax < 300){
-										mtmp->mhpmax += hpgain-1;
-										mtmp->mhp += hpgain-1;
-										grow_up(mtmp, mtmp); //gain last HP and grow up if needed
-									}
-									else {
-										mtmp->mhpmax += 1;
-										mtmp->mhp += 1;
-										grow_up(mtmp, mtmp); //gain last HP and grow up if needed
-									}
-								}
-							}
-					}
-				}
-			} else { //arcadian avenger
-				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-					mdat1 = mtmp->data;
-					if( mdat1==mdat ){
-						if(mtmp->mhp > 0){ 
-							if(lvlgain) for(lvls = lvlgain; lvls > 0; lvls--) grow_up(mtmp, 0);
-							if(hpgain){
+						mdat1==&mons[PM_DEEPEST_ONE]
+					){
+						if(lvlgain) for(lvls = lvlgain; lvls > 0; lvls--) grow_up(mtmp, 0);
+						if(hpgain){
+							if (mtmp->mhpmax < 300){
 								mtmp->mhpmax += hpgain-1;
 								mtmp->mhp += hpgain-1;
 								grow_up(mtmp, mtmp); //gain last HP and grow up if needed
 							}
+							else {
+								mtmp->mhpmax += 1;
+								mtmp->mhp += 1;
+								grow_up(mtmp, mtmp); //gain last HP and grow up if needed
+							}
+						}
+					}
+				}
+			} else { //arcadian avenger
+				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+					if(DEADMONSTER(mtmp))
+						continue;
+					mdat1 = mtmp->data;
+					if( mdat1==mdat ){
+						if(lvlgain) for(lvls = lvlgain; lvls > 0; lvls--) grow_up(mtmp, 0);
+						if(hpgain){
+							mtmp->mhpmax += hpgain-1;
+							mtmp->mhp += hpgain-1;
+							grow_up(mtmp, mtmp); //gain last HP and grow up if needed
 						}
 					}
 				}
