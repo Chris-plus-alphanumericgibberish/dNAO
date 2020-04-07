@@ -2432,7 +2432,7 @@ int base_udr()
 {
 	int udr = 0;
 	
-	if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
+	if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
 		udr += 3;
 	}
 	
@@ -2571,7 +2571,7 @@ lowertorso:
 				armdr += arm_dr_bonus(uarmh);
 				if(magr) armdr += properties_dr(uarmh, agralign, agrmoral);
 			}
-			if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
+			if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
 				udr += 3;
 			}
 			udr += (u.uvaul+4)/5;
