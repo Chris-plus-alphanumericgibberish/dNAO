@@ -414,6 +414,7 @@
 								(ptr) == &mons[PM_MERCURIAL_ESSENCE] ||\
 								(ptr) == &mons[PM_BRIMSTONE_ESSENCE] ||\
 								(ptr) == &mons[PM_HYDRARGYRUMACH_RILMANI] ||\
+								(ptr) == &mons[PM_CENTER_OF_ALL] ||\
 								(ptr) == &mons[PM_AURUMACH_RILMANI]\
 							)
 #define is_deva(ptr)		((ptr)->mlet == S_NEU_ANGEL)
