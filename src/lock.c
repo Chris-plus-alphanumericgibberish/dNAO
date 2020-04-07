@@ -149,10 +149,13 @@ picklock()	/* try to open/close a lock */
 	} else {
 	    if(xlock.box->otyp == MAGIC_CHEST){
 			xlock.box->olocked = 0;
-			xlock.box->obolted = 1;
+			if (!xlock.box->obolted) {
+				pline_The("chest bolts itself to the floor!");
+				xlock.box->obolted = 1;
+			}
 			xlock.box->owt = weight(xlock.box);
 			xlock.box->ovar1 = xlock.mgclcknm;
-			pline_The("chest bolts itself to the floor!");
+			
 		}
 		else {
 			xlock.box->olocked = !xlock.box->olocked;
