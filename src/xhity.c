@@ -4033,8 +4033,8 @@ boolean ranged;
 		&& attk->adtyp != AD_WRAP)
 	{
 		/* are grabs possible? */
-		if ((youagr || youdef)
-			&& !sticks(mdef)
+		if (!(youagr || youdef)
+			|| sticks(mdef)
 			)
 		{
 			/* no grabs allowed, substitute basic claw attack */
