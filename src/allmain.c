@@ -840,6 +840,10 @@ moveloop()
 				insight_vanish(mtmp);
 				continue;
 			}
+			if(mtmp->mfaction == DELOUSED){
+				delouse_tame(mtmp);
+				continue;
+			}
 			if (!DEADMONSTER(mtmp)
 				&& attacktype(mtmp->data, AT_WDGZ)
 				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
@@ -905,6 +909,10 @@ moveloop()
 				}
 				if(mtmp->m_insight_level > u.uinsight){
 					insight_vanish(mtmp);
+					continue;
+				}
+				if(mtmp->mfaction == DELOUSED){
+					delouse_tame(mtmp);
 					continue;
 				}
 				if (mtmp->minvis){
@@ -1762,7 +1770,7 @@ karemade:
 			if(roll_madness(MAD_GOAT_RIDDEN) && adjacent_mon()){
 				pline("Lashing tentacles erupt from your brain!");
 				losehp(max(1,(Upolyd ? ((d(4,4)*u.mh)/u.mhmax) : ((d(4,4)*u.uhp)/u.uhpmax))), "the black mother's touch", KILLED_BY);
-				morehungry(d(4,4)*4);
+				morehungry(d(4,4));
 				if(u.usanity < 50)
 					change_usanity(-1);
 				else
@@ -2144,6 +2152,10 @@ karemade:
 		}
 		if(mtmp->m_insight_level > u.uinsight){
 			insight_vanish(mtmp);
+			continue;
+		}
+		if(mtmp->mfaction == DELOUSED){
+			delouse_tame(mtmp);
 			continue;
 		}
 		if (mtmp->minvis){

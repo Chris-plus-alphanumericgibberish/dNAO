@@ -1825,7 +1825,7 @@ struct obj	*sobj;
 				makeplural(body_part(HAND)),
 				u.umconf ? "even more" : "very");
 			else
-			    Your("%s glow a%s brilliant %s.",
+			    Your("%s glow a%s %s.",
 				makeplural(body_part(HAND)),
 				u.umconf ? "n even more" : "",
 				hcolor(NH_RED));

@@ -4241,10 +4241,16 @@ int spellnum;
 	    if (yours || canseemon(mtmp))
 	        pline("%s seems no deader than before.", Monnam(mtmp));
 	} else if (!(resisted = (resists_magm(mtmp) || resists_death(mtmp) || resist(mtmp, 0, 0, FALSE))) ||
-	           rn2(mons[u.umonnum].mlevel) > 12) {
+	   rn2(mons[u.umonnum].mlevel) > 12
+	){
+		if(is_delouseable(mtmp->data)){
+	        pline("The parasite is killed!");
+			delouse(mtmp, AD_DEAD);
+		} else {
             mtmp->mhp = -1;
-	    if (yours) killed(mtmp);
-	    else monkilled(mtmp, "", AD_SPEL);
+		    if (yours) killed(mtmp);
+		    else monkilled(mtmp, "", AD_SPEL);
+		}
 	    return;
 	} else {
 	    if (resisted) shieldeff(mtmp->mx, mtmp->my);

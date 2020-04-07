@@ -4103,7 +4103,7 @@ int spell;
 			You("preach dreadful knowledge!");
 			for(sy = 0; sy < ROWNO; sy++){
 				for(sx = 0; sx < COLNO; sx++){
-					if(isok(sx,sy) && couldsee(sx,sy) && (mon = m_at(sx, sy))){
+					if(isok(sx,sy) && couldsee(sx,sy) && (mon = m_at(sx, sy)) && !resist(mon, '\0', 0, NOTELL)){
 						mon->mcrazed = TRUE;
 						mon->mflee = TRUE;
 						mon->mdisrobe = TRUE;

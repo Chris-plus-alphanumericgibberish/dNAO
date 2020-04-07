@@ -531,16 +531,24 @@ unsigned int stuckid, steedid;	/* STEED */
 	if (stuckid) {
 		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
 			if (mtmp->m_id == stuckid) break;
-		if (!mtmp) panic("Cannot find the monster ustuck.");
-		u.ustuck = mtmp;
+		if (!mtmp){
+			pline("Error recovery: Cannot find the monster ustuck.");
+			u.ustuck = 0;
+		} else {
+			u.ustuck = mtmp;
+		}
 	}
 #ifdef STEED
 	if (steedid) {
 		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
 			if (mtmp->m_id == steedid) break;
-		if (!mtmp) panic("Cannot find the monster usteed.");
-		u.usteed = mtmp;
-		remove_monster(mtmp->mx, mtmp->my);
+		if (!mtmp){
+			pline("Error recovery: Cannot find the monster usteed.");
+			u.usteed = 0;
+		} else {
+			u.usteed = mtmp;
+			remove_monster(mtmp->mx, mtmp->my);
+		}
 	}
 #endif
 }

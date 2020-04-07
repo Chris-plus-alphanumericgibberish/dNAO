@@ -604,7 +604,7 @@ ARMOR("plasteel armor", "hard white armor", /*Needs encyc entry*//*Needs tile*/
 ARMOR("splint mail", (char *)0,
 	1, 0,   MZ_HUGE, 0,	62, 5, 200,  80,  7, 3, 1, ARM_SUIT, IRON, HI_METAL),
 ARMOR("barnacle armor", "giant shell armor",
-	0, 1,  MZ_LARGE, 0,	0, 10, 150, 1000,  7, 3, 1, ARM_SUIT, SHELL, CLR_GRAY),
+	0, 1,  MZ_LARGE, 0,	0, 10, 150, 1000,  7, 3, 1, ARM_SUIT, SHELL_MAT, CLR_GRAY),
 ARMOR("banded mail", (char *)0,
 	1, 0,   MZ_HUGE, 0,	72, 5, 175,  90,  7, 3, 0, ARM_SUIT, IRON, HI_METAL),
 ARMOR("dwarvish mithril-coat", (char *)0,

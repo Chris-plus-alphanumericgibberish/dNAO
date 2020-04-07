@@ -534,7 +534,7 @@ int sx, sy;
 					if (newobj) {
 						newobj->shopOwned = TRUE;
 						if (is_metallic(newobj) && !newobj->oartifact)
-							set_material(newobj, SHELL);
+							set_material(newobj, SHELL_MAT);
 
 						/* replace curobj with newobj */
 						delobj(curobj);
@@ -547,7 +547,7 @@ int sx, sy;
 					struct obj * newobj = mksobj_at(garden_weapons[rn2(SIZE(garden_weapons))], sx, sy, TRUE, TRUE);
 					if (newobj) {
 						newobj->shopOwned = TRUE;
-						set_material(newobj, SHELL);
+						set_material(newobj, SHELL_MAT);
 						newobj->opoisoned = rn2(3) ? OPOISON_BASIC : OPOISON_ACID;
 
 						/* replace curobj with newobj */

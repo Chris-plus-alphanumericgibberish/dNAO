@@ -1680,7 +1680,8 @@ gcrownu()
     if (ok_wep(obj) || ok_arm(obj)) {
 		bless(obj);
 		obj->oeroded = obj->oeroded2 = 0;
-		obj->oerodeproof = TRUE;
+		if(obj->oartifact != ART_PEN_OF_THE_VOID)
+			obj->oerodeproof = TRUE;
 		obj->bknown = obj->rknown = TRUE;
 		if (obj->spe < 1) obj->spe = 1;
 		/* acquire skill in this weapon */
@@ -2437,7 +2438,7 @@ register struct obj *otmp;
     else if(Blind || (!carried(otmp) && !cansee(x,y)))
 	You_hear("crunching noises.");
     else if(!carried(otmp) && cansee(x,y))
-		pline("A mouth forms from the mist and eats %s!", an(corpse_xname(otmp, TRUE)));
+		pline("A mouth forms from the mist and eats %s!", an(singular(otmp, xname)));
     else pline("A mouth forms from the mist and eats your sacrifice!");
     if (carried(otmp)){
 		if(u.sealsActive&SEAL_BALAM){
@@ -3195,7 +3196,8 @@ dosacrifice()
 		if (otmp) {
 		    if (otmp->spe < 0) otmp->spe = 0;
 		    if (otmp->cursed) uncurse(otmp);
-		    otmp->oerodeproof = TRUE;
+			if(otmp->oartifact != ART_PEN_OF_THE_VOID)
+			    otmp->oerodeproof = TRUE;
 		    dropy(otmp);
 		    at_your_feet("An object");
 		    godvoice(Align2gangr(u.ualign.type), "Use my gift wisely!");

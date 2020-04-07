@@ -1658,7 +1658,7 @@ char *outbuf;
 	}
 	bonus = (incamt > 0) ? "bonus" : "penalty";
 	/* "bonus to hit" vs "damage bonus" */
-	if (!strcmp(inctyp, "damage")) {
+	if (!strcmp(inctyp, "damage") || !strcmp(inctyp, "spell damage")) {
 	    const char *ctmp = inctyp;
 	    inctyp = bonus;
 	    bonus = ctmp;
@@ -1807,22 +1807,38 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(flags.stag) enl_msg("You ", "have","had"," turned stag on your quest leader");
 		else enl_msg("You ", "have","had"," stayed true to your quest");
 		if(flags.leader_backstab) enl_msg("You ", "have","had"," been betrayed by your quest leader");
-		Sprintf(buf, "a hod wantedness of %d", u.hod);
-		you_have(buf);
-		Sprintf(buf, "a gevurah wantedness of %d", u.gevurah);
-		you_have(buf);
-		Sprintf(buf, "a chokhmah wantedness of %d", u.keter);
-		you_have(buf);
-		Sprintf(buf, "%d chokhmah sephiroth ", u.chokhmah);
-		enl_msg(buf, "are", "were", " deployed");
-		Sprintf(buf, "%d weakness from being studied", u.ustdy);
-		you_have(buf);
-		Sprintf(buf, "spirits bound: %d", u.sealCounts);
-		you_have(buf);
-		Sprintf(buf, "seals active: %lx", u.sealsActive);
-		you_have(buf);
-		Sprintf(buf, "special seals active: %lx", u.specialSealsActive);
-		you_have(buf);
+		if(u.hod){
+			Sprintf(buf, "a hod wantedness of %d", u.hod);
+			you_have(buf);
+		}
+		if(u.gevurah){
+			Sprintf(buf, "a gevurah wantedness of %d", u.gevurah);
+			you_have(buf);
+		}
+		if(u.keter){
+			Sprintf(buf, "a chokhmah wantedness of %d", u.keter);
+			you_have(buf);
+		}
+		if(u.chokhmah){
+			Sprintf(buf, "%d chokhmah sephiroth ", u.chokhmah);
+			enl_msg(buf, "are", "were", " deployed");
+		}
+		if(u.ustdy){
+			Sprintf(buf, "%d weakness from being studied", u.ustdy);
+			you_have(buf);
+		}
+		if(u.sealCounts){
+			Sprintf(buf, "spirits bound: %d", u.sealCounts);
+			you_have(buf);
+		}
+		if(u.sealsActive){
+			Sprintf(buf, "seals active: %lx", u.sealsActive);
+			you_have(buf);
+		}
+		if(u.specialSealsActive){
+			Sprintf(buf, "special seals active: %lx", u.specialSealsActive);
+			you_have(buf);
+		}
 	}
 #endif
 	
@@ -2097,7 +2113,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if (u.umadness&MAD_DELUSIONS){
 			you_have("a tendency to hallucinate, obscuring some monsters true forms");
 		}
-		if(u.usanity < 80){
+		if(u.usanity < 80 && u.umadness&MAD_REAL_DELUSIONS){
 			enl_msg("Some monsters ", "will change", "changed", " forms randomly");
 		}
 		if (u.umadness&MAD_SANCTITY){
@@ -2350,19 +2366,31 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(u.ucspeed==HIGH_CLOCKSPEED) you_are("set to emergency speed");
 		if(u.phasengn) you_are("in phase mode");
 	}
-	if (u.uhitinc)
-	    you_have(enlght_combatinc("to hit", u.uhitinc, final, buf));
-	if (u.udaminc)
-	    you_have(enlght_combatinc("damage", u.udaminc, final, buf));
+	if (u.uhitinc || u.uuur_duration)
+	    you_have(enlght_combatinc("to hit", u.uhitinc + (u.uuur_duration ? 10 : 0), final, buf));
+	if (u.udaminc || (u.uaesh/3) || u.uaesh_duration)
+	    you_have(enlght_combatinc("damage", u.udaminc+u.uaesh/3 + (u.uaesh_duration ? 10 : 0), final, buf));
+	if(u.ukrau_duration){
+		you_have("+50% to spell damage");
+	}
+	if (u.ukrau/3)
+	    you_have(enlght_combatinc("spell damage", u.uaesh/3, final, buf));
+	if (u.uhoon/3 || u.uhoon_duration)
+	    you_have(enlght_combatinc("to healing", u.uhoon/3 + (u.uhoon_duration ? 30 : 0), final, buf));
+	if (u.unaen/3 || u.unaen_duration)
+	    you_have(enlght_combatinc("to energy regeneration", u.unaen/3 + (u.unaen_duration ? 30 : 0), final, buf));
 	if (Slow_digestion) you_have("slower digestion");
 	if (Regeneration) enl_msg("You regenerate", "", "d", "");
-	if (u.uspellprot || Protection) {
+	if (u.uspellprot || Protection || u.uuur/2 || u.uuur_duration || (u.uvaul+4)/5) {
 	    int prot = 0;
 
 	    if(uleft && uleft->otyp == RIN_PROTECTION) prot += uleft->spe;
 	    if(uright && uright->otyp == RIN_PROTECTION) prot += uright->spe;
 	    if (HProtection & INTRINSIC) prot += u.ublessed;
 	    prot += u.uspellprot;
+	    prot += u.uuur/2;
+	    prot += u.uuur_duration ? 10 : 0;
+	    prot += (u.uvaul+4)/5;
 
 	    if (prot < 0)
 		you_are("ineffectively protected");
@@ -3109,21 +3137,33 @@ int final;
 		if(u.ucspeed==HIGH_CLOCKSPEED) dump(youwere, "set to emergency speed");
 		if(u.phasengn) dump(youwere, "in phase mode");
 	}
-	if (u.uhitinc)
+	if (u.uhitinc || u.uuur_duration)
 	    dump(youhad,
-		enlght_combatinc("to hit", u.uhitinc, final, buf));
-	if (u.udaminc)
+		enlght_combatinc("to hit", u.uhitinc + (u.uuur_duration ? 10 : 0), final, buf));
+	if (u.udaminc || (u.uaesh/3) || u.uaesh_duration)
 	    dump(youhad,
-		enlght_combatinc("damage", u.udaminc, final, buf));
+		enlght_combatinc("damage", u.udaminc+u.uaesh/3 + (u.uaesh_duration ? 10 : 0), final, buf));
+	if(u.ukrau_duration){
+	    dump(youhad, "+50% to spell damage");
+	}
+	if (u.ukrau/3)
+	    dump(youhad, enlght_combatinc("spell damage", u.uaesh/3, final, buf));
+	if (u.uhoon/3 || u.uhoon_duration)
+	    dump(youhad, enlght_combatinc("to healing", u.uhoon/3 + (u.uhoon_duration ? 30 : 0), final, buf));
+	if (u.unaen/3 || u.unaen_duration)
+	    dump(youhad, enlght_combatinc("to energy regeneration", u.unaen/3 + (u.unaen_duration ? 30 : 0), final, buf));
 	if (Slow_digestion) dump(youhad, "slower digestion");
 	if (Regeneration) dump("  ", "You regenerated");
-	if (u.uspellprot || Protection) {
+	if (u.uspellprot || Protection || u.uuur/2 || u.uuur_duration || (u.uvaul+4)/5) {
 	    int prot = 0;
 
 	    if(uleft && uleft->otyp == RIN_PROTECTION) prot += uleft->spe;
 	    if(uright && uright->otyp == RIN_PROTECTION) prot += uright->spe;
 	    if (HProtection & INTRINSIC) prot += u.ublessed;
 	    prot += u.uspellprot;
+	    prot += u.uuur/2;
+	    prot += u.uuur_duration ? 10 : 0;
+	    prot += (u.uvaul+4)/5;
 	    
 	    if (prot < 0)
 		dump(youwere, "ineffectively protected");
@@ -3286,6 +3326,12 @@ resistances_enlightenment()
 	if (Halluc_resistance)
 		enl_msg("You resist", "", "ed", " hallucinations");
 */
+	if(u.umconf){
+		if(Blind) Sprintf(buf, "Your %s are tingling.", makeplural(body_part(HAND)));
+		else Sprintf(buf, "Your %s are glowing%s red.", makeplural(body_part(HAND)), u.umconf > 20 ? " brilliantly" : u.umconf > 10 ? " bright" : "", hcolor(NH_RED));
+		putstr(en_win, 0, buf);
+	}
+	
 	/*** Thoughts ***/
 	if (active_glyph(CLOCKWISE_METAMORPHOSIS)) putstr(en_win, 0, "A clockwise gyre turns in the depths below your id.");
 	if (active_glyph(ANTI_CLOCKWISE_METAMORPHOSIS)) putstr(en_win, 0, "An anti-clockwise gyre turns in the heights above your soul.");
@@ -3962,6 +4008,9 @@ void
 signs_mirror()
 {
 	boolean message = FALSE;
+	int count;
+	const char *comma;
+	char msgbuf[BUFSZ];
 
 	en_win = create_nhwindow(NHW_MENU);
 	putstr(en_win, 0, "Current Appearance:");
@@ -3971,6 +4020,223 @@ signs_mirror()
 		putstr(en_win, 0, "You are invisible.");
 		message = TRUE;
 	}
+	
+#define PUNCTUTATION	if(count > 0){if(count == 1) Sprintf(eos(msgbuf), "%s and ", comma); else Sprintf(eos(msgbuf), "%s ", comma);}
+	//Words
+	if(u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know){
+		count = 0;
+		if(u.ufirst_light) count++;
+		if(u.ufirst_sky) count++;
+		if(u.ufirst_life) count++;
+		if(u.ufirst_know) count++;
+		
+		if(count == 1){
+			if(u.ufirst_light)
+				putstr(en_win, 0, "There is a blinding glyph on your brow.");
+			else if(u.ufirst_sky)
+				putstr(en_win, 0, "There is a cerulean glyph on your brow.");
+			else if(u.ufirst_life)
+				putstr(en_win, 0, "There is a verdant glyph on your brow.");
+			else if(u.ufirst_know)
+				putstr(en_win, 0, "There is a crimson glyph on your brow.");
+		} else {
+			Sprintf(msgbuf, "There is ");
+			if(count == 2) comma = "";
+			else comma = ",";
+			if(u.ufirst_light){
+				Sprintf(eos(msgbuf), "a blinding glyph");
+				count--;
+				PUNCTUTATION
+			}
+			if(u.ufirst_sky){
+				Sprintf(eos(msgbuf), "a cerulean glyph");
+				count--;
+				PUNCTUTATION
+			}
+			if(u.ufirst_life){
+				Sprintf(eos(msgbuf), "a verdant glyph");
+				count--;
+				PUNCTUTATION
+			}
+			if(u.ufirst_know){
+				Sprintf(eos(msgbuf), "a crimson glyph");
+				count--;
+				PUNCTUTATION
+			}
+			Sprintf(eos(msgbuf), " on your brow.");
+			putstr(en_win, 0, msgbuf);
+		}
+	}
+#undef PUNCTUTATION
+	
+#define PUNCTUTATION	if(count > 0){if(count == 1) Sprintf(eos(msgbuf), "%s and a ", comma); else Sprintf(eos(msgbuf), "%s a ", comma);}
+	//Active syllables
+	if(u.uaesh_duration || u.ukrau_duration || u.uhoon_duration || u.uuur_duration || u.unaen_duration || u.uvaul_duration){
+		count = 0;
+		if(u.uaesh_duration) count++;
+		if(u.ukrau_duration) count++;
+		if(u.uhoon_duration) count++;
+		if(u.uuur_duration) count++;
+		if(u.unaen_duration) count++;
+		if(u.uvaul_duration) count++;
+		if(count == 1){
+			if(u.uaesh_duration)
+				Sprintf(msgbuf, "A %sglowing %s floats above your brow.",  u.uaesh_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_STRENGTH__AESH]));
+			else if(u.ukrau_duration)
+				Sprintf(msgbuf, "A %sglowing %s floats above your brow.",  u.ukrau_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_POWER__KRAU]));
+			else if(u.uhoon_duration)
+				Sprintf(msgbuf, "A %sglowing %s floats above your brow.",  u.uhoon_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_LIFE__HOON]));
+			else if(u.uuur_duration)
+				Sprintf(msgbuf, "A %sglowing %s floats above your brow.",  u.uuur_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_GRACE__UUR]));
+			else if(u.unaen_duration)
+				Sprintf(msgbuf, "A %sglowing %s floats above your brow.",  u.unaen_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_THOUGHT__NAEN]));
+			else if(u.uvaul_duration)
+				Sprintf(msgbuf, "A %sglowing %s floats above your brow.",  u.uvaul_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_SPIRIT__VAUL]));
+			putstr(en_win, 0, msgbuf);
+		} else {
+			if(count == 2) comma = "";
+			else comma = ",";
+			Sprintf(msgbuf, "A ");
+			if(u.uaesh_duration){
+				Sprintf(eos(msgbuf), "%sglowing %s",  u.uaesh_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_STRENGTH__AESH]));
+				count--;
+				PUNCTUTATION
+			}
+			if(u.ukrau_duration){
+				Sprintf(eos(msgbuf), "%sglowing %s",  u.ukrau_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_POWER__KRAU]));
+				count--;
+				PUNCTUTATION
+			}
+			if(u.uhoon_duration){
+				Sprintf(eos(msgbuf), "%sglowing %s",  u.uhoon_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_LIFE__HOON]));
+				count--;
+				PUNCTUTATION
+			}
+			if(u.uuur_duration){
+				Sprintf(eos(msgbuf), "%sglowing %s",  u.uuur_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_GRACE__UUR]));
+				count--;
+				PUNCTUTATION
+			}
+			if(u.unaen_duration){
+				Sprintf(eos(msgbuf), "%sglowing %s",  u.unaen_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_THOUGHT__NAEN]));
+				count--;
+				PUNCTUTATION
+			}
+			if(u.uvaul_duration){
+				Sprintf(eos(msgbuf), "%sglowing %s",  u.uvaul_duration > 10 ?  "brilliantly " : "", OBJ_DESCR(objects[SYLLABLE_OF_SPIRIT__VAUL]));
+				count--;
+				PUNCTUTATION
+			}
+			Sprintf(eos(msgbuf), " float in a column above your brow.");
+			putstr(en_win, 0, msgbuf);
+		}
+	}
+#undef PUNCTUTATION
+	
+	//Inactive syllables
+#define STRIPGLYPH		;
+//define STRIPGLYPH		if ((bp = strstri(msgbuf, " glyph")) != 0) *bp = '\0';
+#define PUNCTUTATION	if(count > 0){if(count == 1) Sprintf(eos(msgbuf), "%s and ", comma); else Sprintf(eos(msgbuf), "%s ", comma);}
+	count = 0;
+	if(u.uaesh && u.uaesh - !!u.uaesh_duration){
+		count++;
+	}
+	if(u.ukrau && u.ukrau - !!u.ukrau_duration){
+		count++;
+	}
+	if(u.uhoon && u.uhoon - !!u.uhoon_duration){
+		count++;
+	}
+	if(u.uuur && u.uuur - !!u.uuur_duration){
+		count++;
+	}
+	if(u.unaen && u.unaen - !!u.unaen_duration){
+		count++;
+	}
+	if(u.uvaul && u.uvaul - !!u.uvaul_duration){
+		count++;
+	}
+	if(count){
+		int num;
+		int total = 0;
+		char *bp;
+		if(count > 2) comma = ",";
+		else comma = "";
+		
+		Sprintf(msgbuf, "");
+		if(u.uaesh && u.uaesh - !!u.uaesh_duration){
+			num = u.uaesh - !!u.uaesh_duration;
+			total += num;
+			if(num == 1)
+				Sprintf(eos(msgbuf), "a %s", OBJ_DESCR(objects[SYLLABLE_OF_STRENGTH__AESH]));
+			else
+				Sprintf(eos(msgbuf), "%d %ss", num, OBJ_DESCR(objects[SYLLABLE_OF_STRENGTH__AESH]));
+			count--;
+			STRIPGLYPH
+			PUNCTUTATION
+		}
+		if(u.ukrau && u.ukrau - !!u.ukrau_duration){
+			num = u.ukrau - !!u.ukrau_duration;
+			total += num;
+			if(num == 1)
+				Sprintf(eos(msgbuf), "a %s", OBJ_DESCR(objects[SYLLABLE_OF_POWER__KRAU]));
+			else
+				Sprintf(eos(msgbuf), "%d %ss", num, OBJ_DESCR(objects[SYLLABLE_OF_POWER__KRAU]));
+			count--;
+			STRIPGLYPH
+			PUNCTUTATION
+		}
+		if(u.uhoon && u.uhoon - !!u.uhoon_duration){
+			num = u.uhoon - !!u.uhoon_duration;
+			total += num;
+			if(num == 1)
+				Sprintf(eos(msgbuf), "a %s", OBJ_DESCR(objects[SYLLABLE_OF_LIFE__HOON]));
+			else
+				Sprintf(eos(msgbuf), "%d %ss", num, OBJ_DESCR(objects[SYLLABLE_OF_LIFE__HOON]));
+			count--;
+			STRIPGLYPH
+			PUNCTUTATION
+		}
+		if(u.uuur && u.uuur - !!u.uuur_duration){
+			num = u.uuur - !!u.uuur_duration;
+			total += num;
+			if(num == 1)
+				Sprintf(eos(msgbuf), "a %s", OBJ_DESCR(objects[SYLLABLE_OF_GRACE__UUR]));
+			else
+				Sprintf(eos(msgbuf), "%d %ss", num, OBJ_DESCR(objects[SYLLABLE_OF_GRACE__UUR]));
+			count--;
+			STRIPGLYPH
+			PUNCTUTATION
+		}
+		if(u.unaen && u.unaen - !!u.unaen_duration){
+			num = u.unaen - !!u.unaen_duration;
+			total += num;
+			if(num == 1)
+				Sprintf(eos(msgbuf), "a %s", OBJ_DESCR(objects[SYLLABLE_OF_THOUGHT__NAEN]));
+			else
+				Sprintf(eos(msgbuf), "%d %ss", num, OBJ_DESCR(objects[SYLLABLE_OF_THOUGHT__NAEN]));
+			count--;
+			STRIPGLYPH
+			PUNCTUTATION
+		}
+		if(u.uvaul && u.uvaul - !!u.uvaul_duration){
+			num = u.uvaul - !!u.uvaul_duration;
+			total += num;
+			if(num == 1)
+				Sprintf(eos(msgbuf), "a %s", OBJ_DESCR(objects[SYLLABLE_OF_SPIRIT__VAUL]));
+			else
+				Sprintf(eos(msgbuf), "%d %ss", num, OBJ_DESCR(objects[SYLLABLE_OF_SPIRIT__VAUL]));
+			count--;
+			STRIPGLYPH
+			PUNCTUTATION
+		}
+		// Sprintf(eos(msgbuf), " glyph%s %s around your head.", total == 1 ? "" : "s", total == 1 ? "drifts" : "drift");
+		Sprintf(eos(msgbuf), " %s around your head.", total == 1 ? "drifts" : "drift");
+		msgbuf[0] = highc(msgbuf[0]);
+		if(msgbuf[0]) putstr(en_win, 0, msgbuf);
+	}
+#undef STRIPGLYPH
+#undef PUNCTUTATION
 	
 	if(u.sealsActive&SEAL_AHAZU && !NoBInvis){
 		if(!(ublindf && ublindf->otyp==MASK)){

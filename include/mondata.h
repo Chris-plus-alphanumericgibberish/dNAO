@@ -414,6 +414,7 @@
 								(ptr) == &mons[PM_MERCURIAL_ESSENCE] ||\
 								(ptr) == &mons[PM_BRIMSTONE_ESSENCE] ||\
 								(ptr) == &mons[PM_HYDRARGYRUMACH_RILMANI] ||\
+								(ptr) == &mons[PM_CENTER_OF_ALL] ||\
 								(ptr) == &mons[PM_AURUMACH_RILMANI]\
 							)
 #define is_deva(ptr)		((ptr)->mlet == S_NEU_ANGEL)
@@ -655,6 +656,8 @@
 				 (ptr) == &mons[PM_MUMMIFIED_GYNOID] || \
 				 (ptr) == &mons[PM_FLAYED_ANDROID] || \
 				 (ptr) == &mons[PM_FLAYED_GYNOID] || \
+				 (ptr) == &mons[PM_CRUCIFIED_ANDROID] || \
+				 (ptr) == &mons[PM_CRUCIFIED_GYNOID] || \
 				 (ptr) == &mons[PM_PARASITIZED_ANDROID] || \
 				 (ptr) == &mons[PM_PARASITIZED_GYNOID] || \
 				 (ptr) == &mons[PM_PARASITIZED_OPERATOR] || \
@@ -677,6 +680,67 @@
 #define is_unalive(ptr)		(on_level(&valley_level, &u.uz) || is_naturally_unalive(ptr))
 
 #define is_naturally_unalive(ptr)		(((ptr)->mflagsa & MA_UNLIVING))
+
+#define is_indigestible(ptr)	((ptr) == &mons[PM_DANCING_BLADE] ||\
+								 (ptr) == &mons[PM_EARTH_ELEMENTAL] ||\
+								 (ptr) == &mons[PM_TERRACOTTA_SOLDIER] ||\
+								 (ptr) == &mons[PM_CLOCKWORK_SOLDIER] ||\
+								 (ptr) == &mons[PM_CLOCKWORK_DWARF] ||\
+								 (ptr) == &mons[PM_CLOCKWORK_FACTORY] ||\
+								 (ptr) == &mons[PM_GOLDEN_HEART] ||\
+								 (ptr) == &mons[PM_JUGGERNAUT] ||\
+								 (ptr) == &mons[PM_ID_JUGGERNAUT] ||\
+								 (ptr) == &mons[PM_SCRAP_TITAN] ||\
+								 (ptr) == &mons[PM_HELLFIRE_COLOSSUS] ||\
+								 (ptr) == &mons[PM_HELLFIRE_ORB] ||\
+								 (ptr) == &mons[PM_CLOCKWORK_AUTOMATON] ||\
+								 (ptr) == &mons[PM_COLOSSAL_CLOCKWORK_WAR_MACHINE] ||\
+								 (ptr) == &mons[PM_MALKUTH_SEPHIRAH] ||\
+								 (ptr) == &mons[PM_YESOD_SEPHIRAH] ||\
+								 (ptr) == &mons[PM_DAAT_SEPHIRAH] ||\
+								 (ptr) == &mons[PM_HOD_SEPHIRAH] ||\
+								 (ptr) == &mons[PM_NETZACH_SEPHIRAH] ||\
+								 (ptr) == &mons[PM_GEVURAH_SEPHIRAH] ||\
+								 (ptr) == &mons[PM_BINAH_SEPHIRAH] ||\
+								 (ptr) == &mons[PM_CHOKHMAH_SEPHIRAH] ||\
+								 (ptr) == &mons[PM_HALF_STONE_DRAGON] ||\
+								 (ptr) == &mons[PM_HOOLOOVOO] ||\
+								 (ptr) == &mons[PM_GOLD_GOLEM] ||\
+								 (ptr) == &mons[PM_CLAY_GOLEM] ||\
+								 (ptr) == &mons[PM_TREASURY_GOLEM] ||\
+								 (ptr) == &mons[PM_SEMBLANCE] ||\
+								 (ptr) == &mons[PM_STONE_GOLEM] ||\
+								 (ptr) == &mons[PM_GLASS_GOLEM] ||\
+								 (ptr) == &mons[PM_IRON_GOLEM] ||\
+								 (ptr) == &mons[PM_ARGENTUM_GOLEM] ||\
+								 (ptr) == &mons[PM_RETRIEVER] ||\
+								 (ptr) == &mons[PM_LIVING_DOLL] ||\
+								 (ptr) == &mons[PM_ARA_KAMEREL] ||\
+								 (ptr) == &mons[PM_ANCIENT_OF_DEATH] ||\
+								 (ptr) == &mons[PM_PALE_NIGHT] ||\
+								 (ptr) == &mons[PM_BAALPHEGOR] ||\
+								 (ptr) == &mons[PM_ARCADIAN_AVENGER] ||\
+								 (ptr) == &mons[PM_DAMAGED_ARCADIAN_AVENGER] ||\
+								 (ptr) == &mons[PM_MUMMIFIED_ANDROID] ||\
+								 (ptr) == &mons[PM_MUMMIFIED_GYNOID] ||\
+								 (ptr) == &mons[PM_FLAYED_ANDROID] ||\
+								 (ptr) == &mons[PM_FLAYED_GYNOID] ||\
+								 (ptr) == &mons[PM_CRUCIFIED_ANDROID] ||\
+								 (ptr) == &mons[PM_CRUCIFIED_GYNOID] ||\
+								 (ptr) == &mons[PM_ANDROID] ||\
+								 (ptr) == &mons[PM_GYNOID] ||\
+								 (ptr) == &mons[PM_OPERATOR] ||\
+								 (ptr) == &mons[PM_COMMANDER] ||\
+								 (ptr) == &mons[PM_SENTINEL_OF_MITHARDIR] ||\
+								 (ptr) == &mons[PM_CHAIN_GOLEM] ||\
+								 is_uvuudaum(ptr) ||\
+								 is_rilmani(ptr))
+
+#define is_delouseable(ptr) ((ptr) == &mons[PM_PARASITIZED_DOLL] ||\
+								   (ptr) == &mons[PM_PARASITIZED_ANDROID] ||\
+								   (ptr) == &mons[PM_PARASITIZED_GYNOID] ||\
+								   (ptr) == &mons[PM_PARASITIZED_OPERATOR] ||\
+								   (ptr) == &mons[PM_PARASITIZED_COMMANDER])
 
 #define is_elemental(ptr)		( (ptr->mflagsa & MA_ELEMENTAL) )
 

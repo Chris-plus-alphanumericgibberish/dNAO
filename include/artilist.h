@@ -1522,7 +1522,7 @@ A("The Mask of Tlaloc",				MASK,					(const char *)0,
 	),
 /*Arc redesign by Riker*/
 A("Ehecailacocozcatl",				AMULET_OF_MAGICAL_BREATHING,			(const char *)0,
-	3000L, SHELL, MZ_DEFAULT, WT_DEFAULT,
+	3000L, SHELL_MAT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,

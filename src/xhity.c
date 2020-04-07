@@ -679,6 +679,7 @@ int tary;
 			/* melee -- if attacking an adjacent square or thrusting a polearm */
 			if (!ranged ||
 				(otmp && is_pole(otmp) && dist2(x(magr), y(magr), tarx, tary) < 8)) {
+				int devai = 0;
 				/* they did do an attack */
 				mon_ranged_gazeonly = FALSE;
 				/* check for wild misses */
@@ -709,7 +710,7 @@ int tary;
 							)
 						{
 							struct monst *mdef2 = m_at(tarx + dx, tary + dy);
-							if (mdef2 && (mdef2 != mdef)) {
+							if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)) {
 								int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
 								bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
 								(void)xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
@@ -717,28 +718,129 @@ int tary;
 							}
 						}
 					}
+					/* Cleaving causes melee attacks to hit an additional neighboring monster */
 					if (youagr && !ranged && Cleaving)
 					{
 						/* try to find direction (u.dx and u.dy may be incorrect) */
 						int dx = sgn(tarx - x(magr));
 						int dy = sgn(tary - y(magr));
-						if((monstermoves+indexnum)&1){//Odd
-							//45 degree rotation
+						if((monstermoves+indexnum+devai)&1){//Odd
+							//-45 degree rotation
 							dx = sgn(dx+dy);
 							dy = sgn(dy-dx);
 						} else {
-							//-45 degree rotation
+							//45 degree rotation
 							dx = sgn(dx-dy);
 							dy = sgn(dx+dy);
 						}
 						if (isok(x(magr) + dx, y(magr) + dy))
 						{
 							struct monst *mdef2 = m_at(x(magr) + dx, y(magr) + dy);
-							if (mdef2 && (mdef2 != mdef)) {
+							if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)) {
 								int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
 								bhitpos.x = x(magr) + dx; bhitpos.y = y(magr) + dy;
 								(void)xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
 								/* we aren't handling MM_AGR_DIED or MM_AGR_STOP; hopefully the attacker being a player covers those cases well enough */
+							}
+						}
+					}
+					/* Club-claw insight weapons strike additional targets if your insight is high enough to perceive the claw */
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && otmp->otyp == CLUB && otmp->oproperties&OPROP_CCLAW){
+						int subresult = 0;
+						otmp->otyp = CLAWED_HAND;
+						/* try to find direction (u.dx and u.dy may be incorrect) */
+						int dx = sgn(tarx - x(magr));
+						int dy = sgn(tary - y(magr));
+						int nx, ny;
+						if (isok(tarx + dx, tary + dy) &&
+							isok(tarx - dx, tary - dy) &&
+							x(magr) == tarx - dx &&
+							y(magr) == tary - dy
+							)
+						{
+							struct monst *mdef2 = m_at(tarx + dx, tary + dy);
+							if (mdef2 && !DEADMONSTER(mdef2)){ //Can hit a worm multiple times
+								int vis2 = VIS_NONE;
+								if(youagr || canseemon(magr))
+									vis2 |= VIS_MAGR;
+								if(mdef2 == &youmonst || canseemon(mdef2))
+									vis2 |= VIS_MDEF;
+								bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+								subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
+								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+							}
+						}
+						//45 degree rotation
+						nx = sgn(dx+dy);
+						ny = sgn(dy-dx);
+						if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+							struct monst *mdef2 = m_at(x(magr) + nx, y(magr) + ny);
+							if (mdef2 && !DEADMONSTER(mdef2)) { //Can hit a worm multiple times
+								int vis2 = VIS_NONE;
+								if(youagr || canseemon(magr))
+									vis2 |= VIS_MAGR;
+								if(mdef2 == &youmonst || canseemon(mdef2))
+									vis2 |= VIS_MDEF;
+								bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+								subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
+								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+							}
+						}
+						//-45 degree rotation
+						nx = sgn(dx-dy);
+						ny = sgn(dx+dy);
+						if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+							struct monst *mdef2 = m_at(x(magr) + nx, y(magr) + ny);
+							if (mdef2 && !DEADMONSTER(mdef2)) { //Can hit a worm multiple times
+								int vis2 = VIS_NONE;
+								if(youagr || canseemon(magr))
+									vis2 |= VIS_MAGR;
+								if(mdef2 == &youmonst || canseemon(mdef2))
+									vis2 |= VIS_MDEF;
+								bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+								subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
+								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+							}
+						}
+						otmp->otyp = CLUB;
+					}
+					/* Rakuyo hit additional targets, if your insight is high enough to percieve the blood */
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 
+						&& otmp && is_rakuyo(otmp)
+					){
+						int subresult = 0;
+						/* try to find direction (u.dx and u.dy may be incorrect) */
+						int dx = sgn(tarx - x(magr));
+						int dy = sgn(tary - y(magr));
+						struct attack blood = {AT_SRPR, AD_BLUD,
+							(youagr && otmp == uwep && u.twoweap && uswapwep && is_rakuyo(uswapwep)) ? 2 : 1, 
+							12+otmp->spe*2
+						};
+						if (isok(tarx + dx, tary + dy) &&
+							isok(tarx - dx, tary - dy) &&
+							x(magr) == tarx - dx &&
+							y(magr) == tary - dy
+							)
+						{
+							struct monst *mdef2 = m_at(tarx + dx, tary + dy);
+							if (mdef2 && !DEADMONSTER(mdef2)){ //Can hit a worm multiple times
+								int vis2 = VIS_NONE;
+								if(youagr || canseemon(magr))
+									vis2 |= VIS_MAGR;
+								if(mdef2 == &youmonst || canseemon(mdef2))
+									vis2 |= VIS_MDEF;
+								bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+								subresult = xmeleehity(magr, mdef2, &blood, (struct obj *)0, vis2, tohitmod, TRUE);
+								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+							}
+							if(u.uinsight >= 40){
+								explode(tarx + dx, tary + dy, AD_FIRE, -1, d(6,6), EXPL_FIERY, 1);
+								if(youagr && otmp == uwep && u.twoweap && uswapwep && is_rakuyo(uswapwep))
+									explode(tarx + dx, tary + dy, AD_FIRE, -1, d(6,6), EXPL_FIERY, 1);
 							}
 						}
 					}
@@ -749,6 +851,7 @@ int tary;
 						else
 							tohitmod -= 4;	/* reduce accuracy on repeated AT_DEVA attacks */
 					}
+					devai++;
 				} while (devaloop);
 
 				if (!ranged)
@@ -8564,7 +8667,7 @@ int vis;
 					EDOG(magr)->hungrytime += 100;  //400/4 = human nut/4
 				}
 			}
-			if (Slow_digestion) {
+			if (Slow_digestion || is_indigestible(youracedata)) {
 				/* Messages are handled in caller */
 				u.uswldtim = 0;
 				result = MM_HIT;
@@ -8592,6 +8695,18 @@ int vis;
 				done(DIED);
 				result = MM_AGR_STOP;		/* lifesaved */
 			}
+			else if(is_indigestible(mdef->data)){
+				You("regurgitate %s.", mon_nam(mdef));
+				dmg = 0;
+				break;
+			}
+			else if(is_delouseable(mdef->data)){
+				mdef = delouse(mdef, AD_DGST);
+				You("regurgitate %s.", mon_nam(mdef));
+				dmg = 0;
+				result |= MM_AGR_STOP;
+				break;
+			}
 			else {
 				if (Slow_digestion) {
 					dmg = 0;
@@ -8605,8 +8720,8 @@ int vis;
 				if (!vegetarian(pd))
 					violated_vegetarian();
 
-				/* Use up amulet of life saving */
-				if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
+				// /* Use up amulet of life saving */
+				// if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
 
 				newuhs(FALSE);
 				xkilled(mdef, 2);
@@ -8653,7 +8768,7 @@ int vis;
 				}
 			}
 		}
-		else {
+		else { //mvm
 			/* eating a Rider or its corpse is fatal */
 			if (is_rider(mdef->data)) {
 				if (vis)
@@ -8673,12 +8788,28 @@ int vis;
 					result = MM_AGR_DIED;
 				}
 			}
+			else if(is_indigestible(mdef->data)){
+				if(canspotmon(magr) || canspotmon(mdef)){
+					pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
+				}
+				dmg = 0;
+				break;
+			}
+			else if(is_delouseable(mdef->data)){
+				mdef = delouse(mdef, AD_DGST);
+				if(canspotmon(magr) || canspotmon(mdef)){
+					pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
+				}
+				dmg = 0;
+				result |= MM_AGR_STOP;
+				break;
+			}
 			else {
 				if (flags.verbose && flags.soundok)
 					verbalize("Burrrrp!");
 
-				/* Use up amulet of life saving - no lifesaving allowed? */
-				if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
+				// /* Use up amulet of life saving - no lifesaving allowed? */
+				// if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
 
 				/* kill */
 				result = xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);

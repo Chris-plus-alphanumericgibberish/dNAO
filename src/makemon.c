@@ -4176,7 +4176,6 @@ register struct monst *mtmp;
 				otmp = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 				otmp->obj_material = SILVER;
 				otmp->oproperties = OPROP_PSIOW;
-				otmp->oproperties = OPROP_LESSW;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				(void)mongets(mtmp, ARCHAIC_HELM);
@@ -6119,6 +6118,39 @@ register struct	monst	*mtmp;
 		} else if(ptr == &mons[PM_GIANT_GOAT_SPAWN]) {
 			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
 				mtmp->mfaction = MISTWEAVER;
+			}
+		} else if(ptr == &mons[PM_LURKING_ONE]) {
+			int i;
+			long long oprop;
+			switch(rnd(20)){
+				case 1:
+					oprop = OPROP_ELECW;
+				break;
+				case 2:
+					oprop = OPROP_ACIDW;
+				break;
+				case 3:
+					oprop = OPROP_MAGCW;
+				break;
+				case 4:
+					oprop = OPROP_WATRW;
+				break;
+				case 5:
+				case 6:
+				case 7:
+					oprop = OPROP_PSIOW;
+				break;
+				default:
+					oprop = 0;
+				break;
+			}
+			for(i = 2; i > 0; i--){
+				otmp = mksobj(CLUB, FALSE, FALSE);
+				otmp->obj_material = BONE;
+				otmp->oproperties = OPROP_CCLAW|oprop;
+				otmp->objsize = mtmp->data->msize;
+				fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
 			}
 		} else if (is_giant(ptr)) {
 		    for (cnt = rn2((int)(mtmp->m_lev / 2)); cnt; cnt--) {
@@ -9681,7 +9713,55 @@ register int otyp;
 		if (is_demon(mtmp->data)) {
 			/* demons never get blessed objects */
 			if (otmp->blessed) curse(otmp);
+			if(mtmp->data == &mons[PM_MARILITH] && otmp->oclass == WEAPON_CLASS){
+				int roll = rnd(3);
+				otmp->spe = max(otmp->spe, roll);
+				
+				roll = rn2(100);
+				if(roll < 25)
+					set_material(otmp, IRON);
+				else if(roll < 50)
+					set_material(otmp, GOLD);
+				else if(roll < 75)
+					set_material(otmp, MITHRIL);
+				else if(roll < 85)
+					set_material(otmp, OBSIDIAN_MT);
+				else if(roll < 95)
+					set_material(otmp, GEMSTONE);
+				else if(roll < 100)
+					set_material(otmp, SILVER);
+				
+				if(rn2(100) < 15){
+					switch(rnd(8)){
+						case 1:
+							otmp->oproperties |= OPROP_FLAYW;
+						break;
+						case 2:
+							otmp->oproperties |= OPROP_FIREW;
+						break;
+						case 3:
+							otmp->oproperties |= OPROP_COLDW;
+						break;
+						case 4:
+							otmp->oproperties |= OPROP_ELECW;
+						break;
+						case 5:
+							otmp->oproperties |= OPROP_ACIDW;
+						break;
+						case 6:
+							otmp->oproperties |= OPROP_MAGCW;
+						break;
+						case 7:
+							otmp->oproperties |= OPROP_ANARW;
+						break;
+						case 8:
+							otmp->oproperties |= OPROP_UNHYW;
+						break;
+				    }
+				}
+		    }
 	    }
+		
 		if(is_lminion(mtmp) || is_nminion(mtmp) || is_cminion(mtmp)) {
 			/* lawful minions don't get cursed, bad, or rusting objects */
 			otmp->cursed = FALSE;

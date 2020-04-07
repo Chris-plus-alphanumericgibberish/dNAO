@@ -3084,6 +3084,8 @@ E struct monst *FDECL(bhit, (int,int,int,int,int (*)(MONST_P,OBJ_P),
 E int FDECL(flash_hits_mon, (struct monst *, struct obj *));
 E int FDECL(burn_floor_paper, (int,int,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(buzz, (int,int,int,int,XCHAR_P,XCHAR_P,int,int,int,int));
+E struct monst * FDECL(delouse, (struct monst *,int));
+E struct monst * FDECL(delouse_tame, (struct monst *));
 E void FDECL(melt_ice, (XCHAR_P,XCHAR_P));
 E int FDECL(zap_over_floor, (XCHAR_P,XCHAR_P,int,int,int,boolean *));
 E void FDECL(fracture_rock, (struct obj *));
