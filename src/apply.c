@@ -61,6 +61,7 @@ STATIC_PTR int FDECL(pick_rune, (BOOLEAN_P));
 STATIC_DCL void FDECL(describe_rune, (int));
 STATIC_PTR char NDECL(pick_carvee);
 
+STATIC_DCL boolean artiexist[];
 
 #ifdef	AMIGA
 void FDECL( amii_speaker, ( struct obj *, char *, int ) );
@@ -1460,12 +1461,19 @@ struct obj *obj;
 		You("unlatch %s.",the(xname(obj)));
 		obj->otyp = RAKUYO_SABER;
 		obj->quan += 1;
-	    dagger = splitobj(obj, 1L);
+		dagger = splitobj(obj, 1L);
 
 		obj_extract_self(dagger);
 		dagger->otyp = RAKUYO_DAGGER;
 		fix_object(obj);
 		fix_object(dagger);
+		
+		if (obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER){
+			dagger->oartifact = 0;
+			artiexist[ART_BLADE_DANCER_S_DAGGER] = FALSE;
+			dagger = oname(dagger, artiname(ART_BLADE_DANCER_S_DAGGER));
+		}
+
 		dagger = hold_another_object(dagger, "You drop %s!",
 				      doname(obj), (const char *)0); /*shouldn't merge, but may drop*/
 		if(dagger && !uswapwep && carried(dagger)){
@@ -1477,7 +1485,10 @@ struct obj *obj;
 			You("need the matching dagger in your swap-weapon sheath or offhand.");
 			return 0;
 		}
-		if(!mergable_traits(obj, uswapwep)){
+		if(!mergable_traits(obj, uswapwep) &&
+			!((obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER) &&
+			(uswapwep->oartifact && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER))
+		){
 			pline("They don't fit together!");
 			return 0;
 		}
