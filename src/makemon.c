@@ -4176,7 +4176,6 @@ register struct monst *mtmp;
 				otmp = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 				otmp->obj_material = SILVER;
 				otmp->oproperties = OPROP_PSIOW;
-				otmp->oproperties = OPROP_LESSW;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				(void)mongets(mtmp, ARCHAIC_HELM);
