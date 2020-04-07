@@ -2438,7 +2438,7 @@ register struct obj *otmp;
     else if(Blind || (!carried(otmp) && !cansee(x,y)))
 	You_hear("crunching noises.");
     else if(!carried(otmp) && cansee(x,y))
-		pline("A mouth forms from the mist and eats %s!", an(corpse_xname(otmp, TRUE)));
+		pline("A mouth forms from the mist and eats %s!", an(singular(otmp, xname)));
     else pline("A mouth forms from the mist and eats your sacrifice!");
     if (carried(otmp)){
 		if(u.sealsActive&SEAL_BALAM){
