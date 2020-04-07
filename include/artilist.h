@@ -481,6 +481,47 @@ A("Magicbane",			ATHAME,							"runed %s",
 	NOINVOKE, NOFLAG
 	),
 
+/*Needs encyc entry*/
+/*  The name is meant to translate to "Sword of the Fuma clan,"
+ *  "Ken" being a word for "sword" (as in "Bokken," "wooden sword")
+ *  "no" being "of", and "Fuma-itto" being "Fuma-clan" (or so I hope...),
+ *  this being a clan of ninja from the Sengoku era
+ *  (there should be an accent over the u of "Fuma" and the o of "-itto").
+ *  Nethack Samurai call broadswords "Ninja-to," which is the steriotypical ninja sword.
+ *  Aparently, there was no such thing as an actual Ninja-to, it's something Hollywood made up!
+ */
+A("Fuma-itto no Ken",	BROADSWORD,						(const char *)0,
+	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_ROGUE, NON_PM, TIER_B, (ARTG_GIFT),
+	NO_MONS(),
+	ATTK(AD_PHYS, 1, 8), (ARTA_HATES|ARTA_CROSSA|ARTA_POIS),	/* missing: SPFX2_NINJA */
+	PROP0(), NOFLAG,
+	PROP0(), NOFLAG,
+	CREATE_AMMO, NOFLAG /*makes shuriken*/
+	),
+
+A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	(const char *)0,
+	3000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, PM_ROGUE, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
+	NO_MONS(),
+	ATTK(AD_DRST, 5, 0), (ARTA_POIS),
+	PROP1(POISON_RES), NOFLAG,
+	PROP0(), NOFLAG,
+	LORDLY, NOFLAG
+	),
+
+/*Needs encyc entry*/
+/* adds sneak attacks "from behind" (allowing sneak attacks for anyone, and increasing damage for rogues/etc) */
+A("Spineseeker",		SHORT_SWORD,					(const char *)0,
+	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_ROGUE, NON_PM, TIER_D, (ARTG_GIFT),
+	NO_MONS(),
+	ATTK(AD_PHYS, 1, 6), NOFLAG,
+	PROP1(STEALTH), NOFLAG,
+	PROP0(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
 /*//////////Double Damage Artifacts//////////*/
 
 A("Grayswandir",		SABER,							(const char *)0,
@@ -512,16 +553,6 @@ A("Fire Brand",			LONG_SWORD,						"ember-runed %s",
 	NOINVOKE, NOFLAG
 	),
 
-A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	(const char *)0,
-	3000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_GIFT|ARTG_INHER),
-	NO_MONS(),
-	ATTK(AD_DRST, 5, 0), (ARTA_POIS),
-	PROP1(POISON_RES), NOFLAG,
-	PROP0(), NOFLAG,
-	LORDLY, NOFLAG
-	),
-
 A("The Green Dragon Crescent Blade",		NAGINATA,	(const char *)0,
 	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
@@ -549,7 +580,7 @@ A("Sunsword",			LONG_SWORD,						(const char *)0,
 	ATTK(AD_PHYS, 1, 0), (ARTA_HATES | ARTA_SILVER | ARTA_BRIGHT | ARTA_BLIND | ARTA_SHINING),
 	PROP1(SEARCHING), (ARTP_BLINDRES),
 	PROP0(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_LIGHT)
 	),
 
 /*can be thrown by dwarves*/
@@ -823,18 +854,6 @@ A("Ramiel",				PARTISAN,						(const char *)0,
 	),
 
 /*Needs encyc entry*/
-/* adds sneak attacks "from behind" (allowing sneak attacks for anyone, and increasing damage for rogues/etc) */
-A("Spineseeker",		SHORT_SWORD,					(const char *)0,
-	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, NON_PM, NON_PM, TIER_D, (ARTG_GIFT),
-	NO_MONS(),
-	ATTK(AD_PHYS, 1, 6), NOFLAG,
-	PROP1(STEALTH), NOFLAG,
-	PROP0(), NOFLAG,
-	NOINVOKE, NOFLAG
-	),
-
-/*Needs encyc entry*/
 /* Player gets a second weapon attack after XL15 with this */
 A("Quicksilver",		FLAIL,							(const char *)0,
 	1200L, SILVER, MZ_DEFAULT, WT_DEFAULT,
@@ -856,25 +875,6 @@ A("Sky Render",			KATANA,							(const char *)0,
 	PROP0(), NOFLAG,
 	PROP1(DISPLACED), NOFLAG,
 	NOINVOKE, NOFLAG
-	),
-
-/*Needs encyc entry*/
-/*  The name is meant to translate to "Sword of the Fuma clan,"
- *  "Ken" being a word for "sword" (as in "Bokken," "wooden sword")
- *  "no" being "of", and "Fuma-itto" being "Fuma-clan" (or so I hope...),
- *  this being a clan of ninja from the Sengoku era
- *  (there should be an accent over the u of "Fuma" and the o of "-itto").
- *  Nethack Samurai call broadswords "Ninja-to," which is the steriotypical ninja sword.
- *  Aparently, there was no such thing as an actual Ninja-to, it's something Hollywood made up!
- */
-A("Fuma-itto no Ken",	BROADSWORD,						(const char *)0,
-	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
-	NO_MONS(),
-	ATTK(AD_PHYS, 1, 8), (ARTA_HATES|ARTA_CROSSA|ARTA_POIS),	/* missing: SPFX2_NINJA */
-	PROP0(), NOFLAG,
-	PROP0(), NOFLAG,
-	CREATE_AMMO, NOFLAG /*makes shuriken*/
 	),
 
 /*Needs encyc entry*/
@@ -904,7 +904,7 @@ A("Yoichi no yumi",		YUMI,							(const char *)0,
 /* die size set to 1d8 in weapon.c */
 A("The Fluorite Octahedron",		BLUE_FLUORITE,		(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
+	A_NONE, NON_PM, NON_PM, TIER_A, NOFLAG,
 	NO_MONS(),
 	NO_ATTK(), (ARTA_DLUCK|ARTA_DEXPL),	/* EXTREMELY potent combination of lucky-exploding dice */
 	PROP0(), NOFLAG,
@@ -1811,7 +1811,7 @@ A("Arcor Kerym",					LONG_SWORD,			(const char *)0,
 	ATTK(AD_PHYS, 5, 0), NOFLAG,
 	PROP1(DRAIN_RES), NOFLAG,
 	PROP0(), NOFLAG,
-	HEALING, NOFLAG
+	HEALING, (ARTI_LIGHT)
 	),
 
 /* needs encyc entry */
@@ -1823,7 +1823,7 @@ A("Aryfaern Kerym",					RUNESWORD,			(const char *)0,
 	ATTK(AD_ELEC, 5, 10), NOFLAG,
 	PROP2(SHOCK_RES, SPELLBOOST), NOFLAG,
 	PROP0(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_LIGHT)
 	),
 
 /* needs encyc entry */
@@ -1835,7 +1835,7 @@ A("Aryvelahr Kerym",				CRYSTAL_SWORD,		(const char *)0,
 	ATTK(AD_PHYS, 5, 0), (ARTA_SILVER),
 	PROP2(REFLECTING, DRAIN_RES), NOFLAG,
 	PROP0(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_LIGHT)
 	),
 
 A("The Staff of Aesculapius",		QUARTERSTAFF,		(const char *)0,
@@ -2284,7 +2284,7 @@ A("Sol Valtiva",					TWO_HANDED_SWORD,	(const char *)0,
 	ATTK(AD_FIRE, 5, 24), (ARTA_EXPLFIRE|ARTA_BLIND|ARTA_BRIGHT),
 	PROP0(), NOFLAG,
 	PROP0(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_LIGHT)
 	),
 
 A("The Eye of the Aethiopica",		AMULET_OF_ESP,		(const char *)0,
@@ -2660,7 +2660,7 @@ A((name),							(type),				(const char *)0,				\
 	ATTK(AD_PHYS, 7, 10), (ARTA_BLIND|ARTA_BRIGHT),										\
 	PROP1(SEARCHING), (ARTP_BLINDRES),													\
 	PROP0(), NOFLAG,																	\
-	NOINVOKE, NOFLAG																	\
+	NOINVOKE, (ARTI_LIGHT)																\
 	)
 ANGELIC_WEAPON("The Sword of Erathaol",		LONG_SWORD),
 ANGELIC_WEAPON("The Saber of Sabaoth",		SABER),

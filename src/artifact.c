@@ -69,6 +69,9 @@ static NEARDATA	int demons[16] = {0, PM_QUASIT, PM_MANES, PM_QUASIT,
 STATIC_PTR int NDECL(read_necro);
 STATIC_PTR int NDECL(read_lost);
 
+STATIC_DCL int FDECL(select_gift_artifact, (aligntyp));
+STATIC_DCL int FDECL(select_floor_artifact, (struct obj *));
+
 STATIC_DCL int FDECL(arti_invoke, (struct obj*));
 STATIC_DCL boolean FDECL(Mb_hit, (struct monst *magr,struct monst *mdef,
 				  struct obj *,int *,int,BOOLEAN_P,char *,char *));
@@ -272,7 +275,10 @@ hack_artifacts()
 		artilist[ART_FIRE_BRAND].otyp = u.brand_otyp;
 		artilist[ART_FROST_BRAND].otyp = u.brand_otyp;
 	}
+	/* fix up pen of the void */
 	artilist[ART_PEN_OF_THE_VOID].alignment = A_VOID; //something changes this??? Change it back.
+	if (Role_if(PM_EXILE))
+		artilist[ART_PEN_OF_THE_VOID].gflags &= ~ARTG_NOGEN;
 	return;
 }
 
@@ -379,93 +385,22 @@ mk_artifact(otmp, alignment)
 struct obj *otmp;	/* existing object; ignored if alignment specified */
 aligntyp alignment;	/* target alignment, or A_NONE */
 {
-	const struct artifact *a;
-	int n, m;
+	int arti;
 	boolean by_align = (alignment != A_NONE);
-	short o_typ = (by_align || !otmp) ? 0 : otmp->otyp;
-	boolean unique = !by_align && otmp && objects[o_typ].oc_unique;
-	short eligible[NROFARTIFACTS];
 	
-	/* gather eligible artifacts */
-	for (n = 0, a = artilist+1, m = 1; a->otyp; a++, m++)
-	    if ((!by_align ? artitypematch(a, otmp) :
-				(a->alignment == alignment ||
-				(a->alignment == A_NONE && (u.ugifts > 0 || alignment == A_VOID )))) &&
-			(!(a->gflags & ARTG_NOGEN) || unique || (m==ART_PEN_OF_THE_VOID && Role_if(PM_EXILE))) && 
-			!artiexist[m]
-		) {
-			if (by_align) {
-				if (Role_if(a->role) || Pantheon_if(a->role)){
-					goto make_artif;	/* 'a' points to the desired one */
-				}
-				else {
-					//boolean preferred = (u.ugifts < 2 || !rn2(u.uartisval / 4));
-					boolean preferred = (u.ugifts < 2 || !rn2(2));	// disabling u.uartisval for now
-					/* conditions that are no-good for giving this artifact */
+	/* get an artifact */
+	if (by_align)
+		arti = select_gift_artifact(alignment);
+	else
+		arti = select_floor_artifact(otmp);
 
-					/* go for preferred artifacts for your first gift (if you didn't already have one specified) */
-					if (!u.ugifts && !(a->gflags & ARTG_GIFT))
-						continue;
-					/* always skip enemies' equipment */
-					if (a->race != NON_PM && race_hostile(&mons[a->race]))
-						continue;
-					/* always skip nameable artifacts */
-					if (a->gflags & ARTG_NAME)
-						continue;
-					/* skip materials that hate the player */
-					if (preferred && !Upolyd && (
-						(hates_iron(youracedata)
-						&& (a->material == IRON || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == IRON)))
-						||
-						(hates_silver(youracedata)
-						&& (a->material == SILVER || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == SILVER)))
-						))
-						continue;
-					/* skip boots for chiropterans */
-					if (preferred && Race_if(PM_CHIROPTERAN) &&
-						(objects[a->otyp].oc_class == ARMOR_CLASS && objects[a->otyp].oc_armcat == ARM_BOOTS)
-						)
-						continue;
-					/* always skip lightsources for Drow */
-					/* TODO: make lightup-when-wielded part of artilist so it can be figured out for here */
-					if (Race_if(PM_DROW) && ((a->iflags & ARTI_PERMALIGHT) || (m == ART_HOLY_MOONLIGHT_SWORD)))
-						continue;
-					/* always skip Callandor for females (Saidin is only for males) */
-					if (m == ART_CALLANDOR && flags.initgend)
-						continue;
-					/* pirates get no artifacts other than the Map */
-					if (Role_if(PM_PIRATE))
-						continue;
-					/* monks are very restricted */
-					if (Role_if(PM_MONK) && !is_monk_safe_artifact(m) && (!(u.uconduct.weaphit) || rn2(20)))
-						continue;
-
-					/* if we made it through that gauntlet, we're good */
-					eligible[n++] = m;
-				}
-			}
-			else {
-				/* Fire Brand and Frost Brand can generate out of MANY otypes, so decrease their odds of being chosen at random */
-				/* if one's been generated, the other HAS to be the same otyp, so no penalty is needed */
-				if ((m == ART_FIRE_BRAND || m == ART_FROST_BRAND)
-					&& u.brand_otyp == STRANGE_OBJECT
-					&& rn2(8))
-					continue;
-
-				eligible[n++] = m;
-			}
-		}
-
-	if (n) {		/* found at least one candidate */
-	    m = eligible[rn2(n)];	/* [0..n-1] */
-	    a = &artilist[m];
-
-	    /* make an appropriate object if necessary, then christen it */
-make_artif: 
-		if (by_align){
+	if (arti) {
+		const struct artifact * a = &artilist[arti];
+	    /* make an appropriate object if necessary */
+		if (by_align) {
 			int otyp = a->otyp;
 
-			if ((m == ART_FIRE_BRAND || m == ART_FROST_BRAND) && u.brand_otyp == STRANGE_OBJECT) {
+			if ((arti == ART_FIRE_BRAND || arti == ART_FROST_BRAND) && u.brand_otyp == STRANGE_OBJECT) {
 				if (Role_if(PM_MONK))
 					otyp = GAUNTLETS;
 				else
@@ -478,13 +413,14 @@ make_artif:
 							!rn2(2) ? SHORT_SWORD :
 									  ATHAME;
 			}
-
 			otmp = mksobj(otyp, TRUE, FALSE);
 		}
+		/* christen the artifact */
 	    otmp = oname(otmp, a->name);
-	    otmp->oartifact = m;
-	    artiexist[m] = TRUE;
-        if(m == ART_HELM_OF_THE_ARCANE_ARCHER){
+		otmp->oartifact = arti;
+		artiexist[arti] = TRUE;
+		/* WHY */
+		if (arti == ART_HELM_OF_THE_ARCANE_ARCHER && by_align){
 			unrestrict_weapon_skill(P_ATTACK_SPELL);
         }
 	} else {
@@ -492,6 +428,130 @@ make_artif:
 	    if (by_align) otmp = 0;	/* (there was no original object) */
 	}
 	return otmp;
+}
+
+/* select an artifact to gift */
+int
+select_gift_artifact(alignment)
+aligntyp alignment;
+{
+	const struct artifact * a;	/* artifact pointer, being looped */
+	int m;						/* artifact index, being looped */
+	int n = 0;					/* number of acceptable artifacts, reset every attempt at selecting */
+	int attempts = 0;			/* attempts made creating a list of artifacts */
+	int condition;
+	int eligible[NROFARTIFACTS];
+
+	/* Pirates quite purposefully can only get the Marauder's Map */
+	if (Role_if(PM_PIRATE))
+		return (artiexist[ART_MARAUDER_S_MAP] ? 0 : ART_MARAUDER_S_MAP);
+
+	for (attempts = 1; (!n || (!rn2(n - 1) && u.ugifts)); attempts++) {
+		n = 0;
+		for (m = 1, a = artilist + 1; a->otyp; a++, m++)
+		{
+			condition = 1;
+
+#define skip_if(x) if((attempts < ++condition) && (x)) continue
+
+			/* cannot already exist */
+			if (artiexist[m])
+				continue;
+			/* cannot be nogen */
+			if (a->gflags & ARTG_NOGEN)
+				continue;
+
+			/* conditions that can be relaxed, in order of least-to-most important */
+
+			/* try to get a role-specific first gift -- overrides alignment, artg_gift considerations */
+			skip_if(!u.ugifts && !(Role_if(a->role) || Pantheon_if(a->role)));
+			if (attempts > 1) {
+				/* try to get an aligned first gift */
+				skip_if(!u.ugifts && a->alignment != alignment);
+				/* go for preferred artifacts for your first gift (if you didn't already have one specified) */
+				skip_if(!u.ugifts && !(a->gflags & ARTG_GIFT));
+			}
+
+			/* avoid weapons for Monks */
+			skip_if(Role_if(PM_MONK) && !is_monk_safe_artifact(m) && !u.uconduct.weaphit);
+			skip_if(Role_if(PM_MONK) && !is_monk_safe_artifact(m) && rn2(20));	/* we relax this requirement before removing it */
+
+			/* avoid artifacts of materials that hate the player's natural form */
+			skip_if(
+				(hates_iron((&mons[urace.malenum]))
+				&& (a->material == IRON || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == IRON)))
+				||
+				(hates_silver((&mons[urace.malenum]))
+				&& (a->material == SILVER || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == SILVER)))
+				);
+
+			/* skip lightsources for Drow */
+			skip_if(Race_if(PM_DROW) &&
+				(  (a->iflags & ARTI_PERMALIGHT)
+				|| (a->iflags & ARTI_LIGHT)
+				|| (m == ART_HOLY_MOONLIGHT_SWORD)
+				));
+
+			/* avoid boots for chiropterans */
+			skip_if(Race_if(PM_CHIROPTERAN) && objects[a->otyp].oc_class == ARMOR_CLASS && objects[a->otyp].oc_armcat == ARM_BOOTS);
+
+			/* skip nameable artifacts */
+			skip_if((a->gflags & ARTG_NAME));
+
+			/* skip Callandor for non-males */
+			skip_if(m == ART_CALLANDOR && flags.initgend);
+
+			/* skip artifacts that outright hate the player */
+			skip_if(a->race != NON_PM && race_hostile(&mons[a->race]));
+
+			/* skip cross-aligned artifacts */
+			skip_if(a->alignment != A_NONE && a->alignment != alignment);
+
+			/* if we made it through that gauntlet, we're good */
+			eligible[n++] = m;
+		}
+	}
+#undef skip_if
+	/* return index of an artifact */
+	if (n > 0)
+		return eligible[rn2(n)];
+	return 0;
+}
+/* try to select an artifact to convert otmp into */
+int
+select_floor_artifact(otmp)
+struct obj * otmp;
+{
+	const struct artifact * a;	/* artifact pointer, being looped */
+	int m;						/* artifact index, being looped */
+	int n = 0;					/* number of acceptable artifacts, reset every attempt at selecting */
+	int eligible[NROFARTIFACTS];
+
+	for (m = 1, a = artilist + 1; a->otyp; a++, m++)
+	{
+		/* cannot already exist */
+		if (artiexist[m])
+			continue;
+		/* cannot be nogen, unless the base object is unique */
+		if (a->gflags & ARTG_NOGEN && !objects[otmp->otyp].oc_unique)
+			continue;
+		/* must match otyp (or be acceptable) */
+		if (!artitypematch(a, otmp))
+			continue;
+		/* Fire Brand and Frost Brand can generate out of MANY otypes, so decrease their odds of being chosen at random */
+		/* if one's been generated, the other HAS to be the same otyp, so no penalty is needed */
+		if ((m == ART_FIRE_BRAND || m == ART_FROST_BRAND)
+			&& u.brand_otyp == STRANGE_OBJECT
+			&& rn2(8))
+			continue;
+
+		/* if we made it through that gauntlet, we're good */
+		eligible[n++] = m;
+	}
+	/* return index of an artifact */
+	if (n > 0)
+		return eligible[rn2(n)];
+	return 0;
 }
 
 /*
@@ -9006,19 +9066,12 @@ boolean silent;
 /* WAC return TRUE if artifact is always lit */
 boolean
 artifact_light(obj)
-    struct obj *obj;
+struct obj *obj;
 {
-    return	(get_artifact(obj) && 
-				(obj->oartifact == ART_SUNSWORD ||
-				 obj->oartifact == ART_SOL_VALTIVA ||
-				 // obj->oartifact == ART_VEIL_OF_LATONA ||
-				 (obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_JACK) ||
-				 (obj->oartifact >= ART_ARCOR_KERYM &&
-				  obj->oartifact <= ART_ARYVELAHR_KERYM) ||
-				 (obj->oartifact >= ART_SWORD_OF_ERATHAOL &&
-				  obj->oartifact <= ART_HAMMER_OF_BARQUIEL)
-				)
-			);
+
+	if (obj && obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_JACK) return TRUE;
+
+	return (obj && obj->oartifact && arti_is_prop(obj, ARTI_LIGHT));
 }
 
 /* return TRUE if artifact is permanently lit */
