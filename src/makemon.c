@@ -9714,7 +9714,55 @@ register int otyp;
 		if (is_demon(mtmp->data)) {
 			/* demons never get blessed objects */
 			if (otmp->blessed) curse(otmp);
+			if(mtmp->data == &mons[PM_MARILITH] && otmp->oclass == WEAPON_CLASS){
+				int roll = rnd(3);
+				otmp->spe = max(otmp->spe, roll);
+				
+				roll = rn2(100);
+				if(roll < 25)
+					set_material(otmp, IRON);
+				else if(roll < 50)
+					set_material(otmp, GOLD);
+				else if(roll < 75)
+					set_material(otmp, MITHRIL);
+				else if(roll < 85)
+					set_material(otmp, OBSIDIAN_MT);
+				else if(roll < 95)
+					set_material(otmp, GEMSTONE);
+				else if(roll < 100)
+					set_material(otmp, SILVER);
+				
+				if(rn2(100) < 15){
+					switch(rnd(8)){
+						case 1:
+							otmp->oproperties |= OPROP_FLAYW;
+						break;
+						case 2:
+							otmp->oproperties |= OPROP_FIREW;
+						break;
+						case 3:
+							otmp->oproperties |= OPROP_COLDW;
+						break;
+						case 4:
+							otmp->oproperties |= OPROP_ELECW;
+						break;
+						case 5:
+							otmp->oproperties |= OPROP_ACIDW;
+						break;
+						case 6:
+							otmp->oproperties |= OPROP_MAGCW;
+						break;
+						case 7:
+							otmp->oproperties |= OPROP_ANARW;
+						break;
+						case 8:
+							otmp->oproperties |= OPROP_UNHYW;
+						break;
+				    }
+				}
+		    }
 	    }
+		
 		if(is_lminion(mtmp) || is_nminion(mtmp) || is_cminion(mtmp)) {
 			/* lawful minions don't get cursed, bad, or rusting objects */
 			otmp->cursed = FALSE;
