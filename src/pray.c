@@ -3218,21 +3218,10 @@ dosacrifice()
 		    /* make sure we can use this weapon */
 		    unrestrict_weapon_skill(weapon_type(otmp));
 		    discover_artifact(otmp->oartifact);
-			if(otmp->oartifact == ART_BLADE_SINGER_S_SPEAR || otmp->oartifact == ART_BLADE_DANCER_S_DAGGER){
-			 if(otmp->oartifact == ART_BLADE_SINGER_S_SPEAR && !exist_artifact(DAGGER, "Blade Dancer's Dagger") ){
-				otmp = mksobj(DAGGER, TRUE, FALSE);
-				otmp = oname(otmp, artiname(ART_BLADE_DANCER_S_DAGGER));		
-			 } else if(otmp->oartifact == ART_BLADE_DANCER_S_DAGGER && !exist_artifact(SPEAR, "Blade Singer's Spear") ){
-				otmp = mksobj(SPEAR, TRUE, FALSE);
-				otmp = oname(otmp, artiname(ART_BLADE_SINGER_S_SPEAR));		
-			 }
+			if(otmp->oartifact == ART_BLADE_SINGER_S_SABER){
 				unrestrict_weapon_skill(P_SPEAR);
 				unrestrict_weapon_skill(P_DAGGER);
 				unrestrict_weapon_skill(P_TWO_WEAPON_COMBAT);
-				if (otmp->spe < 0) otmp->spe = 0;
-				if (otmp->cursed) uncurse(otmp);
-				otmp->oerodeproof = TRUE;
-				dropy(otmp);
 			} else if(otmp->oartifact == ART_BEASTMASTER_S_DUSTER){
 				unrestrict_weapon_skill(P_BEAST_MASTERY);
 			} else if(otmp->oartifact == ART_GRANDMASTER_S_ROBE || otmp->oartifact == ART_PREMIUM_HEART){

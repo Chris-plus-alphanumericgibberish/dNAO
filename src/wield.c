@@ -540,8 +540,7 @@ test_twoweapon()
 		!(u.specialSealsActive&SEAL_MISKA) && 
 		!(u.specialSealsActive&SEAL_BLACK_WEB && !uswapwep) && 
 		!(!Upolyd && uwep && uswapwep && 
-			((artilist[uwep->oartifact].inv_prop == DANCE_DAGGER && artilist[uswapwep->oartifact].inv_prop == SING_SPEAR) ||
-			 (artilist[uswapwep->oartifact].inv_prop == DANCE_DAGGER && artilist[uwep->oartifact].inv_prop == SING_SPEAR))
+			(artilist[uwep->oartifact].inv_prop == BLADESONG && artilist[uswapwep->oartifact].inv_prop == BLADESONG)
 		 ) && 
 		!(!Upolyd && uwep && uswapwep && 
 			((uwep->oartifact == ART_PROFANED_GREATSCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE) ||
