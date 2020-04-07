@@ -22,6 +22,15 @@ STATIC_DCL int FDECL(maid_clean, (struct monst *, struct obj *));
 
 /*#define DEBUG_EFFECTS*/	/* show some messages for debugging */
 
+#define quest_equipment(otmp) ((In_quest(&u.uz) && in_mklev							\
+						&& !Role_if(PM_CONVICT)										\
+						&& !(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON))		\
+						) && (														\
+						otmp->oclass == WEAPON_CLASS								\
+						|| (otmp->oclass == TOOL_CLASS && is_weptool(otmp))			\
+						|| (otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp))	\
+						))
+
 struct icp {
     int  iprob;		/* probability of an item type */
     char iclass;	/* item class */
@@ -227,18 +236,6 @@ boolean artif;
 
 	otmp = mkobj(let, artif);
 	
-	if(In_quest(&u.uz) && in_mklev
-		&& !Role_if(PM_CONVICT)
-		&& !(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON))
-	){
-		if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
-		if(otmp->oclass == ARMOR_CLASS){
-			if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
-			else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
-			else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
-		}
-	}
-	
 	place_object(otmp, x, y);
 	
 	return(otmp);
@@ -252,18 +249,6 @@ boolean init, artif;
 	struct obj *otmp;
 
 	otmp = mksobj(otyp, init, artif);
-	
-	if(In_quest(&u.uz) && in_mklev
-		&& !Role_if(PM_CONVICT)
-		&& !(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON))
-	){
-		if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
-		if(otmp->oclass == ARMOR_CLASS){
-			if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
-			else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
-			else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
-		}
-	}
 	
 	place_object(otmp, x, y);
 	
@@ -583,707 +568,718 @@ boolean artif;
 	otmp->oinvis = !rn2(1250);
 #endif
 	otmp->quan = is_multigen(otmp) ? (long) rn1(6,6) : 1L;
-	if (init) switch (let) {
-	case WEAPON_CLASS:
-		if(!rn2(11)) {
-			otmp->spe = rne(3);
-			otmp->blessed = rn2(2);
-		} else if(!rn2(10)) {
-			curse(otmp);
-			otmp->spe = -rne(3);
-		} else	blessorcurse(otmp, 10);
-		
-		if(otmp->otyp == WHITE_VIBROSWORD
-		 || otmp->otyp == WHITE_VIBROSPEAR
-		 || otmp->otyp == WHITE_VIBROZANBATO
-		)
-			otmp->oproperties |= OPROP_HOLYW;
-		if(otmp->otyp == GOLD_BLADED_VIBROSWORD
-		 || otmp->otyp == GOLD_BLADED_VIBROSPEAR
-		 || otmp->otyp == GOLD_BLADED_VIBROZANBATO
-		)
-			otmp->oproperties |= OPROP_UNHYW;
-		
-		if(is_vibroweapon(otmp)){
-			otmp->ovar1 = 80L + rnd(20);
-		}
-		else if(otmp->otyp == RAYGUN){
-			otmp->ovar1 = (8 + rnd(8))*10L;
-			otmp->altmode = AD_SLEE;
-		}
-		else if(otmp->otyp == MASS_SHADOW_PISTOL){
-			struct obj *stone = mksobj(ROCK, TRUE, FALSE);
-			otmp->ovar1 = 800L + rnd(200);
-			stone->quan = 1;
-			stone->owt = weight(stone);
-			add_to_container(otmp, stone);
-			container_weight(otmp);
-		}
-		else if(is_blaster(otmp)){ //Rayguns and mass-shadow pistols are also blasters, so this has to go under that case
-			otmp->ovar1 = 80L + rnd(20);
-			if(otmp->otyp == ARM_BLASTER) otmp->altmode = WP_MODE_SINGLE;
-			if(otmp->otyp == RAYGUN) otmp->altmode = AD_FIRE;	// I think this is never reached?
-		}
-		else if(otmp->otyp == MOON_AXE){
-			switch(phase_of_the_moon()){
+	if (init) {
+		switch (let) {
+		case WEAPON_CLASS:
+			if (!rn2(11)) {
+				otmp->spe = rne(3);
+				otmp->blessed = rn2(2);
+			}
+			else if (!rn2(10)) {
+				curse(otmp);
+				otmp->spe = -rne(3);
+			}
+			else	blessorcurse(otmp, 10);
+
+			if (otmp->otyp == WHITE_VIBROSWORD
+				|| otmp->otyp == WHITE_VIBROSPEAR
+				|| otmp->otyp == WHITE_VIBROZANBATO
+				)
+				otmp->oproperties |= OPROP_HOLYW;
+			if (otmp->otyp == GOLD_BLADED_VIBROSWORD
+				|| otmp->otyp == GOLD_BLADED_VIBROSPEAR
+				|| otmp->otyp == GOLD_BLADED_VIBROZANBATO
+				)
+				otmp->oproperties |= OPROP_UNHYW;
+
+			if (is_vibroweapon(otmp)){
+				otmp->ovar1 = 80L + rnd(20);
+			}
+			else if (otmp->otyp == RAYGUN){
+				otmp->ovar1 = (8 + rnd(8)) * 10L;
+				otmp->altmode = AD_SLEE;
+			}
+			else if (otmp->otyp == MASS_SHADOW_PISTOL){
+				struct obj *stone = mksobj(ROCK, TRUE, FALSE);
+				otmp->ovar1 = 800L + rnd(200);
+				stone->quan = 1;
+				stone->owt = weight(stone);
+				add_to_container(otmp, stone);
+				container_weight(otmp);
+			}
+			else if (is_blaster(otmp)){ //Rayguns and mass-shadow pistols are also blasters, so this has to go under that case
+				otmp->ovar1 = 80L + rnd(20);
+				if (otmp->otyp == ARM_BLASTER) otmp->altmode = WP_MODE_SINGLE;
+				if (otmp->otyp == RAYGUN) otmp->altmode = AD_FIRE;	// I think this is never reached?
+			}
+			else if (otmp->otyp == MOON_AXE){
+				switch (phase_of_the_moon()){
 				case 0:
 					otmp->ovar1 = ECLIPSE_MOON;
-				break;
+					break;
 				case 1:
 				case 7:
 					otmp->ovar1 = CRESCENT_MOON;
-				break;
+					break;
 				case 2:
 				case 6:
 					otmp->ovar1 = HALF_MOON;
-				break;
+					break;
 				case 3:
 				case 5:
 					otmp->ovar1 = GIBBOUS_MOON;
-				break;
+					break;
 				case 4:
 					otmp->ovar1 = FULL_MOON;
-				break;
+					break;
+				}
 			}
-		}
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-//#ifdef FIREARMS
-		if (otmp->otyp == STICK_OF_DYNAMITE) {
-			otmp->age = (otmp->cursed ? rn2(15) + 2 : 
+			//#ifdef FIREARMS
+			if (otmp->otyp == STICK_OF_DYNAMITE) {
+				otmp->age = (otmp->cursed ? rn2(15) + 2 :
 					(otmp->blessed ? 15 : rn2(10) + 10));
-		}
-//#endif
-		if (is_poisonable(otmp) && ((is_ammo(otmp) && !rn2(100)) || !rn2(1000) )){
-			if(!rn2(100)) otmp->opoisoned = OPOISON_FILTH; /* Once a game or once every few games */
-			else otmp->opoisoned = OPOISON_BASIC;
-		} else if((otmp)->obj_material == WOOD 
-			&& otmp->oartifact != ART_BOW_OF_SKADI
-			&& !rn2(100)
-		){
-			switch(d(1,4)){
+			}
+			//#endif
+			if (is_poisonable(otmp) && ((is_ammo(otmp) && !rn2(100)) || !rn2(1000))){
+				if (!rn2(100)) otmp->opoisoned = OPOISON_FILTH; /* Once a game or once every few games */
+				else otmp->opoisoned = OPOISON_BASIC;
+			}
+			else if ((otmp)->obj_material == WOOD
+				&& otmp->oartifact != ART_BOW_OF_SKADI
+				&& !rn2(100)
+				){
+				switch (d(1, 4)){
 				case 1: otmp->oward = WARD_TOUSTEFNA; break;
 				case 2: otmp->oward = WARD_DREPRUN; break;
 				case 3: otmp->oward = WARD_VEIOISTAFUR; break;
 				case 4: otmp->oward = WARD_THJOFASTAFUR; break;
+				}
 			}
-		}
-		break;
-	case FOOD_CLASS:
-	    otmp->odrained = 0;
-	    otmp->oeaten = 0;
-	    switch(otmp->otyp) {
-	    case CORPSE:
-		/* possibly overridden by mkcorpstat() */
-		tryct = 50;
-		do otmp->corpsenm = undead_to_corpse(rndmonnum());
-		while ((mvitals[otmp->corpsenm].mvflags & G_NOCORPSE) && (--tryct > 0));
-		if (tryct == 0) {
-		/* perhaps rndmonnum() only wants to make G_NOCORPSE monsters on
-		   this level; let's create an adventurer's corpse instead, then */
-			otmp->corpsenm = PM_HUMAN;
-		}
-		/* timer set below */
-		break;
-	    case EGG:
-		otmp->corpsenm = NON_PM;	/* generic egg */
-		
-		if(In_sokoban(&u.uz) || Is_gatetown(&u.uz)) break; /*Some levels shouldn't have mosnters spawning from eggs*/
-		
-		if (!rn2(3)) for (tryct = 200; tryct > 0; --tryct) {
-		    mndx = can_be_hatched(rndmonnum());
-		    if (mndx != NON_PM && !dead_species(mndx, TRUE)) {
-			otmp->corpsenm = mndx;		/* typed egg */
-			attach_egg_hatch_timeout(otmp);
 			break;
-		    }
-		}
-		break;
-	    case EYEBALL:
-			otmp->corpsenm = PM_HUMAN;
-		break;
-	    case TIN:
-		otmp->corpsenm = NON_PM;	/* empty (so far) */
-		if (!rn2(6))
-		    otmp->spe = 1;		/* spinach */
-		else for (tryct = 200; tryct > 0; --tryct) {
-		    mndx = undead_to_corpse(rndmonnum());
-		    if (mons[mndx].cnutrit &&
-			    !(mvitals[mndx].mvflags & G_NOCORPSE)) {
-			otmp->corpsenm = mndx;
-			break;
-		    }
-		}
-		blessorcurse(otmp, 10);
-		break;
-	    case SLIME_MOLD:
-		otmp->spe = current_fruit;
-		break;
-	    case KELP_FROND:
-		otmp->quan = (long) rnd(2);
-		break;
-		case PROTEIN_PILL:
-			otmp->quan = rnd(5) + 5;
-			otmp->owt = weight(otmp);
-		break;
-	    }
-	    if (otmp->otyp == CORPSE || otmp->otyp == MEAT_RING ||
-		otmp->otyp == KELP_FROND) break;
-	    /* fall into next case */
+		case FOOD_CLASS:
+			otmp->odrained = 0;
+			otmp->oeaten = 0;
+			switch (otmp->otyp) {
+			case CORPSE:
+				/* possibly overridden by mkcorpstat() */
+				tryct = 50;
+				do otmp->corpsenm = undead_to_corpse(rndmonnum());
+				while ((mvitals[otmp->corpsenm].mvflags & G_NOCORPSE) && (--tryct > 0));
+				if (tryct == 0) {
+					/* perhaps rndmonnum() only wants to make G_NOCORPSE monsters on
+					   this level; let's create an adventurer's corpse instead, then */
+					otmp->corpsenm = PM_HUMAN;
+				}
+				/* timer set below */
+				break;
+			case EGG:
+				otmp->corpsenm = NON_PM;	/* generic egg */
 
-	case GEM_CLASS:
-		if (otmp->otyp == LOADSTONE) curse(otmp);
-		else if (otmp->otyp == ROCK) otmp->quan = (long) rn1(6,6);
-		else if (otmp->otyp != LUCKSTONE && !rn2(6)) otmp->quan = 2L;
-		else otmp->quan = 1L;
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-	break;
-	case TOOL_CLASS:
-	    switch(otmp->otyp) {
-		case TALLOW_CANDLE:
-		case WAX_CANDLE:	otmp->spe = 1;
-					otmp->age = 20L * /* 400 or 200 */
-					      (long)objects[otmp->otyp].oc_cost;
-					otmp->lamplit = 0;
-					otmp->quan = 1L + ((long)(rn2(2) && !Is_grue_level(&u.uz)) ? rn2(7) : 0);
-					blessorcurse(otmp, 5);
-					break;
-		case LANTERN:
-		case OIL_LAMP:		otmp->spe = 1;
-					otmp->age = (long) rn1(500,1000);
-					otmp->lamplit = 0;
-					blessorcurse(otmp, 5);
-					break;
-		case TORCH:
-					otmp->age = (long) rn1(500,1000);
-					otmp->lamplit = 0;
-					blessorcurse(otmp, 5);
-					break;
-		case SUNROD:
-					otmp->age = (long) rn1(500,1000);
-					otmp->lamplit = 0;
-					blessorcurse(otmp, 5);
-					break;
-		case SHADOWLANDER_S_TORCH:
-					otmp->age = (long) rn1(500,1000);
-					otmp->lamplit = 0;
-					blessorcurse(otmp, 5);
-					break;
-		case CANDLE_OF_INVOCATION:
-		case MAGIC_LAMP:	otmp->spe = 1;
-					otmp->lamplit = 0;
-					blessorcurse(otmp, 2);
-					break;
-		case SEISMIC_HAMMER:
-			otmp->ovar1 = 80L + rnd(20);
-		break;
-		case DOUBLE_LIGHTSABER:
-		case LIGHTSABER:
-		case BEAMSWORD:
-					otmp->altmode = FALSE;
-					otmp->lamplit = 0;
-					otmp->age = (long) rn1(50000,100000);
-					blessorcurse(otmp, 2);
-					{
-						struct obj *gem = mksobj(rn2(6) ? BLUE_FLUORITE : GREEN_FLUORITE, TRUE, FALSE);
-						gem->quan = 1;
-						gem->owt = weight(gem);
-						add_to_container(otmp, gem);
-						container_weight(otmp);
+				if (In_sokoban(&u.uz) || Is_gatetown(&u.uz)) break; /*Some levels shouldn't have mosnters spawning from eggs*/
+
+				if (!rn2(3)) for (tryct = 200; tryct > 0; --tryct) {
+					mndx = can_be_hatched(rndmonnum());
+					if (mndx != NON_PM && !dead_species(mndx, TRUE)) {
+						otmp->corpsenm = mndx;		/* typed egg */
+						attach_egg_hatch_timeout(otmp);
+						break;
 					}
-					otmp->ovar1 = random_saber_hilt();
-					break;
-		case CHEST:
-		case BOX:
-			if(Is_stronghold(&u.uz) && in_mklev){
+				}
+				break;
+			case EYEBALL:
+				otmp->corpsenm = PM_HUMAN;
+				break;
+			case TIN:
+				otmp->corpsenm = NON_PM;	/* empty (so far) */
+				if (!rn2(6))
+					otmp->spe = 1;		/* spinach */
+				else for (tryct = 200; tryct > 0; --tryct) {
+					mndx = undead_to_corpse(rndmonnum());
+					if (mons[mndx].cnutrit &&
+						!(mvitals[mndx].mvflags & G_NOCORPSE)) {
+						otmp->corpsenm = mndx;
+						break;
+					}
+				}
+				blessorcurse(otmp, 10);
+				break;
+			case SLIME_MOLD:
+				otmp->spe = current_fruit;
+				break;
+			case KELP_FROND:
+				otmp->quan = (long)rnd(2);
+				break;
+			case PROTEIN_PILL:
+				otmp->quan = rnd(5) + 5;
+				otmp->owt = weight(otmp);
+				break;
+			}
+			if (otmp->otyp == CORPSE || otmp->otyp == MEAT_RING ||
+				otmp->otyp == KELP_FROND) break;
+			/* fall into next case */
+
+		case GEM_CLASS:
+			if (otmp->otyp == LOADSTONE) curse(otmp);
+			else if (otmp->otyp == ROCK) otmp->quan = (long)rn1(6, 6);
+			else if (otmp->otyp != LUCKSTONE && !rn2(6)) otmp->quan = 2L;
+			else otmp->quan = 1L;
+			break;
+		case TOOL_CLASS:
+			switch (otmp->otyp) {
+			case TALLOW_CANDLE:
+			case WAX_CANDLE:	otmp->spe = 1;
+				otmp->age = 20L * /* 400 or 200 */
+					(long)objects[otmp->otyp].oc_cost;
+				otmp->lamplit = 0;
+				otmp->quan = 1L + ((long)(rn2(2) && !Is_grue_level(&u.uz)) ? rn2(7) : 0);
+				blessorcurse(otmp, 5);
+				break;
+			case LANTERN:
+			case OIL_LAMP:		otmp->spe = 1;
+				otmp->age = (long)rn1(500, 1000);
+				otmp->lamplit = 0;
+				blessorcurse(otmp, 5);
+				break;
+			case TORCH:
+				otmp->age = (long)rn1(500, 1000);
+				otmp->lamplit = 0;
+				blessorcurse(otmp, 5);
+				break;
+			case SUNROD:
+				otmp->age = (long)rn1(500, 1000);
+				otmp->lamplit = 0;
+				blessorcurse(otmp, 5);
+				break;
+			case SHADOWLANDER_S_TORCH:
+				otmp->age = (long)rn1(500, 1000);
+				otmp->lamplit = 0;
+				blessorcurse(otmp, 5);
+				break;
+			case CANDLE_OF_INVOCATION:
+			case MAGIC_LAMP:	otmp->spe = 1;
+				otmp->lamplit = 0;
+				blessorcurse(otmp, 2);
+				break;
+			case SEISMIC_HAMMER:
+				otmp->ovar1 = 80L + rnd(20);
+				break;
+			case DOUBLE_LIGHTSABER:
+			case LIGHTSABER:
+			case BEAMSWORD:
+				otmp->altmode = FALSE;
+				otmp->lamplit = 0;
+				otmp->age = (long)rn1(50000, 100000);
+				blessorcurse(otmp, 2);
+				{
+					struct obj *gem = mksobj(rn2(6) ? BLUE_FLUORITE : GREEN_FLUORITE, TRUE, FALSE);
+					gem->quan = 1;
+					gem->owt = weight(gem);
+					add_to_container(otmp, gem);
+					container_weight(otmp);
+				}
+				otmp->ovar1 = random_saber_hilt();
+				break;
+			case CHEST:
+			case BOX:
+				if (Is_stronghold(&u.uz) && in_mklev){
+					otmp->olocked = 1;
+					otmp->otrapped = 0;
+				}
+				else {
+					otmp->olocked = !!(rn2(5));
+					otmp->otrapped = !(rn2(10));
+				}
+			case ICE_BOX:
+			case SACK:
+			case OILSKIN_SACK:
+			case MASSIVE_STONE_CRATE:
+			case BAG_OF_HOLDING:	mkbox_cnts(otmp);
+				break;
+			case MAGIC_CHEST:
 				otmp->olocked = 1;
-				otmp->otrapped = 0;
-			} else {
-				otmp->olocked = !!(rn2(5));
-				otmp->otrapped = !(rn2(10));
-			}
-		case ICE_BOX:
-		case SACK:
-		case OILSKIN_SACK:
-		case MASSIVE_STONE_CRATE:
-		case BAG_OF_HOLDING:	mkbox_cnts(otmp);
-					break;
-		case MAGIC_CHEST:
-			otmp->olocked = 1;
-			otmp->obolted = 0;
-		break;
+				otmp->obolted = 0;
+				break;
 #ifdef TOURIST
-		case EXPENSIVE_CAMERA:
+			case EXPENSIVE_CAMERA:
 #endif
-		case TINNING_KIT:
-		case MAGIC_MARKER:	otmp->spe = rn1(70,30);
-					break;
-		case CAN_OF_GREASE:	otmp->spe = rnd(25);
-					blessorcurse(otmp, 10);
-		break;
-		case TREPHINATION_KIT:
-		case CRYSTAL_BALL:	otmp->spe = rnd(5);
-					blessorcurse(otmp, 2);
-		break;
-		case POWER_PACK:
-			otmp->quan = rnd(5) + 5;
-			otmp->owt = weight(otmp);
-		break;
-		case SENSOR_PACK:
-			otmp->spe = rnd(5) + 20;
-		break;
-		case HYPOSPRAY_AMPULE:{
-			int pick;
-			switch(rn2(14)){
-				case 0:
-					pick = POT_GAIN_ABILITY;
+			case TINNING_KIT:
+			case MAGIC_MARKER:	otmp->spe = rn1(70, 30);
 				break;
-				case 1:
-					pick = POT_RESTORE_ABILITY;
+			case CAN_OF_GREASE:	otmp->spe = rnd(25);
+				blessorcurse(otmp, 10);
 				break;
-				case 2:
-					pick = POT_BLINDNESS;
+			case TREPHINATION_KIT:
+			case CRYSTAL_BALL:	otmp->spe = rnd(5);
+				blessorcurse(otmp, 2);
 				break;
-				case 3:
-					pick = POT_CONFUSION;
+			case POWER_PACK:
+				otmp->quan = rnd(5) + 5;
+				otmp->owt = weight(otmp);
 				break;
-				case 4:
-					pick = POT_PARALYSIS;
+			case SENSOR_PACK:
+				otmp->spe = rnd(5) + 20;
 				break;
-				case 5:
-					pick = POT_SPEED;
+			case HYPOSPRAY_AMPULE:{
+									  int pick;
+									  switch (rn2(14)){
+									  case 0:
+										  pick = POT_GAIN_ABILITY;
+										  break;
+									  case 1:
+										  pick = POT_RESTORE_ABILITY;
+										  break;
+									  case 2:
+										  pick = POT_BLINDNESS;
+										  break;
+									  case 3:
+										  pick = POT_CONFUSION;
+										  break;
+									  case 4:
+										  pick = POT_PARALYSIS;
+										  break;
+									  case 5:
+										  pick = POT_SPEED;
+										  break;
+									  case 6:
+										  pick = POT_HALLUCINATION;
+										  break;
+									  case 7:
+										  pick = POT_HEALING;
+										  break;
+									  case 8:
+										  pick = POT_EXTRA_HEALING;
+										  break;
+									  case 9:
+										  pick = POT_GAIN_ENERGY;
+										  break;
+									  case 10:
+										  pick = POT_SLEEPING;
+										  break;
+									  case 11:
+										  pick = POT_FULL_HEALING;
+										  break;
+									  case 12:
+										  pick = POT_POLYMORPH;
+										  break;
+									  case 13:
+										  pick = POT_AMNESIA;
+										  break;
+									  }
+									  // otmp->ovar1 = (long)(rn2(POT_POLYMORPH - POT_GAIN_ABILITY + 1) + POT_GAIN_ABILITY);
+									  otmp->ovar1 = (long)(pick);
+									  otmp->spe = rn1(6, 6);
+			}break;
+			case HORN_OF_PLENTY:
+			case BAG_OF_TRICKS:	otmp->spe = rnd(20);
 				break;
-				case 6:
-					pick = POT_HALLUCINATION;
-				break;
-				case 7:
-					pick = POT_HEALING;
-				break;
-				case 8:
-					pick = POT_EXTRA_HEALING;
-				break;
-				case 9:
-					pick = POT_GAIN_ENERGY;
-				break;
-				case 10:
-					pick = POT_SLEEPING;
-				break;
-				case 11:
-					pick = POT_FULL_HEALING;
-				break;
-				case 12:
-					pick = POT_POLYMORPH;
-				break;
-				case 13:
-					pick = POT_AMNESIA;
-				break;
+			case FIGURINE:	{
+								if (Is_paradise(&u.uz)){
+									switch (rn2(3)){
+									case 0:
+										otmp->corpsenm = PM_SHADE;
+										break;
+									case 1:
+										otmp->corpsenm = PM_DARKNESS_GIVEN_HUNGER;
+										break;
+									case 2:
+										otmp->corpsenm = PM_NIGHTGAUNT;
+										break;
+									}
+								}
+								else if (Is_sunkcity(&u.uz)){
+									switch (rn2(3)){
+									case 0:
+										otmp->corpsenm = PM_DEEPEST_ONE;
+										break;
+									case 1:
+										otmp->corpsenm = PM_MASTER_MIND_FLAYER;
+										break;
+									case 2:
+										otmp->corpsenm = PM_SHOGGOTH;
+										break;
+									}
+								}
+								else {
+									int tryct2 = 0;
+									do
+									otmp->corpsenm = rndmonnum();
+									while (is_human(&mons[otmp->corpsenm])
+										&& tryct2++ < 30);
+								}
+								blessorcurse(otmp, 4);
+								break;
 			}
-			// otmp->ovar1 = (long)(rn2(POT_POLYMORPH - POT_GAIN_ABILITY + 1) + POT_GAIN_ABILITY);
-			otmp->ovar1 = (long)(pick);
-			otmp->spe = rn1(6,6);
-		}break;
-		case HORN_OF_PLENTY:
-		case BAG_OF_TRICKS:	otmp->spe = rnd(20);
-					break;
-		case FIGURINE:	{
-					if(Is_paradise(&u.uz)){
-						switch(rn2(3)){
-							case 0:
-								otmp->corpsenm = PM_SHADE;
-							break;
-							case 1:
-								otmp->corpsenm = PM_DARKNESS_GIVEN_HUNGER;
-							break;
-							case 2:
-								otmp->corpsenm = PM_NIGHTGAUNT;
-							break;
-						}
-					} else if(Is_sunkcity(&u.uz)){
-						switch(rn2(3)){
-							case 0:
-								otmp->corpsenm = PM_DEEPEST_ONE;
-							break;
-							case 1:
-								otmp->corpsenm = PM_MASTER_MIND_FLAYER;
-							break;
-							case 2:
-								otmp->corpsenm = PM_SHOGGOTH;
-							break;
-						}
-					} else {
-						int tryct2 = 0;
-						do
-							otmp->corpsenm = rndmonnum();
-						while(is_human(&mons[otmp->corpsenm])
-							&& tryct2++ < 30);
-					}
-					blessorcurse(otmp, 4);
+			case BELL_OF_OPENING:   otmp->spe = 3;
 				break;
+			case MAGIC_FLUTE:
+			case MAGIC_HARP:
+			case FROST_HORN:
+			case FIRE_HORN:
+			case DRUM_OF_EARTHQUAKE:
+				otmp->spe = rn1(5, 4);
+				break;
+			case MASK:
+				if (rn2(4)){
+					int tryct2 = 0;
+					do otmp->corpsenm = rndmonnum();
+					while (is_human(&mons[otmp->corpsenm])
+						&& tryct2++ < 30);
 				}
-		case BELL_OF_OPENING:   otmp->spe = 3;
-					break;
-		case MAGIC_FLUTE:
-		case MAGIC_HARP:
-		case FROST_HORN:
-		case FIRE_HORN:
-		case DRUM_OF_EARTHQUAKE:
-					otmp->spe = rn1(5,4);
-		break;
-	    case MASK:
-			if(rn2(4)){
-				int tryct2 = 0;
-				do otmp->corpsenm = rndmonnum();
-				while(is_human(&mons[otmp->corpsenm])
-					&& tryct2++ < 30);
-			} else if(rn2(10)){
-				do otmp->corpsenm = rn2(PM_LONG_WORM_TAIL);
-				while(mons[otmp->corpsenm].geno & G_UNIQ);
-			} else {
-				do otmp->corpsenm = PM_ARCHEOLOGIST + rn2(PM_WIZARD - PM_ARCHEOLOGIST);
-				while(otmp->corpsenm == PM_WORM_THAT_WALKS);
-			}
-			doMaskStats(otmp);
-		break;
-		}
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 10 : 40))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-	break;
-	case AMULET_CLASS:
-		if (otmp->otyp == AMULET_OF_YENDOR) flags.made_amulet = TRUE;
-		if(rn2(10) && (otmp->otyp == AMULET_OF_STRANGULATION ||
-		   otmp->otyp == AMULET_OF_CHANGE ||
-		   otmp->otyp == AMULET_OF_RESTFUL_SLEEP)) {
-			curse(otmp);
-		} else	blessorcurse(otmp, 10);
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-	case VENOM_CLASS:
-	case CHAIN_CLASS:
-	case BALL_CLASS:
-		break;
-	case POTION_CLASS:
-		if(otmp->otyp == POT_BLOOD){
-			otmp->corpsenm = PM_HUMAN;	/* default value */
-			for (tryct = 200; tryct > 0; --tryct) {
-				mndx = undead_to_corpse(rndmonnum());
-				if (mons[mndx].cnutrit &&
-					!(mvitals[mndx].mvflags & G_NOCORPSE)
-					&& has_blood(&mons[mndx]) ) {
-				otmp->corpsenm = mndx;
-				break;
+				else if (rn2(10)){
+					do otmp->corpsenm = rn2(PM_LONG_WORM_TAIL);
+					while (mons[otmp->corpsenm].geno & G_UNIQ);
 				}
+				else {
+					do otmp->corpsenm = PM_ARCHEOLOGIST + rn2(PM_WIZARD - PM_ARCHEOLOGIST);
+					while (otmp->corpsenm == PM_WORM_THAT_WALKS);
+				}
+				doMaskStats(otmp);
+				break;
 			}
-			blessorcurse(otmp, 10);
-		}
-		if (otmp->otyp == POT_OIL)
-		    otmp->age = MAX_OIL_IN_FLASK;	/* amount of oil */
-		/* fall through */
-	case SCROLL_CLASS:
-#ifdef MAIL
-		if (otmp->otyp != SCR_MAIL)
-#endif
-			blessorcurse(otmp, 4);
-		if(otmp->otyp == SCR_WARD){
-			int prob = rn2(73);
-			/*The circle of acheron is so common and so easy to draw that noone makes ward scrolls of it*/
-			if(prob < 10) otmp->oward = WINGS_OF_GARUDA;
-			else if(prob < 20) otmp->oward = CARTOUCHE_OF_THE_CAT_LORD;
-			else if(prob < 30) otmp->oward = SIGN_OF_THE_SCION_QUEEN;
-			else if(prob < 40) otmp->oward = ELDER_ELEMENTAL_EYE;
-			else if(prob < 50) otmp->oward = ELDER_SIGN;
-			else if(prob < 60) otmp->oward = HAMSA;
-			else if(prob < 70) otmp->oward = PENTAGRAM;
-			else otmp->oward = HEXAGRAM;
-		}
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-	break;
-	case SPBOOK_CLASS:
-		blessorcurse(otmp, 17);
-		// WARD_ACHERON			0x0000008L
-		// WARD_QUEEN			0x0000200L
-		// WARD_GARUDA			0x0000800L
-
-		// WARD_ELDER_SIGN		0x0000080L
-		// WARD_EYE				0x0000100L
-		// WARD_CAT_LORD		0x0000400L
-
-		// WARD_HEXAGRAM		0x0000020L
-		// WARD_PENTAGRAM		0x0000010L
-		// WARD_HAMSA			0x0000040L
-
-		// WARD_HEPTAGRAM		0x0000002L
-
-		/*Spellbooks are warded to help contain the magic.
-		  Some of the wards contain usable symbols*/
-		switch (objects[otmp->otyp].oc_level) {
-		 case 0:
-		 break;
-		 case 1:
-			if( (rn2(3)) ) otmp->oward = WARD_ACHERON;
-			else if( !(rn2(3)) ){
-				if( rn2(2) ) otmp->oward = WARD_QUEEN;
-				else otmp->oward = WARD_GARUDA;
-			}
-		 break;
-		 case 2:
-			if( rn2(2) ){
-				if( !(rn2(8)) ) otmp->oward = WARD_EYE;
-				else if( rn2(2) ) otmp->oward = WARD_QUEEN;
-				else otmp->oward = WARD_GARUDA;
-			}
-			else if( rn2(3) ) otmp->oward = WARD_ACHERON;
-		 break;
-		 case 3:
-			if( !(rn2(3)) ){
-				if( !(rn2(5)) ) otmp->oward = WARD_EYE;
-				else if( !(rn2(4)) ) otmp->oward = WARD_QUEEN;
-				else if( !(rn2(3)) )otmp->oward = WARD_GARUDA;
-				else if(   rn2(2) )otmp->oward = WARD_ELDER_SIGN;
-				else otmp->oward = WARD_CAT_LORD;
-			}
-			else if(rn2(2)){
-				if( !(rn2(4)) ) otmp->oward = WARD_TOUSTEFNA;
-				else if( !(rn2(3)) )otmp->oward = WARD_DREPRUN;
-				else if(  (rn2(2)) )otmp->oward = WARD_VEIOISTAFUR;
-				else otmp->oward = WARD_THJOFASTAFUR;
-			}
-			else if( rn2(3) ) otmp->oward = WARD_ACHERON;
-		 break;
-		 case 4:
-			if( rn2(4) ){
-				if( !(rn2(9)) ) otmp->oward = WARD_EYE;
-				else if( !rn2(8) ) otmp->oward = WARD_QUEEN;
-				else if( !rn2(7) )otmp->oward = WARD_GARUDA;
-				else if( !rn2(6) )otmp->oward = WARD_ELDER_SIGN;
-				else if( !rn2(5) )otmp->oward = WARD_CAT_LORD;
-				else if( !rn2(4) ) otmp->oward = WARD_TOUSTEFNA;
-				else if( !rn2(3) )otmp->oward = WARD_DREPRUN;
-				else if(  rn2(2) )otmp->oward = WARD_VEIOISTAFUR;
-				else otmp->oward = WARD_THJOFASTAFUR;
-			}
-			else otmp->oward = WARD_ACHERON;
-		 break;
-		 case 5:
-			if( !(rn2(4)) ){
-				if( !(rn2(2)) ) otmp->oward = WARD_PENTAGRAM;
-				else otmp->oward = WARD_HAMSA;
-			}
-			else if( (rn2(3)) ){
-				if( !(rn2(8)) ) otmp->oward = WARD_QUEEN;
-				else if( !rn2(7) )otmp->oward = WARD_GARUDA;
-				else if( !rn2(6) )otmp->oward = WARD_ELDER_SIGN;
-				else if( !rn2(5) )otmp->oward = WARD_CAT_LORD;
-				else if( !rn2(4) ) otmp->oward = WARD_TOUSTEFNA;
-				else if( !rn2(3) )otmp->oward = WARD_DREPRUN;
-				else if(  rn2(2) )otmp->oward = WARD_VEIOISTAFUR;
-				else otmp->oward = WARD_THJOFASTAFUR;
-			}
-			else otmp->oward = WARD_EYE;
-		 break;
-		 case 6:
-			if( !(rn2(3)) ){
-				if( !(rn2(3)) ) otmp->oward = WARD_PENTAGRAM;
-				else if( !rn2(2) )otmp->oward = WARD_HEXAGRAM;
-				else otmp->oward = WARD_HAMSA;
-			}
-			else if( (rn2(6)) ){
-				if( !(rn2(8)) ) otmp->oward = WARD_QUEEN;
-				else if( !rn2(7) )otmp->oward = WARD_GARUDA;
-				else if( !rn2(6) )otmp->oward = WARD_ELDER_SIGN;
-				else if( !rn2(5) )otmp->oward = WARD_CAT_LORD;
-				else if( !rn2(4) ) otmp->oward = WARD_TOUSTEFNA;
-				else if( !rn2(3) )otmp->oward = WARD_DREPRUN;
-				else if(  rn2(2) )otmp->oward = WARD_VEIOISTAFUR;
-				else otmp->oward = WARD_THJOFASTAFUR;
-			}
-			else otmp->oward = WARD_EYE;
-		 break;
-		 case 7:
-			if( !(rn2(4)) ){
-				if( !(rn2(3)) ) otmp->oward = WARD_EYE;
-				else if( !rn2(2) )otmp->oward = WARD_ELDER_SIGN;
-				else otmp->oward = WARD_CAT_LORD;
-			}
-			else if( !(rn2(3)) ){
-				if( !(rn2(3)) ) otmp->oward = WARD_ACHERON;
-				else if( !rn2(2) )otmp->oward = WARD_QUEEN;
-				else otmp->oward = WARD_GARUDA;
-			}
-			else if( !(rn2(2)) ){
-				if( !(rn2(3)) ) otmp->oward = WARD_HEXAGRAM;
-				else if( !rn2(2) )otmp->oward = WARD_PENTAGRAM;
-				else otmp->oward = WARD_HAMSA;
-			}
-			else{
-				otmp->oward = WARD_HEPTAGRAM;
-			}
-		 break;
-		 default:
-			impossible("Unknown spellbook level %d, book %d;",
-				objects[otmp->otyp].oc_level, otmp->otyp);
-			return 0;
-		}
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-	break;
-	case ARMOR_CLASS:
-		if(rn2(10) && (otmp->otyp == FUMBLE_BOOTS ||
-		   otmp->otyp == HELM_OF_OPPOSITE_ALIGNMENT ||
-		   otmp->otyp == GAUNTLETS_OF_FUMBLING ||
-		   !rn2(11))) {
-			curse(otmp);
-			otmp->spe = -rne(3);
-		} else if(!rn2(10)) {
-			otmp->blessed = rn2(2);
-			otmp->spe = rne(3);
-		} else	blessorcurse(otmp, 10);
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 10 : 40))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-		/* simulate lacquered armor for samurai */
-		if (Role_if(PM_SAMURAI) && otmp->otyp == SPLINT_MAIL &&
-		    (moves <= 1 || In_quest(&u.uz))) {
-#ifdef UNIXPC
-			/* optimizer bitfield bug */
-			otmp->oerodeproof = 1;
-			otmp->rknown = 1;
-#else
-			otmp->oerodeproof = otmp->rknown = 1;
-#endif
-		}
-		/* MRKR: Mining helmets have lamps */
-		if (otmp->otyp == DWARVISH_HELM) {
-		    otmp->age = (long) rn1(300,300);//Many fewer turns than brass lanterns, as there are so many.
-		    otmp->lamplit = 0;
-		}
-		/* CM: gnomish hats have candles */
-		if (otmp->otyp == GNOMISH_POINTY_HAT) {
-		    otmp->age = (long) rn1(900,900);//Last longer than dwarvish helms, since the radius is smaller
-		    otmp->lamplit = 0;
-		}
-		if(otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT){
-			otmp->ohaluengr = TRUE;
-			if(Race_if(PM_DROW) && Is_qstart(&u.uz)) otmp->oward = u.start_house;
-			else if(!(rn2(10))) otmp->oward = rn2(EDDER_SYMBOL+1-LOLTH_SYMBOL)+LOLTH_SYMBOL;
-			else if(!(rn2(4))) otmp->oward = rn2(LAST_HOUSE+1-FIRST_HOUSE)+FIRST_HOUSE;
-			else otmp->oward = rn2(LAST_FALLEN_HOUSE+1-FIRST_FALLEN_HOUSE)+FIRST_FALLEN_HOUSE;
-		}
-
-	break;
-	case WAND_CLASS:
-		if(otmp->otyp == WAN_WISHING) otmp->spe = rnd(3); else
-		otmp->spe = rn1(5,
-			(objects[otmp->otyp].oc_dir == NODIR) ? 11 : 4);
-		blessorcurse(otmp, 17);
-		if (otmp->otyp == WAN_WISHING)
-			otmp->recharged = 1;
-		else
-			otmp->recharged = 0; /* used to control recharging */
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-	break;
-	case RING_CLASS:
-		if(isEngrRing(otmp->otyp) && !rn2(3) ){
-			if(rn2(4)){
-				otmp->ohaluengr = TRUE;
-				otmp->oward = (long)random_haluIndex();
-			}
-			else{
-				otmp->ohaluengr = FALSE;
-				otmp->oward = rn2(4) ? CIRCLE_OF_ACHERON :
-								!rn2(6) ? HAMSA : 
-								!rn2(5) ? ELDER_SIGN : 
-								!rn2(4) ? WINGS_OF_GARUDA : 
-								!rn2(3) ? ELDER_ELEMENTAL_EYE : 
-								!rn2(2) ? SIGN_OF_THE_SCION_QUEEN : 
-								          CARTOUCHE_OF_THE_CAT_LORD ;
-			}
-		}
-		if(isSignetRing(otmp->otyp)){
-			otmp->ohaluengr = TRUE;
-			if(!(rn2(100))) otmp->oward = rn2(EDDER_SYMBOL+1-LOLTH_SYMBOL)+LOLTH_SYMBOL;
-			else if(!(rn2(4))) otmp->oward = rn2(LAST_HOUSE+1-FIRST_HOUSE)+FIRST_HOUSE;
-			else otmp->oward = rn2(LAST_FALLEN_HOUSE+1-FIRST_FALLEN_HOUSE)+FIRST_FALLEN_HOUSE;
-		}
-		if(otmp->otyp == RIN_WISHES){
-			otmp->spe = rnd(3);
-		}
-		if(objects[otmp->otyp].oc_charged && otmp->otyp != RIN_WISHES) {
-		    blessorcurse(otmp, 3);
-		    if(rn2(10)) {
-			if(rn2(10) && bcsign(otmp))
-			    otmp->spe = bcsign(otmp) * rne(3);
-			else otmp->spe = rn2(2) ? rne(3) : -rne(3);
-		    }
-		    /* make useless +0 rings much less common */
-		    if (otmp->spe == 0) otmp->spe = rn2(4) - rn2(3);
-		    /* negative rings are usually cursed */
-		    if (otmp->spe < 0 && rn2(5)) curse(otmp);
-		} else if(rn2(10) && (otmp->otyp == RIN_TELEPORTATION ||
-			  otmp->otyp == RIN_POLYMORPH ||
-			  otmp->otyp == RIN_AGGRAVATE_MONSTER ||
-			  otmp->otyp == RIN_HUNGER || !rn2(9))) {
-			curse(otmp);
-		}
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-	break;
-	case ROCK_CLASS:
-		switch (otmp->otyp) {
-		    case STATUE:
-			/* possibly overridden by mkcorpstat() */
-			otmp->corpsenm = rndmonnum();
-			if (!verysmall(&mons[otmp->corpsenm]) &&
-				rn2(level_difficulty()/2 + 10) > 10)
-			    (void) add_to_container(otmp,
-						    mkobj(SPBOOK_CLASS,FALSE));
 			break;
+		case AMULET_CLASS:
+			if (otmp->otyp == AMULET_OF_YENDOR) flags.made_amulet = TRUE;
+			if (rn2(10) && (otmp->otyp == AMULET_OF_STRANGULATION ||
+				otmp->otyp == AMULET_OF_CHANGE ||
+				otmp->otyp == AMULET_OF_RESTFUL_SLEEP)) {
+				curse(otmp);
+			}
+			else	blessorcurse(otmp, 10);
+		case VENOM_CLASS:
+		case CHAIN_CLASS:
+		case BALL_CLASS:
+			break;
+		case POTION_CLASS:
+			if (otmp->otyp == POT_BLOOD){
+				otmp->corpsenm = PM_HUMAN;	/* default value */
+				for (tryct = 200; tryct > 0; --tryct) {
+					mndx = undead_to_corpse(rndmonnum());
+					if (mons[mndx].cnutrit &&
+						!(mvitals[mndx].mvflags & G_NOCORPSE)
+						&& has_blood(&mons[mndx])) {
+						otmp->corpsenm = mndx;
+						break;
+					}
+				}
+				blessorcurse(otmp, 10);
+			}
+			if (otmp->otyp == POT_OIL)
+				otmp->age = MAX_OIL_IN_FLASK;	/* amount of oil */
+			/* fall through */
+		case SCROLL_CLASS:
+#ifdef MAIL
+			if (otmp->otyp != SCR_MAIL)
+#endif
+				blessorcurse(otmp, 4);
+			if (otmp->otyp == SCR_WARD){
+				int prob = rn2(73);
+				/*The circle of acheron is so common and so easy to draw that noone makes ward scrolls of it*/
+				if (prob < 10) otmp->oward = WINGS_OF_GARUDA;
+				else if (prob < 20) otmp->oward = CARTOUCHE_OF_THE_CAT_LORD;
+				else if (prob < 30) otmp->oward = SIGN_OF_THE_SCION_QUEEN;
+				else if (prob < 40) otmp->oward = ELDER_ELEMENTAL_EYE;
+				else if (prob < 50) otmp->oward = ELDER_SIGN;
+				else if (prob < 60) otmp->oward = HAMSA;
+				else if (prob < 70) otmp->oward = PENTAGRAM;
+				else otmp->oward = HEXAGRAM;
+			}
+			break;
+		case SPBOOK_CLASS:
+			blessorcurse(otmp, 17);
+			// WARD_ACHERON			0x0000008L
+			// WARD_QUEEN			0x0000200L
+			// WARD_GARUDA			0x0000800L
+
+			// WARD_ELDER_SIGN		0x0000080L
+			// WARD_EYE				0x0000100L
+			// WARD_CAT_LORD		0x0000400L
+
+			// WARD_HEXAGRAM		0x0000020L
+			// WARD_PENTAGRAM		0x0000010L
+			// WARD_HAMSA			0x0000040L
+
+			// WARD_HEPTAGRAM		0x0000002L
+
+			/*Spellbooks are warded to help contain the magic.
+			  Some of the wards contain usable symbols*/
+			switch (objects[otmp->otyp].oc_level) {
+			case 0:
+				break;
+			case 1:
+				if ((rn2(3))) otmp->oward = WARD_ACHERON;
+				else if (!(rn2(3))){
+					if (rn2(2)) otmp->oward = WARD_QUEEN;
+					else otmp->oward = WARD_GARUDA;
+				}
+				break;
+			case 2:
+				if (rn2(2)){
+					if (!(rn2(8))) otmp->oward = WARD_EYE;
+					else if (rn2(2)) otmp->oward = WARD_QUEEN;
+					else otmp->oward = WARD_GARUDA;
+				}
+				else if (rn2(3)) otmp->oward = WARD_ACHERON;
+				break;
+			case 3:
+				if (!(rn2(3))){
+					if (!(rn2(5))) otmp->oward = WARD_EYE;
+					else if (!(rn2(4))) otmp->oward = WARD_QUEEN;
+					else if (!(rn2(3)))otmp->oward = WARD_GARUDA;
+					else if (rn2(2))otmp->oward = WARD_ELDER_SIGN;
+					else otmp->oward = WARD_CAT_LORD;
+				}
+				else if (rn2(2)){
+					if (!(rn2(4))) otmp->oward = WARD_TOUSTEFNA;
+					else if (!(rn2(3)))otmp->oward = WARD_DREPRUN;
+					else if ((rn2(2)))otmp->oward = WARD_VEIOISTAFUR;
+					else otmp->oward = WARD_THJOFASTAFUR;
+				}
+				else if (rn2(3)) otmp->oward = WARD_ACHERON;
+				break;
+			case 4:
+				if (rn2(4)){
+					if (!(rn2(9))) otmp->oward = WARD_EYE;
+					else if (!rn2(8)) otmp->oward = WARD_QUEEN;
+					else if (!rn2(7))otmp->oward = WARD_GARUDA;
+					else if (!rn2(6))otmp->oward = WARD_ELDER_SIGN;
+					else if (!rn2(5))otmp->oward = WARD_CAT_LORD;
+					else if (!rn2(4)) otmp->oward = WARD_TOUSTEFNA;
+					else if (!rn2(3))otmp->oward = WARD_DREPRUN;
+					else if (rn2(2))otmp->oward = WARD_VEIOISTAFUR;
+					else otmp->oward = WARD_THJOFASTAFUR;
+				}
+				else otmp->oward = WARD_ACHERON;
+				break;
+			case 5:
+				if (!(rn2(4))){
+					if (!(rn2(2))) otmp->oward = WARD_PENTAGRAM;
+					else otmp->oward = WARD_HAMSA;
+				}
+				else if ((rn2(3))){
+					if (!(rn2(8))) otmp->oward = WARD_QUEEN;
+					else if (!rn2(7))otmp->oward = WARD_GARUDA;
+					else if (!rn2(6))otmp->oward = WARD_ELDER_SIGN;
+					else if (!rn2(5))otmp->oward = WARD_CAT_LORD;
+					else if (!rn2(4)) otmp->oward = WARD_TOUSTEFNA;
+					else if (!rn2(3))otmp->oward = WARD_DREPRUN;
+					else if (rn2(2))otmp->oward = WARD_VEIOISTAFUR;
+					else otmp->oward = WARD_THJOFASTAFUR;
+				}
+				else otmp->oward = WARD_EYE;
+				break;
+			case 6:
+				if (!(rn2(3))){
+					if (!(rn2(3))) otmp->oward = WARD_PENTAGRAM;
+					else if (!rn2(2))otmp->oward = WARD_HEXAGRAM;
+					else otmp->oward = WARD_HAMSA;
+				}
+				else if ((rn2(6))){
+					if (!(rn2(8))) otmp->oward = WARD_QUEEN;
+					else if (!rn2(7))otmp->oward = WARD_GARUDA;
+					else if (!rn2(6))otmp->oward = WARD_ELDER_SIGN;
+					else if (!rn2(5))otmp->oward = WARD_CAT_LORD;
+					else if (!rn2(4)) otmp->oward = WARD_TOUSTEFNA;
+					else if (!rn2(3))otmp->oward = WARD_DREPRUN;
+					else if (rn2(2))otmp->oward = WARD_VEIOISTAFUR;
+					else otmp->oward = WARD_THJOFASTAFUR;
+				}
+				else otmp->oward = WARD_EYE;
+				break;
+			case 7:
+				if (!(rn2(4))){
+					if (!(rn2(3))) otmp->oward = WARD_EYE;
+					else if (!rn2(2))otmp->oward = WARD_ELDER_SIGN;
+					else otmp->oward = WARD_CAT_LORD;
+				}
+				else if (!(rn2(3))){
+					if (!(rn2(3))) otmp->oward = WARD_ACHERON;
+					else if (!rn2(2))otmp->oward = WARD_QUEEN;
+					else otmp->oward = WARD_GARUDA;
+				}
+				else if (!(rn2(2))){
+					if (!(rn2(3))) otmp->oward = WARD_HEXAGRAM;
+					else if (!rn2(2))otmp->oward = WARD_PENTAGRAM;
+					else otmp->oward = WARD_HAMSA;
+				}
+				else{
+					otmp->oward = WARD_HEPTAGRAM;
+				}
+				break;
+			default:
+				impossible("Unknown spellbook level %d, book %d;",
+					objects[otmp->otyp].oc_level, otmp->otyp);
+				return 0;
+			}
+			break;
+		case ARMOR_CLASS:
+			if (rn2(10) && (otmp->otyp == FUMBLE_BOOTS ||
+				otmp->otyp == HELM_OF_OPPOSITE_ALIGNMENT ||
+				otmp->otyp == GAUNTLETS_OF_FUMBLING ||
+				!rn2(11))) {
+				curse(otmp);
+				otmp->spe = -rne(3);
+			}
+			else if (!rn2(10)) {
+				otmp->blessed = rn2(2);
+				otmp->spe = rne(3);
+			}
+			else	blessorcurse(otmp, 10);
+			/* simulate lacquered armor for samurai */
+			if (Role_if(PM_SAMURAI) && otmp->otyp == SPLINT_MAIL &&
+				(moves <= 1 || In_quest(&u.uz))) {
+#ifdef UNIXPC
+				/* optimizer bitfield bug */
+				otmp->oerodeproof = 1;
+				otmp->rknown = 1;
+#else
+				otmp->oerodeproof = otmp->rknown = 1;
+#endif
+			}
+			/* MRKR: Mining helmets have lamps */
+			if (otmp->otyp == DWARVISH_HELM) {
+				otmp->age = (long)rn1(300, 300);//Many fewer turns than brass lanterns, as there are so many.
+				otmp->lamplit = 0;
+			}
+			/* CM: gnomish hats have candles */
+			if (otmp->otyp == GNOMISH_POINTY_HAT) {
+				otmp->age = (long)rn1(900, 900);//Last longer than dwarvish helms, since the radius is smaller
+				otmp->lamplit = 0;
+			}
+			if (otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == CONSORT_S_SUIT){
+				otmp->ohaluengr = TRUE;
+				if (Race_if(PM_DROW) && Is_qstart(&u.uz)) otmp->oward = u.start_house;
+				else if (!(rn2(10))) otmp->oward = rn2(EDDER_SYMBOL + 1 - LOLTH_SYMBOL) + LOLTH_SYMBOL;
+				else if (!(rn2(4))) otmp->oward = rn2(LAST_HOUSE + 1 - FIRST_HOUSE) + FIRST_HOUSE;
+				else otmp->oward = rn2(LAST_FALLEN_HOUSE + 1 - FIRST_FALLEN_HOUSE) + FIRST_FALLEN_HOUSE;
+			}
+
+			break;
+		case WAND_CLASS:
+			if (otmp->otyp == WAN_WISHING) otmp->spe = rnd(3); else
+				otmp->spe = rn1(5,
+				(objects[otmp->otyp].oc_dir == NODIR) ? 11 : 4);
+			blessorcurse(otmp, 17);
+			if (otmp->otyp == WAN_WISHING)
+				otmp->recharged = 1;
+			else
+				otmp->recharged = 0; /* used to control recharging */
+			break;
+		case RING_CLASS:
+			if (isEngrRing(otmp->otyp) && !rn2(3)){
+				if (rn2(4)){
+					otmp->ohaluengr = TRUE;
+					otmp->oward = (long)random_haluIndex();
+				}
+				else{
+					otmp->ohaluengr = FALSE;
+					otmp->oward = rn2(4) ? CIRCLE_OF_ACHERON :
+						!rn2(6) ? HAMSA :
+						!rn2(5) ? ELDER_SIGN :
+						!rn2(4) ? WINGS_OF_GARUDA :
+						!rn2(3) ? ELDER_ELEMENTAL_EYE :
+						!rn2(2) ? SIGN_OF_THE_SCION_QUEEN :
+						CARTOUCHE_OF_THE_CAT_LORD;
+				}
+			}
+			if (isSignetRing(otmp->otyp)){
+				otmp->ohaluengr = TRUE;
+				if (!(rn2(100))) otmp->oward = rn2(EDDER_SYMBOL + 1 - LOLTH_SYMBOL) + LOLTH_SYMBOL;
+				else if (!(rn2(4))) otmp->oward = rn2(LAST_HOUSE + 1 - FIRST_HOUSE) + FIRST_HOUSE;
+				else otmp->oward = rn2(LAST_FALLEN_HOUSE + 1 - FIRST_FALLEN_HOUSE) + FIRST_FALLEN_HOUSE;
+			}
+			if (otmp->otyp == RIN_WISHES){
+				otmp->spe = rnd(3);
+			}
+			if (objects[otmp->otyp].oc_charged && otmp->otyp != RIN_WISHES) {
+				blessorcurse(otmp, 3);
+				if (rn2(10)) {
+					if (rn2(10) && bcsign(otmp))
+						otmp->spe = bcsign(otmp) * rne(3);
+					else otmp->spe = rn2(2) ? rne(3) : -rne(3);
+				}
+				/* make useless +0 rings much less common */
+				if (otmp->spe == 0) otmp->spe = rn2(4) - rn2(3);
+				/* negative rings are usually cursed */
+				if (otmp->spe < 0 && rn2(5)) curse(otmp);
+			}
+			else if (rn2(10) && (otmp->otyp == RIN_TELEPORTATION ||
+				otmp->otyp == RIN_POLYMORPH ||
+				otmp->otyp == RIN_AGGRAVATE_MONSTER ||
+				otmp->otyp == RIN_HUNGER || !rn2(9))) {
+				curse(otmp);
+			}
+			break;
+		case ROCK_CLASS:
+			switch (otmp->otyp) {
+			case STATUE:
+				/* possibly overridden by mkcorpstat() */
+				otmp->corpsenm = rndmonnum();
+				if (!verysmall(&mons[otmp->corpsenm]) &&
+					rn2(level_difficulty() / 2 + 10) > 10)
+					(void)add_to_container(otmp,
+					mkobj(SPBOOK_CLASS, FALSE));
+				break;
 			case FOSSIL:
-				switch(rnd(12)){
-					case 1:
-						otmp->corpsenm = PM_SABER_TOOTHED_CAT;
+				switch (rnd(12)){
+				case 1:
+					otmp->corpsenm = PM_SABER_TOOTHED_CAT;
 					break;
-					case 2:
-						otmp->corpsenm = PM_TYRANNOSAURUS;
+				case 2:
+					otmp->corpsenm = PM_TYRANNOSAURUS;
 					break;
-					case 3:
-						otmp->corpsenm = PM_TRICERATOPS;
+				case 3:
+					otmp->corpsenm = PM_TRICERATOPS;
 					break;
-					case 4:
-						otmp->corpsenm = PM_DIPLODOCUS;
+				case 4:
+					otmp->corpsenm = PM_DIPLODOCUS;
 					break;
-					case 5:
-					case 6:
-					case 7:
-					case 8:
-						otmp->corpsenm = PM_TRILOBITE;
+				case 5:
+				case 6:
+				case 7:
+				case 8:
+					otmp->corpsenm = PM_TRILOBITE;
 					break;
-					case 9:
-						otmp->corpsenm = PM_TITANOTHERE;
+				case 9:
+					otmp->corpsenm = PM_TITANOTHERE;
 					break;
-					case 10:
-						otmp->corpsenm = PM_BALUCHITHERIUM;
+				case 10:
+					otmp->corpsenm = PM_BALUCHITHERIUM;
 					break;
-					case 11:
-						otmp->corpsenm = PM_MASTODON;
+				case 11:
+					otmp->corpsenm = PM_MASTODON;
 					break;
-					case 12:
-						otmp->corpsenm = PM_CENTIPEDE;
+				case 12:
+					otmp->corpsenm = PM_CENTIPEDE;
 					break;
 				}
+			}
+			break;
+		case COIN_CLASS:
+			// case BED_CLASS:
+		case TILE_CLASS:
+			break;	/* do nothing */
+		default:
+			impossible("impossible mkobj %d, sym '%c'.", otmp->otyp,
+				objects[otmp->otyp].oc_class);
+			return (struct obj *)0;
 		}
-		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20))
-		    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
-	break;
-	case COIN_CLASS:
-	// case BED_CLASS:
-	case TILE_CLASS:
-		break;	/* do nothing */
-	default:
-		impossible("impossible mkobj %d, sym '%c'.", otmp->otyp,
-						objects[otmp->otyp].oc_class);
-		return (struct obj *)0;
+		/* possibly make into an artifact */
+		if (artif && !rn2(Role_if(PM_PIRATE) ? 5 : 20) &&
+			(!(let == ARMOR_CLASS || let == TOOL_CLASS) || !rn2(2))	/* armor and tool artifacts are rarer (1/2 the usual rate) */
+			)
+		{
+			otmp = mk_artifact(otmp, (aligntyp)A_NONE);
+		}
+
+		/* your quest tends to be stocked with things that fit you */
+		if (quest_equipment(otmp) && !otmp->oartifact) {
+			otmp->objsize = (&mons[urace.malenum])->msize;
+			if (otmp->oclass == ARMOR_CLASS){
+				if (is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+				else if (is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
+				else if (is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+			}
+		}
 	}
 
 	/* Some things must get done (timers) even if init = 0 */
