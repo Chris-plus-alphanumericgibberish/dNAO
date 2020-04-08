@@ -10,6 +10,14 @@
 
 #ifdef OVLB
 
+/*
+ * safely sets mon->data
+ * 
+ * flag:
+ *  -1 - do nothing except set mon->data -- will not update intrinsics at all
+ *   0 - replace current data, intrinsics
+ *   1 - replace mtyp, add new intrinsics, but don't remove old intrinsics
+ */
 void
 set_mon_data(mon, ptr, flag)
 struct monst *mon;
@@ -18,6 +26,7 @@ int flag;
 {
 	int i;
     mon->data = ptr;
+	mon->mtyp = ptr - mons;
     if (flag == -1) return;		/* "don't care" */
 
 	/* resistances */

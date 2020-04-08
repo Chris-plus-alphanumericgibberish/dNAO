@@ -4011,7 +4011,7 @@ struct monst *mtmp;
 				pline("%s tears off the right half of %s face before rising through the ceiling!", nyar_name[nyar_form], s_suffix(Monnam(mtmp)));
 				change_usanity(u_sanity_loss_nyar());
 			}
-			mtmp->data = &mons[PM_GHOUL_QUEEN_NITOCRIS];
+			set_mon_data(mtmp, &mons[PM_GHOUL_QUEEN_NITOCRIS], 0);
 			//Surprisingly, this is an effective means of life saving!
 			break;
 		}

@@ -1124,6 +1124,11 @@ moveloop()
 			flags.shade_level=0;
 		    for (mtmp = fmon; mtmp; mtmp = nxtmon){
 				nxtmon = mtmp->nmon;
+				/* check for mtyp not being correct */
+				if (&mons[mtmp->mtyp] != mtmp->data) {
+					impossible("non-matching mtyp (%d) and data (%ld)", mtmp->mtyp, mtmp->data - mons);
+					mtmp->mtyp = mtmp->data - mons;
+				}
 				/* check for bad swap weapons */
 				if (mtmp->msw) {
 					struct obj *obj;
