@@ -3115,7 +3115,7 @@ struct monst *mon;
 						pline("%s puts on a mask!", Monnam(mon));
 					m_useup(mon, otmp);
 					mon->ispolyp = TRUE;
-					newcham(mon, &mons[pm], FALSE, FALSE);
+					newcham(mon, pm, FALSE, FALSE);
 					mon->m_insight_level = 0;
 					m_dowear(mon, TRUE);
 					init_mon_wield_item(mon);

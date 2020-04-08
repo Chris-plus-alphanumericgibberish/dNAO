@@ -2236,13 +2236,13 @@ museamnesia:
 	case MUSE_WAN_POLYMORPH:
 		mzapmsg(mtmp, otmp, TRUE);
 		otmp->spe--;
-		if(!resists_poly(mtmp->data)) newcham(mtmp, (struct permonst *) 0, TRUE, FALSE);
+		if(!resists_poly(mtmp->data)) newcham(mtmp, NON_PM, TRUE, FALSE);
 		if (oseen) makeknown(WAN_POLYMORPH);
 		return 2;
 	case MUSE_POT_POLYMORPH:
 		mquaffmsg(mtmp, otmp);
 		if (vismon) pline("%s suddenly mutates!", Monnam(mtmp));
-		if(!resists_poly(mtmp->data)) newcham(mtmp, (struct permonst *) 0, FALSE, FALSE);
+		if(!resists_poly(mtmp->data)) newcham(mtmp, NON_PM, FALSE, FALSE);
 		if (oseen) makeknown(POT_POLYMORPH);
 		m_useup(mtmp, otmp);
 		return 2;
@@ -2261,7 +2261,7 @@ museamnesia:
 		newsym(trapx, trapy);
 		
 		if(resists_magm(mtmp)) shieldeff(mtmp->mx, mtmp->my);
-		else if(!resists_poly(mtmp->data)) newcham(mtmp, (struct permonst *)0, FALSE, FALSE);
+		else if(!resists_poly(mtmp->data)) newcham(mtmp, NON_PM, FALSE, FALSE);
 		return 2;
 	case MUSE_BULLWHIP:
 		/* attempt to disarm hero */
@@ -2385,7 +2385,7 @@ museamnesia:
 			pline("%s puts on a mask!", Monnam(mtmp));
 		m_useup(mtmp, otmp);
 		mtmp->ispolyp = TRUE;
-		newcham(mtmp, &mons[pm], FALSE, FALSE);
+		newcham(mtmp, pm, FALSE, FALSE);
 		mtmp->m_insight_level = 0;
 		m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);

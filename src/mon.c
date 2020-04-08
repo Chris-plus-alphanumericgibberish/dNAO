@@ -2058,11 +2058,11 @@ struct monst *mtmp;
 	
 	/* possibly polymorph shapechangers and lycanthropes */
 	if (mtmp->cham && !rn2(6))
-	    (void) newcham(mtmp, (struct permonst *)0, FALSE, FALSE);
+	    (void) newcham(mtmp, NON_PM, FALSE, FALSE);
 	were_change(mtmp);
 	if(u.umadness&MAD_REAL_DELUSIONS && !ClearThoughts && u.usanity < mtmp->m_san_level*0.8){
 		if(!(mtmp->data->geno&(G_UNIQ|G_NOGEN))){
-			newcham(mtmp, (struct permonst *)0, FALSE, FALSE);
+			newcham(mtmp, NON_PM, FALSE, FALSE);
 		}
 	}
 	
@@ -2416,7 +2416,7 @@ meatmetal(mtmp)
 			delobj(otmp);
 			ptr = mtmp->data;
 			if (poly) {
-			    if (newcham(mtmp, (struct permonst *)0,
+			    if (newcham(mtmp, NON_PM,
 					FALSE, FALSE))
 				ptr = mtmp->data;
 			} else if (grow) {
@@ -2502,7 +2502,7 @@ meatobj(mtmp)		/* for gelatinous cubes */
 		delobj(otmp);		/* munch */
 		ptr = mtmp->data;
 		if (poly) {
-		    if (newcham(mtmp, (struct permonst *)0, FALSE, FALSE))
+		    if (newcham(mtmp, NON_PM, FALSE, FALSE))
 			ptr = mtmp->data;
 		} else if (grow) {
 		    ptr = grow_up(mtmp, (struct monst *)0);
@@ -3904,7 +3904,7 @@ struct monst *mtmp;
 					mtmp->mintrinsics[(DISPLACED - 1) / 32] &= ~(1 << (DISPLACED - 1) % 32);
 				mtmp->mvar_syllable = 0; //Lose the bonus if resurrected
 			}
-			newcham(mtmp, &mons[rn2(4) ? PM_ACID_BLOB : PM_BLACK_PUDDING], FALSE, FALSE);
+			newcham(mtmp, (rn2(4) ? PM_ACID_BLOB : PM_BLACK_PUDDING), FALSE, FALSE);
 			break;
 		case LSVD_FRC:
 			/* message */
@@ -3977,7 +3977,7 @@ struct monst *mtmp;
 			}
 			/* turn into a polypoid */
 			mtmp->ispolyp = 0;
-			newcham(mtmp, &mons[PM_POLYPOID_BEING], FALSE, FALSE);
+			newcham(mtmp, PM_POLYPOID_BEING, FALSE, FALSE);
 			mtmp->m_insight_level = 40;
 			break;
 		case LSVD_KAM:
@@ -5683,7 +5683,7 @@ mon_to_stone(mtmp)
 	/* it's a golem, and not a stone golem */
 	if(canseemon(mtmp))
 	    pline("%s solidifies...", Monnam(mtmp));
-	if (newcham(mtmp, &mons[PM_STONE_GOLEM], FALSE, FALSE)) {
+	if (newcham(mtmp, PM_STONE_GOLEM, FALSE, FALSE)) {
 	    if(canseemon(mtmp))
 		pline("Now it's %s.", an(mtmp->data->mname));
 	} else {
@@ -5702,7 +5702,7 @@ mon_to_gold(mtmp)
 	/* it's a golem, and not a stone golem */
 	if(canseemon(mtmp))
 	    pline("%s turns shiny...", Monnam(mtmp));
-	if (newcham(mtmp, &mons[PM_GOLD_GOLEM], FALSE, FALSE)) {
+	if (newcham(mtmp, PM_GOLD_GOLEM, FALSE, FALSE)) {
 	    if(canseemon(mtmp))
 		pline("Now it's %s.", an(mtmp->data->mname));
 	} else {
@@ -6250,7 +6250,7 @@ rescham()
 		mcham = (int) mtmp->cham;
 		if (mcham) {
 			mtmp->cham = CHAM_ORDINARY;
-			(void) newcham(mtmp, &mons[cham_to_pm[mcham]],
+			(void) newcham(mtmp, cham_to_pm[mcham],
 				       FALSE, FALSE);
 		}
 		if(is_were(mtmp->data) && mtmp->data->mlet != S_HUMAN)
@@ -6294,7 +6294,7 @@ struct monst *mon;
 	    mcham = (int) mon->cham;
 	    if (mcham) {
 		mon->cham = CHAM_ORDINARY;
-		(void) newcham(mon, &mons[cham_to_pm[mcham]], FALSE, FALSE);
+		(void) newcham(mon, cham_to_pm[mcham], FALSE, FALSE);
 	    } else if (is_were(mon->data) && !is_human(mon->data)) {
 		new_were(mon);
 	    }
@@ -6420,16 +6420,18 @@ struct monst *mon;
 
 /* make a chameleon look like a new monster; returns 1 if it actually changed */
 int
-newcham(mtmp, mdat, polyspot, msg)
+newcham(mtmp, mtyp, polyspot, msg)
 struct monst *mtmp;
-struct permonst *mdat;
+int mtyp;			/* index of monster data to turn into */
 boolean polyspot;	/* change is the result of wand or spell of polymorph */
 boolean msg;		/* "The oldmon turns into a newmon!" */
 {
 	int mhp, hpn, hpd;
-	int mndx, tryct;
+	int tryct;
+	int oldmtyp = mtmp->mtyp;
 	int faceless = 0;
 	struct permonst *olddata = mtmp->data;
+	struct permonst * mdat = &mons[mtyp];
 	char oldname[BUFSZ];
 	
 	if (msg) {
@@ -6441,11 +6443,11 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 
 	/* mdat = 0 -> caller wants a random monster shape */
 	tryct = 0;
-	if (mdat == 0) {
+	if (mtyp == NON_PM) {
 	    while (++tryct <= 100) {
-		mndx = select_newcham_form(mtmp);
-		mdat = &mons[mndx];
-		if ((mvitals[mndx].mvflags & G_GENOD && !In_quest(&u.uz)) != 0 ||
+		mtyp = select_newcham_form(mtmp);
+		mdat = &mons[mtyp];
+		if ((mvitals[mtyp].mvflags & G_GENOD && !In_quest(&u.uz)) != 0 ||
 			is_placeholder(mdat)) continue;
 		/* polyok rules out all MG_PNAME and MA_WERE's;
 		   select_newcham_form might deliberately pick a player
@@ -6455,7 +6457,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		    break;
 	    }
 	    if (tryct > 100) return 0;	/* Should never happen */
-	} else if (mvitals[monsndx(mdat)].mvflags & G_GENOD && !In_quest(&u.uz))
+	} else if (mvitals[mtyp].mvflags & G_GENOD && !In_quest(&u.uz))
 	    return(0);	/* passed in mdat is genocided */
 
 	if(is_male(mdat)) {
@@ -6480,7 +6482,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		}
 	}
 
-	if(mdat == mtmp->data) return(0);	/* still the same monster */
+	if (mtyp == oldmtyp) return(0);	/* still the same monster */
 
 	if(mtmp->wormno) {			/* throw tail away */
 		wormgone(mtmp);
@@ -6488,9 +6490,9 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	}
 	
 	/* Possibly Unblock  */
-	if(!opaque(mdat) && opaque(mtmp->data)) unblock_point(mtmp->mx, mtmp->my);
+	if (!opaque(mdat) && opaque(olddata)) unblock_point(mtmp->mx, mtmp->my);
 	/* Possibly Block  */
-	if(opaque(mdat) && !opaque(mtmp->data)) block_point(mtmp->mx, mtmp->my);
+	if (opaque(mdat) && !opaque(olddata)) block_point(mtmp->mx, mtmp->my);
 	
 	if(mtmp->cham != CHAM_DREAM){
 		hpn = mtmp->mhp;
@@ -6563,17 +6565,17 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	}
 
 #ifndef DCC30_BUG
-	if ((mdat == &mons[PM_LONG_WORM] || mndx == PM_HUNTING_HORROR) && 
+	if ((mtyp == PM_LONG_WORM || mtyp == PM_HUNTING_HORROR) && 
 		(mtmp->wormno = get_wormno()) != 0) {
 #else
 	/* DICE 3.0 doesn't like assigning and comparing mtmp->wormno in the
 	 * same expression.
 	 */
-	if ((mdat == &mons[PM_LONG_WORM] || mndx == PM_HUNTING_HORROR) &&
+	if ((mtyp == PM_LONG_WORM || mtyp == PM_HUNTING_HORROR) &&
 		(mtmp->wormno = get_wormno(), mtmp->wormno != 0)) {
 #endif
 	    /* we can now create worms with tails - 11/91 */
-	    initworm(mtmp, mndx == PM_HUNTING_HORROR ? 2 : rn2(5));
+		initworm(mtmp, mtyp == PM_HUNTING_HORROR ? 2 : rn2(5));
 	    if (count_wsegs(mtmp))
 		place_worm_tail_randomly(mtmp, mtmp->mx, mtmp->my);
 	}
@@ -6584,7 +6586,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	    uchar save_mnamelth = mtmp->mnamelth;
 	    mtmp->mnamelth = 0;
 	    pline("%s turns into %s!", oldname,
-		  mdat == &mons[PM_GREEN_SLIME] ? "slime" :
+			mtyp == PM_GREEN_SLIME ? "slime" :
 		  x_monnam(mtmp, ARTICLE_A, (char*)0, SUPPRESS_SADDLE, FALSE));
 	    mtmp->mnamelth = save_mnamelth;
 	}
@@ -6747,7 +6749,7 @@ kill_genocided_monsters()
 	    mndx = monsndx(mtmp->data);
 	    if ((mvitals[mndx].mvflags & G_GENOD && !In_quest(&u.uz)) || kill_cham[mtmp->cham]) {
 		if (mtmp->cham && !kill_cham[mtmp->cham])
-		    (void) newcham(mtmp, (struct permonst *)0, FALSE, FALSE);
+		    (void) newcham(mtmp, NON_PM, FALSE, FALSE);
 		else
 		    mondead(mtmp);
 	    }

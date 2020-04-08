@@ -584,7 +584,7 @@ int *fail_reason;
 				if(statue->spe&STATUE_EPRE && dungeon_topology.eprecursor_typ == PRE_POLYP)
 					mon->ispolyp = TRUE;
 				if (mon->cham == CHAM_DOPPELGANGER)
-					(void) newcham(mon, mptr, FALSE, FALSE);
+					(void) newcham(mon, monsndx(mptr), FALSE, FALSE);
 			}
 	    } else {
 			if(statue->spe&STATUE_FACELESS){
@@ -1498,7 +1498,7 @@ struct obj *otmp;
 		case POLY_TRAP: 
 		    if (!resists_magm(mtmp) && !resists_poly(mtmp->data)) {
 			if (!resist(mtmp, WAND_CLASS, 0, NOTELL)) {
-			(void) newcham(mtmp, (struct permonst *)0,
+			(void) newcham(mtmp, NON_PM,
 				       FALSE, FALSE);
 			if (!can_saddle(mtmp) || !can_ride(mtmp)) {
 				dismount_steed(DISMOUNT_POLY);
@@ -2484,7 +2484,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		    if (resists_magm(mtmp) || resists_poly(mtmp->data)) {
 			shieldeff(mtmp->mx, mtmp->my);
 		    } else if (!resist(mtmp, WAND_CLASS, 0, NOTELL)) {
-			(void) newcham(mtmp, (struct permonst *)0,
+			(void) newcham(mtmp, NON_PM,
 				       FALSE, FALSE);
 			if (in_sight) seetrap(trap);
 		    }

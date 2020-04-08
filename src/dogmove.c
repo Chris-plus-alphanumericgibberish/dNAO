@@ -439,7 +439,7 @@ boolean devour;
 #endif /* PET_SATIATION */
 
 	if (poly) {
-	    (void) newcham(mtmp, (struct permonst *)0, FALSE,
+	    (void) newcham(mtmp, NON_PM, FALSE,
 			   cansee(mtmp->mx, mtmp->my));
 	}
 	/* limit "instant" growth to prevent potential abuse */

@@ -3475,7 +3475,7 @@ spiriteffects(power, atme)
 				unbind(SEAL_TENEBROUS, TRUE);
 			} else if(mon->data == &mons[PM_INTONER]){
 				pline("%s screams!", SheHeIt(mon));
-				newcham(mon, &mons[PM_BLACK_FLOWER], FALSE, FALSE);
+				newcham(mon, PM_BLACK_FLOWER, FALSE, FALSE);
 			} else if(resists_drli(mon) || !(mon->data->geno & G_GENO) || resists_death(mon)){
 				int nlev;
 				d_level tolevel;
@@ -3800,7 +3800,7 @@ spiriteffects(power, atme)
 					break;
 				}
 				if (tryct > 100) return 0;	/* Should never happen */
-				newcham(mon, mdat, FALSE, FALSE);
+				newcham(mon, mndx, FALSE, FALSE);
 			}
 		}break;
 		case PWR_PHASE_STEP:{

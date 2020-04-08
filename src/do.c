@@ -618,8 +618,7 @@ register struct obj *obj;
 		if (is_animal(u.ustuck->data)) {
 		    if (could_poly || could_slime) {
 			(void) newcham(u.ustuck,
-				       could_poly ? (struct permonst *)0 :
-				       &mons[PM_GREEN_SLIME],
+				       could_poly ? NON_PM : PM_GREEN_SLIME,
 				       FALSE, could_slime);
 			delobj(obj);	/* corpse is digested */
 		    } else if (could_petrify) {

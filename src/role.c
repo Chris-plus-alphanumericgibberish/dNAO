@@ -1347,7 +1347,7 @@ god_priest(gptr, sx, sy, sanctum)
 		if(gptr == DrowMaleLgodKnown || gptr == DrowMaleLgodUknwn){
 			priest->female = FALSE;
 			if(!sanctum){
-				newcham(priest,&mons[PM_DROW_ALIENIST],FALSE,FALSE);
+				newcham(priest,PM_DROW_ALIENIST,FALSE,FALSE);
 				priest->mfaction = XAXOX;
 			}
 			return priest;
@@ -1355,7 +1355,7 @@ god_priest(gptr, sx, sy, sanctum)
 		if(gptr == DrowMaleNgod){
 			priest->female = FALSE;
 			if(!sanctum){
-				newcham(priest,&mons[PM_HEDROW_BLADEMASTER],FALSE,FALSE);
+				newcham(priest,PM_HEDROW_BLADEMASTER,FALSE,FALSE);
 				priest->mfaction = LOLTH_SYMBOL;
 			}
 			return priest;
@@ -1363,7 +1363,7 @@ god_priest(gptr, sx, sy, sanctum)
 		if(gptr == DrowMaleCgod){
 			priest->female = FALSE;
 			if(!sanctum){
-				newcham(priest,&mons[PM_DROW_MATRON],FALSE,FALSE);
+				newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
 				priest->mfaction = LOLTH_SYMBOL;
 			}
 			return priest;
@@ -1372,39 +1372,39 @@ god_priest(gptr, sx, sy, sanctum)
 		if(gptr == DrowNobMaleNgod){
 			priest->female = FALSE;
 			if(!sanctum){
-				newcham(priest,&mons[PM_HEDROW_WIZARD],FALSE,FALSE);
+				newcham(priest,PM_HEDROW_WIZARD,FALSE,FALSE);
 				priest->mfaction = LOLTH_SYMBOL;
 			}
 			return priest;
 		}
 		if(gptr == DrowNobMaleCgod){
 			if(!sanctum){
-				if(priest->female) newcham(priest,&mons[PM_PRIESTESS_OF_GHAUNADAUR],FALSE,FALSE);
-				else newcham(priest,&mons[PM_PRIEST_OF_GHAUNADAUR],FALSE,FALSE);
+				if(priest->female) newcham(priest,PM_PRIESTESS_OF_GHAUNADAUR,FALSE,FALSE);
+				else newcham(priest,PM_PRIEST_OF_GHAUNADAUR,FALSE,FALSE);
 				priest->mfaction = GHAUNADAUR_SYMBOL;
 			}
 			return priest;
 		}
 		if(gptr == DrowFemaleLgod){
 			priest->female = TRUE;
-			if(!sanctum) newcham(priest,&mons[PM_STJARNA_ALFR],FALSE,FALSE);
+			if(!sanctum) newcham(priest,PM_STJARNA_ALFR,FALSE,FALSE);
 			return priest;
 		}
 		if(gptr == DrowNobFemaleLgod){
 			priest->female = TRUE;
-			if(!sanctum) newcham(priest,&mons[PM_DROW_MATRON],FALSE,FALSE);
+			if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
 			//ver'tas
 			return priest;
 		}
 		if(gptr == DrowFemaleNgod){
 			priest->female = TRUE;
-			if(!sanctum) newcham(priest,&mons[PM_DROW_MATRON],FALSE,FALSE);
+			if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
 			//NKiaransali
 			return priest;
 		}
 		if(gptr == DrowFemaleCgod){
 			priest->female = TRUE;
-			if(!sanctum) newcham(priest,&mons[PM_DROW_MATRON],FALSE,FALSE);
+			if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
 			//Lolth
 			return priest;
 		}

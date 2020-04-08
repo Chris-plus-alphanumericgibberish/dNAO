@@ -4312,7 +4312,7 @@ int spellnum;
 	break;
      case TURN_TO_STONE:
 		if(!mtmp) break;
-        if (!(poly_when_stoned(mtmp->data) && newcham(mtmp, &mons[PM_STONE_GOLEM], FALSE, TRUE))) {
+        if (!(poly_when_stoned(mtmp->data) && newcham(mtmp, PM_STONE_GOLEM, FALSE, TRUE))) {
            if(!resists_ston(mtmp) && !rn2(10) ){
 			if (!munstone(mtmp, yours))
 				minstapetrify(mtmp, yours);

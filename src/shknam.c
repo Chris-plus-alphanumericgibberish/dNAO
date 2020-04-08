@@ -792,9 +792,9 @@ struct mkroom	*sroom;
 	
 	//Note: these two don't have a shopkeeper struct
 	if(In_outlands(&u.uz) && !Is_gatetown(&u.uz))
-		newcham(shk, &mons[PM_PLUMACH_RILMANI], FALSE, FALSE);
+		newcham(shk, PM_PLUMACH_RILMANI, FALSE, FALSE);
 	else if (ESHK(shk)->shoptype == SEAFOOD)
-		newcham(shk, &mons[PM_DEEP_ONE], FALSE, FALSE);
+		newcham(shk, PM_DEEP_ONE, FALSE, FALSE);
 	
 	return(sh);
 }

@@ -1469,8 +1469,7 @@ struct obj *obj;
 		fix_object(dagger);
 		
 		if (obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER){
-			dagger->oartifact = 0;
-			artiexist[ART_BLADE_DANCER_S_DAGGER] = FALSE;
+			artifact_exists(dagger, artiname(ART_BLADE_DANCER_S_DAGGER), FALSE);
 			dagger = oname(dagger, artiname(ART_BLADE_DANCER_S_DAGGER));
 		}
 
@@ -3088,7 +3087,7 @@ struct obj *hypo;
 			case POT_POLYMORPH:
 				if (canseemon(mtarg)) pline("%s suddenly mutates!", Monnam(mtarg));
 				if(!resists_poly(mtarg->data))
-					newcham(mtarg, (struct permonst *) 0, FALSE, FALSE);
+					newcham(mtarg, NON_PM, FALSE, FALSE);
 			break;
 			case POT_AMNESIA:
 				if(!amp->cursed){

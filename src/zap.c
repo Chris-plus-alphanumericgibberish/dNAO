@@ -285,7 +285,7 @@ struct obj *otmp;
 			/* flags.bypasses = TRUE; ## for make_corpse() */
 			/* no corpse after system shock */
 			xkilled(mtmp, 3);
-		    } else if (newcham(mtmp, (struct permonst *)0,
+		    } else if (newcham(mtmp, NON_PM,
 				       (otyp != POT_POLYMORPH), FALSE)) {
 			if (!Hallucination && canspotmon(mtmp))
 			    makeknown(otyp);
@@ -398,7 +398,7 @@ struct obj *otmp;
 		if (monsndx(mtmp->data) == PM_STONE_GOLEM) {
 		    char *name = Monnam(mtmp);
 		    /* turn into flesh golem */
-		    if (newcham(mtmp, &mons[PM_FLESH_GOLEM], FALSE, FALSE)) {
+		    if (newcham(mtmp, PM_FLESH_GOLEM, FALSE, FALSE)) {
 			if (canseemon(mtmp))
 			    pline("%s turns to flesh!", name);
 		    } else {
@@ -4529,25 +4529,25 @@ int type;
 		fix_object(otmp);
 	}
 	if(mon->data == &mons[PM_PARASITIZED_ANDROID]){
-		newcham(mon, &mons[PM_ANDROID], FALSE, FALSE);
+		newcham(mon, PM_ANDROID, FALSE, FALSE);
 		mon->m_lev = 7;
 		mon->mhpmax = d(7,8);
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
 	else if(mon->data == &mons[PM_PARASITIZED_GYNOID]){
-		newcham(mon, &mons[PM_GYNOID], FALSE, FALSE);
+		newcham(mon, PM_GYNOID, FALSE, FALSE);
 		mon->m_lev = 14;
 		mon->mhpmax = d(14,8);
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
 	else if(mon->data == &mons[PM_PARASITIZED_OPERATOR]){
-		newcham(mon, &mons[PM_OPERATOR], FALSE, FALSE);
+		newcham(mon, PM_OPERATOR, FALSE, FALSE);
 		mon->m_lev = 7;
 		mon->mhpmax = d(7,8);
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
 	else if(mon->data == &mons[PM_PARASITIZED_COMMANDER]){
-		newcham(mon, &mons[PM_COMMANDER], FALSE, FALSE);
+		newcham(mon, PM_COMMANDER, FALSE, FALSE);
 		mon->m_lev = 3;
 		mon->mhpmax = 20+rn2(4);
 		mon->mhp = min(mon->mhp, mon->mhpmax);
@@ -4561,7 +4561,7 @@ int type;
 		mon->movement = 0;
 	}
 	else if(mon->data == &mons[PM_PARASITIZED_DOLL]){
-		newcham(mon, &mons[PM_LIVING_DOLL], FALSE, FALSE);
+		newcham(mon, PM_LIVING_DOLL, FALSE, FALSE);
 		mon->m_lev = 15;
 		mon->mhpmax = 60;
 		mon->mhp = min(mon->mhp, mon->mhpmax);

@@ -4882,7 +4882,7 @@ boolean ranged;
 			}
 			/* monsters only polymorph; never system shock or degenerate */
 			else {
-				newcham(mdef, (struct permonst *) 0, FALSE, vis);
+				newcham(mdef, NON_PM, FALSE, vis);
 			}
 		}
 		return result;
@@ -5401,11 +5401,11 @@ boolean ranged;
 				/* you slimed it */
 				else if (youagr) {
 					You("turn %s into slime.", mon_nam(mdef));
-					(void)newcham(mdef, &mons[PM_GREEN_SLIME], FALSE, FALSE);
+					(void)newcham(mdef, PM_GREEN_SLIME, FALSE, FALSE);
 				}
 				/* monster slimed it */
 				else {
-					(void)newcham(mdef, &mons[PM_GREEN_SLIME], FALSE, vis);
+					(void)newcham(mdef, PM_GREEN_SLIME, FALSE, vis);
 					mdef->mstrategy &= ~STRAT_WAITFORU;
 				}
 			}
@@ -14039,10 +14039,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 						|| resists_poly(pa))) {
 						if (youdef) {
 							Your("%s turns %s into slime.", body_part(BODY_FLESH), mon_nam(mdef));
-							(void)newcham(mdef, &mons[PM_GREEN_SLIME], FALSE, FALSE);
+							(void)newcham(mdef, PM_GREEN_SLIME, FALSE, FALSE);
 						}
 						else {
-							(void)newcham(mdef, &mons[PM_GREEN_SLIME], FALSE, vis);
+							(void)newcham(mdef, PM_GREEN_SLIME, FALSE, vis);
 							mdef->mstrategy &= ~STRAT_WAITFORU;
 						}
 					}
