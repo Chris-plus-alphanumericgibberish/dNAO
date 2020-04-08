@@ -186,7 +186,7 @@ struct monst *mon;
 			an(mons[pm].mname));
 	}
 
-	set_mon_data(mon, &mons[pm], 0);
+	set_mon_data(mon, pm, 0);
 	if (mon->msleeping || !mon->mcanmove) {
 	    /* transformation wakens and/or revitalizes */
 	    mon->msleeping = 0;
@@ -234,28 +234,28 @@ struct monst *mon;
 				switch(rnd(4)){
 					case 1:
 						if (emits_light_mon(ltnt)) del_light_source(LS_MONSTER, (genericptr_t)ltnt, FALSE);
-						set_mon_data(ltnt, &mons[PM_WATER_ELEMENTAL], 0);
+						set_mon_data(ltnt, PM_WATER_ELEMENTAL, 0);
 						newsym(ltnt->mx,ltnt->my);
 						if (emits_light_mon(ltnt)) new_light_source(ltnt->mx, ltnt->my, emits_light_mon(ltnt),
 								 LS_MONSTER, (genericptr_t)ltnt);
 					break;
 					case 2:
 						if (emits_light_mon(ltnt)) del_light_source(LS_MONSTER, (genericptr_t)ltnt, FALSE);
-						set_mon_data(ltnt, &mons[PM_AIR_ELEMENTAL], 0);
+						set_mon_data(ltnt, PM_AIR_ELEMENTAL, 0);
 						newsym(ltnt->mx,ltnt->my);
 						if (emits_light_mon(ltnt)) new_light_source(ltnt->mx, ltnt->my, emits_light_mon(ltnt),
 								 LS_MONSTER, (genericptr_t)ltnt);
 					break;
 					case 3:
 						if (emits_light_mon(ltnt)) del_light_source(LS_MONSTER, (genericptr_t)ltnt, FALSE);
-						set_mon_data(ltnt, &mons[PM_LIGHTNING_PARAELEMENTAL], 0);
+						set_mon_data(ltnt, PM_LIGHTNING_PARAELEMENTAL, 0);
 						newsym(ltnt->mx,ltnt->my);
 						if (emits_light_mon(ltnt)) new_light_source(ltnt->mx, ltnt->my, emits_light_mon(ltnt),
 								 LS_MONSTER, (genericptr_t)ltnt);
 					break;
 					case 4:
 						if (emits_light_mon(ltnt)) del_light_source(LS_MONSTER, (genericptr_t)ltnt, FALSE);
-						set_mon_data(ltnt, &mons[PM_ICE_PARAELEMENTAL], 0);
+						set_mon_data(ltnt, PM_ICE_PARAELEMENTAL, 0);
 						newsym(ltnt->mx,ltnt->my);
 						if (emits_light_mon(ltnt)) new_light_source(ltnt->mx, ltnt->my, emits_light_mon(ltnt),
 								 LS_MONSTER, (genericptr_t)ltnt);

@@ -19,14 +19,20 @@
  *   1 - replace mtyp, add new intrinsics, but don't remove old intrinsics
  */
 void
-set_mon_data(mon, ptr, flag)
+set_mon_data(mon, mtyp, flag)
 struct monst *mon;
-struct permonst *ptr;
+int mtyp;
 int flag;
 {
 	int i;
-    mon->data = ptr;
-	mon->mtyp = ptr - mons;
+	struct permonst * ptr = &mons[mtyp];
+	mon->data = ptr;
+
+	/* players in their base form are a special case */
+	if (mon == &youmonst && (mtyp == u.umonster))
+		mon->data = ptr = &upermonst;
+
+	mon->mtyp = mtyp;
     if (flag == -1) return;		/* "don't care" */
 
 	/* resistances */

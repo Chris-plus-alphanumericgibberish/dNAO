@@ -1481,7 +1481,7 @@ E void FDECL(insight_vanish,(struct monst *));
 
 /* ### mondata.c ### */
 
-E void FDECL(set_mon_data, (struct monst *,struct permonst *,int));
+E void FDECL(set_mon_data, (struct monst *,int,int));
 E struct attack *FDECL(attacktype_fordmg, (struct permonst *,int,int));
 E boolean FDECL(attacktype, (struct permonst *,int));
 E boolean FDECL(noattacks, (struct permonst *));

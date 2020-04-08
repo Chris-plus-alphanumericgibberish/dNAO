@@ -461,7 +461,7 @@ register int roomno;
 					msg1 = "You are not welcome here!";
 				} else msg1 = "You desecrate this place by your presence!";
 				if(canseemon(priest)) pline("As you approach, the priest suddenly putrefies and melts into a foul-smelling liquid mass!");
-				set_mon_data(priest, &mons[PM_DARKNESS_GIVEN_HUNGER], 0);
+				set_mon_data(priest, PM_DARKNESS_GIVEN_HUNGER, 0);
 				priest->mpeaceful = 0;
 				set_malign(priest);
 			} else if(Is_astralevel(&u.uz) && Role_if(PM_ANACHRONONAUT) && EPRI(priest)->shralign == A_LAWFUL) {
@@ -470,7 +470,7 @@ register int roomno;
 					set_malign(priest);
 				}
 				msg1 = "I SEE YOU!";
-				set_mon_data(priest, &mons[PM_LUGRIBOSSK], 0);
+				set_mon_data(priest, PM_LUGRIBOSSK, 0);
 				//Assumes High Priest is 25, Lugribossk is 27 (archon)
 				priest->m_lev = 27;
 				priest->mhp = 8*26 + rn2(8);

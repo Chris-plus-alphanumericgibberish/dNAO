@@ -4011,7 +4011,7 @@ struct monst *mtmp;
 				pline("%s tears off the right half of %s face before rising through the ceiling!", nyar_name[nyar_form], s_suffix(Monnam(mtmp)));
 				change_usanity(u_sanity_loss_nyar());
 			}
-			set_mon_data(mtmp, &mons[PM_GHOUL_QUEEN_NITOCRIS], 0);
+			set_mon_data(mtmp, PM_GHOUL_QUEEN_NITOCRIS, 0);
 			//Surprisingly, this is an effective means of life saving!
 			break;
 		}
@@ -4081,15 +4081,15 @@ register struct monst *mtmp;
 	mptr = mtmp->data;		/* save this for m_detach() */
 	/* restore chameleon, lycanthropes to true form at death */
 	if (mtmp->cham)
-		set_mon_data(mtmp, &mons[cham_to_pm[mtmp->cham]], -1);
+		set_mon_data(mtmp, cham_to_pm[mtmp->cham], -1);
 	else if (mtmp->data == &mons[PM_WEREJACKAL])
-		set_mon_data(mtmp, &mons[PM_HUMAN_WEREJACKAL], -1);
+		set_mon_data(mtmp, PM_HUMAN_WEREJACKAL, -1);
 	else if (mtmp->data == &mons[PM_WEREWOLF])
-		set_mon_data(mtmp, &mons[PM_HUMAN_WEREWOLF], -1);
+		set_mon_data(mtmp, PM_HUMAN_WEREWOLF, -1);
 	else if (mtmp->data == &mons[PM_WERERAT])
-		set_mon_data(mtmp, &mons[PM_HUMAN_WERERAT], -1);
+		set_mon_data(mtmp, PM_HUMAN_WERERAT, -1);
 	else if (mtmp->data == &mons[PM_ANUBAN_JACKAL])
-		set_mon_data(mtmp, &mons[PM_ANUBITE], -1);
+		set_mon_data(mtmp, PM_ANUBITE, -1);
 
 	if(mtmp->data == &mons[PM_WITCH_S_FAMILIAR]){
 		dead_familiar(mtmp->mvar_witchID);
@@ -4558,7 +4558,7 @@ boolean was_swallowed;			/* digestion */
 				mdat1 = mtmp->data;
 //				if(mdat1==&mons[PM_QUINON]) quincount++;
 				if(mdat1==&mons[PM_QUATON] && quin){
-					set_mon_data(mtmp, &mons[PM_QUINON], 0);
+					set_mon_data(mtmp, PM_QUINON, 0);
 					mtmp->m_lev += 1;
 					mtmp->mhp += 4;
 					mtmp->mhpmax += 4;
@@ -4567,7 +4567,7 @@ boolean was_swallowed;			/* digestion */
 //					quincount++;
 				}
 				else if(mdat1==&mons[PM_TRITON] && qua){
-					set_mon_data(mtmp, &mons[PM_QUATON], 0);
+					set_mon_data(mtmp, PM_QUATON, 0);
 					mtmp->m_lev += 1;
 					mtmp->mhp += 4;
 					mtmp->mhpmax += 4;
@@ -4575,7 +4575,7 @@ boolean was_swallowed;			/* digestion */
 					qua--;
 				}
 				else if(mdat1==&mons[PM_DUTON] && tre){
-					set_mon_data(mtmp, &mons[PM_TRITON], 0);
+					set_mon_data(mtmp, PM_TRITON, 0);
 					mtmp->m_lev += 1;
 					mtmp->mhp += 4;
 					mtmp->mhpmax += 4;
@@ -4583,7 +4583,7 @@ boolean was_swallowed;			/* digestion */
 					tre--;
 				}
 				else if(mdat1==&mons[PM_MONOTON] && duo){
-					set_mon_data(mtmp, &mons[PM_DUTON], 0);
+					set_mon_data(mtmp, PM_DUTON, 0);
 					mtmp->m_lev += 1;
 					mtmp->mhp += 4;
 					mtmp->mhpmax += 4;
@@ -4606,127 +4606,39 @@ boolean was_swallowed;			/* digestion */
 		else if(mdat->mattk[i].adtyp == AD_GROW || (mdat==&mons[PM_QUINON] 
 		        && mdat->mattk[i].adtyp == AD_STUN)){//horrid quinon kludge
 			struct monst *mtmp;
-			struct permonst *mdat1, **child, **growto;
-			int i = 0;
-			int chain = FALSE;
-			int found = FALSE;
-			int tontype = FALSE;
-			if(mdat==&mons[PM_QUINON]){
-				chain = TRUE;
-				tontype = TRUE;
-				child = (struct permonst **) malloc(sizeof(struct permonst)*5);
-				growto = (struct permonst **) malloc(sizeof(struct permonst)*5);
-				child[0]=&mons[PM_QUATON];
-				growto[0]=&mons[PM_QUINON];
-				child[1]=&mons[PM_TRITON];
-				growto[1]=&mons[PM_QUATON];
-				child[2]=&mons[PM_DUTON];
-				growto[2]=&mons[PM_TRITON];
-				child[3]=&mons[PM_MONOTON];
-				growto[3]=&mons[PM_DUTON];
-				child[4]=0;
-				growto[4]=0;
-			}
-			else if(mdat==&mons[PM_QUATON]){
-				chain = TRUE;
-				tontype = TRUE;
-				child = (struct permonst **) malloc(sizeof(struct permonst)*4);
-				growto = (struct permonst **) malloc(sizeof(struct permonst)*4);
-				child[0]=&mons[PM_TRITON];
-				growto[0]=&mons[PM_QUATON];
-				child[1]=&mons[PM_DUTON];
-				growto[1]=&mons[PM_TRITON];
-				child[2]=&mons[PM_MONOTON];
-				growto[2]=&mons[PM_DUTON];
-				child[3]=0;
-				growto[3]=0;
-			}
-			else if(mdat==&mons[PM_TRITON]){
-				chain = TRUE;
-				tontype = TRUE;
-				child = (struct permonst **) malloc(sizeof(struct permonst)*3);
-				growto = (struct permonst **) malloc(sizeof(struct permonst)*3);
-				child[0]=&mons[PM_DUTON];
-				growto[0]=&mons[PM_TRITON];
-				child[1]=&mons[PM_MONOTON];
-				growto[1]=&mons[PM_DUTON];
-				child[2]=0;
-				growto[2]=0;
-			}
-			else if(mdat==&mons[PM_DUTON]){
-				chain = TRUE;
-				tontype = TRUE;
-				child = (struct permonst **) malloc(sizeof(struct permonst)*2);
-				growto = (struct permonst **) malloc(sizeof(struct permonst)*2);
-				child[0]=&mons[PM_MONOTON];
-				growto[0]=&mons[PM_DUTON];
-				child[1]=0;
-				growto[1]=0;
-			}
-			else if(mdat==&mons[PM_MONOTON]){
-				child = (struct permonst **) malloc(sizeof(struct permonst)*1);
-				growto = (struct permonst **) malloc(sizeof(struct permonst)*1);
-				child[0]=0;
-				growto[0]=0;
+			struct monst * axus = (struct monst *)0;
+			boolean found;
+			int current_ton;
+			/* ASSUMES AUTONS ARE IN ORDER FROM MONOTON TO QUINON */
+			for (current_ton = mon->mtyp; current_ton >= PM_MONOTON; current_ton--) {
+				found = FALSE; //haven't found this child yet - 1 per level
+				/* search for child */
 				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-					if(DEADMONSTER(mtmp))
+					if (DEADMONSTER(mtmp))
 						continue;
-					mdat1 = mtmp->data;
-					if(mdat1==&mons[PM_AXUS]){
-						mtmp = makemon(&mons[PM_MONOTON], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY|MM_NOCOUNTBIRTH);
-						if(mtmp) mtmp->mclone = 1;
-						break; //break special for loop
-					}
-				}
-			}
-			for (i=0; child[i] && growto[i]; i++){
-				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-					found = FALSE; //haven't found the child yet.
-//				    mtmp2 = mtmp->nmon;
-					mdat1 = mtmp->data;
-					if(!DEADMONSTER(mtmp) && mdat1==child[i]){
-						set_mon_data(mtmp, growto[i], 0);
+					if (mtmp->mtyp == current_ton-1) {
+						set_mon_data(mtmp, current_ton, 0);
 						//Assumes Auton
 						mtmp->m_lev += 1;
 						mtmp->mhp += 4;
 						mtmp->mhpmax += 4;
-						
 						newsym(mtmp->mx, mtmp->my);
-						found=TRUE;
-						if(child[i] == &mons[PM_MONOTON]){
-							for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-								if(DEADMONSTER(mtmp))
-									continue;
-								mdat1 = mtmp->data;
-								if(mdat1==&mons[PM_AXUS]){
-									mtmp = makemon(child[i], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY);
-									if(mtmp) mtmp->mclone = 1;
-									break; //break special for loop
-								}
-							}
-						}
-						break;//exit inner for loop
+						found = TRUE;
 					}
+					if (!axus && mtmp->mtyp == PM_AXUS)
+						axus = mtmp;
 				}
-				if(!found && tontype){
-					for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-						if(DEADMONSTER(mtmp))
-							continue;
-						mdat1 = mtmp->data;
-						if(mdat1==&mons[PM_AXUS]){
-							chain = FALSE;
-							mtmp = makemon(growto[i], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY);
-							if(mtmp) mtmp->mclone = 1;
-//							makemon(&mons[PM_MONOTON], mtmp->mx, mtmp->my,MM_ADJACENTOK|MM_ANGRY);
-							break; //break special for loop
-						}
-					}
+				/* if Axus is on the level, generate a 'ton beside him */
+				/* monoton if we found someone to grow */
+				/* the full 'ton if we didn't find one */
+				if (axus && (!found || current_ton == PM_MONOTON)) {
+					mtmp = makemon(&mons[current_ton], mtmp->mx, mtmp->my, MM_ADJACENTOK | MM_ANGRY);
+					if (mtmp) mtmp->mclone = 1;
 				}
-				if(!found && chain) break;//exit outer loop if child[i] not found
-											//AND the growth is chained.
+				/* growth is chained -- if we didn't find a child (and Axus didn't provide one), we don't touch the lower 'tons. */
+				if (!axus && !found)
+					break;
 			}
-			free(growto);
-			free(child);
 		}//end AD_GROW basic
 		else if(mdat->mattk[i].adtyp == AD_SOUL){
 			struct monst *mtmp;
@@ -6522,7 +6434,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		if (!mtmp->mhpmax) mtmp->mhpmax = 1;
 	} //else just take on new form I think....
 	/* take on the new form... */
-	set_mon_data(mtmp, mdat, 0);
+	set_mon_data(mtmp, mtyp, 0);
 
 	if (emits_light(olddata) != emits_light_mon(mtmp)
 		|| olddata == &mons[PM_MASKED_QUEEN]
