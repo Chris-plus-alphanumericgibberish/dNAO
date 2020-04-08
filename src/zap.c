@@ -588,8 +588,8 @@ coord *cc;
 	if (obj->oxlth && (obj->oattached == OATTACHED_MONST))
 		mtmp2 = get_mtraits(obj, TRUE);
 	if (mtmp2) {
-		/* save_mtraits() validated mtmp2->mnum */
-		mtmp2->data = &mons[mtmp2->mnum];
+		/* save_mtraits() validated mtmp2->mtyp */
+		mtmp2->data = &mons[mtmp2->mtyp];
 		if (mtmp2->mhpmax <= 0 && !is_rider(mtmp2->data))
 			return (struct monst *)0;
 		mtmp = makemon(mtmp2->data,
@@ -1599,7 +1599,7 @@ poly_obj(obj, id)
 
 	/* avoid abusing eggs laid by you */
 	if (obj->otyp == EGG && obj->spe) {
-		int mnum, tryct = 100;
+		int mtyp, tryct = 100;
 
 		/* first, turn into a generic egg */
 		if (otmp->otyp == EGG)
@@ -1613,10 +1613,10 @@ poly_obj(obj, id)
 
 		/* now change it into something layed by the hero */
 		while (tryct--) {
-		    mnum = can_be_hatched(random_monster());
-		    if (mnum != NON_PM && !dead_species(mnum, TRUE)) {
+		    mtyp = can_be_hatched(random_monster());
+		    if (mtyp != NON_PM && !dead_species(mtyp, TRUE)) {
 			otmp->spe = 1;	/* layed by hero */
-			otmp->corpsenm = mnum;
+			otmp->corpsenm = mtyp;
 			attach_egg_hatch_timeout(otmp);
 			break;
 		    }

@@ -116,7 +116,7 @@ aligntyp alignment;
 boolean talk;
 {
     const int *minions = god_minions(gptr);
-    int mnum=NON_PM, mlev, num = 0, first, last;
+    int mtyp=NON_PM, mlev, num = 0, first, last;
 	struct monst *mon;
 
 	mlev = level_difficulty();
@@ -125,7 +125,7 @@ boolean talk;
 	    if (!(mvitals[minions[first]].mvflags & G_GONE && !In_quest(&u.uz)) && monstr[minions[first]] > mlev/2) break;
 	if(minions[first] == NON_PM){ //All minions too weak, or no minions
 		if(first == 0) return (struct monst *) 0;
-		else mnum = minions[first-1];
+		else mtyp = minions[first-1];
 	}
 	else for (last = first; minions[last] != NON_PM; last++)
 	    if (!(mvitals[minions[last]].mvflags & G_GONE && !In_quest(&u.uz))) {
@@ -136,7 +136,7 @@ boolean talk;
 
 	if(!num){ //All minions too strong, or gap between weak and strong minions
 		if(first == 0) return (struct monst *) 0;
-		else mnum = minions[first-1];
+		else mtyp = minions[first-1];
 	}
 /*	Assumption:	minions are presented in ascending order of strength. */
 	else{
@@ -150,27 +150,27 @@ boolean talk;
 			}
 	    }
 		first--; /* correct an off-by-one error */
-		mnum = minions[first];
+		mtyp = minions[first];
 	}
 
 
-    if (mnum == NON_PM) {
+    if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
-    } else if (mons[mnum].pxlth == 0) {
-		struct permonst *pm = &mons[mnum];
+    } else if (mons[mtyp].pxlth == 0) {
+		struct permonst *pm = &mons[mtyp];
 		mon = makemon(pm, u.ux, u.uy, MM_EMIN);
 		if (mon) {
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
 		}
-    } else if (mnum == PM_ANGEL) {
-		mon = makemon(&mons[mnum], u.ux, u.uy, NO_MM_FLAGS);
+    } else if (mtyp == PM_ANGEL) {
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
 		if (mon) {
 			mon->isminion = TRUE;
 			EPRI(mon)->shralign = alignment;	/* always A_LAWFUL here */
 		}
     } else
-		mon = makemon(&mons[mnum], u.ux, u.uy, NO_MM_FLAGS);
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
     if (mon) {
 		if (talk) {
 			pline_The("voice of %s booms:", align_gname(alignment));
@@ -217,45 +217,45 @@ boolean devils;
 boolean angels;
 {
     register struct monst *mon;
-    int mnum;
+    int mtyp;
 
     switch ((int)alignment) {
 	case A_LAWFUL:
 	case A_VOID:
-	    mnum = devils ? ndemon(alignment) : lminion();
+	    mtyp = devils ? ndemon(alignment) : lminion();
 	    break;
 	case A_NEUTRAL:
-	    mnum = angels ? nminion() : (PM_AIR_ELEMENTAL + rn2(8));
+	    mtyp = angels ? nminion() : (PM_AIR_ELEMENTAL + rn2(8));
 	    break;
 	case A_CHAOTIC:
-	    mnum = angels ? cminion() : ndemon(alignment);
+	    mtyp = angels ? cminion() : ndemon(alignment);
 	    break;
 	case A_NONE:
-	    mnum = angels ? PM_FALLEN_ANGEL : ndemon(alignment);
+	    mtyp = angels ? PM_FALLEN_ANGEL : ndemon(alignment);
 	    break;
 	default:
 //	    impossible("unaligned player?");
 		pline("Odd alignment in minion summoning: %d",(int)alignment);
-	    mnum = ndemon(A_NONE);
+	    mtyp = ndemon(A_NONE);
 	    break;
     }
-    if (mnum == NON_PM) {
+    if (mtyp == NON_PM) {
 		mon = 0;
-    } else if (mons[mnum].pxlth == 0) {
-		struct permonst *pm = &mons[mnum];
+    } else if (mons[mtyp].pxlth == 0) {
+		struct permonst *pm = &mons[mtyp];
 		mon = makemon(pm, u.ux, u.uy, MM_EMIN);
 		if (mon) {
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
 		}
-    } else if (mnum == PM_ANGEL) {
-		mon = makemon(&mons[mnum], u.ux, u.uy, NO_MM_FLAGS);
+    } else if (mtyp == PM_ANGEL) {
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
 		if (mon) {
 			mon->isminion = TRUE;
 			EPRI(mon)->shralign = alignment;	/* always A_LAWFUL here */
 		}
     } else
-		mon = makemon(&mons[mnum], u.ux, u.uy, NO_MM_FLAGS);
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
     if (mon) {
 	if (talk) {
 	    pline_The("voice of %s booms:", align_gname(alignment));

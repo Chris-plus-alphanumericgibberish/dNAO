@@ -7552,7 +7552,7 @@ register int	mmflags;
 	if (ptr == &mons[urole.ldrnum])
 	    quest_status.leader_m_id = mtmp->m_id;
 	mtmp->mxlth = xlth;
-	mtmp->mnum = mndx;
+	mtmp->mtyp = mndx;
 	mtmp->m_lev = adj_lev(ptr);
 	float sanlev = ((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX));
 	mtmp->m_san_level = max(1, (int)(sanlev*100));

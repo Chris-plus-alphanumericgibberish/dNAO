@@ -2565,7 +2565,7 @@ aligntyp alignment;
     register struct permonst *pm;
  */
     const int *minions = god_minions(gptr);
-    int mnum=NON_PM, mlev, num = 0, first, last;
+    int mtyp=NON_PM, mlev, num = 0, first, last;
 	struct monst *mon = (struct monst *)0;
 	
 	mlev = level_difficulty();
@@ -2574,7 +2574,7 @@ aligntyp alignment;
 	    if (!(mvitals[minions[first]].mvflags & G_GONE && !In_quest(&u.uz)) && monstr[minions[first]] > mlev-5) break;
 	if(minions[first] == NON_PM){ //All minions too weak, or no minions
 		if(first == 0) return;
-		else mnum = minions[first-1];
+		else mtyp = minions[first-1];
 	}
 	else for (last = first; minions[last] != NON_PM; last++)
 	    if (!(mvitals[minions[last]].mvflags & G_GONE && !In_quest(&u.uz))) {
@@ -2585,7 +2585,7 @@ aligntyp alignment;
 
 	if(!num){ //All minions too strong, or gap between weak and strong minions
 		if(first == 0) return;
-		else mnum = minions[first-1];
+		else mtyp = minions[first-1];
 	}
 /*	Assumption:	minions are presented in ascending order of strength. */
 	else{
@@ -2599,14 +2599,14 @@ aligntyp alignment;
 			}
 	    }
 		first--; /* correct an off-by-one error */
-		mnum = minions[first];
+		mtyp = minions[first];
 	}
 
 
-    if (mnum == NON_PM) {
+    if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
     }
-	else mon = make_pet_minion(mnum,alignment);
+	else mon = make_pet_minion(mtyp,alignment);
 	
     if (mon) {
 	switch ((int)alignment) {
@@ -2636,11 +2636,11 @@ lawful_god_gives_angel()
     register struct monst *mtmp2;
     register struct permonst *pm;
 */
-    int mnum;
+    int mtyp;
     int mon;
 
-    // mnum = lawful_minion(u.ulevel);
-    // mon = make_pet_minion(mnum,A_LAWFUL);
+    // mtyp = lawful_minion(u.ulevel);
+    // mon = make_pet_minion(mtyp,A_LAWFUL);
     // pline("%s", Blind ? "You feel the presence of goodness." :
 	 // "There is a puff of white fog!");
     // if (u.uhp > (u.uhpmax / 10)) godvoice(Align2gangr(u.ualign.type), "My minion shall serve thee!");

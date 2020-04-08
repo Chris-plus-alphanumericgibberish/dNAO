@@ -364,14 +364,14 @@ struct obj *food;
 boolean the_pfx;
 {
 	const char *result;
-	int mnum = food->corpsenm;
+	int mtyp = food->corpsenm;
 
-	if (food->otyp == CORPSE && (mons[mnum].geno & G_UNIQ)) {
+	if (food->otyp == CORPSE && (mons[mtyp].geno & G_UNIQ)) {
 	    /* grab xname()'s modifiable return buffer for our own use */
 	    char *bufp = xname(food);
 	    Sprintf(bufp, "%s%s corpse",
-		    (the_pfx && !type_is_pname(&mons[mnum])) ? "the " : "",
-		    s_suffix(mons[mnum].mname));
+			(the_pfx && !type_is_pname(&mons[mtyp])) ? "the " : "",
+			s_suffix(mons[mtyp].mname));
 	    result = bufp;
 	} else {
 	    /* the ordinary case */
@@ -1955,25 +1955,25 @@ STATIC_OVL int
 eatcorpse(otmp)		/* called when a corpse is selected as food */
 	register struct obj *otmp;
 {
-	int tp = 0, mnum = otmp->corpsenm;
+	int tp = 0, mtyp = otmp->corpsenm;
 	long rotted = 0L;
-	boolean uniq = !!(mons[mnum].geno & G_UNIQ);
+	boolean uniq = !!(mons[mtyp].geno & G_UNIQ);
 	int retcode = 0;
-	boolean stoneable = (touch_petrifies(&mons[mnum]) && !Stone_resistance &&
+	boolean stoneable = (touch_petrifies(&mons[mtyp]) && !Stone_resistance &&
 				!poly_when_stoned(youracedata));
 
 	/* KMH, conduct */
-	if (!vegan(&mons[mnum])) u.uconduct.unvegan++;
-	if (!vegetarian(&mons[mnum])){
+	if (!vegan(&mons[mtyp])) u.uconduct.unvegan++;
+	if (!vegetarian(&mons[mtyp])){
 		violated_vegetarian();
 	} else {
 		if(roll_madness(MAD_CANNIBALISM)){
-			make_vomiting((3 + (mons[mnum].cwt >> 6))+rn1(15,10), TRUE);
+			make_vomiting((3 + (mons[mtyp].cwt >> 6))+rn1(15,10), TRUE);
 		}
 	}
 
-	if (mnum != PM_LIZARD && mnum != PM_SMALL_CAVE_LIZARD && mnum != PM_CAVE_LIZARD 
-		&& mnum != PM_LARGE_CAVE_LIZARD && mnum != PM_LICHEN && mnum != PM_BEHOLDER
+	if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
 	) {
 		long age = peek_at_iced_corpse_age(otmp);
 
@@ -2003,8 +2003,8 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 		    Sprintf(buf, "%s", the(corpse_xname(otmp,TRUE)));
 		else
 		    Sprintf(buf, "%s%s corpse",
-			    !type_is_pname(&mons[mnum]) ? "the " : "",
-			    s_suffix(mons[mnum].mname));
+			    !type_is_pname(&mons[mtyp]) ? "the " : "",
+			    s_suffix(mons[mtyp].mname));
 
 	    	pline("You drain the blood from %s.", buf);
 		otmp->odrained = 1;
@@ -2017,22 +2017,22 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	    otmp->odrained = 0;
 
 	/* Very rotten corpse will make you sick unless you are a ghoul or a ghast or bound to Chupoclops */
-	if (mnum != PM_ACID_BLOB && !stoneable && rotted > 5L) {
-		boolean cannibal = maybe_cannibal(mnum, FALSE);
+	if (mtyp != PM_ACID_BLOB && !stoneable && rotted > 5L) {
+		boolean cannibal = maybe_cannibal(mtyp, FALSE);
 	    if (u.umonnum == PM_GHOUL) {
 	    	pline("Yum - that %s was well aged%s!",
-		      mons[mnum].mlet == S_PLANT ? "vegetation" :
-		      mons[mnum].mlet == S_FUNGUS ? "fungoid vegetation" :
-		      !vegetarian(&mons[mnum]) ? "meat" : "protoplasm",
+		      mons[mtyp].mlet == S_PLANT ? "vegetation" :
+		      mons[mtyp].mlet == S_FUNGUS ? "fungoid vegetation" :
+		      !vegetarian(&mons[mtyp]) ? "meat" : "protoplasm",
 		      cannibal ? ", cannibal" : "");
 	    } else if(u.sealsActive&SEAL_CHUPOCLOPS){
-		boolean cannibal = maybe_cannibal(mnum, FALSE);
+		boolean cannibal = maybe_cannibal(mtyp, FALSE);
 			pline("The corpse liquefies into a putrid broth, and you slurp it down%s!",
 			cannibal ? ", cannibal" : "");
 		} else {
 		pline("Ulch - that %s was tainted%s!",
-		      mons[mnum].mlet == S_FUNGUS ? "fungoid vegetation" :
-		      !vegetarian(&mons[mnum]) ? "meat" : "protoplasm",
+		      mons[mtyp].mlet == S_FUNGUS ? "fungoid vegetation" :
+		      !vegetarian(&mons[mtyp]) ? "meat" : "protoplasm",
 		      cannibal ? ", cannibal" : "");
 		if (Sick_resistance) {
 			pline("It doesn't seem at all sickening, though...");
@@ -2048,8 +2048,8 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 			    Sprintf(buf, "rotted %s", corpse_xname(otmp,TRUE));
 			else
 			    Sprintf(buf, "%s%s rotted corpse",
-				    !type_is_pname(&mons[mnum]) ? "the " : "",
-				    s_suffix(mons[mnum].mname));
+				    !type_is_pname(&mons[mtyp]) ? "the " : "",
+				    s_suffix(mons[mtyp].mname));
 			make_sick(sick_time, buf, TRUE, SICK_VOMITABLE);
 		}
 		if (carried(otmp)) useup(otmp);
@@ -2059,20 +2059,20 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	} else if (youracedata == &mons[PM_GHOUL]) {
 		pline ("This corpse is too fresh!");
 		return 3;
-	} else if (acidic(&mons[mnum]) && !Acid_resistance) {
+	} else if (acidic(&mons[mtyp]) && !Acid_resistance) {
 		tp++;
 		You("have a very bad case of stomach acid."); /* not body_part() */
 		losehp(rnd(15), "acidic corpse", KILLED_BY_AN);
-	} if (freezing(&mons[mnum]) && !Cold_resistance) {
+	} if (freezing(&mons[mtyp]) && !Cold_resistance) {
 		tp++;
 		You("feel your stomach freeze!"); /* not body_part() */
 		roll_frigophobia();
 		losehp(rnd(12) + rnd(12), "cryonic corpse", KILLED_BY_AN);
-	} if (burning(&mons[mnum]) && !Fire_resistance) {
+	} if (burning(&mons[mtyp]) && !Fire_resistance) {
 		tp++;
 		You("feel your stomach boil!"); /* not body_part() */
 		losehp(rnd(20), "boiling hot corpse", KILLED_BY_AN);
-	} if (poisonous(&mons[mnum]) && rn2(5)) {
+	} if (poisonous(&mons[mtyp]) && rn2(5)) {
 		tp++;
 		pline("Ecch - that must have been poisonous!");
 		if(!Poison_resistance) {
@@ -2080,8 +2080,8 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 			losehp(rnd(15), "poisonous corpse", KILLED_BY_AN);
 		} else	You("seem unaffected by the poison.");
 	/* now any corpse left too long will make you mildly ill */
-	} if ( !(poisonous(&mons[mnum]) || burning(&mons[mnum]) ||
-			 freezing(&mons[mnum])  || acidic(&mons[mnum])) &&
+	} if ( !(poisonous(&mons[mtyp]) || burning(&mons[mtyp]) ||
+			 freezing(&mons[mtyp])  || acidic(&mons[mtyp])) &&
 			(rotted > 5L || (rotted > 3L && rn2(5)))
 					&& !(Sick_resistance || u.sealsActive&SEAL_CHUPOCLOPS)) {
 		tp++;
@@ -2090,11 +2090,11 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	}
 
 	/* delay is weight dependent */
-	victual.reqtime = (u.sealsActive&SEAL_AHAZU) ? 1 : (3 + (mons[mnum].cwt >> 6));
+	victual.reqtime = (u.sealsActive&SEAL_AHAZU) ? 1 : (3 + (mons[mtyp].cwt >> 6));
 	if (otmp->odrained) victual.reqtime = (u.sealsActive&SEAL_AHAZU) ? 1 : rounddiv(victual.reqtime, 5);
 
-	if (!tp && mnum != PM_LIZARD && mnum != PM_SMALL_CAVE_LIZARD && mnum != PM_CAVE_LIZARD 
-		&& mnum != PM_LARGE_CAVE_LIZARD && mnum != PM_LICHEN && mnum != PM_BEHOLDER &&
+	if (!tp && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER &&
 			(otmp->orotten || !rn2(7))) {
 	    if ( (monstermoves - peek_at_iced_corpse_age(otmp)) > 5 && rottenfood(otmp)) {
 		otmp->orotten = TRUE;
@@ -2114,21 +2114,21 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 				otmp->oeaten = drainlevel(otmp);
 		}
 	} else if (!is_vampire(youracedata)) {
-		if(is_rat(&mons[mnum]) && Race_if(PM_DWARF)){
+		if(is_rat(&mons[mtyp]) && Race_if(PM_DWARF)){
 			if(u.uconduct.ratseaten<SIZE(eatrat)) pline("%s", eatrat[u.uconduct.ratseaten++]);
 			else{
 				u.uconduct.ratseaten++;
 				pline("%s", eatrat[SIZE(eatrat)-1]);
 			}
-		} else if(mnum == PM_LONG_WORM){
+		} else if(mtyp == PM_LONG_WORM){
 			pline("This tastes spicy!");
-		} else if(mnum == PM_CROW){
+		} else if(mtyp == PM_CROW){
 			You("eat crow!");
 		} else {
 		    pline("%s%s %s!",
-			  !uniq ? "This " : !type_is_pname(&mons[mnum]) ? "The " : "",
+			  !uniq ? "This " : !type_is_pname(&mons[mtyp]) ? "The " : "",
 			  food_xname(otmp, FALSE),
-			  (vegan(&mons[mnum]) ?
+			  (vegan(&mons[mtyp]) ?
 			   (!(carnivorous(youracedata) || (uarmg && uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)) && herbivorous(youracedata)) :
 			   ((carnivorous(youracedata) || (uarmg && uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)) && !herbivorous(youracedata)))
 			  ? "is delicious" : "tastes terrible");
@@ -2703,7 +2703,7 @@ struct obj *otmp;
 	boolean cadaver = (otmp->otyp == CORPSE),
 		stoneorslime = FALSE;
 	int material = otmp->obj_material,
-	    mnum = otmp->corpsenm;
+	    mtyp = otmp->corpsenm;
 	long rotted = 0L;
 
 	Strcpy(foodsmell, Tobjnam(otmp, "smell"));
@@ -2713,16 +2713,16 @@ struct obj *otmp;
 
 	if (cadaver || otmp->otyp == EGG || otmp->otyp == TIN) {
 		/* These checks must match those in eatcorpse() */
-		stoneorslime = (touch_petrifies(&mons[mnum]) &&
+		stoneorslime = (touch_petrifies(&mons[mtyp]) &&
 				!Stone_resistance &&
 				!poly_when_stoned(youracedata));
 
-		if (mnum == PM_GREEN_SLIME || mnum == PM_FLUX_SLIME)
+		if (mtyp == PM_GREEN_SLIME || mtyp == PM_FLUX_SLIME)
 		    stoneorslime = (!Unchanging && !flaming(youracedata) &&
 			youracedata != &mons[PM_GREEN_SLIME]);
 
-		if (cadaver && mnum != PM_LIZARD && mnum != PM_SMALL_CAVE_LIZARD && mnum != PM_CAVE_LIZARD 
-		&& mnum != PM_LARGE_CAVE_LIZARD && mnum != PM_LICHEN && mnum != PM_BEHOLDER ) {
+		if (cadaver && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER ) {
 			long age = peek_at_iced_corpse_age(otmp);
 			/* worst case rather than random
 			   in this calculation to force prompt */
@@ -2737,7 +2737,7 @@ struct obj *otmp;
 	 * order from most detrimental to least detrimental.
 	 */
 
-	if (cadaver && mnum != PM_ACID_BLOB && rotted > 5L && !(Sick_resistance || u.sealsActive&SEAL_CHUPOCLOPS)) {
+	if (cadaver && mtyp != PM_ACID_BLOB && rotted > 5L && !(Sick_resistance || u.sealsActive&SEAL_CHUPOCLOPS)) {
 		/* Tainted meat */
 		Sprintf(buf, "%s like %s could be tainted! %s",
 			foodsmell, it_or_they, eat_it_anyway);
@@ -2764,21 +2764,21 @@ struct obj *otmp;
 		if (yn_function(buf,ynchars,'n')=='n') return 1;
 		else return 2;
 	}
-	if (cadaver && poisonous(&mons[mnum]) && !Poison_resistance) {
+	if (cadaver && poisonous(&mons[mtyp]) && !Poison_resistance) {
 		/* poisonous */
 		Sprintf(buf, "%s like %s might be poisonous! %s",
 			foodsmell, it_or_they, eat_it_anyway);
 		if (yn_function(buf,ynchars,'n')=='n') return 1;
 		else return 2;
 	}
-	if (cadaver && !vegetarian(&mons[mnum]) &&
+	if (cadaver && !vegetarian(&mons[mtyp]) &&
 	    !u.uconduct.unvegetarian && Role_if(PM_MONK)) {
 		Sprintf(buf, "%s unhealthy. %s",
 			foodsmell, eat_it_anyway);
 		if (yn_function(buf,ynchars,'n')=='n') return 1;
 		else return 2;
 	}
-	if (cadaver && acidic(&mons[mnum]) && !Acid_resistance) {
+	if (cadaver && acidic(&mons[mtyp]) && !Acid_resistance) {
 		Sprintf(buf, "%s rather acidic. %s",
 			foodsmell, eat_it_anyway);
 		if (yn_function(buf,ynchars,'n')=='n') return 1;
@@ -2800,7 +2800,7 @@ struct obj *otmp;
 	    ((material == LEATHER || material == BONE ||
 	      material == EYEBALL || material == SEVERED_HAND ||
 	      material == DRAGON_HIDE || material == WAX) ||
-	     (cadaver && !vegan(&mons[mnum])))) {
+	     (cadaver && !vegan(&mons[mtyp])))) {
 		Sprintf(buf, "%s foul and unfamiliar to you. %s",
 			foodsmell, eat_it_anyway);
 		if (yn_function(buf,ynchars,'n')=='n') return 1;
@@ -2810,14 +2810,14 @@ struct obj *otmp;
 	    ((material == LEATHER || material == BONE ||
 	      material == EYEBALL || material == SEVERED_HAND ||
 	      material == DRAGON_HIDE) ||
-	     (cadaver && !vegetarian(&mons[mnum])))) {
+	     (cadaver && !vegetarian(&mons[mtyp])))) {
 		Sprintf(buf, "%s unfamiliar to you. %s",
 			foodsmell, eat_it_anyway);
 		if (yn_function(buf,ynchars,'n')=='n') return 1;
 		else return 2;
 	}
 
-	if (cadaver && mnum != PM_ACID_BLOB && rotted > 5L && (Sick_resistance || u.sealsActive&SEAL_CHUPOCLOPS)) {
+	if (cadaver && mtyp != PM_ACID_BLOB && rotted > 5L && (Sick_resistance || u.sealsActive&SEAL_CHUPOCLOPS)) {
 		/* Tainted meat with Sick_resistance */
 		Sprintf(buf, "%s like %s could be tainted! %s",
 			foodsmell, it_or_they, eat_it_anyway);

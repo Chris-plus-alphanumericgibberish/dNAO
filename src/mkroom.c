@@ -532,7 +532,7 @@ void
 mklolthgnoll()
 {
 	int x,y,tries=0;
-	int i,j, rmnumb = nroom+ROOMOFFSET, trycount, madedoor;
+	int i,j, rmtypb = nroom+ROOMOFFSET, trycount, madedoor;
 	struct obj *otmp;
 	struct monst *mon;
 	boolean good=FALSE,okspot;
@@ -546,7 +546,7 @@ mklolthgnoll()
 			good = TRUE;
 			for(i=0;i<10;i++) for(j=0;j<10;j++){
 				levl[x+i][y+j].typ = CORR;
-				levl[x+i][y+j].roomno = rmnumb;
+				levl[x+i][y+j].roomno = rmtypb;
 			}
 			for(i=0;i<10;i++){
 				levl[x][y+i].edge = 1;
@@ -675,7 +675,7 @@ void
 mklolthgarden()
 {
 	int x,y,tries=0, width= rn1(4,5), height=rn1(4,5);
-	int i,j, rmnumb = nroom+ROOMOFFSET, trycount, madedoor;
+	int i,j, rmtypb = nroom+ROOMOFFSET, trycount, madedoor;
 	struct obj *otmp;
 	struct monst *mon;
 	boolean good=FALSE,okspot;
@@ -805,7 +805,7 @@ void
 mklolthtroll()
 {
 	int x,y,tries=0, width= 6, height=6;
-	int i,j, rmnumb = nroom+ROOMOFFSET, trycount, madedoor;
+	int i,j, rmtypb = nroom+ROOMOFFSET, trycount, madedoor;
 	struct obj *otmp;
 	struct monst *mon;
 	boolean good=FALSE,okspot;
@@ -924,7 +924,7 @@ void
 mklolthtreasure()
 {
 	int x,y,tries=0, width= 5, height=5;
-	int i,j, rmnumb = nroom+ROOMOFFSET, trycount, madedoor;
+	int i,j, rmtypb = nroom+ROOMOFFSET, trycount, madedoor;
 	struct obj *otmp, *container;
 	struct monst *mon;
 	boolean good=FALSE,okspot;
@@ -1971,7 +1971,7 @@ void
 mkfishinghut(left)
 	int left;
 {
-	int x,y,tries=0, roomnumb;
+	int x,y,tries=0, roomtypb;
 	int i,j, pathto = 0;
 	boolean good=FALSE, okspot, accessible;
 	struct obj *otmp;
@@ -2081,7 +2081,7 @@ void
 mkwell(left)
 	int left;
 {
-	int x,y,tries=0, roomnumb;
+	int x,y,tries=0, roomtypb;
 	int i,j, pathto = 0;
 	boolean good=FALSE, okspot, accessible;
 	struct obj *otmp;
@@ -2147,7 +2147,7 @@ STATIC_OVL
 void
 mkpluhomestead()
 {
-	int x,y,tries=0, roomnumb;
+	int x,y,tries=0, roomtypb;
 	int i,j, pathto = 0;
 	boolean good=FALSE, okspot, accessible;
 	while(!good && tries < 500){
@@ -2207,7 +2207,7 @@ void
 mkelfhut(left)
 int left;
 {
-	int x,y,tries=0, roomnumb;
+	int x,y,tries=0, roomtypb;
 	int i,j, pathto = 0;
 	boolean good=FALSE, okspot, accessible;
 	while(!good && tries < 500){
@@ -2286,7 +2286,7 @@ void
 mkwraithclearing(right)
 int right;
 {
-	int x,y,tries=0, roomnumb;
+	int x,y,tries=0, roomtypb;
 	int i,j;
 	boolean good=FALSE, okspot, accessible;
 	while(!good && tries < 500){
@@ -2351,7 +2351,7 @@ STATIC_OVL
 void
 mkstonepillars()
 {
-	int x,y,tries=0, roomnumb;
+	int x,y,tries=0, roomtypb;
 	int i,j;
 	boolean good=FALSE, okspot;
 	while(!good && tries < 500){
@@ -2434,7 +2434,7 @@ void
 mkcamp(type)
 	int type;
 {
-	int x,y,tries=0, roomnumb;
+	int x,y,tries=0, roomtypb;
 	int r = 4;
 	int i,j, pathto = 0;
 	boolean good=FALSE, okspot, accessible;
@@ -2528,7 +2528,7 @@ STATIC_OVL
 void
 mkpluvillage()
 {
-	int x,y,tries=0, roomnumb;
+	int x,y,tries=0, roomtypb;
 	int i,j, n,ni;
 	int nshacks, sizebig1, sizebig2, sizetot;
 	struct obj *otmp;
@@ -2573,7 +2573,7 @@ mkpluvillage()
 				}
 			
 			//Make left-hand big building
-			roomnumb = nroom;
+			roomtypb = nroom;
 			
 			levl[x+sizebig1-1][y+4+3].typ = BRCORNER;
 			levl[x+sizebig1-1][y+4+3].lit = 1;
@@ -2689,8 +2689,8 @@ mkpluvillage()
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
 				break;
 			}
-			add_door(x+sizebig1-1,y+5,&rooms[roomnumb]);
-			fill_room(&rooms[roomnumb], FALSE);
+			add_door(x+sizebig1-1,y+5,&rooms[roomtypb]);
+			fill_room(&rooms[roomtypb], FALSE);
 			
 			//Make north and south shacks
 			for(n = 0; n<nshacks; n++){
@@ -2755,7 +2755,7 @@ mkpluvillage()
 			}
 			
 			//Make right big building
-			roomnumb = nroom;
+			roomtypb = nroom;
 			
 			levl[x+sizetot][y+4+3].typ = BRCORNER;
 			levl[x+sizetot][y+4+3].lit = 1;
@@ -2874,8 +2874,8 @@ mkpluvillage()
 					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, OROOM, TRUE);
 				break;
 			}
-			add_door(x+sizetot-sizebig2,y+5,&rooms[roomnumb]);
-			fill_room(&rooms[roomnumb], FALSE);
+			add_door(x+sizetot-sizebig2,y+5,&rooms[roomtypb]);
+			fill_room(&rooms[roomtypb], FALSE);
 		}
 	}
 }
@@ -3282,7 +3282,7 @@ STATIC_OVL
 void
 mkferrutower()
 {
-	int x,y,tries=0, roomnumb = nroom;
+	int x,y,tries=0, roomtypb = nroom;
 	int i,j;
 	boolean good=FALSE, okspot, accessible;
 	int size = 8;
@@ -3349,8 +3349,8 @@ mkferrutower()
 		flood_fill_rm(x+size/2, y+size/2,
 			  nroom+ROOMOFFSET, TRUE, TRUE);
 		add_room(x+2, y+2, x+size-3, y+size-3, TRUE, BARRACKS, TRUE);
-		add_door(x+i,y+j,&rooms[roomnumb]);
-		fill_room(&rooms[roomnumb], FALSE);
+		add_door(x+i,y+j,&rooms[roomtypb]);
+		fill_room(&rooms[roomtypb], FALSE);
 	}
 }
 
@@ -3358,7 +3358,7 @@ STATIC_OVL
 void
 mkinvertzigg()
 {
-	int x,y,tries=0, roomnumb = nroom;
+	int x,y,tries=0, roomtypb = nroom;
 	int i,j;
 	boolean good=FALSE, okspot, accessible;
 	int size = 15;

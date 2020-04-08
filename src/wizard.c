@@ -545,7 +545,7 @@ nasty(mcast)
 			do {
 				makeindex = pick_nasty();
 			} while(mcast && attacktype(&mons[makeindex], AT_MAGC) &&
-				monstr[makeindex] >= monstr[mcast->mnum]);
+				monstr[makeindex] >= monstr[mcast->mtyp]);
 			/* do this after picking the monster to place */
 			if (mcast &&
 				!enexto(&bypos, mcast->mux, mcast->muy, &mons[makeindex]))

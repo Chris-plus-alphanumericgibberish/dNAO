@@ -46,7 +46,7 @@ struct monst {
 	struct monst *nmon;
 	struct permonst *data;
 	unsigned m_id;
-	int mnum;		/* permanent monster index number */
+	int mtyp;			/* index number of base permonst array */
 	short movement;		/* movement points (derived from permonst definition and added effects */
 	uchar m_lev;		/* adjusted difficulty level of monster */
 	aligntyp malign;	/* alignment of this monster, relative to the

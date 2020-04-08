@@ -368,12 +368,12 @@
 
 /* Not affected by hallucination.  Gives a generic body for CORPSE */
 #define objnum_to_glyph(onum)	((int) ((onum) << 4) + objects[onum].oc_color + GLYPH_OBJ_OFF)
-#define monnum_to_glyph(mnum)	((int) (mnum) + GLYPH_MON_OFF)
-#define detected_monnum_to_glyph(mnum)	((int) (mnum) + GLYPH_DETECT_OFF)
-#define ridden_monnum_to_glyph(mnum)	((int) (mnum) + GLYPH_RIDDEN_OFF)
-#define petnum_to_glyph(mnum)	((int) (mnum) + GLYPH_PET_OFF)
-#define peacenum_to_glyph(mnum)	((int) (mnum) + GLYPH_PEACE_OFF)
-#define zombienum_to_glyph(mnum)	((int) (mnum) + GLYPH_ZOMBIE_OFF)
+#define monnum_to_glyph(mtyp)	((int) (mtyp) + GLYPH_MON_OFF)
+#define detected_monnum_to_glyph(mtyp)	((int) (mtyp) + GLYPH_DETECT_OFF)
+#define ridden_monnum_to_glyph(mtyp)	((int) (mtyp) + GLYPH_RIDDEN_OFF)
+#define petnum_to_glyph(mtyp)	((int) (mtyp) + GLYPH_PET_OFF)
+#define peacenum_to_glyph(mtyp)	((int) (mtyp) + GLYPH_PEACE_OFF)
+#define zombienum_to_glyph(mtyp)	((int) (mtyp) + GLYPH_ZOMBIE_OFF)
 
 /* The hero's glyph when seen as a monster.
  */

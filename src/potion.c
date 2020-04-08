@@ -1409,26 +1409,26 @@ boolean your_fault;
 		}
 	break;
 	case POT_BLOOD:{
-		int mnum = obj->corpsenm;
-		if(acidic(&mons[mnum]) && !Acid_resistance){
+		int mtyp = obj->corpsenm;
+		if(acidic(&mons[mtyp]) && !Acid_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
 		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
 				    "potion of acidic blood", KILLED_BY_AN);
 		}
-		if(freezing(&mons[mnum]) && !Cold_resistance){
+		if(freezing(&mons[mtyp]) && !Cold_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
 		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
 				    "potion of cryonic blood", KILLED_BY_AN);
 		}
-		if(burning(&mons[mnum]) && !Fire_resistance){
+		if(burning(&mons[mtyp]) && !Fire_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
 		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
 				    "potion of scalding blood", KILLED_BY_AN);
 		}
-		if(poisonous(&mons[mnum]) && !Poison_resistance){
+		if(poisonous(&mons[mtyp]) && !Poison_resistance){
 			if (Upolyd) {
 			    if (u.mh <= 5) u.mh = 1; else u.mh -= 5;
 			} else {
@@ -1438,12 +1438,12 @@ boolean your_fault;
 			losestr(1);
 			exercise(A_CON, FALSE);
 		}
-		if (touch_petrifies(&mons[mnum])) {
+		if (touch_petrifies(&mons[mtyp])) {
 		    if (!Stone_resistance &&
 			!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
 			if (!Stoned) Stoned = 5;
 			killer_format = KILLED_BY;
-			Sprintf(killer_buf, "%s blood", mons[mnum].mname);
+			Sprintf(killer_buf, "%s blood", mons[mtyp].mname);
 			delayed_killer = killer_buf;
 		    }
 		}
@@ -1705,8 +1705,8 @@ boolean your_fault;
 		}
 		break;
 	case POT_BLOOD:{
-		int mnum = obj->corpsenm;
-		if(acidic(&mons[mnum]) && !resists_acid(mon)){
+		int mtyp = obj->corpsenm;
+		if(acidic(&mons[mtyp]) && !resists_acid(mon)){
 		    pline("%s %s in pain!", Monnam(mon),
 			  is_silent_mon(mon) ? "writhes" : "shrieks");
 		    mon->mhp -= d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
@@ -1717,7 +1717,7 @@ boolean your_fault;
 			    monkilled(mon, "", AD_ACID);
 			}
 		}
-		if(freezing(&mons[mnum]) && !resists_cold(mon)){
+		if(freezing(&mons[mtyp]) && !resists_cold(mon)){
 		    pline("%s %s in pain!", Monnam(mon),
 			  is_silent_mon(mon) ? "writhes" : "shrieks");
 		    mon->mhp -= d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
@@ -1728,7 +1728,7 @@ boolean your_fault;
 			    monkilled(mon, "", AD_COLD);
 			}
 		}
-		if(burning(&mons[mnum]) && !resists_fire(mon)){
+		if(burning(&mons[mtyp]) && !resists_fire(mon)){
 		    pline("%s %s in pain!", Monnam(mon),
 			  is_silent_mon(mon) ? "writhes" : "shrieks");
 		    mon->mhp -= d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
@@ -1739,7 +1739,7 @@ boolean your_fault;
 			    monkilled(mon, "", AD_FIRE);
 			}
 		}
-		if(poisonous(&mons[mnum]) && !resists_poison(mon)){
+		if(poisonous(&mons[mtyp]) && !resists_poison(mon)){
 			if((mon->mhpmax > 3) && !resist(mon, POTION_CLASS, 0, NOTELL))
 				mon->mhpmax /= 2;
 			if((mon->mhp > 2) && !resist(mon, POTION_CLASS, 0, NOTELL))
@@ -1748,7 +1748,7 @@ boolean your_fault;
 			if (canseemon(mon))
 				pline("%s looks rather ill.", Monnam(mon));
 		}
-		if (touch_petrifies(&mons[mnum]) && !resists_ston(mon)) {
+		if (touch_petrifies(&mons[mtyp]) && !resists_ston(mon)) {
 			minstapetrify(mon, TRUE);
 		}
 	}break;

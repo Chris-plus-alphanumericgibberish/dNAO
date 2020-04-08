@@ -1327,13 +1327,13 @@ int enhanced;
 }
 
 struct monst *
-make_pet_minion(mnum,alignment)
-int mnum;
+make_pet_minion(mtyp,alignment)
+int mtyp;
 aligntyp alignment;
 {
     register struct monst *mon;
     register struct monst *mtmp2;
-    mon = makemon(&mons[mnum], u.ux, u.uy, NO_MM_FLAGS);
+	mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
     if (!mon) return 0;
     /* now tame that puppy... */
     mtmp2 = newmonst(sizeof(struct edog) + mon->mnamelth);
@@ -1347,10 +1347,11 @@ aligntyp alignment;
     set_malign(mtmp2);
     mtmp2->mtame = 10;
     /* this section names the creature "of ______" */
-    if (mons[mnum].pxlth == 0) {
+	if (mons[mtyp].pxlth == 0) {
 		mtmp2->isminion = TRUE;
 		EMIN(mtmp2)->min_align = alignment;
-    } else if (mnum == PM_ANGEL) {
+	}
+	else if (mtyp == PM_ANGEL) {
 		 mtmp2->isminion = TRUE;
 		 EPRI(mtmp2)->shralign = alignment;
     }

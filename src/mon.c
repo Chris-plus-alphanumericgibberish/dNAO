@@ -6630,41 +6630,41 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
  * NON_PM if the given monster can't be hatched.
  */
 int
-can_be_hatched(mnum)
-int mnum;
+can_be_hatched(mtyp)
+int mtyp;
 {
     /* ranger quest nemesis has the oviparous bit set, making it
        be possible to wish for eggs of that unique monster; turn
        such into ordinary eggs rather than forbidding them outright */
-    if (mnum == PM_SCORPIUS) mnum = PM_SCORPION;
-	else if(mnum == PM_ANCIENT_NAGA) mnum = rn2(PM_GUARDIAN_NAGA_HATCHLING - PM_RED_NAGA_HATCHLING + 1) + PM_RED_NAGA_HATCHLING;
-	else if(mnum == PM_SERPENT_MAN_OF_YOTH) mnum = rn2(PM_COBRA - PM_GARTER_SNAKE + 1) + PM_GARTER_SNAKE;
-	else if(mnum == PM_HUNTING_HORROR) mnum = PM_BABY_LONG_WORM;
-	else if(mnum == PM_SMAUG) mnum = PM_BABY_RED_DRAGON;
+    if (mtyp == PM_SCORPIUS) mtyp = PM_SCORPION;
+	else if(mtyp == PM_ANCIENT_NAGA) mtyp = rn2(PM_GUARDIAN_NAGA_HATCHLING - PM_RED_NAGA_HATCHLING + 1) + PM_RED_NAGA_HATCHLING;
+	else if(mtyp == PM_SERPENT_MAN_OF_YOTH) mtyp = rn2(PM_COBRA - PM_GARTER_SNAKE + 1) + PM_GARTER_SNAKE;
+	else if(mtyp == PM_HUNTING_HORROR) mtyp = PM_BABY_LONG_WORM;
+	else if(mtyp == PM_SMAUG) mtyp = PM_BABY_RED_DRAGON;
 	
-    mnum = little_to_big(mnum, (boolean)rn2(2));
+    mtyp = little_to_big(mtyp, (boolean)rn2(2));
     /*
      * Queen bees lay killer bee eggs (usually), but killer bees don't
      * grow into queen bees.  Ditto for [winged-]gargoyles.
      */
-    if (mnum == PM_KILLER_BEE || mnum == PM_GARGOYLE ||
-	    (lays_eggs(&mons[mnum]) && (BREEDER_EGG ||
-		(mnum != PM_QUEEN_BEE && mnum != PM_WINGED_GARGOYLE))))
-	return mnum;
+    if (mtyp == PM_KILLER_BEE || mtyp == PM_GARGOYLE ||
+	    (lays_eggs(&mons[mtyp]) && (BREEDER_EGG ||
+		(mtyp != PM_QUEEN_BEE && mtyp != PM_WINGED_GARGOYLE))))
+	return mtyp;
     return NON_PM;
 }
 
 /* type of egg laid by #sit; usually matches parent */
 int
-egg_type_from_parent(mnum, force_ordinary)
-int mnum;	/* parent monster; caller must handle lays_eggs() check */
+egg_type_from_parent(mtyp, force_ordinary)
+int mtyp;	/* parent monster; caller must handle lays_eggs() check */
 boolean force_ordinary;
 {
     if (force_ordinary || !BREEDER_EGG) {
-	if (mnum == PM_QUEEN_BEE) mnum = PM_KILLER_BEE;
-	else if (mnum == PM_WINGED_GARGOYLE) mnum = PM_GARGOYLE;
+	if (mtyp == PM_QUEEN_BEE) mtyp = PM_KILLER_BEE;
+	else if (mtyp == PM_WINGED_GARGOYLE) mtyp = PM_GARGOYLE;
     }
-    return mnum;
+    return mtyp;
 }
 
 /* decide whether an egg of the indicated monster type is viable; */
