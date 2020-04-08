@@ -61,8 +61,6 @@ STATIC_PTR int FDECL(pick_rune, (BOOLEAN_P));
 STATIC_DCL void FDECL(describe_rune, (int));
 STATIC_PTR char NDECL(pick_carvee);
 
-STATIC_DCL boolean artiexist[];
-
 #ifdef	AMIGA
 void FDECL( amii_speaker, ( struct obj *, char *, int ) );
 #endif
@@ -1469,8 +1467,7 @@ struct obj *obj;
 		fix_object(dagger);
 		
 		if (obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER){
-			dagger->oartifact = 0;
-			artiexist[ART_BLADE_DANCER_S_DAGGER] = FALSE;
+			artifact_exists(dagger, artiname(ART_BLADE_DANCER_S_DAGGER), FALSE);
 			dagger = oname(dagger, artiname(ART_BLADE_DANCER_S_DAGGER));
 		}
 
