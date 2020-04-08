@@ -862,7 +862,7 @@ boolean called;
 	}
 
 	/* priests and minions: don't even use this function */
-	if ((mtmp->ispriest || mtmp->isminion) && mtmp->data != &mons[PM_BLASPHEMOUS_LURKER]) {
+	if ((mtmp->ispriest || mtmp->isminion) && mtmp->mtyp != PM_BLASPHEMOUS_LURKER) {
 	    char priestnambuf[BUFSZ];
 	    char *name;
 	    long save_prop = EHalluc_resistance;
@@ -894,11 +894,11 @@ boolean called;
 		return buf;
 	    }
 	    Strcat(buf, shkname(mtmp));
-	    if (mdat == &mons[PM_SHOPKEEPER] && !do_invis)
+	    if (mdat->mtyp == PM_SHOPKEEPER && !do_invis)
 		return buf;
 	    Strcat(buf, " the ");
 	    if (do_invis) Strcat(buf, "invisible ");
-		if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]){
+		if (mtmp->mflee && mtmp->mtyp == PM_BANDERSNATCH){
 			Strcat(buf, "frumious ");
 			name_at_start = FALSE;
 		}
@@ -970,17 +970,17 @@ boolean called;
 	} else if (mtmp->mnamelth) {
 	    char *name = NAME(mtmp);
 
-	    if (mdat == &mons[PM_GHOST]) {
+	    if (mdat->mtyp == PM_GHOST) {
 			Sprintf(eos(buf), "%s ghost", s_suffix(name));
 			name_at_start = TRUE;
-	    } else if (mdat == &mons[PM_SHADE]) {
+	    } else if (mdat->mtyp == PM_SHADE) {
 			Sprintf(eos(buf), "%s shade", s_suffix(name));
 			name_at_start = TRUE;
-	    } else if (mdat == &mons[PM_BROKEN_SHADOW]) {
+	    } else if (mdat->mtyp == PM_BROKEN_SHADOW) {
 			Sprintf(eos(buf), "%s broken shadow", s_suffix(name));
 			name_at_start = TRUE;
 	    } else if (called) {
-			if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]){
+			if (mtmp->mflee && mtmp->mtyp == PM_BANDERSNATCH){
 				Sprintf(eos(buf), "frumious ");
 				name_at_start = FALSE;
 			}
@@ -1080,7 +1080,7 @@ boolean called;
 	    name_at_start = FALSE;
 	} else {
 	    name_at_start = (boolean)type_is_pname(mdat);
-		if (mtmp->mflee && mtmp->data == &mons[PM_BANDERSNATCH]){
+		if (mtmp->mflee && mtmp->mtyp == PM_BANDERSNATCH){
 			Strcat(buf, "frumious ");
 			name_at_start = FALSE;
 		}
@@ -1142,11 +1142,11 @@ boolean called;
 	}
 
 	if (name_at_start && (article == ARTICLE_YOUR || !has_adjectives)) {
-	    if (mdat == &mons[PM_WIZARD_OF_YENDOR])
+	    if (mdat->mtyp == PM_WIZARD_OF_YENDOR)
 		article = ARTICLE_THE;
 	    else
 		article = ARTICLE_NONE;
-	} else if ((mdat->geno & G_UNIQ) && article == ARTICLE_A && mdat != &mons[PM_GOD]) {
+	} else if ((mdat->geno & G_UNIQ) && article == ARTICLE_A && mdat->mtyp != PM_GOD) {
 	    article = ARTICLE_THE;
 	}
 
@@ -1214,11 +1214,11 @@ boolean called;
 	}
 
 	if (name_at_start && (article == ARTICLE_YOUR || !has_adjectives)) {
-	    if (mdat == &mons[PM_WIZARD_OF_YENDOR])
+	    if (mdat->mtyp == PM_WIZARD_OF_YENDOR)
 		article = ARTICLE_THE;
 	    else
 		article = ARTICLE_NONE;
-	} else if ((mdat->geno & G_UNIQ) && article == ARTICLE_A && mdat != &mons[PM_GOD]) {
+	} else if ((mdat->geno & G_UNIQ) && article == ARTICLE_A && mdat->mtyp != PM_GOD) {
 	    article = ARTICLE_THE;
 	}
 
@@ -1418,7 +1418,7 @@ char *outbuf;
     /* high priest(ess)'s identity is concealed on the Astral Plane,
        unless you're adjacent (overridden for hallucination which does
        its own obfuscation) */
-    if ( (mon->data == &mons[PM_HIGH_PRIEST] || mon->data == &mons[PM_ELDER_PRIEST]) && !(Hallucination || Delusion(mon)) &&
+    if ( (mon->mtyp == PM_HIGH_PRIEST || mon->mtyp == PM_ELDER_PRIEST) && !(Hallucination || Delusion(mon)) &&
 	    Is_astralevel(&u.uz) && distu(mon->mx, mon->my) > 2) {
 	Strcpy(outbuf, article == ARTICLE_THE ? "the " : "");
 	Strcat(outbuf, mon->female ? "high priestess" : "high priest");

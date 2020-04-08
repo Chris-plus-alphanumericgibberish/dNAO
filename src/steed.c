@@ -42,7 +42,7 @@ can_saddle(mtmp)
 	return ((index(steeds, ptr->mlet) ||
 				(Race_if(PM_ORC) && index(orc_steeds, ptr->mlet)) ||
 				((Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && index(drow_steeds, ptr->mlet)) ||
-				(ptr == &mons[PM_BYAKHEE])
+				(ptr->mtyp == PM_BYAKHEE)
 			) && 
 			(ptr->msize >= MZ_MEDIUM) &&
 			!humanoid(ptr) &&
@@ -105,7 +105,7 @@ use_saddle(otmp)
 		instapetrify(kbuf);
  	    }
 	}
-	if (ptr == &mons[PM_INCUBUS] || ptr == &mons[PM_SUCCUBUS]) {
+	if (ptr->mtyp == PM_INCUBUS || ptr->mtyp == PM_SUCCUBUS) {
 	    pline("Shame on you!");
 	    exercise(A_WIS, FALSE);
 	    return 1;

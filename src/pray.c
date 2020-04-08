@@ -723,7 +723,7 @@ int ga_num;
 	if(ga_num == GA_MOTHER){
 		struct monst *mtmp;
 		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->data == &mons[PM_BLESSED] || mtmp->data == &mons[PM_MOUTH_OF_THE_GOAT])){
+			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT)){
 				mtmp->mpeaceful = 0;
 				mtmp->mtame = 0;
 				set_malign(mtmp);
@@ -3499,7 +3499,7 @@ doturn()
 			    if(!Race_if(PM_VAMPIRE)) pline("Unfortunately, your voice falters.");
 			    else pline("Unfortunately, your concentration falters.");
 			}
-			if(mtmp->data != &mons[PM_BANDERSNATCH]) mtmp->mflee = 0;
+			if(mtmp->mtyp != PM_BANDERSNATCH) mtmp->mflee = 0;
 			mtmp->mfrozen = 0;
 			mtmp->mcanmove = 1;
 		    } else if (!resist(mtmp, '\0', 0, TELL)) {
@@ -4083,7 +4083,7 @@ int x, y;
 {
 	struct monst *mtmp;
 	for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->data == &mons[PM_MOUTH_OF_THE_GOAT]){
+		if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->mtyp == PM_MOUTH_OF_THE_GOAT){
 			xchar xlocale, ylocale, xyloc;
 			xyloc	= mtmp->mtrack[0].x;
 			xlocale = mtmp->mtrack[1].x;
@@ -4093,7 +4093,7 @@ int x, y;
 		}
 	}
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->data == &mons[PM_MOUTH_OF_THE_GOAT] && distu(mtmp->mx,mtmp->my) == 1){
+		if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && distu(mtmp->mx,mtmp->my) == 1){
 			return TRUE;
 		}
 	}
@@ -4224,7 +4224,7 @@ struct obj *otmp;
 		//The Black Goat is pleased
 		struct monst *mtmp;
 		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->data == &mons[PM_BLESSED] || mtmp->data == &mons[PM_MOUTH_OF_THE_GOAT])){
+			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT)){
 				mtmp->mpeaceful = 1;
 				set_malign(mtmp);
 			}

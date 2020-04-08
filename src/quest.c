@@ -464,7 +464,7 @@ STATIC_OVL void
 prisoner_speaks(mtmp)
 	register struct monst *mtmp;
 {
-	if (mtmp->data == &mons[PM_PRISONER] &&
+	if (mtmp->mtyp == PM_PRISONER &&
 			(mtmp->mstrategy & STRAT_WAITMASK)) {
 	    /* Awaken the prisoner */
 	    if (canseemon(mtmp))
@@ -478,7 +478,7 @@ prisoner_speaks(mtmp)
 
 		/* ...But the guards are not */
 	    (void) angry_guards(FALSE);
-	} else if ((mtmp->data == &mons[PM_MINDLESS_THRALL] || mtmp->data == &mons[PM_A_GONE]) &&
+	} else if ((mtmp->mtyp == PM_MINDLESS_THRALL || mtmp->mtyp == PM_A_GONE) &&
 			(mtmp->mstrategy & STRAT_WAITMASK)) {
 	    /* Awaken the prisoner */
 	    if (canseemon(mtmp))
@@ -516,23 +516,23 @@ quest_chat(mtmp)
 		return;
     }
 	
-	if(Role_if(PM_ANACHRONONAUT) && mtmp->data == &mons[PM_ELDER_BRAIN]){
+	if(Role_if(PM_ANACHRONONAUT) && mtmp->mtyp == PM_ELDER_BRAIN){
 		pline("%s",elderBrain[rn2(SIZE(elderBrain))]);
 		return;
 	}
 	
 	if(
 		(Role_if(PM_NOBLEMAN) && 
-			(mtmp->data == &mons[PM_KNIGHT] 
-				|| mtmp->data == &mons[PM_MAID]) && mtmp->mpeaceful)
+			(mtmp->mtyp == PM_KNIGHT 
+				|| mtmp->mtyp == PM_MAID) && mtmp->mpeaceful)
 	  || (Role_if(PM_ANACHRONONAUT) && 
-			(mtmp->data == &mons[PM_MYRKALFAR_WARRIOR] || mtmp->data == &mons[PM_ALIDER] 
-				|| mtmp->data == &mons[PM_MYRKALFAR_MATRON]) && mtmp->mpeaceful)
+			(mtmp->mtyp == PM_MYRKALFAR_WARRIOR || mtmp->mtyp == PM_ALIDER 
+				|| mtmp->mtyp == PM_MYRKALFAR_MATRON) && mtmp->mpeaceful)
 	  || (Race_if(PM_DROW) && is_drow(mtmp->data))
 	  || (Role_if(PM_EXILE) && 
-			mtmp->data == &mons[PM_PEASANT] && mtmp->mpeaceful)
-	  || (Race_if(PM_GNOME) && Role_if(PM_RANGER) && (mtmp->data == &mons[PM_GNOME] || mtmp->data == &mons[PM_GNOME_LORD] || mtmp->data == &mons[PM_GNOME_KING]
-			|| mtmp->data == &mons[PM_TINKER_GNOME] || mtmp->data == &mons[PM_GNOMISH_WIZARD]) && mtmp->mpeaceful)
+			mtmp->mtyp == PM_PEASANT && mtmp->mpeaceful)
+	  || (Race_if(PM_GNOME) && Role_if(PM_RANGER) && (mtmp->mtyp == PM_GNOME || mtmp->mtyp == PM_GNOME_LORD || mtmp->mtyp == PM_GNOME_KING
+			|| mtmp->mtyp == PM_TINKER_GNOME || mtmp->mtyp == PM_GNOMISH_WIZARD) && mtmp->mpeaceful)
 	){
 		chat_with_guardian();
 	} else {
@@ -719,7 +719,7 @@ turn_stag()
 			for(tm = fmon; tm; tm = tm->nmon){
 				if(tm->mfaction == EDDER_SYMBOL || 
 					tm->mfaction == XAXOX || 
-					tm->data == &mons[PM_EDDERKOP]
+					tm->mtyp == PM_EDDERKOP
 				){
 					tm->housealert = 1;
 					tm->mpeaceful = 1;

@@ -497,7 +497,7 @@ pick_lock(pick) /* pick a lock with a given object */
 			&& mtmp->m_ap_type != M_AP_OBJECT) {
 #ifdef TOURIST
 		if (picktyp == CREDIT_CARD &&
-		    (mtmp->isshk || mtmp->data == &mons[PM_ORACLE]))
+		    (mtmp->isshk || mtmp->mtyp == PM_ORACLE))
 		    verbalize("No checks, no credit, no problem.");
 		else
 #endif
@@ -711,7 +711,7 @@ doforce()		/* try to force a chest with your weapon */
 			&& mtmp->m_ap_type != M_AP_FURNITURE
 			&& mtmp->m_ap_type != M_AP_OBJECT) {
 
-		if (mtmp->isshk || mtmp->data == &mons[PM_ORACLE])		
+		if (mtmp->isshk || mtmp->mtyp == PM_ORACLE)		
 		    verbalize("What do you think you are, a Jedi?"); /* Phantom Menace */
 		else
 		    pline("I don't think %s would appreciate that.", mon_nam(mtmp));

@@ -212,7 +212,7 @@ register struct obj *obj;
 			(obj->obj_material == VEGGY || obj->obj_material == FLESH))); /*Processed foods only*/
 	
 	if (metallivorous(youracedata) && is_metallic(obj) &&
-	    (youracedata != &mons[PM_RUST_MONSTER] || is_rustprone(obj)))
+	    (youracedata->mtyp != PM_RUST_MONSTER || is_rustprone(obj)))
 		return TRUE;
 	if (u.umonnum == PM_GELATINOUS_CUBE && is_organic(obj) &&
 		/* [g.cubes can eat containers and retain all contents
@@ -753,7 +753,7 @@ BOOLEAN_P bld, nobadeffects;
 	    case PM_FLUX_SLIME:
 		if (!nobadeffects && !Slimed && !Unchanging 
 			&& !GoodHealth && !flaming(youracedata) 
-			&& youracedata != &mons[PM_GREEN_SLIME]
+			&& youracedata->mtyp != PM_GREEN_SLIME
 		) {
 		    You("don't feel very well.");
 		    Slimed = 10L;
@@ -823,9 +823,9 @@ struct monst *mon;
 	case PM_GREEN_SLIME:
 	case PM_FLUX_SLIME:
 	    if (!Unchanging && !GoodHealth &&
-				youracedata != &mons[PM_FIRE_VORTEX] &&
-			    youracedata != &mons[PM_FIRE_ELEMENTAL] &&
-			    youracedata != &mons[PM_GREEN_SLIME]) {
+				youracedata->mtyp != PM_FIRE_VORTEX &&
+			    youracedata->mtyp != PM_FIRE_ELEMENTAL &&
+			    youracedata->mtyp != PM_GREEN_SLIME) {
 		You("don't feel very well.");
 		Slimed = 10L;
 	    }
@@ -1000,14 +1000,14 @@ boolean drained;
 			chance = 0;//skip roll, give atribute.
 		break;
 		case POISON_RES:
-			if ((ptr == &mons[PM_KILLER_BEE] ||
-					ptr == &mons[PM_SCORPION]) && !rn2(4))
+			if ((ptr->mtyp == PM_KILLER_BEE ||
+					ptr->mtyp == PM_SCORPION) && !rn2(4))
 				chance = 1;
 			else
 				chance = 15;
 			break;
 		case DISPLACED:
-			chance = ptr == &mons[PM_SHIMMERING_DRAGON] ? 0 : 10;
+			chance = ptr->mtyp == PM_SHIMMERING_DRAGON ? 0 : 10;
 			break;
 		case TELEPORT:
 			chance = 10;
@@ -2056,7 +2056,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 		else useupf(otmp, 1L);
 		return(2);
 	    }
-	} else if (youracedata == &mons[PM_GHOUL]) {
+	} else if (youracedata->mtyp == PM_GHOUL) {
 		pline ("This corpse is too fresh!");
 		return 3;
 	} else if (acidic(&mons[mtyp]) && !Acid_resistance) {
@@ -2719,7 +2719,7 @@ struct obj *otmp;
 
 		if (mtyp == PM_GREEN_SLIME || mtyp == PM_FLUX_SLIME)
 		    stoneorslime = (!Unchanging && !flaming(youracedata) &&
-			youracedata != &mons[PM_GREEN_SLIME]);
+			youracedata->mtyp != PM_GREEN_SLIME);
 
 		if (cadaver && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
 		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER ) {
@@ -4593,7 +4593,7 @@ floorfood(verb,corpsecheck)	/* get food from floor or pack */
 		}
 	    }
 
-	    if (youracedata != &mons[PM_RUST_MONSTER] &&
+	    if (youracedata->mtyp != PM_RUST_MONSTER &&
 			!(uclockwork && u.clockworkUpgrades&SCRAP_MAW) &&
 		(gold = g_at(u.ux, u.uy)) != 0) {
 		if (gold->quan == 1L)

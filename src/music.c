@@ -201,14 +201,14 @@ boolean domsg;
 	    else if ((instr_otyp == HARP)
 		&& (mtmp->data->mlet == S_NYMPH || is_elf(mtmp->data)
 			|| mtmp->data->mlet == S_CHA_ANGEL
-			|| mtmp->data == &mons[PM_ANGEL]
+			|| mtmp->mtyp == PM_ANGEL
 			|| mtmp->data->mlet == S_NYMPH)
-		&& !(is_drow(mtmp->data) || mtmp->data == &mons[PM_WEEPING_ANGEL] || mtmp->data == &mons[PM_OONA])
+		&& !(is_drow(mtmp->data) || mtmp->mtyp == PM_WEEPING_ANGEL || mtmp->mtyp == PM_OONA)
 		&& (mtmp->mhp*2 > mtmp->mhpmax))
 		    r = max(10,(mtmp->data->mlet == S_NYMPH ? mtmp->m_lev*2 : mtmp->m_lev));
 	    /* parrots (and other birds?) sing along flutes */
 	    if ((instr_otyp == FLUTE)
-		&& (mtmp->data == &mons[PM_PARROT] || mtmp->data->mlet == S_CHA_ANGEL)
+		&& (mtmp->mtyp == PM_PARROT || mtmp->data->mlet == S_CHA_ANGEL)
 		&& (mtmp->mhp*2 > mtmp->mhpmax))
 		    r = max(10,(mtmp->data->mlet == S_NYMPH ? mtmp->m_lev*2 : mtmp->m_lev));
 	    /* undeads sing along horns */
@@ -216,22 +216,22 @@ boolean domsg;
 		     && (mtmp->data->mlet == S_LICH || mtmp->data->mlet == S_MUMMY
 			 || mtmp->data->mlet == S_VAMPIRE || mtmp->data->mlet == S_WRAITH
 			 || mtmp->data->mlet == S_DEMON || mtmp->data->mlet == S_GHOST
-			 || mtmp->data->mlet == S_SHADE || mtmp->data == &mons[PM_OONA] 
-			 || mtmp->data == &mons[PM_CROW] || mtmp->data == &mons[PM_RAVEN]))
+			 || mtmp->data->mlet == S_SHADE || mtmp->mtyp == PM_OONA 
+			 || mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN))
 		    r = max(10,(mtmp->data->mlet == S_LICH || mtmp->data->mlet == S_DEMON
 				? mtmp->m_lev*2 : mtmp->m_lev));
 	    /* orcs and ogres sing along (shout, actually) drums and bugles */
 	    else if ((instr_otyp == DRUM || instr_otyp == BUGLE)
 		     && (mtmp->data->mlet == S_ORC
 			 || mtmp->data->mlet == S_OGRE
-			 || (mtmp->data == &mons[PM_TRUMPET_ARCHON] && MON_WEP(mtmp) && !mtmp->mcan)
+			 || (mtmp->mtyp == PM_TRUMPET_ARCHON && MON_WEP(mtmp) && !mtmp->mcan)
 			 || mtmp->data->mlet == S_GIANT))
 		    r = max(10, mtmp->m_lev);
     }
 
     if (domsg && (r > 0)){
 		if (canseemon(mtmp)) {
-			if (mtmp->data == &mons[PM_LILLEND])
+			if (mtmp->mtyp == PM_LILLEND)
 				pline("%s's lovely voice sings your song!", Monnam(mtmp));
 			else if (is_bardmon(mtmp->data))
 				pline("%s skillfully sings along with your song!", Monnam(mtmp));
@@ -240,42 +240,42 @@ boolean domsg;
 				pline("%s's dreadful voice chants your song!", Monnam(mtmp));
 			else if (mtmp->data->mlet == S_MUMMY || mtmp->data->mlet == S_GHOST
 					 || mtmp->data->mlet == S_WRAITH || mtmp->data->mlet == S_SHADE
-					 || mtmp->data == &mons[PM_OONA] 
+					 || mtmp->mtyp == PM_OONA 
 			)
 				pline("%s mourns while you play!", Monnam(mtmp));
-			else if (mtmp->data == &mons[PM_CROW] || mtmp->data == &mons[PM_RAVEN])
+			else if (mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN)
 				pline("%s caws and croaks while you play!", Monnam(mtmp));
-			else if (mtmp->data == &mons[PM_PARROT])
+			else if (mtmp->mtyp == PM_PARROT)
 				pline("%s whistles while you play!", Monnam(mtmp));
 			else if (mtmp->data->mlet == S_NYMPH)
 				pline("%s's charming voice sings along!", Monnam(mtmp));
 			else if (mtmp->data->mlet == S_CENTAUR)
 				pline("%s's strong voice sings along!", Monnam(mtmp));
-			else if ((mtmp->data == &mons[PM_TRUMPET_ARCHON] && MON_WEP(mtmp) && !mtmp->mcan))
+			else if ((mtmp->mtyp == PM_TRUMPET_ARCHON && MON_WEP(mtmp) && !mtmp->mcan))
 				pline("%s plays along on %s trumpet!", Monnam(mtmp), hisherits(mtmp));
 			else if (mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE || mtmp->data->mlet == S_GIANT)
 				pline("%s shouts!", Monnam(mtmp));
 			else
 				pline("%s sings while you play!", Monnam(mtmp));
 		} else {
-			if (mtmp->data == &mons[PM_LILLEND])
+			if (mtmp->mtyp == PM_LILLEND)
 				You_hear("a lovely voice singing your song!");
 			else if (mtmp->data->mlet == S_LICH || mtmp->data->mlet == S_DEMON 
 				|| mtmp->data->mlet == S_VAMPIRE)
 				You_hear("a horrible voice chanting your song!");
 			else if (mtmp->data->mlet == S_MUMMY || mtmp->data->mlet == S_GHOST
 					 || mtmp->data->mlet == S_WRAITH || mtmp->data->mlet == S_SHADE
-					 || mtmp->data == &mons[PM_OONA] )
+					 || mtmp->mtyp == PM_OONA )
 				You_hear("someone mourning while you play!");
-			else if (mtmp->data == &mons[PM_CROW] || mtmp->data == &mons[PM_RAVEN])
+			else if (mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN)
 				You_hear("something caw and croak while you play!");
-			else if (mtmp->data == &mons[PM_PARROT])
+			else if (mtmp->mtyp == PM_PARROT)
 				You_hear("something whistle while you play!");
 			else if (mtmp->data->mlet == S_NYMPH)
 				You_hear("a charming voice singing along!");
 			else if (mtmp->data->mlet == S_CENTAUR)
 				You_hear("a strong voice sing along!");
-			else if ((mtmp->data == &mons[PM_TRUMPET_ARCHON] && MON_WEP(mtmp) && !mtmp->mcan))
+			else if ((mtmp->mtyp == PM_TRUMPET_ARCHON && MON_WEP(mtmp) && !mtmp->mcan))
 				pline("a trumpet playing along!");
 			else if (mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE || mtmp->data->mlet == S_GIANT)
 				You_hear("a shout!");
@@ -299,23 +299,23 @@ boolean domsg;
     if ((mtmp->mcanmove) && (!mtmp->msleeping)
 	&& (!mtmp->mconf) && (!mtmp->mflee) && (!mtmp->mcan)
 	&& (distu(mtmp->mx, mtmp->my) <= 25)) {
-		if(mtmp->data == &mons[PM_DREAD_SERAPH])
+		if(mtmp->mtyp == PM_DREAD_SERAPH)
 			r = -2*mtmp->m_lev;
-		else if(mtmp->data == &mons[PM_AGLAOPE] || mtmp->data == &mons[PM_ELVENKING] || mtmp->data == &mons[PM_BAELNORN])
+		else if(mtmp->mtyp == PM_AGLAOPE || mtmp->mtyp == PM_ELVENKING || mtmp->mtyp == PM_BAELNORN)
 			r = -1*(rnd(20) + mtmp->m_lev/3);
-		else if(mtmp->data == &mons[PM_LILLEND])
+		else if(mtmp->mtyp == PM_LILLEND)
 			r = -1*(rnd(20) + mtmp->m_lev);
 	    else if ((instr_otyp == HARP || instr_otyp == FLUTE)
-		     && (mtmp->data == &mons[PM_CROW] || mtmp->data == &mons[PM_RAVEN]))
+		     && (mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN))
 			r = -1*(mtmp->m_lev);
 		else if (mtmp->data->mlet == S_LICH || mtmp->data->mlet == S_DEMON 
 			 || mtmp->data->mlet == S_VAMPIRE)
 			r = -1*(mtmp->m_lev);
 		else if (mtmp->data->mlet == S_MUMMY || mtmp->data->mlet == S_GHOST
 				 || mtmp->data->mlet == S_WRAITH || mtmp->data->mlet == S_SHADE
-				 || mtmp->data == &mons[PM_OONA])
+				 || mtmp->mtyp == PM_OONA)
 			r = -2*(mtmp->m_lev);
-		else if (mtmp->data == &mons[PM_PARROT])
+		else if (mtmp->mtyp == PM_PARROT)
 			r = -1*(mtmp->m_lev);
 		else if (!(instr_otyp == HARP || instr_otyp == FLUTE)
 		     && mtmp->data->mlet == S_NYMPH)
@@ -329,22 +329,22 @@ boolean domsg;
 
     if (domsg && (r < 0)){
 		if (canseemon(mtmp)) {
-			if(mtmp->data == &mons[PM_DREAD_SERAPH])
+			if(mtmp->mtyp == PM_DREAD_SERAPH)
 				pline("%s's terrible voice sings in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->data == &mons[PM_LILLEND])
+			else if (mtmp->mtyp == PM_LILLEND)
 				pline("%s's lovely voice sings in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->data == &mons[PM_AGLAOPE])
+			else if (mtmp->mtyp == PM_AGLAOPE)
 				pline("%s's mocking voice sings in opposition to your song!", Monnam(mtmp));
 			else if (mtmp->data->mlet == S_LICH || mtmp->data->mlet == S_DEMON 
 				|| mtmp->data->mlet == S_VAMPIRE)
 				pline("%s's dreadful voice chants in opposition to your song!", Monnam(mtmp));
 			else if (mtmp->data->mlet == S_MUMMY || mtmp->data->mlet == S_GHOST
 					 || mtmp->data->mlet == S_WRAITH || mtmp->data->mlet == S_SHADE
-					 || mtmp->data == &mons[PM_OONA])
+					 || mtmp->mtyp == PM_OONA)
 				pline("%s wails in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->data == &mons[PM_CROW] || mtmp->data == &mons[PM_RAVEN])
+			else if (mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN)
 				pline("%s caws and croaks in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->data == &mons[PM_PARROT])
+			else if (mtmp->mtyp == PM_PARROT)
 				pline("%s squawks in opposition to your song!", Monnam(mtmp));
 			else if (mtmp->data->mlet == S_NYMPH)
 				pline("%s's charming voice sings in opposition to your song!", Monnam(mtmp));
@@ -355,22 +355,22 @@ boolean domsg;
 			else
 				pline("%s sings in opposition to your song!", Monnam(mtmp));
 		} else {
-			if(mtmp->data == &mons[PM_DREAD_SERAPH])
+			if(mtmp->mtyp == PM_DREAD_SERAPH)
 				You_hear("a terrible voice singing in opposition to your song!");
-			else if (mtmp->data == &mons[PM_LILLEND])
+			else if (mtmp->mtyp == PM_LILLEND)
 				You_hear("a lovely voice singing in opposition to your song!");
-			else if (mtmp->data == &mons[PM_AGLAOPE])
+			else if (mtmp->mtyp == PM_AGLAOPE)
 				You_hear("a mocking voice singing in opposition to your song!");
 			else if (mtmp->data->mlet == S_LICH || mtmp->data->mlet == S_DEMON 
 				|| mtmp->data->mlet == S_VAMPIRE)
 				You_hear("a horrible voice chanting in opposition to your song!");
 			else if (mtmp->data->mlet == S_MUMMY || mtmp->data->mlet == S_GHOST
 					 || mtmp->data->mlet == S_WRAITH || mtmp->data->mlet == S_SHADE
-					 || mtmp->data == &mons[PM_OONA])
+					 || mtmp->mtyp == PM_OONA)
 				You_hear("someone wailing in opposition to your song!");
-			else if (mtmp->data == &mons[PM_CROW] || mtmp->data == &mons[PM_RAVEN])
+			else if (mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN)
 				You_hear("something caws and croaks in opposition to your song!");
-			else if (mtmp->data == &mons[PM_PARROT])
+			else if (mtmp->mtyp == PM_PARROT)
 				You_hear("something squak in opposition to your song!");
 			else if (mtmp->data->mlet == S_NYMPH)
 				You_hear("a charming voice singing in opposition to your song!");
@@ -632,7 +632,7 @@ struct obj * instr;
 			if (showmsg) msg = "%s seems to briefly swing with your music.";
 		}
 		// angels like the sound of harps
-		if ((mtmp->data == &mons[PM_ANGEL]) && (mtmp->malign >= A_COALIGNED)
+		if ((mtmp->mtyp == PM_ANGEL) && (mtmp->malign >= A_COALIGNED)
 		    && (instr_otyp == HARP))
 			dlev -= dlev0/5;
 		// snakes (and nagas) also like music from flutes
@@ -1120,7 +1120,7 @@ int distance;
 		distm = distu(mtmp->mx, mtmp->my);
 		if (distm < distance) {
 		    mtmp->msleeping = 0;
-			if(mtmp->data != &mons[PM_GIANT_TURTLE] || !(mtmp->mflee)){
+			if(mtmp->mtyp != PM_GIANT_TURTLE || !(mtmp->mflee)){
 			    mtmp->mcanmove = 1;
 			    mtmp->mfrozen = 0;
 				if(mtmp->mux == 0 && mtmp->muy == 0){
@@ -1318,7 +1318,7 @@ awaken_soldiers()
 
 	while(mtmp) {
 	    if (!DEADMONSTER(mtmp) &&
-			is_mercenary(mtmp->data) && mtmp->data != &mons[PM_GUARD]) {
+			is_mercenary(mtmp->data) && mtmp->mtyp != PM_GUARD) {
 		mtmp->mpeaceful = mtmp->msleeping = mtmp->mfrozen = 0;
 		mtmp->mcanmove = 1;
 		if (canseemon(mtmp))

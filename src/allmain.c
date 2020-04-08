@@ -487,7 +487,7 @@ you_regen_hp()
 	}
 
 	// invidiaks out of dark
-	if (youracedata == &mons[PM_INVIDIAK] && !isdark(u.ux, u.uy)) {
+	if (youracedata->mtyp == PM_INVIDIAK && !isdark(u.ux, u.uy)) {
 		perX -= HEALCYCLE;
 		u.regen_blocked++;
 	}
@@ -876,7 +876,7 @@ moveloop()
 				average_dogs();
 			for (mtmp = fmon; mtmp; mtmp = nxtmon){
 				nxtmon = mtmp->nmon;
-				if(mtmp->data == &mons[PM_HELLCAT]){
+				if(mtmp->mtyp == PM_HELLCAT){
 					if(!isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
 						mtmp->minvis = TRUE;
 						mtmp->perminvis = TRUE;
@@ -886,7 +886,7 @@ moveloop()
 						mtmp->perminvis = FALSE;
 						newsym(mtmp->mx,mtmp->my);
 					}
-				} else if(mtmp->data == &mons[PM_HUDOR_KAMEREL]){
+				} else if(mtmp->mtyp == PM_HUDOR_KAMEREL){
 					if(is_pool(mtmp->mx,mtmp->my, TRUE) && !mtmp->minvis){
 						mtmp->minvis = TRUE;
 						mtmp->perminvis = TRUE;
@@ -896,7 +896,7 @@ moveloop()
 						mtmp->perminvis = FALSE;
 						newsym(mtmp->mx,mtmp->my);
 					}
-				} else if(mtmp->data == &mons[PM_GRUE] || mtmp->data == &mons[PM_INVIDIAK]){
+				} else if(mtmp->mtyp == PM_GRUE || mtmp->mtyp == PM_INVIDIAK){
 					if(isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
 						mtmp->minvis = TRUE;
 						mtmp->perminvis = TRUE;
@@ -1012,7 +1012,7 @@ moveloop()
 			if(u.sealsActive){
 				if(u.sealsActive&SEAL_MALPHAS){
 					for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-						if(mtmp->data == &mons[PM_CROW] && mtmp->mtame && !um_dist(mtmp->mx,mtmp->my,1)){
+						if(mtmp->mtyp == PM_CROW && mtmp->mtame && !um_dist(mtmp->mx,mtmp->my,1)){
 							u.spiritAC++;
 							u.spiritAttk++;
 						}
@@ -1196,10 +1196,10 @@ moveloop()
 					if(!mtmp->mpeacetime) mtmp->mpeaceful = FALSE;
 				}
 				/* Possibly change hostility */
-				if(mtmp->data == &mons[PM_SURYA_DEVA]){
+				if(mtmp->mtyp == PM_SURYA_DEVA){
 					struct monst *blade;
 					for(blade = fmon; blade; blade = blade->nmon)
-						if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
+						if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
 					if(blade){
 						if(mtmp->mtame && !blade->mtame){
 							if(blade == nxtmon) nxtmon = nxtmon->nmon;
@@ -1216,16 +1216,16 @@ moveloop()
 				/*Reset fracture flag*/
 				if(mtmp->zombify && is_kamerel(mtmp->data)) mtmp->zombify = 0;
 				
-				if(mtmp->data == &mons[PM_ARA_KAMEREL]) flags.goldka_level=1;
-				if(mtmp->data == &mons[PM_ASPECT_OF_THE_SILENCE]){
+				if(mtmp->mtyp == PM_ARA_KAMEREL) flags.goldka_level=1;
+				if(mtmp->mtyp == PM_ASPECT_OF_THE_SILENCE){
 					flags.silence_level=1;
 					losepw(3);
 				}
-				if(mtmp->data == &mons[PM_ZUGGTMOY]) flags.spore_level=1;
-				if(mtmp->data == &mons[PM_JUIBLEX]) flags.slime_level=1;
-				if(mtmp->data == &mons[PM_PALE_NIGHT] || mtmp->data == &mons[PM_DREAD_SERAPH] || mtmp->data == &mons[PM_LEGION]) flags.walky_level=1;
-				if(mtmp->data == &mons[PM_ORCUS] || mtmp->data == &mons[PM_NAZGUL]) flags.shade_level=1;
-				if(mtmp->data == &mons[PM_DREAD_SERAPH] && (mtmp->mstrategy & STRAT_WAITMASK) && (u.uevent.invoked || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)))){
+				if(mtmp->mtyp == PM_ZUGGTMOY) flags.spore_level=1;
+				if(mtmp->mtyp == PM_JUIBLEX) flags.slime_level=1;
+				if(mtmp->mtyp == PM_PALE_NIGHT || mtmp->mtyp == PM_DREAD_SERAPH || mtmp->mtyp == PM_LEGION) flags.walky_level=1;
+				if(mtmp->mtyp == PM_ORCUS || mtmp->mtyp == PM_NAZGUL) flags.shade_level=1;
+				if(mtmp->mtyp == PM_DREAD_SERAPH && (mtmp->mstrategy & STRAT_WAITMASK) && (u.uevent.invoked || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)))){
 					mtmp->mstrategy &= ~STRAT_WAITMASK;
 					pline_The("entire %s is shaking around you!",
 						   In_endgame(&u.uz) ? "plane" : "dungeon");
@@ -1241,15 +1241,15 @@ moveloop()
 					}
 				}
 				
-				if(mtmp->data == &mons[PM_DEEPEST_ONE] && !mtmp->female && u.uevent.ukilled_dagon){
+				if(mtmp->mtyp == PM_DEEPEST_ONE && !mtmp->female && u.uevent.ukilled_dagon){
 					set_mon_data(mtmp, PM_FATHER_DAGON, 0);
 					u.uevent.ukilled_dagon = 0;
 				}
-				if(mtmp->data == &mons[PM_DEEPEST_ONE] && mtmp->female && u.uevent.ukilled_hydra){
+				if(mtmp->mtyp == PM_DEEPEST_ONE && mtmp->female && u.uevent.ukilled_hydra){
 					set_mon_data(mtmp, PM_MOTHER_HYDRA, 0);
 					u.uevent.ukilled_hydra = 0;
 				}
-				if(mtmp->data == &mons[PM_GOLD_GOLEM]){
+				if(mtmp->mtyp == PM_GOLD_GOLEM){
 					int golds = u.goldkamcount_tame + level.flags.goldkamcount_peace + level.flags.goldkamcount_hostile;
 					if(golds > 0){
 						if(canseemon_eyes(mtmp)){
@@ -1291,7 +1291,7 @@ karemade:
 					}
 				}
 				
-				if(mtmp->data == &mons[PM_WALKING_DELIRIUM] && canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
+				if(mtmp->mtyp == PM_WALKING_DELIRIUM && canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
 					static long lastusedmove = 0;
 					if(lastusedmove != moves){
 						pline("%s takes on forms new and terrible!", Monnam(mtmp));
@@ -1300,7 +1300,7 @@ karemade:
 					}
 				}
 				
-				if(mtmp->data == &mons[PM_DREADBLOSSOM_SWARM]){
+				if(mtmp->mtyp == PM_DREADBLOSSOM_SWARM){
 					if(canseemon(mtmp) || u.ustuck == mtmp) mtmp->movement += mcalcmove(mtmp);
 					else {
 						struct monst *tmpm;
@@ -1313,7 +1313,7 @@ karemade:
 					}
 				} else mtmp->movement += mcalcmove(mtmp);
 				
-				if(mtmp->data == &mons[PM_NITOCRIS]){
+				if(mtmp->mtyp == PM_NITOCRIS){
 					if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF)
 						mtmp->mspec_used = 1;
 				}
@@ -1343,14 +1343,14 @@ karemade:
 						pline("%s looks calm again.", Monnam(mtmp));
 				}
 //endif
-				if(mtmp->data == &mons[PM_GREAT_CTHULHU] || mtmp->data == &mons[PM_ZUGGTMOY] 
-					|| mtmp->data == &mons[PM_SWAMP_FERN]) mtmp->mspec_used = 0;
+				if(mtmp->mtyp == PM_GREAT_CTHULHU || mtmp->mtyp == PM_ZUGGTMOY 
+					|| mtmp->mtyp == PM_SWAMP_FERN) mtmp->mspec_used = 0;
 				if(is_weeping(mtmp->data)) mtmp->mspec_used = 0;
-				if(mtmp->data == &mons[PM_CLOCKWORK_SOLDIER] || mtmp->data == &mons[PM_CLOCKWORK_DWARF] || 
-				   mtmp->data == &mons[PM_FABERGE_SPHERE] || mtmp->data == &mons[PM_FIREWORK_CART] ||
-				   mtmp->data == &mons[PM_ID_JUGGERNAUT]
+				if(mtmp->mtyp == PM_CLOCKWORK_SOLDIER || mtmp->mtyp == PM_CLOCKWORK_DWARF || 
+				   mtmp->mtyp == PM_FABERGE_SPHERE || mtmp->mtyp == PM_FIREWORK_CART ||
+				   mtmp->mtyp == PM_ID_JUGGERNAUT
 				) if(rn2(2)) mtmp->mvar_vector = ((int)mtmp->mvar_vector + rn2(3)-1)%8;
-				if((mtmp->data == &mons[PM_JUGGERNAUT] || mtmp->data == &mons[PM_ID_JUGGERNAUT]) && !rn2(3)){
+				if((mtmp->mtyp == PM_JUGGERNAUT || mtmp->mtyp == PM_ID_JUGGERNAUT) && !rn2(3)){
 					int mdx=0, mdy=0, i;
 					if(mtmp->mux == 0 && mtmp->muy == 0){
 						i = rn2(8);
@@ -2124,7 +2124,7 @@ karemade:
 ////////////////////////////////////////////////////////////////////////////////////////////////
 	for (mtmp = fmon; mtmp; mtmp = nxtmon){
 		nxtmon = mtmp->nmon;
-		if(mtmp->data == &mons[PM_HELLCAT]){
+		if(mtmp->mtyp == PM_HELLCAT){
 			if(!isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
 				mtmp->minvis = TRUE;
 				mtmp->perminvis = TRUE;
@@ -2134,7 +2134,7 @@ karemade:
 				mtmp->perminvis = FALSE;
 				newsym(mtmp->mx,mtmp->my);
 			}
-		} else if(mtmp->data == &mons[PM_HUDOR_KAMEREL]){
+		} else if(mtmp->mtyp == PM_HUDOR_KAMEREL){
 			if(is_pool(mtmp->mx,mtmp->my, TRUE) && !mtmp->minvis){
 				mtmp->minvis = TRUE;
 				mtmp->perminvis = TRUE;
@@ -2144,7 +2144,7 @@ karemade:
 				mtmp->perminvis = FALSE;
 				newsym(mtmp->mx,mtmp->my);
 			}
-		} else if(mtmp->data == &mons[PM_GRUE] || mtmp->data == &mons[PM_INVIDIAK]){
+		} else if(mtmp->mtyp == PM_GRUE || mtmp->mtyp == PM_INVIDIAK){
 			if(isdark(mtmp->mx,mtmp->my) && !mtmp->minvis){
 				mtmp->minvis = TRUE;
 				mtmp->perminvis = TRUE;
@@ -2447,6 +2447,7 @@ newgame()
 		mvitals[i].mvflags = mons[i].geno & G_NOCORPSE;
 
 	init_objects();		/* must be before u_init() */
+	id_permonst();		/* must be before u_init() */
 	
 	flags.pantheon = -1;	/* role_init() will reset this */
 	flags.panLgod = -1;	/* role_init() will reset this */
@@ -2834,15 +2835,15 @@ unseen_actions(mon)
 struct monst *mon;
 {
 	//Note: May cause mon to change its state, including moving to a different monster chain.
-	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_BLESSED])
+	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_BLESSED)
 		blessed_spawn(mon);
-	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_THE_GOOD_NEIGHBOR])
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_THE_GOOD_NEIGHBOR)
 		good_neighbor(mon);
-	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_HMNYW_PHARAOH])
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_HMNYW_PHARAOH)
 		dark_pharaoh(mon);
-	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_POLYPOID_BEING])
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_POLYPOID_BEING)
 		polyp_pickup(mon);
-	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->data == &mons[PM_MOUTH_OF_THE_GOAT])
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_MOUTH_OF_THE_GOAT)
 		goat_sacrifice(mon);
 }
 
@@ -2894,10 +2895,10 @@ struct monst *mon;
 				set_malign(mtmp);
 			}
 		} else if((mtmp = m_at(xlocale, ylocale))){
-			if(mtmp->data == &mons[PM_APPRENTICE_WITCH]
-				|| mtmp->data == &mons[PM_WITCH]
-				|| mtmp->data == &mons[PM_COVEN_LEADER]
-				|| mtmp->data == &mons[PM_WITCH_S_FAMILIAR]
+			if(mtmp->mtyp == PM_APPRENTICE_WITCH
+				|| mtmp->mtyp == PM_WITCH
+				|| mtmp->mtyp == PM_COVEN_LEADER
+				|| mtmp->mtyp == PM_WITCH_S_FAMILIAR
 			){
 				//Heal and fix troubles
 				if(needs_familiar(mtmp)){
@@ -2964,7 +2965,7 @@ struct monst *mon;
 	ylocale = mon->mtrack[1].y;
 	struct obj *otmp;
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->data != &mons[PM_NITOCRIS] && mtmp->data != &mons[PM_GHOUL_QUEEN_NITOCRIS])
+		if(mtmp->mtyp != PM_NITOCRIS && mtmp->mtyp != PM_GHOUL_QUEEN_NITOCRIS)
 			continue;
 		//found her
 		if(xyloc == MIGR_EXACT_XY){
@@ -2975,7 +2976,7 @@ struct monst *mon;
 			if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF){
 				//Directed to cast spells on her behalf
 				mtmp->mspec_used = 0;
-			} else if(mtmp->data == &mons[PM_NITOCRIS]){
+			} else if(mtmp->mtyp == PM_NITOCRIS){
 				//No longer protected, kill her
 				if(canseemon(mtmp)){
 					pline("Dark waters pour into %s's mouth and throat!", mon_nam(mtmp));
@@ -2983,7 +2984,7 @@ struct monst *mon;
 				}
 				mtmp->mhp = 0;
 				mondied(mtmp);
-			} else if(mtmp->data == &mons[PM_GHOUL_QUEEN_NITOCRIS]){
+			} else if(mtmp->mtyp == PM_GHOUL_QUEEN_NITOCRIS){
 				if(mtmp->mhp < mtmp->mhpmax/2){
 					mtmp->mhp = mtmp->mhpmax;
 					if(canseemon(mtmp)) pline("Dark waters seal %s's wounds!", mon_nam(mtmp));
@@ -3238,8 +3239,8 @@ dogoat()
 		if(!mon || mon->mpeaceful)
 			continue;
 		if(touch_petrifies(mon->data)
-		 || mon->data == &mons[PM_MEDUSA]
-		 || mon->data == &mons[PM_PALE_NIGHT]
+		 || mon->mtyp == PM_MEDUSA
+		 || mon->mtyp == PM_PALE_NIGHT
 		) continue;
 		
 		if(mon && !mon->mtame){

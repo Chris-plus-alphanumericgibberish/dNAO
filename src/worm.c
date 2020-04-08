@@ -198,7 +198,7 @@ worm_move(worm)
 {
     register struct wseg *seg, *new_seg;	/* new segment */
     register int	 wnum = worm->wormno;	/* worm number */
-	boolean twoLong, hh = worm->data == &mons[PM_HUNTING_HORROR];
+	boolean twoLong, hh = worm->mtyp == PM_HUNTING_HORROR;
 
 
 /*  if (!wnum) return;  bullet proofing */
@@ -420,7 +420,7 @@ cutworm(worm, x, y, weap)
      */
 
     /* Sometimes the tail end dies. */
-    if (worm->data == &mons[PM_HUNTING_HORROR] ||
+    if (worm->mtyp == PM_HUNTING_HORROR ||
 		rn2(3) || !(new_wnum = get_wormno())
 	) {
 		cutoff(worm, new_tail);
@@ -499,7 +499,7 @@ detect_wsegs(worm, use_detection_glyph)
 /*  if (!mtmp->wormno) return;  bullet proofing */
 
     while (curr != wheads[worm->wormno]) {
-	if(worm->data == &mons[PM_HUNTING_HORROR]) num = use_detection_glyph ?
+	if(worm->mtyp == PM_HUNTING_HORROR) num = use_detection_glyph ?
 		detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, worm)) :
 		monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, worm));
 	else num = use_detection_glyph ?

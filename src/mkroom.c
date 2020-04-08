@@ -267,8 +267,8 @@ mkmivault()
 			ptr = mivaultmon();
 			mon = makemon(ptr, x+rnd(2)+1, y+rnd(2)+1, 0);
 			// lovecraft monsters
-			if (ptr == &mons[PM_SHOGGOTH] || ptr == &mons[PM_NIGHTGAUNT]
-					|| ptr == &mons[PM_DARK_YOUNG] || ptr == &mons[PM_HUNTING_HORROR] || ptr == &mons[PM_HUNTING_HORROR_TAIL]){
+			if (ptr->mtyp == PM_SHOGGOTH || ptr->mtyp == PM_NIGHTGAUNT
+					|| ptr->mtyp == PM_DARK_YOUNG || ptr->mtyp == PM_HUNTING_HORROR || ptr->mtyp == PM_HUNTING_HORROR_TAIL){
 				otmp2 = mksobj(FIGURINE, TRUE, FALSE);
 				switch(rn2(4)){
 					case 0:					
@@ -294,10 +294,10 @@ mkmivault()
 				add_to_container(otmp, otmp2);
 			}
 			// clockworks
-			else if (ptr == &mons[PM_JUGGERNAUT] || ptr == &mons[PM_ID_JUGGERNAUT] 
-					|| ptr == &mons[PM_SCRAP_TITAN] || ptr == &mons[PM_HELLFIRE_COLOSSUS]){
+			else if (ptr->mtyp == PM_JUGGERNAUT || ptr->mtyp == PM_ID_JUGGERNAUT 
+					|| ptr->mtyp == PM_SCRAP_TITAN || ptr->mtyp == PM_HELLFIRE_COLOSSUS){
 				if (rn2(2)){
-					add_to_container(otmp, mksobj(ptr == &mons[PM_ID_JUGGERNAUT] ? SUBETHAIC_COMPONENT : HELLFIRE_COMPONENT, TRUE, FALSE));
+					add_to_container(otmp, mksobj(ptr->mtyp == PM_ID_JUGGERNAUT ? SUBETHAIC_COMPONENT : HELLFIRE_COMPONENT, TRUE, FALSE));
 				} else {
 					add_to_container(otmp, mksobj(SCRAP, TRUE, FALSE));
 				}
@@ -312,9 +312,9 @@ mkmivault()
 				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
 			}
 			// spellcasters
-			else if (ptr == &mons[PM_TITAN] || ptr == &mons[PM_EYE_OF_DOOM] 
-					|| ptr == &mons[PM_PRIEST_OF_GHAUNADAUR] || ptr == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
-						|| ptr == &mons[PM_SERPENT_MAN_OF_YOTH]){
+			else if (ptr->mtyp == PM_TITAN || ptr->mtyp == PM_EYE_OF_DOOM 
+					|| ptr->mtyp == PM_PRIEST_OF_GHAUNADAUR || ptr->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
+						|| ptr->mtyp == PM_SERPENT_MAN_OF_YOTH){
 				add_to_container(otmp, mkobj(SPBOOK_CLASS, FALSE));
 				add_to_container(otmp, mkobj(SPBOOK_CLASS, FALSE));
 				if (rn2(2)) add_to_container(otmp, mkobj(SPBOOK_CLASS, FALSE));
@@ -407,8 +407,8 @@ mkmivaultlolth()
 			ptr = mivaultmon();
 			mon = makemon(ptr, x+rnd(2), y+rnd(2), 0);
 			// lovecraft monsters
-			if (ptr == &mons[PM_SHOGGOTH] || ptr == &mons[PM_NIGHTGAUNT] 
-				|| ptr == &mons[PM_DARK_YOUNG] || ptr == &mons[PM_HUNTING_HORROR] || ptr == &mons[PM_HUNTING_HORROR_TAIL]){
+			if (ptr->mtyp == PM_SHOGGOTH || ptr->mtyp == PM_NIGHTGAUNT 
+				|| ptr->mtyp == PM_DARK_YOUNG || ptr->mtyp == PM_HUNTING_HORROR || ptr->mtyp == PM_HUNTING_HORROR_TAIL){
 				otmp2 = mksobj(FIGURINE, TRUE, FALSE);
 				switch(rn2(4)){
 					case 0:					
@@ -434,10 +434,10 @@ mkmivaultlolth()
 				add_to_container(otmp, otmp2);
 			}
 			// clockworks
-			else if (ptr == &mons[PM_JUGGERNAUT] || ptr == &mons[PM_ID_JUGGERNAUT] 
-					|| ptr == &mons[PM_SCRAP_TITAN] || ptr == &mons[PM_HELLFIRE_COLOSSUS]){
+			else if (ptr->mtyp == PM_JUGGERNAUT || ptr->mtyp == PM_ID_JUGGERNAUT 
+					|| ptr->mtyp == PM_SCRAP_TITAN || ptr->mtyp == PM_HELLFIRE_COLOSSUS){
 				if (rn2(2)){
-					add_to_container(otmp, mksobj(ptr == &mons[PM_ID_JUGGERNAUT] ? SUBETHAIC_COMPONENT : HELLFIRE_COMPONENT, TRUE, FALSE));
+					add_to_container(otmp, mksobj(ptr->mtyp == PM_ID_JUGGERNAUT ? SUBETHAIC_COMPONENT : HELLFIRE_COMPONENT, TRUE, FALSE));
 				} else {
 					add_to_container(otmp, mksobj(SCRAP, TRUE, FALSE));
 				}
@@ -452,9 +452,9 @@ mkmivaultlolth()
 				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
 			}
 			// spellcasters
-			else if (ptr == &mons[PM_TITAN] || ptr == &mons[PM_EYE_OF_DOOM] 
-					|| ptr == &mons[PM_PRIEST_OF_GHAUNADAUR] || ptr == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
-						|| ptr == &mons[PM_SERPENT_MAN_OF_YOTH]){
+			else if (ptr->mtyp == PM_TITAN || ptr->mtyp == PM_EYE_OF_DOOM 
+					|| ptr->mtyp == PM_PRIEST_OF_GHAUNADAUR || ptr->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
+						|| ptr->mtyp == PM_SERPENT_MAN_OF_YOTH){
 				add_to_container(otmp, mkobj(SPBOOK_CLASS, FALSE));
 				add_to_container(otmp, mkobj(SPBOOK_CLASS, FALSE));
 				if (rn2(2)) add_to_container(otmp, mkobj(SPBOOK_CLASS, FALSE));

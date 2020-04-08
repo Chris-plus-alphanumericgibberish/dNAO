@@ -226,7 +226,7 @@ do_present_ring(obj)
 					monflee(mtmp, rnd(100), TRUE, TRUE);
 			}
 		} else if(obj->ohaluengr && obj->oward >= FIRST_DROW_SYM && obj->oward <= LAST_DROW_SYM && 
-			(is_elf(mtmp->data) || is_drow(mtmp->data) || mtmp->data == &mons[PM_EDDERKOP])
+			(is_elf(mtmp->data) || is_drow(mtmp->data) || mtmp->mtyp == PM_EDDERKOP)
 		){
 			if(flags.stag && 
 				(mtmp->mfaction == u.start_house || allied_faction(mtmp->mfaction,u.start_house)) && 
@@ -236,7 +236,7 @@ do_present_ring(obj)
 				verbalize("The revolution has begun!");
 				for(tm = fmon; tm; tm = tm->nmon){
 					if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
-						((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+						((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->mtyp == PM_EDDERKOP) ||
 						((tm->mfaction == u.start_house || allied_faction(tm->mfaction,u.start_house)) && 
 							obj->oward == EDDER_SYMBOL && !(tm->female))
 					){
@@ -250,13 +250,13 @@ do_present_ring(obj)
 				}
 			} else if((obj->oward == mtmp->mfaction || allied_faction(obj->oward, mtmp->mfaction)) || 
 				(obj->oward == EILISTRAEE_SYMBOL && is_elf(mtmp->data)) || 
-				((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  mtmp->data == &mons[PM_EDDERKOP])
+				((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  mtmp->mtyp == PM_EDDERKOP)
 			){
 				if(mtmp->housealert && !(mtmp->mpeaceful)){
 					verbalize("Die, spy!");
 					for(tm = fmon; tm; tm = tm->nmon){
 						if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
-							((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+							((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->mtyp == PM_EDDERKOP) ||
 							(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 						){
 							tm->housealert = 1;
@@ -278,7 +278,7 @@ do_present_ring(obj)
 						if(obj->oward != XAXOX && obj->oward != EDDER_SYMBOL) verbalize("Apologies, my lady!");
 						for(tm = fmon; tm; tm = tm->nmon){
 							if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
-								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->mtyp == PM_EDDERKOP) ||
 								(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 							){
 								tm->housealert = 1;
@@ -289,7 +289,7 @@ do_present_ring(obj)
 						verbalize("Die, spy!");
 						for(tm = fmon; tm; tm = tm->nmon){
 							if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
-								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->mtyp == PM_EDDERKOP) ||
 								(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 							){
 								tm->housealert = 1;
@@ -311,7 +311,7 @@ do_present_ring(obj)
 						verbalize("Move along, sir.");
 						for(tm = fmon; tm; tm = tm->nmon){
 							if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
-								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->mtyp == PM_EDDERKOP) ||
 								(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 							){
 								tm->mpeaceful = 1;
@@ -321,7 +321,7 @@ do_present_ring(obj)
 						verbalize("Die, spy!");
 						for(tm = fmon; tm; tm = tm->nmon){
 							if((is_drow(tm->data) && (obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction))) || 
-								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->data == &mons[PM_EDDERKOP]) ||
+								((obj->oward == EDDER_SYMBOL || obj->oward == XAXOX) &&  tm->mtyp == PM_EDDERKOP) ||
 								(obj->oward == EILISTRAEE_SYMBOL && is_elf(tm->data))
 							){
 								tm->housealert = 1;
@@ -335,8 +335,8 @@ do_present_ring(obj)
 				mtmp->housealert = 1;
 				for(tm = fmon; tm; tm = tm->nmon){
 					if((is_drow(tm->data) && (mtmp->mfaction == tm->mfaction || allied_faction(mtmp->mfaction, tm->mfaction))) || 
-						((mtmp->mfaction == EDDER_SYMBOL || mtmp->mfaction == XAXOX || tm->data == &mons[PM_EDDERKOP]) && 
-							(tm->mfaction == EDDER_SYMBOL || tm->mfaction == XAXOX || tm->data == &mons[PM_EDDERKOP])) ||
+						((mtmp->mfaction == EDDER_SYMBOL || mtmp->mfaction == XAXOX || tm->mtyp == PM_EDDERKOP) && 
+							(tm->mfaction == EDDER_SYMBOL || tm->mfaction == XAXOX || tm->mtyp == PM_EDDERKOP)) ||
 						((mtmp->mfaction == EILISTRAEE_SYMBOL || is_elf(mtmp->data)) && 
 							(tm->mfaction == EILISTRAEE_SYMBOL || is_elf(tm->data)))
 					){
@@ -863,7 +863,7 @@ register xchar x, y;
 			pline("%s chokes on the leash!", Monnam(mtmp));
 			/* tameness eventually drops to 1 here (never 0) */
 			if (mtmp->mtame && rn2(mtmp->mtame)) mtmp->mtame--;
-			if(mtmp->data == &mons[PM_CROW] && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
+			if(mtmp->mtyp == PM_CROW && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
 		    }
 		} else {
 		    if (um_dist(mtmp->mx, mtmp->my, 5)) {
@@ -1014,7 +1014,7 @@ struct obj *obj;
 			xkilled(mtmp, 1);
 		}
 	} else if(!mtmp->mcan && !mtmp->minvis &&
-					mtmp->data == &mons[PM_MEDUSA]  && 
+					mtmp->mtyp == PM_MEDUSA  && 
 					ward_at(mtmp->mx,mtmp->my) != HAMSA) {
 		if (mon_reflects(mtmp, "The gaze is reflected away by %s %s!"))
 			return 1;
@@ -1025,7 +1025,7 @@ struct obj *obj;
 			killed(mtmp);
 		}
 	} else if(!mtmp->mcan && !mtmp->minvis &&
-					mtmp->data == &mons[PM_FLOATING_EYE] && 
+					mtmp->mtyp == PM_FLOATING_EYE && 
 					ward_at(mtmp->mx,mtmp->my) != HAMSA) {
 		int tmp = d(min(MAX_BONUS_DICE, (int)mtmp->m_lev), (int)mtmp->data->mattk[0].damd);
 		if (!rn2(4)) tmp = 120;
@@ -1037,13 +1037,13 @@ struct obj *obj;
 			mtmp->mfrozen = 127;
 		else mtmp->mfrozen += tmp;
 	} else if(!mtmp->mcan && !mtmp->minvis &&
-					mtmp->data == &mons[PM_UMBER_HULK] && 
+					mtmp->mtyp == PM_UMBER_HULK && 
 					ward_at(mtmp->mx,mtmp->my) != HAMSA) {
 		if (vis)
 			pline ("%s confuses itself!", Monnam(mtmp));
 		mtmp->mconf = 1;
 	} else if(!mtmp->mcan && !mtmp->minvis && (mlet == S_NYMPH
-				     || mtmp->data==&mons[PM_SUCCUBUS])) {
+				     || mtmp->mtyp==PM_SUCCUBUS)) {
 		if (vis) {
 		    pline ("%s admires herself in your mirror.", Monnam(mtmp));
 		    pline ("She takes it!");
@@ -2999,7 +2999,7 @@ struct obj *hypo;
 			pline("It would seem that the patient has no circulatory system....");
 		} else switch(amp->ovar1){
 			case POT_HEALING:
-				if (mtarg->data == &mons[PM_PESTILENCE]){
+				if (mtarg->mtyp == PM_PESTILENCE){
 					mtarg->mhp -= d(6 + 2 * bcsign(amp), 4);
 					if(mtarg->mhp <= 0) xkilled(mtarg,1);
 					break;
@@ -3011,7 +3011,7 @@ struct obj *hypo;
 				}
 			break;
 			case POT_EXTRA_HEALING:
-				if (mtarg->data == &mons[PM_PESTILENCE]){
+				if (mtarg->mtyp == PM_PESTILENCE){
 					mtarg->mhp -= d(6 + 2 * bcsign(amp), 8);
 					if(mtarg->mhp <= 0) xkilled(mtarg,1);
 					break;
@@ -3023,7 +3023,7 @@ struct obj *hypo;
 				}
 			break;
 			case POT_FULL_HEALING:
-				if (mtarg->data == &mons[PM_PESTILENCE]){
+				if (mtarg->mtyp == PM_PESTILENCE){
 					if((mtarg->mhpmax > 3) && !resist(mtarg, POTION_CLASS, 0, NOTELL))
 						mtarg->mhpmax /= 2;
 					if((mtarg->mhp > 2) && !resist(mtarg, POTION_CLASS, 0, NOTELL))
@@ -5663,10 +5663,10 @@ struct obj **optr;
 		if((mm = m_at(x,y))){
 			if(is_clockwork(mm->data)){
 				if(obj->otyp == CLOCKWORK_COMPONENT){
-					if(	mm->data != &mons[PM_GOLDEN_HEART] && 
-						mm->data != &mons[PM_ID_JUGGERNAUT] && 
-						mm->data != &mons[PM_HELLFIRE_ORB] && 
-						mm->data != &mons[PM_HELLFIRE_COLOSSUS]
+					if(	mm->mtyp != PM_GOLDEN_HEART && 
+						mm->mtyp != PM_ID_JUGGERNAUT && 
+						mm->mtyp != PM_HELLFIRE_ORB && 
+						mm->mtyp != PM_HELLFIRE_COLOSSUS
 					){
 						if(mm->mhp < mm->mhpmax){
 							if(yn("Repair it?") == 'y'){
@@ -5678,9 +5678,9 @@ struct obj **optr;
 						} else pline("It doesn't need repairs.");
 					}
 				} else if(obj->otyp == HELLFIRE_COMPONENT && (
-					mm->data == &mons[PM_HELLFIRE_ORB] || 
-					mm->data == &mons[PM_HELLFIRE_COLOSSUS] || 
-					mm->data == &mons[PM_SCRAP_TITAN]
+					mm->mtyp == PM_HELLFIRE_ORB || 
+					mm->mtyp == PM_HELLFIRE_COLOSSUS || 
+					mm->mtyp == PM_SCRAP_TITAN
 				)){
 					if(mm->mhp < mm->mhpmax){
 						if(yn("Repair it?") == 'y'){
@@ -5691,9 +5691,9 @@ struct obj **optr;
 						}
 					} else pline("It doesn't need repairs.");
 				} else if(obj->otyp == SUBETHAIC_COMPONENT && (
-					mm->data == &mons[PM_GOLDEN_HEART] || 
-					mm->data == &mons[PM_ID_JUGGERNAUT] || 
-					mm->data == &mons[PM_SCRAP_TITAN]
+					mm->mtyp == PM_GOLDEN_HEART || 
+					mm->mtyp == PM_ID_JUGGERNAUT || 
+					mm->mtyp == PM_SCRAP_TITAN
 				)){
 					if(mm->mhp < mm->mhpmax){
 						if(yn("Repair it?") == 'y'){
@@ -5738,9 +5738,9 @@ struct obj **optr;
 			mm->mhp =  mm->mhpmax;
 			mm->mtame = 10;
 			mm->mpeaceful = 1;
-			if((u.dx || u.dy) && (mm->data == &mons[PM_CLOCKWORK_SOLDIER] || mm->data == &mons[PM_CLOCKWORK_DWARF] || 
-				mm->data == &mons[PM_FABERGE_SPHERE] || mm->data == &mons[PM_FIREWORK_CART] || 
-				mm->data == &mons[PM_JUGGERNAUT] || mm->data == &mons[PM_ID_JUGGERNAUT])
+			if((u.dx || u.dy) && (mm->mtyp == PM_CLOCKWORK_SOLDIER || mm->mtyp == PM_CLOCKWORK_DWARF || 
+				mm->mtyp == PM_FABERGE_SPHERE || mm->mtyp == PM_FIREWORK_CART || 
+				mm->mtyp == PM_JUGGERNAUT || mm->mtyp == PM_ID_JUGGERNAUT)
 			){
 				mm->mvar_vector = -1;
 				while(xdir[(int)(++mm->mvar_vector)] != u.dx || ydir[(int)mm->mvar_vector] != u.dy);

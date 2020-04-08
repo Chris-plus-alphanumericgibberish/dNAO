@@ -14,14 +14,14 @@ register struct monst *mon;
 		&& !(is_heladrin(mon->data) && mon->mhp < .5*mon->mhpmax && rn2(2))
 		&& !(is_eeladrin(mon->data) && mon->mhp > .5*mon->mhpmax)
 		&& !(is_yochlol(mon->data) && mon->mhp < .5*mon->mhpmax)
-		&& !(mon->data == &mons[PM_SELKIE] || mon->data == &mons[PM_SEAL])
-		&& !(mon->data == &mons[PM_INCUBUS] || mon->data == &mons[PM_SUCCUBUS])
+		&& !(mon->mtyp == PM_SELKIE || mon->mtyp == PM_SEAL)
+		&& !(mon->mtyp == PM_INCUBUS || mon->mtyp == PM_SUCCUBUS)
 	) return;
 
-	if(mon->data == &mons[PM_NOVIERE_ELADRIN] && !is_pool(mon->mx, mon->my, FALSE)) return;
+	if(mon->mtyp == PM_NOVIERE_ELADRIN && !is_pool(mon->mx, mon->my, FALSE)) return;
 	
 	if (humanoid_torso(mon->data)) {
-		if (mon->data == &mons[PM_INCUBUS] || mon->data == &mons[PM_SUCCUBUS]){
+		if (mon->mtyp == PM_INCUBUS || mon->mtyp == PM_SUCCUBUS){
 			if(!Protection_from_shape_changers 
 			&& !canseemon(mon) 
 			&& mon->mfaction != INCUBUS_FACTION
@@ -31,7 +31,7 @@ register struct monst *mon;
 				mon->female = !mon->female;
 				new_were(mon);
 			}
-	    } else if (mon->data == &mons[PM_MAMMON] || mon->data == &mons[PM_GREEN_PIT_FIEND]){
+	    } else if (mon->mtyp == PM_MAMMON || mon->mtyp == PM_GREEN_PIT_FIEND){
 			if(!Protection_from_shape_changers 
 			&& mon->mhp < mon->mhpmax
 			&& !rn2(20)
@@ -65,7 +65,7 @@ register struct monst *mon;
 		|| (is_yochlol(mon->data) && !Protection_from_shape_changers)
 		|| (is_eeladrin(mon->data) && mon->mhp >= mon->mhpmax)
 	) {
-		if(mon->data == &mons[PM_BALL_OF_LIGHT]){
+		if(mon->mtyp == PM_BALL_OF_LIGHT){
 			mon->mflee = 0;
 			mon->mfleetim = 0;
 		}
@@ -175,10 +175,10 @@ struct monst *mon;
 		return;
 	
 	if(canseemon(mon) && !Hallucination) {
-		if(mon->data != &mons[PM_ANUBITE] && mon->data != &mons[PM_ANUBAN_JACKAL]
+		if(mon->mtyp != PM_ANUBITE && mon->mtyp != PM_ANUBAN_JACKAL
 		  && !is_eladrin(mon->data) && !is_yochlol(mon->data)
-		  && !(mon->data == &mons[PM_SELKIE] || mon->data == &mons[PM_SEAL])
-		  && !(mon->data == &mons[PM_INCUBUS] || mon->data == &mons[PM_SUCCUBUS])
+		  && !(mon->mtyp == PM_SELKIE || mon->mtyp == PM_SEAL)
+		  && !(mon->mtyp == PM_INCUBUS || mon->mtyp == PM_SUCCUBUS)
 		) pline("%s changes into %s.", Monnam(mon),
 			is_human(&mons[pm]) ? "a human" :
 			an(mons[pm].mname+4));
@@ -228,9 +228,9 @@ struct monst *mon;
 				}
 			}
 		}
-		if(mon->data == &mons[PM_ANCIENT_TEMPEST]){
+		if(mon->mtyp == PM_ANCIENT_TEMPEST){
 			struct monst *ltnt;
-			for(ltnt = fmon; ltnt; ltnt = ltnt->nmon) if(ltnt->data == &mons[PM_WIDE_CLUBBED_TENTACLE]){
+			for(ltnt = fmon; ltnt; ltnt = ltnt->nmon) if(ltnt->mtyp == PM_WIDE_CLUBBED_TENTACLE){
 				switch(rnd(4)){
 					case 1:
 						if (emits_light_mon(ltnt)) del_light_source(LS_MONSTER, (genericptr_t)ltnt, FALSE);

@@ -323,10 +323,10 @@ boolean yours; /* is it your fault (for killing monsters) */
 		    if (mtmp->mhp < 1) explmask = 2;
 		    else switch(adtyp) {
 			case AD_PHYS:
-				if(mtmp->data == &mons[PM_LICH__THE_FIEND_OF_EARTH] || 
-				   mtmp->data == &mons[PM_BURNING_FERN_SPROUT] ||
-				   mtmp->data == &mons[PM_BURNING_FERN] ||
-				   mtmp->data == &mons[PM_CHAOS]
+				if(mtmp->mtyp == PM_LICH__THE_FIEND_OF_EARTH || 
+				   mtmp->mtyp == PM_BURNING_FERN_SPROUT ||
+				   mtmp->mtyp == PM_BURNING_FERN ||
+				   mtmp->mtyp == PM_CHAOS
 				) explmask |= TRUE;
 				break;
 			case AD_MAGM:
@@ -510,10 +510,10 @@ boolean yours; /* is it your fault (for killing monsters) */
 			    mdam /= 6;
 			}
 			if(yours && (is_spider(mtmp->data) 
-				|| mtmp->data == &mons[PM_SPROW]
-				|| mtmp->data == &mons[PM_DRIDER]
-				|| mtmp->data == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
-				|| mtmp->data == &mons[PM_AVATAR_OF_LOLTH]
+				|| mtmp->mtyp == PM_SPROW
+				|| mtmp->mtyp == PM_DRIDER
+				|| mtmp->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
+				|| mtmp->mtyp == PM_AVATAR_OF_LOLTH
 			) && roll_madness(MAD_ARACHNOPHOBIA)){
 			    mdam /= 4;
 			}

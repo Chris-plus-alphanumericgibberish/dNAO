@@ -181,7 +181,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	/* determine if thrownobj should return (like Mjollnir) */
 	if (magr && !(hmoncode & HMON_KICKED) && (
 		(Race_if(PM_ANDROID) && !launcher && youagr) ||	/* there's no android monster helper? */
-		(thrownobj->oartifact == ART_MJOLLNIR && (youagr ? (Role_if(PM_VALKYRIE)) : magr ? (magr->data == &mons[PM_VALKYRIE]) : FALSE)) ||
+		(thrownobj->oartifact == ART_MJOLLNIR && (youagr ? (Role_if(PM_VALKYRIE)) : magr ? (magr->mtyp == PM_VALKYRIE) : FALSE)) ||
 		(thrownobj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && (youagr ? (Race_if(PM_DWARF)) : magr ? (is_dwarf(magr->data)) : FALSE)) ||
 		thrownobj->oartifact == ART_SICKLE_MOON ||
 		thrownobj->oartifact == ART_ANNULUS ||
@@ -1179,7 +1179,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 	if (youagr && mdef->mtame) {
 		if (mdef->mcanmove &&
 			(!is_animal(mdef->data)) &&
-			(!mindless_mon(mdef) || (mdef->data == &mons[PM_CROW_WINGED_HALF_DRAGON] && thrownobj->oartifact == ART_YORSHKA_S_SPEAR)) &&
+			(!mindless_mon(mdef) || (mdef->mtyp == PM_CROW_WINGED_HALF_DRAGON && thrownobj->oartifact == ART_YORSHKA_S_SPEAR)) &&
 			!launcher
 			) {
 			if (vis) {
@@ -1398,7 +1398,7 @@ boolean * swapped;
 	at leader.... */
 	pline("%s catches %s.", Monnam(mon), the(xname(obj)));
 	if (mon->mpeaceful) {
-		if (Race_if(PM_ELF) && mon->data == &mons[PM_CELEBORN]){
+		if (Race_if(PM_ELF) && mon->mtyp == PM_CELEBORN){
 			boolean next2u = monnear(mon, u.ux, u.uy);
 			if (obj->oartifact == ART_PALANTIR_OF_WESTERNESSE &&
 				yn("If you prefer, we can use the Palantir to secure the city, and you can use my bow in your travels.") == 'y'
@@ -1428,7 +1428,7 @@ boolean * swapped;
 		else if (Race_if(PM_DROW)){
 			boolean next2u = monnear(mon, u.ux, u.uy);
 			if (quest_status.got_thanks) finish_quest(obj);
-			if (obj->oartifact == ART_SILVER_STARLIGHT && quest_status.got_thanks && mon->data == &mons[PM_ECLAVDRA] &&
+			if (obj->oartifact == ART_SILVER_STARLIGHT && quest_status.got_thanks && mon->mtyp == PM_ECLAVDRA &&
 				yn("Do you wish to take the Wrathful Spider, instead of this?") == 'y'
 				){
 				*swapped = TRUE;
@@ -1446,7 +1446,7 @@ boolean * swapped;
 				obj = addinv(obj);	/* into your inventory */
 				(void)encumber_msg();
 			}
-			else if (obj->oartifact == ART_TENTACLE_ROD && quest_status.got_thanks && mon->data == &mons[PM_SEYLL_AUZKOVYN] &&
+			else if (obj->oartifact == ART_TENTACLE_ROD && quest_status.got_thanks && mon->mtyp == PM_SEYLL_AUZKOVYN &&
 				yn("Do you wish to take the Crescent Blade, instead of this?") == 'y'
 				){
 				*swapped = TRUE;
@@ -1464,7 +1464,7 @@ boolean * swapped;
 				obj = addinv(obj);	/* into your inventory */
 				(void)encumber_msg();
 			}
-			else if (obj->oartifact == ART_DARKWEAVER_S_CLOAK && quest_status.got_thanks && mon->data == &mons[PM_ECLAVDRA] &&
+			else if (obj->oartifact == ART_DARKWEAVER_S_CLOAK && quest_status.got_thanks && mon->mtyp == PM_ECLAVDRA &&
 				yn("Do you wish to take Spidersilk, instead of this?") == 'y'
 				){
 				*swapped = TRUE;
@@ -1482,7 +1482,7 @@ boolean * swapped;
 				obj = addinv(obj);	/* into your inventory */
 				(void)encumber_msg();
 			}
-			else if (obj->oartifact == ART_TENTACLE_ROD && quest_status.got_thanks && mon->data == &mons[PM_DARUTH_XAXOX] &&
+			else if (obj->oartifact == ART_TENTACLE_ROD && quest_status.got_thanks && mon->mtyp == PM_DARUTH_XAXOX &&
 				yn("Do you wish to take the Webweaver's Crook, instead of this?") == 'y'
 				){
 				*swapped = TRUE;
@@ -2642,9 +2642,9 @@ int tary;
 
 	/* Random breath attacks */
 	if (typ == AD_RBRE){
-		if (pa == &mons[PM_CHROMATIC_DRAGON])
+		if (pa->mtyp == PM_CHROMATIC_DRAGON)
 			typ = chromatic_dragon_breaths[rn2(SIZE(chromatic_dragon_breaths))];
-		else if (pa == &mons[PM_PLATINUM_DRAGON])
+		else if (pa->mtyp == PM_PLATINUM_DRAGON)
 			typ = platinum_dragon_breaths[rn2(SIZE(platinum_dragon_breaths))];
 		else 
 			typ = random_breaths[rn2(SIZE(random_breaths))];
@@ -2741,7 +2741,7 @@ int tary;
 	/* cancelled monsters can't spit */
 	if (!youagr && magr->mcan) {
 		/* except for Zeta metroids, which uncancel themselves */
-		if (magr->data == &mons[PM_ZETA_METROID]) //|| mtmp->data==&mons[PM_CRAZY_CHEMIST]) 
+		if (magr->mtyp == PM_ZETA_METROID) //|| mtmp->mtyp==PM_CRAZY_CHEMIST) 
 			magr->mcan = FALSE;
 		else {
 			if (flags.soundok)

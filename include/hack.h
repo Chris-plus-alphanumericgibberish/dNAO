@@ -138,7 +138,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 					(u.sealsActive&SEAL_PAIMON && is_magical((mon)->data)) || \
 					(u.sealsActive&SEAL_ANDROMALIUS && is_thief((mon)->data)) || \
 					(u.sealsActive&SEAL_TENEBROUS && !nonliving_mon(mon)) || \
-					(Upolyd && youmonst.data == &mons[PM_SHARK] && has_blood((mon)->data) && \
+					(Upolyd && youmonst.data->mtyp == PM_SHARK && has_blood((mon)->data) && \
 						(mon)->mhp < (mon)->mhpmax && is_pool(u.ux, u.uy, TRUE) && is_pool((mon)->mx, (mon)->my, TRUE)) || \
 					(u.specialSealsActive&SEAL_ACERERAK && is_undead_mon(mon)) || \
 					(uwep && uwep->oclass == WEAPON_CLASS && (uwep)->obj_material == WOOD && uwep->otyp != MOON_AXE &&\

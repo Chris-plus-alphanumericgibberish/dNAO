@@ -615,7 +615,7 @@ nh_timeout()
 #endif
 
 	for(upp = u.uprops; upp < u.uprops+SIZE(u.uprops); upp++){
-		if((youracedata == &mons[PM_SHOGGOTH] || youracedata == &mons[PM_PRIEST_OF_GHAUNADAUR]) && upp - u.uprops == BLINDED
+		if((youracedata->mtyp == PM_SHOGGOTH || youracedata->mtyp == PM_PRIEST_OF_GHAUNADAUR) && upp - u.uprops == BLINDED
 			&&  upp->intrinsic & TIMEOUT
 		){
 			upp->intrinsic &= ~TIMEOUT;
@@ -1083,7 +1083,7 @@ long timeout;
 		       while it's in your inventory */
 		    if ((yours && !silent) ||
 			(carried(egg) && mon->data->mlet == S_DRAGON) ||
-			(carried(egg) && mon->data == &mons[PM_BABY_METROID]) ) { //metroid egg
+			(carried(egg) && mon->mtyp == PM_BABY_METROID) ) { //metroid egg
 			if ((mon2 = tamedog(mon, (struct obj *)0)) != 0) {
 			    mon = mon2;
 			    if (carried(egg) && mon->data->mlet != S_DRAGON)

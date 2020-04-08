@@ -614,7 +614,7 @@ int mode;
 			dmgtype(youracedata, AD_CORR))) {
 			You("eat through the bars.");
 			dissolve_bars(x,y);
-			if(youracedata == &mons[PM_RUST_MONSTER])
+			if(youracedata->mtyp == PM_RUST_MONSTER)
 				lesshungry(objects[BAR].oc_nutrition);
 	    }
 	    if (!(Passes_walls || passes_bars(&youmonst)))
@@ -1508,7 +1508,7 @@ domove()
 		    break;
 		case 2:
 		    u.uconduct.killer++;
-			if(mtmp->data == &mons[PM_CROW] && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
+			if(mtmp->mtyp == PM_CROW && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
 		    break;
 	    }
 	}
@@ -1593,7 +1593,7 @@ domove()
 		     * minliquid and mintrap don't know to do this
 		     */
 		    u.uconduct.killer++;
-			if(mtmp->data == &mons[PM_CROW] && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
+			if(mtmp->mtyp == PM_CROW && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
 		    break;
 		default:
 		    pline("that's strange, unknown mintrap result!");

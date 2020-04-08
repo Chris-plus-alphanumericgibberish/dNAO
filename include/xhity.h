@@ -42,7 +42,7 @@
 /* TODO: put these in their specified header files */
 /* mondata.h */
 #define is_holy_mon(mon)	(is_uvuudaum((mon)->data) || ((mon)->mfaction == ILLUMINATED))
-#define is_unholy_mon(mon)	((mon)->data == &mons[PM_UVUUDAUM])
+#define is_unholy_mon(mon)	((mon)->mtyp == PM_UVUUDAUM)
 /* obj. h*/
 #define multistriking(otmp)	(!(otmp) ? 0 : \
 	(otmp)->otyp == SET_OF_CROW_TALONS ? 2 : \

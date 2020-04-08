@@ -2930,7 +2930,7 @@ add_to_minv(mon, obj)
     if (obj->where != OBJ_FREE)
 	panic("add_to_minv: obj not free");
 
-	if(mon->data == &mons[PM_MAID] && maid_clean(mon, obj) ) return 1; /*destroyed by maid*/
+	if(mon->mtyp == PM_MAID && maid_clean(mon, obj) ) return 1; /*destroyed by maid*/
 
     /* merge if possible */
     for (otmp = mon->minvent; otmp; otmp = otmp->nobj)

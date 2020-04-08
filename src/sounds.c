@@ -659,7 +659,7 @@ dosounds()
     if (Is_oracle_level(&u.uz) && !rn2(400)) {
 	/* make sure the Oracle is still here */
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
-	    if (!DEADMONSTER(mtmp) && mtmp->data == &mons[PM_ORACLE])
+	    if (!DEADMONSTER(mtmp) && mtmp->mtyp == PM_ORACLE)
 		break;
 	/* and don't produce silly effects when she's clearly visible */
 	if (mtmp && (hallu || !canseemon(mtmp))) {
@@ -678,7 +678,7 @@ dosounds()
 		} else if(messagen == 4){
 			struct monst *tmpm;
 			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-				if(tmpm->data == &mons[PM_WOODCHUCK]){
+				if(tmpm->mtyp == PM_WOODCHUCK){
 					if (resists_death(tmpm)) {
 						// if (canseemon(tmpm))
 							// pline("%s seems no deader than before.", Monnam(tmpm));
@@ -690,7 +690,7 @@ dosounds()
 				}
 			}
 			if(!tmpm){ /*pointer is stale, but still nonzero*/
-				if(youracedata == &mons[PM_WOODCHUCK]){
+				if(youracedata->mtyp == PM_WOODCHUCK){
 					You("have an out of body experience."); //You are hallucinating if you got this message
 				}
 			}
@@ -924,7 +924,7 @@ boolean chatting;
 	}
 	
 	/* Make sure its your role's quest quardian; adjust if not */
-	if (ptr->msound == MS_GUARDIAN && ptr != &mons[urole.guardnum] && ptr != &mons[PM_CELEBORN]){
+	if (ptr->msound == MS_GUARDIAN && ptr != &mons[urole.guardnum] && ptr->mtyp != PM_CELEBORN){
 		int mndx = monsndx(ptr);
 		ptr = &mons[genus(mndx,1)];
 	}
@@ -960,12 +960,12 @@ boolean chatting;
 		}
 	}
 	switch (
-		(mtmp->mfaction == SKELIFIED && ptr != &mons[PM_ECHO]) ? MS_BONES : 
+		(mtmp->mfaction == SKELIFIED && ptr->mtyp != PM_ECHO) ? MS_BONES : 
 		is_silent_mon(mtmp) ? MS_SILENT : 
 		(is_dollable(mtmp->data) && mtmp->m_insight_level) ? MS_STATS : 
 		mtmp->ispriest ? MS_PRIEST : 
 		mtmp->isshk ? MS_SELL : 
-		(mtmp->data == &mons[PM_RHYMER] && !mtmp->mspec_used) ? MS_SONG : 
+		(mtmp->mtyp == PM_RHYMER && !mtmp->mspec_used) ? MS_SONG : 
 		ptr->msound
 	) {
 	case MS_ORACLE:
@@ -1053,11 +1053,11 @@ asGuardian:
 	    		};
 			if (kindred)
 			    verbl_msg = "This is my hunting ground that you dare to prowl!";
-			else if (youracedata == &mons[PM_SILVER_DRAGON] ||
-				 youracedata == &mons[PM_BABY_SILVER_DRAGON]) {
+			else if (youracedata->mtyp == PM_SILVER_DRAGON ||
+				 youracedata->mtyp == PM_BABY_SILVER_DRAGON) {
 			    /* Silver dragons are silver in color, not made of silver */
 			    Sprintf(verbuf, "%s! Your silver sheen does not frighten me!",
-					youracedata == &mons[PM_SILVER_DRAGON] ?
+					youracedata->mtyp == PM_SILVER_DRAGON ?
 					"Fool" : "Young Fool");
 			    verbl_msg = verbuf; 
 			} else {
@@ -1079,7 +1079,7 @@ asGuardian:
 		if (flags.moonphase == FULL_MOON && (night() ^ !rn2(13))) {
 			pline("%s throws back %s head and lets out a blood curdling %s!",
 				  Monnam(mtmp), mhis(mtmp),
-				  ptr == &mons[PM_HUMAN_WERERAT] ? "shriek" : "howl");
+				  ptr->mtyp == PM_HUMAN_WERERAT ? "shriek" : "howl");
 			wake_nearto_noisy(mtmp->mx, mtmp->my, 11*11);
 		} else
 			pline_msg =
@@ -1096,7 +1096,7 @@ asGuardian:
 		else if (mtmp->mtame && EDOG(mtmp)->hungrytime > moves + 1000)
 		    pline_msg = "yips.";
 		else {
-		    if (mtmp->data != &mons[PM_DINGO])	/* dingos do not actually bark */
+		    if (mtmp->mtyp != PM_DINGO)	/* dingos do not actually bark */
 			    pline_msg = "barks.";
 		}
 	    } else {
@@ -1129,7 +1129,7 @@ asGuardian:
 	    pline_msg = "squeaks.";
 	    break;
 	case MS_SQAWK:
-	    if (ptr == &mons[PM_RAVEN] && !mtmp->mpeaceful)
+	    if (ptr->mtyp == PM_RAVEN && !mtmp->mpeaceful)
 	    	verbl_msg = "Nevermore!";
 	    else
 	    	pline_msg = "squawks.";
@@ -1424,12 +1424,12 @@ asGuardian:
 		int ix, iy, i;
 		boolean inrange = FALSE;
 		if(noactions(mtmp)) break;
-		if((ptr == &mons[PM_INTONER] && !rn2(5)) || ptr == &mons[PM_BLACK_FLOWER]){
+		if((ptr->mtyp == PM_INTONER && !rn2(5)) || ptr->mtyp == PM_BLACK_FLOWER){
 			if (!canspotmon(mtmp))
 				map_invisible(mtmp->mx, mtmp->my);
 			switch(rnd(4)){
 				case 1:
-					if(ptr == &mons[PM_INTONER] && u.uinsight > Insanity) pline("%s screams melodiously.", Monnam(mtmp));
+					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity) pline("%s screams melodiously.", Monnam(mtmp));
 					else pline("%s sings the song of broken eyes.", Monnam(mtmp));
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1449,7 +1449,7 @@ asGuardian:
 					}
 				break;
 				case 2:
-					if(ptr == &mons[PM_INTONER] && u.uinsight > Insanity) pline("%s sings a resonant note.", Monnam(mtmp));
+					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity) pline("%s sings a resonant note.", Monnam(mtmp));
 					else pline("%s sings a harmless song of ruin.", Monnam(mtmp));
 					ix = rn2(COLNO);
 					iy = rn2(ROWNO);
@@ -1469,7 +1469,7 @@ asGuardian:
 				break;
 				case 3:{
 					struct obj *ispe = mksobj(SPE_TURN_UNDEAD,TRUE,FALSE);
-					if(ptr == &mons[PM_INTONER] && u.uinsight > Insanity) pline("%s wails deafeningly.", Monnam(mtmp));
+					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity) pline("%s wails deafeningly.", Monnam(mtmp));
 					else pline("%s sings the song of the day of repentance.", Monnam(mtmp));
 					//Rapture invisible creatures
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1503,7 +1503,7 @@ asGuardian:
 					}
 				}break;
 				case 4:
-					if(ptr == &mons[PM_INTONER] && u.uinsight > Insanity) pline("%s screams furiously.", Monnam(mtmp));
+					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity) pline("%s screams furiously.", Monnam(mtmp));
 					else pline("%s sings the song of bloodied prayers.", Monnam(mtmp));
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1515,7 +1515,7 @@ asGuardian:
 					}
 				break;
 			}
-		} else if(!(mtmp->mspec_used) || mtmp->data == &mons[PM_INTONER]){
+		} else if(!(mtmp->mspec_used) || mtmp->mtyp == PM_INTONER){
 			switch(rnd(3)){
 				case 1:
 					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !u.uinvulnerable){
@@ -1533,9 +1533,9 @@ asGuardian:
 					if(!inrange) break;
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5)
 						map_invisible(mtmp->mx, mtmp->my);
-					if(ptr == &mons[PM_INTONER] && u.uinsight > Insanity) pline("%s screeches discordantly.", Monnam(mtmp));
+					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity) pline("%s screeches discordantly.", Monnam(mtmp));
 					else pline("%s sings a song of courage.", Monnam(mtmp));
-					if(mtmp->data != &mons[PM_INTONER]) mtmp->mspec_used = rn1(10,10);
+					if(mtmp->mtyp != PM_INTONER) mtmp->mspec_used = rn1(10,10);
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1587,9 +1587,9 @@ asGuardian:
 					if(!inrange) break;
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5)
 						map_invisible(mtmp->mx, mtmp->my);
-					if(ptr == &mons[PM_INTONER] && u.uinsight > Insanity) pline("%s whistles shrilly.", Monnam(mtmp));
+					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity) pline("%s whistles shrilly.", Monnam(mtmp));
 					else pline("%s sings a song of good health.", Monnam(mtmp));
-					if(mtmp->data != &mons[PM_INTONER]) mtmp->mspec_used = rn1(10,10);
+					if(mtmp->mtyp != PM_INTONER) mtmp->mspec_used = rn1(10,10);
 
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1645,9 +1645,9 @@ asGuardian:
 					if(!inrange) break;
 					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5 && !u.uinvulnerable)
 						map_invisible(mtmp->mx, mtmp->my);
-					if(ptr == &mons[PM_INTONER] && u.uinsight > Insanity) pline("%s laughs frantically.", Monnam(mtmp));
+					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity) pline("%s laughs frantically.", Monnam(mtmp));
 					else pline("%s sings a song of haste.", Monnam(mtmp));
-					if(mtmp->data != &mons[PM_INTONER]) mtmp->mspec_used = rn1(10,10);
+					if(mtmp->mtyp != PM_INTONER) mtmp->mspec_used = rn1(10,10);
 					
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1871,7 +1871,7 @@ asGuardian:
 	case MS_SHRIEK:
 	    pline_msg = "shrieks.";
 	    aggravate();
-		if(mtmp->data == &mons[PM_LAMASHTU]){
+		if(mtmp->mtyp == PM_LAMASHTU){
 			struct monst *tmpm;
 			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 				if(tmpm->mtame > 10){
@@ -1909,21 +1909,21 @@ asGuardian:
 	    pline_msg = "mumbles incomprehensibly.";
 	    break;
 	case MS_DJINNI:
-		if(Role_if(PM_EXILE) && In_quest(&u.uz) && ptr == &mons[PM_PRISONER]){
+		if(Role_if(PM_EXILE) && In_quest(&u.uz) && ptr->mtyp == PM_PRISONER){
 			verbl_msg = woePrisoners[rn2(SIZE(woePrisoners))];
-		} else if (ptr == &mons[PM_EMBRACED_DROWESS]) {
+		} else if (ptr->mtyp == PM_EMBRACED_DROWESS) {
 			verbl_msg = embracedPrisoners[rn2(SIZE(embracedPrisoners))];
-	    } else if(ptr == &mons[PM_A_GONE]) verbl_msg = agonePrisoner[rn2(SIZE(agonePrisoner))];
-	    else if(ptr == &mons[PM_MINDLESS_THRALL]) verbl_msg = thrallPrisoners[rn2(SIZE(thrallPrisoners))];
-	    else if(ptr == &mons[PM_PARASITIZED_ANDROID] || ptr == &mons[PM_PARASITIZED_GYNOID]) verbl_msg = parasitizedDroid[rn2(SIZE(parasitizedDroid))];
+	    } else if(ptr->mtyp == PM_A_GONE) verbl_msg = agonePrisoner[rn2(SIZE(agonePrisoner))];
+	    else if(ptr->mtyp == PM_MINDLESS_THRALL) verbl_msg = thrallPrisoners[rn2(SIZE(thrallPrisoners))];
+	    else if(ptr->mtyp == PM_PARASITIZED_ANDROID || ptr->mtyp == PM_PARASITIZED_GYNOID) verbl_msg = parasitizedDroid[rn2(SIZE(parasitizedDroid))];
 	    else if (mtmp->mtame) {
 			verbl_msg = "Sorry, I'm all out of wishes.";
 	    } else if (mtmp->mpeaceful) {
-			if (ptr == &mons[PM_MARID])
+			if (ptr->mtyp == PM_MARID)
 				pline_msg = "gurgles.";
 			else
 				verbl_msg = "I'm free!";
-		} else if(ptr != &mons[PM_PRISONER]) verbl_msg = "This will teach you not to disturb me!";
+		} else if(ptr->mtyp != PM_PRISONER) verbl_msg = "This will teach you not to disturb me!";
 		else verbl_msg = "I'm free!";
 	    break;
 	case MS_BOAST:	/* giants */
@@ -1944,18 +1944,18 @@ asGuardian:
 	case MS_HUMANOID:
 humanoid_sound:
 		if(Role_if(PM_NOBLEMAN) && 
-			(mtmp->data == &mons[PM_KNIGHT] 
-				|| mtmp->data == &mons[PM_MAID]) && 
+			(mtmp->mtyp == PM_KNIGHT 
+				|| mtmp->mtyp == PM_MAID) && 
 			mtmp->mpeaceful
 		) goto asGuardian; /* Jump up to a different case in this switch statment */
 		else if(Role_if(PM_KNIGHT) && 
-			mtmp->data == &mons[PM_KNIGHT] && 
+			mtmp->mtyp == PM_KNIGHT && 
 			mtmp->mpeaceful
 		) goto asGuardian; /* Jump up to a different case in this switch statment */
 		else if(Role_if(PM_ANACHRONONAUT) && 
-			(mtmp->data == &mons[PM_MYRKALFAR_WARRIOR] 
-				|| mtmp->data == &mons[PM_MYRKALFAR_MATRON] 
-				|| mtmp->data == &mons[PM_ALIDER]) && 
+			(mtmp->mtyp == PM_MYRKALFAR_WARRIOR 
+				|| mtmp->mtyp == PM_MYRKALFAR_MATRON 
+				|| mtmp->mtyp == PM_ALIDER) && 
 			mtmp->mpeaceful
 		) goto asGuardian; /* Jump up to a different case in this switch statment */
 		else if(Race_if(PM_DROW) && 
@@ -1964,13 +1964,13 @@ humanoid_sound:
 			mtmp->mpeaceful
 		) goto asGuardian; /* Jump up to a different case in this switch statment */
 		else if(Role_if(PM_EXILE) && 
-			mtmp->data == &mons[PM_PEASANT] && 
+			mtmp->mtyp == PM_PEASANT && 
 			mtmp->mpeaceful
 		) goto asGuardian; /* Jump up to a different case in this switch statment */
-		else if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && (mtmp->data == &mons[PM_GNOME] || mtmp->data == &mons[PM_GNOME_LORD] || mtmp->data == &mons[PM_GNOME_KING]
-			|| mtmp->data == &mons[PM_TINKER_GNOME] || mtmp->data == &mons[PM_GNOMISH_WIZARD]) && mtmp->mpeaceful
+		else if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && (mtmp->mtyp == PM_GNOME || mtmp->mtyp == PM_GNOME_LORD || mtmp->mtyp == PM_GNOME_KING
+			|| mtmp->mtyp == PM_TINKER_GNOME || mtmp->mtyp == PM_GNOMISH_WIZARD) && mtmp->mpeaceful
 		) goto asGuardian; /* Jump up to a different case in this switch statment */
-		else if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && mtmp->data == &mons[PM_RUGGO_THE_GNOME_HIGH_KING]){
+		else if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && mtmp->mtyp == PM_RUGGO_THE_GNOME_HIGH_KING){
 			verbl_msg = "Ah, comrade!  It is good you are here.  I've hidden the angel behind my throne.";
 			break;
 		}
@@ -2021,7 +2021,7 @@ humanoid_sound:
 			start_clockwinding(key, mtmp, turns);
 			break;
 		}
-		else if(mtmp->mpeaceful && uclockwork && mtmp->data == &mons[PM_TINKER_GNOME] && yn("(Buy clockwork components?)") == 'y'){
+		else if(mtmp->mpeaceful && uclockwork && mtmp->mtyp == PM_TINKER_GNOME && yn("(Buy clockwork components?)") == 'y'){
 			struct obj *comp;
 			int howmany = 0;
 			
@@ -2040,7 +2040,7 @@ humanoid_sound:
 				doname(comp), (const char *)0);
 			break;
 		}
-		else if(mtmp->mpeaceful && uclockwork && mtmp->data == &mons[PM_HOOLOOVOO] && yn("(Buy subethaic components?)") == 'y'){
+		else if(mtmp->mpeaceful && uclockwork && mtmp->mtyp == PM_HOOLOOVOO && yn("(Buy subethaic components?)") == 'y'){
 			struct obj *comp;
 			int howmany = 0;
 			
@@ -2085,7 +2085,7 @@ humanoid_sound:
 #endif
 		default:
 			if(Role_if(PM_RANGER) && Race_if(PM_GNOME) &&
-				mtmp->data == &mons[PM_ARCADIAN_AVENGER] && 
+				mtmp->mtyp == PM_ARCADIAN_AVENGER && 
 				mtmp->m_id == quest_status.leader_m_id
 			) goto asGuardian; /* Jump up to a different case in this switch statment */
 			
@@ -2293,7 +2293,7 @@ humanoid_sound:
 	    }
 	    break;
 	case MS_RIDER:
-	    if (ptr == &mons[PM_DEATH] && !rn2(10))
+	    if (ptr->mtyp == PM_DEATH && !rn2(10))
 		pline_msg = "is busy reading a copy of Sandman #8.";
 	    else verbl_msg = "Who do you think you are, War?";
     break;
@@ -2677,7 +2677,7 @@ int dz;
 		else pline("....");
 	}
 	
-	if(mtmp && mtmp->data == &mons[PM_PRIEST_OF_AN_UNKNOWN_GOD]){
+	if(mtmp && mtmp->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD){
 	  if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
 		&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
 	  ){
@@ -2926,7 +2926,7 @@ int dz;
 		return (0);
     }
 	
-	if(mtmp->data == &mons[PM_NIGHTGAUNT] && u.umonnum == PM_GHOUL){
+	if(mtmp->mtyp == PM_NIGHTGAUNT && u.umonnum == PM_GHOUL){
 		You("bark the secret passwords known to ghouls.");
 		mtmp->mpeaceful = 1;
 		mtmp = tamedog(mtmp, (struct obj *)0);
@@ -2939,7 +2939,7 @@ int dz;
 		return 1;
 	}
     /* That is IT. EVERYBODY OUT. You are DEAD SERIOUS. */
-    if (mtmp->data == &mons[PM_URANIUM_IMP]) {
+    if (mtmp->mtyp == PM_URANIUM_IMP) {
 		monflee(mtmp, rn1(20,10), TRUE, FALSE);
     }
 	
@@ -3045,7 +3045,7 @@ int tx,ty;
       }
     }
 	
-	if(m_at(tx,ty) && (ep->ward_id != ANDROMALIUS || m_at(tx,ty)->data != &mons[PM_SEWER_RAT])) return 0;
+	if(m_at(tx,ty) && (ep->ward_id != ANDROMALIUS || m_at(tx,ty)->mtyp != PM_SEWER_RAT)) return 0;
 	
 	switch(ep->ward_id){
 	case AHAZU:{
@@ -3185,7 +3185,7 @@ int tx,ty;
 			if (!gldring) gldring = find_gold_ring();
 			
 			rat = m_at(tx,ty);
-			if(rat && rat->data == &mons[PM_SEWER_RAT]) t2=17;
+			if(rat && rat->mtyp == PM_SEWER_RAT) t2=17;
 			else rat = 0;
 			
 			for(otmp = level.objects[tx][ty]; otmp; otmp = otmp->nexthere)

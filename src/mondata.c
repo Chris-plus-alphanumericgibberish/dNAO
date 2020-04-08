@@ -10,6 +10,16 @@
 
 #ifdef OVLB
 
+/* saves the index number of each part of the permonst array to itself */
+void
+id_permonst()
+{
+	int i;
+	for (i = 0; i < NUMMONS; i++);
+		mons[i].mtyp = i;
+	return;
+}
+
 /*
  * safely sets mon->data
  * 
@@ -25,7 +35,7 @@ int mtyp;
 int flag;
 {
 	int i;
-	struct permonst * ptr = &mons[mtyp];
+	struct permonst * ptr = &mons[mtyp]; /* this will be changed to a new system, mwahahaa! */
 	mon->data = ptr;
 
 	/* players in their base form are a special case */
@@ -170,7 +180,7 @@ boolean
 poly_when_stoned(ptr)
     struct permonst *ptr;
 {
-    return((boolean)(is_golem(ptr) && ptr != &mons[PM_STONE_GOLEM] && ptr != &mons[PM_SENTINEL_OF_MITHARDIR] &&
+    return((boolean)(is_golem(ptr) && ptr->mtyp != PM_STONE_GOLEM && ptr->mtyp != PM_SENTINEL_OF_MITHARDIR &&
 	    !(mvitals[PM_STONE_GOLEM].mvflags & G_GENOD && !In_quest(&u.uz))));
 	    /* allow G_EXTINCT */
 }
@@ -179,7 +189,7 @@ boolean
 poly_when_golded(ptr)
     struct permonst *ptr;
 {
-    return((boolean)(is_golem(ptr) && ptr != &mons[PM_GOLD_GOLEM] &&
+    return((boolean)(is_golem(ptr) && ptr->mtyp != PM_GOLD_GOLEM &&
 	    !(mvitals[PM_GOLD_GOLEM].mvflags & G_GENOD && !In_quest(&u.uz))));
 	    /* allow G_EXTINCT */
 }
@@ -308,7 +318,7 @@ struct monst *mon;
 
 	return (boolean)(is_undead_mon(mon) || is_demon(ptr) || is_were(ptr) ||
 			 mon->mfaction == TOMB_HERD || species_resists_drain(mon) || 
-			 ptr == &mons[PM_DEATH] ||
+			 ptr->mtyp == PM_DEATH ||
 			 mon_resistance(mon, DRAIN_RES) ||
 			 (mon == u.usteed && u.sealsActive&SEAL_BERITH && Drain_resistance));
 }
@@ -497,7 +507,7 @@ struct monst *mon;
 
     return (boolean) (mon_resistance(mon,PASSES_WALLS) || amorphous(mptr) ||
 		      is_whirly(mptr) || verysmall(mptr) ||
-			  dmgtype(mptr, AD_CORR) || (dmgtype(mptr, AD_RUST) && mptr != &mons[PM_NAIAD] ) ||
+			  dmgtype(mptr, AD_CORR) || (dmgtype(mptr, AD_RUST) && mptr->mtyp != PM_NAIAD ) ||
 		      (slithy(mptr) && !bigmonst(mptr)));
 }
 
@@ -796,7 +806,7 @@ struct monst *mtmp;
 	/* stalking types follow, but won't when fleeing unless you hold
 	   the Amulet */
 	return (boolean)(((mtmp->data->mflagst & MT_STALK) || is_derived_undead_mon(mtmp)) &&
-				(!mtmp->mflee || mtmp->data == &mons[PM_BANDERSNATCH] || u.uhave.amulet));
+				(!mtmp->mflee || mtmp->mtyp == PM_BANDERSNATCH || u.uhave.amulet));
 }
 
 static const short grownups[][2] = {

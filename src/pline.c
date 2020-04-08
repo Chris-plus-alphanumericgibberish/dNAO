@@ -445,8 +445,8 @@ register struct monst *mtmp;
 	aligntyp alignment;
 	char info[BUFSZ], monnambuf[BUFSZ];
 
-	if (mtmp->ispriest || mtmp->data == &mons[PM_ALIGNED_PRIEST]
-				|| mtmp->data == &mons[PM_ANGEL])
+	if (mtmp->ispriest || mtmp->mtyp == PM_ALIGNED_PRIEST
+				|| mtmp->mtyp == PM_ANGEL)
 		alignment = EPRI(mtmp)->shralign;
 	else
 		alignment = mtmp->data->maligntyp;
@@ -467,10 +467,10 @@ register struct monst *mtmp;
 #endif
 	}
 	else if (mtmp->mpeaceful){
-		if(mtmp->data == &mons[PM_UVUUDAUM]) Strcat(info, ", in contemplative meditation");
+		if(mtmp->mtyp == PM_UVUUDAUM) Strcat(info, ", in contemplative meditation");
 		else Strcat(info, ", peaceful");
 	}
-	else if (mtmp->data==&mons[PM_DREAD_SERAPH] && mtmp->mvar2)  Strcat(info, ", in prayer");
+	else if (mtmp->mtyp==PM_DREAD_SERAPH && mtmp->mvar2)  Strcat(info, ", in prayer");
 	else if (mtmp->mtraitor)  Strcat(info, ", traitor");
 	else if (mtmp->mferal)  Strcat(info, ", feral");
 	if (mtmp->meating)	  Strcat(info, ", eating");
@@ -496,7 +496,7 @@ register struct monst *mtmp;
 				  /* [arbitrary reason why it isn't moving] */
 	else if (mtmp->mstrategy & STRAT_WAITMASK)
 				  Strcat(info, ", meditating");
-	else if (mtmp->mflee && mtmp->data != &mons[PM_BANDERSNATCH]) Strcat(info, ", scared");
+	else if (mtmp->mflee && mtmp->mtyp != PM_BANDERSNATCH) Strcat(info, ", scared");
 	if (mtmp->mtrapped)	  Strcat(info, ", trapped");
 	if (mtmp->mspeed)	  Strcat(info,
 					mtmp->mspeed == MFAST ? ", fast" :

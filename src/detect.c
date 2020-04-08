@@ -228,7 +228,7 @@ register struct obj *sobj;
 	   adjust message if you have gold in your inventory */
 	if (sobj) {
 		char buf[BUFSZ];
-		if (youracedata == &mons[PM_GOLD_GOLEM] || youracedata == &mons[PM_TREASURY_GOLEM]) {
+		if (youracedata->mtyp == PM_GOLD_GOLEM || youracedata->mtyp == PM_TREASURY_GOLEM) {
 			Sprintf(buf, "You feel like a million %s!",
 				currency(2L));
 		} else if (hidden_gold() ||
@@ -876,7 +876,7 @@ int mclass;			/* monster class, 0 for all */
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 		if (DEADMONSTER(mtmp)) continue;
 		if (!mclass || mtmp->data->mlet == mclass ||
-		(mtmp->data == &mons[PM_LONG_WORM] && mclass == S_WORM_TAIL))
+		(mtmp->mtyp == PM_LONG_WORM && mclass == S_WORM_TAIL))
 			if (mtmp->mx > 0) {
 				if (mclass && def_monsyms[mclass] == ' ')
 				show_glyph(mtmp->mx,mtmp->my,
@@ -884,12 +884,12 @@ int mclass;			/* monster class, 0 for all */
 			else
 				show_glyph(mtmp->mx,mtmp->my,mon_to_glyph(mtmp));
 			/* don't be stingy - display entire worm */
-			if (mtmp->data == &mons[PM_LONG_WORM]) detect_wsegs(mtmp,0);
+			if (mtmp->mtyp == PM_LONG_WORM) detect_wsegs(mtmp,0);
 			}
 		if (otmp && otmp->cursed &&
 		(mtmp->msleeping || !mtmp->mcanmove)) {
 		mtmp->msleeping = mtmp->mfrozen = 0;
-	  if(mtmp->data!= &mons[PM_GIANT_TURTLE] || !(mtmp->mflee))
+	  if(mtmp->mtyp!= PM_GIANT_TURTLE || !(mtmp->mflee))
 		mtmp->mcanmove = 1;
 		woken = TRUE;
 		}
@@ -942,7 +942,7 @@ register struct obj *otmp;	/* detecting object (if any) */
 		if (mtmp->mtame && mtmp->mx > 0) {
 		show_glyph(mtmp->mx,mtmp->my,mon_to_glyph(mtmp));
 		/* don't be stingy - display entire worm */
-		if (mtmp->data == &mons[PM_LONG_WORM]) detect_wsegs(mtmp,0);
+		if (mtmp->mtyp == PM_LONG_WORM) detect_wsegs(mtmp,0);
 		/* heal */
 		if(canseemon(mtmp) && mtmp->mtame < 20) mtmp->mhp += d(4, 8);
 		if (mtmp->mhp > mtmp->mhpmax)
@@ -1006,7 +1006,7 @@ register struct obj *otmp;	/* detecting object (if any) */
 		if (mtmp->mtame && mtmp->mx > 0) {
 		show_glyph(mtmp->mx,mtmp->my,mon_to_glyph(mtmp));
 		/* don't be stingy - display entire worm */
-		if (mtmp->data == &mons[PM_LONG_WORM]) detect_wsegs(mtmp,0);
+		if (mtmp->mtyp == PM_LONG_WORM) detect_wsegs(mtmp,0);
 		/* increase tameness */
 		if(canseemon(mtmp) && mtmp->mtame < 20) mtmp->mtame++;
 		}

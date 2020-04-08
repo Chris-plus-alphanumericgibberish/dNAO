@@ -231,16 +231,16 @@ register struct obj *gold;
 		    long goldreqd = 0L;
 
 		    if (rn2(3)) {
-			if (mtmp->data == &mons[PM_SOLDIER])
+			if (mtmp->mtyp == PM_SOLDIER)
 			   goldreqd = 100L;
-			else if (mtmp->data == &mons[PM_SERGEANT])
+			else if (mtmp->mtyp == PM_SERGEANT)
 			   goldreqd = 250L;
-			else if (mtmp->data == &mons[PM_LIEUTENANT])
+			else if (mtmp->mtyp == PM_LIEUTENANT)
 			   goldreqd = 500L;
-			else if (mtmp->data == &mons[PM_CAPTAIN])
+			else if (mtmp->mtyp == PM_CAPTAIN)
 			   goldreqd = 750L;
 #ifdef CONVICT
-			else if (mtmp->data == &mons[PM_PRISON_GUARD])
+			else if (mtmp->mtyp == PM_PRISON_GUARD)
 			   goldreqd = 200L;
 #endif /* CONVICT */
 
@@ -1267,8 +1267,8 @@ dumb:
 		if (in_town(x, y))
 		  for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 		    if (DEADMONSTER(mtmp)) continue;
-		    if((mtmp->data == &mons[PM_WATCHMAN] ||
-			mtmp->data == &mons[PM_WATCH_CAPTAIN]) &&
+		    if((mtmp->mtyp == PM_WATCHMAN ||
+			mtmp->mtyp == PM_WATCH_CAPTAIN) &&
 			couldsee(mtmp->mx, mtmp->my) &&
 			mtmp->mpeaceful) {
 			if (canspotmon(mtmp))
@@ -1287,8 +1287,8 @@ dumb:
 	    if (in_town(x, y))
 		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 		    if (DEADMONSTER(mtmp)) continue;
-		    if ((mtmp->data == &mons[PM_WATCHMAN] ||
-				mtmp->data == &mons[PM_WATCH_CAPTAIN]) &&
+		    if ((mtmp->mtyp == PM_WATCHMAN ||
+				mtmp->mtyp == PM_WATCH_CAPTAIN) &&
 			    mtmp->mpeaceful && couldsee(mtmp->mx, mtmp->my)) {
 			if (canspotmon(mtmp))
 			    pline("%s yells:", Amonnam(mtmp));

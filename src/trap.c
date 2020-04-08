@@ -2055,8 +2055,8 @@ struct monst *mtmp;
 				      Monnam(mtmp), a_your[trap->madeby_u]);
 				seetrap(trap);
 			    } else {
-				if((mptr == &mons[PM_OWLBEAR]
-				    || mptr == &mons[PM_BUGBEAR])
+				if((mptr->mtyp == PM_OWLBEAR
+				    || mptr->mtyp == PM_BUGBEAR)
 				   && flags.soundok)
 				    You_hear("the roaring of an angry bear!");
 			    }
@@ -2135,7 +2135,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 #endif
 			    }
 			}
-			if (mptr == &mons[PM_IRON_GOLEM] || mptr == &mons[PM_CHAIN_GOLEM]) {
+			if (mptr->mtyp == PM_IRON_GOLEM || mptr->mtyp == PM_CHAIN_GOLEM) {
 				if (in_sight)
 				    pline("%s falls to pieces!", Monnam(mtmp));
 				else if(mtmp->mtame)
@@ -2144,13 +2144,13 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				mondied(mtmp);
 				if (mtmp->mhp <= 0)
 					trapkilled = TRUE;
-			} else if (mptr == &mons[PM_FLAMING_SPHERE]) {
+			} else if (mptr->mtyp == PM_FLAMING_SPHERE) {
 				if (in_sight)
 				    pline("%s is extinguished!", Monnam(mtmp));
 				mondied(mtmp);
 				if (mtmp->mhp <= 0)
 					trapkilled = TRUE;
-			} else if (mptr == &mons[PM_GREMLIN] && rn2(3)) {
+			} else if (mptr->mtyp == PM_GREMLIN && rn2(3)) {
 				(void)split_mon(mtmp, (struct monst *)0);
 			}
 			break;
@@ -2263,7 +2263,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    pline("%s %s into %s pit!",
 				  Monnam(mtmp), fallverb,
 				  a_your[trap->madeby_u]);
-			    if (mptr == &mons[PM_PIT_VIPER] || mptr == &mons[PM_PIT_FIEND])
+			    if (mptr->mtyp == PM_PIT_VIPER || mptr->mtyp == PM_PIT_FIEND)
 				pline("How pitiful.  Isn't that the pits?");
 			    seetrap(trap);
 			}
@@ -2296,7 +2296,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			}
 			if(mtmp->mhp <= 0) break;
 			if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
-				mptr == &mons[PM_WUMPUS] ||
+				mptr->mtyp == PM_WUMPUS ||
 				(mtmp->wormno && count_wsegs(mtmp) > 5) ||
 				mptr->msize >= MZ_HUGE) {
 			    if (inescapable) {	/* sokoban hole */
@@ -2331,12 +2331,12 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			if (webmaker(mptr) || (Is_lolth_level(&u.uz) && !mtmp->mpeaceful)) break;
 			if (amorphous(mptr) || is_whirly(mptr) || unsolid(mptr)){
 			    if(acidic(mptr) ||
-			       mptr == &mons[PM_GELATINOUS_CUBE] ||
-			       mptr == &mons[PM_FIRE_ELEMENTAL]) {
+			       mptr->mtyp == PM_GELATINOUS_CUBE ||
+			       mptr->mtyp == PM_FIRE_ELEMENTAL) {
 				if (in_sight)
 				    pline("%s %s %s spider web!",
 					  Monnam(mtmp),
-					  (mptr == &mons[PM_FIRE_ELEMENTAL]) ?
+					  (mptr->mtyp == PM_FIRE_ELEMENTAL) ?
 					    "burns" : "dissolves",
 					  a_your[trap->madeby_u]);
 				if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){

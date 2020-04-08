@@ -189,7 +189,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 	    char *name, monnambuf[BUFSZ];
 	    boolean accurate = !do_halu;
 
-	    if (mtmp->data == &mons[PM_COYOTE] && accurate)
+	    if (mtmp->mtyp == PM_COYOTE && accurate)
 		name = coyotename(mtmp, monnambuf);
 	    else
 		name = distant_monnam(mtmp, ARTICLE_NONE, monnambuf);
@@ -205,9 +205,9 @@ lookat(x, y, buf, monbuf, shapebuff)
 #else
 		    "tame " :
 #endif
-		    (mtmp->mpeaceful && accurate) ? (mtmp->data==&mons[PM_UVUUDAUM]) ? "meditating " : "peaceful " : "",
+		    (mtmp->mpeaceful && accurate) ? (mtmp->mtyp==PM_UVUUDAUM) ? "meditating " : "peaceful " : "",
 		    name);
-	    if (mtmp->data==&mons[PM_DREAD_SERAPH] && mtmp->mvar2)
+	    if (mtmp->mtyp==PM_DREAD_SERAPH && mtmp->mvar2)
 		Strcat(buf, "praying ");
 		
 	    if (u.ustuck == mtmp)
@@ -337,7 +337,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 				if(u.specialSealsActive&SEAL_ACERERAK && is_undead_mon(mtmp)) ways_seen++;
 				if(uwep && ((uwep->oward & WARD_THJOFASTAFUR) && 
 					((mtmp)->data->mlet == S_LEPRECHAUN || (mtmp)->data->mlet == S_NYMPH || is_thief((mtmp)->data)))) ways_seen++;
-				if(youracedata == &mons[PM_SHARK] && has_blood_mon(mtmp) &&
+				if(youracedata->mtyp == PM_SHARK && has_blood_mon(mtmp) &&
 						(mtmp)->mhp < (mtmp)->mhpmax && is_pool(u.ux, u.uy, TRUE) && is_pool((mtmp)->mx, (mtmp)->my, TRUE)) ways_seen++;
 				if(MATCH_WARN_OF_MON_STRICT(mtmp)){
 					Sprintf(wbuf, "warned of %s",
@@ -369,7 +369,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
 					}
-					if(youracedata == &mons[PM_SHARK] && has_blood_mon(mtmp) &&
+					if(youracedata->mtyp == PM_SHARK && has_blood_mon(mtmp) &&
 						(mtmp)->mhp < (mtmp)->mhpmax && is_pool(u.ux, u.uy, TRUE) && is_pool((mtmp)->mx, (mtmp)->my, TRUE)){
 					Sprintf(wbuf, "smell blood in the water");
 					Strcat(monbuf, wbuf);

@@ -631,7 +631,7 @@ int	mntmp;
 		pline(use_thec,monsterc,"spin a web");
 	    if (u.umonnum == PM_GREMLIN)
 		pline(use_thec,monsterc,"multiply in a fountain");
-	    if (is_unicorn(youmonst.data) || youmonst.data == &mons[PM_KI_RIN])
+	    if (is_unicorn(youmonst.data) || youmonst.data->mtyp == PM_KI_RIN)
 		pline(use_thec,monsterc,"use your horn");
 	    if (is_mind_flayer(youmonst.data))
 		pline(use_thec,monsterc,"emit a mental blast");
@@ -639,7 +639,7 @@ int	mntmp;
 		pline(use_thec,monsterc,"shriek");
 	    if (youmonst.data->msound == MS_JUBJUB)
 		pline(use_thec,monsterc,"scream");
-	    if (youmonst.data == &mons[PM_TOVE])
+	    if (youmonst.data->mtyp == PM_TOVE)
 		pline(use_thec,monsterc,"gimble a hole in the ground");
 		if (attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH))
 		pline(use_thec,monsterc,"attack a distant target");
@@ -1312,7 +1312,7 @@ dogaze()
 			* affects you if the monster is still alive.
 			*/
 			if (!DEADMONSTER(mtmp) &&
-				(mtmp->data == &mons[PM_FLOATING_EYE]) && !mtmp->mcan) {
+				(mtmp->mtyp == PM_FLOATING_EYE) && !mtmp->mcan) {
 				if (!Free_action) {
 					You("are frozen by %s gaze!",
 						s_suffix(mon_nam(mtmp)));
@@ -1332,7 +1332,7 @@ dogaze()
 			* effect would be too weird.
 			*/
 			if (!DEADMONSTER(mtmp) &&
-				(mtmp->data == &mons[PM_MEDUSA]) && !mtmp->mcan) {
+				(mtmp->mtyp == PM_MEDUSA) && !mtmp->mcan) {
 				pline(
 					"Gazing at the awake %s is not a very good idea.",
 					l_monnam(mtmp));
@@ -1476,19 +1476,19 @@ dogaze()
 				int mndx;
 				struct monst *mtmp2;
 				struct monst *mtmp3;
-				if(youracedata ==  &mons[PM_MIGO_PHILOSOPHER]){
+				if(youracedata->mtyp ==  PM_MIGO_PHILOSOPHER){
 					n = rnd(4);
 					pline("Whirling snow swirls out from around you.");
 					mndx = PM_ICE_VORTEX;
-				} else if(youracedata == &mons[PM_MIGO_QUEEN]){
+				} else if(youracedata->mtyp == PM_MIGO_QUEEN){
 					n = rnd(2);
 					pline("Scalding steam swirls out from around you.");
 					mndx = PM_STEAM_VORTEX;
-				} else if(youracedata == &mons[PM_SWAMP_FERN]){
+				} else if(youracedata->mtyp == PM_SWAMP_FERN){
 					n = 1;
 					You("release a spore.");
 					mndx = PM_SWAMP_FERN_SPORE;
-				} else if(youracedata == &mons[PM_BURNING_FERN]){
+				} else if(youracedata->mtyp == PM_BURNING_FERN){
 					n = 1;
 					You("release a spore.");
 					mndx = PM_BURNING_FERN_SPORE;
@@ -1534,7 +1534,7 @@ dogaze()
 		     * affects you if the monster is still alive.
 		     */
 		    if (!DEADMONSTER(mtmp) &&
-			  (mtmp->data==&mons[PM_FLOATING_EYE]) && !mtmp->mcan) {
+			  (mtmp->mtyp==PM_FLOATING_EYE) && !mtmp->mcan) {
 			if (!Free_action) {
 			    You("are frozen by %s gaze!",
 					     s_suffix(mon_nam(mtmp)));
@@ -1553,7 +1553,7 @@ dogaze()
 		     * effect would be too weird.
 		     */
 		    if (!DEADMONSTER(mtmp) &&
-			    (mtmp->data == &mons[PM_MEDUSA]) && !mtmp->mcan) {
+			    (mtmp->mtyp == PM_MEDUSA) && !mtmp->mcan) {
 			pline(
 			 "Gazing at the awake %s is not a very good idea.",
 			    l_monnam(mtmp));
@@ -2046,31 +2046,31 @@ int part;
 	    if (mptr->mlet == S_DOG || mptr->mlet == S_FELINE ||
 		    mptr->mlet == S_YETI)
 		return part == HAND ? "paw" : "pawed";
-		if(mon == &youmonst && youracedata == &mons[PM_HALF_DRAGON])
+		if(mon == &youmonst && youracedata->mtyp == PM_HALF_DRAGON)
 			return part == HAND ? "claw" : "clawed";
-		if(mon->data == &mons[PM_HALF_DRAGON])
+		if(mon->mtyp == PM_HALF_DRAGON)
 			return part == HAND ? "claw" : "clawed";
 	    if (humanoid(mptr) && attacktype(mptr, AT_CLAW) &&
 		    !index(not_claws, mptr->mlet) &&
-		    mptr != &mons[PM_STONE_GOLEM] &&
-		    mptr != &mons[PM_SENTINEL_OF_MITHARDIR] &&
-		    mptr != &mons[PM_INCUBUS] && mptr != &mons[PM_SUCCUBUS])
+		    mptr->mtyp != PM_STONE_GOLEM &&
+		    mptr->mtyp != PM_SENTINEL_OF_MITHARDIR &&
+		    mptr->mtyp != PM_INCUBUS && mptr->mtyp != PM_SUCCUBUS)
 		return part == HAND ? "claw" : "clawed";
 	}
-	if ((mptr == &mons[PM_MUMAK] || mptr == &mons[PM_MASTODON]) &&
+	if ((mptr->mtyp == PM_MUMAK || mptr->mtyp == PM_MASTODON) &&
 		part == NOSE)
 	    return "trunk";
-	if (mptr == &mons[PM_SHARK] && part == HAIR)
+	if (mptr->mtyp == PM_SHARK && part == HAIR)
 	    return "skin";	/* sharks don't have scales */
-	if (mptr == &mons[PM_JELLYFISH] && (part == ARM || part == FINGER ||
+	if (mptr->mtyp == PM_JELLYFISH && (part == ARM || part == FINGER ||
 	    part == HAND || part == FOOT || part == TOE))
 	    return "tentacle";
-	if (mptr == &mons[PM_FLOATING_EYE] && part == EYE)
+	if (mptr->mtyp == PM_FLOATING_EYE && part == EYE)
 	    return "cornea";
-	if (mptr == &mons[PM_RAVEN] || mptr == &mons[PM_CROW])
+	if (mptr->mtyp == PM_RAVEN || mptr->mtyp == PM_CROW)
 	    return bird_parts[part];
 	if (mptr->mlet == S_CENTAUR || mptr->mlet == S_UNICORN ||
-		(mptr == &mons[PM_ROTHE] && part != HAIR))
+		(mptr->mtyp == PM_ROTHE && part != HAIR))
 	    return horse_parts[part];
 	if (mptr->mlet == S_LIGHT) {
 		if (part == HANDED) return "rayed";
@@ -2081,13 +2081,13 @@ int part;
 	if (mptr->mlet == S_EYE && !is_auton(mptr))
 	    return sphere_parts[part];
 	if (mptr->mlet == S_JELLY || mptr->mlet == S_PUDDING ||
-		mptr->mlet == S_BLOB || mptr == &mons[PM_JELLYFISH])
+		mptr->mlet == S_BLOB || mptr->mtyp == PM_JELLYFISH)
 	    return jelly_parts[part];
 	if (mptr->mlet == S_VORTEX || mptr->mlet == S_ELEMENTAL)
 	    return vortex_parts[part];
 	if (mptr->mlet == S_FUNGUS)
 	    return fungus_parts[part];
-	if (mptr->mlet == S_EEL && mptr != &mons[PM_JELLYFISH])
+	if (mptr->mlet == S_EEL && mptr->mtyp != PM_JELLYFISH)
 	    return fish_parts[part];
 	if (mptr->mlet == S_ANT)
 		return insect_parts[part];

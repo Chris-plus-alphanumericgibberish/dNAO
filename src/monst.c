@@ -39,7 +39,7 @@ void NDECL(monst_init);
  *	symbol color (C(x) macro)
  */
 #define MON(nam,sym,lvl,gen,atk,siz,mr1,mr2,flgm,flgt,flgb,flgg,flga,flgv,col) \
-	   {nam,sym,lvl,gen,atk,siz,mr1,mr2,flgm,flgt,flgb,flgg,flga,flgv,C(col)}
+	   {nam,sym,lvl,gen,atk,siz,mr1,mr2,flgm,flgt,flgb,flgg,flga,flgv,C(col),-1}
 /*Variable-specificity armor-class*/
 #define NAT_AC(ac)  10-ac,0,0
 #define DEX_AC(ac)  0,10-ac,0

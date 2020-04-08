@@ -349,7 +349,7 @@ struct obj *otmp;
 	case SPE_HEALING:
 	case SPE_EXTRA_HEALING:
 		reveal_invis = TRUE;
-	    if (mtmp->data != &mons[PM_PESTILENCE]) {
+	    if (mtmp->mtyp != PM_PESTILENCE) {
 		wake = FALSE;		/* wakeup() makes the target angry */
 		mtmp->mhp += d(6, otyp == SPE_EXTRA_HEALING ? 8 : 4);
 		if (mtmp->mhp > mtmp->mhpmax)
@@ -630,7 +630,7 @@ coord *cc;
 		mtmp2->mtrapped = 0;
 		mtmp2->msleeping = 0;
 		mtmp2->mfrozen = 0;
-      if(mtmp->data == &mons[PM_GIANT_TURTLE] && (mtmp->mflee))
+      if(mtmp->mtyp == PM_GIANT_TURTLE && (mtmp->mflee))
         mtmp2->mcanmove=0;
       else
 		mtmp2->mcanmove = 1;
@@ -779,7 +779,7 @@ boolean dolls;
 					(void) memcpy((genericptr_t)&m_id,
 						(genericptr_t)obj->oextra, sizeof(m_id));
 					ghost = find_mid(m_id, FM_FMON);
-						if (ghost && ghost->data == &mons[PM_GHOST]) {
+						if (ghost && ghost->mtyp == PM_GHOST) {
 							int x2, y2;
 							x2 = ghost->mx; y2 = ghost->my;
 							if (ghost->mtame)
@@ -2812,7 +2812,7 @@ int gaze_cancel;
 	    if (is_were(mdef->data) && mdef->data->mlet != S_HUMAN)
 		were_change(mdef);
 
-	    if (mdef->data == &mons[PM_CLAY_GOLEM] || mdef->data == &mons[PM_SPELL_GOLEM]) {
+	    if (mdef->mtyp == PM_CLAY_GOLEM || mdef->mtyp == PM_SPELL_GOLEM) {
 		if (canseemon(mdef))
 		    pline(writing_vanishes, s_suffix(mon_nam(mdef)));
 
@@ -3474,25 +3474,25 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		break;
 
 	case AD_DEAD:		/* death*/
-		if(mon->data==&mons[PM_METROID]){
+		if(mon->mtyp==PM_METROID){
 			if (canseemon(mon))
 				pline("The metroid is irradiated with pure energy!  It divides!");
 			makemon(&mons[PM_METROID], mon->mx, mon->my, MM_ADJACENTOK);
 			break;
 		}
-		else if(mon->data==&mons[PM_ALPHA_METROID]||mon->data==&mons[PM_GAMMA_METROID]){
+		else if(mon->mtyp==PM_ALPHA_METROID||mon->mtyp==PM_GAMMA_METROID){
 			if (canseemon(mon))
 				pline("The metroid is irradiated with pure energy!  It buds off a baby metroid!");
 			makemon(&mons[PM_BABY_METROID], mon->mx, mon->my, MM_ADJACENTOK);
 			break;
 		}
-		else if(mon->data==&mons[PM_ZETA_METROID]||mon->data==&mons[PM_OMEGA_METROID]){
+		else if(mon->mtyp==PM_ZETA_METROID||mon->mtyp==PM_OMEGA_METROID){
 			if (canseemon(mon))
 				pline("The metroid is irradiated with pure energy!  It buds off another metroid!");
 			makemon(&mons[PM_METROID], mon->mx, mon->my, MM_ADJACENTOK);
 			break;
 		}
-		else if(mon->data==&mons[PM_METROID_QUEEN]){
+		else if(mon->mtyp==PM_METROID_QUEEN){
 			if (canseemon(mon))
 				pline("The metroid queen is irradiated with pure energy!  She buds off more metroids!");
 			makemon(&mons[PM_METROID], mon->mx, mon->my, MM_ADJACENTOK);
@@ -3506,7 +3506,7 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 			mon->mfaction = DELOUSED;
 			break;
 		}
-		if (mon->data == &mons[PM_DEATH]) {
+		if (mon->mtyp == PM_DEATH) {
 			mon->mhpmax += mon->mhpmax / 2;
 			if (mon->mhpmax >= MAGIC_COOKIE)
 				mon->mhpmax = MAGIC_COOKIE - 1;
@@ -3650,10 +3650,10 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 	    tmp /= 6;
 	}
 	if(yours && (is_spider(mon->data) 
-		|| mon->data == &mons[PM_SPROW]
-		|| mon->data == &mons[PM_DRIDER]
-		|| mon->data == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
-		|| mon->data == &mons[PM_AVATAR_OF_LOLTH]
+		|| mon->mtyp == PM_SPROW
+		|| mon->mtyp == PM_DRIDER
+		|| mon->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
+		|| mon->mtyp == PM_AVATAR_OF_LOLTH
 	) && roll_madness(MAD_ARACHNOPHOBIA)){
 	    tmp /= 4;
 	}
@@ -3776,7 +3776,7 @@ xchar sx, sy;
 			break;
 		} else {
 			struct obj *itemp, *inext;
-			if (!Golded && !(Stone_resistance && youracedata != &mons[PM_STONE_GOLEM])
+			if (!Golded && !(Stone_resistance && youracedata->mtyp != PM_STONE_GOLEM)
 				&& !is_gold(youracedata)
 				&& !(poly_when_golded(youracedata) &&
 				polymon(PM_GOLD_GOLEM))
@@ -3937,7 +3937,7 @@ struct obj *otmp;	/* source of flash */
 		    pline("%s is blinded by the flash!", Monnam(mtmp));
 		    res = 1;
 		}
-		if (mtmp->data == &mons[PM_GREMLIN]) {
+		if (mtmp->mtyp == PM_GREMLIN) {
 		    /* Rule #1: Keep them out of the light. */
 		    amt = otmp->otyp == WAN_LIGHT ? d(1 + otmp->spe, 4) :
 		          rn2(min(mtmp->mhp,4));
@@ -4220,13 +4220,13 @@ int dx, dy, range, flat;
 						mon->mhp = mon->mhpmax;
 						break; /* Out of while loop */
 					}
-					if((mon->data == &mons[PM_DEMOGORGON] || mon->data == &mons[PM_LAMASHTU] || mon->data == &mons[PM_ASMODEUS]) && 
+					if((mon->mtyp == PM_DEMOGORGON || mon->mtyp == PM_LAMASHTU || mon->mtyp == PM_ASMODEUS) && 
 						(adtyp == AD_DISN)
 					){
 						shieldeff(sx, sy);
 						break; /* Out of while loop */
 					}
-					if (mon->data == &mons[PM_DEATH] && adtyp == AD_DEAD) {
+					if (mon->mtyp == PM_DEATH && adtyp == AD_DEAD) {
 					if (canseemon(mon)) {
 						hit(fltxt, mon, ".");
 						pline("%s absorbs the deadly %s!", Monnam(mon),
@@ -4236,10 +4236,10 @@ int dx, dy, range, flat;
 					}
 					break; /* Out of while loop */
 					}
-					if(adtyp == AD_DEAD && (mon->data == &mons[PM_METROID]
-					 ||mon->data == &mons[PM_ALPHA_METROID]||mon->data == &mons[PM_GAMMA_METROID]
-					 ||mon->data == &mons[PM_ZETA_METROID]||mon->data == &mons[PM_OMEGA_METROID]
-					 ||mon->data == &mons[PM_METROID_QUEEN])
+					if(adtyp == AD_DEAD && (mon->mtyp == PM_METROID
+					 ||mon->mtyp == PM_ALPHA_METROID||mon->mtyp == PM_GAMMA_METROID
+					 ||mon->mtyp == PM_ZETA_METROID||mon->mtyp == PM_OMEGA_METROID
+					 ||mon->mtyp == PM_METROID_QUEEN)
 					) range=0;//end while loop after this
 					if(adtyp == AD_GOLD){
 						if(otmp){
@@ -4525,28 +4525,28 @@ int type;
 	struct obj *otmp;
 	if(type != AD_DGST){
 		otmp = mksobj_at(CORPSE, mon->mx, mon->my, FALSE, FALSE);
-		otmp->corpsenm = mon->data==&mons[PM_PARASITIZED_COMMANDER] ? PM_PARASITIC_MASTER_MIND_FLAYER : PM_PARASITIC_MIND_FLAYER;
+		otmp->corpsenm = mon->mtyp==PM_PARASITIZED_COMMANDER ? PM_PARASITIC_MASTER_MIND_FLAYER : PM_PARASITIC_MIND_FLAYER;
 		fix_object(otmp);
 	}
-	if(mon->data == &mons[PM_PARASITIZED_ANDROID]){
+	if(mon->mtyp == PM_PARASITIZED_ANDROID){
 		newcham(mon, PM_ANDROID, FALSE, FALSE);
 		mon->m_lev = 7;
 		mon->mhpmax = d(7,8);
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
-	else if(mon->data == &mons[PM_PARASITIZED_GYNOID]){
+	else if(mon->mtyp == PM_PARASITIZED_GYNOID){
 		newcham(mon, PM_GYNOID, FALSE, FALSE);
 		mon->m_lev = 14;
 		mon->mhpmax = d(14,8);
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
-	else if(mon->data == &mons[PM_PARASITIZED_OPERATOR]){
+	else if(mon->mtyp == PM_PARASITIZED_OPERATOR){
 		newcham(mon, PM_OPERATOR, FALSE, FALSE);
 		mon->m_lev = 7;
 		mon->mhpmax = d(7,8);
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
-	else if(mon->data == &mons[PM_PARASITIZED_COMMANDER]){
+	else if(mon->mtyp == PM_PARASITIZED_COMMANDER){
 		newcham(mon, PM_COMMANDER, FALSE, FALSE);
 		mon->m_lev = 3;
 		mon->mhpmax = 20+rn2(4);
@@ -4560,7 +4560,7 @@ int type;
 		mon->entangled = SHACKLES;
 		mon->movement = 0;
 	}
-	else if(mon->data == &mons[PM_PARASITIZED_DOLL]){
+	else if(mon->mtyp == PM_PARASITIZED_DOLL){
 		newcham(mon, PM_LIVING_DOLL, FALSE, FALSE);
 		mon->m_lev = 15;
 		mon->mhpmax = 60;
@@ -4579,10 +4579,10 @@ struct monst *mon;
 {
 	struct monst *mtmp;
 	mon->mfaction = 0;
-	if(mon->data == &mons[PM_COMMANDER]){
+	if(mon->mtyp == PM_COMMANDER){
 		mon->mfaction = M_GREAT_WEB;
 	}
-	if(mon->data == &mons[PM_LIVING_DOLL]){
+	if(mon->mtyp == PM_LIVING_DOLL){
 		mon->mpeaceful = 1;
 	} else {
 		mtmp = tamedog(mon,(struct obj *) 0);
@@ -5280,7 +5280,7 @@ int damage, tell;
 	if (dlev > 50) dlev = 50;
 	else if (dlev < 1) dlev = 1;
 
-	if(mtmp->data == &mons[PM_CHOKHMAH_SEPHIRAH]) dlev+=u.chokhmah;
+	if(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) dlev+=u.chokhmah;
 	resisted = rn2(100 + alev - dlev) < mtmp->data->mr;
 	if (resisted) {
 	    if (tell) {
@@ -5297,10 +5297,10 @@ int damage, tell;
 		damage /= 6;
 	}
 	if(!flags.mon_moving && (is_spider(mtmp->data) 
-		|| mtmp->data == &mons[PM_SPROW]
-		|| mtmp->data == &mons[PM_DRIDER]
-		|| mtmp->data == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
-		|| mtmp->data == &mons[PM_AVATAR_OF_LOLTH]
+		|| mtmp->mtyp == PM_SPROW
+		|| mtmp->mtyp == PM_DRIDER
+		|| mtmp->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
+		|| mtmp->mtyp == PM_AVATAR_OF_LOLTH
 	) && roll_madness(MAD_ARACHNOPHOBIA)){
 		damage /= 4;
 	}

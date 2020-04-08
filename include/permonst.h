@@ -108,6 +108,7 @@ struct permonst {
 # ifdef TEXTCOLOR
 	uchar		mcolor;			/* color to use */
 # endif
+	int				mtyp;			/* Index number of this permonst entry */
 };
 
 extern NEARDATA struct permonst

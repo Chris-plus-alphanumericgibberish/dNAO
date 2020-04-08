@@ -49,7 +49,7 @@
 #define mon_warning(mon) ((Warning && !(mon)->mpeaceful &&         \
          (distu((mon)->mx, (mon)->my) < 100) &&        \
          (((int) ((mon)->m_lev / 4)) >= flags.warnlevel))    \
-        || ((mon)->data == &mons[PM_GREAT_CTHULHU] && \
+        || ((mon)->mtyp == PM_GREAT_CTHULHU && \
 		    (distu((mon)->mx, (mon)->my) < 2*BOLT_LIM * 2*BOLT_LIM) \
 			) \
 		)

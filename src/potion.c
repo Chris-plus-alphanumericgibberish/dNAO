@@ -1463,7 +1463,7 @@ boolean your_fault;
 	case POT_HEALING:
 	case POT_EXTRA_HEALING:
 	case POT_FULL_HEALING:
-		if (mon->data == &mons[PM_PESTILENCE]) goto do_illness;
+		if (mon->mtyp == PM_PESTILENCE) goto do_illness;
 		/*FALLTHRU*/
 	case POT_GOAT_S_MILK:
 	case POT_RESTORE_ABILITY:
@@ -1477,7 +1477,7 @@ boolean your_fault;
 		}
 		break;
 	case POT_SICKNESS:
-		if (mon->data == &mons[PM_PESTILENCE]) goto do_healing;
+		if (mon->mtyp == PM_PESTILENCE) goto do_healing;
 		if (dmgtype(mon->data, AD_DISE) ||
 			   dmgtype(mon->data, AD_PEST) || /* won't happen, see prior goto */
 			   resists_poison(mon)) {
@@ -1557,14 +1557,14 @@ boolean your_fault;
 				!Protection_from_shape_changers)
 			    new_were(mon);	/* transform into beast */
 		    }
-		} else if(mon->data == &mons[PM_GREMLIN]) {
+		} else if(mon->mtyp == PM_GREMLIN) {
 		    angermon = FALSE;
 		    (void)split_mon(mon, (struct monst *)0);
-		} else if(mon->data == &mons[PM_FLAMING_SPHERE] ||
-			mon->data == &mons[PM_IRON_GOLEM] || mon->data == &mons[PM_CHAIN_GOLEM]) {
+		} else if(mon->mtyp == PM_FLAMING_SPHERE ||
+			mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM) {
 		    if (canseemon(mon))
 			pline("%s %s.", Monnam(mon),
-				(mon->data == &mons[PM_IRON_GOLEM] || mon->data == &mons[PM_CHAIN_GOLEM]) ?
+				(mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM) ?
 				"rusts" : "flickers");
 		    mon->mhp -= d(1,6);
 		    if (mon->mhp < 1) {
@@ -1589,14 +1589,14 @@ boolean your_fault;
 			}
 			else if (is_were(mon->data) && !is_human(mon->data))
 			    new_were(mon);	/* revert to human */
-		} else if(mon->data == &mons[PM_GREMLIN]) {
+		} else if(mon->mtyp == PM_GREMLIN) {
 		    angermon = FALSE;
 		    (void)split_mon(mon, (struct monst *)0);
-		} else if(mon->data == &mons[PM_FLAMING_SPHERE] ||
-			mon->data == &mons[PM_IRON_GOLEM] || mon->data == &mons[PM_CHAIN_GOLEM]) {
+		} else if(mon->mtyp == PM_FLAMING_SPHERE ||
+			mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM) {
 		    if (canseemon(mon))
 			pline("%s %s.", Monnam(mon),
-				(mon->data == &mons[PM_IRON_GOLEM] || mon->data == &mons[PM_CHAIN_GOLEM]) ?
+				(mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM) ?
 				"rusts" : "flickers");
 		    mon->mhp -= d(1,6);
 		    if (mon->mhp < 1) {

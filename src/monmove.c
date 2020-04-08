@@ -154,9 +154,9 @@ struct monst *mtmp;
 				 || (alignedfearobj && !touch_artifact(alignedfearobj, mtmp, FALSE))
 				 ) && scaryItem(mtmp)
 				)
-			 || (u.umonnum == PM_GHOUL && x == mtmp->mux && y == mtmp->muy && mtmp->data == &mons[PM_GUG])
-			 || (mat && mat->data == &mons[PM_GHOUL] && mtmp->data == &mons[PM_GUG])
-			 || (mat && mat->data == &mons[PM_MOVANIC_DEVA] && (is_animal(mtmp->data) || is_plant(mtmp->data)))
+			 || (u.umonnum == PM_GHOUL && x == mtmp->mux && y == mtmp->muy && mtmp->mtyp == PM_GUG)
+			 || (mat && mat->mtyp == PM_GHOUL && mtmp->mtyp == PM_GUG)
+			 || (mat && mat->mtyp == PM_MOVANIC_DEVA && (is_animal(mtmp->data) || is_plant(mtmp->data)))
 			 || (wardAt == HEPTAGRAM && scaryHept(num_wards_at(x,y), mtmp))
 			 || (wardAt == GORGONEION && scaryGorg(num_wards_at(x,y), mtmp))
 			 || (wardAt == CIRCLE_OF_ACHERON && scaryCircle(num_wards_at(x,y), mtmp))
@@ -192,8 +192,8 @@ struct monst *mtmp;
 			mtmp->data->mlet == S_NAGA ||
 			mtmp->data->mlet == S_SNAKE ||
 			mtmp->data->mlet == S_LIZARD ||
-			mtmp->data == &mons[PM_TOVE] ||
-			mtmp->data == &mons[PM_KRAKEN];
+			mtmp->mtyp == PM_TOVE ||
+			mtmp->mtyp == PM_KRAKEN;
 }
 
 boolean
@@ -221,7 +221,7 @@ struct monst *mtmp;
 			mtmp->data->mlet == S_SPIDER ||
 			mtmp->data->mlet == S_EEL ||
 			mtmp->data->mlet == S_LIZARD ||
-			mtmp->data == &mons[PM_TOVE];
+			mtmp->mtyp == PM_TOVE;
 }
 
 boolean
@@ -285,19 +285,19 @@ struct monst *mtmp;
 	if(complete <= 0) return FALSE;
 	else if(mtmp->isshk || mtmp->iswiz || 
 			is_rider(mtmp->data) ||
-			(mtmp->data == &mons[PM_CHOKHMAH_SEPHIRAH]) ||
-			(mtmp->data == &mons[PM_ELDER_PRIEST]) ||
-			(mtmp->data == &mons[PM_GREAT_CTHULHU]) ||
-			(mtmp->data == &mons[PM_CHAOS] && rn2(2)) ||
-			(mtmp->data == &mons[PM_DEMOGORGON] && rn2(3)) ||
-			(mtmp->data == &mons[PM_LAMASHTU] && rn2(3)) ||
-			(mtmp->data == &mons[PM_ASMODEUS] && rn2(9))
+			(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) ||
+			(mtmp->mtyp == PM_ELDER_PRIEST) ||
+			(mtmp->mtyp == PM_GREAT_CTHULHU) ||
+			(mtmp->mtyp == PM_CHAOS && rn2(2)) ||
+			(mtmp->mtyp == PM_DEMOGORGON && rn2(3)) ||
+			(mtmp->mtyp == PM_LAMASHTU && rn2(3)) ||
+			(mtmp->mtyp == PM_ASMODEUS && rn2(9))
 		) return FALSE;
-	return 	mtmp->data == &mons[PM_FREEZING_SPHERE] ||
-			mtmp->data == &mons[PM_FLAMING_SPHERE] ||
-			mtmp->data == &mons[PM_SHOCKING_SPHERE] ||
+	return 	mtmp->mtyp == PM_FREEZING_SPHERE ||
+			mtmp->mtyp == PM_FLAMING_SPHERE ||
+			mtmp->mtyp == PM_SHOCKING_SPHERE ||
 			mtmp->data->mlet == S_FUNGUS ||
-			mtmp->data == &mons[PM_ZUGGTMOY] ||
+			mtmp->mtyp == PM_ZUGGTMOY ||
 			mtmp->data->mlet == S_VORTEX ||
 			mtmp->data->mlet == S_ELEMENTAL ||
 			mtmp->data->mlet == S_XORN ||
@@ -306,8 +306,8 @@ struct monst *mtmp;
 			(mtmp->data->mlet == S_NAGA && complete >= 4) ||
 			(is_undead_mon(mtmp) && complete >= 4) ||
 			(mtmp->data->mlet == S_TRAPPER && complete >= 4  && /*This one means "is a metroid", which are being counted as energions for this*/
-				mtmp->data != &mons[PM_TRAPPER] &&
-				mtmp->data != &mons[PM_LURKER_ABOVE]) ||
+				mtmp->mtyp != PM_TRAPPER &&
+				mtmp->mtyp != PM_LURKER_ABOVE) ||
 			(is_angel(mtmp->data) && complete == 7) ||
 			(is_keter(mtmp->data) && complete == 7) ||
 			(is_demon(mtmp->data) && complete == 7) ||
@@ -338,50 +338,50 @@ struct monst *mtmp;
 			mtmp->mfaction == CRANIUM_RAT ||
 			mtmp->mfaction == MISTWEAVER ||
 			mtmp->mfaction == FRACTURED ||
-			mtmp->data == &mons[PM_GUG] ||
-			mtmp->data == &mons[PM_MIGO_WORKER] ||
-			mtmp->data == &mons[PM_MIGO_SOLDIER] ||
-			mtmp->data == &mons[PM_MIGO_PHILOSOPHER] ||
-			mtmp->data == &mons[PM_MIGO_QUEEN] ||
-			mtmp->data == &mons[PM_HOUND_OF_TINDALOS] ||
-			mtmp->data == &mons[PM_TRAPPER] ||
-			mtmp->data == &mons[PM_LURKER_ABOVE] ||
-			mtmp->data == &mons[PM_NIGHTGAUNT] ||
-			mtmp->data == &mons[PM_BYAKHEE] ||
-			(mtmp->data == &mons[PM_HUNTING_HORROR] && complete == 6) ||
-			mtmp->data == &mons[PM_MIND_FLAYER] ||
-			mtmp->data == &mons[PM_PARASITIC_MIND_FLAYER] ||
-			mtmp->data == &mons[PM_PARASITIZED_ANDROID] ||
-			mtmp->data == &mons[PM_PARASITIZED_GYNOID] ||
-			(mtmp->data == &mons[PM_PARASITIC_MASTER_MIND_FLAYER] && complete == 6) ||
-			(mtmp->data == &mons[PM_PARASITIZED_EMBRACED_ALIDER] && complete == 6) ||
-			(mtmp->data == &mons[PM_MASTER_MIND_FLAYER] && complete == 6) ||
-			mtmp->data == &mons[PM_DEEP_ONE] ||
-			mtmp->data == &mons[PM_DEEPER_ONE] ||
-			(mtmp->data == &mons[PM_DEEPEST_ONE] && complete == 6) ||
-			mtmp->data == &mons[PM_CHANGED] ||
-			(mtmp->data == &mons[PM_WARRIOR_CHANGED] && complete == 6) ||
-			mtmp->data == &mons[PM_EDDERKOP] ||
-			mtmp->data == &mons[PM_NEVERWAS] ||
-			mtmp->data == &mons[PM_INTONER] ||
-			(mtmp->data == &mons[PM_BLACK_FLOWER] && complete == 6) ||
-			mtmp->data == &mons[PM_DARK_YOUNG] ||
-			mtmp->data == &mons[PM_WEEPING_ANGEL] ||
-			mtmp->data == &mons[PM_ANCIENT_OF_ICE] ||
-			(mtmp->data == &mons[PM_ANCIENT_OF_DEATH] && complete == 6) ||
-			(mtmp->data == &mons[PM_JUIBLEX] && complete == 6) ||
-			(mtmp->data == &mons[PM_MASKED_QUEEN] && complete == 6) ||
-			(mtmp->data == &mons[PM_PALE_NIGHT] && complete == 6) ||
-			(mtmp->data == &mons[PM_LEVIATHAN] && complete == 6) ||
-			(mtmp->data == &mons[PM_BAALPHEGOR] && complete == 6) ||
-			(mtmp->data == &mons[PM_VERIER] && complete == 6) ||
-			(mtmp->data == &mons[PM_DAGON] && complete == 6) ||
-			(mtmp->data == &mons[PM_DEMOGORGON] && complete == 6 && !rn2(3)) ||
-			(mtmp->data == &mons[PM_GREAT_CTHULHU] && complete == 6) ||
-			(mtmp->data == &mons[PM_LUGRIBOSSK] && complete == 6) ||
-			(mtmp->data == &mons[PM_MAANZECORIAN] && complete == 6) ||
-			(mtmp->data == &mons[PM_ELDER_PRIEST] && complete == 6) ||
-			(mtmp->data == &mons[PM_PRIEST_OF_AN_UNKNOWN_GOD] && complete == 6);
+			mtmp->mtyp == PM_GUG ||
+			mtmp->mtyp == PM_MIGO_WORKER ||
+			mtmp->mtyp == PM_MIGO_SOLDIER ||
+			mtmp->mtyp == PM_MIGO_PHILOSOPHER ||
+			mtmp->mtyp == PM_MIGO_QUEEN ||
+			mtmp->mtyp == PM_HOUND_OF_TINDALOS ||
+			mtmp->mtyp == PM_TRAPPER ||
+			mtmp->mtyp == PM_LURKER_ABOVE ||
+			mtmp->mtyp == PM_NIGHTGAUNT ||
+			mtmp->mtyp == PM_BYAKHEE ||
+			(mtmp->mtyp == PM_HUNTING_HORROR && complete == 6) ||
+			mtmp->mtyp == PM_MIND_FLAYER ||
+			mtmp->mtyp == PM_PARASITIC_MIND_FLAYER ||
+			mtmp->mtyp == PM_PARASITIZED_ANDROID ||
+			mtmp->mtyp == PM_PARASITIZED_GYNOID ||
+			(mtmp->mtyp == PM_PARASITIC_MASTER_MIND_FLAYER && complete == 6) ||
+			(mtmp->mtyp == PM_PARASITIZED_EMBRACED_ALIDER && complete == 6) ||
+			(mtmp->mtyp == PM_MASTER_MIND_FLAYER && complete == 6) ||
+			mtmp->mtyp == PM_DEEP_ONE ||
+			mtmp->mtyp == PM_DEEPER_ONE ||
+			(mtmp->mtyp == PM_DEEPEST_ONE && complete == 6) ||
+			mtmp->mtyp == PM_CHANGED ||
+			(mtmp->mtyp == PM_WARRIOR_CHANGED && complete == 6) ||
+			mtmp->mtyp == PM_EDDERKOP ||
+			mtmp->mtyp == PM_NEVERWAS ||
+			mtmp->mtyp == PM_INTONER ||
+			(mtmp->mtyp == PM_BLACK_FLOWER && complete == 6) ||
+			mtmp->mtyp == PM_DARK_YOUNG ||
+			mtmp->mtyp == PM_WEEPING_ANGEL ||
+			mtmp->mtyp == PM_ANCIENT_OF_ICE ||
+			(mtmp->mtyp == PM_ANCIENT_OF_DEATH && complete == 6) ||
+			(mtmp->mtyp == PM_JUIBLEX && complete == 6) ||
+			(mtmp->mtyp == PM_MASKED_QUEEN && complete == 6) ||
+			(mtmp->mtyp == PM_PALE_NIGHT && complete == 6) ||
+			(mtmp->mtyp == PM_LEVIATHAN && complete == 6) ||
+			(mtmp->mtyp == PM_BAALPHEGOR && complete == 6) ||
+			(mtmp->mtyp == PM_VERIER && complete == 6) ||
+			(mtmp->mtyp == PM_DAGON && complete == 6) ||
+			(mtmp->mtyp == PM_DEMOGORGON && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_GREAT_CTHULHU && complete == 6) ||
+			(mtmp->mtyp == PM_LUGRIBOSSK && complete == 6) ||
+			(mtmp->mtyp == PM_MAANZECORIAN && complete == 6) ||
+			(mtmp->mtyp == PM_ELDER_PRIEST && complete == 6) ||
+			(mtmp->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD && complete == 6);
 }
 boolean
 scaryHam(complete, mtmp)
@@ -392,8 +392,8 @@ struct monst *mtmp;
 	else if(mtmp->isshk || mtmp->iswiz || 
 			is_rider(mtmp->data)) return FALSE;
 	return 	is_auton(mtmp->data) ||
-			mtmp->data == &mons[PM_FLOATING_EYE] || 
-			mtmp->data == &mons[PM_BEHOLDER];
+			mtmp->mtyp == PM_FLOATING_EYE || 
+			mtmp->mtyp == PM_BEHOLDER;
 
 }
 boolean
@@ -404,19 +404,19 @@ struct monst *mtmp;
 	if(complete <= 0) return FALSE;
 	else if(mtmp->isshk || mtmp->iswiz || mtmp->mpeaceful || 
 			is_rider(mtmp->data) ||
-			(mtmp->data == &mons[PM_CHOKHMAH_SEPHIRAH]) ||
-			(mtmp->data == &mons[PM_ELDER_PRIEST]) ||
-			(mtmp->data == &mons[PM_GREAT_CTHULHU]) ||
-			(mtmp->data == &mons[PM_CHAOS] && rn2(2)) ||
-			(mtmp->data == &mons[PM_DEMOGORGON] && rn2(3)) ||
-			(mtmp->data == &mons[PM_LAMASHTU] && rn2(3)) ||
-			(mtmp->data == &mons[PM_ASMODEUS] && complete <= d(1,8))
+			(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) ||
+			(mtmp->mtyp == PM_ELDER_PRIEST) ||
+			(mtmp->mtyp == PM_GREAT_CTHULHU) ||
+			(mtmp->mtyp == PM_CHAOS && rn2(2)) ||
+			(mtmp->mtyp == PM_DEMOGORGON && rn2(3)) ||
+			(mtmp->mtyp == PM_LAMASHTU && rn2(3)) ||
+			(mtmp->mtyp == PM_ASMODEUS && complete <= d(1,8))
 		) return FALSE;
 	return 	(is_minion(mtmp->data) ||
-			mtmp->data == &mons[PM_HELL_HOUND] || 
-			mtmp->data == &mons[PM_HELL_HOUND_PUP] ||
-			mtmp->data == &mons[PM_EYE_OF_DOOM] ||
-			mtmp->data == &mons[PM_SON_OF_TYPHON] ||
+			mtmp->mtyp == PM_HELL_HOUND || 
+			mtmp->mtyp == PM_HELL_HOUND_PUP ||
+			mtmp->mtyp == PM_EYE_OF_DOOM ||
+			mtmp->mtyp == PM_SON_OF_TYPHON ||
 			is_golem(mtmp->data) ||
 			is_angel(mtmp->data) ||
 			is_keter(mtmp->data) ||
@@ -433,22 +433,22 @@ struct monst *mtmp;
 	if(complete <= 0) return FALSE;
 	else if(mtmp->isshk || mtmp->iswiz || 
 			is_rider(mtmp->data) ||
-			(mtmp->data == &mons[PM_CHOKHMAH_SEPHIRAH]) ||
-			(mtmp->data == &mons[PM_ELDER_PRIEST]) ||
-			(mtmp->data == &mons[PM_GREAT_CTHULHU]) ||
-			(mtmp->data == &mons[PM_CHAOS] && rn2(2)) ||
-			(mtmp->data == &mons[PM_DEMOGORGON] && rn2(3)) ||
-			(mtmp->data == &mons[PM_LAMASHTU] && rn2(3)) ||
-			(mtmp->data == &mons[PM_ASMODEUS] && !rn2(9))
+			(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) ||
+			(mtmp->mtyp == PM_ELDER_PRIEST) ||
+			(mtmp->mtyp == PM_GREAT_CTHULHU) ||
+			(mtmp->mtyp == PM_CHAOS && rn2(2)) ||
+			(mtmp->mtyp == PM_DEMOGORGON && rn2(3)) ||
+			(mtmp->mtyp == PM_LAMASHTU && rn2(3)) ||
+			(mtmp->mtyp == PM_ASMODEUS && !rn2(9))
 		) return FALSE;
 	return 	(is_demon(mtmp->data) || 
-			mtmp->data == &mons[PM_HELL_HOUND] ||
-			mtmp->data == &mons[PM_HELL_HOUND_PUP] ||
-			mtmp->data == &mons[PM_GARGOYLE] || 
-			mtmp->data == &mons[PM_WINGED_GARGOYLE] ||
-			mtmp->data == &mons[PM_DJINNI] ||
-			mtmp->data == &mons[PM_SANDESTIN] ||
-			mtmp->data == &mons[PM_SALAMANDER] ||
+			mtmp->mtyp == PM_HELL_HOUND ||
+			mtmp->mtyp == PM_HELL_HOUND_PUP ||
+			mtmp->mtyp == PM_GARGOYLE || 
+			mtmp->mtyp == PM_WINGED_GARGOYLE ||
+			mtmp->mtyp == PM_DJINNI ||
+			mtmp->mtyp == PM_SANDESTIN ||
+			mtmp->mtyp == PM_SALAMANDER ||
 			mtmp->data->mlet == S_ELEMENTAL ||
 			mtmp->data->mlet == S_IMP);
 }
@@ -460,10 +460,10 @@ struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
 	else if(mtmp->isshk || mtmp->iswiz || 
-			is_lminion(mtmp) || mtmp->data == &mons[PM_ANGEL] ||
-			mtmp->data == &mons[PM_MAANZECORIAN] ||
+			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
+			mtmp->mtyp == PM_MAANZECORIAN ||
 			is_rider(mtmp->data)) return FALSE;
-	return mtmp->data == &mons[PM_CERBERUS] || is_undead_mon(mtmp);
+	return mtmp->mtyp == PM_CERBERUS || is_undead_mon(mtmp);
 }
 
 boolean
@@ -473,22 +473,22 @@ struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
 	else if(mtmp->isshk || mtmp->iswiz || 
-			is_lminion(mtmp) || mtmp->data == &mons[PM_ANGEL] ||
+			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
 			is_rider(mtmp->data)) return FALSE;
 	else if(mtmp->data->mlet == S_SNAKE){
 				mtmp->mpeaceful = TRUE;
 			}
 	return d(1,100) <= 33*complete && 
 			(!is_golem(mtmp->data)) &&
-			(mtmp->data != &mons[PM_CHOKHMAH_SEPHIRAH]) &&
-			(mtmp->data != &mons[PM_ELDER_PRIEST]) &&
-			(mtmp->data != &mons[PM_GREAT_CTHULHU]) &&
-			(mtmp->data != &mons[PM_LUGRIBOSSK]) &&
-			(mtmp->data != &mons[PM_MAANZECORIAN]) &&
-			(mtmp->data != &mons[PM_CHAOS] || rn2(2)) &&
-			(mtmp->data != &mons[PM_DEMOGORGON] || !rn2(3)) &&
-			(mtmp->data != &mons[PM_LAMASHTU] || !rn2(3)) &&
-			(mtmp->data != &mons[PM_ASMODEUS] || !rn2(9));
+			(mtmp->mtyp != PM_CHOKHMAH_SEPHIRAH) &&
+			(mtmp->mtyp != PM_ELDER_PRIEST) &&
+			(mtmp->mtyp != PM_GREAT_CTHULHU) &&
+			(mtmp->mtyp != PM_LUGRIBOSSK) &&
+			(mtmp->mtyp != PM_MAANZECORIAN) &&
+			(mtmp->mtyp != PM_CHAOS || rn2(2)) &&
+			(mtmp->mtyp != PM_DEMOGORGON || !rn2(3)) &&
+			(mtmp->mtyp != PM_LAMASHTU || !rn2(3)) &&
+			(mtmp->mtyp != PM_ASMODEUS || !rn2(9));
 	
 }
 
@@ -500,15 +500,15 @@ struct monst *mtmp;
 	if(complete <= 0) return FALSE;
 	else if(mtmp->isshk || mtmp->isgd || mtmp->iswiz || 
 			mtmp->data->mlet == S_HUMAN || mtmp->mpeaceful ||
-			is_lminion(mtmp) || mtmp->data == &mons[PM_ANGEL] ||
+			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
 			is_rider(mtmp->data) ||
-			(mtmp->data == &mons[PM_CHOKHMAH_SEPHIRAH]) ||
-			(mtmp->data == &mons[PM_ELDER_PRIEST] && complete <= d(2,4)+2) ||
-			(mtmp->data == &mons[PM_GREAT_CTHULHU] && complete <= d(2,4)+2) ||
-			(mtmp->data == &mons[PM_CHAOS] && rn2(2)) ||
-			(mtmp->data == &mons[PM_DEMOGORGON] && rn2(3)) ||
-			(mtmp->data == &mons[PM_LAMASHTU] && rn2(3)) ||
-			(mtmp->data == &mons[PM_ASMODEUS] && complete <= d(1,10))
+			(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) ||
+			(mtmp->mtyp == PM_ELDER_PRIEST && complete <= d(2,4)+2) ||
+			(mtmp->mtyp == PM_GREAT_CTHULHU && complete <= d(2,4)+2) ||
+			(mtmp->mtyp == PM_CHAOS && rn2(2)) ||
+			(mtmp->mtyp == PM_DEMOGORGON && rn2(3)) ||
+			(mtmp->mtyp == PM_LAMASHTU && rn2(3)) ||
+			(mtmp->mtyp == PM_ASMODEUS && complete <= d(1,10))
 		) return FALSE;
 	return( !(is_human(mtmp->data) || is_elf(mtmp->data) || is_dwarf(mtmp->data) ||
 		  is_gnome(mtmp->data) || is_orc(mtmp->data)) || 
@@ -522,9 +522,9 @@ struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
 	else if(mtmp->isshk || mtmp->isgd || mtmp->iswiz || 
-			is_lminion(mtmp) || mtmp->data == &mons[PM_ANGEL] ||
+			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
 			is_rider(mtmp->data) ||
-			(mtmp->data == &mons[PM_ELDER_PRIEST])
+			(mtmp->mtyp == PM_ELDER_PRIEST)
 		) return FALSE;
 	if((is_human(mtmp->data) || is_elf(mtmp->data) || is_dwarf(mtmp->data) ||
 		  is_gnome(mtmp->data) || is_orc(mtmp->data)) && 
@@ -541,16 +541,16 @@ struct monst *mtmp;
 {
 	if (mtmp->isshk || mtmp->isgd || mtmp->iswiz || is_blind(mtmp) ||
 	    mtmp->mpeaceful || mtmp->data->mlet == S_HUMAN || 
-	    is_lminion(mtmp) || mtmp->data == &mons[PM_ANGEL] ||
-	    is_rider(mtmp->data) || mtmp->data == &mons[PM_MINOTAUR])
+	    is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
+	    is_rider(mtmp->data) || mtmp->mtyp == PM_MINOTAUR)
 		return(FALSE);
-	return (boolean) (mtmp->data != &mons[PM_ELDER_PRIEST]) &&
-					(mtmp->data != &mons[PM_GREAT_CTHULHU]) &&
-					(mtmp->data != &mons[PM_CHOKHMAH_SEPHIRAH]) &&
-					(mtmp->data != &mons[PM_CHAOS] || rn2(2)) &&
-					(mtmp->data != &mons[PM_DEMOGORGON] || rn2(3)) &&
-					(mtmp->data != &mons[PM_LAMASHTU] || rn2(3)) &&
-					(mtmp->data != &mons[PM_ASMODEUS]);
+	return (boolean) (mtmp->mtyp != PM_ELDER_PRIEST) &&
+					(mtmp->mtyp != PM_GREAT_CTHULHU) &&
+					(mtmp->mtyp != PM_CHOKHMAH_SEPHIRAH) &&
+					(mtmp->mtyp != PM_CHAOS || rn2(2)) &&
+					(mtmp->mtyp != PM_DEMOGORGON || rn2(3)) &&
+					(mtmp->mtyp != PM_LAMASHTU || rn2(3)) &&
+					(mtmp->mtyp != PM_ASMODEUS);
 }
 
 boolean
@@ -565,13 +565,13 @@ struct monst *mtmp;
 	    (is_rider(mtmp->data))
 	)
 		return(FALSE);
-	return (boolean) (mtmp->data != &mons[PM_ELDER_PRIEST]) &&
-					(mtmp->data != &mons[PM_GREAT_CTHULHU]) &&
-					(mtmp->data != &mons[PM_CHOKHMAH_SEPHIRAH]) &&
-					(mtmp->data != &mons[PM_CHAOS] || rn2(2)) &&
-					(mtmp->data != &mons[PM_DEMOGORGON] || !rn2(3)) &&
-					(mtmp->data != &mons[PM_LAMASHTU]) &&
-					(mtmp->data != &mons[PM_ASMODEUS] || !rn2(9));
+	return (boolean) (mtmp->mtyp != PM_ELDER_PRIEST) &&
+					(mtmp->mtyp != PM_GREAT_CTHULHU) &&
+					(mtmp->mtyp != PM_CHOKHMAH_SEPHIRAH) &&
+					(mtmp->mtyp != PM_CHAOS || rn2(2)) &&
+					(mtmp->mtyp != PM_DEMOGORGON || !rn2(3)) &&
+					(mtmp->mtyp != PM_LAMASHTU) &&
+					(mtmp->mtyp != PM_ASMODEUS || !rn2(9));
   } else return(FALSE);
 }
 
@@ -583,27 +583,27 @@ struct monst *mtmp;
   if(Race_if(PM_ELF)){
 	if (mtmp->isshk || mtmp->isgd || mtmp->iswiz || is_blind(mtmp) ||
 	    mtmp->mpeaceful || mtmp->data->mlet == S_HUMAN || 
-	    is_lminion(mtmp) || mtmp->data == &mons[PM_ANGEL] ||
-	    (is_rider(mtmp->data) && !(mtmp->data == &mons[PM_NAZGUL])) || 
-		mtmp->data == &mons[PM_MINOTAUR])
+	    is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
+	    (is_rider(mtmp->data) && !(mtmp->mtyp == PM_NAZGUL)) || 
+		mtmp->mtyp == PM_MINOTAUR)
 		return(FALSE);
-	return (boolean) (mtmp->data != &mons[PM_ELDER_PRIEST]) &&
-					(mtmp->data != &mons[PM_GREAT_CTHULHU]) &&
-					(mtmp->data != &mons[PM_CHOKHMAH_SEPHIRAH]) &&
-					(mtmp->data != &mons[PM_CHAOS] || rn2(2)) &&
-					(mtmp->data != &mons[PM_DEMOGORGON] || !rn2(3)) &&
-					(mtmp->data != &mons[PM_LAMASHTU]) &&
-					(mtmp->data != &mons[PM_ASMODEUS] || !rn2(9));
+	return (boolean) (mtmp->mtyp != PM_ELDER_PRIEST) &&
+					(mtmp->mtyp != PM_GREAT_CTHULHU) &&
+					(mtmp->mtyp != PM_CHOKHMAH_SEPHIRAH) &&
+					(mtmp->mtyp != PM_CHAOS || rn2(2)) &&
+					(mtmp->mtyp != PM_DEMOGORGON || !rn2(3)) &&
+					(mtmp->mtyp != PM_LAMASHTU) &&
+					(mtmp->mtyp != PM_ASMODEUS || !rn2(9));
   }
   else{
 	if (mtmp->isshk || mtmp->isgd || mtmp->iswiz || is_blind(mtmp) ||
 	    mtmp->mpeaceful || mtmp->data->mlet == S_HUMAN || 
-	    is_lminion(mtmp) || mtmp->data == &mons[PM_ANGEL] ||
-	    (is_rider(mtmp->data) && !(mtmp->data == &mons[PM_NAZGUL])) || 
-		mtmp->data == &mons[PM_MINOTAUR])
+	    is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
+	    (is_rider(mtmp->data) && !(mtmp->mtyp == PM_NAZGUL)) || 
+		mtmp->mtyp == PM_MINOTAUR)
 		return(FALSE);
 	return (boolean) mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE 
-				|| mtmp->data->mlet == S_TROLL || mtmp->data == &mons[PM_NAZGUL];
+				|| mtmp->data->mlet == S_TROLL || mtmp->mtyp == PM_NAZGUL;
   }
 	
 
@@ -651,7 +651,7 @@ boolean digest_meal;
 		}
 	}
 	
-	if(!DEADMONSTER(mon) && mon->mhp < mon->mhpmax/2 && (mon->data == &mons[PM_CHANGED] || mon->data == &mons[PM_WARRIOR_CHANGED])){
+	if(!DEADMONSTER(mon) && mon->mhp < mon->mhpmax/2 && (mon->mtyp == PM_CHANGED || mon->mtyp == PM_WARRIOR_CHANGED)){
 		mon->mhp -= 1;
 		flags.cth_attk=TRUE;//state machine stuff.
 		create_gas_cloud(mon->mx+rn2(3)-1, mon->my+rn2(3)-1, rnd(3), rnd(3)+1);
@@ -666,7 +666,7 @@ boolean digest_meal;
 		}
 		return;
 	}
-	if(!DEADMONSTER(mon) && mon->data == &mons[PM_INVIDIAK] && !isdark(mon->mx, mon->my)){
+	if(!DEADMONSTER(mon) && mon->mtyp == PM_INVIDIAK && !isdark(mon->mx, mon->my)){
 		mon->mhp -= 1;
 		if(mon->mhp == 0){
 			mondied(mon);
@@ -748,9 +748,9 @@ disturb(mtmp)
 	 */
 	if(couldsee(mtmp->mx,mtmp->my) &&
 		distu(mtmp->mx,mtmp->my) <= 100 &&
-		(!Stealth || (mtmp->data == &mons[PM_ETTIN] && rn2(10))) &&
+		(!Stealth || (mtmp->mtyp == PM_ETTIN && rn2(10))) &&
 		(!(mtmp->data->mlet == S_NYMPH
-			|| mtmp->data == &mons[PM_JABBERWOCK]
+			|| mtmp->mtyp == PM_JABBERWOCK
 			|| mtmp->data->mlet == S_LEPRECHAUN) || !rn2(50)) &&
 		(Aggravate_monster
 			|| (mtmp->data->mlet == S_DOG ||
@@ -789,7 +789,7 @@ boolean fleemsg;
 		mtmp->mtrack[j].y = 0;
 	}
 
-	if(mtmp->data == &mons[PM_VROCK]){
+	if(mtmp->mtyp == PM_VROCK){
 		struct monst *tmpm;
 		if(!(mtmp->mspec_used || mtmp->mcan)){
 			pline("%s screeches.", Monnam(mtmp));
@@ -817,13 +817,13 @@ boolean fleemsg;
 			if (fleetime == 1) fleetime++;
 				mtmp->mfleetim = min(fleetime, 127);
 	    }
-		if( !mtmp->mflee && mtmp->data == &mons[PM_GIANT_TURTLE]){
+		if( !mtmp->mflee && mtmp->mtyp == PM_GIANT_TURTLE){
 		 mtmp->mcanmove=0;
 		 // mtmp->mfrozen = mtmp->mfleetim;
 		 if(canseemon(mtmp)) 
 		   pline("%s hides in %s shell!",Monnam(mtmp),mhis(mtmp));
 		} else if (!mtmp->mflee && fleemsg && canseemon(mtmp) && !mtmp->mfrozen) 
-			mtmp->data == &mons[PM_BANDERSNATCH] ? pline("%s becomes frumious!", (Monnam(mtmp)))
+			mtmp->mtyp == PM_BANDERSNATCH ? pline("%s becomes frumious!", (Monnam(mtmp)))
 												 : pline("%s turns to flee!", (Monnam(mtmp)));
 	    mtmp->mflee = 1;
 	}
@@ -860,7 +860,7 @@ int *inrange, *nearby, *scared;
 	
 	if(*scared && mtmp->mvanishes > 0) mtmp->mvanishes = mtmp->mvanishes/2 + 1;
 	
-	if(mtmp->data == &mons[PM_DAUGHTER_OF_BEDLAM] && !rn2(20)) *scared = TRUE;
+	if(mtmp->mtyp == PM_DAUGHTER_OF_BEDLAM && !rn2(20)) *scared = TRUE;
 	else if(*nearby && !mtmp->mflee && fleetflee(mtmp->data) && (mtmp->data->mmove > youracedata->mmove || noattacks(mtmp->data))) *scared = TRUE;
 	
 	if(*scared) {
@@ -907,12 +907,12 @@ register struct monst *mtmp;
 	
 	mtmp->mattackedu = 0; /*Clear out attacked bit*/
 	
-	if(mdat == &mons[PM_GNOLL_MATRIARCH]){
+	if(mdat->mtyp == PM_GNOLL_MATRIARCH){
 		if(!rn2(20)){
 			makemon(&mons[PM_GNOLL], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 		}
 	}
-	if(mdat == &mons[PM_FORD_GUARDIAN]){
+	if(mdat->mtyp == PM_FORD_GUARDIAN){
 		if(!rn2(20) && mtmp->mux == u.ux && mtmp->muy == u.uy && !(mtmp->mstrategy&STRAT_WAITFORU)){
 			int i = rnd(4);
 			pline("The waters of the ford rise to the aid of the guardian!");
@@ -920,13 +920,13 @@ register struct monst *mtmp;
 				makemon(&mons[PM_FORD_ELEMENTAL], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 		}
 	}
-	if(mdat == &mons[PM_LEGION]){
+	if(mdat->mtyp == PM_LEGION){
 		rn2(7) ? makemon(mkclass(S_ZOMBIE, G_NOHELL|G_HELL), mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT): 
 				 makemon(&mons[PM_LEGIONNAIRE], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 	}
 	if(needs_familiar(mtmp) && !mtmp->mspec_used){
-		if((mdat == &mons[PM_COVEN_LEADER] && !rn2(4))
-			|| (mdat == &mons[PM_WITCH] && !rn2(20))
+		if((mdat->mtyp == PM_COVEN_LEADER && !rn2(4))
+			|| (mdat->mtyp == PM_WITCH && !rn2(20))
 		){
 			struct monst *familliar;
 			if(canseemon(mtmp))
@@ -964,7 +964,7 @@ register struct monst *mtmp;
 	/* update quest status flags */
 	quest_stat_check(mtmp);
 	
-	if(mdat == &mons[PM_CENTER_OF_ALL] 
+	if(mdat->mtyp == PM_CENTER_OF_ALL 
 		&& !mtmp->mtame 
 		&& !Is_astralevel(&u.uz)
 		&& (near_capacity()>SLT_ENCUMBER || u.ulevel < 14 || mtmp->mpeaceful) 
@@ -997,7 +997,7 @@ register struct monst *mtmp;
 		}
 	}
 
-   if (mdat != &mons[PM_GIANT_TURTLE] || !mtmp->mflee)
+   if (mdat->mtyp != PM_GIANT_TURTLE || !mtmp->mflee)
 	if (!(mtmp->mcanmove && mtmp->mnotlaugh) || (mtmp->mstrategy & STRAT_WAITMASK)) {
 	    if (Hallucination) newsym(mtmp->mx,mtmp->my);
 	    if (mtmp->mcanmove && mtmp->mnotlaugh && (mtmp->mstrategy & STRAT_CLOSE) &&
@@ -1038,19 +1038,19 @@ register struct monst *mtmp;
 			return 0;
 	}
 	
-	if(mtmp->data == &mons[PM_MAD_SEER]){
+	if(mtmp->mtyp == PM_MAD_SEER){
 		if(!rn2(80)){
 			mtmp->mnotlaugh=0;
 			mtmp->mlaughing=rnd(5);
 		}
 	}
 	
-	if(mtmp->data == &mons[PM_QUIVERING_BLOB] && !mtmp->mflee){
+	if(mtmp->mtyp == PM_QUIVERING_BLOB && !mtmp->mflee){
 		if(!rn2(20)){
 			monflee(mtmp, 0, TRUE, TRUE);
 		}
 	}
-	if(mtmp->data == &mons[PM_GRUE]){
+	if(mtmp->mtyp == PM_GRUE){
 		if(!mtmp->mflee && !isdark(mtmp->mx, mtmp->my)){
 			monflee(mtmp, 0, TRUE, TRUE);
 		} else if(mtmp->mflee && isdark(mtmp->mx, mtmp->my)){
@@ -1070,7 +1070,7 @@ register struct monst *mtmp;
 		return(0);
 	}
 	
-	if(mtmp->data == &mons[PM_DRACAE_ELADRIN]){
+	if(mtmp->mtyp == PM_DRACAE_ELADRIN){
 		if(!mtmp->mvar_dracaePreg){
 			struct permonst *ptr = mkclass(S_CHA_ANGEL, G_PLANES);
 			if(ptr)
@@ -1115,7 +1115,7 @@ register struct monst *mtmp;
 			return 0;
 		}
 	}
-	if(mtmp->data == &mons[PM_MOTHERING_MASS]){
+	if(mtmp->mtyp == PM_MOTHERING_MASS){
 		if(!mtmp->mvar_dracaePreg){
 			struct permonst *ptr = mkclass(S_CHA_ANGEL, G_PLANES);
 			if(ptr)
@@ -1163,7 +1163,7 @@ register struct monst *mtmp;
 		}
 	}
 	
-	if(mdat == &mons[PM_OONA] && !mtmp->mspec_used){
+	if(mdat->mtyp == PM_OONA && !mtmp->mspec_used){
 		nearby = FALSE;
 		struct monst *tmpm;
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -1188,10 +1188,10 @@ register struct monst *mtmp;
 		(mdat->msound == MS_DREAD && !rn2(4)) ||
 		(mdat->msound == MS_OONA && (nearby || !rn2(6))) ||
 		(mdat->msound == MS_SONG && !rn2(6)) ||
-		(mdat == &mons[PM_RHYMER] && !mtmp->mspec_used && !rn2(6)) ||
+		(mdat->mtyp == PM_RHYMER && !mtmp->mspec_used && !rn2(6)) ||
 		(mdat->msound == MS_INTONE && !rn2(6)) ||
 		(mdat->msound == MS_FLOWER && !rn2(6)) ||
-		(mdat == &mons[PM_LAMASHTU] && !rn2(7))
+		(mdat->mtyp == PM_LAMASHTU && !rn2(7))
 	) m_respond(mtmp);
 	
 	if(!mtmp->mblinded) for (gazemon = fmon; gazemon; gazemon = nxtmon){
@@ -1203,7 +1203,7 @@ register struct monst *mtmp;
 			&& clear_path(mtmp->mx, mtmp->my, gazemon->mx, gazemon->my)
 		){
 			int i;
-			if(gazemon->data == &mons[PM_MEDUSA] && resists_ston(mtmp)
+			if(gazemon->mtyp == PM_MEDUSA && resists_ston(mtmp)
 			) continue;
 			
 			if (hideablewidegaze(gazemon->data) &&
@@ -1238,12 +1238,12 @@ register struct monst *mtmp;
 	if (mtmp->mflee && !mtmp->mfleetim
 	   && mtmp->mhp == mtmp->mhpmax && !rn2(25)){
 		mtmp->mflee = 0;
-        if(canseemon(mtmp) && (mdat == &mons[PM_GIANT_TURTLE]) && !(mtmp->mfrozen)){
+        if(canseemon(mtmp) && (mdat->mtyp == PM_GIANT_TURTLE) && !(mtmp->mfrozen)){
          pline("%s comes out of %s shell.", Monnam(mtmp), mhis(mtmp));
          mtmp->mcanmove=1;
 		}
     }
-   else if (mdat == &mons[PM_GIANT_TURTLE] && !mtmp->mcanmove)
+   else if (mdat->mtyp == PM_GIANT_TURTLE && !mtmp->mcanmove)
      return (0);
 
 	set_apparxy(mtmp);
@@ -1254,14 +1254,14 @@ register struct monst *mtmp;
 
 	/* Monsters that want to acquire things */
 	/* may teleport, so do it before inrange is set */
-	if(is_covetous(mdat) && (mdat!=&mons[PM_DEMOGORGON] || !rn2(3)) 
-		&& mdat!=&mons[PM_ELDER_PRIEST] /*&& mdat!=&mons[PM_SHAMI_AMOURAE]*/
-		&& mdat!=&mons[PM_LEGION] /*&& mdat!=&mons[PM_SHAMI_AMOURAE]*/
+	if(is_covetous(mdat) && (mdat->mtyp!=PM_DEMOGORGON || !rn2(3)) 
+		&& mdat->mtyp!=PM_ELDER_PRIEST /*&& mdat->mtyp!=PM_SHAMI_AMOURAE*/
+		&& mdat->mtyp!=PM_LEGION /*&& mdat->mtyp!=PM_SHAMI_AMOURAE*/
 		&& !(noactions(mtmp))
 		&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful*/
 	) (void) tactics(mtmp);
 	
-	// if(mdat == &mons[PM_GREAT_CTHULHU] && !rn2(20)){
+	// if(mdat->mtyp == PM_GREAT_CTHULHU && !rn2(20)){
 		// (void) tactics(mtmp);
 		// return 0;
 	// }
@@ -1277,7 +1277,7 @@ register struct monst *mtmp;
 			return 1;
 	}
 	
-	if((is_drow(mtmp->data) || mtmp->data == &mons[PM_LUGRIBOSSK] || mtmp->data == &mons[PM_MAANZECORIAN])
+	if((is_drow(mtmp->data) || mtmp->mtyp == PM_LUGRIBOSSK || mtmp->mtyp == PM_MAANZECORIAN)
 		&& (!mtmp->mpeaceful || Darksight)
 		&& (levl[mtmp->mx][mtmp->my].lit == 1 || viz_array[mtmp->my][mtmp->mx]&TEMP_LIT1)
 		&& !mtmp->mcan && mtmp->mspec_used < 4
@@ -1287,11 +1287,11 @@ register struct monst *mtmp;
 		if(cansee(mtmp->mx,mtmp->my)) pline("%s invokes the darkness.",Monnam(mtmp));
 	    do_clear_area(mtmp->mx,mtmp->my, 5, set_lit, (genericptr_t)0);
 		vision_full_recalc = 1;
-	    if(mtmp->data == &mons[PM_HEDROW_WARRIOR]) mtmp->mspec_used += d(4,4);
+	    if(mtmp->mtyp == PM_HEDROW_WARRIOR) mtmp->mspec_used += d(4,4);
 		else mtmp->mspec_used += max(10 - mtmp->m_lev,2);
 	}
 
-	if (mtmp->data == &mons[PM_NURSE] || mtmp->data == &mons[PM_HEALER]){
+	if (mtmp->mtyp == PM_NURSE || mtmp->mtyp == PM_HEALER){
 	    // && !uarmu && !uarm && !uarmh && !uarms && !uarmg && !uarmc && !uarmf){
 		struct monst *patient = 0;
 		int i, j, x, y, rot = rn2(3);
@@ -1328,7 +1328,7 @@ register struct monst *mtmp;
 		}
 	}
 	
-	if(mtmp->data == &mons[PM_OPERATOR] || mtmp->data == &mons[PM_PARASITIZED_OPERATOR]){
+	if(mtmp->mtyp == PM_OPERATOR || mtmp->mtyp == PM_PARASITIZED_OPERATOR){
 		struct monst *repairee = 0;
 		int i, j, x, y, rot = rn2(3);
 		for(i = -1; i < 2; i++){
@@ -1360,8 +1360,8 @@ register struct monst *mtmp;
 		}
 	}
 	
-	if((mtmp->data == &mons[PM_ANDROID] || mtmp->data == &mons[PM_GYNOID] || mtmp->data == &mons[PM_OPERATOR] ||
-		mtmp->data == &mons[PM_PARASITIZED_ANDROID] || mtmp->data == &mons[PM_PARASITIZED_GYNOID] || mtmp->data == &mons[PM_PARASITIZED_OPERATOR])
+	if((mtmp->mtyp == PM_ANDROID || mtmp->mtyp == PM_GYNOID || mtmp->mtyp == PM_OPERATOR ||
+		mtmp->mtyp == PM_PARASITIZED_ANDROID || mtmp->mtyp == PM_PARASITIZED_GYNOID || mtmp->mtyp == PM_PARASITIZED_OPERATOR)
 		&& MON_WEP(mtmp)
 		&& (is_vibroweapon(MON_WEP(mtmp)) || is_blaster(MON_WEP(mtmp)))
 		&& MON_WEP(mtmp)->ovar1 <= 0
@@ -1386,8 +1386,8 @@ register struct monst *mtmp;
 		return 0;
 	}
 
-	if((mtmp->data == &mons[PM_ANDROID] || mtmp->data == &mons[PM_GYNOID] || mtmp->data == &mons[PM_OPERATOR] ||
-		mtmp->data == &mons[PM_PARASITIZED_ANDROID] || mtmp->data == &mons[PM_PARASITIZED_GYNOID] || mtmp->data == &mons[PM_PARASITIZED_OPERATOR])
+	if((mtmp->mtyp == PM_ANDROID || mtmp->mtyp == PM_GYNOID || mtmp->mtyp == PM_OPERATOR ||
+		mtmp->mtyp == PM_PARASITIZED_ANDROID || mtmp->mtyp == PM_PARASITIZED_GYNOID || mtmp->mtyp == PM_PARASITIZED_OPERATOR)
 		&& MON_WEP(mtmp)
 		&& (is_lightsaber(MON_WEP(mtmp)) && MON_WEP(mtmp)->oartifact != ART_INFINITY_S_MIRRORED_ARC && MON_WEP(mtmp)->otyp != KAMEREL_VAJRA)
 		&& MON_WEP(mtmp)->age <= 0
@@ -1404,7 +1404,7 @@ register struct monst *mtmp;
 		return 0;
 	}
 
-	if(mtmp->data == &mons[PM_PHALANX]
+	if(mtmp->mtyp == PM_PHALANX
 		&& !mtmp->mcan
 		&& !(noactions(mtmp))
 	){
@@ -1466,9 +1466,9 @@ register struct monst *mtmp;
 #endif /* CONVICT */
 
 	/* the watch will look around and see if you are up to no good :-) */
-	if (mdat == &mons[PM_WATCHMAN] || mdat == &mons[PM_WATCH_CAPTAIN])
+	if (mdat->mtyp == PM_WATCHMAN || mdat->mtyp == PM_WATCH_CAPTAIN)
 		watch_on_duty(mtmp);
-	if(mdat == &mons[PM_NURSE]){
+	if(mdat->mtyp == PM_NURSE){
 		int i, j;
 		struct trap *ttmp;
 		struct monst *tmon;
@@ -1494,7 +1494,7 @@ register struct monst *mtmp;
 					}
 				}
 	}
-	if(mdat == &mons[PM_TOVE] && !rn2(20)){
+	if(mdat->mtyp == PM_TOVE && !rn2(20)){
 		struct trap *ttmp = t_at(mtmp->mx, mtmp->my);
 		struct rm *lev = &levl[mtmp->mx][mtmp->my];
 		schar typ;
@@ -1541,7 +1541,7 @@ register struct monst *mtmp;
 				digactualhole(mtmp->mx, mtmp->my, mtmp, HOLE, FALSE, TRUE);
 		}
 	}
-	if (has_mind_blast(mdat) && !u.uinvulnerable && !rn2(mdat == &mons[PM_ELDER_BRAIN] ? 10 : 20)) {
+	if (has_mind_blast(mdat) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20)) {
 		boolean reducedFlayerMessages = (((Role_if(PM_NOBLEMAN) && Race_if(PM_DROW) && flags.initgend) || Role_if(PM_ANACHRONONAUT)) && In_quest(&u.uz));
 		struct monst *m2, *nmon = (struct monst *)0;
 		
@@ -1558,23 +1558,23 @@ register struct monst *mtmp;
 		} else {
 			register boolean m_sen = tp_sensemon(mtmp);
 			
-			if(mdat == &mons[PM_ELDER_BRAIN]) quest_chat(mtmp);
+			if(mdat->mtyp == PM_ELDER_BRAIN) quest_chat(mtmp);
 			
 			if (m_sen || (Blind_telepat && rn2(2)) || !rn2(10)) {
 				int dmg;
 				pline("It locks on to your %s!",
 					m_sen ? "telepathy" :
 					Blind_telepat ? "latent telepathy" : "mind");
-				dmg = (mdat == &mons[PM_GREAT_CTHULHU] || mdat == &mons[PM_LUGRIBOSSK] || mdat == &mons[PM_MAANZECORIAN]) ? d(5,15) : (mdat == &mons[PM_ELDER_BRAIN]) ? d(3,15) : rnd(15);
+				dmg = (mdat->mtyp == PM_GREAT_CTHULHU || mdat->mtyp == PM_LUGRIBOSSK || mdat->mtyp == PM_MAANZECORIAN) ? d(5,15) : (mdat->mtyp == PM_ELDER_BRAIN) ? d(3,15) : rnd(15);
 				if (Half_spell_damage) dmg = (dmg+1) / 2;
 				if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 				losehp(dmg, "psychic blast", KILLED_BY_AN);
-				if(mdat == &mons[PM_SEMBLANCE]) make_hallucinated(HHallucination + dmg, FALSE, 0L);
-				if(mdat == &mons[PM_GREAT_CTHULHU]){
+				if(mdat->mtyp == PM_SEMBLANCE) make_hallucinated(HHallucination + dmg, FALSE, 0L);
+				if(mdat->mtyp == PM_GREAT_CTHULHU){
 					make_stunned(HStun + dmg*10, TRUE);
 					u.umadness |= MAD_DREAMS;
 				}
-				if (mdat == &mons[PM_ELDER_BRAIN]) {
+				if (mdat->mtyp == PM_ELDER_BRAIN) {
 					for (m2 = fmon; m2; m2 = nmon) {
 						nmon = m2->nmon;
 						if (!DEADMONSTER(m2) && (m2->mpeaceful == mtmp->mpeaceful) && mon_resistance(m2,TELEPAT) && (m2!=mtmp))
@@ -1582,7 +1582,7 @@ register struct monst *mtmp;
 							m2->msleeping = 0;
 							if (!m2->mcanmove && !rn2(5)) {
 								m2->mfrozen = 0;
-								if (m2->data != &mons[PM_GIANT_TURTLE] || !(m2->mflee))
+								if (m2->mtyp != PM_GIANT_TURTLE || !(m2->mflee))
 									m2->mcanmove = 1;
 							}
 							m2->mux = u.ux;
@@ -1603,15 +1603,15 @@ register struct monst *mtmp;
 			    (rn2(2) || m2->mblinded)) || !rn2(10)) {
 				if (cansee(m2->mx, m2->my))
 				    pline("It locks on to %s.", mon_nam(m2));
-				if(mdat == &mons[PM_GREAT_CTHULHU]) m2->mconf=TRUE;
-				if(mdat == &mons[PM_GREAT_CTHULHU] || mdat == &mons[PM_LUGRIBOSSK] || mdat == &mons[PM_MAANZECORIAN]) m2->mhp -= d(5,15);
-				else if(mdat == &mons[PM_ELDER_BRAIN]){
+				if(mdat->mtyp == PM_GREAT_CTHULHU) m2->mconf=TRUE;
+				if(mdat->mtyp == PM_GREAT_CTHULHU || mdat->mtyp == PM_LUGRIBOSSK || mdat->mtyp == PM_MAANZECORIAN) m2->mhp -= d(5,15);
+				else if(mdat->mtyp == PM_ELDER_BRAIN){
 					int mfdmg = d(3,15);
 					m2->mhp -= mfdmg;
 					m2->mstdy = max(mfdmg, m2->mstdy);
 				} else {
 					m2->mhp -= rnd(15);
-					if(mdat == &mons[PM_SEMBLANCE]) m2->mconf=TRUE;
+					if(mdat->mtyp == PM_SEMBLANCE) m2->mconf=TRUE;
 				}
 				if (m2->mhp <= 0)
 				    monkilled(m2, "", AD_DRIN);
@@ -1704,7 +1704,7 @@ toofar:
 /*	Now the actual movement phase	*/
 
 #ifndef GOLDOBJ
-	if(!nearby || (mtmp->mflee && mtmp->data != &mons[PM_BANDERSNATCH]) || scared ||
+	if(!nearby || (mtmp->mflee && mtmp->mtyp != PM_BANDERSNATCH) || scared ||
 	   mtmp->mconf || mtmp->mstun || (mtmp->minvis && !rn2(3)) ||
 	   (mdat->mlet == S_LEPRECHAUN && !u.ugold && (mtmp->mgold || rn2(2))) ||
 #else
@@ -1712,7 +1712,7 @@ toofar:
 	    ygold = findgold(invent);
 	    lepgold = findgold(mtmp->minvent);
 	}
-	if(!nearby || (mtmp->mflee && mtmp->data != &mons[PM_BANDERSNATCH]) || scared ||
+	if(!nearby || (mtmp->mflee && mtmp->mtyp != PM_BANDERSNATCH) || scared ||
 	   mtmp->mconf || mtmp->mstun || (mtmp->minvis && !rn2(3)) ||
 	   (mdat->mlet == S_LEPRECHAUN && !ygold && (lepgold || rn2(2))) ||
 #endif
@@ -1735,12 +1735,12 @@ toofar:
 				){
 					if(castmu(mtmp, a, TRUE, TRUE)){
 						tmp = 3;
-						// if(mdat != &mons[PM_DEMOGORGON]) break;
+						// if(mdat->mtyp != PM_DEMOGORGON) break;
 					}
 			    } else {
 					if(castmu(mtmp, a, FALSE, FALSE)){
 						tmp = 3;
-						// if(mdat != &mons[PM_DEMOGORGON]) break;
+						// if(mdat->mtyp != PM_DEMOGORGON) break;
 					}
 				}
 			}
@@ -1770,7 +1770,7 @@ toofar:
 			if(mtmp->wormno && (!mtmp->mpeaceful || Conflict)) wormhitu(mtmp);
 			if(!nearby &&
 			  (ranged_attk(mdat) || find_offensive(mtmp))){
-				if(mdat == &mons[PM_GREAT_CTHULHU] || mdat == &mons[PM_WATCHER_IN_THE_WATER] || mdat == &mons[PM_KETO] || mdat == &mons[PM_ARCADIAN_AVENGER]){
+				if(mdat->mtyp == PM_GREAT_CTHULHU || mdat->mtyp == PM_WATCHER_IN_THE_WATER || mdat->mtyp == PM_KETO || mdat->mtyp == PM_ARCADIAN_AVENGER){
 					break;
 			    } else return(0);
 			    // return(0);
@@ -1801,9 +1801,9 @@ toofar:
 	/* extra emotional attack for vile monsters */
 	if (inrange && mtmp->data->msound == MS_CUSS && !mtmp->mpeaceful &&
 		couldsee(mtmp->mx, mtmp->my) && ((!mtmp->minvis && !rn2(5)) || 
-										mtmp->data == &mons[PM_SIR_GARLAND] || mtmp->data == &mons[PM_GARLAND] ||
-										(mtmp->data == &mons[PM_CHAOS] && (mtmp->mvar2 < 5 || !rn2(5)) )|| 
-										mtmp->data == &mons[PM_APOLLYON]
+										mtmp->mtyp == PM_SIR_GARLAND || mtmp->mtyp == PM_GARLAND ||
+										(mtmp->mtyp == PM_CHAOS && (mtmp->mvar2 < 5 || !rn2(5)) )|| 
+										mtmp->mtyp == PM_APOLLYON
 	) )
 	    cuss(mtmp);
 
@@ -1890,7 +1890,7 @@ register int after;
 	    can_tunnel = tunnels(ptr);
 	can_open = !(nohands(ptr) || verysmall(ptr));
 	can_unlock = ((can_open && (m_carrying(mtmp, SKELETON_KEY)||m_carrying(mtmp, UNIVERSAL_KEY))) ||
-		      mtmp->iswiz || is_rider(ptr) || ptr==&mons[PM_DREAD_SERAPH]);
+		      mtmp->iswiz || is_rider(ptr) || ptr->mtyp==PM_DREAD_SERAPH);
 	doorbuster = is_giant(ptr);
 	if(mtmp->wormno) goto not_special;
 	/* my dog gets special treatment */
@@ -1930,9 +1930,9 @@ register int after;
 			if(mattackm(mtmp, intruder) == 2) return(2);
 			mmoved = 1;
 			goto postmov;
-		} else if(mtmp->data != &mons[PM_DEMOGORGON] 
-			   && mtmp->data!=&mons[PM_ELDER_PRIEST]
-			   /*&& mtmp->data!=&mons[PM_SHAMI_AMOURAE]*/
+		} else if(mtmp->mtyp != PM_DEMOGORGON 
+			   && mtmp->mtyp!=PM_ELDER_PRIEST
+			   /*&& mtmp->mtyp!=PM_SHAMI_AMOURAE*/
 			   ){
 			mmoved = 0;
 		    goto postmov;
@@ -1949,7 +1949,7 @@ register int after;
 	}
 
 #ifdef MAIL
-	if(ptr == &mons[PM_MAIL_DAEMON]) {
+	if(ptr->mtyp == PM_MAIL_DAEMON) {
 	    if(flags.soundok && canseemon(mtmp))
 		verbalize("I'm late!");
 	    mongone(mtmp);
@@ -1974,7 +1974,7 @@ not_special:
 	omy = mtmp->my;
 	gx = mtmp->mux;
 	gy = mtmp->muy;
-	appr = (mtmp->mflee && mtmp->data != &mons[PM_BANDERSNATCH]) ? -1 : 1;
+	appr = (mtmp->mflee && mtmp->mtyp != PM_BANDERSNATCH) ? -1 : 1;
 	if (mtmp->mconf || (u.uswallow && mtmp == u.ustuck) || (gx == 0 && gy == 0))
 		appr = 0;
 	else {
@@ -2010,7 +2010,7 @@ not_special:
 		}
 	}
 
-	if (( !mtmp->mpeaceful || mtmp->data == &mons[PM_MAID] || !rn2(10) )
+	if (( !mtmp->mpeaceful || mtmp->mtyp == PM_MAID || !rn2(10) )
 #ifdef REINCARNATION
 				    && (!Is_rogue_level(&u.uz))
 #endif
@@ -2099,7 +2099,7 @@ not_special:
 		       (likegems && otmp->oclass == GEM_CLASS &&
 			otmp->obj_material != MINERAL) ||
 		       (conceals && !cansee(otmp->ox,otmp->oy)) ||
-		       (ptr == &mons[PM_GELATINOUS_CUBE] &&
+		       (ptr->mtyp == PM_GELATINOUS_CUBE &&
 			!index(indigestion, otmp->oclass) &&
 			!(otmp->otyp == CORPSE &&
 			  touch_petrifies(&mons[otmp->corpsenm])))
@@ -2118,7 +2118,7 @@ not_special:
 					lmy = max(0, omy-minr);
 					gx = otmp->ox;
 					gy = otmp->oy;
-					if(mtmp->data == &mons[PM_MAID] && appr == 0) appr = 1;
+					if(mtmp->mtyp == PM_MAID && appr == 0) appr = 1;
 					if (gx == omx && gy == omy) {
 						mmoved = 3; /* actually unnecessary */
 						goto postmov;
@@ -2161,7 +2161,7 @@ not_special:
 	if (mon_resistance(mtmp,PASSES_WALLS)) flag |= (ALLOW_WALL | ALLOW_ROCK);
 	if (passes_bars(mtmp) && !Is_illregrd(&u.uz) ) flag |= ALLOW_BARS;
 	if (can_tunnel) flag |= ALLOW_DIG;
-	if (is_human(ptr) || ptr == &mons[PM_MINOTAUR]) flag |= ALLOW_SSM;
+	if (is_human(ptr) || ptr->mtyp == PM_MINOTAUR) flag |= ALLOW_SSM;
 	if (is_undead_mon(mtmp) && ptr->mlet != S_GHOST && ptr->mlet != S_SHADE) flag |= NOGARLIC;
 	if (throws_rocks(ptr)) flag |= ALLOW_ROCK;
 	if (can_open) flag |= OPENDOOR;
@@ -2241,9 +2241,9 @@ not_special:
 		}
 		if(Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
 			if(mtmp->mhp == mtmp->mhpmax && (
-				(mtmp->data == &mons[PM_DEEP_ONE] && !rn2(1000))
-				|| (mtmp->data == &mons[PM_DEEPER_ONE] && !rn2(500))
-				|| (mtmp->data == &mons[PM_DEEPEST_ONE] && !rn2(100))
+				(mtmp->mtyp == PM_DEEP_ONE && !rn2(1000))
+				|| (mtmp->mtyp == PM_DEEPER_ONE && !rn2(500))
+				|| (mtmp->mtyp == PM_DEEPEST_ONE && !rn2(100))
 			)){
 				int i, j, count=0;
 				for(i = -1; i < 2; i++) for(j = -1; j < 2; j++){
@@ -2271,9 +2271,9 @@ not_special:
 						}
 					}
 				}
-			} else if((mtmp->data == &mons[PM_DEEP_ONE] && !rn2(20))
-				|| (mtmp->data == &mons[PM_DEEPER_ONE] && !rn2(5))
-				|| (mtmp->data == &mons[PM_DEEPEST_ONE])
+			} else if((mtmp->mtyp == PM_DEEP_ONE && !rn2(20))
+				|| (mtmp->mtyp == PM_DEEPER_ONE && !rn2(5))
+				|| (mtmp->mtyp == PM_DEEPEST_ONE)
 			){
 				int i, j, count=0;
 				for(i = -1; i < 2; i++) for(j = -1; j < 2; j++){
@@ -2414,7 +2414,7 @@ not_special:
 		mtmp->mtrack[j] = mtmp->mtrack[j-1];
 	    mtmp->mtrack[0].x = omx;
 	    mtmp->mtrack[0].y = omy;
-		if(mtmp->data == &mons[PM_HEMORRHAGIC_THING]){
+		if(mtmp->mtyp == PM_HEMORRHAGIC_THING){
 			//The thing leaves bloody footprints, that appear *after* the monster has passed by
 			if(isok(mtmp->mtrack[1].x, mtmp->mtrack[1].y) && mtmp->mtrack[1].x != 0){
 				struct engr *oep = engr_at(mtmp->mtrack[1].x, mtmp->mtrack[1].y);
@@ -2434,9 +2434,9 @@ not_special:
 	    /* Place a segment at the old position. */
 	    if (mtmp->wormno) worm_move(mtmp);
 		
-		if(mtmp->data == &mons[PM_SURYA_DEVA]){
+		if(mtmp->mtyp == PM_SURYA_DEVA){
 			struct monst *blade;
-			for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
+			for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
 			if(blade){
 				int bx = blade->mx, by = blade->my;
 				remove_monster(bx, by);
@@ -2477,8 +2477,8 @@ postmov:
 		    if(here->doormask & (D_LOCKED|D_CLOSED) && amorphous(ptr)) {
 			if (flags.verbose && canseemon(mtmp))
 			    pline("%s %s under the door.", Monnam(mtmp),
-				  (ptr == &mons[PM_FOG_CLOUD] ||
-				   ptr == &mons[PM_YELLOW_LIGHT])
+				  (ptr->mtyp == PM_FOG_CLOUD ||
+				   ptr->mtyp == PM_YELLOW_LIGHT)
 				  ? "flows" : "oozes");
 		    } else if(here->doormask & D_LOCKED && can_unlock) {
 			if(btrapped) {
@@ -2539,13 +2539,13 @@ postmov:
 			    add_damage(mtmp->mx, mtmp->my, 0L);
 		    }
 		} else if (levl[mtmp->mx][mtmp->my].typ == IRONBARS && !Is_illregrd(&u.uz)) {
-		    if ( (dmgtype(ptr,AD_RUST) && ptr != &mons[PM_NAIAD]) || dmgtype(ptr,AD_CORR)) {
+		    if ( (dmgtype(ptr,AD_RUST) && ptr->mtyp != PM_NAIAD) || dmgtype(ptr,AD_CORR)) {
 				if (canseemon(mtmp)) {
 					pline("%s eats through the iron bars.", 
 					Monnam(mtmp)); 
 				}
 				dissolve_bars(mtmp->mx, mtmp->my);
-				if(mtmp->data == &mons[PM_RUST_MONSTER] && mtmp->mtame && mtmp->isminion){
+				if(mtmp->mtyp == PM_RUST_MONSTER && mtmp->mtame && mtmp->isminion){
 					EDOG(mtmp)->hungrytime += 5*objects[BAR].oc_nutrition;
 				}
 			}
@@ -2599,7 +2599,7 @@ postmov:
 		if(g_at(mtmp->mx,mtmp->my) && likegold) mpickgold(mtmp);
 
 		/* Maybe a cube ate just about anything */
-		if (ptr == &mons[PM_GELATINOUS_CUBE]) {
+		if (ptr->mtyp == PM_GELATINOUS_CUBE) {
 		    if (meatobj(mtmp) == 2) return 2;	/* it died */
 		}
 
@@ -2723,7 +2723,7 @@ register struct monst *mtmp;
 	/* Can also learn your position via hearing you */
 	if(couldsee(mtmp->mx,mtmp->my) &&
 		distu(mtmp->mx,mtmp->my) <= 100 &&
-		(!Stealth || (mtmp->data == &mons[PM_ETTIN] && rn2(10))) &&
+		(!Stealth || (mtmp->mtyp == PM_ETTIN && rn2(10))) &&
 		(Aggravate_monster || ((sensitive_ears(mtmp->data) || !rn2(7)) && !is_deaf(mtmp)))
 	) {
 		notseen = FALSE;

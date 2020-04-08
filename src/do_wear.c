@@ -2521,7 +2521,7 @@ struct monst *magr;
 	}
 	
 	//Note: Bias this somehow?
-	if(magr && magr->data == &mons[PM_XAN])
+	if(magr && magr->mtyp == PM_XAN)
 		goto boot_hit;
 	switch(slot){
 		case UPPER_TORSO_DR:
@@ -3732,8 +3732,8 @@ dosymbiotic()
 		if(!mon || mon->mpeaceful || !rn2(4))
 			continue;
 		if(touch_petrifies(mon->data)
-		 || mon->data == &mons[PM_MEDUSA]
-		 || mon->data == &mons[PM_PALE_NIGHT]
+		 || mon->mtyp == PM_MEDUSA
+		 || mon->mtyp == PM_PALE_NIGHT
 		) continue;
 		
 		if (mon && !mon->mtame && magr_can_attack_mdef(&youmonst, mon, u.ux + clockwisex[(i + j) % 8], u.uy + clockwisey[(i + j) % 8], FALSE)){

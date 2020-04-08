@@ -3818,10 +3818,10 @@ register struct monst *shkp;
 	    remove_damage(shkp, FALSE);
 
 	if((udist = distu(omx,omy)) < 3 &&
-		((shkp->data != &mons[PM_GRID_BUG] && shkp->data != &mons[PM_BEBELITH]) || (omx==u.ux || omy==u.uy)) &&
-		((shkp->data != &mons[PM_CLOCKWORK_SOLDIER] && shkp->data != &mons[PM_CLOCKWORK_DWARF] && 
-		   shkp->data != &mons[PM_FABERGE_SPHERE] && shkp->data != &mons[PM_FIREWORK_CART] && 
-		   shkp->data != &mons[PM_JUGGERNAUT] && shkp->data != &mons[PM_ID_JUGGERNAUT]) ||
+		((shkp->mtyp != PM_GRID_BUG && shkp->mtyp != PM_BEBELITH) || (omx==u.ux || omy==u.uy)) &&
+		((shkp->mtyp != PM_CLOCKWORK_SOLDIER && shkp->mtyp != PM_CLOCKWORK_DWARF && 
+		   shkp->mtyp != PM_FABERGE_SPHERE && shkp->mtyp != PM_FIREWORK_CART && 
+		   shkp->mtyp != PM_JUGGERNAUT && shkp->mtyp != PM_ID_JUGGERNAUT) ||
 			(omx + xdir[(int)shkp->mvar_vector] == u.ux && 
 			   omy + ydir[(int)shkp->mvar_vector] == u.uy 
 			)
@@ -4463,8 +4463,8 @@ register boolean silent;
 
 	for (mtmp = fmon; mtmp; mtmp = mtmp2) {
 	    mtmp2 = mtmp->nmon;
-	    if (mtmp->data->mlet == S_KETER && (mtmp->data == &mons[PM_MALKUTH_SEPHIRAH] || 
-											mtmp->data == &mons[PM_YESOD_SEPHIRAH])) {
+	    if (mtmp->data->mlet == S_KETER && (mtmp->mtyp == PM_MALKUTH_SEPHIRAH || 
+											mtmp->mtyp == PM_YESOD_SEPHIRAH)) {
 		if (canspotmon(mtmp)) cnt++;
 		mongone(mtmp);
 	    }

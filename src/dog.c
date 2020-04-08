@@ -15,9 +15,9 @@ void
 initedog(mtmp)
 register struct monst *mtmp;
 {
-	if(mtmp->data == &mons[PM_SURYA_DEVA]){
+	if(mtmp->mtyp == PM_SURYA_DEVA){
 		struct monst *blade;
-		for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
+		for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
 		if(blade && !blade->mtame) tamedog(blade, (struct obj *) 0);
 	}
 	
@@ -361,7 +361,7 @@ boolean with_you;
 
 	num_segs = mtmp->wormno;
 	/* baby long worms have no tail so don't use is_longworm() */
-	if ((mtmp->data == &mons[PM_LONG_WORM]) &&
+	if ((mtmp->mtyp == PM_LONG_WORM) &&
 #ifdef DCC30_BUG
 	    (mtmp->wormno = get_wormno(), mtmp->wormno != 0))
 #else
@@ -697,10 +697,10 @@ boolean pets_only;	/* true for ascension or final escape */
 	    mtmp2 = mtmp->nmon;
 	    if (DEADMONSTER(mtmp)) continue;
 	    if (pets_only && !mtmp->mtame) continue;
-	    if (mtmp->data == &mons[PM_DANCING_BLADE]) continue;
+	    if (mtmp->mtyp == PM_DANCING_BLADE) continue;
 	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)) || 
 			(mtmp->mtame && (all_pets ||
-							// (u.sealsActive&SEAL_MALPHAS && mtmp->data == &mons[PM_CROW]) || //Allow distant crows to get left behind.
+							// (u.sealsActive&SEAL_MALPHAS && mtmp->mtyp == PM_CROW) || //Allow distant crows to get left behind.
 							(distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= pet_dist)
 							)
 			) ||
@@ -781,9 +781,9 @@ boolean pets_only;	/* true for ascension or final escape */
 			mtmp->mlstmv = monstermoves;
 			mtmp->nmon = mydogs;
 			mydogs = mtmp;
-			if(mtmp->data == &mons[PM_SURYA_DEVA]){
+			if(mtmp->mtyp == PM_SURYA_DEVA){
 				struct monst *blade;
-				for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
+				for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
 				if(blade) {
 					if(mtmp2 == blade) mtmp2 = mtmp2->nmon; /*mtmp2 is about to end up on the migrating mons chain*/
 					/* set minvent's obj->no_charge to 0 */
@@ -802,12 +802,12 @@ boolean pets_only;	/* true for ascension or final escape */
 			}
 	    } else if (quest_status.touched_artifact && Race_if(PM_DROW) && !flags.initgend && Role_if(PM_NOBLEMAN) && mtmp->m_id == quest_status.leader_m_id) {
 			mongone(mtmp);
-	    // } else if(u.uevent.qcompleted && mtmp->data == &mons[PM_ORION]){
+	    // } else if(u.uevent.qcompleted && mtmp->mtyp == PM_ORION){
 			// mondied(mtmp);
 	    } else if (mtmp->iswiz || 
-			mtmp->data == &mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES] || 
-			mtmp->data == &mons[PM_CENTER_OF_ALL] || 
-			mtmp->data == &mons[PM_HUNGRY_DEAD] ||
+			mtmp->mtyp == PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES || 
+			mtmp->mtyp == PM_CENTER_OF_ALL || 
+			mtmp->mtyp == PM_HUNGRY_DEAD ||
 			mtmp->mtame
 		) {
 			if (mtmp->mleashed) {
@@ -819,9 +819,9 @@ boolean pets_only;	/* true for ascension or final escape */
 			/* we want to be able to find him when his next resurrection
 			   chance comes up, but have him resume his present location
 			   if player returns to this level before that time */
-			if(mtmp->data == &mons[PM_SURYA_DEVA] && mtmp2 && mtmp2->data == &mons[PM_DANCING_BLADE] && mtmp2->mvar_suryaID == mtmp->m_id)
+			if(mtmp->mtyp == PM_SURYA_DEVA && mtmp2 && mtmp2->mtyp == PM_DANCING_BLADE && mtmp2->mvar_suryaID == mtmp->m_id)
 				mtmp2 = mtmp2->nmon; /*mtmp2 is about to end up on the migrating mons chain*/
-			if(mtmp->data != &mons[PM_DANCING_BLADE]) migrate_to_level(mtmp, ledger_no(&u.uz),
+			if(mtmp->mtyp != PM_DANCING_BLADE) migrate_to_level(mtmp, ledger_no(&u.uz),
 					 MIGR_EXACT_XY, (coord *)0);
 	    }
 	}
@@ -885,9 +885,9 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	mtmp->muy = new_lev.dlevel;
 	mtmp->mx = mtmp->my = 0;	/* this implies migration */
 	
-	if(mtmp->data == &mons[PM_SURYA_DEVA]){
+	if(mtmp->mtyp == PM_SURYA_DEVA){
 		struct monst *blade;
-		for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
+		for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
 		if(blade) {
 			/* set minvent's obj->no_charge to 0 */
 			for(obj = blade->minvent; obj; obj = obj->nobj) {
@@ -950,7 +950,7 @@ register struct obj *obj;
 		    return TABU;
 
 	    /* Ghouls only eat old corpses... yum! */
-	    if (mon->data == &mons[PM_GHOUL]){
+	    if (mon->mtyp == PM_GHOUL){
 		return (obj->otyp == CORPSE && obj->corpsenm != PM_ACID_BLOB &&
 		  peek_at_iced_corpse_age(obj) + 5*rn1(20,10) <= monstermoves) ?
 			DOGFOOD : TABU;
@@ -1052,9 +1052,9 @@ rock:
 		return(TABU);
 	    if (herbi && !carni && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
 		return CADAVER;
-	    if (mon->data == &mons[PM_GELATINOUS_CUBE] && is_organic(obj))
+	    if (mon->mtyp == PM_GELATINOUS_CUBE && is_organic(obj))
 		return(ACCFOOD);
-	    if (metallivorous(mon->data) && is_metallic(obj) && (is_rustprone(obj) || mon->data != &mons[PM_RUST_MONSTER])) {
+	    if (metallivorous(mon->data) && is_metallic(obj) && (is_rustprone(obj) || mon->mtyp != PM_RUST_MONSTER)) {
 		/* Non-rustproofed ferrous based metals are preferred. */
 		return((is_rustprone(obj) && !obj->oerodeproof) ? DOGFOOD :
 			ACCFOOD);
@@ -1185,7 +1185,7 @@ struct obj *obj;
 int enhanced;
 {
 	struct monst *mtmp2, *curmon, *weakdog = (struct monst *) 0;
-	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. || mtmp->data == &mons[PM_MEDUSA] */
+	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. || mtmp->mtyp == PM_MEDUSA */
 	if (is_untamable(mtmp->data) || mtmp->notame || mtmp->iswiz
 		|| (&mons[urole.neminum] == mtmp->data)
 	) return((struct monst *)0);

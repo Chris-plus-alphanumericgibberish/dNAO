@@ -2830,7 +2830,7 @@ struct monst *mtmp;
 	case PM_KNIGHT:
 	    return ("Salutations"); /* Olde English */
 	case PM_SAMURAI:
-	    return (mtmp && mtmp->data == &mons[PM_SHOPKEEPER] ?
+	    return (mtmp && mtmp->mtyp == PM_SHOPKEEPER ?
 	    		"Irasshaimase" : "Konnichi wa"); /* Japanese */
 	case PM_PIRATE:
 		return ("Ahoy");
@@ -2841,7 +2841,7 @@ struct monst *mtmp;
 	case PM_VALKYRIE:
 	    return (
 #ifdef MAIL
-	    		mtmp && mtmp->data == &mons[PM_MAIL_DAEMON] ? "Hallo" :
+	    		mtmp && mtmp->mtyp == PM_MAIL_DAEMON ? "Hallo" :
 #endif
 	    		"Velkommen");   /* Norse */
 	default:
