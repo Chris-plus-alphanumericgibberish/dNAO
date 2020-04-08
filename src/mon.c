@@ -2657,8 +2657,7 @@ mon_can_see_mon(looker, lookie)
 {
 	boolean clearpath;
 	boolean hardtosee;
-	boolean catsightdark = !(levl[looker->mx][looker->my].lit || (viz_array[looker->my][looker->mx]&TEMP_LIT1 && !(viz_array[looker->my][looker->mx]&TEMP_DRK1))) ||
-							(!levl[looker->mx][looker->my].lit && !(viz_array[looker->my][looker->mx]&TEMP_DRK1 && !(viz_array[looker->my][looker->mx]&TEMP_LIT1)));
+	boolean indark = (dimness(looker->mx, looker->my) > 0);
 	
 	if(looker->data == &mons[PM_DREADBLOSSOM_SWARM]){
 		if(lookie->data == &mons[PM_DREADBLOSSOM_SWARM]) return FALSE;
@@ -2716,11 +2715,11 @@ mon_can_see_mon(looker, lookie)
 		int nvrange = 0;
 		boolean darksight = FALSE;
 		/* darksight */
-		if (darksight(looker->data) || (catsight(looker->data) && catsightdark)) {
+		if (darksight(looker->data) || (catsight(looker->data) && indark)) {
 			darksight = TRUE;
 		}
 		/* normal sight */
-		if (normalvision(looker->data) || (catsight(looker->data) && !catsightdark)) {
+		if (normalvision(looker->data) || (catsight(looker->data) && !indark)) {
 			nvrange = 1;
 		}
 		/* low-light vision */

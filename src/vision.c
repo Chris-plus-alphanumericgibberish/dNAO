@@ -512,7 +512,7 @@ vision_recalc(control)
     int oldseenv;				/* previous seenv value */
     int oldxray;				/* previous xray range value */
 	struct monst *mon, *nmon, *mat;
-	boolean catsightdark;
+	boolean indark;
 	boolean darksight = FALSE;
 	int i, j;
 	int nv_range;
@@ -561,7 +561,7 @@ vision_recalc(control)
 		
 		temp_array = viz_array;	/* set viz_array so newsym() will work */
 		viz_array = next_array;
-		catsightdark = (dimness(u.ux, u.uy) > 0);
+		indark = (dimness(u.ux, u.uy) > 0);
 
 		for (row = 0; row < ROWNO; row++) {
 			old_row = temp_array[row];
@@ -584,12 +584,12 @@ vision_recalc(control)
 #endif
     else {
 		/* determine night vision range */
-		catsightdark = (dimness(u.ux, u.uy) > 0);
-		darksight = (catsightdark || (Darksight && !LightBlind));
-		if(Elfsight) nv_range = 3;
-		else if(Lowlightsight) nv_range = 2;
-		else if((Catsight && catsightdark) || (Darksight && LightBlind)) nv_range = 0;
-		else if(Normalvision || (Catsight && !catsightdark)) nv_range = 1;
+		indark = (dimness(u.ux, u.uy) > 0);
+		darksight = ((Catsight && indark) || (Darksight && !LightBlind));
+		if (Elfsight) nv_range = 3;
+		else if (Lowlightsight) nv_range = 2;
+		else if ((Catsight && indark) || (Darksight && LightBlind)) nv_range = 0;
+		else if (Normalvision || (Catsight && !indark)) nv_range = 1;
 		else nv_range = 0;
 		if (Underwater && !Is_waterlevel(&u.uz)) {
 			/*
@@ -697,12 +697,12 @@ vision_recalc(control)
     temp_array = viz_array;
     viz_array = next_array;
 	/* determine night vision range */
-	catsightdark = (dimness(u.ux, u.uy) > 0);
-	darksight = (catsightdark || (Darksight && !LightBlind));
+	indark = (dimness(u.ux, u.uy) > 0);
+	darksight = ((Catsight && indark) || (Darksight && !LightBlind));
 	if(Elfsight) nv_range = 3;
 	else if(Lowlightsight) nv_range = 2;
-	else if((Catsight && catsightdark) || (Darksight && LightBlind)) nv_range = 0;
-	else if(Normalvision || (Catsight && !catsightdark)) nv_range = 1;
+	else if ((Catsight && indark) || (Darksight && LightBlind)) nv_range = 0;
+	else if (Normalvision || (Catsight && !indark)) nv_range = 1;
 	else nv_range = 0;
 	
     /*
@@ -758,8 +758,8 @@ vision_recalc(control)
 			||
 			/* or able to see despite/because of dimness */
 			(!darksight 
-				? dimness(col, row) < nv_range
-				: dimness(col, row) > -nv_range
+				? (dimness(col, row) < nv_range)
+				: (dimness(col, row) > -nv_range)
 			)
 			||
 			/* or darksight mapping terrain */
@@ -785,8 +785,8 @@ vision_recalc(control)
 				||
 				/* or able to see adjacent square despite/because of dimness */
 				(!darksight 
-					? dimness(col+dx, row+dy) < nv_range
-					: dimness(col+dx, row+dy) > -nv_range
+					? (dimness(col+dx, row+dy) < nv_range)
+					: (dimness(col+dx, row+dy) > -nv_range)
 				)
 				||
 				/* or with darksight we can see this kind of terrain anyways */
