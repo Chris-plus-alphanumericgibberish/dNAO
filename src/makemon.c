@@ -9119,8 +9119,10 @@ rndmonst()
 }
 
 /* select a random monster type for a shapeshifter to turn into */
+/* optional: give a function that takes an mtyp and returns TRUE if it meets conditions */
 int
-rndshape()
+rndshape(extra_req)
+boolean FDECL((*extra_req), (int));
 {
 	register struct permonst *ptr;
 	register int mndx, ct;
@@ -9169,6 +9171,8 @@ rndshape()
 	ptr = &mons[mndx];
 	mchoices[mndx] = 0;
 	if (tooweak(mndx, minmlev) || toostrong(mndx, maxmlev))
+		continue;
+	if (extra_req && !(*extra_req)(mndx))
 		continue;
 #ifdef REINCARNATION
 	if (upper && !isupper(def_monsyms[(int)(ptr->mlet)])) continue;

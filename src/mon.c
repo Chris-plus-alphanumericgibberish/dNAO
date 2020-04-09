@@ -25,7 +25,6 @@ STATIC_DCL void FDECL(dead_familiar,(long));
 int scentgoalx, scentgoaly;
 
 #ifdef OVL2
-STATIC_DCL int NDECL(pick_animal);
 STATIC_DCL void FDECL(kill_eggs, (struct obj *));
 #endif
 
@@ -6227,40 +6226,12 @@ register struct monst *mtmp;
 	return(FALSE);
 }
 
-short *animal_list = 0;		/* list of PM values for animal monsters */
-int animal_list_count;
-
-void
-mon_animal_list(construct)
-boolean construct;
+/* is_animal() as a proper function (and of mtyp) for use with rndshape() */
+boolean
+pick_animal(mtyp)
+int mtyp;
 {
-	if (construct) {
-	    short animal_temp[SPECIAL_PM];
-	    int i, n;
-
-	 /* if (animal_list) impossible("animal_list already exists"); */
-
-	    for (n = 0, i = LOW_PM; i < SPECIAL_PM; i++)
-		if (is_animal(&mons[i])) animal_temp[n++] = i;
-	 /* if (n == 0) animal_temp[n++] = NON_PM; */
-
-	    animal_list = (short *)alloc(n * sizeof *animal_list);
-	    (void) memcpy((genericptr_t)animal_list,
-			  (genericptr_t)animal_temp,
-			  n * sizeof *animal_list);
-	    animal_list_count = n;
-	} else {	/* release */
-	    if (animal_list) free((genericptr_t)animal_list), animal_list = 0;
-	    animal_list_count = 0;
-	}
-}
-
-STATIC_OVL int
-pick_animal()
-{
-	if (!animal_list) mon_animal_list(TRUE);
-
-	return animal_list[rn2(animal_list_count)];
+	return (is_animal(&mons[mtyp]));
 }
 
 int
@@ -6279,11 +6250,11 @@ struct monst *mon;
 					    PM_ARCHEOLOGIST);
 		break;
 	    case CHAM_CHAMELEON:
-		if (!rn2(3)) mndx = pick_animal();
-		else mndx = rndshape();//try to get an in-depth monster of any kind
+		if (!rn2(3)) mndx = rndshape(&pick_animal);
+		else mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
 		break;
 	    case CHAM_DREAM:
-		if(rn2(2)) mndx = rndshape();//try to get an in-depth monster of any kind
+		if(rn2(2)) mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
 		else mndx = PM_DREAM_QUASIELEMENTAL;
 		break;
 	    case CHAM_ORDINARY:
@@ -6315,7 +6286,7 @@ struct monst *mon;
 		if (tries==5) pline1(thats_enough_tries);
 	}
 #endif /*WIZARD*/
-	if (mndx == NON_PM) mndx = rndshape();//first try to get an in-depth monster
+	if (mndx == NON_PM) mndx = rndshape((void*)0);//first try to get an in-depth monster
 	if (mndx == NON_PM) mndx = rn1(SPECIAL_PM - LOW_PM, LOW_PM);//double check in case no monst was returned
 	return mndx;
 }
