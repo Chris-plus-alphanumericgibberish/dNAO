@@ -395,14 +395,14 @@ register struct monst *mtmp;
 	killer_format = KILLED_BY_AN;
 	/* "killed by the high priest of Crom" is okay, "killed by the high
 	   priest" alone isn't */
-	if ((mtmp->data->geno & G_UNIQ) != 0 && !( (mtmp->data == &mons[PM_HIGH_PRIEST] || 
-												mtmp->data == &mons[PM_ELDER_PRIEST]) && !mtmp->ispriest)) {
+	if ((mtmp->data->geno & G_UNIQ) != 0 && !( (mtmp->mtyp == PM_HIGH_PRIEST || 
+												mtmp->mtyp == PM_ELDER_PRIEST) && !mtmp->ispriest)) {
 	    if (!type_is_pname(mtmp->data))
 		Strcat(buf, "the ");
 	    killer_format = KILLED_BY;
 	}
 	/* _the_ <invisible> <distorted> ghost of Dudley */
-	if ((mtmp->data == &mons[PM_GHOST] || mtmp->data == &mons[PM_SHADE] || mtmp->data == &mons[PM_BROKEN_SHADOW]) && mtmp->mnamelth) {
+	if ((mtmp->mtyp == PM_GHOST || mtmp->mtyp == PM_SHADE || mtmp->mtyp == PM_BROKEN_SHADOW) && mtmp->mnamelth) {
 		Strcat(buf, "the ");
 		killer_format = KILLED_BY;
 	}
@@ -411,13 +411,13 @@ register struct monst *mtmp;
 	if (distorted)
 		Strcat(buf, "hallucinogen-distorted ");
 
-	if(mtmp->data == &mons[PM_GHOST]) {
+	if(mtmp->mtyp == PM_GHOST) {
 		Strcat(buf, "ghost");
 		if (mtmp->mnamelth) Sprintf(eos(buf), " of %s", NAME(mtmp));
-	} else if(mtmp->data == &mons[PM_BROKEN_SHADOW]) {
+	} else if(mtmp->mtyp == PM_BROKEN_SHADOW) {
 		Strcat(buf, "broken shadow");
 		if (mtmp->mnamelth) Sprintf(eos(buf), " of %s", NAME(mtmp));
-	} else if(mtmp->data == &mons[PM_SHADE]) {
+	} else if(mtmp->mtyp == PM_SHADE) {
 		Strcat(buf, "shade");
 		if (mtmp->mnamelth) Sprintf(eos(buf), " of %s", NAME(mtmp));
 	} else if(mtmp->isshk) {
@@ -445,43 +445,43 @@ register struct monst *mtmp;
 	if(!uclockwork && !uandroid && !nonliving(youracedata)){
 		if (mtmp->data->mlet == S_WRAITH)
 			u.ugrave_arise = PM_WRAITH;
-		else if (mtmp->data == &mons[PM_SHADE])
+		else if (mtmp->mtyp == PM_SHADE)
 			u.ugrave_arise = PM_SHADE;
-		else if (mtmp->data == &mons[PM_BROKEN_SHADOW])
+		else if (mtmp->mtyp == PM_BROKEN_SHADOW)
 			u.ugrave_arise = PM_BROKEN_SHADOW;
 		else if (mtmp->data->mlet == S_MUMMY && urace.mummynum != NON_PM)
 			u.ugrave_arise = urace.mummynum;
 		else if ((mtmp->data->mlet == S_VAMPIRE || mtmp->mfaction == VAMPIRIC) && (Race_if(PM_HUMAN) || Race_if(PM_INHERITOR)))
 			u.ugrave_arise = PM_VAMPIRE;
-		else if (mtmp->data == &mons[PM_GHOUL] || mtmp->data == &mons[PM_GNOLL_GHOUL])
+		else if (mtmp->mtyp == PM_GHOUL || mtmp->mtyp == PM_GNOLL_GHOUL)
 			u.ugrave_arise = PM_GHOUL;
-		else if (mtmp->data == &mons[PM_DREADBLOSSOM_SWARM])
+		else if (mtmp->mtyp == PM_DREADBLOSSOM_SWARM)
 			u.ugrave_arise = PM_DREADBLOSSOM_SWARM;
-		else if (mtmp->data == &mons[PM_DREAD_SERAPH] || mtmp->mfaction == SKELIFIED)
+		else if (mtmp->mtyp == PM_DREAD_SERAPH || mtmp->mfaction == SKELIFIED)
 			u.ugrave_arise = PM_SKELETON;
 		else if (mtmp->data->mlet == S_ZOMBIE || mtmp->mfaction == ZOMBIFIED)
 			u.ugrave_arise = PM_ZOMBIE;
-		else if (mtmp->data == &mons[PM_BAALPHEGOR] || mtmp->mfaction == CRYSTALFIED)
+		else if (mtmp->mtyp == PM_BAALPHEGOR || mtmp->mfaction == CRYSTALFIED)
 			u.ugrave_arise = PM_BAALPHEGOR;
 	} else if(uandroid){
-		if (mtmp->data == &mons[PM_BROKEN_SHADOW])
+		if (mtmp->mtyp == PM_BROKEN_SHADOW)
 			u.ugrave_arise = PM_BROKEN_SHADOW;
 		else if (mtmp->data->mlet == S_MUMMY && urace.mummynum != NON_PM)
 			u.ugrave_arise = urace.mummynum;
 		// else if (mtmp->data->mlet == S_VAMPIRE || mtmp->mfaction == VAMPIRIC)
 			// u.ugrave_arise = PM_VAMPIRIC_DOLL;
-		else if (mtmp->data == &mons[PM_DREAD_SERAPH] || mtmp->mfaction == SKELIFIED)
+		else if (mtmp->mtyp == PM_DREAD_SERAPH || mtmp->mfaction == SKELIFIED)
 			u.ugrave_arise = PM_FLAYED_ANDROID;
 		else if (mtmp->data->mlet == S_ZOMBIE || mtmp->mfaction == ZOMBIFIED)
 			u.ugrave_arise = PM_FLAYED_ANDROID;
-		else if (mtmp->data == &mons[PM_BAALPHEGOR] || mtmp->mfaction == CRYSTALFIED)
+		else if (mtmp->mtyp == PM_BAALPHEGOR || mtmp->mfaction == CRYSTALFIED)
 			u.ugrave_arise = PM_BAALPHEGOR;
 	} else { //clockwork or other nonliving
-		if (mtmp->data == &mons[PM_BROKEN_SHADOW])
+		if (mtmp->mtyp == PM_BROKEN_SHADOW)
 			u.ugrave_arise = PM_BROKEN_SHADOW;
-		else if (mtmp->data == &mons[PM_DREADBLOSSOM_SWARM] && !uclockwork && !is_naturally_unalive(youracedata))
+		else if (mtmp->mtyp == PM_DREADBLOSSOM_SWARM && !uclockwork && !is_naturally_unalive(youracedata))
 			u.ugrave_arise = PM_DREADBLOSSOM_SWARM;
-		else if (mtmp->data == &mons[PM_BAALPHEGOR] || mtmp->mfaction == CRYSTALFIED)
+		else if (mtmp->mtyp == PM_BAALPHEGOR || mtmp->mfaction == CRYSTALFIED)
 			u.ugrave_arise = PM_BAALPHEGOR;
 	}
 	if (u.ugrave_arise >= LOW_PM &&
@@ -1007,7 +1007,7 @@ die:
 	{
 		struct monst *mtmp;
 		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-			if(mtmp->data == &mons[PM_OONA] && mtmp->mtame)
+			if(mtmp->mtyp == PM_OONA && mtmp->mtame)
 				achieve.get_keys |= (1 << (ART_THIRD_KEY_OF_LAW - ART_FIRST_KEY_OF_LAW));
 				
 		}
@@ -1051,17 +1051,17 @@ die:
 		u.ugrave_arise = (NON_PM - 4);	/* statue instead of corpse */
 	    else if (u.ugrave_arise == NON_PM &&
 		     !(mvitals[u.umonnum].mvflags & G_NOCORPSE)) {
-		int mnum = u.umonnum;
+		int mtyp = u.umonnum;
 
 		if (!Upolyd) {
 		    /* Base corpse on race when not poly'd since original
 		     * u.umonnum is based on role, and all role monsters
 		     * are human.
 		     */
-		    mnum = (flags.female && urace.femalenum != NON_PM) ?
+		    mtyp = (flags.female && urace.femalenum != NON_PM) ?
 			urace.femalenum : urace.malenum;
 		}
-		corpse = mk_named_object(CORPSE, &mons[mnum],
+		corpse = mk_named_object(CORPSE, &mons[mtyp],
 				       u.ux, u.uy, plname);
 		Sprintf(pbuf, "%s, %s%s", plname,
 			killer_format == NO_KILLER_PREFIX ? "" :

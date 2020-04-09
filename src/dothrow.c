@@ -601,21 +601,21 @@ quest_arti_hits_leader(obj,mon)
 struct obj *obj;
 struct monst *mon;
 {
-	if(obj->oartifact && is_quest_artifact(obj) && (mon->data == &mons[urole.ldrnum])) return TRUE;
+	if(obj->oartifact && is_quest_artifact(obj) && (mon->mtyp == urole.ldrnum)) return TRUE;
 	else if(Race_if(PM_ELF)){
 		if((obj->oartifact == ART_PALANTIR_OF_WESTERNESSE || obj->oartifact == ART_BELTHRONDING) &&
-			(mon->data == &mons[PM_CELEBORN] || mon->data == &mons[PM_GALADRIEL])
+			(mon->mtyp == PM_CELEBORN || mon->mtyp == PM_GALADRIEL)
 		) return TRUE;
 	} else if(Race_if(PM_DROW)){
 		if(((obj->oartifact == ART_SILVER_STARLIGHT || obj->oartifact == ART_WRATHFUL_SPIDER) &&
-			(flags.initgend && mon->data == &mons[PM_ECLAVDRA])) || 
+			(flags.initgend && mon->mtyp == PM_ECLAVDRA)) || 
 			((obj->oartifact == ART_DARKWEAVER_S_CLOAK || obj->oartifact == ART_SPIDERSILK) &&
-			(!flags.initgend && mon->data == &mons[PM_ECLAVDRA])) ||
+			(!flags.initgend && mon->mtyp == PM_ECLAVDRA)) ||
 			
 			((obj->oartifact == ART_TENTACLE_ROD || obj->oartifact == ART_CRESCENT_BLADE) &&
-			(flags.initgend && mon->data == &mons[PM_SEYLL_AUZKOVYN])) ||
+			(flags.initgend && mon->mtyp == PM_SEYLL_AUZKOVYN)) ||
 			((obj->oartifact == ART_TENTACLE_ROD || obj->oartifact == ART_WEBWEAVER_S_CROOK) &&
-			(!flags.initgend && mon->data == &mons[PM_DARUTH_XAXOX]))
+			(!flags.initgend && mon->mtyp == PM_DARUTH_XAXOX))
 		) return TRUE;
 	}
 	return FALSE;

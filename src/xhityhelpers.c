@@ -72,15 +72,15 @@ boolean active;
 
 	/* some creatures are limited in *where* they can attack */
 	/* Grid bugs and Bebeliths cannot attack at an angle. */
-	if ((pa == &mons[PM_GRID_BUG] || pa == &mons[PM_BEBELITH])
+	if ((pa->mtyp == PM_GRID_BUG || pa->mtyp == PM_BEBELITH)
 		&& x(magr) != tarx && y(magr) != tary)
 		return FALSE;
 
 	/* limited attack angles (monster-agressor only) */
 	if (!youagr && (
-		pa == &mons[PM_CLOCKWORK_SOLDIER] || pa == &mons[PM_CLOCKWORK_DWARF] ||
-		pa == &mons[PM_FABERGE_SPHERE] || pa == &mons[PM_FIREWORK_CART] ||
-		pa == &mons[PM_JUGGERNAUT] || pa == &mons[PM_ID_JUGGERNAUT]))
+		pa->mtyp == PM_CLOCKWORK_SOLDIER || pa->mtyp == PM_CLOCKWORK_DWARF ||
+		pa->mtyp == PM_FABERGE_SPHERE || pa->mtyp == PM_FIREWORK_CART ||
+		pa->mtyp == PM_JUGGERNAUT || pa->mtyp == PM_ID_JUGGERNAUT))
 	{
 		if (x(magr) + xdir[(int)magr->mvar1] != tarx ||
 			y(magr) + ydir[(int)magr->mvar1] != tary)
@@ -324,19 +324,19 @@ struct monst * mon;
 
 	if ((mon->data->mlet == S_SNAKE
 		|| mon->data->mlet == S_NAGA
-		|| mon->data == &mons[PM_COUATL]
-		|| mon->data == &mons[PM_LILLEND]
-		|| mon->data == &mons[PM_MEDUSA]
-		|| mon->data == &mons[PM_MARILITH]
-		|| mon->data == &mons[PM_MAMMON]
-		|| mon->data == &mons[PM_SHAKTARI]
-		|| mon->data == &mons[PM_DEMOGORGON]
-		|| mon->data == &mons[PM_GIANT_EEL]
-		|| mon->data == &mons[PM_ELECTRIC_EEL]
-		|| mon->data == &mons[PM_KRAKEN]
-		|| mon->data == &mons[PM_SALAMANDER]
-		|| mon->data == &mons[PM_KARY__THE_FIEND_OF_FIRE]
-		|| mon->data == &mons[PM_CATHEZAR]
+		|| mon->mtyp == PM_COUATL
+		|| mon->mtyp == PM_LILLEND
+		|| mon->mtyp == PM_MEDUSA
+		|| mon->mtyp == PM_MARILITH
+		|| mon->mtyp == PM_MAMMON
+		|| mon->mtyp == PM_SHAKTARI
+		|| mon->mtyp == PM_DEMOGORGON
+		|| mon->mtyp == PM_GIANT_EEL
+		|| mon->mtyp == PM_ELECTRIC_EEL
+		|| mon->mtyp == PM_KRAKEN
+		|| mon->mtyp == PM_SALAMANDER
+		|| mon->mtyp == PM_KARY__THE_FIEND_OF_FIRE
+		|| mon->mtyp == PM_CATHEZAR
 		) && roll_madness(MAD_OPHIDIOPHOBIA)){
 		pline("You're afraid to go near that horrid serpent!");
 		return TRUE;
@@ -348,10 +348,10 @@ struct monst * mon;
 	}
 
 	if ((is_spider(mon->data)
-		|| mon->data == &mons[PM_SPROW]
-		|| mon->data == &mons[PM_DRIDER]
-		|| mon->data == &mons[PM_PRIESTESS_OF_GHAUNADAUR]
-		|| mon->data == &mons[PM_AVATAR_OF_LOLTH]
+		|| mon->mtyp == PM_SPROW
+		|| mon->mtyp == PM_DRIDER
+		|| mon->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
+		|| mon->mtyp == PM_AVATAR_OF_LOLTH
 		) && roll_madness(MAD_ARACHNOPHOBIA)){
 		pline("You're afraid to go near that terrifying spider!");
 		return TRUE;
@@ -435,7 +435,7 @@ struct monst *mtmp;
 	
 	if (Role_if(PM_KNIGHT) && u.ualign.type == A_LAWFUL &&
 	    (!mtmp->mcanmove || !mtmp->mnotlaugh || mtmp->msleeping ||
-		(mtmp->mflee && mtmp->data != &mons[PM_BANDERSNATCH] && !mtmp->mavenge))){
+		(mtmp->mflee && mtmp->mtyp != PM_BANDERSNATCH && !mtmp->mavenge))){
 		    You("caitiff!");
 			if(u.ualign.record > 10) {
 				u.ualign.sins++;
@@ -486,7 +486,7 @@ demonpet()
 	i = (!is_demon(youracedata) || !rn2(6)) 
 	     ? ndemon(u.ualign.type) : NON_PM;
 	pm = i != NON_PM ? &mons[i] : youracedata;
-	if(pm == &mons[PM_ANCIENT_OF_ICE] || pm == &mons[PM_ANCIENT_OF_DEATH]) {
+	if(pm->mtyp == PM_ANCIENT_OF_ICE || pm->mtyp == PM_ANCIENT_OF_DEATH) {
 	    pm = rn2(4) ? &mons[PM_METAMORPHOSED_NUPPERIBO] : &mons[PM_ANCIENT_NUPPERIBO];
 	}
 	if ((dtmp = makemon(pm, u.ux, u.uy, NO_MM_FLAGS)) != 0)
@@ -1214,10 +1214,10 @@ struct permonst * pd;
 
 	/* consuming the defender is fatal */
 	if ((is_deadly(pd) || 
-		((pd == &mons[PM_GREEN_SLIME] || pd == &mons[PM_FLUX_SLIME]) &&
+		((pd->mtyp == PM_GREEN_SLIME || pd->mtyp == PM_FLUX_SLIME) &&
 			!(Change_res(magr)
-			|| pa == &mons[PM_GREEN_SLIME]
-			|| pa == &mons[PM_FLUX_SLIME]
+			|| pa->mtyp == PM_GREEN_SLIME
+			|| pa->mtyp == PM_FLUX_SLIME
 			|| is_rider(pa)
 			|| resists_poly(pa)))
 		) && (

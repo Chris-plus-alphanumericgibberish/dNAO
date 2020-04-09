@@ -1350,12 +1350,12 @@ touch_artifact(obj, mon, hypothetical)
 	} else if (!is_covetous(mon->data) && !is_mplayer(mon->data)) {
 		if(oart->otyp != UNICORN_HORN){
 			badclass = self_willed &&
-				   ((oart->role != NON_PM && &mons[oart->role] != mon->data && 
+				   ((oart->role != NON_PM && mon->mtyp != oart->role && 
 				   !(oart == &artilist[ART_EXCALIBUR] || oart == &artilist[ART_CLARENT]))
 				   ||
 				   (oart->race != NON_PM && ((mons[oart->race].mflagsa & mon->data->mflagsa) == 0)));
-			if(mon->isminion && (mon->data == &mons[PM_ALIGNED_PRIEST]
-				|| mon->data == &mons[PM_ANGEL])
+			if(mon->isminion && (mon->mtyp == PM_ALIGNED_PRIEST
+				|| mon->mtyp == PM_ANGEL)
 			){
 				badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 				   (oart->alignment != sgn(EPRI(mon)->shralign));
@@ -1369,8 +1369,8 @@ touch_artifact(obj, mon, hypothetical)
 		}
 		else{/* Unicorn horns */
 			badclass = TRUE;
-			if(mon->isminion && (mon->data == &mons[PM_ALIGNED_PRIEST]
-				|| mon->data == &mons[PM_ANGEL])
+			if(mon->isminion && (mon->mtyp == PM_ALIGNED_PRIEST
+				|| mon->mtyp == PM_ANGEL)
 			){
 				badalign = oart->alignment != A_NONE && (oart->alignment != sgn(EPRI(mon)->shralign));
 			} else if(mon->isminion){
@@ -1382,7 +1382,7 @@ touch_artifact(obj, mon, hypothetical)
     } else {    /* an M3_WANTSxxx monster or a fake player */
 		/* special monsters trying to take the Amulet, invocation tools or
 		   quest item can touch anything except for `spec_applies' artifacts */
-		if(mon->data == &mons[PM_WARDEN_ARIANNA] && obj->oartifact == ART_IRON_SPOON_OF_LIBERATION)
+		if(mon->mtyp == PM_WARDEN_ARIANNA && obj->oartifact == ART_IRON_SPOON_OF_LIBERATION)
 			badclass = badalign = forceEvade = TRUE;
 		else badclass = badalign = FALSE;
     }
@@ -1411,7 +1411,7 @@ touch_artifact(obj, mon, hypothetical)
 			// badclass = FALSE;
 		}
 	}
-	if(mon->data == &mons[PM_DAEMON]) badclass = badalign = FALSE;
+	if(mon->mtyp == PM_DAEMON) badclass = badalign = FALSE;
 	
 	if(obj->oartifact >= ART_BLACK_CRYSTAL && obj->oartifact <= ART_AIR_CRYSTAL){
 		if(obj->oartifact == ART_BLACK_CRYSTAL){
@@ -1775,7 +1775,7 @@ int * truedmgptr;
 	if (otmp->oartifact == ART_BLACK_ARROW) {
 		if (goodpointers) {
 			*plusdmgptr += basedmg * 3 + 108;
-			if (mon->data == &mons[PM_SMAUG])
+			if (mon->mtyp == PM_SMAUG)
 				*truedmgptr += mon->mhpmax;
 		}
 		/* return immediately */
@@ -2106,9 +2106,9 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 				&& (!uarms->cursed || rn2(3))
 			   ) || u.sealsActive&SEAL_ENKI)
 			) {
-				int mult = (flaming(youracedata) || youracedata == &mons[PM_EARTH_ELEMENTAL] || youracedata == &mons[PM_IRON_GOLEM] || youracedata == &mons[PM_CHAIN_GOLEM]) ? 2 : 1;
+				int mult = (flaming(youracedata) || youracedata->mtyp == PM_EARTH_ELEMENTAL || youracedata->mtyp == PM_IRON_GOLEM || youracedata->mtyp == PM_CHAIN_GOLEM) ? 2 : 1;
 				*dmgptr += d(dnum,4)*mult;
-				if(youracedata == &mons[PM_GREMLIN] && rn2(3)){
+				if(youracedata->mtyp == PM_GREMLIN && rn2(3)){
 					(void)split_mon(&youmonst, (struct monst *)0);
 				}
 			}
@@ -2132,9 +2132,9 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 				// && (!ublindf->cursed || rn2(3))
 			   ))
 			) {
-				int mult = (flaming(mdef->data) || mdef->data == &mons[PM_EARTH_ELEMENTAL] || mdef->data == &mons[PM_IRON_GOLEM] || mdef->data == &mons[PM_CHAIN_GOLEM]) ? 2 : 1;
+				int mult = (flaming(mdef->data) || mdef->mtyp == PM_EARTH_ELEMENTAL || mdef->mtyp == PM_IRON_GOLEM || mdef->mtyp == PM_CHAIN_GOLEM) ? 2 : 1;
 				*dmgptr += d(dnum,4)*mult;
-				if(mdef->data == &mons[PM_GREMLIN] && rn2(3)){
+				if(mdef->mtyp == PM_GREMLIN && rn2(3)){
 					(void)split_mon(mdef, (struct monst *)0);
 				}
 			}
@@ -2679,7 +2679,7 @@ char *type;			/* blade, staff, etc */
 		    flags.botl = 1;
 		}
 	    } else {
-		if (mdef->data == &mons[PM_CLAY_GOLEM] || mdef->data == &mons[PM_SPELL_GOLEM])
+		if (mdef->mtyp == PM_CLAY_GOLEM || mdef->mtyp == PM_SPELL_GOLEM)
 		    mdef->mhp = 1;	/* cancelled clay golems will die */
 		if (youattack && (attacktype(mdef->data, AT_MAGC) || attacktype(mdef->data, AT_MMGC))) {
 		    You("absorb magical energy!");
@@ -2819,7 +2819,7 @@ int * truedmgptr;
 			youdef && u.sealsActive&SEAL_ENKI
 			))
 			) {
-			int mult = (flaming(pd) || pd == &mons[PM_EARTH_ELEMENTAL] || pd == &mons[PM_IRON_GOLEM] || pd == &mons[PM_CHAIN_GOLEM]) ? 2 : 1;
+			int mult = (flaming(pd) || pd->mtyp == PM_EARTH_ELEMENTAL || pd->mtyp == PM_IRON_GOLEM || pd->mtyp == PM_CHAIN_GOLEM) ? 2 : 1;
 			if (otmp->oproperties&OPROP_LESSW)
 				*truedmgptr += d(1, 8)*mult;
 			else
@@ -2998,7 +2998,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 
 	if (otmp->otyp == KAMEREL_VAJRA && litsaber(otmp)) {
 		if (!Shock_res(mdef)) {
-			if (otmp->where == OBJ_MINVENT && otmp->ocarry->data == &mons[PM_ARA_KAMEREL])
+			if (otmp->where == OBJ_MINVENT && otmp->ocarry->mtyp == PM_ARA_KAMEREL)
 				*truedmgptr += d(6, 6);
 			else
 				*truedmgptr += d(2, 6);
@@ -3494,7 +3494,7 @@ boolean * messaged;
 		}
 	}
 		//sunlight code adapted from Sporkhack
-	if ((pd == &mons[PM_GREMLIN] || pd == &mons[PM_HUNTING_HORROR]) && arti_bright(otmp))
+	if ((pd->mtyp == PM_GREMLIN || pd->mtyp == PM_HUNTING_HORROR) && arti_bright(otmp))
 	{
 		wepdesc = artilist[oartifact].name;
 		/* Sunlight kills gremlins */
@@ -3619,7 +3619,7 @@ boolean * messaged;
 			return result;
 		}
 		/* special effects vs earth elementals */
-		else if (pd == &mons[PM_EARTH_ELEMENTAL]){
+		else if (pd->mtyp == PM_EARTH_ELEMENTAL){
 			struct monst *mtmp = 0;
 			int result = 0;
 			pline("The winds blast the stone and sweep the fragments into a whirling dust storm!");
@@ -3658,7 +3658,7 @@ boolean * messaged;
 			return result;
 		}
 		/* special effects vs water elementals */
-		else if (pd == &mons[PM_WATER_ELEMENTAL]) {
+		else if (pd->mtyp == PM_WATER_ELEMENTAL) {
 			struct monst *mtmp = 0;
 			int result = 0;
 			pline("The winds whip the waters into a rolling fog!");
@@ -3927,7 +3927,7 @@ boolean * messaged;
 			break;
 		case ART_VORPAL_BLADE:
 			wepdesc = "vorpal blade";
-			if (dieroll == 1 || pd == &mons[PM_JABBERWOCK]) {
+			if (dieroll == 1 || pd->mtyp == PM_JABBERWOCK) {
 				behead = TRUE;
 			}
 			break;
@@ -4192,7 +4192,7 @@ boolean * messaged;
 			youdef && u.sealsActive&SEAL_ENKI
 			))
 			) {
-			if (pd == &mons[PM_GREMLIN] && rn2(3)){
+			if (pd->mtyp == PM_GREMLIN && rn2(3)){
 				(void)split_mon(mdef, (struct monst *)0);
 			}
 		}
@@ -4342,7 +4342,7 @@ boolean * messaged;
 		if (youagr) {
 			losehp(d(4,6) + otmp->spe + (Cold_resistance ? 0 : (d(2,6) + otmp->spe)), "a cold black blade", KILLED_BY);
 			if(!Cold_resistance && !rn2(4)) (void) destroy_mitem(magr, POTION_CLASS, AD_COLD);
-		} else if(magr->data != &mons[PM_LEVISTUS]){
+		} else if(magr->mtyp != PM_LEVISTUS){
 			magr->mhp -= d(4,6) + otmp->spe + (resists_cold(magr) ? 0 : (d(2,6) + otmp->spe));
 			if(!resists_cold(magr) && !rn2(4)) (void) destroy_mitem(magr, POTION_CLASS, AD_COLD);
 			// if(magr->mhp < 0){
@@ -5956,8 +5956,8 @@ arti_invoke(obj)
 			struct monst *mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 			mtmp = tamedog(mtmp, (struct obj *) 0);
 			
-			if (mtmp->data != &mons[PM_SKELETON])
-				mtmp->mfaction = SKELIFIED;
+			if (mtmp->mtyp != PM_SKELETON)
+				set_faction(mtmp, SKELIFIED);
 
 			if (onfloor) useupf(corpse, 1);
 			else useup(corpse);
@@ -6323,9 +6323,9 @@ arti_invoke(obj)
 									pline("The %s quickly lengthens and pierces %s %s wall!",
 									obj->oartifact == ART_SCEPTRE_OF_LOLTH ? "Sceptre" : "Rod", 
 									s_suffix(mon_nam(mtmp)), mbodypart(mtmp, STOMACH));
-								if(mtmp->data == &mons[PM_JUIBLEX] 
-									|| mtmp->data == &mons[PM_LEVIATHAN]
-									|| mtmp->data == &mons[PM_METROID_QUEEN]
+								if(mtmp->mtyp == PM_JUIBLEX 
+									|| mtmp->mtyp == PM_LEVIATHAN
+									|| mtmp->mtyp == PM_METROID_QUEEN
 								) mtmp->mhp = (int)(.75*mtmp->mhp + 1);
 								else mtmp->mhp = 1;		/* almost dead */
 								expels(mtmp, mtmp->data, !is_animal(mtmp->data));
@@ -6642,7 +6642,7 @@ arti_invoke(obj)
 							for(; mtmp; mtmp = ntmp){
 								ntmp = mtmp->nmon;
 								if(mon_resistance(mtmp,TELEPAT) && couldsee(mtmp->mx,mtmp->my)){
-									if(mtmp->data == &mons[PM_LUGRIBOSSK]) maanze = TRUE;
+									if(mtmp->mtyp == PM_LUGRIBOSSK) maanze = TRUE;
 									killed(mtmp);
 								} else if(is_magical(mtmp->data) && couldsee(mtmp->mx,mtmp->my) 
 									&& !resist(mtmp, WEAPON_CLASS, 0, NOTELL)
@@ -9470,7 +9470,7 @@ mind_blast_items()
 		// if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe)){
 			mtmp = animate_statue(obj, obj->ox, obj->oy, ANIMATE_NORMAL, (int *) 0);
 			if(mtmp){
-				mtmp->mfaction = TOMB_HERD;
+				set_faction(mtmp, TOMB_HERD);
 				mtmp->m_lev += 4;
 				mtmp->mhpmax += d(4, 8);
 				mtmp->mhp = mtmp->mhpmax;
@@ -9592,7 +9592,7 @@ int spe;
 					m2->msleeping = 0;
 					if (!m2->mcanmove && !rn2(5)) {
 						m2->mfrozen = 0;
-						if (m2->data != &mons[PM_GIANT_TURTLE] || !(m2->mflee))
+						if (m2->mtyp != PM_GIANT_TURTLE || !(m2->mflee))
 							m2->mcanmove = 1;
 					}
 					m2->mux = u.ux;
@@ -9662,7 +9662,7 @@ struct monst *mon;
 			if((otmp->wrathdata >> 2) == PM_MIND_FLAYER)
 				return 1;
 		} else {
-			if(&mons[(otmp->wrathdata >> 2)] == mon->data)
+			if((otmp->wrathdata >> 2) == mon->mtyp)
 				return 1;
 			
 			if(mons[(otmp->wrathdata >> 2)].mflagsa && 

@@ -575,7 +575,7 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(youracedata == &mons[PM_TOVE]){
+	if(youracedata->mtyp == PM_TOVE){
 		Sprintf(buf, "Bore Hole");
 		any.a_int = MATTK_HOLE;	/* must be non-zero */
 		incntlet = 'B';
@@ -3964,13 +3964,13 @@ signs_enlightenment()
 	if(u.specialSealsActive&SEAL_MISKA && u.ulevel >= 10){
 		static char mbuf[BUFSZ] = {'\0'};
 		if(u.ulevel >= 26){
-			int howManyArms = (youracedata == &mons[PM_VALAVI]) ? 6 : 
-						  (youracedata == &mons[PM_MAN_SERPENT_MAGE]) ? 6 : 
-						  (youracedata == &mons[PM_PHALANX]) ? 6 : 
-						  (youracedata == &mons[PM_MARILITH]) ? 8 : 
-						  (youracedata == &mons[PM_KARY__THE_FIEND_OF_FIRE]) ? 8 : 
-						  (youracedata == &mons[PM_CATHEZAR]) ? 8 : 
-						  (youracedata == &mons[PM_SHAKTARI]) ? 8 : 
+			int howManyArms = (youracedata->mtyp == PM_VALAVI) ? 6 : 
+						  (youracedata->mtyp == PM_MAN_SERPENT_MAGE) ? 6 : 
+						  (youracedata->mtyp == PM_PHALANX) ? 6 : 
+						  (youracedata->mtyp == PM_MARILITH) ? 8 : 
+						  (youracedata->mtyp == PM_KARY__THE_FIEND_OF_FIRE) ? 8 : 
+						  (youracedata->mtyp == PM_CATHEZAR) ? 8 : 
+						  (youracedata->mtyp == PM_SHAKTARI) ? 8 : 
 						  4;
 			Sprintf(mbuf, "You have %d arms, and a wolf head grows from each hip.", howManyArms);
 			putstr(en_win, 0, mbuf);
@@ -4509,13 +4509,13 @@ signs_mirror()
 	if(u.specialSealsActive&SEAL_MISKA && !Invis && u.ulevel >= 10){
 		static char mbuf[BUFSZ] = {'\0'};
 		if(u.ulevel >= 26){
-			int howManyArms = (youracedata == &mons[PM_VALAVI]) ? 6 : 
-						  (youracedata == &mons[PM_MAN_SERPENT_MAGE]) ? 6 : 
-						  (youracedata == &mons[PM_PHALANX]) ? 6 : 
-						  (youracedata == &mons[PM_MARILITH]) ? 8 : 
-						  (youracedata == &mons[PM_KARY__THE_FIEND_OF_FIRE]) ? 8 : 
-						  (youracedata == &mons[PM_CATHEZAR]) ? 8 : 
-						  (youracedata == &mons[PM_SHAKTARI]) ? 8 : 
+			int howManyArms = (youracedata->mtyp == PM_VALAVI) ? 6 : 
+						  (youracedata->mtyp == PM_MAN_SERPENT_MAGE) ? 6 : 
+						  (youracedata->mtyp == PM_PHALANX) ? 6 : 
+						  (youracedata->mtyp == PM_MARILITH) ? 8 : 
+						  (youracedata->mtyp == PM_KARY__THE_FIEND_OF_FIRE) ? 8 : 
+						  (youracedata->mtyp == PM_CATHEZAR) ? 8 : 
+						  (youracedata->mtyp == PM_SHAKTARI) ? 8 : 
 						  4;
 			Sprintf(mbuf, "You have %d arms, and a wolf head grows from each hip.", howManyArms);
 			putstr(en_win, 0, mbuf);

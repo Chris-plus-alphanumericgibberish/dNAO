@@ -274,9 +274,8 @@ boolean ghostly;
 			add_id_mapping(mtmp->m_id, nid);
 			mtmp->m_id = nid;
 		}
-		if (moved && mtmp->data) {
-			int offset = mtmp->data - monbegin;	/*(ptrdiff_t)*/
-			mtmp->data = mons + offset;  /* new permonst location */
+		if (mtmp->data) {
+			set_mon_data(mtmp, mtmp->mtyp);
 		}
 		if (ghostly) {
 			int mndx = monsndx(mtmp->data);
@@ -401,6 +400,7 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	if (remember_discover) discover = remember_discover;
 
 	role_init(FALSE);	/* Reset the initial role, race, gender, and alignment */
+	id_permonst();		/* re-generate index numbers of the permonst array */
 #ifdef AMII_GRAPHICS
 	amii_setpens(amii_numcolors);	/* use colors from save file */
 #endif

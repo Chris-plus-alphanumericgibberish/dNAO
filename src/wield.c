@@ -948,9 +948,9 @@ struct permonst * ptr;
 
 	/* Some creatures are specifically always able to wield any weapon in one hand */
 	if (ptr && (
-		ptr == &mons[PM_THRONE_ARCHON] ||
-		ptr == &mons[PM_LUNGORTHIN] ||
-		ptr == &mons[PM_BASTARD_OF_THE_BOREAL_VALLEY]
+		ptr->mtyp == PM_THRONE_ARCHON ||
+		ptr->mtyp == PM_LUNGORTHIN ||
+		ptr->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY
 		))
 		return FALSE;
 

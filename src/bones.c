@@ -360,20 +360,20 @@ struct obj *corpse;
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    if (DEADMONSTER(mtmp)) continue;
 	    mptr = mtmp->data;
-	    if (mtmp->iswiz || mptr == &mons[PM_MEDUSA] ||
+	    if (mtmp->iswiz || mptr->mtyp == PM_MEDUSA ||
 		    mptr->msound == MS_NEMESIS || mptr->msound == MS_LEADER ||
 			quest_status.leader_m_id == mtmp->m_id || 
-		    mptr == &mons[PM_VLAD_THE_IMPALER] || 
+		    mptr->mtyp == PM_VLAD_THE_IMPALER || 
 		    is_keter(mptr) || 
-		    mptr == &mons[PM_HOUND_OF_TINDALOS] || 
-		    mptr == &mons[PM_CLAIRVOYANT_CHANGED] || 
-			(mptr == &mons[PM_DREAD_SERAPH] && !(mtmp->mstrategy & STRAT_WAITFORU)) || 
-			(mptr == &mons[PM_WEEPING_ANGEL] && angelnum > 0) || 
+		    mptr->mtyp == PM_HOUND_OF_TINDALOS || 
+		    mptr->mtyp == PM_CLAIRVOYANT_CHANGED || 
+			(mptr->mtyp == PM_DREAD_SERAPH && !(mtmp->mstrategy & STRAT_WAITFORU)) || 
+			(mptr->mtyp == PM_WEEPING_ANGEL && angelnum > 0) || 
 			(is_drow(mptr) && mtmp->mfaction == LOST_HOUSE) ||
 			(is_dprince(mptr) && !Inhell) || 
 			(is_dlord(mptr) && !Inhell)
 		) mongone(mtmp);
-		if(mptr == &mons[PM_WEEPING_ANGEL]) angelnum++;
+		if(mptr->mtyp == PM_WEEPING_ANGEL) angelnum++;
 	}
 #ifdef STEED
 	if (u.usteed) dismount_steed(DISMOUNT_BONES);
@@ -445,28 +445,28 @@ struct obj *corpse;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				mtmp->mfaction = ZOMBIFIED;
+				set_faction(mtmp, ZOMBIFIED);
 		} else if(u.ugrave_arise == PM_SKELETON){
 			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				mtmp->mfaction = SKELIFIED;
+				set_faction(mtmp, SKELIFIED);
 		} else if(u.ugrave_arise == PM_BAALPHEGOR){
 			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				mtmp->mfaction = CRYSTALFIED;
+				set_faction(mtmp, CRYSTALFIED);
 		} else if(u.ugrave_arise == PM_VAMPIRE){
 			u.ugrave_arise = (u.mfemale && urole.femalenum != NON_PM) ? urole.femalenum : urole.malenum;
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				mtmp->mfaction = VAMPIRIC;
+				set_faction(mtmp, VAMPIRIC);
 		} else {
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);

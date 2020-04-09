@@ -21,6 +21,7 @@ struct attack {
 	uchar		aatyp;
 	uchar		adtyp, damn, damd;
 };
+#define is_null_attk(attk)	((attk) && ((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0))
 
 /*	Max # of attacks for any given monster.
  */
@@ -108,6 +109,7 @@ struct permonst {
 # ifdef TEXTCOLOR
 	uchar		mcolor;			/* color to use */
 # endif
+	int				mtyp;			/* Index number of this permonst entry */
 };
 
 extern NEARDATA struct permonst

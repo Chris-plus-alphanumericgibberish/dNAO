@@ -759,7 +759,7 @@ boolean msgs;
 		if (mtmp) {
 		     /*[don't we need special sokoban handling here?]*/
 		    if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
-		        mtmp->data == &mons[PM_WUMPUS] ||
+		        mtmp->mtyp == PM_WUMPUS ||
 			(mtmp->wormno && count_wsegs(mtmp) > 5) ||
 			mtmp->data->msize >= MZ_HUGE) return;
 		    if (mtmp == u.ustuck)	/* probably a vortex */
@@ -895,7 +895,7 @@ int ttyp;
 		if (mtmp) {
 		     /*[don't we need special sokoban handling here?]*/
 		    if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
-		        mtmp->data == &mons[PM_WUMPUS] ||
+		        mtmp->mtyp == PM_WUMPUS ||
 			(mtmp->wormno && count_wsegs(mtmp) > 5) ||
 			mtmp->data->msize >= MZ_HUGE) return;
 		    if (mtmp == u.ustuck)	/* probably a vortex */
@@ -1785,8 +1785,8 @@ watch_dig(mtmp, x, y, zap)
 	    if (!mtmp) {
 		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 		    if (DEADMONSTER(mtmp)) continue;
-		    if ((mtmp->data == &mons[PM_WATCHMAN] ||
-			 mtmp->data == &mons[PM_WATCH_CAPTAIN]) &&
+		    if ((mtmp->mtyp == PM_WATCHMAN ||
+			 mtmp->mtyp == PM_WATCH_CAPTAIN) &&
 			!is_blind(mtmp) && m_canseeu(mtmp) &&
 			couldsee(mtmp->mx, mtmp->my) && mtmp->mpeaceful)
 			break;
@@ -1876,7 +1876,7 @@ register struct monst *mtmp;
 		here->typ = DOOR;
 		here->doormask = D_NODOOR;
 	    }
-		if(mtmp->data == &mons[PM_MANY_TALONED_THING]){
+		if(mtmp->mtyp == PM_MANY_TALONED_THING){
 			struct engr *oep = engr_at(mtmp->mx, mtmp->my);
 			if(!oep){
 				make_engr_at(mtmp->mx, mtmp->my,
@@ -1955,9 +1955,9 @@ register int zx, zy, digdepth;
 		if (is_animal(mtmp->data))
 		    You("pierce %s %s wall!",
 			s_suffix(mon_nam(mtmp)), mbodypart(mtmp, STOMACH));
-		if(mtmp->data == &mons[PM_JUIBLEX] 
-			|| mtmp->data == &mons[PM_LEVIATHAN]
-			|| mtmp->data == &mons[PM_METROID_QUEEN]
+		if(mtmp->mtyp == PM_JUIBLEX 
+			|| mtmp->mtyp == PM_LEVIATHAN
+			|| mtmp->mtyp == PM_METROID_QUEEN
 												) mtmp->mhp = (int)(.75*mtmp->mhp + 1); 
 		else mtmp->mhp = 1;		/* almost dead */
 		expels(mtmp, mtmp->data, !is_animal(mtmp->data));

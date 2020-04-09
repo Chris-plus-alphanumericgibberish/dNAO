@@ -2567,8 +2567,8 @@ spiriteffects(power, atme)
 							water_damage(mon->minvent, FALSE, FALSE, FALSE, mon);
 						}
 					}
-					if(flaming(mon->data) || mon->data == &mons[PM_EARTH_ELEMENTAL] || mon->data == &mons[PM_IRON_GOLEM] || mon->data == &mons[PM_CHAIN_GOLEM]) dmg *= 2;
-					if(mon->data == &mons[PM_GREMLIN] && rn2(3)){
+					if(flaming(mon->data) || mon->mtyp == PM_EARTH_ELEMENTAL || mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM) dmg *= 2;
+					if(mon->mtyp == PM_GREMLIN && rn2(3)){
 						(void)split_mon(mon, (struct monst *)0);
 					}
 					mon->mhp -= dmg;
@@ -2757,7 +2757,7 @@ spiriteffects(power, atme)
 				if(!mon) break;
 				dmg = d(rnd(5),dsize);
 				if(haseyes(mon->data) && mon->mcansee && can_blnd(&youmonst, mon, AT_CLAW, (struct obj*)0)){
-					if(mon->data == &mons[PM_FLOATING_EYE]){
+					if(mon->mtyp == PM_FLOATING_EYE){
 						You("claw at %s.", mon_nam(mon));
 						dmg += d(5,dsize); //Bonus damage, since this renders wards inefective and is single target.
 						dmg *= 2;
@@ -2794,7 +2794,7 @@ spiriteffects(power, atme)
 				u.irisAttack = moves;
 				pline("Arcs of iridescent droplets tear free from %s body!", s_suffix(mon_nam(mon)));
 				pline("They merge with and are absorbed by your tentacles!");
-				if(mon->data==&mons[PM_WATER_ELEMENTAL] || mon->data==&mons[PM_FOG_CLOUD] || mon->data==&mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES]) dmg *= 2;
+				if(mon->mtyp==PM_WATER_ELEMENTAL || mon->mtyp==PM_FOG_CLOUD || mon->mtyp==PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES) dmg *= 2;
 				if (mon->mhp <= dmg){
 					dmg = mon->mhp;
 					mon->mhp = 0;
@@ -3470,12 +3470,12 @@ spiriteffects(power, atme)
 			mon = m_at(u.ux+u.dx,u.uy+u.dy);
 			if(!mon) return 0;
 			You("speak an echo of the Last Word of creation.");
-			if(mon->data == &mons[PM_DREAD_SERAPH] || mon->data == &mons[PM_BLACK_FLOWER]){
+			if(mon->mtyp == PM_DREAD_SERAPH || mon->mtyp == PM_BLACK_FLOWER){
 				pline("Its voice harmonizes with your own!");
 				unbind(SEAL_TENEBROUS, TRUE);
-			} else if(mon->data == &mons[PM_INTONER]){
+			} else if(mon->mtyp == PM_INTONER){
 				pline("%s screams!", SheHeIt(mon));
-				newcham(mon, &mons[PM_BLACK_FLOWER], FALSE, FALSE);
+				newcham(mon, PM_BLACK_FLOWER, FALSE, FALSE);
 			} else if(resists_drli(mon) || !(mon->data->geno & G_GENO) || resists_death(mon)){
 				int nlev;
 				d_level tolevel;
@@ -3800,7 +3800,7 @@ spiriteffects(power, atme)
 					break;
 				}
 				if (tryct > 100) return 0;	/* Should never happen */
-				newcham(mon, mdat, FALSE, FALSE);
+				newcham(mon, mndx, FALSE, FALSE);
 			}
 		}break;
 		case PWR_PHASE_STEP:{
@@ -4059,11 +4059,11 @@ int spell;
 						if(mon && !mon->mpeaceful){
 							if(is_elemental(mon->data) 
 								|| is_undead_mon(mon) 
-								|| mon->data == &mons[PM_ASPECT_OF_THE_SILENCE] 
-								|| mon->data == &mons[PM_SENTINEL_OF_MITHARDIR] 
-								|| mon->data == &mons[PM_STONE_GOLEM] 
-								|| mon->data == &mons[PM_CLAY_GOLEM] 
-								|| mon->data == &mons[PM_FLESH_GOLEM]
+								|| mon->mtyp == PM_ASPECT_OF_THE_SILENCE 
+								|| mon->mtyp == PM_SENTINEL_OF_MITHARDIR 
+								|| mon->mtyp == PM_STONE_GOLEM 
+								|| mon->mtyp == PM_CLAY_GOLEM 
+								|| mon->mtyp == PM_FLESH_GOLEM
 							) {
 								mon->mhp -= d(nd,12);
 								if (mon->mhp <= 0){
@@ -5433,7 +5433,7 @@ int spell;
 		struct monst *cmon;
 		int dist = 0;
 		for(cmon = fmon; cmon; cmon = cmon->nmon){
-			if(cmon->data == &mons[PM_ASPECT_OF_THE_SILENCE]){
+			if(cmon->mtyp == PM_ASPECT_OF_THE_SILENCE){
 				dist = (int) (3*sqrt(dist2(u.ux,u.uy,cmon->mx,cmon->my)));
 				break;
 			}
@@ -5696,8 +5696,8 @@ dopseudonatural()
 			!(magr_can_attack_mdef(&youmonst, mon, mon->mx, mon->my, FALSE)))
 			continue;
 		if((!Stone_resistance && (touch_petrifies(mon->data)
-		 || mon->data == &mons[PM_MEDUSA]))
-		 || mon->data == &mons[PM_PALE_NIGHT]
+		 || mon->mtyp == PM_MEDUSA))
+		 || mon->mtyp == PM_PALE_NIGHT
 		) continue;
 		
 		if(mon){

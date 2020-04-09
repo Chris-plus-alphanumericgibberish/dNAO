@@ -615,7 +615,7 @@ nh_timeout()
 #endif
 
 	for(upp = u.uprops; upp < u.uprops+SIZE(u.uprops); upp++){
-		if((youracedata == &mons[PM_SHOGGOTH] || youracedata == &mons[PM_PRIEST_OF_GHAUNADAUR]) && upp - u.uprops == BLINDED
+		if((youracedata->mtyp == PM_SHOGGOTH || youracedata->mtyp == PM_PRIEST_OF_GHAUNADAUR) && upp - u.uprops == BLINDED
 			&&  upp->intrinsic & TIMEOUT
 		){
 			upp->intrinsic &= ~TIMEOUT;
@@ -1056,14 +1056,14 @@ long timeout;
 	xchar x, y;
 	boolean yours, silent, knows_egg = FALSE;
 	boolean cansee_hatchspot = FALSE;
-	int i, mnum, hatchcount = 0;
+	int i, mtyp, hatchcount = 0;
 
 	egg = (struct obj *) arg;
 	/* sterilized while waiting */
 	if (egg->corpsenm == NON_PM) return;
 
 	mon = mon2 = (struct monst *)0;
-	mnum = big_to_little(egg->corpsenm);
+	mtyp = big_to_little(egg->corpsenm);
 	/* The identity of one's father is learned, not innate */
 	yours = (egg->spe || (!flags.female && carried(egg) && !rn2(2)));
 	silent = (timeout != monstermoves);	/* hatched while away */
@@ -1072,25 +1072,25 @@ long timeout;
 	if (get_obj_location(egg, &x, &y, 0)) {
 	    hatchcount = rnd((int)egg->quan);
 	    cansee_hatchspot = cansee(x, y) && !silent;
-	    if (!(mons[mnum].geno & G_UNIQ) &&
-		   !(mvitals[mnum].mvflags & G_GONE && !In_quest(&u.uz))) {
+	    if (!(mons[mtyp].geno & G_UNIQ) &&
+		   !(mvitals[mtyp].mvflags & G_GONE && !In_quest(&u.uz))) {
 		for (i = hatchcount; i > 0; i--) {
-		    if (!enexto(&cc, x, y, &mons[mnum]) ||
-			 !(mon = makemon(&mons[mnum], cc.x, cc.y, NO_MINVENT)))
+		    if (!enexto(&cc, x, y, &mons[mtyp]) ||
+			 !(mon = makemon(&mons[mtyp], cc.x, cc.y, NO_MINVENT)))
 			break;
 		    /* tame if your own egg hatches while you're on the
 		       same dungeon level, or any dragon egg (or metroid) which hatches
 		       while it's in your inventory */
 		    if ((yours && !silent) ||
 			(carried(egg) && mon->data->mlet == S_DRAGON) ||
-			(carried(egg) && mon->data == &mons[PM_BABY_METROID]) ) { //metroid egg
+			(carried(egg) && mon->mtyp == PM_BABY_METROID) ) { //metroid egg
 			if ((mon2 = tamedog(mon, (struct obj *)0)) != 0) {
 			    mon = mon2;
 			    if (carried(egg) && mon->data->mlet != S_DRAGON)
 				mon->mtame = 20;
 			}
 		    }
-		    if (mvitals[mnum].mvflags & G_EXTINCT && !In_quest(&u.uz))
+		    if (mvitals[mtyp].mvflags & G_EXTINCT && !In_quest(&u.uz))
 			break;	/* just made last one */
 		    mon2 = mon;	/* in case makemon() fails on 2nd egg */
 		}
@@ -1195,7 +1195,7 @@ long timeout;
 	    }
 
 	    if (cansee_hatchspot && knows_egg)
-		learn_egg_type(mnum);
+		learn_egg_type(mtyp);
 
 	    if (egg->quan > 0) {
 		/* still some eggs left */
@@ -1219,12 +1219,12 @@ long timeout;
 
 /* Learn to recognize eggs of the given type. */
 void
-learn_egg_type(mnum)
-int mnum;
+learn_egg_type(mtyp)
+int mtyp;
 {
 	/* baby monsters hatch from grown-up eggs */
-	mnum = little_to_big(mnum, rn2(2));
-	mvitals[mnum].mvflags |= MV_KNOWS_EGG;
+	mtyp = little_to_big(mtyp, rn2(2));
+	mvitals[mtyp].mvflags |= MV_KNOWS_EGG;
 	/* we might have just learned about other eggs being carried */
 	update_inventory();
 }

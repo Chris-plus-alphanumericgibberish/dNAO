@@ -273,12 +273,12 @@ struct monst *mtmp;
 	 * silly trying to use the same cursed horn round after round
 	 */
 	if (mtmp->mconf || mtmp->mstun || !mtmp->mcansee) {
-	    if (!(is_unicorn(mtmp->data) || mtmp->data == &mons[PM_KI_RIN]) && !nohands(mtmp->data)) {
+	    if (!(is_unicorn(mtmp->data) || mtmp->mtyp == PM_KI_RIN) && !nohands(mtmp->data)) {
 			for(obj = mtmp->minvent; obj; obj = obj->nobj)
 				if (obj->otyp == UNICORN_HORN && !obj->cursed)
 				break;
 	    }
-	    if (obj || is_unicorn(mtmp->data) || mtmp->data == &mons[PM_KI_RIN]) {
+	    if (obj || is_unicorn(mtmp->data) || mtmp->mtyp == PM_KI_RIN) {
 			m.defensive = obj;
 			m.has_defense = MUSE_UNICORN_HORN;
 			return TRUE;
@@ -304,7 +304,7 @@ struct monst *mtmp;
 	 * Pestilence won't use healing even when blind.
 	 */
 	if (!mtmp->mcansee && !nohands(mtmp->data) &&
-		mtmp->data != &mons[PM_PESTILENCE]) {
+		mtmp->mtyp != PM_PESTILENCE) {
 	    if ((obj = m_carrying(mtmp, POT_FULL_HEALING)) != 0) {
 		m.defensive = obj;
 		m.has_defense = MUSE_POT_FULL_HEALING;
@@ -349,7 +349,7 @@ struct monst *mtmp;
 	}
 
 	if (levl[x][y].typ == STAIRS && !stuck && !immobile) {
-		if (x == xdnstair && y == ydnstair && !mon_resistance(mtmp,LEVITATION) && mtmp->data != &mons[PM_SMAUG])
+		if (x == xdnstair && y == ydnstair && !mon_resistance(mtmp,LEVITATION) && mtmp->mtyp != PM_SMAUG)
 			m.has_defense = MUSE_DOWNSTAIRS;
 		if (x == xupstair && y == yupstair && ledger_no(&u.uz) != 1)
 	/* Unfair to let the monsters leave the dungeon with the Amulet */
@@ -369,10 +369,10 @@ struct monst *mtmp;
 		for(xx = x-1; xx <= x+1; xx++) for(yy = y-1; yy <= y+1; yy++)
 		if (isok(xx,yy))
 		if (xx != u.ux && yy != u.uy)
-		if ((mtmp->data != &mons[PM_GRID_BUG] && mtmp->data != &mons[PM_BEBELITH]) || xx == x || yy == y)
-		if((mtmp->data != &mons[PM_CLOCKWORK_SOLDIER] && mtmp->data != &mons[PM_CLOCKWORK_DWARF] && 
-		   mtmp->data != &mons[PM_FABERGE_SPHERE] && mtmp->data != &mons[PM_FIREWORK_CART] && 
-		   mtmp->data != &mons[PM_JUGGERNAUT] && mtmp->data != &mons[PM_ID_JUGGERNAUT]) ||
+		if ((mtmp->mtyp != PM_GRID_BUG && mtmp->mtyp != PM_BEBELITH) || xx == x || yy == y)
+		if((mtmp->mtyp != PM_CLOCKWORK_SOLDIER && mtmp->mtyp != PM_CLOCKWORK_DWARF && 
+		   mtmp->mtyp != PM_FABERGE_SPHERE && mtmp->mtyp != PM_FIREWORK_CART && 
+		   mtmp->mtyp != PM_JUGGERNAUT && mtmp->mtyp != PM_ID_JUGGERNAUT) ||
 			(x + xdir[(int)mtmp->mvar_vector] == xx && 
 			   y + ydir[(int)mtmp->mvar_vector] == yy 
 			)
@@ -413,7 +413,7 @@ struct monst *mtmp;
 		for(xx = x-3; xx <= x+3; xx++) for(yy = y-3; yy <= y+3; yy++)
 		if (isok(xx,yy))
 		if ((mon = m_at(xx,yy)) && is_mercenary(mon->data) &&
-				mon->data != &mons[PM_GUARD] &&
+				mon->mtyp != PM_GUARD &&
 				(mon->msleeping || (!mon->mcanmove && mon->mnotlaugh))) {
 			m.defensive = obj;
 			m.has_defense = MUSE_BUGLE;
@@ -446,7 +446,7 @@ struct monst *mtmp;
 		    && !(levl[x][y].wall_info & W_NONDIGGABLE)
 		    && !(Is_botlevel(&u.uz) || In_endgame(&u.uz))
 		    && !(is_ice(x,y) || is_pool(x,y, TRUE) || is_lava(x,y))
-		    && !(mtmp->data == &mons[PM_VLAD_THE_IMPALER]
+		    && !(mtmp->mtyp == PM_VLAD_THE_IMPALER
 			 && In_V_tower(&u.uz))) {
 			m.defensive = obj;
 			m.has_defense = MUSE_WAN_DIGGING;
@@ -482,7 +482,7 @@ struct monst *mtmp;
 		    }
 		}
 
-	    if (mtmp->data != &mons[PM_PESTILENCE]) {
+	    if (mtmp->mtyp != PM_PESTILENCE) {
 		nomore(MUSE_POT_FULL_HEALING);
 		if(obj->otyp == POT_FULL_HEALING) {
 			m.defensive = obj;
@@ -953,7 +953,7 @@ struct monst *mtmp;
 		case 2: return POT_HEALING;
 		case 3: 
 		case 4: return POT_EXTRA_HEALING;
-		case 5: return (mtmp->data != &mons[PM_PESTILENCE]) ?
+		case 5: return (mtmp->mtyp != PM_PESTILENCE) ?
 				POT_FULL_HEALING : POT_SICKNESS;
 		case 7: if (mon_resistance(mtmp,LEVITATION) || mtmp->isshk || mtmp->isgd
 						|| mtmp->ispriest
@@ -1051,7 +1051,7 @@ struct monst *mtmp;
 	if (!ranged_stuff) return FALSE;
 #define nomore(x) if(m.has_offense==x) continue;
 	for(obj=mtmp->minvent; obj; obj=obj->nobj) {
-	    if(mtmp->data == &mons[PM_VALKYRIE] && obj->oartifact == ART_MJOLLNIR && !obj->cursed && mtmp->misc_worn_check & ARM_GLOVES) {
+	    if(mtmp->mtyp == PM_VALKYRIE && obj->oartifact == ART_MJOLLNIR && !obj->cursed && mtmp->misc_worn_check & ARM_GLOVES) {
 			struct obj *otmp;
 			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 				if (otmp->owornmask & ARM_GLOVES && otmp->otyp == GAUNTLETS_OF_POWER){
@@ -1857,7 +1857,7 @@ struct monst *mtmp;
 	int xx, yy;
 	boolean immobile = (mdat->mmove == 0);
 	boolean stuck = (mtmp == u.ustuck);
-	boolean nomouth = mdat==&mons[PM_NIGHTGAUNT] || ((mtmp->misc_worn_check & W_ARMH) && which_armor(mtmp, W_ARMH) &&
+	boolean nomouth = mdat->mtyp==PM_NIGHTGAUNT || ((mtmp->misc_worn_check & W_ARMH) && which_armor(mtmp, W_ARMH) &&
 			(((which_armor(mtmp, W_ARMH))->otyp) == PLASTEEL_HELM || ((which_armor(mtmp, W_ARMH))->otyp) == CRYSTAL_HELM || ((which_armor(mtmp, W_ARMH))->otyp) == PONTIFF_S_CROWN))
 			 || ((mtmp->misc_worn_check & W_ARMC) && which_armor(mtmp, W_ARMC)
 				&& (((which_armor(mtmp, W_ARMC))->otyp) == WHITE_FACELESS_ROBE
@@ -1888,10 +1888,10 @@ struct monst *mtmp;
 	  for(xx = x-1; xx <= x+1; xx++)
 	    for(yy = y-1; yy <= y+1; yy++)
 		if (isok(xx,yy) && (xx != u.ux || yy != u.uy))
-		    if ((mdat != &mons[PM_GRID_BUG] && mtmp->data != &mons[PM_BEBELITH]) || xx == x || yy == y)
-			if((mtmp->data != &mons[PM_CLOCKWORK_SOLDIER] && mtmp->data != &mons[PM_CLOCKWORK_DWARF] && 
-			   mtmp->data != &mons[PM_FABERGE_SPHERE] && mtmp->data != &mons[PM_FIREWORK_CART] && 
-			   mtmp->data != &mons[PM_JUGGERNAUT] && mtmp->data != &mons[PM_ID_JUGGERNAUT]) ||
+		    if ((mdat->mtyp != PM_GRID_BUG && mtmp->mtyp != PM_BEBELITH) || xx == x || yy == y)
+			if((mtmp->mtyp != PM_CLOCKWORK_SOLDIER && mtmp->mtyp != PM_CLOCKWORK_DWARF && 
+			   mtmp->mtyp != PM_FABERGE_SPHERE && mtmp->mtyp != PM_FIREWORK_CART && 
+			   mtmp->mtyp != PM_JUGGERNAUT && mtmp->mtyp != PM_ID_JUGGERNAUT) ||
 				(x + xdir[(int)mtmp->mvar_vector] == xx && 
 				   y + ydir[(int)mtmp->mvar_vector] == yy 
 				)
@@ -1921,7 +1921,7 @@ struct monst *mtmp;
 			m.has_misc = MUSE_POT_GAIN_LEVEL;
 		}
 		nomore(MUSE_MASK);
-		if(obj->otyp == MASK && !obj->oartifact && mtmp->data == &mons[PM_POLYPOID_BEING] && !(mons[obj->corpsenm].geno&G_UNIQ)){
+		if(obj->otyp == MASK && !obj->oartifact && mtmp->mtyp == PM_POLYPOID_BEING && !(mons[obj->corpsenm].geno&G_UNIQ)){
 			m.misc = obj;
 			m.has_misc = MUSE_MASK;
 		}
@@ -2236,13 +2236,13 @@ museamnesia:
 	case MUSE_WAN_POLYMORPH:
 		mzapmsg(mtmp, otmp, TRUE);
 		otmp->spe--;
-		if(!resists_poly(mtmp->data)) newcham(mtmp, (struct permonst *) 0, TRUE, FALSE);
+		if(!resists_poly(mtmp->data)) newcham(mtmp, NON_PM, TRUE, FALSE);
 		if (oseen) makeknown(WAN_POLYMORPH);
 		return 2;
 	case MUSE_POT_POLYMORPH:
 		mquaffmsg(mtmp, otmp);
 		if (vismon) pline("%s suddenly mutates!", Monnam(mtmp));
-		if(!resists_poly(mtmp->data)) newcham(mtmp, (struct permonst *) 0, FALSE, FALSE);
+		if(!resists_poly(mtmp->data)) newcham(mtmp, NON_PM, FALSE, FALSE);
 		if (oseen) makeknown(POT_POLYMORPH);
 		m_useup(mtmp, otmp);
 		return 2;
@@ -2261,7 +2261,7 @@ museamnesia:
 		newsym(trapx, trapy);
 		
 		if(resists_magm(mtmp)) shieldeff(mtmp->mx, mtmp->my);
-		else if(!resists_poly(mtmp->data)) newcham(mtmp, (struct permonst *)0, FALSE, FALSE);
+		else if(!resists_poly(mtmp->data)) newcham(mtmp, NON_PM, FALSE, FALSE);
 		return 2;
 	case MUSE_BULLWHIP:
 		/* attempt to disarm hero */
@@ -2385,7 +2385,7 @@ museamnesia:
 			pline("%s puts on a mask!", Monnam(mtmp));
 		m_useup(mtmp, otmp);
 		mtmp->ispolyp = TRUE;
-		newcham(mtmp, &mons[pm], FALSE, FALSE);
+		newcham(mtmp, pm, FALSE, FALSE);
 		mtmp->m_insight_level = 0;
 		m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);
@@ -2412,7 +2412,7 @@ struct monst *mtmp;
 			tmpm->msleeping = 0;
 			if(!tmpm->mcanmove && !rn2(5)) {
 				tmpm->mfrozen = 0;
-				if(tmpm->data != &mons[PM_GIANT_TURTLE] || !(tmpm->mflee))
+				if(tmpm->mtyp != PM_GIANT_TURTLE || !(tmpm->mflee))
 					tmpm->mcanmove = 1;
 			}
 			tmpm->mux = mtmp->mx;
@@ -2485,9 +2485,9 @@ struct obj *obj;
 
 	if (is_animal(mon->data) ||
 		mindless_mon(mon) ||
-		mon->data == &mons[PM_SHADE] ||
-		mon->data == &mons[PM_BROKEN_SHADOW] ||
-		mon->data == &mons[PM_GHOST])	/* don't loot bones piles */
+		mon->mtyp == PM_SHADE ||
+		mon->mtyp == PM_BROKEN_SHADOW ||
+		mon->mtyp == PM_GHOST)	/* don't loot bones piles */
 	    return FALSE;
 
 	if (typ == WAN_MAKE_INVISIBLE || typ == POT_INVISIBILITY)
@@ -2809,7 +2809,7 @@ const char *fmt, *str;
 	    if (fmt && str)
 	    	pline(fmt, str, "boots");
 	    return TRUE;
-	} else if (youracedata == &mons[PM_SILVER_DRAGON]) {
+	} else if (youracedata->mtyp == PM_SILVER_DRAGON) {
 	    if (fmt && str)
 	    	pline(fmt, str, "scales");
 	    return TRUE;

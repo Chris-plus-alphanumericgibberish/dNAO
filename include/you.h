@@ -815,8 +815,8 @@ struct you {
 #define	WRITHE							0x00000000000020000L
 #define	RADIANCE						0x00000000000040000L
 };	/* end of `struct you' */
-#define uclockwork ((Race_if(PM_CLOCKWORK_AUTOMATON) && !Upolyd) || (Upolyd && youmonst.data == &mons[PM_CLOCKWORK_AUTOMATON]))
-#define uandroid ((Race_if(PM_ANDROID) && !Upolyd) || (Upolyd && (youmonst.data == &mons[PM_ANDROID] || youmonst.data == &mons[PM_GYNOID])))
+#define uclockwork ((Race_if(PM_CLOCKWORK_AUTOMATON) && !Upolyd) || (Upolyd && youmonst.data->mtyp == PM_CLOCKWORK_AUTOMATON))
+#define uandroid ((Race_if(PM_ANDROID) && !Upolyd) || (Upolyd && (youmonst.data->mtyp == PM_ANDROID || youmonst.data->mtyp == PM_GYNOID)))
 #define umechanoid (uclockwork || uandroid)
 //BAB
 #define BASE_ATTACK_BONUS	((Role_if(PM_BARBARIAN) || Role_if(PM_CONVICT) || Role_if(PM_KNIGHT) || Role_if(PM_ANACHRONONAUT) || \

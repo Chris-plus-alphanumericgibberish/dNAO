@@ -334,21 +334,21 @@ char *pname;		/* caller-supplied output buffer */
 
 	Strcpy(pname, "the ");
 	if (mon->minvis) Strcat(pname, "invisible ");
-	if ((mon->ispriest && !&mons[PM_HIGH_SHAMAN]) || mon->data == &mons[PM_ALIGNED_PRIEST] ||
-					mon->data == &mons[PM_ANGEL]) {
+	if ((mon->ispriest && !&mons[PM_HIGH_SHAMAN]) || mon->mtyp == PM_ALIGNED_PRIEST ||
+					mon->mtyp == PM_ANGEL) {
 		/* use epri */
-		if (mon->mtame && mon->data == &mons[PM_ANGEL])
+		if (mon->mtame && mon->mtyp == PM_ANGEL)
 			Strcat(pname, "guardian ");
-		if (mon->data == &mons[PM_ANGEL]) {
+		if (mon->mtyp == PM_ANGEL) {
 			Strcat(pname, what);
 			Strcat(pname, " ");
 		}
-		if (mon->data != &mons[PM_ANGEL]) {
+		if (mon->mtyp != PM_ANGEL) {
 			if (!mon->ispriest && EPRI(mon)->renegade)
 				Strcat(pname, "renegade ");
-			if (mon->data == &mons[PM_HIGH_PRIEST])
+			if (mon->mtyp == PM_HIGH_PRIEST)
 				Strcat(pname, "high ");
-			if (mon->data == &mons[PM_ELDER_PRIEST])
+			if (mon->mtyp == PM_ELDER_PRIEST)
 				Strcat(pname, "elder ");
 			if (Hallucination)
 				Strcat(pname, "poohbah ");
@@ -359,7 +359,7 @@ char *pname;		/* caller-supplied output buffer */
 		}
 		Strcat(pname, "of ");
 		/* Astral Call bugfix by Patric Muller, tweaked by CM*/
-		if (mon->data == &mons[PM_HIGH_PRIEST] && !Hallucination &&
+		if (mon->mtyp == PM_HIGH_PRIEST && !Hallucination &&
 		            Is_astralevel(&u.uz) && distu(mon->mx, mon->my) > 2) {
 			Strcat(pname, "a whole faith");
 //			Strcat(pname, "?");
@@ -425,10 +425,10 @@ register int roomno;
 	if(!temple_occupied(u.urooms0)) {
 	    if(tended) {
 			shrined = has_shrine(priest);
-			sanctum = ( (priest->data == &mons[PM_HIGH_PRIEST] || priest->data == &mons[PM_ELDER_PRIEST]) &&
+			sanctum = ( (priest->mtyp == PM_HIGH_PRIEST || priest->mtyp == PM_ELDER_PRIEST) &&
 				   (Is_sanctum(&u.uz) || In_endgame(&u.uz)));
 			can_speak = (priest->mcanmove && priest->mnotlaugh && !priest->msleeping &&
-					 flags.soundok && priest->data != &mons[PM_BLASPHEMOUS_LURKER]);
+					 flags.soundok && priest->mtyp != PM_BLASPHEMOUS_LURKER);
 			if (can_speak) {
 				unsigned save_priest = priest->ispriest;
 				/* don't reveal the altar's owner upon temple entry in
@@ -461,7 +461,7 @@ register int roomno;
 					msg1 = "You are not welcome here!";
 				} else msg1 = "You desecrate this place by your presence!";
 				if(canseemon(priest)) pline("As you approach, the priest suddenly putrefies and melts into a foul-smelling liquid mass!");
-				set_mon_data(priest, &mons[PM_DARKNESS_GIVEN_HUNGER], 0);
+				set_mon_data(priest, PM_DARKNESS_GIVEN_HUNGER);
 				priest->mpeaceful = 0;
 				set_malign(priest);
 			} else if(Is_astralevel(&u.uz) && Role_if(PM_ANACHRONONAUT) && EPRI(priest)->shralign == A_LAWFUL) {
@@ -470,7 +470,7 @@ register int roomno;
 					set_malign(priest);
 				}
 				msg1 = "I SEE YOU!";
-				set_mon_data(priest, &mons[PM_LUGRIBOSSK], 0);
+				set_mon_data(priest, PM_LUGRIBOSSK);
 				//Assumes High Priest is 25, Lugribossk is 27 (archon)
 				priest->m_lev = 27;
 				priest->mhp = 8*26 + rn2(8);
@@ -782,7 +782,7 @@ boolean peaceful;
 	register struct monst *roamer;
 	register boolean coaligned = (u.ualign.type == alignment);
 
-	if (ptr != &mons[PM_ALIGNED_PRIEST] && ptr != &mons[PM_ANGEL])
+	if (ptr->mtyp != PM_ALIGNED_PRIEST && ptr->mtyp != PM_ANGEL)
 		return((struct monst *)0);
 	
 	if (MON_AT(x, y)) (void) rloc(m_at(x, y), FALSE);	/* insurance */
@@ -808,8 +808,8 @@ void
 reset_hostility(roamer)
 register struct monst *roamer;
 {
-	if(!(roamer->isminion && (roamer->data == &mons[PM_ALIGNED_PRIEST] ||
-				  roamer->data == &mons[PM_ANGEL])))
+	if(!(roamer->isminion && (roamer->mtyp == PM_ALIGNED_PRIEST ||
+				  roamer->mtyp == PM_ANGEL)))
 	        return;
 
 	if(EPRI(roamer)->shralign != u.ualign.type) {

@@ -212,7 +212,7 @@ struct monst *mon;
 		else tmp += 2;
 	}
 	if (is_spear(otmp) &&
-	   index(kebabable, ptr->mlet)) tmp += (ptr == &mons[PM_SMAUG]) ? 20 : 2;
+	   index(kebabable, ptr->mlet)) tmp += (ptr->mtyp == PM_SMAUG) ? 20 : 2;
 
 	if (is_farm(otmp) &&
 	    ptr->mlet == S_PLANT) tmp += 6;
@@ -633,7 +633,7 @@ int otyp;
 	if (obj && otyp == KAMEREL_VAJRA)
 	{
 		if (litsaber(obj)) {
-			if (obj->where == OBJ_MINVENT && obj->ocarry->data == &mons[PM_ARA_KAMEREL])
+			if (obj->where == OBJ_MINVENT && obj->ocarry->mtyp == PM_ARA_KAMEREL)
 			{
 				spe_mult = 3;
 				ocn *= 3;
@@ -1092,7 +1092,7 @@ int spec;
 	if (otmp->oproperties&OPROP_FLAYW && mon && some_armor(mon))
 		tmp = 1;
 	/* Smaug gets stabbed */
-	if(is_stabbing(otmp) && ptr == &mons[PM_SMAUG])
+	if(is_stabbing(otmp) && ptr->mtyp == PM_SMAUG)
 		tmp += rnd(20);
 	/* axes deal more damage to wooden foes */
 	if (is_axe(otmp) && is_wooden(ptr))
@@ -1145,7 +1145,7 @@ int spot;
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC || otmp->otyp == KAMEREL_VAJRA) &&
 			/* never offhand artifacts (unless you are the Bastard) */
-			(!otmp->oartifact || spot != W_SWAPWEP || mtmp->data == &mons[PM_BASTARD_OF_THE_BOREAL_VALLEY]) &&
+			(!otmp->oartifact || spot != W_SWAPWEP || mtmp->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY) &&
 			/* never untouchable artifacts */
 		    (!otmp->oartifact || touch_artifact(otmp, mtmp, 0)) &&
 			/* never unsuitable for mainhand wielding */
@@ -1153,10 +1153,10 @@ int spot;
 			/* never unsuitable for offhand wielding */
 			(spot!=W_SWAPWEP || (!(otmp->owornmask & (W_WEP)) && (!otmp->cursed || is_weldproof_mon(mtmp)) && !bimanual(otmp, mtmp->data) && (mtmp->misc_worn_check & W_ARMS) == 0 && 
 				( (otmp->owt <= (30 + (mtmp->m_lev/5)*5)) 
-				|| (otmp->otyp == CHAIN && mtmp->data == &mons[PM_CATHEZAR]) 
-				|| (otmp->otyp == CHAIN && mtmp->data == &mons[PM_FIERNA])
-				|| (mtmp->data == &mons[PM_BASTARD_OF_THE_BOREAL_VALLEY])
-				|| (mtmp->data == &mons[PM_CORVIAN_KNIGHT])
+				|| (otmp->otyp == CHAIN && mtmp->mtyp == PM_CATHEZAR) 
+				|| (otmp->otyp == CHAIN && mtmp->mtyp == PM_FIERNA)
+				|| (mtmp->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY)
+				|| (mtmp->mtyp == PM_CORVIAN_KNIGHT)
 				)
 			)) &&
 			/* never a hated weapon */

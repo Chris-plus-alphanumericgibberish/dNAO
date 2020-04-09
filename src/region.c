@@ -1177,7 +1177,7 @@ genericptr_t p2;
     reg = (NhRegion *) p1;
     dam = (int)(intptr_t)reg->arg;
     if (p2 == NULL) {		/* This means *YOU* Bozo! */
-		if (youracedata == &mons[PM_SENTINEL_OF_MITHARDIR]){
+		if (youracedata->mtyp == PM_SENTINEL_OF_MITHARDIR){
 			healup(dam, 0, FALSE, FALSE);
 		}
 		if (nonliving(youracedata) || Breathless)
@@ -1207,7 +1207,7 @@ genericptr_t p2;
     } else {			/* A monster is inside the cloud */
 		mtmp = (struct monst *) p2;
 
-		if (mtmp->data == &mons[PM_SENTINEL_OF_MITHARDIR]){
+		if (mtmp->mtyp == PM_SENTINEL_OF_MITHARDIR){
 			mtmp->mhp = min(mtmp->mhp+dam, mtmp->mhpmax);
 		}
 		/* Non living or non breathing are not concerned */

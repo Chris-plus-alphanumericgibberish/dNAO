@@ -281,7 +281,7 @@ struct entity *etmp;
 		etmp->ex = x;
 		etmp->ey = y;
 		if (mtmp->wormno && (x != mtmp->mx || y != mtmp->my))
-			etmp->edata = mtmp->data == &mons[PM_HUNTING_HORROR] ? 
+			etmp->edata = mtmp->mtyp == PM_HUNTING_HORROR ? 
 				&mons[PM_HUNTING_HORROR_TAIL] :
 				&mons[PM_LONG_WORM_TAIL];
 		else

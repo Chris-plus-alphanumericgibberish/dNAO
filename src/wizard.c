@@ -274,7 +274,7 @@ strategy(mtmp)
 			return(STRAT_HEAL);
 
 	    case 1:	/* the wiz is less cautious */
-			if(mtmp->data != &mons[PM_WIZARD_OF_YENDOR])
+			if(mtmp->mtyp != PM_WIZARD_OF_YENDOR)
 			    return(STRAT_HEAL);
 			/* else fall through */
 
@@ -327,7 +327,7 @@ tactics(mtmp)
 		/* if wounded, hole up on or near the stairs (to block them) */
 		/* unless, of course, there are no stairs (e.g. endlevel) */
 		mtmp->mavenge = 1; /* covetous monsters attack while fleeing */
-		if(mtmp->data == &mons[PM_AGLAOPE]){
+		if(mtmp->mtyp == PM_AGLAOPE){
 			//don't move from current location, post-theft warp does that for you.
 		} else {
 			if(flags.stag && In_quest(&u.uz)){
@@ -357,8 +357,8 @@ tactics(mtmp)
 		/* fall through :-) */
 
 	    case STRAT_NONE:	/* harrass */
-		if (!rn2((!mtmp->mflee || mtmp->data == &mons[PM_BANDERSNATCH]) ? 5 : 33)){
-			if(mtmp->data == &mons[PM_AGLAOPE]){
+		if (!rn2((!mtmp->mflee || mtmp->mtyp == PM_BANDERSNATCH) ? 5 : 33)){
+			if(mtmp->mtyp == PM_AGLAOPE){
 				coord cc;
 				aglaopesong(mtmp);
 				pline("%s's song warps space to draw you together.",Monnam(mtmp));
@@ -400,7 +400,7 @@ tactics(mtmp)
 		}
 		if((u.ux == tx && u.uy == ty) || where == STRAT_PLAYER) {
 		    /* player is standing on it (or has it) */
-			if(mtmp->data == &mons[PM_AGLAOPE]){
+			if(mtmp->mtyp == PM_AGLAOPE){
 				coord cc;
 				aglaopesong(mtmp);
 				pline("%s's song warps space to draw you together.",Monnam(mtmp));
@@ -408,7 +408,7 @@ tactics(mtmp)
 					teleds(cc.x, cc.y, FALSE);
 					return(0);
 				}
-			} else if(mtmp->data == &mons[PM_GREAT_CTHULHU]){
+			} else if(mtmp->mtyp == PM_GREAT_CTHULHU){
 				pline("%s steps through strange angles.",Monnam(mtmp));
 				mofflin(mtmp);
 				return(0);
@@ -475,7 +475,7 @@ aggravate()
 			mtmp->msleeping = 0;
 			if(!mtmp->mcanmove && !rn2(5)) {
 				mtmp->mfrozen = 0;
-				if(mtmp->data != &mons[PM_GIANT_TURTLE] || !(mtmp->mflee))
+				if(mtmp->mtyp != PM_GIANT_TURTLE || !(mtmp->mflee))
 					mtmp->mcanmove = 1;
 			}
 			mtmp->mux = u.ux;
@@ -545,7 +545,7 @@ nasty(mcast)
 			do {
 				makeindex = pick_nasty();
 			} while(mcast && attacktype(&mons[makeindex], AT_MAGC) &&
-				monstr[makeindex] >= monstr[mcast->mnum]);
+				monstr[makeindex] >= monstr[mcast->mtyp]);
 			/* do this after picking the monster to place */
 			if (mcast &&
 				!enexto(&bypos, mcast->mux, mcast->muy, &mons[makeindex]))
@@ -634,7 +634,7 @@ illur_resurrect()
 	verb = "elude";
 	mmtmp = &migrating_mons;
 	while ((mtmp = *mmtmp) != 0) {
-		if (mtmp->data==&mons[PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES]) {
+		if (mtmp->mtyp==PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES) {
 			if((elapsed = monstermoves - mtmp->mlstmv) > 0L){
 				mon_catchup_elapsed_time(mtmp, elapsed);
 				if (elapsed >= LARGEST_INT) elapsed = LARGEST_INT - 1;
@@ -673,7 +673,7 @@ coa_arrive()
 	/* look for a migrating CoAll */
 	mmtmp = &migrating_mons;
 	while ((mtmp = *mmtmp) != 0) {
-		if (mtmp->data==&mons[PM_CENTER_OF_ALL]) {
+		if (mtmp->mtyp==PM_CENTER_OF_ALL) {
 			if((elapsed = monstermoves - mtmp->mlstmv) > 0L){
 				mon_catchup_elapsed_time(mtmp, elapsed);
 				if (elapsed >= LARGEST_INT) elapsed = LARGEST_INT - 1;
@@ -1005,17 +1005,17 @@ register struct monst	*mtmp;
 		    verbalize("%s %s!",
 			  random_malediction[rn2(SIZE(random_malediction))],
 			  random_insult[rn2(SIZE(random_insult))]);
-	} else if(mtmp->data == &mons[PM_CHAOS]){
+	} else if(mtmp->mtyp == PM_CHAOS){
 		if(mtmp->mvar3<5){
 			verbalize("%s", random_chaosism[mtmp->mvar3+5]);
 			mtmp->mvar3++;
 		}
 		else verbalize("%s", random_chaosism[rn2(5)]);
-	} else if(mtmp->data == &mons[PM_GARLAND]){
+	} else if(mtmp->mtyp == PM_GARLAND){
 		verbalize("%s", random_chaos_garlandism[rn2(SIZE(random_chaos_garlandism))]);
-	} else if(mtmp->data == &mons[PM_SIR_GARLAND]){
+	} else if(mtmp->mtyp == PM_SIR_GARLAND){
 		verbalize("%s", random_garlandism[rn2(SIZE(random_garlandism))]);
-	} else if(mtmp->data == &mons[PM_APOLLYON]){
+	} else if(mtmp->mtyp == PM_APOLLYON){
 		verbalize("%s", random_apollyon[rn2(SIZE(random_apollyon))]);
 	} else if(is_angel(mtmp->data) && !(is_lminion(mtmp) && rn2(10))){
 		int t = rn2(SIZE(random_angeldiction));
@@ -1027,7 +1027,7 @@ register struct monst	*mtmp;
 					"cleansed" : "purged"
 			);
 		else verbalize("%s", random_angeldiction[t]);
-	} else if(mtmp->data == &mons[PM_IXOTH]){
+	} else if(mtmp->mtyp == PM_IXOTH){
 		verbalize("%s", random_Ixoth[rn2(SIZE(random_Ixoth))]);
 	} else if(is_szcultist(mtmp->data)){
 		verbalize("%s", random_szcult[rn2(SIZE(random_szcult))]);

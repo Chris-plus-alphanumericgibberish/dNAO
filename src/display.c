@@ -459,19 +459,19 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	int num;
 
 	if (mon->mtame && !Hallucination) {
-	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
+	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			petnum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			petnum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
 		num = pet_to_glyph(mon);
 	} else if (mon->mpeaceful && !Hallucination) {
-	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
+	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			peacenum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			peacenum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
 		num = peace_to_glyph(mon);
 	} else if (is_derived_undead_mon(mon) && !Hallucination) {
-	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
+	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			zombienum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			zombienum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
@@ -480,13 +480,13 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	 * visible by any other means.
 	 */
 	} else if (sightflags == DETECTED) {
-	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
+	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, mon)):
 			detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, mon));
 	    else
 		num = detected_mon_to_glyph(mon);
 	} else {
-	    if (worm_tail) num = mon->data == &mons[PM_HUNTING_HORROR] ?
+	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, mon)):
 			monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, mon));
 	    else
@@ -1820,15 +1820,15 @@ back_to_glyph(x,y)
  * a random monster in swallowed() and don't use what_mon() here.
  */
 STATIC_OVL int
-swallow_to_glyph(mnum, loc)
-    int mnum;
+swallow_to_glyph(mtyp, loc)
+int mtyp;
     int loc;
 {
     if (loc < S_sw_tl || S_sw_br < loc) {
 	impossible("swallow_to_glyph: bad swallow location");
 	loc = S_sw_br;
     }
-    return ((int) (what_mon(mnum, u.ustuck)<<3) | (loc - S_sw_tl)) + GLYPH_SWALLOW_OFF;
+	return ((int)(what_mon(mtyp, u.ustuck) << 3) | (loc - S_sw_tl)) + GLYPH_SWALLOW_OFF;
 }
 
 

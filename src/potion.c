@@ -513,7 +513,7 @@ peffects(otmp)
 		    if (u.ulycn >= LOW_PM && !Race_if(PM_HUMAN_WEREWOLF)) {
 			You("forget your affinity to %s!",
 					makeplural(mons[u.ulycn].mname));
-			if (youracedata == &mons[u.ulycn])
+			if (youracedata->mtyp == u.ulycn)
 			    you_unwere(FALSE);
 			u.ulycn = NON_PM;	/* cure lycanthropy */
 		    }
@@ -557,7 +557,7 @@ peffects(otmp)
 				if (u.ulycn >= LOW_PM) {
 					Your("affinity to %s disappears!",
 					 makeplural(mons[u.ulycn].mname));
-					if (youracedata == &mons[u.ulycn])
+					if (youracedata->mtyp == u.ulycn)
 					you_unwere(FALSE);
 					u.ulycn = NON_PM;	/* cure lycanthropy */
 				}
@@ -607,7 +607,7 @@ peffects(otmp)
 				if (u.ulycn >= LOW_PM) {
 					Your("affinity to %s disappears!",
 					 makeplural(mons[u.ulycn].mname));
-					if (youracedata == &mons[u.ulycn])
+					if (youracedata->mtyp == u.ulycn)
 					you_unwere(FALSE);
 					u.ulycn = NON_PM;	/* cure lycanthropy */
 				}
@@ -1409,26 +1409,26 @@ boolean your_fault;
 		}
 	break;
 	case POT_BLOOD:{
-		int mnum = obj->corpsenm;
-		if(acidic(&mons[mnum]) && !Acid_resistance){
+		int mtyp = obj->corpsenm;
+		if(acidic(&mons[mtyp]) && !Acid_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
 		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
 				    "potion of acidic blood", KILLED_BY_AN);
 		}
-		if(freezing(&mons[mnum]) && !Cold_resistance){
+		if(freezing(&mons[mtyp]) && !Cold_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
 		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
 				    "potion of cryonic blood", KILLED_BY_AN);
 		}
-		if(burning(&mons[mnum]) && !Fire_resistance){
+		if(burning(&mons[mtyp]) && !Fire_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
 		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
 				    "potion of scalding blood", KILLED_BY_AN);
 		}
-		if(poisonous(&mons[mnum]) && !Poison_resistance){
+		if(poisonous(&mons[mtyp]) && !Poison_resistance){
 			if (Upolyd) {
 			    if (u.mh <= 5) u.mh = 1; else u.mh -= 5;
 			} else {
@@ -1438,12 +1438,12 @@ boolean your_fault;
 			losestr(1);
 			exercise(A_CON, FALSE);
 		}
-		if (touch_petrifies(&mons[mnum])) {
+		if (touch_petrifies(&mons[mtyp])) {
 		    if (!Stone_resistance &&
 			!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
 			if (!Stoned) Stoned = 5;
 			killer_format = KILLED_BY;
-			Sprintf(killer_buf, "%s blood", mons[mnum].mname);
+			Sprintf(killer_buf, "%s blood", mons[mtyp].mname);
 			delayed_killer = killer_buf;
 		    }
 		}
@@ -1463,7 +1463,7 @@ boolean your_fault;
 	case POT_HEALING:
 	case POT_EXTRA_HEALING:
 	case POT_FULL_HEALING:
-		if (mon->data == &mons[PM_PESTILENCE]) goto do_illness;
+		if (mon->mtyp == PM_PESTILENCE) goto do_illness;
 		/*FALLTHRU*/
 	case POT_GOAT_S_MILK:
 	case POT_RESTORE_ABILITY:
@@ -1477,7 +1477,7 @@ boolean your_fault;
 		}
 		break;
 	case POT_SICKNESS:
-		if (mon->data == &mons[PM_PESTILENCE]) goto do_healing;
+		if (mon->mtyp == PM_PESTILENCE) goto do_healing;
 		if (dmgtype(mon->data, AD_DISE) ||
 			   dmgtype(mon->data, AD_PEST) || /* won't happen, see prior goto */
 			   resists_poison(mon)) {
@@ -1557,14 +1557,14 @@ boolean your_fault;
 				!Protection_from_shape_changers)
 			    new_were(mon);	/* transform into beast */
 		    }
-		} else if(mon->data == &mons[PM_GREMLIN]) {
+		} else if(mon->mtyp == PM_GREMLIN) {
 		    angermon = FALSE;
 		    (void)split_mon(mon, (struct monst *)0);
-		} else if(mon->data == &mons[PM_FLAMING_SPHERE] ||
-			mon->data == &mons[PM_IRON_GOLEM] || mon->data == &mons[PM_CHAIN_GOLEM]) {
+		} else if(mon->mtyp == PM_FLAMING_SPHERE ||
+			mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM) {
 		    if (canseemon(mon))
 			pline("%s %s.", Monnam(mon),
-				(mon->data == &mons[PM_IRON_GOLEM] || mon->data == &mons[PM_CHAIN_GOLEM]) ?
+				(mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM) ?
 				"rusts" : "flickers");
 		    mon->mhp -= d(1,6);
 		    if (mon->mhp < 1) {
@@ -1589,14 +1589,14 @@ boolean your_fault;
 			}
 			else if (is_were(mon->data) && !is_human(mon->data))
 			    new_were(mon);	/* revert to human */
-		} else if(mon->data == &mons[PM_GREMLIN]) {
+		} else if(mon->mtyp == PM_GREMLIN) {
 		    angermon = FALSE;
 		    (void)split_mon(mon, (struct monst *)0);
-		} else if(mon->data == &mons[PM_FLAMING_SPHERE] ||
-			mon->data == &mons[PM_IRON_GOLEM] || mon->data == &mons[PM_CHAIN_GOLEM]) {
+		} else if(mon->mtyp == PM_FLAMING_SPHERE ||
+			mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM) {
 		    if (canseemon(mon))
 			pline("%s %s.", Monnam(mon),
-				(mon->data == &mons[PM_IRON_GOLEM] || mon->data == &mons[PM_CHAIN_GOLEM]) ?
+				(mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM) ?
 				"rusts" : "flickers");
 		    mon->mhp -= d(1,6);
 		    if (mon->mhp < 1) {
@@ -1705,8 +1705,8 @@ boolean your_fault;
 		}
 		break;
 	case POT_BLOOD:{
-		int mnum = obj->corpsenm;
-		if(acidic(&mons[mnum]) && !resists_acid(mon)){
+		int mtyp = obj->corpsenm;
+		if(acidic(&mons[mtyp]) && !resists_acid(mon)){
 		    pline("%s %s in pain!", Monnam(mon),
 			  is_silent_mon(mon) ? "writhes" : "shrieks");
 		    mon->mhp -= d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
@@ -1717,7 +1717,7 @@ boolean your_fault;
 			    monkilled(mon, "", AD_ACID);
 			}
 		}
-		if(freezing(&mons[mnum]) && !resists_cold(mon)){
+		if(freezing(&mons[mtyp]) && !resists_cold(mon)){
 		    pline("%s %s in pain!", Monnam(mon),
 			  is_silent_mon(mon) ? "writhes" : "shrieks");
 		    mon->mhp -= d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
@@ -1728,7 +1728,7 @@ boolean your_fault;
 			    monkilled(mon, "", AD_COLD);
 			}
 		}
-		if(burning(&mons[mnum]) && !resists_fire(mon)){
+		if(burning(&mons[mtyp]) && !resists_fire(mon)){
 		    pline("%s %s in pain!", Monnam(mon),
 			  is_silent_mon(mon) ? "writhes" : "shrieks");
 		    mon->mhp -= d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
@@ -1739,7 +1739,7 @@ boolean your_fault;
 			    monkilled(mon, "", AD_FIRE);
 			}
 		}
-		if(poisonous(&mons[mnum]) && !resists_poison(mon)){
+		if(poisonous(&mons[mtyp]) && !resists_poison(mon)){
 			if((mon->mhpmax > 3) && !resist(mon, POTION_CLASS, 0, NOTELL))
 				mon->mhpmax /= 2;
 			if((mon->mhp > 2) && !resist(mon, POTION_CLASS, 0, NOTELL))
@@ -1748,7 +1748,7 @@ boolean your_fault;
 			if (canseemon(mon))
 				pline("%s looks rather ill.", Monnam(mon));
 		}
-		if (touch_petrifies(&mons[mnum]) && !resists_ston(mon)) {
+		if (touch_petrifies(&mons[mtyp]) && !resists_ston(mon)) {
 			minstapetrify(mon, TRUE);
 		}
 	}break;
@@ -1901,7 +1901,7 @@ register struct obj *obj;
 		} else if (u.ulycn >= LOW_PM) {
 		    /* vapor from [un]holy water will trigger
 		       transformation but won't cure lycanthropy */
-		    if (obj->blessed && youmonst.data == &mons[u.ulycn])
+		    if (obj->blessed && youmonst.data->mtyp == u.ulycn)
 			you_unwere(FALSE);
 		    else if (obj->cursed && !Upolyd)
 			you_were();
@@ -1913,7 +1913,7 @@ register struct obj *obj;
 		} else if (u.ulycn >= LOW_PM) {
 		    /* vapor from [un]holy water will trigger
 		       transformation but won't cure lycanthropy */
-		    if (youmonst.data == &mons[u.ulycn])
+		    if (youmonst.data->mtyp == u.ulycn)
 				you_unwere(FALSE);
 		}
 		break;

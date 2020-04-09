@@ -2480,7 +2480,7 @@ struct monst *mtmp;
 	otmp = realloc_obj(obj, lth, (genericptr_t) mtmp, namelth, ONAME(obj));
 	if (otmp && otmp->oxlth) {
 		struct monst *mtmp2 = (struct monst *)otmp->oextra;
-		if (mtmp->data) mtmp2->mnum = monsndx(mtmp->data);
+		if (mtmp->data) mtmp2->mtyp = monsndx(mtmp->data);
 		/* invalidate pointers */
 		/* m_id is needed to know if this is a revived quest leader */
 		/* but m_id must be cleared when loading bones */
@@ -2930,7 +2930,7 @@ add_to_minv(mon, obj)
     if (obj->where != OBJ_FREE)
 	panic("add_to_minv: obj not free");
 
-	if(mon->data == &mons[PM_MAID] && maid_clean(mon, obj) ) return 1; /*destroyed by maid*/
+	if(mon->mtyp == PM_MAID && maid_clean(mon, obj) ) return 1; /*destroyed by maid*/
 
     /* merge if possible */
     for (otmp = mon->minvent; otmp; otmp = otmp->nobj)

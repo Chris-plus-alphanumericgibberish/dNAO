@@ -1460,7 +1460,7 @@ E void NDECL(rescham);
 E void NDECL(restartcham);
 E void FDECL(restore_cham, (struct monst *));
 E void FDECL(mon_animal_list, (BOOLEAN_P));
-E int FDECL(newcham, (struct monst *,struct permonst *,BOOLEAN_P,BOOLEAN_P));
+E int FDECL(newcham, (struct monst *,int,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(select_newcham_form, (struct monst *));
 E int FDECL(can_be_hatched, (int));
 E int FDECL(egg_type_from_parent, (int,BOOLEAN_P));
@@ -1481,7 +1481,9 @@ E void FDECL(insight_vanish,(struct monst *));
 
 /* ### mondata.c ### */
 
-E void FDECL(set_mon_data, (struct monst *,struct permonst *,int));
+E void NDECL(id_permonst);
+E void FDECL(set_mon_data, (struct monst *,int));
+E void FDECL(set_faction, (struct monst *, int));
 E struct attack *FDECL(attacktype_fordmg, (struct permonst *,int,int));
 E boolean FDECL(attacktype, (struct permonst *,int));
 E boolean FDECL(noattacks, (struct permonst *));

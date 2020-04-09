@@ -419,7 +419,7 @@ boolean on, silently;
 		switch (which)
 		{
 		case INVIS:
-			if (mon->data != &mons[PM_HELLCAT]){
+			if (mon->mtyp != PM_HELLCAT){
 				mon->invis_blkd = TRUE;
 				update_mon_intrinsic(mon, obj, which, !on, silently);
 			}
@@ -433,7 +433,7 @@ boolean on, silently;
 		switch (which)
 		{
 		case INVIS:
-			if (mon->data != &mons[PM_HELLCAT]){
+			if (mon->mtyp != PM_HELLCAT){
 				mon->invis_blkd = FALSE;
 				if (mon_gets_extrinsic(mon, which, obj))
 					update_mon_intrinsic(mon, obj, which, !on, silently);
@@ -515,7 +515,7 @@ boolean on, silently;
 		switch (which)
 		{
 		case INVIS:
-			if (mon->data != &mons[PM_HELLCAT]){
+			if (mon->mtyp != PM_HELLCAT){
 				mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
 				mon->minvis = !mon->invis_blkd;
 			}
@@ -669,25 +669,21 @@ struct monst *mon;
 	if(!mon->mcan)
 		base -= mon->data->pac;
 	
-	if(mon->data == &mons[PM_ASMODEUS] && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
-	else if(mon->data == &mons[PM_PALE_NIGHT] && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
-	else if(mon->data == &mons[PM_BAALPHEGOR] && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
-	else if(mon->data == &mons[PM_ZAPHKIEL] && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
-	else if(mon->data == &mons[PM_QUEEN_OF_STARS] && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
-	else if(mon->data == &mons[PM_ETERNAL_LIGHT] && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
-	else if(mon->data == &mons[PM_STRANGE_CORPSE] && base < -5) base = -5 + MONSTER_AC_VALUE(base+5);
-	else if(mon->data == &mons[PM_ANCIENT_OF_DEATH] && base < -4) base = -4 + MONSTER_AC_VALUE(base+4);
-	else if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH]){
+	if(mon->mtyp == PM_ASMODEUS && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
+	else if(mon->mtyp == PM_PALE_NIGHT && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
+	else if(mon->mtyp == PM_BAALPHEGOR && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
+	else if(mon->mtyp == PM_ZAPHKIEL && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
+	else if(mon->mtyp == PM_QUEEN_OF_STARS && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
+	else if(mon->mtyp == PM_ETERNAL_LIGHT && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
+	else if(mon->mtyp == PM_STRANGE_CORPSE && base < -5) base = -5 + MONSTER_AC_VALUE(base+5);
+	else if(mon->mtyp == PM_ANCIENT_OF_DEATH && base < -4) base = -4 + MONSTER_AC_VALUE(base+4);
+	else if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
 		base -= u.chokhmah;
 	}
 	else if(is_weeping(mon->data)){
 		if(mon->mvar2 & 0x4L) base = -125; //Fully Quantum Locked
 		if(mon->mvar2 & 0x2L) base = -20; //Partial Quantum Lock
 	}
-	if(mon->mfaction == ZOMBIFIED) base += 2;
-	if(mon->mfaction == SKELIFIED) base -= 2;
-	if(mon->mfaction == CRYSTALFIED) base -= 6;
-	if(mon->mfaction == CRANIUM_RAT) base -= 4;
 	
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
@@ -699,15 +695,21 @@ struct monst *mon;
 		
 		if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
 	}
-	if(helpless(mon))
+
+	if (helpless(mon))
 		base -= 5;
-	else if(which_armor(mon, W_ARM)){
-		if(is_light_armor(which_armor(mon, W_ARM)))
-			base -= mon->data->dac;
-		else if(is_medium_armor(which_armor(mon, W_ARM)))
-			base -= (mon->data->dac)/2;
+	else {
+		struct obj * armor = which_armor(mon, W_ARM);
+		register int mondodgeac = mon->data->dac;
+		if ((mondodgeac < 0)						/* penalties have full effect */
+			|| (!armor)								/* no armor = max mobility */
+			|| (armor && is_light_armor(armor))		/* light armor is also fine  */
+			)
+			base -= mondodgeac;
+		else if (armor && is_medium_armor(armor))	/* medium armor halves dodge AC */
+			base -= mondodgeac/2;
+		/* else no adjustment */
 	}
-	else base -= mon->data->dac;
 	
 	return base;
 }
@@ -722,20 +724,20 @@ struct monst *mon;
 	
 	base = base_mac(mon);
 	
-	if(mon->data == &mons[PM_GIANT_TURTLE] && mon->mflee){
+	if(mon->mtyp == PM_GIANT_TURTLE && mon->mflee){
 		base -= 15;
 	}
 	//Block attack with weapon
 	if(mon != &youmonst &&
-		(mon->data == &mons[PM_MARILITH] 
-		|| mon->data == &mons[PM_SHAKTARI]
-		|| mon->data == &mons[PM_CATHEZAR]
+		(mon->mtyp == PM_MARILITH 
+		|| mon->mtyp == PM_SHAKTARI
+		|| mon->mtyp == PM_CATHEZAR
 	)){
 		int wcount = 0;
 		struct obj *otmp;
 		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
 			if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-				|| (otmp->otyp == CHAIN && mon->data == &mons[PM_CATHEZAR])
+				|| (otmp->otyp == CHAIN && mon->mtyp == PM_CATHEZAR)
 				) && !otmp->oartifact
 				&& otmp != MON_WEP(mon) && otmp != MON_SWEP(mon)
 				&& !otmp->owornmask
@@ -751,17 +753,13 @@ struct monst *mon;
 		}
 	}
 	
-	if(mon->mfaction == ZOMBIFIED) base -= 4;
-	if(mon->mfaction == CRYSTALFIED) base -= 10;
-	if(mon->mfaction == TOMB_HERD) base -= 6;
-	
 	if(mon->mtame){
 		if(u.specialSealsActive&SEAL_COSMOS) base -= spiritDsize();	
 	}
 	
 	
 	//armor AC
-	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
+	if(mon->mtyp == PM_HOD_SEPHIRAH){
 		if(uarm) armac += arm_ac_bonus(uarm);
 		if(uarmf) armac += arm_ac_bonus(uarmf);
 		if(uarmg) armac += arm_ac_bonus(uarmg);
@@ -795,36 +793,32 @@ struct monst *mon;
 	if(!mon->mcan)
 		base -= mon->data->pac;
 	
-	if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH]){
+	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
 		base -= u.chokhmah;
 	}
 	else if(is_weeping(mon->data)){
 		if(mon->mvar2 & 0x4L) base = -125; //Fully Quantum Locked
 		if(mon->mvar2 & 0x2L) base = -20; //Partial Quantum Lock
 	}
-	else if(mon->data == &mons[PM_GIANT_TURTLE] && mon->mflee){
+	else if(mon->mtyp == PM_GIANT_TURTLE && mon->mflee){
 		base -= 15;
 	}
 	else if(mon != &youmonst &&
-		(mon->data == &mons[PM_MARILITH] 
-		|| mon->data == &mons[PM_SHAKTARI]
-		|| mon->data == &mons[PM_CATHEZAR]
+		(mon->mtyp == PM_MARILITH 
+		|| mon->mtyp == PM_SHAKTARI
+		|| mon->mtyp == PM_CATHEZAR
 	)){
 		int wcount = 0;
 		struct obj *otmp;
 		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
 			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-				|| (otmp->otyp == CHAIN && !otmp->owornmask && mon->data == &mons[PM_CATHEZAR])
+				|| (otmp->otyp == CHAIN && !otmp->owornmask && mon->mtyp == PM_CATHEZAR)
 			){
 				base -= 20;
 				break;
 			}
 		}
 	}
-	
-	if(mon->mfaction == ZOMBIFIED) base -= 2;
-	if(mon->mfaction == SKELIFIED) base -= 6;
-	if(mon->mfaction == CRYSTALFIED) base -= 16;
 	
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
@@ -838,7 +832,7 @@ struct monst *mon;
 			base -= def_beastmastery(); // the duster doubles for tame animals
 	}
 	
-	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
+	if(mon->mtyp == PM_HOD_SEPHIRAH){
 		if(uarm) armac += arm_ac_bonus(uarm);
 		if(uarmf) armac += arm_ac_bonus(uarmf);
 		if(uarmg) armac += arm_ac_bonus(uarmg);
@@ -856,15 +850,20 @@ struct monst *mon;
 
 	base -= armac;
 	
-	if(helpless(mon))
+	if (helpless(mon))
 		base -= 5;
-	else if(which_armor(mon, W_ARM)){
-		if(is_light_armor(which_armor(mon, W_ARM)))
-			base -= mon->data->dac;
-		else if(is_medium_armor(which_armor(mon, W_ARM)))
-			base -= (mon->data->dac)/2;
+	else {
+		struct obj * armor = which_armor(mon, W_ARM);
+		register int mondodgeac = mon->data->dac;
+		if ((mondodgeac < 0)						/* penalties have full effect */
+			|| (!armor)								/* no armor = max mobility */
+			|| (armor && is_light_armor(armor))		/* light armor is also fine  */
+			)
+			base -= mondodgeac;
+		else if (armor && is_medium_armor(armor))	/* medium armor halves dodge AC */
+			base -= mondodgeac / 2;
+		/* else no adjustment */
 	}
-	else base -= mon->data->dac;
 	
 	/* since arm_ac_bonus is positive, subtracting it increases AC */
 	return base;
@@ -878,15 +877,15 @@ struct monst *mon;
 	int armac = 0;
 	long mwflags = mon->misc_worn_check;
 	
-	if(mon->data == &mons[PM_GIANT_TURTLE] && mon->mflee){
+	if(mon->mtyp == PM_GIANT_TURTLE && mon->mflee){
 		armac += 15;
 	}
 	
-	if(mon->data == &mons[PM_DANCING_BLADE]){
+	if(mon->mtyp == PM_DANCING_BLADE){
 		return -20;
 	}
 	
-	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
+	if(mon->mtyp == PM_HOD_SEPHIRAH){
 		if(uarm) armac += arm_ac_bonus(uarm);
 		if(uarmf) armac += arm_ac_bonus(uarmf);
 		if(uarmg) armac += arm_ac_bonus(uarmg);
@@ -920,9 +919,6 @@ struct monst *mon;
 		if(u.specialSealsActive&SEAL_COSMOS) base += rnd(spiritDsize());
 	}
 	
-	if(mon->mfaction == ZOMBIFIED) base += 2;
-	if(mon->mfaction == CRYSTALFIED) base += 8;
-	
 	return base;
 }
 
@@ -932,7 +928,7 @@ struct monst *mon;
 {
 	int base = 0;
 	
-	if(mon->data == &mons[PM_CHOKHMAH_SEPHIRAH]){
+	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
 		base += u.chokhmah;
 	}
 	
@@ -974,7 +970,7 @@ struct monst *magr;
 	nat_dr = base_nat_mdr(mon);
 	
 	//armor AC
-	if(mon->data == &mons[PM_HOD_SEPHIRAH]){
+	if(mon->mtyp == PM_HOD_SEPHIRAH){
 		armac = roll_udr(magr);
 		if(armac < 0) armac *= -1;
 	} else {
@@ -999,7 +995,7 @@ struct monst *magr;
 			armac += arm_dr_bonus(curarm);
 			if(magr) armac += properties_dr(curarm, agralign, agrmoral);
 		}
-		if(mon->data == &mons[PM_GIANT_TURTLE] && (mon->mflee || rn2(2))){
+		if(mon->mtyp == PM_GIANT_TURTLE && (mon->mflee || rn2(2))){
 			slot = UPPER_TORSO_DR;
 		} else {
 		//Note: Bias this somehow?
@@ -1204,12 +1200,12 @@ boolean racialexception;
 		    if (!is_shirt(obj) || obj->objsize != mon->data->msize || !shirt_match(mon->data,obj)) continue;
 		    break;
 		case W_ARMC:
-			if(mon->data == &mons[PM_CATHEZAR] && obj->otyp == CHAIN)
+			if(mon->mtyp == PM_CATHEZAR && obj->otyp == CHAIN)
 				break;
 		    if (!is_cloak(obj) || (abs(obj->objsize - mon->data->msize) > 1)) continue;
 		    break;
 		case W_ARMH:
-			if(mon->data == &mons[PM_CATHEZAR] && obj->otyp == CHAIN)
+			if(mon->mtyp == PM_CATHEZAR && obj->otyp == CHAIN)
 				break;
 		    if (!is_helmet(obj) || ((!helm_match(mon->data,obj) || !has_head_mon(mon) || obj->objsize != mon->data->msize) && !is_flimsy(obj))) continue;
 		    /* (flimsy exception matches polyself handling) */
@@ -1219,17 +1215,17 @@ boolean racialexception;
 		    if (cantwield(mon->data) || !is_shield(obj)) continue;
 		    break;
 		case W_ARMG:
-			if((mon->data == &mons[PM_CATHEZAR] || mon->data == &mons[PM_WARDEN_ARIANNA]) && obj->otyp == CHAIN)
+			if((mon->mtyp == PM_CATHEZAR || mon->mtyp == PM_WARDEN_ARIANNA) && obj->otyp == CHAIN)
 				break;
 		    if (!is_gloves(obj) || obj->objsize != mon->data->msize || !can_wear_gloves(mon->data)) continue;
 		    break;
 		case W_ARMF:
-			if((mon->data == &mons[PM_WARDEN_ARIANNA]) && obj->otyp == CHAIN)
+			if((mon->mtyp == PM_WARDEN_ARIANNA) && obj->otyp == CHAIN)
 				break;
 		    if (!is_boots(obj) || obj->objsize != mon->data->msize || !can_wear_boots(mon->data)) continue;
 		    break;
 		case W_ARM:
-			if((mon->data == &mons[PM_CATHEZAR] || mon->data == &mons[PM_WARDEN_ARIANNA]) && obj->otyp == CHAIN)
+			if((mon->mtyp == PM_CATHEZAR || mon->mtyp == PM_WARDEN_ARIANNA) && obj->otyp == CHAIN)
 				break;
 		    if (!is_suit(obj) || (!Is_dragon_scales(obj) && (!arm_match(mon->data, obj) || (obj->objsize != mon->data->msize &&
 				!(is_elven_armor(obj) && abs(obj->objsize - mon->data->msize) <= 1))))

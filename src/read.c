@@ -3135,7 +3135,7 @@ int how;
 	    }
 	} else {
 	    Strcpy(buf, ptr->mname); /* make sure we have standard singular */
-	    if ((ptr->geno & G_UNIQ) && ptr != &mons[PM_HIGH_PRIEST])
+	    if ((ptr->geno & G_UNIQ) && ptr->mtyp != PM_HIGH_PRIEST)
 		which = !type_is_pname(ptr) ? "the " : "";
 	}
 	if (how & REALLY) {

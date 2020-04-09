@@ -27,7 +27,7 @@ cursetxt(mtmp, undirected)
 struct monst *mtmp;
 boolean undirected;
 {
-	if(mtmp->data == &mons[PM_HOUND_OF_TINDALOS])
+	if(mtmp->mtyp == PM_HOUND_OF_TINDALOS)
 		return;
 	if (canseemon(mtmp) && couldsee(mtmp->mx, mtmp->my)) {
 	    const char *point_msg;  /* spellcasting monsters are impolite */
@@ -1386,7 +1386,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	int dmd, dmn;
 	struct obj *mirror;
 
-	if(mtmp->data == &mons[PM_NITOCRIS] && !mtmp->mspec_used && which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF){
+	if(mtmp->mtyp == PM_NITOCRIS && !mtmp->mspec_used && which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF){
 		if(canseemon(mtmp)) pline("Dark water churns around Nitocris!");
 	}
 	else if(mon_resistance(mtmp, NULLMAGIC)) return 0;
@@ -1409,8 +1409,8 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	if ((mattk->adtyp == AD_SPEL || mattk->adtyp == AD_CLRC || mattk->adtyp == AD_PSON) && ml) {
 	    int cnt = 40;
 		
-		// if(Race_if(PM_DROW) && mtmp->data == &mons[PM_AVATAR_OF_LOLTH] && !Role_if(PM_EXILE) && !mtmp->mpeaceful){
-		if(mtmp->data == &mons[PM_AVATAR_OF_LOLTH] && !mtmp->mpeaceful && !strcmp(urole.cgod,"Lolth")){
+		// if(Race_if(PM_DROW) && mtmp->mtyp == PM_AVATAR_OF_LOLTH && !Role_if(PM_EXILE) && !mtmp->mpeaceful){
+		if(mtmp->mtyp == PM_AVATAR_OF_LOLTH && !mtmp->mpeaceful && !strcmp(urole.cgod,"Lolth")){
 			u.ugangr[Align2gangr(A_CHAOTIC)]++;
 			angrygods(A_CHAOTIC);
 			return 1;
@@ -1441,7 +1441,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	}
 
 	if ((mattk->adtyp == AD_SPEL || mattk->adtyp == AD_CLRC) && !nospellcooldowns_mon(mtmp)) {
-	    if(mtmp->data == &mons[PM_HEDROW_WARRIOR]) mtmp->mspec_used = d(4,4);
+	    if(mtmp->mtyp == PM_HEDROW_WARRIOR) mtmp->mspec_used = d(4,4);
 		else mtmp->mspec_used = 10 - mtmp->m_lev;
 	    if (mtmp->mspec_used < 2) mtmp->mspec_used = 2;
 	}
@@ -1452,7 +1452,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 	if (!foundyou && thinks_it_foundyou &&
 		!is_undirected_spell(spellnum) &&
 		!is_aoe_spell(spellnum)) {
-		if(mtmp->data == &mons[PM_HOUND_OF_TINDALOS])
+		if(mtmp->mtyp == PM_HOUND_OF_TINDALOS)
 			return 0;
 	    pline("%s casts a spell at %s!",
 		canseemon(mtmp) ? Monnam(mtmp) : "Something",
@@ -1488,7 +1488,7 @@ castmu(mtmp, mattk, thinks_it_foundyou, foundyou)
 			return(0);
 		}
 	}
-	if(mtmp->data != &mons[PM_HOUND_OF_TINDALOS]){
+	if(mtmp->mtyp != PM_HOUND_OF_TINDALOS){
 		if (canspotmon(mtmp) || !is_undirected_spell(spellnum)) {
 		    pline("%s casts a spell%s!",
 			  canspotmon(mtmp) ? Monnam(mtmp) : "Something",
@@ -2282,7 +2282,7 @@ int spellnum;
 			flags.cth_attk=TRUE;//state machine stuff.
 			create_fog_cloud(mtmp->mux, mtmp->muy, 3, 8);
 			flags.cth_attk=FALSE;
-			if(mtmp->data == &mons[PM_PLUMACH_RILMANI]) mtmp->mcan = 1;
+			if(mtmp->mtyp == PM_PLUMACH_RILMANI) mtmp->mcan = 1;
 		}
 		dmg = 0;
 		stop_occupation();
@@ -2296,7 +2296,7 @@ int spellnum;
 			// pline("%s blurs with speed!", Monnam(mtmp));
 		// mtmp->movement += (extraturns)*12;
 		// for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			// if(tmpm->data == &mons[PM_UVUUDAUM] && tmpm != mtmp){
+			// if(tmpm->mtyp == PM_UVUUDAUM && tmpm != mtmp){
 				// tmpm->movement += (extraturns)*12;
 				// if(canseemon(tmpm))
 					// pline("%s blurs with speed!", Monnam(tmpm));
@@ -3567,7 +3567,7 @@ castmm(mtmp, mdef, mattk)
 	}
 	/* monster unable to cast spells? */
 	if(mtmp->mcan || (mtmp->mspec_used && !nospellcooldowns_mon(mtmp)) || !ml || needs_familiar(mtmp)) {
-		if(mtmp->data == &mons[PM_HOUND_OF_TINDALOS])
+		if(mtmp->mtyp == PM_HOUND_OF_TINDALOS)
 			return 0;
 	    if (canseemon(mtmp) && couldsee(mtmp->mx, mtmp->my))
 	    {
@@ -3616,7 +3616,7 @@ castmm(mtmp, mdef, mattk)
 			return(0);
 		}
 	}
-	if(mtmp->data != &mons[PM_HOUND_OF_TINDALOS]){ //skip messages
+	if(mtmp->mtyp != PM_HOUND_OF_TINDALOS){ //skip messages
 		if (cansee(mtmp->mx, mtmp->my) ||
 		    canseemon(mtmp) ||
 		    (!is_undirected_spell(spellnum) &&
@@ -4292,7 +4292,7 @@ int spellnum;
 				stackobj(otmp);
 			}
        }
-       if(haseyes(mtmp->data) && mattk && mattk->data != &mons[PM_DEMOGORGON] && rn2(3)) {
+       if(haseyes(mtmp->data) && mattk && mattk->mtyp != PM_DEMOGORGON && rn2(3)) {
 			mtmp->mcansee = 0;
 			mtmp->mblinded = max(mtmp->mblinded, rn1(20, 9));
        }
@@ -4312,7 +4312,7 @@ int spellnum;
 	break;
      case TURN_TO_STONE:
 		if(!mtmp) break;
-        if (!(poly_when_stoned(mtmp->data) && newcham(mtmp, &mons[PM_STONE_GOLEM], FALSE, TRUE))) {
+        if (!(poly_when_stoned(mtmp->data) && newcham(mtmp, PM_STONE_GOLEM, FALSE, TRUE))) {
            if(!resists_ston(mtmp) && !rn2(10) ){
 			if (!munstone(mtmp, yours))
 				minstapetrify(mtmp, yours);
@@ -5155,7 +5155,7 @@ uspsibolt:
 			flags.cth_attk=TRUE;//state machine stuff.
 			create_fog_cloud(mtmp->mx, mtmp->my, 3, 8);
 			flags.cth_attk=FALSE;
-			if(mattk && mattk->data == &mons[PM_PLUMACH_RILMANI]) mattk->mcan = 1;
+			if(mattk && mattk->mtyp == PM_PLUMACH_RILMANI) mattk->mcan = 1;
 		} else {
 			create_fog_cloud(mtmp->mx, mtmp->my, 3, 8);
 		}
@@ -5339,7 +5339,7 @@ struct monst *mon;
 	if(!is_witch_mon(mon))
 		return FALSE;
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon)
-		if(mtmp->data == &mons[PM_WITCH_S_FAMILIAR] && mtmp->mvar_witchID == (long)mon->m_id)
+		if(mtmp->mtyp == PM_WITCH_S_FAMILIAR && mtmp->mvar_witchID == (long)mon->m_id)
 			return FALSE;
 	return TRUE;
 }

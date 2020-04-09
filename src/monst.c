@@ -39,7 +39,7 @@ void NDECL(monst_init);
  *	symbol color (C(x) macro)
  */
 #define MON(nam,sym,lvl,gen,atk,siz,mr1,mr2,flgm,flgt,flgb,flgg,flga,flgv,col) \
-	   {nam,sym,lvl,gen,atk,siz,mr1,mr2,flgm,flgt,flgb,flgg,flga,flgv,C(col)}
+	   {nam,sym,lvl,gen,atk,siz,mr1,mr2,flgm,flgt,flgb,flgg,flga,flgv,C(col),-1}
 /*Variable-specificity armor-class*/
 #define NAT_AC(ac)  10-ac,0,0
 #define DEX_AC(ac)  0,10-ac,0
@@ -477,6 +477,7 @@ NEARDATA struct permonst mons[] = {
 	MM_FLY|MM_FLOAT|MM_AMPHIBIOUS /*MM*/, MT_HOSTILE|MT_NOTAKE /*MT*/,
 	MB_NOLIMBS|MB_NOHEAD|MB_NEUTER /*MB*/, MG_INFRAVISIBLE|MG_SANLOSS /*MG*/,
 	0 /*MA*/,  MV_INFRAVISION|MV_CATSIGHT|MV_SEE_INVIS|MV_TELEPATHIC /*MV*/, CLR_BLUE),
+	/* growth code in mon.c relies on sequential order of autons, Monoton to Quinon. */
     MON("monoton", S_EYE, //4 //autons need useful entries I think?
 	LVL_NDR(1, 1, 8, 1, 10, 2), (G_LGROUP|G_NOCORPSE|1),
 	A(ATTK(AT_NONE, AD_PLYS, 1,1), ATTK(AT_GAZE, AD_STDY, 1,11), 

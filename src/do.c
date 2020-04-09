@@ -618,8 +618,7 @@ register struct obj *obj;
 		if (is_animal(u.ustuck->data)) {
 		    if (could_poly || could_slime) {
 			(void) newcham(u.ustuck,
-				       could_poly ? (struct permonst *)0 :
-				       &mons[PM_GREEN_SLIME],
+				       could_poly ? NON_PM : PM_GREEN_SLIME,
 				       FALSE, could_slime);
 			delobj(obj);	/* corpse is digested */
 		    } else if (could_petrify) {
@@ -1729,7 +1728,7 @@ int different;
 	chewed = !different && (mtmp->mhp < mtmp->mhpmax);
 	if (chewed) cname = cname_buf;	/* include "bite-covered" prefix */
 	if(different==REVIVE_ZOMBIE){
-		mtmp->mfaction = ZOMBIFIED;
+		set_faction(mtmp, ZOMBIFIED);
 		mtmp->zombify = 0;
 		if(mtmp->mpeaceful && !mtmp->mtame){
 			mtmp->mpeaceful = 0;
@@ -1775,7 +1774,7 @@ int different;
 		    else if (different==REVIVE_SHADE)
 				pline("%s forms from a corpse!",
 				  Amonnam(mtmp));
-		    else if (mtmp->data==&mons[PM_DEATH])
+		    else if (mtmp->mtyp==PM_DEATH)
 				pline("Death cannot die.");
 			else
 				pline("%s rises from the dead!", chewed ?

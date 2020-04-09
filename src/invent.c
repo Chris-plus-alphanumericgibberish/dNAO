@@ -994,7 +994,7 @@ register const char *let,*word;
 	/* Equivalent of an "ugly check" for gold */
 	if (usegold && !strcmp(word, "eat") &&
 	    (!metallivorous(youracedata)
-	     || youracedata == &mons[PM_RUST_MONSTER]))
+	     || youracedata->mtyp == PM_RUST_MONSTER))
 #ifndef GOLDOBJ
 		usegold = allowgold = FALSE;
 #else

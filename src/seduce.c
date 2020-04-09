@@ -63,25 +63,25 @@ struct attack *mattk;
 		)
 		return 0;
 
-	if(pagr == &mons[PM_SMALL_GOAT_SPAWN] || pagr == &mons[PM_GOAT_SPAWN] || pagr == &mons[PM_GIANT_GOAT_SPAWN])
+	if(pagr->mtyp == PM_SMALL_GOAT_SPAWN || pagr->mtyp == PM_GOAT_SPAWN || pagr->mtyp == PM_GIANT_GOAT_SPAWN)
 		return 1;
 	
-	if(pagr->mlet == S_NYMPH || pagr == &mons[PM_INCUBUS] || pagr == &mons[PM_SUCCUBUS]
-			|| pagr == &mons[PM_CARMILLA] || pagr == &mons[PM_VLAD_THE_IMPALER] || pagr == &mons[PM_LEVISTUS]){
+	if(pagr->mlet == S_NYMPH || pagr->mtyp == PM_INCUBUS || pagr->mtyp == PM_SUCCUBUS
+			|| pagr->mtyp == PM_CARMILLA || pagr->mtyp == PM_VLAD_THE_IMPALER || pagr->mtyp == PM_LEVISTUS){
 		if(genagr == 1 - gendef)
 			return 1;
 		else
-			return (pagr->mlet == S_NYMPH || pagr == &mons[PM_LEVISTUS]) ? 2 : 0;
+			return (pagr->mlet == S_NYMPH || pagr->mtyp == PM_LEVISTUS) ? 2 : 0;
 	}
-	else if(pagr == &mons[PM_MOTHER_LILITH] || pagr == &mons[PM_BELIAL]
-		 /*|| pagr == &mons[PM_SHAMI_AMOURAE]*/){
+	else if(pagr->mtyp == PM_MOTHER_LILITH || pagr->mtyp == PM_BELIAL
+		 /*|| pagr->mtyp == PM_SHAMI_AMOURAE*/){
 		if(genagr == 1 - gendef) return 1;
 		else return 0;
 	}
-	else if(pagr == &mons[PM_FIERNA]) return 2;
-	else if(pagr == &mons[PM_ALRUNES]) return (genagr == gendef) ? 1 : 2;
-	else if(pagr == &mons[PM_MALCANTHET] || pagr == &mons[PM_GRAZ_ZT]
-		 || pagr == &mons[PM_PALE_NIGHT] || pagr == &mons[PM_AVATAR_OF_LOLTH]) 
+	else if(pagr->mtyp == PM_FIERNA) return 2;
+	else if(pagr->mtyp == PM_ALRUNES) return (genagr == gendef) ? 1 : 2;
+	else if(pagr->mtyp == PM_MALCANTHET || pagr->mtyp == PM_GRAZ_ZT
+		 || pagr->mtyp == PM_PALE_NIGHT || pagr->mtyp == PM_AVATAR_OF_LOLTH) 
 			return 1;
 	else return 0;
 }

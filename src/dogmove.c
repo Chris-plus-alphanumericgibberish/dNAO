@@ -116,16 +116,16 @@ boolean check_if_better;
 	    /* food */
             ((dogfood(mtmp, otmp) < APPORT) ||
 	    /* chains for some */
-		 ((mtmp->data == &mons[PM_CATHEZAR]) && otmp->otyp == CHAIN) ||
+		 ((mtmp->mtyp == PM_CATHEZAR) && otmp->otyp == CHAIN) ||
 	    /* better weapons */
 	     (is_armed(mtmp->data) &&
 	      (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && 
 		   (!check_if_better ||
-		    mtmp->data == &mons[PM_MARILITH] ||
+		    mtmp->mtyp == PM_MARILITH ||
 		    would_prefer_hwep(mtmp, otmp) ||
 		    would_prefer_rwep(mtmp, otmp))) ||
 	    /* useful masks */
-	     (otmp->otyp == MASK && mtmp->data == &mons[PM_LILLEND]) ||
+	     (otmp->otyp == MASK && mtmp->mtyp == PM_LILLEND) ||
 	    /* better armor */
 	     (otmp->oclass == ARMOR_CLASS &&
 	      (!check_if_better || is_better_armor(mtmp, otmp))) ||
@@ -344,7 +344,7 @@ boolean devour;
 	    nutrit = (nutrit + 4) / 5;
 	}
 	edog->hungrytime += nutrit;
-	if(u.sealsActive&SEAL_MALPHAS && mtmp->data == &mons[PM_CROW] && obj->otyp == CORPSE){
+	if(u.sealsActive&SEAL_MALPHAS && mtmp->mtyp == PM_CROW && obj->otyp == CORPSE){
 		more_experienced(ptrexperience(&mons[obj->corpsenm]),0);
 		newexplevel();
 	}
@@ -380,7 +380,7 @@ boolean devour;
 	    edog->apport += (int)(200L/
 		((long)edog->dropdist + monstermoves - edog->droptime));
 #endif
-	if (mtmp->data == &mons[PM_RUST_MONSTER] && obj->oerodeproof) {
+	if (mtmp->mtyp == PM_RUST_MONSTER && obj->oerodeproof) {
 	    /* The object's rustproofing is gone now */
 	    obj->oerodeproof = 0;
 	    mtmp->mstun = 1;
@@ -439,7 +439,7 @@ boolean devour;
 #endif /* PET_SATIATION */
 
 	if (poly) {
-	    (void) newcham(mtmp, (struct permonst *)0, FALSE,
+	    (void) newcham(mtmp, NON_PM, FALSE,
 			   cansee(mtmp->mx, mtmp->my));
 	}
 	/* limit "instant" growth to prevent potential abuse */
@@ -826,7 +826,7 @@ boolean ranged;
 	if(mtmp2->mtrapped && t_at(mtmp2->mx, mtmp2->my) && t_at(mtmp2->mx, mtmp2->my)->ttyp == VIVI_TRAP)
 		return FALSE;
 	
-	if(mtmp->mtame && mtmp2->mpeaceful && !u.uevent.uaxus_foe && mtmp2->data == &mons[PM_AXUS])
+	if(mtmp->mtame && mtmp2->mpeaceful && !u.uevent.uaxus_foe && mtmp2->mtyp == PM_AXUS)
 		return FALSE;
 	
 	if(mtmp->mhp < 100 && attacktype_fordmg(mtmp2->data, AT_BOOM, AD_MAND))
@@ -835,7 +835,7 @@ boolean ranged;
 	if((Upolyd ? u.mh < 100 : u.uhp < 100) && mtmp->mtame && attacktype_fordmg(mtmp2->data, AT_BOOM, AD_MAND))
 		return FALSE;
 	
-	if(mtmp2->data == &mons[PM_MANDRAKE])
+	if(mtmp2->mtyp == PM_MANDRAKE)
 		return FALSE;
 	
     return !((!ranged &&
@@ -846,18 +846,18 @@ boolean ranged;
 #endif
 		!(attacktype(mtmp->data, AT_EXPL) || extra_nasty(mtmp->data))) ||
 		(!ranged &&
-		 mtmp2->data == &mons[PM_FLOATING_EYE] && rn2(10) &&
+		 mtmp2->mtyp == PM_FLOATING_EYE && rn2(10) &&
 		 !is_blind(mtmp) && haseyes(mtmp->data) && !is_blind(mtmp2)
 		 && (mon_resistance(mtmp,SEE_INVIS) || !mtmp2->minvis)) ||
 		(!ranged &&
-		 mtmp2->data==&mons[PM_GELATINOUS_CUBE] && rn2(10)) ||
+		 mtmp2->mtyp==PM_GELATINOUS_CUBE && rn2(10)) ||
 		(!ranged &&
 		 max_passive_dmg(mtmp2, mtmp) >= mtmp->mhp) ||
-		((   mtmp2->data == &mons[urole.guardnum]
-		  || mtmp2->data == &mons[urole.ldrnum]
-		  || (Role_if(PM_NOBLEMAN) && (mtmp->data == &mons[PM_KNIGHT] || mtmp->data == &mons[PM_MAID] || mtmp->data == &mons[PM_PEASANT]) && mtmp->mpeaceful)
+		((   mtmp2->mtyp == urole.guardnum
+		  || mtmp2->mtyp == urole.ldrnum
+		  || (Role_if(PM_NOBLEMAN) && (mtmp->mtyp == PM_KNIGHT || mtmp->mtyp == PM_MAID || mtmp->mtyp == PM_PEASANT) && mtmp->mpeaceful)
 		  || (Race_if(PM_DROW) && is_drow(mtmp->data) && mtmp->mpeaceful)
-		  || (Role_if(PM_KNIGHT) && (mtmp->data == &mons[PM_KNIGHT]) && mtmp->mpeaceful)
+		  || (Role_if(PM_KNIGHT) && (mtmp->mtyp == PM_KNIGHT) && mtmp->mpeaceful)
 		  || (Race_if(PM_GNOME) && (is_gnome(mtmp->data) && !is_undead_mon(mtmp)) && mtmp->mpeaceful)
 		  || always_peaceful(mtmp2->data)) &&
 		 mtmp2->mpeaceful && !Conflict) ||
@@ -1241,9 +1241,9 @@ newdogpos:
 		/* insert a worm_move() if worms ever begin to eat things */
 		remove_monster(omx, omy);
 		place_monster(mtmp, nix, niy);
-		if(mtmp->data == &mons[PM_SURYA_DEVA]){
+		if(mtmp->mtyp == PM_SURYA_DEVA){
 			struct monst *blade;
-			for(blade = fmon; blade; blade = blade->nmon) if(blade->data == &mons[PM_DANCING_BLADE] && mtmp->m_id == blade->mvar_suryaID) break;
+			for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
 			if(blade){
 				int bx = blade->mx, by = blade->my;
 				remove_monster(bx, by);

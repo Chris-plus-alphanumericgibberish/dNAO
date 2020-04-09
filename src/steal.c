@@ -242,8 +242,8 @@ int monkey_business; /* true iff an animal is doing the thievery */
 	struct obj *otmp;
 	int tmp, could_petrify, named = 0, armordelay;
 	boolean charms = (is_neuter(mtmp->data) || flags.female == mtmp->female);
-	if(mtmp->data == &mons[PM_ALRUNES]) charms = !charms;
-	else if(mtmp->data == &mons[PM_FIERNA]) charms = TRUE;
+	if(mtmp->mtyp == PM_ALRUNES) charms = !charms;
+	else if(mtmp->mtyp == PM_FIERNA) charms = TRUE;
 
 	if (objnambuf) *objnambuf = '\0';
 	/* the following is true if successful on first of two attacks. */
@@ -382,7 +382,7 @@ gotobj:
 			if (multi < 0 && is_fainted()) unmul((char *)0);
 			slowly = (armordelay >= 1 || multi < 0);
 			if(!artifact){
-			if(mtmp->data == &mons[PM_DEMOGORGON])
+			if(mtmp->mtyp == PM_DEMOGORGON)
 				pline("%s compels you.  You gladly %s your %s.",
 				  Monnam(mtmp),
 				  curssv ? "let him take" :

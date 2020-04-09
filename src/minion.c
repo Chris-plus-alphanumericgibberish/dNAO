@@ -30,23 +30,23 @@ struct monst *mon;
 	if (mon) {
 	    ptr = mon->data;
 	    atyp = (ptr->maligntyp==A_NONE) ? A_NONE : sgn(ptr->maligntyp);
-	    if (mon->ispriest || mon->data == &mons[PM_ALIGNED_PRIEST]
-		|| mon->data == &mons[PM_ANGEL])
+	    if (mon->ispriest || mon->mtyp == PM_ALIGNED_PRIEST
+		|| mon->mtyp == PM_ANGEL)
 		atyp = EPRI(mon)->shralign;
 	} else {
 	    ptr = &mons[PM_WIZARD_OF_YENDOR];
 	    atyp = (ptr->maligntyp==A_NONE) ? A_NONE : sgn(ptr->maligntyp);
 	}
-	if(ptr == &mons[PM_SHAKTARI]) {
+	if(ptr->mtyp == PM_SHAKTARI) {
 	    dtype = PM_MARILITH;
 		cnt = d(1,6);
-	} else if(ptr == &mons[PM_BAALPHEGOR] && rn2(4)) {
+	} else if(ptr->mtyp == PM_BAALPHEGOR && rn2(4)) {
 	    dtype = rn2(4) ? PM_METAMORPHOSED_NUPPERIBO : PM_ANCIENT_NUPPERIBO;
 		cnt = d(4,4);
-	} else if(ptr == &mons[PM_ANCIENT_OF_ICE] || ptr == &mons[PM_ANCIENT_OF_DEATH]) {
+	} else if(ptr->mtyp == PM_ANCIENT_OF_ICE || ptr->mtyp == PM_ANCIENT_OF_DEATH) {
 	    dtype = rn2(4) ? PM_METAMORPHOSED_NUPPERIBO : PM_ANCIENT_NUPPERIBO;
 		cnt = d(1,4);
-	} else if (is_dprince(ptr) || (ptr == &mons[PM_WIZARD_OF_YENDOR])) {
+	} else if (is_dprince(ptr) || (ptr->mtyp == PM_WIZARD_OF_YENDOR)) {
 	    dtype = (!rn2(20)) ? dprince(ptr, atyp) :
 				 (!rn2(4)) ? dlord(ptr, atyp) : ndemon(atyp);
 	    cnt = (!rn2(4) && is_ndemon(&mons[dtype])) ? 2 : 1;
@@ -60,7 +60,7 @@ struct monst *mon;
 	    cnt = 1;
 	} else if (is_lminion(mon)) {
 		if(is_keter(mon->data)){
-			if(mon->data == &mons[PM_MALKUTH_SEPHIRAH] && rn2(8)) return;
+			if(mon->mtyp == PM_MALKUTH_SEPHIRAH && rn2(8)) return;
 			dtype = PM_MALKUTH_SEPHIRAH;
 			cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
 		} else if(In_endgame(&u.uz)){
@@ -75,7 +75,7 @@ struct monst *mon;
 	} else if (is_cminion(mon) && In_endgame(&u.uz)) {
 	    dtype = (is_lord(ptr) && !rn2(20)) ? clord() : cminion();
 	    cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
-	} else if (ptr == &mons[PM_ANGEL]) {
+	} else if (ptr->mtyp == PM_ANGEL) {
 	    if (rn2(6)) {
 			(void) summon_god_minion(align_gname_full(atyp), atyp, FALSE);
 	    } else {
@@ -116,7 +116,7 @@ aligntyp alignment;
 boolean talk;
 {
     const int *minions = god_minions(gptr);
-    int mnum=NON_PM, mlev, num = 0, first, last;
+    int mtyp=NON_PM, mlev, num = 0, first, last;
 	struct monst *mon;
 
 	mlev = level_difficulty();
@@ -125,7 +125,7 @@ boolean talk;
 	    if (!(mvitals[minions[first]].mvflags & G_GONE && !In_quest(&u.uz)) && monstr[minions[first]] > mlev/2) break;
 	if(minions[first] == NON_PM){ //All minions too weak, or no minions
 		if(first == 0) return (struct monst *) 0;
-		else mnum = minions[first-1];
+		else mtyp = minions[first-1];
 	}
 	else for (last = first; minions[last] != NON_PM; last++)
 	    if (!(mvitals[minions[last]].mvflags & G_GONE && !In_quest(&u.uz))) {
@@ -136,7 +136,7 @@ boolean talk;
 
 	if(!num){ //All minions too strong, or gap between weak and strong minions
 		if(first == 0) return (struct monst *) 0;
-		else mnum = minions[first-1];
+		else mtyp = minions[first-1];
 	}
 /*	Assumption:	minions are presented in ascending order of strength. */
 	else{
@@ -150,27 +150,27 @@ boolean talk;
 			}
 	    }
 		first--; /* correct an off-by-one error */
-		mnum = minions[first];
+		mtyp = minions[first];
 	}
 
 
-    if (mnum == NON_PM) {
+    if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
-    } else if (mons[mnum].pxlth == 0) {
-		struct permonst *pm = &mons[mnum];
+    } else if (mons[mtyp].pxlth == 0) {
+		struct permonst *pm = &mons[mtyp];
 		mon = makemon(pm, u.ux, u.uy, MM_EMIN);
 		if (mon) {
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
 		}
-    } else if (mnum == PM_ANGEL) {
-		mon = makemon(&mons[mnum], u.ux, u.uy, NO_MM_FLAGS);
+    } else if (mtyp == PM_ANGEL) {
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
 		if (mon) {
 			mon->isminion = TRUE;
 			EPRI(mon)->shralign = alignment;	/* always A_LAWFUL here */
 		}
     } else
-		mon = makemon(&mons[mnum], u.ux, u.uy, NO_MM_FLAGS);
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
     if (mon) {
 		if (talk) {
 			pline_The("voice of %s booms:", align_gname(alignment));
@@ -188,7 +188,7 @@ boolean talk;
 			int faction = god_faction(gptr);
 			struct obj *otmp;
 
-			mon->mfaction = faction;
+			set_faction(mon, faction);
 			
 			for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
 				if(otmp->otyp == find_signet_ring() || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == NOBLE_S_DRESS){
@@ -198,7 +198,7 @@ boolean talk;
 		}
 		
 		if(gptr == DreadFracture && mon->mfaction != FRACTURED){
-			mon->mfaction = FRACTURED;
+			set_faction(mon, FRACTURED);
 			mon->m_lev += 4;
 			mon->mhpmax = d(mon->m_lev, 8);
 			mon->mhp = mon->mhpmax;
@@ -217,45 +217,45 @@ boolean devils;
 boolean angels;
 {
     register struct monst *mon;
-    int mnum;
+    int mtyp;
 
     switch ((int)alignment) {
 	case A_LAWFUL:
 	case A_VOID:
-	    mnum = devils ? ndemon(alignment) : lminion();
+	    mtyp = devils ? ndemon(alignment) : lminion();
 	    break;
 	case A_NEUTRAL:
-	    mnum = angels ? nminion() : (PM_AIR_ELEMENTAL + rn2(8));
+	    mtyp = angels ? nminion() : (PM_AIR_ELEMENTAL + rn2(8));
 	    break;
 	case A_CHAOTIC:
-	    mnum = angels ? cminion() : ndemon(alignment);
+	    mtyp = angels ? cminion() : ndemon(alignment);
 	    break;
 	case A_NONE:
-	    mnum = angels ? PM_FALLEN_ANGEL : ndemon(alignment);
+	    mtyp = angels ? PM_FALLEN_ANGEL : ndemon(alignment);
 	    break;
 	default:
 //	    impossible("unaligned player?");
 		pline("Odd alignment in minion summoning: %d",(int)alignment);
-	    mnum = ndemon(A_NONE);
+	    mtyp = ndemon(A_NONE);
 	    break;
     }
-    if (mnum == NON_PM) {
+    if (mtyp == NON_PM) {
 		mon = 0;
-    } else if (mons[mnum].pxlth == 0) {
-		struct permonst *pm = &mons[mnum];
+    } else if (mons[mtyp].pxlth == 0) {
+		struct permonst *pm = &mons[mtyp];
 		mon = makemon(pm, u.ux, u.uy, MM_EMIN);
 		if (mon) {
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
 		}
-    } else if (mnum == PM_ANGEL) {
-		mon = makemon(&mons[mnum], u.ux, u.uy, NO_MM_FLAGS);
+    } else if (mtyp == PM_ANGEL) {
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
 		if (mon) {
 			mon->isminion = TRUE;
 			EPRI(mon)->shralign = alignment;	/* always A_LAWFUL here */
 		}
     } else
-		mon = makemon(&mons[mnum], u.ux, u.uy, NO_MM_FLAGS);
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
     if (mon) {
 	if (talk) {
 	    pline_The("voice of %s booms:", align_gname(alignment));
@@ -313,7 +313,7 @@ register struct monst *mtmp;
 	    set_malign(mtmp);
 	    return 0;
 	} else {
-		if(mtmp->data == &mons[PM_ASMODEUS] && demand < 9000) demand = 9000 + rn2(1000);
+		if(mtmp->mtyp == PM_ASMODEUS && demand < 9000) demand = 9000 + rn2(1000);
 		else if(demand < 2000) demand = max(1000+rnd(1000), demand); //demons can't be bribed with chump change.
 	    /* make sure that the demand is unmeetable if the monster
 	       has the Amulet, preventing monster from being satisified
@@ -404,13 +404,13 @@ aligntyp atyp;
 	int tryct, pm;
 	
 	/*Specific aliances go here*/
-	if(ptr == &mons[PM_BAPHOMET] && !(mvitals[PM_PALE_NIGHT].mvflags & G_GONE))
+	if(ptr->mtyp == PM_BAPHOMET && !(mvitals[PM_PALE_NIGHT].mvflags & G_GONE))
 		return PM_PALE_NIGHT;
-	if(ptr == &mons[PM_PALE_NIGHT] && !(mvitals[PM_ASCODEL].mvflags & G_GONE) && !rn2(4))
+	if(ptr->mtyp == PM_PALE_NIGHT && !(mvitals[PM_ASCODEL].mvflags & G_GONE) && !rn2(4))
 		return PM_ASCODEL;
-	if(ptr == &mons[PM_PALE_NIGHT] && !(mvitals[PM_GRAZ_ZT].mvflags & G_GONE))
+	if(ptr->mtyp == PM_PALE_NIGHT && !(mvitals[PM_GRAZ_ZT].mvflags & G_GONE))
 		return PM_GRAZ_ZT;
-	if(ptr == &mons[PM_DEMOGORGON] && !(mvitals[PM_DAGON].mvflags & G_GONE))
+	if(ptr->mtyp == PM_DEMOGORGON && !(mvitals[PM_DAGON].mvflags & G_GONE))
 		return PM_DAGON;
 
 	if(atyp == A_NONE) atyp = !rn2(3) ? A_LAWFUL : A_CHAOTIC;
@@ -422,12 +422,12 @@ aligntyp atyp;
 		for (tryct = 0; tryct < 20; tryct++) {
 			pm = demonPrinces[rn2(SIZE(demonPrinces))];
 			if (!(mvitals[pm].mvflags & G_GONE
-				|| (ptr == &mons[PM_GRAZ_ZT] && pm == PM_MALCANTHET)
-				|| (ptr == &mons[PM_MALCANTHET] && pm == PM_GRAZ_ZT)
-				|| (ptr == &mons[PM_OBOX_OB] && pm == PM_DEMOGORGON)
-				|| (ptr == &mons[PM_DEMOGORGON] && pm == PM_OBOX_OB)
-				|| (ptr == &mons[PM_LAMASHTU] && pm == PM_DEMOGORGON)
-				|| (ptr == &mons[PM_DEMOGORGON] && pm == PM_LAMASHTU)
+				|| (ptr->mtyp == PM_GRAZ_ZT && pm == PM_MALCANTHET)
+				|| (ptr->mtyp == PM_MALCANTHET && pm == PM_GRAZ_ZT)
+				|| (ptr->mtyp == PM_OBOX_OB && pm == PM_DEMOGORGON)
+				|| (ptr->mtyp == PM_DEMOGORGON && pm == PM_OBOX_OB)
+				|| (ptr->mtyp == PM_LAMASHTU && pm == PM_DEMOGORGON)
+				|| (ptr->mtyp == PM_DEMOGORGON && pm == PM_LAMASHTU)
 			))
 				return(pm);
 		}
@@ -464,22 +464,22 @@ aligntyp atyp;
 	int tryct, pm;
 	
 	/*Specific aliances go here*/
-	if(ptr == &mons[PM_MEPHISTOPHELES] && !(mvitals[PM_BAALPHEGOR].mvflags & G_GONE))
+	if(ptr->mtyp == PM_MEPHISTOPHELES && !(mvitals[PM_BAALPHEGOR].mvflags & G_GONE))
 		return PM_BAALPHEGOR;
-	if(ptr == &mons[PM_CRONE_LILITH] && !(mvitals[PM_MOTHER_LILITH].mvflags & G_GONE))
+	if(ptr->mtyp == PM_CRONE_LILITH && !(mvitals[PM_MOTHER_LILITH].mvflags & G_GONE))
 		return PM_MOTHER_LILITH;
-	if(ptr == &mons[PM_CRONE_LILITH] && !(mvitals[PM_DAUGHTER_LILITH].mvflags & G_GONE))
+	if(ptr->mtyp == PM_CRONE_LILITH && !(mvitals[PM_DAUGHTER_LILITH].mvflags & G_GONE))
 		return PM_DAUGHTER_LILITH;
-	if(ptr == &mons[PM_MOTHER_LILITH] && !(mvitals[PM_DAUGHTER_LILITH].mvflags & G_GONE))
+	if(ptr->mtyp == PM_MOTHER_LILITH && !(mvitals[PM_DAUGHTER_LILITH].mvflags & G_GONE))
 		return PM_DAUGHTER_LILITH;
-	if(ptr == &mons[PM_BELIAL] && !(mvitals[PM_FIERNA].mvflags & G_GONE))
+	if(ptr->mtyp == PM_BELIAL && !(mvitals[PM_FIERNA].mvflags & G_GONE))
 		return PM_FIERNA;
-	if(ptr == &mons[PM_MAMMON] && !(mvitals[PM_GLASYA].mvflags & G_GONE) && !rn2(20))
+	if(ptr->mtyp == PM_MAMMON && !(mvitals[PM_GLASYA].mvflags & G_GONE) && !rn2(20))
 		return PM_GLASYA;
 	
-	if(ptr == &mons[PM_PALE_NIGHT] && !(mvitals[PM_BAPHOMET].mvflags & G_GONE))
+	if(ptr->mtyp == PM_PALE_NIGHT && !(mvitals[PM_BAPHOMET].mvflags & G_GONE))
 		return PM_BAPHOMET;
-	if(ptr == &mons[PM_OBOX_OB] && !(mvitals[PM_ALDINACH].mvflags & G_GONE))
+	if(ptr->mtyp == PM_OBOX_OB && !(mvitals[PM_ALDINACH].mvflags & G_GONE))
 		return PM_ALDINACH;
 
 	if(atyp == A_NONE) atyp = rn2(2) ? A_LAWFUL : A_CHAOTIC;
@@ -489,8 +489,8 @@ aligntyp atyp;
 			pm = lordsOfTheNine[rn2(SIZE(lordsOfTheNine))];
 			if(pm == PM_CRONE_LILITH) pm = !rn2(3) ? PM_CRONE_LILITH : !rn2(2) ? PM_MOTHER_LILITH : PM_DAUGHTER_LILITH;
 			if (!(mvitals[pm].mvflags & G_GONE
-				|| (ptr == &mons[PM_MEPHISTOPHELES] && pm == PM_BAALZEBUB)
-				|| (ptr == &mons[PM_BAALZEBUB] && pm == PM_MEPHISTOPHELES)
+				|| (ptr->mtyp == PM_MEPHISTOPHELES && pm == PM_BAALZEBUB)
+				|| (ptr->mtyp == PM_BAALZEBUB && pm == PM_MEPHISTOPHELES)
 			)){
 				if(pm == PM_CREATURE_IN_THE_ICE){
 					mvitals[pm].mvflags |= G_GONE;
@@ -503,10 +503,10 @@ aligntyp atyp;
 		for (tryct = 0; tryct < 20; tryct++) {
 			pm = demonLords[rn2(SIZE(demonLords))];
 			if (!(mvitals[pm].mvflags & G_GONE
-				|| (ptr == &mons[PM_BAPHOMET] && pm == PM_YEENOGHU)
-				|| (ptr == &mons[PM_YEENOGHU] && pm == PM_BAPHOMET)
-				|| (ptr == &mons[PM_ZUGGTMOY] && pm == PM_JUIBLEX)
-				|| (ptr == &mons[PM_JUIBLEX] && pm == PM_ZUGGTMOY)
+				|| (ptr->mtyp == PM_BAPHOMET && pm == PM_YEENOGHU)
+				|| (ptr->mtyp == PM_YEENOGHU && pm == PM_BAPHOMET)
+				|| (ptr->mtyp == PM_ZUGGTMOY && pm == PM_JUIBLEX)
+				|| (ptr->mtyp == PM_JUIBLEX && pm == PM_ZUGGTMOY)
 			))
 				return(pm);
 		}

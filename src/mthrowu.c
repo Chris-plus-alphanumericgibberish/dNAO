@@ -132,7 +132,7 @@ int force_linedup;
 			   ))
 		)
 	){
-	    if(!(mtmp->data == &mons[PM_OONA] && resists_oona(mtmp2)) && mm_aggression(mtmp, mtmp2)) return mtmp2;
+	    if(!(mtmp->mtyp == PM_OONA && resists_oona(mtmp2)) && mm_aggression(mtmp, mtmp2)) return mtmp2;
 	}
 	
 #if 0
@@ -175,7 +175,7 @@ int force_linedup;
 				( is_pole(mrwep) && lined_up(mtmp) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2 && (mtmp->mux == mtmp->mx || mtmp->muy == mtmp->my))
 			   ))
 		)) {
-        	if(!(mtmp->data == &mons[PM_OONA] && Oona_resistance)) return &youmonst;  /* kludge - attack the player first
+        	if(!(mtmp->mtyp == PM_OONA && Oona_resistance)) return &youmonst;  /* kludge - attack the player first
 				      if possible */
 		}
 		if(gx != 0 || gy != 0){
@@ -246,7 +246,7 @@ int force_linedup;
 				( is_pole(mrwep) && lined_up(mtmp) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2 && (mtmp->mux == mtmp->mx || mtmp->muy == mtmp->my))
 			   ))
 		)) {
-        	if(!(mtmp->data == &mons[PM_OONA] && Oona_resistance)) return &youmonst;  /* kludge - attack the player first
+        	if(!(mtmp->mtyp == PM_OONA && Oona_resistance)) return &youmonst;  /* kludge - attack the player first
 				      if possible */
 		}
     }
@@ -284,7 +284,7 @@ int force_linedup;
 				if (((!oldmret) ||
 					(monstr[monsndx(mat->data)] >
 					monstr[monsndx(oldmret->data)])
-					) && !(mtmp->data == &mons[PM_OONA] && resists_oona(mat))
+					) && !(mtmp->mtyp == PM_OONA && resists_oona(mat))
 					 && mm_aggression(mtmp, mat)
 				) mret = mat;
 			}
@@ -304,7 +304,7 @@ int force_linedup;
 					if (((!oldmret) ||
 						(monstr[monsndx(mat->data)] >
 						monstr[monsndx(oldmret->data)])
-						) && !(mtmp->data == &mons[PM_OONA] && resists_oona(mat))
+						) && !(mtmp->mtyp == PM_OONA && resists_oona(mat))
 						 && mm_aggression(mtmp, mat)
 					)
 						mret = mat;
@@ -340,7 +340,7 @@ int force_linedup;
 			if (((!mret) ||
 				(monstr[monsndx(mtmp2->data)] >
 				monstr[monsndx(mret->data)])
-				) && !(mtmp->data == &mons[PM_OONA] && resists_oona(mtmp2))
+				) && !(mtmp->mtyp == PM_OONA && resists_oona(mtmp2))
 				 && mm_aggression(mtmp, mtmp2)
 			){
 				mret = mtmp2;
