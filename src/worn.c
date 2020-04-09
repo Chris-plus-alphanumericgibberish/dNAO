@@ -684,10 +684,6 @@ struct monst *mon;
 		if(mon->mvar2 & 0x4L) base = -125; //Fully Quantum Locked
 		if(mon->mvar2 & 0x2L) base = -20; //Partial Quantum Lock
 	}
-	if(mon->mfaction == ZOMBIFIED) base += 2;
-	if(mon->mfaction == SKELIFIED) base -= 2;
-	if(mon->mfaction == CRYSTALFIED) base -= 6;
-	if(mon->mfaction == CRANIUM_RAT) base -= 4;
 	
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
@@ -699,15 +695,21 @@ struct monst *mon;
 		
 		if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
 	}
-	if(helpless(mon))
+
+	if (helpless(mon))
 		base -= 5;
-	else if(which_armor(mon, W_ARM)){
-		if(is_light_armor(which_armor(mon, W_ARM)))
-			base -= mon->data->dac;
-		else if(is_medium_armor(which_armor(mon, W_ARM)))
-			base -= (mon->data->dac)/2;
+	else {
+		struct obj * armor = which_armor(mon, W_ARM);
+		register int mondodgeac = mon->data->dac;
+		if ((mondodgeac < 0)						/* penalties have full effect */
+			|| (!armor)								/* no armor = max mobility */
+			|| (armor && is_light_armor(armor))		/* light armor is also fine  */
+			)
+			base -= mondodgeac;
+		else if (armor && is_medium_armor(armor))	/* medium armor halves dodge AC */
+			base -= mondodgeac/2;
+		/* else no adjustment */
 	}
-	else base -= mon->data->dac;
 	
 	return base;
 }
@@ -750,10 +752,6 @@ struct monst *mon;
 			base -= rnd(20);
 		}
 	}
-	
-	if(mon->mfaction == ZOMBIFIED) base -= 4;
-	if(mon->mfaction == CRYSTALFIED) base -= 10;
-	if(mon->mfaction == TOMB_HERD) base -= 6;
 	
 	if(mon->mtame){
 		if(u.specialSealsActive&SEAL_COSMOS) base -= spiritDsize();	
@@ -822,10 +820,6 @@ struct monst *mon;
 		}
 	}
 	
-	if(mon->mfaction == ZOMBIFIED) base -= 2;
-	if(mon->mfaction == SKELIFIED) base -= 6;
-	if(mon->mfaction == CRYSTALFIED) base -= 16;
-	
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
 	
@@ -856,15 +850,20 @@ struct monst *mon;
 
 	base -= armac;
 	
-	if(helpless(mon))
+	if (helpless(mon))
 		base -= 5;
-	else if(which_armor(mon, W_ARM)){
-		if(is_light_armor(which_armor(mon, W_ARM)))
-			base -= mon->data->dac;
-		else if(is_medium_armor(which_armor(mon, W_ARM)))
-			base -= (mon->data->dac)/2;
+	else {
+		struct obj * armor = which_armor(mon, W_ARM);
+		register int mondodgeac = mon->data->dac;
+		if ((mondodgeac < 0)						/* penalties have full effect */
+			|| (!armor)								/* no armor = max mobility */
+			|| (armor && is_light_armor(armor))		/* light armor is also fine  */
+			)
+			base -= mondodgeac;
+		else if (armor && is_medium_armor(armor))	/* medium armor halves dodge AC */
+			base -= mondodgeac / 2;
+		/* else no adjustment */
 	}
-	else base -= mon->data->dac;
 	
 	/* since arm_ac_bonus is positive, subtracting it increases AC */
 	return base;
@@ -919,9 +918,6 @@ struct monst *mon;
 	if(mon->mtame){
 		if(u.specialSealsActive&SEAL_COSMOS) base += rnd(spiritDsize());
 	}
-	
-	if(mon->mfaction == ZOMBIFIED) base += 2;
-	if(mon->mfaction == CRYSTALFIED) base += 8;
 	
 	return base;
 }

@@ -588,8 +588,7 @@ coord *cc;
 	if (obj->oxlth && (obj->oattached == OATTACHED_MONST))
 		mtmp2 = get_mtraits(obj, TRUE);
 	if (mtmp2) {
-		/* save_mtraits() validated mtmp2->mtyp */
-		mtmp2->data = &mons[mtmp2->mtyp];
+		set_mon_data(mtmp2, mtmp2->mtyp, 0);
 		if (mtmp2->mhpmax <= 0 && !is_rider(mtmp2->data))
 			return (struct monst *)0;
 		mtmp = makemon(mtmp2->data,
@@ -798,7 +797,7 @@ boolean dolls;
 				if (obj->onamelth)
 					mtmp = christen_monst(mtmp, ONAME(obj));
 				/* flag the quest leader as alive. */
-				if (mtmp->data == &mons[urole.ldrnum] || mtmp->m_id ==
+				if (mtmp->mtyp == urole.ldrnum || mtmp->m_id ==
 					quest_status.leader_m_id) {
 					quest_status.leader_m_id = mtmp->m_id;
 					quest_status.leader_is_dead = FALSE;
@@ -850,7 +849,7 @@ boolean dolls;
 				panic("revive");
 			}
 			if(wasfossil){
-				mtmp->mfaction = SKELIFIED;
+				set_faction(mtmp, SKELIFIED);
 				newsym(mtmp->mx,mtmp->my);
 			}
 		}
@@ -3503,7 +3502,7 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		else if(is_delouseable(mon->data)){
 			if (canseemon(mon))
 				pline("The parasite is killed!");
-			mon->mfaction = DELOUSED;
+			set_faction(mon, DELOUSED);
 			break;
 		}
 		if (mon->mtyp == PM_DEATH) {
@@ -4566,7 +4565,7 @@ int type;
 		mon->mhpmax = 60;
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
-	mon->mfaction = DELOUSED;
+	set_faction(mon, DELOUSED);
 	mon->mtame = 0;
 	mon->mpeaceful = 1;
 	mon->mcanmove = 1;
@@ -4578,9 +4577,9 @@ delouse_tame(mon)
 struct monst *mon;
 {
 	struct monst *mtmp;
-	mon->mfaction = 0;
+	set_faction(mtmp, 0);
 	if(mon->mtyp == PM_COMMANDER){
-		mon->mfaction = M_GREAT_WEB;
+		set_faction(mon, M_GREAT_WEB);
 	}
 	if(mon->mtyp == PM_LIVING_DOLL){
 		mon->mpeaceful = 1;

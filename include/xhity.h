@@ -26,7 +26,6 @@
 #define Magic_res(mon)		((mon)==&youmonst ? Antimagic : resists_magm((mon)))
 #define Half_phys(mon)		((mon)==&youmonst ? Half_physical_damage : mon_resistance((mon), HALF_PHDAM))
 #define Change_res(mon)		((mon)==&youmonst ? Unchanging : mon_resistance((mon), UNCHANGING))
-#define is_null_attk(attk)	((attk) && ((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0))
 #define creature_at(x,y)	(isok(x,y) ? MON_AT(x, y) ? level.monsters[x][y] : (x==u.ux && y==u.uy) ? &youmonst : (struct monst *)0 : (struct monst *)0)
 
 #define FATAL_DAMAGE_MODIFIER 9001

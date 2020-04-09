@@ -1728,7 +1728,7 @@ int different;
 	chewed = !different && (mtmp->mhp < mtmp->mhpmax);
 	if (chewed) cname = cname_buf;	/* include "bite-covered" prefix */
 	if(different==REVIVE_ZOMBIE){
-		mtmp->mfaction = ZOMBIFIED;
+		set_faction(mtmp, ZOMBIFIED);
 		mtmp->zombify = 0;
 		if(mtmp->mpeaceful && !mtmp->mtame){
 			mtmp->mpeaceful = 0;

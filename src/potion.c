@@ -513,7 +513,7 @@ peffects(otmp)
 		    if (u.ulycn >= LOW_PM && !Race_if(PM_HUMAN_WEREWOLF)) {
 			You("forget your affinity to %s!",
 					makeplural(mons[u.ulycn].mname));
-			if (youracedata == &mons[u.ulycn])
+			if (youracedata->mtyp == u.ulycn)
 			    you_unwere(FALSE);
 			u.ulycn = NON_PM;	/* cure lycanthropy */
 		    }
@@ -557,7 +557,7 @@ peffects(otmp)
 				if (u.ulycn >= LOW_PM) {
 					Your("affinity to %s disappears!",
 					 makeplural(mons[u.ulycn].mname));
-					if (youracedata == &mons[u.ulycn])
+					if (youracedata->mtyp == u.ulycn)
 					you_unwere(FALSE);
 					u.ulycn = NON_PM;	/* cure lycanthropy */
 				}
@@ -607,7 +607,7 @@ peffects(otmp)
 				if (u.ulycn >= LOW_PM) {
 					Your("affinity to %s disappears!",
 					 makeplural(mons[u.ulycn].mname));
-					if (youracedata == &mons[u.ulycn])
+					if (youracedata->mtyp == u.ulycn)
 					you_unwere(FALSE);
 					u.ulycn = NON_PM;	/* cure lycanthropy */
 				}
@@ -1901,7 +1901,7 @@ register struct obj *obj;
 		} else if (u.ulycn >= LOW_PM) {
 		    /* vapor from [un]holy water will trigger
 		       transformation but won't cure lycanthropy */
-		    if (obj->blessed && youmonst.data == &mons[u.ulycn])
+		    if (obj->blessed && youmonst.data->mtyp == u.ulycn)
 			you_unwere(FALSE);
 		    else if (obj->cursed && !Upolyd)
 			you_were();
@@ -1913,7 +1913,7 @@ register struct obj *obj;
 		} else if (u.ulycn >= LOW_PM) {
 		    /* vapor from [un]holy water will trigger
 		       transformation but won't cure lycanthropy */
-		    if (youmonst.data == &mons[u.ulycn])
+		    if (youmonst.data->mtyp == u.ulycn)
 				you_unwere(FALSE);
 		}
 		break;

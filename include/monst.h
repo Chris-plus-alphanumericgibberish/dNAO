@@ -213,6 +213,7 @@ struct monst {
 #define	DELOUSED	FACTION_PADDING+14	/* android flag: parasite is killed, but not host */
 #define	M_BLACK_WEB	FACTION_PADDING+15	/* Has a shadow blade attack */
 #define	M_GREAT_WEB	FACTION_PADDING+16	/* Has a stronger shadow blade attack */
+#define MAXFACTION	M_GREAT_WEB
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon */
 //define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil */
 //define	HALF_DRAGON	FACTION_PADDING+3	/* half-dragon */

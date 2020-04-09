@@ -680,7 +680,7 @@ turn_stag()
 	{
 		struct monst *tm;
 		for(tm = fmon; tm; tm = tm->nmon){
-			if(tm->data == &mons[urole.ldrnum]){
+			if(tm->mtyp == urole.ldrnum){
 				tm->housealert = 1;
 				tm->mpeaceful = 1;
 				tm->mstrategy = STRAT_CLOSE;

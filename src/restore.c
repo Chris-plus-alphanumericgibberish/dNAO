@@ -274,9 +274,8 @@ boolean ghostly;
 			add_id_mapping(mtmp->m_id, nid);
 			mtmp->m_id = nid;
 		}
-		if (moved && mtmp->data) {
-			int offset = mtmp->data - monbegin;	/*(ptrdiff_t)*/
-			mtmp->data = mons + offset;  /* new permonst location */
+		if (mtmp->data) {
+			set_mon_data(mtmp, mtmp->mtyp, 0);
 		}
 		if (ghostly) {
 			int mndx = monsndx(mtmp->data);

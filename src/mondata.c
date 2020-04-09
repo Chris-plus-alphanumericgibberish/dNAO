@@ -8,6 +8,8 @@
 
 /*	These routines provide basic data for any type of monster. */
 
+STATIC_DCL struct permonst * FDECL(permonst_of, (int, int));
+
 #ifdef OVLB
 
 /* saves the index number of each part of the permonst array to itself */
@@ -15,7 +17,7 @@ void
 id_permonst()
 {
 	int i;
-	for (i = 0; i < NUMMONS; i++);
+	for (i = 0; i < NUMMONS; i++)
 		mons[i].mtyp = i;
 	return;
 }
@@ -35,12 +37,15 @@ int mtyp;
 int flag;
 {
 	int i;
-	struct permonst * ptr = &mons[mtyp]; /* this will be changed to a new system, mwahahaa! */
-	mon->data = ptr;
+	struct permonst * ptr;
 
 	/* players in their base form are a special case */
-	if (mon == &youmonst && (mtyp == u.umonster))
+	if (mon == &youmonst && (mtyp == u.umonster)) {
 		mon->data = ptr = &upermonst;
+	}
+	else {
+		mon->data = ptr = permonst_of(mtyp, mon->mfaction);
+	}
 
 	mon->mtyp = mtyp;
     if (flag == -1) return;		/* "don't care" */
@@ -118,7 +123,383 @@ int flag;
 	set_mintrinsic(species_is_telepathic(mon->data), TELEPAT);
 #undef set_mintrinsic
     return;
-#
+}
+
+void
+set_faction(mtmp, faction)
+struct monst * mtmp;
+int faction;
+{
+	mtmp->mfaction = faction;
+	set_mon_data(mtmp, mtmp->mtyp, 0);
+	return;
+}
+
+/* 
+ * Returns a pointer to the appropriate permonst structure for the monster parameters given
+ * 
+ * needs an mtyp; faction optional
+ * Do not call with mtyp==NON_PM unless you are intending to get PM_PLAYERMON
+ * 
+ * This function is responsible for allocating memory for new permonsts!
+ */
+struct permonst *
+permonst_of(mtyp, faction)
+int mtyp;
+int faction;
+{
+	static struct permonst * monsarrays[NUMMONS][MAXFACTION - FACTION_PADDING] = { 0 };
+	struct permonst * ptr;
+	int f_index = faction - FACTION_PADDING - 1;	/* first faction is 1-indexed, but we want 0-indexed */
+
+	/* player is special, and has no handling for derived statblocks */
+	if (mtyp == PM_PLAYERMON)
+		return &upermonst;
+	
+	/* validate mtyp */
+	if (mtyp > NUMMONS || mtyp < 0) {
+		impossible("Can not get permonst for mtyp=%d!", mtyp);
+	}
+
+	/* filter out drow/misc factions */
+	if (faction <= FACTION_PADDING)
+		faction = 0;	/* equivalent to no faction */
+
+	/* simplest case: return the common mons[] array */
+	if (!faction)
+		return &mons[mtyp];
+
+	/* next case: we have already generated that particular statblock */
+	if (monsarrays[mtyp][f_index] != (struct permonst *)0) {
+		return monsarrays[mtyp][f_index];
+	}
+
+	/* final case: we need to generate the statblock */
+	/* allocate memory */
+	monsarrays[mtyp][f_index] = (struct permonst *)malloc(sizeof(struct permonst));
+	ptr = monsarrays[mtyp][f_index];
+	/* copy original */
+	*ptr = mons[mtyp];
+	/* make changes to the permonst as necessary */
+	switch (faction)
+	{
+	case ZOMBIFIED:
+		/* flags: */
+		ptr->mflagsm |= (MM_BREATHLESS);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL);
+		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT);
+		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
+		ptr->mflagsa |= (MA_UNDEAD);
+		/* defense: */
+		ptr->nac += 4;
+		ptr->dac += -2;	/* penalty to dodge AC */
+		ptr->hdr += 2;
+		ptr->bdr += 2;
+		ptr->gdr += 2;
+		ptr->ldr += 2;
+		ptr->fdr += 2;
+		/* resists: */
+		ptr->mresists |= (MR_COLD | MR_SLEEP | MR_POISON);
+		/* misc: */
+		ptr->msound = MS_SILENT;
+		/* speed: 0.50x, min 6 */
+		if (ptr->mmove > 6)
+			ptr->mmove = max(6, ptr->mmove / 2);
+		break;
+	case SKELIFIED:
+		/* flags: */
+		ptr->geno |= (G_NOCORPSE);
+		ptr->mflagsm |= (MM_BREATHLESS);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL);
+		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
+		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
+		ptr->mflagsa |= (MA_UNDEAD);
+		/* defense: */
+		ptr->nac += 2;
+		/* resists: */
+		ptr->mresists |= (MR_COLD | MR_SLEEP | MR_POISON);
+		/* misc: */
+		if (mtyp != PM_ECHO)
+			ptr->msound = MS_BONES;
+		/* speed: 0.75x, min 6 */
+		if (ptr->mmove > 6)
+			ptr->mmove = max(6, ptr->mmove * 3 / 4);
+		break;
+	case CRYSTALFIED:
+		/* flags: */
+		ptr->geno |= (G_NOCORPSE);
+		ptr->mflagsm |= (MM_BREATHLESS);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL);
+		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
+		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
+		ptr->mflagsa |= (MA_UNDEAD);
+		/* defense: */
+		ptr->nac += 10;
+		ptr->dac += 6;
+		ptr->hdr += 8;
+		ptr->bdr += 8;
+		ptr->gdr += 8;
+		ptr->ldr += 8;
+		ptr->fdr += 8;
+		/* resists: */
+		ptr->mresists |= (MR_COLD | MR_SLEEP | MR_POISON);
+		/* misc: */
+		ptr->msound = MS_SILENT;
+		break;
+	case FRACTURED:
+		/* flags: */
+		ptr->mflagsm |= (MM_BREATHLESS);
+		ptr->mflagst |= (MT_HOSTILE);
+		ptr->mflagst &= ~(MT_PEACEFUL);
+		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
+		ptr->mflagsa |= (MA_UNDEAD);
+		break;
+	case VAMPIRIC:
+		/* flags: */
+		ptr->mflagsm |= (MM_BREATHLESS);
+		ptr->mflagst |= (MT_HOSTILE);
+		ptr->mflagst &= ~(MT_PEACEFUL);
+		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
+		ptr->mflagsa |= (MA_UNDEAD | MA_VAMPIRE);
+		/* resists: */
+		ptr->mresists |= (MR_SLEEP | MR_POISON);	/* individual monsters gain cold res at mlev >= 10 */
+		break;
+	case ILLUMINATED:
+		/* flags: */
+		ptr->mflagsg |= (MG_HATESUNHOLY);
+		ptr->mflagsg &= ~(MG_HATESHOLY);
+		ptr->mflagsa |= (MA_MINION);
+		break;
+	case INCUBUS_FACTION:
+	case SUCCUBUS_FACTION:
+		/* nothing */
+		break;
+	case PSEUDONATURAL:
+		/* flags */
+		ptr->mflagsa |= (MA_PRIMORDIAL);
+		/* resists: */
+		ptr->mresists |= (MR_POISON);
+		break;
+	case TOMB_HERD:
+		/* flags: */
+		ptr->geno |= (G_NOCORPSE);
+		ptr->mflagsm |= (MM_TENGTPORT);
+		ptr->mflagst |= (MT_HOSTILE);
+		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
+		/* defense: */
+		ptr->nac += 6;
+		/* resists: */
+		ptr->mresists |= (MR_FIRE | MR_COLD | MR_SLEEP | MR_POISON | MR_STONE | MR_DRAIN | MR_SICK | MR_MAGIC);
+		break;
+	case YITH:
+		/* attacks only */
+		break;
+	case CRANIUM_RAT:
+		/* defense: */
+		ptr->dac += 4;
+		break;
+	case MISTWEAVER:
+		/* flags */
+		ptr->mflagsb &= ~(MB_NOHEAD);
+		break;
+	case DELOUSED:
+		/* flags */
+		ptr->mflagsa &= ~(MA_PRIMORDIAL);
+		break;
+	case M_BLACK_WEB:
+		/* attacks only */
+		break;
+	case M_GREAT_WEB:
+		/* attacks only */
+		break;
+	}
+	/* adjust attacks in the permonst */
+	boolean special = FALSE;
+	struct attack * attk;
+	boolean insert;
+	int i, j;
+	for (i = 0; i < NATTK; i++)
+	{
+		attk = &(ptr->mattk[i]);
+		insert = FALSE;
+
+		/* some factions completely skip specific attacks */
+		if (((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
+				(
+				attk->aatyp == AT_SPIT ||
+				attk->aatyp == AT_BREA ||
+				attk->aatyp == AT_GAZE ||
+				attk->aatyp == AT_ARRW ||
+				attk->aatyp == AT_MMGC ||
+				attk->aatyp == AT_TNKR ||
+				attk->aatyp == AT_SRPR ||
+				attk->aatyp == AT_BEAM ||
+				attk->aatyp == AT_MAGC ||
+				(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
+				attk->aatyp == AT_GAZE ||
+				attk->aatyp == AT_WDGZ
+				)) ||
+			((faction == FRACTURED) &&
+				(
+				attk->aatyp == AT_GAZE ||
+				attk->aatyp == AT_WDGZ
+				))
+			)
+		{
+			/* shift all further attacks forwards one slot, and make last one all 0s */
+			extern struct attack noattack;
+			for (j = 0; j < (NATTK - i); j++)
+				attk[j] = attk[j+1];
+			attk[j] = noattack;
+		}
+
+		/* some factions want to adjust existing attacks, or add additional attacks */
+#define insert_okay (!special && (is_null_attk(attk) || (attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp))) && (insert = TRUE))
+#define maybe_insert() if(insert) {for(j=0;j<NATTK-i;j++)attk[j+1]=attk[j];}
+		/* skeletons get a paralyzing touch */
+		if (faction == SKELIFIED && (
+			insert_okay
+			)) 
+		{
+			maybe_insert();
+			attk->aatyp = AT_TUCH;
+			attk->adtyp = AD_SLOW;
+			attk->damn = 1;
+			attk->damd = max(ptr->msize * 2, 4);
+			special = TRUE;
+			
+		}
+		/* vitreans get a cold touch */
+		if (faction == CRYSTALFIED && (
+			insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TUCH;
+			attk->adtyp = AD_ECLD;
+			attk->damn = max(1, min(10, ptr->mlevel / 3));
+			attk->damd = 8;
+			special = TRUE;
+		}
+		/* fractured turn their claws into glass shards */
+		if (faction == FRACTURED && (
+			(attk->aatyp == AT_CLAW && (
+				attk->adtyp == AD_PHYS ||
+				attk->adtyp == AD_SQUE ||
+				attk->adtyp == AD_SAMU
+				))
+			|| insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_CLAW;
+			attk->adtyp = AD_GLSS;
+			attk->damn = max(ptr->mlevel / 10 + 1, attk->damn);
+			attk->damd = max(ptr->msize * 2, max(attk->damd, 4));
+			special = TRUE;
+		}
+		/* vampires' bites are vampiric */
+		if (faction == VAMPIRIC && (
+			(attk->aatyp == AT_BITE)
+			|| insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_BITE;
+			attk->adtyp = AD_VAMP;
+			attk->damn = max(1, attk->damn);
+			attk->damd = max(4, max(ptr->msize * 2, attk->damd));
+			special = TRUE;
+		}
+		/* pseudonatural's bites become int-draining tentacles */
+		if (faction == PSEUDONATURAL && (
+			(attk->aatyp == AT_BITE)
+			|| insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TENT;
+			attk->adtyp = AD_DRIN;
+			attk->damn = 1;
+			attk->damd = 4;
+			special = TRUE;
+		}
+		/* tomb herd's attacks are generally stronger */
+		if (faction == TOMB_HERD && (
+			!is_null_attk(attk))
+			)
+		{
+			if (attk->damn < 3)
+				attk->damd += 2;
+			else
+				attk->damn++;
+		}
+		/* tomb herd also gets an abduction attack */
+		if (faction == TOMB_HERD && (
+			insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TUCH;
+			attk->adtyp = AD_ABDC;
+			attk->damn = 1;
+			attk->damd = 1;
+			special = TRUE;
+		}
+		/* yith gain spellcasting */
+		if (faction == YITH && (
+			insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_MAGC;
+			attk->adtyp = AD_SPEL;
+			attk->damn = 2;
+			attk->damd = 6;
+			special = TRUE;
+		}
+		/* cranium rats gain psionic spellcasting */
+		if (faction == CRANIUM_RAT && (
+			insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_MAGC;
+			attk->adtyp = AD_PSON;
+			attk->damn = 0;
+			attk->damd = 15;
+			special = TRUE;
+		}
+		/* monsters that have mastered the black web gain shadow blades */
+		if (faction == M_BLACK_WEB && (
+			insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_SRPR;
+			attk->adtyp = AD_SHDW;
+			attk->damn = 4;
+			attk->damd = 8;
+			special = TRUE;
+		}
+		if (faction == M_GREAT_WEB && (
+			insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_5SQR;
+			attk->adtyp = AD_SHDW;
+			attk->damn = 8;
+			attk->damd = 8;
+			special = TRUE;
+		}
+	}
+#undef insert_okay
+#undef maybe_insert
+	return ptr;
 }
 
 #endif /* OVLB */
@@ -214,7 +595,7 @@ resists_fire(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (mon->mfaction == TOMB_HERD || species_resists_fire(mon) || mon_resistance(mon, FIRE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Fire_resistance));
+	return (species_resists_fire(mon) || mon_resistance(mon, FIRE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Fire_resistance));
 }
 
 boolean
@@ -224,8 +605,7 @@ resists_cold(mon)
 	if(!mon) return FALSE;
 	
 	return (species_resists_cold(mon) || mon_resistance(mon, COLD_RES) || 
-		(mon->mfaction == VAMPIRIC && mon->m_lev > 10) || 
-		mon->mfaction == TOMB_HERD || mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED || 
+		(mon->mfaction == VAMPIRIC && mon->m_lev > 10) ||  
 		(mon == u.usteed && u.sealsActive&SEAL_BERITH && Cold_resistance));
 }
 
@@ -235,8 +615,7 @@ resists_sleep(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (species_resists_sleep(mon) || mon_resistance(mon, SLEEP_RES) || 
-		mon->mfaction == TOMB_HERD || mon->mfaction == VAMPIRIC || mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || mon->mfaction == CRYSTALFIED || 
+	return (species_resists_sleep(mon) || mon_resistance(mon, SLEEP_RES) ||  
 		((mon) == u.usteed && u.sealsActive&SEAL_BERITH && Sleep_resistance) || (mon)->cham == CHAM_DREAM);
 }
 
@@ -265,9 +644,6 @@ resists_poison(mon)
 	if(!mon) return FALSE;
 	
 	return (species_resists_poison(mon) || mon_resistance(mon, POISON_RES) || 
-		mon->mfaction == PSEUDONATURAL || mon->mfaction == TOMB_HERD || mon->mfaction == VAMPIRIC || 
-		mon->mfaction == ZOMBIFIED || mon->mfaction == SKELIFIED || 
-		mon->mfaction == CRYSTALFIED || 
 		(mon == u.usteed && u.sealsActive&SEAL_BERITH && Poison_resistance));
 }
 
@@ -286,7 +662,7 @@ resists_ston(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (mon->mfaction == TOMB_HERD || species_resists_ston(mon) || mon_resistance(mon, STONE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Stone_resistance));
+	return (species_resists_ston(mon) || mon_resistance(mon, STONE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Stone_resistance));
 }
 
 boolean
@@ -295,7 +671,7 @@ resists_drain(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (mon->mfaction == TOMB_HERD || species_resists_drain(mon) || mon_resistance(mon, DRAIN_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Drain_resistance));
+	return (species_resists_drain(mon) || mon_resistance(mon, DRAIN_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Drain_resistance));
 }
 
 boolean
@@ -304,7 +680,7 @@ resists_sickness(mon)
 {
 	if(!mon) return FALSE;
 	
-	return (mon->mfaction == TOMB_HERD || species_resists_sickness(mon) || mon_resistance(mon, SICK_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Sick_resistance));
+	return (species_resists_sickness(mon) || mon_resistance(mon, SICK_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Sick_resistance));
 }
 
 boolean
@@ -317,7 +693,7 @@ struct monst *mon;
 	ptr = mon->data;
 
 	return (boolean)(is_undead_mon(mon) || is_demon(ptr) || is_were(ptr) ||
-			 mon->mfaction == TOMB_HERD || species_resists_drain(mon) || 
+			 species_resists_drain(mon) || 
 			 ptr->mtyp == PM_DEATH ||
 			 mon_resistance(mon, DRAIN_RES) ||
 			 (mon == u.usteed && u.sealsActive&SEAL_BERITH && Drain_resistance));
@@ -329,7 +705,7 @@ struct monst *mon;
 {
 	if(!mon) return FALSE;
 
-	return (mon->mfaction == TOMB_HERD || species_resists_magic(mon) || mon_resistance(mon, ANTIMAGIC) ||  mon_resistance(mon, NULLMAGIC) ||
+	return (species_resists_magic(mon) || mon_resistance(mon, ANTIMAGIC) ||  mon_resistance(mon, NULLMAGIC) ||
 		(mon == u.usteed && u.sealsActive&SEAL_BERITH && Antimagic));
 }
 
@@ -628,19 +1004,20 @@ int
 monsndx(ptr)		/* return an index into the mons array */
 	struct	permonst	*ptr;
 {
-	register int	i;
-
-	if (ptr == &upermonst) return PM_PLAYERMON;
-
-	i = (int)(ptr - &mons[0]);
-	if (i < LOW_PM || i >= NUMMONS) {
-		/* ought to switch this to use `fmt_ptr' */
-	    panic("monsndx - could not index monster (%lx)",
-		  (unsigned long)ptr);
-	    return NON_PM;		/* will not get here */
-	}
-
-	return(i);
+	return ptr->mtyp;
+	//register int	i;
+	//
+	//if (ptr == &upermonst) return PM_PLAYERMON;
+	//
+	//i = (int)(ptr - &mons[0]);
+	//if (i < LOW_PM || i >= NUMMONS) {
+	//	/* ought to switch this to use `fmt_ptr' */
+	//    panic("monsndx - could not index monster (%lx)",
+	//	  (unsigned long)ptr);
+	//    return NON_PM;		/* will not get here */
+	//}
+	//
+	//return(i);
 }
 
 #endif /* OVL0 */

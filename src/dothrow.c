@@ -601,7 +601,7 @@ quest_arti_hits_leader(obj,mon)
 struct obj *obj;
 struct monst *mon;
 {
-	if(obj->oartifact && is_quest_artifact(obj) && (mon->data == &mons[urole.ldrnum])) return TRUE;
+	if(obj->oartifact && is_quest_artifact(obj) && (mon->mtyp == urole.ldrnum)) return TRUE;
 	else if(Race_if(PM_ELF)){
 		if((obj->oartifact == ART_PALANTIR_OF_WESTERNESSE || obj->oartifact == ART_BELTHRONDING) &&
 			(mon->mtyp == PM_CELEBORN || mon->mtyp == PM_GALADRIEL)

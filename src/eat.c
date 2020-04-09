@@ -3693,7 +3693,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 					if (u.ulycn >= LOW_PM && !Race_if(PM_HUMAN_WEREWOLF)) {
 					You("forget your affinity to %s!",
 							makeplural(mons[u.ulycn].mname));
-					if (youracedata == &mons[u.ulycn])
+					if (youracedata->mtyp == u.ulycn)
 						you_unwere(FALSE);
 					u.ulycn = NON_PM;	/* cure lycanthropy */
 					}

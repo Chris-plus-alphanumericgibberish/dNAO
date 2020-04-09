@@ -924,7 +924,7 @@ boolean chatting;
 	}
 	
 	/* Make sure its your role's quest quardian; adjust if not */
-	if (ptr->msound == MS_GUARDIAN && ptr != &mons[urole.guardnum] && ptr->mtyp != PM_CELEBORN){
+	if (ptr->msound == MS_GUARDIAN && ptr->mtyp != urole.guardnum && ptr->mtyp != PM_CELEBORN){
 		int mndx = monsndx(ptr);
 		ptr = &mons[genus(mndx,1)];
 	}
@@ -960,7 +960,6 @@ boolean chatting;
 		}
 	}
 	switch (
-		(mtmp->mfaction == SKELIFIED && ptr->mtyp != PM_ECHO) ? MS_BONES : 
 		is_silent_mon(mtmp) ? MS_SILENT : 
 		(is_dollable(mtmp->data) && mtmp->m_insight_level) ? MS_STATS : 
 		mtmp->ispriest ? MS_PRIEST : 

@@ -1258,7 +1258,7 @@ int distance;
 		    distu(mtmp->mx, mtmp->my) < distance) {
 		was_peaceful = mtmp->mpeaceful;
 		mtmp->mpeaceful = 1;
-		if(&mons[urole.neminum] == mtmp->data){
+		if(mtmp->mtyp == urole.neminum){
 			mtmp->mpeacetime = max(mtmp->mpeacetime, ACURR(A_DEX));
 			if(mtmp->mpeacetime < 1) mtmp->mpeacetime = 1;
 		}
@@ -1295,7 +1295,7 @@ int distance;
 		    distu(mtmp->mx, mtmp->my) < distance) {
 		mtmp->msleeping = 0;
 		mtmp->mpeaceful = 1;
-		if(&mons[urole.neminum] == mtmp->data){
+		if(mtmp->mtyp == urole.neminum){
 			mtmp->mpeacetime = max(mtmp->mpeacetime, ACURR(A_DEX));
 			if(mtmp->mpeacetime < 1) mtmp->mpeacetime = 1;
 		}

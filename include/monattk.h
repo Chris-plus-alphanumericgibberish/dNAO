@@ -50,6 +50,14 @@
 #define AT_MARI		254	/* uses (i-2)th unwielded weapon in inventory */
 #define AT_MAGC		255	/* uses magic spell(s) */
 
+#define weapon_aatyp(aatyp)	( \
+	(aatyp) == AT_WEAP || \
+	(aatyp) == AT_XWEP || \
+	(aatyp) == AT_MARI || \
+	(aatyp) == AT_DEVA || \
+	(aatyp) == AT_HODS \
+	)
+
 /*	Add new damage types below.
  *
  *	Note that 1-10 correspond to the types of attack used in buzz().

@@ -853,8 +853,8 @@ boolean ranged;
 		 mtmp2->mtyp==PM_GELATINOUS_CUBE && rn2(10)) ||
 		(!ranged &&
 		 max_passive_dmg(mtmp2, mtmp) >= mtmp->mhp) ||
-		((   mtmp2->data == &mons[urole.guardnum]
-		  || mtmp2->data == &mons[urole.ldrnum]
+		((   mtmp2->mtyp == urole.guardnum
+		  || mtmp2->mtyp == urole.ldrnum
 		  || (Role_if(PM_NOBLEMAN) && (mtmp->mtyp == PM_KNIGHT || mtmp->mtyp == PM_MAID || mtmp->mtyp == PM_PEASANT) && mtmp->mpeaceful)
 		  || (Race_if(PM_DROW) && is_drow(mtmp->data) && mtmp->mpeaceful)
 		  || (Role_if(PM_KNIGHT) && (mtmp->mtyp == PM_KNIGHT) && mtmp->mpeaceful)

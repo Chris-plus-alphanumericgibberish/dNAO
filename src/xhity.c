@@ -50,8 +50,8 @@ static const int DjemSo_counterattack[] = {  5, 10, 20 };
 static const int Shien_counterattack[]  = {  5, 10, 20 };
 static const int Soresu_counterattack[] = { 10, 15, 25 };
 /* Misc attacks */
-static struct attack noattack = { 0, 0, 0, 0 };
-static struct attack basicattack  = { AT_WEAP, AD_PHYS, 1, 4 };
+struct attack noattack = { 0, 0, 0, 0 };
+struct attack basicattack  = { AT_WEAP, AD_PHYS, 1, 4 };
 struct attack grapple = { AT_HUGS, AD_PHYS, 0, 6 };	/* for grappler's grasp */
 
 /* getvis()
@@ -1986,170 +1986,15 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		fromlist = FALSE;
 	}
 
-	/* derived undead skip some attacks */
-	if (!youagr && (((
-		magr->mfaction == ZOMBIFIED ||
-		magr->mfaction == SKELIFIED ||
-		magr->mfaction == CRYSTALFIED) && (
-		attk->aatyp == AT_SPIT ||
-		attk->aatyp == AT_BREA ||
-		attk->aatyp == AT_GAZE ||
-		attk->aatyp == AT_ARRW ||
-		attk->aatyp == AT_MMGC ||
-		attk->aatyp == AT_TNKR ||
-		attk->aatyp == AT_SRPR ||
-		attk->aatyp == AT_BEAM ||
-		attk->aatyp == AT_MAGC ||
-		(attk->aatyp == AT_TENT && magr->mfaction == SKELIFIED))
-		) || ((
-		magr->mfaction == FRACTURED) && (
-		attk->aatyp == AT_GAZE ||
-		attk->aatyp == AT_WDGZ)
-		))) {
-		/* just get the next attack */
-		*indexnum += 1;
-		*prev_and_buf = prev_attack;
-		fromlist = TRUE;
-		return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
-	}
-	/* derived undead modify some attacks, and add attacks to the end of their attack chain */
-	if (!youagr) {
-#define ok_undead_subout (!(*subout&SUBOUT_UNDEAD) && (is_null_attk(attk) || (attk->aatyp > AT_HUGS && fromlist)))
-		/* skeletons get a paralyzing touch */
-		if (magr->mfaction == SKELIFIED && ok_undead_subout) {
-			*subout |= SUBOUT_UNDEAD;
-			fromlist = FALSE;
-			attk->aatyp = AT_TUCH;
-			attk->adtyp = AD_SLOW;
-			attk->damn = 1;
-			attk->damd = max(magr->data->msize * 2, 4);
-		}
-		/* vitreans get a cold touch */
-		if (magr->mfaction == CRYSTALFIED && ok_undead_subout) {
-			*subout |= SUBOUT_UNDEAD;
-			fromlist = FALSE;
-			attk->aatyp = AT_TUCH;
-			attk->adtyp = AD_ECLD;
-			attk->damn = min(10, magr->m_lev / 3);
-			attk->damd = 8;
-		}
-		/* vampires' bites become vampiric */
-		if (magr->mfaction == VAMPIRIC && (
-			attk->aatyp == AT_BITE ||
-			ok_undead_subout)
-			){
-			*subout |= SUBOUT_UNDEAD;
-			if (attk->aatyp != AT_BITE)
-				fromlist = FALSE;
-			attk->aatyp = AT_BITE;
-			attk->adtyp = AD_VAMP;
-			attk->damn = max(1, attk->damn);
-			attk->damd = max(4, max(magr->data->msize * 2, attk->damd));
-		}
-		/* fractured's claws become mirror-glass shards */
-		if (magr->mfaction == FRACTURED && (
-			(attk->aatyp == AT_CLAW && (
-			attk->adtyp == AD_PHYS ||
-			attk->adtyp == AD_SQUE ||
-			attk->adtyp == AD_SAMU
-			)) ||
-			ok_undead_subout
-			)) {
-			*subout |= SUBOUT_UNDEAD;
-			if (attk->aatyp != AT_CLAW)
-				fromlist = FALSE;
-			attk->aatyp = AT_CLAW;
-			attk->adtyp = AD_GLSS;
-			attk->damn = max(magr->m_lev / 10 + 1, attk->damn);
-			attk->damd = max(magr->data->msize * 2, max(attk->damd, 4));
-		}
-		/* pseudonatural's bites become int-draining tentacles */
-		if (magr->mfaction == PSEUDONATURAL && (
-			attk->aatyp == AT_BITE ||
-			ok_undead_subout)
-			){
-			*subout |= SUBOUT_UNDEAD;
-			if (attk->aatyp != AT_BITE)
-				fromlist = FALSE;
-			attk->aatyp = AT_TENT;
-			attk->adtyp = AD_DRIN;
-			attk->damn = 1;
-			attk->damd = 4;
-		}
-		/* some pseudonatural's claws become more-damaging tentacles */
-		if (magr->mfaction == PSEUDONATURAL && (
-			attk->aatyp == AT_CLAW && (magr->m_id + *indexnum) % 4 == 0)
-			){
-			attk->aatyp = AT_TENT;
-			if (attk->damn < 3)
-				attk->damd += 2;
-			else
-				attk->damn++;
-		}
-		/* tomb herd's attacks are generally stronger */
-		if (magr->mfaction == TOMB_HERD && (
-			!is_null_attk(attk))
-			){
-			if (attk->damn < 3)
-				attk->damd += 2;
-			else
-				attk->damn++;
-		}
-		/* tomb herd's attacks are generally stronger */
-		if (magr->mfaction == TOMB_HERD && (
-			ok_undead_subout)
-			){
-			*subout |= SUBOUT_UNDEAD;
-			fromlist = FALSE;
-			attk->aatyp = AT_TUCH;
-			attk->adtyp = AD_ABDC;
-			attk->damn = 1;
-			attk->damd = 1;
-		}
-		/* yith gain spellcasting */
-		if (magr->mfaction == YITH && (
-			ok_undead_subout)
-			){
-			*subout |= SUBOUT_UNDEAD;
-			fromlist = FALSE;
-			attk->aatyp = AT_MAGC;
-			attk->adtyp = AD_SPEL;
-			attk->damn = 2;
-			attk->damd = 6;
-		}
-		/* cranium rats gain psionic spellcasting */
-		if (magr->mfaction == CRANIUM_RAT && (
-			ok_undead_subout)
-			){
-			*subout |= SUBOUT_UNDEAD;
-			fromlist = FALSE;
-			attk->aatyp = AT_MAGC;
-			attk->adtyp = AD_PSON;
-			attk->damn = 0;
-			attk->damd = 15;
-		}
-		/* monsters that have mastered the black web gain shadow blades */
-		if (magr->mfaction == M_BLACK_WEB && (
-			ok_undead_subout)
-			){
-			*subout |= SUBOUT_UNDEAD;
-			fromlist = FALSE;
-			attk->aatyp = AT_SRPR;
-			attk->adtyp = AD_SHDW;
-			attk->damn = 4;
-			attk->damd = 8;
-		}
-		if (magr->mfaction == M_GREAT_WEB && (
-			ok_undead_subout)
-			){
-			*subout |= SUBOUT_UNDEAD;
-			fromlist = FALSE;
-			attk->aatyp = AT_5SQR;
-			attk->adtyp = AD_SHDW;
-			attk->damn = 8;
-			attk->damd = 8;
-		}
-#undef ok_undead_subout
+	/* some pseudonatural's claws become more-damaging tentacles */
+	if (!youagr && magr->mfaction == PSEUDONATURAL && (
+		attk->aatyp == AT_CLAW && (magr->m_id + *indexnum) % 4 == 0)
+		){
+		attk->aatyp = AT_TENT;
+		if (attk->damn < 3)
+			attk->damd += 2;
+		else
+			attk->damn++;
 	}
 
 	/* Undead damage multipliers -- note that these must be after actual replacements are done */
@@ -3423,7 +3268,7 @@ int flat_acc;
 	}
 
 	/* weapon accuracy -- only applies for a weapon attack OR a properly-thrown object */
-	if ((attk && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI || attk->aatyp == AT_DEVA || attk->aatyp == AT_HODS))
+	if ((attk && weapon_aatyp(attk->aatyp))
 		|| fired)
 	{
 		if (weapon) {
@@ -3616,8 +3461,7 @@ boolean ranged;
 	char buf[BUFSZ];
 	int result;			/* did attack hit, miss, defender live, die, agressor die, stop? */
 
-	boolean unarmed_punch = ((!weapon || martial_aid(weapon)) &&
-		(attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_DEVA || attk->aatyp == AT_MARI || attk->aatyp == AT_HODS));
+	boolean unarmed_punch = ((!weapon || martial_aid(weapon)) && weapon_aatyp(attk->aatyp));
 
 	int dieroll;				/* rolled accuracy */
 	int accuracy;				/* accuracy of attack; if this is less than dieroll, the attack hits */
@@ -4086,11 +3930,7 @@ boolean ranged;
 		/* else continue on with the grab attack */
 	}
 
-	boolean weaponattk = (attk->aatyp == AT_WEAP ||
-		attk->aatyp == AT_XWEP ||
-		attk->aatyp == AT_DEVA ||
-		attk->aatyp == AT_HODS ||
-		attk->aatyp == AT_MARI);
+	boolean weaponattk = weapon_aatyp(attk->aatyp);
 
 	switch (attk->adtyp)
 	{
@@ -11365,7 +11205,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (/* valid weapon */
 			valid_weapon(weapon) &&
 			/* being used with an attack action, or no attack action (which implies an oddly-launched object, like a falling boulder or something) */
-			(!attk || attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_DEVA || attk->aatyp == AT_MARI || attk->aatyp == AT_HODS) &&
+			(!attk || weapon_aatyp(attk->aatyp)) &&
 			/* isn't a misused launcher */
 			(!is_launcher(weapon) ||
 			weapon->oartifact == ART_LIECLEAVER ||
@@ -11407,7 +11247,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	}
 	else {
 		if (/* being made with an attack action */
-			(attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_DEVA || attk->aatyp == AT_MARI || attk->aatyp == AT_HODS) &&
+			(weapon_aatyp(attk->aatyp)) &&
 			/* not thrown (how could this happen?) */
 			melee)
 			unarmed_punch = TRUE;
@@ -12943,13 +12783,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 
 		/* get resistmask */
-		if (resist_blunt(pd) || (!youdef && (mdef->mfaction == ZOMBIFIED))){
+		if (resist_blunt(pd)){
 			resistmask |= WHACK;
 		}
-		if (resist_pierce(pd) || (!youdef && (mdef->mfaction == ZOMBIFIED || mdef->mfaction == SKELIFIED || mdef->mfaction == CRYSTALFIED))){
+		if (resist_pierce(pd)){
 			resistmask |= PIERCE;
 		}
-		if (resist_slash(pd) || (!youdef && (mdef->mfaction == SKELIFIED || mdef->mfaction == CRYSTALFIED))){
+		if (resist_slash(pd)){
 			resistmask |= SLASH;
 		}
 

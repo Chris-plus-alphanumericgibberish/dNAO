@@ -445,28 +445,28 @@ struct obj *corpse;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				mtmp->mfaction = ZOMBIFIED;
+				set_faction(mtmp, ZOMBIFIED);
 		} else if(u.ugrave_arise == PM_SKELETON){
 			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				mtmp->mfaction = SKELIFIED;
+				set_faction(mtmp, SKELIFIED);
 		} else if(u.ugrave_arise == PM_BAALPHEGOR){
 			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				mtmp->mfaction = CRYSTALFIED;
+				set_faction(mtmp, CRYSTALFIED);
 		} else if(u.ugrave_arise == PM_VAMPIRE){
 			u.ugrave_arise = (u.mfemale && urole.femalenum != NON_PM) ? urole.femalenum : urole.malenum;
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				mtmp->mfaction = VAMPIRIC;
+				set_faction(mtmp, VAMPIRIC);
 		} else {
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);

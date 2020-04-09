@@ -1429,28 +1429,6 @@ generate_list_of_resistances(struct monst * mtmp, char * temp_buf, int resists)
 	unsigned long mg_flags = mtmp->data->mflagsg;
 	if (resists == 1){
 		mr_flags = mtmp->data->mresists;
-		if(mtmp->mfaction == ZOMBIFIED){
-			mr_flags |= MR_COLD | MR_SLEEP | MR_POISON | MR_DRAIN;
-			mg_flags |= MG_RPIERCE | MG_RBLUNT;
-		}
-		if(mtmp->mfaction == SKELIFIED){
-			mr_flags |= MR_COLD | MR_SLEEP | MR_POISON | MR_DRAIN;
-			mg_flags |= MG_RPIERCE | MG_RSLASH;
-		}
-		if(mtmp->mfaction == CRYSTALFIED){
-			mr_flags |= MR_COLD | MR_SLEEP | MR_POISON | MR_DRAIN;
-			mg_flags |= MG_RPIERCE | MG_RSLASH;
-		}
-		if(mtmp->mfaction == VAMPIRIC){
-			mr_flags |= MR_SLEEP | MR_POISON | MR_DRAIN;
-			if(mtmp->m_lev > 10) mr_flags |= MR_COLD;
-		}
-		if(mtmp->mfaction == PSEUDONATURAL){
-			mr_flags |= MR_POISON;
-		}
-		if(mtmp->mfaction == TOMB_HERD){
-			mr_flags |= MR_FIRE|MR_COLD|MR_SLEEP|MR_STONE|MR_DRAIN|MR_POISON|MR_SICK|MR_MAGIC;
-		}
 	}
 	if (resists == 0)
 		mr_flags = mtmp->data->mconveys;
@@ -1545,7 +1523,7 @@ get_weakness_description_of_monster_type(struct monst * mtmp, char * description
 	if (many) {
 		strcat(description, "Weak to ");
 		strcat(description, temp_buf);
-		strcat(description, ".");
+		strcat(description, ". ");
 	}
 	return description;
 }
@@ -1557,7 +1535,7 @@ get_conveys_description_of_monster_type(struct monst * mtmp, char * description)
 	char temp_buf[BUFSZ] = "";
 	temp_buf[0] = '\0';
 	int count = generate_list_of_resistances(mtmp, temp_buf, 0);
-	if ((ptr->geno & G_NOCORPSE) != 0 || mtmp->mfaction == SKELIFIED || mtmp->mfaction == CRYSTALFIED) {
+	if ((ptr->geno & G_NOCORPSE) != 0) {
 		strcat(description, "Leaves no corpse. ");
 	}
 	else if (count == 0) {
@@ -1775,15 +1753,6 @@ char *
 get_speed_description_of_monster_type(struct monst * mtmp, char * description)
 {
 	int speed = mtmp->data->mmove;
-	switch (mtmp->mfaction)
-	{
-	case ZOMBIFIED:
-		speed = max(6, speed * 1/2);
-		break;
-	case SKELIFIED:
-		speed = max(6, speed * 3/4);
-		break;
-	}
 	if (speed > 35) {
 		sprintf(description, "Extremely fast (%d). ", speed);
 	}
@@ -2111,7 +2080,6 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			strcat(description, "Base statistics of this monster type:");
 			strcat(description, "\n");
 			int ac = 10-(ptr->nac+ptr->dac+ptr->pac);
-			ac += (mtmp->mfaction == CRYSTALFIED ? -16 : mtmp->mfaction == SKELIFIED ? -6 : mtmp->mfaction == ZOMBIFIED ? -2 : 0);
 			sprintf(temp_buf, "Base level = %d. Difficulty = %d. AC = %d. MR = %d. Alignment %d. ", ptr->mlevel, monstr[monsndx(ptr)], ac, ptr->mr, ptr->maligntyp);
 			strcat(description, temp_buf);
 			temp_buf[0] = '\0';

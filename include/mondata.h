@@ -106,7 +106,7 @@
 #define nofeet(ptr)			((ptr)->mflagsb & MB_NOFEET)
 #define notake(ptr)		(((ptr)->mflagst & MT_NOTAKE) != 0L)
 #define has_head(ptr)		(((ptr)->mflagsb & MB_NOHEAD) == 0L)
-#define has_head_mon(mon) ((mon)->mfaction == MISTWEAVER || has_head((mon)->data))
+#define has_head_mon(mon) (has_head((mon)->data))
 #define has_horns(ptr)		(num_horns(ptr) > 0)
 #define is_whirly(ptr)		((ptr)->mlet == S_VORTEX || \
 				 (ptr)->mtyp == PM_AIR_ELEMENTAL ||\
@@ -212,10 +212,10 @@
 								 (ptr)->mlet == S_PLANT \
 								)
 #define is_silent(ptr)		((ptr)->msound == MS_SILENT)
-#define is_silent_mon(mon)	(is_silent((mon)->data) || (mon)->mfaction == ZOMBIFIED || (mon)->mfaction == CRYSTALFIED)
+#define is_silent_mon(mon)	(is_silent((mon)->data))
 #define unsolid(ptr)		(((ptr)->mflagsb & MB_UNSOLID) != 0L)
 #define mindless(ptr)		(((ptr)->mflagst & MT_MINDLESS) != 0L || on_level(&valley_level, &u.uz))
-#define mindless_mon(mon)		(mon && (((mon)->mfaction == ZOMBIFIED) || ((mon)->mfaction == SKELIFIED) || ((mon)->mfaction == CRYSTALFIED) || mindless((mon)->data)))
+#define mindless_mon(mon)		(mon && mindless((mon)->data))
 
 #define slithy(ptr)			((ptr)->mflagsb & MB_SLITHY)
 #define humanoid_torso(ptr)	(((ptr)->mflagsb & MB_HUMANOID) != 0)
@@ -255,7 +255,7 @@
 								 (ptr)->mtyp == PM_MASKED_QUEEN \
 								 )
 #define controlledwidegaze(ptr)		(is_angel(ptr) || is_auton(ptr))
-#define controlledwidegaze_mon(mon)		(mon->mfaction == ILLUMINATED || controlledwidegaze((mon)->data))
+#define controlledwidegaze_mon(mon)		(controlledwidegaze((mon)->data))
 #define acidic(ptr)			(((ptr)->mflagsb & MB_ACID) != 0L)
 #define poisonous(ptr)		(((ptr)->mflagsb & MB_POIS) != 0L)
 #define freezing(ptr)		(((ptr)->mflagsb & MB_CHILL) != 0L)
@@ -272,13 +272,13 @@
 							 (ptr)->mtyp == PM_MILITANT_CLERIC ||\
 							 (ptr)->mtyp == PM_HALF_ELF_RANGER)
 #define is_undead(ptr)		(((ptr)->mflagsa & MA_UNDEAD) != 0L)
-#define is_undead_mon(mon)	(mon && (is_undead((mon)->data) || (mon)->mfaction == VAMPIRIC || (mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED || (mon)->mfaction == FRACTURED))
+#define is_undead_mon(mon)	(mon && is_undead((mon)->data))
 #define is_derived_undead_mon(mon)	(mon && ((mon)->mfaction == VAMPIRIC || (mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED || (mon)->mfaction == FRACTURED))
 #define	can_undead_mon(mon)	(mon && !nonliving_mon(mon) && !is_minion((mon)->data) && ((mon)->data->mlet != S_PUDDING) &&\
 								((mon)->data->mlet != S_JELLY) && ((mon)->data->mlet != S_BLOB) && !is_elemental((mon)->data) &&\
 								!is_plant((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data) && !(mvitals[monsndx((mon)->data)].mvflags&G_NOCORPSE))
 #define is_weldproof(ptr)		(is_undead(ptr) || is_demon(ptr) || is_were(ptr))
-#define is_weldproof_mon(mon)		(is_weldproof((mon)->data) || is_derived_undead_mon(mon))
+#define is_weldproof_mon(mon)		(is_weldproof((mon)->data))
 #define is_were(ptr)		(((ptr)->mflagsa & MA_WERE) != 0L)
 #define is_heladrin(ptr)		(\
 							 (ptr)->mtyp == PM_COURE_ELADRIN || \
@@ -476,7 +476,7 @@
 									|| (ptr)->mtyp == PM_MOUTH_OF_THE_GOAT \
 								  )
 #define always_hostile(ptr)	(((ptr)->mflagst & MT_HOSTILE) != 0L)
-#define always_hostile_mon(mon)	(always_hostile((mon)->data) || is_derived_undead_mon(mon))
+#define always_hostile_mon(mon)	(always_hostile((mon)->data))
 #define always_peaceful(ptr)	(((ptr)->mflagst & MT_PEACEFUL) != 0L)
 #define race_hostile(ptr)	(((ptr)->mflagsa & urace.hatemask) != 0L)
 #define race_peaceful(ptr)	(((ptr)->mflagsa & urace.lovemask) != 0L)
@@ -501,10 +501,10 @@
 #define helm_match(ptr,obj)	(((ptr->mflagsb&MB_HEADMODIMASK) == (obj->bodytypeflag&MB_HEADMODIMASK)))
 /*Note: No-modifier helms are "normal"*/
 
-#define hates_holy_mon(mon)	((is_demon((mon)->data) || is_undead_mon(mon) || (((mon)->data->mflagsg&MG_HATESHOLY) != 0)) && (mon)->mfaction != ILLUMINATED)
+#define hates_holy_mon(mon)	(is_demon((mon)->data) || is_undead_mon(mon) || (((mon)->data->mflagsg&MG_HATESHOLY) != 0))
 #define hates_holy(ptr)		(is_demon(ptr) || is_undead(ptr) || (((ptr)->mflagsg&MG_HATESHOLY) != 0))
 #define hates_unholy(ptr)	((ptr->mflagsg&MG_HATESUNHOLY) != 0)
-#define hates_unholy_mon(mon)	((mon)->mfaction == ILLUMINATED || hates_unholy((mon)->data))
+#define hates_unholy_mon(mon)	(hates_unholy((mon)->data))
 #define hates_silver(ptr)	((ptr->mflagsg&MG_HATESSILVER) != 0)
 #define hates_iron(ptr)		((ptr->mflagsg&MG_HATESIRON) != 0)
 
@@ -554,7 +554,7 @@
 
 #define infravision(ptr)	((ptr->mflagsv & MV_INFRAVISION))
 #define infravisible(ptr)	((ptr->mflagsg & MG_INFRAVISIBLE))
-#define infravisible_mon(mon)	(infravisible((mon)->data) && !is_derived_undead_mon(mon))
+#define infravisible_mon(mon)	(infravisible((mon)->data))
 #define bloodsense(ptr)		((ptr->mflagsv & MV_BLOODSENSE))
 #define lifesense(ptr)		((ptr->mflagsv & MV_LIFESENSE))
 #define earthsense(ptr)		((ptr->mflagsv & MV_EARTHSENSE))
@@ -806,7 +806,7 @@
 				   (ptr)->mtyp != PM_GREAT_CTHULHU && \
 				   !is_clockwork(ptr) && \
 				   (!nonliving(ptr) || is_vampire(ptr)))
-#define has_blood_mon(mon)	(has_blood((mon)->data) && !is_derived_undead_mon(mon))
+#define has_blood_mon(mon)	(has_blood((mon)->data))
 
 /* Keep track of ferns, fern sprouts, fern spores, and other plants */
 

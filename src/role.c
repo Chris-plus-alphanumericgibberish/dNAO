@@ -1348,7 +1348,7 @@ god_priest(gptr, sx, sy, sanctum)
 			priest->female = FALSE;
 			if(!sanctum){
 				newcham(priest,PM_DROW_ALIENIST,FALSE,FALSE);
-				priest->mfaction = XAXOX;
+				set_faction(priest, XAXOX);
 			}
 			return priest;
 		}
@@ -1356,7 +1356,7 @@ god_priest(gptr, sx, sy, sanctum)
 			priest->female = FALSE;
 			if(!sanctum){
 				newcham(priest,PM_HEDROW_BLADEMASTER,FALSE,FALSE);
-				priest->mfaction = LOLTH_SYMBOL;
+				set_faction(priest, LOLTH_SYMBOL);
 			}
 			return priest;
 		}
@@ -1364,7 +1364,7 @@ god_priest(gptr, sx, sy, sanctum)
 			priest->female = FALSE;
 			if(!sanctum){
 				newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
-				priest->mfaction = LOLTH_SYMBOL;
+				set_faction(priest, LOLTH_SYMBOL);
 			}
 			return priest;
 		}
@@ -1373,7 +1373,7 @@ god_priest(gptr, sx, sy, sanctum)
 			priest->female = FALSE;
 			if(!sanctum){
 				newcham(priest,PM_HEDROW_WIZARD,FALSE,FALSE);
-				priest->mfaction = LOLTH_SYMBOL;
+				set_faction(priest, LOLTH_SYMBOL);
 			}
 			return priest;
 		}
@@ -1381,7 +1381,7 @@ god_priest(gptr, sx, sy, sanctum)
 			if(!sanctum){
 				if(priest->female) newcham(priest,PM_PRIESTESS_OF_GHAUNADAUR,FALSE,FALSE);
 				else newcham(priest,PM_PRIEST_OF_GHAUNADAUR,FALSE,FALSE);
-				priest->mfaction = GHAUNADAUR_SYMBOL;
+				set_faction(priest, GHAUNADAUR_SYMBOL);
 			}
 			return priest;
 		}

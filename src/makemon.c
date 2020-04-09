@@ -17,7 +17,7 @@ struct monst zeromonst;
    for instance) but is for the priests and monks we use it for... */
 #define quest_mon_represents_role(mptr,role_pm) \
 		(mptr->mlet == S_HUMAN && Role_if(role_pm) && \
-		  (mptr == &mons[urole.ldrnum] || mptr->msound == MS_NEMESIS))
+		  (mptr->mtyp == urole.ldrnum || mptr->msound == MS_NEMESIS))
 
 #ifdef OVL0
 STATIC_DCL boolean FDECL(uncommon, (int));
@@ -602,7 +602,7 @@ register struct monst *mtmp;
 			}
 			else if(mm == PM_GOAT_SPAWN) {
 				if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
-					mtmp->mfaction = MISTWEAVER;
+					set_faction(mtmp, MISTWEAVER);
 				}
 			}
 			else if(mm == PM_DAEMON){
@@ -3794,7 +3794,7 @@ register struct monst *mtmp;
 			(void) mpickobj(mtmp, otmp);
 		} else if(mm == PM_SMALL_GOAT_SPAWN) {
 			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
-				mtmp->mfaction = MISTWEAVER;
+				set_faction(mtmp, MISTWEAVER);
 			}
 		} else if(mm == PM_GNOLL) {
 			switch(rnd(4)){
@@ -4569,7 +4569,7 @@ register struct monst *mtmp;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					if(mtmp->female && u.uinsight > (rnd(10)+rn2(11))){
-						mtmp->mfaction = MISTWEAVER;
+						set_faction(mtmp, MISTWEAVER);
 					} else {
 						otmp = mksobj(WAR_HAT, TRUE, FALSE);
 						otmp->spe = 2;
@@ -4942,7 +4942,7 @@ register struct monst *mtmp;
 					break;
 				}
 			} else if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
-				mtmp->mfaction = MISTWEAVER;
+				set_faction(mtmp, MISTWEAVER);
 			}
 		break;
 	    case S_CENTAUR:
@@ -5005,7 +5005,7 @@ register struct monst *mtmp;
 		}
 		if(ptr->mtyp == PM_FOREST_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR){
 			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
-				mtmp->mfaction = MISTWEAVER;
+				set_faction(mtmp, MISTWEAVER);
 			}
 		}
 		if(ptr->mtyp == PM_MOUNTAIN_CENTAUR){
@@ -6117,7 +6117,7 @@ register struct	monst	*mtmp;
 			(void) mpickobj(mtmp, otmp);
 		} else if(ptr->mtyp == PM_GIANT_GOAT_SPAWN) {
 			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
-				mtmp->mfaction = MISTWEAVER;
+				set_faction(mtmp, MISTWEAVER);
 			}
 		} else if(ptr->mtyp == PM_LURKING_ONE) {
 			int i;
@@ -7491,6 +7491,7 @@ register int	mmflags;
 	mtmp->mcansee = mtmp->mcanhear = mtmp->mcanmove = mtmp->mnotlaugh = TRUE;
 	mtmp->mblinded = mtmp->mfrozen = mtmp->mlaughing = 0;
 	mtmp->mvar1 = mtmp->mvar2 = mtmp->mvar3 = 0;
+	mtmp->mtyp = mndx;
 	set_mon_data(mtmp, mndx, 0);
 	
 	mtmp->mstr = d(3,6);
@@ -7549,10 +7550,9 @@ register int	mmflags;
 		}
 	}
 	
-	if (ptr == &mons[urole.ldrnum])
+	if (ptr->mtyp == urole.ldrnum)
 	    quest_status.leader_m_id = mtmp->m_id;
 	mtmp->mxlth = xlth;
-	mtmp->mtyp = mndx;
 	mtmp->m_lev = adj_lev(ptr);
 	float sanlev = ((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX));
 	mtmp->m_san_level = max(1, (int)(sanlev*100));
@@ -7694,7 +7694,7 @@ register int	mmflags;
 	else if (is_male(ptr)) mtmp->female = FALSE;
 	else mtmp->female = rn2(2);	/* ignored for neuters */
 
-	// if (ptr == &mons[urole.ldrnum])		/* leader knows about portal */
+	// if (ptr->mtyp == urole.ldrnum)		/* leader knows about portal */
 	    // mtmp->mtrapseen |= (1L << (MAGIC_PORTAL-1));
 	// if (ptr->mtyp == PM_OONA)  /* don't trigger statue traps */
 		// mtmp->mtrapseen |= (1L << (STATUE_TRAP-1));
@@ -7702,7 +7702,7 @@ register int	mmflags;
 	    mtmp->mtrapseen = (1L << (PIT - 1)) | (1L << (HOLE - 1));
 	if (In_endgame(&u.uz))  /* know about fire traps here */
 	    mtmp->mtrapseen = (1L << (PIT - 1)) | (1L << (FIRE_TRAP - 1) | (1L << (MAGIC_PORTAL-1)));
-	if (ptr == &mons[urole.ldrnum] || ptr == &mons[urole.guardnum])		/* leader and guards knows about all traps */
+	if (ptr->mtyp == urole.ldrnum || ptr->mtyp == urole.guardnum)		/* leader and guards knows about all traps */
 	    mtmp->mtrapseen |= ~0;
 	mtmp->mtrapseen |= (1L << (STATUE_TRAP-1)); /* all monsters should avoid statue traps */
 
@@ -7721,8 +7721,8 @@ register int	mmflags;
 	   and then unset after this creature's armor is created. */
 	if(is_drow(ptr)){
 		if(!curhouse){
-			if((ptr == &mons[urole.ldrnum] && ptr->mtyp != PM_ECLAVDRA) || 
-				(ptr == &mons[urole.guardnum] && ptr->mtyp != PM_DROW_MATRON_MOTHER && ptr->mtyp != PM_HEDROW_MASTER_WIZARD)
+			if((ptr->mtyp == urole.ldrnum && ptr->mtyp != PM_ECLAVDRA) || 
+				(ptr->mtyp == urole.guardnum && ptr->mtyp != PM_DROW_MATRON_MOTHER && ptr->mtyp != PM_HEDROW_MASTER_WIZARD)
 			){
 				if(Race_if(PM_DROW) && !Role_if(PM_EXILE)) curhouse = u.start_house;
 				else curhouse = LOLTH_SYMBOL;
@@ -7792,9 +7792,9 @@ register int	mmflags;
 			}
 			unsethouse = TRUE;
 		}
-		mtmp->mfaction = curhouse;
-	} else if(!undeadfaction && ((zombiepm >=0 && &mons[zombiepm] == mtmp->data) || (skeletpm >=0 && &mons[skeletpm] == mtmp->data))){
-		if(zombiepm >=0 && &mons[zombiepm] == mtmp->data){
+		set_faction(mtmp, curhouse);
+	} else if(!undeadfaction && ((zombiepm >=0 && mtmp->mtyp == zombiepm) || (skeletpm >=0 && mtmp->mtyp == skeletpm))){
+		if(zombiepm >=0 && mtmp->mtyp == zombiepm){
 			undeadfaction = ZOMBIFIED;
 			unsethouse = TRUE;
 			zombiepm = -1;
@@ -7848,7 +7848,7 @@ register int	mmflags;
 		}
 	}
 	if(undeadfaction){
-		mtmp->mfaction = undeadfaction;
+		set_faction(mtmp, undeadfaction);
 		if(undeadfaction == FRACTURED){
 			mtmp->m_lev += 4;
 			mtmp->mhpmax += d(4, 8);
@@ -8390,14 +8390,14 @@ register int	mmflags;
 			if(mndx == PM_INCUBUS){
 				if(Is_grazzt_level(&u.uz)){
 					if(rn2(2)){
-						mtmp->mfaction = INCUBUS_FACTION;
+						set_faction(mtmp, INCUBUS_FACTION);
 					}
 				}
 			}
 			if(mndx == PM_SUCCUBUS){
 				if(Is_malcanthet_level(&u.uz)){
 					if(rn2(2)){
-						mtmp->mfaction = SUCCUBUS_FACTION;
+						set_faction(mtmp, SUCCUBUS_FACTION);
 					}
 				}
 				else if(In_mordor_quest(&u.uz) 
@@ -8406,7 +8406,7 @@ register int	mmflags;
 					&& !In_mordor_fields(&u.uz)
 					&& in_mklev
 				){
-					mtmp->mfaction = SUCCUBUS_FACTION;
+					set_faction(mtmp, SUCCUBUS_FACTION);
 				}
 			}
 			if(mndx == PM_ANCIENT_OF_DEATH){
@@ -8438,10 +8438,10 @@ register int	mmflags;
 		break;
 	}
 	if(!mtmp->mfaction && is_rat(mtmp->data) && u.uinsight > rn2(INSIGHT_RATE)){
-		mtmp->mfaction = CRANIUM_RAT;
+		set_faction(mtmp, CRANIUM_RAT);
 	}
 	if(!mtmp->mfaction && u.uinsight > rn2(INSIGHT_RATE)){
-		mtmp->mfaction = YITH;
+		set_faction(mtmp, YITH);
 		mtmp->m_lev += 2;
 		mtmp->mhpmax += d(2,8);
 		mtmp->mhp = mtmp->mhpmax;
@@ -9897,7 +9897,7 @@ register struct permonst *ptr;
 		&& (ptr->mtyp == PM_SHOGGOTH || ptr->mtyp == PM_PRIEST_OF_GHAUNADAUR || ptr->mtyp == PM_PRIESTESS_OF_GHAUNADAUR)
 	) return TRUE;
 	
-	if (ptr == &mons[urole.ldrnum] || ptr->msound == MS_GUARDIAN)
+	if (ptr->mtyp == urole.ldrnum || ptr->msound == MS_GUARDIAN)
 		return TRUE;
 	if (ptr->msound == MS_NEMESIS)	return FALSE;
 	
@@ -9975,7 +9975,7 @@ struct monst *mtmp;
 	}
 
 	coaligned = (sgn(mal) == sgn(u.ualign.type));
-	if (mtmp->data == &mons[urole.ldrnum]) {
+	if (mtmp->mtyp == urole.ldrnum) {
 		mtmp->malign = -20;
 	} else if (mal == A_NONE) {
 		if (mtmp->mpeaceful)

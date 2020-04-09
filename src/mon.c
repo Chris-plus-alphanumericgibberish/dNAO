@@ -722,7 +722,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				mon->mfaction = ZOMBIFIED;
+				set_faction(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -736,7 +736,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				mon->mfaction = ZOMBIFIED;
+				set_faction(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -750,7 +750,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				mon->mfaction = ZOMBIFIED;
+				set_faction(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -797,7 +797,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				mon->mfaction = ZOMBIFIED;
+				set_faction(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -811,7 +811,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				mon->mfaction = ZOMBIFIED;
+				set_faction(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -825,7 +825,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				mon->mfaction = ZOMBIFIED;
+				set_faction(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -897,7 +897,7 @@ register struct monst *mtmp;
 				mon->mpeaceful = 1;
 				mon->mcrazed = 1;
 				EDOG(mon)->loyal = TRUE;
-				mon->mfaction = M_GREAT_WEB;
+				set_faction(mon, M_GREAT_WEB);
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
@@ -1132,7 +1132,7 @@ register struct monst *mtmp;
 				mon->female = TRUE;
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				mon->mfaction = ZOMBIFIED;
+				set_faction(mon, ZOMBIFIED);
 			}
 			obj = mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
 			mongone(mon);
@@ -1151,7 +1151,7 @@ register struct monst *mtmp;
 				mon->female = TRUE;
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				mon->mfaction = ZOMBIFIED;
+				set_faction(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -1405,15 +1405,6 @@ mcalcmove(mon)
 struct monst *mon;
 {
     int mmove = mon->data->mmove;
-	
-	if(mon->mfaction == ZOMBIFIED && mmove > 6){
-		mmove = mmove/2;
-		if(mmove < 6) mmove = 6;
-	}
-	if(mon->mfaction == SKELIFIED && mmove > 6){
-		mmove = mmove*3/4;
-		if(mmove < 6) mmove = 6;
-	}
 	
 	if(u.ustuck == mon && mmove < 12 && mon->data->mlet == S_VORTEX){
 		mmove *= 2;
@@ -1838,7 +1829,7 @@ mcalcdistress()
 				tmpm->mpeaceful = mtmp->mpeaceful;
 				if(tmpm->mtame && tmpm->mtame != mtmp->mtame)
 					tmpm->mtame = 0;
-				tmpm->mfaction = CRYSTALFIED;
+				set_faction(tmpm, CRYSTALFIED);
 				newsym(tmpm->mx, tmpm->my);
 				mtmp->mhp += tmpm->mhp;
 			}
@@ -3961,7 +3952,7 @@ struct monst *mtmp;
 			}
 			/* If marked to do so, remve illuminated status */
 			if (!(lifesavers&LSVD_ILU)){
-				mtmp->mfaction = 0;
+				set_faction(mtmp, 0);
 				del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
 				if (emits_light_mon(mtmp))
 					new_light_source(mtmp->mx, mtmp->my, emits_light_mon(mtmp),
@@ -3989,7 +3980,7 @@ struct monst *mtmp;
 				else
 					You_hear("something crack%s!", !is_silent(mtmp->data) ? " with an unearthly scream" : "");
 			}
-			mtmp->mfaction = FRACTURED;
+			set_faction(mtmp, FRACTURED);
 			/* make hostile */
 			mtmp->mtame = 0;
 			mtmp->mpeaceful = 0;
@@ -4155,7 +4146,7 @@ register struct monst *mtmp;
 	if(mtmp->iswiz) wizdead();
 	if(mtmp->data->msound == MS_NEMESIS) nemdead();        
 	//Asc items and crucial bookkeeping
-	if(Race_if(PM_DROW) && !Role_if(PM_NOBLEMAN) && mtmp->data == &mons[urole.neminum] && !flags.made_bell){
+	if(Race_if(PM_DROW) && !Role_if(PM_NOBLEMAN) && mtmp->mtyp == urole.neminum && !flags.made_bell){
 		(void) mksobj_at(BELL_OF_OPENING, mtmp->mx, mtmp->my, TRUE, FALSE);
 		flags.made_bell = TRUE;
 	}
@@ -5918,7 +5909,7 @@ register struct monst *mtmp;
 	/* attacking your own quest leader will anger his or her guardians */
 	if (!flags.mon_moving &&	/* should always be the case here */
 		mtmp->m_id == quest_status.leader_m_id) {
-		// mtmp->data == &mons[quest_info(MS_LEADER)]) {
+		// mtmp->mtyp == quest_info(MS_LEADER) {
 	    struct monst *mon;
 	    struct permonst *q_guardian = &mons[quest_info(MS_GUARDIAN)];
 	    int got_mad = 0;
@@ -6444,7 +6435,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	    if (emits_light(olddata) || mtmp->mfaction == ILLUMINATED)
 			del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
 		if(olddata->mtyp == PM_MASKED_QUEEN)
-			mtmp->mfaction = ILLUMINATED;
+			set_faction(mtmp, ILLUMINATED);
 	    if (emits_light_mon(mtmp))
 		new_light_source(mtmp->mx, mtmp->my, emits_light_mon(mtmp),
 				 LS_MONSTER, (genericptr_t)mtmp);

@@ -240,7 +240,7 @@ do_present_ring(obj)
 						((tm->mfaction == u.start_house || allied_faction(tm->mfaction,u.start_house)) && 
 							obj->oward == EDDER_SYMBOL && !(tm->female))
 					){
-						if(is_drow(tm->data)) tm->mfaction = EDDER_SYMBOL;
+						if(is_drow(tm->data)) set_faction(tm, EDDER_SYMBOL);
 						tm->housealert = 1;
 						tm->mpeaceful = 1;
 					} else if(is_drow(tm->data) && !(obj->oward == tm->mfaction || allied_faction(obj->oward, tm->mfaction)) && mtmp->female){
@@ -1018,12 +1018,6 @@ struct obj *obj;
 					ward_at(mtmp->mx,mtmp->my) != HAMSA) {
 		if (mon_reflects(mtmp, "The gaze is reflected away by %s %s!"))
 			return 1;
-		if(mtmp->mfaction != FRACTURED || !rn2(8)){
-			if (vis)
-				pline("%s is turned to stone!", Monnam(mtmp));
-			stoned = TRUE;
-			killed(mtmp);
-		}
 	} else if(!mtmp->mcan && !mtmp->minvis &&
 					mtmp->mtyp == PM_FLOATING_EYE && 
 					ward_at(mtmp->mx,mtmp->my) != HAMSA) {
@@ -3296,7 +3290,7 @@ struct obj *hypo;
 					if (u.ulycn >= LOW_PM && !Race_if(PM_HUMAN_WEREWOLF)) {
 					You("forget your affinity to %s!",
 							makeplural(mons[u.ulycn].mname));
-					if (youmonst.data == &mons[u.ulycn])
+					if (youmonst.data->mtyp == u.ulycn)
 						you_unwere(FALSE);
 					u.ulycn = NON_PM;	/* cure lycanthropy */
 					}

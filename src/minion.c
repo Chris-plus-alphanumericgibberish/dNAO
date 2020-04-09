@@ -188,7 +188,7 @@ boolean talk;
 			int faction = god_faction(gptr);
 			struct obj *otmp;
 
-			mon->mfaction = faction;
+			set_faction(mon, faction);
 			
 			for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
 				if(otmp->otyp == find_signet_ring() || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == NOBLE_S_DRESS){
@@ -198,7 +198,7 @@ boolean talk;
 		}
 		
 		if(gptr == DreadFracture && mon->mfaction != FRACTURED){
-			mon->mfaction = FRACTURED;
+			set_faction(mon, FRACTURED);
 			mon->m_lev += 4;
 			mon->mhpmax = d(mon->m_lev, 8);
 			mon->mhp = mon->mhpmax;

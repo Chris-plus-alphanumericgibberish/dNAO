@@ -1187,7 +1187,7 @@ int enhanced;
 	struct monst *mtmp2, *curmon, *weakdog = (struct monst *) 0;
 	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. || mtmp->mtyp == PM_MEDUSA */
 	if (is_untamable(mtmp->data) || mtmp->notame || mtmp->iswiz
-		|| (&mons[urole.neminum] == mtmp->data)
+		|| (mtmp->mtyp == urole.neminum)
 	) return((struct monst *)0);
 
 	/* worst case, at least it'll be peaceful. */
@@ -1278,7 +1278,7 @@ int enhanced;
 	if (mtmp->mtame || (!mtmp->mcanmove && !mtmp->moccupation) ||
 	    /* monsters with conflicting structures cannot be tamed */
 	    mtmp->isshk || mtmp->isgd || mtmp->ispriest || mtmp->isminion ||
-	    mtmp->data == &mons[urole.neminum] ||
+	    mtmp->mtyp == urole.neminum ||
 	    (!enhanced && is_demon(mtmp->data) && !is_demon(youracedata)) ||
 	    (obj
 			&& !is_instrument(obj) && obj->otyp != DOLL_OF_FRIENDSHIP 

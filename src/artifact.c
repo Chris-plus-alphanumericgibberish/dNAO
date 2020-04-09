@@ -1350,7 +1350,7 @@ touch_artifact(obj, mon, hypothetical)
 	} else if (!is_covetous(mon->data) && !is_mplayer(mon->data)) {
 		if(oart->otyp != UNICORN_HORN){
 			badclass = self_willed &&
-				   ((oart->role != NON_PM && &mons[oart->role] != mon->data && 
+				   ((oart->role != NON_PM && mon->mtyp != oart->role && 
 				   !(oart == &artilist[ART_EXCALIBUR] || oart == &artilist[ART_CLARENT]))
 				   ||
 				   (oart->race != NON_PM && ((mons[oart->race].mflagsa & mon->data->mflagsa) == 0)));
@@ -5957,7 +5957,7 @@ arti_invoke(obj)
 			mtmp = tamedog(mtmp, (struct obj *) 0);
 			
 			if (mtmp->mtyp != PM_SKELETON)
-				mtmp->mfaction = SKELIFIED;
+				set_faction(mtmp, SKELIFIED);
 
 			if (onfloor) useupf(corpse, 1);
 			else useup(corpse);
@@ -9470,7 +9470,7 @@ mind_blast_items()
 		// if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe)){
 			mtmp = animate_statue(obj, obj->ox, obj->oy, ANIMATE_NORMAL, (int *) 0);
 			if(mtmp){
-				mtmp->mfaction = TOMB_HERD;
+				set_faction(mtmp, TOMB_HERD);
 				mtmp->m_lev += 4;
 				mtmp->mhpmax += d(4, 8);
 				mtmp->mhp = mtmp->mhpmax;
@@ -9662,7 +9662,7 @@ struct monst *mon;
 			if((otmp->wrathdata >> 2) == PM_MIND_FLAYER)
 				return 1;
 		} else {
-			if(&mons[(otmp->wrathdata >> 2)] == mon->data)
+			if((otmp->wrathdata >> 2) == mon->mtyp)
 				return 1;
 			
 			if(mons[(otmp->wrathdata >> 2)].mflagsa && 
