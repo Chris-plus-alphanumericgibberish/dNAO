@@ -1596,17 +1596,16 @@ int * indexnum;					/* index number to use, incremented HERE (if actually pullin
 struct attack * prev_and_buf;	/* double-duty pointer: 1st, is the previous attack; 2nd, is a pointer to allocated memory */
 boolean by_the_book;			/* if true, gives the "standard" attacks for [magr]. Useful for the pokedex. */
 int * subout;					/* records what attacks have been subbed out */
-#define SUBOUT_UNDEAD	0x0001	/* derived undead special attack */
-#define SUBOUT_SPELLS	0x0002	/* Spellcasting attack instead (Five Fiends of Chaos1 and Gae) */
-#define SUBOUT_BAEL1	0x0004	/* Bael's Sword Archon attack chain */
-#define SUBOUT_BAEL2	0x0008	/* Bael's marilith-hands attack chain */
-#define SUBOUT_SPIRITS	0x0010	/* Player's bound spirits */
-#define SUBOUT_BARB1	0x0020	/* 1st bit of barbarian bonus attacks */
-#define SUBOUT_BARB2	0x0040	/* 2nd bit of barbarian bonus attacks, must directly precede the 1st bit */
-#define SUBOUT_MAINWEPB	0x0080	/* Bonus attack caused by the wielded *mainhand* weapon */
-#define SUBOUT_XWEP		0x0100	/* when giving additional attacks, whether or not to use AT_XWEP or AT_WEAP this call */
-#define SUBOUT_GOATSPWN	0x0200	/* Goat spawn: seduction */
-#define SUBOUT_GRAPPLE	0x0400	/* Grappler's Grasp crushing damage */
+#define SUBOUT_SPELLS	0x0001	/* Spellcasting attack instead (Five Fiends of Chaos1 and Gae) */
+#define SUBOUT_BAEL1	0x0002	/* Bael's Sword Archon attack chain */
+#define SUBOUT_BAEL2	0x0004	/* Bael's marilith-hands attack chain */
+#define SUBOUT_SPIRITS	0x0008	/* Player's bound spirits */
+#define SUBOUT_BARB1	0x0010	/* 1st bit of barbarian bonus attacks */
+#define SUBOUT_BARB2	0x0020	/* 2nd bit of barbarian bonus attacks, must directly precede the 1st bit */
+#define SUBOUT_MAINWEPB	0x0040	/* Bonus attack caused by the wielded *mainhand* weapon */
+#define SUBOUT_XWEP		0x0080	/* when giving additional attacks, whether or not to use AT_XWEP or AT_WEAP this call */
+#define SUBOUT_GOATSPWN	0x0100	/* Goat spawn: seduction */
+#define SUBOUT_GRAPPLE	0x0200	/* Grappler's Grasp crushing damage */
 int * tohitmod;					/* some attacks are made with decreased accuracy */
 {
 	struct attack * attk;
@@ -2055,7 +2054,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	return attk;
 }
-#undef SUBOUT_UNDEAD
 #undef SUBOUT_SPELLS
 #undef SUBOUT_BAEL1
 #undef SUBOUT_BAEL2
