@@ -344,7 +344,7 @@ int faction;
 
 		/* some factions want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || (attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp))) && (insert = TRUE))
-#define maybe_insert() if(insert) {for(j=0;j<NATTK-i;j++)attk[j+1]=attk[j];}
+#define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];}
 		/* skeletons get a paralyzing touch */
 		if (faction == SKELIFIED && (
 			insert_okay
