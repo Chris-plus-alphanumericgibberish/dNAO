@@ -255,7 +255,7 @@
 								 (ptr)->mtyp == PM_MASKED_QUEEN \
 								 )
 #define controlledwidegaze(ptr)		(is_angel(ptr) || is_auton(ptr))
-#define controlledwidegaze_mon(mon)		(controlledwidegaze((mon)->data))
+#define controlledwidegaze_mon(mon)		(controlledwidegaze((mon)->data) || (mon)->mfaction == ILLUMINATED)
 #define acidic(ptr)			(((ptr)->mflagsb & MB_ACID) != 0L)
 #define poisonous(ptr)		(((ptr)->mflagsb & MB_POIS) != 0L)
 #define freezing(ptr)		(((ptr)->mflagsb & MB_CHILL) != 0L)
