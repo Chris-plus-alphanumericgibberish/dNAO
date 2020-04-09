@@ -275,7 +275,7 @@ boolean ghostly;
 			mtmp->m_id = nid;
 		}
 		if (mtmp->data) {
-			set_mon_data(mtmp, mtmp->mtyp, 0);
+			set_mon_data(mtmp, mtmp->mtyp);
 		}
 		if (ghostly) {
 			int mndx = monsndx(mtmp->data);

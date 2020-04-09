@@ -7492,7 +7492,7 @@ register int	mmflags;
 	mtmp->mblinded = mtmp->mfrozen = mtmp->mlaughing = 0;
 	mtmp->mvar1 = mtmp->mvar2 = mtmp->mvar3 = 0;
 	mtmp->mtyp = mndx;
-	set_mon_data(mtmp, mndx, 0);
+	set_mon_data(mtmp, mndx);
 	
 	mtmp->mstr = d(3,6);
 	if(strongmonst(mtmp->data)) mtmp->mstr += 10;
@@ -9633,11 +9633,11 @@ struct monst *mtmp, *victim;
 		    pline("As %s grows up into %s, %s %s!", mon_nam(mtmp),
 			an(ptr->mname), mhe(mtmp),
 			nonliving_mon(mtmp) ? "expires" : "dies");
-		set_mon_data(mtmp, newtype, -1);	/* keep mvitals[] accurate */
+		set_mon_data(mtmp, newtype);	/* keep mvitals[] accurate */
 		mondied(mtmp);
 		return (struct permonst *)0;
 	    }
-		set_mon_data(mtmp, newtype, 1);	/* preserve intrinsics */
+		set_mon_data(mtmp, newtype);	/* preserve intrinsics */
 	    newsym(mtmp->mx, mtmp->my);		/* color may change */
 	    lev_limit = (int)mtmp->m_lev;	/* never undo increment */
 		if(newtype == PM_METROID_QUEEN && mtmp->mtame){

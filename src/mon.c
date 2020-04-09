@@ -4002,7 +4002,7 @@ struct monst *mtmp;
 				pline("%s tears off the right half of %s face before rising through the ceiling!", nyar_name[nyar_form], s_suffix(Monnam(mtmp)));
 				change_usanity(u_sanity_loss_nyar());
 			}
-			set_mon_data(mtmp, PM_GHOUL_QUEEN_NITOCRIS, 0);
+			set_mon_data(mtmp, PM_GHOUL_QUEEN_NITOCRIS);
 			//Surprisingly, this is an effective means of life saving!
 			break;
 		}
@@ -4072,15 +4072,15 @@ register struct monst *mtmp;
 	mptr = mtmp->data;		/* save this for m_detach() */
 	/* restore chameleon, lycanthropes to true form at death */
 	if (mtmp->cham)
-		set_mon_data(mtmp, cham_to_pm[mtmp->cham], -1);
+		set_mon_data(mtmp, cham_to_pm[mtmp->cham]);
 	else if (mtmp->mtyp == PM_WEREJACKAL)
-		set_mon_data(mtmp, PM_HUMAN_WEREJACKAL, -1);
+		set_mon_data(mtmp, PM_HUMAN_WEREJACKAL);
 	else if (mtmp->mtyp == PM_WEREWOLF)
-		set_mon_data(mtmp, PM_HUMAN_WEREWOLF, -1);
+		set_mon_data(mtmp, PM_HUMAN_WEREWOLF);
 	else if (mtmp->mtyp == PM_WERERAT)
-		set_mon_data(mtmp, PM_HUMAN_WERERAT, -1);
+		set_mon_data(mtmp, PM_HUMAN_WERERAT);
 	else if (mtmp->mtyp == PM_ANUBAN_JACKAL)
-		set_mon_data(mtmp, PM_ANUBITE, -1);
+		set_mon_data(mtmp, PM_ANUBITE);
 
 	if(mtmp->mtyp == PM_WITCH_S_FAMILIAR){
 		dead_familiar(mtmp->mvar_witchID);
@@ -4549,7 +4549,7 @@ boolean was_swallowed;			/* digestion */
 				mdat1 = mtmp->data;
 //				if(mdat1->mtyp==PM_QUINON) quincount++;
 				if(mdat1->mtyp==PM_QUATON && quin){
-					set_mon_data(mtmp, PM_QUINON, 0);
+					set_mon_data(mtmp, PM_QUINON);
 					mtmp->m_lev += 1;
 					mtmp->mhp += 4;
 					mtmp->mhpmax += 4;
@@ -4558,7 +4558,7 @@ boolean was_swallowed;			/* digestion */
 //					quincount++;
 				}
 				else if(mdat1->mtyp==PM_TRITON && qua){
-					set_mon_data(mtmp, PM_QUATON, 0);
+					set_mon_data(mtmp, PM_QUATON);
 					mtmp->m_lev += 1;
 					mtmp->mhp += 4;
 					mtmp->mhpmax += 4;
@@ -4566,7 +4566,7 @@ boolean was_swallowed;			/* digestion */
 					qua--;
 				}
 				else if(mdat1->mtyp==PM_DUTON && tre){
-					set_mon_data(mtmp, PM_TRITON, 0);
+					set_mon_data(mtmp, PM_TRITON);
 					mtmp->m_lev += 1;
 					mtmp->mhp += 4;
 					mtmp->mhpmax += 4;
@@ -4574,7 +4574,7 @@ boolean was_swallowed;			/* digestion */
 					tre--;
 				}
 				else if(mdat1->mtyp==PM_MONOTON && duo){
-					set_mon_data(mtmp, PM_DUTON, 0);
+					set_mon_data(mtmp, PM_DUTON);
 					mtmp->m_lev += 1;
 					mtmp->mhp += 4;
 					mtmp->mhpmax += 4;
@@ -4608,7 +4608,7 @@ boolean was_swallowed;			/* digestion */
 					if (DEADMONSTER(mtmp))
 						continue;
 					if (mtmp->mtyp == current_ton-1) {
-						set_mon_data(mtmp, current_ton, 0);
+						set_mon_data(mtmp, current_ton);
 						//Assumes Auton
 						mtmp->m_lev += 1;
 						mtmp->mhp += 4;
@@ -6425,7 +6425,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		if (!mtmp->mhpmax) mtmp->mhpmax = 1;
 	} //else just take on new form I think....
 	/* take on the new form... */
-	set_mon_data(mtmp, mtyp, 0);
+	set_mon_data(mtmp, mtyp);
 
 	if (emits_light(olddata) != emits_light_mon(mtmp)
 		|| olddata->mtyp == PM_MASKED_QUEEN

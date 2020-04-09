@@ -1237,11 +1237,11 @@ moveloop()
 				}
 				
 				if(mtmp->mtyp == PM_DEEPEST_ONE && !mtmp->female && u.uevent.ukilled_dagon){
-					set_mon_data(mtmp, PM_FATHER_DAGON, 0);
+					set_mon_data(mtmp, PM_FATHER_DAGON);
 					u.uevent.ukilled_dagon = 0;
 				}
 				if(mtmp->mtyp == PM_DEEPEST_ONE && mtmp->female && u.uevent.ukilled_hydra){
-					set_mon_data(mtmp, PM_MOTHER_HYDRA, 0);
+					set_mon_data(mtmp, PM_MOTHER_HYDRA);
 					u.uevent.ukilled_hydra = 0;
 				}
 				if(mtmp->mtyp == PM_GOLD_GOLEM){
@@ -1251,7 +1251,7 @@ moveloop()
 							pline("%s blossoms into a swirl of mirrored arcs!", Monnam(mtmp));
 							You("see the image of %s reflected in the golden mirrors!", an(mons[PM_ARA_KAMEREL].mname));
 						}
-						set_mon_data(mtmp, PM_ARA_KAMEREL, 0);
+						set_mon_data(mtmp, PM_ARA_KAMEREL);
 						mtmp->m_lev = 15;
 						mtmp->mhpmax = d(15, 8);
 						mtmp->mhp = mtmp->mhpmax;

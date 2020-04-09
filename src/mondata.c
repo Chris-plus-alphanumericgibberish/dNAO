@@ -24,17 +24,11 @@ id_permonst()
 
 /*
  * safely sets mon->data
- * 
- * flag:
- *  -1 - do nothing except set mon->data -- will not update intrinsics at all
- *   0 - replace current data, intrinsics
- *   1 - replace mtyp, add new intrinsics, but don't remove old intrinsics
  */
 void
-set_mon_data(mon, mtyp, flag)
+set_mon_data(mon, mtyp)
 struct monst *mon;
 int mtyp;
-int flag;
 {
 	int i;
 	struct permonst * ptr;
@@ -48,67 +42,59 @@ int flag;
 	}
 
 	mon->mtyp = mtyp;
-    if (flag == -1) return;		/* "don't care" */
 
 	/* resistances */
-    if (flag == 1)
-		mon->mintrinsics[0] |= (ptr->mresists & MR_MASK);
-    else
-		mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
-	if(is_half_dragon(ptr) && (mon->mvar_hdBreath == 0 || flag != 1)){
+	mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
+	if(is_half_dragon(ptr)){
 		/*
 			Store half dragon breath type in mvar_hdBreath
 		*/
 		if(is_half_dragon(ptr)){
-			switch(rnd(6)){
-				case 1:
-					mon->mvar_hdBreath = AD_COLD;
+			static const int half_dragon_types[] = { AD_COLD, AD_FIRE, AD_SLEE, AD_ELEC, AD_DRST, AD_ACID };
+			if (!mon->mvar_hdBreath)
+				mon->mvar_hdBreath = half_dragon_types[rn2(6)];
+			switch (mon->mvar_hdBreath){
+				case AD_COLD:
 					mon->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
 				break;
-				case 2:
-					mon->mvar_hdBreath = AD_FIRE;
+				case AD_FIRE:
 					mon->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
 				break;
-				case 3:
-					mon->mvar_hdBreath = AD_SLEE;
+				case AD_SLEE:
 					mon->mintrinsics[(SLEEP_RES-1)/32] |= (1 << (SLEEP_RES-1)%32);
 				break;
-				case 4:
-					mon->mvar_hdBreath = AD_ELEC;
+				case AD_ELEC:
 					mon->mintrinsics[(SHOCK_RES-1)/32] |= (1 << (SHOCK_RES-1)%32);
 				break;
-				case 5:
-					mon->mvar_hdBreath = AD_DRST;
+				case AD_DRST:
 					mon->mintrinsics[(POISON_RES-1)/32] |= (1 << (POISON_RES-1)%32);
 				break;
-				case 6:
-					mon->mvar_hdBreath = AD_ACID;
+				case AD_ACID:
 					mon->mintrinsics[(ACID_RES-1)/32] |= (1 << (ACID_RES-1)%32);
 				break;
 			}
 		} else if(is_boreal_dragoon(ptr)){
-			switch(rnd(4)){
-				case 1:
-					mon->mvar_hdBreath = AD_COLD;
+			static const int boreal_dragon_types[] = { AD_COLD, AD_FIRE, AD_MAGM, AD_PHYS };
+			if (!mon->mvar_hdBreath)
+				mon->mvar_hdBreath = boreal_dragon_types[rn2(4)];
+			switch (mon->mvar_hdBreath){
+				case AD_COLD:
 					mon->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
 				break;
-				case 2:
-					mon->mvar_hdBreath = AD_FIRE;
+				case AD_FIRE:
 					mon->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
 				break;
-				case 3:
-					mon->mvar_hdBreath = AD_MAGM;
+				case AD_MAGM:
 					mon->mintrinsics[(ANTIMAGIC-1)/32] |= (1 << (ANTIMAGIC-1)%32);
 				break;
-				case 4:
-					mon->mvar_hdBreath = AD_PHYS;
+				case AD_PHYS:
 				break;
 			}
 		}
 	}
 #define set_mintrinsic(ptr_condition, intrinsic) \
-	if ((ptr_condition)) { mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
-	else if (flag != 1)  { mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32); }
+	if ((ptr_condition))	{ mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
+	else					{ mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32); }
 
 	/* other intrinsics */
 	set_mintrinsic(species_flies(mon->data), FLYING);
@@ -131,7 +117,7 @@ struct monst * mtmp;
 int faction;
 {
 	mtmp->mfaction = faction;
-	set_mon_data(mtmp, mtmp->mtyp, 0);
+	set_mon_data(mtmp, mtmp->mtyp);
 	return;
 }
 

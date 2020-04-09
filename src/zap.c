@@ -588,7 +588,7 @@ coord *cc;
 	if (obj->oxlth && (obj->oattached == OATTACHED_MONST))
 		mtmp2 = get_mtraits(obj, TRUE);
 	if (mtmp2) {
-		set_mon_data(mtmp2, mtmp2->mtyp, 0);
+		set_mon_data(mtmp2, mtmp2->mtyp);
 		if (mtmp2->mhpmax <= 0 && !is_rider(mtmp2->data))
 			return (struct monst *)0;
 		mtmp = makemon(mtmp2->data,

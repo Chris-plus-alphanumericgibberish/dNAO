@@ -68,7 +68,7 @@ init_uasmon()
 void
 set_uasmon()
 {
-	set_mon_data(&youmonst, u.umonnum, 0);
+	set_mon_data(&youmonst, u.umonnum);
 }
 
 /** Returns true if the player monster is genocided. */
