@@ -303,6 +303,7 @@ int faction;
 		break;
 	}
 	/* adjust attacks in the permonst */
+	extern struct attack noattack;
 	boolean special = FALSE;
 	struct attack * attk;
 	boolean insert;
@@ -336,7 +337,6 @@ int faction;
 			)
 		{
 			/* shift all further attacks forwards one slot, and make last one all 0s */
-			extern struct attack noattack;
 			for (j = 0; j < (NATTK - i); j++)
 				attk[j] = attk[j+1];
 			attk[j] = noattack;
@@ -344,7 +344,7 @@ int faction;
 
 		/* some factions want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || (attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp))) && (insert = TRUE))
-#define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];}
+#define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;}
 		/* skeletons get a paralyzing touch */
 		if (faction == SKELIFIED && (
 			insert_okay
