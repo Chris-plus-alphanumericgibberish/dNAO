@@ -1295,7 +1295,7 @@ do_dungeon()
 			perror(filename);
 			exit(EXIT_FAILURE);
 		}
-		Fprintf(ofp,Dont_Edit_Data);
+		Fprintf(ofp,"%s",Dont_Edit_Data);
 
 		while (fgets(in_line, sizeof in_line, ifp) != 0) {
 			SpinCursor(3);

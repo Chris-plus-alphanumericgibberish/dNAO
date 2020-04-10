@@ -1868,7 +1868,7 @@ u_init()
 	u.ukrau = 0;
 	u.ukrau_duration = 0;
 	u.uhoon = 0;
-	u.uhoon_duration,
+	u.uhoon_duration = 0;
 	u.uuur = 0;
 	u.uuur_duration = 0;
 	u.unaen = 0;
@@ -2920,7 +2920,7 @@ u_init()
 			case AT_GAZE:
 				attkptr->adtyp = get_random_of(randGazeDamageTypes);
 				if (!rn2(4)) {
-					attkptr->aatyp == AT_WDGZ;	/* hahahaha */
+					attkptr->aatyp = AT_WDGZ;	/* hahahaha */
 					attkptr->damn = rnd(3);			/* reduce to 1-3 */
 					attkptr->damd = rn2(3) * 2 + 4;	/* reduce to 4-8 by 2s */
 				}

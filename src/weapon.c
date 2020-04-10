@@ -763,8 +763,7 @@ boolean youdefend;		// required for lucky dice
 		}
 		else
 		{//assumed to be lucky dice, which at this time don't have a nice NdX function
-			int n = wdie->damn;
-			for (n; n; n--)
+			for (int n = wdie->damn; n; n--)
 			{
 				tmp += youdefend ?
 					(rnl(wdie->damd) + 1) :

@@ -1503,7 +1503,7 @@ roll_av_frigophobia()
 	}
 }
 
-int
+void
 give_madness(mon)
 struct monst *mon;
 {

@@ -1155,7 +1155,7 @@ struct obj * weapon;
 		(!weapon)
 		&&
 		/* slots aren't covered */
-		(!slot || (slot != ~0L) && (
+		((!slot || (slot != ~0L)) && (
 		/* player */
 		(youagr && (
 		((slot & W_ARM) && !uarm) ||

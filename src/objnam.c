@@ -1049,7 +1049,7 @@ boolean adjective;
 			return "brass";
 		/* instruments, copper ring, copper wand */
 		else if (is_instrument(obj)
-			|| (s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "copper", 6))
+			|| ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "copper", 6)))
 			return "copper";
 		else
 			return "bronze";

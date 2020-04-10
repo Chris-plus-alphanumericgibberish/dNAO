@@ -4629,6 +4629,7 @@ use_doll(obj)
 		default:
 		break;
 	}
+	return res;
 }
 
 boolean
