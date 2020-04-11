@@ -929,6 +929,7 @@ register struct monst *mtmp;
 						case 2:
 							otmp = mksobj(CORPSE,TRUE,FALSE);
 							otmp->corpsenm = PM_LICHEN;
+							fix_object(otmp);
 							(void) mpickobj(mtmp, otmp);
 						break;
 						case 3:
