@@ -12852,7 +12852,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	worm's bite attack to kill a shrieker because then it
 	won't swallow the corpse; but if the target survives,
 	the subsequent engulf attack should accomplish that */
-	if (!youdef && !youagr &&
+	if (magr && melee && !youdef && !youagr &&
 		pa->mtyp == PM_PURPLE_WORM &&
 		pd->mtyp == PM_SHRIEKER &&
 		(subtotl > *hp(mdef)))
