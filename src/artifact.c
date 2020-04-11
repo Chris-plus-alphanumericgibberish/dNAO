@@ -3877,35 +3877,35 @@ boolean * messaged;
 	/* vorpal weapons */
 	if (arti_attack_prop(otmp, ARTA_VORPAL) || (oproperties&OPROP_VORPW)) {
 		char buf[BUFSZ];
-		/* We really want "on a natural 20" but Nethack does it in */
-		/* reverse from AD&D. */
-		static const char * const behead_msg[2] = {
-			"%s beheads %s!",
-			"%s decapitates %s!"
-		};
-		static const char * const heart_msg[2] = {
-			"%s pierces %s heart!",
-			"%s punctures %s heart!"
-		};
+		int vorpaldamage = (basedmg * 12) + d(3, 20);
+		int method = 0;
+#define VORPAL_BEHEAD	1
+#define VORPAL_BISECT	2
+#define VORPAL_PIERCE	3
+#define VORPAL_SMASH	4
+#define VORPAL_IGNITE	5
+#define VORPAL_SHEAR	6
 
-		boolean bisect = FALSE;
-		boolean behead = FALSE;
-		boolean pierce = FALSE;
-		boolean smash  = FALSE;
-		boolean ignite = FALSE;
 		switch (oartifact) {
 		case ART_TSURUGI_OF_MURAMASA:
 			wepdesc = "razor-sharp blade";
 			if (dieroll == 1)
-				bisect = TRUE;
+				method = VORPAL_BISECT;
 			break;
 		case ART_KUSANAGI_NO_TSURUGI:
 			wepdesc = "razor-sharp blade";
+			vorpaldamage *= 2;	/* very very lethal */
 			if (dieroll <= 2) {
-				if (bigmonst(pd) && has_head_mon(mdef) && !(youagr && u.uswallow))
-					behead = TRUE;
+				if (bigmonst(pd) && has_head_mon(mdef) && !(youagr && u.uswallow)) {
+					if (noncorporeal(pd) || amorphous(pd)) {
+						method = VORPAL_SHEAR;
+						wepdesc = "shearing wind";
+					}
+					else
+						method = VORPAL_BEHEAD;
+				}
 				else
-					bisect = TRUE;
+					method = VORPAL_BISECT;
 			}
 			break;
 		case ART_LIFEHUNT_SCYTHE:
@@ -3914,7 +3914,7 @@ boolean * messaged;
 				if (has_head_mon(mdef) && lifehunt_sneak_attacking && !(youagr && u.uswallow)
 					&& magr && mdef && (distmin(x(magr), y(magr), x(mdef), y(mdef)) <= 1))
 				{
-					behead = TRUE;
+					method = VORPAL_BEHEAD;
 					lifehunt_sneak_attacking = FALSE;	/* max once per attack action */
 				}
 			}
@@ -3922,13 +3922,13 @@ boolean * messaged;
 		case ART_ARROW_OF_SLAYING:
 			wepdesc = "heart-seeking arrow";
 			if (dieroll == 1) {
-				pierce = TRUE;
+				method = VORPAL_PIERCE;
 			}
 			break;
 		case ART_VORPAL_BLADE:
 			wepdesc = "vorpal blade";
 			if (dieroll == 1 || pd->mtyp == PM_JABBERWOCK) {
-				behead = TRUE;
+				method = VORPAL_BEHEAD;
 			}
 			break;
 		case ART_OGRESMASHER:
@@ -3939,14 +3939,15 @@ boolean * messaged;
 					exercise(A_STR, TRUE);
 					exercise(A_WIS, TRUE);
 				}
-				smash = TRUE;
+				method = VORPAL_SMASH;
 			}
 			break;
 		case ART_TORCH_OF_ORIGINS:
 			wepdesc = "ancient inferno";
+			vorpaldamage = 3000;
 			if (dieroll <= 2) {
 				if (!Fire_res(mdef))
-					ignite = TRUE;
+					method = VORPAL_IGNITE;
 			}
 			break;
 		default:
@@ -3959,101 +3960,127 @@ boolean * messaged;
 			if (dieroll == 1)
 			{
 				if (is_slashing(msgr) && is_stabbing(msgr))
-					behead = TRUE;
+					method = VORPAL_BEHEAD;
 				else if (is_slashing(msgr))
-					bisect = TRUE;
+					method = VORPAL_BISECT;
 				else if (is_stabbing(msgr))
-					pierce = TRUE;
+					method = VORPAL_PIERCE;
 				else if (is_bludgeon(msgr))
-					smash = TRUE;
+					method = VORPAL_SMASH;
 			}
 			break;
 		}
 
-		/* BISECTION */
-		if (bisect) {
-			/* instakill engulfers from inside */
-			if (youagr && u.uswallow && mdef == u.ustuck) {
-				You("slice %s wide open!", mon_nam(mdef));
-				*messaged = TRUE;
-				return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef));
+		/* check misses */
+		if ((method == VORPAL_BEHEAD) && !has_head_mon(mdef) || notonhead || (youagr && u.uswallow && mdef == u.ustuck))
+		{
+			if (youagr)
+				pline("Somehow, you miss %s wildly.", mon_nam(mdef));
+			else if (vis)
+				pline("Somehow, %s misses %swildly.", mon_nam(magr), (youdef ? "you " : ""));
+			*messaged = ((boolean)(youagr || vis));
+			return MM_MISS;	/* miss */
+		}
+		/* check engulfer instakills */
+		else if ((youagr && u.uswallow && mdef == u.ustuck) &&
+			((method == VORPAL_BISECT) || (method == VORPAL_SMASH)))
+		{
+			You("%s %s wide open!", 
+				((method == VORPAL_BISECT) ? "slice" : "smash"),
+				mon_nam(mdef));
+			*messaged = TRUE;
+			return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef));	/* instakill */
+		}
+		/* normal vorpal */
+		else if (method != 0) {
+			/* find defender's applicable armor */
+			struct obj * armor = (struct obj *)0;
+			switch (method) {
+			case VORPAL_BEHEAD:
+				armor = youdef ? uarmh : which_armor(mdef, W_ARMH);
+				break;
+			case VORPAL_BISECT:
+			case VORPAL_PIERCE:
+				armor = youdef ? uarm  : which_armor(mdef, W_ARM);
+				break;
+			case VORPAL_SMASH:
+				armor = youdef ? uarms : which_armor(mdef, W_ARMS);
+				break;
 			}
-			else
-			{
-				if (notonhead) {
-					/* nothing against long worms? */
-					*messaged = FALSE;
-				}
-				else if (bigmonst(pd)) {
-					if (youagr)
-						You("slice deeply into %s!", mon_nam(mdef));
-					else if (vis)
-						pline("%s cuts deeply into %s!", Monnam(magr), hittee);
-					/* 2x damage */
-					*plusdmgptr += basedmg;
-					*messaged = TRUE;
+			if (arti_shining(otmp))
+				armor = (struct obj *)0;
+
+			/* damage, destroy armor */
+			while (armor && vorpaldamage > basedmg * 4) {
+				if (armor->spe > -1 * objects[(armor)->otyp].a_ac){
+					damage_item(armor);
+					vorpaldamage -= (armor->spe + objects[(armor)->otyp].a_ac)*5;
+					if (armor->oartifact)
+						vorpaldamage -= 20;
 				}
 				else {
-					if (vis) {
-						pline("%s cuts %s in half!", The(wepdesc), hittee);
-						otmp->dknown = TRUE;
-					}
-					*messaged = TRUE;
-					if (!youdef) {
-						return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef));
-					}
-					else {
-						losehp(*hp(&youmonst) + 1, an(wepdesc), KILLED_BY);
-						return MM_DEF_LSVD;
-					}
+					claws_destroy_marm(mdef, armor);
+					armor = (struct obj *)0;
+					break;	/* exit armor-killing loop */
 				}
 			}
-		}
-		/* BEHEADING */
-		else if (behead) {
-			/* wild miss against things without heads (or if you are swallowed) */
-			if (!has_head_mon(mdef) || notonhead || (youagr && u.uswallow))
-			{
-				if (youagr)
-					pline("Somehow, you miss %s wildly.", mon_nam(mdef));
-				else if (vis)
-					pline("Somehow, %s misses %swildly.", mon_nam(magr), (youdef ? "you " : ""));
-				*messaged = ((boolean)(youagr || vis));
-				return MM_MISS;
-			}
-			/* pass through the necks of incorporeal things */
-			else if (noncorporeal(pd) || amorphous(pd)) {
-				if (vis) {
-					pline("%s slices through %s %s.", The(wepdesc),
-						(youdef ? "your" : s_suffix(mon_nam(mdef))),
-						mbodypart(mdef, NECK));
-					*messaged = TRUE;
-				}
-				/* Kusanagi no Tsurugi is still lethal! */
-				if (oartifact == ART_KUSANAGI_NO_TSURUGI) {
-					if (vis) {
+
+			/* apply other damage modifiers */
+			if (method == VORPAL_BEHEAD && (noncorporeal(pd) || amorphous(pd)))
+				vorpaldamage = 0;
+			if ((method == VORPAL_BISECT) && (bigmonst(pd) || notonhead))
+				vorpaldamage = basedmg;
+			if ((method == VORPAL_PIERCE) && (!has_blood_mon(mdef) || !(pd->mflagsb&MB_BODYTYPEMASK) || noncorporeal(pd) || amorphous(pd)))
+				vorpaldamage = basedmg;
+
+			/* Are we sufficiently lethal for a vorpal kill? */
+			if ((vorpaldamage + basedmg > *hp(mdef)) && vorpaldamage >= basedmg*4) {
+				if (vis)
+				{
+					/* print message */
+					switch (method) {
+					case VORPAL_BEHEAD:
+						pline("%s %s %s!",
+							The(wepdesc),
+							(!rn2(2) ? "beheads" : "decapitates"),
+							hittee);
+						break;
+					case VORPAL_BISECT:
+						pline("%s cuts %s in half!",
+							The(wepdesc),
+							hittee);
+						break;
+					case VORPAL_PIERCE:
+						pline("%s %s %s %s!",
+							The(wepdesc),
+							(!rn2(2) ? "pierces" : "punctures"),
+							(youdef ? "your" : s_suffix(hittee)),
+							mbodypart(mdef, HEART)
+							);
+						break;
+					case VORPAL_SMASH:
+						pline("%s smashes %s flat!",
+							The(wepdesc),
+							hittee
+							);
+						break;
+					case VORPAL_IGNITE:
+						pline("An ancient inferno flows from %s.", xname(otmp));
+						break;
+					case VORPAL_SHEAR:
+						pline("%s slices through %s %s.",
+							The(wepdesc),
+							(youdef ? "your" : s_suffix(mon_nam(mdef))),
+							mbodypart(mdef, NECK));
 						pline("%s blow%s apart in the wind.",
 							(youdef ? "You" : "It"),
 							(youdef ? "" : "s"));
-						otmp->dknown = TRUE;
+						break;
 					}
-					*messaged = TRUE;
-					if (!youdef) {
-						return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef));
-					}
-					else {
-						losehp(*hp(&youmonst) + 1, "shearing winds", KILLED_BY);
-						return MM_DEF_LSVD;
-					}
-				}
-			}
-			/* behead */
-			else {
-				if (vis) {
-					pline(behead_msg[rn2(SIZE(behead_msg))], The(wepdesc), hittee);
 					otmp->dknown = TRUE;
 					*messaged = TRUE;
 				}
+				/* deal the lethal damage directly */
 				if (!youdef) {
 					return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef));
 				}
@@ -4062,75 +4089,85 @@ boolean * messaged;
 					return MM_DEF_LSVD;
 				}
 			}
-		}
-		/* SHOT THROUGH THE HEART, AND YOU'RE TO BLAME */
-		else if (pierce) {
-			/* 2x damage to monsters without hearts (ish) */
-			if (!has_blood_mon(mdef) || !(pd->mflagsb&MB_BODYTYPEMASK) || noncorporeal(pd) || amorphous(pd)) {
-				if (vis) {
-					pline("%s pierces deeply into %s!",
-						The(wepdesc),
-						(youdef ? "you" : mon_nam(mdef)));
-					*messaged = TRUE;
-				}
-				*plusdmgptr += basedmg;
-			}
 			else {
+				/* non-lethal messages */
 				if (vis) {
-					pline(heart_msg[rn2(SIZE(heart_msg))],
-						The(wepdesc),
-						(youdef ? "your" : s_suffix(mon_nam(mdef))));
+					switch (method) {
+					case VORPAL_BEHEAD:
+						if (armor)
+							pline("%s killing blow was blocked by %s helmet!",
+								The(s_suffix(wepdesc)),
+								(youdef ? "your" : s_suffix(mon_nam(mdef)))
+								);
+						else
+							pline("%s slices %s %s %s%s",
+								The(wepdesc),
+								((noncorporeal(pd) || amorphous(pd)) ? "through" : "into"),
+								(youdef ? "your" : s_suffix(mon_nam(mdef))),
+								mbodypart(mdef, NECK),
+								((vorpaldamage > 0) ? "!" : ".")
+								);
+						break;
+					case VORPAL_BISECT:
+						if (armor)
+							pline("%s killing blow was blocked by %s armor!",
+							The(s_suffix(wepdesc)),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						else
+							pline("%s slices into %s!",
+								The(wepdesc),
+								hittee
+								);
+						break;
+					case VORPAL_PIERCE:
+						if (armor)
+							pline("%s killing blow was blocked by %s armor!",
+							The(s_suffix(wepdesc)),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						else
+							pline("%s pierces into %s!",
+								The(wepdesc),
+								hittee
+								);
+						break;
+					case VORPAL_SMASH:
+						if (armor)
+							pline("%s killing blow was blocked by %s shield!",
+							The(s_suffix(wepdesc)),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						else
+							pline("%s hits %s!",
+								The(wepdesc),
+								hittee
+								);
+						break;
+					case VORPAL_IGNITE:
+						/* we can't be here if mdef was fire-resistant */
+						pline("%s burns %s terribly!",
+							The(wepdesc),
+							hittee
+							);
+						break;
+					case VORPAL_SHEAR:
+						pline("%s slices through %s %s.",
+							The(wepdesc),
+							(youdef ? "your" : s_suffix(mon_nam(mdef))),
+							mbodypart(mdef, NECK));
+						pline("%s ravages %s!",
+							An(wepdesc),
+							hittee
+							);
+						break;
+					}
 					otmp->dknown = TRUE;
 					*messaged = TRUE;
 				}
-				if (!youdef) {
-					return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef));
-				}
-				else {
-					losehp(*hp(&youmonst) + 1, an(wepdesc), KILLED_BY);
-					return MM_DEF_LSVD;
-				}
-			}
-		}
-		/* SMASH 'EM */
-		else if (smash) {
-			/* smash your way out of a swallower */
-			if (youagr && u.uswallow && mdef == u.ustuck) {
-				You("smash %s wide open!", mon_nam(mdef));
-				*messaged = TRUE;
-				return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef));
-			}
-			else {
-				if (vis) {
-					pline("%s smashes %s flat!", The(wepdesc),
-						(youdef ? "you" : mon_nam(mdef)));
-					otmp->dknown = TRUE;
-					*messaged = TRUE;
-				}
-				if (!youdef) {
-					return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef));
-				}
-				else {
-					losehp(*hp(&youmonst) + 1, an(wepdesc), KILLED_BY);
-					return MM_DEF_LSVD;
-				}
-			}
-		}
-		else if (ignite) {
-			if (vis) {
-				pline("An ancient inferno flows from %s.", xname(otmp));
-				*messaged = TRUE;
-			}
-
-			if (!youdef) {
-				/* use a fake attack to avoid leaving a corpse */
-				/* TODO: use some other damage type? Make a new one? */
-				static struct attack ancient_inferno = { AT_WEAP, AD_DISN, 0, 0 };
-				return xdamagey(magr, mdef, &ancient_inferno, *hp(mdef));
-			}
-			else {
-				losehp(*hp(&youmonst) + 1, an(wepdesc), KILLED_BY);
-				return MM_DEF_LSVD;
+				/* don't directly deal the damage; let hmon() apply it */
+				/* this damage may now be reduced by 1/2phys or DR or MG_RSLASH etc */
+				*plusdmgptr += vorpaldamage;
 			}
 		}
 	}
