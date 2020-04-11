@@ -3877,7 +3877,7 @@ boolean * messaged;
 	/* vorpal weapons */
 	if (arti_attack_prop(otmp, ARTA_VORPAL) || (oproperties&OPROP_VORPW)) {
 		char buf[BUFSZ];
-		int vorpaldamage = (basedmg * 12) + d(3, 20);
+		int vorpaldamage = (basedmg * 12) + d(5, 20);
 		int method = 0;
 #define VORPAL_BEHEAD	1
 #define VORPAL_BISECT	2
@@ -3929,6 +3929,8 @@ boolean * messaged;
 			wepdesc = "vorpal blade";
 			if (dieroll == 1 || pd->mtyp == PM_JABBERWOCK) {
 				method = VORPAL_BEHEAD;
+				if (pd->mtyp == PM_JABBERWOCK)
+					vorpaldamage *= 2;
 			}
 			break;
 		case ART_OGRESMASHER:
@@ -4015,8 +4017,6 @@ boolean * messaged;
 				if (armor->spe > -1 * objects[(armor)->otyp].a_ac){
 					damage_item(armor);
 					vorpaldamage -= (armor->spe + objects[(armor)->otyp].a_ac)*5;
-					if (armor->oartifact)
-						vorpaldamage -= 20;
 				}
 				else {
 					claws_destroy_marm(mdef, armor);
