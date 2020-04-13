@@ -13075,7 +13075,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	}
 
 	/* damage resistance -- only print messages for the player, and only set/reset once per turn */
-	if (youagr)
+	/* also don't print message (or unset warning) if the attack is lethal anyways */
+	if (youagr && !lethaldamage)
 	{
 		static long lastwarning = 0;
 
