@@ -4602,9 +4602,11 @@ boolean was_swallowed;			/* digestion */
 			for (current_ton = mon->mtyp; current_ton >= PM_MONOTON; current_ton--) {
 				found = FALSE; //haven't found this child yet - 1 per level
 				/* search for child */
-				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+				for (mtmp = fmon; mtmp && (!found || !axus); mtmp = mtmp->nmon) {
 					if (DEADMONSTER(mtmp))
 						continue;
+					if (!axus && mtmp->mtyp == PM_AXUS)
+						axus = mtmp;
 					if (!found && mtmp->mtyp == current_ton-1) {
 						set_mon_data(mtmp, current_ton);
 						//Assumes Auton
@@ -4614,14 +4616,12 @@ boolean was_swallowed;			/* digestion */
 						newsym(mtmp->mx, mtmp->my);
 						found = TRUE;
 					}
-					if (!axus && mtmp->mtyp == PM_AXUS)
-						axus = mtmp;
 				}
 				/* if Axus is on the level, generate a 'ton beside him */
 				/* monoton if we found someone to grow */
 				/* the full 'ton if we didn't find one */
 				if (axus && (!found || current_ton == PM_MONOTON)) {
-					mtmp = makemon(&mons[current_ton], mtmp->mx, mtmp->my, MM_ADJACENTOK | MM_ANGRY);
+					mtmp = makemon(&mons[current_ton], axus->mx, axus->my, MM_ADJACENTOK | MM_ANGRY);
 					if (mtmp) mtmp->mclone = 1;
 				}
 				/* growth is chained -- if we didn't find a child (and Axus didn't provide one), we don't touch the lower 'tons. */
