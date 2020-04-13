@@ -372,9 +372,9 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 		/* projectile is on a sink (it "sinks" down) or is on a non-allowable square */
 		if ((range != initrange || initrange == 0) &&
-			(!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ)) ||
+			((!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ)) ||
 			closed_door(bhitpos.x, bhitpos.y) ||
-			(IS_SINK(levl[bhitpos.x][bhitpos.y].typ)))
+			(IS_SINK(levl[bhitpos.x][bhitpos.y].typ))))
 		{
 			range = 0;
 		}
@@ -1074,7 +1074,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 		boolean shienuse = FALSE;
 		/* if the player is using Shien lightsaber form, they can direct the reflection */
 		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep)
-			&& u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm)
+			&& u.fightingForm == FFORM_SHIEN && ((!uarm || is_light_armor(uarm))
 			&& rn2(3) < max((min(P_SKILL(u.fightingForm), P_SKILL(weapon_type(uwep)))) - 1, 1))) {
 			You("reflect the %s with your lightsaber!", doname(thrownobj));
 			if (getdir("Redirect it which way?"))

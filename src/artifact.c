@@ -87,7 +87,7 @@ STATIC_DCL int artidisco[NROFARTIFACTS];
 STATIC_OVL int spec_dbon_applies = 0;
 
 /* flags including which artifacts have already been created */
-STATIC_OVL NEARDATA artiexist[1+NROFARTIFACTS+1];
+STATIC_OVL NEARDATA boolean artiexist[1+NROFARTIFACTS+1];
 /* and a discovery list for them (no dummy first entry here) */
 STATIC_OVL int artidisco[NROFARTIFACTS];
 

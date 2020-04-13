@@ -6419,7 +6419,7 @@ register struct	monst	*mtmp;
 			} else if(ptr->mtyp == PM_HUNGRY_DEAD){
 				/* create an attached blob of preserved organs. Killing the blob will kill this hungry dead */
 				struct monst *blbtmp;
-				if (blbtmp = makemon(&mons[PM_BLOB_OF_PRESERVED_ORGANS], mtmp->mx, mtmp->my, MM_ADJACENTOK | MM_NOCOUNTBIRTH)) {
+				if ((blbtmp = makemon(&mons[PM_BLOB_OF_PRESERVED_ORGANS], mtmp->mx, mtmp->my, MM_ADJACENTOK | MM_NOCOUNTBIRTH))) {
 					/* blob created, link it */
 					blbtmp->mvar_huskID = (long)mtmp->m_id;
 				}
@@ -7377,7 +7377,7 @@ register int	mmflags;
 			x = rn1(COLNO-3,2);
 			y = rn2(ROWNO);
 			tryct++;
-		} while(tryct < 400 && (!goodpos(x, y, ptr ? &fakemon : (struct monst *)0, Is_waterlevel(&u.uz) ? gpflags|MM_IGNOREWATER : gpflags))
+		} while((tryct < 400 && (!goodpos(x, y, ptr ? &fakemon : (struct monst *)0, Is_waterlevel(&u.uz) ? gpflags|MM_IGNOREWATER : gpflags)))
 			|| (tryct < 300 && distmin(x,y,u.ux,u.uy) < BOLT_LIM)
 			|| (tryct < 200 && cansee(x, y))
 			|| (tryct < 100 && couldsee(x, y))

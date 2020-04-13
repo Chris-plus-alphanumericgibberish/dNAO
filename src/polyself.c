@@ -1273,6 +1273,7 @@ dotinker()
 		mlocal->mpeaceful = 1;
 		newsym(mlocal->mx,mlocal->my);
 	}
+	return(1);
 }
 
 int
@@ -1347,6 +1348,7 @@ dogaze()
 			You("gaze at empty space.");
 		}
 	}
+	return(1);
 }
 #if 0
 {

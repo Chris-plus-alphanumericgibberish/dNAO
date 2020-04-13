@@ -674,7 +674,7 @@ boolean is_pet;		/* If true, pet should keep wielded/worn items */
 		}
 	} else {
 		//Drop everything, I'm dying :(
-		while(otmp = mtmp->minvent){
+		while((otmp = mtmp->minvent)){
 			obj_extract_self(otmp);
 			mdrop_obj(mtmp, otmp, is_pet && flags.verbose);
 		}

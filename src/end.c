@@ -824,7 +824,7 @@ int how;
 	                /* not useup(); we haven't put this potion into inventory */
 	                obfree(potion, (struct obj *) 0);
 	            }
-	            killer = '\0';
+	            killer = 0;
 	            killer_format = 0;
 	            return;
 	        }

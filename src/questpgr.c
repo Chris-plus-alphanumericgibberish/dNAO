@@ -796,7 +796,7 @@ chaos2_montype()
 		else if(!rn2(3))
 			return !(mvitals[PM_SENTINEL_OF_MITHARDIR].mvflags & G_GENOD) ? &mons[PM_SENTINEL_OF_MITHARDIR] : mkclass(S_GOLEM, G_NOHELL);
 		else if(rn2(2))
-			return !(mvitals[PM_WRAITHWORM].mvflags & G_GENOD) ? &mons[PM_SENTINEL_OF_MITHARDIR] : mkclass(S_SNAKE, G_NOHELL);
+			return !(mvitals[PM_WRAITHWORM].mvflags & G_GENOD) ? &mons[PM_WRAITHWORM] : mkclass(S_SNAKE, G_NOHELL);
 		else 
 			return !(mvitals[PM_LIVING_MIRAGE].mvflags & G_GENOD) ? &mons[PM_LIVING_MIRAGE] : mkclass(S_PUDDING, G_NOHELL);
 	} else if(In_mithardir_catacombs(&u.uz)){
@@ -813,6 +813,7 @@ chaos2_montype()
 		else 
 			return !(mvitals[PM_ASPECT_OF_THE_SILENCE].mvflags & G_GENOD) ? &mons[PM_ASPECT_OF_THE_SILENCE] : mkclass(S_ZOMBIE, G_NOHELL);
 	}
+	return !(mvitals[PM_FOG_CLOUD].mvflags & G_GENOD) ? &mons[PM_FOG_CLOUD] : mkclass(S_VORTEX, G_NOHELL);
 }
 
 struct permonst *
@@ -1029,6 +1030,7 @@ int leftright;
 			case 14: return &mons[PM_QUASIT];
 		}
 	}
+	return &mons[PM_HILL_ORC];
 }
 
 struct permonst *

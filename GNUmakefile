@@ -2,12 +2,13 @@ GAMEDIR = dnethackdir
 
 CFLAGS = -g
 
-LDFLAGS += -no-pie
+LDFLAGS += -Wno-knr-promoted-parameter
 
 GAMELIBS = -lncurses -lm
 
 -include local.mk
 
+CPPFLAGS += -Wno-knr-promoted-parameter
 CPPFLAGS += -Iinclude
 CPPFLAGS += -DDLB
 

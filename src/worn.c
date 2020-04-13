@@ -2,6 +2,7 @@
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
+#include <math.h>
 #include "hack.h"
 void FDECL(mon_block_extrinsic, (struct monst *, struct obj *, int, boolean, boolean));
 boolean FDECL(mon_gets_extrinsic, (struct monst *, int, struct obj *));
@@ -646,7 +647,7 @@ boolean on, silently;
 	}
 	/* if the object blocks an extrinsic, recalculate if the monster should get that extrinsic */
 	/* use all_worn because the owornmask may have been cleared already and monsters will not wield armor */
-	if (which = w_blocks(obj, all_worn))
+	if ((which = w_blocks(obj, all_worn)))
 		mon_block_extrinsic(mon, obj, which, on, silently);
 
 #ifdef STEED
