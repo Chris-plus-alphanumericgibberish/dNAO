@@ -916,7 +916,7 @@ A("The Fluorite Octahedron",		BLUE_FLUORITE,		(const char *)0,
 
 #ifdef TOURIST
 /*Needs encyc entry*/
-A("The Tie-Dye Shirt of Shambhala",	T_SHIRT,			"flambouyantly colourful %s",
+A("The Tie-Dye Shirt of Shambhala",	T_SHIRT,			"flamboyantly colorful %s",
 	4500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_S, (ARTG_MAJOR),
 	NO_MONS(),
