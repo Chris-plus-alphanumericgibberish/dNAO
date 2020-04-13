@@ -1688,10 +1688,12 @@ gcrownu()
 		if (ok_wep(obj)) {
 			unrestrict_weapon_skill(weapon_type(obj));
 		}
-    } else if (class_gift == STRANGE_OBJECT) {
-		/* opportunity knocked, but there was nobody home... */
-		You_feel("unworthy.");
     }
+// Don't give this message -- causes confusion with artiwish allowance "you feel worthy"
+//	else if (class_gift == STRANGE_OBJECT) {
+//		/* opportunity knocked, but there was nobody home... */
+//		You_feel("unworthy.");
+//    }
     update_inventory();
     return;
 }
