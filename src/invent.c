@@ -2470,6 +2470,10 @@ winid *datawin;
 		return;
 	}
 
+	/* hide artifact properties if we haven't discovered the artifact yet */
+	if (undiscovered_artifact(oartifact))
+		oartifact = 0;
+
 	/* type name */
 	if (obj) {
 		Sprintf(buf, "(%s)", obj_descname(obj));
