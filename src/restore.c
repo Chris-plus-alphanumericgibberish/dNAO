@@ -261,6 +261,8 @@ boolean ghostly;
 	/* get the original base address */
 	mread(fd, (genericptr_t)&monbegin, sizeof(monbegin));
 	moved = (monbegin != mons);
+	/* re-generate index numbers of the permonst array */
+	id_permonst();
 
 	while(1) {
 		mread(fd, (genericptr_t) &xl, sizeof(xl));
@@ -400,7 +402,7 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	if (remember_discover) discover = remember_discover;
 
 	role_init(FALSE);	/* Reset the initial role, race, gender, and alignment */
-	id_permonst();		/* re-generate index numbers of the permonst array */
+	
 #ifdef AMII_GRAPHICS
 	amii_setpens(amii_numcolors);	/* use colors from save file */
 #endif

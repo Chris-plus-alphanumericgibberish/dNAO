@@ -17,6 +17,7 @@ void
 id_permonst()
 {
 	int i;
+	if (mons->mtyp == NON_PM)
 	for (i = 0; i < NUMMONS; i++)
 		mons[i].mtyp = i;
 	return;
@@ -139,8 +140,10 @@ int faction;
 	int f_index = faction - FACTION_PADDING - 1;	/* first faction is 1-indexed, but we want 0-indexed */
 
 	/* player is special, and has no handling for derived statblocks */
-	if (mtyp == PM_PLAYERMON)
+	if (mtyp == PM_PLAYERMON) {
+		impossible("attempting to find permonst of playermon, faction %d", faction);
 		return &upermonst;
+	}
 	
 	/* validate mtyp */
 	if (mtyp > NUMMONS || mtyp < 0) {
