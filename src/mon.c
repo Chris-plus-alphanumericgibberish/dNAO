@@ -4605,7 +4605,7 @@ boolean was_swallowed;			/* digestion */
 				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 					if (DEADMONSTER(mtmp))
 						continue;
-					if (mtmp->mtyp == current_ton-1) {
+					if (!found && mtmp->mtyp == current_ton-1) {
 						set_mon_data(mtmp, current_ton);
 						//Assumes Auton
 						mtmp->m_lev += 1;
