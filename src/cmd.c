@@ -3328,7 +3328,7 @@ resistances_enlightenment()
 */
 	if(u.umconf){
 		if(Blind) Sprintf(buf, "Your %s are tingling.", makeplural(body_part(HAND)));
-		else Sprintf(buf, "Your %s are%s glowing%s red.", makeplural(body_part(HAND)), u.umconf > 20 ? " brilliantly" : u.umconf > 10 ? " brightly" : "", hcolor(NH_RED));
+		else Sprintf(buf, "Your %s are glowing%s %s.", makeplural(body_part(HAND)), u.umconf > 20 ? " brilliantly" : u.umconf > 10 ? " brightly" : "", hcolor(NH_RED));
 		putstr(en_win, 0, buf);
 	}
 	
