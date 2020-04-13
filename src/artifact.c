@@ -3974,7 +3974,7 @@ boolean * messaged;
 		}
 
 		/* check misses */
-		if ((method == VORPAL_BEHEAD) && !has_head_mon(mdef) || notonhead || (youagr && u.uswallow && mdef == u.ustuck))
+		if ((method == VORPAL_BEHEAD) && (!has_head_mon(mdef) || notonhead || (youagr && u.uswallow && mdef == u.ustuck)))
 		{
 			if (youagr)
 				pline("Somehow, you miss %s wildly.", mon_nam(mdef));
