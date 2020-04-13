@@ -459,7 +459,7 @@ boolean
 obj_is_pname(obj)
 register struct obj *obj;
 {
-    return((boolean)(obj->dknown && obj->known && obj->onamelth && obj->oartifact));
+	return((boolean)(obj->dknown && obj->known && obj->onamelth && obj->oartifact && !undiscovered_artifact(obj->oartifact)));
 }
 
 /* Give the name of an object seen at a distance.  Unlike xname/doname,
@@ -563,7 +563,7 @@ char *buf;
 		/* allow 'blessed clear potion' if we don't know it's holy water;
 		* always allow "uncursed potion of water"
 		*/
-		if(obj->oartifact == ART_AVENGER && obj->known){
+		if(obj->oartifact == ART_AVENGER && !undiscovered_artifact(ART_AVENGER)){
 			if(!obj->cursed && !obj->blessed)
 				Strcat(buf, "uncursed ");
 		}
@@ -602,7 +602,8 @@ char *buf;
 	/* gold pieces should not have their size described */
 	if (obj->otyp == GOLD_PIECE)
 		return;
-	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT && obj->known) ? artilist[obj->oartifact].size : MZ_MEDIUM))
+	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT && !undiscovered_artifact(obj->oartifact))
+							? artilist[obj->oartifact].size : MZ_MEDIUM))
 	{
 		switch (obj->objsize)
 		{
@@ -850,9 +851,9 @@ boolean dofull;
 			/* note: "holy" and "unholy" properties are shown in the BUC part of the name, as they replace "blessed" and "cursed". */
 			
 			/* note: except "Holy Avenger" and "Unholy Avenger" */
-			if (obj->oartifact == ART_AVENGER && obj->cursed && obj->known && obj->oproperties&OPROP_UNHYW)
+			if (obj->oartifact == ART_AVENGER && obj->cursed && !undiscovered_artifact(obj->oartifact) && obj->oproperties&OPROP_UNHYW)
 				Strcat(buf, "Unholy ");
-			if (obj->oartifact == ART_AVENGER && obj->blessed && obj->known && obj->oproperties&OPROP_HOLYW)
+			if (obj->oartifact == ART_AVENGER && obj->blessed && !undiscovered_artifact(obj->oartifact) && obj->oproperties&OPROP_HOLYW)
 				Strcat(buf, "Holy ");
 		}
 	}
@@ -1140,7 +1141,7 @@ char *buf;
 	/* gold pieces should not have their material described, it's in their name */
 	if(obj->otyp == GOLD_PIECE)
 		return;
-	if(obj->oartifact && obj->known && artilist[obj->oartifact].material != MT_DEFAULT){
+	if (obj->oartifact && !undiscovered_artifact(obj->oartifact) && artilist[obj->oartifact].material != MT_DEFAULT){
 		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
 			return;
