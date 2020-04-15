@@ -3221,6 +3221,9 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 	} else if (weapon != ZAPPED_WAND && weapon != INVIS_BEAM)
 	    tmp_at(DISP_FLASH, obj_to_glyph(obj));
 
+	bhitpos.x = u.ux;
+	bhitpos.y = u.uy;
+
 	while(range-- > 0) {
 	    int x,y;
 		
