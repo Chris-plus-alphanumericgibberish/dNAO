@@ -117,7 +117,7 @@ A("Vorpal Blade",		LONG_SWORD,						(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("The Marauder's Map",	SCR_MAGIC_MAPPING,				(const char *)0,
+A("The Marauder's Map",	SCR_MAGIC_MAPPING,				"parchment scroll",
 	2000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_PIRATE, NON_PM, TIER_B, (ARTG_INHER),
 	NO_MONS(),
