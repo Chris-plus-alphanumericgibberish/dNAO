@@ -56,7 +56,6 @@ picking_lock(x, y)
 	    *y = u.uy + u.dy;
 	    return TRUE;
 	} else {
-	    *x = *y = 0;
 	    return FALSE;
 	}
 }
@@ -66,6 +65,21 @@ picking_at(x, y)
 int x, y;
 {
 	return (boolean)(occupation == picklock && xlock.door == &levl[x][y]);
+}
+
+boolean
+forcing_door(x, y)
+int *x, *y;
+{
+	if (occupation == forcedoor)
+	{
+		*x = u.ux + u.dx;
+		*y = u.uy + u.dy;
+		return TRUE;
+	}
+	else {
+		return FALSE;
+	}
 }
 
 /* produce an occupation string appropriate for the current activity */

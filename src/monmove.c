@@ -52,37 +52,44 @@ register struct monst *mtmp;
 {
 	int	x, y;
 
-	if(mtmp->mpeaceful && in_town(u.ux+u.dx, u.uy+u.dy) &&
-	   !is_blind(mtmp) && m_canseeu(mtmp) && !rn2(3)) {
+	if (mtmp->mpeaceful && in_town(u.ux + u.dx, u.uy + u.dy) &&
+		!is_blind(mtmp) && m_canseeu(mtmp) && !rn2(3)) {
 
-//ifdef CONVICT
-		if(Role_if(PM_CONVICT) && !Upolyd && !(ublindf && ublindf->otyp != LENSES)) {
-            verbalize("%s yells: Hey!  You are the one from the wanted poster!",
-             Amonnam(mtmp));
-            (void) angry_guards(!(flags.soundok));
-            stop_occupation();
-            return;
-        }
-//endif /* CONVICT */
-	    if(picking_lock(&x, &y) && IS_DOOR(levl[x][y].typ) &&
-	       (levl[x][y].doormask & D_LOCKED)) {
-
-		if(couldsee(mtmp->mx, mtmp->my)) {
-
-		  pline("%s yells:", Amonnam(mtmp));
-		  if(levl[x][y].looted & D_WARNED) {
-			verbalize("Halt, thief!  You're under arrest!");
-			(void) angry_guards(!(flags.soundok));
-		  } else {
-			verbalize("Hey, stop picking that lock!");
-			levl[x][y].looted |=  D_WARNED;
-		  }
-		  stop_occupation();
+		//ifdef CONVICT
+		if (Role_if(PM_CONVICT) && !Upolyd && !(ublindf && ublindf->otyp != LENSES)) {
+			verbalize("%s yells: Hey!  You are the one from the wanted poster!",
+				Amonnam(mtmp));
+			(void)angry_guards(!(flags.soundok));
+			stop_occupation();
+			return;
 		}
-	    } else if (is_digging()) {
-		/* chewing, wand/spell of digging are checked elsewhere */
-		watch_dig(mtmp, digging.pos.x, digging.pos.y, FALSE);
-	    }
+		//endif /* CONVICT */
+		if ((
+			(forcing_door(&x, &y)) ||
+			(picking_lock(&x, &y) && (levl[x][y].doormask & D_LOCKED))
+			) &&
+			IS_DOOR(levl[x][y].typ)
+			) {
+			if (couldsee(mtmp->mx, mtmp->my)) {
+				pline("%s yells:", Amonnam(mtmp));
+				if (levl[x][y].looted & D_WARNED) {
+					verbalize("Halt, thief!  You're under arrest!");
+					(void)angry_guards(!(flags.soundok));
+				}
+				else {
+					if (picking_lock(&x, &y))
+						verbalize("Hey, stop picking that lock!");
+					else
+						verbalize("Hey, stop forcing that door!");
+					levl[x][y].looted |= D_WARNED;
+				}
+				stop_occupation();
+			}
+		}
+		else if (is_digging()) {
+			/* chewing, wand/spell of digging are checked elsewhere */
+			watch_dig(mtmp, digging.pos.x, digging.pos.y, FALSE);
+		}
 	}
 }
 
