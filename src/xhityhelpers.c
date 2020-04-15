@@ -1368,7 +1368,8 @@ struct obj * otmp;
 		dmg += vd(ndice, diesize);
 	}
 	if (hates_iron(pd) &&
-		otmp->obj_material == IRON) {
+		otmp->obj_material == IRON &&
+		!(is_lightsaber(otmp) && litsaber(otmp))) {
 		/* default: 1d(XL) */
 		ndice = 1;
 		diesize = mlev(mdef);
@@ -1401,7 +1402,8 @@ struct obj * otmp;
 		else if (otmp->otyp == KHAKKHARA)
 			ndice = rnd(3);
 		/* gold has a particular affinity to blessings and curses */
-		if (otmp->obj_material == GOLD) {
+		if (otmp->obj_material == GOLD &&
+			!(is_lightsaber(otmp) && litsaber(otmp))) {
 			diesize = 20;
 		}
 		/* calculate dice */
@@ -1428,7 +1430,8 @@ struct obj * otmp;
 		else if (otmp->otyp == KHAKKHARA)
 			ndice = rnd(3);
 		/* gold has a particular affinity to blessings and curses */
-		if (otmp->obj_material == GOLD) {
+		if (otmp->obj_material == GOLD &&
+			!(is_lightsaber(otmp) && litsaber(otmp))) {
 			ndice *= 2;
 		}
 		/* calculate */
