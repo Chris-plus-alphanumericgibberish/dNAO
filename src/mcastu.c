@@ -4844,7 +4844,7 @@ uspsibolt:
 	          mon_nam(mtmp));
 	reflects = mon_reflects(mtmp, "It bounces off %s %s.");
 	if (reflects || resists_elec(mtmp)) {
-	    shieldeff(u.ux, u.uy);
+	    shieldeff(mtmp->mx, mtmp->my);
 	    dmg = 0;
 	    if (reflects)
 		break;
