@@ -1813,21 +1813,19 @@ struct obj	*sobj;
 		    }
 		} else {
 		    if (!sobj->blessed) {
-			Your("%s%s %s%s.",
-			makeplural(body_part(HAND)),
-			Blind ? "" : " begin to glow",
-			Blind ? (const char *)"tingle" : hcolor(NH_RED),
-			u.umconf ? " even more" : "");
-			u.umconf++;
+				Your("%s%s %s%s.",
+					makeplural(body_part(HAND)), Blind ? "" : " begin to glow",
+					Blind ? (const char *)"tingle" : hcolor(NH_RED), u.umconf ? " even more" : "");
+				u.umconf++;
 		    } else {
 			if (Blind)
 			    Your("%s tingle %s sharply.",
 				makeplural(body_part(HAND)),
 				u.umconf ? "even more" : "very");
 			else
-			    Your("%s glow a%s %s.",
+			    Your("%s glow%s %s.",
 				makeplural(body_part(HAND)),
-				u.umconf ? "n even more" : "",
+				u.umconf ? " even more" : "",
 				hcolor(NH_RED));
 			/* after a while, repeated uses become less effective */
 			if (u.umconf >= 40)
