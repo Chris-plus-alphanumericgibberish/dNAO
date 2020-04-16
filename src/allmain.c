@@ -2373,6 +2373,9 @@ void
 stop_occupation()
 {
 	struct monst *mtmp;
+	
+	flags.travel = iflags.travel1 = flags.mv = flags.run = 0;
+
 	if(occupation) {
 		if (!maybe_finished_meal(TRUE))
 		    You("stop %s.", occtxt);
