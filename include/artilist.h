@@ -216,8 +216,8 @@ A("Dragonlance",		LANCE,							(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
-A("Nodensfork",			TRIDENT,						(const char *)0,
-	5000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+A("Nodensfork",			TRIDENT,						"wave-etched %s",
+	5000L, SHELL_MAT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_C, (ARTG_GIFT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_PRIMORDIAL | MA_ET /*MA*/, MV_TELEPATHIC | MV_RLYEHIAN /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES|ARTA_SILVER),
@@ -249,7 +249,7 @@ A("Demonbane",			SABER,							(const char *)0,
 	),
 
 /* silver, protects from lycanthropy, and works against quite a number of late-game enemies */
-A("Werebane",			SABER,							(const char *)0,
+A("Werebane",			SABER,							"wolf-hilted %s",
 	1500L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_C, (ARTG_GIFT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_WERE | MA_DEMIHUMAN /*MA*/, 0 /*MV*/),
@@ -274,7 +274,7 @@ A("Giantslayer",		AXE,							(const char *)0,
 
 /* effective vs some standard castlevainia enemy types*/
 /*is given extra damage in weapon.c, since whip damage is so low*/
-A("The Vampire Killer",	BULLWHIP,						(const char *)0,
+A("The Vampire Killer",	BULLWHIP,						"bloodstained chain whip",
 	2500L, METAL, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_C, (ARTG_GIFT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_UNDEAD | MA_DEMON | MA_WERE) /*MA*/, 0 /*MV*/),
@@ -285,8 +285,8 @@ A("The Vampire Killer",	BULLWHIP,						(const char *)0,
 	),
 
 /* works against just about all the late game baddies */
-A("Kingslayer",			STILETTO,						(const char *)0,
-	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+A("Kingslayer",			STILETTO,						"delicately filigreed %s",
+	2500L, GOLD, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_GIFT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MG_LORD | MG_PRINCE) /*MA*/, 0 /*MV*/),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES|ARTA_POIS),
@@ -340,7 +340,7 @@ A("Trollsbane",			MORNING_STAR,					(const char *)0,
  *	Now it will never strike the Valkyrie or fall to the ground,
  *	if both are in good condition.
  */
-A("Mjollnir",			WAR_HAMMER,						(const char *)0,
+A("Mjollnir",			WAR_HAMMER,						"lightning-bolt embossed %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_VALKYRIE, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
@@ -392,7 +392,7 @@ A("Atlantean Royal Sword",			TWO_HANDED_SWORD,	(const char *)0,
 	),
 
 /*	Need a way to convert era times to Japanese luni-solar months.*/
-A("Kiku-ichimonji",		KATANA,							(const char *)0,
+A("Kiku-ichimonji",		KATANA,							"chrysanthemum-hilted %s",
 	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_SAMURAI, NON_PM, TIER_C, (ARTG_GIFT),
 	NO_MONS(),
@@ -433,8 +433,8 @@ A("The Rod of Lordly Might",		MACE,				(const char *)0,
 	LORDLY, (ARTI_ENGRAVE)
 	),
 
-/* uses the Musicallize skill; learns special abilities from hearing songs */
-A("The Singing Sword",	LONG_SWORD,						(const char *)0,
+/* uses the Musicalize skill; learns special abilities from hearing songs */
+A("The Singing Sword",	LONG_SWORD,						"softly singing %s",
 	5000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, PM_BARD, NON_PM, TIER_A, (ARTG_GIFT|ARTG_INHER|ARTG_MAJOR),
 	NO_MONS(),
@@ -445,18 +445,18 @@ A("The Singing Sword",	LONG_SWORD,						(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("Xiuhcoatl",			ATLATL,							(const char *)0,
-	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+A("Xiuhcoatl",			BULLWHIP,							"turquoise scaled %s",
+	4000L, DRAGON_HIDE, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
-	ATTK(AD_FIRE, 3, 10), NOFLAG,
+	ATTK(AD_FIRE, 3, 12), NOFLAG,
 	PROP1(FIRE_RES), NOFLAG,
 	PROP0(), NOFLAG,
 	LORDLY, NOFLAG
 	),
 
 /*invoke for skeletons, life draining */
-A("Staff of Necromancy",QUARTERSTAFF,					"skull-topped %s",
+A("Staff of Necromancy", QUARTERSTAFF,					"skull-topped %s",
 	6660L, BONE, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, PM_VAMPIRE, TIER_B, (ARTG_GIFT|ARTG_INHER),
 	NO_MONS(),
@@ -471,7 +471,7 @@ A("Staff of Necromancy",QUARTERSTAFF,					"skull-topped %s",
  */
 /*Needs encyc entry?*/
 /*provides curse res while wielded */
-A("Magicbane",			ATHAME,							"runed %s",
+A("Magicbane",			ATHAME,							"mystically runed %s",
 	3500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_WIZARD, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
@@ -500,7 +500,7 @@ A("Fuma-itto no Ken",	BROADSWORD,						(const char *)0,
 	CREATE_AMMO, NOFLAG /*makes shuriken*/
 	),
 
-A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	(const char *)0,
+A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"scorpion-hilted %s",
 	3000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, PM_ROGUE, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
@@ -524,7 +524,7 @@ A("Spineseeker",		SHORT_SWORD,					(const char *)0,
 
 /*//////////Double Damage Artifacts//////////*/
 
-A("Grayswandir",		SABER,							(const char *)0,
+A("Grayswandir",		SABER,							"amber-swirled %s",
 	8000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
 	NO_MONS(),
@@ -563,7 +563,7 @@ A("The Green Dragon Crescent Blade",		NAGINATA,	(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
-A("Mirror Brand",		LONG_SWORD,						(const char *)0,
+A("Mirror Brand",		LONG_SWORD,						"polished %s",
 	3000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
 	NO_MONS(),
@@ -607,7 +607,7 @@ A("Windrider",			BOOMERANG,						(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("The Rod of the Ram",	MACE,							(const char *)0,
+A("The Rod of the Ram",	MACE,							"ram-headed %s",
 	3000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, NON_PM, NON_PM, TIER_C, (ARTG_GIFT),
 	NO_MONS(),
@@ -667,7 +667,7 @@ A("Tensa Zangetsu",		TSURUGI,						(const char *)0,
 /*Sort of intermediate between a double damage and a utility weapon,*/
 /*Sode no Shirayuki gains x2 ice damage after using the third dance.*/
 /*however, it only keeps it for a few rounds, and the other dances are attack magic. */
-A("Sode no Shirayuki",	KATANA,							(const char *)0,
+A("Sode no Shirayuki",	KATANA,							"snow-colored %s", // colored not covered
 	8000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
@@ -679,7 +679,7 @@ A("Sode no Shirayuki",	KATANA,							(const char *)0,
 
 /*Tobiume is an awkward weapon.  It loses 3 damage vs large and 2 vs small*/
 /*Ram and Fire blast only trigger if enemy is low hp*/
-A("Tobiume",			LONG_SWORD,						(const char *)0,
+A("Tobiume",			LONG_SWORD,						"three-branched %s",
 	8000L, METAL, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
@@ -707,7 +707,7 @@ A("The Lance of Longinus",		SPEAR,					(const char *)0,
 	// TRAP_DET, A_NONE, PM_ARCHEOLOGIST, NON_PM, 0L,
 	// 0,0,0),
 
-A("The Arkenstone",		DIAMOND,						(const char *)0,
+A("The Arkenstone",		DIAMOND,						"rainbow-glinting %s", 
 	8000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, NOFLAG,
 	NO_MONS(),
@@ -741,10 +741,10 @@ A("The Lifehunt Scythe",SCYTHE,							(const char *)0,
 	INVIS, NOFLAG
 	),
 
-/* effectively becomes two sizes larger when lite, requiring two hands */
+/* effectively becomes two sizes larger when lit, requiring two hands */
 /* attack bonus only applies vs non-magic resistant targets and only when lit */
-A("The Holy Moonlight Sword",	LONG_SWORD,				(const char *)0,
-	4000L, METAL, MZ_DEFAULT, WT_DEFAULT,
+A("The Holy Moonlight Sword",	LONG_SWORD,				(const char *)0, // begging for a description but i couldn't think of a good one
+	4000L, METAL, MZ_DEFAULT, WT_DEFAULT, // if it gets one, it would be sick to have a slightly different one while lit, requires some work tho
 	A_NONE, NON_PM, NON_PM, TIER_A, (ARTG_GIFT|ARTG_INHER),
 	NO_MONS(),
 	ATTK(AD_PHYS, 12, 0), NOFLAG,
@@ -880,8 +880,8 @@ A("Sky Render",			KATANA,							(const char *)0,
 /*Needs encyc entry*/
 /* Crystal sword whose use comes with a price of your sanity */
 A("Callandor",			CRYSTAL_SWORD,					(const char *)0,
-	6660L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
+	6660L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT, // there's an opportunity for a sick name here too
+	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT), 
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROP3(HALF_SPDAM, ENERGY_REGENERATION, SPELLBOOST), NOFLAG,
@@ -983,7 +983,7 @@ A("Mirrorbright",					ROUNDSHIELD,		(const char *)0,
 	),
 
 /*Perseus's shield, needs encyc entry*/
-A("Aegis",							ROUNDSHIELD,		(const char *)0,
+A("Aegis",							ROUNDSHIELD,		"gorgon-emblemed %s",
 	4000L, LEATHER, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_A, NOFLAG,
 	NO_MONS(),
