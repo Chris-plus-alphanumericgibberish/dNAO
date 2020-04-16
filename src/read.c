@@ -116,10 +116,10 @@ doread()
 				}
 				if(u.RoSPflights > 0){
 					static const char *numbers[]={
-						"no", "a singe", "two","three","four","five","six","seven"
+						"no", "a single", "two","three","four","five","six","seven"
 					};
 					pline("Around the pommel, there is a crownlike decoration, with %s raised segment%s.",
-						numbers[u.RoSPflights], u.RoSPflights>1 ? "s" : "");
+						numbers[u.RoSPflights], u.RoSPflights!=1 ? "s" : "");
 				}
 				return(1);
 			}
