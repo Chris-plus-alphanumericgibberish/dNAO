@@ -261,7 +261,7 @@ A("Werebane",			SABER,							"wolf-hilted %s",
 
 /* deducts movement points from hit giants, and also works vs a few late game enemies */
 /* bonus damage applies to all large monsters, and has better damage than a normal axe (base d6+d4/3d4 total) */
-A("Giantslayer",		AXE,							"worn %s labeled as belonging to 'Jack'",
+A("Giantslayer",		AXE,							(const char *)0,
 	2000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, MT_ROCKTHROW /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_GIANT /*MA*/, 0 /*MV*/),
@@ -285,7 +285,7 @@ A("The Vampire Killer",	BULLWHIP,						"bloodstained chain whip",
 	),
 
 /* works against just about all the late game baddies */
-A("Kingslayer",			STILETTO,						"%s inlaid with delicate filigree",
+A("Kingslayer",			STILETTO,						"delicately filigreed %s",
 	2500L, GOLD, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_GIFT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MG_LORD | MG_PRINCE) /*MA*/, 0 /*MV*/),
@@ -340,7 +340,7 @@ A("Trollsbane",			MORNING_STAR,					(const char *)0,
  *	Now it will never strike the Valkyrie or fall to the ground,
  *	if both are in good condition.
  */
-A("Mjollnir",			WAR_HAMMER,						"massive %s embossed with a lightning bolt",
+A("Mjollnir",			WAR_HAMMER,						"lightning-bolt embossed %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_VALKYRIE, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
@@ -392,7 +392,7 @@ A("Atlantean Royal Sword",			TWO_HANDED_SWORD,	(const char *)0,
 	),
 
 /*	Need a way to convert era times to Japanese luni-solar months.*/
-A("Kiku-ichimonji",		KATANA,							"%s with a chrysanthemum on the hilt",
+A("Kiku-ichimonji",		KATANA,							"chrysanthemum-hilted %s",
 	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_SAMURAI, NON_PM, TIER_C, (ARTG_GIFT),
 	NO_MONS(),
@@ -412,7 +412,7 @@ A("Jinja Naginata",		NAGINATA,						(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("Rhongomyniad",		LANCE,							"%s engraved with a grail icon",
+A("Rhongomyniad",		LANCE,							(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_KNIGHT, NON_PM, TIER_C, (ARTG_GIFT),
 	NO_MONS(),
@@ -423,7 +423,7 @@ A("Rhongomyniad",		LANCE,							"%s engraved with a grail icon",
 	),
 
 /*Needs encyc entry*/
-A("The Rod of Lordly Might",		MACE,				"%s with buttons on the haft",
+A("The Rod of Lordly Might",		MACE,				(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
@@ -434,7 +434,7 @@ A("The Rod of Lordly Might",		MACE,				"%s with buttons on the haft",
 	),
 
 /* uses the Musicalize skill; learns special abilities from hearing songs */
-A("The Singing Sword",	LONG_SWORD,						"%s that emanates soft music",
+A("The Singing Sword",	LONG_SWORD,						"softly singing %s",
 	5000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, PM_BARD, NON_PM, TIER_A, (ARTG_GIFT|ARTG_INHER|ARTG_MAJOR),
 	NO_MONS(),
@@ -471,7 +471,7 @@ A("Staff of Necromancy", QUARTERSTAFF,					"skull-topped %s",
  */
 /*Needs encyc entry?*/
 /*provides curse res while wielded */
-A("Magicbane",			ATHAME,							"%s engraved with mystical runes",
+A("Magicbane",			ATHAME,							"mystically runed %s",
 	3500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_WIZARD, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
@@ -500,7 +500,7 @@ A("Fuma-itto no Ken",	BROADSWORD,						(const char *)0,
 	CREATE_AMMO, NOFLAG /*makes shuriken*/
 	),
 
-A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"%s with a hydra-head hilt",
+A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"scorpion-hilted %s",
 	3000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, PM_ROGUE, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
@@ -524,7 +524,7 @@ A("Spineseeker",		SHORT_SWORD,					(const char *)0,
 
 /*//////////Double Damage Artifacts//////////*/
 
-A("Grayswandir",		SABER,							"%s decorated with amber swirls",
+A("Grayswandir",		SABER,							"amber-swirled %s",
 	8000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
 	NO_MONS(),
@@ -679,7 +679,7 @@ A("Sode no Shirayuki",	KATANA,							"snow-colored %s", // colored not covered
 
 /*Tobiume is an awkward weapon.  It loses 3 damage vs large and 2 vs small*/
 /*Ram and Fire blast only trigger if enemy is low hp*/
-A("Tobiume",			LONG_SWORD,						"three-pronged %s",
+A("Tobiume",			LONG_SWORD,						"three-branched %s",
 	8000L, METAL, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
@@ -707,7 +707,7 @@ A("The Lance of Longinus",		SPEAR,					(const char *)0,
 	// TRAP_DET, A_NONE, PM_ARCHEOLOGIST, NON_PM, 0L,
 	// 0,0,0),
 
-A("The Arkenstone",		DIAMOND,						"rainbow-glinting sparkling %s", 
+A("The Arkenstone",		DIAMOND,						"rainbow-glinting %s", 
 	8000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, NOFLAG,
 	NO_MONS(),
