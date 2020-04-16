@@ -1729,6 +1729,14 @@ poly_obj(obj, id)
 	    break;
 	}
 
+	/* add focusing gems to lightsabers */
+	if (is_lightsaber(otmp)) {
+		struct obj *gem = mksobj(rn2(6) ? BLUE_FLUORITE : GREEN_FLUORITE, TRUE, FALSE);
+		gem->quan = 1;
+		gem->owt = weight(gem);
+		add_to_container(otmp, gem);
+	}
+
 	/* update the weight */
 	otmp->owt = weight(otmp);
 
