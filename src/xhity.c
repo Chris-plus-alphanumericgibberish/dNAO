@@ -11552,11 +11552,6 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			seardmg += rnd(20);
 		}
 	}
-	/* lightsabers */
-	else if (otmp && weapon && is_lightsaber(weapon) && litsaber(weapon))
-	{
-		/* do not do any hates-obj damage */;
-	}
 	/* weapons/armor */
 	else if (otmp &&
 		(otmp == weapon ||							// if using a weapon, only check that weapon (probably moot)
@@ -11572,7 +11567,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				jadeobj |= slot;
 		}
 		if (hates_iron(pd) &&
-			otmp->obj_material == IRON) {
+			otmp->obj_material == IRON &&
+			!(is_lightsaber(otmp) && litsaber(otmp))) {
 			ironobj |= slot;
 		}
 		
