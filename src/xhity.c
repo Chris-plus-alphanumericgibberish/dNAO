@@ -8902,7 +8902,7 @@ int vis;
 		break;
 		/* basic damage engulf types */
 	case AD_PHYS:
-		if (pa->mtyp == PM_FOG_CLOUD) {
+		if (pa->mtyp == PM_FOG_CLOUD || pa->mtyp == PM_STEAM_VORTEX) {
 			if (youdef) {
 				You("are laden with moisture and %s",
 					flaming(youracedata) ? "are smoldering out!" :
