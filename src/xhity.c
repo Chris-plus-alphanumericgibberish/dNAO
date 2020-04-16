@@ -508,6 +508,24 @@ int tary;
 		}
 	}
 
+	/* set monster attacking flag */
+	if (!youagr && youdef) {
+		//It is going to try attacking you now, even if it fails for some reason, it tried.
+		magr->mattackedu = TRUE; 
+	}
+
+	/* monsters can use offensive items */
+	/* Unlike defensive stuff, don't let them use item _and_ attack. */
+	if (!youagr && find_offensive(magr)) {
+		int foo = use_offensive(magr);
+
+		if (foo == 1)
+			return MM_AGR_DIED;
+		if (foo == 2)
+			return MM_AGR_STOP;
+	}
+
+
 	/* lillends (that aren't you) can use masks */
 	if (pa->mtyp == PM_LILLEND
 		&& !youagr
