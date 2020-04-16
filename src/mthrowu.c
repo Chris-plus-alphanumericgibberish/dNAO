@@ -73,7 +73,7 @@ extern int monstr[];
 struct monst *
 mfind_target(mtmp, force_linedup)
 struct monst *mtmp;
-int force_linedup;
+int force_linedup;	/* if TRUE, we have some offensive item ready that will work if we are lined up */
 {
     int dir, origdir = -1;
     int x, y, dx, dy;
@@ -98,8 +98,9 @@ int force_linedup;
         register int gx = STRAT_GOALX(mtmp->mstrategy),
                      gy = STRAT_GOALY(mtmp->mstrategy);
         mtmp2 = m_at(gx, gy);
-	if (mtmp2 && (!force_linedup || mlined_up(mtmp, mtmp2, FALSE)) && (
+	if (mtmp2 && (!force_linedup || lined_up(mtmp)) && (
 			   (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan && mlined_up(mtmp, mtmp2, FALSE))
+			|| (force_linedup && mlined_up(mtmp, mtmp2, FALSE))
 			|| (attacktype(mtmp->data, AT_SPIT) && mlined_up(mtmp, mtmp2, FALSE))
 			|| (attacktype(mtmp->data, AT_TNKR) && mlined_up(mtmp, mtmp2, FALSE))
 			|| (attacktype(mtmp->data, AT_ARRW) && mlined_up(mtmp, mtmp2, FALSE))
@@ -144,6 +145,7 @@ int force_linedup;
     	if (!mtmp->mpeaceful && !conflicted &&
 			((mtmp->mstrategy & STRAT_STRATMASK) == STRAT_NONE) && (
 			   (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan && lined_up(mtmp))
+			|| (force_linedup && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_SPIT) && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_TNKR) && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_ARRW) && lined_up(mtmp))
@@ -213,8 +215,9 @@ int force_linedup;
 			}
 		}
 	
-    	if (!mtmp->mpeaceful && (!force_linedup || lined_up(mtmp)) && !conflicted && (
+		if (!mtmp->mpeaceful && (!force_linedup || lined_up(mtmp)) && !conflicted && (
 			   (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan && lined_up(mtmp))
+			|| (force_linedup && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_SPIT) && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_TNKR) && lined_up(mtmp))
 			|| (attacktype(mtmp->data, AT_ARRW) && lined_up(mtmp))
