@@ -3012,6 +3012,8 @@ u_init()
 		horrors[j]->mflagsg &= ~MG_PNAME;				/* not a proper name */
 
 		/* some cleanup to reduce the trainwreck*/
+		if (horrors[j]->mflagsm & MM_WALLWALK)
+			horrors[j]->mflagsm &= ~(MM_TUNNEL | MM_NEEDPICK);
 		if (horrors[j]->mflagsm & MM_TUNNEL)
 			horrors[j]->mflagsm &= ~MM_NEEDPICK;
 		if (horrors[j]->mflagsm & MM_STATIONARY)
