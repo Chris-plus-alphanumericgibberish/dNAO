@@ -776,8 +776,8 @@ int tary;
 							y(magr) == tary - dy
 							)
 						{
-							struct monst *mdef2 = m_at(tarx + dx, tary + dy);
-							if (mdef2 && !DEADMONSTER(mdef2)){ //Can hit a worm multiple times
+							struct monst *mdef2 = m_u_at(tarx + dx, tary + dy);
+							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)){ //Can hit a worm multiple times
 								int vis2 = VIS_NONE;
 								if(youagr || canseemon(magr))
 									vis2 |= VIS_MAGR;
@@ -793,8 +793,8 @@ int tary;
 						nx = sgn(dx+dy);
 						ny = sgn(dy-dx);
 						if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
-							struct monst *mdef2 = m_at(x(magr) + nx, y(magr) + ny);
-							if (mdef2 && !DEADMONSTER(mdef2)) { //Can hit a worm multiple times
+							struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
+							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
 								int vis2 = VIS_NONE;
 								if(youagr || canseemon(magr))
 									vis2 |= VIS_MAGR;
@@ -810,8 +810,8 @@ int tary;
 						nx = sgn(dx-dy);
 						ny = sgn(dx+dy);
 						if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
-							struct monst *mdef2 = m_at(x(magr) + nx, y(magr) + ny);
-							if (mdef2 && !DEADMONSTER(mdef2)) { //Can hit a worm multiple times
+							struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
+							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
 								int vis2 = VIS_NONE;
 								if(youagr || canseemon(magr))
 									vis2 |= VIS_MAGR;
@@ -843,8 +843,8 @@ int tary;
 							y(magr) == tary - dy
 							)
 						{
-							struct monst *mdef2 = m_at(tarx + dx, tary + dy);
-							if (mdef2 && !DEADMONSTER(mdef2)){ //Can hit a worm multiple times
+							struct monst *mdef2 = m_u_at(tarx + dx, tary + dy);
+							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)){ //Can hit a worm multiple times
 								int vis2 = VIS_NONE;
 								if(youagr || canseemon(magr))
 									vis2 |= VIS_MAGR;

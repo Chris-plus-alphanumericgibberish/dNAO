@@ -606,5 +606,7 @@ extern dlevel_t level;	/* structure describing the current level */
 						(struct monst *)0)
 #define m_buried_at(x,y)	(MON_BURIED_AT(x,y) ? level.monsters[x][y] : \
 						       (struct monst *)0)
+#define m_u_at(x,y)		(!isok(x,y) ? (struct monst *)0 : MON_AT(x,y) ? level.monsters[x][y] : \
+						(x == u.ux && y == u.uy) ? &youmonst : (struct monst *)0)
 
 #endif /* RM_H */
