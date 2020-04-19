@@ -8602,11 +8602,14 @@ int vis;
 				if (!vegetarian(pd))
 					violated_vegetarian();
 
-				// /* Use up amulet of life saving */
-				// if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
-
 				newuhs(FALSE);
+
+				/* kludge to hide monster from view, to avoid seeing messages about its lifesaving */
+				char cantseethis = (viz_array[y(mdef)][x(mdef)] & (IN_SIGHT | COULD_SEE));
+				viz_array[y(mdef)][x(mdef)] &= ~(IN_SIGHT | COULD_SEE);
 				xkilled(mdef, 2);
+				viz_array[y(mdef)][x(mdef)] |= cantseethis;
+
 				if (*hp(mdef) > 0) { /* monster lifesaved */
 					You("hurriedly regurgitate the sizzling in your %s.",
 						body_part(STOMACH));
@@ -8690,11 +8693,12 @@ int vis;
 				if (flags.verbose && flags.soundok)
 					verbalize("Burrrrp!");
 
-				// /* Use up amulet of life saving - no lifesaving allowed? */
-				// if (!!(otmp = mlifesaver(mdef))) m_useup(mdef, otmp);
-
 				/* kill */
+				/* kludge to hide monster from view, to avoid seeing messages about its lifesaving */
+				char cantseethis = (viz_array[y(mdef)][x(mdef)] & (IN_SIGHT | COULD_SEE));
+				viz_array[y(mdef)][x(mdef)] &= ~(IN_SIGHT | COULD_SEE);
 				result = xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
+				viz_array[y(mdef)][x(mdef)] |= cantseethis;
 
 				/* if they survivied, by some miracle, end */
 				if (result&MM_DEF_LSVD) {
