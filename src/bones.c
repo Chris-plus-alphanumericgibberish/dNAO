@@ -252,6 +252,9 @@ struct obj *cont;
 		} else if(u.thoughts & RADIANCE){
 			u.thoughts &= ~RADIANCE;
 			otmp = mksobj(RADIANCE_GLYPH, FALSE, FALSE);
+		} else if(u.thoughts & BEASTS_EMBRACE){
+			u.thoughts &= ~BEASTS_EMBRACE;
+			otmp = mksobj(BEAST_S_EMBRACE_GLYPH, FALSE, FALSE);
 		} else {
 			pline("Can't find glyph!");
 		}

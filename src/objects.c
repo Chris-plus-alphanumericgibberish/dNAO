@@ -364,6 +364,10 @@ WEAPON("bullwhip", (char *)0,
 WEAPON("viperwhip", (char *)0,
 	1, 0, MZ_MEDIUM,  2, 30, 40,  4,  3, 2, P,   P_WHIP, SILVER, IDED|UNIDED, HI_SILVER),
 
+WEAPON("bestial claw", (char *)0,
+	1, 0, MZ_MEDIUM,  0, 10, 100,  10,  8, 0, S|P,   P_BARE_HANDED_COMBAT, BONE, FALSE, CLR_WHITE),
+
+
 
 /* Firearms */
 //ifdef FIREARMS
@@ -1332,6 +1336,7 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 	BONE_TILE("moon glyph",  "sword-crossed eye",   0),						// MOON
 	BONE_TILE("writhe glyph",  "writhing vesica piscis",   0),				// WRITHE
 	BONE_TILE("radiance glyph",  "eyed triangle",   0),						// RADIANCE
+	BONE_TILE("beast's embrace glyph",  "curling beast's claw",   0),		// BEASTS_EMBRACE
 #undef BONE_TILE
 #define METALIC_SLAB(name,text, clr) OBJECT( \
 		OBJ(name,text), BITS(0,0,0,0,1,0,1,1,MZ_TINY,0,0,P_NONE,METAL, IDED|UNIDED), 0, \

@@ -538,7 +538,8 @@ test_twoweapon()
 	if (!could_twoweap(youmonst.data) && 
 		!(!Upolyd && Role_if(PM_ANACHRONONAUT)) && 
 		!(u.specialSealsActive&SEAL_MISKA) && 
-		!(u.specialSealsActive&SEAL_BLACK_WEB && !uswapwep) && 
+		!(u.specialSealsActive&SEAL_BLACK_WEB && !uswapwep) &&
+		!(uwep && uwep->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE) && !uswapwep) && 
 		!(!Upolyd && uwep && uswapwep && 
 			(artilist[uwep->oartifact].inv_prop == BLADESONG && artilist[uswapwep->oartifact].inv_prop == BLADESONG)
 		 ) && 
@@ -553,7 +554,10 @@ test_twoweapon()
 		    pline("%s aren't able to use two weapons at once.",
 			  makeplural((flags.female && urole.name.f) ?
 				     urole.name.f : urole.name.m));
-	} else if ((!uwep || !uswapwep) && !u.umartial && !((u.specialSealsActive&SEAL_BLACK_WEB) && !uswapwep))
+	} else if ((!uwep || !uswapwep) && !u.umartial &&
+				!(u.specialSealsActive&SEAL_BLACK_WEB && !uswapwep) && 
+				!(uwep && uwep->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE) && !uswapwep)
+		)	
 		Your("%s%s%s empty.", uwep ? "off " : uswapwep ? "main " : "",
 			body_part(HAND), (!uwep && !uswapwep) ? "s are" : " is");
 	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep)) && !(uwep && (uwep->otyp == STILETTOS))) {
