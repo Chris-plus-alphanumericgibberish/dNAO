@@ -2166,8 +2166,6 @@ long timeout;
 int
 donull()
 {
-	struct obj * otmp = mksobj(CANDLE_OF_INVOCATION, FALSE, FALSE);
-	dropy(otmp);
 	static long lastreped = -13;//hacky way to tell if the player has recently tried repairing themselves
 	if(uclockwork){
 		if(!Upolyd && u.uhp<u.uhpmax){
