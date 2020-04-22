@@ -5644,6 +5644,7 @@ register struct	monst	*mtmp;
 				//Yahar'gul Black Set, badly translated into nethack
 				otmp = mksobj(HELMET, TRUE, FALSE);
 				otmp->obj_material = IRON;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 
 				otmp = mksobj(LEATHER_ARMOR, TRUE, FALSE);
@@ -5659,7 +5660,7 @@ register struct	monst	*mtmp;
 				otmp->spe = rn2(4);
 				(void) mpickobj(mtmp, otmp);
 				
-				if (!rn2(4)){
+				if (!rn2(3)){
 					otmp = mksobj(BEAST_S_EMBRACE_GLYPH, TRUE, FALSE);
 					(void) mpickobj(mtmp, otmp);
 				}
