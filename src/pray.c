@@ -801,7 +801,7 @@ maybe_god_gives_gift()
 //Disable while tiering and full behaviour is still under discussion
 //	return !rn2(10 + (u.uartisval * u.uartisval / 10));
 
-	return !rn2(10 + (2 * u.ugifts * (u.ugifts + nartifacts)));
+	return !rn2(10 + (2 * u.ugifts * nartifacts));
 }
 
 
