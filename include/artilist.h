@@ -1341,7 +1341,7 @@ A("The Hand-Mirror of Cthylla",		MIRROR,					(const char *)0,
 	),
 
 /*from the works of HP Lovecraft*/
-A("The Silver Key",					UNIVERSAL_KEY,			"silver key",
+A("The Silver Key",					UNIVERSAL_KEY,			"strangely figured %s",
 	5000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, NON_PM, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),
