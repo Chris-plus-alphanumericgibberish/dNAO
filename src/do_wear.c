@@ -2462,7 +2462,10 @@ find_dr()
 	
 	for(i = 0; i < 5; i++)
 		udr += slot_udr(i,0);
-	udr /= 5;
+	udr += slot_udr(UPPER_TORSO_DR,0);
+	udr += slot_udr(LOWER_TORSO_DR,0);
+	udr += max(slot_udr(UPPER_TORSO_DR,0), slot_udr(ARM_DR,0));
+	udr /= 9;
 	if (udr > 127) udr = 127;	/* u.uac is an schar */
 	if(udr != u.udr){
 		u.udr = udr;
@@ -2642,8 +2645,35 @@ int
 roll_udr(magr)
 struct monst *magr;
 {
-	int udr = slot_udr(rn2(5), magr);
+	int slot;
+	int udr;
 	int cap = 10;
+	switch(rn2(9)){
+		case 0:
+		case 1:
+			slot = UPPER_TORSO_DR;
+		break;
+		case 2:
+		case 3:
+			slot = LOWER_TORSO_DR;
+		break;
+		case 4:
+			slot = HEAD_DR;
+		break;
+		case 5:
+			slot = LEG_DR;
+		break;
+		case 6:
+			slot = ARM_DR;
+		break;
+		case 7:
+		case 8:
+			if(slot_udr(UPPER_TORSO_DR, magr) > slot_udr(ARM_DR, magr))
+				slot = UPPER_TORSO_DR;
+			else slot = ARM_DR;
+		break;
+	}
+	udr = slot_udr(slot, magr);
 	if(active_glyph(DEEP_SEA))
 		cap += 3;
 	//diminishing returns after 10 points of DR.

@@ -3178,12 +3178,8 @@ struct monst *owner;
 //	int is_lethe = level.flags.lethe || lethe;
 	int is_lethe = lethe;
 	if(owner == &youmonst){
-		if(u.ufirst_sky ||
-		  (uarmc
-			&& (uarmc->otyp == OILSKIN_CLOAK || uarmc->greased)
-			&& (!uarmc->cursed || rn2(3))
-		   ) || (
-			ublindf
+		if(u.ufirst_sky || u.sealsActive&SEAL_ENKI || Preservation ||
+		  (ublindf
 			&& (ublindf->otyp == R_LYEHIAN_FACEPLATE || ublindf->oartifact == ART_MASK_OF_TLALOC)
 			&& (!ublindf->cursed || rn2(3))
 		   ) || (
@@ -3194,9 +3190,15 @@ struct monst *owner;
 			uarms
 			&& uarms->otyp == WHITE_DRAGON_SCALE_SHIELD
 			&& (!uarms->cursed || rn2(3))
-		   ) || u.sealsActive&SEAL_ENKI
+		   )
 		) {
-			if(uarmc && uarmc->otyp != OILSKIN_CLOAK && uarmc->greased){
+			return 0;
+		}
+		if(uarmc
+			&& (uarmc->otyp == OILSKIN_CLOAK || uarmc->greased)
+			&& (!uarmc->cursed || rn2(3))
+		) {
+			if(uarmc->greased){
 				if (force || !rn2(uarmc->blessed ? 4 : 2)){
 					uarmc->greased = 0;
 					pline("The layer of grease on your %s dissolves.", xname(uarmc));

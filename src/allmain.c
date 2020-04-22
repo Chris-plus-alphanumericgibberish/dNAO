@@ -532,6 +532,7 @@ you_regen_hp()
 			|| Role_if(PM_SAMURAI)
 			|| Role_if(PM_VALKYRIE)
 			|| Role_if(PM_MONK)
+			|| Role_if(PM_CONVICT)
 			|| (u.sealsActive&SEAL_BERITH)
 		))
 			reglevel *= 2;

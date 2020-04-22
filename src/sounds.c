@@ -6234,6 +6234,10 @@ struct monst *nurse;
 		getlin("How many courses?", inbuf);
 		if (*inbuf == '\033') count = 1;
 		else count = atoi(inbuf);
+		if(count == 0){
+			pline("Never mind.");
+			return FALSE;
+		}
 		if(count < 0)
 			count = 1;
 	}
@@ -6434,6 +6438,10 @@ struct monst *dollmaker;
 		getlin("How many?", inbuf);
 		if (*inbuf == '\033') count = 1;
 		else count = atoi(inbuf);
+		if(count == 0){
+			pline("Never mind.");
+			return FALSE;
+		}
 		if(count < 0)
 			count = 1;
 	}
