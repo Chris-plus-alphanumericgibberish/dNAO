@@ -847,6 +847,15 @@ struct obj *scroll;
 			pline("Nothing happens.");
 			return 0;
 		}
+	} else if(scroll->otyp == BEAST_S_EMBRACE_GLYPH){
+		thought = BEASTS_EMBRACE;
+		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
+			pline("A bestial figure takes refuge inside you.");
+			u.thoughts |= thought;
+		} else {
+			pline("Nothing happens.");
+			return 0;
+		}
 	} else {
 		impossible("bad shard");
 		return 0;

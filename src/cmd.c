@@ -2101,6 +2101,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (active_glyph(RADIANCE)){
 		enl_msg("The golden pyramid ", "increases", "increased", " magical healing by 30%");
 	}
+	if (active_glyph(BEASTS_EMBRACE)){
+		enl_msg("The hidden figure inside of you ", "lets", "let", " you succumb to the inner beast");
+	}
 	
 	/*** Troubles ***/
 	Sprintf(buf, "%d sanity points", u.usanity);
@@ -3352,6 +3355,7 @@ resistances_enlightenment()
 	if (active_glyph(MOON)) putstr(en_win, 0, "You see the face of the sympathetic moon.");
 	if (active_glyph(WRITHE)) putstr(en_win, 0, "A subtle mucus covers your brain.");
 	if (active_glyph(RADIANCE)) putstr(en_win, 0, "Your mind is impaled on a golden pyramid.");
+	if (active_glyph(BEASTS_EMBRACE)) putstr(en_win, 0, "A bestial figure hides inside of you.");
 	
 	/*** Troubles ***/
 	if(u.usanity < 100)

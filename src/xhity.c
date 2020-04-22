@@ -826,9 +826,7 @@ int tary;
 						otmp->otyp = CLUB;
 					}
 					/* Rakuyo hit additional targets, if your insight is high enough to percieve the blood */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 
-						&& otmp && is_rakuyo(otmp)
-					){
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && is_rakuyo(otmp)){
 						int subresult = 0;
 						/* try to find direction (u.dx and u.dy may be incorrect) */
 						int dx = sgn(tarx - x(magr));
@@ -1979,6 +1977,25 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			/* this is applied to all acceptable attacks; no subout marker is necessary */
 		}	
 	}
+	
+	/* the bestial claw combined with the beast's embrace allows for a powerful extra claw attk */
+	if (youagr && uwep && uwep->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE)) {
+		if (attk->aatyp == AT_XWEP && !uswapwep && u.twoweap) {
+			/* replace the attack */
+			attk->aatyp = AT_CLAW;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 1+u.ulevel/8; // from 1 to 4 dice, hitting 4 at xp 24+
+			
+			// scales inversely with insight, for insight die size of 5 at 15 down to 1 at 40
+			// total dice assuming +7 and xp30 is 4d12 / 4d8 at insight 15/40
+			attk->damd = max(uwep->spe, 1);
+			if (u.uinsight <= 60)
+				attk->damd += ((60-u.uinsight)/20)*((60-u.uinsight)/20);
+						
+			/* this is applied to all acceptable attacks; no subout marker is necessary */
+		}	
+	}
+	
 
 	/* creatures wearing the Grappler's Grasp and currently grappling something get a hug attack if they don't have one already */
 	if (is_null_attk(attk) && !by_the_book && !dmgtype(pa, AT_HUGS) && !(*subout&SUBOUT_GRAPPLE)) {
@@ -11327,6 +11344,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (magr && is_backstabber(pa))
 		sneak_dice++;
 	if (weapon && weapon->owornmask && weapon->oartifact == ART_SPINESEEKER)
+		sneak_dice++;
+	if (weapon && weapon->owornmask && weapon->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE))
 		sneak_dice++;
 	if (weapon && weapon->owornmask && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_ANDROMALIUS)
 		sneak_dice++;

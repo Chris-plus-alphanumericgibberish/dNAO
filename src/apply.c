@@ -2135,6 +2135,9 @@ int otyp;
 	} else if(otyp == RADIANCE_GLYPH){
 		u.thoughts &= ~RADIANCE;
 
+	} else if(otyp == BEAST_S_EMBRACE_GLYPH){
+		u.thoughts &= ~BEASTS_EMBRACE;
+
 	} else {
 		impossible("Can't find glyph!");
 	}
@@ -6942,6 +6945,15 @@ dotrephination_menu()
 	if (u.thoughts&RADIANCE){
 		Sprintf(buf, "Extract the golden pyramid");
 		any.a_int = RADIANCE_GLYPH;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	
+	if (u.thoughts&RADIANCE){
+		Sprintf(buf, "Extract the bestial figure");
+		any.a_int = BEAST_S_EMBRACE_GLYPH;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
