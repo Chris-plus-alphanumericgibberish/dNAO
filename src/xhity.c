@@ -1986,12 +1986,12 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1+u.ulevel/8; // from 1 to 4 dice, hitting 4 at xp 24+
 			
-			// scales inversely with insight, for insight die size of 5 at 15 down to 1 at 40
-			// total dice assuming +7 and xp30 is 4d12 / 4d8 at insight 15/40
+			// scales inversely with insight, insight-based size is 15->5, 40->1, 60->0
+			// total dice assuming +7 and xp30 is 4d12 / 4d8 / 4d7 at insight 15/40/60
 			attk->damd = max(uwep->spe, 1);
 			if (u.uinsight <= 60)
-				attk->damd += ((60-u.uinsight)/20)*((60-u.uinsight)/20);
-						
+				attk->damd += (int)(((60.0-u.uinsight)/20.0)*((60.0-u.uinsight)/20.0));
+
 			/* this is applied to all acceptable attacks; no subout marker is necessary */
 		}	
 	}
