@@ -6951,7 +6951,7 @@ dotrephination_menu()
 		incntlet++;
 	}
 	
-	if (u.thoughts&RADIANCE){
+	if (u.thoughts&BEASTS_EMBRACE){
 		Sprintf(buf, "Extract the bestial figure");
 		any.a_int = BEAST_S_EMBRACE_GLYPH;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
