@@ -123,6 +123,8 @@ boolean talk;
 	
 	for (first = 0; minions[first] != NON_PM; first++)
 	    if (!(mvitals[minions[first]].mvflags & G_GONE && !In_quest(&u.uz)) && monstr[minions[first]] > mlev/2) break;
+	
+	mlev = (mlev+u.ulevel)/2;
 	if(minions[first] == NON_PM){ //All minions too weak, or no minions
 		if(first == 0) return (struct monst *) 0;
 		else mtyp = minions[first-1];
