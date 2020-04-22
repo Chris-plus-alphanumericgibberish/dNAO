@@ -533,9 +533,11 @@
 				 (ptr)->mtyp == PM_EDDERKOP || \
 				 (ptr)->mtyp == PM_AVATAR_OF_LOLTH || (ptr)->mtyp == PM_DROW_MUMMY)
 #define is_unicorn(ptr)		((ptr)->mlet == S_UNICORN && likes_gems(ptr))
-#define is_longworm(ptr)	(((ptr)->mtyp == PM_BABY_LONG_WORM) || \
+#define is_longworm(ptr)	(\
 				 ((ptr)->mtyp == PM_LONG_WORM) || \
-				 ((ptr)->mtyp == PM_LONG_WORM_TAIL))
+				 ((ptr)->mtyp == PM_LONG_WORM_TAIL) || \
+				 ((ptr)->mtyp == PM_HUNTING_HORROR) || \
+				 ((ptr)->mtyp == PM_HUNTING_HORROR_TAIL))
 #define wants_bell(ptr)	((ptr->mflagst & MT_WANTSBELL))
 #define wants_book(ptr)	((ptr->mflagst & MT_WANTSBOOK))
 #define wants_cand(ptr)	((ptr->mflagst & MT_WANTSCAND))
