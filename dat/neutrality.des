@@ -1789,7 +1789,7 @@ CONTAINER:'`',"statue",(47,08)
 CONTAINER:'`',"statue",(38,08)
 CONTAINER:'`',"statue",(26,18)
 # Monsters
-MONSTER:random,random,random
+MONSTER:'@',"werewolf",random
 MONSTER:random,random,random
 MONSTER:random,random,random
 # Objects
@@ -2986,7 +2986,7 @@ MONSTER[75%]:'w',"crimson writher",random
 MONSTER[75%]:'p',"radiant pyramid",random
 
 #
-# The level with the ???'s fortress...
+# The level with the alhoon's fortress...
 #
 MAZE: "nkai-b",' '
 FLAGS: lethe
@@ -3028,7 +3028,7 @@ TRAP:"hole",random
 TRAP:"hole",random
 TRAP:"hole",random
 TRAP:"hole",random
-# The ??? gets a drawbridge...
+# The alhoon gets a drawbridge...
 DRAWBRIDGE:(28,16),west,closed
 # One secret door
 DOOR:locked,(23,18)
@@ -3040,8 +3040,8 @@ MONSTER:'\'',"parasitized doll",(24,16)
 #ENGRAVING:(22,18),burn,"This space for rent."
 # One sneaky trap
 #TRAP:"magic",(24,16)
-# The ??? has some guards
-MONSTER:''',"iron golem",(22,16),hostile
+# The alhoon has some guards
+MONSTER:'@',"werewolf",(22,16),hostile
 MONSTER:'d',"hell hound",(24,14),hostile,asleep
 MONSTER:'P',"green slime",(24,18),hostile,asleep
 MONSTER:'Z',"skeleton",(26,16),hostile,asleep

@@ -5639,7 +5639,34 @@ register struct	monst	*mtmp;
 				otmp->ovar1 = 3;
 				(void) mpickobj(mtmp,otmp);
 			}
+		} else if (ptr->mtyp == PM_HUMAN_WEREWOLF){
+			if (In_lost_cities(&u.uz)){
+				//Yahar'gul Black Set, badly translated into nethack
+				otmp = mksobj(HELMET, TRUE, FALSE);
+				otmp->obj_material = IRON;
+				fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
+
+				otmp = mksobj(LEATHER_ARMOR, TRUE, FALSE);
+				(void) mpickobj(mtmp, otmp);
+
+				otmp = mksobj(GLOVES, TRUE, FALSE);
+				(void) mpickobj(mtmp, otmp);
+			
+				otmp = mksobj(HIGH_BOOTS, TRUE, FALSE);
+				(void) mpickobj(mtmp, otmp);
+
+				otmp = mksobj(BESTIAL_CLAW, TRUE, FALSE);
+				otmp->spe = rn2(4);
+				(void) mpickobj(mtmp, otmp);
+				
+				if (!rn2(3)){
+					otmp = mksobj(BEAST_S_EMBRACE_GLYPH, TRUE, FALSE);
+					(void) mpickobj(mtmp, otmp);
+				}
+			}
 		}
+		
 		break;
 //		case S_IMP:
 //			switch(monsndx(ptr)) {
@@ -5749,7 +5776,33 @@ register struct	monst	*mtmp;
 				otmp->oproperties = OPROP_COLD;
 				fix_object(otmp);
 				(void) mpickobj(mtmp,otmp);
+			} else if (ptr->mtyp == PM_WEREWOLF){
+				if (In_lost_cities(&u.uz)){
+					//Yahar'gul Black Set, badly translated into nethack
+					otmp = mksobj(HELMET, TRUE, FALSE);
+					otmp->obj_material = IRON;
+					(void) mpickobj(mtmp, otmp);
+
+					otmp = mksobj(LEATHER_ARMOR, TRUE, FALSE);
+					(void) mpickobj(mtmp, otmp);
+
+					otmp = mksobj(GLOVES, TRUE, FALSE);
+					(void) mpickobj(mtmp, otmp);
+			
+					otmp = mksobj(HIGH_BOOTS, TRUE, FALSE);
+					(void) mpickobj(mtmp, otmp);
+
+					otmp = mksobj(BESTIAL_CLAW, TRUE, FALSE);
+					otmp->spe = rn2(4);
+					(void) mpickobj(mtmp, otmp);
+				
+					if (!rn2(4)){
+						otmp = mksobj(BEAST_S_EMBRACE_GLYPH, TRUE, FALSE);
+						(void) mpickobj(mtmp, otmp);
+					}
+				}
 			}
+			
 		case S_QUADRUPED:
 			//Escaped war-elephant
 			if(mtmp->mtyp == PM_MUMAK){

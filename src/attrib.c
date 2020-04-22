@@ -1337,6 +1337,9 @@ long int thought;
 		break;
 		case RADIANCE:
 		break;
+		case BEASTS_EMBRACE:
+			sanlevel = 90;
+		break;
 		default:
 			impossible("bad glyph %ld in active_glyph!", thought);
 			return 0;
@@ -1407,6 +1410,9 @@ long int thought;
 		break;
 		case RADIANCE:
 			insightlevel = 12;
+		break;
+		case BEASTS_EMBRACE:
+			insightlevel = 15;
 		break;
 		default:
 			impossible("bad glyph %ld in active_glyph!", thought);

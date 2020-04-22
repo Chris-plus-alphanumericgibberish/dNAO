@@ -814,6 +814,7 @@ struct you {
 #define	MOON							0x00000000000010000L
 #define	WRITHE							0x00000000000020000L
 #define	RADIANCE						0x00000000000040000L
+#define	BEASTS_EMBRACE					0x00000000000080000L
 };	/* end of `struct you' */
 #define uclockwork ((Race_if(PM_CLOCKWORK_AUTOMATON) && !Upolyd) || (Upolyd && youmonst.data->mtyp == PM_CLOCKWORK_AUTOMATON))
 #define uandroid ((Race_if(PM_ANDROID) && !Upolyd) || (Upolyd && (youmonst.data->mtyp == PM_ANDROID || youmonst.data->mtyp == PM_GYNOID)))
