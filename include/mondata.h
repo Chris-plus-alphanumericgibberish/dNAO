@@ -587,6 +587,7 @@
 				  (ptr)->mtyp == PM_BRIGHT_WALKER || \
 				  (ptr)->mtyp == PM_FLAMING_SPHERE || \
 				  (ptr)->mtyp == PM_SHOCKING_SPHERE || \
+				  (ptr)->mtyp == PM_PARASITIZED_DOLL || \
 				  (ptr)->mtyp == PM_MOTE_OF_LIGHT || \
 				  (ptr)->mtyp == PM_BALL_OF_LIGHT || \
 				  (ptr)->mtyp == PM_BLOODY_SUNSET || \

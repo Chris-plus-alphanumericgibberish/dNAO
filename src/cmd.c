@@ -2196,6 +2196,12 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 			enl_msg("Sometimes, you ", "will fail", "failed", " to attack worms and tentacled monsters");
 			enl_msg("You ", "take", "took", " increased damage from worms and tentacles");
 		}
+		if(has_blood(youracedata)){
+			if (u.umadness&MAD_FRENZY){
+				Sprintf(buf, "your %s seethe below your %s", body_part(BLOOD), body_part(BODY_SKIN));
+				enl_msg("You ", "feel ", "felt ", buf);
+			}
+		}
 	}
 	
 	/*** More Troubles ***/
@@ -2995,6 +3001,12 @@ int final;
 		if (u.umadness&MAD_HELMINTHOPHOBIA){
 			dump("  ", "You had an irrational fear of squirming things");
 		}
+		if(has_blood(youracedata)){
+			if (u.umadness&MAD_FRENZY){
+				Sprintf(buf, "You felt your %s seethe below your %s", body_part(BLOOD), body_part(BODY_SKIN));
+				dump("  ", buf);
+			}
+		}
 	}
 	/*** More Troubles ***/
 	if (Halluc_resistance) 	dump("  ", "You resisted hallucinations");
@@ -3449,6 +3461,12 @@ resistances_enlightenment()
 		}
 		if (u.umadness&MAD_HELMINTHOPHOBIA){
 			putstr(en_win, 0, "You have an irrational fear of squirming things.");
+		}
+		if(has_blood(youracedata)){
+			if (u.umadness&MAD_FRENZY){
+				Sprintf(buf, "You feel your %s seethe below your %s", body_part(BLOOD), body_part(BODY_SKIN));
+				putstr(en_win, 0, buf);
+			}
 		}
 	}
 	/*** More Troubles ***/

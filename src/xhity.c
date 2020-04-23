@@ -1121,6 +1121,10 @@ int tary;
 				if (result) {
 					/* increment number of attacks made */
 					attacksmade++;
+					if(attk->adtyp == AD_BDFN && distmin(x(magr), y(magr), x(mdef), y(mdef)) > 2){
+						//Just sit back and gaze
+						mon_ranged_gazeonly = FALSE;
+					}
 				}
 			}
 			break;
@@ -9648,6 +9652,7 @@ int vis;
 	case AD_SSUN:
 	case AD_STDY:
 	case AD_BLAS:
+	case AD_BDFN:
 		needs_magr_eyes = TRUE;
 		needs_mdef_eyes = FALSE;
 		break;
@@ -9744,10 +9749,48 @@ int vis;
 		alt_attk = *attk;
 		alt_attk.aatyp = AT_GAZE;
 		alt_attk.adtyp = adtyp;
-		result = xmeleehurty(magr, mdef, &alt_attk, attk, (struct obj *)0, FALSE, dmg, 0, vis, FALSE);
+		result = xmeleehurty(magr, mdef, &alt_attk, attk, (struct obj *)0, FALSE, dmg, 0, vis, TRUE);
 		wakeup2(mdef, youagr);
 		break;
 
+	case AD_BDFN:
+		if(has_blood_mon(mdef)){
+			if(vis) pline("A thin spear of %s %s pierces %s %s.",
+				(youdef ? "your" : s_suffix(mon_nam(mdef))),
+				mbodypart(mdef, BLOOD),
+				(youdef ? "your" : hisherits(mdef)),
+				mbodypart(mdef, BODY_SKIN)
+				);
+			if(youdef){
+				change_usanity(-1*dmg);
+				exercise(A_CON, FALSE);
+				u.umadness |= MAD_FRENZY;
+			} else {
+				if(mdef->mconf && !rn2(10)){
+					if(mdef->mstun && !rn2(10)){
+						if(vis) pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), hisherits(mdef), mbodypart(mdef, BODY_SKIN));
+						//reduce current HP by 30% (round up, guranteed nonfatal)
+						mdef->mhp = mdef->mhp*.7+1;
+						if(mdef->mhpmax > mdef->mhp){
+							if(mdef->mhpmax > mdef->mhp+mdef->m_lev)
+								mdef->mhpmax -= mdef->m_lev;
+							else
+								mdef->mhpmax--;
+						}
+					} else {
+						mdef->mstun = 1;
+					}
+				} else {
+					mdef->mconf = 1;
+				}
+			}
+			alt_attk = *attk;
+			alt_attk.aatyp = AT_NONE;
+			alt_attk.adtyp = AD_PHYS;
+			result = xmeleehurty(magr, mdef, &alt_attk, attk, (struct obj *)0, FALSE, dmg, 0, FALSE, TRUE);
+			wakeup2(mdef, youagr);
+		}
+	break;
 		/* lifedrain gazes */
 	case AD_VAMP:
 	case AD_DRLI:
