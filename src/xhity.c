@@ -10703,6 +10703,7 @@ int vis;
 			while (!(ABASE(A_WIS) <= ATTRMIN(A_WIS)) && dmg > 0) {
 				dmg--;
 				(void)adjattrib(A_WIS, -1, TRUE);
+				change_usanity(-1);
 				forget(10);	/* lose 10% of memory per point lost*/
 				exercise(A_WIS, FALSE);
 				/* Great Cthulhu permanently drains wisdom */
@@ -10711,6 +10712,7 @@ int vis;
 			}
 			if (dmg > 0) {
 				You("tear at yourself in horror!"); //assume always able to damage self
+				change_usanity(-1*dmg);
 				xdamagey(magr, mdef, attk, dmg*10);
 			}
 		}
