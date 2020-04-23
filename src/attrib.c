@@ -1253,7 +1253,8 @@ void
 change_usanity(delta)
 int delta;
 {
-	pline("Sanity change: %d + %d", u.usanity, delta);
+	if(discover || wizard)
+		pline("Sanity change: %d + %d", u.usanity, delta);
 	u.usanity += delta;
 	if(!u.umadness && u.usanity < 50)
 		u.usanity = 50;
@@ -1268,7 +1269,8 @@ void
 change_uinsight(delta)
 int delta;
 {
-	pline("Insight change: %d + %d", u.uinsight, delta);
+	if(discover || wizard)
+		pline("Insight change: %d + %d", u.uinsight, delta);
 	u.uinsight += delta;
 	if(u.uinsight < 0)
 		u.uinsight = 0;
