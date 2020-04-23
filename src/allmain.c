@@ -3095,7 +3095,7 @@ struct monst *mon;
 			}
 		}
 		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ)){
+			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ) && mons[otmp->corpsenm].pxlth == 0){
 				for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
 					mtmp2 = mtmp->nmon;
 					if (mtmp == mon) {
