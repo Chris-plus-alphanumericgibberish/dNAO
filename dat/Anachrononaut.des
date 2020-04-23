@@ -228,8 +228,8 @@ CONTAINER:'(',"chest",(19,17)
 	OBJECT:'[',"bodyglove",contained, uncursed, 0
 	OBJECT:'[',"bodyglove",contained, uncursed, 0
 CONTAINER:'(',"chest",(19,16)
-	OBJECT:'(',"expensive camera",contained, uncursed, 0
-	OBJECT:'(',"expensive camera",contained, uncursed, 0
+	OBJECT:'(',"expensive camera",contained
+	OBJECT:'(',"expensive camera",contained
 	OBJECT:'(',"credit card",contained, uncursed, 0
 	OBJECT:'(',"credit card",contained, uncursed, 0
 	OBJECT:'(',"credit card",contained, uncursed, 0
