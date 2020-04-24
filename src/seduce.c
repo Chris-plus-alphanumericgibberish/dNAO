@@ -2380,7 +2380,7 @@ int dmg;
 						change_usanity(u_sanity_loss(mon)/2); /*Forces a san check*/
 						if(roll_madness(MAD_TALONS)){
 							You("panic after having your underclothes pulled off!");
-							nomul(-1*rnd(6),"panicking");
+							HPanicking += 1+rnd(6);
 						}
 					}
 				}
@@ -2417,7 +2417,7 @@ int dmg;
 					change_usanity(u_sanity_loss(mon)/2); /*Forces a san check*/
 					if(roll_madness(MAD_TALONS)){
 						You("panic after having your armor removed!");
-						nomul(-1*rnd(6),"panicking");
+						HPanicking += 1+rnd(6);
 					}
 				}
 		  }
@@ -2447,7 +2447,7 @@ int dmg;
 					(void) mpickobj(mon,otmp);
 					if(roll_madness(MAD_TALONS)){
 						You("panic after having your cloak taken!");
-						nomul(-1*rnd(6),"panicking");
+						HPanicking += 1+rnd(6);
 					}
 				}
 			}
@@ -2488,7 +2488,7 @@ int dmg;
 							(void) mpickobj(mon,otmp);
 							if(roll_madness(MAD_TALONS)){
 								You("panic after having your boots sucked off!");
-								nomul(-1*rnd(6),"panicking");
+								HPanicking += 1+rnd(6);
 							}
 						}
 					}
@@ -2509,7 +2509,7 @@ int dmg;
 					(void) mpickobj(mon,otmp);
 					if(roll_madness(MAD_TALONS)){
 						You("panic after having your weapon taken!");
-						nomul(-1*rnd(6),"panicking");
+						HPanicking += 1+rnd(6);
 					}
 				 }
 				 else{
@@ -2544,7 +2544,7 @@ int dmg;
 						(void) mpickobj(mon,otmp);
 						if(roll_madness(MAD_TALONS)){
 							You("panic after having your gloves sucked off!");
-							nomul(-1*rnd(6),"panicking");
+							HPanicking += 1+rnd(6);
 						}
 					}
 				}
@@ -2565,7 +2565,7 @@ int dmg;
 					(void) mpickobj(mon,otmp);
 					if(roll_madness(MAD_TALONS)){
 						You("panic after having your shield taken!");
-						nomul(-1*rnd(6),"panicking");
+						HPanicking += 1+rnd(6);
 					}
 				 }
 				 else{
@@ -2602,7 +2602,7 @@ int dmg;
 						change_usanity(u_sanity_loss(mon)/2); /*Forces a san check*/
 						if(roll_madness(MAD_TALONS)){
 							You("panic after having your helmet stolen!");
-							nomul(-1*rnd(6),"panicking");
+							HPanicking += 1+rnd(6);
 						}
 					}
 				}
@@ -2755,7 +2755,7 @@ int dmg;
 		}
 	if(roll_madness(MAD_HELMINTHOPHOBIA)){
 		You("panic from the squirming tentacles!");
-		nomul(-1*rnd(6),"panicking");
+		HPanicking += 1+rnd(6);
 	}
 	return 1;
 }

@@ -2458,6 +2458,9 @@ int * dz;
 		||
 		/* or greased */
 		(ammo->greased)
+		||
+		/* or panicked */
+		(youagr && Panicking)
 		)
 		&&
 		/* at a 1/7 chance */

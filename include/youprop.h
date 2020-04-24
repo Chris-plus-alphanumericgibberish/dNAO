@@ -226,6 +226,10 @@
 #define EHunger			u.uprops[HUNGER].extrinsic
 #define Hunger			(HHunger || EHunger)
 
+#define HPanicking			u.uprops[PANIC].intrinsic
+#define EPanicking			u.uprops[PANIC].extrinsic
+#define Panicking			((HPanicking || EPanicking) && !ClearThoughts)
+
 
 /*** Vision and senses ***/
 #define HNormalvision		u.uprops[NORMALVISION].intrinsic

@@ -855,11 +855,11 @@ moveloop()
 		if((is_ice(u.ux, u.uy) || mad_turn(MAD_COLD_NIGHT)) && roll_madness(MAD_FRIGOPHOBIA)){
 			if(!Flying && !Levitation){
 				You("panic from setting foot on ice!");
-				nomul(-1*rnd(6), "panicking");
+				HPanicking += 1+rnd(6);
 			}
 			else if(roll_madness(MAD_FRIGOPHOBIA)){//Very scared of ice
 				You("panic from traveling over ice!");
-				nomul(-1*rnd(3), "panicking");
+				HPanicking += 1+rnd(3);
 			}
 		}
 		
@@ -1505,6 +1505,11 @@ karemade:
 					/* average movement is 1.33 times normal */
 					if (rn2(3) != 0) moveamt += NORMAL_SPEED / 2;
 				}
+			}
+			
+			//Run away!
+			if(Panicking){
+				moveamt += 2;
 			}
 			
 			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HASTE){

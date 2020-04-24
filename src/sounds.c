@@ -5808,6 +5808,12 @@ int p_skill;
 {
 	int curskill = OLD_P_SKILL(p_skill),
 		maxskill = P_MAX_SKILL(p_skill);
+	
+	/* Fine motor control drops to 0 while panicking */
+	if(p_skill == P_WAND_POWER && Panicking){
+		return 0;
+	}
+	
 	if(p_skill == P_BARE_HANDED_COMBAT){
 		if((u.sealsActive&SEAL_EURYNOME) && (u.sealsActive&SEAL_BUER)){
 			curskill += 2;

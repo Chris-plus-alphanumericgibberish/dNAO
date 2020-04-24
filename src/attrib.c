@@ -1482,11 +1482,11 @@ roll_frigophobia()
 	if(roll_madness(MAD_FRIGOPHOBIA)){
 		if(!Cold_resistance){
 			You("panic from the cold!");
-			nomul(-1*rnd(6), "panicking");
+			HPanicking += 1+rnd(6);
 		}
 		else if(roll_madness(MAD_FRIGOPHOBIA)){//Very scared of ice
 			You("panic from the chill!");
-			nomul(-1*rnd(3), "panicking");
+			HPanicking += 1+rnd(3);
 		}
 	}
 }
@@ -1499,14 +1499,14 @@ roll_av_frigophobia()
 	if(roll_madness(MAD_FRIGOPHOBIA)){
 		if(FrozenAir && !Breathless){
 			You("panic in the airless void!");
-			nomul(-1*rnd(8), "panicking");
+			HPanicking += 1+rnd(8);
 		} else if(!Cold_resistance){
 			You("panic in the cold!");
-			nomul(-1*rnd(6), "panicking");
+			HPanicking += 1+rnd(6);
 		}
 		else if(roll_madness(MAD_FRIGOPHOBIA)){//Very scared of ice
 			You("panic beneath the airless heavens!");
-			nomul(-1*rnd(4), "panicking");
+			HPanicking += 1+rnd(4);
 		}
 	}
 }

@@ -5344,15 +5344,11 @@ int spell;
 		splcaster += urole.spelsbon;
 
 	/* `healing spell' bonus */
-	if(spellid(spell) == SPE_HEALING ||
-	    spellid(spell) == SPE_EXTRA_HEALING ||
-	    spellid(spell) == SPE_CURE_BLINDNESS ||
-	    spellid(spell) == SPE_CURE_SICKNESS ||
-	    spellid(spell) == SPE_RESTORE_ABILITY ||
-	    spellid(spell) == SPE_REMOVE_CURSE
-	) (uarm && uarm->otyp == HEALER_UNIFORM) ? 
+	if(emergency_spell(spell)){
+		(uarm && uarm->otyp == HEALER_UNIFORM) ? 
 		(splcaster += 2*special) :
 		(splcaster += special);
+	}
 
 	if(splcaster > 20) splcaster = 20;
 
@@ -5440,6 +5436,11 @@ int spell;
 		}
 		chance = min(100, chance);
 		if(dist < 100) chance -= 100-dist;
+	}
+	
+	//Panic can be overcome by Naen
+	if(Panicking && spell_skilltype(spellid(spell)) != P_ESCAPE_SPELL && !emergency_spell(spell)){
+		chance = 0;
 	}
 	
 	//While the Naen syllable is active, the only spell failure chance comes from the Spire 

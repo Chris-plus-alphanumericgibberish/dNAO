@@ -1226,7 +1226,7 @@ int tary;
 		/* player panics after being attacked by a sea creature */
 		if (youdef && is_aquatic(magr->data) && roll_madness(MAD_THALASSOPHOBIA)){
 			You("panic after being attacked by a sea monster!");
-			nomul(-1 * rnd(6), "panicking");
+			HPanicking += 1+rnd(6);
 		}
 	}
 	
@@ -3079,6 +3079,16 @@ int flat_acc;
 		}
 		else {
 			base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS : thrown ? 0.25 : 0.67);
+		}
+		if(youagr){
+			static long warnpanic = 0;
+			if(Panicking){
+				if(warnpanic != moves){
+					pline("You swing wildly in your panic!");
+				}
+				warnpanic = moves;
+				base_acc = -5;
+			} else warnpanic = 0L;
 		}
 	}
 	/* other attacker-related accuracy bonuses */
@@ -6844,7 +6854,7 @@ boolean ranged;
 			}
 			if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
 				You("panic anyway!");
-				nomul(-1 * rnd(3), "panicking");
+				HPanicking += 1+rnd(3);
 			}
 			/* don't do any further damage or anything, but do trigger retaliation attacks */
 			return MM_HIT;
@@ -6935,7 +6945,7 @@ boolean ranged;
 				}
 				if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
 					You("panic from the burrowing tentacles!");
-					nomul(-1 * rnd(6), "panicking");
+					HPanicking += 1+rnd(6);
 				}
 				/* if a migo scooped out your brain, it stops attacking */
 				if (pa->mtyp == PM_MIGO_PHILOSOPHER || pa->mtyp == PM_MIGO_QUEEN)
@@ -12773,6 +12783,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		+ snekdmg
 		+ jostdmg;
 
+	/* If the character is panicking, all their attacks do half damage */
+	if(Panicking){
+		subtotl = subtotl/2+1;
+	}
+	
 	/* Reduce Incoming Damage */
 	/* min 1 base damage (0 if real_attack is false) */
 	if (subtotl < 1)
@@ -12782,7 +12797,6 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (hits_insubstantial(magr, mdef, attk, weapon) == 1) {
 		subtotl = 0;
 	}
-
 	/* some creatures resist weapon attacks to the extreme */
 	if (resist_attacks(pd) && (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack)) {
 		if (subtotl > 0) {
@@ -13580,11 +13594,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (youdef && !recursed && roll_madness(MAD_OPHIDIOPHOBIA)) {
 			if (poisons_majoreff || poisons_minoreff) {
 				You("panic!");
-				nomul(-1 * rnd(6), "panicking");
+				HPanicking += 1+rnd(6);
 			}
 			else if (poisons_resisted) {
 				You("panic anyway!");
-				nomul(-1 * rnd(3), "panicking");
+				HPanicking += 1+rnd(3);
 			}
 		}
 

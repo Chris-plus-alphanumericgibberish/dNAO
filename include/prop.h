@@ -53,7 +53,8 @@
 #define JUMPING						1 + FUMBLING					
 #define WWALKING					1 + JUMPING						
 #define HUNGER						1 + WWALKING					
-#define GLIB						1 + HUNGER						
+#define PANIC						1 + HUNGER					
+#define GLIB						1 + PANIC						
 #define LIFESAVED					1 + GLIB						
 #define CLAIRVOYANT					1 + LIFESAVED					
 #define VOMITING					1 + CLAIRVOYANT					

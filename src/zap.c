@@ -5105,7 +5105,7 @@ register int osym, dmgtyp;
 		if(loststuff > 1)
 			You("panic after some of your possessions are destroyed!");
 		else You("panic after one of your possessions is destroyed!");
-		nomul(-1*rnd(6), "panicking");
+		HPanicking += 1+rnd(6);
 	}
 	return;
 }
