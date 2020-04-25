@@ -595,8 +595,8 @@ int sx, sy;
 						newobj->shopOwned = TRUE;
 						if(!newobj->oartifact && newobj->otyp != CRYSTAL_SWORD)
 							set_material(newobj, SILVER);
-						// newobj->opoisoned = rn2(3) ? OPOISON_ACID : OPOISON_SILVER;
-						newobj->opoisoned = OPOISON_ACID; //Silver is not implemented.
+						newobj->opoisoned = rn2(3) ? OPOISON_ACID : OPOISON_SILVER;
+						// newobj->opoisoned = OPOISON_ACID;
 
 						/* replace curobj with newobj */
 						delobj(curobj);

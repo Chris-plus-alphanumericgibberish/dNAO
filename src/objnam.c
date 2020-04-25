@@ -892,6 +892,7 @@ char *buf;
 		if (obj->opoisoned & OPOISON_PARAL) Strcat(buf, "envenomed ");
 		if (obj->opoisoned & OPOISON_AMNES) Strcat(buf, "lethe-rusted ");
 		if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, "acid-coated ");
+		if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, "silvered ");
 		if (obj->otyp == VIPERWHIP && obj->opoisonchrgs) Sprintf(eos(buf), "(%d coatings) ", (int)(obj->opoisonchrgs + 1));
 	}
 }
@@ -1923,6 +1924,7 @@ weapon:
 					if (obj->opoisoned & OPOISON_PARAL) Strcat(buf, ", venom injecting");
 					if (obj->opoisoned & OPOISON_AMNES) Strcat(buf, ", lethe injecting");
 					if (obj->opoisoned & OPOISON_ACID) Strcat(buf, ", acid injecting");
+					if (obj->opoisoned & OPOISON_ACID) Strcat(buf, ", silvered ");
 				}
 				Strcat(buf, ")");
 			}
@@ -1934,6 +1936,7 @@ weapon:
 				if (obj->opoisoned & OPOISON_PARAL) Strcat(buf, " (venom injecting)");
 				if (obj->opoisoned & OPOISON_AMNES) Strcat(buf, " (lethe injecting)");
 				if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, " (acid injecting)");
+				if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, " (silvered)");
 			}
 			break;
 		case FOOD_CLASS:
@@ -3499,6 +3502,8 @@ int wishflags;
 			ispoisoned=OPOISON_AMNES;
 		} else if(!strncmpi(bp, "acid-coated ",l=12)) {
 			ispoisoned=OPOISON_ACID;
+		} else if(!strncmpi(bp, "silvered ",l=9)) {
+			ispoisoned=OPOISON_SILVER;
 		} else if(!strncmpi(bp, "greased ",l=8)) {
 			isgreased=1;
 		} else if (!strncmpi(bp, "very ", l=5)) {
