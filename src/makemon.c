@@ -10058,8 +10058,13 @@ struct monst *mtmp;
 			mtmp->malign = -3*max(3,absmal);
 		else	/* renegade */
 			mtmp->malign = max(3,absmal);
-	} else	/* not coaligned and therefore hostile */
-		mtmp->malign = abs(mal);
+	} else{	/* not coaligned and therefore hostile */
+		//Neutral murder bugfix: neutral murderables should be worth 1 algnment if hostile.
+		if(!mal && is_human(mtmp->data) && !is_derived_undead_mon(mtmp) && !mtmp->mpeaceful)
+			mtmp->malign = 1;
+		else
+			mtmp->malign = abs(mal);
+	}
 }
 
 #endif /* OVL1 */
