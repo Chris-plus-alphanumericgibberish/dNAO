@@ -892,7 +892,7 @@ char *buf;
 		if (obj->opoisoned & OPOISON_PARAL) Strcat(buf, "envenomed ");
 		if (obj->opoisoned & OPOISON_AMNES) Strcat(buf, "lethe-rusted ");
 		if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, "acid-coated ");
-		if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, "silvered ");
+		if (obj->opoisoned & OPOISON_SILVER)  Strcat(buf, "silvered ");
 		if (obj->otyp == VIPERWHIP && obj->opoisonchrgs) Sprintf(eos(buf), "(%d coatings) ", (int)(obj->opoisonchrgs + 1));
 	}
 }
