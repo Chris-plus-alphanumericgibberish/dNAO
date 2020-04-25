@@ -2820,6 +2820,9 @@ struct monst * mdef;
 	if (!Stone_res(mdef)
 		&& !(youdef && Stoned))
 	{
+		/* wake the defender */
+		wakeup2(mdef, youagr);
+
 		/* vs player */
 		if (youdef) {
 			if (!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
