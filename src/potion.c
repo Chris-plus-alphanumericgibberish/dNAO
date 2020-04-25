@@ -14,6 +14,15 @@ STATIC_DCL long FDECL(itimeout, (long));
 STATIC_DCL void NDECL(ghost_from_bottle);
 STATIC_DCL short FDECL(mixtype, (struct obj *,struct obj *));
 
+#define polypotion(obj) \
+	((obj)->otyp == POT_POLYMORPH || \
+	((obj)->otyp == POT_BLOOD && (\
+		(obj)->corpsenm == PM_CHAMELEON || \
+		(obj)->corpsenm == PM_SMALL_MIMIC || \
+		(obj)->corpsenm == PM_LARGE_MIMIC || \
+		(obj)->corpsenm == PM_GIANT_MIMIC)\
+	))
+
 /* force `val' to be within valid range for intrinsic timeout value */
 STATIC_OVL long
 itimeout(val)
@@ -2569,14 +2578,7 @@ dodip()
 		return 0;
 	}
 	//from Slashem, modified
-	if(!(potion->otyp == POT_WATER || potion->otyp == POT_ACID || potion->otyp == POT_POLYMORPH ||
-		(potion->otyp == POT_BLOOD && 
-			(potion->corpsenm == PM_CHAMELEON ||
-			 potion->corpsenm == PM_SMALL_MIMIC ||
-			 potion->corpsenm == PM_LARGE_MIMIC ||
-			 potion->corpsenm == PM_GIANT_MIMIC
-			)
-		)) && obj->otyp == POT_WATER) {
+	if(!(potion->otyp == POT_WATER || potion->otyp == POT_ACID || polypotion(potion)) && obj->otyp == POT_WATER) {
 	  /* swap roles, to ensure symmetry, but don't if the potion is polymorph or acid */
 	  struct obj *otmp = potion;
 	  potion = obj;
@@ -2667,29 +2669,14 @@ dodip()
 	/* WAC - Finn Theoderson - make polymorph and gain level msgs similar
 	 * 	 Give out name of new object and allow user to name the potion
 	 */
-	else if (obj->otyp == POT_POLYMORPH ||
-		(obj->otyp == POT_BLOOD && 
-			(obj->corpsenm == PM_CHAMELEON ||
-			 obj->corpsenm == PM_SMALL_MIMIC ||
-			 obj->corpsenm == PM_LARGE_MIMIC ||
-			 obj->corpsenm == PM_GIANT_MIMIC
-			)
-		) ||
-		potion->otyp == POT_POLYMORPH ||
-		(potion->otyp == POT_BLOOD && 
-			(potion->corpsenm == PM_CHAMELEON ||
-			 potion->corpsenm == PM_SMALL_MIMIC ||
-			 potion->corpsenm == PM_LARGE_MIMIC ||
-			 potion->corpsenm == PM_GIANT_MIMIC
-			)
-		)
-	) {
+	else if (polypotion(obj) || polypotion(potion))
+	{
 	    /* some objects can't be polymorphed */
-	    if (obj->otyp == potion->otyp ||	/* both POT_POLY */
+		if ((polypotion(obj) && polypotion(potion)) ||	/* both polypotions */
 		    obj->otyp == WAN_POLYMORPH ||
 		    obj->otyp == SPE_POLYMORPH ||
 		    obj == uball || obj == uskin ||
-		    obj_resists(obj->otyp == POT_POLYMORPH ?
+			obj_resists(polypotion(obj) ?
 				potion : obj, 5, 95)) {
 			pline1(nothing_happens);
 	    } else {
@@ -2709,7 +2696,8 @@ dodip()
 		else if (was_quiver) setuqwep(obj);
 
 		if (obj->otyp != save_otyp || (obj->otyp == HYPOSPRAY_AMPULE && objects[HYPOSPRAY_AMPULE].oc_name_known)) {
-			makeknown(POT_POLYMORPH);
+			if (save_otyp == POT_POLYMORPH || potion->otyp == POT_POLYMORPH)
+				makeknown(POT_POLYMORPH);
 			useup(potion);
 			prinv((char *)0, obj, 0L);
 			return 1;
