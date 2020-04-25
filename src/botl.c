@@ -608,6 +608,12 @@ bot2()
 #else
   Strcat(nb = eos(nb), " Stun");
 #endif
+  if(Panicking)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Panic", newbot2);
+#else
+  Strcat(nb = eos(nb), " Panic");
+#endif
   if(Hallucination)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Hallu", newbot2);
