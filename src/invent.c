@@ -791,6 +791,55 @@ register int type;
 	return((struct obj *) 0);
 }
 
+char
+carrying_applyable_ring()
+{
+	register struct obj *otmp;
+
+	for(otmp = invent; otmp; otmp = otmp->nobj)
+		if(otmp->oclass == RING_CLASS && (isEngrRing((otmp)->otyp) || isSignetRing((otmp)->otyp)) && otmp->oward)
+			return TRUE;
+	return FALSE;
+}
+
+char
+carrying_readable_weapon()
+{
+	register struct obj *otmp;
+
+	for(otmp = invent; otmp; otmp = otmp->nobj)
+		if((otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && otmp->oward)
+		  || otmp->oartifact && 
+			(otmp->oartifact == ART_EXCALIBUR || 
+			 otmp->oartifact == ART_GLAMDRING || 
+			 otmp->oartifact == ART_ITLACHIAYAQUE || 
+			 otmp->oartifact == ART_ROD_OF_SEVEN_PARTS ||
+			 otmp->oartifact == ART_BOW_OF_SKADI ||
+			 otmp->oartifact == ART_PEN_OF_THE_VOID ||
+			 otmp->oartifact == ART_STAFF_OF_NECROMANCY
+			)
+		)
+			return TRUE;
+	return FALSE;
+}
+
+char
+carrying_readable_armor()
+{
+	register struct obj *otmp;
+
+	for(otmp = invent; otmp; otmp = otmp->nobj)
+		if(otmp->oclass == ARMOR_CLASS
+			&& otmp->ohaluengr
+			&& otmp->oward
+			&& (   otmp->otyp == DROVEN_PLATE_MAIL 
+				|| otmp->otyp == DROVEN_CHAIN_MAIL
+				|| otmp->otyp == CONSORT_S_SUIT)
+			)
+			return TRUE;
+	return FALSE;
+}
+
 struct obj *
 carrying_art(artnum)
 register int artnum;
@@ -1211,52 +1260,6 @@ register const char *let,*word;
 		}
 	    }
 		
-		//Make exceptions for lightsabers (examines hilt)
-		if (otmp->otyp == LIGHTSABER && !strcmp(word, "read")){
-			bp[foo++] = otmp->invlet;
-			allowall = TRUE;//for whatever reason, must allow all in order to get message other than "silly"
-		}
-		//Make an exception for readable artifacts.
-		if (otmp->oartifact && 
-			(otmp->oartifact == ART_EXCALIBUR || 
-			 otmp->oartifact == ART_GLAMDRING || 
-			 otmp->oartifact == ART_ITLACHIAYAQUE || 
-			 otmp->oartifact == ART_ROD_OF_SEVEN_PARTS ||
-			 otmp->oartifact == ART_BOW_OF_SKADI ||
-			 otmp->oartifact == ART_PEN_OF_THE_VOID ||
-			 otmp->oartifact == ART_STAFF_OF_NECROMANCY
-			) && !strcmp(word, "read")
-		){
-			bp[foo++] = otmp->invlet;
-			allowall = TRUE;//for whatever reason, must allow all in order to get message other than "silly"
-		}
-		//Make exceptions for wooden weapons that have been engraved
-		if(otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && otmp->oward && !strcmp(word, "read")){
-			bp[foo++] = otmp->invlet;
-			allowall = TRUE;
-		}
-		//Make exceptions for armors that have been engraved
-		if(otmp->oclass == ARMOR_CLASS
-			&& otmp->ohaluengr
-			&& otmp->oward
-			&& (   otmp->otyp == DROVEN_PLATE_MAIL 
-				|| otmp->otyp == DROVEN_CHAIN_MAIL
-				|| otmp->otyp == CONSORT_S_SUIT)
-			&& !strcmp(word, "read")
-		){
-			bp[foo++] = otmp->invlet;
-			allowall = TRUE;
-		}
-		//Make exceptions for rings that have been engraved
-		if(otmp->oclass == RING_CLASS && (isEngrRing((otmp)->otyp) || isSignetRing((otmp)->otyp)) && otmp->oward && (!strcmp(word, "read") || !strcmp(word, "use or apply"))){
-			bp[foo++] = otmp->invlet;
-			allowall = TRUE;
-		}
-		//Make exceptions for runed candles
-		if(otmp->otyp == CANDLE_OF_INVOCATION && !strcmp(word, "read")){
-			bp[foo++] = otmp->invlet;
-			allowall = TRUE;
-		}
 		//Make exceptions for gemstone items made of specific gems
 		if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)
 			&& (!objects[otmp->ovar1].oc_name_known || !otmp->dknown)

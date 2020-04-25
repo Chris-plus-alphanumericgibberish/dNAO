@@ -55,7 +55,6 @@ STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
 STATIC_DCL boolean FDECL(figurine_location_checks,
 				(struct obj *, coord *, BOOLEAN_P));
 STATIC_DCL boolean NDECL(uhave_graystone);
-STATIC_DCL void FDECL(add_class, (char *, CHAR_P));
 STATIC_DCL int FDECL(do_carve_obj, (struct obj *));
 STATIC_PTR int FDECL(pick_rune, (BOOLEAN_P));
 STATIC_DCL void FDECL(describe_rune, (int));
@@ -5291,7 +5290,7 @@ struct obj *obj;
     return 1;
 }
 
-STATIC_OVL void
+void
 add_class(cl, class)
 char *cl;
 char class;
@@ -6101,6 +6100,9 @@ doapply()
 	if (carrying(DWARVISH_HELM) || carrying(GNOMISH_POINTY_HAT) 
 		|| carrying(DROVEN_CLOAK) || carrying_art(ART_AEGIS))
 		add_class(class_list, ARMOR_CLASS);
+	if(carrying_applyable_ring()){
+		add_class(class_list, RING_CLASS);
+	}
 
 
 	obj = getobj(class_list, "use or apply");
