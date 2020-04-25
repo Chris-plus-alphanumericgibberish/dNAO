@@ -243,6 +243,7 @@ int faction;
 		ptr->mflagsm |= (MM_BREATHLESS);
 		ptr->mflagst |= (MT_HOSTILE);
 		ptr->mflagst &= ~(MT_PEACEFUL);
+		ptr->mflagsb |= (MB_NOEYES);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
 		break;
@@ -317,7 +318,7 @@ int faction;
 		insert = FALSE;
 
 		/* some factions completely skip specific attacks */
-		if (((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
+		if ((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
 				(
 				attk->aatyp == AT_SPIT ||
 				attk->aatyp == AT_BREA ||
@@ -331,12 +332,7 @@ int faction;
 				(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
 				attk->aatyp == AT_GAZE ||
 				attk->aatyp == AT_WDGZ
-				)) ||
-			((faction == FRACTURED) &&
-				(
-				attk->aatyp == AT_GAZE ||
-				attk->aatyp == AT_WDGZ
-				))
+				)
 			)
 		{
 			/* shift all further attacks forwards one slot, and make last one all 0s */

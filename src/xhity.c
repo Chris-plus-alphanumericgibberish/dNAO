@@ -9708,12 +9708,12 @@ int vis;
 	}
 
 
-	if ((needs_magr_eyes && (
+	if ((needs_magr_eyes && haseyes(pa) && (
 		(youagr  && (Blind)) ||
 		(!youagr && (is_blind(magr)))
 		))
 		||
-		(needs_mdef_eyes && (
+		(needs_mdef_eyes && haseyes(pd) && (
 		(youdef  && !umetgaze(magr)) ||
 		(youagr  && mon_can_see_you(mdef)) ||
 		(!youagr && !youdef && !mmetgaze(magr, mdef))
