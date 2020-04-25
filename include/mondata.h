@@ -254,7 +254,7 @@
 								 (ptr)->mtyp == PM_UVUUDAUM || \
 								 (ptr)->mtyp == PM_MASKED_QUEEN \
 								 )
-#define controlledwidegaze(ptr)		(is_angel(ptr) || is_auton(ptr))
+#define controlledwidegaze(ptr)		(!((ptr)->mtyp == PM_MEDUSA || (ptr)->mtyp == PM_UVUUDAUM || (ptr)->mtyp == PM_GREAT_CTHULHU || (ptr)->mtyp == PM_OBOX_OB || (ptr)->mtyp == PM_DAGON))
 #define controlledwidegaze_mon(mon)		(controlledwidegaze((mon)->data) || (mon)->mfaction == ILLUMINATED)
 #define acidic(ptr)			(((ptr)->mflagsb & MB_ACID) != 0L)
 #define poisonous(ptr)		(((ptr)->mflagsb & MB_POIS) != 0L)
