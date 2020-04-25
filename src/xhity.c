@@ -9633,22 +9633,36 @@ int vis;
 	/* figure out if gaze requires eye-contact or not */
 	switch (adtyp)
 	{
+		/* seeing the monster is dangerous (wide-angle gaze only) */
+	case AD_CONF:
+	case AD_WISD:
+	case AD_BLND:
+	case AD_HALU:
+	case AD_STON:
+		if(attk->aatyp == AT_WDGZ){
+			/* These relate to the natural form of the monster, and can't be canceled*/
+			if(adtyp == AD_CONF 
+			|| adtyp == AD_WISD
+			|| (adtyp == AD_BLND && pa->mtyp == PM_BLESSED)
+			)
+				needs_uncancelled = FALSE;
+			needs_magr_eyes = FALSE;
+			needs_mdef_eyes = TRUE;
+			maybe_not = FALSE;
+			break;
+		}
+		/* else fall through */
 		/* meeting the gaze of the monster is dangerous */
 	case AD_DEAD:
 	case AD_PLYS:
-	case AD_STON:
 	case AD_LUCK:
-	case AD_BLND:
-	case AD_CONF:
 	case AD_SLOW:
 	case AD_STUN:
-	case AD_HALU:
 	case AD_SLEE:
 	case AD_BLNK:
 	case AD_SSEX:
 	case AD_SEDU:
 	case AD_VAMP:
-	case AD_WISD:
 		needs_magr_eyes = TRUE;
 		needs_mdef_eyes = TRUE;
 		break;
@@ -9681,34 +9695,18 @@ int vis;
 		impossible("unhandled gaze type %d", adtyp);
 		break;
 	}
-	/* special cases */
-	if (pa->mtyp == PM_MEDUSA && adtyp == AD_STON) {	// Medusa's petrification curse
-		needs_magr_eyes = FALSE;
-		maybe_not = FALSE;
-	}
+
 	/* actually, right now, all stoning gazes are a straight copy-paste, so do this for now. */
 	if (adtyp == AD_STON) {
 		needs_magr_eyes = needs_mdef_eyes = maybe_not = needs_uncancelled = FALSE;
 	}
-	if ((is_angel(pa) || pa->mtyp == PM_BLESSED) && adtyp == AD_BLND) {				// Angels' blinding radiance
-		needs_magr_eyes = FALSE;
-		maybe_not = FALSE;
-	}
-	if (is_uvuudaum(pa) && adtyp == AD_CONF) {			// Uvuudaum's form 
-		needs_magr_eyes = FALSE;
-		needs_uncancelled = FALSE;
-		maybe_not = FALSE;
-	}
+
 	if (pa->mtyp == PM_DEMOGORGON) {					// Demogorgon is special
 		needs_mdef_eyes = TRUE;
 		needs_uncancelled = FALSE;
 		maybe_not = FALSE;
 	}
-	if (attk->adtyp == AD_WISD) {						// Obox-Ob, Great Cthulhu special
-		needs_magr_eyes = FALSE;
-		needs_uncancelled = FALSE;
-		maybe_not = FALSE;
-	}
+
 
 	if ((needs_magr_eyes && (
 		(youagr  && (Blind)) ||
