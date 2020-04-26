@@ -3680,6 +3680,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 					nomovemsg = You_can_move_again;
 					exercise(A_DEX, FALSE);
 				}
+			
 			}
 			if(otmp->opoisoned & OPOISON_AMNES){
 				forget(otmp->cursed ? 25 : otmp->blessed ? 0 : 10);
@@ -3707,9 +3708,14 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 					newuhs(FALSE);
 				} else
 					exercise(A_WIS, FALSE);
-			} else if((otmp->opoisoned & OPOISON_ACID) && !Acid_resistance){
+			}
+			if((otmp->opoisoned & OPOISON_ACID) && !Acid_resistance){
 				You("have a very bad case of stomach acid."); /* not body_part() */
-				losehp(rnd(15), "acidic corpse", KILLED_BY_AN);
+				losehp(rnd(15), "acidic meal", KILLED_BY_AN);
+			}
+			if((otmp->opoisoned & OPOISON_SILVER) && hates_silver(youracedata)){
+				pline("The silver sears the inside of your mouth!"); /* not body_part() */
+				losehp(rnd(20), "silvery meal", KILLED_BY_AN);
 			}
 		} else if (!otmp->cursed)
 		pline("This %s is delicious!",

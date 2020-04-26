@@ -2879,7 +2879,7 @@ dodip()
 			if(obj->otyp != VIPERWHIP) obj->opoisoned = 0;
 			if(obj->otyp == VIPERWHIP) pline("%s is drawn up into %s.",
 				  buf, the(xname(obj)));
-			else pline("%s forms a coating on %s.",
+			else pline("%s forms a blinding coating on %s.",
 				  buf, the(xname(obj)));
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisonchrgs && obj->opoisoned == OPOISON_BLIND) obj->opoisonchrgs += 2;
@@ -2897,13 +2897,33 @@ dodip()
 			if(obj->otyp != VIPERWHIP) obj->opoisoned = 0;
 			if(obj->otyp == VIPERWHIP) pline("%s is drawn up into %s.",
 				  buf, the(xname(obj)));
-			else pline("%s forms a coating on %s.",
+			else pline("%s forms a paralyzing coating on %s.",
 				  buf, the(xname(obj)));
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisonchrgs && obj->opoisoned == OPOISON_PARAL) obj->opoisonchrgs += 2;
 				else obj->opoisonchrgs = 1;
 			}
 			obj->opoisoned = OPOISON_PARAL;
+			goto poof;
+	    } else if(potion->otyp == POT_STARLIGHT && obj->obj_material == SILVER &&
+	    		(!(obj->opoisoned & OPOISON_SILVER) || obj->otyp == VIPERWHIP)
+	    	) {
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			obj->opoisoned = 0;
+			if(obj->otyp != VIPERWHIP) obj->opoisoned = 0;
+			if(obj->otyp == VIPERWHIP) pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			else pline("%s forms a silvery coating on %s.",
+				  buf, the(xname(obj)));
+			if(obj->otyp == VIPERWHIP){
+				if(obj->opoisonchrgs && obj->opoisoned == OPOISON_SILVER) obj->opoisonchrgs += 2;
+				else obj->opoisonchrgs = 1;
+			}
+			obj->opoisoned = OPOISON_SILVER;
 			goto poof;
 	    } else if(obj->opoisoned &&
 			  (potion->otyp == POT_HEALING ||
