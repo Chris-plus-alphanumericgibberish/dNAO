@@ -4125,7 +4125,11 @@ struct obj *otmp;
 		//otmp is now gone, and rider may have printed messages
 		return;
 	}
-	
+
+	if(otmp->otyp == AMULET_OF_YENDOR){
+		pline("The Amulet proves inedible.");
+		return;
+	}
 
 	if ((otmp->corpsenm == PM_ACID_BLOB
 		|| (monstermoves <= peek_at_iced_corpse_age(otmp) + 50)
@@ -4138,7 +4142,7 @@ struct obj *otmp;
 		//minimum, but still eat.
 		value = 1;
 	}
-
+	
 	if (yourinvent && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_CHAOTIC) {
