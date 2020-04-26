@@ -1262,7 +1262,8 @@ int delta;
 		u.usanity = 0;
 	if(u.usanity > 100)
 		u.usanity = 100;
-	pline("= %d", u.usanity);
+	if(discover || wizard)
+		pline("= %d", u.usanity);
 }
 
 void
@@ -1276,7 +1277,8 @@ int delta;
 		u.uinsight = 0;
 	if(u.uinsight > INSIGHT_RATE/20)
 		u.uinsight = INSIGHT_RATE/20;
-	pline("= %d", u.uinsight);
+	if(discover || wizard)
+		pline("= %d", u.uinsight);
 }
 
 void
