@@ -2863,6 +2863,8 @@ winid *datawin;
 				size_penalty = max(0, size_penalty - 1);
 			if (u.sealsActive&SEAL_YMIR)
 				size_penalty = max(0, size_penalty - 1);
+			
+			hitbon -= size_penalty * 4;
 		} 
 		
 		if (hitbon != 0)
