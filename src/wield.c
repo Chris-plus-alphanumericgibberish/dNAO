@@ -945,6 +945,13 @@ struct permonst * ptr;
 		return FALSE;
 	/* get wielder's size -- optional, will assume medium (human) */
 	wielder_size = (ptr ? ptr->msize : MZ_MEDIUM);
+	
+	if (ptr == youracedata){
+		if (Role_if(PM_CAVEMAN))
+			wielder_size += 1;
+		if (u.sealsActive&SEAL_YMIR)
+			wielder_size += 1;
+	}
 
 	/* Some creatures are specifically always able to wield any weapon in one hand */
 	if (ptr && (

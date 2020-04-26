@@ -3293,9 +3293,16 @@ int flat_acc;
 			/* Houchou always hits when thrown */
 			if (weapon->oartifact == ART_HOUCHOU && thrown)
 				wepn_acc += 1000;
+
 			/* -4 accuracy per weapon size too large (not for thrown objects) */
-			if (!thrown && weapon->objsize - pa->msize > 0){
-				wepn_acc += -4 * (weapon->objsize - pa->msize);
+			if (!thrown){
+				int size_penalty = weapon->objsize - pa->msize;
+				if (Role_if(PM_CAVEMAN))
+					size_penalty = max(0, size_penalty-1);
+				if (u.sealsActive&SEAL_YMIR)
+					size_penalty = max(0, size_penalty-1);
+				
+				wepn_acc += -4 * max(0, size_penalty);
 			}
 			/* fencing gloves increase weapon accuracy when you have a free off-hand */
 			if (!thrown && !bimanual(weapon, magr->data) && !which_armor(magr, W_ARMS)) {

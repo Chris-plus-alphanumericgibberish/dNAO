@@ -2855,7 +2855,16 @@ winid *datawin;
 		}
 
 		/* to-hit */
-		int hitbon = oc.oc_hitbon - (obj ? (4 * max(0,(obj->objsize - youracedata->msize))) : 0);
+
+		int hitbon = oc.oc_hitbon;
+		if (obj){
+			int size_penalty = obj->objsize - youracedata->msize;
+			if (Role_if(PM_CAVEMAN))
+				size_penalty = max(0, size_penalty - 1);
+			if (u.sealsActive&SEAL_YMIR)
+				size_penalty = max(0, size_penalty - 1);
+		} 
+		
 		if (hitbon != 0)
 		{
 			Sprintf(buf, "Has a %s %s to hit.",
