@@ -2350,6 +2350,8 @@ boolean amnesia;
 #else
 			obj->blessed = obj->cursed = FALSE;
 #endif
+			if (obj->otyp == POT_STARLIGHT)
+				end_burn(obj, FALSE);
 			obj->otyp = POT_WATER;
 		} else obj->odiluted++;
 		used = TRUE;
