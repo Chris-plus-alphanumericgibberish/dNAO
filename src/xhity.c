@@ -9552,6 +9552,81 @@ expl_common:
 	return result;
 }
 
+void
+getgazeinfo(aatyp, adtyp, pa, needs_magr_eyes, needs_mdef_eyes, needs_uncancelled)
+int aatyp;
+int adtyp;
+struct permonst * pa;
+boolean * needs_magr_eyes;
+boolean * needs_mdef_eyes;
+boolean * needs_uncancelled;
+{
+#define maybeset(b, tf) if(b) {*(b)=tf;}
+	/* figure out if gaze requires eye-contact or not */
+	switch (adtyp)
+	{
+		/* seeing the monster is dangerous (wide-angle gaze only) */
+	case AD_CONF:
+	case AD_WISD:
+	case AD_BLND:
+	case AD_HALU:
+	case AD_STON:
+		if (aatyp == AT_WDGZ){
+			/* These relate to the natural form of the monster, and can't be canceled*/
+			if (adtyp == AD_CONF
+				|| adtyp == AD_WISD
+				|| (adtyp == AD_BLND && pa->mtyp == PM_BLESSED)
+				)
+				maybeset(needs_uncancelled, FALSE);
+			maybeset(needs_magr_eyes, FALSE);
+			maybeset(needs_mdef_eyes, TRUE);
+			break;
+		}
+		/* else fall through */
+		/* meeting the gaze of the monster is dangerous */
+	case AD_DEAD:
+	case AD_PLYS:
+	case AD_LUCK:
+	case AD_SLOW:
+	case AD_STUN:
+	case AD_SLEE:
+	case AD_BLNK:
+	case AD_SSEX:
+	case AD_SEDU:
+	case AD_VAMP:
+		maybeset(needs_magr_eyes, TRUE);
+		maybeset(needs_mdef_eyes, TRUE);
+		break;
+		/* the monster staring *at* something is dangerous */
+	case AD_FIRE:
+	case AD_COLD:
+	case AD_ELEC:
+	case AD_DRLI:
+	case AD_CNCL:
+	case AD_ENCH:
+	case AD_SSUN:
+	case AD_STDY:
+	case AD_BLAS:
+	case AD_BDFN:
+		maybeset(needs_magr_eyes, TRUE);
+		maybeset(needs_mdef_eyes, FALSE);
+		break;
+		/* these adtyps are just using gaze as a convenient way of causing something non-gaze-y to happen */
+	case AD_WTCH:
+	case AD_MIST:
+	case AD_SPOR:
+		maybeset(needs_magr_eyes, FALSE);
+		maybeset(needs_mdef_eyes, FALSE);
+		maybeset(needs_uncancelled, FALSE);
+		break;
+	default:
+		impossible("unhandled gaze type %d", adtyp);
+		break;
+	}
+	return;
+#undef maybeset
+}
+
 boolean
 umetgaze(mtmp)
 struct monst *mtmp;
@@ -9630,71 +9705,12 @@ int vis;
 			adtyp = AD_CONF;
 		break;
 	}
-	/* figure out if gaze requires eye-contact or not */
-	switch (adtyp)
-	{
-		/* seeing the monster is dangerous (wide-angle gaze only) */
-	case AD_CONF:
-	case AD_WISD:
-	case AD_BLND:
-	case AD_HALU:
-	case AD_STON:
-		if(attk->aatyp == AT_WDGZ){
-			/* These relate to the natural form of the monster, and can't be canceled*/
-			if(adtyp == AD_CONF 
-			|| adtyp == AD_WISD
-			|| (adtyp == AD_BLND && pa->mtyp == PM_BLESSED)
-			)
-				needs_uncancelled = FALSE;
-			needs_magr_eyes = FALSE;
-			needs_mdef_eyes = TRUE;
-			maybe_not = FALSE;
-			break;
-		}
-		/* else fall through */
-		/* meeting the gaze of the monster is dangerous */
-	case AD_DEAD:
-	case AD_PLYS:
-	case AD_LUCK:
-	case AD_SLOW:
-	case AD_STUN:
-	case AD_SLEE:
-	case AD_BLNK:
-	case AD_SSEX:
-	case AD_SEDU:
-	case AD_VAMP:
-		needs_magr_eyes = TRUE;
-		needs_mdef_eyes = TRUE;
-		break;
-		/* the monster staring *at* something is dangerous */
-	case AD_FIRE:
-	case AD_COLD:
-	case AD_ELEC:
-	case AD_DRLI:
-	case AD_CNCL:
-	case AD_ENCH:
-	case AD_SSUN:
-	case AD_STDY:
-	case AD_BLAS:
-	case AD_BDFN:
-		needs_magr_eyes = TRUE;
-		needs_mdef_eyes = FALSE;
-		break;
-		/* these adtyps are just using gaze as a convenient way of causing something non-gaze-y to happen */
-	case AD_WTCH:
-	case AD_MIST:
-	case AD_SPOR:
-		needs_magr_eyes = FALSE;
-		needs_mdef_eyes = FALSE;
-		needs_uncancelled = FALSE;
-		/* these are just straight copy-pasted from originals at the moment, and only are coded for monster vs player */
-		if (!youdef)
-			return MM_MISS;
-		break;
-	default:
-		impossible("unhandled gaze type %d", adtyp);
-		break;
-	}
+	/* get eyes, uncancelledness */
+	getgazeinfo(attk->aatyp, adtyp, pa, &needs_magr_eyes, &needs_mdef_eyes, &needs_uncancelled);
+
+	/* widegazes cannot fail */
+	if (attk->aatyp == AT_WDGZ)
+		maybe_not = FALSE;
 
 	/* actually, right now, all stoning gazes are a straight copy-paste, so do this for now. */
 	if (adtyp == AD_STON) {

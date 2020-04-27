@@ -341,6 +341,21 @@ int faction;
 			attk[j] = noattack;
 		}
 
+		/* if creatures don't have eyes, some gaze attacks are impossible */
+		if ((attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ) && !haseyes(ptr))
+		{
+			boolean needs_magr_eyes;
+			getgazeinfo(attk->aatyp, attk->adtyp, ptr, &needs_magr_eyes, (boolean *)0, (boolean *)0);
+			if (needs_magr_eyes == TRUE)
+			{
+				/* remove attack */
+				/* shift all further attacks forwards one slot, and make last one all 0s */
+				for (j = 0; j < (NATTK - i); j++)
+					attk[j] = attk[j + 1];
+				attk[j] = noattack;
+			}
+		}
+
 		/* some factions want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || (attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp))) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;}
