@@ -264,14 +264,18 @@ int *rank_indx, *title_length;
 	/* Loop through each of the roles */
 	for (i = 0; roles[i].name.m; i++)
 	    for (j = 0; j < 9; j++) {
-	    	if (roles[i].rank[j].m && !strncmpi(str,
-	    			roles[i].rank[j].m, strlen(roles[i].rank[j].m))) {
+	    	if (roles[i].rank[j].m
+				&& !strncmpi(str, roles[i].rank[j].m, strlen(roles[i].rank[j].m))
+				&& strlen(roles[i].rank[j].m) == (eos((char *)str)-str)
+				) {
 	    	    if (rank_indx) *rank_indx = j;
 	    	    if (title_length) *title_length = strlen(roles[i].rank[j].m);
 	    	    return roles[i].malenum;
 	    	}
-	    	if (roles[i].rank[j].f && !strncmpi(str,
-	    			roles[i].rank[j].f, strlen(roles[i].rank[j].f))) {
+	    	if (roles[i].rank[j].f
+				&& !strncmpi(str, roles[i].rank[j].f, strlen(roles[i].rank[j].f))
+				&& strlen(roles[i].rank[j].f) == (eos((char *)str) - str)
+				) {
 	    	    if (rank_indx) *rank_indx = j;
 	    	    if (title_length) *title_length = strlen(roles[i].rank[j].f);
 	    	    return ((roles[i].femalenum != NON_PM) ?
