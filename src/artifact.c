@@ -9080,33 +9080,40 @@ artifact_wet(obj, silent)
 struct obj *obj;
 boolean silent;
 {
-	 if (!obj->oartifact) return (-1);
-	 switch (artilist[(int) (obj)->oartifact].adtyp) {
-		 case AD_FIRE:
-			 if (!silent) {
-				pline("A cloud of steam rises.");
-				pline("%s is untouched.", The(xname(obj)));
-			 }
-			 return (AD_FIRE);
-		 case AD_COLD:
-			 if (!silent) {
-				pline("Icicles form and fall from the freezing %s.",
-			             the(xname(obj)));
-			 }
-			 return (AD_COLD);
-		 case AD_ELEC:
-			 if (!silent) {
-				pline_The("humid air crackles with electricity from %s.",
-						the(xname(obj)));
-			 }
-			 return (AD_ELEC);
-		 case AD_DRLI:
-			 if (!silent) {
-				pline("%s absorbs the water!", The(xname(obj)));
-			 }
-			 return (AD_DRLI);
-		 default:
-			 break;
+	int adtyp = 0;
+
+	if (is_lightsaber(obj) && litsaber(obj))
+		adtyp = (obj->otyp == KAMEREL_VAJRA ? AD_ELEC : AD_FIRE);
+	else if (obj->oartifact)
+		adtyp = artilist[(int)(obj)->oartifact].adtyp;
+
+	switch (adtyp) 
+	{
+	case AD_FIRE:
+		if (!silent) {
+			pline("A cloud of steam rises.");
+			pline("%s is untouched.", The(xname(obj)));
+		}
+		return (AD_FIRE);
+	case AD_COLD:
+		if (!silent) {
+			pline("Icicles form and fall from the freezing %s.",
+				the(xname(obj)));
+		}
+		return (AD_COLD);
+	case AD_ELEC:
+		if (!silent) {
+			pline_The("humid air crackles with electricity from %s.",
+				the(xname(obj)));
+		}
+		return (AD_ELEC);
+	case AD_DRLI:
+		if (!silent) {
+			pline("%s absorbs the water!", The(xname(obj)));
+		}
+		return (AD_DRLI);
+	default:
+		break;
 	}
 	return (-1);
 }
