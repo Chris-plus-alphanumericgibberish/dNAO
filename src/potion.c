@@ -2737,6 +2737,9 @@ dodip()
 		obj->blessed = obj->cursed = obj->bknown = 0;
 		if (Blind || Hallucination) obj->dknown = 0;
 
+		if (obj->otyp == POT_STARLIGHT)
+			end_burn(obj, FALSE);
+
 		if ((mixture = mixtype(obj, potion)) != 0) {
 			obj->otyp = mixture;
 		} else {
