@@ -5163,13 +5163,6 @@ int spell;
 	
 	if(Nullmagic && spellid(spell)!=SPE_ANTIMAGIC_SHIELD) return 0;
 	
-	if ((uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM) ||
-		(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM && (
-		(spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE)))
-		) {
-		return 100;
-	}
-	
 	/* Calculate intrinsic ability (splcaster) */
 
 	splcaster = urole.spelbase;
@@ -5189,6 +5182,14 @@ int spell;
 		else if(Role_if(PM_BARD) && spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
 			statused = ACURR(A_CHA);
 		else statused = ACURR(urole.spelstat);
+	}
+
+	/* some artifacts pracically cast the spells on their own */
+	if ((uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM) ||
+		(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM && (
+		(spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE)))
+		) {
+		splcaster -= 200;
 	}
 	
 	if(uwep){
