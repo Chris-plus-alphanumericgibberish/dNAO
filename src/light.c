@@ -83,15 +83,15 @@ new_light_source(x, y, range, type, id)
 	}
 	if (!duplicate) {
 		ls = (light_source *)alloc(sizeof(light_source));
+		ls->next = light_base;
+		light_base = ls;
 	}
-	ls->next = light_base;
     ls->x = x;
     ls->y = y;
     ls->range = range;
     ls->type = type;
     ls->id = id;
     ls->flags = 0;
-    light_base = ls;
 
     vision_full_recalc = 1;	/* make the source show up */
 }
