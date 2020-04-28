@@ -4590,7 +4590,7 @@ delouse_tame(mon)
 struct monst *mon;
 {
 	struct monst *mtmp;
-	set_faction(mtmp, 0);
+	set_faction(mon, 0);
 	if(mon->mtyp == PM_COMMANDER){
 		set_faction(mon, M_GREAT_WEB);
 	}
