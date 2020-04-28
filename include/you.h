@@ -442,6 +442,7 @@ struct you {
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
 	int brand_otyp;				/* Record the otyp of Fire and Frost Brand in this game */
+	char ring_wishes;			/* Record the how many wishes were/should be in the castle ring */
 	unsigned udg_cnt;		/* timer for wizard intervention WRONG?:how long you have been demigod */
 	unsigned ill_cnt;		/* timer for illurien intervention */
 	struct u_event	uevent;		/* certain events have happened */
