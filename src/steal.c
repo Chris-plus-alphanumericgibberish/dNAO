@@ -484,7 +484,7 @@ register struct obj *otmp;
 				/* burning objects should go out; non-burning objects should just be disabled */
 				if (obj_is_burning(otmp) && u.uswallow && mtmp == u.ustuck && !Blind)
 					pline("%s out.", Tobjnam(otmp, "go"));
-				end_burn(otmp, otmp->otyp != MAGIC_LAMP);
+				end_burn(otmp, TRUE);
 			}
 		}
 

@@ -1584,6 +1584,12 @@ fix_object(otmp)
 	struct obj *otmp;
 {
 	otmp->owt = weight(otmp);
+	if (obj_eternal_light(otmp) && !otmp->lamplit &&
+		/* special case where these lights should be snuffed */
+		!(mcarried(otmp) && attacktype(otmp->ocarry->data, AT_ENGL))
+		) {
+		begin_burn(otmp);
+	}
 }
 
 /*o_init.c*/
