@@ -2756,6 +2756,7 @@ dodip()
 				  struct obj *otmp;
 				  otmp = mkobj(POTION_CLASS,FALSE);
 				  obj->otyp = otmp->otyp;
+				  fix_object(obj);
 				  obfree(otmp, (struct obj *)0);
 				}
 				break;
