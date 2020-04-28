@@ -1089,8 +1089,10 @@ register struct obj *obj;
 	     */
 		    obj->otyp = POT_FRUIT_JUICE;
 		} else {
-	            obj->otyp = POT_WATER;
-		    obj->odiluted = 0; /* same as any other water */
+			if (obj->otyp == POT_STARLIGHT)
+				end_burn(obj, FALSE);
+			obj->otyp = POT_WATER;
+			obj->odiluted = 0; /* same as any other water */
 		}
 		break;
 	    }

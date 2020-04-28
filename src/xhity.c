@@ -2814,7 +2814,7 @@ struct monst * mdef;
 
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pa = !magr ? (struct permonst *)0 : youagr ? youracedata : magr->data;
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 
 	if (!Stone_res(mdef)
@@ -2827,18 +2827,24 @@ struct monst * mdef;
 		if (youdef) {
 			if (!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
 				Stoned = 5;
-				delayed_killer = pa->mname;
-				if (pa->geno & G_UNIQ) {
-					if (!type_is_pname(pa)) {
-						static char kbuf[BUFSZ];
-						/* "the" buffer may be reallocated */
-						Strcpy(kbuf, the(delayed_killer));
-						delayed_killer = kbuf;
+				if (magr) {
+					delayed_killer = pa->mname;
+					if (pa->geno & G_UNIQ) {
+						if (!type_is_pname(pa)) {
+							static char kbuf[BUFSZ];
+							/* "the" buffer may be reallocated */
+							Strcpy(kbuf, the(delayed_killer));
+							delayed_killer = kbuf;
+						}
+						killer_format = KILLED_BY;
 					}
-					killer_format = KILLED_BY;
+					else
+						killer_format = KILLED_BY_AN;
 				}
-				else
+				else {
+					delayed_killer = "object";
 					killer_format = KILLED_BY_AN;
+				}
 			}
 		}
 		/* vs monsters */
@@ -2859,7 +2865,7 @@ struct monst * mdef;
 			else {
 				if (mdef->mtame && !youagr)
 					You("have a peculiarly sad feeling for a moment, then it passes.");
-				return (MM_HIT | (MM_DEF_DIED | (youagr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED)));
+				return (MM_HIT | (MM_DEF_DIED | (youagr || !magr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED)));
 			}
 		}
 	}
@@ -12155,12 +12161,22 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 								);
 							hittxt = TRUE;
 						}
-						else if (vis) {
+						else if (vis && magr) {
 							pline("%s hits %s with %s %s %s%s",
 								Monnam(magr),
 								(youdef ? "you" : mon_nam(mdef)),
 								hisherits(magr),
 								mons[weapon->corpsenm].mname,
+								((weapon->quan > 1) ? makeplural(withwhat) : withwhat),
+								(youdef ? "!" : ".")
+								);
+							hittxt = TRUE;
+						}
+						else if (vis) {
+							pline("%s %s hit with %s %s%s",
+								(youdef ? "You" : Monnam(mdef)),
+								(youdef ? "are" : "is"),
+								an(mons[weapon->corpsenm].mname),
 								((weapon->quan > 1) ? makeplural(withwhat) : withwhat),
 								(youdef ? "!" : ".")
 								);
@@ -12193,14 +12209,25 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				if (touch_petrifies(&mons[weapon->corpsenm])) {
 					/*learn_egg_type(obj->corpsenm);*/
 					if (vis) {
-						pline("%s hit%s %s with %s %s egg%s!",
-							(youagr ? "You" : Monnam(magr)),
-							(youagr ? "" : "s"),
-							(youdef ? "you" : mon_nam(mdef)),
-							(weapon->known ? "the" : (cnt > 1L) ? "some" : "a"),
-							(weapon->known ? mons[weapon->corpsenm].mname : "petrifying"),
-							plur(cnt)
-							);
+						if (magr) {
+							pline("%s hit%s %s with %s %s egg%s!",
+								(youagr ? "You" : Monnam(magr)),
+								(youagr ? "" : "s"),
+								(youdef ? "you" : mon_nam(mdef)),
+								(weapon->known ? "the" : (cnt > 1L) ? "some" : "a"),
+								(weapon->known ? mons[weapon->corpsenm].mname : "petrifying"),
+								plur(cnt)
+								);
+						}
+						else {
+							pline("%s %s hit with %s %s egg%s!",
+								(youdef ? "You" : Monnam(mdef)),
+								(youdef ? "are" : "is"),
+								(weapon->known ? "the" : (cnt > 1L) ? "some" : "a"),
+								(weapon->known ? mons[weapon->corpsenm].mname : "petrifying"),
+								plur(cnt)
+								);
+						}
 						hittxt = TRUE;
 					}
 					if (vis)

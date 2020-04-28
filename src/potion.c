@@ -2359,6 +2359,8 @@ boolean amnesia;
 #else
 			obj->blessed = obj->cursed = FALSE;
 #endif
+			if (obj->otyp == POT_STARLIGHT)
+				end_burn(obj, FALSE);
 			obj->otyp = POT_WATER;
 		} else obj->odiluted++;
 		used = TRUE;
@@ -2735,6 +2737,9 @@ dodip()
 		obj->blessed = obj->cursed = obj->bknown = 0;
 		if (Blind || Hallucination) obj->dknown = 0;
 
+		if (obj->otyp == POT_STARLIGHT)
+			end_burn(obj, FALSE);
+
 		if ((mixture = mixtype(obj, potion)) != 0) {
 			obj->otyp = mixture;
 		} else {
@@ -2751,6 +2756,7 @@ dodip()
 				  struct obj *otmp;
 				  otmp = mkobj(POTION_CLASS,FALSE);
 				  obj->otyp = otmp->otyp;
+				  fix_object(obj);
 				  obfree(otmp, (struct obj *)0);
 				}
 				break;
