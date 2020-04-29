@@ -5052,6 +5052,154 @@ int tx,ty;
 }
 
 int *
+spirit_props(floorID)
+int floorID;
+{
+#define MAXSPIRITPROPS 3
+	static int propchain[MAXSPIRITPROPS + 1];
+	int i = 0;
+
+	/* WARNING: by giving a dedicated bit in extrinsics for spirits,
+	 * we cannot have two spirits that can be bound simultaneously 
+	 * granting duplicate properties
+	 */
+
+	switch (floorID)
+	{
+	case AHAZU:
+		break;
+	case AMON:
+		propchain[i++] = EXTRAMISSION;
+		propchain[i++] = COLD_RES;
+		break;
+	case ANDREALPHUS:
+		propchain[i++] = WARN_OF_MON;
+		propchain[i++] = TELEPORT_CONTROL;
+		break;
+	case ANDROMALIUS:
+		break;
+	case ASTAROTH:
+		propchain[i++] = MAGICAL_BREATHING;
+		propchain[i++] = SHOCK_RES;
+		break;
+	case BALAM:
+		propchain[i++] = HALF_SPDAM;
+		break;
+	case BERITH:
+		break;
+	case BUER:
+		break;
+	case CHUPOCLOPS:
+		propchain[i++] = SLEEP_RES;
+		break;
+	case DANTALION:
+		propchain[i++] = TELEPAT;
+		break;
+	case ECHIDNA:
+		propchain[i++] = ACID_RES;
+		break;
+	case EDEN:
+		propchain[i++] = REFLECTING;
+		break;
+	case ENKI:
+		propchain[i++] = SWIMMING;
+		break;
+	case EURYNOME:
+		propchain[i++] = FREE_ACTION;
+		propchain[i++] = WWALKING;
+		break;
+	case EVE:
+		propchain[i++] = HALF_PHDAM;
+		break;
+	case FAFNIR:
+		propchain[i++] = INFRAVISION;
+		propchain[i++] = FIRE_RES;
+		break;
+	case HUGINN_MUNINN:
+		propchain[i++] = WARNING;
+		propchain[i++] = HALLUC_RES;
+		break;
+	case IRIS:
+		propchain[i++] = SICK_RES;
+		break;
+	case JACK:
+		propchain[i++] = LIFESAVED;
+		break;
+	case MALPHAS:
+		break;
+	case MARIONETTE:
+		propchain[i++] = STONE_RES;
+		break;
+	case MOTHER:
+		propchain[i++] = CLAIRVOYANT;
+		propchain[i++] = ANTIMAGIC;
+		break;
+	case NABERIUS:
+		propchain[i++] = SEE_INVIS;
+		break;
+	case ORTHOS:
+		propchain[i++] = DISPLACED;
+		propchain[i++] = DISINT_RES;
+		break;
+	case OSE:
+		propchain[i++] = JUMPING;
+		break;
+	case OTIAX:
+		propchain[i++] = SEARCHING;
+		break;
+	case PAIMON:
+		propchain[i++] = WARN_OF_MON;
+		break;
+	case SHIRO:
+		propchain[i++] = INVIS;
+		propchain[i++] = STEALTH;
+		break;
+	case SIMURGH:
+		break;
+	case TENEBROUS:
+		propchain[i++] = DRAIN_RES;
+		break;
+	case YMIR:
+		propchain[i++] = POISON_RES;
+		break;
+		/* quest spirits */
+	case DAHLVER_NAR:
+		propchain[i++] = FIXED_ABIL;
+		break;
+	case ACERERAK:
+		propchain[i++] = WARN_OF_MON;
+		propchain[i++] = WELDPROOF;
+		break;
+	case COUNCIL:
+		break;
+	case COSMOS:
+		break;
+	case LIVING_CRYSTAL:
+		break;
+	case TWO_TREES:
+		break;
+	case MISKA:
+		break;
+	case NUDZIRATH:
+		propchain[i++] = SPELLBOOST;
+		break;
+	case ALIGNMENT_THING:
+		propchain[i++] = AGGRAVATE_MONSTER;
+		break;
+	case UNKNOWN_GOD:
+		break;
+	case BLACK_WEB:
+		break;
+	case NUMINA:
+		propchain[i++] = DETECT_MONSTERS;
+		break;
+	}
+	/* add termintor */
+	propchain[i] = NO_PROP;
+	return propchain;
+}
+
+int *
 spirit_skills(floorID)
 int floorID;
 {
@@ -5278,6 +5426,11 @@ int floorID;
 		u.sealTimeout[floorID - FIRST_SEAL] = moves + bindingPeriod;
 	}
 
+	/* give properties based on seal */
+	int * spiritprops = spirit_props(floorID);
+	for (i = 0; spiritprops[i] != NO_PROP; i++)
+		u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
+
 	/* unrestrict skills based on seal */
 	int * spiritskills = spirit_skills(floorID);
 	for (i = 0; spiritskills[i] != P_NONE; i++)
@@ -5331,6 +5484,13 @@ councilspirit(floorID)
 	set_spirit_powers(new_seal);
 	u.spiritT[CROWN_SPIRIT] = moves + bindingPeriod;
 	u.sealTimeout[floorID - FIRST_SEAL] = moves + bindingPeriod;
+
+	/* give properties based on seal */
+	int * spiritprops = spirit_props(floorID);
+	for (i = 0; spiritprops[i] != NO_PROP; i++)
+		u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
+
+	/* but don't unrestrict skills -- player should have already bound to it */
 	
 	vision_full_recalc = 1;	/* visible monsters may have changed */
 	doredraw();
@@ -5353,6 +5513,13 @@ gnosisspirit(floorID)
 	set_spirit_powers(new_seal);
 	u.spiritT[GPREM_SPIRIT] = moves + bindingPeriod;
 //	u.sealTimeout[floorID - FIRST_SEAL] = moves + bindingPeriod;
+
+	/* give properties based on seal */
+	int * spiritprops = spirit_props(floorID);
+	for (i = 0; spiritprops[i] != NO_PROP; i++)
+		u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
+
+	/* but don't unrestrict skills -- player should have already bound to it */
 	
 	vision_full_recalc = 1;	/* visible monsters may have changed */
 	doredraw();

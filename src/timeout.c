@@ -372,6 +372,12 @@ boolean forced;
 					u.spirit[GPREM_SPIRIT] = 0;
 				}
 			}
+
+			/* remove properties given by spirit */
+			int * spiritprops = spirit_props(decode_sealID(spir));
+			for (i = 0; spiritprops[i] != NO_PROP; i++)
+				u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
+
 		} else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID){
 			uwep->ovar1 &= ~spir;
 			if(uwep->lamplit && !artifact_light(uwep)) end_burn(uwep, TRUE);
@@ -403,6 +409,10 @@ boolean forced;
 			u.spirit[OUTER_SPIRIT]=0;
 			u.spiritT[OUTER_SPIRIT]=0;
 		}
+		/* remove properties given by spirit */
+		int * spiritprops = spirit_props(decode_sealID(spir));
+		for (i = 0; spiritprops[i] != NO_PROP; i++)
+			u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
 	}
 	stop_occupation();
 	if(flags.run) nomul(0, NULL);
