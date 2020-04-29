@@ -9728,6 +9728,10 @@ int vis;
 	if (attk->aatyp == AT_WDGZ)
 		maybe_not = FALSE;
 
+	/* these gazes are actually hacks and only work vs the player */
+	if (!youdef && (adtyp == AD_WTCH || adtyp == AD_MIST || adtyp == AD_SPOR))
+		return MM_MISS;
+
 	/* actually, right now, all stoning gazes are a straight copy-paste, so do this for now. */
 	if (adtyp == AD_STON) {
 		needs_magr_eyes = needs_mdef_eyes = maybe_not = needs_uncancelled = FALSE;
