@@ -4024,12 +4024,12 @@ int floorID;
 	if(floorID == NUMINA)
 		return SEAL_SPECIAL|SEAL_NUMINA;
 	if(floorID < QUEST_SPIRITS){
-		i = floorID - QUEST_SPIRITS;
+		i = floorID - FIRST_SEAL;
 		sealID = 1L << i;
 	} else {
-		i = floorID - FIRST_SEAL;
+		i = floorID - QUEST_SPIRITS;
 		sealID |= SEAL_SPECIAL;
-		sealID |= 1L << (i - DAHLVER_NAR);
+		sealID |= 1L << i;
 	}
 	return sealID;
 }
