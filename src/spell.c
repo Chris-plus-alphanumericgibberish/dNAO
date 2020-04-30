@@ -51,6 +51,12 @@ STATIC_DCL boolean FDECL(can_maintain_spell, (int));
 
 long FDECL(doreadstudy, (const char *));
 
+struct spirit_power {
+	const long owner;
+	const char * name;
+	const char * desc;
+};
+
 //definition of an extern in you.h
 char *wardDecode[26] = {
 	"digit",
@@ -1094,94 +1100,153 @@ getspirit(power_no)
 	return dospiritmenu("Choose which power to use", power_no, TRUE);
 }
 
-static const long spiritPOwner[NUMBER_POWERS] = {
-	SEAL_AHAZU,
-	SEAL_AMON,
-	SEAL_ANDREALPHUS, SEAL_ANDREALPHUS,
-	SEAL_ANDROMALIUS, SEAL_ANDROMALIUS,
-	SEAL_ASTAROTH, SEAL_ASTAROTH,
-	SEAL_BALAM, SEAL_BALAM,
-	SEAL_BERITH, SEAL_BERITH,
-	SEAL_BUER, SEAL_BUER,
-	SEAL_CHUPOCLOPS,
-	SEAL_DANTALION, SEAL_DANTALION,
-	SEAL_SHIRO,
-	SEAL_ECHIDNA, SEAL_ECHIDNA,
-	SEAL_EDEN, SEAL_EDEN, SEAL_EDEN,
-	SEAL_ENKI, SEAL_ENKI,
-	SEAL_EURYNOME, SEAL_EURYNOME,
-	SEAL_EVE, SEAL_EVE,
-	SEAL_FAFNIR, SEAL_FAFNIR,
-	SEAL_HUGINN_MUNINN,
-	SEAL_IRIS, SEAL_IRIS,
-	SEAL_JACK, SEAL_JACK,
-	SEAL_MALPHAS,
-	SEAL_MARIONETTE, SEAL_MARIONETTE,
-	SEAL_MOTHER,
-	SEAL_NABERIUS, SEAL_NABERIUS,
-	SEAL_ORTHOS,
-	SEAL_OSE, SEAL_OSE,
-	SEAL_OTIAX,
-	SEAL_PAIMON, SEAL_PAIMON,
-	SEAL_SIMURGH, SEAL_SIMURGH, SEAL_SIMURGH,
-	SEAL_TENEBROUS, SEAL_TENEBROUS, SEAL_TENEBROUS,
-	SEAL_YMIR, SEAL_YMIR,
-	SEAL_SPECIAL|SEAL_DAHLVER_NAR,
-	SEAL_SPECIAL|SEAL_ACERERAK,
-	SEAL_SPECIAL|SEAL_COUNCIL,
-	SEAL_SPECIAL|SEAL_COSMOS,
-	SEAL_SPECIAL|SEAL_LIVING_CRYSTAL,
-	SEAL_SPECIAL|SEAL_TWO_TREES,SEAL_SPECIAL|SEAL_TWO_TREES,
-	SEAL_SPECIAL|SEAL_NUDZIRATH, SEAL_SPECIAL|SEAL_NUDZIRATH,
-	SEAL_SPECIAL|SEAL_ALIGNMENT_THING,
-	SEAL_SPECIAL|SEAL_UNKNOWN_GOD,
-	SEAL_SPECIAL|SEAL_BLACK_WEB, SEAL_SPECIAL|SEAL_BLACK_WEB,
-	SEAL_SPECIAL|SEAL_NUMINA, SEAL_SPECIAL|SEAL_NUMINA, SEAL_SPECIAL|SEAL_NUMINA, SEAL_SPECIAL|SEAL_NUMINA
-};
-
-static const char *spiritPName[NUMBER_POWERS] = {
-	"Abduction",
-	"Fire Breath",
-	"Transdimensional Ray", "Teleport",
-	"Jester's Mirth", "Thief's Instincts",
-	"Astaroth's Assembly", "Astaroth's Shards",
-	"Icy Glare", "Balam's Anointing",
-	"Blood Mercenary", "Sow Discord",
-	"Gift of Healing", "Gift of Health",
-	"Throw webbing",
-	"Thought Travel", "Dread of Dantalion",
-	"Earth Swallow",
-	"Echidna's Venom", "Sing Lullaby",
-	"Purifying Blast", "Recall to Eden", "Stargate",
-	"Walk among Thresholds", "Geyser",
-	"Vengeance", "Shape the Wind",
-	"Thorns and Stones", "Barrage",
-	"Breathe Poison", "Ruinous Strike",
-	"Raven's Talons",
-	"Horrid Wilting", "Horrid Rainbow",
-	"Refill Lantern", "Hellfire", 
-	"Call Murder",
-	"Root Shout", "Yank Wires",
-	"Disgusted Gaze",
-	"Bloody Tongue", "Silver Tongue",
-	"Exhalation of the Rift", 
-	"Querient Thoughts", "Great Leap",
-	"Open",
-	"Read Spell", "Book Telepathy",
-	"Unite the Earth and Sky", "Hook in the Sky", "Enlightenment",
-	"Damning Darkness", "Touch of the Void", "Echoes of the Last Word",
-	"Poison Gaze", "Gap Step",
-	"Moan",
-	"Swallow Soul",
-	"Embassy of Elements",
-	"Crystal Memories",
-	"Pseudonatural Surge",
-	"Silver dew of Telperion","Golden dew of Laurelin",
-	"Mirror Shatter", "Mirror Walk",
-	"Flowing Forms",
-	"Phase step",
-	"Black Bolt", "Weave a Black Web",
-	"Identify", "Clairvoyance", "Find Path", "Gnosis Premonition"
+static const struct spirit_power spirit_powers[NUMBER_POWERS] = {
+	{ SEAL_AHAZU, "Abduction",
+	"Attempt to remove an adjacent monster from the game. You must have injured the monster. You do not receive XP, and most of their inventory vanishes with them. Your prayer timeout or god's anger is decreased as though you had sacrificed the victim, and you gain any beneficial effects other than satiety that you would have gained from eating their corpse, while avoiding any harmful effects." },
+	{ SEAL_AMON, "Fire Breath",
+	"Breathe a ray of fire, much like a red dragon." },
+	{ SEAL_ANDREALPHUS, "Transdimensional Ray",
+	"Fire a beam that passes through walls, teleports struck monsters, and deals damage to them." },
+	{ SEAL_ANDREALPHUS, "Teleport",
+	"Hungerless teleport." },
+	{ SEAL_ANDROMALIUS, "Jester's Mirth",
+	"Immobilize a single adjacent monster with laughter. They will be vulnerable to sneak attacks while immobilized." },
+	{ SEAL_ANDROMALIUS, "Thief's Instincts",
+	"Detect hidden doors and traps." },
+	{ SEAL_ASTAROTH, "Astaroth's Assembly",
+	"Projects a beam up to 5 spaces in the chosen direction. A electrical explosion centers on the first target struck. The further away the target, the less damage dealt. You gain increased AC in inverse proportion to the damage dealt." },
+	{ SEAL_ASTAROTH, "Astaroth's Shards",
+	"Fires a barrage of shuriken along random ranks. You take a little damage." },
+	{ SEAL_BALAM, "Icy Glare",
+	"Deals ice damage to the first target in the indicated direction, and half damage to all targets in a ~90 degree wedge centered on the chosen direction. Blinds you for 5 turns." },
+	{ SEAL_BALAM, "Balam's Anointing",
+	"Makes a touch attack against a single adjacent creature and deals cold damage. A target with a head and without thick skin may be killed outright. A target with a head, eyes, and thick skin instead takes double damage and is blinded." },
+	{ SEAL_BERITH, "Blood Mercenary",
+	"Fires a beam dealing non-elemental damage in a chosen direction. You lose gold equal to the total damage dealt by this attack." },
+	{ SEAL_BERITH, "Sow Discord",
+	"Monsters on the level attack each other for a handful of turns ." },
+	{ SEAL_BUER, "Gift of Healing",
+	"Heal single adjacent target. May also be used to heal yourself." },
+	{ SEAL_BUER, "Gift of Health",
+	"Clear most status ailments from single adjacent target. May also be used to remove status ailments from yourself." },
+	{ SEAL_CHUPOCLOPS, "Throw webbing",
+	"Throw a ball of webbing in a chosen direction." },
+	{ SEAL_DANTALION, "Thought Travel",
+	"Teleport to chosen creature you can sense telepathically." },
+	{ SEAL_DANTALION, "Dread of Dantalion",
+	"Cause all monsters in line-of-sight to flee from you." },
+	{ SEAL_ECHIDNA, "Echidna's Venom",
+	"Spit acid in the chosen direction." },
+	{ SEAL_ECHIDNA, "Sing Lullaby",
+	"Attempt to tame chosen adjacent monster. Monsters must not be mindless and must be an animal or monstrous." },
+	{ SEAL_EDEN, "Purifying Blast",
+	"Powerful multi-hit attack. Deals damage with a large knockback, followed by a fireball. The blast must be charged, rendering you temporarily immobile. While immobile, you have improved AC." },
+	{ SEAL_EDEN, "Recall to Eden",
+	"Attempt to remove an adjacent monster from the game. Probability of success is based on your relative HP totals. You will recover some HP if the attack succeeds, but you will not gain XP for the kill, and much of the monster's inventory will disappear with it." },
+	{ SEAL_EDEN, "Stargate",
+	"Branchport. Drains your energy. This must be charged, rendering you temporarily immobile. While immobile, you have improved AC." },
+	{ SEAL_ENKI, "Walk among Thresholds",
+	"Teleport to a chosen doorway." },
+	{ SEAL_ENKI, "Geyser",
+	"ERROR 404: description not found." },
+	{ SEAL_EURYNOME, "Vengeance",
+	"Damage all adjacent creatures that have damaged you with their attacks." },
+	{ SEAL_EURYNOME, "Shape the Wind",
+	"Creates a number of temporary pets. These pets vanish after five turns." },
+	{ SEAL_EVE, "Thorns and Stones",
+	"You create a small stack of ammunition for your currently wielded ranged weapon, and take a small amount of damage." },
+	{ SEAL_EVE, "Barrage",
+	"Fire a large number of projectiles." },
+	{ SEAL_FAFNIR, "Breathe Poison",
+	"Creates a stinking cloud centered at the chosen location." },
+	{ SEAL_FAFNIR, "Ruinous Strike",
+	"Digs out and untraps target adjacent square, or moderately damages target adjacent nonliving creature, or destroys target adjacent golem." },
+	{ SEAL_HUGINN_MUNINN, "Raven's Talons",
+	"Permanently blinds single adjacent target, while dealing damage. Deals less damage against a blind or sightless target." },
+	{ SEAL_IRIS, "Horrid Wilting",
+	"You suck moisture out of a single adjacent target, healing yourself for a like amount. Nonliving and anhydrous creatures are immune to this attack." },
+	{ SEAL_IRIS, "Horrid Rainbow",
+	"You turn animals, humanoids, and humans near you (as turn undead)." },
+	{ SEAL_JACK, "Refill Lantern",
+	"Add some fuel to a wielded oil lamp or lightsaber." },
+	{ SEAL_JACK, "Hellfire",
+	"Creates a moderately-damaging explosion of fire centered on the chosen square. Requires you to wield a lit potion of oil, oil lamp, or lightsaber." },
+	{ SEAL_MALPHAS, "Call Murder",
+	"Summons a tame crow. The crow's level is based on your level." },
+	{ SEAL_MARIONETTE, "Root Shout",
+	"Fires a moderately damaging beam of force in the chosen direction. The beam digs through walls." },
+	{ SEAL_MARIONETTE, "Yank Wires",
+	"Flings you in the chosen direction." },
+	{ SEAL_MOTHER, "Disgusted Gaze",
+	"One chosen target is struck by lightning, and nearby targets may be paralyzed. You must not be wearing gloves or a mummy wrapping." },
+	{ SEAL_NABERIUS, "Bloody Tongue",
+	"Causes chosen single adjacent monster to flee." },
+	{ SEAL_NABERIUS, "Silver Tongue",
+	"Tames chosen single adjacent monster." },
+	{ SEAL_ORTHOS, "Exhalation of the Rift",
+	"You exhale a damaging line of wind in the chosen direction, knocked creatures back. The line is wide; monsters on the edge take reduced damage." },
+	{ SEAL_OSE,				"Querient Thoughts",		
+	"You release a blast of psychic static that damages all telepathic monsters on the level, and may damage other monsters." },
+	{ SEAL_OSE,				"Great Leap",				
+	"You level teleport, at the cost of hunger." },
+	{ SEAL_OTIAX,			"Open",						
+	"Opens a door in any solid surface, regardless of whether there was actually a door there. Damages monsters, with a chance to instantly kill them by releasing their innards." },
+	{ SEAL_PAIMON,			"Read Spell",				
+	"Cast a spell from a wielded spellbook." },
+	{ SEAL_PAIMON,			"Book Telepathy",			
+	"Detect spellbooks on the current level." },
+	{ SEAL_SHIRO,			"Earth Swallow",			
+	"Create a pit in target adjacent square, then throw a boulder into the pit." },
+	{ SEAL_SIMURGH,			"Unite the Earth and Sky",	
+	"Creates a tree or fills a pit with water in the chosen adjacent square." },
+	{ SEAL_SIMURGH,			"Hook in the Sky",			
+	"You rise through the ceiling." },
+	{ SEAL_SIMURGH,			"Enlightenment",			
+	"You benefit from enlightenment." },
+	{ SEAL_TENEBROUS,		"Damning Darkness",			
+	"Damage all non-undead, non-demonic, non-drain resistant creatures standing near you. Creatures in a lit square are more heavily damaged. Makes the surrounding squares dark." },
+	{ SEAL_TENEBROUS,		"Touch of the Void",		
+	"Make a touch attack to drain levels from target adjacent creature." },
+	{ SEAL_TENEBROUS,		"Echoes of the Last Word",	
+	"Remove target adjacent non-unique life-drain resistant, non-genocidable, or demonic creature from the game. Teleports target adjacent unique life-drain resistant, non-genocidable, or demonic creature to a random dungeon level." },
+	{ SEAL_YMIR,			"Poison Gaze",				
+	"Deal damage to a single target creature with a poison-elemental gaze attack." },
+	{ SEAL_YMIR,			"Gap Step",					
+	"You begin levitating." },
+	{ SEAL_SPECIAL|SEAL_DAHLVER_NAR,		"Moan",						
+	"Frighten, confuse, and/or drive nearby creatures insane." },
+	{ SEAL_SPECIAL|SEAL_ACERERAK,			"Swallow Soul",				
+	"You suck out and consume the soul of one adjacent living creature that doesn't resist draining and is of lower level than you. This will repair one lost level, or heal you." },
+	{ SEAL_SPECIAL|SEAL_COUNCIL,			"Embassy of Elements",		
+	"Allows you to bind any spirit of the near void you have previously contacted, without needing a binding ritual." },
+	{ SEAL_SPECIAL|SEAL_COSMOS,				"Crystal Memories",			
+	"Summons a dead unique monster to aid you for 5 turns." },
+	{ SEAL_SPECIAL|SEAL_LIVING_CRYSTAL,		"Pseudonatural Surge",		
+	"ERROR 404: description not found." },
+	{ SEAL_SPECIAL|SEAL_TWO_TREES,			"Silver dew of Telperion",	
+	"ERROR 404: description not found." },
+	{ SEAL_SPECIAL|SEAL_TWO_TREES,			"Golden dew of Laurelin",	
+	"ERROR 404: description not found." },
+	{ SEAL_SPECIAL|SEAL_NUDZIRATH,			"Mirror Shatter",			
+	"Shatters a wielded mirror, dealing damage and shattering other mirrors in that direction." },
+	{ SEAL_SPECIAL|SEAL_NUDZIRATH,			"Mirror Walk",				
+	"ERROR 404: description not found." },
+	{ SEAL_SPECIAL|SEAL_ALIGNMENT_THING,	"Flowing Forms",			
+	"Zap a beam of polymorph in a specified direction." },
+	{ SEAL_SPECIAL|SEAL_UNKNOWN_GOD,		"Phase step",				
+	"You can briefly walk through walls." },
+	{ SEAL_SPECIAL|SEAL_BLACK_WEB,			"Black Bolt",				
+	"ERROR 404: description not found." },
+	{ SEAL_SPECIAL|SEAL_BLACK_WEB,			"Weave a Black Web",		
+	"ERROR 404: description not found." },
+	{ SEAL_SPECIAL|SEAL_NUMINA,				"Identify",					
+	"Identifies inventory." },
+	{ SEAL_SPECIAL|SEAL_NUMINA,				"Clairvoyance",				
+	"Map the local area." },
+	{ SEAL_SPECIAL|SEAL_NUMINA,				"Find Path",				
+	"Detect nearby magic portals." },
+	{ SEAL_SPECIAL|SEAL_NUMINA,				"Gnosis Premonition",		
+	"Allows use of Gnostic Premonition despite having spirits bound." }
 };
 
 int
@@ -1267,16 +1332,16 @@ spiritLets(lets, respect_timeout)
 	if(flags.timeoutOrder){
 		for(s=0; s<NUM_BIND_SPRITS; s++){
 			if(u.spirit[s]) for(i = 0; i<52; i++){
-				if(spiritPOwner[u.spiritPOrder[i]] == u.spirit[s] && (u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout)){
+				if(spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s] && (u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout)){
 					Sprintf(lets, "%c", i<26 ? 'a'+(char)i : 'A'+(char)(i-26));
 				}
 			}
 		}
 	} else {
 		for(i = 0; i<52; i++){
-			if(((spiritPOwner[u.spiritPOrder[i]] & u.sealsActive &&
-				!(spiritPOwner[u.spiritPOrder[i]] & SEAL_SPECIAL)) || 
-				spiritPOwner[u.spiritPOrder[i]] & u.specialSealsActive & ~SEAL_SPECIAL) &&
+			if(((spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
+				!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
+				spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL) &&
 				(u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout)
 			){
 				Sprintf(lets, "%c", i<26 ? 'a'+(char)i : 'A'+(char)(i-26));
@@ -1392,10 +1457,10 @@ check_spirit_let(let)
 	else if(let >= 'A' && let <= 'Z') i = (int)(let - 'A' + 26);
 	else return FALSE; //not a valid letter
 	
-	return u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves && spiritPOwner[u.spiritPOrder[i]] &&
-			((spiritPOwner[u.spiritPOrder[i]] & u.sealsActive &&
-			!(spiritPOwner[u.spiritPOrder[i]] & SEAL_SPECIAL)) || 
-			spiritPOwner[u.spiritPOrder[i]] & u.specialSealsActive & ~SEAL_SPECIAL);
+	return u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves && spirit_powers[u.spiritPOrder[i]].owner &&
+			((spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
+			!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
+			spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL);
 }
 /*
  * returns the skill associated with a spell damage type
@@ -4549,21 +4614,21 @@ int respect_timeout;
 			if(u.spirit[s]){
 				j=0;
 				place = 1;
-				while(!(spiritPOwner[u.spiritPOrder[j]] & place)){
+				while(!(spirit_powers[u.spiritPOrder[j]].owner & place)){
 					j++;
 					place = place << 1;
 				}
 				add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_BOLD, sealNames[j], MENU_UNSELECTED);
 				for(i = 0; i<52; i++){
-					if(spiritPOwner[u.spiritPOrder[i]] == u.spirit[s]){
+					if(spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
 						if(u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
-							Sprintf1(buf, spiritPName[u.spiritPOrder[i]]);
+							Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
 							any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
 							add_menu(tmpwin, NO_GLYPH, &any,
 								i<26 ? 'a'+(char)i : 'A'+(char)(i-26), 
 								0, ATR_NONE, buf, MENU_UNSELECTED);
 						} else {
-							Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spiritPName[u.spiritPOrder[i]]);
+							Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
 							add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
 						}
 					}
@@ -4573,19 +4638,19 @@ int respect_timeout;
 	} else {
 		for(i = 0; i<52; i++){
 			if(((u.spiritPOrder[i] != -1 &&
-				spiritPOwner[u.spiritPOrder[i]] & u.sealsActive &&
-				!(spiritPOwner[u.spiritPOrder[i]] & SEAL_SPECIAL)) || 
-				(spiritPOwner[u.spiritPOrder[i]] & SEAL_SPECIAL && 
-				spiritPOwner[u.spiritPOrder[i]] & u.specialSealsActive & ~SEAL_SPECIAL))
+				spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
+				!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
+				(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL && 
+				spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL))
 			){
 				if(u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
-					Sprintf1(buf, spiritPName[u.spiritPOrder[i]]);
+					Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
 					any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
 					add_menu(tmpwin, NO_GLYPH, &any,
 						i<26 ? 'a'+(char)i : 'A'+(char)(i-26), 
 						0, ATR_NONE, buf, MENU_UNSELECTED);
 				} else {
-					Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spiritPName[u.spiritPOrder[i]]);
+					Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
 					add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
 				}
 			}
@@ -5602,16 +5667,16 @@ set_spirit_powers(spirits_seal)
 	int i,j;
 	if(spirits_seal==0) return;
 	for(i=0;i<NUMBER_POWERS;i++){
-		if(spiritPOwner[i]==spirits_seal){
+		if (spirit_powers[i].owner == spirits_seal){
 			u.spiritPColdowns[i] = 0;
 			for(j=0;j<52;j++){
 				if(u.spiritPOrder[j] == i) break;
 			}
 			if(j==52) for(j=0;j<52;j++){
 				if(u.spiritPOrder[j] == -1 ||
-					!((spiritPOwner[u.spiritPOrder[j]] & u.sealsActive &&
-					!(spiritPOwner[u.spiritPOrder[j]] & SEAL_SPECIAL)) || 
-					spiritPOwner[u.spiritPOrder[j]] & u.specialSealsActive & ~SEAL_SPECIAL)
+					!((spirit_powers[u.spiritPOrder[j]].owner & u.sealsActive &&
+					!(spirit_powers[u.spiritPOrder[j]].owner & SEAL_SPECIAL)) || 
+					spirit_powers[u.spiritPOrder[j]].owner & u.specialSealsActive & ~SEAL_SPECIAL)
 				){
 					u.spiritPOrder[j] = i;
 					break;
