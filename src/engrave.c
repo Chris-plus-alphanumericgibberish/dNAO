@@ -4005,7 +4005,7 @@ long sealID;
 	if(sealID&SEAL_SPECIAL){
 		offset = sealID&~SEAL_SPECIAL;
 		for(j = 0; j < 32; j++)
-			if((sealID>>j) == 1L)
+			if((offset>>j) == 1L)
 				return j+QUEST_SPIRITS;
 	} else {
 		for(j = 0; j < 32; j++)

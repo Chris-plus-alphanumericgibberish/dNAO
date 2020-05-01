@@ -36,7 +36,7 @@ STATIC_PTR int NDECL(learn);
 STATIC_DCL boolean FDECL(getspell, (int *, int));
 STATIC_DCL boolean FDECL(getspirit, (int *));
 STATIC_DCL boolean FDECL(spiritLets, (char *, int));
-STATIC_DCL int FDECL(dospiritmenu, (const char *, int *, int));
+STATIC_DCL int FDECL(dospiritmenu, (int, int *, int));
 STATIC_DCL boolean FDECL(dospellmenu, (int,int *));
 STATIC_DCL void FDECL(describe_spell, (int));
 STATIC_DCL int FDECL(percent_success, (int));
@@ -1097,7 +1097,7 @@ getspirit(power_no)
 		    You("don't know that power.");
 		}
 	}
-	return dospiritmenu("Choose which power to use", power_no, TRUE);
+	return dospiritmenu(SPELLMENU_CAST, power_no, TRUE);
 }
 
 static const struct spirit_power spirit_powers[NUMBER_POWERS] = {
@@ -1135,6 +1135,8 @@ static const struct spirit_power spirit_powers[NUMBER_POWERS] = {
 	"Teleport to chosen creature you can sense telepathically." },
 	{ SEAL_DANTALION, "Dread of Dantalion",
 	"Cause all monsters in line-of-sight to flee from you." },
+	{ SEAL_SHIRO, "Earth Swallow",
+	"Create a pit in target adjacent square, then throw a boulder into the pit." },
 	{ SEAL_ECHIDNA, "Echidna's Venom",
 	"Spit acid in the chosen direction." },
 	{ SEAL_ECHIDNA, "Sing Lullaby",
@@ -1148,7 +1150,7 @@ static const struct spirit_power spirit_powers[NUMBER_POWERS] = {
 	{ SEAL_ENKI, "Walk among Thresholds",
 	"Teleport to a chosen doorway." },
 	{ SEAL_ENKI, "Geyser",
-	"ERROR 404: description not found." },
+	"Blast an adjacent monster with a geyser from the abzu, dealing damage and wetting their inventory." },
 	{ SEAL_EURYNOME, "Vengeance",
 	"Damage all adjacent creatures that have damaged you with their attacks." },
 	{ SEAL_EURYNOME, "Shape the Wind",
@@ -1195,8 +1197,6 @@ static const struct spirit_power spirit_powers[NUMBER_POWERS] = {
 	"Cast a spell from a wielded spellbook." },
 	{ SEAL_PAIMON,			"Book Telepathy",			
 	"Detect spellbooks on the current level." },
-	{ SEAL_SHIRO,			"Earth Swallow",			
-	"Create a pit in target adjacent square, then throw a boulder into the pit." },
 	{ SEAL_SIMURGH,			"Unite the Earth and Sky",	
 	"Creates a tree or fills a pit with water in the chosen adjacent square." },
 	{ SEAL_SIMURGH,			"Hook in the Sky",			
@@ -4588,8 +4588,8 @@ dovspell()
 }
 
 int
-dospiritmenu(prompt, power_no, respect_timeout)
-const char *prompt;
+dospiritmenu(action, power_no, respect_timeout)
+int action;	/* SPELLMENU_CAST, ~~SPELLMENU_VIEW~~, SPELLMENU_DESCRIBE, or ~~??? index~~ */
 int *power_no;
 int respect_timeout;
 {
@@ -4606,9 +4606,6 @@ int respect_timeout;
 	any.a_void = 0;		/* zero out all bits */
 	anyvoid.a_void = 0;		/* zero out all bits */
 	
-	Sprintf(buf, "Select spirit power:");
-	add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	
 	if(flags.timeoutOrder){
 		for(s=0; s<NUM_BIND_SPRITS; s++){
 			if(u.spirit[s]){
@@ -4621,7 +4618,7 @@ int respect_timeout;
 				add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_BOLD, sealNames[j], MENU_UNSELECTED);
 				for(i = 0; i<52; i++){
 					if(spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
-						if(u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
+						if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
 							Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
 							any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
 							add_menu(tmpwin, NO_GLYPH, &any,
@@ -4637,13 +4634,13 @@ int respect_timeout;
 		}
 	} else {
 		for(i = 0; i<52; i++){
-			if(((u.spiritPOrder[i] != -1 &&
+			if (u.spiritPOrder[i] != -1 && ((
 				spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
 				!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
-				(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL && 
-				spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL))
+				((spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL) && 
+				(spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL)))
 			){
-				if(u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
+				if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
 					Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
 					any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
 					add_menu(tmpwin, NO_GLYPH, &any,
@@ -4656,13 +4653,99 @@ int respect_timeout;
 			}
 		}
 	}
-	end_menu(tmpwin, prompt);
+
+	//Other menu options
+	if (action != SPELLMENU_CAST && action < 0) {
+		Sprintf(buf, "Use a power instead");
+		any.a_int = SPELLMENU_CAST;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'!', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	if (action != SPELLMENU_DESCRIBE && action < 0) {
+		// Describe a spell
+		Sprintf(buf, "Describe a power instead");
+		any.a_int = SPELLMENU_DESCRIBE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'?', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+//	if (action != SPELLMENU_VIEW && action < 0 && spellid(1) != NO_SPELL){
+//		// Describe a spell
+//		Sprintf(buf, "Rearrange powers instead");
+//		any.a_int = SPELLMENU_VIEW;
+//		add_menu(tmpwin, NO_GLYPH, &any,
+//			'+', 0, ATR_NONE, buf,
+//			MENU_UNSELECTED);
+//	}
+	switch (action)
+	{
+//	case SPELLMENU_VIEW:
+//		Sprintf(buf, "Choose which power to reorder");
+//		break;
+	case SPELLMENU_CAST:
+		Sprintf(buf, "Choose which power to use");
+		break;
+	case SPELLMENU_DESCRIBE:
+		Sprintf(buf, "Choose which power to describe");
+		break;
+//	default:
+//		Sprintf(buf, "Reordering powers; swap '%c' with", spellet(action));
+//		break;
+	}
+	end_menu(tmpwin, buf);
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
-	if(n > 0) *power_no = selected[0].item.a_int - 1;
+//	if(n > 0) *power_no = selected[0].item.a_int - 1;
 	destroy_nhwindow(tmpwin);
-	return (n > 0) ? TRUE : FALSE;
+	
+
+	if (n > 0){
+		int p_no = selected[0].item.a_int - 1;
+
+		if (selected[0].item.a_int < 0){
+			return dospiritmenu(selected[0].item.a_int, power_no, respect_timeout);
+		}
+		else if (!(action == SPELLMENU_VIEW && spellid(1) == NO_SPELL)) {
+			/* we aren't attempting to rearrange spells with only 1 spell known */
+			switch (action)
+			{
+//			case SPELLMENU_VIEW:
+//				*power_no = p_no;
+//				return dospiritmenu(p_no, power_no, respect_timeout);
+//
+			case SPELLMENU_CAST:
+				*power_no = p_no;
+				return TRUE;
+
+			case SPELLMENU_DESCRIBE:
+				if (TRUE)
+				{
+					tmpwin = create_nhwindow(NHW_MENU);
+					start_menu(tmpwin);
+					Sprintf(buf, "%s %s", s_suffix(sealNames[decode_sealID(spirit_powers[p_no].owner) - FIRST_SEAL]),
+						spirit_powers[p_no].name);
+					putstr(tmpwin, 0, buf);
+					putstr(tmpwin, 0, spirit_powers[p_no].desc);
+					end_menu(tmpwin, (const char *)0);
+					display_nhwindow(tmpwin, FALSE);
+					destroy_nhwindow(tmpwin);
+				}
+				return dospiritmenu(action, power_no, respect_timeout);
+
+//			default:
+//			{
+//					   struct spell spl_tmp;
+//					   spl_tmp = spl_book[*power_no];
+//					   spl_book[*power_no] = spl_book[p_no];
+//					   spl_book[p_no] = spl_tmp;
+//					   return dospellmenu(SPELLMENU_VIEW, power_no);
+//			}
+			} // switch(splaction)
+		} // doing something allowable
+	} // menu item was selected
+	return FALSE;
 }
 
 STATIC_OVL boolean
@@ -5676,7 +5759,7 @@ set_spirit_powers(spirits_seal)
 				if(u.spiritPOrder[j] == -1 ||
 					!((spirit_powers[u.spiritPOrder[j]].owner & u.sealsActive &&
 					!(spirit_powers[u.spiritPOrder[j]].owner & SEAL_SPECIAL)) || 
-					spirit_powers[u.spiritPOrder[j]].owner & u.specialSealsActive & ~SEAL_SPECIAL)
+					(spirit_powers[u.spiritPOrder[j]].owner & u.specialSealsActive & ~SEAL_SPECIAL))
 				){
 					u.spiritPOrder[j] = i;
 					break;
@@ -5721,7 +5804,7 @@ reorder_spirit_powers()
 		}
 	} else {
 		int power_no;
-		if(dospiritmenu("Choose which power to reorder", &power_no, TRUE))
+		if(dospiritmenu(SPELLMENU_CAST, &power_no, TRUE))
 			for(power_indx = 0; power_indx < 52; power_indx++){
 				if(power_no == u.spiritPOrder[power_indx])
 					break;
