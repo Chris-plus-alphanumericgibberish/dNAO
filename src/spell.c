@@ -4589,7 +4589,7 @@ dovspell()
 
 int
 dospiritmenu(action, power_no, respect_timeout)
-int action;	/* SPELLMENU_CAST, ~~SPELLMENU_VIEW~~, SPELLMENU_DESCRIBE, or ~~??? index~~ */
+int action;	/* SPELLMENU_CAST, SPELLMENU_VIEW, SPELLMENU_DESCRIBE, or power number */
 int *power_no;
 int respect_timeout;
 {
@@ -4598,7 +4598,7 @@ int respect_timeout;
 	char buf[BUFSZ];
 	menu_item *selected;
 	anything any, anyvoid;
-	int i,s,j;
+	int i,s,j,p;
 	long place;
 	
 	tmpwin = create_nhwindow(NHW_MENU);
@@ -4607,6 +4607,7 @@ int respect_timeout;
 	anyvoid.a_void = 0;		/* zero out all bits */
 	
 	if(flags.timeoutOrder){
+		p = 0;
 		for(s=0; s<NUM_BIND_SPRITS; s++){
 			if(u.spirit[s]){
 				j=0;
@@ -4628,11 +4629,13 @@ int respect_timeout;
 							Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
 							add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
 						}
+						p++;
 					}
 				}
 			}
 		}
 	} else {
+		p = 0;
 		for(i = 0; i<52; i++){
 			if (u.spiritPOrder[i] != -1 && ((
 				spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
@@ -4650,6 +4653,7 @@ int respect_timeout;
 					Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
 					add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
 				}
+				p++;
 			}
 		}
 	}
@@ -4670,34 +4674,45 @@ int respect_timeout;
 			'?', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-//	if (action != SPELLMENU_VIEW && action < 0 && spellid(1) != NO_SPELL){
-//		// Describe a spell
-//		Sprintf(buf, "Rearrange powers instead");
-//		any.a_int = SPELLMENU_VIEW;
-//		add_menu(tmpwin, NO_GLYPH, &any,
-//			'+', 0, ATR_NONE, buf,
-//			MENU_UNSELECTED);
-//	}
+	if (action != SPELLMENU_VIEW && action < 0 && p>=2){
+		// Describe a spell
+		Sprintf(buf, "Rearrange powers instead");
+		any.a_int = SPELLMENU_VIEW;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'+', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
 	switch (action)
 	{
-//	case SPELLMENU_VIEW:
-//		Sprintf(buf, "Choose which power to reorder");
-//		break;
+	case SPELLMENU_VIEW:
+		Sprintf(buf, "Choose which power to reorder");
+		break;
 	case SPELLMENU_CAST:
 		Sprintf(buf, "Choose which power to use");
 		break;
 	case SPELLMENU_DESCRIBE:
 		Sprintf(buf, "Choose which power to describe");
 		break;
-//	default:
-//		Sprintf(buf, "Reordering powers; swap '%c' with", spellet(action));
-//		break;
+	default:
+		if (TRUE) {
+			char let;
+			/* find letter that matches action -- we can assume we will find it */
+			for (i = 0; i < 52; i++)
+			if (u.spiritPOrder[i] == action)
+				break;
+			if (i < 26)
+				let = 'a' + i;
+			else
+				let = 'A' + 1;
+
+			Sprintf(buf, "Reordering powers; swap '%c' with", let);
+		}
+		break;
 	}
 	end_menu(tmpwin, buf);
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
-//	if(n > 0) *power_no = selected[0].item.a_int - 1;
 	destroy_nhwindow(tmpwin);
 	
 
@@ -4707,14 +4722,13 @@ int respect_timeout;
 		if (selected[0].item.a_int < 0){
 			return dospiritmenu(selected[0].item.a_int, power_no, respect_timeout);
 		}
-		else if (!(action == SPELLMENU_VIEW && spellid(1) == NO_SPELL)) {
-			/* we aren't attempting to rearrange spells with only 1 spell known */
+		else {
 			switch (action)
 			{
-//			case SPELLMENU_VIEW:
-//				*power_no = p_no;
-//				return dospiritmenu(p_no, power_no, respect_timeout);
-//
+			case SPELLMENU_VIEW:
+				*power_no = p_no;
+				return dospiritmenu(p_no, power_no, respect_timeout);
+
 			case SPELLMENU_CAST:
 				*power_no = p_no;
 				return TRUE;
@@ -4734,14 +4748,21 @@ int respect_timeout;
 				}
 				return dospiritmenu(action, power_no, respect_timeout);
 
-//			default:
-//			{
-//					   struct spell spl_tmp;
-//					   spl_tmp = spl_book[*power_no];
-//					   spl_book[*power_no] = spl_book[p_no];
-//					   spl_book[p_no] = spl_tmp;
-//					   return dospellmenu(SPELLMENU_VIEW, power_no);
-//			}
+			default:
+				/* swap action's char with power_no's char */
+				/* find letter that matches action -- we can assume we will find it */
+				for (i = 0; i < 52; i++)
+				if (u.spiritPOrder[i] == action)
+					break;
+				for (j = 0; j < 52; j++)
+				if (u.spiritPOrder[j] == p_no)
+					break;
+
+				s					= u.spiritPOrder[i];
+				u.spiritPOrder[i]	= u.spiritPOrder[j];
+				u.spiritPOrder[j]	= s;
+
+				return dospiritmenu(SPELLMENU_VIEW, power_no, respect_timeout);
 			} // switch(splaction)
 		} // doing something allowable
 	} // menu item was selected
