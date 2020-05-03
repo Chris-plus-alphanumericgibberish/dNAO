@@ -526,12 +526,22 @@ nh_timeout()
 	if(u.voidChime){
 		u.voidChime--;
 		if(!u.voidChime){
-			if(u.spiritTineA) u.sealsActive&=(~u.spiritTineA);
-				if(u.spiritTineA&wis_spirits) u.wisSpirits--;
-				if(u.spiritTineA&int_spirits) u.intSpirits--;
-			if(u.spiritTineB) u.sealsActive&=(~u.spiritTineB);
-				if(u.spiritTineB&wis_spirits) u.wisSpirits--;
-				if(u.spiritTineB&int_spirits) u.intSpirits--;
+			int i;
+			int * spiritprops;
+			if (u.spiritTineA) {
+				u.sealsActive &= (~u.spiritTineA);
+				if (u.spiritTineA&wis_spirits) u.wisSpirits--;
+				if (u.spiritTineA&int_spirits) u.intSpirits--;
+				for (i = 0, spiritprops = spirit_props(decode_sealID(u.spiritTineA)); spiritprops[i] != NO_PROP; i++)
+					u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
+			}
+			if (u.spiritTineB) {
+				u.sealsActive &= (~u.spiritTineB);
+				if (u.spiritTineB&wis_spirits) u.wisSpirits--;
+				if (u.spiritTineB&int_spirits) u.intSpirits--;
+				for (i = 0, spiritprops = spirit_props(decode_sealID(u.spiritTineB)); spiritprops[i] != NO_PROP; i++)
+					u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
+			}
 			if(uwep && uwep->oartifact==ART_PEN_OF_THE_VOID){
 				uwep->ovar1 = 0;
 				uwep->ovar1 |= u.spiritTineA;

@@ -6743,6 +6743,7 @@ arti_invoke(obj)
 		case VOID_CHIME:
 			if(quest_status.killed_nemesis){
 				int i;
+				int * spiritprops;
 				u.voidChime = 5;
 				pline("You strike the twin-bladed athame like a tuning fork. The beautiful chime is like nothing you have ever heard.");
 				obj->ovar1 |= u.sealsActive;
@@ -6750,9 +6751,13 @@ arti_invoke(obj)
 				set_spirit_powers(u.spiritTineA);
 					if(u.spiritTineA&wis_spirits) u.wisSpirits++;
 					if(u.spiritTineA&int_spirits) u.intSpirits++;
+					for (i = 0, spiritprops = spirit_props(decode_sealID(u.spiritTineA)); spiritprops[i] != NO_PROP; i++)
+						u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
 				set_spirit_powers(u.spiritTineB);
 					if(u.spiritTineB&wis_spirits) u.wisSpirits++;
 					if(u.spiritTineB&int_spirits) u.intSpirits++;
+					for (i = 0, spiritprops = spirit_props(decode_sealID(u.spiritTineB)); spiritprops[i] != NO_PROP; i++)
+						u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
 				for(i=0;i < NUMBER_POWERS;i++){
 					u.spiritPColdowns[i] = 0;
 				}
