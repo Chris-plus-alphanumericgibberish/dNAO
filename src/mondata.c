@@ -1090,8 +1090,11 @@ const char *in_str;
 #endif
 		{ "olog hai",		PM_OLOG_HAI },
 		{ "arch lich",		PM_ARCH_LICH },
+		/* spacing */
+		{ "mindflayer",		PM_MIND_FLAYER },
+		{ "master mindflayer",	PM_MASTER_MIND_FLAYER },
 	    /* Some irregular plurals */
-		{ "incubi",		PM_INCUBUS },
+		{ "incubi",			PM_INCUBUS },
 		{ "succubi",		PM_SUCCUBUS },
 		{ "violet fungi",	PM_VIOLET_FUNGUS },
 		{ "homunculi",		PM_HOMUNCULUS },
@@ -1099,11 +1102,15 @@ const char *in_str;
 		{ "lurkers above",	PM_LURKER_ABOVE },
 		{ "cavemen",		PM_CAVEMAN },
 		{ "cavewomen",		PM_CAVEWOMAN },
-		{ "djinn",		PM_DJINNI },
+		{ "djinn",			PM_DJINNI },
 		{ "mumakil",		PM_MUMAK },
 		{ "erinyes",		PM_ERINYS },
-	    /* falsely caught by -ves check above */
+		/* Inappropriate singularization by -ves check above */
 		{ "master of thief",	PM_MASTER_OF_THIEVES },
+		/* Potential misspellings where we want to avoid falling back
+		to the rank title prefix (input has been singularized) */
+		{ "master thief",		PM_MASTER_OF_THIEVES },
+		{ "master of assassin", PM_MASTER_ASSASSIN },
 	    /* human-form weres */
 		{ "wererat (human)",	PM_HUMAN_WERERAT },
 		{ "werejackal (human)",	PM_HUMAN_WEREJACKAL },
