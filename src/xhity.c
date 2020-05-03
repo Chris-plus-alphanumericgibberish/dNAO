@@ -3574,6 +3574,12 @@ boolean ranged;
 		domissmsg = FALSE;
 		miss = TRUE;
 	}
+	/* Otiax protects you from being hit (1/5) */
+	if (youdef && u.sealsActive&SEAL_OTIAX && !rn2(5))
+	{
+		/* No special message, they just miss? */
+		miss = TRUE;
+	}
 
 	/* get accuracy of attack */
 	if (miss)
