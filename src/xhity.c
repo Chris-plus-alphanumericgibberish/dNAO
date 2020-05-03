@@ -959,6 +959,9 @@ int tary;
 			/* cannot swallow huge or larger */
 			if (pd->msize >= MZ_HUGE)
 				continue;
+			/* ahazu protects the player from engulfing */
+			if (youdef && u.sealsActive&SEAL_AHAZU)
+				continue;
 			/* check for wild misses */
 			if (missedyou) {
 				wildmiss(magr, attk, otmp, ranged);
