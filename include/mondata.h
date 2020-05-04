@@ -191,6 +191,10 @@
 #define no_innards(ptr)	((ptr)->mlet == S_VORTEX || \
 						 (ptr)->mlet == S_LIGHT || \
 						 (ptr)->mlet == S_ELEMENTAL || \
+						 (ptr)->mlet == S_MIMIC || \
+						 ((ptr)->mtyp == PM_BALL_OF_LIGHT) || \
+						 ((ptr)->mtyp == PM_BALL_OF_RADIANCE) || \
+						 ((ptr)->mtyp == PM_BALL_OF_GOSSAMER_SUNLIGHT) || \
 						 ((ptr)->mtyp == PM_SHAMBLING_HORROR && u.shambin == 2) || \
 						 ((ptr)->mtyp == PM_STUMBLING_HORROR && u.stumbin == 2) || \
 						 ((ptr)->mtyp == PM_WANDERING_HORROR && u.wandein == 2) || \
