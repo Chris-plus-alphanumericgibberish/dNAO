@@ -959,6 +959,9 @@ int tary;
 			/* cannot swallow huge or larger */
 			if (pd->msize >= MZ_HUGE)
 				continue;
+			/* ahazu protects the player from engulfing */
+			if (youdef && u.sealsActive&SEAL_AHAZU)
+				continue;
 			/* check for wild misses */
 			if (missedyou) {
 				wildmiss(magr, attk, otmp, ranged);
@@ -3579,6 +3582,12 @@ boolean ranged;
 				);
 		}
 		domissmsg = FALSE;
+		miss = TRUE;
+	}
+	/* Otiax protects you from being hit (1/5) */
+	if (youdef && u.sealsActive&SEAL_OTIAX && !rn2(5))
+	{
+		/* No special message, they just miss? */
 		miss = TRUE;
 	}
 

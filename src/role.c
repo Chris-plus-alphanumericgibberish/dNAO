@@ -770,7 +770,7 @@ const struct Race races[] = {
 },
 {	"Drow", "droven", "drovenkind", "Dro",
 	{"hedrow", "drow"},
-	PM_DROW, NON_PM, PM_DROW_MUMMY, PM_DROW,
+	PM_DROW, NON_PM, PM_DROW_MUMMY, PM_HEDROW_ZOMBIE,
 	ROLE_MALE|ROLE_FEMALE | ROLE_CHAOTIC,
 	MA_ELF, 0, MA_FEY|MA_ELF|MA_ORC,
 	/*  Str    Int Wis Dex Con Cha */
@@ -911,7 +911,7 @@ struct Race urace =
 struct Race myrkalfr = 
 {	"myrkalfr", "myrkalfar", "myrkalfrkind", "Dro",
 	{"myrkalfr", "myrkalfr"},
-	PM_MYRKALFR, NON_PM, PM_DROW_MUMMY, PM_DROW,
+	PM_MYRKALFR, NON_PM, PM_DROW_MUMMY, PM_HEDROW_ZOMBIE,
 	ROLE_MALE|ROLE_FEMALE | ROLE_CHAOTIC,
 	MA_ELF, 0, MA_ELF|MA_ORC|MA_DROW,
 	/*  Str    Int Wis Dex Con Cha */
