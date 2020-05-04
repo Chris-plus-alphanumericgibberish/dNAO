@@ -807,6 +807,7 @@
 				   (ptr)->mlet != S_MIMIC && \
 				   (ptr)->mtyp != PM_WEEPING_ANGEL && \
 				   (ptr)->mtyp != PM_GREAT_CTHULHU && \
+				   (ptr)->mtyp != PM_STAR_SPAWN && \
 				   !is_clockwork(ptr) && \
 				   (!nonliving(ptr) || is_vampire(ptr)))
 #define has_blood_mon(mon)	(has_blood((mon)->data))
