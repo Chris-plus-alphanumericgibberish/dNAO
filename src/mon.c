@@ -3777,7 +3777,7 @@ struct monst *mtmp;
 		lifesavers |= LSVD_KAM;
 	if(mtmp->mtyp == PM_NITOCRIS)
 		lifesavers |= LSVD_NIT;
-	if (mtmp->mtyp == PM_BLESSED && rn2(3))
+	if (mtmp->mtyp == PM_BLESSED && !mtmp->mcan && rn2(3))
 		lifesavers |= LSVD_HLO;
 
 	/* some lifesavers do NOT work on stone/gold/glass-ing */
