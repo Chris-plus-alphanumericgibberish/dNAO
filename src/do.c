@@ -1050,6 +1050,7 @@ boolean at_stairs, falling, portal;
 		familiar = FALSE;
 	boolean new = FALSE;	/* made a new level? */
 	struct monst *mtmp;
+	struct obj *obj;
 	char whynot[BUFSZ];
 
 	if (dunlev(newlevel) > dunlevs_in_dungeon(newlevel))
@@ -1142,6 +1143,11 @@ boolean at_stairs, falling, portal;
 	u.uinwater = 0;
 	u.usubwater = 0;
 	u.uundetected = 0;	/* not hidden, even if means are available */
+	u.uz.flags.mirror = 0; /*Level has a mirror on it (needed for Nudzirath) */
+	for(obj = fobj; obj; obj = obj->nobj){
+		if(obj->otyp == MIRROR)
+			u.uz.flags.mirror = 1;
+	}
 	keepdogs(FALSE);
 	if (u.uswallow)				/* idem */
 		u.uswldtim = u.uswallow = 0;
