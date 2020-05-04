@@ -46,7 +46,7 @@ BRANCH:(66,17,66,17),(0,0,0,0)
 TELEPORT_REGION:(58,09,72,18),(0,0,0,0),down
 
 # Artifact Doors
-NON_PASSWALL:(00,00,13,05)
+NON_PASSWALL:(00,00,11,05)
 DOOR:locked,(04,01), 3
 DOOR:locked,(08,04), 2
 DOOR:locked,(13,01), 1
