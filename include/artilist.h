@@ -1838,7 +1838,7 @@ A("Aryvelahr Kerym",				LONG_SWORD,		(const char *)0,
 	NOINVOKE, (ARTI_LIGHT)
 	),
 
-A("The Staff of Aesculapius",		QUARTERSTAFF,		(const char *)0,
+A("The Staff of Aesculapius",		QUARTERSTAFF,		"serpent-entwined staff",
 	5000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_HEALER, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
@@ -1871,7 +1871,7 @@ A("The Eyes of the Overworld",		LENSES,				(const char *)0,
 
 /*Needs encyc entry*/
 /* Also has holy and unholy properties */
-A("Avenger",						LONG_SWORD,			(const char *)0,
+A("Avenger",						LONG_SWORD,			"winged long sword",
 	1000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_NOBLEMAN, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),
