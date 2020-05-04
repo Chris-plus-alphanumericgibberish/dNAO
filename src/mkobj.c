@@ -1261,6 +1261,7 @@ boolean artif;
 					otmp->corpsenm = PM_CENTIPEDE;
 					break;
 				}
+				otmp->owt = weight(otmp);
 			}
 			break;
 		case COIN_CLASS:
