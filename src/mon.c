@@ -3777,7 +3777,7 @@ struct monst *mtmp;
 		lifesavers |= LSVD_KAM;
 	if(mtmp->mtyp == PM_NITOCRIS)
 		lifesavers |= LSVD_NIT;
-	if (mtmp->mtyp == PM_BLESSED && rn2(3))
+	if (mtmp->mtyp == PM_BLESSED && !mtmp->mcan && rn2(3))
 		lifesavers |= LSVD_HLO;
 
 	/* some lifesavers do NOT work on stone/gold/glass-ing */
@@ -4277,7 +4277,7 @@ register struct monst *mtmp;
 	}
 	if(mtmp->mtame && roll_madness(MAD_TALONS)){
 		You("panic after losing a pet!");
-		nomul(-1*rnd(6), "panicking");
+		HPanicking += 1+rnd(6);
 	}
 #ifdef RECORD_ACHIEVE
 	if(mtmp->mtyp == PM_LUCIFER){
@@ -5766,7 +5766,7 @@ int fatal;			/* 1 in X chance of significant debilitation */
 		/* fear of snakes (and so poison) */
 		if (roll_madness(MAD_OPHIDIOPHOBIA)){
 			You("panic anyway!");
-			nomul(-1 * rnd(3), "panicking");
+			HPanicking += 1+rnd(3);
 		}
 	}
 	else {
@@ -5805,7 +5805,7 @@ int fatal;			/* 1 in X chance of significant debilitation */
 		}
 		if (roll_madness(MAD_OPHIDIOPHOBIA)){
 			You("panic!");
-			nomul(-1 * rnd(6), "panicking");
+			HPanicking += 1+rnd(6);
 		}
 		(void)encumber_msg();
 	}

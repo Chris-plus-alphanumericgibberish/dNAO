@@ -243,6 +243,7 @@ int faction;
 		ptr->mflagsm |= (MM_BREATHLESS);
 		ptr->mflagst |= (MT_HOSTILE);
 		ptr->mflagst &= ~(MT_PEACEFUL);
+		ptr->mflagsb |= (MB_NOEYES);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
 		break;
@@ -317,7 +318,7 @@ int faction;
 		insert = FALSE;
 
 		/* some factions completely skip specific attacks */
-		if (((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
+		if ((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
 				(
 				attk->aatyp == AT_SPIT ||
 				attk->aatyp == AT_BREA ||
@@ -331,18 +332,28 @@ int faction;
 				(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
 				attk->aatyp == AT_GAZE ||
 				attk->aatyp == AT_WDGZ
-				)) ||
-			((faction == FRACTURED) &&
-				(
-				attk->aatyp == AT_GAZE ||
-				attk->aatyp == AT_WDGZ
-				))
+				)
 			)
 		{
 			/* shift all further attacks forwards one slot, and make last one all 0s */
 			for (j = 0; j < (NATTK - i); j++)
 				attk[j] = attk[j+1];
 			attk[j] = noattack;
+		}
+
+		/* if creatures don't have eyes, some gaze attacks are impossible */
+		if ((attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ) && !haseyes(ptr))
+		{
+			boolean needs_magr_eyes;
+			getgazeinfo(attk->aatyp, attk->adtyp, ptr, &needs_magr_eyes, (boolean *)0, (boolean *)0);
+			if (needs_magr_eyes == TRUE)
+			{
+				/* remove attack */
+				/* shift all further attacks forwards one slot, and make last one all 0s */
+				for (j = 0; j < (NATTK - i); j++)
+					attk[j] = attk[j + 1];
+				attk[j] = noattack;
+			}
 		}
 
 		/* some factions want to adjust existing attacks, or add additional attacks */
@@ -1079,8 +1090,11 @@ const char *in_str;
 #endif
 		{ "olog hai",		PM_OLOG_HAI },
 		{ "arch lich",		PM_ARCH_LICH },
+		/* spacing */
+		{ "mindflayer",		PM_MIND_FLAYER },
+		{ "master mindflayer",	PM_MASTER_MIND_FLAYER },
 	    /* Some irregular plurals */
-		{ "incubi",		PM_INCUBUS },
+		{ "incubi",			PM_INCUBUS },
 		{ "succubi",		PM_SUCCUBUS },
 		{ "violet fungi",	PM_VIOLET_FUNGUS },
 		{ "homunculi",		PM_HOMUNCULUS },
@@ -1088,11 +1102,15 @@ const char *in_str;
 		{ "lurkers above",	PM_LURKER_ABOVE },
 		{ "cavemen",		PM_CAVEMAN },
 		{ "cavewomen",		PM_CAVEWOMAN },
-		{ "djinn",		PM_DJINNI },
+		{ "djinn",			PM_DJINNI },
 		{ "mumakil",		PM_MUMAK },
 		{ "erinyes",		PM_ERINYS },
-	    /* falsely caught by -ves check above */
+		/* Inappropriate singularization by -ves check above */
 		{ "master of thief",	PM_MASTER_OF_THIEVES },
+		/* Potential misspellings where we want to avoid falling back
+		to the rank title prefix (input has been singularized) */
+		{ "master thief",		PM_MASTER_OF_THIEVES },
+		{ "master of assassin", PM_MASTER_ASSASSIN },
 	    /* human-form weres */
 		{ "wererat (human)",	PM_HUMAN_WERERAT },
 		{ "werejackal (human)",	PM_HUMAN_WEREJACKAL },

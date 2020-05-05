@@ -53,7 +53,8 @@
 #define JUMPING						1 + FUMBLING					
 #define WWALKING					1 + JUMPING						
 #define HUNGER						1 + WWALKING					
-#define GLIB						1 + HUNGER						
+#define PANIC						1 + HUNGER					
+#define GLIB						1 + PANIC						
 #define LIFESAVED					1 + GLIB						
 #define CLAIRVOYANT					1 + LIFESAVED					
 #define VOMITING					1 + CLAIRVOYANT					
@@ -140,6 +141,7 @@ struct prop {
 #endif
 #	define W_BALL	    0x00200000L /* Punishment ball */
 #	define W_CHAIN	    0x00400000L /* Punishment chain */
+#	define W_SPIRIT		0x00800000L	/* Bound spirit */
 #	define W_SKIN		I_SPECIAL	/* merged into skin */
 
 	/*** Property is blocked by an object ***/

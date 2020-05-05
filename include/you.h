@@ -442,6 +442,7 @@ struct you {
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
 	int brand_otyp;				/* Record the otyp of Fire and Frost Brand in this game */
+	char ring_wishes;			/* Record the how many wishes were/should be in the castle ring */
 	unsigned udg_cnt;		/* timer for wizard intervention WRONG?:how long you have been demigod */
 	unsigned ill_cnt;		/* timer for illurien intervention */
 	struct u_event	uevent;		/* certain events have happened */
@@ -548,6 +549,7 @@ struct you {
 #define	MAD_DREAMS			0x00000000000080000L
 #define	MAD_HELMINTHOPHOBIA	0x00000000000100000L
 #define	MAD_GOAT_RIDDEN		0x00000000000200000L
+#define	MAD_FRENZY			0x00000000000400000L
 	int 	uinsight;	/* to record level of insight */
 	/*Insight rate calculation: 40: "high insight" 300: "Approximate per-turn WoYendor intervention rate" 5: "total number of harmful effects" */
 #define INSIGHT_RATE (40*300*5)

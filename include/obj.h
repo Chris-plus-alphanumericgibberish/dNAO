@@ -545,6 +545,7 @@ struct weapon_dice {
 //#endif
 #define is_poisonable(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			!is_launcher(otmp) &&\
+			!is_lightsaber(otmp) &&\
 			!is_unpoisonable_firearm_ammo(otmp) &&\
 			objects[otmp->otyp].oc_dir &&\
 			objects[otmp->otyp].oc_dir != WHACK)

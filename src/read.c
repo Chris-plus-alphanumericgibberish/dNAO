@@ -42,10 +42,22 @@ doread()
 {
 	register struct obj *scroll;
 	register boolean confused;
-
+	char class_list[MAXOCLASSES+2];
+	
 	known = FALSE;
 	if(check_capacity((char *)0)) return (0);
-	scroll = getobj(readable, "read");
+	
+	Strcpy(class_list, readable);
+	if(carrying_applyable_ring())
+		add_class(class_list, RING_CLASS);
+	if(carrying(LIGHTSABER) || carrying(CANDLE_OF_INVOCATION))
+		add_class(class_list, TOOL_CLASS);
+	if(carrying_readable_weapon())
+		add_class(class_list, WEAPON_CLASS);
+	if(carrying_readable_armor())
+		add_class(class_list, ARMOR_CLASS);
+	
+	scroll = getobj(class_list, "read");
 	if(!scroll) return(0);
 	
 	if((scroll->oartifact 

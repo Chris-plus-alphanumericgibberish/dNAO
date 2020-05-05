@@ -1253,7 +1253,8 @@ void
 change_usanity(delta)
 int delta;
 {
-	pline("Sanity change: %d + %d", u.usanity, delta);
+	if(discover || wizard)
+		pline("Sanity change: %d + %d", u.usanity, delta);
 	u.usanity += delta;
 	if(!u.umadness && u.usanity < 50)
 		u.usanity = 50;
@@ -1261,20 +1262,23 @@ int delta;
 		u.usanity = 0;
 	if(u.usanity > 100)
 		u.usanity = 100;
-	pline("= %d", u.usanity);
+	if(discover || wizard)
+		pline("= %d", u.usanity);
 }
 
 void
 change_uinsight(delta)
 int delta;
 {
-	pline("Insight change: %d + %d", u.uinsight, delta);
+	if(discover || wizard)
+		pline("Insight change: %d + %d", u.uinsight, delta);
 	u.uinsight += delta;
 	if(u.uinsight < 0)
 		u.uinsight = 0;
 	if(u.uinsight > INSIGHT_RATE/20)
 		u.uinsight = INSIGHT_RATE/20;
-	pline("= %d", u.uinsight);
+	if(discover || wizard)
+		pline("= %d", u.uinsight);
 }
 
 void
@@ -1480,11 +1484,11 @@ roll_frigophobia()
 	if(roll_madness(MAD_FRIGOPHOBIA)){
 		if(!Cold_resistance){
 			You("panic from the cold!");
-			nomul(-1*rnd(6), "panicking");
+			HPanicking += 1+rnd(6);
 		}
 		else if(roll_madness(MAD_FRIGOPHOBIA)){//Very scared of ice
 			You("panic from the chill!");
-			nomul(-1*rnd(3), "panicking");
+			HPanicking += 1+rnd(3);
 		}
 	}
 }
@@ -1497,14 +1501,14 @@ roll_av_frigophobia()
 	if(roll_madness(MAD_FRIGOPHOBIA)){
 		if(FrozenAir && !Breathless){
 			You("panic in the airless void!");
-			nomul(-1*rnd(8), "panicking");
+			HPanicking += 1+rnd(8);
 		} else if(!Cold_resistance){
 			You("panic in the cold!");
-			nomul(-1*rnd(6), "panicking");
+			HPanicking += 1+rnd(6);
 		}
 		else if(roll_madness(MAD_FRIGOPHOBIA)){//Very scared of ice
 			You("panic beneath the airless heavens!");
-			nomul(-1*rnd(4), "panicking");
+			HPanicking += 1+rnd(4);
 		}
 	}
 }

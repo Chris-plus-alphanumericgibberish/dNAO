@@ -6743,6 +6743,7 @@ arti_invoke(obj)
 		case VOID_CHIME:
 			if(quest_status.killed_nemesis){
 				int i;
+				int * spiritprops;
 				u.voidChime = 5;
 				pline("You strike the twin-bladed athame like a tuning fork. The beautiful chime is like nothing you have ever heard.");
 				obj->ovar1 |= u.sealsActive;
@@ -6750,9 +6751,13 @@ arti_invoke(obj)
 				set_spirit_powers(u.spiritTineA);
 					if(u.spiritTineA&wis_spirits) u.wisSpirits++;
 					if(u.spiritTineA&int_spirits) u.intSpirits++;
+					for (i = 0, spiritprops = spirit_props(decode_sealID(u.spiritTineA)); spiritprops[i] != NO_PROP; i++)
+						u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
 				set_spirit_powers(u.spiritTineB);
 					if(u.spiritTineB&wis_spirits) u.wisSpirits++;
 					if(u.spiritTineB&int_spirits) u.intSpirits++;
+					for (i = 0, spiritprops = spirit_props(decode_sealID(u.spiritTineB)); spiritprops[i] != NO_PROP; i++)
+						u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
 				for(i=0;i < NUMBER_POWERS;i++){
 					u.spiritPColdowns[i] = 0;
 				}
@@ -9080,33 +9085,40 @@ artifact_wet(obj, silent)
 struct obj *obj;
 boolean silent;
 {
-	 if (!obj->oartifact) return (-1);
-	 switch (artilist[(int) (obj)->oartifact].adtyp) {
-		 case AD_FIRE:
-			 if (!silent) {
-				pline("A cloud of steam rises.");
-				pline("%s is untouched.", The(xname(obj)));
-			 }
-			 return (AD_FIRE);
-		 case AD_COLD:
-			 if (!silent) {
-				pline("Icicles form and fall from the freezing %s.",
-			             the(xname(obj)));
-			 }
-			 return (AD_COLD);
-		 case AD_ELEC:
-			 if (!silent) {
-				pline_The("humid air crackles with electricity from %s.",
-						the(xname(obj)));
-			 }
-			 return (AD_ELEC);
-		 case AD_DRLI:
-			 if (!silent) {
-				pline("%s absorbs the water!", The(xname(obj)));
-			 }
-			 return (AD_DRLI);
-		 default:
-			 break;
+	int adtyp = 0;
+
+	if (is_lightsaber(obj) && litsaber(obj))
+		adtyp = (obj->otyp == KAMEREL_VAJRA ? AD_ELEC : AD_FIRE);
+	else if (obj->oartifact)
+		adtyp = artilist[(int)(obj)->oartifact].adtyp;
+
+	switch (adtyp) 
+	{
+	case AD_FIRE:
+		if (!silent) {
+			pline("A cloud of steam rises.");
+			pline("%s is untouched.", The(xname(obj)));
+		}
+		return (AD_FIRE);
+	case AD_COLD:
+		if (!silent) {
+			pline("Icicles form and fall from the freezing %s.",
+				the(xname(obj)));
+		}
+		return (AD_COLD);
+	case AD_ELEC:
+		if (!silent) {
+			pline_The("humid air crackles with electricity from %s.",
+				the(xname(obj)));
+		}
+		return (AD_ELEC);
+	case AD_DRLI:
+		if (!silent) {
+			pline("%s absorbs the water!", The(xname(obj)));
+		}
+		return (AD_DRLI);
+	default:
+		break;
 	}
 	return (-1);
 }

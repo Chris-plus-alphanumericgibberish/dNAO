@@ -855,11 +855,11 @@ moveloop()
 		if((is_ice(u.ux, u.uy) || mad_turn(MAD_COLD_NIGHT)) && roll_madness(MAD_FRIGOPHOBIA)){
 			if(!Flying && !Levitation){
 				You("panic from setting foot on ice!");
-				nomul(-1*rnd(6), "panicking");
+				HPanicking += 1+rnd(6);
 			}
 			else if(roll_madness(MAD_FRIGOPHOBIA)){//Very scared of ice
 				You("panic from traveling over ice!");
-				nomul(-1*rnd(3), "panicking");
+				HPanicking += 1+rnd(3);
 			}
 		}
 		
@@ -1507,6 +1507,11 @@ karemade:
 				}
 			}
 			
+			//Run away!
+			if(Panicking){
+				moveamt += 2;
+			}
+			
 			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HASTE){
 				moveamt += 2;
 			}
@@ -1684,6 +1689,23 @@ karemade:
 					exercise(A_CHA, FALSE);
 				}
 			}
+			
+			if(has_blood(youracedata) && u.usanity < 50 && roll_madness(MAD_FRENZY)){
+				int *hp = (Upolyd) ? (&u.mh) : (&u.uhp);
+				Your("%s leaps through your %s!", body_part(BLOOD), body_part(BODY_SKIN));
+				//reduce current HP by 30% (round up, guranteed nonfatal)
+				if(ACURR(A_CON) > 3)
+					(void)adjattrib(A_CON, -1, FALSE);
+				*hp = *hp*.7+1;
+				u.umadness &= ~MAD_FRENZY;
+				flags.botl = 1;
+			} else if(u.umadness&MAD_FRENZY){
+				change_usanity(-1);
+				if(!rn2(20)){
+					u.umadness &= ~MAD_FRENZY;
+				}
+			}
+			
 			if(!rn2(8) && !flaming(youracedata) && roll_madness(MAD_COLD_NIGHT)){
 				if(u.usanity <= 88 && !rn2(11)){
 					if(!Breathless && !Blind)

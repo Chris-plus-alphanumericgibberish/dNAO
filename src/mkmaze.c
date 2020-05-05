@@ -729,13 +729,17 @@ fixup_special()
 			assign_level(&sstairs.tolev, &qstart_level);
 		}
 	}
-	/* WISHING REVAMP: Place candle of wishing on valley altar (TBD: only do so if the ring will grant only a single wish)*/
+	/* WISHING REVAMP: Place candle of wishing on valley altar, if needed to make up for a 1-wish-ring */
 	if(on_level(&valley_level, &u.uz)){
-		int x, y;
-		for(x = 0; x<COLNO; x++){
-			for(y = 0; y<ROWNO; y++){
-				if(isok(x,y) && levl[x][y].typ == ALTAR){
-					mksobj_at(CANDLE_OF_INVOCATION, x, y, FALSE, FALSE);
+		if(u.ring_wishes == -1)
+			u.ring_wishes = rnd(3);
+		if(u.ring_wishes == 1){
+			int x, y;
+			for(x = 0; x<COLNO; x++){
+				for(y = 0; y<ROWNO; y++){
+					if(isok(x,y) && levl[x][y].typ == ALTAR){
+						mksobj_at(CANDLE_OF_INVOCATION, x, y, FALSE, FALSE);
+					}
 				}
 			}
 		}

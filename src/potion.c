@@ -14,6 +14,15 @@ STATIC_DCL long FDECL(itimeout, (long));
 STATIC_DCL void NDECL(ghost_from_bottle);
 STATIC_DCL short FDECL(mixtype, (struct obj *,struct obj *));
 
+#define polypotion(obj) \
+	((obj)->otyp == POT_POLYMORPH || \
+	((obj)->otyp == POT_BLOOD && (\
+		(obj)->corpsenm == PM_CHAMELEON || \
+		(obj)->corpsenm == PM_SMALL_MIMIC || \
+		(obj)->corpsenm == PM_LARGE_MIMIC || \
+		(obj)->corpsenm == PM_GIANT_MIMIC)\
+	))
+
 /* force `val' to be within valid range for intrinsic timeout value */
 STATIC_OVL long
 itimeout(val)
@@ -380,6 +389,22 @@ dodrink()
 	otmp = getobj(beverages, "drink");
 	if(!otmp) return(0);
 	if(otmp->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
+
+	/* quan > 1 used to be left to useup(), but we need to force
+	   the current potion to be unworn, and don't want to do
+	   that for the entire stack when starting with more than 1.
+	   [Drinking a wielded potion of polymorph can trigger a shape
+	   change which causes hero's weapon to be dropped.  In 3.4.x,
+	   that led to an "object lost" panic since subsequent useup()
+	   was no longer dealing with an inventory item.  Unwearing
+	   the current potion is intended to keep it in inventory.] */
+	if (otmp->quan > 1L) {
+	    otmp = splitobj(otmp, 1L);
+	    otmp->owornmask = 0L;	/* rest of original stuck unaffected */
+	} else if (otmp->owornmask) {
+	    remove_worn_item(otmp, FALSE);
+	}
+	
 	otmp->in_use = TRUE;		/* you've opened the stopper */
 
 #define POTION_OCCUPANT_CHANCE(n) (13 + 2*(n))	/* also in muse.c */
@@ -2334,6 +2359,8 @@ boolean amnesia;
 #else
 			obj->blessed = obj->cursed = FALSE;
 #endif
+			if (obj->otyp == POT_STARLIGHT)
+				end_burn(obj, FALSE);
 			obj->otyp = POT_WATER;
 		} else obj->odiluted++;
 		used = TRUE;
@@ -2553,14 +2580,7 @@ dodip()
 		return 0;
 	}
 	//from Slashem, modified
-	if(!(potion->otyp == POT_WATER || potion->otyp == POT_ACID || potion->otyp == POT_POLYMORPH ||
-		(potion->otyp == POT_BLOOD && 
-			(potion->corpsenm == PM_CHAMELEON ||
-			 potion->corpsenm == PM_SMALL_MIMIC ||
-			 potion->corpsenm == PM_LARGE_MIMIC ||
-			 potion->corpsenm == PM_GIANT_MIMIC
-			)
-		)) && obj->otyp == POT_WATER) {
+	if(!(potion->otyp == POT_WATER || potion->otyp == POT_ACID || polypotion(potion)) && obj->otyp == POT_WATER) {
 	  /* swap roles, to ensure symmetry, but don't if the potion is polymorph or acid */
 	  struct obj *otmp = potion;
 	  potion = obj;
@@ -2651,29 +2671,14 @@ dodip()
 	/* WAC - Finn Theoderson - make polymorph and gain level msgs similar
 	 * 	 Give out name of new object and allow user to name the potion
 	 */
-	else if (obj->otyp == POT_POLYMORPH ||
-		(obj->otyp == POT_BLOOD && 
-			(obj->corpsenm == PM_CHAMELEON ||
-			 obj->corpsenm == PM_SMALL_MIMIC ||
-			 obj->corpsenm == PM_LARGE_MIMIC ||
-			 obj->corpsenm == PM_GIANT_MIMIC
-			)
-		) ||
-		potion->otyp == POT_POLYMORPH ||
-		(potion->otyp == POT_BLOOD && 
-			(potion->corpsenm == PM_CHAMELEON ||
-			 potion->corpsenm == PM_SMALL_MIMIC ||
-			 potion->corpsenm == PM_LARGE_MIMIC ||
-			 potion->corpsenm == PM_GIANT_MIMIC
-			)
-		)
-	) {
+	else if (polypotion(obj) || polypotion(potion))
+	{
 	    /* some objects can't be polymorphed */
-	    if (obj->otyp == potion->otyp ||	/* both POT_POLY */
+		if ((polypotion(obj) && polypotion(potion)) ||	/* both polypotions */
 		    obj->otyp == WAN_POLYMORPH ||
 		    obj->otyp == SPE_POLYMORPH ||
 		    obj == uball || obj == uskin ||
-		    obj_resists(obj->otyp == POT_POLYMORPH ?
+			obj_resists(polypotion(obj) ?
 				potion : obj, 5, 95)) {
 			pline1(nothing_happens);
 	    } else {
@@ -2693,7 +2698,8 @@ dodip()
 		else if (was_quiver) setuqwep(obj);
 
 		if (obj->otyp != save_otyp || (obj->otyp == HYPOSPRAY_AMPULE && objects[HYPOSPRAY_AMPULE].oc_name_known)) {
-			makeknown(POT_POLYMORPH);
+			if (save_otyp == POT_POLYMORPH || potion->otyp == POT_POLYMORPH)
+				makeknown(POT_POLYMORPH);
 			useup(potion);
 			prinv((char *)0, obj, 0L);
 			return 1;
@@ -2731,6 +2737,9 @@ dodip()
 		obj->blessed = obj->cursed = obj->bknown = 0;
 		if (Blind || Hallucination) obj->dknown = 0;
 
+		if (obj->otyp == POT_STARLIGHT)
+			end_burn(obj, FALSE);
+
 		if ((mixture = mixtype(obj, potion)) != 0) {
 			obj->otyp = mixture;
 		} else {
@@ -2747,6 +2756,7 @@ dodip()
 				  struct obj *otmp;
 				  otmp = mkobj(POTION_CLASS,FALSE);
 				  obj->otyp = otmp->otyp;
+				  fix_object(obj);
 				  obfree(otmp, (struct obj *)0);
 				}
 				break;
@@ -2875,7 +2885,7 @@ dodip()
 			if(obj->otyp != VIPERWHIP) obj->opoisoned = 0;
 			if(obj->otyp == VIPERWHIP) pline("%s is drawn up into %s.",
 				  buf, the(xname(obj)));
-			else pline("%s forms a coating on %s.",
+			else pline("%s forms a blinding coating on %s.",
 				  buf, the(xname(obj)));
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisonchrgs && obj->opoisoned == OPOISON_BLIND) obj->opoisonchrgs += 2;
@@ -2893,13 +2903,33 @@ dodip()
 			if(obj->otyp != VIPERWHIP) obj->opoisoned = 0;
 			if(obj->otyp == VIPERWHIP) pline("%s is drawn up into %s.",
 				  buf, the(xname(obj)));
-			else pline("%s forms a coating on %s.",
+			else pline("%s forms a paralyzing coating on %s.",
 				  buf, the(xname(obj)));
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisonchrgs && obj->opoisoned == OPOISON_PARAL) obj->opoisonchrgs += 2;
 				else obj->opoisonchrgs = 1;
 			}
 			obj->opoisoned = OPOISON_PARAL;
+			goto poof;
+	    } else if(potion->otyp == POT_STARLIGHT && obj->obj_material == SILVER &&
+	    		(!(obj->opoisoned & OPOISON_SILVER) || obj->otyp == VIPERWHIP)
+	    	) {
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			obj->opoisoned = 0;
+			if(obj->otyp != VIPERWHIP) obj->opoisoned = 0;
+			if(obj->otyp == VIPERWHIP) pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			else pline("%s forms a silvery coating on %s.",
+				  buf, the(xname(obj)));
+			if(obj->otyp == VIPERWHIP){
+				if(obj->opoisonchrgs && obj->opoisoned == OPOISON_SILVER) obj->opoisonchrgs += 2;
+				else obj->opoisonchrgs = 1;
+			}
+			obj->opoisoned = OPOISON_SILVER;
 			goto poof;
 	    } else if(obj->opoisoned &&
 			  (potion->otyp == POT_HEALING ||

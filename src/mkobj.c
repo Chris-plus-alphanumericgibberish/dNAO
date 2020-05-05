@@ -1188,7 +1188,16 @@ boolean artif;
 				else otmp->oward = rn2(LAST_FALLEN_HOUSE + 1 - FIRST_FALLEN_HOUSE) + FIRST_FALLEN_HOUSE;
 			}
 			if (otmp->otyp == RIN_WISHES){
-				otmp->spe = rnd(3);
+				if(Is_stronghold(&u.uz)){
+					if(u.ring_wishes == -1){
+						otmp->spe = rnd(3);
+						u.ring_wishes = otmp->spe;
+					} else {
+						otmp->spe = u.ring_wishes;
+					}
+				} else {
+					otmp->spe = rnd(3);
+				}
 			}
 			if (objects[otmp->otyp].oc_charged && otmp->otyp != RIN_WISHES) {
 				blessorcurse(otmp, 3);
@@ -1252,6 +1261,7 @@ boolean artif;
 					otmp->corpsenm = PM_CENTIPEDE;
 					break;
 				}
+				otmp->owt = weight(otmp);
 			}
 			break;
 		case COIN_CLASS:

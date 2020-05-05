@@ -1456,7 +1456,7 @@ mineralize()
 		    }
 		}
 		if (depth(&u.uz) > 14 && rn2(1000) < fossilprob) {
-			if ((otmp = mksobj(FOSSIL, FALSE, FALSE)) != 0) {
+			if ((otmp = mksobj(FOSSIL, TRUE, FALSE)) != 0) {
 				otmp->quan = 1L;
 				otmp->owt = weight(otmp);
 				otmp->ox = x,  otmp->oy = y;

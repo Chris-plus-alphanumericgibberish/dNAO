@@ -1089,8 +1089,10 @@ register struct obj *obj;
 	     */
 		    obj->otyp = POT_FRUIT_JUICE;
 		} else {
-	            obj->otyp = POT_WATER;
-		    obj->odiluted = 0; /* same as any other water */
+			if (obj->otyp == POT_STARLIGHT)
+				end_burn(obj, FALSE);
+			obj->otyp = POT_WATER;
+			obj->odiluted = 0; /* same as any other water */
 		}
 		break;
 	    }
@@ -4588,7 +4590,7 @@ delouse_tame(mon)
 struct monst *mon;
 {
 	struct monst *mtmp;
-	set_faction(mtmp, 0);
+	set_faction(mon, 0);
 	if(mon->mtyp == PM_COMMANDER){
 		set_faction(mon, M_GREAT_WEB);
 	}
@@ -5105,7 +5107,7 @@ register int osym, dmgtyp;
 		if(loststuff > 1)
 			You("panic after some of your possessions are destroyed!");
 		else You("panic after one of your possessions is destroyed!");
-		nomul(-1*rnd(6), "panicking");
+		HPanicking += 1+rnd(6);
 	}
 	return;
 }

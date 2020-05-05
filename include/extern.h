@@ -61,6 +61,7 @@ E int FDECL(unfixable_trouble_count,(BOOLEAN_P));
 E void FDECL(remove_thought, (int));
 E int NDECL(dotrephination_menu);
 E int NDECL(partial_action);
+E void FDECL(add_class, (char *, char));
 
 /* ### artifact.c ### */
 
@@ -1033,6 +1034,9 @@ E struct obj *FDECL(veioistafur_at, (int,int));
 E struct obj *FDECL(thjofastafur_at, (int,int));
 E struct obj *FDECL(fear_arti_at, (int, int));
 E struct obj *FDECL(carrying, (int));
+E char NDECL(carrying_applyable_ring);
+E char NDECL(carrying_readable_weapon);
+E char NDECL(carrying_readable_armor);
 E struct obj *FDECL(carrying_art, (int));
 E boolean NDECL(have_lizard);
 E struct obj *FDECL(o_on, (unsigned int,struct obj *));
@@ -2429,6 +2433,7 @@ E void FDECL(beg, (struct monst *));
 E void FDECL(m_command, (struct monst *));
 E int NDECL(dotalk);
 E int FDECL(dochat, (BOOLEAN_P, int, int, int));
+E int * FDECL(spirit_props, (int));
 E void FDECL(councilspirit, (int));
 E void FDECL(gnosisspirit, (int));
 E void NDECL(scatter_seals);
@@ -3009,6 +3014,7 @@ E struct attack * FDECL(getattk, (struct monst *, struct monst *, int *, int *, 
 E boolean FDECL(slips_free, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xmeleehurty, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, boolean, int, int, int, boolean));
+E void FDECL(getgazeinfo, (int, int, struct permonst *, boolean *, boolean *, boolean *));
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
 E int FDECL(hmon2point0, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, void *, int, int, int, boolean, int, boolean, int, boolean *));

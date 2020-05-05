@@ -358,7 +358,7 @@ int tary;
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !sensemon(mdef)) :
+	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !(canseemon(mdef) || sensemon(mdef))) :
 		(magr->mconf || magr->mstun || magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
 
 	/* set permonst pointers */
@@ -959,6 +959,9 @@ int tary;
 			/* cannot swallow huge or larger */
 			if (pd->msize >= MZ_HUGE)
 				continue;
+			/* ahazu protects the player from engulfing */
+			if (youdef && u.sealsActive&SEAL_AHAZU)
+				continue;
 			/* check for wild misses */
 			if (missedyou) {
 				wildmiss(magr, attk, otmp, ranged);
@@ -1121,6 +1124,10 @@ int tary;
 				if (result) {
 					/* increment number of attacks made */
 					attacksmade++;
+					if(attk->adtyp == AD_BDFN && distmin(x(magr), y(magr), x(mdef), y(mdef)) > 2){
+						//Just sit back and gaze
+						mon_ranged_gazeonly = FALSE;
+					}
 				}
 			}
 			break;
@@ -1222,7 +1229,7 @@ int tary;
 		/* player panics after being attacked by a sea creature */
 		if (youdef && is_aquatic(magr->data) && roll_madness(MAD_THALASSOPHOBIA)){
 			You("panic after being attacked by a sea monster!");
-			nomul(-1 * rnd(6), "panicking");
+			HPanicking += 1+rnd(6);
 		}
 	}
 	
@@ -2810,28 +2817,37 @@ struct monst * mdef;
 
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pa = !magr ? (struct permonst *)0 : youagr ? youracedata : magr->data;
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 
 	if (!Stone_res(mdef)
 		&& !(youdef && Stoned))
 	{
+		/* wake the defender */
+		wakeup2(mdef, youagr);
+
 		/* vs player */
 		if (youdef) {
 			if (!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
 				Stoned = 5;
-				delayed_killer = pa->mname;
-				if (pa->geno & G_UNIQ) {
-					if (!type_is_pname(pa)) {
-						static char kbuf[BUFSZ];
-						/* "the" buffer may be reallocated */
-						Strcpy(kbuf, the(delayed_killer));
-						delayed_killer = kbuf;
+				if (magr) {
+					delayed_killer = pa->mname;
+					if (pa->geno & G_UNIQ) {
+						if (!type_is_pname(pa)) {
+							static char kbuf[BUFSZ];
+							/* "the" buffer may be reallocated */
+							Strcpy(kbuf, the(delayed_killer));
+							delayed_killer = kbuf;
+						}
+						killer_format = KILLED_BY;
 					}
-					killer_format = KILLED_BY;
+					else
+						killer_format = KILLED_BY_AN;
 				}
-				else
+				else {
+					delayed_killer = "object";
 					killer_format = KILLED_BY_AN;
+				}
 			}
 		}
 		/* vs monsters */
@@ -2852,7 +2868,7 @@ struct monst * mdef;
 			else {
 				if (mdef->mtame && !youagr)
 					You("have a peculiarly sad feeling for a moment, then it passes.");
-				return (MM_HIT | (MM_DEF_DIED | (youagr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED)));
+				return (MM_HIT | (MM_DEF_DIED | (youagr || !magr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED)));
 			}
 		}
 	}
@@ -3075,6 +3091,16 @@ int flat_acc;
 		}
 		else {
 			base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS : thrown ? 0.25 : 0.67);
+		}
+		if(youagr){
+			static long warnpanic = 0;
+			if(Panicking){
+				if(warnpanic != moves){
+					pline("You swing wildly in your panic!");
+				}
+				warnpanic = moves;
+				base_acc = -5;
+			} else warnpanic = 0L;
 		}
 	}
 	/* other attacker-related accuracy bonuses */
@@ -3310,9 +3336,16 @@ int flat_acc;
 			/* Houchou always hits when thrown */
 			if (weapon->oartifact == ART_HOUCHOU && thrown)
 				wepn_acc += 1000;
+
 			/* -4 accuracy per weapon size too large (not for thrown objects) */
-			if (!thrown && weapon->objsize - pa->msize > 0){
-				wepn_acc += -4 * (weapon->objsize - pa->msize);
+			if (!thrown){
+				int size_penalty = weapon->objsize - pa->msize;
+				if (Role_if(PM_CAVEMAN))
+					size_penalty = max(0, size_penalty-1);
+				if (u.sealsActive&SEAL_YMIR)
+					size_penalty = max(0, size_penalty-1);
+				
+				wepn_acc += -4 * max(0, size_penalty);
 			}
 			/* fencing gloves increase weapon accuracy when you have a free off-hand */
 			if (!thrown && !bimanual(weapon, magr->data) && !which_armor(magr, W_ARMS)) {
@@ -3549,6 +3582,12 @@ boolean ranged;
 				);
 		}
 		domissmsg = FALSE;
+		miss = TRUE;
+	}
+	/* Otiax protects you from being hit (1/5) */
+	if (youdef && u.sealsActive&SEAL_OTIAX && !rn2(5))
+	{
+		/* No special message, they just miss? */
 		miss = TRUE;
 	}
 
@@ -6840,7 +6879,7 @@ boolean ranged;
 			}
 			if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
 				You("panic anyway!");
-				nomul(-1 * rnd(3), "panicking");
+				HPanicking += 1+rnd(3);
 			}
 			/* don't do any further damage or anything, but do trigger retaliation attacks */
 			return MM_HIT;
@@ -6931,7 +6970,7 @@ boolean ranged;
 				}
 				if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
 					You("panic from the burrowing tentacles!");
-					nomul(-1 * rnd(6), "panicking");
+					HPanicking += 1+rnd(6);
 				}
 				/* if a migo scooped out your brain, it stops attacking */
 				if (pa->mtyp == PM_MIGO_PHILOSOPHER || pa->mtyp == PM_MIGO_QUEEN)
@@ -9538,6 +9577,81 @@ expl_common:
 	return result;
 }
 
+void
+getgazeinfo(aatyp, adtyp, pa, needs_magr_eyes, needs_mdef_eyes, needs_uncancelled)
+int aatyp;
+int adtyp;
+struct permonst * pa;
+boolean * needs_magr_eyes;
+boolean * needs_mdef_eyes;
+boolean * needs_uncancelled;
+{
+#define maybeset(b, tf) if(b) {*(b)=tf;}
+	/* figure out if gaze requires eye-contact or not */
+	switch (adtyp)
+	{
+		/* seeing the monster is dangerous (wide-angle gaze only) */
+	case AD_CONF:
+	case AD_WISD:
+	case AD_BLND:
+	case AD_HALU:
+	case AD_STON:
+		if (aatyp == AT_WDGZ){
+			/* These relate to the natural form of the monster, and can't be canceled*/
+			if (adtyp == AD_CONF
+				|| adtyp == AD_WISD
+				|| (adtyp == AD_BLND && pa->mtyp == PM_BLESSED)
+				)
+				maybeset(needs_uncancelled, FALSE);
+			maybeset(needs_magr_eyes, FALSE);
+			maybeset(needs_mdef_eyes, TRUE);
+			break;
+		}
+		/* else fall through */
+		/* meeting the gaze of the monster is dangerous */
+	case AD_DEAD:
+	case AD_PLYS:
+	case AD_LUCK:
+	case AD_SLOW:
+	case AD_STUN:
+	case AD_SLEE:
+	case AD_BLNK:
+	case AD_SSEX:
+	case AD_SEDU:
+	case AD_VAMP:
+		maybeset(needs_magr_eyes, TRUE);
+		maybeset(needs_mdef_eyes, TRUE);
+		break;
+		/* the monster staring *at* something is dangerous */
+	case AD_FIRE:
+	case AD_COLD:
+	case AD_ELEC:
+	case AD_DRLI:
+	case AD_CNCL:
+	case AD_ENCH:
+	case AD_SSUN:
+	case AD_STDY:
+	case AD_BLAS:
+	case AD_BDFN:
+		maybeset(needs_magr_eyes, TRUE);
+		maybeset(needs_mdef_eyes, FALSE);
+		break;
+		/* these adtyps are just using gaze as a convenient way of causing something non-gaze-y to happen */
+	case AD_WTCH:
+	case AD_MIST:
+	case AD_SPOR:
+		maybeset(needs_magr_eyes, FALSE);
+		maybeset(needs_mdef_eyes, FALSE);
+		maybeset(needs_uncancelled, FALSE);
+		break;
+	default:
+		impossible("unhandled gaze type %d", adtyp);
+		break;
+	}
+	return;
+#undef maybeset
+}
+
 boolean
 umetgaze(mtmp)
 struct monst *mtmp;
@@ -9616,91 +9730,35 @@ int vis;
 			adtyp = AD_CONF;
 		break;
 	}
-	/* figure out if gaze requires eye-contact or not */
-	switch (adtyp)
-	{
-		/* meeting the gaze of the monster is dangerous */
-	case AD_DEAD:
-	case AD_PLYS:
-	case AD_STON:
-	case AD_LUCK:
-	case AD_BLND:
-	case AD_CONF:
-	case AD_SLOW:
-	case AD_STUN:
-	case AD_HALU:
-	case AD_SLEE:
-	case AD_BLNK:
-	case AD_SSEX:
-	case AD_SEDU:
-	case AD_VAMP:
-	case AD_WISD:
-		needs_magr_eyes = TRUE;
-		needs_mdef_eyes = TRUE;
-		break;
-		/* the monster staring *at* something is dangerous */
-	case AD_FIRE:
-	case AD_COLD:
-	case AD_ELEC:
-	case AD_DRLI:
-	case AD_CNCL:
-	case AD_ENCH:
-	case AD_SSUN:
-	case AD_STDY:
-	case AD_BLAS:
-		needs_magr_eyes = TRUE;
-		needs_mdef_eyes = FALSE;
-		break;
-		/* these adtyps are just using gaze as a convenient way of causing something non-gaze-y to happen */
-	case AD_WTCH:
-	case AD_MIST:
-	case AD_SPOR:
-		needs_magr_eyes = FALSE;
-		needs_mdef_eyes = FALSE;
-		needs_uncancelled = FALSE;
-		/* these are just straight copy-pasted from originals at the moment, and only are coded for monster vs player */
-		if (!youdef)
-			return MM_MISS;
-		break;
-	default:
-		impossible("unhandled gaze type %d", adtyp);
-		break;
-	}
-	/* special cases */
-	if (pa->mtyp == PM_MEDUSA && adtyp == AD_STON) {	// Medusa's petrification curse
-		needs_magr_eyes = FALSE;
+	/* get eyes, uncancelledness */
+	getgazeinfo(attk->aatyp, adtyp, pa, &needs_magr_eyes, &needs_mdef_eyes, &needs_uncancelled);
+
+	/* widegazes cannot fail */
+	if (attk->aatyp == AT_WDGZ)
 		maybe_not = FALSE;
-	}
+
+	/* these gazes are actually hacks and only work vs the player */
+	if (!youdef && (adtyp == AD_WTCH || adtyp == AD_MIST || adtyp == AD_SPOR))
+		return MM_MISS;
+
 	/* actually, right now, all stoning gazes are a straight copy-paste, so do this for now. */
 	if (adtyp == AD_STON) {
 		needs_magr_eyes = needs_mdef_eyes = maybe_not = needs_uncancelled = FALSE;
 	}
-	if ((is_angel(pa) || pa->mtyp == PM_BLESSED) && adtyp == AD_BLND) {				// Angels' blinding radiance
-		needs_magr_eyes = FALSE;
-		maybe_not = FALSE;
-	}
-	if (is_uvuudaum(pa) && adtyp == AD_CONF) {			// Uvuudaum's form 
-		needs_magr_eyes = FALSE;
-		needs_uncancelled = FALSE;
-		maybe_not = FALSE;
-	}
+
 	if (pa->mtyp == PM_DEMOGORGON) {					// Demogorgon is special
 		needs_mdef_eyes = TRUE;
 		needs_uncancelled = FALSE;
 		maybe_not = FALSE;
 	}
-	if (attk->adtyp == AD_WISD) {						// Obox-Ob, Great Cthulhu special
-		needs_magr_eyes = FALSE;
-		needs_uncancelled = FALSE;
-		maybe_not = FALSE;
-	}
 
-	if ((needs_magr_eyes && (
+
+	if ((needs_magr_eyes && haseyes(pa) && (
 		(youagr  && (Blind)) ||
 		(!youagr && (is_blind(magr)))
 		))
 		||
-		(needs_mdef_eyes && (
+		(needs_mdef_eyes && haseyes(pd) && (
 		(youdef  && !umetgaze(magr)) ||
 		(youagr  && mon_can_see_you(mdef)) ||
 		(!youagr && !youdef && !mmetgaze(magr, mdef))
@@ -9744,10 +9802,48 @@ int vis;
 		alt_attk = *attk;
 		alt_attk.aatyp = AT_GAZE;
 		alt_attk.adtyp = adtyp;
-		result = xmeleehurty(magr, mdef, &alt_attk, attk, (struct obj *)0, FALSE, dmg, 0, vis, FALSE);
+		result = xmeleehurty(magr, mdef, &alt_attk, attk, (struct obj *)0, FALSE, dmg, 0, vis, TRUE);
 		wakeup2(mdef, youagr);
 		break;
 
+	case AD_BDFN:
+		if(has_blood_mon(mdef)){
+			if(vis) pline("A thin spear of %s %s pierces %s %s.",
+				(youdef ? "your" : s_suffix(mon_nam(mdef))),
+				mbodypart(mdef, BLOOD),
+				(youdef ? "your" : hisherits(mdef)),
+				mbodypart(mdef, BODY_SKIN)
+				);
+			if(youdef){
+				change_usanity(-1*dmg);
+				exercise(A_CON, FALSE);
+				u.umadness |= MAD_FRENZY;
+			} else {
+				if(mdef->mconf && !rn2(10)){
+					if(mdef->mstun && !rn2(10)){
+						if(vis) pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), hisherits(mdef), mbodypart(mdef, BODY_SKIN));
+						//reduce current HP by 30% (round up, guranteed nonfatal)
+						mdef->mhp = mdef->mhp*.7+1;
+						if(mdef->mhpmax > mdef->mhp){
+							if(mdef->mhpmax > mdef->mhp+mdef->m_lev)
+								mdef->mhpmax -= mdef->m_lev;
+							else
+								mdef->mhpmax--;
+						}
+					} else {
+						mdef->mstun = 1;
+					}
+				} else {
+					mdef->mconf = 1;
+				}
+			}
+			alt_attk = *attk;
+			alt_attk.aatyp = AT_NONE;
+			alt_attk.adtyp = AD_PHYS;
+			result = xmeleehurty(magr, mdef, &alt_attk, attk, (struct obj *)0, FALSE, dmg, 0, FALSE, TRUE);
+			wakeup2(mdef, youagr);
+		}
+	break;
 		/* lifedrain gazes */
 	case AD_VAMP:
 	case AD_DRLI:
@@ -10660,6 +10756,7 @@ int vis;
 			while (!(ABASE(A_WIS) <= ATTRMIN(A_WIS)) && dmg > 0) {
 				dmg--;
 				(void)adjattrib(A_WIS, -1, TRUE);
+				change_usanity(-1);
 				forget(10);	/* lose 10% of memory per point lost*/
 				exercise(A_WIS, FALSE);
 				/* Great Cthulhu permanently drains wisdom */
@@ -10668,6 +10765,7 @@ int vis;
 			}
 			if (dmg > 0) {
 				You("tear at yourself in horror!"); //assume always able to damage self
+				change_usanity(-1*dmg);
 				xdamagey(magr, mdef, attk, dmg*10);
 			}
 		}
@@ -12076,12 +12174,22 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 								);
 							hittxt = TRUE;
 						}
-						else if (vis) {
+						else if (vis && magr) {
 							pline("%s hits %s with %s %s %s%s",
 								Monnam(magr),
 								(youdef ? "you" : mon_nam(mdef)),
 								hisherits(magr),
 								mons[weapon->corpsenm].mname,
+								((weapon->quan > 1) ? makeplural(withwhat) : withwhat),
+								(youdef ? "!" : ".")
+								);
+							hittxt = TRUE;
+						}
+						else if (vis) {
+							pline("%s %s hit with %s %s%s",
+								(youdef ? "You" : Monnam(mdef)),
+								(youdef ? "are" : "is"),
+								an(mons[weapon->corpsenm].mname),
 								((weapon->quan > 1) ? makeplural(withwhat) : withwhat),
 								(youdef ? "!" : ".")
 								);
@@ -12114,14 +12222,25 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				if (touch_petrifies(&mons[weapon->corpsenm])) {
 					/*learn_egg_type(obj->corpsenm);*/
 					if (vis) {
-						pline("%s hit%s %s with %s %s egg%s!",
-							(youagr ? "You" : Monnam(magr)),
-							(youagr ? "" : "s"),
-							(youdef ? "you" : mon_nam(mdef)),
-							(weapon->known ? "the" : (cnt > 1L) ? "some" : "a"),
-							(weapon->known ? mons[weapon->corpsenm].mname : "petrifying"),
-							plur(cnt)
-							);
+						if (magr) {
+							pline("%s hit%s %s with %s %s egg%s!",
+								(youagr ? "You" : Monnam(magr)),
+								(youagr ? "" : "s"),
+								(youdef ? "you" : mon_nam(mdef)),
+								(weapon->known ? "the" : (cnt > 1L) ? "some" : "a"),
+								(weapon->known ? mons[weapon->corpsenm].mname : "petrifying"),
+								plur(cnt)
+								);
+						}
+						else {
+							pline("%s %s hit with %s %s egg%s!",
+								(youdef ? "You" : Monnam(mdef)),
+								(youdef ? "are" : "is"),
+								(weapon->known ? "the" : (cnt > 1L) ? "some" : "a"),
+								(weapon->known ? mons[weapon->corpsenm].mname : "petrifying"),
+								plur(cnt)
+								);
+						}
 						hittxt = TRUE;
 					}
 					if (vis)
@@ -12728,6 +12847,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		+ snekdmg
 		+ jostdmg;
 
+	/* If the character is panicking, all their attacks do half damage */
+	if(Panicking){
+		subtotl = subtotl/2+1;
+	}
+	
 	/* Reduce Incoming Damage */
 	/* min 1 base damage (0 if real_attack is false) */
 	if (subtotl < 1)
@@ -12737,7 +12861,6 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (hits_insubstantial(magr, mdef, attk, weapon) == 1) {
 		subtotl = 0;
 	}
-
 	/* some creatures resist weapon attacks to the extreme */
 	if (resist_attacks(pd) && (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack)) {
 		if (subtotl > 0) {
@@ -13535,11 +13658,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (youdef && !recursed && roll_madness(MAD_OPHIDIOPHOBIA)) {
 			if (poisons_majoreff || poisons_minoreff) {
 				You("panic!");
-				nomul(-1 * rnd(6), "panicking");
+				HPanicking += 1+rnd(6);
 			}
 			else if (poisons_resisted) {
 				You("panic anyway!");
-				nomul(-1 * rnd(3), "panicking");
+				HPanicking += 1+rnd(3);
 			}
 		}
 

@@ -21,7 +21,9 @@ struct spell {
 #define decrnknow(spell)	spl_book[spell].sp_know--
 #define spellid(spell)		spl_book[spell].sp_id
 #define spellknow(spell)	spl_book[spell].sp_know
-
+#define emergency_spell(spell) (spellid(spell) == SPE_HEALING || spellid(spell) == SPE_EXTRA_HEALING || \
+							    spellid(spell) == SPE_CURE_BLINDNESS || spellid(spell) == SPE_CURE_SICKNESS || \
+							    spellid(spell) == SPE_RESTORE_ABILITY || spellid(spell) == SPE_REMOVE_CURSE)
 #define FIRST_LIGHT	MAXSPELL+1
 #define PART_WATER	MAXSPELL+2
 #define OVERGROW	MAXSPELL+3

@@ -186,11 +186,12 @@
 #define AD_BLAS     123 /* Blaspheme on the target's behaf */
 #define AD_SESN     124 /* 4 seasons attack */
 #define AD_POLN     125 /* Cover in pollen */
+#define AD_BDFN     126 /* Blood Frenzy */
 
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	126
+#define AD_DUNSTAN	127
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3

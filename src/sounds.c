@@ -42,6 +42,7 @@ const int nurseprices[] = {
 
 static const char *FDECL(DantalionRace,(int));
 int FDECL(dobinding,(int, int));
+int * FDECL(spirit_skills, (int));
 static int NDECL(doblessmenu);
 static int NDECL(donursemenu);
 static int FDECL(dodollmenu, (struct monst *));
@@ -5050,657 +5051,457 @@ int tx,ty;
 	return 1;
 }
 
+int *
+spirit_props(floorID)
+int floorID;
+{
+#define MAXSPIRITPROPS 3
+	static int propchain[MAXSPIRITPROPS + 1];
+	int i = 0;
+
+	/* WARNING: by giving a dedicated bit in extrinsics for spirits,
+	 * we cannot have two spirits that can be bound simultaneously 
+	 * granting duplicate properties
+	 */
+
+	switch (floorID)
+	{
+	case AHAZU:
+		break;
+	case AMON:
+		propchain[i++] = EXTRAMISSION;
+		propchain[i++] = COLD_RES;
+		break;
+	case ANDREALPHUS:
+		propchain[i++] = WARN_OF_MON;
+		propchain[i++] = TELEPORT_CONTROL;
+		break;
+	case ANDROMALIUS:
+		break;
+	case ASTAROTH:
+		propchain[i++] = MAGICAL_BREATHING;
+		propchain[i++] = SHOCK_RES;
+		break;
+	case BALAM:
+		propchain[i++] = HALF_SPDAM;
+		break;
+	case BERITH:
+		break;
+	case BUER:
+		break;
+	case CHUPOCLOPS:
+		propchain[i++] = SLEEP_RES;
+		break;
+	case DANTALION:
+		propchain[i++] = TELEPAT;
+		break;
+	case ECHIDNA:
+		propchain[i++] = ACID_RES;
+		break;
+	case EDEN:
+		propchain[i++] = REFLECTING;
+		break;
+	case ENKI:
+		propchain[i++] = SWIMMING;
+		break;
+	case EURYNOME:
+		propchain[i++] = FREE_ACTION;
+		propchain[i++] = WWALKING;
+		break;
+	case EVE:
+		propchain[i++] = HALF_PHDAM;
+		break;
+	case FAFNIR:
+		propchain[i++] = INFRAVISION;
+		propchain[i++] = FIRE_RES;
+		break;
+	case HUGINN_MUNINN:
+		propchain[i++] = WARNING;
+		propchain[i++] = HALLUC_RES;
+		break;
+	case IRIS:
+		propchain[i++] = SICK_RES;
+		break;
+	case JACK:
+		propchain[i++] = LIFESAVED;
+		break;
+	case MALPHAS:
+		break;
+	case MARIONETTE:
+		propchain[i++] = STONE_RES;
+		break;
+	case MOTHER:
+		propchain[i++] = CLAIRVOYANT;
+		propchain[i++] = ANTIMAGIC;
+		break;
+	case NABERIUS:
+		propchain[i++] = SEE_INVIS;
+		break;
+	case ORTHOS:
+		propchain[i++] = DISPLACED;
+		propchain[i++] = DISINT_RES;
+		break;
+	case OSE:
+		propchain[i++] = JUMPING;
+		break;
+	case OTIAX:
+		propchain[i++] = SEARCHING;
+		break;
+	case PAIMON:
+		propchain[i++] = WARN_OF_MON;
+		break;
+	case SHIRO:
+		propchain[i++] = INVIS;
+		propchain[i++] = STEALTH;
+		break;
+	case SIMURGH:
+		break;
+	case TENEBROUS:
+		propchain[i++] = DRAIN_RES;
+		break;
+	case YMIR:
+		propchain[i++] = POISON_RES;
+		break;
+		/* quest spirits */
+	case DAHLVER_NAR:
+		propchain[i++] = FIXED_ABIL;
+		break;
+	case ACERERAK:
+		propchain[i++] = WARN_OF_MON;
+		propchain[i++] = WELDPROOF;
+		break;
+	case COUNCIL:
+		break;
+	case COSMOS:
+		break;
+	case LIVING_CRYSTAL:
+		break;
+	case TWO_TREES:
+		break;
+	case MISKA:
+		break;
+	case NUDZIRATH:
+		propchain[i++] = SPELLBOOST;
+		break;
+	case ALIGNMENT_THING:
+		propchain[i++] = AGGRAVATE_MONSTER;
+		break;
+	case UNKNOWN_GOD:
+		break;
+	case BLACK_WEB:
+		break;
+	case NUMINA:
+		propchain[i++] = DETECT_MONSTERS;
+		break;
+	}
+	/* add termintor */
+	propchain[i] = NO_PROP;
+	return propchain;
+}
+
+int *
+spirit_skills(floorID)
+int floorID;
+{
+#define MAXSPIRITSKILLS 5
+	static int skillchain[MAXSPIRITSKILLS+1];
+	int i = 0;
+
+	switch (floorID)
+	{
+	case AHAZU:
+		skillchain[i++] = P_FLAIL;
+		break;
+	case AMON:
+		skillchain[i++] = P_CLERIC_SPELL;
+		break;
+	case ANDREALPHUS:
+		skillchain[i++] = P_ESCAPE_SPELL;
+		break;
+	case ANDROMALIUS:
+		skillchain[i++] = P_DAGGER;
+		break;
+	case ASTAROTH:
+		skillchain[i++] = P_CROSSBOW;
+		skillchain[i++] = P_SHURIKEN;
+		break;
+	case BALAM:
+		skillchain[i++] = P_WHIP;
+		break;
+	case BERITH:
+		skillchain[i++] = P_SABER;
+		skillchain[i++] = P_LANCE;
+		skillchain[i++] = P_RIDING;
+		break;
+	case BUER:
+		skillchain[i++] = P_HEALING_SPELL;
+		skillchain[i++] = P_BARE_HANDED_COMBAT;
+		break;
+	case CHUPOCLOPS:
+		skillchain[i++] = P_KNIFE;
+		break;
+	case DANTALION:
+		skillchain[i++] = P_BROAD_SWORD;
+		skillchain[i++] = P_TWO_HANDED_SWORD;
+		skillchain[i++] = P_SCIMITAR;
+		break;
+	case SHIRO:
+		skillchain[i++] = P_POLEARMS;
+		break;
+	case ECHIDNA:
+		skillchain[i++] = P_UNICORN_HORN;
+		break;
+	case EDEN:
+		skillchain[i++] = P_LONG_SWORD;
+		break;
+	case ENKI:
+		skillchain[i++] = P_SHORT_SWORD;
+		skillchain[i++] = P_HAMMER;
+		skillchain[i++] = P_SLING;
+		skillchain[i++] = P_DART;
+		skillchain[i++] = P_BOOMERANG;
+		break;
+	case EURYNOME:
+		skillchain[i++] = P_BARE_HANDED_COMBAT;
+		break;
+	case EVE:
+		skillchain[i++] = P_BOW;
+		skillchain[i++] = P_HARVEST;
+		break;
+	case FAFNIR:
+		skillchain[i++] = P_PICK_AXE;
+		break;
+	case HUGINN_MUNINN:
+		skillchain[i++] = P_SPEAR;
+		break;
+	case IRIS:
+		skillchain[i++] = P_MORNING_STAR;
+		break;
+	case JACK:
+		break;
+	case MALPHAS:
+		skillchain[i++] = P_BEAST_MASTERY;
+		break;
+	case MARIONETTE:
+		skillchain[i++] = P_MATTER_SPELL;
+		break;
+	case MOTHER:
+		skillchain[i++] = P_DIVINATION_SPELL;
+		break;
+	case NABERIUS:
+		skillchain[i++] = P_QUARTERSTAFF;
+		skillchain[i++] = P_ATTACK_SPELL;
+		break;
+	case ORTHOS:
+		skillchain[i++] = P_MUSICALIZE;
+		break;
+	case OSE:
+		skillchain[i++] = P_TRIDENT;
+		break; 
+	case OTIAX:
+		break; 
+	case PAIMON:
+		skillchain[i++] = P_WAND_POWER;
+		break; 
+	case SIMURGH:
+		skillchain[i++] = P_ENCHANTMENT_SPELL;
+		break; 
+	case TENEBROUS:
+		skillchain[i++] = P_MACE;
+		break; 
+	case YMIR:
+		skillchain[i++] = P_CLUB;
+		break;
+	case DAHLVER_NAR:
+	case ACERERAK:
+	case COUNCIL: /*Council of Elements == crowning*/
+	case COSMOS:
+	case LIVING_CRYSTAL:
+	case TWO_TREES:
+		break; 
+	case MISKA:
+		skillchain[i++] = P_TWO_WEAPON_COMBAT;
+		break; 
+	case NUDZIRATH:
+	case ALIGNMENT_THING:
+	case UNKNOWN_GOD:
+	case BLACK_WEB:
+	case NUMINA:
+		break;
+	}
+	/* add termintor */
+	skillchain[i] = P_NONE;
+	return skillchain;
+}
+
 void
-bindspirit(seal_id)
-	int seal_id;
+bindspirit(floorID)
+int floorID;
 {
 	int bindingPeriod = 5000;
-	switch(seal_id){
-		case AHAZU:{
-			if(u.sealTimeout[AHAZU-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_FLAIL);
-				u.sealsActive |= SEAL_AHAZU;
-				u.sealsUsed |= SEAL_AHAZU;
-				u.spirit[u.sealCounts] = SEAL_AHAZU;
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				set_spirit_powers(SEAL_AHAZU);
-				u.sealCounts++;
-				u.sealTimeout[AHAZU-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case AMON:{
-			if(u.sealTimeout[AMON-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_CLERIC_SPELL);
-				u.sealsActive |= SEAL_AMON;
-				u.sealsUsed |= SEAL_AMON;
-				u.spirit[u.sealCounts] = SEAL_AMON;
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				set_spirit_powers(SEAL_AMON);
-				u.wisSpirits++;
-				u.sealCounts++;
-				u.sealTimeout[AMON-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case ANDREALPHUS:{
-			if(u.sealTimeout[ANDREALPHUS-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_ESCAPE_SPELL);
-				u.sealsActive |= SEAL_ANDREALPHUS;
-				u.sealsUsed |= SEAL_ANDREALPHUS;
-				u.spirit[u.sealCounts] = SEAL_ANDREALPHUS;
-				set_spirit_powers(SEAL_ANDREALPHUS);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.intSpirits++;
-				u.sealCounts++;
-				u.sealTimeout[ANDREALPHUS-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case ANDROMALIUS:{
-			if(u.sealTimeout[ANDROMALIUS-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_DAGGER);
-				u.sealsActive |= SEAL_ANDROMALIUS;
-				u.sealsUsed |= SEAL_ANDROMALIUS;
-				u.spirit[u.sealCounts] = SEAL_ANDROMALIUS;
-				set_spirit_powers(SEAL_ANDROMALIUS);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[ANDROMALIUS-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case ASTAROTH:{
-			if(u.sealTimeout[ASTAROTH-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_CROSSBOW);
-				unrestrict_weapon_skill(P_SHURIKEN);
-				u.sealsActive |= SEAL_ASTAROTH;
-				u.sealsUsed |= SEAL_ASTAROTH;
-				u.spirit[u.sealCounts] = SEAL_ASTAROTH;
-				set_spirit_powers(SEAL_ASTAROTH);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[ASTAROTH-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case BALAM:{
-			if(u.sealTimeout[BALAM-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_WHIP);
-				u.sealsActive |= SEAL_BALAM;
-				u.sealsUsed |= SEAL_BALAM;
-				u.spirit[u.sealCounts] = SEAL_BALAM;
-				set_spirit_powers(SEAL_BALAM);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[BALAM-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case BERITH:{
-			if(u.sealTimeout[BERITH-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_SABER);
-				unrestrict_weapon_skill(P_LANCE);
-				unrestrict_weapon_skill(P_RIDING);
-				u.sealsActive |= SEAL_BERITH;
-				u.sealsUsed |= SEAL_BERITH;
-				u.spirit[u.sealCounts] = SEAL_BERITH;
-				set_spirit_powers(SEAL_BERITH);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[BERITH-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case BUER:{
-			if(u.sealTimeout[BUER-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_HEALING_SPELL);
-				unrestrict_weapon_skill(P_BARE_HANDED_COMBAT);
-				u.umartial = TRUE;
-				u.sealsActive |= SEAL_BUER;
-				u.sealsUsed |= SEAL_BUER;
-				u.spirit[u.sealCounts] = SEAL_BUER;
-				set_spirit_powers(SEAL_BUER);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.wisSpirits++;
-				u.sealCounts++;
-				u.sealTimeout[BUER-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case CHUPOCLOPS:{
-			if(u.sealTimeout[CHUPOCLOPS-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_KNIFE);
-				u.sealsActive |= SEAL_CHUPOCLOPS;
-				u.sealsUsed |= SEAL_CHUPOCLOPS;
-				u.spirit[u.sealCounts] = SEAL_CHUPOCLOPS;
-				set_spirit_powers(SEAL_CHUPOCLOPS);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[CHUPOCLOPS-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case DANTALION:{
-			if(u.sealTimeout[DANTALION-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_BROAD_SWORD);
-				unrestrict_weapon_skill(P_TWO_HANDED_SWORD);
-				unrestrict_weapon_skill(P_SCIMITAR);
-				u.sealsActive |= SEAL_DANTALION;
-				u.sealsUsed |= SEAL_DANTALION;
-				u.spirit[u.sealCounts] = SEAL_DANTALION;
-				set_spirit_powers(SEAL_DANTALION);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[DANTALION-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case SHIRO:{
-			if(u.sealTimeout[SHIRO-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_POLEARMS);
-				u.sealsActive |= SEAL_SHIRO;
-				u.sealsUsed |= SEAL_SHIRO;
-				u.spirit[u.sealCounts] = SEAL_SHIRO;
-				set_spirit_powers(SEAL_SHIRO);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[SHIRO-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case ECHIDNA:{
-			if(u.sealTimeout[ECHIDNA-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_UNICORN_HORN);
-				u.sealsActive |= SEAL_ECHIDNA;
-				u.sealsUsed |= SEAL_ECHIDNA;
-				u.spirit[u.sealCounts] = SEAL_ECHIDNA;
-				set_spirit_powers(SEAL_ECHIDNA);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[ECHIDNA-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case EDEN:{
-			if(u.sealTimeout[EDEN-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_LONG_SWORD);
-				u.sealsActive |= SEAL_EDEN;
-				u.sealsUsed |= SEAL_EDEN;
-				u.spirit[u.sealCounts] = SEAL_EDEN;
-				set_spirit_powers(SEAL_EDEN);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[EDEN-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case ENKI:{
-			if(u.sealTimeout[ENKI-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_SHORT_SWORD);
-				unrestrict_weapon_skill(P_HAMMER);
-				unrestrict_weapon_skill(P_SLING);
-				unrestrict_weapon_skill(P_DART);
-				unrestrict_weapon_skill(P_BOOMERANG);
-				HSwimming |= INTRINSIC;
-				u.sealsActive |= SEAL_ENKI;
-				u.sealsUsed |= SEAL_ENKI;
-				u.spirit[u.sealCounts] = SEAL_ENKI;
-				set_spirit_powers(SEAL_ENKI);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[ENKI-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case EURYNOME:{
-			if(u.sealTimeout[EURYNOME-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_BARE_HANDED_COMBAT);
-				u.sealsActive |= SEAL_EURYNOME;
-				u.sealsUsed |= SEAL_EURYNOME;
-				u.spirit[u.sealCounts] = SEAL_EURYNOME;
-				set_spirit_powers(SEAL_EURYNOME);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[EURYNOME-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case EVE:{
-			if(u.sealTimeout[EVE-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_BOW);
-				unrestrict_weapon_skill(P_HARVEST);
-				u.sealsActive |= SEAL_EVE;
-				u.sealsUsed |= SEAL_EVE;
-				u.spirit[u.sealCounts] = SEAL_EVE;
-				set_spirit_powers(SEAL_EVE);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[EVE-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case FAFNIR:{
-			if(u.sealTimeout[FAFNIR-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_PICK_AXE);
-				u.sealsActive |= SEAL_FAFNIR;
-				u.sealsUsed |= SEAL_FAFNIR;
-				u.spirit[u.sealCounts] = SEAL_FAFNIR;
-				set_spirit_powers(SEAL_FAFNIR);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[FAFNIR-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case HUGINN_MUNINN:{
-			if(u.sealTimeout[HUGINN_MUNINN-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_SPEAR);
-				u.sealsActive |= SEAL_HUGINN_MUNINN;
-				u.sealsUsed |= SEAL_HUGINN_MUNINN;
-				u.spirit[u.sealCounts] = SEAL_HUGINN_MUNINN;
-				set_spirit_powers(SEAL_HUGINN_MUNINN);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[HUGINN_MUNINN-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case IRIS:{
-			if(u.sealTimeout[IRIS-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_MORNING_STAR);
-				u.sealsActive |= SEAL_IRIS;
-				u.sealsUsed |= SEAL_IRIS;
-				u.spirit[u.sealCounts] = SEAL_IRIS;
-				set_spirit_powers(SEAL_IRIS);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[IRIS-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case JACK:{
-			if(u.sealTimeout[JACK-FIRST_SEAL] < moves){
-				u.sealsActive |= SEAL_JACK;
-				u.sealsUsed |= SEAL_JACK;
-				u.spirit[u.sealCounts] = SEAL_JACK;
-				set_spirit_powers(SEAL_JACK);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[JACK-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case MALPHAS:{
-			if(u.sealTimeout[MALPHAS-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_BEAST_MASTERY);
-				u.sealsActive |= SEAL_MALPHAS;
-				u.sealsUsed |= SEAL_MALPHAS;
-				u.spirit[u.sealCounts] = SEAL_MALPHAS;
-				set_spirit_powers(SEAL_MALPHAS);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[MALPHAS-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case MARIONETTE:{
-			if(u.sealTimeout[MARIONETTE-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_MATTER_SPELL);
-				u.sealsActive |= SEAL_MARIONETTE;
-				u.sealsUsed |= SEAL_MARIONETTE;
-				u.spirit[u.sealCounts] = SEAL_MARIONETTE;
-				set_spirit_powers(SEAL_MARIONETTE);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[MARIONETTE-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case MOTHER:{
-			if(u.sealTimeout[MOTHER-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_DIVINATION_SPELL);
-				u.sealsActive |= SEAL_MOTHER;
-				u.sealsUsed |= SEAL_MOTHER;
-				u.spirit[u.sealCounts] = SEAL_MOTHER;
-				set_spirit_powers(SEAL_MOTHER);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.wisSpirits++;
-				u.sealCounts++;
-				u.sealTimeout[MOTHER-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case NABERIUS:{
-			if(u.sealTimeout[NABERIUS-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_QUARTERSTAFF);
-				unrestrict_weapon_skill(P_ATTACK_SPELL);
-				u.sealsActive |= SEAL_NABERIUS;
-				u.sealsUsed |= SEAL_NABERIUS;
-				u.spirit[u.sealCounts] = SEAL_NABERIUS;
-				set_spirit_powers(SEAL_NABERIUS);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.intSpirits++;
-				u.sealCounts++;
-				u.sealTimeout[NABERIUS-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case ORTHOS:{
-			if(u.sealTimeout[ORTHOS-FIRST_SEAL] < moves){
-				u.sealsActive |= SEAL_ORTHOS;
-				u.sealsUsed |= SEAL_ORTHOS;
-				unrestrict_weapon_skill(P_MUSICALIZE);
-				u.spirit[u.sealCounts] = SEAL_ORTHOS;
-				set_spirit_powers(SEAL_ORTHOS);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[ORTHOS-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case OSE:{
-			if(u.sealTimeout[OSE-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_TRIDENT);
-				u.sealsActive |= SEAL_OSE;
-				u.sealsUsed |= SEAL_OSE;
-				u.spirit[u.sealCounts] = SEAL_OSE;
-				set_spirit_powers(SEAL_OSE);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.intSpirits++;
-				u.sealCounts++;
-				u.sealTimeout[OSE-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case OTIAX:{
-			if(u.sealTimeout[OTIAX-FIRST_SEAL] < moves){
-				u.sealsActive |= SEAL_OTIAX;
-				u.sealsUsed |= SEAL_OTIAX;
-				u.spirit[u.sealCounts] = SEAL_OTIAX;
-				set_spirit_powers(SEAL_OTIAX);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[OTIAX-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case PAIMON:{
-			if(u.sealTimeout[PAIMON-FIRST_SEAL] < moves){
-				u.sealsActive |= SEAL_PAIMON;
-				u.sealsUsed |= SEAL_PAIMON;
-				unrestrict_weapon_skill(P_WAND_POWER);
-				u.spirit[u.sealCounts] = SEAL_PAIMON;
-				set_spirit_powers(SEAL_PAIMON);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.intSpirits++;
-				u.sealCounts++;
-				u.sealTimeout[PAIMON-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case SIMURGH:{
-			if(u.sealTimeout[SIMURGH-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_ENCHANTMENT_SPELL);
-				u.sealsActive |= SEAL_SIMURGH;
-				u.sealsUsed |= SEAL_SIMURGH;
-				u.spirit[u.sealCounts] = SEAL_SIMURGH;
-				set_spirit_powers(SEAL_SIMURGH);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[SIMURGH-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case TENEBROUS:{
-			if(u.sealTimeout[TENEBROUS-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_MACE);
-				u.sealsActive |= SEAL_TENEBROUS;
-				u.sealsUsed |= SEAL_TENEBROUS;
-				if(Role_if(PM_EXILE) && u.ufirst_life && u.ufirst_sky && u.ufirst_light && (u.sealsUsed&SEAL_TENEBROUS) && !(u.specialSealsKnown&SEAL_LIVING_CRYSTAL)){
-					pline("As knowledge of the Echo flows into your mind, you also realize how the Words you've learned can be used in the drawing of a seal!");
-					u.specialSealsKnown |= SEAL_LIVING_CRYSTAL;
-				}
-				u.spirit[u.sealCounts] = SEAL_TENEBROUS;
-				set_spirit_powers(SEAL_TENEBROUS);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[TENEBROUS-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case YMIR:{
-			if(u.sealTimeout[YMIR-FIRST_SEAL] < moves){
-				unrestrict_weapon_skill(P_CLUB);
-				u.sealsActive |= SEAL_YMIR;
-				u.sealsUsed |= SEAL_YMIR;
-				u.spirit[u.sealCounts] = SEAL_YMIR;
-				set_spirit_powers(SEAL_YMIR);
-				u.spiritT[u.sealCounts] = moves + bindingPeriod;
-				u.sealCounts++;
-				u.sealTimeout[YMIR-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case DAHLVER_NAR:{
-			if(u.sealTimeout[DAHLVER_NAR-FIRST_SEAL] < moves){
-				if(u.spirit[QUEST_SPIRIT]){
-					//Eject current quest spirit
-					if(u.specialSealsActive&SEAL_ACERERAK) unbind(SEAL_SPECIAL|SEAL_ACERERAK,TRUE);
-				}
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_DAHLVER_NAR;
-				u.specialSealsUsed |= SEAL_DAHLVER_NAR;
-				u.spirit[QUEST_SPIRIT] = SEAL_SPECIAL|SEAL_DAHLVER_NAR;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_DAHLVER_NAR);
-				u.spiritT[QUEST_SPIRIT] = moves + bindingPeriod;
-				u.wisSpirits++;
-				u.sealTimeout[DAHLVER_NAR-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		}break;
-		case ACERERAK:{
-			if(u.sealTimeout[ACERERAK-FIRST_SEAL] < moves){
-				if(u.spirit[QUEST_SPIRIT]){
-					//Eject current quest spirit
-					if(u.specialSealsActive&SEAL_DAHLVER_NAR) unbind(SEAL_SPECIAL|SEAL_DAHLVER_NAR,TRUE);
-				}
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_ACERERAK;
-				u.specialSealsUsed |= SEAL_ACERERAK;
-				u.spirit[QUEST_SPIRIT] = SEAL_SPECIAL|SEAL_ACERERAK;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_ACERERAK);
-				u.spiritT[QUEST_SPIRIT] = moves + bindingPeriod;
-				u.sealTimeout[ACERERAK-FIRST_SEAL] = moves + bindingPeriod;
-				u.intSpirits++;
-			} else You("can't feel the spirit.");
-		}break;
-		case COUNCIL: /*Council of Elements == crowning*/
-			u.specialSealsActive |= SEAL_SPECIAL|SEAL_COUNCIL;
-			u.specialSealsUsed |= SEAL_COUNCIL;
-			set_spirit_powers(SEAL_SPECIAL|SEAL_COUNCIL);
-		break;
-		case COSMOS:
-			if(u.sealTimeout[COSMOS-FIRST_SEAL] < moves){
-				if(u.spirit[ALIGN_SPIRIT]){
-					//Eject current alignment quest spirit
-					int i;
-					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
-						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
-							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
-							break;
-						}
-					}
-					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
-				}
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_COSMOS;
-				u.specialSealsUsed |= SEAL_COSMOS;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_COSMOS);
-				u.spirit[ALIGN_SPIRIT] = SEAL_SPECIAL|SEAL_COSMOS;
-				u.spiritT[ALIGN_SPIRIT] = moves + bindingPeriod;
-				u.sealTimeout[COSMOS-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		break;
-		case LIVING_CRYSTAL:
-			if(u.sealTimeout[LIVING_CRYSTAL-FIRST_SEAL] < moves){
-				if(u.spirit[ALIGN_SPIRIT]){
-					//Eject current alignment quest spirit
-					int i;
-					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
-						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
-							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
-							break;
-						}
-					}
-					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
-				}
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_LIVING_CRYSTAL;
-				u.specialSealsUsed |= SEAL_LIVING_CRYSTAL;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_LIVING_CRYSTAL);
-				u.spirit[ALIGN_SPIRIT] = SEAL_SPECIAL|SEAL_LIVING_CRYSTAL;
-				u.spiritT[ALIGN_SPIRIT] = moves + bindingPeriod;
-				u.sealTimeout[LIVING_CRYSTAL-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		break;
-		case TWO_TREES:
-			if(u.sealTimeout[TWO_TREES-FIRST_SEAL] < moves){
-				if(u.spirit[ALIGN_SPIRIT]){
-					//Eject current alignment quest spirit
-					int i;
-					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
-						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
-							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
-							break;
-						}
-					}
-					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
-				}
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_TWO_TREES;
-				u.specialSealsUsed |= SEAL_TWO_TREES;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_TWO_TREES);
-				u.spirit[ALIGN_SPIRIT] = SEAL_SPECIAL|SEAL_TWO_TREES;
-				u.spiritT[ALIGN_SPIRIT] = moves + bindingPeriod;
-				u.sealTimeout[TWO_TREES-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		break;
-		case MISKA:
-			if(u.sealTimeout[MISKA-FIRST_SEAL] < moves){
-				if(u.spirit[ALIGN_SPIRIT]){
-					//Eject current alignment quest spirit
-					int i;
-					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
-						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
-							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
-							break;
-						}
-					}
-					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
-				}
-				unrestrict_weapon_skill(P_TWO_WEAPON_COMBAT);
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_MISKA;
-				u.specialSealsUsed |= SEAL_MISKA;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_MISKA);
-				u.spirit[ALIGN_SPIRIT] = SEAL_SPECIAL|SEAL_MISKA;
-				u.spiritT[ALIGN_SPIRIT] = moves + bindingPeriod;
-				u.sealTimeout[MISKA-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		break;
-		case NUDZIRATH:
-			if(u.sealTimeout[NUDZIRATH-FIRST_SEAL] < moves){
-				if(u.spirit[ALIGN_SPIRIT]){
-					//Eject current alignment quest spirit
-					int i;
-					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
-						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
-							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
-							break;
-						}
-					}
-					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
-				}
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_NUDZIRATH;
-				u.specialSealsUsed |= SEAL_NUDZIRATH;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_NUDZIRATH);
-				u.spirit[ALIGN_SPIRIT] = SEAL_SPECIAL|SEAL_NUDZIRATH;
-				u.spiritT[ALIGN_SPIRIT] = moves + bindingPeriod;
-				u.sealTimeout[NUDZIRATH-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		break;
-		case ALIGNMENT_THING:
-			if(u.sealTimeout[ALIGNMENT_THING-FIRST_SEAL] < moves){
-				if(u.spirit[ALIGN_SPIRIT]){
-					//Eject current alignment quest spirit
-					int i;
-					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
-						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
-							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
-							break;
-						}
-					}
-					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
-				}
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_ALIGNMENT_THING;
-				u.specialSealsUsed |= SEAL_ALIGNMENT_THING;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_ALIGNMENT_THING);
-				u.spirit[ALIGN_SPIRIT] = SEAL_SPECIAL|SEAL_ALIGNMENT_THING;
-				u.spiritT[ALIGN_SPIRIT] = moves + bindingPeriod;
-				u.sealTimeout[ALIGNMENT_THING-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		break;
-		case UNKNOWN_GOD:
-			if(u.sealTimeout[UNKNOWN_GOD-FIRST_SEAL] < moves){
-				if(u.spirit[ALIGN_SPIRIT]){
-					//Eject current alignment quest spirit
-					int i;
-					for(i=0;i<=(NUMINA-QUEST_SPIRITS);i++){
-						if(((u.spirit[ALIGN_SPIRIT]&~SEAL_SPECIAL)>>i)&0x1L){
-							u.sealTimeout[QUEST_SPIRITS+i-FIRST_SEAL] = moves;
-							break;
-						}
-					}
-					unbind(u.spirit[ALIGN_SPIRIT],FALSE);
-				}
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_UNKNOWN_GOD;
-				u.specialSealsUsed |= SEAL_UNKNOWN_GOD;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_UNKNOWN_GOD);
-				u.spirit[ALIGN_SPIRIT] = SEAL_SPECIAL|SEAL_UNKNOWN_GOD;
-				u.spiritT[ALIGN_SPIRIT] = moves + bindingPeriod;
-				u.sealTimeout[UNKNOWN_GOD-FIRST_SEAL] = moves + bindingPeriod;
-			} else You("can't feel the spirit.");
-		break;
-		case BLACK_WEB:
-			if(u.sealTimeout[BLACK_WEB-FIRST_SEAL] < moves){
-				if(u.spirit[ALIGN_SPIRIT]){
-					//Eject current quest spirit
-					unbind(u.spirit[QUEST_SPIRIT],TRUE);
-				}
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_BLACK_WEB;
-				u.specialSealsUsed |= SEAL_BLACK_WEB;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_BLACK_WEB);
-				if(!Role_if(PM_ANACHRONONAUT)){
-					u.spirit[QUEST_SPIRIT] = SEAL_SPECIAL|SEAL_BLACK_WEB;
-					u.spiritT[QUEST_SPIRIT] = moves + bindingPeriod;
-					u.sealTimeout[BLACK_WEB-FIRST_SEAL] = moves + bindingPeriod;
-				}
-			} else You("can't feel the spirit.");
-		break;
-		case NUMINA:{
-			if(u.ulevel == 30 && Role_if(PM_EXILE)){
-				int skill;
-				for (skill = 0; skill < P_NUM_SKILLS; skill++) {
-					if(OLD_P_SKILL(skill) < P_UNSKILLED) OLD_P_SKILL(skill) = P_UNSKILLED;
-				}
-				u.spirit[OUTER_SPIRIT] = SEAL_SPECIAL|SEAL_NUMINA;
-				u.specialSealsActive |= SEAL_SPECIAL|SEAL_NUMINA;
-				u.specialSealsUsed |= SEAL_NUMINA;
-				set_spirit_powers(SEAL_SPECIAL|SEAL_NUMINA);
-			} else You("can't hear the numina.");
-		}break;
+	long sealID = get_sealID(floorID);
+	int i;
+	int spirit_type;
+
+	/* special cases: Numina, Council of Elements */
+	if (floorID == NUMINA) {
+		if (u.ulevel == 30 && Role_if(PM_EXILE)){
+			int skill;
+			for (skill = 0; skill < P_NUM_SKILLS; skill++) {
+				if (OLD_P_SKILL(skill) < P_UNSKILLED) OLD_P_SKILL(skill) = P_UNSKILLED;
+			}
+			u.spirit[OUTER_SPIRIT] = sealID;
+			u.specialSealsActive |= sealID;
+			u.specialSealsUsed |= sealID;
+			set_spirit_powers(sealID);
+		}
+		else
+			You("can't hear the numina.");
+		return;
+
 	}
+	else if (floorID == COUNCIL) {
+		u.specialSealsActive |= sealID;
+		u.specialSealsUsed |= sealID;
+		set_spirit_powers(sealID);
+		return;
+	}
+	else if (
+		floorID == COSMOS ||
+		floorID == LIVING_CRYSTAL ||
+		floorID == TWO_TREES ||
+		floorID == MISKA ||
+		floorID == NUDZIRATH ||
+		floorID == ALIGNMENT_THING ||
+		floorID == UNKNOWN_GOD
+		) {
+		spirit_type = ALIGN_SPIRIT;
+	}
+	else if (
+		floorID == ACERERAK ||
+		floorID == DAHLVER_NAR ||
+		floorID == BLACK_WEB
+		) {
+		spirit_type = QUEST_SPIRIT;
+	}
+	else
+	{
+		spirit_type = u.sealCounts;
+	}
+
+	/* check timeout period */
+	if (u.sealTimeout[floorID - FIRST_SEAL] >= moves) {
+		/* too soon */
+		You("can't feel the spirit.");
+		return;
+	}
+
+	/* possibly eject spirits */
+	if (spirit_type == ALIGN_SPIRIT && u.spirit[ALIGN_SPIRIT]){
+		/* Peacefully eject current alignment spirit */
+		u.sealTimeout[decode_sealID(u.spirit[ALIGN_SPIRIT])] = moves;
+		unbind(u.spirit[ALIGN_SPIRIT], FALSE);
+	}
+	if (spirit_type == QUEST_SPIRIT && u.spirit[QUEST_SPIRIT]){
+		/* Forcefully eject current quest spirit */
+		if (u.spirit[QUEST_SPIRIT])
+			unbind(u.spirit[QUEST_SPIRIT], TRUE);
+	}
+
+	/* set common things */
+	if (!(sealID & SEAL_SPECIAL))
+	{
+		u.sealsActive |= sealID;
+		u.sealsUsed |= sealID;
+		u.sealCounts++;
+	}
+	else {
+		u.specialSealsActive |= sealID;
+		u.specialSealsUsed |= sealID;
+	}
+	set_spirit_powers(sealID);
+	if (!(floorID == BLACK_WEB && Role_if(PM_ANACHRONONAUT))){
+		u.spirit[spirit_type] = sealID;
+		u.spiritT[spirit_type] = moves + bindingPeriod;
+		u.sealTimeout[floorID - FIRST_SEAL] = moves + bindingPeriod;
+	}
+
+	/* give properties based on seal */
+	int * spiritprops = spirit_props(floorID);
+	for (i = 0; spiritprops[i] != NO_PROP; i++)
+		u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
+
+	/* unrestrict skills based on seal */
+	int * spiritskills = spirit_skills(floorID);
+	for (i = 0; spiritskills[i] != P_NONE; i++)
+		unrestrict_weapon_skill(spiritskills[i]);
+
+	/* add to spell-attribute count */
+	/* special-seals cannot be part of the wis_spirits long and must be handled separately */
+	if ((sealID & SEAL_SPECIAL) ? floorID == DAHLVER_NAR : (sealID & wis_spirits))
+		u.wisSpirits++;
+	if ((sealID & SEAL_SPECIAL) ? floorID == ACERERAK : (sealID & int_spirits))
+		u.intSpirits++;
+
+	/* special effects not covered by anything above */
+	switch (floorID)
+	{
+	case BUER:
+		u.umartial = TRUE;
+		break;
+	case ENKI:
+		HSwimming |= INTRINSIC;
+		break;
+	case TENEBROUS:
+		if (Role_if(PM_EXILE) && u.ufirst_life && u.ufirst_sky && u.ufirst_light && !(u.specialSealsKnown&SEAL_LIVING_CRYSTAL)){
+			pline("As knowledge of the Echo flows into your mind, you also realize how the Words you've learned can be used in the drawing of a seal!");
+			u.specialSealsKnown |= SEAL_LIVING_CRYSTAL;
+		}
+		break;
+	}
+
 	vision_full_recalc = 1; //many spirits change what is visible.
 	doredraw();
 	return;
 }
 
 void
-councilspirit(seal_id)
-	int seal_id;
+councilspirit(floorID)
+	int floorID;
 {
-	int bindingPeriod = 5000, i, seal_index = (seal_id-FIRST_SEAL);
-	long old_seal = u.spirit[CROWN_SPIRIT], new_seal = (0x1L<<seal_index);
+	int bindingPeriod = 5000, i;
+	long old_seal = u.spirit[CROWN_SPIRIT], new_seal = get_sealID(floorID);
 	
 	if(new_seal&int_spirits) u.intSpirits++;
 	else if(new_seal&wis_spirits) u.wisSpirits++;
 	
-	for(i=0;i<=(YMIR-FIRST_SEAL);i++){
-		if((old_seal>>i)&0x1L){
-			u.sealTimeout[i] = moves;
-			break;
-		}
-	}
+	/* old crown spirit does not go on timeout */
+	u.sealTimeout[decode_sealID(old_seal)] = moves;
+
 	u.sealsActive &=~old_seal;
 	u.sealsActive |= new_seal;
-	u.spirit[CROWN_SPIRIT] = (0x1L<<seal_index);
+	u.spirit[CROWN_SPIRIT] = new_seal;
 	set_spirit_powers(new_seal);
 	u.spiritT[CROWN_SPIRIT] = moves + bindingPeriod;
-	u.sealTimeout[seal_index] = moves + bindingPeriod;
+	u.sealTimeout[floorID - FIRST_SEAL] = moves + bindingPeriod;
+
+	/* give properties based on seal */
+	int * spiritprops = spirit_props(floorID);
+	for (i = 0; spiritprops[i] != NO_PROP; i++)
+		u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
+
+	/* but don't unrestrict skills -- player should have already bound to it */
 	
 	vision_full_recalc = 1;	/* visible monsters may have changed */
 	doredraw();
 }
 
 void
-gnosisspirit(seal_id)
-	int seal_id;
+gnosisspirit(floorID)
+	int floorID;
 {
-	int bindingPeriod = 5, i, seal_index = (seal_id-FIRST_SEAL);
-	long new_seal = (0x1L<<seal_index);
+	int bindingPeriod = 5, i;
+	long new_seal = get_sealID(floorID);
 	
 	if(u.spirit[GPREM_SPIRIT] != 0L) unbind(u.spirit[GPREM_SPIRIT], FALSE);
 	
@@ -5708,10 +5509,17 @@ gnosisspirit(seal_id)
 	else if(new_seal&wis_spirits) u.wisSpirits++;
 	
 	u.sealsActive |= new_seal;
-	u.spirit[GPREM_SPIRIT] = (0x1L<<seal_index);
+	u.spirit[GPREM_SPIRIT] = new_seal;
 	set_spirit_powers(new_seal);
 	u.spiritT[GPREM_SPIRIT] = moves + bindingPeriod;
-//	u.sealTimeout[seal_index] = moves + bindingPeriod;
+//	u.sealTimeout[floorID - FIRST_SEAL] = moves + bindingPeriod;
+
+	/* give properties based on seal */
+	int * spiritprops = spirit_props(floorID);
+	for (i = 0; spiritprops[i] != NO_PROP; i++)
+		u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
+
+	/* but don't unrestrict skills -- player should have already bound to it */
 	
 	vision_full_recalc = 1;	/* visible monsters may have changed */
 	doredraw();
@@ -5722,11 +5530,11 @@ scatter_seals()
 {
 	struct engr *oep = engr_at(u.ux,u.uy);
 	int i;
-	long seal_flag = 0x1L;
+	long sealID = 0x1L;
 	
 	for(i = 0; i < (QUEST_SPIRITS-FIRST_SEAL); i++){
-		seal_flag = 0x1L << i;
-		if(u.sealsActive&seal_flag){
+		sealID = 0x1L << i;
+		if(u.sealsActive&sealID){
 			if(!oep){
 				make_engr_at(u.ux, u.uy,
 				 "", 0L, DUST);
@@ -5808,6 +5616,12 @@ int p_skill;
 {
 	int curskill = OLD_P_SKILL(p_skill),
 		maxskill = P_MAX_SKILL(p_skill);
+	
+	/* Fine motor control drops to 0 while panicking */
+	if(p_skill == P_WAND_POWER && Panicking){
+		return 0;
+	}
+	
 	if(p_skill == P_BARE_HANDED_COMBAT){
 		if((u.sealsActive&SEAL_EURYNOME) && (u.sealsActive&SEAL_BUER)){
 			curskill += 2;
@@ -5901,49 +5715,36 @@ boolean
 spiritSkill(p_skill)
 int p_skill;
 {
-	// if(u.specialSealsActive & SEAL_NUMINA) return TRUE;
-	if(p_skill == P_DAGGER) return u.sealsActive & SEAL_ANDROMALIUS? TRUE : FALSE;
-	if(p_skill == P_KNIFE) return u.sealsActive & SEAL_CHUPOCLOPS? TRUE : FALSE;
-	if(p_skill == P_AXE) return u.sealsActive & SEAL_MARIONETTE? TRUE : FALSE;
-	if(p_skill == P_PICK_AXE) return u.sealsActive & SEAL_FAFNIR? TRUE : FALSE;
-	if(p_skill == P_SHORT_SWORD) return u.sealsActive & SEAL_ENKI? TRUE : FALSE;
-	if(p_skill == P_BROAD_SWORD) return u.sealsActive & SEAL_DANTALION? TRUE : FALSE;
-	if(p_skill == P_LONG_SWORD) return u.sealsActive & SEAL_EDEN? TRUE : FALSE;
-	if(p_skill == P_TWO_HANDED_SWORD) return u.sealsActive & SEAL_DANTALION? TRUE : FALSE;
-	if(p_skill == P_SCIMITAR) return u.sealsActive & SEAL_DANTALION? TRUE : FALSE;
-	if(p_skill == P_SABER) return u.sealsActive & SEAL_BERITH? TRUE : FALSE;
-	if(p_skill == P_CLUB) return u.sealsActive & SEAL_YMIR? TRUE : FALSE;
-	if(p_skill == P_MACE) return u.sealsActive & SEAL_TENEBROUS? TRUE : FALSE;
-	if(p_skill == P_MORNING_STAR) return u.sealsActive & SEAL_IRIS? TRUE : FALSE;
-	if(p_skill == P_FLAIL) return u.sealsActive & SEAL_AHAZU? TRUE : FALSE;
-	if(p_skill == P_HAMMER) return u.sealsActive & SEAL_ENKI ? TRUE : FALSE;
-	if(p_skill == P_QUARTERSTAFF) return u.sealsActive & SEAL_NABERIUS? TRUE : FALSE;
-	if(p_skill == P_POLEARMS) return u.sealsActive & SEAL_SHIRO? TRUE : FALSE;
-	if(p_skill == P_SPEAR) return u.sealsActive & SEAL_HUGINN_MUNINN? TRUE : FALSE;
-	if(p_skill == P_TRIDENT) return u.sealsActive & SEAL_OSE? TRUE : FALSE;
-	if(p_skill == P_LANCE) return u.sealsActive & SEAL_BERITH? TRUE : FALSE;
-	if(p_skill == P_BOW) return u.sealsActive & SEAL_EVE? TRUE : (u.sealsActive & SEAL_BERITH && u.usteed)? TRUE : FALSE;
-	if(p_skill == P_SLING) return u.sealsActive & SEAL_ENKI? TRUE : FALSE;
-	if(p_skill == P_CROSSBOW) return u.sealsActive & SEAL_ASTAROTH? TRUE : FALSE;
-	if(p_skill == P_DART) return u.sealsActive & SEAL_ENKI? TRUE : FALSE;
-	if(p_skill == P_SHURIKEN) return u.sealsActive & SEAL_ASTAROTH? TRUE : FALSE;
-	if(p_skill == P_BOOMERANG) return u.sealsActive & SEAL_ENKI? TRUE : FALSE;
-	if(p_skill == P_WHIP) return u.sealsActive & SEAL_BALAM? TRUE : FALSE;
-	if(p_skill == P_HARVEST) return u.sealsActive & SEAL_EVE? TRUE : FALSE;
-	if(p_skill == P_UNICORN_HORN) return u.sealsActive & SEAL_ECHIDNA? TRUE : FALSE;
-	if(p_skill == P_ATTACK_SPELL) return u.sealsActive & SEAL_NABERIUS? TRUE : FALSE;
-	if(p_skill == P_HEALING_SPELL) return u.sealsActive & SEAL_BUER? TRUE : FALSE;
-	if(p_skill == P_DIVINATION_SPELL) return u.sealsActive & SEAL_MOTHER? TRUE : FALSE;
-	if(p_skill == P_ENCHANTMENT_SPELL) return u.sealsActive & SEAL_SIMURGH? TRUE : FALSE;
-	if(p_skill == P_CLERIC_SPELL) return u.sealsActive & SEAL_AMON? TRUE : FALSE;
-	if(p_skill == P_ESCAPE_SPELL) return u.sealsActive & SEAL_ANDREALPHUS? TRUE : FALSE;
-	if(p_skill == P_MATTER_SPELL) return u.sealsActive & SEAL_MARIONETTE? TRUE : FALSE;
-	if(p_skill == P_WAND_POWER) return u.sealsActive & SEAL_PAIMON? TRUE : FALSE;
-	if(p_skill == P_RIDING) return u.sealsActive & SEAL_BERITH? TRUE : FALSE;
-	if(p_skill == P_BARE_HANDED_COMBAT) return u.sealsActive & (SEAL_EURYNOME|SEAL_BUER)? TRUE : FALSE;
-	if(p_skill == P_BEAST_MASTERY) return u.sealsActive & SEAL_MALPHAS? TRUE : FALSE;
-	if(p_skill == P_MUSICALIZE) return u.sealsActive & SEAL_ORTHOS? TRUE : FALSE;
-	if(p_skill == P_TWO_WEAPON_COMBAT) return u.specialSealsActive & (SEAL_MISKA)? TRUE : FALSE;
+	static long seal_skill_list[P_NUM_SKILLS];
+	static long specialseal_skill_list[P_NUM_SKILLS];
+	static boolean madelist = FALSE;
+
+	if (!madelist) {
+		/* must create list */
+		madelist = TRUE;
+		int floorID;
+		int * list;
+		int i;
+		for (floorID = FIRST_SEAL; floorID <= NUMINA; floorID++) {
+			list = spirit_skills(floorID);
+			for (i = 0; list[i] != P_NONE; i++) {
+				if (floorID < QUEST_SPIRITS)
+					seal_skill_list[list[i]] |= get_sealID(floorID);
+				else
+					specialseal_skill_list[list[i]] |= (get_sealID(floorID) & ~SEAL_SPECIAL);
+			}
+		}
+	}
+
+	if (u.sealsActive & seal_skill_list[p_skill])
+		return TRUE;
+	if (u.specialSealsActive & specialseal_skill_list[p_skill])
+		return TRUE;
+
+	/* special cases */
+	if (u.sealsActive & SEAL_BERITH && u.usteed && p_skill == P_BOW)
+		return TRUE;
+
 	return FALSE;
 }
 #ifdef USER_SOUNDS

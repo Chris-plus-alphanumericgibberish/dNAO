@@ -191,6 +191,10 @@
 #define no_innards(ptr)	((ptr)->mlet == S_VORTEX || \
 						 (ptr)->mlet == S_LIGHT || \
 						 (ptr)->mlet == S_ELEMENTAL || \
+						 (ptr)->mlet == S_MIMIC || \
+						 ((ptr)->mtyp == PM_BALL_OF_LIGHT) || \
+						 ((ptr)->mtyp == PM_BALL_OF_RADIANCE) || \
+						 ((ptr)->mtyp == PM_BALL_OF_GOSSAMER_SUNLIGHT) || \
 						 ((ptr)->mtyp == PM_SHAMBLING_HORROR && u.shambin == 2) || \
 						 ((ptr)->mtyp == PM_STUMBLING_HORROR && u.stumbin == 2) || \
 						 ((ptr)->mtyp == PM_WANDERING_HORROR && u.wandein == 2) || \
@@ -254,7 +258,7 @@
 								 (ptr)->mtyp == PM_UVUUDAUM || \
 								 (ptr)->mtyp == PM_MASKED_QUEEN \
 								 )
-#define controlledwidegaze(ptr)		(is_angel(ptr) || is_auton(ptr))
+#define controlledwidegaze(ptr)		(!((ptr)->mtyp == PM_MEDUSA || (ptr)->mtyp == PM_UVUUDAUM || (ptr)->mtyp == PM_GREAT_CTHULHU || (ptr)->mtyp == PM_OBOX_OB || (ptr)->mtyp == PM_DAGON))
 #define controlledwidegaze_mon(mon)		(controlledwidegaze((mon)->data) || (mon)->mfaction == ILLUMINATED)
 #define acidic(ptr)			(((ptr)->mflagsb & MB_ACID) != 0L)
 #define poisonous(ptr)		(((ptr)->mflagsb & MB_POIS) != 0L)
@@ -587,6 +591,7 @@
 				  (ptr)->mtyp == PM_BRIGHT_WALKER || \
 				  (ptr)->mtyp == PM_FLAMING_SPHERE || \
 				  (ptr)->mtyp == PM_SHOCKING_SPHERE || \
+				  (ptr)->mtyp == PM_PARASITIZED_DOLL || \
 				  (ptr)->mtyp == PM_MOTE_OF_LIGHT || \
 				  (ptr)->mtyp == PM_BALL_OF_LIGHT || \
 				  (ptr)->mtyp == PM_BLOODY_SUNSET || \
@@ -806,6 +811,7 @@
 				   (ptr)->mlet != S_MIMIC && \
 				   (ptr)->mtyp != PM_WEEPING_ANGEL && \
 				   (ptr)->mtyp != PM_GREAT_CTHULHU && \
+				   (ptr)->mtyp != PM_STAR_SPAWN && \
 				   !is_clockwork(ptr) && \
 				   (!nonliving(ptr) || is_vampire(ptr)))
 #define has_blood_mon(mon)	(has_blood((mon)->data))

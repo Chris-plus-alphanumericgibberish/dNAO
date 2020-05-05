@@ -3185,7 +3185,7 @@ register struct obj *atmp;
 			useup(otmp);
 			if(roll_madness(MAD_TALONS)){
 				You("panic after having your cloak destroyed!");
-				nomul(-1*rnd(6),"panicking");
+				HPanicking += 1+rnd(6);
 			}
 		} else {
 			Your("%s resists destruction!", cloak_simple_name(uarmc));
@@ -3199,7 +3199,7 @@ register struct obj *atmp;
 			useup(otmp);
 			if(roll_madness(MAD_TALONS)){
 				You("panic after having your armor destroyed!");
-				nomul(-1*rnd(6),"panicking");
+				HPanicking += 1+rnd(6);
 			}
 		} else {
 			Your("armor resists destruction!");
@@ -3212,7 +3212,7 @@ register struct obj *atmp;
 			useup(otmp);
 			if(roll_madness(MAD_TALONS)){
 				You("panic after having your underclothes destroyed!");
-				nomul(-1*rnd(6),"panicking");
+				HPanicking += 1+rnd(6);
 			}
 		} else {
 			Your("underclothes resists destruction!");
@@ -3225,7 +3225,7 @@ register struct obj *atmp;
 			useup(otmp);
 			if(roll_madness(MAD_TALONS)){
 				You("panic after having your helmet destroyed!");
-				nomul(-1*rnd(6),"panicking");
+				HPanicking += 1+rnd(6);
 			}
 		} else {
 			Your("helmet resists destruction!");
@@ -3239,7 +3239,7 @@ register struct obj *atmp;
 			selftouch("You");
 			if(roll_madness(MAD_TALONS)){
 				You("panic after having your gloves destroyed!");
-				nomul(-1*rnd(6),"panicking");
+				HPanicking += 1+rnd(6);
 			}
 		} else {
 			Your("gloves resists destruction!");
@@ -3252,7 +3252,7 @@ register struct obj *atmp;
 			useup(otmp);
 			if(roll_madness(MAD_TALONS)){
 				You("panic after having your boots destroyed!");
-				nomul(-1*rnd(6),"panicking");
+				HPanicking += 1+rnd(6);
 			}
 		} else {
 			Your("boots resists destruction!");
@@ -3265,7 +3265,7 @@ register struct obj *atmp;
 			useup(otmp);
 			if(roll_madness(MAD_TALONS)){
 				You("panic after having your shield destroyed!");
-				nomul(-1*rnd(6),"panicking");
+				HPanicking += 1+rnd(6);
 			}
 		} else {
 			Your("shield resists destruction!");
@@ -3349,7 +3349,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your cloak shredded!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarm)) {
 		if (donning(otmp)) cancel_don();
@@ -3359,7 +3359,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your armor ripped open!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 #ifdef TOURIST
 	} else if (DESTROY_ARM(uarmu)) {
@@ -3369,7 +3369,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your underclothes torn off!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 #endif
 	} else if (DESTROY_ARM(uarmh)) {
@@ -3379,7 +3379,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your helmet destroyed!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarmg)) {
 		if (donning(otmp)) cancel_don();
@@ -3389,7 +3389,7 @@ register struct obj *atmp;
 		selftouch("You");
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your gloves ripped off!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarmf)) {
 		if (donning(otmp)) cancel_don();
@@ -3398,7 +3398,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your boots ripped open!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarms)) {
 		if (donning(otmp)) cancel_don();
@@ -3407,7 +3407,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your shield destroyed!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else {
 		return 0;		/* could not destroy anything */
@@ -3493,7 +3493,7 @@ register struct obj *atmp;
 		rloco(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after losing your cloak!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (TELEPORT_ARM(uarm)) {
 		if (donning(otmp)) cancel_don();
@@ -3504,7 +3504,7 @@ register struct obj *atmp;
 		rloco(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after losing your armor!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (TELEPORT_ARM(uarmu)) {
 		if (donning(otmp)) cancel_don();
@@ -3515,7 +3515,7 @@ register struct obj *atmp;
 		rloco(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after losing your underclothes!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (TELEPORT_ARM(uarmh)) {
 		if (donning(otmp)) cancel_don();
@@ -3526,7 +3526,7 @@ register struct obj *atmp;
 		rloco(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after losing your helmet!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (TELEPORT_ARM(uarmg)) {
 		if (donning(otmp)) cancel_don();
@@ -3538,7 +3538,7 @@ register struct obj *atmp;
 		selftouch("You");
 		if(roll_madness(MAD_TALONS)){
 			You("panic after losing your gloves!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (TELEPORT_ARM(uarmf)) {
 		if (donning(otmp)) cancel_don();
@@ -3549,7 +3549,7 @@ register struct obj *atmp;
 		rloco(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after losing your boots!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (TELEPORT_ARM(uarms)) {
 		if (donning(otmp)) cancel_don();
@@ -3560,7 +3560,7 @@ register struct obj *atmp;
 		rloco(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after losing your shield!");
-			nomul(-1*rnd(6),"panic");
+			HPanicking += 1+rnd(6);
 		}
 	} else {
 		return 0;		/* could not destroy anything */
@@ -3587,7 +3587,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your cloak shredded!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarm)) {
 		if (donning(otmp)) cancel_don();
@@ -3596,7 +3596,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your armor torn apart!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 #ifdef TOURIST
 	} else if (DESTROY_ARM(uarmu)) {
@@ -3606,7 +3606,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your underclothes shredded!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 #endif
 	} else if (DESTROY_ARM(uarmh)) {
@@ -3616,7 +3616,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your helmet broken!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarmg)) {
 		if (donning(otmp)) cancel_don();
@@ -3626,7 +3626,7 @@ register struct obj *atmp;
 		selftouch("You");
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your gloves shredded!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarmf)) {
 		if (donning(otmp)) cancel_don();
@@ -3635,7 +3635,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your boots shredded!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarms)) {
 		if (donning(otmp)) cancel_don();
@@ -3644,7 +3644,7 @@ register struct obj *atmp;
 		useup(otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after having your shield smashed!");
-			nomul(-1*rnd(6),"panicking");
+			HPanicking += 1+rnd(6);
 		}
 	} else {
 		return 0;		/* could not destroy anything */

@@ -3074,6 +3074,7 @@ u_init()
 	else u.wandein = 0;
 
 	u.oonaenergy = !rn2(3) ? AD_FIRE : rn2(2) ? AD_COLD : AD_ELEC;
+	u.ring_wishes = -1;
 	dungeon_topology.alt_tower = !rn2(8);
 	dungeon_topology.alt_tulani = !rn2(3);
 	
