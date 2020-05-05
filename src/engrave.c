@@ -4005,7 +4005,7 @@ long sealID;
 	if(sealID&SEAL_SPECIAL){
 		offset = sealID&~SEAL_SPECIAL;
 		for(j = 0; j < 32; j++)
-			if((sealID>>j) == 1L)
+			if((offset>>j) == 1L)
 				return j+QUEST_SPIRITS;
 	} else {
 		for(j = 0; j < 32; j++)
@@ -4024,12 +4024,12 @@ int floorID;
 	if(floorID == NUMINA)
 		return SEAL_SPECIAL|SEAL_NUMINA;
 	if(floorID < QUEST_SPIRITS){
-		i = floorID - QUEST_SPIRITS;
+		i = floorID - FIRST_SEAL;
 		sealID = 1L << i;
 	} else {
-		i = floorID - FIRST_SEAL;
+		i = floorID - QUEST_SPIRITS;
 		sealID |= SEAL_SPECIAL;
-		sealID |= 1L << (i - DAHLVER_NAR);
+		sealID |= 1L << i;
 	}
 	return sealID;
 }
