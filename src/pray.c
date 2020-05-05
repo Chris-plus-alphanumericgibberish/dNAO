@@ -203,8 +203,8 @@ in_trouble()
 	if(u.utrap && u.utraptype == TT_LAVA) return(TROUBLE_LAVA);
 	if(Sick) return(TROUBLE_SICK);
 	if(u.uhs >= WEAK && !Race_if(PM_INCANTIFIER)) return(TROUBLE_STARVING);
-	if (Upolyd ? (u.mh <= 5 || u.mh*7 <= u.mhmax) :
-		(u.uhp <= 5 || u.uhp*7 <= u.uhpmax)) return TROUBLE_HIT;
+	if (Upolyd ? (u.mh <= 5 || u.mh*2 <= u.mhmax) :
+		(u.uhp <= 5 || u.uhp*2 <= u.uhpmax)) return TROUBLE_HIT;
 	if(u.wimage >= 10 && on_altar()) return(TROUBLE_WIMAGE);
 	if(u.umorgul && on_altar()) return(TROUBLE_MORGUL);
 	if(u.uhpmod < -18 && on_altar()) return(TROUBLE_HPMOD);
