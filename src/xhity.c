@@ -12866,37 +12866,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 		/* get attackmask */
 		if (weapon && (valid_weapon_attack || invalid_weapon_attack)) {
-			otmp = weapon;
-			if (is_bludgeon(otmp)
-				|| otmp->oartifact == ART_YORSHKA_S_SPEAR
-				|| otmp->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD
-				|| otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
-				|| (otmp->otyp == KAMEREL_VAJRA && !litsaber(otmp))
-				){
-				attackmask |= WHACK;
-			}
-			if (is_stabbing(otmp)
-				|| otmp->oartifact == ART_ROGUE_GEAR_SPIRITS
-				|| (otmp->otyp == KAMEREL_VAJRA && !litsaber(otmp))
-				){
-				attackmask |= PIERCE;
-			}
-			if (is_slashing(otmp)
-				|| otmp->oartifact == ART_LIECLEAVER
-				|| otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
-				){
-				attackmask |= SLASH;
-			}
-			if (is_blasting(otmp)
-				|| (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit)
-				|| otmp->oartifact == ART_FIRE_BRAND
-				|| otmp->oartifact == ART_FROST_BRAND
-				){
-				attackmask |= EXPLOSION;
-			}
-			/* if it's not any of the above, we're just smacking things with it */
-			if (!attackmask)
-				attackmask = WHACK;
+			attackmask = attack_mask(weapon, 0, 0);
 		}
 		else if (unarmed_punch) {
 			//Can always whack someone
