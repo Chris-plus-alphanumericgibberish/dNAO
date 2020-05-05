@@ -2025,7 +2025,8 @@ mbag_explodes(obj, depthin)
 	return FALSE;
 
     /* odds: 1/1, 2/2, 3/4, 4/8, 5/16, 6/32, 7/64, 8/128, 9/128, 10/128,... */
-    if ((Is_mbag(obj) || obj->otyp == WAN_CANCELLATION) &&
+	/* Wands of Cancellation now don't cause explosions if nested.  Bags of tricks still do */
+    if ((Is_mbag(obj) || (obj->otyp == WAN_CANCELLATION && !depthin)) &&
 	(rn2(1 << (depthin > 7 ? 7 : depthin)) <= depthin))
 	return TRUE;
     else if (Has_contents(obj)) {
@@ -2059,6 +2060,11 @@ register struct obj *obj;
 		return 0;
 	} else if (obj == current_container) {
 		pline("That would be an interesting topological exercise.");
+		return 0;
+	} else if ((Is_mbag(obj) || obj->otyp == WAN_CANCELLATION)
+		&& objects[obj->otyp].oc_name_known && obj->dknown && current_container->otyp == BAG_OF_HOLDING
+	) {
+		pline("That combination is a little too explosive.");
 		return 0;
 	} else if (obj->owornmask & (W_ARMOR | W_RING | W_AMUL | W_TOOL)) {
 		Norep("You cannot %s %s you are wearing.",
