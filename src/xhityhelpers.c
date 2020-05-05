@@ -1158,6 +1158,7 @@ struct obj * weapon;
 		((!slot || (slot != ~0L)) && (
 		/* player */
 		(youagr && (
+		(!slot) ||
 		((slot & W_ARM) && !uarm) ||
 		((slot & W_ARMC) && !uarmc) ||
 		((slot & W_ARMH) && !uarmh) ||
