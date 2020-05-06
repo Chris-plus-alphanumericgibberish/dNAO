@@ -1294,35 +1294,49 @@ register struct monst *mtmp;
 		return (0);
 #endif
 
+	/* Frost Treads freeze water and lava */
+	struct obj * otmp;
+	if ((otmp = which_armor(mtmp, W_ARMF)) &&
+		otmp->oartifact == ART_FROST_TREADS &&
+		!is_3dwater(mtmp->mx, mtmp->my) &&
+		(is_pool(mtmp->mx, mtmp->my, TRUE) || is_lava(mtmp->mx, mtmp->my)))
+	{
+		zap_over_floor(mtmp->mx, mtmp->my, AD_COLD, WAND_CLASS, FALSE, NULL);
+		inpool = FALSE;
+		inlava = FALSE;
+		inshallow = FALSE;
+	}
+
     /* Gremlin multiplying won't go on forever since the hit points
      * keep going down, and when it gets to 1 hit point the clone
      * function will fail.
      */
-    if (mtmp->mtyp == PM_GREMLIN && (inpool || infountain || inshallow) && rn2(3)) {
-	if (split_mon(mtmp, (struct monst *)0))
-	    dryup(mtmp->mx, mtmp->my, FALSE);
-	if (inpool) water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
-	return (0);
-    } else if ((mtmp->mtyp == PM_IRON_GOLEM || mtmp->mtyp == PM_CHAIN_GOLEM) && ((inpool && !rn2(5)) || inshallow)) {
-	/* rusting requires oxygen and water, so it's faster for shallow water */
-	int dam = d(2,6);
-	if (cansee(mtmp->mx,mtmp->my))
-	    pline("%s rusts.", Monnam(mtmp));
-	mtmp->mhp -= dam;
-	if (mtmp->mhpmax > dam) mtmp->mhpmax -= dam;
-	if (mtmp->mhp < 1) {
-	    if (canseemon(mtmp)) pline("%s falls to pieces!", Monnam(mtmp));
-	    mondead(mtmp);
-	    if (mtmp->mhp < 1) {
-			if (mtmp->mtame && !canseemon(mtmp))
-				pline("May %s rust in peace.", mon_nam(mtmp));
-			return (1);
-		}
+	if (mtmp->mtyp == PM_GREMLIN && (inpool || infountain || inshallow) && rn2(3)) {
+		if (split_mon(mtmp, (struct monst *)0))
+			dryup(mtmp->mx, mtmp->my, FALSE);
+		if (inpool) water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
+		return (0);	/* gremlins in water */
 	}
-	if(inshallow) water_damage(which_armor(mtmp, W_ARMF), FALSE, FALSE, level.flags.lethe, mtmp);
-	else water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
-	return (0);
-    }
+	else if ((mtmp->mtyp == PM_IRON_GOLEM || mtmp->mtyp == PM_CHAIN_GOLEM) && ((inpool && !rn2(5)) || inshallow)) {
+		/* rusting requires oxygen and water, so it's faster for shallow water */
+		int dam = d(2, 6);
+		if (cansee(mtmp->mx, mtmp->my))
+			pline("%s rusts.", Monnam(mtmp));
+		mtmp->mhp -= dam;
+		if (mtmp->mhpmax > dam) mtmp->mhpmax -= dam;
+		if (mtmp->mhp < 1) {
+			if (canseemon(mtmp)) pline("%s falls to pieces!", Monnam(mtmp));
+			mondead(mtmp);
+			if (mtmp->mhp < 1) {
+				if (mtmp->mtame && !canseemon(mtmp))
+					pline("May %s rust in peace.", mon_nam(mtmp));
+				return (1);
+			}
+		}
+		if (inshallow) water_damage(which_armor(mtmp, W_ARMF), FALSE, FALSE, level.flags.lethe, mtmp);
+		else water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
+		return (0);	/* iron/chain golems in water */
+	}
 
     if (inlava) {
 	/*
