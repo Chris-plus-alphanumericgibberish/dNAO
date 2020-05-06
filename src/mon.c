@@ -1279,13 +1279,13 @@ register struct monst *mtmp;
 {
 	boolean inpool, inlava, infountain, inshallow;
 
-	inpool = is_pool(mtmp->mx,mtmp->my, FALSE) &&
-	     ((!mon_resistance(mtmp,FLYING) && !mon_resistance(mtmp,LEVITATION)) || is_3dwater(mtmp->mx,mtmp->my));
+	inpool = is_3dwater(mtmp->mx, mtmp->my) || (is_pool(mtmp->mx, mtmp->my, FALSE) &&
+		(!mon_resistance(mtmp, WWALKING) && !mon_resistance(mtmp, FLYING) && !mon_resistance(mtmp, LEVITATION)));
 	inlava = is_lava(mtmp->mx,mtmp->my) &&
-	     !mon_resistance(mtmp,FLYING) && !mon_resistance(mtmp,LEVITATION);
+		(!mon_resistance(mtmp, WWALKING) && !mon_resistance(mtmp, FLYING) && !mon_resistance(mtmp, LEVITATION));
 	infountain = IS_FOUNTAIN(levl[mtmp->mx][mtmp->my].typ);
 	inshallow = IS_PUDDLE(levl[mtmp->mx][mtmp->my].typ) &&
-	     (!mon_resistance(mtmp,FLYING) && !mon_resistance(mtmp,LEVITATION));
+		(!mon_resistance(mtmp, WWALKING) && !mon_resistance(mtmp, FLYING) && !mon_resistance(mtmp, LEVITATION));
 
 #ifdef STEED
 	/* Flying and levitation keeps our steed out of the liquid */
@@ -3029,9 +3029,10 @@ mfndpos(mon, poss, info, flag)
 	wantpool = mdat->mlet == S_EEL;
 	wantpuddle = wantpool && mdat->msize == MZ_TINY;
 	cubewaterok = (mon_resistance(mon,SWIMMING) || breathless_mon(mon) || amphibious_mon(mon));
-	poolok = mon_resistance(mon,FLYING) || is_clinger(mdat) ||
-		 (mon_resistance(mon,SWIMMING) && !wantpool);
-	lavaok = mon_resistance(mon,FLYING) || is_clinger(mdat) || likes_lava(mdat);
+	poolok = mon_resistance(mon, WWALKING) || mon_resistance(mon, FLYING) || is_clinger(mdat)
+		|| (mon_resistance(mon,SWIMMING) && !wantpool);
+	lavaok = mon_resistance(mon,FLYING) || is_clinger(mdat) || likes_lava(mdat)
+		|| (mon_resistance(mon, WWALKING) && resists_fire(mon));
 	quantumlock = (is_weeping(mdat) && !u.uevent.invoked);
 	thrudoor = ((flag & (ALLOW_WALL|BUSTDOOR)) != 0L);
 	if (flag & ALLOW_DIG) {
