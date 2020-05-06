@@ -747,25 +747,20 @@ register boolean mod;
 }
 
 /*
- * Returns a pointer to a TEMPORARY array of all the properties (that are in prop.h) an artifact has (either while equiped or while carried)
+ * Fills an int array of all the properties (that are in prop.h) an artifact has (either while equiped or while carried)
  * If while_carried == TRUE, do not list properties that require the artifact to be wielded / worn
- * 
- * The array that is returned only stores the most recent query for each of carried/equiped.
  */
-int *
-art_property_list(oartifact, while_carried)
+void
+get_art_property_list(property_list, oartifact, while_carried)
+int * property_list;
 int oartifact;
 boolean while_carried;
 {
-	static int equiped_property_list[LAST_PROP];	// the temporary list of properties for while equiped
-	static int carried_property_list[LAST_PROP];	// the temporary list of properties for while carried
-	int * property_list = (while_carried ? carried_property_list : equiped_property_list);
-
 	/* quick safety check */
 	if (oartifact < 1 || oartifact > NROFARTIFACTS)
 	{
 		property_list[0] = 0;
-		return property_list;
+		return;
 	}
 
 	int cur_prop = NO_PROP;
@@ -784,9 +779,7 @@ boolean while_carried;
 	}
 	// add a terminator to the array
 	property_list[j] = 0;
-
-	// return the list
-	return property_list;
+	return;
 }
 
 int
@@ -1030,11 +1023,11 @@ arti_reflects(obj)
 struct obj *obj;
 {
 	int i;
-	int * proplist;
+	int proplist[LAST_PROP];
 
 	/* first check normal item properties */
 	i = 0;
-	proplist = item_property_list(obj, obj->otyp);
+	get_item_property_list(proplist, obj, obj->otyp);
 	while (proplist[i]) {
 		if (proplist[i] == REFLECTING)
 			return TRUE;
@@ -1042,7 +1035,7 @@ struct obj *obj;
 	}
 	/* then while-worn artifact properties */
 	i = 0;
-	proplist = art_property_list(obj->oartifact, FALSE);
+	get_art_property_list(proplist, obj->oartifact, FALSE);
 	while (proplist[i]) {
 		if (proplist[i] == REFLECTING)
 			return TRUE;
@@ -1050,7 +1043,7 @@ struct obj *obj;
 	}
 	/* then while-carried artifact properties */
 	i = 0;
-	proplist = art_property_list(obj->oartifact, TRUE);
+	get_art_property_list(proplist, obj->oartifact, TRUE);
 	while (proplist[i]) {
 		if (proplist[i] == REFLECTING)
 			return TRUE;
@@ -1121,12 +1114,12 @@ long wp_mask;
 	boolean exist_nonspecwarn;
 	int i, j;
 	int this_art_property_list[LAST_PROP];
-	int * tmp_property_list;
+	int tmp_property_list[LAST_PROP];
 
 	if (!oart) return;
 	
 	/* get the property list (either for the slot or for slotless) */
-	tmp_property_list = art_property_list(oartifact, wp_mask == W_ART);
+	get_art_property_list(tmp_property_list, oartifact, wp_mask == W_ART);
 	/* copy it to this local array */
 	for (i = 0; tmp_property_list[i]; i++)
 		this_art_property_list[i] = tmp_property_list[i];	// set indices
@@ -1148,7 +1141,7 @@ long wp_mask;
 			for (obj = invent; (obj && !got_prop); obj = obj->nobj)
 			if (obj != otmp && obj->oartifact) {
 				/* write over tmp_property_list with the carried artifact -- this is why we needed a copy earlier */
-				tmp_property_list = art_property_list(obj->oartifact, wp_mask == W_ART);
+				get_art_property_list(tmp_property_list, obj->oartifact, wp_mask == W_ART);
 
 				/* specific-monster warning needs to be specially handled */
 				if (this_art_property_list[i] == WARN_OF_MON)
