@@ -1690,12 +1690,14 @@ register int x,y;
 				}
 		  }
 		  else{//note: assumes that there can only be ONE halucinatory ward scribed.
-			if(ep->complete_wards) pline("There is %s %s", 
-										haluWard[ep->ward_id],
-										word);
-			if(ep->scuffed_wards) pline("It is scuffed.");
-			else if(ep->degraded_wards) pline("It is degraded.");
-			else if(ep->partial_wards) pline("Although only fragments are left.");
+			  if (ep->complete_wards + ep->scuffed_wards + ep->degraded_wards + ep->partial_wards) {
+				  pline("There is %s %s",
+					  haluWard[ep->ward_id],
+					  word);
+			  }
+			  if (ep->scuffed_wards) pline("It is scuffed.");
+			  else if (ep->degraded_wards) pline("It is degraded.");
+			  else if (ep->partial_wards) pline("Only fragments are left.");
 		  }
 		 }
 		 else{
