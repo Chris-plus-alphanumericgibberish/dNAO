@@ -7245,6 +7245,15 @@ arti_invoke(obj)
 			}
 			return 1;
 		}break;
+		case ALLSIGHT:
+			You("see the world in utter clarity.");
+			n = rnz(30);
+			make_blinded((long)u.ucreamed, TRUE);
+			HSee_invisible += n;
+			HProtection_from_shape_changers += n;
+			HXray_vision += n;
+			/* todo: temporarily set insight and bring insight creatures into view, mwahaha */
+			break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!

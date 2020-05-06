@@ -1001,7 +1001,7 @@ A("The Shield of the All-Seeing",	ORCISH_SHIELD,		(const char *)0,
 	NO_ATTK(), NOFLAG,
 	PROP3(SEARCHING, WARN_OF_MON, FIRE_RES), (ARTP_SEEK),
 	PROP0(), NOFLAG,
-	PROT_FROM_SHAPE_CHANGERS, (ARTI_PLUSSEV)	/* needs message for invoke */
+	ALLSIGHT, (ARTI_PLUSSEV)	/* needs message for invoke */
 	),
 
 /*Needs encyc entry*/
