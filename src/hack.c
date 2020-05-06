@@ -1733,6 +1733,8 @@ boolean pick;
 			You("pop out of the water like a cork!");
 		else if (Flying)
 			You("fly out of the water.");
+		else if (uarmf && uarmf->oartifact == ART_FROST_TREADS)
+			You("climb stairs of ice out of the water.");
 		else if (Wwalking)
 			You("slowly rise above the surface.");
 		else
@@ -1791,6 +1793,9 @@ stillinwater:;
 #endif
 			(void)rust_dmg(uarmf, "boots", 1, TRUE, &youmonst);
 	    }
+		if (uarmf && uarmf->oartifact == ART_FROST_TREADS && is_pool(u.ux, u.uy, TRUE)) {
+			zap_over_floor(u.ux, u.uy, AD_COLD, WAND_CLASS, FALSE, NULL);
+		}
 	}
 	check_special_room(FALSE);
 #ifdef SINKS

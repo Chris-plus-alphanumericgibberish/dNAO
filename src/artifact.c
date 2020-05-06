@@ -152,6 +152,7 @@ hack_artifacts()
 	artilist[ART_CROWN_OF_THE_SAINT_KING].otyp = gcircletsa;
 	artilist[ART_HELM_OF_THE_DARK_LORD].otyp = find_vhelm();
 	artilist[ART_SHARD_FROM_MORGOTH_S_CROWN].otyp = find_good_iring();
+	artilist[ART_FROST_TREADS].otyp = find_skates();
 	
 	if(!Role_if(PM_BARD)){
  	    artilist[ART_SINGING_SWORD].role = NON_PM;

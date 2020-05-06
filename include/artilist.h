@@ -1038,6 +1038,19 @@ A("Water Flowers",					WATER_WALKING_BOOTS,(const char *)0,
 	),
 
 /*Needs encyc entry*/
+/* actually whatever otyp snow shoes are */
+/* freezes water/lava underfoot */
+A("Frost Treads",					WATER_WALKING_BOOTS,(const char *)0,
+	1500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_D, NOFLAG,
+	NO_MONS(),
+	ATTK(AD_COLD, 1, 8), NOFLAG,
+	PROP2(WWALKING, COLD_RES), NOFLAG,
+	PROP0(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
+	),
+
+/*Needs encyc entry*/
 A("Hammerfeet",						KICKING_BOOTS,		(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_GIFT|ARTG_INHER),
