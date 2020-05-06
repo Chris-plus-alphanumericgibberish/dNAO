@@ -741,12 +741,14 @@ const char * haluWard[] =  {
 	"a mockingjay", /* Hunger Games */
 	"a Sharuan Mindharp", /* Star Wars expanded universe */
 	"a winged blade of light", /* Jedi Order symbol */
+	"an inverted scarab beetle", /* Worm */
 	
 	/* webcomics */
 	"a Court symbol",	"a Forest symbol",	"the sign of the Wandering Eye", /* Gunnerkrigg Court */
 	"a winged tower", /* Girl Genius */
 		"a stylized trilobite",
 	"a setting (rising?) sun", /* Dresden Codak */
+	"a line splitting a circle", /* Kill Six Billion Demons */
 	
 	/* anime and manga */
 	"a Robotech Defense Force insignia", /*...Robotech*/
