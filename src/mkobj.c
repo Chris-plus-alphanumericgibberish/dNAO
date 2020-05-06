@@ -2277,9 +2277,10 @@ register struct obj *obj;
 		 *	   cursed (not supposed to happen), it will be treated
 		 *	   as cursed.
 		 */
-		if (obj->otyp == BAG_OF_HOLDING)
-		    cwt = obj->cursed ? (cwt * 2) :
-					(1 + (cwt / (obj->blessed ? 4 : 2)));
+		if (obj->oartifact == ART_WALLET_OF_PERSEUS)
+			cwt = obj->cursed ? (cwt * 4) : (1 + (cwt / (obj->blessed ? 6 : 3)));
+		else if (obj->otyp == BAG_OF_HOLDING)
+		    cwt = obj->cursed ? (cwt * 2) : (1 + (cwt / (obj->blessed ? 4 : 2)));
 
 		return wt + cwt;
 	}
