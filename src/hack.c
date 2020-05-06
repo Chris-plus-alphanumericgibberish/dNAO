@@ -1024,7 +1024,7 @@ domove()
 		if (on_ice) {
 		    static int skates = 0;
 		    if (!skates) skates = find_skates();
-		    if ((uarmf && uarmf->otyp == skates)
+		    if ((uarmf && (uarmf->otyp == skates || uarmf->oartifact == ART_FROST_TREADS))
 			    || resists_cold(&youmonst)
 			    || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			    || is_whirly(youracedata))
