@@ -1298,7 +1298,7 @@ register struct monst *mtmp;
 	struct obj * otmp;
 	if ((otmp = which_armor(mtmp, W_ARMF)) &&
 		otmp->oartifact == ART_FROST_TREADS &&
-		!is_3dwater(mtmp->mx, mtmp->my) &&
+		!is_3dwater(mtmp->mx, mtmp->my) && !Is_waterlevel(&u.uz) &&
 		(is_pool(mtmp->mx, mtmp->my, TRUE) || is_lava(mtmp->mx, mtmp->my)))
 	{
 		zap_over_floor(mtmp->mx, mtmp->my, AD_COLD, WAND_CLASS, FALSE, NULL);

@@ -1793,7 +1793,8 @@ stillinwater:;
 #endif
 			(void)rust_dmg(uarmf, "boots", 1, TRUE, &youmonst);
 	    }
-		if (uarmf && uarmf->oartifact == ART_FROST_TREADS && is_pool(u.ux, u.uy, TRUE)) {
+		if (uarmf && uarmf->oartifact == ART_FROST_TREADS
+			&& is_pool(u.ux, u.uy, TRUE) && !is_3dwater(u.ux, u.uy) && !Is_waterlevel(&u.uz)) {
 			zap_over_floor(u.ux, u.uy, AD_COLD, WAND_CLASS, FALSE, NULL);
 		}
 	}
