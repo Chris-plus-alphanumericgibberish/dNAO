@@ -175,19 +175,22 @@
 						(dimness(u.ux,u.uy) <= 0) &&\
 						!(ublindf && !Blindfolded))
 #define Blinded			u.uprops[BLINDED].intrinsic
+#define HBlind_res		u.uprops[BLIND_RES].intrinsic
+#define EBlind_res		u.uprops[BLIND_RES].extrinsic
+#define Blind_res		(HBlind_res || EBlind_res)
 #define Blindfolded		((ublindf && ublindf->otyp != LENSES && ublindf->otyp != MASK && ublindf->otyp != ANDROID_VISOR && ublindf->otyp != LIVING_MASK) ||\
 						(uarmh && uarmh->otyp == PLASTEEL_HELM && uarmh->obj_material != objects[uarmh->otyp].oc_material && is_opaque(uarmh)) ||\
 						(uarmh && uarmh->otyp == CRYSTAL_HELM && is_opaque(uarmh)))
 		/* ...means blind because of a cover */
 #define NoLightBlind	((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && is_opaque(uarm)) || (uarmu && is_opaque(uarmu)))) && \
-		 !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) && !forcesight)
+		 !Blind_res && !forcesight)
 // #define Blind	((Blinded || Blindfolded || !haseyes(youracedata) || LightBlind) && \
 		 // !(u.sealsActive&SEAL_DANTALION && !(uarm && uarm->otyp != CRYSTAL_PLATE_MAIL)) && \
-		 // !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) && !forcesight)
+		 // !Blind_res && !forcesight)
 #define Blind	((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && is_opaque(uarm)) || (uarmu && is_opaque(uarmu)))) && \
-		 !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) && !forcesight)
+		 !Blind_res && !forcesight)
 		/* ...the Eyes operate even when you really are blind
 		    or don't have any eyes */
 
@@ -201,6 +204,7 @@
 
 /* Hallucination is solely a timeout; its resistance is extrinsic */
 #define HHallucination		u.uprops[HALLUC].intrinsic
+#define HHalluc_resistance	u.uprops[HALLUC_RES].intrinsic
 #define EHalluc_resistance	u.uprops[HALLUC_RES].extrinsic
 #define Halluc_resistance	(EHalluc_resistance || \
 							 u.sealsActive&SEAL_HUGINN_MUNINN || \

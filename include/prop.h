@@ -40,8 +40,9 @@
 #define STUNNED						1 + FAST						
 #define CONFUSION					1 + STUNNED						
 #define SICK						1 + CONFUSION					
-#define BLINDED						1 + SICK						
-#define SLEEPING					1 + BLINDED						
+#define BLINDED						1 + SICK			
+#define BLIND_RES					1 + BLINDED
+#define SLEEPING					1 + BLIND_RES					
 #define WOUNDED_LEGS				1 + SLEEPING					
 #define STONED						1 + WOUNDED_LEGS				
 #define GOLDED						1 + STONED						
