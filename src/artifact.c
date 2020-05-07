@@ -7249,7 +7249,7 @@ arti_invoke(obj)
 			You("see the world in utter clarity.");
 			/* Clear blindness and hallucination, and provide temporary immunity.
 			* However, any new applications can still result in blindness/hallu the moment the protection wears off */
-			n = rnz(30);
+			n = (Race_if(PM_ORC) && !Upolyd) ? 40 : 30;
 			Blinded = 0;
 			HBlind_res += n;
 			HHalluc_resistance += n;
