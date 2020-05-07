@@ -132,6 +132,10 @@ register struct monst *mtmp;
 	for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj)
 		if(otmp->otyp == AMULET_OF_YENDOR ||
 			is_quest_artifact(otmp) ||
+			otmp->oartifact == ART_SILVER_KEY ||
+			(otmp->oartifact >= ART_FIRST_KEY_OF_LAW && otmp->oartifact <= ART_THIRD_KEY_OF_NEUTRALITY) ||
+			otmp->oartifact == ART_PEN_OF_THE_VOID ||
+			otmp->oartifact == ART_ANNULUS ||
 			otmp->otyp == BELL_OF_OPENING ||
 			otmp->otyp == CANDELABRUM_OF_INVOCATION ||
 			otmp->otyp == SPE_BOOK_OF_THE_DEAD) return(1);
