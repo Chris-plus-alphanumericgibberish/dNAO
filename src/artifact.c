@@ -7247,11 +7247,19 @@ arti_invoke(obj)
 		}break;
 		case ALLSIGHT:
 			You("see the world in utter clarity.");
+			/* Clear blindness and hallucination, and provide temporary immunity.
+			* However, any new applications can still result in blindness/hallu the moment the protection wears off */
 			n = rnz(30);
-			make_blinded((long)u.ucreamed, TRUE);
-			HSee_invisible += n;
+			Blinded = 0;
+			HBlind_res += n;
+			HHalluc_resistance += n;
+			(void)make_hallucinated(FALSE, FALSE, W_ART);	/* silent */
+			/* also, grant Xray vision and protection from shape changers */
 			HProtection_from_shape_changers += n;
 			HXray_vision += n;
+			/* we'll need a full recalc */
+			vision_full_recalc = 1;
+
 			/* todo: temporarily set insight and bring insight creatures into view, mwahaha */
 			break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
