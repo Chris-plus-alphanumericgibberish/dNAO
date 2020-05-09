@@ -2430,7 +2430,7 @@ not_special:
 					 "", 0L, DUST);
 					oep = engr_at(mtmp->mtrack[1].x, mtmp->mtrack[1].y);
 				}
-				if(oep && (oep->ward_type == DUST || oep->ward_type == ENGR_BLOOD)){
+				if (oep && (oep->ward_type == 0)){	/* cannot replace an existing ward here */
 					oep->ward_id = FOOTPRINT;
 					oep->halu_ward = 1;
 					oep->ward_type = ENGR_BLOOD;
