@@ -30,14 +30,14 @@
 #define EFire_resistance	u.uprops[FIRE_RES].extrinsic
 #define Fire_resistance		(HFire_resistance || EFire_resistance || \
 				 species_resists_fire(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_FIRE) ||\
-				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA || active_glyph(SMOLDERING_BULWARK) || u.sealsActive&SEAL_FAFNIR)
+				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA || active_glyph(SMOLDERING_BULWARK))
 #define InvFire_resistance	(EFire_resistance || Preservation || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
 
 #define HCold_resistance	u.uprops[COLD_RES].intrinsic
 #define ECold_resistance	u.uprops[COLD_RES].extrinsic
 #define NCold_resistance		((Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_COLD) ||\
 				 species_resists_cold(&youmonst) || active_glyph(FROSTED_BULWARK) || \
-				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA || u.sealsActive&SEAL_AMON)
+				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 #define Cold_resistance		(HCold_resistance || ECold_resistance || NCold_resistance)
 #define InvCold_resistance	(ECold_resistance || Preservation || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 
@@ -45,18 +45,18 @@
 #define ESleep_resistance	u.uprops[SLEEP_RES].extrinsic
 #define Sleep_resistance	(HSleep_resistance || ESleep_resistance || \
 				 (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_SLEE) || \
-				 species_resists_sleep(&youmonst) || u.sealsActive&SEAL_CHUPOCLOPS)
+				 species_resists_sleep(&youmonst))
 
 #define HDisint_resistance	u.uprops[DISINT_RES].intrinsic
 #define EDisint_resistance	u.uprops[DISINT_RES].extrinsic
 #define Disint_resistance	(HDisint_resistance || EDisint_resistance || \
-				 species_resists_disint(&youmonst) || u.sealsActive&SEAL_ORTHOS)
+				 species_resists_disint(&youmonst))
 
 #define HShock_resistance	u.uprops[SHOCK_RES].intrinsic
 #define EShock_resistance	u.uprops[SHOCK_RES].extrinsic
 #define Shock_resistance	(HShock_resistance || EShock_resistance || \
 				 species_resists_elec(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_ELEC) ||\
-				 ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || active_glyph(DISSIPATING_BULWARK) || u.sealsActive&SEAL_ASTAROTH)
+				 ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || active_glyph(DISSIPATING_BULWARK))
 #define InvShock_resistance	(EShock_resistance || Preservation || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (HShock_resistance&FROMRACE && Race_if(PM_ANDROID)))
 
 #define HPoison_resistance	u.uprops[POISON_RES].intrinsic
@@ -64,12 +64,12 @@
 #define Poison_resistance	(HPoison_resistance || EPoison_resistance || GoodHealth || \
 				 species_resists_poison(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_DRST) ||\
 				 (ward_at(u.ux,u.uy) == WINGS_OF_GARUDA && num_wards_at(u.ux, u.uy) > rn2(7))\
-				 || u.sealsActive&SEAL_YMIR || active_glyph(CLEAR_DEEPS))
+				 || active_glyph(CLEAR_DEEPS))
 
 #define HAcid_resistance	u.uprops[ACID_RES].intrinsic
 #define EAcid_resistance	u.uprops[ACID_RES].extrinsic
 #define Acid_resistance		(HAcid_resistance || EAcid_resistance || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_ACID) ||\
-							 species_resists_acid(&youmonst) || u.sealsActive&SEAL_ECHIDNA)
+							 species_resists_acid(&youmonst))
 #define InvAcid_resistance	(EAcid_resistance || Preservation)
 
 #define HDrain_resistance	u.uprops[DRAIN_RES].intrinsic
@@ -81,14 +81,11 @@
 						(mvitals[PM_HOUSECAT].mvflags & G_GENOD || mvitals[PM_HOUSECAT].died >= 120) && \
 						(mvitals[PM_LARGE_CAT].mvflags & G_GENOD || mvitals[PM_LARGE_CAT].died >= 120) \
 					) \
-				 ) || \
-				 u.sealsActive&SEAL_TENEBROUS\
-				)
+				 ))
 
 #define HAntimagic		u.uprops[ANTIMAGIC].intrinsic
 #define EAntimagic		u.uprops[ANTIMAGIC].extrinsic
 #define Antimagic		(EAntimagic || HAntimagic ||\
-						(u.sealsActive&SEAL_MOTHER) ||\
 						(u.usteed && u.usteed->misc_worn_check & W_SADDLE \
 						&& which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
 						Nullmagic || active_glyph(ARCANE_BULWARK) ||\
@@ -101,7 +98,7 @@
 #define HStone_resistance	u.uprops[STONE_RES].intrinsic
 #define EStone_resistance	u.uprops[STONE_RES].extrinsic
 #define Stone_resistance	(HStone_resistance || EStone_resistance || GoodHealth ||\
-							u.sealsActive&SEAL_MARIONETTE || species_resists_ston(&youmonst))
+							species_resists_ston(&youmonst))
 
 #define HSick_resistance	u.uprops[SICK_RES].intrinsic
 #define ESick_resistance	u.uprops[SICK_RES].extrinsic
@@ -111,7 +108,7 @@
 						(mvitals[PM_HOUSECAT].mvflags & G_GENOD || mvitals[PM_HOUSECAT].died >= 120) && \
 						(mvitals[PM_LARGE_CAT].mvflags & G_GENOD || mvitals[PM_LARGE_CAT].died >= 120) \
 					) \
-				 ) || u.sealsActive&SEAL_IRIS || species_resists_sickness(&youmonst))
+				 ) || species_resists_sickness(&youmonst))
 
 #define HStrangled		u.uprops[STRANGLED].intrinsic
 #define EStrangled		u.uprops[STRANGLED].extrinsic
@@ -207,7 +204,6 @@
 #define HHalluc_resistance	u.uprops[HALLUC_RES].intrinsic
 #define EHalluc_resistance	u.uprops[HALLUC_RES].extrinsic
 #define Halluc_resistance	(EHalluc_resistance || \
-							 u.sealsActive&SEAL_HUGINN_MUNINN || \
 				 (Upolyd && dmgtype(youmonst.data, AD_HALU)))
 #define Hallucination		(HHallucination && !Halluc_resistance)
 
@@ -264,7 +260,7 @@
 #define HExtramission		u.uprops[EXTRAMISSION].intrinsic
 #define EExtramission		u.uprops[EXTRAMISSION].extrinsic
 #define Extramission		(HExtramission || EExtramission || \
-				 extramission(youracedata) || u.sealsActive&SEAL_AMON)
+				 extramission(youracedata))
 
 #define HXray_vision	u.uprops[XRAY_VISION].intrinsic
 #define EXray_vision	u.uprops[XRAY_VISION].extrinsic
@@ -273,7 +269,7 @@
 #define HSee_invisible		u.uprops[SEE_INVIS].intrinsic
 #define ESee_invisible		u.uprops[SEE_INVIS].extrinsic
 #define See_invisible_old	(HSee_invisible || ESee_invisible || \
-				 species_perceives(youracedata) || u.sealsActive&SEAL_NABERIUS)
+				 species_perceives(youracedata))
 #define See_invisible(X,Y)	(ESee_invisible || (See_invisible_old && dist2(u.ux, u.uy, X, Y)<13))
 
 #define HEcholocation		u.uprops[ECHOLOCATION].intrinsic
@@ -284,7 +280,7 @@
 #define HInfravision		u.uprops[INFRAVISION].intrinsic
 #define EInfravision		u.uprops[INFRAVISION].extrinsic
 #define Infravision		(HInfravision || EInfravision || \
-				  infravision(youracedata) || u.sealsActive&SEAL_FAFNIR)
+				  infravision(youracedata))
 
 #define HBloodsense		u.uprops[BLOODSENSE].intrinsic
 #define EBloodsense		u.uprops[BLOODSENSE].extrinsic
@@ -313,40 +309,39 @@
 
 #define HDetect_monsters	u.uprops[DETECT_MONSTERS].intrinsic
 #define EDetect_monsters	u.uprops[DETECT_MONSTERS].extrinsic
-#define Detect_monsters		(HDetect_monsters || EDetect_monsters || u.specialSealsActive&SEAL_NUMINA)
+#define Detect_monsters		(HDetect_monsters || EDetect_monsters)
 
 #define HTelepat		u.uprops[TELEPAT].intrinsic
 #define ETelepat		u.uprops[TELEPAT].extrinsic
 #define Blind_telepat		(HTelepat || ETelepat || \
-				 species_is_telepathic(youracedata) || u.sealsActive&SEAL_DANTALION)
-#define Unblind_telepat		(ETelepat || u.sealsActive&SEAL_DANTALION)
+				 species_is_telepathic(youracedata))
+#define Unblind_telepat		(ETelepat)
 
 #define HWarning		u.uprops[WARNING].intrinsic
 #define EWarning		u.uprops[WARNING].extrinsic
-#define Warning			(HWarning || EWarning || u.sealsActive&SEAL_HUGINN_MUNINN)
+#define Warning			(HWarning || EWarning)
 
 /* Warning for a specific type of monster */
 #define HWarn_of_mon		u.uprops[WARN_OF_MON].intrinsic
 #define EWarn_of_mon		u.uprops[WARN_OF_MON].extrinsic
 #define Warn_of_mon		(HWarn_of_mon || EWarn_of_mon || (uwep && uwep->oclass == WEAPON_CLASS && (uwep)->obj_material == WOOD && (uwep)->otyp != MOON_AXE && \
-					(uwep->oward & WARD_THJOFASTAFUR)) || u.sealsActive&SEAL_PAIMON || u.sealsActive&SEAL_ANDREALPHUS || u.sealsActive&SEAL_ACERERAK)
+					(uwep->oward & WARD_THJOFASTAFUR)))
 
 #define HSearching		u.uprops[SEARCHING].intrinsic
 #define ESearching		u.uprops[SEARCHING].extrinsic
-#define Searching		(HSearching || ESearching || u.sealsActive&SEAL_OTIAX)
+#define Searching		(HSearching || ESearching)
 
 #define HClairvoyant		u.uprops[CLAIRVOYANT].intrinsic
 #define EClairvoyant		u.uprops[CLAIRVOYANT].extrinsic
 #define BClairvoyant		u.uprops[CLAIRVOYANT].blocked
-#define Clairvoyant		((HClairvoyant || EClairvoyant || u.sealsActive&SEAL_MOTHER || \
+#define Clairvoyant		((HClairvoyant || EClairvoyant || \
 							(uwep && uwep->oartifact == ART_HOLY_MOONLIGHT_SWORD && uwep->lamplit)\
 						) && !BClairvoyant)
 
 #define HWeldproof	u.uprops[WELDPROOF].intrinsic
 #define EWeldproof	u.uprops[WELDPROOF].extrinsic
 #define Weldproof	(HWeldproof || EWeldproof || \
-					 is_demon(youracedata) || is_undead(youracedata) || (u.ulycn >= LOW_PM) || (Race_if(PM_ANDROID)) ||\
-					 (u.specialSealsActive&SEAL_ACERERAK)\
+					 is_demon(youracedata) || is_undead(youracedata) || (u.ulycn >= LOW_PM) || (Race_if(PM_ANDROID))\
 					)
 
 /*** Appearance and behavior ***/
@@ -359,13 +354,11 @@
 						 pm_invisible(youracedata) || \
 						 (ward_at(u.ux,u.uy) == HAMSA \
 							&& num_wards_at(u.ux, u.uy) == 6 ) || \
-						  u.sealsActive&SEAL_SHIRO || \
 						  (flags.run != 0 && uwep && uwep->oartifact == ART_TOBIUME))
 #define Invis			(((HInvis || EInvis || \
 						 pm_invisible(youracedata) || \
 						 (ward_at(u.ux,u.uy) == HAMSA \
 							&& num_wards_at(u.ux, u.uy) == 6 ) || \
-						  u.sealsActive&SEAL_SHIRO || \
 						  (flags.run != 0 && uwep && uwep->oartifact == ART_TOBIUME)\
 						  ) && !BInvis) || Underwater)
 #define Invisible		(Invis && !See_invisible(u.ux,u.uy) && !Underwater)
@@ -374,17 +367,17 @@
 #define HDisplaced		u.uprops[DISPLACED].intrinsic
 #define EDisplaced		u.uprops[DISPLACED].extrinsic
 #define Displaced		(HDisplaced || EDisplaced || \
-						 species_displaces(youracedata) || u.sealsActive&SEAL_ORTHOS || u.uvaul_duration)
+						 species_displaces(youracedata) || u.uvaul_duration)
 
 #define HStealth		u.uprops[STEALTH].intrinsic
 #define EStealth		u.uprops[STEALTH].extrinsic
 #define BStealth		(u.uprops[STEALTH].blocked || (uwep && uwep->otyp == KHAKKHARA))
-#define Stealth			((HStealth || EStealth || Underwater || u.sealsActive&SEAL_SHIRO || \
+#define Stealth			((HStealth || EStealth || Underwater || \
 						 (flags.run != 0 && uwep && uwep->oartifact == ART_TOBIUME)) && !BStealth)
 
 #define HAggravate_monster	u.uprops[AGGRAVATE_MONSTER].intrinsic
 #define EAggravate_monster	u.uprops[AGGRAVATE_MONSTER].extrinsic
-#define Aggravate_monster	((HAggravate_monster || EAggravate_monster || u.specialSealsActive&SEAL_ALIGNMENT_THING) && !(uarmc && uarmc->oartifact == ART_MANTLE_OF_WRATH))
+#define Aggravate_monster	((HAggravate_monster || EAggravate_monster) && !(uarmc && uarmc->oartifact == ART_MANTLE_OF_WRATH))
 
 #define HConflict		u.uprops[CONFLICT].intrinsic
 #define EConflict		u.uprops[CONFLICT].extrinsic
@@ -394,7 +387,7 @@
 /*** Transportation ***/
 #define HJumping		u.uprops[JUMPING].intrinsic
 #define EJumping		u.uprops[JUMPING].extrinsic
-#define Jumping			(HJumping || EJumping || u.sealsActive&SEAL_OSE)
+#define Jumping			(HJumping || EJumping)
 
 #define HTeleportation		u.uprops[TELEPORT].intrinsic
 #define ETeleportation		u.uprops[TELEPORT].extrinsic
@@ -405,7 +398,6 @@
 #define HTeleport_control	u.uprops[TELEPORT_CONTROL].intrinsic
 #define ETeleport_control	u.uprops[TELEPORT_CONTROL].extrinsic
 #define Teleport_control	(HTeleport_control || ETeleport_control || \
-				 u.sealsActive&SEAL_ANDREALPHUS || \
 				 ward_at(u.ux,u.uy) == ANDREALPHUS_STABILIZE || \
 				 species_controls_teleports(youracedata))
 
@@ -430,7 +422,7 @@
 #endif
 	/* May touch surface; does not override any others */
 
-#define Wwalking		((HWwalking || EWwalking || u.sealsActive&SEAL_EURYNOME) && \
+#define Wwalking		((HWwalking || EWwalking) && \
 				 !is_3dwater(u.ux, u.uy))
 
 #define HWwalking	u.uprops[WWALKING].intrinsic
@@ -444,22 +436,18 @@
 #ifdef STEED
 # define Swimming	(((HSwimming || ESwimming || \
 				 species_swims(youracedata) || \
-				 Is_waterlevel(&u.uz) || \
-				 u.sealsActive&SEAL_ENKI) && !Punished && inv_weight() < 0) || \
+				 Is_waterlevel(&u.uz)) && !Punished && inv_weight() < 0) || \
 				 (u.usteed && mon_resistance(u.usteed,SWIMMING)))
 # define NoburdSwimming	(((HSwimming || ESwimming || \
 				 species_swims(youracedata) || \
-				 Is_waterlevel(&u.uz) || \
-				 u.sealsActive&SEAL_ENKI) && !Punished) || \
+				 Is_waterlevel(&u.uz)) && !Punished) || \
 				 (u.usteed && mon_resistance(u.usteed,SWIMMING)))
 #else
 # define Swimming	(((HSwimming || ESwimming || \
-				 species_swims(youracedata) || \
-				 u.sealsActive&SEAL_ENKI) \
+				 species_swims(youracedata)) \
 				 && !Punished && inv_weight() < 0) || Is_waterlevel(&u.uz))
 # define NoburdSwimming	(((HSwimming || ESwimming || \
-				 species_swims(youracedata) || \
-				 u.sealsActive&SEAL_ENKI) \
+				 species_swims(youracedata)) \
 				 && !Punished) || Is_waterlevel(&u.uz))
 #endif
 	/* Get wet, don't go under water unless if amphibious */
@@ -467,13 +455,11 @@
 #define HMagical_breathing	u.uprops[MAGICAL_BREATHING].intrinsic
 #define EMagical_breathing	u.uprops[MAGICAL_BREATHING].extrinsic
 #define Amphibious		(HMagical_breathing || EMagical_breathing || \
-				 u.sealsActive&SEAL_ASTAROTH || \
 				 (Swimming && u.divetimer > 0 && u.usubwater) || \
 				 amphibious(youracedata))
 	/* Get wet, may go under surface */
 
 #define Breathless		(HMagical_breathing || EMagical_breathing || \
-				 u.sealsActive&SEAL_ASTAROTH || \
 				 breathless(youracedata))
 
 //define Underwater		(u.uinwater)
@@ -497,11 +483,11 @@
 
 #define HHalf_spell_damage	u.uprops[HALF_SPDAM].intrinsic
 #define EHalf_spell_damage	u.uprops[HALF_SPDAM].extrinsic
-#define Half_spell_damage	(HHalf_spell_damage || EHalf_spell_damage || u.sealsActive&SEAL_BALAM)
+#define Half_spell_damage	(HHalf_spell_damage || EHalf_spell_damage)
 
 #define HHalf_physical_damage	u.uprops[HALF_PHDAM].intrinsic
 #define EHalf_physical_damage	u.uprops[HALF_PHDAM].extrinsic
-#define Half_physical_damage	(HHalf_physical_damage || EHalf_physical_damage || u.sealsActive&SEAL_EVE)
+#define Half_physical_damage	(HHalf_physical_damage || EHalf_physical_damage)
 
 #define HRegeneration		u.uprops[REGENERATION].intrinsic
 #define ERegeneration		u.uprops[REGENERATION].extrinsic
@@ -538,7 +524,7 @@
 
 #define HSpellboost		u.uprops[SPELLBOOST].intrinsic
 #define ESpellboost		u.uprops[SPELLBOOST].extrinsic
-#define Spellboost		(HSpellboost || ESpellboost || u.specialSealsActive&SEAL_NUDZIRATH)
+#define Spellboost		(HSpellboost || ESpellboost)
 
 #define HSterile	u.uprops[STERILE].intrinsic
 #define ESterile	u.uprops[STERILE].extrinsic
@@ -552,7 +538,6 @@
 
 #define EReflecting		u.uprops[REFLECTING].extrinsic
 #define Reflecting		(EReflecting || \
-						 (u.sealsActive&SEAL_EDEN) || \
 						 (uwep && is_lightsaber(uwep) && uwep->lamplit && ((u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))) || (u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))))) || \
 						 (u.usteed && u.usteed->misc_worn_check & W_SADDLE \
 						 && which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
@@ -560,11 +545,11 @@
 
 #define EFree_action		u.uprops[FREE_ACTION].extrinsic
 
-#define Free_action		(EFree_action || u.sealsActive&SEAL_EURYNOME) /* [Tom] */
+#define Free_action		(EFree_action) /* [Tom] */
 
-#define Fixed_abil		(u.uprops[FIXED_ABIL].extrinsic || u.specialSealsActive&SEAL_DAHLVER_NAR)	/* KMH */
+#define Fixed_abil		(u.uprops[FIXED_ABIL].extrinsic)	/* KMH */
 
-#define Lifesaved		(u.uprops[LIFESAVED].extrinsic || u.sealsActive&SEAL_JACK || (uleft && uleft->otyp == RIN_WISHES && uleft->spe > 0) || (uright && uright->otyp == RIN_WISHES && uright->spe > 0)) /*Note: the rings only give life saving when charged, so it can't be a normal property*/
+#define Lifesaved		(u.uprops[LIFESAVED].extrinsic || (uleft && uleft->otyp == RIN_WISHES && uleft->spe > 0) || (uright && uright->otyp == RIN_WISHES && uright->spe > 0)) /*Note: the rings only give life saving when charged, so it can't be a normal property*/
 
 #define Necrospellboost	(u.uprops[NECROSPELLS].extrinsic)
 

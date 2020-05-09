@@ -1200,7 +1200,7 @@ int
 dovampminion()
 {
 	struct obj *otmp;
-	struct obj *corpse;
+	struct obj *corpse = (struct obj *)0;
 	boolean onfloor = FALSE;
 	char qbuf[QBUFSZ];
 	char c;

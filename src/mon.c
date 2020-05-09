@@ -1279,13 +1279,13 @@ register struct monst *mtmp;
 {
 	boolean inpool, inlava, infountain, inshallow;
 
-	inpool = is_pool(mtmp->mx,mtmp->my, FALSE) &&
-	     ((!mon_resistance(mtmp,FLYING) && !mon_resistance(mtmp,LEVITATION)) || is_3dwater(mtmp->mx,mtmp->my));
+	inpool = is_3dwater(mtmp->mx, mtmp->my) || (is_pool(mtmp->mx, mtmp->my, FALSE) &&
+		(!mon_resistance(mtmp, WWALKING) && !mon_resistance(mtmp, FLYING) && !mon_resistance(mtmp, LEVITATION)));
 	inlava = is_lava(mtmp->mx,mtmp->my) &&
-	     !mon_resistance(mtmp,FLYING) && !mon_resistance(mtmp,LEVITATION);
+		(!mon_resistance(mtmp, WWALKING) && !mon_resistance(mtmp, FLYING) && !mon_resistance(mtmp, LEVITATION));
 	infountain = IS_FOUNTAIN(levl[mtmp->mx][mtmp->my].typ);
 	inshallow = IS_PUDDLE(levl[mtmp->mx][mtmp->my].typ) &&
-	     (!mon_resistance(mtmp,FLYING) && !mon_resistance(mtmp,LEVITATION));
+		(!mon_resistance(mtmp, WWALKING) && !mon_resistance(mtmp, FLYING) && !mon_resistance(mtmp, LEVITATION));
 
 #ifdef STEED
 	/* Flying and levitation keeps our steed out of the liquid */
@@ -1294,35 +1294,49 @@ register struct monst *mtmp;
 		return (0);
 #endif
 
+	/* Frost Treads freeze water and lava */
+	struct obj * otmp;
+	if ((otmp = which_armor(mtmp, W_ARMF)) &&
+		otmp->oartifact == ART_FROST_TREADS &&
+		!is_3dwater(mtmp->mx, mtmp->my) && !Is_waterlevel(&u.uz) &&
+		(is_pool(mtmp->mx, mtmp->my, TRUE) || is_lava(mtmp->mx, mtmp->my)))
+	{
+		zap_over_floor(mtmp->mx, mtmp->my, AD_COLD, WAND_CLASS, FALSE, NULL);
+		inpool = FALSE;
+		inlava = FALSE;
+		inshallow = FALSE;
+	}
+
     /* Gremlin multiplying won't go on forever since the hit points
      * keep going down, and when it gets to 1 hit point the clone
      * function will fail.
      */
-    if (mtmp->mtyp == PM_GREMLIN && (inpool || infountain || inshallow) && rn2(3)) {
-	if (split_mon(mtmp, (struct monst *)0))
-	    dryup(mtmp->mx, mtmp->my, FALSE);
-	if (inpool) water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
-	return (0);
-    } else if ((mtmp->mtyp == PM_IRON_GOLEM || mtmp->mtyp == PM_CHAIN_GOLEM) && ((inpool && !rn2(5)) || inshallow)) {
-	/* rusting requires oxygen and water, so it's faster for shallow water */
-	int dam = d(2,6);
-	if (cansee(mtmp->mx,mtmp->my))
-	    pline("%s rusts.", Monnam(mtmp));
-	mtmp->mhp -= dam;
-	if (mtmp->mhpmax > dam) mtmp->mhpmax -= dam;
-	if (mtmp->mhp < 1) {
-	    if (canseemon(mtmp)) pline("%s falls to pieces!", Monnam(mtmp));
-	    mondead(mtmp);
-	    if (mtmp->mhp < 1) {
-			if (mtmp->mtame && !canseemon(mtmp))
-				pline("May %s rust in peace.", mon_nam(mtmp));
-			return (1);
-		}
+	if (mtmp->mtyp == PM_GREMLIN && (inpool || infountain || inshallow) && rn2(3)) {
+		if (split_mon(mtmp, (struct monst *)0))
+			dryup(mtmp->mx, mtmp->my, FALSE);
+		if (inpool) water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
+		return (0);	/* gremlins in water */
 	}
-	if(inshallow) water_damage(which_armor(mtmp, W_ARMF), FALSE, FALSE, level.flags.lethe, mtmp);
-	else water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
-	return (0);
-    }
+	else if ((mtmp->mtyp == PM_IRON_GOLEM || mtmp->mtyp == PM_CHAIN_GOLEM) && ((inpool && !rn2(5)) || inshallow)) {
+		/* rusting requires oxygen and water, so it's faster for shallow water */
+		int dam = d(2, 6);
+		if (cansee(mtmp->mx, mtmp->my))
+			pline("%s rusts.", Monnam(mtmp));
+		mtmp->mhp -= dam;
+		if (mtmp->mhpmax > dam) mtmp->mhpmax -= dam;
+		if (mtmp->mhp < 1) {
+			if (canseemon(mtmp)) pline("%s falls to pieces!", Monnam(mtmp));
+			mondead(mtmp);
+			if (mtmp->mhp < 1) {
+				if (mtmp->mtame && !canseemon(mtmp))
+					pline("May %s rust in peace.", mon_nam(mtmp));
+				return (1);
+			}
+		}
+		if (inshallow) water_damage(which_armor(mtmp, W_ARMF), FALSE, FALSE, level.flags.lethe, mtmp);
+		else water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
+		return (0);	/* iron/chain golems in water */
+	}
 
     if (inlava) {
 	/*
@@ -3029,9 +3043,10 @@ mfndpos(mon, poss, info, flag)
 	wantpool = mdat->mlet == S_EEL;
 	wantpuddle = wantpool && mdat->msize == MZ_TINY;
 	cubewaterok = (mon_resistance(mon,SWIMMING) || breathless_mon(mon) || amphibious_mon(mon));
-	poolok = mon_resistance(mon,FLYING) || is_clinger(mdat) ||
-		 (mon_resistance(mon,SWIMMING) && !wantpool);
-	lavaok = mon_resistance(mon,FLYING) || is_clinger(mdat) || likes_lava(mdat);
+	poolok = mon_resistance(mon, WWALKING) || mon_resistance(mon, FLYING) || is_clinger(mdat)
+		|| (mon_resistance(mon,SWIMMING) && !wantpool);
+	lavaok = mon_resistance(mon,FLYING) || is_clinger(mdat) || likes_lava(mdat)
+		|| (mon_resistance(mon, WWALKING) && resists_fire(mon));
 	quantumlock = (is_weeping(mdat) && !u.uevent.invoked);
 	thrudoor = ((flag & (ALLOW_WALL|BUSTDOOR)) != 0L);
 	if (flag & ALLOW_DIG) {
@@ -3777,7 +3792,7 @@ struct monst *mtmp;
 		lifesavers |= LSVD_KAM;
 	if(mtmp->mtyp == PM_NITOCRIS)
 		lifesavers |= LSVD_NIT;
-	if (mtmp->mtyp == PM_BLESSED && rn2(3))
+	if (mtmp->mtyp == PM_BLESSED && !mtmp->mcan && rn2(3))
 		lifesavers |= LSVD_HLO;
 
 	/* some lifesavers do NOT work on stone/gold/glass-ing */

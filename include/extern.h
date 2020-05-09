@@ -2433,6 +2433,7 @@ E void FDECL(beg, (struct monst *));
 E void FDECL(m_command, (struct monst *));
 E int NDECL(dotalk);
 E int FDECL(dochat, (BOOLEAN_P, int, int, int));
+E int * FDECL(spirit_props, (int));
 E void FDECL(councilspirit, (int));
 E void FDECL(gnosisspirit, (int));
 E void NDECL(scatter_seals);
@@ -2626,7 +2627,7 @@ E void NDECL(write_HUP_file);
 
 E void NDECL(initrack);
 E void NDECL(settrack);
-E coord *FDECL(gettrack, (int,int));
+E coord *FDECL(gettrack, (int,int,int));
 
 /* ### trap.c ### */
 
@@ -2861,6 +2862,7 @@ E int NDECL(dosuspend);
 /* ### weapon.c ### */
 
 E int FDECL(hitval, (struct obj *,struct monst *));
+E int FDECL(attack_mask, (struct obj *, int, int));
 E int FDECL(dmgval_core, (struct weapon_dice *, boolean, struct obj *, int));
 E int FDECL(weapon_dmg_roll, (struct attack *, boolean));
 E int FDECL(dmgval, (struct obj *,struct monst *, int));

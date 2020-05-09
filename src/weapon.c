@@ -246,6 +246,59 @@ struct monst *mon;
 	return tmp;
 }
 
+/* returns the attack mask of something being used as a weapon 
+ * This would be for the purpose of checking vs resists_blunt, etc.
+ * 
+ */
+int
+attack_mask(obj, otyp, oartifact)
+struct obj * obj;
+int otyp;
+int oartifact;
+{
+	if (obj)
+	{
+		otyp = obj->otyp;
+		oartifact = obj->oartifact;
+	}
+
+	int attackmask = objects[otyp].oc_dir;
+
+	/* oc_dir is reused for wands (directionality) and spellbooks (school) -- these are all blunt weapons */
+	if (objects[otyp].oc_class == WAND_CLASS || objects[otyp].oc_class == SPBOOK_CLASS)
+		return WHACK;
+
+	/* catch special cases */
+	if (   oartifact == ART_YORSHKA_S_SPEAR
+		|| oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD
+		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
+		|| (obj && otyp == KAMEREL_VAJRA && !litsaber(obj))
+		){
+		attackmask |= WHACK;
+	}
+	if (   oartifact == ART_ROGUE_GEAR_SPIRITS
+		|| (obj && otyp == KAMEREL_VAJRA && !litsaber(obj))
+		){
+		attackmask |= PIERCE;
+	}
+	if (   oartifact == ART_LIECLEAVER
+		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
+		){
+		attackmask |= SLASH;
+	}
+	if ((obj && oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
+		|| oartifact == ART_FIRE_BRAND
+		|| oartifact == ART_FROST_BRAND
+		){
+		attackmask |= EXPLOSION;
+	}
+	/* if it's not any of the above, we're just smacking things with it */
+	if (!attackmask)
+		attackmask = WHACK;
+
+	return attackmask;
+}
+
 /* Historical note: The original versions of Hack used a range of damage
  * which was similar to, but not identical to the damage used in Advanced
  * Dungeons and Dragons.  I figured that since it was so close, I may as well

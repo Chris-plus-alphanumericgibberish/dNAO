@@ -741,12 +741,14 @@ const char * haluWard[] =  {
 	"a mockingjay", /* Hunger Games */
 	"a Sharuan Mindharp", /* Star Wars expanded universe */
 	"a winged blade of light", /* Jedi Order symbol */
+	"an inverted scarab beetle", /* Worm */
 	
 	/* webcomics */
 	"a Court symbol",	"a Forest symbol",	"the sign of the Wandering Eye", /* Gunnerkrigg Court */
 	"a winged tower", /* Girl Genius */
 		"a stylized trilobite",
 	"a setting (rising?) sun", /* Dresden Codak */
+	"a line splitting a circle", /* Kill Six Billion Demons */
 	
 	/* anime and manga */
 	"a Robotech Defense Force insignia", /*...Robotech*/
@@ -1690,12 +1692,14 @@ register int x,y;
 				}
 		  }
 		  else{//note: assumes that there can only be ONE halucinatory ward scribed.
-			if(ep->complete_wards) pline("There is %s %s", 
-										haluWard[ep->ward_id],
-										word);
-			if(ep->scuffed_wards) pline("It is scuffed.");
-			else if(ep->degraded_wards) pline("It is degraded.");
-			else if(ep->partial_wards) pline("Although only fragments are left.");
+			  if (ep->complete_wards + ep->scuffed_wards + ep->degraded_wards + ep->partial_wards) {
+				  pline("There is %s %s",
+					  haluWard[ep->ward_id],
+					  word);
+			  }
+			  if (ep->scuffed_wards) pline("It is scuffed.");
+			  else if (ep->degraded_wards) pline("It is degraded.");
+			  else if (ep->partial_wards) pline("Only fragments are left.");
 		  }
 		 }
 		 else{
@@ -4005,7 +4009,7 @@ long sealID;
 	if(sealID&SEAL_SPECIAL){
 		offset = sealID&~SEAL_SPECIAL;
 		for(j = 0; j < 32; j++)
-			if((sealID>>j) == 1L)
+			if((offset>>j) == 1L)
 				return j+QUEST_SPIRITS;
 	} else {
 		for(j = 0; j < 32; j++)
@@ -4024,12 +4028,12 @@ int floorID;
 	if(floorID == NUMINA)
 		return SEAL_SPECIAL|SEAL_NUMINA;
 	if(floorID < QUEST_SPIRITS){
-		i = floorID - QUEST_SPIRITS;
+		i = floorID - FIRST_SEAL;
 		sealID = 1L << i;
 	} else {
-		i = floorID - FIRST_SEAL;
+		i = floorID - QUEST_SPIRITS;
 		sealID |= SEAL_SPECIAL;
-		sealID |= 1L << (i - DAHLVER_NAR);
+		sealID |= 1L << i;
 	}
 	return sealID;
 }

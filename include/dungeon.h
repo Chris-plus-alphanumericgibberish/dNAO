@@ -12,7 +12,7 @@ typedef struct d_flags {	/* dungeon/level type flags */
 	Bitfield(rogue_like, 1); /* is this an old-fashioned presentation? */
 	Bitfield(align, 3);	/* dungeon alignment. */
 	Bitfield(raise, 3);	/* corpse resurection type (current max 8) */
-	Bitfield(unused, 1);	/* etc... */
+	Bitfield(mirror, 1);	/* has at least one mirror on the ground */
 } d_flags;
 
 typedef struct d_level {	/* basic dungeon level element */

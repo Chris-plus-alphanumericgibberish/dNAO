@@ -1081,7 +1081,7 @@ TOOL("holy symbol of the black mother", "tarnished triple goat-head",
 TOOL("magic marker", (char *)0, 1,   MZ_TINY, 0, 1, 1,  15,  2,  50, PLASTIC, CLR_RED),
 /* traps */
 TOOL("land mine",(char *)0,     1,  MZ_LARGE, 0, 0, 0,   0,300, 180, IRON, CLR_RED),
-TOOL("beartrap", (char *)0,     1,  MZ_LARGE, 0, 0, 0,   0,200,  60, IRON, HI_METAL),
+TOOL("beartrap", (char *)0,     1,  MZ_LARGE, 0, 0, 0,   0,100,  60, IRON, HI_METAL),
 /* instruments */
 /* some code in invent.c and obj.h requires wooden flute .. drum of earthquake to be
    consecutive, with the wooden flute first and drum of earthquake last */

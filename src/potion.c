@@ -3045,6 +3045,14 @@ dodip()
 			You("make a torch from your club and the oil.");
 			obj->otyp = TORCH;
 			obj->oclass = TOOL_CLASS;
+			obj->age = (long)rn1(500, 1000);
+			if (obj->oeroded || obj->oerodeproof || !is_flammable(obj)) {
+				obj->age /= (1 << max(obj->oeroded, 4 * (obj->oerodeproof || !is_flammable(obj))));
+				if (is_flammable(obj)) {
+					obj->oeroded = 0;
+					obj->oerodeproof = 0;
+				}
+			}
 			if(potion->dknown && !objects[potion->otyp].oc_name_known)
 				makeknown(potion->otyp);
 			goto poof;

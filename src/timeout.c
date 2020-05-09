@@ -372,6 +372,12 @@ boolean forced;
 					u.spirit[GPREM_SPIRIT] = 0;
 				}
 			}
+
+			/* remove properties given by spirit */
+			int * spiritprops = spirit_props(decode_sealID(spir));
+			for (i = 0; spiritprops[i] != NO_PROP; i++)
+				u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
+
 		} else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID){
 			uwep->ovar1 &= ~spir;
 			if(uwep->lamplit && !artifact_light(uwep)) end_burn(uwep, TRUE);
@@ -403,6 +409,10 @@ boolean forced;
 			u.spirit[OUTER_SPIRIT]=0;
 			u.spiritT[OUTER_SPIRIT]=0;
 		}
+		/* remove properties given by spirit */
+		int * spiritprops = spirit_props(decode_sealID(spir));
+		for (i = 0; spiritprops[i] != NO_PROP; i++)
+			u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
 	}
 	stop_occupation();
 	if(flags.run) nomul(0, NULL);
@@ -516,12 +526,22 @@ nh_timeout()
 	if(u.voidChime){
 		u.voidChime--;
 		if(!u.voidChime){
-			if(u.spiritTineA) u.sealsActive&=(~u.spiritTineA);
-				if(u.spiritTineA&wis_spirits) u.wisSpirits--;
-				if(u.spiritTineA&int_spirits) u.intSpirits--;
-			if(u.spiritTineB) u.sealsActive&=(~u.spiritTineB);
-				if(u.spiritTineB&wis_spirits) u.wisSpirits--;
-				if(u.spiritTineB&int_spirits) u.intSpirits--;
+			int i;
+			int * spiritprops;
+			if (u.spiritTineA) {
+				u.sealsActive &= (~u.spiritTineA);
+				if (u.spiritTineA&wis_spirits) u.wisSpirits--;
+				if (u.spiritTineA&int_spirits) u.intSpirits--;
+				for (i = 0, spiritprops = spirit_props(decode_sealID(u.spiritTineA)); spiritprops[i] != NO_PROP; i++)
+					u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
+			}
+			if (u.spiritTineB) {
+				u.sealsActive &= (~u.spiritTineB);
+				if (u.spiritTineB&wis_spirits) u.wisSpirits--;
+				if (u.spiritTineB&int_spirits) u.intSpirits--;
+				for (i = 0, spiritprops = spirit_props(decode_sealID(u.spiritTineB)); spiritprops[i] != NO_PROP; i++)
+					u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
+			}
 			if(uwep && uwep->oartifact==ART_PEN_OF_THE_VOID){
 				uwep->ovar1 = 0;
 				uwep->ovar1 |= u.spiritTineA;
@@ -1408,22 +1428,41 @@ long timeout;
 			obj->age = 0;
 			end_burn(obj, FALSE);
 			if (menorah) {
-			    obj->spe = 0;	/* no more candles */
-			} else if (Is_candle(obj) || obj->otyp == POT_OIL 
-				|| obj->otyp == SHADOWLANDER_S_TORCH || obj->otyp == TORCH
-				|| obj->otyp == SUNROD
-			) {
-			    /* get rid of candles and burning oil potions */
-			    obj_extract_self(obj);
-			    obfree(obj, (struct obj *)0);
-			    obj = (struct obj *) 0;
-//#ifdef FIREARMS
-		} else if (obj->otyp == STICK_OF_DYNAMITE) {
-			bomb_blow((genericptr_t) obj, timeout);
-			return;
-//#endif
+				obj->spe = 0;	/* no more candles */
 			}
-		} else {
+			else if (Is_candle(obj) || obj->otyp == POT_OIL
+				|| obj->otyp == SUNROD
+				) {
+				/* get rid of candles and burning oil potions */
+				obj_extract_self(obj);
+				obfree(obj, (struct obj *)0);
+				obj = (struct obj *) 0;
+				//#ifdef FIREARMS
+			}
+			else if (obj->otyp == SHADOWLANDER_S_TORCH || obj->otyp == TORCH) {
+				/* torches may become burnt clubs */
+				if (obj_resists(obj, 100, 10))
+				{
+					obj->otyp = CLUB;
+					obj->oclass = WEAPON_CLASS;
+					obj->age = monstermoves;
+					if (is_flammable(obj) && !obj->oerodeproof)
+						obj->oeroded = min(obj->oeroded + 1, 3);
+					fix_object(obj);
+				}
+				else {
+					obj_extract_self(obj);
+					obfree(obj, (struct obj *)0);
+					obj = (struct obj *) 0;
+				}
+			}
+			else if (obj->otyp == STICK_OF_DYNAMITE) {
+				bomb_blow((genericptr_t)obj, timeout);
+				return;
+				//#endif
+			}
+		}
+		else {
 			obj->age -= how_long;
 		    begin_burn(obj);
 	    }
@@ -1738,9 +1777,21 @@ long timeout;
 			}
 			end_burn(obj, FALSE);
 
-			obj_extract_self(obj);
-			obfree(obj, (struct obj *)0);
-			obj = (struct obj *) 0;
+			/* torches may become burnt clubs */
+			if (obj_resists(obj, 100, 10))
+			{
+				obj->otyp = CLUB;
+				obj->oclass = WEAPON_CLASS;
+				obj->age = monstermoves;
+				if (is_flammable(obj) && !obj->oerodeproof)
+					obj->oeroded = min(obj->oeroded + 1, 3);
+				fix_object(obj);
+			}
+			else {
+				obj_extract_self(obj);
+				obfree(obj, (struct obj *)0);
+				obj = (struct obj *) 0;
+			}
 		}
 		
 		if (obj && obj->age){
@@ -1867,9 +1918,21 @@ long timeout;
 			}
 			end_burn(obj, FALSE);
 
-			obj_extract_self(obj);
-			obfree(obj, (struct obj *)0);
-			obj = (struct obj *) 0;
+			/* torches may become burnt clubs */
+			if (obj_resists(obj, 100, 10))
+			{
+				obj->otyp = CLUB;
+				obj->oclass = WEAPON_CLASS;
+				obj->age = monstermoves;
+				if (is_flammable(obj) && !obj->oerodeproof)
+					obj->oeroded = min(obj->oeroded + 1, 3);
+				fix_object(obj);
+			}
+			else {
+				obj_extract_self(obj);
+				obfree(obj, (struct obj *)0);
+				obj = (struct obj *) 0;
+			}
 		}
 		
 		if (obj && obj->age){
