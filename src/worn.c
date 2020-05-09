@@ -46,17 +46,16 @@ const struct worn {
 		   has no significant effect on their use of w_blocks() */
 
 /* 
- * Returns a pointer to a TEMPORARY array of all the properties (from prop.h) an item has
- * This pointer should be used immediately and discarded, since calling this function again will modify the contents of the array
+ * Fills an int array propert_list with all the properties (from prop.h) an item has
  *
  * If called without an obj, uses otyp to give as much info as possible without knowing obj
  */
-int *
-item_property_list(obj, otyp)
+void
+get_item_property_list(property_list, obj, otyp)
+int * property_list;
 struct obj* obj;
 int otyp;
 {
-	static int property_list[LAST_PROP];	// the temporary list of properties
 	int cur_prop, i;
 	boolean got_prop;
 
@@ -189,9 +188,7 @@ int otyp;
 	}
 	// add a terminator to the array
 	property_list[i] = 0;
-
-	// return the list
-	return property_list;	
+	return;	
 }
 
 /* Updated to use the extrinsic and blocked fields. */
@@ -239,7 +236,8 @@ long mask;
 		    if (wp->w_mask & ~(W_SWAPWEP|W_QUIVER)) {
 			/* leave as "x = x <op> y", here and below, for broken
 			 * compilers */			
-			int * property_list = item_property_list(oobj, oobj->otyp);
+			int property_list[LAST_PROP];
+			get_item_property_list(property_list, oobj, oobj->otyp);
 			p = 0;
 			while (property_list[p] != 0)	{
 				u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic & ~wp->w_mask;
@@ -263,7 +261,8 @@ long mask;
 		    if (wp->w_mask & ~(W_SWAPWEP|W_QUIVER)) {
 			if (obj->oclass == WEAPON_CLASS || is_weptool(obj) ||
 					    mask != W_WEP) {
-				int * property_list = item_property_list(obj, obj->otyp);
+				int property_list[LAST_PROP];
+				get_item_property_list(property_list, obj, obj->otyp);
 				p = 0;
 				while (property_list[p] != 0)	{
 					u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic | wp->w_mask;
@@ -301,7 +300,8 @@ register struct obj *obj;
 	for(wp = worn; wp->w_mask; wp++)
 	    if(obj == *(wp->w_obj)) {
 		*(wp->w_obj) = 0;
-		int * property_list = item_property_list(obj, obj->otyp);
+		int property_list[LAST_PROP];
+		get_item_property_list(property_list, obj, obj->otyp);
 		p = 0;
 		while (property_list[p] != 0)	{
 			u.uprops[property_list[p]].extrinsic = u.uprops[property_list[p]].extrinsic & ~wp->w_mask;
@@ -459,10 +459,10 @@ struct monst *mon;
 int which;
 struct obj *ignored_obj;
 {
-	struct obj *otmp;			/* item in mon's inventory */
-	boolean got_prop = FALSE;	/* property to find */
-	int * tmp_property_list;	/* list of item/artifact properties */
-	int i;						/* loop counter */
+	struct obj *otmp;					/* item in mon's inventory */
+	boolean got_prop = FALSE;			/* property to find */
+	int tmp_property_list[LAST_PROP];	/* list of item/artifact properties */
+	int i;								/* loop counter */
 
 	for (otmp = mon->minvent; (otmp && !got_prop); otmp = otmp->nobj){
 		/* ignore one object in particular */
@@ -471,7 +471,7 @@ struct obj *ignored_obj;
 
 		/* worn items */
 		if (otmp->owornmask) {
-			tmp_property_list = item_property_list(otmp, otmp->otyp);
+			get_item_property_list(tmp_property_list, otmp, otmp->otyp);
 			for (i = 0; tmp_property_list[i]; i++)
 			{
 				if (tmp_property_list[i] == which)
@@ -480,7 +480,8 @@ struct obj *ignored_obj;
 		}
 		/* worn artifacts */
 		if (otmp->owornmask && otmp->oartifact){
-			tmp_property_list = art_property_list(otmp->oartifact, FALSE);
+			get_art_property_list(tmp_property_list, otmp->oartifact, FALSE);
+			//tmp_property_list = art_property_list(otmp->oartifact, FALSE);
 			for (i = 0; tmp_property_list[i]; i++)
 			{
 				if (tmp_property_list[i] == which)
@@ -489,7 +490,8 @@ struct obj *ignored_obj;
 		}
 		/* carried artifacts */
 		if (otmp->oartifact){
-			tmp_property_list = art_property_list(otmp->oartifact, TRUE);
+			get_art_property_list(tmp_property_list, otmp->oartifact, TRUE);
+			//tmp_property_list = art_property_list(otmp->oartifact, TRUE);
 			for (i = 0; tmp_property_list[i]; i++)
 			{
 				if (tmp_property_list[i] == which)
@@ -616,8 +618,8 @@ boolean on, silently;
 	int unseen = !canseemon(mon);
     int which;
     long all_worn = ~0L; /* clang lint */
-	
-	int * property_list = item_property_list(obj, obj->otyp);
+	int property_list[LAST_PROP];
+	get_item_property_list(property_list, obj, obj->otyp);
 	/* only turn on properties from this list if obj is worn */
 	if (!on || obj->owornmask) {
 		which = 0;
@@ -630,7 +632,7 @@ boolean on, silently;
 	{
 		/* only turn on properties from this list if obj is worn */
 		if (!on || obj->owornmask) {
-			property_list = art_property_list(obj->oartifact, FALSE);
+			get_art_property_list(property_list, obj->oartifact, FALSE);
 			which = 0;
 			while (property_list[which] != 0)	{
 				update_mon_intrinsic(mon, obj, property_list[which], on, silently);
@@ -638,7 +640,7 @@ boolean on, silently;
 			}
 		}
 		/* while-carried properties */
-		property_list = art_property_list(obj->oartifact, TRUE);
+		get_art_property_list(property_list, obj->oartifact, TRUE);
 		which = 0;
 		while (property_list[which] != 0)	{
 			update_mon_intrinsic(mon, obj, property_list[which], on, silently);

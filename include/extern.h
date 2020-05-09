@@ -78,7 +78,7 @@ E struct obj *FDECL(mk_minor_special, (struct obj *));
 E const char *FDECL(artifact_name, (const char *,short *));
 E boolean FDECL(exist_artifact, (int,const char *));
 E void FDECL(artifact_exists, (struct obj *,const char *,BOOLEAN_P));
-E int * FDECL(art_property_list, (int, BOOLEAN_P));
+E void FDECL(get_art_property_list, (int *, int, BOOLEAN_P));
 E int NDECL(nartifact_exist);
 E boolean FDECL(arti_gen_prop, (struct obj *, unsigned long));
 E boolean FDECL(arti_worn_prop, (struct obj *, unsigned long));
@@ -2975,7 +2975,7 @@ E int FDECL(count_wsegs, (struct monst *));
 E boolean FDECL(worm_known, (struct monst *));
 
 /* ### worn.c ### */
-E int *FDECL(item_property_list, (struct obj*, int));
+E void FDECL(get_item_property_list, (int *, struct obj*, int));
 E void FDECL(setworn, (struct obj *,long));
 E void FDECL(setnotworn, (struct obj *));
 E void FDECL(mon_set_minvis, (struct monst *));
