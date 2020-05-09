@@ -2487,30 +2487,47 @@ winid *datawin;
 		OBJPUTSTR(buf);
 	}
 
-		/* Object classes currently with no special messages here: amulets. */
+	/* Object classes currently with no special messages here: amulets. */
 	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill)) {
+		int mask = attack_mask(obj, otyp, oartifact);
 		boolean otyp_is_blaster = (otyp == HAND_BLASTER || otyp == ARM_BLASTER || otyp == MASS_SHADOW_PISTOL || otyp == CUTTING_LASER || otyp == RAYGUN);
 		boolean otyp_is_launcher = (((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp == ATLATL) && !otyp_is_blaster);
+
+		/* get damage type */
+		buf2[0] = '\0';
+		int i;
+		static const char * damagetypes[] = { "blunt", "piercing", "slashing", "energy" };
+		for (i = 0; i < 4; i++) {
+			if (mask & (1 << i)) {
+				if (eos(buf2) != buf2)
+					Strcat(buf2, "/");
+				Strcat(buf2, damagetypes[i]);
+			}
+		}
+		Strcat(buf2, " ");
+
 		if (oc.oc_skill >= 0) {
 			if (obj) {
-				Sprintf(buf, "%s-handed %s%s.", 
+				Sprintf(buf, "%s-handed %s%s%s.", 
 					((obj ? bimanual(obj, youmonst.data) : oc.oc_bimanual) ? "Two" : "One"),
+					(otyp_is_blaster || otyp_is_launcher) ? "" : buf2,
 					(otyp_is_blaster ? "blaster" : otyp_is_launcher ? "launcher" : "weapon"),
 					((obj && is_weptool(obj)) && !otyp_is_launcher ? "-tool" : "")
 					);
 			}
 			else {
-				Sprintf(buf, "%s-handed %s%s",
+				Sprintf(buf, "%s-handed %s%s%s",
 					(oc.oc_bimanual ? "Two" : "Single"),
+					(otyp_is_blaster || otyp_is_launcher) ? "" : buf2,
 					(otyp_is_launcher ? "launcher" : "weapon"),
 					((olet == TOOL_CLASS && oc.oc_skill) ? "-tool" : ""));
 			}
 		}
 		else if (oc.oc_skill <= -P_BOW && oc.oc_skill >= -P_CROSSBOW) {
-			Strcpy(buf, "Ammunition.");
+			Sprintf(buf, "%sammunition.", upstart(buf2));
 		}
 		else {
-			Strcpy(buf, "Thrown missile.");
+			Sprintf(buf, "Thrown %smissile.", buf2);
 		}
 		OBJPUTSTR(buf);
 

@@ -2862,6 +2862,7 @@ E int NDECL(dosuspend);
 /* ### weapon.c ### */
 
 E int FDECL(hitval, (struct obj *,struct monst *));
+E int FDECL(attack_mask, (struct obj *, int, int));
 E int FDECL(dmgval_core, (struct weapon_dice *, boolean, struct obj *, int));
 E int FDECL(weapon_dmg_roll, (struct attack *, boolean));
 E int FDECL(dmgval, (struct obj *,struct monst *, int));
