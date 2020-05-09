@@ -11153,6 +11153,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 	boolean resisted_weapon_attacks = FALSE;
 	boolean resisted_attack_type = FALSE;
+	int attackmask = 0;
 	static int warnedotyp = -1;
 	static struct permonst *warnedptr = 0;
 
@@ -12870,7 +12871,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	}
 	/* other creatures resist specific types of attacks */
 	else if (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack) {
-		int attackmask = 0;
+		/* attackmask has a larger scope so it can be referenced in the resist message later */
 		int resistmask = 0;
 
 		/* get attackmask */
@@ -13219,24 +13220,19 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 						pline("%s is resistant to attacks.",
 							Monnam(mdef));
 					}
-					else if (valid_weapon_attack || invalid_weapon_attack) {
-						pline("%s %s ineffective against %s.",
-							The(xname(weapon)),
-							(weapon->quan > 1L ? "are" : "is"),
-							mon_nam(mdef)
-							);
-					}
-					else if (unarmed_punch) {
-						pline("Your %s are ineffective against %s.",
-							makeplural(body_part(HAND)),
-							mon_nam(mdef)
-							);
-					}
-					else if (unarmed_kick) {
-						pline("Your %s is ineffective against %s.",
-							body_part(FOOT),
-							mon_nam(mdef)
-							);
+					else {
+						/* warn of one of your damage types */
+						/* not perfectly balanced; will favour one type (P>S, S>B, B>P) 2:1 if an attack has 2 types */
+						int i, j;
+						static const char * damagetypes[] = { "blunt force", "sharp point", "cutting edge" };
+						for (i = 0, j = rn2(3); i < 3; i++) {
+							if (attackmask & (1 << (i + j) % 3)) {
+								pline("The %s is ineffective against %s.",
+									damagetypes[(i + j) % 3],
+									mon_nam(mdef));
+								break;
+							}
+						}
 					}
 					warnedotyp = (weapon ? weapon->otyp : 0);
 					warnedptr = pd;
