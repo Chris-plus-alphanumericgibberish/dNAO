@@ -6365,7 +6365,7 @@ arti_invoke(obj)
 					case COMMAND_WHIP:
 						uwep->otyp = BULLWHIP;
 						if (uwep->oartifact == ART_XIUHCOATL)
-							uwep->obj_material = LEATHER;
+							uwep->obj_material = artilist[uwep->oartifact].material;
 					break;
 					case COMMAND_ATLATL:
 						uwep->otyp = ATLATL;

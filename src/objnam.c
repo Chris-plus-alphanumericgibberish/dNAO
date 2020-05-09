@@ -1000,6 +1000,8 @@ boolean adjective;
 		/* for some reason, this is dragonhide? */
 		if (obj->otyp == LEO_NEMAEUS_HIDE)
 			return "lionhide";
+		if (obj->oartifact && obj->oartifact == ART_XIUHCOATL)
+			return "serpenthide";
 		/* hard object made of dragonhide (or described as being dragon-bone) -> bone or tooth */
 		else if ((objects[obj->otyp].oc_material > LEATHER && objects[obj->otyp].oc_material != DRAGON_HIDE)
 			|| ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && !strncmp(s, "dragonbone", 10))

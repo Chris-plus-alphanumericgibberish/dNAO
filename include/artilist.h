@@ -445,7 +445,7 @@ A("The Singing Sword",	LONG_SWORD,						"softly singing %s",
 	),
 
 /*Needs encyc entry*/
-A("Xiuhcoatl",			BULLWHIP,							"turquoise scaled %s",
+A("Xiuhcoatl",			BULLWHIP,							(const char *)0,
 	4000L, DRAGON_HIDE, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
