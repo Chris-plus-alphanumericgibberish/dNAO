@@ -6305,8 +6305,23 @@ arti_invoke(obj)
 		break;
 		case LORDLY:
 			if(uwep && uwep == obj){
-				//struct obj *otmp;
-				int lordlydictum = dolordsmenu("What is your command, my Lord?", obj);
+				
+				int lordlydictum;
+				
+				if (obj->oartifact == ART_ROD_OF_LORDLY_MIGHT ||
+						obj->oartifact == ART_ROD_OF_THE_ELVISH_LORDS ||
+						obj->oartifact == ART_SCEPTRE_OF_LOLTH){
+					
+					if (flags.female)
+						lordlydictum = dolordsmenu("What is your command, my Lady?", obj);
+					else
+						lordlydictum = dolordsmenu("What is your command, my Lord?", obj);
+				
+				} else {
+					lordlydictum = dolordsmenu("What is your command?", obj);
+				}
+				
+				
 				switch(lordlydictum){
 					case 0:
 					break;
