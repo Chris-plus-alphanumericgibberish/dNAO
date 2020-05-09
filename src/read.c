@@ -246,7 +246,7 @@ doread()
 				return 0;
 			} else {
 				int i;
-				You("read the forbidden secrets of time and decay!");
+				You("read the dark secrets inscribed on the staff.");
 				for (i = 0; i < MAXSPELL; i++)  {
 					if (spellid(i) == SPE_DRAIN_LIFE)  {
 						if (spellknow(i) <= 1000) {
