@@ -1141,6 +1141,17 @@ A("Hellrider's Saddle",				SADDLE,					(const char *)0,
 	PROP0(), NOFLAG,
 	INVIS, (ARTI_PLUSSEV)
 	),
+
+/*Needs encyc entry*/
+A("The Wallet of Perseus",			BAG_OF_HOLDING,			(const char *)0,
+	10000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_NOGEN),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROP0(), NOFLAG,
+	PROP0(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
 /*
  *	The artifacts for the quest dungeon, all self-willed.
  */
