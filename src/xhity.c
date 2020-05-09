@@ -11378,23 +11378,35 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (youagr && is_lightsaber(weapon) && litsaber(weapon) && melee)
 				ulightsaberhit = TRUE;
 		}
-		else
-			invalid_weapon_attack = TRUE;
+		else {
+			/* catch non-standard weapons here, rather than putting an || in the above if() */
+
+			/* beartraps are real attacks */
+			if (trap && melee && weapon)
+				valid_weapon_attack = TRUE;
+			else
+				invalid_weapon_attack = TRUE;
+		}
 	}
 	else {
-		if (/* being made with an attack action */
+		/* unarmed punches are made with an attack action */
+		if (
 			(weapon_aatyp(attk->aatyp)) &&
 			/* not thrown (how could this happen?) */
 			melee)
 			unarmed_punch = TRUE;
-		else if (attk->aatyp == AT_KICK && melee)	/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
+		/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
+		else if (attk->aatyp == AT_KICK && melee)
 			unarmed_kick = TRUE;
+		/* mercurial blades aren't spiritual rapiers */
 		else if (attk->adtyp == AD_MERC && melee)
 			fake_valid_weapon_attack = TRUE;
+		/* monsters' "spiritual rapier" is a fake melee weapon */
 		else if (attk->aatyp == AT_SRPR && melee){
 			natural_strike = TRUE;
 			fake_valid_weapon_attack = TRUE;
 		}
+		/* standard monster attacks */
 		else
 			natural_strike = TRUE;
 	}

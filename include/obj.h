@@ -545,12 +545,13 @@ struct weapon_dice {
 //#else
 //#define is_unpoisonable_firearm_ammo(otmp)	0
 //#endif
-#define is_poisonable(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
+#define is_poisonable(otmp)	(((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			!is_launcher(otmp) &&\
 			!is_lightsaber(otmp) &&\
 			!is_unpoisonable_firearm_ammo(otmp) &&\
 			objects[otmp->otyp].oc_dir &&\
-			objects[otmp->otyp].oc_dir != WHACK)
+			objects[otmp->otyp].oc_dir != WHACK)\
+			|| otmp->otyp == BEARTRAP)
 #define uslinging()	(uwep && objects[uwep->otyp].oc_skill == P_SLING)
 #define is_bludgeon(otmp)	(otmp->oclass == SPBOOK_CLASS || \
 			otmp->oclass == WAND_CLASS || \

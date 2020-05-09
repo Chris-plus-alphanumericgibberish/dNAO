@@ -915,8 +915,8 @@ unsigned trflags;
 		u.utraptype = TT_BEARTRAP;
 #ifdef STEED
 		if (u.usteed) {
-			pline("%s bear trap closes on %s %s!",
-				A_Your[trap->madeby_u], s_suffix(mon_nam(u.usteed)),
+			pline("%s %s closes on %s %s!",
+				A_Your[trap->madeby_u], xname(trap->ammo), s_suffix(mon_nam(u.usteed)),
 				mbodypart(u.usteed, FOOT));
 
 			hmon2point0((struct monst *)0, u.usteed, (struct attack *)0, (struct attack *)0, trap->ammo, trap,
@@ -928,8 +928,8 @@ unsigned trflags;
 		    long side = rn2(3) ? LEFT_SIDE : RIGHT_SIDE;
 			static int jboots5 = 0;
 			if (!jboots5) jboots5 = find_jboots();
-		    pline("%s bear trap closes on your %s!",
-			    A_Your[trap->madeby_u], body_part(FOOT));
+		    pline("%s %s closes on your %s!",
+				A_Your[trap->madeby_u], xname(trap->ammo), body_part(FOOT));
 
 			hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, trap->ammo, trap,
 				HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0);
@@ -2051,8 +2051,8 @@ struct monst *mtmp;
 				!is_whirly(mptr) && !unsolid(mptr)) {
 			    mtmp->mtrapped = 1;
 			    if(in_sight) {
-				pline("%s is caught in %s bear trap!",
-				      Monnam(mtmp), a_your[trap->madeby_u]);
+				pline("%s is caught in %s %s!",
+				      Monnam(mtmp), a_your[trap->madeby_u], xname(trap->ammo));
 				seetrap(trap);
 			    } else {
 				if((mptr->mtyp == PM_OWLBEAR
