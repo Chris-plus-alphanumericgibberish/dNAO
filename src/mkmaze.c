@@ -1574,6 +1574,9 @@ int x,y,depth;
 #endif
 		move(&x,&y,dir);
 		walkfrom(x,y,depth+1);
+		/* move x and y back to our original spot */
+		move(&x, &y, (dir + 2) % 4);
+		move(&x, &y, (dir + 2) % 4);
 	}
 }
 #endif /* MICRO */
