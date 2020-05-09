@@ -3219,9 +3219,12 @@ winid *datawin;
 	} propertynames[]; /* located in timeout.c */
 	int i;
 
-	int * properties_item = item_property_list(obj, otyp);
-	int * properties_art = art_property_list(oartifact, FALSE);
-	int * properties_art_carried = art_property_list(oartifact, TRUE);
+	int properties_item[LAST_PROP];
+	get_item_property_list(properties_item, obj, otyp);
+	int properties_art[LAST_PROP];
+	get_art_property_list(properties_art, oartifact, FALSE);
+	int properties_art_carried[LAST_PROP];
+	get_art_property_list(properties_art_carried, oartifact, TRUE);
 
 	for (i = 0; propertynames[i].prop_name; i++) {
 		boolean got_prop = FALSE, while_carried = FALSE;

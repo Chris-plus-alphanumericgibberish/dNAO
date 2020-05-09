@@ -2224,15 +2224,17 @@ boolean allow_lethal;
 			if (!cnt)
 				continue;
 			/* print message */
-			if (cnt == quan || quan == 1)	mult = "";
-			else if (cnt > 1)				mult = "Some of ";
-			else							mult = "One of ";
-			pline("%s%s %s %s!",
-				mult,
-				(youdef) ? ((mult[0] != '\0') ? "your" : "Your") : ((mult[0] != '\0') ? s_suffix(mon_nam(mtmp)) : s_suffix(Monnam(mtmp))),
-				xname(obj),
-				(cnt > 1L) ? destroy_strings[dindx * 3 + 1]
-				: destroy_strings[dindx * 3]);
+			if (vis) {
+				if (cnt == quan || quan == 1)	mult = "";
+				else if (cnt > 1)				mult = "Some of ";
+				else							mult = "One of ";
+				pline("%s%s %s %s!",
+					mult,
+					(youdef) ? ((mult[0] != '\0') ? "your" : "Your") : ((mult[0] != '\0') ? s_suffix(mon_nam(mtmp)) : s_suffix(Monnam(mtmp))),
+					xname(obj),
+					(cnt > 1L) ? destroy_strings[dindx * 3 + 1]
+					: destroy_strings[dindx * 3]);
+			}
 
 			/* potion vapors */
 			if (osym == POTION_CLASS && dmgtyp != AD_COLD) {
