@@ -1208,7 +1208,7 @@ long wp_mask;
 			*/
 			(void)make_hallucinated((long)!on, restoring ? FALSE : TRUE, wp_mask);
 			break;
-		/* needs vision update*/
+		/* needs full vision update*/
 		case XRAY_VISION:
 			if (otmp->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && !Race_if(PM_DWARF))
 				break;	/* do not modify xray vision */
@@ -1216,16 +1216,9 @@ long wp_mask;
 			if (on) *mask |= wp_mask;
 			else *mask &= ~wp_mask;
 
-			if (Xray_vision) {
-				u.xray_range = max(3, u.xray_range);
-			}
-			else {
-				/* as it turns out, this currently does not interfere with orthos, because orthos is hacked in */
-				u.xray_range = -1;
-			}
 			vision_full_recalc = 1;
 			break;
-		/* needs vision update */
+		/* needs monster vision update */
 		case WARNING:
 		case TELEPAT:
 			if (on) *mask |= wp_mask;
@@ -3866,6 +3859,40 @@ boolean * messaged;
 			}
 		}
 	} 
+	/* while Plague is invoked, lethal-filth arrows cause victims to virulently explode.
+	 * Not you, though. You just die. It's simpler that way.
+	 * Slightly different from actual Vorpal; the dieroll is hacked in xhity to ==1 if and only if we have lethal filth. */
+	if (oartifact == ART_PLAGUE && (monstermoves < otmp->ovar1) && (dieroll == 1) && !youdef) {
+		int mx, my;
+		if (vis&VIS_MAGR && vis&VIS_MDEF) {
+			pline_The("tainted %s strikes true!", xname(msgr));
+		}
+		if (vis&VIS_MDEF) {
+			pline("%s %s bubbles, and %s explodes!",
+				s_suffix(Monnam(mdef)),
+				mbodypart(mdef, BODY_SKIN),
+				mon_nam(mdef)
+				);
+			*messaged = TRUE;
+		}
+		/* we want to avoid catching mdef in this explosion -- kludge time */
+		/* note: long worms still get caught in the explosion, because of course they do, so don't kludge at all to be on the safe side */
+		if (!is_longworm(mdef->data)) {
+			mx = x(mdef);
+			my = y(mdef);
+			level.monsters[mx][my] = (struct monst *)0;
+		}
+
+		killer = "virulent explosion";
+		explode(mx, my, AD_DISE, MON_EXPLODE, d(6, 6), EXPL_NOXIOUS,
+			((mdef->data->msize + 3) / 4));	/* tiny -> R0; gigantic -> R2; others -> R1 */
+
+		if (!is_longworm(mdef->data)) {
+			level.monsters[mx][my] = mdef;
+		}
+
+		return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef)); /* instakill */
+	}
 
 	/* vorpal weapons */
 	if (arti_attack_prop(otmp, ARTA_VORPAL) || (oproperties&OPROP_VORPW)) {
@@ -7250,6 +7277,39 @@ arti_invoke(obj)
 			}
 			return 1;
 		}break;
+		case ALLSIGHT:
+			You("see the world in utter clarity.");
+			/* Clear blindness and hallucination, and provide temporary immunity.
+			* However, any new applications can still result in blindness/hallu the moment the protection wears off */
+			n = (Race_if(PM_ORC) && !Upolyd) ? 40 : 30;
+			Blinded = 0;
+			HBlind_res += n;
+			HHalluc_resistance += n;
+			(void)make_hallucinated(FALSE, FALSE, W_ART);	/* silent */
+			/* also, grant Xray vision and protection from shape changers */
+			HProtection_from_shape_changers += n;
+			HXray_vision += n;
+			/* we'll need a full recalc */
+			vision_full_recalc = 1;
+
+			/* todo: temporarily set insight and bring insight creatures into view, mwahaha */
+			break;
+		case FILTH_ARROWS:
+			if ((!uwep && uwep == obj)){
+				You_feel("that you should be wielding %s.", the(xname(obj)));;
+				obj->age = monstermoves;
+				return(0);
+			}
+			/* message */
+			if (flags.soundok) {
+				pline("%s keens quietly.", The(xname(obj)));
+			}
+			else {
+				pline("%s vibrates softly.", The(xname(obj)));
+			}
+			/* if time < ovar1, arrows will be filthed (done in xhity.c) */
+			obj->ovar1 = monstermoves + 13;
+			break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!

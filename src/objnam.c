@@ -3018,6 +3018,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-8, "Longinus") || 	/* spear */
 			   !BSTRCMPI(bp, p-14, "Twelve Mirrors") || 	/* staff */
 			   !BSTRCMPI(bp, p-13, "Water Flowers") || 	/* boots */
+			   !BSTRCMPI(bp, p-12, "Frost Treads") || 	/* boots */
 			   !BSTRCMPI(bp, p-14, "Dwarvish Lords") || /* axe */
 			   !BSTRCMPI(bp, p-12, "Elvish Lords") || /* mace */
 			   !BSTRCMPI(bp, p-11, "Seven Parts") || /* spear */

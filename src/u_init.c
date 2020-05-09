@@ -2028,11 +2028,8 @@ u_init()
 	(void) time(&u.ubirthday);
 #endif
 
-	/*
-	 *  For now, everyone starts out with their xray range disabled.
-	 */
+	/* set nvrange */
 	u.nv_range   =  urace.nv_range;
-	u.xray_range = -1;
 
 
 	/*** Role-specific initializations ***/

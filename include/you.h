@@ -222,9 +222,6 @@ struct Race {
 #define NORMALNIGHTVIS	1
 #define NIGHTVISION2	2
 #define NIGHTVISION3	3
-#if 0	/* DEFERRED */
-	int   xray_range;	/* X-ray vision range */
-#endif
 
 	/*** Properties in variable-length arrays ***/
 	/* intrinsics (see attrib.c) */
@@ -338,9 +335,8 @@ struct you {
 #define SICK_NONVOMITABLE 0x02
 #define SICK_ALL 0x03
 
-	/* These ranges can never be more than MAX_RANGE (vision.h). */
+	/* This can never be more than MAX_RANGE (vision.h). */
 	int nv_range;		/* current night vision range */
-	int xray_range;		/* current xray vision range */
 
 	/*
 	 * These variables are valid globally only when punished and blind.

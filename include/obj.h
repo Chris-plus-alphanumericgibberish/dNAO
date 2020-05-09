@@ -287,6 +287,7 @@ struct obj {
 #define FULL_MOON	 	4
 
 	/* Songs that the Singing Sword has heard */
+	/* Last-invoked time for Plague's filthed arrows */
 	/* Spirits bound into the Pen of the Void */
 	/* The ema of damage taken for gloves of the berserker */
 	/* Life/Death for the scalpel of life and death */
@@ -294,6 +295,7 @@ struct obj {
 	/* Misc data for the artifact spellbooks */
 #define obj_art_uses_ovar1(otmp) (\
 	   (otmp)->oartifact == ART_SINGING_SWORD \
+	|| (otmp)->oartifact == ART_PLAGUE \
 	|| (otmp)->oartifact == ART_PEN_OF_THE_VOID \
 	|| (otmp)->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER \
 	|| (otmp)->oartifact == ART_SCALPEL_OF_LIFE_AND_DEATH \
@@ -543,12 +545,13 @@ struct weapon_dice {
 //#else
 //#define is_unpoisonable_firearm_ammo(otmp)	0
 //#endif
-#define is_poisonable(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
+#define is_poisonable(otmp)	(((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			!is_launcher(otmp) &&\
 			!is_lightsaber(otmp) &&\
 			!is_unpoisonable_firearm_ammo(otmp) &&\
 			objects[otmp->otyp].oc_dir &&\
-			objects[otmp->otyp].oc_dir != WHACK)
+			objects[otmp->otyp].oc_dir != WHACK)\
+			|| otmp->otyp == BEARTRAP)
 #define uslinging()	(uwep && objects[uwep->otyp].oc_skill == P_SLING)
 #define is_bludgeon(otmp)	(otmp->oclass == SPBOOK_CLASS || \
 			otmp->oclass == WAND_CLASS || \

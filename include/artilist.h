@@ -901,6 +901,18 @@ A("Yoichi no yumi",		YUMI,							(const char *)0,
 	),
 
 /*Needs encyc entry*/
+/* all arrows fired from it are treated as poisoned (or filthed for a short period after invoking) */
+A("Plague",				BOW,							(const char *)0,
+	4000L, BONE, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
+	NO_MONS(),
+	ATTK(AD_DRST, 5, 7), NOFLAG,
+	PROP2(POISON_RES, SICK_RES), NOFLAG,
+	PROP0(), NOFLAG,
+	FILTH_ARROWS, NOFLAG
+	),
+
+/*Needs encyc entry*/
 /* die size set to 1d8 in weapon.c */
 A("The Fluorite Octahedron",		BLUE_FLUORITE,		(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
@@ -999,9 +1011,9 @@ A("The Shield of the All-Seeing",	ORCISH_SHIELD,		(const char *)0,
 	A_NONE, NON_PM, PM_ORC, TIER_D, NOFLAG,
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, MA_ELF /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
-	PROP3(SEARCHING, WARN_OF_MON, FIRE_RES), (ARTP_SEEK),
+	PROP4(SEARCHING, WARN_OF_MON, FIRE_RES, SEE_INVIS), (ARTP_SEEK),
 	PROP0(), NOFLAG,
-	PROT_FROM_SHAPE_CHANGERS, (ARTI_PLUSSEV)	/* needs message for invoke */
+	ALLSIGHT, (ARTI_PLUSSEV)	/* needs message for invoke */
 	),
 
 /*Needs encyc entry*/
@@ -1035,6 +1047,18 @@ A("Water Flowers",					WATER_WALKING_BOOTS,(const char *)0,
 	PROP1(DISPLACED), NOFLAG,
 	PROP0(), NOFLAG,
 	TELEPORT_SHOES, (ARTI_PLUSSEV)
+	),
+
+/*Needs encyc entry*/
+/* freezes water/lava underfoot */
+A("Frost Treads",					WATER_WALKING_BOOTS,(const char *)0,
+	1500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_D, NOFLAG,
+	NO_MONS(),
+	ATTK(AD_COLD, 1, 8), NOFLAG,
+	PROP1(COLD_RES), NOFLAG,
+	PROP0(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
 /*Needs encyc entry*/
@@ -1116,6 +1140,17 @@ A("Hellrider's Saddle",				SADDLE,					(const char *)0,
 	PROP2(ANTIMAGIC, REFLECTING), NOFLAG,
 	PROP0(), NOFLAG,
 	INVIS, (ARTI_PLUSSEV)
+	),
+
+/*Needs encyc entry*/
+A("The Wallet of Perseus",			BAG_OF_HOLDING,			(const char *)0,
+	10000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_NOGEN),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROP0(), NOFLAG,
+	PROP0(), NOFLAG,
+	NOINVOKE, NOFLAG
 	),
 /*
  *	The artifacts for the quest dungeon, all self-willed.
@@ -1864,7 +1899,7 @@ A("The Eyes of the Overworld",		LENSES,				(const char *)0,
 	A_NEUTRAL, PM_MONK, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
-	PROP1(XRAY_VISION), NOFLAG,
+	PROP2(BLIND_RES, XRAY_VISION), NOFLAG,
 	PROP1(ANTIMAGIC), NOFLAG,
 	ENLIGHTENING, NOFLAG
 	),

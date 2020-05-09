@@ -11155,6 +11155,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 	boolean resisted_weapon_attacks = FALSE;
 	boolean resisted_attack_type = FALSE;
+	int attackmask = 0;
 	static int warnedotyp = -1;
 	static struct permonst *warnedptr = 0;
 
@@ -11379,23 +11380,35 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (youagr && is_lightsaber(weapon) && litsaber(weapon) && melee)
 				ulightsaberhit = TRUE;
 		}
-		else
-			invalid_weapon_attack = TRUE;
+		else {
+			/* catch non-standard weapons here, rather than putting an || in the above if() */
+
+			/* beartraps are real attacks */
+			if (trap && melee && weapon)
+				valid_weapon_attack = TRUE;
+			else
+				invalid_weapon_attack = TRUE;
+		}
 	}
 	else {
-		if (/* being made with an attack action */
+		/* unarmed punches are made with an attack action */
+		if (
 			(weapon_aatyp(attk->aatyp)) &&
 			/* not thrown (how could this happen?) */
 			melee)
 			unarmed_punch = TRUE;
-		else if (attk->aatyp == AT_KICK && melee)	/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
+		/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
+		else if (attk->aatyp == AT_KICK && melee)
 			unarmed_kick = TRUE;
+		/* mercurial blades aren't spiritual rapiers */
 		else if (attk->adtyp == AD_MERC && melee)
 			fake_valid_weapon_attack = TRUE;
+		/* monsters' "spiritual rapier" is a fake melee weapon */
 		else if (attk->aatyp == AT_SRPR && melee){
 			natural_strike = TRUE;
 			fake_valid_weapon_attack = TRUE;
 		}
+		/* standard monster attacks */
 		else
 			natural_strike = TRUE;
 	}
@@ -11831,6 +11844,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			artipoisons |= OPOISON_FILTH;
 		if (poisonedobj->oartifact == ART_MOONBEAM)
 			artipoisons |= OPOISON_SLEEP;
+		/* Plague adds poisons to its launched ammo */
+		if (launcher && launcher->oartifact == ART_PLAGUE) {
+			if (monstermoves < launcher->ovar1)
+				artipoisons |= OPOISON_FILTH;
+			else
+				artipoisons |= OPOISON_BASIC;
+		}
 		poisons |= artipoisons;
 
 		/* Penalties for you using a poisoned weapon */
@@ -12806,6 +12826,9 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp) {
+				/* kludge for Plague: artifact_hit() needs to know if lethal filth occured */
+				if (otmp->oartifact == ART_PLAGUE)
+					dieroll = (poisons_majoreff&OPOISON_FILTH) ? 1 : (dieroll == 1) ? 2 : dieroll;
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
@@ -12872,42 +12895,12 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	}
 	/* other creatures resist specific types of attacks */
 	else if (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack) {
-		int attackmask = 0;
+		/* attackmask has a larger scope so it can be referenced in the resist message later */
 		int resistmask = 0;
 
 		/* get attackmask */
 		if (weapon && (valid_weapon_attack || invalid_weapon_attack)) {
-			otmp = weapon;
-			if (is_bludgeon(otmp)
-				|| otmp->oartifact == ART_YORSHKA_S_SPEAR
-				|| otmp->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD
-				|| otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
-				|| (otmp->otyp == KAMEREL_VAJRA && !litsaber(otmp))
-				){
-				attackmask |= WHACK;
-			}
-			if (is_stabbing(otmp)
-				|| otmp->oartifact == ART_ROGUE_GEAR_SPIRITS
-				|| (otmp->otyp == KAMEREL_VAJRA && !litsaber(otmp))
-				){
-				attackmask |= PIERCE;
-			}
-			if (is_slashing(otmp)
-				|| otmp->oartifact == ART_LIECLEAVER
-				|| otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
-				){
-				attackmask |= SLASH;
-			}
-			if (is_blasting(otmp)
-				|| (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit)
-				|| otmp->oartifact == ART_FIRE_BRAND
-				|| otmp->oartifact == ART_FROST_BRAND
-				){
-				attackmask |= EXPLOSION;
-			}
-			/* if it's not any of the above, we're just smacking things with it */
-			if (!attackmask)
-				attackmask = WHACK;
+			attackmask = attack_mask(weapon, 0, 0);
 		}
 		else if (unarmed_punch) {
 			//Can always whack someone
@@ -13251,24 +13244,19 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 						pline("%s is resistant to attacks.",
 							Monnam(mdef));
 					}
-					else if (valid_weapon_attack || invalid_weapon_attack) {
-						pline("%s %s ineffective against %s.",
-							The(xname(weapon)),
-							(weapon->quan > 1L ? "are" : "is"),
-							mon_nam(mdef)
-							);
-					}
-					else if (unarmed_punch) {
-						pline("Your %s are ineffective against %s.",
-							makeplural(body_part(HAND)),
-							mon_nam(mdef)
-							);
-					}
-					else if (unarmed_kick) {
-						pline("Your %s is ineffective against %s.",
-							body_part(FOOT),
-							mon_nam(mdef)
-							);
+					else {
+						/* warn of one of your damage types */
+						/* not perfectly balanced; will favour one type (P>S, S>B, B>P) 2:1 if an attack has 2 types */
+						int i, j;
+						static const char * damagetypes[] = { "blunt force", "sharp point", "cutting edge" };
+						for (i = 0, j = rn2(3); i < 3; i++) {
+							if (attackmask & (1 << (i + j) % 3)) {
+								pline("The %s is ineffective against %s.",
+									damagetypes[(i + j) % 3],
+									mon_nam(mdef));
+								break;
+							}
+						}
 					}
 					warnedotyp = (weapon ? weapon->otyp : 0);
 					warnedptr = pd;
