@@ -1976,7 +1976,7 @@ spiriteffects(power, atme)
 					pline("There is no target there.");
 					break;
 				}
-				if(mon->uhurtm && mon->data->geno & G_GENO){
+				if(mon->uhurtm && (mon->data->geno&G_GENO || mdef->mhp < .1*mdef->mhpmax)){
 #define MAXVALUE 24
 					extern const int monstr[];
 					int value = min(monstr[monsndx(mon->data)] + 1,MAXVALUE);
