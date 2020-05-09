@@ -4932,6 +4932,12 @@ lava_effects()
 
     burn_away_slime();
     melt_frozen_air();
+
+	if (uarmf && uarmf->oartifact == ART_FROST_TREADS) {
+		zap_over_floor(u.ux, u.uy, AD_COLD, WAND_CLASS, FALSE, NULL);
+		return FALSE;
+	}
+
     if (likes_lava(youracedata)) return FALSE;
 
     if (!Fire_resistance) {

@@ -1024,7 +1024,7 @@ domove()
 		if (on_ice) {
 		    static int skates = 0;
 		    if (!skates) skates = find_skates();
-		    if ((uarmf && uarmf->otyp == skates)
+		    if ((uarmf && (uarmf->otyp == skates || uarmf->oartifact == ART_FROST_TREADS))
 			    || resists_cold(&youmonst)
 			    || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			    || is_whirly(youracedata))
@@ -1733,6 +1733,8 @@ boolean pick;
 			You("pop out of the water like a cork!");
 		else if (Flying)
 			You("fly out of the water.");
+		else if (uarmf && uarmf->oartifact == ART_FROST_TREADS)
+			You("climb stairs of ice out of the water.");
 		else if (Wwalking)
 			You("slowly rise above the surface.");
 		else
@@ -1791,6 +1793,10 @@ stillinwater:;
 #endif
 			(void)rust_dmg(uarmf, "boots", 1, TRUE, &youmonst);
 	    }
+		if (uarmf && uarmf->oartifact == ART_FROST_TREADS
+			&& is_pool(u.ux, u.uy, TRUE) && !is_3dwater(u.ux, u.uy) && !Is_waterlevel(&u.uz)) {
+			zap_over_floor(u.ux, u.uy, AD_COLD, WAND_CLASS, FALSE, NULL);
+		}
 	}
 	check_special_room(FALSE);
 #ifdef SINKS
