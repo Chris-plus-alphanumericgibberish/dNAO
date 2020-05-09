@@ -228,10 +228,9 @@ lookat(x, y, buf, monbuf, shapebuff)
 	    }
 
 		{
-		int ways_seen = 0, normal = 0, xraydist;
+		int ways_seen = 0, normal = 0, xraydist = xraydist();
 		boolean useemon = (boolean) canseemon(mtmp);
 
-		xraydist = (u.xray_range<0) ? -1 : u.xray_range * u.xray_range;
 		/* normal vision */
 		if ((mtmp->wormno ? worm_known(mtmp) : cansee(mtmp->mx, mtmp->my)) &&
 			mon_visible(mtmp) && !mtmp->minvis) {
@@ -264,8 +263,11 @@ lookat(x, y, buf, monbuf, shapebuff)
 		    ways_seen++;
 		/* xray */
 		if (useemon && xraydist > 0 &&
-			distu(mtmp->mx, mtmp->my) <= xraydist)
-		    ways_seen++;
+			distu(mtmp->mx, mtmp->my) <= xraydist) {
+			ways_seen++;
+			if (!couldsee(mtmp->mx, mtmp->my))
+				normal--;
+		}
 		if (Detect_monsters)
 		    ways_seen++;
 		if (MATCH_WARN_OF_MON(mtmp))

@@ -1215,7 +1215,7 @@ long wp_mask;
 			*/
 			(void)make_hallucinated((long)!on, restoring ? FALSE : TRUE, wp_mask);
 			break;
-		/* needs vision update*/
+		/* needs full vision update*/
 		case XRAY_VISION:
 			if (otmp->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && !Race_if(PM_DWARF))
 				break;	/* do not modify xray vision */
@@ -1223,16 +1223,9 @@ long wp_mask;
 			if (on) *mask |= wp_mask;
 			else *mask &= ~wp_mask;
 
-			if (Xray_vision) {
-				u.xray_range = max(3, u.xray_range);
-			}
-			else {
-				/* as it turns out, this currently does not interfere with orthos, because orthos is hacked in */
-				u.xray_range = -1;
-			}
 			vision_full_recalc = 1;
 			break;
-		/* needs vision update */
+		/* needs monster vision update */
 		case WARNING:
 		case TELEPAT:
 			if (on) *mask |= wp_mask;
@@ -7291,6 +7284,23 @@ arti_invoke(obj)
 			}
 			return 1;
 		}break;
+		case ALLSIGHT:
+			You("see the world in utter clarity.");
+			/* Clear blindness and hallucination, and provide temporary immunity.
+			* However, any new applications can still result in blindness/hallu the moment the protection wears off */
+			n = (Race_if(PM_ORC) && !Upolyd) ? 40 : 30;
+			Blinded = 0;
+			HBlind_res += n;
+			HHalluc_resistance += n;
+			(void)make_hallucinated(FALSE, FALSE, W_ART);	/* silent */
+			/* also, grant Xray vision and protection from shape changers */
+			HProtection_from_shape_changers += n;
+			HXray_vision += n;
+			/* we'll need a full recalc */
+			vision_full_recalc = 1;
+
+			/* todo: temporarily set insight and bring insight creatures into view, mwahaha */
+			break;
 		case FILTH_ARROWS:
 			if ((!uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;

@@ -866,6 +866,13 @@ nh_timeout()
 			if(u.usanity < 100)
 				pline("Your mind feels less clear.");
 		break;
+		case XRAY_VISION:
+			if (Hallucination)
+				pline("Your visions recede.");
+			else
+				pline("Your vision recedes.");
+			vision_full_recalc = 1;
+		break;
 		}
 		}
 	}

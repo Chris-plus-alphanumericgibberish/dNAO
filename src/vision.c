@@ -510,7 +510,7 @@ vision_recalc(control)
     static unsigned char colbump[COLNO+1];	/* cols to bump sv */
     unsigned char *sv;				/* ptr to seen angle bits */
     int oldseenv;				/* previous seenv value */
-    int oldxray;				/* previous xray range value */
+    int xray;					/* xray range value holder */
 	struct monst *mon, *nmon, *mat;
 	boolean indark;
 	boolean darksight = FALSE;
@@ -630,15 +630,11 @@ vision_recalc(control)
 		 * Set the IN_SIGHT bit for xray and night vision.
 		 */
 		
-		if(u.sealsActive&SEAL_ORTHOS){
-			oldxray = u.xray_range;
-			u.xray_range += spiritDsize()+1;
-		}
-		if (u.xray_range >= 0) {
-			if (u.xray_range) {
-			ranges = circle_ptr(u.xray_range);
+		if ((xray = xrayrange()) >= 0) {
+			if (xray > 0) {
+				ranges = circle_ptr(xray);
 
-			for (row = u.uy-u.xray_range; row <= u.uy+u.xray_range; row++) {
+				for (row = u.uy - xray; row <= u.uy + xray; row++) {
 				if (row < 0) continue;	if (row >= ROWNO) break;
 				dy = v_abs(u.uy-row);	next_row = next_array[row];
 
@@ -667,7 +663,7 @@ vision_recalc(control)
 			}
 		}
 		
-		if (nv_range && u.xray_range < nv_range) {
+		if (nv_range && xray < nv_range) {
 			ranges = circle_ptr(nv_range);
 
 			for (row = u.uy-nv_range; row <= u.uy+nv_range; row++) {
@@ -684,7 +680,6 @@ vision_recalc(control)
 				next_rmax[row] = max(stop, next_rmax[row]);
 			}
 		}
-		if(u.sealsActive&SEAL_ORTHOS) u.xray_range=oldxray;
     }
 
     /* Set the correct bits for all light sources. */

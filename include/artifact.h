@@ -351,11 +351,12 @@ struct artifact {
 #define AEGIS           (LAST_PROP+67)
 #define WATER           (LAST_PROP+68)
 #define SINGING         (LAST_PROP+69)
-#define WIND_PETS		(LAST_PROP+70)
-#define DEATH_TCH		(LAST_PROP+71)
-#define SKELETAL_MINION		(LAST_PROP+72)
+#define WIND_PETS	      (LAST_PROP+70)
+#define DEATH_TCH       (LAST_PROP+71)
+#define SKELETAL_MINION (LAST_PROP+72)
 #define ORACLE          (LAST_PROP+73)
-#define FILTH_ARROWS	(LAST_PROP+74)
+#define FILTH_ARROWS    (LAST_PROP+74)
+#define ALLSIGHT        (LAST_PROP+75)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20
