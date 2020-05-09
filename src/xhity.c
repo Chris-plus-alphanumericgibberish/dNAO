@@ -11830,6 +11830,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			artipoisons |= OPOISON_FILTH;
 		if (poisonedobj->oartifact == ART_MOONBEAM)
 			artipoisons |= OPOISON_SLEEP;
+		/* Plague adds poisons to its launched ammo */
+		if (launcher && launcher->oartifact == ART_PLAGUE) {
+			if (monstermoves < launcher->ovar1)
+				artipoisons |= OPOISON_FILTH;
+			else
+				artipoisons |= OPOISON_BASIC;
+		}
 		poisons |= artipoisons;
 
 		/* Penalties for you using a poisoned weapon */
@@ -12805,6 +12812,9 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp) {
+				/* kludge for Plague: artifact_hit() needs to know if lethal filth occured */
+				if (otmp->oartifact == ART_PLAGUE)
+					dieroll = (poisons_majoreff&OPOISON_FILTH) ? 1 : (dieroll == 1) ? 2 : dieroll;
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;

@@ -901,6 +901,18 @@ A("Yoichi no yumi",		YUMI,							(const char *)0,
 	),
 
 /*Needs encyc entry*/
+/* all arrows fired from it are treated as poisoned (or filthed for a short period after invoking) */
+A("Plague",				BOW,							(const char *)0,
+	4000L, BONE, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
+	NO_MONS(),
+	ATTK(AD_DRST, 5, 7), NOFLAG,
+	PROP2(POISON_RES, SICK_RES), NOFLAG,
+	PROP0(), NOFLAG,
+	FILTH_ARROWS, NOFLAG
+	),
+
+/*Needs encyc entry*/
 /* die size set to 1d8 in weapon.c */
 A("The Fluorite Octahedron",		BLUE_FLUORITE,		(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,

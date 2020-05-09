@@ -3873,6 +3873,40 @@ boolean * messaged;
 			}
 		}
 	} 
+	/* while Plague is invoked, lethal-filth arrows cause victims to virulently explode.
+	 * Not you, though. You just die. It's simpler that way.
+	 * Slightly different from actual Vorpal; the dieroll is hacked in xhity to ==1 if and only if we have lethal filth. */
+	if (oartifact == ART_PLAGUE && (monstermoves < otmp->ovar1) && (dieroll == 1) && !youdef) {
+		int mx, my;
+		if (vis&VIS_MAGR && vis&VIS_MDEF) {
+			pline_The("tainted %s strikes true!", xname(msgr));
+		}
+		if (vis&VIS_MDEF) {
+			pline("%s %s bubbles, and %s explodes!",
+				s_suffix(Monnam(mdef)),
+				mbodypart(mdef, BODY_SKIN),
+				mon_nam(mdef)
+				);
+			*messaged = TRUE;
+		}
+		/* we want to avoid catching mdef in this explosion -- kludge time */
+		/* note: long worms still get caught in the explosion, because of course they do, so don't kludge at all to be on the safe side */
+		if (!is_longworm(mdef->data)) {
+			mx = x(mdef);
+			my = y(mdef);
+			level.monsters[mx][my] = (struct monst *)0;
+		}
+
+		killer = "virulent explosion";
+		explode(mx, my, AD_DISE, MON_EXPLODE, d(6, 6), EXPL_NOXIOUS,
+			((mdef->data->msize + 3) / 4));	/* tiny -> R0; gigantic -> R2; others -> R1 */
+
+		if (!is_longworm(mdef->data)) {
+			level.monsters[mx][my] = mdef;
+		}
+
+		return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef)); /* instakill */
+	}
 
 	/* vorpal weapons */
 	if (arti_attack_prop(otmp, ARTA_VORPAL) || (oproperties&OPROP_VORPW)) {
@@ -7257,6 +7291,22 @@ arti_invoke(obj)
 			}
 			return 1;
 		}break;
+		case FILTH_ARROWS:
+			if ((!uwep && uwep == obj)){
+				You_feel("that you should be wielding %s.", the(xname(obj)));;
+				obj->age = monstermoves;
+				return(0);
+			}
+			/* message */
+			if (flags.soundok) {
+				pline("%s keens quietly.", The(xname(obj)));
+			}
+			else {
+				pline("%s vibrates softly.", The(xname(obj)));
+			}
+			/* if time < ovar1, arrows will be filthed (done in xhity.c) */
+			obj->ovar1 = monstermoves + 13;
+			break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
