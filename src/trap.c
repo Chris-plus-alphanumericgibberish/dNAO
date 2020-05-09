@@ -3491,11 +3491,11 @@ drown()
 	
 	if (!u.uinwater) {
 	    You("%s into the %swater%c",
-		Is_waterlevel(&u.uz) ? "plunge" : "fall",
+		Is_waterlevel(&u.uz) ? "plunge" : Flying ? "fly" : Levitation ? "hover" : "fall",
 		sparkle,
 		Amphibious || Swimming ? '.' : '!');
 	}
-	if (!u.usubwater && !Swimming && !Is_waterlevel(&u.uz))
+	if (!u.usubwater && !Swimming && !Is_waterlevel(&u.uz) && !(Flying||Levitation))
 		You("sink like %s.",
 		Hallucination ? "the Titanic" : "a rock");
 
@@ -3538,13 +3538,15 @@ drown()
 		if (Amphibious &&  u.usubwater){
 			if (flags.verbose)
 				if(!Swimming) pline("But you aren't drowning.");
-			if (!Is_waterlevel(&u.uz)) {
+			if (!is_3dwater(u.ux, u.uy)) {
 				if (Hallucination)
 					Your("keel hits the bottom.");
 				else
 					You("touch bottom.");
-				under_water(1);
 			}
+			/* only continue showing vision on waterlevel */
+			if (!Is_waterlevel(&u.uz))
+				under_water(1);
 		} else { //canswim and are swiming
 			You("swim on the surface.");
 		}
