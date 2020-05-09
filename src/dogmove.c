@@ -780,7 +780,7 @@ int after, udist, whappr;
 	if (gx == u.ux && gy == u.uy && !in_masters_sight) {
 	    register coord *cp;
 
-	    cp = gettrack(omx,omy);
+	    cp = gettrack(omx,omy,0);
 	    if (cp) {
 		gx = cp->x;
 		gy = cp->y;

@@ -2627,7 +2627,7 @@ E void NDECL(write_HUP_file);
 
 E void NDECL(initrack);
 E void NDECL(settrack);
-E coord *FDECL(gettrack, (int,int));
+E coord *FDECL(gettrack, (int,int,int));
 
 /* ### trap.c ### */
 

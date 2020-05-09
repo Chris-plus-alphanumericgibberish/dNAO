@@ -36,12 +36,12 @@ settrack()
 #ifdef OVL0
 
 coord *
-gettrack(x, y)
-register int x, y;
+gettrack(x, y, maxtrack)
+register int x, y, maxtrack;
 {
     int cnt, ndist;
     coord *tc;
-    cnt = utcnt;
+    cnt = !maxtrack ? utcnt : min(maxtrack, utcnt);
     for(tc = &utrack[utpnt]; cnt--; ){
 		if(tc == utrack) tc = &utrack[UTSZ-1];
 	

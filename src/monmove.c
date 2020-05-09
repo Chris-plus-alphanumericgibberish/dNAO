@@ -1982,7 +1982,7 @@ not_special:
 	gx = mtmp->mux;
 	gy = mtmp->muy;
 	appr = (mtmp->mflee && mtmp->mtyp != PM_BANDERSNATCH) ? -1 : 1;
-	if (mtmp->mconf || (u.uswallow && mtmp == u.ustuck) || (gx == 0 && gy == 0))
+	if (mtmp->mconf || (u.uswallow && mtmp == u.ustuck))
 		appr = 0;
 	else {
 #ifdef GOLDOBJ
@@ -2006,16 +2006,20 @@ not_special:
 #endif
 			appr = -1;
 
-		if (!should_see && can_track(ptr) && (goodsmeller(ptr) || (mtmp)->mcansee)) {
+		/* monsters can track you */
+		if (!should_see && (goodsmeller(ptr) || (mtmp)->mcansee)) {
 			register coord *cp;
-
-			cp = gettrack(omx,omy);
+			/* good trackers can follow your trail up to 200 turns, others just for your few most recent steps */
+			cp = gettrack(omx, omy, can_track(ptr) ? 0 : rnd(mtmp->mint/3));
 			if (cp) {
 				gx = cp->x;
 				gy = cp->y;
 			}
 		}
 	}
+	/* if monster has no idea where you could be, set appr to 0 */
+	if (gx == 0 && gy == 0)
+		appr = 0;
 
 	if (( !mtmp->mpeaceful || mtmp->mtyp == PM_MAID || !rn2(10) )
 #ifdef REINCARNATION
