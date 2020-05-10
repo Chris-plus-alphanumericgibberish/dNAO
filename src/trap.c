@@ -3491,11 +3491,11 @@ drown()
 	
 	if (!u.uinwater) {
 	    You("%s into the %swater%c",
-		Is_waterlevel(&u.uz) ? "plunge" : "fall",
+		Is_waterlevel(&u.uz) ? "plunge" : Flying ? "fly" : Levitation ? "hover" : "fall",
 		sparkle,
 		Amphibious || Swimming ? '.' : '!');
 	}
-	if (!u.usubwater && !Swimming && !Is_waterlevel(&u.uz))
+	if (!u.usubwater && !Swimming && !Is_waterlevel(&u.uz) && !(Flying||Levitation))
 		You("sink like %s.",
 		Hallucination ? "the Titanic" : "a rock");
 
@@ -3528,9 +3528,9 @@ drown()
 	if (Amphibious || (Swimming && !(u.divetimer == 0 && u.usubwater))) {
 		u.uinwater = 1;
 		if(uclockwork) u.uboiler = MAX_BOILER;
-		if (Swimming && !is_3dwater(u.ux-u.dx,u.uy-u.dy) && u.divetimer > 0 && !Is_waterlevel(&u.uz) && yn("Dive underwater?")=='y') {
+		if (Swimming && !is_3dwater(u.ux,u.uy) && u.divetimer > 0 && !Is_waterlevel(&u.uz) && yn("Dive underwater?")=='y') {
 			u.usubwater = 1;
-		} else if(is_3dwater(u.ux-u.dx,u.uy-u.dy)){
+		} else if(is_3dwater(u.ux,u.uy)){
 			u.usubwater = 1;
 		} else if(Amphibious && !Swimming){
 			u.usubwater = 1;
@@ -3545,6 +3545,7 @@ drown()
 					You("touch bottom.");
 				under_water(1);
 			}
+				
 		} else { //canswim and are swiming
 			You("swim on the surface.");
 		}
