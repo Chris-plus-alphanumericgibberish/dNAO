@@ -808,16 +808,16 @@ carrying_readable_weapon()
 	register struct obj *otmp;
 
 	for(otmp = invent; otmp; otmp = otmp->nobj)
-		if((otmp->oclass == WEAPON_CLASS && (otmp)->obj_material == WOOD && otmp->oward)
-		  || otmp->oartifact && 
-			(otmp->oartifact == ART_EXCALIBUR || 
-			 otmp->oartifact == ART_GLAMDRING || 
-			 otmp->oartifact == ART_ITLACHIAYAQUE || 
-			 otmp->oartifact == ART_ROD_OF_SEVEN_PARTS ||
-			 otmp->oartifact == ART_BOW_OF_SKADI ||
-			 otmp->oartifact == ART_PEN_OF_THE_VOID ||
-			 otmp->oartifact == ART_STAFF_OF_NECROMANCY
-			)
+		if((otmp->oclass == WEAPON_CLASS && otmp->obj_material == WOOD && otmp->oward) || 
+			(otmp->oartifact && (
+				otmp->oartifact == ART_EXCALIBUR || 
+				otmp->oartifact == ART_GLAMDRING || 
+				otmp->oartifact == ART_ITLACHIAYAQUE || 
+				otmp->oartifact == ART_ROD_OF_SEVEN_PARTS ||
+				otmp->oartifact == ART_BOW_OF_SKADI ||
+				otmp->oartifact == ART_PEN_OF_THE_VOID ||
+				otmp->oartifact == ART_STAFF_OF_NECROMANCY
+			))
 		)
 			return TRUE;
 	return FALSE;
