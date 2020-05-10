@@ -11902,6 +11902,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			case OPOISON_FILTH:
 				resists = Sick_res(mdef);
 				majoreff = !rn2(10);
+				if (launcher && launcher->oartifact == ART_PLAGUE && monstermoves < launcher->ovar1)
+					majoreff = !rn2(5);	/* while invoked, Plague's arrows are twice as likely to instakill (=20%) */
 				break;
 			case OPOISON_SLEEP:
 				resists = Sleep_res(mdef);
