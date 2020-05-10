@@ -519,7 +519,7 @@ int otyp;
 			ocn = 1;
 			ocd = 2;
 			bonn = 2;
-			bond = max(4 + 2 * dmod, 2);
+			bond = 4
 		}
 		else if (obj->oartifact == ART_LIECLEAVER) {
 			ocn = 1;	/* plus another 1d10 from being an artifact */
