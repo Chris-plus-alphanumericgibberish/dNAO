@@ -3538,15 +3538,14 @@ drown()
 		if (Amphibious &&  u.usubwater){
 			if (flags.verbose)
 				if(!Swimming) pline("But you aren't drowning.");
-			if (!is_3dwater(u.ux, u.uy)) {
+			if (!Is_waterlevel(&u.uz)) {
 				if (Hallucination)
 					Your("keel hits the bottom.");
 				else
 					You("touch bottom.");
-			}
-			/* only continue showing vision on waterlevel */
-			if (!Is_waterlevel(&u.uz))
 				under_water(1);
+			}
+				
 		} else { //canswim and are swiming
 			You("swim on the surface.");
 		}
