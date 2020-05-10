@@ -2284,9 +2284,12 @@ struct obj *obj;
 	else if (obj->oartifact == ART_ITLACHIAYAQUE)
 				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Read into the smoky depths of this shield", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_STAFF_OF_NECROMANCY)
+				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+				"Study the forbidden secrets of necromancy", MENU_UNSELECTED);
 	else if (obj->oartifact == ART_PEN_OF_THE_VOID)
 				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
-				"Inspect this weapon", MENU_UNSELECTED);
+				(mvitals[PM_ACERERAK].died > 0) ? "Inspect the twin blades" : "Inspect the blade", MENU_UNSELECTED);
 	/* R: rub */
 	any.a_void = (genericptr_t)dorub;
 	if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP)
