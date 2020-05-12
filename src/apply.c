@@ -4591,7 +4591,7 @@ use_doll(obj)
 				if(!Blind)
 					pline("The %s says a prayer.", OBJ_DESCR(objects[obj->otyp]));
 				pline("%s seems %s.", u_gname(),
-				  Hallucination ? "groovy" : "slightly mollified");
+				  Hallucination ? "groovy" : "mollified");
 				u.ugangr[Align2gangr(u.ualign.type)] = 0;
 				if ((int)u.uluck < 0) u.uluck = 0;
 				u.reconciled = REC_MOL;
