@@ -4152,8 +4152,6 @@ struct obj *otmp;
 			if (!Inhell) angrygods(Align2gangr(u.ualign.type));
 			change_luck(-5);
 		} else adjalign(5);
-		if (carried(otmp)) useup(otmp);
-		else useupf(otmp, 1L);
 	//Pets are just eaten like anything else.  Your god doesn't know you did it, and the goat doesn't care.
 	} else if (is_undead(ptr)) { /* Not demons--no demon corpses */
 		if (u.ualign.type != A_CHAOTIC)
