@@ -358,6 +358,7 @@ int faction;
 
 		/* some factions want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || (attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp))) && (insert = TRUE))
+#define end_insert_okay (!special && is_null_attk(attk) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;}
 		/* skeletons get a paralyzing touch */
 		if (faction == SKELIFIED && (
@@ -451,7 +452,7 @@ int faction;
 		}
 		/* yith gain spellcasting */
 		if (faction == YITH && (
-			insert_okay
+			end_insert_okay
 			))
 		{
 			maybe_insert();
@@ -463,7 +464,7 @@ int faction;
 		}
 		/* cranium rats gain psionic spellcasting */
 		if (faction == CRANIUM_RAT && (
-			insert_okay
+			end_insert_okay
 			))
 		{
 			maybe_insert();
@@ -498,6 +499,7 @@ int faction;
 		}
 	}
 #undef insert_okay
+#undef end_insert_okay
 #undef maybe_insert
 	return ptr;
 }
