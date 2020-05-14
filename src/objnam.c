@@ -3026,6 +3026,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-11, "Seven Parts") || /* spear */
 			   !BSTRCMPI(bp, p-10, "Lost Names") || /* book */
 			   !BSTRCMPI(bp, p-15, "Infinite Spells") || /* book */
+			   !BSTRCMPI(bp, p-6, "talons") || /* book */
 			   !BSTRCMPI(bp, p-10, "eucalyptus") ||
 #ifdef WIZARD
 			   !BSTRCMPI(bp, p-9, "iron bars") ||
@@ -3927,12 +3928,12 @@ int wishflags;
 	} else if(cnt > 1 && !strncmpi(bp, "pairs of ",9)) {
 		bp += 9;
 		cnt *= 2;
-	} else if (!strncmpi(bp, "set of ",7)) {
+	} else if (!strncmpi(bp, "set of ",7) && strncmpi(bp, "set of crow talons", 18)) {
 		bp += 7;
-	} else if (!strncmpi(bp, "sets of ",8)) {
+	} else if (!strncmpi(bp, "sets of ",8) && strncmpi(bp, "sets of crow talons", 19)) {
 		bp += 8;
 	}
-
+	
 	/*
 	 * Find corpse type using "of" (figurine of an orc, tin of orc meat)
 	 * Don't check if it's a wand or spellbook.
@@ -3942,7 +3943,8 @@ int wishflags;
 	 && !strstri(bp, "spellbook ")
 	 && !strstri(bp, "book ")
 	 && !strstri(bp, "rod ")
-	 && !strstri(bp, "finger ")) {
+	 && !strstri(bp, "finger ")
+	 && !strstri(bp, "set of ")) {
 	    if ((p = strstri(bp, " of ")) != 0
 		&& (mntmp = name_to_mon(p+4)) >= LOW_PM)
 		*p = 0;
@@ -3959,6 +3961,8 @@ int wishflags;
 	if (strncmpi(bp, "magenta", 7)) /* not the "mage" rank */
 	if (strncmpi(bp, "band", 4)) /* not the "ban" rank */
 	if (strncmpi(bp, "green dragon crescent blade", 27)) /* not the "green dragon" monster */
+	if (strncmpi(bp, "crow quill", 10)) /* not a "crow" */
+	if (strncmpi(bp, "set of crow talons", 18)) /* not a "crow" */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
 	if (strncmpi(bp, "platinum dragon plate", 22)) /* not a "dragon" */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
