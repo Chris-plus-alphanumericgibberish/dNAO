@@ -4352,7 +4352,7 @@ int dx, dy, range, flat;
 				range -= 2;
 				pline("%s hits you!", The(fltxt));
 				if (Reflecting && (
-						(!(flags.drgn_brth) && adtyp != AD_SLEE) || 
+						(!(flags.drgn_brth) && !(adtyp == AD_SLEE && olet == FOOD_CLASS)) || 
 						(uwep && is_lightsaber(uwep) && litsaber(uwep) && 
 							((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) || 
 							 (u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
