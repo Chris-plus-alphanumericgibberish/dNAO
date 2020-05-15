@@ -1479,13 +1479,14 @@ register struct monst *mtmp;
 					(void)mongets(mtmp, ELVEN_BOW);
 					m_initthrow(mtmp, ELVEN_ARROW, 12);
 					
-					(void)mongets(mtmp, LEATHER_HELM);
+					(void)mongets(mtmp, SHEMAGH);
 					(void)mongets(mtmp, LEATHER_ARMOR);
 					(void)mongets(mtmp, GLOVES);
 					(void)mongets(mtmp, ELVEN_BOOTS);
 				} else if(mm == PM_ALABASTER_ELF_ELDER){
 					(void)mongets(mtmp, QUARTERSTAFF);
 					
+					(void)mongets(mtmp, SHEMAGH);
 					(void)mongets(mtmp, ELVEN_TOGA);
 					(void)mongets(mtmp, ELVEN_BOOTS);
 				} else if(mm == PM_MYRKALFAR_WARRIOR){

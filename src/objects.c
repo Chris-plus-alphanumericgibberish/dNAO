@@ -519,6 +519,9 @@ HELM_MATSPEC("crystal helm", "fish bowl", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2,150, 300, 9, 1, 0, GLASS,UNIDED, HI_GLASS),
 HELM("pontiff's crown", "filigreed faceless helm", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, METAL, HI_GOLD),
+HELM_MATSPEC("shemagh", "white headscarf", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,	0, 0, 5,   5, 10, 0, 0, CLOTH,UNIDED, CLR_WHITE),
+
 /* With shuffled appearances... */
 HELM("helmet", "plumed helmet", /* circlet */
 		0, 0,  0,      8, 1, 30,  10, 9, 2, 0, IRON, HI_METAL),
