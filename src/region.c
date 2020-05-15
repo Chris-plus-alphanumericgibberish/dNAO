@@ -1185,7 +1185,7 @@ genericptr_t p2;
 		
 		if (uarmh && uarmh->otyp == SHEMAGH){
 			if (!rn2(4))
-				pline("The %s prevents you from inhaling dust!", simple_typename(uarmh->otyp));
+				pline("The %s protects you from the dust!", simple_typename(uarmh->otyp));
 			
 			return FALSE;
 		}
