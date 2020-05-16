@@ -361,6 +361,7 @@ Helmet_on()
     if (!uarmh) return 0;
     switch(uarmh->otyp) {
 	case FEDORA:
+	case SHEMAGH:
 	case HELMET:
 	case DROVEN_HELM:
 	case FLACK_HELMET:
@@ -466,6 +467,7 @@ Helmet_off()
 
     switch(uarmh->otyp) {
 	case FEDORA:
+	case SHEMAGH:
 	case HELMET:
 	case DROVEN_HELM:
 	case FLACK_HELMET:

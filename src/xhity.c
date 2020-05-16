@@ -8863,7 +8863,12 @@ int vis;
 	case AD_BLND:
 		if (can_blnd(magr, mdef, attk->aatyp, (struct obj*)0)) {
 			if (youdef) {
-				if (!Blind) {
+			
+				if (uarmh && uarmh->otyp == SHEMAGH && 
+					(magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND))
+				{
+					pline("The %s protects you from the dust!", simple_typename(uarmh->otyp));
+				} else if (!Blind) {
 					You_cant("see in here!");
 					make_blinded((long)dmg, FALSE);
 					if (!Blind)
@@ -8874,10 +8879,17 @@ int vis;
 					make_blinded(Blinded + 1, FALSE);
 			}
 			else {
-				if (vis&VIS_MDEF && mdef->mcansee)
-					pline("%s can't see in there!", Monnam(mdef));
-				mdef->mcansee = 0;
-				mdef->mblinded = min(127, dmg + mdef->mblinded);
+				struct obj *otmp = which_armor(mdef, W_ARMH);
+				
+				if (otmp && otmp->otyp == SHEMAGH && (magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND)){
+					if (vis&VIS_MDEF)
+						pline("The %s protects %s from the dust!", simple_typename(otmp->otyp), Monnam(mdef));
+				} else {
+					if (vis&VIS_MDEF && mdef->mcansee)
+						pline("%s can't see in there!", Monnam(mdef));
+					mdef->mcansee = 0;
+					mdef->mblinded = min(127, dmg + mdef->mblinded);
+				}
 			}
 		}
 		result = MM_HIT;
