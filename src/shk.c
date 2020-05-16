@@ -4808,7 +4808,7 @@ shk_identify(slang, shkp)
 		if (obj->dknown && objects[obj->otyp].oc_name_known)
 		{
 			if (ident_type=='b') ripoff=TRUE;
-			if (ident_type=='p' && obj->bknown && obj->rknown && obj->known) ripoff=TRUE;
+			if (ident_type=='p' && obj->bknown && obj->rknown && obj->known && !undiscovered_artifact(obj->oartifact)) ripoff=TRUE;
 		}
 	
 		/* Compute the charge */
