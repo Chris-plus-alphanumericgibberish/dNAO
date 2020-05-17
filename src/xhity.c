@@ -7400,32 +7400,51 @@ boolean ranged;
 			pline("%s reaches out with %s %s!  A corona of dancing energy surrounds the %s!",
 				Monnam(magr), mhis(magr), mbodypart(magr, ARM), mbodypart(magr, HAND));
 		}
-		/* shock / fire / stun combo */
-		alt_attk.aatyp = AT_NONE;
-
-		alt_attk.adtyp = AD_ELEC;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* elec damage */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
-		alt_attk.adtyp = AD_FIRE;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* fire damage */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
-		alt_attk.adtyp = AD_STUN;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 3, dieroll, vis, ranged);		/* 3 turn stun, minor physical damage */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		/* "Positive energy": shock / fire / stun combo */
+		/* completely resisted by Shock res */
+		if (!Shock_res(mdef)) {
+			alt_attk.aatyp = AT_NONE;
+			alt_attk.adtyp = AD_ELEC;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* elec damage */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			alt_attk.adtyp = AD_FIRE;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* fire damage */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			alt_attk.adtyp = AD_STUN;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 3, dieroll, vis, ranged);		/* 3 turn stun, minor physical damage */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+		}
+		else {
+			/* 1-damage physical touch */
+			alt_attk.aatyp = AT_TUCH;
+			alt_attk.adtyp = AD_PHYS;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 1, dieroll, vis, ranged);
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+		}
 
 		/* but wait, there's more! */
 		if (vis && dohitmsg) {
 			pline("%s reaches out with %s other %s!  A penumbra of shadows surrounds the %s!",
 				Monnam(magr), mhis(magr), mbodypart(magr, ARM), mbodypart(magr, HAND));
 		}
-		/* cold / drain combo */
-		alt_attk.aatyp = AT_NONE;
-		alt_attk.adtyp = AD_COLD;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* cold damage */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
-		alt_attk.adtyp = AD_DRLI;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 0, dieroll, vis, ranged);		/* level drain */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		/* "Negative energy": cold / drain combo */
+		/* completely resisted by Drain res */
+		if (!Drain_res(mdef)) {
+			alt_attk.aatyp = AT_NONE;
+			alt_attk.adtyp = AD_COLD;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* cold damage */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			alt_attk.adtyp = AD_DRLI;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 0, dieroll, vis, ranged);		/* level drain */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+		}
+		else {
+			/* 1-damage physical touch */
+			alt_attk.aatyp = AT_TUCH;
+			alt_attk.adtyp = AD_PHYS;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 1, dieroll, vis, ranged);
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+		}
 
 		return result;
 
