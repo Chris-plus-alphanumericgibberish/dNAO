@@ -3221,7 +3221,7 @@ dosacrifice()
 		    unrestrict_weapon_skill(weapon_type(otmp));
 		    discover_artifact(otmp->oartifact);
 			if(otmp->oartifact == ART_BLADE_SINGER_S_SABER){
-				unrestrict_weapon_skill(P_SPEAR);
+				unrestrict_weapon_skill(P_SABER);
 				unrestrict_weapon_skill(P_DAGGER);
 				unrestrict_weapon_skill(P_TWO_WEAPON_COMBAT);
 			} else if(otmp->oartifact == ART_BEASTMASTER_S_DUSTER){
