@@ -542,7 +542,14 @@ struct obj * otmp;
 		/* if one's been generated, the other HAS to be the same otyp, so no penalty is needed */
 		if ((m == ART_FIRE_BRAND || m == ART_FROST_BRAND)
 			&& u.brand_otyp == STRANGE_OBJECT
-			&& rn2(8))
+			&& (
+				rn2(6)
+				/* small base weapons less frequent */
+				|| !rn2(objects[otmp->otyp].oc_size + 1)
+				/* elven/droven base weapons much less frequent */
+				|| ((is_elven_weapon(otmp) || is_droven_weapon(otmp)) && rn2(4))
+				)
+			)
 			continue;
 
 		/* if we made it through that gauntlet, we're good */
