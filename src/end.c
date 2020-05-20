@@ -424,13 +424,19 @@ register struct monst *mtmp;
 		Sprintf(eos(buf), "%s %s, the shopkeeper",
 			(mtmp->female ? "Ms." : "Mr."), shkname(mtmp));
 		killer_format = KILLED_BY;
+		if (mtmp->mfaction)
+			append_faction_desc(mtmp, buf, TRUE);
 	} else if (mtmp->ispriest || mtmp->isminion) {
 		/* m_monnam() suppresses "the" prefix plus "invisible", and
 		   it overrides the effect of Hallucination on priestname() */
 		killer = m_monnam(mtmp);
 		Strcat(buf, killer);
+		if (mtmp->mfaction)
+			append_faction_desc(mtmp, buf, type_is_pname(mtmp->data));
 	} else {
 		Strcat(buf, mtmp->data->mname);
+		if (mtmp->mfaction)
+			append_faction_desc(mtmp, buf, type_is_pname(mtmp->data));
 		if (mtmp->mnamelth)
 		    Sprintf(eos(buf), " called %s", NAME(mtmp));
 	}
