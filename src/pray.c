@@ -4186,12 +4186,12 @@ struct obj *otmp;
 	    if(u.ugangr[GA_MOTHER] < 0) u.ugangr[GA_MOTHER] = 0;
 	    if(u.ugangr[GA_MOTHER] != saved_anger) {
 		if (u.ugangr[GA_MOTHER]) {
-		    pline("%s seems %s.", u_gname(),
+			pline("%s seems %s.", upstart(goattitles[rn2(SIZE(goattitles))]),
 			  Hallucination ? "groovy" : "slightly mollified");
 
 		    if ((int)u.uluck < 0) change_luck(1);
 		} else {
-		    pline("%s seems %s.", u_gname(), Hallucination ?
+			pline("%s seems %s.", upstart(goattitles[rn2(SIZE(goattitles))]), Hallucination ?
 			  "cosmic (not a new fact)" : "mollified");
 
 		    if ((int)u.uluck < 0) u.uluck = 0;
