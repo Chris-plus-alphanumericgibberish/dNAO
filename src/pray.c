@@ -4022,7 +4022,7 @@ boolean yours;
 	int cn = otmp->corpsenm;
 	struct monst *revived = 0;
 	if(is_rider(&mons[otmp->corpsenm])){
-		pline("A pulse of darkness radiates %s!", The(xname(otmp)));
+		pline("A pulse of darkness radiates from %s!", the(xname(otmp)));
 		revived = revive(otmp, FALSE);
 		if(yours)
 			gods_upset(GA_MOTHER);
