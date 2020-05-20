@@ -2101,7 +2101,7 @@ goat_pleased()
 				Your("%s %s%s.", aobjnam(uwep, "softly glow"),
 					 hcolor(NH_AMBER), repair_buf);
 				else You_feel("the power of %s over your %s.",
-				u_gname(), xname(uwep));
+				goattitles[rn2(SIZE(goattitles))], xname(uwep));
 				*repair_buf = '\0';
 			} else if (!uwep->blessed) {
 				bless(uwep);
@@ -2111,7 +2111,7 @@ goat_pleased()
 					 aobjnam(uwep, "softly glow"),
 					 an(hcolor(NH_LIGHT_BLUE)), repair_buf);
 				else You_feel("the blessing of %s over your %s.",
-				u_gname(), xname(uwep));
+				goattitles[rn2(SIZE(goattitles))], xname(uwep));
 				*repair_buf = '\0';
 			}
 
