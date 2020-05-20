@@ -26,7 +26,6 @@ STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 STATIC_DCL int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, void *, int, int, int, boolean, int, boolean, int, boolean *));
@@ -958,6 +957,9 @@ int tary;
 				continue;
 			/* cannot swallow huge or larger */
 			if (pd->msize >= MZ_HUGE)
+				continue;
+			/* cannot swallow anyone else while player is engulfed */
+			if (u.uswallow && u.ustuck == magr && !youdef)
 				continue;
 			/* ahazu protects the player from engulfing */
 			if (youdef && u.sealsActive&SEAL_AHAZU)
@@ -8417,11 +8419,18 @@ int vis;
 			/* remove ball and chain */
 			if (Punished)
 				unplacebc();
-			/* move attacker */
-			remove_monster(x(magr), y(magr));
-			magr->mtrapped = 0;		/* no longer on old trap */
-			place_monster(magr, u.ux, u.uy);
-			newsym(x(magr), y(magr));
+			/* maybe move attacker */
+			if (!stationary(magr->data)) {
+				remove_monster(x(magr), y(magr));
+				magr->mtrapped = 0;		/* no longer on old trap */
+				place_monster(magr, u.ux, u.uy);
+				newsym(x(magr), y(magr));
+			}
+			else {
+				/* or maybe pluck the player */
+				u.ux = x(magr);
+				u.uy = y(magr);
+			}
 			u.ustuck = magr;
 #ifdef STEED
 			if (is_animal(pa) && u.usteed) {
@@ -8548,8 +8557,8 @@ int vis;
 		/* deal damage and other effects */
 		result = xengulfhurty(magr, mdef, attk, vis);
 
-		/* if defender died, move agressor to defender's coord */
-		if (result&MM_DEF_DIED) {
+		/* if defender died and aggressor isn't stationary, move agressor to defender's coord */
+		if (!stationary(magr->data) && result&MM_DEF_DIED) {
 			/* sanity check */
 			if (*hp(mdef) > 0)
 				impossible("dead engulfee still alive?");

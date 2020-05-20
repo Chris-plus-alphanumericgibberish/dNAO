@@ -1867,7 +1867,13 @@ stillinwater:;
 					Amonnam(mtmp));
 			break;
 		}
-		mnexto(mtmp); /* have to move the monster */
+		if (attacktype(mtmp->data, AT_ENGL)) {
+			/* engulf the player */
+			(void)xengulfhity(mtmp, &youmonst, attacktype_fordmg(mtmp->data, AT_ENGL, AD_ANY), 6);	/* vis == VIS_MDEF|VIS_NONE */
+		}
+		else {
+			mnexto(mtmp); /* have to move the monster */
+		}
 	}
 }
 
