@@ -2059,10 +2059,6 @@ goat_pleased()
 	    pat_on_head = 1;
 	} else {
 	    int action = rn1(Luck + (goat_mouth_at(u.ux, u.uy) ? 4 : 2), 1);
-	    /* pleased Lawful gods often send you a helpful angel if you're
-	       getting the crap beat out of you */
-	    if ((u.uhp < 5 || (u.uhp*7 < u.uhpmax)) &&
-		 u.ualign.type == A_LAWFUL && rn2(3)) lawful_god_gives_angel();
 
 	    if (!goat_mouth_at(u.ux, u.uy)) action = min(action, 3);
 
