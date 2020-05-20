@@ -8419,6 +8419,7 @@ int vis;
 				unplacebc();
 			/* move attacker */
 			remove_monster(x(magr), y(magr));
+			newsym(x(magr), y(magr));
 			magr->mtrapped = 0;		/* no longer on old trap */
 			place_monster(magr, u.ux, u.uy);
 			newsym(x(magr), y(magr));
@@ -8453,6 +8454,7 @@ int vis;
 			}
 
 			if (touch_petrifies(youracedata) && !resists_ston(magr)) {
+				expels(magr, pa, FALSE);
 				minstapetrify(magr, TRUE);
 				if (magr->mhp > 0)
 					return MM_AGR_STOP;
