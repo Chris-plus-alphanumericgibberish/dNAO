@@ -3233,6 +3233,8 @@ dosacrifice()
 				unrestrict_weapon_skill(P_RIDING);
 				mksobj_at(SADDLE, u.ux, u.uy, FALSE, FALSE);
 				u.umartial = TRUE;
+			} else if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA){
+				unrestrict_weapon_skill(P_WHIP);
 			}
 			return(1);
 		}
