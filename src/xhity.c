@@ -13845,14 +13845,20 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		if (!level.flags.noteleport) {
 			coord cc;
-			if (youagr) {
-				tele();
+			if (magr) {
+				if (youagr) {
+					tele();
+				}
+				else {
+					rloc(magr, FALSE);
+				}
+				if (enexto(&cc, x(magr), y(magr), &mons[PM_URANIUM_IMP])) {
+					rloc_to(mdef, cc.x, cc.y);
+				}
 			}
 			else {
-				rloc(magr, FALSE);
-			}
-			if (enexto(&cc, x(magr), y(magr), &mons[PM_URANIUM_IMP])) {
-				rloc_to(mdef, cc.x, cc.y);
+				/* if no attacker, the uranium imp teleports at random */
+				rloc(mdef, FALSE);
 			}
 			
 			return MM_AGR_STOP;
