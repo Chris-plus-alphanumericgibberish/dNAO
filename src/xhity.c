@@ -8518,6 +8518,7 @@ int vis;
 		}
 	}
 	else {
+		boolean did_tmp_at = FALSE;
 		/* message */
 		if (youagr) {
 			You("%s %s!",
@@ -8542,6 +8543,7 @@ int vis;
 			/* SCOPECREEP: get the correct glyph for pets/peacefuls/zombies/detected/etc */
 			tmp_at(DISP_FLASH, mon_to_glyph(magr));
 			tmp_at(x(mdef), y(mdef));
+			did_tmp_at = TRUE;
 			delay_output();
 			delay_output();
 		}
@@ -8565,8 +8567,10 @@ int vis;
 			}
 		}
 		/* remap the agressor's old location */
-		if (youagr ? (!Invisible) : canspotmon(magr)) {
+		if (did_tmp_at) {
 			tmp_at(DISP_END, 0);
+		}
+		if (youagr ? (!Invisible) : canspotmon(magr)) {
 			newsym(x(magr), y(magr));
 		}
 	}
