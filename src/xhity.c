@@ -26,7 +26,6 @@ STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 STATIC_DCL int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, void *, int, int, int, boolean, int, boolean, int, boolean *));
@@ -958,6 +957,9 @@ int tary;
 				continue;
 			/* cannot swallow huge or larger */
 			if (pd->msize >= MZ_HUGE)
+				continue;
+			/* cannot swallow anyone else while player is engulfed */
+			if (u.uswallow && u.ustuck == magr && !youdef)
 				continue;
 			/* ahazu protects the player from engulfing */
 			if (youdef && u.sealsActive&SEAL_AHAZU)
@@ -7400,32 +7402,51 @@ boolean ranged;
 			pline("%s reaches out with %s %s!  A corona of dancing energy surrounds the %s!",
 				Monnam(magr), mhis(magr), mbodypart(magr, ARM), mbodypart(magr, HAND));
 		}
-		/* shock / fire / stun combo */
-		alt_attk.aatyp = AT_NONE;
-
-		alt_attk.adtyp = AD_ELEC;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* elec damage */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
-		alt_attk.adtyp = AD_FIRE;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* fire damage */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
-		alt_attk.adtyp = AD_STUN;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 3, dieroll, vis, ranged);		/* 3 turn stun, minor physical damage */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		/* "Positive energy": shock / fire / stun combo */
+		/* completely resisted by Shock res */
+		if (!Shock_res(mdef)) {
+			alt_attk.aatyp = AT_NONE;
+			alt_attk.adtyp = AD_ELEC;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* elec damage */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			alt_attk.adtyp = AD_FIRE;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* fire damage */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			alt_attk.adtyp = AD_STUN;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 3, dieroll, vis, ranged);		/* 3 turn stun, minor physical damage */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+		}
+		else {
+			/* 1-damage physical touch */
+			alt_attk.aatyp = AT_TUCH;
+			alt_attk.adtyp = AD_PHYS;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 1, dieroll, vis, ranged);
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+		}
 
 		/* but wait, there's more! */
 		if (vis && dohitmsg) {
 			pline("%s reaches out with %s other %s!  A penumbra of shadows surrounds the %s!",
 				Monnam(magr), mhis(magr), mbodypart(magr, ARM), mbodypart(magr, HAND));
 		}
-		/* cold / drain combo */
-		alt_attk.aatyp = AT_NONE;
-		alt_attk.adtyp = AD_COLD;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* cold damage */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
-		alt_attk.adtyp = AD_DRLI;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 0, dieroll, vis, ranged);		/* level drain */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		/* "Negative energy": cold / drain combo */
+		/* completely resisted by Drain res */
+		if (!Drain_res(mdef)) {
+			alt_attk.aatyp = AT_NONE;
+			alt_attk.adtyp = AD_COLD;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);		/* cold damage */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			alt_attk.adtyp = AD_DRLI;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 0, dieroll, vis, ranged);		/* level drain */
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+		}
+		else {
+			/* 1-damage physical touch */
+			alt_attk.aatyp = AT_TUCH;
+			alt_attk.adtyp = AD_PHYS;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, 1, dieroll, vis, ranged);
+			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+		}
 
 		return result;
 
@@ -8417,11 +8438,19 @@ int vis;
 			/* remove ball and chain */
 			if (Punished)
 				unplacebc();
-			/* move attacker */
-			remove_monster(x(magr), y(magr));
-			magr->mtrapped = 0;		/* no longer on old trap */
-			place_monster(magr, u.ux, u.uy);
-			newsym(x(magr), y(magr));
+			/* maybe move attacker */
+			if (!stationary(magr->data)) {
+				remove_monster(x(magr), y(magr));
+				newsym(x(magr), y(magr));
+				magr->mtrapped = 0;		/* no longer on old trap */
+				place_monster(magr, u.ux, u.uy);
+				newsym(x(magr), y(magr));
+			}
+			else {
+				/* or maybe pluck the player */
+				u.ux = x(magr);
+				u.uy = y(magr);
+			}
 			u.ustuck = magr;
 #ifdef STEED
 			if (is_animal(pa) && u.usteed) {
@@ -8453,6 +8482,7 @@ int vis;
 			}
 
 			if (touch_petrifies(youracedata) && !resists_ston(magr)) {
+				expels(magr, pa, FALSE);
 				minstapetrify(magr, TRUE);
 				if (magr->mhp > 0)
 					return MM_AGR_STOP;
@@ -8518,6 +8548,7 @@ int vis;
 		}
 	}
 	else {
+		boolean did_tmp_at = FALSE;
 		/* message */
 		if (youagr) {
 			You("%s %s!",
@@ -8542,14 +8573,15 @@ int vis;
 			/* SCOPECREEP: get the correct glyph for pets/peacefuls/zombies/detected/etc */
 			tmp_at(DISP_FLASH, mon_to_glyph(magr));
 			tmp_at(x(mdef), y(mdef));
+			did_tmp_at = TRUE;
 			delay_output();
 			delay_output();
 		}
 		/* deal damage and other effects */
 		result = xengulfhurty(magr, mdef, attk, vis);
 
-		/* if defender died, move agressor to defender's coord */
-		if (result&MM_DEF_DIED) {
+		/* if defender died and aggressor isn't stationary, move agressor to defender's coord */
+		if (!stationary(magr->data) && result&MM_DEF_DIED) {
 			/* sanity check */
 			if (*hp(mdef) > 0)
 				impossible("dead engulfee still alive?");
@@ -8565,8 +8597,10 @@ int vis;
 			}
 		}
 		/* remap the agressor's old location */
-		if (youagr ? (!Invisible) : canspotmon(magr)) {
+		if (did_tmp_at) {
 			tmp_at(DISP_END, 0);
+		}
+		if (youagr ? (!Invisible) : canspotmon(magr)) {
 			newsym(x(magr), y(magr));
 		}
 	}
@@ -8863,7 +8897,12 @@ int vis;
 	case AD_BLND:
 		if (can_blnd(magr, mdef, attk->aatyp, (struct obj*)0)) {
 			if (youdef) {
-				if (!Blind) {
+			
+				if (uarmh && uarmh->otyp == SHEMAGH && 
+					(magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND))
+				{
+					pline("The %s protects you from the dust!", simple_typename(uarmh->otyp));
+				} else if (!Blind) {
 					You_cant("see in here!");
 					make_blinded((long)dmg, FALSE);
 					if (!Blind)
@@ -8874,10 +8913,17 @@ int vis;
 					make_blinded(Blinded + 1, FALSE);
 			}
 			else {
-				if (vis&VIS_MDEF && mdef->mcansee)
-					pline("%s can't see in there!", Monnam(mdef));
-				mdef->mcansee = 0;
-				mdef->mblinded = min(127, dmg + mdef->mblinded);
+				struct obj *otmp = which_armor(mdef, W_ARMH);
+				
+				if (otmp && otmp->otyp == SHEMAGH && (magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND)){
+					if (vis&VIS_MDEF)
+						pline("The %s protects %s from the dust!", simple_typename(otmp->otyp), Monnam(mdef));
+				} else {
+					if (vis&VIS_MDEF && mdef->mcansee)
+						pline("%s can't see in there!", Monnam(mdef));
+					mdef->mcansee = 0;
+					mdef->mblinded = min(127, dmg + mdef->mblinded);
+				}
 			}
 		}
 		result = MM_HIT;
@@ -11906,6 +11952,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			case OPOISON_FILTH:
 				resists = Sick_res(mdef);
 				majoreff = !rn2(10);
+				if (launcher && launcher->oartifact == ART_PLAGUE && monstermoves < launcher->ovar1)
+					majoreff = !rn2(5);	/* while invoked, Plague's arrows are twice as likely to instakill (=20%) */
 				break;
 			case OPOISON_SLEEP:
 				resists = Sleep_res(mdef);
@@ -13831,14 +13879,20 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		if (!level.flags.noteleport) {
 			coord cc;
-			if (youagr) {
-				tele();
+			if (magr) {
+				if (youagr) {
+					tele();
+				}
+				else {
+					rloc(magr, FALSE);
+				}
+				if (enexto(&cc, x(magr), y(magr), &mons[PM_URANIUM_IMP])) {
+					rloc_to(mdef, cc.x, cc.y);
+				}
 			}
 			else {
-				rloc(magr, FALSE);
-			}
-			if (enexto(&cc, x(magr), y(magr), &mons[PM_URANIUM_IMP])) {
-				rloc_to(mdef, cc.x, cc.y);
+				/* if no attacker, the uranium imp teleports at random */
+				rloc(mdef, FALSE);
 			}
 			
 			return MM_AGR_STOP;

@@ -1182,6 +1182,13 @@ genericptr_t p2;
 		}
 		if (nonliving(youracedata) || Breathless)
 			return FALSE;
+		
+		if (uarmh && uarmh->otyp == SHEMAGH){
+			if (!rn2(4))
+				pline("The %s protects you from the dust!", simple_typename(uarmh->otyp));
+			
+			return FALSE;
+		}
 		if (!Blind)
 			make_blinded(1L, FALSE);
 		if(dam > 3 && !rn2(20) && !Sick_resistance){ //Only a large dust storm
@@ -1210,6 +1217,11 @@ genericptr_t p2;
 		if (mtmp->mtyp == PM_SENTINEL_OF_MITHARDIR){
 			mtmp->mhp = min(mtmp->mhp+dam, mtmp->mhpmax);
 		}
+		struct obj *otmp = which_armor(mtmp, W_ARMH);
+		
+		if (otmp && otmp->otyp == SHEMAGH)
+			return FALSE;
+		
 		/* Non living or non breathing are not concerned */
 		if (!nonliving(mtmp->data) && !breathless_mon(mtmp)) {
 			if(heros_fault(reg)) setmangry(mtmp);

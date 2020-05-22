@@ -318,7 +318,7 @@ int faction;
 		insert = FALSE;
 
 		/* some factions completely skip specific attacks */
-		if ((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
+		while ((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
 				(
 				attk->aatyp == AT_SPIT ||
 				attk->aatyp == AT_BREA ||
@@ -331,7 +331,8 @@ int faction;
 				attk->aatyp == AT_MAGC ||
 				(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
 				attk->aatyp == AT_GAZE ||
-				attk->aatyp == AT_WDGZ
+				attk->aatyp == AT_WDGZ ||
+				(attk->aatyp == AT_NONE && attk->adtyp == AD_PLYS)
 				)
 			)
 		{
@@ -357,8 +358,26 @@ int faction;
 		}
 
 		/* some factions want to adjust existing attacks, or add additional attacks */
-#define insert_okay (!special && (is_null_attk(attk) || (attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp))) && (insert = TRUE))
+#define insert_okay (!special && (is_null_attk(attk) || \
+					(attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) || attk->aatyp == AT_NONE)) \
+					&& (insert = TRUE))
+#define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;}
+		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
+		if ((faction == ZOMBIFIED || faction == SKELIFIED) && (
+			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
+				is_null_attk(attk) || 
+				(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
+				) && (insert = TRUE)
+			))
+		{
+			maybe_insert()
+			attk->aatyp = !nolimbs(ptr) ? AT_CLAW : AT_BITE;
+			attk->adtyp = AD_PHYS;
+			attk->damn = ptr->mlevel / 10 + (faction == ZOMBIFIED ? 1 : 2);
+			attk->damd = max(ptr->msize * 2, 4);
+		}
+
 		/* skeletons get a paralyzing touch */
 		if (faction == SKELIFIED && (
 			insert_okay
@@ -451,7 +470,7 @@ int faction;
 		}
 		/* yith gain spellcasting */
 		if (faction == YITH && (
-			insert_okay
+			end_insert_okay
 			))
 		{
 			maybe_insert();
@@ -463,7 +482,7 @@ int faction;
 		}
 		/* cranium rats gain psionic spellcasting */
 		if (faction == CRANIUM_RAT && (
-			insert_okay
+			end_insert_okay
 			))
 		{
 			maybe_insert();
@@ -498,6 +517,7 @@ int faction;
 		}
 	}
 #undef insert_okay
+#undef end_insert_okay
 #undef maybe_insert
 	return ptr;
 }

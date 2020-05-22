@@ -792,16 +792,16 @@ int ga_num;
 boolean
 maybe_god_gives_gift()
 {
-	int nartifacts = u.ugifts + (Role_if(PM_PRIEST) ? 0 : u.uconduct.wisharti);
 	/* previous: 1 in (10 + (2 * gifts * (gifts+wishes))) */
 	/* Role_if(PM_PRIEST) ? !rn2(10 + (2 * u.ugifts * u.ugifts)) : !rn2(10 + (2 * u.ugifts * nartifacts)) */
 	/* the average giftable artifact has a value of 4 (TIER_B), plus any bonuses for the player being good with it */
 	/* uartisval isn't increased for priests when wishing */
 
-//Disable while tiering and full behaviour is still under discussion
-//	return !rn2(10 + (u.uartisval * u.uartisval / 10));
-
-	return !rn2(10 + (2 * u.ugifts * nartifacts));
+	//New:
+	return !rn2(10 + (u.uartisval * u.uartisval * 2 / 25));
+	//Old:
+	//int nartifacts = u.ugifts + (Role_if(PM_PRIEST) ? 0 : u.uconduct.wisharti);
+	//return !rn2(10 + (2 * u.ugifts * nartifacts));
 }
 
 
@@ -2059,10 +2059,6 @@ goat_pleased()
 	    pat_on_head = 1;
 	} else {
 	    int action = rn1(Luck + (goat_mouth_at(u.ux, u.uy) ? 4 : 2), 1);
-	    /* pleased Lawful gods often send you a helpful angel if you're
-	       getting the crap beat out of you */
-	    if ((u.uhp < 5 || (u.uhp*7 < u.uhpmax)) &&
-		 u.ualign.type == A_LAWFUL && rn2(3)) lawful_god_gives_angel();
 
 	    if (!goat_mouth_at(u.ux, u.uy)) action = min(action, 3);
 
@@ -2105,7 +2101,7 @@ goat_pleased()
 				Your("%s %s%s.", aobjnam(uwep, "softly glow"),
 					 hcolor(NH_AMBER), repair_buf);
 				else You_feel("the power of %s over your %s.",
-				u_gname(), xname(uwep));
+				goattitles[rn2(SIZE(goattitles))], xname(uwep));
 				*repair_buf = '\0';
 			} else if (!uwep->blessed) {
 				bless(uwep);
@@ -2115,7 +2111,7 @@ goat_pleased()
 					 aobjnam(uwep, "softly glow"),
 					 an(hcolor(NH_LIGHT_BLUE)), repair_buf);
 				else You_feel("the blessing of %s over your %s.",
-				u_gname(), xname(uwep));
+				goattitles[rn2(SIZE(goattitles))], xname(uwep));
 				*repair_buf = '\0';
 			}
 
@@ -3206,8 +3202,8 @@ dosacrifice()
 			otmp->gifted = Align2gangr(u.ualign.type);
 			u.ugifts++;
 			u.uartisval += arti_value(otmp);
-		    //u.ublesscnt = rnz(300 + (u.uartisval * 10));
-			u.ublesscnt = rnz(300 + (u.ugifts * 50));
+		    u.ublesscnt = rnz(300 + (u.uartisval * 10));
+			//u.ublesscnt = rnz(300 + (u.ugifts * 50));
 			u.lastprayed = moves;
 			u.reconciled = REC_NONE;
 			u.lastprayresult = PRAY_GIFT;
@@ -3221,7 +3217,7 @@ dosacrifice()
 		    unrestrict_weapon_skill(weapon_type(otmp));
 		    discover_artifact(otmp->oartifact);
 			if(otmp->oartifact == ART_BLADE_SINGER_S_SABER){
-				unrestrict_weapon_skill(P_SPEAR);
+				unrestrict_weapon_skill(P_SABER);
 				unrestrict_weapon_skill(P_DAGGER);
 				unrestrict_weapon_skill(P_TWO_WEAPON_COMBAT);
 			} else if(otmp->oartifact == ART_BEASTMASTER_S_DUSTER){
@@ -3233,6 +3229,8 @@ dosacrifice()
 				unrestrict_weapon_skill(P_RIDING);
 				mksobj_at(SADDLE, u.ux, u.uy, FALSE, FALSE);
 				u.umartial = TRUE;
+			} else if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA){
+				unrestrict_weapon_skill(P_WHIP);
 			}
 			return(1);
 		}
@@ -4022,7 +4020,7 @@ boolean yours;
 	int cn = otmp->corpsenm;
 	struct monst *revived = 0;
 	if(is_rider(&mons[otmp->corpsenm])){
-		pline("A pulse of darkness radiates %s!", The(xname(otmp)));
+		pline("A pulse of darkness radiates from %s!", the(xname(otmp)));
 		revived = revive(otmp, FALSE);
 		if(yours)
 			gods_upset(GA_MOTHER);
@@ -4186,12 +4184,12 @@ struct obj *otmp;
 	    if(u.ugangr[GA_MOTHER] < 0) u.ugangr[GA_MOTHER] = 0;
 	    if(u.ugangr[GA_MOTHER] != saved_anger) {
 		if (u.ugangr[GA_MOTHER]) {
-		    pline("%s seems %s.", u_gname(),
+			pline("%s seems %s.", upstart(goattitles[rn2(SIZE(goattitles))]),
 			  Hallucination ? "groovy" : "slightly mollified");
 
 		    if ((int)u.uluck < 0) change_luck(1);
 		} else {
-		    pline("%s seems %s.", u_gname(), Hallucination ?
+			pline("%s seems %s.", upstart(goattitles[rn2(SIZE(goattitles))]), Hallucination ?
 			  "cosmic (not a new fact)" : "mollified");
 
 		    if ((int)u.uluck < 0) u.uluck = 0;

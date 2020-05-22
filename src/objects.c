@@ -399,17 +399,17 @@ GUN("cutting laser","hard tan lozenge",             0,   MZ_SMALL, 0,   1, 1000,
 
 GUN("raygun", "hard handle ending in glassy disks", 0,  MZ_MEDIUM, 0,   8, 3000, 15,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BRIGHT_CYAN), /*Needs tile*/
 BULLET("bullet", "pellet",
-	0,    MZ_TINY, 0,  1,   5, 8, 6, 0,  WP_BULLET,   P,   METAL, -P_FIREARM, HI_METAL),/*Needs tile*/
+	0,    MZ_TINY, 0,  1,   5, 8, 6, 0,  WP_BULLET,   E|P, METAL, -P_FIREARM, HI_METAL),/*Needs tile*/
 BULLET("silver bullet", "silver pellet",
-	0,    MZ_TINY, 0,  1,  15, 8, 6, 0,  WP_BULLET,   P,  SILVER, -P_FIREARM, HI_SILVER),/*Needs tile*/
+	0,    MZ_TINY, 0,  1,  15, 8, 6, 0,  WP_BULLET,   E|P,SILVER, -P_FIREARM, HI_SILVER),/*Needs tile*/
 BULLET("shotgun shell", "red tube",
-	0,    MZ_TINY, 0,  1,  10,12, 6,10,   WP_SHELL,   P,   METAL, -P_FIREARM, CLR_RED),/*Needs tile*/
+	0,    MZ_TINY, 0,  1,  10,12, 6,10,   WP_SHELL,   E|P, METAL, -P_FIREARM, CLR_RED),/*Needs tile*/
 BULLET("frag grenade", "green spheriod",
 	0,   MZ_SMALL, 0,  5, 350, 2, 2, 0, WP_GRENADE,   B,    IRON, -P_FIREARM, CLR_GREEN),/*Needs tile*/
 BULLET("gas grenade", "lime spheriod",
 	0,   MZ_SMALL, 0,  2, 350, 2, 2, 0, WP_GRENADE,   B,    IRON, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/
 BULLET("rocket", "firework",
-	0,   MZ_SMALL, 0, 20, 450,12,20, 0,  WP_ROCKET,   P,  SILVER, -P_FIREARM, CLR_BLUE),/*Needs tile*/
+	0,   MZ_SMALL, 0, 20, 450,12,20, 0,  WP_ROCKET,   E|P,SILVER, -P_FIREARM, CLR_BLUE),/*Needs tile*/
 BULLET("stick of dynamite", "red stick",
 	0,   MZ_SMALL, 0, 10, 150, 0, 0, 0, WP_GENERIC,   B, PLASTIC,     P_NONE, CLR_RED),/*Needs tile*/
 
@@ -418,7 +418,7 @@ BULLET("blaster bolt", "ruby bolt",
 BULLET("heavy blaster bolt", "scarlet bolt",
 	0,    MZ_TINY, 0,  1,   0,10,12, 0, WP_BLASTER,   E,   METAL, -P_FIREARM, CLR_ORANGE),/*Needs tile*/
 BULLET("laser beam", "green bolt",
-	0,    MZ_TINY, 0,  1,   0, 1, 1, 0, WP_BLASTER,   S,   METAL, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/
+	0,    MZ_TINY, 0,  1,   0, 1, 1, 0, WP_BLASTER,   E|S, METAL, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/
 //endif
 
 /* bows */
@@ -519,6 +519,9 @@ HELM_MATSPEC("crystal helm", "fish bowl", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2,150, 300, 9, 1, 0, GLASS,UNIDED, HI_GLASS),
 HELM("pontiff's crown", "filigreed faceless helm", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, METAL, HI_GOLD),
+HELM_MATSPEC("shemagh", "white headscarf", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,	0, 0, 5,   5, 10, 0, 0, CLOTH,UNIDED, CLR_WHITE),
+
 /* With shuffled appearances... */
 HELM("helmet", "plumed helmet", /* circlet */
 		0, 0,  0,      8, 1, 30,  10, 9, 2, 0, IRON, HI_METAL),

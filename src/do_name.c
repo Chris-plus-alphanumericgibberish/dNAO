@@ -15,7 +15,6 @@ STATIC_DCL struct artifact artilist[];
 //STATIC_DCL void FDECL(do_oname, (struct obj *));//moved to extern.h
 static void FDECL(getpos_help, (BOOLEAN_P,const char *));
 
-STATIC_DCL void FDECL(append_faction_desc, (struct monst *, char *, boolean));
 STATIC_DCL boolean FDECL(maybe_append_injury_desc, (struct monst *, char *));
 
 extern const char what_is_an_unknown_object[];		/* from pager.c */

@@ -1168,7 +1168,7 @@ struct obj * weapon;
 		((slot & W_ARMU) && !uarmu)))
 		||
 		/* monster */
-		(!youagr && (slot & ~(magr->misc_worn_check)))
+		(!youagr && ((slot & ~(magr->misc_worn_check)) || !slot))
 		))
 		/* not a damage type that doesn't actually contact */
 		&& !(
