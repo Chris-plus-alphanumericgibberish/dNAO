@@ -595,9 +595,12 @@ int sx, sy;
 						newobj->shopOwned = TRUE;
 						if(!newobj->oartifact && newobj->otyp != CRYSTAL_SWORD)
 							set_material(newobj, SILVER);
-						newobj->opoisoned = rn2(3) ? OPOISON_ACID : OPOISON_SILVER;
-						// newobj->opoisoned = OPOISON_ACID;
-
+						
+						if (newobj->obj_material != SILVER && !rn2(3))
+							newobj->opoisoned = OPOISON_SILVER;
+						else
+							newobj->opoisoned = OPOISON_ACID;
+						
 						/* replace curobj with newobj */
 						delobj(curobj);
 						/* assign the new object to the curobj pointer */
