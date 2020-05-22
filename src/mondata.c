@@ -318,7 +318,7 @@ int faction;
 		insert = FALSE;
 
 		/* some factions completely skip specific attacks */
-		if ((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
+		while ((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
 				(
 				attk->aatyp == AT_SPIT ||
 				attk->aatyp == AT_BREA ||
