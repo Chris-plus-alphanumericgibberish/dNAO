@@ -942,9 +942,11 @@ peffects(otmp)
 		}
 	    if (!(HFast & INTRINSIC)) {
 			if (!Fast) You("speed up.");
-			else Your("quickness feels more natural.");
+			else {
+				Your("quickness feels more natural.");
+				unkn++;
+			}
 			HFast |= FROMOUTSIDE;
-			unkn++;
 	    } else nothing++;
 		exercise(A_DEX, TRUE);
 	break;

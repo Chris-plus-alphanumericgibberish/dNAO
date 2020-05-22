@@ -118,7 +118,7 @@ stoned_dialogue()
 	}
 	if (i == 5L)
 		HFast = 0L;
-	if (i == 3L)
+	if (i == 3L && !Free_action)
 		nomul(-3, "getting stoned");
 	exercise(A_DEX, FALSE);
 }
@@ -142,7 +142,7 @@ golded_dialogue()
 	}
 	if (i == 5L)
 		HFast = 0L;
-	if (i == 3L)
+	if (i == 3L && !Free_action)
 		nomul(-3, "turning to gold");
 	exercise(A_DEX, FALSE);
 }

@@ -2059,10 +2059,6 @@ goat_pleased()
 	    pat_on_head = 1;
 	} else {
 	    int action = rn1(Luck + (goat_mouth_at(u.ux, u.uy) ? 4 : 2), 1);
-	    /* pleased Lawful gods often send you a helpful angel if you're
-	       getting the crap beat out of you */
-	    if ((u.uhp < 5 || (u.uhp*7 < u.uhpmax)) &&
-		 u.ualign.type == A_LAWFUL && rn2(3)) lawful_god_gives_angel();
 
 	    if (!goat_mouth_at(u.ux, u.uy)) action = min(action, 3);
 
@@ -2105,7 +2101,7 @@ goat_pleased()
 				Your("%s %s%s.", aobjnam(uwep, "softly glow"),
 					 hcolor(NH_AMBER), repair_buf);
 				else You_feel("the power of %s over your %s.",
-				u_gname(), xname(uwep));
+				goattitles[rn2(SIZE(goattitles))], xname(uwep));
 				*repair_buf = '\0';
 			} else if (!uwep->blessed) {
 				bless(uwep);
@@ -2115,7 +2111,7 @@ goat_pleased()
 					 aobjnam(uwep, "softly glow"),
 					 an(hcolor(NH_LIGHT_BLUE)), repair_buf);
 				else You_feel("the blessing of %s over your %s.",
-				u_gname(), xname(uwep));
+				goattitles[rn2(SIZE(goattitles))], xname(uwep));
 				*repair_buf = '\0';
 			}
 
@@ -3221,7 +3217,7 @@ dosacrifice()
 		    unrestrict_weapon_skill(weapon_type(otmp));
 		    discover_artifact(otmp->oartifact);
 			if(otmp->oartifact == ART_BLADE_SINGER_S_SABER){
-				unrestrict_weapon_skill(P_SPEAR);
+				unrestrict_weapon_skill(P_SABER);
 				unrestrict_weapon_skill(P_DAGGER);
 				unrestrict_weapon_skill(P_TWO_WEAPON_COMBAT);
 			} else if(otmp->oartifact == ART_BEASTMASTER_S_DUSTER){
@@ -4022,7 +4018,7 @@ boolean yours;
 	int cn = otmp->corpsenm;
 	struct monst *revived = 0;
 	if(is_rider(&mons[otmp->corpsenm])){
-		pline("A pulse of darkness radiates %s!", The(xname(otmp)));
+		pline("A pulse of darkness radiates from %s!", the(xname(otmp)));
 		revived = revive(otmp, FALSE);
 		if(yours)
 			gods_upset(GA_MOTHER);
@@ -4186,12 +4182,12 @@ struct obj *otmp;
 	    if(u.ugangr[GA_MOTHER] < 0) u.ugangr[GA_MOTHER] = 0;
 	    if(u.ugangr[GA_MOTHER] != saved_anger) {
 		if (u.ugangr[GA_MOTHER]) {
-		    pline("%s seems %s.", u_gname(),
+			pline("%s seems %s.", upstart(goattitles[rn2(SIZE(goattitles))]),
 			  Hallucination ? "groovy" : "slightly mollified");
 
 		    if ((int)u.uluck < 0) change_luck(1);
 		} else {
-		    pline("%s seems %s.", u_gname(), Hallucination ?
+			pline("%s seems %s.", upstart(goattitles[rn2(SIZE(goattitles))]), Hallucination ?
 			  "cosmic (not a new fact)" : "mollified");
 
 		    if ((int)u.uluck < 0) u.uluck = 0;
