@@ -361,7 +361,7 @@ int faction;
 #define insert_okay (!special && (is_null_attk(attk) || \
 					(attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) || attk->aatyp == AT_NONE)) \
 					&& (insert = TRUE))
-#define end_insert_okay (!special && is_null_attk(attk) && (insert = TRUE))
+#define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
 		if ((faction == ZOMBIFIED || faction == SKELIFIED) && (
