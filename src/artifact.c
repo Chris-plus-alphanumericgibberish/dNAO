@@ -3374,7 +3374,7 @@ boolean * messaged;
 	}
 
 	if (attacks(AD_FIRE, otmp) || (oproperties&OPROP_FIREW)) {
-		if (oartifact && (vis&VIS_MAGR)) {
+		if (attacks(AD_FIRE, otmp) && (vis&VIS_MAGR)) {	/* only artifacts message */
 			pline_The("fiery %s %s %s%c",
 				wepdesc,
 				vtense(wepdesc,
@@ -3397,7 +3397,7 @@ boolean * messaged;
 		(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)
 		)
 		){
-		if (oartifact && (vis&VIS_MAGR)) {
+		if (attacks(AD_COLD, otmp) && (vis&VIS_MAGR)) {
 			pline_The("ice-cold %s %s %s%c",
 				wepdesc,
 				vtense(wepdesc,
@@ -3419,7 +3419,7 @@ boolean * messaged;
 		}
 	}
 	if (attacks(AD_ELEC, otmp) || (oproperties&OPROP_ELECW)) {
-		if (oartifact && (vis&VIS_MAGR)) {
+		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR)) {
 			pline_The("%s hits%s %s%c",
 				wepdesc,
 				vtense(wepdesc, "hit"),
@@ -3430,7 +3430,7 @@ boolean * messaged;
 	    if (!rn2(5)) (void) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
 	}
 	if (attacks(AD_ACID, otmp) || (oproperties&OPROP_ACIDW)) {
-		if (oartifact && (vis&VIS_MAGR)) {
+		if (attacks(AD_ACID, otmp) && (vis&VIS_MAGR)) {
 			pline_The("foul %s %s %s%c",
 				wepdesc,
 				vtense(wepdesc,
