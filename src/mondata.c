@@ -331,7 +331,8 @@ int faction;
 				attk->aatyp == AT_MAGC ||
 				(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
 				attk->aatyp == AT_GAZE ||
-				attk->aatyp == AT_WDGZ
+				attk->aatyp == AT_WDGZ ||
+				(attk->aatyp == AT_NONE && attk->adtyp == AD_PLYS)
 				)
 			)
 		{
@@ -357,15 +358,21 @@ int faction;
 		}
 
 		/* some factions want to adjust existing attacks, or add additional attacks */
-#define insert_okay (!special && (is_null_attk(attk) || (attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp))) && (insert = TRUE))
+#define insert_okay (!special && (is_null_attk(attk) || \
+					(attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) || attk->aatyp == AT_NONE)) \
+					&& (insert = TRUE))
 #define end_insert_okay (!special && is_null_attk(attk) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
 		if ((faction == ZOMBIFIED || faction == SKELIFIED) && (
-			is_null_attk(attk) && i == 0
+			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
+				is_null_attk(attk) || 
+				(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
+				) && (insert = TRUE)
 			))
 		{
-			attk->aatyp = nolimbs(ptr) ? AT_BITE : AT_CLAW;
+			maybe_insert()
+			attk->aatyp = !nolimbs(ptr) ? AT_CLAW : AT_BITE;
 			attk->adtyp = AD_PHYS;
 			attk->damn = ptr->mlevel / 10 + (faction == ZOMBIFIED ? 1 : 2);
 			attk->damd = max(ptr->msize * 2, 4);
