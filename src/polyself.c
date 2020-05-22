@@ -2025,7 +2025,7 @@ int part;
 		"scales", "blood", "gill", "nostril", "stomach","heart","scales",
 		"flesh","beat","bones","ear","creak","crack" },
 	*snakeleg_humanoid_parts[] = { "arm", "eye", "face", "finger",
-		"fingertip", "serpentine lower body", "hand", "handed", "head", "leg",
+		"fingertip", "serpentine lower body", "hand", "handed", "head", "rear region",
 		"light headed", "neck", "spine", "tail-tip", "scales",
 		"blood", "lung", "nose", "stomach","heart","scales",
 		"flesh","beat","bones","ear","creak","crack" },
