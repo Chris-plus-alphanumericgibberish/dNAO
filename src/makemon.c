@@ -6012,8 +6012,10 @@ register struct	monst	*mtmp;
 		if (ptr->mtyp == PM_MINOTAUR) {
 		    if (!rn2(3) || (in_mklev && Is_earthlevel(&u.uz)))
 			(void) mongets(mtmp, WAN_DIGGING);
-		} else if(monsndx(ptr) == PM_DEEPEST_ONE) {
-			 if(on_level(&rlyeh_level,&u.uz)){
+		} else if(ptr->mtyp == PM_DEEPEST_ONE
+			|| ptr->mtyp == PM_FATHER_DAGON
+			|| ptr->mtyp == PM_MOTHER_HYDRA) {
+			 if(on_level(&rlyeh_level,&u.uz) || ptr->mlevel>=50){
 			otmp = mksobj(TRIDENT, TRUE, FALSE);
 			otmp->oerodeproof = 1;
 			otmp->spe = 9;
