@@ -2285,6 +2285,9 @@ E const char *NDECL(getDnDElfCgod);
 E const char *NDECL(getDnDHumLgod);
 E const char *NDECL(getDnDHumNgod);
 E const char *NDECL(getDnDHumCgod);
+#ifdef RECORD_ACHIEVE
+E void NDECL(give_quest_trophy);
+#endif
 
 /* ### rumors.c ### */
 

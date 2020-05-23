@@ -686,6 +686,44 @@ struct u_achieve {
 		Bitfield(killed_lucifer,1);		/* Bragging rights */
 		Bitfield(killed_asmodeus,1);		/* Bragging rights */
 		Bitfield(killed_demogorgon,1);		/* Bragging rights */
+		unsigned long long	trophies;	/* Flags for Junethack trophies */
+#define	ARC_QUEST		0x1L << 0
+#define	CAV_QUEST		0x1L << 1
+#define	CON_QUEST		0x1L << 2
+#define	KNI_QUEST		0x1L << 3
+#define	ANA_QUEST		0x1L << 4
+#define	AND_QUEST		0x1L << 5
+#define	ANA_ASC			0x1L << 6
+#define	BIN_QUEST		0x1L << 7
+#define	BIN_ASC			0x1L << 8
+#define	PIR_QUEST		0x1L << 9
+#define	BRD_QUEST		0x1L << 10
+#define	NOB_QUEST		0x1L << 11
+#define	HDR_NOB_QUEST	0x1L << 12
+#define	HDR_SHR_QUEST	0x1L << 13
+#define	DRO_NOB_QUEST	0x1L << 14
+#define	DRO_SHR_QUEST	0x1L << 15
+#define	DWA_NOB_QUEST	0x1L << 16
+#define	DWA_KNI_QUEST	0x1L << 17
+#define	GNO_RAN_QUEST	0x1L << 18
+#define	ELF_SHR_QUEST	0x1L << 19
+#define	CLOCK_ASC		0x1L << 20
+#define	CHIRO_ASC		0x1L << 21
+#define	YUKI_ASC		0x1L << 22
+#define	HALF_ASC		0x1L << 23
+#define	LAW_QUEST		0x1L << 24
+#define	NEU_QUEST		0x1L << 25
+#define	CHA_QUEST		0x1L << 26
+#define	MITH_QUEST		0x1L << 27
+#define	MORD_QUEST		0x1L << 28
+#define	SECOND_THOUGHTS	0x1L << 29
+#define	ILLUMIAN		0x1L << 30
+#define	RESCUE			0x1L << 31
+#define	FULL_LOADOUT	0x1L << 32
+#define	NIGHTMAREHUNTER	0x1L << 33
+#define	SPEED_PHASE		0x1L << 34
+#define	QUITE_MAD		0x1L << 35
+#define	TOTAL_DRUNK		0x1L << 36
 };
 
 E struct u_achieve achieve;

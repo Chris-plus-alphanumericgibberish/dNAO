@@ -2902,4 +2902,75 @@ getDnDHumCgod()
 {
 	return DnDHumCgod;
 }
+
+#ifdef RECORD_ACHIEVE
+void
+give_quest_trophy()
+{
+	if(urole.neminum == PM_MINION_OF_HUHETOTL)
+		achieve.trophies |= ARC_QUEST;
+	else if(urole.neminum == PM_CHROMATIC_DRAGON)
+		achieve.trophies |= CAV_QUEST;
+	else if(urole.neminum == PM_WARDEN_ARIANNA)
+		achieve.trophies |= CON_QUEST;
+	else if(urole.neminum == PM_NECROMANCER)
+		achieve.trophies |= ELF_SHR_QUEST;
+	else if(flags.initgend && (urole.neminum == PM_SEYLL_AUZKOVYN || urole.neminum == PM_ECLAVDRA))
+		achieve.trophies |= DRO_SHR_QUEST;
+	else if(!flags.initgend && (urole.neminum == PM_DARUTH_XAXOX || urole.neminum == PM_ECLAVDRA))
+		achieve.trophies |= HDR_SHR_QUEST;
+	else if(urole.neminum == PM_NIMUNE)
+		achieve.trophies |= KNI_QUEST;
+	else if(Role_if(PM_ANACHRONONAUT)){
+		if(Race_if(PM_ANDROID))
+			achieve.trophies |= AND_QUEST;
+		else
+			achieve.trophies |= ANA_QUEST;
+	}
+	else if(urole.neminum == PM_ACERERAK)
+		achieve.trophies |= BIN_QUEST;
+	else if(urole.neminum == PM_REBEL_RINGLEADER)
+		achieve.trophies |= NOB_QUEST;
+	else if(urole.neminum == PM_DURIN_S_BANE)
+		achieve.trophies |= DWA_NOB_QUEST;
+	else if(urole.neminum == PM_BOLG)
+		achieve.trophies |= DWA_KNI_QUEST;
+	else if(urole.neminum == PM_ELDER_BRAIN)
+		achieve.trophies |= DRO_NOB_QUEST;
+	else if(urole.neminum == PM_A_SALOM)
+		achieve.trophies |= HDR_NOB_QUEST;
+	else if(urole.neminum == PM_BLACKBEARD_S_GHOST)
+		achieve.trophies |= PIR_QUEST;
+	else if(urole.neminum == PM_AGLAOPE)
+		achieve.trophies |= BRD_QUEST;
+	else if(urole.neminum == PM_GREAT_HIGH_SHAMAN_OF_KURTULMAK)
+		achieve.trophies |= GNO_RAN_QUEST;
+	
+	if(quest_status.second_thoughts)
+		achieve.trophies |= SECOND_THOUGHTS;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_ascension_trophy()
+{
+	if(Role_if(PM_ANACHRONONAUT))
+		achieve.trophies |= ANA_ASC;
+	else if(Role_if(PM_EXILE))
+		achieve.trophies |= BIN_ASC;
+		
+	if(Race_if(PM_CLOCKWORK_AUTOMATON))
+		achieve.trophies |= CLOCK_ASC;
+	else if(Race_if(PM_CHIROPTERAN))
+		achieve.trophies |= CHIRO_ASC;
+	else if(Race_if(PM_HALF_DRAGON))
+		achieve.trophies |= HALF_ASC;
+	else if(Race_if(PM_YUKI_ONNA))
+		achieve.trophies |= YUKI_ASC;
+	
+	if(achieve.get_keys <= 2)
+		achieve.trophies |= SPEED_PHASE;
+}
+#endif
 /* role.c */

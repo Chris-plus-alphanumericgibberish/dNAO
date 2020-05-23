@@ -81,6 +81,9 @@ nemdead()
 {
 	if(!Qstat(killed_nemesis)) {
 	    Qstat(killed_nemesis) = TRUE;
+#ifdef RECORD_ACHIEVE
+		give_quest_trophy();
+#endif
 		if(Role_if(PM_EXILE)) u.uevent.qcompleted = TRUE;
 	    qt_pager(QT_KILLEDNEM + (flags.stag ? QT_TURNEDSTAG : 0));
 	}
@@ -91,6 +94,9 @@ artitouch()
 {
 	if(!Qstat(touched_artifact)) {
 	    Qstat(touched_artifact) = TRUE;
+#ifdef RECORD_ACHIEVE
+		if(!Role_if(PM_EXILE)) give_quest_trophy();
+#endif
 	    qt_pager(QT_GOTIT + (flags.stag ? QT_TURNEDSTAG : 0));
 	    exercise(A_WIS, TRUE);
 	}
@@ -689,6 +695,8 @@ turn_stag()
 				break;
 			}
 		}
+		if(Qstat(killed_nemesis) || Qstat(touched_artifact))
+			Qstat(second_thoughts) = TRUE;
 		Qstat(met_leader) = 0;
 		Qstat(pissed_off) = 0;
 		Qstat(got_quest) = 0;

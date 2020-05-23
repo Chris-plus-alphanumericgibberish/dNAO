@@ -280,6 +280,7 @@ struct obj *obj;
 		u.uhave.bell = 1;
 #ifdef RECORD_ACHIEVE
 		achieve.get_bell = 1;
+		give_quest_trophy();
 #endif
 	} else if (obj->otyp == SPE_BOOK_OF_THE_DEAD) {
 		if (u.uhave.book) impossible("already have the book?");

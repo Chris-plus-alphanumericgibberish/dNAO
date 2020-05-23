@@ -2843,6 +2843,7 @@ dosacrifice()
 					adjalign(10);
 #ifdef RECORD_ACHIEVE
 					achieve.ascended = 1;
+					give_ascension_trophy();
 #endif
 					pline("An invisible choir sings, and you are bathed in radiance...");
 					godvoice(Align2gangr(altaralign), "Congratulations, mortal!");
@@ -2879,6 +2880,7 @@ dosacrifice()
 					adjalign(10);
 #ifdef RECORD_ACHIEVE
 					achieve.ascended = 1;
+					give_ascension_trophy();
 #endif
 					pline("From the threshold of the Gate, you look back at the world");
 					pline("You don't know what awaits you in the Void,");

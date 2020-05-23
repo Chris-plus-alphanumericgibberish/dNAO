@@ -29,6 +29,7 @@ struct q_score {			/* Quest "scorecard" */
 	/* keep track of leader presence/absence even if leader is
 	   polymorphed, raised from dead, etc */
 	Bitfield(leader_is_dead,1);
+	Bitfield(second_thoughts,1); /*turned stag AFTER completing version 1 of the quest*/
 	unsigned leader_m_id;
 };
 
