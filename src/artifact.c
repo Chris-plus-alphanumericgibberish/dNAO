@@ -3427,7 +3427,7 @@ boolean * messaged;
 	}
 	if (attacks(AD_ELEC, otmp) || (oproperties&OPROP_ELECW)) {
 		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR)) {
-			pline_The("%s hits%s %s%c",
+			pline_The("%s %s %s%c",
 				wepdesc,
 				vtense(wepdesc, "hit"),
 				hittee, !spec_dbon_applies ? '.' : '!');
