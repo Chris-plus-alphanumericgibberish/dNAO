@@ -767,8 +767,15 @@ init_dungeons()		/* initialize the "dungeon" structs */
 	struct proto_dungeon pd;
 	struct level_map *lev_map;
 	struct version_info vers_info;
-	int dungeonversion = rn2(3);
-
+	int dungeonversion;
+	
+	if(flags.chaosvar){
+		//chaosvar is incremented by 1 so that all variants are nonzero
+		dungeonversion = flags.chaosvar-1;
+	} else {
+		//Otherwise pick a random variant
+		dungeonversion = rn2(3);
+	}
 	//Record chaos quest version (note: in the future not all dungeonversions will relate to the chaos quest)
 	chaos_dvariant = dungeonversion;
 	

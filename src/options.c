@@ -323,6 +323,8 @@ static struct Comp_Opt
 						1, SET_IN_GAME },
 	{ "catname",  "the name of your (first) cat (e.g., catname:Tabby)",
 						PL_PSIZ, DISP_IN_GAME },
+	{ "chaos_quest",    "tournament chaos quest (temple, mithardir, or mordor)",
+						10, DISP_IN_GAME },
 	{ "disclose", "the kinds of information to disclose at end of game",
 						sizeof(flags.end_disclose) * 2,
 						SET_IN_GAME },
@@ -2419,6 +2421,23 @@ goodfruit:
 		else if ((op = string_for_env_opt(fullname, opts, FALSE)) != 0)
 			if ((flags.initalign = str2align(op)) == ROLE_NONE)
 				badoption(opts);
+		return;
+	}
+
+	fullname = "chaos_quest";
+	if (match_optname(opts, fullname, sizeof("chaos_quest")-1, TRUE)) {
+		if (negated) bad_negation(fullname, FALSE);
+		else if ((op = string_for_env_opt(fullname, opts, FALSE)) != 0){
+			//flags.chaosvar must be nonzero
+			if(!strcmp(op, "mithardir"))
+				flags.chaosvar = MITHARDIR+1;
+			else if(!strcmp(op, "temple"))
+				flags.chaosvar = TEMPLE_OF_CHAOS+1;
+			else if(!strcmp(op, "mordor"))
+				flags.chaosvar = MORDOR+1;
+			else
+				badoption(opts);
+		}
 		return;
 	}
 
