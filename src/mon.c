@@ -4294,13 +4294,15 @@ register struct monst *mtmp;
 		You("panic after losing a pet!");
 		HPanicking += 1+rnd(6);
 	}
+	if(mtmp->mtyp == PM_ASMODEUS){
+		u.umadness |= MAD_OVERLORD;
+	}
 #ifdef RECORD_ACHIEVE
 	if(mtmp->mtyp == PM_LUCIFER){
 		achieve.killed_lucifer = 1;
 	}
 	else if(mtmp->mtyp == PM_ASMODEUS){
 		achieve.killed_asmodeus = 1;
-		u.umadness |= MAD_OVERLORD;
 	}
 	else if(mtmp->mtyp == PM_DEMOGORGON){
 		achieve.killed_demogorgon = 1;
