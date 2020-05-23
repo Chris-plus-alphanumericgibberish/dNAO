@@ -855,7 +855,7 @@ level_tele()
 		    schar destlev = 0;
 		    int destdnum = 0;
 
-		    if ((newlev = (int)print_dungeon(TRUE, FALSE, &destlev, &destdnum))) {
+		    if ((newlev = (int)print_dungeon(TRUE, &destlev, &destdnum))) {
 			newlevel.dnum = (xchar) destdnum;
 			newlevel.dlevel = destlev;
 			if (In_endgame(&newlevel) && !In_endgame(&u.uz)) {

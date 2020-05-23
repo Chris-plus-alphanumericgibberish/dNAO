@@ -1935,11 +1935,10 @@ print_branch(win, dnum, lower_bound, upper_bound, bymenu, lchoices)
 
 /* Print available dungeon information. */
 schar
-print_dungeon(bymenu, gotdgn, rlev, rdgn)
-boolean bymenu;	/* If TRUE, ask for input to select a level */
-boolean gotdgn;	/* Requires bymenu. If FALSE, select dungeon. If TRUE, select a level within rdgn. */
-schar *rlev;	/* returns selected level depth */
-int *rdgn;		/* returns selected level dungeon number */
+print_dungeon(bymenu, rlev, rdgn)
+boolean bymenu;
+schar *rlev;
+int *rdgn;
 {
     int     i, last_level, nlev;
     char    buf[BUFSZ];
@@ -1975,17 +1974,7 @@ int *rdgn;		/* returns selected level dungeon number */
 	}
 	if (bymenu) {
 	    any.a_void = 0;
-		if (!gotdgn) {
-			any.a_int = lchoices.idx + 1;
-			lchoices.dgn[lchoices.idx] = i;
-			add_menu(win, NO_GLYPH, &any, lchoices.menuletter, 0, iflags.menu_headings, buf, iflags.menu_headings);
-			if (lchoices.menuletter == 'z') lchoices.menuletter = 'A';
-			else lchoices.menuletter++;
-			lchoices.idx++;
-		}
-		else {
-			add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings, buf, MENU_UNSELECTED);
-		}
+	    add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings, buf, MENU_UNSELECTED);
 	} else
 	    putstr(win, 0, buf);
 
@@ -1997,45 +1986,35 @@ int *rdgn;		/* returns selected level dungeon number */
 		if (slev->dlevel.dnum != i) continue;
 		
 		/* print any branches before this level */
-		print_branch(win, i, last_level, slev->dlevel.dlevel, (bymenu && gotdgn && i == *rdgn), &lchoices);
+		print_branch(win, i, last_level, slev->dlevel.dlevel, bymenu, &lchoices);
 		
 		Sprintf(buf, "   %s: %d", slev->proto, depth(&slev->dlevel));
 		if (Is_stronghold(&slev->dlevel))
 		Sprintf(eos(buf), " (tune %s)", tune);
-
 		if (bymenu) {
-			if (gotdgn && i == *rdgn) {
-				/* If other floating branches are added, this will need to change */
-				if (i != knox_level.dnum) {
-					lchoices.lev[lchoices.idx] = slev->dlevel.dlevel;
-					lchoices.dgn[lchoices.idx] = i;
-				}
-				else {
-					/* note: choosing to go to Knox instead brings you to the level 
-					 * in the main dungeon that has the magic portal */
-					lchoices.lev[lchoices.idx] = depth(&slev->dlevel);
-					lchoices.dgn[lchoices.idx] = 0;
-				}
-				lchoices.playerlev[lchoices.idx] = depth(&slev->dlevel);
-				any.a_void = 0;
-				any.a_int = lchoices.idx + 1;
-				add_menu(win, NO_GLYPH, &any, lchoices.menuletter,
-					0, ATR_NONE, buf, MENU_UNSELECTED);
-				if (lchoices.menuletter == 'z') lchoices.menuletter = 'A';
-				else lchoices.menuletter++;
-				lchoices.idx++;
-			}
-			else {
-				any.a_void = 0;
-				add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
-			}
+			/* If other floating branches are added, this will need to change */
+			if (i != knox_level.dnum) {
+			lchoices.lev[lchoices.idx] = slev->dlevel.dlevel;
+			lchoices.dgn[lchoices.idx] = i;
+		} else {
+			lchoices.lev[lchoices.idx] = depth(&slev->dlevel);
+			lchoices.dgn[lchoices.idx] = 0;
+		}
+		lchoices.playerlev[lchoices.idx] = depth(&slev->dlevel);
+		any.a_void = 0;
+		any.a_int = lchoices.idx + 1;
+		add_menu(win, NO_GLYPH, &any, lchoices.menuletter,
+				0, ATR_NONE, buf, MENU_UNSELECTED);
+		if (lchoices.menuletter == 'z') lchoices.menuletter = 'A';
+		else lchoices.menuletter++;
+		lchoices.idx++;
 		} else
 		putstr(win, 0, buf);
 		
 		last_level = slev->dlevel.dlevel;
 	}
 	/* print branches after the last special level */
-	print_branch(win, i, last_level, MAXLEVEL, (bymenu && gotdgn && i == *rdgn), &lchoices);
+	print_branch(win, i, last_level, MAXLEVEL, bymenu, &lchoices);
     }
 
     /* Print out floating branches (if any). */
@@ -2059,26 +2038,12 @@ int *rdgn;		/* returns selected level dungeon number */
 	menu_item *selected;
 	int idx;
 
-	if (lchoices.idx > 1) {
-		end_menu(win, "Level teleport to where:");
-		n = select_menu(win, PICK_ONE, &selected);
-		destroy_nhwindow(win);
-		if (n > 0)
-			idx = selected[0].item.a_int - 1;
-	}
-	else {
-		/* only one choice; don't bother showing it */
-		end_menu(win, "");
-		destroy_nhwindow(win);
-		idx = 0;
-		n = 1;
-	}
+	end_menu(win, "Level teleport to where:");
+	n = select_menu(win, PICK_ONE, &selected);
+	destroy_nhwindow(win);
 	if (n > 0) {
+		idx = selected[0].item.a_int - 1;
 		free((genericptr_t)selected);
-		if (!gotdgn) {
-			*rdgn = lchoices.dgn[idx];
-			return print_dungeon(bymenu, TRUE, rlev, rdgn);
-		}
 		if (rlev && rdgn) {
 			*rlev = lchoices.lev[idx];
 			*rdgn = lchoices.dgn[idx];
