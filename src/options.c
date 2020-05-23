@@ -2435,6 +2435,8 @@ goodfruit:
 				flags.chaosvar = TEMPLE_OF_CHAOS+1;
 			else if(!strcmp(op, "mordor"))
 				flags.chaosvar = MORDOR+1;
+			else if(!strcmp(op, "random"))
+				flags.chaosvar = 0;
 			else
 				badoption(opts);
 		}
