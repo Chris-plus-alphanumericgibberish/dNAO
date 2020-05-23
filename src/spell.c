@@ -4201,7 +4201,7 @@ boolean atme;
 	int color = 0;
 	int inacc = 0;
 	boolean miss = FALSE;
-	int dam = 0;
+	int dam = 0, dice = 0, flat = 0;
 	int rad = 0;
 	
 	if(!spelltyp){
@@ -4306,20 +4306,23 @@ boolean atme;
 	n = 0;
 	switch(pseudo->otyp)  {
 	case SPE_LIGHTNING_STORM:	color = EXPL_MAGICAL;
-								n = rnd(6) + 2;
-								dam = rnd(u.ulevel) + d(6,6) + spell_damage_bonus();
+								n = rnd(4) + 2;
+								dice = 6;
+								flat = spell_damage_bonus();
 								rad = 1;
 								inacc = 3;
 								goto dothrowspell;
 	case SPE_BLIZZARD:			color = EXPL_FROSTY;
 								n = rnd(3) + 1;
-								dam = rnd(u.ulevel) + d(4,6) + spell_damage_bonus();
+								dice = 4;
+								flat = spell_damage_bonus();
 								rad = 1;
 								inacc = 1;
 								goto dothrowspell;
 	case SPE_FIRE_STORM:		color = EXPL_FIERY;
 								n = 1;
-								dam = u.ulevel + d(12,6) + spell_damage_bonus();
+								dice = 12;
+								flat = u.ulevel/2 + spell_damage_bonus();
 								rad = 2;
 								inacc = 0;
 								goto dothrowspell;
@@ -4366,6 +4369,7 @@ dothrowspell:
 						}
 					}
 					else {
+						dam = d(dice, 6) + flat + rnd(u.ulevel);
 						explode(u.dx, u.dy, spell_adtype(pseudo->otyp), 0, dam, color, rad);
 					}
 				}
