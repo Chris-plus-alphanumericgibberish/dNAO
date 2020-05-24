@@ -537,6 +537,7 @@ test_twoweapon()
 
 	if (!could_twoweap(youmonst.data) && 
 		!(!Upolyd && Role_if(PM_ANACHRONONAUT)) && 
+		!(!Upolyd && Role_if(PM_NOBLEMAN) && Race_if(PM_DWARF)) && 
 		!(u.specialSealsActive&SEAL_MISKA) && 
 		!(u.specialSealsActive&SEAL_BLACK_WEB && !uswapwep) &&
 		!(uwep && uwep->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE) && !uswapwep) && 
