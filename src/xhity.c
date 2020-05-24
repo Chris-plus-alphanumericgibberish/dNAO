@@ -12582,9 +12582,30 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (otmp && otmp->otyp == tgloves)
 			basedmg += ((youagr && martial_bonus()) ? 3 : 1);
 
-		/* gloves give enchantment */
-		if (otmp)
+		
+		if (otmp) {
+			/* all gloves give their enchantment to melee damage */
 			basedmg += otmp->spe;
+		}
+		/* no gloves? Look at rings -- which are player-only */
+		else if (youagr &&
+			(otmp = (rslot == W_RINGL) ? uleft
+				: (rslot == W_RINGR) ? uright
+				: (struct obj *)0))
+		{
+
+			/* edder-symbol signet rings increase melee damage */
+			if (otmp
+				&& otmp->ohaluengr
+				&& (isEngrRing(otmp->otyp) || isSignetRing(otmp->otyp))
+				&& otmp->oward == EDDER_SYMBOL)
+			{
+				basedmg += 5;
+			}
+			/* no other rings increase melee damage at this time */
+			/* general handling for offensive artifact rings should be done in the artifact hit block */
+			/* (the Annulus is supposed to increase melee damage even while worn under gloves, and act regardless of striking fist) */
+		}
 	}
 	else if (unarmed_kick) {
 		/* If a proper monster-style attack is being used, no stat-based damage! */
