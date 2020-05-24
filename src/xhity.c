@@ -13038,7 +13038,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if(youdef)
 				pline("Your brain-organ is struck!");
 			else if(canseemon(mdef))
-				pline("%s brain-organ struck!", s_suffix(Monnam(mdef)));
+				pline("%s brain-organ is struck!", s_suffix(Monnam(mdef)));
 			*hp(mdef) = 1;
 			resisted_weapon_attacks = FALSE;
 			resisted_attack_type = FALSE;
