@@ -83,6 +83,7 @@ STATIC_DCL int FDECL(score_wanted,
 #endif
 #ifdef RECORD_ACHIEVE
 STATIC_DCL long FDECL(encodeachieve, (void));
+STATIC_DCL void FDECL(writeachieveX, (char *));
 #endif
 STATIC_DCL long FDECL(encode_xlogflags, (void));
 #ifdef NO_SCAN_BRACK
@@ -336,6 +337,11 @@ struct toptenentry *tt;
 	  if(keys >= 3)					 dnethachievements |= 1L << 4;//10
 	  if(keys == 9)  				 dnethachievements |= 1L << 5;//20
   (void)fprintf(rfile, SEP "dnetachieve=0x%lx", dnethachievements);
+  }
+  {
+	  char achieveXbuff[25*37] = {0};//The longest trophy name is 23 characters, +2 for the separator and null, times 37 trophies.
+	  writeachieveX(achieveXbuff);
+  (void)fprintf(rfile, SEP "achieveX=%s", achieveXbuff);
   }
 #endif
 
@@ -1089,6 +1095,60 @@ encodeachieve(void)
   
   return r;
 }
+#endif
+
+#ifdef RECORD_ACHIEVE
+#define	CHECK_ACHIEVE(aflag, string) \
+	if(achieve.trophies&aflag){\
+		Sprintf(eos(achieveXbuff), "%s%s", seperator, string);\
+		seperator[0] = ',';\
+	}
+
+void
+writeachieveX(achieveXbuff)
+char *achieveXbuff;
+{
+	//achieveXbuff is 25*37 chars long, if you add more achievements increase the multiplier. 25 is > than the average length of a trophy name, but keep an eye on that too.
+	char seperator[2] = "";
+	CHECK_ACHIEVE(ARC_QUEST,"archeologist_quest")
+	CHECK_ACHIEVE(CAV_QUEST,"caveman_quest")
+	CHECK_ACHIEVE(CON_QUEST,"convict_quest")
+	CHECK_ACHIEVE(KNI_QUEST,"knight_quest")
+	CHECK_ACHIEVE(ANA_QUEST,"anachrononaut_quest")
+	CHECK_ACHIEVE(AND_QUEST,"android_quest")
+	CHECK_ACHIEVE(ANA_ASC,"anachrononaut_ascension")
+	CHECK_ACHIEVE(BIN_QUEST,"binder_quest")
+	CHECK_ACHIEVE(BIN_ASC,"binder_ascension")
+	CHECK_ACHIEVE(PIR_QUEST,"pirate_quest")
+	CHECK_ACHIEVE(BRD_QUEST,"bard_quest")
+	CHECK_ACHIEVE(NOB_QUEST,"base_noble_quest")
+	CHECK_ACHIEVE(HDR_NOB_QUEST,"hedrow_noble_quest")
+	CHECK_ACHIEVE(HDR_SHR_QUEST,"hedrow_shared_quest")
+	CHECK_ACHIEVE(DRO_NOB_QUEST,"drow_noble_quest")
+	CHECK_ACHIEVE(DRO_SHR_QUEST,"drow_shared_quest")
+	CHECK_ACHIEVE(DWA_NOB_QUEST,"dwarf_noble_quest")
+	CHECK_ACHIEVE(DWA_KNI_QUEST,"dwarf_knight_quest")
+	CHECK_ACHIEVE(GNO_RAN_QUEST,"gnome_ranger_quest")
+	CHECK_ACHIEVE(ELF_SHR_QUEST,"elf_shared_quest")
+	CHECK_ACHIEVE(CLOCK_ASC,"clockwork_ascension")
+	CHECK_ACHIEVE(CHIRO_ASC,"chiropteran_ascension")
+	CHECK_ACHIEVE(YUKI_ASC,"yuki_ona_ascension")
+	CHECK_ACHIEVE(HALF_ASC,"half_dragon_ascension")
+	CHECK_ACHIEVE(LAW_QUEST,"law_quest")
+	CHECK_ACHIEVE(NEU_QUEST,"neutral_quest")
+	CHECK_ACHIEVE(CHA_QUEST,"chaos_temple_quest")
+	CHECK_ACHIEVE(MITH_QUEST,"mithardir_quest")
+	CHECK_ACHIEVE(MORD_QUEST,"mordor_quest")
+	CHECK_ACHIEVE(SECOND_THOUGHTS,"second_thoughts")
+	CHECK_ACHIEVE(ILLUMIAN,"illuminated")
+	CHECK_ACHIEVE(RESCUE,"exodus")
+	CHECK_ACHIEVE(FULL_LOADOUT,"fully_upgraded")
+	CHECK_ACHIEVE(NIGHTMAREHUNTER,"hunter_of_nightmares")
+	CHECK_ACHIEVE(SPEED_PHASE,"two_keys")
+	CHECK_ACHIEVE(QUITE_MAD,"quite_mad")
+	CHECK_ACHIEVE(TOTAL_DRUNK,"booze_hound")
+}
+#undef CHECK_ACHIEVE
 #endif
 
 /*
