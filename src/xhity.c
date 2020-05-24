@@ -12706,7 +12706,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				/* If you throw using a propellor, you don't get a strength
 				* bonus but you do get an increase-damage bonus.
 				*/
-				if(natural_strike)
+				if (natural_strike || unarmed_punch || unarmed_kick)
 					bon_damage += dbon((struct obj *)0);
 				else if (melee || thrust)
 					bon_damage += dbon(weapon);
@@ -12773,6 +12773,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				wtype = weapon_type(launcher);
 			else if (u.twoweap)
 				wtype = P_TWO_WEAPON_COMBAT;
+			else if (unarmed_punch)
+				wtype = P_BARE_HANDED_COMBAT;
 			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
 				wtype = P_SCIMITAR;
 			else if (weapon && weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
