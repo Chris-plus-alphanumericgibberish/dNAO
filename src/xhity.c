@@ -12564,17 +12564,6 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			}
 		}
 
-		/* martial arts aids */
-		if (weapon && martial_aid(weapon)) {
-			/* if these were lit, it would have been a weapon attack, not an unarmed punch */
-			if (weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC)
-				basedmg += rnd(6) + weapon->spe;
-			else if (weapon->otyp == LIGHTSABER ||
-				weapon->otyp == BEAMSWORD ||
-				weapon->otyp == DOUBLE_LIGHTSABER)
-				basedmg += rnd(4) + weapon->spe;
-		}
-
 		otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 		/* fighting gloves give bonus damage */
 		static int tgloves = 0;
@@ -12697,6 +12686,16 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (youagr && unarmed_punch && u.specialSealsActive&SEAL_DAHLVER_NAR) {
 			bonsdmg += d(2, 6) + min(u.ulevel / 2, (u.uhpmax - u.uhp) / 10);
 		}
+		/* martial aids increase unarmed punching damage */
+		if (unarmed_punch && weapon && martial_aid(weapon)) {
+			/* if these were lit, it would have been a weapon attack, not an unarmed punch */
+			if (weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+				bonsdmg += rnd(6) + weapon->spe;
+			else if (weapon->otyp == LIGHTSABER ||
+				weapon->otyp == BEAMSWORD ||
+				weapon->otyp == DOUBLE_LIGHTSABER)
+				bonsdmg += rnd(4) + weapon->spe;
+		}
 		/* general damage bonus */
 		if(real_attack){
 			/* The player has by-far the most detailed attacks */
@@ -12708,7 +12707,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				/* If you throw using a propellor, you don't get a strength
 				* bonus but you do get an increase-damage bonus.
 				*/
-				if(natural_strike)
+				if (natural_strike || unarmed_punch || unarmed_kick)
 					bon_damage += dbon((struct obj *)0);
 				else if (melee || thrust)
 					bon_damage += dbon(weapon);
@@ -12775,6 +12774,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				wtype = weapon_type(launcher);
 			else if (u.twoweap)
 				wtype = P_TWO_WEAPON_COMBAT;
+			else if (unarmed_punch)
+				wtype = P_BARE_HANDED_COMBAT;
 			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
 				wtype = P_SCIMITAR;
 			else if (weapon && weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
