@@ -549,6 +549,7 @@ struct artifact {
 				(m) == ART_GRAPPLER_S_GRASP ||\
 				(m) == ART_GAUNTLETS_OF_SPELL_POWER ||\
 				(m) == ART_PREMIUM_HEART ||\
+				(m) == ART_GODHANDS ||\
 				(m) == ART_FIRE_BRAND ||\
 				(m) == ART_FROST_BRAND ||\
 				(m) == ART_STORMHELM ||\

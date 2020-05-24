@@ -3224,7 +3224,7 @@ dosacrifice()
 				unrestrict_weapon_skill(P_TWO_WEAPON_COMBAT);
 			} else if(otmp->oartifact == ART_BEASTMASTER_S_DUSTER){
 				unrestrict_weapon_skill(P_BEAST_MASTERY);
-			} else if(otmp->oartifact == ART_GRANDMASTER_S_ROBE || otmp->oartifact == ART_PREMIUM_HEART){
+			} else if(otmp->oartifact == ART_GRANDMASTER_S_ROBE || otmp->oartifact == ART_PREMIUM_HEART || otmp->oartifact == ART_GODHANDS){
 				unrestrict_weapon_skill(P_BARE_HANDED_COMBAT);
 				u.umartial = TRUE;
 			} else if(otmp->oartifact == ART_RHONGOMYNIAD){

@@ -1225,8 +1225,11 @@ int x;
 		}
 	} else if (x == A_DEX) {
 		if (
-			(uarmg && uarmg->oartifact == ART_PREMIUM_HEART)
+			(uarmg && uarmg->oartifact == ART_GODHANDS)
 		) return(25);
+		if (
+			(uarmg && uarmg->oartifact == ART_PREMIUM_HEART)
+		) tmp += uarmg->spe;
 		if(Race_if(PM_ORC)){
 			tmp += u.ulevel/3;
 		}

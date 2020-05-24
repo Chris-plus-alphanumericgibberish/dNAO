@@ -1387,19 +1387,20 @@ struct obj * otmp;
 		diesize = 4;
 		/* special cases that don't affect dice */
 		if (otmp->oartifact == ART_EXCALIBUR ||
+		    otmp->oartifact == ART_GODHANDS ||
 			otmp->oartifact == ART_LANCE_OF_LONGINUS)
 			dmg += vd(3, 7);
 		else if (otmp->oartifact == ART_JINJA_NAGINATA)
 			dmg += vd(1, 12);
-		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
-			dmg += vd(1, 20);
 		else if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)
 			dmg += vd(1, 10) + otmp->spe;
 		else if (otmp->oartifact == ART_VAMPIRE_KILLER)
 			dmg += 7;
 		/* special cases that do affect dice */
-		else if (otmp->oartifact == ART_AMHIMITL)
+		if (otmp->oartifact == ART_AMHIMITL)
 			ndice = 3;
+		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
+			diesize = 20;
 		else if (otmp->otyp == KHAKKHARA)
 			ndice = rnd(3);
 		/* gold has a particular affinity to blessings and curses */
@@ -1418,6 +1419,8 @@ struct obj * otmp;
 		/* special cases */
 		if (otmp->oartifact == ART_STORMBRINGER)
 			ndice = 4; //Extra unholy (4d9 vs excal's 3d7)
+		else if (otmp->oartifact == ART_GODHANDS)
+			dmg += vd(3,9);
 		else if (otmp->oartifact == ART_LANCE_OF_LONGINUS)
 			ndice = 3;
 		else if (otmp->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO)

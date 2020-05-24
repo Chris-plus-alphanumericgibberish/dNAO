@@ -3351,7 +3351,8 @@ winid *datawin;
 	if (oartifact == ART_STORMBRINGER ||
 		oartifact == ART_GREAT_CLAWS_OF_URDLEN ||
 		oartifact == ART_OGRESMASHER)			OBJPUTSTR("Greatly increases CON.");
-	if (oartifact == ART_PREMIUM_HEART)		OBJPUTSTR("Greatly increases DEX.");
+	if (oartifact == ART_GODHANDS)		OBJPUTSTR("Greatly increases DEX.");
+	if (oartifact == ART_PREMIUM_HEART)		OBJPUTSTR("Increases DEX.");
 	if (otyp == KICKING_BOOTS)					OBJPUTSTR("Improves kicking.");
 	if (otyp == MUMMY_WRAPPING)				OBJPUTSTR("Prevents invisibility.");
 	if (otyp == RIN_GAIN_STRENGTH)				OBJPUTSTR("Increases STR by its enchantment.");

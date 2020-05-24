@@ -338,6 +338,7 @@ struct obj * otmp;
 		&& Role_if(PM_MONK)) {
 		switch (otmp->oartifact)
 		{
+		case ART_GODHANDS:
 		case ART_PREMIUM_HEART:
 		case ART_GRAPPLER_S_GRASP:
 		case ART_GRANDMASTER_S_ROBE:

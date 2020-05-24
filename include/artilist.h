@@ -1120,6 +1120,16 @@ A("Premium Heart",					GAUNTLETS_OF_POWER,				(const char *)0,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
+A("Godhands",					GAUNTLETS_OF_POWER,				(const char *)0,
+	7777L, GOLD, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, A_LAWFUL, NON_PM, TIER_A, (ARTG_GIFT),
+	NO_MONS(),
+	ATTK(AD_PHYS, 20, 10), NOFLAG,
+	PROP1(DRAIN_RES), NOFLAG,
+	PROP0(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
+	),
+
 /*Needs encyc entry*/
 /* lets the wearer cast Lightning Storm */
 A("Stormhelm",						HELM_OF_BRILLIANCE,				(const char *)0,

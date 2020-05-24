@@ -3175,11 +3175,11 @@ int flat_acc;
 				bons_acc += u.chokhmah;
 			/* simulate accuracy from stat bonuses from gloves */
 			if ((otmp = which_armor(magr, W_ARMG))) {
-				if (otmp->oartifact == ART_PREMIUM_HEART)
+				if (otmp->oartifact == ART_GODHANDS)
 					bons_acc += 14;
-				else if (otmp->otyp == GAUNTLETS_OF_DEXTERITY)
+				else if (otmp->otyp == GAUNTLETS_OF_DEXTERITY || otmp->oartifact == ART_PREMIUM_HEART)
 					bons_acc += otmp->spe;
-				else if (otmp->otyp == GAUNTLETS_OF_POWER)
+				if (otmp->otyp == GAUNTLETS_OF_POWER)
 					bons_acc += 3;
 			}
 			/* Your steed gets a skill-based boost */

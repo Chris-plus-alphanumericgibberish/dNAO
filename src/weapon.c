@@ -2232,8 +2232,10 @@ struct obj *otmp;
 				bonus = 0;
 			else bonus /= 2; /*Half strength bonus/penalty*/
 			
-			if(arm && arm->oartifact == ART_PREMIUM_HEART) bonus += 8;
-			else if(arm && arm->otyp == GAUNTLETS_OF_DEXTERITY) bonus += arm->spe;
+			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
+			else if(arm 
+			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART)
+			) bonus += (arm->spe)/2;
 //			else bonus += ; Something with dex ac?  That would be a bad idea.
 			
 			if(is_rakuyo(otmp))
