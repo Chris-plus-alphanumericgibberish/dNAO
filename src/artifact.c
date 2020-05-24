@@ -1271,6 +1271,16 @@ touch_artifact(obj, mon, hypothetical)
        will have to be extended to explicitly include quest artifacts */
     self_willed = ((oart->gflags & ARTG_MAJOR) != 0);
     if (yours) {
+#ifdef RECORD_ACHIEVE
+		if(!hypothetical){
+			if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS)
+				give_law_trophy();
+			if(obj->oartifact == ART_SILVER_KEY)
+				give_neutral_trophy();
+			if(obj->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)
+				give_mordor_trophy();
+		}
+#endif
 		if(Role_if(PM_EXILE) && !hypothetical){
 			if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS && !(u.specialSealsKnown&SEAL_MISKA)){
 				pline("There is a seal on the tip of the Rod! You can't see it, you know it's there, just the same.");

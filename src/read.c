@@ -942,6 +942,9 @@ learn_word()
 			u.ufirst_know_timeout = 0;
 		break;
 	}
+	//Note: the word of knowledge can't actually give the mithardir trophy, but it's harmless to check.
+	check_mithardir_trophy();
+	check_illumian_trophy();
 	if(Role_if(PM_EXILE) && u.ufirst_life && u.ufirst_sky && u.ufirst_light && (u.sealsUsed&SEAL_TENEBROUS) && !(u.specialSealsKnown&SEAL_LIVING_CRYSTAL)){
 		pline("As you learn the Word, you also realize how the Words can be used in the drawing of a seal!");
 		u.specialSealsKnown |= SEAL_LIVING_CRYSTAL;

@@ -1578,6 +1578,7 @@ struct monst *mon;
 			// u.umadness |= ;
 		break;
 	}
+	check_madman_trophy();
 }
 
 /* condense clumsy ACURR(A_STR) value into value that fits into game formulas

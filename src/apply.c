@@ -6068,6 +6068,7 @@ struct obj **optr;
 					return 1;
 				break;
 			}
+			check_loadout_trophy();
 	}
 	if (yn("Resize a piece of armor?") == 'y'){
 		if (resizeArmor()){

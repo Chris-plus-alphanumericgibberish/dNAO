@@ -666,6 +666,7 @@ peffects(otmp)
 				u.uhp += u.ulevel*10;
 				if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 				if(u.udrunken < u.ulevel*3) u.udrunken++; //Enki allows clockworks to benefit from booze quaffing
+				check_drunkard_trophy();
 			}
 		} else { /* Note: Androids can get drunk */
 			pline("Ooph!  This tastes like %s%s!",
@@ -678,6 +679,7 @@ peffects(otmp)
 			}
 			if(u.udrunken < u.ulevel*3){
 				u.udrunken++;
+				check_drunkard_trophy();
 				change_usanity(5);
 			} else {
 				if(u.usanity < 50){
@@ -1081,6 +1083,7 @@ as_extra_healing:
 				u.uhp += u.ulevel*10;
 				if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 				if(u.udrunken < u.ulevel*3) u.udrunken++; //Enki allows clockworks to benefit from booze quaffing
+				check_drunkard_trophy();
 			}
 		} else { /* Note: Androids can get drunk */
 			pline("Ooph!  This tastes like %s%s!",
@@ -1093,6 +1096,7 @@ as_extra_healing:
 			}
 			if(u.udrunken < u.ulevel*3){
 				u.udrunken++;
+				check_drunkard_trophy();
 				change_usanity(5);
 			} else {
 				if(u.usanity < 50){

@@ -4314,6 +4314,42 @@ register struct monst *mtmp;
 	) {
 		achieve.killed_challenge = 1;
 	}
+	if(mtmp->mtyp == PM_ARSENAL
+	|| mtmp->mtyp == PM_OONA
+	|| mtmp->mtyp == PM_PLATINUM_DRAGON
+	)
+		give_law_trophy();
+	if(mtmp->mtyp == PM_CHAOS
+	|| mtmp->mtyp == PM_LICH__THE_FIEND_OF_EARTH
+	|| mtmp->mtyp == PM_KARY__THE_FIEND_OF_FIRE
+	|| mtmp->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER
+	|| mtmp->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND
+	){
+		if(mvitals[PM_CHAOS].died
+		&& mvitals[PM_LICH__THE_FIEND_OF_EARTH].died
+		&& mvitals[PM_KARY__THE_FIEND_OF_FIRE].died
+		&& mvitals[PM_KRAKEN__THE_FIEND_OF_WATER].died
+		&& mvitals[PM_TIAMAT__THE_FIEND_OF_WIND].died
+		)
+			give_chaos_temple_trophy();
+	}
+	if(mtmp->mtyp == PM_THE_GOOD_NEIGHBOR
+	|| mtmp->mtyp == PM_HMNYW_PHARAOH
+	|| mtmp->mtyp == PM_NITOCRIS
+	|| mtmp->mtyp == PM_GHOUL_QUEEN_NITOCRIS
+	|| mtmp->mtyp == PM_BLASPHEMOUS_LURKER
+	|| mtmp->mtyp == PM_BLESSED
+	|| mtmp->mtyp == PM_MOUTH_OF_THE_GOAT
+	){
+		if(mvitals[PM_THE_GOOD_NEIGHBOR].died
+		&& mvitals[PM_HMNYW_PHARAOH].died
+		&& (mvitals[PM_NITOCRIS].died || mvitals[PM_GHOUL_QUEEN_NITOCRIS].died)
+		&& mvitals[PM_BLASPHEMOUS_LURKER].died
+		&& mvitals[PM_BLESSED].died
+		&& mvitals[PM_MOUTH_OF_THE_GOAT].died
+		)
+			give_nightmare_hunter_trophy();
+	}
 #endif
 	if(glyph_is_invisible(levl[mtmp->mx][mtmp->my].glyph))
 		unmap_object(mtmp->mx, mtmp->my);

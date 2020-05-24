@@ -2287,6 +2287,18 @@ E const char *NDECL(getDnDHumNgod);
 E const char *NDECL(getDnDHumCgod);
 #ifdef RECORD_ACHIEVE
 E void NDECL(give_quest_trophy);
+E void NDECL(give_ascension_trophy);
+E void NDECL(give_law_trophy);
+E void NDECL(give_neutral_trophy);
+E void NDECL(give_chaos_temple_trophy);
+E void NDECL(check_mithardir_trophy);
+E void NDECL(give_mordor_trophy);
+E void NDECL(check_illumian_trophy);
+E void NDECL(give_rescue_trophy);
+E void NDECL(check_loadout_trophy);
+E void NDECL(give_nightmare_hunter_trophy);
+E void NDECL(check_madman_trophy);
+E void NDECL(check_drunkard_trophy);
 #endif
 
 /* ### rumors.c ### */

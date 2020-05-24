@@ -1294,7 +1294,11 @@ int enhanced;
 	if(!(obj && obj->oclass == SCROLL_CLASS && Confusion)){
 		enough_dogs(1);
 	}
-	
+#ifdef RECORD_ACHIEVE
+	//Taming Oona counts as completing the law quest
+	if(mtmp->mtyp == PM_OONA)
+		give_law_trophy();
+#endif
 	/* make a new monster which has the pet extension */
 	mtmp2 = newmonst(sizeof(struct edog) + mtmp->mnamelth);
 	*mtmp2 = *mtmp;

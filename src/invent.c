@@ -332,6 +332,10 @@ struct obj *obj;
 			obj->record_achieve_special = 0;
 			livelog_write_string("completed Sokoban");
 	}
+	if(obj->otyp == CLOAK_OF_MAGIC_RESISTANCE && obj->record_achieve_special){
+		obj->record_achieve_special = 0;
+		give_law_trophy();
+	}
 #endif /* RECORD_ACHIEVE */
 
 }

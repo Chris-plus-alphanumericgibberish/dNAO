@@ -2973,4 +2973,111 @@ give_ascension_trophy()
 		achieve.trophies |= SPEED_PHASE;
 }
 #endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_law_trophy()
+{
+	achieve.trophies |= LAW_QUEST;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_neutral_trophy()
+{
+	achieve.trophies |= NEU_QUEST;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_chaos_temple_trophy()
+{
+	if(chaos_dvariant == TEMPLE_OF_CHAOS)
+		achieve.trophies |= CHA_QUEST;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+check_mithardir_trophy()
+{
+	if(chaos_dvariant == MITHARDIR){
+		if(u.ufirst_light && u.ufirst_sky && u.ufirst_life)
+			achieve.trophies |= MITH_QUEST;
+	}
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_mordor_trophy()
+{
+	if(chaos_dvariant == MORDOR)
+		achieve.trophies |= MORD_QUEST;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+check_illumian_trophy()
+{
+	int syls;
+	syls = u.uaesh + u.ukrau + u.uhoon + u.uuur + u.unaen + u.uvaul;
+	if(u.ufirst_light && u.ufirst_sky && u.ufirst_life && u.ufirst_know && syls >= 30 && u.sealsUsed&SEAL_TENEBROUS)
+		achieve.trophies |= ILLUMIAN;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_rescue_trophy()
+{
+	achieve.trophies |= RESCUE;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+check_loadout_trophy()
+{
+	long allupgrades = (OIL_STOVE|WOOD_STOVE|FAST_SWITCH|EFFICIENT_SWITCH|ARMOR_PLATING|PHASE_ENGINE|MAGIC_FURNACE|HELLFIRE_FURNACE|SCRAP_MAW);
+	if(u.clockworkUpgrades&allupgrades == allupgrades)
+		achieve.trophies |= FULL_LOADOUT;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_nightmare_hunter_trophy()
+{
+	achieve.trophies |= NIGHTMAREHUNTER;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+check_madman_trophy()
+{
+	int i;
+	int count = 0;
+	for(i = 0; i<64; i++){
+		if(((u.umadness>>i) & 1) == 1)
+			count++;
+	}
+	if(count >= 6)
+		achieve.trophies |= QUITE_MAD;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+check_drunkard_trophy()
+{
+	if(u.udrunken >= 90)
+		achieve.trophies |= TOTAL_DRUNK;
+}
+#endif
+
 /* role.c */

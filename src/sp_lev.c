@@ -1208,6 +1208,11 @@ struct mkroom	*croom;
 			  Is_sokoend_level(&u.uz)) {
 			otmp->record_achieve_special = 1;
 	}
+	if(otmp->otyp == CLOAK_OF_MAGIC_RESISTANCE
+		&& Is_arcadiadonjon(&u.uz)
+	){
+		otmp->record_achieve_special = 1;
+	}
 #endif
 	/* statues placed on top of existing statue traps replace the statue there and attach itself to the trap */
 	if (otmp->otyp == STATUE) {

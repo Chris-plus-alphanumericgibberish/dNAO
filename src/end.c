@@ -1260,6 +1260,8 @@ die:
 	    Strcpy(pbuf, "You");
 	    if (mtmp) {
 		while (mtmp) {
+			if(Race_if(PM_ANDROID) && (mtmp->mtyp == PM_COMMANDER || mtmp->mtyp == PM_OPERATOR))
+				give_rescue_trophy();
 			Sprintf(eos(pbuf), " and %s", mon_nam(mtmp));
 		    if (mtmp->mtame)
 			u.urexp += mtmp->mhp;
