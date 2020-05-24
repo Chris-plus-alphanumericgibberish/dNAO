@@ -576,7 +576,7 @@ exerchk()
 		    case A_CHA: You((mod_val >0) ?
 				    "must have been very charming lately." :
 					u.umorgul ? "have the chill of death about you."
-				    : "haven't been watching behavior.");
+				    : "haven't been watching your behavior.");
 				if(mod_val < 0)	AMAX(i) += mod_val; /* permanent drain */
 			break;
 		    }
