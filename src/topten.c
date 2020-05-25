@@ -1132,7 +1132,7 @@ char *achieveXbuff;
 	CHECK_ACHIEVE(ELF_SHR_QUEST,"elf_shared_quest")
 	CHECK_ACHIEVE(CLOCK_ASC,"clockwork_ascension")
 	CHECK_ACHIEVE(CHIRO_ASC,"chiropteran_ascension")
-	CHECK_ACHIEVE(YUKI_ASC,"yuki_ona_ascension")
+	CHECK_ACHIEVE(YUKI_ASC,"yuki_onna_ascension")
 	CHECK_ACHIEVE(HALF_ASC,"half_dragon_ascension")
 	CHECK_ACHIEVE(LAW_QUEST,"law_quest")
 	CHECK_ACHIEVE(NEU_QUEST,"neutral_quest")
