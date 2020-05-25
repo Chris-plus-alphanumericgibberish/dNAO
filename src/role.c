@@ -2955,7 +2955,7 @@ give_quest_trophy()
 void
 give_ascension_trophy()
 {
-	if(Role_if(PM_ANACHRONONAUT))
+	if(Role_if(PM_ANACHRONONAUT) && flags.questprogress == 2)
 		achieve.trophies |= ANA_ASC;
 	else if(Role_if(PM_EXILE))
 		achieve.trophies |= BIN_ASC;
