@@ -809,68 +809,23 @@ boolean * wepgone;				/* TRUE if projectile is already destroyed */
 	if (!IS_SOFT(levl[bhitpos.x][bhitpos.y].typ) &&
 		breaktest(thrownobj)) {
 
-		/* Nudzirath effects */
-		if (youagr && is_shatterable(thrownobj) && !thrownobj->oerodeproof && u.specialSealsActive&SEAL_NUDZIRATH){
-			int dmg, dsize = spiritDsize(), sx, sy;
-			struct monst *msmon;
-			sx = bhitpos.x;
-			sy = bhitpos.y;
-			if (thrownobj->otyp == MIRROR){
-				if (u.spiritPColdowns[PWR_MIRROR_SHATTER] < monstermoves && !u.uswallow && uwep && uwep->otyp == MIRROR && !(uwep->oartifact)){
-					useup(uwep);
-					explode(u.ux, u.uy, AD_PHYS, TOOL_CLASS, d(5, dsize), HI_SILVER, 1);
-					explode(sx, sy, AD_PHYS, TOOL_CLASS, d(5, dsize), HI_SILVER, 1);
-
-					while (sx != u.ux && sy != u.uy){
-						sx -= u.dx;
-						sy -= u.dy;
-						if (!isok(sx, sy)) break; //shouldn't need this, but....
-						else {
-							msmon = m_at(sx, sy);
-							/* reveal/unreveal invisible msmonsters before tmp_at() */
-							if (msmon && !canspotmon(msmon) && cansee(sx, sy))
-								map_invisible(sx, sy);
-							else if (!msmon && glyph_is_invisible(levl[sx][sy].glyph)) {
-								unmap_object(sx, sy);
-								newsym(sx, sy);
-							}
-							if (msmon) {
-								if (resists_magm(msmon)) {	/* match effect on player */
-									shieldeff(msmon->mx, msmon->my);
-								}
-								else {
-									dmg = d(5, dsize);
-									if (hates_silver(msmon->data)){
-										dmg += rnd(20);
-										pline("The flying shards of mirror sear %s!", mon_nam(msmon));
-									}
-									else {
-										pline("The flying shards of mirror hit %s.", mon_nam(msmon));
-										u_teleport_mon(msmon, TRUE);
-									}
-									msmon->mhp -= dmg;
-									if (msmon->mhp <= 0){
-										xkilled(msmon, 1);
-									}
-								}
-							}
-						}
-					}
-					u.spiritPColdowns[PWR_MIRROR_SHATTER] = monstermoves + 25;
-				}
-				else explode(sx, sy, AD_PHYS, TOOL_CLASS, d(rnd(5), dsize), HI_SILVER, 1);
-			}
-			else if (thrownobj->obj_material == OBSIDIAN_MT) explode(sx, sy, AD_PHYS, WEAPON_CLASS, d(rnd(5), dsize), EXPL_DARK, 1);
-		}
-
 		tmp_at(DISP_FLASH, obj_to_glyph(thrownobj));
 		tmp_at(bhitpos.x, bhitpos.y);
 		if (cansee(bhitpos.x, bhitpos.y))
 			delay_output();
+
+		/* Nudzirath effects */
+		if (youagr && is_shatterable(thrownobj) && !thrownobj->oerodeproof && u.specialSealsActive&SEAL_NUDZIRATH) {
+			nudzirath_shatter(thrownobj, bhitpos.x, bhitpos.y);
+			*wepgone = TRUE;
+		}
+
 		tmp_at(DISP_END, 0);
-		breakmsg(thrownobj, cansee(bhitpos.x, bhitpos.y));
-		breakobj(thrownobj, bhitpos.x, bhitpos.y, youagr, TRUE);
-		*wepgone = TRUE;
+		if (!(*wepgone)) {
+			breakmsg(thrownobj, cansee(bhitpos.x, bhitpos.y));
+			breakobj(thrownobj, bhitpos.x, bhitpos.y, youagr, TRUE);
+			*wepgone = TRUE;
+		}
 		return;
 	}
 

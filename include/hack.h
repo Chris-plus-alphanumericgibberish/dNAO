@@ -120,11 +120,12 @@
 NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 
 /* types of calls to bhit() */
-#define ZAPPED_WAND	0
-#define THROWN_WEAPON	1
-#define KICKED_WEAPON	2
-#define FLASHED_LIGHT	3
-#define INVIS_BEAM	4
+#define ZAPPED_WAND		0	/* invisible ray, pierces monsters */
+#define THROWN_WEAPON	1	/* hopefully deprecated */
+#define KICKED_WEAPON	2	/* hopefully deprecated */
+#define FLASHED_LIGHT	3	/* visible flashed light, stops on first mon hit */
+#define INVIS_BEAM		4	/* invisible ray from a mirror, stops on first mon hit */
+#define TRIGGER_BEAM	5	/* invisible ray, stops on first thing that causes associated functions to return nonzero */
 
 /* types of calls to hmon */
 #define HMON_WHACK		0x01	/* regular melee attack */
