@@ -1367,7 +1367,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			}
 		}
 		/* possibly wake defender */
-		if (!rn2(3))
+		if (youdef || (!mdef->msleeping && mdef->mcanmove))
 		{
 			wakeup2(mdef, youagr);
 		}
