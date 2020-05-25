@@ -1229,7 +1229,7 @@ static const struct spirit_power spirit_powers[NUMBER_POWERS] = {
 	"Deal damage to an adjacent monster, greatly increased to those vulnerable to holy. Friendly creatures are invigorated, instead." },
 	{ SEAL_SPECIAL|SEAL_NUDZIRATH,			"Mirror Shatter",			
 	"Shatter a wielded mirror, dealing damage and shattering other mirrors in that direction." },
-	{ SEAL_SPECIAL|SEAL_NUDZIRATH,			"Mirror Walk",				
+	{ /*SEAL_SPECIAL|SEAL_NUDZIRATH*/0L,			"Mirror Walk",				
 	"ERROR 404: description not found." },
 	{ SEAL_SPECIAL|SEAL_ALIGNMENT_THING,	"Flowing Forms",			
 	"Zap a beam of polymorph in a specified direction." },
