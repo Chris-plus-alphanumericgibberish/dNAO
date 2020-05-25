@@ -3998,7 +3998,7 @@ int sx, sy;
 	}
 	/* does not work at all while swallowed */
 	if (u.uswallow) {
-		impossible("nudzirath_shatter() called while swallowed!");
+		/* just break the object, no special effects */
 		hero_breaks(otmp, sx, sy, carried(otmp));
 		return;
 	}
@@ -4086,6 +4086,9 @@ int sx, sy;
 		/* and the mirror you were carrying */
 		useup(umirror);
 		explode(u.ux, u.uy, AD_PHYS, TOOL_CLASS, d(5, dsize), HI_SILVER, 1);
+
+		/* set spirit power timeout here, in case this was called outside of ^F */
+		u.spiritPColdowns[PWR_MIRROR_SHATTER] = monstermoves + 25;
 	
 	}
 	/* otherwise, break otmp (probably explosively) */
