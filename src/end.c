@@ -593,6 +593,7 @@ boolean taken;
 			for (obj = invent; obj; obj = obj->nobj) {
 			    makeknown(obj->otyp);
 			    obj->known = obj->bknown = obj->dknown = obj->rknown = obj->sknown = 1;
+				if (obj->oartifact) discover_artifact(obj->oartifact);
 			}
 #ifdef DUMP_LOG
 			(void) dump_inventory((char *)0, TRUE, want_disp);
@@ -1481,6 +1482,7 @@ boolean identified, all_containers, want_dump, want_disp;
 			    makeknown(obj->otyp);
 			    obj->known = obj->bknown =
 			    obj->dknown = obj->rknown = obj->sknown = 1;
+				if (obj->oartifact) discover_artifact(obj->oartifact);
 			}
 #ifdef DUMP_LOG
 			if (want_dump)  dump("  ", doname(obj));
