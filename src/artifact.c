@@ -3210,7 +3210,7 @@ boolean * messaged;
 				nmon = fmon;
 			}
 			else {
-				pd2 = mdef->data;
+				pd2 = tmpm->data;
 				nmon = tmpm->nmon;
 			}
 			/* skip already-dead creatures */
