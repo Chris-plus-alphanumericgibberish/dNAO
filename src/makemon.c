@@ -144,8 +144,7 @@ register int x, y, n;
 		if(x == 0 && y == 0) {
 			int tryct = 0;	/* careful with bigrooms */
 			struct monst fakemon = {0};
-
-			fakemon.data = mtmp->data;	/* set up for goodpos */
+			set_mon_data_core(&fakemon, mtmp->data); /* set up for goodpos */
 			do {
 				mm.x = rn1(COLNO-3,2);
 				mm.y = rn2(ROWNO);
@@ -174,8 +173,7 @@ register int x, y, n;
 		if(x == 0 && y == 0) {
 			int tryct = 0;	/* careful with bigrooms */
 			struct monst fakemon = {0};
-
-			fakemon.data = mtmp->data;	/* set up for goodpos */
+			set_mon_data_core(&fakemon, mtmp->data); /* set up for goodpos */
 			do {
 				mm.x = rn1(COLNO-3,2);
 				mm.y = rn2(ROWNO);
@@ -7382,6 +7380,7 @@ register int	mmflags;
 	register struct monst *mtmp, *tmpm;
 	int mndx, mcham, ct, mitem, xlth, num;
 	boolean anymon = (!ptr);
+	boolean givenpos = (x != 0 || y != 0);
 	boolean byyou = (x == u.ux && y == u.uy);
 	boolean allow_minvent = ((mmflags & NO_MINVENT) == 0);
 	boolean countbirth = ((mmflags & MM_NOCOUNTBIRTH) == 0 && !In_quest(&u.uz));
@@ -7408,7 +7407,7 @@ register int	mmflags;
 	#endif
 				return((struct monst *) 0);	/* no more monsters! */
 			}
-			fakemon.data = ptr;
+			set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
 			gpflags = (mmflags & MM_IGNOREWATER) ? MM_IGNOREWATER : 0;
 		} while((!goodpos(x, y, &fakemon, gpflags) 
 				|| (tryct < 50 && !in_mklev && couldsee(x, y)) 
@@ -7429,7 +7428,7 @@ register int	mmflags;
 		int tryct = 0;	/* careful with bigrooms */
 		struct monst fakemon = {0};
 
-		fakemon.data = ptr;	/* set up for goodpos */
+		set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
 		do {
 			x = rn1(COLNO-3,2);
 			y = rn2(ROWNO);
@@ -7458,6 +7457,29 @@ register int	mmflags;
 		}
 		else
 			return((struct monst *)0);
+	} else if (givenpos && ptr) {
+		/* need to check that the given position is safe */
+		struct monst fakemon = { 0 };
+		set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
+		if (!goodpos(x, y, &fakemon, gpflags)){
+			if ((mmflags & MM_ADJACENTOK) != 0) {
+				coord bypos;
+				if (enexto_core(&bypos, x, y, ptr, gpflags)) {
+					if (!(mmflags & MM_ADJACENTSTRICT) || (
+						bypos.x - x <= 1 && bypos.x - x >= -1 &&
+						bypos.y - y <= 1 && bypos.y - y >= -1
+						)){
+						x = bypos.x;
+						y = bypos.y;
+					}
+					else return((struct monst *) 0);
+				}
+				else
+					return((struct monst *) 0);
+			}
+			else
+				return((struct monst *) 0);
+		}
 	}
 	/* Does monster already exist at the position? */
 	if(MON_AT(x, y)) {
@@ -7476,28 +7498,6 @@ register int	mmflags;
 				return((struct monst *) 0);
 		} else 
 			return((struct monst *) 0);
-	}
-	
-	if(ptr && mmflags & MM_CHECK_GOODPOS){
-	 struct monst fakemon = {0};
-	 fakemon.data = ptr;	/* set up for goodpos */
-	 if(!goodpos(x, y, &fakemon, gpflags)){
-		if ((mmflags & MM_ADJACENTOK) != 0) {
-			coord bypos;
-			if(enexto_core(&bypos, x, y, ptr, gpflags)) {
-				if( !(mmflags & MM_ADJACENTSTRICT) || (
-					bypos.x - x <= 1 && bypos.x - x >= -1 &&
-					bypos.y - y <= 1 && bypos.y - y >= -1
-				)){
-					x = bypos.x;
-					y = bypos.y;
-				}
-				else return((struct monst *) 0);
-			} else
-				return((struct monst *) 0);
-		} else 
-			return((struct monst *) 0);
-	 }
 	}
 	
 	if(ptr){
@@ -7525,7 +7525,7 @@ register int	mmflags;
 #endif
 			    return((struct monst *) 0);	/* no more monsters! */
 			}
-			fakemon.data = ptr;	/* set up for goodpos */
+			set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
 		} while(!goodpos(x, y, &fakemon, gpflags) && tryct++ < 150);
 		if(tryct >= 150){
 			return((struct monst *) 0);	/* no more monsters! */

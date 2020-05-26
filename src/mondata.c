@@ -23,17 +23,15 @@ id_permonst()
 	return;
 }
 
-/*
- * safely sets mon->data
+/* 
+ * safely sets mon->data from an mtyp
  */
 void
 set_mon_data(mon, mtyp)
 struct monst *mon;
 int mtyp;
 {
-	int i;
 	struct permonst * ptr;
-
 	/* players in their base form are a special case */
 	if (mon == &youmonst && (mtyp == u.umonster)) {
 		mon->data = ptr = &upermonst;
@@ -41,8 +39,23 @@ int mtyp;
 	else {
 		mon->data = ptr = permonst_of(mtyp, mon->mfaction);
 	}
+	set_mon_data_core(mon, ptr);
+	return;
+}
 
-	mon->mtyp = mtyp;
+/*
+ * safely sets mon->data from an existing data pointer
+ */
+void
+set_mon_data_core(mon, ptr)
+struct monst *mon;
+struct permonst * ptr;
+{
+	int i;
+
+	/* data and type */
+	mon->data = ptr;
+	mon->mtyp = ptr->mtyp;
 
 	/* resistances */
 	mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
