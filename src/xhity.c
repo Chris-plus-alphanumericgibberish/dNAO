@@ -2648,11 +2648,11 @@ int vis;
 		) {
 		/* print appropriate message */
 		if (vis&VIS_MDEF) {
-			pline("%s %s%s %s %s %s %s!",
+			pline("%s %s%s%s %s %s %s!",
 				(youagr ? "You" : Monnam(magr)),
 				(attk->adtyp == AD_WRAP ? "slip" : "grab"),
 				(youagr ? "" : "s"),
-				(attk->adtyp == AD_WRAP ? "off of" : ", but cannot hold onto"),
+				(attk->adtyp == AD_WRAP ? " off of" : ", but cannot hold onto"),
 				(youdef ? "your" : s_suffix(mon_nam(mdef))),
 				(obj->greased ? "greased" : "slippery"),
 				((obj->otyp == OILSKIN_CLOAK && !objects[obj->otyp].oc_name_known)
