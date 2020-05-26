@@ -4674,7 +4674,7 @@ boolean was_swallowed;			/* digestion */
 				/* monoton if we found someone to grow */
 				/* the full 'ton if we didn't find one */
 				if (axus && (!found || current_ton == PM_MONOTON)) {
-					mtmp = makemon(&mons[current_ton], axus->mx, axus->my, MM_ADJACENTOK | MM_ANGRY);
+					mtmp = makemon(&mons[current_ton], axus->mx, axus->my, MM_ADJACENTOK | MM_ANGRY | NO_MINVENT);
 					if (mtmp) mtmp->mclone = 1;
 				}
 				/* growth is chained -- if we didn't find a child (and Axus didn't provide one), we don't touch the lower 'tons. */
