@@ -3749,92 +3749,37 @@ spiriteffects(power, atme)
 				}
 			} else break;
 		}break;
-		case PWR_MIRROR_SHATTER:{
-			int dmg;
-			boolean done = FALSE;
-			struct obj *obj;
-			struct obj *umirror;
-			xchar lsx, lsy, sx, sy;
-			struct monst *mon;
-			sx = u.ux;
-			sy = u.uy;
-			if(u.uswallow){
+		case PWR_MIRROR_SHATTER:
+		
+			if (u.uswallow){
 				You("can't do that in here!");
 				return 0;
 			}
-			for(umirror = invent; umirror; umirror = umirror->nobj)
-				if(umirror->otyp == MIRROR && !(umirror->oartifact)) break;
-			if(!(umirror)){
-				You("must have a breakable mirror in inventory to use this power!");
-				return 0;
-			}
-			if (!getdir((char *)0) || !(u.dx || u.dy)) return(0);
-			while(!done){
-				sx += u.dx;
-				sy += u.dy;
-				if(!isok(sx,sy)) return 0;
-				else {
-					for (obj = level.objects[sx][sy]; obj; obj = obj->nexthere) {
-						if(obj->otyp == MIRROR){
-							useupf(obj, 1);
-							done = TRUE;
-							break;
-						}
-					}
-					mon = m_at(sx, sy);
-					if(!done && mon){
-						for (obj = mon->minvent; obj; obj = obj->nobj) {
-							if(obj->otyp == MIRROR && !(obj->oartifact)){
-								m_useup(mon, obj);
-								done = TRUE;
-								break;
-							}
-						}
-					}
+			else
+			{
+				struct obj *umirror;
+				boolean foundmirror = FALSE;
+
+				for (umirror = invent; umirror; umirror = umirror->nobj) {
+					if (umirror->otyp == MIRROR && !(umirror->oartifact))
+						break;
 				}
-			}
-			if(!done) return 0;
-			//else
-			useup(umirror);
-			if(u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH,TRUE);
-			explode(u.ux,u.uy, AD_PHYS, TOOL_CLASS, d(5,dsize), HI_SILVER, 1);
-			explode(sx,sy, AD_PHYS, TOOL_CLASS, d(5,dsize), HI_SILVER, 1);
-			
-			while(sx != u.ux && sy != u.uy){
-				sx -= u.dx;
-				sy -= u.dy;
-				if(!isok(sx,sy)) break; //shouldn't need this, but....
-				else {
-					mon = m_at(sx, sy);
-					/* reveal/unreveal invisible monsters before tmp_at() */
-					if (mon && !canspotmon(mon) && cansee(sx,sy))
-						map_invisible(sx, sy);
-					else if (!mon && glyph_is_invisible(levl[sx][sy].glyph)) {
-						unmap_object(sx, sy);
-						newsym(sx, sy);
-					}
-					if (mon) {
-						reveal_invis = TRUE;
-						if (resists_magm(mon)) {	/* match effect on player */
-							shieldeff(mon->mx, mon->my);
-						} else {
-							dmg = d(5,dsize);
-							if(hates_silver(mon->data)){
-								dmg += rnd(20);
-								pline("The flying shards of mirror sear %s!", mon_nam(mon));
-							} else {
-								pline("The flying shards of mirror hit %s.", mon_nam(mon));
-								u_teleport_mon(mon, TRUE);
-							}
-							mon->mhp -= dmg;
-							if (mon->mhp <= 0){
-								xkilled(mon, 1);
-							}
-						}
-					}
+				if (!(umirror)) {
+					You("must have a breakable mirror in inventory to use this power!");
+					return 0;
 				}
+
+				/* get direction of power*/
+				if (!getdir((char *)0) || !(u.dx || u.dy)) return(0);
+
+				/* arbitrary 50 range; note it is decreased by 3 when passing through monsters */
+				(void)bhit(u.dx, u.dy, 50, TRIGGER_BEAM, nudzirath_hit_mon, nudzirath_hit_pile, umirror, &foundmirror);
+
+				/* bhit will have set foundmirror to TRUE if it had worked */
+				if (!foundmirror)
+					return 0;
 			}
-		}break;
+			break;
 		case PWR_FLOWING_FORMS:{
 			struct monst *mon;
 			if(!getdir((char *)0) || u.dz)
@@ -3999,6 +3944,164 @@ choose_crystal_summon()
 	return ( n > 0 ) ? &mons[selected[0].item.a_int] : (struct permonst *) 0;
 }
 
+/* nudzirath active power for bhit, hits pile */
+int
+nudzirath_hit_pile(pileobj, mirror)
+struct obj * pileobj;
+struct obj * mirror;
+{
+	if (pileobj->otyp == MIRROR) {
+		nudzirath_shatter(pileobj, pileobj->ox, pileobj->oy);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+/* nudzirath active power for bhit, hits monster */
+int
+nudzirath_hit_mon(mtmp, mirror)
+struct monst * mtmp;
+struct obj * mirror;
+{
+	struct obj * obj;
+	for (obj = mtmp->minvent; obj; obj = obj->nobj) {
+		if (obj->otyp == MIRROR && !(obj->oartifact)){
+			nudzirath_shatter(obj, mtmp->mx, mtmp->my);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+/* nudzirath_shatter()
+ * 
+ * An object was found at (sx,sy) and should be exploded.
+ * We need to manually find (dx,dy) and connect to (u.ux,u.uy) for the major effect
+ */
+void
+nudzirath_shatter(otmp, sx, sy)
+struct obj * otmp;
+int sx, sy;
+{
+	int dmg, dsize = spiritDsize();
+	int tx = sx, ty = sy;
+	int dx = sgn(u.ux - sx);
+	int dy = sgn(u.uy - sy);
+	struct monst *mon;
+
+	struct obj *umirror;
+
+	/* sanity check */
+	if (!(is_shatterable(otmp) && !otmp->oerodeproof && !otmp->oartifact && u.specialSealsActive&SEAL_NUDZIRATH)) {
+		impossible("non-shatterable called in nudzirath_shatter()!");
+		return;
+	}
+	/* does not work at all while swallowed */
+	if (u.uswallow) {
+		/* just break the object, no special effects */
+		hero_breaks(otmp, sx, sy, carried(otmp));
+		return;
+	}
+
+	/* major effect requirements: 
+	 * - active power off cooldown
+	 * - otmp is a mirror 
+	 * - player is carrying a mirror
+	 * - direct line between player and sxsy
+	 */
+	if ((u.spiritPColdowns[PWR_MIRROR_SHATTER] < monstermoves)
+		&& (otmp->otyp == MIRROR))
+	{
+		/* get mirror */
+		for (umirror = invent; umirror; umirror = umirror->nobj) {
+			if (umirror->otyp == MIRROR && !(umirror->oartifact))
+				break;
+		}
+		/* attempt to connect back to player by following dx and dy */
+		if (umirror) {
+			while (isok(tx, ty) && (tx != u.ux || ty != u.uy)) {
+				tx += dx; ty += dy;
+			}
+			/* if it didn't connect back to you, it can't do the major effect */
+			if (tx != u.ux || ty != u.uy) {
+				umirror = (struct obj *)0;
+			}
+		}
+	}
+	else {
+		umirror = (struct obj *)0;
+	}
+
+	/* if umirror is not null, the major effect should occur */
+	if (umirror)
+	{
+		if (u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
+
+		/* explode where the mirror is */
+		hero_breaks(otmp, sx, sy, carried(otmp));
+		explode(sx, sy, AD_PHYS, TOOL_CLASS, d(5, dsize), HI_SILVER, 1);
+		delay_output(); delay_output(); delay_output();
+		/* along the line that connects the two, deal damage to monsters */
+		tx = sx; ty = sy;
+		tmp_at(DISP_BEAM, zapdir_to_glyph(dx, dy, HI_SILVER));
+		while (tx != u.ux || ty != u.uy) {
+			tx += dx;
+			ty += dy;
+			delay_output();
+			if (!isok(tx, ty)) break; //shouldn't need this, but....
+			tmp_at(tx, ty);
+			//mon = m_at(tx, ty)
+			///* reveal/unreveal invisible monsters before tmp_at() */
+			//if (mon && !canspotmon(mon) && cansee(tx, ty))
+			//	map_invisible(tx, ty);
+			//else if (!mon && glyph_is_invisible(levl[tx][ty].glyph)) {
+			//	unmap_object(tx, ty);
+			//	newsym(tx, ty);
+			//}
+
+			if (mon = m_at(tx, ty))
+			{
+				if (resists_magm(mon)) {	/* match effect on player */ /* Nero says: huh? */
+					shieldeff(mon->mx, mon->my);
+				}
+				else {
+					dmg = d(5, dsize);
+					if (hates_silver(mon->data)){
+						dmg += rnd(20);
+						pline("The flying shards of mirror sear %s!", mon_nam(mon));
+					}
+					else {
+						pline("The flying shards of mirror hit %s.", mon_nam(mon));
+						u_teleport_mon(mon, TRUE);
+					}
+					mon->mhp -= dmg;
+					if (mon->mhp <= 0){
+						xkilled(mon, 1);
+					}
+				}
+			}
+		}/* while() connecting mirrors for major effect */
+		tmp_at(DISP_END, 0);
+
+		/* and the mirror you were carrying */
+		useup(umirror);
+		explode(u.ux, u.uy, AD_PHYS, TOOL_CLASS, d(5, dsize), HI_SILVER, 1);
+
+		/* set spirit power timeout here, in case this was called outside of ^F */
+		u.spiritPColdowns[PWR_MIRROR_SHATTER] = monstermoves + 25;
+	
+	}
+	/* otherwise, break otmp (probably explosively) */
+	else {
+		hero_breaks(otmp, sx, sy, carried(otmp));
+
+		if (otmp->otyp == MIRROR)
+			explode(sx, sy, AD_PHYS, TOOL_CLASS, d(rnd(5), dsize), HI_SILVER, 1);
+		else if (otmp->obj_material == OBSIDIAN_MT)
+			explode(sx, sy, AD_PHYS, WEAPON_CLASS, d(rnd(5), dsize), EXPL_DARK, 1);
+	}
+	return;
+}
 
 void
 blessedlight(x,y)
