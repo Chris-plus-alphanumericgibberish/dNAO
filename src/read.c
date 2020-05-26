@@ -550,6 +550,7 @@ doread()
 	if(scroll->oartifact) {
 		if(Blind) {
 			pline("Being blind, you cannot see the %s.", the(xname(scroll)));
+			scroll->in_use = FALSE;
 			return 0;
 		}
 		pline("You examine %s.", the(xname(scroll)));
