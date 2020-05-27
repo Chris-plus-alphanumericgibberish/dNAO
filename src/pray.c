@@ -4165,7 +4165,8 @@ struct obj *otmp;
 	int saved_anger = u.ugangr[GA_MOTHER];
 	int saved_cnt = u.ugoatblesscnt;
 	int saved_luck = u.uluck;
-
+	char goatname[BUFSZ];
+	Strcpy(goatname, goattitles[rn2(SIZE(goattitles))]);
 	/* Sacrificing at an altar of a different alignment */
 	/* Never a conversion */
 	/* never an altar conversion*/
@@ -4186,12 +4187,12 @@ struct obj *otmp;
 	    if(u.ugangr[GA_MOTHER] < 0) u.ugangr[GA_MOTHER] = 0;
 	    if(u.ugangr[GA_MOTHER] != saved_anger) {
 		if (u.ugangr[GA_MOTHER]) {
-			pline("%s seems %s.", upstart(goattitles[rn2(SIZE(goattitles))]),
+			pline("%s seems %s.", upstart(goatname),
 			  Hallucination ? "groovy" : "slightly mollified");
 
 		    if ((int)u.uluck < 0) change_luck(1);
 		} else {
-			pline("%s seems %s.", upstart(goattitles[rn2(SIZE(goattitles))]), Hallucination ?
+			pline("%s seems %s.", upstart(goatname), Hallucination ?
 			  "cosmic (not a new fact)" : "mollified");
 
 		    if ((int)u.uluck < 0) u.uluck = 0;
