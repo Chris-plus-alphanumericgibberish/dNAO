@@ -1640,7 +1640,7 @@ A("The Heart of Ahriman",			RUBY,				(const char *)0,
 
 #ifdef BARD
 A("The Lyre of Orpheus",			MAGIC_HARP,			(const char *)0,
-	5000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	5000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_BARD, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
