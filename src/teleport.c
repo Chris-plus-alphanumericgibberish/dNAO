@@ -120,7 +120,7 @@ struct permonst *mdat;
 	/* default to player's original monster type */
 	mdat = &mons[u.umonster];
     }
-    fakemon.data = mdat;	/* set up for goodpos */
+    set_mon_data_core(&fakemon, mdat);	/* set up for goodpos */
     good_ptr = good;
     range = 3;
     /*
@@ -195,7 +195,7 @@ struct permonst *mdat;
 	/* default to player's original monster type */
 	mdat = &mons[u.umonster];
     }
-    fakemon.data = mdat;	/* set up for goodpos */
+	set_mon_data_core(&fakemon, mdat);	/* set up for goodpos */
 	for(j = 0; j < 8; j++){
 		x = xx;
 		y = yy;
@@ -265,7 +265,7 @@ unsigned entflags;
 	/* default to player's original monster type */
 	mdat = &mons[u.umonster];
     }
-    fakemon.data = mdat;	/* set up for goodpos */
+	set_mon_data_core(&fakemon, mdat);
     good_ptr = good;
     range = 1;
     /*
