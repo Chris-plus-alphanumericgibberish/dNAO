@@ -23,17 +23,15 @@ id_permonst()
 	return;
 }
 
-/*
- * safely sets mon->data
+/* 
+ * safely sets mon->data from an mtyp
  */
 void
 set_mon_data(mon, mtyp)
 struct monst *mon;
 int mtyp;
 {
-	int i;
 	struct permonst * ptr;
-
 	/* players in their base form are a special case */
 	if (mon == &youmonst && (mtyp == u.umonster)) {
 		mon->data = ptr = &upermonst;
@@ -41,8 +39,23 @@ int mtyp;
 	else {
 		mon->data = ptr = permonst_of(mtyp, mon->mfaction);
 	}
+	set_mon_data_core(mon, ptr);
+	return;
+}
 
-	mon->mtyp = mtyp;
+/*
+ * safely sets mon->data from an existing data pointer
+ */
+void
+set_mon_data_core(mon, ptr)
+struct monst *mon;
+struct permonst * ptr;
+{
+	int i;
+
+	/* data and type */
+	mon->data = ptr;
+	mon->mtyp = ptr->mtyp;
 
 	/* resistances */
 	mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
@@ -359,7 +372,8 @@ int faction;
 
 		/* some factions want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || \
-					((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp)) || attk->aatyp == AT_NONE)) \
+					((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
+						&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
 					&& (insert = TRUE))
 #define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;}

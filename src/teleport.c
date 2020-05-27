@@ -71,7 +71,7 @@ unsigned gpflags;
 						Swimming || Amphibious);
 			else	return (mon_resistance(mtmp,FLYING) || breathless_mon(mtmp) || mon_resistance(mtmp,SWIMMING) ||
 								is_clinger(mdat) || amphibious_mon(mtmp));
-	    } else if (mdat->mlet == S_EEL && !ignorewater) {
+	    } else if (mdat->mlet == S_EEL && !ignorewater && rn2(13)) {
 			if (is_pool(x, y, TRUE))
 				return (mdat->msize == MZ_TINY);
 			return FALSE;
@@ -120,7 +120,7 @@ struct permonst *mdat;
 	/* default to player's original monster type */
 	mdat = &mons[u.umonster];
     }
-    fakemon.data = mdat;	/* set up for goodpos */
+    set_mon_data_core(&fakemon, mdat);	/* set up for goodpos */
     good_ptr = good;
     range = 3;
     /*
@@ -195,7 +195,7 @@ struct permonst *mdat;
 	/* default to player's original monster type */
 	mdat = &mons[u.umonster];
     }
-    fakemon.data = mdat;	/* set up for goodpos */
+	set_mon_data_core(&fakemon, mdat);	/* set up for goodpos */
 	for(j = 0; j < 8; j++){
 		x = xx;
 		y = yy;
@@ -265,7 +265,7 @@ unsigned entflags;
 	/* default to player's original monster type */
 	mdat = &mons[u.umonster];
     }
-    fakemon.data = mdat;	/* set up for goodpos */
+	set_mon_data_core(&fakemon, mdat);
     good_ptr = good;
     range = 1;
     /*

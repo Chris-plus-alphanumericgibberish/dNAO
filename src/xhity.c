@@ -2648,11 +2648,11 @@ int vis;
 		) {
 		/* print appropriate message */
 		if (vis&VIS_MDEF) {
-			pline("%s %s%s %s %s %s %s!",
+			pline("%s %s%s%s %s %s %s!",
 				(youagr ? "You" : Monnam(magr)),
 				(attk->adtyp == AD_WRAP ? "slip" : "grab"),
 				(youagr ? "" : "s"),
-				(attk->adtyp == AD_WRAP ? "off of" : ", but cannot hold onto"),
+				(attk->adtyp == AD_WRAP ? " off of" : ", but cannot hold onto"),
 				(youdef ? "your" : s_suffix(mon_nam(mdef))),
 				(obj->greased ? "greased" : "slippery"),
 				((obj->otyp == OILSKIN_CLOAK && !objects[obj->otyp].oc_name_known)
@@ -12147,7 +12147,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			/* do the potion effects */
 			/* note: if player is defending, this assumes the potion was thrown */
 			potionhit(mdef, otmp, youagr);
-			*wepgone = TRUE;
+			if (wepgone)
+				*wepgone = TRUE;
 			/* check if defender was killed */
 			if (*hp(mdef) < 1)
 				return MM_DEF_DIED;
@@ -12170,8 +12171,27 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			switch (weapon->otyp)
 			{
 			case MIRROR:
+				/* with Nudzirath bound, thrown mirrors have a different behaviour */
+				if (youagr && thrown && !weapon->oartifact && u.specialSealsActive&SEAL_NUDZIRATH) {
+
+					/* remember stuff about the mirror so weapon can be used after nudzirath_shatter() is called */
+					otmp = weapon;
+					weapon = &tempwep;
+					
+					nudzirath_shatter(otmp, bhitpos.x, bhitpos.y);
+					if (wepgone)
+						*wepgone = TRUE;
+
+					/* check if defender was killed */
+					if (*hp(mdef) < 1)
+						return MM_DEF_DIED;
+					/* nudzirath_shatter prints messages */
+					hittxt = TRUE;
+					real_attack = FALSE;
+					basedmg = 1;
+				}
 				/* mirrors shatter */
-				if (breaktest(weapon)) {
+				else if (breaktest(weapon)) {
 					/* if break the mirror, it affects your luck. And prints a message. */
 					if (youagr) {
 						if (u.specialSealsActive&SEAL_NUDZIRATH){
@@ -12973,6 +12993,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		/* get attackmask */
 		if (weapon && (valid_weapon_attack || invalid_weapon_attack)) {
 			attackmask = attack_mask(weapon, 0, 0);
+			otmp = weapon;
 		}
 		else if (unarmed_punch) {
 			//Can always whack someone

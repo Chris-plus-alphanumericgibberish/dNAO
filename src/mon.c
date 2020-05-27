@@ -2152,7 +2152,7 @@ movemon()
 			struct monst *sprout = (struct monst *) 0;
 			int newx = (mtmp->mx-1)+rn2(3), newy = (mtmp->my-1)+rn2(3);
 			if(isok(newx,newy)){
-				sprout = makemon(mtmp->data, newx, newy, MM_CHECK_GOODPOS|MM_NOCOUNTBIRTH|NO_MINVENT);
+				sprout = makemon(mtmp->data, newx, newy, MM_NOCOUNTBIRTH|NO_MINVENT);
 				if(sprout) sprout->mhp = In_hell(&u.uz) ? sprout->mhp*3/4 : sprout->mhp/2;
 			}
 		}
@@ -4674,7 +4674,7 @@ boolean was_swallowed;			/* digestion */
 				/* monoton if we found someone to grow */
 				/* the full 'ton if we didn't find one */
 				if (axus && (!found || current_ton == PM_MONOTON)) {
-					mtmp = makemon(&mons[current_ton], axus->mx, axus->my, MM_ADJACENTOK | MM_ANGRY);
+					mtmp = makemon(&mons[current_ton], axus->mx, axus->my, MM_ADJACENTOK | MM_ANGRY | NO_MINVENT);
 					if (mtmp) mtmp->mclone = 1;
 				}
 				/* growth is chained -- if we didn't find a child (and Axus didn't provide one), we don't touch the lower 'tons. */

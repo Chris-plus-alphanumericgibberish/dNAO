@@ -3228,7 +3228,7 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 
 	if (weapon == FLASHED_LIGHT) {
 	    tmp_at(DISP_BEAM, cmap_to_glyph(S_flashbeam));
-	} else if (weapon != ZAPPED_WAND && weapon != INVIS_BEAM)
+	} else if (weapon != ZAPPED_WAND && weapon != INVIS_BEAM && weapon != TRIGGER_BEAM)
 	    tmp_at(DISP_FLASH, obj_to_glyph(obj));
 
 	bhitpos.x = u.ux;
@@ -3249,7 +3249,8 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 		
 		trap = t_at(x, y);
 
-		if (trap && trap->ttyp == STATUE_TRAP) activate_statue_trap(trap, x, y, (obj->otyp == WAN_STRIKING || obj->otyp == SPE_FORCE_BOLT) ? TRUE : FALSE);
+		if (trap && trap->ttyp == STATUE_TRAP && weapon != TRIGGER_BEAM)
+			activate_statue_trap(trap, x, y, (obj->otyp == WAN_STRIKING || obj->otyp == SPE_FORCE_BOLT) ? TRUE : FALSE);
 		
 	    if(is_pick(obj) && inside_shop(x, y) &&
 					   (mtmp = shkcatch(obj, x, y))) {
@@ -3293,7 +3294,7 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 		notonhead = (bhitpos.x != mtmp->mx ||
 			     bhitpos.y != mtmp->my);
 		if (weapon != FLASHED_LIGHT) {
-			if(weapon != ZAPPED_WAND) {
+			if (weapon != ZAPPED_WAND && weapon != TRIGGER_BEAM) {
 			    if(weapon != INVIS_BEAM) tmp_at(DISP_END, 0);
 			    if (cansee(bhitpos.x,bhitpos.y) && !canspotmon(mtmp)) {
 				if (weapon != INVIS_BEAM) {
@@ -3304,8 +3305,13 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 				return(mtmp);
 			}
 			if (weapon != INVIS_BEAM) {
-			    (*fhitm)(mtmp, obj);
-			    range -= 3;
+				int res = (*fhitm)(mtmp, obj);
+				if (weapon == TRIGGER_BEAM && res) {
+					if (obj_destroyed) *obj_destroyed = TRUE;	/* doesn't destroy obj, but signals effect was done*/
+					return mtmp;
+				}
+				else
+					range -= 3;
 			}
 		} else {
 		    /* FLASHED_LIGHT hitting invisible monster
@@ -3332,8 +3338,14 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 		}
 	    }
 	    if(fhito) {
-		if(bhitpile(obj,fhito,bhitpos.x,bhitpos.y))
-		    range--;
+			if (bhitpile(obj, fhito, bhitpos.x, bhitpos.y)) {
+				if (weapon == TRIGGER_BEAM) {
+					if (obj_destroyed) *obj_destroyed = TRUE;	/* doesn't destroy obj, but signals effect was done*/
+					return (struct monst *)0;
+				}
+				else
+					range--;
+			}
 	    }
 	    if(weapon == ZAPPED_WAND && (IS_DOOR(typ) || typ == SDOOR)) {
 		switch (obj->otyp) {
@@ -3361,7 +3373,7 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 		bhitpos.y -= ddy;
 		break;
 	    }
-	    if(weapon != ZAPPED_WAND && weapon != INVIS_BEAM) {
+	    if(weapon != ZAPPED_WAND && weapon != INVIS_BEAM && weapon != TRIGGER_BEAM) {
 		/* 'I' present but no monster: erase */
 		/* do this before the tmp_at() */
 		if (glyph_is_invisible(levl[bhitpos.x][bhitpos.y].glyph)
@@ -3374,7 +3386,7 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 	    }
 	}
 
-	if (weapon != ZAPPED_WAND && weapon != INVIS_BEAM) tmp_at(DISP_END, 0);
+	if (weapon != ZAPPED_WAND && weapon != INVIS_BEAM && weapon != TRIGGER_BEAM) tmp_at(DISP_END, 0);
 
 	if(shopdoor)
 	    pay_for_damage("destroy", FALSE);
@@ -5133,7 +5145,9 @@ int osym, dmgtyp;
 	vis = canseemon(mtmp);
 	for(obj = mtmp->minvent; obj; obj = obj2) {
 	    obj2 = obj->nobj;
-	    if(obj->oclass != osym) continue; /* test only objs of type osym */
+		if (obj->oclass != osym) continue; /* test only objs of type osym */
+		if (obj->oartifact) continue; /* don't destroy artifacts */
+		if (obj->in_use && obj->quan == 1) continue; /* not available */
 	    skip = 0;
 	    quan = 0L;
 	    dindx = 0;

@@ -5399,7 +5399,7 @@ int floorID;
 	/* possibly eject spirits */
 	if (spirit_type == ALIGN_SPIRIT && u.spirit[ALIGN_SPIRIT]){
 		/* Peacefully eject current alignment spirit */
-		u.sealTimeout[decode_sealID(u.spirit[ALIGN_SPIRIT])] = moves;
+		u.sealTimeout[decode_sealID(u.spirit[ALIGN_SPIRIT]) - FIRST_SEAL] = moves;
 		unbind(u.spirit[ALIGN_SPIRIT], FALSE);
 	}
 	if (spirit_type == QUEST_SPIRIT && u.spirit[QUEST_SPIRIT]){
