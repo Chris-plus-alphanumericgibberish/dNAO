@@ -3801,7 +3801,7 @@ struct monst *mtmp;
 
 	/* some lifesavers should SILENTLY fail to protect from genocide */
 	if (mvitals[monsndx(mtmp->data)].mvflags & G_GENOD && !In_quest(&u.uz))
-		lifesavers &= ~(LSVD_FRC | LSVD_NBW | LSVD_KAM);
+		lifesavers &= ~(LSVD_FRC | LSVD_NBW | LSVD_KAM | LSVD_HLO);
 
 	/* quick check -- if no lifesavers, let's fail immediately */
 	if (!lifesavers) {

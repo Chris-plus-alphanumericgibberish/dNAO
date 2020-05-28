@@ -780,7 +780,7 @@ int ga_num;
 
 	    default:	
 			gods_angry(ga_num);
-			god_zaps_you(resp_god);
+			god_zaps_you(ga_num);
 			break;
 	}
 	u.ublesscnt = rnz(300);
@@ -2930,7 +2930,7 @@ dosacrifice()
 	pline("Suddenly, you realize that %s has noticed you...", a_gname());
 		godvoice(Align2gangr(altaralign), "So, mortal!  You dare desecrate my High Temple!");
 	/* Throw everything we have at the player */
-	god_zaps_you(altaralign);
+	god_zaps_you(Align2gangr(altaralign));
     } else if (value < 0) { /* I don't think the gods are gonna like this... */
 		gods_upset(Align2gangr(altaralign));
     } else {
