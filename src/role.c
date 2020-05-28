@@ -3043,7 +3043,7 @@ void
 check_loadout_trophy()
 {
 	long allupgrades = (OIL_STOVE|WOOD_STOVE|FAST_SWITCH|EFFICIENT_SWITCH|ARMOR_PLATING|PHASE_ENGINE|MAGIC_FURNACE|HELLFIRE_FURNACE|SCRAP_MAW);
-	if(u.clockworkUpgrades&allupgrades == allupgrades)
+	if((u.clockworkUpgrades&allupgrades) == allupgrades)
 		achieve.trophies |= FULL_LOADOUT;
 }
 #endif
