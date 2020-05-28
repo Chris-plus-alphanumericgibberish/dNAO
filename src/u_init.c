@@ -3424,6 +3424,9 @@ register struct trobj *trop;
                 obj->cursed = TRUE;
             }
 #endif /* CONVICT */
+			if (obj->otyp == TINNING_KIT) {
+				obj->spe = rn1(50, 50);	/* more charges than standard generation */
+			}
 			if (trop->trspe != UNDEF_SPE)
 			    obj->spe = trop->trspe;
 			if (trop->trbless != UNDEF_BLESS)
