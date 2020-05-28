@@ -1713,6 +1713,7 @@ struct obj	*sobj;
 		s = sobj->cursed ? -otmp->spe : otmp->spe;
 		if (s > (special_armor ? 5 : 3) && rn2(s)) {
 			if(otmp->oartifact){
+				int delta = 0 - otmp->spe;
 				Your("%s violently %s%s%s for a while, then %s.",
 					 xname(otmp),
 					 otense(otmp, Blind ? "vibrate" : "glow"),
@@ -1721,6 +1722,7 @@ struct obj	*sobj;
 					hcolor(sobj->cursed ? NH_BLACK : NH_SILVER),
 					 otense(otmp, "fade"));
 					otmp->spe = 0;
+					adj_abon(otmp, delta);
 			} else {
 				Your("%s violently %s%s%s for a while, then %s.",
 					 xname(otmp),
