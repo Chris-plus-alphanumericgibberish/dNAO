@@ -6014,53 +6014,53 @@ register struct	monst	*mtmp;
 			|| ptr->mtyp == PM_FATHER_DAGON
 			|| ptr->mtyp == PM_MOTHER_HYDRA) {
 			 if(on_level(&rlyeh_level,&u.uz) || ptr->mlevel>=50){
-			otmp = mksobj(TRIDENT, TRUE, FALSE);
-			otmp->oerodeproof = 1;
-			otmp->spe = 9;
-				otmp->objsize = MZ_HUGE;
-				fix_object(otmp);
-			(void) mpickobj(mtmp, otmp);
-			
-			otmp = mksobj(RANSEUR, TRUE, FALSE);
-			otmp->oerodeproof = 1;
-			otmp->spe = 9;
-				otmp->objsize = MZ_HUGE;
-				fix_object(otmp);
-			(void) mpickobj(mtmp, otmp);
-			
-			otmp = mksobj(CROSSBOW, TRUE, FALSE);
-				otmp->objsize = MZ_HUGE;
-				fix_object(otmp);
-			(void) mpickobj(mtmp, otmp);
-			otmp = mksobj(CROSSBOW_BOLT, TRUE, FALSE);
-			otmp->oerodeproof = 1;
-			otmp->quan = 18;
-			otmp->owt = weight(otmp);
-			otmp->spe = 9;
-				otmp->objsize = MZ_HUGE;
-				fix_object(otmp);
-			(void) mpickobj(mtmp, otmp);
-			
-			otmp = mksobj(SHIELD_OF_REFLECTION, TRUE, FALSE);
-			set_material(otmp, COPPER);
-			otmp->oerodeproof = 1;
-			otmp->spe = 9;
-				otmp->objsize = MZ_HUGE;
-				fix_object(otmp);
-			(void) mpickobj(mtmp, otmp);
-			
-			(void) mongets(mtmp, rnd_attack_potion(mtmp));
-			(void) mongets(mtmp, rnd_attack_potion(mtmp));
-			
-			otmp = mksobj(rnd_utility_potion(mtmp), TRUE, FALSE);
-			otmp->blessed = FALSE;
-			otmp->cursed = FALSE;
-			(void) mpickobj(mtmp, otmp);
-			
-			otmp = mksobj(rnd_utility_potion(mtmp), TRUE, FALSE);
-			otmp->blessed = FALSE;
-			otmp->cursed = FALSE;
-			(void) mpickobj(mtmp, otmp);
+				otmp = mksobj(TRIDENT, TRUE, FALSE);
+				otmp->oerodeproof = 1;
+				otmp->spe = 9;
+					otmp->objsize = MZ_HUGE;
+					fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
+				
+				otmp = mksobj(RANSEUR, TRUE, FALSE);
+				otmp->oerodeproof = 1;
+				otmp->spe = 9;
+					otmp->objsize = MZ_HUGE;
+					fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
+				
+				otmp = mksobj(CROSSBOW, TRUE, FALSE);
+					otmp->objsize = MZ_HUGE;
+					fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
+				otmp = mksobj(CROSSBOW_BOLT, TRUE, FALSE);
+				otmp->oerodeproof = 1;
+				otmp->quan = 18;
+				otmp->owt = weight(otmp);
+				otmp->spe = 9;
+					otmp->objsize = MZ_HUGE;
+					fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
+				
+				otmp = mksobj(SHIELD_OF_REFLECTION, TRUE, FALSE);
+				set_material(otmp, COPPER);
+				otmp->oerodeproof = 1;
+				otmp->spe = 9;
+					otmp->objsize = MZ_HUGE;
+					fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
+				
+				(void) mongets(mtmp, rnd_attack_potion(mtmp));
+				(void) mongets(mtmp, rnd_attack_potion(mtmp));
+				
+				otmp = mksobj(rnd_utility_potion(mtmp), TRUE, FALSE);
+				otmp->blessed = FALSE;
+				otmp->cursed = FALSE;
+				(void) mpickobj(mtmp, otmp);
+				
+				otmp = mksobj(rnd_utility_potion(mtmp), TRUE, FALSE);
+				otmp->blessed = FALSE;
+				otmp->cursed = FALSE;
+				(void) mpickobj(mtmp, otmp);
 			} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
 				otmp = mksobj(QUARTERSTAFF, TRUE, FALSE);
 				otmp->spe = 9;

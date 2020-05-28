@@ -1237,11 +1237,15 @@ moveloop()
 					}
 				}
 				
-				if(mtmp->mtyp == PM_DEEPEST_ONE && !mtmp->female && u.uevent.ukilled_dagon){
+				if(mtmp->mtyp == PM_DEEPEST_ONE && !mtmp->female && u.uevent.ukilled_dagon && !(In_quest(&u.uz) && Role_if(PM_ANACHRONONAUT))){
+					if(mtmp->m_lev < mons[PM_FATHER_DAGON].mlevel)
+						mtmp->m_lev = mons[PM_FATHER_DAGON].mlevel;
 					set_mon_data(mtmp, PM_FATHER_DAGON);
 					u.uevent.ukilled_dagon = 0;
 				}
-				if(mtmp->mtyp == PM_DEEPEST_ONE && mtmp->female && u.uevent.ukilled_hydra){
+				if(mtmp->mtyp == PM_DEEPEST_ONE && mtmp->female && u.uevent.ukilled_hydra && !(In_quest(&u.uz) && Role_if(PM_ANACHRONONAUT))){
+					if(mtmp->m_lev < mons[PM_MOTHER_HYDRA].mlevel)
+						mtmp->m_lev = mons[PM_MOTHER_HYDRA].mlevel;
 					set_mon_data(mtmp, PM_MOTHER_HYDRA);
 					u.uevent.ukilled_hydra = 0;
 				}
