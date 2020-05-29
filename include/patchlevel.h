@@ -42,8 +42,9 @@
  * 3.17.1: Bard first gift, singing quest guardians, and monster music affects the player 
  * 3.18.0: Alternate Chaos quests, Android Anachrononauts
  * 3.19.0: xhity and artifact revisions (Nero), sanity and insight
+ * 3.19.1: Bugfixes and Junethack handling (trophies, pick chaos quest)
  */
-#define PATCHLEVEL	0
+#define PATCHLEVEL	1
 /*
  * Incrementing EDITLEVEL can be used to force invalidation of old bones
  * and save files.
