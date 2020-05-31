@@ -11207,6 +11207,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	static int warnedotyp = -1;
 	static struct permonst *warnedptr = 0;
 
+	char killerbuf[BUFSZ];		/* only for use with killer */
 	char buf[BUFSZ];
 
 	boolean phase_armor = FALSE;
@@ -11355,12 +11356,12 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			switch (trap->ttyp) {
 			case ARROW_TRAP:
 			case DART_TRAP:
-				Sprintf(buf, "%s trap", killer_xname(weapon));	/* killer_xname() adds a/an/the */
-				killer = buf;
+				Sprintf(killerbuf, "%s trap", killer_xname(weapon));	/* killer_xname() adds a/an/the */
+				killer = killerbuf;
 				break;
 			case BEAR_TRAP:
-				Sprintf(buf, "%s", killer_xname(weapon));	/* killer_xname() adds a/an/the */
-				killer = buf;
+				Sprintf(killerbuf, "%s", killer_xname(weapon));	/* killer_xname() adds a/an/the */
+				killer = killerbuf;
 				break;
 			case ROCKTRAP:
 				killer = "a falling rock trap";
@@ -11376,7 +11377,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		/* "killed by (a) <weapon> */
 		else if (thrown && weapon) {
 			killer_format = KILLED_BY;	/* killer_xname() adds a/an/the */
-			killer = killer_xname(weapon);
+			Strcpy(killerbuf, killer_xname(weapon));
+			killer = killerbuf;
 		}
 		/* nothing to work with, give basic message */
 		else {
