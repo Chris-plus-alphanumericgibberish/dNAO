@@ -32,7 +32,7 @@ STATIC_DCL void FDECL(setallstolen, (struct obj *));
 STATIC_DCL void FDECL(setallpaid, (struct obj *));
 STATIC_DCL void FDECL(pacify_shk, (struct monst *));
 STATIC_DCL struct bill_x *FDECL(onbill, (struct obj *, struct monst *, BOOLEAN_P));
-STATIC_DCL struct monst *FDECL(next_shkp, (struct monst *, BOOLEAN_P));
+STATIC_DCL struct monst *FDECL(next_shkp, (struct monst *, BOOLEAN_P, BOOLEAN_P));
 STATIC_DCL long FDECL(shop_debt, (struct eshk *));
 STATIC_DCL char *FDECL(shk_owns, (char *,struct obj *));
 STATIC_DCL char *FDECL(mon_owns, (char *,struct obj *));
@@ -194,20 +194,21 @@ long amount;
 #endif /* GOLDOBJ */
 
 STATIC_OVL struct monst *
-next_shkp(shkp, withbill)
+next_shkp(shkp, withbill, allowdead)
 register struct monst *shkp;
 register boolean withbill;
+register boolean allowdead;
 {
 	for (; shkp; shkp = shkp->nmon) {
-	    if (DEADMONSTER(shkp)) continue;
+	    if (DEADMONSTER(shkp) && !allowdead) continue;
 	    if (shkp->isshk && (ESHK(shkp)->billct || !withbill)) break;
 	}
 
-	if (shkp) {
+	if (shkp && !DEADMONSTER(shkp)) {
 	    if (NOTANGRY(shkp)) {
-		if (ESHK(shkp)->surcharge) pacify_shk(shkp);
+			if (ESHK(shkp)->surcharge) pacify_shk(shkp);
 	    } else {
-		if (!ESHK(shkp)->surcharge) rile_shk(shkp);
+			if (!ESHK(shkp)->surcharge) rile_shk(shkp);
 	    }
 	}
 	return(shkp);
@@ -839,15 +840,15 @@ struct obj *obj1, *obj2;
 	register boolean are_mergable = FALSE;
 
 	/* look up the first object by finding shk whose bill it's on */
-	for (shkp1 = next_shkp(fmon, TRUE); shkp1;
-		shkp1 = next_shkp(shkp1->nmon, TRUE))
+	for (shkp1 = next_shkp(fmon, TRUE, TRUE); shkp1;
+		shkp1 = next_shkp(shkp1->nmon, TRUE, TRUE))
 	    if ((bp1 = onbill(obj1, shkp1, TRUE)) != 0) break;
 	/* second object is probably owned by same shk; if not, look harder */
 	if (shkp1 && (bp2 = onbill(obj2, shkp1, TRUE)) != 0) {
 	    shkp2 = shkp1;
 	} else {
-	    for (shkp2 = next_shkp(fmon, TRUE); shkp2;
-		    shkp2 = next_shkp(shkp2->nmon, TRUE))
+	    for (shkp2 = next_shkp(fmon, TRUE, TRUE); shkp2;
+		    shkp2 = next_shkp(shkp2->nmon, TRUE, TRUE))
 		if ((bp2 = onbill(obj2, shkp2, TRUE)) != 0) break;
 	}
 
@@ -893,8 +894,8 @@ shopper_financial_report()
 	/* pass 0: report for the shop we're currently in, if any;
 	   pass 1: report for all other shops on this level. */
 	for (pass = this_shkp ? 0 : 1; pass <= 1; pass++)
-	    for (shkp = next_shkp(fmon, FALSE);
-		    shkp; shkp = next_shkp(shkp->nmon, FALSE)) {
+	    for (shkp = next_shkp(fmon, FALSE, TRUE);
+		    shkp; shkp = next_shkp(shkp->nmon, FALSE, TRUE)) {
 		if ((shkp != this_shkp) ^ pass) continue;
 		eshkp = ESHK(shkp);
 		if ((amt = eshkp->credit) != 0)
@@ -1002,8 +1003,8 @@ register struct obj *obj, *merge;
 	shkp = 0;
 	if (obj->unpaid) {
 	    /* look for a shopkeeper who owns this object */
-	    for (shkp = next_shkp(fmon, TRUE); shkp;
-		    shkp = next_shkp(shkp->nmon, TRUE))
+	    for (shkp = next_shkp(fmon, TRUE, TRUE); shkp;
+		    shkp = next_shkp(shkp->nmon, TRUE, TRUE))
 		if (onbill(obj, shkp, TRUE)) break;
 	}
 	/* sanity check, more or less */
@@ -1127,8 +1128,8 @@ angry_shk_exists()
 {
 	register struct monst *shkp;
 
-	for (shkp = next_shkp(fmon, FALSE);
-		shkp; shkp = next_shkp(shkp->nmon, FALSE))
+	for (shkp = next_shkp(fmon, FALSE, FALSE);
+		shkp; shkp = next_shkp(shkp->nmon, FALSE, FALSE))
 	    if (ANGRY(shkp)) return(TRUE);
 	return(FALSE);
 }
@@ -1324,8 +1325,8 @@ dopay()
 	/* find how many shk's there are, how many are in */
 	/* sight, and are you in a shop room with one.    */
 	nxtm = resident = 0;
-	for (shkp = next_shkp(fmon, FALSE);
-		shkp; shkp = next_shkp(shkp->nmon, FALSE)) {
+	for (shkp = next_shkp(fmon, FALSE, FALSE);
+		shkp; shkp = next_shkp(shkp->nmon, FALSE, FALSE)) {
 	    sk++;
 	    if (ANGRY(shkp) && distu(shkp->mx, shkp->my) <= 2) nxtm = shkp;
 	    if (canspotmon(shkp)) seensk++;
@@ -1356,8 +1357,8 @@ dopay()
 	}
 
 	if (seensk == 1) {
-		for (shkp = next_shkp(fmon, FALSE);
-			shkp; shkp = next_shkp(shkp->nmon, FALSE))
+		for (shkp = next_shkp(fmon, FALSE, FALSE);
+			shkp; shkp = next_shkp(shkp->nmon, FALSE, FALSE))
 		    if (canspotmon(shkp)) break;
 		if (shkp != resident && distu(shkp->mx, shkp->my) > 2) {
 		    pline("%s is not near enough to receive your payment.",
@@ -2131,8 +2132,8 @@ int croaked;	/* -1: escaped dungeon; 0: quit; 1: died */
 	    ESHK(mtmp)->pbanned = FALSE; /* Un-ban for bones levels */
 	    ESHK(mtmp)->signspotted = 0; /* seen no signs */
 	}
-	for (mtmp = next_shkp(fmon, FALSE);
-		mtmp; mtmp = next_shkp(mtmp2, FALSE)) {
+	for (mtmp = next_shkp(fmon, FALSE, FALSE);
+		mtmp; mtmp = next_shkp(mtmp2, FALSE, FALSE)) {
 	    mtmp2 = mtmp->nmon;
 	    if (mtmp != resident) {
 		/* for bones: we don't want a shopless shk around */
@@ -2611,8 +2612,8 @@ register struct obj *unp_obj;	/* known to be unpaid */
 	register struct bill_x *bp = (struct bill_x *)0;
 	register struct monst *shkp;
 
-	for(shkp = next_shkp(fmon, TRUE); shkp;
-					shkp = next_shkp(shkp->nmon, TRUE))
+	for(shkp = next_shkp(fmon, TRUE, TRUE); shkp;
+					shkp = next_shkp(shkp->nmon, TRUE, TRUE))
 	    if ((bp = onbill(unp_obj, shkp, TRUE)) != 0) break;
 
 	/* onbill() gave no message if unexpected problem occurred */
