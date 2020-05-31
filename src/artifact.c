@@ -4462,25 +4462,27 @@ boolean * messaged;
 
 		for (; leveldrain > 0; leveldrain--) {
 			if (youdef) {
-				dlife = u.uhpmax;
+				dlife = *hpmax(mdef);
 				losexp("life drainage", FALSE, FALSE, FALSE);
-				dlife -= u.uhpmax;
+				dlife -= *hpmax(mdef);
 			}
 			else {
-				dlife = mdef->mhpmax;
-				mdef->mhpmax -= min(rnd(8), mdef->mhpmax);
-				if (mdef->mhpmax == 0 || mdef->m_lev == 0) {
+				dlife = *hpmax(mdef);
+				*hpmax(mdef) -= min(rnd(8), *hpmax(mdef));
+				if (*hpmax(mdef) == 0 || mlev(mdef) == 0) {
 					if (youagr && oartifact == ART_STORMBRINGER && dieroll <= 2 && !is_silent_mon(mdef))
 						pline("%s cries out in pain and despair and terror.", Monnam(mdef));
 					*hp(mdef) = 1;
+					*hpmax(mdef) = 1;
 				}
-				mdef->m_lev -= min(1, mdef->m_lev);
-				dlife -= mdef->mhpmax;
+				if (mdef->m_lev > 0)
+					mdef->m_lev--;
+				dlife -= *hpmax(mdef);
 			}
 			if (magr) {
 				*hp(magr) += dlife / 2;
-				if (magr->mhp > magr->mhpmax)
-					magr->mhp = magr->mhpmax;
+				if (*hp(magr) > *hpmax(magr))
+					*hp(magr) = *hpmax(magr);
 			}
 			*truedmgptr += dlife;
 		}
