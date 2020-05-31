@@ -4486,6 +4486,8 @@ boolean * messaged;
 			}
 			*truedmgptr += dlife;
 		}
+		if (youagr || youdef)
+			flags.botl = 1;
 	}
 	return MM_HIT;
 #undef currdmg
