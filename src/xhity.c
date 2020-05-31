@@ -66,7 +66,7 @@ int tary;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	int vis;
+	int vis = 0;
 	
 	if (!tarx && !tary) {
 		tarx = x(mdef);
