@@ -135,7 +135,7 @@ Boots_on()
 			incr_itimeout(&HFumbling, rnd(20));
 		break;
 	case FLYING_BOOTS:
-		if (!oldprop && !(mon_resistance(&youmonst,FLYING) || (u.usteed && mon_resistance(u.usteed,FLYING))) && !HLevitation) {
+		if (!oldprop && !(species_flies(youracedata) || (u.usteed && mon_resistance(u.usteed,FLYING))) && !HLevitation) {
 			makeknown(uarmf->otyp);
 			float_up();
 			spoteffects(FALSE);
@@ -189,7 +189,7 @@ Boots_off()
 			HFumbling = EFumbling = 0;
 		break;
 	case FLYING_BOOTS:
-		if (!oldprop && !mon_resistance(&youmonst,FLYING) && !(u.usteed && mon_resistance(u.usteed,FLYING)) && !Levitation && !cancelled_don) {
+		if (!oldprop && !species_flies(youracedata) && !(u.usteed && mon_resistance(u.usteed,FLYING)) && !Levitation && !cancelled_don) {
 			(void) float_down(0L, 0L);
 			makeknown(otyp);
 		}
@@ -992,7 +992,7 @@ register struct obj *obj;
 #endif
 
 		if (Invis && !oldprop && !HSee_invisible &&
-				!mon_resistance(&youmonst,SEE_INVIS) && !Blind) {
+				!species_perceives(youracedata) && !Blind) {
 		    newsym(u.ux,u.uy);
 		    pline("Suddenly you are transparent, but there!");
 		    makeknown(RIN_SEE_INVISIBLE);

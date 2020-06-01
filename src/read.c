@@ -924,6 +924,7 @@ learn_word()
 			You("learn the First Word of Creation!");
 			u.ufirst_light = TRUE;
 			u.ufirst_light_timeout = 0;
+			HFlying |= FROMOUTSIDE;
 			float_up();
 			spoteffects(FALSE);
 		break;
