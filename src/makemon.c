@@ -7427,8 +7427,8 @@ register int	mmflags;
 	if(x == 0 && y == 0) {
 		int tryct = 0;	/* careful with bigrooms */
 		struct monst fakemon = {0};
-
-		set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
+		
+		if(ptr) set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
 		do {
 			x = rn1(COLNO-3,2);
 			y = rn2(ROWNO);
