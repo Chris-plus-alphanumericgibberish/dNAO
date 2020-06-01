@@ -5358,6 +5358,11 @@ int
 pick_rune(describe)
 boolean describe;
 {
+	if (!(u.wardsknown & (WARD_TOUSTEFNA | WARD_DREPRUN | WARD_OTTASTAFUR | WARD_KAUPALOKI | WARD_VEIOISTAFUR | WARD_THJOFASTAFUR))){
+		You("can't think of anything to carve.");
+		return 0;
+	}
+
 	winid tmpwin;
 	int n, how;
 	char buf[BUFSZ];
@@ -5369,10 +5374,6 @@ boolean describe;
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
 	
-	if(!(u.wardsknown & (WARD_TOUSTEFNA|WARD_DREPRUN|WARD_OTTASTAFUR|WARD_KAUPALOKI|WARD_VEIOISTAFUR|WARD_THJOFASTAFUR) )){
-		You("can't think of anything to carve.");
-		return 0;
-	}
 	Sprintf(buf, "Known Magical Staves");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	if(u.wardsknown & WARD_TOUSTEFNA){
