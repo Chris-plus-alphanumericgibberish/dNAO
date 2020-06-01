@@ -3378,7 +3378,9 @@ boolean * messaged;
 
 	default:
 		/* try to be as vague as possible */
-		if (is_blade(msgr))
+		if (msgr->otyp == SET_OF_CROW_TALONS)
+			wepdesc = "blades";
+		else if (is_blade(msgr))
 			wepdesc = "blade";
 		else if (msgr->otyp == UNICORN_HORN)
 			wepdesc = "horn";
