@@ -6829,7 +6829,11 @@ boolean ranged;
 					if (youdef) {
 						You("disintegrate!");
 						killer_format = KILLED_BY;
-						killer = pa->mname;
+						Sprintf(killer_buf, "disintegrated by %s", 
+							type_is_pname(pa) ? pa->mname : an(pa->mname));
+						killer = killer_buf;
+						/* when killed by disintegration, don't leave corpse */
+						u.ugrave_arise = NON_PM;
 						done(DISINTEGRATED);
 						You("reintegrate!");//lifesaved
 						return MM_DEF_LSVD;
