@@ -876,6 +876,7 @@ struct obj *scroll;
 	//Speak one word of power per move free.
 	if(objects[scroll->otyp].oc_magic){
 		useup(scroll);
+		check_illumian_trophy();
 		return partial_action();
 	}
 	else {
