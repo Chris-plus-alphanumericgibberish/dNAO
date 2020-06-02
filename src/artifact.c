@@ -3846,34 +3846,46 @@ boolean * messaged;
 	if (oartifact == ART_TECPATL_OF_HUHETOTL){
 		if (!youdef) {
 			if (has_blood_mon(mdef) && !noncorporeal(pd)) {
-				if (vis){
+				if (vis & VIS_MDEF) {
 					*messaged = TRUE;
-					pline("The sacrificial blade drinks the blood of %s!", mon_nam(mdef));					
-					*truedmgptr += d(2,4);
+					pline("The sacrificial blade drinks the blood of %s!", mon_nam(mdef));
+				}
 #define MAXVALUE 24
-					if (youagr && mdef->mhp < currdmg) {
-						killed(mdef);
-						return MM_DEF_DIED;
-					}
-					if (DEADMONSTER(mdef)) {	//else lifesaved 
-						extern const int monstr[];
-						int value = min(monstr[monsndx(pd)] + 1,MAXVALUE);
-						if(u.ugangr[Align2gangr(u.ualign.type)]) {
-							u.ugangr[Align2gangr(u.ualign.type)] -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
-							if(u.ugangr[Align2gangr(u.ualign.type)] < 0) u.ugangr[Align2gangr(u.ualign.type)] = 0;
-						} else if(u.ualign.record < 0) {
-							if(value > MAXVALUE) value = MAXVALUE;
-							if(value > -u.ualign.record) value = -u.ualign.record;
-							adjalign(value);
-						} else if (u.ublesscnt > 0) {
-							u.ublesscnt -=
-							((value * (u.ualign.type == A_CHAOTIC ? 500 : 300)) / MAXVALUE);
-							if(u.ublesscnt < 0) u.ublesscnt = 0;
+				/* if this bonus damage would be the edge when killing, a sacrifice to the gods! */
+				int sacrifice_dmg = d(2, 4);
+				if ((mdef->mhp > currdmg)
+					&& (*truedmgptr += sacrifice_dmg)
+					&& (mdef->mhp <= currdmg)
+					)
+				{
+					killed(mdef);
+					if (DEADMONSTER(mdef)) {	//else lifesaved
+						/* only the player gets benefits from sacrificing */
+						if (youagr)
+						{
+							extern const int monstr[];
+							int value = min(monstr[monsndx(pd)] + 1, MAXVALUE);
+							if (u.ugangr[Align2gangr(u.ualign.type)]) {
+								u.ugangr[Align2gangr(u.ualign.type)] -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
+								if (u.ugangr[Align2gangr(u.ualign.type)] < 0) u.ugangr[Align2gangr(u.ualign.type)] = 0;
+							}
+							else if (u.ualign.record < 0) {
+								if (value > MAXVALUE) value = MAXVALUE;
+								if (value > -u.ualign.record) value = -u.ualign.record;
+								adjalign(value);
+							}
+							else if (u.ublesscnt > 0) {
+								u.ublesscnt -=
+									((value * (u.ualign.type == A_CHAOTIC ? 500 : 300)) / MAXVALUE);
+								if (u.ublesscnt < 0) u.ublesscnt = 0;
+							}
 						}
+						return MM_DEF_DIED;
 					}
 					else
 						return MM_DEF_LSVD;
 				}
+
 			}
 		}
 	} 
