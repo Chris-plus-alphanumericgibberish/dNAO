@@ -3033,6 +3033,11 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-9, "iron bars") ||
 #endif
 			   !BSTRCMPI(bp, p-5, "aklys") ||
+			   !BSTRCMPI(bp, p-13, "rotated cross") ||
+			   !BSTRCMPI(bp, p-8, "caduceus") ||
+			   !BSTRCMPI(bp, p-14, "vertical lines") ||
+			   !BSTRCMPI(bp, p-14, "vertical marks") ||
+			   !BSTRCMPI(bp, p-6, "piscis") ||
 			   !BSTRCMPI(bp, p-6, "lembas") ||
 			   !BSTRCMPI(bp, p-5, "dress") ||
 			   !BSTRCMPI(bp, p-16, "descent of stars") ||
@@ -3734,7 +3739,7 @@ int wishflags;
 		} else if (!strncmpi(bp, "psionic ", l=8) || !strncmpi(bp, "whispering ", l=11)
 			) {
 			oproperties |= OPROP_PSIOW;
-		} else if (!strncmpi(bp, "deep ", l=5) || !strncmpi(bp, "mumbling ", l=9)
+		} else if ((!strncmpi(bp, "deep ", l=5) && strncmpi(bp, "deep sea", l=8)) || !strncmpi(bp, "mumbling ", l=9)
 			) {
 			oproperties |= OPROP_DEEPW;
 		} else if (!strncmpi(bp, "shocking ", l=9)
@@ -3743,7 +3748,10 @@ int wishflags;
 		} else if (!strncmpi(bp, "sizzling ", l=9)
 			) {
 			oproperties |= OPROP_ACIDW;
-		} else if (!strncmpi(bp, "sparkling ", l=10) && strncmpi(bp, "sparkling potion", 16)
+		} else if (!strncmpi(bp, "sparkling ", l=10) && 
+				strncmpi(bp, "sparkling horizontal", l=20) && 
+				strncmpi(bp, "sparkling lake", l=14) && 
+				strncmpi(bp, "sparkling potion", 16)
 			) {
 			oproperties |= OPROP_MAGCW;
 		} else if (!strncmpi(bp, "anarchic ", l=9)
@@ -3929,7 +3937,11 @@ int wishflags;
 	} else if(cnt > 1 && !strncmpi(bp, "pairs of ",9)) {
 		bp += 9;
 		cnt *= 2;
-	} else if (!strncmpi(bp, "set of ",7) && strncmpi(bp, "set of crow talons", 18)) {
+	} else if (!strncmpi(bp, "set of ",7) && 
+		strncmpi(bp, "set of crow talons", 18) &&
+		strncmpi(bp, "set of many vertical lines", 26) &&
+		strncmpi(bp, "set of coalescing", 17)
+	) {
 		bp += 7;
 	} else if (!strncmpi(bp, "sets of ",8) && strncmpi(bp, "sets of crow talons", 19)) {
 		bp += 8;
@@ -3963,6 +3975,8 @@ int wishflags;
 	if (strncmpi(bp, "band", 4)) /* not the "ban" rank */
 	if (strncmpi(bp, "green dragon crescent blade", 27)) /* not the "green dragon" monster */
 	if (strncmpi(bp, "crow quill", 10)) /* not a "crow" */
+	if (strncmpi(bp, "sparkling lake", 14)) /* not a "sparkling lake" */
+	if (strncmpi(bp, "frosted lake", 12)) /* not a "frosted lake" */
 	if (strncmpi(bp, "set of crow talons", 18)) /* not a "crow" */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
 	if (strncmpi(bp, "platinum dragon plate", 22)) /* not a "dragon" */
