@@ -1223,16 +1223,22 @@ int tary;
 
 	/* do some things only if attacks were made */
 	if (attacksmade > 0) {
+		
+		/* when the player is noticably attacked: */
+		if (youdef && ((allres & MM_HIT) || (vis&VIS_MAGR)))
+		{
+			/* player multi-tile movements are interrupted */
+			nomul(0, NULL);
+			/* player panics after being attacked by a sea creature */
+			if (is_aquatic(magr->data) && roll_madness(MAD_THALASSOPHOBIA)){
+				You("panic after being attacked by a sea monster!");
+				HPanicking += 1 + rnd(6);
+			}
+		}
+
+		/* this must come after possibly interrupting player */
 		/* signify that the attack action was indeed taken, even if no attacks hit */
 		allres |= MM_HIT;
-		/* player multi-tile movements are interrupted */
-		if (youdef)
-			nomul(0, NULL);
-		/* player panics after being attacked by a sea creature */
-		if (youdef && is_aquatic(magr->data) && roll_madness(MAD_THALASSOPHOBIA)){
-			You("panic after being attacked by a sea monster!");
-			HPanicking += 1+rnd(6);
-		}
 	}
 	
 	return allres;
@@ -6829,7 +6835,11 @@ boolean ranged;
 					if (youdef) {
 						You("disintegrate!");
 						killer_format = KILLED_BY;
-						killer = pa->mname;
+						Sprintf(killer_buf, "disintegrated by %s", 
+							type_is_pname(pa) ? pa->mname : an(pa->mname));
+						killer = killer_buf;
+						/* when killed by disintegration, don't leave corpse */
+						u.ugrave_arise = NON_PM;
 						done(DISINTEGRATED);
 						You("reintegrate!");//lifesaved
 						return MM_DEF_LSVD;
