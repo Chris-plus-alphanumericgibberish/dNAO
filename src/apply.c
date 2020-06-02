@@ -6068,8 +6068,7 @@ struct obj **optr;
 					return 1;
 				break;
 			}
-			check_loadout_trophy();
-	}
+		}
 	if (yn("Resize a piece of armor?") == 'y'){
 		if (resizeArmor()){
 			useup(obj);
@@ -6727,6 +6726,7 @@ doapply()
 	break;
 	case UPGRADE_KIT:
 		res = doUseUpgradeKit(&obj);
+		check_loadout_trophy();
 	break;
 	default:
 		/* Pole-weapons can strike at a distance */
