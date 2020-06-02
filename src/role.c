@@ -2971,6 +2971,13 @@ give_ascension_trophy()
 	
 	if(achieve.get_keys <= 2)
 		achieve.trophies |= SPEED_PHASE;
+	
+	//There were some bugs with these, which *should* be fixed, but check all of them anyway.
+	check_mithardir_trophy();
+	check_illumian_trophy();
+	check_loadout_trophy();
+	check_madman_trophy();
+	check_drunkard_trophy();
 }
 #endif
 
