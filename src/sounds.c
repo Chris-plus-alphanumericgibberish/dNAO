@@ -5457,6 +5457,7 @@ int floorID;
 			pline("As knowledge of the Echo flows into your mind, you also realize how the Words you've learned can be used in the drawing of a seal!");
 			u.specialSealsKnown |= SEAL_LIVING_CRYSTAL;
 		}
+		check_illumian_trophy();
 		break;
 	}
 
