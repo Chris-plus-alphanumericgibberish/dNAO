@@ -3250,12 +3250,11 @@ dodip()
 			      newbuf);
 		    if(!objects[old_otyp].oc_uname &&
 			!objects[old_otyp].oc_name_known && old_dknown) {
-			struct obj fakeobj;
-			fakeobj = zeroobj;
-			fakeobj.dknown = 1;
-			fakeobj.otyp = old_otyp;
-			fakeobj.oclass = POTION_CLASS;
-			docall(&fakeobj);
+			struct obj * fakeobj;
+			fakeobj = mksobj(old_otyp, FALSE, FALSE);
+			fakeobj->dknown = 1;
+			docall(fakeobj);
+			delobj(fakeobj);
 		    }
 		}
 		obj_extract_self(singlepotion);
