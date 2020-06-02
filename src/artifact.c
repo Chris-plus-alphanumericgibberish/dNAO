@@ -9744,8 +9744,9 @@ int spe;
 		nmon2 = m2->nmon;
 		if (DEADMONSTER(m2)) continue;
 		if (mindless_mon(m2)) continue;
-		if ((mon_resistance(m2,TELEPAT) &&
-			(rn2(2) || m2->mblinded)) || !rn2(10)) {
+		if ((mon_resistance(m2,TELEPAT) && (rn2(2) || m2->mblinded))
+			|| !rn2(10)
+		){
 			if (cansee(m2->mx, m2->my))
 				pline("It locks on to %s.", mon_nam(m2));
 			dmg = d(dnum, dsize);
