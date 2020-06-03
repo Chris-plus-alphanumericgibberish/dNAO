@@ -12551,17 +12551,21 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 	}
 	else if (unarmed_punch) {
+		struct obj * gloves = (youagr ? uarmg : which_armor(magr, W_ARMG));
 		struct weapon_dice unarmed_dice;
 		int unarmedMult;
 		/* initialize struct */
 		dmgval_core(&unarmed_dice, bigmonst(pd), (struct obj *)0, 0);
 		/* determine unarmedMult */
 		if (youagr) {
-			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : (!uarmg && u.sealsActive&SEAL_ECHIDNA) ? 2 : 1;
+			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : (!gloves && u.sealsActive&SEAL_ECHIDNA) ? 2 : 1;
 		}
 		else {
 			unarmedMult = 1;
 		}
+		if (gloves && gloves->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
+			unarmedMult += 2;
+
 		/* base unarmed dice */
 		if (youagr && martial_bonus())
 			unarmed_dice.oc.damd = 4 * unarmedMult;
@@ -12596,17 +12600,16 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			}
 		}
 
-		otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 		/* fighting gloves give bonus damage */
 		static int tgloves = 0;
 		if (!tgloves) tgloves = find_tgloves();
-		if (otmp && otmp->otyp == tgloves)
+		if (gloves && gloves->otyp == tgloves)
 			basedmg += ((youagr && martial_bonus()) ? 3 : 1);
 
 		
-		if (otmp) {
+		if (gloves) {
 			/* all gloves give their enchantment to melee damage */
-			basedmg += otmp->spe;
+			basedmg += gloves->spe;
 		}
 		/* no gloves? Look at rings -- which are player-only */
 		else if (youagr &&
