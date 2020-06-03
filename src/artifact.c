@@ -503,7 +503,7 @@ aligntyp alignment;
 			skip_if(m == ART_CALLANDOR && flags.initgend);
 
 			/* skip artifacts that outright hate the player */
-			skip_if(a->race != NON_PM && race_hostile(&mons[a->race]));
+			skip_if((a->aflags & ARTA_HATES) && (urace.selfmask & a->mflagsa));
 
 			/* skip cross-aligned artifacts */
 			skip_if(a->alignment != A_NONE && a->alignment != alignment);
