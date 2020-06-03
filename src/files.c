@@ -1020,7 +1020,8 @@ restore_saved_game()
 
 	if (!uptodate(fd, fq_save)) {
 	    (void) close(fd),  fd = -1;
-	    (void) delete_savefile();
+	    if (yn("Delete the old file?") == 'y') /* Damn you, sadistic programmers who delete stuff without asking! --Amy */
+			(void) delete_savefile();
 	}
 	return fd;
 }
