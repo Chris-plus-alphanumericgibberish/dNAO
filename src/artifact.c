@@ -464,8 +464,9 @@ aligntyp alignment;
 
 			/* conditions that can be relaxed, in order of least-to-most important */
 
-			/* try to get a role-specific first gift -- overrides alignment, artg_gift considerations */
-			skip_if(!u.ugifts && !(Role_if(a->role) || Pantheon_if(a->role)));
+			/* try to get a role-specific first (second, third, etc.) gift -- overrides alignment, artg_gift considerations */
+			skip_if(!(Role_if(a->role) || Pantheon_if(a->role)));
+			
 			if (attempts > 1) {
 				/* try to get an aligned first gift */
 				skip_if(!u.ugifts && a->alignment != alignment);
