@@ -202,7 +202,6 @@ OBJECT:'%',"tripe ration",(54,00)
 
 # Monsters on siege duty.
 
-MONSTER:'U',"shambling horror",(70,10)
 MONSTER:'h',"edderkop",(70,10)
 MONSTER:'h',"edderkop",(70,10)
 MONSTER:'h',"edderkop",(70,10)
@@ -277,8 +276,6 @@ GOLD: random, random
 GOLD: random, random
 GOLD: random, random
 #
-
-MONSTER:'U',"stumbling horror",random
 
 MONSTER: 'C', "drider", random, hostile
 MONSTER: 'C', "drider", random, hostile
@@ -461,7 +458,6 @@ MONSTER: 'M', "drow mummy", (61,10), hostile
 MONSTER: 'M', "drow mummy", (61,09), hostile
 MONSTER: 'M', "drow mummy", (60,09), hostile
 
-MONSTER:'U',"wandering horror",(55,10)
 MONSTER: '@', "embraced drowess", (54,10), hostile
 MONSTER: '@', "embraced drowess", (56,05), hostile
 MONSTER: '@', "embraced drowess", (56,14), hostile
