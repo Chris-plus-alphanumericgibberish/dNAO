@@ -2634,20 +2634,74 @@ max_mon_load(mtmp)
 register struct monst *mtmp;
 {
 	long maxload = MAX_CARR_CAP;
-	long carcap = 25L*(acurrstr((int)(mtmp->mstr)) + mtmp->mcon) + 50L;
-
-
-	if (!mtmp->data->cwt){
-		maxload = (maxload * (long)mtmp->data->msize) / MZ_HUMAN;
-		carcap = (carcap * (long)mtmp->data->msize) / MZ_HUMAN;
-	} else if (!strongmonst(mtmp->data)
-		|| (strongmonst(mtmp->data) && (mtmp->data->cwt > WT_HUMAN))
-	){
-		maxload = (maxload * (long)mtmp->data->cwt) / WT_HUMAN;
-		carcap = (carcap * (long)mtmp->data->cwt) / WT_HUMAN;
+	struct permonst *mdat = mtmp->data;
+	struct obj *gloves;
+	struct obj *cloak;
+	struct obj *bodyarmor;
+	struct obj *underarmor;	
+	struct obj *boots;	
+	// long carcap = 25L*(acurrstr((int)(mtmp->mstr)) + mtmp->mcon) + 50L;
+	long carcap;
+	gloves = which_armor(mtmp, W_ARMG);
+	cloak = which_armor(mtmp, W_ARMC);
+	bodyarmor = which_armor(mtmp, W_ARM);
+	underarmor = which_armor(mtmp, W_ARMU);
+	boots = which_armor(mtmp, W_ARMF);
+	
+	if(gloves && gloves->otyp == GAUNTLETS_OF_POWER){
+		carcap = 25L*(25L + 11L) + 50L;
+	} else if(strongmonst(mdat)){
+		carcap = 25L*(18L + 11L) + 50L;
+	} else {
+		carcap = 25L*(11L + 11L) + 50L;
 	}
 
+
+	if (!mdat->cwt){
+		maxload = (maxload * (long)mdat->msize) / MZ_HUMAN;
+		carcap = (carcap * (long)mdat->msize) / MZ_HUMAN;
+	} else if (!strongmonst(mdat)
+		|| (strongmonst(mdat) && (mdat->cwt > WT_HUMAN))
+	){
+		maxload = (maxload * (long)mdat->cwt) / WT_HUMAN;
+		carcap = (carcap * (long)mdat->cwt) / WT_HUMAN;
+	}
+
+	if (!mdat->cwt)
+		carcap = (carcap * (long)mdat->msize) / MZ_HUMAN;
+	else if (!strongmonst(mdat)
+		|| (strongmonst(mdat) && (mdat->cwt > WT_HUMAN)))
+		carcap = (carcap * (long)mdat->cwt / WT_HUMAN);
+	
 	if (carcap > maxload) carcap = maxload;
+
+	static int hboots = 0;
+	if (!hboots) hboots = find_hboots();
+	if (boots && boots->otyp == hboots) carcap += boots->cursed ? 0 : 100;
+	
+	if(animaloid(mdat) || naoid(mdat)){
+		carcap *= 1.5;
+	}
+	if(centauroid(mdat) || mdat->mtyp == PM_BLESSED){
+		carcap *= 1.25;
+	}
+	if(arti_lighten(bodyarmor, FALSE)){
+		if(bodyarmor->blessed) carcap *= 1.5;
+		else if(!bodyarmor->cursed) carcap *= 1.25;
+		else carcap *= .75;
+	}
+	if(arti_lighten(cloak, FALSE)){
+		if(cloak->blessed) carcap *= 1.5;
+		else if(!cloak->cursed) carcap *= 1.25;
+		else carcap *= .75;
+	}
+#ifdef TOURIST
+	if(arti_lighten(underarmor, FALSE)){
+		if(underarmor->blessed) carcap *= 1.5;
+		else if(!underarmor->cursed) carcap *= 1.25;
+		else carcap *= .75;
+	}
+#endif	/* TOURIST */
 
 	if (carcap < 1) carcap = 1;
 

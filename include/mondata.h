@@ -231,6 +231,7 @@
 #define centauroid(ptr)		(((ptr)->mflagsb & MB_BODYTYPEMASK) == (MB_HUMANOID|MB_ANIMAL))
 #define snakemanoid(ptr)	(((ptr)->mflagsb & MB_BODYTYPEMASK) == (MB_HUMANOID|MB_SLITHY))
 #define leggedserpent(ptr)	(((ptr)->mflagsb & MB_BODYTYPEMASK) == (MB_ANIMAL|MB_SLITHY))
+#define naoid(ptr)			(((ptr)->mflagsb & MB_BODYTYPEMASK) == 0)
 
 #define noboots(ptr)			((slithy(ptr) && !humanoid_feet(ptr)) || nolimbs(ptr) || nofeet(ptr))
 

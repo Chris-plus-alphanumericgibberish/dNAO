@@ -2611,10 +2611,29 @@ weight_cap()
 	
 	struct permonst *mdat = youracedata;
 	
+	struct obj *gloves = uarmg;
+	struct obj *cloak = uarmc;
+	struct obj *bodyarmor = uarm;
+	struct obj *underarmor = uarmu;
+	struct obj *boots = uarmf;
+	
 #ifdef STEED
 	/*If mounted your steed is doing the carrying, use its data instead*/
 	if(u.usteed && u.usteed->data){
-		carrcap = 25L*(acurrstr((int)(u.usteed->mstr)) + u.usteed->mcon) + 50L;
+		// carrcap = 25L*(acurrstr((int)(u.usteed->mstr)) + u.usteed->mcon) + 50L;
+		gloves = which_armor(u.usteed, W_ARMG);
+		cloak = which_armor(u.usteed, W_ARMC);
+		bodyarmor = which_armor(u.usteed, W_ARM);
+		underarmor = which_armor(u.usteed, W_ARMU);
+		boots = which_armor(u.usteed, W_ARMF);
+		
+		if(gloves && gloves->otyp == GAUNTLETS_OF_POWER){
+			carrcap = 25L*(25L + 11L) + 50L;
+		} else if(strongmonst(u.usteed->data)){
+			carrcap = 25L*(18L + 11L) + 50L;
+		} else {
+			carrcap = 25L*(11L + 11L) + 50L;
+		}
 		mdat = u.usteed->data;
 	}
 #endif
@@ -2636,22 +2655,23 @@ weight_cap()
 		|| (strongmonst(mdat) && (mdat->cwt > WT_HUMAN)))
 		carrcap = (carrcap * (long)mdat->cwt / WT_HUMAN);
 
-	if (Levitation || Weightless    /* pugh@cornell */
-	)
+	if (Levitation || Weightless)    /* pugh@cornell */
 		carrcap = maxcap;
 	else {
-		if(u.ucarinc < 0) carrcap += u.ucarinc;
-		if(Race_if(PM_ORC)){
-			carrcap = 2*carrcap/3 + u.ulevel*carrcap/30;
+		if(!u.usteed){
+			if(u.ucarinc < 0) carrcap += u.ucarinc;
+			if(Race_if(PM_ORC) && !Upolyd){
+				carrcap = 2*carrcap/3 + u.ulevel*carrcap/30;
+			}
 		}
 
 		if(carrcap > maxcap) carrcap = maxcap;
 		/* note that carinc bonues can push you over the normal limit! */
-		if(u.ucarinc > 0) carrcap += u.ucarinc;
+		if(!u.usteed && u.ucarinc > 0) carrcap += u.ucarinc;
 
 		static int hboots = 0;
 		if (!hboots) hboots = find_hboots();
-		if (uarmf && uarmf->otyp == hboots) carrcap += uarmf->cursed ? 0 : 100; 
+		if (boots && boots->otyp == hboots) carrcap += boots->cursed ? 0 : 100; 
 		
 		if (!Flying) {
 			if(EWounded_legs & LEFT_SIDE) carrcap -= 100;
@@ -2661,24 +2681,32 @@ weight_cap()
 	}
 	if(u.sealsActive&SEAL_FAFNIR) carrcap *= 1+((double) u.ulevel)/100;
 	if(active_glyph(COMMUNION)) carrcap *= 1.25;
-	if(arti_lighten(uarm, FALSE)){
-		if(uarm->blessed) carrcap *= 1.5;
-		else if(!uarm->cursed) carrcap *= 1.25;
+	if(animaloid(mdat) || naoid(mdat)){
+		carrcap *= 1.5;
+	}
+	if(centauroid(mdat) || mdat->mtyp == PM_BLESSED){
+		carrcap *= 1.25;
+	}
+	if(arti_lighten(bodyarmor, FALSE)){
+		if(bodyarmor->blessed) carrcap *= 1.5;
+		else if(!bodyarmor->cursed) carrcap *= 1.25;
 		else carrcap *= .75;
 	}
-	if(arti_lighten(uarmc, FALSE)){
-		if(uarmc->blessed) carrcap *= 1.5;
-		else if(!uarmc->cursed) carrcap *= 1.25;
+	if(arti_lighten(cloak, FALSE)){
+		if(cloak->blessed) carrcap *= 1.5;
+		else if(!cloak->cursed) carrcap *= 1.25;
 		else carrcap *= .75;
 	}
 #ifdef TOURIST
-	if(arti_lighten(uarmu, FALSE)){
-		if(uarmu->blessed) carrcap *= 1.5;
-		else if(!uarmu->cursed) carrcap *= 1.25;
+	if(arti_lighten(underarmor, FALSE)){
+		if(underarmor->blessed) carrcap *= 1.5;
+		else if(!underarmor->cursed) carrcap *= 1.25;
 		else carrcap *= .75;
 	}
 #endif	/* TOURIST */
 
+	if (carrcap < 1) carrcap = 1;
+	
 	return((int) carrcap);
 }
 

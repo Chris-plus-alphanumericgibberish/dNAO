@@ -7559,7 +7559,9 @@ register int	mmflags;
 		mtmp->mstr = mtmp->mdex;
 		mtmp->mdex = swap;
 	}
-	mtmp->mcon = d(3,6);
+	// mtmp->mcon = d(3,6);
+	//More tightly constrain to "average"
+	mtmp->mcon = 7 + d(1,6);
 	if(is_animal(mtmp->data)) mtmp->mint = 3;
 	else if(mindless_mon(mtmp)) mtmp->mint = 0;
 	else if(is_magical(mtmp->data)) mtmp->mint = 13+rnd(5);
