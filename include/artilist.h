@@ -1837,7 +1837,7 @@ A("The Ruinous Descent of Stars",	MORNING_STAR,		(const char *)0,
 /*returns to your hand when thrown; +1 multishot for drow & elves */
 A("Sickle Moon",					SICKLE,				(const char *)0,
 	4000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_NOWISH),	/* may randomly generate */
+	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_NOWISH),	/* may randomly generate */
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 0), NOFLAG,
 	PROP0(), NOFLAG,
