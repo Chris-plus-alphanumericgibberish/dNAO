@@ -3059,7 +3059,9 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			case SPBOOK_CLASS:
 				if(otmp->oartifact) break; //redundant check
 				u.uconduct.food++;
-				You("drain the magic from the %s.", xname(otmp));
+				You("drain the %smagic from the %s.", 
+					(otmp->spestudied == MAX_SPELL_STUDY) ? "last of the " : "",
+					xname(otmp));
 				otmp->spestudied++;
 				costly_cancel(otmp);
 	    	    if(otmp->spestudied > MAX_SPELL_STUDY) otmp->otyp = SPE_BLANK_PAPER;
