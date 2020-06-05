@@ -1008,9 +1008,14 @@ struct mkroom	*croom;
 	
 	if(parsed)
 	{
-		int dummy=0;//we don't care about wish returns
-		otmp = readobjnam(o->name.str,&dummy,WISH_MKLEV);
-		place_object(otmp,x,y);
+		int retval=0;
+		otmp = readobjnam(o->name.str, &retval, WISH_MKLEV);
+		if (retval & WISH_FAILURE) {
+			impossible("failed to create %s", o->name.str);
+			return;
+		}
+		else
+			place_object(otmp,x,y);
 	}
 	else
 	{
