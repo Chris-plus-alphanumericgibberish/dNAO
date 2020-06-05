@@ -4185,7 +4185,7 @@ signs_mirror()
 		if(count > 2) comma = ",";
 		else comma = "";
 		
-		Sprintf(msgbuf, "");
+		msgbuf[0] = 0;
 		if(u.uaesh && u.uaesh - !!u.uaesh_duration){
 			num = u.uaesh - !!u.uaesh_duration;
 			total += num;

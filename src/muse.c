@@ -65,7 +65,6 @@ struct obj *obj;
 
 	if (obj->oclass == POTION_CLASS) {
 	    coord cc;
-	    static const char * const empty = "The potion turns out to be empty.";
 	    const char *potion_descr;
 	    struct monst *mtmp;
 #define POTION_OCCUPANT_CHANCE(n) (13 + 2*(n))	/* also in potion.c */
@@ -79,7 +78,7 @@ struct obj *obj;
 		    m_useup(mon, obj);
 		    mtmp = makemon(&mons[PM_GHOST], cc.x, cc.y, NO_MM_FLAGS);
 		    if (!mtmp) {
-			if (vis) pline(empty);
+			if (vis) pline("The potion turns out to be empty.");
 		    } else {
 			if (vis) {
 			    pline("As %s opens the bottle, an enormous %s emerges!",
@@ -102,7 +101,7 @@ struct obj *obj;
 		m_useup(mon, obj);
 		mtmp = makemon(&mons[PM_DJINNI], cc.x, cc.y, NO_MM_FLAGS);
 		if (!mtmp) {
-		    if (vis) pline(empty);
+		    if (vis) pline("The potion turns out to be empty.");
 		} else {
 		    if (vis)
 			pline("In a cloud of smoke, %s emerges!",
