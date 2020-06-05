@@ -2685,12 +2685,11 @@ A("Doomscreamer",					TWO_HANDED_SWORD,	(const char *)0,
 	),
 
 /*Needs encyc entry */
-/*Weapon of Graz'zt, from Gord the Rogue*/
 A("The Wand of Orcus",				WAN_DEATH,			(const char *)0,
 	8000L, MT_DEFAULT, MZ_HUGE, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
-	ATTK(AD_DRLI, 5, 12), (ARTA_DRAIN),
+	ATTK(AD_DRLI, 20, 12), (ARTA_DRAIN),
 	PROP0(), NOFLAG,
 	PROP0(), NOFLAG,
 	NOINVOKE, (ARTI_BLOODTHRST)
