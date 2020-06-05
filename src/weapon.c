@@ -528,6 +528,11 @@ int otyp;
 			bond = 12;
 			spe_mult = 2;
 		}
+		else if (obj->oartifact == ART_WAND_OF_ORCUS) {
+			ocn = 1;
+			ocd = 4;
+			spe_mult = 0;	/* it's a wand */
+		}
 		else if (obj->oartifact == ART_ROGUE_GEAR_SPIRITS) {
 			ocn = 1;
 			ocd = (large ? 2 : 4);
