@@ -11446,6 +11446,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			/* beartraps are real attacks */
 			if (trap && melee && weapon)
 				valid_weapon_attack = TRUE;
+			else if (melee && weapon && weapon->oartifact == ART_WAND_OF_ORCUS)
+				valid_weapon_attack = TRUE;
 			else
 				invalid_weapon_attack = TRUE;
 		}
