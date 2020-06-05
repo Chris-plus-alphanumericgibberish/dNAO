@@ -3739,7 +3739,7 @@ int wishflags;
 		} else if (!strncmpi(bp, "psionic ", l=8) || !strncmpi(bp, "whispering ", l=11)
 			) {
 			oproperties |= OPROP_PSIOW;
-		} else if ((!strncmpi(bp, "deep ", l=5) && strncmpi(bp, "deep sea", l=8)) || !strncmpi(bp, "mumbling ", l=9)
+		} else if ((!strncmpi(bp, "deep ", l=5) && strncmpi(bp, "deep sea", 8)) || !strncmpi(bp, "mumbling ", l=9)
 			) {
 			oproperties |= OPROP_DEEPW;
 		} else if (!strncmpi(bp, "shocking ", l=9)
@@ -3749,8 +3749,8 @@ int wishflags;
 			) {
 			oproperties |= OPROP_ACIDW;
 		} else if (!strncmpi(bp, "sparkling ", l=10) && 
-				strncmpi(bp, "sparkling horizontal", l=20) && 
-				strncmpi(bp, "sparkling lake", l=14) && 
+				strncmpi(bp, "sparkling horizontal", 20) && 
+				strncmpi(bp, "sparkling lake", 14) && 
 				strncmpi(bp, "sparkling potion", 16)
 			) {
 			oproperties |= OPROP_MAGCW;
