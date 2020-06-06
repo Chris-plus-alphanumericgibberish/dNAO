@@ -1159,6 +1159,8 @@ rile_shk(shkp)
 register struct monst *shkp;
 {
 	NOTANGRY(shkp) = FALSE;	/* make angry */
+	if (canseemon(shkp))
+		newsym(shkp->mx, shkp->my);
 	if (!ESHK(shkp)->surcharge) {
 		register struct bill_x *bp = ESHK(shkp)->bill_p;
 		register int ct = ESHK(shkp)->billct;
