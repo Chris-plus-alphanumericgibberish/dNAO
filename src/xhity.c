@@ -2637,8 +2637,10 @@ int vis;
 		obj = (youdef ? uarmf : which_armor(mdef, W_ARMF));
 		if (obj && obj->otyp == mboots1)
 			break;
-		else
-			/*fall through to default (body armors)*/;
+		else {
+			obj = (struct obj *)0;
+			/*fall through to default (body armors)*/
+		}
 	default:
 		if (!obj) obj = (youdef ? uarmc : which_armor(mdef, W_ARMC));
 		if (!obj) obj = (youdef ? uarm : which_armor(mdef, W_ARM));
