@@ -479,13 +479,13 @@ aligntyp alignment;
 			skip_if(Role_if(PM_MONK) && !is_monk_safe_artifact(m) && rn2(20));	/* we relax this requirement before removing it */
 
 			/* avoid artifacts of materials that hate the player's natural form */
-			skip_if(
+			skip_if(!(Role_if(a->role) || Pantheon_if(a->role)) && (
 				(hates_iron((&mons[urace.malenum]))
 				&& (a->material == IRON || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == IRON)))
 				||
 				(hates_silver((&mons[urace.malenum]))
 				&& (a->material == SILVER || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == SILVER)))
-				);
+				));
 
 			/* skip lightsources for Drow */
 			skip_if(Race_if(PM_DROW) &&
