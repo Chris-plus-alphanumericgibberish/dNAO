@@ -3775,6 +3775,10 @@ boolean ranged;
 	if (hit) {
 		/* DEAL THE DAMAGE */
 		result = xmeleehurty(magr, mdef, attk, attk, weapon, TRUE, -1, dieroll, vis, ranged);
+
+		/* the player exercises dexterity when hitting */
+		if (youagr)
+			exercise(A_DEX, TRUE);
 	}
 	else {
 		result = MM_MISS;
