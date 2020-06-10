@@ -1305,13 +1305,13 @@ gcrownu()
 			;		/* already got bonus above for some reason */
 		} else if (!already_exists) {
 			if(u.ualign.type == A_CHAOTIC){
-				obj = mksobj(CRYSTAL_SWORD, FALSE, FALSE);
+				obj = mksobj(LONG_SWORD, FALSE, FALSE);
 				obj = oname(obj, artiname(ART_ARYVELAHR_KERYM));
 			} else if(u.ualign.type == A_NEUTRAL){
 				obj = mksobj(RUNESWORD, FALSE, FALSE);
 				obj = oname(obj, artiname(ART_ARYFAERN_KERYM));
 			} else {
-				obj = mksobj(LONG_SWORD, FALSE, FALSE);
+				obj = mksobj(CRYSTAL_SWORD, FALSE, FALSE);
 				obj = oname(obj, artiname(ART_ARCOR_KERYM));
 			}
 			obj->spe = 1;
