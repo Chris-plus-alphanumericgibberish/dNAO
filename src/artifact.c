@@ -7048,16 +7048,17 @@ arti_invoke(obj)
               case 0:
                 break;
               case COMMAND_IMPROVE_WEP:
-                scroll = mksobj(SCR_ENCHANT_ARMOR, TRUE, FALSE);
+                scroll = mksobj(SCR_ENCHANT_WEAPON, TRUE, FALSE);
                 break;
               case COMMAND_IMPROVE_ARM:
-                scroll = mksobj(SCR_ENCHANT_WEAPON, TRUE, FALSE);
+                scroll = mksobj(SCR_ENCHANT_ARMOR, TRUE, FALSE);
                 break;
           }
           scroll->blessed = obj->blessed;
           scroll->cursed = obj->cursed;
+		  scroll->quan = 20;				/* do not let useup get it */
           seffects(scroll);
-          obfree(scroll,(struct obj *)0);
+          obfree(scroll,(struct obj *)0);	/* now, get rid of it */
         } break;
         case SUMMON_PET:{
           /* TODO */
