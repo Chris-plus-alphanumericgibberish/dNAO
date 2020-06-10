@@ -1665,6 +1665,8 @@ register struct monst *mtmp;
 			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
 			 || otmp->otyp == KAMEREL_VAJRA
             ) &&
+			/* never ammo or missiles */
+			!(is_ammo(otmp) || is_missile(otmp)) &&
 			/* never untouchable artifacts */
 			(touch_artifact(otmp, mtmp, 0)) &&
 			/* never too-large for available hands */
