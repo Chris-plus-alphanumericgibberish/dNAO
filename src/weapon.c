@@ -1682,8 +1682,8 @@ register struct monst *mtmp;
 		Oselect(CLUB, W_WEP);
 
 	for (i = 0; i < SIZE(hwep); i++) {
-	    if (hwep[i] == CORPSE && !(mtmp->misc_worn_check & W_ARMG))
-		continue;
+	    if (hwep[i] == CORPSE && !((mtmp->misc_worn_check & W_ARMG) || resists_ston(mtmp)))
+			continue;
 		Oselect(hwep[i], W_WEP);
 	}
 
