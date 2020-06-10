@@ -1545,9 +1545,11 @@ struct monst *mtmp;
 	    	    	}
 		    }
 		}
+		/* Preserve the cursedness of the item before freeing it */
+		int cursed = otmp->cursed;
 		m_useup(mtmp, otmp);
 		/* Attack the player */
-		if (distmin(mmx, mmy, u.ux, u.uy) == 1 && !otmp->cursed) {
+		if (distmin(mmx, mmy, u.ux, u.uy) == 1 && !cursed) {
 		    int dmg;
 		    struct obj *otmp2;
 
