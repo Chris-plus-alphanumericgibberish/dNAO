@@ -538,12 +538,18 @@ boolean on, silently;
 			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
 			if (!oldprop && (mon_resistance(mon,LEVITATION) || mon_resistance(mon,FLYING))) {
 				m_float_up(mon, silently);
+				if (obj && !silently && canseemon(mon)) {
+					makeknown(obj->otyp);
+				}
 			}
 			break;
 		case DISPLACED:
 			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
 			if (!oldprop && mon_resistance(mon,DISPLACED) && !silently && canseemon(mon)) {
 				pline("%s outline begins shimmering!", s_suffix(Monnam(mon)));
+				if (obj) {
+					makeknown(obj->otyp);
+				}
 			}
 			break;
 		case SWIMMING:
@@ -581,12 +587,18 @@ boolean on, silently;
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
 				if (oldprop && !mon_resistance(mon,LEVITATION) && !mon_resistance(mon,FLYING)) {
 					m_float_down(mon, silently);
+					if (obj && !silently && canseemon(mon)) {
+						makeknown(obj->otyp);
+					}
 				}
 				break;
 			case DISPLACED:
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
 				if (oldprop && !mon_resistance(mon,DISPLACED) && !silently && canseemon(mon)) {
 					pline("%s outline stops shimmering.", s_suffix(Monnam(mon)));
+					if (obj) {
+						makeknown(obj->otyp);
+					}
 				}
 				break;
 			case SWIMMING:
