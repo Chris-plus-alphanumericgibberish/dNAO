@@ -672,7 +672,11 @@ int how;
 	    u.usick_type = 0;
 	    Sick = 0;
 	}
-	if (how == CHOKING) reset_uhunger();
+	if (how == CHOKING) {
+		reset_uhunger();
+		HStrangled &= ~TIMEOUT;
+		delayed_killer = 0;
+	}
 	nomovemsg = "You survived that attempt on your life.";
 	flags.move = 0;
 	if(multi > 0) multi = 0; else multi = -1;
