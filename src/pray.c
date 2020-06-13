@@ -2859,7 +2859,7 @@ dosacrifice()
 					carries you off on their shoulders */
 					adjalign(-99);
 					pline("%s accepts your gift, and regains complete control over his creation.", a_gname());
-					pline("In that instant, you loose all your powers as %s shuts the Gate.", a_gname());
+					pline("In that instant, you lose all your powers as %s shuts the Gate.", a_gname());
 					pline("Fortunately, %s permits you to live...", a_gname());
 					pline("Occasionally, you may even be able to remember that you have forgoten something.");
 					pline("A cloud of %s smoke surrounds you...",
