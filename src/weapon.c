@@ -1665,6 +1665,8 @@ register struct monst *mtmp;
 			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
 			 || otmp->otyp == KAMEREL_VAJRA
             ) &&
+			/* never ammo or missiles */
+			!(is_ammo(otmp) || is_missile(otmp)) &&
 			/* never untouchable artifacts */
 			(touch_artifact(otmp, mtmp, 0)) &&
 			/* never too-large for available hands */
@@ -1680,8 +1682,8 @@ register struct monst *mtmp;
 		Oselect(CLUB, W_WEP);
 
 	for (i = 0; i < SIZE(hwep); i++) {
-	    if (hwep[i] == CORPSE && !(mtmp->misc_worn_check & W_ARMG))
-		continue;
+	    if (hwep[i] == CORPSE && !((mtmp->misc_worn_check & W_ARMG) || resists_ston(mtmp)))
+			continue;
 		Oselect(hwep[i], W_WEP);
 	}
 
