@@ -5589,6 +5589,7 @@ register struct	monst	*mtmp;
 		    (void) mongets(mtmp, BUCKLER);
 #ifndef GOLDOBJ
 		    mtmp->mgold = (long)rn1(10,20);
+			u.spawnedGold += mtmp->mgold;
 #else
 		    mkmonmoney(mtmp,(long)rn1(10,20));
 #endif
@@ -6495,6 +6496,7 @@ register struct	monst	*mtmp;
 	    case S_LEPRECHAUN:
 #ifndef GOLDOBJ
 		mtmp->mgold = (long) d(level_difficulty(), 30);
+		u.spawnedGold += mtmp->mgold;
 #else
 		mkmonmoney(mtmp, (long) d(level_difficulty(), 30));
 #endif

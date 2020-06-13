@@ -786,8 +786,9 @@ struct mkroom	*sroom;
 #endif
 #ifndef GOLDOBJ
 	shk->mgold = 1000L + 30L*(long)rnd(100);	/* initial capital */
+	u.spawnedGold += shk->mgold;
 #else
-        mkmonmoney(shk, 1000L + 30L*(long)rnd(100));	/* initial capital */
+	mkmonmoney(shk, 1000L + 30L*(long)rnd(100));	/* initial capital */
 #endif
 	if (shp->shknms == shkrings)
 	    (void) mongets(shk, TOUCHSTONE);

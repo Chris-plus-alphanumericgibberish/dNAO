@@ -396,6 +396,7 @@ register boolean special;
 			/* gold supply by killing one mplayer.  Not good. */
 #ifndef GOLDOBJ
 			mtmp->mgold = rn2(1000);
+			u.spawnedGold += mtmp->mgold;
 #else
 			mkmonmoney(mtmp, rn2(1000));
 #endif
