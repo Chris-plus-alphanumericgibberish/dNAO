@@ -657,6 +657,10 @@ const char *name;
 	    if (obj == uswapwep) untwoweapon();
 	    /* activate warning if you've just named your weapon "Sting" */
 	    if (obj == uwep) set_artifact_intrinsic(obj, TRUE, W_WEP);
+	    if (obj == uwep && obj->oartifact == ART_KUSANAGI_NO_TSURUGI){
+	    	setuwep((struct obj *) 0);
+	    	pline("You are not yet worthy of wielding this sword, but you may bear it until you are ready.");
+	    }
 		if (carried(obj)) {
 			/*
 			 * We may need to do extra adjustments for the hero if we're

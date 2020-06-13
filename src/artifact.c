@@ -1347,7 +1347,7 @@ touch_artifact(obj, mon, hypothetical)
 				&& oart->race == NON_PM
 			) badclass = TRUE;
 			
-			if(oart == &artilist[ART_KUSANAGI_NO_TSURUGI] && !(u.ulevel >= 30 || u.uhave.amulet)){
+			if(oart == &artilist[ART_KUSANAGI_NO_TSURUGI] && !(u.ulevel >= 22 || u.uhave.amulet)){
 				badclass = TRUE;
 				badalign = TRUE;
 			}
