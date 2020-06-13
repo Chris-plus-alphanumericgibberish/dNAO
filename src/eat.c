@@ -436,26 +436,26 @@ choke(food)	/* To a full belly all food is bad. (It.) */
 		if(food) {
 			You("choke over your %s.", foodword(food));
 			if (food->oclass == COIN_CLASS) {
-				killer = "a very rich meal";
+				delayed_killer = "a very rich meal";
 			} else {
-				killer = food_xname(food, FALSE);
+				delayed_killer = food_xname(food, FALSE);
 				if (food->otyp == CORPSE &&
-				    (mons[food->corpsenm].geno & G_UNIQ)) {
-				    if (!type_is_pname(&mons[food->corpsenm]))
-					killer = the(killer);
-				    killer_format = KILLED_BY;
+					(mons[food->corpsenm].geno & G_UNIQ)) {
+					if (!type_is_pname(&mons[food->corpsenm]))
+						delayed_killer = the(delayed_killer);
+					killer_format = KILLED_BY;
 				}
+				else
+					delayed_killer = an(delayed_killer);
 			}
 		} else {
 			You("choke over it.");
-			killer = "quick snack";
+			delayed_killer = "a quick snack";
 		}
-		if (!Unchanging && Upolyd) {
-			rehumanize();
-		} else {
-			You("die...");
-			done(CHOKING);
-		}
+
+		u.divetimer = (u.divetimer+1)/2;
+		HStrangled |= rnd(u.divetimer) + 1;
+		do_reset_eat();
 	 }
 	}
 }
