@@ -268,8 +268,13 @@ boolean expdrain; /* attack drains exp as well */
 	}
 	if(Role_if(PM_EXILE)) binderdown();
 	if (uwep && uwep->oartifact == ART_KUSANAGI_NO_TSURUGI && u.ulevel < 30 && !u.uhave.amulet){
+		char buf[BUFSZ];
+		You("are blasted by %s power!", s_suffix(the(xname(uwep))));
+		Sprintf(buf, "touching %s", artiname(uwep->oartifact));
+		losehp(d((Antimagic ? 2 : 4), 10), buf, KILLED_BY);
+		
 		setuwep((struct obj *) 0);
-		pline("You are no longer a Shogun worthy of wielding this sword, and must sheathe it for now."); 
+		pline("You are no longer a Shogun worthy of wielding this sword, and must sheathe it for now.");
 	}
 	flags.botl = 1;
 }

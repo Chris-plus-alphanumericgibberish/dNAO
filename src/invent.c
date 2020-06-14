@@ -569,10 +569,14 @@ struct obj *obj;
 	} else if (obj->otyp == AMULET_OF_YENDOR) {
 		if (!u.uhave.amulet) impossible("don't have amulet?");
 		u.uhave.amulet = 0;
-		pline("bleh");
 		if (uwep && uwep->oartifact == ART_KUSANAGI_NO_TSURUGI && u.ulevel < 30){
+			char buf[BUFSZ];
+			You("are blasted by %s power!", s_suffix(the(xname(uwep))));
+			Sprintf(buf, "touching %s", artiname(uwep->oartifact));
+			losehp(d((Antimagic ? 2 : 4), 10), buf, KILLED_BY);
+
 			setuwep((struct obj *) 0);
-			pline("Without the Amulet of Yendor, you are no longer worthy to wield this sword and must sheathe it for now."); 
+			pline("Without the Amulet of Yendor, you are no longer worthy of wielding this sword and must sheathe it.");
 		}
 
 	} else if (obj->otyp == CANDELABRUM_OF_INVOCATION) {
