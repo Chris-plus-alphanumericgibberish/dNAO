@@ -1387,9 +1387,10 @@ struct obj * otmp;
 		diesize = 4;
 		/* special cases that don't affect dice */
 		if (otmp->oartifact == ART_EXCALIBUR ||
-		    otmp->oartifact == ART_GODHANDS ||
 			otmp->oartifact == ART_LANCE_OF_LONGINUS)
 			dmg += vd(3, 7);
+		else if (otmp->oartifact == ART_GODHANDS)
+			dmg += 7;
 		else if (otmp->oartifact == ART_JINJA_NAGINATA)
 			dmg += vd(1, 12);
 		else if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)
@@ -1420,7 +1421,7 @@ struct obj * otmp;
 		if (otmp->oartifact == ART_STORMBRINGER)
 			ndice = 4; //Extra unholy (4d9 vs excal's 3d7)
 		else if (otmp->oartifact == ART_GODHANDS)
-			dmg += vd(3,9);
+			dmg += 9;
 		else if (otmp->oartifact == ART_LANCE_OF_LONGINUS)
 			ndice = 3;
 		else if (otmp->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO)
