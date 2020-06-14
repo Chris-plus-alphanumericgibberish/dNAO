@@ -4758,9 +4758,11 @@ boolean was_swallowed;			/* digestion */
 					if(DEADMONSTER(mtmp))
 						continue;
 					mdat1 = mtmp->data;
-					if( mdat1->mtyp==PM_DEEP_ONE || 
-						mdat1->mtyp==PM_DEEPER_ONE || 
-						mdat1->mtyp==PM_DEEPEST_ONE
+					if( mdat1->mtyp==PM_DEEP_ONE
+						|| mdat1->mtyp==PM_DEEPER_ONE
+						|| mdat1->mtyp==PM_DEEPEST_ONE
+						|| mdat1->mtyp==PM_FATHER_DAGON
+						|| mdat1->mtyp==PM_MOTHER_HYDRA
 					){
 						if(lvlgain) for(lvls = lvlgain; lvls > 0; lvls--) grow_up(mtmp, 0);
 						if(hpgain){

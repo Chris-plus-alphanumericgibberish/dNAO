@@ -366,6 +366,8 @@ struct monst *mtmp;
 			mtmp->mtyp == PM_DEEP_ONE ||
 			mtmp->mtyp == PM_DEEPER_ONE ||
 			(mtmp->mtyp == PM_DEEPEST_ONE && complete == 6) ||
+			(mtmp->mtyp == PM_FATHER_DAGON && complete == 6) ||
+			(mtmp->mtyp == PM_MOTHER_HYDRA && complete == 6) ||
 			mtmp->mtyp == PM_CHANGED ||
 			(mtmp->mtyp == PM_WARRIOR_CHANGED && complete == 6) ||
 			mtmp->mtyp == PM_EDDERKOP ||
