@@ -88,6 +88,11 @@ int shots, shotlimit;
 		clicky = TRUE;
 	}
 	
+	if(shots <= 0){
+		You("push the firing stud, but nothing happens.");
+		return 1;
+	}
+	
 	if(!u.dx && !u.dy){
 		shotlimit = 1;
 		if(u.dz > 0){
