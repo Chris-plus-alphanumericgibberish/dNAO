@@ -288,7 +288,8 @@ struct obj *obj;
 #ifdef RECORD_ACHIEVE
 		achieve.get_book = 1;
 #endif
-	} else if (obj->oartifact) {
+	}
+	if (obj->oartifact) {
 		if (is_quest_artifact(obj)) {
 		    if (u.uhave.questart){
 				struct obj *otherquestart;
@@ -588,7 +589,8 @@ struct obj *obj;
 	} else if (obj->otyp == SPE_BOOK_OF_THE_DEAD) {
 		if (!u.uhave.book) impossible("don't have the book?");
 		u.uhave.book = 0;
-	} else if (obj->oartifact) {
+	}
+	if (obj->oartifact) {
 		if (is_quest_artifact(obj)) {
 			struct obj *otherquestart;
 		    if (!u.uhave.questart)
