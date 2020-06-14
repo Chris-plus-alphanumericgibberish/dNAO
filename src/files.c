@@ -1742,7 +1742,7 @@ get_uchars(fp, buf, bufp, list, modlist, size, name)
     while (1) {
 	switch(*bufp) {
 	    case ' ':  case '\0':
-	    case '\t': case '\n':
+		case '\t': case '\n': case '\r':
 		if (havenum) {
 		    /* if modifying in place, don't insert zeros */
 		    if (num || !modlist) list[count] = num;
@@ -1810,7 +1810,7 @@ get_longs(fp, buf, bufp, list, modlist, size, name)
     while (1) {
 	switch(*bufp) {
 	    case ' ':  case '\0':
-	    case '\t': case '\n':
+		case '\t': case '\n': case '\r':
 		if (havenum) {
 		    num = parse_codepoint(tmpnum);
 		    /* if modifying in place, don't insert zeros */
