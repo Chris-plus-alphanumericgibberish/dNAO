@@ -252,7 +252,7 @@ struct monst * mdef;
 		}
 
 		if (!DEADMONSTER(mdef) && u.sealsActive&SEAL_AHAZU){
-			if (*hp(mdef) < .1*(*hpmax(mdef))){
+			if ((*hp(mdef) < .1*(*hpmax(mdef))) && !is_rider(pd)){
 #define MAXVALUE 24
 				extern const int monstr[];
 				int value = min(monstr[monsndx(pd)] + 1, MAXVALUE);
