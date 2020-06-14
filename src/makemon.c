@@ -6650,6 +6650,7 @@ register struct	monst	*mtmp;
 				(void) mpickobj(mtmp, otmp);
 				/*Plate Mail*/
 				otmp = mksobj(CRYSTAL_PLATE_MAIL, TRUE, FALSE);
+				otmp->bodytypeflag = (MB_HUMANOID|MB_ANIMAL);
 				otmp->ohaluengr = TRUE;
 				otmp->oward = LOLTH_SYMBOL;
 				otmp->blessed = TRUE;
