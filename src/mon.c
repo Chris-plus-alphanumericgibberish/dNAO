@@ -3325,10 +3325,9 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 	    }
 	}
 	/* possibly try again with relaxed requirements */
-	if (!cnt && (wantpool || wantdry || !(flag&ALLOW_TRAPS))) {
+	if (!cnt && (wantpool || wantdry)) {
 		wantpool = FALSE;
 		wantdry = FALSE;
-		flag |= ALLOW_TRAPS;
 		goto nexttry;
 	}
 	/* clear the creatures current square from poss and info */
