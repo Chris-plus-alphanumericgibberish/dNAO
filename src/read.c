@@ -1640,11 +1640,12 @@ struct obj	*sobj;
 
 		otmp = some_armor(&youmonst);
 		if(!otmp) {
+			exercise(A_CON, !sobj->cursed);
+			exercise(A_STR, !sobj->cursed);
+			/* strange feeling may free sobj */
 			strange_feeling(sobj,
 					!Blind ? "Your skin glows then fades." :
 					"Your skin feels warm for a moment.");
-			exercise(A_CON, !sobj->cursed);
-			exercise(A_STR, !sobj->cursed);
 			return(1);
 		}
 		if(confused) {
@@ -1795,10 +1796,11 @@ struct obj	*sobj;
 			if(!otmp) {
 				char tempBuff[BUFSZ];
 				Sprintf(tempBuff, "Your %s itch.", body_part(BONES));
-				strange_feeling(sobj,tempBuff);
-//				strange_feeling(sobj,"Your bones itch.");
 				exercise(A_STR, FALSE);
 				exercise(A_CON, FALSE);
+				/* Strange feeling may free the object it's given */
+				strange_feeling(sobj,tempBuff);
+//				strange_feeling(sobj,"Your bones itch.");
 				return(1);
 			}
 			otmp->oerodeproof = sobj->cursed;
@@ -1807,9 +1809,12 @@ struct obj	*sobj;
 		}
 		if(!sobj->cursed || !otmp || !otmp->cursed) {
 		    if(!destroy_arm(otmp)) {
-			strange_feeling(sobj,"Your skin itches.");
-			exercise(A_STR, FALSE);
-			exercise(A_CON, FALSE);
+				char tempBuff[BUFSZ];
+				Sprintf(tempBuff, "Your %s itches.", body_part(BODY_SKIN));
+				exercise(A_STR, FALSE);
+				exercise(A_CON, FALSE);
+				/* Strange feeling may free the object it's given */
+				strange_feeling(sobj,tempBuff);
 			return(1);
 		    } else
 			known = TRUE;
