@@ -898,8 +898,9 @@ unsigned trflags;
 		seetrap(trap);
 		if(amorphous(youracedata) || is_whirly(youracedata) ||
 						    unsolid(youracedata)) {
-		    pline("%s bear trap closes harmlessly through you.",
-			    A_Your[trap->madeby_u]);
+		    pline("%s %s closes harmlessly through you.",
+			    A_Your[trap->madeby_u],
+				xname(trap->ammo));
 		    break;
 		}
 		if(
@@ -907,8 +908,9 @@ unsigned trflags;
 		   !u.usteed &&
 #endif
 		   youracedata->msize < MZ_SMALL) {
-		    pline("%s bear trap closes harmlessly over you.",
-			    A_Your[trap->madeby_u]);
+		    pline("%s %s closes harmlessly over you.",
+			    A_Your[trap->madeby_u],
+				xname(trap->ammo));
 		    break;
 		}
 		u.utrap = rn1(4, 4);
@@ -1950,9 +1952,12 @@ struct monst *mtmp;
 		    mtmp->mtrapped = 0;
 		}
 	    } else if (metallivorous(mptr)) {
-		if (trap->ttyp == BEAR_TRAP) {
-		    if (canseemon(mtmp))
-			pline("%s eats a bear trap!", Monnam(mtmp));
+		if (trap->ttyp == BEAR_TRAP && is_metallic(trap->ammo)) {
+			if (canseemon(mtmp)) {
+				pline("%s eats %s!",
+					Monnam(mtmp),
+					an(xname(trap->ammo)));
+			}
 		    deltrap(trap);
 		    mtmp->meating = 5;
 		    mtmp->mtrapped = 0;
@@ -3965,12 +3970,12 @@ struct trap *ttmp;
 	if ((mtmp = m_at(ttmp->tx,ttmp->ty)) != 0) {
 		mtmp->mtrapped = 0;
 		You("remove %s %s from %s.", the_your[ttmp->madeby_u],
-			(ttmp->ttyp == BEAR_TRAP) ? "bear trap" : "webbing",
+			(ttmp->ttyp == BEAR_TRAP) ? xname(ttmp->ammo) : "webbing",
 			mon_nam(mtmp));
 		reward_untrap(ttmp, mtmp);
 	} else {
 		if (ttmp->ttyp == BEAR_TRAP) {
-			You("disarm %s bear trap.", the_your[ttmp->madeby_u]);
+			You("disarm %s %s.", the_your[ttmp->madeby_u], xname(ttmp->ammo));
 			remove_trap_ammo(ttmp);
 		} else if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)) /* if (ttmp->ttyp == WEB) */ {
 			You("succeed in removing %s web.", the_your[ttmp->madeby_u]);
