@@ -13079,7 +13079,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (subtotl < 1)
 				subtotl = 1;
 		}
-		else if (subtotl > 0 && vulnerable_mask(resistmask) && !(attackmask & EXPLOSION)) {
+		else if (subtotl > 0 && vulnerable_mask(resistmask) && !(attackmask & EXPLOSION) && (attackmask & ~(resistmask)) != 0L) {
 			/* 2x damage for attacking a vulnerability */
 			subtotl *= 2;
 		}
