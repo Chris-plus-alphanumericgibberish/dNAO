@@ -5015,7 +5015,8 @@ typfnd:
 		}
 		else {
 			/* they get the artifact */
-			u.uconduct.wisharti++;	/* KMH, conduct */
+			if(!wizwish)
+				u.uconduct.wisharti++;	/* KMH, conduct */
 			/* characters other than priests also have their god's likelyhood to grant artifacts decreased */
 			if(!Role_if(PM_PRIEST))
 				u.uartisval += arti_value(otmp);
