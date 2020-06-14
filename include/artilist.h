@@ -500,7 +500,7 @@ A("Fuma-itto no Ken",	BROADSWORD,						(const char *)0,
 	CREATE_AMMO, NOFLAG /*makes shuriken*/
 	),
 
-A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"scorpion-hilted %s",
+A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"scorpion-bladed %s",
 	3000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
@@ -573,7 +573,7 @@ A("Mirror Brand",		LONG_SWORD,						"polished %s",
 	NOINVOKE, NOFLAG
 	),
 
-A("Sunsword",			LONG_SWORD,						(const char *)0,
+A("Sunsword",			LONG_SWORD,						"sun-bladed %s",
 	1500L, GOLD, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_UNDEAD | MA_DEMON) /*MA*/, 0 /*MV*/),
@@ -584,7 +584,7 @@ A("Sunsword",			LONG_SWORD,						(const char *)0,
 	),
 
 /*can be thrown by dwarves*/
-A("The Axe of the Dwarvish Lords",		BATTLE_AXE,		(const char *)0,
+A("The Axe of the Dwarvish Lords",		BATTLE_AXE,		"dwarf-faced %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, PM_DWARF, TIER_A, (ARTG_GIFT),
 	NO_MONS(),
@@ -596,7 +596,7 @@ A("The Axe of the Dwarvish Lords",		BATTLE_AXE,		(const char *)0,
 
 /*returns to your hand.*/
 /*Needs encyc entry*/
-A("Windrider",			BOOMERANG,						(const char *)0,
+A("Windrider",			BOOMERANG,						"winged %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_C, NOFLAG,
 	NO_MONS(),
@@ -618,7 +618,7 @@ A("The Rod of the Ram",	MACE,							"ram-headed %s",
 	),
 
 /* attack power is bound to wielder's life force */
-A("The Atma Weapon",	BEAMSWORD,						(const char *)0,
+A("The Atma Weapon",	BEAMSWORD,						"horned %s",
 	6660L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, MG_NASTY /*MG*/, 0 /*MA*/, 0 /*MV*/),
@@ -652,7 +652,7 @@ A("The Black Arrow",	ANCIENT_ARROW,					(const char *)0,
 
 /*also has a haste effect when wielded, but massively increases hunger and damages the wielder*/
 /*The invoked attack is very powerful*/
-A("Tensa Zangetsu",		TSURUGI,						(const char *)0,
+A("Tensa Zangetsu",		TSURUGI,						"black %s",
 	4444L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, NON_PM, NON_PM, TIER_A, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
@@ -667,7 +667,7 @@ A("Tensa Zangetsu",		TSURUGI,						(const char *)0,
 /*Sort of intermediate between a double damage and a utility weapon,*/
 /*Sode no Shirayuki gains x2 ice damage after using the third dance.*/
 /*however, it only keeps it for a few rounds, and the other dances are attack magic. */
-A("Sode no Shirayuki",	KATANA,							"snow-colored %s", // colored not covered
+A("Sode no Shirayuki",	KATANA,							"snow-white %s", // colored not covered
 	8000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
