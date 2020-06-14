@@ -1618,7 +1618,7 @@ A("Itlachiayaque",					ROUNDSHIELD,		(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("The Annulus",					CHAKRAM,			"%s",
+A("The Annulus",					CHAKRAM,			"intricately-featured %s",
 	3000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_ANACHRONONAUT, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
