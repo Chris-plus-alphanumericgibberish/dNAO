@@ -3071,7 +3071,7 @@ mfndpos(mon, poss, info, flag)
 	register int cnt = 0;
 	register uchar ntyp;
 	uchar nowtyp;
-	boolean wantpool,wantpuddle,poolok,cubewaterok,lavaok,nodiag,quantumlock;
+	boolean wantpool, puddleispool, wantdry, poolok, cubewaterok, lavaok, nodiag, quantumlock;
 	boolean rockok = FALSE, treeok = FALSE, thrudoor;
 	int maxx, maxy;
 	
@@ -3095,10 +3095,17 @@ mfndpos(mon, poss, info, flag)
 
 	nodiag = (mdat->mtyp == PM_GRID_BUG) || (mdat->mtyp == PM_BEBELITH);
 	wantpool = mdat->mlet == S_EEL;
-	wantpuddle = wantpool && mdat->msize == MZ_TINY;
-	cubewaterok = (mon_resistance(mon,SWIMMING) || breathless_mon(mon) || amphibious_mon(mon));
+	wantdry = !wantpool;
+	puddleispool = (wantpool && mdat->msize == MZ_TINY) || (wantdry && (mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM));
+
+	/* nexttry can reset some of the above booleans, but recalculates the ones below. */
+	/* eels prefer the water, but if there is no water nearby, they will crawl over land */
+nexttry:	
+
+	cubewaterok = (mon_resistance(mon, SWIMMING) || (amphibious_mon(mon) && !wantdry));
 	poolok = mon_resistance(mon, WWALKING) || mon_resistance(mon, FLYING) || is_clinger(mdat)
-		|| (mon_resistance(mon,SWIMMING) && !wantpool);
+		|| (mon_resistance(mon, SWIMMING) && !wantpool)
+		|| (amphibious_mon(mon) && !wantdry);
 	lavaok = mon_resistance(mon,FLYING) || is_clinger(mdat) || likes_lava(mdat)
 		|| (mon_resistance(mon, WWALKING) && resists_fire(mon));
 	quantumlock = (is_weeping(mdat) && !u.uevent.invoked);
@@ -3119,9 +3126,6 @@ mfndpos(mon, poss, info, flag)
 	    }
 	    thrudoor |= rockok || treeok;
 	}
-
-nexttry:	/* eels prefer the water, but if there is no water nearby,
-		   they will crawl over land */
 	if(mon->mconf) {
 		flag |= ALLOW_ALL;
 		flag &= ~NOTONL;
@@ -3132,7 +3136,7 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 	maxy = min(y+1,ROWNO-1);
 	for(nx = max(1,x-1); nx <= maxx; nx++)
 	  for(ny = max(0,y-1); ny <= maxy; ny++) {
-	    if(nx == x && ny == y) continue;
+	    //if(nx == x && ny == y) continue;
 	    if(IS_ROCK(ntyp = levl[nx][ny].typ) &&
 	       !((flag & ALLOW_WALL) && may_passwall(nx,ny)) &&
 	       !((IS_TREE(ntyp) ? treeok : rockok) && may_dig(nx,ny))) continue;
@@ -3185,8 +3189,9 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 		//Weeping angels should avoid stepping into corredors, where they can be forced into a standoff.
 		if(quantumlock && IS_ROOM(levl[mon->mx][mon->my].typ) && !IS_ROOM(ntyp) ) continue;
 		
-		if((is_pool(nx,ny, wantpuddle) == wantpool || poolok) &&
+		if(((is_pool(nx, ny, puddleispool) == wantpool) || poolok) &&
 			(cubewaterok || !is_3dwater(nx,ny)) && 
+			(is_pool(nx, ny, puddleispool) == !wantdry) &&
 			(lavaok || !is_lava(nx,ny))) {
 		int dispx, dispy;
 		boolean monseeu = (!is_blind(mon) && (!Invis || mon_resistance(mon,SEE_INVIS)));
@@ -3319,11 +3324,31 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 		cnt++;
 	    }
 	}
-	if(!cnt && wantpool && !is_pool(x,y, wantpuddle)) {
+	/* possibly try again with relaxed requirements */
+	if (!cnt && (wantpool || wantdry)) {
 		wantpool = FALSE;
+		wantdry = FALSE;
 		goto nexttry;
 	}
-	return(cnt);
+	/* clear the creatures current square from poss and info */
+	if (cnt) {
+		int i;
+		for (i = 0; i < cnt; i++)
+		if (poss[i].x == x && poss[i].y == y)
+		{
+			int j;
+			for (j = i; j < cnt - 1; j++) {
+				poss[j].x = poss[j + 1].x;
+				poss[j].y = poss[j + 1].y;
+				info[j] = info[j + 1];
+			}
+			poss[j].x = 0;
+			poss[j].y = 0;
+			info[j] = 0L;
+			cnt--;
+			break;
+		}
+	}	return(cnt);
 }
 
 #endif /* OVL0 */
