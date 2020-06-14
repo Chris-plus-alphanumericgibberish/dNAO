@@ -339,9 +339,9 @@ WEAPON("war hammer", (char *)0,
 	1, 0, MZ_MEDIUM, 15, 50,  5,  4,  4, 0, B,   P_HAMMER, IRON, FALSE, HI_METAL),
 						/* +1 small */
 WEAPON("club", (char *)0,
-	1, 0, MZ_MEDIUM, 11, 30,  3,  6,  3, 0, B,   P_CLUB, WOOD, FALSE, HI_WOOD),
+	1, 0, MZ_MEDIUM, 11, 10,  3,  6,  3, 0, B,   P_CLUB, WOOD, FALSE, HI_WOOD),
 WEAPON("clawed hand", (char *)0,
-	1, 0, MZ_MEDIUM,  0, 30, 300, 12,  6, 0, P|S,   P_CLUB, BONE, FALSE, CLR_GRAY),
+	1, 0, MZ_MEDIUM,  0, 10, 300, 12,  6, 0, P|S,   P_CLUB, BONE, FALSE, CLR_GRAY),
 WEAPON("macuahuitl", "obsidian-edged club",
 	0, 0, MZ_MEDIUM,  0, 40, 10,  8,  6, 0, B|S,   P_CLUB, WOOD, FALSE, HI_WOOD),
 WEAPON("quarterstaff", "staff",
@@ -1120,7 +1120,7 @@ WEPTOOL("torch", (char *)0,
 WEPTOOL("shadowlander's torch", "black torch",
 	0,  MZ_SMALL, 0, 0, 10, 10, 50,  6,  3, 0, WHACK,   P_CLUB, WOOD, CLR_BLACK),
 WEPTOOL("sunrod", "gold rod",
-	1,  MZ_SMALL, 0, 0,  5, 40, 50,  6,  3, 0, WHACK,   P_MACE, GOLD, HI_GOLD),
+	1,  MZ_SMALL, 0, 0,  5, 20, 50,  6,  3, 0, WHACK,   P_MACE, GOLD, HI_GOLD),
 /* 
  * Lightsabers get 3x dice when lit 
  */
