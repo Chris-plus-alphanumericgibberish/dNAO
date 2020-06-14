@@ -668,7 +668,7 @@ int tary;
 						&& (!bimanual(otmp, pa) || pa->mtyp == PM_GYNOID || pa->mtyp == PM_PARASITIZED_GYNOID)// not two-handed
 						&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
 						&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
-						&& !(is_ammo(otmp) || is_pole(otmp) || throwing_weapon(otmp))		// not unsuitable for melee (ammo, throwable, polearm)
+						&& !(is_ammo(otmp) || is_pole(otmp) || is_missile(otmp))			// not unsuitable for melee (ammo, polearm, missile)
 						&& !otmp->owornmask)												// not worn
 					{
 						/* we have a potential weapon */
@@ -2727,7 +2727,7 @@ int dmg;				/* damage to deal */
 
 	/* if defender is already dead, avoid re-killing them; just note that they are dead */
 	if (*hp(mdef) < 1) {
-		return MM_DEF_DIED;
+		return (MM_HIT|MM_DEF_DIED);
 	}
 
 	/* debug */
@@ -2759,9 +2759,9 @@ int dmg;				/* damage to deal */
 				killer = 0;
 			}
 			if (*hp(mdef) > 0)
-				return MM_DEF_LSVD;	/* you lifesaved or rehumanized */
+				return (MM_HIT|MM_DEF_LSVD);	/* you lifesaved or rehumanized */
 			else
-				return MM_DEF_DIED;
+				return (MM_HIT|MM_DEF_DIED);
 		}
 	}
 	/* uhitm */
@@ -2791,9 +2791,9 @@ int dmg;				/* damage to deal */
 				}
 			}
 			if (*hp(mdef) > 0)
-				return MM_DEF_LSVD; /* mdef lifesaved */
+				return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 			else
-				return MM_DEF_DIED;
+				return (MM_HIT|MM_DEF_DIED);
 		}
 	}
 	/* mhitm */
@@ -2801,7 +2801,7 @@ int dmg;				/* damage to deal */
 		if (*hp(mdef)< 1) {
 			monkilled(mdef, "", attk ? (int)attk->adtyp : 0);
 			if (*hp(mdef) > 0)
-				return MM_DEF_LSVD; /* mdef lifesaved */
+				return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 			else
 				return (MM_HIT | MM_DEF_DIED | (!magr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
 		}
@@ -2875,7 +2875,7 @@ struct monst * mdef;
 			}
 			/* survived */
 			if (*hp(mdef) > 0)
-				return MM_DEF_LSVD;
+				return (MM_HIT|MM_DEF_LSVD);
 			/* died */
 			else {
 				if (mdef->mtame && !youagr)
@@ -4201,7 +4201,7 @@ boolean ranged;
 						else
 							mondied(mdef);
 						if (mdef->mhp > 0)
-							return MM_DEF_LSVD;	/* lifesaved? */
+							return (MM_HIT|MM_DEF_LSVD);	/* lifesaved? */
 						else if (mdef->mtame && !vis)
 							pline("May %s roast in peace.", mon_nam(mdef));
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
@@ -4221,7 +4221,7 @@ boolean ranged;
 						else
 							mondied(mdef);
 						if (mdef->mhp > 0)
-							return MM_DEF_LSVD;	/* lifesaved? */
+							return (MM_HIT|MM_DEF_LSVD);	/* lifesaved? */
 						else if (mdef->mtame && !vis)
 							pline("May %s roast in peace.", mon_nam(mdef));
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
@@ -4901,7 +4901,7 @@ boolean ranged;
 						mondied(mdef);
 
 					if (mdef->mhp > 0)
-						return MM_DEF_LSVD;
+						return (MM_HIT|MM_DEF_LSVD);
 					else if (mdef->mtame && !vis && !youagr)
 						pline("May %s rust in peace.", mon_nam(mdef));
 					return (MM_HIT | MM_DEF_DIED | (youagr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
@@ -5088,7 +5088,7 @@ boolean ranged;
 							monkilled(mdef, "", attk->adtyp);
 						/* is it dead, or was it lifesaved? */
 						if (mdef->mhp > 0)
-							return MM_DEF_LSVD;	/* lifesaved */
+							return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 						else
 							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 					}
@@ -5184,7 +5184,7 @@ boolean ranged;
 						monkilled(mdef, "", attk->adtyp);
 					/* is it dead, or was it lifesaved? */
 					if (mdef->mhp > 0)
-						return MM_DEF_LSVD;	/* lifesaved */
+						return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 				}
@@ -5418,7 +5418,7 @@ boolean ranged;
 					pline("Some writing vanishes from your head!");
 					/* KMH -- this is okay with unchanging */
 					rehumanize();
-					return MM_DEF_LSVD;	/* You died but didn't actually die. Lifesaved. */
+					return (MM_HIT|MM_DEF_LSVD);	/* You died but didn't actually die. Lifesaved. */
 				}
 				attrcurse();
 			}
@@ -5439,7 +5439,7 @@ boolean ranged;
 						mondied(mdef);
 
 					if (mdef->mhp > 0)
-						return MM_DEF_LSVD;
+						return (MM_HIT|MM_DEF_LSVD);
 					else if (mdef->mtame && !vis && !youagr)
 						You("have a strangely sad feeling for a moment, then it passes.");
 					return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
@@ -6848,7 +6848,7 @@ boolean ranged;
 						u.ugrave_arise = NON_PM;
 						done(DISINTEGRATED);
 						You("reintegrate!");//lifesaved
-						return MM_DEF_LSVD;
+						return (MM_HIT|MM_DEF_LSVD);
 					}
 					/* monster is disintegrated */
 					else {
@@ -6858,7 +6858,7 @@ boolean ranged;
 						else
 							monkilled(mdef, "", AD_DISN);
 						if (mdef->mhp > 0)
-							return MM_DEF_LSVD;	/* lifesaved */
+							return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 						else
 							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
 					}
@@ -7050,9 +7050,9 @@ boolean ranged;
 				/* use killed, player was responsible */
 				killed(mdef);
 				if (mdef->mhp > 0)
-					return MM_DEF_LSVD;	/* lifesaved */
+					return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 				else
-					return MM_DEF_DIED;
+					return (MM_HIT|MM_DEF_DIED);
 			}
 		}
 		/* mhitm */
@@ -7082,7 +7082,7 @@ boolean ranged;
 				/* use monkilled, player was not responsible */
 				monkilled(mdef, "", AD_DRIN);
 				if (mdef->mhp > 0)
-					return MM_DEF_LSVD;	/* lifesaved */
+					return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 				else
 					return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
 			}
@@ -7266,7 +7266,7 @@ boolean ranged;
 								an(mtmp->data->mname));
 							killer = buf;
 							done(DROWNING);
-							return MM_DEF_DIED;
+							return (MM_HIT|MM_DEF_DIED);
 						}
 					}
 					else if (youagr) {
@@ -7507,7 +7507,7 @@ boolean ranged;
 				1);						/* radius */
 		}
 		if (!youdef && DEADMONSTER(mdef))
-			return MM_DEF_DIED;
+			return (MM_HIT|MM_DEF_DIED);
 		else
 			return MM_HIT;
 		}
@@ -7832,7 +7832,7 @@ boolean ranged;
 						killer_format = KILLED_BY_AN;
 						killer = "touch of death";
 						done(DIED);
-						return MM_DEF_LSVD;	/* must have lifesaved */
+						return (MM_HIT|MM_DEF_LSVD);	/* must have lifesaved */
 					}
 				}
 				else {
@@ -7847,7 +7847,7 @@ boolean ranged;
 							monkilled(mdef, "", AD_DETH);
 
 						if (*hp(mdef) > 0)
-							return MM_DEF_LSVD; /* mdef lifesaved */
+							return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 						else
 							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 					}
@@ -7905,7 +7905,7 @@ boolean ranged;
 						else
 							monkilled(mdef, "", AD_DETH);
 						if (*hp(mdef) > 0)
-							return MM_DEF_LSVD; /* mdef lifesaved */
+							return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 						else
 							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 					}
@@ -8014,7 +8014,7 @@ boolean ranged;
 					else
 						monkilled(mdef, "", AD_FAMN);
 					if (*hp(mdef) > 0)
-						return MM_DEF_LSVD; /* mdef lifesaved */
+						return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 				}
@@ -9983,7 +9983,7 @@ int vis;
 						monkilled(mdef, "", attk->adtyp);
 					/* is it dead, or was it lifesaved? */
 					if (mdef->mhp > 0)
-						return MM_DEF_LSVD;	/* lifesaved */
+						return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 				}
@@ -10093,7 +10093,7 @@ int vis;
 					done(DIED);
 
 					if (*hp(mdef) > 0)
-						return MM_DEF_LSVD;				/* you lifesaved */
+						return (MM_HIT|MM_DEF_LSVD);				/* you lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED);	/* moot */
 				}
@@ -10121,7 +10121,7 @@ int vis;
 					monkilled(mdef, "", AD_DETH);
 
 				if (*hp(mdef) > 0)
-					return MM_DEF_LSVD; /* mdef lifesaved */
+					return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 				else
 					return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 			}
@@ -12171,7 +12171,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				*wepgone = TRUE;
 			/* check if defender was killed */
 			if (*hp(mdef) < 1)
-				return MM_DEF_DIED;
+				return (MM_HIT|MM_DEF_DIED);
 			/* potionhit prints messages */
 			hittxt = TRUE;
 			/* in case potion effect causes transformation */
@@ -12204,7 +12204,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 					/* check if defender was killed */
 					if (*hp(mdef) < 1)
-						return MM_DEF_DIED;
+						return (MM_HIT|MM_DEF_DIED);
 					/* nudzirath_shatter prints messages */
 					hittxt = TRUE;
 					real_attack = FALSE;
@@ -13337,7 +13337,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				}
 				nomul(0, NULL);
 				if (mdef->mhp <= 0) /* flung weapon killed monster */
-					return MM_DEF_DIED;
+					return (MM_HIT|MM_DEF_DIED);
 			}
 		}
 		else {
