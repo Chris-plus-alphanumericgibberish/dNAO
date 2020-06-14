@@ -252,7 +252,7 @@ struct monst * mdef;
 		}
 
 		if (!DEADMONSTER(mdef) && u.sealsActive&SEAL_AHAZU){
-			if (*hp(mdef) < .1*(*hpmax(mdef))){
+			if ((*hp(mdef) < .1*(*hpmax(mdef))) && !is_rider(pd)){
 #define MAXVALUE 24
 				extern const int monstr[];
 				int value = min(monstr[monsndx(pd)] + 1, MAXVALUE);
@@ -13079,7 +13079,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (subtotl < 1)
 				subtotl = 1;
 		}
-		else if (subtotl > 0 && vulnerable_mask(resistmask) && !(attackmask & EXPLOSION)) {
+		else if (subtotl > 0 && vulnerable_mask(resistmask) && !(attackmask & EXPLOSION) && (attackmask & ~(resistmask)) != 0L) {
 			/* 2x damage for attacking a vulnerability */
 			subtotl *= 2;
 		}

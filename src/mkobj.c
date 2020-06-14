@@ -2773,6 +2773,17 @@ register struct obj *otmp;
     extract_nexthere(otmp, &level.objects[x][y]);
     extract_nobj(otmp, &fobj);
     if (otmp->timed) obj_timer_checks(otmp,x,y,0);
+
+	/* if this removed the last object there... */
+	if (!level.objects[x][y]) {
+		/* hiding creatures might be revealed */
+		struct monst * mtmp = m_at(x, y);
+		if (mtmp && hides_under(mtmp->data) && mtmp->mundetected)
+			mtmp->mundetected = FALSE;
+		/* hiding players might be revealed */
+		if ((x == u.ux && y == u.uy) && hides_under(youracedata) && u.uundetected)
+			u.uundetected = FALSE;
+	}
 }
 
 /* throw away all of a monster's inventory */
