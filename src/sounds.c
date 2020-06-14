@@ -4228,7 +4228,8 @@ int tx,ty;
 				if(otmp->otyp == CORPSE && 
 					(otmp->corpsenm == PM_ACID_BLOB
 					|| (monstermoves <= peek_at_iced_corpse_age(otmp) + 50)
-					)
+					) &&
+					!(is_rider(&mons[otmp->corpsenm]))
 				){
 					o = otmp;
 			break;
