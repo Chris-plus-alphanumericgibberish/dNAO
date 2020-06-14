@@ -569,6 +569,12 @@ struct obj *obj;
 	} else if (obj->otyp == AMULET_OF_YENDOR) {
 		if (!u.uhave.amulet) impossible("don't have amulet?");
 		u.uhave.amulet = 0;
+		pline("bleh");
+		if (uwep && uwep->oartifact == ART_KUSANAGI_NO_TSURUGI && u.ulevel < 30){
+			setuwep((struct obj *) 0);
+			pline("Without the Amulet of Yendor, you are no longer worthy to wield this sword and must sheathe it for now."); 
+		}
+
 	} else if (obj->otyp == CANDELABRUM_OF_INVOCATION) {
 		if (!u.uhave.menorah) impossible("don't have candelabrum?");
 		u.uhave.menorah = 0;

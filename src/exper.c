@@ -267,6 +267,10 @@ boolean expdrain; /* attack drains exp as well */
 		else u.uexp = newuexp(1)/2;
 	}
 	if(Role_if(PM_EXILE)) binderdown();
+	if (uwep && uwep->oartifact == ART_KUSANAGI_NO_TSURUGI && u.ulevel < 30 && !u.uhave.amulet){
+		setuwep((struct obj *) 0);
+		pline("You are no longer a Shogun worthy of wielding this sword, and must sheathe it for now."); 
+	}
 	flags.botl = 1;
 }
 
