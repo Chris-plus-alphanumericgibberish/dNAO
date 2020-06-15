@@ -1978,6 +1978,7 @@ get_description_of_damage_type(uchar id)
 	case AD_RETR: return "elemental gaze attack";
 	case AD_SAMU: return "steal Amulet";
 	case AD_CURS: return "steal intrinsic";
+	case AD_BDFN: return "spears of blood";
 	case AD_SQUE: return "steal Quest Artifact or Amulet";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);

@@ -9877,7 +9877,7 @@ int vis;
 
 	case AD_BDFN:
 		if(has_blood_mon(mdef)){
-			if(vis) pline("A thin spear of %s %s pierces %s %s.",
+			if(vis&VIS_MDEF) pline("A thin spear of %s %s pierces %s %s.",
 				(youdef ? "your" : s_suffix(mon_nam(mdef))),
 				mbodypart(mdef, BLOOD),
 				(youdef ? "your" : hisherits(mdef)),
@@ -9890,8 +9890,8 @@ int vis;
 			} else {
 				if(mdef->mconf && !rn2(10)){
 					if(mdef->mstun && !rn2(10)){
-						if(vis) pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), hisherits(mdef), mbodypart(mdef, BODY_SKIN));
-						//reduce current HP by 30% (round up, guranteed nonfatal)
+						if(vis&VIS_MDEF) pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), hisherits(mdef), mbodypart(mdef, BODY_SKIN));
+						//reduce current HP by 30% (round up, guaranteed nonfatal)
 						mdef->mhp = mdef->mhp*.7+1;
 						if(mdef->mhpmax > mdef->mhp){
 							if(mdef->mhpmax > mdef->mhp+mdef->m_lev)
