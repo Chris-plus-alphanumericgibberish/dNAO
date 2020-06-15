@@ -551,7 +551,7 @@ int *fail_reason;
 	    if (is_golem(&mons[statue->corpsenm]) && cause == ANIMATE_SPELL)
 	    	mptr = &mons[PM_FLESH_GOLEM];
 	    else
-		mptr = &mons[statue->corpsenm];
+			mptr = &mons[statue->corpsenm];
 	    /*
 	     * Guard against someone wishing for a statue of a unique monster
 	     * (which is allowed in normal play) and then tossing it onto the
@@ -562,8 +562,8 @@ int *fail_reason;
 	        if (fail_reason) *fail_reason = AS_MON_IS_UNIQUE;
 	        return (struct monst *)0;
 	    }
-	    if (cause == ANIMATE_SPELL &&
-		((mptr->geno & G_UNIQ) || is_unwishable(mptr) || mptr->msound == MS_GUARDIAN)) {
+		
+	    if((mptr->geno & G_UNIQ) || mptr->msound == MS_GUARDIAN){
 		/* Statues of quest guardians or unique monsters
 		 * will not stone-to-flesh as the real thing.
 		 */
