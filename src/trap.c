@@ -552,16 +552,6 @@ int *fail_reason;
 	    	mptr = &mons[PM_FLESH_GOLEM];
 	    else
 			mptr = &mons[statue->corpsenm];
-	    /*
-	     * Guard against someone wishing for a statue of a unique monster
-	     * (which is allowed in normal play) and then tossing it onto the
-	     * [detected or guessed] location of a statue trap.  Normally the
-	     * uppermost statue is the one which would be activated.
-	     */
-	    if (((mptr->geno & G_UNIQ) || is_unwishable(mptr)) && cause != ANIMATE_SPELL) {
-	        if (fail_reason) *fail_reason = AS_MON_IS_UNIQUE;
-	        return (struct monst *)0;
-	    }
 		
 	    if((mptr->geno & G_UNIQ) || mptr->msound == MS_GUARDIAN){
 		/* Statues of quest guardians or unique monsters
