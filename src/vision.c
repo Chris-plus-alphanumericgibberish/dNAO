@@ -536,7 +536,7 @@ vision_recalc(control)
     if (u.uswallow || control == 2) {
 		/* do nothing -- get_unused_cs() nulls out the new work area */
 
-    } else if (Blind) {
+    } else if (Blind || LightBlind) {
 		/*
 		 * Calculate the could_see array even when blind so that monsters
 		 * can see you, even if you can't see them.  Note that the current
@@ -585,7 +585,7 @@ vision_recalc(control)
     else {
 		/* determine night vision range */
 		indark = (dimness(u.ux, u.uy) > 0);
-		darksight = ((Catsight && indark) || (Darksight && !LightBlind));
+		darksight = ((Catsight && indark) || (Darksight));
 		if (Elfsight) nv_range = 3;
 		else if (Lowlightsight) nv_range = 2;
 		else if ((Catsight && indark) || (Darksight && LightBlind)) nv_range = 0;
@@ -693,7 +693,7 @@ vision_recalc(control)
     viz_array = next_array;
 	/* determine night vision range */
 	indark = (dimness(u.ux, u.uy) > 0);
-	darksight = ((Catsight && indark) || (Darksight && !LightBlind));
+	darksight = ((Catsight && indark) || (Darksight));
 	if(Elfsight) nv_range = 3;
 	else if(Lowlightsight) nv_range = 2;
 	else if ((Catsight && indark) || (Darksight && LightBlind)) nv_range = 0;
