@@ -7313,6 +7313,9 @@ boolean ranged;
 			}
 		}
 		/* make physical attack without hitmsg */
+		/* This CANNOT be an AT_HUGS attack, because then it will attempt to do a wrap attack again */
+		if (alt_attk.aatyp == AT_HUGS)
+			alt_attk.aatyp = AT_CLAW;
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
