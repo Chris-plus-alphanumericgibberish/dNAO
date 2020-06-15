@@ -1721,12 +1721,12 @@ struct obj *
 select_pick(mtmp)
 struct monst *mtmp;
 {
-	struct obj * otmp;
+	struct obj *otmp, *obj;
 
-	/* preference to any artifacts (and checks for arti_digs) */
-	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
-		if (is_pick(otmp) && otmp->oartifact)
-			Oselect(otmp->otyp, W_WEP);
+	/* preference to any artifacts (and checks for arti_digs, loop control must use a different variable than otmp, in case Oselect fails for any reason) */
+	for (obj = mtmp->minvent; obj; obj = obj->nobj){
+		if (is_pick(obj) && obj->oartifact)
+			Oselect(obj->otyp, W_WEP);
 	}
 
 	Oselect(DWARVISH_MATTOCK, W_WEP);
@@ -1734,16 +1734,17 @@ struct monst *mtmp;
 	/* failure */
 	return (struct obj *)0;
 }
+
 struct obj *
 select_axe(mtmp)
 struct monst *mtmp;
 {
-	struct obj * otmp;
+	struct obj *otmp, *obj;
 
-	/* preference to any artifacts */
-	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
-		if (is_axe(otmp) && otmp->oartifact)
-			Oselect(otmp->otyp, W_WEP);
+	/* preference to any artifacts (loop control must use a different variable than otmp, in case Oselect fails for any reason) */
+	for (obj = mtmp->minvent; obj; obj = obj->nobj){
+		if (is_axe(obj) && obj->oartifact)
+			Oselect(obj->otyp, W_WEP);
 	}
 
 	Oselect(MOON_AXE, W_WEP);
