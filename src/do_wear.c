@@ -2466,7 +2466,7 @@ find_dr()
 		udr += slot_udr(i,0);
 	udr += slot_udr(UPPER_TORSO_DR,0);
 	udr += slot_udr(LOWER_TORSO_DR,0);
-	udr += max(slot_udr(UPPER_TORSO_DR,0), slot_udr(ARM_DR,0));
+	udr += max(slot_udr(UPPER_TORSO_DR,0), slot_udr(ARM_DR,0))*2;
 	udr /= 9;
 	if (udr > 127) udr = 127;	/* u.uac is an schar */
 	if(udr != u.udr){
