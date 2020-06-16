@@ -1346,7 +1346,9 @@ register struct monst *mtmp;
 				y = mtmp->my+(j+rot)%3;
 				if(!isok(x, y))
 					continue;
-				repairee = m_at(x,y);
+				if(u.ux == x && u.uy == y)
+					repairee = &youmonst;
+				else repairee = m_at(x,y);
 				if(!repairee)
 					continue;
 				if(repairee == &youmonst){
