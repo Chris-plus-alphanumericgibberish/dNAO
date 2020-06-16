@@ -12919,6 +12919,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				}
 			}
 		}
+		/* misc: train player's Soresu skill if applicable */
+		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && magr && melee &&
+			(u.fightingForm == FFORM_SHII_CHO ||
+			(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+			)) use_skill(FFORM_SORESU, 1);
 	}
 	/* ARTIFACT HIT BLOCK */
 	/* this must come after skills are trained, as this can kill the defender and cause a return */
