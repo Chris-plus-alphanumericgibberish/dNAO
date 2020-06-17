@@ -3584,7 +3584,7 @@ boolean ranged;
 		miss = TRUE;
 	}
 	/* insubstantial (shade-type) immunity to being hit */
-	if (!miss && !hits_insubstantial(magr, mdef, attk, weapon)) {
+	if (!miss && insubstantial(pd) && !hits_insubstantial(magr, mdef, attk, weapon)) {
 		/* Print message */
 		if (vis&VIS_MAGR) {
 			Sprintf(buf, "%s", ((!weapon || valid_weapon(weapon)) ? "attack" : cxname(weapon)));
@@ -11779,8 +11779,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	}
 	/* weapons/armor */
 	else if (otmp &&
-		(otmp == weapon ||							// if using a weapon, only check that weapon (probably moot)
-		hits_insubstantial(magr, mdef, attk, otmp))	// if armor harmlessly passes through mdef, skin/rings have an effect
+		// if using a weapon, only check that weapon (probably moot)
+		(otmp == weapon ||
+		// if armor harmlessly passes through mdef, skin/rings have an effect
+		!insubstantial(pd) || hits_insubstantial(magr, mdef, attk, otmp))
 		) {
 		if (otmp->oartifact == ART_GLAMDRING &&
 			(is_orc(pd) || is_demon(pd)))
@@ -11903,7 +11905,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 	}
 
-	if (poisonedobj && hits_insubstantial(magr, mdef, attk, poisonedobj))
+	if (poisonedobj && (!insubstantial(pd) || hits_insubstantial(magr, mdef, attk, poisonedobj)))
 	{
 		int poisons = poisonedobj->opoisoned;
 		int artipoisons = 0;
@@ -13006,7 +13008,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		subtotl = (real_attack ? 1 : 0);
 
 	/* some attacks only deal searing damage to insubstantial creatures */
-	if (hits_insubstantial(magr, mdef, attk, weapon) == 1) {
+	if (insubstantial(pd) && hits_insubstantial(magr, mdef, attk, weapon) == 1) {
 		subtotl = 0;
 	}
 	/* some creatures resist weapon attacks to the extreme */
