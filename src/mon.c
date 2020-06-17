@@ -3102,10 +3102,10 @@ mfndpos(mon, poss, info, flag)
 	/* eels prefer the water, but if there is no water nearby, they will crawl over land */
 nexttry:	
 
-	cubewaterok = (mon_resistance(mon, SWIMMING) || (amphibious_mon(mon) && !wantdry));
+	cubewaterok = (mon_resistance(mon, SWIMMING) || (amphibious_mon(mon) && !wantdry && !wantpool));
 	poolok = mon_resistance(mon, WWALKING) || mon_resistance(mon, FLYING) || is_clinger(mdat)
 		|| (mon_resistance(mon, SWIMMING) && !wantpool)
-		|| (amphibious_mon(mon) && !wantdry);
+		|| (amphibious_mon(mon) && !wantdry && !wantpool);
 	lavaok = mon_resistance(mon,FLYING) || is_clinger(mdat) || likes_lava(mdat)
 		|| (mon_resistance(mon, WWALKING) && resists_fire(mon));
 	quantumlock = (is_weeping(mdat) && !u.uevent.invoked);
