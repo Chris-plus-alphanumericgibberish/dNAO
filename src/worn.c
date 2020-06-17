@@ -779,15 +779,19 @@ struct monst *mon;
 		if(uarmf) armac += arm_ac_bonus(uarmf);
 		if(uarmg) armac += arm_ac_bonus(uarmg);
 		if(uarmu) armac += arm_ac_bonus(uarmu);
-		if(uarms) armac += arm_ac_bonus(uarms);
+		if(uarms){
+			armac += max(0, arm_ac_bonus(uarms) + (uarms->objsize - mon->data->msize));
+		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
-			armac += arm_ac_bonus(obj);
-			if(is_shield(obj)) armac += max(0, obj->objsize - mon->data->msize);
+			if(is_shield(obj))
+				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+			else
+				armac += arm_ac_bonus(obj);
 		}
 	}
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
@@ -852,15 +856,21 @@ struct monst *mon;
 		if(uarmf) armac += arm_ac_bonus(uarmf);
 		if(uarmg) armac += arm_ac_bonus(uarmg);
 		if(uarmu) armac += arm_ac_bonus(uarmu);
-		if(uarms) armac += arm_ac_bonus(uarms);
+		if(uarms){
+			armac += max(0, arm_ac_bonus(uarms) + (uarms->objsize - mon->data->msize));
+		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
-	    if (obj->owornmask & mwflags)
-		armac += arm_ac_bonus(obj);
+	    if (obj->owornmask & mwflags){
+			if(is_shield(obj))
+				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+			else
+				armac += arm_ac_bonus(obj);
+		}
 	}
 
 	base -= armac;
@@ -905,15 +915,21 @@ struct monst *mon;
 		if(uarmf) armac += arm_ac_bonus(uarmf);
 		if(uarmg) armac += arm_ac_bonus(uarmg);
 		if(uarmu) armac += arm_ac_bonus(uarmu);
-		if(uarms) armac += arm_ac_bonus(uarms);
+		if(uarms){
+			armac += max(0, arm_ac_bonus(uarms) + (uarms->objsize - mon->data->msize));
+		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
-	    if (obj->owornmask & mwflags)
-		armac += arm_ac_bonus(obj);
+	    if (obj->owornmask & mwflags){
+			if(is_shield(obj))
+				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+			else
+				armac += arm_ac_bonus(obj);
+		}
 	}
 
 	return 10 - armac;

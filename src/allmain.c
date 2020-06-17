@@ -3169,7 +3169,7 @@ struct monst *mon;
 		for(otmp = level.objects[xlocale][ylocale]; otmp; otmp = otmp2){
 			otmp2 = otmp->nexthere;
 			if(otmp->otyp == CORPSE && !otmp->oartifact){
-				goat_eat(otmp); //No matter what, the this function should remove this corpse.  Either via resurrection or destruction
+				goat_eat(otmp, FALSE); //No matter what, the this function should remove this corpse.  Either via resurrection or destruction
 				//Warning note: otmp is now stale
 				return;
 			}

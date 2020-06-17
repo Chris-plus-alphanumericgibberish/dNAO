@@ -2223,7 +2223,7 @@ struct obj *obj;
 		&& (u.wardsknown & (WARD_TOUSTEFNA | WARD_DREPRUN | WARD_OTTASTAFUR | WARD_KAUPALOKI | WARD_VEIOISTAFUR | WARD_THJOFASTAFUR)))
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Carve a stave with this knife", MENU_UNSELECTED);
-	else if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC)
+	else if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Ignite or deactivate this lightsaber", MENU_UNSELECTED);
 	/* d: drop item, works on everything */
@@ -2942,8 +2942,13 @@ winid *datawin;
 		OBJPUTSTR(buf);
 		/* Defense */
 		if (obj && obj->known) {// calculate the actual AC and DR this armor gives
-			Sprintf(buf, "Is worth %d AC and %d DR.",
-				arm_ac_bonus(obj), arm_dr_bonus(obj));
+			if(is_shield(obj) && obj->objsize != youracedata->msize){
+				Sprintf(buf, "Is worth %d AC (%d to you, due to its size) and %d DR.",
+					arm_ac_bonus(obj), max(0, arm_ac_bonus(obj) + (obj->objsize - youracedata->msize)), arm_dr_bonus(obj));
+			} else {
+				Sprintf(buf, "Is worth %d AC and %d DR.",
+					arm_ac_bonus(obj), arm_dr_bonus(obj));
+			}
 		}
 		else {// say what the base stats are
 			Sprintf(buf, "Base %d AC and %d DR.",

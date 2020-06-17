@@ -1475,6 +1475,10 @@ struct obj * otmp;
 
 /* hits_insubstantial()
  * 
+ * Caller is responsible for checking insubstantial(mdef->data) first
+ * so that this function can also be used for other cases that can cause a creature
+ * to be insubstantial.
+ *
  * returns non-zero if [magr] attacking [mdef] with [attk] hits,
  * specifically in the case of [mdef] being insubstantial (as a shade)
  * 
@@ -1495,10 +1499,6 @@ struct obj * weapon;
 	boolean youdef = (mdef == &youmonst);
 	struct permonst * pa = (magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0);
 	struct permonst * pd = youdef ? youracedata : mdef->data;
-
-	/* if the defender isn't insubstantial, full damage */
-	if (!insubstantial(pd))
-		return 2;
 
 	/* Chupoclops makes all your attacks ethereal */
 	if (youagr && u.sealsActive&SEAL_CHUPOCLOPS)

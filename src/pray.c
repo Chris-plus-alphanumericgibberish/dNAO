@@ -726,7 +726,14 @@ int ga_num;
 			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT)){
 				mtmp->mpeaceful = 0;
 				mtmp->mtame = 0;
-				set_malign(mtmp);
+				//Does not re-set alignment value (as if you attacked a peaceful)
+			}
+		}
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(goat_monster(mtmp->data) && !mtmp->mtame){
+				mtmp->mpeaceful = 0;
+				//Does not re-set alignment value (as if you attacked a peaceful)
+				newsym(mtmp->mx, mtmp->my);
 			}
 		}
 		u.ugoatblesscnt = rnz(300);
@@ -2679,7 +2686,7 @@ dosacrifice()
      */
 	
 	if(goat_mouth_at(u.ux, u.uy)){
-		goat_eat(otmp);
+		goat_eat(otmp, TRUE);
 		return 1;
 	}
 	
@@ -4009,6 +4016,7 @@ boolean yours;
 		if(yours)
 			gods_upset(GA_MOTHER);
 	}
+
 	if(revived)
 		return TRUE;
 	return FALSE;
@@ -4085,7 +4093,7 @@ int x, y;
 {
 	struct monst *mtmp;
 	for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->mtyp == PM_MOUTH_OF_THE_GOAT){
+		if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && !DEADMONSTER(mtmp)){
 			xchar xlocale, ylocale, xyloc;
 			xyloc	= mtmp->mtrack[0].x;
 			xlocale = mtmp->mtrack[1].x;
@@ -4095,7 +4103,7 @@ int x, y;
 		}
 	}
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && distu(mtmp->mx,mtmp->my) == 1){
+		if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && distu(mtmp->mx,mtmp->my) <= 2 && !DEADMONSTER(mtmp)){
 			return TRUE;
 		}
 	}
@@ -4103,7 +4111,7 @@ int x, y;
 }
 
 void
-goat_eat(otmp)
+goat_eat(otmp, yourinvent)
 struct obj *otmp;
 {
     int value = 0;
@@ -4111,9 +4119,7 @@ struct obj *otmp;
 	struct monst *mtmp;
 	extern const int monstr[];
 	xchar x, y;
-	boolean yourinvent = FALSE;
 	
-	yourinvent = carried(otmp);
 	get_obj_location(otmp, &x, &y, BURIED_TOO);
 	
 	if(goat_resurrect(otmp, yourinvent)){
@@ -4234,10 +4240,11 @@ struct obj *otmp;
 				set_malign(mtmp);
 			}
 		}
-		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && goat_monster(mtmp->data)){
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(goat_monster(mtmp->data)){
 				mtmp->mpeaceful = 1;
 				set_malign(mtmp);
+				newsym(mtmp->mx, mtmp->my);
 			}
 		}
 		//Character needs a holy symbol

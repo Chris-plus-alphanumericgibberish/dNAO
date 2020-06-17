@@ -2084,7 +2084,7 @@ E const char *FDECL(halu_gname, (ALIGNTYP_P));
 E const char *FDECL(align_gtitle, (ALIGNTYP_P));
 E void FDECL(altar_wrath, (int,int));
 E int FDECL(candle_on_altar, (struct obj *));
-E void FDECL(goat_eat, (struct obj *));
+E void FDECL(goat_eat, (struct obj *, int));
 E boolean FDECL(goat_mouth_at, (int, int));
 
 /* ### priest.c ### */

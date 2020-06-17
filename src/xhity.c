@@ -788,38 +788,40 @@ int tary;
 								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 							}
 						}
-						//45 degree rotation
-						nx = sgn(dx+dy);
-						ny = sgn(dy-dx);
-						if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
-							struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
-							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
-								int vis2 = VIS_NONE;
-								if(youagr || canseemon(magr))
-									vis2 |= VIS_MAGR;
-								if(mdef2 == &youmonst || canseemon(mdef2))
-									vis2 |= VIS_MDEF;
-								bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
-								subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
-								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
-								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+						if(u.uinsight >= 30){
+							//45 degree rotation
+							nx = sgn(dx+dy);
+							ny = sgn(dy-dx);
+							if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+								struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
+								if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
+									int vis2 = VIS_NONE;
+									if(youagr || canseemon(magr))
+										vis2 |= VIS_MAGR;
+									if(mdef2 == &youmonst || canseemon(mdef2))
+										vis2 |= VIS_MDEF;
+									bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+									subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
+									/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+									result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+								}
 							}
-						}
-						//-45 degree rotation
-						nx = sgn(dx-dy);
-						ny = sgn(dx+dy);
-						if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
-							struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
-							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
-								int vis2 = VIS_NONE;
-								if(youagr || canseemon(magr))
-									vis2 |= VIS_MAGR;
-								if(mdef2 == &youmonst || canseemon(mdef2))
-									vis2 |= VIS_MDEF;
-								bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
-								subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
-								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
-								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+							//-45 degree rotation
+							nx = sgn(dx-dy);
+							ny = sgn(dx+dy);
+							if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+								struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
+								if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
+									int vis2 = VIS_NONE;
+									if(youagr || canseemon(magr))
+										vis2 |= VIS_MAGR;
+									if(mdef2 == &youmonst || canseemon(mdef2))
+										vis2 |= VIS_MDEF;
+									bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+									subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
+									/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+									result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+								}
 							}
 						}
 						otmp->otyp = CLUB;
@@ -3563,7 +3565,9 @@ boolean ranged;
 		mon_resistance(mdef, DISPLACED) &&
 		!(youagr && u.ustuck && u.ustuck == mdef) &&
 		!(youagr && u.uswallow) &&
-		rn2(2)) {
+		!(has_passthrough_displacement(pd) && hits_insubstantial(magr, mdef, attk, weapon)) &&
+		rn2(2)
+		) {
 		if (has_passthrough_displacement(pd)){
 			if (vis&VIS_MAGR) {
 				pline("%s attack passes harmlessly through %s!",
@@ -3584,7 +3588,7 @@ boolean ranged;
 		miss = TRUE;
 	}
 	/* insubstantial (shade-type) immunity to being hit */
-	if (!miss && !hits_insubstantial(magr, mdef, attk, weapon)) {
+	if (!miss && insubstantial(pd) && !hits_insubstantial(magr, mdef, attk, weapon)) {
 		/* Print message */
 		if (vis&VIS_MAGR) {
 			Sprintf(buf, "%s", ((!weapon || valid_weapon(weapon)) ? "attack" : cxname(weapon)));
@@ -11780,8 +11784,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	}
 	/* weapons/armor */
 	else if (otmp &&
-		(otmp == weapon ||							// if using a weapon, only check that weapon (probably moot)
-		hits_insubstantial(magr, mdef, attk, otmp))	// if armor harmlessly passes through mdef, skin/rings have an effect
+		// if using a weapon, only check that weapon (probably moot)
+		(otmp == weapon ||
+		// if armor harmlessly passes through mdef, skin/rings have an effect
+		!insubstantial(pd) || hits_insubstantial(magr, mdef, attk, otmp))
 		) {
 		if (otmp->oartifact == ART_GLAMDRING &&
 			(is_orc(pd) || is_demon(pd)))
@@ -11909,7 +11915,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 	}
 	/* Apply object's poison */
-	if (poisonedobj && hits_insubstantial(magr, mdef, attk, poisonedobj)) {
+	if (poisonedobj && (!insubstantial(pd) || hits_insubstantial(magr, mdef, attk, poisonedobj))) {
 		poisons |= poisonedobj->opoisoned;
 		if (arti_poisoned(poisonedobj))
 			poisons |= OPOISON_BASIC;
@@ -12996,7 +13002,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		subtotl = (real_attack ? 1 : 0);
 
 	/* some attacks only deal searing damage to insubstantial creatures */
-	if (hits_insubstantial(magr, mdef, attk, weapon) == 1) {
+	if (insubstantial(pd) && hits_insubstantial(magr, mdef, attk, weapon) == 1) {
 		subtotl = 0;
 	}
 	/* some creatures resist weapon attacks to the extreme */
