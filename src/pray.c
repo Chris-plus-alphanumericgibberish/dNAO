@@ -726,7 +726,14 @@ int ga_num;
 			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT)){
 				mtmp->mpeaceful = 0;
 				mtmp->mtame = 0;
-				set_malign(mtmp);
+				//Does not re-set alignment value (as if you attacked a peaceful)
+			}
+		}
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(goat_monster(mtmp->data) && !mtmp->mtame){
+				mtmp->mpeaceful = 0;
+				//Does not re-set alignment value (as if you attacked a peaceful)
+				newsym(mtmp->mx, mtmp->my);
 			}
 		}
 		u.ugoatblesscnt = rnz(300);
@@ -4009,6 +4016,7 @@ boolean yours;
 		if(yours)
 			gods_upset(GA_MOTHER);
 	}
+
 	if(revived)
 		return TRUE;
 	return FALSE;
