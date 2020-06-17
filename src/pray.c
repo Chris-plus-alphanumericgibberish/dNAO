@@ -4093,7 +4093,7 @@ int x, y;
 {
 	struct monst *mtmp;
 	for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->mtyp == PM_MOUTH_OF_THE_GOAT){
+		if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && !DEADMONSTER(mtmp)){
 			xchar xlocale, ylocale, xyloc;
 			xyloc	= mtmp->mtrack[0].x;
 			xlocale = mtmp->mtrack[1].x;
@@ -4103,7 +4103,7 @@ int x, y;
 		}
 	}
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && distu(mtmp->mx,mtmp->my) <= 2){
+		if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && distu(mtmp->mx,mtmp->my) <= 2 && !DEADMONSTER(mtmp)){
 			return TRUE;
 		}
 	}
