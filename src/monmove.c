@@ -2126,8 +2126,8 @@ not_special:
 				can_carry(mtmp, otmp) &&
 				/* not covered by a boulder */
 				(throws_rocks(ptr) || !boulder_at(xx, yy)) &&
-				/* only unicorns like gems */
-				(!is_unicorn(ptr) || otmp->obj_material == GEMSTONE) &&
+				/* unicorns only like gems */
+				!(is_unicorn(ptr) && otmp->obj_material != GEMSTONE) &&
 				/* Don't get stuck circling an Elbereth */
 				!(onscary(xx, yy, mtmp)) &&
 				/* Don't go for untouchable artifacts */
