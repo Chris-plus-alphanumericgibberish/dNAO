@@ -3563,7 +3563,9 @@ boolean ranged;
 		mon_resistance(mdef, DISPLACED) &&
 		!(youagr && u.ustuck && u.ustuck == mdef) &&
 		!(youagr && u.uswallow) &&
-		rn2(2)) {
+		!(has_passthrough_displacement(pd) && hits_insubstantial(magr, mdef, attk, weapon)) &&
+		rn2(2)
+		) {
 		if (has_passthrough_displacement(pd)){
 			if (vis&VIS_MAGR) {
 				pline("%s attack passes harmlessly through %s!",
