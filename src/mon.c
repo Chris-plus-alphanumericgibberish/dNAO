@@ -3191,7 +3191,7 @@ nexttry:
 		
 		if(((is_pool(nx, ny, puddleispool) == wantpool) || poolok) &&
 			(cubewaterok || !is_3dwater(nx,ny)) && 
-			(is_pool(nx, ny, puddleispool) == !wantdry) &&
+			((is_pool(nx, ny, puddleispool) == !wantdry) || poolok) &&
 			(lavaok || !is_lava(nx,ny))) {
 		int dispx, dispy;
 		boolean monseeu = (!is_blind(mon) && (!Invis || mon_resistance(mon,SEE_INVIS)));
