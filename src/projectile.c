@@ -1601,7 +1601,7 @@ struct obj *obj;
 			Sprintf(buf, "almost hits the %s", ceiling(u.ux, u.uy));
 		}
 	}
-	if (!hits_insubstantial((struct monst *)0, &youmonst, (struct attack *)0, obj)) {
+	if (insubstantial(youracedata) && !hits_insubstantial((struct monst *)0, &youmonst, (struct attack *)0, obj)) {
 		pline("%s %s, then falls back down through you.", Doname2(obj), buf);
 		hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
 	}
