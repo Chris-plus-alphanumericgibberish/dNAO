@@ -2942,8 +2942,13 @@ winid *datawin;
 		OBJPUTSTR(buf);
 		/* Defense */
 		if (obj && obj->known) {// calculate the actual AC and DR this armor gives
-			Sprintf(buf, "Is worth %d AC and %d DR.",
-				arm_ac_bonus(obj), arm_dr_bonus(obj));
+			if(is_shield(obj) && obj->objsize != youracedata->msize){
+				Sprintf(buf, "Is worth %d AC (%d to you, due to its size) and %d DR.",
+					arm_ac_bonus(obj), max(0, arm_ac_bonus(obj) + (obj->objsize - youracedata->msize)), arm_dr_bonus(obj));
+			} else {
+				Sprintf(buf, "Is worth %d AC and %d DR.",
+					arm_ac_bonus(obj), arm_dr_bonus(obj));
+			}
 		}
 		else {// say what the base stats are
 			Sprintf(buf, "Base %d AC and %d DR.",
