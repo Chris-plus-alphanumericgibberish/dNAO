@@ -4103,7 +4103,7 @@ int x, y;
 		}
 	}
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && distu(mtmp->mx,mtmp->my) == 1){
+		if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && distu(mtmp->mx,mtmp->my) <= 2){
 			return TRUE;
 		}
 	}
