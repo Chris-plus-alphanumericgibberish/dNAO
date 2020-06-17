@@ -2100,44 +2100,54 @@ not_special:
 			(mtoo->msleeping || mtoo->mundetected ||
 			 (mtoo->mappearance && !mtoo->iswiz) ||
 			 !mtoo->data->mmove)) continue;
-			//Don't approach artifacts you can't touch
-			if(otmp->oartifact && !touch_artifact(otmp, mtmp, TRUE))
-				continue;
 			
-		    if(((likegold && otmp->oclass == COIN_CLASS) ||
-		       (likeobjs && index(practical, otmp->oclass) &&
-			(otmp->otyp != CORPSE || (ptr->mlet == S_NYMPH
-			   && !is_rider(&mons[otmp->corpsenm])))) ||
-		       (likemagic && index(magical, otmp->oclass)) ||
-		       (uses_items && searches_for_item(mtmp, otmp)) ||
-		       (likerock && is_boulder(otmp)) ||
-		       (likegems && otmp->oclass == GEM_CLASS &&
-			otmp->obj_material != MINERAL) ||
-		       (conceals && !cansee(otmp->ox,otmp->oy)) ||
-		       (ptr->mtyp == PM_GELATINOUS_CUBE &&
-			!index(indigestion, otmp->oclass) &&
-			!(otmp->otyp == CORPSE &&
-			  touch_petrifies(&mons[otmp->corpsenm])))
-		      ) && touch_artifact(otmp, mtmp, FALSE)) {
-				if(can_carry(mtmp,otmp) &&
-				 (throws_rocks(ptr) ||
-				  !boulder_at(xx,yy)) &&
-				 (!is_unicorn(ptr) ||
-				  otmp->obj_material == GEMSTONE) &&
-				   /* Don't get stuck circling an Elbereth */
-				  !(onscary(xx, yy, mtmp))) {
-					minr = distmin(omx,omy,xx,yy);
-					oomx = min(COLNO-1, omx+minr);
-					oomy = min(ROWNO-1, omy+minr);
-					lmx = max(1, omx-minr);
-					lmy = max(0, omy-minr);
-					gx = otmp->ox;
-					gy = otmp->oy;
-					if(mtmp->mtyp == PM_MAID && appr == 0) appr = 1;
-					if (gx == omx && gy == omy) {
-						mmoved = 3; /* actually unnecessary */
-						goto postmov;
-					}
+			if ((
+				(likegold && (
+					otmp->oclass == COIN_CLASS)) ||
+				(likeobjs && (
+					index(practical, otmp->oclass) &&
+					(otmp->otyp != CORPSE || (ptr->mlet == S_NYMPH && !is_rider(&mons[otmp->corpsenm]))))) ||
+				(likemagic && (
+					index(magical, otmp->oclass))) ||
+				(uses_items && (
+					searches_for_item(mtmp, otmp))) ||
+				(likerock && (
+					is_boulder(otmp))) ||
+				(likegems && (
+					otmp->oclass == GEM_CLASS && otmp->obj_material != MINERAL)) ||
+				(conceals && (
+					!cansee(otmp->ox, otmp->oy))) ||
+				(ptr->mtyp == PM_GELATINOUS_CUBE && (
+					!index(indigestion, otmp->oclass) && !(otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]))))
+				)
+				&&
+				(
+				/* can carry obj */
+				can_carry(mtmp, otmp) &&
+				/* not covered by a boulder */
+				(throws_rocks(ptr) || !boulder_at(xx, yy)) &&
+				/* only unicorns like gems */
+				(!is_unicorn(ptr) || otmp->obj_material == GEMSTONE) &&
+				/* Don't get stuck circling an Elbereth */
+				!(onscary(xx, yy, mtmp)) &&
+				/* Don't go for untouchable artifacts */
+				!(otmp->oartifact && !touch_artifact(otmp, mtmp, TRUE)) &&
+				/* Don't go for underwater items */
+				!is_pool(xx, yy, FALSE)
+				)
+				)
+			{
+				minr = distmin(omx,omy,xx,yy);
+				oomx = min(COLNO-1, omx+minr);
+				oomy = min(ROWNO-1, omy+minr);
+				lmx = max(1, omx-minr);
+				lmy = max(0, omy-minr);
+				gx = otmp->ox;
+				gy = otmp->oy;
+				if(mtmp->mtyp == PM_MAID && appr == 0) appr = 1;
+				if (gx == omx && gy == omy) {
+					mmoved = 3; /* actually unnecessary */
+					goto postmov;
 				}
 		    }
 		}
