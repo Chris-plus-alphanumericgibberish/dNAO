@@ -723,7 +723,7 @@ int otyp;
 	if (obj && obj->oartifact == ART_INFINITY_S_MIRRORED_ARC)
 	{
 		xchar x, y;
-		ocn = 1;
+		ocn = 0;
 		get_obj_location(obj, &x, &y, 0);
 		if (levl[x][y].lit &&
 			!(viz_array[y][x] & TEMP_DRK3 &&
@@ -739,6 +739,11 @@ int otyp;
 
 		if (obj->altmode)
 			ocn *= 2;
+		
+		//I'm not sure if this is needed, but similar things have caused crash bugs before.
+		// If it's not needed, the condition will never be true.
+		if(ocn < 1)
+			ocn = 1;
 		/* set spe_mult */
 		spe_mult = ocn;
 	}

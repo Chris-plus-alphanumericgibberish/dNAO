@@ -4578,6 +4578,7 @@ arti_invoke(obj)
 		oart->inv_prop != FIRE_SHIKAI && 
 		oart->inv_prop != SEVENFOLD && 
 		oart->inv_prop != ANNUL && 
+		oart->inv_prop != ALTMODE && 
 		oart->inv_prop != LORDLY
 	) {
 	    /* the artifact is tired :-) */
@@ -4600,6 +4601,7 @@ arti_invoke(obj)
 		oart->inv_prop != ICE_SHIKAI &&
 		oart->inv_prop != NECRONOMICON &&
 		oart->inv_prop != SPIRITNAMES &&
+		oart->inv_prop != ALTMODE &&
 		oart->inv_prop != LORDLY &&
 		oart->inv_prop != ANNUL &&
 		oart->inv_prop != VOID_CHIME &&
