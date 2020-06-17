@@ -4234,10 +4234,11 @@ struct obj *otmp;
 				set_malign(mtmp);
 			}
 		}
-		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && goat_monster(mtmp->data)){
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(goat_monster(mtmp->data)){
 				mtmp->mpeaceful = 1;
 				set_malign(mtmp);
+				newsym(mtmp->mx, mtmp->my);
 			}
 		}
 		//Character needs a holy symbol
