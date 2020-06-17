@@ -1211,10 +1211,13 @@ register struct monst *mtmp;
 		/* Invisible monster ==> invisible corpse */
 		obj->oinvis = mtmp->minvis;
 #endif
-
 		stackobj(obj);
 	}
 	newsym(x, y);
+	if(obj && obj->otyp == CORPSE && goat_mouth_at(x,y) && !obj->oartifact){
+		goat_eat(obj, !flags.mon_moving); //Goat eat tries *really* hard to destroy whatever you give it.
+		obj = (struct obj *)0;
+	}
 	return obj;
 }
 

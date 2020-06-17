@@ -2686,7 +2686,7 @@ dosacrifice()
      */
 	
 	if(goat_mouth_at(u.ux, u.uy)){
-		goat_eat(otmp);
+		goat_eat(otmp, TRUE);
 		return 1;
 	}
 	
@@ -4111,7 +4111,7 @@ int x, y;
 }
 
 void
-goat_eat(otmp)
+goat_eat(otmp, yourinvent)
 struct obj *otmp;
 {
     int value = 0;
@@ -4119,9 +4119,7 @@ struct obj *otmp;
 	struct monst *mtmp;
 	extern const int monstr[];
 	xchar x, y;
-	boolean yourinvent = FALSE;
 	
-	yourinvent = carried(otmp);
 	get_obj_location(otmp, &x, &y, BURIED_TOO);
 	
 	if(goat_resurrect(otmp, yourinvent)){
