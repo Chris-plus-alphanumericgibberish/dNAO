@@ -4708,171 +4708,181 @@ int respect_timeout;
 	int i,s,j,p;
 	long place;
 	
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	any.a_void = 0;		/* zero out all bits */
-	anyvoid.a_void = 0;		/* zero out all bits */
-	
-	if(flags.timeoutOrder){
-		p = 0;
-		for(s=0; s<NUM_BIND_SPRITS; s++){
-			if(u.spirit[s]){
-				j=0;
-				place = 1;
-				while(!(spirit_powers[u.spiritPOrder[j]].owner & place)){
-					j++;
-					place = place << 1;
-				}
-				add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_BOLD, sealNames[j], MENU_UNSELECTED);
-				for(i = 0; i<52; i++){
-					if(spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
-						if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
-							Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
-							any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
-							add_menu(tmpwin, NO_GLYPH, &any,
-								i<26 ? 'a'+(char)i : 'A'+(char)(i-26), 
-								0, ATR_NONE, buf, MENU_UNSELECTED);
-						} else {
-							Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
-							add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+	do {
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_void = 0;		/* zero out all bits */
+		anyvoid.a_void = 0;		/* zero out all bits */
+
+		if (flags.timeoutOrder){
+			p = 0;
+			for (s = 0; s < NUM_BIND_SPRITS; s++){
+				if (u.spirit[s]){
+					j = 0;
+					place = 1;
+					while (!(spirit_powers[u.spiritPOrder[j]].owner & place)){
+						j++;
+						place = place << 1;
+					}
+					add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_BOLD, sealNames[j], MENU_UNSELECTED);
+					for (i = 0; i < 52; i++){
+						if (spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
+							if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
+								Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
+								any.a_int = u.spiritPOrder[i] + 1;	/* must be non-zero */
+								add_menu(tmpwin, NO_GLYPH, &any,
+									i < 26 ? 'a' + (char)i : 'A' + (char)(i - 26),
+									0, ATR_NONE, buf, MENU_UNSELECTED);
+							}
+							else {
+								Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
+								add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+							}
+							p++;
 						}
-						p++;
 					}
 				}
 			}
 		}
-	} else {
-		p = 0;
-		for(i = 0; i<52; i++){
-			if (u.spiritPOrder[i] != -1 && ((
-				spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
-				!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
-				((spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL) && 
-				(spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL)))
-			){
-				if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
-					Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
-					any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
-					add_menu(tmpwin, NO_GLYPH, &any,
-						i<26 ? 'a'+(char)i : 'A'+(char)(i-26), 
-						0, ATR_NONE, buf, MENU_UNSELECTED);
-				} else {
-					Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
-					add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+		else {
+			p = 0;
+			for (i = 0; i < 52; i++){
+				if (u.spiritPOrder[i] != -1 && ((
+					spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
+					!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) ||
+					((spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL) &&
+					(spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL)))
+					){
+					if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
+						Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
+						any.a_int = u.spiritPOrder[i] + 1;	/* must be non-zero */
+						add_menu(tmpwin, NO_GLYPH, &any,
+							i < 26 ? 'a' + (char)i : 'A' + (char)(i - 26),
+							0, ATR_NONE, buf, MENU_UNSELECTED);
+					}
+					else {
+						Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
+						add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+					}
+					p++;
 				}
-				p++;
 			}
 		}
-	}
 
-	//Other menu options
-	if (action != SPELLMENU_CAST && action < 0) {
-		Sprintf(buf, "Use a power instead");
-		any.a_int = SPELLMENU_CAST;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'!', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (action != SPELLMENU_DESCRIBE && action < 0) {
-		// Describe a spell
-		Sprintf(buf, "Describe a power instead");
-		any.a_int = SPELLMENU_DESCRIBE;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'?', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (action != SPELLMENU_VIEW && action < 0 && p>=2){
-		// Describe a spell
-		Sprintf(buf, "Rearrange powers instead");
-		any.a_int = SPELLMENU_VIEW;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'+', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	switch (action)
-	{
-	case SPELLMENU_VIEW:
-		Sprintf(buf, "Choose which power to reorder");
-		break;
-	case SPELLMENU_CAST:
-		Sprintf(buf, "Choose which power to use");
-		break;
-	case SPELLMENU_DESCRIBE:
-		Sprintf(buf, "Choose which power to describe");
-		break;
-	default:
-		if (TRUE) {
-			char let;
-			/* find letter that matches action -- we can assume we will find it */
-			for (i = 0; i < 52; i++)
-			if (u.spiritPOrder[i] == action)
-				break;
-			if (i < 26)
-				let = 'a' + i;
-			else
-				let = 'A' + 1;
-
-			Sprintf(buf, "Reordering powers; swap '%c' with", let);
+		//Other menu options
+		if (action != SPELLMENU_CAST && action < 0) {
+			Sprintf(buf, "Use a power instead");
+			any.a_int = SPELLMENU_CAST;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'!', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
 		}
-		break;
-	}
-	end_menu(tmpwin, buf);
-
-	how = PICK_ONE;
-	n = select_menu(tmpwin, how, &selected);
-	destroy_nhwindow(tmpwin);
-	
-
-	if (n > 0){
-		int p_no = selected[0].item.a_int - 1;
-
-		if (selected[0].item.a_int < 0){
-			return dospiritmenu(selected[0].item.a_int, power_no, respect_timeout);
+		if (action != SPELLMENU_DESCRIBE && action < 0) {
+			// Describe a spell
+			Sprintf(buf, "Describe a power instead");
+			any.a_int = SPELLMENU_DESCRIBE;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'?', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
 		}
-		else {
-			switch (action)
-			{
-			case SPELLMENU_VIEW:
-				*power_no = p_no;
-				return dospiritmenu(p_no, power_no, respect_timeout);
-
-			case SPELLMENU_CAST:
-				*power_no = p_no;
-				return TRUE;
-
-			case SPELLMENU_DESCRIBE:
-				if (TRUE)
-				{
-					tmpwin = create_nhwindow(NHW_MENU);
-					start_menu(tmpwin);
-					Sprintf(buf, "%s %s", s_suffix(sealNames[decode_sealID(spirit_powers[p_no].owner) - FIRST_SEAL]),
-						spirit_powers[p_no].name);
-					putstr(tmpwin, 0, buf);
-					putstr(tmpwin, 0, spirit_powers[p_no].desc);
-					end_menu(tmpwin, (const char *)0);
-					display_nhwindow(tmpwin, FALSE);
-					destroy_nhwindow(tmpwin);
-				}
-				return dospiritmenu(action, power_no, respect_timeout);
-
-			default:
-				/* swap action's char with power_no's char */
+		if (action != SPELLMENU_VIEW && action < 0 && p >= 2){
+			// Describe a spell
+			Sprintf(buf, "Rearrange powers instead");
+			any.a_int = SPELLMENU_VIEW;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'+', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		switch (action)
+		{
+		case SPELLMENU_VIEW:
+			Sprintf(buf, "Choose which power to reorder");
+			break;
+		case SPELLMENU_CAST:
+			Sprintf(buf, "Choose which power to use");
+			break;
+		case SPELLMENU_DESCRIBE:
+			Sprintf(buf, "Choose which power to describe");
+			break;
+		default:
+			if (TRUE) {
+				char let;
 				/* find letter that matches action -- we can assume we will find it */
 				for (i = 0; i < 52; i++)
 				if (u.spiritPOrder[i] == action)
 					break;
-				for (j = 0; j < 52; j++)
-				if (u.spiritPOrder[j] == p_no)
-					break;
+				if (i < 26)
+					let = 'a' + i;
+				else
+					let = 'A' + 1;
 
-				s					= u.spiritPOrder[i];
-				u.spiritPOrder[i]	= u.spiritPOrder[j];
-				u.spiritPOrder[j]	= s;
+				Sprintf(buf, "Reordering powers; swap '%c' with", let);
+			}
+			break;
+		}
+		end_menu(tmpwin, buf);
 
-				return dospiritmenu(SPELLMENU_VIEW, power_no, respect_timeout);
-			} // switch(splaction)
-		} // doing something allowable
-	} // menu item was selected
+		how = PICK_ONE;
+		n = select_menu(tmpwin, how, &selected);
+		destroy_nhwindow(tmpwin);
+
+
+		if (n > 0){
+			int p_no = selected[0].item.a_int - 1;
+
+			if (selected[0].item.a_int < 0){
+				action = selected[0].item.a_int;
+				continue;
+			}
+			else {
+				switch (action)
+				{
+				case SPELLMENU_VIEW:
+					*power_no = p_no;
+					action = p_no;
+					continue;
+
+				case SPELLMENU_CAST:
+					*power_no = p_no;
+					return TRUE;
+
+				case SPELLMENU_DESCRIBE:
+					if (TRUE)
+					{
+						tmpwin = create_nhwindow(NHW_MENU);
+						start_menu(tmpwin);
+						Sprintf(buf, "%s %s", s_suffix(sealNames[decode_sealID(spirit_powers[p_no].owner) - FIRST_SEAL]),
+							spirit_powers[p_no].name);
+						putstr(tmpwin, 0, buf);
+						putstr(tmpwin, 0, spirit_powers[p_no].desc);
+						end_menu(tmpwin, (const char *)0);
+						display_nhwindow(tmpwin, FALSE);
+						destroy_nhwindow(tmpwin);
+					}
+					continue;
+
+				default:
+					/* swap action's char with power_no's char */
+					/* find letter that matches action -- we can assume we will find it */
+					for (i = 0; i < 52; i++)
+					if (u.spiritPOrder[i] == action)
+						break;
+					for (j = 0; j < 52; j++)
+					if (u.spiritPOrder[j] == p_no)
+						break;
+
+					s = u.spiritPOrder[i];
+					u.spiritPOrder[i] = u.spiritPOrder[j];
+					u.spiritPOrder[j] = s;
+
+					action = SPELLMENU_VIEW;
+					continue;
+				} // switch(splaction)
+			} // doing something allowable
+		} // menu item was selected
+		/* else end menu, nothing was selected */
+		break;
+	}while (TRUE);
 	return FALSE;
 }
 
