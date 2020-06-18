@@ -3130,10 +3130,6 @@ boolean * messaged;
 	if (oproperties)
 		oproperty_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
 
-	/* priests do extra damage with all artifacts */
-	if (oartifact && (youagr ? Role_switch : monsndx(magr->data)) == PM_PRIEST)
-		*plusdmgptr += d(1, mlev(magr));
-
 	/* EXTERNAL damage sources -- explosions and the like, primarily */
 	/* knockback effect */
 	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
