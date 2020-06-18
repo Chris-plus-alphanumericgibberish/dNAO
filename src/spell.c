@@ -4893,164 +4893,171 @@ int *spell_no;
 {
 	winid tmpwin;
 	int i, n, how;
-	int maintainable = 0;
+	int maintainable;
 	char buf[BUFSZ];
 	char buf2[BUFSZ];
 	menu_item *selected;
 	anything any;
 
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	any.a_void = 0;		/* zero out all bits */
+	do{
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_void = 0;		/* zero out all bits */
+		maintainable = 0;
 
-	update_alternate_spells();	// make sure all spells are listed
-	
-	/*
-	 * The correct spacing of the columns depends on the
-	 * following that (1) the font is monospaced and (2)
-	 * that selection letters are pre-pended to the given
-	 * string and are of the form "a - ".
-	 *
-	 * To do it right would require that we implement columns
-	 * in the window-ports (say via a tab character).
-	 */
-	any.a_void = 0;		/* zero out all bits */
-	//Standard Spells
-	if (!iflags.menu_tab_sep)
-		Sprintf(buf, "%-20s     Level  %-12s Fail   Memory", "    Name", "Category");
-	else
-		Sprintf(buf, "Name\tLevel\tCategory\tFail\tMemory");
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
+		update_alternate_spells();	// make sure all spells are listed
 
-		if (can_maintain_spell(spellid(i))){
-			maintainable += 1;
-		}
-		else {
-			if (splaction == SPELLMENU_MAINTAIN)
-				continue;
-		}
-		Sprintf(buf2, "%s%s", spellname(i), spell_maintained(spellid(i)) ? " [M]" : "");
-		Sprintf(buf, iflags.menu_tab_sep ?
-			"%s\t%-d%s\t%s\t%-d%%\t%-d%%\t" : "%-20s  %2d%s   %-12s %3d%%     %3d%%",
-			buf2, spellev(i),
-			spellknow(i) ? " " : "*",
-			spelltypemnemonic(spell_skilltype(spellid(i))),
-			100 - percent_success(i),
-			(spellknow(i) * 100 + (KEEN - 1)) / KEEN
-		);
+		/*
+		 * The correct spacing of the columns depends on the
+		 * following that (1) the font is monospaced and (2)
+		 * that selection letters are pre-pended to the given
+		 * string and are of the form "a - ".
+		 *
+		 * To do it right would require that we implement columns
+		 * in the window-ports (say via a tab character).
+		 */
+		any.a_void = 0;		/* zero out all bits */
+		//Standard Spells
+		if (!iflags.menu_tab_sep)
+			Sprintf(buf, "%-20s     Level  %-12s Fail   Memory", "    Name", "Category");
+		else
+			Sprintf(buf, "Name\tLevel\tCategory\tFail\tMemory");
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
 
-		any.a_int = i+1;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			 spellet(i), 0, ATR_NONE, buf,
-			 (i == splaction) ? MENU_SELECTED : MENU_UNSELECTED);
-	}
-	//Other menu options
-	if (splaction != SPELLMENU_CAST && splaction != SPELLMENU_PICK && splaction < 0) {
-		Sprintf(buf, "Cast a spell instead");
-		any.a_int = SPELLMENU_CAST;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'!', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (splaction != SPELLMENU_MAINTAIN && splaction != SPELLMENU_PICK && splaction < 0 && maintainable){
-		// Maintain a spell
-		Sprintf(buf, "Maintain a spell instead");
-		any.a_int = SPELLMENU_MAINTAIN;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'#', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (splaction != SPELLMENU_DESCRIBE && splaction != SPELLMENU_PICK && splaction < 0){
-		// Describe a spell
-		Sprintf(buf, "Describe a spell instead");
-		any.a_int = SPELLMENU_DESCRIBE;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'?', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (splaction != SPELLMENU_VIEW && splaction != SPELLMENU_PICK && splaction < 0 && spellid(1) != NO_SPELL){
-		// Describe a spell
-		Sprintf(buf, "Rearrange spells instead");
-		any.a_int = SPELLMENU_VIEW;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'+', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	switch (splaction)
-	{
-	case SPELLMENU_PICK:
-		Sprintf(buf, "Choose which spell");
-		break;
-	case SPELLMENU_VIEW:
-		Sprintf(buf, "Choose which spell to reorder");
-		break;
-	case SPELLMENU_CAST:
-		Sprintf(buf, "Choose which spell to cast");
-		break;
-	case SPELLMENU_MAINTAIN:
-		Sprintf(buf, "Choose which spell to (un)maintain");
-		break;
-	case SPELLMENU_DESCRIBE:
-		Sprintf(buf, "Choose which spell to describe");
-		break;
-	default:
-		Sprintf(buf, "Reordering spells; swap '%c' with", spellet(splaction));
-		break;
-	}
-	end_menu(tmpwin, buf);
-
-	how = PICK_ONE;
-	n = select_menu(tmpwin, how, &selected);
-	destroy_nhwindow(tmpwin);
-
-	if (n > 0){
-		int s_no = selected[0].item.a_int - 1;
-
-		if (selected[0].item.a_int < 0){
-			return dospellmenu(selected[0].item.a_int, spell_no);
-		}
-		else if (!(splaction == SPELLMENU_VIEW && spellid(1) == NO_SPELL)) {
-			/* we aren't attempting to rearrange spells with only 1 spell known */
-			switch (splaction)
-			{
-			case SPELLMENU_VIEW:
-				*spell_no = s_no;
-				return dospellmenu(s_no, spell_no);
-
-			case SPELLMENU_PICK:
-			case SPELLMENU_CAST:
-				*spell_no = s_no;
-				return TRUE;
-
-			case SPELLMENU_MAINTAIN:
-				if (!spell_maintained(spellid(s_no)))
-				{
-					spell_maintain(spellid(s_no));
-					You("begin maintaining %s.", spellname(s_no));
-				}
-				else
-				{
-					spell_unmaintain(spellid(s_no));
-					You("stop maintaining %s.", spellname(s_no));
-				}
-				return FALSE;
-
-			case SPELLMENU_DESCRIBE:
-				describe_spell(s_no);
-				return dospellmenu(splaction, spell_no);
-
-			default:
-			{
-				struct spell spl_tmp;
-				spl_tmp = spl_book[*spell_no];
-				spl_book[*spell_no] = spl_book[s_no];
-				spl_book[s_no] = spl_tmp;
-				return dospellmenu(SPELLMENU_VIEW, spell_no);
+			if (can_maintain_spell(spellid(i))){
+				maintainable += 1;
 			}
-			} // switch(splaction)
-		} // doing something allowable
-	} // menu item was selected
+			else {
+				if (splaction == SPELLMENU_MAINTAIN)
+					continue;
+			}
+			Sprintf(buf2, "%s%s", spellname(i), spell_maintained(spellid(i)) ? " [M]" : "");
+			Sprintf(buf, iflags.menu_tab_sep ?
+				"%s\t%-d%s\t%s\t%-d%%\t%-d%%\t" : "%-20s  %2d%s   %-12s %3d%%     %3d%%",
+				buf2, spellev(i),
+				spellknow(i) ? " " : "*",
+				spelltypemnemonic(spell_skilltype(spellid(i))),
+				100 - percent_success(i),
+				(spellknow(i) * 100 + (KEEN - 1)) / KEEN
+				);
+
+			any.a_int = i + 1;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				spellet(i), 0, ATR_NONE, buf,
+				(i == splaction) ? MENU_SELECTED : MENU_UNSELECTED);
+		}
+		//Other menu options
+		if (splaction != SPELLMENU_CAST && splaction != SPELLMENU_PICK && splaction < 0) {
+			Sprintf(buf, "Cast a spell instead");
+			any.a_int = SPELLMENU_CAST;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'!', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if (splaction != SPELLMENU_MAINTAIN && splaction != SPELLMENU_PICK && splaction < 0 && maintainable){
+			// Maintain a spell
+			Sprintf(buf, "Maintain a spell instead");
+			any.a_int = SPELLMENU_MAINTAIN;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'#', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if (splaction != SPELLMENU_DESCRIBE && splaction != SPELLMENU_PICK && splaction < 0){
+			// Describe a spell
+			Sprintf(buf, "Describe a spell instead");
+			any.a_int = SPELLMENU_DESCRIBE;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'?', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if (splaction != SPELLMENU_VIEW && splaction != SPELLMENU_PICK && splaction < 0 && spellid(1) != NO_SPELL){
+			// Describe a spell
+			Sprintf(buf, "Rearrange spells instead");
+			any.a_int = SPELLMENU_VIEW;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'+', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		switch (splaction)
+		{
+		case SPELLMENU_PICK:
+			Sprintf(buf, "Choose which spell");
+			break;
+		case SPELLMENU_VIEW:
+			Sprintf(buf, "Choose which spell to reorder");
+			break;
+		case SPELLMENU_CAST:
+			Sprintf(buf, "Choose which spell to cast");
+			break;
+		case SPELLMENU_MAINTAIN:
+			Sprintf(buf, "Choose which spell to (un)maintain");
+			break;
+		case SPELLMENU_DESCRIBE:
+			Sprintf(buf, "Choose which spell to describe");
+			break;
+		default:
+			Sprintf(buf, "Reordering spells; swap '%c' with", spellet(splaction));
+			break;
+		}
+		end_menu(tmpwin, buf);
+
+		how = PICK_ONE;
+		n = select_menu(tmpwin, how, &selected);
+		destroy_nhwindow(tmpwin);
+
+		if (n > 0){
+			int s_no = selected[0].item.a_int - 1;
+
+			if (selected[0].item.a_int < 0){
+				return dospellmenu(selected[0].item.a_int, spell_no);
+			}
+			else if (!(splaction == SPELLMENU_VIEW && spellid(1) == NO_SPELL)) {
+				/* we aren't attempting to rearrange spells with only 1 spell known */
+				switch (splaction)
+				{
+				case SPELLMENU_VIEW:
+					*spell_no = s_no;
+					splaction = s_no;
+					continue;
+
+				case SPELLMENU_PICK:
+				case SPELLMENU_CAST:
+					*spell_no = s_no;
+					return TRUE;
+
+				case SPELLMENU_MAINTAIN:
+					if (!spell_maintained(spellid(s_no)))
+					{
+						spell_maintain(spellid(s_no));
+						You("begin maintaining %s.", spellname(s_no));
+					}
+					else
+					{
+						spell_unmaintain(spellid(s_no));
+						You("stop maintaining %s.", spellname(s_no));
+					}
+					return FALSE;
+
+				case SPELLMENU_DESCRIBE:
+					describe_spell(s_no);
+					continue;
+
+				default:
+					{
+					struct spell spl_tmp;
+					spl_tmp = spl_book[*spell_no];
+					spl_book[*spell_no] = spl_book[s_no];
+					spl_book[s_no] = spl_tmp;
+					splaction = SPELLMENU_VIEW;
+					continue;
+					}
+				} // switch(splaction)
+			} // doing something allowable
+		} // menu item was selected
+		/* else end menu, nothing was selected */
+		break;
+	}while (TRUE);
 	return FALSE;
 }
 
