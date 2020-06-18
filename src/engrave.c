@@ -3178,185 +3178,190 @@ int describe;
 	winid tmpwin;
 	int n, how;
 	char buf[BUFSZ];
-	char incntlet = 'a';
+	char incntlet;
 	menu_item *selected;
 	anything any;
 
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	any.a_void = 0;		/* zero out all bits */
+	do {
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_void = 0;		/* zero out all bits */
+		incntlet = 'a';
 
-	Sprintf(buf,	"Known Wards");
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	if(u.wardsknown & WARD_HEPTAGRAM){
-		Sprintf(buf,	"Heptagram");
-		any.a_int = HEPTAGRAM;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_GORGONEION){
-		Sprintf(buf,	"Gorgoneion");
-		any.a_int = GORGONEION;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_ACHERON){
-		Sprintf(buf,	"Circle of Acheron");
-		any.a_int = CIRCLE_OF_ACHERON;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_PENTAGRAM){
-		Sprintf(buf,	"Pentagram");
-		any.a_int = PENTAGRAM;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_HEXAGRAM){
-		Sprintf(buf,	"Hexagram");
-		any.a_int = HEXAGRAM;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_HAMSA){
-		Sprintf(buf,	"Hamsa");
-		any.a_int = HAMSA;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_ELDER_SIGN){
-		Sprintf(buf,	"Elder Sign");
-		any.a_int = ELDER_SIGN;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_EYE){
-		Sprintf(buf,	"Elder Elemental Eye");
-		any.a_int = ELDER_ELEMENTAL_EYE;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_QUEEN){
-		Sprintf(buf,	"Sign of the Scion Queen Mother");
-		any.a_int = SIGN_OF_THE_SCION_QUEEN;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_CAT_LORD){
-		Sprintf(buf,	"Cartouche of the Cat Lord");
-		any.a_int = CARTOUCHE_OF_THE_CAT_LORD;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_GARUDA){
-		Sprintf(buf,	"The Wings of Garuda");
-		any.a_int = WINGS_OF_GARUDA;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_CTHUGHA){
-		Sprintf(buf,	"The Sigil of Cthugha");
-		any.a_int = SIGIL_OF_CTHUGHA;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_ITHAQUA){
-		Sprintf(buf,	"The Brand of Ithaqua");
-		any.a_int = BRAND_OF_ITHAQUA;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_KARAKAL){
-		Sprintf(buf,	"The Tracery of Karakal");
-		any.a_int = TRACERY_OF_KARAKAL;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(u.wardsknown & WARD_YELLOW){
-		Sprintf(buf,	"The Yellow Sign");
-		any.a_int = YELLOW_SIGN;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_ANDREALPHUS){
-		Sprintf(buf,	"Hypergeometric transit solution");
-		any.a_int = ANDREALPHUS_TRANSIT;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_ANDREALPHUS){
-		Sprintf(buf,	"Hypergeometric stabilization solution");
-		any.a_int = ANDREALPHUS_STABILIZE;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	}
-	if (!describe){
-		// Describe a ward
-		Sprintf(buf, "Describe a ward instead");
-		any.a_int = -1;					/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'?', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	else {
-		Sprintf(buf, "Draw a ward instead");
-		any.a_int = -1;					/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'!', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
+		Sprintf(buf, "Known Wards");
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		if (u.wardsknown & WARD_HEPTAGRAM){
+			Sprintf(buf, "Heptagram");
+			any.a_int = HEPTAGRAM;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_GORGONEION){
+			Sprintf(buf, "Gorgoneion");
+			any.a_int = GORGONEION;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_ACHERON){
+			Sprintf(buf, "Circle of Acheron");
+			any.a_int = CIRCLE_OF_ACHERON;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_PENTAGRAM){
+			Sprintf(buf, "Pentagram");
+			any.a_int = PENTAGRAM;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_HEXAGRAM){
+			Sprintf(buf, "Hexagram");
+			any.a_int = HEXAGRAM;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_HAMSA){
+			Sprintf(buf, "Hamsa");
+			any.a_int = HAMSA;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_ELDER_SIGN){
+			Sprintf(buf, "Elder Sign");
+			any.a_int = ELDER_SIGN;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_EYE){
+			Sprintf(buf, "Elder Elemental Eye");
+			any.a_int = ELDER_ELEMENTAL_EYE;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_QUEEN){
+			Sprintf(buf, "Sign of the Scion Queen Mother");
+			any.a_int = SIGN_OF_THE_SCION_QUEEN;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_CAT_LORD){
+			Sprintf(buf, "Cartouche of the Cat Lord");
+			any.a_int = CARTOUCHE_OF_THE_CAT_LORD;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_GARUDA){
+			Sprintf(buf, "The Wings of Garuda");
+			any.a_int = WINGS_OF_GARUDA;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_CTHUGHA){
+			Sprintf(buf, "The Sigil of Cthugha");
+			any.a_int = SIGIL_OF_CTHUGHA;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_ITHAQUA){
+			Sprintf(buf, "The Brand of Ithaqua");
+			any.a_int = BRAND_OF_ITHAQUA;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_KARAKAL){
+			Sprintf(buf, "The Tracery of Karakal");
+			any.a_int = TRACERY_OF_KARAKAL;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (u.wardsknown & WARD_YELLOW){
+			Sprintf(buf, "The Yellow Sign");
+			any.a_int = YELLOW_SIGN;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_ANDREALPHUS){
+			Sprintf(buf, "Hypergeometric transit solution");
+			any.a_int = ANDREALPHUS_TRANSIT;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_ANDREALPHUS){
+			Sprintf(buf, "Hypergeometric stabilization solution");
+			any.a_int = ANDREALPHUS_STABILIZE;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+		}
+		if (!describe){
+			// Describe a ward
+			Sprintf(buf, "Describe a ward instead");
+			any.a_int = -1;					/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'?', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		else {
+			Sprintf(buf, "Draw a ward instead");
+			any.a_int = -1;					/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'!', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
 
-	end_menu(tmpwin,	(describe) ? "Choose ward to describe:" : "Choose ward to draw:");
+		end_menu(tmpwin, (describe) ? "Choose ward to describe:" : "Choose ward to draw:");
 
-	how = PICK_ONE;
-	n = select_menu(tmpwin, how, &selected);
-	destroy_nhwindow(tmpwin);
+		how = PICK_ONE;
+		n = select_menu(tmpwin, how, &selected);
+		destroy_nhwindow(tmpwin);
 
-	if (n > 0 && selected[0].item.a_int == -1){
-		return pick_ward(!describe);
-	}
-
-	if (n > 0 && describe){
-		describe_ward(selected[0].item.a_int);
-		return pick_ward(describe);
-	}
-	if (n > 0 && !describe){
-		return selected[0].item.a_int;
-	}
+		if (n > 0 && selected[0].item.a_int == -1){
+			describe = !describe;
+			continue;
+		}
+		if (n > 0 && describe){
+			describe_ward(selected[0].item.a_int);
+			continue;
+		}
+		if (n > 0 && !describe){
+			return selected[0].item.a_int;
+		}
+		/* else end menu; no selection made */
+		break;
+	}while (TRUE);
 
 	return 0;
 }
