@@ -12936,6 +12936,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (valid_weapon_attack || unarmed_punch || unarmed_kick)
 	{
 		int returnvalue = 0;
+		boolean artif_hit = FALSE;
 		/* use guidance glyph */
 		if (youagr && melee && active_glyph(GUIDANCE))
 			doguidance(mdef, basedmg);
@@ -12949,6 +12950,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					u.uconduct.weaphit--;
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED|MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
@@ -12961,6 +12964,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* ranged weapon attacks also proc effects of The Helm of the Arcane Archer */
@@ -12971,6 +12976,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* unarmed punches proc effects of worn gloves */
@@ -12980,6 +12987,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* unarmed kicks proc effects of worn boots */
@@ -12989,8 +12998,15 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
+
+		/* must come after all apply_hit_effects */
+		/* priests do extra damage with all artifacts */
+		if (artif_hit && !recursed && (youagr ? Role_switch : monsndx(magr->data)) == PM_PRIEST)
+			artidmg += d(1, mlev(magr));
 	}
 
 	/* Sum reduceable damage */
