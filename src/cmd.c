@@ -3781,10 +3781,10 @@ spirits_enlightenment()
 		}
 		putstr(en_win, 0, "");
 	}
-	/* the crowning spirit doesn't unbind */
-	if (u.spirit[CROWN_SPIRIT] != 0L)
+	/* the Embassy of Elements's spirit */
+	if (u.specialSealsActive & SEAL_COUNCIL)
 	{
-		putstr(en_win, 0, "Crowning Spirit");
+		putstr(en_win, 0, "Embassy of Elements");
 		if (u.spirit[CROWN_SPIRIT] != 0L) {
 			addseal(CROWN_SPIRIT);
 		}
