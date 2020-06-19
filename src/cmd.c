@@ -3724,33 +3724,43 @@ spirits_enlightenment()
 	putstr(en_win, 0, "Currently bound spirits:");
 	putstr(en_win, 0, "");
 
+#define addseal(id) if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
+	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
+		u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
+	else\
+	Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
+	putstr(en_win, 0, buf)
+#define addempty() Sprintf(buf,"  (empty)"); putstr(en_win, 0, buf)
+
 	/* only show gnosis premonition when it is being used */
 	if (u.spirit[GPREM_SPIRIT] != 0L) {
 		putstr(en_win, 0, "Gnosis Premonition");
-		Sprintf(buf, "  %s", sealNames[decode_sealID(u.spirit[GPREM_SPIRIT]) - (FIRST_SEAL)]);
-		putstr(en_win, 0, buf);
+		addseal(GPREM_SPIRIT);
+		putstr(en_win, 0, "");
 	}
 	/* only show near void spirits if you know any seals */
 	if (u.sealsKnown) {
 		putstr(en_win, 0, "Spirits of the Near Void");
 		for (i = 0; i < u.sealCounts; i++) {
-			Sprintf(buf, "  %s", sealNames[decode_sealID(u.spirit[i]) - (FIRST_SEAL)]);
-			putstr(en_win, 0, buf);
+			addseal(i);
 		}
 		for (; i < binder_nearvoid_slots(); i++) {
-			putstr(en_win, 0, "  (empty)");
+			addempty();
 		}
+		putstr(en_win, 0, "");
 	}
 	/* only show quest spirits if you know either seal */
 	if ((u.specialSealsKnown & (SEAL_ACERERAK | SEAL_DAHLVER_NAR | SEAL_BLACK_WEB))
 		/* needs special case for myrkalfyr who don't know the seal, but are bound anyways */
 		|| (u.specialSealsActive&SEAL_BLACK_WEB)) {
 		putstr(en_win, 0, "Quest Spirit");
-		if (u.spirit[QUEST_SPIRIT] != 0L)
-			Sprintf(buf, "  %s", sealNames[decode_sealID(u.spirit[QUEST_SPIRIT]) - (FIRST_SEAL)]);
-		else
-			Sprintf(buf, "  (empty)");
-		putstr(en_win, 0, buf);
+		if (u.spirit[QUEST_SPIRIT] != 0L) {
+			addseal(QUEST_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
 	}
 	/* only show alignment spirits if you know any */
 	if (u.specialSealsKnown & (
@@ -3763,35 +3773,44 @@ spirits_enlightenment()
 			SEAL_UNKNOWN_GOD
 			)) {
 		putstr(en_win, 0, "Alignment Spirit");
-		if (u.spirit[ALIGN_SPIRIT] != 0L)
-			Sprintf(buf, "  %s", sealNames[decode_sealID(u.spirit[ALIGN_SPIRIT]) - (FIRST_SEAL)]);
-		else
-			Sprintf(buf, "  (empty)");
-		putstr(en_win, 0, buf);
+		if (u.spirit[ALIGN_SPIRIT] != 0L) {
+			addseal(ALIGN_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
 	}
 	/* the crowning spirit doesn't unbind */
 	if (u.spirit[CROWN_SPIRIT] != 0L)
 	{
 		putstr(en_win, 0, "Crowning Spirit");
-		if (u.spirit[CROWN_SPIRIT] != 0L)
-			Sprintf(buf, "  %s", sealNames[decode_sealID(u.spirit[CROWN_SPIRIT]) - (FIRST_SEAL)]);
-		else
-			Sprintf(buf, "  (empty)");
-		putstr(en_win, 0, buf);
+		if (u.spirit[CROWN_SPIRIT] != 0L) {
+			addseal(CROWN_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
 	}
 	/* Show the Numina for Binders once they have hit XL 30 */
 	if (Role_if(PM_EXILE) && (u.ulevelmax >= 30))
 	{
 		putstr(en_win, 0, "Outer Spirit");
-		if (u.spirit[OUTER_SPIRIT] != 0L)
-			Sprintf(buf, "  %s", sealNames[decode_sealID(u.spirit[OUTER_SPIRIT]) - (FIRST_SEAL)]);
-		else
-			Sprintf(buf, "  (empty)");
-		putstr(en_win, 0, buf);
+		if (u.spirit[OUTER_SPIRIT] != 0L) {
+			addseal(OUTER_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
 	}
 	display_nhwindow(en_win, TRUE);
 	destroy_nhwindow(en_win);
 	return;
+
+#undef addseal
+#undef addempty
 }
 
 STATIC_OVL void
