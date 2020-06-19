@@ -3391,40 +3391,40 @@ resistances_enlightenment()
 	/*** Madnesses ***/
 	if(u.usanity < 100 && !ClearThoughts){
 		if (u.umadness&MAD_DELUSIONS){
-			putstr(en_win, 0, "You have a tendency to hallucinate");
+			putstr(en_win, 0, "You have a tendency to hallucinate.");
 		}
 		if(u.usanity < 80){
 			if (u.umadness&MAD_REAL_DELUSIONS){
 				if(u.umadness&MAD_DELUSIONS)
 					putstr(en_win, 0, "...at least, you THINK you're hallucinating....");
 				else
-					putstr(en_win, 0, "You have a tendency to hallucinate... you think");
+					putstr(en_win, 0, "You have a tendency to hallucinate... you think.");
 			}
 		}
 		if (u.umadness&MAD_SANCTITY){
-			putstr(en_win, 0, "You have a tendency to treat women as delicate and holy beings who shouldn't be harmed");
+			putstr(en_win, 0, "You have a tendency to treat women as delicate and holy beings who shouldn't be harmed.");
 		}
 		if (u.umadness&MAD_GLUTTONY){
-			putstr(en_win, 0, "You have a mad hunger");
+			putstr(en_win, 0, "You have a mad hunger.");
 		}
 		if (u.umadness&MAD_SPORES && !Race_if(PM_ANDROID) && !Race_if(PM_CLOCKWORK_AUTOMATON)){
 			//Note: Race_if is correct because it works on your original brain (because magic)
 			putstr(en_win, 0, "She's eating your brain.");
 		}
 		if (u.umadness&MAD_FRIGOPHOBIA){
-			putstr(en_win, 0, "You have an irrational fear of the cold");
+			putstr(en_win, 0, "You have an irrational fear of the cold.");
 		}
 		if (u.umadness&MAD_CANNIBALISM){
-			putstr(en_win, 0, "You have a mad desire to consume living flesh, even the flesh of your own kind");
+			putstr(en_win, 0, "You have a mad desire to consume living flesh, even the flesh of your own kind.");
 		}
 		if (u.umadness&MAD_RAGE){
-			putstr(en_win, 0, "You have a burning, irrational rage");
+			putstr(en_win, 0, "You have a burning, irrational rage.");
 		}
 		if (u.umadness&MAD_ARGENT_SHEEN){
 			putstr(en_win, 0, "The world is full of mirrors, and you can't help but admire yourself.");
 		}
 		if (u.umadness&MAD_SUICIDAL){
-			putstr(en_win, 0, "You have a tendency towards suicidal behavior");
+			putstr(en_win, 0, "You have a tendency towards suicidal behavior.");
 		}
 		if (u.umadness&MAD_NUDIST){
 			putstr(en_win, 0, "You have an irrational dislike of clothing.");
@@ -3464,7 +3464,7 @@ resistances_enlightenment()
 		}
 		if(has_blood(youracedata)){
 			if (u.umadness&MAD_FRENZY){
-				Sprintf(buf, "You feel your %s seethe below your %s", body_part(BLOOD), body_part(BODY_SKIN));
+				Sprintf(buf, "You feel your %s seethe below your %s.", body_part(BLOOD), body_part(BODY_SKIN));
 				putstr(en_win, 0, buf);
 			}
 		}
