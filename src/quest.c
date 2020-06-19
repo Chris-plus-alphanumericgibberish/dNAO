@@ -84,7 +84,10 @@ nemdead()
 #ifdef RECORD_ACHIEVE
 		give_quest_trophy();
 #endif
-		if(Role_if(PM_EXILE)) u.uevent.qcompleted = TRUE;
+		if (Role_if(PM_EXILE)) {
+			u.uevent.qcompleted = TRUE;
+			u.specialSealsKnown |= SEAL_ACERERAK;
+		}
 	    qt_pager(QT_KILLEDNEM + (flags.stag ? QT_TURNEDSTAG : 0));
 	}
 }
@@ -337,6 +340,7 @@ chat_with_leader()
 	    Qstat(got_quest) = TRUE;
 		livelog_write_string("was given their Quest");
 		if(Role_if(PM_EXILE)){
+			u.specialSealsKnown |= SEAL_DAHLVER_NAR;
 			bindspirit(DAHLVER_NAR);
 			u.sealTimeout[DAHLVER_NAR-FIRST_SEAL] = moves + 5000;
 		} else if(Role_if(PM_ANACHRONONAUT)){

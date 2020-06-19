@@ -3702,7 +3702,7 @@ pick_seal()
 			incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 		}
 	}
-	if(Role_if(PM_EXILE) && quest_status.got_quest){
+	if(Role_if(PM_EXILE) && u.specialSealsKnown&SEAL_DAHLVER_NAR){
 		if((u.specialSealsActive&SEAL_DAHLVER_NAR) && u.sealTimeout[DAHLVER_NAR-FIRST_SEAL] > moves){
 			Sprintf(buf,	"%s (active; timeout:%ld)",
 				sealNames[DAHLVER_NAR-FIRST_SEAL], 
@@ -3729,7 +3729,7 @@ pick_seal()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(Role_if(PM_EXILE) && quest_status.killed_nemesis){
+	if(Role_if(PM_EXILE) && u.specialSealsKnown&SEAL_ACERERAK){
 		if((u.specialSealsActive&SEAL_ACERERAK) && u.sealTimeout[ACERERAK-FIRST_SEAL] > moves){
 			Sprintf(buf,	"%s (active; timeout:%ld)",
 				sealNames[ACERERAK-FIRST_SEAL], 
