@@ -3007,11 +3007,29 @@ static const int androCorpses[] = {
 };
 
 int
+binder_nearvoid_slots()
+{
+	int numSlots;
+	if (Role_if(PM_EXILE)){
+		if (u.ulevel <= 2) numSlots = 1;
+		else if (u.ulevel <= 9) numSlots = 2;
+		else if (u.ulevel <= 17) numSlots = 3;
+		else if (u.ulevel <= 25) numSlots = 4;
+		else numSlots = 5;
+	}
+	else {
+		numSlots = 1;
+	}
+	return numSlots;
+}
+
+int
 dobinding(tx,ty)
 int tx,ty;
 {
 	struct engr *ep = get_head_engr();
-	int numSlots, i;
+	int numSlots = binder_nearvoid_slots();
+	int i;
 	int bindingPeriod = 5000;
 	for(;ep;ep=ep->nxt_engr)
 		if(ep->engr_x==tx && ep->engr_y==ty)
@@ -3024,16 +3042,6 @@ int tx,ty;
 	// } else if(ep->engr_time+5 < moves){
 		// pline("The seal is too old.");
 		// return 0;
-	}
-	
-	if(Role_if(PM_EXILE)){
-		if(u.ulevel <= 2) numSlots=1;
-		else if(u.ulevel <= 9) numSlots=2;
-		else if(u.ulevel <= 17) numSlots=3;
-		else if(u.ulevel <= 25) numSlots=4;
-		else numSlots=5;
-	} else {
-		numSlots=1;
 	}
 
     boolean hasSealofSpirits = FALSE;
@@ -5421,8 +5429,8 @@ int floorID;
 		u.specialSealsUsed |= sealID;
 	}
 	set_spirit_powers(sealID);
+	u.spirit[spirit_type] = sealID;
 	if (!(floorID == BLACK_WEB && Role_if(PM_ANACHRONONAUT))){
-		u.spirit[spirit_type] = sealID;
 		u.spiritT[spirit_type] = moves + bindingPeriod;
 		u.sealTimeout[floorID - FIRST_SEAL] = moves + bindingPeriod;
 	}
