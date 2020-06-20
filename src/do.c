@@ -559,6 +559,7 @@ register struct obj *obj;
 #endif
 		boolean wepgone = FALSE;
 		bhitpos.x = u.ux; bhitpos.y = u.uy;
+		obj->ox = u.ux; obj->oy = u.uy;
 		hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
 		return(1);
 	    }
