@@ -3679,6 +3679,7 @@ pick_seal()
 		Sprintf(buf, "Known Seals");
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 
+		/* regular seals */
 		for (i = 0; i < (QUEST_SPIRITS - FIRST_SEAL); i++){
 			seal_flag = 0x1L << i;
 			if (u.sealsKnown&seal_flag){
@@ -3712,306 +3713,41 @@ pick_seal()
 				incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 			}
 		}
-		if (Role_if(PM_EXILE) && quest_status.got_quest){
-			if ((u.specialSealsActive&SEAL_DAHLVER_NAR) && u.sealTimeout[DAHLVER_NAR - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[DAHLVER_NAR - FIRST_SEAL],
-					u.sealTimeout[DAHLVER_NAR - FIRST_SEAL] - moves
-					);
+		/* special seals (does not include Numina) */
+		for (i = QUEST_SPIRITS - FIRST_SEAL; i < NUMINA - FIRST_SEAL; i++){
+			seal_flag = 0x1L << (i - QUEST_SPIRITS + FIRST_SEAL);
+			if (u.specialSealsKnown&seal_flag){
+				if ((u.specialSealsActive&seal_flag) && u.sealTimeout[i] > moves){
+					Sprintf(buf, "%s (active; timeout:%ld)",
+						sealNames[i],
+						u.sealTimeout[i] - moves
+						);
+				}
+				else if (u.specialSealsActive&seal_flag) {
+					Sprintf(buf, "%s (active)",
+						sealNames[i]
+						);
+				}
+				else if (u.sealTimeout[i] > moves){
+					Sprintf(buf, "%s (timeout:%ld)",
+						sealNames[i],
+						u.sealTimeout[i] - moves
+						);
+				}
+				else {
+					Sprintf(buf, "%s%s",
+						sealNames[i],
+						sealTitles[i]
+						);
+				}
+				any.a_int = (i + FIRST_SEAL);	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					incntlet, 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+				incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 			}
-			else if (u.specialSealsActive&SEAL_DAHLVER_NAR) {
-				Sprintf(buf, "%s (active)",
-					sealNames[DAHLVER_NAR - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[DAHLVER_NAR - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[DAHLVER_NAR - FIRST_SEAL],
-					u.sealTimeout[DAHLVER_NAR - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[DAHLVER_NAR - FIRST_SEAL],
-					sealTitles[DAHLVER_NAR - FIRST_SEAL]
-					);
-			}
-			any.a_int = DAHLVER_NAR;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 		}
-		if (Role_if(PM_EXILE) && quest_status.killed_nemesis){
-			if ((u.specialSealsActive&SEAL_ACERERAK) && u.sealTimeout[ACERERAK - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[ACERERAK - FIRST_SEAL],
-					u.sealTimeout[ACERERAK - FIRST_SEAL] - moves
-					);
-			}
-			else if (u.specialSealsActive&SEAL_ACERERAK) {
-				Sprintf(buf, "%s (active)",
-					sealNames[ACERERAK - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[ACERERAK - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[ACERERAK - FIRST_SEAL],
-					u.sealTimeout[ACERERAK - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[ACERERAK - FIRST_SEAL],
-					sealTitles[ACERERAK - FIRST_SEAL]
-					);
-			}
-			any.a_int = ACERERAK;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
-		}
-		if (Role_if(PM_EXILE) && u.specialSealsKnown&SEAL_COSMOS){
-			if ((u.specialSealsActive&SEAL_COSMOS) && u.sealTimeout[COSMOS - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[COSMOS - FIRST_SEAL],
-					u.sealTimeout[COSMOS - FIRST_SEAL] - moves
-					);
-			}
-			else if (u.specialSealsActive&SEAL_COSMOS) {
-				Sprintf(buf, "%s (active)",
-					sealNames[COSMOS - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[COSMOS - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[COSMOS - FIRST_SEAL],
-					u.sealTimeout[COSMOS - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[COSMOS - FIRST_SEAL],
-					sealTitles[COSMOS - FIRST_SEAL]
-					);
-			}
-			any.a_int = COSMOS;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
-		}
-		if (Role_if(PM_EXILE) && u.specialSealsKnown&SEAL_LIVING_CRYSTAL){
-			if ((u.specialSealsActive&SEAL_LIVING_CRYSTAL) && u.sealTimeout[LIVING_CRYSTAL - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[LIVING_CRYSTAL - FIRST_SEAL],
-					u.sealTimeout[LIVING_CRYSTAL - FIRST_SEAL] - moves
-					);
-			}
-			else if (u.specialSealsActive&SEAL_LIVING_CRYSTAL) {
-				Sprintf(buf, "%s (active)",
-					sealNames[LIVING_CRYSTAL - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[LIVING_CRYSTAL - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[LIVING_CRYSTAL - FIRST_SEAL],
-					u.sealTimeout[LIVING_CRYSTAL - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[LIVING_CRYSTAL - FIRST_SEAL],
-					sealTitles[LIVING_CRYSTAL - FIRST_SEAL]
-					);
-			}
-			any.a_int = LIVING_CRYSTAL;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
-		}
-		if (Role_if(PM_EXILE) && u.specialSealsKnown&SEAL_TWO_TREES){
-			if ((u.specialSealsActive&SEAL_TWO_TREES) && u.sealTimeout[TWO_TREES - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[TWO_TREES - FIRST_SEAL],
-					u.sealTimeout[TWO_TREES - FIRST_SEAL] - moves
-					);
-			}
-			else if (u.specialSealsActive&SEAL_TWO_TREES) {
-				Sprintf(buf, "%s (active)",
-					sealNames[TWO_TREES - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[TWO_TREES - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[TWO_TREES - FIRST_SEAL],
-					u.sealTimeout[TWO_TREES - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[TWO_TREES - FIRST_SEAL],
-					sealTitles[TWO_TREES - FIRST_SEAL]
-					);
-			}
-			any.a_int = TWO_TREES;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
-		}
-		if (Role_if(PM_EXILE) && u.specialSealsKnown&SEAL_MISKA){
-			if ((u.specialSealsActive&SEAL_MISKA) && u.sealTimeout[MISKA - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[MISKA - FIRST_SEAL],
-					u.sealTimeout[MISKA - FIRST_SEAL] - moves
-					);
-			}
-			else if (u.specialSealsActive&SEAL_MISKA) {
-				Sprintf(buf, "%s (active)",
-					sealNames[MISKA - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[MISKA - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[MISKA - FIRST_SEAL],
-					u.sealTimeout[MISKA - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[MISKA - FIRST_SEAL],
-					sealTitles[MISKA - FIRST_SEAL]
-					);
-			}
-			any.a_int = MISKA;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
-		}
-		if (Role_if(PM_EXILE) && u.specialSealsKnown&SEAL_NUDZIRATH){
-			if ((u.specialSealsActive&SEAL_NUDZIRATH) && u.sealTimeout[NUDZIRATH - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[NUDZIRATH - FIRST_SEAL],
-					u.sealTimeout[NUDZIRATH - FIRST_SEAL] - moves
-					);
-			}
-			else if (u.specialSealsActive&SEAL_NUDZIRATH) {
-				Sprintf(buf, "%s (active)",
-					sealNames[NUDZIRATH - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[NUDZIRATH - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[NUDZIRATH - FIRST_SEAL],
-					u.sealTimeout[NUDZIRATH - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[NUDZIRATH - FIRST_SEAL],
-					sealTitles[NUDZIRATH - FIRST_SEAL]
-					);
-			}
-			any.a_int = NUDZIRATH;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
-		}
-		if (Role_if(PM_EXILE) && u.specialSealsKnown&SEAL_ALIGNMENT_THING){
-			if ((u.specialSealsActive&SEAL_ALIGNMENT_THING) && u.sealTimeout[ALIGNMENT_THING - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[ALIGNMENT_THING - FIRST_SEAL],
-					u.sealTimeout[ALIGNMENT_THING - FIRST_SEAL] - moves
-					);
-			}
-			else if (u.specialSealsActive&SEAL_ALIGNMENT_THING) {
-				Sprintf(buf, "%s (active)",
-					sealNames[ALIGNMENT_THING - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[ALIGNMENT_THING - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[ALIGNMENT_THING - FIRST_SEAL],
-					u.sealTimeout[ALIGNMENT_THING - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[ALIGNMENT_THING - FIRST_SEAL],
-					sealTitles[ALIGNMENT_THING - FIRST_SEAL]
-					);
-			}
-			any.a_int = ALIGNMENT_THING;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
-		}
-		if (Role_if(PM_EXILE) && u.specialSealsKnown&SEAL_UNKNOWN_GOD){
-			if ((u.specialSealsActive&SEAL_UNKNOWN_GOD) && u.sealTimeout[UNKNOWN_GOD - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[UNKNOWN_GOD - FIRST_SEAL],
-					u.sealTimeout[UNKNOWN_GOD - FIRST_SEAL] - moves
-					);
-			}
-			else if (u.specialSealsActive&SEAL_UNKNOWN_GOD) {
-				Sprintf(buf, "%s (active)",
-					sealNames[UNKNOWN_GOD - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[UNKNOWN_GOD - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[UNKNOWN_GOD - FIRST_SEAL],
-					u.sealTimeout[UNKNOWN_GOD - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[UNKNOWN_GOD - FIRST_SEAL],
-					sealTitles[UNKNOWN_GOD - FIRST_SEAL]
-					);
-			}
-			any.a_int = UNKNOWN_GOD;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
-		}
-		if (u.specialSealsKnown&SEAL_BLACK_WEB){
-			if ((u.specialSealsActive&SEAL_BLACK_WEB) && u.sealTimeout[BLACK_WEB - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (active; timeout:%ld)",
-					sealNames[BLACK_WEB - FIRST_SEAL],
-					u.sealTimeout[BLACK_WEB - FIRST_SEAL] - moves
-					);
-			}
-			else if (u.specialSealsActive&SEAL_BLACK_WEB) {
-				Sprintf(buf, "%s (active)",
-					sealNames[BLACK_WEB - FIRST_SEAL]
-					);
-			}
-			else if (u.sealTimeout[BLACK_WEB - FIRST_SEAL] > moves){
-				Sprintf(buf, "%s (timeout:%ld)",
-					sealNames[BLACK_WEB - FIRST_SEAL],
-					u.sealTimeout[BLACK_WEB - FIRST_SEAL] - moves
-					);
-			}
-			else {
-				Sprintf(buf, "%s%s",
-					sealNames[BLACK_WEB - FIRST_SEAL],
-					sealTitles[BLACK_WEB - FIRST_SEAL]
-					);
-			}
-			any.a_int = BLACK_WEB;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
-		}
+		/* Numina */
 		if (Role_if(PM_EXILE) && u.ulevel == 30){
 			if ((u.specialSealsActive&SEAL_NUMINA)){
 				Sprintf(buf, "%s (active)",

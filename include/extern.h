@@ -2450,6 +2450,7 @@ E void FDECL(beg, (struct monst *));
 E void FDECL(m_command, (struct monst *));
 E int NDECL(dotalk);
 E int FDECL(dochat, (BOOLEAN_P, int, int, int));
+E int NDECL(binder_nearvoid_slots);
 E int * FDECL(spirit_props, (int));
 E void FDECL(councilspirit, (int));
 E void FDECL(gnosisspirit, (int));

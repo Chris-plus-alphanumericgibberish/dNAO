@@ -20,7 +20,8 @@
 #define DOATTRIB_RESISTS	1
 #define DOATTRIB_ARMOR		2
 #define DOATTRIB_ENLIGHTEN	3
-#define DOATTRIB_SPIRITS	4
+#define DOATTRIB_BINDINGS	4
+#define DOATTRIB_SPIRITS	5
 
 #ifdef DEBUG
 /*
@@ -169,6 +170,7 @@ STATIC_PTR int NDECL(doconduct); /**/
 STATIC_PTR int NDECL(minimal_enlightenment);
 STATIC_PTR void NDECL(resistances_enlightenment);
 STATIC_PTR void NDECL(signs_enlightenment);
+STATIC_PTR void NDECL(spirits_enlightenment);
 
 static void FDECL(bind_key, (UCHAR_P, char*));
 static void NDECL(init_bind_list);
@@ -3713,6 +3715,105 @@ udr_enlightenment()
 }
 
 STATIC_OVL void
+spirits_enlightenment()
+{
+	char buf[BUFSZ];
+	int i;
+	en_win = create_nhwindow(NHW_MENU);
+
+	putstr(en_win, 0, "Currently bound spirits:");
+	putstr(en_win, 0, "");
+
+#define addseal(id) if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
+	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
+		u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
+	else\
+	Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
+	putstr(en_win, 0, buf)
+#define addempty() Sprintf(buf,"  (empty)"); putstr(en_win, 0, buf)
+
+	/* only show gnosis premonition when it is being used */
+	if (u.spirit[GPREM_SPIRIT] != 0L) {
+		putstr(en_win, 0, "Gnosis Premonition");
+		addseal(GPREM_SPIRIT);
+		putstr(en_win, 0, "");
+	}
+	/* only show near void spirits if you know any seals */
+	if (u.sealsKnown) {
+		putstr(en_win, 0, "Spirits of the Near Void");
+		for (i = 0; i < u.sealCounts; i++) {
+			addseal(i);
+		}
+		for (; i < binder_nearvoid_slots(); i++) {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	/* only show quest spirits if you know either seal */
+	if ((u.specialSealsKnown & (SEAL_ACERERAK | SEAL_DAHLVER_NAR | SEAL_BLACK_WEB))
+		/* needs special case for myrkalfyr who don't know the seal, but are bound anyways */
+		|| (u.specialSealsActive&SEAL_BLACK_WEB)) {
+		putstr(en_win, 0, "Quest Spirit");
+		if (u.spirit[QUEST_SPIRIT] != 0L) {
+			addseal(QUEST_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	/* only show alignment spirits if you know any */
+	if (u.specialSealsKnown & (
+			SEAL_COSMOS |
+			SEAL_LIVING_CRYSTAL |
+			SEAL_TWO_TREES |
+			SEAL_MISKA |
+			SEAL_NUDZIRATH |
+			SEAL_ALIGNMENT_THING |
+			SEAL_UNKNOWN_GOD
+			)) {
+		putstr(en_win, 0, "Alignment Spirit");
+		if (u.spirit[ALIGN_SPIRIT] != 0L) {
+			addseal(ALIGN_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	/* the Embassy of Elements's spirit */
+	if (u.specialSealsActive & SEAL_COUNCIL)
+	{
+		putstr(en_win, 0, "Embassy of Elements");
+		if (u.spirit[CROWN_SPIRIT] != 0L) {
+			addseal(CROWN_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	/* Show the Numina for Binders once they have hit XL 30 */
+	if (Role_if(PM_EXILE) && (u.ulevelmax >= 30))
+	{
+		putstr(en_win, 0, "Outer Spirit");
+		if (u.spirit[OUTER_SPIRIT] != 0L) {
+			addseal(OUTER_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	display_nhwindow(en_win, TRUE);
+	destroy_nhwindow(en_win);
+	return;
+
+#undef addseal
+#undef addempty
+}
+
+STATIC_OVL void
 signs_enlightenment()
 {
 	boolean message = FALSE;
@@ -4697,11 +4798,19 @@ minimal_enlightenment()
 	}
 	if (u.sealsActive || u.specialSealsActive) {
 		Sprintf(buf, "Describe your binding marks.");
-		any.a_int = DOATTRIB_SPIRITS;
+		any.a_int = DOATTRIB_BINDINGS;
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'd', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 		//signs_enlightenment();
+	}
+	if (u.sealsKnown || u.specialSealsKnown || u.sealsActive || u.specialSealsActive) {
+		Sprintf(buf, "Show your bound spirits.");
+		any.a_int = DOATTRIB_SPIRITS;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'e', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		//spirits_enlightenment();
 	}
 
 	end_menu(tmpwin, "Base Attributes");
@@ -4817,8 +4926,11 @@ doattributes()
 		case DOATTRIB_ENLIGHTEN:
 			enlightenment(0);
 			break;
-		case DOATTRIB_SPIRITS:
+		case DOATTRIB_BINDINGS:
 			signs_enlightenment();
+			break;
+		case DOATTRIB_SPIRITS:
+			spirits_enlightenment();
 			break;
 		default:
 			return 0;
