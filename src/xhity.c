@@ -11227,6 +11227,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 	boolean resisted_weapon_attacks = FALSE;
 	boolean resisted_attack_type = FALSE;
+	boolean resisted_thick_skin = FALSE;
 	int attackmask = 0;
 	static int warnedotyp = -1;
 	static struct permonst *warnedptr = 0;
@@ -13089,7 +13090,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			)){
 			/* damage entirely mitigated */
 			subtotl = 1;
-			resisted_attack_type = TRUE;
+			resisted_thick_skin = TRUE;
 		}
 		if ((attackmask & ~(resistmask)) == 0L && !(otmp && spec_applies(otmp, mdef, TRUE)) && (subtotl > 0)) {
 			/* damage reduced by 75% */
@@ -13128,6 +13129,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			*hp(mdef) = 1;
 			resisted_weapon_attacks = FALSE;
 			resisted_attack_type = FALSE;
+			resisted_thick_skin = FALSE;
 		}
 		else if (phase_armor){
 			subtotl -= (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
@@ -13375,25 +13377,29 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (warnedotyp != (weapon ? weapon->otyp : 0) || warnedptr != pd) {
 				lastwarning = moves;
 				/* warn the player that their attacks are futile */
-				if (resisted_weapon_attacks || resisted_attack_type) {
-					if (resisted_weapon_attacks) {
-						pline("%s is resistant to attacks.",
-							Monnam(mdef));
-					}
-					else {
-						/* warn of one of your damage types */
-						/* not perfectly balanced; will favour one type (P>S, S>B, B>P) 2:1 if an attack has 2 types */
-						int i, j;
-						static const char * damagetypes[] = { "blunt force", "sharp point", "cutting edge" };
-						for (i = 0, j = rn2(3); i < 3; i++) {
-							if (attackmask & (1 << (i + j) % 3)) {
-								pline("The %s is ineffective against %s.",
-									damagetypes[(i + j) % 3],
-									mon_nam(mdef));
-								break;
-							}
+				if (resisted_weapon_attacks) {
+					pline("%s is resistant to attacks.",
+						Monnam(mdef));
+				}
+				else if (resisted_thick_skin) {
+					pline("%s thick skin nullified your attack.",
+						s_suffix(Monnam(mdef)));
+				}
+				else if (resisted_attack_type){
+					/* warn of one of your damage types */
+					/* not perfectly balanced; will favour one type (P>S, S>B, B>P) 2:1 if an attack has 2 types */
+					int i, j;
+					static const char * damagetypes[] = { "blunt force", "sharp point", "cutting edge" };
+					for (i = 0, j = rn2(3); i < 3; i++) {
+						if (attackmask & (1 << (i + j) % 3)) {
+							pline("The %s is ineffective against %s.",
+								damagetypes[(i + j) % 3],
+								mon_nam(mdef));
+							break;
 						}
 					}
+				}
+				if (resisted_weapon_attacks || resisted_thick_skin || resisted_attack_type) {
 					warnedotyp = (weapon ? weapon->otyp : 0);
 					warnedptr = pd;
 				}
