@@ -3230,13 +3230,15 @@ nexttry:
 		} else {
 			if(MON_AT(nx, ny)) {
 				struct monst *mtmp2 = m_at(nx, ny);
-				long mmflag = flag | mm_aggression(mon, mtmp2);
+				if (mtmp2 != mon) {
+					long mmflag = flag | mm_aggression(mon, mtmp2);
 
-				if (!(mmflag & ALLOW_M)) continue;
-				info[cnt] |= ALLOW_M;
-				if (mtmp2->mtame) {
-					if (!(mmflag & ALLOW_TM)) continue;
-					info[cnt] |= ALLOW_TM;
+					if (!(mmflag & ALLOW_M)) continue;
+					info[cnt] |= ALLOW_M;
+					if (mtmp2->mtame) {
+						if (!(mmflag & ALLOW_TM)) continue;
+						info[cnt] |= ALLOW_TM;
+					}
 				}
 			}
 			/* Note: ALLOW_SANCT only prevents movement, not */
