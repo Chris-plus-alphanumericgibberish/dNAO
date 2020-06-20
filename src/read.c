@@ -3247,9 +3247,13 @@ register struct obj	*sobj;
 		return;
 	}
 	You("are being punished for your misbehavior!");
-	if(Punished && uball->owt < 1600){
-		Your("iron ball gets heavier.");
-		uball->owt += 160 * (1 + sobj->cursed);
+	if(Punished){
+		if(uball->owt < 1600){
+			Your("iron ball gets heavier.");
+			uball->owt += 160 * (1 + sobj->cursed);
+		} else {
+			Your("iron ball can grow no heavier.");
+		}
 		return;
 	}
 	if (amorphous(youracedata) || is_whirly(youracedata) || unsolid(youracedata)) {

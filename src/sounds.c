@@ -5201,6 +5201,7 @@ int floorID;
 		break;
 	case NUMINA:
 		propchain[i++] = DETECT_MONSTERS;
+		propchain[i++] = OMNISENSE;
 		break;
 	}
 	/* add termintor */

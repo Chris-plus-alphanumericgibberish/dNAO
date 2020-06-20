@@ -1214,10 +1214,7 @@ register struct monst *mtmp;
 		stackobj(obj);
 	}
 	newsym(x, y);
-	if(obj && obj->otyp == CORPSE && goat_mouth_at(x,y) && !obj->oartifact){
-		goat_eat(obj, !flags.mon_moving); //Goat eat tries *really* hard to destroy whatever you give it.
-		obj = (struct obj *)0;
-	}
+	
 	return obj;
 }
 
@@ -5613,8 +5610,15 @@ xkilled(mtmp, dest)
 		 * different from whether or not the corpse is "special";
 		 * if we want both, we have to specify it explicitly.
 		 */
-		if (corpse_chance(mtmp, (struct monst *)0, FALSE))
-			(void) make_corpse(mtmp);
+		if (corpse_chance(mtmp, (struct monst *)0, FALSE)){
+			struct obj *corpse;
+			corpse = make_corpse(mtmp);
+			if(corpse && corpse->otyp == CORPSE && goat_mouth_at(x,y) && !corpse->oartifact){
+				//We are in the "player has killed monster" function, so it's their fault
+				goat_eat(corpse, TRUE); //Goat eat tries *really* hard to destroy whatever you give it.
+				corpse = (struct obj *)0; //corpse pointer is now stale
+			}
+		}
 	}
 	if(redisp) newsym(x,y);
 cleanup:

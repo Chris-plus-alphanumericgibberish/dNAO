@@ -11222,6 +11222,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		poisons_majoreff = 0,
 		poisons_wipedoff = 0;
 	struct obj * poisonedobj;	/* object that is poisoned responsible for above poisons_X variables -- set once, should not be reset after */
+	int poisons = 0;
 	boolean swordofblood = FALSE;
 
 	boolean resisted_weapon_attacks = FALSE;
@@ -11895,7 +11896,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			seardmg += rnd(mlev(mdef));
 		}
 	}
-	/* Poison */
+	/* Find poisoned object, if any */
 	poisonedobj = (struct obj *)0;
 	if (valid_weapon_attack) {
 		poisonedobj = weapon;
@@ -11907,29 +11908,38 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				: (rslot == W_RINGR) ? uright
 				: (struct obj *)0;
 		}
+		/* Spidersilk adds sleep poison to unarmed punches -- don't set poisonedobj, this is additional */
+		otmp = (youagr ? uarm : which_armor(magr, W_ARM));
+		if (otmp && otmp->oartifact == ART_SPIDERSILK && !rn2(5)) {
+			poisons |= OPOISON_SLEEP;
+		}
 	}
-
-	if (poisonedobj && (!insubstantial(pd) || hits_insubstantial(magr, mdef, attk, poisonedobj)))
-	{
-		int poisons = poisonedobj->opoisoned;
-		int artipoisons = 0;
+	/* Apply object's poison */
+	if (poisonedobj && (!insubstantial(pd) || hits_insubstantial(magr, mdef, attk, poisonedobj))) {
+		poisons |= poisonedobj->opoisoned;
 		if (arti_poisoned(poisonedobj))
-			artipoisons |= OPOISON_BASIC;
+			poisons |= OPOISON_BASIC;
 		if (poisonedobj->oartifact == ART_WEBWEAVER_S_CROOK)
-			artipoisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
+			poisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
 		if (poisonedobj->oartifact == ART_SUNBEAM)
-			artipoisons |= OPOISON_FILTH;
+			poisons |= OPOISON_FILTH;
 		if (poisonedobj->oartifact == ART_MOONBEAM)
-			artipoisons |= OPOISON_SLEEP;
+			poisons |= OPOISON_SLEEP;
 		/* Plague adds poisons to its launched ammo */
 		if (launcher && launcher->oartifact == ART_PLAGUE) {
 			if (monstermoves < launcher->ovar1)
-				artipoisons |= OPOISON_FILTH;
+				poisons |= OPOISON_FILTH;
 			else
-				artipoisons |= OPOISON_BASIC;
+				poisons |= OPOISON_BASIC;
 		}
-		poisons |= artipoisons;
+	}
+	/* All AD_SHDW attacks are poisoned as well */
+	if (attk && attk->adtyp == AD_SHDW) {
+		poisons |= OPOISON_BASIC;
+	}
 
+	if (poisons)
+	{
 		/* Penalties for you using a poisoned weapon */
 		if (poisons && youagr && !recursed)
 		{
@@ -11986,7 +11996,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			case OPOISON_SLEEP:
 				resists = Sleep_res(mdef);
-				majoreff = !rn2(5) || poisonedobj->oartifact == ART_MOONBEAM;
+				majoreff = !rn2(5) || (poisonedobj && poisonedobj->oartifact == ART_MOONBEAM);
 				break;
 			case OPOISON_BLIND:
 				resists = (Poison_res(mdef) || !haseyes(pd));
@@ -12009,7 +12019,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				majoreff = TRUE;
 				break;
 			}
-			if (!rn2(20) && !(artipoisons&i))
+			if (!rn2(20) && poisonedobj && (poisonedobj->opoisoned & i))
 				poisons_wipedoff |= i;
 
 			if (resists)
@@ -12023,7 +12033,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			}
 		}
 		/* poison-injecting rings only ever do major effects */
-		if (poisonedobj->oclass == RING_CLASS) {
+		if (poisonedobj && poisonedobj->oclass == RING_CLASS) {
 			poisons_resisted &= ~(poisons_majoreff);
 			poisons_wipedoff = poisons_majoreff;
 			poisons_minoreff = 0;
@@ -12065,26 +12075,6 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			}
 		}
-	}
-
-	/* Spidersilk adds sleep poison to unarmed punches */
-	if (unarmed_punch) {
-		otmp = (youagr ? uarm : which_armor(magr, W_ARM));	/* note: don't set poisonedobj; this is additional */
-		if (otmp && otmp->oartifact == ART_SPIDERSILK && !rn2(5)) {
-			if (Sleep_res(mdef))
-				poisons_resisted |= OPOISON_SLEEP;
-			else
-				poisons_majoreff |= OPOISON_SLEEP;
-		}
-	}
-	/* AD_SHDW attacks are poisoned as well */
-	if (attk && attk->adtyp == AD_SHDW) {
-		if (Poison_res(mdef))
-			poisons_resisted |= OPOISON_BASIC;
-		else if (rn2(10))
-			poisons_minoreff |= OPOISON_BASIC;
-		else
-			poisons_majoreff |= OPOISON_BASIC;
 	}
 
 	/* Clockwork heat - player melee only */
@@ -12936,6 +12926,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (valid_weapon_attack || unarmed_punch || unarmed_kick)
 	{
 		int returnvalue = 0;
+		boolean artif_hit = FALSE;
 		/* use guidance glyph */
 		if (youagr && melee && active_glyph(GUIDANCE))
 			doguidance(mdef, basedmg);
@@ -12949,6 +12940,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					u.uconduct.weaphit--;
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED|MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
@@ -12961,6 +12954,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* ranged weapon attacks also proc effects of The Helm of the Arcane Archer */
@@ -12971,6 +12966,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* unarmed punches proc effects of worn gloves */
@@ -12980,6 +12977,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* unarmed kicks proc effects of worn boots */
@@ -12989,8 +12988,15 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
+
+		/* must come after all apply_hit_effects */
+		/* priests do extra damage with all artifacts */
+		if (artif_hit && !recursed && (youagr ? Role_switch : monsndx(magr->data)) == PM_PRIEST)
+			artidmg += d(1, mlev(magr));
 	}
 
 	/* Sum reduceable damage */

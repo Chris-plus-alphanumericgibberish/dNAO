@@ -3130,10 +3130,6 @@ boolean * messaged;
 	if (oproperties)
 		oproperty_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
 
-	/* priests do extra damage with all artifacts */
-	if (oartifact && (youagr ? Role_switch : monsndx(magr->data)) == PM_PRIEST)
-		*plusdmgptr += d(1, mlev(magr));
-
 	/* EXTERNAL damage sources -- explosions and the like, primarily */
 	/* knockback effect */
 	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
@@ -7449,21 +7445,21 @@ nothing_special:
 	}
     }
 	if (oart == &artilist[ART_IRON_BALL_OF_LEVITATION]) {
-	if (Punished && (obj != uball)) {
-		unpunish(); /* Remove a mundane heavy iron ball */
-	}
-	
-	if (!Punished) {
-		setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
-		setworn(obj, W_BALL);
-		uball->spe = 1;
-		if (!u.uswallow) {
-		placebc();
-		if (Blind) set_bc(1);	/* set up ball and chain variables */
-		newsym(u.ux,u.uy);		/* see ball&chain if can't see self */
+		if (Punished && (obj != uball)) {
+			unpunish(); /* Remove a mundane heavy iron ball */
 		}
-		Your("%s chains itself to you!", xname(obj));
-	}
+		
+		if (!Punished) {
+			setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
+			setworn(obj, W_BALL);
+			uball->spe = 1;
+			if (!u.uswallow) {
+			placebc();
+			if (Blind) set_bc(1);	/* set up ball and chain variables */
+			newsym(u.ux,u.uy);		/* see ball&chain if can't see self */
+			}
+			Your("%s chains itself to you!", xname(obj));
+		}
 	}
 
     return 1;
