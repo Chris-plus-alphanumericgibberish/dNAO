@@ -164,7 +164,7 @@ s_suffix(s)		/* return a name converted to possessive */
 #define SSUFFIX_BUFFERS 3
 	Static char buf[BUFSZ][SSUFFIX_BUFFERS];
 	static int i = 0;
-	i = (++i) % SSUFFIX_BUFFERS;
+	i = (i + 1) % SSUFFIX_BUFFERS;
 
     Strcpy(buf[i], s);
     if(!strcmpi(buf[i], "it"))
