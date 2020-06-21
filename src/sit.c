@@ -702,7 +702,7 @@ attrcurse()			/* remove a random INTRINSIC ability */
 			You_feel("a little sick!");
 			break;
 		}
-	case 4 : if (HTelepat & INTRINSIC) {
+	case 4 : if ((HTelepat & INTRINSIC) && !Role_if(PM_ANACHRONONAUT)) {
 			HTelepat &= ~INTRINSIC;
 			if (Blind && !Blind_telepat)
 			    see_monsters();	/* Can't sense mons anymore! */

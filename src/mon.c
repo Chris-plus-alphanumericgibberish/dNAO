@@ -5627,7 +5627,8 @@ cleanup:
 	  !(u.sealsActive&SEAL_MALPHAS) && (!always_hostile_mon(mtmp) && mtmp->malign <= 0) &&
 	   (mndx < PM_ARCHEOLOGIST || mndx > PM_WIZARD) &&
 	   u.ualign.type != A_CHAOTIC) {
-		HTelepat &= ~INTRINSIC;
+		if (!Role_if(PM_ANACHRONONAUT))
+			HTelepat &= ~INTRINSIC;	/* no murdering to get rid of this liability in the quest */
 		change_luck(-2);
 		You("murderer!");
 		if(u.ualign.type == A_LAWFUL){
