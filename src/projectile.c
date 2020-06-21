@@ -2643,10 +2643,15 @@ int tary;
 		pline("%s breathes %s!", Monnam(magr), breathwep(typ));
 	}
 	
+	/* set dragonbreath flag if applicable*/
+	if (is_true_dragon(pa))
+		flags.drgn_brth = TRUE;
 	/* do the beam (sadly buzz doesn't do dz) */
 	buzz(typ, FOOD_CLASS, FALSE, (int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)),
 		x(magr), y(magr), dx, dy, 0, attk->damd ? (d((int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)), (int)attk->damd)*mult) : 0);
-	
+	/* reset flag */
+	flags.drgn_brth = FALSE;
+
 	/* interrupt player if they were targetted */
 	if (tarx == u.ux && tary == u.uy)
 		nomul(0, NULL);
