@@ -1180,7 +1180,7 @@ A("The Rod of Seven Parts",			SPEAR,					(const char *)0,
 
 A("The Field Marshal's Baton",		MACE,					(const char *)0,
 	5000L, MT_DEFAULT, MZ_SMALL, WT_DEFAULT,
-	A_LAWFUL, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH),
+	A_LAWFUL, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_NOCNT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, MG_MERC /*MG*/, 0 /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
 	PROP0(), NOFLAG,
