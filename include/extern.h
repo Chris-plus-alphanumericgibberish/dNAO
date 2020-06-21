@@ -3012,6 +3012,8 @@ E int FDECL(full_marmorac, (struct monst *));
 E int FDECL(base_nat_mdr, (struct monst *));
 E int FDECL(base_mdr, (struct monst *));
 E int FDECL(roll_mdr, (struct monst *, struct monst *));
+E int FDECL(avg_mdr, (struct monst *)); 
+E int FDECL(mdat_avg_mdr, (struct monst *));
 E void FDECL(m_dowear, (struct monst *,BOOLEAN_P));
 E boolean FDECL(mon_remove_armor, (struct monst *));
 E struct obj *FDECL(which_armor, (struct monst *,long));

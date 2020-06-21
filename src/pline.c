@@ -519,13 +519,14 @@ register struct monst *mtmp;
 	Strcpy(monnambuf, x_monnam(mtmp, ARTICLE_THE, (char *)0,
 	    (SUPPRESS_IT|SUPPRESS_INVISIBLE), FALSE));
 
-	pline("Status of %s (%s):  Level %d  HP %d(%d)  AC %d%s.",
+	pline("Status of %s (%s):  Level %d  HP %d(%d)  AC %d  DR %d%s.",
 		monnambuf,
 		align_str(alignment),
 		mtmp->m_lev,
 		mtmp->mhp,
 		mtmp->mhpmax,
 		full_mac(mtmp),
+		avg_mdr(mtmp),
 		info);
 }
 

@@ -2083,7 +2083,8 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			strcat(description, "Base statistics of this monster type:");
 			strcat(description, "\n");
 			int ac = 10-(ptr->nac+ptr->dac+ptr->pac);
-			sprintf(temp_buf, "Base level = %d. Difficulty = %d. AC = %d. MR = %d. Alignment %d. ", ptr->mlevel, monstr[monsndx(ptr)], ac, ptr->mr, ptr->maligntyp);
+			sprintf(temp_buf, "Base level = %d. Difficulty = %d. AC = %d. DR = %d. MR = %d. Alignment %d. ",
+				ptr->mlevel, monstr[monsndx(ptr)], ac, mdat_avg_mdr(mtmp), ptr->mr, ptr->maligntyp);
 			strcat(description, temp_buf);
 			temp_buf[0] = '\0';
 			strcat(description, get_speed_description_of_monster_type(mtmp, temp_buf));

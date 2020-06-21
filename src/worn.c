@@ -1144,6 +1144,57 @@ mon_lowertorso:
 	return base;
 }
 
+int
+avg_mdr(mon)
+struct monst *mon;
+{
+	/* stupid solution: take average of 200 calls of monster's rolled DR */
+	/* this function should only be called when the player inspects a creature in some way */
+	int i;
+	int sum = 0;
+
+	for (i = 0; i < 200; i++)
+		sum += roll_mdr(mon, (struct monst *)0);
+
+	return sum / 200;
+}
+
+int
+mdat_avg_mdr(mon)
+struct monst * mon;
+{
+	/* only looks at a monster's base stats with minimal adjustment (and no worn armor) */
+	/* used for pokedex entry */
+	int slots = 5;
+	int dr = 0;
+
+#define m_bdr mon->data->bdr + mon->data->spe_bdr
+#define m_ldr mon->data->ldr + mon->data->spe_ldr
+#define m_hdr mon->data->hdr + mon->data->spe_hdr
+#define m_fdr mon->data->fdr + mon->data->spe_fdr
+#define m_gdr mon->data->gdr + mon->data->spe_gdr
+
+	dr += m_bdr;
+	dr += m_ldr;
+
+	if (has_head_mon(mon))			dr += m_hdr;
+	else							dr += m_bdr;
+
+	if (can_wear_boots(mon->data))	dr += m_fdr;
+	else							dr += m_ldr;
+
+	if (can_wear_gloves(mon->data))	dr += m_gdr;
+	else							dr += m_bdr;
+	
+#undef m_bdr
+#undef m_ldr
+#undef m_hdr
+#undef m_fdr
+#undef m_gdr
+
+	return (dr / 5);
+}
+
 /* weapons are handled separately; rings and eyewear aren't used by monsters */
 
 /* Wear the best object of each type that the monster has.  During creation,
