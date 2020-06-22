@@ -5363,6 +5363,7 @@ int spellID;
 			strcat(desc2, "While active, you cannot cast any spell but this.");
 			strcat(desc3, "Recasting increases the duration of the effect.");
 			strcat(desc4, "Can be maintained.");
+			break;
 		case SPE_PROTECTION:
 			strcat(desc1, "Temporarily improves your AC. AC from this spell is better than normal.");
 			strcat(desc2, "While active, it reduces your magic power recovery.");
