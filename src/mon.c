@@ -5410,9 +5410,6 @@ struct monst *mtmp;
 			u.uswallow = 0;
 			u.uswldtim = 0;
 			if (Punished){
-				if(uball && mcarried(uball)){
-					obj_extract_self(uball);
-				}
 				placebc();
 			}
 			vision_full_recalc = 1;
