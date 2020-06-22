@@ -3926,7 +3926,7 @@ boolean * messaged;
 	/* vorpal weapons */
 	if (arti_attack_prop(otmp, ARTA_VORPAL) || (oproperties&OPROP_VORPW)) {
 		char buf[BUFSZ];
-		int vorpaldamage = (basedmg * 12) + d(5, 20);
+		int vorpaldamage = (basedmg * 20) + d(8, 20);
 		int method = 0;
 #define VORPAL_BEHEAD	1
 #define VORPAL_BISECT	2
@@ -4065,7 +4065,10 @@ boolean * messaged;
 			while (armor && vorpaldamage > basedmg * 4) {
 				if (armor->spe > -1 * objects[(armor)->otyp].a_ac){
 					damage_item(armor);
-					vorpaldamage -= (armor->spe + objects[(armor)->otyp].a_ac)*5;
+					/* artifacts are too much more resistant to being damaged than standard items (90% vs 10%) */
+					/* so they need adjusting here to only be somewhat better */
+					vorpaldamage -= (armor->spe + objects[(armor)->otyp].a_ac)
+						* ((armor->oartifact) ? 3 : 18) / 2;
 				}
 				else {
 					claws_destroy_marm(mdef, armor);
@@ -4073,7 +4076,6 @@ boolean * messaged;
 					break;	/* exit armor-killing loop */
 				}
 			}
-
 			/* apply other damage modifiers */
 			if (method == VORPAL_BEHEAD && (noncorporeal(pd) || amorphous(pd)))
 				vorpaldamage = 0;
