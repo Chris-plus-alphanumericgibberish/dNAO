@@ -977,6 +977,54 @@ roll_mdr(mon, magr)
 struct monst *mon;
 struct monst *magr;
 {
+	int base, nat_dr, armac;
+	int slot;
+	
+	switch(rn2(7)){
+		case 0:
+		case 1:
+			slot = UPPER_TORSO_DR;
+		break;
+		case 2:
+		case 3:
+			slot = LOWER_TORSO_DR;
+		break;
+		case 4:
+			slot = HEAD_DR;
+		break;
+		case 5:
+			slot = LEG_DR;
+		break;
+		case 6:
+			slot = ARM_DR;
+		break;
+	}
+	
+	mon_slot_dr(mon, magr, slot, &base, &armac, &nat_dr);
+
+	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor dr values act like player ac values */
+	
+	if(nat_dr && armac){
+		base += sqrt(nat_dr*nat_dr + armac*armac);
+	} else if(nat_dr){
+		base += nat_dr;
+	} else {
+		base += armac;
+	}
+	
+	/* since arm_ac_bonus is positive, subtracting it increases AC */
+	return base;
+}
+
+void
+mon_slot_dr(mon, magr, slot, base_ac_out, armor_ac_out, natural_ac_out)
+struct monst *mon;
+struct monst *magr;
+int slot;
+int *base_ac_out;
+int *armor_ac_out;
+int *natural_ac_out;
+{
 	struct obj *obj;
 	int base, nat_dr, armac = 0, clkdr = 0;
 	int agralign = 0;
@@ -1002,11 +1050,10 @@ struct monst *magr;
 	
 	//armor AC
 	if(mon->mtyp == PM_HOD_SEPHIRAH){
-		armac = roll_udr(magr);
+		armac = slot_udr(slot, magr);
 		if(armac < 0) armac *= -1;
 	} else {
 		struct obj *curarm;
-		int slot;
 		
 		if (which_armor(mon, W_ARMC)){
 			curarm = which_armor(mon, W_ARMC);
@@ -1021,17 +1068,17 @@ struct monst *magr;
 			armac += arm_dr_bonus(curarm);
 			if(magr) armac += properties_dr(curarm, agralign, agrmoral);
 		}
+		
 		curarm = which_armor(mon, W_ARM);
 		if(curarm && curarm->otyp == JUMPSUIT){
 			armac += arm_dr_bonus(curarm);
 			if(magr) armac += properties_dr(curarm, agralign, agrmoral);
 		}
+		
 		if(mon->mtyp == PM_GIANT_TURTLE && (mon->mflee || rn2(2))){
 			slot = UPPER_TORSO_DR;
-		} else {
-		//Note: Bias this somehow?
-		slot = rn2(5);
 		}
+		
 		switch(slot){
 			case UPPER_TORSO_DR:
 mon_uppertorso:
@@ -1130,33 +1177,58 @@ mon_lowertorso:
 			// armac = 0;
 	// }
 	
-	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor dr values act like player ac values */
-
-	if(nat_dr && armac){
-		base += sqrt(nat_dr*nat_dr + armac*armac);
-	} else if(nat_dr){
-		base += nat_dr;
-	} else {
-		base += armac;
-	}
+	*base_ac_out = base;
+	*armor_ac_out = armac;
+	*natural_ac_out = nat_dr;
 	
-	/* since arm_ac_bonus is positive, subtracting it increases AC */
-	return base;
+	return;
 }
 
 int
 avg_mdr(mon)
 struct monst *mon;
 {
-	/* stupid solution: take average of 200 calls of monster's rolled DR */
-	/* this function should only be called when the player inspects a creature in some way */
 	int i;
 	int sum = 0;
+	int base, nat_dr, armac;
+	int slot;
+	
+	for (i = 0; i < 7; i++){
+		switch(i){
+			case 0:
+			case 1:
+				slot = UPPER_TORSO_DR;
+			break;
+			case 2:
+			case 3:
+				slot = LOWER_TORSO_DR;
+			break;
+			case 4:
+				slot = HEAD_DR;
+			break;
+			case 5:
+				slot = LEG_DR;
+			break;
+			case 6:
+				slot = ARM_DR;
+			break;
+		}
+		
+		mon_slot_dr(mon, (struct monst *) 0, slot, &base, &armac, &nat_dr);
 
-	for (i = 0; i < 200; i++)
-		sum += roll_mdr(mon, (struct monst *)0);
+		if(armac > 11) armac = (armac-10)/2 + 10; /* high armor dr values act like player ac values */
+		
+		if(nat_dr && armac){
+			base += sqrt(nat_dr*nat_dr + armac*armac);
+		} else if(nat_dr){
+			base += nat_dr;
+		} else {
+			base += armac;
+		}
+		sum += base;
+	}
 
-	return sum / 200;
+	return sum / 9;
 }
 
 int
@@ -1165,7 +1237,6 @@ struct monst * mon;
 {
 	/* only looks at a monster's base stats with minimal adjustment (and no worn armor) */
 	/* used for pokedex entry */
-	int slots = 5;
 	int dr = 0;
 
 #define m_bdr mon->data->bdr + mon->data->spe_bdr
@@ -1174,8 +1245,8 @@ struct monst * mon;
 #define m_fdr mon->data->fdr + mon->data->spe_fdr
 #define m_gdr mon->data->gdr + mon->data->spe_gdr
 
-	dr += m_bdr;
-	dr += m_ldr;
+	dr += m_bdr*2;
+	dr += m_ldr*2;
 
 	if (has_head_mon(mon))			dr += m_hdr;
 	else							dr += m_bdr;
@@ -1192,7 +1263,7 @@ struct monst * mon;
 #undef m_fdr
 #undef m_gdr
 
-	return (dr / 5);
+	return (dr / 7);
 }
 
 /* weapons are handled separately; rings and eyewear aren't used by monsters */

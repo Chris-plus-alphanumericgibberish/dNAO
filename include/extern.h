@@ -3012,6 +3012,7 @@ E int FDECL(full_marmorac, (struct monst *));
 E int FDECL(base_nat_mdr, (struct monst *));
 E int FDECL(base_mdr, (struct monst *));
 E int FDECL(roll_mdr, (struct monst *, struct monst *));
+E void FDECL(mon_slot_dr, (struct monst *, struct monst *, int, int *, int *, int *));
 E int FDECL(avg_mdr, (struct monst *)); 
 E int FDECL(mdat_avg_mdr, (struct monst *));
 E void FDECL(m_dowear, (struct monst *,BOOLEAN_P));
