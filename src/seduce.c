@@ -2906,7 +2906,7 @@ const char *str;
 			str);
 		her_strength -= ACURR(A_STR);
 		for(; her_strength >= 0; her_strength--){
-			if(obj->spe > -1*objects[(obj)->otyp].a_ac){
+			if(obj->spe > -1*a_acdr(objects[(obj)->otyp])){
 				damage_item(obj);
 //				Your("%s less effective.", aobjnam(obj, "seem"));
 			}

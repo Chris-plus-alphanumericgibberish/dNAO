@@ -2748,11 +2748,11 @@ summon_alien:
 		} else if ((smarm = some_armor(&youmonst)) == (struct obj *)0) {
 		   Your("skin itches.");
 		/* Quest nemesis maledictions */
-		} else if(objects[smarm->otyp].oc_oprop == DISINT_RES){
-			if(smarm->spe <= -1*objects[smarm->otyp].a_ac) destroy_arm(smarm);
+		} else if(objects[smarm->otyp].oc_oprop != DISINT_RES){
+			if(smarm->spe <= -1*a_acdr(objects[smarm->otyp])) destroy_arm(smarm);
 			else{
-				smarm->spe -= 1;
-				if(smarm->spe < -1*objects[smarm->otyp].a_ac) smarm->spe = -1*objects[smarm->otyp].a_ac;
+				smarm->spe -= dmg;
+				if(smarm->spe < -1*a_acdr(objects[smarm->otyp])) smarm->spe = -1*a_acdr(objects[smarm->otyp]);
 				pline("A field of force surrounds your %s!", xname(smarm));
 			}
 			if (malediction) {

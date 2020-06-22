@@ -139,6 +139,7 @@ struct objclass {
 #define a_can		oc_oc2		/* armor: used in mhitu.c */
 #define a_dr		oc_oc3		/* armor damage reduction, used in arm_dr_bonus */
 #define oc_level	oc_oc2		/* books: spell level */
+#define a_acdr(o)	((o).a_ac + (o).a_dr) /* combined ac and dr bonus of object class o, used for disintegration effects */
 
 	unsigned short	oc_nutrition;	/* food value */
 };

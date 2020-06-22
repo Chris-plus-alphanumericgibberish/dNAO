@@ -3824,7 +3824,7 @@ xchar sx, sy;
 		} else if (uarms) {
 			/* destroy shield; other possessions are safe */
 				for(i=d(1,4); i>0; i--){
-					if(uarms->spe > -1*objects[(uarms)->otyp].a_ac){
+					if(uarms->spe > -1*a_acdr(objects[(uarms)->otyp])){
 						damage_item(uarms);
 						if(i==1) Your("%s damaged by the beam.", aobjnam(uarms, "seem"));
 					}
@@ -3837,7 +3837,7 @@ xchar sx, sy;
 		} else if (uarmc) {
 			/* destroy cloak */
 				for(i=d(1,4); i>0; i--){
-				if(uarmc->spe > -1*objects[(uarmc)->otyp].a_ac){
+				if(uarmc->spe > -1*a_acdr(objects[(uarmc)->otyp])){
 					damage_item(uarmc);
 					if(i==1) Your("%s damaged by the beam.", aobjnam(uarmc, "seem"));
 				}
@@ -3850,7 +3850,7 @@ xchar sx, sy;
 		} else if (uarm) {
 			/* destroy suit */
 				for(i=d(1,4); i>0; i--){
-				if(uarm->spe > -1*objects[(uarm)->otyp].a_ac){
+				if(uarm->spe > -1*a_acdr(objects[(uarm)->otyp])){
 					damage_item(uarm);
 					if(i==1) Your("%s damaged by the beam.", aobjnam(uarm, "seem"));
 				}
@@ -3863,7 +3863,7 @@ xchar sx, sy;
 		} else if(uarmu && objects[uarmu->otyp].a_can > 0){
 			/* destroy underwear */
 				for(i=d(1,4); i>0; i--){
-				if(uarmu->spe > -1*objects[(uarmu)->otyp].a_ac){
+				if(uarmu->spe > -1*a_acdr(objects[(uarmu)->otyp])){
 					damage_item(uarmu);
 					if(i==1) Your("%s damaged by the beam.", aobjnam(uarmu, "seem"));
 				}
@@ -4323,7 +4323,7 @@ int dx, dy, range, flat;
 							/* some armor was damaged or destroyed; no damage done */
 							 int i;
 							 for(i=d(1,4); i>0; i--){
-								if(otmp->spe > -1*objects[(otmp)->otyp].a_ac){
+								if(otmp->spe > -1*a_acdr(objects[(otmp)->otyp])){
 									damage_item(otmp);
 									if (i==1 && canseemon(mon))
 										pline("%s %s is damaged!",

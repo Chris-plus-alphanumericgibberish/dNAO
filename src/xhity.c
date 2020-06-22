@@ -5603,7 +5603,7 @@ boolean ranged;
 				i += rnd(4);
 
 			for (; i>0; i--){
-				if (otmp->spe > -1 * objects[(otmp)->otyp].a_ac){
+				if (otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
 					damage_item(otmp);
 				}
 				else if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON && !rn2(10))){
@@ -6831,7 +6831,7 @@ boolean ranged;
 				else {
 					if (oresist_disintegration(otmp))
 						continue;
-					if (otmp->spe > -1 * objects[otmp->otyp].a_ac){
+					if (otmp->spe > -1 * a_acdr(objects[otmp->otyp])){
 						damage_item(otmp);
 					}
 					else if (!otmp->oartifact){
