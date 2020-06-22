@@ -5401,7 +5401,7 @@ int how;
 
 void
 unstuck(mtmp)
-register struct monst *mtmp;
+struct monst *mtmp;
 {
 	if(u.ustuck == mtmp) {
 		if(u.uswallow){
@@ -5409,7 +5409,12 @@ register struct monst *mtmp;
 			u.uy = mtmp->my;
 			u.uswallow = 0;
 			u.uswldtim = 0;
-			if (Punished) placebc();
+			if (Punished){
+				if(uball && mcarried(uball)){
+					obj_extract_self(uball);
+				}
+				placebc();
+			}
 			vision_full_recalc = 1;
 			docrt();
 		}
