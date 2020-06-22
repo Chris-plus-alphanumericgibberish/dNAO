@@ -1032,10 +1032,14 @@ register struct monst *mtmp;
 	if (mtmp->mdisrobe && !rn2(50)) mtmp->mdisrobe = 0;
 
 	if (mtmp->mcrazed){
-		if(!rn2(4))mtmp->mconf = 1;
-		(void) set_apparxy(mtmp);
-		if(!rn2(4))mtmp->mberserk = 1;
-		(void) set_apparxy(mtmp);
+		if(!rn2(4)){
+			mtmp->mconf = 1;
+			(void) set_apparxy(mtmp);
+		}
+		if(!rn2(4)){
+			mtmp->mberserk = 1;
+			(void) set_apparxy(mtmp);
+		}
 		if(!rn2(10)){
 			mtmp->mnotlaugh=0;
 			mtmp->mlaughing=rnd(5);
