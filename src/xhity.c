@@ -16,7 +16,7 @@ Claws of the Revenancer w/ rings
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
-STATIC_DCL int FDECL(destroy_item2, (struct monst *, int, int, boolean));
+STATIC_DCL int FDECL(destroy_item2, (struct monst *, int, int));
 STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *, boolean));
 STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *));
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
@@ -2127,17 +2127,15 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
  * Can return:
  * MM_MISS		0x00	no items destroyed
  * MM_HIT		0x01	item(s) destroyed
- * MM_DEF_DIED	0x02	defender died
  *
- * If allow_lethal is false, damage will still be dealt but is never fatal,
- * so prematurely killing a monster isn't a problem.
+ * Only allows lethal damage against the player, so this function can be called
+ * while voiding the return.
  */
 int
-destroy_item2(mtmp, osym, dmgtyp, allow_lethal)
+destroy_item2(mtmp, osym, dmgtyp)
 struct monst * mtmp;
 int osym;
 int dmgtyp;
-boolean allow_lethal;
 {
 	boolean youdef = mtmp == &youmonst;
 	struct permonst * data = (youdef) ? youracedata : mtmp->data;
@@ -2164,7 +2162,10 @@ boolean allow_lethal;
 		switch (dmgtyp) {
 			/* Cold freezes potions */
 		case AD_COLD:
-			if (osym == POTION_CLASS && obj->otyp != POT_OIL) {
+			if (osym == POTION_CLASS && !(
+				obj->otyp == POT_OIL ||
+				obj->oerodeproof /* shatterproof */
+				)) {
 				quan = obj->quan;
 				dindx = 0;
 				dmg = 4;
@@ -2175,11 +2176,12 @@ boolean allow_lethal;
 		case AD_FIRE:
 			xresist = (Fire_res(mtmp) && obj->oclass != POTION_CLASS);
 
-			if (osym == SCROLL_CLASS && obj->oartifact)
+			if (obj->oerodeproof && is_flammable(obj))	/* fireproof */
 				skip++;
-			if (obj->otyp == SCR_FIRE || obj->otyp == SCR_GOLD_SCROLL_OF_LAW || obj->otyp == SPE_FIREBALL)
+			if (obj->otyp == SCR_FIRE || obj->otyp == SCR_GOLD_SCROLL_OF_LAW
+				|| obj->otyp == SPE_FIREBALL || obj->otyp == SPE_FIRE_STORM)
 				skip++;
-			if (obj->otyp == SPE_BOOK_OF_THE_DEAD) {
+			if (objects[obj->otyp].oc_unique) {
 				skip++;
 				if (!Blind && vis)
 					pline("%s glows a strange %s, but remains intact.",
@@ -2278,12 +2280,11 @@ boolean allow_lethal;
 						boolean one = (cnt == 1L);
 
 						dmg = d(cnt, dmg);
-						if (!allow_lethal && dmg > *hp(&youmonst))
-							dmg = min(0, *hp(&youmonst) - 1);
 						losehp(dmg, (one && osym != WAND_CLASS) ? how : (const char *)makeplural(how),
 							one ? KILLED_BY_AN : KILLED_BY);
 						exercise(A_STR, FALSE);
 						/* Let's not worry about properly returning if that killed you. If it did, it's moot. I think. */
+						/* at the very least, the return value from this function is being ignored often enough it doesn't matter */
 					}
 				}
 				/* monster */
@@ -2291,15 +2292,10 @@ boolean allow_lethal;
 					if (xresist);	// no message, reduce spam
 					else {
 						dmg = d(cnt, dmg);
-						if (!allow_lethal && dmg >= mtmp->mhp)
+						/* not allowed to be lethal */
+						if (dmg >= mtmp->mhp)
 							dmg = min(0, mtmp->mhp - 1);
-
 						mtmp->mhp -= dmg;
-						if (mtmp->mhp < 1) {
-							if(vis) pline("%s dies!", Monnam(mtmp));
-							mondied(mtmp);
-							return (MM_HIT|MM_DEF_DIED);
-						}
 					}
 				}
 			}
@@ -4139,11 +4135,11 @@ boolean ranged;
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvFire_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, SCROLL_CLASS, AD_FIRE, youdef);
+					destroy_item2(mdef, SCROLL_CLASS, AD_FIRE);
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_FIRE, youdef);
+					destroy_item2(mdef, POTION_CLASS, AD_FIRE);
 				if ((int)mlev(magr) > rn2(25))
-					destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE, youdef);
+					destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE);
 			}
 			/* reduce damage via resistance OR instakill */
 			if (Fire_res(mdef))
@@ -4266,7 +4262,7 @@ boolean ranged;
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvCold_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_COLD, youdef);
+					destroy_item2(mdef, POTION_CLASS, AD_COLD);
 			}
 			/* reduce damage via resistance */
 			if (Cold_res(mdef))
@@ -4341,7 +4337,7 @@ boolean ranged;
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvShock_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, WAND_CLASS, AD_ELEC, youdef);
+					destroy_item2(mdef, WAND_CLASS, AD_ELEC);
 			}
 			/* reduce damage via resistance */
 			if (Shock_res(mdef))
@@ -9162,9 +9158,9 @@ int vis;
 			/* destroy items */
 			if (!InvShock_res(mdef)){
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, WAND_CLASS, AD_ELEC, youdef);
+					destroy_item2(mdef, WAND_CLASS, AD_ELEC);
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, RING_CLASS, AD_ELEC, youdef);
+					destroy_item2(mdef, RING_CLASS, AD_ELEC);
 			}
 			/* golem effects */
 			if (youdef)
@@ -9208,7 +9204,7 @@ int vis;
 			/* destroy items */
 			if (!InvCold_res(mdef)){
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_COLD, youdef);
+					destroy_item2(mdef, POTION_CLASS, AD_COLD);
 			}
 			/* golem effects */
 			if (youdef)
@@ -9275,11 +9271,11 @@ int vis;
 			/* destroy items */
 			if (!InvFire_res(mdef)) {
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, SCROLL_CLASS, AD_FIRE, youdef);
+					destroy_item2(mdef, SCROLL_CLASS, AD_FIRE);
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_FIRE, youdef);
+					destroy_item2(mdef, POTION_CLASS, AD_FIRE);
 				if (mlev(magr) > rn2(25))
-					destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE, youdef);
+					destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE);
 			}
 			/* golem effects */
 			if (youdef)
@@ -9604,25 +9600,25 @@ expl_common:
 			if (attk->adtyp == AD_FIRE || attk->adtyp == AD_EFIR || attk->adtyp == AD_ACFR){
 				if (!InvFire_res(mdef)){
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, SCROLL_CLASS, AD_FIRE, youdef);
+						destroy_item2(mdef, SCROLL_CLASS, AD_FIRE);
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, POTION_CLASS, AD_FIRE, youdef);
+						destroy_item2(mdef, POTION_CLASS, AD_FIRE);
 					if (mlev(magr) > rn2(25))
-						destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE, youdef);
+						destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE);
 				}
 			}
 			else if (attk->adtyp == AD_ELEC || attk->adtyp == AD_EELC){
 				if (!InvShock_res(mdef)){
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, WAND_CLASS, AD_ELEC, youdef);
+						destroy_item2(mdef, WAND_CLASS, AD_ELEC);
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, RING_CLASS, AD_ELEC, youdef);
+						destroy_item2(mdef, RING_CLASS, AD_ELEC);
 				}
 			}
 			else if (attk->adtyp == AD_COLD || attk->adtyp == AD_ECLD){
 				if (!InvCold_res(mdef)){
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, POTION_CLASS, AD_COLD, youdef);
+						destroy_item2(mdef, POTION_CLASS, AD_COLD);
 				}
 			}
 			break;
@@ -10049,11 +10045,11 @@ int vis;
 		/* damage inventory */
 		if (!InvFire_res(mdef) && !(youdef ? Reflecting : mon_resistance(mdef, REFLECTING))) {
 			if ((int)mlev(magr) > rn2(20))
-				destroy_item2(mdef, SCROLL_CLASS, AD_FIRE, youdef);
+				destroy_item2(mdef, SCROLL_CLASS, AD_FIRE);
 			if ((int)mlev(magr) > rn2(20))
-				destroy_item2(mdef, POTION_CLASS, AD_FIRE, youdef);
+				destroy_item2(mdef, POTION_CLASS, AD_FIRE);
 			if ((int)mlev(magr) > rn2(25))
-				destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE, youdef);
+				destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE);
 		}
 
 		if (youdef){
@@ -13440,7 +13436,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		/* inventory damage */
 		if (!InvCold_res(mdef)) {
 			if (mlev(magr) > rn2(20))
-				destroy_item2(mdef, POTION_CLASS, AD_COLD, youdef);
+				destroy_item2(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
 
