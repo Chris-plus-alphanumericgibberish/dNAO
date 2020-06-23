@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "xhity.h"
 
 extern const int monstr[];
 extern void demonpet();
@@ -1368,6 +1369,482 @@ unsigned int type;
         return choose_psionic_spell(mtmp->m_id == 0 ? (rn2(u.ulevel) * 18 / 30) : rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
     return choose_magic_spell(mtmp->m_id == 0 ? (rn2(u.ulevel) * 24 / 30) : rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
 }
+
+
+/* xcasty()
+ * 
+ * Magr attempts to cast a monster spell at mdef, who they think is at (tarx, tary)
+ * If !mdef or (tarx, tary) is (0,0), magr doesn't have a target and should use an undirected spell.
+ * 
+ * Returns MM_MISS if the spellcasting failed, taking time
+ * 
+ * Can handle any of uvm, mvm, mvu.
+ */
+int
+xcasty(magr, mdef, attk, tarx, tary)
+struct monst * magr;
+struct monst * mdef;
+struct attack * attk;
+int tarx;
+int tary;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct permonst * pa = (youagr ? youracedata : magr->data);
+	boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+	int spellnum = 0;
+	int chance = 0;
+	char buf[BUFSZ];
+
+	/* things that block monster spells from even being attempted */
+	if (cantmove(magr))
+		return MM_MISS;
+	if (youagr ? Nullmagic : mon_resistance(magr, NULLMAGIC))
+		return MM_MISS;
+
+	/* Nitocris message on attempting to cast a spell? */
+	impossible("TODO: nitocris message on attempting to cast a spell");
+
+	/* Attempt to find a spell to cast */
+	if (mlev(magr) > 0 && (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC || attk->adtyp == AD_PSON)) {
+		int cnt = 40;	/* 40 attempts at a spell if it has a target, but only 1 attempt if no target */
+
+		do {
+			/* get spell */
+			spellnum = choose_magic_special(magr, attk->adtyp);
+			/* check that the spell selection code did not abort the cast */
+			if (!spellnum)
+				return 0;
+			/* check that we either have a target or are casting an undirected spell */
+			if (!(mdef || is_undirected_spell(spellnum)))
+				return 0;	/* only 1 attempt if no target */
+			impossible("TODO: rewrite spell_would_be_useless to work in all mvm, uvm, mvu");
+		} while ((--cnt > 0) && (spell_would_be_useless(magr, spellnum)));
+
+		if (cnt == 0)
+			return MM_MISS;
+	}
+
+	/* things that cause spellcasting to fail loudly */
+	if (youagr ? (
+		(u.uen < mlev(magr))
+		) : (
+		(magr->mcan) ||
+		(magr->mspec_used && !nospellcooldowns_mon(magr)) ||
+		(mlev(magr) == 0) ||
+		(youdef && (u.uinvulnerable || (u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20))) ||
+		(needs_familiar(magr))
+		)) {
+		impossible("TODO: rewrite cursetxt to work for uvm, mvm.");
+		cursetxt(magr, is_undirected_spell(spellnum));
+		return MM_MISS;
+	}
+
+	/* set spell cooldown for monsters */
+	if (!youagr && (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC) && !nospellcooldowns_mon(magr)) {
+		if (magr->mtyp == PM_HEDROW_WARRIOR) magr->mspec_used = d(4, 4);
+		else magr->mspec_used = 10 - magr->m_lev;
+		if (magr->mspec_used < 2) magr->mspec_used = 2;
+	}
+	/* cost pw for players */
+	if (youagr) {
+		u.uen -= mlev(magr);	/* we already checked that u.uen >= mlev(magr) */
+		flags.botl = 1;
+	}
+
+	if (spellnum && mdef && !foundem &&
+		(youdef || canspotmon(magr)) && 
+		!is_undirected_spell(spellnum) &&
+		!is_aoe_spell(spellnum)) {
+		if (magr->mtyp != PM_HOUND_OF_TINDALOS)	{
+			pline("%s cast%s a spell at %s!",
+				youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+				youagr ? "" : "s",
+				levl[tarx][tary].typ == WATER
+				? "empty water" : "thin air");
+		}
+		return MM_MISS;
+	}
+
+	impossible("TODO: interrupt player if they were targeted by this point?");
+
+	/* calculate success rate of spell */
+	chance = 2;
+	if (!youagr && is_alabaster_mummy(magr->data) && magr->mvar_syllable == SYLLABLE_OF_THOUGHT__NAEN)
+		chance -= 2;
+	if (youagr ? Confusion : magr->mconf)
+		chance += 8;
+	if (!youagr && is_kamerel(pa)){
+		struct obj * mirror;
+		for (mirror = magr->minvent; mirror; mirror = mirror->nobj)
+		if (mirror->otyp == MIRROR && !mirror->cursed) {
+			chance -= 1000;	/* even overcomes the spire's anti-casting effect */
+			break;
+		}
+	}
+	if (u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
+		if (u.uz.dlevel == sum_of_all_level.dlevel) chance -= 1;
+		else if (u.uz.dlevel == spire_level.dlevel - 0) chance += 500;
+		else if (u.uz.dlevel == spire_level.dlevel - 1) chance += 10;
+		else if (u.uz.dlevel == spire_level.dlevel - 2) chance += 8;
+		else if (u.uz.dlevel == spire_level.dlevel - 3) chance += 6;
+		else if (u.uz.dlevel == spire_level.dlevel - 4) chance += 4;
+		else if (u.uz.dlevel == spire_level.dlevel - 5) chance += 2;
+	}
+	/* failure chance determined, check if attack fumbles */
+	if (rn2(mlev(magr) * 2) < chance) {
+		if (youagr)
+			pline_The("air crackles around you.");
+		else if (canseemon(magr) && flags.soundok)
+			pline_The("air crackles around %s.", mon_nam(magr));
+		return MM_MISS;
+	}
+
+	/* print spell-cast message */
+	if (spellnum) {
+		if ((youagr || (youdef && !is_undirected_spell(spellnum)) || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
+			if (is_undirected_spell(spellnum))
+				Sprintf(buf, "");
+			else
+			{
+				Sprintf(buf, " at %s",
+					youdef
+					? ((Invisible && !mon_resistance(magr, SEE_INVIS) && (!foundem)) ?
+						"a spot near you" :
+						(Displaced && (!foundem)) ?
+						"your displaced image" :
+						"you")
+					: (canspotmon(mdef) ? mon_nam(mdef) : "something"));
+			}
+			pline("%s cast%s a spell%s!",
+				youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+				youagr ? "" : "s",
+				buf);
+		}
+	}
+
+	/* do spell */
+	if (spellnum) {
+		/* special case override: the avatar of lolth can ask Lolth to intercede instead of casting a spell */
+		if (youdef && magr->mtyp == PM_AVATAR_OF_LOLTH && !strcmp(urole.cgod, "Lolth") && !is_undirected_spell(spellnum) && !magr->mpeaceful){
+			u.ugangr[Align2gangr(A_CHAOTIC)]++;
+			angrygods(A_CHAOTIC);
+			return MM_HIT;
+		}
+		/* generally: cast the spell */
+		impossible("TODO: write general spell casting");
+		return MM_HIT;
+	}
+	else {
+		/* no spell selected; this probably means we have an elemental spell to cast */
+		/* these typically result in either a beam (zaps a cone of cold, etc) or hand-to-hand magic (covered in frost, etc) */
+		return elemspell(magr, mdef, attk, tarx, tary);
+	}
+
+	/* should not be reached */
+	return MM_MISS;
+}
+
+/* xcasty()
+ * 
+ * Magr casts an elemental spell (ray or hth) at mdef, who they think is at (tarx, tary)
+ * If !mdef or (tarx, tary) is (0,0), magr does nothing
+ * 
+ * Returns MM_MISS only if the spellcasting failed silently and took no time at all
+ */
+int
+elemspell(magr, mdef, attk, tarx, tary)
+struct monst * magr;
+struct monst * mdef;
+struct attack * attk;
+int tarx;
+int tary;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct permonst * pa = (youagr ? youracedata : magr->data);
+	boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+	boolean rangedspell;
+	int adtyp = attk->adtyp;
+
+	/* is it a ranged spell? */
+	if (!tarx && !tary) {
+		if (youagr) {
+			/* get a direction to cast in (assumes ranged spell is possible) */
+			if (!getdir((const char *)0)) {
+				pline_The("air crackles around you.");
+				return MM_MISS;
+			}
+			else {
+				rangedspell = TRUE;
+				tarx = u.ux + u.dx;
+				tary = u.uy + u.dy;
+			}
+		}
+		else {
+			/* monsters just fail */
+			if (canseemon(magr) && flags.soundok)
+				pline_The("air crackles around %s.", mon_nam(magr));
+			impossible("monster got to elemspell() with no target location?"); // test; does this happen?
+			return MM_MISS;
+		}
+	}
+	else if (dist2(x(magr), y(magr), tarx, tary) <= 2) {
+		rangedspell = FALSE;
+	}
+	else {
+		rangedspell = TRUE;
+	}
+
+	/* hand to hand magic */
+	if (!rangedspell)
+	{
+		/* if there's no target where we're casting, fail */
+		if (!foundem) {
+			if ((youagr || youdef || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS)	{
+				pline("%s cast%s a spell at %s!",
+					youagr ? "You" : canseemon(magr) ? Monnam(magr) : "Something",
+					youagr ? "" : "s",
+					levl[tarx][tary].typ == WATER
+					? "empty water" : "thin air");
+			}
+			return MM_MISS;
+		}
+		/* otherwise, print a spellcasting message */
+		else {
+			if ((youagr || youdef || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
+				pline("%s cast%s a spell at %s!",
+					youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+					youagr ? "" : "s",
+					youdef ? "you" : (canspotmon(mdef) ? mon_nam(mdef) : "something"));
+			}
+		}
+
+		impossible("finish writing hth elemental spells");
+
+		int dmd = 6;
+		int dmn = mlev(magr) / 3 + 1;
+		int dmg;
+
+		/* cap level contribution to ndice to MAX_BONUS_DICE */
+		if (dmn > MAX_BONUS_DICE)
+			dmn = MAX_BONUS_DICE;
+		/* increment ndice by specified attack */
+		if (attk->damn)
+			dmn += (int)(attk->damn);
+		/* floor dmn */
+		if (dmn < 1) dmn = 1;
+
+		/* possibly override die size */
+		if (attk->damd)
+			dmd = (int)(attk->damd);
+		/* increase die size */
+		if (!youagr && is_alabaster_mummy(magr->data) && magr->mvar_syllable == SYLLABLE_OF_POWER__KRAU)
+			dmd *= 1.5;
+
+		/* calculate damage */
+		dmg = d(dmn, dmd);
+
+		/* apply damage reductions */
+		if (Half_spel(mdef))
+			dmg = (dmg + 1) / 2;
+		if (youdef && u.uvaul_duration)
+			dmg = (dmg + 1) / 2;
+
+
+		/* handle damage type modifiers */
+		switch (adtyp) {
+		case AD_OONA:
+			adtyp = u.oonaenergy;
+			break;
+		case AD_RBRE:
+			switch (rnd(3)){
+			case 1: adtyp = AD_FIRE; break;
+			case 2: adtyp = AD_COLD; break;
+			case 3: adtyp = AD_ELEC; break;
+			}
+			break;
+		}
+
+		/* do the melee-range spell */
+		/* this should return */
+		switch (adtyp) {
+		case AD_SLEE:
+			/* message */
+			if (youdef || canspotmon(mdef)) {
+				pline("%s%s enveloped in a puff of gas.",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "'re" : " is"
+					);
+			}
+			/* do effect */
+			if (Sleep_res(mdef) || 
+				(youdef ? Breathless : breathless_mon(mdef))) {
+				if (youdef || canseemon(mdef)) {
+					shieldeff(tarx, tary);
+					if (youdef) You("don't feel sleepy!");
+					else pline("%s is unaffected.", Monnam(mdef));
+				}
+			}
+			else {
+				if (youdef)
+					fall_asleep(-dmg, TRUE);
+				else if (sleep_monst(mdef, dmg, -1)) {
+					if (canseemon(mdef))
+						pline("%s falls asleep!", Monnam(mdef));
+					mdef->mstrategy &= ~STRAT_WAITFORU;
+					slept_monst(mdef);
+				}
+			}
+			return MM_HIT;
+
+		case AD_ELEC:
+			/* message */
+			if (youdef || canspotmon(mdef)) {
+				pline("Lightning crackles around %s.",
+					youdef ? "you" : mon_nam(mdef)
+					);
+			}
+			/* do effect */
+			if (Shock_res(mdef)) {
+				if (youdef || canseemon(mdef)) {
+					shieldeff(tarx, tary);
+					if (youdef) pline("But you resist the effects.");
+					else pline("But %s resists the effects.", mhe(mdef));
+				}
+				dmg = 0;
+			}
+			/* damage inventory */
+			if (!InvShock_res(mdef)){
+				impossible("TODO: destroy_item2");
+				destroy_item(WAND_CLASS, AD_ELEC);
+			}
+			return xdamagey(magr, mdef, attk, dmg);
+
+		case AD_FIRE:
+			/* message */
+			if (youdef || canspotmon(mdef)) {
+				pline("%s%s enveloped in flames.",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "'re" : " is"
+					);
+			}
+			/* do effect */
+			if (Fire_res(mdef)) {
+				if (youdef || canseemon(mdef)) {
+					shieldeff(tarx, tary);
+					if (youdef) pline("But you resist the effects.");
+					else pline("But %s resists the effects.", mhe(mdef));
+				}
+				dmg = 0;
+			}
+			/* damage inventory */
+			if (!InvFire_res(mdef)){
+				impossible("TODO: destroy_item2");
+				destroy_item(POTION_CLASS, AD_FIRE);
+				if (!rn2(6)) destroy_item(SCROLL_CLASS, AD_FIRE);
+				if (!rn2(10)) destroy_item(SPBOOK_CLASS, AD_FIRE);
+			}
+			/* other effects */
+			if (youdef) {
+				burn_away_slime();
+				melt_frozen_air();
+			}
+			return xdamagey(magr, mdef, attk, dmg);
+
+		case AD_COLD:
+			/* message */
+			if (youdef || canspotmon(mdef)) {
+				pline("%s%s covered in frost.",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "'re" : " is"
+					);
+			}
+			/* do effect */
+			if (Cold_res(mdef)) {
+				if (youdef || canseemon(mdef)) {
+					shieldeff(tarx, tary);
+					if (youdef) pline("But you resist the effects.");
+					else pline("But %s resists the effects.", mhe(mdef));
+				}
+				dmg = 0;
+			}
+			/* damage inventory */
+			if (!InvCold_res(mdef)){
+				impossible("TODO: destroy_item2");
+				destroy_item(POTION_CLASS, AD_FIRE);
+			}
+			/* other effects */
+			if (youdef) {
+				roll_frigophobia();
+			}
+			return xdamagey(magr, mdef, attk, dmg);
+
+		case AD_MAGM:
+			/* message */
+			if (youdef || canspotmon(mdef)) {
+				pline("%s %s hit by a shower of missiles!",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "are" : "is"
+					);
+			}
+			/* do effect */
+			if (Magic_res(mdef)) {
+				if (youdef || canseemon(mdef)) {
+					shieldeff(tarx, tary);
+					pline_The("missiles bounce off!");
+				}
+				dmg = 0;
+			}
+			return xdamagey(magr, mdef, attk, dmg);
+
+		case AD_STAR:
+			/* message */
+			if (youdef || canspotmon(mdef)) {
+				pline("%s %s hit by a shower of silver stars!",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "are" : "is"
+					);
+			}
+			/* special antimagic effect */
+			if (youdef)
+				drain_en(dmg / 2);
+			else
+				mdef->mspec_used += dmg / 2;
+			/* approximate as dmn/3 silver stars */
+			
+			if (Half_phys(mdef))
+				dmg = (dmg + 1) / 2;
+			if (youdef && u.uvaul_duration)
+				dmg = (dmg + 1) / 2;
+
+			if (dmg > 0) {
+				int i;
+				/* reduce by DR */
+				for (i = dmn / 3; i > 0; i--) {
+					dmg -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+				}
+				/* deals silver-hating damage */
+				if (hates_silver(youdef ? youracedata : mdef->data)) {
+					for (i = dmn / 3; i > 0; i--) {
+						dmg += rnd(20);
+					}
+				}
+			}
+			else {
+				dmg = 1;
+			}
+			return xdamagey(magr, mdef, attk, dmg);
+		}
+	}
+	/* ranged magic */
+	else {
+		impossible("TODO: write ranged elemental spells");
+	}
+	/* should not be reached */
+	return MM_MISS;
+}
+
 
 /* return values:
  * 1: successful spell

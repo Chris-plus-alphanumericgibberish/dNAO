@@ -25,6 +25,7 @@
 #define Stone_res(mon)		((mon)==&youmonst ? Stone_resistance : resists_ston((mon)))
 #define Magic_res(mon)		((mon)==&youmonst ? Antimagic : resists_magm((mon)))
 #define Half_phys(mon)		((mon)==&youmonst ? Half_physical_damage : mon_resistance((mon), HALF_PHDAM))
+#define Half_spel(mon)		((mon)==&youmonst ? Half_spell_damage : mon_resistance((mon), HALF_SPDAM))
 #define Change_res(mon)		((mon)==&youmonst ? Unchanging : mon_resistance((mon), UNCHANGING))
 #define creature_at(x,y)	(isok(x,y) ? MON_AT(x, y) ? level.monsters[x][y] : (x==u.ux && y==u.uy) ? &youmonst : (struct monst *)0 : (struct monst *)0)
 
