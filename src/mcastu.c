@@ -1583,8 +1583,8 @@ elec_spell:
 			dmg = 0;
 		}
 		if(!InvShock_resistance){
-			destroy_item(WAND_CLASS, AD_ELEC);
-			if(!rn2(10)) destroy_item(RING_CLASS, AD_ELEC);
+			destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+			if(!rn2(10)) destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 		}
 		
 		stop_occupation();
@@ -1598,9 +1598,9 @@ fire_spell:
 			dmg = 0;
 		}
 		if(!InvFire_resistance) {
-			destroy_item(POTION_CLASS, AD_FIRE);
-			if(!rn2(6)) destroy_item(SCROLL_CLASS, AD_FIRE);
-			if(!rn2(10)) destroy_item(SPBOOK_CLASS, AD_FIRE);
+			destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+			if(!rn2(6)) destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+			if(!rn2(10)) destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 		}
 		burn_away_slime();
 		melt_frozen_air();
@@ -1615,7 +1615,7 @@ cold_spell:
 			dmg = 0;
 		}
 		roll_frigophobia();
-		if(!InvCold_resistance) destroy_item(POTION_CLASS, AD_COLD);
+		if(!InvCold_resistance) destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 		stop_occupation();
 		break;
 	    case AD_MAGM:
@@ -1877,7 +1877,7 @@ int spellnum;
 				dmg = 0;
 			} 
 			if (!InvAcid_resistance) {
-				destroy_item(POTION_CLASS, AD_FIRE);
+				destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 			}
 			erode_obj(uwep, TRUE, FALSE);
 			erode_obj(uswapwep, TRUE, FALSE);
@@ -1938,9 +1938,9 @@ int spellnum;
 	    dmg = d(8, 6);
 	}
 	if (!InvFire_resistance) {
-		destroy_item(SCROLL_CLASS, AD_FIRE);
-		destroy_item(POTION_CLASS, AD_FIRE);
-		destroy_item(SPBOOK_CLASS, AD_FIRE);
+		destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+		destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+		destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 	}
 	if (Half_spell_damage) dmg = (dmg + 1) / 2;
 	if(u.uvaul_duration) dmg = (dmg + 1) / 2;
@@ -1970,7 +1970,7 @@ int spellnum;
 	roll_frigophobia();
 	if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 	if (!InvCold_resistance) {
-		destroy_item(POTION_CLASS, AD_COLD);
+		destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 	}
 	stop_occupation();
 	break;
@@ -1998,7 +1998,7 @@ int spellnum;
 		roll_frigophobia();
 		if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 		if (!InvCold_resistance) {
-			if(hfdmg > rnd(20)) destroy_item(POTION_CLASS, AD_COLD);
+			if(hfdmg > rnd(20)) destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 		}
 		stop_occupation();
 	}break;
@@ -2020,8 +2020,8 @@ int spellnum;
 			dmg = d(8, 6);
 		}
 		if (!(reflects || InvShock_resistance)) {
-			destroy_item(WAND_CLASS, AD_ELEC);
-			destroy_item(RING_CLASS, AD_ELEC);
+			destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+			destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 		}
 		if (Half_spell_damage) dmg = (dmg + 1) / 2;
 		if(u.uvaul_duration) dmg = (dmg + 1) / 2;
@@ -2054,13 +2054,13 @@ int spellnum;
 		} else if(!Fire_resistance && species_resists_cold(&youmonst)){
 			You("are burned by %s of silver light!", rays);
 			dmg = (d(n,20)*3+1)/2;
-			destroy_item(SCROLL_CLASS, AD_FIRE);
-			destroy_item(POTION_CLASS, AD_FIRE);
-			destroy_item(SPBOOK_CLASS, AD_FIRE);
+			destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+			destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+			destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 		} else if(!Cold_resistance && species_resists_fire(&youmonst)){
 			You("are frozen by %s of silver light!", rays);
 			dmg = (d(n,20)*3+1)/2;
-			destroy_item(POTION_CLASS, AD_COLD);
+			destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 		} else if(hates_unholy(youracedata)){
 			You("are seared by %s of unholy light!", rays);
 			dmg = d(n,20) + d(n,9);
@@ -2070,22 +2070,22 @@ int spellnum;
 		} else if(!Fire_resistance){
 			You("are burned by %s of silver light!", rays);
 			dmg = d(n,20);
-			destroy_item(SCROLL_CLASS, AD_FIRE);
-			destroy_item(POTION_CLASS, AD_FIRE);
-			destroy_item(SPBOOK_CLASS, AD_FIRE);
+			destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+			destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+			destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 		} else if(!Shock_resistance){
 			You("are shocked by %s of silver light!", rays);
 			dmg = d(n,20);
-			destroy_item(WAND_CLASS, AD_ELEC);
-			destroy_mitem(mtmp, RING_CLASS, AD_ELEC);
+			destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+			destroy_item(mtmp, RING_CLASS, AD_ELEC);
 		} else if(!Cold_resistance){
 			You("are frozen by %s of silver light!", rays);
 			dmg = d(n,20);
-			destroy_item(POTION_CLASS, AD_COLD);
+			destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 		} else if(!Acid_resistance){
 			You("are burned by %s of silver light!", rays);
 			dmg = d(n,20);
-			destroy_item(POTION_CLASS, AD_FIRE);
+			destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 		} else {
 			You("are pierced by %s of silver light!", rays);
 			dmg = 0;
@@ -2104,13 +2104,13 @@ int spellnum;
 		if(!Fire_resistance && species_resists_cold(&youmonst)){
 			You("are burned by golden light!");
 			dmg = (d(2,12)*3+1)/2;
-			destroy_item(SCROLL_CLASS, AD_FIRE);
-			destroy_item(POTION_CLASS, AD_FIRE);
-			destroy_item(SPBOOK_CLASS, AD_FIRE);
+			destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+			destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+			destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 		} else if(!Cold_resistance && species_resists_fire(&youmonst)){
 			You("are frozen by golden light!");
 			dmg = (d(2,12)*3+1)/2;
-			destroy_item(POTION_CLASS, AD_COLD);
+			destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 		} else if(hates_silver(youracedata)){
 			You("are seared by golden light!");
 			dmg = d(2,12) + d(1,20);
@@ -2123,22 +2123,22 @@ int spellnum;
 		} else if(!Fire_resistance){
 			You("are burned by golden light!");
 			dmg = d(2,12);
-			destroy_item(SCROLL_CLASS, AD_FIRE);
-			destroy_item(POTION_CLASS, AD_FIRE);
-			destroy_item(SPBOOK_CLASS, AD_FIRE);
+			destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+			destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+			destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 		} else if(!Shock_resistance){
 			You("are shocked by golden light!");
 			dmg = d(2,12);
-			destroy_item(WAND_CLASS, AD_ELEC);
-			destroy_mitem(mtmp, RING_CLASS, AD_ELEC);
+			destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+			destroy_item(mtmp, RING_CLASS, AD_ELEC);
 		} else if(!Cold_resistance){
 			You("are frozen by golden light!");
 			dmg = d(2,12);
-			destroy_item(POTION_CLASS, AD_COLD);
+			destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 		} else if(!Acid_resistance){
 			You("are burned by golden light!");
 			dmg = d(2,12);
-			destroy_item(POTION_CLASS, AD_FIRE);
+			destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 		} else {
 			You("are slashed by golden light!");
 			dmg = 0;
@@ -4825,9 +4825,9 @@ uspsibolt:
 	} else
 	    dmg = d(8, 6);
 	(void) burnarmor(mtmp);
-	destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-	destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
-	destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+	destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+	destroy_item(mtmp, POTION_CLASS, AD_FIRE);
+	destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
 	(void) burn_floor_paper(mtmp->mx, mtmp->my, TRUE, FALSE);
 	break;
     case LIGHTNING_BOLT:
@@ -4850,8 +4850,8 @@ uspsibolt:
 		break;
 	} else
 	    dmg = d(8, 6);
-	destroy_mitem(mtmp, WAND_CLASS, AD_ELEC);
-	destroy_mitem(mtmp, RING_CLASS, AD_ELEC);
+	destroy_item(mtmp, WAND_CLASS, AD_ELEC);
+	destroy_item(mtmp, RING_CLASS, AD_ELEC);
 	break;
     }
 	case SILVER_RAYS:{
@@ -4886,15 +4886,15 @@ uspsibolt:
 				pline("%s is burned by %s of silver light!",
 					  Monnam(mtmp), rays);
 			dmg = (d(n,20)*3+1)/2;
-			destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
-			destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+			destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+			destroy_item(mtmp, POTION_CLASS, AD_FIRE);
+			destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
 		} else if(!resists_cold(mtmp) && species_resists_fire(mtmp)){
 			if (yours || canseemon(mtmp))
 				pline("%s is frozen by %s of silver light!",
 					  Monnam(mtmp), rays);
 			dmg = (d(n,20)*3+1)/2;
-			destroy_mitem(mtmp, POTION_CLASS, AD_COLD);
+			destroy_item(mtmp, POTION_CLASS, AD_COLD);
 		} else if(hates_unholy_mon(mtmp)){
 			if (yours || canseemon(mtmp))
 				pline("%s is seared by %s of unholy light!",
@@ -4910,28 +4910,28 @@ uspsibolt:
 				pline("%s is burned by %s of silver light!",
 					  Monnam(mtmp), rays);
 			dmg = d(n,20);
-			destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
-			destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+			destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+			destroy_item(mtmp, POTION_CLASS, AD_FIRE);
+			destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
 		} else if(!resists_elec(mtmp)){
 			if (yours || canseemon(mtmp))
 				pline("%s is shocked by %s of silver light!",
 					  Monnam(mtmp), rays);
 			dmg = d(n,20);
-			destroy_mitem(mtmp, WAND_CLASS, AD_ELEC);
-			destroy_mitem(mtmp, RING_CLASS, AD_ELEC);
+			destroy_item(mtmp, WAND_CLASS, AD_ELEC);
+			destroy_item(mtmp, RING_CLASS, AD_ELEC);
 		} else if(!resists_cold(mtmp)){
 			if (yours || canseemon(mtmp))
 				pline("%s is frozen by %s of silver light!",
 					  Monnam(mtmp), rays);
 			dmg = d(n,20);
-			destroy_mitem(mtmp, POTION_CLASS, AD_COLD);
+			destroy_item(mtmp, POTION_CLASS, AD_COLD);
 		} else if(!resists_acid(mtmp)){
 			if (yours || canseemon(mtmp))
 				pline("%s is burned by %s of silver light!",
 					  Monnam(mtmp), rays);
 			dmg = d(n,20);
-			destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+			destroy_item(mtmp, POTION_CLASS, AD_FIRE);
 		} else {
 			if (yours || canseemon(mtmp))
 				pline("%s is pierced by %s of silver light!",
@@ -4950,15 +4950,15 @@ uspsibolt:
 				pline("%s is burned by golden light!",
 					  Monnam(mtmp));
 			dmg = (d(2,12)*3+1)/2;
-			destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
-			destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+			destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+			destroy_item(mtmp, POTION_CLASS, AD_FIRE);
+			destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
 		} else if(!resists_cold(mtmp) && species_resists_fire(mtmp)){
 			if (yours || canseemon(mtmp))
 				pline("%s is frozen by golden light!",
 					  Monnam(mtmp));
 			dmg = (d(2,12)*3+1)/2;
-			destroy_mitem(mtmp, POTION_CLASS, AD_COLD);
+			destroy_item(mtmp, POTION_CLASS, AD_COLD);
 		} else if(hates_silver(mtmp->data)){
 			if (yours || canseemon(mtmp))
 				pline("%s is seared by golden light!",
@@ -4979,28 +4979,28 @@ uspsibolt:
 				pline("%s is burned by golden light!",
 					  Monnam(mtmp));
 			dmg = d(2,12);
-			destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
-			destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+			destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+			destroy_item(mtmp, POTION_CLASS, AD_FIRE);
+			destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
 		} else if(!resists_elec(mtmp)){
 			if (yours || canseemon(mtmp))
 				pline("%s is shocked by golden light!",
 					  Monnam(mtmp));
 			dmg = d(2,12);
-			destroy_mitem(mtmp, WAND_CLASS, AD_ELEC);
-			destroy_mitem(mtmp, RING_CLASS, AD_ELEC);
+			destroy_item(mtmp, WAND_CLASS, AD_ELEC);
+			destroy_item(mtmp, RING_CLASS, AD_ELEC);
 		} else if(!resists_cold(mtmp)){
 			if (yours || canseemon(mtmp))
 				pline("%s is frozen by golden light!",
 					  Monnam(mtmp));
 			dmg = d(2,12);
-			destroy_mitem(mtmp, POTION_CLASS, AD_COLD);
+			destroy_item(mtmp, POTION_CLASS, AD_COLD);
 		} else if(!resists_acid(mtmp)){
 			if (yours || canseemon(mtmp))
 				pline("%s is burned by golden light!",
 					  Monnam(mtmp));
 			dmg = d(2,12);
-			destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+			destroy_item(mtmp, POTION_CLASS, AD_FIRE);
 		} else {
 			if (yours || canseemon(mtmp))
 				pline("%s is slashed by golden light!",

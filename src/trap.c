@@ -2231,9 +2231,9 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				mtmp->mhpmax -= rn2(num + 1);
 			}
 			if (burnarmor(mtmp) || rn2(3)) {
-			    (void) destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			    (void) destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
-			    (void) destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+			    (void) destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+			    (void) destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
+			    (void) destroy_item(mtmp, POTION_CLASS, AD_FIRE);
 			}
 			if (burn_floor_paper(mtmp->mx, mtmp->my, see_it, FALSE) &&
 				!see_it && distu(mtmp->mx, mtmp->my) <= 3*3)
@@ -2953,9 +2953,9 @@ struct obj *box;	/* null for floor trap */
 	melt_frozen_air();
 
 	if (burnarmor(&youmonst) || (rn2(3) && !InvFire_resistance)) {
-	    destroy_item(SCROLL_CLASS, AD_FIRE);
-	    destroy_item(SPBOOK_CLASS, AD_FIRE);
-	    destroy_item(POTION_CLASS, AD_FIRE);
+	    destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+	    destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
+	    destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 	}
 	if (!box && burn_floor_paper(u.ux, u.uy, see_it, TRUE) && !see_it)
 	    You("smell paper burning.");
@@ -4745,8 +4745,8 @@ boolean disarm;
 			    dmg = d(4, 4);
 			}
 			if(!InvShock_resistance){
-				destroy_item(RING_CLASS, AD_ELEC);
-				destroy_item(WAND_CLASS, AD_ELEC);
+				destroy_item(&youmonst, RING_CLASS, AD_ELEC);
+				destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
 			}
 			if (dmg) losehp(dmg, "electric shock", KILLED_BY_AN);
 			break;
@@ -5017,9 +5017,9 @@ burn_stuff:
 	useup(obj);
     }
 	if(!(Wwalking || InvFire_resistance)){
-		destroy_item(SCROLL_CLASS, AD_FIRE);
-		destroy_item(SPBOOK_CLASS, AD_FIRE);
-		destroy_item(POTION_CLASS, AD_FIRE);
+		destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+		destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
+		destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 	}
     return(FALSE);
 }

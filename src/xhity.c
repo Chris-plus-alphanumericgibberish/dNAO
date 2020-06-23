@@ -16,7 +16,6 @@ Claws of the Revenancer w/ rings
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
-STATIC_DCL int FDECL(destroy_item2, (struct monst *, int, int));
 STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *, boolean));
 STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *));
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
@@ -2117,7 +2116,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 #undef SUBOUT_MAINWEPB
 #undef SUBOUT_XWEP
 
-/* destroy_item2()
+/* destroy_item()
  *
  * Called when item(s) are supposed to be destroyed in a defender's inventory
  *
@@ -2132,7 +2131,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
  * while voiding the return.
  */
 int
-destroy_item2(mtmp, osym, dmgtyp)
+destroy_item(mtmp, osym, dmgtyp)
 struct monst * mtmp;
 int osym;
 int dmgtyp;
@@ -2140,7 +2139,7 @@ int dmgtyp;
 	boolean youdef = mtmp == &youmonst;
 	struct permonst * data = (youdef) ? youracedata : mtmp->data;
 	int vis = (youdef) ? TRUE : canseemon(mtmp);
-	boolean any_destroyed = FALSE;
+	int ndestroyed = 0;
 	struct obj *obj, *obj2;
 	int dmg, xresist, skip;
 	long i, cnt, quan;
@@ -2268,7 +2267,7 @@ int dmgtyp;
 					else m_useup(mtmp, obj);
 				}
 			}
-			any_destroyed = TRUE;
+			ndestroyed += cnt;
 
 			/* possibly deal damage */
 			if (dmg) {
@@ -2301,8 +2300,15 @@ int dmgtyp;
 			}
 		}
 	}
+	if (ndestroyed && roll_madness(MAD_TALONS) && osym != WAND_CLASS){
+		if (ndestroyed > 1)
+			You("panic after some of your possessions are destroyed!");
+		else You("panic after one of your possessions is destroyed!");
+		HPanicking += 1 + rnd(6);
+	}
+
 	/* return if anything was destroyed */
-	return (any_destroyed ? MM_HIT : MM_MISS);
+	return (ndestroyed ? MM_HIT : MM_MISS);
 }
 
 /* noises()
@@ -4135,11 +4141,11 @@ boolean ranged;
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvFire_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, SCROLL_CLASS, AD_FIRE);
+					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_FIRE);
+					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				if ((int)mlev(magr) > rn2(25))
-					destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE);
+					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 			}
 			/* reduce damage via resistance OR instakill */
 			if (Fire_res(mdef))
@@ -4262,7 +4268,7 @@ boolean ranged;
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvCold_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_COLD);
+					destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
 			/* reduce damage via resistance */
 			if (Cold_res(mdef))
@@ -4337,7 +4343,7 @@ boolean ranged;
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvShock_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, WAND_CLASS, AD_ELEC);
+					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 			}
 			/* reduce damage via resistance */
 			if (Shock_res(mdef))
@@ -9158,9 +9164,9 @@ int vis;
 			/* destroy items */
 			if (!InvShock_res(mdef)){
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, WAND_CLASS, AD_ELEC);
+					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, RING_CLASS, AD_ELEC);
+					destroy_item(mdef, RING_CLASS, AD_ELEC);
 			}
 			/* golem effects */
 			if (youdef)
@@ -9204,7 +9210,7 @@ int vis;
 			/* destroy items */
 			if (!InvCold_res(mdef)){
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_COLD);
+					destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
 			/* golem effects */
 			if (youdef)
@@ -9271,11 +9277,11 @@ int vis;
 			/* destroy items */
 			if (!InvFire_res(mdef)) {
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, SCROLL_CLASS, AD_FIRE);
+					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_FIRE);
+					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				if (mlev(magr) > rn2(25))
-					destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE);
+					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 			}
 			/* golem effects */
 			if (youdef)
@@ -9600,25 +9606,25 @@ expl_common:
 			if (attk->adtyp == AD_FIRE || attk->adtyp == AD_EFIR || attk->adtyp == AD_ACFR){
 				if (!InvFire_res(mdef)){
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, SCROLL_CLASS, AD_FIRE);
+						destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, POTION_CLASS, AD_FIRE);
+						destroy_item(mdef, POTION_CLASS, AD_FIRE);
 					if (mlev(magr) > rn2(25))
-						destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE);
+						destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 				}
 			}
 			else if (attk->adtyp == AD_ELEC || attk->adtyp == AD_EELC){
 				if (!InvShock_res(mdef)){
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, WAND_CLASS, AD_ELEC);
+						destroy_item(mdef, WAND_CLASS, AD_ELEC);
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, RING_CLASS, AD_ELEC);
+						destroy_item(mdef, RING_CLASS, AD_ELEC);
 				}
 			}
 			else if (attk->adtyp == AD_COLD || attk->adtyp == AD_ECLD){
 				if (!InvCold_res(mdef)){
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, POTION_CLASS, AD_COLD);
+						destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
 			}
 			break;
@@ -10045,11 +10051,11 @@ int vis;
 		/* damage inventory */
 		if (!InvFire_res(mdef) && !(youdef ? Reflecting : mon_resistance(mdef, REFLECTING))) {
 			if ((int)mlev(magr) > rn2(20))
-				destroy_item2(mdef, SCROLL_CLASS, AD_FIRE);
+				destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 			if ((int)mlev(magr) > rn2(20))
-				destroy_item2(mdef, POTION_CLASS, AD_FIRE);
+				destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			if ((int)mlev(magr) > rn2(25))
-				destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE);
+				destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 		}
 
 		if (youdef){
@@ -13436,7 +13442,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		/* inventory damage */
 		if (!InvCold_res(mdef)) {
 			if (mlev(magr) > rn2(20))
-				destroy_item2(mdef, POTION_CLASS, AD_COLD);
+				destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
 
