@@ -1398,23 +1398,6 @@ register const char *let,*word;
 		    }
 		    /* they typed a letter (not a space) at the prompt */
 		}
-		if(allowcnt == 2 && !strcmp(word,"throw")) {
-		    /* permit counts for throwing gold, but don't accept
-		     * counts for other things since the throw code will
-		     * split off a single item anyway */
-#ifdef GOLDOBJ
-		    if (ilet != def_oc_syms[COIN_CLASS])
-#endif
-			allowcnt = 1;
-		    if(cnt == 0 && prezero) return((struct obj *)0);
-		    if(cnt > 1) {
-			You("can only throw one item at a time.");
-			continue;
-		    }
-		}
-#ifdef GOLDOBJ
-		flags.botl = 1; /* May have changed the amount of money */
-#endif
 #ifdef REDO
 		savech(ilet);
 #endif
@@ -1425,6 +1408,16 @@ register const char *let,*word;
 #ifdef REDO
 			if (in_doagain) return((struct obj *) 0);
 #endif
+			continue;
+		} else if (allowcnt == 2 && !strcmp(word,"throw") && cnt > 1 && !(
+#ifdef GOLDOBJ
+			(ilet == def_oc_syms[COIN_CLASS]) ||
+#endif
+			(otmp->oartifact == ART_FLUORITE_OCTAHEDRON)
+			)) {
+			You("can only throw one item at a time.");
+			allowcnt = 1;
+			if (cnt == 0 && prezero) return((struct obj *)0);
 			continue;
 		} else if (cnt < 0 || otmp->quan < cnt) {
 			You("don't have that many!  You have only %ld.",
