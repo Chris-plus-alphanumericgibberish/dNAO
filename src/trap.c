@@ -4,7 +4,7 @@
 
 #include "hack.h"
 
-extern const char * const destroy_strings[];	/* from zap.c */
+extern const char * const destroy_strings[];	/* from xhityhelpers.c */
 
 STATIC_DCL void FDECL(dofiretrap, (struct obj *));
 STATIC_DCL void NDECL(domagictrap);

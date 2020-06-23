@@ -4963,16 +4963,6 @@ register struct obj *obj;
 	return TRUE;
 }
 
-const char * const destroy_strings[] = {	/* also used in trap.c */
-	"freezes and shatters", "freeze and shatter", "shattered potion",
-	"boils and explodes", "boil and explode", "boiling potion",
-	"catches fire and burns", "catch fire and burn", "burning scroll",
-	"catches fire and burns", "catch fire and burn", "burning book",
-	"turns to dust and vanishes", "turn to dust and vanish", "",
-	"shoots a spray of sparks", "shoots sparks and arcing current", "discharging wand",
-	"boils vigorously", "boil vigorously", "boiling potion"
-};
-
 #endif /*OVL3*/
 #ifdef OVL2
 

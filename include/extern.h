@@ -3034,7 +3034,6 @@ E int FDECL(dowrite, (struct obj *));
 E int FDECL(getvis, (struct monst *, struct monst *, int, int));
 E boolean FDECL(attack2, (struct monst *));
 E int FDECL(xattacky, (struct monst *, struct monst *, int, int));
-E int FDECL(destroy_item, (struct monst *, int, int));
 E int FDECL(xmeleehity, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, boolean));
 E struct attack * FDECL(getattk, (struct monst *, struct monst *, int *, int *, struct attack *, boolean, int *, int *));
 E boolean FDECL(slips_free, (struct monst *, struct monst *, struct attack *, int));
@@ -3081,6 +3080,7 @@ E boolean FDECL(obj_silver_searing, (struct obj *));
 E boolean FDECL(obj_jade_searing, (struct obj *));
 E int FDECL(hatesobjdmg, (struct monst *, struct obj *));
 E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
+E int FDECL(destroy_item, (struct monst *, int, int));
 
 /* ### zap.c ### */
 
