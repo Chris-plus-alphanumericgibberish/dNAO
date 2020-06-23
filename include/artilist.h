@@ -880,11 +880,23 @@ A("Sky Render",			KATANA,							(const char *)0,
 /*Needs encyc entry*/
 /* Crystal sword whose use comes with a price of your sanity */
 A("Callandor",			CRYSTAL_SWORD,					(const char *)0,
-	6660L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT, // there's an opportunity for a sick name here too
+	7777L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT, // there's an opportunity for a sick name here too
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT), 
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROP3(HALF_SPDAM, ENERGY_REGENERATION, SPELLBOOST), NOFLAG,
+	PROP0(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+/*Needs encyc entry*/
+/* Fluted wand that boosts spellcasting */
+A("The Rod of Tar Valon",			WAN_STRIKING,	"white fluted wand",
+	7777L, BONE, MZ_DEFAULT, WT_DEFAULT,
+	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT), 
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROP2(ENERGY_REGENERATION, SPELLBOOST), NOFLAG,
 	PROP0(), NOFLAG,
 	NOINVOKE, NOFLAG
 	),

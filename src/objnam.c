@@ -992,9 +992,11 @@ boolean adjective;
 		/* special case */
 		if (obj->oartifact == ART_WEBWEAVER_S_CROOK)
 			return "chitin";
+		if (obj->oartifact == ART_ROD_OF_TAR_VALON)
+			return "ivory";
 		else
 			return "bone";
-		case SHELL_MAT:
+	case SHELL_MAT:
 			return "shell";
 	case DRAGON_HIDE:
 		/* for some reason, this is dragonhide? */

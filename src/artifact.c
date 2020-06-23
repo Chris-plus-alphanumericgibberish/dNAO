@@ -264,11 +264,14 @@ hack_artifacts()
 	if(aligns[flags.initalign].value == artilist[ART_CARNWENNAN].alignment){
 		artilist[ART_CARNWENNAN].gflags |= (ARTG_NAME); //name only
 	}
-	/* Callandor only works for natural male players */
+	/* Callandor only works for natural male players, and the Rod of TV is the opposite */
 	if (flags.initgend) {
 		artilist[ART_CALLANDOR].wprops[0] = NO_PROP;
 		artilist[ART_CALLANDOR].wprops[1] = NO_PROP;
 		artilist[ART_CALLANDOR].wprops[2] = NO_PROP;
+	} else {
+		artilist[ART_ROD_OF_TAR_VALON].wprops[0] = NO_PROP;
+		artilist[ART_ROD_OF_TAR_VALON].wprops[1] = NO_PROP;
 	}
 	/* Fix up fire brand and frost brand */
 	if (u.brand_otyp != STRANGE_OBJECT) {
@@ -500,8 +503,9 @@ aligntyp alignment;
 			/* skip nameable artifacts */
 			skip_if((a->gflags & ARTG_NAME));
 
-			/* skip Callandor for non-males */
+			/* skip for gendered sa'angreal */
 			skip_if(m == ART_CALLANDOR && flags.initgend);
+			skip_if(m == ART_ROD_OF_TAR_VALON && !flags.initgend);
 
 			/* skip artifacts that outright hate the player */
 			skip_if((a->aflags & ARTA_HATES) && (urace.selfmask & a->mflagsa));

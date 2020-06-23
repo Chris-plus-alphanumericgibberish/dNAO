@@ -5577,10 +5577,13 @@ int spell;
 			splcaster -= cast_bon;
 		}
 		
-		if(uwep && uwep->oartifact == ART_CALLANDOR && !flags.initgend){	// sa'angreal
+		if(uwep && ((uwep->oartifact == ART_CALLANDOR && !flags.initgend) ||
+					(uwep->oartifact == ART_ROD_OF_TAR_VALON && flags.initgend))
+		){	// sa'angreal
 			cast_bon = 2;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
+		
 		
 		if(Role_if(PM_WIZARD) && uwep->oclass == WAND_CLASS) {	// a tool of spellweaving
 			cast_bon = 1;
