@@ -4318,7 +4318,8 @@ int dx, dy, range, flat;
 					} else {
 						if (!otmp) {
 							/* normal non-fatal hit */
-							hit(fltxt, mon, exclam(tmp));
+							if (yours || canseemon(mon))
+								hit(fltxt, mon, exclam(tmp));
 						} else {
 							/* some armor was damaged or destroyed; no damage done */
 							 int i;
