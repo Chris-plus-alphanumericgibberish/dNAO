@@ -5565,14 +5565,12 @@ arti_invoke(obj)
 		// intentional that the dagger is always weaker than the spear
 		int dancer = 0;	
 		if (obj->oartifact == ART_BLADE_DANCER_S_DAGGER) dancer = 1; 
-		else {
-			if (uswapwep && uswapwep->oartifact && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER) dancer = 2;
-			else dancer = 1;
-		}
+		else if (uswapwep && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER) dancer = 2;
+		else dancer = 1;
 		
 		pline("You enter a %strance, giving you an edge in battle.", (dancer==2) ? "deep ":"");
 		// heal you up to half of your lost hp, modified by enchantment
-		int healamt = (u.uhpmax + 1 - u.uhp) / 2;
+		int healamt = (u.uhpmax + 1 - u.uhp) / ((dancer == 2)?2:4);
 		healamt = max(0, healamt * (obj->spe/10));
 		healup(healamt, 0, FALSE, FALSE);
 
@@ -5580,25 +5578,38 @@ arti_invoke(obj)
 		incr_itimeout(&HFast, rn1(u.ulevel, 50*dancer));
 		
 		// give you some protection
-		int gain = (u.ulevel/6 + obj->spe)*dancer;
-		
+		int l = u.ulevel;
+		int loglev;
+		int gain;
+
+		while (l) {
+			loglev++;
+			l /= 2;
+		}
+		gain = dancer*loglev - u.uspellprot; //refill spellprot, don't stack it.
 		if (gain > 0) {
 			if (!Blind) {
 			const char *hgolden = hcolor(NH_GOLDEN);
 
 			if (u.uspellprot)
-				pline_The("%s haze around you becomes more dense.", hgolden);
+				pline_The("%s haze around you becomes more dense.",
+					  hgolden);
 			else
 				pline_The("%s around you begins to shimmer with %s haze.",
-					(Underwater || Is_waterlevel(&u.uz)) ? "water" : "air", an(hgolden));
+					  (Underwater || Is_waterlevel(&u.uz)) ? "water" :
+					   u.uswallow ? mbodypart(u.ustuck, STOMACH) :
+					  IS_STWALL(levl[u.ux][u.uy].typ) ? "stone" : "air",
+					  an(hgolden));
 			}
 			u.uspellprot += gain;
-			u.uspellprot = min(u.ulevel*2, u.uspellprot);
+			if (u.uspellprot > 2*loglev)
+				u.uspellprot = 2*loglev;
 			
-			u.usptime = (u.ulevel * ((obj->blessed) ? 50 : ((obj->cursed) ? 10 : 30)))/15;
+			u.usptime = (u.ulevel * dancer * ((obj->blessed) ? 30 : ((obj->cursed) ? 5 : 15)))/30;
 			u.uspmtime = (obj->blessed) ? 10 : ((obj->cursed) ? 1 : 5);
 			
 			find_ac();
+
 		} else {
 			Your("skin feels warm for a moment.");
 		}
