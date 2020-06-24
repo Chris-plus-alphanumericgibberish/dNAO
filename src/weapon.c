@@ -2236,8 +2236,9 @@ struct obj *otmp;
 			bonus *= 1.5;
 		
 		if(otmp==mwp 
-		&& (is_rapier(otmp)
+		&& (is_rapier(otmp) || is_rakuyo(otmp)
 			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1 == 0)
+			|| otmp->otyp == SET_OF_CROW_TALONS
 			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
 			|| otmp->oartifact == ART_FRIEDE_S_SCYTHE
 		)){
@@ -2297,8 +2298,9 @@ struct obj *otmp;
 			bonus *= 1.5;
 		
 		if(otmp==uwep 
-		&& (is_rapier(otmp)
+		&& (is_rapier(otmp) || is_rakuyo(otmp)
 			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1 == 0)
+			|| otmp->otyp == SET_OF_CROW_TALONS
 			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
 			|| otmp->oartifact == ART_FRIEDE_S_SCYTHE
 		)){
