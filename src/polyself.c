@@ -1434,11 +1434,11 @@ dogaze()
 		   	         dmg = 0;
 		   	     }
 		   	     if((int) u.ulevel > rn2(20))
-		   	         (void) destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
+		   	         (void) destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
 		   	     if((int) u.ulevel > rn2(20))
-		   	         (void) destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+		   	         (void) destroy_item(mtmp, POTION_CLASS, AD_FIRE);
 		   	     if((int) u.ulevel > rn2(25))
-		   	         (void) destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+		   	         (void) destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
 		   	 break;
 		   	 case AD_COLD:
 		   	     dmg = d(damn,damd);
@@ -1448,7 +1448,7 @@ dogaze()
 		   	         dmg = 0;
 		   	     }
 		   	     if((int) u.ulevel > rn2(20))
-		   	         (void) destroy_mitem(mtmp, POTION_CLASS, AD_COLD);
+		   	         (void) destroy_item(mtmp, POTION_CLASS, AD_COLD);
 		   	 break;
 		   	 case AD_ELEC:
 		   	     dmg = d(damn,damd);

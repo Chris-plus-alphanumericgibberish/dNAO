@@ -2030,7 +2030,7 @@ pray_goat()
 				}
 			}
 			if (!InvAcid_resistance) {
-				destroy_item(POTION_CLASS, AD_FIRE);
+				destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 			}
 			erode_obj(uwep, TRUE, FALSE);
 			erode_obj(uswapwep, TRUE, FALSE);
