@@ -5570,15 +5570,17 @@ arti_invoke(obj)
 			else dancer = 1;
 		}
 		
+		pline("You enter a %strance, giving you an edge in battle.", (dancer==2) ? "deep ":"");
 		// heal you up to half of your lost hp, modified by enchantment
 		int healamt = (u.uhpmax + 1 - u.uhp) / 2;
-		healup(healamt/(10-obj->spe), 0, FALSE, FALSE);
+		healamt = max(0, healamt * (obj->spe/10));
+		healup(healamt, 0, FALSE, FALSE);
 
 		// make you very fast for a limited time
 		incr_itimeout(&HFast, rn1(u.ulevel, 50*dancer));
-	
+		
 		// give you some protection
-		int gain = (u.ulevel/10 + obj->spe)*dancer;
+		int gain = (u.ulevel/6 + obj->spe)*dancer;
 		
 		if (gain > 0) {
 			if (!Blind) {
@@ -5591,7 +5593,10 @@ arti_invoke(obj)
 					(Underwater || Is_waterlevel(&u.uz)) ? "water" : "air", an(hgolden));
 			}
 			u.uspellprot += gain;
-			u.uspmtime = (u.ulevel * (obj->blessed) ? 50 : ((obj->cursed) ? 10 : 30))/15;
+			u.uspellprot = min(u.ulevel*2, u.uspellprot);
+			
+			u.usptime = (u.ulevel * ((obj->blessed) ? 50 : ((obj->cursed) ? 10 : 30)))/15;
+			u.uspmtime = (obj->blessed) ? 10 : ((obj->cursed) ? 1 : 5);
 			
 			find_ac();
 		} else {
