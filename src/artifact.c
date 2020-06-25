@@ -1992,9 +1992,9 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			Sprintf(buf, "fiery");
 			and = TRUE;
 		}
-	    if (!rn2(4)) (void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
-	    if (!rn2(4)) (void) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
-	    if (!rn2(7)) (void) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
+	    if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+	    if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+	    if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 	    if (youdefend && Slimed) burn_away_slime();
 	    if (youdefend && FrozenAir) melt_frozen_air();
 		if(youdefend ? !Fire_resistance : !resists_fire(mdef)){
@@ -2006,8 +2006,8 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			and ? Strcat(buf, " and crackling") : Sprintf(buf, "crackling");
 			and = TRUE;
 		}
-	    if (!rn2(5)) (void) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
-	    if (!rn2(5)) (void) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
+	    if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
+	    if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 		if(youdefend ? !Shock_resistance : !resists_elec(mdef)){
 			*dmgptr += d(dnum,4);
 		}
@@ -2017,7 +2017,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			and ? Strcat(buf, " yet freezing") : Sprintf(buf, "freezing");
 			and = TRUE;
 		}
-	    if (!rn2(4)) (void) destroy_mitem(mdef, POTION_CLASS, AD_COLD);
+	    if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 		if(youdefend ? !Cold_resistance : !resists_cold(mdef)){
 			*dmgptr += d(dnum,4);
 		}
@@ -2081,7 +2081,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			and ? Strcat(buf, " and sizzling") : Sprintf(buf, "sizzling");
 			and = TRUE;
 		}
-	    if (!rn2(2)) (void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+	    if (!rn2(2)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 		if(youdefend ? !Acid_resistance : !resists_acid(mdef)){
 			*dmgptr += d(dnum,4);
 		}
@@ -2954,9 +2954,9 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				(*truedmgptr) += rnd(6) + otmp->spe;
 		}
 		if (!InvFire_res(mdef)){
-			if (!rn2(3)) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
-			if (!rn2(3)) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
-			if (!rn2(3)) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+			if (!rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+			if (!rn2(3)) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			if (!rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 		}
 	}
 	if (otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit){
@@ -2967,7 +2967,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				(*truedmgptr) += rnd(6) + otmp->spe;
 		}
 		if (!InvCold_res(mdef)){
-			if (!rn2(3)) destroy_mitem(mdef, POTION_CLASS, AD_COLD);
+			if (!rn2(3)) destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
 	if (otmp->otyp == SUNROD && otmp->lamplit) {
@@ -2979,11 +2979,11 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				(*truedmgptr) += rnd(6) + otmp->spe;
 		}
 		if (!InvShock_res(mdef)){
-			if (!rn2(3)) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
-			if (!rn2(3)) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
+			if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
+			if (!rn2(3)) destroy_item(mdef, RING_CLASS, AD_ELEC);
 		}
 		if (!InvAcid_res(mdef)){
-			if (rn2(3)) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
+			if (rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 		}
 		if (!resists_blnd(mdef)) {
 			if (youdef) {
@@ -3009,8 +3009,8 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 				*truedmgptr += d(2, 6);
 		}
 		if (!InvShock_res(mdef)) {
-			if (!rn2(3)) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
-			if (!rn2(3)) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
+			if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
+			if (!rn2(3)) destroy_item(mdef, RING_CLASS, AD_ELEC);
 		}
 		if (!resists_blnd(mdef)) {
 			if (youdef) {
@@ -3402,9 +3402,9 @@ boolean * messaged;
 			*messaged = TRUE;
 			}
 		if(oartifact != ART_PROFANED_GREATSCYTHE){
-			if (!rn2(4)) (void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
-			if (!rn2(4)) (void) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
-			if (!rn2(7)) (void) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
+			if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+			if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 		}
 	    if (youdef && Slimed) burn_away_slime();
 	    if (youdef && FrozenAir) melt_frozen_air();
@@ -3423,7 +3423,7 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 			}
-	    if (!rn2(4)) (void) destroy_mitem(mdef, POTION_CLASS, AD_COLD);
+	    if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 	}
 	if (oartifact == ART_SHADOWLOCK) {
 		if (!Cold_res(mdef)) {
@@ -3432,7 +3432,7 @@ boolean * messaged;
 				*messaged = TRUE;
 			}
 			*truedmgptr += d(2, 6) + otmp->spe;
-			if (!rn2(4)) (void)destroy_mitem(mdef, POTION_CLASS, AD_COLD);
+			if (!rn2(4)) (void)destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
 	if (attacks(AD_ELEC, otmp) || (oproperties&OPROP_ELECW)) {
@@ -3443,8 +3443,8 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}
-	    if (!rn2(5)) (void) destroy_mitem(mdef, RING_CLASS, AD_ELEC);
-	    if (!rn2(5)) (void) destroy_mitem(mdef, WAND_CLASS, AD_ELEC);
+	    if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
+	    if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 	}
 	if (attacks(AD_ACID, otmp) || (oproperties&OPROP_ACIDW)) {
 		if (attacks(AD_ACID, otmp) && (vis&VIS_MAGR)) {
@@ -3456,9 +3456,9 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}
-	    if (!rn2(2)) (void) destroy_mitem(mdef, POTION_CLASS, AD_FIRE);
-//	    if (!rn2(4)) (void) destroy_mitem(mdef, SCROLL_CLASS, AD_FIRE);
-//	    if (!rn2(7)) (void) destroy_mitem(mdef, SPBOOK_CLASS, AD_FIRE);
+	    if (!rn2(2)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+//	    if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+//	    if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 	}
 	if (arti_attack_prop(otmp, ARTA_MAGIC) && dieroll <= MB_MAX_DIEROLL) {
 		int dmg = basedmg;
@@ -4429,10 +4429,10 @@ boolean * messaged;
 	if (oartifact == ART_SHADOWLOCK) {
 		if (youagr) {
 			losehp(d(4,6) + otmp->spe + (Cold_resistance ? 0 : (d(2,6) + otmp->spe)), "a cold black blade", KILLED_BY);
-			if(!Cold_resistance && !rn2(4)) (void) destroy_mitem(magr, POTION_CLASS, AD_COLD);
+			if(!Cold_resistance && !rn2(4)) (void) destroy_item(magr, POTION_CLASS, AD_COLD);
 		} else if(magr->mtyp != PM_LEVISTUS){
 			magr->mhp -= d(4,6) + otmp->spe + (resists_cold(magr) ? 0 : (d(2,6) + otmp->spe));
-			if(!resists_cold(magr) && !rn2(4)) (void) destroy_mitem(magr, POTION_CLASS, AD_COLD);
+			if(!resists_cold(magr) && !rn2(4)) (void) destroy_item(magr, POTION_CLASS, AD_COLD);
 			// if(magr->mhp < 0){
 				// mondied(magr);
 			// }
@@ -5565,35 +5565,51 @@ arti_invoke(obj)
 		// intentional that the dagger is always weaker than the spear
 		int dancer = 0;	
 		if (obj->oartifact == ART_BLADE_DANCER_S_DAGGER) dancer = 1; 
-		else {
-			if (uswapwep && uswapwep->oartifact && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER) dancer = 2;
-			else dancer = 1;
-		}
+		else if (uswapwep && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER) dancer = 2;
+		else dancer = 1;
 		
+		pline("You enter a %strance, giving you an edge in battle.", (dancer==2) ? "deep ":"");
 		// heal you up to half of your lost hp, modified by enchantment
-		int healamt = (u.uhpmax + 1 - u.uhp) / 2;
-		healup(healamt/(10-obj->spe), 0, FALSE, FALSE);
+		int healamt = (u.uhpmax + 1 - u.uhp) / ((dancer == 2)?2:4);
+		healamt = max(0, healamt * (obj->spe/10));
+		healup(healamt, 0, FALSE, FALSE);
 
 		// make you very fast for a limited time
 		incr_itimeout(&HFast, rn1(u.ulevel, 50*dancer));
-	
-		// give you some protection
-		int gain = (u.ulevel/10 + obj->spe)*dancer;
 		
+		// give you some protection
+		int l = u.ulevel;
+		int loglev;
+		int gain;
+
+		while (l) {
+			loglev++;
+			l /= 2;
+		}
+		gain = dancer*loglev - u.uspellprot; //refill spellprot, don't stack it.
 		if (gain > 0) {
 			if (!Blind) {
 			const char *hgolden = hcolor(NH_GOLDEN);
 
 			if (u.uspellprot)
-				pline_The("%s haze around you becomes more dense.", hgolden);
+				pline_The("%s haze around you becomes more dense.",
+					  hgolden);
 			else
 				pline_The("%s around you begins to shimmer with %s haze.",
-					(Underwater || Is_waterlevel(&u.uz)) ? "water" : "air", an(hgolden));
+					  (Underwater || Is_waterlevel(&u.uz)) ? "water" :
+					   u.uswallow ? mbodypart(u.ustuck, STOMACH) :
+					  IS_STWALL(levl[u.ux][u.uy].typ) ? "stone" : "air",
+					  an(hgolden));
 			}
 			u.uspellprot += gain;
-			u.uspmtime = (u.ulevel * (obj->blessed) ? 50 : ((obj->cursed) ? 10 : 30))/15;
+			if (u.uspellprot > 2*loglev)
+				u.uspellprot = 2*loglev;
+			
+			u.usptime = (u.ulevel * dancer * ((obj->blessed) ? 30 : ((obj->cursed) ? 5 : 15)))/30;
+			u.uspmtime = (obj->blessed) ? 10 : ((obj->cursed) ? 1 : 5);
 			
 			find_ac();
+
 		} else {
 			Your("skin feels warm for a moment.");
 		}

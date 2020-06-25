@@ -1604,9 +1604,9 @@ struct monst *mtmp;
 			    pline_The("scroll erupts in a tower of flame!");
 			shieldeff(mtmp->mx, mtmp->my);
 			pline("%s is uninjured.", Monnam(mtmp));
-			(void) destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			(void) destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
-			(void) destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+			(void) destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+			(void) destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
+			(void) destroy_item(mtmp, POTION_CLASS, AD_FIRE);
 			num = (2*(rn1(3, 3) + 2 * bcsign(otmp)) + 1)/3;
 			if (Fire_resistance)
 			    You("are not harmed.");

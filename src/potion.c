@@ -3116,8 +3116,8 @@ dodip()
 			losehp(d(3,6) + 3*obj->spe, "discharging sunrod", KILLED_BY_AN);
 		}
 		if(!InvShock_resistance){
-			if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
-			if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+			if (!rn2(3)) destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+			if (!rn2(3)) destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 		}
 		losehp(Acid_resistance ? rnd(5) : rnd(10),
 			   "alchemic blast", KILLED_BY_AN);

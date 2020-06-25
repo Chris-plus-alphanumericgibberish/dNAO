@@ -481,11 +481,11 @@ boolean yours; /* is it your fault (for killing monsters) */
 		}
 
 		if (!(area->locations[i].shielded)) { /* Was affected */
-			idamres += destroy_mitem(mtmp, SCROLL_CLASS, (int) adtyp);
-			idamres += destroy_mitem(mtmp, SPBOOK_CLASS, (int) adtyp);
-			idamnonres += destroy_mitem(mtmp, POTION_CLASS, (int) adtyp);
-			idamnonres += destroy_mitem(mtmp, WAND_CLASS, (int) adtyp);
-			idamnonres += destroy_mitem(mtmp, RING_CLASS, (int) adtyp);
+			idamres += destroy_item(mtmp, SCROLL_CLASS, (int) adtyp);
+			idamres += destroy_item(mtmp, SPBOOK_CLASS, (int) adtyp);
+			idamnonres += destroy_item(mtmp, POTION_CLASS, (int) adtyp);
+			idamnonres += destroy_item(mtmp, WAND_CLASS, (int) adtyp);
+			idamnonres += destroy_item(mtmp, RING_CLASS, (int) adtyp);
 		}
 
 		if (area->locations[i].shielded) {
@@ -575,11 +575,11 @@ boolean yours; /* is it your fault (for killing monsters) */
 		}
 		if (adtyp == AD_FIRE) (void) burnarmor(&youmonst);
 		if(uhurt == 2){
-			destroy_item(SCROLL_CLASS, (int) adtyp);
-			destroy_item(SPBOOK_CLASS, (int) adtyp);
-			destroy_item(POTION_CLASS, (int) adtyp);
-			destroy_item(RING_CLASS, (int) adtyp);
-			destroy_item(WAND_CLASS, (int) adtyp);
+			destroy_item(&youmonst, SCROLL_CLASS, (int) adtyp);
+			destroy_item(&youmonst, SPBOOK_CLASS, (int) adtyp);
+			destroy_item(&youmonst, POTION_CLASS, (int) adtyp);
+			destroy_item(&youmonst, RING_CLASS, (int) adtyp);
+			destroy_item(&youmonst, WAND_CLASS, (int) adtyp);
 		}
 
 		ugolemeffects((int) adtyp, damu);
