@@ -10,9 +10,11 @@ extern void demonpet();
 
 extern void you_aggravate(struct monst *);
 
+STATIC_DCL void FDECL(cursetxt2, (struct monst *, struct monst *, boolean));
 STATIC_DCL int FDECL(choose_magic_spell, (int,int,boolean));
 STATIC_DCL int FDECL(choose_clerical_spell, (int,int,boolean));
 STATIC_DCL int FDECL(choose_psionic_spell, (int,int,boolean));
+STATIC_DCL int FDECL(elemspell, (struct monst *, struct monst *, struct attack *, int, int));
 STATIC_DCL boolean FDECL(is_undirected_spell,(int));
 STATIC_DCL boolean FDECL(is_aoe_spell,(int));
 STATIC_DCL boolean FDECL(spell_would_be_useless,(struct monst *,int));
@@ -49,6 +51,59 @@ boolean undirected;
 	    pline("%s points %s.", Monnam(mtmp), point_msg);
 	} else if ((!(moves % 4) || !rn2(4))) {
 	    if (flags.soundok) Norep("You hear a mumbled curse.");
+	}
+}
+
+/* feedback when frustrated creature couldn't cast a spell */
+void
+cursetxt2(magr, mdef, undirected)
+struct monst * magr;
+struct monst * mdef;
+boolean undirected;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+
+	if (magr->mtyp == PM_HOUND_OF_TINDALOS)
+		return;
+
+	if (youagr) {
+		if (undirected) {
+			You("point all around and curse");
+		}
+		else if (mdef) {
+			You("point at %s and curse.",
+				mon_nam(mdef));
+		}
+		else {
+			/* huh? */
+			You_feel("vexed.");
+		}
+	}
+	else if (canseemon(magr) && couldsee(magr->mx, magr->my)) {
+		const char *point_msg;  /* spellcasting monsters are impolite */
+
+		if (undirected)
+			point_msg = "all around, then curses";
+		else if (youdef) {
+			if ((Invis && !mon_resistance(magr, SEE_INVIS) &&
+				(magr->mux != u.ux || magr->muy != u.uy)) ||
+				(youmonst.m_ap_type == M_AP_OBJECT &&
+				youmonst.mappearance == STRANGE_OBJECT) ||
+				u.uundetected)
+				point_msg = "and curses in your general direction";
+			else if (Displaced && (magr->mux != u.ux || magr->muy != u.uy))
+				point_msg = "and curses at your displaced image";
+			else
+				point_msg = "at you, then curses";
+		} else {
+			/* extremely bland mvm message */
+			point_msg = "and curses";
+		}
+		pline("%s points %s.", Monnam(magr), point_msg);
+	}
+	else if ((!(moves % 4) || !rn2(4))) {
+		if (flags.soundok) Norep("You hear a mumbled curse.");
 	}
 }
 
@@ -1379,9 +1434,11 @@ unsigned int type;
  * Returns MM_MISS if the spellcasting failed, taking time
  * 
  * Can handle any of uvm, mvm, mvu.
+ *
+ * Does not consider whether or not magr should be able to cast at mdef (line of sight, range)
  */
 int
-xcasty(magr, mdef, attk, tarx, tary)
+xcasty2(magr, mdef, attk, tarx, tary)
 struct monst * magr;
 struct monst * mdef;
 struct attack * attk;
@@ -1440,6 +1497,8 @@ int tary;
 		return MM_MISS;
 	}
 
+	/* At this point, magr is committing to attempting to cast a spell */
+
 	/* set spell cooldown for monsters */
 	if (!youagr && (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC) && !nospellcooldowns_mon(magr)) {
 		if (magr->mtyp == PM_HEDROW_WARRIOR) magr->mspec_used = d(4, 4);
@@ -1452,11 +1511,12 @@ int tary;
 		flags.botl = 1;
 	}
 
+	/* check for spells that do absolutely nothing when they miss */
 	if (spellnum && mdef && !foundem &&
-		(youdef || canspotmon(magr)) && 
 		!is_undirected_spell(spellnum) &&
 		!is_aoe_spell(spellnum)) {
-		if (magr->mtyp != PM_HOUND_OF_TINDALOS)	{
+		/* message */
+		if ((youdef || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS)	{
 			pline("%s cast%s a spell at %s!",
 				youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
 				youagr ? "" : "s",
@@ -1466,7 +1526,9 @@ int tary;
 		return MM_MISS;
 	}
 
-	impossible("TODO: interrupt player if they were targeted by this point?");
+	/* interrupt the player if the player is being targeted (comes after filtering out spells that miss and fizzle entirely) */
+	if (youdef && canspotmon(magr))
+		nomul(0, (const char *)0);
 
 	/* calculate success rate of spell */
 	chance = 2;
@@ -1504,7 +1566,7 @@ int tary;
 	if (spellnum) {
 		if ((youagr || (youdef && !is_undirected_spell(spellnum)) || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
 			if (is_undirected_spell(spellnum))
-				Sprintf(buf, "");
+				buf[0] = '\0';
 			else
 			{
 				Sprintf(buf, " at %s",
@@ -1542,10 +1604,11 @@ int tary;
 	}
 
 	/* should not be reached */
+	impossible("end of xcasty() reached");
 	return MM_MISS;
 }
 
-/* xcasty()
+/* elemspell()
  * 
  * Magr casts an elemental spell (ray or hth) at mdef, who they think is at (tarx, tary)
  * If !mdef or (tarx, tary) is (0,0), magr does nothing
@@ -1566,6 +1629,15 @@ int tary;
 	boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
 	boolean rangedspell;
 	int adtyp = attk->adtyp;
+	int dmn = mlev(magr) / 3 + 1;
+	/* cap level contribution to ndice to MAX_BONUS_DICE */
+	if (dmn > MAX_BONUS_DICE)
+		dmn = MAX_BONUS_DICE;
+	/* increment ndice by specified attack */
+	if (attk->damn)
+		dmn += (int)(attk->damn);
+	/* floor dmn */
+	if (dmn < 1) dmn = 1;
 
 	/* is it a ranged spell? */
 	if (!tarx && !tary) {
@@ -1599,6 +1671,9 @@ int tary;
 	/* hand to hand magic */
 	if (!rangedspell)
 	{
+		int dmd = 6;
+		int dmg;
+
 		/* if there's no target where we're casting, fail */
 		if (!foundem) {
 			if ((youagr || youdef || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS)	{
@@ -1620,21 +1695,6 @@ int tary;
 			}
 		}
 
-		impossible("finish writing hth elemental spells");
-
-		int dmd = 6;
-		int dmn = mlev(magr) / 3 + 1;
-		int dmg;
-
-		/* cap level contribution to ndice to MAX_BONUS_DICE */
-		if (dmn > MAX_BONUS_DICE)
-			dmn = MAX_BONUS_DICE;
-		/* increment ndice by specified attack */
-		if (attk->damn)
-			dmn += (int)(attk->damn);
-		/* floor dmn */
-		if (dmn < 1) dmn = 1;
-
 		/* possibly override die size */
 		if (attk->damd)
 			dmd = (int)(attk->damd);
@@ -1650,8 +1710,7 @@ int tary;
 			dmg = (dmg + 1) / 2;
 		if (youdef && u.uvaul_duration)
 			dmg = (dmg + 1) / 2;
-
-
+		
 		/* handle damage type modifiers */
 		switch (adtyp) {
 		case AD_OONA:
@@ -1825,7 +1884,7 @@ int tary;
 					dmg -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
 				}
 				/* deals silver-hating damage */
-				if (hates_silver(youdef ? youracedata : mdef->data)) {
+				if (hates_silver((youdef ? youracedata : mdef->data))) {
 					for (i = dmn / 3; i > 0; i--) {
 						dmg += rnd(20);
 					}
@@ -1839,12 +1898,720 @@ int tary;
 	}
 	/* ranged magic */
 	else {
-		impossible("TODO: write ranged elemental spells");
+		/* determine if magr and mdef are lined up (or magr thinks they are) */
+		/* also checks for direct friendly fire */
+		if (m_online(magr, mdef, tarx, tary, (youagr ? FALSE : (magr->mtame && !magr->mconf)), FALSE)) {
+			/* dmn was calculated above */
+			/* swap damage type as appropriate */
+			if (adtyp == AD_RBRE || adtyp == AD_RETR)
+			{
+				/* random between fire/cold/elec damage */
+				switch (rn2(3))
+				{
+				case 0: adtyp = AD_FIRE; break;
+				case 1: adtyp = AD_COLD; break;
+				case 2: adtyp = AD_ELEC; break;
+				}
+			}
+			else if (adtyp == AD_OONA) {
+				/* Oona */
+				adtyp = u.oonaenergy;
+			}
+			/* message */
+			if (youdef) {
+				/* message */
+				if (canseemon(magr)) {
+					pline("%s zaps you with a %s!", Monnam(magr),
+						flash_type(adtyp, SPBOOK_CLASS));
+				}
+				else {
+					You("are zapped with a %s!",
+						flash_type(adtyp, SPBOOK_CLASS));
+				}
+			}
+			else {
+				if (youagr || canseemon(magr)) {
+					if (mdef) {
+						pline("%s %s %s with a %s!",
+							(youagr ? "You" : Monnam(magr)),
+							(youagr ? "zap" : "zaps"),
+							(canspotmon(mdef) ? mon_nam(mdef) : "something"),
+							flash_type(adtyp, SPBOOK_CLASS)
+							);
+					}
+					else {
+						pline("%s %s a %s!",
+							(youagr ? "You" : Monnam(magr)),
+							(youagr ? "cast" : "casts"),
+							flash_type(adtyp, SPBOOK_CLASS)
+							);
+					}
+				}
+			}
+			/* interrupt player if zap will hit */
+			if (youdef && foundem)
+				nomul(0, NULL);
+
+			/* do the zap */
+			buzz(adtyp, SPBOOK_CLASS, FALSE, dmn,
+				x(magr), y(magr), sgn(tarx-x(magr)), sgn(tary-y(magr)), 0, 0);
+
+			/* return result */
+			/* unfortunately, cannot tell if either lifesaved */
+			return (MM_HIT
+				| ((*hp(magr) < 0) ? MM_AGR_DIED : 0L)
+				| ((mdef && *hp(mdef) < 0) ? MM_DEF_DIED : 0L)	/* note: mdef is not guaranteed here */
+				);
+		}
+		/* if not lined up, no casting */
+		else {
+			return MM_MISS;
+		}
 	}
 	/* should not be reached */
+	impossible("end of elemspell() reached");
 	return MM_MISS;
 }
 
+/* cast_spell2
+ * 
+ * magr is casting a spell, possibly at mdef (who may or may not exist)
+ * 
+ * handles all of mvu, mvm, uvm.
+ */
+int
+cast_spell2(magr, mdef, attk, spell, tarx, tary)
+struct monst * magr;
+struct monst * mdef;	/* optional */
+struct attack * attk;
+int spell;
+int tarx;
+int tary;
+{
+	/* validate */
+	if (!magr) {
+		impossible("cast_spell2() called with no caster");
+		return MM_MISS;
+	}
+
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+
+	/* calculate default damage -- many spells ignore or override this amount */
+	int dmn = min(MAX_BONUS_DICE, mlev(magr) / 3 + 1);
+	if (attk && attk->damn)
+		dmn += attk->damn;
+	int dmd = (attk && attk->damd) ? attk->damd : 6;
+	int dmg = d(dmn, dmd);
+
+	switch (spell)
+	{
+	case PSI_BOLT:
+		/* needs mdef */
+		if (!mdef) {
+			impossible("No mdef for psibolt");
+			return MM_MISS;
+		}
+		/* calculate resistance */
+		if (Magic_res(mdef) || (!youdef && resist(mdef, 0, 0, FALSE))) {
+			shieldeff(x(mdef), y(mdef));
+			dmg = (dmg + 1) / 2;
+			if (dmg > 25)
+				dmg = 25;
+		}
+		else {
+			if (dmg > 50)
+				dmg = 50;
+		}
+		/* message */
+		if (youdef) {
+			if (dmg <= 5)
+				You("get a slight %sache.", body_part(HEAD));
+			else if (dmg <= 10)
+				Your("brain is on fire!");
+			else if (dmg <= 20)
+				Your("%s suddenly aches painfully!", body_part(HEAD));
+			else{
+				Your("%s suddenly aches very painfully!", body_part(HEAD));
+			}
+		}
+		else if (canseemon(mdef)) {
+			pline("%s winces%s", Monnam(mdef), (dmg <= 5) ? "." : "!");
+		}
+		/* deal damage */
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case OPEN_WOUNDS:
+		/* needs mdef */
+		if (!mdef) {
+			impossible("No mdef for open wounds");
+			return MM_MISS;
+		}
+		/* calculate resistance */
+		if (Magic_res(mdef) || (!youdef && resist(mdef, 0, 0, FALSE))) {
+			shieldeff(x(mdef), y(mdef));
+			dmg = (dmg + 1) / 2;
+			if (dmg > 30)
+				dmg = 30;
+		}
+		else {
+			if (dmg > 60)
+				dmg = 60;
+		}
+		/* message */
+		if (youdef) {
+			if (dmg >= *hp(mdef)) {
+				Your("body is covered with deadly wounds!");
+				dmg = max(*hp(mdef) - 5, 0);	/* NOT JUST A MESSAGE, ALSO HAS AN EFFECT FOR YOUDEF */
+			}
+			else if (dmg <= 5)
+				Your("skin itches badly for a moment.");
+			else if (dmg <= 15)
+				pline("Wounds appear on your body!");
+			else if (dmg <= 30)
+				pline("Severe wounds appear on your body!");
+			else
+				Your("body is covered with deep, painful wounds!");
+		}
+		else if (canseemon(mdef)) {
+			if (dmg <= 5)
+				pline("%s looks itchy!", Monnam(mdef));
+			else if (dmg <= 10)
+				pline("Wounds appear on %s!", mon_nam(mdef));
+			else if (dmg <= 20)
+				pline("Severe wounds appear on %s!", mon_nam(mdef));
+			else
+				pline("%s is covered in wounds!", Monnam(mdef));
+		}
+		/* deal damage */
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case MAGIC_MISSILE:
+	case CONE_OF_COLD:
+	case LIGHTNING_BOLT:
+	case SLEEP:
+		if (!mdef) {
+			impossible("ray spell with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			struct attack alt_attk = *attk;
+			switch (spell)
+			{
+			case MAGIC_MISSILE:		alt_attk.adtyp = AD_MAGM; break;
+			case CONE_OF_COLD:		alt_attk.adtyp = AD_COLD; break;
+			case LIGHTNING_BOLT:	alt_attk.adtyp = AD_ELEC; break;
+			case SLEEP:				alt_attk.adtyp = AD_SLEE; break;
+			}
+			return elemspell(magr, mdef, &alt_attk, tarx, tary);
+		}
+
+	case DRAIN_LIFE: 
+		/* similar to player spell "drain life", but only works at close range */
+		if (distmin(x(magr), y(magr), tarx, tary) < 2) {
+			/* note: magic resistance doesn't protect against "drain life" spell */
+			if (Drain_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				if (youdef)
+					You_feel("momentarily frail.");
+				/* no message for monster mdef */
+			}
+			else {
+				if (youdef) {
+					Your("body deteriorates!");
+					exercise(A_CON, FALSE);
+					losexp("life drainage", TRUE, FALSE, FALSE);
+				}
+				else {
+					/* drainlevel from mon */
+					/* print message first -- this should happen before the victim is drained/dies */
+					if (canseemon(mdef))
+						pline("%s suddenly seems weaker!", Monnam(mdef));
+
+					/* for monsters, we need to make something up -- drain 2d6 maxhp, 1 level */
+					dmg = d(2, 6);
+
+					/* kill if this will level-drain below 0 m_lev, or lifedrain below 1 maxhp */
+					if (mlev(mdef) == 0 || *hpmax(mdef) <= dmg) {
+						/* clean up the maybe-dead monster, return early */
+						if (youagr)
+							killed(mdef);
+						else
+							monkilled(mdef, "", attk->adtyp);
+						/* is it dead, or was it lifesaved? */
+						if (mdef->mhp > 0)
+							return (MM_HIT | MM_DEF_LSVD);	/* lifesaved */
+						else
+							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
+					}
+					else {
+						/* drain stats */
+						mdef->m_lev--;
+						mdef->mhpmax -= dmg;
+					}
+				}
+			}
+			if (youdef) stop_occupation();
+		}
+		return MM_HIT;
+
+	case ARROW_RAIN:
+		if (!mdef) {
+			impossible("arrow rain with no mdef?");
+			return MM_MISS;
+		}
+		else
+		{
+			struct obj *otmp;
+			int weap;
+
+			/* get weapon type to rain */
+			if (rn2(3)) weap = ARROW;
+			else if (!rn2(3)) weap = DAGGER;
+			else if (!rn2(3)) weap = SPEAR;
+			else if (!rn2(3)) weap = KNIFE;
+			else if (!rn2(3)) weap = JAVELIN;
+			else if (!rn2(3)) weap = AXE;
+			else {
+				weap = rnd_class(ARROW, WORM_TOOTH - 1);
+				if (weap == TRIDENT) weap = JAVELIN;
+			}
+			/* make them */
+			otmp = mksobj(weap, TRUE, FALSE);
+			otmp->quan = min(dmn, 16);
+			otmp->owt = weight(otmp);
+			otmp->spe = 0;
+
+			/* call projectile() to shoot fire all the weapons */
+			m_shot.n = otmp->quan;
+			m_shot.s = TRUE;
+			m_shot.o = otmp->otyp;
+			for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
+				(void)projectile(magr, otmp, (void *)0, HMON_FIRED, x(mdef), y(mdef), 0, 0, 0, 0, FALSE, FALSE, FALSE);
+			}
+		}
+		return MM_HIT;
+
+	case LIGHTNING:
+		if (!mdef) {
+			impossible("lightning with no mdef?");
+			return MM_MISS;
+		}
+		else
+		{
+			boolean reflects;
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("A bolt of lightning strikes down at %s from above!",
+					youdef ? "you" : mon_nam(mdef));
+			}
+			if (youdef)
+				reflects = ureflects("It bounces off your %s%s.", "");
+			else
+				reflects = mon_reflects(mdef, "It bounces off %s %s.");
+
+			/* check resistance and override damage */
+			if (reflects || Shock_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				dmg = 0;
+			}
+			else {
+				dmg = d(8, 6);
+				if (Half_spel(mdef))
+					dmg = (dmg + 1) / 2;
+				if (youdef && u.uvaul_duration)
+					dmg = (dmg + 1) / 2;
+			}
+
+			/* destroy items if it hit */
+			if (!(reflects || InvShock_res(mdef))) {
+				destroy_item(mdef, WAND_CLASS, AD_ELEC);
+				destroy_item(mdef, RING_CLASS, AD_ELEC);
+			}
+			/* blinds defender (player only?) */
+			if (youdef && !resists_blnd(&youmonst)) {
+				You("are blinded by the flash!");
+				make_blinded((long)rnd(100), FALSE);
+				if (!Blind) Your1(vision_clears);
+			}
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case FIRE_PILLAR:
+		if (!mdef) {
+			impossible("fire pillar with no mdef?");
+			return MM_MISS;
+		}
+		else
+		{
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("A pillar of fire strikes all around %s!",
+					youdef ? "you" : mon_nam(mdef));
+			}
+
+			/* check resistance and override damage */
+			if (Fire_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				dmg = 0;
+			}
+			else {
+				dmg = d(8, 6);
+				if (Half_spel(mdef))
+					dmg = (dmg + 1) / 2;
+				if (youdef && u.uvaul_duration)
+					dmg = (dmg + 1) / 2;
+			}
+
+			(void)burnarmor(mdef);
+			destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+			destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+
+			if (youdef) {
+				burn_away_slime();
+				melt_frozen_air();
+			}
+
+			(void)burn_floor_paper(tarx, tary, TRUE, youagr);
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case GEYSER:
+		if (!mdef) {
+			impossible("geyser with no mdef?");
+			return MM_MISS;
+		}
+		else
+		{
+			struct obj * boots = (youdef ? uarmf : which_armor(mdef, W_ARMF));
+			static int mboots2 = 0;
+			if (!mboots2) mboots2 = find_mboots();
+
+			if (boots && boots->otyp == WATER_WALKING_BOOTS) {
+				/* message part 1*/
+				if (youagr || youdef || canseemon(mdef)){
+					pline("A sudden geyser erupts under %s feet!",
+						youdef ? "your" : s_suffix(mon_nam(mdef)));
+
+					if (youdef || canseemon(mdef))
+						makeknown(boots->otyp);
+				}
+
+				/* message part 2 and effect */
+				if (youdef) {
+					if (ACURR(A_DEX) >= 14){
+						You("put the added momentum to good use.");
+						if (ACURR(A_DEX) == 25) youmonst.movement += 12;
+						else if (ACURR(A_DEX) >= 18) youmonst.movement += 8;
+						else youmonst.movement += 6;
+					}
+					else if (ACURR(A_DEX) <= 10){
+						You("are knocked around by the geyser's force!");
+						if (ACURR(A_DEX) <= 3) dmg = d(8, 6);
+						else if (ACURR(A_DEX) <= 6) dmg = d(4, 6);
+						else if (ACURR(A_DEX) <= 10) dmg = rnd(6);
+					}
+				}
+				else {
+					if (mdef->data->mmove >= 14) pline("%s puts the added monmentum to good use!", Monnam(mdef));
+					else if (mdef->data->mmove <= 10) pline("%s is knocked around by the geyser's force!", Monnam(mdef));
+					
+					if (mdef->data->mmove >= 25) mdef->movement += 12;
+					else if (mdef->data->mmove >= 18) mdef->movement += 8;
+					else if (mdef->data->mmove >= 14) mdef->movement += 6;
+					else if (mdef->data->mmove <= 3) dmg = d(8, 6);
+					else if (mdef->data->mmove <= 6) dmg = d(4, 6);
+					else if (mdef->data->mmove <= 10) dmg = rnd(6);
+				}
+			}
+			else {
+				/* message */
+				if (youagr || youdef || canseemon(mdef)) {
+					pline("A sudden geyser slams into %s from nowhere!",
+						youdef ? "you" : mon_nam(mdef));
+				}
+				/* this is physical damage, not magical damage */
+				dmg = d(8, 6);
+				if (Half_phys(mdef))
+					dmg = (dmg + 1) / 2;
+				if (youdef && u.uvaul_duration)
+					dmg = (dmg + 1) / 2;
+
+				if (boots && boots->otyp == mboots2) {
+					if(youdef) pline("Good thing you're wearing mud boots!");
+				}
+				else
+					water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
+			}
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case ACID_RAIN: /* as seen in the Lethe patch */
+		if (!mdef) {
+			impossible("acid rain with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("A torrent of burning acid rains down on %s!",
+					youdef ? "you" : mon_nam(mdef));
+			}
+
+			struct obj * helm = (youdef ? uarmh : which_armor(mdef, W_ARMH));
+
+			if (helm && is_wide_helm(helm)) {
+				dmg = 0;
+				if (youagr || youdef || canseemon(mdef)) {
+					pline("It runs off the brim of %s %s.",
+						youdef ? "your" : s_suffix(mon_nam(mdef)),
+						OBJ_DESCR(objects[helm->otyp]));
+				}
+			}
+			else {
+				/* check resistance and override damage */
+				dmg = d(8, 6);
+				if (Acid_res(mdef)) {
+					shieldeff(x(mdef), y(mdef));
+					if (youdef)
+						pline("It feels mildly uncomfortable.");
+					dmg = 0;
+				}
+				/* damage inventory */
+				if (!InvAcid_res(mdef)) {
+					erode_obj(youdef ? uwep : MON_WEP(mdef), TRUE, FALSE);
+					erode_obj(youdef ? uswapwep : MON_SWEP(mdef), TRUE, FALSE);
+					erode_armor(mdef, TRUE);
+					destroy_item(POTION_CLASS, AD_FIRE);
+				}
+				water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
+
+				/* blind defender (player only?) */
+				if (youdef && !resists_blnd(&youmonst) && rn2(2)) {
+					pline_The("acid gets into your %s!", eyecount(youracedata) == 1 ?
+						body_part(EYE) : makeplural(body_part(EYE)));
+					make_blinded((long)rnd(Acid_resistance ? 10 : 50), FALSE);
+					if (!Blind) Your1(vision_clears);
+				}
+			}
+			/* TODO: corrode floor objects */
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case HAIL_FLURY:
+	case ICE_STORM:
+		/* ice storm is identical to hail flury, except it overrides dmg to 8d8 */
+		if (!mdef) {
+			impossible("ice storm / hail flury with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			int pdmg = (spell == ICE_STORM ? d(4, 8) : (dmg + 1)/2);	/* physical */
+			int cdmg = (spell == ICE_STORM ? d(4, 8) : (dmg + 1)/2);	/* cold */
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("%s pummel %s from all sides!",
+					(spell == ICE_STORM ? "Chunks of ice" : "Hailstones"),
+					youdef ? "you" : mon_nam(mdef));
+			}
+
+			/* calculate physical damage */
+			if (Half_phys(mdef))
+				pdmg = (pdmg + 1) / 2;
+			/* apply average DR */
+			pdmg -= max(0, (youdef ? u.udr : avg_mdr(mdef)));
+			if (pdmg < 1)
+				pdmg = 1;
+
+			/* calculate cold damage */
+			if (Cold_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				cdmg = 0;
+			}
+			else {
+				if (Half_spel(mdef))
+					cdmg = (cdmg + 1) / 2;
+			}
+			if (!InvCold_resistance) {
+				destroy_item(POTION_CLASS, AD_COLD);
+			}
+
+			/* sum damage components to override dmg */
+			dmg = pdmg + cdmg;
+			/* apply u.uvaul to all */
+			if (youdef && u.uvaul_duration)
+				dmg = (dmg + 1) / 2;
+
+			/* player cold madness*/
+			if (youdef) roll_frigophobia();
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case DEATH_TOUCH:
+		if (!mdef) {
+			impossible("death touch with no mdef?");
+			return MM_MISS;
+		}
+		else if (youagr && (u.sealsActive & SEAL_BUER)) {
+			/* no death magic -- substitute psi bolt */
+			return cast_spell2(magr, mdef, attk, PSI_BOLT, tarx, tary);
+		}
+		else {
+			/* message */
+			if (youagr)
+				pline("You're using the touch of death!");
+			else if (youdef || (mdef->mtame))
+				pline("Oh no, %s using the touch of death!", s_suffix(mhe(magr)));
+			else
+				pline("%s using the touch of death!", upstart(s_suffix(mhe(magr))));
+
+			/* check resistance cases and do effects */
+			if (nonliving_mon(mdef) || is_demon(mdef->data)) {
+				if (youdef || canseemon(mdef)) {
+					pline("%s seem%s no deader than before.",
+						youdef ? "You" : Monnam(mdef),
+						youdef ? "" : "s"
+						);
+				}
+				dmg = 0;
+			}
+			else if (ward_at(x(mdef), y(mdef)) == CIRCLE_OF_ACHERON) {
+				if (youdef || canseemon(mdef)) {
+					pline("%s %s already beyond Acheron.",
+						youdef ? "You" : Monnam(mdef),
+						youdef ? "are" : "is"
+						);
+				}
+				dmg = 0; 
+			}
+			else if ((youdef && (u.sealsActive & SEAL_OSE)) || resists_death(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				dmg = 0;
+			}
+			else {
+				/* split between vs player and vs monster */
+				if (youdef) {
+					if (!Magic_res(mdef) && (rn2(mlev(magr)) > 12)) {
+						if (Hallucination) {
+							You("have an out of body experience.");
+						}
+						else if (*hp(mdef) >= 100){
+							Your("%s stops!  When it finally beats again, it is weak and thready.", body_part(HEART));
+							*hp(mdef) -= d(8, 8);
+						}
+						else {
+							killer_format = KILLED_BY_AN;
+							killer = "touch of death";
+							dmg = *hp(mdef);
+						}
+					}
+					else {
+						if (Magic_res(mdef))
+							shieldeff(x(mdef), y(mdef));
+						//	    pline("Lucky for you, it didn't work!");
+						Your("%s flutters!", body_part(HEART));
+						dmg = 8; //you still take damage
+					}
+				}
+				else {
+					/* monster */
+					boolean resisted = FALSE;
+
+					if (!(resisted = (Magic_res(mdef) || resists_death(mdef) || resist(mdef, 0, 0, FALSE))) ||
+						rn2(mlev(magr)) > 12
+						){
+						if (is_delouseable(mdef->data)){
+							pline("The parasite is killed!");
+							delouse(mdef, AD_DEAD);
+						}
+						else {
+							mdef->mhp = -1;
+							if (youagr) killed(mdef);
+							else monkilled(mdef, "", AD_SPEL);
+						}
+						return ((*hp(mdef)>0 ? MM_DEF_LSVD : MM_DEF_DIED) | MM_HIT);
+					}
+					else {
+						if (resisted) shieldeff(x(mdef), y(mdef));
+						if (youagr || canseemon(mdef))
+						{
+							if (mdef->mtame)
+								pline("Lucky for %s, it didn't work!", mon_nam(mdef));
+							else
+								pline("That didn't work...");
+						}
+						dmg = 0;
+					}
+				}
+			}
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case RAISE_DEAD:
+	case SUMMON_MONS:
+	case SUMMON_DEVIL:
+	case SUMMON_ANGEL:
+	case SUMMON_ALIEN:
+	case SUMMON_YOUNG:
+
+	case CURE_SELF:
+	case MASS_CURE_CLOSE:
+	case MASS_CURE_FAR:
+	case RECOVER:
+	case MAKE_VISIBLE:
+	case HASTE_SELF:
+	case STUN_YOU:
+	case CONFUSE_YOU:
+	case PARALYZE:
+	case BLIND_YOU:
+	case DRAIN_ENERGY:
+	case WEAKEN_STATS:
+	case WEAKEN_YOU:
+	case DESTRY_ARMR:
+	case DESTRY_WEPN:
+	case EVIL_EYE:
+	case CURSE_ITEMS:
+	case INSECTS:
+	case PLAGUE:
+	case PUNISH:
+	case AGGRAVATION:
+	case DISAPPEAR:
+	case DARKNESS:
+	case SUMMON_SPHERE:
+	case MAKE_WEB:
+	case DROP_BOULDER:
+	case EARTHQUAKE:
+	case TURN_TO_STONE:
+	case NIGHTMARE:
+	case FILTH:
+	case CLONE_WIZ:
+	case STRANGLE:
+	case MON_FIRA:
+	case MON_FIRAGA:
+	case MON_BLIZZARA:
+	case MON_BLIZZAGA:
+	case MON_THUNDARA:
+	case MON_THUNDAGA:
+	case MON_FLARE:
+	case MON_WARP:
+	case MON_POISON_GAS:
+	case MON_PROTECTION:
+	case SOLID_FOG:
+	case ACID_BLAST:
+	case PRISMATIC_SPRAY:
+	case SILVER_RAYS:
+	case GOLDEN_WAVE:
+	case VULNERABILITY:
+	case MASS_HASTE:
+	case MON_TIME_STOP:
+	case TIME_DUPLICATE:
+	case NAIL_TO_THE_SKY:
+	case STERILITY_CURSE:
+	}
+	impossible("end of cast_spell2 reached");
+	return MM_MISS;
+}
 
 /* return values:
  * 1: successful spell

@@ -765,9 +765,12 @@ domonability()
 		return res;
 	}
 	case MATTK_SPIT: return dospit();
-	case MATTK_MAGIC: return castum((struct monst *)0,
-	                   &youracedata->mattk[attackindex(youracedata, 
-			                         AT_MAGC,AD_ANY)]);
+	case MATTK_MAGIC: 
+		return xcasty2(&youmonst, (struct monst *)0, &youracedata->mattk[attackindex(youracedata, AT_MAGC, AD_ANY)], 0, 0);
+		
+//		return castum((struct monst *)0,
+//	                   &youracedata->mattk[attackindex(youracedata, 
+//			                         AT_MAGC,AD_ANY)]);
 	case MATTK_REMV: return doremove();
 	case MATTK_GAZE: return dogaze();
 	case MATTK_TNKR: return dotinker();
