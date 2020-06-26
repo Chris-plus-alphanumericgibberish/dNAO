@@ -2115,10 +2115,21 @@ spiriteffects(power, atme)
 						break;//break loop
 					}
 				}
-				pline("Leftover electrical potential produces a field around you.");
-				u.uspellprot = max(5 - (range+1),u.uspellprot);
-				u.usptime = 5;
-				u.uspmtime = 5;
+				/* Grant protection based on the distance Astaroth's Assembly traveled.
+				* Only grant if the player does not already have better protection.
+				*If protection is granted, it decays every 5 turns */
+				if ( 5 - ( range + 1 ) > u.uspellprot )
+				{
+					pline("Leftover electrical potential produces a field around you.");
+					u.uspellprot = 5 - (range+1);
+					u.usptime = 5;
+					u.uspmtime = 5;
+				}
+				/* player would have received protection, but was already better protected */
+				else if ( 5 - ( range + 1 ) > 0 )
+				{
+					pline("Static electricity crackles around you.");
+				}
 			}
 		}break;
 		case PWR_ASTAROTH_S_SHARDS:
