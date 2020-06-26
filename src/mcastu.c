@@ -1492,8 +1492,7 @@ int tary;
 		(youdef && (u.uinvulnerable || (u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20))) ||
 		(needs_familiar(magr))
 		)) {
-		impossible("TODO: rewrite cursetxt to work for uvm, mvm.");
-		cursetxt(magr, is_undirected_spell(spellnum));
+		cursetxt2(magr, mdef, is_undirected_spell(spellnum));
 		return MM_MISS;
 	}
 
@@ -1594,8 +1593,7 @@ int tary;
 			return MM_HIT;
 		}
 		/* generally: cast the spell */
-		impossible("TODO: write general spell casting");
-		return MM_HIT;
+		return cast_spell2(magr, mdef, attk, spellnum, tarx, tary);
 	}
 	else {
 		/* no spell selected; this probably means we have an elemental spell to cast */
@@ -1995,6 +1993,11 @@ int tary;
 	boolean youdef = (mdef == &youmonst);
 	boolean malediction = (youdef && (magr->iswiz || (magr->data->msound == MS_NEMESIS && rn2(2))));
 	int result = MM_MISS;	/* to store intermediary xhity-esque returns */
+
+	/* common to all summon spells */
+	int summonflags = (NO_MINVENT | MM_NOCOUNTBIRTH |
+		((youagr || magr->mtame) ? MM_EDOG : 0) |
+		((!youagr && !magr->mpeaceful) ? MM_ANGRY : 0));
 
 	/* calculate default damage -- many spells ignore or override this amount */
 	int dmn = min(MAX_BONUS_DICE, mlev(magr) / 3 + 1);
@@ -3412,8 +3415,139 @@ int tary;
 // SUMMONING
 //////////////////////////////////////////////////////////////////////////////////////
 	case SUMMON_SPHERE:
+		if (!(tarx || tary)) {
+			impossible("summon sphere with no target location");
+			return MM_MISS;
+		}
+		else {
+			int sphere;
+			/* For a change, let's not assume the spheres are together. : ) */
+			switch (rn2(3)) {
+				case 0: sphere = PM_FLAMING_SPHERE; break;
+				case 1: sphere = PM_FREEZING_SPHERE; break;
+				case 2: sphere = PM_SHOCKING_SPHERE; break;
+			}
+			boolean created = FALSE;
+			boolean dotame = (youagr || magr->mtame);
+			struct monst *mtmp;
+			/* try to make a sphere */
+			if (!(mvitals[sphere].mvflags & G_GONE && !In_quest(&u.uz))) {
+				if ((mtmp = makemon(&mons[sphere], tarx, tary, MM_ADJACENTOK|summonflags)) != 0) {
+					/* check if we can see it */
+					if (canspotmon(mtmp))
+						created++;
+					/* maybe tame */
+					if (dotame)
+						initedog(mtmp);
+					/* all spheres are very temporary */
+					mtmp->mvanishes = d(dmn, 3);
+					mtmp->msleeping = 0;
+					set_malign(mtmp);
+				}
+			}
+			if (created) {
+				pline("%s is created!",
+					Hallucination ? rndmonnam() : Amonnam(mtmp));
+			}
+		}
+		return MM_HIT;
+
 	case INSECTS:
+		if (!(tarx || tary)) {
+			impossible("summon insects with no target location");
+			return MM_MISS;
+		}
+		else if (!(youdef || youagr)) {
+			/* don't let mvm cast this spell. maybe if involving tame creatures is okay, but grudges are NO WAY. */
+			return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+		}
+		else {
+			/* Try for insects, and if there are none
+			left, go for (sticks to) snakes.  -3. */
+			boolean arachnids = (youagr ? Race_if(PM_DROW) : is_drow(magr->data));
+			struct permonst *pm = mkclass(arachnids ? S_SPIDER : S_ANT, 0);
+			struct monst *mtmp = (struct monst *) 0;
+			char let = (pm ? (arachnids ? S_SPIDER : S_ANT) : S_SNAKE);
+			boolean created = FALSE;
+			boolean dotame = (youagr || magr->mtame);
+			int i, quan, oldseen, newseen;
+			coord bypos;
+			const char *fmt;
+
+			quan = (mlev(magr) < 2) ? 1 : rnd((int)mlev(magr) / 2);
+			if (quan < 3)
+				quan = 3;
+
+			for (i = 0; i <= quan; i++) {
+				/* find a spot suitable for a giant beetle, regardless of what creature will actually be summoned */
+				/* slightly less dumb than finding spots suitable for the spellcaster */
+				if (!enexto(&bypos, tarx, tary, &mons[PM_GIANT_BEETLE]))
+					break;
+				if ((pm = mkclass(let, 0)) != 0
+					&& (mtmp = makemon(pm, bypos.x, bypos.y, summonflags)) != 0)
+				{
+					if (canspotmon(mtmp))
+						created = TRUE;
+					if (dotame) {
+						initedog(mtmp);
+						/* your summons are only temporary */
+						mtmp->mvanishes = d(dmn, 6);
+					}
+					mtmp->msleeping = 0;
+					/* arbitrarily strengthen enemies in astral and sanctum */
+					if (Is_astralevel(&u.uz) || Is_sanctum(&u.uz)) {
+						mtmp->m_lev += rn1(3, 3);
+						mtmp->mhp = (mtmp->mhpmax += rn1((int)mlev(magr), 20));
+					}
+					set_malign(mtmp);
+				}
+			}
+
+			if (!created) {
+				pline("%s cast%s at a clump of sticks, but nothing happens.",
+					youagr ? "You" : Monnam(magr),
+					youagr ? "" : "s");
+			}
+			else if (let == S_SNAKE) {
+				pline("%s transform%s a clump of sticks into snakes!",
+					youagr ? "You" : Monnam(magr),
+					youagr ? "" : "s");
+			}
+			else if (youdef && Invisible && !mon_resistance(magr, SEE_INVIS) &&
+				(magr->mux != u.ux || magr->muy != u.uy)) {
+				pline("%s summons %s around a spot near you!",
+					youagr ? "You" : Monnam(magr), let == S_SPIDER ? "arachnids" : "insects");
+			}
+			else if (youdef && Displaced && (magr->mux != u.ux || magr->muy != u.uy)) {
+				pline("%s summons %s around your displaced image!",
+					youagr ? "You" : Monnam(magr), let == S_SPIDER ? "arachnids" : "insects");
+			}
+			else {
+				pline("%s summon%s %s!",
+					youagr ? "You" : Monnam(magr),
+					youagr ? "" : "s",
+					let == S_SPIDER ? "arachnids" : "insects");
+			}
+		}
+		return MM_HIT;
+
 	case RAISE_DEAD:
+		if (!youdef) {
+			/* only the player can be the target of raise dead*/
+			return cast_spell2(magr, mdef, attk, PSI_BOLT, tarx, tary);
+		}
+		else
+		{
+			coord mm;
+			if (canseemon(magr))
+				pline("%s raised the dead!", Monnam(magr));
+			mm.x = magr->mx;
+			mm.y = magr->my;
+			mkundead(&mm, TRUE, NO_MINVENT);
+			stop_occupation();
+		}
+		return MM_HIT;
+
 	case SUMMON_MONS:
 	case SUMMON_DEVIL:
 	case SUMMON_ANGEL:
@@ -3421,7 +3555,7 @@ int tary;
 	case SUMMON_YOUNG:
 	case TIME_DUPLICATE:
 	case CLONE_WIZ:
-		break;
+
 //////////////////////////////////////////////////////////////////////////////////////
 // DEBUFFING AND MISC
 //////////////////////////////////////////////////////////////////////////////////////
@@ -3446,6 +3580,7 @@ int tary;
 	case DROP_BOULDER:
 	case DARKNESS:
 	case MAKE_WEB:
+		impossible("unfinished xcasty spell: %d", spell);
 		break;
 
 	}
