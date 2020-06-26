@@ -5364,6 +5364,10 @@ int floorID;
 			u.specialSealsActive |= sealID;
 			u.specialSealsUsed |= sealID;
 			set_spirit_powers(sealID);
+			/* give properties based on seal */
+			int * spiritprops = spirit_props(floorID);
+			for (i = 0; spiritprops[i] != NO_PROP; i++)
+				u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
 		}
 		else
 			You("can't hear the numina.");
