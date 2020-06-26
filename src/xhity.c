@@ -21,7 +21,6 @@ STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL void FDECL(heal, (struct monst *, int));
-STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 STATIC_DCL int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));

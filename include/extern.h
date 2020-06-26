@@ -3039,6 +3039,7 @@ E int FDECL(xmeleehity, (struct monst *, struct monst *, struct attack *, struct
 E struct attack * FDECL(getattk, (struct monst *, struct monst *, int *, int *, struct attack *, boolean, int *, int *));
 E boolean FDECL(slips_free, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int));
+E int FDECL(xstoney, (struct monst *, struct monst *));
 E int FDECL(xmeleehurty, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, boolean, int, int, int, boolean));
 E void FDECL(getgazeinfo, (int, int, struct permonst *, boolean *, boolean *, boolean *));
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
