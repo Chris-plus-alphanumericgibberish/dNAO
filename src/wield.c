@@ -836,7 +836,7 @@ register int amount;
 	    return(1);
 	}
 	/* there is a (soft) upper and lower limit to uwep->spe */
-	if(uwep->otyp == RAKUYO)
+	if(is_rakuyo(uwep))
 		safelim = 9;
 	else safelim = 5;
 	if(((uwep->spe > safelim && amount >= 0) || (uwep->spe < -safelim && amount < 0))
