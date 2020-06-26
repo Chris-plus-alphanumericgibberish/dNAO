@@ -3414,12 +3414,14 @@ int tary;
 //////////////////////////////////////////////////////////////////////////////////////
 // SUMMONING
 //////////////////////////////////////////////////////////////////////////////////////
+	/* NOTE: summoning is by default only mvu. Exceptions made as desired and as balance allows. */
 	case SUMMON_SPHERE:
 		if (!(tarx || tary)) {
 			impossible("summon sphere with no target location");
 			return MM_MISS;
 		}
 		else {
+			/* full uvm / mvm / mvu allowed */
 			int sphere;
 			/* For a change, let's not assume the spheres are together. : ) */
 			switch (rn2(3)) {
@@ -3458,7 +3460,7 @@ int tary;
 			return MM_MISS;
 		}
 		else if (!(youdef || youagr)) {
-			/* don't let mvm cast this spell. maybe if involving tame creatures is okay, but grudges are NO WAY. */
+			/* only uvm / mvu allowed */
 			return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
 		}
 		else {
@@ -3533,7 +3535,7 @@ int tary;
 
 	case RAISE_DEAD:
 		if (!youdef) {
-			/* only the player can be the target of raise dead*/
+			/* only mvu allowed */
 			return cast_spell2(magr, mdef, attk, PSI_BOLT, tarx, tary);
 		}
 		else
@@ -3541,20 +3543,231 @@ int tary;
 			coord mm;
 			if (canseemon(magr))
 				pline("%s raised the dead!", Monnam(magr));
-			mm.x = magr->mx;
-			mm.y = magr->my;
+			mm.x = x(magr);
+			mm.y = y(magr);
 			mkundead(&mm, TRUE, NO_MINVENT);
 			stop_occupation();
 		}
 		return MM_HIT;
 
 	case SUMMON_MONS:
+		if (!youdef || u.summonMonster || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))) {
+			/* only mvu allowed */
+			/* only one summon spell per global turn allowed */
+			/* disallowed in Anachrononaut quest */
+			return cast_spell2(magr, mdef, attk, PSI_BOLT, tarx, tary);
+		}
+		else
+		{
+			int count;
+			u.summonMonster = TRUE;
+			count = nasty(magr);	/* summon something nasty */
+			if (magr->iswiz)
+				verbalize("Destroy the thief, my pet%s!", plur(count));
+			else {
+				const char *mappear =
+					(count == 1) ? "A monster appears" : "Monsters appear";
+
+				/* messages not quite right if plural monsters created but
+				only a single monster is seen */
+				if (Invisible && !mon_resistance(magr, SEE_INVIS) &&
+					(tarx != u.ux || tary != u.uy))
+					pline("%s around a spot near you!", mappear);
+				else if (Displaced && (tarx != u.ux || tary != u.uy))
+					pline("%s around your displaced image!", mappear);
+				else
+					pline("%s from nowhere!", mappear);
+			}
+			stop_occupation();
+		}
+		return MM_HIT;
+
 	case SUMMON_DEVIL:
+		if (!youdef || u.summonMonster) {
+			/* only mvu allowed */
+			/* only one summon spell per global turn allowed */
+			return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+		}
+		else if (is_alienist(magr->data)) {
+			/* alienists summon aliens. wowzers. */
+			return cast_spell2(magr, mdef, attk, SUMMON_ALIEN, tarx, tary);
+		}
+		else
+		{
+			struct monst * mtmp;
+			/* summon_minion always appears near the player */
+			mtmp = summon_minion(sgn(magr->data->maligntyp), FALSE, TRUE, FALSE);
+			if (mtmp) {
+				u.summonMonster = TRUE;
+				if (canspotmon(mtmp))
+					pline("%s ascends from below!",
+					An(Hallucination ? rndmonnam() : "fiend"));
+				else
+					You("sense the arrival of %s.",
+					an(Hallucination ? rndmonnam() : "hostile fiend"));
+			}
+			stop_occupation();
+		}
+		return MM_HIT;
+
 	case SUMMON_ANGEL:
+		if (!youdef || u.summonMonster) {
+			/* only mvu allowed */
+			/* only one summon spell per global turn allowed */
+			return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+		}
+		else if (is_alienist(magr->data)) {
+			/* alienists summon aliens. wowzers. */
+			return cast_spell2(magr, mdef, attk, SUMMON_ALIEN, tarx, tary);
+		}
+		else
+		{
+			struct monst *mtmp;
+			/* maybe summon nearby the caster, instead of at a target */
+			if (!(tarx || tary) || !clear_path(x(magr), y(magr), tarx, tary)) {
+				tarx = x(magr);
+				tary = y(magr);
+			}
+			mtmp = mk_roamer(&mons[PM_ANGEL], sgn(magr->data->maligntyp), tarx, tary, FALSE);
+			if (mtmp) {
+				u.summonMonster = TRUE;
+				if (canspotmon(mtmp))
+					pline("%s %s!",
+					An(Hallucination ? rndmonnam() : "angel"),
+					Is_astralevel(&u.uz) ? "appears near you" :
+					"descends from above");
+				else
+					You("sense the arrival of %s.",
+					an(Hallucination ? rndmonnam() : "hostile angel"));
+			}
+			stop_occupation();
+		}
+		return MM_HIT;
+
 	case SUMMON_ALIEN:
+		if (!youdef || u.summonMonster) {
+			/* only mvu allowed */
+			/* only one summon spell per global turn allowed */
+			return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+		}
+		else {
+			struct monst *mtmp;
+			int tries = 0;
+			static struct permonst *aliens[] = {
+				&mons[PM_HOOLOOVOO],
+				&mons[PM_SHAMBLING_HORROR],
+				&mons[PM_STUMBLING_HORROR],
+				&mons[PM_WANDERING_HORROR],
+				&mons[PM_MASTER_MIND_FLAYER],
+				&mons[PM_EDDERKOP],
+				&mons[PM_AOA],
+				&mons[PM_HUNTING_HORROR],
+				&mons[PM_BYAKHEE],
+				&mons[PM_UVUUDAUM] };
+
+			/* maybe summon nearby the caster, instead of at a target */
+			if (!(tarx || tary) || !clear_path(x(magr), y(magr), tarx, tary)) {
+				tarx = x(magr);
+				tary = y(magr);
+			}
+
+			do {
+				mtmp = makemon(aliens[rn2(SIZE(aliens))], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH);
+			} while (!mtmp && tries++ < 10);
+			if (mtmp) {
+				u.summonMonster = TRUE;
+				if (canspotmon(mtmp))
+					pline("The world tears open, and %s steps through!",
+					an(Hallucination ? rndmonnam() : "alien"));
+				else
+					You("sense the arrival of %s.",
+					an(Hallucination ? rndmonnam() : "alien"));
+			}
+			stop_occupation();
+		}
+		return MM_HIT;
+
 	case SUMMON_YOUNG:
+		if (!youdef || u.summonMonster) {
+			/* only mvu allowed */
+			/* only one summon spell per global turn allowed */
+			return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+		}
+		else {
+			struct monst *mtmp;
+			int tries = 0;
+			static struct permonst *young[] = {
+				&mons[PM_GIANT_GOAT_SPAWN],
+				&mons[PM_SWIRLING_MIST],
+				&mons[PM_ICE_STORM],
+				&mons[PM_THUNDER_STORM],
+				&mons[PM_FIRE_STORM],
+				&mons[PM_DEMINYMPH],
+				&mons[PM_DARK_YOUNG],
+				&mons[PM_DARK_YOUNG],
+				&mons[PM_DARK_YOUNG],
+				&mons[PM_DARK_YOUNG],
+				&mons[PM_BLESSED] };
+
+			/* maybe summon nearby the caster, instead of at a target */
+			if (!(tarx || tary) || !clear_path(x(magr), y(magr), tarx, tary)) {
+				tarx = x(magr);
+				tary = y(magr);
+			}
+
+			do {
+				mtmp = makemon(young[rn2(SIZE(young))], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH);
+			} while (!mtmp && tries++ < 10);
+			if (mtmp) {
+				u.summonMonster = TRUE;
+				if (canspotmon(mtmp))
+					pline("A monster appears in a swirl of mist!");
+				else
+					You("sense the arrival of a monster!");
+			}
+			stop_occupation();
+		}
+		return MM_HIT;
+
 	case TIME_DUPLICATE:
+		if (!youdef || u.summonMonster) {
+			/* only mvu allowed */
+			/* only one summon spell per global turn allowed */
+			return cast_spell2(magr, mdef, attk, PSI_BOLT, tarx, tary);
+		}
+		else {
+			struct monst *mtmp;
+
+			/* maybe summon nearby the caster, instead of at a target */
+			if (!(tarx || tary) || !clear_path(x(magr), y(magr), tarx, tary)) {
+				tarx = x(magr);
+				tary = y(magr);
+			}
+
+			mtmp = makemon(magr->data, tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | NO_MINVENT);
+			if (mtmp){
+				u.summonMonster = TRUE;
+				mtmp->mvanishes = d(1, 4) + 1;
+				mtmp->mclone = 1;
+			}
+		}
+		return MM_HIT;
+
 	case CLONE_WIZ:
+		if (!youdef) {
+			/* only mvu allowed */
+			return cast_spell2(magr, mdef, attk, PSI_BOLT, tarx, tary);
+		}
+		else {
+			if (magr->iswiz && flags.no_of_wizards == 1) {
+				pline("Double Trouble...");
+				clonewiz();
+			}
+			else {
+				impossible("bad wizard cloning?");
+			}
+		}
+		return MM_HIT;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // DEBUFFING AND MISC

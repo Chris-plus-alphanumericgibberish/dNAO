@@ -1247,6 +1247,7 @@ E int FDECL(buzzmu, (struct monst *,struct attack *, int));
 E int FDECL(buzzmm, (struct monst *,struct monst *,struct attack *, int));
 E int FDECL(castmm, (struct monst *,struct monst *,struct attack *));
 E int FDECL(castum, (struct monst *,struct attack *));
+E int FDECL(cast_spell2, (struct monst *, struct monst *, struct attack *, int, int, int));
 E void FDECL(cast_spell, (struct monst *, int,int));
 E int FDECL(needs_familiar, (struct monst *));
 
