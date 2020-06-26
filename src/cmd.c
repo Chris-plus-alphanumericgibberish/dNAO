@@ -20,7 +20,8 @@
 #define DOATTRIB_RESISTS	1
 #define DOATTRIB_ARMOR		2
 #define DOATTRIB_ENLIGHTEN	3
-#define DOATTRIB_SPIRITS	4
+#define DOATTRIB_BINDINGS	4
+#define DOATTRIB_SPIRITS	5
 
 #ifdef DEBUG
 /*
@@ -169,6 +170,7 @@ STATIC_PTR int NDECL(doconduct); /**/
 STATIC_PTR int NDECL(minimal_enlightenment);
 STATIC_PTR void NDECL(resistances_enlightenment);
 STATIC_PTR void NDECL(signs_enlightenment);
+STATIC_PTR void NDECL(spirits_enlightenment);
 
 static void FDECL(bind_key, (UCHAR_P, char*));
 static void NDECL(init_bind_list);
@@ -3391,40 +3393,40 @@ resistances_enlightenment()
 	/*** Madnesses ***/
 	if(u.usanity < 100 && !ClearThoughts){
 		if (u.umadness&MAD_DELUSIONS){
-			putstr(en_win, 0, "You have a tendency to hallucinate");
+			putstr(en_win, 0, "You have a tendency to hallucinate.");
 		}
 		if(u.usanity < 80){
 			if (u.umadness&MAD_REAL_DELUSIONS){
 				if(u.umadness&MAD_DELUSIONS)
 					putstr(en_win, 0, "...at least, you THINK you're hallucinating....");
 				else
-					putstr(en_win, 0, "You have a tendency to hallucinate... you think");
+					putstr(en_win, 0, "You have a tendency to hallucinate... you think.");
 			}
 		}
 		if (u.umadness&MAD_SANCTITY){
-			putstr(en_win, 0, "You have a tendency to treat women as delicate and holy beings who shouldn't be harmed");
+			putstr(en_win, 0, "You have a tendency to treat women as delicate and holy beings who shouldn't be harmed.");
 		}
 		if (u.umadness&MAD_GLUTTONY){
-			putstr(en_win, 0, "You have a mad hunger");
+			putstr(en_win, 0, "You have a mad hunger.");
 		}
 		if (u.umadness&MAD_SPORES && !Race_if(PM_ANDROID) && !Race_if(PM_CLOCKWORK_AUTOMATON)){
 			//Note: Race_if is correct because it works on your original brain (because magic)
 			putstr(en_win, 0, "She's eating your brain.");
 		}
 		if (u.umadness&MAD_FRIGOPHOBIA){
-			putstr(en_win, 0, "You have an irrational fear of the cold");
+			putstr(en_win, 0, "You have an irrational fear of the cold.");
 		}
 		if (u.umadness&MAD_CANNIBALISM){
-			putstr(en_win, 0, "You have a mad desire to consume living flesh, even the flesh of your own kind");
+			putstr(en_win, 0, "You have a mad desire to consume living flesh, even the flesh of your own kind.");
 		}
 		if (u.umadness&MAD_RAGE){
-			putstr(en_win, 0, "You have a burning, irrational rage");
+			putstr(en_win, 0, "You have a burning, irrational rage.");
 		}
 		if (u.umadness&MAD_ARGENT_SHEEN){
 			putstr(en_win, 0, "The world is full of mirrors, and you can't help but admire yourself.");
 		}
 		if (u.umadness&MAD_SUICIDAL){
-			putstr(en_win, 0, "You have a tendency towards suicidal behavior");
+			putstr(en_win, 0, "You have a tendency towards suicidal behavior.");
 		}
 		if (u.umadness&MAD_NUDIST){
 			putstr(en_win, 0, "You have an irrational dislike of clothing.");
@@ -3464,7 +3466,7 @@ resistances_enlightenment()
 		}
 		if(has_blood(youracedata)){
 			if (u.umadness&MAD_FRENZY){
-				Sprintf(buf, "You feel your %s seethe below your %s", body_part(BLOOD), body_part(BODY_SKIN));
+				Sprintf(buf, "You feel your %s seethe below your %s.", body_part(BLOOD), body_part(BODY_SKIN));
 				putstr(en_win, 0, buf);
 			}
 		}
@@ -3710,6 +3712,105 @@ udr_enlightenment()
 	display_nhwindow(en_win, TRUE);
 	destroy_nhwindow(en_win);
 	return;
+}
+
+STATIC_OVL void
+spirits_enlightenment()
+{
+	char buf[BUFSZ];
+	int i;
+	en_win = create_nhwindow(NHW_MENU);
+
+	putstr(en_win, 0, "Currently bound spirits:");
+	putstr(en_win, 0, "");
+
+#define addseal(id) if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
+	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
+		u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
+	else\
+	Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
+	putstr(en_win, 0, buf)
+#define addempty() Sprintf(buf,"  (empty)"); putstr(en_win, 0, buf)
+
+	/* only show gnosis premonition when it is being used */
+	if (u.spirit[GPREM_SPIRIT] != 0L) {
+		putstr(en_win, 0, "Gnosis Premonition");
+		addseal(GPREM_SPIRIT);
+		putstr(en_win, 0, "");
+	}
+	/* only show near void spirits if you know any seals */
+	if (u.sealsKnown) {
+		putstr(en_win, 0, "Spirits of the Near Void");
+		for (i = 0; i < u.sealCounts; i++) {
+			addseal(i);
+		}
+		for (; i < binder_nearvoid_slots(); i++) {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	/* only show quest spirits if you know either seal */
+	if ((u.specialSealsKnown & (SEAL_ACERERAK | SEAL_DAHLVER_NAR | SEAL_BLACK_WEB))
+		/* needs special case for myrkalfyr who don't know the seal, but are bound anyways */
+		|| (u.specialSealsActive&SEAL_BLACK_WEB)) {
+		putstr(en_win, 0, "Quest Spirit");
+		if (u.spirit[QUEST_SPIRIT] != 0L) {
+			addseal(QUEST_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	/* only show alignment spirits if you know any */
+	if (u.specialSealsKnown & (
+			SEAL_COSMOS |
+			SEAL_LIVING_CRYSTAL |
+			SEAL_TWO_TREES |
+			SEAL_MISKA |
+			SEAL_NUDZIRATH |
+			SEAL_ALIGNMENT_THING |
+			SEAL_UNKNOWN_GOD
+			)) {
+		putstr(en_win, 0, "Alignment Spirit");
+		if (u.spirit[ALIGN_SPIRIT] != 0L) {
+			addseal(ALIGN_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	/* the Embassy of Elements's spirit */
+	if (u.specialSealsActive & SEAL_COUNCIL)
+	{
+		putstr(en_win, 0, "Embassy of Elements");
+		if (u.spirit[CROWN_SPIRIT] != 0L) {
+			addseal(CROWN_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	/* Show the Numina for Binders once they have hit XL 30 */
+	if (Role_if(PM_EXILE) && (u.ulevelmax >= 30))
+	{
+		putstr(en_win, 0, "Outer Spirit");
+		if (u.spirit[OUTER_SPIRIT] != 0L) {
+			addseal(OUTER_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	display_nhwindow(en_win, TRUE);
+	destroy_nhwindow(en_win);
+	return;
+
+#undef addseal
+#undef addempty
 }
 
 STATIC_OVL void
@@ -4185,7 +4286,7 @@ signs_mirror()
 		if(count > 2) comma = ",";
 		else comma = "";
 		
-		Sprintf(msgbuf, "");
+		msgbuf[0] = 0;
 		if(u.uaesh && u.uaesh - !!u.uaesh_duration){
 			num = u.uaesh - !!u.uaesh_duration;
 			total += num;
@@ -4697,11 +4798,19 @@ minimal_enlightenment()
 	}
 	if (u.sealsActive || u.specialSealsActive) {
 		Sprintf(buf, "Describe your binding marks.");
-		any.a_int = DOATTRIB_SPIRITS;
+		any.a_int = DOATTRIB_BINDINGS;
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'd', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 		//signs_enlightenment();
+	}
+	if (u.sealsKnown || u.specialSealsKnown || u.sealsActive || u.specialSealsActive) {
+		Sprintf(buf, "Show your bound spirits.");
+		any.a_int = DOATTRIB_SPIRITS;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'e', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		//spirits_enlightenment();
 	}
 
 	end_menu(tmpwin, "Base Attributes");
@@ -4817,8 +4926,11 @@ doattributes()
 		case DOATTRIB_ENLIGHTEN:
 			enlightenment(0);
 			break;
-		case DOATTRIB_SPIRITS:
+		case DOATTRIB_BINDINGS:
 			signs_enlightenment();
+			break;
+		case DOATTRIB_SPIRITS:
+			spirits_enlightenment();
 			break;
 		default:
 			return 0;

@@ -218,22 +218,36 @@ static NEARDATA const char * const choke_texts2[] = {
 	"You suffocate."
 };
 
+static NEARDATA const char * const choke_texts3[] = {
+	"You can't dislodge your meal.",
+	"You're gasping for air.",
+	"You can no longer breathe.",
+	"You're turning %s.",
+	"You choke to death."
+};
+
 STATIC_OVL void
 choke_dialogue()
 {
 	register long i = u.divetimer;
+	const char *str;
 
 	if(i > 0 && i <= SIZE(choke_texts)) {
-	    if (!rn2(10))
+		if (HStrangled & TIMEOUT) {
+			str = choke_texts3[SIZE(choke_texts) - i];
+			goto printchokestr;
+		}
+	    else if (!rn2(10))
 			pline(choke_texts2[SIZE(choke_texts2) - i], body_part(NECK));
-	    else {
-		const char *str = choke_texts[SIZE(choke_texts)-i];
+		else {
+			str = choke_texts[SIZE(choke_texts) - i];
 
-		if (index(str, '%'))
-		    pline(str, hcolor(NH_BLUE));
-		else
-		    pline1(str);
-	    }
+printchokestr:
+			if (index(str, '%'))
+				pline(str, hcolor(NH_BLUE));
+			else
+				pline1(str);
+		}
 	}
 	exercise(A_STR, FALSE);
 }
@@ -607,8 +621,10 @@ nh_timeout()
 		else if(u.divetimer > 1) u.divetimer--;
 		else {
 			killer_format = KILLED_BY;
-			killer = (u.uburied || FrozenAir) ? "suffocation" : "strangulation";
-			done(DIED);
+			killer = ((HStrangled & TIMEOUT) && delayed_killer) ? delayed_killer
+				: (u.uburied || FrozenAir) ? "suffocation"
+				: "strangulation";
+			done(((HStrangled & TIMEOUT) && delayed_killer) ? CHOKING : DIED);
 		}
 	} else if((u.usubwater || is_3dwater(u.ux,u.uy)) && u.divetimer > 0 && !Breathless && !amphibious(youracedata)){
 		u.divetimer--;
@@ -1441,7 +1457,7 @@ long timeout;
 			}
 			else if (obj->otyp == SHADOWLANDER_S_TORCH || obj->otyp == TORCH) {
 				/* torches may become burnt clubs */
-				if (obj_resists(obj, 100, 10))
+				if (obj_resists(obj, 10, 100))
 				{
 					obj->otyp = CLUB;
 					obj->oclass = WEAPON_CLASS;
@@ -1778,7 +1794,7 @@ long timeout;
 			end_burn(obj, FALSE);
 
 			/* torches may become burnt clubs */
-			if (obj_resists(obj, 100, 10))
+			if (obj_resists(obj, 10, 100))
 			{
 				obj->otyp = CLUB;
 				obj->oclass = WEAPON_CLASS;
@@ -1786,6 +1802,7 @@ long timeout;
 				if (is_flammable(obj) && !obj->oerodeproof)
 					obj->oeroded = min(obj->oeroded + 1, 3);
 				fix_object(obj);
+				break;	/* don't do other torch things */
 			}
 			else {
 				obj_extract_self(obj);
@@ -1919,7 +1936,7 @@ long timeout;
 			end_burn(obj, FALSE);
 
 			/* torches may become burnt clubs */
-			if (obj_resists(obj, 100, 10))
+			if (obj_resists(obj, 10, 100))
 			{
 				obj->otyp = CLUB;
 				obj->oclass = WEAPON_CLASS;
@@ -1927,6 +1944,7 @@ long timeout;
 				if (is_flammable(obj) && !obj->oerodeproof)
 					obj->oeroded = min(obj->oeroded + 1, 3);
 				fix_object(obj);
+				break;	/* don't do other torch things */
 			}
 			else {
 				obj_extract_self(obj);

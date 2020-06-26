@@ -1601,7 +1601,7 @@ struct obj *obj;
 			Sprintf(buf, "almost hits the %s", ceiling(u.ux, u.uy));
 		}
 	}
-	if (!hits_insubstantial((struct monst *)0, &youmonst, (struct attack *)0, obj)) {
+	if (insubstantial(youracedata) && !hits_insubstantial((struct monst *)0, &youmonst, (struct attack *)0, obj)) {
 		pline("%s %s, then falls back down through you.", Doname2(obj), buf);
 		hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
 	}
@@ -1760,6 +1760,10 @@ int shotlimit;
 			multishot = ((multishot > 5) ? (multishot / 3) : 1);
 		/* else it is auto == no change */
 	}
+
+	/* The Fluorite Octet can be thrown (by hand) as many as wanted at once */
+	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON && !launcher)
+		multishot = shotlimit ? shotlimit : 8;
 
 	/* For most things, limit multishot to ammo supply */
 	if ((long)multishot > ammo->quan && !(
@@ -1929,6 +1933,7 @@ dothrow()
 
 	/* kludge to work around parse()'s pre-decrement of 'multi' */
 	shotlimit = (multi || save_cm) ? multi + 1 : 0;
+	multi = 0;		/* reset; it's been used up */
 
 	/* try to find a wielded launcher */
 	if (ammo != uwep && ammo != uswapwep &&

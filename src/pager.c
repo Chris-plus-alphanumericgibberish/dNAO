@@ -1978,6 +1978,7 @@ get_description_of_damage_type(uchar id)
 	case AD_RETR: return "elemental gaze attack";
 	case AD_SAMU: return "steal Amulet";
 	case AD_CURS: return "steal intrinsic";
+	case AD_BDFN: return "spears of blood";
 	case AD_SQUE: return "steal Quest Artifact or Amulet";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
@@ -2082,7 +2083,8 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			strcat(description, "Base statistics of this monster type:");
 			strcat(description, "\n");
 			int ac = 10-(ptr->nac+ptr->dac+ptr->pac);
-			sprintf(temp_buf, "Base level = %d. Difficulty = %d. AC = %d. MR = %d. Alignment %d. ", ptr->mlevel, monstr[monsndx(ptr)], ac, ptr->mr, ptr->maligntyp);
+			sprintf(temp_buf, "Base level = %d. Difficulty = %d. AC = %d. DR = %d. MR = %d. Alignment %d. ",
+				ptr->mlevel, monstr[monsndx(ptr)], ac, mdat_avg_mdr(mtmp), ptr->mr, ptr->maligntyp);
 			strcat(description, temp_buf);
 			temp_buf[0] = '\0';
 			strcat(description, get_speed_description_of_monster_type(mtmp, temp_buf));

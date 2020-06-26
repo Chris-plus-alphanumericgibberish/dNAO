@@ -2968,8 +2968,13 @@ give_ascension_trophy()
 		achieve.trophies |= HALF_ASC;
 	else if(Race_if(PM_YUKI_ONNA))
 		achieve.trophies |= YUKI_ASC;
-	
-	if(achieve.get_keys <= 2)
+	int i;
+	int keys = 0;
+	for(i = 0; i<9; i++){
+		if(achieve.get_keys&(0x1 << i))
+			keys++;
+	}
+	if(keys <= 2)
 		achieve.trophies |= SPEED_PHASE;
 	
 	//There were some bugs with these, which *should* be fixed, but check all of them anyway.

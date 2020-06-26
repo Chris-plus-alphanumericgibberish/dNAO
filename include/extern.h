@@ -2084,7 +2084,7 @@ E const char *FDECL(halu_gname, (ALIGNTYP_P));
 E const char *FDECL(align_gtitle, (ALIGNTYP_P));
 E void FDECL(altar_wrath, (int,int));
 E int FDECL(candle_on_altar, (struct obj *));
-E void FDECL(goat_eat, (struct obj *));
+E void FDECL(goat_eat, (struct obj *, int));
 E boolean FDECL(goat_mouth_at, (int, int));
 
 /* ### priest.c ### */
@@ -2450,6 +2450,7 @@ E void FDECL(beg, (struct monst *));
 E void FDECL(m_command, (struct monst *));
 E int NDECL(dotalk);
 E int FDECL(dochat, (BOOLEAN_P, int, int, int));
+E int NDECL(binder_nearvoid_slots);
 E int * FDECL(spirit_props, (int));
 E void FDECL(councilspirit, (int));
 E void FDECL(gnosisspirit, (int));
@@ -3011,6 +3012,9 @@ E int FDECL(full_marmorac, (struct monst *));
 E int FDECL(base_nat_mdr, (struct monst *));
 E int FDECL(base_mdr, (struct monst *));
 E int FDECL(roll_mdr, (struct monst *, struct monst *));
+E void FDECL(mon_slot_dr, (struct monst *, struct monst *, int, int *, int *, int *));
+E int FDECL(avg_mdr, (struct monst *)); 
+E int FDECL(mdat_avg_mdr, (struct monst *));
 E void FDECL(m_dowear, (struct monst *,BOOLEAN_P));
 E boolean FDECL(mon_remove_armor, (struct monst *));
 E struct obj *FDECL(which_armor, (struct monst *,long));
@@ -3076,6 +3080,7 @@ E boolean FDECL(obj_silver_searing, (struct obj *));
 E boolean FDECL(obj_jade_searing, (struct obj *));
 E int FDECL(hatesobjdmg, (struct monst *, struct obj *));
 E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
+E int FDECL(destroy_item, (struct monst *, int, int));
 
 /* ### zap.c ### */
 
@@ -3124,8 +3129,6 @@ E int FDECL(zap_over_floor, (XCHAR_P,XCHAR_P,int,int,int,boolean *));
 E void FDECL(fracture_rock, (struct obj *));
 E boolean FDECL(break_statue, (struct obj *));
 E boolean FDECL(break_crate, (struct obj *));
-E void FDECL(destroy_item, (int,int));
-E int FDECL(destroy_mitem, (struct monst *,int,int));
 E int FDECL(resist, (struct monst *,CHAR_P,int,int));
 E boolean FDECL(makewish, (int));
 E void FDECL(costly_cancel, (struct obj *));

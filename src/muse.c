@@ -65,7 +65,6 @@ struct obj *obj;
 
 	if (obj->oclass == POTION_CLASS) {
 	    coord cc;
-	    static const char * const empty = "The potion turns out to be empty.";
 	    const char *potion_descr;
 	    struct monst *mtmp;
 #define POTION_OCCUPANT_CHANCE(n) (13 + 2*(n))	/* also in potion.c */
@@ -79,7 +78,7 @@ struct obj *obj;
 		    m_useup(mon, obj);
 		    mtmp = makemon(&mons[PM_GHOST], cc.x, cc.y, NO_MM_FLAGS);
 		    if (!mtmp) {
-			if (vis) pline(empty);
+			if (vis) pline("The potion turns out to be empty.");
 		    } else {
 			if (vis) {
 			    pline("As %s opens the bottle, an enormous %s emerges!",
@@ -102,7 +101,7 @@ struct obj *obj;
 		m_useup(mon, obj);
 		mtmp = makemon(&mons[PM_DJINNI], cc.x, cc.y, NO_MM_FLAGS);
 		if (!mtmp) {
-		    if (vis) pline(empty);
+		    if (vis) pline("The potion turns out to be empty.");
 		} else {
 		    if (vis)
 			pline("In a cloud of smoke, %s emerges!",
@@ -1546,9 +1545,11 @@ struct monst *mtmp;
 	    	    	}
 		    }
 		}
+		/* Preserve the cursedness of the item before freeing it */
+		int cursed = otmp->cursed;
 		m_useup(mtmp, otmp);
 		/* Attack the player */
-		if (distmin(mmx, mmy, u.ux, u.uy) == 1 && !otmp->cursed) {
+		if (distmin(mmx, mmy, u.ux, u.uy) == 1 && !cursed) {
 		    int dmg;
 		    struct obj *otmp2;
 
@@ -1603,9 +1604,9 @@ struct monst *mtmp;
 			    pline_The("scroll erupts in a tower of flame!");
 			shieldeff(mtmp->mx, mtmp->my);
 			pline("%s is uninjured.", Monnam(mtmp));
-			(void) destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			(void) destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
-			(void) destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+			(void) destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+			(void) destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
+			(void) destroy_item(mtmp, POTION_CLASS, AD_FIRE);
 			num = (2*(rn1(3, 3) + 2 * bcsign(otmp)) + 1)/3;
 			if (Fire_resistance)
 			    You("are not harmed.");

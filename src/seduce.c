@@ -1786,22 +1786,45 @@ register struct monst *mon;
 			do_genocide(1);
 		break;
 		case 2:{
-			int i;
+			int i, j;
 			verbalize("I grant you six magics!");
-			for (i = 6; i > 0; i--) {
-				/* IMPROVEMENT NOTE: Randomize order, also, you will never
-					reach this code while wearing armor or a cloak. */
-				if(uwep && uwep->spe < 6) uwep->spe = 6;
-				else if(uarm && uarm->spe < 6) uarm->spe = 6;
-				else if(uarmc && uarmc->spe < 6) uarmc->spe = 6;
-				else if(uarms && uarms->spe < 6) uarms->spe = 6;
-				else if(uswapwep && uswapwep->spe < 6) uswapwep->spe = 6;
-				else if(uarmh && uarmh->spe < 6) uarmh->spe = 6;
-				else if(uarmg && uarmg->spe < 6) uarmg->spe = 6;
-				else if(uarmf && uarmf->spe < 6) uarmf->spe = 6;
-				else if(uquiver && uquiver->spe < 6) uquiver->spe = 6;
-				else if(uarmu && uarmu->spe < 6) uarmu->spe = 6;
-		   }
+			/* get six enchantable/chargable pieces of gear that are less than +6 */
+			struct obj * gear[] = {
+				uwep,
+				uarm,
+				uarmc,
+				uarms,
+				uswapwep,
+				uarmh,
+				uarmg,
+				uarmf,
+				uquiver,
+				uarmu,
+				uright,
+				uleft,
+				(struct obj *)0
+				};
+			int len = 12;	/* number of entries in gear */
+			struct obj * otmp;
+			for (i = 6; i > 0 && len >= 0;) {
+				j = rn2(len);
+				otmp = gear[j];
+				if (otmp &&  (
+						otmp->oclass == WEAPON_CLASS ||
+						otmp->oclass == ARMOR_CLASS ||
+						(otmp->oclass == TOOL_CLASS && is_weptool(otmp)) ||
+						(otmp->oclass == RING_CLASS && objects[otmp->otyp].oc_charged && otmp->otyp != RIN_WISHES)
+						) &&
+					otmp->spe < 6) {
+					otmp->spe = 6;
+					i--;
+				}
+				else {
+					for (; j < len; j++)
+						gear[j] = gear[j + 1];
+					len--;
+				}
+			}
 		}break;
 		case 3:{
 			int i;
@@ -2883,7 +2906,7 @@ const char *str;
 			str);
 		her_strength -= ACURR(A_STR);
 		for(; her_strength >= 0; her_strength--){
-			if(obj->spe > -1*objects[(obj)->otyp].a_ac){
+			if(obj->spe > -1*a_acdr(objects[(obj)->otyp])){
 				damage_item(obj);
 //				Your("%s less effective.", aobjnam(obj, "seem"));
 			}

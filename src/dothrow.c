@@ -88,6 +88,11 @@ int shots, shotlimit;
 		clicky = TRUE;
 	}
 	
+	if(shots <= 0){
+		You("push the firing stud, but nothing happens.");
+		return 1;
+	}
+	
 	if(!u.dx && !u.dy){
 		shotlimit = 1;
 		if(u.dz > 0){
@@ -811,6 +816,25 @@ boolean from_invent;
 			dowebgush(x,y, obj->ovar1 ? obj->ovar1 : 2);
 		break;
 	}
+
+	/* dump all contents on floor */
+	if (Has_contents(obj)) {
+		struct obj * otmp;
+		while ((otmp = obj->cobj) != 0) {
+			obj_extract_self(otmp);
+			if (obj->otyp == ICE_BOX && otmp->otyp == CORPSE) {
+				otmp->age = monstermoves - otmp->age; /* actual age */
+				start_corpse_timeout(otmp);
+			}
+			/* possibly 'donate' it to a shop */
+			if (hero_caused && *u.ushops)
+				check_shop_obj(otmp, x, y, FALSE);
+			place_object(otmp, x, y);
+			stackobj(otmp);
+		}
+		newsym(x, y);
+	}
+
 	if (hero_caused) {
 	    if (from_invent) {
 		if (*u.ushops)

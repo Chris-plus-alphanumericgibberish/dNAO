@@ -213,8 +213,8 @@ newman()
 	/* 
 	 * Kludge up a reroll of all dice
 	 */
-	u.uhprolled = d(2*u.ulevel, u.uhprolled/u.ulevel);
-	u.uenrolled = d(2*u.ulevel, u.uenrolled/u.ulevel);
+	u.uhprolled = d(2*u.ulevel, max(u.uhprolled/u.ulevel, 1));
+	u.uenrolled = d(2*u.ulevel, max(u.uenrolled/u.ulevel, 1));
 
 	redist_attr();
 
@@ -1434,11 +1434,11 @@ dogaze()
 		   	         dmg = 0;
 		   	     }
 		   	     if((int) u.ulevel > rn2(20))
-		   	         (void) destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
+		   	         (void) destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
 		   	     if((int) u.ulevel > rn2(20))
-		   	         (void) destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+		   	         (void) destroy_item(mtmp, POTION_CLASS, AD_FIRE);
 		   	     if((int) u.ulevel > rn2(25))
-		   	         (void) destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+		   	         (void) destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
 		   	 break;
 		   	 case AD_COLD:
 		   	     dmg = d(damn,damd);
@@ -1448,7 +1448,7 @@ dogaze()
 		   	         dmg = 0;
 		   	     }
 		   	     if((int) u.ulevel > rn2(20))
-		   	         (void) destroy_mitem(mtmp, POTION_CLASS, AD_COLD);
+		   	         (void) destroy_item(mtmp, POTION_CLASS, AD_COLD);
 		   	 break;
 		   	 case AD_ELEC:
 		   	     dmg = d(damn,damd);
@@ -1794,65 +1794,81 @@ int splaction;
 
 	
 	do {
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	any.a_void = 0;		/* zero out all bits */
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_void = 0;		/* zero out all bits */
 
-	Sprintf(buf, "Words of Power");
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	if(u.ufirst_light && (splaction == SPELLMENU_DESCRIBE || u.ufirst_light_timeout <= moves)){
-		Sprintf(buf, "speak the First Word");
-		any.a_int = FIRST_LIGHT+1;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			 'q', 0, ATR_NONE, buf, MENU_UNSELECTED);
-	}
-	if(u.ufirst_sky && (splaction == SPELLMENU_DESCRIBE || u.ufirst_sky_timeout <= moves)){
-		Sprintf(buf, "speak the Dividing Word");
-		any.a_int = PART_WATER+1;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			 'w', 0, ATR_NONE, buf, MENU_UNSELECTED);
-	}
-	if(u.ufirst_life && (splaction == SPELLMENU_DESCRIBE || u.ufirst_life_timeout <= moves)){
-		Sprintf(buf, "speak the Nurturing Word");
-		any.a_int = OVERGROW+1;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			 'e', 0, ATR_NONE, buf, MENU_UNSELECTED);
-	}
-	if(u.ufirst_know && (splaction == SPELLMENU_DESCRIBE || u.ufirst_know_timeout <= moves)){
-		Sprintf(buf, "speak the Word of Knowledge");
-		any.a_int = APPLE_WORD+1;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			 'q', 0, ATR_NONE, buf, MENU_UNSELECTED);
-	}
-	if (splaction != SPELLMENU_DESCRIBE && splaction < 0){
-		Sprintf(buf, "Describe a word instead");
-		any.a_int = SPELLMENU_DESCRIBE;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'?', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (splaction != SPELLMENU_CAST && splaction < 0) {
-		Sprintf(buf, "Cast a spell instead");
-		any.a_int = SPELLMENU_CAST;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'!', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	end_menu(tmpwin, "Select Word");
+		Sprintf(buf, "Words of Power");
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		if (u.ufirst_light && (splaction == SPELLMENU_DESCRIBE || u.ufirst_light_timeout <= moves)){
+			Sprintf(buf, "speak the First Word");
+			any.a_int = FIRST_LIGHT + 1;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'q', 0, ATR_NONE, buf, MENU_UNSELECTED);
+		}
+		if (u.ufirst_sky && (splaction == SPELLMENU_DESCRIBE || u.ufirst_sky_timeout <= moves)){
+			Sprintf(buf, "speak the Dividing Word");
+			any.a_int = PART_WATER + 1;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'w', 0, ATR_NONE, buf, MENU_UNSELECTED);
+		}
+		if (u.ufirst_life && (splaction == SPELLMENU_DESCRIBE || u.ufirst_life_timeout <= moves)){
+			Sprintf(buf, "speak the Nurturing Word");
+			any.a_int = OVERGROW + 1;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'e', 0, ATR_NONE, buf, MENU_UNSELECTED);
+		}
+		if (u.ufirst_know && (splaction == SPELLMENU_DESCRIBE || u.ufirst_know_timeout <= moves)){
+			Sprintf(buf, "speak the Word of Knowledge");
+			any.a_int = APPLE_WORD + 1;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'q', 0, ATR_NONE, buf, MENU_UNSELECTED);
+		}
+		if (splaction != SPELLMENU_DESCRIBE && splaction < 0){
+			Sprintf(buf, "Describe a word instead");
+			any.a_int = SPELLMENU_DESCRIBE;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'?', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if (splaction != SPELLMENU_CAST && splaction < 0) {
+			Sprintf(buf, "Speak a word instead");
+			any.a_int = SPELLMENU_CAST;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'!', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		end_menu(tmpwin, "Select Word");
 
-	how = PICK_ONE;
-	n = select_menu(tmpwin, how, &selected);
-	destroy_nhwindow(tmpwin);
-	
-	if(splaction == SPELLMENU_DESCRIBE && n > 0 && selected[0].item.a_int != SPELLMENU_CAST) 
-		worddescriptions(selected[0].item.a_int-1);
-	
-	} while(splaction == SPELLMENU_DESCRIBE && n > 0 && selected[0].item.a_int != SPELLMENU_CAST);
-	
-	if(n > 0 && selected[0].item.a_int == SPELLMENU_CAST) return dowords(SPELLMENU_CAST);
-	if(n > 0 && selected[0].item.a_int == SPELLMENU_DESCRIBE) return dowords(SPELLMENU_DESCRIBE);
-	if(splaction == SPELLMENU_CAST) return (n > 0) ? wordeffects(selected[0].item.a_int-1) : 0;
-	
+		how = PICK_ONE;
+		n = select_menu(tmpwin, how, &selected);
+		destroy_nhwindow(tmpwin);
+
+
+		if (n > 0){
+			int s_no = selected[0].item.a_int - 1;
+
+			if (selected[0].item.a_int < 0){
+				splaction = selected[0].item.a_int;
+				continue;
+			}
+			else {
+				switch (splaction)
+				{
+				case SPELLMENU_CAST:
+					return (wordeffects(selected[0].item.a_int - 1));
+
+				case SPELLMENU_DESCRIBE:
+					worddescriptions(selected[0].item.a_int - 1);
+					continue;
+
+				} // switch(splaction)
+			} // doing something allowable
+		} // menu item was selected
+		/* else end menu, nothing was selected */
+		break;
+	} while (TRUE);
+
 	return 0;
 }
 

@@ -1008,9 +1008,14 @@ struct mkroom	*croom;
 	
 	if(parsed)
 	{
-		int dummy=0;//we don't care about wish returns
-		otmp = readobjnam(o->name.str,&dummy,WISH_MKLEV);
-		place_object(otmp,x,y);
+		int retval=0;
+		otmp = readobjnam(o->name.str, &retval, WISH_MKLEV);
+		if (retval & WISH_FAILURE) {
+			impossible("failed to create %s", o->name.str);
+			return;
+		}
+		else
+			place_object(otmp,x,y);
 	}
 	else
 	{
@@ -1040,17 +1045,6 @@ struct mkroom	*croom;
 			otmp = mkgold(0L, x, y);
 			else
 			otmp = mkobj_at(oclass, x, y, !named);
-		}
-	}
-	if(In_quest(&u.uz) 
-		&& !Role_if(PM_CONVICT)
-		&& !(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON))
-	){
-		if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
-		if(otmp->oclass == ARMOR_CLASS){
-			if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
-			else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
-			else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (youracedata->mflagsb&MB_BODYTYPEMASK);
 		}
 	}
 	

@@ -1720,12 +1720,12 @@ karemade:
 				}
 				roll_av_frigophobia();
 				if(!InvCold_resistance || !rn2(11)){
-					destroy_item(POTION_CLASS, AD_COLD);
+					destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 				}
 			} else if(FrozenAir){
 				roll_av_frigophobia();
 				if(!InvCold_resistance || !rn2(11)){
-					destroy_item(POTION_CLASS, AD_COLD);
+					destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 				}
 			}
 			
@@ -1733,12 +1733,12 @@ karemade:
 				You("feel its burning gaze upon you!");
 				u.ustdy += 9;
 				if(!InvFire_resistance || !rn2(11)){
-					destroy_item(POTION_CLASS, AD_FIRE);
-					destroy_item(SCROLL_CLASS, AD_FIRE);
+					destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+					destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
 				}
 				if(!rn2(11) && roll_madness(MAD_OVERLORD)){
 					u.ustdy += 90;
-					destroy_item(SPBOOK_CLASS, AD_FIRE);
+					destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 				}
 				nomul(0, NULL);
 			}
@@ -1909,9 +1909,9 @@ karemade:
 					}
 				} else if(u.utemp) u.utemp--;
 				if(u.utemp > BURNING_HOT){
-					if((u.utemp-5)*2 > rnd(10)) destroy_item(SCROLL_CLASS, AD_FIRE);
-					if((u.utemp-5)*2 > rnd(10)) destroy_item(POTION_CLASS, AD_FIRE);
-					if((u.utemp-5)*2 > rnd(10)) destroy_item(SPBOOK_CLASS, AD_FIRE);
+					if((u.utemp-5)*2 > rnd(10)) destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+					if((u.utemp-5)*2 > rnd(10)) destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+					if((u.utemp-5)*2 > rnd(10)) destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 					
 					if(u.utemp >= MELTING && !(HFire_resistance || u.sealsActive&SEAL_FAFNIR)){
 						You("are melting!");
@@ -3169,7 +3169,7 @@ struct monst *mon;
 		for(otmp = level.objects[xlocale][ylocale]; otmp; otmp = otmp2){
 			otmp2 = otmp->nexthere;
 			if(otmp->otyp == CORPSE && !otmp->oartifact){
-				goat_eat(otmp); //No matter what, the this function should remove this corpse.  Either via resurrection or destruction
+				goat_eat(otmp, FALSE); //No matter what, the this function should remove this corpse.  Either via resurrection or destruction
 				//Warning note: otmp is now stale
 				return;
 			}

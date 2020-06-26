@@ -492,7 +492,7 @@ A("Magicbane",			ATHAME,							"mystically runed %s",
  */
 A("Fuma-itto no Ken",	BROADSWORD,						(const char *)0,
 	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, PM_ROGUE, NON_PM, TIER_B, (ARTG_GIFT),
+	A_CHAOTIC, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 8), (ARTA_HATES|ARTA_CROSSA|ARTA_POIS),	/* missing: SPFX2_NINJA */
 	PROP0(), NOFLAG,
@@ -500,9 +500,9 @@ A("Fuma-itto no Ken",	BROADSWORD,						(const char *)0,
 	CREATE_AMMO, NOFLAG /*makes shuriken*/
 	),
 
-A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"scorpion-hilted %s",
+A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"scorpion-bladed %s",
 	3000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, PM_ROGUE, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
+	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
 	ATTK(AD_DRST, 5, 0), (ARTA_POIS),
 	PROP1(POISON_RES), NOFLAG,
@@ -514,7 +514,7 @@ A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"scorpion-hilted %s",
 /* adds sneak attacks "from behind" (allowing sneak attacks for anyone, and increasing damage for rogues/etc) */
 A("Spineseeker",		SHORT_SWORD,					(const char *)0,
 	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, PM_ROGUE, NON_PM, TIER_D, (ARTG_GIFT),
+	A_CHAOTIC, NON_PM, NON_PM, TIER_D, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 6), NOFLAG,
 	PROP1(STEALTH), NOFLAG,
@@ -573,7 +573,7 @@ A("Mirror Brand",		LONG_SWORD,						"polished %s",
 	NOINVOKE, NOFLAG
 	),
 
-A("Sunsword",			LONG_SWORD,						(const char *)0,
+A("Sunsword",			LONG_SWORD,						"sun-bladed %s",
 	1500L, GOLD, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, 0 /*MG*/, (MA_UNDEAD | MA_DEMON) /*MA*/, 0 /*MV*/),
@@ -584,7 +584,7 @@ A("Sunsword",			LONG_SWORD,						(const char *)0,
 	),
 
 /*can be thrown by dwarves*/
-A("The Axe of the Dwarvish Lords",		BATTLE_AXE,		(const char *)0,
+A("The Axe of the Dwarvish Lords",		BATTLE_AXE,		"dwarf-faced %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, PM_DWARF, TIER_A, (ARTG_GIFT),
 	NO_MONS(),
@@ -596,7 +596,7 @@ A("The Axe of the Dwarvish Lords",		BATTLE_AXE,		(const char *)0,
 
 /*returns to your hand.*/
 /*Needs encyc entry*/
-A("Windrider",			BOOMERANG,						(const char *)0,
+A("Windrider",			BOOMERANG,						"winged %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_C, NOFLAG,
 	NO_MONS(),
@@ -618,7 +618,7 @@ A("The Rod of the Ram",	MACE,							"ram-headed %s",
 	),
 
 /* attack power is bound to wielder's life force */
-A("The Atma Weapon",	BEAMSWORD,						(const char *)0,
+A("The Atma Weapon",	BEAMSWORD,						"horned %s",
 	6660L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, MG_NASTY /*MG*/, 0 /*MA*/, 0 /*MV*/),
@@ -652,7 +652,7 @@ A("The Black Arrow",	ANCIENT_ARROW,					(const char *)0,
 
 /*also has a haste effect when wielded, but massively increases hunger and damages the wielder*/
 /*The invoked attack is very powerful*/
-A("Tensa Zangetsu",		TSURUGI,						(const char *)0,
+A("Tensa Zangetsu",		TSURUGI,						"black %s",
 	4444L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, NON_PM, NON_PM, TIER_A, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
@@ -667,7 +667,7 @@ A("Tensa Zangetsu",		TSURUGI,						(const char *)0,
 /*Sort of intermediate between a double damage and a utility weapon,*/
 /*Sode no Shirayuki gains x2 ice damage after using the third dance.*/
 /*however, it only keeps it for a few rounds, and the other dances are attack magic. */
-A("Sode no Shirayuki",	KATANA,							"snow-colored %s", // colored not covered
+A("Sode no Shirayuki",	KATANA,							"snow-white %s", // colored not covered
 	8000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
@@ -1122,7 +1122,7 @@ A("Premium Heart",					GAUNTLETS_OF_POWER,				(const char *)0,
 
 A("Godhands",					GAUNTLETS_OF_POWER,				(const char *)0,
 	7777L, GOLD, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, A_LAWFUL, NON_PM, TIER_A, (ARTG_GIFT),
+	A_LAWFUL, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_PHYS, 20, 10), NOFLAG,
 	PROP1(DRAIN_RES), NOFLAG,
@@ -1180,7 +1180,7 @@ A("The Rod of Seven Parts",			SPEAR,					(const char *)0,
 
 A("The Field Marshal's Baton",		MACE,					(const char *)0,
 	5000L, MT_DEFAULT, MZ_SMALL, WT_DEFAULT,
-	A_LAWFUL, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH),
+	A_LAWFUL, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_NOCNT),
 	MONS(0 /*Monster Symbol*/, 0 /*MM*/, 0 /*MT*/, 0 /*MB*/, MG_MERC /*MG*/, 0 /*MA*/, 0 /*MV*/),
 	NO_ATTK(), NOFLAG,
 	PROP0(), NOFLAG,
@@ -1618,7 +1618,7 @@ A("Itlachiayaque",					ROUNDSHIELD,		(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("The Annulus",					CHAKRAM,			"%s",
+A("The Annulus",					CHAKRAM,			"intricately-featured %s",
 	3000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_ANACHRONONAUT, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
@@ -2685,12 +2685,11 @@ A("Doomscreamer",					TWO_HANDED_SWORD,	(const char *)0,
 	),
 
 /*Needs encyc entry */
-/*Weapon of Graz'zt, from Gord the Rogue*/
 A("The Wand of Orcus",				WAN_DEATH,			(const char *)0,
 	8000L, MT_DEFAULT, MZ_HUGE, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
-	ATTK(AD_DRLI, 5, 12), (ARTA_DRAIN),
+	ATTK(AD_DRLI, 20, 12), (ARTA_DRAIN),
 	PROP0(), NOFLAG,
 	PROP0(), NOFLAG,
 	NOINVOKE, (ARTI_BLOODTHRST)

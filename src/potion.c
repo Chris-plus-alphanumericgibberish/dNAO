@@ -3116,8 +3116,8 @@ dodip()
 			losehp(d(3,6) + 3*obj->spe, "discharging sunrod", KILLED_BY_AN);
 		}
 		if(!InvShock_resistance){
-			if (!rn2(3)) destroy_item(WAND_CLASS, AD_ELEC);
-			if (!rn2(3)) destroy_item(RING_CLASS, AD_ELEC);
+			if (!rn2(3)) destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+			if (!rn2(3)) destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 		}
 		losehp(Acid_resistance ? rnd(5) : rnd(10),
 			   "alchemic blast", KILLED_BY_AN);
@@ -3250,12 +3250,11 @@ dodip()
 			      newbuf);
 		    if(!objects[old_otyp].oc_uname &&
 			!objects[old_otyp].oc_name_known && old_dknown) {
-			struct obj fakeobj;
-			fakeobj = zeroobj;
-			fakeobj.dknown = 1;
-			fakeobj.otyp = old_otyp;
-			fakeobj.oclass = POTION_CLASS;
-			docall(&fakeobj);
+			struct obj * fakeobj;
+			fakeobj = mksobj(old_otyp, FALSE, FALSE);
+			fakeobj->dknown = 1;
+			docall(fakeobj);
+			delobj(fakeobj);
 		    }
 		}
 		obj_extract_self(singlepotion);

@@ -1411,6 +1411,7 @@ mkkamereltowers()
 						otmp->spe = 1;
 						otmp->cursed = 0;
 						otmp->blessed = 0;
+						otmp->age = 0;
 						place_object(otmp, x, y);
 					} else {
 						obfree(otmp, (struct obj *)0);
@@ -1524,6 +1525,7 @@ mkkamereltowers()
 						otmp->spe = 1;
 						otmp->cursed = 0;
 						otmp->blessed = 0;
+						otmp->age = 0;
 						place_object(otmp, x, y);
 					} else {
 						obfree(otmp, (struct obj *)0);

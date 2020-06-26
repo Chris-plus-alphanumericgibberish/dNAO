@@ -672,7 +672,11 @@ int how;
 	    u.usick_type = 0;
 	    Sick = 0;
 	}
-	if (how == CHOKING) reset_uhunger();
+	if (how == CHOKING) {
+		reset_uhunger();
+		HStrangled &= ~TIMEOUT;
+		delayed_killer = 0;
+	}
 	nomovemsg = "You survived that attempt on your life.";
 	flags.move = 0;
 	if(multi > 0) multi = 0; else multi = -1;
@@ -752,7 +756,6 @@ winid endwin;
     char pbuf[BUFSZ];
     struct obj *otmp;
     long value, points;
-    short dummy;	/* object type returned by artifact_name() */
 
     for (otmp = list; otmp; otmp = otmp->nobj) {
 	if (otmp->oartifact ||
@@ -769,7 +772,7 @@ winid endwin;
 		/* assumes artifacts don't have quan > 1 */
 		Sprintf(pbuf, "%s%s (worth %ld %s and %ld points)",
 			the_unique_obj(otmp) ? "The " : "",
-			otmp->oartifact ? artifact_name(xname(otmp), &dummy) :
+			otmp->oartifact ? artiname(otmp->oartifact) :
 				OBJ_NAME(objects[otmp->otyp]),
 			value, currency(value), points);
 #ifdef DUMP_LOG

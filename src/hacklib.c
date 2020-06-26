@@ -161,16 +161,20 @@ char *
 s_suffix(s)		/* return a name converted to possessive */
     const char *s;
 {
-    Static char buf[BUFSZ];
+#define SSUFFIX_BUFFERS 3
+	Static char buf[BUFSZ][SSUFFIX_BUFFERS];
+	static int i = 0;
+	i = (i + 1) % SSUFFIX_BUFFERS;
 
-    Strcpy(buf, s);
-    if(!strcmpi(buf, "it"))
-	Strcat(buf, "s");
-    else if(*(eos(buf)-1) == 's')
-	Strcat(buf, "'");
+    Strcpy(buf[i], s);
+    if(!strcmpi(buf[i], "it"))
+	Strcat(buf[i], "s");
+    else if(*(eos(buf[i])-1) == 's')
+	Strcat(buf[i], "'");
     else
-	Strcat(buf, "'s");
-    return buf;
+	Strcat(buf[i], "'s");
+    return buf[i];
+#undef SSUFFIX_BUFFERS
 }
 
 char *

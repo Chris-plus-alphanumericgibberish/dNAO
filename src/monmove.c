@@ -366,6 +366,8 @@ struct monst *mtmp;
 			mtmp->mtyp == PM_DEEP_ONE ||
 			mtmp->mtyp == PM_DEEPER_ONE ||
 			(mtmp->mtyp == PM_DEEPEST_ONE && complete == 6) ||
+			(mtmp->mtyp == PM_FATHER_DAGON && complete == 6) ||
+			(mtmp->mtyp == PM_MOTHER_HYDRA && complete == 6) ||
 			mtmp->mtyp == PM_CHANGED ||
 			(mtmp->mtyp == PM_WARRIOR_CHANGED && complete == 6) ||
 			mtmp->mtyp == PM_EDDERKOP ||
@@ -1030,10 +1032,14 @@ register struct monst *mtmp;
 	if (mtmp->mdisrobe && !rn2(50)) mtmp->mdisrobe = 0;
 
 	if (mtmp->mcrazed){
-		if(!rn2(4))mtmp->mconf = 1;
-		(void) set_apparxy(mtmp);
-		if(!rn2(4))mtmp->mberserk = 1;
-		(void) set_apparxy(mtmp);
+		if(!rn2(4)){
+			mtmp->mconf = 1;
+			(void) set_apparxy(mtmp);
+		}
+		if(!rn2(4)){
+			mtmp->mberserk = 1;
+			(void) set_apparxy(mtmp);
+		}
 		if(!rn2(10)){
 			mtmp->mnotlaugh=0;
 			mtmp->mlaughing=rnd(5);
@@ -1344,7 +1350,9 @@ register struct monst *mtmp;
 				y = mtmp->my+(j+rot)%3;
 				if(!isok(x, y))
 					continue;
-				repairee = m_at(x,y);
+				if(u.ux == x && u.uy == y)
+					repairee = &youmonst;
+				else repairee = m_at(x,y);
 				if(!repairee)
 					continue;
 				if(repairee == &youmonst){
@@ -2096,44 +2104,54 @@ not_special:
 			(mtoo->msleeping || mtoo->mundetected ||
 			 (mtoo->mappearance && !mtoo->iswiz) ||
 			 !mtoo->data->mmove)) continue;
-			//Don't approach artifacts you can't touch
-			if(otmp->oartifact && !touch_artifact(otmp, mtmp, TRUE))
-				continue;
 			
-		    if(((likegold && otmp->oclass == COIN_CLASS) ||
-		       (likeobjs && index(practical, otmp->oclass) &&
-			(otmp->otyp != CORPSE || (ptr->mlet == S_NYMPH
-			   && !is_rider(&mons[otmp->corpsenm])))) ||
-		       (likemagic && index(magical, otmp->oclass)) ||
-		       (uses_items && searches_for_item(mtmp, otmp)) ||
-		       (likerock && is_boulder(otmp)) ||
-		       (likegems && otmp->oclass == GEM_CLASS &&
-			otmp->obj_material != MINERAL) ||
-		       (conceals && !cansee(otmp->ox,otmp->oy)) ||
-		       (ptr->mtyp == PM_GELATINOUS_CUBE &&
-			!index(indigestion, otmp->oclass) &&
-			!(otmp->otyp == CORPSE &&
-			  touch_petrifies(&mons[otmp->corpsenm])))
-		      ) && touch_artifact(otmp, mtmp, FALSE)) {
-				if(can_carry(mtmp,otmp) &&
-				 (throws_rocks(ptr) ||
-				  !boulder_at(xx,yy)) &&
-				 (!is_unicorn(ptr) ||
-				  otmp->obj_material == GEMSTONE) &&
-				   /* Don't get stuck circling an Elbereth */
-				  !(onscary(xx, yy, mtmp))) {
-					minr = distmin(omx,omy,xx,yy);
-					oomx = min(COLNO-1, omx+minr);
-					oomy = min(ROWNO-1, omy+minr);
-					lmx = max(1, omx-minr);
-					lmy = max(0, omy-minr);
-					gx = otmp->ox;
-					gy = otmp->oy;
-					if(mtmp->mtyp == PM_MAID && appr == 0) appr = 1;
-					if (gx == omx && gy == omy) {
-						mmoved = 3; /* actually unnecessary */
-						goto postmov;
-					}
+			if ((
+				(likegold && (
+					otmp->oclass == COIN_CLASS)) ||
+				(likeobjs && (
+					index(practical, otmp->oclass) &&
+					(otmp->otyp != CORPSE || (ptr->mlet == S_NYMPH && !is_rider(&mons[otmp->corpsenm]))))) ||
+				(likemagic && (
+					index(magical, otmp->oclass))) ||
+				(uses_items && (
+					searches_for_item(mtmp, otmp))) ||
+				(likerock && (
+					is_boulder(otmp))) ||
+				(likegems && (
+					otmp->oclass == GEM_CLASS && otmp->obj_material != MINERAL)) ||
+				(conceals && (
+					!cansee(otmp->ox, otmp->oy))) ||
+				(ptr->mtyp == PM_GELATINOUS_CUBE && (
+					!index(indigestion, otmp->oclass) && !(otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]))))
+				)
+				&&
+				(
+				/* can carry obj */
+				can_carry(mtmp, otmp) &&
+				/* not covered by a boulder */
+				(throws_rocks(ptr) || !boulder_at(xx, yy)) &&
+				/* unicorns only like gems */
+				!(is_unicorn(ptr) && otmp->obj_material != GEMSTONE) &&
+				/* Don't get stuck circling an Elbereth */
+				!(onscary(xx, yy, mtmp)) &&
+				/* Don't go for untouchable artifacts */
+				!(otmp->oartifact && !touch_artifact(otmp, mtmp, TRUE)) &&
+				/* Don't go for underwater items */
+				!is_pool(xx, yy, FALSE)
+				)
+				)
+			{
+				minr = distmin(omx,omy,xx,yy);
+				oomx = min(COLNO-1, omx+minr);
+				oomy = min(ROWNO-1, omy+minr);
+				lmx = max(1, omx-minr);
+				lmy = max(0, omy-minr);
+				gx = otmp->ox;
+				gy = otmp->oy;
+				if(mtmp->mtyp == PM_MAID && appr == 0) appr = 1;
+				if (gx == omx && gy == omy) {
+					mmoved = 3; /* actually unnecessary */
+					goto postmov;
 				}
 		    }
 		}

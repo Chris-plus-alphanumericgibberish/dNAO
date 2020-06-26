@@ -657,6 +657,10 @@ const char *name;
 	    if (obj == uswapwep) untwoweapon();
 	    /* activate warning if you've just named your weapon "Sting" */
 	    if (obj == uwep) set_artifact_intrinsic(obj, TRUE, W_WEP);
+	    if (obj == uwep && obj->oartifact == ART_KUSANAGI_NO_TSURUGI){
+	    	setuwep((struct obj *) 0);
+	    	pline("You are not yet worthy of wielding this sword, but you may bear it until you are ready.");
+	    }
 		if (carried(obj)) {
 			/*
 			 * We may need to do extra adjustments for the hero if we're
@@ -829,12 +833,13 @@ char * buf;
 {
 	if (((u.sealsActive&SEAL_MOTHER && !is_undead_mon(mtmp)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) || (ublindf && ublindf->otyp == ANDROID_VISOR))
 		&& !flags.suppress_hurtness){
-		if (mtmp->mhp == mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
+		if (mtmp->mhp >= mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 		else if (mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
 		else if (mtmp->mhp >= .5*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "bruised ") : Strcat(buf, "dented ");
 		else if (mtmp->mhp >= .25*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
 		else if (mtmp->mhp >= .1*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
 		else if (mtmp->mhp > 0) (has_blood_mon(mtmp)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
+		else return FALSE;	/* dead monster */
 		return TRUE;
 	}
 	return FALSE;

@@ -135,7 +135,7 @@ Boots_on()
 			incr_itimeout(&HFumbling, rnd(20));
 		break;
 	case FLYING_BOOTS:
-		if (!oldprop && !(mon_resistance(&youmonst,FLYING) || (u.usteed && mon_resistance(u.usteed,FLYING))) && !HLevitation) {
+		if (!oldprop && !(species_flies(youracedata) || (u.usteed && mon_resistance(u.usteed,FLYING))) && !HLevitation) {
 			makeknown(uarmf->otyp);
 			float_up();
 			spoteffects(FALSE);
@@ -189,7 +189,7 @@ Boots_off()
 			HFumbling = EFumbling = 0;
 		break;
 	case FLYING_BOOTS:
-		if (!oldprop && !mon_resistance(&youmonst,FLYING) && !(u.usteed && mon_resistance(u.usteed,FLYING)) && !Levitation && !cancelled_don) {
+		if (!oldprop && !species_flies(youracedata) && !(u.usteed && mon_resistance(u.usteed,FLYING)) && !Levitation && !cancelled_don) {
 			(void) float_down(0L, 0L);
 			makeknown(otyp);
 		}
@@ -992,7 +992,7 @@ register struct obj *obj;
 #endif
 
 		if (Invis && !oldprop && !HSee_invisible &&
-				!mon_resistance(&youmonst,SEE_INVIS) && !Blind) {
+				!species_perceives(youracedata) && !Blind) {
 		    newsym(u.ux,u.uy);
 		    pline("Suddenly you are transparent, but there!");
 		    makeknown(RIN_SEE_INVISIBLE);
@@ -2134,7 +2134,7 @@ struct obj * otmp;
 			otmp->otyp == CRYSTAL_GAUNTLETS)
 			spemult *= 2;
 
-		def += (otmp->spe * spemult + 1) / 2;
+		def += sgn(otmp->spe)*(abs(otmp->spe) * spemult + 1) / 2;
 	}
 
 	// artifact bonus def
@@ -2363,8 +2363,7 @@ find_ac()
 	if (uarmh)	uac -= arm_ac_bonus(uarmh);
 	if (uarmf)	uac -= arm_ac_bonus(uarmf);
 	if(uarms){
-		uac -= arm_ac_bonus(uarms);
-		uac -= (uarms->objsize - youracedata->msize);
+		uac -= max(0, arm_ac_bonus(uarms) + (uarms->objsize - youracedata->msize));
 	}
 	if (uarmg)	uac -= arm_ac_bonus(uarmg);
 	if (uarmu)	uac -= arm_ac_bonus(uarmu);
@@ -2466,7 +2465,7 @@ find_dr()
 		udr += slot_udr(i,0);
 	udr += slot_udr(UPPER_TORSO_DR,0);
 	udr += slot_udr(LOWER_TORSO_DR,0);
-	udr += max(slot_udr(UPPER_TORSO_DR,0), slot_udr(ARM_DR,0));
+	udr += max(slot_udr(UPPER_TORSO_DR,0), slot_udr(ARM_DR,0))*2;
 	udr /= 9;
 	if (udr > 127) udr = 127;	/* u.uac is an schar */
 	if(udr != u.udr){
@@ -2503,7 +2502,7 @@ struct monst *magr;
 			agrmoral = -1;
 			else if(hates_unholy_mon(magr))
 			agrmoral = 1;
-	}
+		}
 	}
 	
 	udr = base_udr();

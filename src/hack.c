@@ -1400,14 +1400,14 @@ domove()
 			}
 		} else {
 			if(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20){
-				You("phase through the bear trap.");
+				You("phase through %s.", the(xname(t_at(u.ux, u.uy)->ammo)));
 				u.utrap = 0;
 		    } else if(uwep && 
 				(is_lightsaber(uwep) && litsaber(uwep))
 			){
 				trap = t_at(u.ux,u.uy);
 				u.utrap = 0;
-				pline("The energy blade burns through the bear trap!");
+				pline("The energy blade burns through %s!", the(xname(trap->ammo)));
 				if(is_lightsaber(uwep) && uwep->oartifact != ART_INFINITY_S_MIRRORED_ARC && uwep->otyp != KAMEREL_VAJRA) uwep->age -= 100;
 				if(trap->ttyp == BEAR_TRAP){
 					deltrap(trap);
@@ -1416,7 +1416,9 @@ domove()
 				usedmove = FALSE;
 			} else {
 		    if(flags.verbose) {
-			predicament = "caught in a bear trap";
+				char buf[BUFSZ];
+				Sprintf(buf, "caught in %s", an(xname(t_at(u.ux, u.uy)->ammo)));
+				predicament = buf;
 #ifdef STEED
 			if (u.usteed)
 			    Norep("%s is %s.", upstart(y_monnam(u.usteed)),
@@ -2648,7 +2650,7 @@ weight_cap()
 	}
 	/* consistent with can_carry() in mon.c */
 	if (mdat->mlet == S_NYMPH)
-		carrcap = MAX_CARR_CAP;
+		carrcap = max(carrcap, MAX_CARR_CAP);
 	else if (!mdat->cwt)
 		carrcap = (carrcap * (long)mdat->msize) / MZ_HUMAN;
 	else if (!strongmonst(mdat)

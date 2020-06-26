@@ -163,7 +163,10 @@ boolean quietly;	/* hide the basic message saying what you are now wielding */
 		    wep->otyp == BATTLE_AXE ? "axe" : "weapon");
 	else if (wep->otyp == ARM_BLASTER && uarmg && is_metal(uarmg))
 		You("cannot fit the bracer over such bulky, rigid gloves.");
-	else if (wep->oartifact && !touch_artifact(wep, &youmonst, FALSE)) {
+	else if (wep->oartifact == ART_KUSANAGI_NO_TSURUGI && !(u.ulevel >= 30 || u.uhave.amulet)) {
+	    pline("Only a Shogun, or a bearer of the Amulet of Yendor, is truly worthy of wielding this sword.");
+	    res++;	/* takes a turn even though it doesn't get wielded */
+	} else if (wep->oartifact && !touch_artifact(wep, &youmonst, FALSE)) {
 	    res++;	/* takes a turn even though it doesn't get wielded */
 	} else {
 	    /* Weapon WILL be wielded after this point */
@@ -833,7 +836,7 @@ register int amount;
 	    return(1);
 	}
 	/* there is a (soft) upper and lower limit to uwep->spe */
-	if(uwep->otyp == RAKUYO)
+	if(is_rakuyo(uwep))
 		safelim = 9;
 	else safelim = 5;
 	if(((uwep->spe > safelim && amount >= 0) || (uwep->spe < -safelim && amount < 0))

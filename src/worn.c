@@ -538,12 +538,18 @@ boolean on, silently;
 			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
 			if (!oldprop && (mon_resistance(mon,LEVITATION) || mon_resistance(mon,FLYING))) {
 				m_float_up(mon, silently);
+				if (obj && !silently && canseemon(mon)) {
+					makeknown(obj->otyp);
+				}
 			}
 			break;
 		case DISPLACED:
 			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
 			if (!oldprop && mon_resistance(mon,DISPLACED) && !silently && canseemon(mon)) {
 				pline("%s outline begins shimmering!", s_suffix(Monnam(mon)));
+				if (obj) {
+					makeknown(obj->otyp);
+				}
 			}
 			break;
 		case SWIMMING:
@@ -581,12 +587,18 @@ boolean on, silently;
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
 				if (oldprop && !mon_resistance(mon,LEVITATION) && !mon_resistance(mon,FLYING)) {
 					m_float_down(mon, silently);
+					if (obj && !silently && canseemon(mon)) {
+						makeknown(obj->otyp);
+					}
 				}
 				break;
 			case DISPLACED:
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
 				if (oldprop && !mon_resistance(mon,DISPLACED) && !silently && canseemon(mon)) {
 					pline("%s outline stops shimmering.", s_suffix(Monnam(mon)));
+					if (obj) {
+						makeknown(obj->otyp);
+					}
 				}
 				break;
 			case SWIMMING:
@@ -767,15 +779,19 @@ struct monst *mon;
 		if(uarmf) armac += arm_ac_bonus(uarmf);
 		if(uarmg) armac += arm_ac_bonus(uarmg);
 		if(uarmu) armac += arm_ac_bonus(uarmu);
-		if(uarms) armac += arm_ac_bonus(uarms);
+		if(uarms){
+			armac += max(0, arm_ac_bonus(uarms) + (uarms->objsize - mon->data->msize));
+		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
-			armac += arm_ac_bonus(obj);
-			if(is_shield(obj)) armac += max(0, obj->objsize - mon->data->msize);
+			if(is_shield(obj))
+				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+			else
+				armac += arm_ac_bonus(obj);
 		}
 	}
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
@@ -840,15 +856,21 @@ struct monst *mon;
 		if(uarmf) armac += arm_ac_bonus(uarmf);
 		if(uarmg) armac += arm_ac_bonus(uarmg);
 		if(uarmu) armac += arm_ac_bonus(uarmu);
-		if(uarms) armac += arm_ac_bonus(uarms);
+		if(uarms){
+			armac += max(0, arm_ac_bonus(uarms) + (uarms->objsize - mon->data->msize));
+		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
-	    if (obj->owornmask & mwflags)
-		armac += arm_ac_bonus(obj);
+	    if (obj->owornmask & mwflags){
+			if(is_shield(obj))
+				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+			else
+				armac += arm_ac_bonus(obj);
+		}
 	}
 
 	base -= armac;
@@ -893,15 +915,21 @@ struct monst *mon;
 		if(uarmf) armac += arm_ac_bonus(uarmf);
 		if(uarmg) armac += arm_ac_bonus(uarmg);
 		if(uarmu) armac += arm_ac_bonus(uarmu);
-		if(uarms) armac += arm_ac_bonus(uarms);
+		if(uarms){
+			armac += max(0, arm_ac_bonus(uarms) + (uarms->objsize - mon->data->msize));
+		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
 		
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
-	    if (obj->owornmask & mwflags)
-		armac += arm_ac_bonus(obj);
+	    if (obj->owornmask & mwflags){
+			if(is_shield(obj))
+				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+			else
+				armac += arm_ac_bonus(obj);
+		}
 	}
 
 	return 10 - armac;
@@ -949,6 +977,54 @@ roll_mdr(mon, magr)
 struct monst *mon;
 struct monst *magr;
 {
+	int base, nat_dr, armac;
+	int slot;
+	
+	switch(rn2(7)){
+		case 0:
+		case 1:
+			slot = UPPER_TORSO_DR;
+		break;
+		case 2:
+		case 3:
+			slot = LOWER_TORSO_DR;
+		break;
+		case 4:
+			slot = HEAD_DR;
+		break;
+		case 5:
+			slot = LEG_DR;
+		break;
+		case 6:
+			slot = ARM_DR;
+		break;
+	}
+	
+	mon_slot_dr(mon, magr, slot, &base, &armac, &nat_dr);
+
+	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor dr values act like player ac values */
+	
+	if(nat_dr && armac){
+		base += sqrt(nat_dr*nat_dr + armac*armac);
+	} else if(nat_dr){
+		base += nat_dr;
+	} else {
+		base += armac;
+	}
+	
+	/* since arm_ac_bonus is positive, subtracting it increases AC */
+	return base;
+}
+
+void
+mon_slot_dr(mon, magr, slot, base_ac_out, armor_ac_out, natural_ac_out)
+struct monst *mon;
+struct monst *magr;
+int slot;
+int *base_ac_out;
+int *armor_ac_out;
+int *natural_ac_out;
+{
 	struct obj *obj;
 	int base, nat_dr, armac = 0, clkdr = 0;
 	int agralign = 0;
@@ -974,11 +1050,10 @@ struct monst *magr;
 	
 	//armor AC
 	if(mon->mtyp == PM_HOD_SEPHIRAH){
-		armac = roll_udr(magr);
+		armac = slot_udr(slot, magr);
 		if(armac < 0) armac *= -1;
 	} else {
 		struct obj *curarm;
-		int slot;
 		
 		if (which_armor(mon, W_ARMC)){
 			curarm = which_armor(mon, W_ARMC);
@@ -993,17 +1068,17 @@ struct monst *magr;
 			armac += arm_dr_bonus(curarm);
 			if(magr) armac += properties_dr(curarm, agralign, agrmoral);
 		}
+		
 		curarm = which_armor(mon, W_ARM);
 		if(curarm && curarm->otyp == JUMPSUIT){
 			armac += arm_dr_bonus(curarm);
 			if(magr) armac += properties_dr(curarm, agralign, agrmoral);
 		}
+		
 		if(mon->mtyp == PM_GIANT_TURTLE && (mon->mflee || rn2(2))){
 			slot = UPPER_TORSO_DR;
-		} else {
-		//Note: Bias this somehow?
-		slot = rn2(5);
 		}
+		
 		switch(slot){
 			case UPPER_TORSO_DR:
 mon_uppertorso:
@@ -1102,18 +1177,93 @@ mon_lowertorso:
 			// armac = 0;
 	// }
 	
-	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor dr values act like player ac values */
-
-	if(nat_dr && armac){
-		base += sqrt(nat_dr*nat_dr + armac*armac);
-	} else if(nat_dr){
-		base += nat_dr;
-	} else {
-		base += armac;
-	}
+	*base_ac_out = base;
+	*armor_ac_out = armac;
+	*natural_ac_out = nat_dr;
 	
-	/* since arm_ac_bonus is positive, subtracting it increases AC */
-	return base;
+	return;
+}
+
+int
+avg_mdr(mon)
+struct monst *mon;
+{
+	int i;
+	int sum = 0;
+	int base, nat_dr, armac;
+	int slot;
+	
+	for (i = 0; i < 7; i++){
+		switch(i){
+			case 0:
+			case 1:
+				slot = UPPER_TORSO_DR;
+			break;
+			case 2:
+			case 3:
+				slot = LOWER_TORSO_DR;
+			break;
+			case 4:
+				slot = HEAD_DR;
+			break;
+			case 5:
+				slot = LEG_DR;
+			break;
+			case 6:
+				slot = ARM_DR;
+			break;
+		}
+		
+		mon_slot_dr(mon, (struct monst *) 0, slot, &base, &armac, &nat_dr);
+
+		if(armac > 11) armac = (armac-10)/2 + 10; /* high armor dr values act like player ac values */
+		
+		if(nat_dr && armac){
+			base += sqrt(nat_dr*nat_dr + armac*armac);
+		} else if(nat_dr){
+			base += nat_dr;
+		} else {
+			base += armac;
+		}
+		sum += base;
+	}
+
+	return sum / 9;
+}
+
+int
+mdat_avg_mdr(mon)
+struct monst * mon;
+{
+	/* only looks at a monster's base stats with minimal adjustment (and no worn armor) */
+	/* used for pokedex entry */
+	int dr = 0;
+
+#define m_bdr mon->data->bdr + mon->data->spe_bdr
+#define m_ldr mon->data->ldr + mon->data->spe_ldr
+#define m_hdr mon->data->hdr + mon->data->spe_hdr
+#define m_fdr mon->data->fdr + mon->data->spe_fdr
+#define m_gdr mon->data->gdr + mon->data->spe_gdr
+
+	dr += m_bdr*2;
+	dr += m_ldr*2;
+
+	if (has_head_mon(mon))			dr += m_hdr;
+	else							dr += m_bdr;
+
+	if (can_wear_boots(mon->data))	dr += m_fdr;
+	else							dr += m_ldr;
+
+	if (can_wear_gloves(mon->data))	dr += m_gdr;
+	else							dr += m_bdr;
+	
+#undef m_bdr
+#undef m_ldr
+#undef m_hdr
+#undef m_fdr
+#undef m_gdr
+
+	return (dr / 7);
 }
 
 /* weapons are handled separately; rings and eyewear aren't used by monsters */

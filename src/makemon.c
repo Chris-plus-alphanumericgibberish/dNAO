@@ -5589,6 +5589,7 @@ register struct	monst	*mtmp;
 		    (void) mongets(mtmp, BUCKLER);
 #ifndef GOLDOBJ
 		    mtmp->mgold = (long)rn1(10,20);
+			u.spawnedGold += mtmp->mgold;
 #else
 		    mkmonmoney(mtmp,(long)rn1(10,20));
 #endif
@@ -6495,6 +6496,7 @@ register struct	monst	*mtmp;
 	    case S_LEPRECHAUN:
 #ifndef GOLDOBJ
 		mtmp->mgold = (long) d(level_difficulty(), 30);
+		u.spawnedGold += mtmp->mgold;
 #else
 		mkmonmoney(mtmp, (long) d(level_difficulty(), 30));
 #endif
@@ -6650,6 +6652,7 @@ register struct	monst	*mtmp;
 				(void) mpickobj(mtmp, otmp);
 				/*Plate Mail*/
 				otmp = mksobj(CRYSTAL_PLATE_MAIL, TRUE, FALSE);
+				otmp->bodytypeflag = (MB_HUMANOID|MB_ANIMAL);
 				otmp->ohaluengr = TRUE;
 				otmp->oward = LOLTH_SYMBOL;
 				otmp->blessed = TRUE;

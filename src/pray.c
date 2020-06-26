@@ -726,7 +726,14 @@ int ga_num;
 			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT)){
 				mtmp->mpeaceful = 0;
 				mtmp->mtame = 0;
-				set_malign(mtmp);
+				//Does not re-set alignment value (as if you attacked a peaceful)
+			}
+		}
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(goat_monster(mtmp->data) && !mtmp->mtame){
+				mtmp->mpeaceful = 0;
+				//Does not re-set alignment value (as if you attacked a peaceful)
+				newsym(mtmp->mx, mtmp->my);
 			}
 		}
 		u.ugoatblesscnt = rnz(300);
@@ -1249,15 +1256,21 @@ gcrownu()
 						obj = mksobj(MORNING_STAR, FALSE, FALSE);
 						obj = oname(obj, artiname(ART_RUINOUS_DESCENT_OF_STARS));
 						discover_artifact(ART_RUINOUS_DESCENT_OF_STARS);
+						at_your_feet("A morning star");
 					} else if(u.ualign.type == A_NEUTRAL){
-						obj = mksobj(GAUNTLETS_OF_DEXTERITY, FALSE, FALSE);
-						obj = oname(obj, artiname(ART_CLAWS_OF_THE_REVENANCER));
-						discover_artifact(ART_CLAWS_OF_THE_REVENANCER);
+						obj = mksobj(DROVEN_SHORT_SWORD, FALSE, FALSE);
+						obj = oname(obj, artiname(ART_LOLTH_S_FANG));
+						discover_artifact(ART_LOLTH_S_FANG);
+						at_your_feet("A sword");
 					} else if(u.ualign.type == A_LAWFUL){
 						obj = mksobj(DROVEN_CROSSBOW, FALSE, FALSE);
 						obj = oname(obj, artiname(ART_LIECLEAVER));
 						discover_artifact(ART_LIECLEAVER);
-					}
+						at_your_feet("A crossbow");
+					}					
+					obj->spe = 1;
+					dropy(obj);
+					u.ugifts++;
 				}
 			} else if (!already_exists) {
 				obj = mksobj(DROVEN_SHORT_SWORD, FALSE, FALSE);
@@ -1305,13 +1318,13 @@ gcrownu()
 			;		/* already got bonus above for some reason */
 		} else if (!already_exists) {
 			if(u.ualign.type == A_CHAOTIC){
-				obj = mksobj(CRYSTAL_SWORD, FALSE, FALSE);
+				obj = mksobj(LONG_SWORD, FALSE, FALSE);
 				obj = oname(obj, artiname(ART_ARYVELAHR_KERYM));
 			} else if(u.ualign.type == A_NEUTRAL){
 				obj = mksobj(RUNESWORD, FALSE, FALSE);
 				obj = oname(obj, artiname(ART_ARYFAERN_KERYM));
 			} else {
-				obj = mksobj(LONG_SWORD, FALSE, FALSE);
+				obj = mksobj(CRYSTAL_SWORD, FALSE, FALSE);
 				obj = oname(obj, artiname(ART_ARCOR_KERYM));
 			}
 			obj->spe = 1;
@@ -2017,7 +2030,7 @@ pray_goat()
 				}
 			}
 			if (!InvAcid_resistance) {
-				destroy_item(POTION_CLASS, AD_FIRE);
+				destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 			}
 			erode_obj(uwep, TRUE, FALSE);
 			erode_obj(uswapwep, TRUE, FALSE);
@@ -2679,7 +2692,7 @@ dosacrifice()
      */
 	
 	if(goat_mouth_at(u.ux, u.uy)){
-		goat_eat(otmp);
+		goat_eat(otmp, TRUE);
 		return 1;
 	}
 	
@@ -2859,7 +2872,7 @@ dosacrifice()
 					carries you off on their shoulders */
 					adjalign(-99);
 					pline("%s accepts your gift, and regains complete control over his creation.", a_gname());
-					pline("In that instant, you loose all your powers as %s shuts the Gate.", a_gname());
+					pline("In that instant, you lose all your powers as %s shuts the Gate.", a_gname());
 					pline("Fortunately, %s permits you to live...", a_gname());
 					pline("Occasionally, you may even be able to remember that you have forgoten something.");
 					pline("A cloud of %s smoke surrounds you...",
@@ -4009,6 +4022,7 @@ boolean yours;
 		if(yours)
 			gods_upset(GA_MOTHER);
 	}
+
 	if(revived)
 		return TRUE;
 	return FALSE;
@@ -4085,7 +4099,7 @@ int x, y;
 {
 	struct monst *mtmp;
 	for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->mtyp == PM_MOUTH_OF_THE_GOAT){
+		if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && !DEADMONSTER(mtmp)){
 			xchar xlocale, ylocale, xyloc;
 			xyloc	= mtmp->mtrack[0].x;
 			xlocale = mtmp->mtrack[1].x;
@@ -4095,7 +4109,7 @@ int x, y;
 		}
 	}
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-		if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && distu(mtmp->mx,mtmp->my) == 1){
+		if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && distu(mtmp->mx,mtmp->my) <= 2 && !DEADMONSTER(mtmp)){
 			return TRUE;
 		}
 	}
@@ -4103,7 +4117,7 @@ int x, y;
 }
 
 void
-goat_eat(otmp)
+goat_eat(otmp, yourinvent)
 struct obj *otmp;
 {
     int value = 0;
@@ -4111,9 +4125,7 @@ struct obj *otmp;
 	struct monst *mtmp;
 	extern const int monstr[];
 	xchar x, y;
-	boolean yourinvent = FALSE;
 	
-	yourinvent = carried(otmp);
 	get_obj_location(otmp, &x, &y, BURIED_TOO);
 	
 	if(goat_resurrect(otmp, yourinvent)){
@@ -4234,10 +4246,11 @@ struct obj *otmp;
 				set_malign(mtmp);
 			}
 		}
-		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && goat_monster(mtmp->data)){
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(goat_monster(mtmp->data)){
 				mtmp->mpeaceful = 1;
 				set_malign(mtmp);
+				newsym(mtmp->mx, mtmp->my);
 			}
 		}
 		//Character needs a holy symbol

@@ -4,7 +4,7 @@
 
 #include "hack.h"
 
-extern const char * const destroy_strings[];	/* from zap.c */
+extern const char * const destroy_strings[];	/* from xhityhelpers.c */
 
 STATIC_DCL void FDECL(dofiretrap, (struct obj *));
 STATIC_DCL void NDECL(domagictrap);
@@ -551,19 +551,9 @@ int *fail_reason;
 	    if (is_golem(&mons[statue->corpsenm]) && cause == ANIMATE_SPELL)
 	    	mptr = &mons[PM_FLESH_GOLEM];
 	    else
-		mptr = &mons[statue->corpsenm];
-	    /*
-	     * Guard against someone wishing for a statue of a unique monster
-	     * (which is allowed in normal play) and then tossing it onto the
-	     * [detected or guessed] location of a statue trap.  Normally the
-	     * uppermost statue is the one which would be activated.
-	     */
-	    if (((mptr->geno & G_UNIQ) || is_unwishable(mptr)) && cause != ANIMATE_SPELL) {
-	        if (fail_reason) *fail_reason = AS_MON_IS_UNIQUE;
-	        return (struct monst *)0;
-	    }
-	    if (cause == ANIMATE_SPELL &&
-		((mptr->geno & G_UNIQ) || is_unwishable(mptr) || mptr->msound == MS_GUARDIAN)) {
+			mptr = &mons[statue->corpsenm];
+		
+	    if((mptr->geno & G_UNIQ) || mptr->msound == MS_GUARDIAN){
 		/* Statues of quest guardians or unique monsters
 		 * will not stone-to-flesh as the real thing.
 		 */
@@ -898,8 +888,9 @@ unsigned trflags;
 		seetrap(trap);
 		if(amorphous(youracedata) || is_whirly(youracedata) ||
 						    unsolid(youracedata)) {
-		    pline("%s bear trap closes harmlessly through you.",
-			    A_Your[trap->madeby_u]);
+		    pline("%s %s closes harmlessly through you.",
+			    A_Your[trap->madeby_u],
+				xname(trap->ammo));
 		    break;
 		}
 		if(
@@ -907,8 +898,9 @@ unsigned trflags;
 		   !u.usteed &&
 #endif
 		   youracedata->msize < MZ_SMALL) {
-		    pline("%s bear trap closes harmlessly over you.",
-			    A_Your[trap->madeby_u]);
+		    pline("%s %s closes harmlessly over you.",
+			    A_Your[trap->madeby_u],
+				xname(trap->ammo));
 		    break;
 		}
 		u.utrap = rn1(4, 4);
@@ -1950,9 +1942,12 @@ struct monst *mtmp;
 		    mtmp->mtrapped = 0;
 		}
 	    } else if (metallivorous(mptr)) {
-		if (trap->ttyp == BEAR_TRAP) {
-		    if (canseemon(mtmp))
-			pline("%s eats a bear trap!", Monnam(mtmp));
+		if (trap->ttyp == BEAR_TRAP && is_metallic(trap->ammo)) {
+			if (canseemon(mtmp)) {
+				pline("%s eats %s!",
+					Monnam(mtmp),
+					an(xname(trap->ammo)));
+			}
 		    deltrap(trap);
 		    mtmp->meating = 5;
 		    mtmp->mtrapped = 0;
@@ -2236,9 +2231,9 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				mtmp->mhpmax -= rn2(num + 1);
 			}
 			if (burnarmor(mtmp) || rn2(3)) {
-			    (void) destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
-			    (void) destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
-			    (void) destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+			    (void) destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+			    (void) destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
+			    (void) destroy_item(mtmp, POTION_CLASS, AD_FIRE);
 			}
 			if (burn_floor_paper(mtmp->mx, mtmp->my, see_it, FALSE) &&
 				!see_it && distu(mtmp->mx, mtmp->my) <= 3*3)
@@ -2958,9 +2953,9 @@ struct obj *box;	/* null for floor trap */
 	melt_frozen_air();
 
 	if (burnarmor(&youmonst) || (rn2(3) && !InvFire_resistance)) {
-	    destroy_item(SCROLL_CLASS, AD_FIRE);
-	    destroy_item(SPBOOK_CLASS, AD_FIRE);
-	    destroy_item(POTION_CLASS, AD_FIRE);
+	    destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+	    destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
+	    destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 	}
 	if (!box && burn_floor_paper(u.ux, u.uy, see_it, TRUE) && !see_it)
 	    You("smell paper burning.");
@@ -3965,12 +3960,12 @@ struct trap *ttmp;
 	if ((mtmp = m_at(ttmp->tx,ttmp->ty)) != 0) {
 		mtmp->mtrapped = 0;
 		You("remove %s %s from %s.", the_your[ttmp->madeby_u],
-			(ttmp->ttyp == BEAR_TRAP) ? "bear trap" : "webbing",
+			(ttmp->ttyp == BEAR_TRAP) ? xname(ttmp->ammo) : "webbing",
 			mon_nam(mtmp));
 		reward_untrap(ttmp, mtmp);
 	} else {
 		if (ttmp->ttyp == BEAR_TRAP) {
-			You("disarm %s bear trap.", the_your[ttmp->madeby_u]);
+			You("disarm %s %s.", the_your[ttmp->madeby_u], xname(ttmp->ammo));
 			remove_trap_ammo(ttmp);
 		} else if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)) /* if (ttmp->ttyp == WEB) */ {
 			You("succeed in removing %s web.", the_your[ttmp->madeby_u]);
@@ -4750,8 +4745,8 @@ boolean disarm;
 			    dmg = d(4, 4);
 			}
 			if(!InvShock_resistance){
-				destroy_item(RING_CLASS, AD_ELEC);
-				destroy_item(WAND_CLASS, AD_ELEC);
+				destroy_item(&youmonst, RING_CLASS, AD_ELEC);
+				destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
 			}
 			if (dmg) losehp(dmg, "electric shock", KILLED_BY_AN);
 			break;
@@ -5022,9 +5017,9 @@ burn_stuff:
 	useup(obj);
     }
 	if(!(Wwalking || InvFire_resistance)){
-		destroy_item(SCROLL_CLASS, AD_FIRE);
-		destroy_item(SPBOOK_CLASS, AD_FIRE);
-		destroy_item(POTION_CLASS, AD_FIRE);
+		destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+		destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
+		destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 	}
     return(FALSE);
 }

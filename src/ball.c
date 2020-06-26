@@ -111,15 +111,21 @@ placebc()
 	return;
     }
 
+	//The ball is prone to ending up in a :( state.
+	if(uball->where != OBJ_FREE && uball->where != OBJ_INVENT){
+		obj_extract_self(uball);
+		setworn(uball, W_BALL);
+	}
+	
     (void) flooreffects(uchain, u.ux, u.uy, "");	/* chain might rust */
 
     if (carried(uball))		/* the ball is carried */
-	u.bc_order = BCPOS_DIFFER;
+		u.bc_order = BCPOS_DIFFER;
     else {
-	/* ball might rust -- already checked when carried */
-	(void) flooreffects(uball, u.ux, u.uy, "");
-	place_object(uball, u.ux, u.uy);
-	u.bc_order = BCPOS_CHAIN;
+		/* ball might rust -- already checked when carried */
+		(void) flooreffects(uball, u.ux, u.uy, "");
+		place_object(uball, u.ux, u.uy);
+		u.bc_order = BCPOS_CHAIN;
     }
 
     place_object(uchain, u.ux, u.uy);

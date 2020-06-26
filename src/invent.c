@@ -288,7 +288,8 @@ struct obj *obj;
 #ifdef RECORD_ACHIEVE
 		achieve.get_book = 1;
 #endif
-	} else if (obj->oartifact) {
+	}
+	if (obj->oartifact) {
 		if (is_quest_artifact(obj)) {
 		    if (u.uhave.questart){
 				struct obj *otherquestart;
@@ -569,6 +570,16 @@ struct obj *obj;
 	} else if (obj->otyp == AMULET_OF_YENDOR) {
 		if (!u.uhave.amulet) impossible("don't have amulet?");
 		u.uhave.amulet = 0;
+		if (uwep && uwep->oartifact == ART_KUSANAGI_NO_TSURUGI && u.ulevel < 30){
+			char buf[BUFSZ];
+			You("are blasted by %s power!", s_suffix(the(xname(uwep))));
+			Sprintf(buf, "touching %s", artiname(uwep->oartifact));
+			losehp(d((Antimagic ? 2 : 4), 10), buf, KILLED_BY);
+
+			setuwep((struct obj *) 0);
+			pline("Without the Amulet of Yendor, you are no longer worthy of wielding this sword and must sheathe it.");
+		}
+
 	} else if (obj->otyp == CANDELABRUM_OF_INVOCATION) {
 		if (!u.uhave.menorah) impossible("don't have candelabrum?");
 		u.uhave.menorah = 0;
@@ -578,7 +589,8 @@ struct obj *obj;
 	} else if (obj->otyp == SPE_BOOK_OF_THE_DEAD) {
 		if (!u.uhave.book) impossible("don't have the book?");
 		u.uhave.book = 0;
-	} else if (obj->oartifact) {
+	}
+	if (obj->oartifact) {
 		if (is_quest_artifact(obj)) {
 			struct obj *otherquestart;
 		    if (!u.uhave.questart)
@@ -1386,23 +1398,6 @@ register const char *let,*word;
 		    }
 		    /* they typed a letter (not a space) at the prompt */
 		}
-		if(allowcnt == 2 && !strcmp(word,"throw")) {
-		    /* permit counts for throwing gold, but don't accept
-		     * counts for other things since the throw code will
-		     * split off a single item anyway */
-#ifdef GOLDOBJ
-		    if (ilet != def_oc_syms[COIN_CLASS])
-#endif
-			allowcnt = 1;
-		    if(cnt == 0 && prezero) return((struct obj *)0);
-		    if(cnt > 1) {
-			You("can only throw one item at a time.");
-			continue;
-		    }
-		}
-#ifdef GOLDOBJ
-		flags.botl = 1; /* May have changed the amount of money */
-#endif
 #ifdef REDO
 		savech(ilet);
 #endif
@@ -1413,6 +1408,16 @@ register const char *let,*word;
 #ifdef REDO
 			if (in_doagain) return((struct obj *) 0);
 #endif
+			continue;
+		} else if (allowcnt == 2 && !strcmp(word,"throw") && cnt > 1 && !(
+#ifdef GOLDOBJ
+			(ilet == def_oc_syms[COIN_CLASS]) ||
+#endif
+			(otmp->oartifact == ART_FLUORITE_OCTAHEDRON)
+			)) {
+			You("can only throw one item at a time.");
+			allowcnt = 1;
+			if (cnt == 0 && prezero) return((struct obj *)0);
 			continue;
 		} else if (cnt < 0 || otmp->quan < cnt) {
 			You("don't have that many!  You have only %ld.",
@@ -2211,7 +2216,7 @@ struct obj *obj;
 		&& (u.wardsknown & (WARD_TOUSTEFNA | WARD_DREPRUN | WARD_OTTASTAFUR | WARD_KAUPALOKI | WARD_VEIOISTAFUR | WARD_THJOFASTAFUR)))
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Carve a stave with this knife", MENU_UNSELECTED);
-	else if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC)
+	else if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Ignite or deactivate this lightsaber", MENU_UNSELECTED);
 	/* d: drop item, works on everything */
@@ -2930,8 +2935,13 @@ winid *datawin;
 		OBJPUTSTR(buf);
 		/* Defense */
 		if (obj && obj->known) {// calculate the actual AC and DR this armor gives
-			Sprintf(buf, "Is worth %d AC and %d DR.",
-				arm_ac_bonus(obj), arm_dr_bonus(obj));
+			if(is_shield(obj) && obj->objsize != youracedata->msize){
+				Sprintf(buf, "Is worth %d AC (%d to you, due to its size) and %d DR.",
+					arm_ac_bonus(obj), max(0, arm_ac_bonus(obj) + (obj->objsize - youracedata->msize)), arm_dr_bonus(obj));
+			} else {
+				Sprintf(buf, "Is worth %d AC and %d DR.",
+					arm_ac_bonus(obj), arm_dr_bonus(obj));
+			}
 		}
 		else {// say what the base stats are
 			Sprintf(buf, "Base %d AC and %d DR.",

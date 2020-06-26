@@ -1159,6 +1159,8 @@ rile_shk(shkp)
 register struct monst *shkp;
 {
 	NOTANGRY(shkp) = FALSE;	/* make angry */
+	if (canseemon(shkp))
+		newsym(shkp->mx, shkp->my);
 	if (!ESHK(shkp)->surcharge) {
 		register struct bill_x *bp = ESHK(shkp)->bill_p;
 		register int ct = ESHK(shkp)->billct;
@@ -3140,8 +3142,7 @@ xchar x, y;
 
 		if(container) {
 			dropped_container(obj, shkp, FALSE);
-			if(!obj->unpaid && !saleitem)
-			    obj->no_charge = 1;
+			obj->no_charge = (!obj->unpaid && !saleitem);
 			if(obj->unpaid || count_unpaid(obj->cobj))
 			    subfrombill(obj, shkp);
 		} else obj->no_charge = 1;
@@ -3201,7 +3202,7 @@ xchar x, y;
 		    if(!isgold) {
 			if (container)
 			    dropped_container(obj, shkp, FALSE);
-			if (!obj->unpaid && !saleitem) obj->no_charge = 1;
+			obj->no_charge = (!obj->unpaid && !saleitem);
 			subfrombill(obj, shkp);
 		    }
 		    return;
@@ -3264,7 +3265,7 @@ move_on:
 		    if (c == 'q') sell_response = 'n';
 		    if (container)
 			dropped_container(obj, shkp, FALSE);
-		    if (!obj->unpaid) obj->no_charge = 1;
+		    obj->no_charge = (!obj->unpaid);
 		    subfrombill(obj, shkp);
 		}
 	} else {
@@ -3297,13 +3298,13 @@ move_on:
 		 case 'q':  sell_response = 'n';
 		 case 'n':  if (container)
 				dropped_container(obj, shkp, FALSE);
-			    if (!obj->unpaid) obj->no_charge = 1;
+			    obj->no_charge = (!obj->unpaid);
 			    subfrombill(obj, shkp);
 			    break;
 		 case 'a':  sell_response = 'y';
 		 case 'y':  if (container)
 				dropped_container(obj, shkp, TRUE);
-			    if (!obj->unpaid && !saleitem) obj->no_charge = 1;
+			    obj->no_charge = (!obj->unpaid && !saleitem);
 			    subfrombill(obj, shkp);
 			    pay(-offer, shkp);
 				obj->ostolen = FALSE;

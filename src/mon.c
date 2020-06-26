@@ -1211,10 +1211,10 @@ register struct monst *mtmp;
 		/* Invisible monster ==> invisible corpse */
 		obj->oinvis = mtmp->minvis;
 #endif
-
 		stackobj(obj);
 	}
 	newsym(x, y);
+	
 	return obj;
 }
 
@@ -3071,7 +3071,7 @@ mfndpos(mon, poss, info, flag)
 	register int cnt = 0;
 	register uchar ntyp;
 	uchar nowtyp;
-	boolean wantpool,wantpuddle,poolok,cubewaterok,lavaok,nodiag,quantumlock;
+	boolean wantpool, puddleispool, wantdry, poolok, cubewaterok, lavaok, nodiag, quantumlock;
 	boolean rockok = FALSE, treeok = FALSE, thrudoor;
 	int maxx, maxy;
 	
@@ -3095,10 +3095,17 @@ mfndpos(mon, poss, info, flag)
 
 	nodiag = (mdat->mtyp == PM_GRID_BUG) || (mdat->mtyp == PM_BEBELITH);
 	wantpool = mdat->mlet == S_EEL;
-	wantpuddle = wantpool && mdat->msize == MZ_TINY;
-	cubewaterok = (mon_resistance(mon,SWIMMING) || breathless_mon(mon) || amphibious_mon(mon));
+	wantdry = !wantpool;
+	puddleispool = (wantpool && mdat->msize == MZ_TINY) || (wantdry && (mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM));
+
+	/* nexttry can reset some of the above booleans, but recalculates the ones below. */
+	/* eels prefer the water, but if there is no water nearby, they will crawl over land */
+nexttry:	
+
+	cubewaterok = (mon_resistance(mon, SWIMMING) || (amphibious_mon(mon) && !wantdry && !wantpool));
 	poolok = mon_resistance(mon, WWALKING) || mon_resistance(mon, FLYING) || is_clinger(mdat)
-		|| (mon_resistance(mon,SWIMMING) && !wantpool);
+		|| (mon_resistance(mon, SWIMMING) && !wantpool)
+		|| (amphibious_mon(mon) && !wantdry && !wantpool);
 	lavaok = mon_resistance(mon,FLYING) || is_clinger(mdat) || likes_lava(mdat)
 		|| (mon_resistance(mon, WWALKING) && resists_fire(mon));
 	quantumlock = (is_weeping(mdat) && !u.uevent.invoked);
@@ -3119,9 +3126,6 @@ mfndpos(mon, poss, info, flag)
 	    }
 	    thrudoor |= rockok || treeok;
 	}
-
-nexttry:	/* eels prefer the water, but if there is no water nearby,
-		   they will crawl over land */
 	if(mon->mconf) {
 		flag |= ALLOW_ALL;
 		flag &= ~NOTONL;
@@ -3132,7 +3136,7 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 	maxy = min(y+1,ROWNO-1);
 	for(nx = max(1,x-1); nx <= maxx; nx++)
 	  for(ny = max(0,y-1); ny <= maxy; ny++) {
-	    if(nx == x && ny == y) continue;
+	    //if(nx == x && ny == y) continue;
 	    if(IS_ROCK(ntyp = levl[nx][ny].typ) &&
 	       !((flag & ALLOW_WALL) && may_passwall(nx,ny)) &&
 	       !((IS_TREE(ntyp) ? treeok : rockok) && may_dig(nx,ny))) continue;
@@ -3185,8 +3189,9 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 		//Weeping angels should avoid stepping into corredors, where they can be forced into a standoff.
 		if(quantumlock && IS_ROOM(levl[mon->mx][mon->my].typ) && !IS_ROOM(ntyp) ) continue;
 		
-		if((is_pool(nx,ny, wantpuddle) == wantpool || poolok) &&
+		if(((is_pool(nx, ny, puddleispool) == wantpool) || poolok) &&
 			(cubewaterok || !is_3dwater(nx,ny)) && 
+			((is_pool(nx, ny, puddleispool) == !wantdry) || poolok) &&
 			(lavaok || !is_lava(nx,ny))) {
 		int dispx, dispy;
 		boolean monseeu = (!is_blind(mon) && (!Invis || mon_resistance(mon,SEE_INVIS)));
@@ -3225,13 +3230,15 @@ nexttry:	/* eels prefer the water, but if there is no water nearby,
 		} else {
 			if(MON_AT(nx, ny)) {
 				struct monst *mtmp2 = m_at(nx, ny);
-				long mmflag = flag | mm_aggression(mon, mtmp2);
+				if (mtmp2 != mon) {
+					long mmflag = flag | mm_aggression(mon, mtmp2);
 
-				if (!(mmflag & ALLOW_M)) continue;
-				info[cnt] |= ALLOW_M;
-				if (mtmp2->mtame) {
-					if (!(mmflag & ALLOW_TM)) continue;
-					info[cnt] |= ALLOW_TM;
+					if (!(mmflag & ALLOW_M)) continue;
+					info[cnt] |= ALLOW_M;
+					if (mtmp2->mtame) {
+						if (!(mmflag & ALLOW_TM)) continue;
+						info[cnt] |= ALLOW_TM;
+					}
 				}
 			}
 			/* Note: ALLOW_SANCT only prevents movement, not */
@@ -3319,11 +3326,31 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 		cnt++;
 	    }
 	}
-	if(!cnt && wantpool && !is_pool(x,y, wantpuddle)) {
+	/* possibly try again with relaxed requirements */
+	if (!cnt && (wantpool || wantdry)) {
 		wantpool = FALSE;
+		wantdry = FALSE;
 		goto nexttry;
 	}
-	return(cnt);
+	/* clear the creatures current square from poss and info */
+	if (cnt) {
+		int i;
+		for (i = 0; i < cnt; i++)
+		if (poss[i].x == x && poss[i].y == y)
+		{
+			int j;
+			for (j = i; j < cnt - 1; j++) {
+				poss[j].x = poss[j + 1].x;
+				poss[j].y = poss[j + 1].y;
+				info[j] = info[j + 1];
+			}
+			poss[j].x = 0;
+			poss[j].y = 0;
+			info[j] = 0L;
+			cnt--;
+			break;
+		}
+	}	return(cnt);
 }
 
 #endif /* OVL0 */
@@ -4758,9 +4785,11 @@ boolean was_swallowed;			/* digestion */
 					if(DEADMONSTER(mtmp))
 						continue;
 					mdat1 = mtmp->data;
-					if( mdat1->mtyp==PM_DEEP_ONE || 
-						mdat1->mtyp==PM_DEEPER_ONE || 
-						mdat1->mtyp==PM_DEEPEST_ONE
+					if( mdat1->mtyp==PM_DEEP_ONE
+						|| mdat1->mtyp==PM_DEEPER_ONE
+						|| mdat1->mtyp==PM_DEEPEST_ONE
+						|| mdat1->mtyp==PM_FATHER_DAGON
+						|| mdat1->mtyp==PM_MOTHER_HYDRA
 					){
 						if(lvlgain) for(lvls = lvlgain; lvls > 0; lvls--) grow_up(mtmp, 0);
 						if(hpgain){
@@ -5372,7 +5401,7 @@ int how;
 
 void
 unstuck(mtmp)
-register struct monst *mtmp;
+struct monst *mtmp;
 {
 	if(u.ustuck == mtmp) {
 		if(u.uswallow){
@@ -5380,7 +5409,9 @@ register struct monst *mtmp;
 			u.uy = mtmp->my;
 			u.uswallow = 0;
 			u.uswldtim = 0;
-			if (Punished) placebc();
+			if (Punished){
+				placebc();
+			}
 			vision_full_recalc = 1;
 			docrt();
 		}
@@ -5583,8 +5614,15 @@ xkilled(mtmp, dest)
 		 * different from whether or not the corpse is "special";
 		 * if we want both, we have to specify it explicitly.
 		 */
-		if (corpse_chance(mtmp, (struct monst *)0, FALSE))
-			(void) make_corpse(mtmp);
+		if (corpse_chance(mtmp, (struct monst *)0, FALSE)){
+			struct obj *corpse;
+			corpse = make_corpse(mtmp);
+			if(corpse && corpse->otyp == CORPSE && goat_mouth_at(x,y) && !corpse->oartifact){
+				//We are in the "player has killed monster" function, so it's their fault
+				goat_eat(corpse, TRUE); //Goat eat tries *really* hard to destroy whatever you give it.
+				corpse = (struct obj *)0; //corpse pointer is now stale
+			}
+		}
 	}
 	if(redisp) newsym(x,y);
 cleanup:

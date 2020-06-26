@@ -1976,7 +1976,7 @@ spiriteffects(power, atme)
 					pline("There is no target there.");
 					break;
 				}
-				if(mon->uhurtm && (mon->data->geno&G_GENO || mon->mhp < .1*mon->mhpmax)){
+				if(mon->uhurtm && (mon->data->geno&G_GENO || mon->mhp < .1*mon->mhpmax) && !is_rider(mon->data)){
 #define MAXVALUE 24
 					extern const int monstr[];
 					int value = min(monstr[monsndx(mon->data)] + 1,MAXVALUE);
@@ -4708,171 +4708,181 @@ int respect_timeout;
 	int i,s,j,p;
 	long place;
 	
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	any.a_void = 0;		/* zero out all bits */
-	anyvoid.a_void = 0;		/* zero out all bits */
-	
-	if(flags.timeoutOrder){
-		p = 0;
-		for(s=0; s<NUM_BIND_SPRITS; s++){
-			if(u.spirit[s]){
-				j=0;
-				place = 1;
-				while(!(spirit_powers[u.spiritPOrder[j]].owner & place)){
-					j++;
-					place = place << 1;
-				}
-				add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_BOLD, sealNames[j], MENU_UNSELECTED);
-				for(i = 0; i<52; i++){
-					if(spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
-						if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
-							Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
-							any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
-							add_menu(tmpwin, NO_GLYPH, &any,
-								i<26 ? 'a'+(char)i : 'A'+(char)(i-26), 
-								0, ATR_NONE, buf, MENU_UNSELECTED);
-						} else {
-							Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
-							add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+	do {
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_void = 0;		/* zero out all bits */
+		anyvoid.a_void = 0;		/* zero out all bits */
+
+		if (flags.timeoutOrder){
+			p = 0;
+			for (s = 0; s < NUM_BIND_SPRITS; s++){
+				if (u.spirit[s]){
+					j = 0;
+					place = 1;
+					while (!(spirit_powers[u.spiritPOrder[j]].owner & place)){
+						j++;
+						place = place << 1;
+					}
+					add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_BOLD, sealNames[j], MENU_UNSELECTED);
+					for (i = 0; i < 52; i++){
+						if (spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
+							if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
+								Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
+								any.a_int = u.spiritPOrder[i] + 1;	/* must be non-zero */
+								add_menu(tmpwin, NO_GLYPH, &any,
+									i < 26 ? 'a' + (char)i : 'A' + (char)(i - 26),
+									0, ATR_NONE, buf, MENU_UNSELECTED);
+							}
+							else {
+								Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
+								add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+							}
+							p++;
 						}
-						p++;
 					}
 				}
 			}
 		}
-	} else {
-		p = 0;
-		for(i = 0; i<52; i++){
-			if (u.spiritPOrder[i] != -1 && ((
-				spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
-				!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
-				((spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL) && 
-				(spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL)))
-			){
-				if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
-					Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
-					any.a_int = u.spiritPOrder[i]+1;	/* must be non-zero */
-					add_menu(tmpwin, NO_GLYPH, &any,
-						i<26 ? 'a'+(char)i : 'A'+(char)(i-26), 
-						0, ATR_NONE, buf, MENU_UNSELECTED);
-				} else {
-					Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
-					add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+		else {
+			p = 0;
+			for (i = 0; i < 52; i++){
+				if (u.spiritPOrder[i] != -1 && ((
+					spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
+					!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) ||
+					((spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL) &&
+					(spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL)))
+					){
+					if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
+						Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
+						any.a_int = u.spiritPOrder[i] + 1;	/* must be non-zero */
+						add_menu(tmpwin, NO_GLYPH, &any,
+							i < 26 ? 'a' + (char)i : 'A' + (char)(i - 26),
+							0, ATR_NONE, buf, MENU_UNSELECTED);
+					}
+					else {
+						Sprintf(buf, " %2ld %s", u.spiritPColdowns[u.spiritPOrder[i]] - monstermoves + 1, spirit_powers[u.spiritPOrder[i]].name);
+						add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+					}
+					p++;
 				}
-				p++;
 			}
 		}
-	}
 
-	//Other menu options
-	if (action != SPELLMENU_CAST && action < 0) {
-		Sprintf(buf, "Use a power instead");
-		any.a_int = SPELLMENU_CAST;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'!', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (action != SPELLMENU_DESCRIBE && action < 0) {
-		// Describe a spell
-		Sprintf(buf, "Describe a power instead");
-		any.a_int = SPELLMENU_DESCRIBE;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'?', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (action != SPELLMENU_VIEW && action < 0 && p>=2){
-		// Describe a spell
-		Sprintf(buf, "Rearrange powers instead");
-		any.a_int = SPELLMENU_VIEW;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'+', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	switch (action)
-	{
-	case SPELLMENU_VIEW:
-		Sprintf(buf, "Choose which power to reorder");
-		break;
-	case SPELLMENU_CAST:
-		Sprintf(buf, "Choose which power to use");
-		break;
-	case SPELLMENU_DESCRIBE:
-		Sprintf(buf, "Choose which power to describe");
-		break;
-	default:
-		if (TRUE) {
-			char let;
-			/* find letter that matches action -- we can assume we will find it */
-			for (i = 0; i < 52; i++)
-			if (u.spiritPOrder[i] == action)
-				break;
-			if (i < 26)
-				let = 'a' + i;
-			else
-				let = 'A' + 1;
-
-			Sprintf(buf, "Reordering powers; swap '%c' with", let);
+		//Other menu options
+		if (action != SPELLMENU_CAST && action < 0) {
+			Sprintf(buf, "Use a power instead");
+			any.a_int = SPELLMENU_CAST;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'!', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
 		}
-		break;
-	}
-	end_menu(tmpwin, buf);
-
-	how = PICK_ONE;
-	n = select_menu(tmpwin, how, &selected);
-	destroy_nhwindow(tmpwin);
-	
-
-	if (n > 0){
-		int p_no = selected[0].item.a_int - 1;
-
-		if (selected[0].item.a_int < 0){
-			return dospiritmenu(selected[0].item.a_int, power_no, respect_timeout);
+		if (action != SPELLMENU_DESCRIBE && action < 0) {
+			// Describe a spell
+			Sprintf(buf, "Describe a power instead");
+			any.a_int = SPELLMENU_DESCRIBE;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'?', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
 		}
-		else {
-			switch (action)
-			{
-			case SPELLMENU_VIEW:
-				*power_no = p_no;
-				return dospiritmenu(p_no, power_no, respect_timeout);
-
-			case SPELLMENU_CAST:
-				*power_no = p_no;
-				return TRUE;
-
-			case SPELLMENU_DESCRIBE:
-				if (TRUE)
-				{
-					tmpwin = create_nhwindow(NHW_MENU);
-					start_menu(tmpwin);
-					Sprintf(buf, "%s %s", s_suffix(sealNames[decode_sealID(spirit_powers[p_no].owner) - FIRST_SEAL]),
-						spirit_powers[p_no].name);
-					putstr(tmpwin, 0, buf);
-					putstr(tmpwin, 0, spirit_powers[p_no].desc);
-					end_menu(tmpwin, (const char *)0);
-					display_nhwindow(tmpwin, FALSE);
-					destroy_nhwindow(tmpwin);
-				}
-				return dospiritmenu(action, power_no, respect_timeout);
-
-			default:
-				/* swap action's char with power_no's char */
+		if (action != SPELLMENU_VIEW && action < 0 && p >= 2){
+			// Describe a spell
+			Sprintf(buf, "Rearrange powers instead");
+			any.a_int = SPELLMENU_VIEW;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'+', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		switch (action)
+		{
+		case SPELLMENU_VIEW:
+			Sprintf(buf, "Choose which power to reorder");
+			break;
+		case SPELLMENU_CAST:
+			Sprintf(buf, "Choose which power to use");
+			break;
+		case SPELLMENU_DESCRIBE:
+			Sprintf(buf, "Choose which power to describe");
+			break;
+		default:
+			if (TRUE) {
+				char let;
 				/* find letter that matches action -- we can assume we will find it */
 				for (i = 0; i < 52; i++)
 				if (u.spiritPOrder[i] == action)
 					break;
-				for (j = 0; j < 52; j++)
-				if (u.spiritPOrder[j] == p_no)
-					break;
+				if (i < 26)
+					let = 'a' + i;
+				else
+					let = 'A' + 1;
 
-				s					= u.spiritPOrder[i];
-				u.spiritPOrder[i]	= u.spiritPOrder[j];
-				u.spiritPOrder[j]	= s;
+				Sprintf(buf, "Reordering powers; swap '%c' with", let);
+			}
+			break;
+		}
+		end_menu(tmpwin, buf);
 
-				return dospiritmenu(SPELLMENU_VIEW, power_no, respect_timeout);
-			} // switch(splaction)
-		} // doing something allowable
-	} // menu item was selected
+		how = PICK_ONE;
+		n = select_menu(tmpwin, how, &selected);
+		destroy_nhwindow(tmpwin);
+
+
+		if (n > 0){
+			int p_no = selected[0].item.a_int - 1;
+
+			if (selected[0].item.a_int < 0){
+				action = selected[0].item.a_int;
+				continue;
+			}
+			else {
+				switch (action)
+				{
+				case SPELLMENU_VIEW:
+					*power_no = p_no;
+					action = p_no;
+					continue;
+
+				case SPELLMENU_CAST:
+					*power_no = p_no;
+					return TRUE;
+
+				case SPELLMENU_DESCRIBE:
+					if (TRUE)
+					{
+						tmpwin = create_nhwindow(NHW_MENU);
+						start_menu(tmpwin);
+						Sprintf(buf, "%s %s", s_suffix(sealNames[decode_sealID(spirit_powers[p_no].owner) - FIRST_SEAL]),
+							spirit_powers[p_no].name);
+						putstr(tmpwin, 0, buf);
+						putstr(tmpwin, 0, spirit_powers[p_no].desc);
+						end_menu(tmpwin, (const char *)0);
+						display_nhwindow(tmpwin, FALSE);
+						destroy_nhwindow(tmpwin);
+					}
+					continue;
+
+				default:
+					/* swap action's char with power_no's char */
+					/* find letter that matches action -- we can assume we will find it */
+					for (i = 0; i < 52; i++)
+					if (u.spiritPOrder[i] == action)
+						break;
+					for (j = 0; j < 52; j++)
+					if (u.spiritPOrder[j] == p_no)
+						break;
+
+					s = u.spiritPOrder[i];
+					u.spiritPOrder[i] = u.spiritPOrder[j];
+					u.spiritPOrder[j] = s;
+
+					action = SPELLMENU_VIEW;
+					continue;
+				} // switch(splaction)
+			} // doing something allowable
+		} // menu item was selected
+		/* else end menu, nothing was selected */
+		break;
+	}while (TRUE);
 	return FALSE;
 }
 
@@ -4883,164 +4893,171 @@ int *spell_no;
 {
 	winid tmpwin;
 	int i, n, how;
-	int maintainable = 0;
+	int maintainable;
 	char buf[BUFSZ];
 	char buf2[BUFSZ];
 	menu_item *selected;
 	anything any;
 
-	tmpwin = create_nhwindow(NHW_MENU);
-	start_menu(tmpwin);
-	any.a_void = 0;		/* zero out all bits */
+	do{
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_void = 0;		/* zero out all bits */
+		maintainable = 0;
 
-	update_alternate_spells();	// make sure all spells are listed
-	
-	/*
-	 * The correct spacing of the columns depends on the
-	 * following that (1) the font is monospaced and (2)
-	 * that selection letters are pre-pended to the given
-	 * string and are of the form "a - ".
-	 *
-	 * To do it right would require that we implement columns
-	 * in the window-ports (say via a tab character).
-	 */
-	any.a_void = 0;		/* zero out all bits */
-	//Standard Spells
-	if (!iflags.menu_tab_sep)
-		Sprintf(buf, "%-20s     Level  %-12s Fail   Memory", "    Name", "Category");
-	else
-		Sprintf(buf, "Name\tLevel\tCategory\tFail\tMemory");
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
+		update_alternate_spells();	// make sure all spells are listed
 
-		if (can_maintain_spell(spellid(i))){
-			maintainable += 1;
-		}
-		else {
-			if (splaction == SPELLMENU_MAINTAIN)
-				continue;
-		}
-		Sprintf(buf2, "%s%s", spellname(i), spell_maintained(spellid(i)) ? " [M]" : "");
-		Sprintf(buf, iflags.menu_tab_sep ?
-			"%s\t%-d%s\t%s\t%-d%%\t%-d%%\t" : "%-20s  %2d%s   %-12s %3d%%     %3d%%",
-			buf2, spellev(i),
-			spellknow(i) ? " " : "*",
-			spelltypemnemonic(spell_skilltype(spellid(i))),
-			100 - percent_success(i),
-			(spellknow(i) * 100 + (KEEN - 1)) / KEEN
-		);
+		/*
+		 * The correct spacing of the columns depends on the
+		 * following that (1) the font is monospaced and (2)
+		 * that selection letters are pre-pended to the given
+		 * string and are of the form "a - ".
+		 *
+		 * To do it right would require that we implement columns
+		 * in the window-ports (say via a tab character).
+		 */
+		any.a_void = 0;		/* zero out all bits */
+		//Standard Spells
+		if (!iflags.menu_tab_sep)
+			Sprintf(buf, "%-20s     Level  %-12s Fail   Memory", "    Name", "Category");
+		else
+			Sprintf(buf, "Name\tLevel\tCategory\tFail\tMemory");
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
 
-		any.a_int = i+1;	/* must be non-zero */
-		add_menu(tmpwin, NO_GLYPH, &any,
-			 spellet(i), 0, ATR_NONE, buf,
-			 (i == splaction) ? MENU_SELECTED : MENU_UNSELECTED);
-	}
-	//Other menu options
-	if (splaction != SPELLMENU_CAST && splaction != SPELLMENU_PICK && splaction < 0) {
-		Sprintf(buf, "Cast a spell instead");
-		any.a_int = SPELLMENU_CAST;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'!', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (splaction != SPELLMENU_MAINTAIN && splaction != SPELLMENU_PICK && splaction < 0 && maintainable){
-		// Maintain a spell
-		Sprintf(buf, "Maintain a spell instead");
-		any.a_int = SPELLMENU_MAINTAIN;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'#', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (splaction != SPELLMENU_DESCRIBE && splaction != SPELLMENU_PICK && splaction < 0){
-		// Describe a spell
-		Sprintf(buf, "Describe a spell instead");
-		any.a_int = SPELLMENU_DESCRIBE;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'?', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	if (splaction != SPELLMENU_VIEW && splaction != SPELLMENU_PICK && splaction < 0 && spellid(1) != NO_SPELL){
-		// Describe a spell
-		Sprintf(buf, "Rearrange spells instead");
-		any.a_int = SPELLMENU_VIEW;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'+', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-	}
-	switch (splaction)
-	{
-	case SPELLMENU_PICK:
-		Sprintf(buf, "Choose which spell");
-		break;
-	case SPELLMENU_VIEW:
-		Sprintf(buf, "Choose which spell to reorder");
-		break;
-	case SPELLMENU_CAST:
-		Sprintf(buf, "Choose which spell to cast");
-		break;
-	case SPELLMENU_MAINTAIN:
-		Sprintf(buf, "Choose which spell to (un)maintain");
-		break;
-	case SPELLMENU_DESCRIBE:
-		Sprintf(buf, "Choose which spell to describe");
-		break;
-	default:
-		Sprintf(buf, "Reordering spells; swap '%c' with", spellet(splaction));
-		break;
-	}
-	end_menu(tmpwin, buf);
-
-	how = PICK_ONE;
-	n = select_menu(tmpwin, how, &selected);
-	destroy_nhwindow(tmpwin);
-
-	if (n > 0){
-		int s_no = selected[0].item.a_int - 1;
-
-		if (selected[0].item.a_int < 0){
-			return dospellmenu(selected[0].item.a_int, spell_no);
-		}
-		else if (!(splaction == SPELLMENU_VIEW && spellid(1) == NO_SPELL)) {
-			/* we aren't attempting to rearrange spells with only 1 spell known */
-			switch (splaction)
-			{
-			case SPELLMENU_VIEW:
-				*spell_no = s_no;
-				return dospellmenu(s_no, spell_no);
-
-			case SPELLMENU_PICK:
-			case SPELLMENU_CAST:
-				*spell_no = s_no;
-				return TRUE;
-
-			case SPELLMENU_MAINTAIN:
-				if (!spell_maintained(spellid(s_no)))
-				{
-					spell_maintain(spellid(s_no));
-					You("begin maintaining %s.", spellname(s_no));
-				}
-				else
-				{
-					spell_unmaintain(spellid(s_no));
-					You("stop maintaining %s.", spellname(s_no));
-				}
-				return FALSE;
-
-			case SPELLMENU_DESCRIBE:
-				describe_spell(s_no);
-				return dospellmenu(splaction, spell_no);
-
-			default:
-			{
-				struct spell spl_tmp;
-				spl_tmp = spl_book[*spell_no];
-				spl_book[*spell_no] = spl_book[s_no];
-				spl_book[s_no] = spl_tmp;
-				return dospellmenu(SPELLMENU_VIEW, spell_no);
+			if (can_maintain_spell(spellid(i))){
+				maintainable += 1;
 			}
-			} // switch(splaction)
-		} // doing something allowable
-	} // menu item was selected
+			else {
+				if (splaction == SPELLMENU_MAINTAIN)
+					continue;
+			}
+			Sprintf(buf2, "%s%s", spellname(i), spell_maintained(spellid(i)) ? " [M]" : "");
+			Sprintf(buf, iflags.menu_tab_sep ?
+				"%s\t%-d%s\t%s\t%-d%%\t%-d%%\t" : "%-20s  %2d%s   %-12s %3d%%     %3d%%",
+				buf2, spellev(i),
+				spellknow(i) ? " " : "*",
+				spelltypemnemonic(spell_skilltype(spellid(i))),
+				100 - percent_success(i),
+				(spellknow(i) * 100 + (KEEN - 1)) / KEEN
+				);
+
+			any.a_int = i + 1;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				spellet(i), 0, ATR_NONE, buf,
+				(i == splaction) ? MENU_SELECTED : MENU_UNSELECTED);
+		}
+		//Other menu options
+		if (splaction != SPELLMENU_CAST && splaction != SPELLMENU_PICK && splaction < 0) {
+			Sprintf(buf, "Cast a spell instead");
+			any.a_int = SPELLMENU_CAST;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'!', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if (splaction != SPELLMENU_MAINTAIN && splaction != SPELLMENU_PICK && splaction < 0 && maintainable){
+			// Maintain a spell
+			Sprintf(buf, "Maintain a spell instead");
+			any.a_int = SPELLMENU_MAINTAIN;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'#', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if (splaction != SPELLMENU_DESCRIBE && splaction != SPELLMENU_PICK && splaction < 0){
+			// Describe a spell
+			Sprintf(buf, "Describe a spell instead");
+			any.a_int = SPELLMENU_DESCRIBE;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'?', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if (splaction != SPELLMENU_VIEW && splaction != SPELLMENU_PICK && splaction < 0 && spellid(1) != NO_SPELL){
+			// Describe a spell
+			Sprintf(buf, "Rearrange spells instead");
+			any.a_int = SPELLMENU_VIEW;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'+', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		switch (splaction)
+		{
+		case SPELLMENU_PICK:
+			Sprintf(buf, "Choose which spell");
+			break;
+		case SPELLMENU_VIEW:
+			Sprintf(buf, "Choose which spell to reorder");
+			break;
+		case SPELLMENU_CAST:
+			Sprintf(buf, "Choose which spell to cast");
+			break;
+		case SPELLMENU_MAINTAIN:
+			Sprintf(buf, "Choose which spell to (un)maintain");
+			break;
+		case SPELLMENU_DESCRIBE:
+			Sprintf(buf, "Choose which spell to describe");
+			break;
+		default:
+			Sprintf(buf, "Reordering spells; swap '%c' with", spellet(splaction));
+			break;
+		}
+		end_menu(tmpwin, buf);
+
+		how = PICK_ONE;
+		n = select_menu(tmpwin, how, &selected);
+		destroy_nhwindow(tmpwin);
+
+		if (n > 0){
+			int s_no = selected[0].item.a_int - 1;
+
+			if (selected[0].item.a_int < 0){
+				return dospellmenu(selected[0].item.a_int, spell_no);
+			}
+			else if (!(splaction == SPELLMENU_VIEW && spellid(1) == NO_SPELL)) {
+				/* we aren't attempting to rearrange spells with only 1 spell known */
+				switch (splaction)
+				{
+				case SPELLMENU_VIEW:
+					*spell_no = s_no;
+					splaction = s_no;
+					continue;
+
+				case SPELLMENU_PICK:
+				case SPELLMENU_CAST:
+					*spell_no = s_no;
+					return TRUE;
+
+				case SPELLMENU_MAINTAIN:
+					if (!spell_maintained(spellid(s_no)))
+					{
+						spell_maintain(spellid(s_no));
+						You("begin maintaining %s.", spellname(s_no));
+					}
+					else
+					{
+						spell_unmaintain(spellid(s_no));
+						You("stop maintaining %s.", spellname(s_no));
+					}
+					return FALSE;
+
+				case SPELLMENU_DESCRIBE:
+					describe_spell(s_no);
+					continue;
+
+				default:
+					{
+					struct spell spl_tmp;
+					spl_tmp = spl_book[*spell_no];
+					spl_book[*spell_no] = spl_book[s_no];
+					spl_book[s_no] = spl_tmp;
+					splaction = SPELLMENU_VIEW;
+					continue;
+					}
+				} // switch(splaction)
+			} // doing something allowable
+		} // menu item was selected
+		/* else end menu, nothing was selected */
+		break;
+	}while (TRUE);
 	return FALSE;
 }
 
@@ -5346,6 +5363,7 @@ int spellID;
 			strcat(desc2, "While active, you cannot cast any spell but this.");
 			strcat(desc3, "Recasting increases the duration of the effect.");
 			strcat(desc4, "Can be maintained.");
+			break;
 		case SPE_PROTECTION:
 			strcat(desc1, "Temporarily improves your AC. AC from this spell is better than normal.");
 			strcat(desc2, "While active, it reduces your magic power recovery.");

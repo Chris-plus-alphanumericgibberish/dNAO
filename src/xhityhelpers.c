@@ -1,3 +1,7 @@
+/*	SCCS Id: @(#)xhityhelpers.c	3.4	2003/10/20	*/
+/* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
+/* NetHack may be freely redistributed.  See license for details. */
+
 #include "hack.h"
 #include "artifact.h"
 #include "monflag.h"
@@ -1318,6 +1322,7 @@ struct obj * obj;
 		return FALSE;
 
 	if (
+		(obj->otyp == JADE) ||
 		(obj->oclass == RING_CLASS && obj->otyp == jadeRing) ||
 		(obj->obj_material == GEMSTONE && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj) && obj->ovar1 == JADE)
 		)
@@ -1387,9 +1392,10 @@ struct obj * otmp;
 		diesize = 4;
 		/* special cases that don't affect dice */
 		if (otmp->oartifact == ART_EXCALIBUR ||
-		    otmp->oartifact == ART_GODHANDS ||
 			otmp->oartifact == ART_LANCE_OF_LONGINUS)
 			dmg += vd(3, 7);
+		else if (otmp->oartifact == ART_GODHANDS)
+			dmg += 7;
 		else if (otmp->oartifact == ART_JINJA_NAGINATA)
 			dmg += vd(1, 12);
 		else if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)
@@ -1420,7 +1426,7 @@ struct obj * otmp;
 		if (otmp->oartifact == ART_STORMBRINGER)
 			ndice = 4; //Extra unholy (4d9 vs excal's 3d7)
 		else if (otmp->oartifact == ART_GODHANDS)
-			dmg += vd(3,9);
+			dmg += 9;
 		else if (otmp->oartifact == ART_LANCE_OF_LONGINUS)
 			ndice = 3;
 		else if (otmp->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO)
@@ -1473,6 +1479,10 @@ struct obj * otmp;
 
 /* hits_insubstantial()
  * 
+ * Caller is responsible for checking insubstantial(mdef->data) first
+ * so that this function can also be used for other cases that can cause a creature
+ * to be insubstantial.
+ *
  * returns non-zero if [magr] attacking [mdef] with [attk] hits,
  * specifically in the case of [mdef] being insubstantial (as a shade)
  * 
@@ -1493,10 +1503,6 @@ struct obj * weapon;
 	boolean youdef = (mdef == &youmonst);
 	struct permonst * pa = (magr ? (youagr ? youracedata : magr->data) : (struct permonst *)0);
 	struct permonst * pd = youdef ? youracedata : mdef->data;
-
-	/* if the defender isn't insubstantial, full damage */
-	if (!insubstantial(pd))
-		return 2;
 
 	/* Chupoclops makes all your attacks ethereal */
 	if (youagr && u.sealsActive&SEAL_CHUPOCLOPS)
@@ -1592,4 +1598,213 @@ struct obj * weapon;
 			return 1;
 	}
 	return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+/* item destruction strings */
+const char * const destroy_strings[] = {	/* also used in trap.c */
+	"freezes and shatters", "freeze and shatter", "shattered potion",
+	"boils and explodes", "boil and explode", "boiling potion",
+	"catches fire and burns", "catch fire and burn", "burning scroll",
+	"catches fire and burns", "catch fire and burn", "burning book",
+	"turns to dust and vanishes", "turn to dust and vanish", "",
+	"shoots a spray of sparks", "shoots sparks and arcing current", "discharging wand",
+	"boils vigorously", "boil vigorously", "boiling potion"
+};
+
+/* destroy_item()
+*
+* Called when item(s) are supposed to be destroyed in a defender's inventory
+*
+* Works for player and monster mtmp
+* Assumes both the defender is alive and existant when called
+*
+* Can return:
+* MM_MISS		0x00	no items destroyed
+* MM_HIT		0x01	item(s) destroyed
+*
+* Only allows lethal damage against the player, so this function can be called
+* while voiding the return.
+*/
+int
+destroy_item(mtmp, osym, dmgtyp)
+struct monst * mtmp;
+int osym;
+int dmgtyp;
+{
+	boolean youdef = mtmp == &youmonst;
+	struct permonst * data = (youdef) ? youracedata : mtmp->data;
+	int vis = (youdef) ? TRUE : canseemon(mtmp);
+	int ndestroyed = 0;
+	struct obj *obj, *obj2;
+	int dmg, xresist, skip;
+	long i, cnt, quan;
+	int dindx;
+	const char *mult;
+
+	if (osym == RING_CLASS && dmgtyp == AD_ELEC)
+		return MM_MISS; /*Rings aren't destroyed by electrical damage anymore*/
+
+	for (obj = (youdef ? invent : mtmp->minvent); obj; obj = obj2) {
+		obj2 = obj->nobj;
+		if (obj->oclass != osym) continue; /* test only objs of type osym */
+		if (obj->oartifact) continue; /* don't destroy artifacts */
+		if (obj->in_use && obj->quan == 1) continue; /* not available */
+		xresist = skip = 0;
+		dmg = dindx = 0;
+		quan = 0L;
+
+		switch (dmgtyp) {
+			/* Cold freezes potions */
+		case AD_COLD:
+			if (osym == POTION_CLASS && !(
+				obj->otyp == POT_OIL ||
+				obj->oerodeproof /* shatterproof */
+				)) {
+				quan = obj->quan;
+				dindx = 0;
+				dmg = 4;
+			}
+			else skip++;
+			break;
+			/* Fire boils potions, burns scrolls, burns spellbooks */
+		case AD_FIRE:
+			xresist = (Fire_res(mtmp) && obj->oclass != POTION_CLASS);
+
+			if (obj->oerodeproof && is_flammable(obj))	/* fireproof */
+				skip++;
+			if (obj->otyp == SCR_FIRE || obj->otyp == SCR_GOLD_SCROLL_OF_LAW
+				|| obj->otyp == SPE_FIREBALL || obj->otyp == SPE_FIRE_STORM)
+				skip++;
+			if (objects[obj->otyp].oc_unique) {
+				skip++;
+				if (!Blind && vis)
+					pline("%s glows a strange %s, but remains intact.",
+					The(xname(obj)), hcolor("dark red"));
+			}
+			quan = obj->quan;
+			switch (osym) {
+			case POTION_CLASS:
+				dindx = 1;
+				dmg = 6;
+				break;
+			case SCROLL_CLASS:
+				dindx = 2;
+				dmg = 1;
+				break;
+			case SPBOOK_CLASS:
+				dindx = 3;
+				dmg = 6;
+				break;
+			default:
+				skip++;
+				break;
+			}
+			break;
+			/* electricity sparks charges out of wands */
+		case AD_ELEC:
+			xresist = (Shock_res(mtmp));
+			quan = obj->quan;
+			if (osym == WAND_CLASS){
+				if (obj->otyp == WAN_LIGHTNING)
+					skip++;
+				dindx = 5;
+				dmg = 6;
+			}
+			else
+				skip++;
+			break;
+			/* other damage types don't destroy items here */
+		default:
+			skip++;
+			break;
+		}
+		/* destroy the item, if allowed */
+		if (!skip) {
+			if (obj->in_use) --quan; /* one will be used up elsewhere */
+			int amt = (osym == WAND_CLASS) ? obj->spe : quan;
+			/* approx 10% of items in the stack get destroyed */
+			for (i = cnt = 0L; i < amt; i++) {
+				if (!rn2(10)) cnt++;
+			}
+			/* No items destroyed? Skip */
+			if (!cnt)
+				continue;
+			/* print message */
+			if (vis) {
+				if (cnt == quan || quan == 1)	mult = "";
+				else if (cnt > 1)				mult = "Some of ";
+				else							mult = "One of ";
+				pline("%s%s %s %s!",
+					mult,
+					(youdef) ? ((mult[0] != '\0') ? "your" : "Your") : ((mult[0] != '\0') ? s_suffix(mon_nam(mtmp)) : s_suffix(Monnam(mtmp))),
+					xname(obj),
+					(cnt > 1L) ? destroy_strings[dindx * 3 + 1]
+					: destroy_strings[dindx * 3]);
+			}
+
+			/* potion vapors */
+			if (osym == POTION_CLASS && dmgtyp != AD_COLD) {
+				if (!breathless(data) || haseyes(data)) {
+					if (youdef)
+						potionbreathe(obj);
+					else
+						/* no function for monster breathing potions */;
+				}
+			}
+			/* destroy item */
+			if (osym == WAND_CLASS)
+				obj->spe -= cnt;
+			else {
+				if (obj == current_wand) current_wand = 0;	/* destroyed */
+				for (i = 0; i < cnt; i++) {
+					/* use correct useup function */
+					if (youdef) useup(obj);
+					else m_useup(mtmp, obj);
+				}
+			}
+			ndestroyed += cnt;
+
+			/* possibly deal damage */
+			if (dmg) {
+				/* you */
+				if (youdef) {
+					if (xresist)	You("aren't hurt!");
+					else {
+						const char *how = destroy_strings[dindx * 3 + 2];
+						boolean one = (cnt == 1L);
+
+						dmg = d(cnt, dmg);
+						losehp(dmg, (one && osym != WAND_CLASS) ? how : (const char *)makeplural(how),
+							one ? KILLED_BY_AN : KILLED_BY);
+						exercise(A_STR, FALSE);
+						/* Let's not worry about properly returning if that killed you. If it did, it's moot. I think. */
+						/* at the very least, the return value from this function is being ignored often enough it doesn't matter */
+					}
+				}
+				/* monster */
+				else {
+					if (xresist);	// no message, reduce spam
+					else {
+						dmg = d(cnt, dmg);
+						/* not allowed to be lethal */
+						if (dmg >= mtmp->mhp)
+							dmg = min(0, mtmp->mhp - 1);
+						mtmp->mhp -= dmg;
+					}
+				}
+			}
+		}
+	}
+	if (ndestroyed && roll_madness(MAD_TALONS) && osym != WAND_CLASS){
+		if (ndestroyed > 1)
+			You("panic after some of your possessions are destroyed!");
+		else You("panic after one of your possessions is destroyed!");
+		HPanicking += 1 + rnd(6);
+	}
+
+	/* return if anything was destroyed */
+	return (ndestroyed ? MM_HIT : MM_MISS);
 }

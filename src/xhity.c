@@ -16,7 +16,6 @@ Claws of the Revenancer w/ rings
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
-STATIC_DCL int FDECL(destroy_item2, (struct monst *, int, int, boolean));
 STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *, boolean));
 STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *));
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
@@ -31,9 +30,6 @@ STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, void *, int, int, int, boolean, int, boolean, int, boolean *));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
-
-/* item destruction strings from zap.c */
-extern const char * const destroy_strings[];
 
 /* for long worms */
 extern boolean notonhead;
@@ -252,7 +248,7 @@ struct monst * mdef;
 		}
 
 		if (!DEADMONSTER(mdef) && u.sealsActive&SEAL_AHAZU){
-			if (*hp(mdef) < .1*(*hpmax(mdef))){
+			if ((*hp(mdef) < .1*(*hpmax(mdef))) && !is_rider(pd)){
 #define MAXVALUE 24
 				extern const int monstr[];
 				int value = min(monstr[monsndx(pd)] + 1, MAXVALUE);
@@ -668,7 +664,7 @@ int tary;
 						&& (!bimanual(otmp, pa) || pa->mtyp == PM_GYNOID || pa->mtyp == PM_PARASITIZED_GYNOID)// not two-handed
 						&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
 						&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
-						&& !(is_ammo(otmp) || is_pole(otmp) || throwing_weapon(otmp))		// not unsuitable for melee (ammo, throwable, polearm)
+						&& !(is_ammo(otmp) || is_pole(otmp) || is_missile(otmp))			// not unsuitable for melee (ammo, polearm, missile)
 						&& !otmp->owornmask)												// not worn
 					{
 						/* we have a potential weapon */
@@ -788,38 +784,40 @@ int tary;
 								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 							}
 						}
-						//45 degree rotation
-						nx = sgn(dx+dy);
-						ny = sgn(dy-dx);
-						if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
-							struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
-							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
-								int vis2 = VIS_NONE;
-								if(youagr || canseemon(magr))
-									vis2 |= VIS_MAGR;
-								if(mdef2 == &youmonst || canseemon(mdef2))
-									vis2 |= VIS_MDEF;
-								bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
-								subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
-								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
-								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+						if(u.uinsight >= 30){
+							//45 degree rotation
+							nx = sgn(dx+dy);
+							ny = sgn(dy-dx);
+							if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+								struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
+								if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
+									int vis2 = VIS_NONE;
+									if(youagr || canseemon(magr))
+										vis2 |= VIS_MAGR;
+									if(mdef2 == &youmonst || canseemon(mdef2))
+										vis2 |= VIS_MDEF;
+									bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+									subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
+									/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+									result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+								}
 							}
-						}
-						//-45 degree rotation
-						nx = sgn(dx-dy);
-						ny = sgn(dx+dy);
-						if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
-							struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
-							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
-								int vis2 = VIS_NONE;
-								if(youagr || canseemon(magr))
-									vis2 |= VIS_MAGR;
-								if(mdef2 == &youmonst || canseemon(mdef2))
-									vis2 |= VIS_MDEF;
-								bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
-								subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
-								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
-								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+							//-45 degree rotation
+							nx = sgn(dx-dy);
+							ny = sgn(dx+dy);
+							if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+								struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
+								if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
+									int vis2 = VIS_NONE;
+									if(youagr || canseemon(magr))
+										vis2 |= VIS_MAGR;
+									if(mdef2 == &youmonst || canseemon(mdef2))
+										vis2 |= VIS_MDEF;
+									bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+									subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
+									/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+									result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+								}
 							}
 						}
 						otmp->otyp = CLUB;
@@ -1223,16 +1221,22 @@ int tary;
 
 	/* do some things only if attacks were made */
 	if (attacksmade > 0) {
+		
+		/* when the player is noticably attacked: */
+		if (youdef && ((allres & MM_HIT) || (vis&VIS_MAGR)))
+		{
+			/* player multi-tile movements are interrupted */
+			nomul(0, NULL);
+			/* player panics after being attacked by a sea creature */
+			if (is_aquatic(magr->data) && roll_madness(MAD_THALASSOPHOBIA)){
+				You("panic after being attacked by a sea monster!");
+				HPanicking += 1 + rnd(6);
+			}
+		}
+
+		/* this must come after possibly interrupting player */
 		/* signify that the attack action was indeed taken, even if no attacks hit */
 		allres |= MM_HIT;
-		/* player multi-tile movements are interrupted */
-		if (youdef)
-			nomul(0, NULL);
-		/* player panics after being attacked by a sea creature */
-		if (youdef && is_aquatic(magr->data) && roll_madness(MAD_THALASSOPHOBIA)){
-			You("panic after being attacked by a sea monster!");
-			HPanicking += 1+rnd(6);
-		}
 	}
 	
 	return allres;
@@ -2109,198 +2113,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 #undef SUBOUT_MAINWEPB
 #undef SUBOUT_XWEP
 
-/* destroy_item2()
- *
- * Called when item(s) are supposed to be destroyed in a defender's inventory
- *
- * Works for player and monster mtmp
- * Assumes both the defender is alive and existant when called
- *
- * Can return:
- * MM_MISS		0x00	no items destroyed
- * MM_HIT		0x01	item(s) destroyed
- * MM_DEF_DIED	0x02	defender died
- *
- * If allow_lethal is false, damage will still be dealt but is never fatal,
- * so prematurely killing a monster isn't a problem.
- */
-int
-destroy_item2(mtmp, osym, dmgtyp, allow_lethal)
-struct monst * mtmp;
-int osym;
-int dmgtyp;
-boolean allow_lethal;
-{
-	boolean youdef = mtmp == &youmonst;
-	struct permonst * data = (youdef) ? youracedata : mtmp->data;
-	int vis = (youdef) ? TRUE : canseemon(mtmp);
-	boolean any_destroyed = FALSE;
-	struct obj *obj, *obj2;
-	int dmg, xresist, skip;
-	long i, cnt, quan;
-	int dindx;
-	const char *mult;
-
-	if (osym == RING_CLASS && dmgtyp == AD_ELEC)
-		return MM_MISS; /*Rings aren't destroyed by electrical damage anymore*/
-
-	for (obj = (youdef ? invent : mtmp->minvent); obj; obj = obj2) {
-		obj2 = obj->nobj;
-		if (obj->oclass != osym) continue; /* test only objs of type osym */
-		if (obj->oartifact) continue; /* don't destroy artifacts */
-		if (obj->in_use && obj->quan == 1) continue; /* not available */
-		xresist = skip = 0;
-		dmg = dindx = 0;
-		quan = 0L;
-
-		switch (dmgtyp) {
-			/* Cold freezes potions */
-		case AD_COLD:
-			if (osym == POTION_CLASS && obj->otyp != POT_OIL) {
-				quan = obj->quan;
-				dindx = 0;
-				dmg = 4;
-			}
-			else skip++;
-			break;
-			/* Fire boils potions, burns scrolls, burns spellbooks */
-		case AD_FIRE:
-			xresist = (Fire_res(mtmp) && obj->oclass != POTION_CLASS);
-
-			if (osym == SCROLL_CLASS && obj->oartifact)
-				skip++;
-			if (obj->otyp == SCR_FIRE || obj->otyp == SCR_GOLD_SCROLL_OF_LAW || obj->otyp == SPE_FIREBALL)
-				skip++;
-			if (obj->otyp == SPE_BOOK_OF_THE_DEAD) {
-				skip++;
-				if (!Blind && vis)
-					pline("%s glows a strange %s, but remains intact.",
-					The(xname(obj)), hcolor("dark red"));
-			}
-			quan = obj->quan;
-			switch (osym) {
-			case POTION_CLASS:
-				dindx = 1;
-				dmg = 6;
-				break;
-			case SCROLL_CLASS:
-				dindx = 2;
-				dmg = 1;
-				break;
-			case SPBOOK_CLASS:
-				dindx = 3;
-				dmg = 6;
-				break;
-			default:
-				skip++;
-				break;
-			}
-			break;
-			/* electricity sparks charges out of wands */
-		case AD_ELEC:
-			xresist = (Shock_res(mtmp));
-			quan = obj->quan;
-			if (osym == WAND_CLASS){
-				if (obj->otyp == WAN_LIGHTNING)
-					skip++;
-				dindx = 5;
-				dmg = 6;
-			}
-			else
-				skip++;
-			break;
-			/* other damage types don't destroy items here */
-		default:
-			skip++;
-			break;
-		}
-		/* destroy the item, if allowed */
-		if (!skip) {
-			if (obj->in_use) --quan; /* one will be used up elsewhere */
-			int amt = (osym == WAND_CLASS) ? obj->spe : quan;
-			/* approx 10% of items in the stack get destroyed */
-			for (i = cnt = 0L; i < amt; i++) {
-				if (!rn2(10)) cnt++;
-			}
-			/* No items destroyed? Skip */
-			if (!cnt)
-				continue;
-			/* print message */
-			if (vis) {
-				if (cnt == quan || quan == 1)	mult = "";
-				else if (cnt > 1)				mult = "Some of ";
-				else							mult = "One of ";
-				pline("%s%s %s %s!",
-					mult,
-					(youdef) ? ((mult[0] != '\0') ? "your" : "Your") : ((mult[0] != '\0') ? s_suffix(mon_nam(mtmp)) : s_suffix(Monnam(mtmp))),
-					xname(obj),
-					(cnt > 1L) ? destroy_strings[dindx * 3 + 1]
-					: destroy_strings[dindx * 3]);
-			}
-
-			/* potion vapors */
-			if (osym == POTION_CLASS && dmgtyp != AD_COLD) {
-				if (!breathless(data) || haseyes(data)) {
-					if (youdef)
-						potionbreathe(obj);
-					else
-						/* no function for monster breathing potions */;
-				}
-			}
-			/* destroy item */
-			if (osym == WAND_CLASS)
-				obj->spe -= cnt;
-			else {
-				if (obj == current_wand) current_wand = 0;	/* destroyed */
-				for (i = 0; i < cnt; i++) {
-					/* use correct useup function */
-					if (youdef) useup(obj);
-					else m_useup(mtmp, obj);
-				}
-			}
-			any_destroyed = TRUE;
-
-			/* possibly deal damage */
-			if (dmg) {
-				/* you */
-				if (youdef) {
-					if (xresist)	You("aren't hurt!");
-					else {
-						const char *how = destroy_strings[dindx * 3 + 2];
-						boolean one = (cnt == 1L);
-
-						dmg = d(cnt, dmg);
-						if (!allow_lethal && dmg > *hp(&youmonst))
-							dmg = min(0, *hp(&youmonst) - 1);
-						losehp(dmg, (one && osym != WAND_CLASS) ? how : (const char *)makeplural(how),
-							one ? KILLED_BY_AN : KILLED_BY);
-						exercise(A_STR, FALSE);
-						/* Let's not worry about properly returning if that killed you. If it did, it's moot. I think. */
-					}
-				}
-				/* monster */
-				else {
-					if (xresist);	// no message, reduce spam
-					else {
-						dmg = d(cnt, dmg);
-						if (!allow_lethal && dmg >= mtmp->mhp)
-							dmg = min(0, mtmp->mhp - 1);
-
-						mtmp->mhp -= dmg;
-						if (mtmp->mhp < 1) {
-							if(vis) pline("%s dies!", Monnam(mtmp));
-							mondied(mtmp);
-							return (MM_HIT|MM_DEF_DIED);
-						}
-					}
-				}
-			}
-		}
-	}
-	/* return if anything was destroyed */
-	return (any_destroyed ? MM_HIT : MM_MISS);
-}
-
 /* noises()
  * prints noises from mvm combat
  */
@@ -2631,8 +2443,10 @@ int vis;
 		obj = (youdef ? uarmf : which_armor(mdef, W_ARMF));
 		if (obj && obj->otyp == mboots1)
 			break;
-		else
-			/*fall through to default (body armors)*/;
+		else {
+			obj = (struct obj *)0;
+			/*fall through to default (body armors)*/
+		}
 	default:
 		if (!obj) obj = (youdef ? uarmc : which_armor(mdef, W_ARMC));
 		if (!obj) obj = (youdef ? uarm : which_armor(mdef, W_ARM));
@@ -2719,7 +2533,7 @@ int dmg;				/* damage to deal */
 
 	/* if defender is already dead, avoid re-killing them; just note that they are dead */
 	if (*hp(mdef) < 1) {
-		return MM_DEF_DIED;
+		return (MM_HIT|MM_DEF_DIED);
 	}
 
 	/* debug */
@@ -2751,9 +2565,9 @@ int dmg;				/* damage to deal */
 				killer = 0;
 			}
 			if (*hp(mdef) > 0)
-				return MM_DEF_LSVD;	/* you lifesaved or rehumanized */
+				return (MM_HIT|MM_DEF_LSVD);	/* you lifesaved or rehumanized */
 			else
-				return MM_DEF_DIED;
+				return (MM_HIT|MM_DEF_DIED);
 		}
 	}
 	/* uhitm */
@@ -2783,9 +2597,9 @@ int dmg;				/* damage to deal */
 				}
 			}
 			if (*hp(mdef) > 0)
-				return MM_DEF_LSVD; /* mdef lifesaved */
+				return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 			else
-				return MM_DEF_DIED;
+				return (MM_HIT|MM_DEF_DIED);
 		}
 	}
 	/* mhitm */
@@ -2793,7 +2607,7 @@ int dmg;				/* damage to deal */
 		if (*hp(mdef)< 1) {
 			monkilled(mdef, "", attk ? (int)attk->adtyp : 0);
 			if (*hp(mdef) > 0)
-				return MM_DEF_LSVD; /* mdef lifesaved */
+				return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 			else
 				return (MM_HIT | MM_DEF_DIED | (!magr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
 		}
@@ -2867,7 +2681,7 @@ struct monst * mdef;
 			}
 			/* survived */
 			if (*hp(mdef) > 0)
-				return MM_DEF_LSVD;
+				return (MM_HIT|MM_DEF_LSVD);
 			/* died */
 			else {
 				if (mdef->mtame && !youagr)
@@ -3555,7 +3369,9 @@ boolean ranged;
 		mon_resistance(mdef, DISPLACED) &&
 		!(youagr && u.ustuck && u.ustuck == mdef) &&
 		!(youagr && u.uswallow) &&
-		rn2(2)) {
+		!(has_passthrough_displacement(pd) && hits_insubstantial(magr, mdef, attk, weapon)) &&
+		rn2(2)
+		) {
 		if (has_passthrough_displacement(pd)){
 			if (vis&VIS_MAGR) {
 				pline("%s attack passes harmlessly through %s!",
@@ -3576,7 +3392,7 @@ boolean ranged;
 		miss = TRUE;
 	}
 	/* insubstantial (shade-type) immunity to being hit */
-	if (!miss && !hits_insubstantial(magr, mdef, attk, weapon)) {
+	if (!miss && insubstantial(pd) && !hits_insubstantial(magr, mdef, attk, weapon)) {
 		/* Print message */
 		if (vis&VIS_MAGR) {
 			Sprintf(buf, "%s", ((!weapon || valid_weapon(weapon)) ? "attack" : cxname(weapon)));
@@ -3767,6 +3583,10 @@ boolean ranged;
 	if (hit) {
 		/* DEAL THE DAMAGE */
 		result = xmeleehurty(magr, mdef, attk, attk, weapon, TRUE, -1, dieroll, vis, ranged);
+
+		/* the player exercises dexterity when hitting */
+		if (youagr)
+			exercise(A_DEX, TRUE);
 	}
 	else {
 		result = MM_MISS;
@@ -4123,11 +3943,11 @@ boolean ranged;
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvFire_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, SCROLL_CLASS, AD_FIRE, youdef);
+					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_FIRE, youdef);
+					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				if ((int)mlev(magr) > rn2(25))
-					destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE, youdef);
+					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 			}
 			/* reduce damage via resistance OR instakill */
 			if (Fire_res(mdef))
@@ -4189,7 +4009,7 @@ boolean ranged;
 						else
 							mondied(mdef);
 						if (mdef->mhp > 0)
-							return MM_DEF_LSVD;	/* lifesaved? */
+							return (MM_HIT|MM_DEF_LSVD);	/* lifesaved? */
 						else if (mdef->mtame && !vis)
 							pline("May %s roast in peace.", mon_nam(mdef));
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
@@ -4209,7 +4029,7 @@ boolean ranged;
 						else
 							mondied(mdef);
 						if (mdef->mhp > 0)
-							return MM_DEF_LSVD;	/* lifesaved? */
+							return (MM_HIT|MM_DEF_LSVD);	/* lifesaved? */
 						else if (mdef->mtame && !vis)
 							pline("May %s roast in peace.", mon_nam(mdef));
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
@@ -4250,7 +4070,7 @@ boolean ranged;
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvCold_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_COLD, youdef);
+					destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
 			/* reduce damage via resistance */
 			if (Cold_res(mdef))
@@ -4325,7 +4145,7 @@ boolean ranged;
 			/* damage can only kill the player, right now, but it will injure monsters */
 			if (!InvShock_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
-					destroy_item2(mdef, WAND_CLASS, AD_ELEC, youdef);
+					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 			}
 			/* reduce damage via resistance */
 			if (Shock_res(mdef))
@@ -4889,7 +4709,7 @@ boolean ranged;
 						mondied(mdef);
 
 					if (mdef->mhp > 0)
-						return MM_DEF_LSVD;
+						return (MM_HIT|MM_DEF_LSVD);
 					else if (mdef->mtame && !vis && !youagr)
 						pline("May %s rust in peace.", mon_nam(mdef));
 					return (MM_HIT | MM_DEF_DIED | (youagr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
@@ -5076,7 +4896,7 @@ boolean ranged;
 							monkilled(mdef, "", attk->adtyp);
 						/* is it dead, or was it lifesaved? */
 						if (mdef->mhp > 0)
-							return MM_DEF_LSVD;	/* lifesaved */
+							return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 						else
 							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 					}
@@ -5172,7 +4992,7 @@ boolean ranged;
 						monkilled(mdef, "", attk->adtyp);
 					/* is it dead, or was it lifesaved? */
 					if (mdef->mhp > 0)
-						return MM_DEF_LSVD;	/* lifesaved */
+						return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 				}
@@ -5406,7 +5226,7 @@ boolean ranged;
 					pline("Some writing vanishes from your head!");
 					/* KMH -- this is okay with unchanging */
 					rehumanize();
-					return MM_DEF_LSVD;	/* You died but didn't actually die. Lifesaved. */
+					return (MM_HIT|MM_DEF_LSVD);	/* You died but didn't actually die. Lifesaved. */
 				}
 				attrcurse();
 			}
@@ -5427,7 +5247,7 @@ boolean ranged;
 						mondied(mdef);
 
 					if (mdef->mhp > 0)
-						return MM_DEF_LSVD;
+						return (MM_HIT|MM_DEF_LSVD);
 					else if (mdef->mtame && !vis && !youagr)
 						You("have a strangely sad feeling for a moment, then it passes.");
 					return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
@@ -5587,7 +5407,7 @@ boolean ranged;
 				i += rnd(4);
 
 			for (; i>0; i--){
-				if (otmp->spe > -1 * objects[(otmp)->otyp].a_ac){
+				if (otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
 					damage_item(otmp);
 				}
 				else if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON && !rn2(10))){
@@ -6815,7 +6635,7 @@ boolean ranged;
 				else {
 					if (oresist_disintegration(otmp))
 						continue;
-					if (otmp->spe > -1 * objects[otmp->otyp].a_ac){
+					if (otmp->spe > -1 * a_acdr(objects[otmp->otyp])){
 						damage_item(otmp);
 					}
 					else if (!otmp->oartifact){
@@ -6829,10 +6649,14 @@ boolean ranged;
 					if (youdef) {
 						You("disintegrate!");
 						killer_format = KILLED_BY;
-						killer = pa->mname;
+						Sprintf(killer_buf, "disintegrated by %s", 
+							type_is_pname(pa) ? pa->mname : an(pa->mname));
+						killer = killer_buf;
+						/* when killed by disintegration, don't leave corpse */
+						u.ugrave_arise = NON_PM;
 						done(DISINTEGRATED);
 						You("reintegrate!");//lifesaved
-						return MM_DEF_LSVD;
+						return (MM_HIT|MM_DEF_LSVD);
 					}
 					/* monster is disintegrated */
 					else {
@@ -6842,7 +6666,7 @@ boolean ranged;
 						else
 							monkilled(mdef, "", AD_DISN);
 						if (mdef->mhp > 0)
-							return MM_DEF_LSVD;	/* lifesaved */
+							return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 						else
 							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
 					}
@@ -7034,9 +6858,9 @@ boolean ranged;
 				/* use killed, player was responsible */
 				killed(mdef);
 				if (mdef->mhp > 0)
-					return MM_DEF_LSVD;	/* lifesaved */
+					return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 				else
-					return MM_DEF_DIED;
+					return (MM_HIT|MM_DEF_DIED);
 			}
 		}
 		/* mhitm */
@@ -7066,7 +6890,7 @@ boolean ranged;
 				/* use monkilled, player was not responsible */
 				monkilled(mdef, "", AD_DRIN);
 				if (mdef->mhp > 0)
-					return MM_DEF_LSVD;	/* lifesaved */
+					return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 				else
 					return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
 			}
@@ -7250,7 +7074,7 @@ boolean ranged;
 								an(mtmp->data->mname));
 							killer = buf;
 							done(DROWNING);
-							return MM_DEF_DIED;
+							return (MM_HIT|MM_DEF_DIED);
 						}
 					}
 					else if (youagr) {
@@ -7297,6 +7121,9 @@ boolean ranged;
 			}
 		}
 		/* make physical attack without hitmsg */
+		/* This CANNOT be an AT_HUGS attack, because then it will attempt to do a wrap attack again */
+		if (alt_attk.aatyp == AT_HUGS)
+			alt_attk.aatyp = AT_CLAW;
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
 
@@ -7491,7 +7318,7 @@ boolean ranged;
 				1);						/* radius */
 		}
 		if (!youdef && DEADMONSTER(mdef))
-			return MM_DEF_DIED;
+			return (MM_HIT|MM_DEF_DIED);
 		else
 			return MM_HIT;
 		}
@@ -7816,7 +7643,7 @@ boolean ranged;
 						killer_format = KILLED_BY_AN;
 						killer = "touch of death";
 						done(DIED);
-						return MM_DEF_LSVD;	/* must have lifesaved */
+						return (MM_HIT|MM_DEF_LSVD);	/* must have lifesaved */
 					}
 				}
 				else {
@@ -7831,7 +7658,7 @@ boolean ranged;
 							monkilled(mdef, "", AD_DETH);
 
 						if (*hp(mdef) > 0)
-							return MM_DEF_LSVD; /* mdef lifesaved */
+							return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 						else
 							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 					}
@@ -7889,7 +7716,7 @@ boolean ranged;
 						else
 							monkilled(mdef, "", AD_DETH);
 						if (*hp(mdef) > 0)
-							return MM_DEF_LSVD; /* mdef lifesaved */
+							return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 						else
 							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 					}
@@ -7998,7 +7825,7 @@ boolean ranged;
 					else
 						monkilled(mdef, "", AD_FAMN);
 					if (*hp(mdef) > 0)
-						return MM_DEF_LSVD; /* mdef lifesaved */
+						return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 				}
@@ -9139,9 +8966,9 @@ int vis;
 			/* destroy items */
 			if (!InvShock_res(mdef)){
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, WAND_CLASS, AD_ELEC, youdef);
+					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, RING_CLASS, AD_ELEC, youdef);
+					destroy_item(mdef, RING_CLASS, AD_ELEC);
 			}
 			/* golem effects */
 			if (youdef)
@@ -9185,7 +9012,7 @@ int vis;
 			/* destroy items */
 			if (!InvCold_res(mdef)){
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_COLD, youdef);
+					destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
 			/* golem effects */
 			if (youdef)
@@ -9252,11 +9079,11 @@ int vis;
 			/* destroy items */
 			if (!InvFire_res(mdef)) {
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, SCROLL_CLASS, AD_FIRE, youdef);
+					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 				if (mlev(magr) > rn2(20))
-					destroy_item2(mdef, POTION_CLASS, AD_FIRE, youdef);
+					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				if (mlev(magr) > rn2(25))
-					destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE, youdef);
+					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 			}
 			/* golem effects */
 			if (youdef)
@@ -9581,25 +9408,25 @@ expl_common:
 			if (attk->adtyp == AD_FIRE || attk->adtyp == AD_EFIR || attk->adtyp == AD_ACFR){
 				if (!InvFire_res(mdef)){
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, SCROLL_CLASS, AD_FIRE, youdef);
+						destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, POTION_CLASS, AD_FIRE, youdef);
+						destroy_item(mdef, POTION_CLASS, AD_FIRE);
 					if (mlev(magr) > rn2(25))
-						destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE, youdef);
+						destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 				}
 			}
 			else if (attk->adtyp == AD_ELEC || attk->adtyp == AD_EELC){
 				if (!InvShock_res(mdef)){
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, WAND_CLASS, AD_ELEC, youdef);
+						destroy_item(mdef, WAND_CLASS, AD_ELEC);
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, RING_CLASS, AD_ELEC, youdef);
+						destroy_item(mdef, RING_CLASS, AD_ELEC);
 				}
 			}
 			else if (attk->adtyp == AD_COLD || attk->adtyp == AD_ECLD){
 				if (!InvCold_res(mdef)){
 					if (mlev(magr) > rn2(20))
-						destroy_item2(mdef, POTION_CLASS, AD_COLD, youdef);
+						destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
 			}
 			break;
@@ -9858,7 +9685,7 @@ int vis;
 
 	case AD_BDFN:
 		if(has_blood_mon(mdef)){
-			if(vis) pline("A thin spear of %s %s pierces %s %s.",
+			if(vis&VIS_MDEF) pline("A thin spear of %s %s pierces %s %s.",
 				(youdef ? "your" : s_suffix(mon_nam(mdef))),
 				mbodypart(mdef, BLOOD),
 				(youdef ? "your" : hisherits(mdef)),
@@ -9871,8 +9698,8 @@ int vis;
 			} else {
 				if(mdef->mconf && !rn2(10)){
 					if(mdef->mstun && !rn2(10)){
-						if(vis) pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), hisherits(mdef), mbodypart(mdef, BODY_SKIN));
-						//reduce current HP by 30% (round up, guranteed nonfatal)
+						if(vis&VIS_MDEF) pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), hisherits(mdef), mbodypart(mdef, BODY_SKIN));
+						//reduce current HP by 30% (round up, guaranteed nonfatal)
 						mdef->mhp = mdef->mhp*.7+1;
 						if(mdef->mhpmax > mdef->mhp){
 							if(mdef->mhpmax > mdef->mhp+mdef->m_lev)
@@ -9967,7 +9794,7 @@ int vis;
 						monkilled(mdef, "", attk->adtyp);
 					/* is it dead, or was it lifesaved? */
 					if (mdef->mhp > 0)
-						return MM_DEF_LSVD;	/* lifesaved */
+						return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 				}
@@ -10026,11 +9853,11 @@ int vis;
 		/* damage inventory */
 		if (!InvFire_res(mdef) && !(youdef ? Reflecting : mon_resistance(mdef, REFLECTING))) {
 			if ((int)mlev(magr) > rn2(20))
-				destroy_item2(mdef, SCROLL_CLASS, AD_FIRE, youdef);
+				destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 			if ((int)mlev(magr) > rn2(20))
-				destroy_item2(mdef, POTION_CLASS, AD_FIRE, youdef);
+				destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			if ((int)mlev(magr) > rn2(25))
-				destroy_item2(mdef, SPBOOK_CLASS, AD_FIRE, youdef);
+				destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 		}
 
 		if (youdef){
@@ -10077,7 +9904,7 @@ int vis;
 					done(DIED);
 
 					if (*hp(mdef) > 0)
-						return MM_DEF_LSVD;				/* you lifesaved */
+						return (MM_HIT|MM_DEF_LSVD);				/* you lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED);	/* moot */
 				}
@@ -10105,7 +9932,7 @@ int vis;
 					monkilled(mdef, "", AD_DETH);
 
 				if (*hp(mdef) > 0)
-					return MM_DEF_LSVD; /* mdef lifesaved */
+					return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
 				else
 					return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 			}
@@ -11199,10 +11026,12 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		poisons_majoreff = 0,
 		poisons_wipedoff = 0;
 	struct obj * poisonedobj;	/* object that is poisoned responsible for above poisons_X variables -- set once, should not be reset after */
+	int poisons = 0;
 	boolean swordofblood = FALSE;
 
 	boolean resisted_weapon_attacks = FALSE;
 	boolean resisted_attack_type = FALSE;
+	boolean resisted_thick_skin = FALSE;
 	int attackmask = 0;
 	static int warnedotyp = -1;
 	static struct permonst *warnedptr = 0;
@@ -11435,6 +11264,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 			/* beartraps are real attacks */
 			if (trap && melee && weapon)
+				valid_weapon_attack = TRUE;
+			else if (melee && weapon && weapon->oartifact == ART_WAND_OF_ORCUS)
 				valid_weapon_attack = TRUE;
 			else
 				invalid_weapon_attack = TRUE;
@@ -11758,8 +11589,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	}
 	/* weapons/armor */
 	else if (otmp &&
-		(otmp == weapon ||							// if using a weapon, only check that weapon (probably moot)
-		hits_insubstantial(magr, mdef, attk, otmp))	// if armor harmlessly passes through mdef, skin/rings have an effect
+		// if using a weapon, only check that weapon (probably moot)
+		(otmp == weapon ||
+		// if armor harmlessly passes through mdef, skin/rings have an effect
+		!insubstantial(pd) || hits_insubstantial(magr, mdef, attk, otmp))
 		) {
 		if (otmp->oartifact == ART_GLAMDRING &&
 			(is_orc(pd) || is_demon(pd)))
@@ -11868,7 +11701,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			seardmg += rnd(mlev(mdef));
 		}
 	}
-	/* Poison */
+	/* Find poisoned object, if any */
 	poisonedobj = (struct obj *)0;
 	if (valid_weapon_attack) {
 		poisonedobj = weapon;
@@ -11880,29 +11713,38 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				: (rslot == W_RINGR) ? uright
 				: (struct obj *)0;
 		}
+		/* Spidersilk adds sleep poison to unarmed punches -- don't set poisonedobj, this is additional */
+		otmp = (youagr ? uarm : which_armor(magr, W_ARM));
+		if (otmp && otmp->oartifact == ART_SPIDERSILK && !rn2(5)) {
+			poisons |= OPOISON_SLEEP;
+		}
 	}
-
-	if (poisonedobj && hits_insubstantial(magr, mdef, attk, poisonedobj))
-	{
-		int poisons = poisonedobj->opoisoned;
-		int artipoisons = 0;
+	/* Apply object's poison */
+	if (poisonedobj && (!insubstantial(pd) || hits_insubstantial(magr, mdef, attk, poisonedobj))) {
+		poisons |= poisonedobj->opoisoned;
 		if (arti_poisoned(poisonedobj))
-			artipoisons |= OPOISON_BASIC;
+			poisons |= OPOISON_BASIC;
 		if (poisonedobj->oartifact == ART_WEBWEAVER_S_CROOK)
-			artipoisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
+			poisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
 		if (poisonedobj->oartifact == ART_SUNBEAM)
-			artipoisons |= OPOISON_FILTH;
+			poisons |= OPOISON_FILTH;
 		if (poisonedobj->oartifact == ART_MOONBEAM)
-			artipoisons |= OPOISON_SLEEP;
+			poisons |= OPOISON_SLEEP;
 		/* Plague adds poisons to its launched ammo */
 		if (launcher && launcher->oartifact == ART_PLAGUE) {
 			if (monstermoves < launcher->ovar1)
-				artipoisons |= OPOISON_FILTH;
+				poisons |= OPOISON_FILTH;
 			else
-				artipoisons |= OPOISON_BASIC;
+				poisons |= OPOISON_BASIC;
 		}
-		poisons |= artipoisons;
+	}
+	/* All AD_SHDW attacks are poisoned as well */
+	if (attk && attk->adtyp == AD_SHDW) {
+		poisons |= OPOISON_BASIC;
+	}
 
+	if (poisons)
+	{
 		/* Penalties for you using a poisoned weapon */
 		if (poisons && youagr && !recursed)
 		{
@@ -11959,7 +11801,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			case OPOISON_SLEEP:
 				resists = Sleep_res(mdef);
-				majoreff = !rn2(5) || poisonedobj->oartifact == ART_MOONBEAM;
+				majoreff = !rn2(5) || (poisonedobj && poisonedobj->oartifact == ART_MOONBEAM);
 				break;
 			case OPOISON_BLIND:
 				resists = (Poison_res(mdef) || !haseyes(pd));
@@ -11982,7 +11824,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				majoreff = TRUE;
 				break;
 			}
-			if (!rn2(20) && !(artipoisons&i))
+			if (!rn2(20) && poisonedobj && (poisonedobj->opoisoned & i))
 				poisons_wipedoff |= i;
 
 			if (resists)
@@ -11996,7 +11838,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			}
 		}
 		/* poison-injecting rings only ever do major effects */
-		if (poisonedobj->oclass == RING_CLASS) {
+		if (poisonedobj && poisonedobj->oclass == RING_CLASS) {
 			poisons_resisted &= ~(poisons_majoreff);
 			poisons_wipedoff = poisons_majoreff;
 			poisons_minoreff = 0;
@@ -12038,26 +11880,6 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			}
 		}
-	}
-
-	/* Spidersilk adds sleep poison to unarmed punches */
-	if (unarmed_punch) {
-		otmp = (youagr ? uarm : which_armor(magr, W_ARM));	/* note: don't set poisonedobj; this is additional */
-		if (otmp && otmp->oartifact == ART_SPIDERSILK && !rn2(5)) {
-			if (Sleep_res(mdef))
-				poisons_resisted |= OPOISON_SLEEP;
-			else
-				poisons_majoreff |= OPOISON_SLEEP;
-		}
-	}
-	/* AD_SHDW attacks are poisoned as well */
-	if (attk && attk->adtyp == AD_SHDW) {
-		if (Poison_res(mdef))
-			poisons_resisted |= OPOISON_BASIC;
-		else if (rn2(10))
-			poisons_minoreff |= OPOISON_BASIC;
-		else
-			poisons_majoreff |= OPOISON_BASIC;
 	}
 
 	/* Clockwork heat - player melee only */
@@ -12153,7 +11975,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				*wepgone = TRUE;
 			/* check if defender was killed */
 			if (*hp(mdef) < 1)
-				return MM_DEF_DIED;
+				return (MM_HIT|MM_DEF_DIED);
 			/* potionhit prints messages */
 			hittxt = TRUE;
 			/* in case potion effect causes transformation */
@@ -12186,7 +12008,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 					/* check if defender was killed */
 					if (*hp(mdef) < 1)
-						return MM_DEF_DIED;
+						return (MM_HIT|MM_DEF_DIED);
 					/* nudzirath_shatter prints messages */
 					hittxt = TRUE;
 					real_attack = FALSE;
@@ -12541,17 +12363,21 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 	}
 	else if (unarmed_punch) {
+		struct obj * gloves = (youagr ? uarmg : which_armor(magr, W_ARMG));
 		struct weapon_dice unarmed_dice;
 		int unarmedMult;
 		/* initialize struct */
 		dmgval_core(&unarmed_dice, bigmonst(pd), (struct obj *)0, 0);
 		/* determine unarmedMult */
 		if (youagr) {
-			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : (!uarmg && u.sealsActive&SEAL_ECHIDNA) ? 2 : 1;
+			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : (!gloves && u.sealsActive&SEAL_ECHIDNA) ? 2 : 1;
 		}
 		else {
 			unarmedMult = 1;
 		}
+		if (gloves && gloves->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
+			unarmedMult += 2;
+
 		/* base unarmed dice */
 		if (youagr && martial_bonus())
 			unarmed_dice.oc.damd = 4 * unarmedMult;
@@ -12586,17 +12412,16 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			}
 		}
 
-		otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 		/* fighting gloves give bonus damage */
 		static int tgloves = 0;
 		if (!tgloves) tgloves = find_tgloves();
-		if (otmp && otmp->otyp == tgloves)
+		if (gloves && gloves->otyp == tgloves)
 			basedmg += ((youagr && martial_bonus()) ? 3 : 1);
 
 		
-		if (otmp) {
+		if (gloves) {
 			/* all gloves give their enchantment to melee damage */
-			basedmg += otmp->spe;
+			basedmg += gloves->spe;
 		}
 		/* no gloves? Look at rings -- which are player-only */
 		else if (youagr &&
@@ -12895,12 +12720,18 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				}
 			}
 		}
+		/* misc: train player's Soresu skill if applicable */
+		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && magr && melee &&
+			(u.fightingForm == FFORM_SHII_CHO ||
+			(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+			)) use_skill(FFORM_SORESU, 1);
 	}
 	/* ARTIFACT HIT BLOCK */
 	/* this must come after skills are trained, as this can kill the defender and cause a return */
 	if (valid_weapon_attack || unarmed_punch || unarmed_kick)
 	{
 		int returnvalue = 0;
+		boolean artif_hit = FALSE;
 		/* use guidance glyph */
 		if (youagr && melee && active_glyph(GUIDANCE))
 			doguidance(mdef, basedmg);
@@ -12914,6 +12745,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					u.uconduct.weaphit--;
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED|MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
@@ -12926,6 +12759,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* ranged weapon attacks also proc effects of The Helm of the Arcane Archer */
@@ -12936,6 +12771,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* unarmed punches proc effects of worn gloves */
@@ -12945,6 +12782,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
 		/* unarmed kicks proc effects of worn boots */
@@ -12954,8 +12793,15 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
 			}
 		}
+
+		/* must come after all apply_hit_effects */
+		/* priests do extra damage with all artifacts */
+		if (artif_hit && !recursed && magr && (youagr ? Role_switch : monsndx(magr->data)) == PM_PRIEST)
+			artidmg += d(1, mlev(magr));
 	}
 
 	/* Sum reduceable damage */
@@ -12977,7 +12823,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		subtotl = (real_attack ? 1 : 0);
 
 	/* some attacks only deal searing damage to insubstantial creatures */
-	if (hits_insubstantial(magr, mdef, attk, weapon) == 1) {
+	if (insubstantial(pd) && hits_insubstantial(magr, mdef, attk, weapon) == 1) {
 		subtotl = 0;
 	}
 	/* some creatures resist weapon attacks to the extreme */
@@ -13048,7 +12894,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			)){
 			/* damage entirely mitigated */
 			subtotl = 1;
-			resisted_attack_type = TRUE;
+			resisted_thick_skin = TRUE;
 		}
 		if ((attackmask & ~(resistmask)) == 0L && !(otmp && spec_applies(otmp, mdef, TRUE)) && (subtotl > 0)) {
 			/* damage reduced by 75% */
@@ -13058,7 +12904,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (subtotl < 1)
 				subtotl = 1;
 		}
-		else if (subtotl > 0 && vulnerable_mask(resistmask) && !(attackmask & EXPLOSION)) {
+		else if (subtotl > 0 && vulnerable_mask(resistmask) && !(attackmask & EXPLOSION) && (attackmask & ~(resistmask)) != 0L) {
 			/* 2x damage for attacking a vulnerability */
 			subtotl *= 2;
 		}
@@ -13087,6 +12933,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			*hp(mdef) = 1;
 			resisted_weapon_attacks = FALSE;
 			resisted_attack_type = FALSE;
+			resisted_thick_skin = FALSE;
 		}
 		else if (phase_armor){
 			subtotl -= (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
@@ -13316,7 +13163,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				}
 				nomul(0, NULL);
 				if (mdef->mhp <= 0) /* flung weapon killed monster */
-					return MM_DEF_DIED;
+					return (MM_HIT|MM_DEF_DIED);
 			}
 		}
 		else {
@@ -13334,25 +13181,29 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (warnedotyp != (weapon ? weapon->otyp : 0) || warnedptr != pd) {
 				lastwarning = moves;
 				/* warn the player that their attacks are futile */
-				if (resisted_weapon_attacks || resisted_attack_type) {
-					if (resisted_weapon_attacks) {
-						pline("%s is resistant to attacks.",
-							Monnam(mdef));
-					}
-					else {
-						/* warn of one of your damage types */
-						/* not perfectly balanced; will favour one type (P>S, S>B, B>P) 2:1 if an attack has 2 types */
-						int i, j;
-						static const char * damagetypes[] = { "blunt force", "sharp point", "cutting edge" };
-						for (i = 0, j = rn2(3); i < 3; i++) {
-							if (attackmask & (1 << (i + j) % 3)) {
-								pline("The %s is ineffective against %s.",
-									damagetypes[(i + j) % 3],
-									mon_nam(mdef));
-								break;
-							}
+				if (resisted_weapon_attacks) {
+					pline("%s is resistant to attacks.",
+						Monnam(mdef));
+				}
+				else if (resisted_thick_skin) {
+					pline("%s thick skin nullified your attack.",
+						s_suffix(Monnam(mdef)));
+				}
+				else if (resisted_attack_type){
+					/* warn of one of your damage types */
+					/* not perfectly balanced; will favour one type (P>S, S>B, B>P) 2:1 if an attack has 2 types */
+					int i, j;
+					static const char * damagetypes[] = { "blunt force", "sharp point", "cutting edge" };
+					for (i = 0, j = rn2(3); i < 3; i++) {
+						if (attackmask & (1 << (i + j) % 3)) {
+							pline("The %s is ineffective against %s.",
+								damagetypes[(i + j) % 3],
+								mon_nam(mdef));
+							break;
 						}
 					}
+				}
+				if (resisted_weapon_attacks || resisted_thick_skin || resisted_attack_type) {
 					warnedotyp = (weapon ? weapon->otyp : 0);
 					warnedptr = pd;
 				}
@@ -13393,7 +13244,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		/* inventory damage */
 		if (!InvCold_res(mdef)) {
 			if (mlev(magr) > rn2(20))
-				destroy_item2(mdef, POTION_CLASS, AD_COLD, youdef);
+				destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
 

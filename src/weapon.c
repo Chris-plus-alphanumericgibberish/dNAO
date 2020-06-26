@@ -528,6 +528,11 @@ int otyp;
 			bond = 12;
 			spe_mult = 2;
 		}
+		else if (obj->oartifact == ART_WAND_OF_ORCUS) {
+			ocn = 1;
+			ocd = 4;
+			spe_mult = 0;	/* it's a wand */
+		}
 		else if (obj->oartifact == ART_ROGUE_GEAR_SPIRITS) {
 			ocn = 1;
 			ocd = (large ? 2 : 4);
@@ -718,7 +723,7 @@ int otyp;
 	if (obj && obj->oartifact == ART_INFINITY_S_MIRRORED_ARC)
 	{
 		xchar x, y;
-		ocn = 1;
+		ocn = 0;
 		get_obj_location(obj, &x, &y, 0);
 		if (levl[x][y].lit &&
 			!(viz_array[y][x] & TEMP_DRK3 &&
@@ -734,6 +739,11 @@ int otyp;
 
 		if (obj->altmode)
 			ocn *= 2;
+		
+		//I'm not sure if this is needed, but similar things have caused crash bugs before.
+		// If it's not needed, the condition will never be true.
+		if(ocn < 1)
+			ocn = 1;
 		/* set spe_mult */
 		spe_mult = ocn;
 	}
@@ -1660,6 +1670,8 @@ register struct monst *mtmp;
 			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
 			 || otmp->otyp == KAMEREL_VAJRA
             ) &&
+			/* never ammo or missiles */
+			!(is_ammo(otmp) || is_missile(otmp)) &&
 			/* never untouchable artifacts */
 			(touch_artifact(otmp, mtmp, 0)) &&
 			/* never too-large for available hands */
@@ -1675,8 +1687,8 @@ register struct monst *mtmp;
 		Oselect(CLUB, W_WEP);
 
 	for (i = 0; i < SIZE(hwep); i++) {
-	    if (hwep[i] == CORPSE && !(mtmp->misc_worn_check & W_ARMG))
-		continue;
+	    if (hwep[i] == CORPSE && !((mtmp->misc_worn_check & W_ARMG) || resists_ston(mtmp)))
+			continue;
 		Oselect(hwep[i], W_WEP);
 	}
 
@@ -1714,12 +1726,12 @@ struct obj *
 select_pick(mtmp)
 struct monst *mtmp;
 {
-	struct obj * otmp;
+	struct obj *otmp, *obj;
 
-	/* preference to any artifacts (and checks for arti_digs) */
-	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
-		if (is_pick(otmp) && otmp->oartifact)
-			Oselect(otmp->otyp, W_WEP);
+	/* preference to any artifacts (and checks for arti_digs, loop control must use a different variable than otmp, in case Oselect fails for any reason) */
+	for (obj = mtmp->minvent; obj; obj = obj->nobj){
+		if (is_pick(obj) && obj->oartifact)
+			Oselect(obj->otyp, W_WEP);
 	}
 
 	Oselect(DWARVISH_MATTOCK, W_WEP);
@@ -1727,16 +1739,17 @@ struct monst *mtmp;
 	/* failure */
 	return (struct obj *)0;
 }
+
 struct obj *
 select_axe(mtmp)
 struct monst *mtmp;
 {
-	struct obj * otmp;
+	struct obj *otmp, *obj;
 
-	/* preference to any artifacts */
-	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
-		if (is_axe(otmp) && otmp->oartifact)
-			Oselect(otmp->otyp, W_WEP);
+	/* preference to any artifacts (loop control must use a different variable than otmp, in case Oselect fails for any reason) */
+	for (obj = mtmp->minvent; obj; obj = obj->nobj){
+		if (is_axe(obj) && obj->oartifact)
+			Oselect(obj->otyp, W_WEP);
 	}
 
 	Oselect(MOON_AXE, W_WEP);
@@ -2223,8 +2236,9 @@ struct obj *otmp;
 			bonus *= 1.5;
 		
 		if(otmp==mwp 
-		&& (is_rapier(otmp)
+		&& (is_rapier(otmp) || is_rakuyo(otmp)
 			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1 == 0)
+			|| otmp->otyp == SET_OF_CROW_TALONS
 			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
 			|| otmp->oartifact == ART_FRIEDE_S_SCYTHE
 		)){
@@ -2284,8 +2298,9 @@ struct obj *otmp;
 			bonus *= 1.5;
 		
 		if(otmp==uwep 
-		&& (is_rapier(otmp)
+		&& (is_rapier(otmp) || is_rakuyo(otmp)
 			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1 == 0)
+			|| otmp->otyp == SET_OF_CROW_TALONS
 			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
 			|| otmp->oartifact == ART_FRIEDE_S_SCYTHE
 		)){
