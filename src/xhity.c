@@ -13556,14 +13556,20 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			case OPOISON_PARAL:
 				if (youdef) {
-					nomul(-(25 - rnd(ACURR(A_CON))), "immobilized by paralysis venom");
+					int dur = rnd(25 - rnd(ACURR(A_CON)));
+					if (Poison_res(mdef))
+						dur = (dur + 2) / 3;
+					nomul(-dur, "immobilized by paralysis venom");
 				}
 				else {
+					int dur = rnd(25);
+					if (Poison_res(mdef))
+						dur = (dur + 2) / 3;
 					if (canseemon(mdef) && mdef->mcanmove)
 						pline("%s stops moving!", Monnam(mdef));
 					if (mdef->mcanmove) {
 						mdef->mcanmove = 0;
-						mdef->mfrozen = rnd(25);
+						mdef->mfrozen = dur;
 					}
 				}
 				break;
