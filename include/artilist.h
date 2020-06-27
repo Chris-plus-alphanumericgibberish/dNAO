@@ -345,7 +345,7 @@ A("Mjollnir",			WAR_HAMMER,						"lightning-bolt embossed %s",
 	A_NEUTRAL, PM_VALKYRIE, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_ELEC, 5, 24), (ARTA_EXPLELEC),
-	PROP0(), NOFLAG,
+	PROP1(SHOCK_RES), NOFLAG,
 	PROP0(), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
