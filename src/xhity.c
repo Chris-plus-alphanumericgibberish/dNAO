@@ -12889,7 +12889,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 		if ((thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA)) && (
 			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS))) || 
-			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !arti_shining(otmp)) ||
+			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !litsaber(otmp)) ||
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->oproperties&OPROP_FLAYW))
 			)){
 			/* damage entirely mitigated */
