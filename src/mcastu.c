@@ -17,7 +17,7 @@ STATIC_DCL boolean FDECL(is_aoe_attack_spell	 ,(int));
 STATIC_DCL boolean FDECL(is_buff_spell			 ,(int));
 STATIC_DCL boolean FDECL(is_summon_spell		 ,(int));
 STATIC_DCL boolean FDECL(is_debuff_spell		 ,(int));
-STATIC_DCL boolean FDECL(spell_would_be_useless2, (struct monst *, struct monst *, int, int, int));
+STATIC_DCL boolean FDECL(spell_would_be_useless, (struct monst *, struct monst *, int, int, int));
 
 #ifdef OVL0
 
@@ -1536,10 +1536,10 @@ int tary;
 				 * so if the selected spell would be useless, move on 
 				 * 
 				 * a player casting with no target used alt-M, so try to get them a real spell   */
-				if (!youagr && spell_would_be_useless2(magr, mdef, spellnum, tarx, tary))
+				if (!youagr && spell_would_be_useless(magr, mdef, spellnum, tarx, tary))
 					return MM_MISS;
 			}
-		} while ((--cnt > 0) && (spell_would_be_useless2(magr, mdef, spellnum, tarx, tary)));
+		} while ((--cnt > 0) && (spell_would_be_useless(magr, mdef, spellnum, tarx, tary)));
 
 		if (cnt == 0) {
 			if (youagr) {
@@ -4750,7 +4750,7 @@ int spellnum;
 
 /* Note that spells that are not implemented for all of uvm/mvm/mvu handle those cases gracefully in cast_spell */
 boolean
-spell_would_be_useless2(magr, mdef, spellnum, tarx, tary)
+spell_would_be_useless(magr, mdef, spellnum, tarx, tary)
 struct monst * magr;
 struct monst * mdef;
 int spellnum;
