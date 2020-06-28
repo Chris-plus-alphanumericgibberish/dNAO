@@ -710,7 +710,9 @@ struct obj *spellbook;
 		
 		delay = -10*objects[booktype].oc_delay;
 
-		RoSbook = doreadstudy("You open the spellbook.");
+		if (booktype == SPE_BOOK_OF_THE_DEAD) RoSbook = READ_SPELL;
+		else 
+			RoSbook = doreadstudy("You open the spellbook.");
 		if(!RoSbook){
 			delay = 0;
 			return 0;
