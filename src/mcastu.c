@@ -5055,6 +5055,11 @@ int tary;
 		spellnum == DESTRY_WEPN
 		))
 		return TRUE;
+	/* don't destroy armor if target has no armor */
+	if (!some_armor(mdef) && (
+		spellname == DESTRY_ARMR
+		))
+		return TRUE;
 	/* make visible spell by spellcaster with see invisible. */
 	if ((youagr ? See_invisible_old : mon_resistance(magr, SEE_INVIS)) && (
 		spellnum == MAKE_VISIBLE
@@ -5064,6 +5069,11 @@ int tary;
 	if ((amorphous(mdef->data) || is_whirly(mdef->data) || flaming(mdef->data) || unsolid(mdef->data) ||
 		(youdef && uwep && uwep->oartifact == ART_STING) || (youdef ? (ACURR(A_STR) >= 18) : strongmonst(mdef->data))) && (
 		spellnum == MAKE_WEB
+		))
+		return TRUE;
+	/* Drow aren't hindered by darkness */
+	if (is_drow(mdef->data) && (
+		spellnum == DARKNESS
 		))
 		return TRUE;
 	/* don't summon spheres when all types are gone */
