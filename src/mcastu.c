@@ -17,6 +17,11 @@ STATIC_DCL int FDECL(choose_psionic_spell, (int,int,boolean));
 STATIC_DCL int FDECL(elemspell, (struct monst *, struct monst *, struct attack *, int, int));
 STATIC_DCL boolean FDECL(is_undirected_spell,(int));
 STATIC_DCL boolean FDECL(is_aoe_spell,(int));
+STATIC_DCL boolean FDECL(is_directed_attack_spell,(int));
+STATIC_DCL boolean FDECL(is_aoe_attack_spell	 ,(int));
+STATIC_DCL boolean FDECL(is_buff_spell			 ,(int));
+STATIC_DCL boolean FDECL(is_summon_spell		 ,(int));
+STATIC_DCL boolean FDECL(is_debuff_spell		 ,(int));
 STATIC_DCL boolean FDECL(spell_would_be_useless2, (struct monst *, struct monst *, int, int, int));
 STATIC_DCL boolean FDECL(spell_would_be_useless,(struct monst *,int));
 STATIC_DCL boolean FDECL(mspell_would_be_useless,(struct monst *,struct monst *,int));
@@ -1564,13 +1569,23 @@ int tary;
 			/* check that the spell selection code did not abort the cast */
 			if (!spellnum)
 				return 0;
-			/* check that we either have a target or are casting an undirected spell */
-			if (!(mdef || is_undirected_spell(spellnum)))
-				return 0;	/* only 1 attempt if no target */
+			/* if we have no target... */
+			if (!mdef) {
+				/* !youagr means it's a monster maybe casting something as they wander
+				 * so if the selected spell would be useless, move on 
+				 * 
+				 * a player casting with no target used alt-M, so try to get them a real spell   */
+				if (!youagr && spell_would_be_useless2(magr, mdef, spellnum, tarx, tary))
+					return MM_MISS;
+			}
 		} while ((--cnt > 0) && (spell_would_be_useless2(magr, mdef, spellnum, tarx, tary)));
 
-		if (cnt == 0)
+		if (cnt == 0) {
+			if (youagr) {
+				You("can't think of anything to cast.");
+			}
 			return MM_MISS;
+		}
 	}
 
 	/* things that cause spellcasting to fail loudly */
@@ -1645,10 +1660,15 @@ int tary;
 	}
 	/* failure chance determined, check if attack fumbles */
 	if (rn2(mlev(magr) * 2) < chance) {
-		if (youagr)
+		if (youagr) {
 			pline_The("air crackles around you.");
-		else if (canseemon(magr) && flags.soundok)
+			u.uen += mlev(magr) / 2;
+		}
+		else if (canseemon(magr) && flags.soundok) {
 			pline_The("air crackles around %s.", mon_nam(magr));
+			if (magr->mspec_used)
+				magr->mspec_used /= 2;
+		}
 		return MM_MISS;
 	}
 
@@ -2823,7 +2843,7 @@ int tary;
 				"I condemn thee to eternity unmoving!");
 
 			if (!Stone_res(mdef) &&
-				(!rn2(10) || (youdef && !have_lizard()))
+				(!rn2(10) || !youdef || !have_lizard())
 				){
 				result |= xstoney(magr, mdef);
 				/* print extra message for player */
