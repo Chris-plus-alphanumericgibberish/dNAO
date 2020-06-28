@@ -139,8 +139,6 @@ char *wardDecode[26] = {
 #define uarmgbon 6 /* Casting channels through the hands */
 #define uarmfbon 2 /* All metal interferes to some degree */
 
-/* since the spellbook itself doesn't blow up, don't say just "explodes" */
-static const char explodes[] = "radiates explosive energy";
 static const char where_to_cast[] = "Where do you want to cast the spell?";
 static const char where_to_gaze[] = "Where do you want to look?";
 
@@ -160,72 +158,105 @@ char ilet;
 
 /* TRUE: book should be destroyed by caller */
 STATIC_OVL boolean
-cursed_book(bp)
-	struct obj *bp;
-{
+cursed_book(struct obj *bp){
 	int lev = objects[bp->otyp].oc_level;
+
+	boolean was_in_use;
+	boolean already_cursed = bp->cursed;
+	int dmg = 0;
 	
-	if(RoSbook == STUDY_WARD) lev -= 1; //The wardings paritally protect you from the magic contained within the book.
+	if(RoSbook == STUDY_WARD) lev -= 1; //The wardings partially protect you from the magic contained within the book.
+	
+	for (int spell = 0; spell < MAXSPELL; spell++)
+		if (spellid(spell) == bp->otyp)
+			lev -= 1; // if you already know it, you're more resilient to failure
+
+	if (lev < 0) lev = 0;
 	
 	switch(rn2(lev)) {
-	case 0:
-		You_feel("a wrenching sensation.");
-		tele();		/* teleport him */
-		break;
-	case 1:
-		You_feel("threatened.");
-		aggravate();
-		break;
-	case 2:
-		make_blinded(Blinded + rn1(100,250),TRUE);
-		break;
-	case 3:
-		take_gold();
-		break;
-	case 4:
-		pline("These runes were just too much to comprehend.");
-		make_confused(HConfusion + rn1(7,16),FALSE);
-		break;
-	case 5:
-		pline_The("book was coated with contact poison!");
-		if (uarmg) {
-		    if (uarmg->oerodeproof || !is_corrodeable(uarmg)) {
-			Your("gloves seem unaffected.");
-		    } else if (uarmg->oeroded2 < MAX_ERODE) {
-			if (uarmg->greased) {
-			    grease_protect(uarmg, "gloves", &youmonst);
-			} else {
-			    Your("gloves corrode%s!",
-				 uarmg->oeroded2+1 == MAX_ERODE ?
-				 " completely" : uarmg->oeroded2 ?
-				 " further" : "");
-			    uarmg->oeroded2++;
+		case 0:
+			if (already_cursed || rn2(4)) {
+				You_feel("a wrenching sensation.");
+				tele(); /* teleport him */
 			}
-		    } else
-			Your("gloves %s completely corroded.",
-			     Blind ? "feel" : "look");
-		    break;
-		}
-		/* temp disable in_use; death should not destroy the book */
-		bp->in_use = FALSE;
-		losestr(Poison_resistance ? rn1(2,1) : rn1(4,3));
-		losehp(rnd(Poison_resistance ? 6 : 10),
-		       "contact-poisoned spellbook", KILLED_BY_AN);
-		bp->in_use = TRUE;
-		break;
-	case 6:
-		if(Antimagic) {
-		    shieldeff(u.ux, u.uy);
-		    pline_The("book %s, but you are unharmed!", explodes);
-		} else {
-		    pline("As you read the book, it %s in your %s!",
-			  explodes, body_part(FACE));
-		    losehp(2*rnd(10)+5, "exploding rune", KILLED_BY_AN);
-		}
+			else {
+				if (bp->blessed) {
+					pline_The("book glows brown.");
+					unbless(bp);
+				}
+				else {
+					pline_The("book glows %s.", NH_BLACK);
+					curse(bp);
+				}
+				bp->bknown = TRUE;
+			}
+			break;
+		case 1:
+			You_feel("threatened.");
+			aggravate();
+			break;
+		case 2:
+			make_blinded(Blinded + rn1(100,250),TRUE);
+			break;
+		case 3:
+			pline_The("book develops a huge set of teeth and bites you!");
+			was_in_use = bp->in_use;
+			bp->in_use = FALSE;
+			losehp(rn1(5, 3), "carnivorous book", KILLED_BY_AN);
+			bp->in_use = was_in_use;
+			break;
+		case 4:
+			You("are frozen in fear!");
+			nomul(rn1(lev*2, lev*2), "frozen by a book");
+			break;
+		case 5:
+			pline_The("book was coated with contact poison!");
+			if (uarmg) {
+				if (uarmg->oerodeproof || !is_corrodeable(uarmg)) {
+				Your("gloves seem unaffected.");
+				} else if (uarmg->oeroded2 < MAX_ERODE) {
+				if (uarmg->greased) {
+					grease_protect(uarmg, "gloves", &youmonst);
+				} else {
+					Your("gloves corrode%s!",
+					 uarmg->oeroded2+1 == MAX_ERODE ?
+					 " completely" : uarmg->oeroded2 ?
+					 " further" : "");
+					uarmg->oeroded2++;
+				}
+				} else
+				Your("gloves %s completely corroded.",
+					 Blind ? "feel" : "look");
+				break;
+			}
+			/* temp disable in_use; death should not destroy the book */
+			bp->in_use = FALSE;
+			losestr(Poison_resistance ? rn1(2,1) : rn1(4,3));
+			dmg = Poison_resistance ? rnd(6) : rnd(10);
+			losehp(dmg, "contact-poisoned spellbook", KILLED_BY_AN);
+			bp->in_use = TRUE;
+			break;
+		case 6:
+			if(Antimagic) {
+				shieldeff(u.ux, u.uy);
+				pline_The("book radiates explosive energy, but you are unharmed!");
+			} else {
+				pline("As you read the book, it radiates explosive energy right at you!");
+				dmg = 2*rnd(10) + 10;
+			}
+			
+			if (Half_spell_damage) dmg = (dmg+1/2);
+			losehp(dmg, "exploding rune", KILLED_BY_AN);
+			
+			return TRUE;
+		default:
+			impossible("spellbook level out of bounds in failure effects");
+			rndcurse();
+			break;
+	}
+	if (already_cursed) {
+		pline_The("spellbook crumbles to dust!");
 		return TRUE;
-	default:
-		rndcurse();
-		break;
 	}
 	return FALSE;
 }
@@ -236,20 +267,20 @@ confused_book(spellbook)
 struct obj *spellbook;
 {
 	boolean gone = FALSE;
-
+	
 	if (!rn2(3) && spellbook->otyp != SPE_BOOK_OF_THE_DEAD) {
-	    spellbook->in_use = TRUE;	/* in case called from learn */
-	    pline(
-	"Being confused you have difficulties in controlling your actions.");
-	    display_nhwindow(WIN_MESSAGE, FALSE);
-	    You("accidentally tear the spellbook to pieces.");
-	    if (!objects[spellbook->otyp].oc_name_known &&
-		!objects[spellbook->otyp].oc_uname)
-		docall(spellbook);
-	    useup(spellbook);
-	    gone = TRUE;
+		spellbook->in_use = TRUE;
+		pline("Being confused, you have difficulties in controlling your actions.");
+		display_nhwindow(WIN_MESSAGE, FALSE);
+		You("accidentally tear the spellbook to pieces.");
+	
+		if (!objects[spellbook->otyp].oc_name_known && !objects[spellbook->otyp].oc_uname)
+			docall(spellbook);
+	
+		useup(spellbook);
+		gone = TRUE;
 	} else {
-	    You("find yourself reading the %s line over and over again.",
+		You("find yourself reading the %s line over and over again.",
 		spellbook == book ? "next" : "first");
 	}
 	return gone;
@@ -487,20 +518,19 @@ learn()
 	 }
 	 return(0);
 	}
+	
 	Sprintf(splname, objects[booktype].oc_name_known ?
 			"\"%s\"" : "the \"%s\" spell",
 		OBJ_NAME(objects[booktype]));
+	
 	for (i = 0; i < MAXSPELL; i++)  {
 		if (spellid(i) == booktype)  {
-			if (book->spestudied > MAX_SPELL_STUDY) {
-			    pline("This spellbook is too faint to be read any more.");
-			    book->otyp = booktype = SPE_BLANK_PAPER;
-			} else if (spellknow(i) <= 1000) {
+			if (spellknow(i) <= KEEN) {
 			    Your("knowledge of %s is keener.", splname);
 			    incrnknow(i);
 			    book->spestudied++;
 			    exercise(A_WIS,TRUE);       /* extra study */
-			} else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+			} else {
 			    You("know %s quite well already.", splname);
 			    costly = FALSE;
 			}
@@ -520,20 +550,17 @@ learn()
 		}
 	}
 
-	if ((booktype = further_study(book->otyp)))
-	{
+	if ((booktype = further_study(book->otyp))) {
 		You("are able to apply the writings of the book to learn another spell.");
-		Sprintf(splname, objects[booktype].oc_name_known ?
-			"\"%s\"" : "the \"%s\" spell",
-			OBJ_NAME(objects[booktype]));
+		Sprintf(splname, objects[booktype].oc_name_known ? "\"%s\"" : "the \"%s\" spell", OBJ_NAME(objects[booktype]));
 		for (i = 0; i < MAXSPELL; i++)  {
 			if (spellid(i) == booktype)  {
-				if (spellknow(i) <= 1000) {
+				if (spellknow(i) <= KEEN) {
 					Your("knowledge of %s is keener.", splname);
 					incrnknow(i);
 					exercise(A_WIS, TRUE);       /* extra study */
 				}
-				else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+				else { /* 1000 < spellknow(i) <= KEEN */
 					You("know %s quite well already.", splname);
 				}
 				break;
@@ -549,14 +576,12 @@ learn()
 	}
 
 	if (i == MAXSPELL) impossible("Too many spells memorized!");
-
-	if (book->cursed) {	/* maybe a demon cursed it */
-	    if (cursed_book(book)) {
-		useup(book);
-		book = 0;
-		return 0;
-	    }
+	
+	if (book->spestudied > MAX_SPELL_STUDY) {
+		pline("This spellbook is too faint to be read any more.");
+		book->otyp = booktype = SPE_BLANK_PAPER;
 	}
+	
 	if (costly) check_unpaid(book);
 	book = 0;
 	return(0);
@@ -609,23 +634,21 @@ struct obj *spellbook;
 
 	if(spellbook->oartifact){ //this is the primary artifact-book check.
 		if(spellbook->oartifact != ART_BOOK_OF_INFINITE_SPELLS){
-			doparticularinvoke(spellbook);//there is a redundant check in the spell learning code
-			return 1;					//which should never be reached, and only catches books of secrets anyway.
+			doparticularinvoke(spellbook); //there is a redundant check in the spell learning code
+			return 1; //which should never be reached, and only catches books of secrets anyway.
 		} else {
 			int i;
 			boolean read_book = FALSE;
-			Sprintf(splname, objects[spellbook->ovar1].oc_name_known ?
-					"\"%s\"" : "the \"%s\" spell",
-				OBJ_NAME(objects[spellbook->ovar1]));
+			Sprintf(splname, objects[spellbook->ovar1].oc_name_known ? "\"%s\"" : "the \"%s\" spell", OBJ_NAME(objects[spellbook->ovar1]));
 			for (i = 0; i < MAXSPELL; i++)  {
 				if (spellid(i) == spellbook->ovar1)  {
-					pline("The endless pages of the book cover the material of a spellbook of %s in exhaustive detail.",OBJ_NAME(objects[spellbook->ovar1]));
-					if (spellknow(i) <= 1000) {
+					pline("The endless pages of the book cover the material of a spellbook of %s in exhaustive detail.", OBJ_NAME(objects[spellbook->ovar1]));
+					if (spellknow(i) <= KEEN) {
 						Your("knowledge of %s is keener.", splname);
 						incrnknow(i);
 						read_book = TRUE;
 						exercise(A_WIS,TRUE);       /* extra study */
-					} else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+					} else { /* 1000 < spellknow(i) <= KEEN */
 						You("know %s quite well already.", splname);
 					}
 					break;
@@ -642,18 +665,16 @@ struct obj *spellbook;
 			int booktype;
 			if ((booktype = further_study(spellbook->ovar1))){
 				You("understand the material thoroughly, and can see a way to cast another spell.");
-				Sprintf(splname, objects[booktype].oc_name_known ?
-					"\"%s\"" : "the \"%s\" spell",
-					OBJ_NAME(objects[booktype]));
+				Sprintf(splname, objects[booktype].oc_name_known ? "\"%s\"" : "the \"%s\" spell", OBJ_NAME(objects[booktype]));
 				for (i = 0; i < MAXSPELL; i++)  {
 					if (spellid(i) == booktype)  {
-						if (spellknow(i) <= 1000) {
+						if (spellknow(i) <= KEEN) {
 							Your("knowledge of %s is keener.", splname);
 							incrnknow(i);
 							exercise(A_WIS, TRUE);       /* extra study */
 							read_book = TRUE;
 						}
-						else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+						else { /* 1000 < spellknow(i) <= KEEN */
 							You("know %s quite well already.", splname);
 						}
 						break;
@@ -669,7 +690,7 @@ struct obj *spellbook;
 				}
 			}
 			if (read_book && !rn2(20)){
-				spellbook->ovar1 = rn2(SPE_BLANK_PAPER - SPE_DIG) + SPE_DIG;
+				spellbook->ovar1 = rn1(SPE_BLANK_PAPER - SPE_DIG, SPE_DIG);
 				pline("The endless pages of the book turn themselves. They settle on a section describing %s.", OBJ_NAME(objects[spellbook->ovar1]));
 			}
 			if (i == MAXSPELL) impossible("Too many spells memorized!");
@@ -677,41 +698,18 @@ struct obj *spellbook;
 		}
 	}
 
-	if (delay && !confused && spellbook == book &&
-		    /* handle the sequence: start reading, get interrupted,
-		       have book become erased somehow, resume reading it */
-		    booktype != SPE_BLANK_PAPER) {
+	if (delay && !confused && spellbook == book && booktype != SPE_BLANK_PAPER) {
+		/* handle the sequence: start reading, get interrupted, have book become erased somehow, resume reading it */
 		You("continue your efforts to memorize the spell.");
 	} else {
-		/* KMH -- Simplified this code */
 		if (booktype == SPE_BLANK_PAPER) {
 			pline("This spellbook is all blank.");
 			makeknown(booktype);
 			return(1);
 		}
-		switch (objects[booktype].oc_level) {
-		 case 1:
-		 case 2:
-			delay = -objects[booktype].oc_delay;
-			break;
-		 case 3:
-		 case 4:
-			delay = -(objects[booktype].oc_level - 1) *
-				objects[booktype].oc_delay;
-			break;
-		 case 5:
-		 case 6:
-			delay = -objects[booktype].oc_level *
-				objects[booktype].oc_delay;
-			break;
-		 case 7:
-			delay = -8 * objects[booktype].oc_delay;
-			break;
-		 default:
-			impossible("Unknown spellbook level %d, book %d;",
-				objects[booktype].oc_level, booktype);
-			return 0;
-		}
+		
+		delay = -10*objects[booktype].oc_delay;
+
 		RoSbook = doreadstudy("You open the spellbook.");
 		if(!RoSbook){
 			delay = 0;
@@ -724,67 +722,74 @@ struct obj *spellbook;
 				delay = 0;
 				return 0;
 			}
-		}		/* Books are often wiser than their readers (Rus.) */
+		}
+		
+		char qbuf[QBUFSZ];
+		Sprintf(qbuf, "You know \"%s\" quite well already. Try to refresh your memory anyway?", OBJ_NAME(objects[booktype]));
+		
+		for (int i = 0; i < MAXSPELL; i++)
+			if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n')
+				return 0;
+		
 		spellbook->in_use = TRUE;
-		if (!spellbook->blessed &&
-			!spellbook->oartifact && 
-		    spellbook->otyp != SPE_BOOK_OF_THE_DEAD) {
-		    if (spellbook->cursed) {
-				too_hard = TRUE;
-		    } else {
-			/* uncursed - chance to fail */
-			int read_ability = ACURR(A_INT) + 4 + u.ulevel/2
-			    + ((RoSbook == STUDY_WARD) ? 10 : 0)
-			    - 2*objects[booktype].oc_level
-			    + ((ublindf && ublindf->otyp == LENSES) ? 2 : 0);
+		
+		if (!spellbook->oartifact && spellbook->otyp != SPE_BOOK_OF_THE_DEAD) {
+			int read_ability = 4 + ACURR(A_INT) + u.ulevel/2 - 2*objects[booktype].oc_level;
+			if (RoSbook == STUDY_WARD) read_ability += 10;
+			if (spellbook->blessed) read_ability += 10;
+			if (spellbook->cursed) read_ability -= 10;
+			if (ublindf && ublindf->otyp == LENSES) read_ability += 2;
+			for (int spell = 0; spell < MAXSPELL; spell++)
+				if (spellid(spell) == booktype)
+					read_ability += 10 * spellknow(booktype)/KEEN; // if you already know it, you're more likely to succeed
+			
 			/* only wizards know if a spell is too difficult */
-			if ((Role_if(PM_WIZARD) || u.sealsActive&SEAL_PAIMON) && read_ability < 20 &&
-			    !confused) {
+			/* paimon makes you an honorary wizard */
+			if ((Role_if(PM_WIZARD) || u.sealsActive&SEAL_PAIMON) && read_ability < 20 && !confused) {
 			    char qbuf[QBUFSZ];
-			    Sprintf(qbuf,
-		      "This spellbook is %sdifficult to comprehend. Continue?",
-				    (read_ability < 12 ? "very " : ""));
+			    Sprintf(qbuf, "This spellbook is %sdifficult to comprehend. Continue?", (read_ability < 12 ? "very " : ""));
 			    if (yn(qbuf) != 'y') {
-				spellbook->in_use = FALSE;
-				return(1);
+					spellbook->in_use = FALSE;
+					return(1);
 			    }
 			}
 			/* its up to random luck now */
 			if (rnd(20) > read_ability) {
 			    too_hard = TRUE;
 			}
-		    }
 		}
 
 		if (too_hard) {
-		    boolean gone = cursed_book(spellbook);
-
-		    nomul(delay, "reading a book");			/* study time */
+			pline("These runes were just too much to comprehend.");
+		    make_confused(itimeout_incr(HConfusion, delay), TRUE);
 		    delay = 0;
+
+			boolean gone = cursed_book(spellbook);
+					    
 		    if(gone || !rn2(3)) {
-			if (!gone) pline_The("spellbook crumbles to dust!");
-			if (!objects[spellbook->otyp].oc_name_known &&
-				!objects[spellbook->otyp].oc_uname)
-			    docall(spellbook);
-			useup(spellbook);
-		    } else
-			spellbook->in_use = FALSE;
+				if (!gone) pline_The("spellbook crumbles to dust!");
+				if (!objects[spellbook->otyp].oc_name_known && !objects[spellbook->otyp].oc_uname)
+					docall(spellbook);
+				useup(spellbook);
+		    } else spellbook->in_use = FALSE;
+	
 		    return(1);
 		} else if (confused) {
-		    if (!confused_book(spellbook)) {
-			spellbook->in_use = FALSE;
-		    }
-		    nomul(delay, "reading a book");
+		    if (!confused_book(spellbook)) spellbook->in_use = FALSE;
+		    make_confused(itimeout_incr(HConfusion, delay), TRUE);
 		    delay = 0;
 		    return(1);
 		}
+		
 		spellbook->in_use = FALSE;
 
-		RoSbook == READ_SPELL ? 
-			You("begin to %s the runes.",
-				spellbook->otyp == SPE_BOOK_OF_THE_DEAD ? "recite" :
-				"memorize") 
-			: You("begin to study the ward.");
+		if (RoSbook == STUDY_WARD)
+			You("begin to study the ward.");
+		else if (spellbook->otyp == SPE_BOOK_OF_THE_DEAD)
+			You("begin to recite the runes.");
+		else
+			You("begin to memorize the runes.");
+			
 	}
 
 	book = spellbook;
@@ -4059,7 +4064,7 @@ int sx, sy;
 			//	newsym(tx, ty);
 			//}
 
-			if (mon = m_at(tx, ty))
+			if ((mon = m_at(tx, ty)))
 			{
 				if (resists_magm(mon)) {	/* match effect on player */ /* Nero says: huh? */
 					shieldeff(mon->mx, mon->my);
@@ -5867,7 +5872,7 @@ const char *prompt;
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
 
-	Sprintf(buf, "Read the spellbook or Study its wardings?");
+	Sprintf(buf, "Read the spellbook or study its wardings?");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	
 		Sprintf(buf, "Read spell");
