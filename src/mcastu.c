@@ -2063,13 +2063,13 @@ int tary;
 	}
 
 	/*debug*/
-	if (wizard) {
-		pline("[%s casting %s at %s]",
-			m_monnam(magr),
-			spellname[spell],
-			(mdef == &youmonst) ? "you" : mdef ? m_monnam(mdef) : "no one"
-			);
-	}
+	//if (wizard) {
+	//	pline("[%s casting %s at %s]",
+	//		m_monnam(magr),
+	//		spellname[spell],
+	//		(mdef == &youmonst) ? "you" : mdef ? m_monnam(mdef) : "no one"
+	//		);
+	//}
 
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
