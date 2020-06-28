@@ -1427,12 +1427,106 @@ unsigned int type;
 }
 
 
+const char * spellname[] =
+{
+	"dummyspell",
+	"PSI_BOLT",
+	"OPEN_WOUNDS",
+	"MAGIC_MISSILE",
+	"DRAIN_LIFE",
+	"ARROW_RAIN",
+	//5
+	"CONE_OF_COLD",
+	"LIGHTNING",
+	"LIGHTNING_BOLT",
+	"FIRE_PILLAR",
+	"GEYSER",
+	//10
+	"ACID_RAIN",
+	"ICE_STORM",
+	"HAIL_FLURY",
+	"SUMMON_MONS",
+	"SUMMON_DEVIL",
+	//15
+	"DEATH_TOUCH",
+	"CURE_SELF",
+	"MASS_CURE_CLOSE",
+	"MASS_CURE_FAR",
+	"RECOVER",
+	//20
+	"MAKE_VISIBLE",
+	"HASTE_SELF",
+	"STUN_YOU",
+	"CONFUSE_YOU",
+	"PARALYZE",
+	//25
+	"BLIND_YOU",
+	"SLEEP",
+	"DRAIN_ENERGY",
+	"WEAKEN_STATS",
+	"WEAKEN_YOU",
+	//30
+	"DESTRY_ARMR",
+	"DESTRY_WEPN",
+	"EVIL_EYE",
+	"CURSE_ITEMS",
+	"INSECTS",
+	//35
+	"RAISE_DEAD",
+	"SUMMON_ANGEL",
+	"SUMMON_ALIEN",
+	"SUMMON_YOUNG",
+	"PLAGUE",
+	//40
+	"PUNISH",
+	"AGGRAVATION",
+	"DISAPPEAR",
+	"DARKNESS",
+	"SUMMON_SPHERE",
+	//45
+	"MAKE_WEB",
+	"DROP_BOULDER",
+	"EARTHQUAKE",
+	"TURN_TO_STONE",
+	"NIGHTMARE",
+	//50
+	"FILTH",
+	"CLONE_WIZ",
+	"STRANGLE",
+	"MON_FIRA",
+	"MON_FIRAGA",
+	//55
+	"MON_BLIZZARA",
+	"MON_BLIZZAGA",
+	"MON_THUNDARA",
+	"MON_THUNDAGA",
+	"MON_FLARE",
+	//60
+	"MON_WARP",
+	"MON_POISON_GAS",
+	"MON_PROTECTION",
+	"SOLID_FOG",
+	"ACID_BLAST",
+	//65
+	"PRISMATIC_SPRAY",
+	"SILVER_RAYS",
+	"GOLDEN_WAVE",
+	"VULNERABILITY",
+	"MASS_HASTE",
+	//70
+	"MON_TIME_STOP",
+	"TIME_DUPLICATE",
+	"NAIL_TO_THE_SKY",
+	"STERILITY_CURSE"
+};
+
+
 /* xcasty()
  * 
  * Magr attempts to cast a monster spell at mdef, who they think is at (tarx, tary)
  * If !mdef or (tarx, tary) is (0,0), magr doesn't have a target and should use an undirected spell.
  * 
- * Returns MM_MISS if the spellcasting failed, taking time
+ * Returns MM_MISS if the spellcasting failed
  * 
  * Can handle any of uvm, mvm, mvu.
  *
@@ -1986,6 +2080,15 @@ int tary;
 		return MM_MISS;
 	}
 
+	/*debug*/
+	if (wizard) {
+		pline("[%s casting %s at %s]",
+			m_monnam(magr),
+			spellname[spell],
+			(mdef == &youmonst) ? "you" : mdef ? m_monnam(mdef) : "no one"
+			);
+	}
+
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	boolean malediction = (youdef && (magr->iswiz || (magr->data->msound == MS_NEMESIS && rn2(2))));
@@ -2461,12 +2564,16 @@ int tary;
 		}
 		else {
 			/* message */
+			char heshe[BUFSZ];
+			if (!youagr)
+				Strcpy(heshe, mhe(magr));	/* need to allocate a buffer for upstart to modify */
+
 			if (youagr)
 				pline("You're using the touch of death!");
-			else if (youdef || (mdef->mtame))
-				pline("Oh no, %s using the touch of death!", s_suffix(mhe(magr)));
-			else
-				pline("%s using the touch of death!", upstart(s_suffix(mhe(magr))));
+			else if (youdef || (canseemon(mdef) && mdef->mtame))
+				pline("Oh no, %s's using the touch of death!", heshe);
+			else if (canseemon(mdef))
+				pline("%s's using the touch of death!", upstart(heshe));
 
 			/* check resistance cases and do effects */
 			if (nonliving_mon(mdef) || is_demon(mdef->data)) {
@@ -3642,6 +3749,8 @@ int tary;
 					You("sense the arrival of %s.",
 					an(Hallucination ? rndmonnam() : "hostile fiend"));
 			}
+			else
+				return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
 			stop_occupation();
 		}
 		return MM_HIT;
@@ -3676,6 +3785,8 @@ int tary;
 					You("sense the arrival of %s.",
 					an(Hallucination ? rndmonnam() : "hostile angel"));
 			}
+			else
+				return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
 			stop_occupation();
 		}
 		return MM_HIT;
@@ -3719,6 +3830,8 @@ int tary;
 					You("sense the arrival of %s.",
 					an(Hallucination ? rndmonnam() : "alien"));
 			}
+			else
+				return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
 			stop_occupation();
 		}
 		return MM_HIT;
@@ -3761,6 +3874,8 @@ int tary;
 				else
 					You("sense the arrival of a monster!");
 			}
+			else
+				return cast_spell2(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
 			stop_occupation();
 		}
 		return MM_HIT;
@@ -4180,10 +4295,16 @@ int tary;
 			const char *hands;
 			boolean dofailmsg = FALSE;
 			hands = bimanual(otmp, mdef->data) ? makeplural(mbodypart(mdef, HAND)) : mbodypart(mdef, HAND);
-			if (otmp->oclass == WEAPON_CLASS && !Magic_res(mdef) && !otmp->oartifact && rn2(4)) {
+			if (otmp && otmp->oclass == WEAPON_CLASS && !Magic_res(mdef) && !otmp->oartifact && rn2(4)) {
 				if (otmp->spe > -7){
-					otmp->spe -= 1;
-					pline("Your %s has been damaged!", xname(otmp));
+					otmp->spe -= (youdef ? 1 : rnd(7));	/* it's a bother to you, but not much to monsters */
+					if (otmp->spe < -7)
+						otmp->spe = -7;
+
+					if (youdef)
+						pline("Your %s has been damaged!", xname(otmp));
+					else if (canseemon(mdef))
+						pline("%s weapon is damaged!", s_suffix(Monnam(mdef)));
 				}
 				else if (youdef && (rn2(3) && magr->data->maligntyp < 0) && !Hallucination) {
 					if (malediction)
@@ -4193,11 +4314,13 @@ int tary;
 					useup(otmp);
 				}
 				else {
-					pline("%s %s shape in %s %s.",
-						youdef ? "Your" : s_suffix(Monnam(mdef)),
-						aobjnam(otmp, "change"),
-						youdef ? "your" : s_suffix(mon_nam(mdef)),
-						hands);
+					if (youdef || youagr || canseemon(mdef)) {
+						pline("%s %s shape in %s %s.",
+							youdef ? "Your" : s_suffix(Monnam(mdef)),
+							aobjnam(otmp, "change"),
+							youdef ? "your" : s_suffix(mon_nam(mdef)),
+							hands);
+					}
 					poly_obj(otmp, BANANA);
 				}
 			}
@@ -4212,12 +4335,14 @@ int tary;
 						dropx(otmp);
 					}
 					else {
-						pline("%s %s knocked out of %s %s!",
-							s_suffix(Monnam(mdef)),
-							aobjnam(otmp, "are"),
-							s_suffix(mon_nam(mdef)),
-							hands
-							);
+						if (youagr || canseemon(mdef)) {
+							pline("%s %s knocked out of %s %s!",
+								s_suffix(Monnam(mdef)),
+								aobjnam(otmp, "are"),
+								s_suffix(mon_nam(mdef)),
+								hands
+								);
+						}
 						/* unwield their weapon and drop it -- all done in mdrop_obj */
 						mdrop_obj(mdef, otmp, TRUE);
 					}
@@ -4228,9 +4353,17 @@ int tary;
 
 			if (dofailmsg) {
 				if (youdef || canseemon(mdef)) {
-					pline("%s %s for a moment.",
-						youdef ? "Your" : s_suffix(Monnam(mdef)),
-						aobjnam(otmp, "shudder"));
+					if (otmp) {
+						pline("%s %s for a moment.",
+							youdef ? "Your" : s_suffix(Monnam(mdef)),
+							aobjnam(otmp, "shudder"));
+					}
+					else {
+						pline("%s %s shudder for a moment.",
+							youdef ? "Your" : s_suffix(Monnam(mdef)),
+							makeplural(mbodypart(mdef, HAND))
+							);
+					}
 				}
 			}
 			stop_occupation();
@@ -4741,20 +4874,23 @@ int tary;
 		return TRUE;
 
 	/* don't cast mass healing with no injured allies */
-	/* (oversight: does not check range nor line of sight to them) */
 	if ((spellnum == MASS_CURE_CLOSE || spellnum == MASS_CURE_FAR))
 	{
 		boolean friendly = (youagr || magr->mtame);
 		boolean peaceful = (!friendly && magr->mpeaceful);
 
 		/* heal you? */
-		if (friendly && (*hp(&youmonst) < *hpmax(&youmonst)))
+		if (friendly
+			&& (*hp(&youmonst) < *hpmax(&youmonst))
+			&& (dist2(tarx, tary, u.ux, u.uy) <= 3 * 3 + 1))
 			return FALSE;
 		
 		/* heal allies? */
 		for (tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if (((friendly && tmpm->mtame) || (peaceful == tmpm->mpeaceful && !tmpm->mtame))
-				&& !mm_aggression(magr, mdef)
+			if (((friendly && tmpm->mtame) || (peaceful == tmpm->mpeaceful && !tmpm->mtame && !friendly))
+				&& (tmpm != magr)
+				&& (dist2(tarx, tary, tmpm->mx, tmpm->my) <= 3 * 3 + 1)
+				&& (youagr || !mm_aggression(magr, tmpm))
 				&& (*hp(tmpm) < *hpmax(tmpm)))
 				return FALSE;
 		}
@@ -4767,7 +4903,6 @@ int tary;
 	}
 
 	/* don't cast mass protection/haste without provocation */
-	/* (oversight: does not always check range, and never line of sight) */
 	if (spellnum == MON_PROTECTION || spellnum == MASS_HASTE) {
 		/* you: always */
 		if (youagr)
@@ -4775,8 +4910,10 @@ int tary;
 		/* all: when injured */
 		if (*hp(magr) < *hpmax(magr))
 			return FALSE;
-		/* tame: if you're injured */
-		if (magr->mtame && (*hp(&youmonst) < *hpmax(&youmonst)))
+		/* tame: if you're injured and nearby */
+		if (magr->mtame
+			&& (*hp(&youmonst) < *hpmax(&youmonst))
+			&& (dist2(tarx, tary, tmpm->mx, tmpm->my) <= 3 * 3 + 1))
 			return FALSE;
 		/* all: if nearby ally injured, or enemy near */
 		for (tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -4799,9 +4936,21 @@ int tary;
 		&& (!youagr && !magr->mtame && magr->mpeaceful))
 		return TRUE;
 
+	/* the wiz won't use the following cleric-specific or otherwise weak spells */
+	if (!youagr && magr->iswiz && (
+		spellnum == SUMMON_SPHERE || spellnum == DARKNESS ||
+		spellnum == PUNISH || spellnum == INSECTS ||
+		spellnum == SUMMON_ANGEL || spellnum == DROP_BOULDER
+		))
+		return TRUE;
+
 //////////////////////////////////////////////////////////////////////////////////////
-// PART 3:  SPELLS ARE INEFFECTIVE IN THESE CASES, AND CASTERS WILL SOMETIMES CAST THEM ANYWAYS
+// PART 3:  SPELLS ARE INEFFECTIVE AGAINST MDEF IN THESE CASES, AND CASTERS WILL SOMETIMES CAST THEM ANYWAYS
 //////////////////////////////////////////////////////////////////////////////////////
+
+	/* if the spell is a buff spell, and therfore can have no target, we can cast it -- all further checks depend on defender */
+	if (is_buff_spell(spellnum))
+		return FALSE;
 
 	/* maybe cast the spell now, ignoring the checks in part 3 */
 	/* dependent on magr's level */
@@ -4900,13 +5049,6 @@ int tary;
 	/* make visible spell against visible creature */
 	if (!(youdef ? (HInvis&INTRINSIC) : mdef->minvis) && (
 		spellnum == MAKE_VISIBLE
-		))
-		return TRUE;
-	/* the wiz won't use the following cleric-specific or otherwise weak spells */
-	if (!youagr && magr->iswiz && (
-		spellnum == SUMMON_SPHERE || spellnum == DARKNESS ||
-		spellnum == PUNISH || spellnum == INSECTS ||
-		spellnum == SUMMON_ANGEL || spellnum == DROP_BOULDER
 		))
 		return TRUE;
 	/* don't destroy weapon if not wielding anything */

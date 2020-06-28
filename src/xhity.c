@@ -8015,6 +8015,11 @@ int vis;
 	else
 		can_target = FALSE;
 
+	if (can_target)
+		return xcasty2(magr, mdef, attk, tarx, tary);
+	else
+		return xcasty2(magr, (struct monst *)0, attk, 0, 0);
+
 	/* determine if magr and mdef are lined up (or magr thinks they are) */
 	/* also checks for direct friendly fire */
 	on_line = m_online(magr, mdef, tarx, tary, (youagr ? FALSE : (magr->mtame && !magr->mconf)), FALSE);

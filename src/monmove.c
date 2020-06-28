@@ -1748,12 +1748,12 @@ toofar:
 			    if (mtmp->mux==u.ux && mtmp->muy==u.uy && couldsee(mtmp->mx, mtmp->my) && !mtmp->mpeaceful && 
 					dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= BOLT_LIM*BOLT_LIM
 				){
-					if(castmu(mtmp, a, TRUE, TRUE)){
+					if (xcasty2(mtmp, &youmonst, a, mtmp->mux, mtmp->mux)){
 						tmp = 3;
 						// if(mdat->mtyp != PM_DEMOGORGON) break;
 					}
 			    } else {
-					if(castmu(mtmp, a, FALSE, FALSE)){
+					if (xcasty2(mtmp, (struct monst *)0, a, 0, 0)){
 						tmp = 3;
 						// if(mdat->mtyp != PM_DEMOGORGON) break;
 					}
