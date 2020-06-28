@@ -1240,15 +1240,9 @@ E void FDECL(mapglyph, (int, glyph_t *, int *, unsigned *, int, int));
 
 /* ### mcastu.c ### */
 
-E void FDECL(cursetxt, (struct monst *, BOOLEAN_P));
-E int FDECL(xcasty2, (struct monst *, struct monst *, struct attack *, int, int));
-E int FDECL(castmu, (struct monst *,struct attack *,BOOLEAN_P,BOOLEAN_P));
-E int FDECL(buzzmu, (struct monst *,struct attack *, int));
-E int FDECL(buzzmm, (struct monst *,struct monst *,struct attack *, int));
-E int FDECL(castmm, (struct monst *,struct monst *,struct attack *));
-E int FDECL(castum, (struct monst *,struct attack *));
-E int FDECL(cast_spell2, (struct monst *, struct monst *, struct attack *, int, int, int));
-E void FDECL(cast_spell, (struct monst *, int,int));
+E void FDECL(cursetxt, (struct monst *, struct monst *, boolean));
+E int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int, int));
+E int FDECL(cast_spell, (struct monst *, struct monst *, struct attack *, int, int, int));
 E int FDECL(needs_familiar, (struct monst *));
 
 /* ### minion.c ### */

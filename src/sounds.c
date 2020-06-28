@@ -1198,7 +1198,8 @@ asGuardian:
 			}
 			if(!mtmp->mpeaceful && mtmp->mux != 0){
 				make_stunned(HStun + mtmp->mhp/10, TRUE);
-				cast_spell(mtmp, 0, !rn2(4) ? SUMMON_ANGEL : SUMMON_MONS);
+				struct attack fakesummonspell = { AT_MAGC, AD_CLRC, 0, 6 };
+				cast_spell(mtmp, (struct monst *)0, &fakesummonspell, !rn2(4) ? SUMMON_ANGEL : SUMMON_MONS, 0, 0);
 			}
 			if(uwep && uwep->oartifact == ART_SINGING_SWORD){
 				uwep->ovar1 |= OHEARD_RALLY;
