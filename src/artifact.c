@@ -3130,6 +3130,11 @@ boolean * messaged;
 	if (oproperties)
 		oproperty_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
 
+	/* this didn't trigger spec_dbon_applies, but still needs to happen later */
+	if (dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON)
+		&& !Drain_res(mdef) && !otmp->oartifact && otmp->otyp != SPE_BLANK_PAPER && otmp->otyp != SPE_SECRETS)
+		spec_dbon_applies = TRUE;
+
 	/* EXTERNAL damage sources -- explosions and the like, primarily */
 	/* knockback effect */
 	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
@@ -4378,6 +4383,7 @@ boolean * messaged;
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************
 	*/
+
 	if (!spec_dbon_applies) {
 	    /* since damage bonus didn't apply, nothing more to do;  
 	       no further attacks have side-effects on inventory */
@@ -4438,7 +4444,8 @@ boolean * messaged;
 			// }
 		}
 	}
-	if (arti_attack_prop(otmp, ARTA_DRAIN)) {
+	if (arti_attack_prop(otmp, ARTA_DRAIN) ||
+		(dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON))) {
 		int dlife;
 		int leveldrain = 1;
 		/* message */
@@ -4492,10 +4499,21 @@ boolean * messaged;
 					mdef->m_lev--;
 				dlife -= *hpmax(mdef);
 			}
-			if (magr) {
-				*hp(magr) += dlife / 2;
-				if (*hp(magr) > *hpmax(magr))
-					*hp(magr) = *hpmax(magr);
+
+			/* gain from drain */
+
+			/* paimon drains into the book, not the attacker */
+			if (dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON)) {
+				if (otmp->spestudied>0)
+					otmp->spestudied--;
+			}
+			/* everything else turns the drain into life */
+			else {
+				if (magr) {
+					*hp(magr) += dlife / 2;
+					if (*hp(magr) > *hpmax(magr))
+						*hp(magr) = *hpmax(magr);
+				}
 			}
 			*truedmgptr += dlife;
 		}
