@@ -12645,7 +12645,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 		/* must come after all apply_hit_effects */
 		/* priests do extra damage with all artifacts */
-		if (artif_hit && !recursed && (youagr ? Role_switch : monsndx(magr->data)) == PM_PRIEST)
+		if (artif_hit && !recursed && magr && (youagr ? Role_switch : monsndx(magr->data)) == PM_PRIEST)
 			artidmg += d(1, mlev(magr));
 	}
 
