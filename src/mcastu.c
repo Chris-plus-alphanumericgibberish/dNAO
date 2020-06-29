@@ -5057,7 +5057,7 @@ int tary;
 		return TRUE;
 	/* don't destroy armor if target has no armor */
 	if (!some_armor(mdef) && (
-		spellname == DESTRY_ARMR
+		spellnum == DESTRY_ARMR
 		))
 		return TRUE;
 	/* make visible spell by spellcaster with see invisible. */
