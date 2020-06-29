@@ -644,9 +644,10 @@ int
 study_book(spellbook)
 struct obj *spellbook;
 {
-	register int	 booktype = spellbook->otyp;
+	register int booktype = spellbook->otyp;
 	register boolean confused = (Confusion != 0);
 	char splname[BUFSZ];
+	int spell;
 	boolean too_hard = FALSE;
 
 	if(spellbook->oartifact){ //this is the primary artifact-book check.
@@ -770,7 +771,7 @@ struct obj *spellbook;
 			if (spellbook->blessed) read_ability += 10;
 			if (spellbook->cursed) read_ability -= 10;
 			if (ublindf && ublindf->otyp == LENSES) read_ability += 2;
-			for (int spell = 0; spell < MAXSPELL; spell++)
+			for (spell = 0; spell < MAXSPELL; spell++)
 				if (spellid(spell) == booktype)
 					read_ability += 10 * spellknow(booktype)/KEEN; // if you already know it, you're more likely to succeed
 			
