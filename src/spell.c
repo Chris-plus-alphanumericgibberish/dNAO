@@ -157,8 +157,7 @@ char ilet;
 }
 
 /* TRUE: book should be destroyed by caller */
-STATIC_OVL boolean
-cursed_book(struct obj *bp){
+STATIC_OVL boolean cursed_book(struct obj *bp){
 	int lev = objects[bp->otyp].oc_level;
 
 	boolean was_in_use;
@@ -181,11 +180,11 @@ cursed_book(struct obj *bp){
 			}
 			else {
 				if (bp->blessed) {
-					pline_The("book glows brown.");
+					pline_The("book glows %s.", hcolor("brown"));
 					unbless(bp);
 				}
 				else {
-					pline_The("book glows %s.", NH_BLACK);
+					pline_The("book glows %s.", hcolor("black"));
 					curse(bp);
 				}
 				bp->bknown = TRUE;
@@ -246,6 +245,7 @@ cursed_book(struct obj *bp){
 			}
 			
 			if (Half_spell_damage) dmg = (dmg+1/2);
+			if (u.uvaul_duration) dmg = (dmg+1/2);
 			losehp(dmg, "exploding rune", KILLED_BY_AN);
 			
 			return TRUE;
@@ -262,10 +262,7 @@ cursed_book(struct obj *bp){
 }
 
 /* study while confused: returns TRUE if the book is destroyed */
-STATIC_OVL boolean
-confused_book(spellbook)
-struct obj *spellbook;
-{
+STATIC_OVL boolean confused_book(struct obj *spellbook){
 	boolean gone = FALSE;
 	
 	if (!rn2(3) && spellbook->otyp != SPE_BOOK_OF_THE_DEAD) {
@@ -284,6 +281,26 @@ struct obj *spellbook;
 		spellbook == book ? "next" : "first");
 	}
 	return gone;
+}
+
+/* study while confused: returns TRUE if the book is destroyed */
+STATIC_OVL void hallu_book(struct obj *spellbook){
+	switch(rn2(4)){
+		case 0:
+			if (!(ublindf && ublindf->otyp == LENSES)){
+				pline("Wait a minute, where are your reading glasses?");
+				break;
+			}
+		case 1:
+			pline("You have absolutely no clue what you just read, but you completely agree with every word.");
+			break;
+		case 2:
+			pline("Hm, the herb growing instructions in this book are fascinating.");
+			break;
+		case 3:
+			pline("The book contains a detailed recipe for blueberry muffins, complete with the author's signature.");
+			break;
+	}
 }
 
 /* special effects for The Book of the Dead */
@@ -735,6 +752,18 @@ struct obj *spellbook;
 		
 		spellbook->in_use = TRUE;
 		
+		// moved above because there's no reason to let you fail before the confused procs
+		if (confused) {
+		    if (!confused_book(spellbook)) spellbook->in_use = FALSE;
+		    delay = 0;
+		    return(1);
+		} else if (Hallucination) {
+		    hallu_book(spellbook);
+		    spellbook->in_use = FALSE;
+		    delay = 0;
+		    return(1);
+		}
+		
 		if (!spellbook->oartifact && spellbook->otyp != SPE_BOOK_OF_THE_DEAD) {
 			int read_ability = 4 + ACURR(A_INT) + u.ulevel/2 - 2*objects[booktype].oc_level;
 			if (RoSbook == STUDY_WARD) read_ability += 10;
@@ -776,12 +805,7 @@ struct obj *spellbook;
 		    } else spellbook->in_use = FALSE;
 	
 		    return(1);
-		} else if (confused) {
-		    if (!confused_book(spellbook)) spellbook->in_use = FALSE;
-		    make_confused(itimeout_incr(HConfusion, delay), TRUE);
-		    delay = 0;
-		    return(1);
-		}
+		}  
 		
 		spellbook->in_use = FALSE;
 
