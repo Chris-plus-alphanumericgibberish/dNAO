@@ -5487,16 +5487,16 @@ councilspirit(floorID)
 	int bindingPeriod = 5000, i;
 	long old_seal = u.spirit[CROWN_SPIRIT], new_seal = get_sealID(floorID);
 	
-	if(new_seal&int_spirits) u.intSpirits++;
-	else if(new_seal&wis_spirits) u.wisSpirits++;
 	
-	/* old crown spirit does not go on timeout */
+	/* Peacefully eject current crown spirit */
+	unbind(old_seal, FALSE);
+	/* it does not go on timeout */
 	u.sealTimeout[decode_sealID(old_seal)] = moves;
 
-	u.sealsActive &=~old_seal;
+	/* set standard bound-spirit things */
 	u.sealsActive |= new_seal;
-	u.spirit[CROWN_SPIRIT] = new_seal;
 	set_spirit_powers(new_seal);
+	u.spirit[CROWN_SPIRIT] = new_seal;
 	u.spiritT[CROWN_SPIRIT] = moves + bindingPeriod;
 	u.sealTimeout[floorID - FIRST_SEAL] = moves + bindingPeriod;
 
@@ -5506,6 +5506,12 @@ councilspirit(floorID)
 		u.uprops[spiritprops[i]].extrinsic |= W_SPIRIT;
 
 	/* but don't unrestrict skills -- player should have already bound to it */
+
+	/* add to spell-attribute count */
+	if (new_seal & wis_spirits)
+		u.wisSpirits++;
+	if (new_seal & int_spirits)
+		u.intSpirits++;	
 	
 	vision_full_recalc = 1;	/* visible monsters may have changed */
 	doredraw();
