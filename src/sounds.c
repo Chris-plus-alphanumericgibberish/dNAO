@@ -5194,6 +5194,7 @@ int floorID;
 		break;
 	case ALIGNMENT_THING:
 		propchain[i++] = AGGRAVATE_MONSTER;
+		propchain[i++] = POLYMORPH_CONTROL;
 		break;
 	case UNKNOWN_GOD:
 		break;
