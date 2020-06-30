@@ -21,9 +21,8 @@ STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL void FDECL(heal, (struct monst *, int));
-STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
-STATIC_DCL int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int));
+STATIC_DCL int FDECL(xcastmagicy, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
@@ -1158,7 +1157,7 @@ int tary;
 			if (pa->mtyp == PM_DEMOGORGON && !ranged && rn2(6) && !(youagr || magr->mflee))
 				continue;
 
-			result = xcasty(magr, mdef, attk, vis);
+			result = xcastmagicy(magr, mdef, attk, vis);
 
 			if (result) {
 				/* if the spell was successful, the defender may wake up (MM_MISS -> no spell cast, no chance to wake) */
@@ -7961,7 +7960,7 @@ boolean ranged;
 }
 
 int
-xcasty(magr, mdef, attk, vis)
+xcastmagicy(magr, mdef, attk, vis)
 struct monst * magr;
 struct monst * mdef;
 struct attack * attk;
@@ -7970,24 +7969,12 @@ int vis;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
-	struct permonst * pd = youdef ? youracedata : mdef->data;
-	boolean on_line;
 	boolean can_target;
-	boolean foundyou;
-	int newres;
 	int result = MM_MISS;
 	int distance;
 	int range;
 	int tarx = (youdef ? magr->mux : x(mdef));
 	int tary = (youdef ? magr->muy : y(mdef));
-	int dx = sgn(tarx - x(magr));
-	int dy = sgn(tary - y(magr));
-
-	/* cancelled monsters can't cast spells -- return early */
-	if (!youagr && magr->mcan) {
-		cursetxt(magr, FALSE);
-		return MM_MISS;
-	}
 
 	/* find distance between magr and mdef */
 	distance = dist2(
@@ -8016,152 +8003,10 @@ int vis;
 	else
 		can_target = FALSE;
 
-	/* determine if magr and mdef are lined up (or magr thinks they are) */
-	/* also checks for direct friendly fire */
-	on_line = m_online(magr, mdef, tarx, tary, (youagr ? FALSE : (magr->mtame && !magr->mconf)), FALSE);
-
-	/* determine if monster is actually aiming at player, if youdef */
-	if (youdef && tarx == u.ux && tary == u.uy)
-		foundyou = TRUE;
+	if (can_target)
+		result = xcasty(magr, mdef, attk, tarx, tary);
 	else
-		foundyou = FALSE;
-
-	/* Non-standard (and non-star???) spell types */
-	if (attk->adtyp != AD_SPEL &&
-		attk->adtyp != AD_CLRC &&
-		attk->adtyp != AD_PSON &&
-		attk->adtyp != AD_STAR)
-	{
-		/* needs a target */
-		if (can_target) {
-			if (distance <= 2) {
-				/* melee magic */
-				/* currently part of castum (and variants) */
-				if (youdef)
-					newres = castmu(magr, attk, TRUE, foundyou);
-				else if (youagr)
-					newres = castum(mdef, attk);
-				else
-					newres = castmm(magr, mdef, attk);
-				/* confirm result */
-				switch (newres)
-				{
-				case 0:	/* unsuccessful spell */
-					result = MM_MISS;
-					break;
-				case 1:	/* successful spell */
-					result = MM_HIT;
-					break;
-				case 2:	/* (m) target died */
-					result = MM_DEF_DIED;
-					break;
-				}
-			}
-			else {
-				/* ranged magic */
-				/* requires being on a line */
-				if (on_line) {
-					/* ray spell */
-					int dmn;
-					int type = attk->adtyp;
-					/* get number of damage dice */
-					dmn = (min(MAX_BONUS_DICE, mlev(magr) / 3 + 1));
-					if (attk->damn)
-						dmn += attk->damn;
-					if (dmn < 1)
-						dmn = 1;
-					/* swap damage type as appropriate */
-					if (type == AD_RBRE || type == AD_RETR)
-					{
-						/* random between fire/cold/elec damage */
-						switch (rn2(3))
-						{
-						case 0: type = AD_FIRE; break;
-						case 1: type = AD_COLD; break;
-						case 2: type = AD_ELEC; break;
-						}
-					}
-					else if (type == AD_OONA) {
-						/* Oona */
-						type = u.oonaenergy;
-					}
-					/* message */
-					if (youdef) {
-						/* message */
-						if (vis&VIS_MAGR) {
-							pline("%s zaps you with a %s!", Monnam(magr),
-								flash_type(type, SPBOOK_CLASS));
-						}
-						else {
-							You("are zapped with a %s!",
-								flash_type(type, SPBOOK_CLASS));
-						}
-					}
-					else {
-						if (vis&VIS_MAGR) {
-							pline("%s %s %s with a %s!",
-								(youagr ? "You" : Monnam(magr)),
-								(youagr ? "zap" : "zaps"),
-								mon_nam(mdef),
-								flash_type(type, SPBOOK_CLASS)
-								);
-						}
-					}
-					/* interrupt player if zap will hit */
-					if (youdef && foundyou)
-						nomul(0, NULL);
-					/* do the zap */
-					/* FIXME: this prints a message even if you can't see magr or mdef */
-					buzz(type, SPBOOK_CLASS, FALSE, dmn,
-						x(magr), y(magr), dx, dy, 0, 0);
-					/* figure out who died */
-					/* unfortunately, cannot tell if either lifesaved */
-					if (*hp(mdef) < 0)
-						result |= MM_DEF_DIED;
-					if (*hp(magr) < 0)
-						result |= MM_AGR_DIED;
-
-				}
-				/* if not lined up, no casting */
-			}
-		}
-		/* needs a target */
-	}
-	/* standard spell damage types: AD_MAGC, AD_CLRC, AD_PSON, and for some reason, AD_STAR */
-	else {
-		/* farm out to old existing spellcasting functions */
-		if (youdef) {
-			/* can cast without actually having you in range */
-			newres = castmu(magr, attk, can_target, (foundyou&&can_target));
-		}
-		else if (youagr) {
-			/* you need to be in range */
-			if (can_target)
-				newres = castum(mdef, attk);
-			else
-				newres = 0;
-		}
-		else {
-			/* monsters need to be in range of each other */
-			if (can_target)
-				newres = castmm(magr, mdef, attk);
-			else
-				newres = 0;
-		}
-		/* confirm result */
-		switch (newres)
-		{
-		case 0:	/* unsuccessful spell */
-			result = MM_MISS;
-			break;
-		case 1:	/* successful spell */
-			result = MM_HIT;
-			break;
-		case 2:	/* (m) target died */
-			result = MM_DEF_DIED;
-			break;
-		}
-	}
+		result = xcasty(magr, (struct monst *)0, attk, 0, 0);
 
 	return result;
 }

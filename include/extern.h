@@ -1240,13 +1240,9 @@ E void FDECL(mapglyph, (int, glyph_t *, int *, unsigned *, int, int));
 
 /* ### mcastu.c ### */
 
-E void FDECL(cursetxt, (struct monst *, BOOLEAN_P));
-E int FDECL(castmu, (struct monst *,struct attack *,BOOLEAN_P,BOOLEAN_P));
-E int FDECL(buzzmu, (struct monst *,struct attack *, int));
-E int FDECL(buzzmm, (struct monst *,struct monst *,struct attack *, int));
-E int FDECL(castmm, (struct monst *,struct monst *,struct attack *));
-E int FDECL(castum, (struct monst *,struct attack *));
-E void FDECL(cast_spell, (struct monst *, int,int));
+E void FDECL(cursetxt, (struct monst *, struct monst *, boolean));
+E int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int, int));
+E int FDECL(cast_spell, (struct monst *, struct monst *, struct attack *, int, int, int));
 E int FDECL(needs_familiar, (struct monst *));
 
 /* ### minion.c ### */
@@ -3038,6 +3034,7 @@ E int FDECL(xmeleehity, (struct monst *, struct monst *, struct attack *, struct
 E struct attack * FDECL(getattk, (struct monst *, struct monst *, int *, int *, struct attack *, boolean, int *, int *));
 E boolean FDECL(slips_free, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xdamagey, (struct monst *, struct monst *, struct attack *, int));
+E int FDECL(xstoney, (struct monst *, struct monst *));
 E int FDECL(xmeleehurty, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, boolean, int, int, int, boolean));
 E void FDECL(getgazeinfo, (int, int, struct permonst *, boolean *, boolean *, boolean *));
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
