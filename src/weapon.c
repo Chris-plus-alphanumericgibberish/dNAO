@@ -881,10 +881,12 @@ int spec;
 	if (!mon) ptr = &mons[PM_HUMAN];
 	else ptr = youdefend ? youracedata : mon->data;
 
-	if (otyp == CREAM_PIE) return 0;
-	
+	if (otyp == CREAM_PIE)
+		return 0;
+	if (otmp->oclass == SPBOOK_CLASS)	/* assumes no spellbooks have actual damage dice */
+		return 1;
 	if (otmp->oartifact == ART_HOUCHOU)
-	        return 9999;
+	    return 9999;
 
 	/* grab the weapon dice from dmgval_core */
 	spe_mult = dmgval_core(&wdice, bigmonst(ptr), otmp, otyp);
