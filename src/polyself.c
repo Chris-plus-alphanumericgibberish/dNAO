@@ -2339,7 +2339,7 @@ dodroidmenu()
 			incntlet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(((uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_BASIC) || (!uwep && P_SKILL(P_MARTIAL_ARTS) >= P_BASIC)) && u.uen > 0 && !u.twoweap){
+	if(((uwep && (!is_lightsaber(uwep) || litsaber(uwep)) && P_SKILL(objects[uwep->otyp].oc_skill) >= P_BASIC) || ((!uwep || (is_lightsaber(uwep) && !litsaber(uwep))) && P_SKILL(P_MARTIAL_ARTS) >= P_BASIC)) && u.uen > 0 && !u.twoweap){
 		Sprintf(buf, "Combo");
 		incntlet = 'c';
 		any.a_int = ANDROID_COMBO;	/* must be non-zero */

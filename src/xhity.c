@@ -14846,7 +14846,7 @@ android_combo()
 	static struct attack finisher =		{ AT_CLAW, AD_PHYS,16, 8 };
 
 	/* unarmed */
-	if (!uwep){
+	if (!uwep || (is_lightsaber(uwep) && !litsaber(uwep))){
 		if (!getdir((char *)0))
 			return FALSE;
 		if (u.ustuck && u.uswallow)
