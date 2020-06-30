@@ -277,8 +277,10 @@ boolean forcecontrol;
 	boolean isvamp = (is_vampire(youracedata));
 	boolean hasmask = (ublindf && ublindf->otyp==MASK && polyok(&mons[ublindf->corpsenm]));
 	boolean was_floating = (Levitation || Flying);
+	boolean allow_selfrace_poly = (wizard || (u.specialSealsActive&SEAL_ALIGNMENT_THING));
+	boolean allow_nopoly_poly = wizard;
 
-	if(!Polymorph_control && !forcecontrol && !draconian && !iswere && !isvamp && !hasmask && !(u.specialSealsActive&SEAL_ALIGNMENT_THING)) {
+	if(!Polymorph_control && !forcecontrol && !draconian && !iswere && !isvamp && !hasmask) {
 	    if (rn2(20) > ACURR(A_CON)) {
 		You("%s", shudder_for_moment);
 		losehp(rnd(30), "system shock", KILLED_BY_AN);
@@ -298,7 +300,8 @@ boolean forcecontrol;
 			/* Note:  humans are illegal as monsters, but an
 			 * illegal monster forces newman(), which is what we
 			 * want if they specified a human.... */
-			else if (!polyok(&mons[mntmp]) && !your_race(&mons[mntmp]))
+			else if ((!allow_nopoly_poly && !polyok(&mons[mntmp])) ||
+					(!allow_selfrace_poly && !your_race(&mons[mntmp])))
 				You("cannot polymorph into that.");
 			else break;
 		} while(++tries < 5);
@@ -370,9 +373,9 @@ boolean forcecontrol;
 	/* The below polyok() fails either if everything is genocided, or if
 	 * we deliberately chose something illegal to force newman().
 	 */
-	if ( !polyok(&mons[mntmp]) || 
-		(!(u.specialSealsActive&SEAL_ALIGNMENT_THING) && !rn2(5)) || 
-		(!(u.specialSealsActive&SEAL_ALIGNMENT_THING) && your_race(&mons[mntmp]))
+	if ((!allow_nopoly_poly   && !polyok(&mons[mntmp])) ||
+		(!allow_selfrace_poly && !rn2(5)) ||
+		(!allow_selfrace_poly && your_race(&mons[mntmp]))
 	) newman();
 	else if(!polymon(mntmp)) return;
 
@@ -403,6 +406,9 @@ int	mntmp;
 	boolean could_pass_walls = Passes_walls;
 	int mlvl;
 	const char *s;
+
+	if (!polyok(&mons[mntmp]))
+		impossible("polyself into nopoly monster");
 
 	if (mvitals[mntmp].mvflags & G_GENOD && !In_quest(&u.uz)) {	/* allow G_EXTINCT */
 		You_feel("rather %s-ish.",mons[mntmp].mname);

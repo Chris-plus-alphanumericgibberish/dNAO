@@ -10754,15 +10754,17 @@ boolean * hittxt;
 	int result = MM_HIT;
 	int tmpplusdmg;
 	int tmptruedmg;
-	if (otmp->oartifact || otmp->oproperties) {		// artifact and oproperties
-		tmpplusdmg = tmptruedmg = 0;
-		result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
-		*plusdmgptr += tmpplusdmg;
-		*truedmgptr += tmptruedmg;
-		if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
-			return result;
-	}
-	if (spec_prop_otyp(otmp)) {	// otyp
+
+	/* artifact and oproperties and misc */
+	tmpplusdmg = tmptruedmg = 0;
+	result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
+	*plusdmgptr += tmpplusdmg;
+	*truedmgptr += tmptruedmg;
+	if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
+		return result;
+
+	/* otyp */
+	if (spec_prop_otyp(otmp)) {	
 		tmpplusdmg = tmptruedmg = 0;
 		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
 		*plusdmgptr += tmpplusdmg;
@@ -11110,7 +11112,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			/* beartraps are real attacks */
 			if (trap && melee && weapon)
 				valid_weapon_attack = TRUE;
+			/* Wand of Orcus makes for a melee weapon */
 			else if (melee && weapon && weapon->oartifact == ART_WAND_OF_ORCUS)
+				valid_weapon_attack = TRUE;
+			/* Spellbooks are weapons if you have Paimon bound */
+			else if (melee && weapon && weapon->oclass == SPBOOK_CLASS && youagr && u.sealsActive&SEAL_PAIMON)
 				valid_weapon_attack = TRUE;
 			else
 				invalid_weapon_attack = TRUE;
@@ -11829,13 +11835,6 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			basedmg = 1;
 			break;
 
-		case SPBOOK_CLASS:
-			if (youagr && (u.sealsActive&SEAL_PAIMON))
-				basedmg = rnd(spiritDsize()) + objects[weapon->otyp].oc_level;
-			else
-				basedmg = 1;	// assumes spellbooks weigh <200 aum
-			break;
-
 		default:
 			switch (weapon->otyp)
 			{
@@ -12398,6 +12397,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		/* Dahlver Nar gives bonus damage to unarmed punches */
 		if (youagr && unarmed_punch && u.specialSealsActive&SEAL_DAHLVER_NAR) {
 			bonsdmg += d(2, 6) + min(u.ulevel / 2, (u.uhpmax - u.uhp) / 10);
+		}
+		/* Paimon increases damage dealt with spellbooks significantly */
+		if (valid_weapon_attack && weapon && weapon->oclass == SPBOOK_CLASS && youagr && u.sealsActive&SEAL_PAIMON) {
+			bonsdmg += objects[weapon->otyp].oc_level + spiritDsize();
 		}
 		/* martial aids increase unarmed punching damage */
 		if (unarmed_punch && weapon && martial_aid(weapon)) {

@@ -4892,13 +4892,11 @@ int respect_timeout;
 				case SPELLMENU_DESCRIBE:
 					if (TRUE)
 					{
-						tmpwin = create_nhwindow(NHW_MENU);
-						start_menu(tmpwin);
+						tmpwin = create_nhwindow(NHW_TEXT);
 						Sprintf(buf, "%s %s", s_suffix(sealNames[decode_sealID(spirit_powers[p_no].owner) - FIRST_SEAL]),
 							spirit_powers[p_no].name);
 						putstr(tmpwin, 0, buf);
 						putstr(tmpwin, 0, spirit_powers[p_no].desc);
-						end_menu(tmpwin, (const char *)0);
 						display_nhwindow(tmpwin, FALSE);
 						destroy_nhwindow(tmpwin);
 					}
@@ -5617,7 +5615,7 @@ int spell;
 				cast_bon += 1;
 			if (uwep->oartifact && !(uwep->oartifact == ART_PEN_OF_THE_VOID && !(mvitals[PM_ACERERAK].died > 0)))
 				cast_bon *= 2;
-			splcaster -= cast_bon;
+			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 		
 		if(uwep && uwep->oartifact == ART_CALLANDOR && !flags.initgend){	// sa'angreal
