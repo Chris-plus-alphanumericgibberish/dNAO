@@ -4119,6 +4119,7 @@ int x, y;
 void
 goat_eat(otmp, yourinvent)
 struct obj *otmp;
+boolean yourinvent;
 {
     int value = 0;
 	struct permonst *ptr = &mons[otmp->corpsenm];
