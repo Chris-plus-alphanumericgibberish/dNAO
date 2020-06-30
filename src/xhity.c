@@ -15024,6 +15024,8 @@ android_combo()
 				if(!DEADMONSTER(mdef))
 					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 			}
+			if(attacked)
+				hurtle(u.dx, u.dy, 1, FALSE, FALSE);
 			n--;
 			u.uen--;
 			attacked = TRUE;
