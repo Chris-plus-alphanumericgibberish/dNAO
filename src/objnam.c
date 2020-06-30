@@ -289,7 +289,7 @@ struct obj *otmp;
 			}
 		} break;
 		case ART_ARKENSTONE: return Hallucination ? hcolor(0) : "rainbow-glinting sparking white";
-		case ART_FLUORITE_OCTAHEDRON: return Hallucination ? hcolor(0) : "burning cerulean";
+		case ART_FLUORITE_OCTAHEDRON: return Hallucination ? hcolor(0) : "burning cobalt";
 		case ART_HEART_OF_AHRIMAN: return Hallucination ? hcolor(0) : "pulsing and shimmering ruby";
 		case ART_GLITTERSTONE: return Hallucination ? hcolor(0) : "glittering gold";
 		
@@ -518,7 +518,7 @@ char *buf;
 {
 	char tmpbuf[PREFIX + 1];
 
-	if (obj->quan != 1L && !(obj->quan == 8 && obj->oartifact == ART_FLUORITE_OCTAHEDRON))
+	if (obj->quan != 1L)
 	{
 		Sprintf(tmpbuf, "%ld ", obj->quan);
 		Strcat(buf, tmpbuf);
@@ -1281,6 +1281,7 @@ boolean with_price;
 		}
 		else {
 			Strcat(buf, oart->desc);
+			if (obj->quan != 1L) Strcpy(buf, makeplural(buf)); // makes fluorite octet display right
 		}
 	}
 	else if (!obj_is_pname(obj))
@@ -1652,7 +1653,7 @@ boolean with_price;
 #endif
 		if (obj->quan != 1L) Strcpy(buf, makeplural(buf));
 	}//endif !obj_is_pname(obj)
-
+	
 	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)) {
 		if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
 			if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
@@ -2822,6 +2823,12 @@ const char *oldstr;
 		Strcpy(spot-3, "dra");
 		goto bottom;
 	}
+	
+	if (len >= 4 && (!strcmp(spot-3, " die"))) {
+		Strcpy(spot-3, " dice");
+		goto bottom;
+	}
+	
 	
 	/* note: -eau/-eaux (gateau, bordeau...) */
 	/* note: ox/oxen, VAX/VAXen, goose/geese */
