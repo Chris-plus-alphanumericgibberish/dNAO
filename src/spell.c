@@ -5585,7 +5585,7 @@ int spell;
 				cast_bon += 1;
 			if (uwep->oartifact && !(uwep->oartifact == ART_PEN_OF_THE_VOID && !(mvitals[PM_ACERERAK].died > 0)))
 				cast_bon *= 2;
-			splcaster -= cast_bon;
+			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 		
 		if(uwep && uwep->oartifact == ART_CALLANDOR && !flags.initgend){	// sa'angreal
