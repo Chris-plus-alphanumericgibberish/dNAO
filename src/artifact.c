@@ -254,7 +254,7 @@ hack_artifacts()
 	}
 	if (Role_if(PM_MONK)) {
 	    artilist[ART_GRANDMASTER_S_ROBE].alignment = alignmnt;
-	    artilist[ART_ROBE_OF_THE_ARCHMAGI].alignment = alignmnt;
+	    artilist[ART_ROBE_OF_THE_ARCHMAGI].alignment = A_CHAOTIC;
 	    artilist[ART_ROBE_OF_THE_ARCHMAGI].role = Role_switch;
 	}
 	if (urole.questarti) {
