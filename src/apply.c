@@ -4065,7 +4065,7 @@ use_grapple (obj)
 		pline_The("hook slices through the %s.", surface(cc.x, cc.y));
 	    else {
 		You("are yanked toward the %s!", surface(cc.x, cc.y));
-		hurtle(sgn(cc.x-u.ux), sgn(cc.y-u.uy), 1, FALSE);
+		hurtle(sgn(cc.x-u.ux), sgn(cc.y-u.uy), 1, FALSE, TRUE);
 		spoteffects(TRUE);
 	    }
 	    return (1);
@@ -4177,7 +4177,7 @@ use_crook (obj)
 				return (1);
 			} else {
 				You("pull yourself toward %s!", mon_nam(mtmp));
-				hurtle(sgn(mtmp->mx-u.ux), sgn(mtmp->my-u.uy), 1, FALSE);
+				hurtle(sgn(mtmp->mx-u.ux), sgn(mtmp->my-u.uy), 1, FALSE, TRUE);
 				spoteffects(TRUE);
 				return (1);
 			}
@@ -4197,7 +4197,7 @@ use_crook (obj)
 				return (1);
 			} else {
 				You("are yanked toward %s!", mon_nam(mtmp));
-				hurtle(sgn(mtmp->mx-u.ux), sgn(mtmp->my-u.uy), 1, FALSE);
+				hurtle(sgn(mtmp->mx-u.ux), sgn(mtmp->my-u.uy), 1, FALSE, TRUE);
 				spoteffects(TRUE);
 				return (1);
 			}
@@ -4217,7 +4217,7 @@ use_crook (obj)
 			// pline_The("hook slices through the %s.", surface(cc.x, cc.y));
 	    // else {
 			// You("are yanked toward the %s!", surface(cc.x, cc.y));
-			// hurtle(sgn(cc.x-u.ux), sgn(cc.y-u.uy), 1, FALSE);
+			// hurtle(sgn(cc.x-u.ux), sgn(cc.y-u.uy), 1, FALSE, TRUE);
 			// spoteffects(TRUE);
 	    // }
 	    // return (1);

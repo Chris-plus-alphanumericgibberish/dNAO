@@ -601,7 +601,7 @@ E void FDECL(impact_drop, (struct obj *,XCHAR_P,XCHAR_P,XCHAR_P));
 /* ### dothrow.c ### */
 
 E int FDECL(zap_raygun, (struct obj *,int, int));
-E void FDECL(hurtle, (int,int,int,BOOLEAN_P));
+E void FDECL(hurtle, (int,int,int,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(mhurtle, (struct monst *,int,int,int));
 E int FDECL(hero_breaks, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E int FDECL(breaks, (struct obj *,XCHAR_P,XCHAR_P));

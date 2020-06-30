@@ -689,7 +689,7 @@ dokick()
 		    range = (3*(int)mdat->cwt) / range;
 
 		    if(range < 1) range = 1;
-		    hurtle(-u.dx, -u.dy, range, TRUE);
+		    hurtle(-u.dx, -u.dy, range, TRUE, TRUE);
 		}
 		return(1);
 	}
@@ -709,7 +709,7 @@ dokick()
 	     || boulder_at(x,y))) {
 		if(kick_object(x, y)) {
 		    if(Weightless)
-			hurtle(-u.dx, -u.dy, 1, TRUE); /* assume it's light */
+			hurtle(-u.dx, -u.dy, 1, TRUE, TRUE); /* assume it's light */
 		    return(1);
 		}
 		goto ouch;
@@ -1203,7 +1203,7 @@ ouch:
 		    losehp(rnd(ACURR(A_CON) > 15 ? 3 : 5), kickstr(buf),
 			KILLED_BY);
 		    if(Weightless || Levitation)
-			hurtle(-u.dx, -u.dy, rn1(2,4), TRUE); /* assume it's heavy */
+			hurtle(-u.dx, -u.dy, rn1(2,4), TRUE, TRUE); /* assume it's heavy */
 		    return(1);
 		}
 		goto dumb;
@@ -1223,7 +1223,7 @@ dumb:
 			set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
 		}
 		if ((Weightless || Levitation) && rn2(2)) {
-		    hurtle(-u.dx, -u.dy, 1, TRUE);
+		    hurtle(-u.dx, -u.dy, 1, TRUE, TRUE);
 		    return 1;		/* you moved, so use up a turn */
 		}
 		return(0);

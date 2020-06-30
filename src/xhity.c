@@ -13575,7 +13575,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	/* hurtle mdef (player-inflicted only for now, as long as staggering strikes and jousting are) */
 	if (staggering_strike || jousting) {
 		if (youdef) {
-			hurtle(sgn(x(mdef)-x(magr)), sgn(y(mdef)-y(magr)), 1, TRUE);
+			hurtle(sgn(x(mdef)-x(magr)), sgn(y(mdef)-y(magr)), 1, TRUE, TRUE);
 			if (staggering_strike)
 				make_stunned(HStun + rnd(10), TRUE);
 		}
