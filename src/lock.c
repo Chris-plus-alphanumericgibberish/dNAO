@@ -325,8 +325,14 @@ forcedoor()      /* try to break/pry open a door */
 	    xlock.door->doormask = D_BROKEN;
 	else xlock.door->doormask = D_NODOOR;
 		unblock_point(u.ux+u.dx, u.uy+u.dy);
-	if (*in_rooms(u.ux+u.dx, u.uy+u.dy, SHOPBASE))
-	    add_damage(u.ux+u.dx, u.uy+u.dy, 0L);
+
+	if (*in_rooms(u.ux + u.dx, u.uy + u.dy, SHOPBASE) && (
+		(xlock.door->doormask == D_BROKEN) ||
+		(xlock.door->doormask == D_NODOOR)
+		)) {
+		add_damage(u.ux + u.dx, u.uy + u.dy, 400L);
+		pay_for_damage("break", FALSE);
+	}
 	newsym(u.ux+u.dx, u.uy+u.dy);
 	
 	exercise(A_STR, TRUE);
