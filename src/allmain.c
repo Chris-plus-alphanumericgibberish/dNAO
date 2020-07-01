@@ -1433,9 +1433,7 @@ karemade:
 					for(x = 1; x < COLNO; x++)
 						for(y = 0; y < ROWNO; y++){
 							if(IS_CORNER(levl[x][y].typ) && couldsee(x, y) && rn2(45) < u.ulevel){
-								flags.cth_attk=TRUE;//state machine stuff.
-								create_gas_cloud(x, y, 4, 30);
-								flags.cth_attk=FALSE;
+								create_gas_cloud(x, y, 4, 30, FALSE);
 								makemon(&mons[PM_HOUND_OF_TINDALOS], x, y, 0);
 							}
 						}
@@ -1890,9 +1888,7 @@ karemade:
 						lesshungry(steam);
 						u.ustove -= min(10,u.ustove);
 						u.uboiler-=steam;
-						flags.cth_attk=TRUE;//state machine stuff.
-						create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(3));
-						flags.cth_attk=FALSE;
+						create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(3), FALSE);
 						if(u.utemp && moves%2) u.utemp--;
 					} else {
 						if(u.utemp<=WARM || 
@@ -1902,9 +1898,7 @@ karemade:
 							(u.utemp>MELTING && u.utemp<=MELTED && !(moves%3)) ||
 							(u.utemp>MELTED && !(moves%4))
 						) u.utemp++;
-						flags.cth_attk=TRUE;//state machine stuff.
-						create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(6)); //Longer-lived smoke
-						flags.cth_attk=FALSE;
+						create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(6), FALSE); //Longer-lived smoke
 						u.ustove -= min(10,u.ustove);
 					}
 				} else if(u.utemp) u.utemp--;

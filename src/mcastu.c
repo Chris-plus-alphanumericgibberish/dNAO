@@ -3247,9 +3247,7 @@ int tary;
 			return MM_MISS;
 		}
 		else {
-			flags.cth_attk = TRUE;
-			create_gas_cloud(tarx, tary, rnd(3), rnd(3) + 1);
-			flags.cth_attk = FALSE;
+			create_gas_cloud(tarx, tary, rnd(3), rnd(3) + 1, youagr);
 			if (youdef)
 				stop_occupation();
 		}
@@ -3261,9 +3259,7 @@ int tary;
 			return MM_MISS;
 		}
 		else {
-			flags.cth_attk = TRUE;
-			create_fog_cloud(tarx, tary, 3, 8);
-			flags.cth_attk = FALSE;
+			create_fog_cloud(tarx, tary, 3, 8, youagr);
 			if (!youagr && magr->mtyp == PM_PLUMACH_RILMANI)
 				magr->mcan = 1;
 			if (youdef)
