@@ -221,7 +221,7 @@
 #define mindless(ptr)		(((ptr)->mflagst & MT_MINDLESS) != 0L || on_level(&valley_level, &u.uz))
 #define mindless_mon(mon)		(mon && mindless((mon)->data))
 #define intelligent_mon(mon)	(!mindless_mon(mon) && !is_animal((mon)->data))
-#define murderable_mon(mon)	(mon && intelligent_mon(mon) && always_peaceful((mon)->data) && !always_hostile_mon(mon))
+#define murderable_mon(mon)	((mon) && ((intelligent_mon(mon) && always_peaceful((mon)->data) && !always_hostile_mon(mon)) || (mon)->isshk || (mon)->isgd || (mon)->ispriest))
 
 #define slithy(ptr)			((ptr)->mflagsb & MB_SLITHY)
 #define humanoid_torso(ptr)	(((ptr)->mflagsb & MB_HUMANOID) != 0)
