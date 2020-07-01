@@ -518,7 +518,7 @@ char *buf;
 {
 	char tmpbuf[PREFIX + 1];
 
-	if (obj->quan != 1L)
+	if (obj->quan != 1L && !(obj->quan == 8 && obj->oartifact == ART_FLUORITE_OCTAHEDRON && !undiscovered_artifact(obj->oartifact)))
 	{
 		Sprintf(tmpbuf, "%ld ", obj->quan);
 		Strcat(buf, tmpbuf);
