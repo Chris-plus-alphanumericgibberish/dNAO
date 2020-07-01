@@ -2329,6 +2329,9 @@ const char *str;
 				)) ||
 				(strlen(str) >= 25 && (
 				!strncmp(str, "Candelabrum of Invocation", 25)
+				)) ||
+				(strlen(str) >= 12 && (
+				!strncmp(str, "Fluorite Oct", 12)
 				))
 				))
 				insert_the = TRUE;
@@ -2402,7 +2405,7 @@ register const char *verb;
 	 * if the result of xname(otmp) would be plural.  Don't bother
 	 * recomputing xname(otmp) at this time.
 	 */
-	if (!is_plural(otmp))
+	if (!is_plural(otmp) || (otmp->oartifact == ART_FLUORITE_OCTAHEDRON && otmp->quan == 8))
 	    return vtense((char *)0, verb);
 
 	buf = nextobuf();
