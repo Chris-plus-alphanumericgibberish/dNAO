@@ -1993,8 +1993,8 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		mdef->movement -= 3;
 	}
 	if (pen->ovar1&SEAL_AMON) {
-	    if (vis){ 
-			Sprintf(buf, "fiery");
+	    if (vis){
+			Sprintf(buf, "fiery"); // profane
 			and = TRUE;
 		}
 	    if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -2002,6 +2002,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 	    if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 	    if (youdefend && Slimed) burn_away_slime();
 	    if (youdefend && FrozenAir) melt_frozen_air();
+	    // if(youdef ? (hates_unholy(youracedata)) : (hates_unholy_mon(mdef))){
 		if(youdefend ? !Fire_resistance : !resists_fire(mdef)){
 			*dmgptr += d(dnum,4);
 		}
@@ -5314,8 +5315,7 @@ arti_invoke(obj)
                }
            }
            pline("A cloud of toxic smoke pours out!");
-           (void) create_gas_cloud(cc.x, cc.y, 3+bcsign(obj),
-                                           8+4*bcsign(obj));
+           (void) create_gas_cloud(cc.x, cc.y, 3+bcsign(obj), 8+4*bcsign(obj), TRUE);
 		   }
     break;
 	case BLESS:

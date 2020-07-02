@@ -1762,7 +1762,7 @@ int shotlimit;
 	}
 
 	/* The Fluorite Octet can be thrown (by hand) as many as wanted at once */
-	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON && !launcher)
+	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON && !launcher && !(youagr && Race_if(PM_ANDROID)))
 		multishot = shotlimit ? shotlimit : 8;
 
 	/* For most things, limit multishot to ammo supply */
@@ -2329,6 +2329,9 @@ boolean forcedestroy;
 	m_shot.s = (launcher) ? TRUE : FALSE;
 	m_shot.o = ammo->otyp;
 	m_shot.n = multishot;
+	
+	if (!shotlimit && ammo->oartifact == ART_FLUORITE_OCTAHEDRON)
+		shotlimit = m_shot.n;
 	
 	/* give a message if shooting more than one, or if player attempted to specify a count */
 	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON){

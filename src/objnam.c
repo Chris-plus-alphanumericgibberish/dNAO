@@ -289,7 +289,7 @@ struct obj *otmp;
 			}
 		} break;
 		case ART_ARKENSTONE: return Hallucination ? hcolor(0) : "rainbow-glinting sparking white";
-		case ART_FLUORITE_OCTAHEDRON: return Hallucination ? hcolor(0) : "burning cerulean";
+		case ART_FLUORITE_OCTAHEDRON: return Hallucination ? hcolor(0) : "burning cobalt";
 		case ART_HEART_OF_AHRIMAN: return Hallucination ? hcolor(0) : "pulsing and shimmering ruby";
 		case ART_GLITTERSTONE: return Hallucination ? hcolor(0) : "glittering gold";
 		
@@ -518,7 +518,7 @@ char *buf;
 {
 	char tmpbuf[PREFIX + 1];
 
-	if (obj->quan != 1L && !(obj->quan == 8 && obj->oartifact == ART_FLUORITE_OCTAHEDRON))
+	if (obj->quan != 1L && !(obj->quan == 8 && obj->oartifact == ART_FLUORITE_OCTAHEDRON && !undiscovered_artifact(obj->oartifact)))
 	{
 		Sprintf(tmpbuf, "%ld ", obj->quan);
 		Strcat(buf, tmpbuf);
@@ -602,8 +602,12 @@ char *buf;
 	/* gold pieces should not have their size described */
 	if (obj->otyp == GOLD_PIECE)
 		return;
-	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT && !undiscovered_artifact(obj->oartifact))
-							? artilist[obj->oartifact].size : MZ_MEDIUM))
+
+	int size = MZ_MEDIUM;
+	if (obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT && !(undiscovered_artifact(obj->oartifact) || iflags.artifact_descriptors))
+		size = artilist[obj->oartifact].size;
+	
+	if (obj->objsize != size)
 	{
 		switch (obj->objsize)
 		{
@@ -860,6 +864,156 @@ boolean dofull;
 }
 
 static void
+add_voidpen_words(obj, buf)
+struct obj *obj;
+char *buf;
+{
+	if (obj->oartifact != ART_PEN_OF_THE_VOID)
+		return;
+	
+	if(u.voidChime){
+		Strcat(buf, "ringing ");
+		return;
+	}
+
+	if (obj->ovar1&SEAL_AHAZU){
+		Strcat(buf, "hungry ");
+	}
+
+	if (obj->ovar1&SEAL_AMON){
+		if (obj->ovar1&SEAL_ENKI)
+			Strcat(buf, "steaming ");
+		else if (obj->ovar1&SEAL_BERITH)
+			Strcat(buf, "blood-crusted ");
+		else
+			Strcat(buf, "fiery ");
+	}
+
+	if (obj->ovar1&SEAL_ANDREALPHUS){
+		Strcat(buf, "curved ");
+	}
+
+	if (obj->ovar1&SEAL_ANDROMALIUS){
+		Strcat(buf, "mischievous ");
+	}
+
+	if (obj->ovar1&SEAL_ASTAROTH){
+		Strcat(buf, "crackling ");
+	}
+
+	if (obj->ovar1&SEAL_BALAM){
+		Strcat(buf, "freezing ");
+	}
+
+	if (obj->ovar1&SEAL_BERITH){
+		if (obj->ovar1&SEAL_ENKI)
+			Strcat(buf, "blood-dripping ");
+		else if (!(obj->ovar1&SEAL_AMON))
+			Strcat(buf, "blood-soaked ");
+	}
+
+	if (obj->ovar1&SEAL_BUER){
+		Strcat(buf, "lively ");
+	}
+
+	if (obj->ovar1&SEAL_CHUPOCLOPS){
+		Strcat(buf, "webbed ");
+	}
+
+	if (obj->ovar1&SEAL_DANTALION){
+		Strcat(buf, "jeweled ");
+	}
+
+	if (obj->ovar1&SEAL_ECHIDNA){
+		Strcat(buf, "caustic ");
+	}
+
+	if (obj->ovar1&SEAL_EDEN){
+		// covered in poisoned words
+	}
+
+	if (obj->ovar1&SEAL_ENKI){
+		if (obj->ovar1&SEAL_IRIS)
+			Strcat(buf, "dehydrated ");
+		else if (!(obj->ovar1&SEAL_AMON) && !(obj->ovar1&SEAL_BERITH))
+			Strcat(buf, "dripping ");
+	}
+
+	if (obj->ovar1&SEAL_EURYNOME){
+		Strcat(buf, "vengeful ");
+	}
+
+	if (obj->ovar1&SEAL_EVE){
+		Strcat(buf, "vine-wrapped ");
+	}
+
+	if (obj->ovar1&SEAL_FAFNIR){
+		Strcat(buf, "ruinous ");
+	}
+
+	if (obj->ovar1&SEAL_HUGINN_MUNINN){
+		Strcat(buf, "talon-shaped ");
+	}
+
+	if (obj->ovar1&SEAL_IRIS){
+		Strcat(buf, "rainbow ");
+	}
+
+	if (obj->ovar1&SEAL_JACK){
+		Strcat(buf, "glowing ");
+	}
+
+	if (obj->ovar1&SEAL_MALPHAS){
+		Strcat(buf, "crow-embossed ");
+	}
+
+	if (obj->ovar1&SEAL_MARIONETTE){
+		Strcat(buf, "wire-wrapped ");
+	}
+
+	if (obj->ovar1&SEAL_MOTHER){
+		Strcat(buf, "eye-marked ");
+	}
+
+	if (obj->ovar1&SEAL_NABERIUS){
+		Strcat(buf, "fanged ");
+	}
+
+	if (obj->ovar1&SEAL_ORTHOS){
+		Strcat(buf, "whistling ");
+	}
+
+	if (obj->ovar1&SEAL_OSE){
+		Strcat(buf, "murmuring ");
+	}
+
+	if (obj->ovar1&SEAL_OTIAX){
+		Strcat(buf, "mist-wreathed ");
+	}
+
+	if (obj->ovar1&SEAL_PAIMON){
+		Strcat(buf, "ink-stained ");
+	}
+
+	if (obj->ovar1&SEAL_SHIRO){
+		Strcat(buf, "distinctive ");
+	}
+
+	if (obj->ovar1&SEAL_SIMURGH){
+		Strcat(buf, "feathered ");
+	}
+
+	if (obj->ovar1&SEAL_TENEBROUS){
+		Strcat(buf, "shadowed ");
+	}
+
+	if (obj->ovar1&SEAL_YMIR){
+		// covered in poisoned words
+	}
+
+}
+
+static void
 add_enchantment_number(obj, buf)
 struct obj *obj;
 char *buf;
@@ -884,6 +1038,15 @@ char *buf;
 	 * which is handled elsewhere */
 	if (obj->otyp == find_signet_ring())
 		return;
+	
+	boolean show_poison = iflags.artifact_descriptors || undiscovered_artifact(obj->oartifact);
+	if (show_poison){
+		if (arti_poisoned(obj) && obj->oartifact != ART_WEBWEAVER_S_CROOK)
+			Strcat(buf, "poisoned ");
+	
+		if (arti_silvered(obj))
+			Strcat(buf, "silvered ");
+	}
 	if (obj->opoisoned){
 		if (obj->opoisoned & OPOISON_BASIC) Strcat(buf, "poisoned ");
 		if (obj->opoisoned & OPOISON_FILTH) Strcat(buf, "filth-crusted ");
@@ -1144,7 +1307,7 @@ char *buf;
 	/* gold pieces should not have their material described, it's in their name */
 	if(obj->otyp == GOLD_PIECE)
 		return;
-	if (obj->oartifact && !undiscovered_artifact(obj->oartifact) && artilist[obj->oartifact].material != MT_DEFAULT){
+	if (obj->oartifact && !iflags.artifact_descriptors && !undiscovered_artifact(obj->oartifact) && artilist[obj->oartifact].material != MT_DEFAULT){
 		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
 			return;
@@ -1262,6 +1425,7 @@ boolean with_price;
 		if (dofull) add_grease_words(obj, buf);
 		if (dofull) add_enchantment_number(obj, buf);
 		add_properties_words(obj, buf, dofull);	// Note: more verbose for artifacts if dofull is true
+		if (iflags.artifact_descriptors && dofull) add_voidpen_words(obj, buf);
 		add_poison_words(obj, buf);
 		add_insight_words(obj, buf);
 		add_colours_words(obj, buf);
@@ -1281,6 +1445,7 @@ boolean with_price;
 		}
 		else {
 			Strcat(buf, oart->desc);
+			if (obj->quan != 1L) Strcpy(buf, makeplural(buf)); // makes fluorite octet display right
 		}
 	}
 	else if (!obj_is_pname(obj))
@@ -1652,7 +1817,7 @@ boolean with_price;
 #endif
 		if (obj->quan != 1L) Strcpy(buf, makeplural(buf));
 	}//endif !obj_is_pname(obj)
-
+	
 	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)) {
 		if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
 			if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
@@ -2328,6 +2493,9 @@ const char *str;
 				)) ||
 				(strlen(str) >= 25 && (
 				!strncmp(str, "Candelabrum of Invocation", 25)
+				)) ||
+				(strlen(str) >= 12 && (
+				!strncmp(str, "Fluorite Oct", 12)
 				))
 				))
 				insert_the = TRUE;
@@ -2401,7 +2569,7 @@ register const char *verb;
 	 * if the result of xname(otmp) would be plural.  Don't bother
 	 * recomputing xname(otmp) at this time.
 	 */
-	if (!is_plural(otmp))
+	if (!is_plural(otmp) || (otmp->oartifact == ART_FLUORITE_OCTAHEDRON && otmp->quan == 8))
 	    return vtense((char *)0, verb);
 
 	buf = nextobuf();
@@ -2475,6 +2643,7 @@ register const char *verb;
 			(*(spot-1) != 'u' && *(spot-1) != 's') &&
 			!((spot - subj) >= 5 && !strncmp(spot-4, "Chaos", 5))
 		) ||
+		((spot - subj) >= 5 && !strncmp(spot-4, "hedra", 5)) ||
 		((spot - subj) >= 4 && !strncmp(spot-3, "eeth", 4)) ||
 		((spot - subj) >= 3 && !strncmp(spot-3, "feet", 4)) ||
 		((spot - subj) >= 2 && !strncmp(spot-1, "ia", 2)) ||
@@ -2822,6 +2991,12 @@ const char *oldstr;
 		Strcpy(spot-3, "dra");
 		goto bottom;
 	}
+	
+	if (len >= 4 && (!strcmp(spot-3, " die"))) {
+		Strcpy(spot-3, " dice");
+		goto bottom;
+	}
+	
 	
 	/* note: -eau/-eaux (gateau, bordeau...) */
 	/* note: ox/oxen, VAX/VAXen, goose/geese */

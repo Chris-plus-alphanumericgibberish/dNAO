@@ -406,6 +406,9 @@ dodrink()
 	}
 	
 	otmp->in_use = TRUE;		/* you've opened the stopper */
+	if (otmp->oartifact)
+		otmp->in_use = FALSE;
+	
 
 #define POTION_OCCUPANT_CHANCE(n) (13 + 2*(n))	/* also in muse.c */
 
@@ -435,6 +438,9 @@ register struct obj *otmp;
 	int retval;
 
 	otmp->in_use = TRUE;
+	if (otmp->oartifact)
+		otmp->in_use = FALSE;
+	
 	nothing = unkn = 0;
 	if((retval = peffects(otmp)) >= 0) return(retval);
 
@@ -2593,6 +2599,9 @@ dodip()
 	  obj = otmp;
 	}
 	potion->in_use = TRUE;		/* assume it will be used up */
+	if (potion->oartifact)
+		potion->in_use = FALSE;
+	
 	if(potion->otyp == POT_WATER) {
 		boolean useeit = !Blind;
 		if (useeit) (void) Shk_Your(Your_buf, obj);
@@ -2845,7 +2854,8 @@ dodip()
 	if(is_poisonable(obj)) {
 	    if( (potion->otyp == POT_SICKNESS || 
 				(potion->otyp == POT_BLOOD && poisonous(&mons[potion->corpsenm]))) 
-			&& (!(obj->opoisoned & OPOISON_BASIC) || obj->otyp == VIPERWHIP)
+			&& (!(obj->opoisoned & OPOISON_BASIC || arti_poisoned(obj))
+	    		|| obj->otyp == VIPERWHIP)
 		){
 			char buf[BUFSZ];
 			if (potion->quan > 1L)
@@ -2918,7 +2928,8 @@ dodip()
 			obj->opoisoned = OPOISON_PARAL;
 			goto poof;
 	    } else if(potion->otyp == POT_STARLIGHT && obj->obj_material != SILVER &&
-	    		(!(obj->opoisoned & OPOISON_SILVER) || obj->otyp == VIPERWHIP)
+	    		(!(obj->opoisoned & OPOISON_SILVER || arti_silvered(obj))
+	    		|| obj->otyp == VIPERWHIP)
 	    	) {
 			char buf[BUFSZ];
 			if (potion->quan > 1L)

@@ -52,8 +52,6 @@ struct flag {
 	boolean  made_amulet;
 	boolean  makelev_closerooms;	/* allow rooms to be placed very close to each other, causing overlaps and merges*/
 	boolean  mon_moving;	/* monsters' turn to move */
-	boolean  cth_attk;		/* for use with stinking cloud, mark when 
-							 'thulhu makes a cloud sos the comp knows he did it */
 	boolean  drgn_brth;		/* for use with breath weapons, indicates that a dragon is breathing */
 	boolean  move;
 	boolean  mv;
@@ -332,6 +330,7 @@ struct instance_flags {
     boolean role_obj_names;
     boolean obscure_role_obj_names;
     boolean dnethack_start_text;
+    boolean artifact_descriptors;
     boolean dnethack_dungeon_colors;
 
 	int pokedex;	/* default monster stats to show in the pokedex */
