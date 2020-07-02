@@ -5255,7 +5255,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"help", "give a help message", dohelp, IFBURIED},
 	{"seetrap", "show the type of a trap", doidtrap, IFBURIED},
 	{"kick", "kick something", dokick, !IFBURIED},
-	{"look", "loot a box on the floor", dolook, IFBURIED},
+	{"look", "look at the floor beneath you", dolook, IFBURIED},
 	{"call", "call (name) a particular monster", do_naming_mname, IFBURIED},
 	{"callold", "call (name) a particular monster (vanilla)", do_mname, IFBURIED},
 	{"rest", "rest one move while doing nothing", donull, IFBURIED, !AUTOCOMPLETE, "waiting"},
