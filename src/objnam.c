@@ -602,8 +602,12 @@ char *buf;
 	/* gold pieces should not have their size described */
 	if (obj->otyp == GOLD_PIECE)
 		return;
-	if (obj->objsize != ((obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT && !undiscovered_artifact(obj->oartifact))
-							? artilist[obj->oartifact].size : MZ_MEDIUM))
+
+	int size = MZ_MEDIUM;
+	if (obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT && !(undiscovered_artifact(obj->oartifact) || iflags.artifact_descriptors))
+		size = artilist[obj->oartifact].size;
+	
+	if (obj->objsize != size)
 	{
 		switch (obj->objsize)
 		{
@@ -1035,13 +1039,16 @@ char *buf;
 	if (obj->otyp == find_signet_ring())
 		return;
 	
-	if (arti_poisoned(obj) && obj->oartifact != ART_WEBWEAVER_S_CROOK &&
-			(undiscovered_artifact(obj->oartifact) || obj->oartifact == ART_PEN_OF_THE_VOID))
-		Strcat(buf, "poisoned ");
+	boolean show_poison = iflags.artifact_descriptors ||
+							undiscovered_artifact(obj->oartifact) ||
+							obj->oartifact == ART_PEN_OF_THE_VOID;
+	if (show_poison){
+		if (arti_poisoned(obj) && obj->oartifact != ART_WEBWEAVER_S_CROOK)
+			Strcat(buf, "poisoned ");
 	
-	if (arti_silvered(obj) && (undiscovered_artifact(obj->oartifact) || obj->oartifact == ART_PEN_OF_THE_VOID))
-		Strcat(buf, "silvered ");
-	
+		if (arti_silvered(obj))
+			Strcat(buf, "silvered ");
+	}
 	if (obj->opoisoned){
 		if (obj->opoisoned & OPOISON_BASIC) Strcat(buf, "poisoned ");
 		if (obj->opoisoned & OPOISON_FILTH) Strcat(buf, "filth-crusted ");
@@ -1302,7 +1309,7 @@ char *buf;
 	/* gold pieces should not have their material described, it's in their name */
 	if(obj->otyp == GOLD_PIECE)
 		return;
-	if (obj->oartifact && !undiscovered_artifact(obj->oartifact) && artilist[obj->oartifact].material != MT_DEFAULT){
+	if (obj->oartifact && !iflags.artifact_descriptors && !undiscovered_artifact(obj->oartifact) && artilist[obj->oartifact].material != MT_DEFAULT){
 		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
 			return;
@@ -1420,7 +1427,7 @@ boolean with_price;
 		if (dofull) add_grease_words(obj, buf);
 		if (dofull) add_enchantment_number(obj, buf);
 		add_properties_words(obj, buf, dofull);	// Note: more verbose for artifacts if dofull is true
-		add_voidpen_words(obj, buf);
+		if (iflags.artifact_descriptors && dofull) add_voidpen_words(obj, buf);
 		add_poison_words(obj, buf);
 		add_insight_words(obj, buf);
 		add_colours_words(obj, buf);
