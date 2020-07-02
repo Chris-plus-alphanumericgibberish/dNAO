@@ -5314,8 +5314,7 @@ arti_invoke(obj)
                }
            }
            pline("A cloud of toxic smoke pours out!");
-           (void) create_gas_cloud(cc.x, cc.y, 3+bcsign(obj),
-                                           8+4*bcsign(obj));
+           (void) create_gas_cloud(cc.x, cc.y, 3+bcsign(obj), 8+4*bcsign(obj), TRUE);
 		   }
     break;
 	case BLESS:

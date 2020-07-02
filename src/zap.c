@@ -4795,10 +4795,8 @@ boolean *shopdamage;
 	}
 	else if (adtyp == AD_DRST) {
 		if(flags.drgn_brth){
-			flags.cth_attk=!yours;//state machine stuff.
-			create_gas_cloud(x, y, 1, 8);
-			flags.cth_attk=FALSE;
-			// (void) create_gas_cloud(x, y, 1, 8, rn1(20, 5));
+			create_gas_cloud(x, y, 1, 8, yours);
+			// (void) create_gas_cloud(x, y, 1, 8, rn1(20, 5), yours);
 		}
 	}
 	else if (adtyp == AD_ACID && levl[x][y].typ == IRONBARS && (flags.drgn_brth || !rn2(5))) {

@@ -2507,8 +2507,7 @@ struct obj	*sobj;
 		    You("smell rotten eggs.");
 		    return 0;
 		}
-		(void) create_gas_cloud(cc.x, cc.y, 3+bcsign(sobj),
-						8+4*bcsign(sobj));
+		(void) create_gas_cloud(cc.x, cc.y, 3+bcsign(sobj), 8+4*bcsign(sobj), TRUE);
 		break;
 	}
 	case SPE_ANTIMAGIC_SHIELD:

@@ -918,9 +918,10 @@ genericptr_t p2;
 }
 
 NhRegion *
-create_force_field(x, y, radius, ttl)
+create_force_field(x, y, radius, ttl, yours)
 xchar x, y;
 int radius, ttl;
+boolean yours
 {
     int i;
     NhRegion *ff;
@@ -941,7 +942,7 @@ int radius, ttl;
 	tmprect.hy--;
     }
     ff->ttl = ttl;
-    if (!in_mklev && !flags.mon_moving)
+    if (yours)
 		set_heros_fault(ff);		/* assume player has created it */
 	else clear_heros_fault(ff);
  /* ff->can_enter_f = enter_force_field; */
@@ -1040,10 +1041,11 @@ genericptr_t p2;
 }
 
 NhRegion *
-create_gas_cloud(x, y, radius, damage)
+create_gas_cloud(x, y, radius, damage, yours)
 xchar x, y;
 int radius;
 int damage;
+boolean yours;
 {
     NhRegion *cloud;
     int i, nrect;
@@ -1065,7 +1067,7 @@ int damage;
     cloud->ttl = rn1(3,4);
 	cloud->rx = x;
 	cloud->ry = y;
-    if (!in_mklev && !flags.mon_moving && !flags.cth_attk)
+	if (yours)
 		set_heros_fault(cloud);		/* assume player has created it */
 	else clear_heros_fault(cloud);
     cloud->inside_f = INSIDE_GAS_CLOUD;
@@ -1094,10 +1096,11 @@ genericptr_t p2;
 }
 
 NhRegion *
-create_fog_cloud(x, y, radius, damage)
+create_fog_cloud(x, y, radius, damage, yours)
 xchar x, y;
 int radius;
 int damage;
+boolean yours;
 {
     NhRegion *cloud;
     int i, nrect;
@@ -1119,7 +1122,7 @@ int damage;
     cloud->ttl = damage;
 	cloud->rx = x;
 	cloud->ry = y;
-    if (!in_mklev && !flags.mon_moving && !flags.cth_attk)
+	if (yours)
 		set_heros_fault(cloud);		/* assume player has created it */
 	else clear_heros_fault(cloud);
     cloud->inside_f = INSIDE_FOG_CLOUD;
