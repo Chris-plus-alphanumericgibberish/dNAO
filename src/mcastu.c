@@ -1732,7 +1732,7 @@ int tary;
 			return MM_MISS;
 		}
 	}
-	else if (dist2(x(magr), y(magr), tarx, tary) <= 2) {
+	else if (mdef && dist2(x(magr), y(magr), tarx, tary) <= 2 && tarx == x(mdef) && tary == y(mdef)) {
 		rangedspell = FALSE;
 	}
 	else {
@@ -4657,6 +4657,11 @@ int spellnum;
 	case MON_POISON_GAS:
 	case SOLID_FOG:
 	case EARTHQUAKE:
+	/* also directed attack spells */
+	case MAGIC_MISSILE:
+	case CONE_OF_COLD:
+	case LIGHTNING_BOLT:
+	case SLEEP:
 		return TRUE;
 	default:
 		break;
