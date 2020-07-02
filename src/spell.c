@@ -5539,10 +5539,10 @@ int spell;
 		
 		if (uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO
 			&& spell_skilltype(spellid(spell)) == P_ATTACK_SPELL
-			&& Race_if(PM_DROW) && strcmp(urole.ngod,"_Keptolo") && u.ualign.record >= 20
+			&& Race_if(PM_DROW) && strcmp(urole.ngod,"_Keptolo") 
+			&& u.ualign.type == A_NEUTRAL && u.ualign.record >= 20
 		) {	// Bonus to attack spells, including granted drain life
 			splcaster -= urole.spelarmr;
-			pline("test");
 		}
 
 		if (uwep->otyp == KHAKKHARA) {	// a priestly channeling tool
