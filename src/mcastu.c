@@ -2195,7 +2195,7 @@ int tary;
 
 	case DRAIN_LIFE: 
 		/* similar to player spell "drain life", but only works at close range */
-		if (distmin(x(magr), y(magr), tarx, tary) < 2) {
+		if (dist2(x(magr), y(magr), tarx, tary) <= 2) {
 			/* note: magic resistance doesn't protect against "drain life" spell */
 			if (Drain_res(mdef)) {
 				shieldeff(x(mdef), y(mdef));
@@ -4463,7 +4463,7 @@ int tary;
 			impossible("curse items with no target?");
 			return MM_MISS;
 		}
-		else {
+		else if (dist2(x(magr), y(magr), tarx, tary) <= 24) {
 			if (youdef) {
 				if (rndcurse())
 					You_feel("as if you need some help.");
@@ -4846,7 +4846,12 @@ int tary;
 
 	/* don't cast drain life, death touch if not in melee range */
 	if ((spellnum == DRAIN_LIFE || spellnum == DEATH_TOUCH)
-		&& !(distmin(x(magr), y(magr), tarx, tary) <= 2))
+		&& !(dist2(x(magr), y(magr), tarx, tary) <= 2))
+		return TRUE;
+
+	/* don't cast curse items from too far away */
+	if (spellnum == CURSE_ITEMS
+		&& !(dist2(x(magr), y(magr), tarx, tary) <= 24))
 		return TRUE;
 
 	/* don't cast haste self when already fast */
