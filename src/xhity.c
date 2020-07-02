@@ -11153,7 +11153,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			weapon->oartifact == ART_SILENCE_GLAIVE ||
 			weapon->oartifact == ART_HEARTCLEAVER ||
 			weapon->oartifact == ART_SOL_VALTIVA ||
-			weapon->oartifact == ART_DEATH_SPEAR_OF_VHAERUN ||
+			weapon->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||
 			weapon->oartifact == ART_SHADOWLOCK ||
 			weapon->oartifact == ART_PEN_OF_THE_VOID
 			) &&
