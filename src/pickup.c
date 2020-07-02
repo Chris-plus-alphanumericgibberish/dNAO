@@ -3285,7 +3285,7 @@ dotip()
                     nobj = cobj->nexthere;
                     if (!Is_container(cobj))
                         continue;
-                    Sprintf(qbuf, "You see here %s, tip it?", safe_qbuf(qbuf, sizeof("There is  here, tip it?"), doname(cobj), xname(cobj), "container"));
+                    Sprintf(qbuf, "You see here %s, tip it?", safe_qbuf(qbuf, sizeof("You see here , tip it?"), doname(cobj), xname(cobj), "container"));
                     c = ynq(qbuf);
                     if (c == 'q')
                         return 0;
