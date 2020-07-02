@@ -5063,7 +5063,7 @@ typfnd:
 	/* set material */
 	if(mat){
 		if (wizwish)
-			set_material(otmp, mat);
+			set_material_gm(otmp, mat);
 		else if (!otmp->oartifact || is_malleable_artifact(&artilist[otmp->oartifact]))
 			maybe_set_material(otmp, mat, TRUE);	// always limited by allowable random materials, but ignore normal probabilities
 		/* set gemtype, if specified and allowable*/

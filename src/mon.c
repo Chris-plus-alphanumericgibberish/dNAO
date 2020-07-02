@@ -289,7 +289,7 @@ register struct monst *mtmp;
 	if(mtmp->mfaction == CRYSTALFIED){
 		obj = mkcorpstat(STATUE, (struct monst *)0,
 			mdat, x, y, FALSE);
-		set_material(obj, GLASS);
+		set_material_gm(obj, GLASS);
 	} else if(mtmp->mfaction == TOMB_HERD) {
 		obj = mkcorpstat(STATUE, (struct monst *)0,
 			mdat, x, y, FALSE);
@@ -367,7 +367,7 @@ register struct monst *mtmp;
 	    case PM_MANTICORE:
 		if (mtmp->mrevived ? !rn2(6) : TRUE) {
 			obj = mksobj_at(SPIKE, x, y, TRUE, FALSE);
-			set_material(obj, BONE);
+			set_material_gm(obj, BONE);
 			obj->blessed = 0;
 			obj->cursed = 0;
 			obj->quan = d(4,6);
@@ -543,7 +543,7 @@ register struct monst *mtmp;
 			num = d(3,6);
 			while(num--){
 				obj = mksobj_at(PLATE_MAIL, x, y, TRUE, FALSE);
-				set_material(obj, COPPER);
+				set_material_gm(obj, COPPER);
 				obj->spe = 3;
 			}
 			num = d(2,4);
@@ -643,22 +643,22 @@ register struct monst *mtmp;
 			num = d(2,4);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 			}
 		break;
@@ -672,11 +672,11 @@ register struct monst *mtmp;
 			num = d(2,6);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -711,10 +711,10 @@ register struct monst *mtmp;
 		break;
 	    case PM_CRUCIFIED_ANDROID:
 			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			mon = makemon(&mons[PM_ANDROID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 			if (mon){
@@ -786,10 +786,10 @@ register struct monst *mtmp;
 		break;
 	    case PM_CRUCIFIED_GYNOID:
 			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			mon = makemon(&mons[PM_GYNOID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 			if (mon){
@@ -886,7 +886,7 @@ register struct monst *mtmp;
 		break;
 	    case PM_PARASITIZED_COMMANDER:
 			obj = mksobj_at(SHACKLES, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oproperties = OPROP_ELECW;
 			obj->oeroded = 1;
 			mon = makemon(&mons[PM_COMMANDER], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
@@ -921,11 +921,11 @@ register struct monst *mtmp;
 			num = d(2,6);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj = mksobj_at(KITE_SHIELD, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -933,7 +933,7 @@ register struct monst *mtmp;
 			num = d(6,6);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -972,7 +972,7 @@ register struct monst *mtmp;
 			num = d(2,4);
 			while(num--) {
 				obj = mksobj_at(QUARTERSTAFF, x, y, TRUE, FALSE);
-				set_material(obj, WOOD);
+				set_material_gm(obj, WOOD);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -980,7 +980,7 @@ register struct monst *mtmp;
 			num = d(3,4);
 			while(num--) {
 				obj = mksobj_at(QUARTERSTAFF, x, y, TRUE, FALSE);
-				set_material(obj, WOOD);
+				set_material_gm(obj, WOOD);
 				obj->spe = rnd(3);
 			}
 			mtmp->mnamelth = 0;
@@ -989,7 +989,7 @@ register struct monst *mtmp;
 			num = d(2,3);
 			while(num--) {
 				obj = mksobj_at(CLUB, x, y, TRUE, FALSE);
-				set_material(obj, WOOD);
+				set_material_gm(obj, WOOD);
 			}
 			obj = mkobj_at(SPBOOK_CLASS, x, y, FALSE);
 			mtmp->mnamelth = 0;
@@ -5143,7 +5143,7 @@ register struct monst *mdef;
 		   item-conferred attributes */
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
-		set_material(otmp, GOLD);
+		set_material_gm(otmp, GOLD);
 		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
@@ -5277,7 +5277,7 @@ register struct monst *mdef;
 		   item-conferred attributes */
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
-		set_material(otmp, GLASS);
+		set_material_gm(otmp, GLASS);
 		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;

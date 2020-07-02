@@ -1032,7 +1032,7 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 					/*Helm*/
 					otmp = mksobj(DROVEN_HELM, TRUE, FALSE);
-					set_material(otmp, SILVER);
+					set_material_gm(otmp, SILVER);
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					otmp->oerodeproof = TRUE;
@@ -1040,7 +1040,7 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 					/*boots*/
 					otmp = mksobj(SHOES, TRUE, FALSE);
-					set_material(otmp, SILVER);
+					set_material_gm(otmp, SILVER);
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					otmp->oerodeproof = TRUE;
@@ -6043,7 +6043,7 @@ register struct	monst	*mtmp;
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(SHIELD_OF_REFLECTION, TRUE, FALSE);
-				set_material(otmp, COPPER);
+				set_material_gm(otmp, COPPER);
 				otmp->oerodeproof = 1;
 				otmp->spe = 9;
 					otmp->objsize = MZ_HUGE;
