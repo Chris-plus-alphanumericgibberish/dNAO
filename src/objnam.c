@@ -4626,6 +4626,7 @@ typfnd:
 		typ == SPE_LIGHTNING_BOLT ||
 		typ == SPE_POISON_SPRAY ||
 		typ == SPE_LIGHTNING_STORM ||
+		typ == SPE_SECRETS ||
 		typ == SCR_CONSECRATION
 		))
 	{
