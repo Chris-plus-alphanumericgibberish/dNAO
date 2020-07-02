@@ -34,8 +34,9 @@ STATIC_PTR int FDECL(out_container,(struct obj *));
 STATIC_DCL long FDECL(mbag_item_gone, (int,struct obj *));
 STATIC_DCL int FDECL(menu_loot, (int, struct obj *, BOOLEAN_P));
 STATIC_DCL int FDECL(in_or_out_menu, (const char *,struct obj *, BOOLEAN_P, BOOLEAN_P));
+STATIC_DCL void FDECL(tipcontainer, (struct obj *));
 STATIC_DCL int FDECL(container_at, (int, int, BOOLEAN_P));
-STATIC_DCL boolean FDECL(able_to_loot, (int, int));
+STATIC_DCL boolean FDECL(able_to_loot, (int, int, boolean));
 STATIC_DCL boolean FDECL(mon_beside, (int, int));
 STATIC_DCL int FDECL(use_lightsaber, (struct obj *));
 STATIC_DCL char NDECL(pick_gemstone);
@@ -470,7 +471,7 @@ int what;		/* should be a long */
 	 * Start the actual pickup process.  This is split into two main
 	 * sections, the newer menu and the older "traditional" methods.
 	 * Automatic pickup has been split into its own menu-style routine
-	 * to make things less confusing.
+	 * to make things less confusin
 	 */
 	if (autopickup) {
 	    n = autopick(objchain, traverse_how, &pick_list);
@@ -566,8 +567,7 @@ menu_pickup:
 		if (!all_of_a_type) {
 		    char qbuf[BUFSZ];
 		    Sprintf(qbuf, "Pick up %s?",
-			safe_qbuf("", sizeof("Pick up ?"), doname(obj),
-					an(simple_typename(obj->otyp)), "something"));
+			safe_qbuf("", sizeof("Pick up ?"), doname(obj), an(simple_typename(obj->otyp)), "something"));
 		    switch ((obj->quan < 2L) ? ynaq(qbuf) : ynNaq(qbuf)) {
 		    case 'q': goto end_query;	/* out 2 levels */
 		    case 'n': continue;
@@ -1436,9 +1436,9 @@ boolean telekinesis;	/* not picking it up directly by hand */
 
 /*
  * Do the actual work of picking otmp from the floor or monster's interior
- * and putting it in the hero's inventory.  Take care of billing.  Return a
+ * and putting it in the hero's inventory.  Take care of billin  Return a
  * pointer to the object where otmp ends up.  This may be different
- * from otmp because of merging.
+ * from otmp because of mergin
  *
  * Gold never reaches this routine unless GOLDOBJ is defined.
  */
@@ -1541,9 +1541,11 @@ boolean countem;
 }
 
 STATIC_OVL boolean
-able_to_loot(x, y)
+able_to_loot(x, y, looting)
 int x, y;
+boolean looting;
 {
+	const char *verb = looting ? "loot" : "tip";
 	if (!can_reach_floor()) {
 #ifdef STEED
 		if (u.usteed && P_SKILL(P_RIDING) < P_BASIC)
@@ -1552,17 +1554,17 @@ int x, y;
 #endif
 			You("cannot reach the %s.", surface(x, y));
 		return FALSE;
-	} else if (is_pool(x, y, FALSE) || is_lava(x, y)) {
+	} else if ((is_pool(x, y, FALSE) && (looting || !Underwater)) || is_lava(x, y)) {
 		/* at present, can't loot in water even when Underwater */
-		You("cannot loot things that are deep in the %s.",
+		You("cannot %s things that are deep in the %s.", verb,
 		    is_lava(x, y) ? "lava" : "water");
 		return FALSE;
 	} else if (nolimbs(youracedata)) {
-		pline("Without limbs, you cannot loot anything.");
+		pline("Without limbs, you cannot %s anythin", verb);
 		return FALSE;
 	} else if (!freehand()) {
-		pline("Without a free %s, you cannot loot anything.",
-			body_part(HAND));
+		pline("Without a free %s, you cannot %s anythin",
+			body_part(HAND), verb);
 		return FALSE;
 	}
 	return TRUE;
@@ -1603,7 +1605,7 @@ boolean noit;
     }
     if (cobj->otyp == BAG_OF_TRICKS) {
 	int tmp;
-	You("carefully open the bag...");
+	You("carefully open the ba..");
 	pline("It develops a huge set of teeth and bites you!");
 	tmp = rnd(10);
 	if (Half_physical_damage) tmp = (tmp+1) / 2;
@@ -1648,7 +1650,7 @@ lootcont:
 
 	if (container_at(cc.x, cc.y, FALSE)) {
 
-		if (!able_to_loot(cc.x, cc.y)) return 0;
+		if (!able_to_loot(cc.x, cc.y, TRUE)) return 0;
 
 		for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
 			if (Is_container(cobj) || cobj->otyp == MASS_SHADOW_PISTOL || (is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC && cobj->otyp != KAMEREL_VAJRA)) num_cont++;
@@ -1701,8 +1703,7 @@ lootcont:
 				if (Is_container(cobj)) {
 					Sprintf(qbuf, "There is %s here, loot it?",
 						safe_qbuf("", sizeof("There is  here, loot it?"),
-							 doname(cobj), an(simple_typename(cobj->otyp)),
-							 "a container"));
+							 doname(cobj), an(simple_typename(cobj->otyp)), "a container"));
 					c = ynq(qbuf);
 					if (c == 'q') return (timepassed);
 					if (c == 'n') continue;
@@ -1714,7 +1715,7 @@ lootcont:
 					}
 					if (cobj->otyp == BAG_OF_TRICKS) {
 						int tmp;
-						You("carefully open the bag...");
+						You("carefully open the ba..");
 						pline("It develops a huge set of teeth and bites you!");
 						tmp = rnd(10);
 						if (Half_physical_damage) tmp = (tmp+1) / 2;
@@ -2056,7 +2057,7 @@ register struct obj *obj;
 		impossible("<in> no current_container?");
 		return 0;
 	} else if (obj == uball || obj == uchain) {
-		You("must be kidding.");
+		You("must be kiddin");
 		return 0;
 	} else if (obj == current_container) {
 		pline("That would be an interesting topological exercise.");
@@ -2067,7 +2068,7 @@ register struct obj *obj;
 		pline("That combination is a little too explosive.");
 		return 0;
 	} else if (obj->owornmask & (W_ARMOR | W_RING | W_AMUL | W_TOOL)) {
-		Norep("You cannot %s %s you are wearing.",
+		Norep("You cannot %s %s you are wearin",
 			Icebox ? "refrigerate" : "stash", something);
 		return 0;
 	} else if ((obj->otyp == LOADSTONE) && obj->cursed) {
@@ -2127,7 +2128,7 @@ register struct obj *obj;
 	     // *
 	     // * Timers attached to objects on the magic_chest_objs chain are
 	     // * considered global and therefore follow the hero from level to
-	     // * level.  If the timeout happens to be REVIVE_MON (e.g. a troll
+	     // * level.  If the timeout happens to be REVIVE_MON (e. a troll
 	     // * corpse), the revival code has no sensible place to put the
 	     // * revived monster and the corpse simply vanishes.  To prevent
 	     // * magic chests being exploited to get rid of reviving corpses,
@@ -2136,7 +2137,7 @@ register struct obj *obj;
 	     // */
 	    // if (report_timer(level, REVIVE_MON, obj)) {
 		// if (revive_corpse(obj, REVIVE_MONSTER)) {
-		    // /* Stop any multi-looting. */
+		    // /* Stop any multi-lootin */
 		    // nomul(-1, "startled by a reviving monster");
 		    // nomovemsg = "";
 		    // return -1;
@@ -2874,7 +2875,7 @@ register int held;
 		return used;
 	}
 	/* Count the number of contained objects. Sometimes toss objects if */
-	/* a cursed magic bag.						    */
+	/* a cursed magic ba						    */
 	if (cobj_is_magic_chest(obj))
 	    curr = magic_chest_objs[((int)obj->ovar1)%10];/*guard against polymorph related whoopies*/
 	else
@@ -3200,4 +3201,295 @@ boolean outokay, inokay;
     return n;
 }
 
-/*pickup.c*/
+static const char tippables[] = { ALL_CLASSES, TOOL_CLASS, 0 };
+
+
+/* #tip command -- empty container contents onto floor */
+int
+dotip()
+{
+    struct obj *cobj, *nobj;
+    coord cc;
+    int boxes;
+    char c, buf[BUFSZ], qbuf[BUFSZ];
+    const char *spillage = 0;
+
+    /*
+     * doesn't require free hands;
+     * limbs are needed to tip floor containers
+     */
+
+    /* at present, can only tip things at current spot, not adjacent ones */
+    cc.x = u.ux, cc.y = u.uy;
+
+    /* check floor container(s) first; at most one will be accessed */
+    if ((boxes = container_at(cc.x, cc.y, TRUE)) > 0) {
+        Sprintf(buf, "You can't tip %s while carrying so much.",
+                !flags.verbose ? "a container" : (boxes > 1) ? "one" : "it");
+        if (!check_capacity(buf) && able_to_loot(cc.x, cc.y, FALSE)) {
+            if (boxes > 1 && (flags.menu_style != MENU_TRADITIONAL
+                              || iflags.menu_requested)) {
+                /* use menu to pick a container to tip */
+                int n, i;
+                winid win;
+                anything any;
+                menu_item *pick_list = (menu_item *) 0;
+                struct obj dummyobj, *otmp;
+
+                any = zeroany;
+                win = create_nhwindow(NHW_MENU);
+                start_menu(win);
+
+                for (cobj = level.objects[cc.x][cc.y], i = 0; cobj;
+                     cobj = cobj->nexthere)
+                    if (Is_container(cobj)) {
+                        ++i;
+                        any.a_obj = cobj;
+                        add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE,
+                                 doname(cobj), MENU_UNSELECTED);
+                    }
+                if (invent) {
+                    any = zeroany;
+                    add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE,
+                             "", MENU_UNSELECTED);
+                    any.a_obj = &dummyobj;
+                    /* use 'i' for inventory unless there are so many
+                       containers that it's already being used */
+                    i = (i <= 'i' - 'a' && !iflags.lootabc) ? 'i' : 0;
+                    add_menu(win, NO_GLYPH, &any, i, 0, ATR_NONE,
+                             "tip something being carried", MENU_UNSELECTED);
+                }
+                end_menu(win, "Tip which container?");
+                n = select_menu(win, PICK_ONE, &pick_list);
+                destroy_nhwindow(win);
+                /*
+                 * Deal with quirk of preselected item in pick-one menu:
+                 * n ==  0 => picked preselected entry, toggling it off;
+                 * n ==  1 => accepted preselected choice via SPACE or RETURN;
+                 * n ==  2 => picked something other than preselected entry;
+                 * n == -1 => cancelled via ESC;
+                 */
+                otmp = (n <= 0) ? (struct obj *) 0 : pick_list[0].item.a_obj;
+                if (n > 1 && otmp == &dummyobj)
+                    otmp = pick_list[1].item.a_obj;
+                if (pick_list)
+                    free((genericptr_t) pick_list);
+                if (otmp && otmp != &dummyobj) {
+                    tipcontainer(otmp);
+                    return 1;
+                }
+                if (n == -1)
+                    return 0;
+                /* else pick-from-invent below */
+            } else {
+                for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = nobj) {
+                    nobj = cobj->nexthere;
+                    if (!Is_container(cobj))
+                        continue;
+                    c = ynq(safe_qbuf(qbuf, sizeof("There is  here, tip it?"),
+                                      doname(cobj), xname(cobj), "container"));
+                    if (c == 'q')
+                        return 0;
+                    if (c == 'n')
+                        continue;
+                    tipcontainer(cobj);
+                    /* can only tip one container at a time */
+                    return 1;
+                }
+            }
+        }
+    }
+
+    /* either no floor container(s) or couldn't tip one or didn't tip any */
+    cobj = getobj(tippables, "tip");
+    if (!cobj)
+        return 0;
+
+    /* normal case */
+    if (Is_container(cobj) || cobj->otyp == HORN_OF_PLENTY) {
+        tipcontainer(cobj);
+        return 1;
+    }
+    /* assorted other cases */
+    if (Is_candle(cobj) && cobj->lamplit) {
+        /* note "wax" even for tallow candles to avoid giving away info */
+        spillage = "wax";
+    } else if ((cobj->otyp == POT_OIL && cobj->lamplit)
+               || (cobj->otyp == OIL_LAMP && cobj->age != 0L)
+               || (cobj->otyp == MAGIC_LAMP && cobj->spe != 0)) {
+        spillage = "oil";
+        /* todo: reduce potion's remaining burn timer or oil lamp's fuel */
+    } else if (cobj->otyp == CAN_OF_GREASE && cobj->spe > 0) {
+        /* charged consumed below */
+        spillage = "grease";
+    } else if (cobj->otyp == FOOD_RATION || cobj->otyp == CRAM_RATION
+               || cobj->otyp == LEMBAS_WAFER) {
+        spillage = "crumbs";
+    } else if (cobj->oclass == VENOM_CLASS) {
+        spillage = "venom";
+    }
+    if (spillage) {
+        buf[0] = '\0';
+        if (is_pool(u.ux, u.uy, TRUE))
+            Sprintf(buf, " and gradually %s", vtense(spillage, "dissipate"));
+        else if (is_lava(u.ux, u.uy))
+            Sprintf(buf, " and immediately %s away",
+                    vtense(spillage, "burn"));
+        pline("Some %s %s onto the %s%s.", spillage,
+              vtense(spillage, "spill"), surface(u.ux, u.uy), buf);
+        /* shop usage message comes after the spill message */
+        if (cobj->otyp == CAN_OF_GREASE && cobj->spe > 0) {
+            consume_obj_charge(cobj, TRUE);
+        }
+        /* something [useless] happened */
+        return 1;
+    }
+    /* anything not covered yet */
+    if (cobj->oclass == POTION_CLASS) /* can't pour potions... */
+        pline_The("%s %s securely sealed.", xname(cobj), otense(cobj, "are"));
+    else if (cobj->otyp == STATUE)
+        pline("Nothing interesting happens.");
+    else
+        pline1(nothing_happens);
+    return 0;
+}
+
+static void
+tipcontainer(box)
+struct obj *box; /* or bag */
+{
+    xchar ox = u.ux, oy = u.uy; /* #tip only works at hero's location */
+    boolean empty_it = FALSE, maybeshopgoods;
+
+    /* box is either held or on floor at hero's spot; no need to check for
+       nesting; when held, we need to update its location to match hero's;
+       for floor, the coordinate updating is redundant */
+    if (get_obj_location(box, &ox, &oy, 0))
+        box->ox = ox, box->oy = oy;
+
+    /* Shop handling:  can't rely on the container's own unpaid
+       or no_charge status because contents might differ with it.
+       A carried container's contents will be flagged as unpaid
+       or not, as appropriate, and need no special handling here.
+       Items owned by the hero get sold to the shop without
+       confirmation as with other uncontrolled drops.  A floor
+       container's contents will be marked no_charge if owned by
+       hero, otherwise they're owned by the shop.  By passing
+       the contents through shop billing, they end up getting
+       treated the same as in the carried case.   We do so one
+       item at a time instead of doing whole container at once
+       to reduce the chance of exhausting shk's billing capacity. */
+    maybeshopgoods = !carried(box) && costly_spot(box->ox, box->oy);
+
+    /* caveat: this assumes that cknown, lknown, olocked, and otrapped
+       fields haven't been overloaded to mean something special for the
+       non-standard "container" horn of plenty */
+    if (box->olocked) {
+        pline("It's locked.");
+    } else if (box->otrapped) {
+        /* we're not reaching inside but we're still handling it... */
+        (void) chest_trap(box, HAND, FALSE);
+        /* even if the trap fails, you've used up this turn */
+        if (multi >= 0) { /* in case we didn't become paralyzed */
+            nomul(-1, "tipping a container");
+        }
+    } else if (box->otyp == BAG_OF_TRICKS || box->otyp == HORN_OF_PLENTY) {
+        boolean bag = box->otyp == BAG_OF_TRICKS;
+        int old_spe = box->spe, seen = 0;
+
+        if (maybeshopgoods && !box->no_charge)
+            addtobill(box, FALSE, FALSE, TRUE);
+        /* apply this bag/horn until empty or monster/object creation fails
+           (if the latter occurs, force the former...) */
+        do {
+            if (!(bag ? bagotricks(box, TRUE) : hornoplenty(box, TRUE))) 
+                break;
+        } while (box->spe > 0);
+
+        if (box->spe < old_spe) {
+            if (bag)
+                pline((seen == 0) ? "Nothing seems to happen."
+                                  : (seen == 1) ? "A monster appears."
+                                                : "Monsters appear!");
+            /* check_unpaid wants to see a non-zero charge count */
+            box->spe = old_spe;
+            check_unpaid_usage(box, TRUE);
+            box->spe = 0; /* empty */
+        }
+        if (maybeshopgoods && !box->no_charge)
+            subfrombill(box, shop_keeper(*in_rooms(ox, oy, SHOPBASE)));
+    } else if (box->otyp == BOX && box->spe == 1) {
+        char yourbuf[BUFSZ];
+
+        observe_quantum_cat(box, TRUE);
+        if (!Has_contents(box)) /* evidently a live cat came out */
+            /* container type of "large box" is inferred */
+            pline("%sbox is now empty.", Shk_Your(yourbuf, box));
+        else /* holds cat corpse */
+            empty_it = TRUE;
+    } else if (!Has_contents(box)) {
+        pline("It's empty.");
+    } else {
+        empty_it = TRUE;
+    }
+
+    if (empty_it) {
+        struct obj *otmp, *nobj;
+        boolean terse, highdrop = !can_reach_floor(),
+                altarizing = IS_ALTAR(levl[ox][oy].typ),
+                cursed_mbag = (Is_mbag(box) && box->cursed);
+        int held = carried(box);
+        long loss = 0L;
+
+        if (u.uswallow)
+            highdrop = altarizing = FALSE;
+        terse = !(highdrop || altarizing || costly_spot(box->ox, box->oy));
+        /* Terse formatting is
+         * "Objects spill out: obj1, obj2, obj3, ..., objN."
+         * If any other messages intervene between objects, we revert to
+         * "ObjK drops to the floor.", "ObjL drops to the floor.", &c.
+         */
+        pline("%s out%c",
+              box->cobj->nobj ? "Objects spill" : "An object spills",
+              terse ? ':' : '.');
+        for (otmp = box->cobj; otmp; otmp = nobj) {
+            nobj = otmp->nobj;
+            obj_extract_self(otmp);
+            otmp->ox = box->ox, otmp->oy = box->oy;
+
+            if (cursed_mbag && !rn2(13)) {
+                loss += mbag_item_gone(held, otmp);
+                /* abbreviated drop format is no longer appropriate */
+                terse = FALSE;
+                continue;
+            }
+
+            if (highdrop) {
+                /* might break or fall down stairs; handles altars itself */
+            	boolean wepgone = FALSE;
+				bhitpos.x = u.ux; bhitpos.y = u.uy;
+				otmp->ox = u.ux; otmp->oy = u.uy;
+				hitfloor2(&youmonst, otmp, (struct obj *)0, FALSE, FALSE, &wepgone);
+            } else {
+                if (altarizing) {
+                    doaltarobj(otmp);
+                } else if (!terse) {
+                    pline("%s %s to the %s.", Doname2(otmp),
+                          otense(otmp, "drop"), surface(ox, oy));
+                } else {
+                    pline("%s%c", doname(otmp), nobj ? ',' : '.');
+                }
+                dropy(otmp);
+            }
+        }
+        if (loss) /* magic bag lost some shop goods */
+            You("owe %ld %s for lost merchandise.", loss, currency(loss));
+        box->owt = weight(box); /* mbag_item_gone() doesn't update this */
+        if (held)
+            (void) encumber_msg();
+    }
+    if (carried(box)) /* box is now empty with cknown set */
+        update_inventory();
+}
+
+/*pickup.c*/ 

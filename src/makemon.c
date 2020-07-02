@@ -10205,27 +10205,33 @@ assign_sym:
 }
 
 /* release a monster from a bag of tricks */
-void
-bagotricks(bag)
+boolean
+bagotricks(bag, tipping)
 struct obj *bag;
+boolean tipping;
 {
-    if (!bag || bag->otyp != BAG_OF_TRICKS) {
-	impossible("bad bag o' tricks");
-    } else if (bag->spe < 1) {
-	pline1(nothing_happens);
-    } else {
 	boolean gotone = FALSE;
-	int cnt = 1;
+	if (!bag || bag->otyp != BAG_OF_TRICKS) {
+		impossible("bad bag o' tricks");
+	} else if (bag->spe < 1) {
+		if (tipping)
+			pline("It's empty.");
+		else
+			pline1(nothing_happens);
+	} else {
 
-	consume_obj_charge(bag, TRUE);
+		int cnt = 1;
+		consume_obj_charge(bag, !tipping);
 
-	if (!rn2(23)) cnt += rn1(7, 1);
-	while (cnt-- > 0) {
-	    if (makemon((struct permonst *)0, u.ux, u.uy, NO_MM_FLAGS))
-		gotone = TRUE;
-	}
-	if (gotone) makeknown(BAG_OF_TRICKS);
+		if (!rn2(23)) cnt += rn1(7, 1);
+		while (cnt-- > 0) {
+			if (makemon((struct permonst *)0, u.ux, u.uy, NO_MM_FLAGS))
+			gotone = TRUE;
+		}
+		if (gotone) makeknown(BAG_OF_TRICKS);
     }
+    
+    return gotone;
 }
 
 #endif /* OVLB */
