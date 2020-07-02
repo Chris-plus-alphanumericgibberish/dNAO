@@ -4559,7 +4559,7 @@ int tary;
 		else
 		{
 			struct trap * ttmp;
-			if (ttmp = maketrap(u.ux, u.uy, WEB)) {
+			if ((ttmp = maketrap(u.ux, u.uy, WEB))) {
 				You("become entangled in hundreds of %s!",
 					Hallucination ? "two-minute noodles" : "thick cobwebs");
 				dotrap(ttmp, NOWEBMSG);
@@ -4584,10 +4584,10 @@ boolean
 is_undirected_spell(spellnum)
 int spellnum;
 {
-	if (is_buff_spell(spellnum) && !(
+	if ((is_buff_spell(spellnum) && !(
 		spellnum == MASS_CURE_FAR ||
 		spellnum == MON_PROTECTION
-		) ||
+		)) ||
 		spellnum == RAISE_DEAD ||
 		spellnum == TIME_DUPLICATE ||
 		spellnum == CLONE_WIZ
