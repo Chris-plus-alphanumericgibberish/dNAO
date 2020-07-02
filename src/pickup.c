@@ -1436,9 +1436,9 @@ boolean telekinesis;	/* not picking it up directly by hand */
 
 /*
  * Do the actual work of picking otmp from the floor or monster's interior
- * and putting it in the hero's inventory.  Take care of billin  Return a
+ * and putting it in the hero's inventory.  Take care of billing.  Return a
  * pointer to the object where otmp ends up.  This may be different
- * from otmp because of mergin
+ * from otmp because of merging.
  *
  * Gold never reaches this routine unless GOLDOBJ is defined.
  */
@@ -1560,10 +1560,10 @@ boolean looting;
 		    is_lava(x, y) ? "lava" : "water");
 		return FALSE;
 	} else if (nolimbs(youracedata)) {
-		pline("Without limbs, you cannot %s anythin", verb);
+		pline("Without limbs, you cannot %s anything.", verb);
 		return FALSE;
 	} else if (!freehand()) {
-		pline("Without a free %s, you cannot %s anythin",
+		pline("Without a free %s, you cannot %s anything.",
 			body_part(HAND), verb);
 		return FALSE;
 	}
@@ -1605,7 +1605,7 @@ boolean noit;
     }
     if (cobj->otyp == BAG_OF_TRICKS) {
 	int tmp;
-	You("carefully open the ba..");
+	You("carefully open the bag...");
 	pline("It develops a huge set of teeth and bites you!");
 	tmp = rnd(10);
 	if (Half_physical_damage) tmp = (tmp+1) / 2;
@@ -2057,7 +2057,7 @@ register struct obj *obj;
 		impossible("<in> no current_container?");
 		return 0;
 	} else if (obj == uball || obj == uchain) {
-		You("must be kiddin");
+		You("must be kidding.");
 		return 0;
 	} else if (obj == current_container) {
 		pline("That would be an interesting topological exercise.");
@@ -2068,7 +2068,7 @@ register struct obj *obj;
 		pline("That combination is a little too explosive.");
 		return 0;
 	} else if (obj->owornmask & (W_ARMOR | W_RING | W_AMUL | W_TOOL)) {
-		Norep("You cannot %s %s you are wearin",
+		Norep("You cannot %s %s you are wearing.",
 			Icebox ? "refrigerate" : "stash", something);
 		return 0;
 	} else if ((obj->otyp == LOADSTONE) && obj->cursed) {
@@ -2128,7 +2128,7 @@ register struct obj *obj;
 	     // *
 	     // * Timers attached to objects on the magic_chest_objs chain are
 	     // * considered global and therefore follow the hero from level to
-	     // * level.  If the timeout happens to be REVIVE_MON (e. a troll
+	     // * level.  If the timeout happens to be REVIVE_MON (e.g. a troll
 	     // * corpse), the revival code has no sensible place to put the
 	     // * revived monster and the corpse simply vanishes.  To prevent
 	     // * magic chests being exploited to get rid of reviving corpses,
@@ -2137,7 +2137,7 @@ register struct obj *obj;
 	     // */
 	    // if (report_timer(level, REVIVE_MON, obj)) {
 		// if (revive_corpse(obj, REVIVE_MONSTER)) {
-		    // /* Stop any multi-lootin */
+		    // /* Stop any multi-looting. */
 		    // nomul(-1, "startled by a reviving monster");
 		    // nomovemsg = "";
 		    // return -1;
@@ -2874,8 +2874,7 @@ register int held;
 	    used = 1;
 		return used;
 	}
-	/* Count the number of contained objects. Sometimes toss objects if */
-	/* a cursed magic ba						    */
+	/* Count the number of contained objects. Sometimes toss objects if a cursed magic bag. */
 	if (cobj_is_magic_chest(obj))
 	    curr = magic_chest_objs[((int)obj->ovar1)%10];/*guard against polymorph related whoopies*/
 	else
@@ -3384,6 +3383,10 @@ struct obj *box; /* or bag */
     /* caveat: this assumes that cknown, lknown, olocked, and otrapped
        fields haven't been overloaded to mean something special for the
        non-standard "container" horn of plenty */
+    if (box->otyp == MAGIC_CHEST && box->obolted){
+    	pline("You can't tip something bolted down!");
+    	return;
+    }
     if (box->olocked) {
         pline("It's locked.");
     } else if (box->otrapped) {
@@ -3402,7 +3405,7 @@ struct obj *box; /* or bag */
         /* apply this bag/horn until empty or monster/object creation fails
            (if the latter occurs, force the former...) */
         do {
-            if (!(bag ? bagotricks(box, TRUE) : hornoplenty(box, TRUE))) 
+            if (!(bag ? bagotricks(box, TRUE, &seen) : hornoplenty(box, TRUE))) 
                 break;
         } while (box->spe > 0);
 
@@ -3457,7 +3460,14 @@ struct obj *box; /* or bag */
             obj_extract_self(otmp);
             otmp->ox = box->ox, otmp->oy = box->oy;
 
-            if (cursed_mbag && !rn2(13)) {
+			if (box->otyp == ICE_BOX){
+				if (!age_is_relative(otmp)) {
+					otmp->age = monstermoves - otmp->age; /* actual age */
+					if (otmp->otyp == CORPSE)
+						start_corpse_timeout(otmp);
+				}
+			}
+            else if (cursed_mbag && !rn2(13)) {
                 loss += mbag_item_gone(held, otmp);
                 /* abbreviated drop format is no longer appropriate */
                 terse = FALSE;

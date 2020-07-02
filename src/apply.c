@@ -6187,7 +6187,7 @@ doapply()
 		goto xit2; /* obj may have been destroyed */
 		break;
 	case BAG_OF_TRICKS:
-		bagotricks(obj, FALSE);
+		bagotricks(obj, FALSE, (int *) 0);
 		break;
 	case CAN_OF_GREASE:
 		use_grease(obj);

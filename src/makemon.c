@@ -10205,35 +10205,47 @@ assign_sym:
 }
 
 /* release a monster from a bag of tricks */
-boolean
-bagotricks(bag, tipping)
+int
+bagotricks(bag, tipping, seencount)
 struct obj *bag;
-boolean tipping;
+boolean tipping; /* caller emptying entire contents; affects shop handling */
+int *seencount;  /* secondary output */
 {
-	boolean gotone = FALSE;
+	int moncount = 0;
+
 	if (!bag || bag->otyp != BAG_OF_TRICKS) {
 		impossible("bad bag o' tricks");
 	} else if (bag->spe < 1) {
-		if (tipping)
-			pline("It's empty.");
-		else
-			pline1(nothing_happens);
+		/* if tipping known empty bag, give normal empty container message */
+		pline1(tipping ? "It's empty." : nothing_happens);
+		/* now known to be empty if sufficiently discovered */
 	} else {
+		struct monst *mtmp;
+		int creatcnt = 1, seecount = 0;
 
-		int cnt = 1;
-		consume_obj_charge(bag, !tipping);
+		consume_obj_charge(bag, TRUE);
 
-		if (!rn2(23)) cnt += rn1(7, 1);
-		while (cnt-- > 0) {
-			if (makemon((struct permonst *)0, u.ux, u.uy, NO_MM_FLAGS))
-			gotone = TRUE;
+		if (!rn2(23))
+			creatcnt += rnd(7);
+		do {
+			mtmp = makemon((struct permonst *) 0, u.ux, u.uy, NO_MM_FLAGS);
+			if (mtmp) {
+				++moncount;
+				if (canspotmon(mtmp))
+					++seecount;
+			}
+		} while (--creatcnt > 0);
+		if (seecount) {
+			if (seencount)
+				*seencount += seecount;
+			if (bag->dknown)
+				makeknown(BAG_OF_TRICKS);
+		} else if (!tipping) {
+			pline1(!moncount ? nothing_happens : "Nothing seems to happen.");
 		}
-		if (gotone) makeknown(BAG_OF_TRICKS);
-    }
-    
-    return gotone;
+	}
+	return moncount;
 }
-
 #endif /* OVLB */
 
 /*makemon.c*/
