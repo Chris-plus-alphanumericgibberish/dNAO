@@ -2121,7 +2121,6 @@ E boolean FDECL(m_online, (struct monst *, struct monst *, int, int, boolean, bo
 E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
 E boolean NDECL(android_combo);
 E boolean FDECL(umetgaze, (struct monst *));
-E boolean FDECL(mmetgaze, (struct monst *, struct monst *));
 E int NDECL(dothrow);
 E int NDECL(dofire);
 E int FDECL(mthrow, (struct monst *, struct obj *, struct obj *, int, int, boolean));
