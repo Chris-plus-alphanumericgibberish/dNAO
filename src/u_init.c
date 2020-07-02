@@ -604,6 +604,11 @@ static struct trobj ExtraBook[] = {
 	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 1 },
 	{ 0, 0, 0, 0, 0 }
 };
+static struct trobj CarvingTools[] = {
+	{ CLUB, 0, WEAPON_CLASS, 1, 0 },
+	{ KNIFE, 0, WEAPON_CLASS, 1, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj GnomishHat[] = {
 	{ GNOMISH_POINTY_HAT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ 0, 0, 0, 0, 0 }
@@ -720,7 +725,6 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_ORC,	RING_MAIL,		ORCISH_RING_MAIL      },
     { PM_ORC,	CHAIN_MAIL,		ORCISH_CHAIN_MAIL     },
     // Dwarf substitutions
-    { PM_DWARF,	KNIFE,				DAGGER	      		  },
     { PM_DWARF, SPEAR,				DWARVISH_SPEAR	      },
     { PM_DWARF, SHORT_SWORD,		DWARVISH_SHORT_SWORD  },
     { PM_DWARF, HELMET,				DWARVISH_HELM    },
@@ -2593,20 +2597,13 @@ u_init()
 	    knows_object(DWARVISH_MITHRIL_COAT);
 	    knows_object(DWARVISH_CLOAK);
 	    knows_object(DWARVISH_ROUNDSHIELD);
-		otmp = mksobj(CLUB, TRUE, FALSE);
-		otmp->spe = otmp->cursed = otmp->blessed = 0;
-		if(Role_if(PM_EXILE)) otmp->dknown = otmp->rknown = otmp->sknown = 1;
-		else otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
-		addinv(otmp);
-		otmp = mksobj(KNIFE, TRUE, FALSE);
-		otmp->spe = otmp->cursed = otmp->blessed = 0;
-		if(Role_if(PM_EXILE)) otmp->dknown = otmp->rknown = otmp->sknown = 1;
-		else otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
-		addinv(otmp);
+		/* Dwarves know all carved wards */
 		u.wardsknown |= WARD_TOUSTEFNA;
 		u.wardsknown |= WARD_DREPRUN;
 		u.wardsknown |= WARD_VEIOISTAFUR;
 		u.wardsknown |= WARD_THJOFASTAFUR;
+		/* And get the tools to carve one */
+		ini_inv(CarvingTools);
 	}break;
 
 	case PM_GNOME:
