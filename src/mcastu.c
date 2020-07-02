@@ -2544,7 +2544,7 @@ int tary;
 			/* no death magic -- substitute psi bolt */
 			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
 		}
-		else {
+		else if (dist2(x(magr), y(magr), tarx, tary) <= 2) {
 			/* message */
 			char heshe[BUFSZ];
 			if (!youagr)
@@ -4844,8 +4844,8 @@ int tary;
 		&& !clearline)
 		return TRUE;
 
-	/* don't cast drain life if not in range */
-	if (spellnum == DRAIN_LIFE
+	/* don't cast drain life, death touch if not in melee range */
+	if ((spellnum == DRAIN_LIFE || spellnum == DEATH_TOUCH)
 		&& !(distmin(x(magr), y(magr), tarx, tary) <= 2))
 		return TRUE;
 
