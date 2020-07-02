@@ -484,7 +484,8 @@ register struct monst *mtmp;
 			      w2 = rn2(2) ? DAGGER : KNIFE;
 				  (void)mongets(mtmp, CROSSBOW);
 				  m_initthrow(mtmp, CROSSBOW_BOLT, 10);
-				  (void)mongets(mtmp, rnd(WAN_LIGHTNING-WAN_CREATE_MONSTER)+WAN_CREATE_MONSTER);
+				  if ((otmp = mongets(mtmp, rnd(WAN_LIGHTNING - WAN_CREATE_MONSTER) + WAN_CREATE_MONSTER)))
+					  otmp->recharged = rnd(7);
 				  (void)mongets(mtmp, SCALE_MAIL);
 			break;
 			case PM_LEGION_DEVIL_SERGEANT:
@@ -492,8 +493,10 @@ register struct monst *mtmp;
 			      w2 = rn2(2) ? DAGGER : KNIFE;
 				  (void)mongets(mtmp, CROSSBOW);
 				  m_initthrow(mtmp, CROSSBOW_BOLT, 20);
-				  (void)mongets(mtmp, rnd_attack_wand(mtmp));
-				  (void)mongets(mtmp, rnd(WAN_LIGHTNING-WAN_CREATE_MONSTER)+WAN_CREATE_MONSTER);
+				  if ((otmp = mongets(mtmp, rnd_attack_wand(mtmp))))
+					  otmp->recharged = rnd(7);
+				  if ((otmp = mongets(mtmp, rnd(WAN_LIGHTNING - WAN_CREATE_MONSTER) + WAN_CREATE_MONSTER)))
+					  otmp->recharged = rnd(7);
 				  (void)mongets(mtmp, SCALE_MAIL);
 			break;
 			case PM_LEGION_DEVIL_CAPTAIN:
@@ -501,9 +504,12 @@ register struct monst *mtmp;
 			      w2 = rn2(2) ? DAGGER : KNIFE;
 				  (void)mongets(mtmp, BOW);
 				  m_initthrow(mtmp, ARROW, 30);
-				  (void)mongets(mtmp, rnd_attack_wand(mtmp));
-				  (void)mongets(mtmp, rnd_utility_wand(mtmp));
-				  (void)mongets(mtmp, rnd(WAN_LIGHTNING-WAN_CREATE_MONSTER)+WAN_CREATE_MONSTER);
+				  if ((otmp = mongets(mtmp, rnd_attack_wand(mtmp))))
+					  otmp->recharged = rnd(7);
+				  if ((otmp = mongets(mtmp, rnd_utility_wand(mtmp))))
+					  otmp->recharged = rnd(7);
+				  if ((otmp = mongets(mtmp, rnd(WAN_LIGHTNING - WAN_CREATE_MONSTER) + WAN_CREATE_MONSTER)))
+					  otmp->recharged = rnd(7);
 				  (void)mongets(mtmp, SCALE_MAIL);
 			break;
 			case PM_GLASYA:
