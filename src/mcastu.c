@@ -1732,7 +1732,7 @@ int tary;
 			return MM_MISS;
 		}
 	}
-	else if (dist2(x(magr), y(magr), tarx, tary) <= 2) {
+	else if (mdef && dist2(x(magr), y(magr), tarx, tary) <= 2 && tarx == x(mdef) && tary == y(mdef)) {
 		rangedspell = FALSE;
 	}
 	else {
@@ -2195,7 +2195,7 @@ int tary;
 
 	case DRAIN_LIFE: 
 		/* similar to player spell "drain life", but only works at close range */
-		if (distmin(x(magr), y(magr), tarx, tary) < 2) {
+		if (dist2(x(magr), y(magr), tarx, tary) <= 2) {
 			/* note: magic resistance doesn't protect against "drain life" spell */
 			if (Drain_res(mdef)) {
 				shieldeff(x(mdef), y(mdef));
@@ -2544,7 +2544,7 @@ int tary;
 			/* no death magic -- substitute psi bolt */
 			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
 		}
-		else {
+		else if (dist2(x(magr), y(magr), tarx, tary) <= 2) {
 			/* message */
 			char heshe[BUFSZ];
 			if (!youagr)
@@ -4459,7 +4459,7 @@ int tary;
 			impossible("curse items with no target?");
 			return MM_MISS;
 		}
-		else {
+		else if (dist2(x(magr), y(magr), tarx, tary) <= 24) {
 			if (youdef) {
 				if (rndcurse())
 					You_feel("as if you need some help.");
@@ -4559,7 +4559,7 @@ int tary;
 		else
 		{
 			struct trap * ttmp;
-			if (ttmp = maketrap(u.ux, u.uy, WEB)) {
+			if ((ttmp = maketrap(u.ux, u.uy, WEB))) {
 				You("become entangled in hundreds of %s!",
 					Hallucination ? "two-minute noodles" : "thick cobwebs");
 				dotrap(ttmp, NOWEBMSG);
@@ -4584,10 +4584,10 @@ boolean
 is_undirected_spell(spellnum)
 int spellnum;
 {
-	if (is_buff_spell(spellnum) && !(
+	if ((is_buff_spell(spellnum) && !(
 		spellnum == MASS_CURE_FAR ||
 		spellnum == MON_PROTECTION
-		) ||
+		)) ||
 		spellnum == RAISE_DEAD ||
 		spellnum == TIME_DUPLICATE ||
 		spellnum == CLONE_WIZ
@@ -4653,6 +4653,11 @@ int spellnum;
 	case MON_POISON_GAS:
 	case SOLID_FOG:
 	case EARTHQUAKE:
+	/* also directed attack spells */
+	case MAGIC_MISSILE:
+	case CONE_OF_COLD:
+	case LIGHTNING_BOLT:
+	case SLEEP:
 		return TRUE;
 	default:
 		break;
@@ -4835,9 +4840,14 @@ int tary;
 		&& !clearline)
 		return TRUE;
 
-	/* don't cast drain life if not in range */
-	if (spellnum == DRAIN_LIFE
-		&& !(distmin(x(magr), y(magr), tarx, tary) <= 2))
+	/* don't cast drain life, death touch if not in melee range */
+	if ((spellnum == DRAIN_LIFE || spellnum == DEATH_TOUCH)
+		&& !(dist2(x(magr), y(magr), tarx, tary) <= 2))
+		return TRUE;
+
+	/* don't cast curse items from too far away */
+	if (spellnum == CURSE_ITEMS
+		&& !(dist2(x(magr), y(magr), tarx, tary) <= 24))
 		return TRUE;
 
 	/* don't cast haste self when already fast */
