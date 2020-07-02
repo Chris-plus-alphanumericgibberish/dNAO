@@ -6519,6 +6519,14 @@ doapply()
 		}
 		if(Punished) unpunish();
 		
+#ifdef STEED
+		/* also affects saddles */
+		if (u.usteed) {
+			curo = which_armor(u.usteed, W_SADDLE);
+			if (curo) uncurse(curo);
+		}
+#endif
+
 		//Share your insanity
 		if(u.usanity < 100){
 			change_usanity((100 - u.usanity)/2);

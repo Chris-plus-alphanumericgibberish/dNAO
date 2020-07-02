@@ -1962,6 +1962,16 @@ struct obj	*sobj;
 			    else uncurse(obj);
 			}
 		    }
+#ifdef STEED
+			/* also affects saddles */
+			if (u.usteed) {	
+				obj = which_armor(u.usteed, W_SADDLE);
+				if (obj) {
+					if (confused) blessorcurse(obj, 2);
+					else uncurse(obj);
+				}
+			}
+#endif
 		}
 		if(Punished && !confused) unpunish();
 		update_inventory();
