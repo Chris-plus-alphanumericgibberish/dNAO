@@ -860,6 +860,156 @@ boolean dofull;
 }
 
 static void
+add_voidpen_words(obj, buf)
+struct obj *obj;
+char *buf;
+{
+	if (obj->oartifact != ART_PEN_OF_THE_VOID)
+		return;
+	
+	if(u.voidChime){
+		Strcat(buf, "ringing ");
+		return;
+	}
+
+	if (obj->ovar1&SEAL_AHAZU){
+		Strcat(buf, "hungry ");
+	}
+
+	if (obj->ovar1&SEAL_AMON){
+		if (obj->ovar1&SEAL_ENKI)
+			Strcat(buf, "steaming ");
+		else if (obj->ovar1&SEAL_BERITH)
+			Strcat(buf, "blood-crusted ");
+		else
+			Strcat(buf, "fiery ");
+	}
+
+	if (obj->ovar1&SEAL_ANDREALPHUS){
+		Strcat(buf, "curved ");
+	}
+
+	if (obj->ovar1&SEAL_ANDROMALIUS){
+		Strcat(buf, "mischievous ");
+	}
+
+	if (obj->ovar1&SEAL_ASTAROTH){
+		Strcat(buf, "crackling ");
+	}
+
+	if (obj->ovar1&SEAL_BALAM){
+		Strcat(buf, "freezing ");
+	}
+
+	if (obj->ovar1&SEAL_BERITH){
+		if (obj->ovar1&SEAL_ENKI)
+			Strcat(buf, "blood-dripping ");
+		else if (!(obj->ovar1&SEAL_AMON))
+			Strcat(buf, "blood-soaked ");
+	}
+
+	if (obj->ovar1&SEAL_BUER){
+		Strcat(buf, "lively ");
+	}
+
+	if (obj->ovar1&SEAL_CHUPOCLOPS){
+		Strcat(buf, "webbed ");
+	}
+
+	if (obj->ovar1&SEAL_DANTALION){
+		Strcat(buf, "jeweled ");
+	}
+
+	if (obj->ovar1&SEAL_ECHIDNA){
+		Strcat(buf, "caustic ");
+	}
+
+	if (obj->ovar1&SEAL_EDEN){
+		// covered in poisoned words
+	}
+
+	if (obj->ovar1&SEAL_ENKI){
+		if (obj->ovar1&SEAL_IRIS)
+			Strcat(buf, "dehydrated ");
+		else if (!(obj->ovar1&SEAL_AMON) && !(obj->ovar1&SEAL_BERITH))
+			Strcat(buf, "dripping ");
+	}
+
+	if (obj->ovar1&SEAL_EURYNOME){
+		Strcat(buf, "vengeful ");
+	}
+
+	if (obj->ovar1&SEAL_EVE){
+		Strcat(buf, "vine-wrapped ");
+	}
+
+	if (obj->ovar1&SEAL_FAFNIR){
+		Strcat(buf, "ruinous ");
+	}
+
+	if (obj->ovar1&SEAL_HUGINN_MUNINN){
+		Strcat(buf, "talon-shaped ");
+	}
+
+	if (obj->ovar1&SEAL_IRIS){
+		Strcat(buf, "rainbow ");
+	}
+
+	if (obj->ovar1&SEAL_JACK){
+		Strcat(buf, "glowing ");
+	}
+
+	if (obj->ovar1&SEAL_MALPHAS){
+		Strcat(buf, "crow-embossed ");
+	}
+
+	if (obj->ovar1&SEAL_MARIONETTE){
+		Strcat(buf, "wire-wrapped ");
+	}
+
+	if (obj->ovar1&SEAL_MOTHER){
+		Strcat(buf, "eye-marked ");
+	}
+
+	if (obj->ovar1&SEAL_NABERIUS){
+		Strcat(buf, "fanged ");
+	}
+
+	if (obj->ovar1&SEAL_ORTHOS){
+		Strcat(buf, "whistling ");
+	}
+
+	if (obj->ovar1&SEAL_OSE){
+		Strcat(buf, "murmuring ");
+	}
+
+	if (obj->ovar1&SEAL_OTIAX){
+		Strcat(buf, "mist-wreathed ");
+	}
+
+	if (obj->ovar1&SEAL_PAIMON){
+		Strcat(buf, "ink-stained ");
+	}
+
+	if (obj->ovar1&SEAL_SHIRO){
+		Strcat(buf, "distinctive ");
+	}
+
+	if (obj->ovar1&SEAL_SIMURGH){
+		Strcat(buf, "feathered ");
+	}
+
+	if (obj->ovar1&SEAL_TENEBROUS){
+		Strcat(buf, "shadowed ");
+	}
+
+	if (obj->ovar1&SEAL_YMIR){
+		// covered in poisoned words
+	}
+
+}
+
+static void
 add_enchantment_number(obj, buf)
 struct obj *obj;
 char *buf;
@@ -884,6 +1034,14 @@ char *buf;
 	 * which is handled elsewhere */
 	if (obj->otyp == find_signet_ring())
 		return;
+	
+	if (arti_poisoned(obj) && obj->oartifact != ART_WEBWEAVER_S_CROOK &&
+			(undiscovered_artifact(obj->oartifact) || obj->oartifact == ART_PEN_OF_THE_VOID))
+		Strcat(buf, "poisoned ");
+	
+	if (arti_silvered(obj) && (undiscovered_artifact(obj->oartifact) || obj->oartifact == ART_PEN_OF_THE_VOID))
+		Strcat(buf, "silvered ");
+	
 	if (obj->opoisoned){
 		if (obj->opoisoned & OPOISON_BASIC) Strcat(buf, "poisoned ");
 		if (obj->opoisoned & OPOISON_FILTH) Strcat(buf, "filth-crusted ");
@@ -1262,6 +1420,7 @@ boolean with_price;
 		if (dofull) add_grease_words(obj, buf);
 		if (dofull) add_enchantment_number(obj, buf);
 		add_properties_words(obj, buf, dofull);	// Note: more verbose for artifacts if dofull is true
+		add_voidpen_words(obj, buf);
 		add_poison_words(obj, buf);
 		add_insight_words(obj, buf);
 		add_colours_words(obj, buf);

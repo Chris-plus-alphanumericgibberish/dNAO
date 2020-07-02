@@ -2845,7 +2845,8 @@ dodip()
 	if(is_poisonable(obj)) {
 	    if( (potion->otyp == POT_SICKNESS || 
 				(potion->otyp == POT_BLOOD && poisonous(&mons[potion->corpsenm]))) 
-			&& (!(obj->opoisoned & OPOISON_BASIC) || obj->otyp == VIPERWHIP)
+			&& (!(obj->opoisoned & OPOISON_BASIC || arti_poisoned(obj))
+	    		|| obj->otyp == VIPERWHIP)
 		){
 			char buf[BUFSZ];
 			if (potion->quan > 1L)
@@ -2918,7 +2919,8 @@ dodip()
 			obj->opoisoned = OPOISON_PARAL;
 			goto poof;
 	    } else if(potion->otyp == POT_STARLIGHT && obj->obj_material != SILVER &&
-	    		(!(obj->opoisoned & OPOISON_SILVER) || obj->otyp == VIPERWHIP)
+	    		(!(obj->opoisoned & OPOISON_SILVER || arti_silvered(obj))
+	    		|| obj->otyp == VIPERWHIP)
 	    	) {
 			char buf[BUFSZ];
 			if (potion->quan > 1L)

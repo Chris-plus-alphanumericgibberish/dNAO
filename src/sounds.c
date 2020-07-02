@@ -4690,7 +4690,7 @@ int tx,ty;
 					u.sealTimeout[SIMURGH-FIRST_SEAL] = moves + bindingPeriod;
 				}
 				else{
-					pline("It leaves");
+					pline("It leaves.");
 					// u.sealTimeout[SIMURGH-FIRST_SEAL] = moves + bindingPeriod/10;
 				}
 			} else{
