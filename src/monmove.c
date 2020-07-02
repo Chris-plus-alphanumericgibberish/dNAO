@@ -2688,7 +2688,7 @@ boolean heard;		/* print You_hear() message? */
 
 	for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
 		obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-		set_material(obj, Is_illregrd(&u.uz) ? METAL : IRON);
+		set_material_gm(obj, Is_illregrd(&u.uz) ? METAL : IRON);
 		obj->spe = 0;
 		obj->cursed = obj->blessed = FALSE;
 	}

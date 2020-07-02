@@ -2808,7 +2808,7 @@ int tary;
 		if (!youagr && onscary(tarx, tary, magr)) return FALSE; //Warded; did not fire
 		ammo_type = SPIKE;
 		qvr = mksobj(ammo_type, FALSE, FALSE);
-		set_material(qvr, SHADOWSTEEL);
+		set_material_gm(qvr, SHADOWSTEEL);
 		qvr->quan = 1;
 		qvr->spe = 8;
 		qvr->opoisoned = (OPOISON_BASIC | OPOISON_BLIND);
@@ -2828,7 +2828,7 @@ int tary;
 	case AD_PLYS:
 		ammo_type = SPIKE;
 		qvr = mksobj(ammo_type, FALSE, FALSE);
-		set_material(qvr, BONE);
+		set_material_gm(qvr, BONE);
 		qvr->quan = 1;
 		qvr->opoisoned = (OPOISON_PARAL);
 		break;

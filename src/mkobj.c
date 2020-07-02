@@ -1838,7 +1838,7 @@ boolean check_all;
 		random_mat_list++;
 	}
 	if (random_mat_list->iclass) /* a 0 indicates to use default material */
-		set_material(obj, random_mat_list->iclass);
+		set_material_gm(obj, random_mat_list->iclass);
 }
 
 
@@ -1900,10 +1900,36 @@ struct obj* obj;
 			random_mat_list++;
 		}
 		if (random_mat_list->iclass) /* a 0 indicates to use default material */
-			set_material(obj, random_mat_list->iclass);
+			set_material_gm(obj, random_mat_list->iclass);
 	}
 	return;
 }
+
+/* "Game Master"-facing set material function.
+ *  Should do the absolute minimum to make sure that obj is not in an inconsistent state after mat is set.
+ *  In particular, it should never change the base object type.
+ */
+
+void
+set_material_gm(obj, mat)
+struct obj *obj;
+int mat;
+{
+	int oldmat = obj->obj_material;
+
+	if(mat == obj->obj_material) return; //Already done!
+	
+	/* cover special properties of materials like shadowsteel timer and gemstone type */
+	handle_material_specials(obj, oldmat, obj->obj_material);
+
+	fix_object(obj);
+}
+
+/* Player-facing (or simulation-facing) set material function.
+ *  Intended to be called when objects change material during the course of play.
+ *  May make whatever changes to the base item type it sees fit.
+ *  May even refuse to actually set the material, currently in the case of spellbooks.
+ */
 
 void
 set_material(obj, mat)
@@ -2139,7 +2165,7 @@ int mat;
 			if(obj->otyp == WAN_WISHING)
 				obj->spe /= 5;
 			if(!(obj->recharged)) obj->recharged = 1;
-			obj->obj_material = mat;
+			set_material_gm(obj, mat); //Set the material using the minimal set material function
 		break;
 		case GEM_CLASS:
 			if(mat != GLASS && mat != GEMSTONE){
@@ -2150,18 +2176,13 @@ int mat;
 				obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
 			else if (mat == GLASS && oldmat == GEMSTONE)
 				obj->otyp = LAST_GEM + rnd(9);
-			obj->obj_material = mat;
+			set_material_gm(obj, mat); //Set the material using the minimal set material function
 		break;
 		default:
-			obj->obj_material = mat;
+			set_material_gm(obj, mat); //Set the material using the minimal set material function
 		break;
 	}
 	//Silver bell should resist
-	
-	/* cover special properties of materials like shadowsteel timer and gemstone type */
-	handle_material_specials(obj, oldmat, obj->obj_material);
-
-	fix_object(obj);
 	
 	if(owner == &youmonst){
 		setworn(obj, W_ARM);

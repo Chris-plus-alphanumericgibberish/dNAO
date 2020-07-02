@@ -658,7 +658,7 @@ const char *name;
 		else if (is_malleable_artifact(&artilist[obj->oartifact]));//keep current/default material
 		else
 			tmp = objects[obj->otyp].oc_material;
-		set_material(obj, tmp);
+		set_material_gm(obj, tmp);
 		
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type

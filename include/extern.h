@@ -1337,6 +1337,7 @@ E void FDECL(set_obj_size, (struct obj *, int));
 E void FDECL(set_obj_quan, (struct obj *, int));
 E void FDECL(maybe_set_material, (struct obj *, int, boolean));
 E void FDECL(set_material, (struct obj *, int));
+E void FDECL(set_material_gm, (struct obj *, int));
 E int FDECL(weight, (struct obj *));
 E struct obj *FDECL(mkgold, (long,int,int));
 E struct obj *FDECL(mkgold_core, (long,int,int,boolean));
