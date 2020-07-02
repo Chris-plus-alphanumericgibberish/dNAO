@@ -3285,8 +3285,8 @@ dotip()
                     nobj = cobj->nexthere;
                     if (!Is_container(cobj))
                         continue;
-                    c = ynq(safe_qbuf(qbuf, sizeof("There is  here, tip it?"),
-                                      doname(cobj), xname(cobj), "container"));
+                    Sprintf(qbuf, "You see here %s, tip it?", safe_qbuf(qbuf, sizeof("There is  here, tip it?"), doname(cobj), xname(cobj), "container"));
+                    c = ynq(qbuf);
                     if (c == 'q')
                         return 0;
                     if (c == 'n')
@@ -3412,8 +3412,8 @@ struct obj *box; /* or bag */
         if (box->spe < old_spe) {
             if (bag)
                 pline((seen == 0) ? "Nothing seems to happen."
-                                  : (seen == 1) ? "A monster appears."
-                                                : "Monsters appear!");
+                                  : (seen == 1) ? "A monster suddenly appears!"
+                                                : "Monsters suddenly appear!");
             /* check_unpaid wants to see a non-zero charge count */
             box->spe = old_spe;
             check_unpaid_usage(box, TRUE);
