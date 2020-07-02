@@ -1039,9 +1039,7 @@ char *buf;
 	if (obj->otyp == find_signet_ring())
 		return;
 	
-	boolean show_poison = iflags.artifact_descriptors ||
-							undiscovered_artifact(obj->oartifact) ||
-							obj->oartifact == ART_PEN_OF_THE_VOID;
+	boolean show_poison = iflags.artifact_descriptors || undiscovered_artifact(obj->oartifact);
 	if (show_poison){
 		if (arti_poisoned(obj) && obj->oartifact != ART_WEBWEAVER_S_CROOK)
 			Strcat(buf, "poisoned ");
