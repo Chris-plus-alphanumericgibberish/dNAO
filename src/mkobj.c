@@ -1304,8 +1304,8 @@ boolean artif;
 	if(otmp->oproperties&OPROP_WRTHW)
 		otmp->wrathdata = PM_ORC<<2;//wrathful + 1/4 vs orcs
 
-	/* unique objects may have an associated artifact entry */
-	if (objects[otyp].oc_unique && !otmp->oartifact)
+	/* spellbooks of secrets should become a random artifact spellbook */
+	if (otyp == SPE_SECRETS)
 	    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
 	
 	/* track words */
