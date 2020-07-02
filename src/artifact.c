@@ -254,7 +254,7 @@ hack_artifacts()
 	}
 	if (Role_if(PM_MONK)) {
 	    artilist[ART_GRANDMASTER_S_ROBE].alignment = alignmnt;
-	    artilist[ART_ROBE_OF_THE_ARCHMAGI].alignment = alignmnt;
+	    artilist[ART_ROBE_OF_THE_ARCHMAGI].alignment = A_CHAOTIC;
 	    artilist[ART_ROBE_OF_THE_ARCHMAGI].role = Role_switch;
 	}
 	if (urole.questarti) {
@@ -1435,6 +1435,11 @@ touch_artifact(obj, mon, hypothetical)
 			if(yours) badclass = badalign = forceEvade = !mvitals[PM_TIAMAT__THE_FIEND_OF_WIND].died;
 			else badclass = badalign = forceEvade = !!(mvitals[PM_TIAMAT__THE_FIEND_OF_WIND].died);
 		}
+	}
+	
+	if(obj->oartifact == ART_KUSANAGI_NO_TSURUGI && badalign){
+		pline("You have betrayed what you stood for, and are no longer worthy of even bearing the sword.");
+		forceEvade = TRUE;
 	}
 	
 	if (((badclass || badalign) && self_willed) ||
@@ -3130,6 +3135,11 @@ boolean * messaged;
 	if (oproperties)
 		oproperty_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
 
+	/* this didn't trigger spec_dbon_applies, but still needs to happen later */
+	if (dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON)
+		&& !Drain_res(mdef) && !otmp->oartifact && otmp->otyp != SPE_BLANK_PAPER && otmp->otyp != SPE_SECRETS)
+		spec_dbon_applies = TRUE;
+
 	/* EXTERNAL damage sources -- explosions and the like, primarily */
 	/* knockback effect */
 	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
@@ -4378,6 +4388,7 @@ boolean * messaged;
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************
 	*/
+
 	if (!spec_dbon_applies) {
 	    /* since damage bonus didn't apply, nothing more to do;  
 	       no further attacks have side-effects on inventory */
@@ -4438,7 +4449,8 @@ boolean * messaged;
 			// }
 		}
 	}
-	if (arti_attack_prop(otmp, ARTA_DRAIN)) {
+	if (arti_attack_prop(otmp, ARTA_DRAIN) ||
+		(dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON))) {
 		int dlife;
 		int leveldrain = 1;
 		/* message */
@@ -4492,10 +4504,21 @@ boolean * messaged;
 					mdef->m_lev--;
 				dlife -= *hpmax(mdef);
 			}
-			if (magr) {
-				*hp(magr) += dlife / 2;
-				if (*hp(magr) > *hpmax(magr))
-					*hp(magr) = *hpmax(magr);
+
+			/* gain from drain */
+
+			/* paimon drains into the book, not the attacker */
+			if (dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON)) {
+				if (otmp->spestudied>0)
+					otmp->spestudied--;
+			}
+			/* everything else turns the drain into life */
+			else {
+				if (magr) {
+					*hp(magr) += dlife / 2;
+					if (*hp(magr) > *hpmax(magr))
+						*hp(magr) = *hpmax(magr);
+				}
 			}
 			*truedmgptr += dlife;
 		}
@@ -9776,8 +9799,9 @@ int spe;
 		nmon2 = m2->nmon;
 		if (DEADMONSTER(m2)) continue;
 		if (mindless_mon(m2)) continue;
-		if ((mon_resistance(m2,TELEPAT) &&
-			(rn2(2) || m2->mblinded)) || !rn2(10)) {
+		if ((mon_resistance(m2,TELEPAT) && (rn2(2) || m2->mblinded))
+			|| !rn2(10)
+		){
 			if (cansee(m2->mx, m2->my))
 				pline("It locks on to %s.", mon_nam(m2));
 			dmg = d(dnum, dsize);

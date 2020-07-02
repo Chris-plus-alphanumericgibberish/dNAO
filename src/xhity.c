@@ -21,9 +21,8 @@ STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL void FDECL(heal, (struct monst *, int));
-STATIC_DCL int FDECL(xstoney, (struct monst *, struct monst *));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
-STATIC_DCL int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int));
+STATIC_DCL int FDECL(xcastmagicy, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
@@ -1158,7 +1157,7 @@ int tary;
 			if (pa->mtyp == PM_DEMOGORGON && !ranged && rn2(6) && !(youagr || magr->mflee))
 				continue;
 
-			result = xcasty(magr, mdef, attk, vis);
+			result = xcastmagicy(magr, mdef, attk, vis);
 
 			if (result) {
 				/* if the spell was successful, the defender may wake up (MM_MISS -> no spell cast, no chance to wake) */
@@ -7961,7 +7960,7 @@ boolean ranged;
 }
 
 int
-xcasty(magr, mdef, attk, vis)
+xcastmagicy(magr, mdef, attk, vis)
 struct monst * magr;
 struct monst * mdef;
 struct attack * attk;
@@ -7970,24 +7969,12 @@ int vis;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
-	struct permonst * pd = youdef ? youracedata : mdef->data;
-	boolean on_line;
 	boolean can_target;
-	boolean foundyou;
-	int newres;
 	int result = MM_MISS;
 	int distance;
 	int range;
 	int tarx = (youdef ? magr->mux : x(mdef));
 	int tary = (youdef ? magr->muy : y(mdef));
-	int dx = sgn(tarx - x(magr));
-	int dy = sgn(tary - y(magr));
-
-	/* cancelled monsters can't cast spells -- return early */
-	if (!youagr && magr->mcan) {
-		cursetxt(magr, FALSE);
-		return MM_MISS;
-	}
 
 	/* find distance between magr and mdef */
 	distance = dist2(
@@ -8016,152 +8003,10 @@ int vis;
 	else
 		can_target = FALSE;
 
-	/* determine if magr and mdef are lined up (or magr thinks they are) */
-	/* also checks for direct friendly fire */
-	on_line = m_online(magr, mdef, tarx, tary, (youagr ? FALSE : (magr->mtame && !magr->mconf)), FALSE);
-
-	/* determine if monster is actually aiming at player, if youdef */
-	if (youdef && tarx == u.ux && tary == u.uy)
-		foundyou = TRUE;
+	if (can_target)
+		result = xcasty(magr, mdef, attk, tarx, tary);
 	else
-		foundyou = FALSE;
-
-	/* Non-standard (and non-star???) spell types */
-	if (attk->adtyp != AD_SPEL &&
-		attk->adtyp != AD_CLRC &&
-		attk->adtyp != AD_PSON &&
-		attk->adtyp != AD_STAR)
-	{
-		/* needs a target */
-		if (can_target) {
-			if (distance <= 2) {
-				/* melee magic */
-				/* currently part of castum (and variants) */
-				if (youdef)
-					newres = castmu(magr, attk, TRUE, foundyou);
-				else if (youagr)
-					newres = castum(mdef, attk);
-				else
-					newres = castmm(magr, mdef, attk);
-				/* confirm result */
-				switch (newres)
-				{
-				case 0:	/* unsuccessful spell */
-					result = MM_MISS;
-					break;
-				case 1:	/* successful spell */
-					result = MM_HIT;
-					break;
-				case 2:	/* (m) target died */
-					result = MM_DEF_DIED;
-					break;
-				}
-			}
-			else {
-				/* ranged magic */
-				/* requires being on a line */
-				if (on_line) {
-					/* ray spell */
-					int dmn;
-					int type = attk->adtyp;
-					/* get number of damage dice */
-					dmn = (min(MAX_BONUS_DICE, mlev(magr) / 3 + 1));
-					if (attk->damn)
-						dmn += attk->damn;
-					if (dmn < 1)
-						dmn = 1;
-					/* swap damage type as appropriate */
-					if (type == AD_RBRE || type == AD_RETR)
-					{
-						/* random between fire/cold/elec damage */
-						switch (rn2(3))
-						{
-						case 0: type = AD_FIRE; break;
-						case 1: type = AD_COLD; break;
-						case 2: type = AD_ELEC; break;
-						}
-					}
-					else if (type == AD_OONA) {
-						/* Oona */
-						type = u.oonaenergy;
-					}
-					/* message */
-					if (youdef) {
-						/* message */
-						if (vis&VIS_MAGR) {
-							pline("%s zaps you with a %s!", Monnam(magr),
-								flash_type(type, SPBOOK_CLASS));
-						}
-						else {
-							You("are zapped with a %s!",
-								flash_type(type, SPBOOK_CLASS));
-						}
-					}
-					else {
-						if (vis&VIS_MAGR) {
-							pline("%s %s %s with a %s!",
-								(youagr ? "You" : Monnam(magr)),
-								(youagr ? "zap" : "zaps"),
-								mon_nam(mdef),
-								flash_type(type, SPBOOK_CLASS)
-								);
-						}
-					}
-					/* interrupt player if zap will hit */
-					if (youdef && foundyou)
-						nomul(0, NULL);
-					/* do the zap */
-					/* FIXME: this prints a message even if you can't see magr or mdef */
-					buzz(type, SPBOOK_CLASS, FALSE, dmn,
-						x(magr), y(magr), dx, dy, 0, 0);
-					/* figure out who died */
-					/* unfortunately, cannot tell if either lifesaved */
-					if (*hp(mdef) < 0)
-						result |= MM_DEF_DIED;
-					if (*hp(magr) < 0)
-						result |= MM_AGR_DIED;
-
-				}
-				/* if not lined up, no casting */
-			}
-		}
-		/* needs a target */
-	}
-	/* standard spell damage types: AD_MAGC, AD_CLRC, AD_PSON, and for some reason, AD_STAR */
-	else {
-		/* farm out to old existing spellcasting functions */
-		if (youdef) {
-			/* can cast without actually having you in range */
-			newres = castmu(magr, attk, can_target, (foundyou&&can_target));
-		}
-		else if (youagr) {
-			/* you need to be in range */
-			if (can_target)
-				newres = castum(mdef, attk);
-			else
-				newres = 0;
-		}
-		else {
-			/* monsters need to be in range of each other */
-			if (can_target)
-				newres = castmm(magr, mdef, attk);
-			else
-				newres = 0;
-		}
-		/* confirm result */
-		switch (newres)
-		{
-		case 0:	/* unsuccessful spell */
-			result = MM_MISS;
-			break;
-		case 1:	/* successful spell */
-			result = MM_HIT;
-			break;
-		case 2:	/* (m) target died */
-			result = MM_DEF_DIED;
-			break;
-		}
-	}
+		result = xcasty(magr, (struct monst *)0, attk, 0, 0);
 
 	return result;
 }
@@ -10909,15 +10754,17 @@ boolean * hittxt;
 	int result = MM_HIT;
 	int tmpplusdmg;
 	int tmptruedmg;
-	if (otmp->oartifact || otmp->oproperties) {		// artifact and oproperties
-		tmpplusdmg = tmptruedmg = 0;
-		result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
-		*plusdmgptr += tmpplusdmg;
-		*truedmgptr += tmptruedmg;
-		if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
-			return result;
-	}
-	if (spec_prop_otyp(otmp)) {	// otyp
+
+	/* artifact and oproperties and misc */
+	tmpplusdmg = tmptruedmg = 0;
+	result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
+	*plusdmgptr += tmpplusdmg;
+	*truedmgptr += tmptruedmg;
+	if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
+		return result;
+
+	/* otyp */
+	if (spec_prop_otyp(otmp)) {	
 		tmpplusdmg = tmptruedmg = 0;
 		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
 		*plusdmgptr += tmpplusdmg;
@@ -11265,7 +11112,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			/* beartraps are real attacks */
 			if (trap && melee && weapon)
 				valid_weapon_attack = TRUE;
+			/* Wand of Orcus makes for a melee weapon */
 			else if (melee && weapon && weapon->oartifact == ART_WAND_OF_ORCUS)
+				valid_weapon_attack = TRUE;
+			/* Spellbooks are weapons if you have Paimon bound */
+			else if (melee && weapon && weapon->oclass == SPBOOK_CLASS && youagr && u.sealsActive&SEAL_PAIMON)
 				valid_weapon_attack = TRUE;
 			else
 				invalid_weapon_attack = TRUE;
@@ -11984,13 +11835,6 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			basedmg = 1;
 			break;
 
-		case SPBOOK_CLASS:
-			if (youagr && (u.sealsActive&SEAL_PAIMON))
-				basedmg = rnd(spiritDsize()) + objects[weapon->otyp].oc_level;
-			else
-				basedmg = 1;	// assumes spellbooks weigh <200 aum
-			break;
-
 		default:
 			switch (weapon->otyp)
 			{
@@ -12554,6 +12398,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (youagr && unarmed_punch && u.specialSealsActive&SEAL_DAHLVER_NAR) {
 			bonsdmg += d(2, 6) + min(u.ulevel / 2, (u.uhpmax - u.uhp) / 10);
 		}
+		/* Paimon increases damage dealt with spellbooks significantly */
+		if (valid_weapon_attack && weapon && weapon->oclass == SPBOOK_CLASS && youagr && u.sealsActive&SEAL_PAIMON) {
+			bonsdmg += objects[weapon->otyp].oc_level + spiritDsize();
+		}
 		/* martial aids increase unarmed punching damage */
 		if (unarmed_punch && weapon && martial_aid(weapon)) {
 			/* if these were lit, it would have been a weapon attack, not an unarmed punch */
@@ -12889,7 +12737,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 		if ((thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA)) && (
 			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS))) || 
-			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !arti_shining(otmp)) ||
+			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !litsaber(otmp)) ||
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->oproperties&OPROP_FLAYW))
 			)){
 			/* damage entirely mitigated */
@@ -13727,7 +13575,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	/* hurtle mdef (player-inflicted only for now, as long as staggering strikes and jousting are) */
 	if (staggering_strike || jousting) {
 		if (youdef) {
-			hurtle(sgn(x(mdef)-x(magr)), sgn(y(mdef)-y(magr)), 1, TRUE);
+			hurtle(sgn(x(mdef)-x(magr)), sgn(y(mdef)-y(magr)), 1, TRUE, TRUE);
 			if (staggering_strike)
 				make_stunned(HStun + rnd(10), TRUE);
 		}
@@ -14998,7 +14846,7 @@ android_combo()
 	static struct attack finisher =		{ AT_CLAW, AD_PHYS,16, 8 };
 
 	/* unarmed */
-	if (!uwep){
+	if (!uwep || (is_lightsaber(uwep) && !litsaber(uwep))){
 		if (!getdir((char *)0))
 			return FALSE;
 		if (u.ustuck && u.uswallow)
@@ -15176,6 +15024,8 @@ android_combo()
 				if(!DEADMONSTER(mdef))
 					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 			}
+			if(attacked)
+				hurtle(u.dx, u.dy, 1, FALSE, FALSE);
 			n--;
 			u.uen--;
 			attacked = TRUE;

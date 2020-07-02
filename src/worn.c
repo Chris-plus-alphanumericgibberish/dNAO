@@ -712,7 +712,7 @@ struct monst *mon;
 	}
 
 	if (helpless(mon))
-		base -= 5;
+		base += 5;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
 		register int mondodgeac = mon->data->dac;
@@ -876,7 +876,7 @@ struct monst *mon;
 	base -= armac;
 	
 	if (helpless(mon))
-		base -= 5;
+		base += 5;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
 		register int mondodgeac = mon->data->dac;

@@ -2371,7 +2371,7 @@ boolean forcedestroy;
 		(void)projectile(&youmonst, ammo, launcher, (m_shot.s || !is_ammo(ammo) || ammo->oclass==GEM_CLASS) ? HMON_FIRED : HMON_MISTHROWN,
 			u.ux, u.uy, dx, dy, dz, range, forcedestroy, TRUE, impaired);
 		if (Weightless || Levitation)
-			hurtle(-u.dx, -u.dy, hurtle_dist, TRUE);
+			hurtle(-u.dx, -u.dy, hurtle_dist, TRUE, TRUE);
 	}
 
 	/* end */

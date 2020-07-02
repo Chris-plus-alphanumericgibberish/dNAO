@@ -480,9 +480,10 @@ mhurtle_step(arg, x, y)
  * kick or throw and be only.
  */
 void
-hurtle(dx, dy, range, verbose)
+hurtle(dx, dy, range, verbose, do_nomul)
     int dx, dy, range;
     boolean verbose;
+    boolean do_nomul;
 {
     coord uc, cc;
 
@@ -496,13 +497,13 @@ hurtle(dx, dy, range, verbose)
      */
     if(Punished && !carried(uball)) {
 	You_feel("a tug from the iron ball.");
-	nomul(0, NULL);
+	if(do_nomul) nomul(0, NULL);
 	return;
     } else if (u.utrap) {
 	You("are anchored by the %s.",
 	    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_LAVA ? "lava" :
 		u.utraptype == TT_INFLOOR ? surface(u.ux,u.uy) : "trap");
-	nomul(0, NULL);
+	if(do_nomul) nomul(0, NULL);
 	return;
     }
 
@@ -512,7 +513,7 @@ hurtle(dx, dy, range, verbose)
 
     if(!range || (!dx && !dy) || u.ustuck) return; /* paranoia */
 
-    nomul(-(range/4+1), "moving through the air");
+    if(do_nomul) nomul(-(range/4+1), "moving through the air");
     if (verbose)
 	You("%s in the opposite direction.", range > 1 ? "hurtle" : "float");
     /* if we're in the midst of shooting multiple projectiles, stop */

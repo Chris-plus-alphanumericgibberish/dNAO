@@ -445,8 +445,6 @@ nh_timeout()
 	
 	if (flags.friday13) baseluck -= 1;
 	
-	if(u.lastcast) u.lastcast--;
-	
 	if(u.uaesh_duration) u.uaesh_duration--;
 	if(u.uhoon_duration) u.uhoon_duration--;
 	if(u.ukrau_duration) u.ukrau_duration--;

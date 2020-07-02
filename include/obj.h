@@ -633,6 +633,10 @@ struct weapon_dice {
 				|| (otmp)->otyp == DWARVISH_ROUNDSHIELD)
 #define is_gnomish_armor(otmp)	((otmp)->otyp == GNOMISH_POINTY_HAT)
 
+#define is_wide_helm(otmp)		((otmp)->otyp == SEDGE_HAT\
+				|| (otmp)->otyp == WAR_HAT\
+				|| (otmp)->otyp == WITCH_HAT)
+
 #define is_plussev_armor(otmp)	(is_elven_armor((otmp))\
 								|| arti_plussev((otmp))\
 								|| ((otmp)->otyp == CORNUTHAUM && Role_if(PM_WIZARD))\
