@@ -3912,6 +3912,8 @@ int tx,ty;
 						u.spiritTineB = SEAL_EDEN;
 						u.spiritTineTB= moves + bindingPeriod;
 					}
+					if (uwep->opoisoned & OPOISON_SILVER)
+						uwep->opoisoned &= ~OPOISON_SILVER;
 					u.sealTimeout[EDEN-FIRST_SEAL] = moves + bindingPeriod;
 				}
 				else{
@@ -4690,7 +4692,7 @@ int tx,ty;
 					u.sealTimeout[SIMURGH-FIRST_SEAL] = moves + bindingPeriod;
 				}
 				else{
-					pline("It leaves");
+					pline("It leaves.");
 					// u.sealTimeout[SIMURGH-FIRST_SEAL] = moves + bindingPeriod/10;
 				}
 			} else{
@@ -4794,6 +4796,8 @@ int tx,ty;
 						u.spiritTineB = SEAL_YMIR;
 						u.spiritTineTB= moves + bindingPeriod;
 					}
+					if (uwep->opoisoned & OPOISON_BASIC)
+						uwep->opoisoned &= ~OPOISON_BASIC;
 					u.sealTimeout[YMIR-FIRST_SEAL] = moves + bindingPeriod;
 				} else {
 					if(!Blind) pline("The eye closes.");

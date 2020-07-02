@@ -2851,13 +2851,17 @@ winid *datawin;
 			//int artipoisons = 0;
 			if (arti_poisoned(obj))
 				poisons |= OPOISON_BASIC;
+			if (arti_silvered(obj))
+				poisons |= OPOISON_SILVER;
 			if (oartifact == ART_WEBWEAVER_S_CROOK)
 				poisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
 			if (oartifact == ART_SUNBEAM)
 				poisons |= OPOISON_FILTH;
 			if (oartifact == ART_MOONBEAM)
 				poisons |= OPOISON_SLEEP;
-
+			
+			
+			
 			if (poisons) {
 				/* special cases */
 				if (poisons == OPOISON_BASIC) {

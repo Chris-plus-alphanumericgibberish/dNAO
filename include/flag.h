@@ -330,6 +330,7 @@ struct instance_flags {
     boolean role_obj_names;
     boolean obscure_role_obj_names;
     boolean dnethack_start_text;
+    boolean artifact_descriptors;
     boolean dnethack_dungeon_colors;
 
 	int pokedex;	/* default monster stats to show in the pokedex */
