@@ -3727,13 +3727,17 @@ spirits_enlightenment()
 	putstr(en_win, 0, "Currently bound spirits:");
 	putstr(en_win, 0, "");
 
-#define addseal(id) if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
+#define addseal(id) do {if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
 	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
 		u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
 	else\
 	Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
-	putstr(en_win, 0, buf)
-#define addempty() Sprintf(buf,"  (empty)"); putstr(en_win, 0, buf)
+	putstr(en_win, 0, buf); } while (0)
+#define addpen(seal) do {\
+	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(seal) - (FIRST_SEAL)], \
+		u.sealTimeout[decode_sealID(seal) - (FIRST_SEAL)] - moves); \
+	putstr(en_win, 0, buf); } while (0)
+#define addempty() do {Sprintf(buf,"  (empty)"); putstr(en_win, 0, buf);} while(0)
 
 	/* only show gnosis premonition when it is being used */
 	if (u.spirit[GPREM_SPIRIT] != 0L) {
@@ -3805,6 +3809,28 @@ spirits_enlightenment()
 		}
 		else {
 			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+
+	/* Show spirits bound into the Pen of the Void */
+	if (!undiscovered_artifact(ART_PEN_OF_THE_VOID)) {
+		if (u.voidChime)
+			putstr(en_win, 0, "Bound to you and the Pen of the Void");
+		else
+			putstr(en_win, 0, "Bound to the Pen of the Void");
+
+		/* All get the first slot */
+		if (u.spiritTineA)
+			addpen(u.spiritTineA);
+		else
+			addempty();
+		/* Second slot belongs to discipled Binders */
+		if (quest_status.killed_nemesis && Role_if(PM_EXILE)) {
+			if (u.spiritTineB)
+				addpen(u.spiritTineB);
+			else
+				addempty();
 		}
 		putstr(en_win, 0, "");
 	}
