@@ -1061,7 +1061,7 @@ int menutype;
 	char ilet, lets[BUFSZ], qbuf[QBUFSZ];
 
 	if (spellid(0) == NO_SPELL && !((uarmh && uarmh->oartifact == ART_STORMHELM)  
-		|| (uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_VHAERUN) 
+		|| (uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO) 
 		|| (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
 	)){
 	    You("don't know any spells right now.");
@@ -1414,7 +1414,7 @@ update_alternate_spells()
 			}
 		}
 	}
-	if (uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_VHAERUN){
+	if (uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO){
 		for (i = 0; i < MAXSPELL; i++) {
 			if (spellid(i) == SPE_DRAIN_LIFE) {
 				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
@@ -5536,13 +5536,13 @@ int spell;
 			|| uwep->oartifact == ART_PROFANED_GREATSCYTHE
 			|| uwep->oartifact == ART_GARNET_ROD
 		) splcaster -= urole.spelarmr;
-
-		if (uwep->otyp == ART_DEATH_SPEAR_OF_VHAERUN
+		
+		if (uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO
 			&& spell_skilltype(spellid(spell)) == P_ATTACK_SPELL
-			&& Race_if(PM_DROW)
-			&& !flags.initgend
+			&& Race_if(PM_DROW) && strcmp(urole.ngod,"_Keptolo") && u.ualign.record >= 20
 		) {	// Bonus to attack spells, including granted drain life
 			splcaster -= urole.spelarmr;
+			pline("test");
 		}
 
 		if (uwep->otyp == KHAKKHARA) {	// a priestly channeling tool

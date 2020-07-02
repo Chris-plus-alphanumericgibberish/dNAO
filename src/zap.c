@@ -419,7 +419,7 @@ struct obj *otmp;
 		} else {
 			levlost = 1;
 			dmg = rnd(8);
-			if (uwep && (uwep->oartifact == ART_DEATH_SPEAR_OF_VHAERUN || 
+			if (uwep && (uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO || 
 						uwep->oartifact == ART_STAFF_OF_NECROMANCY)
 			){
 				dmg += d((u.ulevel+1)/3, 4);

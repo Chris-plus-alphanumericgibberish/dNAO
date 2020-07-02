@@ -242,7 +242,7 @@ hack_artifacts()
 			} else {
 				artilist[ART_ROD_OF_LORDLY_MIGHT].gflags |= ARTG_NOGEN;
 				artilist[ART_ROD_OF_LORDLY_MIGHT].role = NON_PM;
-				artilist[ART_DEATH_SPEAR_OF_VHAERUN].gflags &= ~(ARTG_NOGEN);
+				artilist[ART_DEATH_SPEAR_OF_KEPTOLO].gflags &= ~(ARTG_NOGEN);
 			}
 		} else if(Race_if(PM_DWARF) && urole.ldrnum == PM_DAIN_II_IRONFOOT){
 			artilist[ART_ROD_OF_LORDLY_MIGHT].gflags |= ARTG_NOGEN;
