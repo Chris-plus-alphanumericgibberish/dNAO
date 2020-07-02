@@ -2673,7 +2673,7 @@ weight_cap()
 
 		static int hboots = 0;
 		if (!hboots) hboots = find_hboots();
-		if (boots && boots->otyp == hboots) carrcap += boots->cursed ? 0 : 100; 
+		if (boots && boots->otyp == hboots) carrcap += 100; 
 		
 		if (!Flying) {
 			if(EWounded_legs & LEFT_SIDE) carrcap -= 100;
