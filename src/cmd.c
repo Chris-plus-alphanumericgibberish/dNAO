@@ -90,6 +90,7 @@ extern int NDECL(dodip); /**/
 extern int NDECL(dosacrifice); /**/
 extern int NDECL(dopray); /**/
 extern int NDECL(doturn); /**/
+extern int NDECL(dotip); /**/
 extern int NDECL(doredraw); /**/
 extern int NDECL(doread); /**/
 extern int NDECL(dosave); /**/
@@ -5328,6 +5329,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"sit", "sit down", dosit, !IFBURIED, AUTOCOMPLETE},
 	{"swim", "swim under water", dodeepswim, !IFBURIED, AUTOCOMPLETE},
 	{"turn", "turn undead", doturn, IFBURIED, AUTOCOMPLETE},
+	{"tip", "empty a container", dotip, IFBURIED, AUTOCOMPLETE},
 	{"twoweapon", "toggle two-weapon combat", dotwoweapon, !IFBURIED, AUTOCOMPLETE},
 	{"untrap", "untrap something", dountrap, !IFBURIED, AUTOCOMPLETE},
 	{"unmaintain", "stop maintaining a spell", dounmaintain, IFBURIED, AUTOCOMPLETE},

@@ -3178,6 +3178,80 @@ dealloc_obj(obj)
     free((genericptr_t) obj);
 }
 
+int
+hornoplenty(horn, tipping)
+struct obj *horn;
+boolean tipping; /* caller emptying entire contents; affects shop handling */
+{
+    int objcount = 0;
+
+    if (!horn || horn->otyp != HORN_OF_PLENTY) {
+        impossible("bad horn o' plenty");
+    } else if (horn->spe < 1) {
+        pline1(nothing_happens);
+    } else {
+        struct obj *obj;
+        const char *what;
+
+        consume_obj_charge(horn, !tipping);
+        if (!rn2(13)) {
+            obj = mkobj(POTION_CLASS, FALSE);
+            if (objects[obj->otyp].oc_magic)
+                do {
+                    obj->otyp = rnd_class(POT_BOOZE, POT_WATER);
+                } while (obj->otyp == POT_SICKNESS);
+            what = (obj->quan > 1L) ? "Some potions" : "A potion";
+        } else {
+            obj = mkobj(FOOD_CLASS, FALSE);
+            if (obj->otyp == FOOD_RATION && !rn2(7))
+                obj->otyp = LUMP_OF_ROYAL_JELLY;
+            what = "Some food";
+        }
+        ++objcount;
+        pline("%s %s out.", what, vtense(what, "spill"));
+        obj->blessed = horn->blessed;
+        obj->cursed = horn->cursed;
+        obj->owt = weight(obj);
+        /* using a shop's horn of plenty entails a usage fee and also
+           confers ownership of the created item to the shopkeeper */
+        if (horn->unpaid)
+            addtobill(obj, FALSE, FALSE, tipping);
+        /* if it ended up on bill, we don't want "(unpaid, N zorkids)"
+           being included in its formatted name during next message */
+        if (!tipping) {
+            obj = hold_another_object(obj,
+                                      u.uswallow
+                                        ? "Oops!  %s out of your reach!"
+                                        : (Is_airlevel(&u.uz)
+                                           || Is_waterlevel(&u.uz)
+                                           || levl[u.ux][u.uy].typ < IRONBARS
+                                           || levl[u.ux][u.uy].typ >= ICE)
+                                          ? "Oops!  %s away from you!"
+                                          : "Oops!  %s to the floor!",
+                                      The(aobjnam(obj, "slip")), (char *) 0);
+        } else {
+            /* assumes this is taking place at hero's location */
+            if (!can_reach_floor()) {
+            	boolean wepgone = FALSE;
+				bhitpos.x = u.ux; bhitpos.y = u.uy;
+				obj->ox = u.ux; obj->oy = u.uy;
+				hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
+                //hitfloor(obj, TRUE); /* does altar check, message, drop */
+            } else {
+                if (IS_ALTAR(levl[u.ux][u.uy].typ))
+                    doaltarobj(obj); /* does its own drop message */
+                else
+                    pline("%s %s to the %s.", Doname2(obj),
+                          otense(obj, "drop"), surface(u.ux, u.uy));
+                dropy(obj);
+            }
+        }
+        if (horn->dknown)
+            makeknown(HORN_OF_PLENTY);
+    }
+    return objcount;
+}
+
 #ifdef WIZARD
 /* Check all object lists for consistency. */
 void

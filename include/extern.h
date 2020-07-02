@@ -1229,7 +1229,7 @@ E void FDECL(mimic_hit_msg, (struct monst *, SHORT_P));
 #ifdef GOLDOBJ
 E void FDECL(mkmonmoney, (struct monst *, long));
 #endif
-E void FDECL(bagotricks, (struct obj *));
+E int FDECL(bagotricks, (struct obj *, boolean, int *));
 E boolean FDECL(propagate, (int, BOOLEAN_P,BOOLEAN_P));
 E boolean FDECL(mon_can_see_you, (struct monst *));
 E boolean FDECL(mon_can_see_mon, (struct monst *, struct monst *));
@@ -1371,6 +1371,7 @@ E struct obj *FDECL(add_to_container, (struct obj *, struct obj *));
 E void FDECL(add_to_migration, (struct obj *));
 E void FDECL(add_to_buried, (struct obj *));
 E void FDECL(dealloc_obj, (struct obj *));
+E int FDECL(hornoplenty, (struct obj *, boolean));
 E void FDECL(obj_ice_effects, (int, int, BOOLEAN_P));
 E long FDECL(peek_at_iced_corpse_age, (struct obj *));
 E void FDECL(doMaskStats, (struct obj *));
@@ -1969,6 +1970,7 @@ E int FDECL(query_objlist, (const char *, struct obj *, int,
 E struct obj *FDECL(pick_obj, (struct obj *));
 E int NDECL(encumber_msg);
 E int NDECL(doloot);
+E int NDECL(dotip);
 E int NDECL(dopetequip);
 E int FDECL(use_container, (struct obj *,int));
 E int FDECL(use_massblaster, (struct obj *));
