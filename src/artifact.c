@@ -553,6 +553,10 @@ struct obj * otmp;
 				)
 			)
 			continue;
+		/* Since Pirates can only be gifted the Marauder's Map, don't let it generate on the floor and leave 
+		 * them sacrificing eternally for a gift that will never come */
+		if (m == ART_MARAUDER_S_MAP && Role_if(PM_PIRATE))
+			continue;
 
 		/* if we made it through that gauntlet, we're good */
 		eligible[n++] = m;
