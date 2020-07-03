@@ -1635,83 +1635,25 @@ register struct monst *mtmp;
 	}
 toofar:
 
-	/* If monster is nearby you, and has to wield a weapon, do so.   This
-	 * costs the monster a move, of course.
-	 */
-	if((!mtmp->mpeaceful || Conflict) && inrange &&
-	   dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 8
-	   && !no_upos(mtmp)
-	   && attacktype(mdat, AT_WEAP)) {
-	    struct obj *mw_tmp;
+	if (TRUE); /* stupid to make the label not label a declaration */
 
-	    /* The scared check is necessary.  Otherwise a monster that is
-	     * one square near the player but fleeing into a wall would keep	
-	     * switching between pick-axe and weapon.  If monster is stuck
-	     * in a trap, prefer ranged weapon (wielding is done in thrwmu).
-	     * This may cost the monster an attack, but keeps the monster
-	     * from switching back and forth if carrying both.
-	     */
-	    mw_tmp = MON_WEP(mtmp);
-	    if (!(scared && mw_tmp && is_pick(mw_tmp)) &&
-		mtmp->weapon_check == NEED_WEAPON &&
-		!(mtmp->mtrapped && !nearby && select_rwep(mtmp))) {
-			mtmp->combat_mode = HNDHND_MODE;
-			mtmp->weapon_check = NEED_HTH_WEAPON;
-			if (mon_wield_item(mtmp) != 0) return(0);
-	    }
-	}
-/*      Look for other monsters to fight (at a distance) */
-	if ((
-	      (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan) ||
-	      attacktype(mtmp->data, AT_ARRW) ||
-	      attacktype(mtmp->data, AT_LNCK) ||
-	      attacktype(mtmp->data, AT_LRCH) ||
-	      attacktype(mtmp->data, AT_5SQR) ||
-	      attacktype(mtmp->data, AT_5SBT) ||
-	      (!mtmp->mspec_used && 
-			(attacktype(mtmp->data, AT_SPIT) ||
-			 attacktype(mtmp->data, AT_TNKR) ||
-			 attacktype(mtmp->data, AT_BEAM) ||
-			 (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan)
-			)
-		  )||
-	     (attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan &&
-			(((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp
-	         <= AD_SPC2))
-	      ) ||
-	     (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan &&
-	      (((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp
-	         <= AD_SPC2))
-	      ) ||
-	     (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan &&
-	      (((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp
-	         == AD_RBRE))
-	      ) ||
-	     (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan &&
-	      (((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp
-	         == AD_OONA))
-	      ) ||
-	     (attacktype(mtmp->data, AT_WEAP) &&
-	      (select_rwep(mtmp) != 0)) ||
-	      find_offensive(mtmp)) && 
-	    mtmp->mlstmv != monstermoves)
-	{
-	    register struct monst *mtmp2 = mfind_target(mtmp, FALSE);
-	    if (mtmp2 && 
-	        (mtmp2 != &youmonst || 
-				dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) > 2) &&
-			(mtmp2 != mtmp)
-		){
-	        int res;
-			mon_ranged_gazeonly = 1;//State variable
-			res = (mtmp2 == &youmonst) ? mattacku(mtmp)
-		                           : mattackm(mtmp, mtmp2);
-			/* note: mattacku and mattackm have different returns */
-			if (res & MM_AGR_DIED) return 1; /* Oops. */
+	/* Look for other monsters to fight (at a distance) */
+	struct monst *mtmp2 = mfind_target(mtmp, FALSE);
+	if (mtmp2 && 
+	    (mtmp2 != &youmonst || 
+			dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) > 2) &&
+		(mtmp2 != mtmp)
+	){
+	    int res;
+		mon_ranged_gazeonly = 1;//State variable
+		res = (mtmp2 == &youmonst) ? mattacku(mtmp)
+		                        : mattackm(mtmp, mtmp2);
 
-			if(!(mon_ranged_gazeonly))
-				return 0; /* that was our move for the round */
-	    }
+		if (res & MM_AGR_DIED)
+			return 1; /* Oops. */
+
+		if(!(mon_ranged_gazeonly) && (res & MM_HIT))
+			return 0; /* that was our move for the round */
 	}
 
 /*	Now the actual movement phase	*/

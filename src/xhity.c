@@ -609,22 +609,31 @@ int tary;
 				(aatyp == AT_WEAP || aatyp == AT_DEVA) &&				// using a primary weapon attack
 				(magr->weapon_check == NEED_WEAPON || !MON_WEP(magr))	// needs a weapon
 				){
+				/* what ranged weapon options do we have? */
+				otmp = select_rwep(magr);
+
 				/* pick appropriate weapon based on range to target */
 				if (dist2(x(magr), y(magr), tarx, tary) <= 
-					(MON_WEP(magr) && is_pole(MON_WEP(magr))) ? 2 : 8)	// if a polearm is wielded, continue using it 2 < x <= 8
+					((otmp && is_pole(otmp)) ? 2 : 8))		// if we have a polearm, use it longer range
 				{
-					/* melee or polearm range */
+					/* melee range */
 					magr->combat_mode = HNDHND_MODE;
 					magr->weapon_check = NEED_HTH_WEAPON;
 				}
 				else {
-					/* long range */
+					/* long or polearm range */
 					magr->combat_mode = RANGED_MODE;
 					magr->weapon_check = NEED_RANGED_WEAPON;
 				}
 				if (mon_wield_item(magr) != 0)				// and try to wield something (did it take time?)
 				{
-					continue;								// it took time, don't attack using this action
+					if (MON_WEP(magr) && is_pole(MON_WEP(magr))) {
+						/* you can wield a polearm and attack in the same action */
+					}
+					else {
+						allres |= MM_HIT;					// this xattacky() call took time
+						continue;							// it took time, don't attack using this action
+					}
 				}
 			}
 			/* 2: Offhand attack when not allowed */

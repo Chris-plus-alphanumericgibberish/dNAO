@@ -93,7 +93,29 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 	
 	struct obj *mrwep = select_rwep(magr);
 	
-	if (is_derived_undead_mon(magr)) return 0;
+	if (is_derived_undead_mon(magr))
+		return (struct monst *)0;
+
+	/* Check that magr can make any ranged attacks at all */
+	if (!force_linedup &&
+		!(
+		(attacktype(magr->data, AT_WEAP) && mrwep) ||
+		(attacktype(magr->data, AT_DEVA) && mrwep) ||
+		(attacktype(magr->data, AT_BREA) && !magr->mcan) ||
+		(attacktype(magr->data, AT_MAGC) && !magr->mcan) ||
+		(attacktype(magr->data, AT_MMGC) && !magr->mcan) ||
+		(attacktype(magr->data, AT_GAZE) && !magr->mcan) ||
+		(attacktype(magr->data, AT_SPIT)) ||
+		(attacktype(magr->data, AT_ARRW)) ||
+		(attacktype(magr->data, AT_TNKR)) ||
+		(attacktype(magr->data, AT_BEAM)) ||
+		(attacktype(magr->data, AT_LRCH)) ||
+		(attacktype(magr->data, AT_LNCK)) ||
+		(attacktype(magr->data, AT_5SQR)) ||
+		(attacktype(magr->data, AT_5SBT)) ||
+		(is_commander(magr->data))
+		))
+		return (struct monst *)0;
 
 	/* priority of targets:
 	 * covetous item holder
@@ -130,6 +152,10 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 		if (mdef == &youmonst) {
 			tarx = magr->mux;
 			tary = magr->muy;
+
+			/* don't attempt to attack self if displacement made magr think player is on top of magr */
+			if (tarx == magr->mx && tary == magr->my)
+				continue;
 		}
 		else {
 			tarx = mdef->mx;
