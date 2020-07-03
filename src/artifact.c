@@ -534,8 +534,8 @@ struct obj * otmp;
 		/* cannot already exist */
 		if (artiexist[m])
 			continue;
-		/* cannot be nogen, unless the base object is unique */
-		if (a->gflags & ARTG_NOGEN && !objects[otmp->otyp].oc_unique)
+		/* cannot be nogen, with exceptions */
+		if (a->gflags & ARTG_NOGEN && !(otmp->otyp == SPE_SECRETS))
 			continue;
 		/* must match otyp (or be acceptable) */
 		if (!artitypematch(a, otmp))
