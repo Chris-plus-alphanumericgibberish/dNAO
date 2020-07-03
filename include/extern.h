@@ -1229,7 +1229,7 @@ E void FDECL(mimic_hit_msg, (struct monst *, SHORT_P));
 #ifdef GOLDOBJ
 E void FDECL(mkmonmoney, (struct monst *, long));
 #endif
-E void FDECL(bagotricks, (struct obj *));
+E int FDECL(bagotricks, (struct obj *, boolean, int *));
 E boolean FDECL(propagate, (int, BOOLEAN_P,BOOLEAN_P));
 E boolean FDECL(mon_can_see_you, (struct monst *));
 E boolean FDECL(mon_can_see_mon, (struct monst *, struct monst *));
@@ -1337,6 +1337,7 @@ E void FDECL(set_obj_size, (struct obj *, int));
 E void FDECL(set_obj_quan, (struct obj *, int));
 E void FDECL(maybe_set_material, (struct obj *, int, boolean));
 E void FDECL(set_material, (struct obj *, int));
+E void FDECL(set_material_gm, (struct obj *, int));
 E int FDECL(weight, (struct obj *));
 E struct obj *FDECL(mkgold, (long,int,int));
 E struct obj *FDECL(mkgold_core, (long,int,int,boolean));
@@ -1370,6 +1371,7 @@ E struct obj *FDECL(add_to_container, (struct obj *, struct obj *));
 E void FDECL(add_to_migration, (struct obj *));
 E void FDECL(add_to_buried, (struct obj *));
 E void FDECL(dealloc_obj, (struct obj *));
+E int FDECL(hornoplenty, (struct obj *, boolean));
 E void FDECL(obj_ice_effects, (int, int, BOOLEAN_P));
 E long FDECL(peek_at_iced_corpse_age, (struct obj *));
 E void FDECL(doMaskStats, (struct obj *));
@@ -1968,6 +1970,7 @@ E int FDECL(query_objlist, (const char *, struct obj *, int,
 E struct obj *FDECL(pick_obj, (struct obj *));
 E int NDECL(encumber_msg);
 E int NDECL(doloot);
+E int NDECL(dotip);
 E int NDECL(dopetequip);
 E int FDECL(use_container, (struct obj *,int));
 E int FDECL(use_massblaster, (struct obj *));
@@ -2117,7 +2120,6 @@ E boolean FDECL(m_online, (struct monst *, struct monst *, int, int, boolean, bo
 E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
 E boolean NDECL(android_combo);
 E boolean FDECL(umetgaze, (struct monst *));
-E boolean FDECL(mmetgaze, (struct monst *, struct monst *));
 E int NDECL(dothrow);
 E int NDECL(dofire);
 E int FDECL(mthrow, (struct monst *, struct obj *, struct obj *, int, int, boolean));
@@ -2208,8 +2210,8 @@ E NhRegion *FDECL(visible_region_at, (XCHAR_P,XCHAR_P));
 E void FDECL(show_region, (NhRegion*, XCHAR_P, XCHAR_P));
 E void FDECL(save_regions, (int,int));
 E void FDECL(rest_regions, (int,BOOLEAN_P));
-E NhRegion* FDECL(create_gas_cloud, (XCHAR_P, XCHAR_P, int, int));
-E NhRegion* FDECL(create_fog_cloud, (XCHAR_P, XCHAR_P, int, int));
+E NhRegion* FDECL(create_gas_cloud, (XCHAR_P, XCHAR_P, int, int, boolean));
+E NhRegion* FDECL(create_fog_cloud, (XCHAR_P, XCHAR_P, int, int, boolean));
 E NhRegion* FDECL(create_dust_cloud, (XCHAR_P, XCHAR_P, int, int));
 
 /* ### restore.c ### */

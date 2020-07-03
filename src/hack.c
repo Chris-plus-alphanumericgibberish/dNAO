@@ -767,7 +767,7 @@ int mode;
 		!In_sokoban(&u.uz)) {
 		if (still_chewing(x,y)) return FALSE;
 	    } else
-		if (moverock() < 0) return FALSE;
+		if (flags.run || moverock() < 0) return FALSE;
 	} else if (mode == TEST_TRAV) {
 	    struct obj* obj;
 
@@ -2673,7 +2673,7 @@ weight_cap()
 
 		static int hboots = 0;
 		if (!hboots) hboots = find_hboots();
-		if (boots && boots->otyp == hboots) carrcap += boots->cursed ? 0 : 100; 
+		if (boots && boots->otyp == hboots) carrcap += 100; 
 		
 		if (!Flying) {
 			if(EWounded_legs & LEFT_SIDE) carrcap -= 100;

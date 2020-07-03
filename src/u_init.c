@@ -604,6 +604,11 @@ static struct trobj ExtraBook[] = {
 	{ UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 1 },
 	{ 0, 0, 0, 0, 0 }
 };
+static struct trobj CarvingTools[] = {
+	{ CLUB, 0, WEAPON_CLASS, 1, 0 },
+	{ KNIFE, 0, WEAPON_CLASS, 1, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj GnomishHat[] = {
 	{ GNOMISH_POINTY_HAT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ 0, 0, 0, 0, 0 }
@@ -720,7 +725,6 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_ORC,	RING_MAIL,		ORCISH_RING_MAIL      },
     { PM_ORC,	CHAIN_MAIL,		ORCISH_CHAIN_MAIL     },
     // Dwarf substitutions
-    { PM_DWARF,	KNIFE,				DAGGER	      		  },
     { PM_DWARF, SPEAR,				DWARVISH_SPEAR	      },
     { PM_DWARF, SHORT_SWORD,		DWARVISH_SHORT_SWORD  },
     { PM_DWARF, HELMET,				DWARVISH_HELM    },
@@ -2593,20 +2597,13 @@ u_init()
 	    knows_object(DWARVISH_MITHRIL_COAT);
 	    knows_object(DWARVISH_CLOAK);
 	    knows_object(DWARVISH_ROUNDSHIELD);
-		otmp = mksobj(CLUB, TRUE, FALSE);
-		otmp->spe = otmp->cursed = otmp->blessed = 0;
-		if(Role_if(PM_EXILE)) otmp->dknown = otmp->rknown = otmp->sknown = 1;
-		else otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
-		addinv(otmp);
-		otmp = mksobj(KNIFE, TRUE, FALSE);
-		otmp->spe = otmp->cursed = otmp->blessed = 0;
-		if(Role_if(PM_EXILE)) otmp->dknown = otmp->rknown = otmp->sknown = 1;
-		else otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
-		addinv(otmp);
+		/* Dwarves know all carved wards */
 		u.wardsknown |= WARD_TOUSTEFNA;
 		u.wardsknown |= WARD_DREPRUN;
 		u.wardsknown |= WARD_VEIOISTAFUR;
 		u.wardsknown |= WARD_THJOFASTAFUR;
+		/* And get the tools to carve one */
+		ini_inv(CarvingTools);
 	}break;
 
 	case PM_GNOME:
@@ -3179,7 +3176,7 @@ register struct trobj *trop;
 				}
 			}
 			obj = mksobj(otyp, TRUE, FALSE);
-			set_material(obj, objects[otyp].oc_material);
+			set_material_gm(obj, objects[otyp].oc_material);
 
 			if(obj->otyp == POT_BLOOD) 
 				obj->corpsenm = PM_HUMAN;
@@ -3192,33 +3189,32 @@ register struct trobj *trop;
 			}
 			if(obj->otyp == BULLWHIP && Race_if(PM_DROW) && flags.initgend){
 				obj->otyp = VIPERWHIP;
-				set_material(obj, SILVER);
+				set_material_gm(obj, SILVER);
 				obj->ovar1 = 1;
 			}
 			if(obj->otyp == SLIME_MOLD && Race_if(PM_DROW)){
 				obj->spe = fruitadd("mushroom cake");
 			}
 			if(obj->otyp == HEAVY_MACHINE_GUN && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
-				set_material(obj, MITHRIL);
+				set_material_gm(obj, MITHRIL);
 			}
 			if(obj->otyp == BATTLE_AXE && Role_if(PM_ANACHRONONAUT) && Race_if(PM_ANDROID)){
 				set_obj_size(obj, MZ_LARGE);
 			}
 			if(obj->otyp == SCALE_MAIL && Role_if(PM_ANACHRONONAUT)){
-				set_material(obj, COPPER);
+				set_material_gm(obj, COPPER);
 			}
 			if(obj->otyp == GAUNTLETS && Role_if(PM_ANACHRONONAUT)){
-				set_material(obj, COPPER);
+				set_material_gm(obj, COPPER);
 			}
 			if(obj->otyp == GAUNTLETS && Race_if(PM_CHIROPTERAN)){
-				obj->obj_material = LEATHER;
-				fix_object(obj);
+				set_material_gm(obj, LEATHER);
 			}
 			if(obj->otyp == PISTOL && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
-				set_material(obj, MITHRIL);
+				set_material_gm(obj, MITHRIL);
 			}
 			if(obj->otyp == SEISMIC_HAMMER && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
-				set_material(obj, MITHRIL);
+				set_material_gm(obj, MITHRIL);
 			}
 			
 			/* Don't start with +0 or negative rings */
@@ -3249,7 +3245,7 @@ register struct trobj *trop;
 			if((Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && trop->trclass == RING_CLASS) obj = mksobj(find_signet_ring(),TRUE,FALSE);
 			else obj = mkobj(trop->trclass, FALSE);
 			otyp = obj->otyp;
-			set_material(obj, objects[otyp].oc_material);
+			set_material_gm(obj, objects[otyp].oc_material);
 			while (otyp == WAN_WISHING
 				|| otyp == RIN_WISHES
 				|| otyp == nocreate
@@ -3297,7 +3293,7 @@ register struct trobj *trop;
 				dealloc_obj(obj);
 				obj = mkobj(trop->trclass, FALSE);
 				otyp = obj->otyp;
-				set_material(obj, objects[otyp].oc_material);
+				set_material_gm(obj, objects[otyp].oc_material);
 			}
 
 			/* Don't start with +0 or negative rings */
@@ -3349,7 +3345,7 @@ register struct trobj *trop;
 					knows_object(obj->otyp);
 					if(obj->oclass == WEAPON_CLASS){
 						if(obj->obj_material == METAL){
-							set_material(obj, IRON);
+							set_material_gm(obj, IRON);
 						}
 						if(obj->obj_material != WOOD) obj->oeroded = 1;
 						else obj->oeroded2 = 1;
@@ -3393,9 +3389,9 @@ register struct trobj *trop;
 				if(Role_if(PM_SAMURAI) && obj->oclass == ARMOR_CLASS && obj->obj_material == IRON) obj->oerodeproof = 1;
 				if(Role_if(PM_SAMURAI) && obj->otyp == MASK){
 					if(hates_iron(youracedata)){
-						set_material(obj, Race_if(PM_DROW) ? OBSIDIAN_MT : MITHRIL);
+						set_material_gm(obj, Race_if(PM_DROW) ? OBSIDIAN_MT : MITHRIL);
 					} else {
-						set_material(obj, IRON);
+						set_material_gm(obj, IRON);
 					}
 //					obj->oerodeproof = 1;
 					obj->corpsenm = PM_HUMAN;
@@ -3443,7 +3439,7 @@ register struct trobj *trop;
 				&& !is_ammo(obj)
 			){
 				if(obj->obj_material == SILVER){
-					set_material(obj, GOLD);
+					set_material_gm(obj, GOLD);
 				}
 			}
 			if(hates_iron(youracedata)
@@ -3451,7 +3447,7 @@ register struct trobj *trop;
 				&& !is_ammo(obj)
 			){
 				if(obj->obj_material == IRON){
-					set_material(obj, Race_if(PM_DROW) ? OBSIDIAN_MT : MITHRIL);
+					set_material_gm(obj, Race_if(PM_DROW) ? OBSIDIAN_MT : MITHRIL);
 				}
 			}
 #ifdef GOLDOBJ

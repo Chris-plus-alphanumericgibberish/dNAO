@@ -408,7 +408,7 @@ struct obj *corpse;
 		/* embed your possessions in your statue */
 		otmp = mk_named_object(STATUE, &mons[u.umonnum],
 				       u.ux, u.uy, plname);
-		set_material(otmp, GOLD);
+		set_material_gm(otmp, GOLD);
 		drop_upon_death((struct monst *)0, otmp);
 		if (!otmp) return;	/* couldn't make statue */
 		mtmp = (struct monst *)0;
@@ -418,7 +418,7 @@ struct obj *corpse;
 		/* embed your possessions in your statue */
 		otmp = mk_named_object(STATUE, &mons[u.umonnum],
 				       u.ux, u.uy, plname);
-		set_material(otmp, GLASS);
+		set_material_gm(otmp, GLASS);
 		drop_upon_death((struct monst *)0, otmp);
 		if (!otmp) return;	/* couldn't make statue */
 		mtmp = (struct monst *)0;

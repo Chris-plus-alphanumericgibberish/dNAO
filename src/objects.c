@@ -1415,7 +1415,7 @@ SPELL("blank paper",     "plain",       P_NONE,					18, 0, 0, 0,         HI_PAPE
 /* a special, one of a kind, spellbook */
 OBJECT(OBJ("Book of the Dead", "papyrus"), BITS(0,0,1,0,1,0,1,1,MZ_LARGE,0,0,P_NONE,PAPER,0), 0,
 	SPBOOK_CLASS, 0, 0,20, 10000, 0, 0, 0, 7, 0, 20, HI_PAPER),
-OBJECT(OBJ("secrets", "ragged leather"), BITS(0,0,1,0,1,0,1,1,MZ_LARGE,0,0,P_NONE,PAPER,0), 0,
+OBJECT(OBJ("secrets", "ragged leather"), BITS(0,0,1,0,1,0,0,1,MZ_LARGE,0,0,P_NONE,PAPER,0), 0,
 	SPBOOK_CLASS, 0, 0,20, 10000, 0, 0, 0, 7, 0, 20, CLR_BROWN),
 #undef SPELL
 

@@ -505,7 +505,7 @@ int sx, sy;
 					newobj->shopOwned = TRUE;
 					if (newobj) {
 						if (is_metallic(newobj) && !newobj->oartifact)
-							set_material(newobj, MINERAL);
+							set_material_gm(newobj, MINERAL);
 						else if (newobj->obj_material == CLOTH)
 							newobj->oproperties = OPROP_WOOL;
 
@@ -534,7 +534,7 @@ int sx, sy;
 					if (newobj) {
 						newobj->shopOwned = TRUE;
 						if (is_metallic(newobj) && !newobj->oartifact)
-							set_material(newobj, SHELL_MAT);
+							set_material_gm(newobj, SHELL_MAT);
 
 						/* replace curobj with newobj */
 						delobj(curobj);
@@ -547,7 +547,7 @@ int sx, sy;
 					struct obj * newobj = mksobj_at(garden_weapons[rn2(SIZE(garden_weapons))], sx, sy, TRUE, TRUE);
 					if (newobj) {
 						newobj->shopOwned = TRUE;
-						set_material(newobj, SHELL_MAT);
+						set_material_gm(newobj, SHELL_MAT);
 						newobj->opoisoned = rn2(3) ? OPOISON_BASIC : OPOISON_ACID;
 
 						/* replace curobj with newobj */
@@ -563,7 +563,7 @@ int sx, sy;
 			}
 			if (shp->shoptype == SEAFOOD) {
 				if (curobj->oclass == AMULET_CLASS) {
-					set_material(curobj, GOLD);
+					set_material_gm(curobj, GOLD);
 				}
 				else if (curobj->otyp == SLIME_MOLD){
 					switch(rnd(6)){
@@ -594,7 +594,7 @@ int sx, sy;
 					if (newobj) {
 						newobj->shopOwned = TRUE;
 						if(!newobj->oartifact && newobj->otyp != CRYSTAL_SWORD)
-							set_material(newobj, SILVER);
+							set_material_gm(newobj, SILVER);
 						
 						if (newobj->obj_material != SILVER && !rn2(3))
 							newobj->opoisoned = OPOISON_SILVER;

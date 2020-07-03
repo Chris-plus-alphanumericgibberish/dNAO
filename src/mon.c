@@ -289,7 +289,7 @@ register struct monst *mtmp;
 	if(mtmp->mfaction == CRYSTALFIED){
 		obj = mkcorpstat(STATUE, (struct monst *)0,
 			mdat, x, y, FALSE);
-		set_material(obj, GLASS);
+		set_material_gm(obj, GLASS);
 	} else if(mtmp->mfaction == TOMB_HERD) {
 		obj = mkcorpstat(STATUE, (struct monst *)0,
 			mdat, x, y, FALSE);
@@ -367,7 +367,7 @@ register struct monst *mtmp;
 	    case PM_MANTICORE:
 		if (mtmp->mrevived ? !rn2(6) : TRUE) {
 			obj = mksobj_at(SPIKE, x, y, TRUE, FALSE);
-			set_material(obj, BONE);
+			set_material_gm(obj, BONE);
 			obj->blessed = 0;
 			obj->cursed = 0;
 			obj->quan = d(4,6);
@@ -543,7 +543,7 @@ register struct monst *mtmp;
 			num = d(3,6);
 			while(num--){
 				obj = mksobj_at(PLATE_MAIL, x, y, TRUE, FALSE);
-				set_material(obj, COPPER);
+				set_material_gm(obj, COPPER);
 				obj->spe = 3;
 			}
 			num = d(2,4);
@@ -643,22 +643,22 @@ register struct monst *mtmp;
 			num = d(2,4);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 			}
 		break;
@@ -672,11 +672,11 @@ register struct monst *mtmp;
 			num = d(2,6);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -711,10 +711,10 @@ register struct monst *mtmp;
 		break;
 	    case PM_CRUCIFIED_ANDROID:
 			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			mon = makemon(&mons[PM_ANDROID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 			if (mon){
@@ -786,10 +786,10 @@ register struct monst *mtmp;
 		break;
 	    case PM_CRUCIFIED_GYNOID:
 			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			mon = makemon(&mons[PM_GYNOID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 			if (mon){
@@ -886,7 +886,7 @@ register struct monst *mtmp;
 		break;
 	    case PM_PARASITIZED_COMMANDER:
 			obj = mksobj_at(SHACKLES, x, y, FALSE, FALSE);
-			set_material(obj, IRON);
+			set_material_gm(obj, IRON);
 			obj->oproperties = OPROP_ELECW;
 			obj->oeroded = 1;
 			mon = makemon(&mons[PM_COMMANDER], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
@@ -921,11 +921,11 @@ register struct monst *mtmp;
 			num = d(2,6);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj = mksobj_at(KITE_SHIELD, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -933,7 +933,7 @@ register struct monst *mtmp;
 			num = d(6,6);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
-				set_material(obj, IRON);
+				set_material_gm(obj, IRON);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -972,7 +972,7 @@ register struct monst *mtmp;
 			num = d(2,4);
 			while(num--) {
 				obj = mksobj_at(QUARTERSTAFF, x, y, TRUE, FALSE);
-				set_material(obj, WOOD);
+				set_material_gm(obj, WOOD);
 			}
 			mtmp->mnamelth = 0;
 		break;
@@ -980,7 +980,7 @@ register struct monst *mtmp;
 			num = d(3,4);
 			while(num--) {
 				obj = mksobj_at(QUARTERSTAFF, x, y, TRUE, FALSE);
-				set_material(obj, WOOD);
+				set_material_gm(obj, WOOD);
 				obj->spe = rnd(3);
 			}
 			mtmp->mnamelth = 0;
@@ -989,7 +989,7 @@ register struct monst *mtmp;
 			num = d(2,3);
 			while(num--) {
 				obj = mksobj_at(CLUB, x, y, TRUE, FALSE);
-				set_material(obj, WOOD);
+				set_material_gm(obj, WOOD);
 			}
 			obj = mkobj_at(SPBOOK_CLASS, x, y, FALSE);
 			mtmp->mnamelth = 0;
@@ -1056,9 +1056,7 @@ register struct monst *mtmp;
 		goto default_1;
 		break;
 	    case PM_CHANGED:
-			flags.cth_attk=TRUE;//state machine stuff.
-			create_gas_cloud(x, y, 4, rnd(3)+1);
-			flags.cth_attk=FALSE;
+			create_gas_cloud(x, y, 4, rnd(3)+1, FALSE);
 			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
 			obj->corpsenm = humanoid_eyes[rn2(SIZE(humanoid_eyes))];
 			obj->quan = 2;
@@ -1066,9 +1064,7 @@ register struct monst *mtmp;
 		goto default_1;
 		break;
 	    case PM_WARRIOR_CHANGED:
-			flags.cth_attk=TRUE;//state machine stuff.
-			create_gas_cloud(x, y, 5, rnd(3)+1);
-			flags.cth_attk=FALSE;
+			create_gas_cloud(x, y, 5, rnd(3)+1, FALSE);
 			num = rn1(10,10);
 			while (num--){
 				obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
@@ -1077,9 +1073,7 @@ register struct monst *mtmp;
 		goto default_1;
 		break;
 	    case PM_TWITCHING_FOUR_ARMED_CHANGED:
-			flags.cth_attk=TRUE;//state machine stuff.
-			create_gas_cloud(x, y, 4, rnd(3)+1);
-			flags.cth_attk=FALSE;
+			create_gas_cloud(x, y, 4, rnd(3)+1, FALSE);
 			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
 			obj->corpsenm = PM_MYRKALFR;
 			obj->quan = 2;
@@ -1099,9 +1093,7 @@ register struct monst *mtmp;
 		goto default_1;
 		break;
 	    case PM_CLAIRVOYANT_CHANGED:
-			flags.cth_attk=TRUE;//state machine stuff.
-			create_gas_cloud(x, y, 4, rnd(3)+1);
-			flags.cth_attk=FALSE;
+			create_gas_cloud(x, y, 4, rnd(3)+1, FALSE);
 			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
 			obj->corpsenm = PM_HUMAN;
 			obj->quan = 2;
@@ -1494,9 +1486,7 @@ mcalcdistress()
 	}
 
 	if(mtmp->mtyp == PM_HEZROU && !(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
-		flags.cth_attk=TRUE;//state machine stuff.
-		create_gas_cloud(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, rnd(3), rnd(3)+1);
-		flags.cth_attk=FALSE;
+		create_gas_cloud(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, rnd(3), rnd(3)+1, FALSE);
 	}
 	
 	if(mtmp->mtyp == PM_FIRST_WRAITHWORM && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < 6){
@@ -4664,9 +4654,7 @@ boolean was_swallowed;			/* digestion */
 	    	killer_format = KILLED_BY_AN;
 			explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, d(8,8), EXPL_NOXIOUS, 1);
 			if(mdat->mtyp==PM_GREAT_CTHULHU){
-				flags.cth_attk=TRUE;//state machine stuff.
-				create_gas_cloud(mon->mx, mon->my, 2, 30);
-				flags.cth_attk=FALSE;
+				create_gas_cloud(mon->mx, mon->my, 2, 30, FALSE);
 			}
 		}
 		else if(mdat->mattk[i].adtyp == AD_GROW && (mdat->mtyp==PM_AXUS)){
@@ -4899,7 +4887,7 @@ struct monst *mon;
 	    coord mm; schar ltyp;
 	    mm.x = mon->mx; mm.y = mon->my;
 	    ltyp = levl[mm.x][mm.y].typ;
-	    create_gas_cloud(mm.x, mm.y, rn1(2,1), rnd(8));
+	    create_gas_cloud(mm.x, mm.y, rn1(2,1), rnd(8), FALSE);
 	    /* all fern spores have a 2/3 chance of creating nothing, except for
 	       the generic fern spore, which guarantees a terrain-appropriate fern */
 	    if (mon->mtyp == PM_DUNGEON_FERN_SPORE) {
@@ -5155,7 +5143,7 @@ register struct monst *mdef;
 		   item-conferred attributes */
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
-		set_material(otmp, GOLD);
+		set_material_gm(otmp, GOLD);
 		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
@@ -5289,7 +5277,7 @@ register struct monst *mdef;
 		   item-conferred attributes */
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
-		set_material(otmp, GLASS);
+		set_material_gm(otmp, GLASS);
 		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;

@@ -437,7 +437,7 @@ dig()
 				}
 				for(numsticks = d(2,4)-1; numsticks > 0; numsticks--){
 					staff = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, dpx, dpy, FALSE, FALSE);
-					set_material(staff, WOOD);
+					set_material_gm(staff, WOOD);
 					staff->spe = 0;
 					staff->cursed = staff->blessed = FALSE;
 				}
@@ -457,7 +457,7 @@ dig()
 					} else {
 						if(Is_belial_level(&u.uz)){
 							otmp = mksobj_at(DROVEN_DAGGER, dpx, dpy, FALSE, FALSE);
-							set_material(otmp, OBSIDIAN_MT);
+							set_material_gm(otmp, OBSIDIAN_MT);
 						} else {
 							otmp = mksobj_at(ROCK, dpx, dpy, FALSE, FALSE);
 						}
@@ -489,7 +489,7 @@ dig()
 			if(!is_lightsaber(digitem)){
 				if(Is_belial_level(&u.uz)){
 					otmp = mksobj_at(DROVEN_DAGGER, dpx, dpy, FALSE, FALSE);
-					set_material(otmp, OBSIDIAN_MT);
+					set_material_gm(otmp, OBSIDIAN_MT);
 				} else {
 					otmp = mksobj_at(ROCK, dpx, dpy, FALSE, FALSE);
 				}
@@ -1892,7 +1892,7 @@ register struct monst *mtmp;
 		}
 		if(Is_belial_level(&u.uz)){
 			otmp = mksobj_at(DROVEN_DAGGER, mtmp->mx, mtmp->my, FALSE, FALSE);
-			set_material(otmp, OBSIDIAN_MT);
+			set_material_gm(otmp, OBSIDIAN_MT);
 		} else {
 			otmp = mksobj_at(ROCK, mtmp->mx, mtmp->my, FALSE, FALSE);
 		}
@@ -1902,7 +1902,7 @@ register struct monst *mtmp;
 	    here->typ = ROOM;
 		for(numsticks = d(2,4)-1; numsticks > 0; numsticks--){
 			otmp = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, mtmp->mx, mtmp->my, FALSE, FALSE);
-			set_material(otmp, WOOD);
+			set_material_gm(otmp, WOOD);
 			otmp->spe = 0;
 			otmp->cursed = otmp->blessed = FALSE;
 		}
@@ -1912,7 +1912,7 @@ register struct monst *mtmp;
 		else {
 			if(Is_belial_level(&u.uz)){
 				otmp = mksobj_at(DROVEN_DAGGER, mtmp->mx, mtmp->my, FALSE, FALSE);
-				set_material(otmp, OBSIDIAN_MT);
+				set_material_gm(otmp, OBSIDIAN_MT);
 			} else {
 				otmp = mksobj_at(ROCK, mtmp->mx, mtmp->my, FALSE, FALSE);
 			}

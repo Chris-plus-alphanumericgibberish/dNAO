@@ -1962,6 +1962,16 @@ struct obj	*sobj;
 			    else uncurse(obj);
 			}
 		    }
+#ifdef STEED
+			/* also affects saddles */
+			if (u.usteed) {	
+				obj = which_armor(u.usteed, W_SADDLE);
+				if (obj) {
+					if (confused) blessorcurse(obj, 2);
+					else uncurse(obj);
+				}
+			}
+#endif
 		}
 		if(Punished && !confused) unpunish();
 		update_inventory();
@@ -2507,8 +2517,7 @@ struct obj	*sobj;
 		    You("smell rotten eggs.");
 		    return 0;
 		}
-		(void) create_gas_cloud(cc.x, cc.y, 3+bcsign(sobj),
-						8+4*bcsign(sobj));
+		(void) create_gas_cloud(cc.x, cc.y, 3+bcsign(sobj), 8+4*bcsign(sobj), TRUE);
 		break;
 	}
 	case SPE_ANTIMAGIC_SHIELD:

@@ -1762,7 +1762,7 @@ int shotlimit;
 	}
 
 	/* The Fluorite Octet can be thrown (by hand) as many as wanted at once */
-	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON && !launcher)
+	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON && !launcher && !(youagr && Race_if(PM_ANDROID)))
 		multishot = shotlimit ? shotlimit : 8;
 
 	/* For most things, limit multishot to ammo supply */
@@ -2330,6 +2330,9 @@ boolean forcedestroy;
 	m_shot.o = ammo->otyp;
 	m_shot.n = multishot;
 	
+	if (!shotlimit && ammo->oartifact == ART_FLUORITE_OCTAHEDRON)
+		shotlimit = m_shot.n;
+	
 	/* give a message if shooting more than one, or if player attempted to specify a count */
 	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON){
 		if (!m_shot.s){
@@ -2648,10 +2651,15 @@ int tary;
 		pline("%s breathes %s!", Monnam(magr), breathwep(typ));
 	}
 	
+	/* set dragonbreath flag if applicable*/
+	if (is_true_dragon(pa))
+		flags.drgn_brth = TRUE;
 	/* do the beam (sadly buzz doesn't do dz) */
 	buzz(typ, FOOD_CLASS, FALSE, (int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)),
 		x(magr), y(magr), dx, dy, 0, attk->damd ? (d((int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)), (int)attk->damd)*mult) : 0);
-	
+	/* reset flag */
+	flags.drgn_brth = FALSE;
+
 	/* interrupt player if they were targetted */
 	if (tarx == u.ux && tary == u.uy)
 		nomul(0, NULL);
@@ -2800,7 +2808,7 @@ int tary;
 		if (!youagr && onscary(tarx, tary, magr)) return FALSE; //Warded; did not fire
 		ammo_type = SPIKE;
 		qvr = mksobj(ammo_type, FALSE, FALSE);
-		set_material(qvr, SHADOWSTEEL);
+		set_material_gm(qvr, SHADOWSTEEL);
 		qvr->quan = 1;
 		qvr->spe = 8;
 		qvr->opoisoned = (OPOISON_BASIC | OPOISON_BLIND);
@@ -2820,7 +2828,7 @@ int tary;
 	case AD_PLYS:
 		ammo_type = SPIKE;
 		qvr = mksobj(ammo_type, FALSE, FALSE);
-		set_material(qvr, BONE);
+		set_material_gm(qvr, BONE);
 		qvr->quan = 1;
 		qvr->opoisoned = (OPOISON_PARAL);
 		break;

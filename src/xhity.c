@@ -9323,6 +9323,7 @@ boolean * needs_uncancelled;
 			if (adtyp == AD_CONF
 				|| adtyp == AD_WISD
 				|| (adtyp == AD_BLND && pa->mtyp == PM_BLESSED)
+				|| (adtyp == AD_STON && pa->mtyp == PM_MEDUSA)	/* acutally can be cancelled, but we want to print a special message */
 				)
 				maybeset(needs_uncancelled, FALSE);
 			maybeset(needs_magr_eyes, FALSE);
@@ -9374,6 +9375,7 @@ boolean * needs_uncancelled;
 #undef maybeset
 }
 
+/* still needed to support old AD_SEDU gaze attack */
 boolean
 umetgaze(mtmp)
 struct monst *mtmp;
@@ -9381,13 +9383,6 @@ struct monst *mtmp;
 	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) && multi>=0);
 }
 
-boolean
-mmetgaze(looker, lookie)
-struct monst *looker;
-struct monst *lookie;
-{
-	return (mon_can_see_mon(looker, lookie) && !(is_blind(looker) || is_blind(lookie)) && !(looker->msleeping || lookie->msleeping));
-}
 
 /* xgazey()
  * 
@@ -9463,11 +9458,6 @@ int vis;
 	if (!youdef && (adtyp == AD_WTCH || adtyp == AD_MIST || adtyp == AD_SPOR))
 		return MM_MISS;
 
-	/* actually, right now, all stoning gazes are a straight copy-paste, so do this for now. */
-	if (adtyp == AD_STON) {
-		needs_magr_eyes = needs_mdef_eyes = maybe_not = needs_uncancelled = FALSE;
-	}
-
 	if (pa->mtyp == PM_DEMOGORGON) {					// Demogorgon is special
 		needs_mdef_eyes = TRUE;
 		needs_uncancelled = FALSE;
@@ -9475,16 +9465,25 @@ int vis;
 	}
 
 
-	if ((needs_magr_eyes && haseyes(pa) && (
-		(youagr  && (Blind)) ||
-		(!youagr && (is_blind(magr)))
+	if (/* needs_magr_eyes:   magr must have eyes and can actively see mdef */
+		(needs_magr_eyes && !(
+			(haseyes(pa)) &&
+			(!(youagr ? Blind : is_blind(magr))) &&
+			(!(youdef ? Invis : mdef->minvis) || (youagr ? See_invisible(x(mdef), y(mdef)) : mon_resistance(magr, SEE_INVIS))) &&
+			(youagr ? canseemon(mdef) : youdef ? mon_can_see_you(magr) : mon_can_see_mon(magr, mdef)) &&
+			(!(youagr ? Sleeping : magr->msleeping))
 		))
 		||
-		(needs_mdef_eyes && haseyes(pd) && (
-		(youdef  && !umetgaze(magr)) ||
-		(youagr  && mon_can_see_you(mdef)) ||
-		(!youagr && !youdef && !mmetgaze(magr, mdef))
-		))){
+		/* needs_mdef_eyes:   mdef must have eyes and can actively see magr */
+		(needs_mdef_eyes && !(
+			(haseyes(pd)) &&
+			(!(youdef ? Blind : is_blind(mdef))) &&
+			(!(youagr ? Invis : magr->minvis) || (youdef ? See_invisible(x(magr), y(magr)) : mon_resistance(mdef, SEE_INVIS))) &&
+			(youdef ? canseemon(magr) : youagr ? mon_can_see_you(mdef) : mon_can_see_mon(mdef, magr)) &&
+			(!(youdef ? Sleeping : mdef->msleeping)) &&
+			(!(youdef && ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD)) /* wearing the Eyes, nearly anything is safe to see */
+		))
+		){
 		/* gaze fails because the appropriate gazer/gazee eye (contact?) is not available */
 		return MM_MISS;
 	}
@@ -9529,33 +9528,36 @@ int vis;
 		break;
 
 	case AD_BDFN:
-		if(has_blood_mon(mdef)){
-			if(vis&VIS_MDEF) pline("A thin spear of %s %s pierces %s %s.",
+		if (has_blood_mon(mdef)){
+			if (vis&VIS_MDEF) pline("A thin spear of %s %s pierces %s %s.",
 				(youdef ? "your" : s_suffix(mon_nam(mdef))),
 				mbodypart(mdef, BLOOD),
 				(youdef ? "your" : hisherits(mdef)),
 				mbodypart(mdef, BODY_SKIN)
 				);
-			if(youdef){
-				change_usanity(-1*dmg);
+			if (youdef){
+				change_usanity(-1 * dmg);
 				exercise(A_CON, FALSE);
 				u.umadness |= MAD_FRENZY;
-			} else {
-				if(mdef->mconf && !rn2(10)){
-					if(mdef->mstun && !rn2(10)){
-						if(vis&VIS_MDEF) pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), hisherits(mdef), mbodypart(mdef, BODY_SKIN));
+			}
+			else {
+				if (mdef->mconf && !rn2(10)){
+					if (mdef->mstun && !rn2(10)){
+						if (vis&VIS_MDEF) pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), hisherits(mdef), mbodypart(mdef, BODY_SKIN));
 						//reduce current HP by 30% (round up, guaranteed nonfatal)
-						mdef->mhp = mdef->mhp*.7+1;
-						if(mdef->mhpmax > mdef->mhp){
-							if(mdef->mhpmax > mdef->mhp+mdef->m_lev)
+						mdef->mhp = mdef->mhp*.7 + 1;
+						if (mdef->mhpmax > mdef->mhp){
+							if (mdef->mhpmax > mdef->mhp + mdef->m_lev)
 								mdef->mhpmax -= mdef->m_lev;
 							else
 								mdef->mhpmax--;
 						}
-					} else {
+					}
+					else {
 						mdef->mstun = 1;
 					}
-				} else {
+				}
+				else {
 					mdef->mconf = 1;
 				}
 			}
@@ -9565,7 +9567,7 @@ int vis;
 			result = xmeleehurty(magr, mdef, &alt_attk, attk, (struct obj *)0, FALSE, dmg, 0, FALSE, TRUE);
 			wakeup2(mdef, youagr);
 		}
-	break;
+		break;
 		/* lifedrain gazes */
 	case AD_VAMP:
 	case AD_DRLI:
@@ -9639,7 +9641,7 @@ int vis;
 						monkilled(mdef, "", attk->adtyp);
 					/* is it dead, or was it lifesaved? */
 					if (mdef->mhp > 0)
-						return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
+						return (MM_HIT | MM_DEF_LSVD);	/* lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 				}
@@ -9749,7 +9751,7 @@ int vis;
 					done(DIED);
 
 					if (*hp(mdef) > 0)
-						return (MM_HIT|MM_DEF_LSVD);				/* you lifesaved */
+						return (MM_HIT | MM_DEF_LSVD);				/* you lifesaved */
 					else
 						return (MM_HIT | MM_DEF_DIED);	/* moot */
 				}
@@ -9777,7 +9779,7 @@ int vis;
 					monkilled(mdef, "", AD_DETH);
 
 				if (*hp(mdef) > 0)
-					return (MM_HIT|MM_DEF_LSVD); /* mdef lifesaved */
+					return (MM_HIT | MM_DEF_LSVD); /* mdef lifesaved */
 				else
 					return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 			}
@@ -9785,45 +9787,174 @@ int vis;
 		break;
 		/* stonegaze */
 	case AD_STON:
-		/* STRAIGHT COPY-PASTE FROM ORIGINAL. */
-		if (youdef) {
-			if (pa->mtyp == PM_MEDUSA){
-				static boolean tamemedusa = FALSE;
-				if (magr->mcan){
-					if (!canseemon(magr)) break;	/* silently */
+		/* special-case for medusa */
+		if (pa->mtyp == PM_MEDUSA) {
+			static boolean medusa_canc = FALSE;
+			static boolean medusa_uref = FALSE;
+			static boolean medusa_mref = FALSE;
+			static boolean medusa_nnot = FALSE;
+			static boolean medusa_rref = FALSE;
+			boolean printed_ref = FALSE;
+
+			/* cancelled Medusa does nothing */
+			if (!youagr && magr->mcan) {
+				/* message for player */
+				if (youdef && (vis&VIS_MAGR) && !medusa_canc) {
 					pline("%s doesn't look all that ugly.", Monnam(magr));
-					break;
+					medusa_canc = TRUE;
 				}
-				else if (Reflecting && couldsee(magr->mx, magr->my)) {
-					/* hero has line of sight to Medusa and she's not blind */
-					boolean useeit = canseemon(magr);
+				return MM_HIT;	/* no further effects */
+			}
+			else medusa_canc = FALSE;
 
-					if (useeit){
-						if (!(tamemedusa && magr->mtame))
-							(void)ureflects("%s image is reflected by your %s.",
+			/* Medusa's gaze can be safely reflected back at her */
+			if (youdef ? Reflecting : mon_resistance(mdef, REFLECTING)) {
+				if (youdef) {
+					if (!medusa_uref) {
+						(void)ureflects("%s image is reflected by your %s.",
 							s_suffix(Monnam(magr)));
+						medusa_uref = TRUE;
+						printed_ref = TRUE;
 					}
-					if (mon_reflects(magr, (!useeit || tamemedusa) ? (char *)0 :
-						"The image is reflected away by %s %s!")){
-						if (magr->mtame) tamemedusa = TRUE;
-						break;
-					}
-					if (!m_canseeu(magr) || is_blind(magr)) { /* probably you're invisible */
-						if (useeit)
-							pline(
-							"%s doesn't seem to notice that %s image was reflected.",
-							Monnam(magr), mhis(magr));
-						break;
-					}
-					if (useeit)
-						pline("%s is turned to stone!", Monnam(magr));
-					stoned = TRUE;
-					killed(magr);
-
-					if (magr->mhp > 0) break;
-					return 2;
 				}
-				if (umetgaze(magr) && !Stone_resistance) {
+				else {
+					if (!medusa_mref && (vis&VIS_MDEF)) {
+						Sprintf(buf, "%s image is reflected by %%s %%s.",
+							Monnam(magr));
+						mon_reflects(mdef, buf);
+						medusa_mref = TRUE;
+						printed_ref = TRUE;
+					}
+				}
+				/* Medusa's gaze was reflected, it may turn Medusa to stone */
+				/* check if medusa can see her reflection */
+				if ((youagr ? Blind : is_blind(magr))
+					|| (
+					((youagr ? Invis : magr->minvis) || (youdef ? Invis : mdef->minvis))
+					&& !(youagr ? See_invisible(x(mdef), y(mdef)) : mon_resistance(magr, SEE_INVIS))
+					))
+				{
+					if (!youagr && (vis&VIS_MAGR) && !medusa_nnot) {
+						if (!printed_ref) {
+							if (youdef) {
+								Sprintf(buf, "%%s doesn't seem to notice that %s image was reflected by your %%s.",
+									mhis(magr));
+								ureflects(buf, Monnam(magr));
+							}
+							else {
+								Sprintf(buf, "%s doesn't seem to notice that %s image was reflected by %%s %%s.",
+									Monnam(magr),
+									mhis(magr));
+								mon_reflects(mdef, buf);
+							}
+						}
+						else {
+							Strcpy(buf, mhe(magr));
+							pline("%s doesn't seem to notice.",
+								upstart(buf));
+						}
+						medusa_nnot = TRUE;
+					}
+					return MM_HIT;	/* no further effects */
+				}
+				else if(printed_ref) medusa_nnot = FALSE;
+
+				/* check if medusa re-reflected her image */
+				if (youagr ? Reflecting : mon_resistance(magr, REFLECTING)) {
+					if ((vis&VIS_MAGR) && !medusa_rref) {
+						if (!printed_ref) {
+							if (youagr) {
+								ureflects("Your image is reflected back at you by %s, which you reflect away with your %s!", mon_nam(magr));
+							}
+							else {
+								Sprintf(buf, "%%s image is reflected back at %s by %s, which %s reflects away with %s %%s!",
+									mhis(magr),
+									youdef ? "you" : mon_nam(mdef),
+									mhe(magr),
+									mhis(magr)
+									);
+								mon_reflects(magr, buf);
+							}
+						}
+						else {
+							if (youagr) {
+								ureflects("Your %s%s reflects your image away!", "");
+							}
+							else {
+								Sprintf(buf, "%%s %%s reflects %s image away!",
+									mhis(magr)
+									);
+								mon_reflects(magr, buf);
+							}
+						}
+						medusa_rref = TRUE;
+					}
+					return MM_HIT;	/* no further effects */
+				}
+				else if (printed_ref) medusa_rref = FALSE;
+
+				/* otherwise, medusa gets affected by her own image! */
+				medusa_canc = FALSE;
+				medusa_uref = FALSE;
+				medusa_mref = FALSE;
+				medusa_nnot = FALSE;
+				medusa_rref = FALSE;
+				if (youagr) {
+					/* don't use xstoney, which is a delayed stoning effect */
+					if (!Stone_resistance) {
+						if (!printed_ref) {
+							mon_reflects(mdef, "You see your image reflected in %s %s!");
+						}
+						else {
+							You("see your reflected image!");
+						}
+						stop_occupation();
+						if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
+						You("turn to stone...");
+						killer_format = KILLED_BY;
+						killer = "Poseidon's curse";
+						done(STONING);
+						return (MM_HIT | MM_AGR_STOP);	/* you lifesaved */
+					}
+				}
+				else {
+					if (!printed_ref) {
+						if (youdef) {
+							Sprintf(buf, "%s sees %s image reflected in your %%s%%s!",
+								Monnam(magr),
+								mhis(magr)
+								);
+							ureflects(buf, "");
+						}
+						else {
+							Sprintf(buf, "%s sees %s image reflected in %%s %%s!",
+								Monnam(magr),
+								mhis(magr)
+								);
+							mon_reflects(mdef, buf);
+						}
+					}
+					pline("%s is turned to stone!", Monnam(magr));
+					/* Medusa doesn't get any of the usual anti-stoning methods to protect her from her own curse */
+					stoned = TRUE;
+					if (youdef)
+						killed(magr);
+					else
+						monkilled(magr, "", AD_STON);
+					return (MM_HIT | (*hp(magr) > 0 ? MM_AGR_STOP : MM_AGR_DIED));
+				}
+			}
+			else {
+				if (youdef)
+					medusa_uref = FALSE;
+				else
+					medusa_mref = FALSE;
+			}
+
+			/* reflection handled; we already knew mdef can see magr to get here; attempt to stone mdef */
+			if (!Stone_res(mdef)) {
+				/* don't use xstoney, which is a delayed stoning effect vs player */
+				if (youdef) {
 					You("see %s.", mon_nam(magr));
 					stop_occupation();
 					if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
@@ -9831,116 +9962,53 @@ int vis;
 					killer_format = KILLED_BY;
 					killer = "Poseidon's curse";
 					done(STONING);
+					return (MM_HIT | MM_DEF_LSVD);	/* if you didn't lifesave, it's a moot point */
 				}
-				tamemedusa = FALSE;
-			}
-			else if (magr->mcan || is_blind(magr)) {
-				if (!canseemon(magr)) break;	/* silently */
-				pline("%s gazes ineffectually.", Monnam(magr));
-				break;
-			}
-			else if (pa->mtyp == PM_PALE_NIGHT){
-				if (canseemon(magr)) pline("%s parts her shroud!", Monnam(magr));
-				if (magr->mcan || Stone_resistance) {
-					if (!canseemon(magr)) break;	/* silently */
-					pline("%s %s.", Monnam(magr),
-						"doesn't look all that ugly");
-					break;
-				}
-				if (Reflecting && couldsee(magr->mx, magr->my)) {
-					boolean useeit = canseemon(magr);
-					if (useeit)
-						(void)ureflects("%s image is reflected by your %s.",
-						s_suffix(Monnam(magr)));
-					if (mon_reflects(magr, !useeit ? (char *)0 :
-						"The image is reflected away by %s %s!"))
-						break;
-					if (!m_canseeu(magr)) { /* probably you're invisible */
-						if (useeit)
-							pline(
-							"%s doesn't seem to notice that %s image was reflected.",
-							Monnam(magr), mhis(magr));
-						break;
+				else {
+					if (!munstone(mdef, youagr))
+					{
+						if (poly_when_stoned(pd)) {
+							mon_to_stone(mdef);
+							return (MM_HIT | MM_DEF_LSVD);
+						}
+						if ((vis&VIS_MDEF) && (vis&VIS_MAGR))
+							pline("%s sees %s and turns to stone!", Monnam(mdef), mon_nam(magr));
+						else if ((vis&VIS_MDEF))
+							pline("%s turns to stone!", Monnam(mdef));
+						monstone(mdef);
 					}
-					return 0;
+					if (mdef->mhp > 0)
+						return (MM_HIT|MM_DEF_LSVD);
+					else if (mdef->mtame && !vis)
+						You("have a peculiarly sad feeling for a moment, then it passes.");
+
+					return (MM_DEF_DIED | (grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
 				}
-				if (couldsee(magr->mx, magr->my) &&
-					!Stone_resistance) {
-					if (ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) {
-						Your("lenses block out your sight!");
-						break;
-					}
-					You("see the truth behind the veil!");
-					stop_occupation();
-					if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))
-						break;
-					You("turn to stone...");
-					killer_format = KILLED_BY;
-					killer = pa->mname;
-					done(STONING);
-				}
-				return 0;
 			}
-			else if (pa->mtyp == PM_BEHOLDER){
-				if (umetgaze(magr) && !Stone_resistance) {
-					You("meet %s gaze.", s_suffix(mon_nam(magr)));
-					stop_occupation();
-					if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
-					Stoned = 5;
-					delayed_killer = "a beholder's eye of petrification.";
-				}
+		}/* end medusa stoning gaze */
+
+		/* all other stoning gazes are delayed stoning that require full magr-mdef eye contact */
+		/* the eye-contact requirement should have been handled already */
+		if ((vis&VIS_MDEF) && (vis&VIS_MAGR)) {
+			/* change message based on expected effectiveness of xstoney() */
+			if (Stone_res(mdef) || (youdef && Stoned)) {
+				pline("%s gaze%s ineffectively at %s.",
+					youagr ? "You" : Monnam(magr),
+					youagr ? "" : "s",
+					youdef ? "you" : mon_nam(mdef)
+					);
 			}
 			else {
-				if (umetgaze(magr) && !Stone_resistance) {
-					You("meet %s gaze.", s_suffix(mon_nam(magr)));
-					stop_occupation();
-					if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) break;
-					You("turn to stone...");
-					killer_format = KILLED_BY;
-					killer = pa->mname;
-					done(STONING);
-				}
+				pline("%s meet%s %s petrifying gaze!",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "" : "s",
+					youagr ? "your" : s_suffix(mon_nam(magr))
+					);
 			}
 		}
-		else if (!youagr) {
-			if (magr->mcan || !mmetgaze(magr, mdef))
-				return MM_MISS;
-			if (canseemon(magr)){
-				if (attk->aatyp == AT_GAZE){
-					Sprintf(buf, "%s", Monnam(magr));
-					pline("%s gazes at %s...", buf, mon_nam(mdef));
-				}
-				else if (attk->aatyp == AT_WDGZ){
-					Sprintf(buf, "%s", Monnam(mdef));
-					pline("%s can see %s...", buf, mon_nam(magr));
-				}
-			}
-			/* may die from the acid if it eats a stone-curing corpse */
-			if (!resists_ston(mdef) && munstone(mdef, FALSE))
-				goto post_stone;
-			if (poly_when_stoned(pd)) {
-				mon_to_stone(mdef);
-				break;
-			}
-			if (!resists_ston(mdef)) {
-				if (vis)
-					pline("%s turns to stone!", Monnam(mdef));
-				monstone(mdef);
-			post_stone:
-				if (mdef->mhp > 0)
-					return MM_HIT;
-				else if (mdef->mtame && !vis)
-					You("have a peculiarly sad feeling for a moment, then it passes.");
+		/* do stone */
+		return xstoney(magr, mdef);
 
-				return (MM_DEF_DIED | (grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
-			}
-			break;
-		}
-		else {
-			/* youagr */
-			/* NOT IMPLEMENTED YET */;
-		}
-		break;
 		/* confusion */
 	case AD_CONF:
 		/* 4/5 chance to succeed */
@@ -11085,7 +11153,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			weapon->oartifact == ART_SILENCE_GLAIVE ||
 			weapon->oartifact == ART_HEARTCLEAVER ||
 			weapon->oartifact == ART_SOL_VALTIVA ||
-			weapon->oartifact == ART_DEATH_SPEAR_OF_VHAERUN ||
+			weapon->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||
 			weapon->oartifact == ART_SHADOWLOCK ||
 			weapon->oartifact == ART_PEN_OF_THE_VOID
 			) &&
@@ -12390,7 +12458,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					bonsdmg += (uwep->spe + 1);
 			}
 			if (uwep->osinging == OSING_DIRGE) {
-				if (!(youagr || (magr->mtame && !mindless_mon(magr) && !is_deaf(magr))))
+				if (!youagr && !magr->mtame && !mindless_mon(magr) && !is_deaf(magr))
 					bonsdmg -= (uwep->spe + 1);
 			}
 		}
@@ -13404,14 +13472,20 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			case OPOISON_PARAL:
 				if (youdef) {
-					nomul(-(25 - rnd(ACURR(A_CON))), "immobilized by paralysis venom");
+					int dur = rnd(25 - rnd(ACURR(A_CON)));
+					if (Poison_res(mdef))
+						dur = (dur + 2) / 3;
+					nomul(-dur, "immobilized by paralysis venom");
 				}
 				else {
+					int dur = rnd(25);
+					if (Poison_res(mdef))
+						dur = (dur + 2) / 3;
 					if (canseemon(mdef) && mdef->mcanmove)
 						pline("%s stops moving!", Monnam(mdef));
 					if (mdef->mcanmove) {
 						mdef->mcanmove = 0;
-						mdef->mfrozen = rnd(25);
+						mdef->mfrozen = dur;
 					}
 				}
 				break;
