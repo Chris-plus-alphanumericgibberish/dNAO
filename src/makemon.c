@@ -3303,12 +3303,29 @@ register struct monst *mtmp;
 				int i;
 				for(i = d(3,3); i > 0; i--){
 					otmp = mksobj(MASK, FALSE, FALSE);
-					otmp->obj_material = WOOD;
 					otmp->corpsenm = masktypes[rn2(SIZE(masktypes))];
-					fix_object(otmp);
+					set_material_gm(otmp, WOOD);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
 				}
+			} else if(ptr->mtyp == PM_KUKER){
+				switch(rnd(4)){
+					case 1:
+					case 2:
+						otmp = mksobj(QUARTERSTAFF, FALSE, FALSE);
+					break;
+					case 3:
+						otmp = mksobj(SCIMITAR, FALSE, FALSE);
+					break;
+					case 4:
+						otmp = mksobj(SPEAR, FALSE, FALSE);
+					break;
+				}
+				otmp->oprop = OPROP_HOLYW;
+				otmp->spe = 7;
+				set_material_gm(otmp, WOOD);
+				bless(otmp);
+				(void)mongets(mtmp, BELL);
 			} else if(ptr->mtyp == PM_GWYNHARWYF){
 				(void)mongets(mtmp, CLOAK);
 				(void)mongets(mtmp, HIGH_BOOTS);
@@ -8045,6 +8062,9 @@ register int	mmflags;
 				}
 			} else if(mndx == PM_KETO || mndx == PM_DRACAE_ELADRIN){ 
 				mtmp->mhpmax = 3*mtmp->mhpmax;
+				mtmp->mhp = mtmp->mhpmax;
+			} else if(mndx == PM_KUKER){ 
+				mtmp->mhpmax = mtmp->m_lev*8 - 4; //Max HP
 				mtmp->mhp = mtmp->mhpmax;
 			}
 		break;
