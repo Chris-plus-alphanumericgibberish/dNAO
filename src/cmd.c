@@ -90,6 +90,7 @@ extern int NDECL(dodip); /**/
 extern int NDECL(dosacrifice); /**/
 extern int NDECL(dopray); /**/
 extern int NDECL(doturn); /**/
+extern int NDECL(dotip); /**/
 extern int NDECL(doredraw); /**/
 extern int NDECL(doread); /**/
 extern int NDECL(dosave); /**/
@@ -3727,13 +3728,17 @@ spirits_enlightenment()
 	putstr(en_win, 0, "Currently bound spirits:");
 	putstr(en_win, 0, "");
 
-#define addseal(id) if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
+#define addseal(id) do {if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
 	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
 		u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
 	else\
 	Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
-	putstr(en_win, 0, buf)
-#define addempty() Sprintf(buf,"  (empty)"); putstr(en_win, 0, buf)
+	putstr(en_win, 0, buf); } while (0)
+#define addpen(seal) do {\
+	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(seal) - (FIRST_SEAL)], \
+		u.sealTimeout[decode_sealID(seal) - (FIRST_SEAL)] - moves); \
+	putstr(en_win, 0, buf); } while (0)
+#define addempty() do {Sprintf(buf,"  (empty)"); putstr(en_win, 0, buf);} while(0)
 
 	/* only show gnosis premonition when it is being used */
 	if (u.spirit[GPREM_SPIRIT] != 0L) {
@@ -3805,6 +3810,28 @@ spirits_enlightenment()
 		}
 		else {
 			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+
+	/* Show spirits bound into the Pen of the Void */
+	if (!undiscovered_artifact(ART_PEN_OF_THE_VOID)) {
+		if (u.voidChime)
+			putstr(en_win, 0, "Bound to you and the Pen of the Void");
+		else
+			putstr(en_win, 0, "Bound to the Pen of the Void");
+
+		/* All get the first slot */
+		if (u.spiritTineA)
+			addpen(u.spiritTineA);
+		else
+			addempty();
+		/* Second slot belongs to discipled Binders */
+		if (quest_status.killed_nemesis && Role_if(PM_EXILE)) {
+			if (u.spiritTineB)
+				addpen(u.spiritTineB);
+			else
+				addempty();
 		}
 		putstr(en_win, 0, "");
 	}
@@ -5228,7 +5255,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"help", "give a help message", dohelp, IFBURIED},
 	{"seetrap", "show the type of a trap", doidtrap, IFBURIED},
 	{"kick", "kick something", dokick, !IFBURIED},
-	{"look", "loot a box on the floor", dolook, IFBURIED},
+	{"look", "look at the floor beneath you", dolook, IFBURIED},
 	{"call", "call (name) a particular monster", do_naming_mname, IFBURIED},
 	{"callold", "call (name) a particular monster (vanilla)", do_mname, IFBURIED},
 	{"rest", "rest one move while doing nothing", donull, IFBURIED, !AUTOCOMPLETE, "waiting"},
@@ -5302,6 +5329,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"sit", "sit down", dosit, !IFBURIED, AUTOCOMPLETE},
 	{"swim", "swim under water", dodeepswim, !IFBURIED, AUTOCOMPLETE},
 	{"turn", "turn undead", doturn, IFBURIED, AUTOCOMPLETE},
+	{"tip", "empty a container", dotip, IFBURIED, AUTOCOMPLETE},
 	{"twoweapon", "toggle two-weapon combat", dotwoweapon, !IFBURIED, AUTOCOMPLETE},
 	{"untrap", "untrap something", dountrap, !IFBURIED, AUTOCOMPLETE},
 	{"unmaintain", "stop maintaining a spell", dounmaintain, IFBURIED, AUTOCOMPLETE},

@@ -922,7 +922,7 @@ A("Plague",				BOW,							(const char *)0,
 
 /*Needs encyc entry*/
 /* die size set to 1d8 in weapon.c */
-A("The Fluorite Octahedron",		BLUE_FLUORITE,		(const char *)0,
+A("The Fluorite Octahedron",		BLUE_FLUORITE,		"glowing cobalt eight-sided die",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_A, NOFLAG,
 	NO_MONS(),
@@ -2061,7 +2061,7 @@ A("The Web of the Chosen",			DROVEN_CLOAK,		(const char *)0,
 
 /*Needs encyc entry*/
 /* Hedrow noble first gift */
-A("The Death-Spear of Vhaerun",		DROVEN_SPEAR,		(const char *)0,
+A("The Death-Spear of Keptolo",		DROVEN_SPEAR,		(const char *)0,
 	4000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_NOBLEMAN, PM_DROW, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),

@@ -609,18 +609,30 @@ const char *name;
 	if (lth) artifact_exists(obj, name, TRUE);
 	
 	if (obj->oartifact) {
+		int tmp;
 		
-		/*artifacts are unique, except the fluorite octet which is a set of 8*/
-		if(obj->oartifact == ART_FLUORITE_OCTAHEDRON) obj->quan = 8L;
-		else obj->quan = 1L;
-		obj->owt = weight(obj);
+		/* quantity */
+		if (obj->oartifact == ART_FLUORITE_OCTAHEDRON)
+			obj->quan = 8L;
+		else if (
+			obj->oartifact == ART_MOONBEAM ||
+			obj->oartifact == ART_SUNBEAM
+			)
+			obj->quan = 20L;
+		else
+			obj->quan = 1L;
 		
-		if(obj->oartifact == ART_WAR_MASK_OF_DURIN) obj->corpsenm = PM_DWARF;
-		if(obj->oartifact == ART_MASK_OF_TLALOC) obj->corpsenm = PM_GOD;
+		/* mask type */
+		if (obj->oartifact == ART_WAR_MASK_OF_DURIN)
+			obj->corpsenm = PM_DWARF;
+		if (obj->oartifact == ART_MASK_OF_TLALOC)
+			obj->corpsenm = PM_GOD;
 		
-		if(obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD) obj->owt = 150;
+		/* weight */
+		if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD)
+			obj->owt = 150;
 		
-
+		/* size */
 		if (obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT)
 			obj->objsize = artilist[obj->oartifact].size;
 		else if(is_malleable_artifact(&artilist[obj->oartifact]))
@@ -628,28 +640,33 @@ const char *name;
 		else
 			obj->objsize = MZ_MEDIUM;
 		
-		if (obj->oartifact && artilist[obj->oartifact].material != MT_DEFAULT) obj->obj_material = artilist[obj->oartifact].material;
-		else if (obj->otyp == SABER)                                           obj->obj_material = SILVER;
-		else if (obj->otyp == KHAKKHARA)                                       obj->obj_material = SILVER;
-		else if (obj->otyp == CHAKRAM)                                         obj->obj_material = SILVER;
-		else if (obj->otyp == GLOVES)                                          obj->obj_material = LEATHER;
-		else if (obj->otyp == BAR)                                             obj->obj_material = IRON;
-		else if (obj->otyp == VIPERWHIP)                                       obj->obj_material = SILVER;
-		else if (obj->otyp == find_gcirclet())                                 obj->obj_material = GOLD;
-		else if (obj->otyp == ARMORED_BOOTS)                                   obj->obj_material = COPPER;
-		else if (obj->otyp == ROUNDSHIELD)                                     obj->obj_material = COPPER;
-		else if (obj->otyp == LIGHTSABER)                                      obj->obj_material = SILVER;
-		else if (obj->otyp == BEAMSWORD)                                       obj->obj_material = GOLD;
-		else if (obj->otyp == KAMEREL_VAJRA)                                   obj->obj_material = GOLD;
-		else if (obj->otyp == DOUBLE_LIGHTSABER)                               obj->obj_material = PLATINUM;
+		/* material */
+		if (obj->oartifact && artilist[obj->oartifact].material != MT_DEFAULT) tmp = artilist[obj->oartifact].material;
+		else if (obj->otyp == SABER)                                           tmp = SILVER;
+		else if (obj->otyp == KHAKKHARA)                                       tmp = SILVER;
+		else if (obj->otyp == CHAKRAM)                                         tmp = SILVER;
+		else if (obj->otyp == GLOVES)                                          tmp = LEATHER;
+		else if (obj->otyp == BAR)                                             tmp = IRON;
+		else if (obj->otyp == VIPERWHIP)                                       tmp = SILVER;
+		else if (obj->otyp == find_gcirclet())                                 tmp = GOLD;
+		else if (obj->otyp == ARMORED_BOOTS)                                   tmp = COPPER;
+		else if (obj->otyp == ROUNDSHIELD)                                     tmp = COPPER;
+		else if (obj->otyp == LIGHTSABER)                                      tmp = SILVER;
+		else if (obj->otyp == BEAMSWORD)                                       tmp = GOLD;
+		else if (obj->otyp == KAMEREL_VAJRA)                                   tmp = GOLD;
+		else if (obj->otyp == DOUBLE_LIGHTSABER)                               tmp = PLATINUM;
 		else if (is_malleable_artifact(&artilist[obj->oartifact]));//keep current/default material
 		else
-			obj->obj_material = objects[obj->otyp].oc_material;
+			tmp = objects[obj->otyp].oc_material;
+		set_material_gm(obj, tmp);
 		
+		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
 		else obj->bodytypeflag = MB_HUMANOID;
 		
-		if(obj->oartifact == ART_SCOURGE_OF_LOLTH) obj->ovar1 = 8;
+		/* viperwhip heads */
+		if (obj->oartifact == ART_SCOURGE_OF_LOLTH)
+			obj->ovar1 = 8;
 		
 		fix_object(obj);
 

@@ -662,9 +662,7 @@ boolean digest_meal;
 	
 	if(!DEADMONSTER(mon) && mon->mhp < mon->mhpmax/2 && (mon->mtyp == PM_CHANGED || mon->mtyp == PM_WARRIOR_CHANGED)){
 		mon->mhp -= 1;
-		flags.cth_attk=TRUE;//state machine stuff.
-		create_gas_cloud(mon->mx+rn2(3)-1, mon->my+rn2(3)-1, rnd(3), rnd(3)+1);
-		flags.cth_attk=FALSE;
+		create_gas_cloud(mon->mx+rn2(3)-1, mon->my+rn2(3)-1, rnd(3), rnd(3)+1, FALSE);
 		if(mon->mhp == 0){
 			mondied(mon);
 			return;
@@ -2690,7 +2688,7 @@ boolean heard;		/* print You_hear() message? */
 
 	for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
 		obj = mksobj_at(BAR, x, y, FALSE, FALSE);
-		set_material(obj, Is_illregrd(&u.uz) ? METAL : IRON);
+		set_material_gm(obj, Is_illregrd(&u.uz) ? METAL : IRON);
 		obj->spe = 0;
 		obj->cursed = obj->blessed = FALSE;
 	}

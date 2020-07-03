@@ -458,7 +458,7 @@ struct weapon_dice {
 			  otmp->otyp==AKLYS || \
 			  otmp->oartifact==ART_SOL_VALTIVA || \
 			  otmp->oartifact==ART_SHADOWLOCK || \
-			  otmp->oartifact==ART_DEATH_SPEAR_OF_VHAERUN || \
+			  otmp->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
 			  (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE ) \
 			 ))
 #define is_spear(otmp)	(otmp->oclass == WEAPON_CLASS && \

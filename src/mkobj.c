@@ -1304,8 +1304,8 @@ boolean artif;
 	if(otmp->oproperties&OPROP_WRTHW)
 		otmp->wrathdata = PM_ORC<<2;//wrathful + 1/4 vs orcs
 
-	/* unique objects may have an associated artifact entry */
-	if (objects[otyp].oc_unique && !otmp->oartifact)
+	/* spellbooks of secrets should become a random artifact spellbook */
+	if (otyp == SPE_SECRETS)
 	    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
 	
 	/* track words */
@@ -1838,7 +1838,7 @@ boolean check_all;
 		random_mat_list++;
 	}
 	if (random_mat_list->iclass) /* a 0 indicates to use default material */
-		set_material(obj, random_mat_list->iclass);
+		set_material_gm(obj, random_mat_list->iclass);
 }
 
 
@@ -1900,10 +1900,36 @@ struct obj* obj;
 			random_mat_list++;
 		}
 		if (random_mat_list->iclass) /* a 0 indicates to use default material */
-			set_material(obj, random_mat_list->iclass);
+			set_material_gm(obj, random_mat_list->iclass);
 	}
 	return;
 }
+
+/* "Game Master"-facing set material function.
+ *  Should do the absolute minimum to make sure that obj is not in an inconsistent state after mat is set.
+ *  In particular, it should never change the base object type.
+ */
+
+void
+set_material_gm(obj, mat)
+struct obj *obj;
+int mat;
+{
+	int oldmat = obj->obj_material;
+
+	if(mat == obj->obj_material) return; //Already done!
+	
+	/* cover special properties of materials like shadowsteel timer and gemstone type */
+	handle_material_specials(obj, oldmat, obj->obj_material);
+
+	fix_object(obj);
+}
+
+/* Player-facing (or simulation-facing) set material function.
+ *  Intended to be called when objects change material during the course of play.
+ *  May make whatever changes to the base item type it sees fit.
+ *  May even refuse to actually set the material, currently in the case of spellbooks.
+ */
 
 void
 set_material(obj, mat)
@@ -2139,7 +2165,7 @@ int mat;
 			if(obj->otyp == WAN_WISHING)
 				obj->spe /= 5;
 			if(!(obj->recharged)) obj->recharged = 1;
-			obj->obj_material = mat;
+			set_material_gm(obj, mat); //Set the material using the minimal set material function
 		break;
 		case GEM_CLASS:
 			if(mat != GLASS && mat != GEMSTONE){
@@ -2150,18 +2176,13 @@ int mat;
 				obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
 			else if (mat == GLASS && oldmat == GEMSTONE)
 				obj->otyp = LAST_GEM + rnd(9);
-			obj->obj_material = mat;
+			set_material_gm(obj, mat); //Set the material using the minimal set material function
 		break;
 		default:
-			obj->obj_material = mat;
+			set_material_gm(obj, mat); //Set the material using the minimal set material function
 		break;
 	}
 	//Silver bell should resist
-	
-	/* cover special properties of materials like shadowsteel timer and gemstone type */
-	handle_material_specials(obj, oldmat, obj->obj_material);
-
-	fix_object(obj);
 	
 	if(owner == &youmonst){
 		setworn(obj, W_ARM);
@@ -3155,6 +3176,80 @@ dealloc_obj(obj)
     //if (obj == thrownobj) thrownobj = (struct obj*)0;
 
     free((genericptr_t) obj);
+}
+
+int
+hornoplenty(horn, tipping)
+struct obj *horn;
+boolean tipping; /* caller emptying entire contents; affects shop handling */
+{
+    int objcount = 0;
+
+    if (!horn || horn->otyp != HORN_OF_PLENTY) {
+        impossible("bad horn o' plenty");
+    } else if (horn->spe < 1) {
+        pline1(nothing_happens);
+    } else {
+        struct obj *obj;
+        const char *what;
+
+        consume_obj_charge(horn, !tipping);
+        if (!rn2(13)) {
+            obj = mkobj(POTION_CLASS, FALSE);
+            if (objects[obj->otyp].oc_magic)
+                do {
+                    obj->otyp = rnd_class(POT_BOOZE, POT_WATER);
+                } while (obj->otyp == POT_SICKNESS);
+            what = (obj->quan > 1L) ? "Some potions" : "A potion";
+        } else {
+            obj = mkobj(FOOD_CLASS, FALSE);
+            if (obj->otyp == FOOD_RATION && !rn2(7))
+                obj->otyp = LUMP_OF_ROYAL_JELLY;
+            what = "Some food";
+        }
+        ++objcount;
+        pline("%s %s out.", what, vtense(what, "spill"));
+        obj->blessed = horn->blessed;
+        obj->cursed = horn->cursed;
+        obj->owt = weight(obj);
+        /* using a shop's horn of plenty entails a usage fee and also
+           confers ownership of the created item to the shopkeeper */
+        if (horn->unpaid)
+            addtobill(obj, FALSE, FALSE, tipping);
+        /* if it ended up on bill, we don't want "(unpaid, N zorkids)"
+           being included in its formatted name during next message */
+        if (!tipping) {
+            obj = hold_another_object(obj,
+                                      u.uswallow
+                                        ? "Oops!  %s out of your reach!"
+                                        : (Is_airlevel(&u.uz)
+                                           || Is_waterlevel(&u.uz)
+                                           || levl[u.ux][u.uy].typ < IRONBARS
+                                           || levl[u.ux][u.uy].typ >= ICE)
+                                          ? "Oops!  %s away from you!"
+                                          : "Oops!  %s to the floor!",
+                                      The(aobjnam(obj, "slip")), (char *) 0);
+        } else {
+            /* assumes this is taking place at hero's location */
+            if (!can_reach_floor()) {
+            	boolean wepgone = FALSE;
+				bhitpos.x = u.ux; bhitpos.y = u.uy;
+				obj->ox = u.ux; obj->oy = u.uy;
+				hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
+                //hitfloor(obj, TRUE); /* does altar check, message, drop */
+            } else {
+                if (IS_ALTAR(levl[u.ux][u.uy].typ))
+                    doaltarobj(obj); /* does its own drop message */
+                else
+                    pline("%s %s to the %s.", Doname2(obj),
+                          otense(obj, "drop"), surface(u.ux, u.uy));
+                dropy(obj);
+            }
+        }
+        if (horn->dknown)
+            makeknown(HORN_OF_PLENTY);
+    }
+    return objcount;
 }
 
 #ifdef WIZARD

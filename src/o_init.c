@@ -201,7 +201,7 @@ shuffle_all()
 				 oclass == TILE_CLASS ||
 				 oclass == SPBOOK_CLASS
 			){
-			    while (!objects[j].oc_magic || objects[j].oc_unique)
+			    while (!objects[j].oc_magic || objects[j].oc_unique || j == SPE_SECRETS)
 				j--;
 			}
 			else if (oclass == SCROLL_CLASS){
