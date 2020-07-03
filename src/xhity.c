@@ -610,7 +610,9 @@ int tary;
 				(magr->weapon_check == NEED_WEAPON || !MON_WEP(magr))	// needs a weapon
 				){
 				/* pick appropriate weapon based on range to target */
-				if (dist2(x(magr), y(magr), tarx, tary) <= 8) {
+				if (dist2(x(magr), y(magr), tarx, tary) <= 
+					(MON_WEP(magr) && is_pole(MON_WEP(magr))) ? 2 : 8)	// if a polearm is wielded, continue using it 2 < x <= 8
+				{
 					/* melee or polearm range */
 					magr->combat_mode = HNDHND_MODE;
 					magr->weapon_check = NEED_HTH_WEAPON;
