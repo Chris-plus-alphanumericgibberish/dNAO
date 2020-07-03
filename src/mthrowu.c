@@ -205,12 +205,16 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 				(attacktype(magr->data, AT_BEAM))
 			))
 			||
-			/* attacks in a square range of 2 -- includes polearms */
-			(distmin(magr->mx, magr->my, tarx, tary) <= 2 && (
-				(attacktype(magr->data, AT_LRCH)) ||
-				(attacktype(magr->data, AT_LNCK)) ||
+			/* attacks in polearm range */
+			(dist2(magr->mx, magr->my, tarx, tary) <= m_pole_range(magr) && (
 				(attacktype(magr->data, AT_WEAP) && mrwep && is_pole(mrwep)) ||
 				(attacktype(magr->data, AT_DEVA) && mrwep && is_pole(mrwep))
+			))
+			||
+			/* attacks in a square range of 2 */
+			(distmin(magr->mx, magr->my, tarx, tary) <= 2 && (
+				(attacktype(magr->data, AT_LRCH)) ||
+				(attacktype(magr->data, AT_LNCK))
 			))
 			||
 			/* attacks in a square range of 5 */
@@ -289,6 +293,47 @@ lined_up(mtmp)		/* is mtmp in position to use ranged attack? */
 {
 	return(linedup(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my));
 }
+
+
+/* returns the max euclidean distance magr can use a polearm at */
+/* Ranges:
+ * 
+ * ESBSE
+ * S...S
+ * B.@.B
+ * S...S
+ * ESBSE
+ *  
+ */
+int
+m_pole_range(magr)
+struct monst * magr;
+{
+	if (magr == &youmonst) {
+		impossible("calculating player's polearm range with m_pole_range?");
+		return 8;
+	}
+
+	int skill_equiv = P_BASIC;
+
+	if (magr->data->mlevel >= 6)
+		skill_equiv++;
+	if (magr->data->mlevel >= 12)
+		skill_equiv++;
+	if (is_prince(magr->data))
+		skill_equiv++;
+
+	/* cap at expert */
+	if (skill_equiv > P_EXPERT)
+		skill_equiv = P_EXPERT;
+
+	switch (skill_equiv) {
+	case P_BASIC:	return 4;
+	case P_SKILLED:	return 5;
+	case P_EXPERT:	return 8;
+	}
+}
+
 
 #endif /* OVL1 */
 #ifdef OVL0

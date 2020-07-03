@@ -613,8 +613,8 @@ int tary;
 				otmp = select_rwep(magr);
 
 				/* pick appropriate weapon based on range to target */
-				if (dist2(x(magr), y(magr), tarx, tary) <= 
-					((otmp && is_pole(otmp)) ? 2 : 8))		// if we have a polearm, use it longer range
+				if (dist2(x(magr), y(magr), tarx, tary) <
+					((otmp && is_pole(otmp)) ? 3 : m_pole_range(magr)))	// if we have a polearm, use it longer range
 				{
 					/* melee range */
 					magr->combat_mode = HNDHND_MODE;
@@ -702,7 +702,7 @@ int tary;
 			/* make the attack */
 			/* melee -- if attacking an adjacent square or thrusting a polearm */
 			if (!ranged ||
-				(otmp && is_pole(otmp) && dist2(x(magr), y(magr), tarx, tary) < 8)) {
+				(otmp && is_pole(otmp) && dist2(x(magr), y(magr), tarx, tary) <= m_pole_range(magr))) {
 				int devai = 0;
 				/* they did do an attack */
 				mon_ranged_gazeonly = FALSE;
