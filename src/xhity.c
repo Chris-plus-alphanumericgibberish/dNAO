@@ -631,6 +631,7 @@ int tary;
 						/* you can wield a polearm and attack in the same action */
 					}
 					else {
+						mon_ranged_gazeonly = FALSE;
 						allres |= MM_HIT;					// this xattacky() call took time
 						continue;							// it took time, don't attack using this action
 					}
