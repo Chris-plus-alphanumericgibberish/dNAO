@@ -507,17 +507,8 @@ domonability()
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
 	
-	Sprintf(buf, "Attacks");
+	Sprintf(buf, "Abilities");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	if(u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know){
-		Sprintf(buf, "Speak a Word of Power");
-		any.a_int = MATTK_WORD;	/* must be non-zero */
-		incntlet = 'p';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
-	}
 	if(uarm && uarms && 
 		Is_dragon_armor(uarm) && Is_dragon_shield(uarms) && 
 		Have_same_dragon_armor_and_shield &&
@@ -542,7 +533,7 @@ domonability()
 			((flags.HDbreath == AD_ACID) && (
 				(uarm && (uarm->otyp == YELLOW_DRAGON_SCALES || uarm->otyp == YELLOW_DRAGON_SCALE_MAIL)) ||
 				(uarms && uarms->otyp == YELLOW_DRAGON_SCALE_SHIELD))))))){
-			Sprintf(buf, "Armor's Breath Weapon");
+			Sprintf(buf, "Use your armor's breath weapon");
 			any.a_int = MATTK_DSCALE;	/* must be non-zero */
 			incntlet = 'a';
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -552,7 +543,7 @@ domonability()
 		}
 	}
 	if(is_were(youracedata)){
-		Sprintf(buf, "Summon Aid");
+		Sprintf(buf, "Summon aid");
 		any.a_int = MATTK_SUMM;	/* must be non-zero */
 		incntlet = 'A';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -560,17 +551,8 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(is_vampire(youracedata) && u.ulevel > 1){
-		Sprintf(buf, "Create Minion");
-		any.a_int = MATTK_VAMP;	/* must be non-zero */
-		incntlet = 'V';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;	
-	}
 	if(can_breathe(youmonst.data) || Race_if(PM_HALF_DRAGON)){
-		Sprintf(buf, "Breath Weapon");
+		Sprintf(buf, "Use your breath weapon");
 		any.a_int = MATTK_BREATH;	/* must be non-zero */
 		incntlet = 'b';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -579,7 +561,7 @@ domonability()
 		atleastone = TRUE;
 	}
 	if(youracedata->mtyp == PM_TOVE){
-		Sprintf(buf, "Bore Hole");
+		Sprintf(buf, "Bore a hole");
 		any.a_int = MATTK_HOLE;	/* must be non-zero */
 		incntlet = 'B';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -588,7 +570,7 @@ domonability()
 		atleastone = TRUE;
 	}
 	if(uclockwork){
-		Sprintf(buf, "Adjust Clock");
+		Sprintf(buf, "Adjust your Clockspeed");
 		any.a_int = MATTK_CLOCK;	/* must be non-zero */
 		incntlet = 'c';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -597,7 +579,7 @@ domonability()
 		atleastone = TRUE;
 	}
 	if(uandroid){
-		Sprintf(buf, "Use Android Abilities");
+		Sprintf(buf, "Use Android abilities");
 		any.a_int = MATTK_DROID;	/* must be non-zero */
 		incntlet = 'd';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -615,7 +597,7 @@ domonability()
 		atleastone = TRUE;
 	}
 	if(attacktype(youracedata, AT_GAZE)){
-		Sprintf(buf, "Gaze");
+		Sprintf(buf, "Gaze at something");
 		any.a_int = MATTK_GAZE;	/* must be non-zero */
 		incntlet = 'g';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -642,7 +624,7 @@ domonability()
 		atleastone = TRUE;
 	}
 	if(is_drow(youracedata)){
-		Sprintf(buf, "Invoke Darkness");
+		Sprintf(buf, "Invoke the darkness");
 		any.a_int = MATTK_DARK;	/* must be non-zero */
 		incntlet = 'i';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -651,7 +633,7 @@ domonability()
 		atleastone = TRUE;
 	}
 	if(youracedata->mlet == S_NYMPH){
-		Sprintf(buf, "Remove Iron Ball");
+		Sprintf(buf, "Remove an iron ball");
 		any.a_int = MATTK_REMV;	/* must be non-zero */
 		incntlet = 'I';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -660,7 +642,7 @@ domonability()
 		atleastone = TRUE;
 	}
 	if(is_mind_flayer(youracedata)){
-		Sprintf(buf, "Mind Blast");
+		Sprintf(buf, "Emit a mind blast");
 		any.a_int = MATTK_MIND;	/* must be non-zero */
 		incntlet = 'm';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -668,17 +650,17 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
-	if(attacktype(youracedata, AT_MAGC)){
-		Sprintf(buf, "Monster Spells");
-		any.a_int = MATTK_MAGIC;	/* must be non-zero */
-		incntlet = 'M';
+	if (u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know){
+		Sprintf(buf, "Speak a word of power");
+		any.a_int = MATTK_WORD;	/* must be non-zero */
+		incntlet = 'p';
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
 	if (attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH)){
-		Sprintf(buf, "Reach Attack");
+		Sprintf(buf, "Make a reach attack");
 		any.a_int = MATTK_REACH;	/* must be non-zero */
 		incntlet = 'r';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -687,7 +669,7 @@ domonability()
 		atleastone = TRUE;
 	}
 	if(u.umonnum == PM_GREMLIN){
-		Sprintf(buf, "Replicate");
+		Sprintf(buf, "Replicate yourself");
 		any.a_int = MATTK_REPL;	/* must be non-zero */
 		incntlet = 'R';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -723,7 +705,7 @@ domonability()
 		atleastone = TRUE;
 	}
 	if(is_unicorn(youracedata)){
-		Sprintf(buf, "Unicorn Horn");
+		Sprintf(buf, "Use your unicorn horn");
 		any.a_int = MATTK_UHORN;	/* must be non-zero */
 		incntlet = 'u';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -731,8 +713,17 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
+	if (is_vampire(youracedata) && u.ulevel > 1){
+		Sprintf(buf, "Raise a vampiric minion");
+		any.a_int = MATTK_VAMP;	/* must be non-zero */
+		incntlet = 'V';
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		atleastone = TRUE;
+	}
 	if(webmaker(youracedata)){
-		Sprintf(buf, "Make Web");
+		Sprintf(buf, "Spin a web");
 		any.a_int = MATTK_WEBS;	/* must be non-zero */
 		incntlet = 'w';
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -740,6 +731,25 @@ domonability()
 			MENU_UNSELECTED);
 		atleastone = TRUE;
 	}
+	if (spellid(0) != NO_SPELL) {
+		Sprintf(buf, "Cast spells");
+		any.a_int = MATTK_MAGIC;	/* must be non-zero */
+		incntlet = 'z';
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		atleastone = TRUE;
+	}
+	if (attacktype(youracedata, AT_MAGC)){
+		Sprintf(buf, "Cast a monster spell");
+		any.a_int = MATTK_MAGIC;	/* must be non-zero */
+		incntlet = 'Z';
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		atleastone = TRUE;
+	}
+
 	if(!atleastone){
 		if(Upolyd) pline("Any special ability you may have is purely reflexive.");
 		else You("don't have a special ability in your normal form!");
