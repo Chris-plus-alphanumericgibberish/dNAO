@@ -3321,7 +3321,7 @@ register struct monst *mtmp;
 						otmp = mksobj(SPEAR, FALSE, FALSE);
 					break;
 				}
-				otmp->oprop = OPROP_HOLYW;
+				otmp->oproperties = OPROP_HOLYW;
 				otmp->spe = 7;
 				set_material_gm(otmp, WOOD);
 				bless(otmp);
