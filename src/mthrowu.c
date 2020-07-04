@@ -70,298 +70,202 @@ struct obj *obj;
 extern int monstr[];
 
 /* Find a target for a ranged attack. */
+/* needs to set tbx, tby */
 struct monst *
-mfind_target(mtmp, force_linedup)
-struct monst *mtmp;
+mfind_target(magr, force_linedup)
+struct monst *magr;
 int force_linedup;	/* if TRUE, we have some offensive item ready that will work if we are lined up */
 {
-    int dir, origdir = -1;
-    int x, y, dx, dy;
+	struct monst * mdef = (struct monst *)0;
+	struct monst * best_target = (struct monst *)0;
+	int target_val = 0;
+	int best_val = 0;
+	int tarx;
+	int tary;
+	boolean coveted = FALSE;	/* mdef was found via covetousness (used to prioritize this mdef in targeting loop) */
+	boolean tried_you = FALSE;	/* you have been attempted as mdef (used to prioritize you in targeting loop)*/
 
-    int i;
+	boolean conflicted = Conflict && couldsee(magr->mx, magr->my) &&
+		(distu(magr->mx, magr->my) <= BOLT_LIM*BOLT_LIM) &&
+		!resist(magr, RING_CLASS, 0, 0);
 
-    struct monst *mat, *mret = (struct monst *)0, *oldmret = (struct monst *)0;
-	struct monst *mtmp2;
+	boolean dogbesafe = (magr->mtame && !magr->mconf && !conflicted);
 	
-    boolean conflicted = Conflict && couldsee(mtmp->mx,mtmp->my) && 
-						(distu(mtmp->mx,mtmp->my) <= BOLT_LIM*BOLT_LIM) &&
-						!resist(mtmp, RING_CLASS, 0, 0);
+	struct obj *mrwep = select_rwep(magr);
 	
-	struct obj *mrwep = select_rwep(mtmp);
-	
-	if(is_derived_undead_mon(mtmp)) return 0;
-	
-	
-    if (is_covetous(mtmp->data) && !mtmp->mtame)
-    {
-        /* find our mark and let him have it, if possible! */
-        register int gx = STRAT_GOALX(mtmp->mstrategy),
-                     gy = STRAT_GOALY(mtmp->mstrategy);
-        mtmp2 = m_at(gx, gy);
-	if (mtmp2 && (!force_linedup || lined_up(mtmp)) && (
-			   (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan && mlined_up(mtmp, mtmp2, FALSE))
-			|| (force_linedup && mlined_up(mtmp, mtmp2, FALSE))
-			|| (attacktype(mtmp->data, AT_SPIT) && mlined_up(mtmp, mtmp2, FALSE))
-			|| (attacktype(mtmp->data, AT_TNKR) && mlined_up(mtmp, mtmp2, FALSE))
-			|| (attacktype(mtmp->data, AT_ARRW) && mlined_up(mtmp, mtmp2, FALSE))
-			|| (attacktype(mtmp->data, AT_BEAM) && mlined_up(mtmp, mtmp2, FALSE))
-			|| (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan && (
-			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp <= AD_SPC2) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_RBRE) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_OONA) )
-				&& mlined_up(mtmp, mtmp2, FALSE)
-			  )
-			|| (attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan && (
-			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp <= AD_SPC2) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_RBRE) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_OONA) )
-				&& mlined_up(mtmp, mtmp2, FALSE)
-			  )
-			|| (is_commander(mtmp->data) && distmin(mtmp2->mx, mtmp2->my, mtmp->mx, mtmp->my) < BOLT_LIM)
-			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 2)
-			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 2)
-			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 5)
-			|| (attacktype(mtmp->data, AT_5SBT) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 5)
-			|| (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_WEAP, AD_PHYS) && mrwep && (
-				(!is_pole(mrwep) && mlined_up(mtmp, mtmp2, FALSE)) ||
-				( is_pole(mrwep) && mlined_up(mtmp, mtmp2, FALSE) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 2 && (mtmp2->mx == mtmp->mx || mtmp2->my == mtmp->my))
-			   ))
-		)
-	){
-	    if(!(mtmp->mtyp == PM_OONA && resists_oona(mtmp2)) && mm_aggression(mtmp, mtmp2)) return mtmp2;
+	if (is_derived_undead_mon(magr))
+		return (struct monst *)0;
+
+	/* Check that magr can make any ranged attacks at all */
+	if (!force_linedup &&
+		!(
+		(attacktype(magr->data, AT_WEAP) && mrwep) ||
+		(attacktype(magr->data, AT_DEVA) && mrwep) ||
+		(attacktype(magr->data, AT_BREA) && !magr->mcan) ||
+		(attacktype(magr->data, AT_MAGC) && !magr->mcan) ||
+		(attacktype(magr->data, AT_MMGC) && !magr->mcan) ||
+		(attacktype(magr->data, AT_GAZE) && !magr->mcan) ||
+		(attacktype(magr->data, AT_SPIT)) ||
+		(attacktype(magr->data, AT_ARRW)) ||
+		(attacktype(magr->data, AT_TNKR)) ||
+		(attacktype(magr->data, AT_BEAM)) ||
+		(attacktype(magr->data, AT_LRCH)) ||
+		(attacktype(magr->data, AT_LNCK)) ||
+		(attacktype(magr->data, AT_5SQR)) ||
+		(attacktype(magr->data, AT_5SBT)) ||
+		(is_commander(magr->data))
+		))
+		return (struct monst *)0;
+
+	/* priority of targets:
+	 * covetous item holder
+	 * player
+	 * others
+	 */
+	/* maybe have a prefered mdef */
+	if (is_covetous(magr->data) && !magr->mtame) {
+		tarx = STRAT_GOALX(magr->mstrategy);
+		tary = STRAT_GOALY(magr->mstrategy);
+		if ((mdef = m_at(tarx, tary)))
+			coveted = TRUE;
 	}
 	
-#if 0
-	if (!is_mplayer(mtmp->data)/* || !(mtmp->mstrategy & STRAT_NONE)*/)
-	{
-		return 0;
+	/* target-finding loop */
+	do {
+		/* get next target */
+		if (coveted)
+			coveted = FALSE;
+		else if (!tried_you) {
+			mdef = &youmonst;
+			tried_you = TRUE;
+		}
+		else if (mdef == &youmonst)
+			mdef = fmon;
+		else
+			mdef = mdef->nmon;
+
+		/* validate */
+		if (!mdef)
+			continue;
+
+		/* get location of next target */
+		if (mdef == &youmonst) {
+			tarx = magr->mux;
+			tary = magr->muy;
+
+			/* don't attempt to attack self if displacement made magr think player is on top of magr */
+			if (tarx == magr->mx && tary == magr->my)
+				continue;
+		}
+		else {
+			tarx = mdef->mx;
+			tary = mdef->my;
+		}
+
+		/* is mdef an acceptable target? */
+		if (!clear_path(magr->mx, magr->my, tarx, tary))
+			continue;
+		if (dogbesafe && (mdef == &youmonst))
+			continue;
+		if (mdef != &youmonst && !(mm_aggression(magr, mdef) & ALLOW_M) && !conflicted)
+			continue;
+
+		/* don't make ranged attacks at melee distance */
+		if (distmin(magr->mx, magr->my, tarx, tary) < 2)
+			continue;
+
+		/* horrible kludge: Oona doesn't target those resistant to her at range */
+		if (mdef == &youmonst ? Oona_resistance : resists_oona(mdef))
+			continue;
+
+		/* are any of our attacks good? */
+		if (/* force_linedup means we only check m_online -- we have a specific attack in mind to use that needs to be on a line */
+			(force_linedup) ? m_online(magr, mdef, tarx, tary, dogbesafe, TRUE) : (
+
+			/* OTHERWISE... (!force_linedup) */
+
+			/* attacks that are on a line that do NOT stop on hit */
+			(m_online(magr, mdef, tarx, tary, dogbesafe, FALSE) && (
+				(attacktype(magr->data, AT_BREA) && !magr->mcan) ||
+				(attacktype(magr->data, AT_MAGC) && !magr->mcan && !real_spell_adtyp((attacktype_fordmg(magr->data, AT_MAGC, AD_ANY))->adtyp)) ||
+				(attacktype(magr->data, AT_MMGC) && !magr->mcan && !real_spell_adtyp((attacktype_fordmg(magr->data, AT_MMGC, AD_ANY))->adtyp))
+			))
+			||
+			/* attacks that are on a line that DO stop on hit */
+			(m_online(magr, mdef, tarx, tary, dogbesafe, TRUE) && (
+				(attacktype(magr->data, AT_SPIT)) ||
+				(attacktype(magr->data, AT_ARRW)) ||
+				(attacktype(magr->data, AT_WEAP) && mrwep && !is_pole(mrwep)) ||
+				(attacktype(magr->data, AT_DEVA) && mrwep && !is_pole(mrwep))
+			))
+			||
+			/* attacks that are on a line that are ALWAYS SAFE */
+			(m_online(magr, mdef, tarx, tary, FALSE, FALSE) && (
+				(attacktype(magr->data, AT_TNKR)) ||
+				(attacktype(magr->data, AT_BEAM))
+			))
+			||
+			/* attacks in polearm range */
+			(dist2(magr->mx, magr->my, tarx, tary) <= m_pole_range(magr) && (
+				(attacktype(magr->data, AT_WEAP) && mrwep && is_pole(mrwep)) ||
+				(attacktype(magr->data, AT_DEVA) && mrwep && is_pole(mrwep))
+			))
+			||
+			/* attacks in a square range of 2 */
+			(distmin(magr->mx, magr->my, tarx, tary) <= 2 && (
+				(attacktype(magr->data, AT_LRCH)) ||
+				(attacktype(magr->data, AT_LNCK))
+			))
+			||
+			/* attacks in a square range of 5 */
+			(distmin(magr->mx, magr->my, tarx, tary) <= 5 && (
+				(attacktype(magr->data, AT_5SQR)) ||
+				(attacktype(magr->data, AT_5SBT))
+			))
+			||
+			/* attacks in a square range of 8 */
+			(distmin(magr->mx, magr->my, tarx, tary) <= 8 && (
+				(is_commander(magr->data) && !rn2(4)) ||	/* !rn2(4) -> reduce command frequency */
+				(attacktype(magr->data, AT_GAZE) && !magr->mcan) ||
+				(attacktype(magr->data, AT_MAGC) && !magr->mcan && real_spell_adtyp((attacktype_fordmg(magr->data, AT_MAGC, AD_ANY))->adtyp)) ||
+				(attacktype(magr->data, AT_MMGC) && !magr->mcan && real_spell_adtyp((attacktype_fordmg(magr->data, AT_MMGC, AD_ANY))->adtyp))
+			))
+			))
+		{
+			/* mdef can be targeted by one of our attacks */
+			/* calculate value of target */
+			if (is_covetous(magr->data) && !magr->mtame &&
+				mdef == m_at(STRAT_GOALX(magr->mstrategy), STRAT_GOALY(magr->mstrategy))) {
+				/* prefer item-holder */
+				target_val = 999;
+			}
+			else if (mdef == &youmonst) {
+				/* prefer player */
+				target_val = 999;
+			}
+			else {
+				/* value is mdef's difficulty, but adjusted to prefer closer targets */
+				target_val = monstr[mdef->mtyp] + BOLT_LIM - distmin(magr->mx, magr->my, tarx, tary);
+			}
+			/* maybe we have a new target */
+			if (target_val > best_val) {
+				best_target = mdef;
+				best_val = target_val;
+			}
+			/* if we found a prefered target (best_val == 999), end target-finding loop early */
+		}
+	} while (mdef && best_val < 999);
+
+	/* we have a target */
+
+	/* set tbx, tby */
+	/* caller has to know to reject tbx==0, tby==0 if called with force_linedup */
+	if (!linedup(tarx, tary, magr->mx, magr->my)) {
+		tbx = tby = 0;
 	}
-#endif
-    	if (!mtmp->mpeaceful && !conflicted &&
-			((mtmp->mstrategy & STRAT_STRATMASK) == STRAT_NONE) && (
-			   (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan && lined_up(mtmp))
-			|| (force_linedup && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_SPIT) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_TNKR) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_ARRW) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_BEAM) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan && (
-			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp <= AD_SPC2) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_RBRE) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_OONA) )
-				&& lined_up(mtmp)
-			  )
-			|| (attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan && (
-			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp <= AD_SPC2) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_RBRE) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_OONA) )
-				&& lined_up(mtmp)
-			  )
-			|| (is_commander(mtmp->data) && distmin(mtmp->mux, mtmp->muy, mtmp->mx, mtmp->my) < BOLT_LIM)
-			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2)
-			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2)
-			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 5)
-			|| (attacktype(mtmp->data, AT_5SBT) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 5)
-			|| (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_WEAP, AD_PHYS) && mrwep && (
-				(!is_pole(mrwep) && lined_up(mtmp)) ||
-				( is_pole(mrwep) && lined_up(mtmp) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2 && (mtmp->mux == mtmp->mx || mtmp->muy == mtmp->my))
-			   ))
-		)) {
-        	if(!(mtmp->mtyp == PM_OONA && Oona_resistance)) return &youmonst;  /* kludge - attack the player first
-				      if possible */
-		}
-		if(gx != 0 || gy != 0){
-			for (dir = 0; dir < 8; dir++)
-				if (dirx[dir] == sgn(gx-mtmp->mx) &&
-					diry[dir] == sgn(gy-mtmp->my))
-						break;
 
-			if (dir == 8) {
-				tbx = tby = 0;
-				return 0;
-			}
-		} else {
-			dir = rn2(8);
-		}
-
-		origdir = -1;
-    } else {
-		int i, j;
-		struct monst *tmpm;
-    	dir = rn2(8);
-		origdir = -1;
-
-		//Don't make ranged attacks if in melee
-		for(i=-1;i<2;i++){
-			for(j=-1;j<2;j++){
-				if(!i && !j)
-					continue;
-				if(isok(mtmp->mx+i, mtmp->my+j)){
-					tmpm = m_at(mtmp->mx+i, mtmp->my+j);
-					if(tmpm && mm_aggression(mtmp, tmpm)){
-						return (struct monst *) 0;
-					}
-				}
-			}
-		}
-	
-		if (!mtmp->mpeaceful && (!force_linedup || lined_up(mtmp)) && !conflicted && (
-			   (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan && lined_up(mtmp))
-			|| (force_linedup && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_SPIT) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_TNKR) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_ARRW) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_BEAM) && lined_up(mtmp))
-			|| (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan && (
-			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp <= AD_SPC2) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_RBRE) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp == AD_OONA) )
-				&& lined_up(mtmp)
-			  )
-			|| (attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan && (
-			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp <= AD_SPC2) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_RBRE) ||
-			  ((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp == AD_OONA) )
-				&& lined_up(mtmp)
-			  )
-			|| (is_commander(mtmp->data) && distmin(mtmp->mux, mtmp->muy, mtmp->mx, mtmp->my) < BOLT_LIM)
-			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2)
-			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2)
-			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 5)
-			|| (attacktype(mtmp->data, AT_5SBT) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 5)
-			|| (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_WEAP, AD_PHYS) && mrwep && (
-				(!is_pole(mrwep) && lined_up(mtmp)) ||
-				( is_pole(mrwep) && lined_up(mtmp) && distmin(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my) <= 2 && (mtmp->mux == mtmp->mx || mtmp->muy == mtmp->my))
-			   ))
-		)) {
-        	if(!(mtmp->mtyp == PM_OONA && Oona_resistance)) return &youmonst;  /* kludge - attack the player first
-				      if possible */
-		}
-    }
-
-    for (; dir != origdir; dir = ((dir + 1) % 8))
-    {
-        if (origdir < 0) origdir = dir;
-
-	mret = (struct monst *)0;
-
-	x = mtmp->mx;
-	y = mtmp->my;
-	dx = dirx[dir];
-	dy = diry[dir];
-	for(i = 0; i < BOLT_LIM; i++)
-	{
-	    x += dx;
-	    y += dy;
-
-	    if (!isok(x, y) || !ZAP_POS(levl[x][y].typ) || closed_door(x, y))
-	        break; /* off the map or otherwise bad */
-
-	    if (!conflicted &&
-	        ((mtmp->mpeaceful && (x == mtmp->mux && y == mtmp->muy)) ||
-	        (mtmp->mtame && x == u.ux && y == u.uy)))
-	    {
-	        mret = oldmret;
-	        break; /* don't attack you if peaceful */
-	    }
-
-	    if ((mat = m_at(x, y)))
-	    {
-	        /* i > 0 ensures this is not a close range attack */
-	        if (mtmp->mtame && !mat->mtame && i > 0) {
-				if (((!oldmret) ||
-					(monstr[monsndx(mat->data)] >
-					monstr[monsndx(oldmret->data)])
-					) && !(mtmp->mtyp == PM_OONA && resists_oona(mat))
-					 && mm_aggression(mtmp, mat)
-				) mret = mat;
-			}
-			else if ((mm_aggression(mtmp, mat) & ALLOW_M)
-				|| conflicted)
-			{
-				if (mtmp->mtame && !conflicted){
-					mret = oldmret;
-					break; /* not willing to attack in that direction */
-				}
-
-				/* Can't make some pairs work together
-				   if they hate each other on principle. */
-				if ((conflicted ||
-					(!(mtmp->mtame && mat->mtame) || !rn2(5))) &&
-				i > 0) {
-					if (((!oldmret) ||
-						(monstr[monsndx(mat->data)] >
-						monstr[monsndx(oldmret->data)])
-						) && !(mtmp->mtyp == PM_OONA && resists_oona(mat))
-						 && mm_aggression(mtmp, mat)
-					)
-						mret = mat;
-				}
-			}
-			if (mtmp->mtame && mat->mtame)
-			{
-				mret = oldmret;
-				break;  /* Not going to hit friendlies unless they
-						   already hate them, as above. */
-			}
-		}
-	}
-	oldmret = mret;
-    }
-	
-	if(!mret && !force_linedup) for(mtmp2 = fmon; mtmp2; mtmp2 = mtmp2->nmon){
-		if(mtmp == mtmp2) continue;
-    	if ((!!mtmp->mtame != !!mtmp2->mtame || conflicted || (mm_aggression(mtmp, mtmp2) & ALLOW_M)) &&
-			!mlined_up(mtmp, mtmp2, FALSE) && //Note: must be something we don't want to hit in the way.
-			(
-			   (is_commander(mtmp->data) && distmin(mtmp2->mx, mtmp2->my, mtmp->mx, mtmp->my) < BOLT_LIM)
-			|| (attacktype(mtmp->data, AT_LRCH) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 2)
-			|| (attacktype(mtmp->data, AT_LNCK) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 2)
-			|| (attacktype(mtmp->data, AT_5SQR) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 5)
-			|| (attacktype(mtmp->data, AT_5SBT) && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) <= 5)
-			|| (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-			|| (attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) && !mtmp->mcan && distmin(mtmp2->mx,mtmp2->my,mtmp->mx,mtmp->my) < BOLT_LIM)
-		)) {
-			if (((!mret) ||
-				(monstr[monsndx(mtmp2->data)] >
-				monstr[monsndx(mret->data)])
-				) && !(mtmp->mtyp == PM_OONA && resists_oona(mtmp2))
-				 && mm_aggression(mtmp, mtmp2)
-			){
-				mret = mtmp2;
-			}
-		}
-	}
-	
-    if (mret != (struct monst *)0) {
-		if(!mlined_up(mtmp, mret, FALSE)){
-			tbx = tby = 0;
-		}
-        return mret; /* should be the strongest monster that's not behind
-	                a friendly */
-    }
-
-    /* Nothing lined up? */
-    tbx = tby = 0;
-    return (struct monst *)0;
+	/* return the best target we found */
+	return best_target;
 }
 
 boolean
@@ -390,48 +294,46 @@ lined_up(mtmp)		/* is mtmp in position to use ranged attack? */
 	return(linedup(mtmp->mux,mtmp->muy,mtmp->mx,mtmp->my));
 }
 
-boolean
-mlined_up(mtmp, mdef, breath)	/* is mtmp in position to use ranged attack? */
-	register struct monst *mtmp;
-	register struct monst *mdef;
-	register boolean breath;
+
+/* returns the max euclidean distance magr can use a polearm at */
+/* Ranges:
+ * 
+ * ESBSE
+ * S...S
+ * B.@.B
+ * S...S
+ * ESBSE
+ *  
+ */
+int
+m_pole_range(magr)
+struct monst * magr;
 {
-	struct monst *mat;
-
-        boolean lined_up = linedup(mdef->mx,mdef->my,mtmp->mx,mtmp->my);
-
-	int dx = sgn(mdef->mx - mtmp->mx),
-	    dy = sgn(mdef->my - mtmp->my);
-
-	int x = mtmp->mx, y = mtmp->my;
-
-	int i = 10; /* arbitrary */
-
-        /* No special checks if confused - can't tell friend from foe */
-	if (!lined_up || mtmp->mconf || !mtmp->mtame) return lined_up;
-
-        /* Check for friendlies in the line of fire. */
-	for (; !breath || i > 0; --i)
-	{
-	    x += dx;
-	    y += dy;
-	    if (!isok(x, y)) break;
-		
-            if (x == u.ux && y == u.uy) 
-	        return FALSE;
-
-	    mat = m_at(x, y);
-	    if (mat)
-	    {
-	        if (!breath && mat == mdef) return lined_up;
-
-		/* Don't hit friendlies: */
-		if (mat->mtame) return FALSE;
-	    }
+	if (magr == &youmonst) {
+		impossible("calculating player's polearm range with m_pole_range?");
+		return 8;
 	}
 
-	return lined_up;
+	int skill_equiv = P_BASIC;
+
+	if (magr->data->mlevel >= 6)
+		skill_equiv++;
+	if (magr->data->mlevel >= 12)
+		skill_equiv++;
+	if (is_prince(magr->data))
+		skill_equiv++;
+
+	/* cap at expert */
+	if (skill_equiv > P_EXPERT)
+		skill_equiv = P_EXPERT;
+
+	switch (skill_equiv) {
+	case P_BASIC:	return 4;
+	case P_SKILLED:	return 5;
+	case P_EXPERT:	return 8;
+	}
 }
+
 
 #endif /* OVL1 */
 #ifdef OVL0
