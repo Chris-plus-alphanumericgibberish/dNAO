@@ -7996,17 +7996,18 @@ int vis;
 		range = (BOLT_LIM*BOLT_LIM);
 
 	/* determine if magr can target mdef */
-	if ((youdef ? couldsee(x(magr), y(magr)) : clear_path(x(magr), y(magr), x(mdef), y(mdef))) &&	/* clear line of sight */
-		((youdef||youagr) ? TRUE : mon_can_see_mon(magr, mdef)) &&									/* can see def (ignored vs player?) */
-		dist2(x(magr), y(magr), x(mdef), y(mdef)) <= range)											/* within range */
+	if ((clear_path(x(magr), y(magr), tarx, tary)) &&	/* clear line of sight */
+		dist2(x(magr), y(magr), tarx, tary) <= range)	/* within range */
 		can_target = TRUE;
 	else
 		can_target = FALSE;
 
 	if (can_target)
 		result = xcasty(magr, mdef, attk, tarx, tary);
-	else
+	else if (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC || attk->adtyp == AD_PSON)
 		result = xcasty(magr, (struct monst *)0, attk, 0, 0);
+	else
+		result = MM_MISS;	/* nothing to cast */
 
 	return result;
 }
