@@ -1746,7 +1746,7 @@ toofar:
 			    if (mtmp->mux==u.ux && mtmp->muy==u.uy && couldsee(mtmp->mx, mtmp->my) && !mtmp->mpeaceful && 
 					dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= BOLT_LIM*BOLT_LIM
 				){
-					if (xcasty(mtmp, &youmonst, a, mtmp->mux, mtmp->mux)){
+					if (xcasty(mtmp, &youmonst, a, mtmp->mux, mtmp->muy)){
 						tmp = 3;
 						// if(mdat->mtyp != PM_DEMOGORGON) break;
 					}
