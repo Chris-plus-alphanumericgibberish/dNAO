@@ -1669,9 +1669,10 @@ int tary;
 		/* generally: cast the spell */
 		return cast_spell(magr, mdef, attk, spellnum, tarx, tary);
 	}
-	else {
+	else if (!notarget || youagr) {
 		/* no spell selected; this probably means we have an elemental spell to cast */
 		/* these typically result in either a beam (zaps a cone of cold, etc) or hand-to-hand magic (covered in frost, etc) */
+		/* the player can be prompted to cast in a direction; otherwise, we need a target */
 		return elemspell(magr, mdef, attk, tarx, tary);
 	}
 
