@@ -609,20 +609,32 @@ int tary;
 				(aatyp == AT_WEAP || aatyp == AT_DEVA) &&				// using a primary weapon attack
 				(magr->weapon_check == NEED_WEAPON || !MON_WEP(magr))	// needs a weapon
 				){
+				/* what ranged weapon options do we have? */
+				otmp = select_rwep(magr);
+
 				/* pick appropriate weapon based on range to target */
-				if (dist2(x(magr), y(magr), tarx, tary) <= 8) {
-					/* melee or polearm range */
+				if (dist2(x(magr), y(magr), tarx, tary) <
+					((otmp && is_pole(otmp)) ? 3 : m_pole_range(magr)))	// if we have a polearm, use it longer range
+				{
+					/* melee range */
 					magr->combat_mode = HNDHND_MODE;
 					magr->weapon_check = NEED_HTH_WEAPON;
 				}
 				else {
-					/* long range */
+					/* long or polearm range */
 					magr->combat_mode = RANGED_MODE;
 					magr->weapon_check = NEED_RANGED_WEAPON;
 				}
 				if (mon_wield_item(magr) != 0)				// and try to wield something (did it take time?)
 				{
-					continue;								// it took time, don't attack using this action
+					if (MON_WEP(magr) && is_pole(MON_WEP(magr))) {
+						/* you can wield a polearm and attack in the same action */
+					}
+					else {
+						mon_ranged_gazeonly = FALSE;
+						allres |= MM_HIT;					// this xattacky() call took time
+						continue;							// it took time, don't attack using this action
+					}
 				}
 			}
 			/* 2: Offhand attack when not allowed */
@@ -690,7 +702,7 @@ int tary;
 			/* make the attack */
 			/* melee -- if attacking an adjacent square or thrusting a polearm */
 			if (!ranged ||
-				(otmp && is_pole(otmp) && dist2(x(magr), y(magr), tarx, tary) < 8)) {
+				(otmp && is_pole(otmp) && dist2(x(magr), y(magr), tarx, tary) <= m_pole_range(magr))) {
 				int devai = 0;
 				/* they did do an attack */
 				mon_ranged_gazeonly = FALSE;
@@ -7996,17 +8008,18 @@ int vis;
 		range = (BOLT_LIM*BOLT_LIM);
 
 	/* determine if magr can target mdef */
-	if ((youdef ? couldsee(x(magr), y(magr)) : clear_path(x(magr), y(magr), x(mdef), y(mdef))) &&	/* clear line of sight */
-		((youdef||youagr) ? TRUE : mon_can_see_mon(magr, mdef)) &&									/* can see def (ignored vs player?) */
-		dist2(x(magr), y(magr), x(mdef), y(mdef)) <= range)											/* within range */
+	if ((clear_path(x(magr), y(magr), tarx, tary)) &&	/* clear line of sight */
+		dist2(x(magr), y(magr), tarx, tary) <= range)	/* within range */
 		can_target = TRUE;
 	else
 		can_target = FALSE;
 
 	if (can_target)
 		result = xcasty(magr, mdef, attk, tarx, tary);
-	else
+	else if (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC || attk->adtyp == AD_PSON)
 		result = xcasty(magr, (struct monst *)0, attk, 0, 0);
+	else
+		result = MM_MISS;	/* nothing to cast */
 
 	return result;
 }

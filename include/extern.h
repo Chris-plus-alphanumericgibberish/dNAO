@@ -1657,7 +1657,7 @@ E int FDECL(set_destroy_thrown, (int));
 E struct monst *FDECL(mfind_target, (struct monst *, int));
 E boolean FDECL(linedup, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P));
 E boolean FDECL(lined_up, (struct monst *));
-E boolean FDECL(mlined_up, (struct monst *,struct monst *,BOOLEAN_P));
+E int FDECL(m_pole_range, (struct monst *));
 E struct obj *FDECL(m_carrying, (struct monst *,int));
 E struct obj *FDECL(m_carrying_charged, (struct monst *,int));
 E void FDECL(m_useup, (struct monst *,struct obj *));

@@ -217,6 +217,8 @@
 #define AD_CURS		AD_CLRC+6	/* random curse (ex. gremlin) */
 #define AD_SQUE		AD_CLRC+7	/* hits, may steal Quest Art or Amulet (Nemeses) */
 
+#define real_spell_adtyp(adtyp) \
+	((adtyp) == AD_SPEL || (adtyp) == AD_CLRC || (adtyp) == AD_PSON)
 
 /*
  *  Monster to monster attacks.  When a monster attacks another (mattackm),
