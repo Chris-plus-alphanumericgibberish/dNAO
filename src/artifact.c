@@ -534,8 +534,8 @@ struct obj * otmp;
 		/* cannot already exist */
 		if (artiexist[m])
 			continue;
-		/* cannot be nogen, unless the base object is unique */
-		if (a->gflags & ARTG_NOGEN && !objects[otmp->otyp].oc_unique)
+		/* cannot be nogen, with exceptions */
+		if (a->gflags & ARTG_NOGEN && !(otmp->otyp == SPE_SECRETS))
 			continue;
 		/* must match otyp (or be acceptable) */
 		if (!artitypematch(a, otmp))
@@ -552,6 +552,10 @@ struct obj * otmp;
 				|| ((is_elven_weapon(otmp) || is_droven_weapon(otmp)) && rn2(4))
 				)
 			)
+			continue;
+		/* Since Pirates can only be gifted the Marauder's Map, don't let it generate on the floor and leave 
+		 * them sacrificing eternally for a gift that will never come */
+		if (m == ART_MARAUDER_S_MAP && Role_if(PM_PIRATE))
 			continue;
 
 		/* if we made it through that gauntlet, we're good */

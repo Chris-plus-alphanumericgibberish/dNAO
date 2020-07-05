@@ -1175,6 +1175,10 @@ int spec;
 		tmp *= 2;
 		tmp += rnd(20);
 	}
+	/* shotguns are great at putting down zombies (Note: mon may be null if hypotetical) */
+	if (otmp->otyp == SHOTGUN_SHELL && mon && mon->mfaction == ZOMBIFIED)
+		tmp += d(2, 6);
+
 	/* Eve slays plants too */
 	if(u.sealsActive&SEAL_EVE && !youdefend && ptr->mlet == S_PLANT)
 		tmp *= 2;

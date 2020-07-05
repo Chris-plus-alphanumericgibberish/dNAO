@@ -515,6 +515,7 @@ make_version()
 	version.entity_count = (version.entity_count << 12) | (unsigned long)i;
 	for (i = 0; mons[i].mlet; i++) continue;
 	version.entity_count = (version.entity_count << 12) | (unsigned long)i;
+	version.entity_count = (version.entity_count << 12) | MAX_GOD;
 	/*
 	 * Value used for compiler (word size/field alignment/padding) check.
 	 */
@@ -598,17 +599,17 @@ do_date(int verinfo)
 #else
 	ul_sfx = "L";
 #endif
-	Fprintf(ofp,"#define VERSION_NUMBER 0x%08lx%s\n",
+	Fprintf(ofp,"#define VERSION_NUMBER 0x%08llx%s\n",
 		version.incarnation, ul_sfx);
-	Fprintf(ofp,"#define VERSION_FEATURES 0x%08lx%s\n",
+	Fprintf(ofp,"#define VERSION_FEATURES 0x%08llx%s\n",
 		version.feature_set, ul_sfx);
 #ifdef IGNORED_FEATURES
 	Fprintf(ofp,"#define IGNORED_FEATURES 0x%08lx%s\n",
 		(unsigned long) IGNORED_FEATURES, ul_sfx);
 #endif
-	Fprintf(ofp,"#define VERSION_SANITY1 0x%08lx%s\n",
+	Fprintf(ofp,"#define VERSION_SANITY1 0x%08llx%s\n",
 		version.entity_count, ul_sfx);
-	Fprintf(ofp,"#define VERSION_SANITY2 0x%08lx%s\n",
+	Fprintf(ofp,"#define VERSION_SANITY2 0x%08llx%s\n",
 		version.struct_sizes, ul_sfx);
 	Fprintf(ofp,"\n");
 	Fprintf(ofp,"#define VERSION_STRING \"%s\"\n", version_string(buf));

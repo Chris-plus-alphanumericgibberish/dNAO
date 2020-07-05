@@ -126,6 +126,22 @@ struct permonst * ptr;
 }
 
 void
+give_mintrinsic(mon, intrinsic)
+struct monst * mon;
+long intrinsic;
+{
+	mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32);
+}
+
+void
+remove_mintrinsic(mon, intrinsic)
+struct monst * mon;
+long intrinsic;
+{
+	mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
+}
+
+void
 set_faction(mtmp, faction)
 struct monst * mtmp;
 int faction;

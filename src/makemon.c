@@ -484,7 +484,8 @@ register struct monst *mtmp;
 			      w2 = rn2(2) ? DAGGER : KNIFE;
 				  (void)mongets(mtmp, CROSSBOW);
 				  m_initthrow(mtmp, CROSSBOW_BOLT, 10);
-				  (void)mongets(mtmp, rnd(WAN_LIGHTNING-WAN_CREATE_MONSTER)+WAN_CREATE_MONSTER);
+				  if ((otmp = mongets(mtmp, rnd(WAN_LIGHTNING - WAN_CREATE_MONSTER) + WAN_CREATE_MONSTER)))
+					  otmp->recharged = rnd(7);
 				  (void)mongets(mtmp, SCALE_MAIL);
 			break;
 			case PM_LEGION_DEVIL_SERGEANT:
@@ -492,8 +493,10 @@ register struct monst *mtmp;
 			      w2 = rn2(2) ? DAGGER : KNIFE;
 				  (void)mongets(mtmp, CROSSBOW);
 				  m_initthrow(mtmp, CROSSBOW_BOLT, 20);
-				  (void)mongets(mtmp, rnd_attack_wand(mtmp));
-				  (void)mongets(mtmp, rnd(WAN_LIGHTNING-WAN_CREATE_MONSTER)+WAN_CREATE_MONSTER);
+				  if ((otmp = mongets(mtmp, rnd_attack_wand(mtmp))))
+					  otmp->recharged = rnd(7);
+				  if ((otmp = mongets(mtmp, rnd(WAN_LIGHTNING - WAN_CREATE_MONSTER) + WAN_CREATE_MONSTER)))
+					  otmp->recharged = rnd(7);
 				  (void)mongets(mtmp, SCALE_MAIL);
 			break;
 			case PM_LEGION_DEVIL_CAPTAIN:
@@ -501,9 +504,12 @@ register struct monst *mtmp;
 			      w2 = rn2(2) ? DAGGER : KNIFE;
 				  (void)mongets(mtmp, BOW);
 				  m_initthrow(mtmp, ARROW, 30);
-				  (void)mongets(mtmp, rnd_attack_wand(mtmp));
-				  (void)mongets(mtmp, rnd_utility_wand(mtmp));
-				  (void)mongets(mtmp, rnd(WAN_LIGHTNING-WAN_CREATE_MONSTER)+WAN_CREATE_MONSTER);
+				  if ((otmp = mongets(mtmp, rnd_attack_wand(mtmp))))
+					  otmp->recharged = rnd(7);
+				  if ((otmp = mongets(mtmp, rnd_utility_wand(mtmp))))
+					  otmp->recharged = rnd(7);
+				  if ((otmp = mongets(mtmp, rnd(WAN_LIGHTNING - WAN_CREATE_MONSTER) + WAN_CREATE_MONSTER)))
+					  otmp->recharged = rnd(7);
 				  (void)mongets(mtmp, SCALE_MAIL);
 			break;
 			case PM_GLASYA:
@@ -1522,6 +1528,7 @@ register struct monst *mtmp;
 					(void)mongets(mtmp, ORIHALCYON_GAUNTLETS);
 					(void)mongets(mtmp, ELVEN_BOOTS);
 				} else if(mm == PM_MYRKALFAR_MATRON){
+					give_mintrinsic(mtmp, TELEPAT);
 					otmp = mksobj(ARM_BLASTER, TRUE, FALSE);
 					otmp->spe = 4;
 					otmp->ovar1 = 50 + d(5,10);
@@ -1551,6 +1558,7 @@ register struct monst *mtmp;
 					mtmp->m_lev += 7;
 					mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, 8);
 					
+					give_mintrinsic(mtmp, TELEPAT);
 					otmp = mksobj(LIGHTSABER, TRUE, FALSE);
 					otmp->spe = 3;
 					otmp->ovar1 = !rn2(4) ? 2L : !rn2(3) ? 9L : rn2(2) ? 21L : 22L;
@@ -3297,12 +3305,29 @@ register struct monst *mtmp;
 				int i;
 				for(i = d(3,3); i > 0; i--){
 					otmp = mksobj(MASK, FALSE, FALSE);
-					otmp->obj_material = WOOD;
 					otmp->corpsenm = masktypes[rn2(SIZE(masktypes))];
-					fix_object(otmp);
+					set_material_gm(otmp, WOOD);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
 				}
+			} else if(ptr->mtyp == PM_KUKER){
+				switch(rnd(4)){
+					case 1:
+					case 2:
+						otmp = mksobj(QUARTERSTAFF, FALSE, FALSE);
+					break;
+					case 3:
+						otmp = mksobj(SCIMITAR, FALSE, FALSE);
+					break;
+					case 4:
+						otmp = mksobj(SPEAR, FALSE, FALSE);
+					break;
+				}
+				otmp->oproperties = OPROP_HOLYW;
+				otmp->spe = 7;
+				set_material_gm(otmp, WOOD);
+				bless(otmp);
+				(void)mongets(mtmp, BELL);
 			} else if(ptr->mtyp == PM_GWYNHARWYF){
 				(void)mongets(mtmp, CLOAK);
 				(void)mongets(mtmp, HIGH_BOOTS);
@@ -5509,44 +5534,44 @@ register struct	monst	*mtmp;
 				}
 			} else {
 				if (mac < -1 && rn2(5))
-				mac += objects[PLATE_MAIL].a_ac + mongets(mtmp, PLATE_MAIL);
+					mac += arm_ac_bonus(mongets(mtmp, PLATE_MAIL));
 				else if (mac < 3 && rn2(5))
-				mac += objects[SPLINT_MAIL].a_ac + mongets(mtmp, (rn2(3)) ?
-						   SPLINT_MAIL : BANDED_MAIL);
+					mac += arm_ac_bonus(mongets(mtmp, (rn2(3)) ?
+							SPLINT_MAIL : BANDED_MAIL));
 				else if (rn2(5))
-				mac += objects[RING_MAIL].a_ac + mongets(mtmp, (rn2(3)) ?
-						   RING_MAIL : STUDDED_LEATHER_ARMOR);
+					mac += arm_ac_bonus(mongets(mtmp, (rn2(3)) ?
+							RING_MAIL : STUDDED_LEATHER_ARMOR));
 				else
-				mac += objects[LEATHER_ARMOR].a_ac + mongets(mtmp, LEATHER_ARMOR);
+					mac += arm_ac_bonus(mongets(mtmp, LEATHER_ARMOR));
 
 				if (mac < 10 && rn2(3))
-				mac += objects[HELMET].a_ac + mongets(mtmp, HELMET);
+				mac += arm_ac_bonus(mongets(mtmp, HELMET));
 				else if (mac < 10 && rn2(2))
-				mac += objects[LEATHER_HELM].a_ac + mongets(mtmp, LEATHER_HELM);
+				mac += arm_ac_bonus(mongets(mtmp, LEATHER_HELM));
 				else if (mac < 10 && !rn2(10))
-				mac += objects[WAR_HAT].a_ac + mongets(mtmp, WAR_HAT);
+				mac += arm_ac_bonus(mongets(mtmp, WAR_HAT));
 				
 				if (mac < 10 && rn2(3))
-				mac += objects[BUCKLER].a_ac + mongets(mtmp, BUCKLER);
+				mac += arm_ac_bonus(mongets(mtmp, BUCKLER));
 				else if (mac < 10 && rn2(2))
-				mac += objects[KITE_SHIELD].a_ac + mongets(mtmp, KITE_SHIELD);
+				mac += arm_ac_bonus(mongets(mtmp, KITE_SHIELD));
 				else if (mac < 10 && rn2(2))
-				mac += objects[ROUNDSHIELD].a_ac + mongets(mtmp, ROUNDSHIELD);
+				mac += arm_ac_bonus(mongets(mtmp, ROUNDSHIELD));
 			
 				if (mac < 10 && rn2(3))
-				mac += objects[LOW_BOOTS].a_ac + mongets(mtmp, LOW_BOOTS);
+				mac += arm_ac_bonus(mongets(mtmp, LOW_BOOTS));
 				else if (mac < 10 && rn2(2))
-				mac += objects[HIGH_BOOTS].a_ac + mongets(mtmp, HIGH_BOOTS);
+				mac += arm_ac_bonus(mongets(mtmp, HIGH_BOOTS));
 				else if (mac < 10 && rn2(2))
-				mac += objects[ARMORED_BOOTS].a_ac + mongets(mtmp, ARMORED_BOOTS);
+				mac += arm_ac_bonus(mongets(mtmp, ARMORED_BOOTS));
 			
 				if (mac < 10 && rn2(3))
-				mac += objects[GLOVES].a_ac + mongets(mtmp, GLOVES);
+				mac += arm_ac_bonus(mongets(mtmp, GLOVES));
 				else if (mac < 10 && rn2(2))
-				mac += objects[GAUNTLETS].a_ac + mongets(mtmp, GAUNTLETS);
+				mac += arm_ac_bonus(mongets(mtmp, GAUNTLETS));
 			
 				if (mac < 10 && rn2(2))
-				mac += objects[CLOAK].a_ac + mongets(mtmp, CLOAK);
+				mac += arm_ac_bonus(mongets(mtmp, CLOAK));
 			}
 			if(ptr->mtyp != PM_GUARD &&
 #ifdef CONVICT
@@ -8040,6 +8065,9 @@ register int	mmflags;
 			} else if(mndx == PM_KETO || mndx == PM_DRACAE_ELADRIN){ 
 				mtmp->mhpmax = 3*mtmp->mhpmax;
 				mtmp->mhp = mtmp->mhpmax;
+			} else if(mndx == PM_KUKER){ 
+				mtmp->mhpmax = mtmp->m_lev*8 - 4; //Max HP
+				mtmp->mhp = mtmp->mhpmax;
 			}
 		break;
 	    case S_GIANT:
@@ -9735,7 +9763,7 @@ struct monst *mtmp, *victim;
 #endif /* OVLB */
 #ifdef OVL1
 
-int
+struct obj *
 mongets(mtmp, otyp)
 register struct monst *mtmp;
 register int otyp;
@@ -9744,34 +9772,41 @@ register int otyp;
 	int spe;
 
 	if (undeadfaction && mtmp->mfaction == undeadfaction && rn2(2))
-		return 0;
-	if (!otyp) return 0;
+		return (struct obj *)0;
+	if (!otyp)
+		return (struct obj *)0;
+
 	otmp = mksobj(otyp, TRUE, FALSE);
 	if (otmp) {
 		/*Size and shape it to owner*/
-		if((otmp->oclass == ARMOR_CLASS || otmp->oclass == WEAPON_CLASS) && mtmp->mtyp != PM_HOBBIT)
+		if ((otmp->oclass == ARMOR_CLASS || otmp->oclass == WEAPON_CLASS) && mtmp->mtyp != PM_HOBBIT)
 			otmp->objsize = mtmp->data->msize;
-		if(otmp->otyp == BULLWHIP && is_drow(mtmp->data) && mtmp->female)
+		if (otmp->otyp == BULLWHIP && is_drow(mtmp->data) && mtmp->female)
 			otmp->obj_material = SILVER;
-		if(otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp)){
-			if(is_suit(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_BODYTYPEMASK);
-			else if(is_helmet(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_HEADMODIMASK);
-			else if(is_shirt(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (mtmp->data->mflagsb&MB_BODYTYPEMASK);
+		if (otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp)){
+			if (is_suit(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_BODYTYPEMASK);
+			else if (is_helmet(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_HEADMODIMASK);
+			else if (is_shirt(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (mtmp->data->mflagsb&MB_BODYTYPEMASK);
 		}
-		
-		if(mtmp->data->mlet == S_GOLEM){
-			if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS){
-				if(mtmp->mtyp == PM_GOLD_GOLEM){
+
+		if (mtmp->data->mlet == S_GOLEM){
+			if (otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS){
+				if (mtmp->mtyp == PM_GOLD_GOLEM){
 					otmp->obj_material = GOLD;
-				} else if(mtmp->mtyp == PM_TREASURY_GOLEM){
+				}
+				else if (mtmp->mtyp == PM_TREASURY_GOLEM){
 					otmp->obj_material = GOLD;
-				} else if(mtmp->mtyp == PM_GLASS_GOLEM){
+				}
+				else if (mtmp->mtyp == PM_GLASS_GOLEM){
 					otmp->obj_material = GLASS;
-				} else if(mtmp->mtyp == PM_GROVE_GUARDIAN){
+				}
+				else if (mtmp->mtyp == PM_GROVE_GUARDIAN){
 					otmp->obj_material = SILVER;
-				} else if(mtmp->mtyp == PM_IRON_GOLEM){
+				}
+				else if (mtmp->mtyp == PM_IRON_GOLEM){
 					otmp->obj_material = IRON;
-				} else if(mtmp->mtyp == PM_ARGENTUM_GOLEM){
+				}
+				else if (mtmp->mtyp == PM_ARGENTUM_GOLEM){
 					otmp->obj_material = SILVER;
 				}
 			}
@@ -9779,91 +9814,97 @@ register int otyp;
 		if (is_demon(mtmp->data)) {
 			/* demons never get blessed objects */
 			if (otmp->blessed) curse(otmp);
-			if(mtmp->mtyp == PM_MARILITH && otmp->oclass == WEAPON_CLASS){
+			if (mtmp->mtyp == PM_MARILITH && otmp->oclass == WEAPON_CLASS){
 				int roll = rnd(3);
 				otmp->spe = max(otmp->spe, roll);
-				
+
 				roll = rn2(100);
-				if(roll < 25)
+				if (roll < 25)
 					set_material(otmp, IRON);
-				else if(roll < 50)
+				else if (roll < 50)
 					set_material(otmp, GOLD);
-				else if(roll < 75)
+				else if (roll < 75)
 					set_material(otmp, MITHRIL);
-				else if(roll < 85)
+				else if (roll < 85)
 					set_material(otmp, OBSIDIAN_MT);
-				else if(roll < 95)
+				else if (roll < 95)
 					set_material(otmp, GEMSTONE);
-				else if(roll < 100)
+				else if (roll < 100)
 					set_material(otmp, SILVER);
-				
-				if(rn2(100) < 15){
-					switch(rnd(8)){
-						case 1:
-							otmp->oproperties |= OPROP_FLAYW;
+
+				if (rn2(100) < 15){
+					switch (rnd(8)){
+					case 1:
+						otmp->oproperties |= OPROP_FLAYW;
 						break;
-						case 2:
-							otmp->oproperties |= OPROP_FIREW;
+					case 2:
+						otmp->oproperties |= OPROP_FIREW;
 						break;
-						case 3:
-							otmp->oproperties |= OPROP_COLDW;
+					case 3:
+						otmp->oproperties |= OPROP_COLDW;
 						break;
-						case 4:
-							otmp->oproperties |= OPROP_ELECW;
+					case 4:
+						otmp->oproperties |= OPROP_ELECW;
 						break;
-						case 5:
-							otmp->oproperties |= OPROP_ACIDW;
+					case 5:
+						otmp->oproperties |= OPROP_ACIDW;
 						break;
-						case 6:
-							otmp->oproperties |= OPROP_MAGCW;
+					case 6:
+						otmp->oproperties |= OPROP_MAGCW;
 						break;
-						case 7:
-							otmp->oproperties |= OPROP_ANARW;
+					case 7:
+						otmp->oproperties |= OPROP_ANARW;
 						break;
-						case 8:
-							otmp->oproperties |= OPROP_UNHYW;
+					case 8:
+						otmp->oproperties |= OPROP_UNHYW;
 						break;
-				    }
+					}
 				}
-		    }
-	    }
-		
-		if(is_lminion(mtmp) || is_nminion(mtmp) || is_cminion(mtmp)) {
+			}
+		}
+
+		if (is_lminion(mtmp) || is_nminion(mtmp) || is_cminion(mtmp)) {
 			/* lawful minions don't get cursed, bad, or rusting objects */
 			otmp->cursed = FALSE;
 			otmp->blessed = TRUE;
-			if(otmp->spe < 0) otmp->spe *= -1;
+			if (otmp->spe < 0) otmp->spe *= -1;
 			otmp->oerodeproof = TRUE;
-	    }
-		if(is_mplayer(mtmp->data) && is_sword(otmp)) {
+		}
+		if (is_mplayer(mtmp->data) && is_sword(otmp)) {
 			otmp->spe = (3 + rn2(4));
-	    }
+		}
 		fix_object(otmp);
 
-	    if(otmp->otyp == CANDELABRUM_OF_INVOCATION) {
+		if (otmp->otyp == CANDELABRUM_OF_INVOCATION) {
 			otmp->spe = 0;
 			otmp->age = 0L;
 			otmp->lamplit = FALSE;
 			otmp->blessed = otmp->cursed = FALSE;
-	    } else if (otmp->otyp == BELL_OF_OPENING) {
+		}
+		else if (otmp->otyp == BELL_OF_OPENING) {
 			otmp->blessed = otmp->cursed = FALSE;
-	    } else if (otmp->otyp == SPE_BOOK_OF_THE_DEAD) {
+		}
+		else if (otmp->otyp == SPE_BOOK_OF_THE_DEAD) {
 			otmp->blessed = FALSE;
 			otmp->cursed = TRUE;
-	    }
+		}
 
-	    /* leaders don't tolerate inferior quality battle gear */
-	    if (is_prince(mtmp->data)) {
+		/* leaders don't tolerate inferior quality battle gear */
+		if (is_prince(mtmp->data)) {
 			if (otmp->oclass == WEAPON_CLASS && otmp->spe < 1)
 				otmp->spe = 1;
 			else if (otmp->oclass == ARMOR_CLASS && otmp->spe < 0)
 				otmp->spe = 0;
-	    }
+		}
 
-	    spe = otmp->spe;
-	    (void) mpickobj(mtmp, otmp);	/* might free otmp */
-	    return(spe);
-	} else return(0);
+		spe = otmp->spe;
+		if (mpickobj(mtmp, otmp)) {
+			/* freed otmp, cannot be modified by caller, oops */
+			return (struct obj *)0;
+		}
+		
+	}
+	return otmp;
 }
 
 #endif /* OVL1 */

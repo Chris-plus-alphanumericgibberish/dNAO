@@ -1919,6 +1919,8 @@ int mat;
 
 	if(mat == obj->obj_material) return; //Already done!
 	
+	obj->obj_material = mat; //Set material
+	
 	/* cover special properties of materials like shadowsteel timer and gemstone type */
 	handle_material_specials(obj, oldmat, obj->obj_material);
 
