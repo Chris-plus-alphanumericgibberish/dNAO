@@ -89,7 +89,7 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 		(distu(magr->mx, magr->my) <= BOLT_LIM*BOLT_LIM) &&
 		!resist(magr, RING_CLASS, 0, 0);
 
-	boolean dogbesafe = (magr->mtame && !magr->mconf && !conflicted);
+	boolean dogbesafe = ((magr->mtame || magr->mpeaceful) && !(magr->mconf && !rn2(8)) && !conflicted);
 	
 	struct obj *mrwep = select_rwep(magr);
 	
