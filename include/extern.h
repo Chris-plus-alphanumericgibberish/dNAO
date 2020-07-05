@@ -1489,6 +1489,8 @@ E void FDECL(insight_vanish,(struct monst *));
 E void NDECL(id_permonst);
 E void FDECL(set_mon_data, (struct monst *,int));
 E void FDECL(set_mon_data_core, (struct monst *, struct permonst *));
+E void FDECL(give_mintrinsic, (struct monst *, long));
+E void FDECL(remove_mintrinsic, (struct monst *, long));
 E void FDECL(set_faction, (struct monst *, int));
 E struct attack *FDECL(attacktype_fordmg, (struct permonst *,int,int));
 E boolean FDECL(attacktype, (struct permonst *,int));

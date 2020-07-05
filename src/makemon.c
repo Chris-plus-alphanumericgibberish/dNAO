@@ -1528,6 +1528,7 @@ register struct monst *mtmp;
 					(void)mongets(mtmp, ORIHALCYON_GAUNTLETS);
 					(void)mongets(mtmp, ELVEN_BOOTS);
 				} else if(mm == PM_MYRKALFAR_MATRON){
+					give_mintrinsic(mtmp, TELEPAT);
 					otmp = mksobj(ARM_BLASTER, TRUE, FALSE);
 					otmp->spe = 4;
 					otmp->ovar1 = 50 + d(5,10);
@@ -1557,6 +1558,7 @@ register struct monst *mtmp;
 					mtmp->m_lev += 7;
 					mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, 8);
 					
+					give_mintrinsic(mtmp, TELEPAT);
 					otmp = mksobj(LIGHTSABER, TRUE, FALSE);
 					otmp->spe = 3;
 					otmp->ovar1 = !rn2(4) ? 2L : !rn2(3) ? 9L : rn2(2) ? 21L : 22L;
