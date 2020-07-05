@@ -2340,6 +2340,7 @@ unsigned id;
 {
 	struct obj *obj;
 	struct monst *mon, *mmtmp[3];
+	struct trap * ttmp;
 	int i;
 
 	/* first check various obj lists directly */
@@ -2348,6 +2349,10 @@ unsigned id;
 	if ((obj = o_on(id, fobj)) != 0) return obj;
 	if ((obj = o_on(id, level.buriedobjlist)) != 0) return obj;
 	if ((obj = o_on(id, migrating_objs)) != 0) return obj;
+
+	/* not found yet; check all traps' ammo */
+	for (ttmp = ftrap; ttmp; ttmp = ttmp->ntrap)
+	if ((obj = o_on(id, ttmp->ammo)) != 0) return obj;
 
 	/* not found yet; check inventory for members of various monst lists */
 	mmtmp[0] = fmon;
