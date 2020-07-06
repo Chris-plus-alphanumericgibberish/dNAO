@@ -1782,16 +1782,16 @@ shk_other_services()
 	menu_item *selected;
 	int n, seenSeals;
 	
-	/* Init your name */
-	if (!is_human(youracedata))
-		slang = "ugly";
-	else
-		slang = (flags.female) ? "lady" : "buddy";
-
 	/* Init the shopkeeper */
 	shkp = shop_keeper(*u.ushops);
 	if(!shkp) return; //'keeper is out of his shop
 	
+	/* Init your name */
+	if (humanoid_upperbody(youracedata) != humanoid_upperbody(shkp->data))
+		slang = "ugly";
+	else
+		slang = (flags.female) ? "lady" : "buddy";
+
 	seenSeals = countCloseSigns(shkp);
 	if(seenSeals && strcmp(shkname(shkp), "Izchak") == 0) seenSeals = 0;
 	ESHK(shkp)->signspotted = max(seenSeals, ESHK(shkp)->signspotted);
