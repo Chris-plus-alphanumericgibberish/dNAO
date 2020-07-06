@@ -329,9 +329,10 @@ struct monst * magr;
 		skill_equiv = P_EXPERT;
 
 	switch (skill_equiv) {
-	case P_BASIC:	return 4;
-	case P_SKILLED:	return 5;
-	case P_EXPERT:	return 8;
+		case P_EXPERT:	return 8;
+		case P_SKILLED:	return 5;
+		case P_BASIC:	return 4;		
+		default: return 4; // shouldn't be reached
 	}
 }
 
