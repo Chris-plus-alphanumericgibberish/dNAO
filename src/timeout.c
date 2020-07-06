@@ -1827,7 +1827,7 @@ long timeout;
 			}
 		}
 		
-		if (obj && obj->age){
+		if (obj && obj->age && obj->otyp == TORCH){
 			if(obj->where == OBJ_MINVENT &&
 				is_szcultist(obj->ocarry->data)
 			){
@@ -1969,7 +1969,7 @@ long timeout;
 			}
 		}
 		
-		if (obj && obj->age){
+		if (obj && obj->age && obj->otyp == SHADOWLANDER_S_TORCH){
 			if(obj->where == OBJ_MINVENT &&
 				is_szcultist(obj->ocarry->data)
 			){
