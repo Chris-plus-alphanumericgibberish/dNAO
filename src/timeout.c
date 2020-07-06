@@ -592,7 +592,8 @@ nh_timeout()
 		while(u.spirit[0] && u.spiritT[0] < moves) unbind(u.spirit[0],0);
 		if(u.spiritTineB && u.spiritTineTB < moves) unbind(u.spiritTineB,0);
 		if(u.spiritTineA && u.spiritTineTA < moves) unbind(u.spiritTineA,0);
-		if(u.spirit[QUEST_SPIRIT] && u.spiritT[QUEST_SPIRIT] < moves) 
+		if(u.spirit[QUEST_SPIRIT] && u.spiritT[QUEST_SPIRIT] < moves
+			&& !((u.spirit[QUEST_SPIRIT] & SEAL_BLACK_WEB) && Role_if(PM_ANACHRONONAUT)))
 			unbind(u.spirit[QUEST_SPIRIT],0);
 		if(u.spirit[ALIGN_SPIRIT] && u.spiritT[ALIGN_SPIRIT] < moves) 
 			unbind(u.spirit[ALIGN_SPIRIT],0);
