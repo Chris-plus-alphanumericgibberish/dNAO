@@ -372,9 +372,14 @@ struct you {
 #define MATTK_HOLE 18
 #define MATTK_REACH 19
 #define MATTK_DROID 20
-#define MATTK_WORD 21
-#define MATTK_TNKR 22
-#define MATTK_VAMP 23
+#define MATTK_TNKR 21
+#define MATTK_VAMP 22
+#define MATTK_U_SPELLS 24
+#define MATTK_U_SPIRITS 25
+#define MATTK_U_WORD 26
+#define MATTK_U_TURN_UNDEAD 27 /* MATTK_U_TURN would be amusing, but even more confusing */
+#define MATTK_U_STYLE 28
+#define MATTK_U_MONST 29
 
 	struct attribs	macurr,		/* for monster attribs */
 			mamax;		/* for monster attribs */

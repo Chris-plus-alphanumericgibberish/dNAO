@@ -579,11 +579,14 @@ boolean player_abilities;
 	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14) {
 		add_ability('E', "Sing an Elemental into being", MATTK_ELMENTAL);
 	}
+	if (Role_if(PM_EXILE) || u.sealsActive || u.specialSealsActive) {
+		add_ability('f', "Fire a spirit power", MATTK_U_SPIRITS);
+	}
+	if (uwep && is_lightsaber(uwep)) {	/* I can't wait until fighting forms are mainstream */
+		add_ability('F', "Pick a fighting form", MATTK_U_STYLE);
+	}
 	if(attacktype(youracedata, AT_GAZE)){
 		add_ability('g', "Gaze at something", MATTK_GAZE);
-	}
-	if(attacktype(youracedata, AT_TNKR)){
-		add_ability('t', "Tinker", MATTK_TNKR);
 	}
 	if(is_hider(youracedata)){
 		add_ability('h', "Hide", MATTK_HIDE);
@@ -597,8 +600,11 @@ boolean player_abilities;
 	if (is_mind_flayer(youracedata)){
 		add_ability('m', "Emit a mind blast", MATTK_MIND);
 	}
+	if (!mon_abilities){
+		add_ability('M', "Use a monstrous ability", MATTK_U_MONST);
+	}
 	if (u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know){
-		add_ability('p', "Speak a word of power", MATTK_WORD);
+		add_ability('p', "Speak a word of power", MATTK_U_WORD);
 	}
 	if (attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH)){
 		add_ability('r', "Make a reach attack", MATTK_REACH);
@@ -615,6 +621,12 @@ boolean player_abilities;
 	if (youracedata->msound == MS_JUBJUB){
 		add_ability('S', "Scream", MATTK_SCREAM);
 	}
+	if (attacktype(youracedata, AT_TNKR)){
+		add_ability('t', "Tinker", MATTK_TNKR);
+	}
+	if (Role_if(PM_PRIEST) || Role_if(PM_KNIGHT) || Race_if(PM_VAMPIRE) || (Role_if(PM_NOBLEMAN) && Race_if(PM_ELF))) {
+		add_ability('T', "Turn undead", MATTK_U_TURN_UNDEAD);
+	}
 	if (is_unicorn(youracedata)){
 		add_ability('u', "Use your unicorn horn", MATTK_UHORN);
 	}
@@ -625,7 +637,7 @@ boolean player_abilities;
 		add_ability('w', "Spin a web", MATTK_WEBS);
 	}
 	if (spellid(0) != NO_SPELL) {
-		add_ability('z', "Cast spells", MATTK_MAGIC);
+		add_ability('z', "Cast spells", MATTK_U_SPELLS);
 	}
 	if (attacktype(youracedata, AT_MAGC)){
 		add_ability('Z', "Cast a monster spell", MATTK_MAGIC);
@@ -634,12 +646,17 @@ boolean player_abilities;
 #undef add_ability
 
 	if(!atleastone){
-		if(Upolyd) pline("Any special ability you may have is purely reflexive.");
-		else You("don't have a special ability in your normal form!");
+		if (!player_abilities) {
+			if (Upolyd) pline("Any special ability you may have is purely reflexive.");
+			else You("don't have a special ability in your normal form!");
+		}
+		else {
+			pline("You are extraordinary mundane.");
+		}
 		return 0;
 	}
 	
-	end_menu(tmpwin, "Choose which attack to use");
+	end_menu(tmpwin, "Choose which ability to use");
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
@@ -648,7 +665,15 @@ boolean player_abilities;
 	if(n <= 0) return 0;
 	
 	switch (selected[0].item.a_int) {
-	case MATTK_WORD: return dowords(SPELLMENU_CAST);
+	/* Player abilities */
+	case MATTK_U_WORD: return dowords(SPELLMENU_CAST);
+	case MATTK_U_SPELLS: return docast();
+	case MATTK_U_SPIRITS: return dospirit();
+	case MATTK_U_TURN_UNDEAD: return doturn();
+	case MATTK_U_STYLE: return dofightingform();
+	case MATTK_U_MONST: return domonability();
+
+	/* Monster (or monster-like) abilities */
 	case MATTK_BREATH: return dobreathe(youmonst.data);
 	case MATTK_DSCALE:{
 		int res = dobreathe(Dragon_shield_to_pm(uarms));
