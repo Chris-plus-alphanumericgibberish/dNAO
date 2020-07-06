@@ -6671,7 +6671,7 @@ boolean ranged;
 					}
 					/* monster is disintegrated */
 					else {
-						pline("%s disintegrates!", Monnam(mdef));
+						if(vis) pline("%s disintegrates!", Monnam(mdef));
 						if (youagr)
 							xkilled(mdef, 2);
 						else
