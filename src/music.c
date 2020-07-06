@@ -192,8 +192,8 @@ boolean domsg;
     if (song_being_played() == SNG_NONE) return 0;
 
     if ((mtmp->mcanmove) && (!mtmp->msleeping) && (!Conflict)
-	&& (!mtmp->mconf) && (!mtmp->mflee) && (!mtmp->mcan)
-	&& (distu(mtmp->mx, mtmp->my) <= 25)) {
+	&& !mtmp->mberserk && (!mtmp->mconf) && (!mtmp->mflee) 
+	&& (!mtmp->mcan) && (distu(mtmp->mx, mtmp->my) <= 25)) {
 	    /* bards sing */
 		if(is_bardmon(mtmp->data))
 			r = rnd(20) + mtmp->m_lev;

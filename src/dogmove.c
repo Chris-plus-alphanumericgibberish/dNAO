@@ -860,7 +860,7 @@ boolean ranged;
 		  || (Role_if(PM_KNIGHT) && (mtmp->mtyp == PM_KNIGHT) && mtmp->mpeaceful)
 		  || (Race_if(PM_GNOME) && (is_gnome(mtmp->data) && !is_undead_mon(mtmp)) && mtmp->mpeaceful)
 		  || always_peaceful(mtmp2->data)) &&
-		 mtmp2->mpeaceful && !Conflict) ||
+		 mtmp2->mpeaceful && !(Conflict || mtmp->mberserk)) ||
 	   (!ranged && touch_petrifies(mtmp2->data) &&
 		!resists_ston(mtmp)));
 }
@@ -934,7 +934,7 @@ register int after;	/* this is extra fast monster movement */
 #ifdef STEED
 	/* Let steeds eat and maybe throw rider during Conflict */
 	if (mtmp == u.usteed) {
-	    if (Conflict && !resist(mtmp, RING_CLASS, 0, 0)) {
+	    if ((Conflict && !resist(mtmp, RING_CLASS, 0, 0)) || mtmp->mberserk) {
 		dismount_steed(DISMOUNT_THROWN);
 		return (1);
 	    }
@@ -986,7 +986,7 @@ register int after;	/* this is extra fast monster movement */
 	if (throws_rocks(mtmp->data)) allowflags |= ALLOW_ROCK;
 	
 	/*I'm making minions just RESIST conflict automatically, instead of becoming a swarm of hostile angels*/
-	if (Conflict && has_edog && !resist(mtmp, RING_CLASS, 0, 0)) {
+	if ((Conflict && has_edog && !resist(mtmp, RING_CLASS, 0, 0)) || mtmp->mberserk) {
 	    allowflags |= ALLOW_U;
 	    // if (!has_edog) {
 		// coord mm;
@@ -1010,7 +1010,7 @@ register int after;	/* this is extra fast monster movement */
 
 	    // }
 	}
-	if (!Conflict && !mtmp->mconf &&
+	if (!Conflict && !mtmp->mberserk && !mtmp->mconf &&
 	    mtmp == u.ustuck && !sticks(&youmonst)) {
 	    unstuck(mtmp);	/* swallowed case handled above */
 	    You("get released!");

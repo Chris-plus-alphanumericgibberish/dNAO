@@ -647,10 +647,11 @@ fightm(mtmp)		/* have monsters fight each other */
 {
 	register struct monst *mon, *nmon;
 	int result, has_u_swallowed;
-	boolean conflict = Conflict && 
+	boolean conflict = (Conflict && 
 						couldsee(mtmp->mx,mtmp->my) && 
 						(distu(mtmp->mx,mtmp->my) <= BOLT_LIM*BOLT_LIM) && 
-						!resist(mtmp, RING_CLASS, 0, 0);
+						!resist(mtmp, RING_CLASS, 0, 0))
+					|| mtmp->mberserk;
 #ifdef LINT
 	nmon = 0;
 #endif

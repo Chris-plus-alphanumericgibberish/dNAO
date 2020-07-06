@@ -1565,7 +1565,7 @@ register struct monst *mtmp;
 			// goto toofar;
 		// }
 		if(!reducedFlayerMessages) pline("A wave of psychic energy pours over you!");
-		if (mtmp->mpeaceful &&
+		if (mtmp->mpeaceful && !mtmp->mberserk &&
 		    (!Conflict || resist(mtmp, RING_CLASS, 0, 0))){
 			if(!reducedFlayerMessages) pline("It feels quite soothing.");
 		} else {
@@ -1722,7 +1722,7 @@ toofar:
 			/* Maybe it stepped on a trap and fell asleep... */
 			if (mtmp->msleeping || !(mtmp->mcanmove && mtmp->mnotlaugh)) return(0);
 			/* Long worms thrash around */
-			if(mtmp->wormno && (!mtmp->mpeaceful || Conflict)) wormhitu(mtmp);
+			if(mtmp->wormno && (!mtmp->mpeaceful || Conflict || mtmp->mberserk)) wormhitu(mtmp);
 			if(!nearby &&
 			  (ranged_attk(mdat) || find_offensive(mtmp))){
 				if(mdat->mtyp == PM_GREAT_CTHULHU || mdat->mtyp == PM_WATCHER_IN_THE_WATER || mdat->mtyp == PM_KETO || mdat->mtyp == PM_ARCADIAN_AVENGER){
@@ -1745,7 +1745,7 @@ toofar:
 	}
 /*	Now, attack the player if possible - one attack set per monst	*/
 
-	if (!mtmp->mpeaceful ||
+	if (!mtmp->mpeaceful || mtmp->mberserk ||
 	    (Conflict && !resist(mtmp, RING_CLASS, 0, 0))) {
 	    if(inrange && !noattacks(mdat) && u.uhp > 0 && !scared && tmp != 3)
 			if((mattacku(mtmp)&MM_AGR_DIED)) return(1); /* monster died (e.g. exploded) */
@@ -2114,14 +2114,14 @@ not_special:
 
 	/* don't tunnel if hostile and close enough to prefer a weapon */
 	if (can_tunnel && needspick(ptr) &&
-	    ((!mtmp->mpeaceful || Conflict) && !no_upos(mtmp) && 
+	    ((!mtmp->mpeaceful || Conflict || mtmp->mberserk) && !no_upos(mtmp) && 
 	     dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 8))
 	    can_tunnel = FALSE;
 
 	nix = omx;
 	niy = omy;
 	flag = 0L;
-	if (mtmp->mpeaceful && (!Conflict || resist(mtmp, RING_CLASS, 0, 0)))
+	if (mtmp->mpeaceful && !mtmp->mberserk && (!Conflict || resist(mtmp, RING_CLASS, 0, 0)))
 	    flag |= (ALLOW_SANCT | ALLOW_SSM);
 	else flag |= ALLOW_U;
 	if (is_minion(ptr) || is_rider(ptr)) flag |= ALLOW_SANCT;

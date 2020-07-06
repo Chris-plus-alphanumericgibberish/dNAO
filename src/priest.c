@@ -179,7 +179,7 @@ register struct monst *priest;
 	gx += rn1(3,-1);	/* mill around the altar */
 	gy += rn1(3,-1);
 
-	if(!priest->mpeaceful ||
+	if(!priest->mpeaceful || priest->mberserk ||
 	   (Conflict && !resist(priest, RING_CLASS, 0, 0))) {
 		if(monnear(priest, u.ux, u.uy) && !priest->mflee) {
 			if(Displaced)

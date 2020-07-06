@@ -3829,7 +3829,7 @@ register struct monst *shkp;
 			)
 		)
 	){
-		if(ANGRY(shkp) ||
+		if(ANGRY(shkp) || shkp->mberserk ||
 		   (Conflict && !resist(shkp, RING_CLASS, 0, 0))) {
 			if(Displaced)
 			  Your("displaced image doesn't fool %s!",

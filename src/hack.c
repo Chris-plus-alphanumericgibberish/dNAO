@@ -1114,8 +1114,8 @@ domove()
 			    /*FALLTHRU*/
 			default:
 			    if ((u.ustuck->mtame &&
-				!Conflict && !u.ustuck->mconf) || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)
-				goto pull_free;
+				!Conflict && !u.ustuck->mberserk && !u.ustuck->mconf) || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)
+					goto pull_free;
 			    You("cannot escape from %s!", mon_nam(u.ustuck));
 			    nomul(0, NULL);
 			    return;

@@ -85,9 +85,10 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 	boolean coveted = FALSE;	/* mdef was found via covetousness (used to prioritize this mdef in targeting loop) */
 	boolean tried_you = FALSE;	/* you have been attempted as mdef (used to prioritize you in targeting loop)*/
 
-	boolean conflicted = Conflict && couldsee(magr->mx, magr->my) &&
-		(distu(magr->mx, magr->my) <= BOLT_LIM*BOLT_LIM) &&
-		!resist(magr, RING_CLASS, 0, 0);
+	boolean conflicted = (Conflict && couldsee(magr->mx, magr->my) &&
+			(distu(magr->mx, magr->my) <= BOLT_LIM*BOLT_LIM) &&
+			!resist(magr, RING_CLASS, 0, 0)) 
+		|| (magr->mberserk);
 
 	boolean dogbesafe = ((magr->mtame || magr->mpeaceful) && !(magr->mconf && !rn2(8)) && !conflicted);
 	
