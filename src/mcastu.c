@@ -1562,6 +1562,7 @@ int tary;
 	boolean youdef = (mdef == &youmonst);
 	struct permonst * pa = (youagr ? youracedata : magr->data);
 	boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+	boolean notarget = (!mdef || (!tarx && !tary));
 	int spellnum = 0;
 	int chance = 0;
 	char buf[BUFSZ];
@@ -1583,7 +1584,7 @@ int tary;
 			if (!spellnum)
 				return 0;
 			/* if we have no target... */
-			if (!mdef) {
+			if (notarget) {
 				/* !youagr means it's a monster maybe casting something as they wander
 				 * so if the selected spell would be useless, move on 
 				 * 
@@ -1642,7 +1643,7 @@ int tary;
 	}
 
 	/* check for spells that do absolutely nothing when they miss */
-	if (spellnum && mdef && !foundem &&
+	if (spellnum && !notarget && !foundem &&
 		!is_buff_spell(spellnum) &&
 		!is_summon_spell(spellnum) &&
 		!is_aoe_attack_spell(spellnum)) {
@@ -1732,9 +1733,10 @@ int tary;
 		/* generally: cast the spell */
 		return cast_spell(magr, mdef, attk, spellnum, tarx, tary);
 	}
-	else {
+	else if (!notarget || youagr) {
 		/* no spell selected; this probably means we have an elemental spell to cast */
 		/* these typically result in either a beam (zaps a cone of cold, etc) or hand-to-hand magic (covered in frost, etc) */
+		/* the player can be prompted to cast in a direction; otherwise, we need a target */
 		return elemspell(magr, mdef, attk, tarx, tary);
 	}
 
@@ -4661,7 +4663,7 @@ int tary;
 	return MM_MISS;
 }
 
-/* spells that do not appear to have a target when cast */
+/* spells that do not appear to have a target when cast, and may be cast with none of (mdef, tarx, tary) */
 boolean
 is_undirected_spell(spellnum)
 int spellnum;
@@ -4845,6 +4847,11 @@ int tary;
 	boolean youdef = (mdef == &youmonst);
 	int wardAt = ward_at(tarx, tary);
 	struct monst *tmpm;
+	/* Most spells need a target */
+	boolean notarget = (!mdef || (!tarx && !tary));
+	if (notarget && !is_undirected_spell(spellnum))
+		return TRUE;
+
 	/* Some spells work with a valid line of sight */
 	boolean clearpath = clear_path(x(magr), y(magr), tarx, tary);
 	/* Some spells need a clear line of fire */
@@ -4854,8 +4861,8 @@ int tary;
 // PART 1:  SPELLS SHOULD NEVER BE CAST IN THESE CASES 
 //////////////////////////////////////////////////////////////////////////////////////
 
-	/* only buff spells may be cast at a location without a clear line of sight to target */
-	if (!clearpath && !is_buff_spell(spellnum))
+	/* only undirected spells may be cast with no clear line to the target */
+	if (!clearpath && !is_undirected_spell(spellnum))
 		return TRUE;
 
 	/* Don't cast directed attack or debuff spells at warded spaces */
