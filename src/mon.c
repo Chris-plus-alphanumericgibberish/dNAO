@@ -3361,7 +3361,10 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	
 	// if(magr->mpeaceful && mdef->mpeaceful && (magr->mtame || mdef->mtame)) return 0L;
 	
-	if(magr->mtame && (mdef->mtame || mdef->moccupation)){
+	//Pets never grudge on pets, a monster you're interacting with, or quest quardians and leaders.
+	if(magr->mtame && (mdef->mtame || mdef->moccupation 
+		|| (mdef->mpeaceful && (mdef->m_id == quest_status.leader_m_id || md->msound==MS_GUARDIAN))
+	)){
 			return 0L;
 	}
 	
