@@ -123,8 +123,11 @@ STATIC_DCL int NDECL(use_reach_attack);
 STATIC_PTR int NDECL(doprev_message);
 STATIC_PTR int NDECL(timed_occupation);
 STATIC_PTR int NDECL(doextcmd);
+STATIC_PTR int NDECL(doability);
 STATIC_PTR int NDECL(domonability);
+STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
+STATIC_PTR int NDECL(dofightingform);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
 # ifdef WIZARD
 STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
@@ -491,9 +494,24 @@ extcmd_via_menu()	/* here after # - now show pick-list of possible commands */
 }
 #endif
 
-/* #monster command - use special monster ability while polymorphed */
+/* #ability command - use standard abilities, maybe polymorphed */
+STATIC_PTR int
+doability()
+{
+	return ability_menu(iflags.quick_m_abilities, TRUE);
+}
+
+/* #monster command - use special monster abilities while polymorphed */
 STATIC_PTR int
 domonability()
+{
+	return ability_menu(TRUE, FALSE);
+}
+
+STATIC_PTR int
+ability_menu(mon_abilities, you_abilities)
+boolean mon_abilities;
+boolean you_abilities;
 {
 	winid tmpwin;
 	int n, how;
@@ -507,18 +525,16 @@ domonability()
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
 	
-	Sprintf(buf, "Attacks");
+
+#define add_ability(letter, string, value) \
+	do { \
+	Sprintf(buf, (string)); any.a_int = (value); atleastone = TRUE; \
+	add_menu(tmpwin, NO_GLYPH, &any, (letter), 0, ATR_NONE, buf, MENU_UNSELECTED); \
+	} while (0)
+
+	Sprintf(buf, "Abilities");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	if(u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know){
-		Sprintf(buf, "Speak a Word of Power");
-		any.a_int = MATTK_WORD;	/* must be non-zero */
-		incntlet = 'p';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
-	}
-	if(uarm && uarms && 
+	if (mon_abilities && uarm && uarms &&
 		Is_dragon_armor(uarm) && Is_dragon_shield(uarms) && 
 		Have_same_dragon_armor_and_shield &&
 		uarm->age < monstermoves && uarms->age < monstermoves
@@ -541,212 +557,111 @@ domonability()
 				(uarms && uarms->otyp == GREEN_DRAGON_SCALE_SHIELD))) ||
 			((flags.HDbreath == AD_ACID) && (
 				(uarm && (uarm->otyp == YELLOW_DRAGON_SCALES || uarm->otyp == YELLOW_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == YELLOW_DRAGON_SCALE_SHIELD))))))){
-			Sprintf(buf, "Armor's Breath Weapon");
-			any.a_int = MATTK_DSCALE;	/* must be non-zero */
-			incntlet = 'a';
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			atleastone = TRUE;
+				(uarms && uarms->otyp == YELLOW_DRAGON_SCALE_SHIELD)))))))
+		{
+			add_ability('a', "Use your armor's breath weapon", MATTK_DSCALE);
 		}
 	}
-	if(is_were(youracedata)){
-		Sprintf(buf, "Summon Aid");
-		any.a_int = MATTK_SUMM;	/* must be non-zero */
-		incntlet = 'A';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && is_were(youracedata)){
+		add_ability('A', "Summon aid", MATTK_SUMM);
 	}
-	if(is_vampire(youracedata) && u.ulevel > 1){
-		Sprintf(buf, "Create Minion");
-		any.a_int = MATTK_VAMP;	/* must be non-zero */
-		incntlet = 'V';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;	
+	if (mon_abilities && (can_breathe(youmonst.data) || Race_if(PM_HALF_DRAGON))){
+		add_ability('b', "Use your breath weapon", MATTK_BREATH);
 	}
-	if(can_breathe(youmonst.data) || Race_if(PM_HALF_DRAGON)){
-		Sprintf(buf, "Breath Weapon");
-		any.a_int = MATTK_BREATH;	/* must be non-zero */
-		incntlet = 'b';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && youracedata->mtyp == PM_TOVE){
+		add_ability('B', "Bore a hole", MATTK_BREATH);
 	}
-	if(youracedata->mtyp == PM_TOVE){
-		Sprintf(buf, "Bore Hole");
-		any.a_int = MATTK_HOLE;	/* must be non-zero */
-		incntlet = 'B';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && uclockwork){
+		add_ability('c', "Adjust your clockspeed", MATTK_CLOCK);
 	}
-	if(uclockwork){
-		Sprintf(buf, "Adjust Clock");
-		any.a_int = MATTK_CLOCK;	/* must be non-zero */
-		incntlet = 'c';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && uandroid){
+		add_ability('d', "Use Android abilities", MATTK_DROID);
 	}
-	if(uandroid){
-		Sprintf(buf, "Use Android Abilities");
-		any.a_int = MATTK_DROID;	/* must be non-zero */
-		incntlet = 'd';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (you_abilities && Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14) {
+		add_ability('E', "Sing an Elemental into being", MATTK_U_ELMENTAL);
 	}
-	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14){
-		Sprintf(buf, "Sing an Elemental into being");
-		any.a_int = MATTK_ELMENTAL;	/* must be non-zero */
-		incntlet = 'E';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (you_abilities && Role_if(PM_EXILE) || u.sealsActive || u.specialSealsActive) {
+		add_ability('f', "Fire a spirit power", MATTK_U_SPIRITS);
 	}
-	if(attacktype(youracedata, AT_GAZE)){
-		Sprintf(buf, "Gaze");
-		any.a_int = MATTK_GAZE;	/* must be non-zero */
-		incntlet = 'g';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (you_abilities && uwep && is_lightsaber(uwep)) {	/* I can't wait until fighting forms are mainstream */
+		add_ability('F', "Pick a fighting form", MATTK_U_STYLE);
 	}
-	if(attacktype(youracedata, AT_TNKR)){
-		Sprintf(buf, "Tinker");
-		any.a_int = MATTK_TNKR;	/* must be non-zero */
-		incntlet = 't';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && attacktype(youracedata, AT_GAZE)){
+		add_ability('g', "Gaze at something", MATTK_GAZE);
 	}
-	if(is_hider(youracedata)){
-		Sprintf(buf, "Hide");
-		any.a_int = MATTK_HIDE;	/* must be non-zero */
-		incntlet = 'h';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && is_hider(youracedata)){
+		add_ability('h', "Hide", MATTK_HIDE);
 	}
-	if(is_drow(youracedata)){
-		Sprintf(buf, "Invoke Darkness");
-		any.a_int = MATTK_DARK;	/* must be non-zero */
-		incntlet = 'i';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && is_drow(youracedata)){
+		add_ability('i', "Invoke the darkness", MATTK_DARK);
 	}
-	if(youracedata->mlet == S_NYMPH){
-		Sprintf(buf, "Remove Iron Ball");
-		any.a_int = MATTK_REMV;	/* must be non-zero */
-		incntlet = 'I';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && youracedata->mlet == S_NYMPH){
+		add_ability('I', "Remove an iron ball", MATTK_REMV);
 	}
-	if(is_mind_flayer(youracedata)){
-		Sprintf(buf, "Mind Blast");
-		any.a_int = MATTK_MIND;	/* must be non-zero */
-		incntlet = 'm';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && is_mind_flayer(youracedata)){
+		add_ability('m', "Emit a mind blast", MATTK_MIND);
 	}
-	if(attacktype(youracedata, AT_MAGC)){
-		Sprintf(buf, "Monster Spells");
-		any.a_int = MATTK_MAGIC;	/* must be non-zero */
-		incntlet = 'M';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (you_abilities && !mon_abilities){
+		add_ability('M', "Use a monstrous ability", MATTK_U_MONST);
 	}
-	if (attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH)){
-		Sprintf(buf, "Reach Attack");
-		any.a_int = MATTK_REACH;	/* must be non-zero */
-		incntlet = 'r';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (you_abilities && (u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know)){
+		add_ability('p', "Speak a word of power", MATTK_U_WORD);
 	}
-	if(u.umonnum == PM_GREMLIN){
-		Sprintf(buf, "Replicate");
-		any.a_int = MATTK_REPL;	/* must be non-zero */
-		incntlet = 'R';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH)){
+		add_ability('r', "Make a reach attack", MATTK_REACH);
 	}
-	if(attacktype(youracedata, AT_SPIT)){
-		Sprintf(buf, "Spit");
-		any.a_int = MATTK_SPIT;	/* must be non-zero */
-		incntlet = 's';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && u.umonnum == PM_GREMLIN){
+		add_ability('R', "Replicate yourself", MATTK_REPL);
 	}
-	if(youracedata->msound == MS_SHRIEK || youracedata->msound == MS_SHOG){ //player can't speak elder thing.
-		Sprintf(buf, "Shriek");
-		any.a_int = MATTK_SHRIEK;	/* must be non-zero */
-		incntlet = 'S';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && attacktype(youracedata, AT_SPIT)){
+		add_ability('s', "Spit", MATTK_SPIT);
 	}
-	if(youracedata->msound == MS_JUBJUB){
-		Sprintf(buf, "Scream");
-		any.a_int = MATTK_SCREAM;	/* must be non-zero */
-		incntlet = 'S';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && youracedata->msound == MS_SHRIEK || youracedata->msound == MS_SHOG){ //player can't speak elder thing.
+		add_ability('S', "Shriek", MATTK_SHRIEK);
 	}
-	if(is_unicorn(youracedata)){
-		Sprintf(buf, "Unicorn Horn");
-		any.a_int = MATTK_UHORN;	/* must be non-zero */
-		incntlet = 'u';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && youracedata->msound == MS_JUBJUB){
+		add_ability('S', "Scream", MATTK_SCREAM);
 	}
-	if(webmaker(youracedata)){
-		Sprintf(buf, "Make Web");
-		any.a_int = MATTK_WEBS;	/* must be non-zero */
-		incntlet = 'w';
-		add_menu(tmpwin, NO_GLYPH, &any,
-			incntlet, 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		atleastone = TRUE;
+	if (mon_abilities && attacktype(youracedata, AT_TNKR)){
+		add_ability('t', "Tinker", MATTK_TNKR);
 	}
+	if (you_abilities && (Role_if(PM_PRIEST) || Role_if(PM_KNIGHT) || Race_if(PM_VAMPIRE) || (Role_if(PM_NOBLEMAN) && Race_if(PM_ELF)))) {
+		add_ability('T', "Turn undead", MATTK_U_TURN_UNDEAD);
+	}
+	if (mon_abilities && is_unicorn(youracedata)){
+		add_ability('u', "Use your unicorn horn", MATTK_UHORN);
+	}
+	if (mon_abilities && is_vampire(youracedata) && u.ulevel > 1){
+		add_ability('V', "Raise a vampiric minion", MATTK_VAMP);
+	}
+	if (mon_abilities && webmaker(youracedata)){
+		add_ability('w', "Spin a web", MATTK_WEBS);
+	}
+	if (you_abilities && spellid(0) != NO_SPELL) {
+		add_ability('z', "Cast spells", MATTK_U_SPELLS);
+	}
+	if (mon_abilities && attacktype(youracedata, AT_MAGC)){
+		add_ability('Z', "Cast a monster spell", MATTK_MAGIC);
+	}
+
+#undef add_ability
+
 	if(!atleastone){
-		if(Upolyd) pline("Any special ability you may have is purely reflexive.");
-		else You("don't have a special ability in your normal form!");
+		if (!you_abilities) {
+			if (Upolyd) pline("Any special ability you may have is purely reflexive.");
+			else You("don't have a special ability in your normal form!");
+		}
+		else {
+			pline("You are extraordinary mundane.");
+		}
 		return 0;
 	}
 	
-	end_menu(tmpwin, "Choose which attack to use");
+	if (mon_abilities && you_abilities)
+		Strcpy(buf, "Choose which ability to use");
+	else
+		Sprintf(buf, "Choose which %s ability to use", mon_abilities ? "monster" : "player");
+	end_menu(tmpwin, buf);
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
@@ -755,7 +670,16 @@ domonability()
 	if(n <= 0) return 0;
 	
 	switch (selected[0].item.a_int) {
-	case MATTK_WORD: return dowords(SPELLMENU_CAST);
+	/* Player abilities */
+	case MATTK_U_WORD: return dowords(SPELLMENU_CAST);
+	case MATTK_U_SPELLS: return docast();
+	case MATTK_U_SPIRITS: return dospirit();
+	case MATTK_U_TURN_UNDEAD: return doturn();
+	case MATTK_U_STYLE: return dofightingform();
+	case MATTK_U_MONST: return domonability();
+	case MATTK_U_ELMENTAL: return doelementalbreath();
+
+	/* Monster (or monster-like) abilities */
 	case MATTK_BREATH: return dobreathe(youmonst.data);
 	case MATTK_DSCALE:{
 		int res = dobreathe(Dragon_shield_to_pm(uarms));
@@ -782,7 +706,6 @@ domonability()
 	case MATTK_MIND: return domindblast();
 	case MATTK_CLOCK: return doclockspeed();
 	case MATTK_DROID: return doandroid();
-	case MATTK_ELMENTAL: return doelementalbreath();
 	case MATTK_DARK: return dodarken();
 	case MATTK_REPL: {
 	    if(IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
@@ -5301,6 +5224,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"zap", "zap a wand", dozap, !IFBURIED},
 	{"explore_mode", "enter explore (discovery) mode (only if defined)", enter_explore_mode, IFBURIED},
 
+	{"ability", "use an inherent or learned ability", doability, IFBURIED, AUTOCOMPLETE},
 	{"adjust", "adjust inventory letters", doorganize, IFBURIED, AUTOCOMPLETE},
 	{"annotate", "annotate current dungeon level", donamelevel, IFBURIED, AUTOCOMPLETE},
 	{"chat", "talk to someone", dotalk, IFBURIED, AUTOCOMPLETE},	/* converse? */
@@ -5358,6 +5282,8 @@ struct ext_func_tab extcmdlist[] = {
 #endif
 	{(char *)0, (char *)0, donull, TRUE}, /* #seenv */
 	{(char *)0, (char *)0, donull, TRUE}, /* #showkills (showborn patch) */
+	{(char *)0, (char *)0, donull, TRUE}, /* #setinsight */
+	{(char *)0, (char *)0, donull, TRUE}, /* #setsanity */
 	{(char *)0, (char *)0, donull, TRUE}, /* #stats */
 	{(char *)0, (char *)0, donull, TRUE}, /* #timeout */
 	{(char *)0, (char *)0, donull, TRUE}, /* #vision */
@@ -5462,8 +5388,8 @@ init_bind_list(void)
 	bind_key(C('a'), "mount" );
 	bind_key(M('a'), "adjust" );
 	/*       'b', 'B' : go sw */
-	bind_key('B',    "monster" );
-	bind_key(C('b'),    "monster" );
+	bind_key('B',    "ability" );
+	bind_key(C('b'), "ability" );
 	bind_key('c',    "close" );
 	bind_key('C',    "call" );
 	bind_key(M('c'), "chat" );
