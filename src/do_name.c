@@ -609,7 +609,7 @@ const char *name;
 	if (lth) artifact_exists(obj, name, TRUE);
 	
 	if (obj->oartifact) {
-		int tmp;
+		int tmp = 0;
 		
 		/* quantity */
 		if (obj->oartifact == ART_FLUORITE_OCTAHEDRON)
@@ -658,7 +658,9 @@ const char *name;
 		else if (is_malleable_artifact(&artilist[obj->oartifact]));//keep current/default material
 		else
 			tmp = objects[obj->otyp].oc_material;
-		set_material_gm(obj, tmp);
+		
+		if(tmp)
+			set_material_gm(obj, tmp);
 		
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
