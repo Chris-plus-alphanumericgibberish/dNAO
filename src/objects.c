@@ -243,16 +243,16 @@ WEAPON("runesword", "runed black blade",
 						/* +d4 small, +1 large */
 						/* +5d2 +d8 from level drain */
 WEAPON("white vibrosword", "white sword", /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM,  0,  7,8000, 10, 12, 1, P|S,   P_LONG_SWORD, PLASTIC, FALSE, CLR_WHITE),
+	0, 0, MZ_MEDIUM,  0, 40,8000, 10, 12, 1, P|S,   P_LONG_SWORD,  SILVER, FALSE, CLR_WHITE),
 WEAPON("gold-bladed vibrosword", "black and gold sword", /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM,  0, 80,8000, 10, 12, 1, P|S,   P_LONG_SWORD,    GOLD, FALSE, CLR_BLACK),
+	0, 0, MZ_MEDIUM,  0, 53,8000, 10, 12, 1, P|S,   P_LONG_SWORD,    GOLD, FALSE, CLR_BLACK),
 WEAPON("red-eyed vibrosword", "blue-glowing sword", /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM,  0, 80,8000, 10, 12, 1, P|S,   P_LONG_SWORD, PLASTIC, FALSE, CLR_GRAY),
+	0, 0, MZ_MEDIUM,  0, 10,8000, 10, 12, 1, P|S,   P_LONG_SWORD, PLASTIC, FALSE, CLR_GRAY),
 WEAPON("white vibrozanbato", "curved white sword",
-	0, 0,   MZ_HUGE,  0, 60,16000, 16,  8, 2, S,   P_TWO_HANDED_SWORD, PLASTIC, FALSE, CLR_WHITE),
+	0, 0,   MZ_HUGE,  0, 60,16000, 16,  8, 2, S,   P_TWO_HANDED_SWORD, SILVER, FALSE, CLR_WHITE),
 						    /* +2d6 large */
 WEAPON("gold-bladed vibrozanbato", "curved black and gold sword",
-	0, 0,   MZ_HUGE,  0, 60,16000, 16,  8, 2, S,   P_TWO_HANDED_SWORD, GOLD, FALSE, CLR_BLACK),
+	0, 0,   MZ_HUGE,  0, 80,16000, 16,  8, 2, S,   P_TWO_HANDED_SWORD, GOLD, FALSE, CLR_BLACK),
 						    /* +2d6 large */
 
 WEAPON("double force-blade", "double-bladed weapon",
