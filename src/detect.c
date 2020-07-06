@@ -679,8 +679,13 @@ struct obj	*detector;	/* object doing the detecting */
 /*
  *	Map all buried objects first.
  */
+
 	for (obj = level.buriedobjlist; obj; obj = obj->nobj)
 		if (obj && (otmp = o_artifact(obj))) {
+			if (otmp != obj) {
+				otmp->ox = obj->ox;
+				otmp->oy = obj->oy;
+			}
 			map_object(otmp, 1);
 		}
 	/*
@@ -695,18 +700,22 @@ struct obj	*detector;	/* object doing the detecting */
 	for (y = 0; y < ROWNO; y++)
 		for (obj = level.objects[x][y]; obj; obj = obj->nexthere)
 		if (obj && (otmp = o_artifact(obj))) {
+			if (otmp != obj) {
+				otmp->ox = obj->ox;
+				otmp->oy = obj->oy;
+			}
 			map_object(otmp, 1);
-	break;
+			break;
 		}
 	/* Objects in the monster's inventory override floor objects. */
 	for (mtmp = fmon ; mtmp ; mtmp = mtmp->nmon) {
 	if (DEADMONSTER(mtmp)) continue;
 	for (obj = mtmp->minvent; obj; obj = obj->nobj)
-		if (obj && obj->oartifact) {
-			obj->ox = mtmp->mx;		/* at monster location */
-			obj->oy = mtmp->my;
-			map_object(obj, 1);
-	break;
+		if (obj && (otmp = o_artifact(obj))) {
+			otmp->ox = mtmp->mx;		/* at monster location */
+			otmp->oy = mtmp->my;
+			map_object(otmp, 1);
+			break;
 		}
 	}
 
