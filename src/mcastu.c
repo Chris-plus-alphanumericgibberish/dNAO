@@ -653,6 +653,56 @@ unsigned int type;
 			break;
 		}
 	break;
+	case PM_ALIDER:
+		switch (rnd(8)) {
+			case 8:
+			return FIRE_PILLAR;
+			break;
+			case 7:
+			return ICE_STORM;
+			break;
+			case 6:
+			return CURE_SELF;
+			break;
+			case 5:
+			return MASS_CURE_FAR;
+			break;
+			case 4:
+			return SLEEP;
+			break;
+			case 3:
+			return OPEN_WOUNDS;
+			break;
+			case 2:
+			return LIGHTNING;
+			break;
+			case 1:
+			return DISINT_RAY;
+			break;
+		}
+	break;
+	case PM_PARASITIZED_EMBRACED_ALIDER:
+		switch (rnd(6)) {
+			case 6:
+			return FIRE_PILLAR;
+			break;
+			case 5:
+			return ICE_STORM;
+			break;
+			case 4:
+			return CURE_SELF;
+			break;
+			case 3:
+			return OPEN_WOUNDS;
+			break;
+			case 2:
+			return LIGHTNING;
+			break;
+			case 1:
+			return DISINT_RAY;
+			break;
+		}
+	break;
 	case PM_FORD_GUARDIAN:
 		switch(rn2(5)){
 			case 0:
@@ -1484,6 +1534,8 @@ const char * spellname[] =
 	"TIME_DUPLICATE",
 	"NAIL_TO_THE_SKY",
 	"STERILITY_CURSE"
+	"DISINT_RAY"
+	//75
 };
 
 
@@ -1568,6 +1620,18 @@ int tary;
 	/* set spell cooldown for monsters */
 	if (!youagr && (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC) && !nospellcooldowns_mon(magr)) {
 		if (magr->mtyp == PM_HEDROW_WARRIOR) magr->mspec_used = d(4, 4);
+		else if(magr->mtyp == PM_ALIDER){
+			struct monst *mtmp;
+			magr->mspec_used = 60;
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+				if(!DEADMONSTER(mtmp) && (mtmp != magr) && (mtmp->mpeaceful == magr->mpeaceful)
+					&& (mtmp->mtyp == PM_MYRKALFAR_WARRIOR || mtmp->mtyp == PM_MYRKALFAR_MATRON 
+						|| (is_drow(mtmp->data) && mtmp->mtame && magr->mtame))
+				) magr->mspec_used /= 2;
+			}
+			if(magr->mtame)
+				magr->mspec_used /= 2;
+		}
 		else magr->mspec_used = 10 - magr->m_lev;
 		if (magr->mspec_used < 2) magr->mspec_used = 2;
 	}
@@ -1729,6 +1793,7 @@ int tary;
 			if (canseemon(magr) && flags.soundok)
 				pline_The("air crackles around %s.", mon_nam(magr));
 			impossible("monster got to elemspell() with no target location?"); // test; does this happen?
+			pline("%s is attempting to cast at %s.", Monnam(magr), mdef ? mon_nam(mdef) : "no target");
 			return MM_MISS;
 		}
 	}
@@ -4400,6 +4465,23 @@ int tary;
 		}
 		return MM_HIT;
 
+    case DISINT_RAY:
+		if (!mdef) {
+			impossible("disintegration with no target?");
+			return MM_MISS;
+		}
+		if(magr){
+			struct attack disintegrate = {AT_BEAM, AD_DISN, 4, 1};
+			//xmeleehurty(magr, mdef, attk, originalattk, weapon, dohitmsg, flatdmg, dieroll, vis, ranged)
+			(void)xmeleehurty(magr, mdef, &disintegrate, &disintegrate, (struct obj *)0, FALSE, -1, rn1(18, 2), canseemon(mdef), TRUE);
+		}
+		else {
+			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
+		}
+		if(youdef)
+			stop_occupation();
+		return MM_HIT;
+	
 	case VULNERABILITY:
 		if (TRUE) {
 			struct monst *cmon;
@@ -4627,6 +4709,7 @@ int spellnum;
 	case GOLDEN_WAVE:
 	case MON_WARP:
 	case DROP_BOULDER:
+	case DISINT_RAY:
 		return TRUE;
 	default:
 		break;
@@ -4945,7 +5028,8 @@ int tary;
 	if (!youagr && magr->iswiz && (
 		spellnum == SUMMON_SPHERE || spellnum == DARKNESS ||
 		spellnum == PUNISH || spellnum == INSECTS ||
-		spellnum == SUMMON_ANGEL || spellnum == DROP_BOULDER
+		spellnum == SUMMON_ANGEL || spellnum == DROP_BOULDER ||
+		spellnum == DISINT_RAY
 		))
 		return TRUE;
 

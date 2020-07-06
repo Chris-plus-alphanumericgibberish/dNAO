@@ -382,8 +382,10 @@
 #define TIME_DUPLICATE         MON_TIME_STOP+1
 #define NAIL_TO_THE_SKY        TIME_DUPLICATE+1
 #define STERILITY_CURSE        NAIL_TO_THE_SKY+1
+#define DISINT_RAY             STERILITY_CURSE+1
+//75
 
-#define MON_LASTSPELL          STERILITY_CURSE
+#define MON_LASTSPELL          DISINT_RAY
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

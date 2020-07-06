@@ -2208,6 +2208,8 @@ not_special:
 			}
 			}//End target ana leader
 		}
+		
+		//Loop to place breaching charge on ana quest home
 		if(Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
 			if(mtmp->mhp == mtmp->mhpmax && (
 				(mtmp->mtyp == PM_DEEP_ONE && !rn2(1000))
