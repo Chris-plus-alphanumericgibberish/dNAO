@@ -1385,7 +1385,7 @@ karemade:
 				if(mtmp && !(LBbreach && moves%5)) {
 					verbalize("**EMERGENCY ALERT: hostile entities detected within Last Bastion**");
 					LBbreach = TRUE;
-					(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
+					if(!rn2(70)) (void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 				} else if(!mtmp) LBbreach = FALSE;
 				
 				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) if(!mtmp->mpeaceful && mtmp->mx <= 26 && mtmp->mx > 23) break;
