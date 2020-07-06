@@ -3997,6 +3997,12 @@ boolean * messaged;
 					vorpaldamage *= 2;
 			}
 			break;
+		case ART_CRESCENT_BLADE:
+			wepdesc = "burning blade";
+			if (dieroll == 1) {
+				method = VORPAL_BEHEAD;
+			}
+			break;
 		case ART_OGRESMASHER:
 			wepdesc = "vengeful hammer";
 			if (pd->mlet == S_OGRE) {
