@@ -391,13 +391,19 @@ struct obj *corpse;
 	/* check iron balls separately--maybe they're not carrying it */
 	if (uball) uball->owornmask = uchain->owornmask = 0;
 
+	/* Hero is no longer on the map. Needs to be done before makemons. */
+	x = u.ux;
+	y = u.uy;
+	u.ux = 0;
+	u.uy = 0;
+	
 	/* dispose of your possessions, usually cursed */
 	if (u.ugrave_arise == (NON_PM - 1)) {
 		struct obj *otmp;
 
 		/* embed your possessions in your statue */
 		otmp = mk_named_object(STATUE, &mons[u.umonnum],
-				       u.ux, u.uy, plname);
+				       x, y, plname);
 
 		drop_upon_death((struct monst *)0, otmp);
 		if (!otmp) return;	/* couldn't make statue */
@@ -407,7 +413,7 @@ struct obj *corpse;
 
 		/* embed your possessions in your statue */
 		otmp = mk_named_object(STATUE, &mons[u.umonnum],
-				       u.ux, u.uy, plname);
+				       x, y, plname);
 		set_material_gm(otmp, GOLD);
 		drop_upon_death((struct monst *)0, otmp);
 		if (!otmp) return;	/* couldn't make statue */
@@ -417,7 +423,7 @@ struct obj *corpse;
 
 		/* embed your possessions in your statue */
 		otmp = mk_named_object(STATUE, &mons[u.umonnum],
-				       u.ux, u.uy, plname);
+				       x, y, plname);
 		set_material_gm(otmp, GLASS);
 		drop_upon_death((struct monst *)0, otmp);
 		if (!otmp) return;	/* couldn't make statue */
@@ -434,7 +440,7 @@ struct obj *corpse;
 		 * on your location
 		 */
 		in_mklev = TRUE;
-		mtmp = makemon(&mons[PM_GHOST], u.ux, u.uy, MM_NONAME);
+		mtmp = makemon(&mons[PM_GHOST], x, y, MM_NONAME);
 		in_mklev = FALSE;
 		if (!mtmp) return;
 		mtmp = christen_monst(mtmp, plname);
@@ -445,34 +451,34 @@ struct obj *corpse;
 		if(u.ugrave_arise == PM_ZOMBIE){
 			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
 			in_mklev = TRUE;
-			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
+			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
 				set_faction(mtmp, ZOMBIFIED);
 		} else if(u.ugrave_arise == PM_SKELETON){
 			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
 			in_mklev = TRUE;
-			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
+			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
 				set_faction(mtmp, SKELIFIED);
 		} else if(u.ugrave_arise == PM_BAALPHEGOR){
 			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
 			in_mklev = TRUE;
-			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
+			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
 				set_faction(mtmp, CRYSTALFIED);
 		} else if(u.ugrave_arise == PM_VAMPIRE){
 			u.ugrave_arise = (u.mfemale && urole.femalenum != NON_PM) ? urole.femalenum : urole.malenum;
 			in_mklev = TRUE;
-			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
+			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
 				set_faction(mtmp, VAMPIRIC);
 		} else {
 			in_mklev = TRUE;
-			mtmp = makemon(&mons[u.ugrave_arise], u.ux, u.uy, NO_MM_FLAGS);
+			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
 			in_mklev = FALSE;
 		}
 		if (!mtmp) {
@@ -480,7 +486,7 @@ struct obj *corpse;
 			return;
 		}
 		mtmp = christen_monst(mtmp, plname);
-		newsym(u.ux, u.uy);
+		newsym(x, y);
 		Your("body rises from the dead as %s%s...",
 			an(mons[u.ugrave_arise].mname),
 			mtmp->mfaction == ZOMBIFIED ? " zombie" :
@@ -511,9 +517,6 @@ struct obj *corpse;
 	}
 	resetobjs(fobj,FALSE);
 	resetobjs(level.buriedobjlist, FALSE);
-
-	/* Hero is no longer on the map. */
-	u.ux = u.uy = 0;
 
 	/* Clear all memory from the level. */
 	for(x=0; x<COLNO; x++) for(y=0; y<ROWNO; y++) {
