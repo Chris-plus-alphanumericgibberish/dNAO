@@ -2600,7 +2600,9 @@ E void FDECL(substitute_tiles, (d_level *));
 
 E void NDECL(burn_away_slime);
 E void NDECL(melt_frozen_air);
+E void FDECL(unbind_lifesaving, (long));
 E void FDECL(unbind, (long, BOOLEAN_P));
+E void FDECL(unbind_core, (long, BOOLEAN_P, BOOLEAN_P));
 E void NDECL(nh_timeout);
 E void FDECL(fall_asleep, (int, BOOLEAN_P));
 E void FDECL(attach_bomb_blow_timeout, (struct obj *,int,BOOLEAN_P));

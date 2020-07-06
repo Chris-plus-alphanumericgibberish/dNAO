@@ -869,46 +869,7 @@ int how;
 			pline_The("medallion crumbles to dust!");
 			if (uamul) useup(uamul);
 		} else if(u.sealsActive&SEAL_JACK){
-			int i;
-			boolean foundJack = FALSE;
-			u.sealsActive &= ~SEAL_JACK;
-			losexp("shredding of the soul",TRUE,TRUE,TRUE);
-			for(i=0; i<u.sealCounts; i++){
-				if(u.spirit[i] == SEAL_JACK){
-					foundJack = TRUE;
-				}
-				if(foundJack){
-					if(i<u.sealCounts-1){
-						u.spirit[i] = u.spirit[i+1];
-						u.spiritT[i] = u.spiritT[i+1];
-					} else {
-						u.spirit[i]=0;
-						u.spiritT[i]=0;
-						u.sealCounts--;
-					}
-				}
-			}
-			if(!foundJack){
-				if(u.spirit[CROWN_SPIRIT] == SEAL_JACK){
-					u.spirit[CROWN_SPIRIT] = 0;
-				}
-				else if(u.spirit[GPREM_SPIRIT] == SEAL_JACK){
-					u.spirit[GPREM_SPIRIT] = 0;
-				}
-			}
-			if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID){
-				uwep->ovar1 &= ~SEAL_JACK;
-				if(u.spiritTineA == SEAL_JACK){
-					u.spiritTineA = u.spiritTineB;
-					u.spiritTineTA = u.spiritTineTB;
-					u.spiritTineB = 0;
-					u.spiritTineTB = 0;
-				} else if(u.spiritTineB == SEAL_JACK){
-					u.spiritTineB = 0;
-					u.spiritTineTB = 0;
-				}
-				if(uwep->lamplit) end_burn(uwep, TRUE);
-			}
+			unbind_lifesaving(SEAL_JACK);
 		} else if(uleft && uleft->otyp == RIN_WISHES && uleft->spe > 0){
 			You("wish that hadn't happened.");
 			pline("A star flares on your left ring-finger!");
