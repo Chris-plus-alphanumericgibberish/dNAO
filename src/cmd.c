@@ -5194,6 +5194,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"zap", "zap a wand", dozap, !IFBURIED},
 	{"explore_mode", "enter explore (discovery) mode (only if defined)", enter_explore_mode, IFBURIED},
 
+	{"ability", "use an inherent or learned ability", doability, IFBURIED, AUTOCOMPLETE},
 	{"adjust", "adjust inventory letters", doorganize, IFBURIED, AUTOCOMPLETE},
 	{"annotate", "annotate current dungeon level", donamelevel, IFBURIED, AUTOCOMPLETE},
 	{"chat", "talk to someone", dotalk, IFBURIED, AUTOCOMPLETE},	/* converse? */
@@ -5251,6 +5252,8 @@ struct ext_func_tab extcmdlist[] = {
 #endif
 	{(char *)0, (char *)0, donull, TRUE}, /* #seenv */
 	{(char *)0, (char *)0, donull, TRUE}, /* #showkills (showborn patch) */
+	{(char *)0, (char *)0, donull, TRUE}, /* #setinsight */
+	{(char *)0, (char *)0, donull, TRUE}, /* #setsanity */
 	{(char *)0, (char *)0, donull, TRUE}, /* #stats */
 	{(char *)0, (char *)0, donull, TRUE}, /* #timeout */
 	{(char *)0, (char *)0, donull, TRUE}, /* #vision */
@@ -5355,8 +5358,8 @@ init_bind_list(void)
 	bind_key(C('a'), "mount" );
 	bind_key(M('a'), "adjust" );
 	/*       'b', 'B' : go sw */
-	bind_key('B',    "monster" );
-	bind_key(C('b'),    "monster" );
+	bind_key('B',    "ability" );
+	bind_key(C('b'), "ability" );
 	bind_key('c',    "close" );
 	bind_key('C',    "call" );
 	bind_key(M('c'), "chat" );
