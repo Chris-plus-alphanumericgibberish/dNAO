@@ -332,6 +332,7 @@ struct instance_flags {
     boolean dnethack_start_text;
     boolean artifact_descriptors;
     boolean dnethack_dungeon_colors;
+	boolean quick_m_abilities;
 
 	int pokedex;	/* default monster stats to show in the pokedex */
 /*

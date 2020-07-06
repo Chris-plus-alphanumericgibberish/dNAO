@@ -123,7 +123,9 @@ STATIC_DCL int NDECL(use_reach_attack);
 STATIC_PTR int NDECL(doprev_message);
 STATIC_PTR int NDECL(timed_occupation);
 STATIC_PTR int NDECL(doextcmd);
+STATIC_PTR int NDECL(doability);
 STATIC_PTR int NDECL(domonability);
+STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
 # ifdef WIZARD
@@ -495,17 +497,16 @@ extcmd_via_menu()	/* here after # - now show pick-list of possible commands */
 STATIC_PTR int
 doability()
 {
-	return ability_menu(FALSE, TRUE);
+	return ability_menu(iflags.quick_m_abilities, TRUE);
 }
 
-/* #monster command - use special monster ability while polymorphed */
+/* #monster command - use special monster abilities while polymorphed */
 STATIC_PTR int
 domonability()
 {
 	return ability_menu(TRUE, FALSE);
 }
 
-/* #monster command - use special monster ability while polymorphed */
 STATIC_PTR int
 ability_menu(mon_abilities, player_abilities)
 boolean mon_abilities;

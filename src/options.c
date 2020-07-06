@@ -216,6 +216,7 @@ static struct Bool_Opt
 	{"prayconfirm", &flags.prayconfirm, TRUE, SET_IN_GAME},
 	{"preload_tiles", &iflags.wc_preload_tiles, TRUE, DISP_IN_GAME},	/*WC*/
 	{"pushweapon", &flags.pushweapon, FALSE, SET_IN_GAME},
+	{"quick_m_abilities", &iflags.quick_m_abilities, TRUE, SET_IN_GAME },
 	{"quiver_fired", &iflags.quiver_fired, TRUE, SET_IN_GAME},
 #ifdef QWERTZ
 	{"qwertz_movement", &iflags.qwertz_movement, FALSE, SET_IN_GAME},
