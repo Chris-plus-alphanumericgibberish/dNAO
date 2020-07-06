@@ -3230,7 +3230,7 @@ nexttry:
 		} else {
 			if(MON_AT(nx, ny)) {
 				struct monst *mtmp2 = m_at(nx, ny);
-				if (mtmp2 != mon) {
+				if (mtmp2 && !(nx == x && ny == y)) {
 					long mmflag = flag | mm_aggression(mon, mtmp2);
 
 					if (!(mmflag & ALLOW_M)) continue;
