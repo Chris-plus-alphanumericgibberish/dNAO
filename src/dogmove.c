@@ -1039,38 +1039,25 @@ register int after;	/* this is extra fast monster movement */
 	    if (ret == 2) return 1; /* did something */
 	}
 	else
-	if (( (attacktype(mtmp->data, AT_BREA) && !mtmp->mcan) ||
-	      attacktype(mtmp->data, AT_BEAM) ||
-	      (attacktype(mtmp->data, AT_GAZE) && !mtmp->mcan) ||
-	      attacktype(mtmp->data, AT_SPIT) ||
-	      attacktype(mtmp->data, AT_ARRW) ||
-	      attacktype(mtmp->data, AT_LRCH) ||
-	      attacktype(mtmp->data, AT_LNCK) ||
-	      attacktype(mtmp->data, AT_5SQR) ||
-	      attacktype(mtmp->data, AT_5SBT) ||
-	      attacktype(mtmp->data, AT_TNKR) ||
-	     ( (attacktype(mtmp->data, AT_MAGC) && !mtmp->mcan &&
-			(attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY))->adtyp <= AD_SPC2
-			) || 
-			(attacktype(mtmp->data, AT_MMGC) && !mtmp->mcan &&
-			(attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY))->adtyp <= AD_SPC2
-			)
-	      ) ||
-	     (attacktype(mtmp->data, AT_WEAP) &&
-	      select_rwep(mtmp))) &&
-	    mtmp->mlstmv != monstermoves)
+	if (mtmp->mlstmv != monstermoves)
 	{
-	    struct monst *mon = mfind_target(mtmp, FALSE);
-	    if (mon && (mon != &youmonst) &&
-	        acceptable_pet_target(mtmp, mon, TRUE))
-	    {
-	        int res = (mon == &youmonst) ? mattacku(mtmp)
-		                             : mattackm(mtmp, mon);
-	        if (res & MM_AGR_DIED)
-		    return 2; /* died */
+		/* Look for monsters to fight (at a distance) */
+		struct monst *mtmp2 = mfind_target(mtmp, FALSE);
+		if (mtmp2 && (mtmp2 != mtmp)
+			&& (mtmp2 != &youmonst)
+			&& acceptable_pet_target(mtmp, mtmp2, TRUE))
+		{
+			int res;
+			mon_ranged_gazeonly = 1;//State variable
+			res = (mtmp2 == &youmonst) ? mattacku(mtmp)
+				: mattackm(mtmp, mtmp2);
 
-		return 1; /* attacked */
-	    }
+			if (res & MM_AGR_DIED)
+				return 2; /* Oops, died */
+
+			if (!(mon_ranged_gazeonly) && (res & MM_HIT))
+				return 1; /* that was our move for the round */
+		}
 	}
 
 	if (!nohands(mtmp->data) && !verysmall(mtmp->data)) {
