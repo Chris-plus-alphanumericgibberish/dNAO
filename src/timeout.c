@@ -319,6 +319,22 @@ unbind(spir,forced)
 long spir;
 boolean forced;
 {
+	unbind_core(spir,forced,FALSE);
+}
+
+void
+unbind_lifesaving(spir)
+long spir;
+{
+	unbind_core(spir,TRUE,TRUE);
+}
+
+void
+unbind_core(spir,forced,lifesave_forced)
+long spir;
+boolean forced;
+boolean lifesave_forced;
+{
 	int i;
 	boolean found = FALSE, gnosis = (spir == u.spirit[GPREM_SPIRIT]);
 	
@@ -326,19 +342,13 @@ boolean forced;
 		Your("life is saved!");
 		pline("Unfortunately, your soul is torn to shreds.");
 	}
-	if(forced && !gnosis){
-		if(spir == SEAL_ORTHOS && Hallucination) losexp("being eaten by a grue",TRUE,TRUE,TRUE);
-		else losexp("shredding of the soul",TRUE,TRUE,TRUE);
-		if(flags.run) nomul(0, NULL);
-		stop_occupation();
-	}
 	
 	if(forced && gnosis){
 		You("are shaken to your core!");
 		return;
 	}
 	
-	if(forced && u.voidChime) return; //void chime allows you to keep spirits bound even if you break their taboos.
+	if(forced && u.voidChime && !lifesave_forced) return; //void chime allows you to keep spirits bound even if you break their taboos.
 	
 	if(spir == SEAL_ORTHOS && Hallucination) pline("Orthos has been eaten by a grue!");
 	
@@ -432,6 +442,14 @@ boolean forced;
 	if(flags.run) nomul(0, NULL);
 	vision_full_recalc = 1;	/* visible monsters may have changed */
 	doredraw();
+	
+	//Do this last.  Needed to avoid looping forever on Jack level 1.
+	if(forced && !gnosis){
+		if(spir == SEAL_ORTHOS && Hallucination) losexp("being eaten by a grue",TRUE,TRUE,TRUE);
+		else losexp("shredding of the soul",TRUE,TRUE,TRUE);
+		if(flags.run) nomul(0, NULL);
+		stop_occupation();
+	}
 	return;
 }
 
