@@ -127,6 +127,7 @@ STATIC_PTR int NDECL(doability);
 STATIC_PTR int NDECL(domonability);
 STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
+STATIC_PTR int NDECL(dofightingform);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
 # ifdef WIZARD
 STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
@@ -508,9 +509,9 @@ domonability()
 }
 
 STATIC_PTR int
-ability_menu(mon_abilities, player_abilities)
+ability_menu(mon_abilities, you_abilities)
 boolean mon_abilities;
-boolean player_abilities;
+boolean you_abilities;
 {
 	winid tmpwin;
 	int n, how;
@@ -533,7 +534,7 @@ boolean player_abilities;
 
 	Sprintf(buf, "Abilities");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	if(uarm && uarms && 
+	if (mon_abilities && uarm && uarms &&
 		Is_dragon_armor(uarm) && Is_dragon_shield(uarms) && 
 		Have_same_dragon_armor_and_shield &&
 		uarm->age < monstermoves && uarms->age < monstermoves
@@ -561,92 +562,92 @@ boolean player_abilities;
 			add_ability('a', "Use your armor's breath weapon", MATTK_DSCALE);
 		}
 	}
-	if(is_were(youracedata)){
+	if (mon_abilities && is_were(youracedata)){
 		add_ability('A', "Summon aid", MATTK_SUMM);
 	}
-	if(can_breathe(youmonst.data) || Race_if(PM_HALF_DRAGON)){
+	if (mon_abilities && (can_breathe(youmonst.data) || Race_if(PM_HALF_DRAGON))){
 		add_ability('b', "Use your breath weapon", MATTK_BREATH);
 	}
-	if(youracedata->mtyp == PM_TOVE){
+	if (mon_abilities && youracedata->mtyp == PM_TOVE){
 		add_ability('B', "Bore a hole", MATTK_BREATH);
 	}
-	if(uclockwork){
+	if (mon_abilities && uclockwork){
 		add_ability('c', "Adjust your clockspeed", MATTK_CLOCK);
 	}
-	if(uandroid){
+	if (mon_abilities && uandroid){
 		add_ability('d', "Use Android abilities", MATTK_DROID);
 	}
-	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14) {
-		add_ability('E', "Sing an Elemental into being", MATTK_ELMENTAL);
+	if (you_abilities && Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14) {
+		add_ability('E', "Sing an Elemental into being", MATTK_U_ELMENTAL);
 	}
-	if (Role_if(PM_EXILE) || u.sealsActive || u.specialSealsActive) {
+	if (you_abilities && Role_if(PM_EXILE) || u.sealsActive || u.specialSealsActive) {
 		add_ability('f', "Fire a spirit power", MATTK_U_SPIRITS);
 	}
-	if (uwep && is_lightsaber(uwep)) {	/* I can't wait until fighting forms are mainstream */
+	if (you_abilities && uwep && is_lightsaber(uwep)) {	/* I can't wait until fighting forms are mainstream */
 		add_ability('F', "Pick a fighting form", MATTK_U_STYLE);
 	}
-	if(attacktype(youracedata, AT_GAZE)){
+	if (mon_abilities && attacktype(youracedata, AT_GAZE)){
 		add_ability('g', "Gaze at something", MATTK_GAZE);
 	}
-	if(is_hider(youracedata)){
+	if (mon_abilities && is_hider(youracedata)){
 		add_ability('h', "Hide", MATTK_HIDE);
 	}
-	if (is_drow(youracedata)){
+	if (mon_abilities && is_drow(youracedata)){
 		add_ability('i', "Invoke the darkness", MATTK_DARK);
 	}
-	if (youracedata->mlet == S_NYMPH){
+	if (mon_abilities && youracedata->mlet == S_NYMPH){
 		add_ability('I', "Remove an iron ball", MATTK_REMV);
 	}
-	if (is_mind_flayer(youracedata)){
+	if (mon_abilities && is_mind_flayer(youracedata)){
 		add_ability('m', "Emit a mind blast", MATTK_MIND);
 	}
-	if (!mon_abilities){
+	if (you_abilities && !mon_abilities){
 		add_ability('M', "Use a monstrous ability", MATTK_U_MONST);
 	}
-	if (u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know){
+	if (you_abilities && (u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know)){
 		add_ability('p', "Speak a word of power", MATTK_U_WORD);
 	}
-	if (attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH)){
+	if (mon_abilities && attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH)){
 		add_ability('r', "Make a reach attack", MATTK_REACH);
 	}
-	if (u.umonnum == PM_GREMLIN){
+	if (mon_abilities && u.umonnum == PM_GREMLIN){
 		add_ability('R', "Replicate yourself", MATTK_REPL);
 	}
-	if (attacktype(youracedata, AT_SPIT)){
+	if (mon_abilities && attacktype(youracedata, AT_SPIT)){
 		add_ability('s', "Spit", MATTK_SPIT);
 	}
-	if(youracedata->msound == MS_SHRIEK || youracedata->msound == MS_SHOG){ //player can't speak elder thing.
+	if (mon_abilities && youracedata->msound == MS_SHRIEK || youracedata->msound == MS_SHOG){ //player can't speak elder thing.
 		add_ability('S', "Shriek", MATTK_SHRIEK);
 	}
-	if (youracedata->msound == MS_JUBJUB){
+	if (mon_abilities && youracedata->msound == MS_JUBJUB){
 		add_ability('S', "Scream", MATTK_SCREAM);
 	}
-	if (attacktype(youracedata, AT_TNKR)){
+	if (mon_abilities && attacktype(youracedata, AT_TNKR)){
 		add_ability('t', "Tinker", MATTK_TNKR);
 	}
-	if (Role_if(PM_PRIEST) || Role_if(PM_KNIGHT) || Race_if(PM_VAMPIRE) || (Role_if(PM_NOBLEMAN) && Race_if(PM_ELF))) {
+	if (you_abilities && (Role_if(PM_PRIEST) || Role_if(PM_KNIGHT) || Race_if(PM_VAMPIRE) || (Role_if(PM_NOBLEMAN) && Race_if(PM_ELF)))) {
 		add_ability('T', "Turn undead", MATTK_U_TURN_UNDEAD);
 	}
-	if (is_unicorn(youracedata)){
+	if (mon_abilities && is_unicorn(youracedata)){
 		add_ability('u', "Use your unicorn horn", MATTK_UHORN);
 	}
-	if (is_vampire(youracedata) && u.ulevel > 1){
+	if (mon_abilities && is_vampire(youracedata) && u.ulevel > 1){
 		add_ability('V', "Raise a vampiric minion", MATTK_VAMP);
 	}
-	if (webmaker(youracedata)){
+	if (mon_abilities && webmaker(youracedata)){
 		add_ability('w', "Spin a web", MATTK_WEBS);
 	}
-	if (spellid(0) != NO_SPELL) {
+	if (you_abilities && spellid(0) != NO_SPELL) {
 		add_ability('z', "Cast spells", MATTK_U_SPELLS);
 	}
-	if (attacktype(youracedata, AT_MAGC)){
+	if (mon_abilities && attacktype(youracedata, AT_MAGC)){
 		add_ability('Z', "Cast a monster spell", MATTK_MAGIC);
 	}
 
 #undef add_ability
 
 	if(!atleastone){
-		if (!player_abilities) {
+		if (!you_abilities) {
 			if (Upolyd) pline("Any special ability you may have is purely reflexive.");
 			else You("don't have a special ability in your normal form!");
 		}
@@ -656,7 +657,11 @@ boolean player_abilities;
 		return 0;
 	}
 	
-	end_menu(tmpwin, "Choose which ability to use");
+	if (mon_abilities && you_abilities)
+		Strcpy(buf, "Choose which ability to use");
+	else
+		Sprintf(buf, "Choose which %s ability to use", mon_abilities ? "monster" : "player");
+	end_menu(tmpwin, buf);
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
@@ -672,6 +677,7 @@ boolean player_abilities;
 	case MATTK_U_TURN_UNDEAD: return doturn();
 	case MATTK_U_STYLE: return dofightingform();
 	case MATTK_U_MONST: return domonability();
+	case MATTK_U_ELMENTAL: return doelementalbreath();
 
 	/* Monster (or monster-like) abilities */
 	case MATTK_BREATH: return dobreathe(youmonst.data);
@@ -700,7 +706,6 @@ boolean player_abilities;
 	case MATTK_MIND: return domindblast();
 	case MATTK_CLOCK: return doclockspeed();
 	case MATTK_DROID: return doandroid();
-	case MATTK_ELMENTAL: return doelementalbreath();
 	case MATTK_DARK: return dodarken();
 	case MATTK_REPL: {
 	    if(IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {

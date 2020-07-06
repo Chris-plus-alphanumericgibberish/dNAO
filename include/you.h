@@ -364,7 +364,7 @@ struct you {
 #define MATTK_MIND 10
 #define MATTK_CLOCK 11
 #define MATTK_DARK 12
-#define MATTK_ELMENTAL 13
+#define MATTK_VAMP 13
 #define MATTK_REPL 14
 #define MATTK_UHORN 15
 #define MATTK_SHRIEK 16
@@ -373,13 +373,13 @@ struct you {
 #define MATTK_REACH 19
 #define MATTK_DROID 20
 #define MATTK_TNKR 21
-#define MATTK_VAMP 22
-#define MATTK_U_SPELLS 24
-#define MATTK_U_SPIRITS 25
-#define MATTK_U_WORD 26
-#define MATTK_U_TURN_UNDEAD 27 /* MATTK_U_TURN would be amusing, but even more confusing */
-#define MATTK_U_STYLE 28
-#define MATTK_U_MONST 29
+#define MATTK_U_SPELLS 22
+#define MATTK_U_SPIRITS 23
+#define MATTK_U_WORD 24
+#define MATTK_U_TURN_UNDEAD 25 /* MATTK_U_TURN would be amusing, but even more confusing */
+#define MATTK_U_STYLE 26
+#define MATTK_U_MONST 27
+#define MATTK_U_ELMENTAL 28
 
 	struct attribs	macurr,		/* for monster attribs */
 			mamax;		/* for monster attribs */
