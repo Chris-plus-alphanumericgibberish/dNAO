@@ -2796,11 +2796,7 @@ int tary;
 						/* since monsters don't glib, we need to forcibly drop their weapon now */
 						if (!otmp->cursed) {
 							obj_extract_self(otmp);
-							possibly_unwield(mdef, FALSE);
-							setmnotwielded(mdef, otmp);
-							obj_no_longer_held(otmp);
-							place_object(otmp, x(mdef), y(mdef));
-							stackobj(otmp);
+							mdrop_obj(mdef, otmp, FALSE);
 						}
 					}
 				}
@@ -4388,8 +4384,9 @@ int tary;
 								hands
 								);
 						}
-						/* unwield their weapon and drop it -- all done in mdrop_obj */
-						mdrop_obj(mdef, otmp, TRUE);
+						/* unwield their weapon and drop it */
+						obj_extract_self(otmp);
+						mdrop_obj(mdef, otmp, FALSE);
 					}
 				}
 				else dofailmsg = TRUE;
