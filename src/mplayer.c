@@ -239,12 +239,22 @@ register boolean special;
 		    if (special && rn2(4)) helm = rn2(2) ? HELM_OF_BRILLIANCE : HELM_OF_TELEPATHY;
 		break;
 		case PM_INCANTIFIER:
-		    if (rn2(4)) weapon = rn2(2) ? QUARTERSTAFF : ATHAME;
-	    	armor = rn2(2) ? BLACK_DRAGON_SCALE_MAIL :
-	    			SILVER_DRAGON_SCALE_MAIL;
-	    	cloak = ROBE;
-		    if (rn2(4)) helm = HELM_OF_BRILLIANCE;
-		    shield = STRANGE_OBJECT;
+			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
+				weapon = rn2(2) ? DOUBLE_LIGHTSABER : LIGHTSABER;
+				armor = !rn2(3) ? JUMPSUIT : 
+						 rn2(2) ? BODYGLOVE :
+						 PLASTEEL_ARMOR;
+				helm = HELM_OF_BRILLIANCE;
+				cloak = rn2(4) ? ROBE : CLOAK_OF_PROTECTION;
+				shield = (rn2(2) && weapon == LIGHTSABER) ? : STRANGE_OBJECT;
+			} else {
+				if (rn2(4)) weapon = rn2(2) ? QUARTERSTAFF : ATHAME;
+				armor = rn2(2) ? BLACK_DRAGON_SCALE_MAIL :
+						SILVER_DRAGON_SCALE_MAIL;
+				cloak = ROBE;
+				if (rn2(4)) helm = HELM_OF_BRILLIANCE;
+				shield = STRANGE_OBJECT;
+			}
 		break;
 		case PM_KNIGHT:
 		    if (rn2(4)) weapon = LONG_SWORD;
