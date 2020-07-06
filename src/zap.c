@@ -4689,7 +4689,7 @@ boolean *shopdamage;
 		if (cansee(x,y)) newsym(x,y);
 	    }
 	    if(IS_GRASS(lev->typ)){
-		lev->typ = ROOM;
+		lev->typ = SOIL;
 		if(cansee(x,y)) {
 			pline("The grass burns away!");
 			newsym(x,y);
