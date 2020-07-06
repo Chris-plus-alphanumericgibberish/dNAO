@@ -8266,7 +8266,8 @@ int vis;
 		result = xengulfhurty(magr, mdef, attk, vis);
 
 		/* if defender died and aggressor isn't stationary, move agressor to defender's coord */
-		if (!stationary(magr->data) && result&MM_DEF_DIED) {
+		/* if mdef was your steed, you are still there, so magr can't take your spot! */
+		if (!stationary(magr->data) && result&MM_DEF_DIED && !(mdef == u.usteed)) {
 			/* sanity check */
 			if (*hp(mdef) > 0)
 				impossible("dead engulfee still alive?");
