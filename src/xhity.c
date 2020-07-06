@@ -11233,7 +11233,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (fired && launcher &&								// Firing ammo from a launcher
 		(objects[launcher->otyp].oc_skill == P_CROSSBOW ||	// from a REAL crossbow (but not the Pen of the Void or the BFG, those would be brokenly strong)
 		launcher->otyp == SNIPER_RIFLE)						// or a sniper rifle
-		&& !(noncorporeal(pd) || amorphous(pd) || ((stationary(pd) || sessile(pd)) && (pd->mlet == S_FUNGUS || pd->mlet == S_PLANT)))	// versus vulnerable targets
+		&& !(noanatomy(pd))	// versus vulnerable targets
 		){
 		precision_mult = 1;
 		/* R/U/B/S/E : 1x/1x/1x/2x/3x multiplier */
@@ -11277,13 +11277,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		sneak_dice++;
 
 	/* sneak attack -- defender's conditions must allow sneak attacking, and we must have sneak attack dice */
-	if (sneak_dice && (
-		!noncorporeal(pd) &&
-		!amorphous(pd) &&
-		!((stationary(pd) || sessile(pd)) && (pd->mlet == S_FUNGUS || pd->mlet == S_PLANT)) &&
+	if (sneak_dice &&
+		!noanatomy(pd) &&
 		!(youagr && u.uswallow)
-		))
-	{
+	){
 		if (youagr) {
 			if (!mdef->mcanmove || !mdef->mnotlaugh ||
 				mdef->mstun || mdef->mconf || mdef->msleeping)

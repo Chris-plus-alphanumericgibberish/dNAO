@@ -1030,10 +1030,7 @@ int spec;
 	{
 	case ART_SILVER_STARLIGHT:
 		// bonus damage to specific types of foes
-		if (!(noncorporeal(ptr) || amorphous(ptr)
-			|| ((stationary(ptr) || sessile(ptr)) && (ptr->mlet == S_FUNGUS || ptr->mlet == S_PLANT))
-			))
-		{
+		if (!(noanatomy(ptr))){
 			/* modify wdice */
 			// 1 additional main die
 			// plus a 1d4 bonus die

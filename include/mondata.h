@@ -235,6 +235,8 @@
 #define leggedserpent(ptr)	(((ptr)->mflagsb & MB_BODYTYPEMASK) == (MB_ANIMAL|MB_SLITHY))
 #define naoid(ptr)			(((ptr)->mflagsb & MB_BODYTYPEMASK) == 0)
 
+#define noanatomy(ptr)			(noncorporeal(ptr) || amorphous(ptr) || naoid(ptr))
+
 #define noboots(ptr)			((slithy(ptr) && !humanoid_feet(ptr)) || nolimbs(ptr) || nofeet(ptr))
 
 #define is_animal(ptr)		(((ptr)->mflagst & MT_ANIMAL) != 0L)
