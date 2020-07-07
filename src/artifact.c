@@ -9689,7 +9689,7 @@ mind_blast_items()
 			if(obj->ovar1 <= u.uinsight && !rn2(20)){
 				struct monst *mtmp;
 				mtmp = revive(obj, TRUE);
-				pline("%s wakes up.", Monnam(mtmp));
+				if(mtmp) pline("%s wakes up.", Monnam(mtmp));
 			} else if(cansee(x, y) && !rn2(20))
 				pline("%s its finger.", Tobjnam(obj, "tap"));
 		}
