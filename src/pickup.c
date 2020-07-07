@@ -471,7 +471,7 @@ int what;		/* should be a long */
 	 * Start the actual pickup process.  This is split into two main
 	 * sections, the newer menu and the older "traditional" methods.
 	 * Automatic pickup has been split into its own menu-style routine
-	 * to make things less confusin
+	 * to make things less confusing.
 	 */
 	if (autopickup) {
 	    n = autopick(objchain, traverse_how, &pick_list);
@@ -1715,7 +1715,7 @@ lootcont:
 					}
 					if (cobj->otyp == BAG_OF_TRICKS) {
 						int tmp;
-						You("carefully open the ba..");
+						You("carefully open the bag...");
 						pline("It develops a huge set of teeth and bites you!");
 						tmp = rnd(10);
 						if (Half_physical_damage) tmp = (tmp+1) / 2;
