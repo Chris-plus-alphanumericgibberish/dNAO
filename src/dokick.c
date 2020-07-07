@@ -646,7 +646,6 @@ dokick()
 		}
 	}
 
-	wake_nearby();
 	u_wipe_engr(2);
 
 	/* if the location we're kicking isn't on the map, just hurt yourself */
@@ -691,6 +690,7 @@ dokick()
 		    if(range < 1) range = 1;
 		    hurtle(-u.dx, -u.dy, range, TRUE, TRUE);
 		}
+		wake_nearby();
 		return(1);
 	}
 	if (glyph_is_invisible(levl[x][y].glyph)) {
@@ -700,6 +700,7 @@ dokick()
 	if ((is_pool(x, y, TRUE)) ^ !!u.uinwater) {
 		/* objects normally can't be removed from water by kicking */
 		You("splash some water around.");
+		wake_nearby();
 		return 1;
 	}
 
@@ -709,6 +710,7 @@ dokick()
 	     || boulder_at(x,y))) {
 		if(kick_object(x, y)) {
 		    if(Weightless)
+			wake_nearby();
 			hurtle(-u.dx, -u.dy, 1, TRUE, TRUE); /* assume it's light */
 		    return(1);
 		}
@@ -739,6 +741,7 @@ dokick()
 			if (maploc->doormask == D_ISOPEN ||
 			    maploc->doormask == D_NODOOR)
 			    unblock_point(x,y);	/* vision */
+			wake_nearby();
 			return(1);
 		    } else goto ouch;
 		}
@@ -753,6 +756,7 @@ dokick()
 			else
 			    newsym(x,y);
 			unblock_point(x,y);	/* vision */
+			wake_nearby();
 			return(1);
 		    } else goto ouch;
 		}
@@ -772,6 +776,7 @@ dokick()
 			wake_nearby_noisy();
 			if(u.sealsActive&SEAL_DANTALION) unbind(SEAL_DANTALION,TRUE);
 			exercise(A_DEX, TRUE);
+			wake_nearby();
 			return(1);
 		    } else if(Luck > 0 && !rn2(3) && !(maploc->looted&T_LOOTED)) {
 			(void) mkgold((long) rn1(201, 300), x, y);
@@ -788,9 +793,11 @@ dokick()
 			}
 			/* prevent endless milking */
 			maploc->looted &= T_LOOTED;
+			wake_nearby();
 			return(1);
 		    } else if (!rn2(4)) {
 			if(dunlev(&u.uz) < dunlevs_in_dungeon(&u.uz)) {
+				wake_nearby();
 			    fall_through(FALSE);
 			    return(1);
 			} else goto ouch;
@@ -803,6 +810,7 @@ dokick()
 		    if(!rn2(3)) goto ouch;
 		    altar_wrath(x, y);
 		    exercise(A_DEX, TRUE);
+			wake_nearby();
 		    return(1);
 		}
 		if(IS_FOUNTAIN(maploc->typ)) {
@@ -816,6 +824,7 @@ dokick()
 				/* could cause short-lived fumbling here */
 			}
 		    exercise(A_DEX, TRUE);
+			wake_nearby();
 		    return(1);
 		}
 		if(IS_GRAVE(maploc->typ) || maploc->typ == IRONBARS)
@@ -843,6 +852,7 @@ dokick()
 					else
 					    pline("Some black feathers drift down.");
 					maploc->looted |= TREE_SWARM;
+					wake_nearby();
 					return(1);
 				}
 			    goto ouch;
@@ -874,6 +884,7 @@ dokick()
 					exercise(A_WIS, TRUE);	/* discovered a new food source! */
 					newsym(x, y);
 					maploc->looted |= TREE_LOOTED;
+					wake_nearby();
 					return(1);
 			    } else if (rn2(3)) {
 					if ( !rn2(3) && !(mvitals[PM_PARROT].mvflags & G_GONE && !In_quest(&u.uz)) )
@@ -895,6 +906,7 @@ dokick()
 					else
 					    pline("Some colorful feathers drift down.");
 					maploc->looted |= TREE_SWARM;
+					wake_nearby();
 					return(1);
 				}
 			    goto ouch;
@@ -926,6 +938,7 @@ dokick()
 					exercise(A_WIS, TRUE);	/* discovered a new food source! */
 					newsym(x, y);
 					maploc->looted |= TREE_LOOTED;
+					wake_nearby();
 					return(1);
 			    } else if (rn2(3)) {
 					if ( !rn2(3) && !(mvitals[PM_MIRKWOOD_SPIDER].mvflags & G_GONE && !In_quest(&u.uz)) )
@@ -947,6 +960,7 @@ dokick()
 					else
 					    pline("Some scraps of webbing drift down.");
 					maploc->looted |= TREE_SWARM;
+					wake_nearby();
 					return(1);
 				}
 			    goto ouch;
@@ -971,6 +985,7 @@ dokick()
 					mtmp->msleeping  = FALSE;
 					mtmp->mcanmove  = TRUE;
 					maploc->looted |= TREE_SWARM;
+					wake_nearby();
 					return(1);
 				}
 			    goto ouch;
@@ -1010,6 +1025,7 @@ dokick()
 					exercise(A_WIS, TRUE);	/* discovered a new food source! */
 					newsym(x, y);
 					maploc->looted |= TREE_LOOTED;
+					wake_nearby();
 					return(1);
 			    } else if (!(maploc->looted & TREE_SWARM)) {
 			    	int cnt = rnl(4) + 4;
@@ -1029,6 +1045,7 @@ dokick()
 					if ( made )
 					    pline("You've attracted the tree's guardians!");
 					maploc->looted |= TREE_SWARM;
+					wake_nearby();
 					return(1);
 				}
 			    goto ouch;
@@ -1063,6 +1080,7 @@ dokick()
 					exercise(A_WIS, TRUE);	/* discovered a new food source! */
 					newsym(x, y);
 					maploc->looted |= TREE_LOOTED;
+					wake_nearby();
 					return(1);
 			    } else if (!(maploc->looted & TREE_SWARM)) {
 			    	int cnt = rnl(4) + 2;
@@ -1080,6 +1098,7 @@ dokick()
 					else
 					    You("smell stale honey.");
 					maploc->looted |= TREE_SWARM;
+					wake_nearby();
 					return(1);
 				}
 			    goto ouch;
@@ -1124,6 +1143,7 @@ dokick()
 				break;
 			}
 			}
+			wake_nearby();
 			return(1);
 		}
 #ifdef SINKS
@@ -1138,6 +1158,7 @@ dokick()
 			    pline("Klunk!  The pipes vibrate noisily.");
 			else pline("Klunk!");
 			exercise(A_DEX, TRUE);
+			wake_nearby();
 			return(1);
 		    } else if(!(maploc->looted & S_LPUDDING) && !rn2(3) &&
 			  !(mvitals[PM_BLACK_PUDDING].mvflags & G_GONE && !In_quest(&u.uz))) {
@@ -1151,6 +1172,7 @@ dokick()
 			exercise(A_DEX, TRUE);
 			newsym(x,y);
 			maploc->looted |= S_LPUDDING;
+			wake_nearby();
 			return(1);
 		    } else if(!(maploc->looted & S_LDWASHER) && !rn2(3) &&
 			      !(mvitals[washerndx].mvflags & G_GONE && !In_quest(&u.uz))) {
@@ -1161,6 +1183,7 @@ dokick()
 			    newsym(x,y);
 			maploc->looted |= S_LDWASHER;
 			exercise(A_DEX, TRUE);
+			wake_nearby();
 			return(1);
 		    } else if(!rn2(3)) {
 			pline("Flupp!  %s.", (Blind ?
@@ -1175,6 +1198,7 @@ dokick()
 			    exercise(A_WIS, TRUE);	/* a discovery! */
 			    maploc->looted |= S_LRING;
 			}
+			wake_nearby();
 			return(1);
 		    }
 		    goto ouch;
@@ -1203,6 +1227,7 @@ ouch:
 		    losehp(rnd(ACURR(A_CON) > 15 ? 3 : 5), kickstr(buf),
 			KILLED_BY);
 		    if(Weightless || Levitation)
+			wake_nearby();
 			hurtle(-u.dx, -u.dy, rn1(2,4), TRUE, TRUE); /* assume it's heavy */
 		    return(1);
 		}
@@ -1224,9 +1249,8 @@ dumb:
 		}
 		if ((Weightless || Levitation) && rn2(2)) {
 		    hurtle(-u.dx, -u.dy, 1, TRUE, TRUE);
-		    return 1;		/* you moved, so use up a turn */
 		}
-		return(0);
+		return 1;
 	}
 
 	/* Ali - artifact doors from slashem*/
@@ -1236,6 +1260,7 @@ dumb:
 	if(Levitation) goto ouch;
 
 	exercise(A_DEX, TRUE);
+	wake_nearby(); //At this point we know we hit a door?
 	/* door is known to be CLOSED or LOCKED */
 	if(rnl(35) < avrg_attrib + (!martial() ? 0 : ACURR(A_DEX))) {
 		boolean shopdoor = *in_rooms(x, y, SHOPBASE) ? TRUE : FALSE;
@@ -1305,7 +1330,7 @@ dumb:
 		    }
 		}
 	}
-	return(1);
+	return 1;
 }
 
 STATIC_OVL void
