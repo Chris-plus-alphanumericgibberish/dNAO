@@ -580,7 +580,7 @@ boolean you_abilities;
 	if (you_abilities && Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14) {
 		add_ability('E', "Sing an Elemental into being", MATTK_U_ELMENTAL);
 	}
-	if (you_abilities && Role_if(PM_EXILE) || u.sealsActive || u.specialSealsActive) {
+	if (you_abilities && (Role_if(PM_EXILE) || u.sealsActive || u.specialSealsActive)) {
 		add_ability('f', "Fire a spirit power", MATTK_U_SPIRITS);
 	}
 	if (you_abilities && uwep && is_lightsaber(uwep)) {	/* I can't wait until fighting forms are mainstream */
@@ -607,7 +607,7 @@ boolean you_abilities;
 	if (you_abilities && (u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know)){
 		add_ability('p', "Speak a word of power", MATTK_U_WORD);
 	}
-	if (mon_abilities && attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH)){
+	if (mon_abilities && (attacktype(youracedata, AT_LNCK) || attacktype(youracedata, AT_LRCH))){
 		add_ability('r', "Make a reach attack", MATTK_REACH);
 	}
 	if (mon_abilities && u.umonnum == PM_GREMLIN){
@@ -616,7 +616,7 @@ boolean you_abilities;
 	if (mon_abilities && attacktype(youracedata, AT_SPIT)){
 		add_ability('s', "Spit", MATTK_SPIT);
 	}
-	if (mon_abilities && youracedata->msound == MS_SHRIEK || youracedata->msound == MS_SHOG){ //player can't speak elder thing.
+	if (mon_abilities && (youracedata->msound == MS_SHRIEK || youracedata->msound == MS_SHOG)){ //player can't speak elder thing.
 		add_ability('S', "Shriek", MATTK_SHRIEK);
 	}
 	if (mon_abilities && youracedata->msound == MS_JUBJUB){
