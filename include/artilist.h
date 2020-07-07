@@ -890,17 +890,6 @@ A("Callandor",			CRYSTAL_SWORD,					(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("Yoichi no yumi",		YUMI,							(const char *)0,
-	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
-	NO_MONS(),
-	ATTK(AD_PHYS, 20, 0), NOFLAG,
-	PROP0(), NOFLAG,
-	PROP0(), NOFLAG,
-	CREATE_AMMO, NOFLAG
-	),
-
-/*Needs encyc entry*/
 /* all arrows fired from it are treated as poisoned (or filthed for a short period after invoking) */
 A("Plague",				BOW,							(const char *)0,
 	4000L, BONE, MZ_DEFAULT, WT_DEFAULT,
@@ -1492,6 +1481,18 @@ A("Sunbeam",						GOLDEN_ARROW,			(const char *)0,
 	PROP1(DRAIN_RES), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
+
+/*Needs encyc entry*/
+A("The Veil of Latona",				CLOAK_OF_INVISIBILITY,	(const char *)0,
+	1000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, PM_RANGER, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROP2(ANTIMAGIC, REFLECTING), NOFLAG,
+	PROP1(DRAIN_RES), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
 /*Needs encyc entry*/
 /* permanently drugged */
 A("Moonbeam",						SILVER_ARROW,			(const char *)0,
@@ -1505,14 +1506,14 @@ A("Moonbeam",						SILVER_ARROW,			(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("The Veil of Latona",				CLOAK_OF_INVISIBILITY,	(const char *)0,
-	1000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NEUTRAL, PM_RANGER, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+A("Yoichi no yumi",		YUMI,							(const char *)0,
+	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
-	NO_ATTK(), NOFLAG,
-	PROP2(ANTIMAGIC, REFLECTING), NOFLAG,
-	PROP1(DRAIN_RES), NOFLAG,
-	NOINVOKE, NOFLAG
+	ATTK(AD_PHYS, 20, 0), NOFLAG,
+	PROP0(), NOFLAG,
+	PROP0(), NOFLAG,
+	CREATE_AMMO, NOFLAG
 	),
 
 A("Hermes's Sandals",				FLYING_BOOTS,			"pair of winged sandals",
