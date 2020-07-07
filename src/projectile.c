@@ -61,7 +61,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	struct obj * thrownobj;				/* singular fired/thrown object */
 	boolean onlyone;					/* if ammo only consists of thrownobj */
 	boolean wepgone = FALSE;			/* TRUE if thrownobj is destroyed */
-	boolean returning;					/* TRUE if projectile should magically return to magr (like Mjollnir) */
+	boolean returning = FALSE;			/* TRUE if projectile should magically return to magr (like Mjollnir) */
 	struct monst * mdef = (struct monst *)0;
 	int result = 0;
 	int range = initrange;
@@ -179,21 +179,23 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	}
 
 	/* determine if thrownobj should return (like Mjollnir) */
-	if (magr && !(hmoncode & HMON_KICKED) && (
-		(Race_if(PM_ANDROID) && !launcher && youagr) ||	/* there's no android monster helper? */
-		(thrownobj->oartifact == ART_MJOLLNIR && (youagr ? (Role_if(PM_VALKYRIE)) : magr ? (magr->mtyp == PM_VALKYRIE) : FALSE)) ||
-		(thrownobj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && (youagr ? (Race_if(PM_DWARF)) : magr ? (is_dwarf(magr->data)) : FALSE)) ||
-		thrownobj->oartifact == ART_SICKLE_MOON ||
-		thrownobj->oartifact == ART_ANNULUS ||
-		thrownobj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
-		thrownobj->oartifact == ART_DART_OF_THE_ASSASSIN ||
-		thrownobj->oartifact == ART_WINDRIDER ||
-		thrownobj->oartifact == ART_AMHIMITL
-		)) {
-		returning = TRUE;
-	}
-	else {
-		returning = FALSE;
+	if(magr && !(hmoncode & HMON_KICKED)){
+		if ((thrownobj->oartifact == ART_MJOLLNIR && (youagr ? (Role_if(PM_VALKYRIE)) : magr ? (magr->mtyp == PM_VALKYRIE) : FALSE)) ||
+			(thrownobj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && (youagr ? (Race_if(PM_DWARF)) : magr ? (is_dwarf(magr->data)) : FALSE)) ||
+			thrownobj->oartifact == ART_SICKLE_MOON ||
+			thrownobj->oartifact == ART_ANNULUS ||
+			thrownobj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
+			thrownobj->oartifact == ART_DART_OF_THE_ASSASSIN ||
+			thrownobj->oartifact == ART_WINDRIDER ||
+			thrownobj->oartifact == ART_AMHIMITL
+		) {
+			returning = TRUE;
+		}
+		else if(Race_if(PM_ANDROID) && !launcher && youagr && thrownobj->oartifact != ART_FLUORITE_OCTAHEDRON){/* there's no android monster helper? */
+			returning = TRUE;
+			range = range/2 + 1;
+			initrange = initrange/2 + 1;
+		}
 	}
 
 	/* player exercises STR just be throwing heavy things */
@@ -1762,7 +1764,7 @@ int shotlimit;
 	}
 
 	/* The Fluorite Octet can be thrown (by hand) as many as wanted at once */
-	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON && !launcher && !(youagr && Race_if(PM_ANDROID)))
+	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON && !launcher)
 		multishot = shotlimit ? shotlimit : 8;
 
 	/* For most things, limit multishot to ammo supply */
