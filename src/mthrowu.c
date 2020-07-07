@@ -176,7 +176,7 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 			continue;
 
 		/* horrible kludge: Oona doesn't target those resistant to her at range */
-		if (mdef == &youmonst ? Oona_resistance : resists_oona(mdef))
+		if (magr->mtyp == PM_OONA && (mdef == &youmonst ? Oona_resistance : resists_oona(mdef)))
 			continue;
 
 		/* are any of our attacks good? */
