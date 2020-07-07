@@ -15109,8 +15109,11 @@ android_combo()
 				if(!DEADMONSTER(mdef))
 					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 			}
-			if(attacked)
+			//lunge in the direction attacked. 
+			if(!u.ustuck && goodpos(u.ux+u.dx, u.uy+u.dy, &youmonst, 0)){
 				hurtle(u.dx, u.dy, 1, FALSE, FALSE);
+				spoteffects(TRUE);
+			}
 			n--;
 			u.uen--;
 			attacked = TRUE;
