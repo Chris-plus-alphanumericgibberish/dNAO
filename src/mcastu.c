@@ -3532,6 +3532,7 @@ int tary;
 				find_ac();
 			}
 		}
+		return MM_HIT;
 
 	case MON_TIME_STOP:
 		if (u.summonMonster || youagr) {
