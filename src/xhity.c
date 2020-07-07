@@ -15227,23 +15227,41 @@ android_combo()
 		u.uen--;
 
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
-			if (dofire()){
-				u.uen--;
-			}
-			else return TRUE;
+			//Two throws. Aborting either one ends the combo.
+			if(!dofire())
+				return TRUE;
+			//Charge energy for continuing combo after first throw.
+			u.uen--;
+			//Now do second throw. Aborting either one ends the combo.
+			if(!dofire())
+				return TRUE;
 		}
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+			//One throw, followed by a moving attack.  Aborting either one ends the combo.
 			if (dofire()){
+				//Charge energy for continuing the combo after the throw
 				u.uen--;
 				if (uwep){
+					/* get direction of attack */
+					if (!getdir((char *)0))
+						return TRUE;
+					/* Lunge in indicated direction */
+					if(!u.ustuck && goodpos(u.ux+u.dx, u.uy+u.dy, &youmonst, 0)){
+						hurtle(u.dx, u.dy, 1, FALSE, FALSE);
+						spoteffects(TRUE);
+					}
 					/* get defender */
 					if (u.ustuck && u.uswallow)
 						mdef = u.ustuck;
 					else
 						mdef = m_at(u.ux + u.dx, u.uy + u.dy);
-					/* attack (once) (no message for no defender) */
-					if (mdef) {
+					/* attack (twice) */
+					if (!mdef)
+						You("leap and swing wildly!");
+					else {
 						vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+						xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
+						if(!DEADMONSTER(mdef))
 						xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 					}
 				}
