@@ -15110,7 +15110,7 @@ android_combo()
 					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 			}
 			//lunge in the direction attacked. 
-			if(!u.ustuck && goodpos(u.ux+u.dx, u.uy+u.dy, &youmonst, 0)){
+			if(!u.ustuck && !u.utrap && goodpos(u.ux+u.dx, u.uy+u.dy, &youmonst, 0)){
 				hurtle(u.dx, u.dy, 1, FALSE, FALSE);
 				spoteffects(TRUE);
 			}
@@ -15246,7 +15246,7 @@ android_combo()
 					if (!getdir((char *)0))
 						return TRUE;
 					/* Lunge in indicated direction */
-					if(!u.ustuck && goodpos(u.ux+u.dx, u.uy+u.dy, &youmonst, 0)){
+					if(!u.ustuck && !u.utrap && goodpos(u.ux+u.dx, u.uy+u.dy, &youmonst, 0)){
 						hurtle(u.dx, u.dy, 1, FALSE, FALSE);
 						spoteffects(TRUE);
 					}
