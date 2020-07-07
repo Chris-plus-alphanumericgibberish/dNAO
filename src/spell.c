@@ -2788,12 +2788,12 @@ spiriteffects(power, atme)
 			otmp = hold_another_object(otmp, "They %s out.",
 						   aobjnam(otmp, "fall"), (const char *)0);
 		}break;
-		case PWR_BARAGE:
+		case PWR_BARRAGE:
 			You("get ready to fire a barrage.");
 			if(uquiver){
-				barage = TRUE; //state variable
+				barrage = TRUE; //state variable
 				dofire();
-				barage = FALSE;
+				barrage = FALSE;
 			} else {
 				You("have nothing quivered.");
 				return 0;

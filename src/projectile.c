@@ -1714,8 +1714,8 @@ int shotlimit;
 	}
 
 	/* Okay. */
-	if (youagr && barage) {
-		/* Spirit power barage maximized multishot */
+	if (youagr && barrage) {
+		/* Spirit power barrage maximized multishot */
 		multishot += u.ulevel / 10 + 1;
 	}
 	else {
