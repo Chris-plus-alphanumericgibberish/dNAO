@@ -24,6 +24,7 @@
 #define ARTG_INHER		0x0010L /* allowable for an Inheritor to start with */
 #define ARTG_MAJOR		0x0020L /* artifact evades the grasp of the unworthy */
 #define ARTG_NOCNT		0x0040L /* should not be sacrificable to Priests of an Unknown God ??? */
+#define ARTG_FXALGN		0x0080L /* doesn't change alignment to match a role's */
 
 #define ARTA_HATES		0x00000001L /* hates specific kinds of foes; only deals bonus damage to them (cross-aligned is a possibility too) */
 #define ARTA_CROSSA		0x00000002L /* artifact hates cross-aligned foes (as well as any specified monster flags) -- use with ARTA_HATES */

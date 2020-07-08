@@ -132,7 +132,9 @@ hack_artifacts()
 	
 	/* Fix up the alignments of "gift" artifacts */
 	for (art = artilist+1; art->otyp; art++)
-	    if ((art->role == Role_switch || Pantheon_if(art->role)) && (art->alignment != A_NONE || Role_if(PM_BARD)))
+	    if ((art->role == Role_switch || Pantheon_if(art->role))
+	    		&& (art->alignment != A_NONE || Role_if(PM_BARD))
+		    	&& !(art->gflags & ARTG_FXALGN))
 			art->alignment = alignmnt;
 
 
