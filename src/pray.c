@@ -4444,23 +4444,26 @@ boolean yourinvent;
 	    /* The player can gain an artifact */
 	    /* The chance goes down as the number of artifacts goes up */
 		/* Priests now only count gifts in this calculation, found artifacts are excluded */
-	    if(u.ulevel > 2 && u.uluck >= 0 
-		    && (!flags.made_know || 
-			 (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || uwep->oartifact) && !(uwep->oproperties&OPROP_ACIDW))
-		    )
-			&& maybe_god_gives_gift()
-		){
-			if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || uwep->oartifact) && !(uwep->oproperties&OPROP_ACIDW)){
-				if(!Blind) pline("Acid drips from your weapon!");
-				uwep->oproperties |= OPROP_ACIDW;
-				uwep->oeroded = 0;
-				uwep->oeroded2 = 0;
-				uwep->oerodeproof = 1;
+		struct obj *otmp = (struct obj *)0;
+		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || uwep->oartifact) && !(uwep->oproperties&OPROP_ACIDW))
+			otmp = uwep;
+		else if (uarmg && u.umartial && uarmg->oartifact && !(uarmg->oproperties&OPROP_ACIDW))
+			otmp = uarmg;
+		else if (uarmf && u.umartial && uarmf->oartifact && !(uarmf->oproperties&OPROP_ACIDW))
+			otmp = uarmf;
+			
+	    if(u.ulevel > 2 && u.uluck >= 0 && (!flags.made_know || otmp) && maybe_god_gives_gift()){
+			if(otmp){
+				if(!Blind) pline("Acid drips from your %s!", 
+					(otmp == uwep) ? "weapon" : ((otmp == uarmg) ? "gloves" : "boots"));
+				otmp->oproperties |= OPROP_ACIDW;
+				otmp->oeroded = 0;
+				otmp->oeroded2 = 0;
+				otmp->oerodeproof = 1;
 				u.ugifts++;
 				u.uartisval += TIER_S;
 			}
 			else if(!flags.made_know){
-				struct obj *otmp;
 				otmp = mksobj(WORD_OF_KNOWLEDGE, FALSE, FALSE);
 				dropy(otmp);
 				at_your_feet("An object");
