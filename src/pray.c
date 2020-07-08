@@ -3964,20 +3964,29 @@ aligntyp alignment;
 					if (++i >= A_MAX) i = 0;
 				}
 				
-				i = rn2(A_MAX);
-				for (ii = A_MAX; ii > 0; ii--) {
-					if (adjattrib(i, 1, (ii == 1) ? 0 : -1))
-						break;
-					i = (i+1)%6;
+				if (ii == A_MAX){
+					i = rn2(A_MAX);
+					for (ii = A_MAX; ii > 0; ii--) {
+						if (adjattrib(i, 1, (ii == 1) ? 0 : -1))
+							break;
+						i = (i+1)%6;
+					}
 				}
 				flags.botl = 1;
 				break;
 			case 1: // increase weapon enchantment
 				if (uwep && uwep->spe < 7 && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)))
 					uwep->spe++;
-				else if(uswapwep && uswapwep->spe < 7 && (uswapwep->oclass == WEAPON_CLASS || is_weptool(uswapwep)))
+				else if (uswapwep && uswapwep->spe < 7 && (uswapwep->oclass == WEAPON_CLASS || is_weptool(uswapwep)))
 					uswapwep->spe++;
-				
+				else if (u.umartial && uarmg && (uarmg->oartifact || !uwep) && uarmg->spe < 5)
+					uarmg->spe++;
+				else if (u.umartial && uarmf && (uarmf->oartifact || !uwep) && uarmf->spe < 5)
+					uarmf->spe++;
+				else if (uleft && objects[uleft->otyp].oc_charged && uleft->spe < 5)
+					uleft->spe++;
+				else if (uright && objects[uright->otyp].oc_charged && uright->spe < 5)
+					uright->spe++;
 				break;
 			case 2: // identify an item
 				if (uwep && not_fully_identified(uwep)) identify(uwep);
@@ -3994,7 +4003,10 @@ aligntyp alignment;
 				else if (uarms && not_fully_identified(uarms)) identify(uarms);
 				else {
 					for(otmp=invent; otmp; otmp=otmp->nobj)
-					if (not_fully_identified(otmp)) identify(otmp);
+					if (not_fully_identified(otmp)){
+						identify(otmp);
+						break;
+					}
 				}
 				break;
 			case 3: // give an intrinsic for 500-1500 turns, first of pois/slee/fire/cold/shock
@@ -4064,71 +4076,115 @@ aligntyp alignment;
 				break;
 			case 4: // repair an item
 				for (i = 3; i >= 0; i--){
-					if (uwep && uwep->oeroded == i && (i > 0 || !uwep->oerodeproof)){
-						if (i == 0)
-							uwep->oerodeproof = TRUE;
-						else
-							uwep->oeroded = 0;
-						
+					if (uwep && (uwep->oeroded == i || uwep->oeroded2 == i)){
 						uwep->rknown = TRUE;
-						break;
-					} else if (uswapwep && uswapwep->oeroded == i && (i > 0 || !uswapwep->oerodeproof)){
-						if (i == 0)
-							uswapwep->oerodeproof = TRUE;
-						else
-							uswapwep->oeroded = 0;
-						
+						if (uwep->oeroded == i && i > 0){
+							uwep->oeroded--;
+							break;
+						} else if (uwep->oeroded2 == i && i > 0){
+							uwep->oeroded2--;
+							break;
+						} else if (uwep->oeroded == i && uwep->oeroded2 == i && !(uwep->oerodeproof)){
+							uwep->oerodeproof = TRUE;
+							break;
+						}
+					} if (uswapwep && (uswapwep->oeroded == i || uswapwep->oeroded2 == i)){
 						uswapwep->rknown = TRUE;
-						break;
-					} else if (uarmc && uarmc->oeroded == i && (i > 0 || !uarmc->oerodeproof)){
-						if (i == 0)
-							uarmc->oerodeproof = TRUE;
-						else
-							uarmc->oeroded = 0;
-						
+						if (uswapwep->oeroded == i && i > 0){
+							uswapwep->oeroded--;
+							break;
+						} else if (uswapwep->oeroded2 == i && i > 0){
+							uswapwep->oeroded2--;
+							break;
+						} else if (uswapwep->oeroded == i && uswapwep->oeroded2 == i && !(uswapwep->oerodeproof)){
+							uswapwep->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmc && (uarmc->oeroded == i || uarmc->oeroded2 == i)){
 						uarmc->rknown = TRUE;
-						break;
-					} else if (uarm && uarm->oeroded == i && (i > 0 || !uarm->oerodeproof)){
-						if (i == 0)
-							uarm->oerodeproof = TRUE;
-						else
-							uarm->oeroded = 0;
-						
+						if (uarmc->oeroded == i && i > 0){
+							uarmc->oeroded--;
+							break;
+						} else if (uarmc->oeroded2 == i && i > 0){
+							uarmc->oeroded2--;
+							break;
+						} else if (uarmc->oeroded == i && uarmc->oeroded2 == i && !(uarmc->oerodeproof)){
+							uarmc->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarm && (uarm->oeroded == i || uarm->oeroded2 == i)){
 						uarm->rknown = TRUE;
-						break;
-					} else if (uarmu && uarmu->oeroded == i && (i > 0 || !uarmu->oerodeproof)){
-						if (i == 0)
-							uarmu->oerodeproof = TRUE;
-						else
-							uarmu->oeroded = 0;
-						
+						if (uarm->oeroded == i && i > 0){
+							uarm->oeroded--;
+							break;
+						} else if (uarm->oeroded2 == i && i > 0){
+							uarm->oeroded2--;
+							break;
+						} else if (uarm->oeroded == i && uarm->oeroded2 == i && !(uarm->oerodeproof)){
+							uarm->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmu && (uarmu->oeroded == i || uarmu->oeroded2 == i)){
 						uarmu->rknown = TRUE;
-						break;
-					} else if (uarmh && uarmh->oeroded == i && (i > 0 || !uarmh->oerodeproof)){
-						if (i == 0)
-							uarmh->oerodeproof = TRUE;
-						else
-							uarmh->oeroded = 0;
-						
+						if (uarmu->oeroded == i && i > 0){
+							uarmu->oeroded--;
+							break;
+						} else if (uarmu->oeroded2 == i && i > 0){
+							uarmu->oeroded2--;
+							break;
+						} else if (uarmu->oeroded == i && uarmu->oeroded2 == i && !(uarmu->oerodeproof)){
+							uarmu->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmh && (uarmh->oeroded == i || uarmh->oeroded2 == i)){
 						uarmh->rknown = TRUE;
-						break;
-					} else if (uarmg && uarmg->oeroded == i && (i > 0 || !uarmg->oerodeproof)){
-						if (i == 0)
-							uarmg->oerodeproof = TRUE;
-						else
-							uarmg->oeroded = 0;
-						
+						if (uarmh->oeroded == i && i > 0){
+							uarmh->oeroded--;
+							break;
+						} else if (uarmh->oeroded2 == i && i > 0){
+							uarmh->oeroded2--;
+							break;
+						} else if (uarmh->oeroded == i && uarmh->oeroded2 == i && !(uarmh->oerodeproof)){
+							uarmh->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmg && (uarmg->oeroded == i || uarmg->oeroded2 == i)){
 						uarmg->rknown = TRUE;
-						break;
-					} else if (uarmf && uarmf->oeroded == i && (i > 0 || !uarmf->oerodeproof)){
-						if (i == 0)
-							uarmf->oerodeproof = TRUE;
-						else
-							uarmf->oeroded = 0;
-						
+						if (uarmg->oeroded == i && i > 0){
+							uarmg->oeroded--;
+							break;
+						} else if (uarmg->oeroded2 == i && i > 0){
+							uarmg->oeroded2--;
+							break;
+						} else if (uarmg->oeroded == i && uarmg->oeroded2 == i && !(uarmg->oerodeproof)){
+							uarmg->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmf && (uarmf->oeroded == i || uarmf->oeroded2 == i)){
 						uarmf->rknown = TRUE;
-						break;
-					} 
+						if (uarmf->oeroded == i && i > 0){
+							uarmf->oeroded--;
+							break;
+						} else if (uarmf->oeroded2 == i && i > 0){
+							uarmf->oeroded2--;
+							break;
+						} else if (uarmf->oeroded == i && uarmf->oeroded2 == i && !(uarmf->oerodeproof)){
+							uarmf->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarms && (uarms->oeroded == i || uarms->oeroded2 == i)){
+						uarms->rknown = TRUE;
+						if (uarms->oeroded == i && i > 0){
+							uarms->oeroded--;
+							break;
+						} else if (uarms->oeroded2 == i && i > 0){
+							uarms->oeroded2--;
+							break;
+						} else if (uarms->oeroded == i && uarms->oeroded2 == i && !(uarms->oerodeproof)){
+							uarms->oerodeproof = TRUE;
+							break;
+						}
+					}
 				}
 				break;
 			case 5: // bless/curse an item
@@ -4158,8 +4214,10 @@ aligntyp alignment;
 					if (wrongbuc(otmp)) break;
 					return;
 				}
-				if (hates_unholy(youracedata) && hates_holy(youracedata))
-					otmp->cursed = otmp->blessed = 0;
+				if (hates_unholy(youracedata) && hates_holy(youracedata)){
+					uncurse(otmp);
+					unbless(otmp);
+				}
 				else if (hates_holy(youracedata))
 					curse(otmp);
 				else if (hates_unholy(youracedata))
@@ -4172,9 +4230,9 @@ aligntyp alignment;
 					Your("%s %s.", what ? what : (const char *) aobjnam(otmp, "softly glow"), 
 								hcolor(otmp->blessed ? NH_LIGHT_BLUE : \
 								(otmp->cursed ? NH_BLACK : NH_AMBER)));
+#undef wrongbuc
 				break;
 			default: impossible("bad god_gives_benefit benefit?");
-				
 		}
 	}
 }
