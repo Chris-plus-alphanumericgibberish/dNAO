@@ -2541,23 +2541,17 @@ struct obj	*sobj;
 		}
 		if(confused){
 			//Confused: Remove magic shield
-			if(HNullmagic && ( HNullmagic & ~TIMEOUT) == 0L)
+			if(HNullmagic && (HNullmagic & ~TIMEOUT) == 0L)
 				pline("The shimmering film around you pops!");
 			else pline("Nothing happens.");
-			HNullmagic &= ~TIMEOUT;
+			give_intrinsic(NULLMAGIC, -2);
 	break;
 		}
 		if(!Nullmagic) pline("A shimmering film surrounds you!");
 		else pline("The shimmering film grows brighter!");
-		if ((HNullmagic & TIMEOUT) + amt < TIMEOUT) {
-			long timer = (HNullmagic & TIMEOUT) + amt;
-			HNullmagic &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HNullmagic |= timer; //set new timer
-		}
-		else{
-			HNullmagic |= TIMEOUT; //set timer to max value
-		}
-	}break;
+		give_intrinsic(NULLMAGIC, amt);
+	}
+	break;
 	case SCR_RESISTANCE:{
 		if(confused){
 			int damlevel = max(3, u.ulevel), sx = u.ux, sy = u.uy;
@@ -2605,74 +2599,38 @@ struct obj	*sobj;
 	break;
 		}
 		long rturns = sobj->blessed ? 5000L : sobj->cursed ? 5L : 250L;
-		if( !(HFire_resistance) ) {
-			You(Hallucination ? "be chillin'." :
-			    "feel a momentary chill.");
-		}
-		if( (HFire_resistance & TIMEOUT) + rturns < TIMEOUT) {
-			long timer = (HFire_resistance & TIMEOUT) + rturns;
-			HFire_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HFire_resistance |= timer; //set new timer
-		}
-		else{
-			HFire_resistance |= TIMEOUT; //set timer to max value
-		}
 		
-		if( !(HSleep_resistance) ) {
+		if (!(HFire_resistance))
+			You(Hallucination ? "be chillin'." : "feel a momentary chill.");
+		give_intrinsic(FIRE_RES, rturns);
+		
+		if (!(HSleep_resistance))
 			You_feel("wide awake.");
-		}
-		if( (HSleep_resistance & TIMEOUT) + rturns < TIMEOUT) {
-			long timer = (HSleep_resistance & TIMEOUT) + rturns;
-			HSleep_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HSleep_resistance |= timer; //set new timer
-		}
-		else{
-			HSleep_resistance |= TIMEOUT; //set timer to max value
-		}
+		give_intrinsic(SLEEP_RES, rturns);
 		
-		if( !(HCold_resistance) ) {
+		if (!(HCold_resistance))
 			You_feel("full of hot air.");
-		}
-		if( (HCold_resistance & TIMEOUT) + rturns < TIMEOUT) {
-			long timer = (HCold_resistance & TIMEOUT) + rturns;
-			HCold_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HCold_resistance |= timer; //set new timer
-		}
-		else{
-			HCold_resistance |= TIMEOUT; //set timer to max value
-		}
+		give_intrinsic(COLD_RES, rturns);
 		
-		if( !(HShock_resistance) ) {
+		
+		if (!(HShock_resistance)) {
 			if (Hallucination)
 				rn2(2) ? You_feel("grounded in reality.") : Your("health currently feels amplified!");
 			else
 				You_feel("well grounded.");
 		}
-		if( (HShock_resistance & TIMEOUT) + rturns < TIMEOUT) {
-			long timer = (HShock_resistance & TIMEOUT) + rturns;
-			HShock_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HShock_resistance |= timer; //set new timer
-		}
-		else{
-			HShock_resistance |= TIMEOUT; //set timer to max value
-		}
+		give_intrinsic(SHOCK_RES, rturns);
 		
-		if( !(HAcid_resistance) ) {
+		if (!(HAcid_resistance)) {
 			if (Hallucination)
 				rn2(2) ? You_feel("like you've really gotten back to basics!") : You_feel("insoluble.");
 			else
 				Your("skin feels leathery.");
 		}
-		if( (HAcid_resistance & TIMEOUT) + rturns < TIMEOUT) {
-			// long timer = max((HAcid_resistance & TIMEOUT), (long)(nutval*multiplier));
-			long timer = (HAcid_resistance & TIMEOUT) + rturns;
-			HAcid_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HAcid_resistance |= timer; //set new timer
-		}
-		else{
-			HAcid_resistance |= TIMEOUT; //set timer to max value
-		}
-	}break;
+		give_intrinsic(ACID_RES, rturns);
+		
+	}
+	break;
 	case SCR_CONSECRATION:
 	if(In_endgame(&u.uz)){
 		if(Is_astralevel(&u.uz)) pline("This place is already pretty consecrated.");
