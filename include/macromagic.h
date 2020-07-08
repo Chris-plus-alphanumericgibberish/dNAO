@@ -1,6 +1,6 @@
 /* Nero's Black Magic Fuckery of Macros */
-#ifndef NEROSMACROMAGIC_H
-#define NEROSMACROMAGIC_H
+#ifndef MACROMAGIC_H
+#define MACROMAGIC_H
 
 /*
 How macro magic works:
@@ -98,6 +98,8 @@ We need to predefine our default values.
 #define DEF01 0
 #define DEF02 0
 etc etc.
+This is done in this file to all 0s as a default-default, if you will.
+To set a different default, undef the one to change to placate the compiler before redefining it.
 */
 
 
@@ -220,6 +222,37 @@ etc etc.
 #define _fe_28(_call, RN, x, ...)	_call(RN, x) _fe_27(_call, RN, __VA_ARGS__)
 #define _fe_29(_call, RN, x, ...)	_call(RN, x) _fe_28(_call, RN, __VA_ARGS__)
 #define _fe_30(_call, RN, x, ...)	_call(RN, x) _fe_29(_call, RN, __VA_ARGS__)
+
+/* default values */
+#define DEF01 0
+#define DEF02 0
+#define DEF03 0
+#define DEF04 0
+#define DEF05 0
+#define DEF06 0
+#define DEF07 0
+#define DEF08 0
+#define DEF09 0
+#define DEF10 0
+#define DEF11 0
+#define DEF12 0
+#define DEF13 0
+#define DEF14 0
+#define DEF15 0
+#define DEF16 0
+#define DEF17 0
+#define DEF18 0
+#define DEF19 0
+#define DEF20 0
+#define DEF21 0
+#define DEF22 0
+#define DEF23 0
+#define DEF24 0
+#define DEF25 0
+#define DEF26 0
+#define DEF27 0
+#define DEF28 0
+#define DEF29 0
 
 /* diagonal hit pattern:  RmCn(x) is (x) iff m==n, else is nothing */
 /* >>>>> must grow (N^2) with increasing total arguements */

@@ -1,7 +1,7 @@
 /*	SCCS Id: @(#)artilist.h 3.4	2003/02/12	*/
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
-#include "nerosmacromagic.h"
+#include "macromagic.h"
 /* we need to set these *before* makedefs.c or else it won't be getting the right number of arguments */
 #define PROPS(...) {FIRST_EIGHT(dummy, ##__VA_ARGS__, 0,0,0,0,0,0,0,0)}
 #define FIRST_EIGHT(dummy, a1, a2, a3, a4, a5, a6, a7, a8, ...) a1, a2, a3, a4, a5, a6, a7, a8
@@ -17,13 +17,6 @@
 #define vsMG(x)   C05((x))
 #define vsMA(x)   C06((x))
 #define vsMV(x)   C07((x))
-#define DEF01 0
-#define DEF02 0
-#define DEF03 0
-#define DEF04 0
-#define DEF05 0
-#define DEF06 0
-#define DEF07 0
 
 #define NO_ATTK()									    0,   0,   0
 #define ATTK(adtyp, acc, dam)						adtyp, acc, dam
