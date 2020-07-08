@@ -12526,6 +12526,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 						override_str = 0;
 					}
 				}
+
+				/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
+				if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
+					if (ACURR(A_INT) == 25) bon_damage += 8;
+					else bon_damage += max(0, (ACURR(A_INT) - 10) / 2);
+				}
+
 				bonsdmg += bon_damage;
 			} else if(!youagr && magr){
 				int bon_damage = 0;
