@@ -876,10 +876,10 @@ A("Quicksilver",		FLAIL,							(const char *)0,
 /*Needs encyc entry*/
 /* slotless displacement makes this quite good even after you've found a better weapon */
 A("Sky Render",			KATANA,							(const char *)0,
-	1200L, METAL, MZ_DEFAULT, WT_DEFAULT,
+	1200L, IRON, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
-	ATTK(AD_PHYS, 10, 10), NOFLAG,
+	ATTK(AD_PHYS, 10, 10), ARTA_SILVER,
 	PROPS(), NOFLAG,
 	PROPS(DISPLACED), NOFLAG,
 	NOINVOKE, NOFLAG
