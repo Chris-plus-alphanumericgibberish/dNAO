@@ -5162,7 +5162,7 @@ typfnd:
 	}
 	
 	/* set eroded */
-	if (is_damageable(otmp) || otmp->otyp == CRYSKNIFE) {
+	if (is_damageable(otmp) || otmp->otyp == MASK || otmp->otyp == CRYSKNIFE) {
 	    if (eroded && (is_flammable(otmp) || is_rustprone(otmp)))
 		    otmp->oeroded = eroded;
 	    if (eroded2 && (is_corrodeable(otmp) || is_rottable(otmp)))
