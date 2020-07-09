@@ -357,6 +357,7 @@ struct artifact {
 #define ORACLE          (LAST_PROP+73)
 #define FILTH_ARROWS    (LAST_PROP+74)
 #define ALLSIGHT        (LAST_PROP+75)
+#define INVOKE_DARK     (LAST_PROP+76)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20

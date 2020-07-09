@@ -1304,6 +1304,17 @@ A("The Mantle of Wrath",			ORCISH_CLOAK,			(const char *)0,
 	),
 
 /*Needs encyc entry*/
+A("The Heart of Shadow",					BATTLE_AXE,			"black-flamed %s",
+	6660L, OBSIDIAN_MT, MZ_HUGE, WT_DEFAULT,
+	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	ATTK(AD_FIRE, 20, 10), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(ANTIMAGIC), NOFLAG,
+	INVOKE_DARK, NOFLAG
+	),
+
+/*Needs encyc entry*/
 /*Actually an iron ring (or twisted, if iron is hunger)*/
 A("The Shard from Morgoth's Crown",	RIN_ADORNMENT,			"twisted band of jagged iron",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,

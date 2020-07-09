@@ -1230,6 +1230,7 @@ int spot;
 				|| (otmp->otyp == CHAIN && mtmp->mtyp == PM_CATHEZAR) 
 				|| (otmp->otyp == CHAIN && mtmp->mtyp == PM_FIERNA)
 				|| (mtmp->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY)
+				|| (mtmp->mtyp == PM_LUNGORTHIN)
 				|| (mtmp->mtyp == PM_CORVIAN_KNIGHT)
 				)
 			)) &&

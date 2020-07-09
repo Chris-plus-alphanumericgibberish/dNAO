@@ -7517,7 +7517,16 @@ arti_invoke(obj)
 			}
 			/* if time < ovar1, arrows will be filthed (done in xhity.c) */
 			obj->ovar1 = monstermoves + 13;
-			break;
+		break;
+		case INVOKE_DARK:{
+          struct obj *wand;
+		  wand = mksobj(WAN_DARKNESS, FALSE, FALSE);
+          wand->spe = 1;
+          wand->blessed = 1;
+          wand->ovar1 = 1;
+          weffects(wand);
+          obfree(wand,(struct obj *)0);
+		}break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!

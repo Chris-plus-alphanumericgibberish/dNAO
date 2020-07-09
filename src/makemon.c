@@ -7147,20 +7147,21 @@ register struct	monst	*mtmp;
 			break;
 ////////////////////////////////////////
 		    case PM_LUNGORTHIN:
-				otmp = mksobj(BATTLE_AXE, FALSE, FALSE);
-				otmp->obj_material = MINERAL;
-				otmp->objsize = MZ_HUGE;
-				add_oprop(otmp, OPROP_UNHYW);
-				otmp->spe = 4;
-				fix_object(otmp);
-				mpickobj(mtmp, otmp);
-				
 				otmp = mksobj(BULLWHIP, FALSE, FALSE);
 				otmp->obj_material = MINERAL;
 				add_oprop(otmp, OPROP_FIREW);
 				add_oprop(otmp, OPROP_LESSER_UNHYW);
 				otmp->objsize = MZ_GIGANTIC;
 				otmp->spe = 4;
+				curse(otmp);
+				fix_object(otmp);
+				mpickobj(mtmp, otmp);
+				
+				otmp = mksobj(BATTLE_AXE, FALSE, FALSE);
+				otmp = oname(otmp, artiname(ART_HEART_OF_SHADOW));
+				add_oprop(otmp, OPROP_UNHYW);
+				otmp->spe = 4;
+				curse(otmp);
 				fix_object(otmp);
 				mpickobj(mtmp, otmp);
 				
