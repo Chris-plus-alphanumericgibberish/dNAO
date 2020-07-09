@@ -1,14 +1,110 @@
 /* Nero's Black Magic Fuckery of Macros */
-#ifndef NEROSMACROMAGIC_H
-#define NEROSMACROMAGIC_H
+#ifndef MACROMAGIC_H
+#define MACROMAGIC_H
+
+/*
+How macro magic works:
+
+I want to be able to instantiate a structure without directly specifying every bit:
+
+struct mythingA = {"name", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x8|0x1, 0};
+struct mythingB = {something};
+
+What does SETnn do ?
+SET01 sets exactly 1 parameter :
+
+struct mythingA = { a1 };
+struct mythingB = { SET01(something) };
+
+SET03 sets exactly 3 parameters:
+
+struct mythingA = { a1, a2, a3 };
+struct mythingB = { SET03(something) };
+
+How does SETnn expand ?
+
+SET03(args)
+->SET(03, args), SET02(args)
+->SET(03, args), SET(02, args), SET01(args)
+->SET(03, args), SET(02, args), SET(01, args)
+
+What does SET do ?
+SET(nn, args) fills exactly one field, the nnth.
+
+pline("%d  %d  %d",
+SET(01, args),
+SET(02, args),
+SET(03, args));
+
+If args contains an argument that is supposed to fill the nnth field, it uses that.Otherwise, it uses a default value.
+
+How can SET set a specific field ?
+SET(nn, args) knows it has to grab an argument that is somehow labeled to fill the nnth field, and ignore all other args.
+If each argument is also numbered, we just have to match field# to arg#:
+
+f  arg #
+i  X| |
+e  -+-+-
+l   |X|
+d  -+-+-
+#   | |X
+
+Rows are the field number(Rnn)
+Columns are the argument number(Cmm)
+
+How does SET expand ?
+It expands into :
+
+MAYBE(defaultnn, CALL_MACRO_X_FOR_EACH(CONCAT, Rnn, args))
+
+The way MAYBE is written, it effectively happens after CALL_MACRO_X_FOR_EACH.
+For now, just know that if we're filling a field that we have an argument for, MAYBE will do nothing at all.
+
+We'll also skim through CALL_MACRO_X_FOR_EACH.
+Similarly to how SETnn works as a chain, CALL_MACRO_X_FOR_EACH uses a chain to call CONCAT with first argument Rnn and second argument 1 of args :
+
+args = C01(x), C02(y), C03(z)
+CALL_MACRO_X_FOR_EACH(CONCAT, R01, C01(x), C02(y), C03(z))
+->CONCAT(R01, C01(x)) CONCAT(R01, C02(y)) CONCAT(R01, C03(z))
+
+CONCAT concatenates the labels Rnn with each argument :
+
+CONCAT(R01, C01(x)) CONCAT(R01, C02(y)) CONCAT(R01, C03(z))
+->R01C01(x) R01C02(y) R01C03(z)
+
+This is the order - of - n ^ 2 part.Each and every RnnCmm(X) combination is actually a #define.
+Only the ones where nn == mm turn into(X), all others turn into nothing.
+
+R01C01(x) R01C02(y) R01C03(z)
+->x
+
+What if no arguments are given that match the field number ?
+This is where MAYBE comes in, and replaces nothingness :
+
+R01C02(y) R01C03(z)
+->
+
+with a default value :
+
+MAYBE(defaultnn, )
+->defaultnn
+
+What if >1 arguments are given for 1 field number ?
+ie, SET04(C02(x), C02(y));
+This will not work, much like writing int mynum = 5 7; will not work.
+
+How do we set defaults?
+We need to predefine our default values.
+#define DEF01 0
+#define DEF02 0
+etc etc.
+This is done in this file to all 0s as a default-default, if you will.
+To set a different default, undef the one to change to placate the compiler before redefining it.
+*/
+
 
 #define FIRSTFOUR(dummy, a1, a2, a3, a4, ...) a1, a2, a3, a4
 #define FILL(...) FIRSTFOUR(dummy, ##__VA_ARGS__, 0, 0, 0, 0)
-
-
-
-
-
 
 /* if "..." is nonblank, expand to the first arg of "...". otherwise, expand to DEF */
 /* MAYBE(default, maybe_blank) */
@@ -126,6 +222,37 @@
 #define _fe_28(_call, RN, x, ...)	_call(RN, x) _fe_27(_call, RN, __VA_ARGS__)
 #define _fe_29(_call, RN, x, ...)	_call(RN, x) _fe_28(_call, RN, __VA_ARGS__)
 #define _fe_30(_call, RN, x, ...)	_call(RN, x) _fe_29(_call, RN, __VA_ARGS__)
+
+/* default values */
+#define DEF01 0
+#define DEF02 0
+#define DEF03 0
+#define DEF04 0
+#define DEF05 0
+#define DEF06 0
+#define DEF07 0
+#define DEF08 0
+#define DEF09 0
+#define DEF10 0
+#define DEF11 0
+#define DEF12 0
+#define DEF13 0
+#define DEF14 0
+#define DEF15 0
+#define DEF16 0
+#define DEF17 0
+#define DEF18 0
+#define DEF19 0
+#define DEF20 0
+#define DEF21 0
+#define DEF22 0
+#define DEF23 0
+#define DEF24 0
+#define DEF25 0
+#define DEF26 0
+#define DEF27 0
+#define DEF28 0
+#define DEF29 0
 
 /* diagonal hit pattern:  RmCn(x) is (x) iff m==n, else is nothing */
 /* >>>>> must grow (N^2) with increasing total arguements */
