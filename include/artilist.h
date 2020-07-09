@@ -1843,7 +1843,7 @@ A("The Ruinous Descent of Stars",	MORNING_STAR,		(const char *)0,
 /* needs encyc entry */
 /* Drow noble crowning gift, Lawful */
 /*returns to your hand when thrown; +1 multishot for drow & elves */
-A("Sickle Moon",					SICKLE,				(const char *)0,
+A("Sickle Moon",					ELVEN_SICKLE,				(const char *)0,
 	4000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_NOWISH),	/* may randomly generate */
 	NO_MONS(),
