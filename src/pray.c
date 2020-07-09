@@ -2271,8 +2271,11 @@ water_prayer(bless_water)
 	    changed += otmp->quan;
 	} else if(otmp->oclass == POTION_CLASS)
 	    other = TRUE;
-	else if (otmp->oproperties & ((bless_water) ? OPROP_HOLYW : OPROP_UNHYW) && (bless_water ? !otmp->blessed : !otmp->cursed))
-	{
+	else if (((bless_water) ? 
+				(check_oprop(otmp, OPROP_HOLY) || check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_LESSER_HOLYW)) : 
+				(check_oprop(otmp, OPROP_UNHY) || check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_LESSER_UNHYW))) 
+		&& (bless_water ? !otmp->blessed : !otmp->cursed)
+	){
 		otmp->blessed = bless_water;
 		otmp->cursed = !bless_water;
 		otmp->bknown = bc_known;
@@ -4066,9 +4069,9 @@ goat_gives_benefit()
 			change_luck(2*LUCKMAX);
 		break;
 		case 3:
-			if(uwep && !uwep->oartifact && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !(uwep->oproperties&OPROP_ACIDW)){
+			if(uwep && !uwep->oartifact && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_LESSER_ACIDW)){
 				if(!Blind) pline("Acid drips from your weapon!");
-				uwep->oproperties |= OPROP_ACIDW;
+				add_oprop(uwep, OPROP_LESSER_ACIDW);
 				uwep->oeroded = 0;
 				uwep->oeroded2 = 0;
 				uwep->oerodeproof = 1;
@@ -4276,13 +4279,14 @@ boolean yourinvent;
 		/* Priests now only count gifts in this calculation, found artifacts are excluded */
 	    if(u.ulevel > 2 && u.uluck >= 0 
 		    && (!flags.made_know || 
-			 (uwep && (uwep->oartifact || uwep->oproperties || spec_prop_otyp(uwep)) && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !(uwep->oproperties&OPROP_ACIDW))
+			 (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW))
 		    )
 			&& maybe_god_gives_gift()
 		){
-			if(uwep && (uwep->oartifact || uwep->oproperties || spec_prop_otyp(uwep)) && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !(uwep->oproperties&OPROP_ACIDW)){
+			if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW)){
 				if(!Blind) pline("Acid drips from your weapon!");
-				uwep->oproperties |= OPROP_ACIDW;
+				remove_oprop(uwep, OPROP_LESSER_ACIDW);
+				add_oprop(uwep, OPROP_ACIDW);
 				uwep->oeroded = 0;
 				uwep->oeroded2 = 0;
 				uwep->oerodeproof = 1;

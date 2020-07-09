@@ -2733,46 +2733,104 @@ winid *datawin;
 			if (buf[0] != '\0')
 				OBJPUTSTR(buf);
 		}
-		/* offensive object properties (objects only) */
-		if (obj && obj->oproperties & OPROP_W_MASK)
-		{
+		/* object properties (objects only) */
+		if(!check_oprop(obj, OPROP_NONE)){
 			/* holy/unholy bonus damage */
 			buf[0] = '\0';
-			ADDCLASSPROP((obj->oproperties&OPROP_HOLYW && obj->blessed), "holy");
-			ADDCLASSPROP((obj->oproperties&OPROP_UNHYW && obj->cursed), "unholy");
+			ADDCLASSPROP(check_oprop(obj, OPROP_HOLYW) && obj->blessed, "holy");
+			ADDCLASSPROP(check_oprop(obj, OPROP_UNHYW) && obj->cursed, "unholy");
 			if (buf[0] != '\0')
 			{
-				Sprintf(buf2, "Deals %s %s damage.",
-					(obj->oproperties&OPROP_LESSW ? "1d8 bonus" : "double"),
-					buf);
+				Sprintf(buf2, "Deals double %s damage.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_HOLYW) && obj->blessed, "holy");
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_UNHYW) && obj->cursed, "unholy");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 2d6 bonus %s damage.", buf);
 				OBJPUTSTR(buf2);
 			}
 			/* simple damage properties */
 			buf[0] = '\0';
-			ADDCLASSPROP(obj->oproperties&OPROP_FIREW, "fire");
-			ADDCLASSPROP(obj->oproperties&OPROP_COLDW, "cold");
-			ADDCLASSPROP(obj->oproperties&OPROP_WATRW, "water");
-			ADDCLASSPROP(obj->oproperties&OPROP_ELECW, "lightning");
-			ADDCLASSPROP(obj->oproperties&OPROP_ACIDW, "acid");
-			ADDCLASSPROP(obj->oproperties&OPROP_MAGCW, "magic");
-			ADDCLASSPROP(obj->oproperties&OPROP_PSIOW, "psionic");
+			ADDCLASSPROP(check_oprop(obj, OPROP_FIREW), "fire");
+			ADDCLASSPROP(check_oprop(obj, OPROP_COLDW), "cold");
+			ADDCLASSPROP(check_oprop(obj, OPROP_WATRW), "water");
+			ADDCLASSPROP(check_oprop(obj, OPROP_ELECW), "lightning");
+			ADDCLASSPROP(check_oprop(obj, OPROP_ACIDW), "acid");
+			ADDCLASSPROP(check_oprop(obj, OPROP_MAGCW), "magic");
 			if (buf[0] != '\0')
 			{
-				Sprintf(buf2, "Deals %s %s damage.",
-					(obj->oproperties&OPROP_LESSW ? "1d8 bonus" : "double"),
-					buf);
+				Sprintf(buf2, "Deals double %s damage.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			ADDCLASSPROP(check_oprop(obj, OPROP_PSIOW), "psionic");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals double-plus-enchantment %s damage.", buf);
+				OBJPUTSTR(buf2);
+			}
+			/* simple lesser damage properties */
+			buf[0] = '\0';
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_FIREW), "fire");
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_COLDW), "cold");
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_WATRW), "water");
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_ELECW), "lightning");
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_ACIDW), "acid");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 2d6 bonus %s damage.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			ADDCLASSPROP(check_oprop(obj, OPROP_OONA_FIREW), "fire");
+			ADDCLASSPROP(check_oprop(obj, OPROP_OONA_COLDW), "cold");
+			ADDCLASSPROP(check_oprop(obj, OPROP_OONA_ELECW), "lightning");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 1d8 bonus %s damage.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_MAGCW), "magic");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 3d4 bonus %s damage.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_PSIOW), "psionic");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 2d12 bonus %s damage.", buf);
 				OBJPUTSTR(buf2);
 			}
 			/* alignment damage properties */
 			buf[0] = '\0';
-			ADDCLASSPROP(obj->oproperties&OPROP_ANARW, "lawful and neutral creatures");
-			ADDCLASSPROP(obj->oproperties&OPROP_CONCW, "lawful and chaotic creatures");
-			ADDCLASSPROP(obj->oproperties&OPROP_AXIOW, "neutral and chaotic creatures");
+			ADDCLASSPROP(check_oprop(obj, OPROP_ANARW), "lawful and neutral creatures");
+			ADDCLASSPROP(check_oprop(obj, OPROP_CONCW), "lawful and chaotic creatures");
+			ADDCLASSPROP(check_oprop(obj, OPROP_AXIOW), "neutral and chaotic creatures");
 			if (buf[0] != '\0')
 			{
-				Sprintf(buf2, "Deals %s damage to %s.",
-					(obj->oproperties&OPROP_LESSW ? "1d8 bonus" : "double"),
-					buf);
+				Sprintf(buf2, "Deals double damage to %s.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_ANARW), "lawful and neutral creatures");
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_CONCW), "lawful and chaotic creatures");
+			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_AXIOW), "neutral and chaotic creatures");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 2d6 bonus damage to %s.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			ADDCLASSPROP((check_oprop(obj, OPROP_OONA_FIREW) || check_oprop(obj, OPROP_OONA_COLDW) || check_oprop(obj, OPROP_OONA_ELECW)), "neutral and chaotic creatures");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 1d8 bonus damage to %s.", buf);
 				OBJPUTSTR(buf2);
 			}
 			/* other stuff
@@ -2780,10 +2838,10 @@ winid *datawin;
 			 * than bonus damage (such as Vorpal Blade being vorpal)
 			 */
 //			buf[0] = '\0';
-//			ADDCLASSPROP((obj->oproperties&OPROP_DEEPW && obj->spe < 8), "telepathically lashes out");
-//			ADDCLASSPROP((obj->oproperties&OPROP_VORPW), "beheads creatures");
-//			ADDCLASSPROP((obj->oproperties&OPROP_MORGW), "inflicts unhealing wounds while cursed");
-//			ADDCLASSPROP((obj->oproperties&OPROP_FLAYW), "destroys armor");
+//			ADDCLASSPROP((check_oprop(obj, OPROP_DEEPW && obj->spe < 8), "telepathically lashes out");
+//			ADDCLASSPROP((check_oprop(obj, OPROP_VORPW), "beheads creatures");
+//			ADDCLASSPROP((check_oprop(obj, OPROP_MORGW), "inflicts unhealing wounds while cursed");
+//			ADDCLASSPROP((check_oprop(obj, OPROP_FLAYW), "destroys armor");
 //			if (buf[0] != '\0')
 //			{
 //				Sprintf(buf2, "It %s.", buf);
@@ -4468,7 +4526,7 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 
 	if(obj->oartifact != otmp->oartifact) return FALSE;
 	
-	if(obj->oproperties != otmp->oproperties) return FALSE;
+	if(!oprops_match(obj, otmp)) return FALSE;
 	
 	return TRUE;
 }

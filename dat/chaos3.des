@@ -736,19 +736,22 @@ MONSTER[75%]: '@', "Grey-elf", random
 
 MONSTER[75%]: '@', "elf-lord", random
 MONSTER[75%]: '@', "elf-lady", random
-MONSTER[25%]: '@', "Elvenking", random
-MONSTER[25%]: '@', "Elvenqueen", random
+MONSTER[75%]: '@', "Elvenking", random
+MONSTER[75%]: '@', "Elvenqueen", random
 
 MONSTER: 'A', "lillend", random
 MONSTER[75%]: 'A', "Coure Eladrin", random
 MONSTER[75%]: 'A', "Coure Eladrin", random
 MONSTER[75%]: 'A', "Noviere Eladrin", random
-MONSTER[25%]: 'A', "Shiere Eladrin", random
-MONSTER[25%]: 'A', "Ghaele Eladrin", random
+MONSTER[75%]: 'A', "Shiere Eladrin", random
+MONSTER[75%]: 'A', "Ghaele Eladrin", random
 
-MONSTER[25%]: '7', "Justice Archon", random
-MONSTER[25%]: '9', "Monadic Deva", random
-MONSTER[25%]: '&', "erinys", random
+MONSTER[75%]: '7', "Justice Archon", random
+MONSTER[75%]: '7', "Shield Archon", random
+MONSTER[75%]: '7', "Sword Archon", random
+
+MONSTER[75%]: '9', "Monadic Deva", random
+MONSTER[75%]: '&', "erinys", random
 
 MONSTER[75%]: 'h', "dwarf", random
 MONSTER[75%]: 'h', "dwarf", random
@@ -1057,63 +1060,73 @@ OBJECT:'!',"full healing", contained, cursed, 0
 OBJECT:'[',"orcish cloak", (53,10), cursed, 2,"The Mantle of Wrath"
 
 CONTAINER: '(', "chest", (23,03)
-OBJECT:'#',"cursed +1 iron helmet", contained
+OBJECT:'#',"unholy-armor +1 iron helmet", contained
 OBJECT:'#',"blessed fixed helmet", contained
 OBJECT:'[',"archaic helm", contained
+OBJECT:'#',"tiny holy-armor +3 silver helm", contained
+OBJECT:'#',"tiny cloth shemagh", contained
+OBJECT:'#',"blessed +3 flower-woven band", contained
 OBJECT:'#',"gemstone band", contained
 OBJECT:'[',"high-elven helm", contained
-OBJECT:'#',"blessed +3 cloth elven helm", contained
 
 CONTAINER: '(', "chest"  , (24,04)
-OBJECT:'#',"cursed +1 iron plate mail", contained
+OBJECT:'#',"unholy-armor +1 iron plate mail", contained
 OBJECT:'#',"blessed fixed gentlewoman's dress", contained
 OBJECT:'[',"archaic plate mail", contained
 OBJECT:'[',"crystal plate mail", contained
-OBJECT:'[',"high-elven plate", contained
+OBJECT:'#',"tiny holy-armor +3 silver plate mail", contained
+OBJECT:'#',"tiny cloth jacket", contained
 OBJECT:'[',"elven toga", contained, blessed, +3
+OBJECT:'[',"high-elven plate", contained
 
 CONTAINER: '(', "chest"  , (25,04)
-OBJECT:'#',"cursed +1 iron gauntlets", contained
+OBJECT:'#',"unholy-armor +1 iron gauntlets", contained
 OBJECT:'#',"blessed fixed iron gauntlets", contained
 OBJECT:'[',"crystal gauntlets", contained
-OBJECT:'[',"high-elven gauntlets", contained
+OBJECT:'#',"tiny holy-armor holy-weapon +3 silver gauntlets of power", contained
+OBJECT:'#',"tiny cloth gloves", contained
 OBJECT:'#',"blessed +3 cloth gloves", contained
+OBJECT:'[',"high-elven gauntlets", contained
 
 CONTAINER: '(', "chest"  , (57,08)
-OBJECT:'#',"lesser unholy flaming +1 iron long sword", contained
-OBJECT:'#',"blessed fixed silver long sword", contained
+OBJECT:'#',"unholy-weapon red-hot +4 iron long sword", contained
+OBJECT:'#',"consecrated fixed silver long sword", contained
 OBJECT:'#',"blessed fixed flaming +4 two-handed sword", contained
-OBJECT:'#',"bronze long sword", contained
-OBJECT:')',"crystal sword", contained
-OBJECT:'#',"large high-elven warsword", contained
-OBJECT:'#',"mithril elven broadsword", contained
+OBJECT:'#',"sparking bronze long sword", contained
+OBJECT:'#',"unruly crystal sword", contained
+OBJECT:'#',"large damp high-elven warsword", contained
+OBJECT:'#',"tiny holy-weapon wrathful +3 moon axe", contained
+OBJECT:'#',"blessed fixed +3 silver long sword", contained
 OBJECT:'#',"blessed +3 mithril rapier", contained
 OBJECT:'#',"blessed wand of nothing", contained
+OBJECT:'#',"mithril wrathful elven broadsword", contained
 OBJECT:'#',"blessed fixed +3 elven bow", contained
-OBJECT:'#',"blessed fixed +3 silver long sword", contained
 
 CONTAINER: '(', "chest"  , (56,08)
-OBJECT:'#',"cursed +1 iron kite shield", contained
+OBJECT:'#',"unholy-armor +1 iron kite shield", contained
 OBJECT:'#',"blessed fixed iron kite shield", contained
 OBJECT:'[',"roundshield", contained
-OBJECT:'[',"crystal shield", contained
 OBJECT:'[',"crystal shield", contained
 OBJECT:'#',"mithril elven shield", contained
 
 CONTAINER: '(', "chest"  , (55,08)
-OBJECT:'#',"cursed +1 iron armored boots", contained
+OBJECT:'#',"unholy-armor +1 iron armored boots", contained
 OBJECT:'#',"blessed fixed iron armored boots", contained
 OBJECT:'[',"archaic boots", contained
-OBJECT:'#',"mithril armored boots", contained
+OBJECT:'#',"tiny holy-armor holy-weapon +3 silver armored boots", contained
+OBJECT:'#',"tiny high boots", contained
 OBJECT:'#',"blessed +3 cloth shoes", contained
+OBJECT:'#',"mithril armored boots", contained
 
 CONTAINER: '(', "chest"  , (55,09)
 OBJECT:'_',"iron bands", contained
+OBJECT:'#',"fixed holy-armor woolen cloth robe", contained
+OBJECT:'#',"tiny lenses", contained
 OBJECT:'#',"elven cloak", contained
-OBJECT:'#',"blessed +3 cloth elven cloak", contained
 OBJECT:'(',"crystal ball", contained, blessed, +3
 OBJECT:'!',"starlight", contained, blessed, 0
 OBJECT:'(',"harp", contained
+OBJECT:'#',"blessed +3 cloth elven cloak", contained
 OBJECT:'#',"30 blessed fixed silver elven arrow", contained
 
 CONTAINER: '(', "chest"  , (56,09)

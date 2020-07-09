@@ -1159,7 +1159,7 @@ int spec;
 			tmp = 0;
 	}
 	/* Flaying weapons don't damage armored foes */
-	if (otmp->oproperties&OPROP_FLAYW && mon && some_armor(mon))
+	if (check_oprop(otmp, OPROP_FLAYW) && mon && some_armor(mon))
 		tmp = 1;
 	/* Smaug gets stabbed */
 	if(is_stabbing(otmp) && ptr->mtyp == PM_SMAUG)
@@ -1625,7 +1625,7 @@ struct obj *otmp;
     
         if (wep->oartifact) return FALSE;
 		
-        if (wep->oproperties && !otmp->oproperties) return FALSE;
+        if (!check_oprop(wep, OPROP_NONE)) return FALSE;
 
         if (is_giant(mtmp->data) &&  wep->otyp == CLUB) return FALSE;
         if (is_giant(mtmp->data) && otmp->otyp == CLUB) return TRUE;
@@ -1668,7 +1668,7 @@ register struct monst *mtmp;
 			|| otmp->otyp == CHAIN || otmp->otyp == HEAVY_IRON_BALL
 			) &&
 			/* an artifact or other special weapon*/
-			(otmp->oartifact || otmp->oproperties) &&
+			(otmp->oartifact || !check_oprop(otmp, OPROP_NONE)) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
 			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC

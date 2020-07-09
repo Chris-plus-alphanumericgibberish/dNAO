@@ -568,9 +568,9 @@ char *buf;
 				Strcat(buf, "uncursed ");
 		}
 		else if (obj->cursed)
-			Strcat(buf, (obj->known && (obj->oproperties&OPROP_UNHYW || obj->oproperties&OPROP_UNHY)) ? "unholy " : "cursed ");
+			Strcat(buf, (obj->known && (check_oprop(obj, OPROP_UNHYW) || check_oprop(obj, OPROP_UNHY))) ? "unholy " : check_oprop(obj, OPROP_LESSER_UNHYW) ? "desecrated " : "cursed ");
 		else if (obj->blessed)
-			Strcat(buf, (obj->known && (obj->oproperties&OPROP_HOLYW || obj->oproperties&OPROP_HOLY)) ? "holy " : "blessed ");
+			Strcat(buf, (obj->known && (check_oprop(obj, OPROP_HOLYW) || check_oprop(obj, OPROP_HOLY))) ? "holy " : check_oprop(obj, OPROP_LESSER_HOLYW) ? "consecrated " : "blessed ");
 		else if (iflags.show_buc || ((!obj->known || !objects[obj->otyp].oc_charged ||
 			(obj->oclass == ARMOR_CLASS ||
 			obj->oclass == RING_CLASS))
@@ -780,86 +780,112 @@ struct obj *obj;
 char *buf;
 boolean dofull;
 {
-	if ((obj->oproperties&OPROP_WOOL) == OPROP_WOOL && !(obj->obj_material != objects[obj->otyp].oc_material && obj->obj_material == CLOTH)){
+	if (check_oprop(obj, OPROP_WOOL) && !(obj->obj_material != objects[obj->otyp].oc_material && obj->obj_material == CLOTH)){
 		if (obj->obj_material == CLOTH)
 			Strcat(buf, "woolen ");
 		else
 			Strcat(buf, "wool-lined ");
-	} else if(obj->oproperties && (obj->oartifact == 0 || dofull)){
-		if(obj->oproperties&OPROP_ANAR && obj->known)
-			Strcat(buf, "anarchic ");
-		if(obj->oproperties&OPROP_CONC && obj->known)
-			Strcat(buf, "concordant ");
-		if(obj->oproperties&OPROP_AXIO && obj->known)
-			Strcat(buf, "axiomatic ");
-		if(obj->oproperties&OPROP_MAGC && obj->known)
-			Strcat(buf, "magic-resistant ");
-		if(obj->oproperties&OPROP_REFL)
-			Strcat(buf, "reflective ");
-		if(obj->oproperties&OPROP_FIRE && obj->known)
-			Strcat(buf, "fireproof ");
-		if(obj->oproperties&OPROP_COLD && obj->known)
-			Strcat(buf, "coldproof ");
-		if(obj->oproperties&OPROP_ELEC && obj->known)
-			Strcat(buf, "voltproof ");
-		if(obj->oproperties&OPROP_ACID && obj->known)
-			Strcat(buf, "acidproof ");
 	}
-
-	if (obj->oproperties && (obj->oartifact == 0 || dofull)){
-		if(!(obj->oproperties&OPROP_LESSW 
-			&& obj->oproperties&OPROP_AXIOW 
-			&& obj->oproperties&(OPROP_FIREW|OPROP_COLDW|OPROP_ELECW)
-			&& obj->known
-		)){
-			//Note: Oona's properties were already added as part of the materials check
-			if(obj->oproperties&OPROP_LESSW && obj->known)
-				Strcat(buf, "lesser ");
-			if (obj->oproperties&OPROP_ANARW && obj->known)
-				Strcat(buf, "anarchic ");
-			if (obj->oproperties&OPROP_CONCW && obj->known)
-				Strcat(buf, "concordant ");
-			if (obj->oproperties&OPROP_AXIOW && obj->known)
-				Strcat(buf, "axiomatic ");
-			if (obj->oproperties&OPROP_PSIOW){
-				if (obj->known) Strcat(buf, "psionic ");
-				else if (Blind_telepat) Strcat(buf, "whispering ");
-			}
-			if (obj->oproperties&OPROP_DEEPW){
-				if (Blind_telepat && obj->spe < 8) Strcat(buf, "mumbling ");
-			}
-			if (obj->oproperties&OPROP_PHSEW)
-				Strcat(buf, "faded ");
-			if (obj->oproperties&OPROP_WATRW)
-				Strcat(buf, "misty ");
-			if (obj->oproperties&OPROP_FIREW){
-				if (obj->oproperties&OPROP_LESSW && !obj->known) Strcat(buf, "red-hot ");
-				else Strcat(buf, "flaming ");
-			}
-			if (obj->oproperties&OPROP_COLDW)
-				Strcat(buf, "freezing ");
-			if (obj->oproperties&OPROP_ELECW)
-				Strcat(buf, "shocking ");
-			if (obj->oproperties&OPROP_ACIDW)
-				Strcat(buf, "sizzling ");
-			if (obj->oproperties&OPROP_MAGCW)
-				Strcat(buf, "sparkling ");
-			if (obj->oproperties&OPROP_VORPW && obj->known)
-				Strcat(buf, "vorpal ");
-			if (obj->oproperties&OPROP_MORGW && obj->known && obj->cursed)
-				Strcat(buf, "morgul ");
-			if (obj->oproperties&OPROP_WRTHW && obj->known)
-				Strcat(buf, "wrathful ");
-			if (obj->oproperties&OPROP_FLAYW && obj->known)
-				Strcat(buf, "flaying ");
-			/* note: "holy" and "unholy" properties are shown in the BUC part of the name, as they replace "blessed" and "cursed". */
-			
-			/* note: except "Holy Avenger" and "Unholy Avenger" */
-			if (obj->oartifact == ART_AVENGER && obj->cursed && !undiscovered_artifact(obj->oartifact) && obj->oproperties&OPROP_UNHYW)
-				Strcat(buf, "Unholy ");
-			if (obj->oartifact == ART_AVENGER && obj->blessed && !undiscovered_artifact(obj->oartifact) && obj->oproperties&OPROP_HOLYW)
-				Strcat(buf, "Holy ");
+	
+	if (!check_oprop(obj, OPROP_NONE) && (obj->oartifact == 0 || dofull)){
+		if((check_oprop(obj, OPROP_ANARW) || check_oprop(obj, OPROP_ANAR)) && obj->known)
+			Strcat(buf, "anarchic ");
+		if((check_oprop(obj, OPROP_CONCW) || check_oprop(obj, OPROP_CONC)) && obj->known)
+			Strcat(buf, "concordant ");
+		if((check_oprop(obj, OPROP_AXIOW) || check_oprop(obj, OPROP_AXIO)) && obj->known)
+			Strcat(buf, "axiomatic ");
+		if(check_oprop(obj, OPROP_MAGC) && obj->known)
+			Strcat(buf, "magic-resistant ");
+		if(check_oprop(obj, OPROP_REFL))
+			Strcat(buf, "reflective ");
+		if(check_oprop(obj, OPROP_FIRE) && obj->known)
+			Strcat(buf, "flameproof ");
+		if(check_oprop(obj, OPROP_COLD) && obj->known)
+			Strcat(buf, "coldproof ");
+		if(check_oprop(obj, OPROP_ELEC) && obj->known)
+			Strcat(buf, "voltproof ");
+		if(check_oprop(obj, OPROP_ACID) && obj->known)
+			Strcat(buf, "acidproof ");
+		
+		if (check_oprop(obj, OPROP_LESSER_ANARW) && obj->known)
+			Strcat(buf, "unruly ");
+		if (check_oprop(obj, OPROP_LESSER_CONCW) && obj->known)
+			Strcat(buf, "accordant ");
+		if (check_oprop(obj, OPROP_LESSER_AXIOW) && obj->known)
+			Strcat(buf, "apodictic ");
+		
+		if (check_oprop(obj, OPROP_PSIOW)){
+			if (obj->known) Strcat(buf, "psionic ");
+			else if (Blind_telepat) Strcat(buf, "whispering ");
 		}
+		if (check_oprop(obj, OPROP_LESSER_PSIOW)){
+			if (Blind_telepat) Strcat(buf, "rustling ");
+		}
+		if (check_oprop(obj, OPROP_DEEPW)){
+			if (Blind_telepat && obj->spe < 8) Strcat(buf, "mumbling ");
+		}
+		if (check_oprop(obj, OPROP_PHSEW))
+			Strcat(buf, "faded ");
+		
+		if (check_oprop(obj, OPROP_WATRW))
+			Strcat(buf, "misty ");
+		if (check_oprop(obj, OPROP_LESSER_WATRW))
+			Strcat(buf, "damp ");
+		
+		if (check_oprop(obj, OPROP_FIREW))
+			Strcat(buf, "flaming ");
+		if (check_oprop(obj, OPROP_OONA_FIREW))
+			Strcat(buf, "forge-hot ");
+		if (check_oprop(obj, OPROP_LESSER_FIREW))
+			Strcat(buf, "red-hot ");
+		
+		if (check_oprop(obj, OPROP_COLDW))
+			Strcat(buf, "freezing ");
+		if (check_oprop(obj, OPROP_OONA_COLDW))
+			Strcat(buf, "crystalline ");
+		if (check_oprop(obj, OPROP_LESSER_COLDW))
+			Strcat(buf, "frosted ");
+		
+		if (check_oprop(obj, OPROP_ELECW))
+			Strcat(buf, "shocking ");
+		if (check_oprop(obj, OPROP_OONA_ELECW))
+			Strcat(buf, "arcing ");
+		if (check_oprop(obj, OPROP_LESSER_ELECW))
+			Strcat(buf, "sparking ");
+		
+		if (check_oprop(obj, OPROP_ACIDW))
+			Strcat(buf, "sizzling ");
+		if (check_oprop(obj, OPROP_LESSER_ACIDW))
+			Strcat(buf, "acrid ");
+		
+		if (check_oprop(obj, OPROP_MAGCW))
+			Strcat(buf, "sparkling ");
+		if (check_oprop(obj, OPROP_LESSER_MAGCW))
+			Strcat(buf, "glittering ");
+		
+		if (check_oprop(obj, OPROP_VORPW) && obj->known)
+			Strcat(buf, "vorpal ");
+		
+		if (check_oprop(obj, OPROP_MORGW) && obj->known && obj->cursed)
+			Strcat(buf, "morgul ");
+		if (check_oprop(obj, OPROP_LESSER_MORGW) && obj->known && obj->cursed)
+			Strcat(buf, "morgul-shard ");
+		
+		if (check_oprop(obj, OPROP_WRTHW) && obj->known)
+			Strcat(buf, "wrathful ");
+		
+		if (check_oprop(obj, OPROP_FLAYW) && obj->known)
+			Strcat(buf, "flaying ");
+		if (check_oprop(obj, OPROP_LESSER_FLAYW) && obj->known)
+			Strcat(buf, "excoriating ");
+		/* note: "holy" and "unholy" properties are shown in the BUC part of the name, as they replace "blessed" and "cursed". */
+		
+		/* note: except "Holy Avenger" and "Unholy Avenger" */
+		/* also note: just going to assume it has the correct properties for these names */
+		if (obj->oartifact == ART_AVENGER && obj->cursed && !undiscovered_artifact(obj->oartifact))
+			Strcat(buf, "Unholy ");
+		if (obj->oartifact == ART_AVENGER && obj->blessed && !undiscovered_artifact(obj->oartifact))
+			Strcat(buf, "Holy ");
 	}
 }
 
@@ -1065,7 +1091,7 @@ add_insight_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (obj->otyp == CLUB && obj->oproperties&OPROP_CCLAW){
+	if (obj->otyp == CLUB && check_oprop(obj, OPROP_CCLAW)){
 		if(u.uinsight >= 30)
 			Strcat(buf, "thrashing ");
 		else if(u.uinsight >= 15)
@@ -1122,7 +1148,15 @@ boolean adjective;
 		/* supposed to be made of straw or straw-like substance */
 		if (obj->otyp == SEDGE_HAT || obj->otyp == SHEAF_OF_HAY)
 			return "straw";
-		else
+		else if(obj->obj_material != objects[obj->otyp].oc_material){
+			if(obj->obj_color == CLR_BROWN){
+				return (adjective ? "branch-woven" : "woven branches");
+			}
+			if(obj->obj_color == CLR_GREEN || obj->obj_color == CLR_BRIGHT_GREEN){
+				return (adjective ? "branch-woven" : "leafy woven branches");
+			}
+			return (adjective ? "flower-woven" : "flowers and young branches");
+		} else
 			return (adjective ? "organic" : "organic material");
 	case FLESH:
 		/* meat! */
@@ -1134,7 +1168,7 @@ boolean adjective;
 		return "paper";
 	case CLOTH:
 		/* woolen cloth equipment is just wool */
-		if ((obj->oproperties&OPROP_WOOL) == OPROP_WOOL)
+		if (check_oprop(obj, OPROP_WOOL))
 			return (adjective ? "woolen" : "wool");
 		/* overly fancy clothing */
 		else if (obj->otyp == GENTLEMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_DRESS)
@@ -1187,26 +1221,11 @@ boolean adjective;
 		/* all metal wands have interesting materials (eg uranium)*/
 		if (obj->oclass == WAND_CLASS)
 			return OBJ_DESCR(objects[obj->otyp]);
-		/* Oona's weapons */
-		else if (adjective
-			&& obj->oproperties&OPROP_LESSW
-			&& obj->oproperties&OPROP_AXIOW
-			&& obj->oproperties&(OPROP_FIREW | OPROP_COLDW | OPROP_ELECW)
-			&& obj->known)
-		{
-			if (obj->oproperties&OPROP_FIREW)
-				return "forge-hot";
-			if (obj->oproperties&OPROP_COLDW)
-				return "crystalline";
-			if (obj->oproperties&OPROP_ELECW)
-				return "arcing";
-		}
 		/* whistles are made of tin */
 		else if (obj->otyp == WHISTLE || obj->otyp == MAGIC_WHISTLE)
 			return "tin";
-		/* because it wasn't hard enough to remember how to spell */
 		else if (obj->otyp == ORIHALCYON_GAUNTLETS && !adjective)
-			return "orichalcum";
+			return "orihalcyon";
 		else
 			return (adjective ? "metallic" : "metal");
 	case COPPER:
@@ -1396,7 +1415,7 @@ boolean with_price;
 	if (Role_if(PM_PIRATE) && iflags.role_obj_names && Alternate_item_name(typ, Pirate_items))
 		actualn = Alternate_item_name(typ, Pirate_items);
 
-	if(obj->otyp == CLUB && obj->oproperties&OPROP_CCLAW){
+	if(obj->otyp == CLUB && check_oprop(obj, OPROP_CCLAW)){
 		if(u.uinsight >= 15)
 			actualn = "arm";
 	}
@@ -3501,7 +3520,7 @@ int wishflags;
 		sizewished = FALSE;
 	int objsize = (from_user ? youracedata->msize : MZ_MEDIUM);
 	long bodytype = 0L;
-	long long int oproperties = 0L;
+	unsigned long int oprop_list[OPROP_LISTSIZE] = {0};
 	char oclass;
 	char *un, *dn, *actualn;
 	const char *name=0;
@@ -3788,7 +3807,7 @@ int wishflags;
 		} else if (!strncmpi(bp, "wax ", l=4) && strncmpi(bp, "wax candle", 10)
 			) {
 			mat = WAX;
-		} else if ((!strncmpi(bp, "veggy ", l=6) || !strncmpi(bp, "organic ", l=8))
+		} else if ((!strncmpi(bp, "veggy ", l=6) || !strncmpi(bp, "flower-woven ", l=13))
 			) {
 			mat = VEGGY;
 		} else if (!strncmpi(bp, "flesh ", l=6) && strncmpi(bp, "flesh golem", 11)
@@ -3887,77 +3906,147 @@ int wishflags;
 			mat = OBSIDIAN_MT;
 		} else if (!strncmpi(bp, "shadowsteel ", l=12)) {
 			mat = SHADOWSTEEL;
-		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)
-			) {
-			oproperties |= OPROP_WOOL;
-		} else if (!strncmpi(bp, "lesser ", l=7)
-			) {
-			oproperties |= OPROP_LESSW;
-		} else if (!strncmpi(bp, "magic-resistant ", l=16)
-			) {
-			oproperties |= OPROP_MAGC;
-		} else if (!strncmpi(bp, "flaming ", l=8)
-			) {
-			oproperties |= OPROP_FIREW;
-		} else if (!strncmpi(bp, "freezing ", l=9)
-			) {
-			oproperties |= OPROP_COLDW;
-		} else if (!strncmpi(bp, "reflective ", l=11)
-			) {
-			oproperties |= OPROP_REFL;
-		} else if (!strncmpi(bp, "misty ", l=6)
-			) {
-			oproperties |= OPROP_WATRW;
-		} else if (!strncmpi(bp, "faded ", l=6)
-			) {
-			oproperties |= OPROP_PHSEW;
-		} else if (!strncmpi(bp, "psionic ", l=8) || !strncmpi(bp, "whispering ", l=11)
-			) {
-			oproperties |= OPROP_PSIOW;
-		} else if ((!strncmpi(bp, "deep ", l=5) && strncmpi(bp, "deep sea", 8)) || !strncmpi(bp, "mumbling ", l=9)
-			) {
-			oproperties |= OPROP_DEEPW;
-		} else if (!strncmpi(bp, "shocking ", l=9)
-			) {
-			oproperties |= OPROP_ELECW;
-		} else if (!strncmpi(bp, "sizzling ", l=9)
-			) {
-			oproperties |= OPROP_ACIDW;
+		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)) {
+			add_oprop_list(oprop_list, OPROP_WOOL);
+
+		} else if (!strncmpi(bp, "magic-resistant ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_MAGC);
+
+		} else if (!strncmpi(bp, "flameproof ", l=11)) {
+			add_oprop_list(oprop_list, OPROP_FIRE);
+
+		} else if (!strncmpi(bp, "coldproof ", l=10)) {
+			add_oprop_list(oprop_list, OPROP_COLD);
+
+		} else if (!strncmpi(bp, "voltproof ", l=10)) {
+			add_oprop_list(oprop_list, OPROP_ELEC);
+
+		} else if (!strncmpi(bp, "acidproof ", l=10)) {
+			add_oprop_list(oprop_list, OPROP_ACID);
+
+		} else if (!strncmpi(bp, "anarchic-armor ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_ANAR);
+
+		} else if (!strncmpi(bp, "concordant-armor ", l=17)) {
+			add_oprop_list(oprop_list, OPROP_CONC);
+
+		} else if (!strncmpi(bp, "axiomatic-armor ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_AXIO);
+
+		} else if (!strncmpi(bp, "reflective ", l=11)) {
+			add_oprop_list(oprop_list, OPROP_REFL);
+
+		} else if (!strncmpi(bp, "anarchic-weapon ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_ANARW);
+
+		} else if (!strncmpi(bp, "concordant-weapon ", l=18)) {
+			add_oprop_list(oprop_list, OPROP_CONCW);
+
+		} else if (!strncmpi(bp, "axiomatic-weapon ", l=17)) {
+			add_oprop_list(oprop_list, OPROP_AXIOW);
+
+		} else if (!strncmpi(bp, "unruly ", l=7)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_ANARW);
+
+		} else if (!strncmpi(bp, "accordant ", l=10)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_CONCW);
+
+		} else if (!strncmpi(bp, "apodictic ", l=10)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_AXIOW);
+
+		} else if (!strncmpi(bp, "flaming ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_FIREW);
+		} else if (!strncmpi(bp, "forge-hot ", l=10)) {
+			add_oprop_list(oprop_list, OPROP_OONA_FIREW);
+		} else if (!strncmpi(bp, "red-hot ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_FIREW);
+
+		} else if (!strncmpi(bp, "freezing ", l=9)) {
+			add_oprop_list(oprop_list, OPROP_COLDW);
+		} else if (!strncmpi(bp, "crystalline ", l=12)) {
+			add_oprop_list(oprop_list, OPROP_OONA_COLDW);
+		} else if (!strncmpi(bp, "frosted ", l=8) && strncmpi(bp, "frosted lake", 12)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_COLDW);
+
+		} else if (!strncmpi(bp, "shocking ", l=9)) {
+			add_oprop_list(oprop_list, OPROP_ELECW);
+		} else if (!strncmpi(bp, "arcing ", l=7)) {
+			add_oprop_list(oprop_list, OPROP_OONA_ELECW);
+		} else if (!strncmpi(bp, "sparking ", l=9)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_ELECW);
+
+		} else if (!strncmpi(bp, "misty ", l=6)) {
+			add_oprop_list(oprop_list, OPROP_WATRW);
+		} else if (!strncmpi(bp, "damp ", l=5)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_WATRW);
+
+		} else if (!strncmpi(bp, "faded ", l=6)) {
+			add_oprop_list(oprop_list, OPROP_PHSEW);
+
+		} else if (!strncmpi(bp, "psionic ", l=8) || !strncmpi(bp, "whispering ", l=11)) {
+			add_oprop_list(oprop_list, OPROP_PSIOW);
+		} else if (!strncmpi(bp, "rustling ", l=9)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_PSIOW);
+
+		} else if ((!strncmpi(bp, "deep ", l=5) && strncmpi(bp, "deep sea", 8)) || !strncmpi(bp, "mumbling ", l=9)) {
+			add_oprop_list(oprop_list, OPROP_DEEPW);
+
+		} else if (!strncmpi(bp, "sizzling ", l=9)) {
+			add_oprop_list(oprop_list, OPROP_ACIDW);
+		} else if (!strncmpi(bp, "acrid ", l=6)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_ACIDW);
+
 		} else if (!strncmpi(bp, "sparkling ", l=10) && 
 				strncmpi(bp, "sparkling horizontal", 20) && 
 				strncmpi(bp, "sparkling lake", 14) && 
 				strncmpi(bp, "sparkling potion", 16)
-			) {
-			oproperties |= OPROP_MAGCW;
-		} else if (!strncmpi(bp, "anarchic ", l=9)
-			) {
-			oproperties |= OPROP_ANARW;
-		} else if (!strncmpi(bp, "concordant ", l=11)
-			) {
-			oproperties |= OPROP_CONCW;
-		} else if (!strncmpi(bp, "axiomatic ", l=10)
-			) {
-			oproperties |= OPROP_AXIOW;
-		} else if (!strncmpi(bp, "holy ", l=5) && strncmpi(bp, "holy moonlight sword", 20)
-			) {
+		) {
+			add_oprop_list(oprop_list, OPROP_MAGCW);
+		} else if (!strncmpi(bp, "glittering ", l=11)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_MAGCW);
+
+		} else if (!strncmpi(bp, "holy ", l=5) && strncmpi(bp, "holy moonlight sword", 20)) {
 			blessed = !(uncursed + iscursed);
-			oproperties |= OPROP_HOLYW;
-		} else if (!strncmpi(bp, "unholy ", l=7)
-			) {
+		} else if (!strncmpi(bp, "holy-weapon ", l=12)) {
+			blessed = !(uncursed + iscursed);
+			add_oprop_list(oprop_list, OPROP_HOLYW);
+		} else if (!strncmpi(bp, "holy-armor ", l=11)) {
+			blessed = !(uncursed + iscursed);
+			add_oprop_list(oprop_list, OPROP_HOLY);
+		} else if (!strncmpi(bp, "consecrated ", l=12)) {
+			blessed = !(uncursed + iscursed);
+			add_oprop_list(oprop_list, OPROP_LESSER_HOLYW);
+
+		} else if (!strncmpi(bp, "unholy ", l=7) && strncmpi(bp, "holy moonlight sword", 20)) {
 			iscursed = !(uncursed + blessed);
-			oproperties |= OPROP_UNHYW;
-		} else if (!strncmpi(bp, "vorpal ", l=7) && strncmpi(bp, "Vorpal Blade", 12)
-			) {
-			oproperties |= OPROP_VORPW;
-		} else if (!strncmpi(bp, "morgul ", l=7)
-			) {
-			oproperties |= OPROP_MORGW;
-		} else if (!strncmpi(bp, "wrathful ", l=9)
-			) {
-			oproperties |= OPROP_WRTHW;
-		} else if (!strncmpi(bp, "flaying ", l=8)
-			) {
-			oproperties |= OPROP_FLAYW;
+		} else if (!strncmpi(bp, "unholy-weapon ", l=14)) {
+			iscursed = !(uncursed + blessed);
+			add_oprop_list(oprop_list, OPROP_UNHYW);
+		} else if (!strncmpi(bp, "unholy-armor ", l=13)) {
+			iscursed = !(uncursed + blessed);
+			add_oprop_list(oprop_list, OPROP_UNHY);
+		} else if (!strncmpi(bp, "desecrated ", l=11)) {
+			iscursed = !(uncursed + blessed);
+			add_oprop_list(oprop_list, OPROP_LESSER_UNHYW);
+
+		} else if (!strncmpi(bp, "vorpal ", l=7) && strncmpi(bp, "Vorpal Blade", 12)) {
+			add_oprop_list(oprop_list, OPROP_VORPW);
+
+		} else if (!strncmpi(bp, "morgul ", l=7)) {
+			iscursed = !(uncursed + blessed);
+			add_oprop_list(oprop_list, OPROP_MORGW);
+		} else if (!strncmpi(bp, "morgul-shard ", l=13)) {
+			iscursed = !(uncursed + blessed);
+			add_oprop_list(oprop_list, OPROP_LESSER_MORGW);
+
+		} else if (!strncmpi(bp, "wrathful ", l=9)) {
+			add_oprop_list(oprop_list, OPROP_WRTHW);
+
+		} else if (!strncmpi(bp, "flaying ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_FLAYW);
+		} else if (!strncmpi(bp, "excoriating ", l=12)) {
+			add_oprop_list(oprop_list, OPROP_LESSER_FLAYW);
+
 		} else if (!strncmpi(bp, "magicite ", l=9)) {
 			mat = GEMSTONE; gemtype = MAGICITE_CRYSTAL;
 		} else if (!strncmpi(bp, "dilithium ", l=10)) {
@@ -5114,33 +5203,16 @@ typfnd:
 		otmp->odiluted = 1;
 
 	/* set object properties */
-	if (oproperties && wizwish) // wishing for object properties is wizard-mode only
+	if (wizwish) // wishing for object properties is wizard-mode only
 	{
-		if (wizwish)		// wizard mode will give you what you ask for, even if it breaks things
-			otmp->oproperties = oproperties;
-		else
-		{	// limit granted properties to what is realistic for the item class
-			switch (otmp->oclass)
-			{
-			case TOOL_CLASS:
-				if (is_weptool(otmp))
-					;	// fall through to weapon_class
-				else
-					break;
-			case WEAPON_CLASS:
-				oproperties &= (OPROP_FIREW | OPROP_COLDW | OPROP_PSIOW | OPROP_DEEPW | OPROP_WATRW | OPROP_ELECW | OPROP_ACIDW | OPROP_MAGCW 
-								| OPROP_ANARW | OPROP_CONCW | OPROP_AXIOW | OPROP_HOLYW | OPROP_UNHYW | OPROP_VORPW | OPROP_MORGW | OPROP_FLAYW
-								| OPROP_WRTHW | OPROP_PHSEW | OPROP_LESSW);
-				break;
-			case ARMOR_CLASS:
-				oproperties &= (OPROP_FIRE | OPROP_COLD | OPROP_ELEC | OPROP_ACID | OPROP_MAGC | OPROP_ANAR | OPROP_CONC | OPROP_AXIO | OPROP_REFL);
-				break;
-			default:
-				oproperties = 0;
-			}
-			otmp->oproperties = oproperties;
+		if (wizwish){		// wizard mode will give you what you ask for, even if it breaks things
+			copy_oprop_list(otmp, oprop_list);
 		}
-		if(otmp->oproperties&OPROP_WRTHW)
+		// else
+		// {	// limit granted properties to what is realistic for the item class
+				//The non-wizmode property wish would have to be totally redone, probably with a dedicated function.
+		// }
+		if(check_oprop(otmp, OPROP_WRTHW))
 			otmp->wrathdata = PM_ORC<<2;//wrathful + 1/4 vs orcs
 	}
 		

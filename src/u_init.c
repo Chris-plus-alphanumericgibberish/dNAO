@@ -3198,6 +3198,9 @@ register struct trobj *trop;
 			if(obj->otyp == HEAVY_MACHINE_GUN && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
 				set_material_gm(obj, MITHRIL);
 			}
+			if(obj->otyp == BLACK_DRESS && Role_if(PM_ANACHRONONAUT) && Race_if(PM_ANDROID)){
+				set_material_gm(obj, LEATHER);
+			}
 			if(obj->otyp == BATTLE_AXE && Role_if(PM_ANACHRONONAUT) && Race_if(PM_ANDROID)){
 				set_obj_size(obj, MZ_LARGE);
 			}
@@ -3676,7 +3679,7 @@ scatter_weapons(){
 	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
 	obj->obj_material = METAL;
-	obj->oproperties = OPROP_ELECW;
+	add_oprop(obj, OPROP_ELECW);
 	fix_object(obj);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
@@ -3686,7 +3689,7 @@ scatter_weapons(){
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->obj_material = METAL;
-	obj->oproperties = OPROP_ELECW;
+	add_oprop(obj, OPROP_ELECW);
 	fix_object(obj);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
@@ -3696,7 +3699,7 @@ scatter_weapons(){
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->obj_material = METAL;
-	obj->oproperties = OPROP_ELECW;
+	add_oprop(obj, OPROP_ELECW);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
@@ -3714,7 +3717,7 @@ scatter_weapons(){
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->obj_material = METAL;
-	obj->oproperties = OPROP_AXIOW;
+	add_oprop(obj, OPROP_AXIOW);
 	fix_object(obj);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
@@ -3723,7 +3726,7 @@ scatter_weapons(){
 	obj = mksobj(RAPIER, TRUE, FALSE);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
-	obj->oproperties = OPROP_FLAYW;
+	add_oprop(obj, OPROP_FLAYW);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
@@ -3731,7 +3734,7 @@ scatter_weapons(){
 	obj = mksobj(GLAIVE, TRUE, FALSE);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
-	obj->oproperties = OPROP_FLAYW;
+	add_oprop(obj, OPROP_FLAYW);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle

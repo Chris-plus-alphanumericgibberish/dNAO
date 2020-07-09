@@ -13,6 +13,62 @@
 #ifndef OBJ_H
 #define OBJ_H
 
+enum {
+	OPROP_NONE = 0,
+	OPROP_FIRE,
+	OPROP_COLD,
+	OPROP_WOOL,
+	OPROP_ELEC,
+	OPROP_ACID,
+	OPROP_MAGC,
+	OPROP_ANAR,
+	OPROP_CONC,
+	OPROP_AXIO,
+	OPROP_HOLY,
+	OPROP_UNHY,
+	OPROP_REFL,
+	OPROP_DISN,
+	OPROP_FLAYW,
+	OPROP_LESSER_FLAYW,
+	OPROP_PHSEW,
+	OPROP_FIREW,
+	OPROP_OONA_FIREW,
+	OPROP_LESSER_FIREW,
+	OPROP_COLDW,
+	OPROP_OONA_COLDW,
+	OPROP_LESSER_COLDW,
+	OPROP_ELECW,
+	OPROP_OONA_ELECW,
+	OPROP_LESSER_ELECW,
+	OPROP_ACIDW,
+	OPROP_LESSER_ACIDW,
+	OPROP_MAGCW,
+	OPROP_LESSER_MAGCW,
+	OPROP_ANARW,
+	OPROP_LESSER_ANARW,
+	OPROP_CONCW,
+	OPROP_LESSER_CONCW,
+	OPROP_AXIOW,
+	OPROP_LESSER_AXIOW,
+	OPROP_HOLYW,
+	OPROP_LESSER_HOLYW,
+	OPROP_UNHYW,
+	OPROP_LESSER_UNHYW,
+	OPROP_WATRW,
+	OPROP_LESSER_WATRW,
+	OPROP_DEEPW,
+	OPROP_PSIOW,
+	OPROP_LESSER_PSIOW,
+	OPROP_VORPW,
+	OPROP_MORGW,
+	OPROP_LESSER_MORGW,
+	OPROP_WRTHW,
+	OPROP_CCLAW,
+	MAX_OPROP
+};
+
+#define OPROP_LISTSIZE	((MAX_OPROP-1)/32 + 1)
+
 /* #define obj obj_nh */ /* uncomment for SCO UNIX, which has a conflicting
 			  * typedef for "obj" in <sys/types.h> */
 
@@ -131,6 +187,7 @@ struct obj {
 	//See objclass for values
 	/* 19 free bits in this field, I think -CM */
 	
+	int obj_color;
 	long bodytypeflag;	/* MB tag(s) this item goes with. */
 #define wrathdata	bodytypeflag	/* MA flags this item is currently wrathful against. */
 	int	corpsenm;	/* type of corpse is mons[corpsenm] */
@@ -175,45 +232,9 @@ struct obj {
 #define OPOISON_SILVER	0x80 /* Silver coating */
 #define NUM_POISONS		8	/* number of specifiable poison coatings */
 
-	long long int oproperties;/* special properties */
-#define OPROP_NONE		0x0000000000000000L
-#define OPROP_FIRE		0x0000000000000001L
-#define OPROP_COLD		0x0000000000000002L
-#define OPROP_WOOL		(OPROP_COLD|OPROP_FIRE)
-#define OPROP_ELEC		0x0000000000000004L
-#define OPROP_ACID		0x0000000000000008L
-#define OPROP_MAGC		0x0000000000000010L
-#define OPROP_ANAR		0x0000000000000020L
-#define OPROP_CONC		0x0000000000000040L
-#define OPROP_AXIO		0x0000000000000080L
-#define OPROP_HOLY		0x0000000000000100L
-#define OPROP_UNHY		0x0000000000000200L
-#define OPROP_REFL		0x0000000000000400L
-#define OPROP_DISN		0x0000000000000800L
-#define OPROP_DEF_MASK	0x00000000ffffffffL
-#define OPROP_FLAYW		0x0000000100000000L
-#define OPROP_PHSEW		0x0000000200000000L
-#define OPROP_FIREW		0x0000000400000000L
-#define OPROP_COLDW		0x0000000800000000L
-#define OPROP_ELECW		0x0000001000000000L
-#define OPROP_ACIDW		0x0000002000000000L
-#define OPROP_MAGCW		0x0000004000000000L
-#define OPROP_ANARW		0x0000008000000000L
-#define OPROP_CONCW		0x0000010000000000L
-#define OPROP_AXIOW		0x0000020000000000L
-#define OPROP_LESSW		0x0000040000000000L
-#define OPROP_HOLYW		0x0000080000000000L
-#define OPROP_UNHYW		0x0000100000000000L
-#define OPROP_WATRW		0x0000200000000000L
-#define OPROP_DEEPW		0x0000400000000000L
-#define OPROP_PSIOW		0x0000800000000000L
-#define OPROP_VORPW		0x0001000000000000L
-#define OPROP_MORGW		0x0002000000000000L
-#define OPROP_WRTHW		0x0004000000000000L
-#define OPROP_CCLAW		0x0008000000000000L
-#define OPROP_W_MASK	(~OPROP_DEF_MASK)
+	unsigned long int oproperties[OPROP_LISTSIZE];/* special properties */
 
-  unsigned oeaten;	/* nutrition left in food, if partly eaten */
+	unsigned oeaten;	/* nutrition left in food, if partly eaten */
 	long age;		/* creation date */
 
 	uchar onamelth;		/* length of name (following oxlth) */

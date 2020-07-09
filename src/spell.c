@@ -3899,7 +3899,7 @@ spiriteffects(power, atme)
 			qvr->spe = d(5,dsize) + 8;
 			qvr->obj_material = SHADOWSTEEL;
 			qvr->opoisoned = (OPOISON_BASIC|OPOISON_BLIND);
-			qvr->oproperties = OPROP_PHSEW;
+			add_oprop(qvr, OPROP_PHSEW);
 			projectile(&youmonst, qvr, (void *)0, HMON_FIRED, mon->mx, mon->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);
 			if(!DEADMONSTER(mon) && mon_can_see_you(mon)) // and mon_can_see_you(mon)?
 				setmangry(mon);

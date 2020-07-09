@@ -2182,23 +2182,23 @@ int agrmoral;
 		if(agralign == 0) bonus += 1;
 		else if(agralign < 0) bonus += 2;
 	}
-	if(arm->oproperties&OPROP_ANAR){
+	if(check_oprop(arm, OPROP_ANAR)){
 		if(agralign >= 0) bonus += base;
 		else bonus -= base/2+1;
 	}
-	if(arm->oproperties&OPROP_CONC){
+	if(check_oprop(arm, OPROP_CONC)){
 		if(agralign != 0) bonus += base;
 		else bonus -= base/2+1;
 	}
-	if(arm->oproperties&OPROP_AXIO){
+	if(check_oprop(arm, OPROP_AXIO)){
 		if(agralign <= 0) bonus += base;
 		else bonus -= base/2+1;
 	}
-	if(arm->oproperties&OPROP_HOLY && arm->blessed){
+	if(check_oprop(arm, OPROP_HOLY) && arm->blessed){
 		if(agrmoral < 0) bonus += base;
 		else if(agrmoral > 0) bonus -= base/2+1;
 	}
-	if(arm->oproperties&OPROP_UNHY && arm->cursed){
+	if(check_oprop(arm, OPROP_UNHY) && arm->cursed){
 		if(agrmoral > 0) bonus += base;
 		else if(agrmoral < 0) bonus -= base/2+1;
 	}

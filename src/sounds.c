@@ -2854,7 +2854,8 @@ int dz;
 					money2none(cost);
 #endif
 					bless(uwep);
-					uwep->oproperties |= OPROP_HOLYW;
+					remove_oprop(uwep, OPROP_LESSER_HOLYW);
+					add_oprop(uwep, OPROP_HOLYW);
 					if(uwep->spe < 3)
 						uwep->spe = 3;
 					mongone(mtmp);
@@ -5925,7 +5926,7 @@ doblessmenu()
 			MENU_UNSELECTED);
 	}
 	incntlet++; //Advance anyway
-	if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !(uwep->oproperties&OPROP_HOLYW)){
+	if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_HOLYW)){
 		Sprintf(buf, "Sanctify your weapon");
 		any.a_int = SANCTIFY_WEP;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -6120,7 +6121,7 @@ struct monst *nurse;
 			pline("%s performs surgery, removing %d metallic shard%s from your body.", Monnam(nurse), i, (i>1) ? "s" : "");
 			if(frags){
 				frags->quan = i;
-				frags->oproperties = OPROP_MORGW|OPROP_LESSW;
+				add_oprop(frags, OPROP_LESSER_MORGW);
 				frags->obj_material = METAL;
 				curse(frags);
 				fix_object(frags);
