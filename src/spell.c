@@ -2788,12 +2788,12 @@ spiriteffects(power, atme)
 			otmp = hold_another_object(otmp, "They %s out.",
 						   aobjnam(otmp, "fall"), (const char *)0);
 		}break;
-		case PWR_BARAGE:
+		case PWR_BARRAGE:
 			You("get ready to fire a barrage.");
 			if(uquiver){
-				barage = TRUE; //state variable
+				barrage = TRUE; //state variable
 				dofire();
-				barage = FALSE;
+				barrage = FALSE;
 			} else {
 				You("have nothing quivered.");
 				return 0;
@@ -3899,7 +3899,7 @@ spiriteffects(power, atme)
 			qvr->spe = d(5,dsize) + 8;
 			qvr->obj_material = SHADOWSTEEL;
 			qvr->opoisoned = (OPOISON_BASIC|OPOISON_BLIND);
-			qvr->oproperties = OPROP_PHSEW;
+			add_oprop(qvr, OPROP_PHSEW);
 			projectile(&youmonst, qvr, (void *)0, HMON_FIRED, mon->mx, mon->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);
 			if(!DEADMONSTER(mon) && mon_can_see_you(mon)) // and mon_can_see_you(mon)?
 				setmangry(mon);
@@ -4397,7 +4397,7 @@ boolean atme;
 			You("don't have enough energy to cast that spell (need %d).", energy);
 			return(0);
 		} else {
-			if (spellid(spell) != SPE_DETECT_FOOD && !(Race_if(PM_INCANTIFIER)) ) {
+			if (spellid(spell) != SPE_DETECT_FOOD) {
 				int hungr = spellhunger(energy);
 				/* don't put player (quite) into fainting from
 				 * casting a spell, particularly since they might

@@ -517,8 +517,8 @@ HELM("plasteel helm", "white skull helm", /*Needs encyc entry*//*Needs tile*/
 		0, 1,  INFRAVISION,   0, 2, 25,  50, 8, 2, 2, PLASTIC, CLR_WHITE),
 HELM_MATSPEC("crystal helm", "fish bowl", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2,150, 300, 9, 1, 0, GLASS,UNIDED, HI_GLASS),
-HELM("pontiff's crown", "filigreed faceless helm", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, METAL, HI_GOLD),
+HELM_MATSPEC("pontiff's crown", "filigreed faceless helm", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, GOLD, IDED, HI_GOLD),
 HELM_MATSPEC("shemagh", "white headscarf", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 0, 5,   5, 10, 0, 0, CLOTH,UNIDED, CLR_WHITE),
 

@@ -2585,7 +2585,7 @@ const char *str;
 
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    if (str) {
@@ -2597,7 +2597,7 @@ const char *str;
 	orefl = MON_WEP(mon);
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    /* due to wielded artifact weapon */
@@ -2608,7 +2608,7 @@ const char *str;
 	orefl = which_armor(mon, W_AMUL);
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    if (str) {
@@ -2620,7 +2620,7 @@ const char *str;
 	orefl = which_armor(mon, W_ARMC);
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    if (str)
@@ -2630,7 +2630,7 @@ const char *str;
 	orefl = which_armor(mon, W_ARM);
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    if (str)
@@ -2640,7 +2640,7 @@ const char *str;
 	orefl = which_armor(mon, W_ARMH);
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    if (str) {
@@ -2652,7 +2652,7 @@ const char *str;
 	orefl = which_armor(mon, W_ARMG);
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    if (str) {
@@ -2664,7 +2664,7 @@ const char *str;
 	orefl = which_armor(mon, W_ARMF);
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    if (str) {
@@ -2676,7 +2676,7 @@ const char *str;
 	orefl = which_armor(mon, W_ARMU);
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    if (str) {
@@ -2688,7 +2688,7 @@ const char *str;
 	orefl = which_armor(mon, W_SADDLE);
 	if ((orefl) && (
 		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| (orefl->oproperties&OPROP_REFL)
+		|| check_oprop(orefl, OPROP_REFL)
 		|| arti_reflects(orefl)
 	)) {
 	    if (str) {

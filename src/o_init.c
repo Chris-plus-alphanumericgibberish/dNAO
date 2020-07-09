@@ -1512,12 +1512,124 @@ dodiscovered()				/* free after Robert Viduya */
     return 0;
 }
 
+void
+set_object_color(otmp)
+struct obj *otmp;
+{
+	const char * s;
+	
+	/* should never happen */
+	if (!otmp)
+	{
+		impossible("set_object_color called with no object");
+		return;
+	}
+	/* fake mimic objects use the default color 
+	 * they also have unset data in too many places
+	 */
+	if (otmp->oclass == STRANGE_OBJECT)
+	{
+		otmp->obj_color = objects[otmp->otyp].oc_color;
+		return;
+	}
+	/* color-changing artifacts override this */
+	
+	/* gold pieces are gold */
+	if (otmp->otyp == GOLD_PIECE){
+		otmp->obj_color = HI_GOLD;
+		return;
+	}
+
+	/* plumed helmets and etched helmets get fancy colors, but only if their material is boring (iron/metal) */
+	if ((otmp->obj_material == IRON || otmp->obj_material == METAL)
+		&& ((s = OBJ_DESCR(objects[otmp->otyp])) != (char *)0 && !strncmpi(s, "plumed", 6))){
+		otmp->obj_color = CLR_RED;
+		return;
+	}
+	if ((otmp->obj_material == IRON || otmp->obj_material == METAL)
+		&& ((s = OBJ_DESCR(objects[otmp->otyp])) != (char *)0 && !strncmpi(s, "etched", 6))){
+		otmp->obj_color = CLR_BRIGHT_GREEN;
+		return;
+	}
+
+	/* objects with non-standard materials whose base color is that of their material */
+	if (otmp->obj_material != objects[otmp->otyp].oc_material
+		&& materials[objects[otmp->otyp].oc_material].color == objects[otmp->otyp].oc_color)
+	{
+		/* Fancy gem colors */
+		if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)){
+			otmp->obj_color = objects[otmp->ovar1].oc_color;
+			return;
+		}
+		/* Dragon hide/bone discrepancy -- dragonhide should be leather colored, not bone colored.
+		 * We are neglecting dragon scales, since there currently no circumstances where that happens
+		 * as it requires the base material to be dragonhide, and this code-block applies to modified mats
+		 */
+		if (otmp->obj_material == DRAGON_HIDE && !strncmpi(material_name(otmp, TRUE), "dragonhide", 10)){
+			otmp->obj_color = HI_LEATHER;
+			return;
+		}
+		
+		if(otmp->obj_material == VEGGY){
+			if (otmp->otyp == SEDGE_HAT || otmp->otyp == SHEAF_OF_HAY)
+				otmp->obj_color = CLR_YELLOW;
+			else if(otmp->obj_material != objects[otmp->otyp].oc_material){
+				switch(rn2(12)){
+					case 0:
+						otmp->obj_color = CLR_BROWN;
+					break;
+					case 1:
+						otmp->obj_color = CLR_GREEN;
+					break;
+					case 2:
+						otmp->obj_color = CLR_BRIGHT_GREEN;
+					break;
+					case 3:
+						otmp->obj_color = CLR_RED;
+					break;
+					case 4:
+						otmp->obj_color = CLR_ORANGE;
+					break;
+					case 5:
+						otmp->obj_color = CLR_YELLOW;
+					break;
+					case 6:
+						otmp->obj_color = CLR_BLUE;
+					break;
+					case 7:
+						otmp->obj_color = CLR_BRIGHT_BLUE;
+					break;
+					case 8:
+						otmp->obj_color = CLR_MAGENTA;
+					break;
+					case 9:
+						otmp->obj_color = CLR_BRIGHT_MAGENTA;
+					break;
+					case 10:
+						otmp->obj_color = CLR_BLACK;
+					break;
+					case 11:
+						otmp->obj_color = CLR_WHITE;
+					break;
+				}
+			} else {
+				otmp->obj_color = materials[otmp->obj_material].color;
+			}
+			return;
+		}
+		
+		otmp->obj_color = materials[otmp->obj_material].color;
+		return;
+	}
+	/* default color */
+	otmp->obj_color = objects[otmp->otyp].oc_color;
+	return;
+}
+
 int
 object_color(otmp)
 struct obj *otmp;
 {
-	const char * s;
-
 	/* should never happen */
 	if (!otmp)
 	{
@@ -1547,36 +1659,9 @@ struct obj *otmp;
 										CLR_BRIGHT_GREEN : CLR_GREEN;
 	case ART_PRAYER_WARDED_WRAPPINGS_OF:		return CLR_BLACK;
 	}
-	/* gold pieces are yellow */
-	if (otmp->otyp == GOLD_PIECE)
-		return CLR_YELLOW;
-
-	/* plumed helmets and etched helmets get fancy colors, but only if their material is boring (iron/metal) */
-	if ((otmp->obj_material == IRON || otmp->obj_material == METAL)
-		&& ((s = OBJ_DESCR(objects[otmp->otyp])) != (char *)0 && !strncmpi(s, "plumed", 6)))
-		return CLR_RED;
-	if ((otmp->obj_material == IRON || otmp->obj_material == METAL)
-		&& ((s = OBJ_DESCR(objects[otmp->otyp])) != (char *)0 && !strncmpi(s, "etched", 6)))
-		return CLR_BRIGHT_GREEN;
-
-	/* objects with non-standard materials whose base color is that of their material */
-	if (otmp->obj_material != objects[otmp->otyp].oc_material
-		&& materials[objects[otmp->otyp].oc_material].color == objects[otmp->otyp].oc_color)
-	{
-		/* Fancy gem colors */
-		if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
-			return objects[otmp->ovar1].oc_color;
-		/* Dragon hide/bone discrepancy -- dragonhide should be leather colored, not bone colored.
-		 * We are neglecting dragon scales, since there currently no circumstances where that happens
-		 * as it requires the base material to be dragonhide, and this code-block applies to modified mats
-		 */
-		if (otmp->obj_material == DRAGON_HIDE && !strncmpi(material_name(otmp, TRUE), "dragonhide", 10))
-				return HI_LEATHER;
-		
-		return materials[otmp->obj_material].color;
-	}
-	/* default color */
-	return objects[otmp->otyp].oc_color;
+	
+	//Use the set color.
+	return otmp->obj_color;
 }
 
 void

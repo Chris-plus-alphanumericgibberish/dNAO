@@ -343,7 +343,7 @@ register struct monst *mtmp;
 		otmp = mksobj(ELVEN_BROADSWORD, TRUE, TRUE);
 		otmp->obj_material = SILVER;
 		otmp->objsize = MZ_LARGE;
-		otmp->oproperties = OPROP_WRTHW;
+		add_oprop(otmp, OPROP_WRTHW);
 		otmp->wrathdata = (PM_ORC<<2)+1; //"Plus 2/4 vs orcs"
 		otmp->spe = abs(otmp->spe);
 		bless(otmp);
@@ -596,7 +596,7 @@ register struct monst *mtmp;
 				bless(otmp);
 				otmp->spe = 5;
 				otmp->objsize = MZ_LARGE;
-				otmp->oproperties = OPROP_PSIOW;
+				add_oprop(otmp, OPROP_PSIOW);
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(ROBE, TRUE, FALSE);
 				bless(otmp);
@@ -680,29 +680,28 @@ register struct monst *mtmp;
 						otmp = mksobj(MACE, FALSE, FALSE);
 						otmp->obj_material = METAL;
 						otmp->objsize = MZ_HUGE;
-						otmp->oproperties = OPROP_COLDW;
+						add_oprop(otmp, OPROP_COLDW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 4:
 						otmp = mksobj(LONG_SWORD, FALSE, FALSE);
 						otmp->obj_material = SILVER;
-						otmp->oproperties = OPROP_LESSW|OPROP_COLDW;
+						add_oprop(otmp, OPROP_LESSER_COLDW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 5:
 						otmp = mksobj(SCIMITAR, FALSE, FALSE);
 						otmp->obj_material = SILVER;
-						otmp->oproperties = OPROP_LESSW|OPROP_FIREW;
+						add_oprop(otmp, OPROP_FIREW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						
 						otmp = mksobj(SCIMITAR, FALSE, FALSE);
 						otmp->obj_material = SILVER;
-						rn2(2) ? 
-							(otmp->oproperties = OPROP_LESSW|OPROP_WATRW) :
-							(otmp->oproperties = OPROP_LESSW|OPROP_MAGCW);
+						add_oprop(otmp, OPROP_LESSER_WATRW);
+						add_oprop(otmp, OPROP_LESSER_MAGCW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 					break;
@@ -710,7 +709,7 @@ register struct monst *mtmp;
 						(void)mongets(mtmp, SET_OF_CROW_TALONS);
 						otmp = mksobj(RAPIER, FALSE, FALSE);
 						otmp->obj_material = METAL;
-						otmp->oproperties = OPROP_LESSW|OPROP_COLDW;
+						add_oprop(otmp, OPROP_COLDW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 					break;
@@ -718,14 +717,14 @@ register struct monst *mtmp;
 						(void)mongets(mtmp, KITE_SHIELD);
 						otmp = mksobj(SABER, FALSE, FALSE);
 						otmp->obj_material = SILVER;
-						otmp->oproperties = OPROP_LESSW|OPROP_COLDW;
+						add_oprop(otmp, OPROP_COLDW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 8:
 						otmp = mksobj(SCYTHE, FALSE, FALSE);
 						otmp->obj_material = SILVER;
-						otmp->oproperties = OPROP_LESSW|OPROP_COLDW;
+						add_oprop(otmp, OPROP_LESSER_COLDW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 					break;
@@ -1762,7 +1761,7 @@ register struct monst *mtmp;
 					otmp = mksobj(rn2(2) ? CLUB : AKLYS, FALSE, FALSE);
 					otmp->spe = rn2(4);
 					otmp->obj_material = DRAGON_HIDE;
-					otmp->oproperties = drgnprop[rn2(SIZE(drgnprop))];
+					add_oprop(otmp, drgnprop[rn2(SIZE(drgnprop))]);
 					(void) mpickobj(mtmp, otmp);
 					(void)mongets(mtmp, drgnscl1[rn2(SIZE(drgnscl1))]);
 					(void)mongets(mtmp, drgnscl2[rn2(SIZE(drgnscl2))]);
@@ -1965,7 +1964,8 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 				} else if (mm == PM_KING_ARTHUR){
 					otmp = mksobj(LONG_SWORD, FALSE, FALSE);
-					otmp->oproperties = OPROP_AXIOW;
+					set_material_gm(otmp, SILVER);
+					add_oprop(otmp, OPROP_AXIOW);
 					bless(otmp);
 					otmp->spe = 7;
 					(void) mpickobj(mtmp, otmp);
@@ -2273,9 +2273,15 @@ register struct monst *mtmp;
 					otmp->cursed = 0;
 					otmp->blessed = 1;
 					if(otmp->spe < 3) otmp->spe = 3;
+					set_material_gm(otmp, IRON);
 					otmp = oname(otmp, artiname(ART_AVENGER));
-					otmp->oproperties = OPROP_UNHYW|OPROP_HOLYW;
+					add_oprop(otmp, OPROP_HOLYW);
+					add_oprop(otmp, OPROP_UNHYW);
 					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+					(void) mongets(mtmp, HELMET);
+					otmp = mksobj(GAUNTLETS, TRUE, FALSE);
+					set_material_gm(otmp, LEATHER);
 					(void) mpickobj(mtmp, otmp);
 					(void) mongets(mtmp, GRAY_DRAGON_SCALE_MAIL);
 					(void) mongets(mtmp, KITE_SHIELD);
@@ -2289,17 +2295,19 @@ register struct monst *mtmp;
 				break;
 				case PM_MILITANT_CLERIC:
 					(void) mongets(mtmp, MACE);
+					(void) mongets(mtmp, HELMET);
+					(void) mongets(mtmp, GAUNTLETS);
 					(void) mongets(mtmp, PLATE_MAIL);
 					(void) mongets(mtmp, KITE_SHIELD);
 					otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
-					otmp->obj_material = IRON;
-					fix_object(otmp);
+					set_material_gm(otmp, IRON);
 					(void) mpickobj(mtmp, otmp);
 				break;
 				case PM_HALF_ELF_RANGER:
 					(void) mongets(mtmp, ELVEN_SHORT_SWORD);
 					(void) mongets(mtmp, ELVEN_SHORT_SWORD);
 					(void) mongets(mtmp, ELVEN_MITHRIL_COAT);
+					(void) mongets(mtmp, GLOVES);
 					(void) mongets(mtmp, ELVEN_HELM);
 					(void) mongets(mtmp, ELVEN_CLOAK);
 					(void) mongets(mtmp, HIGH_BOOTS);
@@ -2506,7 +2514,7 @@ register struct monst *mtmp;
 			    otmp->cursed = 0;
 			    otmp->blessed = 0;
 				if(otmp->spe < 4) otmp->spe = 4;
-				otmp->oproperties = OPROP_CONCW;
+				add_oprop(otmp, OPROP_CONCW);
 				otmp->obj_material = GOLD;
 				fix_object(otmp);
 			    (void) mpickobj(mtmp, otmp);
@@ -2515,18 +2523,48 @@ register struct monst *mtmp;
 			    otmp->cursed = 0;
 			    otmp->blessed = 0;
 				if(otmp->spe < 4) otmp->spe = 4;
-				otmp->oproperties = OPROP_CONCW;
+				add_oprop(otmp, OPROP_CONCW);
 				otmp->obj_material = GOLD;
 				fix_object(otmp);
 			    (void) mpickobj(mtmp, otmp);
 				if(!rn2(3)){
+					otmp = mksobj(HELMET, TRUE, FALSE);
+					otmp->objsize = MZ_LARGE;
+					otmp->cursed = 0;
+					otmp->blessed = 0;
+					add_oprop(otmp, OPROP_CONC);
+					if(otmp->spe < 4) otmp->spe = 4;
+					set_material_gm(otmp, GOLD);
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+					
 					otmp = mksobj(PLATE_MAIL, TRUE, FALSE);
 					otmp->objsize = MZ_LARGE;
 					otmp->cursed = 0;
 					otmp->blessed = 0;
-					otmp->oproperties = OPROP_CONC;
+					add_oprop(otmp, OPROP_CONC);
 					if(otmp->spe < 4) otmp->spe = 4;
-					otmp->obj_material = GOLD;
+					set_material_gm(otmp, GOLD);
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+					
+					otmp = mksobj(GAUNTLETS, TRUE, FALSE);
+					otmp->objsize = MZ_LARGE;
+					otmp->cursed = 0;
+					otmp->blessed = 0;
+					add_oprop(otmp, OPROP_CONC);
+					if(otmp->spe < 4) otmp->spe = 4;
+					set_material_gm(otmp, GOLD);
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+					
+					otmp = mksobj(ARMORED_BOOTS, TRUE, FALSE);
+					otmp->objsize = MZ_LARGE;
+					otmp->cursed = 0;
+					otmp->blessed = 0;
+					add_oprop(otmp, OPROP_CONC);
+					if(otmp->spe < 4) otmp->spe = 4;
+					set_material_gm(otmp, GOLD);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 				}
@@ -2537,7 +2575,7 @@ register struct monst *mtmp;
 				otmp->blessed = FALSE;
 				otmp->cursed = FALSE;
 				otmp->spe = 4;
-				otmp->oproperties = OPROP_CONCW;
+				add_oprop(otmp, OPROP_CONCW);
 				otmp->obj_material = GOLD;
 				fix_object(otmp);
 				(void) mpickobj(mtmp,otmp);
@@ -2550,31 +2588,31 @@ register struct monst *mtmp;
 				
 				otmp = mksobj(WAR_HAT, FALSE, FALSE);
 				otmp->objsize = MZ_LARGE;
-				otmp->oproperties = OPROP_CONC;
+				add_oprop(otmp, OPROP_CONC);
 				otmp->obj_material = GOLD;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(LEATHER_ARMOR, FALSE, FALSE);
 				otmp->objsize = MZ_LARGE;
-				otmp->oproperties = OPROP_CONC;
+				add_oprop(otmp, OPROP_CONC);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(ROBE, FALSE, FALSE);
 				otmp->objsize = MZ_LARGE;
-				otmp->oproperties = OPROP_CONC;
+				add_oprop(otmp, OPROP_CONC);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(GAUNTLETS, FALSE, FALSE);
 				otmp->objsize = MZ_LARGE;
-				otmp->oproperties = OPROP_CONC;
+				add_oprop(otmp, OPROP_CONC);
 				otmp->obj_material = LEATHER;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
-				otmp = mksobj(LOW_BOOTS, FALSE, FALSE);
+				otmp = mksobj(HIGH_BOOTS, FALSE, FALSE);
 				otmp->objsize = MZ_LARGE;
-				otmp->oproperties = OPROP_CONC;
+				add_oprop(otmp, OPROP_CONC);
 				(void) mpickobj(mtmp, otmp);
 			}
 			if(ptr->mtyp == PM_AMM_KAMEREL){
@@ -3228,7 +3266,7 @@ register struct monst *mtmp;
 				(void)mongets(mtmp, CRYSTAL_GAUNTLETS);
 				(void)mongets(mtmp, CRYSTAL_HELM);
 			} else if(ptr->mtyp == PM_GAE_ELADRIN){
-				switch(rnd(5)){
+				switch(rnd(6)){
 					case 1:
 					otmp = mksobj(CRYSTAL_PLATE_MAIL, TRUE, FALSE);
 					otmp->obj_material = GEMSTONE;
@@ -3237,7 +3275,7 @@ register struct monst *mtmp;
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(ELVEN_CLOAK, TRUE, FALSE);
-					otmp->oproperties = OPROP_MAGC;
+					add_oprop(otmp, OPROP_MAGC);
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -3249,7 +3287,7 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(rn2(4) ? ARCHAIC_HELM : find_gcirclet(), TRUE, FALSE);
 					if(rn2(2)){
-					otmp->obj_material = GEMSTONE;
+						otmp->obj_material = GEMSTONE;
 						otmp->ovar1 = EMERALD;
 					} else {
 						otmp->obj_material = GOLD;
@@ -3280,7 +3318,7 @@ register struct monst *mtmp;
 					break;
 					case 3:
 					otmp = mksobj(ARCHAIC_GAUNTLETS, TRUE, FALSE);
-					otmp->oproperties = OPROP_MAGC;
+					add_oprop(otmp, OPROP_MAGC);
 					otmp->obj_material = GOLD;
 					fix_object(otmp);
 					bless(otmp);
@@ -3288,7 +3326,8 @@ register struct monst *mtmp;
 					break;
 					case 4:
 					otmp = mksobj(AMULET_OF_LIFE_SAVING, TRUE, FALSE);
-					otmp->oproperties = OPROP_MAGC|OPROP_REFL;
+					add_oprop(otmp, OPROP_MAGC);
+					add_oprop(otmp, OPROP_REFL);
 					otmp->obj_material = GEMSTONE;
 					otmp->ovar1 = EMERALD;
 					fix_object(otmp);
@@ -3296,6 +3335,26 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 					break;
 					case 5:
+						otmp = mksobj(find_gcirclet(), TRUE, FALSE);
+						set_material_gm(otmp, VEGGY);
+						add_oprop(otmp, OPROP_ANAR);
+						add_oprop(otmp, OPROP_HOLY);
+						bless(otmp);
+						(void) mpickobj(mtmp, otmp);
+						otmp = mksobj(CLOAK, TRUE, FALSE);
+						set_material_gm(otmp, VEGGY);
+						add_oprop(otmp, OPROP_ANAR);
+						add_oprop(otmp, OPROP_HOLY);
+						bless(otmp);
+						(void) mpickobj(mtmp, otmp);
+						otmp = mksobj(QUARTERSTAFF, TRUE, FALSE);
+						set_material_gm(otmp, VEGGY);
+						add_oprop(otmp, OPROP_ANARW);
+						add_oprop(otmp, OPROP_HOLYW);
+						bless(otmp);
+						(void) mpickobj(mtmp, otmp);
+					break;
+					case 6:
 					break;
 				}
 			} else if(ptr->mtyp == PM_POLYPOID_BEING){
@@ -3314,16 +3373,17 @@ register struct monst *mtmp;
 				switch(rnd(4)){
 					case 1:
 					case 2:
-						otmp = mksobj(QUARTERSTAFF, FALSE, FALSE);
+						otmp = mksobj(SCIMITAR, FALSE, FALSE);
 					break;
 					case 3:
-						otmp = mksobj(SCIMITAR, FALSE, FALSE);
+						otmp = mksobj(QUARTERSTAFF, FALSE, FALSE);
 					break;
 					case 4:
 						otmp = mksobj(SPEAR, FALSE, FALSE);
 					break;
 				}
-				otmp->oproperties = OPROP_HOLYW;
+				add_oprop(otmp, OPROP_HOLYW);
+				add_oprop(otmp, OPROP_LESSER_FIREW);
 				otmp->spe = 7;
 				set_material_gm(otmp, WOOD);
 				bless(otmp);
@@ -3339,16 +3399,15 @@ register struct monst *mtmp;
 					otmp->spe = 3;
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
-					otmp->oproperties = OPROP_AXIOW|OPROP_LESSW;
 					switch(u.oonaenergy){
 						case AD_COLD:
-							otmp->oproperties |= OPROP_FIREW;
+							add_oprop(otmp, OPROP_OONA_FIREW);
 						break;
 						case AD_FIRE:
-							otmp->oproperties |= OPROP_ELECW;
+							add_oprop(otmp, OPROP_OONA_ELECW);
 						break;
 						case AD_ELEC:
-							otmp->oproperties |= OPROP_COLDW;
+							add_oprop(otmp, OPROP_OONA_COLDW);
 						break;
 					}
 					otmp->obj_material = METAL;
@@ -3358,16 +3417,15 @@ register struct monst *mtmp;
 					otmp->spe = 3;
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
-					otmp->oproperties = OPROP_AXIOW|OPROP_LESSW;
 					switch(u.oonaenergy){
 						case AD_COLD:
-							otmp->oproperties |= OPROP_ELECW;
+							add_oprop(otmp, OPROP_OONA_ELECW);
 						break;
 						case AD_FIRE:
-							otmp->oproperties |= OPROP_COLDW;
+							add_oprop(otmp, OPROP_OONA_COLDW);
 						break;
 						case AD_ELEC:
-							otmp->oproperties |= OPROP_FIREW;
+							add_oprop(otmp, OPROP_OONA_FIREW);
 						break;
 					}
 					otmp->obj_material = METAL;
@@ -3535,13 +3593,13 @@ register struct monst *mtmp;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(RAPIER, TRUE, FALSE);
-					otmp->oproperties = OPROP_FLAYW|OPROP_LESSW;
+					add_oprop(otmp, OPROP_LESSER_FLAYW);
 					(void) mpickobj(mtmp, otmp);
 					break;
 					case 4:
 					otmp = mksobj(SPEAR, TRUE, FALSE);
 					otmp->obj_material = METAL;
-					otmp->oproperties = OPROP_ELECW|OPROP_LESSW;
+					add_oprop(otmp, OPROP_LESSER_ELECW);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(SABER, TRUE, FALSE);
@@ -3552,7 +3610,7 @@ register struct monst *mtmp;
 					case 5:
 					otmp = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 					otmp->obj_material = METAL;
-					otmp->oproperties = OPROP_ELECW|OPROP_LESSW;
+					add_oprop(otmp, OPROP_LESSER_ELECW);
 					otmp->objsize = MZ_LARGE;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -3640,7 +3698,7 @@ register struct monst *mtmp;
 					case 4:
 					otmp = mksobj(SPEAR, TRUE, FALSE);
 					otmp->obj_material = METAL;
-					otmp->oproperties = OPROP_ELECW|OPROP_LESSW;
+					add_oprop(otmp, OPROP_LESSER_ELECW);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					break;
@@ -3665,26 +3723,33 @@ register struct monst *mtmp;
 				(void) mongets(mtmp, GLOVES);
 				(void) mongets(mtmp, HIGH_BOOTS);
 			} else if(mm == PM_PARASITIZED_OPERATOR || mm == PM_OPERATOR){
-				switch(rn2(3)){
+				switch(rn2(4)){
 					case 0:
 					otmp = mksobj(FORCE_PIKE, TRUE, FALSE);
 					otmp->obj_material = METAL;
-					otmp->oproperties = OPROP_ELECW|OPROP_LESSW;
+					add_oprop(otmp, OPROP_LESSER_ELECW);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					break;
 					case 1:
 					otmp = mksobj(LONG_SWORD, TRUE, FALSE);
 					otmp->obj_material = METAL;
-					otmp->oproperties = OPROP_ELECW;
+					add_oprop(otmp, OPROP_ELECW);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					break;
 					case 2:
 					otmp = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 					otmp->obj_material = METAL;
-					otmp->oproperties = OPROP_ELECW;
+					add_oprop(otmp, OPROP_ELECW);
 					otmp->objsize = MZ_LARGE;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+					break;
+					case 3:
+					otmp = mksobj(NAGINATA, TRUE, FALSE);
+					otmp->obj_material = METAL;
+					add_oprop(otmp, OPROP_FLAYW);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					break;
@@ -3716,7 +3781,7 @@ register struct monst *mtmp;
 				struct obj *otmp;
 				otmp = mksobj(PISTOL, FALSE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_HOLYW;
+				add_oprop(otmp, OPROP_HOLYW);
 				otmp->spe = 3;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
@@ -3726,7 +3791,7 @@ register struct monst *mtmp;
 				otmp = mksobj(VIBROBLADE, FALSE, FALSE);
 				otmp->obj_material = SILVER;
 				otmp->objsize = MZ_SMALL;
-				otmp->oproperties = OPROP_HOLYW;
+				add_oprop(otmp, OPROP_HOLYW);
 				otmp->ovar1 = 80 + d(2,10);
 				otmp->spe = 3;
 				fix_object(otmp);
@@ -3734,21 +3799,31 @@ register struct monst *mtmp;
 				
 				otmp = mksobj(GENTLEWOMAN_S_DRESS, FALSE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_HOLY|OPROP_AXIO|OPROP_REFL;
+				add_oprop(otmp, OPROP_HOLY);
+				add_oprop(otmp, OPROP_AXIO);
+				add_oprop(otmp, OPROP_REFL);
 				otmp->spe = 3;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
-				otmp = mksobj(HEELED_BOOTS, FALSE, FALSE);
+				otmp = mksobj(rn2(2) ? HEELED_BOOTS : STILETTOS, FALSE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_HOLY|OPROP_AXIO|OPROP_REFL;
+				add_oprop(otmp, OPROP_HOLY);
+				add_oprop(otmp, OPROP_HOLYW);
+				add_oprop(otmp, OPROP_AXIO);
+				add_oprop(otmp, OPROP_AXIOW);
+				add_oprop(otmp, OPROP_REFL);
 				otmp->spe = 3;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
-				otmp = mksobj(rn2(2) ? LONG_GLOVES : GLOVES, FALSE, FALSE);
+				otmp = mksobj(LONG_GLOVES, FALSE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_HOLY|OPROP_AXIO|OPROP_REFL;
+				add_oprop(otmp, OPROP_HOLY);
+				add_oprop(otmp, OPROP_HOLYW);
+				add_oprop(otmp, OPROP_AXIO);
+				add_oprop(otmp, OPROP_AXIOW);
+				add_oprop(otmp, OPROP_REFL);
 				otmp->spe = 3;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
@@ -3813,7 +3888,8 @@ register struct monst *mtmp;
 			otmp->spe = 4;
 			otmp->ovar1 = 39L;
 			otmp->cobj->otyp = STAR_SAPPHIRE;
-			otmp->oproperties |= OPROP_PSIOW;
+			add_oprop(otmp, OPROP_PSIOW);
+			add_oprop(otmp, OPROP_LESSER_MAGCW);
 			otmp->blessed = TRUE;
 			otmp->cursed = FALSE;
 			(void) mpickobj(mtmp, otmp);
@@ -4179,8 +4255,8 @@ register struct monst *mtmp;
 			if(!rn2(40)){
 				otmp = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_PSIOW;
-				otmp->oproperties = OPROP_VORPW;
+				add_oprop(otmp, OPROP_PSIOW);
+				add_oprop(otmp, OPROP_VORPW);
 				otmp->spe = 5;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
@@ -4200,7 +4276,7 @@ register struct monst *mtmp;
 			} else {
 				otmp = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_PSIOW;
+				add_oprop(otmp, OPROP_PSIOW);
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				(void)mongets(mtmp, ARCHAIC_HELM);
@@ -4282,7 +4358,7 @@ register struct monst *mtmp;
 		    case PM_ANGBAND_ORC:
 				if(In_mordor_quest(&u.uz)){
 					otmp = mksobj(STILETTO, TRUE, FALSE);
-					otmp->oproperties = OPROP_MORGW;
+					add_oprop(otmp, OPROP_MORGW);
 					otmp->opoisoned = OPOISON_BASIC;
 					otmp->obj_material = METAL;
 					fix_object(otmp);
@@ -4467,18 +4543,18 @@ register struct monst *mtmp;
 						otmp = mksobj(LONG_SWORD, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = DRAGON_HIDE;
-						otmp->oproperties = OPROP_AXIOW;
+						add_oprop(otmp, OPROP_AXIOW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(GRAY_DRAGON_SCALE_MAIL, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = GLASS;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, FALSE, FALSE);
 						otmp->spe = 4;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 1:
@@ -4486,72 +4562,73 @@ register struct monst *mtmp;
 						otmp->objsize = MZ_HUGE;
 						otmp->spe = 4;
 						otmp->obj_material = METAL;
-						otmp->oproperties = OPROP_AXIOW;
+						add_oprop(otmp, OPROP_AXIOW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(WHITE_DRAGON_SCALE_MAIL, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = GLASS;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, FALSE, FALSE);
 						otmp->spe = 4;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 2:
 						otmp = mksobj(LONG_SWORD, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = METAL;
-						otmp->oproperties = OPROP_AXIOW;
+						add_oprop(otmp, OPROP_AXIOW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(BLUE_DRAGON_SCALE_MAIL, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = GLASS;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, FALSE, FALSE);
 						otmp->spe = 4;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 3:
 						otmp = mksobj(SCIMITAR, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = METAL;
-						otmp->oproperties = OPROP_AXIOW;
+						add_oprop(otmp, OPROP_AXIOW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(SCIMITAR, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = METAL;
-						otmp->oproperties = OPROP_AXIOW;
+						add_oprop(otmp, OPROP_AXIOW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(BLACK_DRAGON_SCALE_MAIL, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = GLASS;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, FALSE, FALSE);
 						otmp->spe = 4;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 4:
 						otmp = mksobj(GREEN_DRAGON_SCALE_MAIL, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = GLASS;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(GAUNTLETS, FALSE, FALSE);
 						otmp->spe = 4;
-						otmp->oproperties = OPROP_AXIO|OPROP_AXIOW;
+						add_oprop(otmp, OPROP_AXIO);
+						add_oprop(otmp, OPROP_AXIOW);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 5:
@@ -4559,29 +4636,30 @@ register struct monst *mtmp;
 						otmp->objsize = MZ_LARGE;
 						otmp->spe = 4;
 						otmp->obj_material = METAL;
-						otmp->oproperties = OPROP_AXIOW;
+						add_oprop(otmp, OPROP_AXIOW);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(YELLOW_DRAGON_SCALE_MAIL, FALSE, FALSE);
 						otmp->spe = 4;
 						otmp->obj_material = GLASS;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						fix_object(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, FALSE, FALSE);
 						otmp->spe = 4;
-						otmp->oproperties = OPROP_AXIO;
+						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
 				}
 				otmp = mksobj(HEELED_BOOTS, FALSE, FALSE);
 				otmp->spe = 4;
-				otmp->oproperties = OPROP_AXIO;
+				add_oprop(otmp, OPROP_AXIO);
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(WAR_HAT, FALSE, FALSE);
 				otmp->spe = 4;
 				otmp->obj_material = GLASS;
-				otmp->oproperties = OPROP_AXIO|OPROP_REFL;
+				add_oprop(otmp, OPROP_AXIO);
+				add_oprop(otmp, OPROP_REFL);
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_DEMINYMPH){
@@ -5069,14 +5147,14 @@ register struct monst *mtmp;
 	    case S_WRAITH:
 		if(mm == PM_NAZGUL){
 			otmp = mksobj(STILETTO, TRUE, FALSE);
-			otmp->oproperties = OPROP_MORGW;
+			add_oprop(otmp, OPROP_MORGW);
 			otmp->opoisoned = OPOISON_BASIC;
 			otmp->obj_material = METAL;
 			fix_object(otmp);
 			curse(otmp);
 			(void) mpickobj(mtmp, otmp);
 			otmp = mksobj(LONG_SWORD, TRUE, FALSE);
-			otmp->oproperties = OPROP_UNHYW;
+			add_oprop(otmp, OPROP_UNHYW);
 			otmp->oeroded = 1;
 			curse(otmp);
 			(void) mpickobj(mtmp, otmp);
@@ -5088,7 +5166,8 @@ register struct monst *mtmp;
 			(void) mongets(mtmp, ARMORED_BOOTS);
 		} else if(mm == PM_NECROMANCER) {
 			otmp = mksobj(LONG_SWORD, TRUE, FALSE);
-			otmp->oproperties = OPROP_UNHYW|OPROP_MORGW;
+			add_oprop(otmp, OPROP_UNHYW);
+			add_oprop(otmp, OPROP_MORGW);
 			otmp->opoisoned = OPOISON_BASIC;
 			otmp->oerodeproof = TRUE;
 			curse(otmp);
@@ -5098,14 +5177,14 @@ register struct monst *mtmp;
 			if(!rn2(5)) otmp->obj_material = SILVER;
 			else if(!rn2(4)) otmp->obj_material = GOLD;
 			fix_object(otmp);
-			if(!rn2(20)) otmp->oproperties = OPROP_HOLYW|OPROP_LESSW;
+			if(!rn2(20)) add_oprop(otmp, OPROP_LESSER_HOLYW);
 			curse(otmp);
 			(void) mpickobj(mtmp, otmp);
 			otmp = mksobj(LONG_SWORD, TRUE, FALSE);
 			if(!rn2(5)) otmp->obj_material = SILVER;
 			else if(!rn2(4)) otmp->obj_material = GOLD;
 			fix_object(otmp);
-			if(!rn2(20)) otmp->oproperties = OPROP_HOLYW|OPROP_LESSW;
+			if(!rn2(20)) add_oprop(otmp, OPROP_LESSER_HOLYW);
 			curse(otmp);
 			(void) mpickobj(mtmp, otmp);
 		}
@@ -5215,6 +5294,9 @@ register struct monst *mtmp;
 				){
 					(void)mongets(mtmp, SHACKLES);
 					mtmp->entangled = SHACKLES;
+					mtmp->m_lev = 14;
+					mtmp->mhpmax = 7*8 + d(7,8);
+					mtmp->mhp = mtmp->mhpmax;
 					return;
 				}
 				if(!Inhell) chance = 3; //Leather armor
@@ -5777,28 +5859,28 @@ register struct	monst	*mtmp;
 				otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
 				otmp->objsize = MZ_HUGE;
 				otmp->obj_material = METAL;
-				otmp->oproperties = OPROP_COLD;
+				add_oprop(otmp, OPROP_COLD);
 				fix_object(otmp);
 				(void) mpickobj(mtmp,otmp);
 				
 				otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
 				otmp->objsize = MZ_HUGE;
 				otmp->obj_material = METAL;
-				otmp->oproperties = OPROP_COLD;
+				add_oprop(otmp, OPROP_COLD);
 				fix_object(otmp);
 				(void) mpickobj(mtmp,otmp);
 				
 				otmp = mksobj(GAUNTLETS, FALSE, FALSE);
 				otmp->objsize = MZ_HUGE;
 				otmp->obj_material = METAL;
-				otmp->oproperties = OPROP_COLD;
+				add_oprop(otmp, OPROP_COLD);
 				fix_object(otmp);
 				(void) mpickobj(mtmp,otmp);
 				
 				otmp = mksobj(HELMET, FALSE, FALSE);
 				otmp->objsize = MZ_HUGE;
 				otmp->obj_material = METAL;
-				otmp->oproperties = OPROP_COLD;
+				add_oprop(otmp, OPROP_COLD);
 				fix_object(otmp);
 				(void) mpickobj(mtmp,otmp);
 			} else if (ptr->mtyp == PM_WEREWOLF){
@@ -6090,7 +6172,8 @@ register struct	monst	*mtmp;
 			} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
 				otmp = mksobj(QUARTERSTAFF, TRUE, FALSE);
 				otmp->spe = 9;
-				otmp->oproperties = OPROP_PHSEW|OPROP_WATRW;
+				add_oprop(otmp, OPROP_PHSEW);
+				add_oprop(otmp, OPROP_WATRW);
 				otmp->objsize = MZ_GIGANTIC;
 				otmp->obj_material = MINERAL;
 				fix_object(otmp);
@@ -6228,7 +6311,8 @@ register struct	monst	*mtmp;
 			for(i = 2; i > 0; i--){
 				otmp = mksobj(CLUB, FALSE, FALSE);
 				otmp->obj_material = BONE;
-				otmp->oproperties = OPROP_CCLAW|oprop;
+				add_oprop(otmp, OPROP_CCLAW);
+				add_oprop(otmp, oprop);
 				otmp->objsize = mtmp->data->msize;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
@@ -6557,6 +6641,11 @@ register struct	monst	*mtmp;
 				otmp->objsize = MZ_LARGE;
 				fix_object(otmp);
 			    (void) mpickobj(mtmp, otmp);
+			} else if(ptr->mtyp == PM_SWORD_ARCHON){
+				otmp = mksobj(ROBE, FALSE, FALSE);
+				bless(otmp);
+				otmp->oerodeproof = TRUE;
+				(void) mpickobj(mtmp, otmp);
 			}
 		break;
 	    case S_DEMON:
@@ -6723,37 +6812,37 @@ register struct	monst	*mtmp;
 ///////////////////////////////
 			case PM_BAEL:
 				otmp = mksobj(FLAIL, FALSE, FALSE);
-				otmp->oproperties = OPROP_FLAYW;
+				add_oprop(otmp, OPROP_FLAYW);
 				otmp->obj_material = GOLD;
 				otmp->spe = 6;
 				curse(otmp);
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(SCIMITAR, FALSE, FALSE);
-				otmp->oproperties = OPROP_FLAYW;
+				add_oprop(otmp, OPROP_FLAYW);
 				otmp->obj_material = GOLD;
 				otmp->spe = 6;
 				curse(otmp);
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(SABER, FALSE, FALSE);
-				otmp->oproperties = OPROP_FLAYW;
+				add_oprop(otmp, OPROP_FLAYW);
 				otmp->obj_material = GOLD;
 				otmp->spe = 6;
 				curse(otmp);
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(SHORT_SWORD, FALSE, FALSE);
-				otmp->oproperties = OPROP_FLAYW;
+				add_oprop(otmp, OPROP_FLAYW);
 				otmp->obj_material = GOLD;
 				otmp->spe = 6;
 				curse(otmp);
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(SCALPEL, FALSE, FALSE);
-				otmp->oproperties = OPROP_FLAYW;
+				add_oprop(otmp, OPROP_FLAYW);
 				otmp->obj_material = GOLD;
 				otmp->spe = 6;
 				curse(otmp);
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(STILETTO, FALSE, FALSE);
-				otmp->oproperties = OPROP_FLAYW;
+				add_oprop(otmp, OPROP_FLAYW);
 				otmp->obj_material = GOLD;
 				otmp->spe = 6;
 				curse(otmp);
@@ -7058,19 +7147,21 @@ register struct	monst	*mtmp;
 			break;
 ////////////////////////////////////////
 		    case PM_LUNGORTHIN:
-				otmp = mksobj(BATTLE_AXE, FALSE, FALSE);
+				otmp = mksobj(BULLWHIP, FALSE, FALSE);
 				otmp->obj_material = MINERAL;
-				otmp->oproperties = OPROP_LESSW|OPROP_FIREW|OPROP_UNHYW;
-				otmp->objsize = MZ_HUGE;
+				add_oprop(otmp, OPROP_FIREW);
+				add_oprop(otmp, OPROP_LESSER_UNHYW);
+				otmp->objsize = MZ_GIGANTIC;
 				otmp->spe = 4;
+				curse(otmp);
 				fix_object(otmp);
 				mpickobj(mtmp, otmp);
 				
-				otmp = mksobj(BULLWHIP, FALSE, FALSE);
-				otmp->obj_material = MINERAL;
-				otmp->oproperties = OPROP_FIREW;
-				otmp->objsize = MZ_GIGANTIC;
+				otmp = mksobj(BATTLE_AXE, FALSE, FALSE);
+				otmp = oname(otmp, artiname(ART_HEART_OF_SHADOW));
+				add_oprop(otmp, OPROP_UNHYW);
 				otmp->spe = 4;
+				curse(otmp);
 				fix_object(otmp);
 				mpickobj(mtmp, otmp);
 				
@@ -8149,42 +8240,52 @@ register int	mmflags;
 				struct obj *otmp;
 				otmp = mksobj(PISTOL, FALSE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_HOLYW;
+				add_oprop(otmp, OPROP_HOLYW);
 				otmp->spe = 3;
 				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
-				
-				m_initthrow(mtmp, SILVER_BULLET, d(20,20));
+				place_object(otmp, mtmp->mx, mtmp->my);
 				
 				otmp = mksobj(VIBROBLADE, FALSE, FALSE);
 				otmp->obj_material = SILVER;
 				otmp->objsize = MZ_SMALL;
-				otmp->oproperties = OPROP_HOLYW;
+				add_oprop(otmp, OPROP_HOLYW);
 				otmp->ovar1 = 50 + d(5,10);
 				otmp->spe = 3;
 				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
+				place_object(otmp, mtmp->mx, mtmp->my);
 				
 				otmp = mksobj(GENTLEWOMAN_S_DRESS, FALSE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_HOLY|OPROP_AXIO|OPROP_REFL;
+				add_oprop(otmp, OPROP_HOLY);
+				add_oprop(otmp, OPROP_HOLYW);
+				add_oprop(otmp, OPROP_AXIO);
+				add_oprop(otmp, OPROP_AXIOW);
+				add_oprop(otmp, OPROP_REFL);
 				otmp->spe = 3;
 				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
+				place_object(otmp, mtmp->mx, mtmp->my);
 				
-				otmp = mksobj(HEELED_BOOTS, FALSE, FALSE);
+				otmp = mksobj(rn2(2) ? HEELED_BOOTS : STILETTOS, FALSE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_HOLY|OPROP_AXIO|OPROP_REFL;
+				add_oprop(otmp, OPROP_HOLY);
+				add_oprop(otmp, OPROP_HOLYW);
+				add_oprop(otmp, OPROP_AXIO);
+				add_oprop(otmp, OPROP_AXIOW);
+				add_oprop(otmp, OPROP_REFL);
 				otmp->spe = 3;
 				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
+				place_object(otmp, mtmp->mx, mtmp->my);
 				
-				otmp = mksobj(rn2(2) ? LONG_GLOVES : GLOVES, FALSE, FALSE);
+				otmp = mksobj(LONG_GLOVES, FALSE, FALSE);
 				otmp->obj_material = SILVER;
-				otmp->oproperties = OPROP_HOLY|OPROP_AXIO|OPROP_REFL;
+				add_oprop(otmp, OPROP_HOLY);
+				add_oprop(otmp, OPROP_HOLYW);
+				add_oprop(otmp, OPROP_AXIO);
+				add_oprop(otmp, OPROP_AXIOW);
+				add_oprop(otmp, OPROP_REFL);
 				otmp->spe = 3;
 				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
+				place_object(otmp, mtmp->mx, mtmp->my);
 			}
 		break;
 		case S_WRAITH:
@@ -9575,7 +9676,7 @@ struct monst *mtmp, *victim;
 
 	/*Update wrathful weapons here*/
 	if(victim && mtmp != victim){ //Currently used to give some monsters the final HP during special growing-up code.
-		if(MON_WEP(mtmp) && MON_WEP(mtmp)->oproperties&OPROP_WRTHW){
+		if(MON_WEP(mtmp) && check_oprop(MON_WEP(mtmp), OPROP_WRTHW)){
 			struct obj *otmp = MON_WEP(mtmp);
 			if(wrath_target(otmp, victim)){
 				if((otmp->wrathdata&0x3L) < 3) otmp->wrathdata++;
@@ -9594,7 +9695,7 @@ struct monst *mtmp, *victim;
 				}
 			}
 		}
-		if(MON_SWEP(mtmp) && MON_SWEP(mtmp)->oproperties&OPROP_WRTHW){
+		if(MON_SWEP(mtmp) && check_oprop(MON_SWEP(mtmp), OPROP_WRTHW)){
 			struct obj *otmp = MON_SWEP(mtmp);
 			if(wrath_target(otmp, victim)){
 				if((otmp->wrathdata&0xFF) < 3) otmp->wrathdata++;
@@ -9835,28 +9936,28 @@ register int otyp;
 				if (rn2(100) < 15){
 					switch (rnd(8)){
 					case 1:
-						otmp->oproperties |= OPROP_FLAYW;
+						add_oprop(otmp, OPROP_FLAYW);
 						break;
 					case 2:
-						otmp->oproperties |= OPROP_FIREW;
+						add_oprop(otmp, OPROP_FIREW);
 						break;
 					case 3:
-						otmp->oproperties |= OPROP_COLDW;
+						add_oprop(otmp, OPROP_COLDW);
 						break;
 					case 4:
-						otmp->oproperties |= OPROP_ELECW;
+						add_oprop(otmp, OPROP_ELECW);
 						break;
 					case 5:
-						otmp->oproperties |= OPROP_ACIDW;
+						add_oprop(otmp, OPROP_ACIDW);
 						break;
 					case 6:
-						otmp->oproperties |= OPROP_MAGCW;
+						add_oprop(otmp, OPROP_MAGCW);
 						break;
 					case 7:
-						otmp->oproperties |= OPROP_ANARW;
+						add_oprop(otmp, OPROP_ANARW);
 						break;
 					case 8:
-						otmp->oproperties |= OPROP_UNHYW;
+						add_oprop(otmp, OPROP_UNHYW);
 						break;
 					}
 				}

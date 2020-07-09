@@ -417,7 +417,7 @@ register struct monst *mtmp;
 			obj = mksobj_at(find_pcloth(), x, y, FALSE, FALSE);
 		    obj->spe = 0;
 		    obj->cursed = obj->blessed = FALSE;
-			obj->oproperties |= OPROP_WOOL;
+			add_oprop(obj, OPROP_WOOL);
 		}
 		goto default_1;
 
@@ -887,7 +887,7 @@ register struct monst *mtmp;
 	    case PM_PARASITIZED_COMMANDER:
 			obj = mksobj_at(SHACKLES, x, y, FALSE, FALSE);
 			set_material_gm(obj, IRON);
-			obj->oproperties = OPROP_ELECW;
+			add_oprop(obj, OPROP_ELECW);
 			obj->oeroded = 1;
 			mon = makemon(&mons[PM_COMMANDER], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 			if (mon){
@@ -1088,7 +1088,7 @@ register struct monst *mtmp;
 			num = rn1(10,10);
 			while (num--){
 				obj = mksobj_at(WORM_TOOTH, x, y, FALSE, FALSE);
-				obj->oproperties = OPROP_LESSW|OPROP_FLAYW;
+				add_oprop(obj, OPROP_LESSER_FLAYW);
 			}
 		goto default_1;
 		break;
@@ -5440,7 +5440,7 @@ xkilled(mtmp, dest)
 	u.uconduct.killer++;
 	if(mtmp->mtyp == PM_CROW && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
 
-	if(uwep && uwep->oproperties&OPROP_WRTHW){
+	if(uwep && check_oprop(uwep, OPROP_WRTHW)){
 		struct obj *otmp = uwep;
 		if(wrath_target(otmp, mtmp)){
 			if((otmp->wrathdata&0x3L) < 3) otmp->wrathdata++;
@@ -5459,7 +5459,7 @@ xkilled(mtmp, dest)
 			}
 		}
 	}
-	if(uswapwep && u.twoweap && uswapwep->oproperties&OPROP_WRTHW){
+	if(uswapwep && u.twoweap && check_oprop(uswapwep, OPROP_WRTHW)){
 		struct obj *otmp = uswapwep;
 		if(wrath_target(otmp, mtmp)){
 			if((otmp->wrathdata&0xFF) < 3) otmp->wrathdata++;

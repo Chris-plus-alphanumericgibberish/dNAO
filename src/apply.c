@@ -2759,7 +2759,7 @@ struct obj *tstone;
 		break;
 	    }
 	}
-	streak_color = c_obj_colors[objects[obj->otyp].oc_color];
+	streak_color = c_obj_colors[obj->obj_color];
 	break;		/* gem or ring */
 
     default:
@@ -2801,7 +2801,7 @@ struct obj *tstone;
 				return;
 			}
 			/* the touchstone was not effective */
-			streak_color = c_obj_colors[objects[obj->ovar1].oc_color];
+			streak_color = c_obj_colors[obj->obj_color];
 		}
 		else {
 			do_scratch = (tstone->otyp != TOUCHSTONE);
@@ -2812,7 +2812,7 @@ struct obj *tstone;
 	       scratch a stone.  They will leave streaks on
 	       non-touchstones and touchstones alike. */
 	    if (is_flimsy(obj))
-		streak_color = c_obj_colors[objects[obj->otyp].oc_color];
+		streak_color = c_obj_colors[obj->obj_color];
 	    else
 		do_scratch = (tstone->otyp != TOUCHSTONE);
 	    break;
@@ -6545,8 +6545,8 @@ doapply()
 			frags = mksobj(SHURIKEN, FALSE, FALSE);
 			if(frags){
 				frags->quan = i;
-				frags->oproperties = OPROP_MORGW|OPROP_LESSW;
-				frags->obj_material = METAL;
+				add_oprop(frags, OPROP_LESSER_MORGW);
+				set_material_gm(frags, METAL);
 				curse(frags);
 				fix_object(frags);
 				pline("The effigy is pierced by %s!", 

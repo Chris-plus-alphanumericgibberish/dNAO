@@ -82,36 +82,35 @@ int otyp;
 		if (objects[otyp].oc_oprop == cur_prop)
 			got_prop = TRUE;
 		// from object properties
-		if (!got_prop && obj && obj->oproperties)
-		{
+		if (!got_prop && obj && !check_oprop(obj, OPROP_NONE)){
 			switch (cur_prop)
 			{
 			case FIRE_RES:
-				if (obj->oproperties & OPROP_FIRE)
+				if (check_oprop(obj, OPROP_FIRE) || check_oprop(obj, OPROP_WOOL))
 					got_prop = TRUE;
 				break;
 			case COLD_RES:
-				if (obj->oproperties & OPROP_COLD)
+				if (check_oprop(obj, OPROP_COLD) || check_oprop(obj, OPROP_WOOL))
 					got_prop = TRUE;
 				break;
 			case SHOCK_RES:
-				if (obj->oproperties & OPROP_ELEC)
+				if (check_oprop(obj, OPROP_ELEC))
 					got_prop = TRUE;
 				break;
 			case ACID_RES:
-				if (obj->oproperties & OPROP_ACID)
+				if (check_oprop(obj, OPROP_ACID))
 					got_prop = TRUE;
 				break;
 			case ANTIMAGIC:
-				if (obj->oproperties & OPROP_MAGC)
+				if (check_oprop(obj, OPROP_MAGC))
 					got_prop = TRUE;
 				break;
 			case REFLECTING:
-				if (obj->oproperties & OPROP_REFL)
+				if (check_oprop(obj, OPROP_REFL))
 					got_prop = TRUE;
 				break;
 			case DISINT_RES:
-				if (obj->oproperties & OPROP_DISN)
+				if (check_oprop(obj, OPROP_DISN))
 					got_prop = TRUE;
 				break;
 			}

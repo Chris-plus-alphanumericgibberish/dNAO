@@ -436,6 +436,7 @@ you_regen_hp()
 	int perX = 0;
 	int * hpmax;
 	int * hp;
+	boolean blockRegen = FALSE;
 
 	// set hp, maxhp pointers
 	hp    = (Upolyd) ? (&u.mh)    : (&u.uhp);
@@ -483,13 +484,13 @@ you_regen_hp()
 			perX -= HEALCYCLE * (youracedata->msize - 1) / (youracedata->msize);
 		else
 			perX -= HEALCYCLE;
-		u.regen_blocked++;
+		blockRegen = TRUE;
 	}
 
 	// invidiaks out of dark
 	if (youracedata->mtyp == PM_INVIDIAK && !isdark(u.ux, u.uy)) {
 		perX -= HEALCYCLE;
-		u.regen_blocked++;
+		blockRegen = TRUE;
 	}
 	
 	// regeneration 'trinsic
@@ -502,15 +503,29 @@ you_regen_hp()
 	}
 	
 	// "Natural" regeneration has stricter limitations
-	if (u.regen_blocked > 0) u.regen_blocked--;		// not regen_blocked (NOTE: decremented here)
-	else if (!(nonliving(youracedata) && !uandroid) &&	// not nonliving, however, androids auto-repair while asleep
-		!Race_if(PM_INCANTIFIER) &&					// not incantifier (including while polymorphed)
+	if (blockRegen);		// regeneration blocked by inclement conditions this turn.
+	else if (u.regen_blocked > 0) u.regen_blocked--;		// regenration blocked by a curse (NOTE: decremented here)
+	else if (Race_if(PM_INCANTIFIER)){ // Incantifiers are special (including while polymorphed)
+		//Incantifiers have slow and unpredictable but comparitively efficient magical healing
+		// Healing spell is 3hp/power, this is 5hp/power
+		// Hiding in a corner waiting is less efficient than healing with the heal spell.
+		if(Race_if(PM_INCANTIFIER) && (*hp) < (*hpmax) && u.uen > 0){
+			int quantity = maybe_polyd(youmonst.data->mlevel, u.ulevel)/5 + 1;
+			do{
+				if(!rn2(HEALCYCLE)){
+					(*hp) += 5;
+					u.uen--;
+				}
+			} while(--quantity > 0 && u.uen > 0 && (*hp) < (*hpmax));
+			if((*hp) > (*hpmax))
+				(*hp) = (*hpmax);
+		}
+	} else if (!(nonliving(youracedata) && !uandroid) &&	// not nonliving, however, androids auto-repair while asleep
 		(wtcap < MOD_ENCUMBER || !u.umoved) &&		// not overloaded
 		!(uwep && uwep->oartifact == ART_ATMA_WEAPON && uwep->lamplit && !Drain_resistance && rn2(4)) // 3 in 4 chance of being prevented by Atma Weapon
 			// Question for Chris: what if instead, do "reglevel /= 4;" when atma weapon is active, placed either before or after the minimum reg 1 check?
-		)
-	{
-		int reglevel = u.ulevel;
+	){
+		int reglevel = maybe_polyd(youmonst.data->mlevel, u.ulevel);
 
 		// CON bonus (while in natural form)
 		if (!Upolyd)
@@ -594,6 +609,7 @@ you_regen_hp()
 		// Now deal with any remainder
 		if (((moves)*(abs(perX) % HEALCYCLE)) / HEALCYCLE >((moves - 1)*(abs(perX) % HEALCYCLE)) / HEALCYCLE)
 			*hp += 1 * sgn(perX);
+		
 		// cap at maxhp
 		if ((*hp) > (*hpmax))
 			(*hp) = (*hpmax);

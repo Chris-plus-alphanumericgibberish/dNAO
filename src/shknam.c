@@ -507,10 +507,10 @@ int sx, sy;
 						if (is_metallic(newobj) && !newobj->oartifact)
 							set_material_gm(newobj, MINERAL);
 						else if (newobj->obj_material == CLOTH)
-							newobj->oproperties = OPROP_WOOL;
+							add_oprop(newobj, OPROP_WOOL);
 
 						if (newobj->otyp == PLATE_MAIL)
-							newobj->oproperties = OPROP_WOOL;
+							add_oprop(newobj, OPROP_WOOL);
 
 						/* replace curobj with newobj */
 						delobj(curobj);

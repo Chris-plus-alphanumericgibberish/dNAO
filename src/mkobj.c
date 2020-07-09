@@ -541,7 +541,8 @@ boolean artif;
 	otmp->bodytypeflag = MB_HUMANOID;
 	otmp->ovar1 = 0;
 	otmp->oward = 0;
-	otmp->oproperties = 0;
+	for(int i = 0; i < OPROP_LISTSIZE; i++)
+		otmp->oproperties[i] = 0;
 	otmp->gifted = GA_NONE;
 	otmp->lifted = 0;
 	otmp->shopOwned = 0;
@@ -554,6 +555,8 @@ boolean artif;
 	otmp->mp = (struct mask_properties *) 0;
 	
 	init_obj_material(otmp);
+	
+	set_object_color(otmp);
 	
 	if(otyp == VIPERWHIP) otmp->ovar1 = rn2(2) ? 1 : rn2(5) ? rnd(2) : rnd(5);
 	
@@ -585,12 +588,12 @@ boolean artif;
 				|| otmp->otyp == WHITE_VIBROSPEAR
 				|| otmp->otyp == WHITE_VIBROZANBATO
 				)
-				otmp->oproperties |= OPROP_HOLYW;
+				add_oprop(otmp, OPROP_HOLYW);
 			if (otmp->otyp == GOLD_BLADED_VIBROSWORD
 				|| otmp->otyp == GOLD_BLADED_VIBROSPEAR
 				|| otmp->otyp == GOLD_BLADED_VIBROZANBATO
 				)
-				otmp->oproperties |= OPROP_UNHYW;
+				add_oprop(otmp, OPROP_UNHYW);
 
 			if (is_vibroweapon(otmp)){
 				otmp->ovar1 = 80L + rnd(20);
@@ -1301,7 +1304,7 @@ boolean artif;
 		break;
 	}
 
-	if(otmp->oproperties&OPROP_WRTHW)
+	if(check_oprop(otmp, OPROP_WRTHW))
 		otmp->wrathdata = PM_ORC<<2;//wrathful + 1/4 vs orcs
 
 	/* spellbooks of secrets should become a random artifact spellbook */
@@ -1924,6 +1927,9 @@ int mat;
 	/* cover special properties of materials like shadowsteel timer and gemstone type */
 	handle_material_specials(obj, oldmat, obj->obj_material);
 
+	/* reset the color if needed */
+	set_object_color(obj);
+	
 	fix_object(obj);
 }
 

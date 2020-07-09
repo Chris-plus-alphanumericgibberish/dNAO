@@ -844,7 +844,7 @@ register int amount;
 								&& uwep->oartifact != ART_PEN_OF_THE_VOID
 								&& uwep->oartifact != ART_ANNULUS
 	) {
-		if(uwep->oartifact || uwep->oproperties&OPROP_DEEPW){
+		if(uwep->oartifact || check_oprop(uwep, OPROP_DEEPW)){
 			if (!Blind)
 			Your("%s %s for a while and then %s.",
 			 aobjnam(uwep, "violently glow"), color,

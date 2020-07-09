@@ -4581,7 +4581,7 @@ int type;
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 		otmp = mksobj(SHACKLES, FALSE, FALSE);
 		otmp->obj_material = IRON;
-		otmp->oproperties = OPROP_ELECW;
+		add_oprop(otmp, OPROP_ELECW);
 		otmp->oeroded = 1;
 		fix_object(otmp);
 		(void) mpickobj(mon, otmp);

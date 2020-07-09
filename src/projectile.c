@@ -1714,8 +1714,8 @@ int shotlimit;
 	}
 
 	/* Okay. */
-	if (youagr && barage) {
-		/* Spirit power barage maximized multishot */
+	if (youagr && barrage) {
+		/* Spirit power barrage maximized multishot */
 		multishot += u.ulevel / 10 + 1;
 	}
 	else {
@@ -2814,7 +2814,7 @@ int tary;
 		qvr->quan = 1;
 		qvr->spe = 8;
 		qvr->opoisoned = (OPOISON_BASIC | OPOISON_BLIND);
-		qvr->oproperties = (OPROP_PHSEW);
+		add_oprop(qvr, OPROP_PHSEW);
 		portal_projectile = TRUE;
 		/* also webs target hit. done in the function. */
 		break;
@@ -2824,7 +2824,7 @@ int tary;
 		qvr->quan = 1;
 		qvr->spe = d(7, 8) + 1; //same as touch
 		qvr->opoisoned = OPOISON_FILTH;
-		qvr->oproperties = OPROP_PHSEW;
+		add_oprop(qvr, OPROP_PHSEW);
 		portal_projectile = TRUE;
 		break;
 	case AD_PLYS:
@@ -2840,7 +2840,7 @@ int tary;
 		qvr->blessed = 1;
 		qvr->quan = 1;
 		qvr->spe = 7;
-		qvr->oproperties = OPROP_PHSEW;
+		add_oprop(qvr, OPROP_PHSEW);
 		//portal_projectile = TRUE;
 		rngmod = 1000; /* Fly until it strikes something */
 		break;
@@ -2851,7 +2851,7 @@ int tary;
 		qvr->blessed = 1;
 		qvr->quan = 1;
 		qvr->spe = 7 + 50; //Arrows of slaying actually just get +50 damage anyway :/
-		qvr->oproperties = OPROP_PHSEW;
+		add_oprop(qvr, OPROP_PHSEW);
 		//portal_projectile = TRUE;
 		rngmod = 1000; /* Fly until it strikes something */
 		break;

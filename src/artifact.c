@@ -132,7 +132,9 @@ hack_artifacts()
 	
 	/* Fix up the alignments of "gift" artifacts */
 	for (art = artilist+1; art->otyp; art++)
-	    if ((art->role == Role_switch || Pantheon_if(art->role)) && (art->alignment != A_NONE || Role_if(PM_BARD)))
+	    if ((art->role == Role_switch || Pantheon_if(art->role))
+	    		&& (art->alignment != A_NONE || Role_if(PM_BARD))
+		    	&& !(art->gflags & ARTG_FXALGN))
 			art->alignment = alignmnt;
 
 
@@ -567,6 +569,99 @@ struct obj * otmp;
 	return 0;
 }
 
+void
+add_oprop(obj, oprop)
+struct obj *obj;
+int oprop;
+{
+	if(!oprop)
+		return;
+	
+	if(oprop >= MAX_OPROP || oprop < 0)
+		impossible("Attempting to give %s oprop number %d?", doname(obj), oprop);
+	
+	obj->oproperties[(oprop-1)/32] |= (0x1L << ((oprop-1)%32));
+}
+
+void
+remove_oprop(obj, oprop)
+struct obj *obj;
+int oprop;
+{
+	if(!oprop)
+		return;
+	
+	if(oprop >= MAX_OPROP || oprop < 0)
+		impossible("Attempting to remove oprop number %d from %s?", oprop, doname(obj));
+	
+	obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
+}
+
+void
+add_oprop_list(oprop_list, oprop)
+unsigned long int *oprop_list;
+int oprop;
+{
+	if(!oprop)
+		return;
+	
+	if(oprop >= MAX_OPROP || oprop < 0)
+		impossible("Attempting to add oprop number %d to a wish list?", oprop);
+	
+	oprop_list[(oprop-1)/32] |= (0x1L << ((oprop-1)%32));
+}
+
+boolean
+check_oprop(obj, oprop)
+struct obj *obj;
+int oprop;
+{
+	if(!obj) //Just in case something checks a monk's bare fist for object properties or some such.
+		return FALSE;
+	
+	if(!oprop){
+		//Check if there are ANY oprops on this item at all
+		int i;
+		for(i=0;i < OPROP_LISTSIZE; i++){
+			if(obj->oproperties[i])
+				return FALSE; //Found (at least one) oprop, return FALSE
+		}
+		return TRUE; //Found no oprops, return TRUE
+	}
+	
+	if(oprop >= MAX_OPROP || oprop < 0){
+		impossible("Attempting to check oprop number %d on %s?", oprop, doname(obj));
+		return FALSE;
+	}
+	
+	return !!(obj->oproperties[(oprop-1)/32] & (0x1L << ((oprop-1)%32)));
+}
+
+boolean
+oprops_match(obj1, obj2)
+struct obj *obj1;
+struct obj *obj2;
+{
+	//Check if there are any mismatching subsets of oprops
+	int i;
+	for(i=0;i < OPROP_LISTSIZE; i++){
+		if(obj1->oproperties[i] != obj2->oproperties[i])
+			return FALSE; //Found (at least one) oprop that's on one but not on the other.
+	}
+	return TRUE; //Found no mismatches, return TRUE
+}
+
+void
+copy_oprop_list(obj, oprop_list)
+struct obj *obj;
+unsigned long int *oprop_list;
+{
+	int i;
+	for(i=0;i < OPROP_LISTSIZE; i++){
+		obj->oproperties[i] |= oprop_list[i];
+	}
+}
+
 /*
  * Make a special-but-non-artifact weapon based on otmp
  */
@@ -581,31 +676,44 @@ struct obj *otmp;	/* existing object */
 		switch(prop)
 		{
 		case 1:
-			otmp->oproperties |= OPROP_FIREW; break;
+			add_oprop(otmp, OPROP_FIREW);
+		break;
 		case 2:
-			otmp->oproperties |= OPROP_COLDW; break;
+			add_oprop(otmp, OPROP_COLDW);
+		break;
 		case 3:
-			otmp->oproperties |= OPROP_ELECW; break;
+			add_oprop(otmp, OPROP_ELECW);
+		break;
 		case 4:
-			otmp->oproperties |= OPROP_ACIDW; break;
+			add_oprop(otmp, OPROP_ACIDW);
+		break;
 		case 5:
-			otmp->oproperties |= OPROP_MAGCW; break;
+			add_oprop(otmp, OPROP_MAGCW);
+		break;
 		case 6:
-			otmp->oproperties |= OPROP_ANARW; break;
+			add_oprop(otmp, OPROP_ANARW);
+		break;
 		case 7:
-			otmp->oproperties |= OPROP_CONCW; break;
+			add_oprop(otmp, OPROP_CONCW);
+		break;
 		case 8:
-			otmp->oproperties |= OPROP_AXIOW; break;
+			add_oprop(otmp, OPROP_AXIOW);
+		break;
 		case 9:
-			otmp->oproperties |= OPROP_HOLYW; break;
+			add_oprop(otmp, OPROP_HOLYW);
+		break;
 		case 10:
-			otmp->oproperties |= OPROP_UNHYW; break;
+			add_oprop(otmp, OPROP_UNHYW);
+		break;
 		case 11:
-			otmp->oproperties |= OPROP_WATRW; break;
+			add_oprop(otmp, OPROP_WATRW);
+		break;
 		case 12:
-			otmp->oproperties |= OPROP_DEEPW; break;
+			add_oprop(otmp, OPROP_DEEPW);
+		break;
 		case 13:
-			otmp->oproperties |= OPROP_PSIOW; break;
+			add_oprop(otmp, OPROP_PSIOW);
+		break;
 		}
 	}
 	
@@ -626,29 +734,41 @@ struct obj *otmp;	/* existing object */
 		switch(prop)
 		{
 		case 1:
-			otmp->oproperties |= OPROP_FIREW; break;
+			add_oprop(otmp, OPROP_LESSER_FIREW);
+		break;
 		case 2:
-			otmp->oproperties |= OPROP_COLDW; break;
+			add_oprop(otmp, OPROP_LESSER_COLDW);
+		break;
 		case 3:
-			otmp->oproperties |= OPROP_ELECW; break;
+			add_oprop(otmp, OPROP_LESSER_ELECW);
+		break;
 		case 4:
-			otmp->oproperties |= OPROP_ACIDW; break;
+			add_oprop(otmp, OPROP_LESSER_ACIDW);
+		break;
 		case 5:
-			otmp->oproperties |= OPROP_MAGCW; break;
+			add_oprop(otmp, OPROP_LESSER_MAGCW);
+		break;
 		case 6:
-			otmp->oproperties |= OPROP_ANARW; break;
+			add_oprop(otmp, OPROP_LESSER_ANARW);
+		break;
 		case 7:
-			otmp->oproperties |= OPROP_CONCW; break;
+			add_oprop(otmp, OPROP_LESSER_CONCW);
+		break;
 		case 8:
-			otmp->oproperties |= OPROP_AXIOW; break;
+			add_oprop(otmp, OPROP_LESSER_AXIOW);
+		break;
 		case 9:
-			otmp->oproperties |= OPROP_HOLYW; break;
+			add_oprop(otmp, OPROP_LESSER_HOLYW);
+		break;
 		case 10:
-			otmp->oproperties |= OPROP_UNHYW; break;
+			add_oprop(otmp, OPROP_LESSER_UNHYW);
+		break;
 		case 11:
-			otmp->oproperties |= OPROP_WATRW; break;
+			add_oprop(otmp, OPROP_LESSER_WATRW);
+		break;
 		case 12:
-			otmp->oproperties |= OPROP_PSIOW; break;
+			add_oprop(otmp, OPROP_LESSER_PSIOW);
+		break;
 		}
 	}
 	
@@ -980,7 +1100,7 @@ struct obj *obj;
     return (obj && (
 		(obj->oartifact && arti_attack_prop(obj, ARTA_SHINING)) ||
 		(is_lightsaber(obj) && litsaber(obj)) ||
-		(obj->oproperties&OPROP_PHSEW) ||
+		(check_oprop(obj, OPROP_PHSEW)) ||
 		((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && obj->lamplit)
 	));
 }
@@ -2796,23 +2916,23 @@ int * truedmgptr;
 	int original_plusdmgptr = *plusdmgptr;
 	int original_truedmgptr = *truedmgptr;
 	
-	if(otmp->oproperties&OPROP_FIREW){
-		if(!Fire_res(mdef)){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	if(!Fire_res(mdef)){
+		if(check_oprop(otmp, OPROP_FIREW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_OONA_FIREW))
+			*truedmgptr += d(1, 8);
+		if(check_oprop(otmp, OPROP_LESSER_FIREW))
+			*truedmgptr += d(2, 6);
 	}
-	if(otmp->oproperties&OPROP_COLDW){
-		if(!Cold_res(mdef)){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	if(!Cold_res(mdef)){
+		if(check_oprop(otmp, OPROP_COLDW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_OONA_COLDW))
+			*truedmgptr += d(1, 8);
+		if(check_oprop(otmp, OPROP_LESSER_COLDW))
+			*truedmgptr += d(2, 6);
 	}
-	if (otmp->oproperties&OPROP_WATRW){
+	{
 		struct obj *cloak = which_armor(mdef, W_ARMC);
 		struct obj *armor = which_armor(mdef, W_ARM);
 		struct obj *shield = which_armor(mdef, W_ARMS);
@@ -2835,52 +2955,49 @@ int * truedmgptr;
 			))
 			) {
 			int mult = (flaming(pd) || pd->mtyp == PM_EARTH_ELEMENTAL || pd->mtyp == PM_IRON_GOLEM || pd->mtyp == PM_CHAIN_GOLEM) ? 2 : 1;
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8)*mult;
-			else
+			if(check_oprop(otmp, OPROP_WATRW))
 				*truedmgptr += basedmg*mult;
+			if(check_oprop(otmp, OPROP_LESSER_WATRW))
+				*truedmgptr += d(2, 6)*mult;
 		}
 	}
 
-	if(otmp->oproperties&OPROP_ELECW){
-		if (!Shock_res(mdef)){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	if (!Shock_res(mdef)){
+		if(check_oprop(otmp, OPROP_ELECW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_OONA_ELECW))
+			*truedmgptr += d(1, 8);
+		if(check_oprop(otmp, OPROP_LESSER_ELECW))
+			*truedmgptr += d(2, 6);
 	}
-	if(otmp->oproperties&OPROP_ACIDW){
-		if (!Acid_res(mdef)){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	
+	if (!Acid_res(mdef)){
+		if(check_oprop(otmp, OPROP_ACIDW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_LESSER_ACIDW))
+			*truedmgptr += d(2, 6);
 	}
-	if(otmp->oproperties&OPROP_MAGCW){
-		if (!Magic_res(mdef)){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	if (!Magic_res(mdef)){
+		if(check_oprop(otmp, OPROP_MAGCW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_LESSER_MAGCW))
+			*truedmgptr += d(3, 4);
 	}
-	if(otmp->oproperties&OPROP_PSIOW){
-		if(youdef && (Blind_telepat || !rn2(5))){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
-		else if(!youdef && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	//Psionic does slightly buffed damage, but triggers less frequently
+	// Buffed vs. telepathic beings
+	if(youdef && (Blind_telepat || !rn2(5))){
+		if (check_oprop(otmp, OPROP_PSIOW))
+			*truedmgptr += basedmg + otmp->spe;
+		if (check_oprop(otmp, OPROP_LESSER_PSIOW))
+			*truedmgptr += d(2, 12);
 	}
-	if(otmp->oproperties&OPROP_DEEPW){
+	else if(!youdef && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
+		if (check_oprop(otmp, OPROP_PSIOW))
+			*truedmgptr += basedmg + otmp->spe;
+		if (check_oprop(otmp, OPROP_LESSER_PSIOW))
+			*truedmgptr += d(2, 12);
+	}
+	if(check_oprop(otmp, OPROP_DEEPW)){
 		if(otmp->spe < 8){
 		if(youdef && (Blind_telepat || !rn2(5)))
 			*truedmgptr += d(1, 15 - (otmp->spe) * 2);
@@ -2888,55 +3005,44 @@ int * truedmgptr;
 			*truedmgptr += d(1, 15 - (otmp->spe) * 2);
 		}
 	}
-	if(mdef && (otmp->oproperties&OPROP_WRTHW) && (otmp->wrathdata >> 2) >= 0 && (otmp->wrathdata >> 2) < NUMMONS){
+	if(mdef && check_oprop(otmp, OPROP_WRTHW) && (otmp->wrathdata >> 2) >= 0 && (otmp->wrathdata >> 2) < NUMMONS){
 		int bmod = 0;
 		if(wrath_target(otmp, mdef)){
 			bmod = (otmp->wrathdata&0x3L)+1;
-			if(otmp->oproperties&OPROP_LESSW)
-				*plusdmgptr += bmod*rnd(8) / 4;
-			else 
-				*plusdmgptr += bmod*basedmg / 4;
+			*plusdmgptr += bmod*basedmg / 4;
 		}
 	}
-	if(otmp->oproperties&OPROP_ANARW){
-		if(youdef ? (u.ualign.type != A_CHAOTIC) : (sgn(mdef->data->maligntyp) >= 0)){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	if(youdef ? (u.ualign.type != A_CHAOTIC) : (sgn(mdef->data->maligntyp) >= 0)){
+		if(check_oprop(otmp, OPROP_ANARW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_LESSER_ANARW))
+			*truedmgptr += d(2, 6);
 	}
-	if(otmp->oproperties&OPROP_CONCW){
-		if(youdef ? (u.ualign.type != A_NEUTRAL) : (sgn(mdef->data->maligntyp) != 0)){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	if(youdef ? (u.ualign.type != A_NEUTRAL) : (sgn(mdef->data->maligntyp) != 0)){
+		if(check_oprop(otmp, OPROP_CONCW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_LESSER_CONCW))
+			*truedmgptr += d(2, 6);
 	}
-	if(otmp->oproperties&OPROP_AXIOW){
-		if(youdef ? (u.ualign.type != A_LAWFUL) : (sgn(mdef->data->maligntyp) <= 0)){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	if(youdef ? (u.ualign.type != A_LAWFUL) : (sgn(mdef->data->maligntyp) <= 0)){
+		if(check_oprop(otmp, OPROP_AXIOW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_OONA_FIREW) || check_oprop(otmp, OPROP_OONA_COLDW) || check_oprop(otmp, OPROP_OONA_ELECW))
+			*truedmgptr += d(1, 8);
+		if(check_oprop(otmp, OPROP_LESSER_AXIOW))
+			*truedmgptr += d(2, 6);
 	}
-	if(otmp->oproperties&OPROP_HOLYW && otmp->blessed){
-		if(youdef ? (hates_holy(youracedata)) : (hates_holy_mon(mdef))){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	if((youdef ? (hates_holy(youracedata)) : (hates_holy_mon(mdef))) && otmp->blessed){
+		if(check_oprop(otmp, OPROP_HOLYW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_LESSER_HOLYW))
+			*truedmgptr += d(2, 6);
 	}
-	if(otmp->oproperties&OPROP_UNHYW && otmp->cursed){
-		if(youdef ? (hates_unholy(youracedata)) : (hates_unholy_mon(mdef))){
-			if (otmp->oproperties&OPROP_LESSW)
-				*truedmgptr += d(1, 8);
-			else
-				*truedmgptr += basedmg;
-		}
+	if((youdef ? (hates_unholy(youracedata)) : (hates_unholy_mon(mdef))) && otmp->cursed){
+		if(check_oprop(otmp, OPROP_UNHYW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_LESSER_UNHYW))
+			*truedmgptr += d(2, 6);
 	}
 	return ((*truedmgptr != original_truedmgptr) || (*plusdmgptr != original_plusdmgptr));
 }
@@ -3119,7 +3225,6 @@ boolean * messaged;
 	boolean vis = getvis(magr, mdef, 0, 0);
 
 	int oartifact = otmp->oartifact;
-	long long oproperties = otmp->oproperties;
 
 	char hittee[BUFSZ];
 	static const char you[] = "you";
@@ -3137,7 +3242,7 @@ boolean * messaged;
 	/* apply spec_dbon to appropriate damage pointers */
 	if (oartifact)
 		spec_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
-	if (oproperties)
+	if (!check_oprop(otmp, OPROP_NONE))
 		oproperty_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
 
 	/* this didn't trigger spec_dbon_applies, but still needs to happen later */
@@ -3301,16 +3406,21 @@ boolean * messaged;
 		else mdef->mspec_used = max(mdef->mspec_used + 1, 1);
 	}
 
-	/* Avenger cancels victims */
-	if (oartifact == ART_AVENGER && dieroll <= 2){
-		if (cancel_monst(mdef, otmp, youagr, FALSE, FALSE, 0)){
-			if (youagr){
-				u.uen += 10;
+	if (oartifact == ART_AVENGER ){
+		/* Avenger cancels victims */
+		if(dieroll <= 2){
+			if (cancel_monst(mdef, otmp, youagr, FALSE, FALSE, 0)){
+				if (youagr){
+					u.uen += 10;
+				}
+				else {
+					magr->mcan = FALSE;
+					magr->mspec_used = 0;
+				}
 			}
-			else {
-				magr->mcan = FALSE;
-				magr->mspec_used = 0;
-			}
+		}
+		if(youdef ? (u.ualign.type != A_LAWFUL) : (sgn(mdef->data->maligntyp) <= 0)){
+			*truedmgptr += d(2, 7);
 		}
 	}
 
@@ -3405,7 +3515,7 @@ boolean * messaged;
 		break;
 	}
 
-	if (attacks(AD_FIRE, otmp) || (oproperties&OPROP_FIREW)) {
+	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW)){
 		if (attacks(AD_FIRE, otmp) && (vis&VIS_MAGR)) {	/* only artifacts message */
 			pline_The("fiery %s %s %s%c",
 				wepdesc,
@@ -3424,11 +3534,11 @@ boolean * messaged;
 	    if (youdef && Slimed) burn_away_slime();
 	    if (youdef && FrozenAir) melt_frozen_air();
 	}
-	if ((attacks(AD_COLD, otmp) || (oproperties&OPROP_COLDW)) && !(
-		/* exceptions */
-		(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)
+	if ((attacks(AD_COLD, otmp) || check_oprop(otmp,OPROP_COLDW) || check_oprop(otmp,OPROP_OONA_COLDW) || check_oprop(otmp,OPROP_LESSER_COLDW)) && !(
+			/* exceptions */
+			(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)
 		)
-		){
+	){
 		if (attacks(AD_COLD, otmp) && (vis&VIS_MAGR)) {
 			pline_The("ice-cold %s %s %s%c",
 				wepdesc,
@@ -3450,7 +3560,7 @@ boolean * messaged;
 			if (!rn2(4)) (void)destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
-	if (attacks(AD_ELEC, otmp) || (oproperties&OPROP_ELECW)) {
+	if (attacks(AD_ELEC, otmp) || check_oprop(otmp,OPROP_ELECW) || check_oprop(otmp,OPROP_OONA_ELECW) || check_oprop(otmp,OPROP_LESSER_ELECW)){
 		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR)) {
 			pline_The("%s %s %s%c",
 				wepdesc,
@@ -3461,7 +3571,7 @@ boolean * messaged;
 	    if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
 	    if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 	}
-	if (attacks(AD_ACID, otmp) || (oproperties&OPROP_ACIDW)) {
+	if (attacks(AD_ACID, otmp) || check_oprop(otmp,OPROP_ACIDW) || check_oprop(otmp,OPROP_LESSER_ACIDW)){
 		if (attacks(AD_ACID, otmp) && (vis&VIS_MAGR)) {
 			pline_The("foul %s %s %s%c",
 				wepdesc,
@@ -3939,7 +4049,7 @@ boolean * messaged;
 	}
 
 	/* vorpal weapons */
-	if (arti_attack_prop(otmp, ARTA_VORPAL) || (oproperties&OPROP_VORPW)) {
+	if (arti_attack_prop(otmp, ARTA_VORPAL) || check_oprop(otmp,OPROP_VORPW)) {
 		char buf[BUFSZ];
 		int vorpaldamage = (basedmg * 20) + d(8, 20);
 		int method = 0;
@@ -4024,7 +4134,7 @@ boolean * messaged;
 			break;
 		default:
 			/* hopefully it's a vorpal-property weapon at this point */
-			if (oproperties & OPROP_VORPW)
+			if (check_oprop(otmp, OPROP_VORPW))
 				Sprintf(buf, "vorpal %s", simple_typename(msgr->otyp));
 			else
 				Strcpy(buf, simple_typename(msgr->otyp));
@@ -4277,7 +4387,7 @@ boolean * messaged;
 	}
 
 	/* water damage to inventory */
-	if (oproperties&OPROP_WATRW) {
+	if (check_oprop(otmp, OPROP_WATRW)) {
 		water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
 
 		struct obj *cloak = which_armor(mdef, W_ARMC);
@@ -4308,20 +4418,20 @@ boolean * messaged;
 	}
 
 	/* morgul weapons */
-	if (oproperties&OPROP_MORGW && otmp->cursed){
+	if (otmp->cursed && (check_oprop(otmp, OPROP_MORGW) || check_oprop(otmp, OPROP_LESSER_MORGW))){
 		int bonus = 0;
 		if (youdef) {
-			if (!(oproperties&OPROP_LESSW))
+			if (check_oprop(otmp, OPROP_MORGW))
 				u.umorgul++;
-			else
+			if (check_oprop(otmp, OPROP_LESSER_MORGW))
 				u.umorgul = max(1, u.umorgul);
 			bonus = u.umorgul;
 		}
 		else {
-			if (otmp->oproperties&OPROP_LESSW)
-				bonus += 1;
-			else
+			if (check_oprop(otmp, OPROP_MORGW))
 				bonus += d(1, 4);
+			if (check_oprop(otmp, OPROP_LESSER_MORGW))
+				bonus += 1;
 			mdef->mhpmax -= bonus;
 			if (mdef->mhpmax < 1)
 				mdef->mhpmax = 1;
@@ -4331,7 +4441,7 @@ boolean * messaged;
 	}
 
 	/* flaying weapons */
-	if (oproperties&OPROP_FLAYW) {
+	if (check_oprop(otmp, OPROP_FLAYW) || check_oprop(otmp, OPROP_LESSER_FLAYW)) {
 		struct obj *obj = some_armor(mdef);
 		int i;
 		if (obj){
@@ -4340,7 +4450,7 @@ boolean * messaged;
 				(youdef ? "your" : s_suffix(mon_nam(mdef)))
 				);
 			i = 1;
-			if (!(otmp->oproperties&OPROP_LESSW)) i += rnd(4);
+			if (check_oprop(otmp, OPROP_FLAYW)) i += rnd(4);
 			for (; i>0; i--){
 				if (obj->spe > -1 * objects[(obj)->otyp].a_ac){
 					damage_item(obj);
@@ -4387,10 +4497,10 @@ boolean * messaged;
 							pline("%s writhes in pain!", Monnam(mdef));
 					}
 				}
-				if (oproperties&OPROP_LESSW)
-					mdef->movement = max(mdef->movement - 2, -12);
-				else
+				if (check_oprop(otmp, OPROP_FLAYW))
 					mdef->movement = max(mdef->movement - 6, -12);
+				else
+					mdef->movement = max(mdef->movement - 2, -12);
 			}
 		}
 	}
@@ -7393,7 +7503,7 @@ arti_invoke(obj)
 			vision_full_recalc = 1;
 
 			/* todo: temporarily set insight and bring insight creatures into view, mwahaha */
-			break;
+		break;
 		case FILTH_ARROWS:
 			if ((!uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;
@@ -7409,7 +7519,16 @@ arti_invoke(obj)
 			}
 			/* if time < ovar1, arrows will be filthed (done in xhity.c) */
 			obj->ovar1 = monstermoves + 13;
-			break;
+		break;
+		case INVOKE_DARK:{
+          struct obj *wand;
+		  wand = mksobj(WAN_DARKNESS, FALSE, FALSE);
+          wand->spe = 1;
+          wand->blessed = 1;
+          wand->ovar1 = 1;
+          weffects(wand);
+          obfree(wand,(struct obj *)0);
+		}break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
@@ -9505,21 +9624,21 @@ char *name;	/* target alignment, or A_NONE */
 	if(!strcmp(name,  "Mistlight")){
 		if(!rn2(4)) otmp->otyp = LONG_SWORD;
 		
-		if(rn2(2)) otmp->obj_material = SILVER;
-		else otmp->obj_material = GOLD;
+		if(rn2(2)) set_material_gm(otmp, SILVER);
+		else set_material_gm(otmp, GOLD);
 		
 		switch(rnd(4)){
 			case 1:
-				otmp->oproperties = OPROP_HOLYW;
+				add_oprop(otmp, OPROP_HOLYW);
 			break;
 			case 2:
-				otmp->oproperties = OPROP_AXIOW;
+				add_oprop(otmp, OPROP_AXIOW);
 			break;
 			case 3:
-				otmp->oproperties = OPROP_MAGCW;
+				add_oprop(otmp, OPROP_MAGCW);
 			break;
 			case 4:
-				otmp->oproperties = OPROP_WATRW;
+				add_oprop(otmp, OPROP_WATRW);
 			break;
 		}
 	}
@@ -9544,7 +9663,7 @@ mind_blast_items()
 	
 	//collect all the blasting items into a list so that they can blast away without worrying about changing the state of the dungeon.
 	for(obj = invent; obj; obj = obj->nobj){
-		if(obj->oproperties&OPROP_DEEPW && obj->spe < 8){
+		if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
 			nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
 			nblast->nblast = blast_list;
 			nblast->spe = obj->spe;
@@ -9555,7 +9674,7 @@ mind_blast_items()
 		}
 	}
 	for (obj = fobj; obj; obj = obj->nobj) {
-		if(obj->oproperties&OPROP_DEEPW && obj->spe < 8){
+		if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
 			nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
 			nblast->nblast = blast_list;
 			nblast->spe = obj->spe;
@@ -9566,7 +9685,7 @@ mind_blast_items()
 		}
 	}
 	for (obj = level.buriedobjlist; obj; obj = obj->nobj) {
-		if(obj->oproperties&OPROP_DEEPW && obj->spe < 8){
+		if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
 			nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
 			nblast->nblast = blast_list;
 			nblast->spe = obj->spe;
@@ -9579,7 +9698,7 @@ mind_blast_items()
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	if (DEADMONSTER(mtmp)) continue;
 		for (obj = mtmp->minvent; obj; obj = obj->nobj) {
-			if(obj->oproperties&OPROP_DEEPW && obj->spe < 8){
+			if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
 				nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
 				nblast->nblast = blast_list;
 				nblast->spe = obj->spe;
@@ -9833,7 +9952,7 @@ struct obj *obj;
 	return objects[obj->otyp].oc_oprop == DISINT_RES 
 	 || obj->oartifact == ART_CHROMATIC_DRAGON_SCALES
 	 || obj->oartifact == ART_DRAGON_PLATE
-	 || obj->oproperties&OPROP_DISN
+	 || check_oprop(obj, OPROP_DISN)
 	 || is_quest_artifact(obj);
 }
 

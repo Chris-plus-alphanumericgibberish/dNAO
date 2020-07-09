@@ -25,7 +25,7 @@ static NEARDATA const char bullets[] =
 
 
 //definition of an extern in you.h
-boolean barage=FALSE;
+boolean barrage=FALSE;
 #define THROW_UWEP 	1
 #define THROW_USWAPWEP 	2
 

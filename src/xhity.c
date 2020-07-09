@@ -769,7 +769,7 @@ int tary;
 						}
 					}
 					/* Club-claw insight weapons strike additional targets if your insight is high enough to perceive the claw */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && otmp->otyp == CLUB && otmp->oproperties&OPROP_CCLAW){
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && otmp->otyp == CLUB && check_oprop(otmp, OPROP_CCLAW)){
 						int subresult = 0;
 						otmp->otyp = CLAWED_HAND;
 						/* try to find direction (u.dx and u.dy may be incorrect) */
@@ -10837,7 +10837,7 @@ boolean * hittxt;
 	int tmpplusdmg;
 	int tmptruedmg;
 
-	/* artifact and oproperties and misc */
+	/* artifact and object properties and misc */
 	tmpplusdmg = tmptruedmg = 0;
 	result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
 	*plusdmgptr += tmpplusdmg;
@@ -11540,7 +11540,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		
 		if (hates_holy_mon(mdef) &&
-			(otmp->known && (otmp->oproperties&OPROP_HOLYW || otmp->oproperties&OPROP_HOLY)) && /* message requires a particularly holy object */
+			(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_LESSER_HOLYW) || check_oprop(otmp, OPROP_HOLY))) && /* message requires a particularly holy object */
 			otmp->blessed) {
 			holyobj |= slot;
 		}
@@ -11612,7 +11612,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 						ironobj |= rslot;
 					}
 					if (hates_holy_mon(mdef) &&
-						(otmp->known && (otmp->oproperties&OPROP_HOLYW || otmp->oproperties&OPROP_HOLY)) && /* message requires a particularly holy object */
+						(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_LESSER_HOLYW) || check_oprop(otmp, OPROP_HOLY))) && /* message requires a particularly holy object */
 						otmp->blessed) {
 						holyobj |= rslot;
 					}
@@ -12526,6 +12526,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 						override_str = 0;
 					}
 				}
+
+				/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
+				if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
+					if (ACURR(A_INT) == 25) bon_damage += 8;
+					else bon_damage += max(0, (ACURR(A_INT) - 10) / 2);
+				}
+
 				bonsdmg += bon_damage;
 			} else if(!youagr && magr){
 				int bon_damage = 0;
@@ -12817,7 +12824,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if ((thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA)) && (
 			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS))) || 
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !litsaber(otmp)) ||
-			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->oproperties&OPROP_FLAYW))
+			(otmp && (valid_weapon_attack || invalid_weapon_attack) && check_oprop(otmp, OPROP_FLAYW))
 			)){
 			/* damage entirely mitigated */
 			subtotl = 1;
@@ -13237,11 +13244,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 			if (holyobj & slot)
 				Sprintf(buf, "%s%s", buf,
-				(otmp->known && (otmp->oproperties&OPROP_HOLYW || otmp->oproperties&OPROP_HOLY)) ? "holy " : "blessed "
+				(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
+				(otmp->known && check_oprop(otmp, OPROP_LESSER_HOLYW)) ? "consecrated " : "blessed "
 				);
 			if (unholyobj & slot)
 				Sprintf(buf, "%s%s", buf,
-				(otmp->known && (otmp->oproperties&OPROP_UNHYW || otmp->oproperties&OPROP_UNHY)) ? "unholy " : "cursed "
+				(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
+				(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 				);
 			/* special cases */
 			if (otmp->oartifact == ART_SUNSWORD && (silverobj&slot)) {
@@ -13294,11 +13303,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			{
 				if (holyobj & slot)
 					Sprintf(buf, "%s%s", buf,
-					(otmp->known && (otmp->oproperties&OPROP_HOLYW || otmp->oproperties&OPROP_HOLY)) ? "holy " : "blessed "
+					(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
+					(otmp->known && check_oprop(otmp, OPROP_LESSER_HOLYW)) ? "consecrated " : "blessed "
 					);
 				if (unholyobj & slot)
 					Sprintf(buf, "%s%s", buf,
-					(otmp->known && (otmp->oproperties&OPROP_UNHYW || otmp->oproperties&OPROP_UNHY)) ? "unholy " : "cursed "
+					(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
+					(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 					);
 				if (silverobj & slot){
 					Sprintf(buf, "%ssilver%s ", buf, ((jadeobj&slot) || (ironobj&slot) ? "ed" : ""));
@@ -13344,11 +13355,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 			if (holyobj & slot)
 				Sprintf(buf, "%s%s", buf,
-				(otmp->known && (otmp->oproperties&OPROP_HOLYW || otmp->oproperties&OPROP_HOLY)) ? "holy " : "blessed "
+				(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
+				(otmp->known && check_oprop(otmp, OPROP_LESSER_HOLYW)) ? "consecrated " : "blessed "
 				);
 			if (unholyobj & slot)
 				Sprintf(buf, "%s%s", buf,
-				(otmp->known && (otmp->oproperties&OPROP_UNHYW || otmp->oproperties&OPROP_UNHY)) ? "unholy " : "cursed "
+				(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
+				(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 				);
 			if (silverobj & slot){
 				if (!strstri(obuf, "silver "))
