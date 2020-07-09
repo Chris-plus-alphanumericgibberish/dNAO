@@ -2836,7 +2836,6 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	etype = 0;
 	char qbuf[QBUFSZ];
 	char c;
-	int incbalancevar = 5;
 	
 	boolean dont_start = FALSE;
 	
@@ -2987,7 +2986,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    	    (void) drain_item(otmp);
 				if(curspe > otmp->spe){
 					You("drain the %s%s.", xname(otmp),otmp->spe!=0 ? "":" dry");
-					lesshungry(50*incbalancevar);
+					lesshungry(5*INC_BASE_NUTRITION);
 					flags.botl = 1;
 				} else {
 					pline("The %s resists your attempt to drain its magic.", xname(otmp));
@@ -3004,7 +3003,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 
 				if (carried(otmp)) useup(otmp);
 				else useupf(otmp, 1L);
-				lesshungry(50*incbalancevar);
+				lesshungry(5*INC_BASE_NUTRITION);
 				flags.botl = 1;
 			break;
 			case AMULET_CLASS:
@@ -3018,7 +3017,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 
 				if (carried(otmp)) useup(otmp);
 				else useupf(otmp, 1L);
-				lesshungry(50*incbalancevar);
+				lesshungry(5*INC_BASE_NUTRITION);
 				flags.botl = 1;
 			break;
 			case ARMOR_CLASS:
@@ -3027,7 +3026,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    	    (void) drain_item(otmp);
 				if(curspe > otmp->spe){
 					You("drain the %s%s.", xname(otmp),otmp->spe!=0 ? "":" dry");
-					lesshungry(50*incbalancevar);
+					lesshungry(5*INC_BASE_NUTRITION);
 					flags.botl = 1;
 				} else {
 					pline("The %s resists your attempt to drain its magic.", xname(otmp));
@@ -3039,7 +3038,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    	    (void) drain_item(otmp);
 				if(curspe > otmp->spe){
 					You("drain the %s%s.", xname(otmp),otmp->spe!=0 ? "":" dry");
-					lesshungry(50*incbalancevar);
+					lesshungry(5*INC_BASE_NUTRITION);
 					flags.botl = 1;
 				} else {
 					pline("The %s resists your attempt to drain its magic.", xname(otmp));
@@ -3053,7 +3052,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    	    otmp->otyp = SCR_BLANK_PAPER;
 	    	    otmp->spe = 0;
 	    	    otmp->ovar1 = 0;
-				lesshungry(50*incbalancevar);
+				lesshungry(5*INC_BASE_NUTRITION);
 				flags.botl = 1;
 			break;
 			case SPBOOK_CLASS:
@@ -3065,7 +3064,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 				otmp->spestudied++;
 				costly_cancel(otmp);
 	    	    if(otmp->spestudied > MAX_SPELL_STUDY) otmp->otyp = SPE_BLANK_PAPER;
-				lesshungry(50*incbalancevar);
+				lesshungry(5*INC_BASE_NUTRITION);
 				flags.botl = 1;
 			break;
 			case WAND_CLASS:
@@ -3074,7 +3073,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    	    (void) drain_item(otmp);
 				if(curspe > otmp->spe){
 					You("drain the %s%s.", xname(otmp),otmp->spe!=0 ? "":" dry");
-					lesshungry(10*incbalancevar);
+					lesshungry(1*INC_BASE_NUTRITION);
 					flags.botl = 1;
 				} else {
 					pline("The %s resists your attempt to drain its magic.", xname(otmp));
@@ -3937,6 +3936,8 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 		if(u.uhs == HUNGRY) hungermod *= 2;
 		else if(u.uhs < HUNGRY) hungermod *=5;
 	}
+	
+	//Elder vampires can go for longer without blood
 	if(is_vampire(youracedata))
 		hungermod *= (maybe_polyd(youmonst.data->mlevel, u.ulevel)/10 + 1);
 	

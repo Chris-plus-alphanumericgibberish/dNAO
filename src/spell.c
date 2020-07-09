@@ -4397,7 +4397,7 @@ boolean atme;
 			You("don't have enough energy to cast that spell (need %d).", energy);
 			return(0);
 		} else {
-			if (spellid(spell) != SPE_DETECT_FOOD && !(Race_if(PM_INCANTIFIER)) ) {
+			if (spellid(spell) != SPE_DETECT_FOOD) {
 				int hungr = spellhunger(energy);
 				/* don't put player (quite) into fainting from
 				 * casting a spell, particularly since they might

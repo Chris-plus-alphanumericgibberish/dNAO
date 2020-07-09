@@ -4017,7 +4017,7 @@ struct trap *ttmp;
 	u.uconduct.food++;
 	deltrap(ttmp);
 	newsym(trapx, trapy);
-	lesshungry(500);
+	lesshungry(10*INC_BASE_NUTRITION);
 	return 1;
 }
 

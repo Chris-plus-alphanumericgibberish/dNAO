@@ -306,6 +306,7 @@ struct you {
 	int	 uhunger;	/* refd only in eat.c and shk.c */
 	int	 uhungermax;/*  */
 #define YouHunger	(Race_if(PM_INCANTIFIER) ? u.uen : u.uhunger)
+#define	INC_BASE_NUTRITION	25
 #define DEFAULT_HMAX	2000
 	unsigned uhs;		/* hunger state - see eat.c */
 
