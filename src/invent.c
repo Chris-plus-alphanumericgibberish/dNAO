@@ -2959,6 +2959,7 @@ winid *datawin;
 			if (u.sealsActive&SEAL_YMIR)
 				size_penalty = max(0, size_penalty - 1);
 			
+			if(size_penalty < 0) size_penalty = 0;
 			hitbon -= size_penalty * 4;
 		} 
 		
