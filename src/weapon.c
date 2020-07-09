@@ -2333,10 +2333,6 @@ struct obj *otmp;
 		}
 	}
 	
-	if(u.sealsActive&SEAL_DANTALION){
-		if(ACURR(A_INT) == 25) bonus += 8;
-		else bonus += max(0,(ACURR(A_INT)-10)/2);
-	}
 	return bonus;
 }
 

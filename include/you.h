@@ -720,7 +720,7 @@ struct you {
 #define	PWR_VENGANCE				25
 #define	PWR_SHAPE_THE_WIND			26
 #define	PWR_THORNS_AND_STONES		27
-#define	PWR_BARAGE					28
+#define	PWR_BARRAGE					28
 #define	PWR_BREATH_POISON			29
 #define	PWR_RUINOUS_STRIKE			30
 #define	PWR_RAVEN_S_TALONS			31
@@ -844,7 +844,7 @@ extern char *sealTitles[]; /*Defined in engrave.c*/
 extern char *andromaliusItems[18]; /*Defined in sounds.c*/
 extern long int_spirits; /*Defined in sounds.c*/
 extern long wis_spirits; /*Defined in sounds.c*/
-extern boolean barage; /*Defined in dothrow.c*/
+extern boolean barrage; /*Defined in dothrow.c*/
 extern boolean onlykicks; /*Defined in dokick.c*/
 extern const char *Moloch, *Morgoth, *MolochLieutenant, *Silence, *Chaos, *DeepChaos, *tVoid, *Demiurge, *Sophia, *Other, *BlackMother, *Nodens, *DreadFracture, *AllInOne; /*defined in pray*/
 #define Upolyd (u.umonnum != u.umonster)
