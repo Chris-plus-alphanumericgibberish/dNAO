@@ -2475,7 +2475,7 @@ boolean init;
 			if (otmp->otyp == CORPSE) {
 				obj_stop_timers(otmp);
 				/* if the monster was cancelled, don't self-revive */
-				if (mtmp->mcan && !is_rider(ptr))
+				if (mtmp && mtmp->mcan && !is_rider(ptr))
 					otmp->norevive = 1;
 				start_corpse_timeout(otmp);
 			}
