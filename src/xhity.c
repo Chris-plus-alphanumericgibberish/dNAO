@@ -14961,9 +14961,11 @@ android_combo()
 				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj *)0, vis, 0, FALSE);
 		}
 		u.uen--;
+		flags.botl = 1;
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_SKILLED && u.uen > 0){
 			if (dokick()){
 				u.uen--;
+				flags.botl = 1;
 			}
 			else return TRUE;
 		}
@@ -14972,6 +14974,7 @@ android_combo()
 			int k = dokick();
 			if (j || k){
 				u.uen--;
+				flags.botl = 1;
 			}
 			else return TRUE;
 		}
@@ -14980,6 +14983,7 @@ android_combo()
 			int d = getdir((char *)0);
 			if (!j && !d) return TRUE;
 			u.uen--;
+			flags.botl = 1;
 			if (d){
 				if (u.ustuck && u.uswallow)
 					mdef = u.ustuck;
@@ -15002,6 +15006,7 @@ android_combo()
 		if(P_SKILL(P_BARE_HANDED_COMBAT) >= P_GRAND_MASTER && u.uen > 0){
 			if(!getdir((char *)0)) return 1;
 			u.uen--;
+			flags.botl = 1;
 			if (u.ustuck && u.uswallow)
 				mdef = u.ustuck;
 			else
@@ -15038,6 +15043,7 @@ android_combo()
 				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 		}
 		u.uen--;
+		flags.botl = 1;
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
 			int a;
 			int k;
@@ -15070,6 +15076,7 @@ android_combo()
 			if (!j && !d)
 				return TRUE;
 			u.uen--;
+			flags.botl = 1;
 			if (d){
 				/* get defender */
 				if (u.ustuck && u.uswallow)
@@ -15129,6 +15136,7 @@ android_combo()
 			}
 			n--;
 			u.uen--;
+			flags.botl = 1;
 			attacked = TRUE;
 		}
 		return TRUE;
@@ -15155,6 +15163,7 @@ android_combo()
 				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 		}
 		u.uen--;
+		flags.botl = 1;
 
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
 			/* get direction AND do whip things */
@@ -15173,6 +15182,7 @@ android_combo()
 				xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 			}
 			u.uen--;
+			flags.botl = 1;
 		}
 
 
@@ -15213,6 +15223,7 @@ android_combo()
 				}
 			}
 			u.uen--;
+			flags.botl = 1;
 		}
 		return TRUE;
 	}
@@ -15238,6 +15249,7 @@ android_combo()
 			xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 		}
 		u.uen--;
+		flags.botl = 1;
 
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
 			//Two throws. Aborting either one ends the combo.
@@ -15245,6 +15257,7 @@ android_combo()
 				return TRUE;
 			//Charge energy for continuing combo after first throw.
 			u.uen--;
+			flags.botl = 1;
 			//Now do second throw. Aborting either one ends the combo.
 			if(!dofire())
 				return TRUE;
@@ -15254,6 +15267,7 @@ android_combo()
 			if (dofire()){
 				//Charge energy for continuing the combo after the throw
 				u.uen--;
+				flags.botl = 1;
 				if (uwep){
 					/* get direction of attack */
 					if (!getdir((char *)0))
@@ -15315,6 +15329,7 @@ android_combo()
 			}
 		}
 		u.uen--;
+		flags.botl = 1;
 		youmonst.movement -= 3;
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
 			/* use a kick to get direction */
@@ -15337,11 +15352,13 @@ android_combo()
 				}
 			}
 			u.uen--;
+			flags.botl = 1;
 			youmonst.movement -= 3;
 		}
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
 			if (dofire()){
 				u.uen--;
+				flags.botl = 1;
 				/* get defender */
 				if (u.ustuck && u.uswallow)
 					mdef = u.ustuck;
