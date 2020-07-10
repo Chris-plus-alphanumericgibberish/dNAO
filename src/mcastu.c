@@ -2719,7 +2719,7 @@ int tary;
 				if (!Sick_res(mdef) && !umechanoid) {
 					You("are afflicted with disease!");
 					make_sick(Sick ? Sick / 3L + 1L : (long)rn1(ACURR(A_CON), 20),
-						(char *)0, TRUE, SICK_NONVOMITABLE);
+						magr->data->mname, TRUE, SICK_NONVOMITABLE);
 				}
 				else {
 					You_feel("slightly infectious.");
@@ -2835,7 +2835,7 @@ int tary;
 			/* apply sickness to defender (player-only) */
 			if (youdef) {
 				if (!Sick && !umechanoid) make_sick((long)rn1(ACURR(A_CON), 20), /* Don't make the PC more sick */
-					(char *)0, TRUE, SICK_NONVOMITABLE);
+					magr->data->mname, TRUE, SICK_NONVOMITABLE);
 			}
 			else if (!Sick_res(mdef)) {
 				/* 1/10 chance of instakill */
