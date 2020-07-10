@@ -4023,58 +4023,25 @@ aligntyp alignment;
 				
 				if(!(HSleep_resistance)) {
 					You_feel("wide awake.");				
-					if((HSleep_resistance & timeout) < TIMEOUT) {
-						long timer = (HSleep_resistance & TIMEOUT) + timeout;
-						HSleep_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-						HSleep_resistance |= timer; //set new timer
-						break;
-					} else {
-						HSleep_resistance |= timeout;
-						break;
-					}
+					give_intrinsic(SLEEP_RES, timeout);
 				}
 				
 				if(!(HFire_resistance)) {
 					You(Hallucination ? "be chillin'." : "feel a momentary chill.");				
-					if((HFire_resistance & timeout) < TIMEOUT) {
-						long timer = (HFire_resistance & TIMEOUT) + timeout;
-						HFire_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-						HFire_resistance |= timer; //set new timer
-						break;
-					} else {
-						HFire_resistance |= timeout;
-						break;
-					}
+					give_intrinsic(FIRE_RES, timeout);
 				}
 
 				if(!(HCold_resistance)) {
 					You_feel("full of hot air.");
-					if((HCold_resistance & timeout) < TIMEOUT) {
-						long timer = (HFire_resistance & TIMEOUT) + timeout;
-						HCold_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-						HCold_resistance |= timer; //set new timer
-						break;
-					} else {
-						HCold_resistance |= timeout;
-						break;
-					}
+					give_intrinsic(COLD_RES, timeout);
 				}
 						
 				if(!(HShock_resistance)) {
 					if (Hallucination)
 						rn2(2) ? You_feel("grounded in reality.") : Your("health currently feels amplified!");
-					else
-						You_feel("well grounded.");
-				
-					if((HShock_resistance & timeout) < TIMEOUT) {
-						long timer = (HFire_resistance & TIMEOUT) + timeout;
-						HShock_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-						HShock_resistance |= timer; //set new timer
-						break;
-					} else {
-						HShock_resistance |= timeout;
-						break;
-					}
+					else You_feel("well grounded.");
+					
+					give_intrinsic(SHOCK_RES, timeout);
 				}
 				break;
 			case 4: // repair an item

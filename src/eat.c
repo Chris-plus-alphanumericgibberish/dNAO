@@ -7,12 +7,8 @@
 #include "artifact.h"
 /* #define DEBUG */	/* uncomment to enable new eat code debugging */
 
-#ifdef DEBUG
 # ifdef WIZARD
 #define debugpline	if (wizard) pline
-# else
-#define debugpline	pline
-# endif
 #endif
 
 STATIC_PTR int NDECL(eatmdone);
@@ -466,15 +462,11 @@ recalc_wt()
 {
 	struct obj *piece = victual.piece;
 
-#ifdef DEBUG
-	debugpline("Old weight = %d", piece->owt);
-	debugpline("Used time = %d, Req'd time = %d",
-		victual.usedtime, victual.reqtime);
-#endif
+	//debugpline("Old weight = %d", piece->owt);
+	//debugpline("Used time = %d, Req'd time = %d",
+	//	victual.usedtime, victual.reqtime);
 	piece->owt = weight(piece);
-#ifdef DEBUG
-	debugpline("New weight = %d", piece->owt);
-#endif
+	//debugpline("New weight = %d", piece->owt);
 }
 
 void
@@ -484,9 +476,7 @@ reset_eat()		/* called when eating interrupted by an event */
      * the round is spent eating.
      */
 	if(victual.eating && !victual.doreset) {
-#ifdef DEBUG
-	    debugpline("reset_eat...");
-#endif
+	    //debugpline("reset_eat...");
 	    victual.doreset = TRUE;
 	}
 	return;
@@ -502,9 +492,7 @@ register struct obj *otmp;
 		(void) splitobj(otmp, otmp->quan - 1L);
 	    else
 		otmp = splitobj(otmp, 1L);
-#ifdef DEBUG
-	    debugpline("split object,");
-#endif
+	    //debugpline("split object,");
 	}
 
 	if (!otmp->oeaten) {
@@ -594,9 +582,7 @@ struct obj *old_obj, *new_obj;
 STATIC_OVL void
 do_reset_eat()
 {
-#ifdef DEBUG
-	debugpline("do_reset_eat...");
-#endif
+	//debugpline("do_reset_eat...");
 	if (victual.piece) {
 		victual.piece = touchfood(victual.piece);
 		recalc_wt();
@@ -868,109 +854,93 @@ register struct permonst *ptr;
 {
 	switch (type) {
 	    case FIRE_RES:
-#ifdef DEBUG
-		if (ptr->mconveys & MR_FIRE) {
-			debugpline("can get fire resistance");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(ptr->mconveys & MR_FIRE);
-#endif
+			if (ptr->mconveys & MR_FIRE) {
+				//debugpline("can get fire resistance");
+				return(TRUE);
+			} else  return(FALSE);
 	    case SLEEP_RES:
-#ifdef DEBUG
-		if (ptr->mconveys & MR_SLEEP) {
-			debugpline("can get sleep resistance");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(ptr->mconveys & MR_SLEEP);
-#endif
+			if (ptr->mconveys & MR_SLEEP) {
+				debugpline("can get sleep resistance");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    case COLD_RES:
-#ifdef DEBUG
-		if (ptr->mconveys & MR_COLD) {
-			debugpline("can get cold resistance");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(ptr->mconveys & MR_COLD);
-#endif
+			if (ptr->mconveys & MR_COLD) {
+				debugpline("can get cold resistance");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    case ACID_RES:
-#ifdef DEBUG
-		if (ptr->mconveys & MR_ACID) {
-			debugpline("can get acid resistance");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(ptr->mconveys & MR_ACID);
-#endif
+			if (ptr->mconveys & MR_ACID) {
+				debugpline("can get acid resistance");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    case DISINT_RES:
-#ifdef DEBUG
-		if (ptr->mconveys & MR_DISINT) {
-			debugpline("can get disintegration resistance");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(ptr->mconveys & MR_DISINT);
-#endif
+			if (ptr->mconveys & MR_DISINT) {
+				debugpline("can get disintegration resistance");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    case SHOCK_RES:	/* shock (electricity) resistance */
-#ifdef DEBUG
-		if (ptr->mconveys & MR_ELEC) {
-			debugpline("can get shock resistance");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(ptr->mconveys & MR_ELEC);
-#endif
+			if (ptr->mconveys & MR_ELEC) {
+				debugpline("can get shock resistance");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    case POISON_RES:
-#ifdef DEBUG
-		if (ptr->mconveys & MR_POISON) {
-			debugpline("can get poison resistance");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(ptr->mconveys & MR_POISON);
-#endif
+			if (ptr->mconveys & MR_POISON) {
+				debugpline("can get poison resistance");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    case TELEPORT:
-#ifdef DEBUG
-		if (species_teleports(ptr)) {
-			debugpline("can get teleport");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(species_teleports(ptr));
-#endif
+			if (species_teleports(ptr)) {
+				debugpline("can get teleport");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    case DISPLACED:
-#ifdef DEBUG
-		if (species_displaces(ptr)) {
-			debugpline("can displacement");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(species_displaces(ptr));
-#endif
+			if (species_displaces(ptr)) {
+				debugpline("can displacement");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    case TELEPORT_CONTROL:
-#ifdef DEBUG
-		if (species_controls_teleports(ptr)) {
-			debugpline("can get teleport control");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(species_controls_teleports(ptr));
-#endif
+			if (species_controls_teleports(ptr)) {
+				debugpline("can get teleport control");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    case TELEPAT:
-#ifdef DEBUG
-		if (species_is_telepathic(ptr)) {
-			debugpline("can get telepathy");
-			return(TRUE);
-		} else  return(FALSE);
-#else
-		return(species_is_telepathic(ptr));
-#endif
+			if (species_is_telepathic(ptr)) {
+				debugpline("can get telepathy");
+				return(TRUE);
+			} else
+				return(FALSE);
 	    default:
-		return(FALSE);
+			return(FALSE);
 	}
-	/*NOTREACHED*/
 }
+
+void
+give_intrinsic(int type, long duration){
+	boolean permanent = (duration == -1);
+	boolean nullify = (duration == -2);
+	
+	if (permanent){
+		u.uprops[type].intrinsic |= FROMOUTSIDE;
+		return;
+	}
+	
+	if (nullify){
+		u.uprops[type].intrinsic &= ~TIMEOUT;
+	}
+	
+	incr_itimeout(&u.uprops[type].intrinsic, duration);
+	
+}
+
 
 /* givit() tries to give you an intrinsic based on the monster's level
  * and what type of intrinsic it is trying to give you.
@@ -1038,198 +1008,97 @@ boolean drained;
 	else multiplier = 20;
 	if(ptr->geno & G_UNIQ) multiplier = 20;
 	if(ptr->geno & G_UNIQ && ptr->mlevel > 14) permanent = 1;
+
+	long duration = nutval * multiplier;
+	if (permanent)
+		duration = -1;
+	
 	switch (type) {
 	    case FIRE_RES:
-#ifdef DEBUG
-		debugpline("Trying to give fire resistance");
-#endif
-		if( !(HFire_resistance) ) {
-			You(Hallucination ? "be chillin'." :
-			    "feel a momentary chill.");
-		}
-		if( (HFire_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
-			// long timer = max((HFire_resistance & TIMEOUT), (long)(nutval*multiplier));
-			long timer = (HFire_resistance & TIMEOUT) + (long)(nutval*multiplier);
-			HFire_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HFire_resistance |= timer; //set new timer
-		}
-		else{
-			HFire_resistance |= TIMEOUT; //set timer to max value
-		}
-		if(permanent){
-			HFire_resistance |= FROMOUTSIDE;
-		}
+			debugpline("Trying to give fire resistance");
+			if (!(HFire_resistance)) 
+				You(Hallucination ? "be chillin'." :"feel a momentary chill.");
+			give_intrinsic(FIRE_RES, duration);
 		break;
 	    case SLEEP_RES:
-#ifdef DEBUG
-		debugpline("Trying to give sleep resistance");
-#endif
-		if( !(HSleep_resistance) ) {
-			You_feel("wide awake.");
-		}
-		if( (HSleep_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
-			// long timer = max((HSleep_resistance & TIMEOUT), (long)(nutval*multiplier));
-			long timer = (HSleep_resistance & TIMEOUT) + (long)(nutval*multiplier);
-			HSleep_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HSleep_resistance |= timer; //set new timer
-		}
-		else{
-			HSleep_resistance |= TIMEOUT; //set timer to max value
-		}
-		if(permanent){
-			HSleep_resistance |= FROMOUTSIDE;
-		}
+			debugpline("Trying to give sleep resistance");
+			if (!(HSleep_resistance))
+				You_feel("wide awake.");
+			give_intrinsic(SLEEP_RES, duration);
 		break;
 	    case COLD_RES:
-#ifdef DEBUG
-		debugpline("Trying to give cold resistance");
-#endif
-		if( !(HCold_resistance) ) {
-			You_feel("full of hot air.");
-		}
-		if( (HCold_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
-			// long timer = max((HCold_resistance & TIMEOUT), (long)(nutval*multiplier));
-			long timer = (HCold_resistance & TIMEOUT) + (long)(nutval*multiplier);
-			HCold_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HCold_resistance |= timer; //set new timer
-		}
-		else{
-			HCold_resistance |= TIMEOUT; //set timer to max value
-		}
-		if(permanent){
-			HCold_resistance |= FROMOUTSIDE;
-		}
+			debugpline("Trying to give cold resistance");
+			if(!(HCold_resistance))
+				You_feel("full of hot air.");
+			give_intrinsic(COLD_RES, duration);
 		break;
 	    case DISINT_RES:
-#ifdef DEBUG
-		debugpline("Trying to give disintegration resistance");
-#endif
-		if(!(HDisint_resistance & FROMOUTSIDE)) {
-			You_feel(Hallucination ?
-			    "totally together, man." :
-			    "very firm.");
-			HDisint_resistance |= FROMOUTSIDE;
-		}
+			debugpline("Trying to give disintegration resistance");
+			if (!(HDisint_resistance & FROMOUTSIDE)) {
+				You_feel(Hallucination ? "totally together, man." : "very firm.");
+				give_intrinsic(DISINT_RES, -1);
+			}
 		break;
 	    case SHOCK_RES:	/* shock (electricity) resistance */
-#ifdef DEBUG
-		debugpline("Trying to give shock resistance");
-#endif
-		if( !(HShock_resistance) ) {
-			if (Hallucination)
-				rn2(2) ? You_feel("grounded in reality.") : Your("health currently feels amplified!");
-			else
-				You_feel("well grounded.");
-		}
-		if( (HShock_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
-			// long timer = max((HShock_resistance & TIMEOUT), (long)(nutval*multiplier));
-			long timer = (HShock_resistance & TIMEOUT) + (long)(nutval*multiplier);
-			HShock_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HShock_resistance |= timer; //set new timer
-		}
-		else{
-			HShock_resistance |= TIMEOUT; //set timer to max value
-		}
-		if(permanent){
-			HShock_resistance |= FROMOUTSIDE;
-		}
+			debugpline("Trying to give shock resistance");
+			if (!(HShock_resistance)) {
+				if (Hallucination)
+					rn2(2) ? You_feel("grounded in reality.") : Your("health currently feels amplified!");
+				else You_feel("well grounded.");
+			}
+			give_intrinsic(SHOCK_RES, duration);
 		break;
 	    case ACID_RES:	/* acid resistance */
-#ifdef DEBUG
-		debugpline("Trying to give acid resistance");
-#endif
-		if( !(HAcid_resistance) ) {
-			if (Hallucination)
-				rn2(2) ? You_feel("like you've really gotten back to basics!") : You_feel("insoluble.");
-			else
-				Your("skin feels leathery.");
-		}
-		if( (HAcid_resistance & TIMEOUT) + (long)(nutval*multiplier) < TIMEOUT) {
-			// long timer = max((HAcid_resistance & TIMEOUT), (long)(nutval*multiplier));
-			long timer = (HAcid_resistance & TIMEOUT) + (long)(nutval*multiplier);
-			HAcid_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HAcid_resistance |= timer; //set new timer
-		}
-		else{
-			HAcid_resistance |= TIMEOUT; //set timer to max value
-		}
-		if(permanent){
-			HAcid_resistance |= FROMOUTSIDE;
-		}
+			debugpline("Trying to give acid resistance");
+			if (!(HAcid_resistance)) {
+				if (Hallucination)
+					rn2(2) ? You_feel("like you've really gotten back to basics!") : You_feel("insoluble.");
+				else Your("skin feels leathery.");
+			}
+			give_intrinsic(ACID_RES, duration);
 		break;
 	    case POISON_RES:
-#ifdef DEBUG
-		debugpline("Trying to give poison resistance");
-#endif
-		if(!(HPoison_resistance & FROMOUTSIDE)) {
-			You_feel(Poison_resistance ?
-				 "especially healthy." : "healthy.");
-			HPoison_resistance |= FROMOUTSIDE;
-		}
+			debugpline("Trying to give poison resistance");
+			if (!(HPoison_resistance & FROMOUTSIDE)) {
+				You_feel(Poison_resistance ? "especially healthy." : "healthy.");
+				give_intrinsic(POISON_RES, -1);
+			}
 		break;
 	    case DISPLACED:	/* displacement resistance */
 		//Note that intrinsic displacemnt disregards the timeout multiplier and permanence setting.
-#ifdef DEBUG
-		debugpline("Trying to give intrinsic displacement");
-#endif
-		if( !(HDisplaced) ) {
-			if (Hallucination)
-				You_feel("quite beside yourself!");
-			else
-				Your("outline shimmers and shifts.");
-		}
-		if( (HDisplaced & TIMEOUT) + (long)(nutval) < TIMEOUT) {
-			long timer = (HDisplaced & TIMEOUT) + (long)(nutval);
-			HDisplaced &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HDisplaced |= timer; //set new timer
-		}
-		else{
-			HDisplaced |= TIMEOUT; //set timer to max value
-		}
-		// if(permanent){
-			// HDisplaced |= FROMOUTSIDE;
-		// }
+			debugpline("Trying to give intrinsic displacement");
+			if (!(HDisplaced)) {
+				if (Hallucination) You_feel("quite beside yourself!");
+				else Your("outline shimmers and shifts.");
+			}
+			give_intrinsic(DISPLACED, duration);
 		break;
 	    case TELEPORT:
-#ifdef DEBUG
-		debugpline("Trying to give teleport");
-#endif
-		if(!(HTeleportation & FROMOUTSIDE)) {
-			You_feel(Hallucination ? "diffuse." :
-			    "very jumpy.");
-			HTeleportation |= FROMOUTSIDE;
-		}
+			debugpline("Trying to give teleport");
+			if(!(HTeleportation & FROMOUTSIDE)) {
+				You_feel(Hallucination ? "diffuse." : "very jumpy.");
+				give_intrinsic(TELEPORT, -1);
+			}
 		break;
 	    case TELEPORT_CONTROL:
-#ifdef DEBUG
-		debugpline("Trying to give teleport control");
-#endif
-		if(!(HTeleport_control & FROMOUTSIDE)) {
-			You_feel(Hallucination ?
-			    "centered in your personal space." :
-			    "in control of yourself.");
-			HTeleport_control |= FROMOUTSIDE;
-		}
+			debugpline("Trying to give teleport control");
+			if(!(HTeleport_control & FROMOUTSIDE)) {
+				You_feel(Hallucination ? "centered in your personal space." : "in control of yourself.");
+				give_intrinsic(TELEPORT_CONTROL, -1);
+			}
 		break;
 	    case TELEPAT:
-#ifdef DEBUG
-		debugpline("Trying to give telepathy");
-#endif
-		if(!(HTelepat & FROMOUTSIDE)) {
-			You_feel(Hallucination ?
-			    "in touch with the cosmos." :
-			    "a strange mental acuity.");
-			HTelepat |= FROMOUTSIDE;
-			if(Hallucination)
-				change_uinsight(1);
-			/* If blind, make sure monsters show up. */
-			if (Blind) see_monsters();
-		}
+			debugpline("Trying to give telepathy");
+			if(!(HTelepat & FROMOUTSIDE)) {
+				You_feel(Hallucination ? "in touch with the cosmos." : "a strange mental acuity.");
+				give_intrinsic(TELEPAT, -1);
+				if(Hallucination) change_uinsight(1);
+				/* If blind, make sure monsters show up. */
+				if (Blind) see_monsters();
+			}
 		break;
 	    default:
-#ifdef DEBUG
-		debugpline("Tried to give an impossible intrinsic");
-#endif
+			debugpline("Tried to give an impossible intrinsic");
 		break;
 	}
 }
@@ -2142,13 +2011,11 @@ STATIC_OVL void
 start_eating(otmp)		/* called as you start to eat */
 	register struct obj *otmp;
 {
-#ifdef DEBUG
-	debugpline("start_eating: %lx (victual = %lx)", otmp, victual.piece);
+	/*debugpline("start_eating: %lx (victual = %lx)", otmp, victual.piece);
 	debugpline("reqtime = %d", victual.reqtime);
 	debugpline("(original reqtime = %d)", objects[otmp->otyp].oc_delay);
 	debugpline("nmod = %d", victual.nmod);
-	debugpline("oeaten = %d", otmp->oeaten);
-#endif
+	debugpline("oeaten = %d", otmp->oeaten);*/
 	victual.fullwarn = victual.doreset = FALSE;
 	victual.eating = TRUE;
 
@@ -2415,21 +2282,11 @@ struct obj *otmp;
 		}
 		break;
 	    case AMULET_OF_DRAIN_RESISTANCE:
-#ifdef DEBUG
 			debugpline("Trying to give drain resistance");
-#endif
-			if( !(HDrain_resistance) ) {
-				You(Hallucination ? "are bouncing off the walls!" :
-					"feel especially energetic.");
-			}
-			if( (HDrain_resistance & TIMEOUT) + 1000 < TIMEOUT) {
-				long timer = (HDrain_resistance & TIMEOUT)+1000;
-				HDrain_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				HDrain_resistance |= timer; //set new timer
-			}
-			else{
-				HDrain_resistance |= TIMEOUT; //set timer to max value
-			}
+			if (!(HDrain_resistance))
+				You(Hallucination ? "are bouncing off the walls!" : "feel especially energetic.");
+			
+			give_intrinsic(DRAIN_RES, 1000L);
 		break;
 	    case RIN_SUSTAIN_ABILITY:
 	    case AMULET_OF_LIFE_SAVING:
@@ -3862,17 +3719,13 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    basenutrit -= drainlevel(otmp);
 	}
 
-#ifdef DEBUG
-	debugpline("before rounddiv: victual.reqtime == %d", victual.reqtime);
+	/*debugpline("before rounddiv: victual.reqtime == %d", victual.reqtime);
 	debugpline("oeaten == %d, basenutrit == %d", otmp->oeaten, basenutrit);
-	debugpline("nutrit == %d, cnutrit == %d", nutrit, otmp->otyp == CORPSE ?
-	  mons[otmp->corpsenm].cnutrit : objects[otmp->otyp].oc_nutrition);
-#endif
+	debugpline("nutrit == %d, cnutrit == %d", nutrit, otmp->otyp == CORPSE ?*
+	  mons[otmp->corpsenm].cnutrit : objects[otmp->otyp].oc_nutrition);*/
 	victual.reqtime = (basenutrit == 0 ? 0 : (u.sealsActive&SEAL_AHAZU) ? 1 : 
 		rounddiv(victual.reqtime * (long)nutrit, basenutrit));
-#ifdef DEBUG
-	debugpline("after rounddiv: victual.reqtime == %d", victual.reqtime);
-#endif
+	//debugpline("after rounddiv: victual.reqtime == %d", victual.reqtime);
 	/* calculate the modulo value (nutrit. units per round eating)
 	 * [ALI] Note: although this is not exact, the remainder is
 	 *       now dealt with in done_eating().
@@ -4042,9 +3895,7 @@ register int num;
 {
 	/* See comments in newuhs() for discussion on force_save_hs */
 	boolean iseating = (occupation == eatfood) || force_save_hs;
-#ifdef DEBUG
-	debugpline("lesshungry(%d)", num);
-#endif
+ 	//debugpline("lesshungry(%d)", num);
 	if(Race_if(PM_INCANTIFIER)) u.uen += num;
 	else u.uhunger += num;
 	if(((Race_if(PM_INCANTIFIER) && u.uen > u.uenmax) ||

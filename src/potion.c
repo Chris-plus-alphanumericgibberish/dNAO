@@ -1132,24 +1132,11 @@ as_extra_healing:
 				}
 			}
 		}
-		if((HSlow_digestion&TIMEOUT) + 5000L < TIMEOUT){
-			long timer = (HSlow_digestion&TIMEOUT) + 5000L;
-			HSlow_digestion &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HSlow_digestion |= timer; //set new timer
-		}
-		else{
-			HSlow_digestion |= TIMEOUT; //set timer to max value
-		}
+		give_intrinsic(SLOW_DIGESTION, 5000L);
 		if(!Breathless)
 			You("no longer feel the need to breathe!");
-		if((HMagical_breathing&TIMEOUT) + 5000L < TIMEOUT){
-			long timer = (HMagical_breathing&TIMEOUT) + 5000L;
-			HMagical_breathing &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-			HMagical_breathing |= timer; //set new timer
-		}
-		else{
-			HMagical_breathing |= TIMEOUT; //set timer to max value
-		}
+		give_intrinsic(MAGICAL_BREATHING, 5000L);
+		
 		break;
 	case POT_LEVITATION:
 	case SPE_LEVITATION:

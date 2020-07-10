@@ -4305,14 +4305,7 @@ use_doll(obj)
 		case DOLL_OF_JUMPING:
 			if (jump(4)){
 				res = 1;
-				if((HJumping&TIMEOUT) + 100L < TIMEOUT){
-					long timer = (HJumping&TIMEOUT) + 100L;
-					HJumping &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-					HJumping |= timer; //set new timer
-				}
-				else{
-					HJumping |= TIMEOUT; //set timer to max value
-				}
+				give_intrinsic(JUMPING, 100L);
 				if(!Blind)
 					pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 				else pline("The little doll vanishes.");
@@ -4356,14 +4349,7 @@ use_doll(obj)
 		case DOLL_OF_CHASTITY:
 			res = 1;
 			pline("You feel chaste.");
-			if((HChastity&TIMEOUT) + 100L < TIMEOUT){
-				long timer = (HChastity&TIMEOUT) + 100L;
-				HChastity &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				HChastity |= timer; //set new timer
-			}
-			else{
-				HChastity |= TIMEOUT; //set timer to max value
-			}
+			give_intrinsic(CHASTITY, 100L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
@@ -4373,15 +4359,7 @@ use_doll(obj)
 			res = 1;
 			if(!Blind)
 				pline("The doll swings its %s in wide arcs.", rn2(2) ? "greatsword" : "greataxe");
-			if((HCleaving&TIMEOUT) + 100L < TIMEOUT){
-				long timer = (HCleaving&TIMEOUT) + 100L;
-				HCleaving &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				HCleaving |= timer; //set new timer
-				pline("You feel ready to cleave through foes left and right!");
-			}
-			else{
-				HCleaving |= TIMEOUT; //set timer to max value
-			}
+			give_intrinsic(CLEAVING, 100L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
@@ -4406,14 +4384,7 @@ use_doll(obj)
 			if (Golded) fix_petrification();
 			res = 1;
 			pline("You feel very healthy.");
-			if((HGoodHealth&TIMEOUT) + 100L < TIMEOUT){
-				long timer = (HGoodHealth&TIMEOUT) + 100L;
-				HGoodHealth &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				HGoodHealth |= timer; //set new timer
-			}
-			else{
-				HGoodHealth |= TIMEOUT; //set timer to max value
-			}
+			give_intrinsic(GOOD_HEALTH, 100L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
@@ -4425,14 +4396,7 @@ use_doll(obj)
 				(Upolyd && u.mh < u.mhmax)
 			)
 				pline("Your wounds begin rapidly knitting shut.");
-			if((RapidHealing&TIMEOUT) + 5L < TIMEOUT){
-				long timer = (RapidHealing&TIMEOUT) + 5L;
-				RapidHealing &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				RapidHealing |= timer; //set new timer
-			}
-			else{
-				RapidHealing |= TIMEOUT; //set timer to max value
-			}
+			give_intrinsic(RAPID_HEALING, 5L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
@@ -4442,16 +4406,7 @@ use_doll(obj)
 			res = 1;
 			if(!Blind)
 				pline("The many-armed doll begins dancing!");
-			if((HDestruction&TIMEOUT) + 8L < TIMEOUT){
-				long timer = (HDestruction&TIMEOUT) + 8L;
-				if(!Destruction)
-					You("begin radiating waves of destruction!");
-				HDestruction &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				HDestruction |= timer; //set new timer
-			}
-			else{
-				HDestruction |= TIMEOUT; //set timer to max value
-			}
+			give_intrinsic(DESTRUCTION, 8L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
@@ -4479,14 +4434,7 @@ use_doll(obj)
 			res = 1;
 			if(!Blind)
 				pline("The doll opens its umbrella, and a rubbery film forms around your body!");
-			if((HPreservation&TIMEOUT) + 1000L < TIMEOUT){
-				long timer = (HPreservation&TIMEOUT) + 1000L;
-				HPreservation &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				HPreservation |= timer; //set new timer
-			}
-			else{
-				HPreservation |= TIMEOUT; //set timer to max value
-			}
+			give_intrinsic(PRESERVATION, 1000L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
@@ -4496,14 +4444,7 @@ use_doll(obj)
 			res = 1;
 			if(!Blind)
 				pline("The doll draws a wand with blinding speed!");
-			if((HQuickDraw&TIMEOUT) + 100L < TIMEOUT){
-				long timer = (HQuickDraw&TIMEOUT) + 100L;
-				HQuickDraw &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				HQuickDraw |= timer; //set new timer
-			}
-			else{
-				HQuickDraw |= TIMEOUT; //set timer to max value
-			}
+			give_intrinsic(QUICK_DRAW, 100L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
@@ -4605,14 +4546,7 @@ use_doll(obj)
 		case DOLL_OF_CLEAR_THINKING:
 			res = 1;
 			pline("The doll takes up your mental burdens!");
-			if((HClearThoughts&TIMEOUT) + 100L < TIMEOUT){
-				long timer = (HClearThoughts&TIMEOUT) + 100L;
-				HClearThoughts &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				HClearThoughts |= timer; //set new timer
-			}
-			else{
-				HClearThoughts |= TIMEOUT; //set timer to max value
-			}
+			give_intrinsic(CLEAR_THOUGHTS, 100L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
@@ -4620,16 +4554,7 @@ use_doll(obj)
 		break;
 		case DOLL_OF_MIND_BLASTING:
 			res = 1;
-			if((HMindblasting&TIMEOUT) + 8L < TIMEOUT){
-				long timer = (HMindblasting&TIMEOUT) + 8L;
-				if(!Mindblasting)
-					You("begin radiating waves of mental energy!");
-				HMindblasting &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
-				HMindblasting |= timer; //set new timer
-			}
-			else{
-				HMindblasting |= TIMEOUT; //set timer to max value
-			}
+			give_intrinsic(MIND_BLASTS, 8L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
