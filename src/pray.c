@@ -4473,11 +4473,11 @@ boolean yourinvent;
 	    /* The chance goes down as the number of artifacts goes up */
 		/* Priests now only count gifts in this calculation, found artifacts are excluded */
 		struct obj *otmp = (struct obj *)0;
-		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || uwep->oartifact) && !(uwep->oproperties&OPROP_ACIDW))
+		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || uwep->oartifact) && !check_oprop(uwep, OPROP_ACIDW))
 			otmp = uwep;
-		else if (uarmg && u.umartial && uarmg->oartifact && !(uarmg->oproperties&OPROP_ACIDW))
+		else if (uarmg && u.umartial && uarmg->oartifact && !check_oprop(uarmg, OPROP_ACIDW))
 			otmp = uarmg;
-		else if (uarmf && u.umartial && uarmf->oartifact && !(uarmf->oproperties&OPROP_ACIDW))
+		else if (uarmf && u.umartial && uarmf->oartifact && !check_oprop(uarmf, OPROP_ACIDW))
 			otmp = uarmf;
 			
 	    if(u.ulevel > 2 && u.uluck >= 0 && (!flags.made_know || otmp) && maybe_god_gives_gift()){
