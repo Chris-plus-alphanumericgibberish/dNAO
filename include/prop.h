@@ -111,6 +111,8 @@
 #define CLEAR_THOUGHTS				1 + QUICK_DRAW
 #define LAST_PROP		(CLEAR_THOUGHTS)
 
+#define MPROP_SIZE					(LAST_PROP/32 + 1)
+
 /*** Where the properties come from ***/
 /* Definitions were moved here from obj.h and you.h */
 struct prop {

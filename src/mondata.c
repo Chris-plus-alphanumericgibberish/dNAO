@@ -122,6 +122,9 @@ struct permonst * ptr;
 	set_mintrinsic(species_controls_teleports(mon->data), TELEPORT_CONTROL);
 	set_mintrinsic(species_is_telepathic(mon->data), TELEPAT);
 #undef set_mintrinsic
+	for(int i = 0; i < MPROP_SIZE; i++){
+		mon->mintrinsics[i] |= mon->acquired_trinsics[i];
+	}
     return;
 }
 
@@ -131,6 +134,7 @@ struct monst * mon;
 long intrinsic;
 {
 	mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32);
+	mon->acquired_trinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32);
 }
 
 void
@@ -139,6 +143,7 @@ struct monst * mon;
 long intrinsic;
 {
 	mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
+	mon->acquired_trinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
 }
 
 void

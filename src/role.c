@@ -1263,8 +1263,8 @@ god_faction(gptr)
 
 struct monst *
 god_priest(gptr, sx, sy, sanctum)
-	int sx, sy;
 	const char *gptr;
+	int sx, sy;
 	int sanctum;   /* is it the seat of the high priest? */
 {
 	struct monst *priest;
@@ -1299,6 +1299,9 @@ god_priest(gptr, sx, sy, sanctum)
 		priest = makemon(&mons[sanctum ? PM_HIGH_PRIEST : PM_ALIGNED_PRIEST],
 			sx + 1, sy, NO_MM_FLAGS);
 		
+		if(gptr == Moloch){
+			give_mintrinsic(priest, POISON_RES);
+		}
 		
 		if(role != -1){
 			return priest;

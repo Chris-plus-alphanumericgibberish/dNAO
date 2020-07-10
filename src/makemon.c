@@ -5689,11 +5689,14 @@ register struct	monst	*mtmp;
 				case 5: (void) mongets(mtmp, POT_EXTRA_HEALING);
 		    }
 		} else if (ptr->msound == MS_PRIEST ||
-			quest_mon_represents_role(ptr,PM_PRIEST)) {
+			quest_mon_represents_role(ptr,PM_PRIEST)
+		) {
 		    (void) mongets(mtmp, rn2(7) ? ROBE :
 					     rn2(3) ? CLOAK_OF_PROTECTION :
 						 CLOAK_OF_MAGIC_RESISTANCE);
 		    (void) mongets(mtmp, BUCKLER);
+			if(In_moloch_temple(&u.uz))
+				give_mintrinsic(mtmp, POISON_RES);
 #ifndef GOLDOBJ
 		    mtmp->mgold = (long)rn1(10,20);
 			u.spawnedGold += mtmp->mgold;
