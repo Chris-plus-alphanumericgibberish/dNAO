@@ -1170,10 +1170,6 @@ as_extra_healing:
 		break;
 	case POT_GAIN_ENERGY:			/* M. Stephenson */
 		{	register int num;
-			if(otmp->cursed)
-			    You_feel("lackluster.");
-			else
-			    pline("Magical energies course through your body.");
 			num = rnd(5) + 5 * otmp->blessed + 1;
 			u.uenbonus += (otmp->cursed) ? -num : num;
 			calc_total_maxen();
@@ -1183,6 +1179,11 @@ as_extra_healing:
 			if(u.uen <= 0 && !Race_if(PM_INCANTIFIER)) u.uen = 0;
 			flags.botl = 1;
 			if(!otmp->cursed) exercise(A_WIS, TRUE);
+			//Doing the print last causes the bottom line update to show the changed energy scores.
+			if(otmp->cursed)
+			    You_feel("lackluster.");
+			else
+			    pline("Magical energies course through your body.");
 		}
 		break;
 	case POT_OIL:				/* P. Winner */
