@@ -5625,6 +5625,8 @@ arti_invoke(obj)
 					if(mtmp->data->geno & G_GENO){
 						if (DEADMONSTER(mtmp)) continue;
 						mtmp->mhp = mtmp->mhp/4 + 1;
+						if(mon_can_see_you(mtmp) && !mtmp->mtame) //pets are willing to take the colateral damage
+							setmangry(mtmp);
 					}
 				}
 				pline_The("entire dungeon is quaking around you!");
@@ -6138,6 +6140,7 @@ arti_invoke(obj)
 					pline("But %s is already beyond Acheron.", mon_nam(mtmp));
 				else
 					xkilled(mtmp, 1);
+				setmangry(mtmp);
 			}
 			else {
 				/* reset timeout; we didn't actually use the invoke */
@@ -6596,6 +6599,7 @@ arti_invoke(obj)
 								) mtmp->mhp = (int)(.75*mtmp->mhp + 1);
 								else mtmp->mhp = 1;		/* almost dead */
 								expels(mtmp, mtmp->data, !is_animal(mtmp->data));
+								setmangry(mtmp);
 							} else{
 								pline("The %s quickly lengthens and pierces %s %s",
 									obj->oartifact == ART_SCEPTRE_OF_LOLTH ? "Sceptre" : "Rod", 
@@ -6666,6 +6670,7 @@ arti_invoke(obj)
 								if (canseemon(mtmp))
 									pline("%s suddenly seems weaker!", Monnam(mtmp));
 								}
+								setmangry(mtmp);
 								healup(2*dmg, 0, FALSE, TRUE);
 								You_feel("better.");
 							}
@@ -6681,7 +6686,8 @@ arti_invoke(obj)
 							int dmg = d(6,6);
 							if (resists_poison(mtmp)){
 								shieldeff(mtmp->mx, mtmp->my);
-					break;
+								setmangry(mtmp);
+								break;
 							} else {
 								if(!rn2(10)) dmg += mtmp->mhp;
 								mtmp->mhp -= dmg;
@@ -6691,9 +6697,10 @@ arti_invoke(obj)
 								if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < 1)
 									xkilled(mtmp, 1);
 								else {
-								if (canseemon(mtmp))
-									pline("%s suddenly seems weaker!", Monnam(mtmp));
+									if (canseemon(mtmp))
+										pline("%s suddenly seems weaker!", Monnam(mtmp));
 								}
+								setmangry(mtmp);
 							}
 						}
 					break;
@@ -6919,10 +6926,10 @@ arti_invoke(obj)
 									mtmp->mhp -= d(5,15);
 									if (mtmp->mhp <= 0) xkilled(mtmp, 1);
 									else {
-										setmangry(mtmp);
 										mtmp->mstun = 1;
 										mtmp->mconf = 1;
 									}
+									setmangry(mtmp);
 								}
 							}
 							if(HTelepat & INTRINSIC){
@@ -7012,6 +7019,8 @@ arti_invoke(obj)
 					pline("%s screams in agony!",Monnam(mtmp));
 					mtmp->mhp /= 4;
 					if (mtmp->mhp < 1) mtmp->mhp = 1;
+					if(!mtmp->mtame) //pets are willing to take the colateral damage
+						setmangry(mtmp);
 				}
 			}
 			/* Tsk,tsk.. */
@@ -7049,6 +7058,7 @@ arti_invoke(obj)
 
               if(mtmp->mhp <= 0)
                 xkilled(mtmp, 1);
+			  setmangry(mtmp);
             }
           } else You_feel("that you should be wielding %s.", the(xname(obj)));
         } break;
@@ -7245,6 +7255,7 @@ arti_invoke(obj)
                     } else {
                       pline("%s seems no deader than before.", The(Monnam(mtmp)));
                     }
+					setmangry(mtmp);
                   } else {
                     pline("%s resists.", the(Monnam(mtmp)));
                   }
