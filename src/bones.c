@@ -78,7 +78,7 @@ boolean restore;
 		if (restore) {
 			/* rings and wands' material should always match their description */
 			if (otmp->oclass == RING_CLASS || otmp->oclass == WAND_CLASS)
-				otmp->obj_material = objects[otmp->otyp].oc_material;
+				set_material_gm(otmp, objects[otmp->otyp].oc_material);
 		}
 		if (!restore) {
 			/* do not zero out o_ids for ghost levels anymore */
@@ -120,7 +120,7 @@ boolean restore;
 			    curse(otmp);
 			} else if (otmp->otyp == BELL_OF_OPENING) {
 			    otmp->otyp = BELL;
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 			    curse(otmp);
 				fix_object(otmp);
 			} else if (otmp->otyp == SPE_BOOK_OF_THE_DEAD) {
@@ -260,15 +260,15 @@ struct obj *cont;
 		}
 		if(otmp){
 			if(Race_if(PM_ANDROID)){
-				otmp->obj_material = PLASTIC;
+				set_material_gm(otmp, PLASTIC);
 				fix_object(otmp);
 			}
 			if(Race_if(PM_CLOCKWORK_AUTOMATON)){
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 			}
 			if(Race_if(PM_WORM_THAT_WALKS)){
-				otmp->obj_material = SHELL_MAT;
+				set_material_gm(otmp, SHELL_MAT);
 				fix_object(otmp);
 			}
 			if(rn2(5)) curse(otmp);

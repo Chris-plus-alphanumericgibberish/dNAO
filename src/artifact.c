@@ -6573,12 +6573,13 @@ arti_invoke(obj)
 					break;
 					case COMMAND_WHIP:
 						uwep->otyp = BULLWHIP;
-						if (uwep->oartifact == ART_XIUHCOATL)
-							uwep->obj_material = artilist[uwep->oartifact].material;
+						if(uwep->oartifact == ART_XIUHCOATL && uwep->obj_material == WOOD)
+							set_material_gm(uwep, artilist[uwep->oartifact].material);
 					break;
 					case COMMAND_ATLATL:
 						uwep->otyp = ATLATL;
-						uwep->obj_material = WOOD;
+						if(uwep->oartifact == ART_XIUHCOATL && uwep->obj_material == artilist[uwep->oartifact].material)
+							set_material_gm(uwep, WOOD);
 					break;
 					/*These effects are limited by timeout*/
 					case COMMAND_LADDER:

@@ -646,7 +646,7 @@ int dy;							/* */
 		/* create iron bars */
 		for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
 			otmp = mksobj_at(BAR, newx, newy, FALSE, FALSE);
-			otmp->obj_material = IRON;
+			set_material_gm(otmp, IRON);
 			otmp->spe = 0;
 			otmp->cursed = otmp->blessed = FALSE;
 		}

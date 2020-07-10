@@ -2167,15 +2167,15 @@ register struct obj *obj;
 	if(glyph){
 		remove_thought(otyp);
 		if(Race_if(PM_ANDROID)){
-			glyph->obj_material = PLASTIC;
+			set_material_gm(glyph, PLASTIC);
 			fix_object(glyph);
 		}
 		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
-			glyph->obj_material = COPPER;
+			set_material_gm(glyph, COPPER);
 			fix_object(glyph);
 		}
 		if(Race_if(PM_WORM_THAT_WALKS)){
-			glyph->obj_material = SHELL_MAT;
+			set_material_gm(glyph, SHELL_MAT);
 			fix_object(glyph);
 		}
 		hold_another_object(glyph, "You drop %s!", doname(glyph), (const char *)0);

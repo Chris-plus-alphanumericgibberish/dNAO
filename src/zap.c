@@ -1676,7 +1676,7 @@ poly_obj(obj, id)
 		/* turn gold scrolls of law into a handful of gold pieces */
 		otmp->otyp = GOLD_PIECE;
 		otmp->oclass = COIN_CLASS;
-		otmp->obj_material = GOLD;
+		set_material_gm(otmp, GOLD);
 		otmp->quan = rnd(50 * obj->quan) + 50 * obj->quan;
 	}
 	
@@ -4580,7 +4580,7 @@ int type;
 		mon->mhpmax = 20+rn2(4);
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 		otmp = mksobj(SHACKLES, FALSE, FALSE);
-		otmp->obj_material = IRON;
+		set_material_gm(otmp, IRON);
 		add_oprop(otmp, OPROP_ELECW);
 		otmp->oeroded = 1;
 		fix_object(otmp);
@@ -4908,7 +4908,7 @@ register struct obj *obj;		   /* no texts here! */
 	obj->onamelth = 0;		/* no names */
 	obj->oxlth = 0;			/* no extra data */
 	obj->oattached = OATTACHED_NOTHING;
-	obj->obj_material = MINERAL;
+	set_material_gm(obj, MINERAL);
 	obj->owt = weight(obj);
 	set_material(obj, mat);
 	if (obj->where == OBJ_FLOOR) {

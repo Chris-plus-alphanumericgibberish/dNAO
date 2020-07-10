@@ -5038,7 +5038,7 @@ typfnd:
 			){
 			    otmp->otyp = GRAY_DRAGON_SCALE_MAIL +
 						    mntmp - PM_GRAY_DRAGON;
-				otmp->obj_material = objects[otmp->otyp].oc_material;
+				set_material_gm(otmp, objects[otmp->otyp].oc_material);
 			}
 			break;
 		case KITE_SHIELD:
@@ -5048,7 +5048,7 @@ typfnd:
 						mntmp <= PM_YELLOW_DRAGON)
 			    otmp->otyp = GRAY_DRAGON_SCALE_SHIELD +
 						    mntmp - PM_GRAY_DRAGON;
-				otmp->obj_material = objects[otmp->otyp].oc_material;
+				set_material_gm(otmp, objects[otmp->otyp].oc_material);
 			break;
 		}
 	}

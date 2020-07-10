@@ -482,7 +482,7 @@ learn()
 					otmp = mksobj(rnd(4) ? ELVEN_DAGGER : DAGGER, TRUE, FALSE);
 					otmp->spe = d(1,4)+1;
 					otmp->quan += d(2,3);
-					if(otmp->otyp == DAGGER) otmp->obj_material = SILVER;
+					if(otmp->otyp == DAGGER) set_material_gm(otmp, SILVER);
 					pline("...it's been hollowed out.  There is a set of throwing daggers inside.");
 					useup(book);
 					otmp = hold_another_object(otmp, "The %s out.",
@@ -3897,7 +3897,7 @@ spiriteffects(power, atme)
 			qvr->cursed = 0;
 			qvr->quan = 1;
 			qvr->spe = d(5,dsize) + 8;
-			qvr->obj_material = SHADOWSTEEL;
+			set_material_gm(qvr, SHADOWSTEEL);
 			qvr->opoisoned = (OPOISON_BASIC|OPOISON_BLIND);
 			add_oprop(qvr, OPROP_PHSEW);
 			projectile(&youmonst, qvr, (void *)0, HMON_FIRED, mon->mx, mon->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);

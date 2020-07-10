@@ -3620,7 +3620,7 @@ scatter_weapons(){
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
-	obj->obj_material = SILVER;
+	set_material_gm(obj, SILVER);
 	fix_object(obj);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
@@ -3630,7 +3630,7 @@ scatter_weapons(){
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
-	obj->obj_material = SILVER;
+	set_material_gm(obj, SILVER);
 	fix_object(obj);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
@@ -3640,7 +3640,7 @@ scatter_weapons(){
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
-	obj->obj_material = SILVER;
+	set_material_gm(obj, SILVER);
 	fix_object(obj);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
@@ -3678,7 +3678,7 @@ scatter_weapons(){
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
-	obj->obj_material = METAL;
+	set_material_gm(obj, METAL);
 	add_oprop(obj, OPROP_ELECW);
 	fix_object(obj);
 	add_to_migration(obj);
@@ -3688,7 +3688,7 @@ scatter_weapons(){
 	obj = mksobj(SPEAR, TRUE, FALSE);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
-	obj->obj_material = METAL;
+	set_material_gm(obj, METAL);
 	add_oprop(obj, OPROP_ELECW);
 	fix_object(obj);
 	add_to_migration(obj);
@@ -3698,7 +3698,7 @@ scatter_weapons(){
 	obj = mksobj(LONG_SWORD, TRUE, FALSE);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
-	obj->obj_material = METAL;
+	set_material_gm(obj, METAL);
 	add_oprop(obj, OPROP_ELECW);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
@@ -3707,7 +3707,7 @@ scatter_weapons(){
 	obj = mksobj(SABER, TRUE, FALSE);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
-	obj->obj_material = METAL;
+	set_material_gm(obj, METAL);
 	fix_object(obj);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
@@ -3716,7 +3716,7 @@ scatter_weapons(){
 	obj = mksobj(KATANA, TRUE, FALSE);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
-	obj->obj_material = METAL;
+	set_material_gm(obj, METAL);
 	add_oprop(obj, OPROP_AXIOW);
 	fix_object(obj);
 	add_to_migration(obj);

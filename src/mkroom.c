@@ -1813,7 +1813,7 @@ mkminorspire()
 			    otmp = mksobj(LONG_SWORD, FALSE, FALSE);
 				otmp = oname(otmp, artiname(ART_MIRROR_BRAND));
 				if(!otmp->oartifact){
-					otmp->obj_material = SILVER;
+					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 					mksobj_at(SHIELD_OF_REFLECTION, x, y, TRUE, FALSE);
 				}
@@ -1823,19 +1823,19 @@ mkminorspire()
 			    otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
 				otmp = oname(otmp, artiname(ART_SOULMIRROR));
 				if(!otmp->oartifact){
-					otmp->obj_material = MITHRIL;
+					set_material_gm(otmp, MITHRIL);
 					fix_object(otmp);
 					mksobj_at(AMULET_OF_REFLECTION, x, y, FALSE, FALSE);
 				}
 				place_object(otmp, x, y);
 				if(find_sawant()){
 					otmp = mksobj(find_sawant(), FALSE, FALSE);
-					otmp->obj_material = SILVER;
+					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 					
 					otmp = mksobj(BUCKLER, FALSE, FALSE);
-					otmp->obj_material = MITHRIL;
+					set_material_gm(otmp, MITHRIL);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 				} else {
@@ -1846,7 +1846,7 @@ mkminorspire()
 			case 1:
 				if(find_sawant()){
 					otmp = mksobj(find_sawant(), FALSE, FALSE);
-					otmp->obj_material = SILVER;
+					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 					mksobj_at(SHIELD_OF_REFLECTION, x, y, FALSE, FALSE);
@@ -2036,13 +2036,13 @@ mkfishinghut(left)
 				if(!rn2(9)) mksobj_at(CRAM_RATION, x+1, y+1, TRUE, FALSE);
 				if(!rn2(100)){
 					otmp = mkobj(AMULET_CLASS, TRUE);
-					otmp->obj_material = GOLD;
+					set_material_gm(otmp, GOLD);
 					otmp->owt = weight(otmp);
 					place_object(otmp, x+i, y+j);
 				}
 				if(!rn2(100)){
 					otmp = mksobj(find_gcirclet(), TRUE, FALSE);
-					otmp->obj_material = GOLD;
+					set_material_gm(otmp, GOLD);
 					otmp->owt = weight(otmp);
 					place_object(otmp, x+i, y+j);
 				}
@@ -3450,7 +3450,7 @@ mkinvertzigg()
 		
 		if(rn2(3)){
 			chest = mksobj_at(CHEST, x+size/2, y+size/2, TRUE, TRUE);
-			chest->obj_material = IRON;
+			set_material_gm(chest, IRON);
 			fix_object(chest);
 			if ((otmp = mksobj(TORCH, TRUE, FALSE)) != 0) {
 				otmp->quan = rnd(6);
@@ -3637,7 +3637,7 @@ int typ;
 				otmp->blessed = FALSE;
 				otmp->objsize = MZ_GIGANTIC;
 				otmp->spe = 5;
-				otmp->obj_material = BONE;
+				set_material_gm(otmp, BONE);
 				otmp->quan = rn1(5,5);
 				otmp->opoisoned = (OPOISON_PARAL|OPOISON_ACID);
 				fix_object(otmp);
@@ -3674,44 +3674,44 @@ int typ;
 			nwep = rnd(6);
 			for(tries = 0; tries < nwep; tries++){
 				otmp = mksobj_at(SCIMITAR, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 			}
 			for(; nwep < 6; nwep++){
 				otmp = mksobj_at(ROUNDSHIELD, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				otmp->objsize = MZ_SMALL;
 				fix_object(otmp);
 			}
 			if(rn2(2)){
 				otmp = mksobj_at(GAUNTLETS, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 				otmp = mksobj_at(GAUNTLETS, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 				otmp = mksobj_at(GAUNTLETS, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 			} else if(rn2(2)){
 				otmp = mksobj_at(GAUNTLETS_OF_POWER, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 				otmp = mksobj_at(GAUNTLETS_OF_POWER, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 				otmp = mksobj_at(GAUNTLETS_OF_POWER, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 			} else {
 				otmp = mksobj_at(ORIHALCYON_GAUNTLETS, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 				otmp = mksobj_at(ORIHALCYON_GAUNTLETS, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 				otmp = mksobj_at(ORIHALCYON_GAUNTLETS, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 			}
 		} else if(rn2(9)){
@@ -3721,81 +3721,81 @@ int typ;
 				for(tries = rn1(3,3); tries > 0; tries--)
 					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 				otmp = mksobj_at(!rn2(3) ? STILETTO : !rn2(2) ? AXE : WAR_HAMMER, x, y, TRUE, FALSE);
-				otmp->obj_material = COPPER;
+				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 				mksobj_at(WORTHLESS_PIECE_OF_WHITE_GLASS + rn2(WORTHLESS_PIECE_OF_VIOLET_GLAS - WORTHLESS_PIECE_OF_WHITE_GLASS + 1), x, y, TRUE, FALSE);
 			} else if(rn2(10)){	//9 out of 100
 				otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
-				otmp->obj_material = SILVER;
+				set_material_gm(otmp, SILVER);
 				fix_object(otmp);
 				for(tries = rn1(3,3); tries > 0; tries--){
 					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
-					otmp->obj_material = SILVER;
+					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 				}
 				if(find_sawant()){
 					otmp = mksobj(find_sawant(), TRUE, FALSE);
-					otmp->obj_material = SILVER;
+					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 				} else {
 					otmp = mksobj_at(PISTOL, x, y, TRUE, FALSE);
-					otmp->obj_material = SILVER;
+					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 					otmp = mksobj_at(BULLET, x, y, TRUE, FALSE);
-					otmp->obj_material = SILVER;
+					set_material_gm(otmp, SILVER);
 					otmp->quan += rn1(20,20);
 					fix_object(otmp);
 				}
 				otmp = mksobj_at(VIBROBLADE, x, y, TRUE, FALSE);
-				otmp->obj_material = SILVER;
+				set_material_gm(otmp, SILVER);
 				fix_object(otmp);
 				mksobj_at(AMBER + rn2(JADE - AMBER + 1), x, y, TRUE, FALSE);
 			} else if(rn2(10)){	//9 out of 1000
 				otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
-				otmp->obj_material = GOLD;
+				set_material_gm(otmp, GOLD);
 				fix_object(otmp);
 				for(tries = rn1(3,3); tries > 0; tries--){
 					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
-					otmp->obj_material = GOLD;
+					set_material_gm(otmp, GOLD);
 					fix_object(otmp);
 				}
 				if(find_gawant()){
 					otmp = mksobj(find_gawant(), TRUE, FALSE);
-					otmp->obj_material = GOLD;
+					set_material_gm(otmp, GOLD);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 				} else {
 					otmp = mksobj_at(ARM_BLASTER, x, y, TRUE, FALSE);
-					otmp->obj_material = GOLD;
+					set_material_gm(otmp, GOLD);
 					fix_object(otmp);
 				}
 				otmp = mksobj_at(FORCE_PIKE, x, y, TRUE, FALSE);
-				otmp->obj_material = GOLD;
+				set_material_gm(otmp, GOLD);
 				fix_object(otmp);
 				mksobj_at(RUBY + rn2(AQUAMARINE - RUBY + 1), x, y, TRUE, FALSE);
 			} else {			//1 out of 1000
 				otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
-				otmp->obj_material = PLATINUM;
+				set_material_gm(otmp, PLATINUM);
 				fix_object(otmp);
 				for(tries = rn1(3,3); tries > 0; tries--){
 					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
-					otmp->obj_material = PLATINUM;
+					set_material_gm(otmp, PLATINUM);
 					fix_object(otmp);
 				}
 				if(find_pawant()){
 					otmp = mksobj(find_pawant(), TRUE, FALSE);
-					otmp->obj_material = PLATINUM;
+					set_material_gm(otmp, PLATINUM);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 				} else {
 					otmp = mksobj_at(BFG, x, y, TRUE, FALSE);
-					otmp->obj_material = PLATINUM;
+					set_material_gm(otmp, PLATINUM);
 					fix_object(otmp);
 				}
 				//Atma Weapon 1/20000
 				otmp = mksobj_at(BEAMSWORD, x, y, TRUE, TRUE);
-				otmp->obj_material = PLATINUM;
+				set_material_gm(otmp, PLATINUM);
 				fix_object(otmp);
 				mksobj_at(MAGICITE_CRYSTAL + rn2(STAR_SAPPHIRE - MAGICITE_CRYSTAL + 1), x, y, TRUE, FALSE);
 			}
@@ -3803,13 +3803,13 @@ int typ;
 			//Unknown rusted scrap pile
 			otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
 			if(otmp){
-				otmp->obj_material = IRON;
+				set_material_gm(otmp, IRON);
 				otmp->oeroded2 = 2;
 				fix_object(otmp);
 			}
 			for(tries = rn1(2,2); tries > 0; tries--){
 				otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
-				otmp->obj_material = IRON;
+				set_material_gm(otmp, IRON);
 				otmp->oeroded2 = 2;
 				fix_object(otmp);
 			}
@@ -4513,13 +4513,13 @@ struct mkroom *sroom;
 					struct obj *chest, *otmp;
 					chest = mksobj_at((rn2(3)) ? BOX : CHEST,
 							 sx, sy, TRUE, FALSE);
-					chest->obj_material = IRON;
+					set_material_gm(chest, IRON);
 					fix_object(chest);
 					for(i = rnd(4); i > 0; i--) switch(rnd(4)){
 						case 1:
 							if(find_riwant()){
 								otmp = mksobj(find_riwant(), TRUE, FALSE);
-								otmp->obj_material = IRON;
+								set_material_gm(otmp, IRON);
 								fix_object(otmp);
 								add_to_container(chest, otmp);
 							}
@@ -4527,14 +4527,14 @@ struct mkroom *sroom;
 						case 2:
 							if(find_iring() > 0){
 								otmp = mksobj(find_iring(), TRUE, FALSE);
-								otmp->obj_material = IRON;
+								set_material_gm(otmp, IRON);
 								fix_object(otmp);
 								add_to_container(chest, otmp);
 							}
 						break;
 						case 3:
 							otmp = mksobj(UPGRADE_KIT, FALSE, FALSE);
-							otmp->obj_material = IRON;
+							set_material_gm(otmp, IRON);
 							fix_object(otmp);
 							add_to_container(chest, otmp);
 						break;
@@ -4546,17 +4546,17 @@ struct mkroom *sroom;
 								break;
 								case 1:
 									otmp = mksobj(MAGIC_WHISTLE, FALSE, FALSE);
-									otmp->obj_material = IRON;
+									set_material_gm(otmp, IRON);
 									fix_object(otmp);
 								break;
 								case 2:
 									otmp = mksobj(BELL, FALSE, FALSE);
-									otmp->obj_material = IRON;
+									set_material_gm(otmp, IRON);
 									fix_object(otmp);
 								break;
 								case 3:
 									otmp = mksobj(BUGLE, FALSE, FALSE);
-									otmp->obj_material = IRON;
+									set_material_gm(otmp, IRON);
 									fix_object(otmp);
 								break;
 							}
@@ -5400,7 +5400,7 @@ mkisland() /* John Harris, modified from mktemple & mkshop,
 	y = (((sroom->hy - sroom->ly) / 2) + sroom->ly);
 	/* Make the treasure, add gold to it, bury & mark it */
 	otmp = mksobj_at(CHEST, x, y, TRUE, TRUE);
-	otmp->obj_material = IRON;
+	set_material_gm(otmp, IRON);
 	fix_object(otmp);
 	ogold = mkgold((long)rn1(u_depth * 100 + 200, 250), x, y);
 	remove_object(ogold);

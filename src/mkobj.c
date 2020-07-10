@@ -338,7 +338,7 @@ struct obj *box;
 		    otmp->owt = weight(otmp);
 		} else while (otmp->otyp == ROCK) {
 		    otmp->otyp = rnd_class(DILITHIUM_CRYSTAL, LOADSTONE);
-			otmp->obj_material = objects[otmp->otyp].oc_material;
+			set_material_gm(otmp, objects[otmp->otyp].oc_material);
 		    if (otmp->quan > 2L) otmp->quan = 1L;
 		    otmp->owt = weight(otmp);
 		}
