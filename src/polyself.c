@@ -301,7 +301,7 @@ boolean forcecontrol;
 			 * illegal monster forces newman(), which is what we
 			 * want if they specified a human.... */
 			else if ((!allow_nopoly_poly && !polyok(&mons[mntmp])) ||
-					(!allow_selfrace_poly && !your_race(&mons[mntmp])))
+					(!allow_selfrace_poly && your_race(&mons[mntmp])))
 				You("cannot polymorph into that.");
 			else break;
 		} while(++tries < 5);
