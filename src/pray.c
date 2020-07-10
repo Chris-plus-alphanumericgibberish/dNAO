@@ -3949,66 +3949,293 @@ aligntyp alignment;
 {
 	register struct obj *otmp;
 	const char *what = (const char *)0;
+	int i, ii, lim, timeout;
 	
 	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(align_gname_full(alignment),alignment);
 	else {
-		switch (rnl(5)) {
-			case 0: /* randomly charge an object */
-			case 1: /* increase weapon bonus */
-				if(uwep && uwep->spe < 7 && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))){
-					uwep->spe++;
+		switch (rn2(6)) {
+			case 0: // randomly increment an ability score
+				i = rn2(A_MAX);
+				for (ii = 0; ii < A_MAX; ii++) {
+					lim = AMAX(i);
+					if (i == A_STR && u.uhs >= 3) --lim;
+					if (ABASE(i) < lim) {
+						ABASE(i) = lim;
+						pline("Wow! You feel good!");
+						break;
+					}
+					if (++i >= A_MAX) i = 0;
 				}
-			case 2: /* randomly identify items in the backpack */
-			case 3: /* do magic mapping */
-			case 4: /* give some food */
-			case 5: /* randomly bless items */
-		    /* weapon takes precedence if it interferes
-		       with taking off a ring or shield */
+				
+				if (ii == A_MAX){
+					i = rn2(A_MAX);
+					for (ii = A_MAX; ii > 0; ii--) {
+						if (adjattrib(i, 1, (ii == 1) ? 0 : -1))
+							break;
+						i = (i+1)%6;
+					}
+				}
+				flags.botl = 1;
+				break;
+			case 1: // increase weapon enchantment
+				if (uwep && uwep->spe < 7 && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)))
+					uwep->spe++;
+				else if (uswapwep && uswapwep->spe < 7 && (uswapwep->oclass == WEAPON_CLASS || is_weptool(uswapwep)))
+					uswapwep->spe++;
+				else if (u.umartial && uarmg && (uarmg->oartifact || !uwep) && uarmg->spe < 5)
+					uarmg->spe++;
+				else if (u.umartial && uarmf && (uarmf->oartifact || !uwep) && uarmf->spe < 5)
+					uarmf->spe++;
+				else if (uleft && objects[uleft->otyp].oc_charged && uleft->spe < 5)
+					uleft->spe++;
+				else if (uright && objects[uright->otyp].oc_charged && uright->spe < 5)
+					uright->spe++;
+				break;
+			case 2: // identify an item
+				if (uwep && not_fully_identified(uwep)) identify(uwep);
+				else if (uswapwep && not_fully_identified(uswapwep)) identify(uswapwep);
+				else if (uamul && not_fully_identified(uamul)) identify(uamul);
+				else if (uleft && not_fully_identified(uleft)) identify(uleft);
+				else if (uright && not_fully_identified(uright)) identify(uright);
+				else if (uarmc && not_fully_identified(uarmc)) identify(uarmc);
+				else if (uarm && not_fully_identified(uarm)) identify(uarm);
+				else if (uarmu && not_fully_identified(uarmu)) identify(uarmu);
+				else if (uarmh && not_fully_identified(uarmh)) identify(uarmh);
+				else if (uarmg && not_fully_identified(uarmg)) identify(uarmf);
+				else if (uarmf && not_fully_identified(uarmf)) identify(uarmf);
+				else if (uarms && not_fully_identified(uarms)) identify(uarms);
+				else {
+					for(otmp=invent; otmp; otmp=otmp->nobj)
+					if (not_fully_identified(otmp)){
+						identify(otmp);
+						break;
+					}
+				}
+				break;
+			case 3: // give an intrinsic for 500-1500 turns, first of pois/slee/fire/cold/shock
+				timeout = rn1(1000, 500);
 
-		    if (uwep && !uwep->blessed) /* weapon */
-			    otmp = uwep;
-		    else if (uswapwep && !uswapwep->blessed) /* secondary weapon */
-			    otmp = uswapwep;
-		    /* gloves come next, due to rings */
-		    else if (uarmg && !uarmg->blessed)    /* gloves */
-			    otmp = uarmg;
-		    /* then shield due to two handed weapons and spells */
-		    else if (uarms && !uarms->blessed)    /* shield */
-			    otmp = uarms;
-		    /* then cloak due to body armor */
-		    else if (uarmc && !uarmc->blessed)    /* cloak */
-			    otmp = uarmc;
-		    else if (uarm && !uarm->blessed)      /* armor */
-			    otmp = uarm;
-		    else if (uarmh && !uarmh->blessed)    /* helmet */
-			    otmp = uarmh;
-		    else if (uarmf && !uarmf->blessed)    /* boots */
-			    otmp = uarmf;
-//ifdef TOURIST
-		    else if (uarmu && !uarmu->blessed)    /* shirt */
-			    otmp = uarmu;
-//endif
-		    /* (perhaps amulet should take precedence over rings?) */
-		    else if (uleft && !uleft->blessed)
-			    otmp = uleft;
-		    else if (uright && !uright->blessed)
-			    otmp = uright;
-		    else if (uamul && !uamul->blessed) /* amulet */
-			    otmp = uamul;
-		    else {
-			    for(otmp=invent; otmp; otmp=otmp->nobj)
-				if (!otmp->blessed)
+				if(!(HPoison_resistance & FROMOUTSIDE)) {
+					You_feel(Poison_resistance ? "especially healthy." : "healthy.");
+					HPoison_resistance |= FROMOUTSIDE;
 					break;
-			    return; /* Nothing to do! */
-		    }
-		    bless(otmp);
-		    otmp->bknown = TRUE;
-		    if (!Blind)
-			    Your("%s %s.",
-				 what ? what :
-				 (const char *)aobjnam (otmp, "softly glow"),
-				 hcolor(NH_AMBER));
-			break;
+				}
+				
+				if(!(HSleep_resistance)) {
+					You_feel("wide awake.");				
+					if((HSleep_resistance & timeout) < TIMEOUT) {
+						long timer = (HSleep_resistance & TIMEOUT) + timeout;
+						HSleep_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+						HSleep_resistance |= timer; //set new timer
+						break;
+					} else {
+						HSleep_resistance |= timeout;
+						break;
+					}
+				}
+				
+				if(!(HFire_resistance)) {
+					You(Hallucination ? "be chillin'." : "feel a momentary chill.");				
+					if((HFire_resistance & timeout) < TIMEOUT) {
+						long timer = (HFire_resistance & TIMEOUT) + timeout;
+						HFire_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+						HFire_resistance |= timer; //set new timer
+						break;
+					} else {
+						HFire_resistance |= timeout;
+						break;
+					}
+				}
+
+				if(!(HCold_resistance)) {
+					You_feel("full of hot air.");
+					if((HCold_resistance & timeout) < TIMEOUT) {
+						long timer = (HFire_resistance & TIMEOUT) + timeout;
+						HCold_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+						HCold_resistance |= timer; //set new timer
+						break;
+					} else {
+						HCold_resistance |= timeout;
+						break;
+					}
+				}
+						
+				if(!(HShock_resistance)) {
+					if (Hallucination)
+						rn2(2) ? You_feel("grounded in reality.") : Your("health currently feels amplified!");
+					else
+						You_feel("well grounded.");
+				
+					if((HShock_resistance & timeout) < TIMEOUT) {
+						long timer = (HFire_resistance & TIMEOUT) + timeout;
+						HShock_resistance &= ~TIMEOUT; //wipe old timer, leaving higher bits in place
+						HShock_resistance |= timer; //set new timer
+						break;
+					} else {
+						HShock_resistance |= timeout;
+						break;
+					}
+				}
+				break;
+			case 4: // repair an item
+				for (i = 3; i >= 0; i--){
+					if (uwep && (uwep->oeroded == i || uwep->oeroded2 == i)){
+						uwep->rknown = TRUE;
+						if (uwep->oeroded == i && i > 0){
+							uwep->oeroded--;
+							break;
+						} else if (uwep->oeroded2 == i && i > 0){
+							uwep->oeroded2--;
+							break;
+						} else if (uwep->oeroded == i && uwep->oeroded2 == i && !(uwep->oerodeproof)){
+							uwep->oerodeproof = TRUE;
+							break;
+						}
+					} if (uswapwep && (uswapwep->oeroded == i || uswapwep->oeroded2 == i)){
+						uswapwep->rknown = TRUE;
+						if (uswapwep->oeroded == i && i > 0){
+							uswapwep->oeroded--;
+							break;
+						} else if (uswapwep->oeroded2 == i && i > 0){
+							uswapwep->oeroded2--;
+							break;
+						} else if (uswapwep->oeroded == i && uswapwep->oeroded2 == i && !(uswapwep->oerodeproof)){
+							uswapwep->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmc && (uarmc->oeroded == i || uarmc->oeroded2 == i)){
+						uarmc->rknown = TRUE;
+						if (uarmc->oeroded == i && i > 0){
+							uarmc->oeroded--;
+							break;
+						} else if (uarmc->oeroded2 == i && i > 0){
+							uarmc->oeroded2--;
+							break;
+						} else if (uarmc->oeroded == i && uarmc->oeroded2 == i && !(uarmc->oerodeproof)){
+							uarmc->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarm && (uarm->oeroded == i || uarm->oeroded2 == i)){
+						uarm->rknown = TRUE;
+						if (uarm->oeroded == i && i > 0){
+							uarm->oeroded--;
+							break;
+						} else if (uarm->oeroded2 == i && i > 0){
+							uarm->oeroded2--;
+							break;
+						} else if (uarm->oeroded == i && uarm->oeroded2 == i && !(uarm->oerodeproof)){
+							uarm->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmu && (uarmu->oeroded == i || uarmu->oeroded2 == i)){
+						uarmu->rknown = TRUE;
+						if (uarmu->oeroded == i && i > 0){
+							uarmu->oeroded--;
+							break;
+						} else if (uarmu->oeroded2 == i && i > 0){
+							uarmu->oeroded2--;
+							break;
+						} else if (uarmu->oeroded == i && uarmu->oeroded2 == i && !(uarmu->oerodeproof)){
+							uarmu->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmh && (uarmh->oeroded == i || uarmh->oeroded2 == i)){
+						uarmh->rknown = TRUE;
+						if (uarmh->oeroded == i && i > 0){
+							uarmh->oeroded--;
+							break;
+						} else if (uarmh->oeroded2 == i && i > 0){
+							uarmh->oeroded2--;
+							break;
+						} else if (uarmh->oeroded == i && uarmh->oeroded2 == i && !(uarmh->oerodeproof)){
+							uarmh->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmg && (uarmg->oeroded == i || uarmg->oeroded2 == i)){
+						uarmg->rknown = TRUE;
+						if (uarmg->oeroded == i && i > 0){
+							uarmg->oeroded--;
+							break;
+						} else if (uarmg->oeroded2 == i && i > 0){
+							uarmg->oeroded2--;
+							break;
+						} else if (uarmg->oeroded == i && uarmg->oeroded2 == i && !(uarmg->oerodeproof)){
+							uarmg->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarmf && (uarmf->oeroded == i || uarmf->oeroded2 == i)){
+						uarmf->rknown = TRUE;
+						if (uarmf->oeroded == i && i > 0){
+							uarmf->oeroded--;
+							break;
+						} else if (uarmf->oeroded2 == i && i > 0){
+							uarmf->oeroded2--;
+							break;
+						} else if (uarmf->oeroded == i && uarmf->oeroded2 == i && !(uarmf->oerodeproof)){
+							uarmf->oerodeproof = TRUE;
+							break;
+						}
+					} if (uarms && (uarms->oeroded == i || uarms->oeroded2 == i)){
+						uarms->rknown = TRUE;
+						if (uarms->oeroded == i && i > 0){
+							uarms->oeroded--;
+							break;
+						} else if (uarms->oeroded2 == i && i > 0){
+							uarms->oeroded2--;
+							break;
+						} else if (uarms->oeroded == i && uarms->oeroded2 == i && !(uarms->oerodeproof)){
+							uarms->oerodeproof = TRUE;
+							break;
+						}
+					}
+				}
+				break;
+			case 5: // bless/curse an item
+#define wrongbuc(obj) ((hates_unholy(youracedata) && hates_holy(youracedata)) ? \
+						(obj->blessed || obj->cursed) : \
+						(hates_unholy(youracedata) ? !obj->blessed : \
+						(hates_holy(youracedata) ? !obj->cursed : !obj->blessed)))
+
+				/* weapon takes precedence if it interferes with taking off a ring or shield */				
+				if (uwep && wrongbuc(uwep)) otmp = uwep;
+				else if (uswapwep && wrongbuc(uswapwep)) otmp = uswapwep;
+				/* gloves come next, due to rings */
+				else if (uarmg && wrongbuc(uarmg)) otmp = uarmg;
+				/* then shield due to two handed weapons and spells */
+				else if (uarms && wrongbuc(uarms)) otmp = uarms;
+				/* then cloak due to body armor */
+				else if (uarmc && wrongbuc(uarmc)) otmp = uarmc;
+				else if (uarm && wrongbuc(uarm)) otmp = uarm;
+				else if (uarmh && wrongbuc(uarmh)) otmp = uarmh;
+				else if (uarmf && wrongbuc(uarmf)) otmp = uarmf;
+				else if (uarmu && wrongbuc(uarmu)) otmp = uarmu;
+				else if (uamul && wrongbuc(uamul)) otmp = uamul;
+				else if (uleft && wrongbuc(uleft))  otmp = uleft;
+				else if (uright && wrongbuc(uright)) otmp = uright;
+				else {
+					for(otmp=invent; otmp; otmp=otmp->nobj)
+					if (wrongbuc(otmp)) break;
+					return;
+				}
+				if (hates_unholy(youracedata) && hates_holy(youracedata)){
+					uncurse(otmp);
+					unbless(otmp);
+				}
+				else if (hates_holy(youracedata))
+					curse(otmp);
+				else if (hates_unholy(youracedata))
+					bless(otmp);
+				else
+					bless(otmp);
+			
+				otmp->bknown = TRUE;
+				if (!Blind)
+					Your("%s %s.", what ? what : (const char *) aobjnam(otmp, "softly glow"), 
+								hcolor(otmp->blessed ? NH_LIGHT_BLUE : \
+								(otmp->cursed ? NH_BLACK : NH_AMBER)));
+#undef wrongbuc
+				break;
+			default: impossible("bad god_gives_benefit benefit?");
 		}
 	}
 }
@@ -4064,10 +4291,11 @@ goat_gives_benefit()
 				uncurse(optr);
 			}
 			if(Punished) unpunish();
-		break;
+			break;
 		case 2:
+			You_feel("very lucky.");
 			change_luck(2*LUCKMAX);
-		break;
+			break;
 		case 3:
 			if(uwep && !uwep->oartifact && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_LESSER_ACIDW)){
 				if(!Blind) pline("Acid drips from your weapon!");
@@ -4076,13 +4304,13 @@ goat_gives_benefit()
 				uwep->oeroded2 = 0;
 				uwep->oerodeproof = 1;
 			}
-		break;
+			break;
 		case 4:
 			if(HSterile){
 				You_feel("fertile.");
 				HSterile = 0L;
 			}
-		break;
+			break;
 		case 5:
 		case 6:
 		case 7:
@@ -4090,8 +4318,8 @@ goat_gives_benefit()
 			optr->quan = rnd(8);
 			optr->owt = weight(optr);
 			dropy(optr);
-			optr->quan > 1 ? at_your_feet("Some objects") : at_your_feet("An object");
-		break;
+			optr->quan > 1 ? at_your_feet("Some potions") : at_your_feet("A potion");
+			break;
 	}
 	return;
 }
@@ -4277,24 +4505,27 @@ boolean yourinvent;
 	    /* The player can gain an artifact */
 	    /* The chance goes down as the number of artifacts goes up */
 		/* Priests now only count gifts in this calculation, found artifacts are excluded */
-	    if(u.ulevel > 2 && u.uluck >= 0 
-		    && (!flags.made_know || 
-			 (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW))
-		    )
-			&& maybe_god_gives_gift()
-		){
-			if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW)){
-				if(!Blind) pline("Acid drips from your weapon!");
+		struct obj *otmp = (struct obj *)0;
+		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || uwep->oartifact) && !(uwep->oproperties&OPROP_ACIDW))
+			otmp = uwep;
+		else if (uarmg && u.umartial && uarmg->oartifact && !(uarmg->oproperties&OPROP_ACIDW))
+			otmp = uarmg;
+		else if (uarmf && u.umartial && uarmf->oartifact && !(uarmf->oproperties&OPROP_ACIDW))
+			otmp = uarmf;
+			
+	    if(u.ulevel > 2 && u.uluck >= 0 && (!flags.made_know || otmp) && maybe_god_gives_gift()){
+			if(otmp){
+				if(!Blind) pline("Acid drips from your %s!", 
+					(otmp == uwep) ? "weapon" : ((otmp == uarmg) ? "gloves" : "boots"));
 				remove_oprop(uwep, OPROP_LESSER_ACIDW);
 				add_oprop(uwep, OPROP_ACIDW);
-				uwep->oeroded = 0;
-				uwep->oeroded2 = 0;
-				uwep->oerodeproof = 1;
+				otmp->oeroded = 0;
+				otmp->oeroded2 = 0;
+				otmp->oerodeproof = 1;
 				u.ugifts++;
 				u.uartisval += TIER_S;
 			}
 			else if(!flags.made_know){
-				struct obj *otmp;
 				otmp = mksobj(WORD_OF_KNOWLEDGE, FALSE, FALSE);
 				dropy(otmp);
 				at_your_feet("An object");
