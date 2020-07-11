@@ -709,9 +709,10 @@ dokick()
 	    (!Levitation || Weightless || Is_waterlevel(&u.uz)
 	     || boulder_at(x,y))) {
 		if(kick_object(x, y)) {
-		    if(Weightless)
-			wake_nearby();
-			hurtle(-u.dx, -u.dy, 1, TRUE, TRUE); /* assume it's light */
+		    if(Weightless){
+				wake_nearby();
+				hurtle(-u.dx, -u.dy, 1, TRUE, TRUE); /* assume it's light */
+			}
 		    return(1);
 		}
 		goto ouch;
@@ -1226,9 +1227,10 @@ ouch:
 		    if( !(uarmf && uarmf->otyp == jboots2) && !rn2(3)) set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
 		    losehp(rnd(ACURR(A_CON) > 15 ? 3 : 5), kickstr(buf),
 			KILLED_BY);
-		    if(Weightless || Levitation)
-			wake_nearby();
-			hurtle(-u.dx, -u.dy, rn1(2,4), TRUE, TRUE); /* assume it's heavy */
+		    if(Weightless || Levitation){
+				wake_nearby();
+				hurtle(-u.dx, -u.dy, rn1(2,4), TRUE, TRUE); /* assume it's heavy */
+			}
 		    return(1);
 		}
 		goto dumb;

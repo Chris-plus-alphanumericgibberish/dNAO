@@ -2853,7 +2853,6 @@ struct monst *looker;
 	boolean hardtosee;
 	boolean catsightdark = !(levl[looker->mx][looker->my].lit || (viz_array[looker->my][looker->mx]&TEMP_LIT1 && !(viz_array[looker->my][looker->mx]&TEMP_DRK1)));
 	
-	
 	if(looker->mtyp == PM_DREADBLOSSOM_SWARM){
 		if(youracedata->mtyp == PM_DREADBLOSSOM_SWARM) return FALSE;
 		else return canseemon(looker);
