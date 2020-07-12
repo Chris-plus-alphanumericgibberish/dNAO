@@ -2166,6 +2166,7 @@ register struct obj *obj;
 	
 	if(glyph){
 		remove_thought(otyp);
+		//Note: affecting your true brain, so use race-if.
 		if(Race_if(PM_ANDROID)){
 			set_material_gm(glyph, PLASTIC);
 			fix_object(glyph);

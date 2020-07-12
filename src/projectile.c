@@ -191,7 +191,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		) {
 			returning = TRUE;
 		}
-		else if(Race_if(PM_ANDROID) && !launcher && youagr && thrownobj->oartifact != ART_FLUORITE_OCTAHEDRON){/* there's no android monster helper? */
+		else if(uandroid && !launcher && youagr && thrownobj->oartifact != ART_FLUORITE_OCTAHEDRON){/* there's no android monster helper? */
 			returning = TRUE;
 			range = range/2 + 1;
 			initrange = initrange/2 + 1;
@@ -2068,7 +2068,7 @@ dofire()
 		(uwep->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE) && ACURR(A_STR) == STR19(25)) ||
 		(uwep->oartifact == ART_ANNULUS && (uwep->otyp == CHAKRAM || uwep->otyp == LIGHTSABER)) ||
 		(uwep->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && Race_if(PM_DWARF) && ACURR(A_STR) == STR19(25)) ||
-		(!is_blaster(uwep) && Race_if(PM_ANDROID))
+		(!is_blaster(uwep) && uandroid)
 		// (uwep->oartifact == ART_SICKLE_MOON)
 		)) {
 		return uthrow(uwep, (struct obj *)0, shotlimit, FALSE);

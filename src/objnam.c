@@ -1535,11 +1535,11 @@ boolean with_price;
 				Sprintf(eos(buf), " of a%s %s",
 				index(vowels, *(mons[obj->corpsenm].mname)) ? "n" : "",
 				mons[obj->corpsenm].mname);
-			else if (is_blaster(obj) && (obj->known || Race_if(PM_ANDROID)))
+			else if (is_blaster(obj) && (obj->known || uandroid))
 				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
-			else if (is_vibroweapon(obj) && (obj->known || Race_if(PM_ANDROID)))
+			else if (is_vibroweapon(obj) && (obj->known || uandroid))
 				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
-			else if (obj->otyp == SEISMIC_HAMMER && (obj->known || Race_if(PM_ANDROID)))
+			else if (obj->otyp == SEISMIC_HAMMER && (obj->known || uandroid))
 				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
 			break;
 		case ARMOR_CLASS:
