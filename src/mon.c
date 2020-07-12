@@ -3526,6 +3526,13 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 				&&	!(is_undead_mon(mdef)))
 		return ALLOW_M|ALLOW_TM;
 
+	/* Androids vs. mind flayers */
+	if((is_android(ma) && !is_mind_flayer(ma)) && is_mind_flayer(md))
+		return ALLOW_M|ALLOW_TM;
+	/* and vice versa */
+	if((is_android(md) && !is_mind_flayer(md)) && is_mind_flayer(ma))
+		return ALLOW_M|ALLOW_TM;
+
 	/* drow vs. other drow */
 	/* Note that factions may be different than the displayed house name, 
 		as faction is set during generation and displayed house name goes by equipment! */
