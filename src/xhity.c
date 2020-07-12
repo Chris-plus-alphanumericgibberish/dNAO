@@ -6706,7 +6706,16 @@ boolean ranged;
 		if (vis && dohitmsg) {
 			xyhitmsg(magr, mdef, originalattk);
 		}
-
+		if(has_head(pd) && is_android(pd) && !is_mind_flayer(pd)){
+			int newres;
+			newres = android_braindamage(dmg, magr, mdef, vis);
+			if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
+				You("panic from the burrowing tentacles!");
+				HPanicking += 1+rnd(6);
+			}
+			/* don't do any further damage or anything, may trigger retaliation attacks */
+			return newres;
+		}
 		/* entirely unharmed */
 		if (!has_head(pd)
 			|| (youdef && umechanoid)
@@ -6719,7 +6728,7 @@ boolean ranged;
 					);
 			}
 			if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
-				You("panic anyway!");
+				You("panic from the squrming tentacles!");
 				HPanicking += 1+rnd(3);
 			}
 			/* don't do any further damage or anything, but do trigger retaliation attacks */

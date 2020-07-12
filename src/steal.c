@@ -441,13 +441,13 @@ gotobj:
 	(void) mpickobj(mtmp,otmp);	/* may free otmp */
 	if (could_petrify && !(mtmp->misc_worn_check & W_ARMG)) {
 	    minstapetrify(mtmp, TRUE);
-	    return -1;
 	}
 	if(roll_madness(MAD_TALONS)){
 		You("panic after having your property stolen!");
 		nomul(-1*rnd(6),"panic");
 	}
-	return((multi < 0) ? 0 : 1);
+	//mtmp died, probably from taking a petrifying corpse
+	return((mtmp->mhp <= 0) ? -1 : (multi < 0) ? 0 : 1);
 }
 
 #endif /* OVLB */

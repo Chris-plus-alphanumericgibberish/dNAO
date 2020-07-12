@@ -449,6 +449,7 @@ E void FDECL(set_wounded_legs, (long,int));
 E void NDECL(heal_legs);
 E int NDECL(dowait);
 E int NDECL(docome);
+E int FDECL(drop, (struct obj *));
 
 /* ### do_name.c ### */
 
@@ -3146,6 +3147,7 @@ E void FDECL(costly_cancel, (struct obj *));
 E void FDECL(revive_egg, (struct obj *));
 E int NDECL(allow_artwish);
 E boolean NDECL(dowand_refresh);
+E int FDECL(android_braindamage, (int, struct monst *, struct monst *, boolean));
 
 #endif /* !MAKEDEFS_C && !LEV_LEX_C */
 

@@ -9,6 +9,7 @@
 #include "xhity.h"
 
 extern boolean notonhead;
+extern struct attack noattack;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -501,7 +502,7 @@ demonpet()
 /*
  * Player uses theft attack against monster.
  *
- * If the target is wearing body armor, take all of its possesions;
+ * If the target is wearing body armor, take all of its possessions;
  * otherwise, take one object.  [Is this really the behavior we want?]
  *
  * This routine implicitly assumes that there is no way to be able to
@@ -552,21 +553,21 @@ struct attack *mattk;
 	    /* take the object away from the monster */
 	    obj_extract_self(otmp);
 	    if ((unwornmask = otmp->owornmask) != 0L) {
-		mdef->misc_worn_check &= ~unwornmask;
-		if (otmp->owornmask & W_WEP) {
-		    setmnotwielded(mdef,otmp);
-		    MON_NOWEP(mdef);
-		}
-		if (otmp->owornmask & W_SWAPWEP){
-			setmnotwielded(mdef,otmp);
-			MON_NOSWEP(mdef);
-		}
-		otmp->owornmask = 0L;
-		update_mon_intrinsics(mdef, otmp, FALSE, FALSE);
+			mdef->misc_worn_check &= ~unwornmask;
+			if (otmp->owornmask & W_WEP) {
+				setmnotwielded(mdef,otmp);
+				MON_NOWEP(mdef);
+			}
+			if (otmp->owornmask & W_SWAPWEP){
+				setmnotwielded(mdef,otmp);
+				MON_NOSWEP(mdef);
+			}
+			otmp->owornmask = 0L;
+			update_mon_intrinsics(mdef, otmp, FALSE, FALSE);
 
-		if (otmp == stealoid)	/* special message for final item */
-		    pline("%s finishes taking off %s suit.",
-			  Monnam(mdef), mhis(mdef));
+			if (otmp == stealoid)	/* special message for final item */
+				pline("%s finishes taking off %s suit.",
+				  Monnam(mdef), mhis(mdef));
 	    }
 
 		if(near_capacity() < calc_capacity(otmp->owt)){
@@ -1808,4 +1809,327 @@ int dmgtyp;
 
 	/* return if anything was destroyed */
 	return (ndestroyed ? MM_HIT : MM_MISS);
+}
+
+/* Spun out into own function becase 1) it's a lot and 2) it may be useful elsewhere */
+
+int
+android_braindamage(dmg, magr, mdef, vis)
+int dmg;
+struct monst *magr;
+struct monst *mdef;
+boolean vis;
+{
+	boolean youdef = mdef == &youmonst;
+	boolean youagr = magr == &youmonst;
+	int duration, newres = 0;
+	int extra_damage = 0;
+	static int testint = 0;
+	boolean petrifies = FALSE;
+	struct obj *otmp, *otmp2;
+	long unwornmask;
+	// switch(rnd(12)){
+	testint = (testint%12) + 1;
+	switch(testint){
+		case 1:
+			duration = dmg <= 2 ? dmg+1 : dmg*10;
+			if(youdef){
+				Your("photoreceptor wires are %s!", dmg <= 2 ? "unplugged" : "severed");
+				make_blinded(itimeout_incr(Blinded, duration), FALSE);
+			} else {
+				if(youagr){
+					if(dmg <= 2)
+						You("unplug %s photoreceptors!", hisherits(mdef));
+					else You("sever %s photoreceptor wires!", hisherits(mdef));
+				}
+				mdef->mcansee = 0;
+				if ((mdef->mblinded + duration) > 127)
+					mdef->mblinded = 127;
+				else mdef->mblinded += duration;
+			}
+			extra_damage = d(dmg, 4);
+		break;
+		case 2:
+			if(youdef){
+				Your("visual lookup table has been corrupted!");
+				make_hallucinated(itimeout_incr(HHallucination, dmg*10), FALSE, 0L);
+			} else {
+				if(youagr)
+					You("reprogram %s visual lookup table!", hisherits(mdef));
+				mdef->mberserk = 1;
+			}
+			extra_damage = d(dmg, 6);
+		break;
+		case 3:
+			if(youdef){
+				Your("efferent network has been crosswired!");
+				make_stunned(itimeout_incr(HStun, dmg*10), FALSE);
+			} else {
+				if(youagr)
+					You("crosswire %s efferent network!", hisherits(mdef));
+				mdef->mconf = 1;
+			}
+			extra_damage = d(dmg, 4);
+		break;
+		case 4:
+			if(youdef){
+				Your("processing array has been crosswired!");
+				make_confused(itimeout_incr(HConfusion, dmg*10), FALSE);
+			} else {
+				if(youagr)
+					You("crosswire %s processing array!", hisherits(mdef));
+				mdef->mconf = 1;
+			}
+			extra_damage = d(dmg, 6);
+		break;
+		case 5:
+			if(youdef){
+				Your("secondary data store has been compromised!");
+				for(int i = dmg; dmg > 0; dmg--){
+					forget(10);
+				}
+			} else {
+				if(youagr)
+					You("smash %s secondary data store!", hisherits(mdef));
+				if(mdef->mtame && (mdef->isminion || !(EDOG(mdef)->loyal))){//note: won't check loyal if the target is a minion
+					if(mdef->mtame > dmg)
+						mdef->mtame -= dmg;
+					else mdef->mtame = 0;
+				}
+				if(mdef->mcrazed && rnd(20) < dmg){
+					mdef->mcrazed = 0;
+					mdef->mberserk = 0;
+				}
+			}
+			extra_damage = d(dmg, 6);
+		break;
+		case 6:
+			if(youdef){
+				Your("fear response has been dialed up to maximum!");
+				HPanicking += dmg*10L;
+			} else {
+				if(youagr)
+					You("dial %s fear response up to maximum!", hisherits(mdef));
+				monflee(mdef, dmg*10, FALSE, TRUE);
+			}
+			extra_damage = d(dmg, 6);
+		break;
+		case 7:
+			if(youdef){
+				Your("CPU has been damaged!");
+				(void)adjattrib(A_INT, -dmg, FALSE);
+			} else {
+				if(youagr)
+					You("smash %s CPU!", hisherits(mdef));
+				mdef->mconf = 1;
+			}
+			extra_damage = d(dmg, 10);
+		break;
+		case 8:
+			if(youdef){
+				Your("heuristic subprocessor has been damaged!");
+				(void)adjattrib(A_WIS, -dmg, FALSE);
+			} else {
+				if(youagr)
+					You("smash %s heuristic subprocessor!", hisherits(mdef));
+				mdef->mconf = 1;
+			}
+			extra_damage = d(dmg, 10);
+		break;
+		case 9:
+			if(youdef){
+				Your("nausea subroutine has been activated!");
+				if(!Vomiting)
+					make_vomiting(d(5,4), TRUE);
+			} else {
+				if(youagr)
+					You("activate %s nausea subroutine!", hisherits(mdef));
+				if(vis)
+					pline("%s vomits!", Monnam(mdef));
+				mdef->mcanmove = 0;
+				if ((mdef->mfrozen + 3) > 127)
+					mdef->mfrozen = 127;
+				else mdef->mfrozen += 3;
+			}
+			extra_damage = d(dmg, 6);
+		break;
+		case 10:
+			if(youdef){
+				Your("efferent network has been damaged!");
+				set_itimeout(&HFumbling, itimeout_incr(HFumbling, dmg*10));
+			} else {
+				if(youagr)
+					You("strip %s efferent wires!", hisherits(mdef));
+				mdef->mconf = 1;
+			}
+			extra_damage = d(dmg, 6);
+		break;
+		case 11:{
+			if(youdef){
+				Your("primary effector wiring has been compromised!");
+				if((otmp = uwep)){
+					pline("%s directs your %s to surrender your weapon!", Monnam(magr), mbodypart(mdef, ARM));
+				} else if((otmp = uswapwep)){
+					pline("%s directs your %s to surrender your secondary weapon!", Monnam(magr), mbodypart(mdef, ARM));
+				} else if((otmp = uquiver)){
+					pline("%s directs your %s to surrender your quivered weapon!", Monnam(magr), makeplural(mbodypart(mdef, ARM)));
+				} else if((otmp = uarms)){
+					pline("%s directs your %s to surrender your shield!", Monnam(magr), mbodypart(mdef, ARM));
+				}
+				if(otmp){
+					remove_worn_item(otmp, TRUE);
+					obj_extract_self(otmp);
+					if(otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) && !which_armor(mdef, W_ARMG)){
+						petrifies = TRUE;
+					}
+					mpickobj(magr, otmp); //may free otmp
+					if (roll_madness(MAD_TALONS)){
+						You("panic after giving away one of your possessions!");
+						HPanicking += 1 + rnd(6);
+					}
+				}
+			} else if(youagr){
+				char kbuf[BUFSZ];
+				You("hotwire %s primary effectors!", hisherits(mdef));
+				if((otmp = MON_WEP(mdef))){
+					You("force %s to surrender %s weapon!", himherit(mdef), hisherits(mdef));
+				} else if((otmp = MON_SWEP(mdef))){
+					You("force %s to surrender %s secondary weapon!", himherit(mdef), hisherits(mdef));
+				} else if((otmp = which_armor(mdef, W_ARMS))){
+					You("force %s to surrender %s shield!", himherit(mdef), hisherits(mdef));
+				}
+				if(otmp){
+					/* take the object away from the monster */
+					obj_extract_self(otmp);
+					if ((unwornmask = otmp->owornmask) != 0L) {
+						mdef->misc_worn_check &= ~unwornmask;
+						if (otmp->owornmask & W_WEP) {
+							setmnotwielded(mdef,otmp);
+							MON_NOWEP(mdef);
+						}
+						if (otmp->owornmask & W_SWAPWEP){
+							setmnotwielded(mdef,otmp);
+							MON_NOSWEP(mdef);
+						}
+						otmp->owornmask = 0L;
+						update_mon_intrinsics(mdef, otmp, FALSE, FALSE);
+					}
+
+					if(near_capacity() < calc_capacity(otmp->owt)){
+						You("take %s %s and drop it to the %s.",
+							  s_suffix(mon_nam(mdef)), xname(otmp), surface(u.ux, u.uy));
+						if(otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) && !uarmg && !Stone_resistance){
+							Sprintf(kbuf, "stolen %s corpse", mons[otmp->corpsenm].mname);
+							petrifies = TRUE;
+						}
+						dropy(otmp); //may free otmp
+					} else {
+					/* give the object to the character */
+						if(otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) && !uarmg && !Stone_resistance){
+							Sprintf(kbuf, "stolen %s corpse", mons[otmp->corpsenm].mname);
+							petrifies = TRUE;
+						}
+						otmp = hold_another_object(otmp, "You took but dropped %s.", doname(otmp), "You steal: ");  //may free otmp
+					}
+					/* more take-away handling, after theft message */
+					if (unwornmask & W_WEP || unwornmask & W_SWAPWEP) {		/* stole wielded weapon */
+						possibly_unwield(mdef, FALSE);
+					}
+					if (petrifies) {
+						instapetrify(kbuf);
+					}
+				}
+			} else {
+				if((otmp = MON_WEP(mdef))){
+					if(vis)
+						pline("%s surrenders %s weapon!", Monnam(mdef), hisherits(mdef));
+				} else if((otmp = MON_SWEP(mdef))){
+					if(vis)
+						pline("%s surrenders %s secondary weapon!", Monnam(mdef), hisherits(mdef));
+				} else if((otmp = which_armor(mdef, W_ARMS))){
+					if(vis)
+						pline("%s surrenders %s shield!", Monnam(mdef), hisherits(mdef));
+				}
+				if(otmp){
+					/* take the object away from the monster */
+					obj_extract_self(otmp);
+					if ((unwornmask = otmp->owornmask) != 0L) {
+						mdef->misc_worn_check &= ~unwornmask;
+						if (otmp->owornmask & W_WEP) {
+							setmnotwielded(mdef,otmp);
+							MON_NOWEP(mdef);
+						}
+						if (otmp->owornmask & W_SWAPWEP){
+							setmnotwielded(mdef,otmp);
+							MON_NOSWEP(mdef);
+						}
+						otmp->owornmask = 0L;
+						update_mon_intrinsics(mdef, otmp, FALSE, FALSE);
+					}
+
+					if(otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) && !which_armor(mdef, W_ARMG)){
+						petrifies = TRUE;
+					}
+					mpickobj(magr, otmp); //may free otmp
+					
+					/* more take-away handling, after theft message */
+					if (unwornmask & W_WEP || unwornmask & W_SWAPWEP) {		/* stole wielded weapon */
+						possibly_unwield(mdef, FALSE);
+					}
+				}
+			}
+			
+			extra_damage = d(dmg, 4);
+		}break;
+		case 12:
+			if(youdef){
+				int drops = 0;
+				Your("primary and secondary effector wiring has been compromised!");
+				pline("%s directs your body to drop your possessions!", Monnam(magr));
+				if (*u.ushops) sellobj_state(SELL_NORMAL); //Shopkeepers will steal your stuff!
+				for(otmp = invent; otmp; otmp = otmp2) {
+					otmp2 = otmp->nobj;
+					drops += drop(otmp);
+				}
+				if (drops && roll_madness(MAD_TALONS)){
+					You("panic after dropping your %s!", drops == 1 ? "property" : "possessions");
+					HPanicking += 1 + rnd(6);
+				}
+			} else {
+				if(youagr){
+					You("hotwire %s primary and secondary effectors!", hisherits(mdef));
+					You("force %s to drop %s possessions!", himherit(mdef), hisherits(mdef));
+				} else {
+					pline("%s drops %s possessions!", Monnam(mdef), hisherits(mdef));
+				}
+				otmp2 = mdef->minvent;
+				while((otmp = otmp2)){
+					otmp2 = otmp->nobj;
+					if(!(otmp->owornmask&(~(W_WEP|W_SWAPWEP)))){
+						obj_extract_self(otmp);
+						mdrop_obj(mdef, otmp, FALSE);
+					}
+				}
+			}
+			extra_damage = d(dmg, 4);
+		break;
+	}
+	//needs a last thought fades away-type message?
+	newres = xdamagey(magr, mdef, &noattack, extra_damage);
+	//Finally handle cockatrice corpses :(
+	if(!youdef){
+		if (unwornmask & W_ARMG) {	/* stole worn gloves */
+			mselftouch(mdef, (const char *)0, TRUE);
+			if(mdef->mhp <= 0)
+				newres |= MM_DEF_DIED;
+		}
+	}
+	if(!youagr){
+		if (petrifies) {
+			minstapetrify(magr, youdef); //checks stone resistance
+			if(magr->mhp <= 0)
+				newres |= MM_AGR_DIED;
+		}
+	}
+	return newres;
 }

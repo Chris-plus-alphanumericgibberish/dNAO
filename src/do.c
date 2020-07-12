@@ -14,7 +14,6 @@ STATIC_DCL void FDECL(trycall, (struct obj *));
 STATIC_DCL void FDECL(dosinkring, (struct obj *));
 #endif /* SINKS */
 
-STATIC_PTR int FDECL(drop, (struct obj *));
 STATIC_PTR int NDECL(wipeoff);
 
 #ifdef OVL0
@@ -507,7 +506,7 @@ register const char *word;
 	return(TRUE);
 }
 
-STATIC_PTR
+
 int
 drop(obj)
 register struct obj *obj;
