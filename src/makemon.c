@@ -605,8 +605,10 @@ register struct monst *mtmp;
 				(void) mpickobj(mtmp, otmp);
 			}
 			else if(mm == PM_GOAT_SPAWN) {
-				if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
+				int threshold = rnd(10)+rn2(11);
+				if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
 					set_faction(mtmp, MISTWEAVER);
+					mtmp->m_insight_level = threshold;
 				}
 			}
 			else if(mm == PM_DAEMON){
@@ -3894,8 +3896,10 @@ register struct monst *mtmp;
 			otmp->cursed = FALSE;
 			(void) mpickobj(mtmp, otmp);
 		} else if(mm == PM_SMALL_GOAT_SPAWN) {
-			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
+			int threshold = rnd(10)+rn2(11);
+			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
 				set_faction(mtmp, MISTWEAVER);
+				mtmp->m_insight_level = threshold;
 			}
 		} else if(mm == PM_GNOLL) {
 			switch(rnd(4)){
@@ -4671,8 +4675,10 @@ register struct monst *mtmp;
 					set_material_gm(otmp, BONE);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
-					if(mtmp->female && u.uinsight > (rnd(10)+rn2(11))){
+					int threshold = rnd(10)+rn2(11);
+					if(mtmp->female && u.uinsight > threshold){
 						set_faction(mtmp, MISTWEAVER);
+						mtmp->m_insight_level = threshold;
 					} else {
 						otmp = mksobj(WAR_HAT, TRUE, FALSE);
 						otmp->spe = 2;
@@ -5044,8 +5050,12 @@ register struct monst *mtmp;
 						}
 					break;
 				}
-			} else if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
-				set_faction(mtmp, MISTWEAVER);
+			} else {//not shopkeepers, deminymphs, or intoners
+				int threshold = rnd(10)+rn2(11);
+				if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
+					set_faction(mtmp, MISTWEAVER);
+					mtmp->m_insight_level = threshold;
+				}
 			}
 		break;
 	    case S_CENTAUR:
@@ -5107,8 +5117,10 @@ register struct monst *mtmp;
 		    }
 		}
 		if(ptr->mtyp == PM_FOREST_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR){
-			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
+			int threshold = rnd(10)+rn2(11);
+			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
 				set_faction(mtmp, MISTWEAVER);
+				mtmp->m_insight_level = threshold;
 			}
 		}
 		if(ptr->mtyp == PM_MOUNTAIN_CENTAUR){
@@ -6283,8 +6295,10 @@ register struct	monst	*mtmp;
 			fix_object(otmp);
 			(void) mpickobj(mtmp, otmp);
 		} else if(ptr->mtyp == PM_GIANT_GOAT_SPAWN) {
-			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > (rnd(10)+rn2(11))){
+			int threshold = rnd(10)+rn2(11);
+			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
 				set_faction(mtmp, MISTWEAVER);
+				mtmp->m_insight_level = threshold;
 			}
 		} else if(ptr->mtyp == PM_LURKING_ONE) {
 			int i;
