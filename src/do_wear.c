@@ -3751,12 +3751,12 @@ struct monst *magr;
 struct obj *armor;
 {
 	struct monst *mdef;
-	int tmp, weptmp, tchtmp;
 	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
 	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
 	int i = rnd(8),j, lim=0;
 	struct attack symbiote = { AT_TENT, AD_PHYS, 3, 3 };
 	boolean youagr = (magr == &youmonst);
+	boolean youdef;
 	
 	//2 pips on a die is +1 on average
 	if(armor)
@@ -3767,9 +3767,17 @@ struct obj *armor;
 		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
 			continue;
 		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
-		if(youagr && (!mdef || mdef->mpeaceful || !rn2(4)))
+		
+		if(!mdef)
 			continue;
-		else if(!youagr && (!mdef || (mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
+		
+		youdef = (mdef == &youmonst);
+		
+		if(youagr && (mdef->mpeaceful || !rn2(4)))
+			continue;
+		if(youdef && (magr->mpeaceful || !rn2(4)))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
 			continue;
 		//Note: the armor avoids touching petrifying things even if you're immune
 		if(touch_petrifies(mdef->data)
