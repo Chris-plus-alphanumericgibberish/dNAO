@@ -438,6 +438,17 @@ int faction;
 			attk->damd = 8;
 			special = TRUE;
 		}
+		if (faction == MISTWEAVER && (
+			insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TENT;
+			attk->adtyp = AD_DRST;
+			attk->damn = 4;
+			attk->damd = 4;
+			special = TRUE;
+		}
 		/* fractured turn their claws into glass shards */
 		if (faction == FRACTURED && (
 			(attk->aatyp == AT_CLAW && (
