@@ -6706,19 +6706,9 @@ boolean ranged;
 		if (vis && dohitmsg) {
 			xyhitmsg(magr, mdef, originalattk);
 		}
-		if(has_head(pd) && is_android(pd) && !is_mind_flayer(pd)){
-			int newres;
-			newres = android_braindamage(dmg, magr, mdef, vis);
-			if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
-				You("panic from the burrowing tentacles!");
-				HPanicking += 1+rnd(6);
-			}
-			/* don't do any further damage or anything, may trigger retaliation attacks */
-			return newres;
-		}
 		/* entirely unharmed */
 		if (!has_head(pd)
-			|| (youdef && umechanoid)
+			|| (youdef && uclockwork)
 			/*|| notonhead*/ //damnit what
 			) {
 			if (vis) {
@@ -6768,6 +6758,16 @@ boolean ranged;
 			dmg = (dmg+1)/2;
 
 		/* brains will be attacked now */
+		if(is_android(pd) && !is_mind_flayer(pd)){
+			int newres;
+			newres = android_braindamage(dmg, magr, mdef, vis);
+			if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
+				You("panic from the burrowing tentacles!");
+				HPanicking += 1+rnd(6);
+			}
+			/* don't do any further damage or anything, may trigger retaliation attacks */
+			return newres;
+		}
 		/* mhitu */
 		if (youdef) {
 			if (u.sealsActive&SEAL_HUGINN_MUNINN){
