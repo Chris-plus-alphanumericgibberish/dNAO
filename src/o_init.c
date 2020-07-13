@@ -1644,6 +1644,11 @@ struct obj *otmp;
 		return objects[otmp->otyp].oc_color;
 	}
 
+	/* gold pieces are gold */
+	if (otmp->otyp == GOLD_PIECE){
+		return HI_GOLD;
+	}
+
 
 	/* artifacts with set colors */
 	switch (otmp->oartifact)
