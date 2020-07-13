@@ -192,7 +192,7 @@ int y;
 			(void) add_to_minv(mtmp, otmp);
 		else if (cont)
 			(void) add_to_container(cont, otmp);
-		else if (x >= 0 && y >= 0)
+		else if (isok(x, y))
 			place_object(otmp, x, y);
 	}
 	while(u.thoughts && thoughttries++ < 5){
