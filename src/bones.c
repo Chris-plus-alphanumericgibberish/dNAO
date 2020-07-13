@@ -13,7 +13,7 @@ extern long bytes_counted;
 STATIC_DCL boolean FDECL(no_bones_level, (d_level *));
 STATIC_DCL void FDECL(goodfruit, (int));
 STATIC_DCL void FDECL(resetobjs,(struct obj *,BOOLEAN_P));
-STATIC_DCL void FDECL(drop_upon_death, (struct monst *, struct obj *));
+STATIC_DCL void FDECL(drop_upon_death, (struct monst *, struct obj *, int, int));
 
 STATIC_OVL boolean
 no_bones_level(lev)
@@ -165,9 +165,11 @@ boolean restore;
 }
 
 STATIC_OVL void
-drop_upon_death(mtmp, cont)
+drop_upon_death(mtmp, cont, x, y)
 struct monst *mtmp;
 struct obj *cont;
+int x;
+int y;
 {
 	struct obj *otmp;
 	int thoughttries = 0;
@@ -190,8 +192,8 @@ struct obj *cont;
 			(void) add_to_minv(mtmp, otmp);
 		else if (cont)
 			(void) add_to_container(cont, otmp);
-		else
-			place_object(otmp, u.ux, u.uy);
+		else if (isok(x, y))
+			place_object(otmp, x, y);
 	}
 	while(u.thoughts && thoughttries++ < 5){
 		otmp = 0;
@@ -277,7 +279,7 @@ struct obj *cont;
 			else if (cont)
 				(void) add_to_container(cont, otmp);
 			else
-				place_object(otmp, u.ux, u.uy);
+				place_object(otmp, x, y);
 		}
 	}
 	scatter_seals();
@@ -286,7 +288,7 @@ struct obj *cont;
 		long ugold = u.ugold;
 		if (mtmp) mtmp->mgold = ugold;
 		else if (cont) (void) add_to_container(cont, mkgoldobj(ugold));
-		else (void)mkgold_core(ugold, u.ux, u.uy, FALSE);
+		else (void)mkgold_core(ugold, x, y, FALSE);
 		u.ugold = ugold;	/* undo mkgoldobj()'s removal */
 	}
 #endif
@@ -405,7 +407,7 @@ struct obj *corpse;
 		otmp = mk_named_object(STATUE, &mons[u.umonnum],
 				       x, y, plname);
 
-		drop_upon_death((struct monst *)0, otmp);
+		drop_upon_death((struct monst *)0, otmp, x, y);
 		if (!otmp) return;	/* couldn't make statue */
 		mtmp = (struct monst *)0;
 	} else if (u.ugrave_arise == (NON_PM - 3)) {
@@ -415,7 +417,7 @@ struct obj *corpse;
 		otmp = mk_named_object(STATUE, &mons[u.umonnum],
 				       x, y, plname);
 		set_material_gm(otmp, GOLD);
-		drop_upon_death((struct monst *)0, otmp);
+		drop_upon_death((struct monst *)0, otmp, x, y);
 		if (!otmp) return;	/* couldn't make statue */
 		mtmp = (struct monst *)0;
 	} else if (u.ugrave_arise == (NON_PM - 4)) {
@@ -425,17 +427,17 @@ struct obj *corpse;
 		otmp = mk_named_object(STATUE, &mons[u.umonnum],
 				       x, y, plname);
 		set_material_gm(otmp, GLASS);
-		drop_upon_death((struct monst *)0, otmp);
+		drop_upon_death((struct monst *)0, otmp, x, y);
 		if (!otmp) return;	/* couldn't make statue */
 		mtmp = (struct monst *)0;
 	} else if (Race_if(PM_VAMPIRE)) {
 		/* don't let vampires rise as some other monsters */
-		drop_upon_death((struct monst *)0, (struct obj *)0);
+		drop_upon_death((struct monst *)0, (struct obj *)0, x, y);
 		mtmp = (struct monst *)0;
 		u.ugrave_arise = NON_PM;
 	} else if (u.ugrave_arise < LOW_PM) {
 		/* drop everything */
-		drop_upon_death((struct monst *)0, (struct obj *)0);
+		drop_upon_death((struct monst *)0, (struct obj *)0, x, y);
 		/* trick makemon() into allowing monster creation
 		 * on your location
 		 */
@@ -482,7 +484,7 @@ struct obj *corpse;
 			in_mklev = FALSE;
 		}
 		if (!mtmp) {
-			drop_upon_death((struct monst *)0, (struct obj *)0);
+			drop_upon_death((struct monst *)0, (struct obj *)0, x, y);
 			return;
 		}
 		mtmp = christen_monst(mtmp, plname);
@@ -495,7 +497,7 @@ struct obj *corpse;
 			""
 			);
 		display_nhwindow(WIN_MESSAGE, FALSE);
-		drop_upon_death(mtmp, (struct obj *)0);
+		drop_upon_death(mtmp, (struct obj *)0, x, y);
 		m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);
 	}
