@@ -2834,19 +2834,24 @@ see_nearby_monsters()
 		for(dx=-1; dx<2; dx++){
 			for(dy=-1; dy<2; dy++){
 				if(isok(u.ux+dx, u.uy+dy)){
-					if((mtmp = m_at(u.ux+dx, u.uy+dy)) && !mtmp->mtame && canseemon(mtmp) && !(mvitals[monsndx(mtmp->data)].seen)){
-						mvitals[monsndx(mtmp->data)].seen = 1;
-						if(Role_if(PM_TOURIST)){
-							more_experienced(experience(mtmp,0),0);
-							newexplevel();
-						}
-						give_madness(mtmp);
-						if(u.usanity > 0 && taxes_sanity(mtmp->data)){
-							change_usanity(u_sanity_loss(mtmp));
-						}
-						if(yields_insight(mtmp->data)){
-							change_uinsight(u_visible_insight(mtmp));
-						}
+					if((mtmp = m_at(u.ux+dx, u.uy+dy))
+						&& !mtmp->mtame
+						&& canseemon(mtmp)
+						&& (!(mtmp->mappearance || mtmp->mundetected) || sensemon(mtmp))
+						&& !(mvitals[monsndx(mtmp->data)].seen)
+						){
+							mvitals[monsndx(mtmp->data)].seen = 1;
+							if(Role_if(PM_TOURIST)){
+								more_experienced(experience(mtmp,0),0);
+								newexplevel();
+							}
+							give_madness(mtmp);
+							if(u.usanity > 0 && taxes_sanity(mtmp->data)){
+								change_usanity(u_sanity_loss(mtmp));
+							}
+							if(yields_insight(mtmp->data)){
+								change_uinsight(u_visible_insight(mtmp));
+							}
 						}
 					}
 				}
