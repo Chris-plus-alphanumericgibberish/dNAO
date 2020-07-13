@@ -9682,6 +9682,30 @@ dosymbiotic_armors()
 }
 
 void
+dogoat_tentacles()
+{
+	struct monst *mtmp;
+	struct obj *armor;
+	if(roll_madness(MAD_GOAT_RIDDEN) && adjacent_mon()){
+		pline("Lashing tentacles erupt from your brain!");
+		losehp(max(1,(Upolyd ? ((d(4,4)*u.mh)/u.mhmax) : ((d(4,4)*u.uhp)/u.uhpmax))), "the black mother's touch", KILLED_BY);
+		morehungry(d(4,4));
+		if(u.usanity < 50)
+			change_usanity(-1);
+		else
+			change_usanity(-1*d(4,4));
+		dogoat();
+	}
+	
+	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+		if(DEADMONSTER(mtmp))
+			continue;
+		if(is_goat_tentacle_mon(mtmp) && !mtmp->mappearance && !mtmp->msleeping && !mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK))
+			dogoat_mon(mtmp);
+	}
+}
+
+void
 mind_blast_items()
 {
 	struct monst *mtmp, *nmon = (struct monst *)0;

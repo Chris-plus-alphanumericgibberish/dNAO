@@ -7,6 +7,7 @@
 #include "hack.h"
 #include "edog.h"
 #include "artifact.h"
+#include "xhity.h"
 #ifdef OVLB
 #include "artilist.h"
 #else
@@ -1806,16 +1807,7 @@ karemade:
 			dosymbiotic_armors();
 			if(u.spiritPColdowns[PWR_PSEUDONATURAL_SURGE] >= moves+20)
 				dopseudonatural();
-			if(roll_madness(MAD_GOAT_RIDDEN) && adjacent_mon()){
-				pline("Lashing tentacles erupt from your brain!");
-				losehp(max(1,(Upolyd ? ((d(4,4)*u.mh)/u.mhmax) : ((d(4,4)*u.uhp)/u.uhpmax))), "the black mother's touch", KILLED_BY);
-				morehungry(d(4,4));
-				if(u.usanity < 50)
-					change_usanity(-1);
-				else
-					change_usanity(-1*d(4,4));
-				dogoat();
-			}
+			dogoat_tentacles();
 			if(Destruction)
 				dodestruction();
 			if(Mindblasting)
@@ -3257,27 +3249,105 @@ struct monst *mon;
 void
 dogoat()
 {
-	struct monst *mon;
-	int tmp, weptmp, tchtmp;
+	dogoat_mon(&youmonst);
+}
+
+void
+dogoat_mon(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
 	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
 	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
-	int i = rnd(8),j, lim=0;
-	struct attack symbiote = { AT_TENT, AD_PHYS, 4, 4 };
+	int i = rnd(8),j;
+	struct attack symbiote = { AT_TENT, AD_DRST, 4, 4 };
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct permonst *pa;
+	
+	pa = youagr ? youracedata : magr->data;
+	
+	if(pa->mtyp == PM_SWIRLING_MIST){
+		symbiote.aatyp = AT_BKGT;
+		symbiote.adtyp = AD_WET;
+		symbiote.damn = 3;
+		symbiote.damd = 6;
+	} else if(pa->mtyp == PM_DUST_STORM){
+		symbiote.aatyp = AT_BKGT;
+		symbiote.adtyp = AD_BLND;
+		symbiote.damn = 3;
+		symbiote.damd = 8;
+	} else if(pa->mtyp == PM_ICE_STORM){
+		symbiote.aatyp = AT_BKGT;
+		symbiote.adtyp = AD_COLD;
+		symbiote.damn = 3;
+		symbiote.damd = 8;
+	} else if(pa->mtyp == PM_THUNDER_STORM){
+		symbiote.aatyp = AT_BKGT;
+		symbiote.adtyp = AD_ELEC;
+		symbiote.damn = 3;
+		symbiote.damd = 8;
+	} else if(pa->mtyp == PM_FIRE_STORM){
+		symbiote.aatyp = AT_BKGT;
+		symbiote.adtyp = AD_FIRE;
+		symbiote.damn = 3;
+		symbiote.damd = 10;
+	} else if(pa->mtyp == PM_MOUTH_OF_THE_GOAT){
+		symbiote.aatyp = AT_BKGT;
+		symbiote.adtyp = AD_EACD;
+	} else if(pa->mtyp == PM_BLESSED){
+		switch(rnd(8)){
+			default:
+			case 1:
+				symbiote.adtyp = AD_DRST;
+			break;
+			case 2:
+				symbiote.aatyp = AT_GAZE;
+				symbiote.adtyp = AD_STDY;
+			break;
+			case 3:
+				symbiote.aatyp = AT_WEAP;
+				symbiote.adtyp = AD_PHYS;
+			break;
+			case 4:
+				symbiote.aatyp = AT_MAGC;
+				symbiote.adtyp = AD_CLRC;
+				symbiote.damn = 5;
+				symbiote.damd = 8;
+			break;
+		}
+	}
+	
 	for(j=8;j>=1;j--){
-		if(u.ustuck && u.uswallow)
-			mon = u.ustuck;
-		else if(!isok(u.ux+clockwisex[(i+j)%8], u.uy+clockwisey[(i+j)%8]))
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
 			continue;
-		else mon = m_at(u.ux+clockwisex[(i+j)%8], u.uy+clockwisey[(i+j)%8]);
-		if(!mon || mon->mpeaceful)
+		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(!mdef)
 			continue;
-		if(touch_petrifies(mon->data)
-		 || mon->mtyp == PM_MEDUSA
-		 || mon->mtyp == PM_PALE_NIGHT
+		
+		youdef = (mdef == &youmonst);
+
+		if(youagr && (mdef->mpeaceful))
+			continue;
+		if(youdef && (magr->mpeaceful))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful)))
+			continue;
+
+		
+		if((touch_petrifies(mdef->data)
+		 || mdef->mtyp == PM_MEDUSA)
+		 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
 		) continue;
 		
-		if(mon && !mon->mtame){
-			xmeleehity(&youmonst, mon, &symbiote, (struct obj *)0, -1, 0, FALSE);
+		if(mdef->mtyp == PM_PALE_NIGHT)
+			continue;
+		
+		if(mdef && !mdef->mtame){
+			xmeleehity(magr, mdef, &symbiote, (struct obj *)0, -1, 0, FALSE);
 		}
 	}
 }

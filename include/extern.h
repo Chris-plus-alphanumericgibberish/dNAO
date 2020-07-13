@@ -29,6 +29,7 @@ E void FDECL(welcome, (BOOLEAN_P));
 E time_t NDECL(get_realtime);
 #endif
 E void NDECL(dogoat);
+E void FDECL(dogoat_mon, (struct monst *));
 
 /* ### apply.c ### */
 
@@ -143,6 +144,7 @@ E long FDECL(arti_cost, (struct obj *));
 E void FDECL(arti_poly_contents, (struct obj *));
 E struct obj * FDECL(minor_artifact, (struct obj *, char *));
 E void NDECL(dosymbiotic_armors);
+E void NDECL(dogoat_tentacles);
 E void NDECL(mind_blast_items);
 E int FDECL(oresist_disintegration, (struct obj *));
 E int FDECL(wrath_target, (struct obj *, struct monst *));

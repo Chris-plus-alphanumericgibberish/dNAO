@@ -461,6 +461,15 @@
 #define is_female(ptr)		(((ptr)->mflagsb & MB_FEMALE) != 0L)
 #define is_neuter(ptr)		(((ptr)->mflagsb & MB_NEUTER) != 0L)
 #define is_wanderer(ptr)	(((ptr)->mflagst & MT_WANDER) != 0L)
+#define	is_goat_tentacle_mtyp(ptr)	((ptr)->mtyp == PM_DARK_YOUNG \
+									|| (ptr)->mtyp == PM_BLESSED \
+									|| (ptr)->mtyp == PM_SWIRLING_MIST \
+									|| (ptr)->mtyp == PM_DUST_STORM \
+									|| (ptr)->mtyp == PM_ICE_STORM \
+									|| (ptr)->mtyp == PM_THUNDER_STORM \
+									|| (ptr)->mtyp == PM_FIRE_STORM \
+									|| (ptr)->mtyp == PM_MOUTH_OF_THE_GOAT)
+#define	is_goat_tentacle_mon(mon)	(is_goat_tentacle_mtyp((mon)->data) || (mon)->mfaction == MISTWEAVER)
 #define goat_monster(ptr) (\
 									   (ptr)->mtyp == PM_SMALL_GOAT_SPAWN \
 									|| (ptr)->mtyp == PM_GOAT_SPAWN \
@@ -484,6 +493,11 @@
 									|| (ptr)->mtyp == PM_MIGO_QUEEN \
 									|| (ptr)->mtyp == PM_DARK_YOUNG \
 									|| (ptr)->mtyp == PM_BLESSED \
+									|| (ptr)->mtyp == PM_SWIRLING_MIST \
+									|| (ptr)->mtyp == PM_DUST_STORM \
+									|| (ptr)->mtyp == PM_ICE_STORM \
+									|| (ptr)->mtyp == PM_THUNDER_STORM \
+									|| (ptr)->mtyp == PM_FIRE_STORM \
 									|| (ptr)->mtyp == PM_MOUTH_OF_THE_GOAT \
 								  )
 #define always_hostile(ptr)	(((ptr)->mflagst & MT_HOSTILE) != 0L)
