@@ -9664,6 +9664,24 @@ struct blast_element {
 };
 
 void
+dosymbiotic_armors()
+{
+	struct monst *mtmp;
+	struct obj *armor;
+	if(uarm && (uarm->otyp == LIVING_ARMOR || uarm->otyp == BARNACLE_ARMOR))
+		dosymbiotic(&youmonst, uarm);
+	
+	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+		if(DEADMONSTER(mtmp))
+			continue;
+		armor = which_armor(mtmp, W_ARM);
+
+		if(armor && (armor->otyp == LIVING_ARMOR || armor->otyp == BARNACLE_ARMOR))
+			dosymbiotic(mtmp, armor);
+	}
+}
+
+void
 mind_blast_items()
 {
 	struct monst *mtmp, *nmon = (struct monst *)0;

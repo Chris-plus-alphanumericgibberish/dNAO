@@ -1803,9 +1803,7 @@ karemade:
 			
 			/* Item attacks */
 			mind_blast_items();
-			if(uarm && 
-				(uarm->otyp == LIVING_ARMOR || uarm->otyp == BARNACLE_ARMOR)
-			) dosymbiotic();
+			dosymbiotic_armors();
 			if(u.spiritPColdowns[PWR_PSEUDONATURAL_SURGE] >= moves+20)
 				dopseudonatural();
 			if(roll_madness(MAD_GOAT_RIDDEN) && adjacent_mon()){

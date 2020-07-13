@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include "hack.h"
+#include "xhity.h"
 
 #ifndef OVLB
 
@@ -3745,31 +3746,43 @@ register schar delta;
 }
 
 void
-dosymbiotic()
+dosymbiotic(magr, armor)
+struct monst *magr;
+struct obj *armor;
 {
-	struct monst *mon;
+	struct monst *mdef;
 	int tmp, weptmp, tchtmp;
 	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
 	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
 	int i = rnd(8),j, lim=0;
 	struct attack symbiote = { AT_TENT, AD_PHYS, 3, 3 };
+	boolean youagr = (magr == &youmonst);
+	
 	//2 pips on a die is +1 on average
-	if(uarm)
-		symbiote.damd = max(1, 3 + uarm->spe);
+	if(armor)
+		symbiote.damd = max(1, 3 + armor->spe);
 	for(j=8;j>=1;j--){
-		if(u.ustuck && u.uswallow)
-			mon = u.ustuck;
-		else mon = m_at(u.ux+clockwisex[(i+j)%8], u.uy+clockwisey[(i+j)%8]);
-		if(!mon || mon->mpeaceful || !rn2(4))
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
 			continue;
-		if(touch_petrifies(mon->data)
-		 || mon->mtyp == PM_MEDUSA
-		 || mon->mtyp == PM_PALE_NIGHT
+		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		if(youagr && (!mdef || mdef->mpeaceful || !rn2(4)))
+			continue;
+		else if(!youagr && (!mdef || (mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
+			continue;
+		//Note: the armor avoids touching petrifying things even if you're immune
+		if(touch_petrifies(mdef->data)
+		 || mdef->mtyp == PM_MEDUSA
+		 || mdef->mtyp == PM_PALE_NIGHT
 		) continue;
-		
-		if (mon && !mon->mtame && magr_can_attack_mdef(&youmonst, mon, u.ux + clockwisex[(i + j) % 8], u.uy + clockwisey[(i + j) % 8], FALSE)){
-			xmeleehity(&youmonst, mon, &symbiote, (struct obj *)0, -1, 0, FALSE);
-			morehungry(1);
+		if (mdef && !mdef->mtame && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
+			if(DEADMONSTER(mdef))
+				continue;
+			xmeleehity(magr, mdef, &symbiote, (struct obj *)0, -1, 0, FALSE);
+			if(!youagr && DEADMONSTER(magr))
+				break; //oops!
+			if(youagr) morehungry(1);
 			lim++;
 			if(lim > 4) break;
 		}
