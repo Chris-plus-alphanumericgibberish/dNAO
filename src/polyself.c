@@ -753,7 +753,7 @@ break_armor()
 		}
     }
 	if ((otmp = uarmh) != 0){
-		if((!is_flimsy(otmp) && (otmp->objsize != youracedata->msize || has_horns(youracedata) || !has_head(youracedata) || !helm_match(youracedata,otmp)))
+		if((!is_flimsy(otmp) && (otmp->objsize != youracedata->msize || has_horns(youracedata) || !has_head_mon(&youmonst) || !helm_match(youracedata,otmp)))
 			|| is_whirly(youracedata) || noncorporeal(youracedata)
 		) {
 			if (donning(otmp)) cancel_don();

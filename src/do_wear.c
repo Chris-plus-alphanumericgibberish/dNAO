@@ -1608,7 +1608,7 @@ boolean noisy;
 			err++;
 		} else if (!is_flimsy(otmp)) {
 			/* (flimsy exception matches polyself handling), you can even just set a hat on top of your body (no head requried)*/
-			if(!has_head(youracedata)){
+			if(!has_head_mon(&youmonst)){
 				if (noisy)
 				You("don't have a head.");
 				err++;
@@ -2566,7 +2566,7 @@ lowertorso:
 			armdr += clkdr;
 		break;
 		case HEAD_DR:
-			if(!has_head(youracedata)){
+			if(!has_head_mon(&youmonst)){
 				slot = UPPER_TORSO_DR;
 				goto uppertorso;
 			}

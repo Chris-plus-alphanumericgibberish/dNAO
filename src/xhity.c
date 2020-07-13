@@ -5277,7 +5277,7 @@ boolean ranged;
 			spec = TRUE;
 
 		if (spec &&
-			(!has_head(pd))) {
+			(!has_neck(pd))) {
 			if (vis){
 				pline("Somehow, %s %s %s wildly.",
 					(youagr ? "you" : mon_nam(magr)),
@@ -5636,7 +5636,7 @@ boolean ranged;
 		else {
 			/* chance for vorpal-esque head removal */
 			otmp = (youdef ? uarmh : which_armor(mdef, W_ARMH));
-			if (has_head(pd)
+			if (has_neck(pd)
 				&& !otmp
 				&& !rn2(20)
 				&& (*hp(mdef)*10 < *hpmax(mdef))
@@ -5863,7 +5863,7 @@ boolean ranged;
 		/* chance for vorpal-esque headsmashing */
 		if (!rn2(20)){
 			/* lack of head is only a minor issue */
-			if (!has_head(pd)) {
+			if (!has_head_mon(mdef)) {
 				/* 2x damage */
 				dmg *= 2;
 			}
@@ -6707,7 +6707,7 @@ boolean ranged;
 			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* entirely unharmed */
-		if (!has_head(pd)
+		if (!has_head_mon(mdef)
 			|| (youdef && uclockwork)
 			/*|| notonhead*/ //damnit what
 			) {
@@ -11304,7 +11304,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				(mdef->mflee && pd->mtyp != PM_BANDERSNATCH))
 				sneak_attack |= SNEAK_BEHIND;
 			if (((mdef->mux != u.ux || mdef->muy != u.uy) &&
-				((weapon && weapon == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && has_head(pd) && !is_unalive(pd))
+				((weapon && weapon == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && has_neck(pd) && !is_unalive(pd))
 				|| distmin(u.ux, u.uy, mdef->mx, mdef->my) > BOLT_LIM)))
 				sneak_attack |= SNEAK_HIDDEN;
 			if (ulightsaberhit && u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm)))

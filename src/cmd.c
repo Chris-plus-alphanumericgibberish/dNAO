@@ -3605,7 +3605,7 @@ udr_enlightenment()
 	putstr(en_win, 0, "Current Damage Reduction:");
 	putstr(en_win, 0, "");
 	
-	if(!has_head(youracedata)){
+	if(!has_head_mon(&youmonst)){
 		Sprintf(mbuf, "You have no head; shots hit upper body");
 		putstr(en_win, 0, mbuf);
 	} else {

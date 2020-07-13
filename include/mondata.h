@@ -106,7 +106,9 @@
 #define nofeet(ptr)			((ptr)->mflagsb & MB_NOFEET)
 #define notake(ptr)		(((ptr)->mflagst & MT_NOTAKE) != 0L)
 #define has_head(ptr)		(((ptr)->mflagsb & MB_NOHEAD) == 0L)
-#define has_head_mon(mon) (has_head((mon)->data))
+#define has_head_mon(mon) ((mon == &youmonst) ? (has_head(youracedata)) : ((mon)->mfaction != MISTWEAVER && has_head((mon)->data)))
+//Note: Mistweavers still have necks
+#define has_neck(ptr)		(has_head(ptr))
 #define has_horns(ptr)		(num_horns(ptr) > 0)
 #define is_whirly(ptr)		((ptr)->mlet == S_VORTEX || \
 				 (ptr)->mtyp == PM_AIR_ELEMENTAL ||\
@@ -503,7 +505,7 @@
 							(((ptr->mflagsb&MB_BODYTYPEMASK) != 0) && \
 		((ptr->mflagsb&MB_BODYTYPEMASK) == (obj->bodytypeflag&MB_BODYTYPEMASK))))
 #define can_wear_gloves(ptr)	(!nohands(ptr))
-#define can_wear_amulet(ptr)	(has_head(ptr))
+#define can_wear_amulet(ptr)	(has_neck(ptr))
 #define can_wear_boots(ptr)	((humanoid(ptr) || humanoid_feet(ptr)) && !nofeet(ptr) && !nolimbs(ptr))
 #define shirt_match(ptr,obj)	(((ptr->mflagsb&MB_HUMANOID) && (obj->bodytypeflag&MB_HUMANOID)) || \
 		(((ptr->mflagsb&MB_BODYTYPEMASK) != 0) && ((ptr->mflagsb&MB_BODYTYPEMASK) == (obj->bodytypeflag&MB_BODYTYPEMASK))))
