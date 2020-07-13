@@ -1824,13 +1824,10 @@ boolean vis;
 	boolean youagr = magr == &youmonst;
 	int duration, newres = 0;
 	int extra_damage = 0;
-	static int testint = 0;
 	boolean petrifies = FALSE;
 	struct obj *otmp, *otmp2;
 	long unwornmask;
-	// switch(rnd(12)){
-	testint = (testint%12) + 1;
-	switch(testint){
+	switch(rnd(12)){
 		case 1:
 			duration = dmg <= 2 ? dmg+1 : dmg*10;
 			if(youdef){
