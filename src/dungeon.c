@@ -769,7 +769,7 @@ init_dungeons()		/* initialize the "dungeon" structs */
 	struct version_info vers_info;
 	int dungeonversion;
 	
-	if(flags.chaosvar){
+	if(flags.chaosvar && (wizard || is_june())) {
 		//chaosvar is incremented by 1 so that all variants are nonzero
 		dungeonversion = flags.chaosvar-1;
 	} else {
