@@ -1962,6 +1962,10 @@ doputon()
 		}
 		if (otmp->oartifact && !touch_artifact(otmp, &youmonst, FALSE))
 		    return 1;
+		if(otmp->otyp == LENSES && otmp->objsize != youracedata->msize){
+			pline("They don't fit!");
+			return 0;
+		}
 		Blindf_on(otmp);
 		return(1);
 	}

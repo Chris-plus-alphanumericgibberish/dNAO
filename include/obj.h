@@ -517,6 +517,9 @@ struct weapon_dice {
 			 )
 #define is_weptool(o)	((o)->oclass == TOOL_CLASS && \
 			 objects[(o)->otyp].oc_skill != P_NONE)
+#define is_worn_tool(o)	((o)->otyp == BLINDFOLD || (o)->otyp == ANDROID_VISOR || \
+							 (o)->otyp == TOWEL || (o)->otyp == LENSES || \
+							 (o)->otyp == LIVING_MASK || (o)->otyp == MASK || (o)->otyp == R_LYEHIAN_FACEPLATE)
 #define is_instrument(o)	((o)->otyp >= FLUTE && \
 			 (o)->otyp <= DRUM_OF_EARTHQUAKE)
 #define is_lightsaber(otmp) ((otmp)->otyp == LIGHTSABER || \

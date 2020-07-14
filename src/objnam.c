@@ -5081,7 +5081,7 @@ typfnd:
 	}
 	
 	if(otmp->oclass == WEAPON_CLASS 
-	 || (otmp->oclass == TOOL_CLASS && is_weptool(otmp))
+	 || (otmp->oclass == TOOL_CLASS && (is_weptool(otmp) || otmp->otyp == PICK_AXE || otmp->otyp == LENSES))
 	 || (otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp))
 	){
 		otmp->objsize = objsize;

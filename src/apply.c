@@ -5841,7 +5841,7 @@ resizeArmor()
 	
 	
 	// attempt to find a piece of armor to resize
-	NEARDATA const char clothes[] = { ARMOR_CLASS, 0 };
+	NEARDATA const char clothes[] = { ARMOR_CLASS, TOOL_CLASS, 0 };
 	otmp = getobj(clothes, "resize");
 	if (!otmp) return(0);
 
@@ -6078,13 +6078,18 @@ doapply()
 	case MASK:
 		if (obj == ublindf) {
 		    if (!cursed(obj)) Blindf_off(obj);
-		} else if (!ublindf)
-		    Blindf_on(obj);
-		else You("are already %s.",
-			ublindf->otyp == TOWEL ?     "covered by a towel" :
-			(ublindf->otyp == MASK || ublindf->otyp == LIVING_MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE ) ? "wearing a mask" :
-			(ublindf->otyp == BLINDFOLD || ublindf->otyp == ANDROID_VISOR) ? "wearing a blindfold" :
+		} else if (ublindf){
+			You("are already %s.",
+				ublindf->otyp == TOWEL ?     "covered by a towel" :
+				(ublindf->otyp == MASK || ublindf->otyp == LIVING_MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE ) ? "wearing a mask" :
+				(ublindf->otyp == BLINDFOLD || ublindf->otyp == ANDROID_VISOR) ? "wearing a blindfold" :
 						     "wearing lenses");
+		} else if((obj->otyp == LENSES)
+			&& obj->objsize != youracedata->msize
+		){
+			pline("They don't fit!");
+		} else
+		    Blindf_on(obj);
 		break;
 	case CREAM_PIE:
 		res = use_cream_pie(obj);

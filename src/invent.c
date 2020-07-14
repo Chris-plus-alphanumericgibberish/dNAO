@@ -1144,6 +1144,7 @@ register const char *let,*word;
 		|| (!strcmp(word, "wield") &&
 		    ((otmp->oclass == TOOL_CLASS && !is_weptool(otmp)) ||
 			(otmp->oclass == CHAIN_CLASS && otmp->otyp != CHAIN)))
+		|| (!strcmp(word, "resize") && !(otmp->oclass == ARMOR_CLASS || otmp->otyp == LENSES))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
 		|| (!strcmp(word, "inject") && !(otmp->otyp == HYPOSPRAY_AMPULE && otmp->spe > 0))
 		|| (!strcmp(word, "give the tear to") &&
@@ -1469,8 +1470,7 @@ struct obj *otmp;
 		s1 = "T", s2 = "take", s3 = " off";
 	} else if ((ocls == RING_CLASS || otyp == MEAT_RING) ||
 		ocls == AMULET_CLASS ||
-		(otyp == BLINDFOLD || otyp == ANDROID_VISOR || otyp == TOWEL ||
-		otyp == LENSES || otyp == LIVING_MASK || otyp == MASK || otyp == R_LYEHIAN_FACEPLATE)) {
+		(is_worn_tool(otmp))) {
 	    if (!strcmp(word, "wear"))
 		s1 = "P", s2 = "put", s3 = " on";
 	    else if (!strcmp(word, "take off"))
