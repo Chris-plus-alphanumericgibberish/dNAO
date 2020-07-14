@@ -8,6 +8,7 @@
 STATIC_DCL void FDECL(setgemprobs, (d_level*));
 STATIC_DCL void FDECL(shuffle,(int,int,BOOLEAN_P));
 STATIC_DCL void NDECL(shuffle_all);
+STATIC_DCL int FDECL(find_otyp_of_desc, (const char *, const char **, int, int, boolean(*)(int)));
 STATIC_DCL boolean FDECL(interesting_to_discover,(int));
 
 
@@ -244,6 +245,54 @@ shuffle_all()
 
 	/* shuffle the boots [if they change, update find_skates() below] */
 	shuffle(SPEED_BOOTS, FLYING_BOOTS, FALSE);
+}
+
+/* finds the object index for an item whose description matches str (first) or any of strs[],
+ * within the given bounds of the objects array 
+ * Caller is responsible for storing returned otyp.
+ */
+/* finds the object index for an item whose description matches str (first) or any of strs[],
+* within the given bounds of the objects array
+* Caller is responsible for storing returned otyp.
+*/
+int
+find_otyp_of_desc(str, strs, lbound, ubound, extracondition)
+const char * str;
+const char ** strs;
+int lbound;
+int ubound;
+boolean FDECL((*extracondition), (int));	/* extracondition CANNOT call find_otyp_of_desc() */
+{
+	register int i;
+	register int j;
+	register const char *s;
+	const char * curstr;
+
+	j = -1;
+	/* for each string in our list of strings (or just str if onlyone==TRUE) */
+	do {
+		curstr = (j == -1 ? str : strs[j]);
+
+		/* from lbound of objects array to ubound, */
+		for (i = lbound; i <= ubound; i++)
+		{
+			/* if description matches, */
+			if ((s = OBJ_DESCR(objects[i])) != 0 && (
+				!strcmp(s, curstr)
+				))
+			{
+				/* if that's all we're looking for OR it matches our additional criteria, */
+				if (!extracondition || extracondition(i))
+					return i;	/* return it */
+				else
+					break;	/* stop checking strs[j] against objects[i]; increment i. */
+			}
+		}
+	} while (strs && strs[++j]);
+
+	/* did not find it */
+	/* caller should raise impossible */
+	return -1;
 }
 
 /* find the object index for silver attack wand */
