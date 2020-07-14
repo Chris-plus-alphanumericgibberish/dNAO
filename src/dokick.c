@@ -1222,9 +1222,7 @@ ouch:
 					maploc = &levl[x][y];
 				}
 			}
-			static int jboots2 = 0;
-			if (!jboots2) jboots2 = find_jboots();
-		    if( !(uarmf && uarmf->otyp == jboots2) && !rn2(3)) set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
+			if (!(uarmf && uarmf->otyp == find_jboots()) && !rn2(3)) set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
 		    losehp(rnd(ACURR(A_CON) > 15 ? 3 : 5), kickstr(buf),
 			KILLED_BY);
 		    if(Weightless || Levitation){

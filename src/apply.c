@@ -1989,10 +1989,8 @@ int magic; /* 0=Physical, otherwise skill level */
 		switch(u.utraptype) {
 		case TT_BEARTRAP: {
 		    long side = rn2(3) ? LEFT_SIDE : RIGHT_SIDE;
-			static int jboots4 = 0;
-			if (!jboots4) jboots4 = find_jboots();
 		    You("rip yourself free of the bear trap!  Ouch!");
-			if (uarmf && uarmf->otyp == jboots4){
+			if (uarmf && uarmf->otyp == find_jboots()){
 				int bootdamage = d(1,10);
 				losehp(rnd(10), "jumping out of a bear trap", KILLED_BY);
 				set_wounded_legs(side, rn1(100,50));
