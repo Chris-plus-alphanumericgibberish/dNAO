@@ -9664,20 +9664,30 @@ struct blast_element {
 };
 
 void
-dosymbiotic_armors()
+dosymbiotic_equip()
 {
 	struct monst *mtmp;
-	struct obj *armor;
+	struct obj *obj;
 	if(uarm && (uarm->otyp == LIVING_ARMOR || uarm->otyp == BARNACLE_ARMOR))
 		dosymbiotic(&youmonst, uarm);
+	if(uwep && ((check_oprop(uwep, OPROP_LIVEW) && u.uinsight >= 40) || uwep->oartifact == ART_TENTACLE_ROD))
+		doliving(&youmonst, uwep);
+	if(uswapwep && ((check_oprop(uswapwep, OPROP_LIVEW) && u.twoweap && u.uinsight >= 40) || uswapwep->oartifact == ART_TENTACLE_ROD))
+		doliving(&youmonst, uswapwep);
 	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
 			continue;
-		armor = which_armor(mtmp, W_ARM);
-
-		if(armor && (armor->otyp == LIVING_ARMOR || armor->otyp == BARNACLE_ARMOR))
-			dosymbiotic(mtmp, armor);
+		obj = which_armor(mtmp, W_ARM);
+		if(obj && (obj->otyp == LIVING_ARMOR || obj->otyp == BARNACLE_ARMOR))
+			dosymbiotic(mtmp, obj);
+		
+		obj = MON_WEP(mtmp);
+		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || obj->oartifact == ART_TENTACLE_ROD))
+			doliving(mtmp, obj);
+		obj = MON_SWEP(mtmp);
+		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || obj->oartifact == ART_TENTACLE_ROD))
+			doliving(mtmp, obj);
 	}
 }
 
@@ -9705,8 +9715,32 @@ dogoat_tentacles()
 	}
 }
 
+#define HANDLE_SECRETIONS			if(check_oprop(obj, OPROP_ASECW)){\
+			if((!(obj->opoisoned&OPOISON_ACID) || \
+				((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3)\
+			 ) && !rn2(40)\
+			){\
+				obj->opoisoned |= OPOISON_ACID;\
+				if((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3){\
+					obj->opoisonchrgs++;\
+				}\
+			}\
+		}\
+		if(check_oprop(obj, OPROP_PSECW)){\
+			if((!(obj->opoisoned&OPOISON_BASIC) || \
+				((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3)\
+			 ) && !rn2(40)\
+			){\
+				obj->opoisoned |= OPOISON_BASIC;\
+				if((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3){\
+					obj->opoisonchrgs++;\
+				}\
+			}\
+		}
+
+
 void
-mind_blast_items()
+living_items()
 {
 	struct monst *mtmp, *nmon = (struct monst *)0;
 	struct obj *obj, *nobj;
@@ -9726,6 +9760,7 @@ mind_blast_items()
 		if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
 			whisper++;
 		}
+		HANDLE_SECRETIONS
 	}
 	for (obj = fobj; obj; obj = obj->nobj) {
 		if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
@@ -9737,6 +9772,7 @@ mind_blast_items()
 		if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
 			whisper++;
 		}
+		HANDLE_SECRETIONS
 	}
 	for (obj = level.buriedobjlist; obj; obj = obj->nobj) {
 		if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
@@ -9748,6 +9784,7 @@ mind_blast_items()
 		if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
 			whisper++;
 		}
+		HANDLE_SECRETIONS
 	}
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	if (DEADMONSTER(mtmp)) continue;
@@ -9761,6 +9798,7 @@ mind_blast_items()
 			if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
 				whisper++;
 			}
+			HANDLE_SECRETIONS
 		}
 	}
 	

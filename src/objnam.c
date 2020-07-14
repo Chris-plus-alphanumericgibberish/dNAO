@@ -788,6 +788,11 @@ boolean dofull;
 	}
 	
 	if (!check_oprop(obj, OPROP_NONE) && (obj->oartifact == 0 || dofull)){
+		if (check_oprop(obj, OPROP_ASECW) && (obj->known || u.uinsight >= 10) && !(obj->opoisoned&OPOISON_ACID))
+			u.uinsight < 10 ? Strcat(buf, "self-acidifying ") : Strcat(buf, "acid-secreting ");
+		if (check_oprop(obj, OPROP_PSECW) && (obj->known || u.uinsight >= 10) && !(obj->opoisoned&OPOISON_BASIC))
+			u.uinsight < 10 ? Strcat(buf, "self-poisoning ") : Strcat(buf, "poison-secreting ");
+		
 		if((check_oprop(obj, OPROP_ANARW) || check_oprop(obj, OPROP_ANAR)) && obj->known)
 			Strcat(buf, "anarchic ");
 		if((check_oprop(obj, OPROP_CONCW) || check_oprop(obj, OPROP_CONC)) && obj->known)
@@ -878,6 +883,10 @@ boolean dofull;
 			Strcat(buf, "flaying ");
 		if (check_oprop(obj, OPROP_LESSER_FLAYW) && obj->known)
 			Strcat(buf, "excoriating ");
+		
+		if (check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40)
+			Strcat(buf, "living ");
+		
 		/* note: "holy" and "unholy" properties are shown in the BUC part of the name, as they replace "blessed" and "cursed". */
 		
 		/* note: except "Holy Avenger" and "Unholy Avenger" */
@@ -3937,6 +3946,12 @@ int wishflags;
 		} else if (!strncmpi(bp, "reflective ", l=11)) {
 			add_oprop_list(oprop_list, OPROP_REFL);
 
+		} else if (!strncmpi(bp, "self-acidifying ", l=16) || !strncmpi(bp, "acid-secreting ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_ASECW);
+			
+		} else if (!strncmpi(bp, "self-poisoning ", l=15) || !strncmpi(bp, "poison-secreting ", l=17) ) {
+			add_oprop_list(oprop_list, OPROP_PSECW);
+
 		} else if (!strncmpi(bp, "anarchic-weapon ", l=16)) {
 			add_oprop_list(oprop_list, OPROP_ANARW);
 
@@ -4047,6 +4062,13 @@ int wishflags;
 			add_oprop_list(oprop_list, OPROP_FLAYW);
 		} else if (!strncmpi(bp, "excoriating ", l=12)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_FLAYW);
+			
+		} else if (!strncmpi(bp, "living ", l=7) 
+			&& strncmpi(bp, "living armor", 12) && strncmpi(bp, "living doll", 11)
+			&& strncmpi(bp, "living lectern", 14) && strncmpi(bp, "living mirage", 13)
+			&& strncmpi(bp, "living mask", 11) && strncmpi(bp, "living arm", 10)
+		) {
+			add_oprop_list(oprop_list, OPROP_LIVEW);
 
 		} else if (!strncmpi(bp, "magicite ", l=9)) {
 			mat = GEMSTONE; gemtype = MAGICITE_CRYSTAL;

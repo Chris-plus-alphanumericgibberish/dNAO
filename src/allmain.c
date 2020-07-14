@@ -1803,8 +1803,8 @@ karemade:
 			}
 			
 			/* Item attacks */
-			mind_blast_items();
-			dosymbiotic_armors();
+			living_items();
+			dosymbiotic_equip();
 			if(u.spiritPColdowns[PWR_PSEUDONATURAL_SURGE] >= moves+20)
 				dopseudonatural();
 			dogoat_tentacles();

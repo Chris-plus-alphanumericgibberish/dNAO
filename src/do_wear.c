@@ -3770,6 +3770,8 @@ struct obj *armor;
 		
 		if(!mdef)
 			continue;
+		if(DEADMONSTER(mdef))
+			continue;
 		
 		youdef = (mdef == &youmonst);
 		
@@ -3784,15 +3786,59 @@ struct obj *armor;
 		 || mdef->mtyp == PM_MEDUSA
 		 || mdef->mtyp == PM_PALE_NIGHT
 		) continue;
-		if (mdef && !mdef->mtame && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
-			if(DEADMONSTER(mdef))
-				continue;
+		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
 			xmeleehity(magr, mdef, &symbiote, (struct obj *)0, -1, 0, FALSE);
 			if(!youagr && DEADMONSTER(magr))
 				break; //oops!
 			if(youagr) morehungry(1);
 			lim++;
 			if(lim > 4) break;
+		}
+	}
+}
+
+void
+doliving(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	struct monst *mdef;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j, lim=0;
+	struct attack symbiote = { AT_WEAP, AD_PHYS, 4, 4 };
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	
+	for(j=8;j>=1;j--){
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+			continue;
+		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(!mdef)
+			continue;
+		if(DEADMONSTER(mdef))
+			continue;
+		
+		youdef = (mdef == &youmonst);
+		
+		if(youagr && (mdef->mpeaceful || !rn2(4)))
+			continue;
+		if(youdef && (magr->mpeaceful || !rn2(4)))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
+			continue;
+		//Note: petrifying targets are safe, it's a weapon attack
+		if(mdef->mtyp == PM_PALE_NIGHT) continue;
+		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
+			xmeleehity(magr, mdef, &symbiote, wep, -1, 0, FALSE);
+			if(!youagr && DEADMONSTER(magr))
+				break; //oops!
+			if(youagr) morehungry(1);
+			//limit of one attack for weapons
+			break;
 		}
 	}
 }
