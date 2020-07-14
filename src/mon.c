@@ -5614,7 +5614,7 @@ xkilled(mtmp, dest)
 		if (corpse_chance(mtmp, (struct monst *)0, FALSE)){
 			struct obj *corpse;
 			corpse = make_corpse(mtmp);
-			if(corpse && corpse->otyp == CORPSE && goat_mouth_at(x,y) && !corpse->oartifact){
+			if(corpse && corpse->otyp == CORPSE && goat_mouth_at(x,y) && !corpse->oartifact && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
 				//We are in the "player has killed monster" function, so it's their fault
 				goat_eat(corpse, TRUE); //Goat eat tries *really* hard to destroy whatever you give it.
 				corpse = (struct obj *)0; //corpse pointer is now stale
