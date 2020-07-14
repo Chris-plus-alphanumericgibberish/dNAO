@@ -811,6 +811,8 @@ boolean dofull;
 			Strcat(buf, "voltproof ");
 		if(check_oprop(obj, OPROP_ACID) && obj->known)
 			Strcat(buf, "acidproof ");
+		if(check_oprop(obj, OPROP_DISN) && obj->known)
+			Strcat(buf, "disintegration-proof ");
 		
 		if (check_oprop(obj, OPROP_LESSER_ANARW) && obj->known)
 			Strcat(buf, "unruly ");
@@ -3934,6 +3936,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "acidproof ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_ACID);
 
+		} else if (!strncmpi(bp, "disintegration-proof ", l=21)) {
+			add_oprop_list(oprop_list, OPROP_DISN);
+			
 		} else if (!strncmpi(bp, "anarchic-armor ", l=15)) {
 			add_oprop_list(oprop_list, OPROP_ANAR);
 
