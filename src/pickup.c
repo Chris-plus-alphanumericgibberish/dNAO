@@ -3303,7 +3303,7 @@ dotip()
 	/* either no floor container(s) or couldn't tip one or didn't tip any */
 	cobj = getobj(tippables, "tip");
 	if (!cobj)
-		return 0;
+		goto tipmonster;
 
 	/* normal case */
 	if (Is_container(cobj) || cobj->otyp == HORN_OF_PLENTY) {
@@ -3348,11 +3348,95 @@ dotip()
 	if (cobj->oclass == POTION_CLASS) /* can't pour potions... */
 		pline_The("%s %s securely sealed.", xname(cobj), otense(cobj, "are"));
 	else if (uarmh && cobj == uarmh)
-		tiphat();
+		return tiphat();
 	else if (cobj->otyp == STATUE)
 		pline("Nothing interesting happens.");
 	else
 		pline1(nothing_happens);
+tipmonster:
+#define can_respond(mtmp) (mtmp && mtmp->mcanmove && !mtmp->msleeping && m_canseeu(mtmp))
+	if (getdir("Tip a monster? (in what direction)")){
+		struct monst* mtmp = m_at(u.ux+u.dx, u.uy+u.dy);
+		if (!canspotmon(mtmp))
+			mtmp = (struct monst *) 0;
+		
+		if (!mtmp)
+			You("don't see anybody there to tip.");
+		else if (mtmp->mtyp == PM_ROTHE){
+			if (near_capacity() >= MOD_ENCUMBER)
+				You("are carrying too much to do that without falling over.");
+			else if (!(mtmp->mfrozen || mtmp->msleeping))
+				pline("The rothe is awake and resists being toppled over!");
+			else {
+				You("try to push the rothe over.");
+				// going to assume that even if you have no hands, you can still bodycheck
+				// the rothe into wakefulness
+				if (ACURRSTR < 14){
+					pline("It's too heavy for you to budge.");
+					if (rn2(2)){
+						mtmp->msleeping = 0;
+						mtmp->mfrozen = 0;
+						pline("At your push, the rothe wakes up!");
+					}
+				} else {
+					if (Hallucination)
+						pline("The creature has fallen and can't get up.");
+					else
+						You("successfully tip the rothe onto its side, startling it awake!");
+					
+					mtmp->msleeping = 0;
+					mtmp->mfrozen = 1;
+				}
+			}
+		} else if (mtmp->isshk){
+			if (u.ugold){
+				You("offer %s a tip for their excellent service.", Monnam(mtmp));
+				if (strcmp(shkname(mtmp), "Izchak") == 0){
+					pline("Izchak thanks you for your generous tip.");
+					domonnoise(mtmp, TRUE);
+				}
+				u.ugold -= 1;
+				mtmp->mgold += 1;
+			} else
+				You("have no cash on you right now.");
+		} else if (mtmp->mtyp == PM_LEPRECHAUN){
+			if (!can_respond(mtmp))
+				pline("%s doesn't react.", Monnam(mtmp));
+			else if (!u.ugold)
+				You("have no money to bribe with!");
+			else {
+				You("offer %s some gold to leave you alone.", mon_nam(mtmp));
+				if (mtmp->mpeaceful)
+					pline("%s accepts before you can change your mind.", Monnam(mtmp));
+				else
+					pline("%s greedily accepts.", Monnam(mtmp));
+				int cash = rnd(10);
+				u.ugold -= cash;
+				mtmp->mgold += cash;
+				mtmp->mpeaceful = TRUE;
+				
+				if (!tele_restrict(mtmp)) {
+					(void)rloc(mtmp, FALSE);
+					if (canspotmon(mtmp))
+						pline("%s suddenly disappears!", Monnam(mtmp));
+				}
+			}
+		} else if (mtmp->mtyp == PM_MIGO_PHILOSOPHER){
+			if (u.ugold){
+				You("offer %s a penny for their thoughts.", mon_nam(mtmp));
+				u.ugold -= 1;
+				mtmp->mgold += 1;
+				if (can_respond(mtmp))
+					domonnoise(mtmp, TRUE);
+			}
+		} else if (is_mercenary(mtmp->data)){
+			pline("If you want to bribe them, maybe try throwing them some gold instead.");
+		} else {
+			pline("That's a silly monster to tip.");
+		}
+		return 1;
+			
+	} 
 	return 0;
 }
 
@@ -3545,8 +3629,6 @@ tiphat()
 		}
 		return res;
 	}
-#define can_respond(mtmp) (mtmp && !(!mtmp->mcanmove || mtmp->msleeping\
-								|| !m_canseeu(mtmp) || (x != mtmp->mx || y != mtmp->my)))
 
 	mtmp = (struct monst *) 0;
 	vismon = unseen = statue = 0;
@@ -3560,14 +3642,14 @@ tiphat()
 		}
 		mtmp = m_at(x, y);
 		vismon = (mtmp && canseemon(mtmp));
-		if (vismon || (range == 1 && mtmp && can_respond(mtmp) && !is_silent(mtmp->data)))
+		if (vismon || (range == 1 && mtmp && can_respond(mtmp) && (x == mtmp->mx || y == mtmp->my) && !is_silent(mtmp->data)))
 			break;
 	}
 	
 	// statue interactions removed, since they make no sense when the obj has a randomized
 	// glyph, and it would be annoying if a statue is between you and a target
 	
-	if (!mtmp || (mtmp && !can_respond(mtmp))) {
+	if (!mtmp || (mtmp && (!can_respond(mtmp) || (x != mtmp->mx || y != mtmp->my)))) {
 		if (vismon)
 			pline("%s seems not to notice you.", Monnam(mtmp));
 		else
