@@ -559,6 +559,21 @@ find_jboots()
 	return 0;
 }
 
+/* find the object index for riding boots */
+int
+find_rboots()
+{
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	if ((i = find_otyp_of_desc("riding boots", 0, SPEED_BOOTS, FLYING_BOOTS, 0)) != -1)
+		return i;
+	else
+		impossible("could not find riding boots");
+	return 0;
+}
+
 /* find the object index for the ornamental cope */
 int
 find_cope()
@@ -1054,6 +1069,21 @@ find_fgloves()
 		return i;
 	else
 		impossible("could not find fencing gloves");
+	return 0;
+}
+
+/* find the object index for riding gloves */
+int
+find_rgloves()
+{
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	if ((i = find_otyp_of_desc("riding gloves", 0, GLOVES, GAUNTLETS_OF_DEXTERITY, 0)) != -1)
+		return i;
+	else
+		impossible("could not find riding gloves");
 	return 0;
 }
 

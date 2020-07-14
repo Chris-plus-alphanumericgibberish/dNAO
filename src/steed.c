@@ -141,14 +141,10 @@ use_saddle(otmp)
 	if (Confusion || Fumbling || Glib)
 	    chance -= 20;
 	else{
-		if (uarmg &&
-			(s = OBJ_DESCR(objects[uarmg->otyp])) != (char *)0 &&
-			!strncmp(s, "riding ", 7))
+		if (uarmg && uarmg->otyp == find_rgloves())
 			/* Bonus for wearing "riding" (but not fumbling) gloves */
 			chance += 10;
-		if (uarmf &&
-			(s = OBJ_DESCR(objects[uarmf->otyp])) != (char *)0 &&
-			!strncmp(s, "riding ", 7))
+		if (uarmf && uarmf->otyp == find_rboots())
 			/* ... and for "riding boots" */
 			chance += 10;
 	}
