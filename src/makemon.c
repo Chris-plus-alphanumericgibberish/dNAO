@@ -4670,10 +4670,11 @@ register struct monst *mtmp;
 				if(In_lost_cities(&u.uz)){
 					//Cultist of the Black Goat
 					otmp = mksobj(VIPERWHIP, FALSE, FALSE);
-					otmp->spe = 6;
+					otmp->spe = 3;
 					otmp->ovar1 = 4;
+					otmp->opoisoned = OPOISON_ACID;
+					otmp->opoisonchrgs = 3;
 					set_material_gm(otmp, BONE);
-					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					int threshold = rnd(10)+rn2(11);
 					if(mtmp->female && u.uinsight > threshold){
