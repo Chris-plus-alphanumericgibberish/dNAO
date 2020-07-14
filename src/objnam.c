@@ -2121,7 +2121,7 @@ weapon:
 					if (obj->opoisoned & OPOISON_PARAL) Strcat(buf, ", venom injecting");
 					if (obj->opoisoned & OPOISON_AMNES) Strcat(buf, ", lethe injecting");
 					if (obj->opoisoned & OPOISON_ACID) Strcat(buf, ", acid injecting");
-					if (obj->opoisoned & OPOISON_ACID) Strcat(buf, ", silvered ");
+					if (obj->opoisoned & OPOISON_SILVER) Strcat(buf, ", silvered ");
 				}
 				Strcat(buf, ")");
 			}
@@ -2133,7 +2133,7 @@ weapon:
 				if (obj->opoisoned & OPOISON_PARAL) Strcat(buf, " (venom injecting)");
 				if (obj->opoisoned & OPOISON_AMNES) Strcat(buf, " (lethe injecting)");
 				if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, " (acid injecting)");
-				if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, " (silvered)");
+				if (obj->opoisoned & OPOISON_SILVER)  Strcat(buf, " (silvered)");
 			}
 			break;
 		case FOOD_CLASS:
