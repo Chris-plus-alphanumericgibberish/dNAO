@@ -3457,7 +3457,7 @@ boolean ranged;
 		/* multistriking weapons need to determine how many hit, and set ostriking */
 		if (weapon && multistriking(weapon) && !miss) {
 			weapon->ostriking = 0;
-			int attempts = rn2(multistriking(weapon));
+			int attempts = rn2(multistriking(weapon) + 1);	/* ex: multistriking == 2 for 1-3 hits.*/
 			for (; attempts; attempts--) {
 				if (accuracy > rnd(20))
 					weapon->ostriking++;
