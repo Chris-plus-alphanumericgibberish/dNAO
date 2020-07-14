@@ -271,10 +271,7 @@ Cloak_on()
 	default: impossible(unknown_type, c_cloak, uarmc->otyp);
     }
     /* vampires get a charisma bonus when wearing an opera cloak */
-    const char* cloak_desc = OBJ_DESCR(objects[uarmc->otyp]);
-    if (cloak_desc != (char *)0 &&
-	!strcmp(cloak_desc, "opera cloak") &&
-	is_vampire(youracedata)) {
+	if (uarmc->otyp == find_opera_cloak() && is_vampire(youracedata)) {
 		You("%s very impressive in your %s.", Blind ||
 				(Invis && !See_invisible(u.ux, u.uy)) ? "feel" : "look",
 				OBJ_DESCR(objects[uarmc->otyp]));
@@ -340,11 +337,9 @@ Cloak_off()
 	default: impossible(unknown_type, c_cloak, otyp);
     }
     /* vampires get a charisma bonus when wearing an opera cloak */
-    const char* cloak_desc = OBJ_DESCR(objects[otyp]);
-    if (cloak_desc != (char *)0 &&
-	!strcmp(cloak_desc, "opera cloak") &&
-	!cancelled_don &&
-	is_vampire(youracedata)) {
+	if (otyp == find_opera_cloak() &&
+		!cancelled_don &&
+		is_vampire(youracedata)) {
 		ABON(A_CHA) -= 1;
 		flags.botl = 1;
     }
