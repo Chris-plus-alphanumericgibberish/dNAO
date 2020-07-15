@@ -73,10 +73,10 @@ CONCAT(R01, C01(x)) CONCAT(R01, C02(y)) CONCAT(R01, C03(z))
 ->R01C01(x) R01C02(y) R01C03(z)
 
 This is the order - of - n ^ 2 part.Each and every RnnCmm(X) combination is actually a #define.
-Only the ones where nn == mm turn into(X), all others turn into nothing.
+Only the ones where nn == mm turn into (X), all others turn into nothing.
 
 R01C01(x) R01C02(y) R01C03(z)
-->x
+->x,
 
 What if no arguments are given that match the field number ?
 This is where MAYBE comes in, and replaces nothingness :
@@ -84,22 +84,26 @@ This is where MAYBE comes in, and replaces nothingness :
 R01C02(y) R01C03(z)
 ->
 
-with a default value :
-
-MAYBE(defaultnn, )
-->defaultnn
+with a zero :
+-> 0
 
 What if >1 arguments are given for 1 field number ?
 ie, SET04(C02(x), C02(y));
-This will not work, much like writing int mynum = 5 7; will not work.
+This is how you have default arguments.
+The rightmost one will be used:
 
-How do we set defaults?
-We need to predefine our default values.
-#define DEF01 0
-#define DEF02 0
-etc etc.
-This is done in this file to all 0s as a default-default, if you will.
-To set a different default, undef the one to change to placate the compiler before redefining it.
+SET04(C02(x), C02(y))
+-> 0, y, 0, 0
+
+Another example of using defaults:
+#define TEST(...) SET02(C01(-1), C02(-2), __VA_ARGS__)
+TEST()
+-> -1, -2
+TEST(C02(5))
+-> -1, 5
+TEST(C01(3), C02(5))
+-> 3, 5
+
 */
 
 
