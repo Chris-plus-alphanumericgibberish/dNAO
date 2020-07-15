@@ -327,7 +327,7 @@ int faction;
 		break;
 	case MISTWEAVER:
 		/* flags */
-		ptr->mflagsb &= ~(MB_NOHEAD);
+		ptr->mflagsb |= (MB_CAN_AMULET|MB_NOHEAD);
 		break;
 	case DELOUSED:
 		/* flags */

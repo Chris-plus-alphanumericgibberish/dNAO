@@ -161,6 +161,7 @@
 #define MB_LONGNECK		0x00200000L	/* has 'long' (snakelike) head and neck */
 #define MB_NOFEET		0x00400000L	/* no feet to wear boots */
 #define MB_HAS_FEET		0x00800000L	/* does have humanoid feet, even though it has a non-humanoid body plan */
+#define MB_CAN_AMULET	0x01000000L	/* can wear an amulet even if it has no head */
 
 #define MB_SNAKELEG	(MB_HUMANOID|MB_SLITHY)
 #define MB_CENTAUR	(MB_HUMANOID|MB_ANIMAL)
