@@ -8,7 +8,7 @@
 #include "ehor.h"
 
 /*	These routines provide basic data for any type of monster. */
-
+STATIC_DCL void FDECL(set_faction_data, (struct permonst *, struct permonst *, int));
 STATIC_DCL struct permonst * FDECL(permonst_of, (int, int));
 
 #ifdef OVLB
@@ -32,19 +32,27 @@ set_mon_data(mon, mtyp)
 struct monst *mon;
 int mtyp;
 {
+	struct permonst * bas;
 	struct permonst * ptr;
-	/* players in their base form are a special case */
+	/* players in their base form are a very special case */
 	if (mon == &youmonst && (mtyp == u.umonster)) {
-		mon->data = ptr = &upermonst;
+		ptr = &upermonst;
+		/* I'm not sure what bas should be, if it were to be needed */
 	}
 	/* horrors are a special case, and have memory allocated on a per-monster basis */
 	else if (is_horror(&mons[mtyp])) {
-		mon->data = ptr = &(EHOR(mon)->currhorrordata);
+		ptr = &(EHOR(mon)->currhorrordata);
+		bas = &(EHOR(mon)->basehorrordata);
 	}
 	/* eveything else has permonst memory assigned by permonst_of */
 	else {
-		mon->data = ptr = permonst_of(mtyp, mon->mfaction);
+		ptr = permonst_of(mtyp, mon->mfaction);
+		bas = &mons[mtyp];
 	}
+	/* adjust permonst if needed */
+	if (mon != &youmonst && mon->mfaction)
+		set_faction_data(bas, ptr, mon->mfaction);
+	/* set monster data */
 	set_mon_data_core(mon, ptr);
 	return;
 }
@@ -162,53 +170,15 @@ int faction;
 	return;
 }
 
-/* 
- * Returns a pointer to the appropriate permonst structure for the monster parameters given
- * 
- * needs an mtyp; faction optional
- * Do not call with mtyp==NON_PM unless you are intending to get PM_PLAYERMON
- * 
- * This function is responsible for allocating memory for new permonsts!
- */
-struct permonst *
-permonst_of(mtyp, faction)
-int mtyp;
+void
+set_faction_data(base, ptr, faction)
+struct permonst * base;
+struct permonst * ptr;
 int faction;
 {
-	static struct permonst * monsarrays[NUMMONS][MAXFACTION - FACTION_PADDING] = { 0 };
-	struct permonst * ptr;
-	int f_index = faction - FACTION_PADDING - 1;	/* first faction is 1-indexed, but we want 0-indexed */
-
-	/* player is special, and has no handling for derived statblocks */
-	if (mtyp == PM_PLAYERMON) {
-		impossible("attempting to find permonst of playermon, faction %d", faction);
-		return &upermonst;
-	}
-	
-	/* validate mtyp */
-	if (mtyp > NUMMONS || mtyp < 0) {
-		impossible("Can not get permonst for mtyp=%d!", mtyp);
-	}
-
-	/* filter out drow/misc factions */
-	if (faction <= FACTION_PADDING)
-		faction = 0;	/* equivalent to no faction */
-
-	/* simplest case: return the common mons[] array */
-	if (!faction)
-		return &mons[mtyp];
-
-	/* next case: we have already generated that particular statblock */
-	if (monsarrays[mtyp][f_index] != (struct permonst *)0) {
-		return monsarrays[mtyp][f_index];
-	}
-
-	/* final case: we need to generate the statblock */
-	/* allocate memory */
-	monsarrays[mtyp][f_index] = (struct permonst *)malloc(sizeof(struct permonst));
-	ptr = monsarrays[mtyp][f_index];
+	int mtyp = base->mtyp;
 	/* copy original */
-	*ptr = mons[mtyp];
+	*ptr = *base;
 	/* make changes to the permonst as necessary */
 	switch (faction)
 	{
@@ -359,26 +329,26 @@ int faction;
 
 		/* some factions completely skip specific attacks */
 		while ((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
-				(
-				attk->aatyp == AT_SPIT ||
-				attk->aatyp == AT_BREA ||
-				attk->aatyp == AT_GAZE ||
-				attk->aatyp == AT_ARRW ||
-				attk->aatyp == AT_MMGC ||
-				attk->aatyp == AT_TNKR ||
-				attk->aatyp == AT_SRPR ||
-				attk->aatyp == AT_BEAM ||
-				attk->aatyp == AT_MAGC ||
-				(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
-				attk->aatyp == AT_GAZE ||
-				attk->aatyp == AT_WDGZ ||
-				(attk->aatyp == AT_NONE && attk->adtyp == AD_PLYS)
-				)
+			(
+			attk->aatyp == AT_SPIT ||
+			attk->aatyp == AT_BREA ||
+			attk->aatyp == AT_GAZE ||
+			attk->aatyp == AT_ARRW ||
+			attk->aatyp == AT_MMGC ||
+			attk->aatyp == AT_TNKR ||
+			attk->aatyp == AT_SRPR ||
+			attk->aatyp == AT_BEAM ||
+			attk->aatyp == AT_MAGC ||
+			(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
+			attk->aatyp == AT_GAZE ||
+			attk->aatyp == AT_WDGZ ||
+			(attk->aatyp == AT_NONE && attk->adtyp == AD_PLYS)
+			)
 			)
 		{
 			/* shift all further attacks forwards one slot, and make last one all 0s */
 			for (j = 0; j < (NATTK - i); j++)
-				attk[j] = attk[j+1];
+				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
 
@@ -399,21 +369,21 @@ int faction;
 
 		/* some factions want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || \
-					((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
-						&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
-					&& (insert = TRUE))
+	((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
+	&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
+	&& (insert = TRUE))
 #define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;i++;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
 		if ((faction == ZOMBIFIED || faction == SKELIFIED) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
-				is_null_attk(attk) || 
-				(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
-				) && (insert = TRUE)
+			is_null_attk(attk) ||
+			(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
+			) && (insert = TRUE)
 			))
 		{
 			maybe_insert()
-			attk->aatyp = !nolimbs(ptr) ? AT_CLAW : AT_BITE;
+				attk->aatyp = !nolimbs(ptr) ? AT_CLAW : AT_BITE;
 			attk->adtyp = AD_PHYS;
 			attk->damn = ptr->mlevel / 10 + (faction == ZOMBIFIED ? 1 : 2);
 			attk->damd = max(ptr->msize * 2, 4);
@@ -422,7 +392,7 @@ int faction;
 		/* skeletons get a paralyzing touch */
 		if (faction == SKELIFIED && (
 			insert_okay
-			)) 
+			))
 		{
 			maybe_insert();
 			attk->aatyp = AT_TUCH;
@@ -430,7 +400,7 @@ int faction;
 			attk->damn = 1;
 			attk->damd = max(ptr->msize * 2, 4);
 			special = TRUE;
-			
+
 		}
 		/* vitreans get a cold touch */
 		if (faction == CRYSTALFIED && (
@@ -458,10 +428,10 @@ int faction;
 		/* fractured turn their claws into glass shards */
 		if (faction == FRACTURED && (
 			(attk->aatyp == AT_CLAW && (
-				attk->adtyp == AD_PHYS ||
-				attk->adtyp == AD_SQUE ||
-				attk->adtyp == AD_SAMU
-				))
+			attk->adtyp == AD_PHYS ||
+			attk->adtyp == AD_SQUE ||
+			attk->adtyp == AD_SAMU
+			))
 			|| insert_okay
 			))
 		{
@@ -571,6 +541,54 @@ int faction;
 #undef insert_okay
 #undef end_insert_okay
 #undef maybe_insert
+	return;
+}
+
+/* 
+ * Returns a pointer to the appropriate permonst structure for the monster parameters given
+ * 
+ * needs an mtyp; faction optional
+ * Do not call with mtyp==NON_PM unless you are intending to get PM_PLAYERMON
+ * 
+ * This function is responsible for allocating memory for new permonsts!
+ */
+struct permonst *
+permonst_of(mtyp, faction)
+int mtyp;
+int faction;
+{
+	static struct permonst * monsarrays[NUMMONS][MAXFACTION - FACTION_PADDING] = { 0 };
+	struct permonst * ptr;
+	int f_index = faction - FACTION_PADDING - 1;	/* first faction is 1-indexed, but we want 0-indexed */
+
+	/* player is special, and has no handling for derived statblocks */
+	if (mtyp == PM_PLAYERMON) {
+		impossible("attempting to find permonst of playermon, faction %d", faction);
+		return &upermonst;
+	}
+	
+	/* validate mtyp */
+	if (mtyp > NUMMONS || mtyp < 0) {
+		impossible("Can not get permonst for mtyp=%d!", mtyp);
+	}
+
+	/* filter out drow/misc factions */
+	if (faction <= FACTION_PADDING)
+		faction = 0;	/* equivalent to no faction */
+
+	/* simplest case: return the common mons[] array */
+	if (!faction)
+		return &mons[mtyp];
+
+	/* next case: we have already generated that particular statblock */
+	if (monsarrays[mtyp][f_index] != (struct permonst *)0) {
+		return monsarrays[mtyp][f_index];
+	}
+
+	/* final case: we need to generate the statblock */
+	/* allocate memory */
+	monsarrays[mtyp][f_index] = (struct permonst *)malloc(sizeof(struct permonst));
+	ptr = monsarrays[mtyp][f_index];
 	return ptr;
 }
 
