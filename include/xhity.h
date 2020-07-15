@@ -44,6 +44,8 @@
 #define is_holy_mon(mon)	(is_uvuudaum((mon)->data) || ((mon)->mfaction == ILLUMINATED))
 #define is_unholy_mon(mon)	((mon)->mtyp == PM_UVUUDAUM)
 /* obj. h*/
+
+/* multistriking() is 0-based so that only actual multistriking weapons return multistriking!=0 */
 #define multistriking(otmp)	(!(otmp) ? 0 : \
 	(otmp)->otyp == SET_OF_CROW_TALONS ? 2 : \
 	(otmp)->otyp == VIPERWHIP ? ((otmp)->ovar1 - 1) : \
