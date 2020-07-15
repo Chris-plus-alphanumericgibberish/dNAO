@@ -593,8 +593,10 @@ int faction;
 }
 
 void
-make_horror(horror)
+make_horror(horror, target_level, level_bonus)
 struct permonst * horror;
+int target_level;
+int level_bonus;
 {
 	extern int monstr[];
 	struct attack* attkptr;
@@ -922,7 +924,11 @@ struct permonst * horror;
 			horror->mlevel = mstrength(horror);
 			monstr[monsndx(horror)] = mstrength(horror);
 		}
-	} while (horror->mlevel<11);
+		/* add specified flat level bonus */
+		horror->mlevel += level_bonus;
+		monstr[monsndx(horror)] = mstrength(horror);
+
+	} while (abs(horror->mlevel - target_level) > 2);
 
 #undef get_random_of
 	return;

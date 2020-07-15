@@ -2412,10 +2412,10 @@ u_init()
 	calc_total_maxen();
 	u.uen = u.uenmax;
 	
-	// make horrors
-	make_horror(&mons[PM_SHAMBLING_HORROR]);
-	make_horror(&mons[PM_STUMBLING_HORROR]);
-	make_horror(&mons[PM_WANDERING_HORROR]);
+	/* make horrors: progressively nastier */
+	make_horror(&mons[PM_SHAMBLING_HORROR], 15, 1);
+	make_horror(&mons[PM_STUMBLING_HORROR], 17, 2);
+	make_horror(&mons[PM_WANDERING_HORROR], 19, 3);
 	// horror stuff that unfortunately currently can't be part of the permonst
 	if (!rn2(10)) u.shambin = 3;
 	else if (!rn2(9)) u.shambin = 2;
