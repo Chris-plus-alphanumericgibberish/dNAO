@@ -7700,8 +7700,20 @@ register int	mmflags;
 	mtmp->mvar1 = mtmp->mvar2 = mtmp->mvar3 = 0;
 	mtmp->mtyp = mndx;
 	if (is_horror(ptr)) {
-		EHOR(mtmp)->basehorrordata = *ptr;
-		EHOR(mtmp)->currhorrordata = *ptr;
+		if (mndx == PM_NAMELESS_HORROR) {
+			extern char * nameless_horror_name;
+			int plslev = rn2(12);
+			EHOR(mtmp)->basehorrordata = *ptr;
+			nameless_horror_name = EHOR(mtmp)->randname;
+			make_horror(&(EHOR(mtmp)->basehorrordata), 37 + plslev, 15 + plslev);
+			nameless_horror_name = (char *)0;
+			ptr = &(EHOR(mtmp)->basehorrordata);
+			EHOR(mtmp)->currhorrordata = *ptr;
+		}
+		else {
+			EHOR(mtmp)->basehorrordata = *ptr;
+			EHOR(mtmp)->currhorrordata = *ptr;
+		}
 	}
 	set_mon_data(mtmp, mndx);
 	

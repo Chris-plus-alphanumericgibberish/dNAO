@@ -6,6 +6,8 @@
 #define EHOR_H
 
 struct ehor {
+	/* allocated memory for a random name */
+	char randname[40];
 	/* standard data to base this horror off of */
 	struct permonst basehorrordata;
 	/* current and modifiable memory (for zombified, etc) */

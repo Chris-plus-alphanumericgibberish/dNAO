@@ -457,6 +457,7 @@
 #define is_horror(ptr)		(  (ptr)->mtyp == PM_SHAMBLING_HORROR\
 							|| (ptr)->mtyp == PM_STUMBLING_HORROR\
 							|| (ptr)->mtyp == PM_WANDERING_HORROR\
+							|| (ptr)->mtyp == PM_NAMELESS_HORROR\
 							)
 #define is_mercenary(ptr)	(((ptr)->mflagsg & MG_MERC) != 0L)
 #define is_army_pm(pm)		(pm == PM_CAPTAIN || pm == PM_LIEUTENANT || pm == PM_SERGEANT || pm == PM_SOLDIER)

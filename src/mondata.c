@@ -11,6 +11,8 @@
 STATIC_DCL void FDECL(set_faction_data, (struct permonst *, struct permonst *, int));
 STATIC_DCL struct permonst * FDECL(permonst_of, (int, int));
 
+char * nameless_horror_name;
+
 #ifdef OVLB
 
 /* saves the index number of each part of the permonst array to itself */
@@ -43,6 +45,10 @@ int mtyp;
 	else if (is_horror(&mons[mtyp])) {
 		ptr = &(EHOR(mon)->currhorrordata);
 		bas = &(EHOR(mon)->basehorrordata);
+		if (mtyp == PM_NAMELESS_HORROR) {
+			ptr->mname = EHOR(mon)->randname;
+			bas->mname = EHOR(mon)->randname;
+		}
 	}
 	/* eveything else has permonst memory assigned by permonst_of */
 	else {
@@ -882,6 +888,27 @@ int level_bonus;
 		horror->mflagst &= ~MT_COVETOUS;			/* no covetous */
 		horror->mflagsa &= ~MA_WERE;				/* no lycanthropes */
 		horror->mflagsg &= ~MG_PNAME;				/* not a proper name */
+
+		/* special adjustments for Nameless Horrors */
+		if (horror->mtyp == PM_NAMELESS_HORROR) {
+			static const char *Vowels[] = { "a", "e", "i", "o", "u", "y",
+				"ae", "oe", "oo", "ai", "ou", "\'" };
+			static const char *Consonants[] = { "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "qu", "r", "s", "t", "v", "w", "x", "y", "z",
+				"ch", "ll", "sh", "th", "zth", "cl", "kl", "cr", "kr", "gn", "tr", "gh", "bl", "nn", "mm", "\'" };
+			int i;
+			Strcpy(nameless_horror_name, "");
+			for (i = !rn2(3); (i<4 || (rn2(10-i) && rn2(3))); i++) {
+				if (!(i % 2) || !rn2(12))
+					Strcat(nameless_horror_name, get_random_of(Consonants));
+				else
+					Strcat(nameless_horror_name, get_random_of(Vowels));
+			}
+			(void)upstart(nameless_horror_name);
+			horror->mname = nameless_horror_name;
+			horror->mflagsg |= MG_PRINCE;
+			horror->mflagsg |= MG_PNAME;
+			horror->mflagsv |= MV_EXTRAMISSION;
+		}
 
 		/* some cleanup to reduce the trainwreck*/
 		if (horror->mflagsm & MM_WALLWALK)
