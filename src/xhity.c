@@ -3868,13 +3868,13 @@ boolean ranged;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone);
+		result = hmon_general(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis, &wepgone);
+				result = hmon_general(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis, &wepgone);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -10864,13 +10864,78 @@ boolean * hittxt;
 	return result;
 }
 
-/* hmon2point0
+
+/* helpful hmon callers */
+
+/* hit mdef with some object that was launched in some way with no attacker of any sort */
+int
+hmon_with_unowned_obj(mdef, obj, dieroll, usedup)
+struct monst * mdef;
+struct obj * obj;
+int dieroll;
+boolean * usedup;
+{
+	return hmon_general(
+		(struct monst *)0,	/* no attacker */
+		mdef,				/* mdef is the defender */
+		(struct attack *)0,	/* no attack */
+		(struct attack *)0,	/* no attack */
+		obj,				/* hitting mdef with obj */
+		(void *)0,			/* no launcher*/
+		HMON_FIRED,			/* obj should deal full thrown/fired damage */
+		0,					/* no damage override */
+		0,					/* no bonus damage */
+		TRUE,				/* yes, print hit message */
+		dieroll,			/* use given dieroll */
+		FALSE,				/* not recursed */
+		-1,					/* calculate visibility */
+		usedup);			/* maybe care whether or not obj gets used up */
+}
+/* hit mdef with a trap */
+int
+hmon_with_trap(mdef, obj, trap, type, dieroll, usedup)
+struct monst * mdef;
+struct obj * obj;
+struct trap * trap;
+int type;
+int dieroll;
+boolean * usedup;
+{
+	/* melee traps print their own messages, while ranged traps rely on hmon to print hitmessages */
+	boolean printmsg;
+	if (type&HMON_FIRED)
+		printmsg = TRUE;
+	else if (type&HMON_WHACK)
+		printmsg = FALSE;
+	else {
+		impossible("hmon_with_trap called with neither WHACK nor FIRED, %d", type);
+		printmsg = TRUE;
+	}
+
+	return hmon_general(
+		(struct monst *)0,	/* no attacker */
+		mdef,				/* mdef is the defender */
+		(struct attack *)0,	/* no attack */
+		(struct attack *)0,	/* no attack */
+		obj,				/* hitting mdef with obj */
+		trap,				/* trap that did the hitting */
+		HMON_TRAP|type,		/* trap responsible, using given type */
+		0,					/* no damage override */
+		0,					/* no bonus damage */
+		printmsg,			/* maybe print hit message */
+		dieroll,			/* use given dieroll */
+		FALSE,				/* not recursed */
+		-1,					/* calculate visibility */
+		usedup);			/* maybe care whether or not obj gets used up */
+}
+
+/* hmon_general
  * 
  * Like as it was in uhitm.c, this is a wrapper so that ghod_hitsu() and angry_guards()
  * are called after the player hits, while letting hmoncore have messy returns wherever it wants
  */
 int
-hmon2point0(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
+hmon_general(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
 struct monst * magr;			/* attacker */
 struct monst * mdef;			/* defender */
 struct attack * attk;			/* attack structure to use -- if this does not exist, we MUST have a weapon */
