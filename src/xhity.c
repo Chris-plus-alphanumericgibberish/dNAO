@@ -13059,7 +13059,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 	}
 	/* shattering strike -- attempt to destroy the defender's weapon */
-	if (shattering_strike && !lethaldamage) {
+	if (shattering_strike) {
 		if (youagr) {
 			otmp = MON_WEP(mdef);
 			if (otmp &&
