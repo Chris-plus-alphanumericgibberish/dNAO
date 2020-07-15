@@ -3410,7 +3410,7 @@ tipmonster:
 					pline("%s accepts before you can change your mind.", Monnam(mtmp));
 				else
 					pline("%s greedily accepts.", Monnam(mtmp));
-				int cash = rnd(10);
+				int cash = min(u.ugold, rnd(10));
 				u.ugold -= cash;
 				mtmp->mgold += cash;
 				mtmp->mpeaceful = TRUE;
@@ -3642,7 +3642,7 @@ tiphat()
 		}
 		mtmp = m_at(x, y);
 		vismon = (mtmp && canseemon(mtmp));
-		if (vismon || (range == 1 && mtmp && can_respond(mtmp) && (x == mtmp->mx || y == mtmp->my) && !is_silent(mtmp->data)))
+		if (vismon || (range == 1 && mtmp && can_respond(mtmp) && x == mtmp->mx && y == mtmp->my && !is_silent(mtmp->data)))
 			break;
 	}
 	
