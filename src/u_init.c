@@ -2431,6 +2431,11 @@ u_init()
 	else if (!rn2(9)) u.wandein = 2;
 	else if (rn2(8) > 1) u.wandein = 1;
 	else u.wandein = 0;
+	/* all nameless horrors are approx. difficulty 50 */
+	{
+		extern int monstr[];
+		monstr[PM_NAMELESS_HORROR] = 50;
+	}
 
 	u.oonaenergy = !rn2(3) ? AD_FIRE : rn2(2) ? AD_COLD : AD_ELEC;
 	u.ring_wishes = -1;
