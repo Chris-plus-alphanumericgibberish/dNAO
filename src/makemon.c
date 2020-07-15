@@ -6,6 +6,7 @@
 #include "epri.h"
 #include "emin.h"
 #include "edog.h"
+#include "ehor.h"
 #ifdef REINCARNATION
 #include <ctype.h>
 #endif
@@ -7416,6 +7417,17 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 		}
 	    }
 	}
+	/* horrors should keep their extended structure. */
+	if (is_horror(m2->data)) {
+		struct monst *m3;
+		m3 = newmonst(sizeof(struct ehor) + mon->mnamelth);
+		*m3 = *m2;
+		m3->mxlth = sizeof(struct ehor);
+		if (m2->mnamelth) Strcpy(NAME(m3), NAME(m2));
+		*(EHOR(m3)) = *(EHOR(mon));
+		replmon(m2, m3);
+		m2 = m3;
+	}
 	set_malign(m2);
 
 	return m2;
@@ -7675,6 +7687,7 @@ register int	mmflags;
 	xlth = ptr->pxlth;
 	if (mmflags & MM_EDOG) xlth += sizeof(struct edog);
 	else if (mmflags & MM_EMIN) xlth += sizeof(struct emin);
+	else if (is_horror(ptr)) xlth += sizeof(struct ehor);
 	mtmp = newmonst(xlth);
 	*mtmp = zeromonst;		/* clear all entries in structure */
 	(void)memset((genericptr_t)mtmp->mextra, 0, xlth);
@@ -7686,6 +7699,10 @@ register int	mmflags;
 	mtmp->mblinded = mtmp->mfrozen = mtmp->mlaughing = 0;
 	mtmp->mvar1 = mtmp->mvar2 = mtmp->mvar3 = 0;
 	mtmp->mtyp = mndx;
+	if (is_horror(ptr)) {
+		EHOR(mtmp)->basehorrordata = *ptr;
+		EHOR(mtmp)->currhorrordata = *ptr;
+	}
 	set_mon_data(mtmp, mndx);
 	
 	mtmp->mstr = d(3,6);
