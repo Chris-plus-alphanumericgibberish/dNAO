@@ -8202,6 +8202,8 @@ int vis;
 				it take longer for you to be digested, but
 				you'll end up trapped inside for longer too */
 				tim_tmp += -u.uac + 10 + (ACURR(A_CON) / 3 - 1);
+				if(thick_skinned(youracedata) || u.sealsActive&SEAL_ECHIDNA)
+					tim_tmp += 2;
 			}
 			else {
 				/* higher level attacker takes longer to eject hero */
@@ -8379,6 +8381,20 @@ int vis;
 				break;
 			}
 			else {
+				int resist = -1*full_marmorac(mdef) + 10;
+				resist += mdef->data->nac;
+				if(!mdef->mcan)
+					resist += mdef->data->pac;
+				if(thick_skinned(pd))
+					resist += 2;
+				if(resist > 0){
+					if(rnd(20) < resist){
+						You("regurgitate %s.", mon_nam(mdef));
+						dmg = 0;
+						break;
+					}
+					//else continue
+				}
 				if (Slow_digestion) {
 					dmg = 0;
 					break;
@@ -8479,6 +8495,22 @@ int vis;
 				break;
 			}
 			else {
+				int resist = -1*full_marmorac(mdef) + 10;
+				resist += mdef->data->nac;
+				if(!mdef->mcan)
+					resist += mdef->data->pac;
+				if(thick_skinned(pd))
+					resist += 2;
+				if(resist > 0){
+					if(rnd(20) < resist){
+						if(canspotmon(magr) || canspotmon(mdef)){
+							pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
+						}
+						dmg = 0;
+						break;
+					}
+					//else continue
+				}
 				if (flags.verbose && flags.soundok)
 					verbalize("Burrrrp!");
 
