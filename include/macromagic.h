@@ -171,12 +171,18 @@ TEST(C01(3), C02(5))
 	_00, _01, _02, _03, _04, _05, _06, _07, _08, _09, \
 	_10, _11, _12, _13, _14, _15, _16, _17, _18, _19, \
 	_20, _21, _22, _23, _24, _25, _26, _27, _28, _29, \
+	_30, _31, _32, _33, _34, _35, _36, _37, _38, _39, \
+	_40, _41, _42, _43, _44, _45, _46, _47, _48, _49, \
+	_50, _51, _52, _53, _54, _55, _56, _57, _58, _59, \
 	N, ...) N
 
 /* calls macro X of the form X(RN, CN) on all items in list (C1, C2, C3, ...) */
 /* >>>>> must grow with increasing total arguements */
 #define CALL_MACRO_X_FOR_EACH(x, RN, ...) \
 	_GET_NTH_ARG(dummy, ##__VA_ARGS__, \
+	_fe_59, _fe_58, _fe_57, _fe_56, _fe_55, _fe_54, _fe_53, _fe_52, _fe_51, _fe_50, \
+	_fe_49, _fe_48, _fe_47, _fe_46, _fe_45, _fe_44, _fe_43, _fe_42, _fe_41, _fe_40, \
+	_fe_39, _fe_38, _fe_37, _fe_36, _fe_35, _fe_34, _fe_33, _fe_32, _fe_31, _fe_30, \
 	_fe_29, _fe_28, _fe_27, _fe_26, _fe_25, _fe_24, _fe_23, _fe_22, _fe_21, _fe_20, \
 	_fe_19, _fe_18, _fe_17, _fe_16, _fe_15, _fe_14, _fe_13, _fe_12, _fe_11, _fe_10, \
 	_fe_09, _fe_08, _fe_07, _fe_06, _fe_05, _fe_04, _fe_03, _fe_02, _fe_01, _fe_00 \
@@ -215,6 +221,36 @@ TEST(C01(3), C02(5))
 #define _fe_28(_call, RN, x, ...)	_call(RN, x) _fe_27(_call, RN, __VA_ARGS__)
 #define _fe_29(_call, RN, x, ...)	_call(RN, x) _fe_28(_call, RN, __VA_ARGS__)
 #define _fe_30(_call, RN, x, ...)	_call(RN, x) _fe_29(_call, RN, __VA_ARGS__)
+#define _fe_31(_call, RN, x, ...)	_call(RN, x) _fe_30(_call, RN, __VA_ARGS__)
+#define _fe_32(_call, RN, x, ...)	_call(RN, x) _fe_31(_call, RN, __VA_ARGS__)
+#define _fe_33(_call, RN, x, ...)	_call(RN, x) _fe_32(_call, RN, __VA_ARGS__)
+#define _fe_34(_call, RN, x, ...)	_call(RN, x) _fe_33(_call, RN, __VA_ARGS__)
+#define _fe_35(_call, RN, x, ...)	_call(RN, x) _fe_34(_call, RN, __VA_ARGS__)
+#define _fe_36(_call, RN, x, ...)	_call(RN, x) _fe_35(_call, RN, __VA_ARGS__)
+#define _fe_37(_call, RN, x, ...)	_call(RN, x) _fe_36(_call, RN, __VA_ARGS__)
+#define _fe_38(_call, RN, x, ...)	_call(RN, x) _fe_37(_call, RN, __VA_ARGS__)
+#define _fe_39(_call, RN, x, ...)	_call(RN, x) _fe_38(_call, RN, __VA_ARGS__)
+#define _fe_40(_call, RN, x, ...)	_call(RN, x) _fe_39(_call, RN, __VA_ARGS__)
+#define _fe_41(_call, RN, x, ...)	_call(RN, x) _fe_40(_call, RN, __VA_ARGS__)
+#define _fe_42(_call, RN, x, ...)	_call(RN, x) _fe_41(_call, RN, __VA_ARGS__)
+#define _fe_43(_call, RN, x, ...)	_call(RN, x) _fe_42(_call, RN, __VA_ARGS__)
+#define _fe_44(_call, RN, x, ...)	_call(RN, x) _fe_43(_call, RN, __VA_ARGS__)
+#define _fe_45(_call, RN, x, ...)	_call(RN, x) _fe_44(_call, RN, __VA_ARGS__)
+#define _fe_46(_call, RN, x, ...)	_call(RN, x) _fe_45(_call, RN, __VA_ARGS__)
+#define _fe_47(_call, RN, x, ...)	_call(RN, x) _fe_46(_call, RN, __VA_ARGS__)
+#define _fe_48(_call, RN, x, ...)	_call(RN, x) _fe_47(_call, RN, __VA_ARGS__)
+#define _fe_49(_call, RN, x, ...)	_call(RN, x) _fe_48(_call, RN, __VA_ARGS__)
+#define _fe_50(_call, RN, x, ...)	_call(RN, x) _fe_49(_call, RN, __VA_ARGS__)
+#define _fe_51(_call, RN, x, ...)	_call(RN, x) _fe_50(_call, RN, __VA_ARGS__)
+#define _fe_52(_call, RN, x, ...)	_call(RN, x) _fe_51(_call, RN, __VA_ARGS__)
+#define _fe_53(_call, RN, x, ...)	_call(RN, x) _fe_52(_call, RN, __VA_ARGS__)
+#define _fe_54(_call, RN, x, ...)	_call(RN, x) _fe_53(_call, RN, __VA_ARGS__)
+#define _fe_55(_call, RN, x, ...)	_call(RN, x) _fe_54(_call, RN, __VA_ARGS__)
+#define _fe_56(_call, RN, x, ...)	_call(RN, x) _fe_55(_call, RN, __VA_ARGS__)
+#define _fe_57(_call, RN, x, ...)	_call(RN, x) _fe_56(_call, RN, __VA_ARGS__)
+#define _fe_58(_call, RN, x, ...)	_call(RN, x) _fe_57(_call, RN, __VA_ARGS__)
+#define _fe_59(_call, RN, x, ...)	_call(RN, x) _fe_58(_call, RN, __VA_ARGS__)
+#define _fe_60(_call, RN, x, ...)	_call(RN, x) _fe_59(_call, RN, __VA_ARGS__)
 
 /* diagonal hit pattern:  RmCn(x) is (x) iff m==n, else is nothing */
 /* >>>>> must grow (N^2) with increasing total arguements */
