@@ -5,6 +5,8 @@
 /* both passes */
 #include "macromagic.h"
 
+/* object field overrides */
+#define O_MATSPEC(x)	C13(x)
 
 #ifndef OBJECTS_PASS_2_
 /* first pass */
@@ -82,12 +84,6 @@ NEARDATA struct objclass objects[] = {
 		BITS(kn,1,1,0,0,1,0,0,MZ_TINY,0,PIERCE,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
 		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color, __VA_ARGS__)
-#define PROJECTILE_MATSPEC(name,app,kn,prob,wt,cost,sdam,ldam,hitbon,metal,shwmat,sub,color,...) \
-	OBJECT( \
-		OBJ(name,app), \
-		BITS(kn,1,1,0,0,1,0,0,MZ_TINY,0,PIERCE,sub,metal,shwmat), 0, \
-		WEAPON_CLASS, prob, 0, \
-		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color, __VA_ARGS__)
 #define BOW(name, app, kn, size, prob, wt, cost, hitbon, metal, sub, color) \
 	OBJECT( \
 		OBJ(name,app), BITS(kn,0,1,0,0,1,0,0,size,0,0,sub,metal,0), 0, \
@@ -129,8 +125,8 @@ PROJECTILE("ya", "bamboo arrow",
 		0, 15, 1, 4, 7, 7, 1, METAL, -P_BOW, HI_METAL),
 PROJECTILE("crossbow bolt", (char *)0,
 		1, 55, 1, 2, 4, 6, 0, IRON, -P_CROSSBOW, HI_METAL),
-PROJECTILE_MATSPEC("droven bolt", "crossbow bolt", /*Needs encyc entry*/
-		0,  0, 1, 2, 9, 6, 2, OBSIDIAN_MT, UNIDED, -P_CROSSBOW, CLR_BLACK),
+PROJECTILE("droven bolt", "crossbow bolt", /*Needs encyc entry*/
+		0,  0, 1, 2, 9, 6, 2, OBSIDIAN_MT, -P_CROSSBOW, CLR_BLACK, O_MATSPEC(UNIDED)),
 
 WEAPON("dart", (char *)0,
 	1, 1,   MZ_TINY, 58,  1,  2,  3,  2, 0, P,   -P_DART, IRON, FALSE, HI_METAL),
@@ -466,11 +462,6 @@ BOW("atlatl", "notched stick",                      0, MZ_MEDIUM,  0, 12,  30,  
 		OBJ(name,desc), BITS(kn,0,1,0,mgc,1,0,0,size,0,0,sub,metal,0), power, \
 		ARMOR_CLASS, prob, delay, wt, cost, \
 		0, 0, 10 - ac, can, dr, wt, c, __VA_ARGS__ )
-#define ARMOR_MATSPEC(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,sub,metal,shwmat,c,...) \
-	OBJECT( \
-		OBJ(name,desc), BITS(kn,0,1,0,mgc,1,0,0,size,0,0,sub,metal,shwmat), power, \
-		ARMOR_CLASS, prob, delay, wt, cost, \
-		0, 0, 10 - ac, can, dr, wt, c, __VA_ARGS__)
 #define HELM(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
 	ARMOR(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_HELM, metal, c, __VA_ARGS__)
 #define CLOAK(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
@@ -481,17 +472,6 @@ BOW("atlatl", "notched stick",                      0, MZ_MEDIUM,  0, 12,  30,  
 	ARMOR(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_GLOVES, metal, c, __VA_ARGS__)
 #define BOOTS(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
 	ARMOR(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_BOOTS, metal, c, __VA_ARGS__)
-
-#define HELM_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
-	ARMOR_MATSPEC(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_HELM, metal, shwmat, c, __VA_ARGS__)
-#define CLOAK_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
-	ARMOR_MATSPEC(name, desc, kn, mgc, MZ_MEDIUM, power, prob, delay, wt, cost, ac, dr, can, ARM_CLOAK, metal, shwmat, c, __VA_ARGS__)
-#define SHIELD_MATSPEC(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
-	ARMOR_MATSPEC(name, desc, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, ARM_SHIELD, metal, shwmat, c, __VA_ARGS__)
-#define GLOVES_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
-	ARMOR_MATSPEC(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_GLOVES, metal, shwmat, c, __VA_ARGS__)
-#define BOOTS_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
-	ARMOR_MATSPEC(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_BOOTS, metal, shwmat, c, __VA_ARGS__)
 
 /* helmets */
 HELM("sedge hat", "wide conical hat", /*Needs encyc entry*//*Needs tile*/
@@ -523,18 +503,18 @@ HELM("harmonium helm", "red-lacquered spined helm",
 		0, 0,  0,   0, 1, 45,   1, 9, 2, 0, METAL, CLR_RED),
 HELM("elven helm", "runed helm", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 1, 10,   5, 9, 1, 0, WOOD, HI_WOOD),
-HELM_MATSPEC("high-elven helm", "runed helm", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	0, 1, 15,   5, 9, 2, 0, MITHRIL,UNIDED, HI_MITHRIL),
+HELM("high-elven helm", "runed helm", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,	0, 1, 15,   5, 9, 2, 0, MITHRIL, HI_MITHRIL, O_MATSPEC(UNIDED)),
 HELM("droven helm", "spider-shaped helm", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 1, 20,   5, 8, 2, 0, SHADOWSTEEL, CLR_BLACK),
 HELM("plasteel helm", "white skull helm", /*Needs encyc entry*//*Needs tile*/
 		0, 1,  INFRAVISION,   0, 2, 25,  50, 8, 2, 2, PLASTIC, CLR_WHITE),
-HELM_MATSPEC("crystal helm", "fish bowl", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,   0, 2,150, 300, 9, 1, 0, GLASS,UNIDED, HI_GLASS),
-HELM_MATSPEC("pontiff's crown", "filigreed faceless helm", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, GOLD, IDED, HI_GOLD),
-HELM_MATSPEC("shemagh", "white headscarf", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	0, 0, 5,   5, 10, 0, 0, CLOTH,UNIDED, CLR_WHITE),
+HELM("crystal helm", "fish bowl", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,   0, 2,150, 300, 9, 1, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
+HELM("pontiff's crown", "filigreed faceless helm", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, GOLD, HI_GOLD, O_MATSPEC(IDED)),
+HELM("shemagh", "white headscarf", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,	0, 0, 5,   5, 10, 0, 0, CLOTH, CLR_WHITE, O_MATSPEC(UNIDED)),
 
 /* With shuffled appearances... */
 HELM("helmet", "plumed helmet", /* circlet */
@@ -652,8 +632,8 @@ ARMOR("leather armor", (char *)0,
    //kn,mgc,blk,power,prob,delay,wt,cost,ac,dr,can,sub,metal,c)
 ARMOR("living armor", "giant sea anemone",
 	0, 1,  MZ_LARGE, 0,	0, 6,  80,  500, 10, 2, 0, ARM_SUIT, FLESH, CLR_ORANGE),
-ARMOR_MATSPEC("jacket", (char *)0,
-	1, 0, MZ_MEDIUM, 0,	12, 0,	20,  10, 10, 1, 2, ARM_SUIT, LEATHER, IDED|UNIDED, HI_LEATHER),
+ARMOR("jacket", (char *)0,
+	1, 0, MZ_MEDIUM, 0,	12, 0,	20,  10, 10, 1, 2, ARM_SUIT, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
 ARMOR("straitjacket", "long-sleeved jacket", /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_MEDIUM, 0,	0, 0,   15,  10, 10, 1, 2, ARM_SUIT, CLOTH, CLR_WHITE),
 ARMOR("healer uniform","clean white clothes", /*Needs encyc entry*//*Needs tile*/
@@ -710,8 +690,8 @@ CLOAK("alchemy smock", "apron",
 		0, 1,	POISON_RES, 9, 0, 10, 50, 10, 1, 3, CLOTH, CLR_WHITE),
 CLOAK("Leo Nemaeus hide", "lion skin",
 		0, 1,	HALF_PHDAM,	    0, 10, 60, 1200, 10, 5, 0, DRAGON_HIDE, HI_GOLD),
-CLOAK_MATSPEC("cloak", (char *)0,
-		1, 0,	0,	    8, 0, 15, 40, 10, 2, 1, LEATHER, IDED|UNIDED, CLR_BROWN),
+CLOAK("cloak", (char *)0,
+		1, 0,	0,	    8, 0, 15, 40, 10, 2, 1, LEATHER, CLR_BROWN, O_MATSPEC(IDED|UNIDED)),
 /* With shuffled appearances... */
 CLOAK("cloak of protection", "tattered cape",
 		0, 1,	PROTECTION, 9, 0, 10, 50,  9, 1, 3, CLOTH, HI_CLOTH),
@@ -733,12 +713,12 @@ SHIELD("orcish shield", "red-eyed shield",
 		0, 0, MZ_MEDIUM, 0,	     2, 0, 50,	7,  9, 0, 0, IRON, CLR_RED),
 SHIELD("kite shield", (char *)0,
 		1, 0,  MZ_LARGE, 0,	     6, 0,100, 10,  8, 0, 1, IRON, HI_METAL),
-SHIELD_MATSPEC("roundshield", "round shield",
-		0, 0,  MZ_LARGE, 0,	     1, 0,120,  7,  8, 0, 1, COPPER, IDED, HI_COPPER),
+SHIELD("roundshield", "round shield",
+		0, 0,  MZ_LARGE, 0,	     1, 0,120,  7,  8, 0, 1, COPPER, HI_COPPER, O_MATSPEC(IDED)),
 SHIELD("dwarvish roundshield", "round shield",
 		0, 0,  MZ_LARGE, 0,	     4, 0, 80, 10,  7, 0, 1, IRON, HI_METAL),
-SHIELD_MATSPEC("crystal shield", "shield", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  MZ_LARGE, 0,	     0, 0, 80,150,  9, 0, 0, GLASS,UNIDED, HI_GLASS),
+SHIELD("crystal shield", "shield", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  MZ_LARGE, 0,	     0, 0, 80,150,  9, 0, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 SHIELD("shield of reflection", "polished shield",
 		0, 1,  MZ_LARGE, REFLECTING, 3, 0, 60, 50,  8, 0, 0, SILVER, HI_SILVER),
 /*#define SHIELD(name,desc,kn,mgc,blk,power,prob,delay,wt,cost,ac,can,metal,c) \
@@ -764,10 +744,10 @@ DRGN_SHIELD("yellow dragon scale shield", 1, ACID_RES,   900, 7, 0, CLR_YELLOW),
  */
 //define GLOVES(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c) \
 	ARMOR(name,desc,kn,mgc,0,power,prob,delay,wt,cost,ac,dr,can,ARM_GLOVES,metal,c)
-GLOVES_MATSPEC("crystal gauntlets", "gauntlets", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2, 20, 400, 9, 0, 0, GLASS,UNIDED, HI_GLASS),
-GLOVES_MATSPEC("gauntlets", (char *)0, /*Needs encyc entry*//*Needs tile*/
-		1, 0,  0,	   4, 2, 25, 10, 8, 2, 0, IRON,IDED|UNIDED, HI_METAL),
+GLOVES("crystal gauntlets", "gauntlets", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,	   0, 2, 20, 400, 9, 0, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
+GLOVES("gauntlets", (char *)0, /*Needs encyc entry*//*Needs tile*/
+		1, 0,  0,	   4, 2, 25, 10, 8, 2, 0, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
 GLOVES("archaic gauntlets", (char *)0, /*Needs encyc entry*//*Needs tile*/
 		1, 0,  0,	   0, 2, 25, 10, 8, 2, 0, COPPER, HI_COPPER),
 GLOVES("long gloves", (char *)0,
@@ -778,8 +758,8 @@ GLOVES("high-elven gauntlets", "runed gauntlets", /*Needs encyc entry*//*Needs t
 		0, 0,  0,	   0, 2, 15, 50, 8, 2, 0, MITHRIL, HI_MITHRIL),
 GLOVES("plasteel gauntlets", "hard white gauntlets", /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	   0, 2, 15, 50,  8, 2, 0, PLASTIC, CLR_WHITE),
-GLOVES_MATSPEC("gloves", "old gloves",
-		0, 0,  0,	   8, 1, 10,  8, 10, 1, 0, LEATHER,IDED, HI_LEATHER),
+GLOVES("gloves", "old gloves",
+		0, 0,  0,	   8, 1, 10,  8, 10, 1, 0, LEATHER, HI_LEATHER, O_MATSPEC(IDED)),
 GLOVES("gauntlets of fumbling", "padded gloves", /*"padded" should give +1 DR*/
 		0, 1,  FUMBLING,   7, 1, 10, 50, 10, 1, 0, LEATHER, HI_LEATHER),
 GLOVES("gauntlets of power", "riding gloves",
@@ -794,12 +774,12 @@ GLOVES("gauntlets of dexterity", "fencing gloves",
 	ARMOR(name,desc,kn,mgc,0,power,prob,delay,wt,cost,ac,dr,can,ARM_BOOTS,metal,c)
 BOOTS("low boots", "walking shoes",
 		0, 0,  0,	  25, 2, 10,  8, 10, 1, 0, LEATHER, HI_LEATHER),
-BOOTS_MATSPEC("shoes", "hard shoes",
-		0, 0,  0,	   7, 2, 50, 16,  9, 1, 0, IRON,IDED, HI_METAL),
-BOOTS_MATSPEC("armored boots", "boots",
-		0, 0,  0,	   0, 1, 75, 16,  8, 2, 1, IRON,IDED|UNIDED, HI_METAL),
-BOOTS_MATSPEC("archaic boots", "boots",
-		0, 0,  0,	   0, 1, 75, 16,  8, 2, 1, COPPER,UNIDED, HI_COPPER),
+BOOTS("shoes", "hard shoes",
+		0, 0,  0,	   7, 2, 50, 16,  9, 1, 0, IRON, HI_METAL, O_MATSPEC(IDED)),
+BOOTS("armored boots", "boots",
+		0, 0,  0,	   0, 1, 75, 16,  8, 2, 1, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
+BOOTS("archaic boots", "boots",
+		0, 0,  0,	   0, 1, 75, 16,  8, 2, 1, COPPER, HI_COPPER,O_MATSPEC(UNIDED)),
 BOOTS("harmonium boots", "red-lacquered boots",
 		0, 0,  0,	   0, 1, 95,  1,  8, 2, 1, METAL, CLR_RED),
 BOOTS("plasteel boots", "hard white boots", /*Needs encyc entry*//*Needs tile*/
@@ -810,8 +790,8 @@ BOOTS("high boots", "jackboots",
 		0, 0,  0,	  15, 2, 20, 12, 10, 2, 0, LEATHER, HI_LEATHER),
 BOOTS("heeled boots", "tall boots",
 		1, 0,  0,	   0, 2, 20, 12, 10, 2, 0, LEATHER, CLR_BLACK),
-BOOTS_MATSPEC("crystal boots", "boots", /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2, 60,300,  9, 0, 0, GLASS,UNIDED, HI_GLASS),
+BOOTS("crystal boots", "boots", /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,	   0, 2, 60,300,  9, 0, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 /* With shuffled appearances... */
 BOOTS("speed boots", "combat boots",
 		0, 1,  FAST,	  12, 2, 20, 50,  9, 0, 0, LEATHER, HI_LEATHER),
@@ -833,13 +813,6 @@ BOOTS("flying boots", "snow boots",
 #undef GLOVES
 #undef BOOTS
 #undef ARMOR
-
-#undef HELM_MATSPEC
-#undef CLOAK_MATSPEC
-#undef SHIELD_MATSPEC
-#undef GLOVES_MATSPEC
-#undef BOOTS_MATSPEC
-#undef ARMOR_MATSPEC
 
 /* rings ... */
 #define RING(name,power,stone,cost,mgc,spec,mohs,metal,color,...) OBJECT( \
@@ -935,29 +908,14 @@ OBJECT(OBJ("Amulet of Yendor",	/* note: description == name */
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
 		power, TOOL_CLASS, prob, 0, \
 		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
-#define TOOL_MATSPEC(name,desc,kn,size,mrg,mgc,chg,prob,wt,cost,mat, shwmat,color,...) \
-	OBJECT( OBJ(name,desc), \
-		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,shwmat), \
-		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
 #define CONTAINER(name,desc,kn,size,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,chg,1,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
 		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
-#define CONTAINER_MATSPEC(name,desc,kn,size,mgc,chg,prob,wt,cost,mat,shwmat,color,...) \
-	OBJECT( OBJ(name,desc), \
-		BITS(kn,0,chg,1,mgc,chg,0,0,size,0,0,P_NONE,mat,shwmat), \
-		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
 #define WEPTOOL(name,desc,kn,size,mgc,chg,prob,wt,cost,sdam,ldam,hitbon,typ,sub,mat,clr,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,1,chg,mgc,1,0,0,size,0,typ,sub,mat,0), \
-		0, TOOL_CLASS, prob, 0, \
-		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr, __VA_ARGS__)
-#define WEPTOOL_MATSPEC(name,desc,kn,size,mgc,chg,prob,wt,cost,sdam,ldam,hitbon,typ,sub,mat,shwmat,clr,...) \
-	OBJECT( OBJ(name,desc), \
-		BITS(kn,0,1,chg,mgc,1,0,0,size,0,typ,sub,mat,shwmat), \
 		0, TOOL_CLASS, prob, 0, \
 		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr, __VA_ARGS__)
 /* containers */
@@ -981,7 +939,6 @@ CONTAINER("bag of tricks", "bag",       0, MZ_MEDIUM, 1, 1,  20,  15, 100, CLOTH
 //HOSTAGE("distressed princess", (char *)0,           1, 0, 0,  0, 350,.9*1450,  1600, CLOTH, CLR_WHITE),
 #undef HOSTAGE
 #undef CONTAINER
-#undef CONTAINER_MATSPEC
 //OBJECT(obj,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color) \
 //	{0, 0, (char *)0, bits, prp, sym, dly, COLOR_FIELD(color) \
 //	 prob, wt, cost, sdam, ldam, oc1, oc2, oc3, nut}
@@ -993,7 +950,7 @@ CONTAINER("bag of tricks", "bag",       0, MZ_MEDIUM, 1, 1,  20,  15, 100, CLOTH
 		0, TOOL_CLASS, prob, 0, \
 		wt, cost, 0, 0, 0, 0, 0, wt, color )
 TOOL("skeleton key", "key",              0,   MZ_TINY, 0, 0, 0,  80,  3,  10, IRON, HI_METAL),
-TOOL_MATSPEC("universal key", "key",     0,   MZ_TINY, 0, 0, 0,  0,  3,  10, SILVER,UNIDED, HI_SILVER),
+TOOL("universal key", "key",	         0,   MZ_TINY, 0, 0, 0,  0,  3,  10, SILVER, HI_SILVER, O_MATSPEC(UNIDED)),
 #ifdef TOURIST
 TOOL("lock pick", (char *)0,             1,   MZ_TINY, 0, 0, 0,  60,  4,  20, IRON, HI_METAL),
 TOOL("credit card", (char *)0,           1,   MZ_TINY, 0, 0, 0,   0,  1,  10, PLASTIC, CLR_WHITE),
@@ -1005,7 +962,7 @@ TOOL("tallow candle", "candle",          0,   MZ_TINY, 1, 0, 0,  15,  2,  10, WA
 TOOL("wax candle", "candle",             0,   MZ_TINY, 1, 0, 0,   5,  2,  20, WAX, CLR_WHITE),
 TOOL("candle of invocation", "runed candle", 
                                          0,   MZ_TINY, 0, 1, 0,  15,  2,  50, WAX, CLR_ORANGE),
-TOOL_MATSPEC("lantern", (char *)0,       1,  MZ_SMALL, 0, 0, 0,  20, 30,  12, COPPER, IDED|UNIDED, CLR_YELLOW),
+TOOL("lantern", (char *)0,               1,  MZ_SMALL, 0, 0, 0,  20, 30,  12, COPPER, CLR_YELLOW, O_MATSPEC(IDED|UNIDED)),
 TOOL("oil lamp", "lamp",                 0,  MZ_SMALL, 0, 0, 0,  30, 20,  10, COPPER, CLR_YELLOW),
 TOOL("magic lamp", "lamp",               0,  MZ_SMALL, 0, 1, 0,  15, 20,  50, COPPER, CLR_YELLOW),
 // TOOL("shadowlander's torch", "black torch",
@@ -1106,21 +1063,21 @@ TOOL("beartrap", (char *)0,     1,  MZ_LARGE, 0, 0, 0,   0,100,  60, IRON, HI_ME
  *   but for magical instruments that information is very secondary to it being magic
  *   and also sounds weird (ie, a "wooden magic harp" vs a "magic harp")
  */
-TOOL_MATSPEC("whistle", "whistle",         0,   MZ_TINY, 0, 0, 0, 60,  3, 10, METAL, IDED, HI_METAL),
-TOOL_MATSPEC("magic whistle", "whistle",   0,   MZ_TINY, 0, 1, 0, 30,  3, 10, METAL, NIDED, HI_METAL),
-/* "If tin whistles are made out of tin, what do they make foghorns out of?" */
-TOOL_MATSPEC("flute", "flute",             0,  MZ_SMALL, 0, 0, 0,  4,  5, 12, WOOD, IDED, HI_WOOD),
-TOOL_MATSPEC("magic flute", "flute",       0,  MZ_SMALL, 0, 1, 1,  2,  5, 36, WOOD, NIDED, HI_WOOD),
-TOOL_MATSPEC("tooled horn", "horn",        0,  MZ_SMALL, 0, 0, 0,  5, 18, 15, BONE, IDED, CLR_WHITE),
-TOOL_MATSPEC("frost horn", "horn",         0,  MZ_SMALL, 0, 1, 1,  2, 18, 50, BONE, NIDED, CLR_WHITE),
-TOOL_MATSPEC("fire horn", "horn",          0,  MZ_SMALL, 0, 1, 1,  2, 18, 50, BONE, NIDED, CLR_WHITE),
-TOOL_MATSPEC("horn of plenty", "horn",     0,  MZ_SMALL, 0, 1, 1,  2, 18, 50, BONE, NIDED, CLR_WHITE),
-TOOL_MATSPEC("harp", "harp",               0, MZ_MEDIUM, 0, 0, 0,  4, 30, 50, WOOD, IDED, HI_WOOD),
-TOOL_MATSPEC("magic harp", "harp",         0, MZ_MEDIUM, 0, 1, 1,  2, 30, 50, WOOD, NIDED, HI_WOOD),
-TOOL_MATSPEC("bell", (char *)0,            1,   MZ_TINY, 0, 0, 0,  2, 30, 50, COPPER, IDED, HI_COPPER),
-TOOL_MATSPEC("bugle", (char *)0,           1,  MZ_SMALL, 0, 0, 0,  4, 10, 15, COPPER, IDED, HI_COPPER),
-TOOL_MATSPEC("drum", "drum",               0, MZ_MEDIUM, 0, 0, 0,  4, 25, 25, LEATHER, IDED, HI_LEATHER),
-TOOL_MATSPEC("drum of earthquake", "drum", 0, MZ_MEDIUM, 0, 1, 1,  2, 25, 25, LEATHER, NIDED, HI_LEATHER),
+TOOL("whistle", "whistle",         0,   MZ_TINY, 0, 0, 0, 60,  3, 10, METAL,   HI_METAL,   O_MATSPEC(IDED )),
+TOOL("magic whistle", "whistle",   0,   MZ_TINY, 0, 1, 0, 30,  3, 10, METAL,   HI_METAL,   O_MATSPEC(NIDED)),
+/* "If tin whistles are made out of tin, what do they make foghorns out of?" */		   
+TOOL("flute", "flute",             0,  MZ_SMALL, 0, 0, 0,  4,  5, 12, WOOD,    HI_WOOD,    O_MATSPEC(IDED )),
+TOOL("magic flute", "flute",       0,  MZ_SMALL, 0, 1, 1,  2,  5, 36, WOOD,    HI_WOOD,    O_MATSPEC(NIDED)),
+TOOL("tooled horn", "horn",        0,  MZ_SMALL, 0, 0, 0,  5, 18, 15, BONE,    CLR_WHITE,  O_MATSPEC(IDED )),
+TOOL("frost horn", "horn",         0,  MZ_SMALL, 0, 1, 1,  2, 18, 50, BONE,    CLR_WHITE,  O_MATSPEC(NIDED)),
+TOOL("fire horn", "horn",          0,  MZ_SMALL, 0, 1, 1,  2, 18, 50, BONE,    CLR_WHITE,  O_MATSPEC(NIDED)),
+TOOL("horn of plenty", "horn",     0,  MZ_SMALL, 0, 1, 1,  2, 18, 50, BONE,    CLR_WHITE,  O_MATSPEC(NIDED)),
+TOOL("harp", "harp",               0, MZ_MEDIUM, 0, 0, 0,  4, 30, 50, WOOD,    HI_WOOD,    O_MATSPEC(IDED )),
+TOOL("magic harp", "harp",         0, MZ_MEDIUM, 0, 1, 1,  2, 30, 50, WOOD,    HI_WOOD,    O_MATSPEC(NIDED)),
+TOOL("bell", (char *)0,            1,   MZ_TINY, 0, 0, 0,  2, 30, 50, COPPER,  HI_COPPER,  O_MATSPEC(IDED )),
+TOOL("bugle", (char *)0,           1,  MZ_SMALL, 0, 0, 0,  4, 10, 15, COPPER,  HI_COPPER,  O_MATSPEC(IDED )),
+TOOL("drum", "drum",               0, MZ_MEDIUM, 0, 0, 0,  4, 25, 25, LEATHER, HI_LEATHER, O_MATSPEC(IDED )),
+TOOL("drum of earthquake", "drum", 0, MZ_MEDIUM, 0, 1, 1,  2, 25, 25, LEATHER, HI_LEATHER, O_MATSPEC(NIDED)),
 /* tools useful as weapons */
 WEPTOOL("pick-axe", (char *)0,
 	1,  MZ_LARGE, 0, 0, 20, 80,   50,  6,  3, 0, PIERCE,  P_PICK_AXE, IRON, HI_METAL),
@@ -1138,14 +1095,14 @@ WEPTOOL("sunrod", "gold rod",
 /* 
  * Lightsabers get 3x dice when lit 
  */
-WEPTOOL_MATSPEC("lightsaber", "sword hilt", /*Needs (better) encyc entry*/
-	0,  MZ_SMALL, 1, 1,  0, 10, 500,  8,  8, -3, SLASH|E,        P_SABER, SILVER,IDED|UNIDED, HI_SILVER),
-WEPTOOL_MATSPEC("beamsword",  "broadsword hilt", /*Needs encyc entry*/
-	0,  MZ_SMALL, 1, 1,  0, 20, 500, 10, 10, -3, SLASH|E,  P_BROAD_SWORD, GOLD,IDED|UNIDED, HI_GOLD),
-WEPTOOL_MATSPEC("double lightsaber",  "long grip", /*Needs encyc entry*//*Needs tile*//*needs special case for 2handedness*/
-	0,  MZ_SMALL, 1, 1,  0, 30,1000, 10, 10, -6, SLASH|E, P_QUARTERSTAFF, PLATINUM,IDED|UNIDED, HI_SILVER),
-WEPTOOL_MATSPEC("grappling hook", "hook",
-	0, MZ_MEDIUM, 0, 0,  4, 30,  50,  2,  6,  0,   WHACK,        P_FLAIL, IRON, UNIDED, HI_METAL),
+WEPTOOL("lightsaber", "sword hilt", /*Needs (better) encyc entry*/
+	0,  MZ_SMALL, 1, 1,  0, 10, 500,  8,  8, -3, SLASH|E,        P_SABER, SILVER, HI_SILVER, O_MATSPEC(IDED|UNIDED)),
+WEPTOOL("beamsword",  "broadsword hilt", /*Needs encyc entry*/
+	0,  MZ_SMALL, 1, 1,  0, 20, 500, 10, 10, -3, SLASH|E,  P_BROAD_SWORD, GOLD, HI_GOLD, O_MATSPEC(IDED|UNIDED)),
+WEPTOOL("double lightsaber",  "long grip", /*Needs encyc entry*//*Needs tile*//*needs special case for 2handedness*/
+	0,  MZ_SMALL, 1, 1,  0, 30,1000, 10, 10, -6, SLASH|E, P_QUARTERSTAFF, PLATINUM, HI_SILVER, O_MATSPEC(IDED|UNIDED)),
+WEPTOOL("grappling hook", "hook",
+	0, MZ_MEDIUM, 0, 0,  4, 30,  50,  2,  6,  0,   WHACK,        P_FLAIL, IRON, HI_METAL, O_MATSPEC(UNIDED)),
 WEPTOOL("shepherd's crook", "bent staff",
 	0,   MZ_LARGE, 0, 0, 1,  30,   5,  6,  4,  0,   WHACK, P_QUARTERSTAFF, WOOD, HI_WOOD),
 /* 3.4.1: unicorn horn left classified as "magic" */
@@ -1163,8 +1120,6 @@ OBJECT(OBJ("Bell of Opening", "bell"),
 		TOOL_CLASS, 0, 0,10, 5000, 0, 0, 0, 0, 0, 50, HI_SILVER),
 #undef TOOL
 #undef WEPTOOL
-#undef TOOL_MATSPEC
-#undef WEPTOOL_MATSPEC
 
 /* Comestibles ... */
 #define FOOD(name,prob,size,delay,wt,unk,tin,nutrition,color,...) OBJECT( \
