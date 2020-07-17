@@ -6,8 +6,11 @@
 #include "macromagic.h"
 
 /* object field overrides */
+#define O_MAT(x)		C12(x)
 #define O_MATSPEC(x)	C13(x)
 #define O_POWER(x)		C15(x)
+#define O_COLOR(x)		C18(x)
+#define O_WT(x)			C20(x)
 
 #ifndef OBJECTS_PASS_2_
 /* first pass */
@@ -1259,12 +1262,11 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 	SCROLL("mail",                  "stamped",          0,   0,   0),
 #endif
 	SCROLL("blank paper",           "unlabeled",        0,  21,  60),
+
+	SCROLL("Gold Scroll of Law",    "golden",           0,   0,  10,
+		O_MAT(GOLD), O_COLOR(HI_GOLD), O_WT(50)), /* Shopkeepers aren't interested in these */
 #undef SCROLL
-#define GOLD_SCROLL(name,text,mgc,prob,cost,...) OBJECT( \
-		OBJ(name,text), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,P_NONE,GOLD,0), 0, \
-		SCROLL_CLASS, prob, 0, 50, cost, 0, 0, 0, 0, 0, 6, HI_GOLD, __VA_ARGS__)
-	GOLD_SCROLL("Gold Scroll of Law", "golden",        0,  0,  10), /* Shopkeepers aren't interested in these */
-#undef GOLD_SCROLL
+
 #define CERAMIC_TILE(name,text,prob,...) OBJECT( \
 		OBJ(name,text), BITS(0,1,0,0,1,0,0,0,MZ_TINY,0,0,P_NONE,MINERAL, IDED|UNIDED), 0, \
 		TILE_CLASS, prob, 0, 3, 300, 0, 0, 0, 0, 0, 6, CLR_WHITE, __VA_ARGS__)
