@@ -828,7 +828,7 @@ BOOTS("flying boots", "snow boots",
 		OBJ(name,stone), \
 		BITS(0,0,spec,0,mgc,spec,0,0,MZ_TINY,HARDGEM(mohs),0,P_NONE,metal,0), \
 		power, RING_CLASS, 0, 0, 3, cost, 0, 0, 0, 0, 0, 15, color,__VA_ARGS__ )
-RING("wishes", 0, "black",            500, 1, 1, 4, PLATINUM, CLR_BLACK),
+RING("wishes", 0, "black",                  500, 1, 1, 4, PLATINUM, CLR_BLACK, O_NOWISH(1)),
 RING("adornment", ADORNED, "wooden",        100, 1, 1, 2, WOOD, HI_WOOD),
 RING("gain strength", 0, "granite",         150, 1, 1, 7, MINERAL, HI_MINERAL),
 RING("gain constitution", 0, "opal",        150, 1, 1, 7, GEMSTONE,  CLR_WHITE),
@@ -948,22 +948,22 @@ CONTAINER("bag of tricks", "bag",       0, MZ_MEDIUM, 1, 1,  20,  15, 100, CLOTH
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,0,0,0,P_NONE,mat), \
 		0, TOOL_CLASS, prob, 0, \
 		wt, cost, 0, 0, 0, 0, 0, wt, color )
-TOOL("skeleton key", "key",              0,   MZ_TINY, 0, 0, 0,  80,  3,  10, IRON, HI_METAL),
-TOOL("universal key", "key",	         0,   MZ_TINY, 0, 0, 0,  0,  3,  10, SILVER, HI_SILVER, O_MATSPEC(UNIDED)),
+TOOL("skeleton key", "key",              0,   MZ_TINY, 0, 0, 0,  80,  3,  10, IRON,    HI_METAL),
+TOOL("universal key", "key",	         0,   MZ_TINY, 0, 0, 0,   0,  3,  10, SILVER,  HI_SILVER, O_MATSPEC(UNIDED)),
 #ifdef TOURIST
-TOOL("lock pick", (char *)0,             1,   MZ_TINY, 0, 0, 0,  60,  4,  20, IRON, HI_METAL),
+TOOL("lock pick", (char *)0,             1,   MZ_TINY, 0, 0, 0,  60,  4,  20, IRON,    HI_METAL),
 TOOL("credit card", (char *)0,           1,   MZ_TINY, 0, 0, 0,   0,  1,  10, PLASTIC, CLR_WHITE),
 #else
-TOOL("lock pick", (char *)0,             1,   MZ_TINY, 0, 0, 0,  60,  4,  20, IRON, HI_METAL),
+TOOL("lock pick", (char *)0,             1,   MZ_TINY, 0, 0, 0,  60,  4,  20, IRON,    HI_METAL),
 #endif
 /* light sources */
-TOOL("tallow candle", "candle",          0,   MZ_TINY, 1, 0, 0,  15,  2,  10, WAX, CLR_WHITE),
-TOOL("wax candle", "candle",             0,   MZ_TINY, 1, 0, 0,   5,  2,  20, WAX, CLR_WHITE),
+TOOL("tallow candle", "candle",          0,   MZ_TINY, 1, 0, 0,  15,  2,  10, WAX,     CLR_WHITE),
+TOOL("wax candle", "candle",             0,   MZ_TINY, 1, 0, 0,   5,  2,  20, WAX,     CLR_WHITE),
 TOOL("candle of invocation", "runed candle", 
-                                         0,   MZ_TINY, 0, 1, 0,  15,  2,  50, WAX, CLR_ORANGE),
-TOOL("lantern", (char *)0,               1,  MZ_SMALL, 0, 0, 0,  20, 30,  12, COPPER, CLR_YELLOW, O_MATSPEC(IDED|UNIDED)),
-TOOL("oil lamp", "lamp",                 0,  MZ_SMALL, 0, 0, 0,  30, 20,  10, COPPER, CLR_YELLOW),
-TOOL("magic lamp", "lamp",               0,  MZ_SMALL, 0, 1, 0,  15, 20,  50, COPPER, CLR_YELLOW),
+                                         0,   MZ_TINY, 0, 1, 0,  15,  2,  50, WAX,     CLR_ORANGE, O_NOWISH(1)),
+TOOL("lantern", (char *)0,               1,  MZ_SMALL, 0, 0, 0,  20, 30,  12, COPPER,  CLR_YELLOW, O_MATSPEC(IDED|UNIDED)),
+TOOL("oil lamp", "lamp",                 0,  MZ_SMALL, 0, 0, 0,  30, 20,  10, COPPER,  CLR_YELLOW),
+TOOL("magic lamp", "lamp",               0,  MZ_SMALL, 0, 1, 0,  15, 20,  50, COPPER,  CLR_YELLOW, O_NOWISH(1)),
 // TOOL("shadowlander's torch", "black torch",
 								//       0,  MZ_SMALL, 0, 1, 0,  10, 20,  50, WOOD, CLR_BLACK),
 /* other tools */
@@ -1257,7 +1257,7 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 	SCROLL("warding",				"RW NW PRT M HRW",      1,  13, 300),
 	SCROLL("antimagic",				"KARSUS",     		    1,  18, 250),
 	SCROLL("resistance",			"DESREVER TSEPMET",		1,  34, 250),
-	SCROLL("consecration",			"HLY HLS",      		1,   0,3000),
+	SCROLL("consecration",			"HLY HLS",      		1,   0,3000, O_NOWISH(1)),	/* unwishable/unwritable */
 	SCROLL((char *)0,		"FOOBIE BLETCH",        1,   0, 100),
 	SCROLL((char *)0,		"TEMOV",                1,   0, 100),
 	SCROLL((char *)0,		"GARVEN DEH",           1,   0, 100),
@@ -1327,16 +1327,16 @@ SPELL("magic missile",   "vellum",      P_ATTACK_SPELL, 		45, 2, 1, RAY,       H
 SPELL("fireball",        "ragged",      P_ATTACK_SPELL, 		20, 4, 1, RAY,       HI_PAPER),
 SPELL("cone of cold",    "dog eared",   P_ATTACK_SPELL, 		20, 4, 1, RAY,       HI_PAPER),
 SPELL("sleep",           "mottled",     P_ENCHANTMENT_SPELL,	50, 1, 1, RAY,       HI_PAPER),
-SPELL("finger of death", "stained",     P_ATTACK_SPELL,  		5, 7, 1, RAY,       HI_PAPER),
-SPELL("lightning bolt",  "storm-hued",  P_ATTACK_SPELL,  		0, 5, 1, RAY,       CLR_BLUE),
-SPELL("poison spray",    "snakeskin",  	P_MATTER_SPELL,  		0, 4, 1, RAY,       CLR_GREEN),/*Needs tile*/
-SPELL("acid splash",     "acid green", 	P_MATTER_SPELL,  		0, 4, 1, RAY,       CLR_BRIGHT_GREEN),/*Needs tile*/
+SPELL("finger of death", "stained",     P_ATTACK_SPELL,  		 5, 7, 1, RAY,       HI_PAPER),
+SPELL("lightning bolt",  "storm-hued",  P_ATTACK_SPELL,  		 0, 5, 1, RAY,       CLR_BLUE, O_NOWISH(1)), /* unwishable */
+SPELL("poison spray",    "snakeskin",  	P_MATTER_SPELL,  		 0, 4, 1, RAY,       CLR_GREEN, O_NOWISH(1)), /* unwishable *//*Needs tile*/
+SPELL("acid splash",     "acid green", 	P_MATTER_SPELL,  		 0, 4, 1, RAY,       CLR_BRIGHT_GREEN),/*Needs tile*/
 SPELL("light",           "cloth",       P_DIVINATION_SPELL,  	45, 1, 1, NODIR,     HI_CLOTH),
-SPELL("fire storm",		 "flame-red",   P_ATTACK_SPELL,  		0, 6, 1, NODIR,     CLR_RED),
-SPELL("blizzard",        "snow white",  P_ATTACK_SPELL,  		0, 6, 1, NODIR,     CLR_WHITE),
+SPELL("fire storm",		 "flame-red",   P_ATTACK_SPELL,  		 0, 6, 1, NODIR,     CLR_RED),
+SPELL("blizzard",        "snow white",  P_ATTACK_SPELL,  		 0, 6, 1, NODIR,     CLR_WHITE),
 SPELL("detect monsters", "leather",     P_DIVINATION_SPELL,	 	43, 2, 1, NODIR,     HI_LEATHER),
 SPELL("healing",         "white",       P_HEALING_SPELL,  		40, 1, 1, IMMEDIATE, CLR_WHITE),
-SPELL("lightning storm", "ocean blue",  P_ATTACK_SPELL,  		0, 7, 1, NODIR,     CLR_BLUE),
+SPELL("lightning storm", "ocean blue",  P_ATTACK_SPELL,  		 0, 7, 1, NODIR,     CLR_BLUE, O_NOWISH(1)), /* unwishable */
 SPELL("knock",           "pink",        P_MATTER_SPELL,  		30, 1, 1, IMMEDIATE, CLR_BRIGHT_MAGENTA),
 SPELL("force bolt",      "red",         P_ATTACK_SPELL,  		35, 1, 1, IMMEDIATE, CLR_RED),
 SPELL("confuse monster", "orange",      P_ENCHANTMENT_SPELL,	30, 2, 1, IMMEDIATE, CLR_ORANGE),
@@ -1392,38 +1392,36 @@ SPELL("secrets", "ragged leather",      P_NONE,                  0, 7, 1, 0,    
 #define WAND(name,typ,prob,cost,mgc,dir,metal,color,...) OBJECT( \
 		OBJ(name,typ), BITS(0,0,1,0,mgc,1,0,0,MZ_TINY,0,dir,P_NONE,metal,0), 0, \
 		WAND_CLASS, prob, 0, 7, cost, 0, 0, 0, 0, 0, 30, color, __VA_ARGS__)
-WAND("light",          "glass",    90, 100, 1, NODIR,     GLASS,    CLR_WHITE),/*Needs tile?*/
-WAND("darkness",       "obsidian", 10, 100, 1, NODIR,     OBSIDIAN_MT,    CLR_BLACK),/*Needs tile*/
-WAND("wishing",        "dragon-bone",
-					0, 500, 1, NODIR,     DRAGON_HIDE,     CLR_WHITE),	/* should not exist */
-WAND("secret door detection", "balsa",
-				   50, 150, 1, NODIR,	  WOOD,     HI_WOOD),
-WAND("enlightenment",  "crystal",  18, 150, 1, NODIR,     GLASS,    HI_GLASS),
-WAND("create monster", "maple",    42, 200, 1, NODIR,     WOOD,     HI_WOOD),
-WAND("nothing",        "oak",      25, 100, 0, IMMEDIATE, WOOD,     HI_WOOD),
-WAND("striking",       "ebony",    75, 150, 1, IMMEDIATE, WOOD,     HI_WOOD),
-WAND("draining",       "ceramic",   5, 175, 1, IMMEDIATE, MINERAL,  HI_MINERAL),
-WAND("make invisible", "marble",   42, 150, 1, IMMEDIATE, MINERAL,  HI_MINERAL),
-WAND("slow monster",   "tin",      46, 150, 1, IMMEDIATE, METAL,    HI_METAL),
-WAND("speed monster",  "brass",    50, 150, 1, IMMEDIATE, COPPER,   HI_COPPER),
-WAND("undead turning", "copper",   50, 150, 1, IMMEDIATE, COPPER,   HI_COPPER),
-WAND("polymorph",      "silver",   45, 200, 1, IMMEDIATE, SILVER,   HI_SILVER),
-WAND("cancellation",   "platinum", 42, 200, 1, IMMEDIATE, PLATINUM, CLR_WHITE),
-WAND("teleportation",  "iridium",  45, 200, 1, IMMEDIATE, METAL,    CLR_BRIGHT_CYAN),
-WAND("opening",        "zinc",     30, 150, 1, IMMEDIATE, METAL,    HI_METAL),
-WAND("locking",        "aluminum", 25, 150, 1, IMMEDIATE, METAL,    HI_METAL),
-WAND("probing",        "uranium",  30, 150, 1, IMMEDIATE, METAL,    HI_METAL),
-WAND("digging",        "iron",     55, 150, 1, RAY,       IRON,     HI_METAL),
-WAND("magic missile",  "steel",    50, 150, 1, RAY,       IRON,     HI_METAL),
-WAND("fire",           "hexagonal",40, 175, 1, RAY,       IRON,     HI_METAL),
-WAND("cold",           "short",    40, 175, 1, RAY,       IRON,     HI_METAL),
-WAND("sleep",          "runed",    50, 175, 1, RAY,       IRON,     HI_METAL),
-WAND("death",          "long",      5, 500, 1, RAY,       IRON,     HI_METAL),
-WAND("lightning",      "curved",   40, 175, 1, RAY,       IRON,     HI_METAL),
-WAND((char *)0,        "pine",      0, 150, 1, 0,         WOOD,     HI_WOOD),
-WAND((char *)0,        "forked",    0, 150, 1, 0,         WOOD,     HI_WOOD),
-WAND((char *)0,        "spiked",    0, 150, 1, 0,         IRON,     HI_METAL),
-WAND((char *)0,        "jeweled",   0, 150, 1, 0,         IRON,     HI_MINERAL),
+WAND("light",          "glass",         90, 100, 1, NODIR,     GLASS,       CLR_WHITE),/*Needs tile?*/
+WAND("darkness",       "obsidian",      10, 100, 1, NODIR,     OBSIDIAN_MT, CLR_BLACK),/*Needs tile*/
+WAND("wishing",        "dragon-bone",    0, 500, 1, NODIR,     DRAGON_HIDE, CLR_WHITE, O_NOWISH(1)),	/* wizmode only */
+WAND("secret door detection", "balsa",  50, 150, 1, NODIR,	   WOOD,        HI_WOOD),
+WAND("enlightenment",  "crystal",       18, 150, 1, NODIR,     GLASS,       HI_GLASS),
+WAND("create monster", "maple",         42, 200, 1, NODIR,     WOOD,        HI_WOOD),
+WAND("nothing",        "oak",           25, 100, 0, IMMEDIATE, WOOD,        HI_WOOD),
+WAND("striking",       "ebony",         75, 150, 1, IMMEDIATE, WOOD,        HI_WOOD),
+WAND("draining",       "ceramic",        5, 175, 1, IMMEDIATE, MINERAL,     HI_MINERAL),
+WAND("make invisible", "marble",        42, 150, 1, IMMEDIATE, MINERAL,     HI_MINERAL),
+WAND("slow monster",   "tin",           46, 150, 1, IMMEDIATE, METAL,       HI_METAL),
+WAND("speed monster",  "brass",         50, 150, 1, IMMEDIATE, COPPER,      HI_COPPER),
+WAND("undead turning", "copper",        50, 150, 1, IMMEDIATE, COPPER,      HI_COPPER),
+WAND("polymorph",      "silver",        45, 200, 1, IMMEDIATE, SILVER,      HI_SILVER),
+WAND("cancellation",   "platinum",      42, 200, 1, IMMEDIATE, PLATINUM,    CLR_WHITE),
+WAND("teleportation",  "iridium",       45, 200, 1, IMMEDIATE, METAL,       CLR_BRIGHT_CYAN),
+WAND("opening",        "zinc",          30, 150, 1, IMMEDIATE, METAL,       HI_METAL),
+WAND("locking",        "aluminum",      25, 150, 1, IMMEDIATE, METAL,       HI_METAL),
+WAND("probing",        "uranium",       30, 150, 1, IMMEDIATE, METAL,       HI_METAL),
+WAND("digging",        "iron",          55, 150, 1, RAY,       IRON,        HI_METAL),
+WAND("magic missile",  "steel",         50, 150, 1, RAY,       IRON,        HI_METAL),
+WAND("fire",           "hexagonal",     40, 175, 1, RAY,       IRON,        HI_METAL),
+WAND("cold",           "short",         40, 175, 1, RAY,       IRON,        HI_METAL),
+WAND("sleep",          "runed",         50, 175, 1, RAY,       IRON,        HI_METAL),
+WAND("death",          "long",           5, 500, 1, RAY,       IRON,        HI_METAL),
+WAND("lightning",      "curved",        40, 175, 1, RAY,       IRON,        HI_METAL),
+WAND((char *)0,        "pine",           0, 150, 1, 0,         WOOD,        HI_WOOD),
+WAND((char *)0,        "forked",         0, 150, 1, 0,         WOOD,        HI_WOOD),
+WAND((char *)0,        "spiked",         0, 150, 1, 0,         IRON,        HI_METAL),
+WAND((char *)0,        "jeweled",        0, 150, 1, 0,         IRON,        HI_MINERAL),
 #undef WAND
 
 /* coins ... - so far, gold is all there is */

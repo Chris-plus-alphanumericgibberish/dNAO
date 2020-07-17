@@ -4910,16 +4910,7 @@ typfnd:
 	/* some objects are never allowed */
 	if (typ && !wizwish && (
 		objects[typ].oc_unique ||
-		objects[typ].oc_nowish ||
-		typ == MAGIC_LAMP ||
-		typ == CANDLE_OF_INVOCATION ||
-		typ == WAN_WISHING ||
-		typ == RIN_WISHES ||
-		typ == SPE_LIGHTNING_BOLT ||
-		typ == SPE_POISON_SPRAY ||
-		typ == SPE_LIGHTNING_STORM ||
-		typ == SPE_SECRETS ||
-		typ == SCR_CONSECRATION
+		objects[typ].oc_nowish
 		))
 	{
 		*wishreturn = WISH_DENIED;
