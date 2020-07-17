@@ -71,38 +71,38 @@ NEARDATA struct objclass objects[] = {
 			0, ILLOBJ_CLASS, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 
 /* weapons ... */
-#define WEAPON(name,app,kn,mg,size,prob,wt,cost,sdam,ldam,hitbon,typ,sub,metal,shwmat,color) \
+#define WEAPON(name,app,kn,mg,size,prob,wt,cost,sdam,ldam,hitbon,typ,sub,metal,shwmat,color,...) \
 	OBJECT( \
 		OBJ(name,app), BITS(kn,mg,1,0,0,1,0,0,size,0,typ,sub,metal,shwmat), 0, \
 		WEAPON_CLASS, prob, 0, \
-		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color )
-#define PROJECTILE(name,app,kn,prob,wt,cost,sdam,ldam,hitbon,metal,sub,color) \
+		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color, __VA_ARGS__ )
+#define PROJECTILE(name,app,kn,prob,wt,cost,sdam,ldam,hitbon,metal,sub,color,...) \
 	OBJECT( \
 		OBJ(name,app), \
 		BITS(kn,1,1,0,0,1,0,0,MZ_TINY,0,PIERCE,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
-		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color )
-#define PROJECTILE_MATSPEC(name,app,kn,prob,wt,cost,sdam,ldam,hitbon,metal,shwmat,sub,color) \
+		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color, __VA_ARGS__)
+#define PROJECTILE_MATSPEC(name,app,kn,prob,wt,cost,sdam,ldam,hitbon,metal,shwmat,sub,color,...) \
 	OBJECT( \
 		OBJ(name,app), \
 		BITS(kn,1,1,0,0,1,0,0,MZ_TINY,0,PIERCE,sub,metal,shwmat), 0, \
 		WEAPON_CLASS, prob, 0, \
-		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color )
+		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color, __VA_ARGS__)
 #define BOW(name, app, kn, size, prob, wt, cost, hitbon, metal, sub, color) \
 	OBJECT( \
 		OBJ(name,app), BITS(kn,0,1,0,0,1,0,0,size,0,0,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
 		wt, cost, 0, 0, hitbon, WP_GENERIC, 0, wt, color )
-#define BULLET(name,app,kn,size,prob,wt,cost,sdam,ldam,hitbon,ammotyp,typ,metal,sub,color) \
+#define BULLET(name,app,kn,size,prob,wt,cost,sdam,ldam,hitbon,ammotyp,typ,metal,sub,color,...) \
 	OBJECT( \
 		OBJ(name,app), BITS(kn,1,1,0,0,1,0,0,size,0,typ,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
-		wt, cost, sdam, ldam, hitbon, ammotyp, 0, wt, color )
-#define GUN(name,app,kn,size,prob,wt,cost,range,rof,hitbon,ammotyp,metal,sub,color) \
+		wt, cost, sdam, ldam, hitbon, ammotyp, 0, wt, color, __VA_ARGS__)
+#define GUN(name,app,kn,size,prob,wt,cost,range,rof,hitbon,ammotyp,metal,sub,color,...) \
 	OBJECT( \
 		OBJ(name,app), BITS(kn,0,1,0,0,1,0,0,size,0,0,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
-		wt, cost, range, rof, hitbon, ammotyp, 0, wt, color )
+		wt, cost, range, rof, hitbon, ammotyp, 0, wt, color, __VA_ARGS__)
 
 /* Note: for weapons that don't do an even die of damage (ex. 2-7 or 3-18)
  * the extra damage is added on in weapon.c, not here! */
@@ -461,37 +461,37 @@ BOW("atlatl", "notched stick",                      0, MZ_MEDIUM,  0, 12,  30,  
  * Only COPPER (including brass) corrodes.
  * Some creatures are vulnerable to SILVER.
  */
-#define ARMOR(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,sub,metal,c) \
+#define ARMOR(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,sub,metal,c,...) \
 	OBJECT( \
 		OBJ(name,desc), BITS(kn,0,1,0,mgc,1,0,0,size,0,0,sub,metal,0), power, \
 		ARMOR_CLASS, prob, delay, wt, cost, \
-		0, 0, 10 - ac, can, dr, wt, c )
-#define ARMOR_MATSPEC(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,sub,metal,shwmat,c) \
+		0, 0, 10 - ac, can, dr, wt, c, __VA_ARGS__ )
+#define ARMOR_MATSPEC(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,sub,metal,shwmat,c,...) \
 	OBJECT( \
 		OBJ(name,desc), BITS(kn,0,1,0,mgc,1,0,0,size,0,0,sub,metal,shwmat), power, \
 		ARMOR_CLASS, prob, delay, wt, cost, \
-		0, 0, 10 - ac, can, dr, wt, c )
-#define HELM(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c) \
-	ARMOR(name,desc,kn,mgc,MZ_SMALL,power,prob,delay,wt,cost,ac,dr,can,ARM_HELM,metal,c)
-#define CLOAK(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c) \
-	ARMOR(name,desc,kn,mgc,MZ_MEDIUM,power,prob,delay,wt,cost,ac,dr,can,ARM_CLOAK,metal,c)
-#define SHIELD(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,c) \
-	ARMOR(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,ARM_SHIELD,metal,c)
-#define GLOVES(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c) \
-	ARMOR(name,desc,kn,mgc,MZ_SMALL,power,prob,delay,wt,cost,ac,dr,can,ARM_GLOVES,metal,c)
-#define BOOTS(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c) \
-	ARMOR(name,desc,kn,mgc,MZ_SMALL,power,prob,delay,wt,cost,ac,dr,can,ARM_BOOTS,metal,c)
+		0, 0, 10 - ac, can, dr, wt, c, __VA_ARGS__)
+#define HELM(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
+	ARMOR(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_HELM, metal, c, __VA_ARGS__)
+#define CLOAK(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
+	ARMOR(name, desc, kn, mgc, MZ_MEDIUM, power, prob, delay, wt, cost, ac, dr, can, ARM_CLOAK, metal, c, __VA_ARGS__)
+#define SHIELD(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
+	ARMOR(name, desc, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, ARM_SHIELD, metal, c, __VA_ARGS__)
+#define GLOVES(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
+	ARMOR(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_GLOVES, metal, c, __VA_ARGS__)
+#define BOOTS(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
+	ARMOR(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_BOOTS, metal, c, __VA_ARGS__)
 
-#define HELM_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c) \
-	ARMOR_MATSPEC(name,desc,kn,mgc,MZ_SMALL,power,prob,delay,wt,cost,ac,dr,can,ARM_HELM,metal,shwmat,c)
-#define CLOAK_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c) \
-	ARMOR_MATSPEC(name,desc,kn,mgc,MZ_MEDIUM,power,prob,delay,wt,cost,ac,dr,can,ARM_CLOAK,metal,shwmat,c)
-#define SHIELD_MATSPEC(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c) \
-	ARMOR_MATSPEC(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,ARM_SHIELD,metal,shwmat,c)
-#define GLOVES_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c) \
-	ARMOR_MATSPEC(name,desc,kn,mgc,MZ_SMALL,power,prob,delay,wt,cost,ac,dr,can,ARM_GLOVES,metal,shwmat,c)
-#define BOOTS_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c) \
-	ARMOR_MATSPEC(name,desc,kn,mgc,MZ_SMALL,power,prob,delay,wt,cost,ac,dr,can,ARM_BOOTS,metal,shwmat,c)
+#define HELM_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
+	ARMOR_MATSPEC(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_HELM, metal, shwmat, c, __VA_ARGS__)
+#define CLOAK_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
+	ARMOR_MATSPEC(name, desc, kn, mgc, MZ_MEDIUM, power, prob, delay, wt, cost, ac, dr, can, ARM_CLOAK, metal, shwmat, c, __VA_ARGS__)
+#define SHIELD_MATSPEC(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
+	ARMOR_MATSPEC(name, desc, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, ARM_SHIELD, metal, shwmat, c, __VA_ARGS__)
+#define GLOVES_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
+	ARMOR_MATSPEC(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_GLOVES, metal, shwmat, c, __VA_ARGS__)
+#define BOOTS_MATSPEC(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,shwmat,c,...) \
+	ARMOR_MATSPEC(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_BOOTS, metal, shwmat, c, __VA_ARGS__)
 
 /* helmets */
 HELM("sedge hat", "wide conical hat", /*Needs encyc entry*//*Needs tile*/
@@ -557,8 +557,8 @@ HELM("helm of drain resistance", "band", /*diadem of drain resistance*//*Needs t
  *	(2) That the order of the dragon scale mail and dragon scales is the
  *	    the same defined in monst.c.
  */
-#define DRGN_ARMR(name,mgc,power,cost,ac,dr,color) \
-	ARMOR(name,(char *)0,1,mgc,MZ_HUGE,power,0,5,150,cost,ac,dr,0,ARM_SUIT,DRAGON_HIDE,color)
+#define DRGN_ARMR(name,mgc,power,cost,ac,dr,color,...) \
+	ARMOR(name,(char *)0,1,mgc,MZ_HUGE,power,0,5,150,cost,ac,dr,0,ARM_SUIT,DRAGON_HIDE,color,__VA_ARGS__)
 /* 3.4.1: dragon scale mail reclassified as "magic" since magic is
    needed to create them */
 DRGN_ARMR("gray dragon scale mail",   1, ANTIMAGIC,  1200, 5, 4, CLR_GRAY),
@@ -743,8 +743,8 @@ SHIELD("shield of reflection", "polished shield",
 		0, 1,  MZ_LARGE, REFLECTING, 3, 0, 60, 50,  8, 0, 0, SILVER, HI_SILVER),
 /*#define SHIELD(name,desc,kn,mgc,blk,power,prob,delay,wt,cost,ac,can,metal,c) \
      ARMOR(name,desc,kn,mgc,blk,power,prob,delay,wt,cost,ac,can,ARM_SHIELD,metal,c) */
-#define DRGN_SHIELD(name,mgc,power,cost,ac,dr,color)						\
-	ARMOR(name,(char *)0,1,mgc,MZ_LARGE,power,0,0,75,cost,ac,dr,0,ARM_SHIELD,DRAGON_HIDE,color)
+#define DRGN_SHIELD(name,mgc,power,cost,ac,dr,color,...)						\
+	ARMOR(name,(char *)0,1,mgc,MZ_LARGE,power,0,0,75,cost,ac,dr,0,ARM_SHIELD,DRAGON_HIDE,color,__VA_ARGS__)
 /* 3.4.1: dragon scale mail reclassified as "magic" since magic is
    needed to create them */
 DRGN_SHIELD("gray dragon scale shield", 1, ANTIMAGIC,  1200, 7, 0, CLR_GRAY),
@@ -842,10 +842,10 @@ BOOTS("flying boots", "snow boots",
 #undef ARMOR_MATSPEC
 
 /* rings ... */
-#define RING(name,power,stone,cost,mgc,spec,mohs,metal,color) OBJECT( \
+#define RING(name,power,stone,cost,mgc,spec,mohs,metal,color,...) OBJECT( \
 		OBJ(name,stone), \
 		BITS(0,0,spec,0,mgc,spec,0,0,MZ_TINY,HARDGEM(mohs),0,P_NONE,metal,0), \
-		power, RING_CLASS, 0, 0, 3, cost, 0, 0, 0, 0, 0, 15, color )
+		power, RING_CLASS, 0, 0, 3, cost, 0, 0, 0, 0, 0, 15, color,__VA_ARGS__ )
 RING("wishes", 0, "black",            500, 1, 1, 4, PLATINUM, CLR_BLACK),
 RING("adornment", ADORNED, "wooden",        100, 1, 1, 2, WOOD, HI_WOOD),
 RING("gain strength", 0, "granite",         150, 1, 1, 7, MINERAL, HI_MINERAL),
@@ -892,9 +892,9 @@ RING("protection from shape changers", PROT_FROM_SHAPE_CHANGERS, "black signet",
 #undef RING
 
 /* amulets ... - THE Amulet comes last because it is special */
-#define AMULET(name,desc,power,prob) OBJECT( \
+#define AMULET(name,desc,power,prob,...) OBJECT( \
 		OBJ(name,desc), BITS(0,0,0,0,1,0,0,0,0,MZ_TINY,0,P_NONE,IRON,0), power, \
-		AMULET_CLASS, prob, 0, 20, 150, 0, 0, 0, 0, 0, 20, HI_METAL )
+		AMULET_CLASS, prob, 0, 20, 150, 0, 0, 0, 0, 0, 20, HI_METAL, __VA_ARGS__ )
 
 AMULET("amulet of drain resistance","warped",   DRAIN_RES,   60),
 AMULET("amulet of ESP",           "circular",   TELEPAT,    130),
@@ -920,46 +920,46 @@ OBJECT(OBJ("Amulet of Yendor",	/* note: description == name */
 
 /* tools ... */
 /* tools with weapon characteristics come last */
-#define TOOLMASK(name,desc,prop,kn,size,mrg,mgc,chg,prob,wt,cost,mat,color) \
+#define TOOLMASK(name,desc,prop,kn,size,mrg,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
 		prop, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color )
-#define TOOL(name,desc,kn,size,mrg,mgc,chg,prob,wt,cost,mat,color) \
+		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
+#define TOOL(name,desc,kn,size,mrg,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color )
-#define TOOL_ABILITY(name,desc,kn,size,mrg,mgc,power,chg,prob,wt,cost,mat,color) \
+		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
+#define TOOL_ABILITY(name,desc,kn,size,mrg,mgc,power,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
 		power, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color )
-#define TOOL_MATSPEC(name,desc,kn,size,mrg,mgc,chg,prob,wt,cost,mat, shwmat,color) \
+		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
+#define TOOL_MATSPEC(name,desc,kn,size,mrg,mgc,chg,prob,wt,cost,mat, shwmat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,shwmat), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color )
-#define CONTAINER(name,desc,kn,size,mgc,chg,prob,wt,cost,mat,color) \
+		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
+#define CONTAINER(name,desc,kn,size,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,chg,1,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color )
-#define CONTAINER_MATSPEC(name,desc,kn,size,mgc,chg,prob,wt,cost,mat,shwmat,color) \
+		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
+#define CONTAINER_MATSPEC(name,desc,kn,size,mgc,chg,prob,wt,cost,mat,shwmat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,chg,1,mgc,chg,0,0,size,0,0,P_NONE,mat,shwmat), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color )
-#define WEPTOOL(name,desc,kn,size,mgc,chg,prob,wt,cost,sdam,ldam,hitbon,typ,sub,mat,clr) \
+		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
+#define WEPTOOL(name,desc,kn,size,mgc,chg,prob,wt,cost,sdam,ldam,hitbon,typ,sub,mat,clr,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,1,chg,mgc,1,0,0,size,0,typ,sub,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr )
-#define WEPTOOL_MATSPEC(name,desc,kn,size,mgc,chg,prob,wt,cost,sdam,ldam,hitbon,typ,sub,mat,shwmat,clr) \
+		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr, __VA_ARGS__)
+#define WEPTOOL_MATSPEC(name,desc,kn,size,mgc,chg,prob,wt,cost,sdam,ldam,hitbon,typ,sub,mat,shwmat,clr,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,1,chg,mgc,1,0,0,size,0,typ,sub,mat,shwmat), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr )
+		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr, __VA_ARGS__)
 /* containers */
 CONTAINER("box", (char *)0,             1,   MZ_HUGE, 0, 0,  30, 350,   8, WOOD, HI_WOOD),
 CONTAINER("massive stone crate", (char *)0,
@@ -972,11 +972,11 @@ CONTAINER("sack", "bag",                0, MZ_MEDIUM, 0, 0,  20,  15,   2, CLOTH
 CONTAINER("oilskin sack", "bag",        0, MZ_MEDIUM, 0, 0,  20,  15, 100, CLOTH, HI_CLOTH),
 CONTAINER("bag of holding", "bag",      0, MZ_MEDIUM, 1, 0,  20,  15, 100, CLOTH, HI_CLOTH),
 CONTAINER("bag of tricks", "bag",       0, MZ_MEDIUM, 1, 1,  20,  15, 100, CLOTH, HI_CLOTH),
-#define HOSTAGE(name,desc,kn,mgc,chg,prob,ntrtn,wt,cost,mat,color) \
+#define HOSTAGE(name,desc,kn,mgc,chg,prob,ntrtn,wt,cost,mat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,chg,1,mgc,chg,0,0,MZ_MEDIUM,0,0,P_NONE,mat), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, ntrtn, 0, wt, color )
+		wt, cost, 0, 0, 0, ntrtn, 0, wt, color, __VA_ARGS__)
 
 //HOSTAGE("distressed princess", (char *)0,           1, 0, 0,  0, 350,.9*1450,  1600, CLOTH, CLR_WHITE),
 #undef HOSTAGE
@@ -1167,10 +1167,10 @@ OBJECT(OBJ("Bell of Opening", "bell"),
 #undef WEPTOOL_MATSPEC
 
 /* Comestibles ... */
-#define FOOD(name,prob,size,delay,wt,unk,tin,nutrition,color) OBJECT( \
+#define FOOD(name,prob,size,delay,wt,unk,tin,nutrition,color,...) OBJECT( \
 		OBJ(name,(char *)0), BITS(1,1,unk,0,0,0,0,0,size,0,0,P_NONE,tin,0), 0, \
 		FOOD_CLASS, prob, delay, \
-		wt, nutrition/20 + 5, 0, 0, 0, 0, 0, nutrition, color )
+		wt, nutrition / 20 + 5, 0, 0, 0, 0, 0, nutrition, color, __VA_ARGS__)
 /* all types of food (except tins & corpses) must have a delay of at least 1. */
 /* delay on corpses is computed and is weight dependant */
 /* dog eats foods 0-4 but prefers tripe rations above all others */
@@ -1239,9 +1239,9 @@ FOOD("tin",                    75,   MZ_TINY,  0, 10, 1, METAL,   0, HI_METAL),
 #undef FOOD
 
 /* potions ... */
-#define POTION(name,desc,mgc,power,prob,cost,color) OBJECT( \
+#define POTION(name,desc,mgc,power,prob,cost,color,...) OBJECT( \
 		OBJ(name,desc), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,P_NONE,GLASS,0), power, \
-		POTION_CLASS, prob, 0, 20, cost, 0, 0, 0, 0, 0, 10, color )
+		POTION_CLASS, prob, 0, 20, cost, 0, 0, 0, 0, 0, 10, color, __VA_ARGS__)
 POTION("gain ability", "ruby",          1, 0,          40, 300, CLR_RED),
 POTION("restore ability", "pink",       1, 0,          40, 100, CLR_BRIGHT_MAGENTA),
 POTION("confusion", "orange",           1, CONFUSION,  33, 100, CLR_ORANGE),
@@ -1276,9 +1276,9 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 #undef POTION
 
 /* scrolls ... */
-#define SCROLL(name,text,mgc,prob,cost) OBJECT( \
+#define SCROLL(name,text,mgc,prob,cost,...) OBJECT( \
 		OBJ(name,text), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,P_NONE,PAPER,0), 0, \
-		SCROLL_CLASS, prob, 0, 5, cost, 0, 0, 0, 0, 0, 6, HI_PAPER )
+		SCROLL_CLASS, prob, 0, 5, cost, 0, 0, 0, 0, 0, 6, HI_PAPER, __VA_ARGS__)
 	SCROLL("enchant armor",         "ZELGO MER",            1,  59,  80),
 	SCROLL("destroy armor",         "JUYED AWK YACC",       1,  35, 100),
 	SCROLL("confuse monster",       "NR 9",                 1,  41, 100),
@@ -1315,14 +1315,14 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 #endif
 	SCROLL("blank paper",           "unlabeled",        0,  21,  60),
 #undef SCROLL
-#define GOLD_SCROLL(name,text,mgc,prob,cost) OBJECT( \
+#define GOLD_SCROLL(name,text,mgc,prob,cost,...) OBJECT( \
 		OBJ(name,text), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,P_NONE,GOLD,0), 0, \
-		SCROLL_CLASS, prob, 0, 50, cost, 0, 0, 0, 0, 0, 6, HI_GOLD )
+		SCROLL_CLASS, prob, 0, 50, cost, 0, 0, 0, 0, 0, 6, HI_GOLD, __VA_ARGS__)
 	GOLD_SCROLL("Gold Scroll of Law", "golden",        0,  0,  10), /* Shopkeepers aren't interested in these */
 #undef GOLD_SCROLL
-#define CERAMIC_TILE(name,text,prob) OBJECT( \
+#define CERAMIC_TILE(name,text,prob,...) OBJECT( \
 		OBJ(name,text), BITS(0,1,0,0,1,0,0,0,MZ_TINY,0,0,P_NONE,MINERAL, IDED|UNIDED), 0, \
-		TILE_CLASS, prob, 0, 3, 300, 0, 0, 0, 0, 0, 6, CLR_WHITE )
+		TILE_CLASS, prob, 0, 3, 300, 0, 0, 0, 0, 0, 6, CLR_WHITE, __VA_ARGS__)
 	/* Randomized descriptions */
 	CERAMIC_TILE("syllable of strength: Aesh","bipartite glyph", 167),
 	CERAMIC_TILE("syllable of power: Krau",   "crossed glyph",   166),
@@ -1331,9 +1331,9 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 	CERAMIC_TILE("syllable of thought: Naen", "dotted glyph",    167),
 	CERAMIC_TILE("syllable of spirit: Vaul",  "hanging glyph",   166),
 #undef CERAMIC_TILE
-#define BONE_TILE(name,text,prob) OBJECT( \
+#define BONE_TILE(name,text,prob,...) OBJECT( \
 		OBJ(name,text), BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,P_NONE,BONE, IDED|UNIDED), 0, \
-		TILE_CLASS, prob, 0, 3, 300, 0, 0, 0, 0, 0, 6, CLR_GRAY )
+		TILE_CLASS, prob, 0, 3, 300, 0, 0, 0, 0, 0, 6, CLR_GRAY, __VA_ARGS__)
 	BONE_TILE("anti-clockwise metamorphosis glyph",  "counterclockwise-rotated cross",   0),	// ANTI_CLOCKWISE_METAMORPHOSIS
 	BONE_TILE("clockwise metamorphosis glyph",  "clockwise-rotated cross",   0),				// CLOCKWISE_METAMORPHOSIS
 	BONE_TILE("sparkling lake glyph",  "sparkling horizontal line",   0),	// ARCANE_BULWARK
@@ -1355,9 +1355,9 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 	BONE_TILE("radiance glyph",  "eyed triangle",   0),						// RADIANCE
 	BONE_TILE("beast's embrace glyph",  "curling beast's claw",   0),		// BEASTS_EMBRACE
 #undef BONE_TILE
-#define METALIC_SLAB(name,text, clr) OBJECT( \
+#define METALIC_SLAB(name,text, clr,...) OBJECT( \
 		OBJ(name,text), BITS(0,0,0,0,1,0,1,1,MZ_TINY,0,0,P_NONE,METAL, IDED|UNIDED), 0, \
-		TILE_CLASS, 0, 0, 3, 3000, 0, 0, 0, 0, 0, 6, clr )
+		TILE_CLASS, 0, 0, 3, 3000, 0, 0, 0, 0, 0, 6, clr, __VA_ARGS__)
 	/* Fixed descriptions (also, artifact base-items only) */
 	METALIC_SLAB("First Word",  "blinding glyph", CLR_YELLOW),
 	METALIC_SLAB("Dividing Word",  "cerulean glyph", HI_ZAP),
@@ -1366,10 +1366,10 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 #undef METALIC_SLAB
 
 /* spellbooks ... */
-#define SPELL(name,desc,sub,prob,level,mgc,dir,color) OBJECT( \
+#define SPELL(name,desc,sub,prob,level,mgc,dir,color,...) OBJECT( \
 		OBJ(name,desc), BITS(0,0,0,0,mgc,0,0,0,MZ_LARGE,0,dir,sub,PAPER,0), 0, \
 		SPBOOK_CLASS, prob, level, \
-		50, level*100, 0, 0, 0, level, 0, 20, color )
+		50, level * 100, 0, 0, 0, level, 0, 20, color, __VA_ARGS__)
 SPELL("dig",             "parchment",   P_MATTER_SPELL,			20, 5, 1, RAY,       HI_PAPER),
 SPELL("magic missile",   "vellum",      P_ATTACK_SPELL, 		45, 2, 1, RAY,       HI_PAPER),
 SPELL("fireball",        "ragged",      P_ATTACK_SPELL, 		20, 4, 1, RAY,       HI_PAPER),
@@ -1434,9 +1434,9 @@ OBJECT(OBJ("secrets", "ragged leather"), BITS(0,0,1,0,1,0,0,1,MZ_LARGE,0,0,P_NON
 #undef SPELL
 
 /* wands ... */
-#define WAND(name,typ,prob,cost,mgc,dir,metal,color) OBJECT( \
+#define WAND(name,typ,prob,cost,mgc,dir,metal,color,...) OBJECT( \
 		OBJ(name,typ), BITS(0,0,1,0,mgc,1,0,0,MZ_TINY,0,dir,P_NONE,metal,0), 0, \
-		WAND_CLASS, prob, 0, 7, cost, 0, 0, 0, 0, 0, 30, color )
+		WAND_CLASS, prob, 0, 7, cost, 0, 0, 0, 0, 0, 30, color, __VA_ARGS__)
 WAND("light",          "glass",    90, 100, 1, NODIR,     GLASS,    CLR_WHITE),/*Needs tile?*/
 WAND("darkness",       "obsidian", 10, 100, 1, NODIR,     OBSIDIAN_MT,    CLR_BLACK),/*Needs tile*/
 WAND("wishing",        "dragon-bone",
@@ -1472,25 +1472,25 @@ WAND((char *)0,        "jeweled",   0, 150, 1, 0,         IRON,     HI_MINERAL),
 #undef WAND
 
 /* coins ... - so far, gold is all there is */
-#define COIN(name,prob,metal,worth) OBJECT( \
+#define COIN(name,prob,metal,worth,...) OBJECT( \
 		OBJ(name,(char *)0), BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,P_NONE,metal,0), 0, \
-		COIN_CLASS, prob, 0, 1, worth, 0, 0, 0, 0, 0, 0, HI_GOLD )
+		COIN_CLASS, prob, 0, 1, worth, 0, 0, 0, 0, 0, 0, HI_GOLD, __VA_ARGS__)
 	COIN("gold piece",      1000, GOLD,1),
 #undef COIN
 
 /* gems ... - includes stones and rocks but not boulders */
-#define GEM(name,desc,prob,wt,gval,nutr,mohs,glass,color) OBJECT( \
+#define GEM(name,desc,prob,wt,gval,nutr,mohs,glass,color,...) OBJECT( \
 	    OBJ(name,desc), \
 	    BITS(0,1,0,0,0,0,0,0,MZ_TINY,HARDGEM(mohs),PIERCE,-P_SLING,glass,0), 0, \
-	    GEM_CLASS, prob, 0, 1, gval, 3, 3, 0, WP_GENERIC, 0, nutr, color )
-#define ROCK(name,desc,kn,prob,wt,gval,sdam,ldam,hitbon,mgc,nutr,mohs,glass,color) OBJECT( \
+		GEM_CLASS, prob, 0, 1, gval, 3, 3, 0, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
+#define ROCK(name,desc,kn,prob,wt,gval,sdam,ldam,hitbon,mgc,nutr,mohs,glass,color,...) OBJECT( \
 	    OBJ(name,desc), \
 	    BITS(kn,1,0,0,mgc,0,0,0,MZ_TINY,HARDGEM(mohs),WHACK,-P_SLING,glass,0), 0, \
-	    GEM_CLASS, prob, 0, wt, gval, sdam, ldam, hitbon, WP_GENERIC, 0, nutr, color )
-#define FLINT(name,desc,kn,prob,wt,gval,sdam,ldam,hitbon,mgc,nutr,mohs,glass,color) OBJECT( \
+		GEM_CLASS, prob, 0, wt, gval, sdam, ldam, hitbon, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
+#define FLINT(name,desc,kn,prob,wt,gval,sdam,ldam,hitbon,mgc,nutr,mohs,glass,color,...) OBJECT( \
 	    OBJ(name,desc), \
 	    BITS(kn,1,0,0,mgc,0,0,0,MZ_TINY,HARDGEM(mohs),SLASH,-P_SLING,glass,0), 0, \
-	    GEM_CLASS, prob, 0, wt, gval, sdam, ldam, hitbon, WP_GENERIC, 0, nutr, color )
+		GEM_CLASS, prob, 0, wt, gval, sdam, ldam, hitbon, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
 GEM("magicite crystal","brilliant blue",1, 1, 9999, 15, 11, GEMSTONE, CLR_BRIGHT_BLUE),/*Needs tile*/
 GEM("dilithium crystal", "white",      2,  1, 4500, 15,  5, GEMSTONE, CLR_WHITE),
 GEM("diamond", "white",                3,  1, 4000, 15, 10, GEMSTONE, CLR_WHITE),
