@@ -7,6 +7,7 @@
 
 /* object field overrides */
 #define O_MATSPEC(x)	C13(x)
+#define O_POWER(x)		C15(x)
 
 #ifndef OBJECTS_PASS_2_
 /* first pass */
@@ -893,20 +894,10 @@ OBJECT(OBJ("Amulet of Yendor",	/* note: description == name */
 
 /* tools ... */
 /* tools with weapon characteristics come last */
-#define TOOLMASK(name,desc,prop,kn,size,mrg,mgc,chg,prob,wt,cost,mat,color,...) \
-	OBJECT( OBJ(name,desc), \
-		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
-		prop, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
 #define TOOL(name,desc,kn,size,mrg,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
-#define TOOL_ABILITY(name,desc,kn,size,mrg,mgc,power,chg,prob,wt,cost,mat,color,...) \
-	OBJECT( OBJ(name,desc), \
-		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
-		power, TOOL_CLASS, prob, 0, \
 		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
 #define CONTAINER(name,desc,kn,size,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( OBJ(name,desc), \
@@ -984,11 +975,10 @@ TOOL("hypospray", "hammer-shaped device", /*Needs encyc entry*//*Needs tile*/
 TOOL("hypospray ampule", "hard grey bottle", /*Needs encyc entry*//*Needs tile*/
 								0,   MZ_TINY, 0, 1, 0,   0,  1,  50, PLASTIC,CLR_GRAY),
 TOOL("mask", (char *)0,			1,  MZ_SMALL, 0, 0, 0,  10, 10,  80, LEATHER, CLR_WHITE),
-TOOLMASK("R'lyehian faceplate", "ebon pane", POISON_RES,/*Needs tile*/
-								0,  MZ_SMALL, 0, 1, 0,   0, 15, 200, GLASS, CLR_BLACK),
-//define TOOL_ABILITY(name,desc,kn,mrg,mgc,power,chg,prob,wt,cost,mat,color)
-TOOL_ABILITY("living mask", "gilled jellyfish",  
-								0,  MZ_SMALL, 0, 1, MAGICAL_BREATHING, 0,  0,  5, 200, FLESH, CLR_BLUE),
+TOOL("R'lyehian faceplate", "ebon pane", /*Needs tile*/
+								0,  MZ_SMALL, 0, 1, 0,   0, 15, 200, GLASS, CLR_BLACK, O_POWER(POISON_RES)),
+TOOL("living mask", "gilled jellyfish",  
+								0,  MZ_SMALL, 0, 1, 0,   0,  5, 200, FLESH, CLR_BLUE, O_POWER(MAGICAL_BREATHING)),
 TOOL("lenses", (char *)0,		1,   MZ_TINY, 0, 0, 0,   5,  3,  80, GLASS, HI_GLASS), /*Needs encyc entry*/
 TOOL("blindfold", (char *)0,    1,   MZ_TINY, 0, 0, 0,  45,  2,  20, CLOTH, CLR_GRAY),
 TOOL("android visor", "black blindfold",
