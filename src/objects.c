@@ -6,11 +6,16 @@
 #include "macromagic.h"
 
 /* object field overrides */
+#define O_USKWN(x)		C03(x)
+#define O_UNIQ(x)		C07(x)
+#define O_NOWISH(x)		C08(x)
 #define O_MAT(x)		C12(x)
 #define O_MATSPEC(x)	C13(x)
 #define O_POWER(x)		C15(x)
+#define O_DELAY(x)		C17(x)
 #define O_COLOR(x)		C18(x)
 #define O_WT(x)			C20(x)
+#define O_COST(x)		C21(x)
 
 #ifndef OBJECTS_PASS_2_
 /* first pass */
@@ -1373,11 +1378,14 @@ SPELL("freeze sphere",   "hardcover",   P_MATTER_SPELL,			20, 1, 1, NODIR, CLR_B
 #endif
 /* blank spellbook must come last because it retains its description */
 SPELL("blank paper",     "plain",       P_NONE,					18, 0, 0, 0,         HI_PAPER),
+
 /* a special, one of a kind, spellbook */
-OBJECT(OBJ("Book of the Dead", "papyrus"), BITS(0,0,1,0,1,0,1,1,MZ_LARGE,0,0,P_NONE,PAPER,0), 0,
-	SPBOOK_CLASS, 0, 0,20, 10000, 0, 0, 0, 7, 0, 20, HI_PAPER),
-OBJECT(OBJ("secrets", "ragged leather"), BITS(0,0,1,0,1,0,0,1,MZ_LARGE,0,0,P_NONE,PAPER,0), 0,
-	SPBOOK_CLASS, 0, 0,20, 10000, 0, 0, 0, 7, 0, 20, CLR_BROWN),
+SPELL("Book of the Dead","papyrus",     P_NONE,                  0, 7, 1, 0,         HI_PAPER,
+	O_USKWN(1), O_DELAY(0), O_WT(20), O_COST(10000), O_UNIQ(1), O_NOWISH(1)),
+/* base item for many artifact spellbooks */
+SPELL("secrets", "ragged leather",      P_NONE,                  0, 7, 1, 0,         CLR_BROWN,
+	O_USKWN(1), O_DELAY(0), O_WT(20), O_COST(10000), O_NOWISH(1)),
+
 #undef SPELL
 
 /* wands ... */
