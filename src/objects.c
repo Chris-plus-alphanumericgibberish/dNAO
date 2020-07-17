@@ -2,6 +2,10 @@
 /* Copyright (c) Mike Threepoint, 1989.				  */
 /* NetHack may be freely redistributed.  See license for details. */
 
+/* both passes */
+#include "macromagic.h"
+
+
 #ifndef OBJECTS_PASS_2_
 /* first pass */
 struct monst { struct monst *dummy; };	/* lint: struct obj's union */
@@ -32,7 +36,7 @@ struct monst { struct monst *dummy; };	/* lint: struct obj's union */
 #ifndef OBJECTS_PASS_2_
 /* first pass -- object descriptive text */
 # define OBJ(name,desc) name,desc
-# define OBJECT(obj,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color) \
+# define OBJECT(obj,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color,...) \
 	{obj}
 
 NEARDATA struct objdescr obj_descr[] = {
@@ -40,10 +44,20 @@ NEARDATA struct objdescr obj_descr[] = {
 /* second pass -- object definitions */
 
 # define BITS(nmkn,mrg,uskn,ctnr,mgc,chrg,uniq,nwsh,size,tuf,dir,sub,mtrl,shwmat) \
-	nmkn,mrg,uskn,0,mgc,chrg,uniq,nwsh,size,tuf,dir,mtrl,shwmat,sub /* SCO ODT 1.1 cpp fodder */
-# define OBJECT(obj,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color) \
-	{0, 0, (char *)0, bits, prp, sym, dly, COLOR_FIELD(color) \
-	 prob, wt, cost, sdam, ldam, oc1, oc2, oc3, nut}
+	C01(nmkn), C02(mrg), C03(uskn), C04(0), \
+	C05(mgc), C06(chrg), C07(uniq), C08(nwsh), \
+	C09(size), C10(tuf), C11(dir), C12(mtrl), \
+	C13(shwmat), C14(sub)
+# define OBJECT(obj,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color,...) \
+	{0, 0, (char *)0, SET27( \
+	bits, \
+	C15(prp), C16(sym), C17(dly), C18(color), \
+	C19(prob), C20(wt), C21(cost), \
+	C22(sdam), C23(ldam), \
+	C24(oc1), C25(oc2), C26(oc3), C27(nut), \
+	__VA_ARGS__ \
+	)}
+
 # ifndef lint
 #  define HARDGEM(n) (n >= 8)
 # else
