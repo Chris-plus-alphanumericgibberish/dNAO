@@ -7,6 +7,7 @@
 
 /* object field overrides */
 #define O_USKWN(x)		C03(x)
+#define O_MAGIC(x)		C05(x)
 #define O_UNIQ(x)		C07(x)
 #define O_NOWISH(x)		C08(x)
 #define O_MAT(x)		C12(x)
@@ -16,6 +17,7 @@
 #define O_COLOR(x)		C18(x)
 #define O_WT(x)			C20(x)
 #define O_COST(x)		C21(x)
+#define O_NUT(x)		C27(x)
 
 #ifndef OBJECTS_PASS_2_
 /* first pass */
@@ -892,12 +894,11 @@ AMULET("amulet of unchanging",    "concave",    UNCHANGING,	 45),
 AMULET("amulet of nullify magic", "pentagonal",  NULLMAGIC,  45),/*Needs tile*/
 AMULET("amulet of reflection",    "hexagonal",  REFLECTING,  70),
 AMULET("amulet of magical breathing", "octagonal",      MAGICAL_BREATHING, 60),
-OBJECT(OBJ("cheap plastic imitation of the Amulet of Yendor",
-	"Amulet of Yendor"), BITS(0,0,1,0,0,0,0,0,0,0,0,0,PLASTIC,0), 0,
-	AMULET_CLASS, 0, 0, 20,    0, 0, 0, 0, 0, 0,  1, HI_METAL),
-OBJECT(OBJ("Amulet of Yendor",	/* note: description == name */
-	"Amulet of Yendor"), BITS(0,0,1,0,1,0,1,1,0,0,0,0,MITHRIL,0), 0,
-	AMULET_CLASS, 0, 0, 20, 30000, 0, 0, 0, 0, 0, 20, HI_METAL),
+
+AMULET("cheap plastic imitation of the Amulet of Yendor", "Amulet of Yendor", 0, 0,
+	O_USKWN(1), O_MAGIC(0), O_MAT(PLASTIC), O_COST(20), O_NUT(1)),
+AMULET("Amulet of Yendor", "Amulet of Yendor", 0, 0, /* note: description == name */
+	O_USKWN(1), O_MAGIC(0), O_UNIQ(1), O_NOWISH(1), O_MAT(MITHRIL), O_COST(30000)),
 #undef AMULET
 
 /* tools ... */
