@@ -6,6 +6,7 @@
 #include "macromagic.h"
 
 /* object field overrides */
+#define O_MERGE(x)		C02(x)
 #define O_USKWN(x)		C03(x)
 #define O_MAGIC(x)		C05(x)
 #define O_UNIQ(x)		C07(x)
@@ -1140,10 +1141,7 @@ FOOD("egg",                    85,   MZ_TINY,  1,  1, 1, FLESH,  80, CLR_WHITE),
 FOOD("meatball",                0,   MZ_TINY,  1,  1, 0, FLESH,   5, CLR_BROWN),
 FOOD("meat stick",              0,   MZ_TINY,  1,  1, 0, FLESH,   5, CLR_BROWN),
 FOOD("massive chunk of meat",   0,MZ_GIGANTIC,20,400, 0, FLESH,2000, CLR_BROWN),
-/* special case because it's not mergable */
-OBJECT(OBJ("meat ring", (char *)0),
-    BITS(1,0,0,0,0,0,0,0,0,0,0,0,FLESH,0),
-    0, FOOD_CLASS, 0, 1, 5, 1, 0, 0, 0, 0, 0, 5, CLR_BROWN),
+FOOD("meat ring",               0,   MZ_TINY,  1,  1, 0, FLESH,   5, CLR_BROWN, O_MERGE(0)),
 
 /* Body parts.... eeeww */
 FOOD("eyeball",                 0,   MZ_TINY,  1,  0, 0, FLESH,  10, CLR_WHITE),/*Needs tile*/
