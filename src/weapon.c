@@ -340,15 +340,14 @@ int otyp;
 	int dmod = 0;						/* die size modifier */
 	int spe_mult = 1;					/* multiplier for enchantment value */
 
-	int ocaa = AT_NONE;
-	int ocad = AD_PHYS;
 	int ocn = 1;
 	int ocd = 2;
-	int bonaa = AT_NONE;
-	int bonad = AD_PHYS;
 	int bonn = 0;
 	int bond = 0;
 	int flat = 0;
+	boolean lucky = FALSE;
+	boolean exploding = FALSE;
+	int explode_amt = 0;
 
 	/* use the otyp of the object called, if we have one */
 	if (obj)
@@ -358,15 +357,14 @@ int otyp;
 	 * just skip everything and only initialize wdice
 	 */
 	if (!otyp) {
-		(wdice->oc.aatyp) = ocaa;
-		(wdice->oc.adtyp) = ocad;
-		(wdice->oc.damn) = ocn;
-		(wdice->oc.damd) = ocd;
-		(wdice->bon.aatyp) = bonaa;
-		(wdice->bon.adtyp) = bonad;
-		(wdice->bon.damn) = bonn;
-		(wdice->bon.damd) = bond;
+		(wdice->oc_damn) = ocn;
+		(wdice->oc_damd) = ocd;
+		(wdice->bon_damn) = bonn;
+		(wdice->bon_damd) = bond;
 		(wdice->flat) = flat;
+		(wdice->lucky) = lucky;
+		(wdice->exploding) = exploding;
+		(wdice->explode_amt) = explode_amt;
 		return 0;
 	}
 
@@ -444,13 +442,13 @@ int otyp;
 	{
 		/* exploding and lucky dice */
 		if (arti_dluck(obj)) {
-			ocad = AD_LUCK;
+			lucky = TRUE;
 		}
 		if (arti_dexpl(obj)) {
-			ocaa = AT_EXPL;
+			exploding = TRUE;
 			/* some artifacts are special-cased to gain extra damage when exploding */
 			if (obj->oartifact == ART_VORPAL_BLADE || obj->oartifact == ART_SNICKERSNEE)
-				ocaa++;
+				explode_amt = 1;
 		}
 
 		/* other various artifacts and objects */
@@ -685,13 +683,9 @@ int otyp;
 			ocn = 1;
 			ocd = 8;
 		} else {
-			ocaa = AT_NONE;
-			ocad = AD_PHYS;
 			ocn = 1;
 			ocd = 2;
 		}
-		bonaa = AT_NONE;
-		bonad = AD_PHYS;
 		bonn = 0;
 		bond = 0;
 	}
@@ -782,8 +776,8 @@ int otyp;
 	/* if bonus dice do exist, their minimum size is of a d2 */
 	if (bonn && bond < 2)
 		bond = 2;
-	/* if bonus dice are identical in size & roll to oc dice, combine them */
-	if (bonn && (ocd == bond && ocaa == bonaa && ocad == bonad))
+	/* if bonus dice are identical in size to oc dice, combine them */
+	if (bonn && (ocd == bond))
 	{
 		ocn += bonn;
 		bonn = 0;
@@ -791,15 +785,14 @@ int otyp;
 	}
 
 	/* plug everything into wdice */
-	(wdice->oc.aatyp)	= ocaa;
-	(wdice->oc.adtyp)	= ocad;
-	(wdice->oc.damn)	= ocn;
-	(wdice->oc.damd)	= ocd;
-	(wdice->bon.aatyp)	= bonaa;
-	(wdice->bon.adtyp)	= bonad;
-	(wdice->bon.damn)	= bonn;
-	(wdice->bon.damd)	= bond;
-	(wdice->flat)		= flat;
+	(wdice->oc_damn)     = ocn;
+	(wdice->oc_damd)     = ocd;
+	(wdice->bon_damn)    = bonn;
+	(wdice->bon_damd)    = bond;
+	(wdice->flat)        = flat;
+	(wdice->lucky)       = lucky;
+	(wdice->exploding)   = exploding;
+	(wdice->explode_amt) = explode_amt;
 	return spe_mult;
 }
 
@@ -810,52 +803,58 @@ int otyp;
  * data is received in the form of an attack struct
  */
 int
-weapon_dmg_roll(wdie, youdefend)
-struct attack *wdie;
-boolean youdefend;		// required for lucky dice
+weapon_dmg_roll(wdie, youdef)
+struct weapon_dice *wdie;
+boolean youdef;		// required for lucky dice
+{
+	int tmp = 0;
+
+	tmp += weapon_die_roll(wdie->oc_damn,  wdie->oc_damd,  wdie, youdef);
+	tmp += weapon_die_roll(wdie->bon_damn, wdie->bon_damd, wdie, youdef);
+	tmp += wdie->flat;
+
+	return tmp;
+}
+
+int
+weapon_die_roll(n, x, wdie, youdef)
+int n;
+int x;
+struct weapon_dice * wdie;
+boolean youdef;
 {
 	int tmp = 0;
 
 	/* verify there are appropriate dice to roll */
-	if (!wdie->damn)
+	if (!n)
 		return 0;
-	if (wdie->damd < 1)
+	if (x < 1)
 	{
-		impossible("weapon_dmg_roll called with <1 die size and non-zero die number!");
+		impossible("weapon_die_roll called with <1 die size and non-zero die number!");
 		return 0;
 	}
-
-	/* determine function to use, and calculate the oc dice */
-	if (wdie->aatyp == AT_NONE)
-	{//normal dice
-		if (wdie->adtyp == AD_PHYS)
-		{//normal dice
-			tmp += d(wdie->damn, wdie->damd);
-		}
-		else
-		{//assumed to be lucky dice, which at this time don't have a nice NdX function
-			for (int n = wdie->damn; n; n--)
-			{
-				tmp += youdefend ?
-					(rnl(wdie->damd) + 1) :
-					(wdie->damd - rnl(wdie->damd));
-			}
+	/* determine function to use */
+	if (!wdie->exploding && !wdie->lucky) {
+		/* standard dice */
+		tmp += d(n, x);
+	}
+	else if (wdie->exploding && !wdie->lucky) {
+		/* exploding non-lucky dice */
+		tmp += exploding_d(n, x, wdie->explode_amt);
+	}
+	else if (!wdie->exploding && wdie->lucky) {
+		/* lucky non-exploding dice */
+		int i;
+		for (i = n; i; i--)
+		{
+			tmp += youdef ?
+				(rnl(x) + 1) :
+				(x - rnl(x));
 		}
 	}
-	else
-	{//assumed to be exploding dice
-		int m = wdie->aatyp - AT_EXPL;
-
-		if (wdie->adtyp == AD_PHYS)
-		{//exploding dice
-			tmp += exploding_d(wdie->damn, wdie->damd, m);
-		}
-		else
-		{//lucky exploding dice
-			tmp = youdefend ?
-				unlucky_exploding_d(wdie->damn, wdie->damd, m) :
-				lucky_exploding_d(wdie->damn, wdie->damd, m);
-		}
+	else if (wdie->exploding && wdie->lucky) {
+		/* EXTEMELY POTENT exploding lucky dice */
+		tmp += (youdef ? unlucky_exploding_d : lucky_exploding_d)(n, x, wdie->explode_amt);
 	}
 	return tmp;
 }
@@ -894,8 +893,8 @@ int spec;
 	/* increase die sizes by 2 if Marionette applies*/
 	if (spec & SPEC_MARIONETTE)
 	{
-		wdice.oc.damd += 2;
-		wdice.bon.damd += 2;
+		wdice.oc_damd += 2;
+		wdice.bon_damd += 2;
 	}
 
 	/* special cases of otyp not covered by dmgval_core:
@@ -920,8 +919,8 @@ int spec;
 			/* modify wdice's bonus die and apply it */
 			// bonus 1d4 vs small
 			// bonus 1d3 vs large
-			wdice.bon.damn = 1;
-			wdice.bon.damd = max(2, ((bigmonst(ptr) ? 3 : 4) + 2 * (otmp->objsize - MZ_MEDIUM + !!(spec & SPEC_MARIONETTE))));
+			wdice.bon_damn = 1;
+			wdice.bon_damd = max(2, ((bigmonst(ptr) ? 3 : 4) + 2 * (otmp->objsize - MZ_MEDIUM + !!(spec & SPEC_MARIONETTE))));
 			// doubled enchantment
 			spe_mult *= 2;
 		}
@@ -931,16 +930,14 @@ int spec;
 		if (otmp2 && otmp2->otyp == MIRRORBLADE)
 		{// clashing mirrorblades are quite deadly
 			// 2 dice, exploding, with a flat explosion bonus of the average of attacker's and defender's weapons
-			wdice.oc.aatyp = AT_EXPL + (otmp2->spe + otmp->spe) / 2;
-			wdice.oc.damn = 2;
+			wdice.exploding = TRUE;
+			wdice.explode_amt = max(0, (otmp2->spe + otmp->spe) / 2);
+			wdice.oc_damn = 2;
 		}
 		else
 		{// if the defender's weapon would be stronger than the mirrorblade, use that instead
 			/* calculate what the normal damage dice would be */
-			int hyp = 0;
-			hyp += weapon_dmg_roll(&(wdice.oc), youdefend);
-			hyp += weapon_dmg_roll(&(wdice.bon), youdefend);
-			hyp += wdice.flat;
+			int hyp = weapon_dmg_roll(&wdice, youdefend);
 
 			/* calculate what the mirrored damage dice would be */
 			int mir = 0;
@@ -949,13 +946,11 @@ int spec;
 			(void) dmgval_core(&mirdice, bigmonst(ptr), otmp2, 0);	//note: dmgval_core handles zero weapons gracefully
 			if (spec & SPEC_MARIONETTE)
 			{
-				mirdice.oc.damd += 2;
-				mirdice.bon.damd += 2;
+				mirdice.oc_damd += 2;
+				mirdice.bon_damd += 2;
 			}
 			/* find the damage from those dice */
-			mir += weapon_dmg_roll(&(mirdice.oc), youdefend);
-			mir += weapon_dmg_roll(&(mirdice.bon), youdefend);
-			mir += mirdice.flat;
+			mir += weapon_dmg_roll(&mirdice, youdefend);
 			mir += otmp2->spe;	/* also adds enchantment of the copied weapon */
 
 			/* use the better */
@@ -988,7 +983,7 @@ int spec;
 		// damage die is increased by 3x the enchantment of the hammer when charged
 		if (otmp->ovar1)
 		{
-			wdice.oc.damd += 3 * (otmp->spe);
+			wdice.oc_damd += 3 * (otmp->spe);
 			// drain charge on future-tech powered weapons
 			otmp->ovar1--;
 		}
@@ -1014,10 +1009,10 @@ int spec;
 		if((otmp == uwep && !u.twoweap) || (mcarried(otmp) && otmp->owornmask&W_WEP))
 		{
 			// doubled
-			wdice.oc.damn *= 2;
-			wdice.oc.damd *= 2;
-			wdice.bon.damn *= 2;
-			wdice.bon.damd *= 2;
+			wdice.oc_damn *= 2;
+			wdice.oc_damd *= 2;
+			wdice.bon_damn *= 2;
+			wdice.bon_damd *= 2;
 			spe_mult *= 2;
 	    }
 		// drain charge on future-tech powered weapons
@@ -1034,17 +1029,15 @@ int spec;
 			/* modify wdice */
 			// 1 additional main die
 			// plus a 1d4 bonus die
-			wdice.oc.damn += 1;
-			wdice.bon.damn = 1;
-			wdice.bon.damd = 4;
+			wdice.oc_damn += 1;
+			wdice.bon_damn = 1;
+			wdice.bon_damd = 4;
 		}
 		break;
 	case ART_ATMA_WEAPON:
 		/* damage is multiplied % of health remaining (currently only implemented for the player) */
 		/* calculate damage normally */
-		tmp += weapon_dmg_roll(&(wdice.oc), youdefend);
-		tmp += weapon_dmg_roll(&(wdice.bon), youdefend);
-		tmp += wdice.flat;
+		tmp += weapon_dmg_roll(&wdice, youdefend);
 		/* apply the multiplier, if applicable */
 		if (otmp == uwep &&	!Drain_resistance)
 		{
@@ -1064,9 +1057,7 @@ int spec;
 	if (add_dice)
 	{//true, unless overridden by a special case above (mirrorblades, Atma Weapon)
 		/* find the damage from those dice */
-		tmp += weapon_dmg_roll(&(wdice.oc), youdefend);
-		tmp += weapon_dmg_roll(&(wdice.bon), youdefend);
-		tmp += wdice.flat;
+		tmp += weapon_dmg_roll(&wdice, youdefend);
 		/* cannot be negative */
 		if (tmp < 0)
 			tmp = 0;
@@ -1090,19 +1081,19 @@ int spec;
 		else if (u.fightingForm == FFORM_ATARU && u.lastmoved + 1 >= monstermoves && (!uarm || is_light_armor(uarm))){
 			switch (min(P_SKILL(FFORM_ATARU), P_SKILL(weapon_type(otmp)))){
 			case P_BASIC:
-				tmp += d(2, wdice.oc.damd);
+				tmp += d(2, wdice.oc_damd);
 				if (otmp->altmode){ //Probably just the Annulus
 					tmp += d(2, 3);
 				}
 				break;
 			case P_SKILLED:
-				tmp += d(4, wdice.oc.damd);
+				tmp += d(4, wdice.oc_damd);
 				if (otmp->altmode){ //Probably just the Annulus
 					tmp += d(4, 3);
 				}
 				break;
 			case P_EXPERT:
-				tmp += d(6, wdice.oc.damd);
+				tmp += d(6, wdice.oc_damd);
 				if (otmp->altmode){ //Probably just the Annulus
 					tmp += d(6, 3);
 				}
