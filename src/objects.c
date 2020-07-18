@@ -11,6 +11,7 @@
 #define O_MAGIC(x)		C05(x)
 #define O_UNIQ(x)		C07(x)
 #define O_NOWISH(x)		C08(x)
+#define O_DTYPE(x)		C11(x)
 #define O_MAT(x)		C12(x)
 #define O_MATSPEC(x)	C13(x)
 #define O_POWER(x)		C15(x)
@@ -1437,10 +1438,6 @@ WAND((char *)0,        "jeweled",        0, 150, 1, 0,         IRON,        HI_M
 	    OBJ(name,desc), \
 	    BITS(kn,1,0,0,mgc,0,0,0,MZ_TINY,HARDGEM(mohs),WHACK,-P_SLING,glass,0), 0, \
 		GEM_CLASS, prob, 0, wt, gval, sdam, ldam, hitbon, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
-#define FLINT(name,desc,kn,prob,wt,gval,sdam,ldam,hitbon,mgc,nutr,mohs,glass,color,...) OBJECT( \
-	    OBJ(name,desc), \
-	    BITS(kn,1,0,0,mgc,0,0,0,MZ_TINY,HARDGEM(mohs),SLASH,-P_SLING,glass,0), 0, \
-		GEM_CLASS, prob, 0, wt, gval, sdam, ldam, hitbon, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
 GEM("magicite crystal","brilliant blue",1, 1, 9999, 15, 11, GEMSTONE, CLR_BRIGHT_BLUE),/*Needs tile*/
 GEM("dilithium crystal", "white",      2,  1, 4500, 15,  5, GEMSTONE, CLR_WHITE),
 GEM("diamond", "white",                3,  1, 4000, 15, 10, GEMSTONE, CLR_WHITE),
@@ -1491,7 +1488,7 @@ GEM("worthless piece of violet glass", "violet", 77, 1, 0, 6, 5, GLASS, CLR_MAGE
 ROCK("luckstone", "gray",	0, 10,   1, 60, 6, 6, 20, 1, 10, 7, MINERAL, CLR_GRAY),
 ROCK("loadstone", "gray",	0, 10, 500,  1,30,30, -5, 1, 10, 6, MINERAL, CLR_GRAY),
 ROCK("touchstone", "gray",	0,  8,   1, 45, 6, 6,  0, 1, 10, 6, MINERAL, CLR_GRAY),
-FLINT("flint", "gray",		0, 10,   1,  1, 6, 6,  2, 0, 10, 7, MINERAL, CLR_GRAY),
+ROCK("flint", "gray",		0, 10,   1,  1, 6, 6,  2, 0, 10, 7, MINERAL, CLR_GRAY, O_DTYPE(SLASH)),	/* does slashing damage, not blunt */
 ROCK("chunk of unrefined mithril", "silvery metal", 
 							0,  0,   1, 10000,3,3, 3, 0, 0, 10, MITHRIL, HI_MITHRIL),/*Needs tile*/
 ROCK("chunk of fossil dark", "black",
