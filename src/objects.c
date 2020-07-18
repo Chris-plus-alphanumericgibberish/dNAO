@@ -1110,13 +1110,11 @@ WEPTOOL("unicorn horn", (char *)0,
 WEPTOOL("spoon", (char *)0, /*Needs encyc entry*//*Needs tile*/
 	1,   MZ_TINY, 0, 0, 0,   1,   1,  1,  1,  0,  PIERCE,        P_KNIFE, IRON, HI_METAL),
 
-/* two special unique artifact "tools" */
-OBJECT(OBJ("Candelabrum of Invocation", "candelabrum"),
-		BITS(0,0,1,0,1,0,1,1,MZ_SMALL,0,0,P_NONE,GOLD,0), 0,
-		TOOL_CLASS, 0, 0,10, 5000, 0, 0, 0, 0, 0, 200, HI_GOLD),
-OBJECT(OBJ("Bell of Opening", "bell"),
-		BITS(0,0,1,0,1,1,1,1,MZ_TINY,0,0,P_NONE,SILVER,UNIDED), 0,
-		TOOL_CLASS, 0, 0,10, 5000, 0, 0, 0, 0, 0, 50, HI_SILVER),
+/* two special unique artifact tools */
+TOOL("Candelabrum of Invocation", "candelabrum", 0, MZ_SMALL, 0, 1, 0, 0, 10, 5000, GOLD, HI_GOLD,
+	O_USKWN(1), O_UNIQ(1), O_NOWISH(1), O_NUT(200)),
+TOOL("Bell of Opening",           "bell",        0,  MZ_TINY, 0, 1, 1, 0, 10, 5000, SILVER, HI_SILVER,
+	O_USKWN(1), O_UNIQ(1), O_NOWISH(1), O_MATSPEC(UNIDED), O_NUT(50)),
 #undef TOOL
 #undef WEPTOOL
 
