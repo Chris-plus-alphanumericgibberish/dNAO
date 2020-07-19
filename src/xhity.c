@@ -15075,7 +15075,8 @@ android_combo()
 
 		/* attack (melee twice OR throw lightsaber) */
 		if (!mdef) {
-			projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+			if(uwep)
+				projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 		}
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -15090,7 +15091,7 @@ android_combo()
 			int k;
 			/* get direction */
 			a = getdir((char *)0);
-			if (a){
+			if (a && !u.dz){
 				/* get defender */
 				if (u.ustuck && u.uswallow)
 					mdef = u.ustuck;
@@ -15098,7 +15099,8 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee once OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+					if(uwep)
+						projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -15106,7 +15108,7 @@ android_combo()
 				}
 			}
 			k = dokick();
-			if (a || k){
+			if ((a && !u.dz) || k){
 				u.uen--;
 			}
 			else return TRUE;
@@ -15114,7 +15116,7 @@ android_combo()
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
 			int j = jump(1);
 			int d = getdir((char *)0);
-			if (!j && !d)
+			if (!j && (!d || u.dz))
 				return TRUE;
 			u.uen--;
 			flags.botl = 1;
@@ -15126,7 +15128,8 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee twice OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+					if(uwep)
+						projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -15149,7 +15152,7 @@ android_combo()
 
 		while (n > 0 && u.uen > 0){
 			/* get direction of attack; if first time, cancelling will take no time */
-			if (!getdir((char *)0))
+			if (!getdir((char *)0) || u.dz)
 				return attacked;
 			/* things that only occur in the first 'attack' of the combo */
 			if (!attacked) {
@@ -15184,7 +15187,7 @@ android_combo()
 	}
 	else if (objects[uwep->otyp].oc_skill == P_WHIP){ //!uwep handled above
 		/* get direction of attack */
-		if (!getdir((char *)0))
+		if (!getdir((char *)0) || u.dz)
 			return FALSE;
 		/* fast weapons give you speed */
 		if (fast_weapon(uwep))
@@ -15270,7 +15273,7 @@ android_combo()
 	}
 	else if (!bimanual(uwep, youracedata)){ //!uwep handled above
 		/* get direction of attack */
-		if (!getdir((char *)0))
+		if (!getdir((char *)0) || u.dz)
 			return FALSE;
 		/* fast weapons give you speed */
 		if (fast_weapon(uwep))
@@ -15311,7 +15314,7 @@ android_combo()
 				flags.botl = 1;
 				if (uwep){
 					/* get direction of attack */
-					if (!getdir((char *)0))
+					if (!getdir((char *)0) || u.dz)
 						return TRUE;
 					/* Lunge in indicated direction */
 					if(!u.ustuck && !u.utrap && goodpos(u.ux+u.dx, u.uy+u.dy, &youmonst, 0)){
@@ -15341,7 +15344,7 @@ android_combo()
 	else if (bimanual(uwep, youracedata)){ //!uwep handled above
 		int i, j;
 		/* get direction of attack */
-		if (!getdir((char *)0))
+		if (!getdir((char *)0) || u.dz)
 			return FALSE;
 		/* fast weapons give you speed */
 		if (fast_weapon(uwep))
