@@ -956,7 +956,8 @@ int spec;
 			mir += weapon_dmg_roll(&(mirdice.oc), youdefend);
 			mir += weapon_dmg_roll(&(mirdice.bon), youdefend);
 			mir += mirdice.flat;
-			mir += otmp2->spe;	/* also adds enchantment of the copied weapon */
+			if(otmp2)
+				mir += otmp2->spe;	/* also adds enchantment of the copied weapon */
 
 			/* use the better */
 			tmp += max(hyp, mir);
