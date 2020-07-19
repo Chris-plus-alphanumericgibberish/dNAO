@@ -844,7 +844,7 @@ moveloop()
 			if(u.umoved){
 				youmonst.movement -= 3;
 			} else {
-				u.ucspeed = NORMAL_SPEED;
+				u.ucspeed = NORM_CLOCKSPEED;
 				youmonst.movement -= NORMAL_SPEED;
 			}
 		} else youmonst.movement -= NORMAL_SPEED;
