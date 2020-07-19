@@ -9801,6 +9801,21 @@ living_items()
 			HANDLE_SECRETIONS
 		}
 	}
+	struct trap *ttmp;
+	for(ttmp = ftrap; ttmp; ttmp = ttmp->ntrap) {
+		if((obj = ttmp->ammo)){
+			if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
+				nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
+				nblast->nblast = blast_list;
+				nblast->spe = obj->spe;
+				blast_list = nblast;
+			}
+			if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
+				whisper++;
+			}
+			HANDLE_SECRETIONS
+		}
+	}
 	
 	for(nblast = blast_list; nblast; nblast = nblast->nblast){
 		do_item_blast(nblast->spe);
