@@ -1060,7 +1060,7 @@ OBJECT:'!',"full healing", contained, cursed, 0
 OBJECT:'[',"orcish cloak", (53,10), cursed, 2,"The Mantle of Wrath"
 
 CONTAINER: '(', "chest", (23,03)
-OBJECT:'#',"unholy-armor +1 iron helmet", contained
+OBJECT:'#',"unholy-armor +4 iron helmet", contained
 OBJECT:'#',"blessed fixed helmet", contained
 OBJECT:'[',"archaic helm", contained
 OBJECT:'#',"tiny holy-armor +3 silver helm", contained
@@ -1070,7 +1070,7 @@ OBJECT:'#',"gemstone band", contained
 OBJECT:'[',"high-elven helm", contained
 
 CONTAINER: '(', "chest"  , (24,04)
-OBJECT:'#',"unholy-armor +1 iron plate mail", contained
+OBJECT:'#',"unholy-armor +4 iron plate mail", contained
 OBJECT:'#',"blessed fixed gentlewoman's dress", contained
 OBJECT:'[',"archaic plate mail", contained
 OBJECT:'[',"crystal plate mail", contained
@@ -1080,7 +1080,7 @@ OBJECT:'[',"elven toga", contained, blessed, +3
 OBJECT:'[',"high-elven plate", contained
 
 CONTAINER: '(', "chest"  , (25,04)
-OBJECT:'#',"unholy-armor +1 iron gauntlets", contained
+OBJECT:'#',"unholy-armor +4 iron gauntlets", contained
 OBJECT:'#',"blessed fixed iron gauntlets", contained
 OBJECT:'[',"crystal gauntlets", contained
 OBJECT:'#',"tiny holy-armor holy-weapon +3 silver gauntlets of power", contained
@@ -1103,14 +1103,14 @@ OBJECT:'#',"mithril wrathful elven broadsword", contained
 OBJECT:'#',"blessed fixed +3 elven bow", contained
 
 CONTAINER: '(', "chest"  , (56,08)
-OBJECT:'#',"unholy-armor +1 iron kite shield", contained
+OBJECT:'#',"unholy-armor +4 iron kite shield", contained
 OBJECT:'#',"blessed fixed iron kite shield", contained
 OBJECT:'[',"roundshield", contained
 OBJECT:'[',"crystal shield", contained
 OBJECT:'#',"mithril elven shield", contained
 
 CONTAINER: '(', "chest"  , (55,08)
-OBJECT:'#',"unholy-armor +1 iron armored boots", contained
+OBJECT:'#',"unholy-armor +4 iron armored boots", contained
 OBJECT:'#',"blessed fixed iron armored boots", contained
 OBJECT:'[',"archaic boots", contained
 OBJECT:'#',"tiny holy-armor holy-weapon +3 silver armored boots", contained
