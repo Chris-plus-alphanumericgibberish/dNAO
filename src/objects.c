@@ -1355,7 +1355,7 @@ POTION("goat's milk", "black",          1, 0,          0,  900, CLR_BLACK),
 POTION("space mead", "golden",          1, 0,          0,  900, CLR_YELLOW),
 POTION("starlight", "dimly-shining",    1, 0,          4,  250, CLR_BRIGHT_CYAN),
 POTION("water", "clear",                0, 0,          80, 100, CLR_CYAN),
-POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
+POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED, O_USKWN(1)),	/* each potion of blood must be ID-ed */
 #undef POTION
 
 /* scrolls ... */
