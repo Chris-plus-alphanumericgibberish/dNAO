@@ -9987,6 +9987,7 @@ register int otyp;
 						break;
 					case 8:
 						add_oprop(otmp, OPROP_UNHYW);
+						curse(otmp);
 						break;
 					}
 				}
