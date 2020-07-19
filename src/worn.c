@@ -1746,7 +1746,7 @@ struct obj *obj;
 	{
 		/* gloves */
 	case GAUNTLETS_OF_POWER:
-		return 2;
+		return 8;
 		break;
 	case GAUNTLETS_OF_DEXTERITY:
 		return (obj->spe / 2);
