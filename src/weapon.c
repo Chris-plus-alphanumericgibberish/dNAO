@@ -1663,6 +1663,11 @@ register struct monst *mtmp;
 		!attacktype(mtmp->data, AT_DEVA))
 		return (struct obj *)0;
 
+	/* if using an artifact or oprop weapon keep using it. */
+	otmp = MON_WEP(mtmp);
+	if(otmp && (otmp->oartifact || !check_oprop(otmp, OPROP_NONE)))
+		return otmp;
+	
 	/* prefer artifacts to everything else */
 	for(otmp=mtmp->minvent; otmp; otmp = otmp->nobj) {
 		if (/* valid weapon */
@@ -1714,7 +1719,40 @@ register struct monst *mtmp;
 	/* needs to be capable of wielding a weapon in the offhand */
 	if (!attacktype(mtmp->data, AT_XWEP))
 		return (struct obj *)0;
-
+	
+	/* if using an artifact or oprop weapon keep using it. */
+	otmp = MON_SWEP(mtmp);
+	if(otmp && (otmp->oartifact || !check_oprop(otmp, OPROP_NONE)))
+		return otmp;
+	
+	/* prefer artifacts to everything else */
+	for(otmp=mtmp->minvent; otmp; otmp = otmp->nobj) {
+		if (/* valid weapon */
+			(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
+			|| otmp->otyp == CHAIN || otmp->otyp == HEAVY_IRON_BALL
+			) &&
+			/* not already weided in main hand */
+			(otmp != MON_WEP(mtmp)) &&
+			/* an artifact or other special weapon*/
+			(otmp->oartifact || !check_oprop(otmp, OPROP_NONE)) &&
+			/* never uncharged lightsabers */
+            (!is_lightsaber(otmp) || otmp->age
+			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
+			 || otmp->otyp == KAMEREL_VAJRA
+            ) &&
+			/* never ammo or missiles */
+			!(is_ammo(otmp) || is_missile(otmp)) &&
+			/* never untouchable artifacts */
+			(touch_artifact(otmp, mtmp, 0)) &&
+			/* never too-large for available hands */
+			(!bimanual(otmp, mtmp->data)) &&
+			/* never a hated weapon */
+			(mtmp->misc_worn_check & W_ARMG || !hates_silver(mtmp->data) || otmp->obj_material != SILVER) &&
+			(mtmp->misc_worn_check & W_ARMG || !hates_iron(mtmp->data) || otmp->obj_material != IRON) &&
+			(mtmp->misc_worn_check & W_ARMG || !hates_unholy_mon(mtmp) || !is_unholy(otmp))
+			) return otmp;
+	}
+	
 	if(is_giant(mtmp->data))	/* giants just love to use clubs */
 		Oselect(CLUB, W_SWAPWEP);
 
