@@ -1692,13 +1692,29 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
 		}
 
-		/* if twoweaponing, make an xwep attack after each weap attack, if it isn't in the inherent attack chain */
-		if (!by_the_book && *indexnum > 0 && (prev_res[1] != MM_MISS) && prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP && u.twoweap) {
-			fromlist = FALSE;
-			attk->aatyp = AT_XWEP;
-			attk->adtyp = AD_PHYS;
-			attk->damn = 1;
-			attk->damd = 4;
+		/* if twoweaponing... */
+		if (!by_the_book && *indexnum > 0 && (prev_res[1] != MM_MISS) && u.twoweap) {
+			/* follow weapon attacks with offhand attacks */
+			if (prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP) {
+				fromlist = FALSE;
+				attk->aatyp = AT_XWEP;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 4;
+			}
+			/* fixup for black web, which replaces AT_WEAP with an AT_SRPR */
+			/* subout is used to tell if we want to add another attack this time */
+			if ((u.specialSealsActive & SEAL_BLACK_WEB)
+				&& ((*subout) & SUBOUT_XWEP)
+				&& prev_attack.aatyp == AT_SRPR && attk->aatyp != AT_XWEP
+				) {
+				fromlist = FALSE;
+				attk->aatyp = AT_XWEP;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 4;
+				(*subout) &= ~SUBOUT_XWEP;
+			}
 		}
 	}
 
@@ -1993,11 +2009,16 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if (youagr && u.specialSealsActive&SEAL_BLACK_WEB && !by_the_book) {
 		if ((attk->aatyp == AT_WEAP && !uwep) ||
 			(attk->aatyp == AT_XWEP && !uswapwep && u.twoweap)) {
+			/* for mainhand attacks, flag that we want to make an offhand attack next */
+			if (attk->aatyp == AT_WEAP && u.twoweap && !uswapwep)
+				(*subout) |= SUBOUT_XWEP;
+
 			/* replace the attack */
 			attk->aatyp = AT_SRPR;
 			attk->adtyp = AD_SHDW;
 			attk->damn = 4;
 			attk->damd = 8;
+
 			/* this is applied to all acceptable attacks; no subout marker is necessary */
 		}	
 	}
