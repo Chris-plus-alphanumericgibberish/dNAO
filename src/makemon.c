@@ -6661,6 +6661,16 @@ register struct	monst	*mtmp;
 				fix_object(otmp);
 			    (void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_SWORD_ARCHON){
+				if(In_mordor_quest(&u.uz) 
+					&& !In_mordor_forest(&u.uz)
+					&& !Is_ford_level(&u.uz)
+					&& !In_mordor_fields(&u.uz)
+					&& in_mklev
+				){
+					(void)mongets(mtmp, SHACKLES);
+					mtmp->entangled = SHACKLES;
+					return;
+				} //else
 				otmp = mksobj(ROBE, FALSE, FALSE);
 				bless(otmp);
 				otmp->oerodeproof = TRUE;
