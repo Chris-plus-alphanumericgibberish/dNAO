@@ -3389,6 +3389,7 @@ register struct monst *mtmp;
 				otmp->spe = 7;
 				set_material_gm(otmp, WOOD);
 				bless(otmp);
+				(void) mpickobj(mtmp, otmp);
 				(void)mongets(mtmp, BELL);
 			} else if(ptr->mtyp == PM_GWYNHARWYF){
 				(void)mongets(mtmp, CLOAK);
