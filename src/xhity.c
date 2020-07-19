@@ -15332,9 +15332,9 @@ android_combo()
 					else {
 						vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 						xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
-						if(!DEADMONSTER(mdef))
-						xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 					}
+					if(uwep)
+						projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 			}
 			else return TRUE;
@@ -15383,8 +15383,8 @@ android_combo()
 			for (i = 0; i < 8; i++)
 			if (xdir[i] == u.dx && ydir[i] == u.dy)
 				break;
-			/* attack counterclockwise, hitting first direction twice (first and last hits) */
-			for (j = 8; j >= 0; j--){
+			/* attack clockwise, hitting first direction twice (first and last hits) */
+			for (j = 0; j <= 8; j++){
 				if (u.ustuck && u.uswallow)
 					mdef = u.ustuck;
 				else
@@ -15400,21 +15400,25 @@ android_combo()
 			youmonst.movement -= 3;
 		}
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
-			if (dofire()){
-				u.uen--;
-				flags.botl = 1;
-				/* get defender */
+			if (!getdir((char *)0) || u.dz)
+				return TRUE;
+			/* attack counterclockwise, hitting first direction once (and then throw) */
+			for (j = 8; j > 0; j--){
 				if (u.ustuck && u.uswallow)
 					mdef = u.ustuck;
 				else
-					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
-				/* attack (once) */
-				if (mdef) {
+					mdef = m_at(u.ux + xdir[(i + j) % 8], u.uy + ydir[(i + j) % 8]);
+				/* isn't that nice, we don't attack pets (even when confused?) */
+				if (mdef && !mdef->mtame){
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 				}
 			}
-			else return TRUE;
+			if(uwep)
+				projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+			u.uen--;
+			flags.botl = 1;
+			youmonst.movement -= 3;
 		}
 		return TRUE;
 	}
