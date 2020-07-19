@@ -2008,7 +2008,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	/* players with the Black Web Entity bound replace unarmed punches with shadow-blade attacks */
 	if (youagr && u.specialSealsActive&SEAL_BLACK_WEB && !by_the_book) {
 		if ((attk->aatyp == AT_WEAP && !uwep) ||
-			(attk->aatyp == AT_XWEP && !uswapwep && u.twoweap)) {
+			(attk->aatyp == AT_XWEP && !uswapwep && u.twoweap) ||
+			(attk->aatyp == AT_MARI && !is_android(youracedata))	/* (andr/gyn)oids' mari attacks are psi-held, not actual arms */
+			){
 			/* for mainhand attacks, flag that we want to make an offhand attack next */
 			if (attk->aatyp == AT_WEAP && u.twoweap && !uswapwep)
 				(*subout) |= SUBOUT_XWEP;
