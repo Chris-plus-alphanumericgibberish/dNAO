@@ -81,6 +81,7 @@ int adtyp, olet;
 		case AD_ELEC: return "bolt of lightning";
 		case AD_DRST: return "poison spray";
 		case AD_ACID: return "acid splash";
+		case AD_STAR: return "stream of silver stars";
 		default:      impossible("unknown spell damage type in flash_type: %d", adtyp);
 		}
 		break;
@@ -149,6 +150,7 @@ int adtyp;
 		//	return CLR_BRIGHT_CYAN;
 	case AD_COLD:
 	case AD_ELEC:
+	case AD_STAR:
 		return CLR_WHITE;
 	case AD_DRLI:
 		return CLR_MAGENTA;
@@ -3656,6 +3658,13 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		if (!rn2(6)) erode_armor(mon, TRUE);
 		break;
 
+	case AD_STAR:
+		if(!flat) tmp = d(nd,6);
+		else tmp = flat;
+		if(hates_silver(mon->data))
+			tmp += d(nd/3, 20);
+		break;
+
 	default:
 		impossible("unaccounted for damage type in zhitm: %d", adtyp);
 	}
@@ -3932,6 +3941,24 @@ xchar sx, sy;
 				if (flags.drgn_brth || !rn2(6)) erode_armor(&youmonst, TRUE);
 			} else dam = dam/2+1;
 	    }
+	break;
+
+	case AD_STAR:
+		if(!flat) dam = d(nd,6);
+		else dam = flat;
+		if(hates_silver(youracedata)) {
+			if (noncorporeal(youracedata)) {
+				pline("The silver sears you!");
+			}
+			else {
+				pline("The silver sears your %s!", body_part(BODY_FLESH));
+			}
+			dam += d(nd/3, 20);
+		}
+	break;
+
+	default:
+		impossible("unhandled zap type in zhitu: %d", adtyp);
 	break;
 	}
 
