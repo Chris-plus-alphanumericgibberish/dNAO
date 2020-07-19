@@ -340,15 +340,6 @@ int otyp;
 	int dmod = 0;						/* die size modifier */
 	int spe_mult = 1;					/* multiplier for enchantment value */
 
-	int ocn = 1;
-	int ocd = 2;
-	int bonn = 0;
-	int bond = 0;
-	int flat = 0;
-	boolean lucky = FALSE;
-	boolean exploding = FALSE;
-	int explode_amt = 0;
-
 	/* use the otyp of the object called, if we have one */
 	if (obj)
 		otyp = obj->otyp;
@@ -357,19 +348,23 @@ int otyp;
 	 * just skip everything and only initialize wdice
 	 */
 	if (!otyp) {
-		(wdice->oc_damn) = ocn;
-		(wdice->oc_damd) = ocd;
-		(wdice->bon_damn) = bonn;
-		(wdice->bon_damd) = bond;
-		(wdice->flat) = flat;
-		(wdice->lucky) = lucky;
-		(wdice->exploding) = exploding;
-		(wdice->explode_amt) = explode_amt;
+		struct weapon_dice nulldice = {0};
+		*wdice = nulldice;
+		wdice->oc_damn = 1;
+		wdice->oc_damd = 2;
 		return 0;
 	}
 
-	/* grab ldie and sdie from the objclass definition */
-	ocd = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
+	/* grab dice from the objclass definition */
+	*wdice = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
+	int ocn =           (wdice->oc_damn);
+	int ocd =           (wdice->oc_damd);
+	int bonn =          (wdice->bon_damn);
+	int bond =          (wdice->bon_damd);
+	int flat =          (wdice->flat);
+	boolean lucky =     (wdice->lucky);
+	boolean exploding = (wdice->exploding);
+	int explode_amt =   (wdice->explode_amt);
 
 	/* set dmod, if possible*/
 	if (obj){
@@ -569,10 +564,6 @@ int otyp;
 	/* bonus dice */
 	switch (otyp)
 	{
-	case CROSSBOW_BOLT:			add(1); break;
-	case DROVEN_BOLT:			add(1); break;
-	case TRIDENT:				if(large){plus(2,4);} else {add(1);} break;
-	case BATTLE_AXE:			if(large){plus(2,4);} else {pls(4);} break;
 	case VIBROBLADE:			
 	case WHITE_VIBROSWORD:
 	case GOLD_BLADED_VIBROSWORD:
@@ -630,39 +621,10 @@ int otyp;
 	case MIRRORBLADE:			break;	// external special case: depends on defender's weapon
 	case RAPIER:				break;	// external special case: Silver Starlight vs plants
 	case RAKUYO:				break;	// external special case: wielded without twoweaponing
-	case BROADSWORD:			if(large){add(1);} else {pls(4);} break;
-	case ELVEN_BROADSWORD:		if(large){add(2);} else {pls(4);} break;
-	case CRYSTAL_SWORD:			if(large){pls(12);} else {pls(8);} break;
-	case TWO_HANDED_SWORD:		if(large){plus(2,6);} else {;} break;
-	case TSURUGI:				if(large){plus(2,6);} else {;} break;
-	case RUNESWORD:				if(large){add(1);} else {pls(4);} break;
-	case PARTISAN:				if(large){add(1);} else {;} break;
-	case RANSEUR:				pls(4); break;
-	case SPETUM:				if(large){pls(6);} else {add(1);} break;
-	case HALBERD:				if(large){pls(6);} else {;} break;
-	case BARDICHE:				if(large){plus(2,4);} else {pls(4);} break;
-	case VOULGE:				pls(4); break;
-	case DWARVISH_MATTOCK:		if(large){plus(2,6);} else {;} break;
-	case GUISARME:				if(large){;} else {pls(4);} break;
-	case BILL_GUISARME:			if(large){;} else {pls(4);} break;
-	case LUCERN_HAMMER:			if(large){;} else {pls(4);} break;
-	case BEC_DE_CORBIN:			if(large){;} else {;} break;
-	case SCYTHE:				if(large){pls(4);} else {pls(4);} break;
-	case MACE:					if(large){;} else {add(1);} break;
-	case ELVEN_MACE:			if(large){;} else {add(1);} break;
-	case MORNING_STAR:			if(large){add(1);} else {pls(4);} break;
-	case WAR_HAMMER:			if(large){;} else {add(1);} break;
+
 	case KAMEREL_VAJRA:			if(large){;} else {;} break;	// external special case: lightsaber forms, being unlit
-	case FLAIL:					if(large){pls(4);} else {add(1);} break;
 	case VIPERWHIP:				if(large){;} else {;} break;	// external special case: number of heads striking
-	case BULLET:				ocn++; flat += 4; break;
-	case SILVER_BULLET:			ocn++; flat += 4; break;
-	case SHOTGUN_SHELL:			ocn++; flat += 4; break;
-	case ROCKET:				ocn++; flat += 4; break;
-	case BLASTER_BOLT:			ocn += 2; flat += ocd; break;
-	case HEAVY_BLASTER_BOLT:	ocn += 2; flat += ocd; break;
-	case LASER_BEAM:			ocn += 2; flat += 10; break;
-	case CHAIN:					add(1); break;
+
 	case SEISMIC_HAMMER:		if (chrgd){ ocd *= 3; } break;
 	case ACID_VENOM:			if (obj&&obj->ovar1){ ocn = 0; flat = obj->ovar1; } else{ add(6); } break;
 	case LIGHTSABER:			spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ plus(3,3); } break;		// external special case: lightsaber forms

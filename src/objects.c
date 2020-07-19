@@ -11,15 +11,45 @@
 #define O_MAGIC(x)		C05(x)
 #define O_UNIQ(x)		C07(x)
 #define O_NOWISH(x)		C08(x)
-#define O_DTYPE(x)		C11(x)
+#define O_SIZE(x)		C09(x)
+#define O_SKILL(x)		C11(x)
 #define O_MAT(x)		C12(x)
 #define O_MATSPEC(x)	C13(x)
+#define O_DTYPE(x)		C14(x)
 #define O_POWER(x)		C15(x)
 #define O_DELAY(x)		C17(x)
 #define O_COLOR(x)		C18(x)
+#define O_PROB(x)		C19(x)
 #define O_WT(x)			C20(x)
 #define O_COST(x)		C21(x)
 #define O_NUT(x)		C27(x)
+
+/* setting damage dice in a non-awful way */
+#define DMG_(...) DMG__(__VA_ARGS__)
+#define DMG__(ocn, ocd, bonn, bond, flat) \
+						({ocn, ocd, bonn, bond, flat, 0, 0, 0})
+#define DMG(...)		DMG_(SET05(C01(1), C02(2), NWEPDICE(NARGS(__VA_ARGS__),__VA_ARGS__)))
+#define NWEPDICE(...)			NWEPDICE_(__VA_ARGS__)
+#define NWEPDICE_(N, ...)		NWEPDICE##N(NARGS(__VA_ARGS__),__VA_ARGS__)
+#define NWEPDICE03(...)			NWEPDICE03_(__VA_ARGS__)
+#define NWEPDICE02(...)			NWEPDICE02_(__VA_ARGS__)
+#define NWEPDICE01(...)			NWEPDICE01_(__VA_ARGS__)
+#define NWEPDICE03_(N, a, b, c)	PREFIXDICE##N##c, NWEPDICE02_(02, a, b)
+#define NWEPDICE02_(N, a, b)	PREFIXDICE##N##b, NWEPDICE01_(01, a)
+#define NWEPDICE01_(N, a)		PREFIXDICE##N##a
+#define PREFIXDICE01D(...)	OCDICE(NARGS(__VA_ARGS__), __VA_ARGS__)
+#define OCDICE(...)			OCDICE_(__VA_ARGS__)
+#define OCDICE_(N, ...)		OCDICE##N(__VA_ARGS__)
+#define OCDICE01(x)			C02(x)
+#define OCDICE02(n, x)		C01(n), C02(x)
+#define PREFIXDICE02D(...)	BONDICE(NARGS(__VA_ARGS__), __VA_ARGS__)
+#define BONDICE(...)		BONDICE_(__VA_ARGS__)
+#define BONDICE_(N, ...)	BONDICE##N(__VA_ARGS__)
+#define BONDICE01(x)		C03(1), C04(x)
+#define BONDICE02(n, x)		C03(n), C04(x)
+#define PREFIXDICE01F(x)	C05(x)
+#define PREFIXDICE02F(x)	C05(x)
+#define PREFIXDICE03F(x)	C05(x)
 
 #ifndef OBJECTS_PASS_2_
 /* first pass */
@@ -83,15 +113,15 @@ NEARDATA struct objclass objects[] = {
 #endif
 /* dummy object[0] -- description [2nd arg] *must* be NULL */
 	OBJECT(OBJ("strange object",(char *)0), BITS(1,0,0,0,0,0,0,0,0,0,0,P_NONE,0,0),
-			0, ILLOBJ_CLASS, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+			0, ILLOBJ_CLASS, 0, 0, 0, 0, {0}, {0}, 0, 0, 0, 0, 0),
 
 /* weapons ... */
-#define WEAPON(name,app,kn,mg,size,prob,wt,cost,sdam,ldam,hitbon,typ,sub,metal,shwmat,color,...) \
+#define WEAPON(name,app,sdam,ldam,kn,mg,size,prob,wt,cost,hitbon,typ,sub,metal,shwmat,color,...) \
 	OBJECT( \
 		OBJ(name,app), BITS(kn,mg,1,0,0,1,0,0,size,0,typ,sub,metal,shwmat), 0, \
 		WEAPON_CLASS, prob, 0, \
 		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color, __VA_ARGS__ )
-#define PROJECTILE(name,app,kn,prob,wt,cost,sdam,ldam,hitbon,metal,sub,color,...) \
+#define PROJECTILE(name,app,sdam,ldam,kn,prob,wt,cost,hitbon,metal,sub,color,...) \
 	OBJECT( \
 		OBJ(name,app), \
 		BITS(kn,1,1,0,0,1,0,0,MZ_TINY,0,PIERCE,sub,metal,0), 0, \
@@ -101,8 +131,8 @@ NEARDATA struct objclass objects[] = {
 	OBJECT( \
 		OBJ(name,app), BITS(kn,0,1,0,0,1,0,0,size,0,0,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
-		wt, cost, 0, 0, hitbon, WP_GENERIC, 0, wt, color )
-#define BULLET(name,app,kn,size,prob,wt,cost,sdam,ldam,hitbon,ammotyp,typ,metal,sub,color,...) \
+		wt, cost, { 0 }, { 0 }, hitbon, WP_GENERIC, 0, wt, color)
+#define BULLET(name,app,sdam,ldam,kn,size,prob,wt,cost,hitbon,ammotyp,typ,metal,sub,color,...) \
 	OBJECT( \
 		OBJ(name,app), BITS(kn,1,1,0,0,1,0,0,size,0,typ,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
@@ -111,7 +141,7 @@ NEARDATA struct objclass objects[] = {
 	OBJECT( \
 		OBJ(name,app), BITS(kn,0,1,0,0,1,0,0,size,0,0,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
-		wt, cost, range, rof, hitbon, ammotyp, 0, wt, color, __VA_ARGS__)
+		wt, cost, DMG(F(range)), DMG(F(rof)), hitbon, ammotyp, 0, wt, color, __VA_ARGS__)
 
 /* Note: for weapons that don't do an even die of damage (ex. 2-7 or 3-18)
  * the extra damage is added on in weapon.c, not here! */
@@ -123,272 +153,356 @@ NEARDATA struct objclass objects[] = {
 
 /* missiles */
 PROJECTILE("arrow", (char *)0,
-		1, 50, 1, 2, 6, 6, 0, IRON, -P_BOW, HI_METAL),
+		DMG(D(6)), DMG(D(6)),
+		1, 50, 1, 2,  0, IRON,   -P_BOW, HI_METAL),
 PROJECTILE("elven arrow", "runed arrow",
-		0, 18, 1, 2, 7, 5, 2, WOOD, -P_BOW, HI_WOOD),
+		DMG(D(7)), DMG(D(5)),
+		0, 18, 1, 2,  2, WOOD,   -P_BOW, HI_WOOD),
 PROJECTILE("orcish arrow", "crude arrow",
-		0, 18, 1, 2, 5, 8, -1, IRON, -P_BOW, CLR_BLACK),
+		DMG(D(5)), DMG(D(8)),
+		0, 18, 1, 2, -1, IRON,   -P_BOW, CLR_BLACK),
 PROJECTILE("silver arrow", (char *)0,
-		1, 12, 1, 5, 6, 6, 0, SILVER, -P_BOW, HI_SILVER),
+		DMG(D(6)), DMG(D(6)),
+		1, 12, 1, 5,  0, SILVER, -P_BOW, HI_SILVER),
 PROJECTILE("golden arrow", (char *)0, /*Needs encyc entry*//*Needs tile*/
-		1,  9, 2,10,13,13, 0, GOLD, -P_BOW, HI_GOLD),
+		DMG(D(13)), DMG(D(13)),
+		1,  9, 2,10,  0, GOLD,   -P_BOW, HI_GOLD),
 PROJECTILE("ancient arrow", (char *)0, /*Needs encyc entry*//*Needs tile*/
-		1,  0, 1,10,10,10, 0, METAL, -P_BOW, CLR_BLACK),
+		DMG(D(10)), DMG(D(10)),
+		1,  0, 1,10,  0, METAL,  -P_BOW, CLR_BLACK),
 PROJECTILE("ya", "bamboo arrow",
-		0, 15, 1, 4, 7, 7, 1, METAL, -P_BOW, HI_METAL),
+		DMG(D(7)), DMG(D(7)),
+		0, 15, 1, 4,  1, METAL,  -P_BOW, HI_METAL),
 PROJECTILE("crossbow bolt", (char *)0,
-		1, 55, 1, 2, 4, 6, 0, IRON, -P_CROSSBOW, HI_METAL),
+		DMG(D(4), F(1)), DMG(D(6), F(1)),
+		1, 55, 1, 2,  0, IRON,   -P_CROSSBOW, HI_METAL),
 PROJECTILE("droven bolt", "crossbow bolt", /*Needs encyc entry*/
-		0,  0, 1, 2, 9, 6, 2, OBSIDIAN_MT, -P_CROSSBOW, CLR_BLACK, O_MATSPEC(UNIDED)),
+		DMG(D(9), F(1)), DMG(D(6), F(1)),
+		0,  0, 1, 2,  2, OBSIDIAN_MT, -P_CROSSBOW, CLR_BLACK, O_MATSPEC(UNIDED)),
 
 WEAPON("dart", (char *)0,
-	1, 1,   MZ_TINY, 58,  1,  2,  3,  2, 0, P,   -P_DART, IRON, FALSE, HI_METAL),
+	DMG(D(3)), DMG(D(2)),
+	1, 1,   MZ_TINY, 58,  1,  2,  0, P,   -P_DART, IRON, FALSE, HI_METAL),
 WEAPON("shuriken", "throwing star",
-	0, 1,   MZ_TINY, 33,  1,  5,  8,  6, 2, P|S,   -P_SHURIKEN, IRON, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(6)),
+	0, 1,   MZ_TINY, 33,  1,  5,  2, P|S, -P_SHURIKEN, IRON, FALSE, HI_METAL),
 WEAPON("boomerang", (char *)0,
-	1, 1,  MZ_SMALL, 13,  5, 20,  9,  9, 0, B,   -P_BOOMERANG, WOOD, FALSE, HI_WOOD),
+	DMG(D(9)), DMG(D(9)),
+	1, 1,  MZ_SMALL, 13,  5, 20,  0, B,   -P_BOOMERANG, WOOD, FALSE, HI_WOOD),
 WEAPON("chakram", "circular blade", /*Needs encyc entry*//*Needs tile*/
-	1, 1,  MZ_SMALL,  6,  5, 20,  9,  9, 0, S,   -P_BOOMERANG, SILVER, IDED|UNIDED, HI_SILVER),
+	DMG(D(9)), DMG(D(9)),
+	1, 1,  MZ_SMALL,  6,  5, 20,  0, S,   -P_BOOMERANG, SILVER, IDED|UNIDED, HI_SILVER),
 WEAPON("spike", (char *)0, /*Needs encyc entry*/
-	1, 1,   MZ_TINY,  0,  1,  2,  3,  1, 0, P,   -P_DART, BONE, IDED|UNIDED, CLR_WHITE),
+	DMG(D(3)), DMG(D(1)),
+	1, 1,   MZ_TINY,  0,  1,  2,  0, P,   -P_DART, BONE, IDED|UNIDED, CLR_WHITE),
 
 /* spears */
 WEAPON("spear", (char *)0,
-	1, 0,  MZ_LARGE, 50, 25,  3,  6,  8, 0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(8)),
+	1, 0,  MZ_LARGE, 50, 25,  3,  0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
 WEAPON("elven spear", "runed spear",
-	0, 0,  MZ_LARGE, 10, 10,  3,  7,  7, 2, P,   P_SPEAR, WOOD, FALSE, HI_WOOD),
+	DMG(D(7)), DMG(D(7)),
+	0, 0,  MZ_LARGE, 10, 10,  3,  2, P,   P_SPEAR, WOOD, FALSE, HI_WOOD),
 WEAPON("droven spear", "long spear", /*Needs encyc entry*/
-	0, 0,   MZ_HUGE,  0, 15,  3, 12, 12, 2, P,   P_SPEAR, OBSIDIAN_MT, UNIDED, CLR_BLACK),
+	DMG(D(12)), DMG(D(12)),
+	0, 0,   MZ_HUGE,  0, 15,  3,  2, P,   P_SPEAR, OBSIDIAN_MT, UNIDED, CLR_BLACK),
 WEAPON("orcish spear", "crude spear",
-	0, 0,  MZ_LARGE, 13, 25,  3,  5,  10, -1, P,   P_SPEAR, IRON, FALSE, CLR_BLACK),
+	DMG(D(5)), DMG(D(10)),
+	0, 0,  MZ_LARGE, 13, 25,  3, -1, P,   P_SPEAR, IRON, FALSE, CLR_BLACK),
 WEAPON("dwarvish spear", "stout spear",
-	0, 0,  MZ_LARGE, 12, 30,  3,  9,  9, 0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
+	DMG(D(9)), DMG(D(9)),
+	0, 0,  MZ_LARGE, 12, 30,  3,  0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
 WEAPON("javelin", "throwing spear",
-	0, 1,  MZ_LARGE, 10, 20,  3,  6,  6, 0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(6)),
+	0, 1,  MZ_LARGE, 10, 20,  3,  0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
 
 WEAPON("trident", (char *)0, /*Needs encyc entry*/
-	1, 0,  MZ_LARGE,  8, 25,  5,  6,  4, 0, P,   P_TRIDENT, IRON, FALSE, HI_METAL),
-						/* +1 small, +2d4 large */
+	DMG(D(6), F(1)), DMG(D(3, 4)),
+	1, 0,  MZ_LARGE,  8, 25,  5,  0, P,   P_TRIDENT, IRON, FALSE, HI_METAL),
 
 /* blades */
 WEAPON("dagger", (char *)0,
-	1, 1,  MZ_SMALL, 24, 10,  4,  4,  3, 2, P,   P_DAGGER, IRON, FALSE, HI_METAL),
+	DMG(D(4)), DMG(D(3)),
+	1, 1,  MZ_SMALL, 24, 10,  4,  2, P,   P_DAGGER, IRON, FALSE, HI_METAL),
 WEAPON("elven dagger", "runed dagger",
-	0, 1,  MZ_SMALL,  7,  3,  4,  5,  3, 4, P,   P_DAGGER, WOOD, FALSE, HI_WOOD),
+	DMG(D(5)), DMG(D(3)),
+	0, 1,  MZ_SMALL,  7,  3,  4,  4, P,   P_DAGGER, WOOD, FALSE, HI_WOOD),
 WEAPON("droven dagger", "dagger", /*Needs encyc entry*/
-	0, 1,  MZ_SMALL,  0,  5,  12,  8,  6, 4, P,   P_DAGGER, OBSIDIAN_MT, UNIDED, CLR_BLACK),
+	DMG(D(8)), DMG(D(6)),
+	0, 1,  MZ_SMALL,  0,  5, 12,  4, P,   P_DAGGER, OBSIDIAN_MT, UNIDED, CLR_BLACK),
 WEAPON("orcish dagger", "crude dagger",
-	0, 1,  MZ_SMALL,  9, 10,  5,  3,  5, 1, P,   P_DAGGER, IRON, FALSE, CLR_BLACK),
+	DMG(D(3)), DMG(D(5)),
+	0, 1,  MZ_SMALL,  9, 10,  5,  1, P,   P_DAGGER, IRON, FALSE, CLR_BLACK),
 WEAPON("athame", (char *)0,
-	1, 1,  MZ_SMALL,  0, 10,  4,  4,  4, 2, S,   P_DAGGER, IRON, FALSE, HI_METAL),
+	DMG(D(4)), DMG(D(4)),
+	1, 1,  MZ_SMALL,  0, 10,  4,  2, S,   P_DAGGER, IRON, FALSE, HI_METAL),
 WEAPON("set of crow talons", "set of three feather-etched daggers",
-	0, 0,  MZ_SMALL,  0,  9,200,  4,  3, 2, S,   P_DAGGER, METAL, FALSE, HI_METAL),
+	DMG(D(4)), DMG(D(3)),
+	0, 0,  MZ_SMALL,  0,  9,200,  2, S,   P_DAGGER, METAL, FALSE, HI_METAL),
 WEAPON("tecpatl", "notched dagger",
-	0, 1,  MZ_SMALL,  0,  5,  12,  8,  6, 4, P,   P_DAGGER, OBSIDIAN_MT, FALSE, CLR_BLACK),
+	DMG(D(8)), DMG(D(6)),
+	0, 1,  MZ_SMALL,  0,  5, 12,  4, P,   P_DAGGER, OBSIDIAN_MT, FALSE, CLR_BLACK),
 WEAPON("scalpel", (char *)0,
-	1, 1,  MZ_SMALL,  0,  5,  6,  3,  1, 3, S,   P_KNIFE, METAL, FALSE, HI_METAL),
+	DMG(D(3)), DMG(D(1)),
+	1, 1,  MZ_SMALL,  0,  5,  6,  3, S,   P_KNIFE, METAL, FALSE, HI_METAL),
 WEAPON("knife", (char *)0,
-	1, 1,  MZ_SMALL, 14,  5,  4,  3,  2, 2, P|S, P_KNIFE, IRON, FALSE, HI_METAL),
+	DMG(D(5)), DMG(D(3)),
+	1, 1,  MZ_SMALL, 14,  5,  4,  2, P|S, P_KNIFE, IRON, FALSE, HI_METAL),
 WEAPON("stiletto", (char *)0,
-	1, 1,  MZ_SMALL,  4,  5,  4,  6,  2, 1, P, P_KNIFE, IRON, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(2)),
+	1, 1,  MZ_SMALL,  4,  5,  4,  1, P, P_KNIFE, IRON, FALSE, HI_METAL),
 WEAPON("worm tooth", (char *)0,
-	1, 0,  MZ_SMALL,  0, 20,  2,  2,  2, 0, P,   P_KNIFE, MINERAL, FALSE, CLR_WHITE),
+	DMG(D(2)), DMG(D(2)),
+	1, 0,  MZ_SMALL,  0, 20,  2,  0, P,   P_KNIFE, MINERAL, FALSE, CLR_WHITE),
 WEAPON("crysknife", (char *)0,
-	1, 0,  MZ_SMALL,  0, 20,100, 10, 10, 3, P,   P_KNIFE, MINERAL, FALSE, CLR_WHITE),
+	DMG(D(10)), DMG(D(10)),
+	1, 0,  MZ_SMALL,  0, 20,100,  3, P,   P_KNIFE, MINERAL, FALSE, CLR_WHITE),
 
 WEAPON("sickle", (char *)0, /* Vs plants: +6 to hit and double damage */
-	1, 1,  MZ_SMALL, 22, 20,  4,  4,  1, -2, S,   P_HARVEST, IRON, FALSE, HI_METAL),
+	DMG(D(4)), DMG(D(1)),
+	1, 1,  MZ_SMALL, 22, 20,  4, -2, S,   P_HARVEST, IRON, FALSE, HI_METAL),
 WEAPON("elven sickle", "runed sickle", /* Vs plants: +6 to hit and double damage *//*Needs tile*/
-	0, 1,  MZ_SMALL,  0,  5,  4,  6,  3,  0, S,   P_HARVEST, WOOD, FALSE, HI_WOOD),
+	DMG(D(6)), DMG(D(3)),
+	0, 1,  MZ_SMALL,  0,  5,  4,  0, S,   P_HARVEST, WOOD, FALSE, HI_WOOD),
 
 WEAPON("axe", (char *)0,
-	1, 0, MZ_MEDIUM, 20, 60,  8,  6,  4, 0, S,   P_AXE, IRON, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(4)),
+	1, 0, MZ_MEDIUM, 20, 60,  8,  0, S,   P_AXE, IRON, FALSE, HI_METAL),
 WEAPON("battle-axe", "double-bitted axe",/* was "double-headed" ? */
-	0, 0,   MZ_HUGE, 16,120, 40,  8,  6, 0, S,   P_AXE, IRON, FALSE, HI_METAL), /*+1d4/+2d4*/
+	DMG(D(8), D(4)), DMG(D(6), D(2,4)),
+	0, 0,   MZ_HUGE, 16,120, 40,  0, S,   P_AXE, IRON, FALSE, HI_METAL),
 WEAPON("moon axe", "two-handed axe", /*Needs encyc entry*//*Needs tile*/
-	0, 0,   MZ_HUGE, 12,160, 40,  6,  6, 0, S,   P_AXE, SILVER, UNIDED, HI_SILVER),
+	DMG(D(6)), DMG(D(6)),	/* die size modified by phase of moon */
+	0, 0,   MZ_HUGE, 12,160, 40,  0, S,   P_AXE, SILVER, UNIDED, HI_SILVER),
 
 /* swords */
 WEAPON("short sword", (char *)0,
-	1, 0,  MZ_SMALL,  8, 30, 10,  6,  8, 0, P,   P_SHORT_SWORD, IRON, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(8)),
+	1, 0,  MZ_SMALL,  8, 30, 10,  0, P,   P_SHORT_SWORD, IRON, FALSE, HI_METAL),
 WEAPON("elven short sword", "runed short sword",
-	0, 0,  MZ_SMALL,  2, 10, 10,  7,  7, 2, P,   P_SHORT_SWORD, WOOD, FALSE, HI_WOOD),
+	DMG(D(7)), DMG(D(7)),
+	0, 0,  MZ_SMALL,  2, 10, 10,  2, P,   P_SHORT_SWORD, WOOD, FALSE, HI_WOOD),
 WEAPON("droven short sword", "short sword", /*Needs encyc entry*/
-	0, 0,  MZ_SMALL,  0, 15, 10,  9,  9, 2, P,   P_SHORT_SWORD, OBSIDIAN_MT, UNIDED, CLR_BLACK),
+	DMG(D(9)), DMG(D(9)),
+	0, 0,  MZ_SMALL,  0, 15, 10,  2, P,   P_SHORT_SWORD, OBSIDIAN_MT, UNIDED, CLR_BLACK),
 WEAPON("orcish short sword", "crude short sword",
-	0, 0,  MZ_SMALL,  3, 30, 10,  5,  10, -1, P,   P_SHORT_SWORD, IRON, FALSE, CLR_BLACK),
+	DMG(D(5)), DMG(D(10)),
+	0, 0,  MZ_SMALL,  3, 30, 10, -1, P,   P_SHORT_SWORD, IRON, FALSE, CLR_BLACK),
 WEAPON("dwarvish short sword", "broad short sword",
-	0, 0,  MZ_SMALL,  2, 35, 10,  8,  7, 0, P|S,   P_SHORT_SWORD, IRON, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(7)),
+	0, 0,  MZ_SMALL,  2, 35, 10,  0, P|S, P_SHORT_SWORD, IRON, FALSE, HI_METAL),
 WEAPON("mirrorblade", "polished short sword",
-	1, 0,  MZ_SMALL,  0, 40,100,  6,  8, 0, P,   P_SHORT_SWORD, SILVER, FALSE, HI_SILVER),
+	DMG(D(6)), DMG(D(8)),
+	1, 0,  MZ_SMALL,  0, 40,100,  0, P,   P_SHORT_SWORD, SILVER, FALSE, HI_SILVER),
 
 WEAPON("scimitar", "curved sword",
-	0, 0, MZ_MEDIUM, 14, 40, 15,  8,  8, 0, S,   P_SCIMITAR, IRON, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(8)),
+	0, 0, MZ_MEDIUM, 14, 40, 15,  0, S,   P_SCIMITAR, IRON, FALSE, HI_METAL),
 WEAPON("high-elven warsword", "runed curved sword",
-	0, 0, MZ_MEDIUM,  1, 20,150, 10, 10, 2, S,   P_SCIMITAR, MITHRIL, UNIDED, HI_MITHRIL),
+	DMG(D(10)), DMG(D(10)),
+	0, 0, MZ_MEDIUM,  1, 20,150,  2, S,   P_SCIMITAR, MITHRIL, UNIDED, HI_MITHRIL),
 WEAPON("rapier", (char *)0,
-	1, 0, MZ_MEDIUM,  6, 28, 20,  6,  4, 2, P,   P_SABER, METAL, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(4)),
+	1, 0, MZ_MEDIUM,  6, 28, 20,  2, P,   P_SABER, METAL, FALSE, HI_METAL),
 WEAPON("saber", (char *)0,
-	1, 0, MZ_MEDIUM,  6, 34, 75,  8,  8, 0, S,   P_SABER, SILVER, IDED|UNIDED, HI_SILVER),
+	DMG(D(8)), DMG(D(8)),
+	1, 0, MZ_MEDIUM,  6, 34, 75,  0, S,   P_SABER, SILVER, IDED|UNIDED, HI_SILVER),
 WEAPON("crow quill", "feather-etched rapier",
-	0, 0, MZ_MEDIUM,  0, 34,200,  8,  8, 2, P,   P_SABER, METAL, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(8)),
+	0, 0, MZ_MEDIUM,  0, 34,200,  2, P,   P_SABER, METAL, FALSE, HI_METAL),
 WEAPON("rakuyo", "double-bladed saber",
-	0, 0, MZ_MEDIUM,  0, 38,500,  8,  8, 2, P|S,   P_SABER, METAL, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(8)),
+	0, 0, MZ_MEDIUM,  0, 38,500,  2, P|S, P_SABER, METAL, FALSE, HI_METAL),
 WEAPON("rakuyo-saber", "latch-pommeled saber",
-	0, 0, MZ_MEDIUM,  0, 28,400,  8,  8, 2, P|S,   P_SABER, METAL, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(8)),
+	0, 0, MZ_MEDIUM,  0, 28,400,  2, P|S, P_SABER, METAL, FALSE, HI_METAL),
 WEAPON("rakuyo-dagger", "latch-pommeled dagger",
-	0, 0,  MZ_SMALL,  0, 10,100,  4,  3, 2, P|S,   P_DAGGER, METAL, FALSE, HI_METAL),
+	DMG(D(4)), DMG(D(3)),
+	0, 0,  MZ_SMALL,  0, 10,100,  2, P|S, P_DAGGER, METAL, FALSE, HI_METAL),
 WEAPON("broadsword", (char *)0,
-	1, 0,  MZ_LARGE,  8, 70, 10,  4,  6, 0, S,   P_BROAD_SWORD, IRON, FALSE, HI_METAL),
-						/* +d4 small, +1 large */
+	DMG(D(2, 4)), DMG(D(6), F(1)),
+	1, 0,  MZ_LARGE,  8, 70, 10,  0, S,   P_BROAD_SWORD, IRON, FALSE, HI_METAL),
 WEAPON("elven broadsword", "runed broadsword",
-	0, 0,  MZ_LARGE,  4, 20, 10,  6,  6, 2, S,   P_BROAD_SWORD, WOOD, FALSE, HI_WOOD),
-						/* +d4 small, +2 large */
+	DMG(D(6), D(4)), DMG(D(6), F(2)),
+	0, 0,  MZ_LARGE,  4, 20, 10,  2, S,   P_BROAD_SWORD, WOOD, FALSE, HI_WOOD),
 WEAPON("long sword", (char *)0,
-	1, 0, MZ_MEDIUM, 46, 40, 15,  8, 12, 0, S|P,   P_LONG_SWORD, IRON, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(12)),
+	1, 0, MZ_MEDIUM, 46, 40, 15,  0, S|P, P_LONG_SWORD, IRON, FALSE, HI_METAL),
 WEAPON("crystal sword", (char *)0, /*Needs encyc entry*//*Needs tile*/
-	1, 0,  MZ_LARGE, 2, 120,300,  8, 12, 0, S|P,   P_LONG_SWORD, GLASS, FALSE, HI_GLASS),
+	DMG(D(2, 8)), DMG(D(2, 12)),
+	1, 0,  MZ_LARGE, 2, 120,300,  0, S|P, P_LONG_SWORD, GLASS, FALSE, HI_GLASS),
 WEAPON("two-handed sword", (char *)0,
-	1, 0,   MZ_HUGE, 22,150, 50, 12,  6, 0, S,   P_TWO_HANDED_SWORD, IRON, FALSE, HI_METAL),
-						/* +2d6 large */
+	DMG(D(12)), DMG(D(3, 6)),
+	1, 0,   MZ_HUGE, 22,150, 50,  0, S,   P_TWO_HANDED_SWORD, IRON, FALSE, HI_METAL),
 WEAPON("droven greatsword", "two-handed sword", /*Needs encyc entry*//*Needs tile*/
-	0, 0,   MZ_HUGE,  0,120, 50,  18, 30, 2, S,   P_TWO_HANDED_SWORD, OBSIDIAN_MT, UNIDED, CLR_BLACK),
+	DMG(D(18)), DMG(D(30)),
+	0, 0,   MZ_HUGE,  0,120, 50,  2, S,   P_TWO_HANDED_SWORD, OBSIDIAN_MT, UNIDED, CLR_BLACK),
 WEAPON("katana", "samurai sword",
-	0, 0, MZ_MEDIUM,  4, 40, 80, 10, 12, 1, S,   P_LONG_SWORD, IRON, FALSE, HI_METAL),
+	DMG(D(10)), DMG(D(12)),
+	0, 0, MZ_MEDIUM,  4, 40, 80,  1, S,   P_LONG_SWORD, IRON, FALSE, HI_METAL),
 /* special swords set up for artifacts and future weapons*/
 WEAPON("vibroblade", "gray short sword", /*Needs encyc entry*//*Needs tile*/
-	1, 0,  MZ_SMALL,  0,  5,1000, 6,  8, 0, P,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_GRAY),
+	DMG(D(6)), DMG(D(8)),
+	1, 0,  MZ_SMALL,  0,  5,1000, 0, P,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_GRAY),
 WEAPON("tsurugi", "long samurai sword",
-	0, 0,   MZ_HUGE,  0, 60,500, 16,  8, 2, S,   P_TWO_HANDED_SWORD, METAL, FALSE, HI_METAL),
-						/* +2d6 large */
+	DMG(D(16)), DMG(D(8), D(2,6)),
+	0, 0,   MZ_HUGE,  0, 60,500,  2, S,   P_TWO_HANDED_SWORD, METAL, FALSE, HI_METAL),
 WEAPON("runesword", "runed black blade",
-	0, 0,  MZ_LARGE,  0, 40,300,  10,  10, 0, S,   P_BROAD_SWORD, IRON, FALSE, CLR_BLACK),
-						/* +d4 small, +1 large */
-						/* +5d2 +d8 from level drain */
+	DMG(D(10), D(4)), DMG(D(10), F(1)),
+	0, 0,  MZ_LARGE,  0, 40,300,  0, S,   P_BROAD_SWORD, IRON, FALSE, CLR_BLACK),
 WEAPON("white vibrosword", "white sword", /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM,  0, 40,8000, 10, 12, 1, P|S,   P_LONG_SWORD,  SILVER, FALSE, CLR_WHITE),
+	DMG(D(10)), DMG(D(12)),
+	0, 0, MZ_MEDIUM,  0, 40,8000, 1, P|S, P_LONG_SWORD,  SILVER, FALSE, CLR_WHITE),
 WEAPON("gold-bladed vibrosword", "black and gold sword", /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM,  0, 53,8000, 10, 12, 1, P|S,   P_LONG_SWORD,    GOLD, FALSE, CLR_BLACK),
+	DMG(D(10)), DMG(D(12)),
+	0, 0, MZ_MEDIUM,  0, 53,8000, 1, P|S, P_LONG_SWORD,    GOLD, FALSE, CLR_BLACK),
 WEAPON("red-eyed vibrosword", "blue-glowing sword", /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM,  0, 10,8000, 10, 12, 1, P|S,   P_LONG_SWORD, PLASTIC, FALSE, CLR_GRAY),
+	DMG(D(10)), DMG(D(12)),
+	0, 0, MZ_MEDIUM,  0, 10,8000, 1, P|S, P_LONG_SWORD, PLASTIC, FALSE, CLR_GRAY),
 WEAPON("white vibrozanbato", "curved white sword",
-	0, 0,   MZ_HUGE,  0, 60,16000, 16,  8, 2, S,   P_TWO_HANDED_SWORD, SILVER, FALSE, CLR_WHITE),
-						    /* +2d6 large */
+	DMG(D(16)), DMG(D(8), D(2,6)),
+	0, 0,   MZ_HUGE,  0, 60,16000,2, S,   P_TWO_HANDED_SWORD, SILVER, FALSE, CLR_WHITE),
 WEAPON("gold-bladed vibrozanbato", "curved black and gold sword",
-	0, 0,   MZ_HUGE,  0, 80,16000, 16,  8, 2, S,   P_TWO_HANDED_SWORD, GOLD, FALSE, CLR_BLACK),
-						    /* +2d6 large */
+	DMG(D(16)), DMG(D(8), D(2,6)),
+	0, 0,   MZ_HUGE,  0, 80,16000,2, S,   P_TWO_HANDED_SWORD, GOLD, FALSE, CLR_BLACK),
 
 WEAPON("double force-blade", "double-bladed weapon",
-	0, 0,   MZ_HUGE,  0, 40,1000,  6,  4, 2, S,   P_QUARTERSTAFF, PLASTIC, FALSE, CLR_RED),
+	DMG(D(6)), DMG(D(4)),
+	0, 0,   MZ_HUGE,  0, 40,1000, 2, S,   P_QUARTERSTAFF, PLASTIC, FALSE, CLR_RED),
 						    /* 2x, but slower */
 WEAPON("force blade", "latch-ended blade",
-	0, 0,  MZ_SMALL,  0, 20,500,  6,  4, 2, S,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_RED),
+	DMG(D(6)), DMG(D(4)),
+	0, 0,  MZ_SMALL,  0, 20,500,  2, S,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_RED),
 
 WEAPON("force sword", "hard segmented sword",
-	0, 0, MZ_MEDIUM,  0, 40,1000,  8,  6, 2, P|B,   P_BROAD_SWORD, PLASTIC, FALSE, HI_SILVER),
+	DMG(D(8)), DMG(D(6)),
+	0, 0, MZ_MEDIUM,  0, 40,1000, 2, P|B, P_BROAD_SWORD, PLASTIC, FALSE, HI_SILVER),
 WEAPON("force whip", "segmented whip",
-	0, 0, MZ_MEDIUM,  0, 40,1000,  6,  4, 2, P|S,   P_WHIP, PLASTIC, FALSE, CLR_ORANGE),
-						/* +1 small, +1d4 large */
+	DMG(D(6)), DMG(D(4)),
+	0, 0, MZ_MEDIUM,  0, 40,1000, 2, P|S, P_WHIP, PLASTIC, FALSE, CLR_ORANGE),
 /* polearms */
 /* spear-type */
 WEAPON("partisan", "vulgar polearm",
-	0, 0,   MZ_HUGE,  5, 80, 10,  6,  6, 0, P,   P_POLEARMS, IRON, FALSE, HI_METAL),
-						/* +1 large */
+	DMG(D(6)), DMG(D(6), F(1)),
+	0, 0,   MZ_HUGE,  5, 80, 10,  0, P,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("ranseur", "hilted polearm",
-	0, 0,   MZ_HUGE,  5, 50,  6,  4,  4, 0, P,   P_POLEARMS, IRON, FALSE, HI_METAL),
-						/* +d4 both */
+	DMG(D(2, 4)), DMG(D(2, 4)),
+	0, 0,   MZ_HUGE,  5, 50,  6,  0, P,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("spetum", "forked polearm",
-	0, 0,   MZ_HUGE,  5, 50,  5,  6,  6, 0, P,   P_POLEARMS, IRON, FALSE, HI_METAL),
-						/* +1 small, +d6 large */
+	DMG(D(6), F(1)), DMG(D(2, 6)),
+	0, 0,   MZ_HUGE,  5, 50,  5,  0, P,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("glaive", "single-edged polearm",
-	0, 0,   MZ_HUGE,  7, 75,  6,  6, 10, 0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(10)),
+	0, 0,   MZ_HUGE,  7, 75,  6,  0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("naginata", "samurai-sword polearm",
-	0, 0,   MZ_HUGE,  1, 75, 90,  8, 10, 1, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(10)),
+	0, 0,   MZ_HUGE,  1, 75, 90,  1, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("lance", (char *)0,
-	1, 0,  MZ_LARGE,  4, 80, 10,  6,  8, 0, P,   P_LANCE, IRON, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(8)),
+	1, 0,  MZ_LARGE,  4, 80, 10,  0, P,   P_LANCE, IRON, FALSE, HI_METAL),
 WEAPON("force pike", "long gray spear",/*Needs tile*/
-	0, 0,  MZ_LARGE,  0, 30, 1000,  6,  8, 2, P|S,   P_LANCE, PLASTIC, FALSE, CLR_GRAY),
+	DMG(D(6)), DMG(D(8)),
+	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, PLASTIC, FALSE, CLR_GRAY),
 WEAPON("white vibrospear", "long white spear",/*Needs tile*/
-	0, 0,  MZ_LARGE,  0, 30, 1000,  6,  8, 2, P|S,   P_LANCE, PLASTIC, FALSE, CLR_WHITE),
+	DMG(D(6)), DMG(D(8)),
+	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, PLASTIC, FALSE, CLR_WHITE),
 WEAPON("gold-bladed vibrospear", "long black and gold spear",/*Needs tile*/
-	0, 0,  MZ_LARGE,  0, 30, 1000,  6,  8, 2, P|S,   P_LANCE, GOLD, FALSE, CLR_BLACK),
+	DMG(D(6)), DMG(D(8)),
+	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, GOLD, FALSE, CLR_BLACK),
 WEAPON("elven lance", "runed lance", /*Needs encyc entry*//*Needs tile*/
-	0, 0,  MZ_LARGE,  0, 60, 10,  8,  8, 2, P,   P_LANCE, WOOD, FALSE, HI_WOOD),
+	DMG(D(8)), DMG(D(8)),
+	0, 0,  MZ_LARGE,  0, 60, 10,  2, P,   P_LANCE, WOOD, FALSE, HI_WOOD),
 WEAPON("droven lance", "lance", /*Needs encyc entry*//*Needs tile*/
-	0, 0,   MZ_HUGE,  0, 60, 10, 10, 10, 2, P,   P_LANCE, OBSIDIAN_MT, UNIDED, CLR_BLACK),
+	DMG(D(10)), DMG(D(10)),
+	0, 0,   MZ_HUGE,  0, 60, 10,  2, P,   P_LANCE, OBSIDIAN_MT, UNIDED, CLR_BLACK),
 /* axe-type */
 WEAPON("halberd", "angled poleaxe",
-	0, 0,   MZ_HUGE,  8, 75, 10, 10,  6, 0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
-						/* +1d6 large */
+	DMG(D(10)), DMG(D(2, 6)),
+	0, 0,   MZ_HUGE,  8, 75, 10, 0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("bardiche", "long poleaxe",
-	0, 0,   MZ_HUGE,  4, 80,  7,  4,  4, 0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
-						/* +1d4 small, +2d4 large */
+	DMG(D(2, 4)), DMG(D(3, 4)),
+	0, 0,   MZ_HUGE,  4, 80,  7, 0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("voulge", "pole cleaver",
-	0, 0,   MZ_HUGE,  4, 50,  5,  4,  4, 0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
-						/* +d4 both */
+	DMG(D(2, 4)), DMG(D(2, 4)),
+	0, 0,   MZ_HUGE,  4, 50,  5, 0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("dwarvish mattock", "broad pick",
-	0, 0,   MZ_HUGE, 13,120, 50, 12,  8,-1, P|B,   P_PICK_AXE, IRON, FALSE, HI_METAL),
+	DMG(D(12)), DMG(D(8), D(2, 6)),
+	0, 0,   MZ_HUGE, 13,120, 50,-1, P|B, P_PICK_AXE, IRON, FALSE, HI_METAL),
 
 /* curved/hooked */
 WEAPON("fauchard", "pole sickle",
-	0, 0,   MZ_HUGE,  5, 60,  5,  6,  8, 0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(8)),
+	0, 0,   MZ_HUGE,  5, 60,  5,  0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("guisarme", "pruning hook",
-	0, 0,   MZ_HUGE,  5, 80,  5,  4,  8, 0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
-						/* +1d4 small */
+	DMG(D(2, 4)), DMG(D(8)),
+	0, 0,   MZ_HUGE,  5, 80,  5,  0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("bill-guisarme", "hooked polearm",
-	0, 0,   MZ_HUGE,  3, 80,  7,  4, 10, 0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
-						/* +1d4 small */
+	DMG(D(2, 4)), DMG(D(10)),
+	0, 0,   MZ_HUGE,  3, 80,  7,  0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
 /* other */
 WEAPON("lucern hammer", "pronged polearm",
-	0, 0,   MZ_HUGE,  4, 85,  7,  4,  6, 0, B|P, P_POLEARMS, IRON, FALSE, HI_METAL),
-						/* +1d4 small */
+	DMG(D(2, 4)), DMG(D(6)),
+	0, 0,   MZ_HUGE,  4, 85,  7,  0, B|P, P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON("bec de corbin", "beaked polearm",
-	0, 0,   MZ_HUGE,  3, 75,  8,  8,  6, 0, B|P, P_POLEARMS, IRON, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(6)),
+	0, 0,   MZ_HUGE,  3, 75,  8,  0, B|P, P_POLEARMS, IRON, FALSE, HI_METAL),
 
-WEAPON("scythe", (char *)0, /* 2d4 damage. Vs plants: +6 to hit and double damage */
-	1, 0,   MZ_HUGE, 5,  75,  6,  4,  4, -2, S,   P_HARVEST, IRON, FALSE, HI_METAL),
+WEAPON("scythe", (char *)0, 
+	DMG(D(2, 4)), DMG(D(2, 4)), /* Vs plants: +6 to hit and double damage */
+	1, 0,   MZ_HUGE,  5, 75,  6, -2, S,   P_HARVEST, IRON, FALSE, HI_METAL),
 
 /* bludgeons */
 WEAPON("mace", (char *)0,
-	1, 0, MZ_MEDIUM, 40, 30,  5,  6,  6, 0, B,   P_MACE, IRON, FALSE, HI_METAL),
-						/* +1 small */
+	DMG(D(6), F(1)), DMG(D(6)),
+	1, 0, MZ_MEDIUM, 40, 30,  5,  0, B,   P_MACE, IRON, FALSE, HI_METAL),
 WEAPON("elven mace", "runed mace", /*Needs encyc entry*/
-	0, 0, MZ_MEDIUM,  0, 10,  5,  7,  7, 2, B,   P_MACE, WOOD, FALSE, HI_WOOD),
-						/* +1 small */
+	DMG(D(7), F(1)), DMG(D(7)),
+	0, 0, MZ_MEDIUM,  0, 10,  5,  2, B,   P_MACE, WOOD, FALSE, HI_WOOD),
 WEAPON("morning star", (char *)0,
-	1, 0, MZ_MEDIUM, 12, 80, 10,  4,  6, 0, B|P,   P_MORNING_STAR, IRON, FALSE, HI_METAL),
-						/* +d4 small, +1 large */
+	DMG(D(2, 4)), DMG(D(6), F(1)),
+	1, 0, MZ_MEDIUM, 12, 80, 10,  0, B|P, P_MORNING_STAR, IRON, FALSE, HI_METAL),
 WEAPON("war hammer", (char *)0,
-	1, 0, MZ_MEDIUM, 15, 50,  5,  4,  4, 0, B,   P_HAMMER, IRON, FALSE, HI_METAL),
-						/* +1 small */
+	DMG(D(4), F(1)), DMG(D(4)),
+	1, 0, MZ_MEDIUM, 15, 50,  5,  0, B,   P_HAMMER, IRON, FALSE, HI_METAL),
 WEAPON("club", (char *)0,
-	1, 0, MZ_MEDIUM, 11, 10,  3,  6,  3, 0, B,   P_CLUB, WOOD, FALSE, HI_WOOD),
+	DMG(D(6)), DMG(D(3)),
+	1, 0, MZ_MEDIUM, 11, 10,  3,  0, B,   P_CLUB, WOOD, FALSE, HI_WOOD),
 WEAPON("clawed hand", (char *)0,
-	1, 0, MZ_MEDIUM,  0, 10, 300, 12,  6, 0, P|S,   P_CLUB, BONE, FALSE, CLR_GRAY),
+	DMG(D(12)), DMG(D(6)),
+	1, 0, MZ_MEDIUM,  0, 10, 300, 0, P|S, P_CLUB, BONE, FALSE, CLR_GRAY),
 WEAPON("macuahuitl", "obsidian-edged club",
-	0, 0, MZ_MEDIUM,  0, 40, 10,  8,  6, 0, B|S,   P_CLUB, WOOD, FALSE, HI_WOOD),
+	DMG(D(8)), DMG(D(6)),
+	0, 0, MZ_MEDIUM,  0, 40, 10,  0, B|S, P_CLUB, WOOD, FALSE, HI_WOOD),
 WEAPON("quarterstaff", "staff",
-	0, 0,   MZ_HUGE, 10, 40,  5,  6,  6, 0, B,   P_QUARTERSTAFF, WOOD, FALSE, HI_WOOD),
+	DMG(D(6)), DMG(D(6)),
+	0, 0,   MZ_HUGE, 10, 40,  5,  0, B,   P_QUARTERSTAFF, WOOD, FALSE, HI_WOOD),
 WEAPON("khakkhara", "monk's staff", /*Needs encyc entry*//*Needs tile*/
-	0, 0,   MZ_HUGE,  2, 120,  50,  6,  4, 0, B|P,   P_QUARTERSTAFF, SILVER, IDED, HI_SILVER),
+	DMG(D(6)), DMG(D(4)),
+	0, 0,   MZ_HUGE,  2,120, 50,  0, B|P, P_QUARTERSTAFF, SILVER, IDED, HI_SILVER),
 WEAPON("kamerel vajra", "short mace", /*Needs encyc entry*/
-	0, 0, MZ_MEDIUM,  0,  10,800, 6, 6, 1, S|E, P_MACE, GOLD, UNIDED, HI_GOLD),
+	DMG(D(6)), DMG(D(6)),	/* very different dice for different litness states */
+	0, 0, MZ_MEDIUM,  0, 10,800,  1, S|E, P_MACE, GOLD, UNIDED, HI_GOLD),
 WEAPON("bar", (char *)0,
-	1, 0,   MZ_HUGE, 0, 400,  10,  8,  6, -10, B,   P_QUARTERSTAFF, IRON, IDED|UNIDED, HI_METAL),
+	DMG(D(8)), DMG(D(6)),
+	1, 0,   MZ_HUGE, 0, 400, 10,-10, B,   P_QUARTERSTAFF, IRON, IDED|UNIDED, HI_METAL),
 /* two-piece */
 WEAPON("aklys", "thonged club",
-	0, 0, MZ_MEDIUM,  8, 15,  4,  6,  3, 0, B,   P_CLUB, IRON, FALSE, HI_METAL),
+	DMG(D(6)), DMG(D(3)),
+	0, 0, MZ_MEDIUM,  8, 15,  4,  0, B,   P_CLUB, IRON, FALSE, HI_METAL),
 WEAPON("flail", (char *)0,
-	1, 0, MZ_MEDIUM, 35, 15,  4,  6,  4, 0, B,   P_FLAIL, IRON, FALSE, HI_METAL),
-						/* +1 small, +1d4 large */
+	DMG(D(6), F(1)), DMG(D(2, 4)),
+	1, 0, MZ_MEDIUM, 35, 15,  4,  0, B,   P_FLAIL, IRON, FALSE, HI_METAL),
 /* misc */
 WEAPON("bullwhip", (char *)0,
-	1, 0, MZ_MEDIUM,  5, 10,  4,  2,  1, 0, B,   P_WHIP, LEATHER, FALSE, CLR_BROWN),
+	DMG(D(2)), DMG(D(1)),
+	1, 0, MZ_MEDIUM,  5, 10,  4,  0, B,   P_WHIP, LEATHER, FALSE, CLR_BROWN),
 WEAPON("viperwhip", (char *)0,
-	1, 0, MZ_MEDIUM,  2, 30, 40,  4,  3, 2, P,   P_WHIP, SILVER, IDED|UNIDED, HI_SILVER),
+	DMG(D(4)), DMG(D(3)),
+	1, 0, MZ_MEDIUM,  2, 30, 40,  2, P,   P_WHIP, SILVER, IDED|UNIDED, HI_SILVER),
 
 WEAPON("bestial claw", (char *)0,
-	1, 0, MZ_MEDIUM,  0, 10, 100,  10,  8, 0, S|P,   P_BARE_HANDED_COMBAT, BONE, FALSE, CLR_WHITE),
+	DMG(D(10)), DMG(D(8)),
+	1, 0, MZ_MEDIUM,  0, 10,100,  0, S|P, P_BARE_HANDED_COMBAT, BONE, FALSE, CLR_WHITE),
 
 
 
@@ -422,26 +536,36 @@ GUN("cutting laser","hard tan lozenge",             0,   MZ_SMALL, 0,   1, 1000,
 
 GUN("raygun", "hard handle ending in glassy disks", 0,  MZ_MEDIUM, 0,   8, 3000, 15,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BRIGHT_CYAN), /*Needs tile*/
 BULLET("bullet", "pellet",
-	0,    MZ_TINY, 0,  1,   5, 8, 6, 0,  WP_BULLET,   P, METAL, -P_FIREARM, HI_METAL),/*Needs tile*/
+	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
+	0,    MZ_TINY, 0,  1,   5, 0,  WP_BULLET,   P,   METAL, -P_FIREARM, HI_METAL),/*Needs tile*/
 BULLET("silver bullet", "silver pellet",
-	0,    MZ_TINY, 0,  1,  15, 8, 6, 0,  WP_BULLET,   P,SILVER, -P_FIREARM, HI_SILVER),/*Needs tile*/
+	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
+	0,    MZ_TINY, 0,  1,  15, 0,  WP_BULLET,   P,  SILVER, -P_FIREARM, HI_SILVER),/*Needs tile*/
 BULLET("shotgun shell", "red tube",
-	0,    MZ_TINY, 0,  1,  10,12, 6,10,   WP_SHELL,   S, METAL, -P_FIREARM, CLR_RED),/*Needs tile*/
+	DMG(D(2, 12), F(4)), DMG(D(2, 6), F(4)),
+	0,    MZ_TINY, 0,  1,  10,10,   WP_SHELL,   S,   METAL, -P_FIREARM, CLR_RED),/*Needs tile*/
 BULLET("frag grenade", "green spheriod",
-	0,   MZ_SMALL, 0,  5, 350, 2, 2, 0, WP_GRENADE,   B,    IRON, -P_FIREARM, CLR_GREEN),/*Needs tile*/
+	DMG(D(2)), DMG(D(2)),
+	0,   MZ_SMALL, 0,  5, 350, 0, WP_GRENADE,   B,    IRON, -P_FIREARM, CLR_GREEN),/*Needs tile*/
 BULLET("gas grenade", "lime spheriod",
-	0,   MZ_SMALL, 0,  2, 350, 2, 2, 0, WP_GRENADE,   B,    IRON, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/
+	DMG(D(2)), DMG(D(2)),
+	0,   MZ_SMALL, 0,  2, 350, 0, WP_GRENADE,   B,    IRON, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/
 BULLET("rocket", "firework",
-	0,   MZ_SMALL, 0, 20, 450,12,20, 0,  WP_ROCKET,   B,	SILVER, -P_FIREARM, CLR_BLUE),/*Needs tile*/
+	DMG(D(2, 12), F(4)), DMG(D(2, 20), F(4)),
+	0,   MZ_SMALL, 0, 20, 450, 0,  WP_ROCKET,   B,  SILVER, -P_FIREARM, CLR_BLUE),/*Needs tile*/
 BULLET("stick of dynamite", "red stick",
-	0,   MZ_SMALL, 0, 10, 150, 0, 0, 0, WP_GENERIC,   B, PLASTIC,     P_NONE, CLR_RED),/*Needs tile*/
+	DMG(D(1)), DMG(D(1)),
+	0,   MZ_SMALL, 0, 10, 150, 0, WP_GENERIC,   B, PLASTIC,     P_NONE, CLR_RED),/*Needs tile*/
 
 BULLET("blaster bolt", "ruby bolt",
-	0,    MZ_TINY, 0,  1,   0, 6, 8, 0, WP_BLASTER,   E,   METAL, -P_FIREARM, CLR_RED),/*Needs tile*/
+	DMG(D(3, 6), F(6)), DMG(D(3, 8), F(8)),
+	0,    MZ_TINY, 0,  1,   0, 0, WP_BLASTER,   E,   METAL, -P_FIREARM, CLR_RED),/*Needs tile*/
 BULLET("heavy blaster bolt", "scarlet bolt",
-	0,    MZ_TINY, 0,  1,   0,10,12, 0, WP_BLASTER,   E,   METAL, -P_FIREARM, CLR_ORANGE),/*Needs tile*/
+	DMG(D(3, 10), F(10)), DMG(D(3, 12), F(12)),
+	0,    MZ_TINY, 0,  1,   0, 0, WP_BLASTER,   E,   METAL, -P_FIREARM, CLR_ORANGE),/*Needs tile*/
 BULLET("laser beam", "green bolt",
-	0,    MZ_TINY, 0,  1,   0, 1, 1, 0, WP_BLASTER,   E|S, METAL, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/
+	DMG(D(3, 1), F(10)), DMG(D(3, 1), F(10)),
+	0,    MZ_TINY, 0,  1,   0, 0, WP_BLASTER,   E|S, METAL, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/
 //endif
 
 /* bows */
@@ -453,10 +577,6 @@ BOW("sling", (char *)0,			                    1, MZ_MEDIUM, 40,  3,  20, -1, LEA
 BOW("crossbow", (char *)0,		                    1,  MZ_LARGE, 45, 50,  40,  1, WOOD, P_CROSSBOW, HI_WOOD),
 BOW("droven crossbow", "spider-emblemed crossbow",	0,  MZ_LARGE,  0, 50, 120,  4, SILVER, P_CROSSBOW, CLR_BLACK), /*Needs encyc entry*/
 BOW("atlatl", "notched stick",                      0, MZ_MEDIUM,  0, 12,  30,  0, WOOD, P_SPEAR, HI_WOOD), /*Needs encyc entry*/
-
-#undef P
-#undef S
-#undef B
 
 #undef WEAPON
 #undef PROJECTILE
@@ -474,7 +594,7 @@ BOW("atlatl", "notched stick",                      0, MZ_MEDIUM,  0, 12,  30,  
 	OBJECT( \
 		OBJ(name,desc), BITS(kn,0,1,0,mgc,1,0,0,size,0,0,sub,metal,0), power, \
 		ARMOR_CLASS, prob, delay, wt, cost, \
-		0, 0, 10 - ac, can, dr, wt, c, __VA_ARGS__ )
+		{0}, {0}, 10 - ac, can, dr, wt, c, __VA_ARGS__ )
 #define HELM(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
 	ARMOR(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_HELM, metal, c, __VA_ARGS__)
 #define CLOAK(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
@@ -831,7 +951,7 @@ BOOTS("flying boots", "snow boots",
 #define RING(name,power,stone,cost,mgc,spec,mohs,metal,color,...) OBJECT( \
 		OBJ(name,stone), \
 		BITS(0,0,spec,0,mgc,spec,0,0,MZ_TINY,HARDGEM(mohs),0,P_NONE,metal,0), \
-		power, RING_CLASS, 0, 0, 3, cost, 0, 0, 0, 0, 0, 15, color,__VA_ARGS__ )
+		power, RING_CLASS, 0, 0, 3, cost, {0}, {0}, 0, 0, 0, 15, color,__VA_ARGS__ )
 RING("wishes", 0, "black",                  500, 1, 1, 4, PLATINUM, CLR_BLACK, O_NOWISH(1)),
 RING("adornment", ADORNED, "wooden",        100, 1, 1, 2, WOOD, HI_WOOD),
 RING("gain strength", 0, "granite",         150, 1, 1, 7, MINERAL, HI_MINERAL),
@@ -880,7 +1000,7 @@ RING("protection from shape changers", PROT_FROM_SHAPE_CHANGERS, "black signet",
 /* amulets ... - THE Amulet comes last because it is special */
 #define AMULET(name,desc,power,prob,...) OBJECT( \
 		OBJ(name,desc), BITS(0,0,0,0,1,0,0,0,0,MZ_TINY,0,P_NONE,IRON,0), power, \
-		AMULET_CLASS, prob, 0, 20, 150, 0, 0, 0, 0, 0, 20, HI_METAL, __VA_ARGS__ )
+		AMULET_CLASS, prob, 0, 20, 150, {0}, {0}, 0, 0, 0, 20, HI_METAL, __VA_ARGS__ )
 
 AMULET("amulet of drain resistance","warped",   DRAIN_RES,   60),
 AMULET("amulet of ESP",           "circular",   TELEPAT,    130),
@@ -909,13 +1029,13 @@ AMULET("Amulet of Yendor", "Amulet of Yendor", 0, 0, /* note: description == nam
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
+		wt, cost, {0}, {0}, 0, 0, 0, wt, color, __VA_ARGS__)
 #define CONTAINER(name,desc,kn,size,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,chg,1,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color, __VA_ARGS__)
-#define WEPTOOL(name,desc,kn,size,mgc,chg,prob,wt,cost,sdam,ldam,hitbon,typ,sub,mat,clr,...) \
+		wt, cost, {0}, {0}, 0, 0, 0, wt, color, __VA_ARGS__)
+#define WEPTOOL(name,desc,sdam,ldam,kn,size,mgc,chg,prob,wt,cost,hitbon,typ,sub,mat,clr,...) \
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,1,chg,mgc,1,0,0,size,0,typ,sub,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
@@ -936,7 +1056,7 @@ CONTAINER("bag of tricks", "bag",       0, MZ_MEDIUM, 1, 1,  20,  15, 100, CLOTH
 	OBJECT( OBJ(name,desc), \
 		BITS(kn,0,chg,1,mgc,chg,0,0,MZ_MEDIUM,0,0,P_NONE,mat), \
 		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, ntrtn, 0, wt, color, __VA_ARGS__)
+		wt, cost, {0}, {0}, 0, ntrtn, 0, wt, color, __VA_ARGS__)
 
 //HOSTAGE("distressed princess", (char *)0,           1, 0, 0,  0, 350,.9*1450,  1600, CLOTH, CLR_WHITE),
 #undef HOSTAGE
@@ -1081,36 +1201,48 @@ TOOL("drum", "drum",               0, MZ_MEDIUM, 0, 0, 0,  4, 25, 25, LEATHER, H
 TOOL("drum of earthquake", "drum", 0, MZ_MEDIUM, 0, 1, 1,  2, 25, 25, LEATHER, HI_LEATHER, O_MATSPEC(NIDED)),
 /* tools useful as weapons */
 WEPTOOL("pick-axe", (char *)0,
-	1,  MZ_LARGE, 0, 0, 20, 80,   50,  6,  3, 0, PIERCE,  P_PICK_AXE, IRON, HI_METAL),
+	DMG(D(6)), DMG(D(3)),
+	1,  MZ_LARGE, 0, 0, 20, 80,  50,  0, P,   P_PICK_AXE, IRON, HI_METAL),
 WEPTOOL("seismic hammer", "dull metallic hammer",
-	0,   MZ_HUGE, 1, 1,  0,150,  250, 12, 10,-5, WHACK,  P_HAMMER,  METAL, HI_METAL),
+	DMG(D(12)), DMG(D(10)),
+	0,   MZ_HUGE, 1, 1,  0,150, 250, -5, B,   P_HAMMER,  METAL, HI_METAL),
 /*
  * Torches work as clubs
  */
 WEPTOOL("torch", (char *)0,
-	1,  MZ_SMALL, 0, 0, 15, 10,  5,  6,  3, 0, WHACK,   P_CLUB, WOOD, HI_WOOD),
+	DMG(D(6)), DMG(D(3)),
+	1,  MZ_SMALL, 0, 0, 15, 10,   5,  0, B,   P_CLUB, WOOD, HI_WOOD),
 WEPTOOL("shadowlander's torch", "black torch",
-	0,  MZ_SMALL, 0, 0, 10, 10, 50,  6,  3, 0, WHACK,   P_CLUB, WOOD, CLR_BLACK),
+	DMG(D(6)), DMG(D(3)),
+	0,  MZ_SMALL, 0, 0, 10, 10,  50,  0, B,   P_CLUB, WOOD, CLR_BLACK),
 WEPTOOL("sunrod", "gold rod",
-	1,  MZ_SMALL, 0, 0,  5, 20, 50,  6,  3, 0, WHACK,   P_MACE, GOLD, HI_GOLD),
+	DMG(D(6)), DMG(D(3)),
+	1,  MZ_SMALL, 0, 0,  5, 20,  50,  0, B,   P_MACE, GOLD, HI_GOLD),
 /* 
- * Lightsabers get 3x dice when lit 
+ * Lightsabers get 3x dice when lit, and go down to 1d2 damage when unlit
  */
 WEPTOOL("lightsaber", "sword hilt", /*Needs (better) encyc entry*/
-	0,  MZ_SMALL, 1, 1,  0, 10, 500,  8,  8, -3, SLASH|E,        P_SABER, SILVER, HI_SILVER, O_MATSPEC(IDED|UNIDED)),
+	DMG(D(8)), DMG(D(8)),
+	0,  MZ_SMALL, 1, 1,  0, 10, 500, -3, S|E, P_SABER, SILVER, HI_SILVER, O_MATSPEC(IDED|UNIDED)),
 WEPTOOL("beamsword",  "broadsword hilt", /*Needs encyc entry*/
-	0,  MZ_SMALL, 1, 1,  0, 20, 500, 10, 10, -3, SLASH|E,  P_BROAD_SWORD, GOLD, HI_GOLD, O_MATSPEC(IDED|UNIDED)),
+	DMG(D(10)), DMG(D(10)),
+	0,  MZ_SMALL, 1, 1,  0, 20, 500, -3, S|E, P_BROAD_SWORD, GOLD, HI_GOLD, O_MATSPEC(IDED|UNIDED)),
 WEPTOOL("double lightsaber",  "long grip", /*Needs encyc entry*//*Needs tile*//*needs special case for 2handedness*/
-	0,  MZ_SMALL, 1, 1,  0, 30,1000, 10, 10, -6, SLASH|E, P_QUARTERSTAFF, PLATINUM, HI_SILVER, O_MATSPEC(IDED|UNIDED)),
+	DMG(D(10)), DMG(D(10)),
+	0,  MZ_SMALL, 1, 1,  0, 30,1000, -6, S|E, P_QUARTERSTAFF, PLATINUM, HI_SILVER, O_MATSPEC(IDED|UNIDED)),
 WEPTOOL("grappling hook", "hook",
-	0, MZ_MEDIUM, 0, 0,  4, 30,  50,  2,  6,  0,   WHACK,        P_FLAIL, IRON, HI_METAL, O_MATSPEC(UNIDED)),
+	DMG(D(2)), DMG(D(6)),
+	0, MZ_MEDIUM, 0, 0,  4, 30,  50,  0, B,   P_FLAIL, IRON, HI_METAL, O_MATSPEC(UNIDED)),
 WEPTOOL("shepherd's crook", "bent staff",
-	0,   MZ_LARGE, 0, 0, 1,  30,   5,  6,  4,  0,   WHACK, P_QUARTERSTAFF, WOOD, HI_WOOD),
+	DMG(D(6)), DMG(D(4)),
+	0,   MZ_LARGE, 0, 0, 1,  30,   5, 0, B,   P_QUARTERSTAFF, WOOD, HI_WOOD),
 /* 3.4.1: unicorn horn left classified as "magic" */
 WEPTOOL("unicorn horn", (char *)0,
-	1, MZ_MEDIUM, 1, 0, 0,  20, 100, 12, 12,  0,  PIERCE, P_UNICORN_HORN, BONE, CLR_WHITE),
+	DMG(D(12)), DMG(D(12)),
+	1, MZ_MEDIUM, 1, 0, 0,  20, 100,  0, P,   P_UNICORN_HORN, BONE, CLR_WHITE),
 WEPTOOL("spoon", (char *)0, /*Needs encyc entry*//*Needs tile*/
-	1,   MZ_TINY, 0, 0, 0,   1,   1,  1,  1,  0,  PIERCE,        P_KNIFE, IRON, HI_METAL),
+	DMG(D(1)), DMG(D(1)),
+	1,   MZ_TINY, 0, 0, 0,   1,   1,  0, P,   P_KNIFE, IRON, HI_METAL),
 
 /* two special unique artifact tools */
 TOOL("Candelabrum of Invocation", "candelabrum", 0, MZ_SMALL, 0, 1, 0, 0, 10, 5000, GOLD, HI_GOLD,
@@ -1124,7 +1256,7 @@ TOOL("Bell of Opening",           "bell",        0,  MZ_TINY, 0, 1, 1, 0, 10, 50
 #define FOOD(name,prob,size,delay,wt,unk,tin,nutrition,color,...) OBJECT( \
 		OBJ(name,(char *)0), BITS(1,1,unk,0,0,0,0,0,size,0,0,P_NONE,tin,0), 0, \
 		FOOD_CLASS, prob, delay, \
-		wt, nutrition / 20 + 5, 0, 0, 0, 0, 0, nutrition, color, __VA_ARGS__)
+		wt, nutrition / 20 + 5, {0}, {0}, 0, 0, 0, nutrition, color, __VA_ARGS__)
 /* all types of food (except tins & corpses) must have a delay of at least 1. */
 /* delay on corpses is computed and is weight dependant */
 /* dog eats foods 0-4 but prefers tripe rations above all others */
@@ -1192,7 +1324,7 @@ FOOD("tin",                    75,   MZ_TINY,  0, 10, 1, METAL,   0, HI_METAL),
 /* potions ... */
 #define POTION(name,desc,mgc,power,prob,cost,color,...) OBJECT( \
 		OBJ(name,desc), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,P_NONE,GLASS,0), power, \
-		POTION_CLASS, prob, 0, 20, cost, 0, 0, 0, 0, 0, 10, color, __VA_ARGS__)
+		POTION_CLASS, prob, 0, 20, cost, {0}, {0}, 0, 0, 0, 10, color, __VA_ARGS__)
 POTION("gain ability", "ruby",          1, 0,          40, 300, CLR_RED),
 POTION("restore ability", "pink",       1, 0,          40, 100, CLR_BRIGHT_MAGENTA),
 POTION("confusion", "orange",           1, CONFUSION,  33, 100, CLR_ORANGE),
@@ -1229,7 +1361,7 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 /* scrolls ... */
 #define SCROLL(name,text,mgc,prob,cost,...) OBJECT( \
 		OBJ(name,text), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,P_NONE,PAPER,0), 0, \
-		SCROLL_CLASS, prob, 0, 5, cost, 0, 0, 0, 0, 0, 6, HI_PAPER, __VA_ARGS__)
+		SCROLL_CLASS, prob, 0, 5, cost, {0}, {0}, 0, 0, 0, 6, HI_PAPER, __VA_ARGS__)
 	SCROLL("enchant armor",         "ZELGO MER",            1,  59,  80),
 	SCROLL("destroy armor",         "JUYED AWK YACC",       1,  35, 100),
 	SCROLL("confuse monster",       "NR 9",                 1,  41, 100),
@@ -1272,7 +1404,7 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 
 #define CERAMIC_TILE(name,text,prob,...) OBJECT( \
 		OBJ(name,text), BITS(0,1,0,0,1,0,0,0,MZ_TINY,0,0,P_NONE,MINERAL, IDED|UNIDED), 0, \
-		TILE_CLASS, prob, 0, 3, 300, 0, 0, 0, 0, 0, 6, CLR_WHITE, __VA_ARGS__)
+		TILE_CLASS, prob, 0, 3, 300, {0}, {0}, 0, 0, 0, 6, CLR_WHITE, __VA_ARGS__)
 	/* Randomized descriptions */
 	CERAMIC_TILE("syllable of strength: Aesh","bipartite glyph", 167),
 	CERAMIC_TILE("syllable of power: Krau",   "crossed glyph",   166),
@@ -1283,7 +1415,7 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 #undef CERAMIC_TILE
 #define BONE_TILE(name,text,prob,...) OBJECT( \
 		OBJ(name,text), BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,P_NONE,BONE, IDED|UNIDED), 0, \
-		TILE_CLASS, prob, 0, 3, 300, 0, 0, 0, 0, 0, 6, CLR_GRAY, __VA_ARGS__)
+		TILE_CLASS, prob, 0, 3, 300, {0}, {0}, 0, 0, 0, 6, CLR_GRAY, __VA_ARGS__)
 	BONE_TILE("anti-clockwise metamorphosis glyph",  "counterclockwise-rotated cross",   0),	// ANTI_CLOCKWISE_METAMORPHOSIS
 	BONE_TILE("clockwise metamorphosis glyph",  "clockwise-rotated cross",   0),				// CLOCKWISE_METAMORPHOSIS
 	BONE_TILE("sparkling lake glyph",  "sparkling horizontal line",   0),	// ARCANE_BULWARK
@@ -1307,7 +1439,7 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 #undef BONE_TILE
 #define METALIC_SLAB(name,text, clr,...) OBJECT( \
 		OBJ(name,text), BITS(0,0,0,0,1,0,1,1,MZ_TINY,0,0,P_NONE,METAL, IDED|UNIDED), 0, \
-		TILE_CLASS, 0, 0, 3, 3000, 0, 0, 0, 0, 0, 6, clr, __VA_ARGS__)
+		TILE_CLASS, 0, 0, 3, 3000, {0}, {0}, 0, 0, 0, 6, clr, __VA_ARGS__)
 	/* Fixed descriptions (also, artifact base-items only) */
 	METALIC_SLAB("First Word",  "blinding glyph", CLR_YELLOW),
 	METALIC_SLAB("Dividing Word",  "cerulean glyph", HI_ZAP),
@@ -1319,7 +1451,7 @@ POTION("blood", "blood-red",            0, 0,          18, 50,  CLR_RED),
 #define SPELL(name,desc,sub,prob,level,mgc,dir,color,...) OBJECT( \
 		OBJ(name,desc), BITS(0,0,0,0,mgc,0,0,0,MZ_LARGE,0,dir,sub,PAPER,0), 0, \
 		SPBOOK_CLASS, prob, level, \
-		50, level * 100, 0, 0, 0, level, 0, 20, color, __VA_ARGS__)
+		50, level * 100, {0}, {0}, 0, level, 0, 20, color, __VA_ARGS__)
 SPELL("dig",             "parchment",   P_MATTER_SPELL,			20, 5, 1, RAY,       HI_PAPER),
 SPELL("magic missile",   "vellum",      P_ATTACK_SPELL, 		45, 2, 1, RAY,       HI_PAPER),
 SPELL("fireball",        "ragged",      P_ATTACK_SPELL, 		20, 4, 1, RAY,       HI_PAPER),
@@ -1389,7 +1521,7 @@ SPELL("secrets", "ragged leather",      P_NONE,                  0, 7, 1, 0,    
 /* wands ... */
 #define WAND(name,typ,prob,cost,mgc,dir,metal,color,...) OBJECT( \
 		OBJ(name,typ), BITS(0,0,1,0,mgc,1,0,0,MZ_TINY,0,dir,P_NONE,metal,0), 0, \
-		WAND_CLASS, prob, 0, 7, cost, 0, 0, 0, 0, 0, 30, color, __VA_ARGS__)
+		WAND_CLASS, prob, 0, 7, cost, {0}, {0}, 0, 0, 0, 30, color, __VA_ARGS__)
 WAND("light",          "glass",         90, 100, 1, NODIR,     GLASS,       CLR_WHITE),/*Needs tile?*/
 WAND("darkness",       "obsidian",      10, 100, 1, NODIR,     OBSIDIAN_MT, CLR_BLACK),/*Needs tile*/
 WAND("wishing",        "dragon-bone",    0, 500, 1, NODIR,     DRAGON_HIDE, CLR_WHITE, O_NOWISH(1)),	/* wizmode only */
@@ -1425,7 +1557,7 @@ WAND((char *)0,        "jeweled",        0, 150, 1, 0,         IRON,        HI_M
 /* coins ... - so far, gold is all there is */
 #define COIN(name,prob,metal,worth,...) OBJECT( \
 		OBJ(name,(char *)0), BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,P_NONE,metal,0), 0, \
-		COIN_CLASS, prob, 0, 1, worth, 0, 0, 0, 0, 0, 0, HI_GOLD, __VA_ARGS__)
+		COIN_CLASS, prob, 0, 1, worth, {0}, {0}, 0, 0, 0, 0, HI_GOLD, __VA_ARGS__)
 	COIN("gold piece",      1000, GOLD,1),
 #undef COIN
 
@@ -1433,11 +1565,11 @@ WAND((char *)0,        "jeweled",        0, 150, 1, 0,         IRON,        HI_M
 #define GEM(name,desc,prob,wt,gval,nutr,mohs,glass,color,...) OBJECT( \
 	    OBJ(name,desc), \
 	    BITS(0,1,0,0,0,0,0,0,MZ_TINY,HARDGEM(mohs),PIERCE,-P_SLING,glass,0), 0, \
-		GEM_CLASS, prob, 0, 1, gval, 3, 3, 0, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
+		GEM_CLASS, prob, 0, 1, gval, DMG(D(3)), DMG(D(3)), 0, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
 #define ROCK(name,desc,kn,prob,wt,gval,sdam,ldam,hitbon,mgc,nutr,mohs,glass,color,...) OBJECT( \
 	    OBJ(name,desc), \
 	    BITS(kn,1,0,0,mgc,0,0,0,MZ_TINY,HARDGEM(mohs),WHACK,-P_SLING,glass,0), 0, \
-		GEM_CLASS, prob, 0, wt, gval, sdam, ldam, hitbon, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
+		GEM_CLASS, prob, 0, wt, gval, DMG(D(sdam)), DMG(D(ldam)), hitbon, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
 GEM("magicite crystal","brilliant blue",1, 1, 9999, 15, 11, GEMSTONE, CLR_BRIGHT_BLUE),/*Needs tile*/
 GEM("dilithium crystal", "white",      2,  1, 4500, 15,  5, GEMSTONE, CLR_WHITE),
 GEM("diamond", "white",                3,  1, 4000, 15, 10, GEMSTONE, CLR_WHITE),
@@ -1509,11 +1641,11 @@ ROCK("rock", (char *)0,		1,100,   1,  0, 6, 6, 0, 0, 10, 7, MINERAL, CLR_GRAY),
  */
 								//BITS(nmkn,mrg,uskn,ctnr,mgc,chrg,uniq,nwsh,big,tuf,dir,sub,mtrl,shwmat)
 OBJECT(OBJ("boulder",(char *)0), BITS(1,0,0,0,0,0,0,0,MZ_GIGANTIC,0,0,P_NONE,MINERAL,0), 0,
-		ROCK_CLASS,   100, 0, 6000,  0, 20, 20, 0, 0, 0, 2000, HI_MINERAL),
+		ROCK_CLASS,   100, 0, 6000,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2000, HI_MINERAL),
 OBJECT(OBJ("statue", (char *)0), BITS(1,0,0,1,0,0,0,0,    MZ_HUGE,0,0,P_NONE,MINERAL,0), 0,
-		ROCK_CLASS,   800, 0, 2500,  0, 20, 20, 0, 0, 0, 2500, CLR_WHITE),
+		ROCK_CLASS,   800, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2500, CLR_WHITE),
 OBJECT(OBJ("fossil", (char *)0), BITS(1,0,0,0,0,0,0,0,    MZ_HUGE,0,0,P_NONE,MINERAL,0), 0,
-		ROCK_CLASS,   100, 0, 2500,  0, 20, 20, 0, 0, 0, 2500, CLR_BROWN),
+		ROCK_CLASS,   100, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2500, CLR_BROWN),
 /*
 OBJECT(OBJ("bed",(char *)0), BITS(1,0,0,0,0,0,0,0,1,0,0,P_NONE,WOOD,0), 0,
 		BED_CLASS,   900, 0, 2000,  1000, 20, 20, 0, 0, 0, 2000, HI_WOOD),
@@ -1527,54 +1659,72 @@ OBJECT(OBJ("heavy iron ball", (char *)0), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,0,WHACK,
 #else
 OBJECT(OBJ("heavy iron ball", (char *)0), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,0,WHACK,P_NONE,IRON,0), 0,
 #endif /* CONVICT */
-		BALL_CLASS,  1000, 0,  480, 10, 25, 25, 0, 0,  0, 200, HI_METAL),
+		BALL_CLASS,  1000, 0,  480, 10, DMG(D(25)), DMG(D(25)), 0, 0,  0, 200, HI_METAL),
 						/* +d4 when "very heavy" */
-OBJECT(OBJ("chain", (char *)0),               BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,0,WHACK,P_FLAIL, IRON,1), 0,
-		CHAIN_CLASS, 1000, 0,  120,  0,  4,  4, 4, 0,  0, 200, HI_METAL),
-OBJECT(OBJ("sheaf of hay", (char *)0),        BITS(1,1,0,0,0,0,0,0,MZ_MEDIUM,0,    0,P_NONE, VEGGY,0), 0, /*Needs encyc entry*//*Needs tile*/
-		CHAIN_CLASS, 	0, 2, 	20,  0,  0,  0, 0, 0,  0, 100, CLR_YELLOW),
-OBJECT(OBJ("clockwork component", (char *)0), BITS(1,1,0,0,0,0,0,0,MZ_MEDIUM,0,WHACK,P_NONE,COPPER,0), 0, /*Needs encyc entry*//*Needs tile*/
-		CHAIN_CLASS,    0, 0,    1,  0,  1,  1, 0, 0,   0, 20, HI_COPPER),
-OBJECT(OBJ("subethaic component", (char *)0), BITS(1,1,0,0,0,0,0,0,MZ_MEDIUM,0,WHACK,P_NONE, GLASS,0), 0, /*Needs encyc entry*//*Needs tile*/
-		CHAIN_CLASS,    0, 0,    1,  0,  1,  1, 0, 0,   0, 20, HI_GLASS),
-OBJECT(OBJ("scrap", (char *)0),               BITS(1,1,0,0,0,0,0,0,MZ_MEDIUM,0,WHACK,P_NONE,  IRON,0), 0, /*Needs encyc entry*//*Needs tile*/
-		CHAIN_CLASS,    0, 0,    1,  0,  1,  1, 0, 0,   0, 20, CLR_BROWN),
-OBJECT(OBJ("hellfire component", (char *)0),  BITS(1,1,0,0,0,0,0,0,MZ_MEDIUM,0,WHACK,P_NONE, METAL,0), 0, /*Needs encyc entry*//*Needs tile*/
-		CHAIN_CLASS,    0, 0,    1,  0,  1,  1, 0, 0,   0, 20, CLR_ORANGE),
-						/* +1 both l & s */
-OBJECT(OBJ("broken android", (char *)0),      BITS(1,1,0,0,0,0,0,0,  MZ_HUGE,0,WHACK,P_NONE, METAL,0), 0, /*Needs encyc entry*//*Needs tile*/
-		CHAIN_CLASS,    0, 0, 3000,  0,  1,  1, 0, 0,   0, 20, CLR_WHITE),
-OBJECT(OBJ("broken gynoid", (char *)0),       BITS(1,1,0,0,0,0,0,0,  MZ_HUGE,0,WHACK,P_NONE, METAL,0), 0, /*Needs encyc entry*//*Needs tile*/
-		CHAIN_CLASS,    0, 0, 3000,  0,  1,  1, 0, 0,   0, 20, CLR_WHITE),
-OBJECT(OBJ("lifeless doll", (char *)0),       BITS(1,1,0,0,0,0,0,0,  MZ_HUGE,0,WHACK,P_NONE, PLASTIC,0), 0, /*Needs encyc entry*//*Needs tile*/
-		CHAIN_CLASS,    0, 0,  750,  0,  1,  1, 0, 0,   0, 20, CLR_BRIGHT_MAGENTA),
 
-OBJECT(OBJ("rope of entangling", (char *)0),  BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,0,WHACK,P_NONE, VEGGY,0), 0,
-		CHAIN_CLASS,	0, 0,  120,  0,  4,  4, 0, 0,  0, 200, CLR_BROWN),
-OBJECT(OBJ("iron bands", (char *)0),          BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,0,WHACK,P_NONE,  IRON,0), 0,
-		CHAIN_CLASS,	0, 0,  120,  0,  4,  4, 0, 0,  0, 200, HI_METAL),
-OBJECT(OBJ("razor wire", (char *)0),          BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,0,SLASH,P_NONE, METAL,0), 0,
-		CHAIN_CLASS,	0, 0,  120,  0,  4,  4, 0, 0,  0, 200, HI_METAL),
-OBJECT(OBJ("shackles", (char *)0),            BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,0,SLASH,P_NONE,  IRON,0), 0,
-		CHAIN_CLASS,	0, 0,  120,  0,  4,  4, 0, 0,  0, 200, HI_METAL),
+#define CHAIN(name,desc,sdam,ldam,nutr,wt,cost,hitbon,dtyp,mat,color,...) OBJECT( \
+	    OBJ(name,desc), \
+	    BITS(1,1,0,0,0,0,0,0,MZ_MEDIUM,0,dtyp,P_NONE,mat,0), 0, \
+		CHAIN_CLASS, 0, 0, wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
+					
+CHAIN("chain", (char *)0,
+	DMG(D(4), F(1)), DMG(D(4), F(1)),
+	200, 120, 0, 4, B, IRON, HI_METAL,
+	O_MATSPEC(IDED|UNIDED), O_MERGE(0), O_SKILL(P_FLAIL), O_PROB(1000)),
+CHAIN("sheaf of hay", (char *)0,
+	DMG(D(1)), DMG(D(1)),
+	100,  20, 2, 0, 0, VEGGY, CLR_YELLOW),
+CHAIN("clockwork component", (char *)0,
+	DMG(D(1)), DMG(D(1)),
+	 20,   1, 0, 0, B, COPPER, HI_COPPER),
+CHAIN("subethaic component", (char *)0,
+	DMG(D(1)), DMG(D(1)),
+	 20,   1, 0, 0, B, GLASS, HI_GLASS),
+CHAIN("scrap", (char *)0,
+	DMG(D(1)), DMG(D(1)),
+	 20,   1, 0, 0, B, IRON, CLR_BROWN),
+CHAIN("hellfire component", (char *)0,
+	DMG(D(1)), DMG(D(1)),
+	 20,   1, 0, 0, B, METAL, CLR_ORANGE),
+
+#define CHAINCORPSE(name,desc,wt,mat,color,...)\
+	CHAIN(name,desc,{0},{0},20,wt,0,0,0,mat,color,O_MERGE(0),O_SIZE(MZ_HUGE),__VA_ARGS__)
+
+CHAINCORPSE("broken android", (char *)0, 3000, METAL, CLR_WHITE), /*Needs encyc entry*//*Needs tile*/
+CHAINCORPSE("broken gynoid", (char *)0,  3000, METAL, CLR_WHITE), /*Needs encyc entry*//*Needs tile*/
+CHAINCORPSE("lifeless doll", (char *)0,   750, PLASTIC, CLR_BRIGHT_MAGENTA), /*Needs encyc entry*//*Needs tile*/
+
+#undef CHAINCORPSE
+
+#define CHAINROPE(name,desc,dtyp,mat,color,...)\
+	CHAIN(name,desc,DMG(D(4)),DMG(D(4)),200,120,0,0,dtyp,mat,color,O_MERGE(0),__VA_ARGS__)
+
+CHAINROPE("rope of entangling", (char *)0,   B, VEGGY, CLR_BROWN),
+CHAINROPE("iron bands", (char *)0,           B, IRON,  HI_METAL),
+CHAINROPE("razor wire", (char *)0,           S, METAL, HI_METAL),
+CHAINROPE("shackles", (char *)0,             S, IRON,  HI_METAL),
+
+#undef CHAINROPE
+
+#undef CHAIN
 
 OBJECT(OBJ("blinding venom", "splash of venom"),
 		BITS(0,1,0,0,0,0,0,1,MZ_TINY,0,0,P_NONE,LIQUID,0), 0,
-		VENOM_CLASS,  500, 0,	 1,  0,  0,  0, 0, 0,	 0, 0, CLR_BLACK),
+		VENOM_CLASS,  500, 0,	 1,  0,  {0},  {0}, 0, 0,	 0, 0, CLR_BLACK),
 OBJECT(OBJ("acid venom", "splash of venom"),
 		BITS(0,1,0,0,0,0,0,1,MZ_TINY,0,0,P_NONE,LIQUID,0), 0,
-		VENOM_CLASS,  500, 0,	 1,  0,  6,  6, 0, 0,	 0, 0, CLR_BRIGHT_GREEN),
+		VENOM_CLASS,  500, 0,	 1,  0,  DMG(D(6)),  DMG(D(6)), 0, 0,	 0, 0, CLR_BRIGHT_GREEN),
 OBJECT(OBJ("ball of webbing", (char *)0),/*Needs tile*/
 		BITS(1,1,0,0,0,0,0,1,MZ_TINY,0,0,P_NONE,LIQUID,0), 0,
-		VENOM_CLASS,  0, 0,	 1,  0,  6,  6, 0, 0,	 0, 0, CLR_WHITE),
+		VENOM_CLASS,  0, 0,	 1,  0,  DMG(D(6)),  DMG(D(6)), 0, 0,	 0, 0, CLR_WHITE),
 //OBJECT(OBJ("shoggoth venom", "splash of venom"),
 //		BITS(0,1,0,0,0,0,0,1,MZ_TINY,0,0,P_NONE,LIQUID,0), 0,
-//		VENOM_CLASS,  500, 0,	 1,  0,  0,  0, 0, 0,	 0, 0, HI_ORGANIC),
+//		VENOM_CLASS,  500, 0,	 1,  0,  {0},  {0}, 0, 0,	 0, 0, HI_ORGANIC),
 		/* +d6 small or large */
 
 /* fencepost, the deadly Array Terminator -- name [1st arg] *must* be NULL */
 	OBJECT(OBJ((char *)0,(char *)0), BITS(0,0,0,0,0,0,0,0,0,0,0,P_NONE,0,0), 0,
-		ILLOBJ_CLASS, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+		ILLOBJ_CLASS, 0, 0, 0, 0, {0}, {0}, 0, 0, 0, 0, 0)
 }; /* objects[] */
 
 #ifndef OBJECTS_PASS_2_

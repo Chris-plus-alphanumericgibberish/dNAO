@@ -3148,11 +3148,11 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		int bonus = 0;
 		//Non-elemental energy attack: 1 die plus the remaining half die
 		bonus += rnd((mdef && bigmonst(pd)) ? 
-						objects[otmp->otyp].oc_wldam : 
-						objects[otmp->otyp].oc_wsdam);
+						objects[otmp->otyp].oc_wldam.oc_damd : 
+						objects[otmp->otyp].oc_wsdam.oc_damd);
 		bonus += (mdef && bigmonst(pd)) ? 
-					(objects[otmp->otyp].oc_wldam+1)/2 : 
-					(objects[otmp->otyp].oc_wsdam+1)/2;
+					(objects[otmp->otyp].oc_wldam.oc_damd+1)/2 : 
+					(objects[otmp->otyp].oc_wsdam.oc_damd+1)/2;
 		if(otmp->otyp == FORCE_WHIP){
 			bonus += (mdef && bigmonst(pd)) ? 
 							rnd(4)+2 : 

@@ -139,9 +139,10 @@ struct objclass {
 	short	oc_cost;		/* base cost in shops */
 /* Check the AD&D rules!  The FIRST is small monster damage. */
 /* for weapons, and tools, rocks, and gems useful as weapons */
-	schar	oc_wsdam, oc_wldam;	/* max small/large monster damage */
-#define oc_range	oc_wsdam	/* for strength independant ranged weapons */
-#define oc_rof		oc_wldam	/* rate of fire bonus for ranged weapons */
+	struct weapon_dice oc_wsdam;	/* small monster damage */
+	struct weapon_dice oc_wldam;	/* large monster damage */
+#define oc_range	oc_wsdam.flat	/* for strength independant ranged weapons */
+#define oc_rof		oc_wldam.flat	/* rate of fire bonus for ranged weapons */
 	
 	schar	oc_oc1, oc_oc2, oc_oc3;
 #define oc_hitbon	oc_oc1		/* weapons: "to hit" bonus */
