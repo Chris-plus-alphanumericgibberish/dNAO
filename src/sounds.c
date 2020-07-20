@@ -3191,8 +3191,6 @@ int tx,ty;
 			struct monst *rat = 0;
 			int count = 0;
 			int t1, t2;
-			static int gldring = 0;
-			if (!gldring) gldring = find_gold_ring();
 			
 			rat = m_at(tx,ty);
 			if(rat && rat->mtyp == PM_SEWER_RAT) t2=17;
@@ -3203,7 +3201,7 @@ int tx,ty;
 					if(!o1){
 						if(otmp->otyp == SACK){ o1 = otmp; t1 = 0;}
 						else if(otmp->otyp == UNIVERSAL_KEY){ o1 = otmp; t1 = 1;}
-						else if(otmp->oclass == RING_CLASS && otmp->otyp == gldring){ o1 = otmp; t1 = 2;}
+						else if(otmp->oclass == RING_CLASS && otmp->otyp == find_gold_ring()){ o1 = otmp; t1 = 2;}
 						else if(otmp->oclass == COIN_CLASS){ o1 = otmp; t1 = 3;}
 						else if(otmp->otyp == DAGGER){ o1 = otmp; t1 = 4;}
 						else if(otmp->otyp == APPLE){ o1 = otmp; t1 = 5;}
@@ -3222,7 +3220,7 @@ int tx,ty;
 					else if(!o2 && !rat){
 						if(otmp->otyp == SACK && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 0;}
 						else if(otmp->otyp == UNIVERSAL_KEY && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 1;}
-						else if(otmp->oclass == RING_CLASS && otmp->otyp == gldring && otmp->oclass != o1->oclass){ o2 = otmp; t2 = 2;}
+						else if(otmp->oclass == RING_CLASS && otmp->otyp == find_gold_ring() && otmp->oclass != o1->oclass){ o2 = otmp; t2 = 2;}
 						else if(otmp->oclass == COIN_CLASS && otmp->oclass != o1->oclass){ o2 = otmp; t2 = 3;}
 						else if(otmp->otyp == DAGGER && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 4;}
 						else if(otmp->otyp == APPLE && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 5;}
@@ -3269,7 +3267,7 @@ int tx,ty;
 								doname(otmp), (const char *)0);
 						break;
 						case 2:
-							otmp = mksobj(gldring, TRUE, FALSE);
+							otmp = mksobj(find_gold_ring(), TRUE, FALSE);
 							otmp->blessed = FALSE;
 							otmp->cursed = TRUE;
 							hold_another_object(otmp, "You drop %s!",
@@ -3595,8 +3593,6 @@ int tx,ty;
 		} else pline("You can't feel the spirit.");
 	}break;
 	case BERITH:{
-		static int slvring = 0;
-		if (!slvring) slvring = find_silver_ring();
 		if(u.sealTimeout[BERITH-FIRST_SEAL] < moves){
 			struct obj *o = 0, *otmp;
 			//Berith requires that his seal be drawn around a set of riding gloves, riding boots, a saddle, a saber, a longsword, a bow, or a lance.
@@ -3607,7 +3603,7 @@ int tx,ty;
 				}
 			}
 			//Berith also allows the summoner to wear a blessed silver ring on his or her left hand.
-			if(o || (uleft && uleft->otyp == slvring && uleft->blessed)){
+			if (o || (uleft && uleft->otyp == find_silver_ring() && uleft->blessed)){
 				if(u.sealCounts < numSlots){
 					if(!Blind){
 						pline("Gold rains down within the circumference of the seal, melting slowly to blood where it lands.");

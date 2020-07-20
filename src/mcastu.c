@@ -2439,8 +2439,6 @@ int tary;
 		else
 		{
 			struct obj * boots = (youdef ? uarmf : which_armor(mdef, W_ARMF));
-			static int mboots2 = 0;
-			if (!mboots2) mboots2 = find_mboots();
 
 			if (boots && boots->otyp == WATER_WALKING_BOOTS) {
 				/* message part 1*/
@@ -2492,7 +2490,7 @@ int tary;
 				if (youdef && u.uvaul_duration)
 					dmg = (dmg + 1) / 2;
 
-				if (boots && boots->otyp == mboots2) {
+				if (boots && boots->otyp == find_mboots()) {
 					if(youdef) pline("Good thing you're wearing mud boots!");
 				}
 				else

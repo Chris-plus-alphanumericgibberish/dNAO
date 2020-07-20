@@ -1812,10 +1812,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		// first index -- determine if using the alternate attack set (one seduction attack)
 		if (*indexnum == 0){
 			if (youdef){
-				static int engagering6 = 0;
 				boolean engring = FALSE;
-				if (!engagering6) engagering6 = find_engagement_ring();
-				if ((uleft && uleft->otyp == engagering6) || (uright && uright->otyp == engagering6)) engring = TRUE;
+				if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+					(uright && uright->otyp == find_engagement_ring()))
+					engring = TRUE;
 				if(pd && (!(dmgtype(pd, AD_SEDU)
 					|| dmgtype(pd, AD_SSEX)
 					|| dmgtype(pd, AD_LSEX)
@@ -2433,9 +2433,6 @@ int vis;
 	if (vis == -1)
 		vis = getvis(magr, mdef, 0, 0);
 
-	static int mboots1 = 0;
-	if (!mboots1) mboots1 = find_mboots();
-
 	switch (attk->adtyp) {
 		/* INT attacks always target heads */
 	case AD_DRIN:
@@ -2452,7 +2449,7 @@ int vis;
 		/* wrap attacks are specifically blocked by mud boots, in addition to body armors */
 	case AD_WRAP:
 		obj = (youdef ? uarmf : which_armor(mdef, W_ARMF));
-		if (obj && obj->otyp == mboots1)
+		if (obj && obj->otyp == find_mboots())
 			break;
 		else {
 			obj = (struct obj *)0;
@@ -2465,8 +2462,8 @@ int vis;
 	}
 
 	if (obj && (
-		(obj->greased || obj->otyp == OILSKIN_CLOAK) ||		/* greased (or oilskin) armor */
-		(attk->adtyp == AD_WRAP && obj->otyp == mboots1)	/* mud boots vs wrap attacks */
+		(obj->greased || obj->otyp == OILSKIN_CLOAK) ||			/* greased (or oilskin) armor */
+		(attk->adtyp == AD_WRAP && obj->otyp == find_mboots())	/* mud boots vs wrap attacks */
 		)
 		&&
 		!(obj->cursed && !rn2(3))							/* 1/3 chance to fail when cursed */
@@ -2481,7 +2478,7 @@ int vis;
 				(youdef ? "your" : s_suffix(mon_nam(mdef))),
 				(obj->greased ? "greased" : "slippery"),
 				((obj->otyp == OILSKIN_CLOAK && !objects[obj->otyp].oc_name_known)
-					? cloak_simple_name(obj) : obj->otyp == mboots1 ? "mud boots" : xname(obj))
+				? cloak_simple_name(obj) : obj->otyp == find_mboots() ? "mud boots" : xname(obj))
 				);
 		}
 		/* remove grease (50% odds) */
@@ -3180,11 +3177,8 @@ int flat_acc;
 			}
 			/* fencing gloves increase weapon accuracy when you have a free off-hand */
 			if (!thrown && !bimanual(weapon, magr->data) && !which_armor(magr, W_ARMS)) {
-				static int fgloves;
-				if (!fgloves)
-					fgloves = find_fgloves();
 				struct obj * otmp = which_armor(magr, W_ARMG);
-				if (otmp && otmp->otyp == fgloves)
+				if (otmp && otmp->otyp == find_fgloves())
 					wepn_acc += 2;
 			}
 			
@@ -3265,10 +3259,8 @@ int flat_acc;
 
 	/* combat boots increase accuracy */
 	if (magr) {
-		static int cbootsa = 0;
-		if (!cbootsa) cbootsa = find_cboots();
 		otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
-		if (otmp && otmp->otyp == cbootsa)
+		if (otmp && otmp->otyp == find_cboots())
 			wepn_acc++;
 	}
 
@@ -5711,11 +5703,9 @@ boolean ranged;
 					}
 				}
 				/* 1/10 chance to suck off boots */
-				static int bboots1 = 0;
-				if (!bboots1) bboots1 = find_bboots();
 				otmp = (youdef ? uarmf : which_armor(mdef, W_ARMF));
 				if (otmp
-					&& otmp->otyp != bboots1
+					&& otmp->otyp != find_bboots()
 					&& !rn2(10)
 					) {
 					if (youdef) {
@@ -6085,8 +6075,9 @@ boolean ranged;
 				break;
 
 			case AD_SEDU:
-				if (!engagering4) engagering4 = find_engagement_ring();
-				if ((uleft && uleft->otyp == engagering4) || (uright && uright->otyp == engagering4)) engring = TRUE;
+				if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+					(uright && uright->otyp == find_engagement_ring()))
+					engring = TRUE;
 				if (u.sealsActive&SEAL_ANDROMALIUS) break;
 				//pline("test string!");
 				if (pa->mtyp == PM_DEMOGORGON){
@@ -6144,8 +6135,9 @@ boolean ranged;
 			case AD_SSEX:
 				if(Chastity)
 					break;
-				if (!engagering1) engagering1 = find_engagement_ring();
-				if ((uleft && uleft->otyp == engagering1) || (uright && uright->otyp == engagering1))
+
+				if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+					(uright && uright->otyp == find_engagement_ring()))
 					break;
 
 				if (pa->mtyp == PM_MOTHER_LILITH && could_seduce(magr, &youmonst, attk) == 1){
@@ -6591,13 +6583,11 @@ boolean ranged;
 			}
 			else {
 				if (uarmf) {
-					static int jboots1 = 0;
-					if (!jboots1) jboots1 = find_jboots();
 					if (rn2(2) && (uarmf->otyp == LOW_BOOTS ||
 						uarmf->otyp == SHOES))
 						pline("%s pricks the exposed part of your %s %s!",
 						Monnam(magr), sidestr, body_part(LEG));
-					else if (uarmf->otyp != jboots1 && !rn2(5))
+					else if (uarmf->otyp != find_jboots() && !rn2(5))
 						pline("%s pricks through your %s boot!",
 						Monnam(magr), sidestr);
 					else {
@@ -10621,10 +10611,10 @@ int vis;
 			return MM_MISS;
 		/* STRAIGHT COPY-PASTE FROM ORIGINAL */
 		else {
-			static int engagering5 = 0;
 			boolean engring = FALSE;
-			if (!engagering5) engagering5 = find_engagement_ring();
-			if ((uleft && uleft->otyp == engagering5) || (uright && uright->otyp == engagering5)) engring = TRUE;
+			if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+				(uright && uright->otyp == find_engagement_ring()))
+				engring = TRUE;
 			if (u.sealsActive&SEAL_ANDROMALIUS) break;
 			if (distu(magr->mx, magr->my) > 1 ||
 				magr->mcan ||
@@ -10700,11 +10690,10 @@ int vis;
 			return MM_MISS;
 		/* STRAIGHT COPY-PASTE FROM ORIGINAL */
 		else {
-			static int engagering2 = 0;
 			if(Chastity)
 				break;
-			if (!engagering2) engagering2 = find_engagement_ring();
-			if ((uleft && uleft->otyp == engagering2) || (uright && uright->otyp == engagering2))
+			if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+				(uright && uright->otyp == find_engagement_ring()))
 				break;
 			if (could_seduce(magr, &youmonst, attk) == 1
 				&& !magr->mcan
@@ -12377,9 +12366,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 
 		/* fighting gloves give bonus damage */
-		static int tgloves = 0;
-		if (!tgloves) tgloves = find_tgloves();
-		if (gloves && gloves->otyp == tgloves)
+		if (gloves && gloves->otyp == find_tgloves())
 			basedmg += ((youagr && martial_bonus()) ? 3 : 1);
 
 		

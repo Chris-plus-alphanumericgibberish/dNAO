@@ -8,6 +8,8 @@
 STATIC_DCL void FDECL(setgemprobs, (d_level*));
 STATIC_DCL void FDECL(shuffle,(int,int,BOOLEAN_P));
 STATIC_DCL void NDECL(shuffle_all);
+STATIC_DCL int FDECL(find_otyp_of_desc, (const char *, const char **, int, int, boolean(*)(int)));
+STATIC_DCL void NDECL(randomize_nonmatwands);
 STATIC_DCL boolean FDECL(interesting_to_discover,(int));
 
 
@@ -246,746 +248,623 @@ shuffle_all()
 	shuffle(SPEED_BOOTS, FLYING_BOOTS, FALSE);
 }
 
+/* finds the object index for an item whose description matches str (first) or any of strs[],
+ * within the given bounds of the objects array 
+ * Caller is responsible for storing returned otyp.
+ */
+/* finds the object index for an item whose description matches str (first) or any of strs[],
+* within the given bounds of the objects array
+* Caller is responsible for storing returned otyp.
+*/
+int
+find_otyp_of_desc(str, strs, lbound, ubound, extracondition)
+const char * str;
+const char ** strs;
+int lbound;
+int ubound;
+boolean FDECL((*extracondition), (int));	/* extracondition CANNOT call find_otyp_of_desc() */
+{
+	register int i;
+	register int j;
+	register const char *s;
+	const char * curstr;
+
+	j = -1;
+	/* for each string in our list of strings (or just str if onlyone==TRUE) */
+	do {
+		curstr = (j == -1 ? str : strs[j]);
+
+		/* from lbound of objects array to ubound, */
+		for (i = lbound; i <= ubound; i++)
+		{
+			/* if description matches, */
+			if ((s = OBJ_DESCR(objects[i])) != 0 && (
+				!strcmp(s, curstr)
+				))
+			{
+				/* if that's all we're looking for OR it matches our additional criteria, */
+				if (!extracondition || extracondition(i))
+					return i;	/* return it */
+				else
+					break;	/* stop checking strs[j] against objects[i]; increment i. */
+			}
+		}
+	} while (strs && strs[++j]);
+
+	/* did not find it */
+	/* caller should raise impossible */
+	return -1;
+}
+
+/* list of non-material-ed wands */
+/* order can and will be randomized during runtime (terminator excluded) */
+const char * matNeutralWands[] = {
+	"hexagonal",
+	"short",
+	"runed",
+	"long",
+	"curved",
+	"forked",
+	"spiked",
+	(const char *)0
+};
+#define NUM_NONMAT_WANDS 7
+/* randomizes order of non-material-ed wands list */
+void
+randomize_nonmatwands()
+{
+	int i;
+	int j;
+	const char * t;
+	for (i = 0; i < NUM_NONMAT_WANDS - 1; i++)
+	{
+		j = i + rand() / (RAND_MAX / (NUM_NONMAT_WANDS - i) + 1);
+		t = matNeutralWands[j];
+		matNeutralWands[j] = matNeutralWands[i];
+		matNeutralWands[i] = t;
+	}
+	return;
+}
+
 /* find the object index for silver attack wand */
 int
 find_sawant()
 {
-    static int i = -1;
-    register const char *s;
-	
-	if(i != -1) return i;
-	
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "silver")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "hexagonal")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "short")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "runed")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "long")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "curved")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "forked")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "spiked")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-	i = 0;
-    return i;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	randomize_nonmatwands();
+	if ((i = find_otyp_of_desc("silver", matNeutralWands, WAN_LIGHT, WAN_LIGHTNING, is_attack_wand)) != -1)
+		return i;
+	else
+		impossible("could not find silver attack wand");
+	return 0;
 }
 
 /* find the object index for gold attack wand */
 int
 find_gawant()
 {
-    static int i = -1;
-    register const char *s;
-	
-	if(i != -1) return i;
-	
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "gold")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "runed")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "long")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "forked")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "spiked")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "hexagonal")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "short")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "curved")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-	i = 0;
-    return i;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	randomize_nonmatwands();
+	if ((i = find_otyp_of_desc("gold", matNeutralWands, WAN_LIGHT, WAN_LIGHTNING, is_attack_wand)) != -1)
+		return i;
+	else
+		impossible("could not find gold attack wand");
+	return 0;
 }
 
 /* find the object index for platinum attack wand */
 int
 find_pawant()
 {
-    static int i = -1;
-    register const char *s;
-	
-	if(i != -1) return i;
-	
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "platinum")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "runed")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "long")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "forked")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "spiked")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "hexagonal")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "short")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-    for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "curved")
-			)
-		){
-			if(is_attack_wand(i))
-				return i;
-			else break;
-		}
-	i = 0;
-    return i;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	randomize_nonmatwands();
+	if ((i = find_otyp_of_desc("platinum", matNeutralWands, WAN_LIGHT, WAN_LIGHTNING, is_attack_wand)) != -1)
+		return i;
+	else
+		impossible("could not find platinum attack wand");
+	return 0;
 }
 
-/* find the object index for iron wand */
+/* find the object index for platinum wand */
 int
 find_riwant()
 {
-    int i = -1;
-    int j;
-    register const char *s;
-	static char *candidateWands[] = {
-		"iron",
-		"hexagonal",
-		"short",
-		"runed",
-		"long",
-		"curved",
-		"forked",
-		"spiked"
-	};
-	int offset = rn2(SIZE(candidateWands));
-	
-	for(j = 0; j < SIZE(candidateWands); j++){
-		for (i = WAN_LIGHT; i <= WAN_LIGHTNING; i++)
-			if ((s = OBJ_DESCR(objects[i])) != 0 && (
-				!strcmp(s, candidateWands[(j+offset)%SIZE(candidateWands)])
-				)
-			){
-				// if(is_attack_wand(i))
-				return i;
-				// else break;
-			}
-	}
-	i = 0;
-    return i;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	randomize_nonmatwands();
+	if ((i = find_otyp_of_desc("iron", matNeutralWands, WAN_LIGHT, WAN_LIGHTNING, 0)) != -1)
+		return i;
+	else
+		impossible("could not find iron wand");
+	return 0;
 }
 
-/* find the object index for circlet */
+/* find the object index for (gold) circlet */
 int
 find_gcirclet()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = HELMET; i <= HELM_OF_DRAIN_RESISTANCE; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "band")
-		)) return i;
-
-    impossible("band not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("band", 0, HELMET, HELM_OF_DRAIN_RESISTANCE, 0)) != -1)
+		return i;
+	else
+		impossible("could not find circlet");
+	return 0;
 }
 
 /* find the object index for silver ring */
 int
 find_sring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "silver")
-		)) return i;
-
-    impossible("silver ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("silver", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find silver ring");
+	return 0;
 }
 
 /* find the object index for iron ring */
 int
 find_iring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "iron")
-		)) return i;
-
-    impossible("iron ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("iron", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find iron ring");
+	return 0;
 }
 
-/* find the object index for a non-hunger iron ring */
+/* find the object index for a non-polymorph iron ring */
 int
 find_good_iring()
 {
+	static int i = -1;
     register const char *s;
-    register int i = find_iring();
+	if (i != -1) return i;
 	
-	if(i != RIN_POLYMORPH)
+	/* maybe use iron ring */
+	if ((i = find_iring()) && i != RIN_POLYMORPH)
 		return i;
-	
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && (
-			!strcmp(s, "twisted")
-		)) return i;
-
-    impossible("twisted ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	/* if we don't like the iron ring, use "twisted" */
+	if ((i = find_otyp_of_desc("twisted", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find twisted ring");
+    return 0;
 }
 
 /* find the object index for visored helmet */
 int
 find_vhelm()
 {
-    register int i;
-    register const char *s;
-
-    for (i = HELMET; i <= HELM_OF_DRAIN_RESISTANCE; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && 
-			!strcmp(s, "visored helmet")
-		) return i;
-
-    impossible("visored helmet not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+	
+	if ((i = find_otyp_of_desc("visored helmet", 0, HELMET, HELM_OF_DRAIN_RESISTANCE, 0)) != -1)
+		return i;
+	else
+		impossible("could not find visored helmet");
+	return 0;
 }
 
 /* find the object index for snow boots; used [once] by slippery ice code */
 int
 find_skates()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPEED_BOOTS; i <= FLYING_BOOTS; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "snow boots"))
-	    return i;
-
-    impossible("snow boots not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("snow boots", 0, SPEED_BOOTS, FLYING_BOOTS, 0)) != -1)
+		return i;
+	else
+		impossible("could not find snow boots");
+	return 0;
 }
 
 /* find the object index for combat boots */
 int
 find_cboots()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPEED_BOOTS; i <= FLYING_BOOTS; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "combat boots"))
-	    return i;
-
-    impossible("combat boots not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("combat boots", 0, SPEED_BOOTS, FLYING_BOOTS, 0)) != -1)
+		return i;
+	else
+		impossible("could not find combat boots");
+	return 0;
 }
 
 /* find the object index for mud boots */
 int
 find_mboots()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPEED_BOOTS; i <= FLYING_BOOTS; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "mud boots"))
-	    return i;
-
-    impossible("mud boots not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("mud boots", 0, SPEED_BOOTS, FLYING_BOOTS, 0)) != -1)
+		return i;
+	else
+		impossible("could not find mud boots");
+	return 0;
 }
 
 /* find the object index for hiking boots */
 int
 find_hboots()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPEED_BOOTS; i <= FLYING_BOOTS; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "hiking boots"))
-	    return i;
-
-    impossible("hiking boots not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("hiking boots", 0, SPEED_BOOTS, FLYING_BOOTS, 0)) != -1)
+		return i;
+	else
+		impossible("could not find hiking boots");
+	return 0;
 }
 
 /* find the object index for buckled boots */
 int
 find_bboots()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPEED_BOOTS; i <= FLYING_BOOTS; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "buckled boots"))
-	    return i;
-
-    impossible("buckled boots not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("buckled boots", 0, SPEED_BOOTS, FLYING_BOOTS, 0)) != -1)
+		return i;
+	else
+		impossible("could not find buckled boots");
+	return 0;
 }
 
 /* find the object index for jungle boots */
 int
 find_jboots()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPEED_BOOTS; i <= FLYING_BOOTS; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "jungle boots"))
-	    return i;
+	if ((i = find_otyp_of_desc("jungle boots", 0, SPEED_BOOTS, FLYING_BOOTS, 0)) != -1)
+		return i;
+	else
+		impossible("could not find jungle boots");
+	return 0;
+}
 
-    impossible("jungle boots not found?");
-    return -1;	/* not 0, or caller would try again each move */
+/* find the object index for riding boots */
+int
+find_rboots()
+{
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	if ((i = find_otyp_of_desc("riding boots", 0, SPEED_BOOTS, FLYING_BOOTS, 0)) != -1)
+		return i;
+	else
+		impossible("could not find riding boots");
+	return 0;
 }
 
 /* find the object index for the ornamental cope */
 int
 find_cope()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = CLOAK_OF_PROTECTION; i <= CLOAK_OF_DISPLACEMENT; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "ornamental cope"))
-			return i;
-
-    impossible("ornamental cope not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("ornamental cope", 0, CLOAK_OF_PROTECTION, CLOAK_OF_DISPLACEMENT, 0)) != -1)
+		return i;
+	else
+		impossible("could not find ornamental cope");
+	return 0;
 }
 
 /* find the object index for the opera cloak */
 int
 find_opera_cloak()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = CLOAK_OF_PROTECTION; i <= CLOAK_OF_DISPLACEMENT; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "opera cloak"))
-			return i;
+	if ((i = find_otyp_of_desc("opera cloak", 0, CLOAK_OF_PROTECTION, CLOAK_OF_DISPLACEMENT, 0)) != -1)
+		return i;
+	else
+		impossible("could not find opera cloak");
+	return 0;
+}
 
-    impossible("opera cloak not found?");
-    return -1;	/* not 0, or caller would try again each move */
+/* find the object index for piece of cloth */
+int
+find_pcloth()
+{
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	if ((i = find_otyp_of_desc("piece of cloth", 0, CLOAK_OF_PROTECTION, CLOAK_OF_DISPLACEMENT, 0)) != -1)
+		return i;
+	else
+		impossible("could not find piece of cloth");
+	return 0;
 }
 
 /* find the object index for the signet ring */
 int
 find_signet_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "black signet"))
-			return i;
-
-    impossible("signet ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("black signet", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find signet ring");
+	return 0;
+}
+/* legacy function */
+boolean
+isSignetRing(otyp)
+int otyp;
+{
+	return (otyp == find_signet_ring());
 }
 
 /* find the object index for the engagement ring */
 int
 find_engagement_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-		if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "engagement"))
-			return i;
-
-    impossible("engagement ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("engagement", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find engagement ring");
+	return 0;
 }
 
 /* find the object index for the gold ring */
 int
 find_gold_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "gold"))
-	    return i;
-
-    impossible("gold ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("gold", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find gold ring");
+	return 0;
 }
 
 int
 find_silver_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "silver"))
-	    return i;
-
-    impossible("silver ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("silver", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find silver ring");
+	return 0;
 }
 
 int
 find_opal_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "opal"))
-	    return i;
-
-    impossible("opal ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("opal", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find opal ring");
+	return 0;
 }
 
 int
 find_clay_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "clay"))
-	    return i;
-
-    impossible("clay ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("clay", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find clay ring");
+	return 0;
 }
 
 int
 find_coral_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "coral"))
-	    return i;
-
-    impossible("coral ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("coral", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find coral ring");
+	return 0;
 }
 
 int
 find_onyx_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "black onyx"))
-	    return i;
-
-    impossible("black onyx ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("onyx", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find onyx ring");
+	return 0;
 }
 
 int
 find_moonstone_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "moonstone"))
-	    return i;
-
-    impossible("moonstone ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("moonstone", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find moonstone ring");
+	return 0;
 }
 
 int
 find_jade_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "jade"))
-	    return i;
-
-    impossible("jade ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("jade", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find jade ring");
+	return 0;
 }
 
 int
 find_agate_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "agate"))
-	    return i;
-
-    impossible("agate ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("agate", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find agate ring");
+	return 0;
 }
 
 int
 find_topaz_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "topaz"))
-	    return i;
-
-    impossible("topaz ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("topaz", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find topaz ring");
+	return 0;
 }
 
 int
 find_sapphire_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "sapphire"))
-	    return i;
-
-    impossible("sapphire ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("sapphire", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find sapphire ring");
+	return 0;
 }
 
 int
 find_ruby_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "ruby"))
-	    return i;
-
-    impossible("ruby ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("ruby", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find ruby ring");
+	return 0;
 }
 
 int
 find_pearl_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "pearl"))
-	    return i;
-
-    impossible("pearl ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("pearl", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find pearl ring");
+	return 0;
 }
 
 int
 find_ivory_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "ivory"))
-	    return i;
-
-    impossible("ivory ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("ivory", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find ivory ring");
+	return 0;
 }
 
 int
 find_emerald_ring()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = RIN_ADORNMENT; i <= RIN_PROTECTION_FROM_SHAPE_CHAN; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "emerald"))
-	    return i;
-
-    impossible("emerald ring not found?");
-    return -1;	/* not 0, or caller would try again each move */
-}
-
-boolean
-isSignetRing(otyp)
-int otyp;
-{
-	static int sigring = 0;
-	if(!sigring) sigring = find_signet_ring();
-	return sigring == otyp;
+	if ((i = find_otyp_of_desc("emerald", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find emerald ring");
+	return 0;
 }
 
 /* test if a ring is an engravable ring */
@@ -1022,203 +901,92 @@ int otyp;
     return FALSE;
 }
 
+/* find the object index for golden potions */
 int
 find_golden_potion()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = POT_GAIN_ABILITY; i <= POT_BLOOD; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "golden"))
-	    return i;
-
-    impossible("golden potion not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("golden", 0, POT_GAIN_ABILITY, POT_BLOOD, 0)) != -1)
+		return i;
+	else
+		impossible("could not find golden potion");
+	return 0;
 }
 
 int
 find_cloth_book()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPE_DIG; i <= SPE_BLANK_PAPER; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "cloth"))
-	    return i;
-
-    impossible("cloth spellbook not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("cloth", 0, SPE_DIG, SPE_BLANK_PAPER, 0)) != -1)
+		return i;
+	else
+		impossible("could not find cloth spellbook");
+	return 0;
 }
 
 int
 find_leather_book()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPE_DIG; i <= SPE_BLANK_PAPER; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "leather"))
-	    return i;
-
-    impossible("leather spellbook not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("leather", 0, SPE_DIG, SPE_BLANK_PAPER, 0)) != -1)
+		return i;
+	else
+		impossible("could not find leather spellbook");
+	return 0;
 }
 
 int
 find_bronze_book()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPE_DIG; i <= SPE_BLANK_PAPER; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "bronze"))
-	    return i;
-
-    impossible("bronze spellbook not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("bronze", 0, SPE_DIG, SPE_BLANK_PAPER, 0)) != -1)
+		return i;
+	else
+		impossible("could not find bronze spellbook");
+	return 0;
 }
 
 int
 find_silver_book()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPE_DIG; i <= SPE_BLANK_PAPER; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "silver"))
-	    return i;
-
-    impossible("silver spellbook not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("silver", 0, SPE_DIG, SPE_BLANK_PAPER, 0)) != -1)
+		return i;
+	else
+		impossible("could not find silver spellbook");
+	return 0;
 }
 
 int
 find_gold_book()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = SPE_DIG; i <= SPE_BLANK_PAPER; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "gold"))
-	    return i;
-
-    impossible("gold spellbook not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("gold", 0, SPE_DIG, SPE_BLANK_PAPER, 0)) != -1)
+		return i;
+	else
+		impossible("could not find gold spellbook");
+	return 0;
 }
 
-int
-find_hexagonal_wand()
-{
-    register int i;
-    register const char *s;
-
-    for (i = WAN_SECRET_DOOR_DETECTION; i <= WAN_LIGHTNING; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "hexagonal"))
-	    return i;
-
-    // impossible("wand not found?"); //not all wands used
-    return -1;	/* not 0, or caller would try again each move */
-}
-
-int
-find_short_wand()
-{
-    register int i;
-    register const char *s;
-
-    for (i = WAN_SECRET_DOOR_DETECTION; i <= WAN_LIGHTNING; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "short"))
-	    return i;
-
-    // impossible("wand not found?"); //not all wands used
-    return -1;	/* not 0, or caller would try again each move */
-}
-
-int
-find_runed_wand()
-{
-    register int i;
-    register const char *s;
-
-    for (i = WAN_SECRET_DOOR_DETECTION; i <= WAN_LIGHTNING; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "runed"))
-	    return i;
-
-    // impossible("wand not found?"); //not all wands used
-    return -1;	/* not 0, or caller would try again each move */
-}
-
-int
-find_long_wand()
-{
-    register int i;
-    register const char *s;
-
-    for (i = WAN_SECRET_DOOR_DETECTION; i <= WAN_LIGHTNING; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "long"))
-	    return i;
-
-    // impossible("wand not found?"); //not all wands used
-    return -1;	/* not 0, or caller would try again each move */
-}
-
-int
-find_curved_wand()
-{
-    register int i;
-    register const char *s;
-
-    for (i = WAN_SECRET_DOOR_DETECTION; i <= WAN_LIGHTNING; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "curved"))
-	    return i;
-
-    // impossible("wand not found?"); //not all wands used
-    return -1;	/* not 0, or caller would try again each move */
-}
-
-int
-find_forked_wand()
-{
-    register int i;
-    register const char *s;
-
-    for (i = WAN_SECRET_DOOR_DETECTION; i <= WAN_LIGHTNING; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "forked"))
-	    return i;
-
-    // impossible("wand not found?"); //not all wands used
-    return -1;	/* not 0, or caller would try again each move */
-}
-
-int
-find_spiked_wand()
-{
-    register int i;
-    register const char *s;
-
-    for (i = WAN_SECRET_DOOR_DETECTION; i <= WAN_LIGHTNING; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "spiked"))
-	    return i;
-
-    // impossible("wand not found?"); //not all wands used
-    return -1;	/* not 0, or caller would try again each move */
-}
-
-int
-find_jeweled_wand()
-{
-    register int i;
-    register const char *s;
-
-    for (i = WAN_SECRET_DOOR_DETECTION; i <= WAN_LIGHTNING; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "jeweled"))
-	    return i;
-
-    // impossible("wand not found?"); //not all wands used
-    return -1;	/* not 0, or caller would try again each move */
-}
-
-/* find the first wand starting from otype that is compatable with a given material*/
+/* find a wand that is compatable with a given material*/
 int
 matWand(otyp, mat)
 int otyp;
@@ -1226,105 +994,97 @@ int mat;
 {
     int i, j, ctyp;
 	
-	static int matNeutralWands[7] = {0,0,0, 0,0,0, 0}; 
-	if(!matNeutralWands[0]){ 
-		matNeutralWands[0] = find_hexagonal_wand(); 
-		matNeutralWands[1] = find_short_wand(); 
-		matNeutralWands[2] = find_runed_wand();
-		
-		matNeutralWands[3] = find_long_wand();
-		matNeutralWands[4] = find_curved_wand();
-		matNeutralWands[5] = find_spiked_wand();
-		
-		matNeutralWands[6] = find_jeweled_wand();
-	}
-	
+	/* check if there is a wand whose material matches already (prefered) */
+	/* traverses in order of otyp */
 	for(i = WAN_SECRET_DOOR_DETECTION; i <= WAN_LIGHTNING; i++){
 		ctyp = WAN_SECRET_DOOR_DETECTION + (((otyp+i)-WAN_SECRET_DOOR_DETECTION)%(WAN_LIGHTNING-WAN_SECRET_DOOR_DETECTION));
 		if(objects[ctyp].oc_material == mat)
 			return ctyp;
-		for(j = 0; j < 7; j++)
-			if(matNeutralWands[j] == ctyp)
-				return ctyp;
 	}
-	
-	//should never reach this
-    return otyp;
+
+	/* otherwise, grab a random material-neutral wand */
+	randomize_nonmatwands();
+	if ((i = find_otyp_of_desc("dummy-not-a-wand", matNeutralWands, WAN_SECRET_DOOR_DETECTION, WAN_LIGHTNING, 0)) != -1)
+		return i;
+	else
+		impossible("couldn't find material-neutral wand");
+
+	return 0;
 }
 
 /* find the object index for old gloves */
 int
 find_ogloves()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = GLOVES; i <= GAUNTLETS_OF_DEXTERITY; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "old gloves"))
-	    return i;
-
-    impossible("old gloves not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("old gloves", 0, GLOVES, GAUNTLETS_OF_DEXTERITY, 0)) != -1)
+		return i;
+	else
+		impossible("could not find old gloves");
+	return 0;
 }
 
 /* find the object index for fighting gloves */
 int
 find_tgloves()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = GLOVES; i <= GAUNTLETS_OF_DEXTERITY; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "fighting gloves"))
-	    return i;
-
-    impossible("fighting gloves not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("fighting gloves", 0, GLOVES, GAUNTLETS_OF_DEXTERITY, 0)) != -1)
+		return i;
+	else
+		impossible("could not find fighting gloves");
+	return 0;
 }
 
 /* find the object index for padded gloves */
 int
 find_pgloves()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = GLOVES; i <= GAUNTLETS_OF_DEXTERITY; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "padded gloves"))
-	    return i;
-
-    impossible("padded gloves not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("padded gloves", 0, GLOVES, GAUNTLETS_OF_DEXTERITY, 0)) != -1)
+		return i;
+	else
+		impossible("could not find padded gloves");
+	return 0;
 }
 
 /* find the object index for fencing gloves */
 int
 find_fgloves()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = GLOVES; i <= GAUNTLETS_OF_DEXTERITY; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "fencing gloves"))
-	    return i;
-
-    impossible("fencing gloves not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("fencing gloves", 0, GLOVES, GAUNTLETS_OF_DEXTERITY, 0)) != -1)
+		return i;
+	else
+		impossible("could not find fencing gloves");
+	return 0;
 }
 
-/* find the object index for piece of cloth robe */
+/* find the object index for riding gloves */
 int
-find_pcloth()
+find_rgloves()
 {
-    register int i;
-    register const char *s;
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
 
-    for (i = CLOAK_OF_PROTECTION; i <= CLOAK_OF_DISPLACEMENT; i++)
-	if ((s = OBJ_DESCR(objects[i])) != 0 && !strcmp(s, "piece of cloth"))
-	    return i;
-
-    impossible("piece of cloth not found?");
-    return -1;	/* not 0, or caller would try again each move */
+	if ((i = find_otyp_of_desc("riding gloves", 0, GLOVES, GAUNTLETS_OF_DEXTERITY, 0)) != -1)
+		return i;
+	else
+		impossible("could not find riding gloves");
+	return 0;
 }
 
 void

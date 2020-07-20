@@ -129,9 +129,9 @@ struct monst *victim;
 	boolean is_primary = TRUE;
 	boolean vismon = (victim != &youmonst) && canseemon(victim);
 	int erosion;
-    static int ogloves = 0;
-    if (!ogloves) ogloves = find_ogloves();
-    if (otmp && otmp->otyp == ogloves) return FALSE;/* Old gloves are already as damaged as they're going to get */
+
+	if (otmp && otmp->otyp == find_ogloves())
+		return FALSE;/* Old gloves are already as damaged as they're going to get */
 
 	if (!otmp) return(FALSE);
 	switch(type) {
@@ -918,8 +918,6 @@ unsigned trflags;
 #endif
 		{
 		    long side = rn2(3) ? LEFT_SIDE : RIGHT_SIDE;
-			static int jboots5 = 0;
-			if (!jboots5) jboots5 = find_jboots();
 		    pline("%s %s closes on your %s!",
 				A_Your[trap->madeby_u], xname(trap->ammo), body_part(FOOT));
 
@@ -932,7 +930,7 @@ unsigned trflags;
 			if (!u.usteed)
 	#endif
 			{
-			 if( !(uarmf && uarmf->otyp == jboots5)) set_wounded_legs(side, rn1(45, 21));
+				if (!(uarmf && uarmf->otyp == find_jboots())) set_wounded_legs(side, rn1(45, 21));
 			}
 		}
 		exercise(A_DEX, FALSE);

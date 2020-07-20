@@ -901,12 +901,10 @@ struct obj *obj;		/* aatyp == AT_WEAP, AT_SPIT */
 
 	/* check if wearing a visor (only checked if visor might help) */
 	if (check_visor) {
-		static int vhelmsa = 0;
-		if (!vhelmsa) vhelmsa = find_vhelm();
 	    o = (mdef == &youmonst) ? invent : mdef->minvent;
 	    for ( ; o; o = o->nobj){
 			if ((o->owornmask & W_ARMH) &&
-				(o->otyp == vhelmsa || o->otyp == CRYSTAL_HELM || o->otyp == PLASTEEL_HELM || o->otyp == PONTIFF_S_CROWN)
+				(o->otyp == find_vhelm() || o->otyp == CRYSTAL_HELM || o->otyp == PLASTEEL_HELM || o->otyp == PONTIFF_S_CROWN)
 			) return FALSE;
 			if ((o->owornmask & W_ARMC) &&
 				(o->otyp == WHITE_FACELESS_ROBE
