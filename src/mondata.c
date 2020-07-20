@@ -444,7 +444,7 @@ int faction;
 			special = TRUE;
 		}
 		if (faction == MISTWEAVER && (
-			insert_okay
+			end_insert_okay
 			))
 		{
 			maybe_insert();
