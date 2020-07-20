@@ -765,7 +765,7 @@ struct obj *obj;			/* only scatter this obj        */
 					boolean used_up = FALSE;
 					int dieroll = rnd(20);
 					if (tohitval((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 0) >= dieroll)
-						(void)hmon_with_unowned_obj(mtmp, stmp->obj, dieroll, used_up);
+						(void)hmon_with_unowned_obj(mtmp, stmp->obj, dieroll, &used_up);
 					else
 						miss(xname(stmp->obj), mtmp);
 					if (used_up) {
