@@ -910,9 +910,7 @@ unsigned trflags;
 			pline("%s %s closes on %s %s!",
 				A_Your[trap->madeby_u], xname(trap->ammo), s_suffix(mon_nam(u.usteed)),
 				mbodypart(u.usteed, FOOT));
-
-			hmon2point0((struct monst *)0, u.usteed, (struct attack *)0, (struct attack *)0, trap->ammo, trap,
-				HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0);
+			hmon_with_trap(u.usteed, trap->ammo, trap, HMON_WHACK, rnd(20), 0);
 		}
 		else
 #endif
@@ -921,8 +919,7 @@ unsigned trflags;
 		    pline("%s %s closes on your %s!",
 				A_Your[trap->madeby_u], xname(trap->ammo), body_part(FOOT));
 
-			hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, trap->ammo, trap,
-				HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0);
+			hmon_with_trap(&youmonst, trap->ammo, trap, HMON_WHACK, rnd(20), 0);
 
 		    if(u.umonnum == PM_OWLBEAR || u.umonnum == PM_BUGBEAR)
 			You("howl in anger!");
@@ -1658,7 +1655,7 @@ int style;
 			/* boulder may hit creature */
 			int dieroll = rnd(20);
 			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0) >= dieroll)
-				(void)hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up);
+				hmon_with_trap(mtmp, singleobj, trap, HMON_FIRED, dieroll, &used_up);
 			else if (cansee(bhitpos.x, bhitpos.y))
 				miss(xname(singleobj), mtmp);
 			if (used_up)
@@ -1672,7 +1669,7 @@ int style;
 				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0) >= dieroll) {
 					killer = "rolling boulder trap";
 					killer_format = KILLED_BY_AN;
-					(void)hmon2point0((struct monst *)0, &youmonst, (struct attack *)0, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, 0, TRUE, dieroll, FALSE, -1, &used_up);
+					hmon_with_trap(&youmonst, singleobj, trap, HMON_FIRED, dieroll, &used_up);
 				}
 				else if (!Blind)
 					pline("%s missses!", The(xname(singleobj)));
@@ -2054,8 +2051,7 @@ struct monst *mtmp;
 				    You_hear("the roaring of an angry bear!");
 			    }
 
-				if (hmon2point0((struct monst *)0, mtmp, (struct attack *)0, (struct attack *)0, trap->ammo, trap,
-					HMON_WHACK|HMON_TRAP, 0, 0, FALSE, 0, FALSE, -1, (boolean *)0) == MM_DEF_DIED)
+				if (hmon_with_trap(mtmp, trap->ammo, trap, HMON_WHACK, rnd(20), 0) == MM_DEF_DIED)
 					trapkilled = TRUE;
 			}
 			break;
