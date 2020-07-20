@@ -3389,20 +3389,34 @@ tipmonster:
 				}
 			}
 		} else if (mtmp->isshk){
-			if (u.ugold){
+			if (!can_respond(mtmp))
+				pline("%s doesn't react.", Monnam(mtmp));
+#ifdef GOLDOBJ
+			else if (money_cnt(invent))
+#else
+			else if (u.ugold){
+#endif
 				You("offer %s a tip for their excellent service.", Monnam(mtmp));
 				if (strcmp(shkname(mtmp), "Izchak") == 0){
 					pline("Izchak thanks you for your generous tip.");
 					domonnoise(mtmp, TRUE);
 				}
+#ifdef GOLDOBJ
+				money2mon(mtmp,1);
+#else
 				u.ugold -= 1;
 				mtmp->mgold += 1;
+#endif
 			} else
 				You("have no cash on you right now.");
 		} else if (mtmp->mtyp == PM_LEPRECHAUN){
 			if (!can_respond(mtmp))
 				pline("%s doesn't react.", Monnam(mtmp));
+#ifdef GOLDOBJ
+			else if (!money_cnt(invent))
+#else
 			else if (!u.ugold)
+#endif
 				You("have no money to bribe with!");
 			else {
 				You("offer %s some gold to leave you alone.", mon_nam(mtmp));
@@ -3410,9 +3424,14 @@ tipmonster:
 					pline("%s accepts before you can change your mind.", Monnam(mtmp));
 				else
 					pline("%s greedily accepts.", Monnam(mtmp));
+#ifdef GOLDOBJ
+				int cash = min(money_cnt(invent), rnd(10));
+				money2mon(mtmp, cash);
+#else
 				int cash = min(u.ugold, rnd(10));
 				u.ugold -= cash;
 				mtmp->mgold += cash;
+#endif
 				mtmp->mpeaceful = TRUE;
 				
 				if (!tele_restrict(mtmp)) {
@@ -3422,10 +3441,18 @@ tipmonster:
 				}
 			}
 		} else if (mtmp->mtyp == PM_MIGO_PHILOSOPHER){
+#ifdef GOLDOBJ
+			if (money_cnt(invent)){
+#else
 			if (u.ugold){
+#endif
 				You("offer %s a penny for their thoughts.", mon_nam(mtmp));
+#ifdef GOLDOBJ
+				money2mon(mtmp,1);
+#else
 				u.ugold -= 1;
 				mtmp->mgold += 1;
+#endif
 				if (can_respond(mtmp))
 					domonnoise(mtmp, TRUE);
 			}
