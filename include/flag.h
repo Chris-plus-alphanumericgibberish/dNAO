@@ -331,6 +331,7 @@ struct instance_flags {
     boolean obscure_role_obj_names;
     boolean dnethack_start_text;
     boolean artifact_descriptors;
+	boolean force_artifact_names;
     boolean dnethack_dungeon_colors;
 	boolean quick_m_abilities;
 
