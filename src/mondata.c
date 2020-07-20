@@ -327,7 +327,12 @@ int faction;
 		break;
 	case MISTWEAVER:
 		/* flags */
-		ptr->mflagsb |= (MB_CAN_AMULET|MB_NOHEAD);
+		ptr->mflagsb |= (MB_CAN_AMULET|MB_NOHEAD|MB_STRONG);
+		ptr->mresists |= (MR_POISON|MR_ACID|MR_COLD|MR_FIRE|MR_ELEC);
+		ptr->mflagsm |= (MM_AMPHIBIOUS);
+		ptr->mflagst |= (MT_CARNIVORE);
+		ptr->mflagsv |= (MV_ECHOLOCATE|MV_SCENT);
+		ptr->mflagsa |= (MA_ANIMAL|MA_PLANT|MA_PRIMORDIAL);
 		break;
 	case DELOUSED:
 		/* flags */
