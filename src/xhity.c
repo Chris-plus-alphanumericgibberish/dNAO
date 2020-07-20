@@ -12801,6 +12801,20 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (insubstantial(pd) && hits_insubstantial(magr, mdef, attk, weapon) == 1) {
 		subtotl = 0;
 	}
+
+	/* Apply DR before multiplicative defences/vulnerabilites */
+	if (subtotl > 0){
+		if (phase_armor){
+			subtotl -= (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
+		}
+		else {
+			subtotl -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+		}
+		/* can only reduce damage to 1 */
+		if (subtotl < 1)
+			subtotl = 1;
+	}
+
 	/* some creatures resist weapon attacks to the extreme */
 	if (resist_attacks(pd) && (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack)) {
 		if (subtotl > 0) {
@@ -12897,29 +12911,20 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (youagr && is_aquatic(pd) && roll_madness(MAD_THALASSOPHOBIA)){
 		subtotl = (subtotl + 9)/10;
 	}
-	/* Apply DR */
-	if (subtotl > 0){
-		if(pd->mtyp == PM_DEEP_DWELLER && !rn2(10)){
-			/*Brain struck.  Ouch.*/
-			if(youdef)
-				pline("Your brain-organ is struck!");
-			else if(canseemon(mdef))
-				pline("%s brain-organ is struck!", s_suffix(Monnam(mdef)));
-			*hp(mdef) = 1;
-			resisted_weapon_attacks = FALSE;
-			resisted_attack_type = FALSE;
-			resisted_thick_skin = FALSE;
-		}
-		else if (phase_armor){
-			subtotl -= (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
-		}
-		else {
-			subtotl -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
-		}
-		/* can only reduce damage to 1 */
-		if (subtotl < 1)
-			subtotl = 1;
+
+	/* deep dwellers resist attacks, but have a 1/10 chance of being slain outright */
+	if (pd->mtyp == PM_DEEP_DWELLER && !rn2(10)){
+		/*Brain struck.  Ouch.*/
+		if (youdef)
+			pline("Your brain-organ is struck!");
+		else if (canseemon(mdef))
+			pline("%s brain-organ is struck!", s_suffix(Monnam(mdef)));
+		*hp(mdef) = 1;
+		resisted_weapon_attacks = FALSE;
+		resisted_attack_type = FALSE;
+		resisted_thick_skin = FALSE;
 	}
+
 	/* hack to enhance mm_aggression(); we don't want purple
 	worm's bite attack to kill a shrieker because then it
 	won't swallow the corpse; but if the target survives,
