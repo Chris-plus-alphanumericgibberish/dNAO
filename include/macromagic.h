@@ -73,10 +73,10 @@ CONCAT(R01, C01(x)) CONCAT(R01, C02(y)) CONCAT(R01, C03(z))
 ->R01C01(x) R01C02(y) R01C03(z)
 
 This is the order - of - n ^ 2 part.Each and every RnnCmm(X) combination is actually a #define.
-Only the ones where nn == mm turn into(X), all others turn into nothing.
+Only the ones where nn == mm turn into (X), all others turn into nothing.
 
 R01C01(x) R01C02(y) R01C03(z)
-->x
+->x,
 
 What if no arguments are given that match the field number ?
 This is where MAYBE comes in, and replaces nothingness :
@@ -84,63 +84,56 @@ This is where MAYBE comes in, and replaces nothingness :
 R01C02(y) R01C03(z)
 ->
 
-with a default value :
-
-MAYBE(defaultnn, )
-->defaultnn
+with a zero :
+-> 0
 
 What if >1 arguments are given for 1 field number ?
 ie, SET04(C02(x), C02(y));
-This will not work, much like writing int mynum = 5 7; will not work.
+This is how you have default arguments.
+The rightmost one will be used:
 
-How do we set defaults?
-We need to predefine our default values.
-#define DEF01 0
-#define DEF02 0
-etc etc.
-This is done in this file to all 0s as a default-default, if you will.
-To set a different default, undef the one to change to placate the compiler before redefining it.
+SET04(C02(x), C02(y))
+-> 0, y, 0, 0
+
+Another example of using defaults:
+#define TEST(...) SET02(C01(-1), C02(-2), __VA_ARGS__)
+TEST()
+-> -1, -2
+TEST(C02(5))
+-> -1, 5
+TEST(C01(3), C02(5))
+-> 3, 5
+
 */
 
 
 #define FIRSTFOUR(dummy, a1, a2, a3, a4, ...) a1, a2, a3, a4
 #define FILL(...) FIRSTFOUR(dummy, ##__VA_ARGS__, 0, 0, 0, 0)
 
-/* if "..." is nonblank, expand to the first arg of "...". otherwise, expand to DEF */
-/* MAYBE(default, maybe_blank) */
-#define MAYBE(...) M_(__VA_ARGS__)
-/* delay expansion of M once to perform Q */
-#define M_(D, ...) F(D, Q(__VA_ARGS__))
-/* Q(maybe_blank): if __VA_ARGS__ is non-blank, __VA_ARGS__. Otherwise, SPACE */
-#define Q(...) FIRST_ONE(dummy, ##__VA_ARGS__, SPACE)
-/* SPACE just expands into two arguments so that we can differentiate between was-blank (2 args) and non-blank (1 arg) */
-#define SPACE 0, 0
-/* F(default, one-or-two-arguments) */
-#define F(...) F_(__VA_ARGS__)
-#define F_(...) F__(__VA_ARGS__)
-/* delay expansion of F twice, for performing Q and SPACE */
-#define F__(D, ...) H(NARGS(__VA_ARGS__), D, __VA_ARGS__)
-/* H(1 or 2, default, maybe_blank) */
-#define H(...) H_(__VA_ARGS__)
-/* delay expansion once, for performing NARGS */
-#define H_(N, D, ...) DO##N(D, __VA_ARGS__)
-/* based on NARGS, pick correct result */
-#define DO1(D, ...) __VA_ARGS__
-#define DO2(D, ...) D
-/* gets first */
-#define FIRST_ONE(dummy, a1, ...) a1
 /* This counts the number of args */
 #define NARGS_SEQ(_1,_2,_3,_4,_5,_6,_7,_8,N,...) N
-#define NARGS(...) NARGS_SEQ(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1)
+#define NARGS(...) NARGS_SEQ(__VA_ARGS__, 08, 07, 06, 05, 04, 03, 02, 01)
 
-//#define MAYBE_HELPER(...) , ## __VA_ARGS__
-//#define MAYBE(DEF, ...) (DEF MAYBE_HELPER(__VA_ARGS__))
+/* delay expansion of M(X) once to allow X to expand first */
+#define MAYBE(...) M_(__VA_ARGS__)
+/* H( nargs, 0, args) */
+#define M_(...) H(NARGS(__VA_ARGS__), 0, __VA_ARGS__)
+/* delay expansion of H(N,0,args) once to allow N to compute */
+#define H(...) H_(__VA_ARGS__)
+/* concatenate N to pick correct function to take Nth parameter */
+#define H_(N, ...) D##N(__VA_ARGS__)
+/* based on NARGS, pick correct result */
+#define D01(X, ...) X
+#define D02(X, ...) D01(__VA_ARGS__)
+#define D03(X, ...) D02(__VA_ARGS__)
+#define D04(X, ...) D03(__VA_ARGS__)
+#define D05(X, ...) D04(__VA_ARGS__)
 
 /* Concatenate Rn and Cn together to get a row-column pair */
 #define CONCAT(RN, CN)\
 	RN##CN
 
-#define SET(N, ...) MAYBE(DEF##N, CALL_MACRO_X_FOR_EACH(CONCAT, R##N, __VA_ARGS__))
+#define SET(N, ...) MAYBE(CALL_MACRO_X_FOR_EACH(CONCAT, R##N, __VA_ARGS__))
 #define SET01(...)                     SET(01, __VA_ARGS__)
 #define SET02(...) SET01(__VA_ARGS__), SET(02, __VA_ARGS__)
 #define SET03(...) SET02(__VA_ARGS__), SET(03, __VA_ARGS__)
@@ -223,37 +216,6 @@ To set a different default, undef the one to change to placate the compiler befo
 #define _fe_29(_call, RN, x, ...)	_call(RN, x) _fe_28(_call, RN, __VA_ARGS__)
 #define _fe_30(_call, RN, x, ...)	_call(RN, x) _fe_29(_call, RN, __VA_ARGS__)
 
-/* default values */
-#define DEF01 0
-#define DEF02 0
-#define DEF03 0
-#define DEF04 0
-#define DEF05 0
-#define DEF06 0
-#define DEF07 0
-#define DEF08 0
-#define DEF09 0
-#define DEF10 0
-#define DEF11 0
-#define DEF12 0
-#define DEF13 0
-#define DEF14 0
-#define DEF15 0
-#define DEF16 0
-#define DEF17 0
-#define DEF18 0
-#define DEF19 0
-#define DEF20 0
-#define DEF21 0
-#define DEF22 0
-#define DEF23 0
-#define DEF24 0
-#define DEF25 0
-#define DEF26 0
-#define DEF27 0
-#define DEF28 0
-#define DEF29 0
-
 /* diagonal hit pattern:  RmCn(x) is (x) iff m==n, else is nothing */
 /* >>>>> must grow (N^2) with increasing total arguements */
 /* python script to generate these:
@@ -268,7 +230,7 @@ for r in range(1, N):
 		file.write(string)
 file.close()
 */
-#define R01C01(x) (x)
+#define R01C01(x) (x),
 #define R01C02(x)
 #define R01C03(x)
 #define R01C04(x)
@@ -298,7 +260,7 @@ file.close()
 #define R01C28(x)
 #define R01C29(x)
 #define R02C01(x)
-#define R02C02(x) (x)
+#define R02C02(x) (x),
 #define R02C03(x)
 #define R02C04(x)
 #define R02C05(x)
@@ -328,7 +290,7 @@ file.close()
 #define R02C29(x)
 #define R03C01(x)
 #define R03C02(x)
-#define R03C03(x) (x)
+#define R03C03(x) (x),
 #define R03C04(x)
 #define R03C05(x)
 #define R03C06(x)
@@ -358,7 +320,7 @@ file.close()
 #define R04C01(x)
 #define R04C02(x)
 #define R04C03(x)
-#define R04C04(x) (x)
+#define R04C04(x) (x),
 #define R04C05(x)
 #define R04C06(x)
 #define R04C07(x)
@@ -388,7 +350,7 @@ file.close()
 #define R05C02(x)
 #define R05C03(x)
 #define R05C04(x)
-#define R05C05(x) (x)
+#define R05C05(x) (x),
 #define R05C06(x)
 #define R05C07(x)
 #define R05C08(x)
@@ -418,7 +380,7 @@ file.close()
 #define R06C03(x)
 #define R06C04(x)
 #define R06C05(x)
-#define R06C06(x) (x)
+#define R06C06(x) (x),
 #define R06C07(x)
 #define R06C08(x)
 #define R06C09(x)
@@ -448,7 +410,7 @@ file.close()
 #define R07C04(x)
 #define R07C05(x)
 #define R07C06(x)
-#define R07C07(x) (x)
+#define R07C07(x) (x),
 #define R07C08(x)
 #define R07C09(x)
 #define R07C10(x)
@@ -478,7 +440,7 @@ file.close()
 #define R08C05(x)
 #define R08C06(x)
 #define R08C07(x)
-#define R08C08(x) (x)
+#define R08C08(x) (x),
 #define R08C09(x)
 #define R08C10(x)
 #define R08C11(x)
@@ -508,7 +470,7 @@ file.close()
 #define R09C06(x)
 #define R09C07(x)
 #define R09C08(x)
-#define R09C09(x) (x)
+#define R09C09(x) (x),
 #define R09C10(x)
 #define R09C11(x)
 #define R09C12(x)
@@ -538,7 +500,7 @@ file.close()
 #define R10C07(x)
 #define R10C08(x)
 #define R10C09(x)
-#define R10C10(x) (x)
+#define R10C10(x) (x),
 #define R10C11(x)
 #define R10C12(x)
 #define R10C13(x)
@@ -568,7 +530,7 @@ file.close()
 #define R11C08(x)
 #define R11C09(x)
 #define R11C10(x)
-#define R11C11(x) (x)
+#define R11C11(x) (x),
 #define R11C12(x)
 #define R11C13(x)
 #define R11C14(x)
@@ -598,7 +560,7 @@ file.close()
 #define R12C09(x)
 #define R12C10(x)
 #define R12C11(x)
-#define R12C12(x) (x)
+#define R12C12(x) (x),
 #define R12C13(x)
 #define R12C14(x)
 #define R12C15(x)
@@ -628,7 +590,7 @@ file.close()
 #define R13C10(x)
 #define R13C11(x)
 #define R13C12(x)
-#define R13C13(x) (x)
+#define R13C13(x) (x),
 #define R13C14(x)
 #define R13C15(x)
 #define R13C16(x)
@@ -658,7 +620,7 @@ file.close()
 #define R14C11(x)
 #define R14C12(x)
 #define R14C13(x)
-#define R14C14(x) (x)
+#define R14C14(x) (x),
 #define R14C15(x)
 #define R14C16(x)
 #define R14C17(x)
@@ -688,7 +650,7 @@ file.close()
 #define R15C12(x)
 #define R15C13(x)
 #define R15C14(x)
-#define R15C15(x) (x)
+#define R15C15(x) (x),
 #define R15C16(x)
 #define R15C17(x)
 #define R15C18(x)
@@ -718,7 +680,7 @@ file.close()
 #define R16C13(x)
 #define R16C14(x)
 #define R16C15(x)
-#define R16C16(x) (x)
+#define R16C16(x) (x),
 #define R16C17(x)
 #define R16C18(x)
 #define R16C19(x)
@@ -748,7 +710,7 @@ file.close()
 #define R17C14(x)
 #define R17C15(x)
 #define R17C16(x)
-#define R17C17(x) (x)
+#define R17C17(x) (x),
 #define R17C18(x)
 #define R17C19(x)
 #define R17C20(x)
@@ -778,7 +740,7 @@ file.close()
 #define R18C15(x)
 #define R18C16(x)
 #define R18C17(x)
-#define R18C18(x) (x)
+#define R18C18(x) (x),
 #define R18C19(x)
 #define R18C20(x)
 #define R18C21(x)
@@ -808,7 +770,7 @@ file.close()
 #define R19C16(x)
 #define R19C17(x)
 #define R19C18(x)
-#define R19C19(x) (x)
+#define R19C19(x) (x),
 #define R19C20(x)
 #define R19C21(x)
 #define R19C22(x)
@@ -838,7 +800,7 @@ file.close()
 #define R20C17(x)
 #define R20C18(x)
 #define R20C19(x)
-#define R20C20(x) (x)
+#define R20C20(x) (x),
 #define R20C21(x)
 #define R20C22(x)
 #define R20C23(x)
@@ -868,7 +830,7 @@ file.close()
 #define R21C18(x)
 #define R21C19(x)
 #define R21C20(x)
-#define R21C21(x) (x)
+#define R21C21(x) (x),
 #define R21C22(x)
 #define R21C23(x)
 #define R21C24(x)
@@ -898,7 +860,7 @@ file.close()
 #define R22C19(x)
 #define R22C20(x)
 #define R22C21(x)
-#define R22C22(x) (x)
+#define R22C22(x) (x),
 #define R22C23(x)
 #define R22C24(x)
 #define R22C25(x)
@@ -928,7 +890,7 @@ file.close()
 #define R23C20(x)
 #define R23C21(x)
 #define R23C22(x)
-#define R23C23(x) (x)
+#define R23C23(x) (x),
 #define R23C24(x)
 #define R23C25(x)
 #define R23C26(x)
@@ -958,7 +920,7 @@ file.close()
 #define R24C21(x)
 #define R24C22(x)
 #define R24C23(x)
-#define R24C24(x) (x)
+#define R24C24(x) (x),
 #define R24C25(x)
 #define R24C26(x)
 #define R24C27(x)
@@ -988,7 +950,7 @@ file.close()
 #define R25C22(x)
 #define R25C23(x)
 #define R25C24(x)
-#define R25C25(x) (x)
+#define R25C25(x) (x),
 #define R25C26(x)
 #define R25C27(x)
 #define R25C28(x)
@@ -1018,7 +980,7 @@ file.close()
 #define R26C23(x)
 #define R26C24(x)
 #define R26C25(x)
-#define R26C26(x) (x)
+#define R26C26(x) (x),
 #define R26C27(x)
 #define R26C28(x)
 #define R26C29(x)
@@ -1048,7 +1010,7 @@ file.close()
 #define R27C24(x)
 #define R27C25(x)
 #define R27C26(x)
-#define R27C27(x) (x)
+#define R27C27(x) (x),
 #define R27C28(x)
 #define R27C29(x)
 #define R28C01(x)
@@ -1078,7 +1040,7 @@ file.close()
 #define R28C25(x)
 #define R28C26(x)
 #define R28C27(x)
-#define R28C28(x) (x)
+#define R28C28(x) (x),
 #define R28C29(x)
 #define R29C01(x)
 #define R29C02(x)
@@ -1108,6 +1070,6 @@ file.close()
 #define R29C26(x)
 #define R29C27(x)
 #define R29C28(x)
-#define R29C29(x) (x)
+#define R29C29(x) (x),
 
 #endif
