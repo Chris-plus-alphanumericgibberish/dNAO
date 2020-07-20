@@ -5,10 +5,13 @@
 #include "hack.h"
 #include "eshk.h"
 #include "epri.h"
+#include "ehor.h"
 
 /*	These routines provide basic data for any type of monster. */
-
+STATIC_DCL void FDECL(set_faction_data, (struct permonst *, struct permonst *, int));
 STATIC_DCL struct permonst * FDECL(permonst_of, (int, int));
+
+char * nameless_horror_name;
 
 #ifdef OVLB
 
@@ -31,14 +34,31 @@ set_mon_data(mon, mtyp)
 struct monst *mon;
 int mtyp;
 {
+	struct permonst * bas;
 	struct permonst * ptr;
-	/* players in their base form are a special case */
+	/* players in their base form are a very special case */
 	if (mon == &youmonst && (mtyp == u.umonster)) {
-		mon->data = ptr = &upermonst;
+		ptr = &upermonst;
+		/* I'm not sure what bas should be, if it were to be needed */
 	}
+	/* horrors are a special case, and have memory allocated on a per-monster basis */
+	else if (is_horror(&mons[mtyp])) {
+		ptr = &(EHOR(mon)->currhorrordata);
+		bas = &(EHOR(mon)->basehorrordata);
+		if (mtyp == PM_NAMELESS_HORROR) {
+			ptr->mname = EHOR(mon)->randname;
+			bas->mname = EHOR(mon)->randname;
+		}
+	}
+	/* eveything else has permonst memory assigned by permonst_of */
 	else {
-		mon->data = ptr = permonst_of(mtyp, mon->mfaction);
+		ptr = permonst_of(mtyp, mon->mfaction);
+		bas = &mons[mtyp];
 	}
+	/* adjust permonst if needed */
+	if (mon != &youmonst && mon->mfaction)
+		set_faction_data(bas, ptr, mon->mfaction);
+	/* set monster data */
 	set_mon_data_core(mon, ptr);
 	return;
 }
@@ -156,53 +176,15 @@ int faction;
 	return;
 }
 
-/* 
- * Returns a pointer to the appropriate permonst structure for the monster parameters given
- * 
- * needs an mtyp; faction optional
- * Do not call with mtyp==NON_PM unless you are intending to get PM_PLAYERMON
- * 
- * This function is responsible for allocating memory for new permonsts!
- */
-struct permonst *
-permonst_of(mtyp, faction)
-int mtyp;
+void
+set_faction_data(base, ptr, faction)
+struct permonst * base;
+struct permonst * ptr;
 int faction;
 {
-	static struct permonst * monsarrays[NUMMONS][MAXFACTION - FACTION_PADDING] = { 0 };
-	struct permonst * ptr;
-	int f_index = faction - FACTION_PADDING - 1;	/* first faction is 1-indexed, but we want 0-indexed */
-
-	/* player is special, and has no handling for derived statblocks */
-	if (mtyp == PM_PLAYERMON) {
-		impossible("attempting to find permonst of playermon, faction %d", faction);
-		return &upermonst;
-	}
-	
-	/* validate mtyp */
-	if (mtyp > NUMMONS || mtyp < 0) {
-		impossible("Can not get permonst for mtyp=%d!", mtyp);
-	}
-
-	/* filter out drow/misc factions */
-	if (faction <= FACTION_PADDING)
-		faction = 0;	/* equivalent to no faction */
-
-	/* simplest case: return the common mons[] array */
-	if (!faction)
-		return &mons[mtyp];
-
-	/* next case: we have already generated that particular statblock */
-	if (monsarrays[mtyp][f_index] != (struct permonst *)0) {
-		return monsarrays[mtyp][f_index];
-	}
-
-	/* final case: we need to generate the statblock */
-	/* allocate memory */
-	monsarrays[mtyp][f_index] = (struct permonst *)malloc(sizeof(struct permonst));
-	ptr = monsarrays[mtyp][f_index];
+	int mtyp = base->mtyp;
 	/* copy original */
-	*ptr = mons[mtyp];
+	*ptr = *base;
 	/* make changes to the permonst as necessary */
 	switch (faction)
 	{
@@ -358,26 +340,26 @@ int faction;
 
 		/* some factions completely skip specific attacks */
 		while ((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
-				(
-				attk->aatyp == AT_SPIT ||
-				attk->aatyp == AT_BREA ||
-				attk->aatyp == AT_GAZE ||
-				attk->aatyp == AT_ARRW ||
-				attk->aatyp == AT_MMGC ||
-				attk->aatyp == AT_TNKR ||
-				attk->aatyp == AT_SRPR ||
-				attk->aatyp == AT_BEAM ||
-				attk->aatyp == AT_MAGC ||
-				(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
-				attk->aatyp == AT_GAZE ||
-				attk->aatyp == AT_WDGZ ||
-				(attk->aatyp == AT_NONE && attk->adtyp == AD_PLYS)
-				)
+			(
+			attk->aatyp == AT_SPIT ||
+			attk->aatyp == AT_BREA ||
+			attk->aatyp == AT_GAZE ||
+			attk->aatyp == AT_ARRW ||
+			attk->aatyp == AT_MMGC ||
+			attk->aatyp == AT_TNKR ||
+			attk->aatyp == AT_SRPR ||
+			attk->aatyp == AT_BEAM ||
+			attk->aatyp == AT_MAGC ||
+			(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
+			attk->aatyp == AT_GAZE ||
+			attk->aatyp == AT_WDGZ ||
+			(attk->aatyp == AT_NONE && attk->adtyp == AD_PLYS)
+			)
 			)
 		{
 			/* shift all further attacks forwards one slot, and make last one all 0s */
 			for (j = 0; j < (NATTK - i); j++)
-				attk[j] = attk[j+1];
+				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
 
@@ -398,21 +380,21 @@ int faction;
 
 		/* some factions want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || \
-					((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
-						&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
-					&& (insert = TRUE))
+	((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
+	&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
+	&& (insert = TRUE))
 #define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;i++;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
 		if ((faction == ZOMBIFIED || faction == SKELIFIED) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
-				is_null_attk(attk) || 
-				(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
-				) && (insert = TRUE)
+			is_null_attk(attk) ||
+			(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
+			) && (insert = TRUE)
 			))
 		{
 			maybe_insert()
-			attk->aatyp = !nolimbs(ptr) ? AT_CLAW : AT_BITE;
+				attk->aatyp = !nolimbs(ptr) ? AT_CLAW : AT_BITE;
 			attk->adtyp = AD_PHYS;
 			attk->damn = ptr->mlevel / 10 + (faction == ZOMBIFIED ? 1 : 2);
 			attk->damd = max(ptr->msize * 2, 4);
@@ -421,7 +403,7 @@ int faction;
 		/* skeletons get a paralyzing touch */
 		if (faction == SKELIFIED && (
 			insert_okay
-			)) 
+			))
 		{
 			maybe_insert();
 			attk->aatyp = AT_TUCH;
@@ -429,7 +411,7 @@ int faction;
 			attk->damn = 1;
 			attk->damd = max(ptr->msize * 2, 4);
 			special = TRUE;
-			
+
 		}
 		/* vitreans get a cold touch */
 		if (faction == CRYSTALFIED && (
@@ -457,10 +439,10 @@ int faction;
 		/* fractured turn their claws into glass shards */
 		if (faction == FRACTURED && (
 			(attk->aatyp == AT_CLAW && (
-				attk->adtyp == AD_PHYS ||
-				attk->adtyp == AD_SQUE ||
-				attk->adtyp == AD_SAMU
-				))
+			attk->adtyp == AD_PHYS ||
+			attk->adtyp == AD_SQUE ||
+			attk->adtyp == AD_SAMU
+			))
 			|| insert_okay
 			))
 		{
@@ -570,8 +552,424 @@ int faction;
 #undef insert_okay
 #undef end_insert_okay
 #undef maybe_insert
+	return;
+}
+
+/* 
+ * Returns a pointer to the appropriate permonst structure for the monster parameters given
+ * 
+ * needs an mtyp; faction optional
+ * Do not call with mtyp==NON_PM unless you are intending to get PM_PLAYERMON
+ * 
+ * This function is responsible for allocating memory for new permonsts!
+ */
+struct permonst *
+permonst_of(mtyp, faction)
+int mtyp;
+int faction;
+{
+	static struct permonst * monsarrays[NUMMONS][MAXFACTION - FACTION_PADDING] = { 0 };
+	struct permonst * ptr;
+	int f_index = faction - FACTION_PADDING - 1;	/* first faction is 1-indexed, but we want 0-indexed */
+
+	/* player is special, and has no handling for derived statblocks */
+	if (mtyp == PM_PLAYERMON) {
+		impossible("attempting to find permonst of playermon, faction %d", faction);
+		return &upermonst;
+	}
+	
+	/* validate mtyp */
+	if (mtyp > NUMMONS || mtyp < 0) {
+		impossible("Can not get permonst for mtyp=%d!", mtyp);
+	}
+
+	/* filter out drow/misc factions */
+	if (faction <= FACTION_PADDING)
+		faction = 0;	/* equivalent to no faction */
+
+	/* simplest case: return the common mons[] array */
+	if (!faction)
+		return &mons[mtyp];
+
+	/* next case: we have already generated that particular statblock */
+	if (monsarrays[mtyp][f_index] != (struct permonst *)0) {
+		return monsarrays[mtyp][f_index];
+	}
+
+	/* final case: we need to generate the statblock */
+	/* allocate memory */
+	monsarrays[mtyp][f_index] = (struct permonst *)malloc(sizeof(struct permonst));
+	ptr = monsarrays[mtyp][f_index];
 	return ptr;
 }
+
+void
+make_horror(horror, target_level, level_bonus)
+struct permonst * horror;
+int target_level;
+int level_bonus;
+{
+	extern int monstr[];
+	struct attack* attkptr;
+	int horrorattacks;
+	int i;
+
+#define get_random_of(x) (x)[rn2(SIZE((x)))]
+
+	do {
+		/* what a horrible night to have a curse */
+		horror->mlevel = 1;							/* low starting level so difficulty is based on other things*/
+		horror->mmove = rn2(7) * 2 + 6;				/* slow to very fast */
+		switch (rn2(4)){
+		case 0:
+			horror->nac = rn2(21) + (rn2(3) ? 0 : +10);/* any AC */
+			horror->dac = 0;
+			horror->pac = 0;
+			break;
+		case 1:
+			horror->nac = 0;
+			horror->dac = rn2(21) + (rn2(3) ? 0 : +10);/* any AC */
+			horror->pac = 0;
+			break;
+		case 2:
+			horror->nac = 0;
+			horror->dac = 0;
+			horror->pac = rn2(21) + (rn2(3) ? 0 : +10);/* any AC */
+			break;
+		case 3:
+			/* any AC (combo is slightly better) */
+			horror->nac = rn2(8) + (rn2(9) ? 0 : +5);
+			horror->dac = rn2(8) + (rn2(9) ? 0 : +5);
+			horror->pac = rn2(8) + (rn2(9) ? 0 : +5);
+			break;
+		}
+		switch (rn2(4)){
+		case 0:
+			horror->hdr = 0;
+			horror->bdr = 0;
+			horror->gdr = 0;
+			horror->ldr = 0;
+			horror->fdr = 0;
+			break;
+		case 1:{
+				   schar dr = rnd(3);
+				   horror->hdr = dr;
+				   horror->bdr = dr;
+				   horror->gdr = dr;
+				   horror->ldr = dr;
+				   horror->fdr = dr;
+		}break;
+		case 2:{
+				   schar dr = rnd(6);
+				   horror->hdr = dr;
+				   horror->bdr = dr;
+				   horror->gdr = dr;
+				   horror->ldr = dr;
+				   horror->fdr = dr;
+		}break;
+		case 3:
+			horror->hdr = rn2(10);
+			horror->bdr = rn2(10);
+			horror->gdr = rn2(10);
+			horror->ldr = rn2(10);
+			horror->fdr = rn2(10);
+			break;
+		}
+		horror->spe_hdr = 0;
+		horror->spe_bdr = 0;
+		horror->spe_gdr = 0;
+		horror->spe_ldr = 0;
+		horror->spe_fdr = 0;
+
+		horror->mr = rn2(11) * 10;				/* varying amounts of MR */
+		horror->maligntyp = d(2, 9) - 10;			/* any alignment */
+
+		/* attacks...?  */
+		horrorattacks = 0;
+		/* always start with weapon attacks... if it gets any */
+		if (!rn2(4)) {
+			attkptr = &horror->mattk[horrorattacks];
+
+			attkptr->aatyp = get_random_of(randWeaponAttackTypes);
+			attkptr->adtyp = get_random_of(randWeaponDamageTypes);
+			attkptr->damn = d(1, 3);						/*  1 -  3 */
+			attkptr->damd = rn2(5 - attkptr->damn) * 2 + 6;	/*  6 - 12 by 2s */
+
+			/* fixups */
+			switch (attkptr->aatyp)
+			{
+			case AT_SRPR:
+				attkptr->adtyp = get_random_of(randRapierDamageTypes);
+				attkptr->damn += 1;
+				break;
+			case AT_HODS:
+				attkptr->adtyp = AD_HODS;
+				break;
+			case AT_DEVA:
+				attkptr->adtyp = AD_PHYS;
+				attkptr->damn = 1;
+				break;
+			}
+			horrorattacks++;
+
+			/* possibly make more identical attacks */
+			while (!rn2(3) && horrorattacks<6) {
+				attkptr = &horror->mattk[horrorattacks];
+				*attkptr = *(attkptr - 1);
+
+				if (attkptr->aatyp == AT_WEAP)
+					attkptr->aatyp = AT_XWEP;
+				else if (attkptr->aatyp == AT_XWEP)
+					attkptr->aatyp = AT_MARI;
+
+				horrorattacks++;
+			}
+		}
+		/* get some more melee attacks in here (this will bring it up to at least 2, with 2/3 odds of at least 3) */
+		while ((!rn2(horrorattacks) || !rn2(3)) && horrorattacks<6) {
+			attkptr = &horror->mattk[horrorattacks];
+			if (rn2(7)) {
+				attkptr->aatyp = get_random_of(randMeleeAttackTypes);
+				attkptr->adtyp = rn2(3) ? get_random_of(randSpecialDamageTypes) : get_random_of(randWeaponDamageTypes);
+			}
+			else {
+				attkptr->aatyp = (rn2(3) ? AT_TUCH : rn2(3) ? AT_LRCH : AT_5SQR);
+				attkptr->adtyp = get_random_of(randTouchDamageTypes);
+			}
+			attkptr->damn = 1 + d(1, 2) + rn2(2)*rn2(3);	/* 2 -  5, trailing right */
+			attkptr->damd = rn2(5 - attkptr->damn) * 2 + 6;	/* 6 - 10, by 2s */
+
+			/* sometimes consolidate into a high-variance attack */
+			if (!rn2(4)) {
+				int n = 1 + rn2(2)*rn2(2);
+				attkptr->damd = (attkptr->damn * attkptr->damd) / n;
+				attkptr->damn = n;
+			}
+
+			horrorattacks++;
+		}
+		/* chance of getting special, hard-hitting melee attacks */
+		if (horrorattacks <= 2 || (!rn2(8) && horrorattacks < 5)) {
+			attkptr = &horror->mattk[horrorattacks];
+
+			attkptr->aatyp = get_random_of(randSpecialAttackTypes);
+			attkptr->adtyp = get_random_of(randRendDamageTypes);
+			attkptr->damn = d(2, 3);						/* 2 -  6 */
+			attkptr->damd = rn2(5 - attkptr->damn) * 2 + 6;	/* 6 - 10 by 2s */
+
+			/* fixups */
+			if (attkptr->aatyp == AT_ENGL) {
+				attkptr->adtyp = get_random_of(randEngulfDamageTypes);
+				/* engulf attacks can be stronger */
+				attkptr->damn += 2 - attkptr->damn / 3;
+				attkptr->damd += 2;
+			}
+			else if ((attkptr - 1)->aatyp != AT_XWEP) {
+				/* duplicate previous attack and insert it */
+				*(attkptr + 1) = *attkptr;
+				*(attkptr) = *(attkptr - 1);
+				(attkptr - 0)->damd -= 2;
+				(attkptr - 1)->damd -= 2;
+				horrorattacks++;
+			}
+			horrorattacks++;
+		}
+		/* chance of getting ranged attacks */
+		while (!rn2(horrorattacks / 2) && horrorattacks < 6) {
+			attkptr = &horror->mattk[horrorattacks];
+
+			attkptr->aatyp = get_random_of(randRangedAttackTypes);
+			attkptr->damn = d(2, 3);			/*  2 -  6 */
+			attkptr->damd = rn2(3) * 2 + 6;		/*  6 - 10, by 2s */
+
+			switch (attkptr->aatyp) {
+			case AT_SPIT:
+				attkptr->adtyp = get_random_of(randSpitDamageTypes);
+				attkptr->damd = 6;
+				break;
+			case AT_ARRW:
+				attkptr->adtyp = get_random_of(randArrowDamageTypes);
+				attkptr->damn = 1;
+				attkptr->damd = d(2, 3);
+				break;
+			case AT_BREA:
+				attkptr->adtyp = get_random_of(randBreathDamageTypes);
+				attkptr->damn += rnd(3);
+				attkptr->damd += 2;
+				break;
+			case AT_BEAM:
+				attkptr->adtyp = get_random_of(randBeamDamageTypes);
+				break;
+			case AT_GAZE:
+				attkptr->adtyp = get_random_of(randGazeDamageTypes);
+				if (!rn2(4)) {
+					attkptr->aatyp = AT_WDGZ;	/* hahahaha */
+					attkptr->damn = rnd(3);			/* reduce to 1-3 */
+					attkptr->damd = rn2(3) * 2 + 4;	/* reduce to 4-8 by 2s */
+				}
+				break;
+			case AT_MAGC:
+				attkptr->adtyp = get_random_of(randMagicDamageTypes);
+				if (attkptr->adtyp == AD_SPEL || attkptr->adtyp == AD_CLRC) {
+					attkptr->damn = !rn2(3) ? 0 : rnd(4);
+					attkptr->damd = 6;
+				}
+				break;
+			}
+			/* damage overrides */
+			switch (attkptr->adtyp){
+			case AD_LUCK:
+				attkptr->damn = 1;
+				attkptr->damd = rnd(13);
+				break;
+			case AD_VBLD:
+				attkptr->damn = d(1, 3);
+				attkptr->damd = d(1, 3);
+				break;
+			case AD_BLNK:
+			case AD_DEAD:
+				attkptr->damn = 0;
+				attkptr->damd = 0;
+				break;
+			}
+			horrorattacks++;
+		}
+
+		horror->msize = !rn2(6) ? MZ_GIGANTIC : rn2(MZ_HUGE + 1);			/* any size */
+		horror->cwt = randCorpseWeights[horror->msize];					/* probably moot as it's flagged NOCORPSE */
+		horror->cnutrit = randCorpseNut[horror->msize];					/* see above */
+		horror->msound = rn2(MS_HUMANOID);								/* any but the specials */
+		horror->mresists = 0;
+
+
+		for (i = 0; i < rnd(6); i++) {
+			horror->mresists |= (1 << rn2(10));		/* physical resistances... */
+		}
+		// for (i = 0; i < rnd(5); i++) {
+		// horror->mresists |= (0x100 << rn2(7));	/* 'different' resistances, even clumsy */
+		// }
+		horror->mconveys = 0;					/* flagged NOCORPSE */
+
+		/*
+		* now time for the random flags.  this will likely produce
+		* a number of complete trainwreck monsters at first, but
+		* every so often something will dial up nasty stuff
+		*/
+		horror->mflagsm = 0;
+		horror->mflagst = 0;
+		horror->mflagsb = 0;
+		horror->mflagsg = 0;
+		horror->mflagsa = 0;
+		horror->mflagsv = 0;
+
+		for (i = 0; i < rnd(17); i++) {
+			horror->mflagsm |= (1 << rn2(33));		/* trainwreck this way :D */
+		}
+		for (i = 0; i < rnd(17); i++) {
+			horror->mflagst |= (1 << rn2(33));
+		}
+		for (i = 0; i < rnd(17); i++) {
+			horror->mflagsb |= (1 << rn2(33));
+		}
+		for (i = 0; i < rnd(17); i++) {
+			horror->mflagsg |= (1 << rn2(33));
+		}
+		for (i = 0; i < rnd(17); i++) {
+			horror->mflagsa |= (1 << rn2(33));
+		}
+		for (i = 0; i < rnd(17); i++) {
+			horror->mflagsv |= (1 << rn2(33));
+		}
+
+		// horror->mflagsb &= ~MB_UNSOLID;			/* no ghosts */
+		// horror->mflagsm &= ~MM_WALLWALK;			/* no wall-walkers */
+
+		horror->mflagsg |= MG_NOPOLY;		/* Don't let the player be one of these yet. */
+
+		horror->mflagst |= MT_HOSTILE;
+
+		horror->mflagsg &= ~MG_MERC;				/* no guards */
+		horror->mflagst &= ~MT_PEACEFUL;			/* no peacefuls */
+		horror->mflagst &= ~MT_COVETOUS;			/* no covetous */
+		horror->mflagsa &= ~MA_WERE;				/* no lycanthropes */
+		horror->mflagsg &= ~MG_PNAME;				/* not a proper name */
+
+		/* special adjustments for Nameless Horrors */
+		if (horror->mtyp == PM_NAMELESS_HORROR) {
+			static const char *Vowels[] = { "a", "e", "i", "o", "u", "y",
+				"ae", "oe", "oo", "ai", "ou", "\'" };
+			static const char *Consonants[] = { "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "qu", "r", "s", "t", "v", "w", "x", "y", "z",
+				"ch", "ll", "sh", "th", "zth", "cl", "kl", "cr", "kr", "gn", "tr", "gh", "bl", "nn", "mm", "\'" };
+			int i;
+			Strcpy(nameless_horror_name, "");
+			for (i = !rn2(3); (i<4 || (rn2(10-i) && rn2(3))); i++) {
+				if (!(i % 2) || !rn2(12))
+					Strcat(nameless_horror_name, get_random_of(Consonants));
+				else
+					Strcat(nameless_horror_name, get_random_of(Vowels));
+			}
+			(void)upstart(nameless_horror_name);
+			horror->mname = nameless_horror_name;
+			horror->mflagsg |= MG_PRINCE;
+			horror->mflagsg |= MG_PNAME;
+			horror->mflagsv |= MV_EXTRAMISSION;
+		}
+
+		/* some cleanup to reduce the trainwreck*/
+		if (horror->mflagsm & MM_WALLWALK)
+			horror->mflagsm &= ~(MM_TUNNEL | MM_NEEDPICK);
+		if (horror->mflagsm & MM_TUNNEL)
+			horror->mflagsm &= ~MM_NEEDPICK;
+		if (horror->mflagsm & MM_STATIONARY)
+			horror->mflagsm &= ~(MM_FLEETFLEE | MM_TUNNEL | MM_NEEDPICK | MM_NOTONL);
+		if (horror->mflagst & MT_NOTAKE)
+			horror->mflagst &= ~MT_MAID;
+		if (horror->mflagst & MT_MINDLESS)
+			horror->mflagst &= ~MT_ANIMAL;
+		if (horror->mflagst & MT_ANIMAL)
+			horror->mflagst &= ~MT_MINDLESS;
+		if (horror->mflagsb & MB_MALE)
+			horror->mflagsb &= ~(MB_FEMALE | MB_NEUTER);
+		if (horror->mflagsb & MB_FEMALE)
+			horror->mflagsb &= ~(MB_MALE | MB_NEUTER);
+		if (horror->mflagsb & MB_NEUTER)
+			horror->mflagsb &= ~(MB_MALE | MB_FEMALE);
+		if (horror->mflagsb & MB_NOHEAD)
+			horror->mflagsb &= ~(MB_LONGHEAD | MB_LONGNECK);
+		if (horror->mflagsv & MV_EXTRAMISSION)
+			horror->mflagsv &= ~(MV_LOWLIGHT3 | MV_LOWLIGHT2 | MV_NORMAL | MV_CATSIGHT | MV_DARKSIGHT);
+		if (horror->mflagsv & MV_CATSIGHT)
+			horror->mflagsv &= ~(MV_LOWLIGHT3 | MV_LOWLIGHT2 | MV_NORMAL | MV_DARKSIGHT);
+		if (horror->mflagsv & MV_LOWLIGHT3)
+			horror->mflagsv &= ~(MV_LOWLIGHT2 | MV_NORMAL | MV_DARKSIGHT);
+		if (horror->mflagsv & MV_LOWLIGHT2)
+			horror->mflagsv &= ~(MV_NORMAL | MV_DARKSIGHT);
+		if (horror->mflagsv & MV_NORMAL)
+			horror->mflagsv &= ~(MV_DARKSIGHT);
+		if (!(attacktype(horror, AT_MAGC) || attacktype(horror, AT_MMGC)))
+			horror->mflagsg &= ~MG_NOSPELLCOOLDOWN;
+		if (horror->mflagsg & MG_PRINCE)
+			horror->mflagsg &= ~MG_LORD;
+
+		for (i = 0; i < 2; i++) /* adjust its level and difficulty upwards */
+		{
+			horror->mlevel = mstrength(horror);
+			monstr[monsndx(horror)] = mstrength(horror);
+		}
+		/* add specified flat level bonus */
+		horror->mlevel += level_bonus;
+		monstr[monsndx(horror)] = mstrength(horror);
+
+	} while (abs(horror->mlevel - target_level) > 2);
+
+	/* all nameless horrors are approx. difficulty 50 */
+	if (horror->mtyp == PM_NAMELESS_HORROR)
+		monstr[PM_NAMELESS_HORROR] = 50;
+
+#undef get_random_of
+	return;
+}
+
 
 #endif /* OVLB */
 #ifdef OVL0
