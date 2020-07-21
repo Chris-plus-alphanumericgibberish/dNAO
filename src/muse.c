@@ -2725,6 +2725,9 @@ const char *str;
 			case PM_HOD_SEPHIRAH:
 				pline(str, s_suffix(mon_nam(mon)), "armor");
 				break;
+			case PM_NAOME:
+				pline(str, s_suffix(mon_nam(mon)), "golden skin");
+				break;
 			case PM_AMM_KAMEREL:
 				pline(str, s_suffix(mon_nam(mon)), "glassy skin");
 				break;
