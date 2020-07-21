@@ -2129,7 +2129,6 @@ E boolean FDECL(xspity, (struct monst *, struct attack *, int, int));
 E boolean FDECL(xfirey, (struct monst *, struct attack *, int, int));
 E boolean FDECL(m_online, (struct monst *, struct monst *, int, int, boolean, boolean));
 E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
-E boolean NDECL(android_combo);
 E boolean FDECL(umetgaze, (struct monst *));
 E int NDECL(dothrow);
 E int NDECL(dofire);
@@ -3062,6 +3061,7 @@ E void FDECL(wakeup2, (struct monst *, boolean));
 E int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, void *, int, int);
 E void FDECL(weave_black_web, (struct monst *));
+E int NDECL(android_combo);
 E int FDECL(u_pole_pound, (struct monst *));
 
 /* ### xhityhelpers.c ### */
