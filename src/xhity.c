@@ -12609,70 +12609,49 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		/* general damage bonus */
 		if(real_attack){
-			/* The player has by-far the most detailed attacks */
-			if (youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick || natural_strike)) {
-				int bon_damage = 0;
+			if (magr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick || natural_strike)) {
+				/* player-specific bonuses */
+				if (youagr) {
+					bonsdmg += u.udaminc;
+					bonsdmg += aeshbon();
 
-				bon_damage += u.udaminc;
-				bon_damage += aeshbon();
+					/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
+					if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
+						if (ACURR(A_INT) == 25) bonsdmg += 8;
+						else bonsdmg += max(0, (ACURR(A_INT) - 10) / 2);
+					}
+				}
+
+#define dbonus(wep) (youagr ? dbon((wep)) : m_dbon(magr, (wep)))
 				/* If you throw using a propellor, you don't get a strength
 				* bonus but you do get an increase-damage bonus.
 				*/
 				if (natural_strike || unarmed_punch || unarmed_kick)
-					bon_damage += dbon((struct obj *)0);
+					bonsdmg += dbonus((struct obj *)0);
 				else if (melee || thrust)
-					bon_damage += dbon(weapon);
+					bonsdmg += dbonus(weapon);
 				else if (fired)
 				{
 					/* slings get STR bonus */
 					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += dbon(launcher);
+						bonsdmg += dbonus(launcher);
 					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += dbon(launcher) * 2;
+						bonsdmg += dbonus(launcher) * 2;
 					/* other launchers get no STR bonus */
 					else if (launcher)
-						bon_damage += 0;
+						bonsdmg += 0;
 					/* properly-used ranged attacks othersied get STR bonus */
 					else {
 						/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
-						if (hmoncode & HMON_KICKED && uarmf && uarmf->otyp == KICKING_BOOTS)
+						if (hmoncode & HMON_KICKED && youagr && uarmf && uarmf->otyp == KICKING_BOOTS)
 							override_str = 125;	/* 25 STR */
-						bon_damage += dbon(weapon);
+						bonsdmg += dbonus(weapon);
 						override_str = 0;
 					}
 				}
+#undef dbonus
 
-				/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
-				if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
-					if (ACURR(A_INT) == 25) bon_damage += 8;
-					else bon_damage += max(0, (ACURR(A_INT) - 10) / 2);
-				}
-
-				bonsdmg += bon_damage;
-			} else if(!youagr && magr){
-				int bon_damage = 0;
-
-				/* 
-				* Monsters don't actually have anything other than a str bonus, and then only from items.
-				*/
-				if (melee || thrust)
-					bon_damage += m_dbon(magr, weapon);
-				else if (fired) {
-					/* slings get STR bonus */
-					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += m_dbon(magr, launcher);
-					/* atlatls get 2x STR bonus */
-					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += m_dbon(magr, launcher) * 2;
-					/* other launchers get no STR bonus */
-					else if (launcher)
-						bon_damage += 0;
-					/* properly-used ranged attacks othersied get STR bonus */
-					else
-						bon_damage += m_dbon(magr, weapon);
-				}
-				bonsdmg += bon_damage;
 			} else if (trap){
 				/* some traps deal increased damage */
 				if (trap->ttyp == ARROW_TRAP)
