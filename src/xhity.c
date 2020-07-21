@@ -12626,10 +12626,13 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				/* If you throw using a propellor, you don't get a strength
 				* bonus but you do get an increase-damage bonus.
 				*/
-				if (natural_strike || unarmed_punch || unarmed_kick)
-					bonsdmg += dbonus((struct obj *)0);
-				else if (melee || thrust)
-					bonsdmg += dbonus(weapon);
+				if (natural_strike || unarmed_punch || unarmed_kick || melee || thrust) {
+					int tmp = dbonus( (melee || thrust) ? weapon : (struct obj *)0);
+					/* greatly reduced STR damage for offhand attacks */
+					if (attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI)
+						tmp = min(0, tmp);
+					bonsdmg += tmp;
+				}
 				else if (fired)
 				{
 					/* slings get STR bonus */

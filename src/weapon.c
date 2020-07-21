@@ -2310,11 +2310,6 @@ struct obj *otmp;
 	int str = ACURR(A_STR);
 	int bonus = 0;
 	
-	
-	
-	// if (Upolyd || otmp == uswapwep) return(0);
-	if (uswapwep && otmp == uswapwep) return (str < 6) ? (-6+str) : 0;
-	
 	if (str < 6) bonus = -6+str;
 	else if (str < 16) bonus = 0;
 	else if (str < 18) bonus = 1;
@@ -2330,16 +2325,17 @@ struct obj *otmp;
 		bonus += (100 - u.usanity)/10;
 	}
 	if(otmp){
-		if((bimanual(otmp,youracedata) ||
-			(otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
-		) && !uarms && !u.twoweap
-		) bonus *= 2;
-		else if(otmp->otyp == FORCE_SWORD && !uarms && !u.twoweap)
-			bonus *= 2;
-		else if(otmp->otyp == KATANA && !uarms && !u.twoweap)
-			bonus *= 1.5;
-		else if(is_vibrosword(otmp) && !uarms && !u.twoweap)
-			bonus *= 1.5;
+		if (!uarms && !u.twoweap) {
+			if (bimanual(otmp, youracedata) ||
+				(otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0))
+				bonus *= 2;
+			else if (otmp->otyp == FORCE_SWORD)
+				bonus *= 2;
+			else if (otmp->otyp == KATANA)
+				bonus *= 1.5;
+			else if (is_vibrosword(otmp))
+				bonus *= 1.5;
+		}
 		
 		if(otmp==uwep 
 		&& (is_rapier(otmp) || is_rakuyo(otmp)
