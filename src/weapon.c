@@ -3217,112 +3217,70 @@ int wep_type;
 	) type = P_TWO_WEAPON_COMBAT;
 	else type = wep_type;
 	
-    if (type == P_NONE) {
+	skill = P_SKILL(type);
+	
+	if (type == P_TWO_WEAPON_COMBAT)
+		skill = min(skill, P_SKILL(wep_type));
+
+	switch (type)
+	{
+	case P_NONE:
 		bonus = 0;
-    } else if (type <= P_LAST_WEAPON) {
-		switch (P_SKILL(type)) {
-			default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type));
-				 /* fall through */
-			case P_ISRESTRICTED:	bonus = -5; break;
-			case P_UNSKILLED:	bonus = -2; break;
-			case P_BASIC:	bonus =  0; break;
-			case P_SKILLED:	bonus =  2; break;
-			case P_EXPERT:	bonus =  5; break;
-			//For use with martial-arts
-			case P_MASTER:		bonus =  7; break;
-			case P_GRAND_MASTER: bonus = 9; break;
+		break;
+
+	case P_BARE_HANDED_COMBAT:
+		switch (skill){
+		default: impossible("weapon_dam_bonus: bad skill %d", skill); /* fall through */
+		case P_ISRESTRICTED:    bonus = (martial_bonus()) ? -2 : -4; break;
+		case P_UNSKILLED:       bonus = (martial_bonus()) ? +1 : -2; break;
+		case P_BASIC:           bonus = (martial_bonus()) ? +3 : +0; break;
+		case P_SKILLED:         bonus = (martial_bonus()) ? +4 : +1; break;
+		case P_EXPERT:          bonus = (martial_bonus()) ? +5 : +2; break;
+		case P_MASTER:          bonus = (martial_bonus()) ? +7 : +3; break;
+		case P_GRAND_MASTER:    bonus = (martial_bonus()) ? +9 : +5; break;
 		}
-	} else if (type == P_TWO_WEAPON_COMBAT) {
-		skill = P_SKILL(P_TWO_WEAPON_COMBAT);
-		if (P_SKILL(wep_type) < skill) skill = P_SKILL(wep_type);
-		if(wep_type == P_BARE_HANDED_COMBAT){
-			if(martial_bonus()){
-				skill = P_SKILL(type);
-				switch(skill){
-					default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-					case P_ISRESTRICTED:	bonus = -5; break;
-					case P_UNSKILLED:   	bonus = -3; break;
-					case P_BASIC:			bonus = -1; break;
-					case P_SKILLED:			bonus = +1; break;
-					case P_EXPERT:			bonus = +3; break;
-					case P_MASTER:			bonus = +5; break;
-					case P_GRAND_MASTER:	bonus = +7; break;
-				}
-			} else {
-				skill = P_SKILL(type);
-				switch(skill){
-					default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-					case P_ISRESTRICTED:	bonus = -6; break;
-					case P_UNSKILLED:   	bonus = -4; break;
-					case P_BASIC:			bonus = -2; break;
-					case P_SKILLED:			bonus =  0; break;
-					case P_EXPERT:			bonus = +1; break;
-					case P_MASTER:			bonus = +2; break;
-					case P_GRAND_MASTER:	bonus = +3; break;
-				}
+		break;
+
+	case P_TWO_WEAPON_COMBAT:
+		if (wep_type == P_BARE_HANDED_COMBAT) {
+			switch (skill){
+			default: impossible("weapon_dam_bonus: bad skill %d", skill); /* fall through */
+			case P_ISRESTRICTED:    bonus = (martial_bonus()) ? -5 : -6; break;
+			case P_UNSKILLED:       bonus = (martial_bonus()) ? -3 : -4; break;
+			case P_BASIC:           bonus = (martial_bonus()) ? -1 : -2; break;
+			case P_SKILLED:         bonus = (martial_bonus()) ? +1 : +0; break;
+			case P_EXPERT:          bonus = (martial_bonus()) ? +3 : +1; break;
+			case P_MASTER:          bonus = (martial_bonus()) ? +5 : +2; break;
+			case P_GRAND_MASTER:    bonus = (martial_bonus()) ? +7 : +3; break;
 			}
-		} else {
+		}
+		else {
 			switch (skill) {
-				default:
-				case P_ISRESTRICTED:
-				case P_UNSKILLED:	bonus = -5; break;
-				case P_BASIC:	bonus = -3; break;
-				case P_SKILLED:	bonus = -1; break;
-				case P_EXPERT:	bonus =  0; break;
+			default:
+			case P_ISRESTRICTED:
+			case P_UNSKILLED:       bonus = -5; break;
+			case P_BASIC:           bonus = -3; break;
+			case P_SKILLED:         bonus = -1; break;
+			case P_EXPERT:          bonus = +0; break;
 			}
 		}
-    } else if (type == P_BARE_HANDED_COMBAT) {
-	// /*
-	 // *	       b.h.  m.a.
-	 // *	unskl:	 0   n/a
-	 // *	basic:	+1    +3
-	 // *	skild:	+1    +4
-	 // *	exprt:	+2    +6
-	 // *	mastr:	+2    +7
-	 // *	grand:	+3    +9
-	 // */
-	// bonus = P_SKILL(type);
-	// bonus = max(bonus,P_UNSKILLED) - 1;	/* unskilled => 0 */
-	// bonus = ((bonus + 1) * (martial_bonus() ? 3 : 1)) / 2;
-		if(martial_bonus()){
-			skill = P_SKILL(type);
-			switch(skill){
-				default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-				case P_ISRESTRICTED:	bonus = -2; break;
-				case P_UNSKILLED:   	bonus = +1; break;
-				case P_BASIC:			bonus = +3; break;
-				case P_SKILLED:			bonus = +4; break;
-				case P_EXPERT:			bonus = +5; break;
-				case P_MASTER:			bonus = +7; break;
-				case P_GRAND_MASTER:	bonus = +9; break;
-			}
-		} else {
-			skill = P_SKILL(type);
-			switch(skill){
-				default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-				case P_ISRESTRICTED:	bonus = -4; break;
-				case P_UNSKILLED:   	bonus = -2; break;
-				case P_BASIC:			bonus =  0; break;
-				case P_SKILLED:			bonus = +1; break;
-				case P_EXPERT:			bonus = +2; break;
-				case P_MASTER:			bonus = +3; break;
-				case P_GRAND_MASTER:	bonus = +5; break;
-			}
+		break;
+
+	default:
+		/* weapon skills and misc skills */
+		switch (skill) {
+		default: impossible("weapon_dam_bonus: bad skill %d", skill);
+			/* fall through */
+		case P_ISRESTRICTED: bonus = -5; break;
+		case P_UNSKILLED:    bonus = -2; break;
+		case P_BASIC:        bonus = +0; break;
+		case P_SKILLED:      bonus = +2; break;
+		case P_EXPERT:       bonus = +5; break;
+		case P_MASTER:       bonus = +7; break;
+		case P_GRAND_MASTER: bonus = +9; break;
 		}
-    } else { //fallback for weapons that use non-weapon skills (like Singing Sword)
-		switch (P_SKILL(type)) {
-			default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type));
-				 /* fall through */
-			case P_ISRESTRICTED:	bonus = -5; break;
-			case P_UNSKILLED:	bonus = -2; break;
-			case P_BASIC:	bonus =  0; break;
-			case P_SKILLED:	bonus =  2; break;
-			case P_EXPERT:	bonus =  5; break;
-			//For use with martial-arts
-			case P_MASTER:		bonus =  7; break;
-			case P_GRAND_MASTER: bonus = 9; break;
-		}
-    }
+		break;
+	}
 	
 	if(type == P_TWO_WEAPON_COMBAT){
 		/* Sporkhack:
