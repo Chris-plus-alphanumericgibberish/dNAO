@@ -568,6 +568,9 @@ boolean you_abilities;
 	if (mon_abilities && (can_breathe(youmonst.data) || Race_if(PM_HALF_DRAGON))){
 		add_ability('b', "Use your breath weapon", MATTK_BREATH);
 	}
+	if (mon_abilities && (Upolyd && can_breathe(youmonst.data) && Race_if(PM_HALF_DRAGON))){
+		add_ability('B', "Use your halfdragon breath weapon", MATTK_HBREATH);
+	}
 	if (mon_abilities && youracedata->mtyp == PM_TOVE){
 		add_ability('B', "Bore a hole", MATTK_BREATH);
 	}
@@ -681,6 +684,7 @@ boolean you_abilities;
 
 	/* Monster (or monster-like) abilities */
 	case MATTK_BREATH: return dobreathe(youmonst.data);
+	case MATTK_HBREATH: return dobreathe(&mons[PM_HALF_DRAGON]);
 	case MATTK_DSCALE:{
 		int res = dobreathe(Dragon_shield_to_pm(uarms));
 		if(res){
