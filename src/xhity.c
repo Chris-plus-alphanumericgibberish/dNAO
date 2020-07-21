@@ -12669,11 +12669,9 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			int skill_damage = 0;
 			int wtype;
 
-			/* get simple weapon skill associated with the weapon */
+			/* get simple weapon skill associated with the weapon, not including twoweapon */
 			if (fired && launcher)
 				wtype = weapon_type(launcher);
-			else if (u.twoweap)
-				wtype = P_TWO_WEAPON_COMBAT;
 			else if (unarmed_punch)
 				wtype = P_BARE_HANDED_COMBAT;
 			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
@@ -12689,10 +12687,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (fired && launcher) {
 				/* precision fired ammo gets skill bonuses, multiplied */
 				if (is_ammo(weapon) && (precision_mult))
-					skill_damage = weapon_dam_bonus(launcher) * precision_mult;
+					skill_damage = weapon_dam_bonus(launcher, wtype) * precision_mult;
 				/* spears fired from atlatls also get their skill bonus */
 				else if (launcher->otyp == ATLATL)
-					skill_damage = weapon_dam_bonus(launcher);
+					skill_damage = weapon_dam_bonus(launcher, wtype);
 				/* other fired ammo does not get skill bonuses */
 				else
 					skill_damage = 0;
@@ -12704,16 +12702,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					skill_damage = 0;
 				/* otherwise, they do get skill bonuses */
 				else
-					skill_damage = weapon_dam_bonus(weapon);
+					skill_damage = weapon_dam_bonus(weapon, wtype);
 			}
 			/* melee weapons */
 			else if (melee || thrust) {
-				/* some weapons use contextually-specific skills */
-				if (wtype != P_TWO_WEAPON_COMBAT && wtype != weapon_type(weapon))
-					skill_damage = skill_dam_bonus(wtype);
-				/* general case */
-				else
-					skill_damage = weapon_dam_bonus(weapon);
+				skill_damage = weapon_dam_bonus(weapon, wtype);
 			}
 
 			/* Wrathful Spider halves damage from skill for fired bolts */
@@ -12724,7 +12717,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			bonsdmg += skill_damage;
 
 			/* now, train skills */
-			use_skill(wtype, 1);
+			use_skill(u.twoweap ? P_TWO_WEAPON_COMBAT : wtype, 1);
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(FFORM_SHII_CHO, 1);
