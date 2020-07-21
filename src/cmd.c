@@ -572,7 +572,7 @@ boolean you_abilities;
 		add_ability('B', "Use your halfdragon breath weapon", MATTK_HBREATH);
 	}
 	if (mon_abilities && youracedata->mtyp == PM_TOVE){
-		add_ability('B', "Bore a hole", MATTK_BREATH);
+		add_ability('B', "Bore a hole", MATTK_HOLE);
 	}
 	if (mon_abilities && uclockwork){
 		add_ability('c', "Adjust your clockspeed", MATTK_CLOCK);
