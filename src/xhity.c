@@ -12421,25 +12421,25 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 		/* base unarmed dice */
 		if (youagr && martial_bonus())
-			unarmed_dice.oc.damd = 4 * unarmedMult;
+			unarmed_dice.oc_damd = 4 * unarmedMult;
 		else
-			unarmed_dice.oc.damd = 2 * unarmedMult;
+			unarmed_dice.oc_damd = 2 * unarmedMult;
 		/* Eurynome causes exploding dice, sometimes larger dice */
 		if (youagr && u.sealsActive&SEAL_EURYNOME) {
-			unarmed_dice.oc.aatyp = AT_EXPL;
-			unarmed_dice.oc.damd = max(unarmed_dice.oc.damd,
+			unarmed_dice.exploding = TRUE;
+			unarmed_dice.oc_damd = max(unarmed_dice.oc_damd,
 				2 * rnd(5) + (martial_bonus() ? 2 * unarmedMult : 0));
 		}
 		/* Grandmaster's robe causes exploding dice, 50% chance of doubled dice */
 		otmp = (youagr ? uarmc : which_armor(magr, W_ARMC));
 		if (otmp && otmp->oartifact == ART_GRANDMASTER_S_ROBE) {
-			unarmed_dice.oc.aatyp = AT_EXPL;
+			unarmed_dice.exploding = TRUE;
 			if (rn2(2)) {
-				unarmed_dice.oc.damn *= 2;
+				unarmed_dice.oc_damn *= 2;
 			}
 		}
 		/* calculate dice and set basedmg */
-		basedmg = weapon_dmg_roll(&(unarmed_dice.oc), FALSE);
+		basedmg = weapon_dmg_roll(&unarmed_dice, FALSE);
 
 		/* The Annulus is very stronk -- 2x base damage + 2x enchantment */
 		/* yes, this can be redoubled by artifact gloves */
@@ -12448,7 +12448,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (((otmp = uright) && otmp->oartifact == ART_ANNULUS) ||
 				((otmp = uleft) && otmp->oartifact == ART_ANNULUS))
 			{
-				basedmg += weapon_dmg_roll(&(unarmed_dice.oc), FALSE);
+				basedmg += weapon_dmg_roll(&unarmed_dice, FALSE);
 				basedmg += otmp->spe * 2;
 			}
 		}

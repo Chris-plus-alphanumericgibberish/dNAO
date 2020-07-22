@@ -2559,14 +2559,14 @@ winid *datawin;
 
 			Sprintf(buf, "Damage: ");
 
-			if (wdice[0].oc.damn && wdice[0].oc.damd)
+			if (wdice[0].oc_damn && wdice[0].oc_damd)
 			{
-				Sprintf(buf2, "%dd%d", wdice[0].oc.damn, wdice[0].oc.damd);
+				Sprintf(buf2, "%dd%d", wdice[0].oc_damn, wdice[0].oc_damd);
 				Strcat(buf, buf2);
 			}
-			if (wdice[0].bon.damn && wdice[0].bon.damd)
+			if (wdice[0].bon_damn && wdice[0].bon_damd)
 			{
-				Sprintf(buf2, "+%dd%d", wdice[0].bon.damn, wdice[0].bon.damd);
+				Sprintf(buf2, "+%dd%d", wdice[0].bon_damn, wdice[0].bon_damd);
 				Strcat(buf, buf2);
 			}
 			if (wdice[0].flat)
@@ -2576,24 +2576,20 @@ winid *datawin;
 			}
 			Strcat(buf, " versus small and ");
 			/* is there a difference between large and small dice? */
-			if (wdice[0].oc.aatyp != wdice[1].oc.aatyp ||
-				wdice[0].oc.adtyp != wdice[1].oc.adtyp ||
-				wdice[0].oc.damn != wdice[1].oc.damn ||
-				wdice[0].oc.damd != wdice[1].oc.damd ||
-				wdice[0].bon.aatyp != wdice[1].bon.aatyp ||
-				wdice[0].bon.adtyp != wdice[1].bon.adtyp ||
-				wdice[0].bon.damn != wdice[1].bon.damn ||
-				wdice[0].bon.damd != wdice[1].bon.damd ||
+			if (wdice[0].oc_damn != wdice[1].oc_damn ||
+				wdice[0].oc_damd != wdice[1].oc_damd ||
+				wdice[0].bon_damn != wdice[1].bon_damn ||
+				wdice[0].bon_damd != wdice[1].bon_damd ||
 				wdice[0].flat != wdice[1].flat)
 			{
-				if (wdice[1].oc.damn && wdice[1].oc.damd)
+				if (wdice[1].oc_damn && wdice[1].oc_damd)
 				{
-					Sprintf(buf2, "%dd%d", wdice[1].oc.damn, wdice[1].oc.damd);
+					Sprintf(buf2, "%dd%d", wdice[1].oc_damn, wdice[1].oc_damd);
 					Strcat(buf, buf2);
 				}
-				if (wdice[1].bon.damn && wdice[1].bon.damd)
+				if (wdice[1].bon_damn && wdice[1].bon_damd)
 				{
-					Sprintf(buf2, "+%dd%d", wdice[1].bon.damn, wdice[1].bon.damd);
+					Sprintf(buf2, "+%dd%d", wdice[1].bon_damn, wdice[1].bon_damd);
 					Strcat(buf, buf2);
 				}
 				if (wdice[1].flat)

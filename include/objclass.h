@@ -5,6 +5,24 @@
 #ifndef OBJCLASS_H
 #define OBJCLASS_H
 
+
+
+/*
+ * structure to hold enough data about a weapon's damage dice to perform
+ * any special cases that only involve the item itself
+ *    ie, not including interactions with the defender
+ */
+struct weapon_dice {
+	uchar oc_damn;				/* d(N,x) + d(n,x) + f */
+	uchar oc_damd;				/* d(n,X) + d(n,x) + f */
+	uchar bon_damn;				/* d(n,x) + d(N,x) + f */
+	uchar bon_damd;				/* d(n,x) + d(n,X) + f */
+	int flat;					/* d(n,x) + d(n,x) + F */
+	Bitfield(lucky, 1);			/* use luck-biased dice (rnl()) */
+	Bitfield(exploding, 1);		/* use exploding dice */
+	Bitfield(explode_amt, 3);	/* additional amount to increase roll by when dice explode */
+};
+
 /* definition of a class of objects */
 
 struct objclass {
@@ -121,9 +139,10 @@ struct objclass {
 	short	oc_cost;		/* base cost in shops */
 /* Check the AD&D rules!  The FIRST is small monster damage. */
 /* for weapons, and tools, rocks, and gems useful as weapons */
-	schar	oc_wsdam, oc_wldam;	/* max small/large monster damage */
-#define oc_range	oc_wsdam	/* for strength independant ranged weapons */
-#define oc_rof		oc_wldam	/* rate of fire bonus for ranged weapons */
+	struct weapon_dice oc_wsdam;	/* small monster damage */
+	struct weapon_dice oc_wldam;	/* large monster damage */
+#define oc_range	oc_wsdam.flat	/* for strength independant ranged weapons */
+#define oc_rof		oc_wldam.flat	/* rate of fire bonus for ranged weapons */
 	
 	schar	oc_oc1, oc_oc2, oc_oc3;
 #define oc_hitbon	oc_oc1		/* weapons: "to hit" bonus */
