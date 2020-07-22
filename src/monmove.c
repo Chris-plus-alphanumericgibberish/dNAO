@@ -2166,7 +2166,7 @@ not_special:
 		
 		if(appr == 0){
 			struct monst *m2 = (struct monst *)0;
-			int distminbest = SQSRCHRADIUS;
+			int distminbest = BOLT_LIM;
 			for(m2=fmon; m2; m2 = m2->nmon){
 				if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < distminbest
 						&& mm_aggression(mtmp,m2)
@@ -2179,15 +2179,7 @@ not_special:
 					gy = m2->my;
 					mtmp->mux = m2->mx;
 					mtmp->muy = m2->my;
-					if(MON_WEP(mtmp) && 
-						(is_launcher(MON_WEP(mtmp)) || is_firearm(MON_WEP(mtmp)) )
-					){
-						if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) >= BOLT_LIM) appr = 1;
-						else if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < 4) appr = -1;
-						else appr = 0;
-					} else {
-						appr = 1;
-					}
+					appr = 1;
 				}
 			}//End target closest hostile
 			
