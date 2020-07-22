@@ -61,9 +61,13 @@ struct objclass {
 
 #define	UPPER_TORSO_DR 0x01 /* body armor, shirt, cloak (2x weight) */
 #define	LOWER_TORSO_DR 0x02 /* body armor, cloak (2x weight) */
-#define	HEAD_DR        0x04 /* helmet, cloak */
+#define	HEAD_DR        0x04 /* helmet */
 #define	LEG_DR         0x08 /* boots, cloak */
 #define	ARM_DR         0x10 /* gloves */
+
+#define TORSO_DR       (UPPER_TORSO_DR|LOWER_TORSO_DR)
+#define CLOAK_DR       (UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR)
+#define ALL_DR         (UPPER_TORSO_DR|LOWER_TORSO_DR|HEAD_DR|LEG_DR|ARM_DR)
 
 	/*Bitfield(oc_subtyp,3);*/	/* Now too big for a bitfield... see below */
 

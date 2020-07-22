@@ -598,13 +598,13 @@ BOW("atlatl", "notched stick",                      0, MZ_MEDIUM,  0, 12,  30,  
 		{0}, {0}, 10 - ac, can, dr, wt, c, __VA_ARGS__ )
 
 #define SUIT(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
-	ARMOR(name, desc, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, UPPER_TORSO_DR|LOWER_TORSO_DR, ARM_SUIT, metal, c, __VA_ARGS__)
+	ARMOR(name, desc, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, TORSO_DR, ARM_SUIT, metal, c, __VA_ARGS__)
 #define SHIRT(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
 	ARMOR(name, desc, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, UPPER_TORSO_DR, ARM_SHIRT, metal, c, __VA_ARGS__)
 #define HELM(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
 	ARMOR(name, desc, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, HEAD_DR, ARM_HELM, metal, c, __VA_ARGS__)
 #define CLOAK(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
-	ARMOR(name, desc, kn, mgc, MZ_MEDIUM, power, prob, delay, wt, cost, ac, dr, can, HEAD_DR|UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR, ARM_CLOAK, metal, c, __VA_ARGS__)
+	ARMOR(name, desc, kn, mgc, MZ_MEDIUM, power, prob, delay, wt, cost, ac, dr, can, CLOAK_DR, ARM_CLOAK, metal, c, __VA_ARGS__)
 #define SHIELD(name,desc,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
 	ARMOR(name, desc, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, 0, ARM_SHIELD, metal, c, __VA_ARGS__)
 #define GLOVES(name,desc,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
@@ -717,7 +717,7 @@ SUIT("elven toga", (char *)0, /*Needs encyc entry*//*Needs tile*/
 SUIT("noble's dress", "armored black dress", /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, 0,	0, 5, 40, 2000,  6, 4, 3, SHADOWSTEEL, CLR_BLACK),
 SHIRT("black dress", (char *)0, /*Needs encyc entry*/
-	1, 0,   MZ_HUGE, 0,	0, 5,  5,  500, 10, 0, 2, CLOTH, CLR_BLACK),
+	1, 0,   MZ_HUGE, 0,	0, 5,  5,  500, 10, 0, 2, CLOTH, CLR_BLACK, O_DRSLOT(TORSO_DR)),
 SUIT("consort's suit", "loud foppish suit", /*Needs encyc entry*//*Needs tile*/
 	0, 0,   MZ_HUGE, 0,	0, 5, 10, 	1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
 SUIT("gentleman's suit", "expensive clothes", /*Needs encyc entry*/
@@ -797,12 +797,13 @@ SHIRT("striped shirt", (char *)0, /*Needs encyc entry*/
 SHIRT("ruffled shirt", (char *)0, /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_WHITE),
 /* victorian underwear, on the other hand, inflicts a penalty to AC but grants MC 3 */
+/* needs special case to be 'bulky' */
 SHIRT("victorian underwear", "white dress",
-	0, 0, MZ_MEDIUM, 		  0,	 0, 5,	 5,   10, 10, 2, 3, CLOTH, CLR_WHITE),	/* needs special case to be 'bulky' */
+	0, 0, MZ_MEDIUM, 		  0,	 0, 5,	 5,   10, 10, 2, 3, CLOTH, CLR_WHITE,  O_DRSLOT(TORSO_DR)),
 SUIT("jumpsuit", "silvery clothes",/*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_HUGE, REFLECTING,	 0, 5,	 5, 1000, 10, 1, 3, PLASTIC, HI_SILVER),
+	0, 0, MZ_HUGE, REFLECTING,	 0, 5,	 5, 1000, 10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
 SHIRT("bodyglove", "tight black clothes", /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_HUGE, SICK_RES,	 0, 5,	 5, 1000, 10, 0, 3, PLASTIC, CLR_BLACK),
+	0, 0, MZ_HUGE, SICK_RES,	 0, 5,	 5, 1000, 10, 0, 3, PLASTIC, CLR_BLACK, O_DRSLOT(ALL_DR)),
 /* cloaks */
 /*  'cope' is not a spelling mistake... leave it be */
 CLOAK("mummy wrapping", (char *)0,
@@ -814,17 +815,17 @@ CLOAK("droven cloak", "cobwebbed cloak", /*Needs encyc entry*/
 CLOAK("orcish cloak", "coarse mantelet",
 		0, 0,	0,	    8, 0, 10, 40, 10, 0, 2, CLOTH, CLR_BLACK),
 CLOAK("dwarvish cloak", "hooded cloak",
-		0, 0,	0,	    8, 0, 10, 50,10, 1, 2, CLOTH, CLR_BLUE),
+		0, 0,	0,	    8, 0, 10, 50,10, 1, 2, CLOTH, CLR_BLUE, O_DRSLOT(HEAD_DR|CLOAK_DR)),
 CLOAK("oilskin cloak", "slippery cloak",
 		0, 0,	0,	    8, 0, 10, 50,  9, 0, 3, CLOTH, HI_CLOTH),
 CLOAK("robe", (char *)0,
 		1, 1,	0,	    3, 0, 15, 50, 10, 2, 3, CLOTH, CLR_RED),
 CLOAK("white faceless robe", (char *)0,
-		1, 1,	0,	    0, 2, 20, 50, 10, 1, 3, CLOTH, CLR_WHITE),
+		1, 1,	0,	    0, 2, 20, 50, 10, 1, 3, CLOTH, CLR_WHITE, O_DRSLOT(HEAD_DR|CLOAK_DR)),
 CLOAK("black faceless robe", (char *)0,
-		1, 1,	COLD_RES,	    0, 2, 20, 50, 10, 2, 3, CLOTH, CLR_BLACK),
+		1, 1,	COLD_RES,	    0, 2, 20, 50, 10, 2, 3, CLOTH, CLR_BLACK, O_DRSLOT(HEAD_DR|CLOAK_DR)),
 CLOAK("smoky violet faceless robe", (char *)0,
-		1, 1,	COLD_RES,	    0, 2, 20,500, 10, 3, 3, CLOTH, CLR_MAGENTA),
+		1, 1,	COLD_RES,	    0, 2, 20,500, 10, 3, 3, CLOTH, CLR_MAGENTA, O_DRSLOT(HEAD_DR|CLOAK_DR)),
 CLOAK("alchemy smock", "apron",
 		0, 1,	POISON_RES, 9, 0, 10, 50, 10, 1, 3, CLOTH, CLR_WHITE),
 CLOAK("Leo Nemaeus hide", "lion skin",
