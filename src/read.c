@@ -2805,9 +2805,8 @@ struct obj *obj;
 			   as a `not null' flag for set_lit() */
 	boolean permanent_darkness = Is_grue_level(&u.uz);
 	/* first produce the text (provided you're not blind) */
-	if(!on) {
 		register struct obj *otmp;
-
+	if(!on) {
 		if (!Blind) {
 		    if(u.uswallow) {
 			pline("It seems even darker in here than before.");
@@ -2822,8 +2821,8 @@ struct obj *obj;
 
 		/* the magic douses lamps, et al, too */
 		for(otmp = invent; otmp; otmp = otmp->nobj)
-		    if (otmp->lamplit)
-			(void) snuff_lit(otmp);
+			if (otmp->lamplit && && otmp->otyp != SUNROD && !Darkness_cant_snuff(otmp))
+				(void) snuff_lit(otmp);
 		if (Blind) goto do_it;
 	} else {
 		if (Blind) goto do_it;
@@ -2840,6 +2839,10 @@ struct obj *obj;
 					pline("%s glistens.", Monnam(u.ustuck));
 			return;
 		}
+		for(otmp = invent; otmp; otmp = otmp->nobj)
+		    if (otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit)
+				end_burn(otmp, TRUE);
+		
 		if (!permanent_darkness)
 			pline("A lit field surrounds you!");
 		else
