@@ -2983,6 +2983,48 @@ int * truedmgptr;
 		if(check_oprop(otmp, OPROP_LESSER_MAGCW))
 			*truedmgptr += d(3, 4);
 	}
+	if(check_oprop(otmp, OPROP_GOATW)){
+		switch(goat_weapon_damage_turn(otmp)){
+			case AD_EACD:
+				if (!Acid_res(mdef)){
+					*truedmgptr += basedmg;
+				}
+			break;
+			case AD_DRST:
+				*plusdmgptr += d(4,4);
+				if (!Poison_res(mdef)){
+					*truedmgptr += basedmg;
+				}
+			break;
+			case AD_STDY:
+				if (youdef){
+					u.ustdy += basedmg;
+				} else {
+					mdef->mstdy += basedmg;
+				}
+			break;
+			case AD_FIRE:
+				if (!Fire_res(mdef)){
+					*truedmgptr += d(3,10);
+				}
+			break;
+			case AD_COLD:
+				if (!Cold_res(mdef)){
+					*truedmgptr += d(3,8);
+				}
+			break;
+			case AD_ELEC:
+				if (!Shock_res(mdef)){
+					*truedmgptr += d(3,8);
+				}
+			break;
+			case AD_ACID:
+				if (!Acid_res(mdef)){
+					*truedmgptr += d(4,4);
+				}
+			break;
+		}
+	}
 	//Psionic does slightly buffed damage, but triggers less frequently
 	// Buffed vs. telepathic beings
 	if(youdef && (Blind_telepat || !rn2(5))){
@@ -3225,6 +3267,8 @@ boolean * messaged;
 	boolean vis = getvis(magr, mdef, 0, 0);
 
 	int oartifact = otmp->oartifact;
+	
+	int goatweaponturn = 0;
 
 	char hittee[BUFSZ];
 	static const char you[] = "you";
@@ -3236,7 +3280,10 @@ boolean * messaged;
 	/* for artifacts, we must assume they are used properly -- msgr will not override artifact-specific hitmsgs */
 	if (!msgr)
 		msgr = otmp;
-
+	
+	if(check_oprop(otmp,OPROP_GOATW))
+		goatweaponturn = goat_weapon_damage_turn(otmp);
+	
 #define currdmg (basedmg + *plusdmgptr + *truedmgptr)
 
 	/* apply spec_dbon to appropriate damage pointers */
@@ -3514,8 +3561,11 @@ boolean * messaged;
 			wepdesc = OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]);
 		break;
 	}
-
-	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW)){
+	
+	if(goatweaponturn && !youdef && youagr)
+		mdef->mgoatmarked = TRUE;
+	
+	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW) || goatweaponturn == AD_FIRE){
 		if (attacks(AD_FIRE, otmp) && (vis&VIS_MAGR)) {	/* only artifacts message */
 			pline_The("fiery %s %s %s%c",
 				wepdesc,
@@ -3534,10 +3584,10 @@ boolean * messaged;
 	    if (youdef && Slimed) burn_away_slime();
 	    if (youdef && FrozenAir) melt_frozen_air();
 	}
-	if ((attacks(AD_COLD, otmp) || check_oprop(otmp,OPROP_COLDW) || check_oprop(otmp,OPROP_OONA_COLDW) || check_oprop(otmp,OPROP_LESSER_COLDW)) && !(
+	if ((attacks(AD_COLD, otmp)  && !(
 			/* exceptions */
 			(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)
-		)
+		)) || check_oprop(otmp,OPROP_COLDW) || check_oprop(otmp,OPROP_OONA_COLDW) || check_oprop(otmp,OPROP_LESSER_COLDW) || goatweaponturn == AD_COLD
 	){
 		if (attacks(AD_COLD, otmp) && (vis&VIS_MAGR)) {
 			pline_The("ice-cold %s %s %s%c",
@@ -3560,7 +3610,7 @@ boolean * messaged;
 			if (!rn2(4)) (void)destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
-	if (attacks(AD_ELEC, otmp) || check_oprop(otmp,OPROP_ELECW) || check_oprop(otmp,OPROP_OONA_ELECW) || check_oprop(otmp,OPROP_LESSER_ELECW)){
+	if (attacks(AD_ELEC, otmp) || check_oprop(otmp,OPROP_ELECW) || check_oprop(otmp,OPROP_OONA_ELECW) || check_oprop(otmp,OPROP_LESSER_ELECW) || goatweaponturn == AD_ELEC){
 		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR)) {
 			pline_The("%s %s %s%c",
 				wepdesc,
@@ -3571,7 +3621,7 @@ boolean * messaged;
 	    if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
 	    if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 	}
-	if (attacks(AD_ACID, otmp) || check_oprop(otmp,OPROP_ACIDW) || check_oprop(otmp,OPROP_LESSER_ACIDW)){
+	if (attacks(AD_ACID, otmp) || check_oprop(otmp,OPROP_ACIDW) || check_oprop(otmp,OPROP_LESSER_ACIDW) || goatweaponturn == AD_EACD || goatweaponturn == AD_ACID){
 		if (attacks(AD_ACID, otmp) && (vis&VIS_MAGR)) {
 			pline_The("foul %s %s %s%c",
 				wepdesc,
@@ -10102,6 +10152,27 @@ struct monst *mon;
 		}
 	}
 	return 0;
+}
+
+int
+goat_weapon_damage_turn(obj)
+struct obj *obj;
+{
+	unsigned long int hashed = hash((unsigned long) (nonce + obj->o_id + hash(OPROP_GOATW)));
+	switch(hashed%4){
+		case 0: return AD_EACD;
+		case 1: return AD_DRST;
+		case 2: return AD_STDY;
+		case 3:
+			hashed = hash((unsigned long) (moves + hashed));
+			switch(hashed%4){
+				case 0: return AD_FIRE;
+				case 1: return AD_COLD;
+				case 2: return AD_ELEC;
+				case 3: return AD_ACID;
+			}
+	}
+	return AD_EACD;
 }
 
 /*artifact.c*/

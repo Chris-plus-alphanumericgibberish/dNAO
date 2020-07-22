@@ -211,6 +211,10 @@ extern struct god_details god_list[MAX_GOD]; //defined in decl.c
 #define GA_SOTHOTH	13
 #define GA_NUM		14
 
+#define GOAT_EAT_PASSIVE 0
+#define GOAT_EAT_OFFERED 1
+#define GOAT_EAT_MARKED 2
+
 #define Amask2align(x)	((aligntyp) ( (x)==AM_NONE ? A_NONE : \
 									  (x)==AM_CHAOTIC ? A_CHAOTIC :\
 									  (x)==AM_NEUTRAL ? A_NEUTRAL :\

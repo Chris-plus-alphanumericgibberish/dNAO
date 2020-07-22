@@ -2065,6 +2065,9 @@ struct monst *mtmp;
 		mtmp->mblinded = 1;
 	}
 	
+	//No point in checking it before setting it.
+	mtmp->mgoatmarked = FALSE;
+	
 	/* gradually time out temporary problems */
 	if (mtmp->mblinded && !--mtmp->mblinded)
 	    mtmp->mcansee = 1;
@@ -5614,9 +5617,13 @@ xkilled(mtmp, dest)
 		if (corpse_chance(mtmp, (struct monst *)0, FALSE)){
 			struct obj *corpse;
 			corpse = make_corpse(mtmp);
-			if(corpse && corpse->otyp == CORPSE && goat_mouth_at(x,y) && !corpse->oartifact && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
+			if(corpse && corpse->otyp == CORPSE && !corpse->oartifact){
 				//We are in the "player has killed monster" function, so it's their fault
-				goat_eat(corpse, TRUE); //Goat eat tries *really* hard to destroy whatever you give it.
+				if(goat_mouth_at(x,y) && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
+					goat_eat(corpse, GOAT_EAT_OFFERED); //Goat eat tries *really* hard to destroy whatever you give it.
+				} else if(mtmp->mgoatmarked){
+					goat_eat(corpse, GOAT_EAT_MARKED); //Goat eat tries *really* hard to destroy whatever you give it.
+				} else goat_seenonce = FALSE;
 				corpse = (struct obj *)0; //corpse pointer is now stale
 			}
 		}

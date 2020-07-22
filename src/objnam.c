@@ -865,6 +865,23 @@ boolean dofull;
 		if (check_oprop(obj, OPROP_LESSER_ACIDW))
 			Strcat(buf, "acrid ");
 		
+		if (check_oprop(obj, OPROP_GOATW)){
+			switch(goat_weapon_damage_turn(obj)){
+				case AD_EACD:
+					Strcat(buf, "drooling ");
+				break;
+				case AD_DRST:
+					Strcat(buf, "lashing ");
+				break;
+				case AD_STDY:
+					Strcat(buf, "staring ");
+				break;
+				default:
+					Strcat(buf, "stormwrapped ");
+				break;
+			}
+		}
+		
 		if (check_oprop(obj, OPROP_MAGCW))
 			Strcat(buf, "sparkling ");
 		if (check_oprop(obj, OPROP_LESSER_MAGCW))
@@ -4016,6 +4033,9 @@ int wishflags;
 			add_oprop_list(oprop_list, OPROP_ACIDW);
 		} else if (!strncmpi(bp, "acrid ", l=6)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_ACIDW);
+
+		} else if (!strncmpi(bp, "drooling ", l=9) || !strncmpi(bp, "lashing ", l=8) || !strncmpi(bp, "staring ", l=8) || !strncmpi(bp, "stormwrapped ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_GOATW);
 
 		} else if (!strncmpi(bp, "sparkling ", l=10) && 
 				strncmpi(bp, "sparkling horizontal", 20) && 

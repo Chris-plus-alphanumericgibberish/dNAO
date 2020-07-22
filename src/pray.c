@@ -23,7 +23,7 @@ STATIC_DCL void FDECL(godvoice,(int,const char*));
 STATIC_DCL void FDECL(god_zaps_you, (int));
 STATIC_DCL void FDECL(fry_by_god, (int));
 STATIC_DCL void FDECL(consume_offering,(struct obj *));
-STATIC_DCL void FDECL(eat_offering,(struct obj *));
+STATIC_DCL void FDECL(eat_offering,(struct obj *, boolean));
 STATIC_DCL boolean FDECL(water_prayer,(BOOLEAN_P));
 STATIC_DCL boolean FDECL(blocked_boulder,(int,int));
 static void NDECL(lawful_god_gives_angel);
@@ -2365,95 +2365,98 @@ int ga_num;
 static NEARDATA const char sacrifice_types[] = { FOOD_CLASS, AMULET_CLASS, 0 };
 
 STATIC_OVL void
-eat_offering(otmp)
+eat_offering(otmp, silently)
 register struct obj *otmp;
+boolean silently;
 {
 	xchar x, y;
 	get_obj_location(otmp, &x, &y, BURIED_TOO);
-    if (Hallucination)
-	switch (rn2(25)) {
-	    case 0:
-		Your("sacrifice sprouts wings and a propeller and roars away!");
-		break;
-	    case 1:
-		Your("sacrifice puffs up, swelling bigger and bigger, and pops!");
-		break;
-	    case 2:
-		Your("sacrifice collapses into a cloud of dancing particles and fades away!");
-	    case 3:
-		Your("sacrifice scarcifies!");
-	    case 4:
-		You("can't find your sacrifice.");
-		You("must have misplaced it!");
-		break;
-	    case 5:
-		Your("sacrifice is consumed with doubt!");
-		break;
-	    case 6:
-		Your("sacrifice rots away!");
-		break;
-		case 7:
-		Your("sacrifice is homogenized!");
-		break;
-		case 8:
-		Your("sacrifice is vaporized!");
-		break;
-		case 9:
-		Your("sacrifice is consumed in a flash!");
-		break;
-		case 10:
-		Your("sacrifice is consumed by the altar!");
-		break;
-		case 11:
-		You("consume the sacrifice!");
-		break;
-		case 12:
-		Your("sacrifice is rejected!");
-		break;
-		case 13:
-		Your("sacrifice is dejected!");
-		break;
-		case 14:
-		Your("sacrifice is consumed in a rout!");
-		break;
-		case 15:
-		Your("sacrifice is consumed in a lash of fight!");
-		break;
-		case 16:
-		Your("sacrifice is lame!");
-		break;
-		case 17:
-		You("are consumed in a %s!",
-	      u.ualign.type != A_LAWFUL ? "flash of light" : "burst of flame");
-    	break;
-	    case 18:
-		Your("sacrifice is consumed by jealousy!");
-		break;
-	    case 19:
-		Your("sacrifice is consumed by embarrassment!");
-		break;
-	    case 20:
-		Your("sacrifice is consumed by self-hate!");
-		break;
-	    case 21:
-		Your("sacrifice was eaten by fairies!");
-		break;
-	    case 22:
-		Your("sacrifice is vanishes in a dash at night!");
-	    case 23:
-		u.ualign.type == A_LAWFUL ?
-			Your("sacrifice is consumed in a flash of %s light!", hcolor(0)):
-			Your("sacrifice is consumed in a burst of %s flame!", hcolor(0));
-		break;
-	    case 24:
-		Your("sacrifice is consumed by trout!");
-		break;
+	if(!silently){
+		if (Hallucination)
+		switch (rn2(25)) {
+			case 0:
+			Your("sacrifice sprouts wings and a propeller and roars away!");
+			break;
+			case 1:
+			Your("sacrifice puffs up, swelling bigger and bigger, and pops!");
+			break;
+			case 2:
+			Your("sacrifice collapses into a cloud of dancing particles and fades away!");
+			case 3:
+			Your("sacrifice scarcifies!");
+			case 4:
+			You("can't find your sacrifice.");
+			You("must have misplaced it!");
+			break;
+			case 5:
+			Your("sacrifice is consumed with doubt!");
+			break;
+			case 6:
+			Your("sacrifice rots away!");
+			break;
+			case 7:
+			Your("sacrifice is homogenized!");
+			break;
+			case 8:
+			Your("sacrifice is vaporized!");
+			break;
+			case 9:
+			Your("sacrifice is consumed in a flash!");
+			break;
+			case 10:
+			Your("sacrifice is consumed by the altar!");
+			break;
+			case 11:
+			You("consume the sacrifice!");
+			break;
+			case 12:
+			Your("sacrifice is rejected!");
+			break;
+			case 13:
+			Your("sacrifice is dejected!");
+			break;
+			case 14:
+			Your("sacrifice is consumed in a rout!");
+			break;
+			case 15:
+			Your("sacrifice is consumed in a lash of fight!");
+			break;
+			case 16:
+			Your("sacrifice is lame!");
+			break;
+			case 17:
+			You("are consumed in a %s!",
+			  u.ualign.type != A_LAWFUL ? "flash of light" : "burst of flame");
+			break;
+			case 18:
+			Your("sacrifice is consumed by jealousy!");
+			break;
+			case 19:
+			Your("sacrifice is consumed by embarrassment!");
+			break;
+			case 20:
+			Your("sacrifice is consumed by self-hate!");
+			break;
+			case 21:
+			Your("sacrifice was eaten by fairies!");
+			break;
+			case 22:
+			Your("sacrifice is vanishes in a dash at night!");
+			case 23:
+			u.ualign.type == A_LAWFUL ?
+				Your("sacrifice is consumed in a flash of %s light!", hcolor(0)):
+				Your("sacrifice is consumed in a burst of %s flame!", hcolor(0));
+			break;
+			case 24:
+			Your("sacrifice is consumed by trout!");
+			break;
+		}
+		else if(Blind || (!carried(otmp) && !cansee(x,y)))
+		You_hear("crunching noises.");
+		else if(!carried(otmp) && cansee(x,y))
+			pline("A mouth forms from the mist and eats %s!", an(singular(otmp, xname)));
+		else pline("A mouth forms from the mist and eats your sacrifice!");
 	}
-    else if(Blind || (!carried(otmp) && !cansee(x,y)))
-	You_hear("crunching noises.");
-    else if(!carried(otmp) && cansee(x,y))
-		pline("A mouth forms from the mist and eats %s!", an(singular(otmp, xname)));
-    else pline("A mouth forms from the mist and eats your sacrifice!");
     if (carried(otmp)){
 		if(u.sealsActive&SEAL_BALAM){
 			struct permonst *ptr = &mons[otmp->corpsenm];
@@ -2695,7 +2698,7 @@ dosacrifice()
      */
 	
 	if(goat_mouth_at(u.ux, u.uy)){
-		goat_eat(otmp, TRUE);
+		goat_eat(otmp, GOAT_EAT_OFFERED);
 		return 1;
 	}
 	
@@ -4315,9 +4318,9 @@ int x, y;
 }
 
 void
-goat_eat(otmp, yourinvent)
+goat_eat(otmp, eatflag)
 struct obj *otmp;
-boolean yourinvent;
+int eatflag;
 {
     int value = 0;
 	struct permonst *ptr = &mons[otmp->corpsenm];
@@ -4327,12 +4330,12 @@ boolean yourinvent;
 	
 	get_obj_location(otmp, &x, &y, BURIED_TOO);
 	
-	if(goat_resurrect(otmp, yourinvent)){
+	if(goat_resurrect(otmp, eatflag != GOAT_EAT_PASSIVE)){
 		//otmp is now gone, and resurrect may have printed messages
 		return;
 	}
 	
-	if(goat_rider(otmp, yourinvent)){
+	if(goat_rider(otmp, eatflag != GOAT_EAT_PASSIVE)){
 		//otmp is now gone, and rider may have printed messages
 		return;
 	}
@@ -4354,7 +4357,7 @@ boolean yourinvent;
 		value = 1;
 	}
 	
-	if (yourinvent && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
+	if (eatflag != GOAT_EAT_PASSIVE && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_CHAOTIC) {
 			adjalign(-5);
@@ -4383,8 +4386,10 @@ boolean yourinvent;
 	/* never an altar conversion*/
 	
 	/* Rider handled */
-	eat_offering(otmp);
-	if(yourinvent && u.ualign.type != A_CHAOTIC && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
+	eat_offering(otmp, eatflag == GOAT_EAT_MARKED && !(u.ualign.type != A_CHAOTIC && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) && goat_seenonce);
+	if(eatflag == GOAT_EAT_MARKED)
+		goat_seenonce = TRUE;
+	if(eatflag != GOAT_EAT_PASSIVE && u.ualign.type != A_CHAOTIC && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
 		adjalign(-value);
 		u.ugangr[Align2gangr(u.ualign.type)] += 1;
 		(void) adjattrib(A_WIS, -1, TRUE);
@@ -4415,7 +4420,7 @@ boolean yourinvent;
 		else You("have a feeling of inadequacy.");
 	    }
 	//No alignment record for the goat
-	} else if (u.ugoatblesscnt > 0) {
+	} else if (u.ugoatblesscnt > 0 && eatflag != GOAT_EAT_MARKED) {
 	    u.ugoatblesscnt -=
 		((value * (u.ualign.type == A_CHAOTIC ? 500 : 300)) / MAXVALUE);
 	    if(u.ugoatblesscnt < 0) u.ugoatblesscnt = 0;
@@ -4436,7 +4441,7 @@ boolean yourinvent;
 			u.reconciled = REC_REC;
 		}
 	    }
-	} else if(yourinvent){
+	} else if(eatflag == GOAT_EAT_OFFERED){
 		//The Black Goat is pleased
 		struct monst *mtmp;
 		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
@@ -4473,19 +4478,20 @@ boolean yourinvent;
 	    /* The chance goes down as the number of artifacts goes up */
 		/* Priests now only count gifts in this calculation, found artifacts are excluded */
 		struct obj *otmp = (struct obj *)0;
-		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || uwep->oartifact) && !check_oprop(uwep, OPROP_ACIDW))
+		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || uwep->oartifact) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_GOATW))
 			otmp = uwep;
-		else if (uarmg && u.umartial && uarmg->oartifact && !check_oprop(uarmg, OPROP_ACIDW))
+		else if (uarmg && !uwep && u.umartial && !check_oprop(uarmg, OPROP_ACIDW) && !check_oprop(uwep, OPROP_GOATW))
 			otmp = uarmg;
-		else if (uarmf && u.umartial && uarmf->oartifact && !check_oprop(uarmf, OPROP_ACIDW))
+		else if (uarmf && !uarmg && !uwep && u.umartial && !check_oprop(uarmf, OPROP_ACIDW) && !check_oprop(uwep, OPROP_GOATW))
 			otmp = uarmf;
 			
 	    if(u.ulevel > 2 && u.uluck >= 0 && (!flags.made_know || otmp) && maybe_god_gives_gift()){
 			if(otmp){
-				if(!Blind) pline("Acid drips from your %s!", 
-					(otmp == uwep) ? "weapon" : ((otmp == uarmg) ? "gloves" : "boots"));
-				remove_oprop(uwep, OPROP_LESSER_ACIDW);
-				add_oprop(uwep, OPROP_ACIDW);
+				if(!Blind) pline("...your %s %s drooling.", 
+					(otmp == uwep) ? "weapon" : ((otmp == uarmg) ? "gloves" : "boots"),
+					(otmp == uwep) ? "is" : "are");
+				remove_oprop(otmp, OPROP_LESSER_ACIDW);
+				add_oprop(otmp, OPROP_GOATW);
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
