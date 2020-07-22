@@ -464,6 +464,7 @@ E NEARDATA struct dig_info {		/* apply.c, hack.c */
 E NEARDATA long moves, monstermoves;
 E NEARDATA long nonce;
 E NEARDATA long wailmsg;
+E boolean goat_seenonce;
 
 E NEARDATA boolean in_mklev;
 E NEARDATA boolean stoned;

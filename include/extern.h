@@ -148,6 +148,7 @@ E void NDECL(dogoat_tentacles);
 E void NDECL(living_items);
 E int FDECL(oresist_disintegration, (struct obj *));
 E int FDECL(wrath_target, (struct obj *, struct monst *));
+E int FDECL(goat_weapon_damage_turn, (struct obj *));
 
 /* ### attrib.c ### */
 
