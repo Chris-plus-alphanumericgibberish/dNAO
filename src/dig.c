@@ -282,8 +282,6 @@ dig()
 		    You("fumble and drop your %s.", xname(digitem));
 		    dropx(digitem);
 		} else {
-			static int jboots3 = 0;
-			if (!jboots3) jboots3 = find_jboots();
 #ifdef STEED
 		    if (u.usteed)
 			Your("%s %s and %s %s!",
@@ -299,7 +297,7 @@ dig()
 		    if (u.usteed) set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
 			else
 #endif
-		    if( !(uarmf && uarmf->otyp == jboots3)) set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
+			if (!(uarmf && uarmf->otyp == find_jboots())) set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
 		}
 		break;
 	    case 1:

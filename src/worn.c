@@ -1746,14 +1746,14 @@ struct obj *obj;
 	{
 		/* gloves */
 	case GAUNTLETS_OF_POWER:
-		return 2;
+		return 8;
 		break;
 	case GAUNTLETS_OF_DEXTERITY:
 		return (obj->spe / 2);
 		break;
 		/* cloaks */
 	case ALCHEMY_SMOCK:
-		if (!resists_acid(mon) || !resists_poison(mon))
+		if (!species_resists_acid(mon) || !species_resists_poison(mon))
 			return 5;
 		break;
 	case MUMMY_WRAPPING:
@@ -1771,11 +1771,11 @@ struct obj *obj;
 	switch (objects[obj->otyp].oc_oprop)
 	{
 	case ANTIMAGIC:
-		if (!resists_magm(mon))
+		if (!species_resists_magic(mon))
 			return 20;
 		break;
 	case REFLECTING:
-		if (!mon_reflects(mon, (char *)0))
+		if (!(mon->mfaction == FRACTURED || species_reflects(mon)))
 			return 18;
 		break;
 	case FAST:
@@ -1783,45 +1783,45 @@ struct obj *obj;
 			return 15;
 		break;
 	case FLYING:
-		if (!mon_resistance(mon, FLYING))
+		if (!species_flies(mon->data))
 			return 10;
 		break;
 	case DISPLACED:
-		if (!mon_resistance(mon, DISPLACED))
+		if (!species_displaces(mon->data))
 			return 8;
 		break;
 	case STONE_RES:
-		if (!resists_ston(mon))
+		if (!species_resists_ston(mon))
 			return 7;
 		break;
 	case SICK_RES:
-		if (!resists_sickness(mon))
+		if (!species_resists_sickness(mon))
 			return 5;
 		break;
 	case FIRE_RES:
-		if (!resists_fire(mon))
+		if (!species_resists_fire(mon))
 			return 3;
 	case COLD_RES:
-		if (!resists_cold(mon))
+		if (!species_resists_cold(mon))
 			return 3;
 	case SHOCK_RES:
-		if (!resists_elec(mon))
+		if (!species_resists_elec(mon))
 			return 3;
 	case ACID_RES:
-		if (!resists_acid(mon))
+		if (!species_resists_acid(mon))
 			return 3;
 	case POISON_RES:
-		if (!resists_poison(mon))
+		if (!species_resists_poison(mon))
 			return 3;
 	case SLEEP_RES:
-		if (!resists_sleep(mon))
+		if (!species_resists_sleep(mon))
 			return 3;
 	case DRAIN_RES:
-		if (!resists_drli(mon))
+		if (!species_resists_drain(mon))
 			return 3;
 		break;
 	case TELEPAT:
-		if (!mon_resistance(mon, TELEPAT))
+		if (!species_is_telepathic(mon->data))
 			return 1;
 		break;
 	case FUMBLING:
@@ -1831,7 +1831,7 @@ struct obj *obj;
 	case INVIS:
 		if (mon->mtame && !See_invisible_old)
 			return -20;
-		else if (!mon->minvis)
+		else if (!pm_invisible(mon->data))
 			return 5;
 		break;
 	}

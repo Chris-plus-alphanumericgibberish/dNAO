@@ -271,10 +271,7 @@ Cloak_on()
 	default: impossible(unknown_type, c_cloak, uarmc->otyp);
     }
     /* vampires get a charisma bonus when wearing an opera cloak */
-    const char* cloak_desc = OBJ_DESCR(objects[uarmc->otyp]);
-    if (cloak_desc != (char *)0 &&
-	!strcmp(cloak_desc, "opera cloak") &&
-	is_vampire(youracedata)) {
+	if (uarmc->otyp == find_opera_cloak() && is_vampire(youracedata)) {
 		You("%s very impressive in your %s.", Blind ||
 				(Invis && !See_invisible(u.ux, u.uy)) ? "feel" : "look",
 				OBJ_DESCR(objects[uarmc->otyp]));
@@ -340,11 +337,9 @@ Cloak_off()
 	default: impossible(unknown_type, c_cloak, otyp);
     }
     /* vampires get a charisma bonus when wearing an opera cloak */
-    const char* cloak_desc = OBJ_DESCR(objects[otyp]);
-    if (cloak_desc != (char *)0 &&
-	!strcmp(cloak_desc, "opera cloak") &&
-	!cancelled_don &&
-	is_vampire(youracedata)) {
+	if (otyp == find_opera_cloak() &&
+		!cancelled_don &&
+		is_vampire(youracedata)) {
 		ABON(A_CHA) -= 1;
 		flags.botl = 1;
     }
@@ -357,8 +352,6 @@ Helmet_on()
 {
 	boolean already_blind, blind_changed = FALSE;	/* blindness from wearing the helmet was set before this was called, we need a kludge*/
 	struct obj * otmp;
-	static int gcircletsa = 0;
-	if(!gcircletsa) gcircletsa = find_gcirclet();
     if (!uarmh) return 0;
     switch(uarmh->otyp) {
 	case FEDORA:
@@ -382,7 +375,7 @@ Helmet_on()
 	case HELM_OF_TELEPATHY:
 	case HELM_OF_DRAIN_RESISTANCE:
 	case HARMONIUM_HELM:
-		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, uarmh->spe);
+		if (uarmh->otyp == find_gcirclet()) adj_abon(uarmh, uarmh->spe);
 		break;
 	case HELM_OF_BRILLIANCE:
 		adj_abon(uarmh, uarmh->spe);
@@ -397,7 +390,7 @@ Helmet_on()
 		makeknown(uarmh->otyp);
 		break;
 	case HELM_OF_OPPOSITE_ALIGNMENT:
-		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, uarmh->spe);
+		if (uarmh->otyp == find_gcirclet()) adj_abon(uarmh, uarmh->spe);
 		if (u.ualign.type == A_NEUTRAL)
 		    u.ualign.type = rn2(2) ? A_CHAOTIC : A_LAWFUL;
 		else if(u.ualign.type == A_VOID){
@@ -461,8 +454,6 @@ Helmet_off()
 {
 	boolean was_blind = Blind, blind_changed = FALSE;
 	struct obj * otmp = uarmh;
-	static int gcircletsa = 0;
-	if(!gcircletsa) gcircletsa = find_gcirclet();
 	
     takeoff_mask &= ~W_ARMH;
 
@@ -486,7 +477,7 @@ Helmet_off()
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
 	case HARMONIUM_HELM:
-		if(uarmh->otyp == gcircletsa && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
+		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    break;
 	case DUNCE_CAP:
 	    flags.botl = 1;
@@ -499,7 +490,7 @@ Helmet_off()
 	    break;
 	case HELM_OF_TELEPATHY:
 	    /* need to update ability before calling see_monsters() */
-		if(uarmh->otyp == gcircletsa && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
+		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    setworn((struct obj *)0, W_ARMH);
 	    see_monsters();
 	    return 0;
@@ -507,13 +498,13 @@ Helmet_off()
 	    if (!cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    break;
 	case HELM_OF_OPPOSITE_ALIGNMENT:
-		if(uarmh->otyp == gcircletsa && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
+		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    u.ualign.type = u.ualignbase[A_CURRENT];
 	    u.ublessed = 0; /* lose the other god's protection */
 	    flags.botl = 1;
 	    break;
 	case HELM_OF_DRAIN_RESISTANCE:
-		if(uarmh->otyp == gcircletsa && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
+		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    setworn((struct obj *)0, W_ARMH);
 	    return 0;
 	default: impossible(unknown_type, c_helmet, uarmh->otyp);
@@ -2030,9 +2021,7 @@ struct obj * otmp;
 	if (otmp->otyp == CLOAK_OF_PROTECTION)
 		def += 2;
 	// combat boots
-	static int cbootsd = 0;
-	if (!cbootsd) cbootsd = find_cboots();
-	if (otmp->otyp == cbootsd) def += 1;
+	if (otmp->otyp == find_cboots()) def += 1;
 
 	// add enchantment
 	if (otmp->spe)
@@ -2108,21 +2097,13 @@ struct obj * otmp;
 	if (otmp->otyp == CLOAK_OF_PROTECTION)
 		def += 2;
 	// padded gloves
-	static int pgloves = 0;
-	if (!pgloves) pgloves = find_pgloves();
-	if (otmp->otyp == pgloves) def += 1;
+	if (otmp->otyp == find_pgloves()) def += 1;
 	// gold circlet
-	static int girc = 0;
-	if (!girc) girc = find_gcirclet();
-	if (otmp->otyp == girc) def -= 1;
+	if (otmp->otyp == find_gcirclet()) def -= 1;
 	// visored helm
-	static int vhelm = 0;
-	if (!vhelm) vhelm = find_vhelm();
-	if (otmp->otyp == vhelm) def += 1;
+	if (otmp->otyp == find_vhelm()) def += 1;
 	// combat boots
-	static int cbootsd = 0;
-	if (!cbootsd) cbootsd = find_cboots();
-	if (otmp->otyp == cbootsd) def += 1;
+	if (otmp->otyp == find_cboots()) def += 1;
 
 
 	// add enchantment
@@ -3666,9 +3647,6 @@ adj_abon(otmp, delta)
 register struct obj *otmp;
 register schar delta;
 {
-	static int gcircletsa = 0;
-	if(!gcircletsa) gcircletsa = find_gcirclet();
-	
 	if (uarmh && uarmh == otmp) {
 		if(otmp->otyp == HELM_OF_BRILLIANCE){
 			if (delta) {
@@ -3678,7 +3656,7 @@ register schar delta;
 				flags.botl = 1;
 			}
 		}
-		if(otmp->otyp == gcircletsa){
+		if (otmp->otyp == find_gcirclet()){
 			if (delta) {
 				ABON(A_CHA) += (delta);
 				flags.botl = 1;

@@ -1848,7 +1848,8 @@ boolean with_price;
 		if (obj->quan != 1L) Strcpy(buf, makeplural(buf));
 	}//endif !obj_is_pname(obj)
 	
-	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)) {
+	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)
+		|| (iflags.force_artifact_names && !getting_obj_base_desc && obj->oartifact != ART_FLUORITE_OCTAHEDRON)) {
 		if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
 			if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
 			if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_FLUORITE_OCTAHEDRON)){

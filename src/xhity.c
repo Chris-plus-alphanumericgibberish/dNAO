@@ -1692,13 +1692,29 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
 		}
 
-		/* if twoweaponing, make an xwep attack after each weap attack, if it isn't in the inherent attack chain */
-		if (!by_the_book && *indexnum > 0 && (prev_res[1] != MM_MISS) && prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP && u.twoweap) {
-			fromlist = FALSE;
-			attk->aatyp = AT_XWEP;
-			attk->adtyp = AD_PHYS;
-			attk->damn = 1;
-			attk->damd = 4;
+		/* if twoweaponing... */
+		if (!by_the_book && *indexnum > 0 && (prev_res[1] != MM_MISS) && u.twoweap) {
+			/* follow weapon attacks with offhand attacks */
+			if (prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP) {
+				fromlist = FALSE;
+				attk->aatyp = AT_XWEP;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 4;
+			}
+			/* fixup for black web, which replaces AT_WEAP with an AT_SRPR */
+			/* subout is used to tell if we want to add another attack this time */
+			if ((u.specialSealsActive & SEAL_BLACK_WEB)
+				&& ((*subout) & SUBOUT_XWEP)
+				&& prev_attack.aatyp == AT_SRPR && attk->aatyp != AT_XWEP
+				) {
+				fromlist = FALSE;
+				attk->aatyp = AT_XWEP;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 4;
+				(*subout) &= ~SUBOUT_XWEP;
+			}
 		}
 	}
 
@@ -1812,10 +1828,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		// first index -- determine if using the alternate attack set (one seduction attack)
 		if (*indexnum == 0){
 			if (youdef){
-				static int engagering6 = 0;
 				boolean engring = FALSE;
-				if (!engagering6) engagering6 = find_engagement_ring();
-				if ((uleft && uleft->otyp == engagering6) || (uright && uright->otyp == engagering6)) engring = TRUE;
+				if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+					(uright && uright->otyp == find_engagement_ring()))
+					engring = TRUE;
 				if(pd && (!(dmgtype(pd, AD_SEDU)
 					|| dmgtype(pd, AD_SSEX)
 					|| dmgtype(pd, AD_LSEX)
@@ -1992,12 +2008,19 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	/* players with the Black Web Entity bound replace unarmed punches with shadow-blade attacks */
 	if (youagr && u.specialSealsActive&SEAL_BLACK_WEB && !by_the_book) {
 		if ((attk->aatyp == AT_WEAP && !uwep) ||
-			(attk->aatyp == AT_XWEP && !uswapwep && u.twoweap)) {
+			(attk->aatyp == AT_XWEP && !uswapwep && u.twoweap) ||
+			(attk->aatyp == AT_MARI && !is_android(youracedata))	/* (andr/gyn)oids' mari attacks are psi-held, not actual arms */
+			){
+			/* for mainhand attacks, flag that we want to make an offhand attack next */
+			if (attk->aatyp == AT_WEAP && u.twoweap && !uswapwep)
+				(*subout) |= SUBOUT_XWEP;
+
 			/* replace the attack */
 			attk->aatyp = AT_SRPR;
 			attk->adtyp = AD_SHDW;
 			attk->damn = 4;
 			attk->damd = 8;
+
 			/* this is applied to all acceptable attacks; no subout marker is necessary */
 		}	
 	}
@@ -2433,9 +2456,6 @@ int vis;
 	if (vis == -1)
 		vis = getvis(magr, mdef, 0, 0);
 
-	static int mboots1 = 0;
-	if (!mboots1) mboots1 = find_mboots();
-
 	switch (attk->adtyp) {
 		/* INT attacks always target heads */
 	case AD_DRIN:
@@ -2452,7 +2472,7 @@ int vis;
 		/* wrap attacks are specifically blocked by mud boots, in addition to body armors */
 	case AD_WRAP:
 		obj = (youdef ? uarmf : which_armor(mdef, W_ARMF));
-		if (obj && obj->otyp == mboots1)
+		if (obj && obj->otyp == find_mboots())
 			break;
 		else {
 			obj = (struct obj *)0;
@@ -2465,8 +2485,8 @@ int vis;
 	}
 
 	if (obj && (
-		(obj->greased || obj->otyp == OILSKIN_CLOAK) ||		/* greased (or oilskin) armor */
-		(attk->adtyp == AD_WRAP && obj->otyp == mboots1)	/* mud boots vs wrap attacks */
+		(obj->greased || obj->otyp == OILSKIN_CLOAK) ||			/* greased (or oilskin) armor */
+		(attk->adtyp == AD_WRAP && obj->otyp == find_mboots())	/* mud boots vs wrap attacks */
 		)
 		&&
 		!(obj->cursed && !rn2(3))							/* 1/3 chance to fail when cursed */
@@ -2481,7 +2501,7 @@ int vis;
 				(youdef ? "your" : s_suffix(mon_nam(mdef))),
 				(obj->greased ? "greased" : "slippery"),
 				((obj->otyp == OILSKIN_CLOAK && !objects[obj->otyp].oc_name_known)
-					? cloak_simple_name(obj) : obj->otyp == mboots1 ? "mud boots" : xname(obj))
+				? cloak_simple_name(obj) : obj->otyp == find_mboots() ? "mud boots" : xname(obj))
 				);
 		}
 		/* remove grease (50% odds) */
@@ -3180,11 +3200,8 @@ int flat_acc;
 			}
 			/* fencing gloves increase weapon accuracy when you have a free off-hand */
 			if (!thrown && !bimanual(weapon, magr->data) && !which_armor(magr, W_ARMS)) {
-				static int fgloves;
-				if (!fgloves)
-					fgloves = find_fgloves();
 				struct obj * otmp = which_armor(magr, W_ARMG);
-				if (otmp && otmp->otyp == fgloves)
+				if (otmp && otmp->otyp == find_fgloves())
 					wepn_acc += 2;
 			}
 			
@@ -3265,10 +3282,8 @@ int flat_acc;
 
 	/* combat boots increase accuracy */
 	if (magr) {
-		static int cbootsa = 0;
-		if (!cbootsa) cbootsa = find_cboots();
 		otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
-		if (otmp && otmp->otyp == cbootsa)
+		if (otmp && otmp->otyp == find_cboots())
 			wepn_acc++;
 	}
 
@@ -3868,13 +3883,13 @@ boolean ranged;
 			dohitmsg = FALSE;
 		}
 		/* hit with [weapon] */
-		result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone);
+		result = hmon_general(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis, &wepgone);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; (i < weapon->ostriking); i++) {
-				result = hmon2point0(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis, &wepgone);
+				result = hmon_general(magr, mdef, attk, originalattk, weapon, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis, &wepgone);
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -5711,11 +5726,9 @@ boolean ranged;
 					}
 				}
 				/* 1/10 chance to suck off boots */
-				static int bboots1 = 0;
-				if (!bboots1) bboots1 = find_bboots();
 				otmp = (youdef ? uarmf : which_armor(mdef, W_ARMF));
 				if (otmp
-					&& otmp->otyp != bboots1
+					&& otmp->otyp != find_bboots()
 					&& !rn2(10)
 					) {
 					if (youdef) {
@@ -6085,8 +6098,9 @@ boolean ranged;
 				break;
 
 			case AD_SEDU:
-				if (!engagering4) engagering4 = find_engagement_ring();
-				if ((uleft && uleft->otyp == engagering4) || (uright && uright->otyp == engagering4)) engring = TRUE;
+				if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+					(uright && uright->otyp == find_engagement_ring()))
+					engring = TRUE;
 				if (u.sealsActive&SEAL_ANDROMALIUS) break;
 				//pline("test string!");
 				if (pa->mtyp == PM_DEMOGORGON){
@@ -6144,8 +6158,9 @@ boolean ranged;
 			case AD_SSEX:
 				if(Chastity)
 					break;
-				if (!engagering1) engagering1 = find_engagement_ring();
-				if ((uleft && uleft->otyp == engagering1) || (uright && uright->otyp == engagering1))
+
+				if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+					(uright && uright->otyp == find_engagement_ring()))
 					break;
 
 				if (pa->mtyp == PM_MOTHER_LILITH && could_seduce(magr, &youmonst, attk) == 1){
@@ -6591,13 +6606,11 @@ boolean ranged;
 			}
 			else {
 				if (uarmf) {
-					static int jboots1 = 0;
-					if (!jboots1) jboots1 = find_jboots();
 					if (rn2(2) && (uarmf->otyp == LOW_BOOTS ||
 						uarmf->otyp == SHOES))
 						pline("%s pricks the exposed part of your %s %s!",
 						Monnam(magr), sidestr, body_part(LEG));
-					else if (uarmf->otyp != jboots1 && !rn2(5))
+					else if (uarmf->otyp != find_jboots() && !rn2(5))
 						pline("%s pricks through your %s boot!",
 						Monnam(magr), sidestr);
 					else {
@@ -10621,10 +10634,10 @@ int vis;
 			return MM_MISS;
 		/* STRAIGHT COPY-PASTE FROM ORIGINAL */
 		else {
-			static int engagering5 = 0;
 			boolean engring = FALSE;
-			if (!engagering5) engagering5 = find_engagement_ring();
-			if ((uleft && uleft->otyp == engagering5) || (uright && uright->otyp == engagering5)) engring = TRUE;
+			if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+				(uright && uright->otyp == find_engagement_ring()))
+				engring = TRUE;
 			if (u.sealsActive&SEAL_ANDROMALIUS) break;
 			if (distu(magr->mx, magr->my) > 1 ||
 				magr->mcan ||
@@ -10700,11 +10713,10 @@ int vis;
 			return MM_MISS;
 		/* STRAIGHT COPY-PASTE FROM ORIGINAL */
 		else {
-			static int engagering2 = 0;
 			if(Chastity)
 				break;
-			if (!engagering2) engagering2 = find_engagement_ring();
-			if ((uleft && uleft->otyp == engagering2) || (uright && uright->otyp == engagering2))
+			if ((uleft  && uleft->otyp == find_engagement_ring()) ||
+				(uright && uright->otyp == find_engagement_ring()))
 				break;
 			if (could_seduce(magr, &youmonst, attk) == 1
 				&& !magr->mcan
@@ -10896,13 +10908,78 @@ boolean * hittxt;
 	return result;
 }
 
-/* hmon2point0
+
+/* helpful hmon callers */
+
+/* hit mdef with some object that was launched in some way with no attacker of any sort */
+int
+hmon_with_unowned_obj(mdef, obj, dieroll, usedup)
+struct monst * mdef;
+struct obj * obj;
+int dieroll;
+boolean * usedup;
+{
+	return hmon_general(
+		(struct monst *)0,	/* no attacker */
+		mdef,				/* mdef is the defender */
+		(struct attack *)0,	/* no attack */
+		(struct attack *)0,	/* no attack */
+		obj,				/* hitting mdef with obj */
+		(void *)0,			/* no launcher*/
+		HMON_FIRED,			/* obj should deal full thrown/fired damage */
+		0,					/* no damage override */
+		0,					/* no bonus damage */
+		TRUE,				/* yes, print hit message */
+		dieroll,			/* use given dieroll */
+		FALSE,				/* not recursed */
+		-1,					/* calculate visibility */
+		usedup);			/* maybe care whether or not obj gets used up */
+}
+/* hit mdef with a trap */
+int
+hmon_with_trap(mdef, obj, trap, type, dieroll, usedup)
+struct monst * mdef;
+struct obj * obj;
+struct trap * trap;
+int type;
+int dieroll;
+boolean * usedup;
+{
+	/* melee traps print their own messages, while ranged traps rely on hmon to print hitmessages */
+	boolean printmsg;
+	if (type&HMON_FIRED)
+		printmsg = TRUE;
+	else if (type&HMON_WHACK)
+		printmsg = FALSE;
+	else {
+		impossible("hmon_with_trap called with neither WHACK nor FIRED, %d", type);
+		printmsg = TRUE;
+	}
+
+	return hmon_general(
+		(struct monst *)0,	/* no attacker */
+		mdef,				/* mdef is the defender */
+		(struct attack *)0,	/* no attack */
+		(struct attack *)0,	/* no attack */
+		obj,				/* hitting mdef with obj */
+		trap,				/* trap that did the hitting */
+		HMON_TRAP|type,		/* trap responsible, using given type */
+		0,					/* no damage override */
+		0,					/* no bonus damage */
+		printmsg,			/* maybe print hit message */
+		dieroll,			/* use given dieroll */
+		FALSE,				/* not recursed */
+		-1,					/* calculate visibility */
+		usedup);			/* maybe care whether or not obj gets used up */
+}
+
+/* hmon_general
  * 
  * Like as it was in uhitm.c, this is a wrapper so that ghod_hitsu() and angry_guards()
  * are called after the player hits, while letting hmoncore have messy returns wherever it wants
  */
 int
-hmon2point0(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
+hmon_general(magr, mdef, attk, originalattk, weapon, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, wepgone)
 struct monst * magr;			/* attacker */
 struct monst * mdef;			/* defender */
 struct attack * attk;			/* attack structure to use -- if this does not exist, we MUST have a weapon */
@@ -12377,9 +12454,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 
 		/* fighting gloves give bonus damage */
-		static int tgloves = 0;
-		if (!tgloves) tgloves = find_tgloves();
-		if (gloves && gloves->otyp == tgloves)
+		if (gloves && gloves->otyp == find_tgloves())
 			basedmg += ((youagr && martial_bonus()) ? 3 : 1);
 
 		
@@ -12801,6 +12876,20 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (insubstantial(pd) && hits_insubstantial(magr, mdef, attk, weapon) == 1) {
 		subtotl = 0;
 	}
+
+	/* Apply DR before multiplicative defences/vulnerabilites */
+	if (subtotl > 0){
+		if (phase_armor){
+			subtotl -= (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
+		}
+		else {
+			subtotl -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+		}
+		/* can only reduce damage to 1 */
+		if (subtotl < 1)
+			subtotl = 1;
+	}
+
 	/* some creatures resist weapon attacks to the extreme */
 	if (resist_attacks(pd) && (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack)) {
 		if (subtotl > 0) {
@@ -12897,29 +12986,20 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (youagr && is_aquatic(pd) && roll_madness(MAD_THALASSOPHOBIA)){
 		subtotl = (subtotl + 9)/10;
 	}
-	/* Apply DR */
-	if (subtotl > 0){
-		if(pd->mtyp == PM_DEEP_DWELLER && !rn2(10)){
-			/*Brain struck.  Ouch.*/
-			if(youdef)
-				pline("Your brain-organ is struck!");
-			else if(canseemon(mdef))
-				pline("%s brain-organ is struck!", s_suffix(Monnam(mdef)));
-			*hp(mdef) = 1;
-			resisted_weapon_attacks = FALSE;
-			resisted_attack_type = FALSE;
-			resisted_thick_skin = FALSE;
-		}
-		else if (phase_armor){
-			subtotl -= (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
-		}
-		else {
-			subtotl -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
-		}
-		/* can only reduce damage to 1 */
-		if (subtotl < 1)
-			subtotl = 1;
+
+	/* deep dwellers resist attacks, but have a 1/10 chance of being slain outright */
+	if (pd->mtyp == PM_DEEP_DWELLER && !rn2(10)){
+		/*Brain struck.  Ouch.*/
+		if (youdef)
+			pline("Your brain-organ is struck!");
+		else if (canseemon(mdef))
+			pline("%s brain-organ is struck!", s_suffix(Monnam(mdef)));
+		*hp(mdef) = 1;
+		resisted_weapon_attacks = FALSE;
+		resisted_attack_type = FALSE;
+		resisted_thick_skin = FALSE;
 	}
+
 	/* hack to enhance mm_aggression(); we don't want purple
 	worm's bite attack to kill a shrieker because then it
 	won't swallow the corpse; but if the target survives,
@@ -13059,7 +13139,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 	}
 	/* shattering strike -- attempt to destroy the defender's weapon */
-	if (shattering_strike && !lethaldamage) {
+	if (shattering_strike) {
 		if (youagr) {
 			otmp = MON_WEP(mdef);
 			if (otmp &&
@@ -15075,7 +15155,8 @@ android_combo()
 
 		/* attack (melee twice OR throw lightsaber) */
 		if (!mdef) {
-			projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+			if(uwep)
+				projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 		}
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -15090,7 +15171,7 @@ android_combo()
 			int k;
 			/* get direction */
 			a = getdir((char *)0);
-			if (a){
+			if (a && !u.dz){
 				/* get defender */
 				if (u.ustuck && u.uswallow)
 					mdef = u.ustuck;
@@ -15098,7 +15179,8 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee once OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+					if(uwep)
+						projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -15106,7 +15188,7 @@ android_combo()
 				}
 			}
 			k = dokick();
-			if (a || k){
+			if ((a && !u.dz) || k){
 				u.uen--;
 			}
 			else return TRUE;
@@ -15114,7 +15196,7 @@ android_combo()
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
 			int j = jump(1);
 			int d = getdir((char *)0);
-			if (!j && !d)
+			if (!j && (!d || u.dz))
 				return TRUE;
 			u.uen--;
 			flags.botl = 1;
@@ -15126,7 +15208,8 @@ android_combo()
 					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
 				/* attack (melee twice OR throw lightsaber) */
 				if (!mdef) {
-					projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+					if(uwep)
+						projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -15149,7 +15232,7 @@ android_combo()
 
 		while (n > 0 && u.uen > 0){
 			/* get direction of attack; if first time, cancelling will take no time */
-			if (!getdir((char *)0))
+			if (!getdir((char *)0) || u.dz)
 				return attacked;
 			/* things that only occur in the first 'attack' of the combo */
 			if (!attacked) {
@@ -15184,7 +15267,7 @@ android_combo()
 	}
 	else if (objects[uwep->otyp].oc_skill == P_WHIP){ //!uwep handled above
 		/* get direction of attack */
-		if (!getdir((char *)0))
+		if (!getdir((char *)0) || u.dz)
 			return FALSE;
 		/* fast weapons give you speed */
 		if (fast_weapon(uwep))
@@ -15270,7 +15353,7 @@ android_combo()
 	}
 	else if (!bimanual(uwep, youracedata)){ //!uwep handled above
 		/* get direction of attack */
-		if (!getdir((char *)0))
+		if (!getdir((char *)0) || u.dz)
 			return FALSE;
 		/* fast weapons give you speed */
 		if (fast_weapon(uwep))
@@ -15311,7 +15394,7 @@ android_combo()
 				flags.botl = 1;
 				if (uwep){
 					/* get direction of attack */
-					if (!getdir((char *)0))
+					if (!getdir((char *)0) || u.dz)
 						return TRUE;
 					/* Lunge in indicated direction */
 					if(!u.ustuck && !u.utrap && goodpos(u.ux+u.dx, u.uy+u.dy, &youmonst, 0)){
@@ -15329,9 +15412,9 @@ android_combo()
 					else {
 						vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 						xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
-						if(!DEADMONSTER(mdef))
-						xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 					}
+					if(uwep)
+						projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 			}
 			else return TRUE;
@@ -15341,7 +15424,7 @@ android_combo()
 	else if (bimanual(uwep, youracedata)){ //!uwep handled above
 		int i, j;
 		/* get direction of attack */
-		if (!getdir((char *)0))
+		if (!getdir((char *)0) || u.dz)
 			return FALSE;
 		/* fast weapons give you speed */
 		if (fast_weapon(uwep))
@@ -15380,8 +15463,8 @@ android_combo()
 			for (i = 0; i < 8; i++)
 			if (xdir[i] == u.dx && ydir[i] == u.dy)
 				break;
-			/* attack counterclockwise, hitting first direction twice (first and last hits) */
-			for (j = 8; j >= 0; j--){
+			/* attack clockwise, hitting first direction twice (first and last hits) */
+			for (j = 0; j <= 8; j++){
 				if (u.ustuck && u.uswallow)
 					mdef = u.ustuck;
 				else
@@ -15397,21 +15480,25 @@ android_combo()
 			youmonst.movement -= 3;
 		}
 		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
-			if (dofire()){
-				u.uen--;
-				flags.botl = 1;
-				/* get defender */
+			if (!getdir((char *)0) || u.dz)
+				return TRUE;
+			/* attack counterclockwise, hitting first direction once (and then throw) */
+			for (j = 8; j > 0; j--){
 				if (u.ustuck && u.uswallow)
 					mdef = u.ustuck;
 				else
-					mdef = m_at(u.ux + u.dx, u.uy + u.dy);
-				/* attack (once) */
-				if (mdef) {
+					mdef = m_at(u.ux + xdir[(i + j) % 8], u.uy + ydir[(i + j) % 8]);
+				/* isn't that nice, we don't attack pets (even when confused?) */
+				if (mdef && !mdef->mtame){
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 					xmeleehity(&youmonst, mdef, &weaponhit, uwep, vis, 0, FALSE);
 				}
 			}
-			else return TRUE;
+			if(uwep)
+				projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+			u.uen--;
+			flags.botl = 1;
+			youmonst.movement -= 3;
 		}
 		return TRUE;
 	}

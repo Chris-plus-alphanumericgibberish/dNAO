@@ -56,7 +56,7 @@ register struct obj *otmp;
     if (is_shield(otmp) &&
         (mtmp == &youmonst) ? (uwep && bimanual(uwep,youracedata)) 
 	                    : (MON_WEP(mtmp) && bimanual(MON_WEP(mtmp),mtmp->data)))
-	return FALSE;
+		return FALSE;
     
     if (is_gloves(otmp) && (otmp->objsize != mtmp->data->msize || !can_wear_gloves(mtmp->data))) return FALSE;
     

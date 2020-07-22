@@ -452,6 +452,11 @@
 							  || (ptr)->mtyp == PM_SWAMP_FERN_SPROUT\
 							  || (ptr)->mtyp == PM_RAZORVINE\
 							)
+#define is_horror(ptr)		(  (ptr)->mtyp == PM_SHAMBLING_HORROR\
+							|| (ptr)->mtyp == PM_STUMBLING_HORROR\
+							|| (ptr)->mtyp == PM_WANDERING_HORROR\
+							|| (ptr)->mtyp == PM_NAMELESS_HORROR\
+							)
 #define is_mercenary(ptr)	(((ptr)->mflagsg & MG_MERC) != 0L)
 #define is_army_pm(pm)		(pm == PM_CAPTAIN || pm == PM_LIEUTENANT || pm == PM_SERGEANT || pm == PM_SOLDIER)
 #define is_bardmon(ptr)		((ptr)->mtyp == PM_LILLEND || (ptr)->mtyp == PM_RHYMER || (ptr)->mtyp == PM_BARD)
@@ -513,13 +518,16 @@
 #define could_twoweap(ptr)	attacktype(ptr, AT_XWEP)
 // define cantweararm(ptr)	(breakarm(ptr) || sliparm(ptr))
 #define arm_match(ptr,obj)	(Is_dragon_scales(obj) || \
-							(obj->otyp == ELVEN_TOGA && ((ptr->mflagsb&MB_HUMANOID) && (obj->bodytypeflag&MB_HUMANOID))) ||\
-							(((ptr->mflagsb&MB_BODYTYPEMASK) != 0) && \
-		((ptr->mflagsb&MB_BODYTYPEMASK) == (obj->bodytypeflag&MB_BODYTYPEMASK))))
+							((obj->otyp == ELVEN_TOGA || obj->otyp == NOBLE_S_DRESS || obj->otyp == GENTLEWOMAN_S_DRESS) && upper_body_match(ptr,obj)) ||\
+							(full_body_match(ptr,obj)))
+#define full_body_match(ptr,obj)	(((ptr->mflagsb&MB_BODYTYPEMASK) != 0) && \
+		((ptr->mflagsb&MB_BODYTYPEMASK) == (obj->bodytypeflag&MB_BODYTYPEMASK)))
 #define can_wear_gloves(ptr)	(!nohands(ptr))
 #define can_wear_amulet(ptr)	(has_head(ptr) || (ptr->mflagsb&MB_CAN_AMULET))
 #define can_wear_boots(ptr)	((humanoid(ptr) || humanoid_feet(ptr)) && !nofeet(ptr) && !nolimbs(ptr))
-#define shirt_match(ptr,obj)	(((ptr->mflagsb&MB_HUMANOID) && (obj->bodytypeflag&MB_HUMANOID)) || \
+#define shirt_match(ptr,obj)	((obj->otyp != BODYGLOVE && upper_body_match(ptr,obj)) || \
+								full_body_match(ptr,obj))
+#define upper_body_match(ptr,obj)	(((ptr->mflagsb&MB_HUMANOID) && (obj->bodytypeflag&MB_HUMANOID)) || \
 		(((ptr->mflagsb&MB_BODYTYPEMASK) != 0) && ((ptr->mflagsb&MB_BODYTYPEMASK) == (obj->bodytypeflag&MB_BODYTYPEMASK))))
 #define helm_match(ptr,obj)	(((ptr->mflagsb&MB_HEADMODIMASK) == (obj->bodytypeflag&MB_HEADMODIMASK)))
 /*Note: No-modifier helms are "normal"*/

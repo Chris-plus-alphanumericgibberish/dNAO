@@ -128,8 +128,6 @@ hack_artifacts()
 		alignmnt = A_NEUTRAL; /* Males are neutral */
 	}
 
-	int gcircletsa = find_gcirclet();
-	
 	/* Fix up the alignments of "gift" artifacts */
 	for (art = artilist+1; art->otyp; art++)
 	    if ((art->role == Role_switch || Pantheon_if(art->role))
@@ -151,7 +149,7 @@ hack_artifacts()
 	}
 	artilist[ART_MANTLE_OF_HEAVEN].otyp = find_cope();
 	artilist[ART_VESTMENT_OF_HELL].otyp = find_opera_cloak();
-	artilist[ART_CROWN_OF_THE_SAINT_KING].otyp = gcircletsa;
+	artilist[ART_CROWN_OF_THE_SAINT_KING].otyp = find_gcirclet();
 	artilist[ART_HELM_OF_THE_DARK_LORD].otyp = find_vhelm();
 	artilist[ART_SHARD_FROM_MORGOTH_S_CROWN].otyp = find_good_iring();
 	
@@ -215,16 +213,23 @@ hack_artifacts()
 	}
 	
 	/* Fix up the crown */
-	if(gcircletsa == HELMET){
+	switch (find_gcirclet())
+	{
+	case HELMET:
 		obj_descr[HELMET].oc_name = "circlet";
-	} else if(gcircletsa == HELM_OF_BRILLIANCE){
+		break;
+	case HELM_OF_BRILLIANCE:
 		obj_descr[HELM_OF_BRILLIANCE].oc_name = "crown of cognizance";
-	} else if(gcircletsa == HELM_OF_OPPOSITE_ALIGNMENT){
+		break;
+	case HELM_OF_OPPOSITE_ALIGNMENT:
 		obj_descr[HELM_OF_OPPOSITE_ALIGNMENT].oc_name = "tiara of treachery";
-	} else if(gcircletsa == HELM_OF_TELEPATHY){
+		break;
+	case HELM_OF_TELEPATHY:
 		obj_descr[HELM_OF_TELEPATHY].oc_name = "tiara of telepathy";
-	} else if(gcircletsa == HELM_OF_DRAIN_RESISTANCE){
+		break;
+	case HELM_OF_DRAIN_RESISTANCE:
 		obj_descr[HELM_OF_DRAIN_RESISTANCE].oc_name = "diadem of drain resistance";
+		break;
 	}
 	
 	/* Fix up the quest artifact */
@@ -4694,7 +4699,6 @@ arti_invoke(obj)
 	int n, damage;
 	struct permonst *pm;
 	struct monst *mtmp = 0;
-	int sring = find_sring();
 	if (!oart || !oart->inv_prop) {
 		switch (obj->otyp)
 		{
@@ -6764,7 +6768,7 @@ arti_invoke(obj)
 						if(uwep->lamplit) lightsaber_deactivate(uwep,TRUE);
 						uwep->oclass = RING_CLASS;
 						uwep->altmode = FALSE;
-						uwep->otyp = sring;
+						uwep->otyp = find_sring();
 					break;
 					case COMMAND_KHAKKHARA:
 						if(uwep->lamplit) lightsaber_deactivate(uwep,TRUE);
@@ -9710,7 +9714,7 @@ dogoat_tentacles()
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
 			continue;
-		if(is_goat_tentacle_mon(mtmp) && !mtmp->mappearance && !mtmp->msleeping && !mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK))
+		if(is_goat_tentacle_mon(mtmp) && !mtmp->mappearance && !mtmp->msleeping && mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK))
 			dogoat_mon(mtmp);
 	}
 }
@@ -9789,6 +9793,21 @@ living_items()
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	if (DEADMONSTER(mtmp)) continue;
 		for (obj = mtmp->minvent; obj; obj = obj->nobj) {
+			if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
+				nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
+				nblast->nblast = blast_list;
+				nblast->spe = obj->spe;
+				blast_list = nblast;
+			}
+			if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
+				whisper++;
+			}
+			HANDLE_SECRETIONS
+		}
+	}
+	struct trap *ttmp;
+	for(ttmp = ftrap; ttmp; ttmp = ttmp->ntrap) {
+		if((obj = ttmp->ammo)){
 			if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
 				nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
 				nblast->nblast = blast_list;

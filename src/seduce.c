@@ -28,9 +28,9 @@ struct attack *mattk;
 
 	if(Chastity) return 0;
 	
-	static int engagering3 = 0;
-	if (!engagering3) engagering3 = find_engagement_ring();
-	if ( (uleft && uleft->otyp == engagering3) || (uright && uright->otyp == engagering3)) return 0;
+	if ((uleft  && uleft->otyp  == find_engagement_ring()) ||
+		(uright && uright->otyp == find_engagement_ring()))
+		return 0;
 
 	
 	if (is_animal(magr->data)) return (0);
@@ -2500,9 +2500,7 @@ int dmg;
 						 }
 					}
 					else{
-						static int bboots2 = 0;
-						if (!bboots2) bboots2 = find_bboots();
-						if(uarmf->otyp != bboots2){
+						if (uarmf->otyp != find_bboots()){
 							pline("The tentacles suck off your boots!");
 							otmp = uarmf;
 							if (donning(otmp)) cancel_don();

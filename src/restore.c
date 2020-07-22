@@ -414,18 +414,25 @@ unsigned int *stuckid, *steedid;	/* STEED */
 #endif
 	/* reload random monster*/
 	{
+	extern int monstr[];
 	const char *tname;
 	tname = mons[PM_SHAMBLING_HORROR].mname;
 	mread(fd, (genericptr_t) &mons[PM_SHAMBLING_HORROR], sizeof(struct permonst));
 	mons[PM_SHAMBLING_HORROR].mname = tname;
+	monstr[PM_SHAMBLING_HORROR] = mstrength(&mons[PM_SHAMBLING_HORROR]);
 	
 	tname = mons[PM_STUMBLING_HORROR].mname;
 	mread(fd, (genericptr_t) &mons[PM_STUMBLING_HORROR], sizeof(struct permonst));
 	mons[PM_STUMBLING_HORROR].mname = tname;
+	monstr[PM_STUMBLING_HORROR] = mstrength(&mons[PM_STUMBLING_HORROR]);
 	
 	tname = mons[PM_WANDERING_HORROR].mname;
 	mread(fd, (genericptr_t) &mons[PM_WANDERING_HORROR], sizeof(struct permonst));
 	mons[PM_WANDERING_HORROR].mname = tname;
+	monstr[PM_WANDERING_HORROR] = mstrength(&mons[PM_WANDERING_HORROR]);
+
+	/* all nameless horrors are approx. difficulty 50 */
+	monstr[PM_NAMELESS_HORROR] = 50;
 	}
 	
 	/* Fix up the highest ranking eladrins */
