@@ -1022,7 +1022,7 @@ domove()
 		/* check slippery ice */
 		on_ice = !Levitation && !Flying && (is_ice(u.ux, u.uy) || mad_turn(MAD_COLD_NIGHT));
 		if (on_ice) {
-			if ((uarmf && (uarmf->otyp == find_skates || uarmf->oartifact == ART_FROST_TREADS))
+			if ((uarmf && (uarmf->otyp == find_skates() || uarmf->oartifact == ART_FROST_TREADS))
 			    || resists_cold(&youmonst)
 			    || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			    || is_whirly(youracedata))

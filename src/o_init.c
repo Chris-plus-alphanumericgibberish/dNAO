@@ -734,7 +734,7 @@ find_onyx_ring()
 	register const char *s;
 	if (i != -1) return i;
 
-	if ((i = find_otyp_of_desc("onyx", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+	if ((i = find_otyp_of_desc("black onyx", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
 		return i;
 	else
 		impossible("could not find onyx ring");
