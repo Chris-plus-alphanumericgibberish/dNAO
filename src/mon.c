@@ -1142,7 +1142,7 @@ register struct monst *mtmp;
 				mon->female = TRUE;
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_faction(mon, ZOMBIFIED);
+				mon->mcrazed = 1;
 				EDOG(mon)->loyal = TRUE;
 				mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
