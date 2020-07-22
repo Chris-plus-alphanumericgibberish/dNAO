@@ -928,6 +928,7 @@ level_tele()
 				newlev = dungeons[u.uz.dnum].depth_start + 4 - newlev;
 				if(mvitals[PM_VLAD_THE_IMPALER].died > 0) rangeRestricted = FALSE;
 			} else if (In_law(&u.uz)) {
+				if (newlev > 13) newlev = 13;
 				newlev = dungeons[u.uz.dnum].depth_start + (path1_level.dlevel - newlev);
 				if(mvitals[PM_ARSENAL].died > 0) rangeRestricted = FALSE;
 			} else if (In_neu(&u.uz)) {
