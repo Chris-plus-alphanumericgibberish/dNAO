@@ -351,28 +351,28 @@ WEAPON(("katana", "samurai sword"),
 	DMG(D(10)), DMG(D(12)),
 	0, 0, MZ_MEDIUM,  4, 40, 80,  1, S,   P_LONG_SWORD, IRON, FALSE, HI_METAL),
 /* special swords set up for artifacts and future weapons*/
-WEAPON(("vibroblade", "gray short sword"), /*Needs encyc entry*//*Needs tile*/
+WEAPON(("vibroblade", "gray short sword", "short sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
 	1, 0,  MZ_SMALL,  0,  5,1000, 0, P,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_GRAY),
 WEAPON(("tsurugi", "long samurai sword"),
 	DMG(D(16)), DMG(D(8), D(2,6)),
 	0, 0,   MZ_HUGE,  0, 60,500,  2, S,   P_TWO_HANDED_SWORD, METAL, FALSE, HI_METAL),
-WEAPON(("runesword", "runed black blade"),
+WEAPON(("runesword", "runed black blade", "runed blade"),
 	DMG(D(10), D(4)), DMG(D(10), F(1)),
 	0, 0,  MZ_LARGE,  0, 40,300,  0, S,   P_BROAD_SWORD, IRON, FALSE, CLR_BLACK),
-WEAPON(("white vibrosword", "white sword"), /*Needs encyc entry*//*Needs tile*/
+WEAPON(("white vibrosword", "white sword", "long sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(10)), DMG(D(12)),
 	0, 0, MZ_MEDIUM,  0, 40,8000, 1, P|S, P_LONG_SWORD,  SILVER, FALSE, CLR_WHITE),
-WEAPON(("gold-bladed vibrosword", "black and gold sword"), /*Needs encyc entry*//*Needs tile*/
+WEAPON(("gold-bladed vibrosword", "black and gold sword", "long sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(10)), DMG(D(12)),
 	0, 0, MZ_MEDIUM,  0, 53,8000, 1, P|S, P_LONG_SWORD,    GOLD, FALSE, CLR_BLACK),
-WEAPON(("red-eyed vibrosword", "blue-glowing sword"), /*Needs encyc entry*//*Needs tile*/
+WEAPON(("red-eyed vibrosword", "blue-glowing sword", "long sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(10)), DMG(D(12)),
 	0, 0, MZ_MEDIUM,  0, 10,8000, 1, P|S, P_LONG_SWORD, PLASTIC, FALSE, CLR_GRAY),
-WEAPON(("white vibrozanbato", "curved white sword"),
+WEAPON(("white vibrozanbato", "curved white sword", "long curved sword"),
 	DMG(D(16)), DMG(D(8), D(2,6)),
 	0, 0,   MZ_HUGE,  0, 60,16000,2, S,   P_TWO_HANDED_SWORD, SILVER, FALSE, CLR_WHITE),
-WEAPON(("gold-bladed vibrozanbato", "curved black and gold sword"),
+WEAPON(("gold-bladed vibrozanbato", "curved black and gold sword", "long curved sword"),
 	DMG(D(16)), DMG(D(8), D(2,6)),
 	0, 0,   MZ_HUGE,  0, 80,16000,2, S,   P_TWO_HANDED_SWORD, GOLD, FALSE, CLR_BLACK),
 
@@ -410,13 +410,13 @@ WEAPON(("naginata", "samurai-sword polearm"),
 WEAPON(("lance"),
 	DMG(D(6)), DMG(D(8)),
 	1, 0,  MZ_LARGE,  4, 80, 10,  0, P,   P_LANCE, IRON, FALSE, HI_METAL),
-WEAPON(("force pike", "long gray spear"),/*Needs tile*/
+WEAPON(("force pike", "long gray spear", "long spear"),/*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
 	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, PLASTIC, FALSE, CLR_GRAY),
-WEAPON(("white vibrospear", "long white spear"),/*Needs tile*/
+WEAPON(("white vibrospear", "long white spear", "long spear"),/*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
 	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, PLASTIC, FALSE, CLR_WHITE),
-WEAPON(("gold-bladed vibrospear", "long black and gold spear"),/*Needs tile*/
+WEAPON(("gold-bladed vibrospear", "long black and gold spear", "long spear"),/*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
 	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, GOLD, FALSE, CLR_BLACK),
 WEAPON(("elven lance", "runed lance"), /*Needs encyc entry*//*Needs tile*/
@@ -539,10 +539,10 @@ GUN(("gun", "unfamiliar gun"),                        0,  MZ_MEDIUM, 0,  25,  25
 GUN(("long gun", "unfamiliar long gun"),              0,    MZ_HUGE, 0,  30,  150, 22, -1,  1, WP_BULLET, IRON, P_FIREARM, HI_METAL),/*Needs tile*/
 GUN(("heavy gun", "unfamiliar heavy gun"),            0,    MZ_HUGE, 0, 100, 2000, 20,  8, -4, WP_BULLET, IRON, P_FIREARM, HI_METAL),/*Needs tile*/
  /*Needs encyc entry*/
-GUN(("hand blaster", "hard black handmirror"),        0,  MZ_MEDIUM, 0,   2, 1000, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BLACK), /*Needs tile*/
-GUN(("arm blaster",  "hard white bracer"),            0,   MZ_LARGE, 0,   8, 4500, 15,  6,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_WHITE), /*Needs tile*/
-GUN(("mass-shadow pistol",  "rectangular device"),    0,  MZ_MEDIUM, 0,   4, 4500, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_GRAY), /*Needs tile*/
-GUN(("cutting laser","hard tan lozenge"),             0,   MZ_SMALL, 0,   1, 1000,  3, -1,  3,WP_BLASTER, PLASTIC, P_FIREARM, CLR_YELLOW), /*Needs tile*/
+GUN(("hand blaster", "hard black handmirror", "hard handmirror"), 0,  MZ_MEDIUM, 0,   2, 1000, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BLACK), /*Needs tile*/
+GUN(("arm blaster",  "hard white bracer", "hard bracer"),         0,   MZ_LARGE, 0,   8, 4500, 15,  6,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_WHITE), /*Needs tile*/
+GUN(("mass-shadow pistol",  "rectangular device"),                0,  MZ_MEDIUM, 0,   4, 4500, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_GRAY), /*Needs tile*/
+GUN(("cutting laser","hard tan lozenge", "hard lozenge"),         0,   MZ_SMALL, 0,   1, 1000,  3, -1,  3,WP_BLASTER, PLASTIC, P_FIREARM, CLR_YELLOW), /*Needs tile*/
 
 GUN(("raygun", "hard handle ending in glassy disks"), 0,  MZ_MEDIUM, 0,   8, 3000, 15,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BRIGHT_CYAN), /*Needs tile*/
 BULLET(("bullet", "pellet"),
@@ -551,29 +551,29 @@ BULLET(("bullet", "pellet"),
 BULLET(("silver bullet", "silver pellet"),
 	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
 	0,    MZ_TINY, 0,  1,  15, 0,  WP_BULLET,   P,  SILVER, -P_FIREARM, HI_SILVER),/*Needs tile*/
-BULLET(("shotgun shell", "red tube"),
+BULLET(("shotgun shell", "red tube", "tube"),
 	DMG(D(2, 12), F(4)), DMG(D(2, 6), F(4)),
 	0,    MZ_TINY, 0,  1,  10,10,   WP_SHELL,   S,   METAL, -P_FIREARM, CLR_RED),/*Needs tile*/
-BULLET(("frag grenade", "green spheriod"),
+BULLET(("frag grenade", "green spheroid", "spheroid"),
 	DMG(D(2)), DMG(D(2)),
 	0,   MZ_SMALL, 0,  5, 350, 0, WP_GRENADE,   B,    IRON, -P_FIREARM, CLR_GREEN),/*Needs tile*/
-BULLET(("gas grenade", "lime spheriod"),
+BULLET(("gas grenade", "lime spheroid", "spheroid"),
 	DMG(D(2)), DMG(D(2)),
 	0,   MZ_SMALL, 0,  2, 350, 0, WP_GRENADE,   B,    IRON, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/
 BULLET(("rocket", "firework"),
 	DMG(D(2, 12), F(4)), DMG(D(2, 20), F(4)),
 	0,   MZ_SMALL, 0, 20, 450, 0,  WP_ROCKET,   B,  SILVER, -P_FIREARM, CLR_BLUE),/*Needs tile*/
-BULLET(("stick of dynamite", "red stick"),
+BULLET(("stick of dynamite", "red stick", "stick"),
 	DMG(D(1)), DMG(D(1)),
 	0,   MZ_SMALL, 0, 10, 150, 0, WP_GENERIC,   B, PLASTIC,     P_NONE, CLR_RED),/*Needs tile*/
 
-BULLET(("blaster bolt", "ruby bolt"),
+BULLET(("blaster bolt", "ruby bolt", "bolt"),
 	DMG(D(3, 6), F(6)), DMG(D(3, 8), F(8)),
 	0,    MZ_TINY, 0,  1,   0, 0, WP_BLASTER,   E,   METAL, -P_FIREARM, CLR_RED),/*Needs tile*/
-BULLET(("heavy blaster bolt", "scarlet bolt"),
+BULLET(("heavy blaster bolt", "scarlet bolt", "bolt"),
 	DMG(D(3, 10), F(10)), DMG(D(3, 12), F(12)),
 	0,    MZ_TINY, 0,  1,   0, 0, WP_BLASTER,   E,   METAL, -P_FIREARM, CLR_ORANGE),/*Needs tile*/
-BULLET(("laser beam", "green bolt"),
+BULLET(("laser beam", "green bolt", "bolt"),
 	DMG(D(3, 1), F(10)), DMG(D(3, 1), F(10)),
 	0,    MZ_TINY, 0,  1,   0, 0, WP_BLASTER,   E|S, METAL, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/
 //endif
@@ -643,11 +643,11 @@ HELM(("dunce cap", "conical hat"),
 		0, 1,  0,	3, 1,  4,   1, 10, 0, 0, CLOTH, CLR_BLUE),
 HELM(("war hat", "wide helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	2, 0, 60,  30, 8, 2, 2, IRON, HI_METAL),
-HELM(("flack helmet", "green bowl"), /*Needs encyc entry*/
+HELM(("flack helmet", "green bowl", "bowl"), /*Needs encyc entry*/
 		0, 0,  0,	0, 0, 10,  50, 9, 2, 1, PLASTIC, CLR_GREEN),
 HELM(("archaic helm", "helmet"),
 		0, 0,  0,   0, 1, 30,  12, 9, 2, 0, COPPER, HI_COPPER),
-HELM(("harmonium helm", "red-lacquered spined helm"),
+HELM(("harmonium helm", "red-lacquered spined helm", "spined helm"),
 		0, 0,  0,   0, 1, 45,   1, 9, 2, 0, METAL, CLR_RED),
 HELM(("elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 1, 10,   5, 9, 1, 0, WOOD, HI_WOOD),
@@ -655,13 +655,13 @@ HELM(("high-elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 1, 15,   5, 9, 2, 0, MITHRIL, HI_MITHRIL, O_MATSPEC(UNIDED)),
 HELM(("droven helm", "spider-shaped helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 1, 20,   5, 8, 2, 0, SHADOWSTEEL, CLR_BLACK),
-HELM(("plasteel helm", "white skull helm"), /*Needs encyc entry*//*Needs tile*/
+HELM(("plasteel helm", "white skull helm", "skull helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 1,  INFRAVISION,   0, 2, 25,  50, 8, 2, 2, PLASTIC, CLR_WHITE),
 HELM(("crystal helm", "fish bowl"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2,150, 300, 9, 1, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 HELM(("pontiff's crown", "filigreed faceless helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, GOLD, HI_GOLD, O_MATSPEC(IDED)),
-HELM(("shemagh", "white headscarf"), /*Needs encyc entry*//*Needs tile*/
+HELM(("shemagh", "white headscarf", "headscarf"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 0, 5,   5, 10, 0, 0, CLOTH, CLR_WHITE, O_MATSPEC(UNIDED)),
 
 /* With shuffled appearances... */
@@ -722,15 +722,15 @@ SUIT(("plate mail"), /*Needs encyc entry*/
 	1, 0,   MZ_HUGE, 0,	44, 5, 225, 600,  5, 5, 3, IRON, HI_METAL),
 SUIT(("high-elven plate", "runed plate mail"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, 0,	0, 5, 110, 	1200,  4, 6, 3, MITHRIL, HI_MITHRIL),
-SUIT(("droven plate mail", "crested black plate"), /*Needs encyc entry*/
+SUIT(("droven plate mail", "crested black plate", "crested plate mail"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, 0,	0, 5, 85, 	2000,  4, 6, 1, SHADOWSTEEL, CLR_BLACK),
 SUIT(("elven toga"), /*Needs encyc entry*//*Needs tile*/
 	1, 0,  MZ_LARGE, 0,	 0, 5,	 5,  100,10, 1, 2, CLOTH, CLR_GREEN),
-SUIT(("noble's dress", "armored black dress"), /*Needs encyc entry*/
+SUIT(("noble's dress", "armored black dress", "armored dress"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, 0,	0, 5, 40, 2000,  6, 4, 3, SHADOWSTEEL, CLR_BLACK),
-SHIRT(("black dress"), /*Needs encyc entry*/
+SHIRT(("black dress", (char *)0, "dress"), /*Needs encyc entry*/
 	1, 0,   MZ_HUGE, 0,	0, 5,  5,  500, 10, 0, 2, CLOTH, CLR_BLACK, O_DRSLOT(TORSO_DR)),
-SUIT(("consort's suit", "loud foppish suit"), /*Needs encyc entry*//*Needs tile*/
+SUIT(("consort's suit", "loud foppish suit", "clothes"), /*Needs encyc entry*//*Needs tile*/
 	0, 0,   MZ_HUGE, 0,	0, 5, 10, 	1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
 SUIT(("gentleman's suit", "expensive clothes"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, 0,	0, 5, 10, 1000,  10, 1, 2, CLOTH, CLR_BLACK),
@@ -745,11 +745,11 @@ SUIT(("archaic plate mail"), /*Needs encyc entry*/
 SUIT(("archaic plate mail"),
 	1, 0,   MZ_HUGE, 0,	35, 5, 200, 400,  6, 4, 3, COPPER, HI_COPPER),
 #endif
-SUIT(("harmonium plate", "red-lacquered bladed armor"),
+SUIT(("harmonium plate", "red-lacquered bladed armor", "bladed armor"),
 	0, 0,   MZ_HUGE, 0,	 0, 5, 225,   1,  6, 4, 3, METAL, CLR_RED),
-SUIT(("harmonium scale mail", "red-lacquered spiked scale mail"),
+SUIT(("harmonium scale mail", "red-lacquered spiked scale mail", "spiked scale mail"),
 	0, 0,   MZ_HUGE, 0,	 0, 5, 125,   1,  8, 2, 3, METAL, CLR_RED),
-SUIT(("plasteel armor", "hard white armor"), /*Needs encyc entry*//*Needs tile*/
+SUIT(("plasteel armor", "hard white armor", "armor"), /*Needs encyc entry*//*Needs tile*/
 	0, 0,   MZ_HUGE, 0,	 0, 5, 100,  500, 7, 3, 3, PLASTIC, CLR_WHITE),
 // ARMOR(("force armor", "gemstone-adorned clothing"),
 	// 0, 0, 1, 0,	 0, 5,  50, 1000, 9, 3, ARM_SUIT, GEMSTONE, CLR_BRIGHT_GREEN),
@@ -765,7 +765,7 @@ SUIT(("elven mithril-coat"),
 	1, 0, MZ_MEDIUM, 0,	15, 1,  20, 240,  7, 2, 3, MITHRIL, HI_MITHRIL),
 SUIT(("chain mail"),
 	1, 0,  MZ_LARGE, 0,	72, 5, 150,  75,  8, 3, 1, IRON, HI_METAL),
-SUIT(("droven chain mail", "crested black mail"), /*Needs encyc entry*/
+SUIT(("droven chain mail", "crested black mail", "crested mail"), /*Needs encyc entry*/
 	0, 0,  MZ_LARGE, 0,	0, 5,   50,  1000,  8, 4, 2, SHADOWSTEEL, CLR_BLACK),
 SUIT(("orcish chain mail", "crude chain mail"),
 	0, 0,  MZ_LARGE, 0,	20, 5, 150,  75,  8, 2, 1, IRON, CLR_BLACK),
@@ -787,21 +787,21 @@ SUIT(("jacket"),
 	1, 0, MZ_MEDIUM, 0,	12, 0,	20,  10, 10, 1, 2, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
 SUIT(("straitjacket", "long-sleeved jacket"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_MEDIUM, 0,	0, 0,   15,  10, 10, 1, 2, CLOTH, CLR_WHITE),
-SUIT(("healer uniform","clean white clothes"), /*Needs encyc entry*//*Needs tile*/
+SUIT(("healer uniform","clean white clothes", "clean clothes"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_MEDIUM, SICK_RES,	0, 0,	30,  10, 10, 1, 0, CLOTH, CLR_WHITE),
 #ifdef TOURIST
 /* shirts */
 /*ARMOR(("Hawaiian shorts", "flowery shorts and lei"),
 	1, 0, 0, 0,	 0, 0,	 5,   3, 10, 0, ARM_SUIT, CLOTH, CLR_MAGENTA),
 */
-SHIRT(("Hawaiian shirt", "flowery shirt"),
+SHIRT(("Hawaiian shirt", "flowery shirt", "shirt"),
 	0, 0, MZ_MEDIUM, 0,	 10, 0,	 5,   3, 10, 0, 0, CLOTH, CLR_MAGENTA),
 SHIRT(("T-shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 5, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_WHITE),
 SHIRT(("ichcahuipilli", "thick undershirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 3,	 10,   2, 10, 0, 0, CLOTH, CLR_WHITE),
 # ifdef CONVICT
-SHIRT(("striped shirt"), /*Needs encyc entry*/
+SHIRT(("striped shirt", (char *)0, "shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_GRAY),
 # endif /* CONVICT */
 #endif
@@ -810,11 +810,11 @@ SHIRT(("ruffled shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_WHITE),
 /* victorian underwear, on the other hand, inflicts a penalty to AC but grants MC 3 */
 /* needs special case to be 'bulky' */
-SHIRT(("victorian underwear", "white dress"),
+SHIRT(("victorian underwear", "white dress", "dress"),
 	0, 0, MZ_MEDIUM, 		  0,	 0, 5,	 5,   10, 10, 2, 3, CLOTH, CLR_WHITE,  O_DRSLOT(TORSO_DR)),
-SUIT(("jumpsuit", "silvery clothes"),/*Needs encyc entry*//*Needs tile*/
+SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_HUGE, REFLECTING,	 0, 5,	 5, 1000, 10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
-SHIRT(("bodyglove", "tight black clothes"), /*Needs encyc entry*//*Needs tile*/
+SHIRT(("bodyglove", "tight black clothes", "tight clothes"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_HUGE, SICK_RES,	 0, 5,	 5, 1000, 10, 0, 3, PLASTIC, CLR_BLACK, O_DRSLOT(ALL_DR)),
 /* cloaks */
 /*  'cope' is not a spelling mistake... leave it be */
@@ -832,11 +832,11 @@ CLOAK(("oilskin cloak", "slippery cloak"),
 		0, 0,	0,	    8, 0, 10, 50,  9, 0, 3, CLOTH, HI_CLOTH),
 CLOAK(("robe"),
 		1, 1,	0,	    3, 0, 15, 50, 10, 2, 3, CLOTH, CLR_RED),
-CLOAK(("white faceless robe"),
+CLOAK(("white faceless robe", (char *)0, "faceless robe"),
 		1, 1,	0,	    0, 2, 20, 50, 10, 1, 3, CLOTH, CLR_WHITE, O_DRSLOT(HEAD_DR|CLOAK_DR)),
-CLOAK(("black faceless robe"),
+CLOAK(("black faceless robe", (char *)0, "faceless robe"),
 		1, 1,	COLD_RES,	    0, 2, 20, 50, 10, 2, 3, CLOTH, CLR_BLACK, O_DRSLOT(HEAD_DR|CLOAK_DR)),
-CLOAK(("smoky violet faceless robe"),
+CLOAK(("smoky violet faceless robe", (char *)0, "faceless robe"),
 		1, 1,	COLD_RES,	    0, 2, 20,500, 10, 3, 3, CLOTH, CLR_MAGENTA, O_DRSLOT(HEAD_DR|CLOAK_DR)),
 CLOAK(("alchemy smock", "apron"),
 		0, 1,	POISON_RES, 9, 0, 10, 50, 10, 1, 3, CLOTH, CLR_WHITE),
@@ -857,11 +857,11 @@ CLOAK(("cloak of displacement", "piece of cloth"),
 /* shields */
 SHIELD(("buckler"),
 		1, 0,  MZ_SMALL, 0,	     6, 0, 30,	3,  9, 0, 0, WOOD, HI_WOOD),
-SHIELD(("elven shield", "blue and green shield"),
+SHIELD(("elven shield", "blue and green shield", "shield"),
 		0, 0,  MZ_SMALL, 0,	     2, 0, 30,	7,  8, 0, 2, WOOD, CLR_GREEN),
-SHIELD(("Uruk-hai shield", "white-handed shield"),
+SHIELD(("Uruk-hai shield", "white-handed shield", "shield"),
 		0, 0, MZ_MEDIUM, 0,	     2, 0, 50,	7,  8, 0, 1, IRON, HI_METAL),
-SHIELD(("orcish shield", "red-eyed shield"),
+SHIELD(("orcish shield", "red-eyed shield", "shield"),
 		0, 0, MZ_MEDIUM, 0,	     2, 0, 50,	7,  9, 0, 0, IRON, CLR_RED),
 SHIELD(("kite shield"),
 		1, 0,  MZ_LARGE, 0,	     6, 0,100, 10,  8, 0, 1, IRON, HI_METAL),
@@ -871,7 +871,7 @@ SHIELD(("dwarvish roundshield", "round shield"),
 		0, 0,  MZ_LARGE, 0,	     4, 0, 80, 10,  7, 0, 1, IRON, HI_METAL),
 SHIELD(("crystal shield", "shield"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  MZ_LARGE, 0,	     0, 0, 80,150,  9, 0, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
-SHIELD(("shield of reflection", "polished shield"),
+SHIELD(("shield of reflection", "polished shield", "smooth shield"),
 		0, 1,  MZ_LARGE, REFLECTING, 3, 0, 60, 50,  8, 0, 0, SILVER, HI_SILVER),
 /*#define SHIELD(names,kn,mgc,blk,power,prob,delay,wt,cost,ac,can,metal,c) \
      ARMOR(names,kn,mgc,blk,power,prob,delay,wt,cost,ac,can,ARM_SHIELD,metal,c) */
@@ -905,11 +905,11 @@ GLOVES(("archaic gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		1, 0,  0,	   0, 2, 25, 10, 8, 2, 0, COPPER, HI_COPPER),
 GLOVES(("long gloves"),
 		1, 0,  0,	   0, 1,  5,  8, 10, 2, 1, CLOTH, CLR_WHITE),
-GLOVES(("harmonium gauntlets", "red-lacquered hooked gauntlets"), /*Needs encyc entry*//*Needs tile*/
+GLOVES(("harmonium gauntlets", "red-lacquered hooked gauntlets", "hooked gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	   0, 2, 40,  1, 9, 2, 0, METAL, CLR_RED),
 GLOVES(("high-elven gauntlets", "runed gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	   0, 2, 15, 50, 8, 2, 0, MITHRIL, HI_MITHRIL),
-GLOVES(("plasteel gauntlets", "hard white gauntlets"), /*Needs encyc entry*//*Needs tile*/
+GLOVES(("plasteel gauntlets", "hard white gauntlets", "gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	   0, 2, 15, 50,  8, 2, 0, PLASTIC, CLR_WHITE),
 GLOVES(("gloves", "old gloves"),
 		0, 0,  0,	   8, 1, 10,  8, 10, 1, 0, LEATHER, HI_LEATHER, O_MATSPEC(IDED)),
@@ -933,9 +933,9 @@ BOOTS(("armored boots", "boots"),
 		0, 0,  0,	   0, 1, 75, 16,  8, 2, 1, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
 BOOTS(("archaic boots", "boots"),
 		0, 0,  0,	   0, 1, 75, 16,  8, 2, 1, COPPER, HI_COPPER,O_MATSPEC(UNIDED)),
-BOOTS(("harmonium boots", "red-lacquered boots"),
+BOOTS(("harmonium boots", "red-lacquered boots", "boots"),
 		0, 0,  0,	   0, 1, 95,  1,  8, 2, 1, METAL, CLR_RED),
-BOOTS(("plasteel boots", "hard white boots"), /*Needs encyc entry*//*Needs tile*/
+BOOTS(("plasteel boots", "hard white boots", "boots"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	   0, 2, 25, 32,  8, 2, 1, PLASTIC, CLR_WHITE),
 BOOTS(("stilettos", "high-heeled shoes"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	   0, 1, 10, 60, 10, 0, 0, METAL, HI_METAL),
@@ -1113,7 +1113,7 @@ TOOL(("sensor pack", "rigid box"), /*Needs encyc entry*//*Needs tile*/
 								0,  MZ_SMALL, 0, 1, 1,   0, 15,2000, PLASTIC,CLR_WHITE),
 TOOL(("hypospray", "hammer-shaped device"), /*Needs encyc entry*//*Needs tile*/
 								0,  MZ_SMALL, 0, 1, 0,   0, 15, 500, PLASTIC,CLR_GRAY),
-TOOL(("hypospray ampule", "hard grey bottle"), /*Needs encyc entry*//*Needs tile*/
+TOOL(("hypospray ampule", "hard gray bottle", "hard bottle"), /*Needs encyc entry*//*Needs tile*/
 								0,   MZ_TINY, 0, 1, 0,   0,  1,  50, PLASTIC,CLR_GRAY),
 TOOL(("mask"),			1,  MZ_SMALL, 0, 0, 0,  10, 10,  80, LEATHER, CLR_WHITE),
 TOOL(("R'lyehian faceplate", "ebon pane"), /*Needs tile*/
@@ -1122,7 +1122,7 @@ TOOL(("living mask", "gilled jellyfish"),
 								0,  MZ_SMALL, 0, 1, 0,   0,  5, 200, FLESH, CLR_BLUE, O_POWER(MAGICAL_BREATHING)),
 TOOL(("lenses"),		1,   MZ_TINY, 0, 0, 0,   5,  3,  80, GLASS, HI_GLASS), /*Needs encyc entry*/
 TOOL(("blindfold"),    1,   MZ_TINY, 0, 0, 0,  45,  2,  20, CLOTH, CLR_GRAY),
-TOOL(("android visor", "black blindfold"),
+TOOL(("android visor", "black blindfold", "blindfold"),
 								0,   MZ_TINY, 0, 0, 0,   0,  2,  40, CLOTH, CLR_BLACK),
 TOOL(("towel"),        1,   MZ_TINY, 0, 0, 0,  45,  2,  50, CLOTH, CLR_MAGENTA),
 #ifdef STEED
@@ -1133,10 +1133,10 @@ TOOL(("leash"),        1,  MZ_SMALL, 0, 0, 0,  70, 12,  20, LEATHER, HI_LEATHER)
 #endif
 TOOL(("stethoscope"),  1,  MZ_SMALL, 0, 0, 0,  25,  4,  75, IRON, HI_METAL),
 TOOL(("tinning kit"),  1, MZ_MEDIUM, 0, 0, 1,  15,100,  30, IRON, HI_METAL),
-TOOL(("bullet fabber", "white box with a yellow fiddly bit"),/*Needs tile*/
+TOOL(("bullet fabber", "white box with a yellow fiddly bit", "fiddly box"),/*Needs tile*/
 								0, MZ_MEDIUM, 0, 1, 0,   0, 20,  30, PLASTIC, CLR_WHITE),
 TOOL(("upgrade kit"),  1, MZ_MEDIUM, 0, 0, 0,  40,100,  30, COPPER, HI_COPPER),/*Needs encyc entry*//*Needs tile*/
-TOOL(("power pack", "little white cube"), /*Needs encyc entry*//*Needs tile*/
+TOOL(("power pack", "little white cube", "little cube"), /*Needs encyc entry*//*Needs tile*/
 								0,   MZ_TINY, 1, 1, 0,   0,  1,  300, PLASTIC, CLR_WHITE),
 TOOL(("trephination kit"),  
 								1, MZ_MEDIUM, 0, 0, 1,   5, 10,  30, METAL, HI_METAL),/*Needs encyc entry*//*Needs tile*/
@@ -1145,41 +1145,29 @@ TOOL(("can of grease"),1,  MZ_SMALL, 0, 0, 1,  15, 15,  20, IRON, HI_METAL),
 TOOL(("figurine"),     1,  MZ_SMALL, 0, 1, 0,  20, 50,  80, MINERAL, HI_MINERAL),
 /*Keep in sync with doll mvar flags*/
 TOOL(("effigy",   (char *)0),     1,   MZ_TINY, 1, 1, 0,  20,  5,  80, LEATHER, HI_LEATHER),
-TOOL(("doll of jumping",   "Pole-vaulter doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_BLUE),
-TOOL(("doll of friendship",   "Bard doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_BRIGHT_GREEN),
-TOOL(("doll of chastity",   "Priest doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_WHITE),
-TOOL(("doll of cleaving",   "Berserker doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_RED),
-TOOL(("doll of satiation",   "Chef doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_WHITE),
-TOOL(("doll of good health",   "Healer doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_WHITE),
-TOOL(("doll of full healing",   "Nurse doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_WHITE),
-TOOL(("doll of destruction",   "Dancing doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, HI_COPPER),
-TOOL(("doll of memory",   "Scholar doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_BRIGHT_BLUE),
-TOOL(("doll of binding",   "Heretic doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_BROWN),
-TOOL(("doll of preservation",   "Umbrella-wielding doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_YELLOW),
-TOOL(("doll of quick-drawing",   "Archaeologist doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_BROWN),
-TOOL(("doll of wand-charging",   "Wandsman doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_BRIGHT_BLUE),
-TOOL(("doll of stealing",   "Thief doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_BLACK),
-TOOL(("doll of mollification",   "High priest doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, HI_GOLD),
-TOOL(("doll of clear-thinking",   "Madman doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_GRAY),
-TOOL(("doll of mind-blasting",   "Squid-parasitized doll"),
-								0,   MZ_TINY, 1, 1, 0,   0,  1,  80,  CLOTH, CLR_MAGENTA),
-TOOL(("doll's tear",   "milky gemstone"),
+
+#define DOLL(names, color) \
+	TOOL(DEF_BLINDNAME(names, "doll"), 0, MZ_TINY, 1, 1, 0, 0, 1, 80, CLOTH, color)
+
+DOLL(("doll of jumping",        "Pole-vaulter doll"),      CLR_BLUE),
+DOLL(("doll of friendship",     "Bard doll"),              CLR_BRIGHT_GREEN),
+DOLL(("doll of chastity",       "Priest doll"),            CLR_WHITE),
+DOLL(("doll of cleaving",       "Berserker doll"),         CLR_RED),
+DOLL(("doll of satiation",      "Chef doll"),              CLR_WHITE),
+DOLL(("doll of good health",    "Healer doll"),            CLR_WHITE),
+DOLL(("doll of full healing",   "Nurse doll"),             CLR_WHITE),
+DOLL(("doll of destruction",    "Dancing doll"),           HI_COPPER),
+DOLL(("doll of memory",         "Scholar doll"),           CLR_BRIGHT_BLUE),
+DOLL(("doll of binding",        "Heretic doll"),           CLR_BROWN),
+DOLL(("doll of preservation",   "Umbrella-wielding doll"), CLR_YELLOW),
+DOLL(("doll of quick-drawing",  "Archaeologist doll"),     CLR_BROWN),
+DOLL(("doll of wand-charging",  "Wandsman doll"),          CLR_BRIGHT_BLUE),
+DOLL(("doll of stealing",       "Thief doll"),             CLR_BLACK),
+DOLL(("doll of mollification",  "High priest doll"),       HI_GOLD),
+DOLL(("doll of clear-thinking", "Madman doll"),            CLR_GRAY),
+DOLL(("doll of mind-blasting",  "Squid-parasitized doll"), CLR_MAGENTA),
+#undef DOLL
+TOOL(("doll's tear",   "milky gemstone", "gem"),
 								0,   MZ_TINY, 0, 1, 0,   0,  1,8000, GEMSTONE, CLR_WHITE),
 TOOL(("holy symbol of the black mother", "tarnished triple goat-head"), 
 								0,   MZ_TINY, 0, 1, 0,   0, 50,8000, SILVER, CLR_BLACK),
@@ -1222,12 +1210,12 @@ WEPTOOL(("seismic hammer", "dull metallic hammer"),
 WEPTOOL(("torch"),
 	DMG(D(6)), DMG(D(3)),
 	1,  MZ_SMALL, 0, 0, 15, 10,   5,  0, B,   P_CLUB, WOOD, HI_WOOD),
-WEPTOOL(("shadowlander's torch", "black torch"),
+WEPTOOL(("shadowlander's torch", "black torch", "torch"),
 	DMG(D(6)), DMG(D(3)),
 	0,  MZ_SMALL, 0, 0, 10, 10,  50,  0, B,   P_CLUB, WOOD, CLR_BLACK),
-WEPTOOL(("sunrod", "gold rod"),
+WEPTOOL(("sunrod", "rod"),
 	DMG(D(6)), DMG(D(3)),
-	1,  MZ_SMALL, 0, 0,  5, 20,  50,  0, B,   P_MACE, GOLD, HI_GOLD),
+	1,  MZ_SMALL, 0, 0,  5, 20,  50,  0, B,   P_MACE, GOLD, HI_GOLD, O_MATSPEC(UNIDED)),
 /* 
  * Lightsabers get 3x dice when lit, and go down to 1d2 damage when unlit
  */
