@@ -711,6 +711,12 @@
 				 (ptr)->mtyp == PM_PARASITIZED_COMMANDER \
 				)
 
+#define free_android(ptr)	((ptr)->mtyp == PM_ANDROID || \
+				 (ptr)->mtyp == PM_GYNOID || \
+				 (ptr)->mtyp == PM_OPERATOR || \
+				 (ptr)->mtyp == PM_COMMANDER \
+				)
+
 #define is_dollable(ptr)	((ptr)->mtyp == PM_ANDROID || \
 				 (ptr)->mtyp == PM_GYNOID || \
 				 (ptr)->mtyp == PM_OPERATOR || \
