@@ -1828,7 +1828,7 @@ int splaction;
 			Sprintf(buf, "speak the Word of Knowledge");
 			any.a_int = APPLE_WORD + 1;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
-				'q', 0, ATR_NONE, buf, MENU_UNSELECTED);
+				'r', 0, ATR_NONE, buf, MENU_UNSELECTED);
 		}
 		if (splaction != SPELLMENU_DESCRIBE && splaction < 0){
 			Sprintf(buf, "Describe a word instead");
