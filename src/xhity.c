@@ -15029,11 +15029,16 @@ boolean your_fault;
  *
  * Returns FALSE if this was cancelled before doing anything.
  */
-boolean
+int
 android_combo()
 {
 	struct monst * mdef;
 	int vis;
+
+	if (!uandroid) {
+		pline("You aren't an android!");
+		return FALSE;
+	}
 
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
 	static struct attack kickattack =	{ AT_KICK, AD_PHYS, 1, 2 };
