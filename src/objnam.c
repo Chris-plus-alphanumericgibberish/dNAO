@@ -5177,8 +5177,11 @@ typfnd:
 		else if (!otmp->oartifact || is_malleable_artifact(&artilist[otmp->oartifact]))
 			maybe_set_material(otmp, mat, TRUE);	// always limited by allowable random materials, but ignore normal probabilities
 		/* set gemtype, if specified and allowable*/
-			if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
-				otmp->ovar1 = gemtype;
+		if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)) {
+			otmp->ovar1 = gemtype;
+			set_object_color(otmp);
+		}
+
 	}
 	
 	/* set eroded */
