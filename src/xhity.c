@@ -12609,70 +12609,52 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		/* general damage bonus */
 		if(real_attack){
-			/* The player has by-far the most detailed attacks */
-			if (youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick || natural_strike)) {
-				int bon_damage = 0;
+			if (magr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick || natural_strike)) {
+				/* player-specific bonuses */
+				if (youagr) {
+					bonsdmg += u.udaminc;
+					bonsdmg += aeshbon();
 
-				bon_damage += u.udaminc;
-				bon_damage += aeshbon();
+					/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
+					if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
+						if (ACURR(A_INT) == 25) bonsdmg += 8;
+						else bonsdmg += max(0, (ACURR(A_INT) - 10) / 2);
+					}
+				}
+
+#define dbonus(wep) (youagr ? dbon((wep)) : m_dbon(magr, (wep)))
 				/* If you throw using a propellor, you don't get a strength
 				* bonus but you do get an increase-damage bonus.
 				*/
-				if (natural_strike || unarmed_punch || unarmed_kick)
-					bon_damage += dbon((struct obj *)0);
-				else if (melee || thrust)
-					bon_damage += dbon(weapon);
+				if (natural_strike || unarmed_punch || unarmed_kick || melee || thrust) {
+					int tmp = dbonus( (melee || thrust) ? weapon : (struct obj *)0);
+					/* greatly reduced STR damage for offhand attacks */
+					if (attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI)
+						tmp = min(0, tmp);
+					bonsdmg += tmp;
+				}
 				else if (fired)
 				{
 					/* slings get STR bonus */
 					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += dbon(launcher);
+						bonsdmg += dbonus(launcher);
 					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += dbon(launcher) * 2;
+						bonsdmg += dbonus(launcher) * 2;
 					/* other launchers get no STR bonus */
 					else if (launcher)
-						bon_damage += 0;
+						bonsdmg += 0;
 					/* properly-used ranged attacks othersied get STR bonus */
 					else {
 						/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
-						if (hmoncode & HMON_KICKED && uarmf && uarmf->otyp == KICKING_BOOTS)
+						if (hmoncode & HMON_KICKED && youagr && uarmf && uarmf->otyp == KICKING_BOOTS)
 							override_str = 125;	/* 25 STR */
-						bon_damage += dbon(weapon);
+						bonsdmg += dbonus(weapon);
 						override_str = 0;
 					}
 				}
+#undef dbonus
 
-				/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
-				if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
-					if (ACURR(A_INT) == 25) bon_damage += 8;
-					else bon_damage += max(0, (ACURR(A_INT) - 10) / 2);
-				}
-
-				bonsdmg += bon_damage;
-			} else if(!youagr && magr){
-				int bon_damage = 0;
-
-				/* 
-				* Monsters don't actually have anything other than a str bonus, and then only from items.
-				*/
-				if (melee || thrust)
-					bon_damage += m_dbon(magr, weapon);
-				else if (fired) {
-					/* slings get STR bonus */
-					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += m_dbon(magr, launcher);
-					/* atlatls get 2x STR bonus */
-					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += m_dbon(magr, launcher) * 2;
-					/* other launchers get no STR bonus */
-					else if (launcher)
-						bon_damage += 0;
-					/* properly-used ranged attacks othersied get STR bonus */
-					else
-						bon_damage += m_dbon(magr, weapon);
-				}
-				bonsdmg += bon_damage;
 			} else if (trap){
 				/* some traps deal increased damage */
 				if (trap->ttyp == ARROW_TRAP)
@@ -12687,11 +12669,9 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			int skill_damage = 0;
 			int wtype;
 
-			/* get simple weapon skill associated with the weapon */
+			/* get simple weapon skill associated with the weapon, not including twoweapon */
 			if (fired && launcher)
 				wtype = weapon_type(launcher);
-			else if (u.twoweap)
-				wtype = P_TWO_WEAPON_COMBAT;
 			else if (unarmed_punch)
 				wtype = P_BARE_HANDED_COMBAT;
 			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
@@ -12707,10 +12687,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (fired && launcher) {
 				/* precision fired ammo gets skill bonuses, multiplied */
 				if (is_ammo(weapon) && (precision_mult))
-					skill_damage = weapon_dam_bonus(launcher) * precision_mult;
+					skill_damage = weapon_dam_bonus(launcher, wtype) * precision_mult;
 				/* spears fired from atlatls also get their skill bonus */
 				else if (launcher->otyp == ATLATL)
-					skill_damage = weapon_dam_bonus(launcher);
+					skill_damage = weapon_dam_bonus(launcher, wtype);
 				/* other fired ammo does not get skill bonuses */
 				else
 					skill_damage = 0;
@@ -12722,16 +12702,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					skill_damage = 0;
 				/* otherwise, they do get skill bonuses */
 				else
-					skill_damage = weapon_dam_bonus(weapon);
+					skill_damage = weapon_dam_bonus(weapon, wtype);
 			}
 			/* melee weapons */
 			else if (melee || thrust) {
-				/* some weapons use contextually-specific skills */
-				if (wtype != P_TWO_WEAPON_COMBAT && wtype != weapon_type(weapon))
-					skill_damage = skill_dam_bonus(wtype);
-				/* general case */
-				else
-					skill_damage = weapon_dam_bonus(weapon);
+				skill_damage = weapon_dam_bonus(weapon, wtype);
 			}
 
 			/* Wrathful Spider halves damage from skill for fired bolts */
@@ -12742,7 +12717,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			bonsdmg += skill_damage;
 
 			/* now, train skills */
-			use_skill(wtype, 1);
+			use_skill(u.twoweap ? P_TWO_WEAPON_COMBAT : wtype, 1);
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(FFORM_SHII_CHO, 1);
