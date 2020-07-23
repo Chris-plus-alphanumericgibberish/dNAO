@@ -744,13 +744,14 @@ struct obj *spellbook;
 			}
 		}
 		
-		char qbuf[QBUFSZ];
-		Sprintf(qbuf, "You know \"%s\" quite well already. Try to refresh your memory anyway?", OBJ_NAME(objects[booktype]));
-		
-		for (int i = 0; i < MAXSPELL; i++)
-			if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n')
-				return 0;
-		
+		if (RoSbook == READ_SPELL){
+			char qbuf[QBUFSZ];
+			Sprintf(qbuf, "You know \"%s\" quite well already. Try to refresh your memory anyway?", OBJ_NAME(objects[booktype]));
+
+			for (int i = 0; i < MAXSPELL; i++)
+				if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n')
+					return 0;
+		}		
 		spellbook->in_use = TRUE;
 		
 		// moved above because there's no reason to let you fail before the confused procs
