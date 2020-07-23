@@ -951,7 +951,7 @@ level_tele()
 				}
 			}
 #ifdef WIZARD
-			if (wizard) rangeRestricted = FALSE;
+			if (wizard && rangeRestricted && yn("Range restricted. Ignore?")=='y') rangeRestricted = FALSE;
 #endif
 			if (rangeRestricted) {
 				if(urlev <= 0){ /*Level 0 is skipped*/
@@ -1535,6 +1535,9 @@ random_teleport_level()
 	int nlev, max_depth, min_depth,
 	    cur_depth = (int)depth(&u.uz);
 
+	/* enter from bottom going up*/
+	boolean inverted = (dungeons[u.uz.dnum].entry_lev == dungeons[u.uz.dnum].num_dunlevs);
+
 	if (!rn2(5) || Is_knox(&u.uz))
 	    return cur_depth;
 
@@ -1557,16 +1560,24 @@ random_teleport_level()
 	 * monsters sometimes level teleporting out of it into main dungeon.
 	 * Also prevent monsters reaching the Sanctum prior to invocation.
 	 */
-	min_depth = In_quest(&u.uz) ? dungeons[u.uz.dnum].depth_start : 1;
+	min_depth = (In_quest(&u.uz) || In_law(&u.uz) || In_neu(&u.uz) || In_cha(&u.uz)) 
+		? dungeons[u.uz.dnum].depth_start : 1;
 	max_depth = dunlevs_in_dungeon(&u.uz) +
 			(dungeons[u.uz.dnum].depth_start - 1);
 	/* can't reach the Sanctum OR square level if the invocation hasn't been performed */
 	if (Inhell && !u.uevent.invoked) max_depth -= 2;
 
 	/* Get a random value relative to the current dungeon */
-	/* Range is 1 to current+3, current not counting */
-	nlev = rn2(cur_depth + 3 - min_depth) + min_depth;
-	if (nlev >= cur_depth) nlev++;
+	if (!inverted) {
+		/* Range is min_depth to current+3, current not counting */
+		nlev = rn2(cur_depth + 3 - min_depth) + min_depth;
+		if (nlev >= cur_depth) nlev++;
+	}
+	else {
+		/* Range is current-3 to max_depth, current not counting */
+		nlev = max_depth - rn2(max_depth - cur_depth + 3);
+		if (nlev <= cur_depth) nlev--;
+	}
 
 	if (nlev > max_depth) {
 	    nlev = max_depth;
