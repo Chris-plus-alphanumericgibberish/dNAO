@@ -1680,12 +1680,13 @@ boolean with_price;
 					Sprintf(eos(buf), " of %s meat", mons[obj->corpsenm].mname);
 			}
 
+			
+			/* Reminder: Don't use an() on anything that could call xname/doname inside xname/doname */
+			/* it is okay to call an() on mons[].mname, since that is a string constant */
 			if (typ == STATUE || typ == FIGURINE) {
-				Sprintf(eos(buf), " of %s%s",
-					type_is_pname(&mons[obj->corpsenm]) ? "" :
-					((mons[obj->corpsenm].geno & G_UNIQ) && obj->corpsenm != PM_GOD) ? "the " :
-					(index(vowels, *(mons[obj->corpsenm].mname)) ? "an " : "a "),
-					mons[obj->corpsenm].mname
+				Sprintf(eos(buf), " of %s",
+					((mons[obj->corpsenm].geno & G_UNIQ) && obj->corpsenm != PM_GOD && !type_is_pname(&mons[obj->corpsenm])) ? "the " :
+					an(mons[obj->corpsenm].mname)
 					);
 			}
 		}
