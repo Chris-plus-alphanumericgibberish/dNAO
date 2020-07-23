@@ -511,11 +511,6 @@ register struct obj *otmp;
 #endif /* OVL1 */
 #ifdef OVLB
 
-static const char dknowns[] = {
-		WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS,
-		GEM_CLASS, SPBOOK_CLASS, WEAPON_CLASS, TOOL_CLASS, 0
-};
-
 struct obj *
 mksobj(otyp, init, artif)
 int otyp;
@@ -535,7 +530,7 @@ boolean artif;
 	otmp->oclass = let;
 	otmp->otyp = otyp;
 	otmp->where = OBJ_FREE;
-	otmp->dknown = index(dknowns, let) ? 0 : 1;
+	otmp->dknown = 0;
 	otmp->corpsenm = 0; /* BUGFIX: Where does this get set? shouldn't it be given a default during initialization? */
 	otmp->objsize = MZ_MEDIUM;
 	otmp->bodytypeflag = MB_HUMANOID;

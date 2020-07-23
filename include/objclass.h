@@ -175,7 +175,8 @@ struct objclass {
 
 struct objdescr {
 	const char *oc_name;		/* actual name */
-	const char *oc_descr;		/* description when name unknown */
+	const char *oc_descr;		/* description when oclass name unknown */
+	const char *oc_blindname;	/* appearence when object !dknown */
 };
 
 struct colorTextClr {
@@ -265,4 +266,5 @@ struct fruit {
 
 #define OBJ_NAME(obj)  (obj_descr[(obj).oc_name_idx].oc_name)
 #define OBJ_DESCR(obj) (obj_descr[(obj).oc_descr_idx].oc_descr)
+#define OBJ_BLINDNAME(obj) (obj_descr[(obj).oc_descr_idx].oc_blindname)
 #endif /* OBJCLASS_H */
