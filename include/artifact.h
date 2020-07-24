@@ -56,7 +56,7 @@
 #define ARTP_SEEK		0x0001L /* helps you search, ie, adds enhancement bonus to attempts -- only coded for mainhand weapons */
 #define ARTP_NOCALL		0x0002L /* prevents demons from being gated in */
 #define ARTP_NOWERE		0x0004L /* protects from lycanthropy and lycanthrope summoning */
-#define ARTP_BLINDRES	0x0008L /* grants light-blind resistance (which isn't a full property currently) */
+#define ARTP_FORCESIGHT	0x0008L /* you may see even when blinded. not a real property, so special casing required when used */
 #define	ARTP_LIGHTEN	0x0010L /* increases the weight you can haul. Currently only includes Shirts, Cloaks, and body armor.  See do_wear.c and hack.c */
 #define	ARTP_WCATRIB	0x0020L /* when worn above armor, increases Cha.  Under armor, increases Wis. */
 

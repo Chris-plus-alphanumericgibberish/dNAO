@@ -181,13 +181,13 @@
 		/* ...means blind because of a cover */
 #define NoLightBlind	((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && is_opaque(uarm)) || (uarmu && is_opaque(uarmu)))) && \
-		 !Blind_res && !forcesight)
+		 !forcesight)
 // #define Blind	((Blinded || Blindfolded || !haseyes(youracedata) || LightBlind) && \
 		 // !(u.sealsActive&SEAL_DANTALION && !(uarm && uarm->otyp != CRYSTAL_PLATE_MAIL)) && \
 		 // !Blind_res && !forcesight)
 #define Blind	((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && is_opaque(uarm)) || (uarmu && is_opaque(uarmu)))) && \
-		 !Blind_res && !forcesight)
+		 !forcesight)
 		/* ...the Eyes operate even when you really are blind
 		    or don't have any eyes */
 
