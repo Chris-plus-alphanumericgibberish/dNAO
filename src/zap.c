@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "edog.h"
+#include "xhity.h"
 
 /* Disintegration rays have special treatment; corpses are never left.
  * But the routine which calculates the damage is separate from the routine
@@ -3659,10 +3660,24 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		break;
 
 	case AD_STAR:
-		if(!flat) tmp = d(nd,6);
-		else tmp = flat;
-		if(hates_silver(mon->data))
-			tmp += d(nd/3, 20);
+		if(!flat){
+			tmp = d(nd,8);
+		} else {
+			tmp = flat;
+		}
+		//Half lethal half nonlethal
+		tmp /= 2;
+		mon->mspec_used += tmp;
+		//Silver stars, one per die
+		if(hates_silver(mon->data) && nd > 0)
+			tmp += d(nd, 20);
+		//Reduce damage for physical armor
+		/* apply average DR */
+		tmp -= max(0, avg_mdr(mon));
+		if (Half_phys(mon))
+			tmp = (tmp + 1) / 2;
+		if(tmp < 1)
+			tmp = 1;
 		break;
 
 	default:
@@ -3944,17 +3959,31 @@ xchar sx, sy;
 	break;
 
 	case AD_STAR:
-		if(!flat) dam = d(nd,6);
-		else dam = flat;
-		if(hates_silver(youracedata)) {
+		if(!flat){
+			dam = d(nd,8);
+		} else {
+			dam = flat;
+		}
+		//Half lethal half nonlethal
+		dam /= 2;
+		drain_en(dam);
+		//Silver stars, one per die
+		if(hates_silver(youracedata) && nd > 0) {
 			if (noncorporeal(youracedata)) {
-				pline("The silver sears you!");
+				pline("The silver stars sear you!");
 			}
 			else {
-				pline("The silver sears your %s!", body_part(BODY_FLESH));
+				pline("The silver stars sear your %s!", body_part(BODY_FLESH));
 			}
-			dam += d(nd/3, 20);
+			dam += d(nd, 20);
 		}
+		//Reduce damage for physical armor
+		/* apply average DR */
+		dam -= max(0, u.udr);
+		if (Half_phys(&youmonst))
+			dam = (dam + 1) / 2;
+		if(dam < 1)
+			dam = 1;
 	break;
 
 	default:
