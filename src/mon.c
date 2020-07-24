@@ -3530,10 +3530,10 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 		return ALLOW_M|ALLOW_TM;
 
 	/* Androids vs. mind flayers */
-	if((is_android(ma) && !is_mind_flayer(ma)) && is_mind_flayer(md))
+	if(free_android(ma) && is_mind_flayer(md))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
-	if((is_android(md) && !is_mind_flayer(md)) && is_mind_flayer(ma))
+	if(free_android(md) && is_mind_flayer(ma))
 		return ALLOW_M|ALLOW_TM;
 
 	/* drow vs. other drow */
