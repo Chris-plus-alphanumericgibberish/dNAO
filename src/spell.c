@@ -4986,7 +4986,7 @@ int *spell_no;
 			any.a_int = i + 1;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
 				spellet(i), 0, ATR_NONE, buf,
-				(i == splaction) ? MENU_SELECTED : MENU_UNSELECTED);
+				MENU_UNSELECTED);
 		}
 		//Other menu options
 		if (splaction != SPELLMENU_CAST && splaction != SPELLMENU_PICK && splaction < 0) {
