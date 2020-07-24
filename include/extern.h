@@ -1127,6 +1127,7 @@ E int NDECL(dosuspend);
 E void FDECL(new_light_source, (XCHAR_P, XCHAR_P, int, int, genericptr_t));
 E void FDECL(del_light_source, (int, genericptr_t, int));
 E void FDECL(do_light_sources, (char **));
+E boolean NDECL(uswallow_indark);
 E struct monst *FDECL(find_mid, (unsigned, unsigned));
 E void FDECL(save_light_sources, (int, int, int));
 E void FDECL(restore_light_sources, (int));

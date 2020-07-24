@@ -1852,11 +1852,7 @@ long timeout;
 	if (on_floor) {
 	    x = obj->ox;
 	    y = obj->oy;
-		if((levl[x][y].lit == 0 && 
-			!(viz_array[y][x]&TEMP_LIT1 && !(viz_array[y][x]&TEMP_DRK1)))
-		   || (levl[x][y].lit && 
-			(viz_array[y][x]&TEMP_DRK1 && !(viz_array[y][x]&TEMP_LIT1)))
-		){
+		if (dimness(x, y) > 0){
 			if(obj->oeroded && obj->oerodeproof) obj->oeroded--;
 			start_timer(1, TIMER_OBJECT,
 						LIGHT_DAMAGE, (genericptr_t)obj);
@@ -1881,10 +1877,7 @@ long timeout;
 		x = obj->otrap->tx;
 		y = obj->otrap->ty;
 		/* if dark, continue timer and possibly restore durability */
-		if ((levl[x][y].lit == 0 &&
-			!(viz_array[y][x] & TEMP_LIT1 && !(viz_array[y][x] & TEMP_DRK1)))
-			|| (levl[x][y].lit &&
-			(viz_array[y][x] & TEMP_DRK1 && !(viz_array[y][x] & TEMP_LIT1)))
+		if ((dimness(x, y) > 0)
 			/* only some traps are visible to light */
 			|| !(obj->otrap->ttyp == BEAR_TRAP)
 			){
@@ -1937,28 +1930,19 @@ long timeout;
 			return;
 		}
 		
-		if((levl[u.ux][u.uy].lit == 0 && 
-			!(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK1)))
-		  || (levl[u.ux][u.uy].lit && 
-			(viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1)))
+		if ((!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark()))
 		  || ((rn2(3) < armpro) && rn2(50))
 		){
 			if(obj->oeroded && obj->oerodeproof && 
-				((levl[u.ux][u.uy].lit == 0 && 
-					!(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK1)))
-				|| (levl[u.ux][u.uy].lit && 
-					(viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1)))
-				)
-			) obj->oeroded--;
-			start_timer(1, TIMER_OBJECT,
-						LIGHT_DAMAGE, (genericptr_t)obj);
+				(!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark())))
+				obj->oeroded--;
+			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
 			return;
 		}
 		if(obj->oeroded < 2){
 			obj->oeroded++;
 			Your("%s degrade%s.",xname(obj),(obj->quan > 1L ? "" : "s"));
-			start_timer(1, TIMER_OBJECT,
-						LIGHT_DAMAGE, (genericptr_t)obj);
+			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
 			stop_occupation();
 			if(flags.run) nomul(0, NULL);
 			return;
@@ -2031,6 +2015,8 @@ long timeout;
 		int armpro = 0;
 		long unwornmask;
 		struct monst *mtmp;
+		x = obj->ocarry->mx;
+		y = obj->ocarry->my;
 		if(armor){
 			armpro = armor->otyp == DROVEN_CLOAK ? 
 				objects[armor->otyp].a_can - armor->ovar1 :
@@ -2040,17 +2026,9 @@ long timeout;
 			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
 			return;
 		}
-		if((levl[obj->ocarry->mx][obj->ocarry->my].lit == 0 && 
-				!(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_LIT1 && !(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_DRK1)))
-			|| (levl[obj->ocarry->mx][obj->ocarry->my].lit && 
-				(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_DRK1 && !(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_LIT1)))
-			|| ((rn2(3) < armpro) && rn2(50))){
+		if ((dimness(x, y) > 0) || ((rn2(3) < armpro) && rn2(50))){
 			if(obj->oeroded && obj->oerodeproof 
-				&& ((levl[obj->ocarry->mx][obj->ocarry->my].lit == 0 && 
-					!(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_LIT1 && !(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_DRK1))) 
-				   || (levl[obj->ocarry->mx][obj->ocarry->my].lit && 
-					(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_DRK1 && !(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_LIT1)))
-				)
+				&& (dimness(x, y) > 0)
 			) obj->oeroded--;
 			start_timer(1, TIMER_OBJECT,
 						LIGHT_DAMAGE, (genericptr_t)obj);
