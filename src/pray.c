@@ -4445,13 +4445,13 @@ int eatflag;
 		//The Black Goat is pleased
 		struct monst *mtmp;
 		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT || mtmp->mfaction == MISTWEAVER)){
+			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT || has_template(mtmp, MISTWEAVER))){
 				mtmp->mpeaceful = 1;
 				set_malign(mtmp);
 			}
 		}
 		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-			if(goat_monster(mtmp->data) || mtmp->mfaction == MISTWEAVER){
+			if(goat_monster(mtmp->data) || has_template(mtmp, MISTWEAVER)){
 				mtmp->mpeaceful = 1;
 				set_malign(mtmp);
 				newsym(mtmp->mx, mtmp->my);

@@ -523,7 +523,7 @@ int tary;
 	/* lillends (that aren't you) can use masks */
 	if (pa->mtyp == PM_LILLEND
 		&& !youagr
-		&& !(magr->mfaction == ZOMBIFIED || magr->mfaction == SKELIFIED)
+		&& !(has_template(magr, ZOMBIFIED) || has_template(magr, SKELIFIED))
 		&& rn2(2)){
 		magr->mvar2 = monsndx(find_mask(magr));
 		if (!Blind && pa->mtyp != PM_LILLEND && canseemon(magr))
@@ -2068,7 +2068,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 
 	/* some pseudonatural's claws become more-damaging tentacles */
-	if (!youagr && magr->mfaction == PSEUDONATURAL && (
+	if (!youagr && has_template(magr, PSEUDONATURAL) && (
 		attk->aatyp == AT_CLAW && (magr->m_id + *indexnum) % 4 == 0)
 		){
 		attk->aatyp = AT_TENT;
@@ -2080,9 +2080,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 
 	/* Undead damage multipliers -- note that these must be after actual replacements are done */
 	/* zombies deal double damage, and all undead deal double damage at midnight (the midnight multiplier is not shown in the pokedex) */
-	if (!youagr && magr->mfaction == ZOMBIFIED && (is_undead_mon(magr) && midnight() && !by_the_book))
+	if (!youagr && has_template(magr, ZOMBIFIED) && (is_undead_mon(magr) && midnight() && !by_the_book))
 		attk->damn *= 3;
-	else if (!youagr && ((magr->mfaction == ZOMBIFIED) || (is_undead_mon(magr) && midnight() && !by_the_book)))
+	else if (!youagr && (has_template(magr, ZOMBIFIED) || (is_undead_mon(magr) && midnight() && !by_the_book)))
 		attk->damn *= 2;
 
 	/* Bandersnatches become frumious instead of fleeing, dealing double damage -- not shown in the pokedex */
@@ -11954,7 +11954,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 	/* set zombify resulting from melee mvm combat */
 	if (magr && !youagr && !youdef && melee && !recursed) {
-		if ((magr->mfaction == ZOMBIFIED || (magr->mfaction == SKELIFIED && !rn2(20))) && can_undead_mon(mdef)){
+		if ((has_template(magr, ZOMBIFIED) || (has_template(magr, SKELIFIED) && !rn2(20))) && can_undead_mon(mdef)){
 			mdef->zombify = 1;
 		}
 
@@ -11965,7 +11965,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			mdef->zombify = 1;
 		}
 
-		if (magr->mfaction == FRACTURED && is_kamerel(mdef->data)){
+		if (has_template(magr, FRACTURED) && is_kamerel(mdef->data)){
 			mdef->zombify = 1;
 		}
 	}
@@ -13931,7 +13931,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 		vis = getvis(magr, mdef, 0, 0);
 
 	/* Lillends can use masks to counterattack (but only at the end of the chain) */
-	if (!youdef && pd->mtyp == PM_LILLEND && !(mdef->mfaction == ZOMBIFIED || mdef->mfaction == SKELIFIED) && rn2(2) && endofchain){
+	if (!youdef && pd->mtyp == PM_LILLEND && !(has_template(mdef, ZOMBIFIED) || has_template(mdef, SKELIFIED)) && rn2(2) && endofchain){
 		pd = find_mask(mdef);
 		/* message moved to AFTER getting passive attack, to avoid printing a useless message 
 		 * like "The lillend uses a rothe mask!" */

@@ -424,19 +424,19 @@ register struct monst *mtmp;
 		Sprintf(eos(buf), "%s %s, the shopkeeper",
 			(mtmp->female ? "Ms." : "Mr."), shkname(mtmp));
 		killer_format = KILLED_BY;
-		if (mtmp->mfaction)
-			append_faction_desc(mtmp, buf, TRUE);
+		if (templated(mtmp))
+			append_template_desc(mtmp, buf, TRUE);
 	} else if (mtmp->ispriest || mtmp->isminion) {
 		/* m_monnam() suppresses "the" prefix plus "invisible", and
 		   it overrides the effect of Hallucination on priestname() */
 		killer = m_monnam(mtmp);
 		Strcat(buf, killer);
-		if (mtmp->mfaction)
-			append_faction_desc(mtmp, buf, type_is_pname(mtmp->data));
+		if (templated(mtmp))
+			append_template_desc(mtmp, buf, type_is_pname(mtmp->data));
 	} else {
 		Strcat(buf, mtmp->data->mname);
-		if (mtmp->mfaction)
-			append_faction_desc(mtmp, buf, type_is_pname(mtmp->data));
+		if (templated(mtmp))
+			append_template_desc(mtmp, buf, type_is_pname(mtmp->data));
 		if (mtmp->mnamelth)
 		    Sprintf(eos(buf), " called %s", NAME(mtmp));
 	}
@@ -457,37 +457,37 @@ register struct monst *mtmp;
 			u.ugrave_arise = PM_BROKEN_SHADOW;
 		else if (mtmp->data->mlet == S_MUMMY && urace.mummynum != NON_PM)
 			u.ugrave_arise = urace.mummynum;
-		else if ((mtmp->data->mlet == S_VAMPIRE || mtmp->mfaction == VAMPIRIC) && (Race_if(PM_HUMAN) || Race_if(PM_INHERITOR)))
+		else if ((mtmp->data->mlet == S_VAMPIRE || has_template(mtmp, VAMPIRIC)) && (Race_if(PM_HUMAN) || Race_if(PM_INHERITOR)))
 			u.ugrave_arise = PM_VAMPIRE;
 		else if (mtmp->mtyp == PM_GHOUL || mtmp->mtyp == PM_GNOLL_GHOUL)
 			u.ugrave_arise = PM_GHOUL;
 		else if (mtmp->mtyp == PM_DREADBLOSSOM_SWARM)
 			u.ugrave_arise = PM_DREADBLOSSOM_SWARM;
-		else if (mtmp->mtyp == PM_DREAD_SERAPH || mtmp->mfaction == SKELIFIED)
+		else if (mtmp->mtyp == PM_DREAD_SERAPH || has_template(mtmp, SKELIFIED))
 			u.ugrave_arise = PM_SKELETON;
-		else if (mtmp->data->mlet == S_ZOMBIE || mtmp->mfaction == ZOMBIFIED)
+		else if (mtmp->data->mlet == S_ZOMBIE || has_template(mtmp, ZOMBIFIED))
 			u.ugrave_arise = PM_ZOMBIE;
-		else if (mtmp->mtyp == PM_BAALPHEGOR || mtmp->mfaction == CRYSTALFIED)
+		else if (mtmp->mtyp == PM_BAALPHEGOR || has_template(mtmp, CRYSTALFIED))
 			u.ugrave_arise = PM_BAALPHEGOR;
 	} else if(uandroid){
 		if (mtmp->mtyp == PM_BROKEN_SHADOW)
 			u.ugrave_arise = PM_BROKEN_SHADOW;
 		else if (mtmp->data->mlet == S_MUMMY && urace.mummynum != NON_PM)
 			u.ugrave_arise = urace.mummynum;
-		// else if (mtmp->data->mlet == S_VAMPIRE || mtmp->mfaction == VAMPIRIC)
+		// else if (mtmp->data->mlet == S_VAMPIRE || has_template(mtmp, VAMPIRIC))
 			// u.ugrave_arise = PM_VAMPIRIC_DOLL;
-		else if (mtmp->mtyp == PM_DREAD_SERAPH || mtmp->mfaction == SKELIFIED)
+		else if (mtmp->mtyp == PM_DREAD_SERAPH || has_template(mtmp, SKELIFIED))
 			u.ugrave_arise = PM_FLAYED_ANDROID;
-		else if (mtmp->data->mlet == S_ZOMBIE || mtmp->mfaction == ZOMBIFIED)
+		else if (mtmp->data->mlet == S_ZOMBIE || has_template(mtmp, ZOMBIFIED))
 			u.ugrave_arise = PM_FLAYED_ANDROID;
-		else if (mtmp->mtyp == PM_BAALPHEGOR || mtmp->mfaction == CRYSTALFIED)
+		else if (mtmp->mtyp == PM_BAALPHEGOR || has_template(mtmp, CRYSTALFIED))
 			u.ugrave_arise = PM_BAALPHEGOR;
 	} else { //clockwork or other nonliving
 		if (mtmp->mtyp == PM_BROKEN_SHADOW)
 			u.ugrave_arise = PM_BROKEN_SHADOW;
 		else if (mtmp->mtyp == PM_DREADBLOSSOM_SWARM && !uclockwork && !is_naturally_unalive(youracedata))
 			u.ugrave_arise = PM_DREADBLOSSOM_SWARM;
-		else if (mtmp->mtyp == PM_BAALPHEGOR || mtmp->mfaction == CRYSTALFIED)
+		else if (mtmp->mtyp == PM_BAALPHEGOR || has_template(mtmp, CRYSTALFIED))
 			u.ugrave_arise = PM_BAALPHEGOR;
 	}
 	if (u.ugrave_arise >= LOW_PM &&

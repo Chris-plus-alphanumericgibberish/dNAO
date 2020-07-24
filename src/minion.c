@@ -199,8 +199,8 @@ boolean talk;
 			}
 		}
 		
-		if(gptr == DreadFracture && mon->mfaction != FRACTURED){
-			set_faction(mon, FRACTURED);
+		if(gptr == DreadFracture && !has_template(mon, FRACTURED)){
+			set_template(mon, FRACTURED);
 			mon->m_lev += 4;
 			mon->mhpmax = d(mon->m_lev, 8);
 			mon->mhp = mon->mhpmax;

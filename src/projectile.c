@@ -1042,7 +1042,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			*pdy = u.dy;
 			*prange = *prange2;
 		}
-		else if (youdef || mdef->mfaction != FRACTURED){
+		else if (youdef || !has_template(mdef, FRACTURED)){
 			*pdx *= -1;
 			*pdy *= -1;
 		}

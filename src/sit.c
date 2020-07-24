@@ -590,7 +590,7 @@ register struct monst *mtmp;
 	boolean resists = resist(mtmp, 0, 0, FALSE);
 	boolean visible = canseemon(mtmp);
 
-	if(mtmp->mfaction == ILLUMINATED){
+	if(has_template(mtmp, ILLUMINATED)){
 	    if(visible) You("feel a malignant aura burn away in the Light.");
 	    return FALSE;
 	}

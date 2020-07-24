@@ -229,6 +229,7 @@ STATIC_VAR int cham_to_pm[] = {
 			 ((mon)->data->geno & G_UNIQ) ||		\
 			 is_reviver((mon)->data) ||			\
 			 ((mon)->mfaction) ||			\
+			 (templated(mon)) ||			\
 			 ((mon)->ispolyp) ||			\
 			 ((mon)->zombify) ||			\
 			 ((mon)->mtyp == PM_UNDEAD_KNIGHT) ||			\
@@ -286,11 +287,11 @@ register struct monst *mtmp;
 		(void) mksobj_at(MIRROR, x, y, TRUE, FALSE);
 	}
 	
-	if(mtmp->mfaction == CRYSTALFIED){
+	if(has_template(mtmp, CRYSTALFIED)){
 		obj = mkcorpstat(STATUE, (struct monst *)0,
 			mdat, x, y, FALSE);
 		set_material_gm(obj, GLASS);
-	} else if(mtmp->mfaction == TOMB_HERD) {
+	} else if(has_template(mtmp, TOMB_HERD)) {
 		obj = mkcorpstat(STATUE, (struct monst *)0,
 			mdat, x, y, FALSE);
 	} else switch(mndx) {
@@ -721,7 +722,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_faction(mon, ZOMBIFIED);
+				set_template(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -735,7 +736,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_faction(mon, ZOMBIFIED);
+				set_template(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -749,7 +750,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_faction(mon, ZOMBIFIED);
+				set_template(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -796,7 +797,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_faction(mon, ZOMBIFIED);
+				set_template(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -810,7 +811,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_faction(mon, ZOMBIFIED);
+				set_template(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -824,7 +825,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_faction(mon, ZOMBIFIED);
+				set_template(mon, ZOMBIFIED);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -896,7 +897,7 @@ register struct monst *mtmp;
 				mon->mpeaceful = 1;
 				mon->mcrazed = 1;
 				EDOG(mon)->loyal = TRUE;
-				set_faction(mon, M_GREAT_WEB);
+				set_template(mon, M_GREAT_WEB);
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
@@ -1123,7 +1124,7 @@ register struct monst *mtmp;
 				mon->female = TRUE;
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_faction(mon, ZOMBIFIED);
+				set_template(mon, ZOMBIFIED);
 			}
 			obj = mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
 			mongone(mon);
@@ -1788,7 +1789,7 @@ mcalcdistress()
 			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
 				&& (tmpm->mpeaceful != mtmp->mpeaceful || mtmp->mhp < mtmp->mhpmax/4)
 				&& (tmpm->mtame != mtmp->mtame || mtmp->mhp < mtmp->mhpmax/4)
-				&& tmpm->mfaction != CRYSTALFIED
+				&& !has_template(tmpm, CRYSTALFIED)
 				&& !is_demon(tmpm->data)
 				&& !DEADMONSTER(tmpm)
 				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
@@ -1804,7 +1805,7 @@ mcalcdistress()
 			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
 				&& (tmpm->mpeaceful != mtmp->mpeaceful || mtmp->mhp < mtmp->mhpmax/4)
 				&& (tmpm->mtame != mtmp->mtame || mtmp->mhp < mtmp->mhpmax/4)
-				&& tmpm->mfaction != CRYSTALFIED
+				&& !has_template(tmpm, CRYSTALFIED)
 				&& !is_demon(tmpm->data)
 				&& !DEADMONSTER(tmpm)
 				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
@@ -1832,7 +1833,7 @@ mcalcdistress()
 				tmpm->mpeaceful = mtmp->mpeaceful;
 				if(tmpm->mtame && tmpm->mtame != mtmp->mtame)
 					tmpm->mtame = 0;
-				set_faction(tmpm, CRYSTALFIED);
+				set_template(tmpm, CRYSTALFIED);
 				newsym(tmpm->mx, tmpm->my);
 				mtmp->mhp += tmpm->mhp;
 			}
@@ -1953,7 +1954,7 @@ mcalcdistress()
 					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM
 						&& tmpm->mpeaceful != mtmp->mpeaceful
 						&& tmpm->mtame != mtmp->mtame
-						&& tmpm->mfaction != CRYSTALFIED
+						&& !has_template(tmpm, CRYSTALFIED)
 						// && !(uamul && (uamul->otyp == AMULET_VERSUS_CURSES))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_MAGICBANE) && rn2(20))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20))
@@ -3865,11 +3866,11 @@ struct monst *mtmp;
 		|| is_alabaster_mummy(mtmp->data)
 		)))
 		lifesavers |= LSVD_ALA;
-	if (mtmp->mfaction == FRACTURED && !rn2(2))
+	if (has_template(mtmp, FRACTURED) && !rn2(2))
 		lifesavers |= LSVD_FRC;
 	if (mtmp->ispolyp)
 		lifesavers |= LSVD_PLY;
-	if (mtmp->mfaction == ILLUMINATED)
+	if (has_template(mtmp, ILLUMINATED))
 		lifesavers |= LSVD_ILU;
 	if (mtmp->zombify && is_kamerel(mtmp->data))
 		lifesavers |= LSVD_KAM;
@@ -4048,7 +4049,7 @@ struct monst *mtmp;
 			}
 			/* If marked to do so, remve illuminated status */
 			if (!(lifesavers&LSVD_ILU)){
-				set_faction(mtmp, 0);
+				set_template(mtmp, 0);
 				del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
 				if (emits_light_mon(mtmp))
 					new_light_source(mtmp->mx, mtmp->my, emits_light_mon(mtmp),
@@ -4076,7 +4077,7 @@ struct monst *mtmp;
 				else
 					You_hear("something crack%s!", !is_silent(mtmp->data) ? " with an unearthly scream" : "");
 			}
-			set_faction(mtmp, FRACTURED);
+			set_template(mtmp, FRACTURED);
 			/* make hostile */
 			mtmp->mtame = 0;
 			mtmp->mpeaceful = 0;
@@ -4204,7 +4205,7 @@ register struct monst *mtmp;
 				reset_rndmonst(tmp);
 			}
 	}
-	if(tmp == PM_ARA_KAMEREL && mtmp->mfaction != FRACTURED){
+	if(tmp == PM_ARA_KAMEREL && !has_template(mtmp, FRACTURED)){
 		if(mtmp->mtame)
 			u.goldkamcount_tame++;
 		else if(mtmp->mpeaceful)
@@ -4826,13 +4827,13 @@ boolean was_swallowed;			/* digestion */
 	/* must duplicate this below check in xkilled() since it results in
 	 * creating no objects as well as no corpse
 	 */
-	if (mon->mfaction == SKELIFIED)
+	if (has_template(mon, SKELIFIED))
 		return FALSE;
 
-	if (mon->mfaction == CRYSTALFIED)
+	if (has_template(mon, CRYSTALFIED))
 		return TRUE;
 
-	if (mon->mfaction == TOMB_HERD)
+	if (has_template(mon, TOMB_HERD))
 		return TRUE;
 
 	if (is_golem(mdat)
@@ -5079,7 +5080,7 @@ register struct monst *mdef;
 		/* Archeologists should not break unique statues */
 		if (mdef->data->geno & G_UNIQ)
 			otmp->spe = STATUE_HISTORIC;
-		if (mdef->mfaction == ILLUMINATED)
+		if (has_template(mdef, ILLUMINATED))
 			otmp->spe |= STATUE_FACELESS;
 		otmp->owt = weight(otmp);
 	} else
@@ -5175,7 +5176,7 @@ register struct monst *mdef;
 		/* Archeologists should not break unique statues */
 		if (mdef->data->geno & G_UNIQ)
 			otmp->spe = STATUE_HISTORIC;
-		if (mdef->mfaction == ILLUMINATED)
+		if (has_template(mdef, ILLUMINATED))
 			otmp->spe |= STATUE_FACELESS;
 		otmp->owt = weight(otmp);
 	} else {
@@ -5308,7 +5309,7 @@ register struct monst *mdef;
 		/* Archeologists should not break unique statues */
 		if (mdef->data->geno & G_UNIQ)
 			otmp->spe = STATUE_HISTORIC;
-		if (mdef->mfaction == ILLUMINATED)
+		if (has_template(mdef, ILLUMINATED))
 			otmp->spe |= STATUE_FACELESS;
 		otmp->owt = weight(otmp);
 	} else {
@@ -5455,13 +5456,13 @@ xkilled(mtmp, dest)
 			if((otmp->wrathdata&0x3L) < 3) otmp->wrathdata++;
 		}
 		else {
-			if(mtmp->mfaction == ZOMBIFIED){
+			if(has_template(mtmp, ZOMBIFIED)){
 				otmp->wrathdata = PM_ZOMBIE<<2;
-			} else if(mtmp->mfaction == SKELIFIED){
+			} else if(has_template(mtmp, SKELIFIED)){
 				otmp->wrathdata = PM_SKELETON<<2;
-			} else if(mtmp->mfaction == VAMPIRIC){
+			} else if(has_template(mtmp, VAMPIRIC)){
 				otmp->wrathdata = PM_VAMPIRE<<2;
-			} else if(mtmp->mfaction == PSEUDONATURAL){
+			} else if(has_template(mtmp, PSEUDONATURAL)){
 				otmp->wrathdata = PM_MIND_FLAYER<<2;
 			} else {
 				otmp->wrathdata = monsndx(mtmp->data)<<2;
@@ -5474,13 +5475,13 @@ xkilled(mtmp, dest)
 			if((otmp->wrathdata&0xFF) < 3) otmp->wrathdata++;
 		}
 		else {
-			if(mtmp->mfaction == ZOMBIFIED){
+			if(has_template(mtmp, ZOMBIFIED)){
 				otmp->wrathdata = PM_ZOMBIE<<2;
-			} else if(mtmp->mfaction == SKELIFIED){
+			} else if(has_template(mtmp, SKELIFIED)){
 				otmp->wrathdata = PM_SKELETON<<2;
-			} else if(mtmp->mfaction == VAMPIRIC){
+			} else if(has_template(mtmp, VAMPIRIC)){
 				otmp->wrathdata = PM_VAMPIRE<<2;
-			} else if(mtmp->mfaction == PSEUDONATURAL){
+			} else if(has_template(mtmp, PSEUDONATURAL)){
 				otmp->wrathdata = PM_MIND_FLAYER<<2;
 			} else {
 				otmp->wrathdata = monsndx(mtmp->data)<<2;
@@ -6551,10 +6552,10 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	) {
 	    /* used to give light, now doesn't, or vice versa,
 	       or light's range has changed */
-	    if (emits_light(olddata) || mtmp->mfaction == ILLUMINATED)
+	    if (emits_light(olddata) || has_template(mtmp, ILLUMINATED))
 			del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
 		if(olddata->mtyp == PM_MASKED_QUEEN)
-			set_faction(mtmp, ILLUMINATED);
+			set_template(mtmp, ILLUMINATED);
 	    if (emits_light_mon(mtmp))
 		new_light_source(mtmp->mx, mtmp->my, emits_light_mon(mtmp),
 				 LS_MONSTER, (genericptr_t)mtmp);

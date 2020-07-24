@@ -2387,7 +2387,7 @@ struct monst * commander;
 	{
 	case PM_LEGION:
 	case PM_LEGIONNAIRE:
-		return (follower->mfaction == ZOMBIFIED);
+		return (has_template(follower, ZOMBIFIED));
 
 	default:
 		return permon_in_command_chain(monsndx(follower->data), monsndx(commander->data));

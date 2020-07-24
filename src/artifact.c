@@ -6265,7 +6265,7 @@ arti_invoke(obj)
 			mtmp = tamedog(mtmp, (struct obj *) 0);
 			
 			if (mtmp->mtyp != PM_SKELETON)
-				set_faction(mtmp, SKELIFIED);
+				set_template(mtmp, SKELIFIED);
 
 			if (onfloor) useupf(corpse, 1);
 			else useup(corpse);
@@ -9952,7 +9952,7 @@ living_items()
 		// if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe)){
 			mtmp = animate_statue(obj, obj->ox, obj->oy, ANIMATE_NORMAL, (int *) 0);
 			if(mtmp){
-				set_faction(mtmp, TOMB_HERD);
+				set_template(mtmp, TOMB_HERD);
 				mtmp->m_lev += 4;
 				mtmp->mhpmax += d(4, 8);
 				mtmp->mhp = mtmp->mhpmax;
@@ -10132,16 +10132,16 @@ struct monst *mon;
 		)
 			return 1;
 	} else {
-		if(mon->mfaction == ZOMBIFIED){
+		if(has_template(mon, ZOMBIFIED)){
 			if((otmp->wrathdata >> 2) == PM_ZOMBIE)
 				return 1;
-		} else if(mon->mfaction == SKELIFIED){
+		} else if(has_template(mon, SKELIFIED)){
 			if((otmp->wrathdata >> 2) == PM_SKELETON)
 				return 1;
-		} else if(mon->mfaction == VAMPIRIC){
+		} else if(has_template(mon, VAMPIRIC)){
 			if((otmp->wrathdata >> 2) == PM_VAMPIRE)
 				return 1;
-		} else if(mon->mfaction == PSEUDONATURAL){
+		} else if(has_template(mon, PSEUDONATURAL)){
 			if((otmp->wrathdata >> 2) == PM_MIND_FLAYER)
 				return 1;
 		} else {

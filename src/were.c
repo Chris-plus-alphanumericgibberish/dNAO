@@ -198,7 +198,7 @@ struct monst *mon;
 	if (emits_light(olddata) != emits_light_mon(mon)) {
 	    /* used to give light, now doesn't, or vice versa,
 	       or light's range has changed */
-	    if (emits_light(olddata) || mon->mfaction == ILLUMINATED)
+	    if (emits_light(olddata) || has_template(mon, ILLUMINATED))
 		del_light_source(LS_MONSTER, (genericptr_t)mon, FALSE);
 	    if (emits_light_mon(mon))
 		new_light_source(mon->mx, mon->my, emits_light_mon(mon),

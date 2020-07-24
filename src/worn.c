@@ -1712,7 +1712,7 @@ struct obj *obj;
 			return 20;
 		break;
 	case REFLECTING:
-		if (!(mon->mfaction == FRACTURED || species_reflects(mon)))
+		if (!(has_template(mon, FRACTURED) || species_reflects(mon)))
 			return 18;
 		break;
 	case FAST:

@@ -339,12 +339,12 @@ struct monst *mtmp;
 			mtmp->data->mlet == S_PUDDING ||
 			mtmp->data->mlet == S_UMBER ||
 			mtmp->data->mlet == S_EEL ||
-			mtmp->mfaction == PSEUDONATURAL ||
-			mtmp->mfaction == TOMB_HERD ||
-			mtmp->mfaction == YITH ||
-			mtmp->mfaction == CRANIUM_RAT ||
-			mtmp->mfaction == MISTWEAVER ||
-			mtmp->mfaction == FRACTURED ||
+			has_template(mtmp, PSEUDONATURAL) ||
+			has_template(mtmp, TOMB_HERD) ||
+			has_template(mtmp, YITH) ||
+			has_template(mtmp, CRANIUM_RAT) ||
+			has_template(mtmp, MISTWEAVER) ||
+			has_template(mtmp, FRACTURED) ||
 			mtmp->mtyp == PM_GUG ||
 			mtmp->mtyp == PM_MIGO_WORKER ||
 			mtmp->mtyp == PM_MIGO_SOLDIER ||

@@ -1241,7 +1241,7 @@ dovampminion()
 	} else {
 		struct monst *mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 		mtmp = tamedog(mtmp, (struct obj *) 0);
-		set_faction(mtmp, VAMPIRIC);
+		set_template(mtmp, VAMPIRIC);
 
 		if (onfloor) useupf(corpse, 1);
 		else useup(corpse);

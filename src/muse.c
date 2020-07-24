@@ -2701,7 +2701,7 @@ const char *str;
 	    }
 	    return TRUE;
 	}
-	if(mon->mfaction == FRACTURED){
+	if(has_template(mon, FRACTURED)){
 		if(str) 
 		pline(str, s_suffix(mon_nam(mon)), "fractured surface");
 		return TRUE;

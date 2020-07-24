@@ -1416,7 +1416,7 @@ start_corpse_timeout(body)
 		action = REVIVE_MON;
 		when = rn2(TAINT_AGE)+2;
 	} else if (attchmon
-	 && (attchmon->mfaction == ZOMBIFIED)
+	 && (has_template(attchmon, ZOMBIFIED))
 	 && !body->norevive
 	) {
 //		pline("setting up zombie revival for %s", xname(body));

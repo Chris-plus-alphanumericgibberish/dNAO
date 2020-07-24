@@ -855,7 +855,7 @@ boolean dolls;
 				panic("revive");
 			}
 			if(wasfossil){
-				set_faction(mtmp, SKELIFIED);
+				set_template(mtmp, SKELIFIED);
 				newsym(mtmp->mx,mtmp->my);
 			}
 		}
@@ -3533,7 +3533,7 @@ struct obj **ootmp;	/* to return worn armor for caller to disintegrate */
 		else if(is_delouseable(mon->data)){
 			if (canseemon(mon))
 				pline("The parasite is killed!");
-			set_faction(mon, DELOUSED);
+			set_template(mon, DELOUSED);
 			break;
 		}
 		if (mon->mtyp == PM_DEATH) {
@@ -4297,7 +4297,7 @@ int dx, dy, range, flat;
 						shieldeff(mon->mx, mon->my);
 						(void) mon_reflects(mon, "But it reflects from %s %s!");
 					}
-					if(mon->mfaction == FRACTURED){
+					if(has_template(mon, FRACTURED)){
 						int i = rn2(8);
 						dx = dirx[i];
 						dy = diry[i];
@@ -4386,7 +4386,7 @@ int dx, dy, range, flat;
 							monkilled(mon, (char *)0, -AD_RBRE);
 						else
 							xkilled(mon, 2);
-					} else if(adtyp == AD_DEAD && mon->mfaction == DELOUSED) {
+					} else if(adtyp == AD_DEAD && has_template(mon, DELOUSED)) {
 						mon = delouse(mon, AD_DEAD);
 					} else if(mon->mhp < 1) {
 						if(!yours)
@@ -4669,7 +4669,7 @@ int type;
 		mon->mhpmax = 60;
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
-	set_faction(mon, DELOUSED);
+	set_template(mon, DELOUSED);
 	mon->mtame = 0;
 	mon->mpeaceful = 1;
 	mon->mcanmove = 1;
@@ -4681,9 +4681,9 @@ delouse_tame(mon)
 struct monst *mon;
 {
 	struct monst *mtmp;
-	set_faction(mon, 0);
+	set_template(mon, 0);
 	if(mon->mtyp == PM_COMMANDER){
-		set_faction(mon, M_GREAT_WEB);
+		set_template(mon, M_GREAT_WEB);
 	}
 	if(mon->mtyp == PM_LIVING_DOLL){
 		mon->mpeaceful = 1;

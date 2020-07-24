@@ -858,7 +858,7 @@ moveloop()
 				insight_vanish(mtmp);
 				continue;
 			}
-			if(mtmp->mfaction == DELOUSED){
+			if(has_template(mtmp, DELOUSED)){
 				delouse_tame(mtmp);
 				continue;
 			}
@@ -929,7 +929,7 @@ moveloop()
 					insight_vanish(mtmp);
 					continue;
 				}
-				if(mtmp->mfaction == DELOUSED){
+				if(has_template(mtmp, DELOUSED)){
 					delouse_tame(mtmp);
 					continue;
 				}
@@ -2182,7 +2182,7 @@ karemade:
 			insight_vanish(mtmp);
 			continue;
 		}
-		if(mtmp->mfaction == DELOUSED){
+		if(has_template(mtmp, DELOUSED)){
 			delouse_tame(mtmp);
 			continue;
 		}
