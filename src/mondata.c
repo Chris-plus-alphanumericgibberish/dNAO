@@ -1224,14 +1224,12 @@ struct monst *mon;
 		|| dmgtype_fromattack(ptr, AD_BLND, AT_WDGZ)
 	)
 	    return TRUE;
-	o = is_you ? uwep : MON_WEP(mon);
-	if (o && arti_blindres(o, FALSE))
-	    return TRUE;
-	o = is_you ? invent : mon->minvent;
-	for ( ; o; o = o->nobj)
-	    if ((o->owornmask && objects[o->otyp].oc_oprop == BLINDED) ||
-		    arti_blindres(o, TRUE))
+
+	if (is_you && Blind_res)
 		return TRUE;
+	else if (!is_you && mon_resistance(mon, BLIND_RES))
+		return TRUE;
+
 	return FALSE;
 }
 

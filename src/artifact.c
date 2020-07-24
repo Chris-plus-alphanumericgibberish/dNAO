@@ -1138,13 +1138,13 @@ boolean while_carried;
 }
 
 boolean
-arti_blindres(obj, while_carried)
+arti_forcesight(obj, while_carried)
 struct obj * obj;
 boolean while_carried;
 {
 	return (obj && obj->oartifact &&
-		(arti_worn_prop(obj, ARTP_BLINDRES)
-		|| (while_carried && arti_carry_prop(obj, ARTP_BLINDRES))));
+		(arti_worn_prop(obj, ARTP_FORCESIGHT)
+		|| (while_carried && arti_carry_prop(obj, ARTP_FORCESIGHT))));
 }
 
 boolean
@@ -1370,6 +1370,12 @@ long wp_mask;
 			break;
 		}//end switch
 	}//end for
+
+	/* things that aren't properties at all */
+
+	/* assumes there can only be one source of forcesight at once! */
+	if (arti_forcesight(otmp, wp_mask == W_ART))
+		forcesight = on;
 
 	if(wp_mask == W_ART && !on && oart->inv_prop) {
 	    /* might have to turn off invoked power too */
