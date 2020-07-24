@@ -568,8 +568,11 @@ boolean you_abilities;
 	if (mon_abilities && (can_breathe(youmonst.data) || Race_if(PM_HALF_DRAGON))){
 		add_ability('b', "Use your breath weapon", MATTK_BREATH);
 	}
+	if (mon_abilities && (Upolyd && can_breathe(youmonst.data) && Race_if(PM_HALF_DRAGON))){
+		add_ability('B', "Use your halfdragon breath weapon", MATTK_HBREATH);
+	}
 	if (mon_abilities && youracedata->mtyp == PM_TOVE){
-		add_ability('B', "Bore a hole", MATTK_BREATH);
+		add_ability('B', "Bore a hole", MATTK_HOLE);
 	}
 	if (mon_abilities && uclockwork){
 		add_ability('c', "Adjust your clockspeed", MATTK_CLOCK);
@@ -681,6 +684,7 @@ boolean you_abilities;
 
 	/* Monster (or monster-like) abilities */
 	case MATTK_BREATH: return dobreathe(youmonst.data);
+	case MATTK_HBREATH: return dobreathe(&mons[PM_HALF_DRAGON]);
 	case MATTK_DSCALE:{
 		int res = dobreathe(Dragon_shield_to_pm(uarms));
 		if(res){
@@ -5228,6 +5232,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"adjust", "adjust inventory letters", doorganize, IFBURIED, AUTOCOMPLETE},
 	{"annotate", "annotate current dungeon level", donamelevel, IFBURIED, AUTOCOMPLETE},
 	{"chat", "talk to someone", dotalk, IFBURIED, AUTOCOMPLETE},	/* converse? */
+	{"combo", "use an android combo based on your weapon", android_combo, !IFBURIED},
 	{"come", "order pets to come", docome, !IFBURIED, AUTOCOMPLETE},
 	{"conduct", "list which challenges you have adhered to", doconduct, IFBURIED, AUTOCOMPLETE},
 	{"dip", "dip an object into something", dodip, !IFBURIED, AUTOCOMPLETE},

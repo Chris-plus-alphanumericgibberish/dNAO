@@ -271,10 +271,7 @@ Cloak_on()
 	default: impossible(unknown_type, c_cloak, uarmc->otyp);
     }
     /* vampires get a charisma bonus when wearing an opera cloak */
-    const char* cloak_desc = OBJ_DESCR(objects[uarmc->otyp]);
-    if (cloak_desc != (char *)0 &&
-	!strcmp(cloak_desc, "opera cloak") &&
-	is_vampire(youracedata)) {
+	if (uarmc->otyp == find_opera_cloak() && is_vampire(youracedata)) {
 		You("%s very impressive in your %s.", Blind ||
 				(Invis && !See_invisible(u.ux, u.uy)) ? "feel" : "look",
 				OBJ_DESCR(objects[uarmc->otyp]));
@@ -340,11 +337,9 @@ Cloak_off()
 	default: impossible(unknown_type, c_cloak, otyp);
     }
     /* vampires get a charisma bonus when wearing an opera cloak */
-    const char* cloak_desc = OBJ_DESCR(objects[otyp]);
-    if (cloak_desc != (char *)0 &&
-	!strcmp(cloak_desc, "opera cloak") &&
-	!cancelled_don &&
-	is_vampire(youracedata)) {
+	if (otyp == find_opera_cloak() &&
+		!cancelled_don &&
+		is_vampire(youracedata)) {
 		ABON(A_CHA) -= 1;
 		flags.botl = 1;
     }
@@ -357,8 +352,6 @@ Helmet_on()
 {
 	boolean already_blind, blind_changed = FALSE;	/* blindness from wearing the helmet was set before this was called, we need a kludge*/
 	struct obj * otmp;
-	static int gcircletsa = 0;
-	if(!gcircletsa) gcircletsa = find_gcirclet();
     if (!uarmh) return 0;
     switch(uarmh->otyp) {
 	case FEDORA:
@@ -382,7 +375,7 @@ Helmet_on()
 	case HELM_OF_TELEPATHY:
 	case HELM_OF_DRAIN_RESISTANCE:
 	case HARMONIUM_HELM:
-		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, uarmh->spe);
+		if (uarmh->otyp == find_gcirclet()) adj_abon(uarmh, uarmh->spe);
 		break;
 	case HELM_OF_BRILLIANCE:
 		adj_abon(uarmh, uarmh->spe);
@@ -397,7 +390,7 @@ Helmet_on()
 		makeknown(uarmh->otyp);
 		break;
 	case HELM_OF_OPPOSITE_ALIGNMENT:
-		if(uarmh->otyp == gcircletsa) adj_abon(uarmh, uarmh->spe);
+		if (uarmh->otyp == find_gcirclet()) adj_abon(uarmh, uarmh->spe);
 		if (u.ualign.type == A_NEUTRAL)
 		    u.ualign.type = rn2(2) ? A_CHAOTIC : A_LAWFUL;
 		else if(u.ualign.type == A_VOID){
@@ -461,8 +454,6 @@ Helmet_off()
 {
 	boolean was_blind = Blind, blind_changed = FALSE;
 	struct obj * otmp = uarmh;
-	static int gcircletsa = 0;
-	if(!gcircletsa) gcircletsa = find_gcirclet();
 	
     takeoff_mask &= ~W_ARMH;
 
@@ -486,7 +477,7 @@ Helmet_off()
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
 	case HARMONIUM_HELM:
-		if(uarmh->otyp == gcircletsa && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
+		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    break;
 	case DUNCE_CAP:
 	    flags.botl = 1;
@@ -499,7 +490,7 @@ Helmet_off()
 	    break;
 	case HELM_OF_TELEPATHY:
 	    /* need to update ability before calling see_monsters() */
-		if(uarmh->otyp == gcircletsa && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
+		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    setworn((struct obj *)0, W_ARMH);
 	    see_monsters();
 	    return 0;
@@ -507,13 +498,13 @@ Helmet_off()
 	    if (!cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    break;
 	case HELM_OF_OPPOSITE_ALIGNMENT:
-		if(uarmh->otyp == gcircletsa && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
+		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    u.ualign.type = u.ualignbase[A_CURRENT];
 	    u.ublessed = 0; /* lose the other god's protection */
 	    flags.botl = 1;
 	    break;
 	case HELM_OF_DRAIN_RESISTANCE:
-		if(uarmh->otyp == gcircletsa && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
+		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    setworn((struct obj *)0, W_ARMH);
 	    return 0;
 	default: impossible(unknown_type, c_helmet, uarmh->otyp);
@@ -2030,9 +2021,7 @@ struct obj * otmp;
 	if (otmp->otyp == CLOAK_OF_PROTECTION)
 		def += 2;
 	// combat boots
-	static int cbootsd = 0;
-	if (!cbootsd) cbootsd = find_cboots();
-	if (otmp->otyp == cbootsd) def += 1;
+	if (otmp->otyp == find_cboots()) def += 1;
 
 	// add enchantment
 	if (otmp->spe)
@@ -2108,21 +2097,13 @@ struct obj * otmp;
 	if (otmp->otyp == CLOAK_OF_PROTECTION)
 		def += 2;
 	// padded gloves
-	static int pgloves = 0;
-	if (!pgloves) pgloves = find_pgloves();
-	if (otmp->otyp == pgloves) def += 1;
+	if (otmp->otyp == find_pgloves()) def += 1;
 	// gold circlet
-	static int girc = 0;
-	if (!girc) girc = find_gcirclet();
-	if (otmp->otyp == girc) def -= 1;
+	if (otmp->otyp == find_gcirclet()) def -= 1;
 	// visored helm
-	static int vhelm = 0;
-	if (!vhelm) vhelm = find_vhelm();
-	if (otmp->otyp == vhelm) def += 1;
+	if (otmp->otyp == find_vhelm()) def += 1;
 	// combat boots
-	static int cbootsd = 0;
-	if (!cbootsd) cbootsd = find_cboots();
-	if (otmp->otyp == cbootsd) def += 1;
+	if (otmp->otyp == find_cboots()) def += 1;
 
 
 	// add enchantment
@@ -2482,18 +2463,28 @@ find_dr()
 #endif /* OVL0 */
 #ifdef OVLB
 
+/* Calculates your DR for a slot 
+ * Does not randomize values >10 (must be done elsewhere)
+ * 
+ * Includes effectiveness vs magr (optional)
+ */
 int
 slot_udr(slot, magr)
 int slot;
 struct monst *magr;
 {
-	int udr;
-	int nat_udr;
+	/* DR addition: bas + sqrt(nat^2 + arm^2) */
+	int bas_udr; /* base DR:    magical-ish   */
+	int nat_udr; /* natural DR: (poly)form    */
+	int arm_udr; /* armor DR:   worn armor    */
+
+	bas_udr = base_udr();
+	nat_udr = base_nat_udr();
+	arm_udr = 0;
+
+	/* for use vs specific magr */
 	int agralign = 0;
 	int agrmoral = 0;
-	int armdr = 0;
-	int clkdr = 0;
-	
 	if(magr){
 		agralign = (magr == &youmonst) ? sgn(u.ualign.type) : sgn(magr->data->maligntyp);
 		
@@ -2510,141 +2501,81 @@ struct monst *magr;
 		}
 	}
 	
-	udr = base_udr();
-	nat_udr = base_nat_udr();
-	
-	if (uarmc){
-		clkdr += arm_dr_bonus(uarmc);
-		if(magr) clkdr += properties_dr(uarmc, agralign, agrmoral);
-	} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
-		clkdr += max( 1 + (uwep->spe+1)/2,0);
+	/* some slots may be unacceptable and must be replaced */
+	if (magr && magr->mtyp == PM_XAN)
+		slot = LEG_DR;
+	if (slot == HEAD_DR && !has_head_mon(&youmonst))
+		slot = UPPER_TORSO_DR;
+	if (slot == LEG_DR && !can_wear_boots(youracedata))
+		slot = LOWER_TORSO_DR;
+	if (slot == ARM_DR && !can_wear_gloves(youracedata))
+		slot = UPPER_TORSO_DR;
+
+	/* DR of worn armor */
+	struct obj * uarmor[] = { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu };
+	int i;
+	for (i = 0; i < SIZE(uarmor); i++) {
+		if (uarmor[i] && (objects[uarmor[i]->otyp].oc_dir & slot)) {
+			arm_udr += arm_dr_bonus(uarmor[i]);
+			if (magr) arm_udr += properties_dr(uarmor[i], agralign, agrmoral);
+		}
 	}
-	
-	if(uarmu && uarmu->otyp == BODYGLOVE){
-		armdr += arm_dr_bonus(uarmu);
-		if(magr) armdr += properties_dr(uarmu, agralign, agrmoral);
+	/* Tensa Zangetsu adds to worn armor */
+	if (uwep && uwep->oartifact == ART_TENSA_ZANGETSU) {
+		if (!uarmc && (slot & CLOAK_DR)) {
+			arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
+		}
+		if (!uarm && (slot & TORSO_DR)) {
+			arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
+		}
 	}
-	if(uarm && uarm->otyp == JUMPSUIT){
-		armdr += arm_dr_bonus(uarm);
-		if(magr) armdr += properties_dr(uarm, agralign, agrmoral);
+	/* Natural DR (overriden and ignored by base_nat_udr() for halfdragons) */
+	if (!Race_if(PM_HALF_DRAGON)) {
+		switch (slot)
+		{
+		case UPPER_TORSO_DR: nat_udr += youracedata->bdr; break;
+		case LOWER_TORSO_DR: nat_udr += youracedata->ldr; break;
+		case HEAD_DR:        nat_udr += youracedata->hdr; break;
+		case LEG_DR:         nat_udr += youracedata->fdr; break;
+		case ARM_DR:         nat_udr += youracedata->gdr; break;
+		}
 	}
-	
-	//Note: Bias this somehow?
-	if(magr && magr->mtyp == PM_XAN)
-		goto boot_hit;
-	switch(slot){
-		case UPPER_TORSO_DR:
-uppertorso:
-			//Note: upper body (shirt plus torso armor)
-			if(!Race_if(PM_HALF_DRAGON))
-				nat_udr += youracedata->bdr;
-			if (uarmu){
-				if(uarmu->otyp != BODYGLOVE){
-					armdr += arm_dr_bonus(uarmu);
-					if(magr) armdr += properties_dr(uarmu, agralign, agrmoral);
-				}
-			}
-			udr += (u.uvaul+3)/5;
-			//Note: SHOULD fall-through here to add the torso armor bonus
-		case LOWER_TORSO_DR:
-lowertorso:
-			//Note: lower body (torso armor only)
-			if (uarm){
-				if(uarm->otyp != JUMPSUIT){
-					armdr += arm_dr_bonus(uarm);
-					if(magr) armdr += properties_dr(uarm, agralign, agrmoral);
-				}
-			} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
-				armdr += max( 1 + (uwep->spe+1)/2,0);
-			}
-			//Lower body SPECIFIC modifiers
-			if (slot == LOWER_TORSO_DR){
-				if(!Race_if(PM_HALF_DRAGON))
-					nat_udr += youracedata->ldr;
-				if(uarmu && (uarmu->otyp == BLACK_DRESS || uarmu->otyp == VICTORIAN_UNDERWEAR)){
-					armdr += arm_dr_bonus(uarmu);
-					if(magr) armdr += properties_dr(uarmu, agralign, agrmoral);
-				}
-				udr += (u.uvaul+1)/5;
-			}
-			armdr += clkdr;
-		break;
-		case HEAD_DR:
-			if(!has_head_mon(&youmonst)){
-				slot = UPPER_TORSO_DR;
-				goto uppertorso;
-			}
-			if(!Race_if(PM_HALF_DRAGON))
-				nat_udr += youracedata->hdr;
-			if (uarmh){
-				armdr += arm_dr_bonus(uarmh);
-				if(magr) armdr += properties_dr(uarmh, agralign, agrmoral);
-			}
-			if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
-				udr += 3;
-			}
-			udr += (u.uvaul+4)/5;
-			armdr += clkdr;
-		break;
-		case LEG_DR:
-boot_hit:
-			if(!can_wear_boots(youracedata)){
-				slot = LOWER_TORSO_DR;
-				goto lowertorso;
-			}
-			if(!Race_if(PM_HALF_DRAGON))
-				nat_udr += youracedata->fdr;
-			if (uarmf){
-				armdr += arm_dr_bonus(uarmf);
-				if(magr) armdr += properties_dr(uarmf, agralign, agrmoral);
-			} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
-				armdr += max( 1 + (uwep->spe+1)/2,0);
-			}
-			udr += (u.uvaul)/5;
-			armdr += clkdr;
-		break;
-		case ARM_DR:
-			if(!can_wear_gloves(youracedata)){
-				slot = UPPER_TORSO_DR;
-				goto uppertorso;
-			}
-			if(!Race_if(PM_HALF_DRAGON))
-				nat_udr += youracedata->gdr;
-			if (uarmg){
-				armdr += arm_dr_bonus(uarmg);
-				if(magr) armdr += properties_dr(uarmg, agralign, agrmoral);
-			} else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
-				armdr += max( 1 + (uwep->spe+1)/2,0);
-			}
-			if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
-				udr += 3;
-			}
-			udr += (u.uvaul+2)/5;
-		break;
+	/* Wearing the Shard from Morgoth's Crown adds +3 magical DR to arms and head (in addition to its +3 to all slots) */
+	if (((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN))
+		&& (slot & (ARM_DR | HEAD_DR))) {
+		bas_udr += 3;
 	}
-	
-	
-	// if(u.ustdy && armdr>0){
-		// armdr -= u.ustdy;
-		// if(armdr<0)
-			// armdr = 0;
-	// }
-	
-	if(armdr && nat_udr){
-		/* Assumes that dr values can't be negative */
-		udr += (int)sqrt(nat_udr*nat_udr + armdr*armdr);
-	} else if(nat_udr){
-		udr += nat_udr;
-	} else {
-		udr += armdr;
+	/* Vaul is not randomized, and contributes to magical DR */
+	if (u.uvaul) {
+		int offset;
+		switch (slot)
+		{
+		case UPPER_TORSO_DR: offset = 3; break;
+		case LOWER_TORSO_DR: offset = 1; break;
+		case HEAD_DR:        offset = 4; break;
+		case LEG_DR:         offset = 0; break;
+		case ARM_DR:         offset = 2; break;
+		}
+		bas_udr += ((u.uvaul + offset) / 5);
 	}
+	/* Having the Deep Sea glyph increase magical DR by 3 */
+	if (active_glyph(DEEP_SEA))
+		bas_udr += 3;
+
+	/* Combine into total */
+	int total_dr = bas_udr;
+	if(arm_udr >= 0 && nat_udr >= 0) {
+		total_dr += (int)sqrt(nat_udr*nat_udr + arm_udr*arm_udr);
+	}
+	else {
+		total_dr += nat_udr + arm_udr;
+	}
+
+	/* cap at 127 (u.udr is an schar) */
+	if (total_dr > 127)
+		total_dr = 127;
 	
-	if(active_glyph(DEEP_SEA))
-		udr += 3;
-	
-	if (udr > 127) udr = 127;	/* u.uac is an schar */
-	
-	return udr;
+	return total_dr;
 }
 
 int
@@ -3666,9 +3597,6 @@ adj_abon(otmp, delta)
 register struct obj *otmp;
 register schar delta;
 {
-	static int gcircletsa = 0;
-	if(!gcircletsa) gcircletsa = find_gcirclet();
-	
 	if (uarmh && uarmh == otmp) {
 		if(otmp->otyp == HELM_OF_BRILLIANCE){
 			if (delta) {
@@ -3678,7 +3606,7 @@ register schar delta;
 				flags.botl = 1;
 			}
 		}
-		if(otmp->otyp == gcircletsa){
+		if (otmp->otyp == find_gcirclet()){
 			if (delta) {
 				ABON(A_CHA) += (delta);
 				flags.botl = 1;

@@ -506,7 +506,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 							Tobjnam(thrownobj, Blind ? "hit" : "fly"),
 							body_part(ARM));
 						/* object now hits you -- ouch! */
-						(void)hmon2point0(magr, magr, (struct attack *)0, (struct attack *)0, thrownobj, (void *)0, HMON_FIRED, 0, 0, TRUE, 0, FALSE, -1, &wepgone);
+						(void)hmon_general(magr, magr, (struct attack *)0, (struct attack *)0, thrownobj, (void *)0, HMON_FIRED, 0, 0, TRUE, 0, FALSE, -1, &wepgone);
 					}
 					/* end copy */
 				}
@@ -1195,7 +1195,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			exercise(A_DEX, TRUE);
 		/* call hmon to make the projectile hit */
 		/* hmon will do hitmsg */
-		result = hmon2point0(magr, mdef, &dummy, &dummy, thrownobj, vpointer, hmoncode, 0, 0, TRUE, dieroll, FALSE, vis, wepgone);
+		result = hmon_general(magr, mdef, &dummy, &dummy, thrownobj, vpointer, hmoncode, 0, 0, TRUE, dieroll, FALSE, vis, wepgone);
 
 		/* wake up defender */
 		wakeup2(mdef, youagr);

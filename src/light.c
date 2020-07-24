@@ -656,14 +656,20 @@ snuff_light_source(x, y)
 		*/
 		if (ls->type == LS_OBJECT && ls->x == x && ls->y == y) {
 			obj = (struct obj *) ls->id;
+
 			if (obj_is_burning(obj)) {
+				/* objects that shouldn't be snuffed, despite being in obj_is_burning */
+				if (obj->otyp == SUNROD)
+					continue;
+
+				/* snuff it */
 				end_burn(obj, obj->otyp != MAGIC_LAMP);
 			}
 		}
 	}
 }
 
-/* Return TRUE if object sheds any light or darkness at all. */
+/* Return TRUE if object is currently shedding any light or darkness. */
 boolean
 obj_sheds_light(obj)
 struct obj *obj;
@@ -675,7 +681,7 @@ struct obj *obj;
 		));
 }
 /* Return TRUE if object's light should in theory never go out */
-/* it is still temporarily extinguished when in a monster's stomach */
+/* it is still temporarily extinguished when in a monster's stomach or in a container, but should auto-ignite */
 boolean
 obj_eternal_light(obj)
 struct obj * obj;
@@ -688,6 +694,7 @@ struct obj * obj;
 }
 
 /* Return TRUE if sheds light AND will be snuffed by end_burn(). */
+/* These _usually_ may also be ended by snuff_light_source(), the overlap is close enough to not warrant a 2nd function */
 boolean
 obj_is_burning(obj)
     struct obj *obj;

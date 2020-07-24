@@ -316,9 +316,7 @@ found_ward:
 	pen->spe -= actualcost;
 
 	/* can't write if we don't know it - unless we're lucky */
-	if(new_obj->otyp == SPE_SECRETS || new_obj->otyp == SPE_LIGHTNING_BOLT || 
-		new_obj->otyp == SPE_POISON_SPRAY ||
-		new_obj->otyp == SPE_LIGHTNING_STORM ||
+	if(objects[new_obj->otyp].oc_nowish ||
 	  (!(objects[new_obj->otyp].oc_name_known) &&
 	   !(objects[new_obj->otyp].oc_uname) &&
 	   (rnl(100) >= (Role_if(PM_WIZARD) ? 33 : 7)))) {

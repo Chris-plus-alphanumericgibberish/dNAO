@@ -1022,9 +1022,7 @@ domove()
 		/* check slippery ice */
 		on_ice = !Levitation && !Flying && (is_ice(u.ux, u.uy) || mad_turn(MAD_COLD_NIGHT));
 		if (on_ice) {
-		    static int skates = 0;
-		    if (!skates) skates = find_skates();
-		    if ((uarmf && (uarmf->otyp == skates || uarmf->oartifact == ART_FROST_TREADS))
+			if ((uarmf && (uarmf->otyp == find_skates() || uarmf->oartifact == ART_FROST_TREADS))
 			    || resists_cold(&youmonst)
 			    || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			    || is_whirly(youracedata))
@@ -2671,9 +2669,7 @@ weight_cap()
 		/* note that carinc bonues can push you over the normal limit! */
 		if(!u.usteed && u.ucarinc > 0) carrcap += u.ucarinc;
 
-		static int hboots = 0;
-		if (!hboots) hboots = find_hboots();
-		if (boots && boots->otyp == hboots) carrcap += 100; 
+		if (boots && boots->otyp == find_hboots()) carrcap += 100;
 		
 		if (!Flying) {
 			if(EWounded_legs & LEFT_SIDE) carrcap -= 100;

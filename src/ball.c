@@ -595,9 +595,8 @@ drag:
 		You("are jerked back by the iron ball!");
 		if ((victim = m_at(uchain->ox, uchain->oy)) != 0) {
 			int dieroll = rnd(20);
-			boolean wepgone = FALSE;
 			if (tohitval((struct monst *)0, victim, (struct attack *)0, uball, (void *)0, HMON_FIRED, 0) >= dieroll)
-				(void)hmon2point0((struct monst *)0, victim, (struct attack *)0, (struct attack *)0, uball, (struct obj *)0, HMON_FIRED, 0, 0, TRUE, dieroll, FALSE, TRUE, &wepgone);
+				(void)hmon_with_unowned_obj(victim, uball, dieroll, 0);
 		    else
 				miss(xname(uball), victim);
 		}		/* now check again in case mon died */
@@ -681,15 +680,13 @@ xchar x, y;
 		break;
 	    case TT_BEARTRAP: {
 		register long side = rn2(3) ? LEFT_SIDE : RIGHT_SIDE;
-		static int jboots6 = 0;
-		if (!jboots6) jboots6 = find_jboots();
 		pline(pullmsg, "bear trap");
 #ifdef STEED
 		if(u.usteed) set_wounded_legs(side, rn1(1000, 500)); /*clunky as hell, but gets the job done! */
 		if (!u.usteed)
 #endif
 		{
-			if (uarmf && uarmf->otyp == jboots6){
+			if (uarmf && uarmf->otyp == find_jboots()){
 				int bootdamage = d(1,10);
 				losehp(2, "leg damage from being pulled out of a bear trap",
 						KILLED_BY);

@@ -353,34 +353,35 @@ struct you {
 	int umonnum;			/* current monster number */
 
 	int mh, mhmax, mhrolled, mtimedone;	/* for polymorph-self */
-#define MATTK_DSCALE 1
-#define MATTK_BREATH 2
-#define MATTK_SPIT 3
-#define MATTK_MAGIC 4
-#define MATTK_REMV 5
-#define MATTK_GAZE 6
-#define MATTK_SUMM 7
-#define MATTK_WEBS 8
-#define MATTK_HIDE 9
-#define MATTK_MIND 10
-#define MATTK_CLOCK 11
-#define MATTK_DARK 12
-#define MATTK_VAMP 13
-#define MATTK_REPL 14
-#define MATTK_UHORN 15
-#define MATTK_SHRIEK 16
-#define MATTK_SCREAM 17
-#define MATTK_HOLE 18
-#define MATTK_REACH 19
-#define MATTK_DROID 20
-#define MATTK_TNKR 21
-#define MATTK_U_SPELLS 22
-#define MATTK_U_SPIRITS 23
-#define MATTK_U_WORD 24
-#define MATTK_U_TURN_UNDEAD 25 /* MATTK_U_TURN would be amusing, but even more confusing */
-#define MATTK_U_STYLE 26
-#define MATTK_U_MONST 27
-#define MATTK_U_ELMENTAL 28
+#define MATTK_DSCALE         1
+#define MATTK_BREATH         2
+#define MATTK_HBREATH        3
+#define MATTK_SPIT           4
+#define MATTK_MAGIC          5
+#define MATTK_REMV           6
+#define MATTK_GAZE           7
+#define MATTK_SUMM           8
+#define MATTK_WEBS           9
+#define MATTK_HIDE          10
+#define MATTK_MIND          11
+#define MATTK_CLOCK         12
+#define MATTK_DARK          13
+#define MATTK_VAMP          14
+#define MATTK_REPL          15
+#define MATTK_UHORN         16
+#define MATTK_SHRIEK        17
+#define MATTK_SCREAM        18
+#define MATTK_HOLE          19
+#define MATTK_REACH         20
+#define MATTK_DROID         21
+#define MATTK_TNKR          22
+#define MATTK_U_SPELLS      23
+#define MATTK_U_SPIRITS     24
+#define MATTK_U_WORD        25
+#define MATTK_U_TURN_UNDEAD 26 /* MATTK_U_TURN would be amusing, but even more confusing */
+#define MATTK_U_STYLE       27
+#define MATTK_U_MONST       28
+#define MATTK_U_ELMENTAL    29
 
 	struct attribs	macurr,		/* for monster attribs */
 			mamax;		/* for monster attribs */
@@ -475,11 +476,6 @@ struct you {
 	schar	uacinc;			/* bonus AC (not spell/divine) */
 	schar	uac;
 	schar	udr;
-#define	UPPER_TORSO_DR	0
-#define	LOWER_TORSO_DR	1
-#define	HEAD_DR			2
-#define	LEG_DR			3
-#define	ARM_DR			4
 	uchar	uspellprot;		/* protection by SPE_PROTECTION */
 	uchar	udrunken;		/* drunkeness level (based on total number of potions of booze drunk) */
 	uchar	usptime;		/* #moves until uspellprot-- */

@@ -4389,6 +4389,13 @@ struct permonst _mons2[] = {
 	0 /*MM*/, MT_CARNIVORE /*MT*/,
 	0 /*MB*/, MG_INFRAVISIBLE /*MG*/,
 	0 /*MA*/,  MV_NORMAL /*MV*/, CLR_RED),
+	MON("Nameless Horror", S_UMBER,//"11"
+	LVL(10, 12, 0, 0, 0), (G_HELL|G_NOCORPSE|1),
+	A(NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
+	SIZ(25, 25, 0, MS_SILENT, MZ_TINY), 0, 0,
+	0 /*MM*/, MT_CARNIVORE /*MT*/,
+	0 /*MB*/, MG_INFRAVISIBLE /*MG*/,
+	0 /*MA*/, MV_NORMAL /*MV*/, HI_LORD),
 	
     MON("uvuudaum", S_UMBER,//26
 	LVL_NDR(19, 16, -20, 10, 80, 0), (G_NOHELL|G_NOCORPSE|1),

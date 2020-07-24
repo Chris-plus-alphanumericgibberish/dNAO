@@ -511,11 +511,6 @@ register struct obj *otmp;
 #endif /* OVL1 */
 #ifdef OVLB
 
-static const char dknowns[] = {
-		WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS,
-		GEM_CLASS, SPBOOK_CLASS, WEAPON_CLASS, TOOL_CLASS, 0
-};
-
 struct obj *
 mksobj(otyp, init, artif)
 int otyp;
@@ -535,7 +530,7 @@ boolean artif;
 	otmp->oclass = let;
 	otmp->otyp = otyp;
 	otmp->where = OBJ_FREE;
-	otmp->dknown = index(dknowns, let) ? 0 : 1;
+	otmp->dknown = 0;
 	otmp->corpsenm = 0; /* BUGFIX: Where does this get set? shouldn't it be given a default during initialization? */
 	otmp->objsize = MZ_MEDIUM;
 	otmp->bodytypeflag = MB_HUMANOID;
@@ -565,8 +560,7 @@ boolean artif;
 	if ((otmp->otyp >= ELVEN_SHIELD && otmp->otyp <= ORCISH_SHIELD) ||
 			otmp->otyp == SHIELD_OF_REFLECTION)
 		otmp->dknown = 0;
-	if (!objects[otmp->otyp].oc_uses_known && otmp->otyp!=POT_BLOOD)
-		otmp->known = 1;
+
 #ifdef INVISIBLE_OBJECTS
 	otmp->oinvis = !rn2(1250);
 #endif
@@ -2120,52 +2114,40 @@ int mat;
 	switch(objects[obj->otyp].oc_class){
 		case POTION_CLASS:
 			switch(mat){
-				case GOLD:{
-					static int goldpotion = 0; 
-					if(!goldpotion) goldpotion = find_golden_potion();
-					if(goldpotion > -1){
-						obj->otyp = goldpotion;
+				case GOLD:
+					if(find_golden_potion()) {
+						obj->otyp = find_golden_potion();
 					}
-				}break;
+					break;
 			}
 		break;
 		case SPBOOK_CLASS:
 			switch(mat){
-				case CLOTH:{
-					static int clothbook = 0; 
-					if(!clothbook) clothbook = find_cloth_book();
-					if(clothbook > -1){
-						obj->otyp = clothbook;
+				case CLOTH:
+					if (find_cloth_book()) {
+						obj->otyp = find_cloth_book();
 					}
-				}break;
-				case LEATHER:{
-					static int leatherbook = 0; 
-					if(!leatherbook) leatherbook = find_leather_book();
-					if(leatherbook > -1){
-						obj->otyp = leatherbook;
+					break;
+				case LEATHER:
+					if (find_leather_book()) {
+						obj->otyp = find_leather_book();
 					}
-				}break;
-				case COPPER:{
-					static int bronzebook = 0; 
-					if(!bronzebook) bronzebook = find_bronze_book();
-					if(bronzebook > -1){
-						obj->otyp = bronzebook;
+					break;
+				case COPPER:
+					if (find_bronze_book()) {
+						obj->otyp = find_bronze_book();
 					}
-				}break;
-				case SILVER:{
-					static int silverbook = 0; 
-					if(!silverbook) silverbook = find_silver_book();
-					if(silverbook > -1){
-						obj->otyp = silverbook;
+					break;
+				case SILVER:
+					if (find_silver_book()) {
+						obj->otyp = find_silver_book();
 					}
-				}break;
-				case GOLD:{
-					static int goldbook = 0; 
-					if(!goldbook) goldbook = find_gold_book();
-					if(goldbook > -1){
-						obj->otyp = goldbook;
+					break;
+				case GOLD:
+					if (find_gold_book()) {
+						obj->otyp = find_gold_book();
 					}
-				}break;
+					break;
 			}
 		break;
 		case WAND_CLASS:
