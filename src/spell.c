@@ -1512,6 +1512,7 @@ int atype;
 	case AD_ELEC:
 	case AD_DEAD:
 	case AD_DRLI:
+	case AD_STAR:
 		return P_ATTACK_SPELL;
 	case AD_DRST:
 	case AD_ACID:
