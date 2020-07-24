@@ -4242,6 +4242,7 @@ int dx, dy, range, flat;
 		lsx = sx; sx += dx;
 		lsy = sy; sy += dy;
 		if(isok(sx,sy) && (lev = &levl[sx][sy]) && lev->typ) {
+			
 			mon = m_at(sx, sy);
 			if(cansee(sx,sy)) {
 				/* reveal/unreveal invisible monsters before tmp_at() */
@@ -4263,7 +4264,14 @@ int dx, dy, range, flat;
 		/* Fireballs and Acid Splashes only damage when they explode */
 		if (!(olet == SPBOOK_CLASS && (adtyp == AD_FIRE || adtyp == AD_ACID)))
 			range += zap_over_floor(sx, sy, adtyp, olet, yours, &shopdamage);
-
+		
+		// if(!mon && sx == u.ux && sy == u.uy && range >= 0){
+			// mon = &youmonst;
+			// if (u.usteed && !rn2(3) && !(mon_reflects(u.usteed, (char *)0) && (olet != FOOD_CLASS))) {
+				// mon = u.usteed;
+			// }
+		// }
+		
 		if (mon) {
 			if (olet == SPBOOK_CLASS && (adtyp == AD_FIRE || adtyp == AD_ACID))
 				break;
@@ -4271,20 +4279,31 @@ int dx, dy, range, flat;
 #ifdef STEED
 			buzzmonst:
 #endif
-			if (zap_hit(mon, (olet == SPBOOK_CLASS) ? adtyp : 0, FALSE) || (olet == FOOD_CLASS)) {
-				if (mon_reflects(mon, (char *)0) && (olet != FOOD_CLASS)) {
+			if (zap_hit(mon, (olet == SPBOOK_CLASS) ? adtyp : 0, FALSE)  || (flags.drgn_brth && adtyp != AD_DISN)
+				|| adtyp == AD_GOLD
+				|| (adtyp == AD_SLEE && olet == FOOD_CLASS)
+			) {
+				range -= 2;
+				if (mon_reflects(mon, (char *)0) && (olet != FOOD_CLASS) && (
+						(!(flags.drgn_brth) && !(adtyp == AD_SLEE && olet == FOOD_CLASS)) || 
+						(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_STAFF_OF_TWELVE_MIRRORS) ||
+						(which_armor(mon, W_ARM) && (which_armor(mon, W_ARM)->otyp == SILVER_DRAGON_SCALE_MAIL || which_armor(mon, W_ARM)->otyp == SILVER_DRAGON_SCALES || which_armor(mon, W_ARM)->otyp == JUMPSUIT)) ||
+						(which_armor(mon, W_ARMS) && (which_armor(mon, W_ARMS)->otyp == SILVER_DRAGON_SCALE_SHIELD || which_armor(mon, W_ARMS)->oartifact == ART_ITLACHIAYAQUE)) ||
+						(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_DRAGONLANCE)
+					)
+				) {
 					if(cansee(mon->mx,mon->my)) {
 						hit(fltxt, mon, exclam(0));
 						shieldeff(mon->mx, mon->my);
 						(void) mon_reflects(mon, "But it reflects from %s %s!");
 					}
-					if(mon->mfaction != FRACTURED){
-						dx = -dx;
-						dy = -dy;
-					} else {
+					if(mon->mfaction == FRACTURED){
 						int i = rn2(8);
 						dx = dirx[i];
 						dy = diry[i];
+					} else {
+						dx = -dx;
+						dy = -dy;
 					}
 				} else {
 					boolean mon_could_move = mon->mcanmove;
@@ -4417,9 +4436,9 @@ int dx, dy, range, flat;
 				goto buzzmonst;
 			} else
 #endif
-			if (zap_hit(&youmonst, 0, FALSE) || ((flags.drgn_brth && adtyp != AD_DISN)
+			if (zap_hit(&youmonst, 0, FALSE) || (flags.drgn_brth && adtyp != AD_DISN)
 				|| adtyp == AD_GOLD
-				|| (adtyp == AD_SLEE && olet == FOOD_CLASS))
+				|| (adtyp == AD_SLEE && olet == FOOD_CLASS)
 			) {
 				range -= 2;
 				pline("%s hits you!", The(fltxt));
