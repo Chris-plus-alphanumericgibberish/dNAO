@@ -116,6 +116,7 @@
 #include "wintype.h"
 #include "decl.h"
 #include "timeout.h"
+#include "zap.h"
 
 NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 
