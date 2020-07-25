@@ -1065,11 +1065,8 @@ moveloop()
 			if(u.sealsActive&SEAL_FAFNIR && money_cnt(invent) == 0) unbind(SEAL_FAFNIR,TRUE);
 #endif
 			if(u.sealsActive&SEAL_JACK && (Is_astralevel(&u.uz) || Inhell)) unbind(SEAL_JACK,TRUE);
-			if(u.sealsActive&SEAL_ORTHOS && !(Darksight || Catsight || Extramission)
-				&&!(
-					(viz_array[u.uy][u.ux]&TEMP_LIT3 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)) || 
-					(levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_DRK3 && !(viz_array[u.uy][u.ux]&TEMP_LIT3)))
-				   )
+			if (u.sealsActive&SEAL_ORTHOS && !(Darksight || Catsight || Extramission)
+				&& (!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark()))
 			){
 				if(Elfsight){
 					if(++u.orthocounts>(5*3)) unbind(SEAL_ORTHOS,TRUE);
