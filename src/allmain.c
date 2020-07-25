@@ -1442,7 +1442,7 @@ karemade:
 						if(tries >= 0)
 							makemon(ford_montype(-1), x, y, MM_ADJACENTOK);
 					}
-				} else if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && u.uinsight > rn2(INSIGHT_RATE)){
+				} else if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && check_insight()){
 					int x, y;
 					for(x = 1; x < COLNO; x++)
 						for(y = 0; y < ROWNO; y++){
@@ -2836,19 +2836,28 @@ see_nearby_monsters()
 						&& !mtmp->mtame
 						&& canseemon(mtmp)
 						&& (!(mtmp->mappearance || mtmp->mundetected) || sensemon(mtmp))
-						&& !(mvitals[monsndx(mtmp->data)].seen)
 						){
-							mvitals[monsndx(mtmp->data)].seen = 1;
-							if(Role_if(PM_TOURIST)){
-								more_experienced(experience(mtmp,0),0);
-								newexplevel();
+							if(!(mvitals[monsndx(mtmp->data)].seen)){
+								mvitals[monsndx(mtmp->data)].seen = TRUE;
+								if(Role_if(PM_TOURIST)){
+									more_experienced(experience(mtmp,0),0);
+									newexplevel();
+								}
+								//May have already gained madness from an attack, but re-giving it is harmless
+								give_madness(mtmp);
 							}
-							give_madness(mtmp);
-							if(u.usanity > 0 && taxes_sanity(mtmp->data)){
-								change_usanity(u_sanity_loss(mtmp));
+							
+							//May have already lost sanity from seeing it from a distance, or wiped the memory with amnesia.
+							if(mvitals[monsndx(mtmp->data)].san_lost == 0 && taxes_sanity(mtmp->data)){
+								mvitals[monsndx(mtmp->data)].san_lost = u_sanity_loss(mtmp);
+								change_usanity(mvitals[monsndx(mtmp->data)].san_lost);
 							}
-							if(yields_insight(mtmp->data)){
-								change_uinsight(u_visible_insight(mtmp));
+							if(!mvitals[monsndx(mtmp->data)].vis_insight && yields_insight(mtmp->data)){
+								uchar insight;
+								mvitals[monsndx(mtmp->data)].vis_insight = TRUE;
+								insight = u_visible_insight(mtmp);
+								mvitals[monsndx(mtmp->data)].insight_gained += insight;
+								change_uinsight(insight);
 							}
 						}
 					}

@@ -529,7 +529,10 @@ E NEARDATA struct mvitals {
 	uchar	born;
 	uchar	died;
 	uchar	mvflags;
+	int	san_lost;
+	int	insight_gained;
 	Bitfield(seen,1);
+	Bitfield(vis_insight,1);
 	Bitfield(onekill,1);
 } mvitals[NUMMONS];
 

@@ -8060,10 +8060,10 @@ register int	mmflags;
 			undeadtemplate = FRACTURED;
 			unsethouse = TRUE;
 		}
-	} else if(randmonst && !undeadtemplate && can_undead_mon(mtmp) && u.uinsight > rn2(INSIGHT_RATE)){
+	} else if(randmonst && !undeadtemplate && can_undead_mon(mtmp) && check_insight()){
 		undeadtemplate = PSEUDONATURAL;
 		unsethouse = TRUE;
-	} else if(randmonst && !undeadtemplate && is_rat(mtmp->data) && u.uinsight > rn2(INSIGHT_RATE)){
+	} else if(randmonst && !undeadtemplate && is_rat(mtmp->data) && check_insight()){
 		undeadtemplate = CRANIUM_RAT;
 		unsethouse = TRUE;
 	} else if(randmonst && !undeadtemplate && can_undead_mon(mtmp) && !Is_rogue_level(&u.uz)){
@@ -8686,10 +8686,10 @@ register int	mmflags;
 //			pline("%d\n",mtmp->mhpmax);
 		break;
 	}
-	if(!templated(mtmp) && is_rat(mtmp->data) && u.uinsight > rn2(INSIGHT_RATE)){
+	if(!templated(mtmp) && is_rat(mtmp->data) && check_insight()){
 		set_template(mtmp, CRANIUM_RAT);
 	}
-	if(!templated(mtmp) && u.uinsight > rn2(INSIGHT_RATE)){
+	if(!templated(mtmp) && check_insight()){
 		set_template(mtmp, YITH);
 		mtmp->m_lev += 2;
 		mtmp->mhpmax += d(2,8);

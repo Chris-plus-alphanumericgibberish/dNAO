@@ -1278,10 +1278,19 @@ int delta;
 	u.uinsight += delta;
 	if(u.uinsight < 0)
 		u.uinsight = 0;
-	if(u.uinsight > INSIGHT_RATE/20)
-		u.uinsight = INSIGHT_RATE/20;
 	if(discover || wizard)
 		pline("= %d", u.uinsight);
+}
+
+boolean
+check_insight()
+{
+	int insight;
+	if(u.uinsight > INSIGHT_RATE/20)
+		insight = INSIGHT_RATE/20;
+	else insight = u.uinsight;
+	
+	return insight > rn2(INSIGHT_RATE);
 }
 
 void

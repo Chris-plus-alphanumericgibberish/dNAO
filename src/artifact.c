@@ -9954,7 +9954,7 @@ living_items()
 	//Animate objects in the dungeon
 	for (obj = fobj; obj; obj = nobj) {
 		nobj = obj->nobj;
-		if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe) && u.uinsight > rn2(INSIGHT_RATE*70)){
+		if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe) && !rn2(70) && check_insight()){
 		// if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe)){
 			mtmp = animate_statue(obj, obj->ox, obj->oy, ANIMATE_NORMAL, (int *) 0);
 			if(mtmp){

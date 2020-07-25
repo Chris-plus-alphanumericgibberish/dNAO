@@ -1516,6 +1516,34 @@ forget_levels(percent)
 	}
 }
 
+/* Forget % of insight gained and sanity lost from monsters. */
+void
+losesaninsight(percent)
+	int percent;
+{
+	int i, count = 0;
+	int indices[NUMMONS] = {0};
+	
+	for(i = 0; i < NUMMONS; i++){
+		if(mvitals[i].san_lost != 0 || mvitals[i].insight_gained != 0)
+			indices[count++] = i;
+	}
+	randomize(indices, count);
+
+	/* forget first % of randomized indices */
+	count = ((count * percent) + 50) / 100;
+	for (i = 0; i < count; i++) {
+		if(discover || wizard)
+			pline("Forgeting %s", mons[indices[i]].mname);
+		change_usanity(-1*mvitals[indices[i]].san_lost);
+	    mvitals[indices[i]].san_lost = 0;
+		change_uinsight(-1*mvitals[indices[i]].insight_gained);
+	    mvitals[indices[i]].insight_gained = 0;
+	    mvitals[indices[i]].vis_insight = FALSE;
+	    mvitals[indices[i]].onekill = FALSE;
+	}
+}
+
 /*
  * Forget some things (e.g. after reading a scroll of amnesia).  When called,
  * the following are always forgotten:
@@ -1552,22 +1580,7 @@ int howmuch;
 
 	if (howmuch) losespells(howmuch);
 	
-	if(howmuch){
-		if(u.usanity < 100){
-			int loss = 100 - u.usanity;
-			loss = loss*howmuch/100;
-			if(loss == 0) loss = 1;
-			
-			change_usanity(loss);
-		}
-		if(u.uinsight > 0){
-			int loss = u.uinsight;
-			loss = loss*howmuch/100;
-			if(loss == 0) loss = 1;
-			
-			change_uinsight(-1*loss);
-		}
-	}
+	if(howmuch) losesaninsight(howmuch);
 	/*
 	 * Make sure that what was seen is restored correctly.  To do this,
 	 * we need to go blind for an instant --- turn off the display,

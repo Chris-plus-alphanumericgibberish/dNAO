@@ -5677,9 +5677,11 @@ cleanup:
 	more_experienced(tmp, 0);
 	newexplevel();		/* will decide if you go up */
 	if(!mvitals[mndx].onekill){
-		mvitals[mndx].onekill = 1;
+		mvitals[mndx].onekill = TRUE;
 		if(yields_insight(mtmp->data)){
-			change_uinsight(u_insight_gain(mtmp));
+			uchar insight = u_insight_gain(mtmp);
+			mvitals[monsndx(mtmp->data)].insight_gained += insight;
+			change_uinsight(insight);
 			change_usanity(u_sanity_gain(mtmp));
 		}
 	}

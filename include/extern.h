@@ -173,6 +173,7 @@ E int NDECL(maxen);
 E double FDECL(conplus, (int));
 E void FDECL(change_usanity, (int));
 E void FDECL(change_uinsight, (int));
+E boolean NDECL(check_insight);
 E int FDECL(glyph_sanity, (long int));
 E int FDECL(glyph_insight, (long int));
 E int FDECL(active_glyph, (long int));
