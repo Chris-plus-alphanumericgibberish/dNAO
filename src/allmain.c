@@ -3269,58 +3269,36 @@ struct monst *magr;
 	struct permonst *pa;
 	
 	pa = youagr ? youracedata : magr->data;
-	
-#define	ROLE_BKGT	switch(rnd(4)){\
-	case 1:\
-		symbiote.aatyp = AT_TUCH;\
-	break;\
-	case 2:\
-		symbiote.aatyp = AT_BITE;\
-		symbiote.adtyp = AD_PHYS;\
-	break;\
-	case 3:\
-		symbiote.aatyp = AT_KICK;\
-		symbiote.adtyp = AD_PHYS;\
-	break;\
-	case 4:\
-		symbiote.aatyp = AT_BUTT;\
-		symbiote.adtyp = AD_PHYS;\
-	break;\
-	case 5:\
-		symbiote.aatyp = AT_GAZE;\
-		symbiote.adtyp = AD_STDY;\
-	break;\
-}
-	
+		
 	if(pa->mtyp == PM_SWIRLING_MIST){
+		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_WET;
 		symbiote.damn = 3;
 		symbiote.damd = 6;
-		ROLE_BKGT
 	} else if(pa->mtyp == PM_DUST_STORM){
+		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_BLND;
 		symbiote.damn = 3;
 		symbiote.damd = 8;
-		ROLE_BKGT
 	} else if(pa->mtyp == PM_ICE_STORM){
+		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_COLD;
 		symbiote.damn = 3;
 		symbiote.damd = 8;
-		ROLE_BKGT
 	} else if(pa->mtyp == PM_THUNDER_STORM){
+		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_ELEC;
 		symbiote.damn = 3;
 		symbiote.damd = 8;
-		ROLE_BKGT
 	} else if(pa->mtyp == PM_FIRE_STORM){
+		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_FIRE;
 		symbiote.damn = 3;
 		symbiote.damd = 10;
-		ROLE_BKGT
 	} else if(pa->mtyp == PM_MOUTH_OF_THE_GOAT){
+		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_EACD;
 		//uses default 4d4 damage dice
-		ROLE_BKGT
 	} else if(pa->mtyp == PM_BLESSED){
 		//mostly uses default 4d4 damage dice
 		switch(rnd(8)){
@@ -3344,7 +3322,32 @@ struct monst *magr;
 			break;
 		}
 	}
+	//roll the bkgt attacks here, since it doesn't pass through the main subout code.
+	if(symbiote.aatyp == AT_BKGT){
+		switch(rnd(4)){
+			case 1:
+				symbiote.aatyp = AT_TUCH;
+			break;
+			case 2:
+				symbiote.aatyp = AT_BITE;
+				symbiote.adtyp = AD_PHYS;
+			break;
+			case 3:
+				symbiote.aatyp = AT_KICK;
+				symbiote.adtyp = AD_PHYS;
+			break;
+			case 4:
+				symbiote.aatyp = AT_BUTT;
+				symbiote.adtyp = AD_PHYS;
+			break;
+			case 5:
+				symbiote.aatyp = AT_GAZE;
+				symbiote.adtyp = AD_STDY;
+			break;
+		}
+	}
 	
+	//Attack all surrounding foes
 	for(j=8;j>=1;j--){
 		if(youagr && u.ustuck && u.uswallow)
 			mdef = u.ustuck;
