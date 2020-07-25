@@ -1517,18 +1517,22 @@ register struct monst *mtmp;
 			(ttmp && ttmp->ttyp == MAGIC_PORTAL) ||
 		   /* ALI - artifact doors from slash'em */
 			(IS_DOOR(levl[mtmp->mx][mtmp->my].typ) && artifact_door(mtmp->mx, mtmp->my)) ||
-			(IS_ROCK(lev->typ) && lev->typ != SDOOR &&
-			(lev->wall_info & W_NONDIGGABLE) != 0) ||
-			(is_pool(mtmp->mx, mtmp->my, TRUE) || is_lava(mtmp->mx, mtmp->my)) ||
-			(lev->typ == DRAWBRIDGE_DOWN ||
-			   (is_drawbridge_wall(mtmp->mx, mtmp->my) >= 0)) ||
-			(boulder_at(mtmp->mx, mtmp->my)) ||
-			(IS_GRAVE(lev->typ)) ||
-			(lev->typ == DRAWBRIDGE_UP) ||
-			(IS_THRONE(lev->typ)) ||
-			(IS_ALTAR(lev->typ)) ||
-			(Is_airlevel(&u.uz))
-		)){
+			(boulder_at(mtmp->mx, mtmp->my))
+			)
+			&& (
+				levl[mtmp->mx][mtmp->my].typ == CORR ||
+				levl[mtmp->mx][mtmp->my].typ == DOOR ||
+				levl[mtmp->mx][mtmp->my].typ == ROOM ||
+				levl[mtmp->mx][mtmp->my].typ == ICE ||
+				levl[mtmp->mx][mtmp->my].typ == GRASS ||
+				levl[mtmp->mx][mtmp->my].typ == SOIL ||
+				levl[mtmp->mx][mtmp->my].typ == SAND ||
+				levl[mtmp->mx][mtmp->my].typ == PUDDLE ||
+				//Note: on levels other than air and lolth, clouds are assumed to be at ground level
+				(levl[mtmp->mx][mtmp->my].typ == CLOUD 
+					&& !Is_airlevel(&u.uz) && !Is_lolth_level(&u.uz))
+			)
+		){
 			typ = fillholetyp(mtmp->mx,mtmp->my);
 			if (canseemon(mtmp))
 				pline("%s gyres and gimbles into the %s.", Monnam(mtmp),surface(mtmp->mx,mtmp->my));
