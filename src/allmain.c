@@ -3270,35 +3270,59 @@ struct monst *magr;
 	
 	pa = youagr ? youracedata : magr->data;
 	
+#define	ROLE_BKGT	switch(rnd(4)){\
+	case 1:\
+		symbiote.aatyp = AT_TUCH;\
+	break;\
+	case 2:\
+		symbiote.aatyp = AT_BITE;\
+		symbiote.adtyp = AD_PHYS;\
+	break;\
+	case 3:\
+		symbiote.aatyp = AT_KICK;\
+		symbiote.adtyp = AD_PHYS;\
+	break;\
+	case 4:\
+		symbiote.aatyp = AT_BUTT;\
+		symbiote.adtyp = AD_PHYS;\
+	break;\
+	case 5:\
+		symbiote.aatyp = AT_GAZE;\
+		symbiote.adtyp = AD_STDY;\
+	break;\
+}
+	
 	if(pa->mtyp == PM_SWIRLING_MIST){
-		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_WET;
 		symbiote.damn = 3;
 		symbiote.damd = 6;
+		ROLE_BKGT
 	} else if(pa->mtyp == PM_DUST_STORM){
-		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_BLND;
 		symbiote.damn = 3;
 		symbiote.damd = 8;
+		ROLE_BKGT
 	} else if(pa->mtyp == PM_ICE_STORM){
-		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_COLD;
 		symbiote.damn = 3;
 		symbiote.damd = 8;
+		ROLE_BKGT
 	} else if(pa->mtyp == PM_THUNDER_STORM){
-		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_ELEC;
 		symbiote.damn = 3;
 		symbiote.damd = 8;
+		ROLE_BKGT
 	} else if(pa->mtyp == PM_FIRE_STORM){
-		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_FIRE;
 		symbiote.damn = 3;
 		symbiote.damd = 10;
+		ROLE_BKGT
 	} else if(pa->mtyp == PM_MOUTH_OF_THE_GOAT){
-		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_EACD;
+		//uses default 4d4 damage dice
+		ROLE_BKGT
 	} else if(pa->mtyp == PM_BLESSED){
+		//mostly uses default 4d4 damage dice
 		switch(rnd(8)){
 			default:
 			case 1:
@@ -3328,6 +3352,9 @@ struct monst *magr;
 			continue;
 		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
 		
+		if(u.ux == x(magr)+clockwisex[(i+j)%8] && u.uy == y(magr)+clockwisey[(i+j)%8])
+			mdef = &youmonst;
+		
 		if(!mdef)
 			continue;
 		
@@ -3340,17 +3367,23 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful)))
 			continue;
 
-		
-		if((touch_petrifies(mdef->data)
-		 || mdef->mtyp == PM_MEDUSA)
-		 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
-		) continue;
-		
-		if(mdef->mtyp == PM_PALE_NIGHT)
-			continue;
+		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
+			if((touch_petrifies(mdef->data)
+			 || mdef->mtyp == PM_MEDUSA)
+			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+			) continue;
+			
+			if(mdef->mtyp == PM_PALE_NIGHT)
+				continue;
+		}
 		
 		if(mdef && !mdef->mtame){
-			xmeleehity(magr, mdef, &symbiote, (struct obj *)0, -1, 0, FALSE);
+			if(symbiote.aatyp == AT_MAGC)
+				xcasty(magr, mdef, &symbiote, mdef->mx, mdef->my);
+			else if(symbiote.aatyp == AT_GAZE)
+				xgazey(magr, mdef, &symbiote, -1);
+			else
+				xmeleehity(magr, mdef, &symbiote, (struct obj *)0, -1, 0, FALSE);
 		}
 	}
 }
