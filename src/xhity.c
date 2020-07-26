@@ -14405,7 +14405,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 
 				if (!rn2(8) && !(result&(MM_AGR_DIED | MM_AGR_STOP)))
 				{
-					if (youdef) {
+					if (youagr) {
 						char buf[BUFSZ];
 						Sprintf(buf, "%s shadow", s_suffix(Monnam(mdef)));
 						poisoned(buf, A_STR, pd->mname, 30);
