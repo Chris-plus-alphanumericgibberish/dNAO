@@ -16,6 +16,8 @@ struct zapdata {
 	int damd;				/* size of dice */
 	int flat;				/* alternative to damn and damd -- flat damage to deal */
 
+	Bitfield(always_hits, 1);	/* cannot miss */
+	Bitfield(phase_armor, 1);	/* ignore defender's worn armor when rolling To-Hit vs AC*/
 	Bitfield(unreflectable, 2);	/* zap is harder/impossible to reflect */
 #define ZAP_REFL_ADVANCED		0x1
 #define ZAP_REFL_NEVER			0x2
@@ -26,7 +28,9 @@ struct zapdata {
 	Bitfield(explosive, 1);		/* causes a standard explosion at end of range */
 	Bitfield(splashing, 1);		/* causes a splash at end of range */
 	Bitfield(directly_hits, 1);	/* actually hits monsters. Usually TRUE, but often FALSE if explosive or splashing. */
-//	Bitfield(fat_zap, 1);		/* wide zap hits 3-wide. only the center part bounces, though*/
+	Bitfield(affects_floor, 1);	/* does zap-over-floor effects */
+	Bitfield(no_bounce, 1);		/* does not bounce off of walls */
+	Bitfield(no_hit_wall, 1);	/* stops just short of walls */
 };
 
 
