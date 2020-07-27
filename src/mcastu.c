@@ -2028,6 +2028,15 @@ int tary;
 			else {
 				dmg = 1;
 			}
+			/* extra message for the silver */
+			if (youdef && hates_silver(youracedata)) {
+				if (noncorporeal(youracedata)) {
+					pline("The silver stars sear you!");
+				}
+				else {
+					pline("The silver stars sear your %s!", body_part(BODY_FLESH));
+				}
+			}
 			return xdamagey(magr, mdef, attk, dmg);
 		}
 	}

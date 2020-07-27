@@ -26,7 +26,7 @@ STATIC_DCL void FDECL(polyuse, (struct obj*, int, int));
 STATIC_DCL void FDECL(create_polymon, (struct obj *, int));
 STATIC_DCL boolean FDECL(zap_updown, (struct obj *));
 STATIC_DCL boolean FDECL(zap_reflect, (struct monst *, struct zapdata *));
-STATIC_DCL int FDECL(zap_damage, (struct zapdata *, boolean));
+STATIC_DCL int FDECL(zapdamage, (struct monst *, struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zhit, (struct monst *, struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zhitm, (struct monst *,int,int,int,int,int,struct obj **));
 STATIC_DCL void FDECL(zhitu, (int,int,int,int,const char *,XCHAR_P,XCHAR_P));
@@ -3183,12 +3183,17 @@ register const char *str;
 register struct monst *mtmp;
 register const char *force;		/* usually either "." or "!" */
 {
-	if((!cansee(bhitpos.x,bhitpos.y) && !canspotmon(mtmp) &&
-	     !(u.uswallow && mtmp == u.ustuck))
-	   || !flags.verbose)
-	    pline("%s %s it.", The(str), vtense(str, "hit"));
-	else pline("%s %s %s%s", The(str), vtense(str, "hit"),
-		   mon_nam(mtmp), force);
+	if (mtmp == &youmonst) {
+		pline("%s %s you%s", The(str), vtense(str, "hit"), force);
+	}
+	else {
+		if ((!cansee(bhitpos.x, bhitpos.y) && !canspotmon(mtmp) &&
+			!(u.uswallow && mtmp == u.ustuck))
+			|| !flags.verbose)
+			pline("%s %s it.", The(str), vtense(str, "hit"));
+		else pline("%s %s %s%s", The(str), vtense(str, "hit"),
+			mon_nam(mtmp), force);
+	}
 }
 
 void
@@ -3448,10 +3453,13 @@ struct zapdata * zapdata;
 }
 
 int
-zapdamage(zapdata, youagr)
+zapdamage(magr, mdef, zapdata)
+struct monst * magr;
+struct monst * mdef;
 struct zapdata * zapdata;
-boolean youagr;
 {
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
 	int dmg;
 	/* calculate damage */
 	if (zapdata->flat) {
@@ -3466,10 +3474,48 @@ boolean youagr;
 	}
 
 	/* damage bonuses */
-	if (youagr && zapdata->ztyp == ZAP_SPELL) {
-		if (u.ukrau_duration)
+	if (zapdata->ztyp == ZAP_SPELL) {
+		if (youagr)
+			dmg += spell_damage_bonus();
+		if (youagr && u.ukrau_duration)
 			dmg *= 1.5;
-		dmg += spell_damage_bonus();
+		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)) {
+			dmg *= 2;
+		}
+	}
+	/* general resistance */
+	if (mdef && Half_spel(mdef))
+		dmg /= 2;
+
+	/* monsters can save for half damage */
+	if (!youdef) {
+		if (resist(mdef, (zapdata->ztyp == ZAP_WAND) ? WAND_CLASS : '\0', 0, NOTELL)
+			)
+			dmg /= 2;
+	}
+
+	/* madness damage reductions */
+	if (youagr) {
+		if (mdef->female && humanoid_torso(mdef->data) && roll_madness(MAD_SANCTITY)){
+			dmg /= 4;
+		}
+		if (roll_madness(MAD_ARGENT_SHEEN)){
+			dmg /= 6;
+		}
+		if ((is_spider(mdef->data)
+			|| mdef->mtyp == PM_SPROW
+			|| mdef->mtyp == PM_DRIDER
+			|| mdef->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
+			|| mdef->mtyp == PM_AVATAR_OF_LOLTH
+			) && roll_madness(MAD_ARACHNOPHOBIA)){
+			dmg /= 4;
+		}
+		if (mdef->female && humanoid_upperbody(mdef->data) && roll_madness(MAD_ARACHNOPHOBIA)){
+			dmg /= 2;
+		}
+		if (is_aquatic(mdef->data) && roll_madness(MAD_THALASSOPHOBIA)){
+			dmg /= 10;
+		}
 	}
 	return dmg;
 }
@@ -3511,7 +3557,7 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 
 	/* intercept player zapping their swallower; RETURN EARLY */
 	if (youagr && u.uswallow) {
-		dmg = zhit(magr, u.ustuck, zapdata);
+		zhit(magr, u.ustuck, zapdata);
 		if (!u.ustuck)
 			u.uswallow = 0;
 		return;
@@ -3794,10 +3840,10 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 	/* some zaps have effects at their end */
 	/* TODO: get colours from zapdata */
 	if (zapdata->explosive) {
-		explode(sx, sy, zapdata->adtyp, 0, zapdamage(zapdata, youagr), EXPL_FIERY, 1 + !!(youagr &&Double_spell_size));
+		explode(sx, sy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), EXPL_FIERY, 1 + !!(youagr &&Double_spell_size));
 	}
 	if (zapdata->splashing) {
-		splash(sx, sy, dx, dy, zapdata->adtyp, 0, zapdamage(zapdata, youagr), EXPL_NOXIOUS);
+		splash(sx, sy, dx, dy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), EXPL_NOXIOUS);
 	}
 
 	/* calculate shop damage */
@@ -3812,7 +3858,8 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 }
 
 
-/* PRINTS MESSAGES AND DOES Z HIT EFFECTS */
+/* prints messages and does all zap-hit effects */
+/* CAN MODIFY ZAPDATA */
 int
 zhit(magr, mdef, zapdata)
 struct monst * magr;
@@ -3822,7 +3869,22 @@ struct zapdata * zapdata;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	boolean sho_shieldeff = FALSE;
-	int dmg = zapdamage(zapdata, youagr);
+	struct attack attk = { AT_NONE, zapdata->adtyp, 0, 0 };
+	int dmg = zapdamage(magr, mdef, zapdata);
+	int svddmg = dmg;	/* saved damage for golemeffects() */
+
+	struct obj * otmp;
+	char buf[BUFSZ];
+	boolean havemsg = FALSE;
+	boolean doshieldeff = FALSE;
+	const char * fltxt = flash_type(zapdata->adtyp, zapdata->ztyp);
+
+	/* macros to help put messages in the right place  */
+#define addmsg(...) do{if(!havemsg){Sprintf(buf, __VA_ARGS__);havemsg=TRUE;}else{Strcat(buf, " "); Sprintf(eos(buf), __VA_ARGS__);}}while(0)
+#define domsg() do{if((youagr || youdef || canseemon(mdef)) && dmg<*hp(mdef))\
+	hit(fltxt, mdef, exclam(dmg)); \
+	if(doshieldeff) shieldeff(bhitpos.x, bhitpos.y);\
+	if(havemsg) pline1(buf);}while(0)
 
 	/* do effects of zap */
 	switch (zapdata->adtyp) {
@@ -3830,13 +3892,464 @@ struct zapdata * zapdata;
 		/* check resist */
 		if (Magic_res(mdef)) {
 			dmg = 0;
-			sho_shieldeff = TRUE;
+			doshieldeff = TRUE;
 			if (youdef)
-				pline_The("missiles bounce off!");
-			break;
+				addmsg("The missiles bouce off!");
+		}
+		domsg();
+		if (youdef && dmg > 0)
+			exercise(A_STR, FALSE);
+		/* deal damage */
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_FIRE:
+		/* check resist / weakness */
+		if (Fire_res(mdef)) {
+			doshieldeff = TRUE;
+			if (youdef)
+				addmsg("You don't feel hot!");
+			dmg = 0;
+		}
+		else if (Cold_res(mdef)) {
+			dmg *= 1.5;
+		}
+		domsg();
+		golemeffects(mdef, AD_FIRE, svddmg);
+		/* damage inventory */
+		if (!InvFire_res(mdef)) {
+			burnarmor(mdef);
+			if (!rn2(3)) (void)destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			if (!rn2(3)) (void)destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+			if (!rn2(5)) (void)destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+		}
+		/* other */
+		if (youdef) {
+			burn_away_slime();
+			melt_frozen_air();
 		}
 		/* deal damage */
-		break;
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_COLD:
+		/* check resist / weakness */
+		if (Cold_res(mdef)) {
+			doshieldeff = TRUE;
+			if (youdef)
+				addmsg("You don't feel cold!");
+			dmg = 0;
+		}
+		else if (Fire_res(mdef)) {
+			dmg *= 1.5;
+		}
+		domsg();
+		golemeffects(mdef, AD_COLD, svddmg);
+		/* damage inventory */
+		if (!InvCold_res(mdef)) {
+			burnarmor(mdef);
+			if (!rn2(3)) (void)destroy_item(mdef, POTION_CLASS, AD_COLD);
+		}
+		/* other */
+		if (youdef) {
+			roll_frigophobia();
+		}
+		/* deal damage */
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_ELEC:
+		/* check resist */
+		if (Shock_res(mdef)) {
+			doshieldeff = TRUE;
+			if (youdef)
+				addmsg("You aren't shocked!");
+			dmg = 0;
+		}
+		domsg();
+		golemeffects(mdef, AD_ELEC, svddmg);
+		/* damage inventory */
+		if (!InvShock_res(mdef)) {
+			if (!rn2(3)) (void)destroy_item(mdef, WAND_CLASS, AD_ELEC);
+		}
+		/* deal damage */
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_ACID:
+		/* check resist */
+		if (Acid_res(mdef)) {
+			doshieldeff = TRUE;
+			if (youdef)
+				addmsg("You seem unaffected.");
+			dmg = 0;
+		}
+		/* extra effects vs player */
+		if (youdef && dmg > 0) {
+			addmsg("The acid burns!");
+			exercise(A_STR, FALSE);
+		}
+		domsg();
+		/* damage inventory */
+		if (!InvAcid_res(mdef)) {
+			if (!rn2(6)) (void)destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			if (!rn2(6)) erode_obj(youdef ? uwep : MON_WEP(mdef), TRUE, TRUE);
+			if (!rn2(6)) erode_armor(mdef, TRUE);
+		}
+		/* deal damage */
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_DRST:
+		if (zapdata->ztyp == ZAP_SPELL) {
+			/* the lethal "poison spray" spell */
+			if (Poison_res(mdef)) {
+				doshieldeff = TRUE;
+				if (youdef)
+					addmsg("The poison doesn't seem to affect you.");
+				dmg = 0;
+			}
+			else {
+				dmg = *hp(mdef) + 1;
+				if (youdef) {
+					domsg();
+					pline_The("poison was deadly...");
+					done(POISONING);
+					return MM_DEF_LSVD;
+				}
+			}
+			domsg();
+			return xdamagey(magr, mdef, &attk, dmg);
+		}
+		else {
+			/* other poison rays */
+			if (youdef) {
+				if (Poison_res(mdef)) dmg = 0; else dmg = 4;
+				domsg();	/* gotta call before poisoned() */
+				/* poisoned() deals the damage and checks resistance */
+				poisoned("blast", A_DEX, "poisoned blast", 15);
+			}
+			else {
+				if (Poison_res(mdef)) {
+					doshieldeff = TRUE;
+					dmg = 0;
+				}
+				domsg();	/* call after maybe reducing dmg to 0 */
+			}
+		}
+		/* deal damage */
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_SLEE:
+		dmg = zapdata->flat ? zapdata->flat : d(zapdata->damn, 25);
+		/* asymmetric */
+		if (youdef) {
+			if (Sleep_res(mdef)) {
+				doshieldeff = TRUE;
+				dmg = 0;
+				addmsg("don't feel sleepy.");
+			}
+			domsg();
+			if (dmg>0) {
+				fall_asleep(-dmg, TRUE); /* sleep ray */
+			}
+		}
+		else {
+			domsg();
+			(void)sleep_monst(mdef, dmg, zapdata->ztyp == ZAP_WAND ? WAND_CLASS : '\0');
+		}
+		/* rayguns are stunrays */
+		if (zapdata->ztyp == ZAP_RAYGUN) {
+			if (youdef) {
+				make_stunned(HStun + dmg, TRUE);
+			}
+			else {
+				mdef->mconf = TRUE;
+				mdef->mstun = TRUE;
+			}
+		}
+		/* dragons' sleep gas is hallucinogenic */
+		if (magr && is_true_dragon(magr->data)) {
+			if (youdef) {
+				make_hallucinated(HHallucination + dmg, TRUE, 0L);
+			}
+			else {
+				mdef->mconf = TRUE;
+			}
+		}
+
+		/* deal no damage */
+		return xdamagey(magr, mdef, &attk, 0);
+
+	case AD_DRLI:
+		/* check resist */
+		if (Drain_res(mdef)) {
+			doshieldeff = TRUE;
+			if (youdef)
+				addmsg("You aren't affected.");
+			dmg = 0;
+		}
+		domsg();
+
+		if(dmg > 0){
+			/* drain levels */
+			if (youdef) {
+				losexp("life force drain", TRUE, FALSE, FALSE);
+				dmg = 0;
+			}
+			else {
+				dmg = d(2, 6);
+				if (canseemon(mdef))
+					pline("%s suddenly seems weaker!", Monnam(mdef));
+				mdef->mhpmax -= dmg;
+				if (mdef->m_lev == 0)
+					dmg = mdef->mhp;
+				else
+					mdef->m_lev--;
+				/* Automatic kill if drained past level 0 */
+			}
+		}
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_STAR:
+		domsg();
+		/* special antimagic effect */
+		if (youdef)
+			drain_en(dmg / 2);
+		else
+			mdef->mspec_used += dmg / 2;
+		/* approximate as dmn/3 silver stars */
+		if (Half_phys(mdef))
+			dmg = (dmg + 1) / 2;
+		if (youdef && u.uvaul_duration)
+			dmg = (dmg + 1) / 2;
+
+		if (dmg > 0) {
+			int i;
+			/* reduce by DR */
+			for (i = zapdata->damn / 3; i > 0; i--) {
+				dmg -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+			}
+			/* deals silver-hating damage */
+			if (hates_silver((youdef ? youracedata : mdef->data))) {
+				for (i = zapdata->damn / 3; i > 0; i--) {
+					dmg += rnd(20);
+				}
+			}
+		}
+		else {
+			dmg = 1;
+		}
+		/* extra message for the silver */
+		if (youdef && hates_silver(youracedata)) {
+			if (noncorporeal(youracedata)) {
+				pline("The silver stars sear you!");
+			}
+			else {
+				pline("The silver stars sear your %s!", body_part(BODY_FLESH));
+			}
+		}
+
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_DEAD:
+		/* some creatures have special interactions with death beams */
+		if (is_metroid(mdef->data)) {
+			dmg = 0;
+			domsg();	/* bud_metroid() prints messages */
+			if (!youdef)
+				bud_metroid(mdef);
+			else {
+				You("are irradiated with pure energy!");
+				healup(d(3, 10), 0, FALSE, FALSE);
+			}
+			zapdata->single_target = TRUE; /* absorbs the beam */
+		}
+		else if (!youdef && is_delouseable(mdef->data)){
+			dmg = 0;
+			domsg();
+			if (canseemon(mdef))
+				pline("The parasite is killed!");
+			delouse(mdef, AD_DEAD);
+		}
+		else if (mdef->mtyp == PM_DEATH) {
+			dmg = 0;
+			domsg();
+			if (canseemon(mdef)) {
+				pline("%s absorbs the deadly %s!", Monnam(mdef),
+					zapdata->ztyp == ZAP_BREATH ? "blast" : "ray");
+				pline("It seems even stronger than before.");
+			}
+			mdef->mhpmax += mdef->mhpmax / 2;
+			if (mdef->mhpmax >= MAGIC_COOKIE)
+				mdef->mhpmax = MAGIC_COOKIE - 1;
+			mdef->mhp = mdef->mhpmax;
+			zapdata->single_target = TRUE; /* absorbs the beam */
+		}
+		/* standard creatures */
+		else {
+			if (resists_death(mdef) || (youdef && u.sealsActive&SEAL_OSE)) {
+				doshieldeff = TRUE;
+				if (youdef)
+					addmsg("don't seem affected.");
+				dmg = 0;
+			}
+			else if (Magic_res(mdef)) {
+				doshieldeff = TRUE;
+				if (youdef)
+					addmsg("aren't affected.");
+				dmg = 0;
+			}
+			else {
+				dmg = *hp(mdef) + 1;
+			}
+			domsg();
+			if (dmg > 0) {
+				if (youdef) {
+					killer_format = KILLED_BY_AN;
+					killer = flash_type(zapdata->adtyp, zapdata->ztyp);
+					u.ugrave_arise = -3;
+					done(DIED);
+					return MM_DEF_LSVD; /* or, lifesaved */
+				}
+			}
+		}
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_DISN:
+		if (Disint_res(mdef)) {
+			doshieldeff = TRUE;
+			if (youdef)
+				addmsg("are not disintegrated.");
+			dmg = 0;
+		}
+		else if (is_rider(mdef->data)) {
+			/* minor bug: armor doesn't protect them from disintegrating (and then reintegrating) */
+			if (canseemon(mdef)) {
+				addmsg("%s disintegrates.", Monnam(mdef));
+				addmsg("%s body reintegrates before your %s!",
+					s_suffix(Monnam(mdef)),
+					(eyecount(youracedata) == 1) ?
+					body_part(EYE) : makeplural(body_part(EYE)));
+				addmsg("%s resurrects!", Monnam(mdef));
+			}
+			mdef->mhp = mdef->mhpmax;
+			dmg = 0;
+		}
+		else {
+			dmg = *hp(mdef) + 1;
+		}
+		domsg();
+
+		if (dmg > 0)
+		{
+			if (/* armor must be in order of disintegration */
+				(otmp = youdef ? uarms : which_armor(mdef, W_ARMS)) ||
+				(otmp = youdef ? uarmc : which_armor(mdef, W_ARMC)) ||
+				(otmp = youdef ? uarm : which_armor(mdef, W_ARM)) ||
+				((otmp = youdef ? uarmu : which_armor(mdef, W_ARMU)) && objects[otmp->otyp].a_can > 0)
+				) {
+				/* armor protects */
+				int i;
+				for (i = min(1, dmg / 10); i > 0; i++) {
+
+					/* player */
+					if (otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
+						damage_item(otmp);
+						if (i == 1) {
+							if (youdef)
+								Your("%s damaged by the beam.", aobjnam(otmp, "seem"));
+							else if (canseemon(mdef))
+								pline("%s %s is damaged!", s_suffix(Monnam(mdef)), distant_name(otmp, xname));
+						}
+					}
+					else {
+						if (youdef) {
+							(void)destroy_arm(otmp);
+						}
+						else {
+							if (canseemon(mdef))
+								pline("%s %s is disintegrated!", s_suffix(Monnam(mdef)), distant_name(otmp, xname));
+							m_useup(mdef, otmp);
+						}
+						i = 0;
+					}
+				}
+			}/*armor*/
+			else {
+
+				if (youdef) {
+					/* you are dead */
+					killer_format = KILLED_BY_AN;
+					killer = flash_type(zapdata->adtyp, zapdata->ztyp);
+					/* when killed by disintegration breath, don't leave corpse */
+					u.ugrave_arise = NON_PM;
+					done(DISINTEGRATED);
+					return MM_DEF_LSVD; /* or, lifesaved */
+				}
+				else {
+					/* monster's inventory gets hit by the disint too */
+					struct obj *otmp2, *m_lsvd = mlifesaver(mdef);
+
+					if (canseemon(mdef)) {
+						if (!m_lsvd)
+							pline("%s is disintegrated!", Monnam(mdef));
+					}
+#ifndef GOLDOBJ
+					mdef->mgold = 0L;
+#endif
+					/* note: worn amulet of life saving must be preserved in order to operate */
+#define oresist_disintegration(obj) \
+	(item_has_property(obj, DISINT_RES) || \
+	obj_resists(obj, 5, 50) || is_quest_artifact(obj) || \
+	obj == m_lsvd)
+					for (otmp = mdef->minvent; otmp; otmp = otmp2) {
+						otmp2 = otmp->nobj;
+						if (!oresist_disintegration(otmp)) {
+							obj_extract_self(otmp);
+							obfree(otmp, (struct obj *)0);
+						}
+					}
+#undef oresist_disintegration
+					return xdamagey(magr, mdef, &attk, *hp(mdef) + 1);
+				}
+			}/*!armor*/
+		}/*!resisted*/
+
+		return xdamagey(magr, mdef, &attk, 0);
+
+	case AD_GOLD:
+		domsg();
+		if (/* armor must be in order of gilding */
+			((otmp = youdef ? uarms : which_armor(mdef, W_ARMS)) && otmp->obj_material != GOLD) ||
+			((otmp = youdef ? uarmc : which_armor(mdef, W_ARMC)) && otmp->obj_material != GOLD) ||
+			((otmp = youdef ? uarm  : which_armor(mdef, W_ARM )) && otmp->obj_material != GOLD) ||
+			((otmp = youdef ? uarmu : which_armor(mdef, W_ARMU)) && otmp->obj_material != GOLD && objects[otmp->otyp].a_can > 0)
+			) {
+			set_material(otmp, GOLD);
+		}
+		else {
+			/* gild 10% of inventory */
+			struct obj *itemp, *inext;
+			for (itemp = (youdef ? invent : mdef->minvent); itemp; itemp = inext){
+				inext = itemp->nobj;
+				if (!rn2(10)) set_material(itemp, GOLD);
+			}
+
+			/* player */
+			if (youdef && !Golded && !(Stone_resistance && youracedata->mtyp != PM_STONE_GOLEM)
+				&& !is_gold(youracedata)
+				&& !(poly_when_golded(youracedata) && polymon(PM_GOLD_GOLEM))
+				) {
+				Golded = 9;
+				delayed_killer = "the breath of Mammon";
+				killer_format = KILLED_BY;
+				/* continue on to deal damage */
+			}
+			/* monster */
+			if (!youdef && !resists_ston(mdef) && !is_gold(mdef->data)) {
+				minstagoldify(mdef, youagr);
+				return !DEADMONSTER(mdef) ? MM_DEF_LSVD : MM_DEF_DIED; /* dead (or maybe lifesaved) */
+			}
+		}
+
+		return xdamagey(magr, mdef, &attk, dmg);
+
 	default:
 		impossible("unhandled zap damage type %d", zapdata->adtyp);
 		break;

@@ -1160,34 +1160,7 @@ boolean
 arti_reflects(obj)
 struct obj *obj;
 {
-	int i;
-	int proplist[LAST_PROP];
-
-	/* first check normal item properties */
-	i = 0;
-	get_item_property_list(proplist, obj, obj->otyp);
-	while (proplist[i]) {
-		if (proplist[i] == REFLECTING)
-			return TRUE;
-		i++;
-	}
-	/* then while-worn artifact properties */
-	i = 0;
-	get_art_property_list(proplist, obj->oartifact, FALSE);
-	while (proplist[i]) {
-		if (proplist[i] == REFLECTING)
-			return TRUE;
-		i++;
-	}
-	/* then while-carried artifact properties */
-	i = 0;
-	get_art_property_list(proplist, obj->oartifact, TRUE);
-	while (proplist[i]) {
-		if (proplist[i] == REFLECTING)
-			return TRUE;
-		i++;
-	}
-    return FALSE;
+	return item_has_property(obj, REFLECTING);
 }
 
 #endif /* OVL0 */
