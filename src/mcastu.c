@@ -2098,9 +2098,11 @@ int tary;
 					}
 				}
 			}
-			/* interrupt player if zap will hit */
-			if (youdef && foundem)
-				nomul(0, NULL);
+			/* modify zap for some spells */
+			if (adtyp == AD_STAR) {
+				zapdata.unreflectable = ZAP_REFL_NEVER;
+				zapdata.damd = 8;
+			}
 
 			/* do the zap */
 			zap(magr, x(magr), y(magr), sgn(tarx - x(magr)), sgn(tary - y(magr)), rn1(7, 7), &zapdata);
