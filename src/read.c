@@ -2635,10 +2635,10 @@ struct obj	*sobj;
 	if(In_endgame(&u.uz)){
 		if(Is_astralevel(&u.uz)) pline("This place is already pretty consecrated.");
 		else pline("It would seem base matter alone cannot be consecrated.");
-	break;
+		goto returnscroll;
 	} else if(Is_sanctum(&u.uz)){
 		pline("This place is much too unholy for the scroll to work.");
-	break;
+		goto returnscroll;
 	} else {
 		aligntyp whichgod;
 		if(sobj->cursed || In_hell(&u.uz)){
@@ -2653,7 +2653,13 @@ struct obj	*sobj;
 			pline("%s altar appears in front of you!", An(align_str(whichgod)));
 			newsym(u.ux, u.uy);
 		}
-		else angrygods(Align2gangr(whichgod));
+		else {
+			pline1(nothing_happens);
+			/* this is a fairly unique scroll; don't waste it */
+		returnscroll:
+			pline("The scroll reappears in your pack!");
+			sobj->quan++;	/* don't let useup get it */
+		}
 	}break;
 	case SCR_GOLD_SCROLL_OF_LAW: {
 		register struct monst *mtmp;
