@@ -3066,6 +3066,8 @@ register struct	obj	*obj;
 	    zapnodir(obj);
 
 	} else {
+		struct zapdata zapdat = { 0 };
+		int range = rn1(7, 7);
 	    /* neither immediate nor directionless */
 
 		if(u.sealsActive&SEAL_BUER && (otyp == SPE_FINGER_OF_DEATH || otyp == WAN_DEATH ))
@@ -3074,14 +3076,37 @@ register struct	obj	*obj;
 	    if (otyp == WAN_DIGGING || otyp == SPE_DIG)
 			zap_dig(-1,-1,-1);//-1-1-1 = "use defaults"
 	    else if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_ACID_SPLASH){
-			buzz(spell_adtype(otyp), SPBOOK_CLASS, TRUE,
-				 u.ulevel / 2 + 1,
-				 u.ux, u.uy, u.dx, u.dy,0,0);
+			basiczap(&zapdat, spell_adtype(otyp), ZAP_SPELL, u.ulevel / 2 + 1);
+			/* some spells are special */
+			switch (otyp) {
+			case SPE_MAGIC_MISSILE:
+				zapdat.single_target = TRUE;
+				break;
+			case SPE_FIREBALL:
+				zapdat.explosive = TRUE;
+				zapdat.single_target = TRUE;
+				zapdat.directly_hits = FALSE;
+				zapdat.affects_floor = FALSE;
+				zapdat.no_hit_wall = TRUE;
+				break;
+			case SPE_ACID_SPLASH:
+				range = 1;
+				zapdat.splashing = TRUE;
+				zapdat.unreflectable = ZAP_REFL_NEVER;
+				zapdat.directly_hits = FALSE;
+				zapdat.affects_floor = FALSE;
+				zapdat.no_bounce = TRUE;
+				break;
+			case SPE_POISON_SPRAY:
+				zapdat.no_bounce = TRUE;
+				break;
+			}
+			zap(&youmonst, u.ux, u.uy, u.dx, u.dy, range, &zapdat);
+
 	    } else if (otyp >= WAN_MAGIC_MISSILE && otyp <= WAN_LIGHTNING){
+			basiczap(&zapdat, wand_adtype(otyp), ZAP_WAND, wand_damage_die(P_SKILL(P_WAND_POWER)) / ((otyp == WAN_MAGIC_MISSILE) ? 2 : 1));
 			use_skill(P_WAND_POWER, wandlevel(otyp));
-			buzz(wand_adtype(otyp), WAND_CLASS, TRUE,
-				 wand_damage_die(P_SKILL(P_WAND_POWER))/((otyp == WAN_MAGIC_MISSILE) ? 2 : 1),
-				 u.ux, u.uy, u.dx, u.dy,0,0);
+			zap(&youmonst, u.ux, u.uy, u.dx, u.dy, range, &zapdat);
 	    } else
 		impossible("weffects: unexpected spell or wand");
 	    disclose = TRUE;
@@ -3479,7 +3504,8 @@ struct zapdata * zapdata;
 			dmg += spell_damage_bonus();
 		if (youagr && u.ukrau_duration)
 			dmg *= 1.5;
-		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)) {
+		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)
+			&& !(zapdata->explosive || zapdata->splashing)) {
 			dmg *= 2;
 		}
 	}
@@ -3488,14 +3514,14 @@ struct zapdata * zapdata;
 		dmg /= 2;
 
 	/* monsters can save for half damage */
-	if (!youdef) {
+	if (mdef && !youdef) {
 		if (resist(mdef, (zapdata->ztyp == ZAP_WAND) ? WAND_CLASS : '\0', 0, NOTELL)
 			)
 			dmg /= 2;
 	}
 
 	/* madness damage reductions */
-	if (youagr) {
+	if (mdef && youagr) {
 		if (mdef->female && humanoid_torso(mdef->data) && roll_madness(MAD_SANCTITY)){
 			dmg /= 4;
 		}
@@ -3518,6 +3544,23 @@ struct zapdata * zapdata;
 		}
 	}
 	return dmg;
+}
+
+/* helper to make a basic zap */
+void
+basiczap(zapdat, adtyp, ztyp, ndice)
+struct zapdata * zapdat;
+int adtyp;
+int ztyp;
+int ndice;
+{
+	zapdat->adtyp = adtyp;
+	zapdat->damd = 6;
+	zapdat->damn = ndice;
+	zapdat->ztyp = ztyp;
+	zapdat->affects_floor = 1;
+	zapdat->directly_hits = 1;
+	return;
 }
 
 void
@@ -3599,7 +3642,7 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 				range += zap_over_floor(sx, sy, zapdata->adtyp, zapdata->ztyp, youagr, &shopdamage);
 
 			/* there's a creature here */
-			if (sx = u.ux && sy == u.uy)
+			if (sx == u.ux && sy == u.uy)
 				mdef = &youmonst;
 			else
 				mdef = m_at(sx, sy);
@@ -3945,7 +3988,6 @@ struct zapdata * zapdata;
 		golemeffects(mdef, AD_COLD, svddmg);
 		/* damage inventory */
 		if (!InvCold_res(mdef)) {
-			burnarmor(mdef);
 			if (!rn2(3)) (void)destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 		/* other */
@@ -4186,13 +4228,13 @@ struct zapdata * zapdata;
 			if (resists_death(mdef) || (youdef && u.sealsActive&SEAL_OSE)) {
 				doshieldeff = TRUE;
 				if (youdef)
-					addmsg("don't seem affected.");
+					addmsg("You don't seem affected.");
 				dmg = 0;
 			}
 			else if (Magic_res(mdef)) {
 				doshieldeff = TRUE;
 				if (youdef)
-					addmsg("aren't affected.");
+					addmsg("You aren't affected.");
 				dmg = 0;
 			}
 			else {
@@ -4215,7 +4257,7 @@ struct zapdata * zapdata;
 		if (Disint_res(mdef)) {
 			doshieldeff = TRUE;
 			if (youdef)
-				addmsg("are not disintegrated.");
+				addmsg("You are not disintegrated.");
 			dmg = 0;
 		}
 		else if (is_rider(mdef->data)) {
