@@ -2042,6 +2042,9 @@ int tary;
 	}
 	/* ranged magic */
 	else {
+		/* set up zapdata structure */
+		struct zapdata zapdata = { 0 };
+
 		/* determine if magr and mdef are lined up (or magr thinks they are) */
 		/* also checks for direct friendly fire */
 		if (m_online(magr, mdef, tarx, tary, (youagr ? FALSE : (magr->mtame && !magr->mconf)), FALSE)) {
@@ -2061,6 +2064,9 @@ int tary;
 				/* Oona */
 				adtyp = u.oonaenergy;
 			}
+			/* now that we have finallized adtyp, do basic setup of zapdata structure */
+			basiczap(&zapdata, adtyp, ZAP_SPELL, dmn);
+
 			/* message */
 			if (youdef) {
 				/* message */
@@ -2097,8 +2103,7 @@ int tary;
 				nomul(0, NULL);
 
 			/* do the zap */
-			buzz(adtyp, SPBOOK_CLASS, FALSE, dmn,
-				x(magr), y(magr), sgn(tarx-x(magr)), sgn(tary-y(magr)), 0, 0);
+			zap(magr, x(magr), y(magr), sgn(tarx - x(magr)), sgn(tary - y(magr)), rn1(7, 7), &zapdata);
 
 			/* return result */
 			/* unfortunately, cannot tell if either lifesaved */

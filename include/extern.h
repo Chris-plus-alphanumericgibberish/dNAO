@@ -3126,7 +3126,7 @@ E int FDECL(bhitpile, (struct obj *,int (*)(OBJ_P,OBJ_P),int,int));
 E int FDECL(zappable, (struct obj *));
 E void FDECL(zapnodir, (struct obj *));
 E int NDECL(dozap);
-E void FDECL(basiczap, (struct zapdata *, int, int, int));
+E struct zapdata * FDECL(basiczap, (struct zapdata *, int, int, int));
 E void FDECL(zap, (struct monst *, int, int, int, int, int, struct zapdata *));
 E int FDECL(zapyourself, (struct obj *,BOOLEAN_P));
 E boolean FDECL(cancel_monst, (struct monst *,struct obj *,

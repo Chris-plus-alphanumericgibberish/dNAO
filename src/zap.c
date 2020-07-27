@@ -53,6 +53,8 @@ STATIC_VAR const char are_blinded_by_the_flash[] = "are blinded by the flash!";
 static const int dirx[8] = {0, 1, 1,  1,  0, -1, -1, -1},
 				 diry[8] = {1, 1, 0, -1, -1, -1,  0,  1};
 
+struct zapdata tzapdat;	/* temporary zap data -- assumes there is only 1 zap happening at once (which is a safe assumption for now) */
+
 /* returns the string formerly given in the flash_type char*[] array. Not exhaustive -- if new combinations are used, they must be added here as well */
 /* adtyp  -- AD_TYPE damage type, defined in monattk.h */
 /* olet  -- O_CLASS type -- wand, spell, corpse (breath attack), weapon (raygun) */
@@ -3499,7 +3501,7 @@ struct zapdata * zapdata;
 	}
 
 	/* damage bonuses */
-	if (zapdata->ztyp == ZAP_SPELL) {
+	if (magr && zapdata->ztyp == ZAP_SPELL) {
 		if (youagr)
 			dmg += spell_damage_bonus();
 		if (youagr && u.ukrau_duration)
@@ -3547,20 +3549,24 @@ struct zapdata * zapdata;
 }
 
 /* helper to make a basic zap */
-void
+struct zapdata *
 basiczap(zapdat, adtyp, ztyp, ndice)
 struct zapdata * zapdat;
 int adtyp;
 int ztyp;
 int ndice;
 {
+	if (!zapdat) {
+		zapdat = &tzapdat;	/* use temporary global zapdata */
+	}
+	zapdat = memset(zapdat, 0, sizeof(struct zapdata));	/* clear old */
 	zapdat->adtyp = adtyp;
 	zapdat->damd = 6;
 	zapdat->damn = ndice;
 	zapdat->ztyp = ztyp;
 	zapdat->affects_floor = 1;
 	zapdat->directly_hits = 1;
-	return;
+	return zapdat;
 }
 
 void
@@ -3905,7 +3911,7 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 /* CAN MODIFY ZAPDATA */
 int
 zhit(magr, mdef, zapdata)
-struct monst * magr;
+struct monst * magr;	/* may be null */
 struct monst * mdef;
 struct zapdata * zapdata;
 {

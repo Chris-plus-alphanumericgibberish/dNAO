@@ -151,7 +151,10 @@ int shots, shotlimit;
 		} else {
 			if(Hallucination) pline1(Ronnie_ray_gun[rn2(SIZE(Ronnie_ray_gun))]);
 			raygun->ovar1 -= cost;
-			buzz(raygun->altmode, WEAPON_CLASS, TRUE, 6, u.ux, u.uy, u.dx, u.dy, 1,0);
+
+			struct zapdata zapdata = { 0 };
+			basiczap(&zapdata, raygun->altmode, ZAP_RAYGUN, 6);
+			zap(&youmonst, u.ux, u.uy, u.dx, u.dy, 1, &zapdata);
 			return 1;
 		}
 	}
@@ -165,7 +168,11 @@ int shots, shotlimit;
 	while(shots){
 		if(Hallucination) pline1(Ronnie_ray_gun[rn2(SIZE(Ronnie_ray_gun))]);
 		raygun->ovar1 -= cost;
-		buzz(raygun->altmode, WEAPON_CLASS, TRUE, 6, u.ux, u.uy, u.dx, u.dy, objects[(raygun->otyp)].oc_range, 0);
+
+		struct zapdata zapdata = { 0 };
+		basiczap(&zapdata, raygun->altmode, ZAP_RAYGUN, 6);
+		zap(&youmonst, u.ux, u.uy, u.dx, u.dy, objects[(raygun->otyp)].oc_range, &zapdata);
+
 		shots--;
 	}
 	
