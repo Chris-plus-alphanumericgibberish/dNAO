@@ -396,7 +396,9 @@ boolean	inc_or_dec;
 		 *
 		 *	Note: *YES* ACURR is the right one to use.
 		 */
-		AEXE(i) += (inc_or_dec) ? (rn2(19) > ACURR(i)) : -rn2(2);
+		AEXE(i) += (inc_or_dec)
+			? ((rn2(19) > ACURR(i)) || (AEXE(i) < 0 && rn2(AEXE(i)*-1 + 1)))
+			: -rn2(2);
 #ifdef DEBUG
 		pline("%s, %s AEXE = %d",
 			(i == A_STR) ? "Str" : (i == A_WIS) ? "Wis" :
