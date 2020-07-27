@@ -379,10 +379,8 @@ boolean	inc_or_dec;
 #ifdef DEBUG
 	pline("Exercise:");
 #endif
-	if (i == A_CHA) return;	/* can't exercise cha */
-	if(umechanoid) return; /* Mechanoids can't excercise abilities */
-	if(u.sealsActive&SEAL_HUGINN_MUNINN && (i == A_INT || i == A_WIS)) return; /* don't excercise int or wis while artificially maxed */
-	
+	/* Mechanoids can't excercise abilities */
+	if(umechanoid) return;
 	/* no physical exercise while polymorphed; the body's temporary */
 	if (Upolyd && i != A_WIS && i != A_INT) return;
 
