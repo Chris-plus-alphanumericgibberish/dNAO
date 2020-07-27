@@ -2652,7 +2652,8 @@ struct obj	*sobj;
 			levl[u.ux][u.uy].altarmask = Align2amask( whichgod );
 			pline("%s altar appears in front of you!", An(align_str(whichgod)));
 			newsym(u.ux, u.uy);
-		} else angrygods(whichgod);
+		}
+		else angrygods(Align2gangr(whichgod));
 	}break;
 	case SCR_GOLD_SCROLL_OF_LAW: {
 		register struct monst *mtmp;
