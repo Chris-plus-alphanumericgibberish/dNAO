@@ -7,11 +7,11 @@
 
 struct zapdata {
 	int adtyp;				/* damage type (AD_type) */
-	Bitfield(ztyp, 6);		/* originator of zap (ZAP_type) */
-#define ZAP_WAND	11
-#define ZAP_SPELL	10
-#define ZAP_BREATH	7
-#define ZAP_RAYGUN	2
+	Bitfield(ztyp, 3);		/* originator of zap (ZAP_type) */
+#define ZAP_WAND	1
+#define ZAP_SPELL	2
+#define ZAP_BREATH	3
+#define ZAP_RAYGUN	4
 	int damn;				/* number of dice */
 	int damd;				/* size of dice */
 	int flat;				/* alternative to damn and damd -- flat damage to deal */

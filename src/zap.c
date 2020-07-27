@@ -59,12 +59,12 @@ struct zapdata tzapdat;	/* temporary zap data -- assumes there is only 1 zap hap
 /* adtyp  -- AD_TYPE damage type, defined in monattk.h */
 /* olet  -- O_CLASS type -- wand, spell, corpse (breath attack), weapon (raygun) */
 char *
-flash_type(adtyp, olet)
-int adtyp, olet;
+flash_type(adtyp, ztyp)
+int adtyp, ztyp;
 {
-	switch (olet)
+	switch (ztyp)
 	{
-	case WAND_CLASS:
+	case ZAP_WAND:
 		switch (adtyp)
 		{
 		case AD_MAGM: return "magic missile";
@@ -76,7 +76,7 @@ int adtyp, olet;
 		default:      impossible("unknown wand damage type in flash_type: %d", adtyp);
 		}
 		break;
-	case SPBOOK_CLASS:
+	case ZAP_SPELL:
 		switch (adtyp)
 		{
 		case AD_MAGM: return "magic missile";
@@ -92,7 +92,7 @@ int adtyp, olet;
 		}
 		break;
 
-	case FOOD_CLASS:	//actually breath attacks
+	case ZAP_BREATH:
 		switch (adtyp)
 		{
 		case AD_MAGM: return "blast of missiles";
@@ -107,7 +107,7 @@ int adtyp, olet;
 		case AD_GOLD: return "blast of golden shards";
 		default:      impossible("unknown breath damage type in flash_type: %d", adtyp);
 		}
-	case WEAPON_CLASS:
+	case ZAP_RAYGUN:
 		switch (adtyp)
 		{
 		case AD_MAGM: return "magic ray";
@@ -119,7 +119,7 @@ int adtyp, olet;
 		default:      impossible("unknown raygun damage type in flash_type: %d", adtyp);
 		}
 	default:
-		impossible("unknown object class in flash_type: %d", olet);
+		impossible("unknown ztyp in flash_type: %d", ztyp);
 	}
 	return "404 BEAM NOT FOUND";
 }

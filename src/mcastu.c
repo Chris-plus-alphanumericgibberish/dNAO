@@ -2072,11 +2072,11 @@ int tary;
 				/* message */
 				if (canseemon(magr)) {
 					pline("%s zaps you with a %s!", Monnam(magr),
-						flash_type(adtyp, SPBOOK_CLASS));
+						flash_type(adtyp, ZAP_SPELL));
 				}
 				else {
 					You("are zapped with a %s!",
-						flash_type(adtyp, SPBOOK_CLASS));
+						flash_type(adtyp, ZAP_SPELL));
 				}
 			}
 			else {
@@ -2086,14 +2086,14 @@ int tary;
 							(youagr ? "You" : Monnam(magr)),
 							(youagr ? "zap" : "zaps"),
 							(canspotmon(mdef) ? mon_nam(mdef) : "something"),
-							flash_type(adtyp, SPBOOK_CLASS)
+							flash_type(adtyp, ZAP_SPELL)
 							);
 					}
 					else {
 						pline("%s %s a %s!",
 							(youagr ? "You" : Monnam(magr)),
 							(youagr ? "cast" : "casts"),
-							flash_type(adtyp, SPBOOK_CLASS)
+							flash_type(adtyp, ZAP_SPELL)
 							);
 					}
 				}
