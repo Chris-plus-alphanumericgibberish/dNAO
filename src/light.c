@@ -702,13 +702,9 @@ snuff_light_source(x, y)
 		*/
 		if (ls->type == LS_OBJECT && ls->x == x && ls->y == y) {
 			obj = (struct obj *) ls->id;
-
-			if (obj_is_burning(obj)) {
-				/* objects that shouldn't be snuffed, despite being in obj_is_burning */
-				if (obj->otyp == SUNROD)
-					continue;
-
-				/* snuff it */
+			if (obj_is_burning(obj) && !Darkness_cant_snuff(obj)) {
+				// this assumes snuff_light_source is only called on you're making DARKNESS,
+				// never when you're making LIGHT sources to "snuff" darkness sources (shadow torches)
 				end_burn(obj, obj->otyp != MAGIC_LAMP);
 			}
 		}

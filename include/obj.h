@@ -793,6 +793,11 @@ struct obj {
 #define Is_darklight_source(otmp) ((otmp)->otyp == SHADOWLANDER_S_TORCH || \
 			 (otmp)->otyp == CHUNK_OF_FOSSIL_DARK ||\
 			 (is_lightsaber(otmp) && otmp->cobj && otmp->cobj->otyp == CHUNK_OF_FOSSIL_DARK))
+// NOT an exhaustive list, but this SHOULD be everything that would fall under snuff_lit
+// and shouldn't be put out by darkness spells
+#define Darkness_cant_snuff(otmp) (Is_darklight_source(otmp) || \
+			(is_lightsaber(otmp) && (otmp->oartifact == ART_ARKENSTONE || otmp->oartifact == ART_GLITTERSTONE)) || \
+			(otmp->otyp == SUNROD))
 
 /* MAGIC_LAMP intentionally excluded below */
 /* age field of this is relative age rather than absolute */
