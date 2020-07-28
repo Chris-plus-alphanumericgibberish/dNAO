@@ -2821,7 +2821,7 @@ struct obj *obj;
 
 		/* the magic douses lamps, et al, too */
 		for(otmp = invent; otmp; otmp = otmp->nobj)
-			if (otmp->lamplit && && otmp->otyp != SUNROD && !Darkness_cant_snuff(otmp))
+			if (otmp->lamplit && otmp->otyp != SUNROD && !Darkness_cant_snuff(otmp))
 				(void) snuff_lit(otmp);
 		if (Blind) goto do_it;
 	} else {
