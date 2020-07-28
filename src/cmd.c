@@ -925,8 +925,8 @@ dofightingform()
 	
 	Sprintf(buf,	"Known Forms");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	if(P_SKILL(FFORM_SHII_CHO) >= P_BASIC){
-		if(u.fightingForm == FFORM_SHII_CHO) {
+	if(P_SKILL(P_SHII_CHO) >= P_BASIC){
+		if(activeFightingForm(FFORM_SHII_CHO)) {
 			Sprintf(buf,	"Shii-Cho (active)");
 		} else {
 			Sprintf(buf,	"Shii-Cho");
@@ -937,8 +937,8 @@ dofightingform()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(P_SKILL(FFORM_MAKASHI) >= P_BASIC){
-		if(u.fightingForm == FFORM_MAKASHI) {
+	if(P_SKILL(P_MAKASHI) >= P_BASIC){
+		if(activeFightingForm(FFORM_MAKASHI)) {
 			if(uarm && !(is_light_armor(uarm) || is_medium_armor(uarm))){
 				Sprintf(buf,	"Makashi (selected; blocked by armor)");
 			} else {
@@ -957,8 +957,8 @@ dofightingform()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(P_SKILL(FFORM_SORESU) >= P_BASIC){
-		if(u.fightingForm == FFORM_SORESU) {
+	if(P_SKILL(P_SORESU) >= P_BASIC){
+		if(activeFightingForm(FFORM_SORESU)) {
 			if(uarm && !(is_light_armor(uarm) || is_medium_armor(uarm))){
 				Sprintf(buf,	"Soresu (selected; blocked by armor)");
 			} else {
@@ -977,8 +977,8 @@ dofightingform()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(P_SKILL(FFORM_ATARU) >= P_BASIC){
-		if(u.fightingForm == FFORM_ATARU) {
+	if(P_SKILL(P_ATARU) >= P_BASIC){
+		if(activeFightingForm(FFORM_ATARU)) {
 			if(uarm && !(is_light_armor(uarm))){
 				Sprintf(buf,	"Ataru (selected; blocked by armor)");
 			} else {
@@ -997,8 +997,8 @@ dofightingform()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(P_SKILL(FFORM_SHIEN) >= P_BASIC){
-		if(u.fightingForm == FFORM_SHIEN) {
+	if(P_SKILL(P_SHIEN) >= P_BASIC){
+		if(activeFightingForm(FFORM_SHIEN)) {
 			if(uarm && !(is_light_armor(uarm))){
 				Sprintf(buf,	"Shien (selected; blocked by armor)");
 			} else {
@@ -1017,8 +1017,8 @@ dofightingform()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(P_SKILL(FFORM_DJEM_SO) >= P_BASIC){
-		if(u.fightingForm == FFORM_DJEM_SO) {
+	if(P_SKILL(P_DJEM_SO) >= P_BASIC){
+		if(activeFightingForm(FFORM_DJEM_SO)) {
 			if(uarm && !(is_light_armor(uarm) || is_medium_armor(uarm))){
 				Sprintf(buf,	"Djem So (selected; blocked by armor)");
 			} else {
@@ -1037,12 +1037,12 @@ dofightingform()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(P_SKILL(FFORM_NIMAN) >= P_BASIC){
-		if(u.fightingForm == FFORM_NIMAN) {
+	if(P_SKILL(P_NIMAN) >= P_BASIC){
+		if(activeFightingForm(FFORM_NIMAN)) {
 			if(uarm && (is_metallic(uarm))){
 				Sprintf(buf,	"Niman (selected; blocked by armor)");
 			} else {
-				int nskill = P_SKILL(FFORM_NIMAN);
+				int nskill = P_SKILL(P_NIMAN);
 				if(u.lastcast >= monstermoves && nskill >= P_BASIC){
 					Sprintf(buf,	"Niman (active; +%dd%ld)", 
 						nskill == P_BASIC ? 3 : 
@@ -1065,8 +1065,8 @@ dofightingform()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(P_SKILL(FFORM_JUYO) >= P_BASIC){
-		if(u.fightingForm == FFORM_JUYO) {
+	if(P_SKILL(P_JUYO) >= P_BASIC){
+		if(activeFightingForm(FFORM_JUYO)) {
 			if(uarm && !(is_light_armor(uarm))){
 				Sprintf(buf,	"Juyo (selected; blocked by armor)");
 			} else {
@@ -1091,10 +1091,10 @@ dofightingform()
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
 	
-	if(n <= 0 || u.fightingForm == selected[0].item.a_int){
+	if(n <= 0 || activeFightingForm(selected[0].item.a_int)){
 		return 0;
 	} else {
-		u.fightingForm = selected[0].item.a_int;
+		setFightingForm(selected[0].item.a_int);
 		return 0;
 	}
 }
@@ -2360,8 +2360,8 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Reflecting) you_have("reflection");
 	if (Reflecting && (
 			(uwep && is_lightsaber(uwep) && litsaber(uwep) && 
-				((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) || 
-				 (u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+				((activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm))) || 
+				 (activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 				)
 			) ||
 			(uarm && (uarm->otyp == SILVER_DRAGON_SCALE_MAIL || uarm->otyp == SILVER_DRAGON_SCALES || uarm->otyp == SILVER_DRAGON_SCALE_SHIELD)) ||

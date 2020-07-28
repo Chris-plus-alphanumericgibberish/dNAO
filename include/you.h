@@ -310,15 +310,8 @@ struct you {
 #define DEFAULT_HMAX	2000
 	unsigned uhs;		/* hunger state - see eat.c */
 
-	int fightingForm;
-// #define FFORM_SHII_CHO	1
-// #define FFORM_MAKASHI	2
-// #define FFORM_SORESU	3
-// #define FFORM_ATARU		4
-// #define FFORM_DJEM_SO	5
-// #define FFORM_SHIEN		6
-// #define FFORM_NIMAN		7
-// #define FFORM_JUYO		8
+#define FFORM_LISTSIZE	(LAST_FFORM/32 + 1)
+	unsigned long int fightingForm[FFORM_LISTSIZE];/* special properties */
 	// long laststruck;
 	long lastmoved;
 	long lastcast;

@@ -983,9 +983,9 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 
 	/* train player's Shien skill, if player is defending */
 	if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && P_SKILL(weapon_type(uwep)) >= P_BASIC){
-		if (P_SKILL(FFORM_SHII_CHO) >= P_BASIC){
-			if (u.fightingForm == FFORM_SHII_CHO ||
-				(u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm)))
+		if (P_SKILL(P_SHII_CHO) >= P_BASIC){
+			if (activeFightingForm(FFORM_SHII_CHO) ||
+				(activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm)))
 				) use_skill(FFORM_SHIEN, 1);
 		}
 	}
@@ -1031,8 +1031,9 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 		boolean shienuse = FALSE;
 		/* if the player is using Shien lightsaber form, they can direct the reflection */
 		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep)
-			&& u.fightingForm == FFORM_SHIEN && ((!uarm || is_light_armor(uarm))
-			&& rn2(3) < max((min(P_SKILL(u.fightingForm), P_SKILL(weapon_type(uwep)))) - 1, 1))) {
+			&& activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm))
+			&& rnd(3) < FightingFormSkillLevel(FFORM_SHIEN)
+		){
 			You("reflect the %s with your lightsaber!", doname(thrownobj));
 			if (getdir("Redirect it which way?"))
 				shienuse = TRUE;
@@ -1055,14 +1056,11 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 	}
 	/* the player has a chance to burn some projectiles (not blaster bolts or laser beams) out of the air with a lightsaber */
 	else if (!(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT)
-		&& youdef && uwep && is_lightsaber(uwep) && litsaber(uwep)
-		&& (
-		((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) ||
-		(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))))
-		&& 
-		rn2(3) < max((min(P_SKILL(u.fightingForm), P_SKILL(weapon_type(uwep))))-1,1))
+		&& youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && (
+			(activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm)) && rnd(3) < FightingFormSkillLevel(FFORM_SHIEN)) ||
+			(activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)) && rnd(3) < FightingFormSkillLevel(FFORM_SORESU))
 		)
-	{
+	){
 		You("burn %s out of the %s!", doname(thrownobj), (Underwater || Is_waterlevel(&u.uz)) ? "water" : "air");
 		obfree(thrownobj, (struct obj*) 0);
 		*wepgone = TRUE;

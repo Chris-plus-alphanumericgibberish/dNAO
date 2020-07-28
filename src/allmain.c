@@ -1638,8 +1638,8 @@ karemade:
 				moveamt += 3;
 			if(u.uuur_duration)
 				moveamt += 6;
-			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-				// switch(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep)))){
+			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+				// switch(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep)))){
 					// case P_BASIC:       moveamt = max(moveamt-6,1); break;
 					// case P_SKILLED:     moveamt = max(moveamt-4,1); break;
 					// case P_EXPERT:      moveamt = max(moveamt-3,1); break;

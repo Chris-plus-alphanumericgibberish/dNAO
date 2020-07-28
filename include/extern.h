@@ -187,6 +187,10 @@ E void NDECL(calc_total_maxen);
 E schar FDECL(acurr, (int));
 E schar FDECL(acurrstr, (int));
 E void FDECL(adjalign, (int));
+E void FDECL(setFightingForm, (int));
+E boolean FDECL(activeFightingForm, (int));
+E int FDECL(getFightingFormSkill, (int));
+E void NDECL(validateLightsaberForm);
 E int NDECL(uhp);
 E int NDECL(uhpmax);
 

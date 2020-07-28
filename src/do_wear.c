@@ -2221,8 +2221,8 @@ int base_uac()
 			if(!uarmc && !uarm) uac -= max( (uwep->spe+1)/2,0);
 		}
 		if(is_lightsaber(uwep) && litsaber(uwep)){
-			if(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-				switch(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep)))){
+			if(activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+				switch(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:
 						uac -=   max(0, (ACURR(A_DEX)+ACURR(A_INT) - 20)/5);
 					break;
@@ -2233,8 +2233,8 @@ int base_uac()
 						uac -= max(0, (ACURR(A_DEX)+ACURR(A_INT) - 20)/2);
 					break;
 				}
-			} else if(u.fightingForm == FFORM_ATARU && (!uarm || is_light_armor(uarm))){
-				switch(min(P_SKILL(FFORM_ATARU), P_SKILL(weapon_type(uwep)))){
+			} else if(activeFightingForm(FFORM_ATARU) && (!uarm || is_light_armor(uarm))){
+				switch(min(P_SKILL(P_ATARU), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:
 						uac += 20;
 					break;
@@ -2245,14 +2245,14 @@ int base_uac()
 						uac += 5;
 					break;
 				}
-			} else if(u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+			} else if(activeFightingForm(FFORM_MAKASHI) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
 				int sx, sy, mcount = 0;
 				for(sx = u.ux-1; sx<=u.ux+1; sx++){
 					for(sy = u.uy-1; sy<=u.uy+1; sy++){
 						if(isok(sx,sy) && m_at(sx,sy)) mcount++;
 					}
 				}
-				switch(min(P_SKILL(FFORM_MAKASHI), P_SKILL(weapon_type(uwep)))){
+				switch(min(P_SKILL(P_MAKASHI), P_SKILL(weapon_type(uwep)))){
 					case P_BASIC:
 						if(mcount) uac += (mcount-1) * 10;
 					break;

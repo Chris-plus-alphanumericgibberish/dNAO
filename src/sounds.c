@@ -5661,22 +5661,22 @@ int p_skill;
 	}
 	
 	if(p_skill == FFORM_SHIEN){
-		if(OLD_P_SKILL(FFORM_DJEM_SO) >= P_SKILLED) curskill++;
-		if(OLD_P_SKILL(FFORM_DJEM_SO) >= P_EXPERT) curskill++;
+		if(OLD_P_SKILL(P_DJEM_SO) >= P_SKILLED) curskill++;
+		if(OLD_P_SKILL(P_DJEM_SO) >= P_EXPERT) curskill++;
 	}
 	
 	if(p_skill == FFORM_DJEM_SO){
-		if(OLD_P_SKILL(FFORM_SHIEN) >= P_SKILLED) curskill++;
-		if(OLD_P_SKILL(FFORM_SHIEN) >= P_EXPERT) curskill++;
+		if(OLD_P_SKILL(P_SHIEN) >= P_SKILLED) curskill++;
+		if(OLD_P_SKILL(P_SHIEN) >= P_EXPERT) curskill++;
 	}
 	
 	if(p_skill == FFORM_NIMAN && curskill < P_BASIC){
 		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 			curskill = P_BASIC;
-			OLD_P_SKILL(FFORM_NIMAN) = P_BASIC;
+			OLD_P_SKILL(P_NIMAN) = P_BASIC;
 		} else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC) {
 			curskill = P_BASIC;
-			OLD_P_SKILL(FFORM_NIMAN) = P_BASIC;
+			OLD_P_SKILL(P_NIMAN) = P_BASIC;
 		}
 	}
 	

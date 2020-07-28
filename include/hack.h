@@ -374,7 +374,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define a_align(x,y)	((aligntyp)Amask2align(levl[x][y].altarmask & AM_MASK))
 
 /* negative armor class is randomly weakened to prevent invulnerability */
-#define AC_VALUE(AC)	((AC) >= -10 ? (AC) : (u.sealsActive&SEAL_BALAM || u.fightingForm == FFORM_SORESU) ? min_ints(-rnd(-(AC+10)),-rnd(-(AC+10))) : -rnd(-(AC+10)) )
+#define AC_VALUE(AC)	((AC) >= -10 ? (AC) : (u.sealsActive&SEAL_BALAM || activeFightingForm(FFORM_SORESU)) ? min_ints(-rnd(-(AC+10)),-rnd(-(AC+10))) : -rnd(-(AC+10)) )
 #define MONSTER_AC_VALUE(AC)	((AC) >= -10 ? (AC) : -rnd(-(AC+10)) )
 
 #if defined(MICRO) && !defined(__DJGPP__)

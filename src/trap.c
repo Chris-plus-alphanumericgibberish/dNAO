@@ -736,25 +736,11 @@ unsigned trflags;
 
 	if(
 		uwep && is_lightsaber(uwep) && litsaber(uwep) && 
-			((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) || 
-			 (u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+			((activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm)) && rnd(3) < FightingFormSkillLevel(FFORM_SHIEN)) || 
+			 (activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)) && rnd(3) < FightingFormSkillLevel(FFORM_SORESU))
 			)
 	){
-		switch(min(P_SKILL(u.fightingForm), P_SKILL(weapon_type(uwep)))){
-			case P_BASIC:
-				if(rn2(100) < 33){
-					shienuse = TRUE;
-				}
-			break;
-			case P_SKILLED:
-				if(rn2(100) < 66){
-					shienuse = TRUE;
-				}
-			break;
-			case P_EXPERT:
-				shienuse = TRUE;
-			break;
-		}
+		shienuse = TRUE;
 	}
 	
 	/* KMH -- You can't escape the Sokoban level traps */

@@ -3458,8 +3458,8 @@ struct zapdata * zapdata;
 			otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS ||
 			otmp->oartifact == ART_DRAGONLANCE ||
 			(youdef && is_lightsaber(otmp) && (
-			(u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) ||
-			(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))))
+			(activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm))) ||
+			(activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))))
 			)) ||
 			/* body armor */
 			((otmp = youdef ? uarm : which_armor(mdef, W_ARM)) && (
@@ -3687,8 +3687,8 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 
 						/* reflect and redirect */
 						if (youdef && (
-							(uwep && is_lightsaber(uwep) && litsaber(uwep) && u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))
-							&& (rnd(3) < min(P_SKILL(u.fightingForm), P_SKILL(weapon_type(uwep))))) ||
+							(uwep && is_lightsaber(uwep) && litsaber(uwep) && activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm))
+								&& rnd(3) < FightingFormSkillLevel(FFORM_SHIEN)) ||
 							(uwep && uwep->oartifact == ART_STAFF_OF_TWELVE_MIRRORS)
 							)
 							&& getdir((char *)0) && (u.dx || u.dy)

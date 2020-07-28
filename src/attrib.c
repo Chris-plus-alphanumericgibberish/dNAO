@@ -1629,6 +1629,91 @@ register int n;
 		}
 }
 
+void
+setFightingForm(fform)
+int fform;
+{
+	int i;
+	if(fform > LAST_FFORM || fform < 0)
+		impossible("Attempting to set fighting form number %d?", fform);
+	
+	for(i=0; i < FFORM_LISTSIZE; i++)
+		u.fightingForm[i] = 0L;
+
+	u.fightingForm[(fform-1)/32] |= (0x1L << ((fform-1)%32));
+}
+
+boolean
+activeFightingForm(fform)
+int fform;
+{
+	int i;
+	if(fform > LAST_FFORM || fform < 0)
+		impossible("Attempting to check fighting form number %d?", fform);
+	
+	if(!fform){
+		//Check if there are ANY fighting forms set at all
+		int i;
+		for(i=0; i < FFORM_LISTSIZE; i++){
+			if(u.fightingForm[i])
+				return FALSE; //Found (at least one) fighting form, return FALSE
+		}
+		return TRUE; //Found no fighting forms, return TRUE
+	}
+	
+	return !!(u.fightingForm[(fform-1)/32] & (0x1L << ((fform-1)%32)));
+}
+
+int
+getFightingFormSkill(fform)
+int fform;
+{
+	switch(fform){
+		case FFORM_SHII_CHO:
+			return P_SHII_CHO;
+		break;
+		case FFORM_MAKASHI:
+			return P_MAKASHI;
+		break;
+		case FFORM_SORESU:
+			return P_SORESU;
+		break;
+		case FFORM_ATARU:
+			return P_ATARU;
+		break;
+		case FFORM_DJEM_SO:
+			return P_DJEM_SO;
+		break;
+		case FFORM_SHIEN:
+			return P_SHIEN;
+		break;
+		case FFORM_NIMAN:
+			return P_NIMAN;
+		break;
+		case FFORM_JUYO:
+			return P_JUYO;
+		break;
+		default:
+			impossible("Attempting to get skill of fighting form number %d?", fform);
+			return P_NONE;
+		break;
+	}
+	return P_NONE; //Never reached
+}
+
+void
+validateLightsaberForm()
+{
+	int i;
+	for(i=FFORM_SHII_CHO; i <= FFORM_JUYO; i++)
+		if(activeFightingForm(i) && FightingFormSkillLevel(i) >= P_BASIC)
+			return;
+
+	if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+		setFightingForm(FFORM_NIMAN);
+	else setFightingForm(FFORM_SHII_CHO);
+}
+
 #endif /* OVL2 */
 
 /** Returns the hitpoints of your current form. */

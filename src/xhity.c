@@ -3234,7 +3234,7 @@ int flat_acc;
 
 			/* Shii Cho lightsaber form is not meant for fighting other lightsaber users */
 			if (youagr && is_lightsaber(weapon) && litsaber(weapon)){
-				if (u.fightingForm == FFORM_SHII_CHO && MON_WEP(mdef) && is_lightsaber(MON_WEP(mdef)) && litsaber(MON_WEP(mdef))){
+				if (activeFightingForm(FFORM_SHII_CHO) && MON_WEP(mdef) && is_lightsaber(MON_WEP(mdef)) && litsaber(MON_WEP(mdef))){
 					wepn_acc -= 5;
 				}
 			}
@@ -11383,7 +11383,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			sneak_dice++;
 		if (u.sealsActive&SEAL_ANDROMALIUS)
 			sneak_dice++;
-		if (ulightsaberhit && u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm)))
+		if (ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)))
 			sneak_dice++;
 	}
 	if (magr && is_backstabber(pa))
@@ -11416,7 +11416,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				((weapon && weapon == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && has_head(pd) && !is_unalive(pd))
 				|| distmin(u.ux, u.uy, mdef->mx, mdef->my) > BOLT_LIM)))
 				sneak_attack |= SNEAK_HIDDEN;
-			if (ulightsaberhit && u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm)))
+			if (ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)))
 				sneak_attack |= SNEAK_JUYO;	/* modifies a sneak attack; not sufficient on its own */
 		}
 		else if (youdef) {
@@ -11542,12 +11542,12 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			(weapon && weapon == uwep && uwep->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD &&
 			(dieroll < P_SKILL(weapon_type(uwep)))) ||
 			// Djem So
-			(ulightsaberhit && u.fightingForm == FFORM_DJEM_SO && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)) &&
-			(dieroll < min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(uwep)))) &&
+			(ulightsaberhit && activeFightingForm(FFORM_DJEM_SO) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)) &&
+			(dieroll < min(P_SKILL(P_DJEM_SO), P_SKILL(weapon_type(uwep)))) &&
 			(mdef->mattackedu || !rn2(5))) ||	// (odds reduced by 80% when not counterattacking)
 			// Juyo 
-			(ulightsaberhit && u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm)) &&
-			(dieroll < min(P_SKILL(FFORM_JUYO), P_SKILL(weapon_type(uwep)))) &&
+			(ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)) &&
+			(dieroll < min(P_SKILL(P_JUYO), P_SKILL(weapon_type(uwep)))) &&
 			((sneak_attack&SNEAK_JUYO) || (rn2(5) < 2)))	// (odds reduced by 60% when not sneak attacking)
 			)
 		{
@@ -12721,24 +12721,24 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(FFORM_SHII_CHO, 1);
-				if (P_SKILL(FFORM_SHII_CHO) >= P_BASIC || weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC){
-					if ((u.fightingForm == FFORM_SHII_CHO ||
-						(u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+				if (P_SKILL(P_SHII_CHO) >= P_BASIC || weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+					if ((activeFightingForm(FFORM_SHII_CHO) ||
+						(activeFightingForm(FFORM_MAKASHI) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 						) &&
 						!uarms && !u.twoweap && wtype == P_SABER
 						) use_skill(FFORM_MAKASHI, 1);
-					if ((u.fightingForm == FFORM_SHII_CHO ||
-						(u.fightingForm == FFORM_ATARU && (!uarm || is_light_armor(uarm)))
+					if ((activeFightingForm(FFORM_SHII_CHO) ||
+						(activeFightingForm(FFORM_ATARU) && (!uarm || is_light_armor(uarm)))
 						) &&
 						u.lastmoved + 1 >= monstermoves
 						) use_skill(FFORM_ATARU, 1);
-					if ((u.fightingForm == FFORM_SHII_CHO ||
-						(u.fightingForm == FFORM_DJEM_SO && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+					if ((activeFightingForm(FFORM_SHII_CHO) ||
+						(activeFightingForm(FFORM_DJEM_SO) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 						) &&
 						mdef->mattackedu
 						) use_skill(FFORM_DJEM_SO, 1);
-					if ((u.fightingForm == FFORM_SHII_CHO ||
-						(u.fightingForm == FFORM_NIMAN && (!uarm || !is_metallic(uarm)))
+					if ((activeFightingForm(FFORM_SHII_CHO) ||
+						(activeFightingForm(FFORM_NIMAN) && (!uarm || !is_metallic(uarm)))
 						) &&
 						u.lastcast >= monstermoves
 						) use_skill(FFORM_NIMAN, 1);
@@ -12747,8 +12747,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		/* misc: train player's Soresu skill if applicable */
 		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && magr && melee &&
-			(u.fightingForm == FFORM_SHII_CHO ||
-			(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+			(activeFightingForm(FFORM_SHII_CHO) ||
+			(activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 			)) use_skill(FFORM_SORESU, 1);
 	}
 	/* ARTIFACT HIT BLOCK */
@@ -13071,7 +13071,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			else if (sneak_attack & SNEAK_HELPLESS) You("rain blows on the helpless %s%s", l_monnam(mdef), exclam(subtotl));
 			else									You("rain blows on %s%s", mon_nam(mdef), exclam(subtotl));
 			/* ...player gets bonus movement points! */
-			switch (min(P_SKILL(FFORM_JUYO), P_SKILL(weapon_type(weapon)))){
+			switch (min(P_SKILL(P_JUYO), P_SKILL(weapon_type(weapon)))){
 			case P_BASIC:	youmonst.movement += NORMAL_SPEED / 4;	break;
 			case P_SKILLED:	youmonst.movement += NORMAL_SPEED / 3;	break;
 			case P_EXPERT:	youmonst.movement += NORMAL_SPEED / 2;	break;
@@ -14039,20 +14039,18 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 				(multi >= 0) &&														/* not paralyzed */
 				distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1 &&					/* in close quarters */
 				!(result&MM_AGR_DIED) &&											/* attacker is still alive */
-				(u.fightingForm == FFORM_DJEM_SO || u.fightingForm == FFORM_SORESU)	/* proper forms */
+				(activeFightingForm(FFORM_DJEM_SO) || activeFightingForm(FFORM_SORESU))	/* proper forms */
 				){
 				int chance = 0;
 
 				/* determine chance of counterattacking */
-				switch (u.fightingForm) {
-				case FFORM_DJEM_SO:
+				if(activeFightingForm(FFORM_DJEM_SO)){
 					if (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))
-						chance = DjemSo_counterattack[(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(uwep))) - 2)];
-					break;
-				case FFORM_SORESU:
+						chance = DjemSo_counterattack[(min(P_SKILL(P_DJEM_SO), P_SKILL(weapon_type(uwep))) - 2)];
+				}
+				if(activeFightingForm(FFORM_SORESU)){
 					if (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))
-						chance = Soresu_counterattack[(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep))) - 2)];
-					break;
+						chance = Soresu_counterattack[(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep))) - 2)];
 				}
 
 				/* maybe make the counterattack */
@@ -14064,7 +14062,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 						newvis |= VIS_MAGR;
 
 					You("counterattack!");
-					use_skill(u.fightingForm, 1);
+					if(activeFightingForm(FFORM_DJEM_SO))
+						use_skill(P_DJEM_SO, 1);
+					if(activeFightingForm(FFORM_SORESU))
+						use_skill(P_SORESU, 1);
 
 					newres = xmeleehity(mdef, magr, &basicattack, uwep, newvis, 0, FALSE);
 					if (newres&MM_DEF_DIED)
@@ -14103,10 +14104,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 				/* lightsaber forms (per-round) (player-only) */
 				if (youdef &&
 					is_lightsaber(otmp) && litsaber(otmp) &&
-					u.fightingForm == FFORM_SHIEN &&
+					activeFightingForm(FFORM_SHIEN) &&
 					(!uarm || is_light_armor(uarm)))
 				{
-					chance += Shien_counterattack[(min(P_SKILL(FFORM_SHIEN), P_SKILL(weapon_type(uwep))) - 2)];
+					chance += Shien_counterattack[(min(P_SKILL(P_SHIEN), P_SKILL(weapon_type(uwep))) - 2)];
 				}
 				/* Sansara Mirror */
 				if (otmp->oartifact == ART_SANSARA_MIRROR) {
@@ -14148,8 +14149,8 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 						pline("%s counterattacks!", Monnam(mdef));
 					}
 					/* train lightsaber skill if applicable */
-					if (youdef && u.fightingForm == FFORM_SHIEN)
-						use_skill(u.fightingForm, 1);
+					if (youdef && activeFightingForm(FFORM_SHIEN))
+						use_skill(P_SHIEN, 1);
 
 					/* make the attack */
 					newres = xmeleehity(mdef, magr, counter, otmp, newvis, 0, FALSE);
