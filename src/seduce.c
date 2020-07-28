@@ -1,7 +1,6 @@
 #include "hack.h"
-//#include "artifact.h"
-//#include "monflag.h"
 #include "edog.h"
+#include "seduce.h"
 
 # ifdef SEDUCE
 STATIC_DCL void FDECL(mayberem, (struct obj *, const char *));
@@ -9,6 +8,7 @@ STATIC_DCL void FDECL(lrdmayberem, (struct obj *, const char *));
 STATIC_DCL void FDECL(mlcmayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(sflmayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(palemayberem, (struct obj *, const char *, BOOLEAN_P));
+STATIC_DCL void FDECL(seduce_effect, (struct monst *, int));
 # endif
 
 static const char tools[] = { TOOL_CLASS, 0 };
@@ -229,127 +229,61 @@ register struct monst *mon;
 		}
 		if (Sterile || rn2(35) > ACURR(A_CHA) + ACURR(A_INT)) {
 			/* Don't bother with mspec_used here... it didn't get tired! */
-			if(!uclockwork){
-				pline("%s seems to have enjoyed it more than you...",
-					noit_Monnam(mon));
-			} else{
-				char buf[BUFSZ];
+			if (uclockwork) {
+				/* message */
 				pline("%s looks briefly confused...",
 					noit_Monnam(mon));
-				if(!rn2(5) && !Drain_resistance){
-					pline("...then tries to suck out your soul with a kiss!");
-					losexp("stolen soul",FALSE,FALSE,FALSE);
-				}
-				else {
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, FALSE);
-				}
-				goto pay;
+				/* effect */
+				if (!rn2(5) && !Drain_resistance)
+					seduce_effect(mon, SEDU_SUCKSOUL);
+				else
+					seduce_effect(mon, SEDU_STEALONE);
 			}
-			switch (rn2(5)) {
-				case 0: You_feel("drained of energy.");
-					u.uen = 0;
-					u.uenbonus -= rnd(Half_physical_damage ? 5 : 10);
-						exercise(A_CON, FALSE);
-					calc_total_maxen();
-					break;
-				case 1: You("are down in the dumps.");
-					(void) adjattrib(A_CON, -1, TRUE);
-						exercise(A_CON, FALSE);
-					flags.botl = 1;
-					break;
-				case 2: Your("senses are dulled.");
-					(void) adjattrib(A_WIS, -1, TRUE);
-						exercise(A_WIS, FALSE);
-					flags.botl = 1;
-					break;
-				case 3:
-					if (!Drain_resistance) {
-						You_feel("out of shape.");
-						losexp("overexertion",TRUE,FALSE,FALSE);
-					} else {
-						You("have a curious feeling...");
-					}
-					break;
-				case 4: {
-					int tmp;
-					You_feel("exhausted.");
-						exercise(A_STR, FALSE);
-					tmp = rn1(10, 6);
-					if(Half_physical_damage) tmp = (tmp+1) / 2;
-					losehp(tmp, "exhaustion", KILLED_BY);
-					break;
-				}
+			else {
+				/* no setup message */
+				/* just effect */
+				const int bad_sedu_effects[] = {
+					SEDU_DRAINEN,
+					SEDU_DUMPS,
+					SEDU_DULLSENSES,
+					SEDU_DRAINLVL,
+					SEDU_EXHAUSTED
+				};
+				seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
 			}
+			
 		} else {
 			mon->mspec_used = rnd(100); /* monster is worn out */
-			if(!uclockwork){
-				You("seem to have enjoyed it more than %s...",
-					noit_mon_nam(mon));
-			} else{
+			if (uclockwork) {
+				/* message */
 				pline("Time stands still while you and %s lie in each other's arms...",
 					noit_mon_nam(mon));
-				if(!rn2(5)){
-					pline("That was a very educational experience.");
-					pluslvl(FALSE);
-					goto pay;
-				} else if(u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER)){
-					You("persuade %s to wind your clockwork.",
-						noit_mon_nam(mon));
-					struct obj *key;
-					int turns = 0;
-					
-					Strcpy(class_list, tools);
-					key = getobj(class_list, "wind with");
-					if (!key){
-						pline1(Never_mind);
-						goto pay;
-					}
-					turns = ask_turns(mon, 0, 0);
-					if(!turns){
-						pline1(Never_mind);
-						goto pay;
-					}
-					turns = (.8 + ((double)rn2(5))) * (turns);
-					lesshungry(turns*10);
-					You("notice %s wound your clockwork %d times.",noit_mon_nam(mon),turns);
-					goto pay;
-				} else {
+				/* effect */
+				if (!rn2(5))
+					seduce_effect(mon, SEDU_EDUCATE);
+				else if (u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER))
+					seduce_effect(mon, SEDU_WIND);
+				else {
 					pline("%s looks happy, but confused.",
 						noit_Monnam(mon));
-					goto pay;
 				}
 			}
-			switch (rn2(5)) {
-			case 0: You_feel("raised to your full potential.");
-				exercise(A_CON, TRUE);
-				u.uenbonus += rnd(10)+5;
-				calc_total_maxen();
-				u.uen = min(u.uen+400,u.uenmax);
-				break;
-			case 1: You_feel("good enough to do it again.");
-				(void) adjattrib(A_CON, 1, TRUE);
-				exercise(A_CON, TRUE);
-				flags.botl = 1;
-				break;
-			case 2: You("will always remember %s...", noit_mon_nam(mon));
-				(void) adjattrib(A_WIS, 1, TRUE);
-				exercise(A_WIS, TRUE);
-				flags.botl = 1;
-				break;
-			case 3: pline("That was a very educational experience.");
-				pluslvl(FALSE);
-				exercise(A_WIS, TRUE);
-				break;
-			case 4: You_feel("restored to health!");
-				u.uhp = u.uhpmax;
-				if (Upolyd) u.mh = u.mhmax;
-				exercise(A_STR, TRUE);
-				flags.botl = 1;
-				break;
+			else {
+				/* message */
+				You("seem to have enjoyed it more than %s...",
+					noit_mon_nam(mon));
+				/* effect */
+				const int good_sedu_effects[] = {
+					SEDU_GAINEN,
+					SEDU_GOODENOUGH,
+					SEDU_REMEMBER,
+					SEDU_EDUCATE,
+					SEDU_RESTOREHP
+				};
+				seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 			}
 		}
-pay:
+
 		if (mon->mtame) /* don't charge */ ;
 		else if (rn2(20) < ACURR(A_CHA)) {
 			pline("%s demands that you pay %s, but you refuse...",
@@ -507,8 +441,8 @@ register struct monst *mon;
 		if (helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_WIS)) {
 			struct trap *ttmp2 = maketrap(u.ux, u.uy, WEB);
 			/* Don't bother with mspec_used here... it didn't get tired! */
-LolthAttacks:
-			if(Blind) You("suddenly find yourself in the arms of a giant spider!");
+		LolthAttacks:
+			if (Blind) You("suddenly find yourself in the arms of a giant spider!");
 			else pline("She suddenly becomes a giant spider and seizes you with her legs!");
 			//Lolth bad
 			if (ttmp2) {
@@ -516,77 +450,32 @@ LolthAttacks:
 				dotrap(ttmp2, NOWEBMSG);
 #ifdef STEED
 				if (u.usteed && u.utrap) {
-				/* you, not steed, are trapped */
-				dismount_steed(DISMOUNT_FELL);
+					/* you, not steed, are trapped */
+					dismount_steed(DISMOUNT_FELL);
 				}
 #endif
 			}
-			if(uclockwork){
-				char buf[BUFSZ];
+			if (uclockwork){
 				pline("%s pauses in momentary confusion...",
 					noit_Monnam(mon));
-				if(rn2(5) && !Drain_resistance){
-					pline("...then tries to suck out your soul with her fangs!");
-					losexp("stolen soul",FALSE,FALSE,FALSE);
-					losexp("stolen soul",FALSE,FALSE,FALSE);
+				if (rn2(5) && !Drain_resistance){
+					seduce_effect(mon, SEDU_SUCKSOUL);
 				}
 				else {
-					pline("...then starts picking through your things!");
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, TRUE);
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, TRUE);
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, TRUE);
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, TRUE);
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, TRUE);
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, TRUE);
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, TRUE);
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, TRUE);
+					seduce_effect(mon, SEDU_STEALEIGHT);
 				}
-			} else {
-			int tmp;
-			pline("After wrapping you up, she bites into your helpless form!");
+			}
+			else {
+				int tmp;
+				pline("After wrapping you up, she bites into your helpless form!");
 				exercise(A_STR, FALSE);
-			tmp = d(6, 8);
-			if(Half_physical_damage) tmp = (tmp+1) / 2;
-			losehp(tmp, "Lolth's bite", KILLED_BY);
-			switch (rn2(2)) {
-				case 0: 
-				if (has_blood(youracedata)) {
-				   Your("blood is being drained!");
-				   /* Get 1/20th of full corpse value
-					* Therefore 4 bites == 1 drink
-					*/
-					if (mon->mtame && !mon->isminion)
-						EDOG(mon)->hungrytime += ((int)((youracedata)->cnutrit / 20) + 1);
-				}
-				if (!mon->mcan && !rn2(3) && !Drain_resistance) {
-					losexp("life force drain",FALSE,FALSE,FALSE);
-					losexp("life force drain",TRUE,FALSE,FALSE);
-				}
-				break;
-				case 1:
-					pline("She injects you with her poison!");
-					if(Poison_resistance) pline_The("poison doesn't seem to affect you.");
-					else {
-					(void) adjattrib(A_CON, -4, TRUE);
-						exercise(A_CON, FALSE);
-					flags.botl = 1;
-					if(!Upolyd || Unchanging){
-						killer = "the poisoned kiss of Lolth's fangs";
-						killer_format = KILLED_BY;
-						done(DIED);
-					} else rehumanize();
-					}
-				break;
+				tmp = d(6, 8);
+				if (Half_physical_damage) tmp = (tmp + 1) / 2;
+				losehp(tmp, "Lolth's bite", KILLED_BY);
+
+				seduce_effect(mon, rn2(2) ? SEDU_VAMP : SEDU_POISONBITE);
 			}
-			}
+			return 1;
 		} else {
 			//Lolth good
 			if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
@@ -601,6 +490,8 @@ LolthAttacks:
 				}
 			}
 			mon->mspec_used = rnd(100); /* monster is worn out */
+
+			/* message */
 			if(Blind) pline("An elf-maid clasps herself to you!");
 			else pline("She becomes a beautiful dark-skinned elf-maid!");
 			if(!uclockwork){
@@ -611,27 +502,14 @@ LolthAttacks:
 				pline("Time stands still while you and %s lie in each other's arms...",
 					noit_mon_nam(mon));
 			}
-			switch (rn2(4)) {
-			case 0: 
-				verbalize("Tell me your greatest desire!");
-				makewish(WISH_VERBOSE);	// can not grant artifacts
-			break;
-			case 1:
-					verbalize("Go forth and slay thy enemies with my blessing!");
-					u.udaminc += d(1,10);
-					u.uhitinc += d(1,10);
-			break;
-			case 2: pline("That was a very educational experience.");
-				pluslvl(FALSE);
-				exercise(A_WIS, TRUE);
-			break;
-			case 3: You_feel("restored to health!");
-				u.uhp = u.uhpmax;
-				if (Upolyd) u.mh = u.mhmax;
-				exercise(A_STR, TRUE);
-				flags.botl = 1;
-				break;
-			}
+			/* effect */
+			const int good_sedu_effects[] = {
+				SEDU_WISH,
+				SEDU_BLESS,
+				SEDU_EDUCATE,
+				SEDU_RESTOREHP
+			};
+			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 		}
 	}
 	if (!rn2(25)) mon->mcan = 1; /* monster is worn out */
@@ -719,172 +597,80 @@ struct monst *mon;
 			noit_mon_nam(mon));
 	}
 	if (Sterile || rn2(139) > ACURR(A_CHA) + ACURR(A_INT)) {
-		if(!uclockwork){
-			pline("%s seems to have enjoyed it more than you...",
-				noit_Monnam(mon));
-		} else{
-			char buf[BUFSZ];
+		if (uclockwork){
 			pline("%s looks briefly confused...",
 				noit_Monnam(mon));
-			if(!rn2(5) && !Drain_resistance){
-				pline("...then tries to suck out your soul with a kiss!");
-				losexp("stolen soul",FALSE,FALSE,FALSE);
-				losexp("stolen soul",FALSE,FALSE,FALSE);
-				losexp("stolen soul",TRUE,FALSE,FALSE);
+			if (!rn2(5) && !Drain_resistance){
+				seduce_effect(mon, SEDU_SUCKSOUL);
 			}
 			else {
-				buf[0] = '\0';
-				steal(mon, buf, FALSE, FALSE);
-			}
-			pline("Before you can get up, %s slips a knife into your gears!",
-			noit_Monnam(mon));
-			if(Half_physical_damage) losehp(rn1(5, 6), "knife to the ribs", KILLED_BY);
-			else losehp(rn1(10, 6), "knife in the gears", KILLED_BY);
-			goto pay;
-		}
-		switch (rn2(5)) {
-			case 0: You_feel("drained of energy.");
-				u.uen = 0;
-				u.uenbonus -= rnd(Half_physical_damage ? 45 : 90);
-					exercise(A_CON, FALSE);
-				calc_total_maxen();
-				break;
-			case 1: You("are down in the dumps.");
-				(void) adjattrib(A_CON, -6, TRUE);
-				(void) adjattrib(A_WIS, -3, TRUE);
-					exercise(A_CON, FALSE);
-				flags.botl = 1;
-				break;
-			case 2: Your("senses are dulled.");
-				(void) adjattrib(A_WIS, -9, TRUE);
-					exercise(A_WIS, FALSE);
-					exercise(A_WIS, FALSE);
-					exercise(A_WIS, FALSE);
-				flags.botl = 1;
-				break;
-			case 3:
-				if (!Drain_resistance) {
-					You_feel("out of shape.");
-					losexp("overexertion",FALSE,FALSE,FALSE);
-					losexp("overexertion",FALSE,FALSE,FALSE);
-					losexp("overexertion",TRUE,FALSE,FALSE);
-				} else {
-					You("have a curious feeling...");
-				}
-				break;
-			case 4: {
-				int tmp;
-				if (!Drain_resistance) {
-					losexp("exhaustion",TRUE,FALSE,FALSE);
-				}
-				You_feel("exhausted.");
-					exercise(A_STR, FALSE);
-					exercise(A_STR, FALSE);
-					exercise(A_STR, FALSE);
-				tmp = rn1(20, 6);
-				if(Half_physical_damage) tmp = (tmp+1) / 2;
-				losehp(tmp, "exhaustion", KILLED_BY);
-				break;
+				seduce_effect(mon, SEDU_STEALONE);
 			}
 		}
-		if(ACURR(A_CHA)+rn1(4,3) < 24){
-			pline("Before you can get up, %s slips a knife between your ribs!",
-			noit_Monnam(mon));
-			if(Half_physical_damage) losehp(rn1(5, 6), "knife to the ribs", KILLED_BY);
-			else losehp(rn1(10, 6), "knife to the ribs", KILLED_BY);
+		else {
+			/* message */
+			pline("%s seems to have enjoyed it more than you...",
+				noit_Monnam(mon));
+			/* just effect */
+			const int bad_sedu_effects[] = {
+				SEDU_DRAINEN,
+				SEDU_DUMPS,
+				SEDU_DULLSENSES,
+				SEDU_DRAINLVL,
+				SEDU_EXHAUSTED
+			};
+			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
+
+		}
+		const char * knife = uclockwork ? "knife to the gears" : "knife to the ribs";
+		if (ACURR(A_CHA) + rn1(4, 3) < 24){
+			pline("Before you can get up, %s slips a knife %s!",
+				noit_Monnam(mon), uclockwork ? "into your gears" : "between your ribs");
+			if (Half_physical_damage) losehp(rn1(5, 6), knife, KILLED_BY);
+			else losehp(rn1(10, 6), knife, KILLED_BY);
 		}
 		else{
 			pline("As you get up, %s tries to knife you, but is too distracted to do it properly!",
 			noit_Monnam(mon));
-			if(Half_physical_damage) losehp(rn1(1, 6), "knife to the ribs", KILLED_BY);
-			else losehp(rn1(2, 6), "knife to the ribs", KILLED_BY);
+			if (Half_physical_damage) losehp(rn1(1, 6), knife, KILLED_BY);
+			else losehp(rn1(2, 6), knife, KILLED_BY);
 		}
 		mon->mspec_used = rnd(13)+3;
-		return 0;
+		return 0; /* keeps making attacks! */
 	} else {
 		mon->mspec_used = rnd(39)+13;
-		if(!uclockwork){
-			You("seem to have enjoyed it more than %s...",
-				noit_mon_nam(mon));
-		} else{
+		if (uclockwork) {
 			pline("Time stands still while you and %s lie in each other's arms...",
 				noit_mon_nam(mon));
 			if(!rn2(5)){
-				pline("That was a very educational experience!");
-				pluslvl(FALSE);
-				pluslvl(FALSE);
-				goto pay;
+				seduce_effect(mon, SEDU_EDUCATE);
 			} else if(u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER)){
-				You("persuade %s to wind your clockwork.",
-					noit_mon_nam(mon));
-				struct obj *key;
-				int turns = 0;
-				
-				Strcpy(class_list, tools);
-				key = getobj(class_list, "wind with");
-				if (!key){
-					pline1(Never_mind);
-					goto pay;
-				}
-				turns = ask_turns(mon, 0, 0);
-				if(!turns){
-					pline1(Never_mind);
-					goto pay;
-				}
-				lesshungry(turns*10);
-				You("notice %s wound your clockwork %d times.",noit_mon_nam(mon),turns);
-				goto pay;
+				seduce_effect(mon, SEDU_WIND);
 			} else {
 				pline("%s looks happy, but confused.",
 					noit_Monnam(mon));
-				goto pay;
 			}
 		}
-		switch (rn2(5)) {
-		case 0: You_feel("raised to your full potential.");
-			exercise(A_CON, TRUE);
-			u.uenbonus += rnd(10)+5;
-			calc_total_maxen();
-			u.uen = min(u.uen+400,u.uenmax);
-			exercise(A_CON, TRUE);
-			break;
-		case 1: You_feel("good enough to do it again.");
-			(void) adjattrib(A_CON, 2, TRUE);
-			exercise(A_CON, TRUE);
-			exercise(A_CON, TRUE);
-			exercise(A_CON, TRUE);
-			flags.botl = 1;
-			break;
-		case 2: You("will always remember %s...", noit_mon_nam(mon));
-			(void) adjattrib(A_WIS, 2, TRUE);
-			exercise(A_WIS, TRUE);
-			exercise(A_WIS, TRUE);
-			exercise(A_WIS, TRUE);
-			flags.botl = 1;
-			break;
-		case 3: pline("That was a very educational experience.");
-			pluslvl(FALSE);
-			exercise(A_WIS, TRUE);
-			pluslvl(FALSE);
-			exercise(A_WIS, TRUE);
-			break;
-		case 4: You_feel("restored to health!");
-			u.uhp = u.uhpmax;
-			if (Upolyd) u.mh = u.mhmax;
-			exercise(A_STR, TRUE);
-			u.uenbonus += rnd(10)+5;
-			calc_total_maxen();
-			u.uen = min(u.uen+400,u.uenmax);
-			flags.botl = 1;
-			break;
+		else {
+			/* message */
+			You("seem to have enjoyed it more than %s...",
+				noit_mon_nam(mon));
+			/* effect */
+			const int good_sedu_effects[] = {
+				SEDU_GAINEN,
+				SEDU_GOODENOUGH,
+				SEDU_REMEMBER,
+				SEDU_EDUCATE,
+				SEDU_RESTOREHP
+			};
+			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 		}
 	}
-pay:
 	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
 	return 1;
 }
 
- int
+int
 dobelialseduce(mon)
 struct monst *mon;
 {
@@ -963,168 +749,78 @@ struct monst *mon;
 			noit_mon_nam(mon));
 	}
 	if (Sterile || rn2(139) > ACURR(A_CHA) + ACURR(A_INT)) {
-		if(!uclockwork){
-			pline("%s seems to have enjoyed it more than you...",
-				noit_Monnam(mon));
-		} else{
-			char buf[BUFSZ];
+		if (uclockwork){
 			pline("%s looks briefly confused...",
 				noit_Monnam(mon));
-			if(!rn2(5) && !Drain_resistance){
-				pline("...then tries to suck out your soul with a kiss!");
-				losexp("stolen soul",FALSE,FALSE,FALSE);
-				losexp("stolen soul",FALSE,FALSE,FALSE);
-				losexp("stolen soul",FALSE,FALSE,FALSE);
+			if (!rn2(5) && !Drain_resistance){
+				seduce_effect(mon, SEDU_SUCKSOUL);
 			}
 			else {
-				buf[0] = '\0';
-				steal(mon, buf, FALSE, FALSE);
+				seduce_effect(mon, SEDU_STEALONE);
 			}
-			pline("Before you can get up, %s slips a knife between your ribs!",
-			noit_Monnam(mon));
-			if(Half_physical_damage) losehp(d(5, 6), "knife to the ribs", KILLED_BY);
-			else losehp(d(10, 6), "knife to the ribs", KILLED_BY);
-			goto pay;
 		}
-		switch (rn2(5)) {
-			case 0: You_feel("drained of energy.");
-				u.uen = 0;
-				u.uenbonus -= rnd(Half_physical_damage ? 45 : 90);
-					exercise(A_CON, FALSE);
-				calc_total_maxen();
+		else {
+			/* message */
+			pline("%s seems to have enjoyed it more than you...",
+				noit_Monnam(mon));
+			/* just effect */
+			const int bad_sedu_effects[] = {
+				SEDU_DRAINEN,
+				SEDU_DUMPS,
+				SEDU_DULLSENSES,
+				SEDU_DRAINLVL,
+				SEDU_EXHAUSTED
+			};
+			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
 
-				break;
-			case 1: You("are down in the dumps.");
-				(void) adjattrib(A_CON, -6, TRUE);
-				(void) adjattrib(A_WIS, -3, TRUE);
-					exercise(A_CON, FALSE);
-				flags.botl = 1;
-				break;
-			case 2: Your("senses are dulled.");
-				(void) adjattrib(A_WIS, -9, TRUE);
-					exercise(A_WIS, FALSE);
-					exercise(A_WIS, FALSE);
-					exercise(A_WIS, FALSE);
-				flags.botl = 1;
-				break;
-			case 3:
-				if (!Drain_resistance) {
-					You_feel("out of shape.");
-					losexp("overexertion",FALSE,FALSE,FALSE);
-					losexp("overexertion",FALSE,FALSE,FALSE);
-					losexp("overexertion",TRUE,FALSE,FALSE);
-				} else {
-					You("have a curious feeling...");
-				}
-				break;
-			case 4: {
-				int tmp;
-				if (!Drain_resistance) {
-					losexp("exhaustion",TRUE,FALSE,FALSE);
-				}
-				You_feel("exhausted.");
-					exercise(A_STR, FALSE);
-					exercise(A_STR, FALSE);
-					exercise(A_STR, FALSE);
-				tmp = d(20, 6);
-				if(Half_physical_damage) tmp = (tmp+1) / 2;
-				losehp(tmp, "exhaustion", KILLED_BY);
-				break;
-			}
 		}
-		if(ACURR(A_CHA)+d(4,3) < 24){
-			pline("Before you can get up, %s slips a knife between your ribs!",
-			noit_Monnam(mon));
-			if(Half_physical_damage) losehp(d(5, 6), "knife to the ribs", KILLED_BY);
-			else losehp(d(10, 6), "knife to the ribs", KILLED_BY);
+		const char * knife = uclockwork ? "knife to the gears" : "knife to the ribs";
+		if (ACURR(A_CHA) + rn1(4, 3) < 24){
+			pline("Before you can get up, %s slips a knife %s!",
+				noit_Monnam(mon), uclockwork ? "into your gears" : "between your ribs");
+			if (Half_physical_damage) losehp(rn1(5, 6), knife, KILLED_BY);
+			else losehp(rn1(10, 6), knife, KILLED_BY);
 		}
 		else{
 			pline("As you get up, %s tries to knife you, but is too distracted to do it properly!",
-			noit_Monnam(mon));
-			if(Half_physical_damage) losehp(d(1, 6), "knife to the ribs", KILLED_BY);
-			else losehp(d(2, 6), "knife to the ribs", KILLED_BY);
+				noit_Monnam(mon));
+			if (Half_physical_damage) losehp(rn1(1, 6), knife, KILLED_BY);
+			else losehp(rn1(2, 6), knife, KILLED_BY);
 		}
-		mon->mspec_used = rnd(13)+3;
-		return 0;
-	} else {
-		mon->mspec_used = rnd(39)+13;
-		if(!uclockwork){
-			You("seem to have enjoyed it more than %s...",
-				noit_mon_nam(mon));
-		} else{
+		mon->mspec_used = rnd(13) + 3;
+		return 0; /* keeps making attacks! */
+	}
+	else {
+		mon->mspec_used = rnd(39) + 13;
+		if (uclockwork) {
 			pline("Time stands still while you and %s lie in each other's arms...",
 				noit_mon_nam(mon));
-			if(!rn2(5)){
-				pline("That was a very educational experience.");
-				pluslvl(FALSE);
-				pluslvl(FALSE);
-				goto pay;
-			} else if(u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER)){
-				You("persuade %s to wind your clockwork.",
-					noit_mon_nam(mon));
-				struct obj *key;
-				int turns = 0;
-				
-				Strcpy(class_list, tools);
-				key = getobj(class_list, "wind with");
-				if (!key){
-					pline1(Never_mind);
-					goto pay;
-				}
-				turns = ask_turns(mon, 0, 0);
-				if(!turns){
-					pline1(Never_mind);
-					goto pay;
-				}
-				lesshungry(turns*10);
-				You("notice %s wound your clockwork %d times.",noit_mon_nam(mon),turns);
-				goto pay;
-			} else {
+			if (!rn2(5)){
+				seduce_effect(mon, SEDU_EDUCATE);
+			}
+			else if (u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER)){
+				seduce_effect(mon, SEDU_WIND);
+			}
+			else {
 				pline("%s looks happy, but confused.",
 					noit_Monnam(mon));
-				goto pay;
 			}
 		}
-		switch (rn2(5)) {
-		case 0: You_feel("raised to your full potential.");
-			exercise(A_CON, TRUE);
-			u.uenbonus += rnd(10)+5;
-			calc_total_maxen();
-			u.uen = min(u.uenmax, u.uen+400);
-			exercise(A_CON, TRUE);
-			break;
-		case 1: You_feel("good enough to do it again.");
-			(void) adjattrib(A_CON, 2, TRUE);
-			exercise(A_CON, TRUE);
-			exercise(A_CON, TRUE);
-			exercise(A_CON, TRUE);
-			flags.botl = 1;
-			break;
-		case 2: You("will always remember %s...", noit_mon_nam(mon));
-			(void) adjattrib(A_WIS, 2, TRUE);
-			exercise(A_WIS, TRUE);
-			exercise(A_WIS, TRUE);
-			exercise(A_WIS, TRUE);
-			flags.botl = 1;
-			break;
-		case 3: pline("That was a very educational experience.");
-			pluslvl(FALSE);
-			exercise(A_WIS, TRUE);
-			pluslvl(FALSE);
-			exercise(A_WIS, TRUE);
-			break;
-		case 4: You_feel("restored to health!");
-			u.uhp = u.uhpmax;
-			if (Upolyd) u.mh = u.mhmax;
-			exercise(A_STR, TRUE);
-			u.uenbonus += rnd(10)+5;
-			calc_total_maxen();
-			u.uen = min(u.uen+400,u.uenmax);
-			flags.botl = 1;
-			break;
+		else {
+			/* message */
+			You("seem to have enjoyed it more than %s...",
+				noit_mon_nam(mon));
+			/* effect */
+			const int good_sedu_effects[] = {
+				SEDU_GAINEN,
+				SEDU_GOODENOUGH,
+				SEDU_REMEMBER,
+				SEDU_EDUCATE,
+				SEDU_RESTOREHP
+			};
+			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 		}
 	}
-pay:
 	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
 	return 1;
 }
@@ -1253,10 +949,7 @@ register struct monst *mon;
 			noit_mon_nam(mon));
 	}
 	if (Sterile || helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_CON) + ACURR(A_INT)) {
-		if(!uclockwork){
-			pline("%s seems to have enjoyed it more than you...",
-				noit_Monnam(mon));
-		} else{
+		if (uclockwork) {
 			pline("...but she becomes enraged when she discovers you're mechanical!");
 			verbalize("How dare you trick me!");
 			pline("She attacks your keyhole with her barbed tail!");
@@ -1266,203 +959,76 @@ register struct monst *mon;
 			losehp(d(4, 4), "an enraged demoness", KILLED_BY);
 			(void) adjattrib(A_CHA, -1*d(2,4), TRUE);
 			AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
-			goto pay;
 		}
-		switch (rn2(8)) {
-			case 0: You_feel("drained of energy.");
-				u.uen = 0;
-				u.uenbonus -= Half_physical_damage ? 45 : 90;
-					exercise(A_CON, FALSE);
-				calc_total_maxen();
-
-				break;
-			case 1: You("are down in the dumps.");
-				u.uhpmod -= Half_physical_damage ? 25 : 50;
-				calc_total_maxhp();
-				(void) adjattrib(A_CON, -2, TRUE);
-				(void) adjattrib(A_STR, -2, TRUE);
-				if (diseasemu(mon->data)) You("seem to have caught a disease!"); 
-					exercise(A_CON, FALSE);
-				flags.botl = 1;
-				break;
-			case 2: Your("mind is dulled.");
-				if(u.sealsActive&SEAL_HUGINN_MUNINN){
-					unbind(SEAL_HUGINN_MUNINN,TRUE);
-				} else {
-					(void) adjattrib(A_INT, -3, TRUE);
-					(void) adjattrib(A_WIS, -3, TRUE);
-					forget(30);
-					exercise(A_WIS, FALSE);
-					exercise(A_WIS, FALSE);
-					exercise(A_WIS, FALSE);
-				}
-				flags.botl = 1;
-				break;
-			case 3:
-				Your("pack feels heavier.");
-				(void) adjattrib(A_STR, -2, TRUE);
-				u.ucarinc -= 100;
-			break;
-			case 4: {
-				int tmp;
-				if (!Drain_resistance) {
-					losexp("exhaustion",FALSE,FALSE,FALSE);
-					losexp("exhaustion",TRUE,FALSE,FALSE);
-				}
-				You_feel("exhausted.");
-					exercise(A_STR, FALSE);
-				tmp = rn1(10, 6);
-				if(Half_physical_damage) tmp = (tmp+1) / 2;
-				losehp(tmp, "exhaustion", KILLED_BY);
-				break;
-			}
-			case 5: {
-				verbalize("If thou art as terrible a fighter as thou art a lover, death shall find you soon.");
-				u.uacinc -= 10;
-				u.udaminc -= 10;
-				u.uhitinc -= 10;
-			}
-			break;
-			case 6:
-				You_feel("robbed... but your possessions are still here...?");
-				attrcurse();
-			break;
-			case 7:
-		    if (Levitation || Weightless||Is_waterlevel(&u.uz))
-				You("are motionlessly suspended.");
-#ifdef STEED
-			else if (u.usteed)
-				You("are frozen in place!");
-#endif
-			else
-				You("are paralyzed!");
-			pline("She has immobilized you with her magic!");
-		    nomul(-(rn1(10, 25)), "immobilized by night-terrors");
-		    nomovemsg = You_can_move_again;
-		    exercise(A_DEX, FALSE);
-			break;
+		else {
+			/* message */
+			pline("%s seems to have enjoyed it more than you...",
+				noit_Monnam(mon));
+			/* effect */
+			const int bad_sedu_effects[] = {
+				SEDU_DRAINEN,
+				SEDU_DUMPS,
+				SEDU_BURDEN,
+				SEDU_DULLSENSES,
+				SEDU_EXHAUSTED,
+				SEDU_CURSE,
+				SEDU_GREMLIN,
+				SEDU_PARALYZE
+			};
+			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
 		}
-		return 1;
+		return 1; /* don't rloc, and that was all for our attacks */
 	} else {
 		mon->mspec_used = rnd(39)+13;
-		if(!uclockwork){
-			You("seem to have enjoyed it more than %s...",
-				noit_mon_nam(mon));
-		} else{
+		if (uclockwork) {
 			pline("She becomes very angry when she discovers your mechanical nature.");
 			pline("She claws at you...");
 			losehp(d(4, 4), "an angry paramour", KILLED_BY);
 			pline("...but you manage to distract her before she does serious harm.");
-			switch(rn2(4)){
-				case 0:
-						verbalize("Thou art wonderful! My favor shall protect you from harm!");
-						/* Well, she's mixing thous and yous in these pronouncements, */
-						/* But apparently she's ALSO overenthused enough to bless somebody who's fighting her, so... */
-						u.uacinc += d(1,10);
-				break;
-				case 1:
-						verbalize("I name you my champion. Go forth and slay thy enemies with my blessing!");
-						u.udaminc += d(1,10);
-						u.uhitinc += d(1,10);
-				break;
-				case 2:
-						verbalize("Truly thou art as a fountain of life!");
-						u.uhpmultiplier += 2;
-						u.uenmultiplier += 2;
-				break;
-				case 3:
-						You_feel("as though you could lift mountains!");
-						u.ucarinc += d(1,4)*50;
-				break;
-			}
-			goto pay;
+			
+			/* effect */
+			const int good_sedu_effects[] = {
+				SEDU_PROTECT,
+				SEDU_BLESS,
+				SEDU_LIFEFONT,
+				SEDU_CARRYCAP
+			};
+			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 		}
-		if(ufem && (ACURR(A_CHA) < rn2(35))){
-			if(rn2(2) || uarmh){
-				pline("She attacks you with her barbed tail!");
-				losehp(d(4, 12), "a jealous demoness", KILLED_BY);
+		else {
+			/* message */
+			You("seem to have enjoyed it more than %s...",
+				noit_mon_nam(mon));
+
+			if (ufem && (ACURR(A_CHA) < rn2(35))){
+				/* jealousy can rob you of a good effect */
+				if (rn2(2) || uarmh){
+					pline("She attacks you with her barbed tail!");
+					losehp(d(4, 12), "a jealous demoness", KILLED_BY);
+				}
+				else{
+					pline("She claws your face!");
+					losehp(d(4, 4), "a jealous demoness", KILLED_BY);
+					(void)adjattrib(A_CHA, -1 * d(2, 4), TRUE);
+					AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
+				}
 			}
-			else{
-				pline("She claws your face!");
-				losehp(d(4, 4), "a jealous demoness", KILLED_BY);
-				(void) adjattrib(A_CHA, -1*d(2,4), TRUE);
-				AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
+			else {
+				/* good effect */
+				const int good_sedu_effects[] = {
+					SEDU_POISRES,
+					SEDU_ACIDRES,
+					SEDU_SICKRES,
+					SEDU_RAISESTATS,
+					SEDU_PROTECT,
+					SEDU_BLESS,
+					SEDU_LIFEFONT,
+					SEDU_CARRYCAP
+				};
+				seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 			}
-		}
-		else switch (rn2(8)) {
-		case 0: 
-			if(!(HPoison_resistance & FROMOUTSIDE)) {
-				You_feel("healthy.");
-				HPoison_resistance |= FROMOUTSIDE;
-			}
-			else pline("but that's about it.");
-		break;
-		case 1: You_feel("raised to your full potential.");
-			(void) adjattrib(A_STR, 2, TRUE);
-			(void) adjattrib(A_DEX, 2, TRUE);
-			(void) adjattrib(A_CON, 2, TRUE);
-			(void) adjattrib(A_INT, 2, TRUE);
-			(void) adjattrib(A_WIS, 2, TRUE);
-			(void) adjattrib(A_CHA, 2, TRUE);
-			exercise(A_STR, TRUE);
-			exercise(A_STR, TRUE);
-			exercise(A_STR, TRUE);
-			exercise(A_DEX, TRUE);
-			exercise(A_DEX, TRUE);
-			exercise(A_DEX, TRUE);
-			exercise(A_CON, TRUE);
-			exercise(A_CON, TRUE);
-			exercise(A_CON, TRUE);
-			exercise(A_INT, TRUE);
-			exercise(A_INT, TRUE);
-			exercise(A_INT, TRUE);
-			exercise(A_WIS, TRUE);
-			exercise(A_WIS, TRUE);
-			exercise(A_WIS, TRUE);
-			exercise(A_CHA, TRUE);
-			exercise(A_CHA, TRUE);
-			exercise(A_CHA, TRUE);
-			flags.botl = 1;
-			break;
-		case 2:
-			if(!(HAcid_resistance & FROMOUTSIDE)) {
-				if(Hallucination) You("like you've gone back to the basics.");
-				else Your("health seems insoluble.");
-				HAcid_resistance |= FROMOUTSIDE;
-			}
-			else pline("but that's about it.");
-		break;
-		case 3:
-			if(!(HSick_resistance & FROMOUTSIDE) && !rn2(4)) {
-				You(Hallucination ? "feel alright." :
-				    "feel healthier than you ever have before.");
-				HSick_resistance |= FROMOUTSIDE;
-			}
-			else pline("but that's about it.");
-		break;
-		case 4:
-				verbalize("Thou art wonderful! My favor shall protect you from harm!");
-				/* Well, she's mixing thous and yous in these pronouncements, */
-				/* But apparently she's ALSO overenthused enough to bless somebody who's fighting her, so... */
-				u.uacinc += d(1,10);
-		break;
-		case 5:
-				verbalize("I name you my champion. Go forth and slay thy enemies with my blessing!");
-				u.udaminc += d(1,10);
-				u.uhitinc += d(1,10);
-		break;
-		case 6:
-				verbalize("Truly thou art as a fountain of life!");
-				u.uhpmultiplier += 2;
-				u.uenmultiplier += 2;
-		break;
-		case 7:
-				You_feel("as though you could lift mountains!");
-				u.ucarinc += d(1,4)*50;
-		break;
 		}
 	}
-pay:
 	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
 	return 1;
 }
@@ -1592,11 +1158,7 @@ register struct monst *mon;
 			noit_mon_nam(mon));
 	}
 	if (Sterile || helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_CON) + ACURR(A_INT)) {
-		struct obj *optr;
-		if(!uclockwork){
-			pline("%s seems to have enjoyed it more than you...",
-				noit_Monnam(mon));
-		} else{
+		if (uclockwork) {
 			pline("...he becomes enraged when he discovers you're mechanical!");
 			verbalize("How dare you trick me!");
 			pline("He viciously bites you!");
@@ -1609,162 +1171,30 @@ register struct monst *mon;
 				morehungry(d(3,8));
 			}
 		}
-		switch (rn2(6)) {
-			case 0: verbalize("Surely you don't need all this junk?!");
-				buf[0] = '\0';
-				steal(mon, buf, FALSE, FALSE);
-				buf[0] = '\0';
-				steal(mon, buf, FALSE, FALSE);
-				buf[0] = '\0';
-				steal(mon, buf, FALSE, FALSE);
-				buf[0] = '\0';
-				steal(mon, buf, FALSE, FALSE);
-				buf[0] = '\0';
-				steal(mon, buf, FALSE, FALSE);
-				buf[0] = '\0';
-				steal(mon, buf, FALSE, FALSE);
-			break;
-			case 1:
-				if(u.twoweap){
-					verbalize("You're going to hurt yourself with those.");
-					u.twoweap = FALSE;
-					optr = uswapwep;
-					setuswapwep((struct obj *)0);
-					freeinv(optr);
-					(void) mpickobj(mon,optr);
-
-					optr = uwep;
-					setuwep((struct obj *)0);
-					freeinv(optr);
-					(void) mpickobj(mon,optr);
-				}
-				else if(uwep && !(uwep->otyp != BAR)){
-					verbalize("You're going to hurt yourself with that.");
-					optr = uwep;
-					setuwep((struct obj *)0);
-					freeinv(optr);
-					(void) mpickobj(mon,optr);
-				}
-				if(!uwep){
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, FALSE);
-					optr = mksobj(BAR, TRUE, FALSE);		
-					curse(optr);
-					optr->spe = -6;
-					verbalize("This will keep you out of trouble.");
-					(void) hold_another_object(optr, u.uswallow ?
-							   "Fortunately, you're out of reach! %s away." :
-							   "Fortunately, you can't hold anything more! %s away.",
-							   The(aobjnam(optr,
-								 Weightless || u.uinwater ?
-								   "slip" : "drop")),
-							   (const char *)0);
-					if(carried(optr)){
-						setuwep(optr);
-					}
-				} else{
-					verbalize("You're so helpless!");
-						losexp("dark speach",FALSE,TRUE,FALSE);
-				}
-			break;
-			case 2:
-				if(uarmh && uarmh->otyp != DUNCE_CAP){
-					Helmet_off();
-				}
-				if(!uarmh){
-					verbalize("This should greatly improve your intellect.");
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, FALSE);
-					optr = mksobj(DUNCE_CAP, TRUE, FALSE);		
-					curse(optr);
-					optr->spe = -6;
-					(void) hold_another_object(optr, u.uswallow ?
-							   "Fortunately, you're out of reach! %s away." :
-							   "Fortunately, you can't hold anything more! %s away.",
-							   The(aobjnam(optr,
-								 Weightless || u.uinwater ?
-								   "slip" : "drop")),
-							   (const char *)0);
-					if(carried(optr)){
-						setworn(optr, W_ARMH);
-						Helmet_on();
-					}
-				}
-				else{
-					verbalize("You're so stupid!");
-					losexp("dark speach",FALSE,TRUE,FALSE);
-				}
-				
-			break;
-			case 3:
-				if(uarmf && uarmf->otyp != FUMBLE_BOOTS){
-					Boots_off();
-				}
-				if(!uarmf){
-					verbalize("These boots will improve your looks.");
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, FALSE);
-					optr = mksobj(FUMBLE_BOOTS, TRUE, FALSE);		
-					curse(optr);
-					optr->spe = -6;
-					(void) hold_another_object(optr, u.uswallow ?
-							   "Fortunately, you're out of reach! %s away." :
-							   "Fortunately, you can't hold anything more! %s away.",
-							   The(aobjnam(optr,
-								 Weightless || u.uinwater ?
-								   "slip" : "drop")),
-							   (const char *)0);
-					if(carried(optr)){
-						setworn(optr, W_ARMF);
-						Boots_on();
-					}
-				}
-				else{
-					verbalize("You're so clumsy!");
-					losexp("dark speach",FALSE,TRUE,FALSE);
-				}
-			break;
-			case 4:
-				if(uamul && uamul->otyp != AMULET_OF_RESTFUL_SLEEP ){
-					Amulet_off();
-				}
-				if(!uamul){
-					verbalize("You need to take things more slowly.");
-					buf[0] = '\0';
-					steal(mon, buf, FALSE, FALSE);
-					optr = mksobj(AMULET_OF_RESTFUL_SLEEP, TRUE, FALSE);		
-					curse(optr);
-					(void) hold_another_object(optr, u.uswallow ?
-							   "Fortunately, you're out of reach! %s away." :
-							   "Fortunately, you can't hold anything more! %s away.",
-							   The(aobjnam(optr,
-								 Weightless || u.uinwater ?
-								   "slip" : "drop")),
-							   (const char *)0);
-					if(carried(optr)){
-						setworn(optr, W_AMUL);
-						Amulet_on();
-					}
-				}
-				else{
-					verbalize("You're so lazy!");
-					losexp("dark speach",FALSE,TRUE,FALSE);
-				}
-			break;
-			case 5:
-			    punish((struct obj *)0);
-			    punish((struct obj *)0);
-			    punish((struct obj *)0);
-				verbalize("Stay here.");
-			break;
+		else {
+			/* message */
+			pline("%s seems to have enjoyed it more than you...",
+				noit_Monnam(mon));
+			/* effect */
+			const int bad_sedu_effects[] = {
+				SEDU_STEALSIX,
+				SEDU_BADWEAP,
+				SEDU_BADHAT,
+				SEDU_BADBOOTS,
+				SEDU_BADAMU,
+				SEDU_PUNISH
+			};
+			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
 		}
-		return 1;
+		return 1; /* don't rloc, that was our only attack */
 	} else {
-		struct obj *optr;
 		mon->mspec_used = rnd(39)+13;
+		/* message */
 		You("seem to have enjoyed it more than %s...",
 			noit_mon_nam(mon));
-		if(!ufem && (ACURR(A_CHA) < rn2(35))){
+
+		if(!ufem && (ACURR(A_CHA) < rn2(35))) {
+			/* jealousy may rob you of a good effect */
 			if(rn2(2) || uarmh || HAcid_resistance){
 				pline("He viciously bites you!");
 				losehp(d(4, 8), "a jealous demon prince", KILLED_BY);
@@ -1776,120 +1206,17 @@ register struct monst *mon;
 				AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
 			}
 		}
-		else switch (rn2(6)) {
-		case 0: 
-			verbalize("Tell me your greatest desire!");
-			makewish(WISH_VERBOSE);	// can not grant artifacts
-		break;
-		case 1:
-			verbalize("Tell me, whom shall I kill?");
-			do_genocide(1);
-		break;
-		case 2:{
-			int i, j;
-			verbalize("I grant you six magics!");
-			/* get six enchantable/chargable pieces of gear that are less than +6 */
-			struct obj * gear[] = {
-				uwep,
-				uarm,
-				uarmc,
-				uarms,
-				uswapwep,
-				uarmh,
-				uarmg,
-				uarmf,
-				uquiver,
-				uarmu,
-				uright,
-				uleft,
-				(struct obj *)0
-				};
-			int len = 12;	/* number of entries in gear */
-			struct obj * otmp;
-			for (i = 6; i > 0 && len >= 0;) {
-				j = rn2(len);
-				otmp = gear[j];
-				if (otmp &&  (
-						otmp->oclass == WEAPON_CLASS ||
-						otmp->oclass == ARMOR_CLASS ||
-						(otmp->oclass == TOOL_CLASS && is_weptool(otmp)) ||
-						(otmp->oclass == RING_CLASS && objects[otmp->otyp].oc_charged && otmp->otyp != RIN_WISHES)
-						) &&
-					otmp->spe < 6) {
-					otmp->spe = 6;
-					i--;
-				}
-				else {
-					for (; j < len; j++)
-						gear[j] = gear[j + 1];
-					len--;
-				}
-			}
-		}break;
-		case 3:{
-			int i;
-			verbalize("I grant you six truths!");
-			for (i = 6; i > 0; i--) {
-				optr = mksobj(POT_ENLIGHTENMENT, TRUE, FALSE);
-				bless(optr);
-				hold_another_object(optr, u.uswallow ?
-				       "Oops!  %s out of your reach!" :
-				       (Weightless ||
-					Is_waterlevel(&u.uz) ||
-					levl[u.ux][u.uy].typ < IRONBARS ||
-					levl[u.ux][u.uy].typ >= ICE) ?
-				       "Oops!  %s away from you!" :
-				       "Oops!  %s to the floor!",
-				       The(aobjnam(optr,
-					     Weightless || u.uinwater ?
-						   "slip" : "drop")),
-				       (const char *)0);
-		   }
-		}break;
-		case 4:
-			verbalize("I grant you life!");
-			optr = mksobj(AMULET_OF_LIFE_SAVING, TRUE, FALSE);		
-			bless(optr);
-			(void) hold_another_object(optr, u.uswallow ?
-				       "Oops!  %s out of your reach!" :
-				       (Weightless ||
-					Is_waterlevel(&u.uz) ||
-					levl[u.ux][u.uy].typ < IRONBARS ||
-					levl[u.ux][u.uy].typ >= ICE) ?
-				       "Oops!  %s away from you!" :
-				       "Oops!  %s to the floor!",
-				       The(aobjnam(optr,
-					     Weightless || u.uinwater ?
-						   "slip" : "drop")),
-				       (const char *)0);
-			if(carried(optr)){
-				if(!uamul){
-					setworn(optr, W_AMUL);
-					Amulet_on();
-				}
-			}
-		break;
-		case 5:{
-			int i;
-			verbalize("I grant you six followers!");
-			for (i = 6; i > 0; i--) {
-				optr = mksobj(FIGURINE, TRUE, FALSE);
-				bless(optr);
-				hold_another_object(optr, u.uswallow ?
-				       "Oops!  %s out of your reach!" :
-				       (Weightless ||
-					Is_waterlevel(&u.uz) ||
-					levl[u.ux][u.uy].typ < IRONBARS ||
-					levl[u.ux][u.uy].typ >= ICE) ?
-				       "Oops!  %s away from you!" :
-				       "Oops!  %s to the floor!",
-				       The(aobjnam(optr,
-					     Weightless || u.uinwater ?
-						   "slip" : "drop")),
-				       (const char *)0);
-		   }
-		}
-		break;
+		else {
+			/* good effect */
+			const int good_sedu_effects[] = {
+				SEDU_WISH,
+				SEDU_GENOCIDE,
+				SEDU_SIXMAGICS,
+				SEDU_SIXTRUTHS,
+				SEDU_SIXFOLLOWERS,
+				SEDU_LIFESAVING
+			};
+			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 		}
 	}
 	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
@@ -2070,284 +1397,6 @@ register struct monst *mon;
 	} else {
 		You("hang back from the %s form beneath the shroud. It poses enticingly.", fem ? "voluptuous feminine" : "muscular masculine");
 	}
-	return 1;
-}
-
-int
-dotemplateseduce(mon)
-register struct monst *mon;
-{
-	register struct obj *ring, *nring;
-	boolean fem = mon->female; /* otherwise incubus */
-	char qbuf[QBUFSZ];
-	struct obj *key;
-	int turns = 0;
-	char class_list[MAXOCLASSES+2];
-//	pline("starting ssex");
-	if (mon->mcan || mon->mspec_used) {
-		pline("%s acts as though %s has got a %sheadache.",
-			  Monnam(mon), mhe(mon),
-			  mon->mcan ? "severe " : "");
-		return 0;
-	}
-
-	if (unconscious()) {
-		pline("%s seems dismayed at your lack of response.",
-			  Monnam(mon));
-		return 0;
-	}
-
-	if (Blind) pline("It caresses you...");
-	else You_feel("very attracted to %s.", mon_nam(mon));
-
-	for(ring = invent; ring; ring = nring) {
-		nring = ring->nobj;
-		if (ring->otyp != RIN_ADORNMENT) continue;
-		if (fem) {
-		if (rn2(20) < ACURR(A_CHA)) {
-			Sprintf(qbuf, "\"That %s looks pretty.  May I have it?\"",
-			safe_qbuf("",sizeof("\"That  looks pretty.  May I have it?\""),
-			xname(ring), simple_typename(ring->otyp), "ring"));
-			makeknown(RIN_ADORNMENT);
-			if (yn(qbuf) == 'n') continue;
-		} else pline("%s decides she'd like your %s, and takes it.",
-			Blind ? "She" : Monnam(mon), xname(ring));
-		makeknown(RIN_ADORNMENT);
-		if (ring==uleft || ring==uright) Ring_gone(ring);
-		if (ring==uwep) setuwep((struct obj *)0);
-		if (ring==uswapwep) setuswapwep((struct obj *)0);
-		if (ring==uquiver) setuqwep((struct obj *)0);
-		freeinv(ring);
-		(void) mpickobj(mon,ring);
-		} else {
-		char buf[BUFSZ];
-
-		if (uleft && uright && uleft->otyp == RIN_ADORNMENT
-				&& (uright->otyp==RIN_ADORNMENT || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)))
-			break;
-		if (ring==uleft || ring==uright) continue;
-		if (rn2(20) < ACURR(A_CHA)) {
-			Sprintf(qbuf,"\"That %s looks pretty.  Would you wear it for me?\"",
-			safe_qbuf("",
-				sizeof("\"That  looks pretty.  Would you wear it for me?\""),
-				xname(ring), simple_typename(ring->otyp), "ring"));
-			makeknown(RIN_ADORNMENT);
-			if (yn(qbuf) == 'n') continue;
-		} else {
-			pline("%s decides you'd look prettier wearing your %s,",
-			Blind ? "He" : Monnam(mon), xname(ring));
-			pline("and puts it on your finger.");
-		}
-		makeknown(RIN_ADORNMENT);
-		if (!uright && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-			pline("%s puts %s on your right %s.",
-			Blind ? "He" : Monnam(mon), the(xname(ring)), body_part(HAND));
-			setworn(ring, RIGHT_RING);
-		} else if (!uleft) {
-			pline("%s puts %s on your left %s.",
-			Blind ? "He" : Monnam(mon), the(xname(ring)), body_part(HAND));
-			setworn(ring, LEFT_RING);
-		} else if (uright && uright->otyp != RIN_ADORNMENT && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-			Strcpy(buf, xname(uright));
-			pline("%s replaces your %s with your %s.",
-			Blind ? "He" : Monnam(mon), buf, xname(ring));
-			Ring_gone(uright);
-			setworn(ring, RIGHT_RING);
-		} else if (uleft && uleft->otyp != RIN_ADORNMENT) {
-			Strcpy(buf, xname(uleft));
-			pline("%s replaces your %s with your %s.",
-			Blind ? "He" : Monnam(mon), buf, xname(ring));
-			Ring_gone(uleft);
-			setworn(ring, LEFT_RING);
-		} else impossible("ring replacement");
-		Ring_on(ring);
-		prinv((char *)0, ring, 0L);
-		}
-	}
-
-	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
-#ifdef TOURIST
-								&& !uarmu
-#endif
-									)
-		pline("%s murmurs sweet nothings into your ear.",
-			Blind ? (fem ? "She" : "He") : Monnam(mon));
-	else
-		pline("%s murmurs in your ear, while helping you undress.",
-			Blind ? (fem ? "She" : "He") : Monnam(mon));
-	mayberem(uarmc, cloak_simple_name(uarmc));
-	if(!uarmc)
-		mayberem(uarm, "suit");
-	mayberem(uarmf, "boots");
-	if(!uwep || !welded(uwep))
-		mayberem(uarmg, "gloves");
-	mayberem(uarms, "shield");
-	mayberem(uarmh, "helmet");
-#ifdef TOURIST
-	if(!uarmc && !uarm)
-		mayberem(uarmu, "shirt");
-#endif
-
-	if (uarm || uarmc) {
-		verbalize("You're such a %s; I wish...",
-				flags.female ? "sweet lady" : "nice guy");
-		if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-		return 1;
-	}
-	if (u.ualign.type == A_CHAOTIC)
-		adjalign(1);
-
-	/* by this point you have discovered mon's identity, blind or not... */
-	if(!uclockwork){
-		pline("Time stands still while you and %s lie in each other's arms...",
-			noit_mon_nam(mon));
-	}
-	else{
-		pline("You and %s lie down together...",
-			noit_mon_nam(mon));
-	}
-	if (Sterile || rn2(35) > (ACURR(A_CHA) + ACURR(A_INT))) {
-		/* Don't bother with mspec_used here... it didn't get tired! */
-		if(!uclockwork){
-			pline("%s seems to have enjoyed it more than you...",
-				noit_Monnam(mon));
-		} else{
-			char buf[BUFSZ];
-			pline("%s looks briefly confused...",
-				noit_Monnam(mon));
-			if(!rn2(5) && !Drain_resistance){
-				pline("...then tries to suck out your soul with a kiss!");
-				losexp("stolen soul",FALSE,FALSE,FALSE);
-			}
-			else {
-				buf[0] = '\0';
-				steal(mon, buf, FALSE, FALSE);
-			}
-			goto pay;
-		}
-		switch (rn2(5)) {
-			case 0: You_feel("drained of energy.");
-				u.uen = 0;
-				u.uenbonus -= rnd(Half_physical_damage ? 5 : 10);
-					exercise(A_CON, FALSE);
-				calc_total_maxen();
-
-				break;
-			case 1: You("are down in the dumps.");
-				(void) adjattrib(A_CON, -1, TRUE);
-					exercise(A_CON, FALSE);
-				flags.botl = 1;
-				break;
-			case 2: Your("senses are dulled.");
-				(void) adjattrib(A_WIS, -1, TRUE);
-					exercise(A_WIS, FALSE);
-				flags.botl = 1;
-				break;
-			case 3:
-				if (!Drain_resistance) {
-					You_feel("out of shape.");
-					losexp("overexertion",TRUE,FALSE,FALSE);
-				} else {
-					You("have a curious feeling...");
-				}
-				break;
-			case 4: {
-				int tmp;
-				You_feel("exhausted.");
-					exercise(A_STR, FALSE);
-				tmp = rn1(10, 6);
-				if(Half_physical_damage) tmp = (tmp+1) / 2;
-				losehp(tmp, "exhaustion", KILLED_BY);
-				break;
-			}
-/*				boolean not_affected=0;
-				int tmp = d(6,6);
-				You_feel("as though you are loosing your mind!");
-				not_affected |= Blind ||
-					(u.umonnum == PM_BLACK_LIGHT ||
-					 u.umonnum == PM_VIOLET_FUNGUS ||
-					 dmgtype(youracedata, AD_HALU));
-				if (!not_affected) {
-				    boolean chg;
-				    chg = make_hallucinated(HHallucination + (long)tmp,FALSE,0L);
-				    You("%s.", chg ? "are freaked out" : "seem unaffected");
-				}
-				(void) adjattrib(A_INT, -1, FALSE);
-				forget(5);
-				exercise(A_WIS, FALSE);
-				exercise(A_WIS, FALSE);
-				exercise(A_INT, FALSE);
-				exercise(A_INT, FALSE);
-*/		}
-	} else {
-		mon->mspec_used = rnd(100); /* monster is worn out */
-		if(!uclockwork){
-			You("seem to have enjoyed it more than %s...",
-				noit_mon_nam(mon));
-		} else{
-			pline("Time stands still while you and %s lie in each other's arms...",
-				noit_mon_nam(mon));
-			if(!rn2(5)){
-				pline("That was a very educational experience.");
-				pluslvl(FALSE);
-				goto pay;
-			} else if(u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER)){
-				You("persuade %s to wind your clockwork.",
-					noit_mon_nam(mon));
-				struct obj *key;
-				int turns = 0;
-				
-				Strcpy(class_list, tools);
-				key = getobj(class_list, "wind with");
-				if (!key){
-					pline1(Never_mind);
-					goto pay;
-				}
-				turns = ask_turns(mon, 0, 0);
-				if(!turns){
-					pline1(Never_mind);
-					goto pay;
-				}
-				turns = (.8 + ((double)rn2(5))) * (turns);
-				lesshungry(turns*10);
-				You("notice %s wound your clockwork %d times.",noit_mon_nam(mon),turns);
-				goto pay;
-			} else {
-				pline("%s looks happy, but confused.",
-					noit_Monnam(mon));
-				goto pay;
-			}
-		}
-		switch (rn2(5)) {
-		case 0: You_feel("raised to your full potential.");
-			exercise(A_CON, TRUE);
-			u.uenbonus += rnd(10)+5;
-			calc_total_maxen();
-			u.uen = min(u.uen+400,u.uenmax);
-			break;
-		case 1: You_feel("good enough to do it again.");
-			(void) adjattrib(A_CON, 1, TRUE);
-			exercise(A_CON, TRUE);
-			flags.botl = 1;
-			break;
-		case 2: You("will always remember %s...", noit_mon_nam(mon));
-			(void) adjattrib(A_WIS, 1, TRUE);
-			exercise(A_WIS, TRUE);
-			flags.botl = 1;
-			break;
-		case 3: pline("That was a very educational experience.");
-			pluslvl(FALSE);
-			exercise(A_WIS, TRUE);
-			break;
-		case 4: You_feel("restored to health!");
-			u.uhp = u.uhpmax;
-			if (Upolyd) u.mh = u.mhmax;
-			exercise(A_STR, TRUE);
-			flags.botl = 1;
-			break;
-		}
-	}
-pay:
 	return 1;
 }
 
@@ -2940,6 +1989,614 @@ boolean helpless;
 		}
 	}
 }
+
+void
+seduce_effect(mon, effect_num)
+struct monst * mon;
+int effect_num;
+{
+	char qbuf[QBUFSZ];
+	struct obj *key;
+	int turns = 0;
+	char class_list[MAXOCLASSES + 2];
+	int tmp;
+	char buf[BUFSZ];
+	struct obj * optr;
+
+	boolean greater = /* lilith/belial seduce */
+		(mon->mtyp == PM_MOTHER_LILITH || mon->mtyp == PM_BELIAL);
+	boolean greatest = /* malcanthet/graz'zt seduce */
+		(mon->mtyp == PM_MALCANTHET || mon->mtyp == PM_GRAZ_ZT);
+
+	if (effect_num < 0)
+	{
+		switch (effect_num)
+		{
+		case SEDU_DRAINEN:
+			You_feel("drained of energy.");
+			drain_en(u.uen * 99 / 100);
+			tmp = (greater || greatest ? 90 : 10) / (Half_physical_damage ? 2 : 1);
+			u.uenbonus -= rnd(tmp);
+			exercise(A_CON, FALSE);
+			calc_total_maxen();
+			break;
+		case SEDU_DUMPS:
+			You("are down in the dumps.");
+			if (greatest) {
+				u.uhpmod -= Half_physical_damage ? 25 : 50;
+				calc_total_maxhp();
+				(void)adjattrib(A_CON, -2, TRUE);
+				(void)adjattrib(A_STR, -2, TRUE);
+				if (diseasemu(mon->data))
+					You("seem to have caught a disease!");
+			}
+			else if (greater) {
+				(void)adjattrib(A_CON, -6, TRUE);
+				(void)adjattrib(A_WIS, -3, TRUE);
+				exercise(A_CON, FALSE);
+			}
+			else {
+				(void)adjattrib(A_CON, -1, TRUE);
+				exercise(A_CON, FALSE);
+			}
+			flags.botl = 1;
+			break;
+		case SEDU_DULLSENSES:
+			Your("%s are dulled.", greatest ? "mind" : "senses");
+			if (greatest) {
+				if (u.sealsActive&SEAL_HUGINN_MUNINN){
+					unbind(SEAL_HUGINN_MUNINN, TRUE);
+				}
+				else {
+					(void)adjattrib(A_INT, -3, TRUE);
+					(void)adjattrib(A_WIS, -3, TRUE);
+					forget(30);
+					exercise(A_WIS, FALSE);
+					exercise(A_WIS, FALSE);
+					exercise(A_WIS, FALSE);
+				}
+			}
+			else if (greater) {
+				(void)adjattrib(A_WIS, -9, TRUE);
+				exercise(A_WIS, FALSE);
+				exercise(A_WIS, FALSE);
+				exercise(A_WIS, FALSE);
+			}
+			else {
+				(void)adjattrib(A_WIS, -1, TRUE);
+				exercise(A_WIS, FALSE);
+			}
+			flags.botl = 1;
+			break;
+		case SEDU_DRAINLVL:
+			if (!Drain_resistance) {
+				You_feel("out of shape.");
+				if (greater) {
+					losexp("overexertion", FALSE, FALSE, FALSE);
+					losexp("overexertion", FALSE, FALSE, FALSE);
+				}
+				losexp("overexertion", TRUE, FALSE, FALSE);
+			}
+			else {
+				You("have a curious feeling...");
+			}
+			break;
+		case SEDU_EXHAUSTED:
+			if (greater) {
+				if (!Drain_resistance) {
+					if (greatest)
+						losexp("exhaustion", FALSE, FALSE, FALSE);
+					losexp("exhaustion", TRUE, FALSE, FALSE);
+				}
+				exercise(A_STR, FALSE);
+				exercise(A_STR, FALSE);
+			}
+			You_feel("exhausted.");
+			exercise(A_STR, FALSE);
+			tmp = rn1(greater || greatest ? 20 : 10, 6);
+			if (Half_physical_damage) tmp = (tmp + 1) / 2;
+			losehp(tmp, "exhaustion", KILLED_BY);
+			break;
+
+
+		case SEDU_SUCKSOUL:
+			if (!Drain_resistance){
+				pline("...then tries to suck out your soul with %s!",
+					mon->mtyp == PM_AVATAR_OF_LOLTH ? "her fangs" : "a kiss");
+				losexp("stolen soul", FALSE, FALSE, FALSE);
+
+				if (mon->mtyp == PM_AVATAR_OF_LOLTH)
+					losexp("stolen soul", FALSE, FALSE, FALSE);
+
+				if (greater) {
+					losexp("stolen soul", FALSE, FALSE, FALSE);
+					losexp("stolen soul", TRUE, FALSE, FALSE);
+				}
+			}
+			break;
+
+		case SEDU_STEALONE:
+			buf[0] = '\0';
+			steal(mon, buf, FALSE, FALSE);
+			break;
+
+		case SEDU_STEALEIGHT:
+			/* flavoured for Lolth */
+			pline("...then starts picking through your things!");
+			for (tmp = 0; tmp < 8; tmp++) {
+				buf[0] = '\0';
+				steal(mon, buf, FALSE, TRUE);
+			}
+
+		case SEDU_VAMP:
+			if (has_blood(youracedata)) {
+				Your("blood is being drained!");
+				/* Get 1/20th of full corpse value
+				* Therefore 4 bites == 1 drink
+				*/
+				if (mon->mtame && !mon->isminion)
+					EDOG(mon)->hungrytime += ((int)((youracedata)->cnutrit / 20) + 1);
+			}
+			if (!mon->mcan && !rn2(3) && !Drain_resistance) {
+				losexp("life force drain", FALSE, FALSE, FALSE);
+				losexp("life force drain", TRUE, FALSE, FALSE);
+			}
+			break;
+		case SEDU_POISONBITE:
+			pline("%s injects you with %s poison!", SheHeIt(mon), hisherits(mon));
+			if (Poison_resistance) pline_The("poison doesn't seem to affect you.");
+			else {
+				(void)adjattrib(A_CON, -4, TRUE);
+				exercise(A_CON, FALSE);
+				flags.botl = 1;
+				if (!Upolyd || Unchanging){
+					killer = "the poisoned kiss of Lolth's fangs";
+					killer_format = KILLED_BY;
+					done(DIED);
+				}
+				else rehumanize();
+			}
+			break;
+
+		case SEDU_BURDEN:
+			Your("pack feels heavier.");
+			(void)adjattrib(A_STR, -2, TRUE);
+			u.ucarinc -= 100;
+			break;
+
+		case SEDU_CURSE:
+			verbalize("If thou art as terrible a fighter as thou art a lover, death shall find you soon.");
+			u.uacinc -= 10;
+			u.udaminc -= 10;
+			u.uhitinc -= 10;
+			break;
+
+		case SEDU_GREMLIN:
+			You_feel("robbed... but your possessions are still here...?");
+			attrcurse();
+			break;
+
+		case SEDU_PARALYZE:
+			if (Levitation || Weightless || Is_waterlevel(&u.uz))
+				You("are motionlessly suspended.");
+#ifdef STEED
+			else if (u.usteed)
+				You("are frozen in place!");
+#endif
+			else
+				You("are paralyzed!");
+			pline("She has immobilized you with her magic!");
+			nomul(-(rn1(10, 25)), "immobilized by night-terrors");
+			nomovemsg = You_can_move_again;
+			exercise(A_DEX, FALSE);
+			break;
+
+		case SEDU_STEALSIX:
+			verbalize("Surely you don't need all this junk?!");
+			for (tmp = 0; tmp < 6; tmp++) {
+				buf[0] = '\0';
+				steal(mon, buf, FALSE, FALSE);
+			}
+			break;
+
+		case SEDU_BADWEAP:
+			if (u.twoweap){
+				verbalize("You're going to hurt yourself with those.");
+				u.twoweap = FALSE;
+				optr = uswapwep;
+				setuswapwep((struct obj *)0);
+				freeinv(optr);
+				(void)mpickobj(mon, optr);
+
+				optr = uwep;
+				setuwep((struct obj *)0);
+				freeinv(optr);
+				(void)mpickobj(mon, optr);
+			}
+			else if (uwep && !(uwep->otyp != BAR)){
+				verbalize("You're going to hurt yourself with that.");
+				optr = uwep;
+				setuwep((struct obj *)0);
+				freeinv(optr);
+				(void)mpickobj(mon, optr);
+			}
+			if (!uwep){
+				buf[0] = '\0';
+				steal(mon, buf, FALSE, FALSE);
+				optr = mksobj(BAR, TRUE, FALSE);
+				curse(optr);
+				optr->spe = -6;
+				verbalize("This will keep you out of trouble.");
+				(void)hold_another_object(optr, u.uswallow ?
+					"Fortunately, you're out of reach! %s away." :
+					"Fortunately, you can't hold anything more! %s away.",
+					The(aobjnam(optr,
+					Weightless || u.uinwater ?
+					"slip" : "drop")),
+					(const char *)0);
+				if (carried(optr)){
+					setuwep(optr);
+				}
+			}
+			else{
+				verbalize("You're so helpless!");
+				losexp("dark speech", FALSE, TRUE, FALSE);
+			}
+			break;
+		case SEDU_BADHAT:
+			if (uarmh && uarmh->otyp != DUNCE_CAP){
+				Helmet_off();
+			}
+			if (!uarmh){
+				verbalize("This should greatly improve your intellect.");
+				buf[0] = '\0';
+				steal(mon, buf, FALSE, FALSE);
+				optr = mksobj(DUNCE_CAP, TRUE, FALSE);
+				curse(optr);
+				optr->spe = -6;
+				(void)hold_another_object(optr, u.uswallow ?
+					"Fortunately, you're out of reach! %s away." :
+					"Fortunately, you can't hold anything more! %s away.",
+					The(aobjnam(optr,
+					Weightless || u.uinwater ?
+					"slip" : "drop")),
+					(const char *)0);
+				if (carried(optr)){
+					setworn(optr, W_ARMH);
+					Helmet_on();
+				}
+			}
+			else{
+				verbalize("You're so stupid!");
+				losexp("dark speech", FALSE, TRUE, FALSE);
+			}
+
+			break;
+		case SEDU_BADBOOTS:
+			if (uarmf && uarmf->otyp != FUMBLE_BOOTS){
+				Boots_off();
+			}
+			if (!uarmf){
+				verbalize("These boots will improve your looks.");
+				buf[0] = '\0';
+				steal(mon, buf, FALSE, FALSE);
+				optr = mksobj(FUMBLE_BOOTS, TRUE, FALSE);
+				curse(optr);
+				optr->spe = -6;
+				(void)hold_another_object(optr, u.uswallow ?
+					"Fortunately, you're out of reach! %s away." :
+					"Fortunately, you can't hold anything more! %s away.",
+					The(aobjnam(optr,
+					Weightless || u.uinwater ?
+					"slip" : "drop")),
+					(const char *)0);
+				if (carried(optr)){
+					setworn(optr, W_ARMF);
+					Boots_on();
+				}
+			}
+			else{
+				verbalize("You're so clumsy!");
+				losexp("dark speech", FALSE, TRUE, FALSE);
+			}
+			break;
+		case SEDU_BADAMU:
+			if (uamul && uamul->otyp != AMULET_OF_RESTFUL_SLEEP){
+				Amulet_off();
+			}
+			if (!uamul){
+				verbalize("You need to take things more slowly.");
+				buf[0] = '\0';
+				steal(mon, buf, FALSE, FALSE);
+				optr = mksobj(AMULET_OF_RESTFUL_SLEEP, TRUE, FALSE);
+				curse(optr);
+				(void)hold_another_object(optr, u.uswallow ?
+					"Fortunately, you're out of reach! %s away." :
+					"Fortunately, you can't hold anything more! %s away.",
+					The(aobjnam(optr,
+					Weightless || u.uinwater ?
+					"slip" : "drop")),
+					(const char *)0);
+				if (carried(optr)){
+					setworn(optr, W_AMUL);
+					Amulet_on();
+				}
+			}
+			else{
+				verbalize("You're so lazy!");
+				losexp("dark speech", FALSE, TRUE, FALSE);
+			}
+			break;
+		case SEDU_PUNISH:
+			punish((struct obj *)0);
+			punish((struct obj *)0);
+			punish((struct obj *)0);
+			verbalize("Stay here.");
+			break;
+		}
+	}
+	else {
+		switch (effect_num)
+		{
+		case SEDU_GAINEN:
+			You_feel("raised to your full potential.");
+			exercise(A_CON, TRUE);
+			if (greater)
+				exercise(A_CON, TRUE);
+			u.uenbonus += rnd(10) + 5;
+			calc_total_maxen();
+			u.uen = min(u.uen + 400, u.uenmax);
+			break;
+		case SEDU_GOODENOUGH:
+			You_feel("good enough to do it again.");
+			(void)adjattrib(A_CON, 1 + greater, TRUE);
+			exercise(A_CON, TRUE);
+			if (greater) {
+				exercise(A_CON, TRUE);
+				exercise(A_CON, TRUE);
+			}
+			flags.botl = 1;
+			break;
+		case SEDU_REMEMBER:
+			You("will always remember %s...", noit_mon_nam(mon));
+			(void)adjattrib(A_WIS, 1 + greater, TRUE);
+			exercise(A_WIS, TRUE);
+			if (greater) {
+				exercise(A_WIS, TRUE);
+				exercise(A_WIS, TRUE);
+			}
+			flags.botl = 1;
+			break;
+		case SEDU_EDUCATE:
+			pline("That was a very educational experience.");
+			pluslvl(FALSE);
+			exercise(A_WIS, TRUE);
+			if (greater) {
+				pluslvl(FALSE);
+				exercise(A_WIS, TRUE);
+			}
+			break;
+		case SEDU_RESTOREHP:
+			You_feel("restored to health!");
+			u.uhp = u.uhpmax;
+			if (Upolyd) u.mh = u.mhmax;
+			exercise(A_STR, TRUE);
+			if (greater) {
+				u.uenbonus += rnd(10) + 5;
+				calc_total_maxen();
+				u.uen = min(u.uen + 400, u.uenmax);
+			}
+			flags.botl = 1;
+			break;
+
+		case SEDU_WIND:
+			if (!uclockwork || Race_if(PM_INCANTIFIER)) {
+				impossible("Can't wind you!");
+				break;
+			}
+			You("persuade %s to wind your clockwork.",
+				noit_mon_nam(mon));
+			struct obj *key;
+			int turns = 0;
+
+			Strcpy(class_list, tools);
+			key = getobj(class_list, "wind with");
+			if (!key){
+				pline1(Never_mind);
+			}
+			else {
+				turns = ask_turns(mon, 0, 0);
+				if (!turns){
+					pline1(Never_mind);
+				}
+				else {
+					turns = (.8 + ((double)rn2(5))) * (turns);
+					lesshungry(turns * 10);
+					You("notice %s wound your clockwork %d times.", noit_mon_nam(mon), turns);
+				}
+			}
+			break;
+
+		case SEDU_WISH:
+			verbalize("Tell me your greatest desire!");
+			makewish(WISH_VERBOSE);	// can not grant artifacts
+			break;
+
+		case SEDU_BLESS:
+			verbalize("Go forth and slay thy enemies with my blessing!");
+			u.udaminc += d(1, 10);
+			u.uhitinc += d(1, 10);
+			break;
+
+		case SEDU_PROTECT:
+			verbalize("Thou art wonderful! My favor shall protect you from harm!");
+			/* Well, she's mixing thous and yous in these pronouncements, */
+			/* But apparently she's ALSO overenthused enough to bless somebody who's fighting her, so... */
+			u.uacinc += d(1, 10);
+			break;
+
+		case SEDU_RAISESTATS:
+			You_feel("raised to your full potential.");
+			/* raises all stats by 2 and exercises them 3 times each */
+			for (tmp = 0; tmp < 18; tmp++) {
+				if (tmp % 3 == 0)
+					adjattrib(tmp / 3, 2, TRUE);
+				exercise(tmp / 3, TRUE);
+			}
+			flags.botl = 1;
+			break;
+
+		case SEDU_LIFEFONT:
+			verbalize("Truly thou art as a fountain of life!");
+			u.uhpmultiplier += 2;
+			u.uenmultiplier += 2;
+			break;
+
+		case SEDU_CARRYCAP:
+			You_feel("as though you could lift mountains!");
+			u.ucarinc += d(1, 4) * 50;
+			break;
+
+		case SEDU_POISRES:
+			if (!(HPoison_resistance & FROMOUTSIDE)) {
+				You_feel("healthy.");
+				HPoison_resistance |= FROMOUTSIDE;
+			}
+			else pline("but that's about it.");
+			break;
+		case SEDU_ACIDRES:
+			if (!(HAcid_resistance & FROMOUTSIDE)) {
+				if (Hallucination) You("like you've gone back to the basics.");
+				else Your("health seems insoluble.");
+				HAcid_resistance |= FROMOUTSIDE;
+			}
+			else pline("but that's about it.");
+			break;
+		case SEDU_SICKRES:
+			if (!(HSick_resistance & FROMOUTSIDE) && !rn2(4)) {
+				You(Hallucination ? "feel alright." :
+					"feel healthier than you ever have before.");
+				HSick_resistance |= FROMOUTSIDE;
+			}
+			else pline("but that's about it.");
+			break;
+
+		case SEDU_GENOCIDE:
+			verbalize("Tell me, whom shall I kill?");
+			do_genocide(1);
+			break;
+
+		case SEDU_SIXMAGICS:{
+								int i, j;
+								verbalize("I grant you six magics!");
+								/* get six enchantable/chargable pieces of gear that are less than +6 */
+								struct obj * gear[] = {
+									uwep,
+									uarm,
+									uarmc,
+									uarms,
+									uswapwep,
+									uarmh,
+									uarmg,
+									uarmf,
+									uquiver,
+									uarmu,
+									uright,
+									uleft,
+									(struct obj *)0
+								};
+								int len = SIZE(gear);
+								struct obj * otmp;
+								for (i = 6; i > 0 && len >= 0;) {
+									j = rn2(len);
+									otmp = gear[j];
+									if (otmp && (
+										otmp->oclass == WEAPON_CLASS ||
+										otmp->oclass == ARMOR_CLASS ||
+										(otmp->oclass == TOOL_CLASS && is_weptool(otmp)) ||
+										(otmp->oclass == RING_CLASS && objects[otmp->otyp].oc_charged && otmp->otyp != RIN_WISHES)
+										) &&
+										otmp->spe < 6) {
+										otmp->spe = 6;
+										i--;
+									}
+									else {
+										for (; j < len; j++)
+											gear[j] = gear[j + 1];
+										len--;
+									}
+								}}
+			break;
+
+		case SEDU_SIXTRUTHS:
+			verbalize("I grant you six truths!");
+			for (tmp = 0; tmp < 6; tmp++) {
+				optr = mksobj(POT_ENLIGHTENMENT, TRUE, FALSE);
+				bless(optr);
+				hold_another_object(optr, u.uswallow ?
+					"Oops!  %s out of your reach!" :
+					(Weightless ||
+					Is_waterlevel(&u.uz) ||
+					levl[u.ux][u.uy].typ < IRONBARS ||
+					levl[u.ux][u.uy].typ >= ICE) ?
+					"Oops!  %s away from you!" :
+					"Oops!  %s to the floor!",
+					The(aobjnam(optr,
+					Weightless || u.uinwater ?
+					"slip" : "drop")),
+					(const char *)0);
+			}
+			break;
+
+		case SEDU_SIXFOLLOWERS:
+			verbalize("I grant you six followers!");
+			for (tmp = 0; tmp < 6; tmp++) {
+				optr = mksobj(FIGURINE, TRUE, FALSE);
+				bless(optr);
+				hold_another_object(optr, u.uswallow ?
+					"Oops!  %s out of your reach!" :
+					(Weightless ||
+					Is_waterlevel(&u.uz) ||
+					levl[u.ux][u.uy].typ < IRONBARS ||
+					levl[u.ux][u.uy].typ >= ICE) ?
+					"Oops!  %s away from you!" :
+					"Oops!  %s to the floor!",
+					The(aobjnam(optr,
+					Weightless || u.uinwater ?
+					"slip" : "drop")),
+					(const char *)0);
+			}
+			break;
+
+		case SEDU_LIFESAVING:
+			verbalize("I grant you life!");
+			optr = mksobj(AMULET_OF_LIFE_SAVING, TRUE, FALSE);
+			bless(optr);
+			(void)hold_another_object(optr, u.uswallow ?
+				"Oops!  %s out of your reach!" :
+				(Weightless ||
+				Is_waterlevel(&u.uz) ||
+				levl[u.ux][u.uy].typ < IRONBARS ||
+				levl[u.ux][u.uy].typ >= ICE) ?
+				"Oops!  %s away from you!" :
+				"Oops!  %s to the floor!",
+				The(aobjnam(optr,
+				Weightless || u.uinwater ?
+				"slip" : "drop")),
+				(const char *)0);
+			if (carried(optr)){
+				if (!uamul){
+					setworn(optr, W_AMUL);
+					Amulet_on();
+				}
+			}
+			break;
+		}
+	}
+	return;
+}
+
+
 #endif  /* SEDUCE */
 
 #endif /* OVLB */
