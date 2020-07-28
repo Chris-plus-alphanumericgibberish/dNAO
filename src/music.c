@@ -1732,8 +1732,8 @@ struct obj *instr;
 			losehp(damage, buf, KILLED_BY);
 		    }
 		} else {
-		    buzz((instr->otyp == FROST_HORN) ? AD_COLD : AD_FIRE, WAND_CLASS, TRUE,
-			 rn1(6,6), u.ux, u.uy, u.dx, u.dy,0,0);
+			zap(&youmonst, u.ux, u.uy, u.dx, u.dy, rn1(7, 7),
+				basiczap(0, ((instr->otyp == FROST_HORN) ? AD_COLD : AD_FIRE), ZAP_WAND, rn1(6, 6)));
 		}
 		makeknown(instr->otyp);
 		if(uwep && uwep->oartifact == ART_SINGING_SWORD){

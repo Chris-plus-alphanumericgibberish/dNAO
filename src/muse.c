@@ -1296,8 +1296,8 @@ register struct obj *otmp;
 	return 0;
 }
 
-/* A modified bhit() for monsters.  Based on bhit() in zap.c.  Unlike
- * buzz(), bhit() doesn't take into account the possibility of a monster
+/* A modified bhit() for monsters.  Based on bhit() in zap.c.
+ * bhit() doesn't take into account the possibility of a monster
  * zapping you, so we need a special function for it.  (Unless someone wants
  * to merge the two functions...)
  */
@@ -1419,10 +1419,10 @@ struct monst *mtmp;
 		otmp->spe--;
 		if (oseen) makeknown(otmp->otyp);
 		m_using = TRUE;
-		buzz(wand_adtype(otmp->otyp), WAND_CLASS, FALSE,
-			(otmp->otyp == WAN_MAGIC_MISSILE) ? 2 : 6,
-			mtmp->mx, mtmp->my,
-			sgn(tbx), sgn(tby),0,0);
+		
+		zap(mtmp, mtmp->mx, mtmp->my, sgn(tbx), sgn(tby), rn1(7, 7),
+			basiczap(0, wand_adtype(otmp->otyp), ZAP_WAND, (otmp->otyp == WAN_MAGIC_MISSILE) ? 2 : 6));
+
 		m_using = FALSE;
 		if(u.ux != mtmp->mux || u.uy != mtmp->muy){
 			mtmp->mux = mtmp->muy = 0;
@@ -1437,9 +1437,10 @@ struct monst *mtmp;
 			You_hear("a horn being played.");
 		otmp->spe--;
 		m_using = TRUE;
-		buzz(((otmp->otyp==FROST_HORN) ? AD_COLD : AD_FIRE), WAND_CLASS, FALSE,
-			rn1(6,6), mtmp->mx, mtmp->my,
-			sgn(tbx), sgn(tby),0,0);
+
+		zap(mtmp, mtmp->mx, mtmp->my, sgn(tbx), sgn(tby), rn1(7, 7),
+			basiczap(0, ((otmp->otyp == FROST_HORN) ? AD_COLD : AD_FIRE), ZAP_WAND, rn1(6, 6)));
+
 		m_using = FALSE;
 		if(u.ux != mtmp->mux || u.uy != mtmp->muy){
 			mtmp->mux = mtmp->muy = 0;

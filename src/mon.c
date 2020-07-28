@@ -6791,10 +6791,16 @@ kill_genocided_monsters()
 
 void
 golemeffects(mon, damtype, dam)
-register struct monst *mon;
+struct monst *mon;
 int damtype, dam;
 {
     int heal = 0, slow = 0;
+
+	/* intercept player */
+	if (mon == &youmonst) {
+		ugolemeffects(damtype, dam);
+		return;
+	}
 
     if (mon->mtyp == PM_FLESH_GOLEM) {
 	if (damtype == AD_ELEC) heal = dam / 6;
@@ -6817,6 +6823,36 @@ int damtype, dam;
 		pline("%s seems healthier.", Monnam(mon));
 	}
     }
+}
+
+/* metroid is hit by a death ray and splits off more metroids */
+void
+bud_metroid(mon)
+struct monst * mon;
+{
+	if (mon->mtyp == PM_METROID){
+		if (canseemon(mon))
+			pline("The metroid is irradiated with pure energy!  It divides!");
+		makemon(&mons[PM_METROID], mon->mx, mon->my, MM_ADJACENTOK);
+	}
+	else if (mon->mtyp == PM_ALPHA_METROID || mon->mtyp == PM_GAMMA_METROID){
+		if (canseemon(mon))
+			pline("The metroid is irradiated with pure energy!  It buds off a baby metroid!");
+		makemon(&mons[PM_BABY_METROID], mon->mx, mon->my, MM_ADJACENTOK);
+	}
+	else if (mon->mtyp == PM_ZETA_METROID || mon->mtyp == PM_OMEGA_METROID){
+		if (canseemon(mon))
+			pline("The metroid is irradiated with pure energy!  It buds off another metroid!");
+		makemon(&mons[PM_METROID], mon->mx, mon->my, MM_ADJACENTOK);
+	}
+	else if (mon->mtyp == PM_METROID_QUEEN){
+		if (canseemon(mon))
+			pline("The metroid queen is irradiated with pure energy!  She buds off more metroids!");
+		makemon(&mons[PM_METROID], mon->mx, mon->my, MM_ADJACENTOK);
+		makemon(&mons[PM_METROID], mon->mx, mon->my, MM_ADJACENTOK);
+		makemon(&mons[PM_METROID], mon->mx, mon->my, MM_ADJACENTOK);
+	}
+	return;
 }
 
 boolean

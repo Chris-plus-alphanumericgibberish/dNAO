@@ -1488,6 +1488,7 @@ E int FDECL(egg_type_from_parent, (int,BOOLEAN_P));
 E boolean FDECL(dead_species, (int,BOOLEAN_P));
 E void NDECL(kill_genocided_monsters);
 E void FDECL(golemeffects, (struct monst *,int,int));
+E void FDECL(bud_metroid, (struct monst *));
 E boolean FDECL(angry_guards, (BOOLEAN_P));
 E void NDECL(pacify_guards);
 E void FDECL(removeMonster,(int,int));
@@ -3011,6 +3012,7 @@ E int FDECL(count_wsegs, (struct monst *));
 E boolean FDECL(worm_known, (struct monst *));
 
 /* ### worn.c ### */
+E boolean FDECL(item_has_property, (struct obj *, int));
 E void FDECL(get_item_property_list, (int *, struct obj*, int));
 E void FDECL(setworn, (struct obj *,long));
 E void FDECL(setnotworn, (struct obj *));
@@ -3125,6 +3127,8 @@ E int FDECL(bhitpile, (struct obj *,int (*)(OBJ_P,OBJ_P),int,int));
 E int FDECL(zappable, (struct obj *));
 E void FDECL(zapnodir, (struct obj *));
 E int NDECL(dozap);
+E struct zapdata * FDECL(basiczap, (struct zapdata *, int, int, int));
+E void FDECL(zap, (struct monst *, int, int, int, int, int, struct zapdata *));
 E int FDECL(zapyourself, (struct obj *,BOOLEAN_P));
 E boolean FDECL(cancel_monst, (struct monst *,struct obj *,
 			       BOOLEAN_P,BOOLEAN_P,BOOLEAN_P,int));

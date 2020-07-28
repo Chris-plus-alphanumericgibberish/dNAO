@@ -2590,6 +2590,7 @@ int tary;
 {
 	boolean youagr = (magr == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct zapdata zapdata;
 	int typ = attk->adtyp;
 	int mult = 1;
 	static const int chromatic_dragon_breaths[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_DRST, AD_DISN, AD_ACID };
@@ -2653,18 +2654,18 @@ int tary;
 		pline("%s breathes %s!", Monnam(magr), breathwep(typ));
 	}
 	
-	/* set dragonbreath flag if applicable*/
-	if (is_true_dragon(pa))
-		flags.drgn_brth = TRUE;
-	/* do the beam (sadly buzz doesn't do dz) */
-	buzz(typ, FOOD_CLASS, FALSE, (int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)),
-		x(magr), y(magr), dx, dy, 0, attk->damd ? (d((int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)), (int)attk->damd)*mult) : 0);
-	/* reset flag */
-	flags.drgn_brth = FALSE;
 
-	/* interrupt player if they were targetted */
-	if (tarx == u.ux && tary == u.uy)
-		nomul(0, NULL);
+	/* set up zapdata */
+	basiczap(&zapdata, typ, ZAP_BREATH, 0);
+
+	/* set dragonbreath if applicable*/
+	if (is_true_dragon(pa))
+		zapdata.unreflectable = ZAP_REFL_ADVANCED;
+	/* set damage */
+	zapdata.damn = attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3));
+	zapdata.damd = (attk->damd ? attk->damd : 6) * mult;
+
+	zap(magr, x(magr), y(magr), dx, dy, rn1(7, 7), &zapdata);
 
 	/* breath runs out sometimes. */ 
 	if (!youagr) {

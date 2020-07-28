@@ -2028,11 +2028,23 @@ int tary;
 			else {
 				dmg = 1;
 			}
+			/* extra message for the silver */
+			if (youdef && hates_silver(youracedata)) {
+				if (noncorporeal(youracedata)) {
+					pline("The silver stars sear you!");
+				}
+				else {
+					pline("The silver stars sear your %s!", body_part(BODY_FLESH));
+				}
+			}
 			return xdamagey(magr, mdef, attk, dmg);
 		}
 	}
 	/* ranged magic */
 	else {
+		/* set up zapdata structure */
+		struct zapdata zapdata = { 0 };
+
 		/* determine if magr and mdef are lined up (or magr thinks they are) */
 		/* also checks for direct friendly fire */
 		if (m_online(magr, mdef, tarx, tary, (youagr ? FALSE : (magr->mtame && !magr->mconf)), FALSE)) {
@@ -2052,16 +2064,19 @@ int tary;
 				/* Oona */
 				adtyp = u.oonaenergy;
 			}
+			/* now that we have finallized adtyp, do basic setup of zapdata structure */
+			basiczap(&zapdata, adtyp, ZAP_SPELL, dmn);
+
 			/* message */
 			if (youdef) {
 				/* message */
 				if (canseemon(magr)) {
 					pline("%s zaps you with a %s!", Monnam(magr),
-						flash_type(adtyp, SPBOOK_CLASS));
+						flash_type(adtyp, ZAP_SPELL));
 				}
 				else {
 					You("are zapped with a %s!",
-						flash_type(adtyp, SPBOOK_CLASS));
+						flash_type(adtyp, ZAP_SPELL));
 				}
 			}
 			else {
@@ -2071,25 +2086,26 @@ int tary;
 							(youagr ? "You" : Monnam(magr)),
 							(youagr ? "zap" : "zaps"),
 							(canspotmon(mdef) ? mon_nam(mdef) : "something"),
-							flash_type(adtyp, SPBOOK_CLASS)
+							flash_type(adtyp, ZAP_SPELL)
 							);
 					}
 					else {
 						pline("%s %s a %s!",
 							(youagr ? "You" : Monnam(magr)),
 							(youagr ? "cast" : "casts"),
-							flash_type(adtyp, SPBOOK_CLASS)
+							flash_type(adtyp, ZAP_SPELL)
 							);
 					}
 				}
 			}
-			/* interrupt player if zap will hit */
-			if (youdef && foundem)
-				nomul(0, NULL);
+			/* modify zap for some spells */
+			if (adtyp == AD_STAR) {
+				zapdata.unreflectable = ZAP_REFL_NEVER;
+				zapdata.damd = 8;
+			}
 
 			/* do the zap */
-			buzz(adtyp, SPBOOK_CLASS, FALSE, dmn,
-				x(magr), y(magr), sgn(tarx-x(magr)), sgn(tary-y(magr)), 0, 0);
+			zap(magr, x(magr), y(magr), sgn(tarx - x(magr)), sgn(tary - y(magr)), rn1(7, 7), &zapdata);
 
 			/* return result */
 			/* unfortunately, cannot tell if either lifesaved */

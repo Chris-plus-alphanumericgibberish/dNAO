@@ -45,6 +45,38 @@ const struct worn {
 		/* note: monsters don't have clairvoyance, so your role
 		   has no significant effect on their use of w_blocks() */
 
+
+/* returns TRUE if obj confers prop
+ * also checks artifact properties
+ */
+boolean
+item_has_property(obj, prop)
+struct obj * obj;
+int prop;
+{
+	int property_list[LAST_PROP];
+	int i;
+	/* first check object (ocl, oprops) */
+	get_item_property_list(property_list, obj, obj->otyp);
+	for (i = 0; property_list[i] != 0; i++)	{
+		if (property_list[i] == prop)
+			return TRUE;
+	}
+	/* then while-worn artifact properties */
+	get_art_property_list(property_list, obj->oartifact, FALSE);
+	for (i = 0; property_list[i] != 0; i++)	{
+		if (property_list[i] == prop)
+			return TRUE;
+	}
+	/* then while-carried artifact properties */
+	get_art_property_list(property_list, obj->oartifact, TRUE);
+	for (i = 0; property_list[i] != 0; i++)	{
+		if (property_list[i] == prop)
+			return TRUE;
+	}
+	return FALSE;
+}
+
 /* 
  * Fills an int array propert_list with all the properties (from prop.h) an item has
  *

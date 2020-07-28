@@ -1160,34 +1160,7 @@ boolean
 arti_reflects(obj)
 struct obj *obj;
 {
-	int i;
-	int proplist[LAST_PROP];
-
-	/* first check normal item properties */
-	i = 0;
-	get_item_property_list(proplist, obj, obj->otyp);
-	while (proplist[i]) {
-		if (proplist[i] == REFLECTING)
-			return TRUE;
-		i++;
-	}
-	/* then while-worn artifact properties */
-	i = 0;
-	get_art_property_list(proplist, obj->oartifact, FALSE);
-	while (proplist[i]) {
-		if (proplist[i] == REFLECTING)
-			return TRUE;
-		i++;
-	}
-	/* then while-carried artifact properties */
-	i = 0;
-	get_art_property_list(proplist, obj->oartifact, TRUE);
-	while (proplist[i]) {
-		if (proplist[i] == REFLECTING)
-			return TRUE;
-		i++;
-	}
-    return FALSE;
+	return item_has_property(obj, REFLECTING);
 }
 
 #endif /* OVL0 */
@@ -3362,7 +3335,7 @@ boolean * messaged;
 			(abs(deltax) <= 1) &&
 			(abs(deltay) <= 1)
 			){
-			buzz(AD_ELEC, WAND_CLASS, youagr, 6, x(magr), y(magr), sgn(deltax), sgn(deltay), 0, 0);
+			zap(magr, x(magr), y(magr), sgn(deltax), sgn(deltay), rn1(7, 7), basiczap(0, AD_ELEC, ZAP_WAND, 6));
 		}
 		/* otherwise explosion */
 		else {
@@ -5361,14 +5334,14 @@ arti_invoke(obj)
 				    return 1;
 				}
 				else if(getdir((char *)0) && (u.dx || u.dy)) {
-					int dmg;
-					dmg = u.ulevel + obj->spe;
-					if(u.ukrau_duration) dmg *= 1.5;
-					dmg += spell_damage_bonus();
+					struct zapdata zapdata;
+					basiczap(&zapdata, AD_COLD, ZAP_SPELL, 0);
+					zapdata.flat = u.ulevel + obj->spe;
+
 					pline("Tsugi no mai, Hakuren!");
 					u.SnSd2 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
-					buzz(AD_COLD, WAND_CLASS, TRUE,
-						 dmg, u.ux, u.uy, u.dx, u.dy,7+obj->spe,0);
+					
+					zap(&youmonst, u.ux, u.uy, u.dx, u.dy, 7 + obj->spe, &zapdata);
 				}
 					nomul(-1, "performing a sword dance");//both the first and the second dance leave you momentarily exposed.
 			}
