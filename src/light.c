@@ -405,6 +405,52 @@ do_light_sources(cs_rows)
     }
 }
 
+/* returns true if a swallowed player is in the dark
+ *
+ * needed for things that depend on the player being in/out of light
+ * ex) Orthos binding, ex) shadowsteel equipment
+ */
+boolean
+uswallow_indark()
+{
+	if (!u.uswallow || !u.ustuck) {
+		return (dimness(u.ux, u.uy) > 0);
+	}
+
+	boolean tlit = FALSE;
+	boolean tdark = FALSE;
+
+	/* being inside a monster that emits light counts as a temp ls */
+	if (emits_light_mon(u.ustuck)) {
+		if (Is_darklight_monster(u.ustuck->data))
+			tdark = TRUE;
+		else
+			tlit = TRUE;
+	}
+	/* being a creature that emits light counts as a temp ls */
+	if (emits_light(youracedata)) {
+		if (Is_darklight_monster(youracedata))
+			tdark = TRUE;
+		else
+			tlit = TRUE;
+	}
+	/* your carried lightsources */
+	light_source *ls;
+	for (ls = light_base; ls; ls = ls->next) {
+		if ((ls->type == LS_OBJECT) &&
+			(ls->x == u.ux) &&
+			(ls->y == u.uy) &&
+			(carried(((struct obj *)ls->id))))
+		{
+			if (Is_darklight_source(((struct obj *)(ls->id))))
+				tdark = TRUE;
+			else
+				tlit = TRUE;
+		}
+	}
+	return (tdark || !tlit);
+}
+
 /* (mon->mx == 0) implies migrating */
 #define mon_is_local(mon)	((mon)->mx > 0)
 
@@ -665,7 +711,7 @@ snuff_light_source(x, y)
 	}
 }
 
-/* Return TRUE if object sheds any light or darkness at all. */
+/* Return TRUE if object is currently shedding any light or darkness. */
 boolean
 obj_sheds_light(obj)
 struct obj *obj;
@@ -677,7 +723,7 @@ struct obj *obj;
 		));
 }
 /* Return TRUE if object's light should in theory never go out */
-/* it is still temporarily extinguished when in a monster's stomach */
+/* it is still temporarily extinguished when in a monster's stomach or in a container, but should auto-ignite */
 boolean
 obj_eternal_light(obj)
 struct obj * obj;
@@ -690,6 +736,7 @@ struct obj * obj;
 }
 
 /* Return TRUE if sheds light AND will be snuffed by end_burn(). */
+/* These _usually_ may also be ended by snuff_light_source(), the overlap is close enough to not warrant a 2nd function */
 boolean
 obj_is_burning(obj)
     struct obj *obj;

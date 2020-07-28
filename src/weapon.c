@@ -340,16 +340,6 @@ int otyp;
 	int dmod = 0;						/* die size modifier */
 	int spe_mult = 1;					/* multiplier for enchantment value */
 
-	int ocaa = AT_NONE;
-	int ocad = AD_PHYS;
-	int ocn = 1;
-	int ocd = 2;
-	int bonaa = AT_NONE;
-	int bonad = AD_PHYS;
-	int bonn = 0;
-	int bond = 0;
-	int flat = 0;
-
 	/* use the otyp of the object called, if we have one */
 	if (obj)
 		otyp = obj->otyp;
@@ -358,20 +348,23 @@ int otyp;
 	 * just skip everything and only initialize wdice
 	 */
 	if (!otyp) {
-		(wdice->oc.aatyp) = ocaa;
-		(wdice->oc.adtyp) = ocad;
-		(wdice->oc.damn) = ocn;
-		(wdice->oc.damd) = ocd;
-		(wdice->bon.aatyp) = bonaa;
-		(wdice->bon.adtyp) = bonad;
-		(wdice->bon.damn) = bonn;
-		(wdice->bon.damd) = bond;
-		(wdice->flat) = flat;
+		struct weapon_dice nulldice = {0};
+		*wdice = nulldice;
+		wdice->oc_damn = 1;
+		wdice->oc_damd = 2;
 		return 0;
 	}
 
-	/* grab ldie and sdie from the objclass definition */
-	ocd = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
+	/* grab dice from the objclass definition */
+	*wdice = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
+	int ocn =           (wdice->oc_damn);
+	int ocd =           (wdice->oc_damd);
+	int bonn =          (wdice->bon_damn);
+	int bond =          (wdice->bon_damd);
+	int flat =          (wdice->flat);
+	boolean lucky =     (wdice->lucky);
+	boolean exploding = (wdice->exploding);
+	int explode_amt =   (wdice->explode_amt);
 
 	/* set dmod, if possible*/
 	if (obj){
@@ -444,13 +437,13 @@ int otyp;
 	{
 		/* exploding and lucky dice */
 		if (arti_dluck(obj)) {
-			ocad = AD_LUCK;
+			lucky = TRUE;
 		}
 		if (arti_dexpl(obj)) {
-			ocaa = AT_EXPL;
+			exploding = TRUE;
 			/* some artifacts are special-cased to gain extra damage when exploding */
 			if (obj->oartifact == ART_VORPAL_BLADE || obj->oartifact == ART_SNICKERSNEE)
-				ocaa++;
+				explode_amt = 1;
 		}
 
 		/* other various artifacts and objects */
@@ -571,10 +564,6 @@ int otyp;
 	/* bonus dice */
 	switch (otyp)
 	{
-	case CROSSBOW_BOLT:			add(1); break;
-	case DROVEN_BOLT:			add(1); break;
-	case TRIDENT:				if(large){plus(2,4);} else {add(1);} break;
-	case BATTLE_AXE:			if(large){plus(2,4);} else {pls(4);} break;
 	case VIBROBLADE:			
 	case WHITE_VIBROSWORD:
 	case GOLD_BLADED_VIBROSWORD:
@@ -632,39 +621,10 @@ int otyp;
 	case MIRRORBLADE:			break;	// external special case: depends on defender's weapon
 	case RAPIER:				break;	// external special case: Silver Starlight vs plants
 	case RAKUYO:				break;	// external special case: wielded without twoweaponing
-	case BROADSWORD:			if(large){add(1);} else {pls(4);} break;
-	case ELVEN_BROADSWORD:		if(large){add(2);} else {pls(4);} break;
-	case CRYSTAL_SWORD:			if(large){pls(12);} else {pls(8);} break;
-	case TWO_HANDED_SWORD:		if(large){plus(2,6);} else {;} break;
-	case TSURUGI:				if(large){plus(2,6);} else {;} break;
-	case RUNESWORD:				if(large){add(1);} else {pls(4);} break;
-	case PARTISAN:				if(large){add(1);} else {;} break;
-	case RANSEUR:				pls(4); break;
-	case SPETUM:				if(large){pls(6);} else {add(1);} break;
-	case HALBERD:				if(large){pls(6);} else {;} break;
-	case BARDICHE:				if(large){plus(2,4);} else {pls(4);} break;
-	case VOULGE:				pls(4); break;
-	case DWARVISH_MATTOCK:		if(large){plus(2,6);} else {;} break;
-	case GUISARME:				if(large){;} else {pls(4);} break;
-	case BILL_GUISARME:			if(large){;} else {pls(4);} break;
-	case LUCERN_HAMMER:			if(large){;} else {pls(4);} break;
-	case BEC_DE_CORBIN:			if(large){;} else {;} break;
-	case SCYTHE:				if(large){pls(4);} else {pls(4);} break;
-	case MACE:					if(large){;} else {add(1);} break;
-	case ELVEN_MACE:			if(large){;} else {add(1);} break;
-	case MORNING_STAR:			if(large){add(1);} else {pls(4);} break;
-	case WAR_HAMMER:			if(large){;} else {add(1);} break;
+
 	case KAMEREL_VAJRA:			if(large){;} else {;} break;	// external special case: lightsaber forms, being unlit
-	case FLAIL:					if(large){pls(4);} else {add(1);} break;
 	case VIPERWHIP:				if(large){;} else {;} break;	// external special case: number of heads striking
-	case BULLET:				ocn++; flat += 4; break;
-	case SILVER_BULLET:			ocn++; flat += 4; break;
-	case SHOTGUN_SHELL:			ocn++; flat += 4; break;
-	case ROCKET:				ocn++; flat += 4; break;
-	case BLASTER_BOLT:			ocn += 2; flat += ocd; break;
-	case HEAVY_BLASTER_BOLT:	ocn += 2; flat += ocd; break;
-	case LASER_BEAM:			ocn += 2; flat += 10; break;
-	case CHAIN:					add(1); break;
+
 	case SEISMIC_HAMMER:		if (chrgd){ ocd *= 3; } break;
 	case ACID_VENOM:			if (obj&&obj->ovar1){ ocn = 0; flat = obj->ovar1; } else{ add(6); } break;
 	case LIGHTSABER:			spe_mult = 3; ocn += 2; if(obj&&obj->altmode){ plus(3,3); } break;		// external special case: lightsaber forms
@@ -685,13 +645,9 @@ int otyp;
 			ocn = 1;
 			ocd = 8;
 		} else {
-			ocaa = AT_NONE;
-			ocad = AD_PHYS;
 			ocn = 1;
 			ocd = 2;
 		}
-		bonaa = AT_NONE;
-		bonad = AD_PHYS;
 		bonn = 0;
 		bond = 0;
 	}
@@ -782,8 +738,8 @@ int otyp;
 	/* if bonus dice do exist, their minimum size is of a d2 */
 	if (bonn && bond < 2)
 		bond = 2;
-	/* if bonus dice are identical in size & roll to oc dice, combine them */
-	if (bonn && (ocd == bond && ocaa == bonaa && ocad == bonad))
+	/* if bonus dice are identical in size to oc dice, combine them */
+	if (bonn && (ocd == bond))
 	{
 		ocn += bonn;
 		bonn = 0;
@@ -791,15 +747,14 @@ int otyp;
 	}
 
 	/* plug everything into wdice */
-	(wdice->oc.aatyp)	= ocaa;
-	(wdice->oc.adtyp)	= ocad;
-	(wdice->oc.damn)	= ocn;
-	(wdice->oc.damd)	= ocd;
-	(wdice->bon.aatyp)	= bonaa;
-	(wdice->bon.adtyp)	= bonad;
-	(wdice->bon.damn)	= bonn;
-	(wdice->bon.damd)	= bond;
-	(wdice->flat)		= flat;
+	(wdice->oc_damn)     = ocn;
+	(wdice->oc_damd)     = ocd;
+	(wdice->bon_damn)    = bonn;
+	(wdice->bon_damd)    = bond;
+	(wdice->flat)        = flat;
+	(wdice->lucky)       = lucky;
+	(wdice->exploding)   = exploding;
+	(wdice->explode_amt) = explode_amt;
 	return spe_mult;
 }
 
@@ -810,52 +765,58 @@ int otyp;
  * data is received in the form of an attack struct
  */
 int
-weapon_dmg_roll(wdie, youdefend)
-struct attack *wdie;
-boolean youdefend;		// required for lucky dice
+weapon_dmg_roll(wdie, youdef)
+struct weapon_dice *wdie;
+boolean youdef;		// required for lucky dice
+{
+	int tmp = 0;
+
+	tmp += weapon_die_roll(wdie->oc_damn,  wdie->oc_damd,  wdie, youdef);
+	tmp += weapon_die_roll(wdie->bon_damn, wdie->bon_damd, wdie, youdef);
+	tmp += wdie->flat;
+
+	return tmp;
+}
+
+int
+weapon_die_roll(n, x, wdie, youdef)
+int n;
+int x;
+struct weapon_dice * wdie;
+boolean youdef;
 {
 	int tmp = 0;
 
 	/* verify there are appropriate dice to roll */
-	if (!wdie->damn)
+	if (!n)
 		return 0;
-	if (wdie->damd < 1)
+	if (x < 1)
 	{
-		impossible("weapon_dmg_roll called with <1 die size and non-zero die number!");
+		impossible("weapon_die_roll called with <1 die size and non-zero die number!");
 		return 0;
 	}
-
-	/* determine function to use, and calculate the oc dice */
-	if (wdie->aatyp == AT_NONE)
-	{//normal dice
-		if (wdie->adtyp == AD_PHYS)
-		{//normal dice
-			tmp += d(wdie->damn, wdie->damd);
-		}
-		else
-		{//assumed to be lucky dice, which at this time don't have a nice NdX function
-			for (int n = wdie->damn; n; n--)
-			{
-				tmp += youdefend ?
-					(rnl(wdie->damd) + 1) :
-					(wdie->damd - rnl(wdie->damd));
-			}
+	/* determine function to use */
+	if (!wdie->exploding && !wdie->lucky) {
+		/* standard dice */
+		tmp += d(n, x);
+	}
+	else if (wdie->exploding && !wdie->lucky) {
+		/* exploding non-lucky dice */
+		tmp += exploding_d(n, x, wdie->explode_amt);
+	}
+	else if (!wdie->exploding && wdie->lucky) {
+		/* lucky non-exploding dice */
+		int i;
+		for (i = n; i; i--)
+		{
+			tmp += youdef ?
+				(rnl(x) + 1) :
+				(x - rnl(x));
 		}
 	}
-	else
-	{//assumed to be exploding dice
-		int m = wdie->aatyp - AT_EXPL;
-
-		if (wdie->adtyp == AD_PHYS)
-		{//exploding dice
-			tmp += exploding_d(wdie->damn, wdie->damd, m);
-		}
-		else
-		{//lucky exploding dice
-			tmp = youdefend ?
-				unlucky_exploding_d(wdie->damn, wdie->damd, m) :
-				lucky_exploding_d(wdie->damn, wdie->damd, m);
-		}
+	else if (wdie->exploding && wdie->lucky) {
+		/* EXTEMELY POTENT exploding lucky dice */
+		tmp += (youdef ? unlucky_exploding_d : lucky_exploding_d)(n, x, wdie->explode_amt);
 	}
 	return tmp;
 }
@@ -894,8 +855,8 @@ int spec;
 	/* increase die sizes by 2 if Marionette applies*/
 	if (spec & SPEC_MARIONETTE)
 	{
-		wdice.oc.damd += 2;
-		wdice.bon.damd += 2;
+		wdice.oc_damd += 2;
+		wdice.bon_damd += 2;
 	}
 
 	/* special cases of otyp not covered by dmgval_core:
@@ -920,8 +881,8 @@ int spec;
 			/* modify wdice's bonus die and apply it */
 			// bonus 1d4 vs small
 			// bonus 1d3 vs large
-			wdice.bon.damn = 1;
-			wdice.bon.damd = max(2, ((bigmonst(ptr) ? 3 : 4) + 2 * (otmp->objsize - MZ_MEDIUM + !!(spec & SPEC_MARIONETTE))));
+			wdice.bon_damn = 1;
+			wdice.bon_damd = max(2, ((bigmonst(ptr) ? 3 : 4) + 2 * (otmp->objsize - MZ_MEDIUM + !!(spec & SPEC_MARIONETTE))));
 			// doubled enchantment
 			spe_mult *= 2;
 		}
@@ -931,16 +892,14 @@ int spec;
 		if (otmp2 && otmp2->otyp == MIRRORBLADE)
 		{// clashing mirrorblades are quite deadly
 			// 2 dice, exploding, with a flat explosion bonus of the average of attacker's and defender's weapons
-			wdice.oc.aatyp = AT_EXPL + (otmp2->spe + otmp->spe) / 2;
-			wdice.oc.damn = 2;
+			wdice.exploding = TRUE;
+			wdice.explode_amt = max(0, (otmp2->spe + otmp->spe) / 2);
+			wdice.oc_damn = 2;
 		}
 		else
 		{// if the defender's weapon would be stronger than the mirrorblade, use that instead
 			/* calculate what the normal damage dice would be */
-			int hyp = 0;
-			hyp += weapon_dmg_roll(&(wdice.oc), youdefend);
-			hyp += weapon_dmg_roll(&(wdice.bon), youdefend);
-			hyp += wdice.flat;
+			int hyp = weapon_dmg_roll(&wdice, youdefend);
 
 			/* calculate what the mirrored damage dice would be */
 			int mir = 0;
@@ -949,13 +908,11 @@ int spec;
 			(void) dmgval_core(&mirdice, bigmonst(ptr), otmp2, 0);	//note: dmgval_core handles zero weapons gracefully
 			if (spec & SPEC_MARIONETTE)
 			{
-				mirdice.oc.damd += 2;
-				mirdice.bon.damd += 2;
+				mirdice.oc_damd += 2;
+				mirdice.bon_damd += 2;
 			}
 			/* find the damage from those dice */
-			mir += weapon_dmg_roll(&(mirdice.oc), youdefend);
-			mir += weapon_dmg_roll(&(mirdice.bon), youdefend);
-			mir += mirdice.flat;
+			mir += weapon_dmg_roll(&mirdice, youdefend);
 			if(otmp2)
 				mir += otmp2->spe;	/* also adds enchantment of the copied weapon */
 
@@ -989,7 +946,7 @@ int spec;
 		// damage die is increased by 3x the enchantment of the hammer when charged
 		if (otmp->ovar1)
 		{
-			wdice.oc.damd += 3 * (otmp->spe);
+			wdice.oc_damd += 3 * (otmp->spe);
 			// drain charge on future-tech powered weapons
 			otmp->ovar1--;
 		}
@@ -1015,10 +972,10 @@ int spec;
 		if((otmp == uwep && !u.twoweap) || (mcarried(otmp) && otmp->owornmask&W_WEP))
 		{
 			// doubled
-			wdice.oc.damn *= 2;
-			wdice.oc.damd *= 2;
-			wdice.bon.damn *= 2;
-			wdice.bon.damd *= 2;
+			wdice.oc_damn *= 2;
+			wdice.oc_damd *= 2;
+			wdice.bon_damn *= 2;
+			wdice.bon_damd *= 2;
 			spe_mult *= 2;
 	    }
 		// drain charge on future-tech powered weapons
@@ -1035,17 +992,15 @@ int spec;
 			/* modify wdice */
 			// 1 additional main die
 			// plus a 1d4 bonus die
-			wdice.oc.damn += 1;
-			wdice.bon.damn = 1;
-			wdice.bon.damd = 4;
+			wdice.oc_damn += 1;
+			wdice.bon_damn = 1;
+			wdice.bon_damd = 4;
 		}
 		break;
 	case ART_ATMA_WEAPON:
 		/* damage is multiplied % of health remaining (currently only implemented for the player) */
 		/* calculate damage normally */
-		tmp += weapon_dmg_roll(&(wdice.oc), youdefend);
-		tmp += weapon_dmg_roll(&(wdice.bon), youdefend);
-		tmp += wdice.flat;
+		tmp += weapon_dmg_roll(&wdice, youdefend);
 		/* apply the multiplier, if applicable */
 		if (otmp == uwep &&	!Drain_resistance)
 		{
@@ -1065,9 +1020,7 @@ int spec;
 	if (add_dice)
 	{//true, unless overridden by a special case above (mirrorblades, Atma Weapon)
 		/* find the damage from those dice */
-		tmp += weapon_dmg_roll(&(wdice.oc), youdefend);
-		tmp += weapon_dmg_roll(&(wdice.bon), youdefend);
-		tmp += wdice.flat;
+		tmp += weapon_dmg_roll(&wdice, youdefend);
 		/* cannot be negative */
 		if (tmp < 0)
 			tmp = 0;
@@ -1075,8 +1028,8 @@ int spec;
 
 	/* lightsaber forms */
 	if (is_lightsaber(otmp) && (otmp == uwep || (u.twoweap && otmp == uswapwep))){
-		if (u.fightingForm == FFORM_MAKASHI && otmp == uwep && !u.twoweap && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-			switch (min(P_SKILL(FFORM_MAKASHI), P_SKILL(weapon_type(otmp)))){
+		if (activeFightingForm(FFORM_MAKASHI) && otmp == uwep && !u.twoweap && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+			switch (min(P_SKILL(P_MAKASHI), P_SKILL(weapon_type(otmp)))){
 			case P_BASIC:
 				if (mon->ustdym<5) mon->ustdym += 1;
 				break;
@@ -1088,35 +1041,35 @@ int spec;
 				break;
 			}
 		}
-		else if (u.fightingForm == FFORM_ATARU && u.lastmoved + 1 >= monstermoves && (!uarm || is_light_armor(uarm))){
-			switch (min(P_SKILL(FFORM_ATARU), P_SKILL(weapon_type(otmp)))){
+		else if (activeFightingForm(FFORM_ATARU) && u.lastmoved + 1 >= monstermoves && (!uarm || is_light_armor(uarm))){
+			switch (min(P_SKILL(P_ATARU), P_SKILL(weapon_type(otmp)))){
 			case P_BASIC:
-				tmp += d(2, wdice.oc.damd);
+				tmp += d(2, wdice.oc_damd);
 				if (otmp->altmode){ //Probably just the Annulus
 					tmp += d(2, 3);
 				}
 				break;
 			case P_SKILLED:
-				tmp += d(4, wdice.oc.damd);
+				tmp += d(4, wdice.oc_damd);
 				if (otmp->altmode){ //Probably just the Annulus
 					tmp += d(4, 3);
 				}
 				break;
 			case P_EXPERT:
-				tmp += d(6, wdice.oc.damd);
+				tmp += d(6, wdice.oc_damd);
 				if (otmp->altmode){ //Probably just the Annulus
 					tmp += d(6, 3);
 				}
 				break;
 			}
 		}
-		else if (u.fightingForm == FFORM_DJEM_SO && mon->mattackedu && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+		else if (activeFightingForm(FFORM_DJEM_SO) && mon->mattackedu && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
 			int sbon = ACURR(A_STR);
 			if (sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
 			else if (sbon > 18) sbon = 18; //remove percentile adjustment
 			//else it is fine as is.
 			sbon = (sbon + 2) / 3; //1-9
-			switch (min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(otmp)))){
+			switch (min(P_SKILL(P_DJEM_SO), P_SKILL(weapon_type(otmp)))){
 			case P_BASIC:
 				tmp += d(1, sbon);
 				break;
@@ -1128,8 +1081,8 @@ int spec;
 				break;
 			}
 		}
-		else if (u.fightingForm == FFORM_NIMAN && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
-			switch (min(P_SKILL(FFORM_NIMAN), P_SKILL(weapon_type(otmp)))){
+		else if (activeFightingForm(FFORM_NIMAN) && u.lastcast >= monstermoves && (!uarm || !is_metallic(uarm))){
+			switch (min(P_SKILL(P_NIMAN), P_SKILL(weapon_type(otmp)))){
 			case P_BASIC:
 				tmp -= 2;
 				if (u.lastcast >= monstermoves) tmp += d(otmp->altmode ? 6 : 3, u.lastcast - monstermoves + 1);
@@ -1174,7 +1127,7 @@ int spec;
 		tmp += rnd(20);
 	}
 	/* shotguns are great at putting down zombies (Note: mon may be null if hypotetical) */
-	if (otmp->otyp == SHOTGUN_SHELL && mon && mon->mfaction == ZOMBIFIED)
+	if (otmp->otyp == SHOTGUN_SHELL && mon && has_template(mon, ZOMBIFIED))
 		tmp += d(2, 6);
 
 	/* Eve slays plants too */
@@ -2310,11 +2263,6 @@ struct obj *otmp;
 	int str = ACURR(A_STR);
 	int bonus = 0;
 	
-	
-	
-	// if (Upolyd || otmp == uswapwep) return(0);
-	if (uswapwep && otmp == uswapwep) return (str < 6) ? (-6+str) : 0;
-	
 	if (str < 6) bonus = -6+str;
 	else if (str < 16) bonus = 0;
 	else if (str < 18) bonus = 1;
@@ -2330,16 +2278,17 @@ struct obj *otmp;
 		bonus += (100 - u.usanity)/10;
 	}
 	if(otmp){
-		if((bimanual(otmp,youracedata) ||
-			(otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
-		) && !uarms && !u.twoweap
-		) bonus *= 2;
-		else if(otmp->otyp == FORCE_SWORD && !uarms && !u.twoweap)
-			bonus *= 2;
-		else if(otmp->otyp == KATANA && !uarms && !u.twoweap)
-			bonus *= 1.5;
-		else if(is_vibrosword(otmp) && !uarms && !u.twoweap)
-			bonus *= 1.5;
+		if (!uarms && !u.twoweap) {
+			if (bimanual(otmp, youracedata) ||
+				(otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0))
+				bonus *= 2;
+			else if (otmp->otyp == FORCE_SWORD)
+				bonus *= 2;
+			else if (otmp->otyp == KATANA)
+				bonus *= 1.5;
+			else if (is_vibrosword(otmp))
+				bonus *= 1.5;
+		}
 		
 		if(otmp==uwep 
 		&& (is_rapier(otmp) || is_rakuyo(otmp)
@@ -2374,39 +2323,6 @@ struct obj *otmp;
 	
 	return bonus;
 }
-
-int
-dtypbon(otyp)		/* damage bonus for strength */
-int otyp;
-{
-	int str = ACURR(A_STR);
-	int bonus = 0;
-	
-	
-	if (str < 6) bonus = -6+str;
-	else if (str < 16) bonus = 0;
-	else if (str < 18) bonus = 1;
-	else if (str == 18) bonus = 2;		/* up to 18 */
-	else if (str <= STR18(75)) bonus = 3;		/* up to 18/75 */
-	else if (str <= STR18(90)) bonus = 4;		/* up to 18/90 */
-	else if (str < STR18(100)) bonus = 5;		/* up to 18/99 */
-	else if (str < STR19(22)) bonus = 6;
-	else if (str < STR19(25)) bonus = 7;
-	else /*  str ==25*/bonus = 8;
-	
-	if(otyp && objects[otyp].oc_bimanual) bonus *= 2;
-	
-	if(otyp==RAPIER){
-		int dex = ACURR(A_DEX);
-		bonus/=2; /*Half strength bonus/penalty*/
-		
-		bonus += (dex-11)/2;
-	}
-	
-	if(u.sealsActive&SEAL_DANTALION) bonus += max(0,(ACURR(A_INT)-10)/2);
-	return bonus;
-}
-
 
 /* copy the skill level name into the given buffer */
 STATIC_OVL char *
@@ -3069,13 +2985,8 @@ struct obj *weapon;
 #endif
 	//Do to-hit bonuses for lightsaber forms here.  May do other fighting styles at some point.
 	if(weapon && is_lightsaber(weapon) && litsaber(weapon) && uwep == weapon){
-		if(u.fightingForm < FFORM_SHII_CHO || u.fightingForm > FFORM_JUYO) u.fightingForm = FFORM_SHII_CHO;
-		if(P_SKILL(u.fightingForm) < P_BASIC){
-			if(weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC)
-				u.fightingForm = FFORM_NIMAN;
-			else u.fightingForm = FFORM_SHII_CHO;
-		}
-		if(u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+		validateLightsaberForm();
+		if(activeFightingForm(FFORM_MAKASHI) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
 			if(wep_type != P_SABER){
 				if(makashiwarn) pline("Your %s seem%s very unwieldy.",xname(uwep),uwep->quan == 1 ? "s" : "");
 				makashiwarn = FALSE;
@@ -3083,140 +2994,71 @@ struct obj *weapon;
 			} else if(!makashiwarn) makashiwarn = TRUE;
 		} else if(!makashiwarn) makashiwarn = TRUE;
 
-		switch(u.fightingForm){
-			case FFORM_SHII_CHO:
-				switch(min(P_SKILL(FFORM_SHII_CHO), P_SKILL(wep_type))){
-					case P_ISRESTRICTED:bonus -= 5; break;
-					case P_UNSKILLED:   bonus -= 2; break;
-					case P_BASIC:       break;
-					case P_SKILLED:     bonus += 2; break;
-					case P_EXPERT:      bonus += 5; break;
-				}
-			break;
-			case FFORM_MAKASHI:
-				if(!uarm || is_light_armor(uarm) || is_medium_armor(uarm)){
-					int sx, sy, mcount = -1;
-					for(sx = u.ux-1; sx<=u.ux+1; sx++){
-						for(sy = u.uy-1; sy<=u.uy+1; sy++){
-							if(isok(sx,sy) && m_at(sx,sy)) mcount++;
-						}
-					}
-					switch(min(P_SKILL(FFORM_MAKASHI), P_SKILL(wep_type))){
-						case P_BASIC:
-							if(wep_type == P_SABER) bonus += ((ACURR(A_DEX)+3)/3 - 4);
-							if(mcount) bonus -= (mcount-1) * 5;
-						break;
-						case P_SKILLED:
-							if(wep_type == P_SABER) bonus += (2*(ACURR(A_DEX)+3)/3 - 4);
-							if(mcount) bonus -= (mcount-1) * 2;
-						break;
-						case P_EXPERT:
-							if(wep_type == P_SABER) bonus += ACURR(A_DEX) - 1;
-							if(mcount) bonus -= (mcount-1);
-						break;
+		if(activeFightingForm(FFORM_SHII_CHO)){
+			switch(min(P_SKILL(P_SHII_CHO), P_SKILL(wep_type))){
+				case P_ISRESTRICTED:bonus -= 5; break;
+				case P_UNSKILLED:   bonus -= 2; break;
+				case P_BASIC:       break;
+				case P_SKILLED:     bonus += 2; break;
+				case P_EXPERT:      bonus += 5; break;
+			}
+		}
+		if(activeFightingForm(FFORM_MAKASHI)){
+			if(!uarm || is_light_armor(uarm) || is_medium_armor(uarm)){
+				int sx, sy, mcount = -1;
+				for(sx = u.ux-1; sx<=u.ux+1; sx++){
+					for(sy = u.uy-1; sy<=u.uy+1; sy++){
+						if(isok(sx,sy) && m_at(sx,sy)) mcount++;
 					}
 				}
-			break;
-			case FFORM_SORESU:
-				if(!uarm || is_light_armor(uarm) || is_medium_armor(uarm)){
-					if(flags.mon_moving){
-						switch(min(P_SKILL(FFORM_SORESU), P_SKILL(wep_type))){
-							case P_BASIC:
-								bonus += 1;
-							break;
-							case P_SKILLED:
-								bonus += 2;
-							break;
-							case P_EXPERT:
-								bonus += 5;
-							break;
-						}
-					} else {
-						switch(min(P_SKILL(FFORM_SORESU), P_SKILL(wep_type))){
-							case P_BASIC:
-								bonus -= 10;
-							break;
-							case P_SKILLED:
-								bonus -= 5;
-							break;
-							case P_EXPERT:
-								bonus -= 2;
-							break;
-						}
-					}
+				switch(min(P_SKILL(P_MAKASHI), P_SKILL(wep_type))){
+					case P_BASIC:
+						if(wep_type == P_SABER) bonus += ((ACURR(A_DEX)+3)/3 - 4);
+						if(mcount) bonus -= (mcount-1) * 5;
+					break;
+					case P_SKILLED:
+						if(wep_type == P_SABER) bonus += (2*(ACURR(A_DEX)+3)/3 - 4);
+						if(mcount) bonus -= (mcount-1) * 2;
+					break;
+					case P_EXPERT:
+						if(wep_type == P_SABER) bonus += ACURR(A_DEX) - 1;
+						if(mcount) bonus -= (mcount-1);
+					break;
 				}
-			break;
-			case FFORM_ATARU:
-				if(!uarm || is_light_armor(uarm)){
-					switch(min(P_SKILL(FFORM_ATARU), P_SKILL(wep_type))){
-						case P_BASIC:
-							bonus -= 2;
-						break;
-						case P_SKILLED:
-							bonus -= 1;
-						break;
-						case P_EXPERT:
-						break;
-					}
-				}
-			break;
-			case FFORM_DJEM_SO:{
-				int sbon;
-				int str = ACURR(A_STR);
-				if (str < 6) sbon = -2;
-				else if (str < 8) sbon = -1;
-				else if (str < 17) sbon = 0;
-				else if (str <= STR18(50)) sbon = 1;	/* up to 18/50 */
-				else if (str < STR18(100)) sbon = 2;
-				else sbon = 3;
+			}
+		}
+		if(activeFightingForm(FFORM_SORESU)){
+			if(!uarm || is_light_armor(uarm) || is_medium_armor(uarm)){
 				if(flags.mon_moving){
-					switch(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(wep_type))){
+					switch(min(P_SKILL(P_SORESU), P_SKILL(wep_type))){
 						case P_BASIC:
-							bonus += 1 + sbon;
-						break;
-						case P_SKILLED:
-							bonus += 2 + sbon;
-						break;
-						case P_EXPERT:
-							bonus += 5 + sbon;
-						break;
-					}
-				} else {
-					bonus += sbon;
-				}
-			} break;
-			case FFORM_SHIEN:
-				if(flags.mon_moving){
-					switch(min(P_SKILL(FFORM_SHIEN), P_SKILL(wep_type))){
-						case P_BASIC:
-							// bonus
-						break;
-						case P_SKILLED:
 							bonus += 1;
 						break;
-						case P_EXPERT:
+						case P_SKILLED:
 							bonus += 2;
+						break;
+						case P_EXPERT:
+							bonus += 5;
 						break;
 					}
 				} else {
-					switch(min(P_SKILL(FFORM_SHIEN), P_SKILL(wep_type))){
+					switch(min(P_SKILL(P_SORESU), P_SKILL(wep_type))){
 						case P_BASIC:
-							bonus -= 5;
+							bonus -= 10;
 						break;
 						case P_SKILLED:
-							bonus -= 2;
+							bonus -= 5;
 						break;
 						case P_EXPERT:
-							bonus -= 1;
+							bonus -= 2;
 						break;
 					}
 				}
-			break;
-			// case FFORM_NIMAN:
-				// //no bonus or penalty
-			// break;
-			case FFORM_JUYO:
-				switch(min(P_SKILL(FFORM_JUYO), P_SKILL(wep_type))){
+			}
+		}
+		if(activeFightingForm(FFORM_ATARU)){
+			if(!uarm || is_light_armor(uarm)){
+				switch(min(P_SKILL(P_ATARU), P_SKILL(wep_type))){
 					case P_BASIC:
 						bonus -= 2;
 					break;
@@ -3226,7 +3068,74 @@ struct obj *weapon;
 					case P_EXPERT:
 					break;
 				}
-			break;
+			}
+		}
+		if(activeFightingForm(FFORM_DJEM_SO)){
+			int sbon;
+			int str = ACURR(A_STR);
+			if (str < 6) sbon = -2;
+			else if (str < 8) sbon = -1;
+			else if (str < 17) sbon = 0;
+			else if (str <= STR18(50)) sbon = 1;	/* up to 18/50 */
+			else if (str < STR18(100)) sbon = 2;
+			else sbon = 3;
+			if(flags.mon_moving){
+				switch(min(P_SKILL(P_DJEM_SO), P_SKILL(wep_type))){
+					case P_BASIC:
+						bonus += 1 + sbon;
+					break;
+					case P_SKILLED:
+						bonus += 2 + sbon;
+					break;
+					case P_EXPERT:
+						bonus += 5 + sbon;
+					break;
+				}
+			} else {
+				bonus += sbon;
+			}
+		}
+		if(activeFightingForm(FFORM_SHIEN)){
+			if(flags.mon_moving){
+				switch(min(P_SKILL(P_SHIEN), P_SKILL(wep_type))){
+					case P_BASIC:
+						// bonus
+					break;
+					case P_SKILLED:
+						bonus += 1;
+					break;
+					case P_EXPERT:
+						bonus += 2;
+					break;
+				}
+			} else {
+				switch(min(P_SKILL(P_SHIEN), P_SKILL(wep_type))){
+					case P_BASIC:
+						bonus -= 5;
+					break;
+					case P_SKILLED:
+						bonus -= 2;
+					break;
+					case P_EXPERT:
+						bonus -= 1;
+					break;
+				}
+			}
+		}
+		// if(activeFightingForm(FFORM_NIMAN)){
+			// //no bonus or penalty
+		// break;
+		if(activeFightingForm(FFORM_JUYO)){
+			switch(min(P_SKILL(P_JUYO), P_SKILL(wep_type))){
+				case P_BASIC:
+					bonus -= 2;
+				break;
+				case P_SKILLED:
+					bonus -= 1;
+				break;
+				case P_EXPERT:
+				break;
+			}
 		}
 	}
 	
@@ -3241,134 +3150,77 @@ struct obj *weapon;
  * Treat restricted weapons as unskilled.
  */
 int
-weapon_dam_bonus(weapon)
+weapon_dam_bonus(weapon, wep_type)
 struct obj *weapon;
+int wep_type;
 {
-    int type, wep_type, skill, bonus = 0;
+    int type, skill, bonus = 0;
 	unsigned int maxweight = 0;
 
-    wep_type = weapon_type(weapon);
     /* use two weapon skill only if attacking with one of the wielded weapons */
 	if((u.twoweap && (weapon == uwep || weapon == uswapwep))
 		&& !(uwep && uswapwep && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
 	) type = P_TWO_WEAPON_COMBAT;
 	else type = wep_type;
 	
-    if (type == P_NONE) {
+	skill = P_SKILL(type);
+	
+	if (type == P_TWO_WEAPON_COMBAT)
+		skill = min(skill, P_SKILL(wep_type));
+
+	switch (wep_type) /* does not include P_TWO_WEAPON_COMBAT, which is a penalty applied further below */
+	{
+	case P_NONE:
 		bonus = 0;
-    } else if (type <= P_LAST_WEAPON) {
-		switch (P_SKILL(type)) {
-			default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type));
-				 /* fall through */
-			case P_ISRESTRICTED:	bonus = -5; break;
-			case P_UNSKILLED:	bonus = -2; break;
-			case P_BASIC:	bonus =  0; break;
-			case P_SKILLED:	bonus =  2; break;
-			case P_EXPERT:	bonus =  5; break;
-			//For use with martial-arts
-			case P_MASTER:		bonus =  7; break;
-			case P_GRAND_MASTER: bonus = 9; break;
+		break;
+
+	case P_BARE_HANDED_COMBAT:
+		switch (skill){
+		default: impossible("weapon_dam_bonus: bad skill %d", skill); /* fall through */
+		case P_ISRESTRICTED:    bonus = (martial_bonus()) ? -2 : -4; break;
+		case P_UNSKILLED:       bonus = (martial_bonus()) ? +1 : -2; break;
+		case P_BASIC:           bonus = (martial_bonus()) ? +3 : +0; break;
+		case P_SKILLED:         bonus = (martial_bonus()) ? +4 : +1; break;
+		case P_EXPERT:          bonus = (martial_bonus()) ? +5 : +2; break;
+		case P_MASTER:          bonus = (martial_bonus()) ? +7 : +3; break;
+		case P_GRAND_MASTER:    bonus = (martial_bonus()) ? +9 : +5; break;
 		}
-	} else if (type == P_TWO_WEAPON_COMBAT) {
-		skill = P_SKILL(P_TWO_WEAPON_COMBAT);
-		if (P_SKILL(wep_type) < skill) skill = P_SKILL(wep_type);
-		if(wep_type == P_BARE_HANDED_COMBAT){
-			if(martial_bonus()){
-				skill = P_SKILL(type);
-				switch(skill){
-					default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-					case P_ISRESTRICTED:	bonus = -5; break;
-					case P_UNSKILLED:   	bonus = -3; break;
-					case P_BASIC:			bonus = -1; break;
-					case P_SKILLED:			bonus = +1; break;
-					case P_EXPERT:			bonus = +3; break;
-					case P_MASTER:			bonus = +5; break;
-					case P_GRAND_MASTER:	bonus = +7; break;
-				}
-			} else {
-				skill = P_SKILL(type);
-				switch(skill){
-					default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-					case P_ISRESTRICTED:	bonus = -6; break;
-					case P_UNSKILLED:   	bonus = -4; break;
-					case P_BASIC:			bonus = -2; break;
-					case P_SKILLED:			bonus =  0; break;
-					case P_EXPERT:			bonus = +1; break;
-					case P_MASTER:			bonus = +2; break;
-					case P_GRAND_MASTER:	bonus = +3; break;
-				}
-			}
-		} else {
-			switch (skill) {
-				default:
-				case P_ISRESTRICTED:
-				case P_UNSKILLED:	bonus = -5; break;
-				case P_BASIC:	bonus = -3; break;
-				case P_SKILLED:	bonus = -1; break;
-				case P_EXPERT:	bonus =  0; break;
-			}
+		break;
+
+	default:
+		/* weapon skills and misc skills */
+		switch (skill) {
+		default: impossible("weapon_dam_bonus: bad skill %d", skill);
+			/* fall through */
+		case P_ISRESTRICTED: bonus = -5; break;
+		case P_UNSKILLED:    bonus = -2; break;
+		case P_BASIC:        bonus = +0; break;
+		case P_SKILLED:      bonus = +2; break;
+		case P_EXPERT:       bonus = +5; break;
+		case P_MASTER:       bonus = +7; break;
+		case P_GRAND_MASTER: bonus = +9; break;
 		}
-    } else if (type == P_BARE_HANDED_COMBAT) {
-	// /*
-	 // *	       b.h.  m.a.
-	 // *	unskl:	 0   n/a
-	 // *	basic:	+1    +3
-	 // *	skild:	+1    +4
-	 // *	exprt:	+2    +6
-	 // *	mastr:	+2    +7
-	 // *	grand:	+3    +9
-	 // */
-	// bonus = P_SKILL(type);
-	// bonus = max(bonus,P_UNSKILLED) - 1;	/* unskilled => 0 */
-	// bonus = ((bonus + 1) * (martial_bonus() ? 3 : 1)) / 2;
-		if(martial_bonus()){
-			skill = P_SKILL(type);
-			switch(skill){
-				default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-				case P_ISRESTRICTED:	bonus = -2; break;
-				case P_UNSKILLED:   	bonus = +1; break;
-				case P_BASIC:			bonus = +3; break;
-				case P_SKILLED:			bonus = +4; break;
-				case P_EXPERT:			bonus = +5; break;
-				case P_MASTER:			bonus = +7; break;
-				case P_GRAND_MASTER:	bonus = +9; break;
-			}
-		} else {
-			skill = P_SKILL(type);
-			switch(skill){
-				default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-				case P_ISRESTRICTED:	bonus = -4; break;
-				case P_UNSKILLED:   	bonus = -2; break;
-				case P_BASIC:			bonus =  0; break;
-				case P_SKILLED:			bonus = +1; break;
-				case P_EXPERT:			bonus = +2; break;
-				case P_MASTER:			bonus = +3; break;
-				case P_GRAND_MASTER:	bonus = +5; break;
-			}
-		}
-    } else { //fallback for weapons that use non-weapon skills (like Singing Sword)
-		switch (P_SKILL(type)) {
-			default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type));
-				 /* fall through */
-			case P_ISRESTRICTED:	bonus = -5; break;
-			case P_UNSKILLED:	bonus = -2; break;
-			case P_BASIC:	bonus =  0; break;
-			case P_SKILLED:	bonus =  2; break;
-			case P_EXPERT:	bonus =  5; break;
-			//For use with martial-arts
-			case P_MASTER:		bonus =  7; break;
-			case P_GRAND_MASTER: bonus = 9; break;
-		}
-    }
+		break;
+	}
 	
 	if(type == P_TWO_WEAPON_COMBAT){
+		/* Effective skill damage after applying twoweapon combat penalty:
+		            R/ U/ B/ S/ E/ M/ G
+		1W martial -2 +1 +3 +4 +5 +7 +9
+		2W martial -2 +1 +2 +2 +3 +4 +5
+
+		1W unarmed -4 -2 +0 +1 +2 +3 +5
+		2W unarmed -4 -2 -1 -1 +0 +0 +1
+
+		1W weapons -5 -2 +0 +2 +5      
+		2W weapons -5 -3 -2 -1 +1      
+		*/
+
 		/* Sporkhack:
-		 * Heavy things are hard to use in your offhand unless you're
-		 * very good at what you're doing.
+		 * Heavy things are hard to use in your offhand unless you're very good at what you're doing.
 		 *
-		 * No real need to restrict unskilled here since knives and such
-		 * are very hard to find and people who are restricted can't
-		 * #twoweapon even at unskilled...
+		 * No real need to restrict unskilled here since knives and such are very hard to find,
+		 * and people who are restricted can't #twoweapon even at unskilled...
 		 */
 		switch (P_SKILL(P_TWO_WEAPON_COMBAT)) {
 			default:
@@ -3380,10 +3232,21 @@ struct obj *weapon;
 			case P_MASTER:		 maxweight = 50; break;	 /* war hammer */
 			case P_GRAND_MASTER: maxweight = 60; break;	 /* axe */
 		}
-		if (uswapwep && !(uwep && (uwep->otyp == STILETTOS)) && uswapwep->owt > maxweight
-		&& uswapwep->oartifact != ART_BLADE_DANCER_S_DAGGER && uswapwep->oartifact != ART_FRIEDE_S_SCYTHE
-		) {
-			bonus += max(-20, -5 * (uswapwep->owt-maxweight)/maxweight);
+		if (wep_type == P_BARE_HANDED_COMBAT) {
+			bonus -= (skill * 2 / 3);
+		}
+		else {
+			bonus -= skill;
+			/* additional penalty for over-weight offhand weapons */
+			if (uswapwep && uswapwep->owt > maxweight && !(
+					(uwep && (uwep->otyp == STILETTOS)) ||
+					(uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER) ||
+					(uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
+				))
+			{
+				/* additional penalty of -5 per <maxweight> aum over maxweight */
+				bonus -= min((5 * (uswapwep->owt - maxweight) / maxweight), 20);
+			}
 		}
 	}
 
@@ -3402,175 +3265,68 @@ struct obj *weapon;
 
 	//Do damage bonuses for lightsaber forms here.  May do other fighting styles at some point.
 	if(weapon && is_lightsaber(weapon) && litsaber(weapon) && uwep == weapon){
-		if(u.fightingForm < FFORM_SHII_CHO || u.fightingForm > FFORM_JUYO) u.fightingForm = FFORM_SHII_CHO;
-		if(P_SKILL(u.fightingForm) < P_BASIC) u.fightingForm = FFORM_SHII_CHO;
-		switch(u.fightingForm){
-			// case FFORM_SHII_CHO:
-				// //no bonus
-			// break;
-			case FFORM_MAKASHI:
-				if(!uarms && !u.twoweap && wep_type == P_SABER) switch(min(P_SKILL(FFORM_MAKASHI), P_SKILL(wep_type))){
+		validateLightsaberForm();
+		// if(activeFightingForm(FFORM_SHII_CHO)){
+			// //no bonus
+		// }
+		if(activeFightingForm(FFORM_MAKASHI)){
+			if(!uarms && !u.twoweap && wep_type == P_SABER) switch(min(P_SKILL(P_MAKASHI), P_SKILL(wep_type))){
+				case P_BASIC:
+					bonus += 2 + ((ACURR(A_DEX)+3)/3 - 4);
+				break;
+				case P_SKILLED:
+					bonus += (2*(ACURR(A_DEX)+3))/3 - 3;
+				break;
+				case P_EXPERT:
+					bonus += 1 + ACURR(A_DEX);
+				break;
+			}
+		}
+		// if(activeFightingForm(FFORM_SORESU)){
+			// //No bonus
+		// }
+		// if(activeFightingForm(FFORM_ATARU)){
+			// //No bonus
+		// }
+		// if(activeFightingForm(FFORM_DJEM_SO)){
+			// //No bonus
+		// }
+		if(activeFightingForm(FFORM_SHIEN)){
+			int sx, sy, mcount = -1;
+			for(sx = u.ux-1; sx<=u.ux+1; sx++){
+				for(sy = u.uy-1; sy<=u.uy+1; sy++){
+					if(isok(sx,sy) && m_at(sx,sy)) mcount++;
+				}
+			}
+			if(mcount > 1){
+				int sbon = ACURR(A_STR);
+				if(sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
+				else if(sbon > 18) sbon = 18; //remove percentile adjustment
+				//else it is fine as is.
+				sbon = (sbon+2)/3; //1-9
+				switch(min(P_SKILL(P_SHIEN), P_SKILL(wep_type))){
 					case P_BASIC:
-						bonus += 2 + ((ACURR(A_DEX)+3)/3 - 4);
+						bonus += d(1,sbon+mcount); //1d17 max
 					break;
 					case P_SKILLED:
-						bonus += (2*(ACURR(A_DEX)+3))/3 - 3;
+						bonus += d(1,sbon+mcount*2); //1d25 max
 					break;
 					case P_EXPERT:
-						bonus += 1 + ACURR(A_DEX);
+						bonus += d(1,sbon+mcount*3); //1d33 max
 					break;
 				}
-			break;
-			// case FFORM_SORESU:
-				// //No bonus
-			// break;
-			// case FFORM_ATARU:
-				// //No bonus
-			// break;
-			// case FFORM_DJEM_SO:
-				// //No bonus
-			// break;
-			case FFORM_SHIEN:{
-				int sx, sy, mcount = -1;
-				for(sx = u.ux-1; sx<=u.ux+1; sx++){
-					for(sy = u.uy-1; sy<=u.uy+1; sy++){
-						if(isok(sx,sy) && m_at(sx,sy)) mcount++;
-					}
-				}
-				if(mcount > 1){
-					int sbon = ACURR(A_STR);
-					if(sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
-					else if(sbon > 18) sbon = 18; //remove percentile adjustment
-					//else it is fine as is.
-					sbon = (sbon+2)/3; //1-9
-					switch(min(P_SKILL(FFORM_SHIEN), P_SKILL(wep_type))){
-						case P_BASIC:
-							bonus += d(1,sbon+mcount); //1d17 max
-						break;
-						case P_SKILLED:
-							bonus += d(1,sbon+mcount*2); //1d25 max
-						break;
-						case P_EXPERT:
-							bonus += d(1,sbon+mcount*3); //1d33 max
-						break;
-					}
-				}
-			} break;
-			// case FFORM_NIMAN:
-				// //no bonus
-			// break;
-			// case FFORM_JUYO:
-				// //no bonus
-			// break;
+			}
 		}
+		// if(activeFightingForm(FFORM_NIMAN)){
+			// //no bonus
+		// }
+		// if(activeFightingForm(FFORM_JUYO)){
+			// //no bonus
+		// }
 	}
 	
 	if(wep_type == P_AXE && Race_if(PM_DWARF) && ublindf && ublindf->oartifact == ART_WAR_MASK_OF_DURIN) bonus += 5;
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && type != P_TWO_WEAPON_COMBAT) bonus = max(bonus,0);
-	
-	return bonus;
-}
-
-/*
- * Return damage bonus/penalty based on skill.
- * Treat restricted weapons as unskilled.
- */
-int
-skill_dam_bonus(type)
-int type;
-{
-    int bonus = 0;
-
-    /* use two weapon skill only if attacking with one of the wielded weapons */
-	
-    if (type == P_NONE) {
-		bonus = 0;
-    } else if (type <= P_LAST_WEAPON) {
-		switch (P_SKILL(type)) {
-			default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type));
-				 /* fall through */
-			case P_ISRESTRICTED:	bonus = -5; break;
-			case P_UNSKILLED:	bonus = -2; break;
-			case P_BASIC:	bonus =  0; break;
-			case P_SKILLED:	bonus =  2; break;
-			case P_EXPERT:	bonus =  5; break;
-		}
-	} else if (type == P_TWO_WEAPON_COMBAT) {
-		switch (P_SKILL(type)) {
-			default:
-			case P_ISRESTRICTED:
-			case P_UNSKILLED:	bonus = -5; break;
-			case P_BASIC:	bonus = -3; break;
-			case P_SKILLED:	bonus = -1; break;
-			case P_EXPERT:	bonus =  0; break;
-		}
-    } else if (type == P_BARE_HANDED_COMBAT) {
-		if(martial_bonus()){
-			switch(P_SKILL(type)){
-				default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-				case P_ISRESTRICTED:	bonus = -2; break;
-				case P_UNSKILLED:   	bonus = +1; break;
-				case P_BASIC:			bonus = +3; break;
-				case P_SKILLED:			bonus = +4; break;
-				case P_EXPERT:			bonus = +5; break;
-				case P_MASTER:			bonus = +7; break;
-				case P_GRAND_MASTER:	bonus = +9; break;
-			}
-		} else {
-			switch(P_SKILL(type)){
-				default: impossible("weapon_dam_bonus: bad skill %d",P_SKILL(type)); /* fall through */
-				case P_ISRESTRICTED:	bonus = -4; break;
-				case P_UNSKILLED:   	bonus = -2; break;
-				case P_BASIC:			bonus =  0; break;
-				case P_SKILLED:			bonus = +1; break;
-				case P_EXPERT:			bonus = +2; break;
-				case P_MASTER:			bonus = +3; break;
-				case P_GRAND_MASTER:	bonus = +5; break;
-			}
-		}
-    }
-	
-	if(type == P_TWO_WEAPON_COMBAT){
-		int maxweight;
-		/* Sporkhack:
-		 * Heavy things are hard to use in your offhand unless you're
-		 * very good at what you're doing.
-		 *
-		 * No real need to restrict unskilled here since knives and such
-		 * are very hard to find and people who are restricted can't
-		 * #twoweapon even at unskilled...
-		 */
-		switch (P_SKILL(P_TWO_WEAPON_COMBAT)) {
-			default:
-			case P_ISRESTRICTED:
-			case P_UNSKILLED:	 maxweight = 10; break;	 /* not silver daggers */
-			case P_BASIC:		 maxweight = 20; break;	 /* daggers, crysknife, sickle, aklys, flail, bullwhip, unicorn horn */
-			case P_SKILLED:	 	 maxweight = 30; break;	 /* shortswords and spears (inc silver), mace, club, lightsaber, grappling hook */
-			case P_EXPERT:		 maxweight = 40; break;	 /* sabers and long swords, axe weighs 60, war hammer 50, pickaxe 80, beamsword */
-			case P_MASTER:		 maxweight = 50; break;	 /* war hammer */
-			case P_GRAND_MASTER: maxweight = 60; break;	 /* axe */
-		}
-		if (uswapwep && !(uwep && (uwep->otyp == STILETTOS)) && uswapwep->owt > maxweight
-		&& uswapwep->oartifact != ART_BLADE_DANCER_S_DAGGER && uswapwep->oartifact != ART_FRIEDE_S_SCYTHE
-		) {
-			bonus += max(-20, -5 * (uswapwep->owt-maxweight)/maxweight);
-		}
-	}
-
-#ifdef STEED
-	/* KMH -- Riding gives some thrusting damage */
-	if (u.usteed && type != P_TWO_WEAPON_COMBAT) {
-		switch (P_SKILL(P_RIDING)) {
-		    case P_ISRESTRICTED:
-		    case P_UNSKILLED:   break;
-		    case P_BASIC:       break;
-		    case P_SKILLED:     bonus += 2; break;
-		    case P_EXPERT:      bonus += 5; break;
-		}
-	}
-#endif
-
-	if(type == P_AXE && Race_if(PM_DWARF) && ublindf && ublindf->oartifact == ART_WAR_MASK_OF_DURIN) bonus += 5;
 	
 	return bonus;
 }

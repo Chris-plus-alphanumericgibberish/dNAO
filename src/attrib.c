@@ -379,10 +379,8 @@ boolean	inc_or_dec;
 #ifdef DEBUG
 	pline("Exercise:");
 #endif
-	if (i == A_CHA) return;	/* can't exercise cha */
-	if(umechanoid) return; /* Mechanoids can't excercise abilities */
-	if(u.sealsActive&SEAL_HUGINN_MUNINN && (i == A_INT || i == A_WIS)) return; /* don't excercise int or wis while artificially maxed */
-	
+	/* Mechanoids can't excercise abilities */
+	if(umechanoid) return;
 	/* no physical exercise while polymorphed; the body's temporary */
 	if (Upolyd && i != A_WIS && i != A_INT) return;
 
@@ -396,7 +394,9 @@ boolean	inc_or_dec;
 		 *
 		 *	Note: *YES* ACURR is the right one to use.
 		 */
-		AEXE(i) += (inc_or_dec) ? (rn2(19) > ACURR(i)) : -rn2(2);
+		AEXE(i) += (inc_or_dec)
+			? ((rn2(19) > ACURR(i)) || (AEXE(i) < 0 && rn2(AEXE(i)*-1 + 1)))
+			: -rn2(2);
 #ifdef DEBUG
 		pline("%s, %s AEXE = %d",
 			(i == A_STR) ? "Str" : (i == A_WIS) ? "Wis" :
@@ -1278,10 +1278,19 @@ int delta;
 	u.uinsight += delta;
 	if(u.uinsight < 0)
 		u.uinsight = 0;
-	if(u.uinsight > INSIGHT_RATE/20)
-		u.uinsight = INSIGHT_RATE/20;
 	if(discover || wizard)
 		pline("= %d", u.uinsight);
+}
+
+boolean
+check_insight()
+{
+	int insight;
+	if(u.uinsight > INSIGHT_RATE/20)
+		insight = INSIGHT_RATE/20;
+	else insight = u.uinsight;
+	
+	return insight > rn2(INSIGHT_RATE);
 }
 
 void
@@ -1618,6 +1627,91 @@ register int n;
 			if(u.ualign.record > ALIGNLIM)
 				u.ualign.record = ALIGNLIM;
 		}
+}
+
+void
+setFightingForm(fform)
+int fform;
+{
+	int i;
+	if(fform > LAST_FFORM || fform < 0)
+		impossible("Attempting to set fighting form number %d?", fform);
+	
+	for(i=0; i < FFORM_LISTSIZE; i++)
+		u.fightingForm[i] = 0L;
+
+	u.fightingForm[(fform-1)/32] |= (0x1L << ((fform-1)%32));
+}
+
+boolean
+activeFightingForm(fform)
+int fform;
+{
+	int i;
+	if(fform > LAST_FFORM || fform < 0)
+		impossible("Attempting to check fighting form number %d?", fform);
+	
+	if(!fform){
+		//Check if there are ANY fighting forms set at all
+		int i;
+		for(i=0; i < FFORM_LISTSIZE; i++){
+			if(u.fightingForm[i])
+				return FALSE; //Found (at least one) fighting form, return FALSE
+		}
+		return TRUE; //Found no fighting forms, return TRUE
+	}
+	
+	return !!(u.fightingForm[(fform-1)/32] & (0x1L << ((fform-1)%32)));
+}
+
+int
+getFightingFormSkill(fform)
+int fform;
+{
+	switch(fform){
+		case FFORM_SHII_CHO:
+			return P_SHII_CHO;
+		break;
+		case FFORM_MAKASHI:
+			return P_MAKASHI;
+		break;
+		case FFORM_SORESU:
+			return P_SORESU;
+		break;
+		case FFORM_ATARU:
+			return P_ATARU;
+		break;
+		case FFORM_DJEM_SO:
+			return P_DJEM_SO;
+		break;
+		case FFORM_SHIEN:
+			return P_SHIEN;
+		break;
+		case FFORM_NIMAN:
+			return P_NIMAN;
+		break;
+		case FFORM_JUYO:
+			return P_JUYO;
+		break;
+		default:
+			impossible("Attempting to get skill of fighting form number %d?", fform);
+			return P_NONE;
+		break;
+	}
+	return P_NONE; //Never reached
+}
+
+void
+validateLightsaberForm()
+{
+	int i;
+	for(i=FFORM_SHII_CHO; i <= FFORM_JUYO; i++)
+		if(activeFightingForm(i) && FightingFormSkillLevel(i) >= P_BASIC)
+			return;
+
+	if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+		setFightingForm(FFORM_NIMAN);
+	else setFightingForm(FFORM_SHII_CHO);
 }
 
 #endif /* OVL2 */

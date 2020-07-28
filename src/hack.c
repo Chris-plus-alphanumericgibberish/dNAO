@@ -1022,7 +1022,7 @@ domove()
 		/* check slippery ice */
 		on_ice = !Levitation && !Flying && (is_ice(u.ux, u.uy) || mad_turn(MAD_COLD_NIGHT));
 		if (on_ice) {
-			if ((uarmf && (uarmf->otyp == find_skates || uarmf->oartifact == ART_FROST_TREADS))
+			if ((uarmf && (uarmf->otyp == find_skates() || uarmf->oartifact == ART_FROST_TREADS))
 			    || resists_cold(&youmonst)
 			    || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			    || is_whirly(youracedata))
@@ -1197,7 +1197,7 @@ domove()
 		/* try to attack; note that it might evade */
 		/* also, we don't attack tame when _safepet_ */
 		else if (attack2(mtmp)){
-			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && u.fightingForm == FFORM_ATARU && (!uarm || is_light_armor(uarm))){
+			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && activeFightingForm(FFORM_ATARU) && (!uarm || is_light_armor(uarm))){
 				coord cc;
 				if(!u.utrap && tt_findadjacent(&cc, mtmp) && (cc.x != u.ux || cc.y != u.uy)){
 					You("somersault to a new location!");

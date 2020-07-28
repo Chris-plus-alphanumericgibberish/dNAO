@@ -5002,8 +5002,8 @@ shk_appraisal(slang, shkp)
 	struct obj *obj;                /* The object picked            */
 	int charge;                     /* How much for appraisal       */
 	boolean guesswork;              /* Shopkeeper unsure?           */
-	char ascii_wsdam[5];            /* Ascii form of damage         */
-	char ascii_wldam[5];
+	char buf[BUFSZ];
+	char buf2[BUFSZ];
 
 
 	/* Pick object */
@@ -5049,8 +5049,54 @@ shk_appraisal(slang, shkp)
 	}
 
 	/* Convert damage to ascii */
-	Sprintf(ascii_wsdam, "%d", objects[obj->otyp].oc_wsdam);
-	Sprintf(ascii_wldam, "%d", objects[obj->otyp].oc_wldam);
+
+	struct weapon_dice wdice[2];
+	(void)dmgval_core(&wdice[0], FALSE, obj, obj->otyp);	// small dice
+	(void)dmgval_core(&wdice[1], TRUE, obj, obj->otyp);		// large dice
+
+	Sprintf(buf, "Damage: ");
+
+	if (wdice[0].oc_damn && wdice[0].oc_damd)
+	{
+		Sprintf(buf2, "%dd%d", wdice[0].oc_damn, wdice[0].oc_damd);
+		Strcat(buf, buf2);
+	}
+	if (wdice[0].bon_damn && wdice[0].bon_damd)
+	{
+		Sprintf(buf2, "+%dd%d", wdice[0].bon_damn, wdice[0].bon_damd);
+		Strcat(buf, buf2);
+	}
+	if (wdice[0].flat)
+	{
+		Sprintf(buf2, "%s", sitoa(wdice[0].flat));
+		Strcat(buf, buf2);
+	}
+	Strcat(buf, " versus small and ");
+	/* is there a difference between large and small dice? */
+	if (wdice[0].oc_damn != wdice[1].oc_damn ||
+		wdice[0].oc_damd != wdice[1].oc_damd ||
+		wdice[0].bon_damn != wdice[1].bon_damn ||
+		wdice[0].bon_damd != wdice[1].bon_damd ||
+		wdice[0].flat != wdice[1].flat)
+	{
+		if (wdice[1].oc_damn && wdice[1].oc_damd)
+		{
+			Sprintf(buf2, "%dd%d", wdice[1].oc_damn, wdice[1].oc_damd);
+			Strcat(buf, buf2);
+		}
+		if (wdice[1].bon_damn && wdice[1].bon_damd)
+		{
+			Sprintf(buf2, "+%dd%d", wdice[1].bon_damn, wdice[1].bon_damd);
+			Strcat(buf, buf2);
+		}
+		if (wdice[1].flat)
+		{
+			Sprintf(buf2, "%s", sitoa(wdice[1].flat));
+			Strcat(buf, buf2);
+		}
+		Strcat(buf, " versus ");
+	}
+	Strcat(buf, "large monsters.");
 
 	/* Will shopkeeper be unsure? */
 	if (guesswork)
@@ -5062,25 +5108,15 @@ shk_appraisal(slang, shkp)
 			verbalize("Sorry, %s, but I'm not certain.", slang);
 			break;
 
-		    case 2:
-			/* Not sure about large foes */
-			verbalize(basic_damage, ascii_wsdam, "?");
-			break;
-
-		    case 3:
-			/* Not sure about small foes */
-			verbalize(basic_damage, "?", ascii_wldam);
-			break;
-
 		    default:
-			verbalize(basic_damage, ascii_wsdam, ascii_wldam);
+			verbalize("%s", buf);
 			break;
 			
 		}
 	}
 	else
 	{
-		verbalize(basic_damage, ascii_wsdam, ascii_wldam);
+		verbalize("%s", buf);
 	}
 }
 

@@ -90,14 +90,14 @@
 #define P_MARTIAL_ARTS		P_BARE_HANDED_COMBAT	/* Role distinguishes */
 #define P_TWO_WEAPON_COMBAT	(P_LAST_SPELL + 2)	/* Finally implemented */
 #define P_BEAST_MASTERY	(P_LAST_SPELL + 3)	/* Finally implemented */
-#define FFORM_SHII_CHO	(P_LAST_SPELL + 4)
-#define FFORM_MAKASHI	(P_LAST_SPELL + 5)
-#define FFORM_SORESU	(P_LAST_SPELL + 6)
-#define FFORM_ATARU		(P_LAST_SPELL + 7)
-#define FFORM_DJEM_SO	(P_LAST_SPELL + 8)
-#define FFORM_SHIEN		(P_LAST_SPELL + 9)
-#define FFORM_NIMAN		(P_LAST_SPELL +10)
-#define FFORM_JUYO		(P_LAST_SPELL +11)
+#define P_SHII_CHO	(P_LAST_SPELL + 4)
+#define P_MAKASHI	(P_LAST_SPELL + 5)
+#define P_SORESU	(P_LAST_SPELL + 6)
+#define P_ATARU		(P_LAST_SPELL + 7)
+#define P_DJEM_SO	(P_LAST_SPELL + 8)
+#define P_SHIEN		(P_LAST_SPELL + 9)
+#define P_NIMAN		(P_LAST_SPELL +10)
+#define P_JUYO		(P_LAST_SPELL +11)
 #ifdef STEED
 #define P_RIDING		(P_LAST_SPELL +12)	/* How well you control your steed */
 #define P_LAST_H_TO_H		P_RIDING
@@ -111,7 +111,19 @@
 /* These roles qualify for a martial arts bonus */
 #define martial_bonus()	(u.umartial)
 
+/* Fighting form IDs */
+#define NO_FFORM		0
+#define FFORM_SHII_CHO	1
+#define FFORM_MAKASHI	2
+#define FFORM_SORESU	3
+#define FFORM_ATARU		4
+#define FFORM_DJEM_SO	5
+#define FFORM_SHIEN		6
+#define FFORM_NIMAN		7
+#define FFORM_JUYO		8
+#define LAST_FFORM		FFORM_JUYO
 
+#define FightingFormSkillLevel(i)	P_SKILL(getFightingFormSkill(i))
 /*
  * These are the standard weapon skill levels.  It is important that
  * the lowest "valid" skill be be 1.  The code calculates the

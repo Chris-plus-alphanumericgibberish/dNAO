@@ -153,6 +153,7 @@ struct monst {
 	Bitfield(zombify,1);/* should rise as zombie */ /*88*/
 	Bitfield(ispolyp,1);/* is a polypoid being */ /*89*/
 	Bitfield(mdisrobe,1);/* disrobing */ /*91*/
+	Bitfield(mgoatmarked,1);/* will be eaten by the goat if you kill it this turn */ /*92*/
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
 #define BASE_DOG_ENCOURAGED_MAX		7
@@ -196,6 +197,7 @@ struct monst {
 	short mxlth;		/* length of following data */
 	int meating;		/* monster is eating timeout */
 	int mfaction;		/* faction to which monster belongs */
+	int mtemplate;		/* template applied to monster */
 /*Note: first drow house is 8*/
 #define	FACTION_PADDING	1000
 #define	ZOMBIFIED	FACTION_PADDING+1	/* zombie 'faction' */

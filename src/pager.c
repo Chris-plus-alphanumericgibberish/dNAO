@@ -2062,14 +2062,14 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 
 	char name[BUFSZ] = "";
 	Strcat(name, ptr->mname);
-	if (mtmp->mfaction == ZOMBIFIED)		Strcat(name, " zombie");
-	else if (mtmp->mfaction == SKELIFIED)	Strcat(name, " skeleton");
-	else if (mtmp->mfaction == CRYSTALFIED) Strcat(name, " vitrean");
-	else if (mtmp->mfaction == FRACTURED)	Strcat(name, " witness");
-	else if (mtmp->mfaction == ILLUMINATED)	Strcat(name, " shining one");
-	else if (mtmp->mfaction == VAMPIRIC)	Strcat(name, " vampire");
-	else if (mtmp->mfaction == PSEUDONATURAL)	Strcat(name, " pseudonatural");
-	else if (mtmp->mfaction == TOMB_HERD)	Strcat(name, " tomb herd");
+	if (has_template(mtmp, ZOMBIFIED))		Strcat(name, " zombie");
+	else if (has_template(mtmp, SKELIFIED))	Strcat(name, " skeleton");
+	else if (has_template(mtmp, CRYSTALFIED)) Strcat(name, " vitrean");
+	else if (has_template(mtmp, FRACTURED))	Strcat(name, " witness");
+	else if (has_template(mtmp, ILLUMINATED))	Strcat(name, " shining one");
+	else if (has_template(mtmp, VAMPIRIC))	Strcat(name, " vampire");
+	else if (has_template(mtmp, PSEUDONATURAL))	Strcat(name, " pseudonatural");
+	else if (has_template(mtmp, TOMB_HERD))	Strcat(name, " tomb herd");
 
 	temp_buf[0] = '\0';
 	if (iflags.pokedex) {

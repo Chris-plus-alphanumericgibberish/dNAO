@@ -43,6 +43,10 @@
 													|| (levl[(mon)->mx][(mon)->my].lit &&  (viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1))))))
 #define is_deaf(mon)		(!((mon)->mcanhear) || (mon)->mtyp == PM_ALABASTER_ELF || (mon)->mtyp == PM_ALABASTER_ELF_ELDER)
 
+#define has_template(mon, id)	((mon)->mtemplate == (id))
+#define templated(mon)			((mon)->mtemplate != 0)
+#define get_template(mon)			((mon)->mtemplate)
+
 #define is_molochan(ptr)	((ptr)->maligntyp == A_NONE)
 #define is_voidalign(ptr)	((ptr)->maligntyp == A_VOID)
 #define is_lawful(ptr)		((ptr)->maligntyp > A_NEUTRAL && !is_molochan(ptr) && !is_voidalign(ptr))
@@ -264,7 +268,7 @@
 								 (ptr)->mtyp == PM_MASKED_QUEEN \
 								 )
 #define controlledwidegaze(ptr)		(!((ptr)->mtyp == PM_MEDUSA || (ptr)->mtyp == PM_UVUUDAUM || (ptr)->mtyp == PM_GREAT_CTHULHU || (ptr)->mtyp == PM_OBOX_OB || (ptr)->mtyp == PM_DAGON))
-#define controlledwidegaze_mon(mon)		(controlledwidegaze((mon)->data) || (mon)->mfaction == ILLUMINATED)
+#define controlledwidegaze_mon(mon)		(controlledwidegaze((mon)->data) || has_template(mon, ILLUMINATED))
 #define acidic(ptr)			(((ptr)->mflagsb & MB_ACID) != 0L)
 #define poisonous(ptr)		(((ptr)->mflagsb & MB_POIS) != 0L)
 #define freezing(ptr)		(((ptr)->mflagsb & MB_CHILL) != 0L)
@@ -282,7 +286,7 @@
 							 (ptr)->mtyp == PM_HALF_ELF_RANGER)
 #define is_undead(ptr)		(((ptr)->mflagsa & MA_UNDEAD) != 0L)
 #define is_undead_mon(mon)	(mon && is_undead((mon)->data))
-#define is_derived_undead_mon(mon)	(mon && ((mon)->mfaction == VAMPIRIC || (mon)->mfaction == ZOMBIFIED || (mon)->mfaction == SKELIFIED || (mon)->mfaction == CRYSTALFIED || (mon)->mfaction == FRACTURED))
+#define is_derived_undead_mon(mon)	(mon && (has_template(mon, VAMPIRIC) || has_template(mon, ZOMBIFIED) || has_template(mon, SKELIFIED) || has_template(mon, CRYSTALFIED) || has_template(mon, FRACTURED)))
 #define	can_undead_mon(mon)	(mon && !nonliving_mon(mon) && !is_minion((mon)->data) && ((mon)->data->mlet != S_PUDDING) &&\
 								((mon)->data->mlet != S_JELLY) && ((mon)->data->mlet != S_BLOB) && !is_elemental((mon)->data) &&\
 								!is_plant((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data) && !(mvitals[monsndx((mon)->data)].mvflags&G_NOCORPSE))
@@ -472,7 +476,7 @@
 									|| (ptr)->mtyp == PM_THUNDER_STORM \
 									|| (ptr)->mtyp == PM_FIRE_STORM \
 									|| (ptr)->mtyp == PM_MOUTH_OF_THE_GOAT)
-#define	is_goat_tentacle_mon(mon)	(is_goat_tentacle_mtyp((mon)->data) || (mon)->mfaction == MISTWEAVER)
+#define	is_goat_tentacle_mon(mon)	(is_goat_tentacle_mtyp((mon)->data) || has_template(mon, MISTWEAVER))
 #define goat_monster(ptr) (\
 									   (ptr)->mtyp == PM_SMALL_GOAT_SPAWN \
 									|| (ptr)->mtyp == PM_GOAT_SPAWN \
@@ -642,7 +646,7 @@
 				 ((ptr)->mtyp == PM_EDDERKOP) ? 8 : \
 				 ((ptr)->mtyp == PM_SURYA_DEVA) ? 9 : \
 				 0)
-#define emits_light_mon(mon) (mon->mfaction == ILLUMINATED ? \
+#define emits_light_mon(mon) (has_template(mon, ILLUMINATED) ? \
 							 max(3, emits_light((mon)->data)) : \
 							 emits_light((mon)->data))
 #define Is_darklight_monster(ptr)	((ptr)->mtyp == PM_EDDERKOP\
@@ -714,6 +718,12 @@
 				 (ptr)->mtyp == PM_PARASITIZED_GYNOID || \
 				 (ptr)->mtyp == PM_PARASITIZED_OPERATOR || \
 				 (ptr)->mtyp == PM_PARASITIZED_COMMANDER \
+				)
+
+#define free_android(ptr)	((ptr)->mtyp == PM_ANDROID || \
+				 (ptr)->mtyp == PM_GYNOID || \
+				 (ptr)->mtyp == PM_OPERATOR || \
+				 (ptr)->mtyp == PM_COMMANDER \
 				)
 
 #define is_dollable(ptr)	((ptr)->mtyp == PM_ANDROID || \

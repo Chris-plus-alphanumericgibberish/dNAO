@@ -809,35 +809,35 @@ rndghostname()
 }
 
 void
-append_faction_desc(mtmp, buf, pname)
+append_template_desc(mtmp, buf, pname)
 struct monst * mtmp;
 char * buf;
 boolean pname;
 {
 	if (pname){
-		if (mtmp->mfaction == ZOMBIFIED) Strcat(buf, "'s zombie");
-		else if (mtmp->mfaction == SKELIFIED) Strcat(buf, "'s skeleton");
-		else if (mtmp->mfaction == CRYSTALFIED) Strcat(buf, "'s vitrean");
-		else if (mtmp->mfaction == FRACTURED) Strcat(buf, ", Witness of the Fracture");
-		else if (mtmp->mfaction == ILLUMINATED) Strcat(buf, "the Illuminated");
-		else if (mtmp->mfaction == VAMPIRIC) Strcat(buf, ", vampire");
-		else if (mtmp->mfaction == PSEUDONATURAL) Strcat(buf, "the Pseudonatural");
-		else if (mtmp->mfaction == TOMB_HERD) Strcat(buf, "of the Herd");
-		else if (mtmp->mfaction == MISTWEAVER){
+		if (has_template(mtmp, ZOMBIFIED)) Strcat(buf, "'s zombie");
+		else if (has_template(mtmp, SKELIFIED)) Strcat(buf, "'s skeleton");
+		else if (has_template(mtmp, CRYSTALFIED)) Strcat(buf, "'s vitrean");
+		else if (has_template(mtmp, FRACTURED)) Strcat(buf, ", Witness of the Fracture");
+		else if (has_template(mtmp, ILLUMINATED)) Strcat(buf, "the Illuminated");
+		else if (has_template(mtmp, VAMPIRIC)) Strcat(buf, ", vampire");
+		else if (has_template(mtmp, PSEUDONATURAL)) Strcat(buf, "the Pseudonatural");
+		else if (has_template(mtmp, TOMB_HERD)) Strcat(buf, "of the Herd");
+		else if (has_template(mtmp, MISTWEAVER)){
 			if (mtmp->female) Strcat(buf, ", Daughter of the Black Goat");
 			else Strcat(buf, ", Child of the Black Goat");
 		}
 	}
 	else {
-		if (mtmp->mfaction == ZOMBIFIED) Strcat(buf, " zombie");
-		else if (mtmp->mfaction == SKELIFIED) Strcat(buf, " skeleton");
-		else if (mtmp->mfaction == CRYSTALFIED) Strcat(buf, " vitrean");
-		else if (mtmp->mfaction == FRACTURED) Strcat(buf, " witness");
-		else if (mtmp->mfaction == ILLUMINATED) Strcat(buf, " shining one");
-		else if (mtmp->mfaction == VAMPIRIC) Strcat(buf, " vampire");
-		else if (mtmp->mfaction == PSEUDONATURAL) Strcat(buf, " pseudonatural");
-		else if (mtmp->mfaction == TOMB_HERD) Strcat(buf, " herd");
-		else if (mtmp->mfaction == MISTWEAVER){
+		if (has_template(mtmp, ZOMBIFIED)) Strcat(buf, " zombie");
+		else if (has_template(mtmp, SKELIFIED)) Strcat(buf, " skeleton");
+		else if (has_template(mtmp, CRYSTALFIED)) Strcat(buf, " vitrean");
+		else if (has_template(mtmp, FRACTURED)) Strcat(buf, " witness");
+		else if (has_template(mtmp, ILLUMINATED)) Strcat(buf, " shining one");
+		else if (has_template(mtmp, VAMPIRIC)) Strcat(buf, " vampire");
+		else if (has_template(mtmp, PSEUDONATURAL)) Strcat(buf, " pseudonatural");
+		else if (has_template(mtmp, TOMB_HERD)) Strcat(buf, " herd");
+		else if (has_template(mtmp, MISTWEAVER)){
 			if (mtmp->female) Strcat(buf, " dark daughter");
 			else Strcat(buf, " dark child");
 		}
@@ -1004,7 +1004,7 @@ boolean called;
 			name_at_start = FALSE;
 		}
 	    Strcat(buf, mdat->mname);
-		append_faction_desc(mtmp, buf, TRUE);
+		append_template_desc(mtmp, buf, TRUE);
 	    return buf;
 	}
 
@@ -1066,7 +1066,7 @@ boolean called;
 			}
 			
 			Sprintf(eos(buf), "%s", mdat->mname);
-			append_faction_desc(mtmp, buf, type_is_pname(mdat));
+			append_template_desc(mtmp, buf, type_is_pname(mdat));
 			Sprintf(eos(buf), " called %s", name);
 			
 			name_at_start = (boolean)type_is_pname(mdat);
@@ -1092,7 +1092,7 @@ boolean called;
 				 monsndx(mdat),
 				 (boolean)mtmp->female));
 	    Strcat(buf, lcase(pbuf));
-		append_faction_desc(mtmp, buf, FALSE);
+		append_template_desc(mtmp, buf, FALSE);
 	    name_at_start = FALSE;
 	} else {
 	    name_at_start = (boolean)type_is_pname(mdat);
@@ -1121,7 +1121,7 @@ boolean called;
 			name_at_start = FALSE;
 		}
 	    Strcat(buf, mdat->mname);
-		append_faction_desc(mtmp, buf, type_is_pname(mdat));
+		append_template_desc(mtmp, buf, type_is_pname(mdat));
 	}
 
 	if (name_at_start && (article == ARTICLE_YOUR || !has_adjectives)) {

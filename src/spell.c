@@ -744,13 +744,14 @@ struct obj *spellbook;
 			}
 		}
 		
-		char qbuf[QBUFSZ];
-		Sprintf(qbuf, "You know \"%s\" quite well already. Try to refresh your memory anyway?", OBJ_NAME(objects[booktype]));
-		
-		for (int i = 0; i < MAXSPELL; i++)
-			if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n')
-				return 0;
-		
+		if (RoSbook == READ_SPELL){
+			char qbuf[QBUFSZ];
+			Sprintf(qbuf, "You know \"%s\" quite well already. Try to refresh your memory anyway?", OBJ_NAME(objects[booktype]));
+
+			for (int i = 0; i < MAXSPELL; i++)
+				if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n')
+					return 0;
+		}		
 		spellbook->in_use = TRUE;
 		
 		// moved above because there's no reason to let you fail before the confused procs
@@ -1511,6 +1512,7 @@ int atype;
 	case AD_ELEC:
 	case AD_DEAD:
 	case AD_DRLI:
+	case AD_STAR:
 		return P_ATTACK_SPELL;
 	case AD_DRST:
 	case AD_ACID:
@@ -1898,30 +1900,31 @@ spiritDsize()
 STATIC_PTR int
 purifying_blast()
 {
+	struct zapdata zapdata = { 0 };
 	struct monst *mon;
 	int dmg;
 	int dsize = spiritDsize();
 	
 	mon = m_at(u.ux+u.dx, u.uy+u.dy);
-	if(!mon){
-		buzz(AD_FIRE, SPBOOK_CLASS, TRUE, 0,
-			u.ux, u.uy, u.dx, u.dy,25,d(10,dsize));
-	} else if(resists_elec(mon) || resists_disint(mon)){
-		shieldeff(mon->mx, mon->my);
-		buzz(AD_FIRE, SPBOOK_CLASS, TRUE, 0,
-			u.ux+u.dx, u.uy+u.dy, u.dx, u.dy,25,d(10,dsize));
-	} else {
-		mhurtle(mon, u.dx, u.dy, 25);
-		dmg = d(10,dsize);
-		mon->mhp -= dmg;
-		setmangry(mon);
-		if(hates_silver(mon->data)) mon->mhp -= d(5,dsize);
-		if (mon->mhp <= 0){
-			xkilled(mon, 1);
+	if (mon) {
+		if (resists_elec(mon) || resists_disint(mon))
+			shieldeff(mon->mx, mon->my);
+		else {
+			mhurtle(mon, u.dx, u.dy, 25);
+			dmg = d(10, dsize);
+			mon->mhp -= dmg;
+			setmangry(mon);
+			if (hates_silver(mon->data)) mon->mhp -= d(5, dsize);
+			if (mon->mhp <= 0){
+				xkilled(mon, 1);
+			}
 		}
-		buzz(AD_FIRE, SPBOOK_CLASS, TRUE, 0,
-			u.ux, u.uy, u.dx, u.dy,25,d(10,dsize));
 	}
+	/* then shoot a fireball */
+	basiczap(&zapdata, AD_FIRE, ZAP_SPELL, d(10, dsize));
+	zapdata.explosive = 1; zapdata.directly_hits = 0; zapdata.affects_floor = 0; zapdata.single_target = 1; zapdata.no_hit_wall = 1;
+	zap(&youmonst, u.ux, u.uy, u.dx, u.dy, 25, &zapdata);
+
 	// u.uacinc-=7;  //Note: was added when purifying blast began to charge.
 	return 0;
 }
@@ -2036,11 +2039,11 @@ spiriteffects(power, atme)
 				break;
 			}
 		}break;
-		case PWR_FIRE_BREATH:
+		case PWR_FIRE_BREATH:{
 			if (!getdir((char *)0) || !(u.dx || u.dy)) return(0);
-			buzz(AD_FIRE, FOOD_CLASS, TRUE, 0,
-				u.ux, u.uy, u.dx, u.dy,0,d(5,dsize));
-		break;
+			struct zapdata zapdata = { 0 };
+			zap(&youmonst, u.ux, u.uy, u.dx, u.dy, rn1(7, 7), basiczap(&zapdata, AD_FIRE, ZAP_BREATH, d(5, dsize)));
+		}break;
 		case PWR_TRANSDIMENSIONAL_RAY:{
 			int dmg;
 			int range = rn1(7,7);
@@ -4984,7 +4987,7 @@ int *spell_no;
 			any.a_int = i + 1;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
 				spellet(i), 0, ATR_NONE, buf,
-				(i == splaction) ? MENU_SELECTED : MENU_UNSELECTED);
+				MENU_UNSELECTED);
 		}
 		//Other menu options
 		if (splaction != SPELLMENU_CAST && splaction != SPELLMENU_PICK && splaction < 0) {

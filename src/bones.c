@@ -456,28 +456,28 @@ struct obj *corpse;
 			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				set_faction(mtmp, ZOMBIFIED);
+				set_template(mtmp, ZOMBIFIED);
 		} else if(u.ugrave_arise == PM_SKELETON){
 			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				set_faction(mtmp, SKELIFIED);
+				set_template(mtmp, SKELIFIED);
 		} else if(u.ugrave_arise == PM_BAALPHEGOR){
 			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				set_faction(mtmp, CRYSTALFIED);
+				set_template(mtmp, CRYSTALFIED);
 		} else if(u.ugrave_arise == PM_VAMPIRE){
 			u.ugrave_arise = (u.mfemale && urole.femalenum != NON_PM) ? urole.femalenum : urole.malenum;
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
 			in_mklev = FALSE;
 			if(mtmp)
-				set_faction(mtmp, VAMPIRIC);
+				set_template(mtmp, VAMPIRIC);
 		} else {
 			in_mklev = TRUE;
 			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
@@ -491,9 +491,9 @@ struct obj *corpse;
 		newsym(x, y);
 		Your("body rises from the dead as %s%s...",
 			an(mons[u.ugrave_arise].mname),
-			mtmp->mfaction == ZOMBIFIED ? " zombie" :
-			mtmp->mfaction == SKELIFIED ? " skeleton" :
-			mtmp->mfaction == CRYSTALFIED ? " vitrean" :
+			has_template(mtmp, ZOMBIFIED) ? " zombie" :
+			has_template(mtmp, SKELIFIED) ? " skeleton" :
+			has_template(mtmp, CRYSTALFIED) ? " vitrean" :
 			""
 			);
 		display_nhwindow(WIN_MESSAGE, FALSE);

@@ -5,6 +5,24 @@
 #ifndef OBJCLASS_H
 #define OBJCLASS_H
 
+
+
+/*
+ * structure to hold enough data about a weapon's damage dice to perform
+ * any special cases that only involve the item itself
+ *    ie, not including interactions with the defender
+ */
+struct weapon_dice {
+	uchar oc_damn;				/* d(N,x) + d(n,x) + f */
+	uchar oc_damd;				/* d(n,X) + d(n,x) + f */
+	uchar bon_damn;				/* d(n,x) + d(N,x) + f */
+	uchar bon_damd;				/* d(n,x) + d(n,X) + f */
+	int flat;					/* d(n,x) + d(n,x) + F */
+	Bitfield(lucky, 1);			/* use luck-biased dice (rnl()) */
+	Bitfield(exploding, 1);		/* use exploding dice */
+	Bitfield(explode_amt, 3);	/* additional amount to increase roll by when dice explode */
+};
+
 /* definition of a class of objects */
 
 struct objclass {
@@ -31,7 +49,7 @@ struct objclass {
 #define oc_bulky	oc_size==MZ_HUGE	/* for armor */
 	Bitfield(oc_tough,1);	/* hard gems/rings */
 
-	Bitfield(oc_dir,4);
+	Bitfield(oc_dir,5);
 #define NODIR		1	/* for wands/spells: non-directional */
 #define IMMEDIATE	2	/*		     directional */
 #define RAY		3	/*		     zap beams */
@@ -40,6 +58,16 @@ struct objclass {
 #define PIERCE		2	/* for weapons & tools used as weapons */
 #define SLASH		4	/* (latter includes iron ball & chain) */
 #define EXPLOSION	8	/* (rockets,  grenades) */
+
+#define	UPPER_TORSO_DR 0x01 /* body armor, shirt, cloak (2x weight) */
+#define	LOWER_TORSO_DR 0x02 /* body armor, cloak (2x weight) */
+#define	HEAD_DR        0x04 /* helmet */
+#define	LEG_DR         0x08 /* boots, cloak */
+#define	ARM_DR         0x10 /* gloves */
+
+#define TORSO_DR       (UPPER_TORSO_DR|LOWER_TORSO_DR)
+#define CLOAK_DR       (UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR)
+#define ALL_DR         (UPPER_TORSO_DR|LOWER_TORSO_DR|HEAD_DR|LEG_DR|ARM_DR)
 
 	/*Bitfield(oc_subtyp,3);*/	/* Now too big for a bitfield... see below */
 
@@ -121,9 +149,10 @@ struct objclass {
 	short	oc_cost;		/* base cost in shops */
 /* Check the AD&D rules!  The FIRST is small monster damage. */
 /* for weapons, and tools, rocks, and gems useful as weapons */
-	schar	oc_wsdam, oc_wldam;	/* max small/large monster damage */
-#define oc_range	oc_wsdam	/* for strength independant ranged weapons */
-#define oc_rof		oc_wldam	/* rate of fire bonus for ranged weapons */
+	struct weapon_dice oc_wsdam;	/* small monster damage */
+	struct weapon_dice oc_wldam;	/* large monster damage */
+#define oc_range	oc_wsdam.flat	/* for strength independant ranged weapons */
+#define oc_rof		oc_wldam.flat	/* rate of fire bonus for ranged weapons */
 	
 	schar	oc_oc1, oc_oc2, oc_oc3;
 #define oc_hitbon	oc_oc1		/* weapons: "to hit" bonus */
@@ -146,7 +175,8 @@ struct objclass {
 
 struct objdescr {
 	const char *oc_name;		/* actual name */
-	const char *oc_descr;		/* description when name unknown */
+	const char *oc_descr;		/* description when oclass name unknown */
+	const char *oc_blindname;	/* appearence when object !dknown */
 };
 
 struct colorTextClr {
@@ -236,4 +266,5 @@ struct fruit {
 
 #define OBJ_NAME(obj)  (obj_descr[(obj).oc_name_idx].oc_name)
 #define OBJ_DESCR(obj) (obj_descr[(obj).oc_descr_idx].oc_descr)
+#define OBJ_BLINDNAME(obj) (obj_descr[(obj).oc_descr_idx].oc_blindname)
 #endif /* OBJCLASS_H */

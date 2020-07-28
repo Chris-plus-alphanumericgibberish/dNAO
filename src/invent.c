@@ -2471,6 +2471,11 @@ winid *datawin;
 	const char* dir = (oc.oc_dir == NODIR ? "Non-directional"
 		: (oc.oc_dir == IMMEDIATE ? "Beam"
 		: "Ray"));
+	int goatweaponturn = 0;
+	
+	if(check_oprop(obj,OPROP_GOATW))
+		goatweaponturn = goat_weapon_damage_turn(obj);
+
 
 #define OBJPUTSTR(str) putstr(*datawin, ATR_NONE, str)
 #define ADDCLASSPROP(cond, str)         \
@@ -2559,14 +2564,14 @@ winid *datawin;
 
 			Sprintf(buf, "Damage: ");
 
-			if (wdice[0].oc.damn && wdice[0].oc.damd)
+			if (wdice[0].oc_damn && wdice[0].oc_damd)
 			{
-				Sprintf(buf2, "%dd%d", wdice[0].oc.damn, wdice[0].oc.damd);
+				Sprintf(buf2, "%dd%d", wdice[0].oc_damn, wdice[0].oc_damd);
 				Strcat(buf, buf2);
 			}
-			if (wdice[0].bon.damn && wdice[0].bon.damd)
+			if (wdice[0].bon_damn && wdice[0].bon_damd)
 			{
-				Sprintf(buf2, "+%dd%d", wdice[0].bon.damn, wdice[0].bon.damd);
+				Sprintf(buf2, "+%dd%d", wdice[0].bon_damn, wdice[0].bon_damd);
 				Strcat(buf, buf2);
 			}
 			if (wdice[0].flat)
@@ -2576,24 +2581,20 @@ winid *datawin;
 			}
 			Strcat(buf, " versus small and ");
 			/* is there a difference between large and small dice? */
-			if (wdice[0].oc.aatyp != wdice[1].oc.aatyp ||
-				wdice[0].oc.adtyp != wdice[1].oc.adtyp ||
-				wdice[0].oc.damn != wdice[1].oc.damn ||
-				wdice[0].oc.damd != wdice[1].oc.damd ||
-				wdice[0].bon.aatyp != wdice[1].bon.aatyp ||
-				wdice[0].bon.adtyp != wdice[1].bon.adtyp ||
-				wdice[0].bon.damn != wdice[1].bon.damn ||
-				wdice[0].bon.damd != wdice[1].bon.damd ||
+			if (wdice[0].oc_damn != wdice[1].oc_damn ||
+				wdice[0].oc_damd != wdice[1].oc_damd ||
+				wdice[0].bon_damn != wdice[1].bon_damn ||
+				wdice[0].bon_damd != wdice[1].bon_damd ||
 				wdice[0].flat != wdice[1].flat)
 			{
-				if (wdice[1].oc.damn && wdice[1].oc.damd)
+				if (wdice[1].oc_damn && wdice[1].oc_damd)
 				{
-					Sprintf(buf2, "%dd%d", wdice[1].oc.damn, wdice[1].oc.damd);
+					Sprintf(buf2, "%dd%d", wdice[1].oc_damn, wdice[1].oc_damd);
 					Strcat(buf, buf2);
 				}
-				if (wdice[1].bon.damn && wdice[1].bon.damd)
+				if (wdice[1].bon_damn && wdice[1].bon_damd)
 				{
-					Sprintf(buf2, "+%dd%d", wdice[1].bon.damn, wdice[1].bon.damd);
+					Sprintf(buf2, "+%dd%d", wdice[1].bon_damn, wdice[1].bon_damd);
 					Strcat(buf, buf2);
 				}
 				if (wdice[1].flat)
@@ -2758,7 +2759,8 @@ winid *datawin;
 			ADDCLASSPROP(check_oprop(obj, OPROP_COLDW), "cold");
 			ADDCLASSPROP(check_oprop(obj, OPROP_WATRW), "water");
 			ADDCLASSPROP(check_oprop(obj, OPROP_ELECW), "lightning");
-			ADDCLASSPROP(check_oprop(obj, OPROP_ACIDW), "acid");
+			ADDCLASSPROP(check_oprop(obj, OPROP_ACIDW) || goatweaponturn == AD_EACD, "acid");
+			ADDCLASSPROP(goatweaponturn == AD_STDY, "study");
 			ADDCLASSPROP(check_oprop(obj, OPROP_MAGCW), "magic");
 			if (buf[0] != '\0')
 			{
@@ -2766,6 +2768,13 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			buf[0] = '\0';
+			
+			if (goatweaponturn == AD_DRST)
+			{
+				Sprintf(buf2, "Deals double poison damage plus 4d4 physical.");
+				OBJPUTSTR(buf2);
+			}
+			
 			ADDCLASSPROP(check_oprop(obj, OPROP_PSIOW), "psionic");
 			if (buf[0] != '\0')
 			{
@@ -2785,6 +2794,7 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			buf[0] = '\0';
+			
 			ADDCLASSPROP(check_oprop(obj, OPROP_OONA_FIREW), "fire");
 			ADDCLASSPROP(check_oprop(obj, OPROP_OONA_COLDW), "cold");
 			ADDCLASSPROP(check_oprop(obj, OPROP_OONA_ELECW), "lightning");
@@ -2794,6 +2804,32 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			buf[0] = '\0';
+			
+			ADDCLASSPROP(goatweaponturn == AD_COLD, "cold");
+			ADDCLASSPROP(goatweaponturn == AD_ELEC, "lightning");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 3d8 bonus %s damage.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			
+			ADDCLASSPROP(goatweaponturn == AD_FIRE, "fire");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 3d10 bonus %s damage.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			
+			ADDCLASSPROP(goatweaponturn == AD_ACID, "acid");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Deals 4d4 bonus %s damage.", buf);
+				OBJPUTSTR(buf2);
+			}
+			buf[0] = '\0';
+			
 			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_MAGCW), "magic");
 			if (buf[0] != '\0')
 			{

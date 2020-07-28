@@ -339,12 +339,12 @@ struct monst *mtmp;
 			mtmp->data->mlet == S_PUDDING ||
 			mtmp->data->mlet == S_UMBER ||
 			mtmp->data->mlet == S_EEL ||
-			mtmp->mfaction == PSEUDONATURAL ||
-			mtmp->mfaction == TOMB_HERD ||
-			mtmp->mfaction == YITH ||
-			mtmp->mfaction == CRANIUM_RAT ||
-			mtmp->mfaction == MISTWEAVER ||
-			mtmp->mfaction == FRACTURED ||
+			has_template(mtmp, PSEUDONATURAL) ||
+			has_template(mtmp, TOMB_HERD) ||
+			has_template(mtmp, YITH) ||
+			has_template(mtmp, CRANIUM_RAT) ||
+			has_template(mtmp, MISTWEAVER) ||
+			has_template(mtmp, FRACTURED) ||
 			mtmp->mtyp == PM_GUG ||
 			mtmp->mtyp == PM_MIGO_WORKER ||
 			mtmp->mtyp == PM_MIGO_SOLDIER ||
@@ -1517,18 +1517,22 @@ register struct monst *mtmp;
 			(ttmp && ttmp->ttyp == MAGIC_PORTAL) ||
 		   /* ALI - artifact doors from slash'em */
 			(IS_DOOR(levl[mtmp->mx][mtmp->my].typ) && artifact_door(mtmp->mx, mtmp->my)) ||
-			(IS_ROCK(lev->typ) && lev->typ != SDOOR &&
-			(lev->wall_info & W_NONDIGGABLE) != 0) ||
-			(is_pool(mtmp->mx, mtmp->my, TRUE) || is_lava(mtmp->mx, mtmp->my)) ||
-			(lev->typ == DRAWBRIDGE_DOWN ||
-			   (is_drawbridge_wall(mtmp->mx, mtmp->my) >= 0)) ||
-			(boulder_at(mtmp->mx, mtmp->my)) ||
-			(IS_GRAVE(lev->typ)) ||
-			(lev->typ == DRAWBRIDGE_UP) ||
-			(IS_THRONE(lev->typ)) ||
-			(IS_ALTAR(lev->typ)) ||
-			(Is_airlevel(&u.uz))
-		)){
+			(boulder_at(mtmp->mx, mtmp->my))
+			)
+			&& (
+				levl[mtmp->mx][mtmp->my].typ == CORR ||
+				levl[mtmp->mx][mtmp->my].typ == DOOR ||
+				levl[mtmp->mx][mtmp->my].typ == ROOM ||
+				levl[mtmp->mx][mtmp->my].typ == ICE ||
+				levl[mtmp->mx][mtmp->my].typ == GRASS ||
+				levl[mtmp->mx][mtmp->my].typ == SOIL ||
+				levl[mtmp->mx][mtmp->my].typ == SAND ||
+				levl[mtmp->mx][mtmp->my].typ == PUDDLE ||
+				//Note: on levels other than air and lolth, clouds are assumed to be at ground level
+				(levl[mtmp->mx][mtmp->my].typ == CLOUD 
+					&& !Is_airlevel(&u.uz) && !Is_lolth_level(&u.uz))
+			)
+		){
 			typ = fillholetyp(mtmp->mx,mtmp->my);
 			if (canseemon(mtmp))
 				pline("%s gyres and gimbles into the %s.", Monnam(mtmp),surface(mtmp->mx,mtmp->my));
@@ -2166,7 +2170,7 @@ not_special:
 		
 		if(appr == 0){
 			struct monst *m2 = (struct monst *)0;
-			int distminbest = SQSRCHRADIUS;
+			int distminbest = BOLT_LIM;
 			for(m2=fmon; m2; m2 = m2->nmon){
 				if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < distminbest
 						&& mm_aggression(mtmp,m2)
@@ -2179,15 +2183,7 @@ not_special:
 					gy = m2->my;
 					mtmp->mux = m2->mx;
 					mtmp->muy = m2->my;
-					if(MON_WEP(mtmp) && 
-						(is_launcher(MON_WEP(mtmp)) || is_firearm(MON_WEP(mtmp)) )
-					){
-						if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) >= BOLT_LIM) appr = 1;
-						else if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < 4) appr = -1;
-						else appr = 0;
-					} else {
-						appr = 1;
-					}
+					appr = 1;
 				}
 			}//End target closest hostile
 			

@@ -858,7 +858,7 @@ moveloop()
 				insight_vanish(mtmp);
 				continue;
 			}
-			if(mtmp->mfaction == DELOUSED){
+			if(has_template(mtmp, DELOUSED)){
 				delouse_tame(mtmp);
 				continue;
 			}
@@ -929,7 +929,7 @@ moveloop()
 					insight_vanish(mtmp);
 					continue;
 				}
-				if(mtmp->mfaction == DELOUSED){
+				if(has_template(mtmp, DELOUSED)){
 					delouse_tame(mtmp);
 					continue;
 				}
@@ -1065,11 +1065,8 @@ moveloop()
 			if(u.sealsActive&SEAL_FAFNIR && money_cnt(invent) == 0) unbind(SEAL_FAFNIR,TRUE);
 #endif
 			if(u.sealsActive&SEAL_JACK && (Is_astralevel(&u.uz) || Inhell)) unbind(SEAL_JACK,TRUE);
-			if(u.sealsActive&SEAL_ORTHOS && !(Darksight || Catsight || Extramission)
-				&&!(
-					(viz_array[u.uy][u.ux]&TEMP_LIT3 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)) || 
-					(levl[u.ux][u.uy].lit && !(viz_array[u.uy][u.ux]&TEMP_DRK3 && !(viz_array[u.uy][u.ux]&TEMP_LIT3)))
-				   )
+			if (u.sealsActive&SEAL_ORTHOS && !(Darksight || Catsight || Extramission)
+				&& (!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark()))
 			){
 				if(Elfsight){
 					if(++u.orthocounts>(5*3)) unbind(SEAL_ORTHOS,TRUE);
@@ -1445,7 +1442,7 @@ karemade:
 						if(tries >= 0)
 							makemon(ford_montype(-1), x, y, MM_ADJACENTOK);
 					}
-				} else if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && u.uinsight > rn2(INSIGHT_RATE)){
+				} else if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && check_insight()){
 					int x, y;
 					for(x = 1; x < COLNO; x++)
 						for(y = 0; y < ROWNO; y++){
@@ -1641,8 +1638,8 @@ karemade:
 				moveamt += 3;
 			if(u.uuur_duration)
 				moveamt += 6;
-			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-				// switch(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep)))){
+			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+				// switch(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep)))){
 					// case P_BASIC:       moveamt = max(moveamt-6,1); break;
 					// case P_SKILLED:     moveamt = max(moveamt-4,1); break;
 					// case P_EXPERT:      moveamt = max(moveamt-3,1); break;
@@ -2182,7 +2179,7 @@ karemade:
 			insight_vanish(mtmp);
 			continue;
 		}
-		if(mtmp->mfaction == DELOUSED){
+		if(has_template(mtmp, DELOUSED)){
 			delouse_tame(mtmp);
 			continue;
 		}
@@ -2839,19 +2836,28 @@ see_nearby_monsters()
 						&& !mtmp->mtame
 						&& canseemon(mtmp)
 						&& (!(mtmp->mappearance || mtmp->mundetected) || sensemon(mtmp))
-						&& !(mvitals[monsndx(mtmp->data)].seen)
 						){
-							mvitals[monsndx(mtmp->data)].seen = 1;
-							if(Role_if(PM_TOURIST)){
-								more_experienced(experience(mtmp,0),0);
-								newexplevel();
+							if(!(mvitals[monsndx(mtmp->data)].seen)){
+								mvitals[monsndx(mtmp->data)].seen = TRUE;
+								if(Role_if(PM_TOURIST)){
+									more_experienced(experience(mtmp,0),0);
+									newexplevel();
+								}
+								//May have already gained madness from an attack, but re-giving it is harmless
+								give_madness(mtmp);
 							}
-							give_madness(mtmp);
-							if(u.usanity > 0 && taxes_sanity(mtmp->data)){
-								change_usanity(u_sanity_loss(mtmp));
+							
+							//May have already lost sanity from seeing it from a distance, or wiped the memory with amnesia.
+							if(mvitals[monsndx(mtmp->data)].san_lost == 0 && taxes_sanity(mtmp->data)){
+								mvitals[monsndx(mtmp->data)].san_lost = u_sanity_loss(mtmp);
+								change_usanity(mvitals[monsndx(mtmp->data)].san_lost);
 							}
-							if(yields_insight(mtmp->data)){
-								change_uinsight(u_visible_insight(mtmp));
+							if(!mvitals[monsndx(mtmp->data)].vis_insight && yields_insight(mtmp->data)){
+								uchar insight;
+								mvitals[monsndx(mtmp->data)].vis_insight = TRUE;
+								insight = u_visible_insight(mtmp);
+								mvitals[monsndx(mtmp->data)].insight_gained += insight;
+								change_uinsight(insight);
 							}
 						}
 					}
@@ -3175,7 +3181,7 @@ struct monst *mon;
 		for(otmp = level.objects[xlocale][ylocale]; otmp; otmp = otmp2){
 			otmp2 = otmp->nexthere;
 			if(otmp->otyp == CORPSE && !otmp->oartifact && !rn2(4)){
-				goat_eat(otmp, FALSE); //No matter what, the this function should remove this corpse.  Either via resurrection or destruction
+				goat_eat(otmp, GOAT_EAT_PASSIVE); //No matter what, the this function should remove this corpse.  Either via resurrection or destruction
 				//Warning note: otmp is now stale
 				return;
 			}
@@ -3272,7 +3278,7 @@ struct monst *magr;
 	struct permonst *pa;
 	
 	pa = youagr ? youracedata : magr->data;
-	
+		
 	if(pa->mtyp == PM_SWIRLING_MIST){
 		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_WET;
@@ -3301,7 +3307,9 @@ struct monst *magr;
 	} else if(pa->mtyp == PM_MOUTH_OF_THE_GOAT){
 		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_EACD;
+		//uses default 4d4 damage dice
 	} else if(pa->mtyp == PM_BLESSED){
+		//mostly uses default 4d4 damage dice
 		switch(rnd(8)){
 			default:
 			case 1:
@@ -3323,13 +3331,41 @@ struct monst *magr;
 			break;
 		}
 	}
+	//roll the bkgt attacks here, since it doesn't pass through the main subout code.
+	if(symbiote.aatyp == AT_BKGT){
+		switch(rnd(5)){
+			case 1:
+				symbiote.aatyp = AT_TUCH;
+			break;
+			case 2:
+				symbiote.aatyp = AT_BITE;
+				symbiote.adtyp = AD_PHYS;
+			break;
+			case 3:
+				symbiote.aatyp = AT_KICK;
+				symbiote.adtyp = AD_PHYS;
+			break;
+			case 4:
+				symbiote.aatyp = AT_BUTT;
+				symbiote.adtyp = AD_PHYS;
+			break;
+			case 5:
+				symbiote.aatyp = AT_GAZE;
+				symbiote.adtyp = AD_STDY;
+			break;
+		}
+	}
 	
+	//Attack all surrounding foes
 	for(j=8;j>=1;j--){
 		if(youagr && u.ustuck && u.uswallow)
 			mdef = u.ustuck;
 		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
 			continue;
 		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(u.ux == x(magr)+clockwisex[(i+j)%8] && u.uy == y(magr)+clockwisey[(i+j)%8])
+			mdef = &youmonst;
 		
 		if(!mdef)
 			continue;
@@ -3343,17 +3379,23 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful)))
 			continue;
 
-		
-		if((touch_petrifies(mdef->data)
-		 || mdef->mtyp == PM_MEDUSA)
-		 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
-		) continue;
-		
-		if(mdef->mtyp == PM_PALE_NIGHT)
-			continue;
+		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
+			if((touch_petrifies(mdef->data)
+			 || mdef->mtyp == PM_MEDUSA)
+			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+			) continue;
+			
+			if(mdef->mtyp == PM_PALE_NIGHT)
+				continue;
+		}
 		
 		if(mdef && !mdef->mtame){
-			xmeleehity(magr, mdef, &symbiote, (struct obj *)0, -1, 0, FALSE);
+			if(symbiote.aatyp == AT_MAGC)
+				xcasty(magr, mdef, &symbiote, mdef->mx, mdef->my);
+			else if(symbiote.aatyp == AT_GAZE)
+				xgazey(magr, mdef, &symbiote, -1);
+			else
+				xmeleehity(magr, mdef, &symbiote, (struct obj *)0, -1, 0, FALSE);
 		}
 	}
 }

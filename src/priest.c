@@ -904,7 +904,8 @@ struct monst *priest;
 	    break;
 	}
 
-	buzz(AD_ELEC, SPBOOK_CLASS, FALSE, 6, x, y, sgn(tbx), sgn(tby),0,0); /* bolt of lightning */
+	zap(priest, x, y, sgn(tbx), sgn(tby), rn1(7, 7), basiczap(0, AD_ELEC, ZAP_SPELL, 6));
+
 	exercise(A_WIS, FALSE);
 	last_smite = monstermoves;
 }
