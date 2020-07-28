@@ -3333,7 +3333,7 @@ struct monst *magr;
 	}
 	//roll the bkgt attacks here, since it doesn't pass through the main subout code.
 	if(symbiote.aatyp == AT_BKGT){
-		switch(rnd(4)){
+		switch(rnd(5)){
 			case 1:
 				symbiote.aatyp = AT_TUCH;
 			break;
