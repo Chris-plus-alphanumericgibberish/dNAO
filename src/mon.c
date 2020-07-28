@@ -4452,13 +4452,20 @@ boolean was_swallowed;			/* digestion */
 	if (mdat->mtyp == PM_VLAD_THE_IMPALER) {
 		if(mvitals[PM_VLAD_THE_IMPALER].died == 1) livelog_write_string("destroyed Vlad the Impaler");
 	    if (cansee(mon->mx, mon->my) && !was_swallowed)
-		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
+			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    return FALSE;
 	}
 	else if(mdat->mlet == S_VAMPIRE && mdat->geno & G_UNIQ){
 		//Don't livelog Vlad's wives; livelog spam reduction
-		pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
+		if (cansee(mon->mx, mon->my) && !was_swallowed)
+			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
 	    return FALSE;
+	}
+	else if (mdat->mtyp == PM_ACERERAK) {
+		if (mvitals[PM_ACERERAK].died == 1) livelog_write_string("destroyed Acererak");
+		if (cansee(mon->mx, mon->my) && !was_swallowed)
+			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
+		return FALSE;
 	}
 	else if (mdat->mlet == S_LICH && mdat->mtyp != PM_LICH__THE_FIEND_OF_EARTH) {
 	    if (cansee(mon->mx, mon->my) && !was_swallowed)
