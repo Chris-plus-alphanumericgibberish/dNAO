@@ -181,13 +181,13 @@
 		/* ...means blind because of a cover */
 #define NoLightBlind	((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && is_opaque(uarm)) || (uarmu && is_opaque(uarmu)))) && \
-		 !Blind_res && !forcesight)
+		 !forcesight)
 // #define Blind	((Blinded || Blindfolded || !haseyes(youracedata) || LightBlind) && \
 		 // !(u.sealsActive&SEAL_DANTALION && !(uarm && uarm->otyp != CRYSTAL_PLATE_MAIL)) && \
 		 // !Blind_res && !forcesight)
 #define Blind	((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && is_opaque(uarm)) || (uarmu && is_opaque(uarmu)))) && \
-		 !Blind_res && !forcesight)
+		 !forcesight)
 		/* ...the Eyes operate even when you really are blind
 		    or don't have any eyes */
 
@@ -538,7 +538,7 @@
 
 #define EReflecting		u.uprops[REFLECTING].extrinsic
 #define Reflecting		(EReflecting || \
-						 (uwep && is_lightsaber(uwep) && uwep->lamplit && ((u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))) || (u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))))) || \
+						 (uwep && is_lightsaber(uwep) && uwep->lamplit && ((activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))) || (activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm))))) || \
 						 (u.usteed && u.usteed->misc_worn_check & W_SADDLE \
 						 && which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
 						species_reflects(&youmonst))

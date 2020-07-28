@@ -1138,13 +1138,13 @@ boolean while_carried;
 }
 
 boolean
-arti_blindres(obj, while_carried)
+arti_forcesight(obj, while_carried)
 struct obj * obj;
 boolean while_carried;
 {
 	return (obj && obj->oartifact &&
-		(arti_worn_prop(obj, ARTP_BLINDRES)
-		|| (while_carried && arti_carry_prop(obj, ARTP_BLINDRES))));
+		(arti_worn_prop(obj, ARTP_FORCESIGHT)
+		|| (while_carried && arti_carry_prop(obj, ARTP_FORCESIGHT))));
 }
 
 boolean
@@ -1160,34 +1160,7 @@ boolean
 arti_reflects(obj)
 struct obj *obj;
 {
-	int i;
-	int proplist[LAST_PROP];
-
-	/* first check normal item properties */
-	i = 0;
-	get_item_property_list(proplist, obj, obj->otyp);
-	while (proplist[i]) {
-		if (proplist[i] == REFLECTING)
-			return TRUE;
-		i++;
-	}
-	/* then while-worn artifact properties */
-	i = 0;
-	get_art_property_list(proplist, obj->oartifact, FALSE);
-	while (proplist[i]) {
-		if (proplist[i] == REFLECTING)
-			return TRUE;
-		i++;
-	}
-	/* then while-carried artifact properties */
-	i = 0;
-	get_art_property_list(proplist, obj->oartifact, TRUE);
-	while (proplist[i]) {
-		if (proplist[i] == REFLECTING)
-			return TRUE;
-		i++;
-	}
-    return FALSE;
+	return item_has_property(obj, REFLECTING);
 }
 
 #endif /* OVL0 */
@@ -1370,6 +1343,12 @@ long wp_mask;
 			break;
 		}//end switch
 	}//end for
+
+	/* things that aren't properties at all */
+
+	/* assumes there can only be one source of forcesight at once! */
+	if (arti_forcesight(otmp, wp_mask == W_ART))
+		forcesight = on;
 
 	if(wp_mask == W_ART && !on && oart->inv_prop) {
 	    /* might have to turn off invoked power too */
@@ -2988,6 +2967,48 @@ int * truedmgptr;
 		if(check_oprop(otmp, OPROP_LESSER_MAGCW))
 			*truedmgptr += d(3, 4);
 	}
+	if(check_oprop(otmp, OPROP_GOATW)){
+		switch(goat_weapon_damage_turn(otmp)){
+			case AD_EACD:
+				if (!Acid_res(mdef)){
+					*truedmgptr += basedmg;
+				}
+			break;
+			case AD_DRST:
+				*plusdmgptr += d(4,4);
+				if (!Poison_res(mdef)){
+					*truedmgptr += basedmg;
+				}
+			break;
+			case AD_STDY:
+				if (youdef){
+					u.ustdy += basedmg;
+				} else {
+					mdef->mstdy += basedmg;
+				}
+			break;
+			case AD_FIRE:
+				if (!Fire_res(mdef)){
+					*truedmgptr += d(3,10);
+				}
+			break;
+			case AD_COLD:
+				if (!Cold_res(mdef)){
+					*truedmgptr += d(3,8);
+				}
+			break;
+			case AD_ELEC:
+				if (!Shock_res(mdef)){
+					*truedmgptr += d(3,8);
+				}
+			break;
+			case AD_ACID:
+				if (!Acid_res(mdef)){
+					*truedmgptr += d(4,4);
+				}
+			break;
+		}
+	}
 	//Psionic does slightly buffed damage, but triggers less frequently
 	// Buffed vs. telepathic beings
 	if(youdef && (Blind_telepat || !rn2(5))){
@@ -3153,11 +3174,11 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		int bonus = 0;
 		//Non-elemental energy attack: 1 die plus the remaining half die
 		bonus += rnd((mdef && bigmonst(pd)) ? 
-						objects[otmp->otyp].oc_wldam : 
-						objects[otmp->otyp].oc_wsdam);
+						objects[otmp->otyp].oc_wldam.oc_damd : 
+						objects[otmp->otyp].oc_wsdam.oc_damd);
 		bonus += (mdef && bigmonst(pd)) ? 
-					(objects[otmp->otyp].oc_wldam+1)/2 : 
-					(objects[otmp->otyp].oc_wsdam+1)/2;
+					(objects[otmp->otyp].oc_wldam.oc_damd+1)/2 : 
+					(objects[otmp->otyp].oc_wsdam.oc_damd+1)/2;
 		if(otmp->otyp == FORCE_WHIP){
 			bonus += (mdef && bigmonst(pd)) ? 
 							rnd(4)+2 : 
@@ -3230,6 +3251,8 @@ boolean * messaged;
 	boolean vis = getvis(magr, mdef, 0, 0);
 
 	int oartifact = otmp->oartifact;
+	
+	int goatweaponturn = 0;
 
 	char hittee[BUFSZ];
 	static const char you[] = "you";
@@ -3241,7 +3264,10 @@ boolean * messaged;
 	/* for artifacts, we must assume they are used properly -- msgr will not override artifact-specific hitmsgs */
 	if (!msgr)
 		msgr = otmp;
-
+	
+	if(check_oprop(otmp,OPROP_GOATW))
+		goatweaponturn = goat_weapon_damage_turn(otmp);
+	
 #define currdmg (basedmg + *plusdmgptr + *truedmgptr)
 
 	/* apply spec_dbon to appropriate damage pointers */
@@ -3309,7 +3335,7 @@ boolean * messaged;
 			(abs(deltax) <= 1) &&
 			(abs(deltay) <= 1)
 			){
-			buzz(AD_ELEC, WAND_CLASS, youagr, 6, x(magr), y(magr), sgn(deltax), sgn(deltay), 0, 0);
+			zap(magr, x(magr), y(magr), sgn(deltax), sgn(deltay), rn1(7, 7), basiczap(0, AD_ELEC, ZAP_WAND, 6));
 		}
 		/* otherwise explosion */
 		else {
@@ -3519,8 +3545,11 @@ boolean * messaged;
 			wepdesc = OBJ_DESCR(objects[msgr->otyp]) ? OBJ_DESCR(objects[msgr->otyp]) : OBJ_NAME(objects[msgr->otyp]);
 		break;
 	}
-
-	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW)){
+	
+	if(goatweaponturn && !youdef && youagr)
+		mdef->mgoatmarked = TRUE;
+	
+	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW) || goatweaponturn == AD_FIRE){
 		if (attacks(AD_FIRE, otmp) && (vis&VIS_MAGR)) {	/* only artifacts message */
 			pline_The("fiery %s %s %s%c",
 				wepdesc,
@@ -3539,10 +3568,10 @@ boolean * messaged;
 	    if (youdef && Slimed) burn_away_slime();
 	    if (youdef && FrozenAir) melt_frozen_air();
 	}
-	if ((attacks(AD_COLD, otmp) || check_oprop(otmp,OPROP_COLDW) || check_oprop(otmp,OPROP_OONA_COLDW) || check_oprop(otmp,OPROP_LESSER_COLDW)) && !(
+	if ((attacks(AD_COLD, otmp)  && !(
 			/* exceptions */
 			(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)
-		)
+		)) || check_oprop(otmp,OPROP_COLDW) || check_oprop(otmp,OPROP_OONA_COLDW) || check_oprop(otmp,OPROP_LESSER_COLDW) || goatweaponturn == AD_COLD
 	){
 		if (attacks(AD_COLD, otmp) && (vis&VIS_MAGR)) {
 			pline_The("ice-cold %s %s %s%c",
@@ -3565,7 +3594,7 @@ boolean * messaged;
 			if (!rn2(4)) (void)destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
-	if (attacks(AD_ELEC, otmp) || check_oprop(otmp,OPROP_ELECW) || check_oprop(otmp,OPROP_OONA_ELECW) || check_oprop(otmp,OPROP_LESSER_ELECW)){
+	if (attacks(AD_ELEC, otmp) || check_oprop(otmp,OPROP_ELECW) || check_oprop(otmp,OPROP_OONA_ELECW) || check_oprop(otmp,OPROP_LESSER_ELECW) || goatweaponturn == AD_ELEC){
 		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR)) {
 			pline_The("%s %s %s%c",
 				wepdesc,
@@ -3576,7 +3605,7 @@ boolean * messaged;
 	    if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
 	    if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 	}
-	if (attacks(AD_ACID, otmp) || check_oprop(otmp,OPROP_ACIDW) || check_oprop(otmp,OPROP_LESSER_ACIDW)){
+	if (attacks(AD_ACID, otmp) || check_oprop(otmp,OPROP_ACIDW) || check_oprop(otmp,OPROP_LESSER_ACIDW) || goatweaponturn == AD_EACD || goatweaponturn == AD_ACID){
 		if (attacks(AD_ACID, otmp) && (vis&VIS_MAGR)) {
 			pline_The("foul %s %s %s%c",
 				wepdesc,
@@ -5305,14 +5334,14 @@ arti_invoke(obj)
 				    return 1;
 				}
 				else if(getdir((char *)0) && (u.dx || u.dy)) {
-					int dmg;
-					dmg = u.ulevel + obj->spe;
-					if(u.ukrau_duration) dmg *= 1.5;
-					dmg += spell_damage_bonus();
+					struct zapdata zapdata;
+					basiczap(&zapdata, AD_COLD, ZAP_SPELL, 0);
+					zapdata.flat = u.ulevel + obj->spe;
+
 					pline("Tsugi no mai, Hakuren!");
 					u.SnSd2 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
-					buzz(AD_COLD, WAND_CLASS, TRUE,
-						 dmg, u.ux, u.uy, u.dx, u.dy,7+obj->spe,0);
+					
+					zap(&youmonst, u.ux, u.uy, u.dx, u.dy, 7 + obj->spe, &zapdata);
 				}
 					nomul(-1, "performing a sword dance");//both the first and the second dance leave you momentarily exposed.
 			}
@@ -6215,7 +6244,7 @@ arti_invoke(obj)
 			mtmp = tamedog(mtmp, (struct obj *) 0);
 			
 			if (mtmp->mtyp != PM_SKELETON)
-				set_faction(mtmp, SKELIFIED);
+				set_template(mtmp, SKELIFIED);
 
 			if (onfloor) useupf(corpse, 1);
 			else useup(corpse);
@@ -9898,11 +9927,11 @@ living_items()
 	//Animate objects in the dungeon
 	for (obj = fobj; obj; obj = nobj) {
 		nobj = obj->nobj;
-		if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe) && u.uinsight > rn2(INSIGHT_RATE*70)){
+		if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe) && !rn2(70) && check_insight()){
 		// if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe)){
 			mtmp = animate_statue(obj, obj->ox, obj->oy, ANIMATE_NORMAL, (int *) 0);
 			if(mtmp){
-				set_faction(mtmp, TOMB_HERD);
+				set_template(mtmp, TOMB_HERD);
 				mtmp->m_lev += 4;
 				mtmp->mhpmax += d(4, 8);
 				mtmp->mhp = mtmp->mhpmax;
@@ -10082,16 +10111,16 @@ struct monst *mon;
 		)
 			return 1;
 	} else {
-		if(mon->mfaction == ZOMBIFIED){
+		if(has_template(mon, ZOMBIFIED)){
 			if((otmp->wrathdata >> 2) == PM_ZOMBIE)
 				return 1;
-		} else if(mon->mfaction == SKELIFIED){
+		} else if(has_template(mon, SKELIFIED)){
 			if((otmp->wrathdata >> 2) == PM_SKELETON)
 				return 1;
-		} else if(mon->mfaction == VAMPIRIC){
+		} else if(has_template(mon, VAMPIRIC)){
 			if((otmp->wrathdata >> 2) == PM_VAMPIRE)
 				return 1;
-		} else if(mon->mfaction == PSEUDONATURAL){
+		} else if(has_template(mon, PSEUDONATURAL)){
 			if((otmp->wrathdata >> 2) == PM_MIND_FLAYER)
 				return 1;
 		} else {
@@ -10106,6 +10135,27 @@ struct monst *mon;
 		}
 	}
 	return 0;
+}
+
+int
+goat_weapon_damage_turn(obj)
+struct obj *obj;
+{
+	unsigned long int hashed = hash((unsigned long) (nonce + obj->o_id + hash(OPROP_GOATW)));
+	switch(hashed%4){
+		case 0: return AD_EACD;
+		case 1: return AD_DRST;
+		case 2: return AD_STDY;
+		case 3:
+			hashed = hash((unsigned long) (moves + hashed));
+			switch(hashed%4){
+				case 0: return AD_FIRE;
+				case 1: return AD_COLD;
+				case 2: return AD_ELEC;
+				case 3: return AD_ACID;
+			}
+	}
+	return AD_EACD;
 }
 
 /*artifact.c*/

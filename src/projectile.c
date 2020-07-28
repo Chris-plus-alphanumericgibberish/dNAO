@@ -983,9 +983,9 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 
 	/* train player's Shien skill, if player is defending */
 	if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && P_SKILL(weapon_type(uwep)) >= P_BASIC){
-		if (P_SKILL(FFORM_SHII_CHO) >= P_BASIC){
-			if (u.fightingForm == FFORM_SHII_CHO ||
-				(u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm)))
+		if (P_SKILL(P_SHII_CHO) >= P_BASIC){
+			if (activeFightingForm(FFORM_SHII_CHO) ||
+				(activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm)))
 				) use_skill(FFORM_SHIEN, 1);
 		}
 	}
@@ -1031,8 +1031,9 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 		boolean shienuse = FALSE;
 		/* if the player is using Shien lightsaber form, they can direct the reflection */
 		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep)
-			&& u.fightingForm == FFORM_SHIEN && ((!uarm || is_light_armor(uarm))
-			&& rn2(3) < max((min(P_SKILL(u.fightingForm), P_SKILL(weapon_type(uwep)))) - 1, 1))) {
+			&& activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm))
+			&& rnd(3) < FightingFormSkillLevel(FFORM_SHIEN)
+		){
 			You("reflect the %s with your lightsaber!", doname(thrownobj));
 			if (getdir("Redirect it which way?"))
 				shienuse = TRUE;
@@ -1042,7 +1043,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 			*pdy = u.dy;
 			*prange = *prange2;
 		}
-		else if (youdef || mdef->mfaction != FRACTURED){
+		else if (youdef || !has_template(mdef, FRACTURED)){
 			*pdx *= -1;
 			*pdy *= -1;
 		}
@@ -1055,14 +1056,11 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 	}
 	/* the player has a chance to burn some projectiles (not blaster bolts or laser beams) out of the air with a lightsaber */
 	else if (!(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT)
-		&& youdef && uwep && is_lightsaber(uwep) && litsaber(uwep)
-		&& (
-		((u.fightingForm == FFORM_SHIEN && (!uarm || is_light_armor(uarm))) ||
-		(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))))
-		&& 
-		rn2(3) < max((min(P_SKILL(u.fightingForm), P_SKILL(weapon_type(uwep))))-1,1))
+		&& youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && (
+			(activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm)) && rnd(3) < FightingFormSkillLevel(FFORM_SHIEN)) ||
+			(activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)) && rnd(3) < FightingFormSkillLevel(FFORM_SORESU))
 		)
-	{
+	){
 		You("burn %s out of the %s!", doname(thrownobj), (Underwater || Is_waterlevel(&u.uz)) ? "water" : "air");
 		obfree(thrownobj, (struct obj*) 0);
 		*wepgone = TRUE;
@@ -2590,6 +2588,7 @@ int tary;
 {
 	boolean youagr = (magr == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct zapdata zapdata;
 	int typ = attk->adtyp;
 	int mult = 1;
 	static const int chromatic_dragon_breaths[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_DRST, AD_DISN, AD_ACID };
@@ -2653,18 +2652,18 @@ int tary;
 		pline("%s breathes %s!", Monnam(magr), breathwep(typ));
 	}
 	
-	/* set dragonbreath flag if applicable*/
-	if (is_true_dragon(pa))
-		flags.drgn_brth = TRUE;
-	/* do the beam (sadly buzz doesn't do dz) */
-	buzz(typ, FOOD_CLASS, FALSE, (int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)),
-		x(magr), y(magr), dx, dy, 0, attk->damd ? (d((int)attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3)), (int)attk->damd)*mult) : 0);
-	/* reset flag */
-	flags.drgn_brth = FALSE;
 
-	/* interrupt player if they were targetted */
-	if (tarx == u.ux && tary == u.uy)
-		nomul(0, NULL);
+	/* set up zapdata */
+	basiczap(&zapdata, typ, ZAP_BREATH, 0);
+
+	/* set dragonbreath if applicable*/
+	if (is_true_dragon(pa))
+		zapdata.unreflectable = ZAP_REFL_ADVANCED;
+	/* set damage */
+	zapdata.damn = attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3));
+	zapdata.damd = (attk->damd ? attk->damd : 6) * mult;
+
+	zap(magr, x(magr), y(magr), dx, dy, rn1(7, 7), &zapdata);
 
 	/* breath runs out sometimes. */ 
 	if (!youagr) {

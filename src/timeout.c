@@ -2428,8 +2428,7 @@ do_storms()
 	    dirx = rn2(3) - 1;
 	    diry = rn2(3) - 1;
 	    if(dirx != 0 || diry != 0)
-		buzz(AD_ELEC, SPBOOK_CLASS, FALSE,/* "monster" LIGHTNING spell */
-		     8, x, y, dirx, diry,0,0);
+			zap((struct monst *)0, x, y, dirx, diry, rn1(7, 7), basiczap(0, AD_ELEC, ZAP_WAND, 8));
 	}
     }
 

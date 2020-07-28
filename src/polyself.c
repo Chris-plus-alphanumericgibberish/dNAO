@@ -865,8 +865,9 @@ rehumanize()
 
 int
 dobreathe(mdat)
-	struct permonst *mdat;
+struct permonst *mdat;
 {
+	struct zapdata zapdata;
 	struct attack *mattk;
 
 	if (Strangled) {
@@ -893,6 +894,8 @@ dobreathe(mdat)
 			type = flags.HDbreath;
 			if(type == AD_SLEE) multiplier = 4.0;
 		}
+		basiczap(&zapdata, type, ZAP_BREATH, 0);	/* begin setup of zapdata */
+
 		if(Race_if(PM_HALF_DRAGON)){
 			// give Half-dragons a +0.5 bonus per armor piece that matches their default breath
 			if (flags.HDbreath == AD_FIRE){
@@ -982,10 +985,16 @@ dobreathe(mdat)
 		}
 		if(carrying_art(ART_DRAGON_S_HEART_STONE))
 			multiplier *= 2;
-		if(is_true_dragon(mdat) || (Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) flags.drgn_brth = 1;
-	    buzz(type, FOOD_CLASS, TRUE, (int)mattk->damn + (u.ulevel/2),
-			u.ux, u.uy, u.dx, u.dy,0, mattk->damd ? ((int)(d((int)mattk->damn + (u.ulevel/2), (int)mattk->damd)*multiplier)) : 0);
-		flags.drgn_brth = 0;
+
+		/* dragon-breath is hard to reflect */
+		if (is_true_dragon(mdat) || (Race_if(PM_HALF_DRAGON) && u.ulevel >= 14))
+			zapdata.unreflectable = ZAP_REFL_ADVANCED;
+
+		/* find damage */
+		zapdata.damn = mattk->damn + (u.ulevel / 2);
+		zapdata.damd = (mattk->damd ? mattk->damd : 6) * multiplier;
+		/* do the zap */
+		zap(&youmonst, u.ux, u.uy, u.dx, u.dy, rn1(7, 7), &zapdata);
 	}
 	return(1);
 }
@@ -1241,7 +1250,7 @@ dovampminion()
 	} else {
 		struct monst *mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 		mtmp = tamedog(mtmp, (struct obj *) 0);
-		set_faction(mtmp, VAMPIRIC);
+		set_template(mtmp, VAMPIRIC);
 
 		if (onfloor) useupf(corpse, 1);
 		else useup(corpse);
@@ -1828,7 +1837,7 @@ int splaction;
 			Sprintf(buf, "speak the Word of Knowledge");
 			any.a_int = APPLE_WORD + 1;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
-				'q', 0, ATR_NONE, buf, MENU_UNSELECTED);
+				'r', 0, ATR_NONE, buf, MENU_UNSELECTED);
 		}
 		if (splaction != SPELLMENU_DESCRIBE && splaction < 0){
 			Sprintf(buf, "Describe a word instead");

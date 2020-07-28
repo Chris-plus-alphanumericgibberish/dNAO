@@ -41,7 +41,7 @@
 
 /* TODO: put these in their specified header files */
 /* mondata.h */
-#define is_holy_mon(mon)	(is_uvuudaum((mon)->data) || ((mon)->mfaction == ILLUMINATED))
+#define is_holy_mon(mon)	(is_uvuudaum((mon)->data) || has_template(mon, ILLUMINATED))
 #define is_unholy_mon(mon)	((mon)->mtyp == PM_UVUUDAUM)
 /* obj. h*/
 

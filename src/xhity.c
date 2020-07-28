@@ -523,7 +523,7 @@ int tary;
 	/* lillends (that aren't you) can use masks */
 	if (pa->mtyp == PM_LILLEND
 		&& !youagr
-		&& !(magr->mfaction == ZOMBIFIED || magr->mfaction == SKELIFIED)
+		&& !(has_template(magr, ZOMBIFIED) || has_template(magr, SKELIFIED))
 		&& rn2(2)){
 		magr->mvar2 = monsndx(find_mask(magr));
 		if (!Blind && pa->mtyp != PM_LILLEND && canseemon(magr))
@@ -2068,7 +2068,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 
 	/* some pseudonatural's claws become more-damaging tentacles */
-	if (!youagr && magr->mfaction == PSEUDONATURAL && (
+	if (!youagr && has_template(magr, PSEUDONATURAL) && (
 		attk->aatyp == AT_CLAW && (magr->m_id + *indexnum) % 4 == 0)
 		){
 		attk->aatyp = AT_TENT;
@@ -2080,9 +2080,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 
 	/* Undead damage multipliers -- note that these must be after actual replacements are done */
 	/* zombies deal double damage, and all undead deal double damage at midnight (the midnight multiplier is not shown in the pokedex) */
-	if (!youagr && magr->mfaction == ZOMBIFIED && (is_undead_mon(magr) && midnight() && !by_the_book))
+	if (!youagr && has_template(magr, ZOMBIFIED) && (is_undead_mon(magr) && midnight() && !by_the_book))
 		attk->damn *= 3;
-	else if (!youagr && ((magr->mfaction == ZOMBIFIED) || (is_undead_mon(magr) && midnight() && !by_the_book)))
+	else if (!youagr && (has_template(magr, ZOMBIFIED) || (is_undead_mon(magr) && midnight() && !by_the_book)))
 		attk->damn *= 2;
 
 	/* Bandersnatches become frumious instead of fleeing, dealing double damage -- not shown in the pokedex */
@@ -3234,7 +3234,7 @@ int flat_acc;
 
 			/* Shii Cho lightsaber form is not meant for fighting other lightsaber users */
 			if (youagr && is_lightsaber(weapon) && litsaber(weapon)){
-				if (u.fightingForm == FFORM_SHII_CHO && MON_WEP(mdef) && is_lightsaber(MON_WEP(mdef)) && litsaber(MON_WEP(mdef))){
+				if (activeFightingForm(FFORM_SHII_CHO) && MON_WEP(mdef) && is_lightsaber(MON_WEP(mdef)) && litsaber(MON_WEP(mdef))){
 					wepn_acc -= 5;
 				}
 			}
@@ -11383,7 +11383,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			sneak_dice++;
 		if (u.sealsActive&SEAL_ANDROMALIUS)
 			sneak_dice++;
-		if (ulightsaberhit && u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm)))
+		if (ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)))
 			sneak_dice++;
 	}
 	if (magr && is_backstabber(pa))
@@ -11416,7 +11416,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				((weapon && weapon == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && has_head(pd) && !is_unalive(pd))
 				|| distmin(u.ux, u.uy, mdef->mx, mdef->my) > BOLT_LIM)))
 				sneak_attack |= SNEAK_HIDDEN;
-			if (ulightsaberhit && u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm)))
+			if (ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)))
 				sneak_attack |= SNEAK_JUYO;	/* modifies a sneak attack; not sufficient on its own */
 		}
 		else if (youdef) {
@@ -11542,12 +11542,12 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			(weapon && weapon == uwep && uwep->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD &&
 			(dieroll < P_SKILL(weapon_type(uwep)))) ||
 			// Djem So
-			(ulightsaberhit && u.fightingForm == FFORM_DJEM_SO && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)) &&
-			(dieroll < min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(uwep)))) &&
+			(ulightsaberhit && activeFightingForm(FFORM_DJEM_SO) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)) &&
+			(dieroll < min(P_SKILL(P_DJEM_SO), P_SKILL(weapon_type(uwep)))) &&
 			(mdef->mattackedu || !rn2(5))) ||	// (odds reduced by 80% when not counterattacking)
 			// Juyo 
-			(ulightsaberhit && u.fightingForm == FFORM_JUYO && (!uarm || is_light_armor(uarm)) &&
-			(dieroll < min(P_SKILL(FFORM_JUYO), P_SKILL(weapon_type(uwep)))) &&
+			(ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)) &&
+			(dieroll < min(P_SKILL(P_JUYO), P_SKILL(weapon_type(uwep)))) &&
 			((sneak_attack&SNEAK_JUYO) || (rn2(5) < 2)))	// (odds reduced by 60% when not sneak attacking)
 			)
 		{
@@ -11954,7 +11954,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 	/* set zombify resulting from melee mvm combat */
 	if (magr && !youagr && !youdef && melee && !recursed) {
-		if ((magr->mfaction == ZOMBIFIED || (magr->mfaction == SKELIFIED && !rn2(20))) && can_undead_mon(mdef)){
+		if ((has_template(magr, ZOMBIFIED) || (has_template(magr, SKELIFIED) && !rn2(20))) && can_undead_mon(mdef)){
 			mdef->zombify = 1;
 		}
 
@@ -11965,7 +11965,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			mdef->zombify = 1;
 		}
 
-		if (magr->mfaction == FRACTURED && is_kamerel(mdef->data)){
+		if (has_template(magr, FRACTURED) && is_kamerel(mdef->data)){
 			mdef->zombify = 1;
 		}
 	}
@@ -12421,25 +12421,25 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 
 		/* base unarmed dice */
 		if (youagr && martial_bonus())
-			unarmed_dice.oc.damd = 4 * unarmedMult;
+			unarmed_dice.oc_damd = 4 * unarmedMult;
 		else
-			unarmed_dice.oc.damd = 2 * unarmedMult;
+			unarmed_dice.oc_damd = 2 * unarmedMult;
 		/* Eurynome causes exploding dice, sometimes larger dice */
 		if (youagr && u.sealsActive&SEAL_EURYNOME) {
-			unarmed_dice.oc.aatyp = AT_EXPL;
-			unarmed_dice.oc.damd = max(unarmed_dice.oc.damd,
+			unarmed_dice.exploding = TRUE;
+			unarmed_dice.oc_damd = max(unarmed_dice.oc_damd,
 				2 * rnd(5) + (martial_bonus() ? 2 * unarmedMult : 0));
 		}
 		/* Grandmaster's robe causes exploding dice, 50% chance of doubled dice */
 		otmp = (youagr ? uarmc : which_armor(magr, W_ARMC));
 		if (otmp && otmp->oartifact == ART_GRANDMASTER_S_ROBE) {
-			unarmed_dice.oc.aatyp = AT_EXPL;
+			unarmed_dice.exploding = TRUE;
 			if (rn2(2)) {
-				unarmed_dice.oc.damn *= 2;
+				unarmed_dice.oc_damn *= 2;
 			}
 		}
 		/* calculate dice and set basedmg */
-		basedmg = weapon_dmg_roll(&(unarmed_dice.oc), FALSE);
+		basedmg = weapon_dmg_roll(&unarmed_dice, FALSE);
 
 		/* The Annulus is very stronk -- 2x base damage + 2x enchantment */
 		/* yes, this can be redoubled by artifact gloves */
@@ -12448,7 +12448,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (((otmp = uright) && otmp->oartifact == ART_ANNULUS) ||
 				((otmp = uleft) && otmp->oartifact == ART_ANNULUS))
 			{
-				basedmg += weapon_dmg_roll(&(unarmed_dice.oc), FALSE);
+				basedmg += weapon_dmg_roll(&unarmed_dice, FALSE);
 				basedmg += otmp->spe * 2;
 			}
 		}
@@ -12609,70 +12609,52 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		/* general damage bonus */
 		if(real_attack){
-			/* The player has by-far the most detailed attacks */
-			if (youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick || natural_strike)) {
-				int bon_damage = 0;
+			if (magr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick || natural_strike)) {
+				/* player-specific bonuses */
+				if (youagr) {
+					bonsdmg += u.udaminc;
+					bonsdmg += aeshbon();
 
-				bon_damage += u.udaminc;
-				bon_damage += aeshbon();
+					/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
+					if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
+						if (ACURR(A_INT) == 25) bonsdmg += 8;
+						else bonsdmg += max(0, (ACURR(A_INT) - 10) / 2);
+					}
+				}
+
+#define dbonus(wep) (youagr ? dbon((wep)) : m_dbon(magr, (wep)))
 				/* If you throw using a propellor, you don't get a strength
 				* bonus but you do get an increase-damage bonus.
 				*/
-				if (natural_strike || unarmed_punch || unarmed_kick)
-					bon_damage += dbon((struct obj *)0);
-				else if (melee || thrust)
-					bon_damage += dbon(weapon);
+				if (natural_strike || unarmed_punch || unarmed_kick || melee || thrust) {
+					int tmp = dbonus( (melee || thrust) ? weapon : (struct obj *)0);
+					/* greatly reduced STR damage for offhand attacks */
+					if (attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI)
+						tmp = min(0, tmp);
+					bonsdmg += tmp;
+				}
 				else if (fired)
 				{
 					/* slings get STR bonus */
 					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += dbon(launcher);
+						bonsdmg += dbonus(launcher);
 					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += dbon(launcher) * 2;
+						bonsdmg += dbonus(launcher) * 2;
 					/* other launchers get no STR bonus */
 					else if (launcher)
-						bon_damage += 0;
+						bonsdmg += 0;
 					/* properly-used ranged attacks othersied get STR bonus */
 					else {
 						/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
-						if (hmoncode & HMON_KICKED && uarmf && uarmf->otyp == KICKING_BOOTS)
+						if (hmoncode & HMON_KICKED && youagr && uarmf && uarmf->otyp == KICKING_BOOTS)
 							override_str = 125;	/* 25 STR */
-						bon_damage += dbon(weapon);
+						bonsdmg += dbonus(weapon);
 						override_str = 0;
 					}
 				}
+#undef dbonus
 
-				/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
-				if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
-					if (ACURR(A_INT) == 25) bon_damage += 8;
-					else bon_damage += max(0, (ACURR(A_INT) - 10) / 2);
-				}
-
-				bonsdmg += bon_damage;
-			} else if(!youagr && magr){
-				int bon_damage = 0;
-
-				/* 
-				* Monsters don't actually have anything other than a str bonus, and then only from items.
-				*/
-				if (melee || thrust)
-					bon_damage += m_dbon(magr, weapon);
-				else if (fired) {
-					/* slings get STR bonus */
-					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bon_damage += m_dbon(magr, launcher);
-					/* atlatls get 2x STR bonus */
-					else if (launcher && launcher->otyp == ATLATL)
-						bon_damage += m_dbon(magr, launcher) * 2;
-					/* other launchers get no STR bonus */
-					else if (launcher)
-						bon_damage += 0;
-					/* properly-used ranged attacks othersied get STR bonus */
-					else
-						bon_damage += m_dbon(magr, weapon);
-				}
-				bonsdmg += bon_damage;
 			} else if (trap){
 				/* some traps deal increased damage */
 				if (trap->ttyp == ARROW_TRAP)
@@ -12687,11 +12669,9 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			int skill_damage = 0;
 			int wtype;
 
-			/* get simple weapon skill associated with the weapon */
+			/* get simple weapon skill associated with the weapon, not including twoweapon */
 			if (fired && launcher)
 				wtype = weapon_type(launcher);
-			else if (u.twoweap)
-				wtype = P_TWO_WEAPON_COMBAT;
 			else if (unarmed_punch)
 				wtype = P_BARE_HANDED_COMBAT;
 			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
@@ -12707,10 +12687,10 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			if (fired && launcher) {
 				/* precision fired ammo gets skill bonuses, multiplied */
 				if (is_ammo(weapon) && (precision_mult))
-					skill_damage = weapon_dam_bonus(launcher) * precision_mult;
+					skill_damage = weapon_dam_bonus(launcher, wtype) * precision_mult;
 				/* spears fired from atlatls also get their skill bonus */
 				else if (launcher->otyp == ATLATL)
-					skill_damage = weapon_dam_bonus(launcher);
+					skill_damage = weapon_dam_bonus(launcher, wtype);
 				/* other fired ammo does not get skill bonuses */
 				else
 					skill_damage = 0;
@@ -12722,16 +12702,11 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 					skill_damage = 0;
 				/* otherwise, they do get skill bonuses */
 				else
-					skill_damage = weapon_dam_bonus(weapon);
+					skill_damage = weapon_dam_bonus(weapon, wtype);
 			}
 			/* melee weapons */
 			else if (melee || thrust) {
-				/* some weapons use contextually-specific skills */
-				if (wtype != P_TWO_WEAPON_COMBAT && wtype != weapon_type(weapon))
-					skill_damage = skill_dam_bonus(wtype);
-				/* general case */
-				else
-					skill_damage = weapon_dam_bonus(weapon);
+				skill_damage = weapon_dam_bonus(weapon, wtype);
 			}
 
 			/* Wrathful Spider halves damage from skill for fired bolts */
@@ -12742,28 +12717,28 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			bonsdmg += skill_damage;
 
 			/* now, train skills */
-			use_skill(wtype, 1);
+			use_skill(u.twoweap ? P_TWO_WEAPON_COMBAT : wtype, 1);
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(FFORM_SHII_CHO, 1);
-				if (P_SKILL(FFORM_SHII_CHO) >= P_BASIC || weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC){
-					if ((u.fightingForm == FFORM_SHII_CHO ||
-						(u.fightingForm == FFORM_MAKASHI && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+				if (P_SKILL(P_SHII_CHO) >= P_BASIC || weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC){
+					if ((activeFightingForm(FFORM_SHII_CHO) ||
+						(activeFightingForm(FFORM_MAKASHI) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 						) &&
 						!uarms && !u.twoweap && wtype == P_SABER
 						) use_skill(FFORM_MAKASHI, 1);
-					if ((u.fightingForm == FFORM_SHII_CHO ||
-						(u.fightingForm == FFORM_ATARU && (!uarm || is_light_armor(uarm)))
+					if ((activeFightingForm(FFORM_SHII_CHO) ||
+						(activeFightingForm(FFORM_ATARU) && (!uarm || is_light_armor(uarm)))
 						) &&
 						u.lastmoved + 1 >= monstermoves
 						) use_skill(FFORM_ATARU, 1);
-					if ((u.fightingForm == FFORM_SHII_CHO ||
-						(u.fightingForm == FFORM_DJEM_SO && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+					if ((activeFightingForm(FFORM_SHII_CHO) ||
+						(activeFightingForm(FFORM_DJEM_SO) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 						) &&
 						mdef->mattackedu
 						) use_skill(FFORM_DJEM_SO, 1);
-					if ((u.fightingForm == FFORM_SHII_CHO ||
-						(u.fightingForm == FFORM_NIMAN && (!uarm || !is_metallic(uarm)))
+					if ((activeFightingForm(FFORM_SHII_CHO) ||
+						(activeFightingForm(FFORM_NIMAN) && (!uarm || !is_metallic(uarm)))
 						) &&
 						u.lastcast >= monstermoves
 						) use_skill(FFORM_NIMAN, 1);
@@ -12772,8 +12747,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		}
 		/* misc: train player's Soresu skill if applicable */
 		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && magr && melee &&
-			(u.fightingForm == FFORM_SHII_CHO ||
-			(u.fightingForm == FFORM_SORESU && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+			(activeFightingForm(FFORM_SHII_CHO) ||
+			(activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 			)) use_skill(FFORM_SORESU, 1);
 	}
 	/* ARTIFACT HIT BLOCK */
@@ -13096,7 +13071,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			else if (sneak_attack & SNEAK_HELPLESS) You("rain blows on the helpless %s%s", l_monnam(mdef), exclam(subtotl));
 			else									You("rain blows on %s%s", mon_nam(mdef), exclam(subtotl));
 			/* ...player gets bonus movement points! */
-			switch (min(P_SKILL(FFORM_JUYO), P_SKILL(weapon_type(weapon)))){
+			switch (min(P_SKILL(P_JUYO), P_SKILL(weapon_type(weapon)))){
 			case P_BASIC:	youmonst.movement += NORMAL_SPEED / 4;	break;
 			case P_SKILLED:	youmonst.movement += NORMAL_SPEED / 3;	break;
 			case P_EXPERT:	youmonst.movement += NORMAL_SPEED / 2;	break;
@@ -13956,7 +13931,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 		vis = getvis(magr, mdef, 0, 0);
 
 	/* Lillends can use masks to counterattack (but only at the end of the chain) */
-	if (!youdef && pd->mtyp == PM_LILLEND && !(mdef->mfaction == ZOMBIFIED || mdef->mfaction == SKELIFIED) && rn2(2) && endofchain){
+	if (!youdef && pd->mtyp == PM_LILLEND && !(has_template(mdef, ZOMBIFIED) || has_template(mdef, SKELIFIED)) && rn2(2) && endofchain){
 		pd = find_mask(mdef);
 		/* message moved to AFTER getting passive attack, to avoid printing a useless message 
 		 * like "The lillend uses a rothe mask!" */
@@ -14064,20 +14039,18 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 				(multi >= 0) &&														/* not paralyzed */
 				distmin(x(magr), y(magr), x(mdef), y(mdef)) == 1 &&					/* in close quarters */
 				!(result&MM_AGR_DIED) &&											/* attacker is still alive */
-				(u.fightingForm == FFORM_DJEM_SO || u.fightingForm == FFORM_SORESU)	/* proper forms */
+				(activeFightingForm(FFORM_DJEM_SO) || activeFightingForm(FFORM_SORESU))	/* proper forms */
 				){
 				int chance = 0;
 
 				/* determine chance of counterattacking */
-				switch (u.fightingForm) {
-				case FFORM_DJEM_SO:
+				if(activeFightingForm(FFORM_DJEM_SO)){
 					if (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))
-						chance = DjemSo_counterattack[(min(P_SKILL(FFORM_DJEM_SO), P_SKILL(weapon_type(uwep))) - 2)];
-					break;
-				case FFORM_SORESU:
+						chance = DjemSo_counterattack[(min(P_SKILL(P_DJEM_SO), P_SKILL(weapon_type(uwep))) - 2)];
+				}
+				if(activeFightingForm(FFORM_SORESU)){
 					if (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))
-						chance = Soresu_counterattack[(min(P_SKILL(FFORM_SORESU), P_SKILL(weapon_type(uwep))) - 2)];
-					break;
+						chance = Soresu_counterattack[(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep))) - 2)];
 				}
 
 				/* maybe make the counterattack */
@@ -14089,7 +14062,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 						newvis |= VIS_MAGR;
 
 					You("counterattack!");
-					use_skill(u.fightingForm, 1);
+					if(activeFightingForm(FFORM_DJEM_SO))
+						use_skill(P_DJEM_SO, 1);
+					if(activeFightingForm(FFORM_SORESU))
+						use_skill(P_SORESU, 1);
 
 					newres = xmeleehity(mdef, magr, &basicattack, uwep, newvis, 0, FALSE);
 					if (newres&MM_DEF_DIED)
@@ -14128,10 +14104,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 				/* lightsaber forms (per-round) (player-only) */
 				if (youdef &&
 					is_lightsaber(otmp) && litsaber(otmp) &&
-					u.fightingForm == FFORM_SHIEN &&
+					activeFightingForm(FFORM_SHIEN) &&
 					(!uarm || is_light_armor(uarm)))
 				{
-					chance += Shien_counterattack[(min(P_SKILL(FFORM_SHIEN), P_SKILL(weapon_type(uwep))) - 2)];
+					chance += Shien_counterattack[(min(P_SKILL(P_SHIEN), P_SKILL(weapon_type(uwep))) - 2)];
 				}
 				/* Sansara Mirror */
 				if (otmp->oartifact == ART_SANSARA_MIRROR) {
@@ -14173,8 +14149,8 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 						pline("%s counterattacks!", Monnam(mdef));
 					}
 					/* train lightsaber skill if applicable */
-					if (youdef && u.fightingForm == FFORM_SHIEN)
-						use_skill(u.fightingForm, 1);
+					if (youdef && activeFightingForm(FFORM_SHIEN))
+						use_skill(P_SHIEN, 1);
 
 					/* make the attack */
 					newres = xmeleehity(mdef, magr, counter, otmp, newvis, 0, FALSE);
@@ -14430,7 +14406,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 
 				if (!rn2(8) && !(result&(MM_AGR_DIED | MM_AGR_STOP)))
 				{
-					if (youdef) {
+					if (youagr) {
 						char buf[BUFSZ];
 						Sprintf(buf, "%s shadow", s_suffix(Monnam(mdef)));
 						poisoned(buf, A_STR, pd->mname, 30);
@@ -15054,11 +15030,16 @@ boolean your_fault;
  *
  * Returns FALSE if this was cancelled before doing anything.
  */
-boolean
+int
 android_combo()
 {
 	struct monst * mdef;
 	int vis;
+
+	if (!uandroid) {
+		pline("You aren't an android!");
+		return FALSE;
+	}
 
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
 	static struct attack kickattack =	{ AT_KICK, AD_PHYS, 1, 2 };

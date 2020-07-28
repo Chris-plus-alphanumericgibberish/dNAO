@@ -713,7 +713,7 @@ doforce()		/* try to force a chest with your weapon */
 			xlock.chance = spiritDsize() * 10;
 		else if (picktyp == 2) //lightsaber
 		    xlock.chance = uwep->spe * 2 + 75;
-		else xlock.chance = objects[uwep->otyp].oc_wldam * 2;
+		else xlock.chance = objects[uwep->otyp].oc_wldam.oc_damd * 2;
 		xlock.picktyp = picktyp;
 		xlock.usedtime = 0;
 		break;
@@ -783,7 +783,7 @@ doforce()		/* try to force a chest with your weapon */
 		    else if (is_lightsaber(uwep))
 				xlock.chance = uwep->spe + 38;
 		    else
-				xlock.chance = uwep->spe + objects[uwep->otyp].oc_wldam;
+				xlock.chance = uwep->spe + objects[uwep->otyp].oc_wldam.oc_damd;
 		    xlock.picktyp = picktyp;
 		    xlock.usedtime = 0;    
 		    xlock.door = door;

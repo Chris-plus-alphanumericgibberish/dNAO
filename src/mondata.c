@@ -8,7 +8,7 @@
 #include "ehor.h"
 
 /*	These routines provide basic data for any type of monster. */
-STATIC_DCL void FDECL(set_faction_data, (struct permonst *, struct permonst *, int));
+STATIC_DCL void FDECL(set_template_data, (struct permonst *, struct permonst *, int));
 STATIC_DCL struct permonst * FDECL(permonst_of, (int, int));
 
 char * nameless_horror_name;
@@ -52,12 +52,12 @@ int mtyp;
 	}
 	/* eveything else has permonst memory assigned by permonst_of */
 	else {
-		ptr = permonst_of(mtyp, mon->mfaction);
+		ptr = permonst_of(mtyp, get_template(mon));
 		bas = &mons[mtyp];
 	}
 	/* adjust permonst if needed */
-	if (mon != &youmonst && mon->mfaction)
-		set_faction_data(bas, ptr, mon->mfaction);
+	if (mon != &youmonst && templated(mon))
+		set_template_data(bas, ptr, get_template(mon));
 	/* set monster data */
 	set_mon_data_core(mon, ptr);
 	return;
@@ -166,18 +166,30 @@ long intrinsic;
 	mon->acquired_trinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
 }
 
+//Note: intended to be mental things relating to a faction a monster belongs to
 void
 set_faction(mtmp, faction)
 struct monst * mtmp;
 int faction;
 {
 	mtmp->mfaction = faction;
+	set_mon_data(mtmp, mtmp->mtyp); //Should be unlikely to actually result in a change in data.
+	return;
+}
+
+//Note: intended to be physical things like zombification.
+void
+set_template(mtmp, template)
+struct monst * mtmp;
+int template;
+{
+	mtmp->mtemplate = template;
 	set_mon_data(mtmp, mtmp->mtyp);
 	return;
 }
 
 void
-set_faction_data(base, ptr, faction)
+set_template_data(base, ptr, faction)
 struct permonst * base;
 struct permonst * ptr;
 int faction;
@@ -278,10 +290,6 @@ int faction;
 		ptr->mflagsg |= (MG_HATESUNHOLY);
 		ptr->mflagsg &= ~(MG_HATESHOLY);
 		ptr->mflagsa |= (MA_MINION);
-		break;
-	case INCUBUS_FACTION:
-	case SUCCUBUS_FACTION:
-		/* nothing */
 		break;
 	case PSEUDONATURAL:
 		/* flags */
@@ -1074,7 +1082,7 @@ resists_cold(mon)
 	if(!mon) return FALSE;
 	
 	return (species_resists_cold(mon) || mon_resistance(mon, COLD_RES) || 
-		(mon->mfaction == VAMPIRIC && mon->m_lev > 10) ||  
+		(has_template(mon, VAMPIRIC) && mon->m_lev > 10) ||  
 		(mon == u.usteed && u.sealsActive&SEAL_BERITH && Cold_resistance));
 }
 
@@ -1216,14 +1224,12 @@ struct monst *mon;
 		|| dmgtype_fromattack(ptr, AD_BLND, AT_WDGZ)
 	)
 	    return TRUE;
-	o = is_you ? uwep : MON_WEP(mon);
-	if (o && arti_blindres(o, FALSE))
-	    return TRUE;
-	o = is_you ? invent : mon->minvent;
-	for ( ; o; o = o->nobj)
-	    if ((o->owornmask && objects[o->otyp].oc_oprop == BLINDED) ||
-		    arti_blindres(o, TRUE))
+
+	if (is_you && Blind_res)
 		return TRUE;
+	else if (!is_you && mon_resistance(mon, BLIND_RES))
+		return TRUE;
+
 	return FALSE;
 }
 
@@ -1634,7 +1640,7 @@ pronoun_gender(mtmp)
 register struct monst *mtmp;
 {
 	if(is_neuter(mtmp->data) || !canspotmon(mtmp)) return 2;
-	if(mtmp->mfaction == SKELIFIED && !Role_if(PM_ARCHEOLOGIST))
+	if(has_template(mtmp, SKELIFIED) && !Role_if(PM_ARCHEOLOGIST))
 		return 2;
 	return (humanoid_torso(mtmp->data) || (mtmp->data->geno & G_UNIQ) ||
 		type_is_pname(mtmp->data)) ? (int)mtmp->female : 2;

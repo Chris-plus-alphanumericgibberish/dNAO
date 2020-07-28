@@ -320,6 +320,8 @@ NEARDATA long moves = 1L, monstermoves = 1L;
 NEARDATA long nonce = 0L;
 NEARDATA long wailmsg = 0L;
 
+boolean goat_seenonce = FALSE;
+
 /* objects that are moving to another dungeon level */
 NEARDATA struct obj *migrating_objs = (struct obj *)0;
 /* objects not yet paid for */

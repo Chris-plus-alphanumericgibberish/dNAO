@@ -34,7 +34,7 @@ STATIC_DCL void FDECL(m_initinv,(struct monst *));
 
 extern const int monstr[];
 int curhouse = 0;
-int undeadfaction = 0;
+int undeadtemplate = 0;
 int zombiepm = -1;
 int skeletpm = -1;
 
@@ -608,7 +608,7 @@ register struct monst *mtmp;
 			else if(mm == PM_GOAT_SPAWN) {
 				int threshold = rnd(10)+rn2(11);
 				if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
-					set_faction(mtmp, MISTWEAVER);
+					set_template(mtmp, MISTWEAVER);
 					mtmp->m_insight_level = threshold;
 				}
 			}
@@ -3900,7 +3900,7 @@ register struct monst *mtmp;
 		} else if(mm == PM_SMALL_GOAT_SPAWN) {
 			int threshold = rnd(10)+rn2(11);
 			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
-				set_faction(mtmp, MISTWEAVER);
+				set_template(mtmp, MISTWEAVER);
 				mtmp->m_insight_level = threshold;
 			}
 		} else if(mm == PM_GNOLL) {
@@ -4680,7 +4680,7 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 					int threshold = rnd(10)+rn2(11);
 					if(mtmp->female && u.uinsight > threshold){
-						set_faction(mtmp, MISTWEAVER);
+						set_template(mtmp, MISTWEAVER);
 						mtmp->m_insight_level = threshold;
 					} else {
 						otmp = mksobj(WAR_HAT, TRUE, FALSE);
@@ -5056,7 +5056,7 @@ register struct monst *mtmp;
 			} else {//not shopkeepers, deminymphs, or intoners
 				int threshold = rnd(10)+rn2(11);
 				if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
-					set_faction(mtmp, MISTWEAVER);
+					set_template(mtmp, MISTWEAVER);
 					mtmp->m_insight_level = threshold;
 				}
 			}
@@ -5122,7 +5122,7 @@ register struct monst *mtmp;
 		if(ptr->mtyp == PM_FOREST_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR){
 			int threshold = rnd(10)+rn2(11);
 			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
-				set_faction(mtmp, MISTWEAVER);
+				set_template(mtmp, MISTWEAVER);
 				mtmp->m_insight_level = threshold;
 			}
 		}
@@ -5676,7 +5676,7 @@ register struct	monst	*mtmp;
 #endif /* CONVICT */
 			ptr->mtyp != PM_WATCHMAN &&
 			ptr->mtyp != PM_WATCH_CAPTAIN) {
-			if(!(level.flags.has_barracks || In_law(&u.uz) || in_mklev || undeadfaction)){
+			if(!(level.flags.has_barracks || In_law(&u.uz) || in_mklev || undeadtemplate)){
 				if (!rn2(3)) (void) mongets(mtmp, K_RATION);
 				if (!rn2(2)) (void) mongets(mtmp, C_RATION);
 			}
@@ -6300,7 +6300,7 @@ register struct	monst	*mtmp;
 		} else if(ptr->mtyp == PM_GIANT_GOAT_SPAWN) {
 			int threshold = rnd(10)+rn2(11);
 			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
-				set_faction(mtmp, MISTWEAVER);
+				set_template(mtmp, MISTWEAVER);
 				mtmp->m_insight_level = threshold;
 			}
 		} else if(ptr->mtyp == PM_LURKING_ONE) {
@@ -7519,9 +7519,9 @@ register int	mmflags;
 register int	undeadtype;
 {
 	struct monst *mtmp = 0;
-	undeadfaction = undeadtype;
+	undeadtemplate = undeadtype;
 	mtmp = makemon(ptr, x, y, mmflags);
-	undeadfaction = 0;
+	undeadtemplate = 0;
 	return mtmp;
 }
 /*
@@ -8029,63 +8029,63 @@ register int	mmflags;
 			unsethouse = TRUE;
 		}
 		set_faction(mtmp, curhouse);
-	} else if(!undeadfaction && ((zombiepm >=0 && mtmp->mtyp == zombiepm) || (skeletpm >=0 && mtmp->mtyp == skeletpm))){
+	} else if(!undeadtemplate && ((zombiepm >=0 && mtmp->mtyp == zombiepm) || (skeletpm >=0 && mtmp->mtyp == skeletpm))){
 		if(zombiepm >=0 && mtmp->mtyp == zombiepm){
-			undeadfaction = ZOMBIFIED;
+			undeadtemplate = ZOMBIFIED;
 			unsethouse = TRUE;
 			zombiepm = -1;
 		} else {
-			undeadfaction = SKELIFIED;
+			undeadtemplate = SKELIFIED;
 			unsethouse = TRUE;
 			skeletpm = -1;
 		}
 	} else if(In_quest(&u.uz) && urole.neminum == PM_NECROMANCER && mtmp->mtyp == PM_ELF){
-		undeadfaction = ZOMBIFIED;
+		undeadtemplate = ZOMBIFIED;
 		unsethouse = TRUE;
 		m_initlgrp(mtmp, mtmp->mx, mtmp->my);
 	} else if(mtmp->mtyp == PM_ECHO){
-		undeadfaction = SKELIFIED;
+		undeadtemplate = SKELIFIED;
 		unsethouse = TRUE;
-	} else if(!undeadfaction && (mtmp->data->geno&G_HELL) == 0 && Is_mephisto_level(&u.uz)){
-		undeadfaction = CRYSTALFIED;
+	} else if(!undeadtemplate && (mtmp->data->geno&G_HELL) == 0 && Is_mephisto_level(&u.uz)){
+		undeadtemplate = CRYSTALFIED;
 		unsethouse = TRUE;
 	} else if(is_kamerel(mtmp->data)){
 		if(level.flags.has_kamerel_towers && (mtmp->mtyp != PM_ARA_KAMEREL || rn2(2))){
-			undeadfaction = FRACTURED;
+			undeadtemplate = FRACTURED;
 			unsethouse = TRUE;
 		} else if(!level.flags.has_minor_spire && mtmp->mtyp != PM_ARA_KAMEREL
 			&& (mtmp->mtyp != PM_HUDOR_KAMEREL || rn2(2))
 			&& (mtmp->mtyp != PM_SHARAB_KAMEREL || !rn2(4))
 		){
-			undeadfaction = FRACTURED;
+			undeadtemplate = FRACTURED;
 			unsethouse = TRUE;
 		}
-	} else if(randmonst && !undeadfaction && can_undead_mon(mtmp) && u.uinsight > rn2(INSIGHT_RATE)){
-		undeadfaction = PSEUDONATURAL;
+	} else if(randmonst && !undeadtemplate && can_undead_mon(mtmp) && check_insight()){
+		undeadtemplate = PSEUDONATURAL;
 		unsethouse = TRUE;
-	} else if(randmonst && !undeadfaction && is_rat(mtmp->data) && u.uinsight > rn2(INSIGHT_RATE)){
-		undeadfaction = CRANIUM_RAT;
+	} else if(randmonst && !undeadtemplate && is_rat(mtmp->data) && check_insight()){
+		undeadtemplate = CRANIUM_RAT;
 		unsethouse = TRUE;
-	} else if(randmonst && !undeadfaction && can_undead_mon(mtmp) && !Is_rogue_level(&u.uz)){
+	} else if(randmonst && !undeadtemplate && can_undead_mon(mtmp) && !Is_rogue_level(&u.uz)){
 		if(In_mines(&u.uz)){
 			if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && rn2(10) <= 5){
-				undeadfaction = ZOMBIFIED;
+				undeadtemplate = ZOMBIFIED;
 				unsethouse = TRUE;
 				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
 			} else if(!rn2(10)){
-				undeadfaction = ZOMBIFIED;
+				undeadtemplate = ZOMBIFIED;
 				unsethouse = TRUE;
 				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
 			}
 		} else if(!rn2(100)){
-			undeadfaction = ZOMBIFIED;
+			undeadtemplate = ZOMBIFIED;
 			unsethouse = TRUE;
 			m_initlgrp(mtmp, mtmp->mx, mtmp->my);
 		}
 	}
-	if(undeadfaction){
-		set_faction(mtmp, undeadfaction);
-		if(undeadfaction == FRACTURED){
+	if(undeadtemplate){
+		set_template(mtmp, undeadtemplate);
+		if(undeadtemplate == FRACTURED){
 			mtmp->m_lev += 4;
 			mtmp->mhpmax += d(4, 8);
 			mtmp->mhp = mtmp->mhpmax;
@@ -8686,11 +8686,11 @@ register int	mmflags;
 //			pline("%d\n",mtmp->mhpmax);
 		break;
 	}
-	if(!mtmp->mfaction && is_rat(mtmp->data) && u.uinsight > rn2(INSIGHT_RATE)){
-		set_faction(mtmp, CRANIUM_RAT);
+	if(!templated(mtmp) && is_rat(mtmp->data) && check_insight()){
+		set_template(mtmp, CRANIUM_RAT);
 	}
-	if(!mtmp->mfaction && u.uinsight > rn2(INSIGHT_RATE)){
-		set_faction(mtmp, YITH);
+	if(!templated(mtmp) && check_insight()){
+		set_template(mtmp, YITH);
 		mtmp->m_lev += 2;
 		mtmp->mhpmax += d(2,8);
 		mtmp->mhp = mtmp->mhpmax;
@@ -8855,9 +8855,9 @@ register int	mmflags;
 		skeletpm = -1;
 	}
 	if(unsethouse){
-		/*At this point, we have FINALLY created the inventory for the initial creature and all its associates, so the global should be unset now.*/
+		/*At this point, we have FINALLY created the inventory for the initial creature and all its associates, so the globals should be unset now.*/
 		curhouse = 0;
-		undeadfaction = 0;
+		undeadtemplate = 0;
 	}
 	if ((ptr->mflagst & MT_WAITMASK) && !(mmflags & MM_NOWAIT) && !u.uevent.invoked) {
 		if (ptr->mflagst & MT_WAITFORU)
@@ -9056,7 +9056,7 @@ rndmonst()
 	    return &mons[PM_CENTER_OF_ALL]; /*center of all may be created at any time */
 	}
 
-	if (u.uz.dnum == quest_dnum && !undeadfaction && (ptr = qt_montype()) != 0){
+	if (u.uz.dnum == quest_dnum && !undeadtemplate && (ptr = qt_montype()) != 0){
 		if(ptr->mtyp == PM_LONG_WORM_TAIL) return (struct permonst *) 0;
 	    else if(Role_if(PM_ANACHRONONAUT) || rn2(7)) return ptr;
 		//else continue to random generation
@@ -9740,13 +9740,13 @@ struct monst *mtmp, *victim;
 				if((otmp->wrathdata&0x3L) < 3) otmp->wrathdata++;
 			}
 			else {
-				if(victim->mfaction == ZOMBIFIED){
+				if(has_template(victim, ZOMBIFIED)){
 					otmp->wrathdata = PM_ZOMBIE<<2;
-				} else if(victim->mfaction == SKELIFIED){
+				} else if(has_template(victim, SKELIFIED)){
 					otmp->wrathdata = PM_SKELETON<<2;
-				} else if(victim->mfaction == VAMPIRIC){
+				} else if(has_template(victim, VAMPIRIC)){
 					otmp->wrathdata = PM_VAMPIRE<<2;
-				} else if(victim->mfaction == PSEUDONATURAL){
+				} else if(has_template(victim, PSEUDONATURAL)){
 					otmp->wrathdata = PM_MIND_FLAYER<<2;
 				} else {
 					otmp->wrathdata = monsndx(victim->data)<<2;
@@ -9759,13 +9759,13 @@ struct monst *mtmp, *victim;
 				if((otmp->wrathdata&0xFF) < 3) otmp->wrathdata++;
 			}
 			else {
-				if(victim->mfaction == ZOMBIFIED){
+				if(has_template(victim, ZOMBIFIED)){
 					otmp->wrathdata = PM_ZOMBIE<<2;
-				} else if(victim->mfaction == SKELIFIED){
+				} else if(has_template(victim, SKELIFIED)){
 					otmp->wrathdata = PM_SKELETON<<2;
-				} else if(victim->mfaction == VAMPIRIC){
+				} else if(has_template(victim, VAMPIRIC)){
 					otmp->wrathdata = PM_VAMPIRE<<2;
-				} else if(victim->mfaction == PSEUDONATURAL){
+				} else if(has_template(victim, PSEUDONATURAL)){
 					otmp->wrathdata = PM_MIND_FLAYER<<2;
 				} else {
 					otmp->wrathdata = monsndx(victim->data)<<2;
@@ -9930,7 +9930,7 @@ register int otyp;
 	register struct obj *otmp;
 	int spe;
 
-	if (undeadfaction && mtmp->mfaction == undeadfaction && rn2(2))
+	if (undeadtemplate && has_template(mtmp, undeadtemplate) && rn2(2))
 		return (struct obj *)0;
 	if (!otyp)
 		return (struct obj *)0;

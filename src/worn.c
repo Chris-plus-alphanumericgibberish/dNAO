@@ -45,6 +45,38 @@ const struct worn {
 		/* note: monsters don't have clairvoyance, so your role
 		   has no significant effect on their use of w_blocks() */
 
+
+/* returns TRUE if obj confers prop
+ * also checks artifact properties
+ */
+boolean
+item_has_property(obj, prop)
+struct obj * obj;
+int prop;
+{
+	int property_list[LAST_PROP];
+	int i;
+	/* first check object (ocl, oprops) */
+	get_item_property_list(property_list, obj, obj->otyp);
+	for (i = 0; property_list[i] != 0; i++)	{
+		if (property_list[i] == prop)
+			return TRUE;
+	}
+	/* then while-worn artifact properties */
+	get_art_property_list(property_list, obj->oartifact, FALSE);
+	for (i = 0; property_list[i] != 0; i++)	{
+		if (property_list[i] == prop)
+			return TRUE;
+	}
+	/* then while-carried artifact properties */
+	get_art_property_list(property_list, obj->oartifact, TRUE);
+	for (i = 0; property_list[i] != 0; i++)	{
+		if (property_list[i] == prop)
+			return TRUE;
+	}
+	return FALSE;
+}
+
 /* 
  * Fills an int array propert_list with all the properties (from prop.h) an item has
  *
@@ -1015,17 +1047,30 @@ struct monst *magr;
 	return base;
 }
 
+/* Calculates mon's DR for a slot 
+ * Does not randomize values >10 (must be done elsewhere)
+ * 
+ * Includes effectiveness vs magr (optional)
+ */
 void
-mon_slot_dr(mon, magr, slot, base_ac_out, armor_ac_out, natural_ac_out)
+mon_slot_dr(mon, magr, slot, base_dr_out, armor_dr_out, natural_dr_out)
 struct monst *mon;
 struct monst *magr;
 int slot;
-int *base_ac_out;
-int *armor_ac_out;
-int *natural_ac_out;
+int *base_dr_out;
+int *armor_dr_out;
+int *natural_dr_out;
 {
-	struct obj *obj;
-	int base, nat_dr, armac = 0, clkdr = 0;
+	/* DR addition: bas + sqrt(nat^2 + arm^2) (not done in this function) */
+	int bas_mdr; /* base DR:    magical-ish   */
+	int nat_mdr; /* natural DR: (poly)form    */
+	int arm_mdr; /* armor DR:   worn armor    */
+
+	bas_mdr = base_mdr(mon);
+	nat_mdr = base_nat_mdr(mon);
+	arm_mdr = 0;
+
+	/* for use vs specific magr */
 	int agralign = 0;
 	int agrmoral = 0;
 	if(magr){
@@ -1037,148 +1082,72 @@ int *natural_ac_out;
 			else if(hates_unholy(youracedata))
 				agrmoral = 1;
 		} else {
-			if(hates_holy_mon(magr))
-				agrmoral = -1;
+		if(hates_holy_mon(magr))
+			agrmoral = -1;
 			else if(hates_unholy_mon(magr))
-				agrmoral = 1;
+			agrmoral = 1;
 		}
 	}
 	
-	base = base_mdr(mon);
-	nat_dr = base_nat_mdr(mon);
-	
-	//armor AC
-	if(mon->mtyp == PM_HOD_SEPHIRAH){
-		armac = slot_udr(slot, magr);
-		if(armac < 0) armac *= -1;
-	} else {
-		struct obj *curarm;
-		
-		if (which_armor(mon, W_ARMC)){
-			curarm = which_armor(mon, W_ARMC);
-			clkdr += arm_dr_bonus(curarm);
-			if(magr) clkdr += properties_dr(curarm, agralign, agrmoral);
-		} else if(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU){
-			clkdr += max( 1 + (MON_WEP(mon)->spe+1)/2,0);
-		}
-		
-		curarm = which_armor(mon, W_ARMU);
-		if(curarm && curarm->otyp == BODYGLOVE){
-			armac += arm_dr_bonus(curarm);
-			if(magr) armac += properties_dr(curarm, agralign, agrmoral);
-		}
-		
-		curarm = which_armor(mon, W_ARM);
-		if(curarm && curarm->otyp == JUMPSUIT){
-			armac += arm_dr_bonus(curarm);
-			if(magr) armac += properties_dr(curarm, agralign, agrmoral);
-		}
-		
-		if(mon->mtyp == PM_GIANT_TURTLE && (mon->mflee || rn2(2))){
-			slot = UPPER_TORSO_DR;
-		}
-		
-		switch(slot){
-			case UPPER_TORSO_DR:
-mon_uppertorso:
-				//Note: upper body (shirt plus torso armor)
-				nat_dr += mon->data->bdr;
-				if(!mon->mcan)
-					base += mon->data->spe_bdr;
-				if (which_armor(mon, W_ARMU)){
-					curarm = which_armor(mon, W_ARMU);
-					if(curarm->otyp != BODYGLOVE){
-						armac += arm_dr_bonus(curarm);
-						if(magr) armac += properties_dr(curarm, agralign, agrmoral);
-					}
-				}
-			case LOWER_TORSO_DR:
-mon_lowertorso:
-				//Note: lower body (torso armor only)
-				if (which_armor(mon, W_ARM)){
-					curarm = which_armor(mon, W_ARM);
-					if(curarm->otyp != JUMPSUIT){
-						armac += arm_dr_bonus(curarm);
-						if(magr) armac += properties_dr(curarm, agralign, agrmoral);
-					}
-				} else if(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU){
-					armac += max( 1 + (MON_WEP(mon)->spe+1)/2,0);
-				}
-				armac += clkdr;
-				//Lower body SPECIFIC modifiers
-				if(slot == LOWER_TORSO_DR){
-					nat_dr += mon->data->ldr;
-					if(!mon->mcan)
-						base += mon->data->spe_ldr;
-					if (which_armor(mon, W_ARMU)){
-						curarm = which_armor(mon, W_ARMU);
-						if(curarm->otyp == BLACK_DRESS || curarm->otyp == VICTORIAN_UNDERWEAR){
-							armac += arm_dr_bonus(curarm);
-							if(magr) armac += properties_dr(curarm, agralign, agrmoral);
-						}
-					}
-				}
-			break;
-			case HEAD_DR:
-				if(!has_head_mon(mon)){
-					slot = UPPER_TORSO_DR;
-					goto mon_uppertorso;
-				}
-				nat_dr += mon->data->hdr;
-				if(!mon->mcan)
-					base += mon->data->spe_hdr;
-				if (which_armor(mon, W_ARMH)){
-					curarm = which_armor(mon, W_ARMH);
-					armac += arm_dr_bonus(curarm);
-					if(magr) armac += properties_dr(curarm, agralign, agrmoral);
-				}
-				armac += clkdr;
-			break;
-			case LEG_DR:
-				if(!can_wear_boots(mon->data)){
-					slot = LOWER_TORSO_DR;
-					goto mon_lowertorso;
-				}
-				nat_dr += mon->data->fdr;
-				if(!mon->mcan)
-					base += mon->data->spe_fdr;
-				if (which_armor(mon, W_ARMF)){
-					curarm = which_armor(mon, W_ARMF);
-					armac += arm_dr_bonus(curarm);
-					if(magr) armac += properties_dr(curarm, agralign, agrmoral);
-				} else if(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU){
-					armac += max( 1 + (MON_WEP(mon)->spe+1)/2,0);
-				}
-				armac += clkdr;
-			break;
-			case ARM_DR:
-				if(!can_wear_gloves(mon->data)){
-					slot = UPPER_TORSO_DR;
-					goto mon_uppertorso;
-				}
-				nat_dr += mon->data->gdr;
-				if(!mon->mcan)
-					base += mon->data->spe_gdr;
-				if (which_armor(mon, W_ARMG)){
-					curarm = which_armor(mon, W_ARMG);
-					armac += arm_dr_bonus(curarm);
-					if(magr) armac += properties_dr(curarm, agralign, agrmoral);
-				} else if(MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU){
-					armac += max( 1 + (MON_WEP(mon)->spe+1)/2,0);
-				}
-			break;
+	/* some slots may be unacceptable and must be replaced */
+	if (magr && magr->mtyp == PM_XAN)
+		slot = LEG_DR;
+	if (mon->mtyp == PM_GIANT_TURTLE && (mon->mflee || rn2(2)))
+		slot = UPPER_TORSO_DR;
+	if (slot == HEAD_DR && !has_head_mon(mon))
+		slot = UPPER_TORSO_DR;
+	if (slot == LEG_DR && !can_wear_boots(mon->data))
+		slot = LOWER_TORSO_DR;
+	if (slot == ARM_DR && !can_wear_gloves(mon->data))
+		slot = UPPER_TORSO_DR;
+
+	/* DR of worn armor */
+	int marmor[] = { W_ARM, W_ARMC, W_ARMF, W_ARMH, W_ARMG, W_ARMS, W_ARMU };
+	int i;
+	struct obj * curarm;
+	for (i = 0; i < SIZE(marmor); i++) {
+		curarm = which_armor(mon, marmor[i]);
+		if (curarm && (objects[curarm->otyp].oc_dir & slot)) {
+			arm_mdr += arm_dr_bonus(curarm);
+			if (magr) arm_mdr += properties_dr(curarm, agralign, agrmoral);
 		}
 	}
-	
-	// if(armac && mon->mstdy){
-		// armac -= mon->mstdy;
-		// if(armac<0)
-			// armac = 0;
-	// }
-	
-	*base_ac_out = base;
-	*armor_ac_out = armac;
-	*natural_ac_out = nat_dr;
+	/* Tensa Zangetsu adds to worn armor */
+	if (MON_WEP(mon) && MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU) {
+		if (!which_armor(mon, W_ARMC) && (slot & CLOAK_DR)) {
+			arm_mdr += max(1 + (MON_WEP(mon)->spe + 1) / 2, 0);
+		}
+		if (!which_armor(mon, W_ARM) && (slot & TORSO_DR)) {
+			arm_mdr += max(1 + (MON_WEP(mon)->spe + 1) / 2, 0);
+		}
+	}
+	/* Hod Sephirah OVERRIDE other arm_mdr sources with the player's total DR (regardless of who's attacking them) */
+	if (mon->mtyp == PM_HOD_SEPHIRAH) {
+		arm_mdr = slot_udr(slot, magr);
+	}
+	/* Natural DR */
+	switch (slot)
+	{
+	case UPPER_TORSO_DR: nat_mdr += mon->data->bdr; break;
+	case LOWER_TORSO_DR: nat_mdr += mon->data->ldr; break;
+	case HEAD_DR:        nat_mdr += mon->data->hdr; break;
+	case LEG_DR:         nat_mdr += mon->data->fdr; break;
+	case ARM_DR:         nat_mdr += mon->data->gdr; break;
+	}
+	if (!mon->mcan) {
+		switch (slot)
+		{
+		case UPPER_TORSO_DR: nat_mdr += mon->data->spe_bdr; break;
+		case LOWER_TORSO_DR: nat_mdr += mon->data->spe_ldr; break;
+		case HEAD_DR:        nat_mdr += mon->data->spe_hdr; break;
+		case LEG_DR:         nat_mdr += mon->data->spe_fdr; break;
+		case ARM_DR:         nat_mdr += mon->data->spe_gdr; break;
+		}
+	}
+
+	*base_dr_out    = bas_mdr;
+	*armor_dr_out   = arm_mdr;
+	*natural_dr_out = nat_mdr;
 	
 	return;
 }
@@ -1775,7 +1744,7 @@ struct obj *obj;
 			return 20;
 		break;
 	case REFLECTING:
-		if (!(mon->mfaction == FRACTURED || species_reflects(mon)))
+		if (!(has_template(mon, FRACTURED) || species_reflects(mon)))
 			return 18;
 		break;
 	case FAST:
@@ -1915,11 +1884,7 @@ long timeout;
 	if (on_floor) {
 	    x = obj->ox;
 	    y = obj->oy;
-		if((levl[x][y].lit == 0 && 
-			!(viz_array[y][x]&TEMP_LIT1 && !(viz_array[y][x]&TEMP_DRK1)))
-		   || (levl[x][y].lit && 
-			(viz_array[y][x]&TEMP_DRK1 && !(viz_array[y][x]&TEMP_LIT1)))
-		){
+		if (dimness(x, y) > 0){
 			if(obj->oeroded && obj->oerodeproof) obj->oeroded--;
 			start_timer(1, TIMER_OBJECT,
 						LIGHT_DAMAGE, (genericptr_t)obj);
@@ -1944,10 +1909,7 @@ long timeout;
 		x = obj->otrap->tx;
 		y = obj->otrap->ty;
 		/* if dark, continue timer and possibly restore durability */
-		if ((levl[x][y].lit == 0 &&
-			!(viz_array[y][x] & TEMP_LIT1 && !(viz_array[y][x] & TEMP_DRK1)))
-			|| (levl[x][y].lit &&
-			(viz_array[y][x] & TEMP_DRK1 && !(viz_array[y][x] & TEMP_LIT1)))
+		if ((dimness(x, y) > 0)
 			/* only some traps are visible to light */
 			|| !(obj->otrap->ttyp == BEAR_TRAP)
 			){
@@ -2000,28 +1962,19 @@ long timeout;
 			return;
 		}
 		
-		if((levl[u.ux][u.uy].lit == 0 && 
-			!(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK1)))
-		  || (levl[u.ux][u.uy].lit && 
-			(viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1)))
+		if ((!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark()))
 		  || ((rn2(3) < armpro) && rn2(50))
 		){
 			if(obj->oeroded && obj->oerodeproof && 
-				((levl[u.ux][u.uy].lit == 0 && 
-					!(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK1)))
-				|| (levl[u.ux][u.uy].lit && 
-					(viz_array[u.uy][u.ux]&TEMP_DRK1 && !(viz_array[u.uy][u.ux]&TEMP_LIT1)))
-				)
-			) obj->oeroded--;
-			start_timer(1, TIMER_OBJECT,
-						LIGHT_DAMAGE, (genericptr_t)obj);
+				(!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark())))
+				obj->oeroded--;
+			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
 			return;
 		}
 		if(obj->oeroded < 2){
 			obj->oeroded++;
 			Your("%s degrade%s.",xname(obj),(obj->quan > 1L ? "" : "s"));
-			start_timer(1, TIMER_OBJECT,
-						LIGHT_DAMAGE, (genericptr_t)obj);
+			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
 			stop_occupation();
 			if(flags.run) nomul(0, NULL);
 			return;
@@ -2094,6 +2047,8 @@ long timeout;
 		int armpro = 0;
 		long unwornmask;
 		struct monst *mtmp;
+		x = obj->ocarry->mx;
+		y = obj->ocarry->my;
 		if(armor){
 			armpro = armor->otyp == DROVEN_CLOAK ? 
 				objects[armor->otyp].a_can - armor->ovar1 :
@@ -2103,17 +2058,9 @@ long timeout;
 			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
 			return;
 		}
-		if((levl[obj->ocarry->mx][obj->ocarry->my].lit == 0 && 
-				!(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_LIT1 && !(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_DRK1)))
-			|| (levl[obj->ocarry->mx][obj->ocarry->my].lit && 
-				(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_DRK1 && !(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_LIT1)))
-			|| ((rn2(3) < armpro) && rn2(50))){
+		if ((dimness(x, y) > 0) || ((rn2(3) < armpro) && rn2(50))){
 			if(obj->oeroded && obj->oerodeproof 
-				&& ((levl[obj->ocarry->mx][obj->ocarry->my].lit == 0 && 
-					!(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_LIT1 && !(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_DRK1))) 
-				   || (levl[obj->ocarry->mx][obj->ocarry->my].lit && 
-					(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_DRK1 && !(viz_array[obj->ocarry->my][obj->ocarry->mx]&TEMP_LIT1)))
-				)
+				&& (dimness(x, y) > 0)
 			) obj->oeroded--;
 			start_timer(1, TIMER_OBJECT,
 						LIGHT_DAMAGE, (genericptr_t)obj);

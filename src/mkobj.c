@@ -511,11 +511,6 @@ register struct obj *otmp;
 #endif /* OVL1 */
 #ifdef OVLB
 
-static const char dknowns[] = {
-		WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS,
-		GEM_CLASS, SPBOOK_CLASS, WEAPON_CLASS, TOOL_CLASS, 0
-};
-
 struct obj *
 mksobj(otyp, init, artif)
 int otyp;
@@ -535,7 +530,7 @@ boolean artif;
 	otmp->oclass = let;
 	otmp->otyp = otyp;
 	otmp->where = OBJ_FREE;
-	otmp->dknown = index(dknowns, let) ? 0 : 1;
+	otmp->dknown = 0;
 	otmp->corpsenm = 0; /* BUGFIX: Where does this get set? shouldn't it be given a default during initialization? */
 	otmp->objsize = MZ_MEDIUM;
 	otmp->bodytypeflag = MB_HUMANOID;
@@ -565,8 +560,7 @@ boolean artif;
 	if ((otmp->otyp >= ELVEN_SHIELD && otmp->otyp <= ORCISH_SHIELD) ||
 			otmp->otyp == SHIELD_OF_REFLECTION)
 		otmp->dknown = 0;
-	if (!objects[otmp->otyp].oc_uses_known && otmp->otyp!=POT_BLOOD)
-		otmp->known = 1;
+
 #ifdef INVISIBLE_OBJECTS
 	otmp->oinvis = !rn2(1250);
 #endif
@@ -1422,7 +1416,7 @@ start_corpse_timeout(body)
 		action = REVIVE_MON;
 		when = rn2(TAINT_AGE)+2;
 	} else if (attchmon
-	 && (attchmon->mfaction == ZOMBIFIED)
+	 && (has_template(attchmon, ZOMBIFIED))
 	 && !body->norevive
 	) {
 //		pline("setting up zombie revival for %s", xname(body));
