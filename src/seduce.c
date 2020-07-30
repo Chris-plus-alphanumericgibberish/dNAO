@@ -1587,7 +1587,7 @@ struct monst * mon;
 		}
 	}
 	else {
-		void(*undressfunc)(struct obj *, const char *, boolean) = 0;
+		void FDECL((*undressfunc), (register struct obj *, const char *, boolean)) = 0;
 		boolean helpless = unconscious();
 
 		/* message and select correct function */
