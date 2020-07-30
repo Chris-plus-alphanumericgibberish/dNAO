@@ -97,162 +97,152 @@ int
 doseduce(mon)
 register struct monst *mon;
 {
-	register struct obj *ring, *nring;
-	boolean fem = mon->female; /* otherwise incubus */
-	char qbuf[QBUFSZ];
-	struct obj *key;
-	int turns = 0;
-	char class_list[MAXOCLASSES+2];
-//	pline("starting ssex");
-	if(TRUE){
+	if (mon->mcan || mon->mspec_used) {
+		pline("%s acts as though %s has got a %sheadache.",
+				Monnam(mon), mhe(mon),
+				mon->mcan ? "severe " : "");
+		return 0;
+	}
 
-		if (mon->mcan || mon->mspec_used) {
-			pline("%s acts as though %s has got a %sheadache.",
-				  Monnam(mon), mhe(mon),
-				  mon->mcan ? "severe " : "");
-			return 0;
+	if (unconscious()) {
+		pline("%s seems dismayed at your lack of response.",
+				Monnam(mon));
+		return 0;
+	}
+
+	if (Blind) pline("It caresses you...");
+	else You_feel("very attracted to %s.", mon_nam(mon));
+
+	sedu_adornment_ring(mon);
+
+	sedu_undress(mon);
+
+	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
+		verbalize("You're such a %s; I wish...",
+				flags.female ? "sweet lady" : "nice guy");
+		if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
+		if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
+		return 1;
+	}
+	if (u.ualign.type == A_CHAOTIC)
+		adjalign(1);
+
+	/* by this point you have discovered mon's identity, blind or not... */
+	if(!uclockwork){
+		pline("Time stands still while you and %s lie in each other's arms...",
+			noit_mon_nam(mon));
+	}
+	else{
+		pline("You and %s lie down together...",
+			noit_mon_nam(mon));
+	}
+	if (Sterile || rn2(35) > ACURR(A_CHA) + ACURR(A_INT)) {
+		/* Don't bother with mspec_used here... it didn't get tired! */
+		if (uclockwork) {
+			/* message */
+			pline("%s looks briefly confused...",
+				noit_Monnam(mon));
+			/* effect */
+			if (!rn2(5) && !Drain_resistance)
+				seduce_effect(mon, SEDU_SUCKSOUL);
+			else
+				seduce_effect(mon, SEDU_STEALONE);
 		}
-
-		if (unconscious()) {
-			pline("%s seems dismayed at your lack of response.",
-				  Monnam(mon));
-			return 0;
+		else {
+			/* no setup message */
+			/* just effect */
+			const int bad_sedu_effects[] = {
+				SEDU_DRAINEN,
+				SEDU_DUMPS,
+				SEDU_DULLSENSES,
+				SEDU_DRAINLVL,
+				SEDU_EXHAUSTED
+			};
+			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
 		}
-
-		if (Blind) pline("It caresses you...");
-		else You_feel("very attracted to %s.", mon_nam(mon));
-
-		sedu_adornment_ring(mon);
-
-		sedu_undress(mon);
-
-		if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
-			verbalize("You're such a %s; I wish...",
-					flags.female ? "sweet lady" : "nice guy");
-			if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
-			if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-			return 1;
-		}
-		if (u.ualign.type == A_CHAOTIC)
-			adjalign(1);
-
-		/* by this point you have discovered mon's identity, blind or not... */
-		if(!uclockwork){
+			
+	} else {
+		mon->mspec_used = rnd(100); /* monster is worn out */
+		if (uclockwork) {
+			/* message */
 			pline("Time stands still while you and %s lie in each other's arms...",
 				noit_mon_nam(mon));
-		}
-		else{
-			pline("You and %s lie down together...",
-				noit_mon_nam(mon));
-		}
-		if (Sterile || rn2(35) > ACURR(A_CHA) + ACURR(A_INT)) {
-			/* Don't bother with mspec_used here... it didn't get tired! */
-			if (uclockwork) {
-				/* message */
-				pline("%s looks briefly confused...",
-					noit_Monnam(mon));
-				/* effect */
-				if (!rn2(5) && !Drain_resistance)
-					seduce_effect(mon, SEDU_SUCKSOUL);
-				else
-					seduce_effect(mon, SEDU_STEALONE);
-			}
+			/* effect */
+			if (!rn2(5))
+				seduce_effect(mon, SEDU_EDUCATE);
+			else if (u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER))
+				seduce_effect(mon, SEDU_WIND);
 			else {
-				/* no setup message */
-				/* just effect */
-				const int bad_sedu_effects[] = {
-					SEDU_DRAINEN,
-					SEDU_DUMPS,
-					SEDU_DULLSENSES,
-					SEDU_DRAINLVL,
-					SEDU_EXHAUSTED
-				};
-				seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
-			}
-			
-		} else {
-			mon->mspec_used = rnd(100); /* monster is worn out */
-			if (uclockwork) {
-				/* message */
-				pline("Time stands still while you and %s lie in each other's arms...",
-					noit_mon_nam(mon));
-				/* effect */
-				if (!rn2(5))
-					seduce_effect(mon, SEDU_EDUCATE);
-				else if (u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER))
-					seduce_effect(mon, SEDU_WIND);
-				else {
-					pline("%s looks happy, but confused.",
-						noit_Monnam(mon));
-				}
-			}
-			else {
-				/* message */
-				You("seem to have enjoyed it more than %s...",
-					noit_mon_nam(mon));
-				/* effect */
-				const int good_sedu_effects[] = {
-					SEDU_GAINEN,
-					SEDU_GOODENOUGH,
-					SEDU_REMEMBER,
-					SEDU_EDUCATE,
-					SEDU_RESTOREHP
-				};
-				seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
+				pline("%s looks happy, but confused.",
+					noit_Monnam(mon));
 			}
 		}
-
-		if (mon->mtame) /* don't charge */ ;
-		else if (rn2(20) < ACURR(A_CHA)) {
-			pline("%s demands that you pay %s, but you refuse...",
-				noit_Monnam(mon),
-				Blind ? (fem ? "her" : "him") : mhim(mon));
-		} else if (u.umonnum == PM_LEPRECHAUN)
-			pline("%s tries to take your money, but fails...",
-					noit_Monnam(mon));
 		else {
-	#ifndef GOLDOBJ
-			long cost;
-
-			if (u.ugold > (long)LARGEST_INT - 10L)
-				cost = (long) rnd(LARGEST_INT) + 500L;
-			else
-				cost = (long) rnd((int)u.ugold + 10) + 500L;
-			if (mon->mpeaceful) {
-				cost /= 5L;
-				if (!cost) cost = 1L;
-			}
-			if (cost > u.ugold) cost = u.ugold;
-			if (!cost) verbalize("It's on the house!");
-			else {
-				pline("%s takes %ld %s for services rendered!",
-					noit_Monnam(mon), cost, currency(cost));
-				u.ugold -= cost;
-				mon->mgold += cost;
-				flags.botl = 1;
-			}
-	#else
-			long cost;
-					long umoney = money_cnt(invent);
-
-			if (umoney > (long)LARGEST_INT - 10L)
-				cost = (long) rnd(LARGEST_INT) + 500L;
-			else
-				cost = (long) rnd((int)umoney + 10) + 500L;
-			if (mon->mpeaceful) {
-				cost /= 5L;
-				if (!cost) cost = 1L;
-			}
-			if (cost > umoney) cost = umoney;
-			if (!cost) verbalize("It's on the house!");
-			else { 
-				pline("%s takes %ld %s for services rendered!",
-					noit_Monnam(mon), cost, currency(cost));
-						money2mon(mon, cost);
-				flags.botl = 1;
-			}
-	#endif
+			/* message */
+			You("seem to have enjoyed it more than %s...",
+				noit_mon_nam(mon));
+			/* effect */
+			const int good_sedu_effects[] = {
+				SEDU_GAINEN,
+				SEDU_GOODENOUGH,
+				SEDU_REMEMBER,
+				SEDU_EDUCATE,
+				SEDU_RESTOREHP
+			};
+			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 		}
+	}
+
+	if (mon->mtame) /* don't charge */ ;
+	else if (rn2(20) < ACURR(A_CHA)) {
+		pline("%s demands that you pay %s, but you refuse...",
+			noit_Monnam(mon),
+			Blind ? (mon->female ? "her" : "him") : mhim(mon));
+	} else if (u.umonnum == PM_LEPRECHAUN)
+		pline("%s tries to take your money, but fails...",
+				noit_Monnam(mon));
+	else {
+#ifndef GOLDOBJ
+		long cost;
+
+		if (u.ugold > (long)LARGEST_INT - 10L)
+			cost = (long) rnd(LARGEST_INT) + 500L;
+		else
+			cost = (long) rnd((int)u.ugold + 10) + 500L;
+		if (mon->mpeaceful) {
+			cost /= 5L;
+			if (!cost) cost = 1L;
+		}
+		if (cost > u.ugold) cost = u.ugold;
+		if (!cost) verbalize("It's on the house!");
+		else {
+			pline("%s takes %ld %s for services rendered!",
+				noit_Monnam(mon), cost, currency(cost));
+			u.ugold -= cost;
+			mon->mgold += cost;
+			flags.botl = 1;
+		}
+#else
+		long cost;
+				long umoney = money_cnt(invent);
+
+		if (umoney > (long)LARGEST_INT - 10L)
+			cost = (long) rnd(LARGEST_INT) + 500L;
+		else
+			cost = (long) rnd((int)umoney + 10) + 500L;
+		if (mon->mpeaceful) {
+			cost /= 5L;
+			if (!cost) cost = 1L;
+		}
+		if (cost > umoney) cost = umoney;
+		if (!cost) verbalize("It's on the house!");
+		else { 
+			pline("%s takes %ld %s for services rendered!",
+				noit_Monnam(mon), cost, currency(cost));
+					money2mon(mon, cost);
+			flags.botl = 1;
+		}
+#endif
 	}
 	if (!rn2(25)) mon->mcan = 1; /* monster is worn out */
 	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
@@ -263,104 +253,97 @@ int
 dololthseduce(mon)
 register struct monst *mon;
 {
-	register struct obj *ring, *nring;
-	boolean fem = TRUE, helpless;
-	char qbuf[QBUFSZ];
-	struct obj *key;
-	int turns = 0;
-	char class_list[MAXOCLASSES+2];
-//	pline("starting ssex");
-	if(TRUE){
-		if (unconscious()) {
-			helpless = TRUE;
-			pline("%s seems pleased at your lack of response.",
-				  Monnam(mon));
-		}
+	boolean helpless = FALSE;
 
-		if (Blind) pline("It caresses you...");
-		else You_feel("very attracted to %s.", mon_nam(mon));
+	if (unconscious()) {
+		helpless = TRUE;
+		pline("%s seems pleased at your lack of response.",
+				Monnam(mon));
+	}
 
-		sedu_adornment_ring(mon);
+	if (Blind) pline("It caresses you...");
+	else You_feel("very attracted to %s.", mon_nam(mon));
 
-		sedu_undress(mon);
+	sedu_adornment_ring(mon);
 
-		if (u.ualign.type == A_CHAOTIC)
-			adjalign(1);
+	sedu_undress(mon);
 
-		/* by this point you have discovered mon's identity, blind or not... */
-		if (helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_WIS)) {
-			struct trap *ttmp2 = maketrap(u.ux, u.uy, WEB);
-			/* Don't bother with mspec_used here... it didn't get tired! */
-		LolthAttacks:
-			if (Blind) You("suddenly find yourself in the arms of a giant spider!");
-			else pline("She suddenly becomes a giant spider and seizes you with her legs!");
-			//Lolth bad
-			if (ttmp2) {
-				pline("She wraps you tight in her webs!");
-				dotrap(ttmp2, NOWEBMSG);
+	if (u.ualign.type == A_CHAOTIC)
+		adjalign(1);
+
+	/* by this point you have discovered mon's identity, blind or not... */
+	if (helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_WIS)) {
+		struct trap *ttmp2 = maketrap(u.ux, u.uy, WEB);
+		/* Don't bother with mspec_used here... it didn't get tired! */
+	LolthAttacks:
+		if (Blind) You("suddenly find yourself in the arms of a giant spider!");
+		else pline("She suddenly becomes a giant spider and seizes you with her legs!");
+		//Lolth bad
+		if (ttmp2) {
+			pline("She wraps you tight in her webs!");
+			dotrap(ttmp2, NOWEBMSG);
 #ifdef STEED
-				if (u.usteed && u.utrap) {
-					/* you, not steed, are trapped */
-					dismount_steed(DISMOUNT_FELL);
-				}
-#endif
+			if (u.usteed && u.utrap) {
+				/* you, not steed, are trapped */
+				dismount_steed(DISMOUNT_FELL);
 			}
-			if (uclockwork){
-				pline("%s pauses in momentary confusion...",
-					noit_Monnam(mon));
-				if (rn2(5) && !Drain_resistance){
-					seduce_effect(mon, SEDU_SUCKSOUL);
-				}
-				else {
-					seduce_effect(mon, SEDU_STEALEIGHT);
-				}
+#endif
+		}
+		if (uclockwork){
+			pline("%s pauses in momentary confusion...",
+				noit_Monnam(mon));
+			if (rn2(5) && !Drain_resistance){
+				seduce_effect(mon, SEDU_SUCKSOUL);
 			}
 			else {
-				int tmp;
-				pline("After wrapping you up, she bites into your helpless form!");
-				exercise(A_STR, FALSE);
-				tmp = d(6, 8);
-				if (Half_physical_damage) tmp = (tmp + 1) / 2;
-				losehp(tmp, "Lolth's bite", KILLED_BY);
-
-				seduce_effect(mon, rn2(2) ? SEDU_VAMP : SEDU_POISONBITE);
+				seduce_effect(mon, SEDU_STEALEIGHT);
 			}
-			return 1;
-		} else {
-			//Lolth good
-			if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
-				if(flags.female){
-					verbalize("You're such a sweet lady, I wish you were more open to new things...");
-					if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
-					if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-					return 1;
-				} else {
-					verbalize("How dare you refuse me!");
-					goto LolthAttacks;
-				}
-			}
-			mon->mspec_used = rnd(100); /* monster is worn out */
-
-			/* message */
-			if(Blind) pline("An elf-maid clasps herself to you!");
-			else pline("She becomes a beautiful dark-skinned elf-maid!");
-			if(!uclockwork){
-				pline("Time stands still while you lie in each other's arms...");
-			} else{
-				pline("You and %s lie down together...",
-					noit_mon_nam(mon));
-				pline("Time stands still while you and %s lie in each other's arms...",
-					noit_mon_nam(mon));
-			}
-			/* effect */
-			const int good_sedu_effects[] = {
-				SEDU_WISH,
-				SEDU_BLESS,
-				SEDU_EDUCATE,
-				SEDU_RESTOREHP
-			};
-			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 		}
+		else {
+			int tmp;
+			pline("After wrapping you up, she bites into your helpless form!");
+			exercise(A_STR, FALSE);
+			tmp = d(6, 8);
+			if (Half_physical_damage) tmp = (tmp + 1) / 2;
+			losehp(tmp, "Lolth's bite", KILLED_BY);
+
+			seduce_effect(mon, rn2(2) ? SEDU_VAMP : SEDU_POISONBITE);
+		}
+		return 1;
+	} else {
+		//Lolth good
+		if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
+			if(flags.female){
+				verbalize("You're such a sweet lady, I wish you were more open to new things...");
+				if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
+				if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
+				return 1;
+			} else {
+				verbalize("How dare you refuse me!");
+				goto LolthAttacks;
+			}
+		}
+		mon->mspec_used = rnd(100); /* monster is worn out */
+
+		/* message */
+		if(Blind) pline("An elf-maid clasps herself to you!");
+		else pline("She becomes a beautiful dark-skinned elf-maid!");
+		if(!uclockwork){
+			pline("Time stands still while you lie in each other's arms...");
+		} else{
+			pline("You and %s lie down together...",
+				noit_mon_nam(mon));
+			pline("Time stands still while you and %s lie in each other's arms...",
+				noit_mon_nam(mon));
+		}
+		/* effect */
+		const int good_sedu_effects[] = {
+			SEDU_WISH,
+			SEDU_BLESS,
+			SEDU_EDUCATE,
+			SEDU_RESTOREHP
+		};
+		seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 	}
 	if (!rn2(25)) mon->mcan = 1; /* monster is worn out */
 	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
@@ -371,16 +354,6 @@ int
 dolilithseduce(mon)
 struct monst *mon;
 {
-	struct obj *ring, *nring;
-	boolean fem = TRUE; /* Lilith */
-	//char qbuf[QBUFSZ];
-	char qbuf[QBUFSZ];
-	struct obj *key;
-	int turns = 0;
-	char class_list[MAXOCLASSES+2];
-
-
-
 	if (mon->mcan || mon->mspec_used) {
 		pline("%s is uninterested in you.", Monnam(mon));
 		return 0;
@@ -492,15 +465,6 @@ int
 dobelialseduce(mon)
 struct monst *mon;
 {
-	struct obj *ring, *nring;
-	boolean fem = FALSE; /* Belial */
-	//char qbuf[QBUFSZ];
-	char qbuf[QBUFSZ];
-	struct obj *key;
-	int turns = 0;
-	char class_list[MAXOCLASSES+2];
-
-
 	if (mon->mcan || mon->mspec_used) {
 		pline("%s is uninterested in you.", Monnam(mon));
 		return 0;
@@ -615,12 +579,8 @@ int
 domlcseduce(mon)
 register struct monst *mon;
 {
-	register struct obj *ring, *nring;
-	boolean fem = TRUE; /* otherwise incubus */
-	boolean ufem=poly_gender();
-	char qbuf[QBUFSZ];
 	boolean helpless = FALSE;
-//	pline("starting mlc seduce");
+
 	if (mon->mcan || mon->mspec_used) {
 		pline("%s is uninterested in you.", Monnam(mon));
 		return 0;
@@ -710,7 +670,7 @@ register struct monst *mon;
 			You("seem to have enjoyed it more than %s...",
 				noit_mon_nam(mon));
 
-			if (ufem && (ACURR(A_CHA) < rn2(35))){
+			if ((poly_gender()==1) && (ACURR(A_CHA) < rn2(35))){
 				/* jealousy can rob you of a good effect */
 				if (rn2(2) || uarmh){
 					pline("She attacks you with her barbed tail!");
@@ -747,13 +707,8 @@ int
 dograzseduce(mon)
 register struct monst *mon;
 {
-	register struct obj *ring, *nring;
-	boolean fem = FALSE;
-	boolean ufem=poly_gender();
-	char qbuf[QBUFSZ];
-	char buf[QBUFSZ];
 	boolean helpless = FALSE;
-//	pline("starting mlc seduce");
+
 	if (mon->mcan || mon->mspec_used) {
 		pline("%s is uninterested in you.", Monnam(mon));
 		return 0;
@@ -827,7 +782,7 @@ register struct monst *mon;
 		You("seem to have enjoyed it more than %s...",
 			noit_mon_nam(mon));
 
-		if(!ufem && (ACURR(A_CHA) < rn2(35))) {
+		if((poly_gender()==0) && (ACURR(A_CHA) < rn2(35))) {
 			/* jealousy may rob you of a good effect */
 			if(rn2(2) || uarmh || HAcid_resistance){
 				pline("He viciously bites you!");
@@ -1627,7 +1582,7 @@ struct monst * mon;
 
 		default:
 			pline("%s murmurs sweet nothings into your ear.",
-				Blind ? SheHeIt(mon) : Monnam(mon));
+				Blind ? (mon->female ? "She" : "He") : Monnam(mon));
 			break;
 		}
 	}
@@ -1642,20 +1597,20 @@ struct monst * mon;
 		case PM_SHAMI_AMOURAE:
 			undressfunc = &dosflseduce;
 			pline("%s growls into your ear, while tearing at your clothing.",
-				Blind ? SheHeIt(mon) : Monnam(mon));
+				Blind ? (mon->female ? "She" : "He") : Monnam(mon));
 			break;
 			*/
 		case PM_MALCANTHET:
 		case PM_GRAZ_ZT:
 			undressfunc = &mlcmayberem;
 			pline("%s starts undressing you.",
-				Blind ? SheHeIt(mon) : Monnam(mon));
+				Blind ? (mon->female ? "She" : "He") : Monnam(mon));
 			break;
 
 		case PM_PALE_NIGHT:
 			undressfunc = &palemayberem;
 			You("move to embrace %s, brushing aside the gossamer shroud hiding %s body from you.",
-				noit_Monnam(mon), hisherits(mon));
+				noit_Monnam(mon), (poly_gender() ? "his" : "her"));	/* Pale Night's apparent gender is based on yours */
 			break;
 
 		case PM_AVATAR_OF_LOLTH:
@@ -1667,7 +1622,7 @@ struct monst * mon;
 			if (!undressfunc)
 				undressfunc = &mayberem;
 			pline("%s murmurs in your ear, while helping you undress.",
-				Blind ? SheHeIt(mon) : Monnam(mon));
+				Blind ? (mon->female ? "She" : "He") : Monnam(mon));
 			break;
 		}
 		/* undress player */
@@ -1770,8 +1725,8 @@ struct monst * mon;
 			}
 			else {
 				pline("%s decides %s'd like your %s, and takes it.",
-					Blind ? SheHeIt(mon) : Monnam(mon),
-					sheheit(mon),
+					Blind ? (mon->female ? "She" : "He") : Monnam(mon),
+					(mon->female ? "she" : "he"),
 					xname(ring));
 			}
 			makeknown(RIN_ADORNMENT);
@@ -1798,31 +1753,31 @@ struct monst * mon;
 			}
 			else {
 				pline("%s decides you'd look prettier wearing your %s,",
-					Blind ? SheHeIt(mon) : Monnam(mon), xname(ring));
+					Blind ? (mon->female ? "She" : "He") : Monnam(mon), xname(ring));
 				pline("and puts it on your finger.");
 			}
 			makeknown(RIN_ADORNMENT);
 			if (!uright && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
 				pline("%s puts %s on your right %s.",
-					Blind ? SheHeIt(mon) : Monnam(mon), the(xname(ring)), body_part(HAND));
+					Blind ? (mon->female ? "She" : "He") : Monnam(mon), the(xname(ring)), body_part(HAND));
 				setworn(ring, RIGHT_RING);
 			}
 			else if (!uleft) {
 				pline("%s puts %s on your left %s.",
-					Blind ? SheHeIt(mon) : Monnam(mon), the(xname(ring)), body_part(HAND));
+					Blind ? (mon->female ? "She" : "He") : Monnam(mon), the(xname(ring)), body_part(HAND));
 				setworn(ring, LEFT_RING);
 			}
 			else if (uright && uright->otyp != RIN_ADORNMENT && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
 				Strcpy(buf, xname(uright));
 				pline("%s replaces your %s with your %s.",
-					Blind ? SheHeIt(mon) : Monnam(mon), buf, xname(ring));
+					Blind ? (mon->female ? "She" : "He") : Monnam(mon), buf, xname(ring));
 				Ring_gone(uright);
 				setworn(ring, RIGHT_RING);
 			}
 			else if (uleft && uleft->otyp != RIN_ADORNMENT) {
 				Strcpy(buf, xname(uleft));
 				pline("%s replaces your %s with your %s.",
-					Blind ? SheHeIt(mon) : Monnam(mon), buf, xname(ring));
+					Blind ? (mon->female ? "She" : "He") : Monnam(mon), buf, xname(ring));
 				Ring_gone(uleft);
 				setworn(ring, LEFT_RING);
 			}
@@ -1988,7 +1943,7 @@ int effect_num;
 			}
 			break;
 		case SEDU_POISONBITE:
-			pline("%s injects you with %s poison!", SheHeIt(mon), hisherits(mon));
+			pline("%s injects you with %s poison!", (mon->female ? "She" : "He"), (mon->female ? "her" : "his"));
 			if (Poison_resistance) pline_The("poison doesn't seem to affect you.");
 			else {
 				(void)adjattrib(A_CON, -4, TRUE);
