@@ -3,11 +3,12 @@
 #include "seduce.h"
 
 # ifdef SEDUCE
-STATIC_DCL void FDECL(mayberem, (struct obj *, const char *));
-STATIC_DCL void FDECL(lrdmayberem, (struct obj *, const char *));
+STATIC_DCL void FDECL(mayberem, (struct obj *, const char *, BOOLEAN_P));
+STATIC_DCL void FDECL(lrdmayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(mlcmayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(sflmayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(palemayberem, (struct obj *, const char *, BOOLEAN_P));
+STATIC_DCL void FDECL(sedu_undress, (struct monst *));
 STATIC_DCL void FDECL(sedu_adornment_ring, (struct monst *));
 STATIC_DCL void FDECL(seduce_effect, (struct monst *, int));
 # endif
@@ -123,28 +124,7 @@ register struct monst *mon;
 
 		sedu_adornment_ring(mon);
 
-		if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
-	#ifdef TOURIST
-									&& !uarmu
-	#endif
-										)
-			pline("%s murmurs sweet nothings into your ear.",
-				Blind ? (fem ? "She" : "He") : Monnam(mon));
-		else
-			pline("%s murmurs in your ear, while helping you undress.",
-				Blind ? (fem ? "She" : "He") : Monnam(mon));
-		mayberem(uarmc, cloak_simple_name(uarmc));
-		if(!uarmc)
-			mayberem(uarm, "suit");
-		mayberem(uarmf, "boots");
-		if(!uwep || !welded(uwep))
-			mayberem(uarmg, "gloves");
-		mayberem(uarms, "shield");
-		mayberem(uarmh, "helmet");
-	#ifdef TOURIST
-		if(!uarmc && !uarm)
-			mayberem(uarmu, "shirt");
-	#endif
+		sedu_undress(mon);
 
 		if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
 			verbalize("You're such a %s; I wish...",
@@ -302,28 +282,7 @@ register struct monst *mon;
 
 		sedu_adornment_ring(mon);
 
-		if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
-	#ifdef TOURIST
-									&& !uarmu
-	#endif
-										)
-			pline("%s murmurs sweet nothings into your ear.",
-				Blind ? "She" : Monnam(mon));
-		else
-			pline("%s murmurs in your ear, while helping you undress.",
-				Blind ? "She" : Monnam(mon));
-		lrdmayberem(uarmc, cloak_simple_name(uarmc));
-		if(!uarmc)
-			lrdmayberem(uarm, "suit");
-		lrdmayberem(uarmf, "boots");
-		if(!uwep || !welded(uwep))
-			lrdmayberem(uarmg, "gloves");
-		lrdmayberem(uarms, "shield");
-		lrdmayberem(uarmh, "helmet");
-	#ifdef TOURIST
-		if(!uarmc && !uarm)
-			lrdmayberem(uarmu, "shirt");
-	#endif
+		sedu_undress(mon);
 
 		if (u.ualign.type == A_CHAOTIC)
 			adjalign(1);
@@ -438,26 +397,7 @@ struct monst *mon;
 
 	sedu_adornment_ring(mon);
 
-	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
-#ifdef TOURIST
-								&& !uarmu
-#endif
-									)
-		pline("She murmurs sweet nothings into your ear.");
-	else
-		pline("She murmurs in your ear, while helping you undress.");
-	lrdmayberem(uarmc, cloak_simple_name(uarmc));
-	if(!uarmc)
-		lrdmayberem(uarm, "suit");
-	lrdmayberem(uarmf, "boots");
-	if(!uwep || !welded(uwep))
-		lrdmayberem(uarmg, "gloves");
-	lrdmayberem(uarms, "shield");
-	lrdmayberem(uarmh, "helmet");
-#ifdef TOURIST
-	if(!uarmc && !uarm)
-		lrdmayberem(uarmu, "shirt");
-#endif
+	sedu_undress(mon);
 
 	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
 		verbalize("You're such a %s; I wish...",
@@ -577,26 +517,7 @@ struct monst *mon;
 
 	sedu_adornment_ring(mon);
 
-	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
-#ifdef TOURIST
-								&& !uarmu
-#endif
-									)
-		pline("He murmurs sweet nothings into your ear.");
-	else
-		pline("He murmurs in your ear, while helping you undress.");
-	lrdmayberem(uarmc, cloak_simple_name(uarmc));
-	if(!uarmc)
-		lrdmayberem(uarm, "suit");
-	lrdmayberem(uarmf, "boots");
-	if(!uwep || !welded(uwep))
-		lrdmayberem(uarmg, "gloves");
-	lrdmayberem(uarms, "shield");
-	lrdmayberem(uarmh, "helmet");
-#ifdef TOURIST
-	if(!uarmc && !uarm)
-		lrdmayberem(uarmu, "shirt");
-#endif
+	sedu_undress(mon);
 
 	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
 		verbalize("You're such a %s; I wish...",
@@ -717,28 +638,7 @@ register struct monst *mon;
 
 	sedu_adornment_ring(mon);
 
-	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
-#ifdef TOURIST
-								&& !uarmu
-#endif
-									)
-		pline("%s caresses your body.",
-			Blind ? "She" : Monnam(mon));
-	else
-		pline("%s starts undressing you.",
-			Blind ? "She" : Monnam(mon));
-	mlcmayberem(uarmc, cloak_simple_name(uarmc), helpless);
-	if(!uarmc)
-		mlcmayberem(uarm, "suit", helpless);
-	mlcmayberem(uarmf, "boots", helpless);
-	if(!uwep || !welded(uwep))
-		mlcmayberem(uarmg, "gloves", helpless);
-	mlcmayberem(uarms, "shield", helpless);
-	mlcmayberem(uarmh, "helmet", helpless);
-#ifdef TOURIST
-	if(!uarmc && !uarm)
-		mlcmayberem(uarmu, "shirt", helpless);
-#endif
+	sedu_undress(mon);
 
 	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
 		verbalize("How dare you refuse me!");
@@ -871,28 +771,7 @@ register struct monst *mon;
 
 	sedu_adornment_ring(mon);
 
-	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
-#ifdef TOURIST
-								&& !uarmu
-#endif
-									)
-		pline("%s caresses your body.",
-			Blind ? "He" : Monnam(mon));
-	else
-		pline("%s starts undressing you.",
-			Blind ? "He" : Monnam(mon));
-	mlcmayberem(uarmc, cloak_simple_name(uarmc), helpless);
-	if(!uarmc)
-		mlcmayberem(uarm, "suit", helpless);
-/*	mlcmayberem(uarmf, "boots", helpless); */
-	if(!uwep || !welded(uwep))
-		mlcmayberem(uarmg, "gloves", helpless);
-	mlcmayberem(uarms, "shield", helpless);
-/*	mlcmayberem(uarmh, "helmet", helpless); */
-#ifdef TOURIST
-	if(!uarmc && !uarm)
-		mlcmayberem(uarmu, "shirt", helpless);
-#endif
+	sedu_undress(mon);
 
 	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
 		verbalize("How dare you refuse me!");
@@ -998,29 +877,7 @@ register struct monst *mon;
 	if (Blind) You_feel("Something grab you...");
 	else pline("%s grabs you.", mon_nam(mon));
 
-
-	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
-#ifdef TOURIST
-								&& !uarmu
-#endif
-									)
-		pline("%s stares at you.",
-			Blind ? (fem ? "She" : "He") : Monnam(mon));
-	else
-		pline("%s growels into your ear, while tearing at your clothing.",
-			Blind ? (fem ? "She" : "He") : Monnam(mon));
-	sflmayberem(uarmc, cloak_simple_name(uarmc), helpless);
-	if(!uarmc)
-		sflmayberem(uarm, "suit", helpless);
-	sflmayberem(uarmf, "boots", helpless);
-	if(!uwep || !welded(uwep))
-		sflmayberem(uarmg, "gloves", helpless);
-	sflmayberem(uarms, "shield", helpless);
-	sflmayberem(uarmh, "helmet", helpless);
-#ifdef TOURIST
-	if(!uarmc && !uarm)
-		sflmayberem(uarmu, "shirt", helpless);
-#endif
+	sedu_undress(mon);
 
 	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
 		verbalize("You can't resist forever!");
@@ -1095,19 +952,9 @@ register struct monst *mon;
 	if (rn2(66) > 2*ACURR(A_WIS) - ACURR(A_INT) || helpless) {
 		int lifesaved = 0;
 		int wdmg = (int)(d(1,10)) + 1;
-		You("move to embrace %s, brushing aside the gossamer shroud hiding %s body from you.",
-			noit_Monnam(mon), fem ? "her" : "his");
-		palemayberem(uarmc, cloak_simple_name(uarmc), helpless);
-		if(!uarmc)
-			palemayberem(uarm, "suit", helpless);
-		palemayberem(uarmf, "boots", helpless);
-		palemayberem(uarmg, "gloves", helpless);
-		palemayberem(uarms, "shield", helpless);
-		palemayberem(uarmh, "helmet", helpless);
-	#ifdef TOURIST
-		if(!uarmc && !uarm)
-			palemayberem(uarmu, "shirt", helpless);
-	#endif
+		
+		sedu_undress(mon);
+
 		if(rn2( (int)(ACURR(A_WIS)/2))){
 			boolean loopingDeath = TRUE;
 			while(loopingDeath) {
@@ -1586,9 +1433,10 @@ int dmg;
 }
 
 STATIC_OVL void
-mayberem(obj, str)
+mayberem(obj, str, helpless)
 register struct obj *obj;
 const char *str;
+boolean helpless;
 {
 	char qbuf[QBUFSZ];
 
@@ -1618,9 +1466,10 @@ const char *str;
 	remove_worn_item(obj, TRUE);
 }
 STATIC_OVL void
-lrdmayberem(obj, str)
+lrdmayberem(obj, str, helpless)
 register struct obj *obj;
 const char *str;
+boolean helpless;
 {
 	char qbuf[QBUFSZ];
 
@@ -1689,9 +1538,9 @@ boolean helpless;
 
 STATIC_OVL void
 sflmayberem(obj, str, helpless)
-boolean helpless;
 register struct obj *obj;
 const char *str;
+boolean helpless;
 {
 	char qbuf[QBUFSZ];
 	int her_strength;
@@ -1743,6 +1592,107 @@ boolean helpless;
 			destroy_arm(obj);
 		}
 	}
+}
+
+void
+sedu_undress(mon)
+struct monst * mon;
+{
+	/* check no-clothes case */
+	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
+#ifdef TOURIST
+		&& !uarmu
+#endif
+		) {
+		/* message */
+		switch (mon->mtyp)
+		{
+			/*
+		case PM_SHAMI_AMOURAE:
+			if (canseemon(mon))
+			pline("%s stares at you.",
+				Monnam(mon));
+			break;
+			*/
+		case PM_MALCANTHET:
+		case PM_GRAZ_ZT:
+			if (!Blind)	/* if Blind, we already got "It caresses you..." */
+				pline("%s caresses your body.", Monnam(mon));
+			break;
+
+		case PM_PALE_NIGHT:
+			You("move to embrace %s, brushing aside the gossamer shroud hiding %s body from you.",
+				noit_Monnam(mon), hisherits(mon));
+			break;
+
+		default:
+			pline("%s murmurs sweet nothings into your ear.",
+				Blind ? SheHeIt(mon) : Monnam(mon));
+			break;
+		}
+	}
+	else {
+		void(*undressfunc)(struct obj *, const char *, boolean) = 0;
+		boolean helpless = unconscious();
+
+		/* message and select correct function */
+		switch (mon->mtyp)
+		{
+			/*
+		case PM_SHAMI_AMOURAE:
+			undressfunc = &dosflseduce;
+			pline("%s growls into your ear, while tearing at your clothing.",
+				Blind ? SheHeIt(mon) : Monnam(mon));
+			break;
+			*/
+		case PM_MALCANTHET:
+		case PM_GRAZ_ZT:
+			undressfunc = &mlcmayberem;
+			pline("%s starts undressing you.",
+				Blind ? SheHeIt(mon) : Monnam(mon));
+			break;
+
+		case PM_PALE_NIGHT:
+			undressfunc = &palemayberem;
+			You("move to embrace %s, brushing aside the gossamer shroud hiding %s body from you.",
+				noit_Monnam(mon), hisherits(mon));
+			break;
+
+		case PM_AVATAR_OF_LOLTH:
+		case PM_MOTHER_LILITH:
+		case PM_BELIAL:
+			undressfunc = &lrdmayberem;
+			/* fall through to default message */
+		default:
+			if (!undressfunc)
+				undressfunc = &mayberem;
+			pline("%s murmurs in your ear, while helping you undress.",
+				Blind ? SheHeIt(mon) : Monnam(mon));
+			break;
+		}
+		/* undress player */
+		undressfunc(uarmc, cloak_simple_name(uarmc), helpless);
+
+		if (!uarmc)
+			undressfunc(uarm, "suit", helpless);
+
+		if (mon->mtyp != PM_GRAZ_ZT) /* his seduces can replace your boots */
+			undressfunc(uarmf, "boots", helpless);
+
+		if (!uwep || !welded(uwep))
+			undressfunc(uarmg, "gloves", helpless);
+
+		undressfunc(uarms, "shield", helpless);
+
+		if (mon->mtyp != PM_GRAZ_ZT) /* his seduces can replace your hat */
+			undressfunc(uarmh, "helmet", helpless);
+#ifdef TOURIST
+		if (!uarmc && !uarm)
+			undressfunc(uarmu, "shirt", helpless);
+#endif
+	}
+
+	return;
 }
 
 void
