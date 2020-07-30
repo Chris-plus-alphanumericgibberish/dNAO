@@ -2609,6 +2609,11 @@ int dmg;				/* damage to deal */
 			monflee(mdef, 10 * rnd(dmg), FALSE, FALSE);
 		}
 
+		/* set uhurtm */
+		if (dmg > 0) {
+			mdef->uhurtm = TRUE;
+		}
+
 		if (*hp(mdef) < 1) {
 			/* killed a pet by accident */
 			if (mdef->mtame && !cansee(mdef->mx, mdef->my)) {
