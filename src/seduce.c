@@ -8,6 +8,7 @@ STATIC_DCL void FDECL(lrdmayberem, (struct obj *, const char *));
 STATIC_DCL void FDECL(mlcmayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(sflmayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(palemayberem, (struct obj *, const char *, BOOLEAN_P));
+STATIC_DCL void FDECL(sedu_adornment_ring, (struct monst *));
 STATIC_DCL void FDECL(seduce_effect, (struct monst *, int));
 # endif
 
@@ -120,70 +121,7 @@ register struct monst *mon;
 		if (Blind) pline("It caresses you...");
 		else You_feel("very attracted to %s.", mon_nam(mon));
 
-		for(ring = invent; ring; ring = nring) {
-			nring = ring->nobj;
-			if (ring->otyp != RIN_ADORNMENT) continue;
-			if (fem) {
-			if (rn2(20) < ACURR(A_CHA)) {
-				Sprintf(qbuf, "\"That %s looks pretty.  May I have it?\"",
-				safe_qbuf("",sizeof("\"That  looks pretty.  May I have it?\""),
-				xname(ring), simple_typename(ring->otyp), "ring"));
-				makeknown(RIN_ADORNMENT);
-				if (yn(qbuf) == 'n') continue;
-			} else pline("%s decides she'd like your %s, and takes it.",
-				Blind ? "She" : Monnam(mon), xname(ring));
-			makeknown(RIN_ADORNMENT);
-			if (ring==uleft || ring==uright) Ring_gone(ring);
-			if (ring==uwep) setuwep((struct obj *)0);
-			if (ring==uswapwep) setuswapwep((struct obj *)0);
-			if (ring==uquiver) setuqwep((struct obj *)0);
-			freeinv(ring);
-			(void) mpickobj(mon,ring);
-			} else {
-			char buf[BUFSZ];
-
-			if (uleft && uright && uleft->otyp == RIN_ADORNMENT
-					&& (uright->otyp==RIN_ADORNMENT || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)))
-				break;
-			if (ring==uleft || ring==uright) continue;
-			if (rn2(20) < ACURR(A_CHA)) {
-				Sprintf(qbuf,"\"That %s looks pretty.  Would you wear it for me?\"",
-				safe_qbuf("",
-					sizeof("\"That  looks pretty.  Would you wear it for me?\""),
-					xname(ring), simple_typename(ring->otyp), "ring"));
-				makeknown(RIN_ADORNMENT);
-				if (yn(qbuf) == 'n') continue;
-			} else {
-				pline("%s decides you'd look prettier wearing your %s,",
-				Blind ? "He" : Monnam(mon), xname(ring));
-				pline("and puts it on your finger.");
-			}
-			makeknown(RIN_ADORNMENT);
-			if (!uright && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-				pline("%s puts %s on your right %s.",
-				Blind ? "He" : Monnam(mon), the(xname(ring)), body_part(HAND));
-				setworn(ring, RIGHT_RING);
-			} else if (!uleft) {
-				pline("%s puts %s on your left %s.",
-				Blind ? "He" : Monnam(mon), the(xname(ring)), body_part(HAND));
-				setworn(ring, LEFT_RING);
-			} else if (uright && uright->otyp != RIN_ADORNMENT && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-				Strcpy(buf, xname(uright));
-				pline("%s replaces your %s with your %s.",
-				Blind ? "He" : Monnam(mon), buf, xname(ring));
-				Ring_gone(uright);
-				setworn(ring, RIGHT_RING);
-			} else if (uleft && uleft->otyp != RIN_ADORNMENT) {
-				Strcpy(buf, xname(uleft));
-				pline("%s replaces your %s with your %s.",
-				Blind ? "He" : Monnam(mon), buf, xname(ring));
-				Ring_gone(uleft);
-				setworn(ring, LEFT_RING);
-			} else impossible("ring replacement");
-			Ring_on(ring);
-			prinv((char *)0, ring, 0L);
-			}
-		}
+		sedu_adornment_ring(mon);
 
 		if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
 	#ifdef TOURIST
@@ -362,54 +300,7 @@ register struct monst *mon;
 		if (Blind) pline("It caresses you...");
 		else You_feel("very attracted to %s.", mon_nam(mon));
 
-		for(ring = invent; ring; ring = nring) {
-			nring = ring->nobj;
-			if (ring->otyp != RIN_ADORNMENT) continue;
-			{
-				char buf[BUFSZ];
-
-				if (uleft && uright && uleft->otyp == RIN_ADORNMENT
-						&& (uright->otyp==RIN_ADORNMENT || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)))
-					break;
-				if (ring==uleft || ring==uright) continue;
-				if (!helpless && rn2(40) < ACURR(A_CHA)) {
-					Sprintf(qbuf,"\"That %s looks pretty.  Would you wear it for me?\"",
-					safe_qbuf("",
-						sizeof("\"That  looks pretty.  Would you wear it for me?\""),
-						xname(ring), simple_typename(ring->otyp), "ring"));
-					makeknown(RIN_ADORNMENT);
-					if (yn(qbuf) == 'n') continue;
-				} else {
-					pline("%s decides you'd look prettier wearing your %s,",
-					Blind ? "She" : Monnam(mon), xname(ring));
-					pline("and puts it on your finger.");
-				}
-				makeknown(RIN_ADORNMENT);
-				if (!uright && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-					pline("%s puts %s on your right %s.",
-					Blind ? "She" : Monnam(mon), the(xname(ring)), body_part(HAND));
-					setworn(ring, RIGHT_RING);
-				} else if (!uleft) {
-					pline("%s puts %s on your left %s.",
-					Blind ? "She" : Monnam(mon), the(xname(ring)), body_part(HAND));
-					setworn(ring, LEFT_RING);
-				} else if (uright && uright->otyp != RIN_ADORNMENT && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-					Strcpy(buf, xname(uright));
-					pline("%s replaces your %s with your %s.",
-					Blind ? "She" : Monnam(mon), buf, xname(ring));
-					Ring_gone(uright);
-					setworn(ring, RIGHT_RING);
-				} else if (uleft && uleft->otyp != RIN_ADORNMENT) {
-					Strcpy(buf, xname(uleft));
-					pline("%s replaces your %s with your %s.",
-					Blind ? "She" : Monnam(mon), buf, xname(ring));
-					Ring_gone(uleft);
-					setworn(ring, LEFT_RING);
-				} else impossible("ring replacement");
-				Ring_on(ring);
-				prinv((char *)0, ring, 0L);
-			}
-		}
+		sedu_adornment_ring(mon);
 
 		if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
 	#ifdef TOURIST
@@ -545,20 +436,7 @@ struct monst *mon;
 	if (Blind) pline("It caresses you...");
 	else You_feel("very attracted to %s.", mon_nam(mon));
 
-	for(ring = invent; ring; ring = nring) {
-		nring = ring->nobj;
-		if (ring->otyp != RIN_ADORNMENT) continue;
-		pline("%s decides she'd like your %s, and takes it.",
-			Blind ? "She" : Monnam(mon), xname(ring));
-		makeknown(RIN_ADORNMENT);
-		if (ring==uleft || ring==uright) Ring_gone(ring);
-		if (ring==uwep) setuwep((struct obj *)0);
-		if (ring==uswapwep) setuswapwep((struct obj *)0);
-		if (ring==uquiver) setuqwep((struct obj *)0);
-		freeinv(ring);
-		(void) mpickobj(mon,ring);
-		
-	}
+	sedu_adornment_ring(mon);
 
 	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
 #ifdef TOURIST
@@ -697,20 +575,7 @@ struct monst *mon;
 	if (Blind) pline("It caresses you...");
 	else You_feel("very attracted to %s.", mon_nam(mon));
 
-	for(ring = invent; ring; ring = nring) {
-		nring = ring->nobj;
-		if (ring->otyp != RIN_ADORNMENT) continue;
-		pline("%s decides he'd like your %s, and takes it.",
-			Blind ? "He" : Monnam(mon), xname(ring));
-		makeknown(RIN_ADORNMENT);
-		if (ring==uleft || ring==uright) Ring_gone(ring);
-		if (ring==uwep) setuwep((struct obj *)0);
-		if (ring==uswapwep) setuswapwep((struct obj *)0);
-		if (ring==uquiver) setuqwep((struct obj *)0);
-		freeinv(ring);
-		(void) mpickobj(mon,ring);
-		
-	}
+	sedu_adornment_ring(mon);
 
 	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
 #ifdef TOURIST
@@ -850,62 +715,7 @@ register struct monst *mon;
 	if (Blind) pline("It caresses you...");
 	else You_feel("very attracted to %s.", mon_nam(mon));
 
-	for(ring = invent; ring; ring = nring) {
-		nring = ring->nobj;
-		if (ring->otyp != RIN_ADORNMENT) continue;
-		if (ufem) {
-		if (rn2(45) < ACURR(A_CHA)) {
-			Sprintf(qbuf, "\"That %s looks pretty.  Give it to me.\"",
-			safe_qbuf("",sizeof("\"That  looks pretty.  Give it to me.\""),
-			xname(ring), simple_typename(ring->otyp), "ring"));
-			makeknown(RIN_ADORNMENT);
-			if (yn(qbuf) == 'n') continue;
-		} else pline("%s decides she'd like your %s, and takes it.",
-			Blind ? "She" : Monnam(mon), xname(ring));
-		makeknown(RIN_ADORNMENT);
-		if (ring==uleft || ring==uright) Ring_gone(ring);
-		if (ring==uwep) setuwep((struct obj *)0);
-		if (ring==uswapwep) setuswapwep((struct obj *)0);
-		if (ring==uquiver) setuqwep((struct obj *)0);
-		freeinv(ring);
-		(void) mpickobj(mon,ring);
-		} else {
-		char buf[BUFSZ];
-		if (uleft && uright && uleft->otyp == RIN_ADORNMENT
-				&& (uright->otyp==RIN_ADORNMENT || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)))
-			break;
-		if (ring==uleft || ring==uright) continue;
-		
-		pline("%s decides you'd look more handsome wearing your %s,",
-		Blind ? "She" : Monnam(mon), xname(ring));
-		pline("and puts it on your finger.");
-		
-		makeknown(RIN_ADORNMENT);
-		if (!uright && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-			pline("%s puts %s on your right %s.",
-			Blind ? "She" : Monnam(mon), the(xname(ring)), body_part(HAND));
-			setworn(ring, RIGHT_RING);
-		} else if (!uleft) {
-			pline("%s puts %s on your left %s.",
-			Blind ? "She" : Monnam(mon), the(xname(ring)), body_part(HAND));
-			setworn(ring, LEFT_RING);
-		} else if (uright && uright->otyp != RIN_ADORNMENT && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-			Strcpy(buf, xname(uright));
-			pline("%s replaces your %s with your %s.",
-			Blind ? "She" : Monnam(mon), buf, xname(ring));
-			Ring_gone(uright);
-			setworn(ring, RIGHT_RING);
-		} else if (uleft && uleft->otyp != RIN_ADORNMENT) {
-			Strcpy(buf, xname(uleft));
-			pline("%s replaces your %s with your %s.",
-			Blind ? "She" : Monnam(mon), buf, xname(ring));
-			Ring_gone(uleft);
-			setworn(ring, LEFT_RING);
-		} else impossible("ring replacement");
-		Ring_on(ring);
-		prinv((char *)0, ring, 0L);
-		}
-	}
+	sedu_adornment_ring(mon);
 
 	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
 #ifdef TOURIST
@@ -1059,62 +869,7 @@ register struct monst *mon;
 	if (Blind) pline("It caresses you...");
 	else You_feel("very attracted to %s.", mon_nam(mon));
 
-	for(ring = invent; ring; ring = nring) {
-		nring = ring->nobj;
-		if (ring->otyp != RIN_ADORNMENT) continue;
-		if (!ufem) {
-		if (rn2(45) < ACURR(A_CHA)) {
-			Sprintf(qbuf, "\"That %s looks pretty.  Give it to me.\"",
-			safe_qbuf("",sizeof("\"That looks pretty.  Give it to me.\""),
-			xname(ring), simple_typename(ring->otyp), "ring"));
-			makeknown(RIN_ADORNMENT);
-			if (yn(qbuf) == 'n') continue;
-		} else pline("%s decides he'd like your %s, and takes it.",
-			Blind ? "He" : Monnam(mon), xname(ring));
-		makeknown(RIN_ADORNMENT);
-		if (ring==uleft || ring==uright) Ring_gone(ring);
-		if (ring==uwep) setuwep((struct obj *)0);
-		if (ring==uswapwep) setuswapwep((struct obj *)0);
-		if (ring==uquiver) setuqwep((struct obj *)0);
-		freeinv(ring);
-		(void) mpickobj(mon,ring);
-		} else {
-		char buf[BUFSZ];
-		if (uleft && uright && uleft->otyp == RIN_ADORNMENT
-				&& (uright->otyp==RIN_ADORNMENT || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)))
-			break;
-		if (ring==uleft || ring==uright) continue;
-		
-		pline("%s decides you'd look prettier wearing your %s,",
-		Blind ? "He" : Monnam(mon), xname(ring));
-		pline("and puts it on your finger.");
-		
-		makeknown(RIN_ADORNMENT);
-		if (!uright && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-			pline("%s puts %s on your right %s.",
-			Blind ? "He" : Monnam(mon), the(xname(ring)), body_part(HAND));
-			setworn(ring, RIGHT_RING);
-		} else if (!uleft) {
-			pline("%s puts %s on your left %s.",
-			Blind ? "He" : Monnam(mon), the(xname(ring)), body_part(HAND));
-			setworn(ring, LEFT_RING);
-		} else if (uright && uright->otyp != RIN_ADORNMENT && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
-			Strcpy(buf, xname(uright));
-			pline("%s replaces your %s with your %s.",
-			Blind ? "He" : Monnam(mon), buf, xname(ring));
-			Ring_gone(uright);
-			setworn(ring, RIGHT_RING);
-		} else if (uleft && uleft->otyp != RIN_ADORNMENT) {
-			Strcpy(buf, xname(uleft));
-			pline("%s replaces your %s with your %s.",
-			Blind ? "He" : Monnam(mon), buf, xname(ring));
-			Ring_gone(uleft);
-			setworn(ring, LEFT_RING);
-		} else impossible("ring replacement");
-		Ring_on(ring);
-		prinv((char *)0, ring, 0L);
-		}
-	}
+	sedu_adornment_ring(mon);
 
 	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
 #ifdef TOURIST
@@ -1989,6 +1744,146 @@ boolean helpless;
 		}
 	}
 }
+
+void
+sedu_adornment_ring(mon)
+struct monst * mon;
+{
+	struct obj * ring;
+	struct obj * nring;
+	char qbuf[BUFSZ];
+	char buf[BUFSZ];
+
+	boolean takesring;
+	boolean resist;
+	boolean found = FALSE;
+
+	switch (mon->mtyp)
+	{
+	case PM_AVATAR_OF_LOLTH:
+		takesring = FALSE;
+		resist = (!unconscious() && rn2(40) < ACURR(A_CHA));
+		break;
+	case PM_MOTHER_LILITH:
+		takesring = TRUE;
+		resist = FALSE;
+		break;
+	case PM_BELIAL:
+		takesring = TRUE;
+		resist = FALSE;
+		break;
+	case PM_MALCANTHET:
+		if (poly_gender() == 1) {
+			/* ufem */
+			takesring = TRUE;
+			resist = (rn2(45) < ACURR(A_CHA));
+		}
+		else {
+			takesring = FALSE;
+			resist = FALSE;
+		}
+		break;
+	case PM_GRAZ_ZT:
+		if (poly_gender() == 0) {
+			/* umal */
+			takesring = TRUE;
+			resist = (rn2(45) < ACURR(A_CHA));
+		}
+		else {
+			takesring = FALSE;
+			resist = FALSE;
+		}
+		break;
+	default:
+		takesring = !mon->female;
+		resist = (rn2(20) < ACURR(A_CHA));
+		break;
+	}
+
+	for (ring = invent; !found && ring; ring = nring) {
+		nring = ring->nobj;
+		if (ring->otyp != RIN_ADORNMENT) continue;
+
+		/* adornment ring found */
+
+		if (takesring) {
+			found = TRUE;
+			if (resist) {
+				Sprintf(buf, "\"That %%s looks pretty.  %s\"",
+					(mon->mtyp == PM_MALCANTHET || mon->mtyp == PM_GRAZ_ZT) ? "Give it to me." : "May I have it?");
+
+				Sprintf(qbuf, buf,
+					safe_qbuf("", strlen(buf),
+					xname(ring), simple_typename(ring->otyp), "ring"));
+				makeknown(RIN_ADORNMENT);
+				if (yn(qbuf) == 'n') continue;
+			}
+			else {
+				pline("%s decides %s'd like your %s, and takes it.",
+					Blind ? SheHeIt(mon) : Monnam(mon),
+					sheheit(mon),
+					xname(ring));
+			}
+			makeknown(RIN_ADORNMENT);
+			if (ring == uleft || ring == uright) Ring_gone(ring);
+			if (ring == uwep) setuwep((struct obj *)0);
+			if (ring == uswapwep) setuswapwep((struct obj *)0);
+			if (ring == uquiver) setuqwep((struct obj *)0);
+			freeinv(ring);
+			(void)mpickobj(mon, ring);
+		}
+		else {
+			if (uleft && uright && uleft->otyp == RIN_ADORNMENT
+				&& (uright->otyp == RIN_ADORNMENT || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)))
+				break;
+			if (ring == uleft || ring == uright) continue;
+			found = TRUE;
+			if (resist) {
+				Sprintf(qbuf, "\"That %s looks pretty.  Would you wear it for me?\"",
+					safe_qbuf("",
+					sizeof("\"That  looks pretty.  Would you wear it for me?\""),
+					xname(ring), simple_typename(ring->otyp), "ring"));
+				makeknown(RIN_ADORNMENT);
+				if (yn(qbuf) == 'n') continue;
+			}
+			else {
+				pline("%s decides you'd look prettier wearing your %s,",
+					Blind ? SheHeIt(mon) : Monnam(mon), xname(ring));
+				pline("and puts it on your finger.");
+			}
+			makeknown(RIN_ADORNMENT);
+			if (!uright && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
+				pline("%s puts %s on your right %s.",
+					Blind ? SheHeIt(mon) : Monnam(mon), the(xname(ring)), body_part(HAND));
+				setworn(ring, RIGHT_RING);
+			}
+			else if (!uleft) {
+				pline("%s puts %s on your left %s.",
+					Blind ? SheHeIt(mon) : Monnam(mon), the(xname(ring)), body_part(HAND));
+				setworn(ring, LEFT_RING);
+			}
+			else if (uright && uright->otyp != RIN_ADORNMENT && !(uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) {
+				Strcpy(buf, xname(uright));
+				pline("%s replaces your %s with your %s.",
+					Blind ? SheHeIt(mon) : Monnam(mon), buf, xname(ring));
+				Ring_gone(uright);
+				setworn(ring, RIGHT_RING);
+			}
+			else if (uleft && uleft->otyp != RIN_ADORNMENT) {
+				Strcpy(buf, xname(uleft));
+				pline("%s replaces your %s with your %s.",
+					Blind ? SheHeIt(mon) : Monnam(mon), buf, xname(ring));
+				Ring_gone(uleft);
+				setworn(ring, LEFT_RING);
+			}
+			else impossible("ring replacement");
+			Ring_on(ring);
+			prinv((char *)0, ring, 0L);
+		}
+	}
+	return;
+}
+
 
 void
 seduce_effect(mon, effect_num)
