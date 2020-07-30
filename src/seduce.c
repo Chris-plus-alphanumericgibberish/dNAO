@@ -1602,13 +1602,13 @@ struct monst * mon;
 			*/
 		case PM_MALCANTHET:
 		case PM_GRAZ_ZT:
-			undressfunc = &mlcmayberem;
+			undressfunc = (void*)&mlcmayberem;
 			pline("%s starts undressing you.",
 				Blind ? (mon->female ? "She" : "He") : Monnam(mon));
 			break;
 
 		case PM_PALE_NIGHT:
-			undressfunc = &palemayberem;
+			undressfunc = (void*)&palemayberem;
 			You("move to embrace %s, brushing aside the gossamer shroud hiding %s body from you.",
 				noit_Monnam(mon), (poly_gender() ? "his" : "her"));	/* Pale Night's apparent gender is based on yours */
 			break;
@@ -1616,11 +1616,11 @@ struct monst * mon;
 		case PM_AVATAR_OF_LOLTH:
 		case PM_MOTHER_LILITH:
 		case PM_BELIAL:
-			undressfunc = &lrdmayberem;
+			undressfunc = (void*)&lrdmayberem;
 			/* fall through to default message */
 		default:
 			if (!undressfunc)
-				undressfunc = &mayberem;
+				undressfunc = (void*)&mayberem;
 			pline("%s murmurs in your ear, while helping you undress.",
 				Blind ? (mon->female ? "She" : "He") : Monnam(mon));
 			break;
