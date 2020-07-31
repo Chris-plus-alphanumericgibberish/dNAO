@@ -3241,10 +3241,23 @@ int flat_acc;
 		}
 		/* skill bonus (player-only; applies without a weapon as well) */
 		if (youagr) {
+			int wtype;
+			/* get simple weapon skill associated with the weapon, not including twoweapon */
 			if (fired && launcher)
-				wepn_acc += weapon_hit_bonus(launcher);
+				wtype = weapon_type(launcher);
+			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
+				wtype = P_SCIMITAR;
+			else if (weapon && weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
+				wtype = P_PICK_AXE;
+			else if (weapon && weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
+				wtype = P_MACE;
+			else
+				wtype = weapon_type(weapon);
+
+			if (fired && launcher)
+				wepn_acc += weapon_hit_bonus(launcher, wtype);
 			else if (!misthrown)
-				wepn_acc += weapon_hit_bonus(weapon);
+				wepn_acc += weapon_hit_bonus(weapon, wtype);
 		}
 		/* monk accuracy bonus/penalty (player-only) (melee) */
 		if (youagr && melee && Role_if(PM_MONK) && !Upolyd) {
