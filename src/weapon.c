@@ -2945,10 +2945,8 @@ int wep_type;
 				(uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
 				))
 			{
-				/* flat penalty of -4 just for going a little over */
-				aumpenalty = 4;
-				/* additional penalty of -10 per <maxweight> aum over maxweight */
-				aumpenalty += min((10 * (uswapwep->owt - maxweight) / maxweight), 20);
+				/* penalty of -1 per aum over maxweight, min 5 max 40 */
+				aumpenalty = max(5, min((uswapwep->owt - maxweight), 40));
 				bonus -= aumpenalty;
 			}
 		}
@@ -3243,8 +3241,8 @@ int wep_type;
 					(uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
 				))
 			{
-				/* additional penalty of -5 per <maxweight> aum over maxweight */
-				bonus -= min((5 * (uswapwep->owt - maxweight) / maxweight), 20);
+				/* additional penalty of -0.5 per aum over maxweight, max 10 */
+				bonus -= min(uswapwep->owt - maxweight, 20)/2;
 			}
 		}
 	}
