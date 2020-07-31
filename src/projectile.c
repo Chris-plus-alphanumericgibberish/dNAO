@@ -182,10 +182,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	if (youagr && fired && (
 		thrownobj->oartifact == ART_SUNBEAM ||
 		thrownobj->oartifact == ART_MOONBEAM ||
-		(launcher && launcher->oartifact == ART_PARADOX && !thrownobj->oartifact)
+		(launcher && launcher->oartifact == ART_EPOCH_S_CURVE && !thrownobj->oartifact)
 		)) {
 		int delay = rnz(20);
-		if (launcher && launcher->oartifact == ART_PARADOX)	/* accelerates return of sunbeam/moonbeam */
+		if (launcher && launcher->oartifact == ART_EPOCH_S_CURVE)	/* accelerates return of sunbeam/moonbeam */
 			delay = min(delay, 5);
 
 		start_timer(delay, TIMER_OBJECT, RETURN_AMMO, (genericptr_t)thrownobj);

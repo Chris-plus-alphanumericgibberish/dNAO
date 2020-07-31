@@ -916,8 +916,8 @@ A("Plague",				BOW,							(const char *)0,
 
 /*Needs encyc entry*/
 /* all non-artifact arrows fired from it return to your inventory 5 turns later */
-A("Paradox",			BOW,							"scintillating %s",
-	4000L, METAL, MZ_DEFAULT, WT_DEFAULT,
+A("Epoch's Curve",			BOW,							"white ash longbow",
+	4000L, WOOD, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_PHYS, 5, 6), NOFLAG,
