@@ -2142,6 +2142,7 @@ E boolean FDECL(umetgaze, (struct monst *));
 E int NDECL(dothrow);
 E int NDECL(dofire);
 E int FDECL(mthrow, (struct monst *, struct obj *, struct obj *, int, int, boolean));
+E void FDECL(return_ammo, (genericptr_t, long));
 
 /* ### quest.c ### */
 
