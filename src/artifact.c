@@ -4554,7 +4554,7 @@ boolean * messaged;
 	if (arti_attack_prop(otmp, ARTA_CANCEL) && dieroll <= 2 && (youdef || !mdef->mcan)) {
 		if (!Blind && (youagr || canseemon(magr))) {
 			pline("%s flashes %s as it hits %s!",
-				xname(otmp),
+				The(xname(otmp)),
 				hcolor(NH_WHITE),
 				mon_nam(mdef)
 				);
