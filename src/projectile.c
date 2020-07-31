@@ -179,7 +179,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	}
 
 	/* some thrownobj should just reappear in your bag a while later */
-	if (fired && (
+	if (youagr && fired && (
 		thrownobj->oartifact == ART_SUNBEAM ||
 		thrownobj->oartifact == ART_MOONBEAM)) {
 		start_timer(rnz(20), TIMER_OBJECT, RETURN_AMMO, (genericptr_t)thrownobj);
