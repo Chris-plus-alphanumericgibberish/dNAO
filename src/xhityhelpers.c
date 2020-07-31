@@ -1776,11 +1776,12 @@ int dmgtyp;
 					if (xresist)	You("aren't hurt!");
 					else {
 						const char *how = destroy_strings[dindx * 3 + 2];
-						boolean one = (cnt == 1L);
+						boolean one = (cnt == 1L || osym == WAND_CLASS);
 
 						dmg = d(cnt, dmg);
-						losehp(dmg, (one && osym != WAND_CLASS) ? how : (const char *)makeplural(how),
-							one ? KILLED_BY_AN : KILLED_BY);
+						losehp(dmg,
+							(one ? how : (const char *)makeplural(how)),
+							(one ? KILLED_BY_AN : KILLED_BY));
 						exercise(A_STR, FALSE);
 						/* Let's not worry about properly returning if that killed you. If it did, it's moot. I think. */
 						/* at the very least, the return value from this function is being ignored often enough it doesn't matter */
