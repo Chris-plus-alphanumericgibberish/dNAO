@@ -538,42 +538,36 @@ test_twoweapon()
 {
 	struct obj *otmp;
 
-	if (!could_twoweap(youmonst.data) && 
-		!(!Upolyd && Role_if(PM_ANACHRONONAUT)) && 
-		!(!Upolyd && Role_if(PM_NOBLEMAN) && Race_if(PM_DWARF)) && 
-		!(u.specialSealsActive&SEAL_MISKA) && 
-		!(u.specialSealsActive&SEAL_BLACK_WEB && !uswapwep) &&
-		!(uwep && uwep->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE) && !uswapwep) && 
-		!(!Upolyd && uwep && uswapwep && 
-			(artilist[uwep->oartifact].inv_prop == BLADESONG && artilist[uswapwep->oartifact].inv_prop == BLADESONG)
-		 ) && 
-		!(!Upolyd && uwep && uswapwep && 
-			((uwep->oartifact == ART_PROFANED_GREATSCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE) ||
-			 (uwep->oartifact == ART_LIFEHUNT_SCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE))
-		 )
-	) {
-		if (Upolyd)
-		    You_cant("use two weapons in your current form.");
-		else
-		    pline("%s aren't able to use two weapons at once.",
-			  makeplural((flags.female && urole.name.f) ?
-				     urole.name.f : urole.name.m));
-	} else if ((!uwep || !uswapwep) && !u.umartial &&
-				!(u.specialSealsActive&SEAL_BLACK_WEB && !uswapwep) && 
-				!(uwep && uwep->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE) && !uswapwep)
-		)	
+	/* all non-polyd players can twoweapon, albeit possibly very badly */
+	if (Upolyd && !could_twoweap(youracedata)) {
+		You_cant("use two weapons in your current form.");
+	}
+	/* you need to have weapons for both hands (in most cases) */
+	else if ((!uwep || !uswapwep) && !(
+		/* exceptions: */
+			/* martial arts training let you use unarmed with either hand, and to supplement weapons */
+			(u.umartial) ||
+			/* having the black web bound lets you use your shadowblades with either hand, and to supplement weapons */
+			(u.specialSealsActive&SEAL_BLACK_WEB) ||
+			/* wielding a bestial claw lets you replace offhand unarmed with an AT_CLAW attack */
+			(uwep && uwep->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE))
+		)){
 		Your("%s%s%s empty.", uwep ? "off " : uswapwep ? "main " : "",
 			body_part(HAND), (!uwep && !uswapwep) ? "s are" : " is");
+	}
+	/* Objects must not be non-weapons */
 	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep)) && !(uwep && (uwep->otyp == STILETTOS))) {
 		otmp = NOT_WEAPON(uwep) ? uwep : uswapwep;
 		pline("%s %s.", Yname2(otmp),
 		    is_plural(otmp) ? "aren't weapons" : "isn't a weapon");
-	} else if ((
+	}
+	/* not twohanded */
+	else if ((
+		/* twohanded (can be paired with punches) */
 		(uwep && bimanual(uwep,youracedata) && !(u.umartial && !uswapwep)) || 
-		(uswapwep && bimanual(uswapwep,youracedata) && !(u.umartial && !uwep)) || 
-		(uwep && is_launcher(uwep) && !is_firearm(uwep)) || 
-		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep))
-		) && 
+		(uswapwep && bimanual(uswapwep,youracedata) && !(u.umartial && !uwep))
+		) &&
+		/* Exception: Friede's Scythe can be offhanded with the (twohanded) Profaned Greatscythe or Lifehunt Scythe. */
 		!(uwep && uswapwep &&
 		  ((uwep->oartifact == ART_PROFANED_GREATSCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE) ||
 		  (uwep->oartifact == ART_LIFEHUNT_SCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)))
@@ -581,10 +575,21 @@ test_twoweapon()
 		otmp = bimanual(uwep,youracedata) ? uwep : uswapwep;
 		if(otmp) pline("%s isn't one-handed.", Yname2(otmp));
 		else You_cant("fight two-handed while wielding this.");
-	} else if (uarms)
+	}
+	/* not a launcher (guns and blasters are ok) */
+	else if (
+		(uwep && is_launcher(uwep) && !is_firearm(uwep)) ||
+		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep)))
+	{
+		You_cant("fight two-handed with this.");
+	}
+	/* cannot be wearing a shield */
+	else if (uarms)
 		You_cant("use two weapons while wearing a shield.");
+	/* cannot fit armblaster over metal gloves */
 	else if (uswapwep && uswapwep->otyp == ARM_BLASTER && uarmg && is_metal(uarmg))
 		You("cannot fit the bracer over such bulky, rigid gloves.");
+	/* some artifacts resist being offhanded */
 	else if (uswapwep && uswapwep->oartifact && !is_twoweapable_artifact(uswapwep))
 		pline("%s %s being held second to another weapon!",
 			Yname2(uswapwep), otense(uswapwep, "resist"));
