@@ -169,19 +169,34 @@ do_light_sources(cs_rows)
 		ls->flags |= LSF_SHOW;
 	}
 
-	/* minor optimization: don't bother with duplicate light sources */
-	/* at hero */
-	/* commented out because it causes weirdness when the player has both a lightsource and a darksource
-	if (ls->x == u.ux && ls->y == u.uy) {
-	    if (at_hero_range >= ls->range)
-		ls->flags &= ~LSF_SHOW;
-	    else
-		at_hero_range = ls->range;
+	/* occluded lightsources should not be shown */
+	/* note: contained objects are not found by get_obj_location()
+	 * without a specific flag set, so they don't need extra handling */
+	if (ls->flags & LSF_SHOW) {
+		if (ls->type == LS_OBJECT && (
+			(
+			/* lightsource is in the stomach of an engulfer */
+			mcarried((struct obj *)ls->id) &&
+			attacktype(((struct obj *)ls->id)->ocarry->data, AT_ENGL))
+			||
+			(
+			/* lightsource carried by player, who is engulfed */
+			carried((struct obj *)ls->id) &&
+			u.uswallow)
+			)){
+			ls->flags &= ~LSF_SHOW;
+		}
+		else if (ls->type == LS_MONSTER && (
+			(
+			/* lightsource is the player; player is engulfed */
+			u.uswallow &&
+			(((struct monst *)ls->id) == &youmonst))
+			)){
+			ls->flags &= ~LSF_SHOW;
+		}
 	}
-	*/
-        /* Candle ranges need to be recomputed to allow altar
-           effects */
 
+	/* Candle ranges need to be recomputed to allow altar effects */
 	if (ls->type == LS_OBJECT) {
 		struct obj *otmp = (struct obj *) ls->id;
 		if (Is_candle(otmp)) {
@@ -722,8 +737,8 @@ struct obj *obj;
 		obj_eternal_light(obj)						/* object should always be shedding light (except when occluded) */
 		));
 }
+
 /* Return TRUE if object's light should in theory never go out */
-/* it is still temporarily extinguished when in a monster's stomach or in a container, but should auto-ignite */
 boolean
 obj_eternal_light(obj)
 struct obj * obj;
@@ -731,7 +746,8 @@ struct obj * obj;
 	return (
 		arti_light(obj) ||							/* artifact lightsource */
 		obj->otyp == POT_STARLIGHT ||				/* always lit potion */
-		obj->otyp == CHUNK_OF_FOSSIL_DARK			/* always dark rock */
+		obj->otyp == CHUNK_OF_FOSSIL_DARK ||		/* always dark rock */
+		(obj->otyp == SUNROD && obj->lamplit)		/* chemical reaction cannot be snuffed */
 		);
 }
 
@@ -743,7 +759,6 @@ obj_is_burning(obj)
 {
     return (obj->lamplit &&
 		 (	ignitable(obj)					/* lightsource uses a flame */
-		 || obj->otyp == SUNROD				/* chemical reaction */
 		 || obj->otyp == LANTERN			/* electric */
 		 || obj->otyp == DWARVISH_HELM		/* electric */
 		 || (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)	/* future-electric */
