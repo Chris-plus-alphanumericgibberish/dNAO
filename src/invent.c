@@ -3911,11 +3911,15 @@ display_inventory(lets, want_reply)
 register const char *lets;
 boolean want_reply;
 {
-	return display_pickinv(lets, want_reply, (long *)0
+	char retval;
+	flags.disp_inv = TRUE;
+	retval = display_pickinv(lets, want_reply, (long *)0
 #ifdef DUMP_LOG
 			       , FALSE , TRUE
 #endif
 	);
+	flags.disp_inv = FALSE;
+	return retval;
 }
 
 #ifdef DUMP_LOG

@@ -246,10 +246,18 @@ static char *
 nextobuf()
 {
 	static char NEARDATA bufs[NUMOBUF][BUFSZ];
+	static char NEARDATA ibufs[NUMOBUF][BUFSZ];
 	static int bufidx = 0;
+	static int ibufidx = 0;
 
-	bufidx = (bufidx + 1) % NUMOBUF;
-	return bufs[bufidx];
+	if (flags.disp_inv) {
+		ibufidx = (ibufidx + 1) % NUMOBUF;
+		return ibufs[ibufidx];
+	}
+	else {
+		bufidx = (bufidx + 1) % NUMOBUF;
+		return bufs[bufidx];
+	}
 }
 
 const char *
