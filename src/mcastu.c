@@ -4450,7 +4450,7 @@ int tary;
 						Monnam(mdef));
 				}
 			}
-			else if (objects[smarm->otyp].oc_oprop != DISINT_RES){
+			else if (!oresist_disintegration(smarm)){
 				if (smarm->spe <= -1 * a_acdr(objects[smarm->otyp])) {
 					youdef ? destroy_arm(smarm) : destroy_marm(mdef, smarm);
 				}

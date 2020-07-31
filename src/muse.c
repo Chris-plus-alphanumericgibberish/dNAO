@@ -2589,11 +2589,7 @@ const char *str;
 	struct obj *orefl = which_armor(mon, W_ARMS);
 	int sheen_turn = mad_turn(MAD_ARGENT_SHEEN);
 
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "shield");
 		makeknown(orefl->otyp);
@@ -2601,102 +2597,63 @@ const char *str;
 	    return TRUE;
 	}
 	orefl = MON_WEP(mon);
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    /* due to wielded artifact weapon */
 	    if (str)
 		pline(str, s_suffix(mon_nam(mon)), "weapon");
 	    return TRUE;
 	}
 	orefl = which_armor(mon, W_AMUL);
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "amulet");
-		makeknown(AMULET_OF_REFLECTION);
+		if (orefl->otyp == AMULET_OF_REFLECTION)
+			makeknown(AMULET_OF_REFLECTION);
 	    }
 	    return TRUE;
 	}
 	orefl = which_armor(mon, W_ARMC);
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str)
 		pline(str, s_suffix(mon_nam(mon)), "cloak");
 	    return TRUE;
 	}
 	orefl = which_armor(mon, W_ARM);
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str)
 		pline(str, s_suffix(mon_nam(mon)), "armor");
 	    return TRUE;
 	}
 	orefl = which_armor(mon, W_ARMH);
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "helm");
-		makeknown(AMULET_OF_REFLECTION);
 	    }
 	    return TRUE;
 	}
 	orefl = which_armor(mon, W_ARMG);
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "gauntlets");
-		makeknown(AMULET_OF_REFLECTION);
 	    }
 	    return TRUE;
 	}
 	orefl = which_armor(mon, W_ARMF);
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "shoes");
-		makeknown(AMULET_OF_REFLECTION);
 	    }
 	    return TRUE;
 	}
 	orefl = which_armor(mon, W_ARMU);
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "underclothes");
-		makeknown(AMULET_OF_REFLECTION);
 	    }
 	    return TRUE;
 	}
 	orefl = which_armor(mon, W_SADDLE);
-	if ((orefl) && (
-		objects[orefl->otyp].oc_oprop == REFLECTING
-		|| check_oprop(orefl, OPROP_REFL)
-		|| arti_reflects(orefl)
-	)) {
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str) {
 		pline(str, s_suffix(mon_nam(mon)), "saddle");
 	    }
