@@ -181,8 +181,14 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	/* some thrownobj should just reappear in your bag a while later */
 	if (youagr && fired && (
 		thrownobj->oartifact == ART_SUNBEAM ||
-		thrownobj->oartifact == ART_MOONBEAM)) {
-		start_timer(rnz(20), TIMER_OBJECT, RETURN_AMMO, (genericptr_t)thrownobj);
+		thrownobj->oartifact == ART_MOONBEAM ||
+		(launcher && launcher->oartifact == ART_PARADOX && !thrownobj->oartifact)
+		)) {
+		int delay = rnz(20);
+		if (launcher && launcher->oartifact == ART_PARADOX)	/* accelerates return of sunbeam/moonbeam */
+			delay = min(delay, 5);
+
+		start_timer(delay, TIMER_OBJECT, RETURN_AMMO, (genericptr_t)thrownobj);
 	}
 
 	/* determine if thrownobj should return (like Mjollnir) */
