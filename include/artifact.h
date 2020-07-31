@@ -33,25 +33,26 @@
 #define ARTA_POIS		0x00000010L /* permanently poisoned */
 #define ARTA_SILVER		0x00000020L /* deals silver damage, even though it isn't made of silver */
 #define ARTA_VORPAL		0x00000040L /* vorpal -- beheads, cleaves, crushes, or otherwise occasionally instakills foes */
-#define ARTA_TENTROD	0x00000080L /* does tentacle-rod bonus effects */
-#define ARTA_THREEHEAD	0x00000100L /* attacks 1-3x with one swing, stunning if all three hit */
-#define ARTA_MAGIC		0x00000200L /* does Magicbane-like bonus effects -- damage must be special cased in mb_hit */
-#define ARTA_DRAIN		0x00000400L /* drains levels from defender and heals attacker */
-#define ARTA_BRIGHT		0x00000800L /* turns gremlins to dust and trolls to stone */
-#define ARTA_BLIND		0x00001000L /* blinds defender */
-#define ARTA_SHINING	0x00002000L /* phases armor; can hit shades */
-#define ARTA_SHATTER	0x00004000L /* shatter's defender's weapon */
-#define ARTA_DISARM		0x00008000L /* disarms opponent */
-#define ARTA_STEAL		0x00010000L /* steals item from defender */
-#define ARTA_HASTE		0x00020000L /* hitting defender grants movement to attacker */
-#define ARTA_EXPLFIRE	0x00040000L /* fire explosion; 25% chance */
-#define ARTA_EXPLCOLD	0x00080000L /* cold explosion; 25% chance */
-#define ARTA_EXPLELEC	0x00100000L /* elec explosion; 25% chance */
-#define ARTA_KNOCKBACK	0x00200000L /* knockback; 25% chance */
-#define ARTA_EXPLFIREX	0x00400000L /* fire explosion; 100% chance*/
-#define ARTA_EXPLCOLDX	0x00800000L /* cold explosion; 100% chance*/
-#define ARTA_EXPLELECX	0x01000000L /* elec explosion; 100% chance*/
-#define ARTA_KNOCKBACKX	0x02000000L /* knockback; 100% chance*/
+#define ARTA_CANCEL		0x00000080L	/* attempts to cancel (hated) creatures on a 1-2 dieroll */
+#define ARTA_TENTROD	0x00000100L /* does tentacle-rod bonus effects */
+#define ARTA_THREEHEAD	0x00000200L /* attacks 1-3x with one swing, stunning if all three hit */
+#define ARTA_MAGIC		0x00000400L /* does Magicbane-like bonus effects -- damage must be special cased in mb_hit */
+#define ARTA_DRAIN		0x00000800L /* drains levels from defender and heals attacker */
+#define ARTA_BRIGHT		0x00001000L /* turns gremlins to dust and trolls to stone */
+#define ARTA_BLIND		0x00002000L /* blinds defender */
+#define ARTA_SHINING	0x00004000L /* phases armor; can hit shades */
+#define ARTA_SHATTER	0x00008000L /* shatter's defender's weapon */
+#define ARTA_DISARM		0x00010000L /* disarms opponent */
+#define ARTA_STEAL		0x00020000L /* steals item from defender */
+#define ARTA_HASTE		0x00040000L /* hitting defender grants movement to attacker */
+#define ARTA_EXPLFIRE	0x00080000L /* fire explosion; 25% chance */
+#define ARTA_EXPLCOLD	0x00100000L /* cold explosion; 25% chance */
+#define ARTA_EXPLELEC	0x00200000L /* elec explosion; 25% chance */
+#define ARTA_KNOCKBACK	0x00400000L /* knockback; 25% chance */
+#define ARTA_EXPLFIREX	0x00800000L /* fire explosion; 100% chance*/
+#define ARTA_EXPLCOLDX	0x01000000L /* cold explosion; 100% chance*/
+#define ARTA_EXPLELECX	0x02000000L /* elec explosion; 100% chance*/
+#define ARTA_KNOCKBACKX	0x04000000L /* knockback; 100% chance*/
 
 #define ARTP_SEEK		0x0001L /* helps you search, ie, adds enhancement bonus to attempts -- only coded for mainhand weapons */
 #define ARTP_NOCALL		0x0002L /* prevents demons from being gated in */
