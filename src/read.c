@@ -1671,7 +1671,6 @@ struct obj	*sobj;
 				} else {
 					Your("%s merges and hardens!", xname(otmp));
 				}
-				setworn((struct obj *)0, W_ARMS);
 				setworn((struct obj *)0, W_ARM);
 				/* assumes same order */
 				otmp->otyp = GRAY_DRAGON_SCALE_SHIELD +
@@ -1684,7 +1683,10 @@ struct obj	*sobj;
 				}
 				otmp->known = 1;
 				fix_object(otmp);
-				setworn(otmp, W_ARMS);
+
+				long wornmask = 0L;
+				if (canwearobj(otmp, &wornmask, FALSE))
+					setworn(otmp, wornmask);
 				break;
 			} else {
 				if(Blind) {
