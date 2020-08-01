@@ -2076,7 +2076,8 @@ remove_thought(otyp)
 int otyp;
 {
 	long int thought;
-	if(otyp == ANTI_CLOCKWISE_METAMORPHOSIS_G){		thought = ANTI_CLOCKWISE_METAMORPHOSIS;
+	if(otyp == ANTI_CLOCKWISE_METAMORPHOSIS_G){
+		thought = ANTI_CLOCKWISE_METAMORPHOSIS;
 	} else if(otyp == CLOCKWISE_METAMORPHOSIS_GLYPH){
 		thought = CLOCKWISE_METAMORPHOSIS;
 	} else if(otyp == SPARKLING_LAKE_GLYPH){
