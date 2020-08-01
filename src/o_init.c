@@ -620,12 +620,12 @@ find_pcloth()
 }
 
 /* find the object index for the signet ring */
+/* bugfix: can't be static-optimized, because we sometimes reshuffle descriptions after calling this function */
 int
 find_signet_ring()
 {
-	static int i = -1;
+	int i = -1;
 	register const char *s;
-	if (i != -1) return i;
 
 	if ((i = find_otyp_of_desc("black signet", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
 		return i;
