@@ -149,7 +149,7 @@ boolean on;	/* TRUE if activating, FALSE if deactivating */
 	if (on) {
 		int i;
 		for (i = 0; i < SIZE(thoughtglyphs); i++) {
-			if (thought == thoughtglyphs[i].thought) {
+			if (thought == thoughtglyphs[i].thought && thoughtglyphs[i].activate_msg) {
 				pline1(thoughtglyphs[i].activate_msg);
 				break;
 			}
