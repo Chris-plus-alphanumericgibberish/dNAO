@@ -1267,6 +1267,17 @@ int delta;
 		u.usanity = 100;
 	if(discover || wizard)
 		pline("= %d", u.usanity);
+
+	/* possibly (de)activate glyphs */
+	long int thought;
+	for (thought = 1L; thought <= u.thoughts; thought = thought << 1) {
+		if ((u.thoughts&thought) &&
+			active_glyph(thought) != was_active_glyph(thought, u.uinsight, u.usanity - delta)
+			) {
+			change_glyph_active(thought, active_glyph(thought));
+		}
+		pline("[%ld]", thought);
+	}
 }
 
 void
@@ -1280,6 +1291,16 @@ int delta;
 		u.uinsight = 0;
 	if(discover || wizard)
 		pline("= %d", u.uinsight);
+
+	/* possibly (de)activate glyphs */
+	long int thought;
+	for (thought = 1L; thought <= u.thoughts; thought = thought << 1) {
+		if ((u.thoughts&thought) &&
+			active_glyph(thought) != was_active_glyph(thought, u.uinsight-delta, u.usanity)
+			) {
+			change_glyph_active(thought, active_glyph(thought));
+		}
+	}
 }
 
 boolean
@@ -1308,6 +1329,9 @@ int
 glyph_sanity(thought)
 long int thought;
 {
+	/* disabled. */
+	return 1000;
+
 	int sanlevel = 1000;
 	switch(thought){
 		case ANTI_CLOCKWISE_METAMORPHOSIS:
@@ -1438,6 +1462,7 @@ long int thought;
 	return insightlevel;
 }
 
+/* returns TRUE if <thought> is currently active */
 int
 active_glyph(thought)
 long int thought;
@@ -1446,11 +1471,55 @@ long int thought;
 	if(!(u.thoughts&thought))
 		return 0;
 	insightlevel = glyph_insight(thought);
-	// sanlevel = glyph_sanity(thought);
+	sanlevel = glyph_sanity(thought);
 	if(u.uinsight >= insightlevel && u.usanity <= sanlevel)
 		return 1;
 	else return 0;
 	return 0;
+}
+boolean
+was_active_glyph(thought, oldinsight, oldsanity)
+long int thought;
+int oldinsight;
+int oldsanity;
+{
+	if (!(u.thoughts&thought))
+		return FALSE;
+	if (oldinsight >= glyph_insight(thought) && oldsanity <= glyph_sanity(thought))
+		return TRUE;
+	return FALSE;
+}
+
+/* perform all tasks when activating/deactivating <thought> */
+/* */
+void
+change_glyph_active(thought, on)
+long int thought;
+boolean on;	/* TRUE if activating, FALSE if deactivating */
+{
+#define toggle_extrinsic(prop) do{if(on) u.uprops[(prop)].extrinsic |= W_GLYPH; else u.uprops[(prop)].extrinsic &= ~W_GLYPH;}while(0)
+	switch (thought)
+	{
+	case ARCANE_BULWARK:
+		toggle_extrinsic(ANTIMAGIC);
+		break;
+	case DISSIPATING_BULWARK:
+		toggle_extrinsic(SHOCK_RES);
+		break;
+	case SMOLDERING_BULWARK:
+		toggle_extrinsic(FIRE_RES);
+		break;
+	case FROSTED_BULWARK:
+		toggle_extrinsic(COLD_RES);
+		break;
+	case CLEAR_DEEPS:
+		toggle_extrinsic(POISON_RES);
+		break;
+	default:
+		/* nothing needed */
+		break;
+	}
+#undef toggle_extrinsic
 }
 
 int

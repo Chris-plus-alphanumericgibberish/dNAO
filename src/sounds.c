@@ -324,88 +324,92 @@ int
 give_glyph(mtmp)
 struct monst *mtmp;
 {
+	long int glyph;
 	switch(monsndx(mtmp->data)){
 		case PM_BESTIAL_DERVISH:
 		pline("A clockwise gyre forms in your mind.");
-		u.thoughts |= CLOCKWISE_METAMORPHOSIS;
+		glyph = CLOCKWISE_METAMORPHOSIS;
 		break;
 		case PM_ETHEREAL_DERVISH:
 		pline("An anti-clockwise gyre forms in your mind.");
-		u.thoughts |= ANTI_CLOCKWISE_METAMORPHOSIS;
+		glyph = ANTI_CLOCKWISE_METAMORPHOSIS;
 		break;
 		case PM_SPARKLING_LAKE:
 		pline("A great volume of sparkling water pours into your mind.");
-		u.thoughts |= ARCANE_BULWARK;
+		glyph = ARCANE_BULWARK;
 		break;
 		case PM_FLASHING_LAKE:
 		pline("A great volume of pure water pours into your mind.");
-		u.thoughts |= DISSIPATING_BULWARK;
+		glyph = DISSIPATING_BULWARK;
 		break;
 		case PM_SMOLDERING_LAKE:
 		pline("A great volume of ash-filled water pours into your mind.");
-		u.thoughts |= SMOLDERING_BULWARK;
+		glyph = SMOLDERING_BULWARK;
 		break;
 		case PM_FROSTED_LAKE:
 		pline("A great volume of freezing water pours into your mind.");
-		u.thoughts |= FROSTED_BULWARK;
+		glyph = FROSTED_BULWARK;
 		break;
 		case PM_BLOOD_SHOWER:
 		pline("A rapturous shower of blood drifts through your mind.");
-		u.thoughts |= BLOOD_RAPTURE;
+		glyph = BLOOD_RAPTURE;
 		break;
 		case PM_MANY_TALONED_THING:
 		pline("A many-taloned clawmark is scoured into your mind.");
-		u.thoughts |= CLAWMARK;
+		glyph = CLAWMARK;
 		break;
 		case PM_DEEP_BLUE_CUBE:
 		pline("A deep sea of blue water fills your mind.");
-		u.thoughts |= CLEAR_DEEPS;
+		glyph = CLEAR_DEEPS;
 		break;
 		case PM_PITCH_BLACK_CUBE:
 		pline("A deep sea of pitch-black water fills your mind.");
-		u.thoughts |= DEEP_SEA;
+		glyph = DEEP_SEA;
 		break;
 		case PM_PRAYERFUL_THING:
 		pline("A strange minister's prayer echoes in you mind.");
-		u.thoughts |= COMMUNION;
+		glyph = COMMUNION;
 		break;
 		case PM_HEMORRHAGIC_THING:
 		pline("Thoughts of weeping form in your mind.");
-		u.thoughts |= CORRUPTION;
+		glyph = CORRUPTION;
 		break;
 		case PM_MANY_EYED_SEEKER:
 		pline("A seeking eye opens in your mind.");
-		u.thoughts |= EYE_THOUGHT;
+		glyph = EYE_THOUGHT;
 		break;
 		case PM_VOICE_IN_THE_DARK:
 		pline("The voice of a formless thing speaks in your mind.");
-		u.thoughts |= FORMLESS_VOICE;
+		glyph = FORMLESS_VOICE;
 		break;
 		case PM_TINY_BEING_OF_LIGHT:
 		pline("You see tiny spirits dancing in the nothing behind your eyes.");
-		u.thoughts |= GUIDANCE;
+		glyph = GUIDANCE;
 		break;
 		case PM_MAN_FACED_MILLIPEDE:
 		pline("Vermin writhe in the filth inside your head.");
-		u.thoughts |= IMPURITY;
+		glyph = IMPURITY;
 		break;
 		case PM_MIRRORED_MOONFLOWER:
 		pline("A reflection of the sympathetic moon fills your mind.");
-		u.thoughts |= MOON;
+		glyph = MOON;
 		break;
 		case PM_CRIMSON_WRITHER:
 		pline("A subtle mucus is revealed in the blood in your brain.");
-		u.thoughts |= WRITHE;
+		glyph = WRITHE;
 		break;
 		case PM_RADIANT_PYRAMID:
 		pline("An irregular golden pyramid rises from the depths of your mind.");
-		u.thoughts |= RADIANCE;
+		glyph = RADIANCE;
 		break;
 		default:
 			impossible("MS_GLYPH monster with no valid glyph!");
 			return 1;
 		break;
 	}
+	u.thoughts |= glyph;
+	if (active_glyph(glyph))
+		change_glyph_active(glyph, TRUE);
 	return 0;
 }
 

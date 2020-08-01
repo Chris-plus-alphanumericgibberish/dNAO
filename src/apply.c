@@ -2075,69 +2075,55 @@ void
 remove_thought(otyp)
 int otyp;
 {
-	if(otyp == ANTI_CLOCKWISE_METAMORPHOSIS_G){
-		u.thoughts &= ~ANTI_CLOCKWISE_METAMORPHOSIS;
-
+	long int thought;
+	if(otyp == ANTI_CLOCKWISE_METAMORPHOSIS_G){		thought = ANTI_CLOCKWISE_METAMORPHOSIS;
 	} else if(otyp == CLOCKWISE_METAMORPHOSIS_GLYPH){
-		u.thoughts &= ~CLOCKWISE_METAMORPHOSIS;
-
+		thought = CLOCKWISE_METAMORPHOSIS;
 	} else if(otyp == SPARKLING_LAKE_GLYPH){
-		u.thoughts &= ~ARCANE_BULWARK;
-
+		thought = ARCANE_BULWARK;
 	} else if(otyp == FADING_LAKE_GLYPH){
-		u.thoughts &= ~DISSIPATING_BULWARK;
-
+		thought = DISSIPATING_BULWARK;
 	} else if(otyp == SMOKING_LAKE_GLYPH){
-		u.thoughts &= ~SMOLDERING_BULWARK;
-
+		thought = SMOLDERING_BULWARK;
 	} else if(otyp == FROSTED_LAKE_GLYPH){
-		u.thoughts &= ~FROSTED_BULWARK;
-
+		thought = FROSTED_BULWARK;
 	} else if(otyp == RAPTUROUS_EYE_GLYPH){
-		u.thoughts &= ~BLOOD_RAPTURE;
-
+		thought = BLOOD_RAPTURE;
 	} else if(otyp == CLAWMARK_GLYPH){
-		u.thoughts &= ~CLAWMARK;
-
+		thought = CLAWMARK;
 	} else if(otyp == CLEAR_SEA_GLYPH){
-		u.thoughts &= ~CLEAR_DEEPS;
-
+		thought = CLEAR_DEEPS;
 	} else if(otyp == DEEP_SEA_GLYPH){
-		u.thoughts &= ~DEEP_SEA;
-
+		thought = DEEP_SEA;
 	} else if(otyp == COMMUNION_GLYPH){
-		u.thoughts &= ~COMMUNION;
-
+		thought = COMMUNION;
 	} else if(otyp == CORRUPTION_GLYPH){
-		u.thoughts &= ~CORRUPTION;
-
+		thought = CORRUPTION;
 	} else if(otyp == EYE_GLYPH){
-		u.thoughts &= ~EYE_THOUGHT;
-
+		thought = EYE_THOUGHT;
 	} else if(otyp == FORMLESS_VOICE_GLYPH){
-		u.thoughts &= ~FORMLESS_VOICE;
-
+		thought = FORMLESS_VOICE;
 	} else if(otyp == GUIDANCE_GLYPH){
-		u.thoughts &= ~GUIDANCE;
-
+		thought = GUIDANCE;
 	} else if(otyp == IMPURITY_GLYPH){
-		u.thoughts &= ~IMPURITY;
-
+		thought = IMPURITY;
 	} else if(otyp == MOON_GLYPH){
-		u.thoughts &= ~MOON;
-
+		thought = MOON;
 	} else if(otyp == WRITHE_GLYPH){
-		u.thoughts &= ~WRITHE;
-
+		thought = WRITHE;
 	} else if(otyp == RADIANCE_GLYPH){
-		u.thoughts &= ~RADIANCE;
-
+		thought = RADIANCE;
 	} else if(otyp == BEAST_S_EMBRACE_GLYPH){
-		u.thoughts &= ~BEASTS_EMBRACE;
-
+		thought = BEASTS_EMBRACE;
 	} else {
 		impossible("Can't find glyph!");
+		return;
 	}
+
+	if (active_glyph(thought))
+		change_glyph_active(thought, FALSE);
+	u.thoughts &= ~thought;
+	return;
 }
 
 STATIC_OVL void

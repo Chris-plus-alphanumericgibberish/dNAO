@@ -1507,7 +1507,7 @@ STATIC_PTR int wiz_setinsight()
 		pline1(Never_mind);
 		return 0;
 	}
-	u.uinsight = max(0, min(100, newval));
+	change_uinsight(newval - u.uinsight);
 	return 0;
 }
 STATIC_PTR int wiz_setsanity()
@@ -1526,7 +1526,7 @@ STATIC_PTR int wiz_setsanity()
 		pline1(Never_mind);
 		return 0;
 	}
-	u.usanity = max(0, min(100, newval));
+	change_usanity(newval - u.usanity);
 	return 0;
 }
 

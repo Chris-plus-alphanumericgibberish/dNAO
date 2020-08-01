@@ -694,6 +694,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A clockwise gyre forms in your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -703,6 +704,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("An anti-clockwise gyre forms in your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -712,6 +714,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A great volume of sparkling water pours into your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -721,6 +724,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A great volume of pure water pours into your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -730,6 +734,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A great volume of ash-filled water pours into your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -739,6 +744,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A great volume of freezing water pours into your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -748,6 +754,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A rapturous shower of blood drifts through your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -757,6 +764,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A many-taloned clawmark is scoured into your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -766,6 +774,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A deep sea of blue water fills your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -775,6 +784,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A deep sea of pitch-black water fills your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -784,6 +794,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A strange minister's prayer echoes in you mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -793,6 +804,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("Thoughts of weeping form in your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -802,6 +814,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A seeking eye opens in your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -811,6 +824,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("The voice of a formless thing speaks in your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -820,6 +834,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("You see tiny spirits dancing in the nothing behind your eyes.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -829,6 +844,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("Vermin writhe in the filth inside your head.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -838,6 +854,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A reflection of the sympathetic moon fills your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -847,6 +864,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A subtle mucus is revealed in the blood in your brain.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -856,6 +874,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("An irregular golden pyramid rises from the depths of your mind.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;
@@ -865,6 +884,7 @@ struct obj *scroll;
 		if(count_glyphs() < 3 && !(u.thoughts&thought) && u.uinsight >= glyph_insight(thought) /*&& u.usanity <= glyph_sanity(thought)*/){
 			pline("A bestial figure takes refuge inside you.");
 			u.thoughts |= thought;
+			change_glyph_active(thought, TRUE);
 		} else {
 			pline("Nothing happens.");
 			return 0;

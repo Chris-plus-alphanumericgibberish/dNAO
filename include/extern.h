@@ -177,6 +177,8 @@ E boolean NDECL(check_insight);
 E int FDECL(glyph_sanity, (long int));
 E int FDECL(glyph_insight, (long int));
 E int FDECL(active_glyph, (long int));
+E boolean FDECL(was_active_glyph, (long int, int, int));
+E void FDECL(change_glyph_active, (long int, boolean));
 E int FDECL(roll_madness, (long int));
 E int FDECL(mad_turn, (long int));
 E void NDECL(roll_av_frigophobia);

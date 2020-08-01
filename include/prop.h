@@ -145,6 +145,7 @@ struct prop {
 #	define W_BALL	    0x00200000L /* Punishment ball */
 #	define W_CHAIN	    0x00400000L /* Punishment chain */
 #	define W_SPIRIT		0x00800000L	/* Bound spirit */
+#	define W_GLYPH		0x01000000L	/* Active thought-glyph */
 #	define W_SKIN		I_SPECIAL	/* merged into skin */
 
 	/*** Property is blocked by an object ***/
