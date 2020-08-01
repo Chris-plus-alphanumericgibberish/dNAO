@@ -59,7 +59,6 @@ E boolean FDECL(use_ring_of_wishes, (struct obj *));
 E boolean FDECL(use_candle_of_invocation, (struct obj *));
 E void FDECL(use_magic_whistle, (struct obj *));
 E int FDECL(unfixable_trouble_count,(BOOLEAN_P));
-E void FDECL(remove_thought, (int));
 E int NDECL(dotrephination_menu);
 E int NDECL(partial_action);
 E void FDECL(add_class, (char *, char));
@@ -940,8 +939,11 @@ E void NDECL(drinksink);
 /* ### thoughtglyph.c ### */
 
 E int NDECL(count_glyphs);
-E boolean FDECL(have_glyph, (struct monst *));
-E boolean FDECL(give_glyph, (struct monst *));
+E long int FDECL(otyp_to_thought, (int));
+E long int FDECL(mtyp_to_thought, (int));
+E boolean FDECL(maybe_give_thought, (long int));
+E void FDECL(give_thought, (long int));
+E void FDECL(remove_thought, (long int));
 E int FDECL(glyph_sanity, (long int));
 E int FDECL(glyph_insight, (long int));
 E boolean FDECL(active_glyph, (long int));

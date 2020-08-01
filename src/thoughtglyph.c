@@ -13,50 +13,74 @@ count_glyphs(){
 	return count;
 }
 
-/* returns TRUE if the player has the thought that mtmp gives */
-boolean
-have_glyph(mtmp)
-struct monst *mtmp;
+/* returns the thought associated with the otyp, if there is one */
+long int
+otyp_to_thought(otyp)
+int otyp;
 {
 	int i;
 
-	if (!mtmp)
-		return FALSE;
-
 	for (i = 0; i < SIZE(thoughtglyphs); i++) {
-		if (mtmp->mtyp == thoughtglyphs[i].mtyp)
-			return !!(u.thoughts & thoughtglyphs[i].thought);
+		if (otyp == thoughtglyphs[i].otyp)
+			return thoughtglyphs[i].thought;
 	}
-	return FALSE;
+	return 0L;
 }
 
-/* gives the player the thought granted by mtmp */
-/* returns TRUE if it succeeded */
-boolean
-give_glyph(mtmp)
-struct monst *mtmp;
+/* returns the thought associated with the mtyp, if there is one */
+long int
+mtyp_to_thought(mtyp)
+int mtyp;
 {
 	int i;
-	long int glyph = 0L;
-
-	if (!mtmp)
-		return FALSE;
 
 	for (i = 0; i < SIZE(thoughtglyphs); i++) {
-		if (mtmp->mtyp == thoughtglyphs[i].mtyp) {
-			glyph = thoughtglyphs[i].thought;
-			break;
-		}
+		if (mtyp == thoughtglyphs[i].mtyp)
+			return thoughtglyphs[i].thought;
 	}
-	if (!glyph) {
-		impossible("MS_GLYPH monster with no valid glyph!");
+	return 0L;
+}
+
+/* gives the player the thought IF they meet the insight/san requirements */
+/* returns TRUE if it succeeds */
+boolean
+maybe_give_thought(thought)
+long int thought;
+{
+	if ((count_glyphs() >= 3) ||
+		(u.thoughts & thought) ||
+		(u.uinsight < glyph_insight(thought)) ||
+		(u.usanity > glyph_sanity(thought))
+		)
 		return FALSE;
+
+	give_thought(thought);
+	return TRUE;
+}
+
+/* gives the player the thought */
+void
+give_thought(thought)
+long int thought;
+{
+	u.thoughts |= thought;
+	if (active_glyph(thought))
+		change_glyph_active(thought, TRUE);
+}
+
+void
+remove_thought(thought)
+long int thought;
+{
+	if (!(u.thoughts & thought)) {
+		impossible("removing thought %ld?", thought);
+		return;
 	}
 
-	u.thoughts |= glyph;
-	if (active_glyph(glyph))
-		change_glyph_active(glyph, TRUE);
-	return TRUE;
+	if (active_glyph(thought))
+		change_glyph_active(thought, FALSE);
+	u.thoughts &= ~thought;
+	return;
 }
 
 int

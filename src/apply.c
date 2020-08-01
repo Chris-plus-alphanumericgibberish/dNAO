@@ -2070,63 +2070,6 @@ struct obj *corpse;
 	return 1;
 }
 
-
-void
-remove_thought(otyp)
-int otyp;
-{
-	long int thought;
-	if(otyp == ANTI_CLOCKWISE_METAMORPHOSIS_G){
-		thought = ANTI_CLOCKWISE_METAMORPHOSIS;
-	} else if(otyp == CLOCKWISE_METAMORPHOSIS_GLYPH){
-		thought = CLOCKWISE_METAMORPHOSIS;
-	} else if(otyp == SPARKLING_LAKE_GLYPH){
-		thought = ARCANE_BULWARK;
-	} else if(otyp == FADING_LAKE_GLYPH){
-		thought = DISSIPATING_BULWARK;
-	} else if(otyp == SMOKING_LAKE_GLYPH){
-		thought = SMOLDERING_BULWARK;
-	} else if(otyp == FROSTED_LAKE_GLYPH){
-		thought = FROSTED_BULWARK;
-	} else if(otyp == RAPTUROUS_EYE_GLYPH){
-		thought = BLOOD_RAPTURE;
-	} else if(otyp == CLAWMARK_GLYPH){
-		thought = CLAWMARK;
-	} else if(otyp == CLEAR_SEA_GLYPH){
-		thought = CLEAR_DEEPS;
-	} else if(otyp == DEEP_SEA_GLYPH){
-		thought = DEEP_SEA;
-	} else if(otyp == COMMUNION_GLYPH){
-		thought = COMMUNION;
-	} else if(otyp == CORRUPTION_GLYPH){
-		thought = CORRUPTION;
-	} else if(otyp == EYE_GLYPH){
-		thought = EYE_THOUGHT;
-	} else if(otyp == FORMLESS_VOICE_GLYPH){
-		thought = FORMLESS_VOICE;
-	} else if(otyp == GUIDANCE_GLYPH){
-		thought = GUIDANCE;
-	} else if(otyp == IMPURITY_GLYPH){
-		thought = IMPURITY;
-	} else if(otyp == MOON_GLYPH){
-		thought = MOON;
-	} else if(otyp == WRITHE_GLYPH){
-		thought = WRITHE;
-	} else if(otyp == RADIANCE_GLYPH){
-		thought = RADIANCE;
-	} else if(otyp == BEAST_S_EMBRACE_GLYPH){
-		thought = BEASTS_EMBRACE;
-	} else {
-		impossible("Can't find glyph!");
-		return;
-	}
-
-	if (active_glyph(thought))
-		change_glyph_active(thought, FALSE);
-	u.thoughts &= ~thought;
-	return;
-}
-
 STATIC_OVL void
 use_trephination_kit(obj)
 register struct obj *obj;
@@ -2150,7 +2093,7 @@ register struct obj *obj;
 	glyph = mksobj(otyp, FALSE, FALSE);
 	
 	if(glyph){
-		remove_thought(otyp);
+		remove_thought(otyp_to_thought(otyp));
 		//Note: affecting your true brain, so use race-if.
 		if(Race_if(PM_ANDROID)){
 			set_material_gm(glyph, PLASTIC);

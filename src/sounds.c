@@ -2529,7 +2529,7 @@ int dz;
 	if(mtmp && mtmp->data->msound == MS_GLYPHS){
 		if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
 			&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
-			&& count_glyphs() < 3 && !have_glyph(mtmp)
+			&& count_glyphs() < 3 && !(u.thoughts & mtyp_to_thought(mtmp->mtyp))
 		){
 			struct obj *optr;
 			if(canspotmon(mtmp)){
@@ -2543,9 +2543,11 @@ int dz;
 			}
 			else{
 				You("let %s take your %s.",mon_nam(mtmp), ONAME(uwep));
-				//Returns 1 as an error state
-				if(give_glyph(mtmp))
-					return 1;
+				if (!mtyp_to_thought(mtmp->mtyp))
+					return 1;	/* error */
+				else
+					give_thought(mtyp_to_thought(mtmp->mtyp));
+
 				optr = uwep;
 				uwepgone();
 				if(optr->gifted != GA_NONE && !Role_if(PM_EXILE)){
@@ -5959,7 +5961,7 @@ struct monst *nurse;
 			glyph = mksobj(otyp, FALSE, FALSE);
 			
 			if(glyph){
-				remove_thought(otyp);
+				remove_thought(otyp_to_thought(otyp));
 				if(Race_if(PM_ANDROID)){
 					set_material_gm(glyph, PLASTIC);
 					fix_object(glyph);
