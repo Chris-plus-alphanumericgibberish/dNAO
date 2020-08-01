@@ -39,10 +39,10 @@ struct thoughtglyph {
 static struct thoughtglyph thoughtglyphs[] =
 {
 	{ ANTI_CLOCKWISE_METAMORPHOSIS_G, PM_BESTIAL_DERVISH, ANTI_CLOCKWISE_METAMORPHOSIS,
-	20, 100, "A clockwise gyre forms in your mind." },
+	20, 100, "A anti-clockwise gyre forms in your mind." },
 
 	{ CLOCKWISE_METAMORPHOSIS_GLYPH, PM_ETHEREAL_DERVISH, CLOCKWISE_METAMORPHOSIS,
-	20, 100, "An anti-clockwise gyre forms in your mind." },
+	20, 100, "An clockwise gyre forms in your mind." },
 
 	{ SPARKLING_LAKE_GLYPH, PM_SPARKLING_LAKE, ARCANE_BULWARK,
 	18, 100, "A great volume of sparkling water pours into your mind." },
