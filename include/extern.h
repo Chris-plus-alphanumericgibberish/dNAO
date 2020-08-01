@@ -940,14 +940,15 @@ E void NDECL(drinksink);
 /* ### thoughtglyph.c ### */
 
 E int NDECL(count_glyphs);
-E int FDECL(have_glyph, (struct monst *));
-E int FDECL(give_glyph, (struct monst *));
-E void FDECL(doguidance, (struct monst *, int));
+E boolean FDECL(have_glyph, (struct monst *));
+E boolean FDECL(give_glyph, (struct monst *));
 E int FDECL(glyph_sanity, (long int));
 E int FDECL(glyph_insight, (long int));
-E int FDECL(active_glyph, (long int));
+E boolean FDECL(active_glyph, (long int));
 E boolean FDECL(was_active_glyph, (long int, int, int));
 E void FDECL(change_glyph_active, (long int, boolean));
+
+E void FDECL(doguidance, (struct monst *, int));
 
 /* ### hack.c ### */
 
