@@ -174,11 +174,6 @@ E double FDECL(conplus, (int));
 E void FDECL(change_usanity, (int));
 E void FDECL(change_uinsight, (int));
 E boolean NDECL(check_insight);
-E int FDECL(glyph_sanity, (long int));
-E int FDECL(glyph_insight, (long int));
-E int FDECL(active_glyph, (long int));
-E boolean FDECL(was_active_glyph, (long int, int, int));
-E void FDECL(change_glyph_active, (long int, boolean));
 E int FDECL(roll_madness, (long int));
 E int FDECL(mad_turn, (long int));
 E void NDECL(roll_av_frigophobia);
@@ -941,6 +936,18 @@ E void FDECL(dipfountain, (struct obj *));
 E void FDECL(breaksink, (int,int));
 E void NDECL(drinksink);
 #endif
+
+/* ### thoughtglyph.c ### */
+
+E int NDECL(count_glyphs);
+E int FDECL(have_glyph, (struct monst *));
+E int FDECL(give_glyph, (struct monst *));
+E void FDECL(doguidance, (struct monst *, int));
+E int FDECL(glyph_sanity, (long int));
+E int FDECL(glyph_insight, (long int));
+E int FDECL(active_glyph, (long int));
+E boolean FDECL(was_active_glyph, (long int, int, int));
+E void FDECL(change_glyph_active, (long int, boolean));
 
 /* ### hack.c ### */
 
@@ -2479,8 +2486,6 @@ E int FDECL(P_SKILL, (int));
 E int FDECL(P_RESTRICTED, (int));
 E boolean FDECL(spiritSkill, (int));
 E boolean FDECL(roleSkill, (int));
-E void FDECL(doguidance, (struct monst *, int));
-E int NDECL(count_glyphs);
 E int FDECL(domonnoise,(struct monst *, BOOLEAN_P));
 #ifdef USER_SOUNDS
 E int FDECL(add_sound_mapping, (const char *));
