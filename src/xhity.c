@@ -11398,7 +11398,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	/* sneak attack -- defender's conditions must allow sneak attacking, and we must have sneak attack dice */
 	if (sneak_dice &&
 		!noanatomy(pd) &&
-		!(youagr && u.uswallow)
+		!(youagr && u.uswallow) &&
+		!(magr == mdef)
 	){
 		if (youagr) {
 			if (!mdef->mcanmove || !mdef->mnotlaugh ||
