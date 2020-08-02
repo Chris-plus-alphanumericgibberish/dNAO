@@ -864,5 +864,6 @@ struct obj {
 /* Flags for get_obj_location(). */
 #define CONTAINED_TOO	0x1
 #define BURIED_TOO	0x2
+#define INTRAP_TOO	0x4
 
 #endif /* OBJ_H */

@@ -559,6 +559,13 @@ int locflags;
 		if (locflags & CONTAINED_TOO)
 		    return get_obj_location(obj->ocontainer, xp, yp, locflags);
 		break;
+		case OBJ_INTRAP:
+		if (locflags & INTRAP_TOO){
+			*xp = obj->otrap->tx;
+			*yp = obj->otrap->ty;
+			return TRUE;
+		}
+		break;
 	}
 	*xp = *yp = 0;
 	return FALSE;

@@ -978,6 +978,9 @@ E int NDECL(inv_cnt);
 #ifdef GOLDOBJ
 E long FDECL(money_cnt, (struct obj *));
 #endif
+E struct obj * FDECL(start_all_items, (int * ));
+E struct obj * FDECL(next_all_items, (int *));
+E void NDECL(end_all_items);
 
 /* ### hacklib.c ### */
 
