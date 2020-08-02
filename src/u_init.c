@@ -891,10 +891,10 @@ static const struct def_skill Skill_Droid_Ana[] = {
 // };
 
 static const struct def_skill Skill_All_Ana[] = {
-    { FFORM_SHII_CHO, P_EXPERT },		{ FFORM_MAKASHI,  P_EXPERT },
-    { FFORM_SORESU, P_EXPERT },			{ FFORM_ATARU,  P_EXPERT },
-    { FFORM_DJEM_SO, P_EXPERT },		{ FFORM_SHIEN,  P_EXPERT },
-    { FFORM_NIMAN, P_EXPERT },			{ FFORM_JUYO,  P_EXPERT },
+    { P_SHII_CHO, P_EXPERT },		{ P_MAKASHI,  P_EXPERT },
+    { P_SORESU, P_EXPERT },			{ P_ATARU,  P_EXPERT },
+    { P_DJEM_SO, P_EXPERT },		{ P_SHIEN,  P_EXPERT },
+    { P_NIMAN, P_EXPERT },			{ P_JUYO,  P_EXPERT },
     { P_NONE, 0 }
 };
 

@@ -986,7 +986,7 @@ boolean * wepgone;				/* pointer to: TRUE if projectile has been destroyed */
 		if (P_SKILL(P_SHII_CHO) >= P_BASIC){
 			if (activeFightingForm(FFORM_SHII_CHO) ||
 				(activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm)))
-				) use_skill(FFORM_SHIEN, 1);
+				) use_skill(P_SHIEN, 1);
 		}
 	}
 

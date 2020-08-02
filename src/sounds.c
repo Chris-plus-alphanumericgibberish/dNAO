@@ -5618,13 +5618,13 @@ int p_skill;
 	
 	if(roleSkill(p_skill)) maxskill = min(maxskill + 1, P_EXPERT);
 	
-	if(p_skill >= FFORM_SHII_CHO && p_skill <= FFORM_JUYO){
+	if(p_skill >= P_SHII_CHO && p_skill <= P_JUYO){
 		if(uwep && is_lightsaber(uwep)) maxskill = min(maxskill, P_SKILL(weapon_type(uwep)));
 		else if(uswapwep && is_lightsaber(uswapwep)) maxskill = min(maxskill, P_SKILL(weapon_type(uswapwep)));
 		else maxskill = P_UNSKILLED;
 	}
 	
-	if(p_skill == FFORM_NIMAN){
+	if(p_skill == P_NIMAN){
 		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
 			maxskill = min(P_EXPERT, P_SKILL(weapon_type(uwep)));
 		else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
@@ -5660,17 +5660,17 @@ int p_skill;
 		curskill = min(curskill+1, P_EXPERT);
 	}
 	
-	if(p_skill == FFORM_SHIEN){
+	if(p_skill == P_SHIEN){
 		if(OLD_P_SKILL(P_DJEM_SO) >= P_SKILLED) curskill++;
 		if(OLD_P_SKILL(P_DJEM_SO) >= P_EXPERT) curskill++;
 	}
 	
-	if(p_skill == FFORM_DJEM_SO){
+	if(p_skill == P_DJEM_SO){
 		if(OLD_P_SKILL(P_SHIEN) >= P_SKILLED) curskill++;
 		if(OLD_P_SKILL(P_SHIEN) >= P_EXPERT) curskill++;
 	}
 	
-	if(p_skill == FFORM_NIMAN && curskill < P_BASIC){
+	if(p_skill == P_NIMAN && curskill < P_BASIC){
 		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 			curskill = P_BASIC;
 			OLD_P_SKILL(P_NIMAN) = P_BASIC;
@@ -5691,7 +5691,7 @@ int
 P_RESTRICTED(p_skill)
 int p_skill;
 {
-	if(p_skill == FFORM_NIMAN){
+	if(p_skill == P_NIMAN){
 		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
 			return P_RESTRICTED(weapon_type(uwep));
 		else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)

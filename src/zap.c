@@ -3696,7 +3696,7 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 							/* you choose direction */
 							dx = u.dx;
 							dy = u.dy;
-							use_skill(FFORM_SHIEN, 1);
+							use_skill(P_SHIEN, 1);
 							tmp_at(DISP_CHANGE, zapdir_to_glyph(dx, dy, zap_glyph_color(zapdata->adtyp)));
 						}
 						else if (!youdef && has_template(mdef, FRACTURED)){

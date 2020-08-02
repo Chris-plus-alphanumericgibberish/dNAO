@@ -12762,28 +12762,28 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			use_skill(u.twoweap ? P_TWO_WEAPON_COMBAT : wtype, 1);
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
-				use_skill(FFORM_SHII_CHO, 1);
+				use_skill(P_SHII_CHO, 1);
 				if (P_SKILL(P_SHII_CHO) >= P_BASIC || weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
 						(activeFightingForm(FFORM_MAKASHI) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 						) &&
 						!uarms && !u.twoweap && wtype == P_SABER
-						) use_skill(FFORM_MAKASHI, 1);
+						) use_skill(P_MAKASHI, 1);
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
 						(activeFightingForm(FFORM_ATARU) && (!uarm || is_light_armor(uarm)))
 						) &&
 						u.lastmoved + 1 >= monstermoves
-						) use_skill(FFORM_ATARU, 1);
+						) use_skill(P_ATARU, 1);
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
 						(activeFightingForm(FFORM_DJEM_SO) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
 						) &&
 						mdef->mattackedu
-						) use_skill(FFORM_DJEM_SO, 1);
+						) use_skill(P_DJEM_SO, 1);
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
 						(activeFightingForm(FFORM_NIMAN) && (!uarm || !is_metallic(uarm)))
 						) &&
 						u.lastcast >= monstermoves
-						) use_skill(FFORM_NIMAN, 1);
+						) use_skill(P_NIMAN, 1);
 				}
 			}
 		}
@@ -12791,7 +12791,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && magr && melee &&
 			(activeFightingForm(FFORM_SHII_CHO) ||
 			(activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
-			)) use_skill(FFORM_SORESU, 1);
+			)) use_skill(P_SORESU, 1);
 	}
 	/* ARTIFACT HIT BLOCK */
 	/* this must come after skills are trained, as this can kill the defender and cause a return */
