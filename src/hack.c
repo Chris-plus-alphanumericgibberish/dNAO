@@ -2909,14 +2909,14 @@ boolean endnow;
 		curmonst = (struct monst *)0;
 		did_migratingmons = FALSE;
 		magic_chest_index = 0;
-		allow_floor     = !!((*wherefrom)&(1 << OBJ_FLOOR));
-		allow_contained = !!((*wherefrom)&(1 << OBJ_CONTAINED));
-		allow_invent    = !!((*wherefrom)&(1 << OBJ_INVENT));
-		allow_minvent   = !!((*wherefrom)&(1 << OBJ_MINVENT));
-		allow_migrating = !!((*wherefrom)&(1 << OBJ_MIGRATING));
-		allow_buried    = !!((*wherefrom)&(1 << OBJ_BURIED));
-		allow_magic     = !!((*wherefrom)&(1 << OBJ_MAGIC_CHEST));
-		allow_intrap    = !!((*wherefrom)&(1 << OBJ_INTRAP));
+		allow_floor     = !wherefrom || !!((*wherefrom)&(1 << OBJ_FLOOR));
+		allow_contained = !wherefrom || !!((*wherefrom)&(1 << OBJ_CONTAINED));
+		allow_invent    = !wherefrom || !!((*wherefrom)&(1 << OBJ_INVENT));
+		allow_minvent   = !wherefrom || !!((*wherefrom)&(1 << OBJ_MINVENT));
+		allow_migrating = !wherefrom || !!((*wherefrom)&(1 << OBJ_MIGRATING));
+		allow_buried    = !wherefrom || !!((*wherefrom)&(1 << OBJ_BURIED));
+		allow_magic     = !wherefrom || !!((*wherefrom)&(1 << OBJ_MAGIC_CHEST));
+		allow_intrap    = !wherefrom || !!((*wherefrom)&(1 << OBJ_INTRAP));
 	}
 
 	do {
@@ -2927,11 +2927,11 @@ boolean endnow;
 			}
 			else if (curwhere == OBJ_FLOOR && allow_floor) {
 				curobj = fobj;
-				*wherefrom = (1 << OBJ_FLOOR);
+				if (wherefrom) *wherefrom = (1 << OBJ_FLOOR);
 			}
 			else if (curwhere == OBJ_INVENT && allow_invent) {
 				curobj = invent;
-				*wherefrom = (1 << OBJ_INVENT);
+				if (wherefrom) *wherefrom = (1 << OBJ_INVENT);
 			}
 			else if (curwhere == OBJ_MINVENT && allow_minvent) {
 				do {
@@ -2943,7 +2943,7 @@ boolean endnow;
 					if (curmonst)
 						curobj = curmonst->minvent;
 				} while (curmonst && !curobj);
-				*wherefrom = (1 << OBJ_MINVENT);
+				if (wherefrom) *wherefrom = (1 << OBJ_MINVENT);
 			}
 			else if (curwhere == OBJ_MIGRATING && allow_minvent && allow_migrating && !did_migratingmons) {
 				do {
@@ -2955,15 +2955,15 @@ boolean endnow;
 					if (curmonst)
 						curobj = curmonst->minvent;
 				} while (curmonst && !curobj);
-				*wherefrom = (1 << OBJ_MINVENT) | (1 << OBJ_MIGRATING);
+				if (wherefrom) *wherefrom = (1 << OBJ_MINVENT) | (1 << OBJ_MIGRATING);
 			}
 			else if (curwhere == OBJ_MIGRATING && allow_migrating) {
 				curobj = migrating_objs;
-				*wherefrom = (1 << OBJ_MIGRATING);
+				if (wherefrom) *wherefrom = (1 << OBJ_MIGRATING);
 			}
 			else if (curwhere == OBJ_BURIED && allow_buried) {
 				curobj = level.buriedobjlist;
-				*wherefrom = (1 << OBJ_BURIED);
+				if (wherefrom) *wherefrom = (1 << OBJ_BURIED);
 			}
 			else if (curwhere == OBJ_ONBILL) {
 				/* we NEVER look on bills */
@@ -2972,7 +2972,7 @@ boolean endnow;
 				do {
 					curobj = magic_chest_objs[magic_chest_index];
 				} while (!curobj && ++magic_chest_index < 10);
-				*wherefrom = (1 << OBJ_MAGIC_CHEST);
+				if (wherefrom) *wherefrom = (1 << OBJ_MAGIC_CHEST);
 			}
 			else if (curwhere == OBJ_INTRAP && allow_intrap) {
 				do {
