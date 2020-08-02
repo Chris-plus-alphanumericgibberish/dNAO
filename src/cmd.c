@@ -2319,7 +2319,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		you_have("+50% to spell damage");
 	}
 	if (u.ukrau/3)
-	    you_have(enlght_combatinc("spell damage", u.uaesh/3, final, buf));
+	    you_have(enlght_combatinc("spell damage", u.ukrau/3, final, buf));
 	if (u.uhoon/3 || u.uhoon_duration)
 	    you_have(enlght_combatinc("to healing", u.uhoon/3 + (u.uhoon_duration ? 30 : 0), final, buf));
 	if (u.unaen/3 || u.unaen_duration)
@@ -3098,7 +3098,7 @@ int final;
 	    dump(youhad, "+50% to spell damage");
 	}
 	if (u.ukrau/3)
-	    dump(youhad, enlght_combatinc("spell damage", u.uaesh/3, final, buf));
+	    dump(youhad, enlght_combatinc("spell damage", u.ukrau/3, final, buf));
 	if (u.uhoon/3 || u.uhoon_duration)
 	    dump(youhad, enlght_combatinc("to healing", u.uhoon/3 + (u.uhoon_duration ? 30 : 0), final, buf));
 	if (u.unaen/3 || u.unaen_duration)
