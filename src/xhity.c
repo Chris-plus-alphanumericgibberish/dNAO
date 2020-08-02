@@ -9424,6 +9424,7 @@ boolean * needs_uncancelled;
 	case AD_STDY:
 	case AD_BLAS:
 	case AD_BDFN:
+	case AD_SPHR:
 		maybeset(needs_magr_eyes, TRUE);
 		maybeset(needs_mdef_eyes, FALSE);
 		break;
@@ -10833,38 +10834,79 @@ int vis;
 		}
 		break;
 	case AD_WTCH:{
-					 //Watcher in the Water's tentacle spawn and retreat behavior
-					 int ltnt = 0, stnt = 0;
-					 struct monst *tmon;
-					 if (distmin(u.ux, u.uy, magr->mx, magr->my) <= 2 && !(magr->mflee)){
-						 magr->mflee = 1;
-						 magr->mfleetim = 2;
-					 }
-					 for (tmon = fmon; tmon; tmon = tmon->nmon){
-						 if (pa->mtyp == PM_WATCHER_IN_THE_WATER){
-							 if (tmon->mtyp == PM_SWARM_OF_SNAKING_TENTACLES) stnt++;
-							 else if (tmon->mtyp == PM_LONG_SINUOUS_TENTACLE) ltnt++;
-						 }
-						 else if (pa->mtyp == PM_KETO){
-							 if (tmon->mtyp == PM_WIDE_CLUBBED_TENTACLE) ltnt++;
-						 }
-					 }
-					 if (pa->mtyp == PM_WATCHER_IN_THE_WATER){
-						 if (stnt<6){
-							 makemon(&mons[PM_SWARM_OF_SNAKING_TENTACLES], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT | MM_NOCOUNTBIRTH);
-						 }
-						 else if (ltnt<2){
-							 makemon(&mons[PM_LONG_SINUOUS_TENTACLE], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT | MM_NOCOUNTBIRTH);
-						 }
-					 }
-					 else if (pa->mtyp == PM_KETO){
-						 if (ltnt<2){
-							 makemon(&mons[PM_WIDE_CLUBBED_TENTACLE], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT | MM_NOCOUNTBIRTH);
-						 }
-					 }
+		 //Watcher in the Water's tentacle spawn and retreat behavior
+		 int ltnt = 0, stnt = 0;
+		 struct monst *tmon;
+		 if (distmin(u.ux, u.uy, magr->mx, magr->my) <= 2 && !(magr->mflee)){
+			 magr->mflee = 1;
+			 magr->mfleetim = 2;
+		 }
+		 for (tmon = fmon; tmon; tmon = tmon->nmon){
+			 if (pa->mtyp == PM_WATCHER_IN_THE_WATER){
+				 if (tmon->mtyp == PM_SWARM_OF_SNAKING_TENTACLES) stnt++;
+				 else if (tmon->mtyp == PM_LONG_SINUOUS_TENTACLE) ltnt++;
+			 }
+			 else if (pa->mtyp == PM_KETO){
+				 if (tmon->mtyp == PM_WIDE_CLUBBED_TENTACLE) ltnt++;
+			 }
+		 }
+		 if (pa->mtyp == PM_WATCHER_IN_THE_WATER){
+			 if (stnt<6){
+				 makemon(&mons[PM_SWARM_OF_SNAKING_TENTACLES], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT | MM_NOCOUNTBIRTH);
+			 }
+			 else if (ltnt<2){
+				 makemon(&mons[PM_LONG_SINUOUS_TENTACLE], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT | MM_NOCOUNTBIRTH);
+			 }
+		 }
+		 else if (pa->mtyp == PM_KETO){
+			 if (ltnt<2){
+				 makemon(&mons[PM_WIDE_CLUBBED_TENTACLE], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT | MM_NOCOUNTBIRTH);
+			 }
+		 }
 	}break;
-
-
+	case AD_SPHR:  // create spheres
+		if (magr->mspec_used)
+			return MM_MISS;
+		else {
+			int i = 0;
+			int n;
+			int mid;
+			struct monst *mtmp;
+			if(pa->mtyp == PM_CANDLE_TREE){
+				mid = PM_FLAMING_SPHERE;
+				// if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
+			} else {
+				switch(rnd(3)){
+					case 1:
+						mid = PM_FLAMING_SPHERE;
+					break;
+					case 2:
+						mid = PM_SHOCKING_SPHERE;
+					break;
+					case 3:
+						mid = PM_FREEZING_SPHERE;
+					break;
+				}
+			}
+			for(n = dmg; n > 0; n--){
+				mtmp = makemon(&mons[mid], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+				if (mtmp) {
+					/* time out */
+					mtmp->mvanishes = mlev(magr) + rnd(mlev(magr));
+					/* can be peaceful */
+					if(magr->mpeaceful)
+						mtmp->mpeaceful = TRUE;
+					/* can be tame */
+					if (magr->mtame) {
+						initedog(mtmp);
+					}
+					/* bonus movement */
+					mtmp->movement = 3*NORMAL_SPEED;
+				}
+			}
+			//Breath timer
+			magr->mspec_used = 10 + rn2(20);
+		}
 		break;
 	default:
 		impossible("unhandled gaze type %d", adtyp);

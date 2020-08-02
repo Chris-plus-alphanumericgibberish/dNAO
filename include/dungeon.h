@@ -60,6 +60,7 @@ typedef struct dungeon {	/* basic dungeon identifier */
 	int	entry_lev;	/* entry level */
 	int	num_dunlevs;	/* number of levels in this dungeon */
 	int	dunlev_ureached; /* how deep you have been in this dungeon */
+	int	dunlev_ureturn; /* where should you return to in this dungeon? */
 	int	ledger_start,	/* the starting depth in "real" terms */
 		depth_start;	/* the starting depth in "logical" terms */
 } dungeon;

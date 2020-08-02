@@ -1228,7 +1228,7 @@ do_look(quick)
 	    }
 	}
 
-#define is_cmap_trap(i) ((i) >= S_arrow_trap && (i) <= S_mummy_trap)
+#define is_cmap_trap(i) ((i) >= S_arrow_trap && (i) <= S_switch)
 #define is_cmap_drawbridge(i) ((i) >= S_vodbridge && (i) <= S_hcdbridge)
 
 	/* Now check for graphics symbols */
@@ -1980,6 +1980,7 @@ get_description_of_damage_type(uchar id)
 	case AD_CURS: return "steal intrinsic";
 	case AD_BDFN: return "spears of blood";
 	case AD_SQUE: return "steal Quest Artifact or Amulet";
+	case AD_SPHR: return "create elemental spheres";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

@@ -1036,6 +1036,9 @@ doelementalbreath()
 		case AD_SLEE:
 			mon = makemon(&mons[PM_DREAM_QUASIELEMENTAL], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 		break;
+		case AD_MAGM:
+			mon = makemon(&mons[PM_ENERGY_VORTEX], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+		break;
 	}
 	if(mon){
 		initedog(mon);

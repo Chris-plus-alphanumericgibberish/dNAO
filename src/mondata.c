@@ -106,6 +106,9 @@ struct permonst * ptr;
 				case AD_ACID:
 					mon->mintrinsics[(ACID_RES-1)/32] |= (1 << (ACID_RES-1)%32);
 				break;
+				case AD_MAGM:
+					mon->mintrinsics[(ANTIMAGIC-1)/32] |= (1 << (ANTIMAGIC-1)%32);
+				break;
 			}
 		} else if(is_boreal_dragoon(ptr)){
 			static const int boreal_dragon_types[] = { AD_COLD, AD_FIRE, AD_MAGM, AD_PHYS };

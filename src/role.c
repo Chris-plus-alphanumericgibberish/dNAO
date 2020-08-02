@@ -278,7 +278,7 @@ struct Role roles[] = {
 	PM_OLD_GYPSY_WOMAN, PM_SERVANT, PM_REBEL_RINGLEADER,
 	PM_SOLDIER, PM_PEASANT, S_HUMANOID, S_HUMAN,
 	ART_MANTLE_OF_HEAVEN,
-	MA_DWARF|MA_ELF|MA_HUMAN|MA_VAMPIRE, ROLE_MALE|ROLE_FEMALE |
+	MA_DWARF|MA_ELF|MA_HUMAN|MA_VAMPIRE|MA_DRAGON, ROLE_MALE|ROLE_FEMALE |
 	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{   10,10,  7, 10,  7,  7 },
@@ -2675,7 +2675,7 @@ int newgame;
 		// urole.enemy2num = PM_MASTODON;
 		// urole.enemy1sym = S_QUADRUPED;
 		// urole.enemy2sym = S_LAW_ANGEL;
-	} else if (Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN)) {
+	} else if (Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend) {
 		if(flags.initgend){
 			flags.racial_pantheon = PM_HALF_DRAGON;
 			urole.filecode = "Hdf";
@@ -2701,6 +2701,7 @@ int newgame;
 			urace.attrmax[A_STR] = STR19(20);
 			urace.attrmax[A_DEX] = 20;
 			urace.attrmax[A_CON] = 18;
+			quest_status.leader_is_dead = TRUE;
 		} else {
 			flags.racial_pantheon = PM_HALF_DRAGON;
 			urole.filecode = "Hdm";

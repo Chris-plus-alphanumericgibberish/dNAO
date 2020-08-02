@@ -1133,11 +1133,30 @@ register struct trap *ttmp;
 	    You_feel("dizzy for a moment, but nothing happens...");
 	    return;
 	}
-
-	target_level = ttmp->dst;
-	schedule_goto(&target_level, FALSE, FALSE, 1,
-		      "You feel dizzy for a moment, but the sensation passes.",
-		      (char *)0);
+	
+	//The exit portal tries to return fem half dragon nobles to where they entered the quest.
+	if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend && In_quest(&u.uz)){
+	    int i;
+	    extern int n_dgns; /* from dungeon.c */
+		//Look for return info
+	    for (i = 0; i < n_dgns; i++)
+			if(dungeons[i].dunlev_ureturn)
+				break;
+		if(i < n_dgns){
+			target_level.dnum = i;
+			target_level.dlevel = dungeons[i].dunlev_ureturn;
+		} else {
+			target_level = ttmp->dst;
+		}
+		schedule_goto(&target_level, FALSE, FALSE, FALSE,
+				  "You feel dizzy for a moment, but the sensation passes.",
+				  (char *)0);
+	} else {
+		target_level = ttmp->dst;
+		schedule_goto(&target_level, FALSE, FALSE, TRUE,
+				  "You feel dizzy for a moment, but the sensation passes.",
+				  (char *)0);
+	}
 }
 
 void

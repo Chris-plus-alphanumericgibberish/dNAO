@@ -557,8 +557,11 @@ boolean you_abilities;
 				(uarms && uarms->otyp == GREEN_DRAGON_SCALE_SHIELD))) ||
 			((flags.HDbreath == AD_ACID) && (
 				(uarm && (uarm->otyp == YELLOW_DRAGON_SCALES || uarm->otyp == YELLOW_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == YELLOW_DRAGON_SCALE_SHIELD)))))))
-		{
+				(uarms && uarms->otyp == YELLOW_DRAGON_SCALE_SHIELD))) ||
+			((flags.HDbreath == AD_MAGM) && (
+				(uarm && (uarm->otyp == GRAY_DRAGON_SCALES || uarm->otyp == GRAY_DRAGON_SCALE_MAIL)) ||
+				(uarms && uarms->otyp == GRAY_DRAGON_SCALE_SHIELD))))))
+		){
 			add_ability('a', "Use your armor's breath weapon", MATTK_DSCALE);
 		}
 	}

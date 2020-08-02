@@ -859,6 +859,22 @@ unsigned trflags;
 			
 		break;
 		
+	    case SWITCH_TRAP:
+			if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend){
+				int ix, iy;
+				for(ix = 1; ix < COLNO; ix++){
+					for(iy = 0; iy < ROWNO; iy++){
+						if(IS_DOOR(levl[ix][iy].typ) && artifact_door(ix,iy)){
+							You_hear("a door open.");
+							levl[ix][iy].typ = ROOM;
+							unblock_point(ix,iy);
+						}
+					}
+				}
+			} else {
+				impossible("dotrap: You triggered an unhandled switch trap");
+			}
+		break;
 	    case VIVI_TRAP:
 			if(trap->tseen){
 				You("shove through the delicate equipment, ruining it!");
@@ -2484,6 +2500,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			}
 		    }
 		    break;
+		case SWITCH_TRAP:
 		case MUMMY_TRAP:
 		// monsters can't activate these bad boys
 		break;

@@ -359,6 +359,7 @@ struct artifact {
 #define FILTH_ARROWS    (LAST_PROP+74)
 #define ALLSIGHT        (LAST_PROP+75)
 #define INVOKE_DARK     (LAST_PROP+76)
+#define QUEST_PORTAL    (LAST_PROP+77)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20

@@ -138,6 +138,7 @@ rndtrap()
 	    switch (rtrap) {
 	     case HOLE:		/* no random holes on special levels */
 	     case MUMMY_TRAP:		/* no random generation */
+	     case SWITCH_TRAP:		/* no random generation */
 	     case VIVI_TRAP:		/* scripted only, no random generation */
 	     case MAGIC_PORTAL:	rtrap = NO_TRAP;
 				break;

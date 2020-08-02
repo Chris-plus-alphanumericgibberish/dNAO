@@ -45,13 +45,13 @@ MONSTER: 'd', "warg", random, hostile
 MONSTER: 'd', "warg", random, hostile
 MONSTER: 'd', "warg", random, hostile
 
-MONSTER: '{', "viper tree", random, hostile
-MONSTER: '{', "viper tree", random, hostile
-MONSTER: '{', "viper tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
 
-MONSTER: '{', "viper tree", random, hostile
-MONSTER: '{', "viper tree", random, hostile
-MONSTER: '{', "viper tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
 
 MAZE: "Hdf-home",'T'
 FLAGS: hardfloor
@@ -232,9 +232,9 @@ STAIR:(00,02),up
 STAIR:(75,10),down
 
 # Church
-REGION:(18,01,24,08),lit,"temple"
+REGION:(18,01,24,07),lit,"temple",unfilled
 ALTAR:(21,02),chaos,shrine
-REGION:(10,01,18,05),lit,"morgue"
+REGION:(10,01,18,04),lit,"morgue"
 
 # Doors
 # Building Doors (others are damaged walls)
@@ -316,13 +316,13 @@ MONSTER: 'd', "warg", random, hostile
 MONSTER: 'd', "warg", random, hostile
 MONSTER: 'd', "warg", random, hostile
 
-MONSTER: '{', "viper tree", random, hostile
-MONSTER: '{', "viper tree", random, hostile
-MONSTER: '{', "viper tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
 
-MONSTER: '{', "viper tree", random, hostile
-MONSTER: '{', "viper tree", random, hostile
-MONSTER: '{', "viper tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
+MONSTER: '{', "candle tree", random, hostile
 
 GEOMETRY:center,center
 #0         1         2         3         4         5         6         7        
@@ -514,11 +514,13 @@ ENDMAP
 REGION:(00,00,75,20),lit,"ordinary"
 # Stairs
 STAIR:(66,10),up
+TRAP: "switch", (08,14)
 # Doors
 # Outside Doors
+NON_DIGGABLE:(00,00,75,20)
 DOOR:closed,(68,10)
 DOOR:locked,(62,10)
-DOOR:locked,(16,08)
+DOOR:locked,(16,08), 1
 DOOR:closed,(22,12)
 
 # Church

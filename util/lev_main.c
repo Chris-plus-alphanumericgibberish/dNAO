@@ -121,6 +121,7 @@ static struct {
 	{ "land mine",	LANDMINE },
 	{ "rolling boulder",	ROLLING_BOULDER_TRAP },
 	{ "mummy trap",	MUMMY_TRAP },
+	{ "switch",	SWITCH_TRAP },
 	{ "sleep gas",	SLP_GAS_TRAP },
 	{ "rust",	RUST_TRAP },
 	{ "fire",	FIRE_TRAP },

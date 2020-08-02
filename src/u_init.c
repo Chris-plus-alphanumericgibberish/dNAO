@@ -2451,7 +2451,7 @@ u_init()
 	dungeon_topology.eprecursor_typ = rnd(8);
 	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN)){
 		if(flags.initgend)
-			flags.HDbreath = AD_COLD;
+			flags.HDbreath = rn2(2) ? AD_MAGM : AD_COLD;
 		else flags.HDbreath = AD_FIRE;
 	} else switch(rnd(6)){
 		case 1:

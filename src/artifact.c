@@ -4911,6 +4911,38 @@ arti_invoke(obj)
 	    }
 	    break;
 	  }
+	case QUEST_PORTAL: {
+	    int i;
+	    d_level newlev;
+	    extern int n_dgns; /* from dungeon.c */
+		
+		if(In_quest(&u.uz)){
+			pline("Nothing happens!");
+			break;
+		}
+	    if(u.uhave.amulet || In_endgame(&u.uz)){
+			You_feel("very disoriented for a moment.");
+			break;
+		}
+		
+		//Clear any old return info
+	    for (i = 0; i < n_dgns; i++)
+			dungeons[i].dunlev_ureturn = 0;
+		
+		//Set return info
+		dungeons[u.uz.dnum].dunlev_ureturn = u.uz.dlevel;
+		
+	    newlev.dnum = quest_dnum;
+		newlev.dlevel = qstart_level.dlevel;
+		
+		if(u.usteed && mon_has_amulet(u.usteed)){
+			dismount_steed(DISMOUNT_VANISHED);
+		}
+		if(!Blind) You("are sucked into the scroll!");
+		else You_feel("weightless for a moment.");
+		
+		goto_level(&newlev, FALSE, FALSE, FALSE);
+	}break;
 	case ENLIGHTENING:
 	    enlightenment(0);
 	break;

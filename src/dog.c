@@ -277,6 +277,9 @@ makedog()
 			case AD_ACID:
 				mtmp->mintrinsics[(ACID_RES-1)/32] &= ~(1 << (ACID_RES-1)%32);
 			break;
+			case AD_MAGM:
+				mtmp->mintrinsics[(ANTIMAGIC-1)/32] &= ~(1 << (ANTIMAGIC-1)%32);
+			break;
 		}
 		switch(flags.HDbreath){
 			case AD_COLD:
@@ -302,6 +305,10 @@ makedog()
 			case AD_ACID:
 				mtmp->mvar_hdBreath = AD_ACID;
 				mtmp->mintrinsics[(ACID_RES-1)/32] |= (1 << (ACID_RES-1)%32);
+			break;
+			case AD_MAGM:
+				mtmp->mvar_hdBreath = AD_MAGM;
+				mtmp->mintrinsics[(ANTIMAGIC-1)/32] |= (1 << (ANTIMAGIC-1)%32);
 			break;
 		}
 	}
@@ -455,7 +462,8 @@ boolean with_you;
 		    xlocale = t->tx,  ylocale = t->ty;
 		    break;
 		} else {
-		    impossible("mon_arrive: no corresponding portal?");
+			//Note: thanks to the Female Half-Dragon Noble quest, this is no longer impossible
+		    // impossible("mon_arrive: no corresponding portal?");
 		} /*FALLTHRU*/
 	 default:
 	 case MIGR_RANDOM:	xlocale = ylocale = 0;

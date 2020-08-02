@@ -2090,6 +2090,17 @@ A("The Cloak of the Consort",		DROVEN_CLOAK,		(const char *)0,
 	),
 
 /*Needs encyc entry*/
+A("Painting Fragment",	SCR_BLANK_PAPER,				"faded canvas scroll",
+	200L, CLOTH, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, PM_NOBLEMAN, PM_HALF_DRAGON, TIER_F, (ARTG_NOGEN|ARTG_NOWISH),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	QUEST_PORTAL, NOFLAG
+	),
+
+/*Needs encyc entry*/
 A("The Profaned Greatscythe",		SCYTHE,				(const char *)0,
 	4000L, MINERAL, MZ_HUGE, WT_DEFAULT,
 	A_LAWFUL, PM_NOBLEMAN, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH),

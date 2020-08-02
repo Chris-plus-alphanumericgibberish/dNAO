@@ -549,6 +549,20 @@ qt_montype()
 		if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GENOD && !In_quest(&u.uz)))
 			return (&mons[qpm]);
 		return (mkclass(S_DEMON, G_HELL));
+	} else if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend
+		&& ((Is_qlocate(&u.uz) && rn2(2)) || (u.uz.dlevel < qlocate_level.dlevel))
+	){
+		int qpm;
+		if(rn2(5)){
+			qpm = PM_WOLF;
+			if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GENOD && !In_quest(&u.uz)))
+				return (&mons[qpm]);
+			return (mkclass(S_DOG, G_NOHELL));
+		}
+		qpm = PM_CANDLE_TREE;
+		if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GENOD && !In_quest(&u.uz)))
+			return (&mons[qpm]);
+		return (mkclass(S_DOG, G_NOHELL));
 	} else {
 		int qpm;
 		if(Race_if(PM_DROW) && !flags.initgend && Role_if(PM_NOBLEMAN) && on_level(&u.uz, &qstart_level)) return &mons[PM_LONG_WORM_TAIL];

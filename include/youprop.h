@@ -85,7 +85,7 @@
 
 #define HAntimagic		u.uprops[ANTIMAGIC].intrinsic
 #define EAntimagic		u.uprops[ANTIMAGIC].extrinsic
-#define Antimagic		(EAntimagic || HAntimagic ||\
+#define Antimagic		(EAntimagic || HAntimagic || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_MAGM) ||\
 						(u.usteed && u.usteed->misc_worn_check & W_SADDLE \
 						&& which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
 						Nullmagic || active_glyph(ARCANE_BULWARK) ||\

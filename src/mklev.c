@@ -1676,10 +1676,7 @@ xchar x, y;	/* location */
 	 * as a favored spot for a branch.
 	 */
 	if (!br || made_branch) return;
-
-	if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend && Is_qstart(&u.uz))
-		return;
-
+	
 	if (!x) {	/* find random coordinates for branch */
 	    br_room = find_branch_room(&m);
 	    x = m.x;
@@ -1696,6 +1693,20 @@ xchar x, y;	/* location */
 	    /* we're on end2 */
 	    make_stairs = br->type != BR_NO_END2;
 	    dest = &br->end1;
+	}
+
+	//The female half dragon noble has a lot of shenanigans going on
+	if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON)){
+		//There is no return portal on the first quest level
+		if(flags.initgend && Is_qstart(&u.uz))
+			return;
+		//The branch level has an artifact instead of a portal
+		if(dest->dnum == quest_dnum){
+			struct obj *obj;
+			obj = mksobj_at(SCR_BLANK_PAPER, x, y, FALSE, FALSE);
+			if(obj) obj = oname(obj, artiname(ART_PAINTING_FRAGMENT));
+			return;
+		}
 	}
 
 	if (br->type == BR_PORTAL) {
@@ -1821,6 +1832,7 @@ coord *tm;
 		/* reject "too hard" traps */
 		switch (kind) {
 		    case VIVI_TRAP:
+		    case SWITCH_TRAP:
 			kind = NO_TRAP; break;
 			case MUMMY_TRAP:
 			if (!(Is_qlocate(&u.uz) && Role_if(PM_ARCHEOLOGIST))) kind = NO_TRAP; 
