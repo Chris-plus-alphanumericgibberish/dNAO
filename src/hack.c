@@ -16,6 +16,7 @@ STATIC_DCL boolean FDECL(findtravelpath, (BOOLEAN_P));
 STATIC_DCL boolean FDECL(monstinroom, (struct permonst *,int));
 
 STATIC_DCL void FDECL(move_update, (BOOLEAN_P));
+STATIC_DCL struct obj * FDECL(all_items, (boolean, int *, boolean));
 
 #define IS_SHOP(x)	(rooms[x].rtype >= SHOPBASE)
 
@@ -2837,5 +2838,189 @@ struct obj *otmp;
 }
 #endif
 #endif /* OVLB */
+
+/* starts all_items() */
+/* initializes all_items to look in where_to_look chains */
+struct obj *
+start_all_items(where_to_look)
+int * where_to_look;
+{
+	return all_items(TRUE, where_to_look, FALSE);
+}
+
+/* gets next object in all_items() */
+/* uses foundwhere to return where the returned object was found */
+/* -> helpful for contained objects, whose obj->where doesn't reflect minvent/migratingminvent/etc */
+struct obj *
+next_all_items(foundwhere)
+int * foundwhere;
+{
+	return all_items(FALSE, foundwhere, FALSE);
+}
+
+/* prematurely ends all_items */
+void
+end_all_items()
+{
+	all_items(FALSE, NULL, TRUE);
+	return;
+}
+
+/* finds all items, specify where you want them from */
+struct obj *
+all_items(start, wherefrom, endnow)
+boolean start;	/* call with TRUE when first calling this function to start it */
+int * wherefrom;	/* bitfield, (1L << obj->where) */
+boolean endnow;
+{
+	static boolean in_progress = FALSE;
+	static int curwhere;
+	static struct obj * prevobj;
+	static struct obj * curobj;
+	static struct trap * curtrap;
+	static struct monst * curmonst;
+	static boolean did_migratingmons;
+	static int magic_chest_index;
+	static boolean allow_floor;
+	static boolean allow_contained;
+	static boolean allow_invent;
+	static boolean allow_minvent;
+	static boolean allow_migrating;
+	static boolean allow_buried;
+	static boolean allow_magic;
+	static boolean allow_intrap;
+
+	if (endnow) {
+		in_progress = FALSE;
+		return (struct obj *)0;
+	}
+
+	if (start && in_progress) {
+		impossible("all_items() called with start=TRUE while in progress!");
+		return (struct obj *)0;
+	}
+
+	if (start) {
+		/* fresh start */
+		curwhere = OBJ_FREE;
+		prevobj = (struct obj *)0;
+		curobj = (struct obj *)0;
+		curtrap = (struct trap *)0;
+		curmonst = (struct monst *)0;
+		did_migratingmons = FALSE;
+		magic_chest_index = 0;
+		allow_floor     = !wherefrom || !!((*wherefrom)&(1 << OBJ_FLOOR));
+		allow_contained = !wherefrom || !!((*wherefrom)&(1 << OBJ_CONTAINED));
+		allow_invent    = !wherefrom || !!((*wherefrom)&(1 << OBJ_INVENT));
+		allow_minvent   = !wherefrom || !!((*wherefrom)&(1 << OBJ_MINVENT));
+		allow_migrating = !wherefrom || !!((*wherefrom)&(1 << OBJ_MIGRATING));
+		allow_buried    = !wherefrom || !!((*wherefrom)&(1 << OBJ_BURIED));
+		allow_magic     = !wherefrom || !!((*wherefrom)&(1 << OBJ_MAGIC_CHEST));
+		allow_intrap    = !wherefrom || !!((*wherefrom)&(1 << OBJ_INTRAP));
+	}
+
+	do {
+		if (!curobj) {
+			/* get the start of a new chain */
+			if (curwhere == OBJ_FREE) {
+				/* we literally cannot search OBJ_FREE */
+			}
+			else if (curwhere == OBJ_FLOOR && allow_floor) {
+				curobj = fobj;
+				if (wherefrom) *wherefrom = (1 << OBJ_FLOOR);
+			}
+			else if (curwhere == OBJ_INVENT && allow_invent) {
+				curobj = invent;
+				if (wherefrom) *wherefrom = (1 << OBJ_INVENT);
+			}
+			else if (curwhere == OBJ_MINVENT && allow_minvent) {
+				do {
+					if (!curmonst) {
+						curmonst = fmon;
+					}
+					else
+						curmonst = curmonst->nmon;
+					if (curmonst)
+						curobj = curmonst->minvent;
+				} while (curmonst && !curobj);
+				if (wherefrom) *wherefrom = (1 << OBJ_MINVENT);
+			}
+			else if (curwhere == OBJ_MIGRATING && allow_minvent && allow_migrating && !did_migratingmons) {
+				do {
+					if (!curmonst) {
+						curmonst = migrating_mons;
+					}
+					else
+						curmonst = curmonst->nmon;
+					if (curmonst)
+						curobj = curmonst->minvent;
+				} while (curmonst && !curobj);
+				if (wherefrom) *wherefrom = (1 << OBJ_MINVENT) | (1 << OBJ_MIGRATING);
+			}
+			else if (curwhere == OBJ_MIGRATING && allow_migrating) {
+				curobj = migrating_objs;
+				if (wherefrom) *wherefrom = (1 << OBJ_MIGRATING);
+			}
+			else if (curwhere == OBJ_BURIED && allow_buried) {
+				curobj = level.buriedobjlist;
+				if (wherefrom) *wherefrom = (1 << OBJ_BURIED);
+			}
+			else if (curwhere == OBJ_ONBILL) {
+				/* we NEVER look on bills */
+			}
+			else if (curwhere == OBJ_MAGIC_CHEST && allow_magic) {
+				do {
+					curobj = magic_chest_objs[magic_chest_index];
+				} while (!curobj && ++magic_chest_index < 10);
+				if (wherefrom) *wherefrom = (1 << OBJ_MAGIC_CHEST);
+			}
+			else if (curwhere == OBJ_INTRAP && allow_intrap) {
+				do {
+					if (!curtrap) {
+						curtrap = ftrap;
+					}
+					else
+						curtrap = curtrap->ntrap;
+					if (curtrap)
+						curobj = curtrap->ammo;
+				} while (curtrap && !curobj);
+				*wherefrom = (1 << OBJ_INTRAP);
+			}
+		}
+		else {
+			prevobj = curobj;
+			curobj = curobj->nobj;
+		}
+
+		/* contained items handling */
+		if (allow_contained) {
+			if (curobj) {
+				/* drop to the bottom of the contained-obj stack */
+				while (curobj->cobj)
+					curobj = curobj->cobj;
+			}
+			else if (prevobj && prevobj->where == OBJ_CONTAINED) {
+				/* if we reached the end of a contained chain, bump up to container */
+				curobj = prevobj->ocontainer;
+			}
+		}
+
+		/* migratingmons handling */
+		if (!curobj && !did_migratingmons) {
+			/* predecrement curwhere so that we run OBJ_MIGRATING again, but this time not the migrating mons */
+			did_migratingmons = TRUE;
+			curwhere--;
+		}
+
+	} while (!curobj && curwhere++ < NOBJ_STATES);
+
+	if (!curobj) {
+		/* finally done */
+		in_progress = FALSE;
+	}
+
+	return curobj;
+}
+
 
 /*hack.c*/

@@ -9795,30 +9795,6 @@ dogoat_tentacles()
 	}
 }
 
-#define HANDLE_SECRETIONS			if(check_oprop(obj, OPROP_ASECW)){\
-			if((!(obj->opoisoned&OPOISON_ACID) || \
-				((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3)\
-			 ) && !rn2(40)\
-			){\
-				obj->opoisoned |= OPOISON_ACID;\
-				if((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3){\
-					obj->opoisonchrgs++;\
-				}\
-			}\
-		}\
-		if(check_oprop(obj, OPROP_PSECW)){\
-			if((!(obj->opoisoned&OPOISON_BASIC) || \
-				((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3)\
-			 ) && !rn2(40)\
-			){\
-				obj->opoisoned |= OPOISON_BASIC;\
-				if((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3){\
-					obj->opoisonchrgs++;\
-				}\
-			}\
-		}
-
-
 void
 living_items()
 {
@@ -9830,148 +9806,87 @@ living_items()
 		return;
 	
 	//collect all the blasting items into a list so that they can blast away without worrying about changing the state of the dungeon.
-	for(obj = invent; obj; obj = obj->nobj){
-		if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
+
+	/* does not search migrating monsters' inventories nor migrating objects nor magic chests */
+	int owhere = ((1 << OBJ_FLOOR) |
+				(1 << OBJ_INVENT) |
+				(1 << OBJ_MINVENT) |
+				(1 << OBJ_BURIED) |
+				(1 << OBJ_CONTAINED) |
+				(1 << OBJ_INTRAP));
+
+	for (obj = start_all_items(&owhere); obj; obj = next_all_items(&owhere)) {
+		/* collect blasting items into a list so they can happen AFTER collecting them all,
+		 * and so not changing the state of the dungeon (which would cause items to be missed) */
+		if (check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
 			nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
 			nblast->nblast = blast_list;
 			nblast->spe = obj->spe;
 			blast_list = nblast;
 		}
-		if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
+		/* find number of faceless statues */
+		if (obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
 			whisper++;
 		}
-		HANDLE_SECRETIONS
-	}
-	for (obj = fobj; obj; obj = obj->nobj) {
-		if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
-			nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
-			nblast->nblast = blast_list;
-			nblast->spe = obj->spe;
-			blast_list = nblast;
-		}
-		if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
-			whisper++;
-		}
-		HANDLE_SECRETIONS
-	}
-	for (obj = level.buriedobjlist; obj; obj = obj->nobj) {
-		if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
-			nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
-			nblast->nblast = blast_list;
-			nblast->spe = obj->spe;
-			blast_list = nblast;
-		}
-		if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
-			whisper++;
-		}
-		HANDLE_SECRETIONS
-	}
-	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-	if (DEADMONSTER(mtmp)) continue;
-		for (obj = mtmp->minvent; obj; obj = obj->nobj) {
-			if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
-				nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
-				nblast->nblast = blast_list;
-				nblast->spe = obj->spe;
-				blast_list = nblast;
+		/* acidify self-acidifying objects */ 
+		if (check_oprop(obj, OPROP_ASECW)){
+			if ((!(obj->opoisoned&OPOISON_ACID) ||
+				((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3)
+				) && !rn2(40)
+				){
+				obj->opoisoned |= OPOISON_ACID;
+				if ((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3){
+					obj->opoisonchrgs++;
+				}
 			}
-			if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
-				whisper++;
+		}
+		/* poison self-poisoning objects */
+		if (check_oprop(obj, OPROP_PSECW)){
+			if ((!(obj->opoisoned&OPOISON_BASIC) ||
+				((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3)
+				) && !rn2(40)
+				){
+				obj->opoisoned |= OPOISON_BASIC;
+				if ((obj->otyp == VIPERWHIP || obj->otyp == find_signet_ring()) && obj->opoisonchrgs < 3){
+					obj->opoisonchrgs++;
+				}
 			}
-			HANDLE_SECRETIONS
 		}
 	}
-	struct trap *ttmp;
-	for(ttmp = ftrap; ttmp; ttmp = ttmp->ntrap) {
-		if((obj = ttmp->ammo)){
-			if(check_oprop(obj, OPROP_DEEPW) && obj->spe < 8){
-				nblast = (struct blast_element *)malloc(sizeof(struct blast_element));
-				nblast->nblast = blast_list;
-				nblast->spe = obj->spe;
-				blast_list = nblast;
-			}
-			if(obj->otyp == STATUE && (obj->spe&STATUE_FACELESS)){
-				whisper++;
-			}
-			HANDLE_SECRETIONS
-		}
-	}
-	
+
+	/* now do the item blasts -- this had to be delayed -- what if a blast killed a monster,
+	 * and its items fell onto the floor after we had already checked the floor's items? */
 	for(nblast = blast_list; nblast; nblast = nblast->nblast){
 		do_item_blast(nblast->spe);
 	}
-	if(whisper && !rn2(20)){
-		if(whisper >= 10){
-			switch(rn2(4)){
-				case 0:
-				You_hear("murmuring babble surrounding you.");
-				break;
-				case 1:
-				You_hear("whispering babble all around you.");
-				break;
-				case 2:
-				You_hear("faint singing.");
-				break;
-				case 3:
-				You_hear("soft sobbing all around you.");
-				break;
-			}
-		} else if(whisper >= 5){
-			switch(rn2(4)){
-				case 0:
-				You_hear("faint murmuring.");
-				break;
-				case 1:
-				You_hear("whispering babble.");
-				break;
-				case 2:
-				You_hear("distant music.");
-				break;
-				case 3:
-				You_hear("soft sobbing.");
-				break;
-			}
-		} else if(whisper >= 2){
-			switch(rn2(4)){
-				case 0:
-				You_hear("isolated murmurs.");
-				break;
-				case 1:
-				You_hear("scattered whispers.");
-				break;
-				case 2:
-				You_hear("faint snatches of songs.");
-				break;
-				case 3:
-				You_hear("soft sobbing.");
-				break;
-			}
-		} else {
-			switch(rn2(4)){
-				case 0:
-				You_hear("someone murmuring.");
-				break;
-				case 1:
-				You_hear("someone whispering.");
-				break;
-				case 2:
-				You_hear("someone humming.");
-				break;
-				case 3:
-				You_hear("someone crying.");
-				break;
-			}
-		}
-	}
-	
-	//free the list
-	while(blast_list){
+	/* free the item-blast list */
+	while (blast_list){
 		nblast = blast_list;
 		blast_list = blast_list->nblast;
 		free(nblast);
 	}
 
-	//Animate objects in the dungeon
+	const char * whispers[4][4] =
+	{
+		/* whisper >= 10 */
+		{ "murmuring babble surrounding you", "whispering babble all around you", "faint singing", "soft sobbing all around you" },
+		/* whisper >= 5 */
+		{ "faint murmuring", "whispering babble", "distant music", "soft sobbing" },
+		/* >= 2 */
+		{ "isolated murmurs", "scattered whispers", "faint snatches of songs", "soft sobbing" },
+		/* == 1 */
+		{ "someone murmuring", "someone whispering", "someone humming", "someone crying" }
+	};
+
+	/* print whisper message from the faceless statues */
+	if(whisper && !rn2(20)){
+		int i = (whisper >= 10) + (whisper >= 5) + (whisper >= 2);
+		You_hear("%s.", whispers[i][rn2(4)]);
+	}
+
+	/* Animate objects in the dungeon -- this only happens to items in one chain (floor) and it changes the state of the dungeon,
+	 * so it's convenient not to handle this in the all_items() loop */
+
 	for (obj = fobj; obj; obj = nobj) {
 		nobj = obj->nobj;
 		if(obj->otyp == STATUE && obj->oattached != OATTACHED_MONST && !(obj->spe) && !rn2(70) && check_insight()){
@@ -9990,13 +9905,13 @@ living_items()
 			}
 		}
 		else if((obj->otyp == BROKEN_ANDROID || obj->otyp == BROKEN_GYNOID || obj->otyp == LIFELESS_DOLL) && obj->ovar1){
-			xchar x, y;
-			get_obj_location(obj, &x, &y, 0);
+			xchar ox, oy;
+			get_obj_location(obj, &ox, &oy, 0);
 			if(obj->ovar1 <= u.uinsight && !rn2(20)){
 				struct monst *mtmp;
 				mtmp = revive(obj, TRUE);
-				if(mtmp) pline("%s wakes up.", Monnam(mtmp));
-			} else if(cansee(x, y) && !rn2(20))
+				if (mtmp && cansee(ox, oy)) pline("%s wakes up.", Monnam(mtmp));
+			} else if(cansee(ox, oy) && !rn2(20))
 				pline("%s its finger.", Tobjnam(obj, "tap"));
 		}
 		//Nitocris's coffin causes Egyptian spawns
