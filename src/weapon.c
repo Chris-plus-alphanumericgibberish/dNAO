@@ -2847,103 +2847,74 @@ uwep_skill_type()
  * Treat restricted weapons as unskilled.
  */
 int
-weapon_hit_bonus(weapon)
+weapon_hit_bonus(weapon, wep_type)
 struct obj *weapon;
+int wep_type;
 {
-    int type, wep_type, skill, bonus = 0;
+	int type, skill, bonus = 0, aumpenalty = 0;
 	unsigned int maxweight = 0;
-    static const char bad_skill[] = "weapon_hit_bonus: bad skill %d";
 	static boolean twowepwarn = TRUE;
 	static boolean makashiwarn = TRUE;
 
-    wep_type = weapon_type(weapon);
-    /* use two weapon skill only if attacking with one of the wielded weapons */
-	if((u.twoweap && (weapon == uwep || weapon == uswapwep))
-		// && !(uwep && uswapwep && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
-	) type = P_TWO_WEAPON_COMBAT;
+	/* use two weapon skill only if attacking with one of the wielded weapons */
+	if ((u.twoweap && (weapon == uwep || weapon == uswapwep))
+		&& !(uwep && uswapwep && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
+		) type = P_TWO_WEAPON_COMBAT;
 	else type = wep_type;
+
+	skill = P_SKILL(type);
+
+	if (type == P_TWO_WEAPON_COMBAT)
+		skill = min(skill, P_SKILL(wep_type));
 	
-    if (type == P_NONE) {
+	switch (wep_type) /* does not include P_TWO_WEAPON_COMBAT, which is a penalty applied further below */
+	{
+	case P_NONE:
 		bonus = 0;
-    } else if (type <= P_LAST_WEAPON) {
-		switch (P_SKILL(type)) {
-			default: impossible(bad_skill, P_SKILL(type)); /* fall through */
-			case P_ISRESTRICTED:
-			case P_UNSKILLED:   bonus = -4; break;
-			case P_BASIC:       bonus =  0; break;
-			case P_SKILLED:     bonus =  2; break;
-			case P_EXPERT:      bonus =  5; break;
-			//For use with martial-arts
-			case P_MASTER:		bonus =  7; break;
-			case P_GRAND_MASTER: bonus = 9; break;
+		break;
+
+	case P_BARE_HANDED_COMBAT:
+		switch (skill){
+		default: impossible("weapon_hit_bonus: bad skill %d", skill); /* fall through */
+		case P_ISRESTRICTED:    bonus = (martial_bonus()) ? +0 : -2; break;
+		case P_UNSKILLED:       bonus = (martial_bonus()) ? +2 : +0; break;
+		case P_BASIC:           bonus = (martial_bonus()) ? +3 : +1; break;
+		case P_SKILLED:         bonus = (martial_bonus()) ? +4 : +2; break;
+		case P_EXPERT:          bonus = (martial_bonus()) ? +5 : +3; break;
+		case P_MASTER:          bonus = (martial_bonus()) ? +7 : +4; break;
+		case P_GRAND_MASTER:    bonus = (martial_bonus()) ? +9 : +5; break;
 		}
-    } else if (type == P_TWO_WEAPON_COMBAT) {
-		skill = P_SKILL(P_TWO_WEAPON_COMBAT);
-		if (P_SKILL(wep_type) < skill) skill = P_SKILL(wep_type);
+		break;
+
+	default:
+		/* weapon skills and misc skills */
 		switch (skill) {
-			default: impossible(bad_skill, skill); /* fall through */
-			case P_ISRESTRICTED:
-			case P_UNSKILLED:   bonus = -10; break;
-			case P_BASIC:	bonus = -8; break;
-			case P_SKILLED:	bonus = -5; break;
-			case P_EXPERT:	bonus = -2; break;
-			//For use with martial-arts
-			case P_MASTER:	bonus =  0; break;
-			case P_GRAND_MASTER:	bonus = +2; break;
+		default: impossible("weapon_hit_bonus: bad skill %d", skill);
+			/* fall through */
+		case P_ISRESTRICTED: bonus = -4; break;
+		case P_UNSKILLED:    bonus = -4; break;
+		case P_BASIC:        bonus = +0; break;
+		case P_SKILLED:      bonus = +2; break;
+		case P_EXPERT:       bonus = +5; break;
+		case P_MASTER:       bonus = +7; break;
+		case P_GRAND_MASTER: bonus = +9; break;
 		}
-    } else if (type == P_BARE_HANDED_COMBAT) {
-	/*
-	 *	       b.h.  m.a.
-	 *	unskl:	+1    +2
-	 *	basic:	+1    +3
-	 *	skild:	+2    +4
-	 *	exprt:	+2    +5
-	 *	mastr:	+3    +6
-	 *	grand:	+3    +7
-	 */
-	// bonus = P_SKILL(type);
-	// bonus = max(bonus,P_UNSKILLED) - 1;	/* unskilled => 0 */
-	// bonus = ((bonus + 1) * (martial_bonus() ? 3 : 1)) / 2;
-		if(martial_bonus()){
-			skill = P_SKILL(type);
-			switch(skill){
-				default: impossible(bad_skill, skill); /* fall through */
-				case P_ISRESTRICTED:	bonus =  0; break;
-				case P_UNSKILLED:   	bonus = +2; break;
-				case P_BASIC:			bonus = +3; break;
-				case P_SKILLED:			bonus = +4; break;
-				case P_EXPERT:			bonus = +5; break;
-				case P_MASTER:			bonus = +7; break;
-				case P_GRAND_MASTER:	bonus = +9; break;
-			}
-		} else {
-			skill = P_SKILL(type);
-			switch(skill){
-				default: impossible(bad_skill, skill); /* fall through */
-				case P_ISRESTRICTED:	bonus = -2; break;
-				case P_UNSKILLED:   	bonus =  0; break;
-				case P_BASIC:			bonus = +1; break;
-				case P_SKILLED:			bonus = +2; break;
-				case P_EXPERT:			bonus = +3; break;
-				case P_MASTER:			bonus = +4; break;
-				case P_GRAND_MASTER:	bonus = +5; break;
-			}
-		}
-    } else { //fallback for weapons that use non-weapon skills (like Singing Sword)
-		switch (P_SKILL(type)) {
-			default: impossible(bad_skill, P_SKILL(type)); /* fall through */
-			case P_ISRESTRICTED:
-			case P_UNSKILLED:   bonus = -4; break;
-			case P_BASIC:       bonus =  0; break;
-			case P_SKILLED:     bonus =  2; break;
-			case P_EXPERT:      bonus =  5; break;
-			//For use with martial-arts, should the need arise
-			case P_MASTER:		bonus =  7; break;
-			case P_GRAND_MASTER: bonus = 9; break;
-		}
+		break;
 	}
-	
+
 	if(type == P_TWO_WEAPON_COMBAT){
+		/* Effective skill to-hit-bonus after applying twoweapon combat penalty:
+		            R/ U/ B/ S/ E/ M/ G
+		1W martial +0 +2 +3 +4 +5 +7 +9
+		2W martial +0 +1 +1 +2 +2 +3 +3
+
+		1W unarmed -2 +0 +1 +2 +3 +4 +5
+		2W unarmed -3 +0 +1 +1 +1 +2 +2
+
+		1W weapons -4 -4 +0 +2 +5      
+		2W weapons -6 -6 +0 +1 +2
+		*/
+
 		/* Sporkhack:
 		 * Heavy things are hard to use in your offhand unless you're
 		 * very good at what you're doing.
@@ -2953,23 +2924,49 @@ struct obj *weapon;
 		 * #twoweapon even at unskilled...
 		 */
 		switch (P_SKILL(P_TWO_WEAPON_COMBAT)) {
-			default: impossible(bad_skill, P_SKILL(P_TWO_WEAPON_COMBAT));
+			default: impossible("weapon_hit_bonus: bad skill %d", P_SKILL(P_TWO_WEAPON_COMBAT));
 			case P_ISRESTRICTED:
-			case P_UNSKILLED:	 maxweight = 10; break;	 /* not silver daggers */
-			case P_BASIC:		 maxweight = 20; break;	 /* daggers, crysknife, sickle, aklys, flail, bullwhip, unicorn horn */
-			case P_SKILLED:	 	 maxweight = 30; break;	 /* shortswords and spears (inc silver), mace, club, lightsaber, grappling hook */
-			case P_EXPERT:		 maxweight = 40; break;	 /* sabers and long swords, axe weighs 60, war hammer 50, pickaxe 80, beamsword */
+			case P_UNSKILLED:		maxweight = 10; break;	 /* not silver daggers */
+			case P_BASIC:			maxweight = 20; break;	 /* daggers, crysknife, sickle, aklys, flail, bullwhip, unicorn horn */
+			case P_SKILLED:	 		maxweight = 30; break;	 /* shortswords and spears (inc silver), mace, club, lightsaber, grappling hook */
+			case P_EXPERT:			maxweight = 40; break;	 /* sabers and long swords, axe weighs 60, war hammer 50, pickaxe 80, beamsword */
 			case P_MASTER:			maxweight = 50; break;
 			case P_GRAND_MASTER:	maxweight = 60; break;
 		}
-		if (uswapwep && !(uwep && (uwep->otyp == STILETTOS)) && uswapwep->owt > maxweight
-		&& uswapwep->oartifact != ART_BLADE_DANCER_S_DAGGER && uswapwep->oartifact != ART_FRIEDE_S_SCYTHE
-		) {
-			if(twowepwarn) pline("Your %s seem%s very unwieldy.",xname(uswapwep),uswapwep->quan == 1 ? "s" : "");
-			twowepwarn = FALSE;
-			bonus += -20;
-		} else if(!twowepwarn) twowepwarn = TRUE;
-	} else if(!twowepwarn) twowepwarn = TRUE;
+		if (wep_type == P_BARE_HANDED_COMBAT) {
+			bonus -= abs(bonus * 2 / 3);
+		}
+		else {
+			bonus -= abs(bonus * 2 / 3);
+			/* additional penalty for over-weight offhand weapons */
+			if (uswapwep && uswapwep->owt > maxweight && !(
+				(uwep && (uwep->otyp == STILETTOS)) ||
+				(uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER) ||
+				(uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
+				))
+			{
+				/* penalty of -1 per aum over maxweight, min 5 max 40 */
+				aumpenalty = max(5, min((uswapwep->owt - maxweight), 40));
+				bonus -= aumpenalty;
+			}
+		}
+	}
+
+	/* only give/reset warnings if we are using our two weapons */
+	if (type == P_TWO_WEAPON_COMBAT) {
+		/* give a warning if your penalty is severe */
+		if (aumpenalty) {
+			if (twowepwarn) {
+				pline("Your %s %sunwieldy. (-%d)",
+					aobjnam(uswapwep, "seem"),
+					(aumpenalty > 10 ? "very " : ""), aumpenalty
+					);
+				twowepwarn = FALSE;
+			}
+		}
+		else if (!twowepwarn) twowepwarn = TRUE;
+	}
+
 #ifdef STEED
 	/* KMH -- It's harder to hit while you are riding */
 	if (u.usteed) {
@@ -3244,8 +3241,8 @@ int wep_type;
 					(uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
 				))
 			{
-				/* additional penalty of -5 per <maxweight> aum over maxweight */
-				bonus -= min((5 * (uswapwep->owt - maxweight) / maxweight), 20);
+				/* additional penalty of -0.5 per aum over maxweight, max 10 */
+				bonus -= min(uswapwep->owt - maxweight, 20)/2;
 			}
 		}
 	}
