@@ -598,6 +598,7 @@ struct obj *scroll;
 		return 0;
 	}
 	if(objects[scroll->otyp].oc_unique){
+		u.uconduct.literate++;
 		study_word(scroll);
 		return 1;
 	}
@@ -873,6 +874,9 @@ struct obj *scroll;
 		impossible("bad shard");
 		return 0;
 	}
+
+	u.uconduct.literate++;
+
 	//Speak one word of power per move free.
 	if(objects[scroll->otyp].oc_magic){
 		useup(scroll);
