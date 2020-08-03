@@ -4550,6 +4550,20 @@ boolean * messaged;
 	    return MM_HIT;
 	}
 
+	/* some artifacts will attempt to cancel (10% chance) the creatures they hit */
+	if (arti_attack_prop(otmp, ARTA_CANCEL) && dieroll <= 2 && (youdef || !mdef->mcan)) {
+		if (!Blind && (youagr || canseemon(magr))) {
+			pline("%s flashes %s as it hits %s!",
+				The(xname(otmp)),
+				hcolor(NH_WHITE),
+				mon_nam(mdef)
+				);
+			*messaged = TRUE;
+		}
+		/* cancel_monst handles resistance */
+		cancel_monst(mdef, otmp, youagr, FALSE, FALSE, FALSE);
+	}
+
 	if (oartifact == ART_LIFEHUNT_SCYTHE) {
 		if (youagr) {
 			int life = (basedmg)/2+1;
