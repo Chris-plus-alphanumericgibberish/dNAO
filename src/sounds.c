@@ -223,194 +223,6 @@ int rmtyp;
     return rooms[rno - ROOMOFFSET].rtype == rmtyp;
 }
 
-int
-count_glyphs(){
-	int i, count = 0;
-	for(i=0; i<32;i++){
-		if(((u.thoughts>>i)&1L) == 1L) count++;
-	}
-	return count;
-}
-
-int
-have_glyph(mtmp)
-struct monst *mtmp;
-{
-	switch(monsndx(mtmp->data)){
-		case PM_BESTIAL_DERVISH:
-		if(u.thoughts & CLOCKWISE_METAMORPHOSIS)
-			return 1;
-		break;
-		case PM_ETHEREAL_DERVISH:
-		if(u.thoughts & ANTI_CLOCKWISE_METAMORPHOSIS)
-			return 1;
-		break;
-		case PM_SPARKLING_LAKE:
-		if(u.thoughts & ARCANE_BULWARK)
-			return 1;
-		break;
-		case PM_FLASHING_LAKE:
-		if(u.thoughts & DISSIPATING_BULWARK)
-			return 1;
-		break;
-		case PM_SMOLDERING_LAKE:
-		if(u.thoughts & SMOLDERING_BULWARK)
-			return 1;
-		break;
-		case PM_FROSTED_LAKE:
-		if(u.thoughts & FROSTED_BULWARK)
-			return 1;
-		break;
-		case PM_BLOOD_SHOWER:
-		if(u.thoughts & BLOOD_RAPTURE)
-			return 1;
-		break;
-		case PM_MANY_TALONED_THING:
-		if(u.thoughts & CLAWMARK)
-			return 1;
-		break;
-		case PM_DEEP_BLUE_CUBE:
-		if(u.thoughts & CLEAR_DEEPS)
-			return 1;
-		break;
-		case PM_PITCH_BLACK_CUBE:
-		if(u.thoughts & DEEP_SEA)
-			return 1;
-		break;
-		case PM_PRAYERFUL_THING:
-		if(u.thoughts & COMMUNION)
-			return 1;
-		break;
-		case PM_HEMORRHAGIC_THING:
-		if(u.thoughts & CORRUPTION)
-			return 1;
-		break;
-		case PM_MANY_EYED_SEEKER:
-		if(u.thoughts & EYE_THOUGHT)
-			return 1;
-		break;
-		case PM_VOICE_IN_THE_DARK:
-		if(u.thoughts & FORMLESS_VOICE)
-			return 1;
-		break;
-		case PM_TINY_BEING_OF_LIGHT:
-		if(u.thoughts & GUIDANCE)
-			return 1;
-		break;
-		case PM_MAN_FACED_MILLIPEDE:
-		if(u.thoughts & IMPURITY)
-			return 1;
-		break;
-		case PM_MIRRORED_MOONFLOWER:
-		if(u.thoughts & MOON)
-			return 1;
-		break;
-		case PM_CRIMSON_WRITHER:
-		if(u.thoughts & WRITHE)
-			return 1;
-		break;
-		case PM_RADIANT_PYRAMID:
-		if(u.thoughts & RADIANCE)
-			return 1;
-		break;
-		default:
-			return 0;
-		break;
-	}
-	return 0;
-}
-
-int
-give_glyph(mtmp)
-struct monst *mtmp;
-{
-	switch(monsndx(mtmp->data)){
-		case PM_BESTIAL_DERVISH:
-		pline("A clockwise gyre forms in your mind.");
-		u.thoughts |= CLOCKWISE_METAMORPHOSIS;
-		break;
-		case PM_ETHEREAL_DERVISH:
-		pline("An anti-clockwise gyre forms in your mind.");
-		u.thoughts |= ANTI_CLOCKWISE_METAMORPHOSIS;
-		break;
-		case PM_SPARKLING_LAKE:
-		pline("A great volume of sparkling water pours into your mind.");
-		u.thoughts |= ARCANE_BULWARK;
-		break;
-		case PM_FLASHING_LAKE:
-		pline("A great volume of pure water pours into your mind.");
-		u.thoughts |= DISSIPATING_BULWARK;
-		break;
-		case PM_SMOLDERING_LAKE:
-		pline("A great volume of ash-filled water pours into your mind.");
-		u.thoughts |= SMOLDERING_BULWARK;
-		break;
-		case PM_FROSTED_LAKE:
-		pline("A great volume of freezing water pours into your mind.");
-		u.thoughts |= FROSTED_BULWARK;
-		break;
-		case PM_BLOOD_SHOWER:
-		pline("A rapturous shower of blood drifts through your mind.");
-		u.thoughts |= BLOOD_RAPTURE;
-		break;
-		case PM_MANY_TALONED_THING:
-		pline("A many-taloned clawmark is scoured into your mind.");
-		u.thoughts |= CLAWMARK;
-		break;
-		case PM_DEEP_BLUE_CUBE:
-		pline("A deep sea of blue water fills your mind.");
-		u.thoughts |= CLEAR_DEEPS;
-		break;
-		case PM_PITCH_BLACK_CUBE:
-		pline("A deep sea of pitch-black water fills your mind.");
-		u.thoughts |= DEEP_SEA;
-		break;
-		case PM_PRAYERFUL_THING:
-		pline("A strange minister's prayer echoes in you mind.");
-		u.thoughts |= COMMUNION;
-		break;
-		case PM_HEMORRHAGIC_THING:
-		pline("Thoughts of weeping form in your mind.");
-		u.thoughts |= CORRUPTION;
-		break;
-		case PM_MANY_EYED_SEEKER:
-		pline("A seeking eye opens in your mind.");
-		u.thoughts |= EYE_THOUGHT;
-		break;
-		case PM_VOICE_IN_THE_DARK:
-		pline("The voice of a formless thing speaks in your mind.");
-		u.thoughts |= FORMLESS_VOICE;
-		break;
-		case PM_TINY_BEING_OF_LIGHT:
-		pline("You see tiny spirits dancing in the nothing behind your eyes.");
-		u.thoughts |= GUIDANCE;
-		break;
-		case PM_MAN_FACED_MILLIPEDE:
-		pline("Vermin writhe in the filth inside your head.");
-		u.thoughts |= IMPURITY;
-		break;
-		case PM_MIRRORED_MOONFLOWER:
-		pline("A reflection of the sympathetic moon fills your mind.");
-		u.thoughts |= MOON;
-		break;
-		case PM_CRIMSON_WRITHER:
-		pline("A subtle mucus is revealed in the blood in your brain.");
-		u.thoughts |= WRITHE;
-		break;
-		case PM_RADIANT_PYRAMID:
-		pline("An irregular golden pyramid rises from the depths of your mind.");
-		u.thoughts |= RADIANCE;
-		break;
-		default:
-			impossible("MS_GLYPH monster with no valid glyph!");
-			return 1;
-		break;
-	}
-	return 0;
-}
-
-
-
 void
 dosounds()
 {
@@ -2717,7 +2529,7 @@ int dz;
 	if(mtmp && mtmp->data->msound == MS_GLYPHS){
 		if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
 			&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
-			&& count_glyphs() < 3 && !have_glyph(mtmp)
+			&& count_glyphs() < 3 && !(u.thoughts & mtyp_to_thought(mtmp->mtyp))
 		){
 			struct obj *optr;
 			if(canspotmon(mtmp)){
@@ -2731,9 +2543,11 @@ int dz;
 			}
 			else{
 				You("let %s take your %s.",mon_nam(mtmp), ONAME(uwep));
-				//Returns 1 as an error state
-				if(give_glyph(mtmp))
-					return 1;
+				if (!mtyp_to_thought(mtmp->mtyp))
+					return 1;	/* error */
+				else
+					give_thought(mtyp_to_thought(mtmp->mtyp));
+
 				optr = uwep;
 				uwepgone();
 				if(optr->gifted != GA_NONE && !Role_if(PM_EXILE)){
@@ -6147,7 +5961,7 @@ struct monst *nurse;
 			glyph = mksobj(otyp, FALSE, FALSE);
 			
 			if(glyph){
-				remove_thought(otyp);
+				remove_thought(otyp_to_thought(otyp));
 				if(Race_if(PM_ANDROID)){
 					set_material_gm(glyph, PLASTIC);
 					fix_object(glyph);

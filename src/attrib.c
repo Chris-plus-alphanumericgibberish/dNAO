@@ -1267,6 +1267,17 @@ int delta;
 		u.usanity = 100;
 	if(discover || wizard)
 		pline("= %d", u.usanity);
+
+	/* possibly (de)activate glyphs */
+	long int thought;
+	for (thought = 1L; thought <= u.thoughts; thought = thought << 1) {
+		if ((u.thoughts&thought) &&
+			active_glyph(thought) != was_active_glyph(thought, u.uinsight, u.usanity - delta)
+			) {
+			change_glyph_active(thought, active_glyph(thought));
+		}
+		pline("[%ld]", thought);
+	}
 }
 
 void
@@ -1280,6 +1291,16 @@ int delta;
 		u.uinsight = 0;
 	if(discover || wizard)
 		pline("= %d", u.uinsight);
+
+	/* possibly (de)activate glyphs */
+	long int thought;
+	for (thought = 1L; thought <= u.thoughts; thought = thought << 1) {
+		if ((u.thoughts&thought) &&
+			active_glyph(thought) != was_active_glyph(thought, u.uinsight-delta, u.usanity)
+			) {
+			change_glyph_active(thought, active_glyph(thought));
+		}
+	}
 }
 
 boolean
@@ -1291,166 +1312,6 @@ check_insight()
 	else insight = u.uinsight;
 	
 	return insight > rn2(INSIGHT_RATE);
-}
-
-void
-doguidance(mdef, dmg)
-struct monst *mdef;
-int dmg;
-{
-	if (mdef && mdef->mattackedu) {
-		int life = (int)(dmg*0.2+1);
-		healup(life, 0, FALSE, FALSE);
-	}
-}
-
-int
-glyph_sanity(thought)
-long int thought;
-{
-	int sanlevel = 1000;
-	switch(thought){
-		case ANTI_CLOCKWISE_METAMORPHOSIS:
-		break;
-		case CLOCKWISE_METAMORPHOSIS:
-		break;
-		case ARCANE_BULWARK:
-		break;
-		case DISSIPATING_BULWARK:
-		break;
-		case SMOLDERING_BULWARK:
-		break;
-		case FROSTED_BULWARK:
-		break;
-		case BLOOD_RAPTURE:
-			sanlevel = 90;
-		break;
-		case CLAWMARK:
-			sanlevel = 90;
-		break;
-		case CLEAR_DEEPS:
-		break;
-		case DEEP_SEA:
-		break;
-		case COMMUNION:
-		break;
-		case CORRUPTION:
-			sanlevel = 80;
-		break;
-		case EYE_THOUGHT:
-		break;
-		case FORMLESS_VOICE:
-		break;
-		case GUIDANCE:
-		break;
-		case IMPURITY:
-			sanlevel = 80;
-		break;
-		case MOON:
-		break;
-		case WRITHE:
-			sanlevel = 90;
-		break;
-		case RADIANCE:
-		break;
-		case BEASTS_EMBRACE:
-			sanlevel = 90;
-		break;
-		default:
-			impossible("bad glyph %ld in active_glyph!", thought);
-			return 0;
-		break;
-	}
-	return sanlevel;
-}
-
-int
-glyph_insight(thought)
-long int thought;
-{
-	int insightlevel = 0;
-	switch(thought){
-		case ANTI_CLOCKWISE_METAMORPHOSIS:
-			insightlevel = 20;
-		break;
-		case CLOCKWISE_METAMORPHOSIS:
-			insightlevel = 20;
-		break;
-		case ARCANE_BULWARK:
-			insightlevel = 18;
-		break;
-		case DISSIPATING_BULWARK:
-			insightlevel = 16;
-		break;
-		case SMOLDERING_BULWARK:
-			insightlevel = 11;
-		break;
-		case FROSTED_BULWARK:
-			insightlevel = 12;
-		break;
-		case BLOOD_RAPTURE:
-			insightlevel = 14;
-		break;
-		case CLAWMARK:
-			insightlevel = 16;
-		break;
-		case CLEAR_DEEPS:
-			insightlevel = 10;
-		break;
-		case DEEP_SEA:
-			insightlevel = 22;
-		break;
-		case COMMUNION:
-			insightlevel = 25;
-		break;
-		case CORRUPTION:
-			insightlevel = 15;
-		break;
-		case EYE_THOUGHT:
-			insightlevel = 17;
-		break;
-		case FORMLESS_VOICE:
-			insightlevel = 19;
-		break;
-		case GUIDANCE:
-			insightlevel = 13;
-		break;
-		case IMPURITY:
-			insightlevel = 5;
-		break;
-		case MOON:
-			insightlevel = 10;
-		break;
-		case WRITHE:
-			insightlevel = 14;
-		break;
-		case RADIANCE:
-			insightlevel = 12;
-		break;
-		case BEASTS_EMBRACE:
-			insightlevel = 15;
-		break;
-		default:
-			impossible("bad glyph %ld in active_glyph!", thought);
-			return 0;
-		break;
-	}
-	return insightlevel;
-}
-
-int
-active_glyph(thought)
-long int thought;
-{
-	int insightlevel = 0, sanlevel = 1000;
-	if(!(u.thoughts&thought))
-		return 0;
-	insightlevel = glyph_insight(thought);
-	// sanlevel = glyph_sanity(thought);
-	if(u.uinsight >= insightlevel && u.usanity <= sanlevel)
-		return 1;
-	else return 0;
-	return 0;
 }
 
 int

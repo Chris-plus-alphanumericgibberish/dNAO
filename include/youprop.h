@@ -30,13 +30,13 @@
 #define EFire_resistance	u.uprops[FIRE_RES].extrinsic
 #define Fire_resistance		(HFire_resistance || EFire_resistance || \
 				 species_resists_fire(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_FIRE) ||\
-				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA || active_glyph(SMOLDERING_BULWARK))
+				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA )
 #define InvFire_resistance	(EFire_resistance || Preservation || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
 
 #define HCold_resistance	u.uprops[COLD_RES].intrinsic
 #define ECold_resistance	u.uprops[COLD_RES].extrinsic
 #define NCold_resistance		((Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_COLD) ||\
-				 species_resists_cold(&youmonst) || active_glyph(FROSTED_BULWARK) || \
+				 species_resists_cold(&youmonst) || \
 				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 #define Cold_resistance		(HCold_resistance || ECold_resistance || NCold_resistance)
 #define InvCold_resistance	(ECold_resistance || Preservation || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
@@ -56,15 +56,14 @@
 #define EShock_resistance	u.uprops[SHOCK_RES].extrinsic
 #define Shock_resistance	(HShock_resistance || EShock_resistance || \
 				 species_resists_elec(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_ELEC) ||\
-				 ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || active_glyph(DISSIPATING_BULWARK))
+				 ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL )
 #define InvShock_resistance	(EShock_resistance || Preservation || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (HShock_resistance&FROMRACE && Race_if(PM_ANDROID)))
 
 #define HPoison_resistance	u.uprops[POISON_RES].intrinsic
 #define EPoison_resistance	u.uprops[POISON_RES].extrinsic
 #define Poison_resistance	(HPoison_resistance || EPoison_resistance || GoodHealth || \
 				 species_resists_poison(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_DRST) ||\
-				 (ward_at(u.ux,u.uy) == WINGS_OF_GARUDA && num_wards_at(u.ux, u.uy) > rn2(7))\
-				 || active_glyph(CLEAR_DEEPS))
+				 (ward_at(u.ux,u.uy) == WINGS_OF_GARUDA && num_wards_at(u.ux, u.uy) > rn2(7)))
 
 #define HAcid_resistance	u.uprops[ACID_RES].intrinsic
 #define EAcid_resistance	u.uprops[ACID_RES].extrinsic
@@ -88,7 +87,7 @@
 #define Antimagic		(EAntimagic || HAntimagic || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_MAGM) ||\
 						(u.usteed && u.usteed->misc_worn_check & W_SADDLE \
 						&& which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
-						Nullmagic || active_glyph(ARCANE_BULWARK) ||\
+						Nullmagic ||\
 				 (Upolyd && resists_magm(&youmonst)))
 
 #define HNullmagic		u.uprops[NULLMAGIC].intrinsic

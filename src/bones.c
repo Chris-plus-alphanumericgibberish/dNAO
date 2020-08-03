@@ -197,6 +197,7 @@ int y;
 	}
 	while(u.thoughts && thoughttries++ < 5){
 		otmp = 0;
+		/* it's not necessary to properly remove the thoughts; the player is dead */
 		if(u.thoughts & ANTI_CLOCKWISE_METAMORPHOSIS){
 			u.thoughts &= ~ANTI_CLOCKWISE_METAMORPHOSIS;
 			otmp = mksobj(ANTI_CLOCKWISE_METAMORPHOSIS_G, FALSE, FALSE);

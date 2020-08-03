@@ -117,6 +117,7 @@
 #include "decl.h"
 #include "timeout.h"
 #include "zap.h"
+#include "thoughtglyph.h"
 
 NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 
