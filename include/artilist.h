@@ -1066,7 +1066,7 @@ A("Frost Treads",					WATER_WALKING_BOOTS,(const char *)0,
 /*Needs encyc entry*/
 A("Hammerfeet",						KICKING_BOOTS,		(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_INHER),
+	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_GIFT|ARTG_INHER),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 0), (ARTA_KNOCKBACKX),
 	PROPS(), NOFLAG,
