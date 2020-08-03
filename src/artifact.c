@@ -4668,6 +4668,7 @@ boolean * messaged;
 						pline("%s cries out in pain and despair and terror.", Monnam(mdef));
 					*hp(mdef) = 1;
 					*hpmax(mdef) = 1;
+					leveldrain = 0;	/* end leveldrain loop */
 				}
 				if (mdef->m_lev > 0)
 					mdef->m_lev--;
