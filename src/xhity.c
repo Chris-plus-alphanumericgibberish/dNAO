@@ -709,6 +709,7 @@ int tary;
 				/* check for wild misses */
 				if (missedyou) {
 					wildmiss(magr, attk, otmp, ranged);
+					attacksmade++;
 					result |= MM_AGR_STOP;	/* it knows you aren't there */
 					continue;
 				}
@@ -1274,6 +1275,10 @@ boolean ranged;
 
 	/* you have to be able to see magr */
 	if (!canseemon(magr))
+		return;
+
+	/* magr must be aiming at least nearby you to message */
+	if (dist2(magr->mux, magr->muy, u.ux, u.uy) > 13)
 		return;
 
 	/* Print message */
