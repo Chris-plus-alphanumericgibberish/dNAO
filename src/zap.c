@@ -3229,9 +3229,9 @@ register const char *str;
 register struct monst *mtmp;
 {
 	pline("%s %s %s.", The(str), vtense(str, "miss"),
-	      ((cansee(bhitpos.x,bhitpos.y) || canspotmon(mtmp))
-	       && flags.verbose) ?
-	      mon_nam(mtmp) : "it");
+		(mtmp == &youmonst) ? "you"
+		: ((cansee(bhitpos.x,bhitpos.y) || canspotmon(mtmp)) && flags.verbose) ? mon_nam(mtmp)
+		: "it");
 }
 #endif /*OVL0*/
 #ifdef OVL1
