@@ -473,16 +473,11 @@ register struct obj *otmp;
 		/* Must do carrying effects on object prior to add_to_minv() */
 		carry_obj_effects(otmp);
 
-		/* don't want hidden light source inside the monster; assumes that
-		engulfers won't have external inventories; whirly monsters cause
-		the light to be extinguished rather than letting it shine thru;
-		must come after carry_obj_effects because that relights always-on
-		lightsources */
-		if (obj_sheds_light(otmp))
-		{
-			if (attacktype(mtmp->data, AT_ENGL)) {
-				/* burning objects should go out; non-burning objects should just be disabled */
-				if (obj_is_burning(otmp) && u.uswallow && mtmp == u.ustuck && !Blind)
+		/* extinguish burning objects -- it isn't strictly necessary to end_burn anymore, though */
+		if (attacktype(mtmp->data, AT_ENGL)) {
+			/* burning objects should go out; */
+			if (obj_is_burning(otmp) && u.uswallow && mtmp == u.ustuck) {
+				if (!Blind)
 					pline("%s out.", Tobjnam(otmp, "go"));
 				end_burn(otmp, TRUE);
 			}
