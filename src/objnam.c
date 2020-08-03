@@ -1535,7 +1535,7 @@ boolean with_price;
 						Strcat(buf, " stone");
 					/* kludge: the real and fake amulets of yendor must be fully id-ed */
 					if (!obj->known && (typ == AMULET_OF_YENDOR || typ == FAKE_AMULET_OF_YENDOR))
-						Strcat(restart, dn); /* overwrite! */
+						Strcpy(restart, dn); /* overwrite! */
 				}
 				else {
 					/* <blind> of <real> */
@@ -1590,7 +1590,7 @@ boolean with_price;
 
 					/* kludge: the real and fake amulets of yendor are just their description */
 					if (typ == AMULET_OF_YENDOR || typ == FAKE_AMULET_OF_YENDOR)
-						Strcat(restart, dn); /* overwrite! */
+						Strcpy(restart, dn); /* overwrite! */
 				}
 			}
 			else {
