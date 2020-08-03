@@ -459,8 +459,11 @@ pick_lock(pick) /* pick a lock with a given object */
 		    } else if(otmp->otyp == MAGIC_CHEST){
 				char locknumber = 0;
 				pline("What lock will you open (0-9)?");
-				do locknumber = readchar();
-				while(!(locknumber >= '0' && locknumber <= '9'));
+				locknumber = readchar();
+				if (locknumber < '0' || locknumber > '9') {
+					pline1(Never_mind);
+					return 0;
+				}
 				if(otmp->ovar1 == (long)(locknumber-'0') && !otmp->olocked){
 					pline("That lock is already open.");
 					return 0;
