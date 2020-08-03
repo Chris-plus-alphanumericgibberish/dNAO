@@ -178,6 +178,19 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		thrownobj->was_thrown = TRUE;
 	}
 
+	/* some thrownobj should just reappear in your bag a while later */
+	if (youagr && fired && (
+		thrownobj->oartifact == ART_SUNBEAM ||
+		thrownobj->oartifact == ART_MOONBEAM ||
+		(launcher && launcher->oartifact == ART_EPOCH_S_CURVE && !thrownobj->oartifact)
+		)) {
+		int delay = rnz(20);
+		if (launcher && launcher->oartifact == ART_EPOCH_S_CURVE)	/* accelerates return of sunbeam/moonbeam */
+			delay = min(delay, 5);
+
+		start_timer(delay, TIMER_OBJECT, RETURN_AMMO, (genericptr_t)thrownobj);
+	}
+
 	/* determine if thrownobj should return (like Mjollnir) */
 	if(magr && !(hmoncode & HMON_KICKED)){
 		if ((thrownobj->oartifact == ART_MJOLLNIR && (youagr ? (Role_if(PM_VALKYRIE)) : magr ? (magr->mtyp == PM_VALKYRIE) : FALSE)) ||
@@ -3135,4 +3148,38 @@ boolean forcedestroy;
 	m_shot.o = STRANGE_OBJECT;
 	m_shot.s = FALSE;
 	return result;
+}
+
+/* return_ammo()
+ * 
+ * returns arg (obj) to player's inventory
+ */
+void
+return_ammo(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *ammo = (struct obj *) arg;
+
+	/* free it from where it is */
+	obj_extract_self(ammo);
+
+	if (isok(ammo->ox, ammo->oy))
+		newsym(ammo->ox, ammo->oy);
+
+	/* return to the player's inventory */
+	(void)hold_another_object(ammo, u.uswallow ?
+		"Oops!  %s out of your reach!" :
+		(Weightless ||
+		Is_waterlevel(&u.uz) ||
+		levl[u.ux][u.uy].typ < IRONBARS ||
+		levl[u.ux][u.uy].typ >= ICE) ?
+		"Oops!  %s away from you!" :
+		"Oops!  %s to the floor!",
+		The(aobjnam(ammo,
+		Weightless || u.uinwater ?
+		"slip" : "drop")),
+		(const char *)0);
+
+	return;
 }

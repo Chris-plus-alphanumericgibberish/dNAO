@@ -915,6 +915,18 @@ A("Plague",				BOW,							(const char *)0,
 	),
 
 /*Needs encyc entry*/
+/* all non-artifact arrows fired from it return to your inventory 5 turns later */
+A("Epoch's Curve",			BOW,							"white ash longbow",
+	4000L, WOOD, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
+	NO_MONS(),
+	ATTK(AD_PHYS, 5, 6), NOFLAG,
+	PROPS(TELEPORT_CONTROL), NOFLAG,
+	PROPS(), NOFLAG,
+	TELEPORT_SHOES, NOFLAG
+	),
+
+/*Needs encyc entry*/
 /* die size set to 1d8 in weapon.c */
 A("The Fluorite Octahedron",		BLUE_FLUORITE,		"glowing cobalt eight-sided die",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,

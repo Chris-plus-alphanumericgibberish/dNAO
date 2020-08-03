@@ -1413,6 +1413,7 @@ struct obj *otmp;
 	/* artifacts with set colors */
 	switch (otmp->oartifact)
 	{
+	case ART_EPOCH_S_CURVE:		return CLR_WHITE;
 	case ART_BLACK_CRYSTAL:		return mvitals[PM_CHAOS].died ? CLR_BLACK : HI_GLASS;
 	case ART_EARTH_CRYSTAL:		return mvitals[PM_LICH__THE_FIEND_OF_EARTH].died ? 
 										CLR_YELLOW : CLR_BROWN;

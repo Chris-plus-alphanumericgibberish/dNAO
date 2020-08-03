@@ -2541,9 +2541,8 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
     TTAB(slimy_corpse,	(timeout_proc)0,	"slimy_corpse"),
 	TTAB(zombie_corpse,	(timeout_proc)0,	"zombie_corpse"),
     TTAB(shady_corpse,	(timeout_proc)0,	"shady_corpse"),
-//#ifdef FIREARMS
-    TTAB(bomb_blow,     (timeout_proc)0,	"bomb_blow")
-//#endif
+    TTAB(bomb_blow,     (timeout_proc)0,	"bomb_blow"),
+	TTAB(return_ammo,   (timeout_proc)0,	"return_ammo")
 };
 #undef TTAB
 
