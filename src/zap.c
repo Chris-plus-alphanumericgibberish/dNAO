@@ -4342,18 +4342,13 @@ struct zapdata * zapdata;
 					mdef->mgold = 0L;
 #endif
 					/* note: worn amulet of life saving must be preserved in order to operate */
-#define oresist_disintegration(obj) \
-	(item_has_property(obj, DISINT_RES) || \
-	obj_resists(obj, 5, 50) || is_quest_artifact(obj) || \
-	obj == m_lsvd)
 					for (otmp = mdef->minvent; otmp; otmp = otmp2) {
 						otmp2 = otmp->nobj;
-						if (!oresist_disintegration(otmp)) {
+						if (!(oresist_disintegration(otmp) || obj_resists(otmp, 5, 50) || otmp == m_lsvd)) {
 							obj_extract_self(otmp);
 							obfree(otmp, (struct obj *)0);
 						}
 					}
-#undef oresist_disintegration
 					return xdamagey(magr, mdef, &attk, *hp(mdef) + 1);
 				}
 			}/*!armor*/

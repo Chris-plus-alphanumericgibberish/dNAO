@@ -2591,7 +2591,7 @@ register struct obj *otmp;
 	int otyp = otmp->otyp;
 	int omat = otmp->obj_material;
 
-	if (objects[otyp].oc_oprop == FIRE_RES || otyp == WAN_FIRE)
+	if (item_has_property(otmp, FIRE_RES) || otyp == WAN_FIRE)
 		return FALSE;
 
 	return((boolean)((omat <= BONE && omat != LIQUID) || omat == PLASTIC));

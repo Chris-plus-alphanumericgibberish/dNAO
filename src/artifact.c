@@ -10121,11 +10121,8 @@ int
 oresist_disintegration(obj)
 struct obj *obj;
 {
-	return objects[obj->otyp].oc_oprop == DISINT_RES 
-	 || obj->oartifact == ART_CHROMATIC_DRAGON_SCALES
-	 || obj->oartifact == ART_DRAGON_PLATE
-	 || check_oprop(obj, OPROP_DISN)
-	 || is_quest_artifact(obj);
+	return item_has_property(obj, DISINT_RES)
+		|| is_quest_artifact(obj);
 }
 
 int
