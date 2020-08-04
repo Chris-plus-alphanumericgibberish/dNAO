@@ -557,9 +557,8 @@ boolean artif;
 	
 	fix_object(otmp);
 	
-	if ((otmp->otyp >= ELVEN_SHIELD && otmp->otyp <= ORCISH_SHIELD) ||
-			otmp->otyp == SHIELD_OF_REFLECTION)
-		otmp->dknown = 0;
+	if (!objects[otyp].oc_uses_known)
+		otmp->known = 1;
 
 #ifdef INVISIBLE_OBJECTS
 	otmp->oinvis = !rn2(1250);
