@@ -2143,8 +2143,13 @@ dofire()
 		}
 	}/* !notake */
 
-	/* TODO: intrinsic monster firing (like a manticore's spikes) */
+	if (attacktype(youracedata, AT_BREA))
+		return dobreathe(youracedata);
 
+	if (attacktype(youracedata, AT_SPIT))
+		return dospit();
+
+	/* TODO: AT_ARRW */
 
 	/* __ You didn't have anything good ready to fire __ */
 	if (!notake(youracedata)) {
