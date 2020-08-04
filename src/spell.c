@@ -137,6 +137,7 @@ char *wardDecode[26] = {
 
 #define uarmhbon 4 /* Metal helmets interfere with the mind */
 #define uarmgbon 6 /* Casting channels through the hands */
+#define uarmsbon 7 /* Shields greatly interfere with casting */
 #define uarmfbon 2 /* All metal interferes to some degree */
 
 static const char where_to_cast[] = "Where do you want to cast the spell?";
@@ -5669,7 +5670,11 @@ int spell;
 	}
 
 	if (uarms) {
+		/* there is a role-specific shield penalty applied to *any* shield */
 		splcaster += urole.spelshld;
+		/* additional flat penalty for a metal shield */
+		if (is_metallic(uarms))
+			splcaster += uarmsbon;
 	}
 
 	if(u.sealsActive&SEAL_PAIMON) splcaster -= urole.spelarmr;
@@ -5725,18 +5730,6 @@ int spell;
 	 */
 	if (chance < 0) chance = 0;
 	if (chance > 120) chance = 120;
-
-	/* Wearing anything but a light shield makes it very awkward
-	 * to cast a spell.  The penalty is not quite so bad for the
-	 * player's role-specific spell.
-	 */
-	if (uarms && (is_metallic(uarms) || weight(uarms) > (int) objects[BUCKLER].oc_weight)) {
-		if (spellid(spell) == urole.spelspec) {
-			chance /= 2;
-		} else {
-			chance /= 4;
-		}
-	}
 
 	/* Finally, chance (based on player intell/wisdom and level) is
 	 * combined with ability (based on player intrinsics and
