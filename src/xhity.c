@@ -3396,8 +3396,6 @@ boolean ranged;
 	char buf[BUFSZ];
 	int result;			/* did attack hit, miss, defender live, die, agressor die, stop? */
 
-	boolean unarmed_punch = ((!weapon || martial_aid(weapon)) && weapon_aatyp(attk->aatyp));
-
 	int dieroll;				/* rolled accuracy */
 	int accuracy;				/* accuracy of attack; if this is less than dieroll, the attack hits */
 	boolean hit = FALSE;		/* whether or not the attack hit */
