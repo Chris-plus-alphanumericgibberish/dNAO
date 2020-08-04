@@ -3849,7 +3849,7 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	    if (near_capacity() > SLT_ENCUMBER) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 	} else {		/* even turns */
 	    if (Hunger) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
-	    if (u.sealsActive&SEAL_AHAZU && moves%10) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
+	    if (u.sealsActive&SEAL_AHAZU && (moves%10 == 1)) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 	    /* Conflict uses up food too */
 	    if (HConflict || (EConflict & (~W_ARTI))) (Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);
 	    /* Alacrity uses up food too */
