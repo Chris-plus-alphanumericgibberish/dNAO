@@ -607,7 +607,7 @@ int mode;
      *  Check for physical obstacles.  First, the place we are going.
      */
     if (IS_ROCK(tmpr->typ) || tmpr->typ == IRONBARS) {
-	if (Blind && mode == DO_MOVE) feel_location(x,y);
+	if ((Blind || LightBlind) && mode == DO_MOVE) feel_location(x,y);
 	if (Passes_walls && may_passwall(x,y)) {
 	    ;	/* do nothing */
 	} else if (tmpr->typ == IRONBARS && !Is_illregrd(&u.uz) && mode == DO_MOVE) {
