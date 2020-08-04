@@ -1979,10 +1979,6 @@ dofire()
 	int shotlimit = 0;
 	char *oldsave_cm = save_cm;
 
-	if (notake(youracedata)) {	/* this will need adjusting when 'f' automatically does AT_SPIT etc */
-		You("are physically incapable of doing that.");
-		return 0;
-	}
 	if (check_capacity((char *)0))
 		return 0;
 
@@ -2000,209 +1996,221 @@ dofire()
 	multi = 0;		/* reset; it's been used up */
 
 
-	/* Fire loaded launchers and blasters */
-	if ((uwep     && ((uquiver && ammo_and_launcher(uquiver, uwep    )) || is_blaster(uwep    ))) ||
-		(uswapwep && ((uquiver && ammo_and_launcher(uquiver, uswapwep)) || is_blaster(uswapwep)) && u.twoweap)
-		)
-	{
-		struct obj * launcher;
-		int hand;
+	/* __ You have something ready to fire __ */
+	if (!notake(youracedata)) {
+		/* Fire loaded launchers and blasters */
+		if ((uwep && ((uquiver && ammo_and_launcher(uquiver, uwep)) || is_blaster(uwep))) ||
+			(uswapwep && ((uquiver && ammo_and_launcher(uquiver, uswapwep)) || is_blaster(uswapwep)) && u.twoweap)
+			)
+		{
+			struct obj * launcher;
+			int hand;
 
-		/* verify twoweapon status */
-		if (u.twoweap && !test_twoweapon())
-			untwoweapon();
+			/* verify twoweapon status */
+			if (u.twoweap && !test_twoweapon())
+				untwoweapon();
 
-		/* do mainhand, then offhand (if twoweaponing) */
-		for (hand = 0; hand < (u.twoweap ? 2 : 1); hand++) {
-			launcher = (!hand ? uwep : uswapwep);
-			if (!launcher || !((uquiver && ammo_and_launcher(uquiver, launcher)) || is_blaster(launcher)))
-				continue;
+			/* do mainhand, then offhand (if twoweaponing) */
+			for (hand = 0; hand < (u.twoweap ? 2 : 1); hand++) {
+				launcher = (!hand ? uwep : uswapwep);
+				if (!launcher || !((uquiver && ammo_and_launcher(uquiver, launcher)) || is_blaster(launcher)))
+					continue;
 
-			if (uquiver && ammo_and_launcher(uquiver, launcher)) {
-				/* simply fire uquiver from the launcher */
-				result += uthrow(uquiver, launcher, shotlimit, FALSE);
-			}
-			else if (is_blaster(launcher)) {
-				/* blasters need to generate their ammo on the fly */
-				struct obj * ammo = (struct obj *)0;
-
-				/* do we have enough charge to fire? */
-				if (!launcher->ovar1) {
-					if (launcher->otyp == RAYGUN) You("push the firing stud, but nothing happens.");
-					else pline("Nothing happens when you pull the trigger.");
-					/* nothing else happens */
+				if (uquiver && ammo_and_launcher(uquiver, launcher)) {
+					/* simply fire uquiver from the launcher */
+					result += uthrow(uquiver, launcher, shotlimit, FALSE);
 				}
-				else {
-					switch (launcher->otyp) {
-					case CUTTING_LASER:
-					case HAND_BLASTER:
-					case ARM_BLASTER:
-					case MASS_SHADOW_PISTOL:
-						ammo = blaster_ammo(launcher);
-						break;
-					case RAYGUN:
-						/* create fake ammo in order to calculate multishot correctly */
-						ammo = blaster_ammo(launcher);
-						if (getdir((char *)0))
-							result += zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
-						/* destroy ammo and don't go through uthrow */
-						obfree(ammo, 0);
-						ammo = (struct obj *)0;
-						break;
-					default:
-						impossible("Unhandled blaster %d!", launcher->otyp);
-						break;
-					}
-					/* always destroy ammo fired from a blaster */
-					if (ammo) {
-						if (launcher->otyp == MASS_SHADOW_PISTOL)
-							ammo->ovar1 = -P_FIREARM;	/* special case to use FIREARM skill instead of SLING */
+				else if (is_blaster(launcher)) {
+					/* blasters need to generate their ammo on the fly */
+					struct obj * ammo = (struct obj *)0;
 
-						result += uthrow(ammo, launcher, shotlimit, TRUE);
-						/* and now delete the ammo object we created */
-						obfree(ammo, 0);
-					}
-				}
-			}
-		}
-		return (result > 0);
-	}
-
-	/* Throw quivered throwing weapons */
-	if (uquiver && throwing_weapon(uquiver)) {
-		return uthrow(uquiver, (struct obj *)0, shotlimit, FALSE);
-	}
-
-	/* Throw wielded weapon -- mainhand only */
-	if ((uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep)))) && (
-		(uwep->oartifact == ART_KHAKKHARA_OF_THE_MONKEY) ||
-		(uwep->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE) && ACURR(A_STR) == STR19(25)) ||
-		(uwep->oartifact == ART_ANNULUS && (uwep->otyp == CHAKRAM || uwep->otyp == LIGHTSABER)) ||
-		(uwep->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && Race_if(PM_DWARF) && ACURR(A_STR) == STR19(25)) ||
-		(!is_blaster(uwep) && uandroid)
-		// (uwep->oartifact == ART_SICKLE_MOON)
-		)) {
-		return uthrow(uwep, (struct obj *)0, shotlimit, FALSE);
-	}
-
-	/* Holy Moonlight Sword's magic blast -- mainhand only */
-	if (uwep && uwep->oartifact == ART_HOLY_MOONLIGHT_SWORD && uwep->lamplit && u.uen >= 25){
-		int dmg = d(2, 12) + 2 * uwep->spe;
-		int range = (Double_spell_size) ? 6 : 3;
-		xchar lsx, lsy, sx, sy;
-		struct monst *mon;
-		sx = u.ux;
-		sy = u.uy;
-		if (!getdir((char *)0) || !(u.dx || u.dy)) return 0;
-		losepw(25);
-		/* also swing in the direction chosen */
-		flags.forcefight = 1;
-		domove();
-		flags.forcefight = 0;
-
-		if (u.uswallow){
-			explode(u.ux, u.uy, AD_MAGM, WAND_CLASS, (d(2, 12) + 2 * uwep->spe) * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
-			return 1;
-		}
-		else {
-			while (--range >= 0){
-				lsx = sx; sx += u.dx;
-				lsy = sy; sy += u.dy;
-				if (isok(sx, sy) && isok(lsx, lsy) && !IS_STWALL(levl[sx][sy].typ)) {
-					mon = m_at(sx, sy);
-					if (mon){
-						explode(sx, sy, AD_MAGM, WAND_CLASS, dmg * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
-						break;//break loop
+					/* do we have enough charge to fire? */
+					if (!launcher->ovar1) {
+						if (launcher->otyp == RAYGUN) You("push the firing stud, but nothing happens.");
+						else pline("Nothing happens when you pull the trigger.");
+						/* nothing else happens */
 					}
 					else {
-						tmp_at(DISP_BEAM, cmap_to_glyph(S_digbeam));
-						tmp_at(sx, sy);
-						if (cansee(sx, sy)) delay_output();
-						tmp_at(DISP_END, 0);
+						switch (launcher->otyp) {
+						case CUTTING_LASER:
+						case HAND_BLASTER:
+						case ARM_BLASTER:
+						case MASS_SHADOW_PISTOL:
+							ammo = blaster_ammo(launcher);
+							break;
+						case RAYGUN:
+							/* create fake ammo in order to calculate multishot correctly */
+							ammo = blaster_ammo(launcher);
+							if (getdir((char *)0))
+								result += zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
+							/* destroy ammo and don't go through uthrow */
+							obfree(ammo, 0);
+							ammo = (struct obj *)0;
+							break;
+						default:
+							impossible("Unhandled blaster %d!", launcher->otyp);
+							break;
+						}
+						/* always destroy ammo fired from a blaster */
+						if (ammo) {
+							if (launcher->otyp == MASS_SHADOW_PISTOL)
+								ammo->ovar1 = -P_FIREARM;	/* special case to use FIREARM skill instead of SLING */
+
+							result += uthrow(ammo, launcher, shotlimit, TRUE);
+							/* and now delete the ammo object we created */
+							obfree(ammo, 0);
+						}
 					}
 				}
-				else {
-					explode(lsx, lsy, AD_MAGM, WAND_CLASS, dmg * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
-					break;//break loop
-				}
 			}
-			return 1;
+			return (result > 0);
 		}
-	}
 
-	/* Rogue Gear Spirits' auto-generated ammo -- mainhand only */
-	if (uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && uwep->oartifact == ART_ROGUE_GEAR_SPIRITS){
-		struct obj *bolt = mksobj(CROSSBOW_BOLT, FALSE, FALSE);
-		bolt->spe = min(0, uwep->spe);
-		bolt->blessed = uwep->blessed;
-		bolt->cursed = uwep->cursed;
-		bolt->objsize = MZ_SMALL;
-		bolt->quan = 3;		/* Make more than enough so that we are always able to manually destroy the excess */
-		fix_object(bolt);
-		result = uthrow(bolt, uwep, shotlimit, TRUE);
-		obfree(bolt, 0);
-		return result;
-	}
+		/* Throw quivered throwing weapons */
+		if (uquiver && throwing_weapon(uquiver)) {
+			return uthrow(uquiver, (struct obj *)0, shotlimit, FALSE);
+		}
+
+		/* Throw wielded weapon -- mainhand only */
+		if ((uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep)))) && (
+			(uwep->oartifact == ART_KHAKKHARA_OF_THE_MONKEY) ||
+			(uwep->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE) && ACURR(A_STR) == STR19(25)) ||
+			(uwep->oartifact == ART_ANNULUS && (uwep->otyp == CHAKRAM || uwep->otyp == LIGHTSABER)) ||
+			(uwep->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && Race_if(PM_DWARF) && ACURR(A_STR) == STR19(25)) ||
+			(!is_blaster(uwep) && uandroid)
+			// (uwep->oartifact == ART_SICKLE_MOON)
+			)) {
+			return uthrow(uwep, (struct obj *)0, shotlimit, FALSE);
+		}
+
+		/* Holy Moonlight Sword's magic blast -- mainhand only */
+		if (uwep && uwep->oartifact == ART_HOLY_MOONLIGHT_SWORD && uwep->lamplit && u.uen >= 25){
+			int dmg = d(2, 12) + 2 * uwep->spe;
+			int range = (Double_spell_size) ? 6 : 3;
+			xchar lsx, lsy, sx, sy;
+			struct monst *mon;
+			sx = u.ux;
+			sy = u.uy;
+			if (!getdir((char *)0) || !(u.dx || u.dy)) return 0;
+			losepw(25);
+			/* also swing in the direction chosen */
+			flags.forcefight = 1;
+			domove();
+			flags.forcefight = 0;
+
+			if (u.uswallow){
+				explode(u.ux, u.uy, AD_MAGM, WAND_CLASS, (d(2, 12) + 2 * uwep->spe) * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
+				return 1;
+			}
+			else {
+				while (--range >= 0){
+					lsx = sx; sx += u.dx;
+					lsy = sy; sy += u.dy;
+					if (isok(sx, sy) && isok(lsx, lsy) && !IS_STWALL(levl[sx][sy].typ)) {
+						mon = m_at(sx, sy);
+						if (mon){
+							explode(sx, sy, AD_MAGM, WAND_CLASS, dmg * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
+							break;//break loop
+						}
+						else {
+							tmp_at(DISP_BEAM, cmap_to_glyph(S_digbeam));
+							tmp_at(sx, sy);
+							if (cansee(sx, sy)) delay_output();
+							tmp_at(DISP_END, 0);
+						}
+					}
+					else {
+						explode(lsx, lsy, AD_MAGM, WAND_CLASS, dmg * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
+						break;//break loop
+					}
+				}
+				return 1;
+			}
+		}
+
+		/* Rogue Gear Spirits' auto-generated ammo -- mainhand only */
+		if (uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && uwep->oartifact == ART_ROGUE_GEAR_SPIRITS){
+			struct obj *bolt = mksobj(CROSSBOW_BOLT, FALSE, FALSE);
+			bolt->spe = min(0, uwep->spe);
+			bolt->blessed = uwep->blessed;
+			bolt->cursed = uwep->cursed;
+			bolt->objsize = MZ_SMALL;
+			bolt->quan = 3;		/* Make more than enough so that we are always able to manually destroy the excess */
+			fix_object(bolt);
+			result = uthrow(bolt, uwep, shotlimit, TRUE);
+			obfree(bolt, 0);
+			return result;
+		}
+	}/* !notake */
 
 	/* TODO: intrinsic monster firing (like a manticore's spikes) */
 
-	/* Throw any old garbage we have quivered */
-	if (uquiver) {
-		return uthrow(uquiver, (struct obj *)0, shotlimit, FALSE);
-	}
-	else {
-		/* We don't have anything that should be done automatically at this point. */
-		if (!flags.autoquiver) {
-			/* Don't automatically fill the quiver */
-			You("have no ammunition readied!");
-			if (iflags.quiver_fired)
-				dowieldquiver(); /* quiver_fired */
-			if (!uquiver)
-				return(dothrow());
+
+	/* __ You didn't have anything good ready to fire __ */
+	if (!notake(youracedata)) {
+		/* Throw any old garbage we have quivered */
+		if (uquiver) {
+			return uthrow(uquiver, (struct obj *)0, shotlimit, FALSE);
 		}
 		else {
-			autoquiver();
-			if (!uquiver) {
-				You("have nothing appropriate for your quiver!");
-				return(dothrow());
+			/* We don't have anything that should be done automatically at this point. */
+			if (!flags.autoquiver) {
+				/* Don't automatically fill the quiver */
+				You("have no ammunition readied!");
+				if (iflags.quiver_fired)
+					dowieldquiver(); /* quiver_fired */
+				if (!uquiver)
+					return(dothrow());
 			}
 			else {
-				You("fill your quiver:");
-				prinv((char *)0, uquiver, 0L);
+				autoquiver();
+				if (!uquiver) {
+					You("have nothing appropriate for your quiver!");
+					return(dothrow());
+				}
+				else {
+					You("fill your quiver:");
+					prinv((char *)0, uquiver, 0L);
+				}
 			}
+		}
+
+		/* Fire now-loaded launchers. We can ignore blasters, because that would have been caught above and didn't care about uquiver */
+		if ((uwep && (uquiver && ammo_and_launcher(uquiver, uwep))) ||
+			(uswapwep && (uquiver && ammo_and_launcher(uquiver, uswapwep)))
+			)
+		{
+			struct obj * launcher;
+			int hand;
+			int result = 0;
+
+			/* verify twoweapon status */
+			if (u.twoweap && !test_twoweapon())
+				untwoweapon();
+
+			/* do mainhand, then offhand (if twoweaponing) */
+			for (hand = 0; hand < (u.twoweap ? 2 : 1); hand++) {
+				launcher = (!hand ? uwep : uswapwep);
+				if (!launcher || !(uquiver && ammo_and_launcher(uquiver, launcher)))
+					continue;
+
+				if (uquiver && ammo_and_launcher(uquiver, launcher)) {
+					/* simply fire uquiver from the launcher */
+					result += uthrow(uquiver, launcher, shotlimit, FALSE);
+				}
+			}
+			return result;
+		}
+
+		/* Throw whaterver it was we quivered */
+		if (uquiver) {
+			return uthrow(uquiver, (struct obj *)0, shotlimit, FALSE);
 		}
 	}
 
-	/* Fire now-loaded launchers. We can ignore blasters, because that would have been caught above and didn't care about uquiver */
-	if ((uwep     && (uquiver && ammo_and_launcher(uquiver, uwep    ))) ||
-		(uswapwep && (uquiver && ammo_and_launcher(uquiver, uswapwep)))
-		)
-	{
-		struct obj * launcher;
-		int hand;
-		int result = 0;
-
-		/* verify twoweapon status */
-		if (u.twoweap && !test_twoweapon())
-			untwoweapon();
-
-		/* do mainhand, then offhand (if twoweaponing) */
-		for (hand = 0; hand < (u.twoweap ? 2 : 1); hand++) {
-			launcher = (!hand ? uwep : uswapwep);
-			if (!launcher || !(uquiver && ammo_and_launcher(uquiver, launcher)))
-				continue;
-
-			if (uquiver && ammo_and_launcher(uquiver, launcher)) {
-				/* simply fire uquiver from the launcher */
-				result += uthrow(uquiver, launcher, shotlimit, FALSE);
-			}
-		}
-		return result;
-	}
-
-	/* Throw whaterver it was we quivered */
-	if (uquiver) {
-		return uthrow(uquiver, (struct obj *)0, shotlimit, FALSE);
+	/* print message if we were unable to fire anything due to our form */
+	if (notake(youracedata)) {
+		You("are physically incapable of doing that.");
 	}
 
 	/* Fall through: we did nothing */
