@@ -203,13 +203,16 @@ forcelock()	/* try to force a locked chest */
 	
 	if(xlock.picktyp == 1) {	/* blade */
 
-	    if((uwep->obj_material == GLASS || uwep->obj_material == OBSIDIAN_MT || (rn2(1000-(int)uwep->spe) > (992-greatest_erosion(uwep)*10) &&
+		if (((is_shatterable(uwep) && !uwep->oerodeproof) || (rn2(1000 - (int)uwep->spe) > (992 - greatest_erosion(uwep) * 10) &&
 	       !uwep->cursed)) && !uwep->oartifact) {
 		/* for a +0 weapon, probability that it survives an unsuccessful
 		 * attempt to force the lock is (.992)^50 = .67
 		 */
 		pline("%sour %s broke!",
 		      (uwep->quan > 1L) ? "One of y" : "Y", xname(uwep));
+		if (is_shatterable(uwep) && uwep->oerodeproof && uwep->known) {
+			pline("Apparently \"shatterproof\" is more like \"shatter-resistant\".");
+		}
 		useup(uwep);
 		You("give up your attempt to force the lock.");
 		exercise(A_DEX, TRUE);
