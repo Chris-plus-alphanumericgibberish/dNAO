@@ -4910,9 +4910,8 @@ typfnd:
 			}
 			break;
 		case FIGURINE:
-			if (!(mons[mntmp].geno & G_UNIQ)
-			    && !is_unwishable(&mons[mntmp])
-			) otmp->corpsenm = mntmp;
+			//if (!(mons[mntmp].geno & G_UNIQ) && !is_unwishable(&mons[mntmp]))
+			otmp->corpsenm = mntmp;
 			break;
 		case EGG:
 			mntmp = can_be_hatched(mntmp);
@@ -4927,9 +4926,9 @@ typfnd:
 		case STATUE: 
 			if(wizwish)
 				otmp->corpsenm = mntmp;
-			else if (!(mons[mntmp].geno & G_UNIQ)
-			    && !is_unwishable(&mons[mntmp])
-			) otmp->corpsenm = mntmp;
+			else if (!(mons[mntmp].geno & G_UNIQ) && !is_unwishable(&mons[mntmp]))
+				otmp->corpsenm = mntmp;
+			
 			if (Has_contents(otmp) && verysmall(&mons[mntmp]))
 			    delete_contents(otmp);	/* no spellbook */
 			otmp->spe = ishistoric ? STATUE_HISTORIC : 0;
