@@ -2149,7 +2149,26 @@ dofire()
 	if (attacktype(youracedata, AT_SPIT))
 		return dospit();
 
-	/* TODO: AT_ARRW */
+	if (attacktype(youracedata, AT_ARRW)) {
+		struct attack * attk = attacktype_fordmg(youracedata, AT_ARRW, AD_ANY);
+		int n;
+		if (getdir((char *)0)) {
+			/* actually have to message in this function */
+			You("shoot!");
+			/* fire d(n,d) projectiles */
+			for (n = d(attk->damn, attk->damd); n > 0; n--)
+				result |= xfirey(&youmonst, attk, 0, 0);
+
+			if (result) {
+				return 1;
+			}
+			else {
+				/* nothing shot, but we messaged, so we have to end here */
+				pline("...or not. Awkward.");
+				return 1;
+			}
+		}
+	}
 
 	/* __ You didn't have anything good ready to fire __ */
 	if (!notake(youracedata)) {
@@ -2625,10 +2644,13 @@ int tary;
 		dy = sgn(tary - y(magr));
 		dz = 0;
 	}
-	else {
+	else if (youagr) {
 		dx = u.dx;
 		dy = u.dy;
 		dz = u.dz;
+	}
+	else {
+		return FALSE;
 	}
 
 	/* Random breath attacks */
@@ -2738,10 +2760,13 @@ int tary;
 		dy = sgn(tary - y(magr));
 		dz = 0;
 	}
-	else {
+	else if (youagr) {
 		dx = u.dx;
 		dy = u.dy;
 		dz = u.dz;
+	}
+	else {
+		return FALSE;
 	}
 
 	/* cancelled monsters can't spit */
@@ -2831,10 +2856,13 @@ int tary;
 		dy = sgn(tary - y(magr));
 		dz = 0;
 	}
-	else {
+	else if (youagr) {
 		dx = u.dx;
 		dy = u.dy;
 		dz = u.dz;
+	}
+	else {
+		return FALSE;
 	}
 
 	switch (typ) {
@@ -2912,11 +2940,11 @@ int tary;
 		qvr = mksobj(ammo_type, FALSE, FALSE);
 		rngmod = 8;
 		/* volley -- inaccurate */
-		if		(tary == y(magr))
+		if		(!dx)
 			yadj = d(1, 3) - 2;
-		else if (tarx == x(magr))
+		else if (!dy)
 			xadj = d(1, 3) - 2;
-		else if (tarx - x(magr) == tary - y(magr)){
+		else if (dx == dy*-1) {
 			xadj = d(1, 3) - 2;
 			yadj = -1 * xadj;
 		}
@@ -2938,9 +2966,28 @@ int tary;
 			return FALSE; 
 	}
 
-	/* check that attacker is in range of target */
-	if (BOLT_LIM + rngmod < distmin(x(magr), y(magr), tarx, tary))
-		return FALSE;
+	/* if the player is using this function, tarx/tary don't exist, which is a problem for portal_projectile */
+	if (youagr && portal_projectile && !(tarx || tary) && (dx || dy)) {
+		struct monst * mdef;
+		tarx = u.ux;
+		tary = u.uy;
+		while (TRUE){ //Exits via break, phase through walls.
+			tarx += dx;
+			tary += dy;
+			if (isok(tarx, tary) && may_passwall(tarx, tary)) {
+				mdef = m_at(tarx, tary);
+				/* reveal/unreveal invisible monsters before tmp_at() */
+				if (mdef && !canspotmon(mdef) && cansee(tarx, tary))
+					map_invisible(tarx, tary);
+				else if (!mdef && glyph_is_invisible(levl[tarx][tary].glyph)) {
+					unmap_object(tarx, tary);
+					newsym(tarx, tary);
+				}
+				if (mdef) break;
+			}
+			else break;
+		}
+	}
 
 	/* don't message here , because this function is often called several times :( */
 
