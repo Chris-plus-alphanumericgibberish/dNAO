@@ -2597,8 +2597,6 @@ boolean stoponhit;
  * 
  * magr is breathing at (tarx, tary)
  * 
- * The player's version is fairly separate, and is in polyself.c
- * TODO: make #monster use this function; add additional functionality to make that possible
  */
 boolean
 xbreathey(magr, attk, tarx, tary)
@@ -2663,6 +2661,16 @@ int tary;
 				You_hear("a cough.");
 			return TRUE;	/* did take time */
 		}
+	}
+
+	/* player uses Pw to breathe instead of having a cooldown */
+	if (youagr) {
+		if (u.uen < 15) {
+			You("don't have enough energy to breathe!");
+			return(0);
+		}
+		losepw(15);
+		flags.botl = 1;
 	}
 
 	/* message */

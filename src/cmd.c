@@ -536,32 +536,26 @@ boolean you_abilities;
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	if (mon_abilities && uarm && uarms &&
 		Is_dragon_armor(uarm) && Is_dragon_shield(uarms) && 
-		Have_same_dragon_armor_and_shield &&
+		(Dragon_armor_matches_mtyp(uarm, Dragon_armor_to_pm(uarms)->mtyp)
+		|| Dragon_armor_matches_mtyp(uarms, Dragon_armor_to_pm(uarm)->mtyp)) &&
 		uarm->age < monstermoves && uarms->age < monstermoves
 	){
-		if (!((Race_if(PM_HALF_DRAGON) &&
-			(((flags.HDbreath == AD_COLD) && (
-				(uarm && (uarm->otyp == WHITE_DRAGON_SCALES || uarm->otyp == WHITE_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == WHITE_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_FIRE) && (
-				(uarm && (uarm->otyp == RED_DRAGON_SCALES || uarm->otyp == RED_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == RED_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_SLEE) && (
-				(uarm && (uarm->otyp == ORANGE_DRAGON_SCALES || uarm->otyp == ORANGE_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == ORANGE_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_ELEC) && (
-				(uarm && (uarm->otyp == BLUE_DRAGON_SCALES || uarm->otyp == BLUE_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == BLUE_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_DRST) && (
-				(uarm && (uarm->otyp == GREEN_DRAGON_SCALES || uarm->otyp == GREEN_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == GREEN_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_ACID) && (
-				(uarm && (uarm->otyp == YELLOW_DRAGON_SCALES || uarm->otyp == YELLOW_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == YELLOW_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_MAGM) && (
-				(uarm && (uarm->otyp == GRAY_DRAGON_SCALES || uarm->otyp == GRAY_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == GRAY_DRAGON_SCALE_SHIELD))))))
-		){
+		boolean armormatch = FALSE;
+		/* halfdragons combine armor breath with their own; don't list if it matches */
+		if (Race_if(PM_HALF_DRAGON)) {
+			int mtyp;
+			switch (flags.HDbreath) {
+			case AD_FIRE: mtyp = PM_RED_DRAGON;    break;
+			case AD_COLD: mtyp = PM_WHITE_DRAGON;  break;
+			case AD_ELEC: mtyp = PM_BLUE_DRAGON;   break;
+			case AD_DRST: mtyp = PM_GREEN_DRAGON;  break;
+			case AD_SLEE: mtyp = PM_ORANGE_DRAGON; break;
+			case AD_ACID: mtyp = PM_YELLOW_DRAGON; break;
+			}
+			/* note: when shield and armor match despite color differences, it is the shield's color that is used */
+			armormatch = Dragon_shield_to_pm(uarms) == &mons[mtyp];
+		}
+		if (!armormatch) {
 			add_ability('a', "Use your armor's breath weapon", MATTK_DSCALE);
 		}
 	}
