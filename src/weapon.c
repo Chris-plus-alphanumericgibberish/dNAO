@@ -1499,6 +1499,7 @@ static const NEARDATA short hwep[] = {
 	  VIBROBLADE,/*2d6+3/2d8+4*/
 	  CRYSTAL_SWORD/*2d8/2d12*/,
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
+	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
 	  TSURUGI/*1d16/1d8+2d6*/, 
 	  MOON_AXE/*variable, 2d6 to 2d12*/,
 	  RUNESWORD/*1d10+1d4/1d10+1*/, 
@@ -1527,7 +1528,6 @@ static const NEARDATA short hwep[] = {
 	  FLAIL/*1d6+1/2d4*/, 
 	  NAGINATA/*1d6+1/2d4*/, 
 	  SCIMITAR/*1d8/1d8*/,
-	  SET_OF_CROW_TALONS/*2d4/2d3*/,
 	  DWARVISH_SHORT_SWORD/*1d8/1d7*/, 
 	  DROVEN_DAGGER/*1d8/1d6*/, 
 	  MACE/*1d6+1/1d6*/, 
