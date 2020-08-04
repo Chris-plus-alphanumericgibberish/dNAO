@@ -668,6 +668,24 @@ register struct monst *mtmp;
 				otmp = oname(otmp, artiname(ART_PROFANED_GREATSCYTHE));
 				fix_object(otmp);
 				(void) mpickobj(mtmp,otmp);
+			} else if(ptr->mtyp == PM_CORVIAN) {
+				switch(rnd(5)){
+					case 1:
+						(void)mongets(mtmp, KNIFE);
+					break;
+					case 2:
+						(void)mongets(mtmp, QUARTERSTAFF);
+					break;
+					case 3:
+						(void)mongets(mtmp, SCYTHE);
+					break;
+					case 4:
+						(void)mongets(mtmp, SICKLE);
+					break;
+					case 5:
+						(void)mongets(mtmp, TRIDENT);
+					break;
+				}
 			} else if(ptr->mtyp == PM_CORVIAN_KNIGHT) {
 				//Note: monster inventories are last-in-first-out, so the offhand weapon needs to be first
 				switch(rnd(8)){
