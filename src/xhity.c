@@ -11340,7 +11340,9 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			/* isn't a misused polearm */
 			(!is_pole(weapon) ||
 			thrust ||
-			u.usteed ||
+#ifdef STEED
+			(youagr && u.usteed) ||
+#endif
 			is_vibropike(weapon) ||
 			weapon->otyp == AKLYS ||
 			weapon->otyp == NAGINATA ||
