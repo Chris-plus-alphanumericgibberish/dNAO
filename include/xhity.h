@@ -52,7 +52,8 @@
 	arti_threeHead((otmp)) ? 2 : \
 	arti_tentRod((otmp)) ? 6 : \
 	0)
-#define martial_aid(otmp)	(is_lightsaber((otmp)) && !litsaber((otmp)) && (otmp)->otyp != KAMEREL_VAJRA)
+#define martial_aid(otmp)	((is_lightsaber((otmp)) && !litsaber((otmp)) && (otmp)->otyp != KAMEREL_VAJRA) || \
+							(valid_weapon((otmp)) && objects[(otmp)->otyp].oc_skill == P_BARE_HANDED_COMBAT))
 #define valid_weapon(otmp)		((otmp)->oclass == WEAPON_CLASS || \
 	is_weptool((otmp)) || \
 	(otmp)->otyp == HEAVY_IRON_BALL || \

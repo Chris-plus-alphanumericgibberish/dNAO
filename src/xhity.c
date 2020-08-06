@@ -3396,8 +3396,6 @@ boolean ranged;
 	char buf[BUFSZ];
 	int result;			/* did attack hit, miss, defender live, die, agressor die, stop? */
 
-	boolean unarmed_punch = ((!weapon || martial_aid(weapon)) && weapon_aatyp(attk->aatyp));
-
 	int dieroll;				/* rolled accuracy */
 	int accuracy;				/* accuracy of attack; if this is less than dieroll, the attack hits */
 	boolean hit = FALSE;		/* whether or not the attack hit */
@@ -11362,11 +11360,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			!(misthrown)
 			)
 		{
-			/* unlit lightsabers are martial arts aids, not weapons */
-			if (martial_aid(weapon) && melee)
-				unarmed_punch = TRUE;
-			else
-				valid_weapon_attack = TRUE;
+			valid_weapon_attack = TRUE;
 
 			if (youagr && is_lightsaber(weapon) && litsaber(weapon) && melee)
 				ulightsaberhit = TRUE;
@@ -12663,16 +12657,6 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		if (valid_weapon_attack && weapon && weapon->oclass == SPBOOK_CLASS && youagr && u.sealsActive&SEAL_PAIMON) {
 			bonsdmg += objects[weapon->otyp].oc_level + spiritDsize();
 		}
-		/* martial aids increase unarmed punching damage */
-		if (unarmed_punch && weapon && martial_aid(weapon)) {
-			/* if these were lit, it would have been a weapon attack, not an unarmed punch */
-			if (weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC)
-				bonsdmg += rnd(6) + weapon->spe;
-			else if (weapon->otyp == LIGHTSABER ||
-				weapon->otyp == BEAMSWORD ||
-				weapon->otyp == DOUBLE_LIGHTSABER)
-				bonsdmg += rnd(4) + weapon->spe;
-		}
 		/* general damage bonus */
 		if(real_attack){
 			if (magr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick || natural_strike)) {
@@ -12693,7 +12677,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				* bonus but you do get an increase-damage bonus.
 				*/
 				if (natural_strike || unarmed_punch || unarmed_kick || melee || thrust) {
-					int tmp = dbonus( (melee || thrust) ? weapon : (struct obj *)0);
+					boolean usewep = (weapon && (melee || thrust) && !martial_aid(weapon));
+					int tmp = dbonus(usewep ? weapon : (struct obj *)0);
 					/* greatly reduced STR damage for offhand attacks */
 					if (attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI)
 						tmp = min(0, tmp);
@@ -12738,7 +12723,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			/* get simple weapon skill associated with the weapon, not including twoweapon */
 			if (fired && launcher)
 				wtype = weapon_type(launcher);
-			else if (unarmed_punch)
+			else if (unarmed_punch || (weapon && martial_aid(weapon)))
 				wtype = P_BARE_HANDED_COMBAT;
 			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
 				wtype = P_SCIMITAR;
