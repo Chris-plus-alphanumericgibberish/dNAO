@@ -98,39 +98,43 @@ boolean quietly;
 	struct monst *mtmp = 0;
 	int chance, trycnt = 100;
 
+
 	do {
 	    if (otmp) {	/* figurine; otherwise spell */
-		int mndx = otmp->corpsenm;
-		pm = &mons[mndx];
-		/* activating a figurine provides one way to exceed the
-		   maximum number of the target critter created--unless
-		   it has a special limit (erinys, Nazgul) */
-		if ((mvitals[mndx].mvflags & G_EXTINCT) &&
-			mbirth_limit(mndx) < MAXMONNO) {
-		    if (!quietly)
-			/* have just been given "You <do something with>
-			   the figurine and it transforms." message */
-			pline("... into a pile of dust.");
-		    break;	/* mtmp is null */
-		}
+			int mndx = otmp->corpsenm;
+			pm = &mons[mndx];
+			// No tame uniqs or nowish creatures
+			if ((pm->geno & G_UNIQ) || is_unwishable(pm)){
+				pline_The("figurine warps strangely!");
+				pm = rndmonst();
+			}
+			/* activating a figurine provides one way to exceed the
+			   maximum number of the target critter created--unless
+			   it has a special limit (erinys, Nazgul) */
+			if ((mvitals[mndx].mvflags & G_EXTINCT) && mbirth_limit(mndx) < MAXMONNO) {
+				/* just printed "You <place> the figurine and it transforms." */
+				if (!quietly)
+					pline("... into a pile of dust.");
+				break;	/* mtmp is null */
+			}
 	    } else if (!rn2(3)) {
-		pm = &mons[pet_type()];
+			pm = &mons[pet_type()];
 	    } else {
-		pm = rndmonst();
-		if (!pm) {
-		  if (!quietly)
-		    There("seems to be nothing available for a familiar.");
-		  break;
+			pm = rndmonst();
+			if (!pm) {
+			  if (!quietly)
+				There("seems to be nothing available for a familiar.");
+			  break;
+			}
+			if(stationary(pm) || sessile(pm))
+				continue;
 		}
-		if(stationary(pm) || sessile(pm))
-			continue;
-	    }
 
-	    mtmp = makemon(pm, x, y, MM_EDOG|MM_IGNOREWATER);
-	    if (otmp && !mtmp) { /* monster was genocided or square occupied */
-	 	if (!quietly)
-		   pline_The("figurine writhes and then shatters into pieces!");
-		break;
+		mtmp = makemon(pm, x, y, MM_EDOG|MM_IGNOREWATER);
+		if (otmp && !mtmp) { /* monster was genocided or square occupied */
+			if (!quietly)
+			   pline_The("figurine writhes and then shatters into pieces!");
+			break;
 	    }
 	} while (!mtmp && --trycnt > 0);
 
