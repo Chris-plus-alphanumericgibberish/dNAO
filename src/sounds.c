@@ -1953,7 +1953,7 @@ humanoid_sound:
 			mtmp->mtyp == PM_KNIGHT && 
 			mtmp->mpeaceful
 		) goto asGuardian; /* Jump up to a different case in this switch statment */
-		else if(Role_if(PM_ANACHRONONAUT) && 
+		else if(Role_if(PM_ANACHRONONAUT) && !Race_if(PM_ANDROID) &&
 			(mtmp->mtyp == PM_MYRKALFAR_WARRIOR 
 				|| mtmp->mtyp == PM_MYRKALFAR_MATRON 
 				|| mtmp->mtyp == PM_ALIDER) && 
