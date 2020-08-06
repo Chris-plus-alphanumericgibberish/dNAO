@@ -232,8 +232,8 @@ STAIR:(00,02),up
 STAIR:(75,10),down
 
 # Church
-REGION:(18,01,24,07),lit,"temple",unfilled
-ALTAR:(21,02),chaos,shrine
+REGION:(18,01,24,07),lit,"temple"
+ALTAR:(21,02),chaos,altar
 REGION:(10,01,18,04),lit,"morgue"
 
 # Doors
