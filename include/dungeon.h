@@ -21,6 +21,9 @@ typedef struct d_level {	/* basic dungeon level element */
 	d_flags flags;		/* type flags */
 } d_level;
 
+//portal destination modifier
+#define PAINTING_OUT	2
+
 typedef struct s_level {	/* special dungeon level element */
 	struct	s_level *next;
 	d_level dlevel;		/* dungeon & level numbers */

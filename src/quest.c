@@ -87,6 +87,9 @@ nemdead()
 		if (Role_if(PM_EXILE)) {
 			u.uevent.qcompleted = TRUE;
 			u.specialSealsKnown |= SEAL_ACERERAK;
+		} else if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON)){
+			//Both don't have proper quest leaders.
+			u.uevent.qcompleted = TRUE;
 		}
 	    qt_pager(QT_KILLEDNEM + (flags.stag ? QT_TURNEDSTAG : 0));
 	}

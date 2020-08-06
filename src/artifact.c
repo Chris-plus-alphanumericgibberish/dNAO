@@ -4942,7 +4942,12 @@ arti_invoke(obj)
 		if(!Blind) You("are sucked into the scroll!");
 		else You_feel("weightless for a moment.");
 		
-		goto_level(&newlev, FALSE, FALSE, FALSE);
+		obj_extract_self(obj);
+		dropy(obj);
+		
+		schedule_goto(&newlev, FALSE, FALSE, FALSE,
+				  "You feel dizzy for a moment, but the sensation passes.",
+				  (char *)0);
 	}break;
 	case ENLIGHTENING:
 	    enlightenment(0);
