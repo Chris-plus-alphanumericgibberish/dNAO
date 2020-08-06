@@ -2190,7 +2190,7 @@ movemon()
 	}
 	if(mtmp->movement < NORMAL_SPEED)
 	    continue;
-
+	
 	mtmp->movement -= NORMAL_SPEED;
 	if (mtmp->movement >= NORMAL_SPEED)
 	    somebody_can_move = TRUE;

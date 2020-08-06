@@ -3223,11 +3223,12 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			mdef->mstdy += 4;
 		}
 	}
+	//Called once per blade striking
 	if(otmp->otyp == SET_OF_CROW_TALONS){
 		if(youdef){
-			u.ustdy += 3*otmp->ostriking + 3;
+			u.ustdy += 3;
 		} else if(mdef){
-			mdef->mstdy += 3*otmp->ostriking + 3;
+			mdef->mstdy += 3;
 		}
 	}
 }
@@ -4956,7 +4957,12 @@ arti_invoke(obj)
 		if(!Blind) You("are sucked into the scroll!");
 		else You_feel("weightless for a moment.");
 		
-		goto_level(&newlev, FALSE, FALSE, FALSE);
+		obj_extract_self(obj);
+		dropy(obj);
+		
+		schedule_goto(&newlev, FALSE, FALSE, FALSE,
+				  "You feel dizzy for a moment, but the sensation passes.",
+				  (char *)0);
 	}break;
 	case ENLIGHTENING:
 	    enlightenment(0);

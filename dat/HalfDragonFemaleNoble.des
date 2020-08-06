@@ -232,8 +232,8 @@ STAIR:(00,02),up
 STAIR:(75,10),down
 
 # Church
-REGION:(18,01,24,07),lit,"temple",unfilled
-ALTAR:(21,02),chaos,shrine
+REGION:(18,01,24,07),lit,"temple"
+ALTAR:(21,02),chaos,altar
 REGION:(10,01,18,04),lit,"morgue"
 
 # Doors
@@ -410,6 +410,8 @@ PORTAL:(23,03,23,03),(00,00,00,00),"qstlb"
 #
 
 #
+OBJECT:'?',"resistance",(40,15)
+OBJECT:'?',"resistance",(40,15)
 OBJECT:'#',"+5 large victorian underwear",(40,15)
 OBJECT:'#',"+5 large gentlewoman's dress",(40,15)
 OBJECT:'#',"+5 large silver gauntlets",(40,15)
@@ -490,7 +492,7 @@ MAP
 1TTTTTTTTTTTT--.....--T----------      ....TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 2------------|.......|--........|   .  .....|.|...TTTTTTTTTTTTTTTTTTTTTTTTTTT
 3|...........|.......|.|......|.|  .........|.|.........TTTTTTTTTTTTTTTTTTTTT
-4------.-----|.......|.|......|.|..........|..|............TTTTTTTTTTTTTTTTTT
+4------.-----|...\...|.|......|.|..........|..|............TTTTTTTTTTTTTTTTTT
 5|......|....|.......|.|......|.|..........|...|..............TTTTTTTTTTTTTTT
 6|.---|.|....|.......|.|......|.|..............|...............---------TTTTT
 7|....|.|....--.....--.|......|.|........  ....|...........|...|.......|TTTTT

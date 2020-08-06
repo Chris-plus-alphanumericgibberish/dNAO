@@ -164,12 +164,12 @@ dosit()
 	} else if(IS_THRONE(typ)) {
 		if(Role_if(PM_NOBLEMAN) && In_quest(&u.uz) && !(Race_if(PM_ELF) || Race_if(PM_DWARF))){
 			You(sit_message, defsyms[S_throne].explanation);
-			if(uarmc &&
+			if((uarmc &&
 			  ((!Race_if(PM_VAMPIRE) && uarmc->oartifact == ART_MANTLE_OF_HEAVEN) ||
 			  ( Race_if(PM_VAMPIRE) && uarmc->oartifact == ART_VESTMENT_OF_HELL) ||
 			  ( Race_if(PM_DROW) && flags.initgend && uarmc->oartifact == ART_WEB_OF_THE_CHOSEN) ||
 			  ( Race_if(PM_DROW) && !flags.initgend && uarmc->oartifact == ART_CLOAK_OF_THE_CONSORT)
-			  )
+			  )) || u.uevent.qcompleted
 			){
 			if(~levl[u.ux][u.uy].looted & (NOBLE_GENO|NOBLE_KNOW|NOBLE_PETS|NOBLE_WISH)){
 			  switch(dohomesit()){

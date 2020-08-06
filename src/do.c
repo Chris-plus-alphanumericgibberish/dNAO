@@ -1083,7 +1083,8 @@ register xchar x, y;
 void
 goto_level(newlevel, at_stairs, falling, portal)
 d_level *newlevel;
-boolean at_stairs, falling, portal;
+boolean at_stairs, falling;
+int portal;
 {
 	int fd, l_idx;
 	int new_ledger;
@@ -1292,8 +1293,24 @@ remake:
 	vision_reset();		/* clear old level's line-of-sight */
 	vision_full_recalc = 0;	/* don't let that reenable vision yet */
 	flush_screen(-1);	/* ensure all map flushes are postponed */
+	
 
-	if (portal && !In_endgame(&u.uz)
+	if (portal == PAINTING_OUT){
+		struct obj *painting;
+		for(painting = fobj; painting; painting = painting->nobj)
+			if(painting->oartifact == ART_PAINTING_FRAGMENT)
+				break;
+	    if (!painting){
+			impossible("goto_level: no painting found!");
+			goto misc_levelport;
+		}
+		if(!isok(painting->ox, painting->oy)){
+			impossible("goto_level: painting doesn't know where it is!");
+			goto misc_levelport;
+		}
+	    u_on_newpos(painting->ox, painting->oy);
+	}
+	else if (portal && !In_endgame(&u.uz)
 		&& !(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend && Is_qstart(&u.uz))
 	) {
 	    /* find the portal on the new level */
@@ -1311,7 +1328,10 @@ remake:
 				if (ttrap->ttyp == MAGIC_PORTAL) break;
 		}
 
-	    if (!ttrap) panic("goto_level: no corresponding portal!");
+	    if (!ttrap){
+			impossible("goto_level: no corresponding portal!");
+			goto misc_levelport;
+		}
 	    seetrap(ttrap);
 	    u_on_newpos(ttrap->tx, ttrap->ty);
 	} else if (at_stairs && !In_endgame(&u.uz)) {
@@ -1419,6 +1439,7 @@ remake:
 		    You("climb down the ladder.");
 	    }
 	} else {	/* trap door or level_tele or In_endgame */
+misc_levelport:
 	    if (was_in_W_tower && On_W_tower_level(&u.uz))
 		/* Stay inside the Wizard's tower when feasible.	*/
 		/* Note: up vs down doesn't really matter in this case. */
@@ -1695,6 +1716,7 @@ const char *pre_msg, *post_msg;
 	if (at_stairs)	 typmask |= 1;
 	if (falling)	 typmask |= 2;
 	if (portal_flag) typmask |= 4;
+	if (portal_flag == PAINTING_OUT) typmask |= 10;
 	if (portal_flag < 0) typmask |= 0200;	/* flag for portal removal */
 	u.utotype = typmask;
 	/* destination level */
@@ -1716,7 +1738,7 @@ deferred_goto()
 
 	    assign_level(&dest, &u.utolev);
 	    if (dfr_pre_msg) pline1(dfr_pre_msg);
-	    goto_level(&dest, !!(typmask&1), !!(typmask&2), !!(typmask&4));
+	    goto_level(&dest, !!(typmask&1), !!(typmask&2), (typmask&10) ? PAINTING_OUT : !!(typmask&4));
 	    if (typmask & 0200) {	/* remove portal */
 		struct trap *t = t_at(u.ux, u.uy);
 

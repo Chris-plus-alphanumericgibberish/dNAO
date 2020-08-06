@@ -1138,6 +1138,7 @@ register struct trap *ttmp;
 	if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend && In_quest(&u.uz)){
 	    int i;
 	    extern int n_dgns; /* from dungeon.c */
+		int painting;
 		//Look for return info
 	    for (i = 0; i < n_dgns; i++)
 			if(dungeons[i].dunlev_ureturn)
@@ -1145,10 +1146,15 @@ register struct trap *ttmp;
 		if(i < n_dgns){
 			target_level.dnum = i;
 			target_level.dlevel = dungeons[i].dunlev_ureturn;
+			dungeons[i].dunlev_ureturn = 0;
+			painting = PAINTING_OUT;
 		} else {
+			//Possibly we branchported in.
 			target_level = ttmp->dst;
+			painting = FALSE;
 		}
-		schedule_goto(&target_level, FALSE, FALSE, FALSE,
+		schedule_goto(&target_level, FALSE, FALSE, painting,
+				  painting ? "You find yourself next to a scrap of canvas." :
 				  "You feel dizzy for a moment, but the sensation passes.",
 				  (char *)0);
 	} else {
