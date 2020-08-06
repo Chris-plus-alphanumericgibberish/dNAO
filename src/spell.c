@@ -2111,7 +2111,14 @@ spiriteffects(power, atme)
 					break;
 				}
 				mon->mnotlaugh = 0;
-				mon->mlaughing = d(1,5)+u.ulevel/10;
+				if (resist(mon, 0, 0, FALSE))
+					mon->mlaughing = 1;
+				else
+					mon->mlaughing = d(1, spiritDsize());
+				
+				// considered a save at the end of every turn to break out, but that's not
+				// a huge difference for high-MR targets, the only ones who really matter.
+				
 				pline("%s collapses in a fit of laughter.", Monnam(mon));
 			} else{
 				pline("There is no target there.");
