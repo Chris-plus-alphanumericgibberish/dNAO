@@ -1981,6 +1981,7 @@ get_description_of_damage_type(uchar id)
 	case AD_BDFN: return "spears of blood";
 	case AD_SQUE: return "steal Quest Artifact or Amulet";
 	case AD_SPHR: return "create elemental spheres";
+	case AD_DARK: return "dark";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

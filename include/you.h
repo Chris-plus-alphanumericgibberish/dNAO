@@ -768,12 +768,8 @@ struct you {
 	boolean uleadamulet;
 	/*Ugly extra artifact variables workaround.  Spaghetti code alert!*/
 	int goldkamcount_tame; /*number of tame golden kamerel following you around*/
-	long SnSd1, SnSd2, SnSd3, SnSd3duration;
-	int ZangetsuSafe;
 	int voidChime;
 	long rangBell; /*Turn last rang bell of opening on*/
-	short RoSPkills, RoSPflights;
-	long BoISspell;
 	/*Keter counters*/
 	int keter, chokhmah, binah, gevurah, hod, daat, netzach;
 	int regifted; /*keeps track of how many artifacts the player has given to the unknown god*/

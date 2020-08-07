@@ -24,6 +24,8 @@
 #define Sick_res(mon)		((mon)==&youmonst ? Sick_resistance : resists_sickness((mon)))
 #define Stone_res(mon)		((mon)==&youmonst ? Stone_resistance : resists_ston((mon)))
 #define Magic_res(mon)		((mon)==&youmonst ? Antimagic : resists_magm((mon)))
+#define Dark_res(mon)		((mon)==&youmonst ? Dark_immune : dark_immune((mon)))
+#define Dark_vuln(mon)		((mon)==&youmonst ? Mortal_race : mortal_race((mon)))
 #define Half_phys(mon)		((mon)==&youmonst ? Half_physical_damage : mon_resistance((mon), HALF_PHDAM))
 #define Half_spel(mon)		((mon)==&youmonst ? Half_spell_damage : mon_resistance((mon), HALF_SPDAM))
 #define Change_res(mon)		((mon)==&youmonst ? Unchanging : mon_resistance((mon), UNCHANGING))

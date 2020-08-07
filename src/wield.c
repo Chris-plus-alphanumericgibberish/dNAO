@@ -116,6 +116,7 @@ register struct obj *obj;
 				&& obj->oartifact != ART_WEBWEAVER_S_CROOK
 				&& obj->oartifact != ART_SILENCE_GLAIVE
 				&& obj->oartifact != ART_HEARTCLEAVER
+				&& obj->oartifact != ART_CRUCIFIX_OF_THE_MAD_KING
 				&& obj->oartifact != ART_SOL_VALTIVA
 				&& obj->oartifact != ART_SHADOWLOCK
 				&& obj->oartifact != ART_DEATH_SPEAR_OF_KEPTOLO
@@ -841,7 +842,7 @@ register int amount;
 	    return(1);
 	}
 	/* there is a (soft) upper and lower limit to uwep->spe */
-	if(is_rakuyo(uwep))
+	if(is_plusten(uwep))
 		safelim = 9;
 	else safelim = 5;
 	if(((uwep->spe > safelim && amount >= 0) || (uwep->spe < -safelim && amount < 0))

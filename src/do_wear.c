@@ -5,6 +5,8 @@
 #include <math.h>
 #include "hack.h"
 #include "xhity.h"
+#include "zap.h"
+#include "artifact.h"
 
 #ifndef OVLB
 
@@ -3698,14 +3700,14 @@ struct obj *armor;
 			mdef = u.ustuck;
 		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
 			continue;
-		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		else mdef = m_u_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
 		
 		if(!mdef)
 			continue;
-		if(DEADMONSTER(mdef))
-			continue;
-		
+
 		youdef = (mdef == &youmonst);
+		if(!youdef && DEADMONSTER(mdef))
+			continue;
 		
 		if(youagr && (mdef->mpeaceful || !rn2(4)))
 			continue;
@@ -3730,14 +3732,475 @@ struct obj *armor;
 }
 
 void
-doliving(magr, wep)
+dodragonhead_roar(magr, wep)
 struct monst *magr;
 struct obj *wep;
 {
 	struct monst *mdef;
 	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
 	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
-	int i = rnd(8),j, lim=0;
+	int i = rnd(8),j;
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	
+	if(youagr || canseemon(magr))
+		pline("The Dragonhead Shield roars!");
+	else pline("It roars!");
+	
+	if(youagr && u.ustuck && u.uswallow){
+		mdef = u.ustuck;
+		mdef->movement -= 12;
+	} else for(j=8;j>=1;j--){
+		if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+			continue;
+		else mdef = m_u_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(!mdef)
+			continue;
+		
+		youdef = (mdef == &youmonst);
+		if(!youdef && DEADMONSTER(mdef))
+			continue;
+		
+		if(youagr && mdef->mpeaceful)
+			continue;
+		if(youdef && magr->mpeaceful)
+			continue;
+		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
+			continue;
+		
+		mdef->movement -= 12;
+	}
+	if(youagr)
+		u.ustdy -= 10;
+	else mdef->mstdy -= 10;
+}
+
+static void
+dodragonhead_bite(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	struct monst *mdef;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j;
+	struct attack symbiote = { AT_HITS, AD_PHYS, 5, 8 };
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	
+	for(j=8;j>=1;j--){
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+			continue;
+		else mdef = m_u_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(!mdef)
+			continue;
+		
+		youdef = (mdef == &youmonst);
+		if(!youdef && DEADMONSTER(mdef))
+			continue;
+		
+		if(youagr && mdef->mpeaceful)
+			continue;
+		if(youdef && magr->mpeaceful)
+			continue;
+		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
+			continue;
+		//Note: petrifying targets are safe, it's a weapon attack
+		if(mdef->mtyp == PM_PALE_NIGHT) continue;
+		
+		if(youdef){
+			if(canseemon(magr))
+				pline("The Dragonhead Shield bites you!");
+			else pline("It bites you!");
+		}
+		else if(youagr || canseemon(magr))
+			pline("The Dragonhead Shield bites %s!", mon_nam(mdef));
+		
+		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
+			xmeleehity(magr, mdef, &symbiote, (struct obj *)0, 0, 0, FALSE);
+			if(!youagr && DEADMONSTER(magr))
+				break; //oops!
+			//limit of one attack for weapons
+			break;
+		}
+	}
+}
+
+static void
+dodragonhead_breathe(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	struct zapdata zapdata;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j,k;
+	boolean gooddir = FALSE;
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct monst *mdef;
+	int curx, cury;
+	
+	for(j=8;j>=1;j--){
+		if(youagr && u.ustuck && u.uswallow){
+			mdef = u.ustuck;
+			gooddir = TRUE;
+		} else for(k = 1; k < 5; k++){
+			curx = x(magr)+k*clockwisex[(i+j)%8];
+			cury = y(magr)+k*clockwisey[(i+j)%8];
+			if(!isok(curx, cury))
+				continue;
+			else mdef = m_u_at(curx, cury);
+			
+			if(!mdef)
+				continue;
+			
+			youdef = (mdef == &youmonst);
+			if(!youdef && DEADMONSTER(mdef))
+				continue;
+			
+			if(youagr && mdef->mpeaceful){
+				gooddir = FALSE;
+				break; //break out of inner loop now, we found a bad target.
+			}
+			if(youdef && magr->mpeaceful){
+				gooddir = FALSE;
+				break; //break out of inner loop now, we found a bad target.
+			}
+			if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful)){
+				gooddir = FALSE;
+				break; //break out of inner loop now, we found a bad target.
+			}
+			//else found a good target over here, and haven't hit a bad one (yet)
+			gooddir = TRUE;
+		}
+		//found good direction, break out of outer loop
+		if(gooddir)
+			break;
+	}
+	if(!j)
+		return;
+	
+	if(youagr || canseemon(magr))
+		pline("The Dragonhead Shield breathes fire!");
+	
+	/* set up zapdata */
+	basiczap(&zapdata, AD_FIRE, ZAP_BREATH, 0);
+
+	/* dragonbreath */
+	zapdata.unreflectable = ZAP_REFL_ADVANCED;
+	/* set damage */
+	zapdata.damn = 10;
+	zapdata.damd = 10;
+	zapdata.no_bounce = TRUE;
+
+	zap(magr, x(magr), y(magr), clockwisex[(i+j)%8], clockwisey[(i+j)%8], 4, &zapdata);
+}
+
+void
+doliving_dragonhead(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	if(!invoked){
+		if(rn2(30))
+			return;
+		if(!nearby_targets(magr))
+			return;
+	}
+	switch(rnd(3)){
+		//roar
+		case 1:
+			dodragonhead_roar(magr, wep);
+		break;
+		//bite
+		case 2:
+			dodragonhead_bite(magr, wep);
+		break;
+		//breathe fire
+		case 3:
+			dodragonhead_breathe(magr, wep);
+		break;
+	}
+}
+
+void
+doking_scream(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	struct monst *mdef;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j;
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	
+	if(youagr || canseemon(magr))
+		pline("The Mad King screams!");
+	else pline("It screams!");
+	
+	if(youagr && u.ustuck && u.uswallow){
+		mdef = u.ustuck;
+		mdef->movement -= 12;
+	} else for(j=8;j>=1;j--){
+		if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+			continue;
+		else mdef = m_u_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(!mdef)
+			continue;
+		
+		youdef = (mdef == &youmonst);
+		if(!youdef && DEADMONSTER(mdef))
+			continue;
+		
+		if(youagr && mdef->mpeaceful)
+			continue;
+		if(youdef && magr->mpeaceful)
+			continue;
+		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
+			continue;
+		
+		if(youdef){
+			mdef->movement -= 12;
+			if(!bigmonst(youracedata)){
+				hurtle(clockwisex[(i+j)%8], clockwisey[(i+j)%8], 1, TRUE, FALSE);
+			}
+		} else {
+			// if (!resist(mdef, WEAPON_CLASS, 0, NOTELL))
+				// monflee(mdef, 3, FALSE, FALSE);
+			if(bigmonst(mdef->data)){
+				mdef->movement -= 12;
+			} else {
+				mhurtle(mdef, clockwisex[(i+j)%8], clockwisey[(i+j)%8], 1);
+				//Note: mdef may be gone now due to traps
+			}
+		}
+	}
+}
+
+void
+doking_bless(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	boolean youagr = (magr == &youmonst);
+	
+	if(youagr)
+		pline("The Mad King blesses you!");
+	else if(canseemon(magr))
+		pline("The Mad King blesses %s!", mon_nam(magr));
+	
+	if(youagr){
+		u.ustdy -= 8;
+		u.uencouraged += 8;
+	} else {
+		magr->mstdy -= 8;
+		magr->encouraged += 8;
+	}
+}
+
+void
+doking_vex(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	boolean youagr = (magr == &youmonst);
+	struct monst *mtmp;
+	int maketame = ((magr->mtame || youagr) ? MM_EDOG : 0);
+	
+	if(youagr)
+		pline("The Mad King curses you!");
+	else if(canseemon(magr))
+		pline("The Mad King curses %s!", mon_nam(magr));
+	
+	mtmp = makemon(&mons[PM_VEXING_ORB], x(magr), y(magr), MM_ADJACENTOK|maketame);
+	if (mtmp) {
+		/* time out */
+		mtmp->mvanishes = 4 + rn2(4);
+		/* can be peaceful */
+		if(magr->mpeaceful)
+			mtmp->mpeaceful = TRUE;
+		/* can be tame */
+		if (maketame) {
+			initedog(mtmp);
+		}
+	}
+}
+
+void
+doliving_mad_king(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	if(!invoked){
+		if(rn2(30))
+			return;
+		if(!nearby_targets(magr))
+			return;
+	}
+	switch(rnd(3)){
+		//scream
+		case 1:
+			doking_scream(magr, wep);
+		break;
+		//bless
+		case 2:
+			doking_bless(magr, wep);
+		break;
+		//vexation
+		case 3:
+			doking_vex(magr, wep);
+		break;
+	}
+}
+
+void
+doringed_awaken(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	boolean youagr = (magr == &youmonst);
+	struct monst *mtmp;
+	
+	//Don't stack multiple
+	if(artinstance[wep->oartifact].RRSember >= moves || artinstance[wep->oartifact].RRSlunar >= moves)
+		return;
+	
+	if(rn2(2)){
+		if(youagr || canseemon(magr))
+			pline("The Ringed Spear awakens and begins to burn!");
+		artinstance[wep->oartifact].RRSember = moves + 20 + rn2(10) + rn2(10);
+	} else {
+		if(youagr || canseemon(magr))
+			pline("The Ringed Spear awakens and begins to gleam royal blue!");
+		artinstance[wep->oartifact].RRSlunar = moves + 20 + rn2(10) + rn2(10);
+	}
+}
+
+void
+doringed_nurture(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	boolean youagr = (magr == &youmonst);
+	struct monst *mtmp;
+	
+	if(rn2(2)){
+		if(youagr)
+			pline("The Ringed Spear nurtures your body!");
+		else if(canseemon(magr))
+			pline("The Ringed Spear nurtures %s body!", s_suffix(mon_nam(magr)));
+		
+		if(youagr){
+			if(uhp() < uhpmax()){
+				healup(min_ints(100, uhpmax()/3+1), 0, FALSE, FALSE);
+			}
+		} else {
+			magr->mhp += min(magr->mhpmax/3+1, 100);
+			if(magr->mhp > magr->mhpmax)
+				magr->mhp = magr->mhpmax;
+		}
+	} else {
+		if(youagr)
+			pline("The Ringed Spear nurtures your spirit!");
+		else if(canseemon(magr))
+			pline("The Ringed Spear nurtures %s spirit!", s_suffix(mon_nam(magr)));
+		
+		if(youagr){
+			u.uen += min(u.uenmax/3+1, 100);
+			if(u.uen > u.uenmax)
+				u.uen = u.uenmax;
+		} else {
+			magr->mspec_used = 0;
+		}
+	}
+}
+
+void
+doringed_companions(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	boolean youagr = (magr == &youmonst);
+	struct monst *mtmp;
+	int maketame = ((magr->mtame || youagr) ? MM_EDOG : 0);
+	int mid;
+	int i;
+	
+	if(rn2(2)){
+		if(youagr || canseemon(magr))
+			pline("The Ringed Spear emits a seething orb of flame!");
+		mid = PM_FLAMING_ORB;
+		i = 1;
+	} else {
+		if(youagr || canseemon(magr))
+			pline("The Ringed Spear emits star-eyed pursuers!");
+		mid = PM_PURSUER;
+		i = 5;
+	}
+	
+	for(; i > 0; i--){
+		mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|maketame);
+		if (mtmp) {
+			/* time out */
+			mtmp->mvanishes = 4 + rn2(4);
+			mtmp->mspec_used = 0;
+			/* can be peaceful */
+			if(magr->mpeaceful)
+				mtmp->mpeaceful = TRUE;
+			/* can be tame */
+			if (maketame) {
+				initedog(mtmp);
+			}
+		}
+	}
+}
+
+void
+doliving_ringed_spear(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	if(!invoked){
+		if(rn2(30))
+			return;
+		if(!nearby_targets(magr))
+			return;
+	}
+	switch(rnd(3)){
+		//awaken
+		case 1:
+			doringed_awaken(magr, wep);
+		break;
+		//nurture
+		case 2:
+			doringed_nurture(magr, wep);
+		break;
+		//companions
+		case 3:
+			doringed_companions(magr, wep);
+		break;
+	}
+}
+
+static void
+doliving_single_attack(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	struct monst *mdef;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j;
 	struct attack symbiote = { AT_WEAP, AD_PHYS, 4, 4 };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
@@ -3747,14 +4210,14 @@ struct obj *wep;
 			mdef = u.ustuck;
 		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
 			continue;
-		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		else mdef = m_u_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
 		
 		if(!mdef)
 			continue;
-		if(DEADMONSTER(mdef))
-			continue;
 		
 		youdef = (mdef == &youmonst);
+		if(!youdef && DEADMONSTER(mdef))
+			continue;
 		
 		if(youagr && (mdef->mpeaceful || !rn2(4)))
 			continue;
@@ -3768,11 +4231,24 @@ struct obj *wep;
 			xmeleehity(magr, mdef, &symbiote, wep, -1, 0, FALSE);
 			if(!youagr && DEADMONSTER(magr))
 				break; //oops!
-			if(youagr) morehungry(1);
 			//limit of one attack for weapons
 			break;
 		}
 	}
+}
+
+void
+doliving(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	if(wep->oartifact == ART_DRAGONHEAD_SHIELD)
+		doliving_dragonhead(magr, wep, FALSE);
+	else if(wep->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING)
+		doliving_mad_king(magr, wep, FALSE);
+	else if(wep->oartifact == ART_RITUAL_RINGED_SPEAR)
+		doliving_ringed_spear(magr, wep, FALSE);
+	else doliving_single_attack(magr, wep);
 }
 
 #endif /* OVLB */

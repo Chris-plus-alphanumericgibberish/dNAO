@@ -1163,7 +1163,13 @@ moveloop()
 				/* Possibly vanish */
 				if(mtmp->mvanishes>-1){
 					if(--mtmp->mvanishes == 0){
-						monvanished(mtmp);
+						if(mtmp->mtyp == PM_VEXING_ORB){
+							//Need a better system than this :(
+							flags.mon_moving = TRUE;
+							mondied(mtmp);
+							flags.mon_moving = FALSE;
+						} else
+							monvanished(mtmp);
 						continue;
 					}
 				}
@@ -1556,9 +1562,9 @@ karemade:
 			if (uwep && uwep->oartifact == ART_GARNET_ROD) moveamt += NORMAL_SPEED / 2;
 			if (uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
 				moveamt += NORMAL_SPEED;
-				if(u.ZangetsuSafe-- < 1){
+				if(artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe-- < 1){
 					if(ublindf && ublindf->otyp == MASK && is_undead(&mons[ublindf->corpsenm])){
-						u.ZangetsuSafe = mons[ublindf->corpsenm].mlevel;
+						artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = mons[ublindf->corpsenm].mlevel;
 						if(ublindf->ovar1>=3){
 							Your("mask shatters!");
 							useup(ublindf);
@@ -1567,7 +1573,7 @@ karemade:
 							ublindf->ovar1++;
 						}
 					} else {
-						u.ZangetsuSafe = 0;
+						artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = 0;
 						losehp(5, "inadvisable haste", KILLED_BY);
 						if (Upolyd) {
 							if(u.mhmax > u.ulevel && moves % 2){
@@ -1589,7 +1595,7 @@ karemade:
 					}
 				}
 			}
-			else if(u.ZangetsuSafe < u.ulevel && !(moves%10)) u.ZangetsuSafe++;
+			else if(artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe < u.ulevel && !(moves%10)) artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe++;
 			
 			if(!(moves%10)){
 				if(u.eurycounts) u.eurycounts--;
@@ -2073,6 +2079,7 @@ karemade:
 	    /******************************************/
 		
 		if(u.ustdy > 0) u.ustdy -= 1;
+		if(u.ustdy < 0) u.ustdy += 1;
 		
 		if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
 			average_dogs();

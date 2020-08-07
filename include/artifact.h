@@ -71,6 +71,7 @@
 #define ARTI_BLOODTHRST	0x0080L /* wants to attack peaceful and tame creatures */
 #define ARTI_SPEAK		0x0100L /* speaks rumours */
 #define ARTI_LUCK		0x0200L /* acts as a luckstone */
+#define ARTI_PLUSTEN	0x0400L /* can be enchanted to plus 10 */
 
 //#define SPFX2_NINJA		0x0000008L	/* throws from 1-your skill level ninja stars after each attack */
 //#define SPFX3_CARCAP	0x0000020L	/* increases carrying capacity when carried */
@@ -283,6 +284,31 @@ struct artifact {
 	unsigned long iflags;		/* special effect intrinsic to the artifact */
 };
 
+struct artinstance{
+	boolean exists; /*Has the artifact been generated*/
+	//Per-artifact variables. Access them via artinstance[ART_NUM].foo
+	long avar1;
+#define SnSd1 avar1
+#define ZangetsuSafe avar1
+#define RoSPkills avar1
+#define BoISspell avar1
+#define RRSember avar1
+	long avar2;
+#define SnSd2 avar2
+#define RoSPflights avar2
+#define RRSlunar avar2
+	long avar3;
+#define SnSd3 avar3
+	long avar4;
+#define SnSd3duration avar4
+};
+
+
+#define get_artifact(o) \
+		(((o)&&(o)->oartifact) ? &artilist[(o)->oartifact] : 0)
+
+extern struct artinstance artinstance[];
+
 /* invoked properties with special powers */
 #define TAMING		(LAST_PROP+1)
 #define HEALING		(LAST_PROP+2)
@@ -353,7 +379,7 @@ struct artifact {
 #define AEGIS           (LAST_PROP+67)
 #define WATER           (LAST_PROP+68)
 #define SINGING         (LAST_PROP+69)
-#define WIND_PETS	      (LAST_PROP+70)
+#define WIND_PETS	    (LAST_PROP+70)
 #define DEATH_TCH       (LAST_PROP+71)
 #define SKELETAL_MINION (LAST_PROP+72)
 #define ORACLE          (LAST_PROP+73)
@@ -361,6 +387,9 @@ struct artifact {
 #define ALLSIGHT        (LAST_PROP+75)
 #define INVOKE_DARK     (LAST_PROP+76)
 #define QUEST_PORTAL    (LAST_PROP+77)
+#define STONE_DRAGON    (LAST_PROP+78)
+#define MAD_KING        (LAST_PROP+79)
+#define RINGED_SPEAR    (LAST_PROP+80)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20
@@ -425,6 +454,8 @@ struct artifact {
 			)
 /* artifact has no specific material or size, eg "silver Grimtooth" */
 #define is_malleable_artifact(a) (is_nameable_artifact((a)) || (a) == &artilist[ART_EXCALIBUR])
+
+#define is_living_artifact(obj) ((obj)->oartifact == ART_TENTACLE_ROD || (obj)->oartifact == ART_DRAGONHEAD_SHIELD || (obj)->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING || (obj)->oartifact == ART_RITUAL_RINGED_SPEAR)
 
 #define is_mastery_artifact_nameable(a) (\
             /* Mastery artifacts */\

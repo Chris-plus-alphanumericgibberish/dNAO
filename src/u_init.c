@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "edog.h"
+#include "artifact.h"
 
 struct trobj {
 	short trotyp;
@@ -1482,7 +1483,7 @@ u_init()
 
 	u.summonMonster = FALSE;
 	u.uleadamulet = FALSE;
-	u.ZangetsuSafe = 1;
+	artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = 1;
 	u.ucspeed = NORM_CLOCKSPEED;
 	u.voidChime = 0;
 	u.regifted = 0;

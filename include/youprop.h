@@ -158,6 +158,9 @@
 #define Punished		(uball)
 #define	Insanity	(100 - u.usanity)
 
+#define Mortal_race	(!nonliving(youracedata) && !is_minion(youracedata) && !is_demon(youracedata) && !is_primordial(youracedata))
+#define Dark_immune	(is_unalive(youracedata) || is_primordial(youracedata))
+
 /* Those implemented solely as timeouts (we use just intrinsic) */
 #define HStun			u.uprops[STUNNED].intrinsic
 #define Stunned			((HStun || u.umonnum == PM_STALKER || \

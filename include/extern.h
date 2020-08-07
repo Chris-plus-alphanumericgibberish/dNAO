@@ -108,6 +108,7 @@ E boolean FDECL(arti_lighten, (struct obj *, boolean));
 E boolean FDECL(arti_chawis, (struct obj *, boolean));
 E boolean FDECL(arti_blindres, (struct obj *, boolean));
 E boolean FDECL(arti_plussev, (struct obj *));
+E boolean FDECL(arti_plusten, (struct obj *));
 E boolean FDECL(arti_silvered, (struct obj *));
 E boolean FDECL(arti_reflects, (struct obj *));
 E boolean FDECL(arti_light, (struct obj *));
@@ -564,6 +565,9 @@ E void FDECL(adj_abon, (struct obj *,SCHAR_P));
 E int FDECL(properties_dr, (struct obj *,int,int));
 E void FDECL(dosymbiotic, (struct monst *, struct obj *));
 E void FDECL(doliving, (struct monst *, struct obj *));
+E void FDECL(doliving_dragonhead, (struct monst *, struct obj *, boolean));
+E void FDECL(doliving_mad_king, (struct monst *, struct obj *, boolean));
+E void FDECL(doliving_ringed_spear, (struct monst *, struct obj *, boolean));
 
 /* ### dog.c ### */
 
@@ -3175,6 +3179,7 @@ E void FDECL(revive_egg, (struct obj *));
 E int NDECL(allow_artwish);
 E boolean NDECL(dowand_refresh);
 E int FDECL(android_braindamage, (int, struct monst *, struct monst *, boolean));
+E boolean FDECL(nearby_targets, (struct monst *));
 
 #endif /* !MAKEDEFS_C && !LEV_LEX_C */
 

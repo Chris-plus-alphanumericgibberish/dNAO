@@ -1476,6 +1476,16 @@ dogaze()
 		   	         dmg = 0;
 		   	     }
 		   	 break;
+		   	 case AD_DARK:
+		   	     dmg = d(damn,damd);
+		   	     You("attack %s with a dark gaze!", mon_nam(mtmp));
+		   	     if (dark_immune(mtmp)) {
+		   	         pline_The("dark doesn't bother %s!", mon_nam(mtmp));
+		   	         dmg = 0;
+		   	     } else if(mortal_race(mtmp)){
+		   	         dmg *= 2;
+				 }
+		   	 break;
 			 case AD_STDY:
 				You("study %s carefully.",mon_nam(mtmp));
 				mtmp->mstdy = max(d(damn,damd),mtmp->mstdy);

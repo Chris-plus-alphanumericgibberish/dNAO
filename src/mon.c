@@ -4600,6 +4600,9 @@ boolean was_swallowed;			/* digestion */
 			else if(mdat->mattk[i].adtyp == AD_ELEC){//mdat->mtyp == PM_SHOCKING_SPHERE){
 				explode(mon->mx, mon->my, AD_ELEC, MON_EXPLODE, tmp, EXPL_MAGICAL, 1);
 			}
+			else if(mdat->mattk[i].adtyp == AD_DARK){
+				explode(mon->mx, mon->my, AD_DARK, MON_EXPLODE, tmp, EXPL_MAGICAL, 2);
+			}
 			else if(mdat->mattk[i].adtyp == AD_FRWK){
 				int x, y, i;
 				for(i = rn2(3)+2; i > 0; i--){

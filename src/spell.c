@@ -5535,6 +5535,7 @@ int spell;
 			|| uwep->oartifact == ART_ARYFAERN_KERYM
 			|| uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC
 			|| uwep->oartifact == ART_PROFANED_GREATSCYTHE
+			|| uwep->oartifact == ART_RITUAL_RINGED_SPEAR
 			|| uwep->oartifact == ART_GARNET_ROD
 		) splcaster -= urole.spelarmr;
 		

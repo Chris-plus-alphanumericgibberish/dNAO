@@ -227,6 +227,9 @@
 #define intelligent_mon(mon)	(!mindless_mon(mon) && !is_animal((mon)->data))
 #define murderable_mon(mon)	((mon) && ((intelligent_mon(mon) && always_peaceful((mon)->data) && !always_hostile_mon(mon)) || (mon)->isshk || (mon)->isgd || (mon)->ispriest))
 
+#define mortal_race(mon)	(intelligent_mon(mon) && !nonliving_mon(mon) && !is_minion((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data))
+#define dark_immune(mon)	(is_unalive((mon)->data) || is_primordial((mon)->data))
+
 #define slithy(ptr)			((ptr)->mflagsb & MB_SLITHY)
 #define humanoid_torso(ptr)	(((ptr)->mflagsb & MB_HUMANOID) != 0)
 #define humanoid_upperbody(ptr)	(humanoid_torso(ptr) && (((ptr)->mflagsb&(MB_LONGHEAD|MB_LONGNECK)) == 0))
@@ -634,6 +637,8 @@
 				  (ptr)->mtyp == PM_DARK_WORM || \
 				  (ptr)->mtyp == PM_FIRE_VORTEX) ? 1 : \
 				 ((ptr)->mtyp == PM_FIRE_ELEMENTAL ||\
+				  (ptr)->mtyp == PM_FLAMING_ORB || \
+				  (ptr)->mtyp == PM_CANDLE_TREE || \
 				  (ptr)->mtyp == PM_DANCING_FLAME ||\
 				  (ptr)->mtyp == PM_COTERIE_OF_MOTES ||\
 				  (ptr)->mtyp == PM_BALL_OF_RADIANCE) ? 2 : \

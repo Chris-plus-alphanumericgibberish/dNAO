@@ -4,6 +4,12 @@
 #include "edog.h"
 #include "xhity.h"
 
+#ifdef OVLB
+#include "artilist.h"
+#else
+STATIC_DCL struct artifact artilist[];
+#endif
+
 /* TODO LIST
 
 MAJOR:
@@ -744,28 +750,37 @@ int tary;
 						}
 					}
 					/* Cleaving causes melee attacks to hit an additional neighboring monster */
-					if (youagr && !ranged && Cleaving)
-					{
+					if ((youagr && !ranged && Cleaving)
+						|| (!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && otmp && otmp->oartifact 
+							&& get_artifact(otmp)->inv_prop == RINGED_SPEAR 
+							&& (artinstance[otmp->oartifact].RRSember >= moves || artinstance[otmp->oartifact].RRSlunar >= moves)
+						)
+					){
+						int subresult = 0;
 						/* try to find direction (u.dx and u.dy may be incorrect) */
 						int dx = sgn(tarx - x(magr));
 						int dy = sgn(tary - y(magr));
+						int nx, ny;
 						if((monstermoves+indexnum+devai)&1){//Odd
 							//-45 degree rotation
-							dx = sgn(dx+dy);
-							dy = sgn(dy-dx);
+							nx = sgn(dx+dy);
+							ny = sgn(dy-dx);
 						} else {
 							//45 degree rotation
-							dx = sgn(dx-dy);
-							dy = sgn(dx+dy);
+							nx = sgn(dx-dy);
+							ny = sgn(dx+dy);
 						}
-						if (isok(x(magr) + dx, y(magr) + dy))
+						if (isok(x(magr) + nx, y(magr) + ny))
 						{
-							struct monst *mdef2 = m_at(x(magr) + dx, y(magr) + dy);
-							if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)) {
+							struct monst *mdef2 = m_at(x(magr) + nx, y(magr) + ny);
+							if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)
+								&& !((youagr && mdef2->mpeaceful) || (!youagr && magr->mpeaceful == mdef2->mpeaceful))
+							){
 								int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
-								bhitpos.x = x(magr) + dx; bhitpos.y = y(magr) + dy;
-								(void)xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
-								/* we aren't handling MM_AGR_DIED or MM_AGR_STOP; hopefully the attacker being a player covers those cases well enough */
+								bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+								subresult = xmeleehity(magr, mdef2, attk, otmp, vis2, tohitmod, TRUE);
+								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 							}
 						}
 					}
@@ -3834,6 +3849,7 @@ boolean ranged;
 		case AD_ACID:
 		case AD_DISE:
 		case AD_POSN:
+		case AD_DARK:
 			/* make a 0 damage physical attack 
 			 * This prints hitmsg and applies on-hit effects of any weapon
 			 */
@@ -8986,6 +9002,7 @@ int vis;
 			}
 		}
 		/* message, special effects */
+		/* This seems buggy mvm. They're really cold if YOU'RE swallowed! */
 		if (((attk->adtyp == AD_EFIR || attk->adtyp == AD_ACFR) || (youagr || !magr->mcan)) &&
 			(rn2(2) || !youdef || !u.uswallow))
 		{
@@ -9037,6 +9054,33 @@ int vis;
 		/* deal damage */
 		result = xdamagey(magr, mdef, attk, dmg);
 		}
+		break;
+	case AD_DARK:
+		/* apply resistance */
+		if (Dark_res(mdef)) {
+			dmg = 0;
+		}
+		else if(Dark_vuln(mdef)){
+			dmg *= 2;
+		}
+		/* message, special effects */
+		if (youagr || !magr->mcan){
+			/* message */
+			if (vis&VIS_MDEF) {
+				if (dmg) {
+					pline("%s %s engulfed in darkness!",
+						(youdef ? "You" : Monnam(mdef)),
+						(youdef ? "are" : "is")
+						);
+					if(youdef && Dark_vuln(mdef))
+						You("are gripped by the fear of death!");
+				}
+			}
+		}
+		else
+			dmg = 0;
+		/* deal damage */
+		result = xdamagey(magr, mdef, attk, dmg);
 		break;
 	case AD_DESC:
 		/* apply resistance/vulnerability */
@@ -9268,6 +9312,10 @@ int vis;
 			if (Shock_res(mdef))
 				dmg /= 2;
 			goto expl_common;
+		case AD_DARK:
+			if (Dark_res(mdef))
+				dmg = 0;
+			goto expl_common;
 		case AD_DESC:
 			if (is_anhydrous(pd) || is_undead_mon(mdef))
 				dmg = 0;
@@ -9440,6 +9488,7 @@ boolean * needs_uncancelled;
 	case AD_FIRE:
 	case AD_COLD:
 	case AD_ELEC:
+	case AD_DARK:
 	case AD_DRLI:
 	case AD_CNCL:
 	case AD_ENCH:
@@ -9547,7 +9596,7 @@ int vis;
 		maybe_not = FALSE;
 
 	/* these gazes are actually hacks and only work vs the player */
-	if (!youdef && (adtyp == AD_WTCH || adtyp == AD_MIST || adtyp == AD_SPOR))
+	if (!youdef && (adtyp == AD_WTCH || adtyp == AD_MIST))
 		return MM_MISS;
 
 	if (pa->mtyp == PM_DEMOGORGON) {					// Demogorgon is special
@@ -9594,6 +9643,7 @@ int vis;
 	case AD_FIRE:
 	case AD_COLD:
 	case AD_ELEC:
+	case AD_DARK:
 		/* 4/5 chance to succeed */
 		if (maybe_not && !rn2(5))
 			return MM_MISS;
@@ -9603,6 +9653,7 @@ int vis;
 			case AD_FIRE:	Sprintf(buf, "fiery");		break;
 			case AD_COLD:	Sprintf(buf, "icy");		break;
 			case AD_ELEC:	Sprintf(buf, "shocking");	break;
+			case AD_DARK:	Sprintf(buf, "dark");	break;
 			}
 			pline("%s attack%s %s with a %s stare.",
 				(youagr ? "You" : Monnam(magr)),
@@ -10829,8 +10880,8 @@ int vis;
 		}
 		break;
 	case AD_SPOR:
-		/* release a spore if the player is nearby */
-		if (is_fern(pa) && !magr->mcan && distu(magr->mx, magr->my) <= 96 &&
+		/* release a spore */
+		if (is_fern(pa) && !magr->mcan && 
 			!is_fern_sprout(pa) ? !rn2(2) : !rn2(4)) {
 			coord mm;
 			mm.x = magr->mx; mm.y = magr->my;
@@ -10895,7 +10946,8 @@ int vis;
 			int n;
 			int mid;
 			struct monst *mtmp;
-			if(pa->mtyp == PM_CANDLE_TREE){
+			int maketame = ((magr->mtame || youagr) ? MM_EDOG : 0);
+			if(pa->mtyp == PM_CANDLE_TREE || pa->mtyp == PM_FLAMING_ORB){
 				mid = PM_FLAMING_SPHERE;
 				// if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
 			} else {
@@ -10912,7 +10964,7 @@ int vis;
 				}
 			}
 			for(n = dmg; n > 0; n--){
-				mtmp = makemon(&mons[mid], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+				mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|MM_ADJACENTSTRICT|maketame);
 				if (mtmp) {
 					/* time out */
 					mtmp->mvanishes = mlev(magr) + rnd(mlev(magr));
@@ -10920,7 +10972,7 @@ int vis;
 					if(magr->mpeaceful)
 						mtmp->mpeaceful = TRUE;
 					/* can be tame */
-					if (magr->mtame) {
+					if (maketame) {
 						initedog(mtmp);
 					}
 					/* bonus movement */
@@ -10928,7 +10980,8 @@ int vis;
 				}
 			}
 			//Breath timer
-			magr->mspec_used = 10 + rn2(20);
+			if(dmg > 1)
+				magr->mspec_used = 10 + rn2(20);
 		}
 		break;
 	default:
@@ -11349,6 +11402,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			weapon->oartifact == ART_WEBWEAVER_S_CROOK ||
 			weapon->oartifact == ART_SILENCE_GLAIVE ||
 			weapon->oartifact == ART_HEARTCLEAVER ||
+			weapon->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING ||
 			weapon->oartifact == ART_SOL_VALTIVA ||
 			weapon->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||
 			weapon->oartifact == ART_SHADOWLOCK ||
@@ -14960,6 +15014,37 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 						}
 						else if canseemon(magr) {
 							pline("%s is jolted with electricity!",
+								Monnam(magr));
+						}
+						newres = xdamagey(mdef, magr, passive, dmg);
+						if (newres&MM_DEF_DIED)
+							result |= MM_AGR_DIED;	/* attacker died */
+						if (newres&MM_DEF_LSVD)
+							result |= MM_AGR_STOP;	/* attacker lifesaved */
+					}
+					break;
+				case AD_DARK:
+					/* resistance */
+					if (Dark_res(magr)) {
+						if (youagr) {
+							shieldeff(u.ux, u.uy);
+							You_feel("unbothered.");
+						}
+					}
+					/* otherwise, damage */
+					else {
+						if (youagr) {
+							if(Mortal_race){
+								You("are suddenly gripped by the terror of death!");
+								dmg *= 2;
+							} else {
+								You("are shrouded in dark!");
+							}
+						}
+						else if canseemon(magr) {
+							if(mortal_race(magr))
+								dmg *= 2;
+							pline("%s is shrouded in dark!",
 								Monnam(magr));
 						}
 						newres = xdamagey(mdef, magr, passive, dmg);

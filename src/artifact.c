@@ -14,7 +14,7 @@
 STATIC_DCL struct artifact artilist[];
 #endif
 /*
- * Note:  both artilist[] and artiexist[] have a dummy element #0,
+ * Note:  both artilist[] and artinstance[] have a dummy element #0,
  *	  so loops over them should normally start at #1.  The primary
  *	  exception is the save & restore code, which doesn't care about
  *	  the contents, just the total size.
@@ -23,9 +23,6 @@ STATIC_DCL struct artifact artilist[];
 extern boolean notonhead;	/* for long worms */
 extern boolean lifehunt_sneak_attacking;
 extern struct attack grapple;
-
-#define get_artifact(o) \
-		(((o)&&(o)->oartifact) ? &artilist[(o)->oartifact] : 0)
 
 //duplicates of other functions, created due to problems with the linker
 STATIC_DCL void NDECL(cast_protection);
@@ -87,7 +84,7 @@ STATIC_DCL int artidisco[NROFARTIFACTS];
 STATIC_OVL int spec_dbon_applies = 0;
 
 /* flags including which artifacts have already been created */
-STATIC_OVL NEARDATA boolean artiexist[1+NROFARTIFACTS+1];
+struct artinstance artinstance[1+NROFARTIFACTS+1];
 /* and a discovery list for them (no dummy first entry here) */
 STATIC_OVL int artidisco[NROFARTIFACTS];
 
@@ -293,7 +290,7 @@ hack_artifacts()
 void
 init_artifacts()
 {
-	(void) memset((genericptr_t) artiexist, 0, sizeof artiexist);
+	(void) memset((genericptr_t) artinstance, 0, sizeof artinstance);
 	(void) memset((genericptr_t) artidisco, 0, sizeof artidisco);
 	hack_artifacts();
 }
@@ -302,7 +299,7 @@ void
 save_artifacts(fd)
 int fd;
 {
-	bwrite(fd, (genericptr_t) artiexist, sizeof artiexist);
+	bwrite(fd, (genericptr_t) artinstance, sizeof artinstance);
 	bwrite(fd, (genericptr_t) artidisco, sizeof artidisco);
 }
 
@@ -310,7 +307,7 @@ void
 restore_artifacts(fd)
 int fd;
 {
-	mread(fd, (genericptr_t) artiexist, sizeof artiexist);
+	mread(fd, (genericptr_t) artinstance, sizeof artinstance);
 	mread(fd, (genericptr_t) artidisco, sizeof artidisco);
 	hack_artifacts();	/* redo non-saved special cases */
 }
@@ -426,7 +423,7 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 		/* christen the artifact */
 	    otmp = oname(otmp, a->name);
 		otmp->oartifact = arti;
-		artiexist[arti] = TRUE;
+		artinstance[arti].exists = TRUE;
 		/* WHY */
 		if (arti == ART_HELM_OF_THE_ARCANE_ARCHER && by_align){
 			unrestrict_weapon_skill(P_ATTACK_SPELL);
@@ -452,7 +449,7 @@ aligntyp alignment;
 
 	/* Pirates quite purposefully can only get the Marauder's Map */
 	if (Role_if(PM_PIRATE))
-		return (artiexist[ART_MARAUDER_S_MAP] ? 0 : ART_MARAUDER_S_MAP);
+		return (artinstance[ART_MARAUDER_S_MAP].exists ? 0 : ART_MARAUDER_S_MAP);
 
 	for (attempts = 1; (!n || (!rn2(n - 1) && u.ugifts)); attempts++) {
 		n = 0;
@@ -463,7 +460,7 @@ aligntyp alignment;
 #define skip_if(x) if((attempts < ++condition) && (x)) continue
 
 			/* cannot already exist */
-			if (artiexist[m])
+			if (artinstance[m].exists)
 				continue;
 			/* cannot be nogen */
 			if (a->gflags & ARTG_NOGEN)
@@ -539,7 +536,7 @@ struct obj * otmp;
 	for (m = 1, a = artilist + 1; a->otyp; a++, m++)
 	{
 		/* cannot already exist */
-		if (artiexist[m])
+		if (artinstance[m].exists)
 			continue;
 		/* cannot be nogen, with exceptions */
 		if (a->gflags & ARTG_NOGEN && !(otmp->otyp == SPE_SECRETS))
@@ -825,13 +822,13 @@ exist_artifact(otyp, name)
 register int otyp;
 register const char *name;
 {
-	register const struct artifact *a;
 	register boolean *arex;
+	int i;
 
 	if (otyp && *name)
-	    for (a = artilist+1,arex = artiexist+1; a->otyp; a++,arex++)
-		if ((int) a->otyp == otyp && !strcmp(a->name, name))
-		    return *arex;
+	    for (i = 1; artilist[i].otyp; i++)
+			if ((int) artilist[i].otyp == otyp && !strcmp(artilist[i].name, name))
+				return artinstance[i].exists;
 	return FALSE;
 }
 
@@ -850,7 +847,7 @@ register boolean mod;
 		    otmp->oartifact = (mod ? m : 0);
 		    otmp->age = 0;
 		    if(otmp->otyp == RIN_INCREASE_DAMAGE) otmp->spe = 0;
-		    artiexist[m] = mod;
+		    artinstance[m].exists = mod;
 			// if(otmp->oartifact == ART_DRAGON_PLATE){
 				// otmp->owt = (int)(otmp->owt * 1.5); //450
 			// }
@@ -858,17 +855,17 @@ register boolean mod;
 				// otmp->owt = (int)(otmp->owt * 2); //300
 			// }
 			if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS){
-				u.RoSPkills = 7;//number of hits untill you gain a +
-				u.RoSPflights = 0;//number of flights remaining
+				artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPkills = 7;//number of hits untill you gain a +
+				artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights = 0;//number of flights remaining
 			}
-			if(otmp->oartifact && get_artifact(otmp)->inv_prop == SPEED_BANKAI){
-				u.ZangetsuSafe = u.ulevel;//turns for which you can use Zangetsu safely
+			if(otmp->oartifact == ART_TENSA_ZANGETSU){
+				artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = u.ulevel;//turns for which you can use Zangetsu safely
 			}
-			if(otmp->oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI){
-				u.SnSd1 = 0;//turn on which you can reuse the first dance
-				u.SnSd2 = 0;//turn on which you can reuse the second dance
-				u.SnSd3 = 0;//turn on which you can reuse the third dance
-				u.SnSd3duration = 0;//turn until which the weapon does full damage
+			if(otmp->oartifact == ART_SODE_NO_SHIRAYUKI){
+				artinstance[ART_SODE_NO_SHIRAYUKI].SnSd1 = 0;//turn on which you can reuse the first dance
+				artinstance[ART_SODE_NO_SHIRAYUKI].SnSd2 = 0;//turn on which you can reuse the second dance
+				artinstance[ART_SODE_NO_SHIRAYUKI].SnSd3 = 0;//turn on which you can reuse the third dance
+				artinstance[ART_SODE_NO_SHIRAYUKI].SnSd3duration = 0;//turn until which the weapon does full damage
 			}
 			if(otmp->oartifact && (get_artifact(otmp)->inv_prop == NECRONOMICON || get_artifact(otmp)->inv_prop == SPIRITNAMES)){
 				otmp->ovar1 = 0;//ovar1 will be used to track special powers, via flags
@@ -924,10 +921,9 @@ int
 nartifact_exist()
 {
     int a = 0;
-    int n = SIZE(artiexist);
-
-    while(n > 1)
-	if(artiexist[--n] && (CountsAgainstGifts(n) /*|| a < 1*/)) a++;
+    int i;
+	for(i = 1; artilist[i].otyp; i++)
+		if(artinstance[i].exists && (CountsAgainstGifts(i) /*|| a < 1*/)) a++;
 
     return max(a-u.regifted, 0);
 }
@@ -1152,6 +1148,13 @@ arti_plussev(obj)
 struct obj *obj;
 {
     return (obj && obj->oartifact && arti_is_prop(obj, ARTI_PLUSSEV));
+}
+
+boolean
+arti_plusten(obj)
+struct obj *obj;
+{
+    return (obj && obj->oartifact && arti_is_prop(obj, ARTI_PLUSTEN));
 }
 
 /* used to check if a monster is getting reflection from this object */
@@ -1679,6 +1682,10 @@ boolean narrow_only;
 			if (Stone_res(mdef))
 				return FALSE;
 		break;
+		case AD_DARK:
+			if (Dark_res(mdef))
+				return FALSE;
+		break;
 		default:
 			impossible("Weird weapon special attack: (%d).", weap->adtyp);
 		}
@@ -1881,6 +1888,15 @@ int * truedmgptr;
 	/* check that we were given an artifact */
 	if (!weap)
 		return FALSE;
+	
+	/* This is a super awkward property to check for :( */
+	if(weap->inv_prop == RINGED_SPEAR){
+		if (!Fire_res(mon) && artinstance[otmp->oartifact].RRSember >= moves)
+			*truedmgptr += basedmg;
+		if (!Magic_res(mon) && artinstance[otmp->oartifact].RRSlunar >= moves)
+			*truedmgptr += basedmg;
+	}
+	
 	/* check that the artifact is offensive */
 	if (!(weap->adtyp || weap->damage || weap->accuracy))
 		return FALSE;
@@ -1904,7 +1920,7 @@ int * truedmgptr;
 	if ((spec_dbon_applies = (spec_applies(otmp, mon, FALSE)
 		&& !(
 		/* additional conditions required to deal bonus damage */
-		(weap->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves) ||	/* only while invoked */
+		(weap->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves) ||	/* only while invoked */
 		(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit))	/* only while lit */
 		)) || (
 		/* alternative conditions for dealing bonus damage (ie spec_dbon_applies == FALSE) */
@@ -3276,7 +3292,7 @@ boolean * messaged;
 		spec_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
 	if (!check_oprop(otmp, OPROP_NONE))
 		oproperty_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
-
+	
 	/* this didn't trigger spec_dbon_applies, but still needs to happen later */
 	if (dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON)
 		&& !Drain_res(mdef) && !otmp->oartifact && otmp->otyp != SPE_BLANK_PAPER && otmp->otyp != SPE_SECRETS)
@@ -3571,7 +3587,7 @@ boolean * messaged;
 	}
 	if ((attacks(AD_COLD, otmp)  && !(
 			/* exceptions */
-			(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && u.SnSd3duration < monstermoves)
+			(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves)
 		)) || check_oprop(otmp,OPROP_COLDW) || check_oprop(otmp,OPROP_OONA_COLDW) || check_oprop(otmp,OPROP_LESSER_COLDW) || goatweaponturn == AD_COLD
 	){
 		if (attacks(AD_COLD, otmp) && (vis&VIS_MAGR)) {
@@ -3637,18 +3653,18 @@ boolean * messaged;
 //	pline("D20 role was %d", dieroll);
 //	pline("%d", otmp->oeaten);
 	if (oartifact == ART_ROD_OF_SEVEN_PARTS ) {
-		if(--u.RoSPkills < 1){
+		if(--artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPkills < 1){
 			if(youagr){
 				if(otmp->spe < 7 && u.ulevel/3 > otmp->spe){
 					otmp->spe++;
 					pline("Your weapon has become more perfect!");
-					u.RoSPkills = 7;
-				} else u.RoSPkills=1;
+					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPkills = 7;
+				} else artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPkills=1;
 			} else {
 				if(otmp->spe < 7 && (magr->m_lev)/3 > otmp->spe){
 					otmp->spe++;
-					u.RoSPkills = 7;
-				} else u.RoSPkills=1;
+					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPkills = 7;
+				} else artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPkills=1;
 			}
 		}
 		/* bonus 7+enchant damage to chaotics */
@@ -5356,11 +5372,11 @@ arti_invoke(obj)
 			pline("What dance will you use (1/2/3)?");
 			dancenumber =  readchar();
 			if (dancenumber == '1') {
-				if(u.SnSd1 > monstermoves){
+				if(artinstance[obj->oartifact].SnSd1 > monstermoves){
 				    You_feel("that %s %s ignoring you.",
 					     the(xname(obj)), otense(obj, "are"));
 					/* and just got more so; patience is essential... */
-					u.SnSd1 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
+					artinstance[obj->oartifact].SnSd1 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
 				    return 1;
 				}
 				else if(throweffect()){
@@ -5370,7 +5386,7 @@ arti_invoke(obj)
 					dmg += spell_damage_bonus();
 					dmg *= 3;
 					pline("Some no mai, Tsukishiro!");
-					u.SnSd1 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
+					artinstance[obj->oartifact].SnSd1 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
 						explode(u.dx, u.dy,
 							AD_COLD, 0,
 							dmg,
@@ -5379,11 +5395,11 @@ arti_invoke(obj)
 				}
 			}
 			else if (dancenumber == '2') {
-				if(u.SnSd2 > monstermoves){
+				if(artinstance[obj->oartifact].SnSd2 > monstermoves){
 				    You_feel("that %s %s ignoring you.",
 					     the(xname(obj)), otense(obj, "are"));
 					/* and just got more so; patience is essential... */
-					u.SnSd2 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
+					artinstance[obj->oartifact].SnSd2 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
 				    return 1;
 				}
 				else if(getdir((char *)0) && (u.dx || u.dy)) {
@@ -5392,30 +5408,30 @@ arti_invoke(obj)
 					zapdata.flat = u.ulevel + obj->spe;
 
 					pline("Tsugi no mai, Hakuren!");
-					u.SnSd2 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
+					artinstance[obj->oartifact].SnSd2 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
 					
 					zap(&youmonst, u.ux, u.uy, u.dx, u.dy, 7 + obj->spe, &zapdata);
 				}
 					nomul(-1, "performing a sword dance");//both the first and the second dance leave you momentarily exposed.
 			}
 			else if (dancenumber == '3') {
-				if(u.SnSd3 > monstermoves){
+				if(artinstance[obj->oartifact].SnSd3 > monstermoves){
 				    You_feel("that %s %s ignoring you.",
 					     the(xname(obj)), otense(obj, "are"));
 					/* and just got more so; patience is essential... */
-					u.SnSd3 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
+					artinstance[obj->oartifact].SnSd3 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
 				    return 1;
 				}
 				else{
 					pline("San no mai, Shirafune!");
 					pline("Ice crackles around your weapon!");
-					u.SnSd3 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
+					artinstance[obj->oartifact].SnSd3 = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? .9 : 1));
 					obj->cursed = 0;
 					obj->blessed = 1;
 					obj->oeroded = 0;
 					obj->oeroded2= 0;
 					if(obj->spe < 3) obj->spe = 3;
-					u.SnSd3duration = monstermoves + (long) u.ulevel + obj->spe;
+					artinstance[obj->oartifact].SnSd3duration = monstermoves + (long) u.ulevel + obj->spe;
 				}
 			}
 			else{
@@ -5984,7 +6000,7 @@ arti_invoke(obj)
 				} else pline("Your weapon rattles faintly.");
 			}
 			else if(strcmp(buf, "Rex") == 0){//Rex:  King.  Grants Levitation.  Three charges.
-				if( (u.RoSPflights > 0) ){
+				if( (artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights > 0) ){
 					pseudo = mksobj(SPE_LEVITATION, FALSE, FALSE);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->blessed = TRUE;
@@ -5993,7 +6009,7 @@ arti_invoke(obj)
 					(void) peffects(pseudo);
 					(void) peffects(pseudo);
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
-					u.RoSPflights--;
+					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights--;
 				}
 				else if( (obj->spe > -5) ){
 					exercise(A_WIS, TRUE);
@@ -6008,7 +6024,7 @@ arti_invoke(obj)
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 					obj->spe--; obj->spe--; obj->spe--; // lose three charge
 					pline("Your weapon has become much more flawed!");
-					u.RoSPflights = 7;
+					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights = 7;
 				} else pline("Your weapon rattles faintly.");
 			}
 			else if(strcmp(buf, "Ruat Coelum") == 0 ||
@@ -6173,7 +6189,7 @@ arti_invoke(obj)
 					if(u.ulevel > 13) pseudo->blessed = TRUE;
 					(void) seffects(pseudo);
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
-					u.RoSPflights = 7; /* Max out your flight gauge */
+					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights = 7; /* Max out your flight gauge */
 					obj->spe = obj->spe - 14;// lose fourteen charge
 					pline("Your weapon rattles alarmingly!!  It has become much more flawed!");
 					wake_nearto_noisy(u.ux, u.uy, 77);
@@ -7627,6 +7643,18 @@ arti_invoke(obj)
           weffects(wand);
           obfree(wand,(struct obj *)0);
 		}break;
+        case STONE_DRAGON:
+			You("wake the stone dragonhead.");
+			doliving_dragonhead(&youmonst, obj, TRUE);
+		break;
+        case MAD_KING:
+			You("wake the mad king.");
+			doliving_mad_king(&youmonst, obj, TRUE);
+		break;
+        case RINGED_SPEAR:
+			You("wake the ringed spear.");
+			doliving_ringed_spear(&youmonst, obj, TRUE);
+		break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
@@ -9756,10 +9784,12 @@ dosymbiotic_equip()
 	struct obj *obj;
 	if(uarm && (uarm->otyp == LIVING_ARMOR || uarm->otyp == BARNACLE_ARMOR))
 		dosymbiotic(&youmonst, uarm);
-	if(uwep && ((check_oprop(uwep, OPROP_LIVEW) && u.uinsight >= 40) || uwep->oartifact == ART_TENTACLE_ROD))
+	if(uwep && ((check_oprop(uwep, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uwep) ))
 		doliving(&youmonst, uwep);
-	if(uswapwep && ((check_oprop(uswapwep, OPROP_LIVEW) && u.twoweap && u.uinsight >= 40) || uswapwep->oartifact == ART_TENTACLE_ROD))
+	if(uswapwep && ((check_oprop(uswapwep, OPROP_LIVEW) && u.twoweap && u.uinsight >= 40) || is_living_artifact(uswapwep) ))
 		doliving(&youmonst, uswapwep);
+	if(uarms && ((check_oprop(uarms, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uarms) ))
+		doliving(&youmonst, uarms);
 	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
@@ -9769,10 +9799,13 @@ dosymbiotic_equip()
 			dosymbiotic(mtmp, obj);
 		
 		obj = MON_WEP(mtmp);
-		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || obj->oartifact == ART_TENTACLE_ROD))
+		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(obj) ))
 			doliving(mtmp, obj);
 		obj = MON_SWEP(mtmp);
-		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || obj->oartifact == ART_TENTACLE_ROD))
+		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(obj) ))
+			doliving(mtmp, obj);
+		obj = which_armor(mtmp, W_ARMS);
+		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(obj) ))
 			doliving(mtmp, obj);
 	}
 }

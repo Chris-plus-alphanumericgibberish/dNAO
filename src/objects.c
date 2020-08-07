@@ -890,6 +890,8 @@ DRGN_SHIELD(("blue dragon scale shield"),       1, SHOCK_RES,   900, 7, 0, CLR_B
 DRGN_SHIELD(("green dragon scale shield"),      1, POISON_RES,  900, 7, 0, CLR_GREEN),
 DRGN_SHIELD(("yellow dragon scale shield"),     1, ACID_RES,    900, 7, 0, CLR_YELLOW),
 #undef DRGN_SHIELD
+SHIELD(("stone dragon shield"),
+		1, 1,  MZ_LARGE, 0, 0, 0, 75, 1200,  7, 0, 0, MINERAL, CLR_GRAY),
 
 /* gloves */
 /* these have their color but not material shuffled, so the IRON must stay

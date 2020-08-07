@@ -795,6 +795,13 @@ boolean dofull;
 			Strcat(buf, "wool-lined ");
 	}
 	
+	if(obj->oartifact && get_artifact(obj)->inv_prop == RINGED_SPEAR){
+		if (artinstance[obj->oartifact].RRSember >= moves)
+			Strcat(buf, "molten ");
+		if (artinstance[obj->oartifact].RRSlunar >= moves)
+			Strcat(buf, "gleaming ");
+	}
+	
 	if (!check_oprop(obj, OPROP_NONE) && (obj->oartifact == 0 || dofull)){
 		if (check_oprop(obj, OPROP_ASECW) && (obj->known || u.uinsight >= 10) && !(obj->opoisoned&OPOISON_ACID))
 			u.uinsight < 10 ? Strcat(buf, "self-acidifying ") : Strcat(buf, "acid-secreting ");

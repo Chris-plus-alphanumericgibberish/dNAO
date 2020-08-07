@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "xhity.h"
 
 #ifdef OVL0
 
@@ -264,6 +265,8 @@ boolean yours; /* is it your fault (for killing monsters) */
 			break;
 		case AD_DISE: str = "cloud of spores";
 			break;
+		case AD_DARK: str = "blast of darkness";
+			break;
 		default:
 			impossible("unaccounted-for explosion damage type in do_explode: %d", adtyp);
 			str = "404 BLAST NOT FOUND";
@@ -307,6 +310,9 @@ boolean yours; /* is it your fault (for killing monsters) */
 			case AD_DISE: /*assumes only swamp ferns have disease explosions*/
 				explmask = !!Sick_resistance;
 				diseasemu(&mons[PM_SWAMP_FERN_SPORE]);
+				break;
+			case AD_DARK:
+				explmask = !!Dark_immune;
 				break;
 			default:
 				impossible("explosion type %d?", adtyp);
@@ -355,6 +361,9 @@ boolean yours; /* is it your fault (for killing monsters) */
 				break;
 			case AD_DISE:
 				explmask |= resists_sickness(mtmp);
+				break;
+			case AD_DARK:
+				explmask |= dark_immune(mtmp);
 				break;
 			default:
 				impossible("explosion type %d?", adtyp);
@@ -530,10 +539,13 @@ boolean yours; /* is it your fault (for killing monsters) */
 			if(hates_silver(mtmp->data) && silver){
 				pline("The %s sear %s!", str, mon_nam(mtmp));
 				mdam += rnd(20);
-			} 
+			}
+			//Bugs? youmonst-as-mtmp can show up here?
 			if (resists_cold(mtmp) && adtyp == AD_FIRE)
 				mdam *= 2;
 			else if (resists_fire(mtmp) && adtyp == AD_COLD)
+				mdam *= 2;
+			else if (Dark_vuln(mtmp) && adtyp == AD_DARK)
 				mdam *= 2;
 			mtmp->mhp -= mdam;
 			mtmp->mhp -= (idamres + idamnonres);

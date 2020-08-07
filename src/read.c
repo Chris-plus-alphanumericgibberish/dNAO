@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "edog.h"
+#include "artifact.h"
 
 /* KMH -- Copied from pray.c; this really belongs in a header file */
 #define DEVOUT 14
@@ -126,12 +127,12 @@ doread()
 						u.uconduct.literate++;
 					break;
 				}
-				if(u.RoSPflights > 0){
+				if(artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights > 0){
 					static const char *numbers[]={
 						"no", "a single", "two","three","four","five","six","seven"
 					};
 					pline("Around the pommel, there is a crownlike decoration, with %s raised segment%s.",
-						numbers[u.RoSPflights], u.RoSPflights!=1 ? "s" : "");
+						numbers[artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights], artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights!=1 ? "s" : "");
 				}
 				return(1);
 			}
@@ -1482,7 +1483,7 @@ struct obj	*sobj;
 	case SCR_ENCHANT_ARMOR:
 	    {
 		register schar s;
-		boolean special_armor;
+		boolean special_armor, plusten_armor;
 		boolean same_color;
 
 		otmp = some_armor(&youmonst);
@@ -1548,6 +1549,7 @@ struct obj	*sobj;
 		}
 		/* elven armor vibrates warningly when enchanted beyond a limit */
 		special_armor = is_plussev_armor(otmp);
+		plusten_armor = is_plusten(otmp);
 		if (sobj->cursed)
 		    same_color =
 			(otmp->otyp == BLACK_DRAGON_SCALE_MAIL ||
@@ -1563,7 +1565,7 @@ struct obj	*sobj;
 
 		/* KMH -- catch underflow */
 		s = sobj->cursed ? -otmp->spe : otmp->spe;
-		if (s > (special_armor ? 5 : 3) && rn2(s)) {
+		if (s > (plusten_armor ? 9 : special_armor ? 5 : 3) && rn2(s)) {
 			if(otmp->oartifact){
 				int delta = 0 - otmp->spe;
 				Your("%s violently %s%s%s for a while, then %s.",
@@ -1631,8 +1633,8 @@ struct obj	*sobj;
 			known = otmp->known;
 		}
 
-		if ((otmp->spe > (special_armor ? 5 : 3)) &&
-		    (special_armor || !rn2(7)))
+		if ((otmp->spe > (plusten_armor ? 9 : special_armor ? 5 : 3)) &&
+		    (plusten_armor || special_armor || !rn2(7)))
 			Your("%s suddenly %s %s.",
 				xname(otmp), otense(otmp, "vibrate"),
 				Blind ? "again" : "unexpectedly");

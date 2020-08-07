@@ -2676,6 +2676,7 @@ winid *datawin;
 					case AD_DRST: Strcat(buf, "poison damage."); break;
 					case AD_DRLI: Strcat(buf, "life drain damage."); break;
 					case AD_STON: Strcat(buf, "petrifying damage."); break;
+					case AD_DARK: Strcat(buf, "dark damage."); break;
 						break;
 					}
 				}
@@ -3059,6 +3060,9 @@ winid *datawin;
 		if (obj && is_plussev_armor(obj))
 			OBJPUTSTR("Holds enchantments well.");
 	}
+	/* Enchantment limit */
+	if (obj && arti_plusten(obj))
+		OBJPUTSTR("Holds enchantments extremely well.");
 	if (olet == FOOD_CLASS) {
 		if (otyp == TIN) {
 			if (obj && obj->known)

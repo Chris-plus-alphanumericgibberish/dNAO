@@ -6,6 +6,7 @@
 
 #include "hack.h"
 #include "lev.h"
+#include "artifact.h"
 
 #ifdef SINKS
 # ifdef OVLB
@@ -955,7 +956,7 @@ doup()
 			|| !sstairs.up)
 		 && !(Role_if(PM_RANGER) && Race_if(PM_GNOME) && Is_qstart(&u.uz) && levl[u.ux][u.uy].ladder == LA_UP)
 	) {
-		if(uwep && uwep->oartifact == ART_ROD_OF_SEVEN_PARTS && u.RoSPflights > 0){
+		if(uwep && uwep->oartifact == ART_ROD_OF_SEVEN_PARTS && artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights > 0){
 			struct obj *pseudo;
 			pseudo = mksobj(SPE_LEVITATION, FALSE, FALSE);
 			pseudo->blessed = pseudo->cursed = 0;
@@ -965,7 +966,7 @@ doup()
 			(void) peffects(pseudo);
 			(void) peffects(pseudo);
 			obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
-			u.RoSPflights--;
+			artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights--;
 		}
 		else{
 			if(levl[u.ux][u.uy].typ == STAIRS){

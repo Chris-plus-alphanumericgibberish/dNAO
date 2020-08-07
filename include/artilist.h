@@ -2150,6 +2150,39 @@ A("Yorshka's Spear",				SPEAR,				(const char *)0,
 	),
 
 /*Needs encyc entry*/
+A("Dragonhead Shield",		STONE_DRAGON_SHIELD,					"stone dragon head",
+	4000L, MINERAL, MZ_HUGE, WT_DEFAULT,
+	A_LAWFUL, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(COLD_RES, DISINT_RES, STONE_RES), NOFLAG,
+	PROPS(), NOFLAG,
+	STONE_DRAGON, (ARTI_PLUSTEN)
+	),
+
+/*Needs encyc entry*/
+A("Crucifix of the Mad King",		HALBERD,					(const char *)0,
+	4000L, METAL, MZ_LARGE, WT_DEFAULT,
+	A_NEUTRAL, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	ATTK(AD_DARK, 1, 10), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	MAD_KING, (ARTI_PLUSTEN)
+	),
+
+/*Needs encyc entry*/
+A("Ritual Ringed Spear",		SPEAR,					"molten-ringed spear",
+	4000L, OBSIDIAN_MT, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	RINGED_SPEAR, (ARTI_PLUSTEN)
+	),
+
+/*Needs encyc entry*/
 /* Doubles dragon attributes when carried */
 A("The Dragon's Heart-Stone",		FLINT,				(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,

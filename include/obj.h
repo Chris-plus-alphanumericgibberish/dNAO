@@ -647,6 +647,8 @@ struct obj {
 				|| (otmp)->otyp == WAR_HAT\
 				|| (otmp)->otyp == WITCH_HAT)
 
+#define is_plusten(otmp)	(arti_plusten(otmp)\
+								|| is_rakuyo(otmp))
 #define is_plussev_armor(otmp)	(is_elven_armor((otmp))\
 								|| arti_plussev((otmp))\
 								|| ((otmp)->otyp == CORNUTHAUM && Role_if(PM_WIZARD))\
