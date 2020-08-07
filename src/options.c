@@ -207,6 +207,7 @@ static struct Bool_Opt
 	{"page_wait", (boolean *)0, FALSE, SET_IN_FILE},
 #endif
 #ifdef PARANOID
+	{"paranoid_self_cast", &iflags.paranoid_self_cast, FALSE, SET_IN_GAME},
 	{"paranoid_hit", &iflags.paranoid_hit, FALSE, SET_IN_GAME},
 	{"paranoid_quit", &iflags.paranoid_quit, FALSE, SET_IN_GAME},
 	{"paranoid_remove", &iflags.paranoid_remove, FALSE, SET_IN_GAME},

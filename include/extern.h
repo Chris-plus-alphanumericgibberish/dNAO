@@ -2542,7 +2542,7 @@ E int FDECL(spiriteffects, (int,BOOLEAN_P));
 E int FDECL(nudzirath_hit_pile, (struct obj *, struct obj *));
 E int FDECL(nudzirath_hit_mon, (struct monst *, struct obj *));
 E void FDECL(nudzirath_shatter, (struct obj *, int, int));
-E int FDECL(spelleffects, (int,BOOLEAN_P,int));
+E int FDECL(spelleffects, (int,boolean,int));
 E int FDECL(wordeffects, (int));
 E void FDECL(losespells, (int));
 E int NDECL(throwgaze);
