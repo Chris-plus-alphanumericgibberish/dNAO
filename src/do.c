@@ -1714,11 +1714,11 @@ const char *pre_msg, *post_msg;
 	int typmask = 0100;		/* non-zero triggers `deferred_goto' */
 
 	/* destination flags (`goto_level' args) */
-	if (at_stairs)	 typmask |= 1;
-	if (falling)	 typmask |= 2;
-	if (portal_flag) typmask |= 4;
-	if (portal_flag == PAINTING_OUT) typmask |= 10;
-	if (portal_flag < 0) typmask |= 0200;	/* flag for portal removal */
+	if (at_stairs)	 typmask |= 0x1;
+	if (falling)	 typmask |= 0x2;
+	if (portal_flag) typmask |= 0x4;
+	if (portal_flag == PAINTING_OUT) typmask |= 0x8;
+	if (portal_flag < 0) typmask |= 0x80;	/* flag for portal removal */
 	u.utotype = typmask;
 	/* destination level */
 	assign_level(&u.utolev, tolev);
@@ -1739,8 +1739,8 @@ deferred_goto()
 
 	    assign_level(&dest, &u.utolev);
 	    if (dfr_pre_msg) pline1(dfr_pre_msg);
-	    goto_level(&dest, !!(typmask&1), !!(typmask&2), (typmask&10) ? PAINTING_OUT : !!(typmask&4));
-	    if (typmask & 0200) {	/* remove portal */
+	    goto_level(&dest, !!(typmask&0x1), !!(typmask&0x2), (typmask&0x8) ? PAINTING_OUT : !!(typmask&0x4));
+	    if (typmask & 0x80) {	/* remove portal */
 		struct trap *t = t_at(u.ux, u.uy);
 
 		if (t) {
