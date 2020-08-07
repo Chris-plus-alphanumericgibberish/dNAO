@@ -697,6 +697,11 @@ int level_bonus;
 
 		/* attacks...?  */
 		horrorattacks = 0;
+		extern struct attack noattack;
+		for (i = 0; i < NATTK; i++) {
+			horror->mattk[i] = noattack;
+		}
+
 		/* always start with weapon attacks... if it gets any */
 		if (!rn2(4)) {
 			attkptr = &horror->mattk[horrorattacks];
@@ -737,7 +742,7 @@ int level_bonus;
 			}
 		}
 		/* get some more melee attacks in here (this will bring it up to at least 2, with 2/3 odds of at least 3) */
-		while ((!rn2(horrorattacks) || !rn2(3)) && horrorattacks<6) {
+		while ((!rn2(horrorattacks) || !rn2(3)) && horrorattacks<NATTK) {
 			attkptr = &horror->mattk[horrorattacks];
 			if (rn2(7)) {
 				attkptr->aatyp = get_random_of(randMeleeAttackTypes);
@@ -760,7 +765,7 @@ int level_bonus;
 			horrorattacks++;
 		}
 		/* chance of getting special, hard-hitting melee attacks */
-		if (horrorattacks <= 2 || (!rn2(8) && horrorattacks < 5)) {
+		if (horrorattacks <= 2 || (!rn2(8) && horrorattacks < NATTK-1)) {
 			attkptr = &horror->mattk[horrorattacks];
 
 			attkptr->aatyp = get_random_of(randSpecialAttackTypes);
@@ -786,10 +791,14 @@ int level_bonus;
 			horrorattacks++;
 		}
 		/* chance of getting ranged attacks */
-		while (!rn2(horrorattacks / 2) && horrorattacks < 6) {
+		while (!rn2(horrorattacks / 2) && horrorattacks < NATTK) {
 			attkptr = &horror->mattk[horrorattacks];
 
-			attkptr->aatyp = get_random_of(randRangedAttackTypes);
+			do {
+				i = get_random_of(randRangedAttackTypes);
+			} while (attacktype(horror, i) && rn2(40));
+			attkptr->aatyp = i;
+
 			attkptr->damn = d(2, 3);			/*  2 -  6 */
 			attkptr->damd = rn2(3) * 2 + 6;		/*  6 - 10, by 2s */
 
@@ -813,11 +822,11 @@ int level_bonus;
 				break;
 			case AT_GAZE:
 				attkptr->adtyp = get_random_of(randGazeDamageTypes);
-				if (!rn2(4)) {
-					attkptr->aatyp = AT_WDGZ;	/* hahahaha */
-					attkptr->damn = rnd(3);			/* reduce to 1-3 */
-					attkptr->damd = rn2(3) * 2 + 4;	/* reduce to 4-8 by 2s */
-				}
+				break;
+			case AT_WDGZ:
+				attkptr->adtyp = get_random_of(randGazeDamageTypes);
+				attkptr->damn = rnd(3);			/* reduce to 1-3 */
+				attkptr->damd = rn2(3) * 2 + 4;	/* reduce to 4-8 by 2s */
 				break;
 			case AT_MAGC:
 				attkptr->adtyp = get_random_of(randMagicDamageTypes);
@@ -919,6 +928,12 @@ int level_bonus;
 				else
 					Strcat(nameless_horror_name, get_random_of(Vowels));
 			}
+			/* names cannot start with apostrophes */
+			while(nameless_horror_name[0] == '\'')
+				nameless_horror_name[0] = (get_random_of(Consonants))[0];
+			/* names cannot end with apostrophes */
+			while (eos(nameless_horror_name)[-1] == '\'')
+				eos(nameless_horror_name)[-1] = (get_random_of(Vowels))[0];
 			(void)upstart(nameless_horror_name);
 			horror->mname = nameless_horror_name;
 			horror->mflagsg |= MG_PRINCE;

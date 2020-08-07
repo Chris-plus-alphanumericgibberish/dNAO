@@ -49,14 +49,16 @@ static int randMeleeAttackTypes[] =
 
 static int randRangedAttackTypes[] =
 					{
+						/* 4x */
+						AT_BREA, AT_BREA, AT_BREA, AT_BREA,
+						AT_GAZE, AT_GAZE, AT_GAZE, AT_GAZE,
+						AT_MAGC, AT_MAGC, AT_MAGC, AT_MAGC,
 						/* 2x */
-						AT_BREA, AT_BREA,
 						AT_SPIT, AT_SPIT,
-						AT_GAZE, AT_GAZE,
-						AT_MAGC, AT_MAGC,
+						AT_ARRW, AT_ARRW,
+						AT_BEAM, AT_BEAM,
 						/* 1x */
-						AT_ARRW,
-						AT_BEAM
+						AT_WDGZ
 					};
 
 static int randSpecialAttackTypes[] =
@@ -294,20 +296,19 @@ static int randArrowDamageTypes[] =
 						AD_BLDR
 					};
 
- // AT_MAGC }
 static int randMagicDamageTypes[] =
 					{
-						AD_SPEL,
-						AD_SPEL,
-						AD_SPEL,
+						/* 6/10 standard spellcasting */
+						AD_SPEL, AD_SPEL, AD_SPEL,
+						AD_CLRC, AD_CLRC, AD_CLRC,
+						/* 4/10 elemental spellcasting */
 						AD_MAGM,
 						AD_FIRE,
 						AD_COLD,
-						AD_ELEC,
-						AD_CLRC,
-						AD_CLRC,
-						AD_CLRC
+						AD_ELEC
 					};
+
+/* corresponds to MZ sizes */
 static int randCorpseWeights[] = 
 						{WT_TINY,
 						 WT_SMALL,
@@ -317,6 +318,7 @@ static int randCorpseWeights[] =
 						 0,
 						 0,
 						 WT_GIGANTIC };
+/* corresponds to MZ sizes */
 static int randCorpseNut[] = 
 						{CN_TINY,
 						 CN_SMALL,

@@ -2231,9 +2231,10 @@ struct obj * blaster;
 		ammo = mksobj(HEAVY_BLASTER_BOLT, FALSE, FALSE);
 		break;
 	case MASS_SHADOW_PISTOL:
-		/* note: does not copy cobj->oartifact */
-		if (blaster->cobj)
+		if (blaster->cobj) {
 			ammo = mksobj(blaster->cobj->otyp, FALSE, FALSE);
+			ammo->oartifact = blaster->cobj->oartifact;
+		}
 		else
 			ammo = mksobj(ROCK, FALSE, FALSE);
 		break;
@@ -2245,6 +2246,10 @@ struct obj * blaster;
 		impossible("Unhandled blaster %d!", blaster->otyp);
 		break;
 	}
+
+	ammo->blessed = blaster->blessed;
+	ammo->cursed = blaster->cursed;
+	ammo->spe = blaster->spe;
 
 	return ammo;
 }

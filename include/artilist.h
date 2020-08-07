@@ -957,7 +957,7 @@ A("The Tie-Dye Shirt of Shambhala",	T_SHIRT,			"flamboyantly colorful %s",
 /*martial arts attacks use exploding dice and get extra damage*/
 A("The Grandmaster's Robe",			ROBE,				(const char *)0,
 	4500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NEUTRAL, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
+	A_NEUTRAL, NON_PM, NON_PM, TIER_A, NOFLAG,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(), NOFLAG,
