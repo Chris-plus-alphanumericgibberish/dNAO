@@ -2951,8 +2951,8 @@ winid *datawin;
 				poisons |= OPOISON_FILTH;
 			if (oartifact == ART_MOONBEAM)
 				poisons |= OPOISON_SLEEP;
-			
-			
+			if (oartifact == ART_DIRGE)
+				poisons |= OPOISON_ACID;
 			
 			if (poisons) {
 				/* special cases */
