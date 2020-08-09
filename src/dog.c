@@ -60,7 +60,7 @@ pet_type()
 		else 
 			return (rn2(3) ? PM_CAVE_SPIDER : PM_BABY_CAVE_LIZARD);
 	}
-	else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN)){
+	else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend){
 		return (PM_UNDEAD_KNIGHT);
 		// if(flags.initgend) 
 		// else 

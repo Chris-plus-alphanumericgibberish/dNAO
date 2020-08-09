@@ -1696,7 +1696,7 @@ xchar x, y;	/* location */
 	}
 
 	//The female half dragon noble has a lot of shenanigans going on
-	if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON)){
+	if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend){
 		//There is no return portal on the first quest level
 		if(flags.initgend && Is_qstart(&u.uz))
 			return;

@@ -1961,7 +1961,7 @@ u_init()
 		break;
 	case PM_NOBLEMAN:
 		if(Race_if(PM_DWARF)) ini_inv(DwarfNoble);
-		else if(Race_if(PM_HALF_DRAGON)){
+		else if(Race_if(PM_HALF_DRAGON) && flags.initgend){
 			if(flags.initgend){
 				ini_inv(HDNobleF);
 			} else {
@@ -2451,7 +2451,7 @@ u_init()
 	}
 
 	dungeon_topology.eprecursor_typ = rnd(8);
-	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN)){
+	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend){
 		if(flags.initgend)
 			flags.HDbreath = rn2(2) ? AD_MAGM : AD_COLD;
 		else flags.HDbreath = AD_FIRE;
