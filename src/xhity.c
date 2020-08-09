@@ -477,6 +477,7 @@ int tary;
 		}
 	    }
 	}
+#ifdef STEED
 	/* monsters may target your steed */
 	if (youdef && u.usteed && !missedyou) {
 		if (magr == u.usteed)
@@ -507,6 +508,7 @@ int tary;
 			return result;
 		}
 	}
+#endif
 
 	/* set monster attacking flag */
 	if (!youagr && youdef) {
@@ -566,8 +568,14 @@ int tary;
 		aatyp = attk->aatyp;
 		adtyp = attk->adtyp;
 		/* maybe end (mdef may have been forcibly moved!)*/
-		if (((youdef || mdef==u.usteed) && !missedyou && (tarx != u.ux || tary != u.uy)) ||
-			(!(youdef || mdef == u.usteed) && m_at(tarx, tary) != mdef)) {
+		if (
+			(youdef
+#ifdef STEED
+			|| mdef == u.usteed
+#endif
+			) ? (!missedyou && (tarx != u.ux || tary != u.uy))
+			: (m_at(tarx, tary) != mdef)
+			) {
 			result = MM_AGR_STOP;
 			continue;
 		}
@@ -3052,9 +3060,11 @@ int flat_acc;
 				if (otmp->otyp == GAUNTLETS_OF_POWER)
 					bons_acc += 3;
 			}
+#ifdef STEED
 			/* Your steed gets a skill-based boost */
 			if (magr == u.usteed)
 				bons_acc += mountedCombat();
+#endif
 			/* All of your pets get a skill-based boost */
 			if (magr->mtame){
 				bons_acc += beastmastery();
@@ -8328,7 +8338,11 @@ int vis;
 
 		/* if defender died and aggressor isn't stationary, move agressor to defender's coord */
 		/* if mdef was your steed, you are still there, so magr can't take your spot! */
-		if (!stationary(magr->data) && result&MM_DEF_DIED && !(mdef == u.usteed)) {
+		if (!stationary(magr->data) && result&MM_DEF_DIED
+#ifdef STEED
+			&& !(mdef == u.usteed)
+#endif
+			) {
 			/* sanity check */
 			if (*hp(mdef) > 0)
 				impossible("dead engulfee still alive?");
