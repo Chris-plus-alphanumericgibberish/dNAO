@@ -14559,13 +14559,13 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				else if (vis) {
 					if (pd->mtyp == PM_RAZORVINE) {
 						pline("%s is hit by %s springing vines!",
-							Monnam(mdef),
+							Monnam(magr),
 							(youdef ? "your" : s_suffix(mon_nam(mdef)))
 							);
 					}
 					else {
 						pline("%s is hit by %s barbs!",
-							Monnam(mdef),
+							Monnam(magr),
 							(youdef ? "your" : s_suffix(mon_nam(mdef)))
 							);
 					}
