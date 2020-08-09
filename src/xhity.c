@@ -11902,6 +11902,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		poisons |= poisonedobj->opoisoned;
 		if (arti_poisoned(poisonedobj))
 			poisons |= OPOISON_BASIC;
+		if (arti_silvered(poisonedobj))
+			poisons |= OPOISON_SILVER;
 		if (poisonedobj->oartifact == ART_WEBWEAVER_S_CROOK)
 			poisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
 		if (poisonedobj->oartifact == ART_SUNBEAM)
@@ -11924,7 +11926,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (poisons)
 	{
 		/* Penalties for you using a poisoned weapon */
-		if (poisons && youagr && !recursed)
+		if ((poisons & ~OPOISON_SILVER) && youagr && !recursed)
 		{
 			if Role_if(PM_SAMURAI) {
 				if (!(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_NINJA)){
@@ -11999,6 +12001,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			case OPOISON_SILVER:
 				resists = !(hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN));
+				if (!resists)
+					silverobj |= slot;
 				majoreff = TRUE;
 				break;
 			}
