@@ -1561,8 +1561,8 @@ boolean with_price;
 					else if (typ == POT_BLOOD && (obj->known || is_vampire(youracedata)))
 						Sprintf(eos(buf), "%s %s", mons[obj->corpsenm].mname, actualn);
 					else if (typ == SCR_WARD) {
-						if (u.wardsknown & obj->oward) Strcat(buf, wardDecode[obj->oward]);
-						else                           Strcat(buf, "an unknown ward");
+						if (u.wardsknown & get_wardID(obj->oward))	Strcat(buf, wardDecode[obj->oward]);
+						else										Strcat(buf, "an unknown ward");
 					}
 					else
 						Strcat(buf, actualn);
