@@ -1218,6 +1218,8 @@ boolean adjective;
 			return "silk";
 		else if (obj->oartifact == ART_SPIDERSILK)
 			return "spidersilk";
+		else if (obj->oartifact == ART_PAINTING_FRAGMENT)
+			return "faded canvas";
 		else
 			return "cloth";
 	case LEATHER:

@@ -550,11 +550,12 @@ doread()
 	scroll->in_use = TRUE;	/* scroll, not spellbook, now being read */
 	if(scroll->oartifact) {
 		if(Blind) {
-			pline("Being blind, you cannot see the %s.", the(xname(scroll)));
+			pline("Being blind, you cannot see %s.", the(xname(scroll)));
 			scroll->in_use = FALSE;
 			return 0;
 		}
-		pline("You examine %s.", the(xname(scroll)));
+		if(scroll->oartifact != ART_PAINTING_FRAGMENT)
+			pline("You examine %s.", the(xname(scroll)));
 	} else if(scroll->otyp != SCR_BLANK_PAPER) {
 	  if(Blind)
 	    pline("As you %s the formula on it, the scroll disappears.",
@@ -1749,11 +1750,15 @@ struct obj	*sobj;
 		break;
 	    }
 	case SCR_BLANK_PAPER:
-	    if (Blind)
-		You("don't remember there being any magic words on this scroll.");
-	    else
-		pline("This scroll seems to be blank.");
-	    known = TRUE;
+		if(sobj->oartifact == ART_PAINTING_FRAGMENT){
+			You("can't make out any detail. There seems to have been a lot of white paint involved, though.");
+		} else {
+			if (Blind)
+			You("don't remember there being any magic words on this scroll.");
+			else
+			pline("This scroll seems to be blank.");
+			known = TRUE;
+		}
 	    break;
 	case SCR_REMOVE_CURSE:
 	case SPE_REMOVE_CURSE:

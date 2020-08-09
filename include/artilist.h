@@ -2102,7 +2102,7 @@ A("The Cloak of the Consort",		DROVEN_CLOAK,		(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("Painting Fragment",	SCR_BLANK_PAPER,				"faded canvas scroll",
+A("Painting Fragment",	SCR_BLANK_PAPER,				"scroll fragment",
 	200L, CLOTH, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, PM_NOBLEMAN, PM_HALF_DRAGON, TIER_F, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),
