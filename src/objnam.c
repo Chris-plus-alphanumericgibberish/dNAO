@@ -1716,10 +1716,10 @@ boolean with_price;
 			/* Reminder: Don't use an() on anything that could call xname/doname inside xname/doname */
 			/* it is okay to call an() on mons[].mname, since that is a string constant */
 			if (typ == STATUE || typ == FIGURINE) {
-				Sprintf(eos(buf), " of %s",
-					((mons[obj->corpsenm].geno & G_UNIQ) && obj->corpsenm != PM_GOD && !type_is_pname(&mons[obj->corpsenm])) ? "the " :
-					an(mons[obj->corpsenm].mname)
-					);
+				if ((mons[obj->corpsenm].geno & G_UNIQ) && obj->corpsenm != PM_GOD && !type_is_pname(&mons[obj->corpsenm]))
+					Sprintf(eos(buf), " of the %s", mons[obj->corpsenm].mname);
+				else
+					Sprintf(eos(buf), " of %s", an(mons[obj->corpsenm].mname));
 			}
 		}
 #ifdef SORTLOOT
