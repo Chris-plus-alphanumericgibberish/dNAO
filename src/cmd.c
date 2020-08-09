@@ -1616,7 +1616,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	putstr(en_win, 0, "");
 
 	if (u.uevent.uhand_of_elbereth) {
-	    static const char * const hofe_titles[39] = {
+	    static const char * const hofe_titles[42] = {
 				/* Default */
 				"the Arm of the Law",		 /*01*/
 				"the Envoy of Balance",		 /*02*/
@@ -1667,8 +1667,13 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 				"the Glory of Poseidon",	 /*36*/
 				/*Archeologist*/
 				"the Warrior of Quetzalcoatl",/*37*/
-				"the Champion of Camaxtli",	 /*38*/
-				"the Fire-bearer of Huhetotl",	 /*39*/
+				"the Champion of Camaxtli",	  /*38*/
+				"the Fire-bearer of Huhetotl",/*39*/
+				/*Female Half Dragon Noble*/
+				"the Dragon-slayer of Gwyn", /*40*/
+				"the Guardian of the Old Lords",/*41*/
+				"the Darkmoon Champion",	 /*42*/
+				
 				/* uhand_of_elbereth max == 63 */
 	    };
 		

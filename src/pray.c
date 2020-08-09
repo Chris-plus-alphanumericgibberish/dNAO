@@ -850,6 +850,7 @@ gcrownu()
 
     obj = ok_wep(uwep) ? uwep : 0;
     already_exists = in_hand = FALSE;	/* lint suppression */
+	/* These roles always get the same title regardless of alignment */
 	if( Pantheon_if(PM_PIRATE) || Role_if(PM_PIRATE) ){
 		u.uevent.uhand_of_elbereth = 2; /* Alignment of P King is treated as neutral */
 		in_hand = (uwep && uwep->oartifact == ART_REAVER);
@@ -932,6 +933,14 @@ gcrownu()
 		already_exists = exist_artifact(GRAY_DRAGON_SCALES, artiname(ART_STEEL_SCALES_OF_KURTULMAK));
 		godvoice(Align2gangr(u.ualign.type), "I claim thee...  Great Slave-Vassal of Kurtulmak!");
 		livelog_write_string("claimed by Kurtulmak");
+	} else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend){
+		u.uevent.uhand_of_elbereth = 40;
+		in_hand = FALSE;
+		already_exists = exist_artifact(STONE_DRAGON_SHIELD, artiname(ART_DRAGONHEAD_SHIELD));
+		godvoice(Align2gangr(u.ualign.type), "I dub thee...  The Dragon-slayer of Gwyn!");
+		livelog_write_string("became the Dragon-slayer of Gwyn");
+		
+	//Default role pantheons start here
 	} else if(Pantheon_if(PM_KNIGHT) || Role_if(PM_KNIGHT)){
 		u.uevent.uhand_of_elbereth = 1;
 		in_hand = FALSE;
@@ -1051,6 +1060,14 @@ gcrownu()
 		already_exists = exist_artifact(AMBER, artiname(ART_GLITTERSTONE));
 		godvoice(Align2gangr(u.ualign.type), "I dub thee...  Thane of Garl Glittergold!");
 		livelog_write_string("became the Thane of Garl Glittergold");
+	} else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend){
+		u.uevent.uhand_of_elbereth = 41;
+		in_hand = FALSE;
+		already_exists = exist_artifact(HALBERD, artiname(ART_CRUCIFIX_OF_THE_MAD_KING));
+		godvoice(Align2gangr(u.ualign.type), "I dub thee...  The Guardian of the Old Lords!");
+		livelog_write_string("became the Guardian of the Old Lords");
+		
+	//Default role pantheons start here
 	} else if(Pantheon_if(PM_HEALER) || Role_if(PM_HEALER)){
 		u.uevent.uhand_of_elbereth = 35;
 		in_hand = FALSE;
@@ -1152,6 +1169,14 @@ gcrownu()
 		already_exists = exist_artifact(GAUNTLETS_OF_POWER, artiname(ART_GREAT_CLAWS_OF_URDLEN));
 		godvoice(Align2gangr(u.ualign.type), "Thou art chosen to rend the Earth in My Name!");
 		livelog_write_string("chosen by Urdlen");
+	} else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend){
+		u.uevent.uhand_of_elbereth = 42;
+		in_hand = FALSE;
+		already_exists = exist_artifact(SPEAR, artiname(ART_RITUAL_RINGED_SPEAR));
+		godvoice(Align2gangr(u.ualign.type), "I dub thee...  The Darkmoon Champion!");
+		livelog_write_string("became the Darkmoon Champion");
+		
+	//Default role pantheons start here
 	} else if(Pantheon_if(PM_HEALER) || Role_if(PM_HEALER)){
 		u.uevent.uhand_of_elbereth = 36;
 		in_hand = FALSE;
@@ -1444,6 +1469,38 @@ gcrownu()
 			}
 			u.ugifts++;
 		}
+	} else if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend){
+		if (class_gift != STRANGE_OBJECT) {
+			;		/* already got bonus above for some reason */
+		} else if (!already_exists) {
+			if(u.ualign.type == A_CHAOTIC){
+				obj = mksobj(SPEAR, FALSE, FALSE);
+				obj = oname(obj, artiname(ART_RITUAL_RINGED_SPEAR));
+				obj->spe = 1;
+				fix_object(obj);
+				at_your_feet("A molten-ringed spear");
+				dropy(obj);
+				discover_artifact(ART_RITUAL_RINGED_SPEAR);
+				expert_weapon_skill(P_SPEAR);
+			} else if(u.ualign.type == A_NEUTRAL){
+				obj = mksobj(HALBERD, FALSE, FALSE);
+				obj = oname(obj, artiname(ART_CRUCIFIX_OF_THE_MAD_KING));
+				at_your_feet("A halberd with an undying zombie impaled on the spike");
+				dropy(obj);
+				discover_artifact(ART_CRUCIFIX_OF_THE_MAD_KING);
+				expert_weapon_skill(P_POLEARMS);
+			} else if(u.ualign.type == A_LAWFUL){
+				obj = mksobj(STONE_DRAGON_SHIELD, FALSE, FALSE);
+				obj = oname(obj, artiname(ART_DRAGONHEAD_SHIELD));
+				at_your_feet("A stone dragon head");
+				dropy(obj);
+				discover_artifact(ART_DRAGONHEAD_SHIELD);
+				// expert_weapon_skill(P_SHIELD);
+			}
+			u.ugifts++;
+		}
+		
+	//Default role pantheons start here
 	} else if (Pantheon_if(PM_KNIGHT) || Role_if(PM_KNIGHT)) {
 		if(!already_exists){
 			obj = mksobj(LONG_SWORD, FALSE, FALSE);
