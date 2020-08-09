@@ -4565,7 +4565,7 @@ dothrowspell:
 				if (iflags.paranoid_self_cast &&
 						pseudo->otyp != SPE_HEALING &&
 						pseudo->otyp != SPE_EXTRA_HEALING &&
-						pseudo->otyp != SPE_TELEPORT_AWAY
+						pseudo->otyp != SPE_TELEPORT_AWAY)
 				{
 					char buf[BUFSZ];
 					getlin ("Are you sure you want to cast that spell at yourself? [yes/no]?",buf);
