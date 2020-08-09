@@ -5525,8 +5525,9 @@ int spell;
 
 	splcaster = urole.spelbase;
 	special = urole.spelheal;
-	
-	if(u.specialSealsActive&SEAL_NUMINA){
+	if(uwep->oartifact == ART_RITUAL_RINGED_SPEAR){
+		statused = ACURR(A_WIS);
+	} else if(u.specialSealsActive&SEAL_NUMINA){
 		if(abs(u.wisSpirits - u.intSpirits) <= 1) statused = max(ACURR(A_WIS), ACURR(A_INT));
 	} else if(u.wisSpirits > u.intSpirits){
 		statused = ACURR(A_WIS);

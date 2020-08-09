@@ -8,6 +8,15 @@
  *	code for monsters.
  */
 #include "hack.h"
+#include "artifact.h"
+#include "hack.h"
+
+
+#ifdef OVLB
+#include "artilist.h"
+#else
+STATIC_DCL struct artifact artilist[];
+#endif
 
 #ifdef DUMP_LOG
 STATIC_DCL int FDECL(enhance_skill, (boolean));
@@ -284,6 +293,9 @@ int oartifact;
 	if (   oartifact == ART_LIECLEAVER
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
 		){
+		attackmask |= SLASH;
+	}
+	if(obj && oartifact && get_artifact(obj)->inv_prop == RINGED_SPEAR && (artinstance[oartifact].RRSember >= moves || artinstance[oartifact].RRSlunar >= moves)){
 		attackmask |= SLASH;
 	}
 	if ((obj && oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
