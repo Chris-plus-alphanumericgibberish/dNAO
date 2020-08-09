@@ -6079,7 +6079,7 @@ arti_invoke(obj)
 				pm->mlevel = lvl;
 			}
 			
-			struct monst *mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+			struct monst *mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|NO_MINVENT);
 			mtmp = tamedog(mtmp, (struct obj *) 0);
 			
 			if (mtmp->mtyp != PM_SKELETON)
