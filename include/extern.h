@@ -2107,6 +2107,7 @@ E void FDECL(gods_upset,(int));
 E void FDECL(angrygods,(int));
 E boolean NDECL(maybe_god_gives_gift);
 E int NDECL(dosacrifice);
+E int NDECL(gcrownu);
 E int NDECL(pray_goat);
 E boolean FDECL(can_pray, (BOOLEAN_P));
 E int NDECL(dopray);

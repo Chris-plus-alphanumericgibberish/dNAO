@@ -14,9 +14,6 @@ STATIC_DCL struct obj *NDECL(worst_cursed_item);
 STATIC_DCL int NDECL(in_trouble);
 STATIC_DCL void FDECL(fix_worst_trouble,(int));
 STATIC_DCL void FDECL(at_your_feet, (const char *));
-#ifdef ELBERETH
-STATIC_DCL void NDECL(gcrownu);
-#endif	/*ELBERETH*/
 STATIC_DCL void NDECL(goat_pleased);
 STATIC_DCL void FDECL(pleased,(ALIGNTYP_P));
 STATIC_DCL void FDECL(godvoice,(int,const char*));
@@ -831,7 +828,7 @@ at_your_feet(str)
 }
 
 //ifdef ELBERETH
-STATIC_OVL void
+int
 gcrownu()
 {
     struct obj *obj;
@@ -885,7 +882,7 @@ gcrownu()
 		pline("  you shall be our emissary to that which gave rise to us all>>");
 		bindspirit(COUNCIL);
 		livelog_write_string("became the Emissary of Elements");
-		return;
+		return 1;
 	} else {
     switch (u.ualign.type) {
     case A_LAWFUL:
@@ -910,7 +907,7 @@ gcrownu()
 				verbalize("You shall be my shepherd, to wrap the world in webs of shadow!");
 				livelog_write_string("became the Shepherd of the Black Web");
 				u.specialSealsKnown |= SEAL_BLACK_WEB;
-				return;
+				return 1;
 			}
 		}
 	} else if(Race_if(PM_ELF)){
@@ -1708,7 +1705,7 @@ gcrownu()
 //		You_feel("unworthy.");
 //    }
     update_inventory();
-    return;
+    return 1;
 }
 //endif	/*ELBERETH*/
 

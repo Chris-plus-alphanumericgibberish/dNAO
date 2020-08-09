@@ -5278,6 +5278,7 @@ struct ext_func_tab extcmdlist[] = {
 	{(char *)0, (char *)0, donull, TRUE}, /* #levelchange */
 	{(char *)0, (char *)0, donull, TRUE}, /* #lightsources */
 	{(char *)0, (char *)0, donull, TRUE}, /* #detect */
+	{(char *)0, (char *)0, donull, TRUE}, /* #gcrown */
 	{(char *)0, (char *)0, donull, TRUE}, /* #map level*/
 #ifdef DEBUG_MIGRATING_MONS
 	{(char *)0, (char *)0, donull, TRUE}, /* #migratemons */
@@ -5316,6 +5317,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"levelchange", "change experience level", wiz_level_change, IFBURIED, AUTOCOMPLETE},
 	{"lightsources", "show mobile light sources", wiz_light_sources, IFBURIED, AUTOCOMPLETE},
 	{"detect", "do wizard detection", wiz_detect, IFBURIED, AUTOCOMPLETE},
+	{"godcrown", "make your god crown you", gcrownu, IFBURIED, AUTOCOMPLETE},
 	{"map", "map the current level", wiz_map, IFBURIED, AUTOCOMPLETE},
 #ifdef DEBUG_MIGRATING_MONS
 	{"migratemons", "migrate n random monsters", wiz_migrate_mons, IFBURIED, AUTOCOMPLETE},
@@ -5343,7 +5345,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"genesis", "create monster", wiz_genesis, IFBURIED},
 	{"identify", "identify items in pack", wiz_identify, IFBURIED},
 	{"levelport", "to trans-level teleport", wiz_level_tele, IFBURIED},
-	{"wish", "make wish", wiz_wish, IFBURIED},
+	{"wish", "make wish", wiz_wish, IFBURIED, AUTOCOMPLETE},
 	{"where", "tell locations of special levels", dooverview_or_wiz_where, IFBURIED},
 	{(char *)0, (char *)0, donull, IFBURIED}
 };
