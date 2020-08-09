@@ -96,7 +96,7 @@ static struct thoughtglyph thoughtglyphs[] =
 	12, 100, "An irregular golden pyramid rises from the depths of your mind." },
 
 	{ BEAST_S_EMBRACE_GLYPH, NON_PM, BEASTS_EMBRACE,
-	15, 90, (const char *)0 }
+	15, 90, "A bestial figure takes refuge inside you." }
 };
 
 
