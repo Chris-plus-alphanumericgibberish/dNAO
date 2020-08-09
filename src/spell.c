@@ -2111,7 +2111,14 @@ spiriteffects(power, atme)
 					break;
 				}
 				mon->mnotlaugh = 0;
-				mon->mlaughing = d(1,5)+u.ulevel/10;
+				if (resist(mon, 0, 0, FALSE))
+					mon->mlaughing = 1;
+				else
+					mon->mlaughing = d(1, spiritDsize());
+				
+				// considered a save at the end of every turn to break out, but that's not
+				// a huge difference for high-MR targets, the only ones who really matter.
+				
 				pline("%s collapses in a fit of laughter.", Monnam(mon));
 			} else{
 				pline("There is no target there.");
@@ -4336,9 +4343,7 @@ int spell;
 	}
 }
 int
-spelleffects(spell, atme, spelltyp)
-int spell, spelltyp;
-boolean atme;
+spelleffects(int spell, boolean atme, int spelltyp)
 {
 	int energy, damage, chance, n, intell;
 	int skill, role_skill;
@@ -4555,6 +4560,23 @@ dothrowspell:
 			    pline_The("magical energy is released!");
 			}
 			if(!u.dx && !u.dy && !u.dz) {
+
+#ifdef PARANOID
+				if (iflags.paranoid_self_cast &&
+						pseudo->otyp != SPE_HEALING &&
+						pseudo->otyp != SPE_EXTRA_HEALING &&
+						pseudo->otyp != SPE_TELEPORT_AWAY)
+				{
+					char buf[BUFSZ];
+					getlin ("Are you sure you want to cast that spell at yourself? [yes/no]?",buf);
+					if ((strcmp (buf, "yes")))
+					{
+						pline_The("spell fizzles and dissipates");
+						break;
+					}
+				}
+#endif
+
 			    if ((damage = zapyourself(pseudo, TRUE)) != 0) {
 				char buf[BUFSZ];
 				Sprintf(buf, "zapped %sself with a spell", uhim());

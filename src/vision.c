@@ -314,7 +314,7 @@ rogue_vision(next, rmin, rmax)
 	    rmax[zy] = stop  = rooms[rnum].hx+1;
 
 	    for (zx = start; zx <= stop; zx++) {
-		if (rooms[rnum].rlit) {
+		if (rooms[rnum].rlit && !(Blind || LightBlind)) {
 		    next[zy][zx] = COULD_SEE | IN_SIGHT;
 		    levl[zx][zy].seenv = SVALL;	/* see the walls */
 		} else
@@ -325,28 +325,30 @@ rogue_vision(next, rmin, rmax)
 
     in_door = levl[u.ux][u.uy].typ == DOOR;
 
-    /* Can always see adjacent. */
-    ylo = max(u.uy - 1, 0);
-    yhi = min(u.uy + 1, ROWNO - 1);
-    xlo = max(u.ux - 1, 1);
-    xhi = min(u.ux + 1, COLNO - 1);
-    for (zy = ylo; zy <= yhi; zy++) {
-	if (xlo < rmin[zy]) rmin[zy] = xlo;
-	if (xhi > rmax[zy]) rmax[zy] = xhi;
+    /* Can always see adjacent, unless blind */
+	if (!(Blind || LightBlind)) {
+		ylo = max(u.uy - 1, 0);
+		yhi = min(u.uy + 1, ROWNO - 1);
+		xlo = max(u.ux - 1, 1);
+		xhi = min(u.ux + 1, COLNO - 1);
+		for (zy = ylo; zy <= yhi; zy++) {
+			if (xlo < rmin[zy]) rmin[zy] = xlo;
+			if (xhi > rmax[zy]) rmax[zy] = xhi;
 
-	for (zx = xlo; zx <= xhi; zx++) {
-	    next[zy][zx] = COULD_SEE | IN_SIGHT;
-	    /*
-	     * Yuck, update adjacent non-diagonal positions when in a doorway.
-	     * We need to do this to catch the case when we first step into
-	     * a room.  The room's walls were not seen from the outside, but
-	     * now are seen (the seen bits are set just above).  However, the
-	     * positions are not updated because they were already in sight.
-	     * So, we have to do it here.
-	     */
-	    if (in_door && (zx == u.ux || zy == u.uy)) newsym(zx,zy);
+			for (zx = xlo; zx <= xhi; zx++) {
+				next[zy][zx] = COULD_SEE | IN_SIGHT;
+				/*
+				 * Yuck, update adjacent non-diagonal positions when in a doorway.
+				 * We need to do this to catch the case when we first step into
+				 * a room.  The room's walls were not seen from the outside, but
+				 * now are seen (the seen bits are set just above).  However, the
+				 * positions are not updated because they were already in sight.
+				 * So, we have to do it here.
+				 */
+				if (in_door && (zx == u.ux || zy == u.uy)) newsym(zx, zy);
+			}
+		}
 	}
-    }
 }
 #endif /* REINCARNATION */
 
@@ -536,46 +538,6 @@ vision_recalc(control)
     if (u.uswallow || control == 2) {
 		/* do nothing -- get_unused_cs() nulls out the new work area */
 
-    } else if (Blind || LightBlind) {
-		/*
-		 * Calculate the could_see array even when blind so that monsters
-		 * can see you, even if you can't see them.  Note that the current
-		 * setup allows:
-		 *
-		 *	+ Monsters to see with the "new" vision, even on the rogue
-		 *	  level.
-		 *
-		 *	+ Monsters can see you even when you're in a pit.
-		 *
-		 *	Also do light sources
-		 */
-		view_from(u.uy, u.ux, next_array, next_rmin, next_rmax,
-			0, (void FDECL((*),(int,int,genericptr_t)))0, (genericptr_t)0);
-
-		do_light_sources(next_array);
-		/*
-		 * Our own version of the update loop below.  We know we can't see
-		 * anything, so we only need update positions we used to be able
-		 * to see.
-		 */
-		
-		temp_array = viz_array;	/* set viz_array so newsym() will work */
-		viz_array = next_array;
-		indark = (dimness(u.ux, u.uy) > 0);
-
-		for (row = 0; row < ROWNO; row++) {
-			old_row = temp_array[row];
-
-			/* Find the min and max positions on the row. */
-			start = min(viz_rmin[row], next_rmin[row]);
-			stop  = max(viz_rmax[row], next_rmax[row]);
-
-			for (col = start; col <= stop; col++)
-			if (old_row[col] & IN_SIGHT) newsym(col,row);
-		}
-
-		/* skip the normal update loop */
-		goto skip;
     }
 #ifdef REINCARNATION
     else if (Is_rogue_level(&u.uz)) {
@@ -586,40 +548,43 @@ vision_recalc(control)
 		/* determine night vision range */
 		indark = (dimness(u.ux, u.uy) > 0);
 		darksight = ((Catsight && indark) || (Darksight));
-		if (Elfsight) nv_range = 3;
+		if (Blind || LightBlind) nv_range = 0;
+		else if (Elfsight) nv_range = 3;
 		else if (Lowlightsight) nv_range = 2;
-		else if ((Catsight && indark) || (Darksight && LightBlind)) nv_range = 0;
 		else if (Normalvision || (Catsight && !indark)) nv_range = 1;
 		else nv_range = 0;
+		if (Catsight && indark && nv_range>0) nv_range--;
+
 		if (Underwater && !Is_waterlevel(&u.uz)) {
 			/*
 			 * The hero is under water.  Only see surrounding locations if
 			 * they are also underwater.  This overrides night vision but
 			 * does not override x-ray vision.
 			 */
-			nv_range = 0;
+			if (nv_range > 0) {
+				nv_range = 0;
+				for (row = u.uy - 1; row <= u.uy + 1; row++)
+				for (col = u.ux - 1; col <= u.ux + 1; col++) {
+					if (!isok(col, row) || !is_pool(col, row, TRUE)) continue;
 
-			for (row = u.uy-1; row <= u.uy+1; row++)
-			for (col = u.ux-1; col <= u.ux+1; col++) {
-				if (!isok(col,row) || !is_pool(col,row, TRUE)) continue;
-
-				next_rmin[row] = min(next_rmin[row], col);
-				next_rmax[row] = max(next_rmax[row], col);
-				next_array[row][col] = IN_SIGHT | COULD_SEE;
+					next_rmin[row] = min(next_rmin[row], col);
+					next_rmax[row] = max(next_rmax[row], col);
+					next_array[row][col] = IN_SIGHT | COULD_SEE;
+				}
 			}
 		}
-
 		/* if in a pit, just update for immediate locations */
 		else if (u.utrap && u.utraptype == TT_PIT) {
-			for (row = u.uy-1; row <= u.uy+1; row++) {
-			if (row < 0) continue;	if (row >= ROWNO) break;
+			if (nv_range > 0) {
+				nv_range = 0;
+				for (row = u.uy - 1; row <= u.uy + 1; row++)
+				for (col = u.ux - 1; col <= u.ux + 1; col++) {
+					if (!isok(col, row)) continue;
 
-			next_rmin[row] = max(      0, u.ux - 1);
-			next_rmax[row] = min(COLNO-1, u.ux + 1);
-			next_row = next_array[row];
-
-			for(col=next_rmin[row]; col <= next_rmax[row]; col++)
-				next_row[col] = IN_SIGHT | COULD_SEE;
+					next_rmin[row] = min(next_rmin[row], col);
+					next_rmax[row] = max(next_rmax[row], col);
+					next_array[row][col] = IN_SIGHT | COULD_SEE;
+				}
 			}
 		} else
 			view_from(u.uy, u.ux, next_array, next_rmin, next_rmax,
@@ -630,7 +595,8 @@ vision_recalc(control)
 		 * Set the IN_SIGHT bit for xray and night vision.
 		 */
 		
-		if ((xray = xrayrange()) >= 0) {
+		/* Xray vision works when LightBlind, but not when Blind */
+		if (!Blind && ((xray = xrayrange()) >= 0)) {
 			if (xray > 0) {
 				ranges = circle_ptr(xray);
 
@@ -694,11 +660,12 @@ vision_recalc(control)
 	/* determine night vision range */
 	indark = (dimness(u.ux, u.uy) > 0);
 	darksight = ((Catsight && indark) || (Darksight));
-	if(Elfsight) nv_range = 3;
-	else if(Lowlightsight) nv_range = 2;
-	else if ((Catsight && indark) || (Darksight && LightBlind)) nv_range = 0;
+	if (Blind || LightBlind) nv_range = 0;
+	else if (Elfsight) nv_range = 3;
+	else if (Lowlightsight) nv_range = 2;
 	else if (Normalvision || (Catsight && !indark)) nv_range = 1;
 	else nv_range = 0;
+	if (Catsight && indark && nv_range>0) nv_range--;
 	
     /*
      * The main update loop.  Here we do two things:
@@ -743,6 +710,8 @@ vision_recalc(control)
 		    newsym(col,row);
 	    }
 	    else if (
+			/* must not be blind */
+			!(Blind || LightBlind) && 
 			/* must be in LoS */
 			(next_row[col] & COULD_SEE) && (
 			/* Either Extramission */
@@ -807,7 +776,7 @@ vision_recalc(control)
 		    if ( !(old_row[col] & IN_SIGHT) || oldseenv != lev->seenv)
 			newsym(col,row);
 		}
-	    } else if ((next_row[col] & COULD_SEE) && lev->waslit) {
+		} else if (!(Blind || LightBlind) && (next_row[col] & COULD_SEE) && lev->waslit) {
 		/*
 		 * If we make it here, the hero _could see_ the location,
 		 * but doesn't see it (location is not lit).
@@ -844,7 +813,6 @@ not_in_sight:
     }	/* end for row . .  */
     colbump[u.ux] = colbump[u.ux+1] = 0;
 
-skip:
     /* This newsym() caused a crash delivering msg about failure to open
      * dungeon file init_dungeons() -> panic() -> done(11) ->
      * vision_recalc(2) -> newsym() -> crash!  u.ux and u.uy are 0 and

@@ -252,17 +252,37 @@ const char *goal;
 			for (ty = lo_y; ty <= hi_y; ty++) {
 			    lo_x = (pass == 0 && ty == lo_y) ? cx + 1 : 1;
 			    hi_x = (pass == 1 && ty == hi_y) ? cx : COLNO - 1;
-			    for (tx = lo_x; tx <= hi_x; tx++) {
-				k = levl[tx][ty].glyph;
-				if (glyph_is_cmap(k) &&
-					matching[glyph_to_cmap(k)]) {
-				    cx = tx,  cy = ty;
-				    if (msg_given) {
-					clear_nhwindow(WIN_MESSAGE);
-					msg_given = FALSE;
-				    }
-				    goto nxtc;
-				}
+				for (tx = lo_x; tx <= hi_x; tx++) {
+					/* look at dungeon feature, not at user-visible glyph */
+					k = back_to_glyph(tx, ty);
+					/* uninteresting background glyph */
+					if (glyph_is_cmap(k) &&
+						(IS_DOOR(levl[tx][ty].typ) || /* monsters mimicking a door */
+							glyph_to_cmap(k) == S_drkroom ||
+							glyph_to_cmap(k) == S_litroom ||
+							glyph_to_cmap(k) == S_brightrm ||
+							glyph_to_cmap(k) == S_corr ||
+							glyph_to_cmap(k) == S_litcorr)) {
+						/* what the user remembers to be at tx,ty */
+						k = glyph_at(tx, ty);
+					}
+					/* TODO: - open doors are only matched with '-' */
+					/* should remembered or seen items be matched? */
+					if (glyph_is_cmap(k) &&
+						matching[glyph_to_cmap(k)] &&
+						levl[tx][ty].seenv && /* only if already seen */
+						(!IS_WALL(levl[tx][ty].typ) &&
+							(levl[tx][ty].typ != SDOOR) &&
+							glyph_to_cmap(k) != S_corr &&
+							glyph_to_cmap(k) != S_litcorr)
+						) {
+						cx = tx,  cy = ty;
+						if (msg_given) {
+							clear_nhwindow(WIN_MESSAGE);
+							msg_given = FALSE;
+						}
+						goto nxtc;
+					}
 			    }	/* column */
 			}	/* row */
 		    }		/* pass */

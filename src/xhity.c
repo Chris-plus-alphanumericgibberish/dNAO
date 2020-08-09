@@ -477,6 +477,7 @@ int tary;
 		}
 	    }
 	}
+#ifdef STEED
 	/* monsters may target your steed */
 	if (youdef && u.usteed && !missedyou) {
 		if (magr == u.usteed)
@@ -507,6 +508,7 @@ int tary;
 			return result;
 		}
 	}
+#endif
 
 	/* set monster attacking flag */
 	if (!youagr && youdef) {
@@ -566,8 +568,14 @@ int tary;
 		aatyp = attk->aatyp;
 		adtyp = attk->adtyp;
 		/* maybe end (mdef may have been forcibly moved!)*/
-		if (((youdef || mdef==u.usteed) && !missedyou && (tarx != u.ux || tary != u.uy)) ||
-			(!(youdef || mdef == u.usteed) && m_at(tarx, tary) != mdef)) {
+		if (
+			(youdef
+#ifdef STEED
+			|| mdef == u.usteed
+#endif
+			) ? (!missedyou && (tarx != u.ux || tary != u.uy))
+			: (m_at(tarx, tary) != mdef)
+			) {
 			result = MM_AGR_STOP;
 			continue;
 		}
@@ -3052,9 +3060,11 @@ int flat_acc;
 				if (otmp->otyp == GAUNTLETS_OF_POWER)
 					bons_acc += 3;
 			}
+#ifdef STEED
 			/* Your steed gets a skill-based boost */
 			if (magr == u.usteed)
 				bons_acc += mountedCombat();
+#endif
 			/* All of your pets get a skill-based boost */
 			if (magr->mtame){
 				bons_acc += beastmastery();
@@ -8328,7 +8338,11 @@ int vis;
 
 		/* if defender died and aggressor isn't stationary, move agressor to defender's coord */
 		/* if mdef was your steed, you are still there, so magr can't take your spot! */
-		if (!stationary(magr->data) && result&MM_DEF_DIED && !(mdef == u.usteed)) {
+		if (!stationary(magr->data) && result&MM_DEF_DIED
+#ifdef STEED
+			&& !(mdef == u.usteed)
+#endif
+			) {
 			/* sanity check */
 			if (*hp(mdef) > 0)
 				impossible("dead engulfee still alive?");
@@ -11888,6 +11902,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 		poisons |= poisonedobj->opoisoned;
 		if (arti_poisoned(poisonedobj))
 			poisons |= OPOISON_BASIC;
+		if (arti_silvered(poisonedobj))
+			poisons |= OPOISON_SILVER;
 		if (poisonedobj->oartifact == ART_WEBWEAVER_S_CROOK)
 			poisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
 		if (poisonedobj->oartifact == ART_SUNBEAM)
@@ -11910,7 +11926,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	if (poisons)
 	{
 		/* Penalties for you using a poisoned weapon */
-		if (poisons && youagr && !recursed)
+		if ((poisons & ~OPOISON_SILVER) && youagr && !recursed)
 		{
 			if Role_if(PM_SAMURAI) {
 				if (!(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_NINJA)){
@@ -11985,6 +12001,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				break;
 			case OPOISON_SILVER:
 				resists = !(hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN));
+				if (!resists)
+					silverobj |= slot;
 				majoreff = TRUE;
 				break;
 			}
@@ -14545,13 +14563,13 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				else if (vis) {
 					if (pd->mtyp == PM_RAZORVINE) {
 						pline("%s is hit by %s springing vines!",
-							Monnam(mdef),
+							Monnam(magr),
 							(youdef ? "your" : s_suffix(mon_nam(mdef)))
 							);
 					}
 					else {
 						pline("%s is hit by %s barbs!",
-							Monnam(mdef),
+							Monnam(magr),
 							(youdef ? "your" : s_suffix(mon_nam(mdef)))
 							);
 					}

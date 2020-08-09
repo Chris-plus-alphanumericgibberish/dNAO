@@ -5110,6 +5110,7 @@ int floorID;
 		skillchain[i++] = P_BEAST_MASTERY;
 		break;
 	case MARIONETTE:
+		skillchain[i++] = P_AXE;	
 		skillchain[i++] = P_MATTER_SPELL;
 		break;
 	case MOTHER:

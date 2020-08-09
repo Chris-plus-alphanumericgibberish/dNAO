@@ -1953,6 +1953,7 @@ u_init()
 		case 2: Monk[M_BOOK].trotyp = SPE_SLEEP; break;
 		}
 		ini_inv(Monk);
+		knows_object(KHAKKHARA);
 		// if(!rn2(5)) ini_inv(Magicmarker);
 		// else if(!rn2(10)) ini_inv(Lamp);
 		// knows_class(ARMOR_CLASS);
