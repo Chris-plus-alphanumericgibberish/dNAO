@@ -28,8 +28,7 @@ STATIC_DCL boolean FDECL(zap_updown, (struct obj *));
 STATIC_DCL boolean FDECL(zap_reflect, (struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zapdamage, (struct monst *, struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zhit, (struct monst *, struct monst *, struct zapdata *));
-STATIC_DCL int FDECL(zhitm, (struct monst *,int,int,int,int,int,struct obj **));
-STATIC_DCL void FDECL(zhitu, (int,int,int,int,const char *,XCHAR_P,XCHAR_P));
+STATIC_DCL void FDECL(lightning_blind, (struct monst *, struct monst *, struct zapdata *));
 #ifdef STEED
 STATIC_DCL boolean FDECL(zap_steed, (struct obj *));
 #endif
@@ -2412,9 +2411,7 @@ boolean ordinary;
 				destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 			}
 		    if (!resists_blnd(&youmonst)) {
-			    You(are_blinded_by_the_flash);
-			    make_blinded((long)rnd(100),FALSE);
-			    if (!Blind) Your1(vision_clears);
+				lightning_blind(NULL, &youmonst, NULL);
 		    }
 		    break;
 		case SPE_FIREBALL:
@@ -3738,19 +3735,10 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 				/* defender notices */
 				if (youagr && !youdef) mdef->mstrategy &= ~STRAT_WAITMASK;
 				if (youdef)	nomul(0, NULL);
+
 				/* lightning blinds */
 				if (zapdata->adtyp == AD_ELEC && !resists_blnd(mdef)) {
-					if (youdef) {
-						You(are_blinded_by_the_flash);
-						make_blinded((long)d(zapdata->damn, 50), FALSE);
-						if (!Blind) Your1(vision_clears);
-					}
-					else {
-						if (!youagr && u.uswallow && mdef == u.ustuck) {
-							mdef->mcansee = 0;
-							mdef->mblinded = min(mdef->mblinded + rnd(50), 127);
-						}
-					}
+					lightning_blind(magr, mdef, zapdata);
 				}
 
 			}/*if mdef*/
@@ -4564,6 +4552,40 @@ boolean phase_armor;
 
 #endif /*OVLB*/
 #ifdef OVL0
+
+/* caller should check !resists_blnd() before calling */
+void
+lightning_blind(magr, mdef, zapdata)
+struct monst * magr;
+struct monst * mdef;
+struct zapdata * zapdata;
+{
+	int blind_duration;
+	int nd;
+	if (zapdata)
+		nd = zapdata->damn;
+	else
+		nd = 2;
+
+	blind_duration = d(nd, 25);
+
+	if (Half_phys(mdef))
+		blind_duration = (blind_duration + 1) / 2;
+
+	if (mdef == &youmonst) {
+		You(are_blinded_by_the_flash);
+		make_blinded(blind_duration, FALSE);
+		if (!Blind) Your1(vision_clears);
+	}
+	else {
+		if (!(magr == &youmonst) && u.uswallow && mdef == u.ustuck) {
+			mdef->mcansee = 0;
+			mdef->mblinded = min(127, blind_duration);
+		}
+	}
+	return;
+}
+
 
 struct monst *
 delouse(mon, type)
