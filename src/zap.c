@@ -3738,11 +3738,19 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 				/* defender notices */
 				if (youagr && !youdef) mdef->mstrategy &= ~STRAT_WAITMASK;
 				if (youdef)	nomul(0, NULL);
-				/* player is blinded by lightning (but monsters aren't?) */
-				if (youdef && zapdata->adtyp == AD_ELEC && !resists_blnd(&youmonst)) {
-					You(are_blinded_by_the_flash);
-					make_blinded((long)d(zapdata->damn, 50), FALSE);
-					if (!Blind) Your1(vision_clears);
+				/* lightning blinds */
+				if (zapdata->adtyp == AD_ELEC && !resists_blnd(mdef)) {
+					if (youdef) {
+						You(are_blinded_by_the_flash);
+						make_blinded((long)d(zapdata->damn, 50), FALSE);
+						if (!Blind) Your1(vision_clears);
+					}
+					else {
+						if (!youagr && u.uswallow && mdef == u.ustuck) {
+							mdef->mcansee = 0;
+							mdef->mblinded = min(mdef->mblinded + rnd(50), 127);
+						}
+					}
 				}
 
 			}/*if mdef*/
