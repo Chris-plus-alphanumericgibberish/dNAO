@@ -4831,10 +4831,9 @@ arti_invoke(obj)
 	    break;
 	  }
 	case HEALING: {
-	    int healamt = (u.uhpmax + 1 - u.uhp) / 2;
+		int healamt = (maybe_polyd(u.mhmax - u.mh, u.uhpmax - u.uhp) + 1) / 2;
 	    long creamed = (long)u.ucreamed;
 
-	    if (Upolyd) healamt = (u.mhmax + 1 - u.mh) / 2;
 	    if (healamt || Sick || Slimed || Blinded > creamed)
 		You_feel("better.");
 	    else
@@ -5817,7 +5816,7 @@ arti_invoke(obj)
 		
 		pline("You enter a %strance, giving you an edge in battle.", (dancer==2) ? "deep ":"");
 		// heal you up to half of your lost hp, modified by enchantment
-		int healamt = (u.uhpmax + 1 - u.uhp) / ((dancer == 2)?2:4);
+		int healamt = (maybe_polyd(u.mhmax - u.mh, u.uhpmax - u.uhp) + 1) / ((dancer == 2) ? 2 : 4);
 		healamt = max(0, healamt * (obj->spe/10));
 		healup(healamt, 0, FALSE, FALSE);
 
@@ -6171,7 +6170,7 @@ arti_invoke(obj)
 						Slimed = 0;
 					 /* flags.botl = 1; -- healup() handles this */
 					}
-					healup(u.uhpmax - u.uhp, 0, TRUE, TRUE); //heal spell
+					healup(maybe_polyd(u.mhmax - u.mh, u.uhpmax - u.uhp), 0, TRUE, TRUE); //heal spell
 					while(n--) {
 						pm = &mons[summons[d(1,6)+3]];
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
