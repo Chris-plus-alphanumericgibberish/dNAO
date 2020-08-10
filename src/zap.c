@@ -28,7 +28,6 @@ STATIC_DCL boolean FDECL(zap_updown, (struct obj *));
 STATIC_DCL boolean FDECL(zap_reflect, (struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zapdamage, (struct monst *, struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zhit, (struct monst *, struct monst *, struct zapdata *));
-STATIC_DCL void FDECL(lightning_blind, (struct monst *, struct monst *, struct zapdata *));
 #ifdef STEED
 STATIC_DCL boolean FDECL(zap_steed, (struct obj *));
 #endif
@@ -2411,7 +2410,7 @@ boolean ordinary;
 				destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 			}
 		    if (!resists_blnd(&youmonst)) {
-				lightning_blind(NULL, &youmonst, NULL);
+				lightning_blind(&youmonst, rnd(50));
 		    }
 		    break;
 		case SPE_FIREBALL:
@@ -3737,8 +3736,9 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 				if (youdef)	nomul(0, NULL);
 
 				/* lightning blinds */
-				if (zapdata->adtyp == AD_ELEC && !resists_blnd(mdef)) {
-					lightning_blind(magr, mdef, zapdata);
+				if (zapdata->adtyp == AD_ELEC && !resists_blnd(mdef)
+					&& !(youagr && u.uswallow && mdef == u.ustuck)) {
+					lightning_blind(mdef, d(zapdata->damn, 25));
 				}
 
 			}/*if mdef*/
@@ -4555,20 +4555,10 @@ boolean phase_armor;
 
 /* caller should check !resists_blnd() before calling */
 void
-lightning_blind(magr, mdef, zapdata)
-struct monst * magr;
+lightning_blind(mdef, blind_duration)
 struct monst * mdef;
-struct zapdata * zapdata;
+int blind_duration;
 {
-	int blind_duration;
-	int nd;
-	if (zapdata)
-		nd = zapdata->damn;
-	else
-		nd = 2;
-
-	blind_duration = d(nd, 25);
-
 	if (Half_phys(mdef))
 		blind_duration = (blind_duration + 1) / 2;
 
@@ -4578,10 +4568,8 @@ struct zapdata * zapdata;
 		if (!Blind) Your1(vision_clears);
 	}
 	else {
-		if (!(magr == &youmonst) && u.uswallow && mdef == u.ustuck) {
-			mdef->mcansee = 0;
-			mdef->mblinded = min(127, blind_duration);
-		}
+		mdef->mcansee = 0;
+		mdef->mblinded = min(127, blind_duration);
 	}
 	return;
 }
