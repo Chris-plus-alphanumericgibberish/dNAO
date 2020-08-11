@@ -42,6 +42,7 @@ unsigned gpflags;
 
 	if (mtmp) {
 	    struct monst *mtmp2 = m_at(x,y);
+		struct trap * ttmp = t_at(x, y);
 
 	    /* Be careful with long worms.  A monster may be placed back in
 	     * its own location.  Normally, if m_at() returns the same monster
@@ -55,6 +56,11 @@ unsigned gpflags;
 	     */
 	    if (mtmp2 && (mtmp2 != mtmp || mtmp->wormno))
 		return FALSE;
+
+		/* Prevent monsters from teleporting to or being created on vivisection traps.
+		 * Level generation must place monsters before placing the traps. */
+		if (ttmp && ttmp->ttyp == VIVI_TRAP)
+			return FALSE;
 
 	    mdat = mtmp->data;
 	    if (is_3dwater(x,y) && !ignorewater) {
