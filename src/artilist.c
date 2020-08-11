@@ -27,11 +27,13 @@
 #ifdef MAKEDEFS_C
 /* in makedefs.c, all we care about is the list of names */
 
-#define A(nam, typ, desc, cost, mat, siz, wgt, aln, cls, rac, val, gen, vsmons, attack, afl, wpr, wfl, cpr, cfl, inv, ifl) nam
+#define A(nam, ...) nam
 
 static const char *artifact_names[] = {
 #else
-/* in artifact.c, set up the actual artifact list structure */
+/* set up the actual artifact list structure */
+#include "hack.h"
+#include "artifact.h"
 
 #define A(nam, typ, desc, cost, mat, siz, wgt, aln, cls, rac, val, gen, vsmons, attack, afl, wpr, wfl, cpr, cfl, inv, ifl) { \
 	 typ, nam, desc, \
@@ -43,7 +45,7 @@ static const char *artifact_names[] = {
 	 cpr, cfl, \
 	 inv, ifl }
 
-STATIC_OVL NEARDATA struct artifact artilist[] = {
+NEARDATA struct artifact artilist[] = {
 #endif	/* MAKEDEFS_C */
 
 /* Artifact cost rationale:

@@ -8,11 +8,6 @@
 #include "epri.h"
 #include "edog.h"
 #include "xhity.h"
-#ifdef OVLB
-#include "artilist.h"
-#else
-STATIC_DCL struct artifact artilist[];
-#endif
 /*
  * Note:  both artilist[] and artinstance[] have a dummy element #0,
  *	  so loops over them should normally start at #1.  The primary

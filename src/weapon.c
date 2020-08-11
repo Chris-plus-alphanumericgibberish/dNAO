@@ -11,13 +11,6 @@
 #include "artifact.h"
 #include "hack.h"
 
-
-#ifdef OVLB
-#include "artilist.h"
-#else
-STATIC_DCL struct artifact artilist[];
-#endif
-
 #ifdef DUMP_LOG
 STATIC_DCL int FDECL(enhance_skill, (boolean));
 #endif

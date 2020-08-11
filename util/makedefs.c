@@ -11,13 +11,14 @@
 #include "permonst.h"
 #include "objclass.h"
 #include "monsym.h"
-#include "artilist.h"
 #include "dungeon.h"
 #include "obj.h"
 #include "monst.h"
 #include "you.h"
 #include "flag.h"
 #include "dlb.h"
+
+#include "../src/artilist.c"
 
 /* version information */
 #ifdef SHORT_FILENAMES
