@@ -3140,7 +3140,7 @@ struct obj *hypo;
 				if (!(HFast & INTRINSIC)) {
 					if (!Fast) You("speed up.");
 					else Your("quickness feels more natural.");
-					HFast |= FROMOUTSIDE;
+					HFast |= TIMEOUT_INF;
 				} else nothing++;
 				exercise(A_DEX, TRUE);
 			break;

@@ -2258,25 +2258,25 @@ int effect_num;
 			break;
 
 		case SEDU_POISRES:
-			if (!(HPoison_resistance & FROMOUTSIDE)) {
+			if (!(HPoison_resistance & INTRINSIC)) {
 				You_feel("healthy.");
-				HPoison_resistance |= FROMOUTSIDE;
+				HPoison_resistance |= TIMEOUT_INF;
 			}
 			else pline("but that's about it.");
 			break;
 		case SEDU_ACIDRES:
-			if (!(HAcid_resistance & FROMOUTSIDE)) {
+			if (!(HAcid_resistance & INTRINSIC)) {
 				if (Hallucination) You("like you've gone back to the basics.");
 				else Your("health seems insoluble.");
-				HAcid_resistance |= FROMOUTSIDE;
+				HAcid_resistance |= TIMEOUT_INF;
 			}
 			else pline("but that's about it.");
 			break;
 		case SEDU_SICKRES:
-			if (!(HSick_resistance & FROMOUTSIDE) && !rn2(4)) {
+			if (!(HSick_resistance & INTRINSIC) && !rn2(4)) {
 				You(Hallucination ? "feel alright." :
 					"feel healthier than you ever have before.");
-				HSick_resistance |= FROMOUTSIDE;
+				HSick_resistance |= TIMEOUT_INF;
 			}
 			else pline("but that's about it.");
 			break;

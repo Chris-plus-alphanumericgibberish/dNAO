@@ -382,7 +382,7 @@ dosit()
 					}
 				} else  {
 					Your("vision becomes clear.");
-					HSee_invisible |= FROMOUTSIDE;
+					HSee_invisible |= TIMEOUT_INF;
 					newsym(u.ux, u.uy);
 				}
 				break;
@@ -683,66 +683,63 @@ register struct monst *mtmp;
 	return FALSE;
 }
 
+/* remove a random INTRINSIC ability
+ * that was gained via eating corpses
+ * or some other re-appliable source */
 void
-attrcurse()			/* remove a random INTRINSIC ability */
+attrcurse()
 {
-	switch(rnd(11)) {
-	case 1 : if (HFire_resistance & INTRINSIC) {
-			HFire_resistance &= ~INTRINSIC;
+	switch(rnd(10)) {
+	case 1 : if (HFire_resistance & TIMEOUT) {
+			HFire_resistance &= ~TIMEOUT;
 			You_feel("warmer.");
 			break;
 		}
-	case 2 : if (HTeleportation & INTRINSIC) {
-			HTeleportation &= ~INTRINSIC;
+	case 2 : if (HTeleportation & TIMEOUT) {
+			HTeleportation &= ~TIMEOUT;
 			You_feel("less jumpy.");
 			break;
 		}
-	case 3 : if (HPoison_resistance & INTRINSIC) {
-			HPoison_resistance &= ~INTRINSIC;
+	case 3 : if (HPoison_resistance & TIMEOUT) {
+			HPoison_resistance &= ~TIMEOUT;
 			You_feel("a little sick!");
 			break;
 		}
-	case 4 : if (HTelepat & INTRINSIC) {
-			HTelepat &= ~INTRINSIC;
+	case 4 : if (HTelepat & TIMEOUT) {
+			HTelepat &= ~TIMEOUT;
 			if (Blind && !Blind_telepat)
 			    see_monsters();	/* Can't sense mons anymore! */
 			Your("senses fail!");
 			break;
 		}
-	case 5 : if (HCold_resistance & INTRINSIC) {
-			HCold_resistance &= ~INTRINSIC;
+	case 5 : if (HCold_resistance & TIMEOUT) {
+			HCold_resistance &= ~TIMEOUT;
 			You_feel("cooler.");
 			break;
 		}
-	case 6 : if (HInvis & INTRINSIC) {
-			HInvis &= ~INTRINSIC;
+	case 6 : if (HInvis & TIMEOUT) {
+			HInvis &= ~TIMEOUT;
 			You_feel("paranoid.");
 			break;
 		}
-	case 7 : if (HSee_invisible & INTRINSIC) {
-			HSee_invisible &= ~INTRINSIC;
+	case 7 : if (HSee_invisible & TIMEOUT) {
+			HSee_invisible &= ~TIMEOUT;
 			You("%s!", Hallucination ? "tawt you taw a puttie tat"
 						: "thought you saw something");
 			break;
 		}
-	case 8 : if (HFast & INTRINSIC) {
-			HFast &= ~INTRINSIC;
+	case 8 : if (HFast & TIMEOUT) {
+			HFast &= ~TIMEOUT;
 			You_feel("slower.");
 			break;
 		}
-	case 9 : if (HStealth & INTRINSIC) {
-			HStealth &= ~INTRINSIC;
+	case 9 : if (HStealth & TIMEOUT) {
+			HStealth &= ~TIMEOUT;
 			You_feel("clumsy.");
 			break;
 		}
-	case 10: if (HProtection & INTRINSIC) {
-			HProtection &= ~INTRINSIC;
-			u.ublessed = 0; /* fix for C343-189 */
-			You_feel("vulnerable.");
-			break;
-		}
-	case 11: if (HAggravate_monster & INTRINSIC) {
-			HAggravate_monster &= ~INTRINSIC;
+	case 10: if (HAggravate_monster & TIMEOUT) {
+			HAggravate_monster &= ~TIMEOUT;
 			You_feel("less attractive.");
 			break;
 		}
