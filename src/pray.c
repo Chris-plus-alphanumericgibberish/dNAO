@@ -4239,8 +4239,9 @@ aligntyp alignment;
 				else {
 					for(otmp=invent; otmp; otmp=otmp->nobj)
 					if (wrongbuc(otmp)) break;
-					return;
 				}
+				if (!otmp)
+					break;	/* no item found */
 				if (hates_unholy(youracedata) && hates_holy(youracedata)){
 					uncurse(otmp);
 					unbless(otmp);
