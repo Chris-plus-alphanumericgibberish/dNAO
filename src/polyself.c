@@ -291,7 +291,7 @@ boolean forcecontrol;
 				uskin = uarm;
 				uarm = (struct obj *)0;
 				/* save/restore hack */
-				uskin->owornmask |= I_SPECIAL;
+				uskin->owornmask |= W_SKIN;
 			}
 		}
 		else if(leonine) {
@@ -303,7 +303,7 @@ boolean forcecontrol;
 				uskin = uarmc;
 				uarmc = (struct obj *)0;
 				/* save/restore hack */
-				uskin->owornmask |= I_SPECIAL;
+				uskin->owornmask |= W_SKIN;
 			}
 		} else if (hasmask) {
 			if ((youmonst.data) == &mons[ublindf->corpsenm])
@@ -1947,17 +1947,17 @@ boolean silently;
 		if(uskin->otyp == LEO_NEMAEUS_HIDE){
 			uarmc = uskin;
 			/* undo save/restore hack */
-			uskin->owornmask &= ~I_SPECIAL;
+			uskin->owornmask &= ~W_SKIN;
 			uskin = (struct obj *)0;
 			/* undo save/restore hack */
-			uarmc->owornmask &= ~I_SPECIAL;
+			uarmc->owornmask &= ~W_SKIN;
 		} else {
 			uarm = uskin;
 			/* undo save/restore hack */
-			uskin->owornmask &= ~I_SPECIAL;
+			uskin->owornmask &= ~W_SKIN;
 			uskin = (struct obj *)0;
 			/* undo save/restore hack */
-			uarm->owornmask &= ~I_SPECIAL;
+			uarm->owornmask &= ~W_SKIN;
 		}
 	}
 }
