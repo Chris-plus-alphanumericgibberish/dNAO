@@ -342,8 +342,8 @@ struct you {
 	int bc_order;	/* ball & chain order [see bc_order() in ball.c] */
 	int bc_felt;	/* mask for ball/chain being felt */
 
-	int umonster;			/* hero's "real" monster num */
-	int umonnum;			/* current monster number */
+	int umonster;			/* hero's role's monster num */
+	int umonnum;			/* current monster number (either your role's or a polyform) */
 
 	int mh, mhmax, mhrolled, mtimedone;	/* for polymorph-self */
 #define MATTK_DSCALE         1
