@@ -279,6 +279,9 @@ worst_cursed_item()
 	for (otmp = invent; otmp; otmp = otmp->nobj)
 	    if (Cursed_obj(otmp, LOADSTONE)) return otmp;
     }
+	/* if weldproof, we don't care about cursed items other than a loadstone */
+	if (Weldproof)
+		return (struct obj *)0;
     /* weapon takes precedence if it is interfering
        with taking off a ring or putting on a shield */
     if (welded(uwep) && (uright || bimanual(uwep,youracedata))) {	/* weapon */
