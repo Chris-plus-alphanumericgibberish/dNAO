@@ -2276,9 +2276,8 @@ struct obj *otmp;
 		break;
 	    case AMULET_OF_RESTFUL_SLEEP: /* another bad idea! */
 		if(!Race_if(PM_INCANTIFIER)){
-			if (!(HSleeping & FROMOUTSIDE))
-				accessory_has_effect(otmp);
-			HSleeping = FROMOUTSIDE | rnd(100);
+			accessory_has_effect(otmp);
+			HSleeping = rnd(100);	/* only puts you to sleep once */
 		}
 		break;
 	    case AMULET_OF_DRAIN_RESISTANCE:
