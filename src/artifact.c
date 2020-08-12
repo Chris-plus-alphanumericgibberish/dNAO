@@ -2223,54 +2223,44 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			and = TRUE;
 		}
 		water_damage(youdefend ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
-		if(youdefend){
-			if(!((uarmc
-				&& (uarmc->otyp == OILSKIN_CLOAK || uarmc->greased)
-				&& (!uarmc->cursed || rn2(3))
-			   ) || (
-				ublindf
-				&& ublindf->otyp == R_LYEHIAN_FACEPLATE
-				&& (!ublindf->cursed || rn2(3))
-			   ) || (
-				uarm
-				&& (uarm->otyp == WHITE_DRAGON_SCALES || uarm->otyp == WHITE_DRAGON_SCALE_MAIL)
-				&& (!uarm->cursed || rn2(3))
-			   ) || (
-				uarms
-				&& uarms->otyp == WHITE_DRAGON_SCALE_SHIELD
-				&& (!uarms->cursed || rn2(3))
-			   ) || u.sealsActive&SEAL_ENKI)
-			) {
-				int mult = (flaming(youracedata) || youracedata->mtyp == PM_EARTH_ELEMENTAL || youracedata->mtyp == PM_IRON_GOLEM || youracedata->mtyp == PM_CHAIN_GOLEM) ? 2 : 1;
-				*dmgptr += d(dnum,4)*mult;
-				if(youracedata->mtyp == PM_GREMLIN && rn2(3)){
-					(void)split_mon(&youmonst, (struct monst *)0);
+		if (youdefend){
+			if (!Waterproof) {
+				if (uarmc && uarmc->greased){
+					if (!rn2(uarmc->blessed ? 4 : 2)){
+						uarmc->greased = 0;
+						pline("The layer of grease on your %s dissolves.", xname(uarmc));
+					}
+				} else {
+					int mult = (flaming(youracedata) ||
+									youracedata->mtyp == PM_EARTH_ELEMENTAL ||
+									youracedata->mtyp == PM_IRON_GOLEM ||
+									youracedata->mtyp == PM_CHAIN_GOLEM
+								) ? 2 : 1;
+					
+					*dmgptr += d(dnum,4)*mult;
+					if(youracedata->mtyp == PM_GREMLIN && rn2(3))
+						(void)split_mon(&youmonst, (struct monst *)0);
 				}
 			}
-		} else{ //Monster
+		} else { //Monster
 			struct obj *cloak = which_armor(mdef, W_ARMC);
-			struct obj *armor = which_armor(mdef, W_ARM);
-			struct obj *shield = which_armor(mdef, W_ARMS);
-			// struct obj *blindfold = which_armor(mdef, W_ARMC);
-			if(!((cloak
-				&& (cloak->otyp == OILSKIN_CLOAK || cloak->greased)
-				&& (!cloak->cursed || rn2(3))
-				) || (armor
-				&& (armor->otyp == WHITE_DRAGON_SCALES || armor->otyp == WHITE_DRAGON_SCALE_MAIL)
-				&& (!armor->cursed || rn2(3))
-				) || (shield
-				&& shield->otyp == WHITE_DRAGON_SCALE_SHIELD
-				&& (!shield->cursed || rn2(3))
-			   // ) || (
-				// ublindf
-				// && ublindf->otyp == R_LYEHIAN_FACEPLATE
-				// && (!ublindf->cursed || rn2(3))
-			   ))
-			) {
-				int mult = (flaming(mdef->data) || mdef->mtyp == PM_EARTH_ELEMENTAL || mdef->mtyp == PM_IRON_GOLEM || mdef->mtyp == PM_CHAIN_GOLEM) ? 2 : 1;
-				*dmgptr += d(dnum,4)*mult;
-				if(mdef->mtyp == PM_GREMLIN && rn2(3)){
-					(void)split_mon(mdef, (struct monst *)0);
+			if (!mon_resistance(mdef, WATERPROOF)) {
+				if (cloak && cloak->greased){
+					if (!rn2(cloak->blessed ? 4 : 2)){
+						cloak->greased = 0;
+						if(canseemon(mdef)) pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
+					}
+				} else {
+					int mult = (flaming(mdef->data) ||
+									mdef->mtyp == PM_EARTH_ELEMENTAL ||
+									mdef->mtyp == PM_IRON_GOLEM ||
+									mdef->mtyp == PM_CHAIN_GOLEM
+								) ? 2 : 1;
+				
+					*dmgptr += d(dnum,4)*mult;
+					if(mdef->mtyp == PM_GREMLIN && rn2(3)){
+						(void)split_mon(mdef, (struct monst *)0);
+					}
 				}
 			}
 		}
@@ -2549,45 +2539,11 @@ struct obj *pen;	/* Pen of the Void */
 	}
 	if (pen->ovar1&SEAL_ENKI) {
 		if(youdefend){
-			if(!((uarmc
-				&& (uarmc->otyp == OILSKIN_CLOAK || uarmc->greased)
-				&& (!uarmc->cursed || rn2(3))
-			   ) || (
-				ublindf
-				&& ublindf->otyp == R_LYEHIAN_FACEPLATE
-				&& (!ublindf->cursed || rn2(3))
-			   ) || (
-				uarm
-				&& (uarm->otyp == WHITE_DRAGON_SCALES || uarm->otyp == WHITE_DRAGON_SCALE_MAIL)
-				&& (!uarm->cursed || rn2(3))
-			   ) || (
-				uarms
-				&& uarms->otyp == WHITE_DRAGON_SCALE_SHIELD
-				&& (!uarms->cursed || rn2(3))
-			   ) || u.sealsActive&SEAL_ENKI)
-			) {
+			if(!Waterproof && !(uarmc && uarmc->greased))
 				return TRUE;
-			}
 		} else{ //Monster
 			struct obj *cloak = which_armor(mdef, W_ARMC);
-			struct obj *armor = which_armor(mdef, W_ARM);
-			struct obj *shield = which_armor(mdef, W_ARMS);
-			// struct obj *blindfold = which_armor(mdef, W_ARMC);
-			if(!((cloak
-				&& (cloak->otyp == OILSKIN_CLOAK || cloak->greased)
-				&& (!cloak->cursed || rn2(3))
-				) || (armor
-				&& (armor->otyp == WHITE_DRAGON_SCALES || armor->otyp == WHITE_DRAGON_SCALE_MAIL)
-				&& (!armor->cursed || rn2(3))
-				) || (shield
-				&& shield->otyp == WHITE_DRAGON_SCALE_SHIELD
-				&& (!shield->cursed || rn2(3))
-			   // ) || (
-				// ublindf
-				// && ublindf->otyp == R_LYEHIAN_FACEPLATE
-				// && (!ublindf->cursed || rn2(3))
-			   ))
-			) {
+			if(!mon_resistance(mdef, WATERPROOF) && !(cloak && cloak->greased)){
 				return TRUE;
 			}
 		}
@@ -2937,24 +2893,23 @@ int * truedmgptr;
 		struct obj *armor = which_armor(mdef, W_ARM);
 		struct obj *shield = which_armor(mdef, W_ARMS);
 
-		if (!((cloak
-			&& (cloak->otyp == OILSKIN_CLOAK || cloak->greased)
-			&& (!cloak->cursed || rn2(3))
-			) || (armor
-			&& (armor->otyp == WHITE_DRAGON_SCALES || armor->otyp == WHITE_DRAGON_SCALE_MAIL)
-			&& (!armor->cursed || rn2(3))
-			) || (shield
-			&& shield->otyp == WHITE_DRAGON_SCALE_SHIELD
-			&& (!shield->cursed || rn2(3))
-			) || (
-			youdef && ublindf
-			&& ublindf->otyp == R_LYEHIAN_FACEPLATE
-			&& (!ublindf->cursed || rn2(3))
-			) || (
-			youdef && u.sealsActive&SEAL_ENKI
-			))
-			) {
-			int mult = (flaming(pd) || pd->mtyp == PM_EARTH_ELEMENTAL || pd->mtyp == PM_IRON_GOLEM || pd->mtyp == PM_CHAIN_GOLEM) ? 2 : 1;
+		if (youdef && uarmc && uarmc->greased) {
+			if (!rn2(uarmc->blessed ? 4 : 2)){
+				uarmc->greased = 0;
+				pline("The layer of grease on your %s dissolves.", xname(uarmc));
+			}
+		} else if (!youdef && cloak && cloak->greased){
+			if (!rn2(cloak->blessed ? 4 : 2)){
+				cloak->greased = 0;
+				if(canseemon(mdef)) pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
+			}
+		} else if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF))){
+			int mult = (flaming(pd) ||
+							pd->mtyp == PM_EARTH_ELEMENTAL ||
+							pd->mtyp == PM_IRON_GOLEM ||
+							pd->mtyp == PM_CHAIN_GOLEM
+						) ? 2 : 1;
+
 			if(check_oprop(otmp, OPROP_WATRW))
 				*truedmgptr += basedmg*mult;
 			if(check_oprop(otmp, OPROP_LESSER_WATRW))
@@ -4441,27 +4396,13 @@ boolean * messaged;
 	if (check_oprop(otmp, OPROP_WATRW)) {
 		water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
 
-		struct obj *cloak = which_armor(mdef, W_ARMC);
-		struct obj *armor = which_armor(mdef, W_ARM);
-		struct obj *shield = which_armor(mdef, W_ARMS);
-
-		if (!((cloak
-			&& (cloak->otyp == OILSKIN_CLOAK || cloak->greased)
-			&& (!cloak->cursed || rn2(3))
-			) || (armor
-			&& (armor->otyp == WHITE_DRAGON_SCALES || armor->otyp == WHITE_DRAGON_SCALE_MAIL)
-			&& (!armor->cursed || rn2(3))
-			) || (shield
-			&& shield->otyp == WHITE_DRAGON_SCALE_SHIELD
-			&& (!shield->cursed || rn2(3))
-			) || (
-			youdef && ublindf
-			&& ublindf->otyp == R_LYEHIAN_FACEPLATE
-			&& (!ublindf->cursed || rn2(3))
-			) || (
-			youdef && u.sealsActive&SEAL_ENKI
-			))
-			) {
+		struct obj *cloak;
+		if (youdef)
+			cloak = uarmc;
+		else
+			cloak = which_armor(mdef, W_ARMC);
+		
+		if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF)) && !(cloak && cloak->greased)) {
 			if (pd->mtyp == PM_GREMLIN && rn2(3)){
 				(void)split_mon(mdef, (struct monst *)0);
 			}

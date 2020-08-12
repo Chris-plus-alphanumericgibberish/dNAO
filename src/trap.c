@@ -3161,68 +3161,31 @@ struct obj *obj;
 boolean force, here, lethe;
 struct monst *owner;
 {
-	/* Dips in the Lethe are a very poor idea Lethe patch*/
+	/* Dips in the Lethe are a very poor idea - Lethe patch*/
 	int luckpenalty = lethe ? 7 : 0;
-	// int luckpenalty = 0;
 	struct obj *otmp;
 	struct obj *obj_original = obj;
 	boolean obj_destroyed = FALSE;
-//	int is_lethe = level.flags.lethe || lethe;
 	int is_lethe = lethe;
 	if(owner == &youmonst){
-		if(u.ufirst_sky || u.sealsActive&SEAL_ENKI || Preservation ||
-		  (ublindf
-			&& (ublindf->otyp == R_LYEHIAN_FACEPLATE || ublindf->oartifact == ART_MASK_OF_TLALOC)
-			&& (!ublindf->cursed || rn2(3))
-		   ) || (
-			uarm
-			&& (uarm->otyp == WHITE_DRAGON_SCALES || uarm->otyp == WHITE_DRAGON_SCALE_MAIL)
-			&& (!uarm->cursed || rn2(3))
-		   ) || (
-			uarms
-			&& uarms->otyp == WHITE_DRAGON_SCALE_SHIELD
-			&& (!uarms->cursed || rn2(3))
-		   )
-		) {
+		if(Waterproof) {
 			return 0;
 		}
-		if(uarmc
-			&& (uarmc->otyp == OILSKIN_CLOAK || uarmc->greased)
-			&& (!uarmc->cursed || rn2(3))
-		) {
-			if(uarmc->greased){
-				if (force || !rn2(uarmc->blessed ? 4 : 2)){
-					uarmc->greased = 0;
-					pline("The layer of grease on your %s dissolves.", xname(uarmc));
-				}
+		if(uarmc && uarmc->greased) {
+			if (force || !rn2(uarmc->blessed ? 4 : 2)){
+				uarmc->greased = 0;
+				pline("The layer of grease on your %s dissolves.", xname(uarmc));
 			}
 			return 0;
 		}
 	} else if(owner){ //Monster
 		struct obj *cloak = which_armor(owner, W_ARMC);
-		struct obj *armor = which_armor(owner, W_ARM);
-		struct obj *shield = which_armor(owner, W_ARMS);
-		// struct obj *blindfold = which_armor(owner, W_ARMC);
-		if((cloak
-			&& (cloak->otyp == OILSKIN_CLOAK || cloak->greased)
-			&& (!cloak->cursed || rn2(3))
-			) || (armor
-			&& (armor->otyp == WHITE_DRAGON_SCALES || armor->otyp == WHITE_DRAGON_SCALE_MAIL)
-			&& (!armor->cursed || rn2(3))
-			) || (shield
-			&& shield->otyp == WHITE_DRAGON_SCALE_SHIELD
-			&& (!shield->cursed || rn2(3))
-		   // ) || (
-			// ublindf
-			// && ublindf->otyp == R_LYEHIAN_FACEPLATE
-			// && (!ublindf->cursed || rn2(3))
-		   )
-		) {
-			if(cloak && cloak->otyp != OILSKIN_CLOAK && cloak->greased){
-				if (force || !rn2(cloak->blessed ? 4 : 2)){
-					cloak->greased = 0;
-					if(canseemon(owner)) pline("The layer of grease on %s's %s dissolves.", mon_nam(owner), xname(cloak));
-				}
+		if(mon_resistance(owner, WATERPROOF)){
+			return 0;
+		} else if (cloak && cloak->greased) {
+			if (force || !rn2(cloak->blessed ? 4 : 2)){
+				cloak->greased = 0;
+				if(canseemon(owner)) pline("The layer of grease on %s's %s dissolves.", mon_nam(owner), xname(cloak));
 			}
 			return 0;
 		}

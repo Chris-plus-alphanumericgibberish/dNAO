@@ -95,6 +95,7 @@ const struct propname {
     { FIXED_ABIL, "fixed abilites" },
     { LIFESAVED, "life will be saved" },
 	{ NULLMAGIC, "magic nullification" },
+    { WATERPROOF, "waterproofing" },
     {  0, 0 },
 };
 

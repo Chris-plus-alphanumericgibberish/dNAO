@@ -97,12 +97,13 @@ int otyp;
 	// bonus properties some items have that cannot fit into objclass->oc_oprop
 	const static int NO_RES[] = { 0 };
 	const static int ALCHEMY_RES[] = { ACID_RES, 0 };
+	const static int FACEPLATE_RES[] = { WATERPROOF, 0 };
 	const static int ORANGE_RES[] = { SLEEP_RES, HALLUC_RES, 0 };
 	const static int YELLOW_RES[] = { STONE_RES, 0 };
 	const static int GREEN_RES[] = { SICK_RES, 0 };
 	const static int BLUE_RES[] = { FAST, 0 };
 	const static int BLACK_RES[] = { DRAIN_RES, 0 };
-	const static int WHITE_RES[] = { MAGICAL_BREATHING, SWIMMING, 0 };
+	const static int WHITE_RES[] = { MAGICAL_BREATHING, SWIMMING, WATERPROOF, 0 };
 	const static int GRAY_RES[] = { HALF_SPDAM, 0 };
 	const static int SHIM_RES[] = { SEE_INVIS, 0 };
 
@@ -156,6 +157,9 @@ int otyp;
 			{
 			case ALCHEMY_SMOCK:
 				bonus_prop_list = (ALCHEMY_RES);
+				break;
+			case R_LYEHIAN_FACEPLATE:
+				bonus_prop_list = (FACEPLATE_RES);
 				break;
 			case ORANGE_DRAGON_SCALES:
 			case ORANGE_DRAGON_SCALE_MAIL:

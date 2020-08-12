@@ -4928,6 +4928,7 @@ int floorID;
 		break;
 	case ENKI:
 		propchain[i++] = SWIMMING;
+		propchain[i++] = WATERPROOF;
 		break;
 	case EURYNOME:
 		propchain[i++] = FREE_ACTION;

@@ -3411,6 +3411,9 @@ winid *datawin;
 			case NULLMAGIC:
 				effect = "apart from magic";
 				break;
+			case WATERPROOF:
+				effect = "waterproof";
+				break;
 			case LIFESAVED:
 				effect = "life saving";
 				/* FALLTHRU */

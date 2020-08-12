@@ -1969,6 +1969,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Drain_resistance) you_are("level-drain resistant");
 	if (Antimagic) you_are("magic-protected");
 	if (Nullmagic) you_are("shrouded in anti-magic");
+	if (Waterproof) you_are("waterproof");
 	if (Stone_resistance)
 		you_are("petrification resistant");
 	if (Poison_resistance) you_are("poison resistant");
@@ -2797,6 +2798,7 @@ int final;
 	if (Drain_resistance) dump(youwere, "level-drain resistant");
 	if (Antimagic) dump(youwere, "magic-protected");
 	if (Nullmagic) dump(youwere, "shrouded in anti-magic");
+	if (Waterproof) dump(youwere, "waterproof");
 	if (Stone_resistance)
 		dump(youwere, "petrification resistant");
 	if (Poison_resistance) dump(youwere, "poison resistant");
@@ -3253,15 +3255,19 @@ resistances_enlightenment()
 	if (Acid_resistance) putstr(en_win, 0, "Your skin feels leathery.");
 	if (Displaced) putstr(en_win, 0, "Your outline shimmers and shifts.");
 	if (Drain_resistance) putstr(en_win, 0, "You feel especially energetic.");
-	if (u.uinwater){
-		if(ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE && !ublindf->cursed)
+	if (u.uinwater && Waterproof){
+		if (ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE)
 			putstr(en_win, 0, "Your faceplate wraps you in a waterproof field.");
-		else if(u.ufirst_sky)
+		else if (ublindf && ublindf->oartifact == ART_MASK_OF_TLALOC)
+			putstr(en_win, 0, "Your mask protects you from rain & storms greater than this.");
+		else if (u.ufirst_sky)
 			putstr(en_win, 0, "The water is separated from you.");
-		else if(uarmc && (uarmc->otyp == OILSKIN_CLOAK || uarmc->greased) && !uarmc->cursed)
-			putstr(en_win, 0, "Your waterproof cloak protects your gear.");
-		else if(u.sealsActive&SEAL_ENKI)
+		else if (uarmc && (uarmc->greased || uarmc->otyp == OILSKIN_CLOAK))
+			putstr(en_win, 0, "Your greased cloak protects your gear.");
+		else if (u.sealsActive&SEAL_ENKI)
 			putstr(en_win, 0, "YOU'RE soaked, but the water doesn't wet your gear.");
+		else
+			putstr(en_win, 0, "Your equipment protects you from the water around you.");
 	}
 	
 	if(Nullmagic){

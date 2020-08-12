@@ -464,6 +464,10 @@
 #define Breathless		(HMagical_breathing || EMagical_breathing || \
 				 breathless(youracedata))
 
+#define HWaterproof	u.uprops[WATERPROOF].intrinsic
+#define EWaterproof	u.uprops[WATERPROOF].extrinsic
+#define Waterproof (Preservation || HWaterproof || EWaterproof || u.ufirst_sky)
+
 //define Underwater		(u.uinwater)
 #define Underwater		(u.usubwater || is_3dwater(u.ux,u.uy))
 /* Note that Underwater and u.uinwater are both used in code.
