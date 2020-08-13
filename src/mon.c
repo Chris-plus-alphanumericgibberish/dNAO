@@ -3354,102 +3354,115 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
    in the absence of Conflict. Incorporates changes from grudge mod */
 long
 mm_aggression(magr, mdef)
-struct monst *magr,	/* monster that is currently deciding where to move */
-	     *mdef;	/* another monster which is next to it */
+struct monst * magr;	/* monster that is currently deciding where to move */
+struct monst * mdef;	/* another monster which is next to it */
 {
-	struct permonst *ma,*md;
-
+	struct permonst *ma, *md;
 	ma = magr->data;
 	md = mdef->data;
-	
-	// if(magr->mpeaceful && mdef->mpeaceful && (magr->mtame || mdef->mtame)) return 0L;
-	
-	//Pets never grudge on pets, a monster you're interacting with, or quest quardians and leaders.
-	if(magr->mtame && (mdef->mtame || mdef->moccupation 
-		|| (mdef->mpeaceful && (mdef->m_id == quest_status.leader_m_id || md->msound==MS_GUARDIAN))
-	)){
-			return 0L;
-	}
-	
-	if(mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP){
-			return 0L;
-	}
-	if(mdef->entangled == SHACKLES){
-		return 0L;
-	}
-	
-	if(!mon_can_see_mon(magr, mdef)) return 0L;
 
-	if(magr->mstrategy & STRAT_WAITMASK)
+	// Pets don't attack:
+	if(magr->mtame && (
+		/* other pets */
+		(mdef->mtame) ||
+		/* creatures you are interacting with */
+		(mdef->moccupation) ||
+		/* peaceful quest guardians/leaders */
+		(mdef->mpeaceful && (mdef->m_id == quest_status.leader_m_id || md->msound==MS_GUARDIAN)) ||
+		/* peaceful Axus */
+		(mdef->mpeaceful && !u.uevent.uaxus_foe && md->mtyp == PM_AXUS)
+	)){
 		return 0L;
-	
-	if(magr->mtame && mdef->mpeaceful && !u.uevent.uaxus_foe && md->mtyp == PM_AXUS)
-		return 0L;
-	
-	if(magr->mhp < 100 && attacktype_fordmg(md, AT_BOOM, AD_MAND))
-		return 0L;
-	
-	if((Upolyd ? u.mh < 100 : u.uhp < 100) && magr->mtame && attacktype_fordmg(md, AT_BOOM, AD_MAND))
-		return 0L;
-	
-	if(ma->mtyp == PM_DREADBLOSSOM_SWARM){
-		if(!(is_fey(md) || is_plant(md))) return ALLOW_M|ALLOW_TM;
 	}
-	if(ma->mtyp == PM_GRUE){
-		if(isdark(mdef->mx, mdef->my)) return ALLOW_M|ALLOW_TM;
+	// monsters trapped in vivisection traps are excluded
+	if(mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP){
+		return 0L;
 	}
-	
-	if((ma->mtyp == PM_OONA || ma->mtyp == PM_OONA)
-		&& sgn(ma->maligntyp) == -1*sgn(md->maligntyp) //"Oona grudges on chaotics, but not on neutrals"
-		&& !(magr->mtame || mdef->mtame) //Normal pet-vs-monster logic should take precedence over this
+	// shackled monsters aren't a threat
+	if(mdef->entangled == SHACKLES) {
+		return 0L;
+	}
+	// must be able to see mdef -- note that this has a 1/8 chance when adjacent even when totally blind!
+	if (!mon_can_see_mon(magr, mdef)) {
+		return 0L;
+	}
+	// magr cannot be waiting
+	if (magr->mstrategy & STRAT_WAITMASK) {
+		return 0L;
+	}
+	// Berserked creatures are effectively always conflicted, and aren't careful about anything unnecessary
+	if (magr->mberserk) {
+		return ALLOW_M | ALLOW_TM;
+	}
+	// careful around mandrakes 
+	if (attacktype_fordmg(md, AT_BOOM, AD_MAND) && (
+		(!mindless(magr->data) && magr->mhp < 100) ||
+		(magr->mtame && maybe_polyd(u.mh, u.uhp) < 100)
+	)) {
+		return 0L;
+	}
+	// careful around cockatrices
+	if (touch_petrifies(md) && !resists_ston(magr)
+		&& !mindless(magr->data) && distmin(magr->mx, magr->my, mdef->mx, mdef->my) < 3 && !MON_WEP(magr)
+	) {
+		return 0L;
+	}
+	// dreadblossoms attack almost anything
+	if(ma->mtyp == PM_DREADBLOSSOM_SWARM &&
+		!(is_fey(md) || is_plant(md))
+	) {
+		return ALLOW_M|ALLOW_TM;
+	}
+	// grue attacks anything in the dark
+	if(ma->mtyp == PM_GRUE &&
+		isdark(mdef->mx, mdef->my)
+	) {
+		return ALLOW_M|ALLOW_TM;
+	}
+	// Oona attacks chaotics and vice versa (normal pet-vs-monster logic takes precedence)
+	if ((ma->mtyp == PM_OONA || md->mtyp == PM_OONA)
+		&& sgn(ma->maligntyp) == -1*sgn(md->maligntyp)
+		&& !(magr->mtame || mdef->mtame)
 	){
 		return ALLOW_M|ALLOW_TM;
 	}
-	
-	
-	/* In the anachrononaut quest, all peaceful monsters are at threat from all hostile monsters.
-		The leader IS in serious danger */
+	// In the anachrononaut quest, all peaceful monsters are at threat from all hostile monsters.
+	// The leader IS in serious danger
+	// However, the imminent doom causes all peacefuls to forget any grudges against each other
+	// (and Illsensine can make her own forces coordinate, of course)
 	if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
 		if(magr->mpeaceful != mdef->mpeaceful) return ALLOW_M|ALLOW_TM;
 		else return 0L;
 	}
-	
-	if(magr->mberserk) return ALLOW_M|ALLOW_TM;
-	
-	if(touch_petrifies(md) && !resists_ston(magr) 
-		&& distmin(magr->mx, magr->my, mdef->mx, mdef->my) < 3
-		&& !MON_WEP(magr)
-	)
-		return 0L;
-	
-	if(md->mtyp == PM_MANDRAKE) return 0L;
-	
-	if(is_drow(ma) && is_drow(md) && (magr->mfaction == mdef->mfaction)) return 0L;
-	
+	// While the player is sowing discord (enhanced conflict), almost anything goes 
 	if (u.sowdisc && !mdef->mtame && canseemon(magr) && canseemon(mdef))
 	    return ALLOW_M|ALLOW_TM;
-	/* supposedly purple worms are attracted to shrieking because they
-	   like to eat shriekers, so attack the latter when feasible */
-	if (ma->mtyp == PM_PURPLE_WORM &&
-		md->mtyp == PM_SHRIEKER)
-			return ALLOW_M|ALLOW_TM;
-
+	// drow don't attack their own
+	if (is_drow(ma) && is_drow(md) && (magr->mfaction == mdef->mfaction)) {
+		return 0L;
+	}
+	// Kiaransali drow are friendly to undead
+	if (((is_drow(ma) && magr->mfaction == LOST_HOUSE) && is_undead(md)) ||
+		((is_drow(md) && mdef->mfaction == LOST_HOUSE) && is_undead(ma))) {
+		return 0L;
+	}
+	// supposedly purple worms are attracted to shrieking because they
+	// like to eat shriekers, so attack the latter when feasible
+	if (ma->mtyp == PM_PURPLE_WORM && md->mtyp == PM_SHRIEKER) {
+		return ALLOW_M|ALLOW_TM;
+	}
+	// ghouls attack gugs (who can retaliate, but won't initiate)
+	if (ma->mtyp == PM_GHOUL && md->mtyp == PM_GUG) {
+		return ALLOW_M|ALLOW_TM;
+	}
 #ifdef ATTACK_PETS
-        /* pets attack hostile monsters */
+    // pets attack hostile monsters
 	if (magr->mtame && !mdef->mpeaceful)
 	    return ALLOW_M|ALLOW_TM;
-	
-        /* and vice versa */
+	// and vice versa, with some limitations that will help your pet survive
 	if (mdef->mtame && !magr->mpeaceful && !mdef->meating && mdef != u.usteed && !mdef->mflee)
 	    return ALLOW_M|ALLOW_TM;
 #endif /* ATTACK_PETS */
-
-	/* Gugs and ghouls fight each other. 
-		Gugs are afraid of
-		Ghouls, so they won't attack first. */
-	if (ma->mtyp == PM_GHOUL &&
-		md->mtyp == PM_GUG)
-			return ALLOW_M|ALLOW_TM;
 
 	/* Since the quest guardians are under siege, it makes sense to have 
        them fight hostiles.  (But we don't want the quest leader to be in danger.) */
@@ -3508,7 +3521,7 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 		return ALLOW_M|ALLOW_TM;
 
 	/* undead vs civs */
-	if(!(In_quest(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || In_cha(&u.uz) || Is_rogue_level(&u.uz) || Inhell || Is_astralevel(&u.uz))){
+	if(!(In_quest(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || In_cha(&u.uz) || Is_stronghold(&u.uz) || Is_rogue_level(&u.uz) || Inhell || Is_astralevel(&u.uz))){
 		if(is_undead_mon(magr) && 
 			(!is_witch_mon(mdef) && !always_hostile_mon(mdef) && !is_undead_mon(mdef) && !(is_animal(md) && !is_domestic(md)) && !mindless_mon(mdef))
 		)
@@ -3586,11 +3599,11 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	if(is_gnoll(md) && is_minotaur(ma))
 		return ALLOW_M|ALLOW_TM;
 
-	/* angels vs. demons */
-	if(is_angel(ma) && (is_demon(md) /*|| md->mtyp == PM_FALLEN_ANGEL*/))
+	/* angels vs. demons (excluding Lamashtu) */
+	if (is_angel(ma) && (is_demon(md) /*|| md->mtyp == PM_FALLEN_ANGEL*/) && !(md->mtyp == PM_LAMASHTU))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
-	if(is_angel(md) && (is_demon(ma) /*|| ma->mtyp == PM_FALLEN_ANGEL || ma->mtyp == PM_LUCIFER*/))
+	if (is_angel(md) && (is_demon(ma) /*|| ma->mtyp == PM_FALLEN_ANGEL || ma->mtyp == PM_LUCIFER*/) && !(ma->mtyp == PM_LAMASHTU))
 		return ALLOW_M|ALLOW_TM;
 
 	/* monadics vs. undead */
