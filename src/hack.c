@@ -821,9 +821,9 @@ boolean guess;
 	int radius = 1;			/* search radius */
 	int i;
 
-	/* If guessing, first find an "obvious" goal location.  The obvious
-	 * goal is the position the player knows of, or might figure out
-	 * (couldsee) that is closest to the target on a straight path.
+	/* If guessing, first find an "obvious" goal location.
+	 * The player must be able to path there successfully
+	 * with findtravelpath(FALSE).
 	 */
 	if (guess) {
 	    tx = u.ux; ty = u.uy; ux = u.tx; uy = u.ty;
@@ -904,14 +904,14 @@ boolean guess;
 		for (ty = 0; ty < ROWNO; ++ty)
 		    if (travel[tx][ty]) {
 			nxtdist = distmin(ux, uy, tx, ty);
-			if (nxtdist == dist && couldsee(tx, ty)) {
+			if (nxtdist == dist) {
 			    nd2 = dist2(ux, uy, tx, ty);
 			    if (nd2 < d2) {
 				/* prefer non-zigzag path */
 				px = tx; py = ty;
 				d2 = nd2;
 			    }
-			} else if (nxtdist < dist && couldsee(tx, ty)) {
+			} else if (nxtdist < dist) {
 			    px = tx; py = ty;
 			    dist = nxtdist;
 			    d2 = dist2(ux, uy, tx, ty);
