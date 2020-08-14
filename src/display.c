@@ -1595,7 +1595,7 @@ int glyph;
     } else if ((offset = (glyph - GLYPH_CMAP_OFF)) >= 0) {	/* cmap */
 	ch = defsyms[offset].sym;
     } else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
-	ch = def_oc_syms[(int)objects[offset].oc_class];
+	ch = def_oc_syms[(int)objects[offset >> 4].oc_class];
     } else if ((offset = (glyph - GLYPH_RIDDEN_OFF)) >= 0) { /* mon ridden */
 	ch = def_monsyms[(int)mons[offset].mlet];
     } else if ((offset = (glyph - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */
