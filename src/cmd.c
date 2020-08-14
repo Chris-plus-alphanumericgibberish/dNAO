@@ -6283,6 +6283,7 @@ register char *cmd;
 	    multi = 0;
 	} else if (*cmd == CMD_TRAVEL && iflags.travelcmd) {
 	  flags.travel = 1;
+	  u.itx = u.ity = 0;
 	  iflags.travel1 = 1;
 	  flags.run = 8;
 	  flags.nopick = 1;

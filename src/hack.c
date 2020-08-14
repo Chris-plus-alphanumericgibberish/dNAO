@@ -811,6 +811,8 @@ boolean guess;
 	}
 	flags.run = 8;
     }
+	if (u.itx == u.ux && u.ity == u.uy)
+		u.itx = u.ity = 0;
     if (u.tx != u.ux || u.ty != u.uy) {
 	xchar travel[COLNO][ROWNO];
 	xchar travelstepx[2][COLNO*ROWNO];
@@ -821,9 +823,9 @@ boolean guess;
 	int radius = 1;			/* search radius */
 	int i;
 
-	/* If guessing, first find an "obvious" goal location.
-	 * The player must be able to path there successfully
-	 * with findtravelpath(FALSE).
+	/* If guessing, first find an "obvious" goal location.  The obvious
+	 * goal is the position the player knows of, or might figure out
+	 * (couldsee) that is closest to the target on a straight path.
 	 */
 	if (guess) {
 	    tx = u.ux; ty = u.uy; ux = u.tx; uy = u.ty;
@@ -896,22 +898,33 @@ boolean guess;
 	/* if guessing, find best location in travel matrix and go there */
 	if (guess) {
 	    int px = tx, py = ty;	/* pick location */
-	    int dist, nxtdist, d2, nd2;
+	    int dist, idist, nxtdist, d2, id2, nd2;
 
 	    dist = distmin(ux, uy, tx, ty);
 	    d2 = dist2(ux, uy, tx, ty);
+
+		/* we may already have an intermediary location picked out */
+		if (u.itx || u.ity) {
+			idist = distmin(ux, uy, u.itx, u.ity);
+			id2 = dist2(ux, uy, u.itx, u.ity);
+		}
+		else {
+			idist = dist;
+			id2 = d2;
+		}
+
 	    for (tx = 1; tx < COLNO; ++tx)
 		for (ty = 0; ty < ROWNO; ++ty)
 		    if (travel[tx][ty]) {
 			nxtdist = distmin(ux, uy, tx, ty);
-			if (nxtdist == dist) {
+			if (nxtdist == dist && couldsee(tx, ty)) {
 			    nd2 = dist2(ux, uy, tx, ty);
 			    if (nd2 < d2) {
 				/* prefer non-zigzag path */
 				px = tx; py = ty;
 				d2 = nd2;
 			    }
-			} else if (nxtdist < dist) {
+			} else if (nxtdist < dist && couldsee(tx, ty)) {
 			    px = tx; py = ty;
 			    dist = nxtdist;
 			    d2 = dist2(ux, uy, tx, ty);
@@ -926,6 +939,18 @@ boolean guess;
 		    return TRUE;
 		goto found;
 	    }
+		/* which is better - our best in LoS, or our saved intermediate? */
+		if (!(u.itx || u.ity) ||
+			(dist == idist && d2 < id2) ||
+			(dist < idist)
+			) {
+			u.itx = px;
+			u.ity = py;
+		}
+		else {
+			px = u.itx;
+			py = u.ity;
+		}
 	    tx = px;
 	    ty = py;
 	    ux = u.ux;

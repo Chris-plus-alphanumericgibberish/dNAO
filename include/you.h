@@ -279,6 +279,7 @@ struct you {
 	schar dx, dy, dz;	/* direction of move (or zap or ... ) */
 	schar di;		/* direction of FF */
 	xchar tx, ty;		/* destination of travel */
+	xchar itx, ity;		/* intermediary travel destination */
 	xchar ux0, uy0;		/* initial position FF */
 	d_level uz, uz0;	/* your level on this and the previous turn */
 	d_level utolev;		/* level monster teleported you to, or uz */
