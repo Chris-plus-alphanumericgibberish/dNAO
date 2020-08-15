@@ -867,8 +867,16 @@ boolean dolls;
 				panic("revive");
 			}
 			if(wasfossil){
-				set_template(mtmp, SKELIFIED);
-				newsym(mtmp->mx,mtmp->my);
+				if (can_undead_mon(mtmp)) {
+					set_template(mtmp, SKELIFIED);
+					newsym(mtmp->mx, mtmp->my);
+				}
+				else {
+					if (cansee(mtmp->mx, mtmp->my)) {
+						pline_The("fossil briefly animates before crumbling into dust.");
+					}
+					mongone(mtmp);
+				}
 			}
 		}
 	}
