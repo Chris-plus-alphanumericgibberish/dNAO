@@ -837,7 +837,6 @@ boolean guess;
 	(void) memset((genericptr_t)travel, 0, sizeof(travel));
 	travelstepx[0][0] = tx;
 	travelstepy[0][0] = ty;
-
 	while (n != 0) {
 	    int nn = 0;
 
@@ -853,7 +852,13 @@ boolean guess;
 		    int nx = x+xdir[ordered[dir]];
 		    int ny = y+ydir[ordered[dir]];
 
+			/* don't go out of bounds */
 		    if (!isok(nx, ny)) continue;
+
+			/* don't go through places we know we can't */
+			if (!test_move(x, y, nx-x, ny-y, TEST_TRAV) && levl[nx][ny].seenv)
+				continue;
+
 		    if ((!Passes_walls && !can_ooze(&youmonst) &&
 			closed_door(x, y)) || boulder_at(x, y)) {
 			/* closed doors and boulders usually
@@ -866,8 +871,8 @@ boolean guess;
 			    continue;
 			}
 		    }
-		    if (test_move(x, y, nx-x, ny-y, TEST_TRAV) &&
-			(levl[nx][ny].seenv || (!Blind && couldsee(nx, ny)))) {
+			/* travelplus is a bit adventerous, and will hope that unseen locations are pathable */
+		    if (iflags.travelplus || levl[nx][ny].seenv) {
 			if (nx == ux && ny == uy) {
 			    if (!guess) {
 				u.dx = x-ux;
@@ -889,14 +894,13 @@ boolean guess;
 		    }
 		}
 	    }
-	    
 	    n = nn;
 	    set = 1-set;
 	    radius++;
 	}
 
 	/* if guessing, find best location in travel matrix and go there */
-	if (guess) {
+	if (guess && !iflags.travelplus) {
 	    int px = tx, py = ty;	/* pick location */
 	    int dist, idist, nxtdist, d2, id2, nd2;
 
