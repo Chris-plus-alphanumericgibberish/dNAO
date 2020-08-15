@@ -2655,29 +2655,27 @@ weight_cap()
 	else if (!strongmonst(mdat)
 		|| (strongmonst(mdat) && (mdat->cwt > WT_HUMAN)))
 		carrcap = (carrcap * (long)mdat->cwt / WT_HUMAN);
+	if (!u.usteed && Race_if(PM_ORC) && !Upolyd){
+		carrcap = 2 * carrcap / 3 + u.ulevel*carrcap / 30;
+	}
 
 	if (Levitation || Weightless)    /* pugh@cornell */
 		carrcap = maxcap;
 	else {
-		if(!u.usteed){
-			if(u.ucarinc < 0) carrcap += u.ucarinc;
-			if(Race_if(PM_ORC) && !Upolyd){
-				carrcap = 2*carrcap/3 + u.ulevel*carrcap/30;
-			}
-		}
+		if (carrcap > maxcap)
+			carrcap = maxcap;
 
-		if(carrcap > maxcap) carrcap = maxcap;
-		/* note that carinc bonues can push you over the normal limit! */
-		if(!u.usteed && u.ucarinc > 0) carrcap += u.ucarinc;
-
+		/* these carrcap modifiers only make sense if you have feet on the ground */
 		if (boots && boots->otyp == find_hboots()) carrcap += 100;
 		
-		if (!Flying) {
+		if (!u.usteed && !Flying) {
 			if(EWounded_legs & LEFT_SIDE) carrcap -= 100;
 			if(EWounded_legs & RIGHT_SIDE) carrcap -= 100;
 		}
 		if (carrcap < 0) carrcap = 0;
 	}
+
+	carrcap += u.ucarinc;
 	if(u.sealsActive&SEAL_FAFNIR) carrcap *= 1+((double) u.ulevel)/100;
 	if(active_glyph(COMMUNION)) carrcap *= 1.25;
 	if(animaloid(mdat) || naoid(mdat)){
