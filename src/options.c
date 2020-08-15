@@ -278,7 +278,6 @@ static struct Bool_Opt
 	{"tombstone",&flags.tombstone, TRUE, SET_IN_GAME},
 	{"toptenwin",&flags.toptenwin, FALSE, SET_IN_GAME},
 	{"travel", &iflags.travelcmd, TRUE, SET_IN_GAME},
-	{"travelplus", &iflags.travelplus, FALSE, SET_IN_GAME},
 #ifdef UTF8_GLYPHS
 	{"UTF8graphics", &iflags.UTF8graphics, FALSE, SET_IN_GAME},
 #else
@@ -447,6 +446,7 @@ static struct Comp_Opt
 	{ "tile_file", "name of tile file", 70, DISP_IN_GAME},	/*WC*/
 	{ "traps",    "the symbols to use in drawing traps",
 						MAXTCHARS+1, SET_IN_FILE },
+	{ "travelplus", "maximum unknown-explore distance when traveling", 32, SET_IN_GAME},
 	{ "vary_msgcount", "show more old messages at a time", 20, DISP_IN_GAME }, /*WC*/
 #ifdef MSDOS
 	{ "video",    "method of video updating", 20, SET_IN_FILE },
@@ -637,6 +637,7 @@ initoptions()
 	flags.end_own = FALSE;
 	flags.end_top = 3;
 	flags.end_around = 2;
+	iflags.travelplus = 0;
 	iflags.runmode = RUN_LEAP;
 	iflags.pokedex = POKEDEX_SHOW_DEFAULT;
 	iflags.msg_history = 20;
@@ -2733,6 +2734,15 @@ goodfruit:
 		return;
 	}
 	
+	fullname = "travelplus";
+	if (match_optname(opts, fullname, 7, TRUE)) {
+		op = string_for_opt(opts, negated);
+		if ((negated && !op) || (!negated && op)) {
+			iflags.travelplus = negated ? 0 : atoi(op);
+		} else if (negated) bad_negation(fullname, TRUE);
+		return;
+	}
+
 #ifdef VIDEOSHADES
 	/* videocolors:string */
 	fullname = "videocolors";
@@ -4202,6 +4212,8 @@ char *buf;
 	}
 	else if (!strcmp(optname, "traps"))
 		Sprintf(buf, "%s", to_be_done);
+	else if (!strcmp(optname, "travelplus"))
+		Sprintf(buf, "%d", iflags.travelplus);
 	else if (!strcmp(optname, "vary_msgcount")) {
 		if (iflags.wc_vary_msgcount) Sprintf(buf, "%d",iflags.wc_vary_msgcount);
 		else Strcpy(buf, defopt);
