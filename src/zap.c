@@ -2092,22 +2092,18 @@ makecorpse:			if (mons[obj->corpsenm].geno &
 
 			    (void) get_obj_location(obj, &oox, &ooy, 0);
 			    refresh_x = oox; refresh_y = ooy;
+				/* Don't corpsify monsters that aren't flesh or have corpses */
 			    if (vegetarian(&mons[obj->corpsenm])||
-					obj->corpsenm == PM_DJINNI) {
-					/* Don't corpsify monsters that aren't flesh */
+					(mons[obj->corpsenm].geno & G_NOCORPSE)) {
 					obj = poly_obj(obj, MEATBALL);
-					if(obj){
-						obj->corpsenm = corpsetype;
-					}
-			    	goto smell;
 			    } else {
 					obj = poly_obj(obj, CORPSE);
 					if(obj){
 						obj->corpsenm = corpsetype;
 						fix_object(obj);
 					}
-			    	goto smell;
 				}
+				goto smell;
 			} else { /* new rock class object... */
 			    /* impossible? */
 			    res = 0;
