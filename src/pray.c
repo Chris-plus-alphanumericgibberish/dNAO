@@ -3407,6 +3407,7 @@ dopray()
     if (!can_pray(TRUE)) return 0;
 	
 	u.lastprayed = moves;
+	u.lastprayresult = PRAY_INPROG;
 	u.reconciled = REC_NONE;
 #ifdef WIZARD
     if (wizard && p_type >= 0) {
