@@ -5667,6 +5667,43 @@ dokeylist(void)
 	destroy_nhwindow(datawin);
 }
 
+/* find the 1st command key that binds to the desired command */
+char *
+find_command_key(command_name, buf)
+const char * command_name;
+char * buf;
+{
+	int i;
+	int key;
+	boolean keys_used[256] = { 0 };
+
+	/* kludge: copy from above to find all keys used by non-commands */
+	for (i = 0; i < 10; i++) {
+		key = iflags.num_pad ? ndir[i] : sdir[i];
+		keys_used[key] = TRUE;
+		if (!iflags.num_pad) {
+			keys_used[toupper(key)] = TRUE;
+			keys_used[C(key)] = TRUE;
+		}
+	}
+	for (i = 0; i < MISC_CMD_COUNT; i++) {
+		keys_used[misc_cmds[i]] = TRUE;
+	}
+
+	for (i = 0; i <= 255; i++) {
+		struct ext_func_tab * extcmd;
+		char* mapping;
+		key = i;
+		if (keys_used[i]) continue;
+		if (key == ' ' && !flags.rest_on_space) continue;
+		if ((extcmd = cmdlist[i].bind_cmd)) {
+			if (!strcmpi(extcmd->ef_txt, command_name))
+				return key2txt(key, buf);
+		}
+	}
+	return (char *)0;
+}
+
 static const char template[] = "%-18s %4ld  %6ld";
 static const char count_str[] = "                   count  bytes";
 static const char separator[] = "------------------ -----  ------";
