@@ -5309,6 +5309,7 @@ struct ext_func_tab extcmdlist[] = {
 	{(char *)0, (char *)0, donull, TRUE}, /* #detect */
 	{(char *)0, (char *)0, donull, TRUE}, /* #map */
 	{(char *)0, (char *)0, donull, TRUE}, /* #genesis */
+	{(char *)0, (char *)0, donull, TRUE}, /* #killall */
 	{(char *)0, (char *)0, donull, TRUE}, /* #identify */
 	{(char *)0, (char *)0, donull, TRUE}, /* #levelport */
 	{(char *)0, (char *)0, donull, TRUE}, /* #wish */
@@ -5348,6 +5349,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"detect", "detect secret doors and traps", wiz_detect, IFBURIED},
 	{"map", "do magic mapping", wiz_map, IFBURIED},
 	{"genesis", "create monster", wiz_genesis, IFBURIED},
+	{"killall", "kill all creatures on level", wiz_kill_all, IFBURIED, AUTOCOMPLETE },
 	{"identify", "identify items in pack", wiz_identify, IFBURIED},
 	{"levelport", "to trans-level teleport", wiz_level_tele, IFBURIED},
 	{"wish", "make wish", wiz_wish, IFBURIED, AUTOCOMPLETE},
