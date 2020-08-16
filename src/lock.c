@@ -521,14 +521,20 @@ pick_lock(pick) /* pick a lock with a given object */
 	    if ((mtmp = m_at(cc.x, cc.y)) && canseemon(mtmp)
 			&& mtmp->m_ap_type != M_AP_FURNITURE
 			&& mtmp->m_ap_type != M_AP_OBJECT) {
+
+			if (mtmp->entangled == SHACKLES){
+				unshackle_mon(mtmp);
+				return 1;	/* that was quick -- we don't have full handling for this yet */
+			}
+
 #ifdef TOURIST
-		if (picktyp == CREDIT_CARD &&
-		    (mtmp->isshk || mtmp->mtyp == PM_ORACLE))
-		    verbalize("No checks, no credit, no problem.");
-		else
+			if (picktyp == CREDIT_CARD &&
+				(mtmp->isshk || mtmp->mtyp == PM_ORACLE))
+				verbalize("No checks, no credit, no problem.");
+			else
 #endif
-		    pline("I don't think %s would appreciate that.", mon_nam(mtmp));
-		return(0);
+				pline("I don't think %s would appreciate that.", mon_nam(mtmp));
+			return(0);
 	    }
 	    if(!IS_DOOR(door->typ)) {
 		if (is_drawbridge_wall(cc.x,cc.y) >= 0)

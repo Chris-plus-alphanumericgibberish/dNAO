@@ -3973,6 +3973,42 @@ struct trap *ttmp;
 	return 1;
 }
 
+void
+unshackle_mon(mtmp)
+struct monst * mtmp;
+{
+	if (!mtmp || mtmp->entangled != SHACKLES) {
+		impossible("%s not shackled?", m_monnam(mtmp));
+		return;
+	}
+
+	mtmp->entangled = 0;
+	You("unlock the shackles imprisoning %s.", mon_nam(mtmp));
+	if (mtmp->mtame){
+		verbalize("Thank you for rescuing me!");
+	}
+	else if (rnd(20) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
+		struct monst *newmon;
+		pline("%s is very grateful!", Monnam(mtmp));
+		newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+		if (newmon) mtmp = newmon;
+		if (!mtmp->mtame)
+			pline("But, apparently not grateful enough to join you.");
+	}
+	else if (mtmp->mpeaceful){
+		pline("%s is grateful for the assistance, but makes no move to help you in return.", Monnam(mtmp));
+	}
+	else if (!mtmp->mpeaceful && rnd(10) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
+		mtmp->mpeaceful = 1;
+		pline("%s is thankful enough for the rescue to not attack you, at least.", Monnam(mtmp));
+	}
+	else {
+		mtmp->movement += 12;
+		pline("That might have been a mistake.");
+	}
+	return;
+}
+
 STATIC_OVL int
 disarm_landmine(ttmp) /* Helge Hafting */
 struct trap *ttmp;
@@ -4415,30 +4451,7 @@ struct obj * tool;
 	} /* end if */
 	else if((mtmp = m_at(x,y)) && mtmp->entangled){
 		if(mtmp->entangled == SHACKLES){
-			mtmp->entangled = 0;
-			You("unlock the shackles imprisoning %s.", mon_nam(mtmp));
-			if(mtmp->mtame){
-				verbalize("Thank you for rescuing me!");
-			}
-			else if(rnd(20) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
-				struct monst *newmon;
-				pline("%s is very grateful!", Monnam(mtmp));
-				newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
-				if(newmon) mtmp = newmon;
-				if(!mtmp->mtame)
-					pline("But, apparently not grateful enough to join you.");
-			}
-			else if(mtmp->mpeaceful){
-				pline("%s is grateful for the assistance, but makes no move to help you in return.", Monnam(mtmp));
-			}
-			else if(!mtmp->mpeaceful && rnd(10) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
-				mtmp->mpeaceful = 1;
-				pline("%s is thankful enough for the rescue to not attack you, at least.", Monnam(mtmp));
-			}
-			else {
-				mtmp->movement += 12;
-				pline("That might have been a mistake.");
-			}
+			unshackle_mon(mtmp);
 		}
 		else {
 			struct obj *obj, *nobj;
