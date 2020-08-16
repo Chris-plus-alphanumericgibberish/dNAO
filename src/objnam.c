@@ -3735,7 +3735,7 @@ int wishflags;
 			&& strncmpi(bp, "leather helm", 12) && strncmpi(bp, "leather hat", 11)
 			) {
 			mat = LEATHER;
-		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", 7))
+		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", l=7))
 			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wood golem", 11)
 			) {
 			mat = WOOD;
