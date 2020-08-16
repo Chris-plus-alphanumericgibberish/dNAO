@@ -3133,6 +3133,7 @@ int flat_acc;
 			gloves = (youagr ? uarmg : which_armor(magr, W_ARMG));
 			if (gloves){
 				switch (gloves->otyp) {
+				case HARMONIUM_GAUNTLETS:
 				case ORIHALCYON_GAUNTLETS:    /* metal */
 				case GAUNTLETS_OF_POWER:    /* metal */
 				case GAUNTLETS:
