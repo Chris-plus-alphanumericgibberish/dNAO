@@ -702,7 +702,7 @@ DRGN_MAIL(("yellow dragon scale mail"), 1, ACID_RES,    900, 5, 4, CLR_YELLOW),
 #undef DRGN_MAIL
 
 #define DRGN_SCALES(names,mgc,power,cost,ac,dr,color,...) \
-	SUIT(DEF_BLINDNAME(names, "dragon scales"),1,mgc,ARMSZ_HEAVY,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
+	SUIT(DEF_BLINDNAME(names, "dragon scales"),1,mgc,ARMSZ_MEDIUM,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
 /* For now, only dragons leave these. */
 /* 3.4.1: dragon scales left classified as "non-magic"; they confer
    magical properties but are produced "naturally" */
@@ -729,11 +729,11 @@ SUIT(("elven toga"), /*Needs encyc entry*//*Needs tile*/
 SUIT(("noble's dress", "armored black dress", "armored dress"), /*Needs encyc entry*/
 	0, 0, ARMSZ_MEDIUM, 0,	0, 5, 40, 2000,  6, 4, 3, SHADOWSTEEL, CLR_BLACK),
 SUIT(("consort's suit", "loud foppish suit", "clothes"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,  ARMSZ_HEAVY, 0,	0, 5, 10, 	1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
+	0, 0,  ARMSZ_LIGHT, 0,	0, 5, 10, 	1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
 SUIT(("gentleman's suit", "expensive clothes"), /*Needs encyc entry*/
-	0, 0,  ARMSZ_HEAVY, 0,	0, 5, 10, 1000,  10, 1, 2, CLOTH, CLR_BLACK),
+	0, 0,  ARMSZ_LIGHT, 0,	0, 5, 10, 1000,  10, 1, 2, CLOTH, CLR_BLACK),
 SUIT(("gentlewoman's dress", "expensive dress"), /*Needs encyc entry*/
-	0, 0,  ARMSZ_HEAVY, 0,	0, 6,100, 1000,  10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
+	0, 0,  ARMSZ_LIGHT, 0,	0, 6,100, 1000,  10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
 SUIT(("crystal plate mail"), /*Needs encyc entry*/
 	1, 0,  ARMSZ_HEAVY, 0,	10, 5, 170, 2000,  7, 3, 0, GLASS, HI_GLASS), /*Best armor, AC wise*/
 #ifdef TOURIST
@@ -770,23 +770,23 @@ SUIT(("orcish chain mail", "crude chain mail"),
 SUIT(("scale mail"),
 	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 125,  45,  8, 2, 0, IRON, HI_METAL),
 SUIT(("studded leather armor"),
-	1, 0, ARMSZ_MEDIUM, 0,	72, 3,  50,  15,  9, 2, 1, LEATHER, HI_LEATHER),
+	1, 0,  ARMSZ_LIGHT, 0,	72, 3,  50,  15,  9, 2, 1, LEATHER, HI_LEATHER),
 SUIT(("ring mail"),
-	1, 0,  ARMSZ_HEAVY, 0,	72, 5, 125, 100,  9, 2, 0, IRON, HI_METAL),
+	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 125, 100,  9, 2, 0, IRON, HI_METAL),
 SUIT(("orcish ring mail", "crude ring mail"),
-	0, 0,  ARMSZ_HEAVY, 0,	20, 5, 125,  80,  9, 1, 1, IRON, CLR_BLACK),
+	0, 0, ARMSZ_MEDIUM, 0,	20, 5, 125,  80,  9, 1, 1, IRON, CLR_BLACK),
 SUIT(("leather armor"),
-	1, 0, ARMSZ_MEDIUM, 0,	82, 3,  40,   5, 10, 2, 0, LEATHER, HI_LEATHER),
+	1, 0,  ARMSZ_LIGHT, 0,	82, 3,  40,   5, 10, 2, 0, LEATHER, HI_LEATHER),
 //ARMOR(names,
    //kn,mgc,blk,power,prob,delay,wt,cost,ac,dr,can,sub,metal,c)
 SUIT(("living armor", "giant sea anemone"),
-	0, 1,  ARMSZ_HEAVY, 0,	0, 6,  80,  500, 10, 2, 0, FLESH, CLR_ORANGE),
+	0, 1, ARMSZ_MEDIUM, 0,	0, 6,  80,  500, 10, 2, 0, FLESH, CLR_ORANGE),
 SUIT(("jacket"),
 	1, 0,  ARMSZ_LIGHT, 0,	12, 0,	20,  10, 10, 1, 2, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
 SUIT(("straitjacket", "long-sleeved jacket"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,  ARMSZ_HEAVY, 0,	0, 0,   15,  10, 10, 1, 2, CLOTH, CLR_WHITE),
+	0, 0,  ARMSZ_LIGHT, 0,	0, 0,   15,  10, 10, 1, 2, CLOTH, CLR_WHITE),
 SUIT(("healer uniform","clean white clothes", "clean clothes"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,  ARMSZ_HEAVY, SICK_RES, 0, 0,  30, 10, 10, 1, 0, CLOTH, CLR_WHITE),
+	0, 0,  ARMSZ_LIGHT, SICK_RES, 0, 0,  30, 10, 10, 1, 0, CLOTH, CLR_WHITE),
 SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs tile*/
 	0, 0,  ARMSZ_LIGHT, REFLECTING,0,5,   5,1000,10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
 #ifdef TOURIST
