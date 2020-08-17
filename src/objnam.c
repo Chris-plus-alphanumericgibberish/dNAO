@@ -4150,6 +4150,7 @@ int wishflags;
 	if (!strstri(bp, "wand ")
 	 && !strstri(bp, "spellbook ")
 	 && !strstri(bp, "book ")
+	 && !strstri(bp, "lump ")
 	 && !strstri(bp, "rod ")
 	 && !strstri(bp, "finger ")
 	 && !strstri(bp, "set of ")) {
