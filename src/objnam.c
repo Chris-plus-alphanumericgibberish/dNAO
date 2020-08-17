@@ -4341,6 +4341,8 @@ int wishflags;
 			 * indicated by asking for a material, eg "cloak", or "silver gauntlets" */
 			if		(mat && !strcmpi(bp, "cloak"))		typ = CLOAK;
 			else if (mat && !strcmpi(bp, "gauntlets"))	typ = GAUNTLETS;
+			else if (name && !strcmpi(bp, "gauntlets") && (!strcmpi(name, "Fire Brand") || !strcmpi(name, "Frost Brand")))
+														typ = GAUNTLETS;
 			else if (mat && !strcmpi(bp, "shoes"))		typ = SHOES;
 			/* otherwise, actually use the o_range */
 			else {
