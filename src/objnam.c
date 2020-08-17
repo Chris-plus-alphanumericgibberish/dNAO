@@ -4012,7 +4012,7 @@ int wishflags;
 			mat = GEMSTONE; gemtype = JET;
 		} else if (!strncmpi(bp, "opal ", l=5) && strncmpi(bp, "opal ring", 9)) {
 			mat = GEMSTONE; gemtype = OPAL;
-		} else if (!strncmpi(bp, "chrysoberyl ", l=11)) {
+		} else if (!strncmpi(bp, "chrysoberyl ", l=12)) {
 			mat = GEMSTONE; gemtype = CHRYSOBERYL;
 		} else if (!strncmpi(bp, "garnet ", l=7) && strncmpi(bp, "garnet rod", 10)) {
 			mat = GEMSTONE; gemtype = GARNET;
