@@ -6229,7 +6229,8 @@ doapply()
 							   The(aobjnam(otmp, "slip")),
 							   (const char *)0);
 			break;
-			case SILVER_BULLET:{
+			case SILVER_BULLET:
+			if(otmp->quan >= 10){
 				struct obj *rocket;
 				rocket = mksobj(ROCKET, FALSE, FALSE);
 				rocket->blessed = otmp->blessed;
