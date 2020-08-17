@@ -4176,6 +4176,7 @@ int wishflags;
 	if (strncmpi(bp, "witch hat", 9)) /* not the "witch" monster */
 	if (strncmpi(bp, "green dragon crescent blade", 27)) /* not the "green dragon" monster */
 	if (strncmpi(bp, "crow quill", 10)) /* not a "crow" */
+	if (strncmpi(bp, "android visor", 13)) /* not an "android" */
 	if (strncmpi(bp, "Uruk-hai shield", 15)) /* not an "uruk-hai" monster */
 	if (strncmpi(bp, "sparkling lake", 14)) /* not a "sparkling lake" */
 	if (strncmpi(bp, "frosted lake", 12)) /* not a "frosted lake" */
