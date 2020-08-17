@@ -13866,7 +13866,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/* apply confuse monster (player only) */
-	if (youagr && u.umconf && !mdef->mconf) {
+	if (youagr && melee && u.umconf && !mdef->mconf) {
 		char *hands = makeplural(body_part(HAND));
 		/* message, reduce your hand glowiness */
 		if (u.umconf == 1) {
