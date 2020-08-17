@@ -889,6 +889,7 @@ struct permonst *mdat;
 		int mtyp;
 		switch (flags.HDbreath)
 		{
+		case AD_MAGM: mtyp = PM_GRAY_DRAGON;   break;
 		case AD_FIRE: mtyp = PM_RED_DRAGON;    break;
 		case AD_COLD: mtyp = PM_WHITE_DRAGON;  break;
 		case AD_ELEC: mtyp = PM_BLUE_DRAGON;   break;
