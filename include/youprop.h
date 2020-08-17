@@ -162,7 +162,7 @@
 /* Those implemented solely as timeouts (we use just intrinsic) */
 #define HStun			u.uprops[STUNNED].intrinsic
 #define Stunned			((HStun || u.umonnum == PM_STALKER || \
-				 youmonst.data->mlet == S_BAT) && !(u.specialSealsActive&SEAL_NUMINA))
+						(Upolyd && youmonst.data->mlet == S_BAT)) && !(u.specialSealsActive&SEAL_NUMINA))
 		/* Note: birds will also be stunned */
 
 #define HConfusion		u.uprops[CONFUSION].intrinsic
