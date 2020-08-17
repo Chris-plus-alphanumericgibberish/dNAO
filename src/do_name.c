@@ -606,6 +606,10 @@ const char *name;
 						u.brand_otyp = BROADSWORD;
 					if (u.brand_otyp == RAKUYO)			// unlatching behaviour duplicates Brand as saber and dagger
 						u.brand_otyp = SABER;
+					if (u.brand_otyp == RAKUYO_SABER)
+						u.brand_otyp = SABER;
+					if (u.brand_otyp == RAKUYO_DAGGER)
+						u.brand_otyp = DAGGER;
 
 					hack_artifacts(); /* update the artilist array -- doing so manually doesn't work for some reason */
 					if (obj->otyp != u.brand_otyp)
