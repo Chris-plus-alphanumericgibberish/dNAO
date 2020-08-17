@@ -3928,7 +3928,8 @@ int wishflags;
 		} else if (!strncmpi(bp, "glittering ", l=11)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_MAGCW);
 
-		} else if (!strncmpi(bp, "holy ", l=5) && strncmpi(bp, "holy moonlight sword", 20)) {
+		} else if (!strncmpi(bp, "holy ", l=5) &&
+			strncmpi(bp, "holy moonlight sword", 20) && strncmpi(bp, "holy symbol of the black mother", 31)) {
 			blessed = !(uncursed + iscursed);
 		} else if (!strncmpi(bp, "holy-weapon ", l=12)) {
 			blessed = !(uncursed + iscursed);
