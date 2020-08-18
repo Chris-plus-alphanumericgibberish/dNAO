@@ -4862,9 +4862,12 @@ int tary;
 	/* Most spells need a target */
 	boolean notarget = (!mdef || (!tarx && !tary));
 	if (notarget) {
-		if (!is_undirected_spell(spellnum))
+		/* most spells need a target */
+		if (!is_undirected_spell(spellnum) && !is_buff_spell(spellnum)) {
 			return TRUE;
+		}
 		else {
+			/* undirected spells, or directed buff spells with no target, are instead self-targeted */
 			tarx = x(magr);
 			tary = y(magr);
 		}
