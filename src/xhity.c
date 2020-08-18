@@ -2075,7 +2075,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	/* creatures wearing the Grappler's Grasp and currently grappling something get a hug attack if they don't have one already */
 	if (is_null_attk(attk) && !by_the_book && !dmgtype(pa, AT_HUGS) && !(*subout&SUBOUT_GRAPPLE)) {
 		struct obj * otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
-		if (otmp && otmp->oartifact == ART_GRAPPLER_S_GRASP) {
+		/* magr must already have hold of mdef, however, which makes it much less useful mvm */
+		if (otmp && otmp->oartifact == ART_GRAPPLER_S_GRASP &&
+			((youagr || youdef) && !u.uswallow && u.ustuck && u.ustuck == (youagr ? mdef : magr))) {
 			*attk = grapple;
 			attk->damn = youagr ? ((P_SKILL(P_BARE_HANDED_COMBAT) + 1) / 2 + martial_bonus()) : 2;
 			*subout |= SUBOUT_GRAPPLE;
