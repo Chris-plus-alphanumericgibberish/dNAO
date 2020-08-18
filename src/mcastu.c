@@ -4861,8 +4861,14 @@ int tary;
 	struct monst *tmpm;
 	/* Most spells need a target */
 	boolean notarget = (!mdef || (!tarx && !tary));
-	if (notarget && !is_undirected_spell(spellnum))
-		return TRUE;
+	if (notarget) {
+		if (!is_undirected_spell(spellnum))
+			return TRUE;
+		else {
+			tarx = x(magr);
+			tary = y(magr);
+		}
+	}
 
 	/* Some spells work with a valid line of sight */
 	boolean clearpath = clear_path(x(magr), y(magr), tarx, tary);
