@@ -5106,9 +5106,10 @@ void NetHackQtBind::qt_number_pad(int)
     // Ignore.
 }
 
-void NetHackQtBind::qt_delay_output()
+void NetHackQtBind::qt_delay_output(int length)
 {
-    NetHackQtDelay delay(15);
+    static int delay[] = { 0, 5, 15 };
+    NetHackQtDelay delay(delay[length]);
     delay.wait();
 }
 

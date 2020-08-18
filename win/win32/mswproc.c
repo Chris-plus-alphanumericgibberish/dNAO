@@ -1699,10 +1699,11 @@ delay_output()  -- Causes a visible delay of 50ms in the output.
 	       Conceptually, this is similar to wait_synch() followed
 	       by a nap(50ms), but allows asynchronous operation.
 */
-void mswin_delay_output()
+void mswin_delay_output(int delay)
 {
+        int length[] = { 0, 10, 50 };
 	logDebug("mswin_delay_output()\n");
-	Sleep(50);
+	Sleep(length[delay]);
 }
 
 void mswin_change_color() 

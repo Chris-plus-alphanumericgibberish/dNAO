@@ -396,7 +396,7 @@ E char FDECL(X11_yn_function, (const char *, const char *, CHAR_P));
 E void FDECL(X11_getlin, (const char *,char *));
 E int NDECL(X11_get_ext_cmd);
 E void FDECL(X11_number_pad, (int));
-E void NDECL(X11_delay_output);
+E void FDECL(X11_delay_output, (int));
 
 /* other defs that really should go away (they're tty specific) */
 E void NDECL(X11_start_screen);

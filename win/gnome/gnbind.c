@@ -1115,12 +1115,13 @@ delay_output()  -- Causes a visible delay of 50ms in the output.
 	       Conceptually, this is similar to wait_synch() followed
 	       by a nap(50ms), but allows asynchronous operation.
 */
-void gnome_delay_output()
+void gnome_delay_output(int delay)
 {
+    static guint length[] = { 0, 10, 50 };
     if (gnome_windowlist[WIN_MESSAGE].win != NULL) {
 	gtk_signal_emit( GTK_OBJECT (gnome_windowlist[WIN_MESSAGE].win),
 	ghack_signals[GHSIG_DELAY],
-	(guint) 50);
+	length[delay]);
     }
 }
 
