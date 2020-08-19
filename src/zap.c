@@ -88,6 +88,7 @@ int adtyp, ztyp;
 		case AD_DRST: return "poison spray";
 		case AD_ACID: return "acid splash";
 		case AD_STAR: return "stream of silver stars";
+		case AD_DISN: return "disintegration ray";
 		default:      impossible("unknown spell damage type in flash_type: %d", adtyp);
 		}
 		break;

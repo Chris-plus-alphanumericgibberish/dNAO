@@ -2103,6 +2103,9 @@ int tary;
 				zapdata.unreflectable = ZAP_REFL_NEVER;
 				zapdata.damd = 8;
 			}
+			if (adtyp == AD_DISN) {
+				zapdata.unreflectable = ZAP_REFL_NEVER;
+			}
 
 			/* do the zap */
 			zap(magr, x(magr), y(magr), sgn(tarx - x(magr)), sgn(tary - y(magr)), rn1(7, 7), &zapdata);
@@ -2260,9 +2263,14 @@ int tary;
 	case CONE_OF_COLD:
 	case LIGHTNING_BOLT:
 	case SLEEP:
+	case DISINT_RAY:
 		if (!mdef) {
 			impossible("ray spell with no mdef?");
 			return MM_MISS;
+		}
+		else if (spell == DISINT_RAY && dist2(x(magr), y(magr), tarx, tary) <= 2) {
+			/* disint ray is ranged-only, substitute with psibolt */
+			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
 		}
 		else {
 			struct attack alt_attk = *attk;
@@ -2272,6 +2280,7 @@ int tary;
 			case CONE_OF_COLD:		alt_attk.adtyp = AD_COLD; break;
 			case LIGHTNING_BOLT:	alt_attk.adtyp = AD_ELEC; break;
 			case SLEEP:				alt_attk.adtyp = AD_SLEE; break;
+			case DISINT_RAY:		alt_attk.adtyp = AD_DISN; break;
 			}
 			return elemspell(magr, mdef, &alt_attk, tarx, tary);
 		}
@@ -4478,23 +4487,6 @@ int tary;
 			stop_occupation();
 		}
 		return MM_HIT;
-
-    case DISINT_RAY:
-		if (!mdef) {
-			impossible("disintegration with no target?");
-			return MM_MISS;
-		}
-		if(magr){
-			struct attack disintegrate = {AT_BEAM, AD_DISN, 4, 1};
-			//xmeleehurty(magr, mdef, attk, originalattk, weapon, dohitmsg, flatdmg, dieroll, vis, ranged)
-			(void)xmeleehurty(magr, mdef, &disintegrate, &disintegrate, (struct obj *)0, FALSE, -1, rn1(18, 2), canseemon(mdef), TRUE);
-		}
-		else {
-			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
-		}
-		if(youdef)
-			stop_occupation();
-		return MM_HIT;
 	
 	case VULNERABILITY:
 		if (TRUE) {
@@ -4755,6 +4747,7 @@ int spellnum;
 	case CONE_OF_COLD:
 	case LIGHTNING_BOLT:
 	case SLEEP:
+	case DISINT_RAY:
 		return TRUE;
 	default:
 		break;
@@ -4938,7 +4931,7 @@ int tary;
 //////////////////////////////////////////////////////////////////////////////////////
 
 	/* ray attack when monster isn't lined up */
-	if ((spellnum == MAGIC_MISSILE || spellnum == SLEEP || spellnum == CONE_OF_COLD || spellnum == LIGHTNING_BOLT)
+	if ((spellnum == MAGIC_MISSILE || spellnum == SLEEP || spellnum == CONE_OF_COLD || spellnum == LIGHTNING_BOLT || spellnum == DISINT_RAY)
 		&& !clearline)
 		return TRUE;
 
