@@ -407,9 +407,6 @@ int	mntmp;
 	int mlvl;
 	const char *s;
 
-	if (!polyok(&mons[mntmp]))
-		impossible("polyself into nopoly monster");
-
 	if (mvitals[mntmp].mvflags & G_GENOD && !In_quest(&u.uz)) {	/* allow G_EXTINCT */
 		You_feel("rather %s-ish.",mons[mntmp].mname);
 		exercise(A_WIS, TRUE);
