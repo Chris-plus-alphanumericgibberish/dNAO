@@ -1740,11 +1740,10 @@ poly_obj(obj, id)
 		break;
 
 	case GEM_CLASS:
-	    if (otmp->quan > (long) rnd(4) &&
-		    obj->obj_material == MINERAL &&
-		    otmp->obj_material != MINERAL) {
-		otmp->otyp = ROCK;	/* transmutation backfired */
-		otmp->quan /= 2L;	/* some material has been lost */
+	    if (otmp->quan > (long)rnd(4) && obj->obj_material == MINERAL && otmp->obj_material != MINERAL) {
+			otmp->otyp = ROCK;	/* transmutation backfired */
+			set_material_gm(otmp, MINERAL);
+			otmp->quan /= 2L;	/* some material has been lost */
 	    }
 	    break;
 	}
