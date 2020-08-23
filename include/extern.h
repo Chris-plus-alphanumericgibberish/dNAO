@@ -1284,6 +1284,17 @@ E int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int, int))
 E int FDECL(cast_spell, (struct monst *, struct monst *, struct attack *, int, int, int));
 E int FDECL(needs_familiar, (struct monst *));
 
+/* ### mextra.c ### */
+E void FDECL(add_mx, (struct monst *, int));
+E void FDECL(add_mx_l, (struct monst *, int, int));
+E void FDECL(rem_mx, (struct monst *, int));
+E void FDECL(cpy_mx, (struct monst *, struct monst *, int));
+E void FDECL(mov_mx, (struct monst *, struct monst *, int));
+E void * FDECL(get_mx, (struct monst *, int));
+E int FDECL(siz_mx, (struct monst *, int));
+E void FDECL(save_mextra, (struct monst *, int));
+E void FDECL(rest_mextra, (struct monst *, int));
+
 /* ### minion.c ### */
 
 E void FDECL(msummon, (struct monst *));

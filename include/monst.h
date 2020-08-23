@@ -262,6 +262,9 @@ struct monst {
 #define	MAX_DOLL_MASK	DOLLMAKER_MIND_BLASTS
 	long mvar2;
 	long mvar3;
+
+	union mextra * mextra_p;
+
 	/* in order to prevent alignment problems mextra should
 	   be (or follow) a long int */
 	long mextra[1]; /* monster dependent info */
