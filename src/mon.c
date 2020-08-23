@@ -12,7 +12,7 @@
 
 #include "hack.h"
 #include "mfndpos.h"
-#include "edog.h"
+#include "mextra.h"
 #include "artifact.h"
 #include <ctype.h>
 #include <stdlib.h>

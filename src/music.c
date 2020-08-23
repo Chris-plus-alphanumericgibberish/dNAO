@@ -32,7 +32,7 @@
 #include "hack.h"
 #ifdef BARD
 #include "skills.h"
-#include "edog.h"
+#include "mextra.h"
 #endif
 
 STATIC_DCL void FDECL(awaken_monsters,(int));

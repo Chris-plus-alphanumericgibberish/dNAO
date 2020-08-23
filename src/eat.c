@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "eshk.h"
+#include "mextra.h"
 #include "artifact.h"
 /* #define DEBUG */	/* uncomment to enable new eat code debugging */
 

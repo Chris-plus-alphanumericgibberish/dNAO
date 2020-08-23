@@ -3,10 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "edog.h"
-#include "emin.h"
-#include "epri.h"
-
+#include "mextra.h"
 #ifdef OVLB
 
 STATIC_DCL int NDECL(pet_type);

@@ -3,10 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "epri.h"
-#include "emin.h"
-#include "edog.h"
-#include "ehor.h"
+#include "mextra.h"
 #ifdef REINCARNATION
 #include <ctype.h>
 #endif

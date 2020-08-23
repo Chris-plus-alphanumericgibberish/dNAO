@@ -4,9 +4,8 @@
 
 #define NEED_VARARGS /* Uses ... */	/* comment line for pre-compiled headers */
 #include "hack.h"
-#include "epri.h"
+#include "mextra.h"
 #ifdef WIZARD
-#include "edog.h"
 #endif
 
 #ifdef OVLB

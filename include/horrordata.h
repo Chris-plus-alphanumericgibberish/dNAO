@@ -4,18 +4,6 @@
 
 #ifndef EHOR_H
 #define EHOR_H
-
-struct ehor {
-	/* allocated memory for a random name */
-	char randname[40];
-	/* standard data to base this horror off of */
-	struct permonst basehorrordata;
-	/* current and modifiable memory (for zombified, etc) */
-	struct permonst currhorrordata;
-};
-
-#define EHOR(mon)	((struct ehor *)&(mon)->mextra[0])
-
 /* How horrors are made */
 static int randWeaponAttackTypes[] =
 					{

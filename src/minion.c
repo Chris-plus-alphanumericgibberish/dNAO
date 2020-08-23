@@ -3,8 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "emin.h"
-#include "epri.h"
+#include "mextra.h"
 #include "artifact.h"
 
 extern const int monstr[];

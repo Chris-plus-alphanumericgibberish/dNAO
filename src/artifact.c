@@ -4,9 +4,7 @@
 
 #include "hack.h"
 #include "artifact.h"
-#include "emin.h"
-#include "epri.h"
-#include "edog.h"
+#include "mextra.h"
 #include "xhity.h"
 #ifdef OVLB
 #include "artilist.h"

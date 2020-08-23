@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "edog.h"
+#include "mextra.h"
 /* #define DEBUG */	/* turn on for diagnostics */
 
 #ifdef OVLB

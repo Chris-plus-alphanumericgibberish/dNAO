@@ -1,7 +1,7 @@
 #include "hack.h"
 #include "artifact.h"
 #include "monflag.h"
-#include "edog.h"
+#include "mextra.h"
 #include "xhity.h"
 
 #ifdef OVLB

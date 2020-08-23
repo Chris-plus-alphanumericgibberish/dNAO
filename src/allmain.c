@@ -5,7 +5,7 @@
 /* various code that was replicated in *main.c */
 
 #include "hack.h"
-#include "edog.h"
+#include "mextra.h"
 #include "artifact.h"
 #include "xhity.h"
 #ifdef OVLB
