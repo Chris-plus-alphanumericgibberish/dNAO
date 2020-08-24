@@ -5,6 +5,7 @@
 #pragma clang diagnostic ignored "-Wint-to-void-pointer-cast"
 
 #include "hack.h"
+#include "mextra.h"
 #include "lev.h"	/* for checking save modes */
 
 STATIC_DCL void NDECL(stoned_dialogue);
@@ -1348,7 +1349,7 @@ slip_or_trip()
 	    pline("%s %s%s on the ice.",
 #ifdef STEED
 		u.usteed ? upstart(x_monnam(u.usteed,
-				u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+				M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 				(char *)0, SUPPRESS_SADDLE, FALSE)) :
 #endif
 		"You", rn2(2) ? "slip" : "slide", on_foot ? "" : "s");

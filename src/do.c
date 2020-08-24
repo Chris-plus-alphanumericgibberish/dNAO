@@ -1674,10 +1674,7 @@ final_level()
 			pline("An angel appears near you.");
 		    else
 			You_feel("the presence of a friendly angel near you.");
-		    /* guardian angel -- the one case mtame doesn't
-		     * imply an edog structure, so we don't want to
-		     * call tamedog().
-		     */
+			initedog(mtmp);
 		    mtmp->mtame = 10;
 		    /* make him strong enough vs. endgame foes */
 		    mtmp->m_lev = rn1(8,15);

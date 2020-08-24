@@ -1292,8 +1292,10 @@ E void FDECL(cpy_mx, (struct monst *, struct monst *, int));
 E void FDECL(mov_mx, (struct monst *, struct monst *, int));
 E void * FDECL(get_mx, (struct monst *, int));
 E int FDECL(siz_mx, (struct monst *, int));
+E void * FDECL(bundle_mextra, (struct monst *, int *));
+E void FDECL(unbundle_mextra, (struct monst *, void *));
 E void FDECL(save_mextra, (struct monst *, int));
-E void FDECL(rest_mextra, (struct monst *, int));
+E void FDECL(rest_mextra, (struct monst *, int, boolean));
 
 /* ### minion.c ### */
 
@@ -2430,6 +2432,7 @@ E boolean FDECL(tended_shop, (struct mkroom *));
 E void FDECL(delete_contents, (struct obj *));
 E void FDECL(obfree, (struct obj *,struct obj *));
 E void FDECL(home_shk, (struct monst *,BOOLEAN_P));
+E void FDECL(pacify_shk, (struct monst *));
 E void FDECL(make_happy_shk, (struct monst *,BOOLEAN_P));
 E void FDECL(hot_pursuit, (struct monst *));
 E void FDECL(make_angry_shk, (struct monst *,XCHAR_P,XCHAR_P));

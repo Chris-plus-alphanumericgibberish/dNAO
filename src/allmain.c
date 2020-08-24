@@ -1280,7 +1280,7 @@ moveloop()
 						mtmp->m_lev = 15;
 						mtmp->mhpmax = d(15, 8);
 						mtmp->mhp = mtmp->mhpmax;
-						if(mtmp->mnamelth) mtmp = christen_monst(mtmp, ""); //Now a different entity
+						if(M_HAS_NAME(mtmp)) mtmp = christen_monst(mtmp, ""); //Now a different entity
 						mtmp->movement = 9;//Don't pause for a turn
 						golds = rnd(golds);
 						
@@ -3140,7 +3140,7 @@ struct monst *mon;
 			}
 		}
 		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ) && mons[otmp->corpsenm].pxlth == 0){
+			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ)){
 				for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
 					mtmp2 = mtmp->nmon;
 					if (mtmp == mon) {

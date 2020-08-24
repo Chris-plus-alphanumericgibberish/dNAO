@@ -44,13 +44,17 @@ int len;
 		return;
 	}
 
+	/* assign allocating size if it's a variable-size mx */
+	if (mx_list[mx_id].s_size == -1)
+		len += sizeof(int);
+
 	/* allocate and link it */
 	mx_p = malloc(len);
 	memset(mx_p, 0, len);
 	mtmp->mextra_p->eindex[mx_id] = mx_p;
 	/* assign size if it's a variable-size mx */
 	if (mx_list[mx_id].s_size == -1)
-		*((int *)mx_p) = len;
+		*((int *)mx_p) = len - sizeof(int);
 
 	return;
 }
@@ -154,46 +158,132 @@ int mx_id;
 	return size;
 }
 
+/* allocates a block of memory containing mtmp and it's components */
+/* free this memory block when done using it! */
+void *
+bundle_mextra(mtmp, len_p)
+struct monst * mtmp;
+int * len_p;
+{
+	int i;
+	int len = 0;
+	int towrite = 0;
+	void * output;
+	void * output_ptr;
+
+	/* determine what components are being bundled, and how large they are */
+	for (i = 0; i < NUM_MX; i++) {
+		if (mtmp->mextra_p->eindex[i]) {
+			towrite |= (1 << i);
+			len += siz_mx(mtmp, i);
+		}
+	}
+	len += sizeof(int);	/* to store which components are going to be written */
+
+	/* allocate that much memory */
+	output_ptr = output = malloc(len);
+
+	/* add what compenents are being written */
+	memcpy(output_ptr, &towrite, sizeof(int));
+	output_ptr = ((int *)output_ptr) + 1;
+
+	/* add those components */
+	for (i = 0; i < NUM_MX; i++) {
+		if (!(towrite & (1 << i)))
+			continue;
+		/* copy memory */
+		memcpy(output_ptr,mtmp->mextra_p->eindex[i],siz_mx(mtmp, i));
+		/* increment output_ptr (char is 1 byte) */
+		output_ptr = ((char *)output_ptr) + siz_mx(mtmp, i);
+	}
+
+	*len_p = len;
+	return output;
+}
+
+/* takes a pointer to a block of memory containing the components of an mextra and assigns them to mtmp */
+void
+unbundle_mextra(mtmp, mextra_block)
+struct monst * mtmp;
+void * mextra_block;
+{
+	int i;
+	int toread = 0;
+	int len;
+	void * mx_p;
+
+	/* determine what components are here */
+	toread = *((int *)mextra_block);
+	mextra_block = ((int *)mextra_block) + 1;
+	
+	/* read those components */
+	for (i = 0; i < NUM_MX; i++) {
+		if (!(toread & (1 << i)))
+			continue;
+		/* get length to use */
+		len = mx_list[i].s_size;
+		if (len == -1)	{// was saved
+			len = *((int *)mextra_block);
+			mextra_block = ((int *)mextra_block) + 1;
+		}
+
+		/* allocate component */
+		add_mx_l(mtmp, i, len);
+		/* create pointer to it */
+		mx_p = get_mx(mtmp, i);
+		/* if we had a variable len, rewrite it */
+		if (mx_list[i].s_size == -1) {
+			*((int *)mx_p) = len;
+			mx_p = ((int *)mx_p) + 1;
+		}
+		/* fill in the body of the component */
+		memcpy(mx_p, mextra_block, len);
+		mextra_block = ((char *)mextra_block) + len;
+	}
+	return;
+}
+
 /* saves mextra from mtmp to fd */
 void
 save_mextra(mtmp, fd)
 struct monst * mtmp;
 int fd;
 {
-	int i;
-	int towrite = 0;
+	void * mextra_block;
+	int len;
 
 	/* don't save nothing */
 	if (!mtmp->mextra_p)
 		return;
 
-	/* determine what components are being written */
-	for (i = 0; i < NUM_MX; i++) {
-		if (mtmp->mextra_p->eindex[i])
-			towrite |= (1 << i);
-	}
-	bwrite(fd, &towrite, sizeof(int));
-	
-	/* write those components */
-	for (i = 0; i < NUM_MX; i++) {
-		if (!(towrite & (1 << i)))
-			continue;
-		bwrite(fd, get_mx(mtmp, i), siz_mx(mtmp, i));
-	}
+	/* get mextra as one continous bundle of memory */
+	mextra_block = bundle_mextra(mtmp, &len);
+
+	/* write it */
+	bwrite(fd, mextra_block, len);
+
+	/* deallocate the block */
+	free(mextra_block);
+
 	return;
 }
 
 /* restores mextra from fd onto mtmp */
 /* should only be called if mtmp->mextra_p existed (currently a stale pointer) */
+/* TODO: combine somehow with unbundle_mextra? Might not be possible. */
 void
-rest_mextra(mtmp, fd)
+rest_mextra(mtmp, fd, ghostly)
 struct monst * mtmp;
 int fd;
+boolean ghostly;
 {
 	int i;
 	int toread = 0;
 	int len;
 	void * mx_p;
+
+	/* clear stale mextra pointer from mtmp */
+	mtmp->mextra_p = (union mextra *)0;
 
 	/* determine what components are being read */
 	mread(fd, (genericptr_t) &toread, sizeof(int));
@@ -204,8 +294,9 @@ int fd;
 			continue;
 		/* get length to read */
 		len = mx_list[i].s_size;
-		if (len == -1)	// was saved
+		if (len == -1) {	// was saved
 			mread(fd, (genericptr_t) &len, sizeof(int));
+		}
 
 		/* allocate component */
 		add_mx_l(mtmp, i, len);
@@ -217,6 +308,28 @@ int fd;
 			mx_p = ((int *)mx_p) + 1;
 		}
 		mread(fd, mx_p, len);
+	}
+
+	/* some components need special handling on restore */
+	if (u.uz.dlevel) {
+		if (mtmp->mextra_p->eshk_p) {
+			struct eshk * eshkp = mtmp->mextra_p->eshk_p;
+			/* assign bill pointer */
+			if (eshkp->bill_p != (struct bill_x *) -1000)
+				eshkp->bill_p = eshkp->bill;
+			/* assign to level */
+			if (ghostly) {
+				assign_level(&(eshkp->shoplevel), &u.uz);
+				if (!mtmp->mpeaceful && strncmpi(eshkp->customer, plname, PL_NSIZ))
+				pacify_shk(mtmp);
+			}
+		}
+		if (mtmp->mextra_p->epri_p) {
+			/* assign to level */
+			if (ghostly) {
+				assign_level(&(mtmp->mextra_p->epri_p->shrlevel), &u.uz);
+			}
+		}
 	}
 	return;
 }

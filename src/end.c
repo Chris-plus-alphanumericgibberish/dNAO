@@ -402,7 +402,7 @@ register struct monst *mtmp;
 	    killer_format = KILLED_BY;
 	}
 	/* _the_ <invisible> <distorted> ghost of Dudley */
-	if ((mtmp->mtyp == PM_GHOST || mtmp->mtyp == PM_SHADE || mtmp->mtyp == PM_BROKEN_SHADOW) && mtmp->mnamelth) {
+	if ((mtmp->mtyp == PM_GHOST || mtmp->mtyp == PM_SHADE || mtmp->mtyp == PM_BROKEN_SHADOW) && M_HAS_NAME(mtmp)) {
 		Strcat(buf, "the ");
 		killer_format = KILLED_BY;
 	}
@@ -413,13 +413,13 @@ register struct monst *mtmp;
 
 	if(mtmp->mtyp == PM_GHOST) {
 		Strcat(buf, "ghost");
-		if (mtmp->mnamelth) Sprintf(eos(buf), " of %s", NAME(mtmp));
+		if (M_HAS_NAME(mtmp)) Sprintf(eos(buf), " of %s", NAME(mtmp));
 	} else if(mtmp->mtyp == PM_BROKEN_SHADOW) {
 		Strcat(buf, "broken shadow");
-		if (mtmp->mnamelth) Sprintf(eos(buf), " of %s", NAME(mtmp));
+		if (M_HAS_NAME(mtmp)) Sprintf(eos(buf), " of %s", NAME(mtmp));
 	} else if(mtmp->mtyp == PM_SHADE) {
 		Strcat(buf, "shade");
-		if (mtmp->mnamelth) Sprintf(eos(buf), " of %s", NAME(mtmp));
+		if (M_HAS_NAME(mtmp)) Sprintf(eos(buf), " of %s", NAME(mtmp));
 	} else if(mtmp->isshk) {
 		Sprintf(eos(buf), "%s %s, the shopkeeper",
 			(mtmp->female ? "Ms." : "Mr."), shkname(mtmp));
@@ -437,7 +437,7 @@ register struct monst *mtmp;
 		Strcat(buf, mtmp->data->mname);
 		if (templated(mtmp))
 			append_template_desc(mtmp, buf, type_is_pname(mtmp->data));
-		if (mtmp->mnamelth)
+		if (M_HAS_NAME(mtmp))
 		    Sprintf(eos(buf), " called %s", NAME(mtmp));
 	}
 

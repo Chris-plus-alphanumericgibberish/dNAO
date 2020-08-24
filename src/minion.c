@@ -157,21 +157,14 @@ boolean talk;
 
     if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
-    } else if (mons[mtyp].pxlth == 0) {
-		struct permonst *pm = &mons[mtyp];
-		mon = makemon(pm, u.ux, u.uy, MM_EMIN);
+    } else {
+		mon = makemon(&mons[mtyp], u.ux, u.uy, MM_EMIN);
 		if (mon) {
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
 		}
-    } else if (mtyp == PM_ANGEL) {
-		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
-		if (mon) {
-			mon->isminion = TRUE;
-			EPRI(mon)->shralign = alignment;	/* always A_LAWFUL here */
-		}
-    } else
-		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
+	}
+
     if (mon) {
 		if (talk) {
 			pline_The("voice of %s booms:", align_gname(alignment));
@@ -242,30 +235,22 @@ boolean angels;
     }
     if (mtyp == NON_PM) {
 		mon = 0;
-    } else if (mons[mtyp].pxlth == 0) {
-		struct permonst *pm = &mons[mtyp];
-		mon = makemon(pm, u.ux, u.uy, MM_EMIN);
+    } else {
+		mon = makemon(&mons[mtyp], u.ux, u.uy, MM_EMIN);
 		if (mon) {
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
 		}
-    } else if (mtyp == PM_ANGEL) {
-		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
-		if (mon) {
-			mon->isminion = TRUE;
-			EPRI(mon)->shralign = alignment;	/* always A_LAWFUL here */
-		}
-    } else
-		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
-    if (mon) {
-	if (talk) {
-	    pline_The("voice of %s booms:", align_gname(alignment));
-	    verbalize("Thou shalt pay for thy indiscretion!");
-	    if (!Blind)
-		pline("%s appears before you.", Amonnam(mon));
 	}
-	mon->mpeaceful = FALSE;
-	/* don't call set_malign(); player was naughty */
+    if (mon) {
+		if (talk) {
+			pline_The("voice of %s booms:", align_gname(alignment));
+			verbalize("Thou shalt pay for thy indiscretion!");
+			if (!Blind)
+			pline("%s appears before you.", Amonnam(mon));
+		}
+		mon->mpeaceful = FALSE;
+		/* don't call set_malign(); player was naughty */
     }
 	return mon;
 }

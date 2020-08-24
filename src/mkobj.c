@@ -2500,12 +2500,30 @@ struct monst *mtmp;
 	struct obj *otmp;
 	int lth, namelth;
 
-	lth = sizeof(struct monst) + mtmp->mxlth + mtmp->mnamelth;
+	void * mextra_bundle;
+	/* if mtmp has an mextra, bundle it */
+	if (mtmp->mextra_p) {
+		void * tmp, * tmp2;
+		mextra_bundle = bundle_mextra(mtmp, &lth);
+		/* realloc_obj actually wants the whole monster */
+		tmp = malloc(lth + sizeof(struct monst));
+		memcpy(tmp, (genericptr_t) mtmp, sizeof(struct monst));
+		tmp2 = ((struct monst *)tmp) + 1;
+		memcpy(tmp2, mextra_bundle, lth);
+		lth += sizeof(struct monst);
+		free(mextra_bundle);	/* free the memory allocated to make the original bundle */
+		mextra_bundle = tmp;	/* mextra_bundle now points to a continuous mtmp+mextra */
+	}
+	else {
+		mextra_bundle = malloc(sizeof(struct monst));
+		memcpy(mextra_bundle, (genericptr_t) mtmp, sizeof(struct monst));
+		lth = sizeof(struct monst);
+	}
 	namelth = obj->onamelth ? strlen(ONAME(obj)) + 1 : 0;
-	otmp = realloc_obj(obj, lth, (genericptr_t) mtmp, namelth, ONAME(obj));
+	otmp = realloc_obj(obj, lth, (genericptr_t) mextra_bundle, namelth, ONAME(obj));
 	if (otmp && otmp->oxlth) {
+		/* it reallocated successfully */
 		struct monst *mtmp2 = (struct monst *)otmp->oextra;
-		if (mtmp->data) mtmp2->mtyp = monsndx(mtmp->data);
 		/* invalidate pointers */
 		/* m_id is needed to know if this is a revived quest leader */
 		/* but m_id must be cleared when loading bones */
@@ -2532,11 +2550,9 @@ boolean copyof;
 		mtmp = (struct monst *)obj->oextra;
 	if (mtmp) {
 	    if (copyof) {
-		int lth = mtmp->mxlth + mtmp->mnamelth;
-		mnew = newmonst(lth);
-		lth += sizeof(struct monst);
-		(void) memcpy((genericptr_t)mnew,
-				(genericptr_t)mtmp, lth);
+			void * mextra_bundle = ((struct monst *)obj->oextra)+1;
+			/* also copy mextra */
+			unbundle_mextra(mtmp, mextra_bundle);
 	    } else {
 	      /* Never insert this returned pointer into mon chains! */
 	    	mnew = mtmp;

@@ -5795,7 +5795,7 @@ mon_chain(win, src, chain, total_count, total_size)
 
 	for (count = size = 0, mon = chain; mon; mon = mon->nmon) {
 	    count++;
-	    size += sizeof(struct monst) + mon->mxlth + mon->mnamelth;
+	    size += sizeof(struct monst);
 	}
 	*total_count += count;
 	*total_size += size;

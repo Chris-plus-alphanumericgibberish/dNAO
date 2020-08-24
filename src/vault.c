@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "vault.h"
+#include "mextra.h"
 
 STATIC_DCL struct monst *NDECL(findgd);
 
@@ -26,13 +26,13 @@ register boolean forceshow;
 	register int fcx, fcy, fcbeg;
 	register struct monst *mtmp;
 
-	if (!on_level(&(EGD(grd)->gdlevel), &u.uz)) return TRUE;
+	if (!on_level(&(EVGD(grd)->gdlevel), &u.uz)) return TRUE;
 
-	while((fcbeg = EGD(grd)->fcbeg) < EGD(grd)->fcend) {
-		fcx = EGD(grd)->fakecorr[fcbeg].fx;
-		fcy = EGD(grd)->fakecorr[fcbeg].fy;
+	while((fcbeg = EVGD(grd)->fcbeg) < EVGD(grd)->fcend) {
+		fcx = EVGD(grd)->fakecorr[fcbeg].fx;
+		fcy = EVGD(grd)->fakecorr[fcbeg].fy;
 		if((grd->mhp <= 0 || !in_fcorridor(grd, u.ux, u.uy)) &&
-				   EGD(grd)->gddone)
+				   EVGD(grd)->gddone)
 			forceshow = TRUE;
 		if((u.ux == fcx && u.uy == fcy && grd->mhp > 0)
 			|| (!forceshow && couldsee(fcx,fcy))
@@ -47,10 +47,10 @@ register boolean forceshow;
 			    (void) rloc(mtmp, FALSE);
 			}
 		}
-		levl[fcx][fcy].typ = EGD(grd)->fakecorr[fcbeg].ftyp;
+		levl[fcx][fcy].typ = EVGD(grd)->fakecorr[fcbeg].ftyp;
 		map_location(fcx, fcy, 1);	/* bypass vision */
 		if(!ACCESSIBLE(levl[fcx][fcy].typ)) block_point(fcx,fcy);
-		EGD(grd)->fcbeg++;
+		EVGD(grd)->fcbeg++;
 	}
 	if(grd->mhp <= 0) {
 	    pline_The("corridor disappears.");
@@ -78,8 +78,8 @@ register struct monst *grd;
 		remove_monster(grd->mx, grd->my);
 		newsym(grd->mx, grd->my);
 		place_monster(grd, 0, 0);
-		EGD(grd)->ogx = grd->mx;
-		EGD(grd)->ogy = grd->my;
+		EVGD(grd)->ogx = grd->mx;
+		EVGD(grd)->ogy = grd->my;
 		dispose = clear_fcorr(grd, TRUE);
 	}
 	return(dispose);
@@ -92,9 +92,9 @@ int x, y;
 {
 	register int fci;
 
-	for(fci = EGD(grd)->fcbeg; fci < EGD(grd)->fcend; fci++)
-		if(x == EGD(grd)->fakecorr[fci].fx &&
-				y == EGD(grd)->fakecorr[fci].fy)
+	for(fci = EVGD(grd)->fcbeg; fci < EVGD(grd)->fcend; fci++)
+		if(x == EVGD(grd)->fakecorr[fci].fx &&
+				y == EVGD(grd)->fakecorr[fci].fy)
 			return(TRUE);
 	return(FALSE);
 }
@@ -106,7 +106,7 @@ findgd()
 	register struct monst *mtmp;
 
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon)
-	    if(mtmp->isgd && !DEADMONSTER(mtmp) && on_level(&(EGD(mtmp)->gdlevel), &u.uz))
+	    if(mtmp->isgd && !DEADMONSTER(mtmp) && on_level(&(EVGD(mtmp)->gdlevel), &u.uz))
 		return(mtmp);
 	return((struct monst *)0);
 }
@@ -227,12 +227,13 @@ fnd:
 	guard->isgd = 1;
 	guard->mpeaceful = 1;
 	set_malign(guard);
-	EGD(guard)->gddone = 0;
-	EGD(guard)->ogx = x;
-	EGD(guard)->ogy = y;
-	assign_level(&(EGD(guard)->gdlevel), &u.uz);
-	EGD(guard)->vroom = vaultroom;
-	EGD(guard)->warncnt = 0;
+	add_mx(guard, MX_EVGD);
+	EVGD(guard)->gddone = 0;
+	EVGD(guard)->ogx = x;
+	EVGD(guard)->ogy = y;
+	assign_level(&(EVGD(guard)->gdlevel), &u.uz);
+	EVGD(guard)->vroom = vaultroom;
+	EVGD(guard)->warncnt = 0;
 
 	reset_faint();			/* if fainted - wake up */
 	if (canspotmon(guard))
@@ -324,36 +325,36 @@ fnd:
 	    verbalize("Please drop that money and follow me.");
 	}
 #endif
-	EGD(guard)->gdx = gx;
-	EGD(guard)->gdy = gy;
-	EGD(guard)->fcbeg = 0;
-	EGD(guard)->fakecorr[0].fx = x;
-	EGD(guard)->fakecorr[0].fy = y;
+	EVGD(guard)->gdx = gx;
+	EVGD(guard)->gdy = gy;
+	EVGD(guard)->fcbeg = 0;
+	EVGD(guard)->fakecorr[0].fx = x;
+	EVGD(guard)->fakecorr[0].fy = y;
 	if(IS_WALL(levl[x][y].typ))
-	    EGD(guard)->fakecorr[0].ftyp = levl[x][y].typ;
+	    EVGD(guard)->fakecorr[0].ftyp = levl[x][y].typ;
 	else { /* the initial guard location is a dug door */
-	    int vlt = EGD(guard)->vroom;
+	    int vlt = EVGD(guard)->vroom;
 	    xchar lowx = rooms[vlt].lx, hix = rooms[vlt].hx;
 	    xchar lowy = rooms[vlt].ly, hiy = rooms[vlt].hy;
 
 	    if(x == lowx-1 && y == lowy-1)
-		EGD(guard)->fakecorr[0].ftyp = TLCORNER;
+		EVGD(guard)->fakecorr[0].ftyp = TLCORNER;
 	    else if(x == hix+1 && y == lowy-1)
-		EGD(guard)->fakecorr[0].ftyp = TRCORNER;
+		EVGD(guard)->fakecorr[0].ftyp = TRCORNER;
 	    else if(x == lowx-1 && y == hiy+1)
-		EGD(guard)->fakecorr[0].ftyp = BLCORNER;
+		EVGD(guard)->fakecorr[0].ftyp = BLCORNER;
 	    else if(x == hix+1 && y == hiy+1)
-		EGD(guard)->fakecorr[0].ftyp = BRCORNER;
+		EVGD(guard)->fakecorr[0].ftyp = BRCORNER;
 	    else if(y == lowy-1 || y == hiy+1)
-		EGD(guard)->fakecorr[0].ftyp = HWALL;
+		EVGD(guard)->fakecorr[0].ftyp = HWALL;
 	    else if(x == lowx-1 || x == hix+1)
-		EGD(guard)->fakecorr[0].ftyp = VWALL;
+		EVGD(guard)->fakecorr[0].ftyp = VWALL;
 	}
 	levl[x][y].typ = DOOR;
 	levl[x][y].doormask = D_NODOOR;
 	unblock_point(x, y);		/* doesn't block light */
-	EGD(guard)->fcend = 1;
-	EGD(guard)->warncnt = 1;
+	EVGD(guard)->fcend = 1;
+	EVGD(guard)->warncnt = 1;
     }
 }
 
@@ -381,7 +382,7 @@ wallify_vault(grd)
 struct monst *grd;
 {
 	int x, y, typ;
-	int vlt = EGD(grd)->vroom;
+	int vlt = EVGD(grd)->vroom;
 	char tmp_viz;
 	xchar lox = rooms[vlt].lx - 1, hix = rooms[vlt].hx + 1,
 	      loy = rooms[vlt].ly - 1, hiy = rooms[vlt].hy + 1;
@@ -402,7 +403,7 @@ struct monst *grd;
 			(void) rloc(mon, FALSE);
 		    }
 		    if ((gold = g_at(x, y)) != 0) {
-			move_gold(gold, EGD(grd)->vroom);
+			move_gold(gold, EVGD(grd)->vroom);
 			movedgold = TRUE;
 		    }
 		    if ((trap = t_at(x, y)) != 0)
@@ -452,7 +453,7 @@ register struct monst *grd;
 	int dx, dy, gx, gy, fci;
 	uchar typ;
 	struct fakecorridor *fcp;
-	register struct egd *egrd = EGD(grd);
+	register struct evgd *egrd = EVGD(grd);
 	register struct rm *crm;
 	register boolean goldincorridor = FALSE,
 			 u_in_vault = vault_occupied(u.urooms)? TRUE : FALSE,
@@ -786,8 +787,8 @@ paygd()
 	    }
 	    mnexto(grd);
 	    pline("%s remits your gold to the vault.", Monnam(grd));
-	    gx = rooms[EGD(grd)->vroom].lx + rn2(2);
-	    gy = rooms[EGD(grd)->vroom].ly + rn2(2);
+	    gx = rooms[EVGD(grd)->vroom].lx + rn2(2);
+	    gy = rooms[EVGD(grd)->vroom].ly + rn2(2);
 	    Sprintf(buf,
 		"To Croesus: here's the gold recovered from %s the %s.",
 		plname, mons[u.umonster].mname);

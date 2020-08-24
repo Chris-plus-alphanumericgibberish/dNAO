@@ -30,7 +30,6 @@ STATIC_DCL void FDECL(setpaid, (struct monst *));
 STATIC_DCL long FDECL(addupbill, (struct monst *));
 STATIC_DCL void FDECL(setallstolen, (struct obj *));
 STATIC_DCL void FDECL(setallpaid, (struct obj *));
-STATIC_DCL void FDECL(pacify_shk, (struct monst *));
 STATIC_DCL struct bill_x *FDECL(onbill, (struct obj *, struct monst *, BOOLEAN_P));
 STATIC_DCL struct monst *FDECL(next_shkp, (struct monst *, BOOLEAN_P, BOOLEAN_P));
 STATIC_DCL long FDECL(shop_debt, (struct eshk *));
@@ -1135,7 +1134,7 @@ angry_shk_exists()
 }
 
 /* remove previously applied surcharge from all billed items */
-STATIC_OVL void
+void
 pacify_shk(shkp)
 register struct monst *shkp;
 {

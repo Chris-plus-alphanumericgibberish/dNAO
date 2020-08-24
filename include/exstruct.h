@@ -31,7 +31,7 @@ struct edog {
 //endif
 	Bitfield(loyal, 1);      	/* is particularly loyal (starting pet, quest home pet) */
 };
-#define EDOG(mon)	((struct edog *)&(mon)->mextra[0])
+#define EDOG(mon)	((mon)->mextra_p->edog_p)
 
 
 struct ehor {
@@ -42,19 +42,22 @@ struct ehor {
 	/* current and modifiable memory (for zombified, etc) */
 	struct permonst currhorrordata;
 };
-#define EHOR(mon)	((struct ehor *)&(mon)->mextra[0])
+#define EHOR(mon)	((mon)->mextra_p->ehor_p)
 
 
 struct emin {
 	aligntyp min_align;	/* alignment of minion */
 };
-#define EMIN(mon)	((struct emin *)&(mon)->mextra[0])
+#define EMIN(mon)	((mon)->mextra_p->emin_p)
 
 
 struct enam {
-	int name_lth;		/* length of name in bytes; how far to read */
-	char name[1];		/* length is actually name_lth, not 1 */
+	int name_lth;			/* length of name in bytes; how far to read */
+	char name[PL_PSIZ];		/* length is actually name_lth */
 };
+#define M_HAS_NAME(mtmp)	((mtmp) && (mtmp)->mextra_p && (mtmp)->mextra_p->enam_p)
+#define NAME(mtmp)	((mtmp)->mextra_p->enam_p->name)
+
 
 struct epri {
 	aligntyp shralign;	/* alignment of priest's shrine */
@@ -65,7 +68,7 @@ struct epri {
 	boolean pbanned;	/* player banned by priest */
 	char signspotted;	/* max number of signs spotted by priest */
 };
-#define EPRI(mon)	((struct epri *)&(mon)->mextra[0])
+#define EPRI(mon)	((mon)->mextra_p->epri_p)
 /* A priest without ispriest is a roaming priest without a shrine, so
  * the fields (except shralign, which becomes only the priest alignment)
  * are available for reuse.
@@ -113,10 +116,29 @@ struct eshk {
 #define SHK_SPECIAL_C   04000L
 #endif
 };
-#define ESHK(mon)	((struct eshk *)&(mon)->mextra[0])
+#define ESHK(mon)	((mon)->mextra_p->eshk_p)
 /* TODO: deprecate these */
 #define NOTANGRY(mon)	((mon)->mpeaceful)
 #define ANGRY(mon)	(!NOTANGRY(mon))
 
+
+#define FCSIZ	(ROWNO+COLNO)
+struct fakecorridor {
+	xchar fx,fy,ftyp;
+};
+
+struct evgd {
+	int fcbeg, fcend;	/* fcend: first unused pos */
+	int vroom;		/* room number of the vault */
+	xchar gdx, gdy;		/* goal of guard's walk */
+	xchar ogx, ogy;		/* guard's last position */
+	d_level gdlevel;	/* level (& dungeon) guard was created in */
+	xchar warncnt;		/* number of warnings to follow */
+	Bitfield(gddone,1);	/* true iff guard has released player */
+	Bitfield(unused,7);
+	struct fakecorridor fakecorr[FCSIZ];
+};
+
+#define EVGD(mon)	((mon)->mextra_p->evgd_p)
 
 #endif /* EXSTRUCT_H */

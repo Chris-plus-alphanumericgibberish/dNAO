@@ -192,9 +192,6 @@ struct monst {
 	xchar combat_mode;
 #define	RANGED_MODE	0
 #define HNDHND_MODE	1
-
-	uchar mnamelth;		/* length of name (following mxlth) */
-	short mxlth;		/* length of following data */
 	int meating;		/* monster is eating timeout */
 	int mfaction;		/* faction to which monster belongs */
 	int mtemplate;		/* template applied to monster */
@@ -264,10 +261,6 @@ struct monst {
 	long mvar3;
 
 	union mextra * mextra_p;
-
-	/* in order to prevent alignment problems mextra should
-	   be (or follow) a long int */
-	long mextra[1]; /* monster dependent info */
 };
 
 /*
@@ -287,14 +280,11 @@ struct monst {
  * exception being the guardian angels which are tame on creation).
  */
 
-#define newmonst(xl) (struct monst *)alloc((unsigned)(xl) + sizeof(struct monst))
 #define dealloc_monst(mon) free((genericptr_t)(mon))
 
 /* these are in mspeed */
 #define MSLOW 1		/* slow monster */
 #define MFAST 2		/* speeded monster */
-
-#define NAME(mtmp)	(((char *)(mtmp)->mextra) + (mtmp)->mxlth)
 
 #define MON_WEP(mon)	((mon)->mw)
 #define MON_NOWEP(mon)	((mon)->mw = (struct obj *)0)

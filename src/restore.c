@@ -254,7 +254,7 @@ boolean ghostly;
 {
 	register struct monst *mtmp, *mtmp2 = 0;
 	register struct monst *first = (struct monst *)0;
-	int xl;
+	int endread;
 	struct permonst *monbegin;
 	boolean moved;
 
@@ -265,12 +265,15 @@ boolean ghostly;
 	id_permonst();
 
 	while(1) {
-		mread(fd, (genericptr_t) &xl, sizeof(xl));
-		if(xl == -1) break;
-		mtmp = newmonst(xl);
+		mread(fd, (genericptr_t) &endread, sizeof(int));
+		if(endread == -1) break;
+		mtmp = malloc(sizeof(struct monst));
 		if(!first) first = mtmp;
 		else mtmp2->nmon = mtmp;
-		mread(fd, (genericptr_t) mtmp, (unsigned) xl + sizeof(struct monst));
+		mread(fd, (genericptr_t) mtmp, sizeof(struct monst));
+		if (mtmp->mextra_p) {
+			rest_mextra(mtmp, fd, ghostly);
+		}
 		if (ghostly) {
 			unsigned nid = flags.ident++;
 			add_id_mapping(mtmp->m_id, nid);
@@ -315,10 +318,6 @@ boolean ghostly;
 				impossible("bad monster swap weapon restore");
 			}
 		}
-
-		if (mtmp->isshk) restshk(mtmp, ghostly);
-		if (mtmp->ispriest) restpriest(mtmp, ghostly);
-
 		mtmp2 = mtmp;
 	}
 	if(first && mtmp2->nmon){

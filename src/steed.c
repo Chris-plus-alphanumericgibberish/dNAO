@@ -546,7 +546,7 @@ dismount_steed(reason)
 		    You("can't. There isn't anywhere for you to stand.");
 		    return;
 		}
-		if (!mtmp->mnamelth) {
+		if (!M_HAS_NAME(mtmp)) {
 			pline("You've been through the dungeon on %s with no name.",
 				an(mtmp->data->mname));
 			if (Hallucination)
