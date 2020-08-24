@@ -948,7 +948,7 @@ register struct monst *mtmp;
 		bwrite(fd, (genericptr_t) &zero, sizeof(int));
 		bwrite(fd, (genericptr_t) mtmp, sizeof(struct monst));
 		if(mtmp->mextra_p)
-			save_mextra(mtmp, fd);
+			save_mextra(mtmp, fd, mode);
 	    }
 	    if (mtmp->minvent)
 		saveobjchn(fd,mtmp->minvent,mode);

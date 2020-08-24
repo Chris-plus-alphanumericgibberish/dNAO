@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "mextra.h"
+#include "lev.h"
 
 /* add one component to mon */
 /* automatically finds size of component */
@@ -92,6 +93,19 @@ int mx_id;
 		/* dealloc mextra_p */
 		free((genericptr_t)mtmp->mextra_p);
 		mtmp->mextra_p = (union mextra *)0;
+	}
+	return;
+}
+
+/* removes all components from mon */
+void
+rem_all_mx(mtmp)
+struct monst * mtmp;
+{
+	int mx_id;
+
+	for (mx_id = 0; (mtmp->mextra_p) && (mx_id < NUM_MX); mx_id++) {
+		rem_mx(mtmp, mx_id);
 	}
 	return;
 }
@@ -245,9 +259,10 @@ void * mextra_block;
 
 /* saves mextra from mtmp to fd */
 void
-save_mextra(mtmp, fd)
+save_mextra(mtmp, fd, mode)
 struct monst * mtmp;
 int fd;
+int mode;
 {
 	void * mextra_block;
 	int len;
@@ -264,6 +279,10 @@ int fd;
 
 	/* deallocate the block */
 	free(mextra_block);
+
+	if (release_data(mode)) {
+		rem_all_mx(mtmp);
+	}
 
 	return;
 }

@@ -1288,13 +1288,14 @@ E int FDECL(needs_familiar, (struct monst *));
 E void FDECL(add_mx, (struct monst *, int));
 E void FDECL(add_mx_l, (struct monst *, int, int));
 E void FDECL(rem_mx, (struct monst *, int));
+E void FDECL(rem_all_mx, (struct monst *));
 E void FDECL(cpy_mx, (struct monst *, struct monst *, int));
 E void FDECL(mov_mx, (struct monst *, struct monst *, int));
 E void * FDECL(get_mx, (struct monst *, int));
 E int FDECL(siz_mx, (struct monst *, int));
 E void * FDECL(bundle_mextra, (struct monst *, int *));
 E void FDECL(unbundle_mextra, (struct monst *, void *));
-E void FDECL(save_mextra, (struct monst *, int));
+E void FDECL(save_mextra, (struct monst *, int, int));
 E void FDECL(rest_mextra, (struct monst *, int, boolean));
 
 /* ### minion.c ### */
@@ -2160,7 +2161,6 @@ E boolean FDECL(in_your_sanctuary, (struct monst *,XCHAR_P,XCHAR_P));
 E void FDECL(ghod_hitsu, (struct monst *));
 E void NDECL(angry_priest);
 E void NDECL(clearpriests);
-E void FDECL(restpriest, (struct monst *,BOOLEAN_P));
 
 /* ### projectile.c ### */
 

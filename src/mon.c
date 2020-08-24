@@ -3706,6 +3706,7 @@ dmonsfree()
 	if ((*mtmp)->mhp <= 0) {
 	    struct monst *freetmp = *mtmp;
 	    *mtmp = (*mtmp)->nmon;
+		rem_all_mx(freetmp);
 	    dealloc_monst(freetmp);
 	    count++;
 	} else
@@ -3765,6 +3766,7 @@ register struct monst *mtmp, *mtmp2;
     if (mtmp2->isshk) replshk(mtmp,mtmp2);
 
     /* discard the old monster */
+	rem_all_mx(mtmp);
     dealloc_monst(mtmp);
 }
 
