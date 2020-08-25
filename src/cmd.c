@@ -5326,10 +5326,12 @@ struct ext_func_tab extcmdlist[] = {
 	{(char *)0, (char *)0, donull, TRUE}, /* #portdebug */
 #endif
 	{(char *)0, (char *)0, donull, TRUE}, /* #seenv */
-	{(char *)0, (char *)0, donull, TRUE}, /* #showkills (showborn patch) */
 	{(char *)0, (char *)0, donull, TRUE}, /* #stats */
 	{(char *)0, (char *)0, donull, TRUE}, /* #timeout */
 	{(char *)0, (char *)0, donull, TRUE}, /* #vision */
+	{(char *)0, (char *)0, donull, TRUE}, /* #showkills (showborn patch) */
+	{(char *)0, (char *)0, donull, TRUE}, /* #setinsight */
+	{(char *)0, (char *)0, donull, TRUE}, /* #setsanity */
 	{(char *)0, (char *)0, donull, TRUE}, /* #dump_map */
 #ifdef DEBUG
 	{(char *)0, (char *)0, donull, TRUE}, /* #wizdebug */
