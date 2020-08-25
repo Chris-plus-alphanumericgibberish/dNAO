@@ -3449,6 +3449,12 @@ boolean * messaged;
 		else mdef->mspec_used = max(mdef->mspec_used + 1, 1);
 	}
 
+	/* Liecleaver does NOT double the damage of fired bolts */
+	if (oartifact == ART_LIECLEAVER && (otmp != msgr)) {
+		/* reduce bonus damage by 1x basedmg to negate previous doubling */
+		*plusdmgptr -= basedmg;
+	}
+
 	if (oartifact == ART_AVENGER ){
 		/* Avenger cancels victims */
 		if(dieroll <= 2){
