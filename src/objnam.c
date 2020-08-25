@@ -2775,20 +2775,20 @@ const char *oldstr;
 
 	/* Same singular and plural; mostly Japanese words except for "manes" */
 	if ((len == 2 && !strcmp(str, "ya")) ||
-	    (len >= 2 && !strcmp(spot-1, "ai")) || /* samurai, Uruk-hai */
-	    (len >= 3 && !strcmp(spot-2, " ya")) ||
-	    (len >= 4 && !strcmp(spot-3, "drow")) ||
-	    (len >= 4 &&
-	     (!strcmp(spot-3, "fish") || !strcmp(spot-3, "tuna") ||
-	      !strcmp(spot-3, "deer") || !strcmp(spot-3, "yaki"))) ||
-	    (len >= 5 && (!strcmp(spot-4, "sheep") ||
+		(len >= 2 && !strcmp(spot-1, "ai")) || /* samurai, Uruk-hai */
+		(len >= 3 && !strcmp(spot-2, " ya")) ||
+		(len >= 4 && !strcmp(spot-3, "drow")) ||
+		(len >= 4 &&
+		 (!strcmp(spot-3, "fish") || !strcmp(spot-3, "tuna") ||
+		  !strcmp(spot-3, "deer") || !strcmp(spot-3, "yaki"))) ||
+		(len >= 5 && (!strcmp(spot-4, "sheep") ||
 			!strcmp(spot-4, "ninja") ||
 			!strcmp(spot-4, "ronin") ||
 			!strcmp(spot-4, "shito") ||
 			!strcmp(spot-4, "tengu") ||
 			!strcmp(spot-4, "manes"))) ||
-	    (len >= 6 && !strcmp(spot-5, "ki-rin")) ||
-	    (len >= 7 && !strcmp(spot-6, "gunyoki")) ||
+		(len >= 6 && !strcmp(spot-5, "ki-rin")) ||
+		(len >= 7 && !strcmp(spot-6, "gunyoki")) ||
 		(len >= 8 && !strcmp(spot-7, "shuriken")))
 		goto bottom;
 
