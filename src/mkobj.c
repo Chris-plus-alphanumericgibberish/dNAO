@@ -2537,6 +2537,9 @@ struct monst *mtmp;
 
 /* returns a pointer to a new monst structure based on
  * the one contained within the obj.
+ * If obj did not have an oattached monst, returns a
+ * temporary monst pointer which cannot be inserted
+ * into the monst chains.
  */
 struct monst *
 get_mtraits(obj, copyof)
@@ -2544,15 +2547,28 @@ struct obj *obj;
 boolean copyof;
 {
 	struct monst *mtmp = (struct monst *)0;
+	struct monst *mnew = (struct monst *)0;
 
-	if (obj->oxlth && obj->oattached == OATTACHED_MONST)
+	if (obj->oxlth && obj->oattached == OATTACHED_MONST) {
 		mtmp = (struct monst *)obj->oextra;
-	if (mtmp && copyof && mtmp->mextra_p) {
-		void * mextra_bundle = ((struct monst *)obj->oextra)+1;
-		/* also copy mextra */
-		unbundle_mextra(mtmp, mextra_bundle);
 	}
-	return mtmp;
+	if (mtmp) {
+		if (copyof) {
+			mnew = malloc(sizeof(struct monst));	/* allocate memory for the monster */
+			memcpy((genericptr_t)mnew, (genericptr_t)mtmp, sizeof(struct monst));
+
+			/* we may also need to copy mextra */
+			if (mnew->mextra_p) {
+				void * mextra_bundle = ((struct monst *)obj->oextra)+1;
+				unbundle_mextra(mnew, mextra_bundle);
+			}
+		}
+		else {
+			/* return a read-only mtmp */
+			mnew = mtmp;
+		}
+	}
+	return mnew;
 }
 
 #endif /* OVL1 */

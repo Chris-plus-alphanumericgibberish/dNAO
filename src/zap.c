@@ -604,8 +604,11 @@ coord *cc;
 		mtmp2 = get_mtraits(obj, TRUE);
 	if (mtmp2) {
 		set_mon_data(mtmp2, mtmp2->mtyp);
-		if (mtmp2->mhpmax <= 0 && !is_rider(mtmp2->data))
+		if (mtmp2->mhpmax <= 0 && !is_rider(mtmp2->data)) {
+			/* no good; free any mx made and return null */
+			rem_all_mx(mtmp2);
 			return (struct monst *)0;
+		}
 		mtmp = makemon(mtmp2->data,
 				cc->x, cc->y, NO_MINVENT|MM_NOWAIT|MM_NOCOUNTBIRTH);
 		if (!mtmp) return mtmp;
