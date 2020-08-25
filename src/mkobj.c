@@ -2544,21 +2544,15 @@ struct obj *obj;
 boolean copyof;
 {
 	struct monst *mtmp = (struct monst *)0;
-	struct monst *mnew = (struct monst *)0;
 
 	if (obj->oxlth && obj->oattached == OATTACHED_MONST)
 		mtmp = (struct monst *)obj->oextra;
-	if (mtmp) {
-	    if (copyof) {
-			void * mextra_bundle = ((struct monst *)obj->oextra)+1;
-			/* also copy mextra */
-			unbundle_mextra(mtmp, mextra_bundle);
-	    } else {
-	      /* Never insert this returned pointer into mon chains! */
-	    	mnew = mtmp;
-	    }
+	if (mtmp && copyof && mtmp->mextra_p) {
+		void * mextra_bundle = ((struct monst *)obj->oextra)+1;
+		/* also copy mextra */
+		unbundle_mextra(mtmp, mextra_bundle);
 	}
-	return mnew;
+	return mtmp;
 }
 
 #endif /* OVL1 */

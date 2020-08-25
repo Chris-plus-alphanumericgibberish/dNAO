@@ -91,7 +91,7 @@ int mx_id;
 			foundany = TRUE;
 	if (!foundany) {
 		/* dealloc mextra_p */
-		free((genericptr_t)mtmp->mextra_p);
+		free((genericptr_t)(mtmp->mextra_p));
 		mtmp->mextra_p = (union mextra *)0;
 	}
 	return;
@@ -122,7 +122,7 @@ int mx_id;
 	if (mx_p1 = get_mx(mon1, mx_id)) {
 		mx_p2 = get_mx(mon2, mx_id);
 		if(!mx_p2)
-			add_mx(mon2, mx_id);
+			add_mx_l(mon2, mx_id, siz_mx(mon1, mx_id)-sizeof(int));
 		memcpy(mx_p1, get_mx(mon2, mx_id), siz_mx(mon1, mx_id));
 	}
 	return;
@@ -137,6 +137,18 @@ int mx_id;
 {
 	cpy_mx(mon1, mon2, mx_id);
 	rem_mx(mon1, mx_id);
+	return;
+}
+
+void
+mov_all_mx(mon1, mon2)
+struct monst * mon1;
+struct monst * mon2;
+{
+	int mx_id;
+	for (mx_id=0; mx_id<NUM_MX; mx_id++)
+		cpy_mx(mon1, mon2, mx_id);
+	rem_all_mx(mon1);
 	return;
 }
 
@@ -225,6 +237,9 @@ void * mextra_block;
 	int toread = 0;
 	int len;
 	void * mx_p;
+
+	/* clear stale mextra pointer from mtmp */
+	mtmp->mextra_p = (union mextra *)0;
 
 	/* determine what components are here */
 	toread = *((int *)mextra_block);

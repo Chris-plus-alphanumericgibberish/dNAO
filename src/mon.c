@@ -3739,6 +3739,9 @@ register struct monst *mtmp, *mtmp2;
     }
     mtmp->minvent = 0;
 
+	/* transfer the monster's components */
+	mov_all_mx(mtmp, mtmp2);
+
     /* remove the old monster from the map and from `fmon' list */
     relmon(mtmp);
 
@@ -3763,10 +3766,9 @@ register struct monst *mtmp, *mtmp2;
 #ifdef STEED
     if (u.usteed == mtmp) u.usteed = mtmp2;
 #endif
-    if (mtmp2->isshk) replshk(mtmp,mtmp2);
+    if (mtmp2->isshk) replshk(mtmp2);
 
     /* discard the old monster */
-	rem_all_mx(mtmp);
     dealloc_monst(mtmp);
 }
 
