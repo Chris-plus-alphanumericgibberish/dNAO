@@ -897,12 +897,10 @@ random_special_room_default_room_and_corridors:
 #undef mnotgone
 
 	/* pick a room */
-	total_prob = rnd(total_prob);
-	while (total_prob > 0)
-	{
-		i--;
+	if (total_prob > 0)
+		total_prob = rnd(total_prob);
+	while (total_prob > 0 && i-- > 0)
 		total_prob -= special_rooms[i].prob;
-	}
 
 	if (i >= 0)
 		return special_rooms[i].type;
