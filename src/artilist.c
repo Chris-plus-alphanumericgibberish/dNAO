@@ -315,7 +315,7 @@ A("Peace Keeper",		ATHAME,							(const char *)0,
 /* set str and con to 25, and smashing ogres excercises str and wis <- A-tier */
 A("Ogresmasher",		WAR_HAMMER,						(const char *)0,
 	2000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_LAWFUL, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
+	A_NONE, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
 	MONS(vsMSYM(S_OGRE)),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES|ARTA_VORPAL|ARTA_CANCEL),
 	PROPS(), NOFLAG,
