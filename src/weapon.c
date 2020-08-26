@@ -1180,8 +1180,7 @@ int spot;
 	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 	    if (otmp->otyp == x &&
 		    /* never select non-cockatrice corpses */
-		    !((x == CORPSE || x == EGG) &&
-			!touch_petrifies(&mons[otmp->corpsenm])) &&
+		    !((x == CORPSE || x == EGG) && (otmp->corpsenm == NON_PM || !touch_petrifies(&mons[otmp->corpsenm]))) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC || otmp->otyp == KAMEREL_VAJRA) &&
 			/* never offhand artifacts (unless you are the Bastard) */
