@@ -3306,6 +3306,8 @@ dosacrifice()
 				u.umartial = TRUE;
 			} else if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA){
 				unrestrict_weapon_skill(P_WHIP);
+			} else if(otmp->oartifact == ART_HELLRIDER_S_SADDLE){
+				unrestrict_weapon_skill(P_RIDING);
 			}
 			return(1);
 		}
