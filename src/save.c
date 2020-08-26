@@ -36,11 +36,6 @@ STATIC_DCL void FDECL(savelev0, (int,int,int));
 STATIC_DCL boolean NDECL(swapout_oldest);
 STATIC_DCL void FDECL(copyfile, (char *,char *));
 #endif /* MFLOPPY */
-#ifdef GCC_WARN
-static long nulls[10];
-#else
-#define nulls nul
-#endif
 
 #if defined(UNIX) || defined(VMS) || defined(__EMX__) || defined(WIN32)
 #define HUP	if (!program_state.done_hup)
@@ -965,6 +960,7 @@ register int fd, mode;
 register struct trap *trap;
 {
 	register struct trap *trap2;
+	static struct trap zerotrap;
 
 	while (trap) {
 	    trap2 = trap->ntrap;
@@ -977,7 +973,7 @@ register struct trap *trap;
 	    trap = trap2;
 	}
 	if (perform_bwrite(mode))
-	    bwrite(fd, (genericptr_t)nulls, sizeof(struct trap));
+	    bwrite(fd, (genericptr_t) &zerotrap, sizeof(struct trap));
 }
 
 /* save all the fruit names and ID's; this is used only in saving whole games
@@ -990,6 +986,7 @@ savefruitchn(fd, mode)
 register int fd, mode;
 {
 	register struct fruit *f2, *f1;
+	static struct fruit zerofruit;
 
 	f1 = ffruit;
 	while (f1) {
@@ -1001,7 +998,7 @@ register int fd, mode;
 	    f1 = f2;
 	}
 	if (perform_bwrite(mode))
-	    bwrite(fd, (genericptr_t)nulls, sizeof(struct fruit));
+	    bwrite(fd, (genericptr_t) &zerofruit, sizeof(struct fruit));
 	if (release_data(mode))
 	    ffruit = 0;
 }
