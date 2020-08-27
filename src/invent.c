@@ -82,7 +82,7 @@ register struct obj *otmp;
 	    (('a' <= i && i <= 'z') || ('A' <= i && i <= 'Z')))
 		return;
 	for(i = lastinvnr+1; i != lastinvnr; i++) {
-		if(i == 52) { i = -1; continue; }
+		if(i >= 52) { i = -1; continue; }
 		if(!inuse[i]) break;
 	}
 	otmp->invlet = (inuse[i] ? NOINVSYM :
