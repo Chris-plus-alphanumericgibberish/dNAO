@@ -2945,7 +2945,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 					if (carried(otmp)) useup(otmp);
 					else useupf(otmp, 1L);
 				}
-				if(otmp->otyp == TIN) {
+				else if(otmp->otyp == TIN) {
 					start_tin(otmp);
 					return(1);
 				}
