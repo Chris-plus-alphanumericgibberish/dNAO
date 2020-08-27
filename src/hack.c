@@ -889,7 +889,7 @@ boolean guess;
 				return TRUE;
 			    }
 			}
-			else if (!suretravel[nx][ny] && levl[nx][ny].seenv && suretravel[nx-x][ny-y]) {
+			else if (!suretravel[nx][ny] && levl[nx][ny].seenv && suretravel[x][y]) {
 				/* we are now sure of this step (because the previous step was) */
 			    travelstepx[1-set][nn] = nx;
 			    travelstepy[1-set][nn] = ny;
