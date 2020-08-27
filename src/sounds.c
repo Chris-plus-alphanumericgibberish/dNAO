@@ -4152,7 +4152,7 @@ int tx,ty;
 		if(u.sealTimeout[MARIONETTE-FIRST_SEAL] < moves){
 			//Spirit requires that her seal be drawn in the Valley of the Dead or in a graveyard.
 			boolean in_a_graveyard = rooms[levl[tx][ty].roomno - ROOMOFFSET].rtype == MORGUE;
-			if (in_a_graveyard || on_level(&valley_level, &u.uz) || on_level(&tomb_dnum, &u.uz)){
+			if (in_a_graveyard || on_level(&valley_level, &u.uz) || (tomb_dnum == u.uz.dnum)){
 				if(!Blind) You("notice metal wires sticking out of the ground within the seal.");
 				if(u.sealCounts < numSlots){
 					if(!Blind) pline("In fact, there are wires sticking up all around you.");
