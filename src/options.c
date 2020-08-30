@@ -4543,22 +4543,28 @@ char *str;
 			;
 		    if (isspace(*c) || *c == 0) numeric = TRUE;
 		}
-		if (found || numeric ||
-		    !strncmp(str, "cursed ", 7) ||
-		    !strncmp(str, "uncursed ", 9) ||
-		    !strncmp(str, "blessed ", 8) ||
-		    !strncmp(str, "partly eaten ", 13) ||
-		    (!strncmp(str, "tin of ", 7) &&
-			(!strcmp(str+7, "spinach") ||
-			 name_to_mon(str+7) >= LOW_PM)) ||
-		    !strcmp(str, "empty tin") ||
-		    ((!strncmp(eos(str)-7," corpse",7) ||
-			    !strncmp(eos(str)-4, " egg",4)) &&
-			name_to_mon(str) >= LOW_PM))
-			{
-				Strcpy(buf, pl_fruit);
-				Strcpy(pl_fruit, "candied ");
-				nmcpy(pl_fruit+8, buf, PL_FSIZ-8);
+		{
+		    int len = strlen(str);
+		    if (found || numeric ||
+			    !strncmp(str, "cursed ", 7) ||
+			    !strncmp(str, "uncursed ", 9) ||
+			    !strncmp(str, "blessed ", 8) ||
+			    !strncmp(str, "partly eaten ", 13) ||
+			    (!strncmp(str, "tin of ", 7) &&
+			     (!strcmp(str+7, "spinach") ||
+			      name_to_mon(str+7) >= LOW_PM)) ||
+			    !strcmp(str, "empty tin") ||
+			    (
+			     ((len >= 8 && !strncmp(eos(str)-7," corpse",7)) ||
+			      (len >= 5 && !strncmp(eos(str)-4, " egg",4)))  &&
+			     name_to_mon(str) >= LOW_PM
+			    )
+		       )
+		    {
+			Strcpy(buf, pl_fruit);
+			Strcpy(pl_fruit, "candied ");
+			nmcpy(pl_fruit+8, buf, PL_FSIZ-8);
+		    }
 		}
 	}
 	for(f=ffruit; f; f = f->nextf) {
