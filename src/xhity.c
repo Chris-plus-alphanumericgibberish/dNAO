@@ -12310,7 +12310,7 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 				}
 
 				/* petrifying eggs */
-				if (touch_petrifies(&mons[weapon->corpsenm])) {
+				if (weapon->corpsenm != NON_PM && touch_petrifies(&mons[weapon->corpsenm])) {
 					/*learn_egg_type(obj->corpsenm);*/
 					if (vis) {
 						if (magr) {
