@@ -220,7 +220,7 @@ int rmtyp;
 {
     int rno = levl[mon->mx][mon->my].roomno;
 
-    return rooms[rno - ROOMOFFSET].rtype == rmtyp;
+    return rno >= ROOMOFFSET && rooms[rno - ROOMOFFSET].rtype == rmtyp;
 }
 
 void
