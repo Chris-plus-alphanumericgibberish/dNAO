@@ -6412,7 +6412,8 @@ char sym;
 	if(iflags.num_pad) sdp = ndir; else sdp = sdir;	/* DICE workaround */
 
 	u.dz = 0;
-	if(!(dp = index(sdp, sym))) return 0;
+	/* sym defaults to null at game start, causing dp - sdp to be 10, overflowing */
+	if(!sym || !(dp = index(sdp, sym))) return 0;
 	u.dx = xdir[dp-sdp];
 	u.dy = ydir[dp-sdp];
 	u.dz = zdir[dp-sdp];
