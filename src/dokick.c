@@ -41,7 +41,7 @@ register boolean clumsy;
 	if(mon->m_ap_type) seemimic(mon);
 	check_caitiff(mon);
 
-	result = xmeleehity(&youmonst, mon, &basickick, (struct obj *)0, -1, 1000, FALSE);
+	result = xmeleehity(&youmonst, mon, &basickick, (struct obj **)0, -1, 1000, FALSE);
 	result = xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, result, mdat, TRUE);
 
 	if (result) {

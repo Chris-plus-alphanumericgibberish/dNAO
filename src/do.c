@@ -167,7 +167,7 @@ const char *verb;
 		    if (mtmp) {
 			if (!mon_resistance(mtmp,PASSES_WALLS) &&
 				!throws_rocks(mtmp->data)) {
-				if (hmon_general(&youmonst, mtmp, (struct attack *)0, (struct attack *)0, obj, (struct obj *)0, HMON_FIRED, 0, 0, TRUE, rnd(20), FALSE, -1, 0) != MM_DEF_DIED
+				if (hmon_general(&youmonst, mtmp, (struct attack *)0, (struct attack *)0, &obj, (struct obj *)0, HMON_FIRED, 0, 0, TRUE, rnd(20), FALSE, -1) != MM_DEF_DIED
 					&& !is_whirly(mtmp->data))
 				return FALSE;	/* still alive */
 			}
@@ -553,7 +553,7 @@ register const char *word;
 
 int
 drop(obj)
-register struct obj *obj;
+struct obj *obj;
 {
 	if(!obj) return(0);
 	if(!canletgo(obj,"drop"))
@@ -600,10 +600,9 @@ register struct obj *obj;
 		if (obj->oclass == COIN_CLASS) flags.botl = 1;
 		freeinv(obj);
 #endif
-		boolean wepgone = FALSE;
 		bhitpos.x = u.ux; bhitpos.y = u.uy;
 		obj->ox = u.ux; obj->oy = u.uy;
-		hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
+		hitfloor2(&youmonst, &obj, (struct obj *)0, FALSE, FALSE);
 		return(1);
 	    }
 	    if (!IS_ALTAR(levl[u.ux][u.uy].typ) && flags.verbose)

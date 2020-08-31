@@ -3590,10 +3590,9 @@ struct obj *box; /* or bag */
 
 			if (highdrop) {
 				/* might break or fall down stairs; handles altars itself */
-				boolean wepgone = FALSE;
 				bhitpos.x = u.ux; bhitpos.y = u.uy;
 				otmp->ox = u.ux; otmp->oy = u.uy;
-				hitfloor2(&youmonst, otmp, (struct obj *)0, FALSE, FALSE, &wepgone);
+				hitfloor2(&youmonst, &otmp, (struct obj *)0, FALSE, FALSE);
 			} else {
 				if (altarizing) {
 					doaltarobj(otmp);

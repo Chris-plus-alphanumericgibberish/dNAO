@@ -774,10 +774,9 @@ struct obj *obj;			/* only scatter this obj        */
 			} else if ((mtmp = m_at(bhitpos.x, bhitpos.y)) != 0) {
 				if (scflags & MAY_HITMON) {
 				    stmp->range--;
-					boolean used_up = FALSE;
 					int dieroll = rnd(20);
 					if (tohitval((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 0) >= dieroll)
-						(void)hmon_with_unowned_obj(mtmp, stmp->obj, dieroll, &used_up);
+						(void)hmon_with_unowned_obj(mtmp, &(stmp->obj), dieroll);
 					else
 						miss(xname(stmp->obj), mtmp);
 					if (used_up) {
@@ -794,7 +793,7 @@ struct obj *obj;			/* only scatter this obj        */
 					if (hitvalu > (dieroll = rnd(20))) {
 						killer = "flying object";
 						killer_format = KILLED_BY_AN;
-						(void)hmon_with_unowned_obj(&youmonst, stmp->obj, dieroll, 0);
+						(void)hmon_with_unowned_obj(&youmonst, &(stmp->obj), dieroll);
 						stmp->range -= 3;
 						stop_occupation();
 					}
