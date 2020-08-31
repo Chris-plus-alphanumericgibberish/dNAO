@@ -3415,7 +3415,7 @@ boolean * messaged;
 		/* cannot begin a grapple -- Damage is done by adding an AT_HUGS to your attack chain, NOT here. */
 		if ((youagr || youdef) && !u.ustuck)
 		{
-			int newres = xmeleehurty(magr, mdef, &grapple, &grapple, otmp, (youagr || youdef), 0, dieroll, -1, FALSE);
+			int newres = xmeleehurty(magr, mdef, &grapple, &grapple, &otmp, (youagr || youdef), 0, dieroll, -1, FALSE);
 
 			/* quick return in case we grabbed a cockatrice or something */
 			if (newres & (MM_AGR_DIED | MM_AGR_STOP))
