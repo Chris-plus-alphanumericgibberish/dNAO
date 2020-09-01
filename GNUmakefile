@@ -43,7 +43,7 @@ SRCOBJ = allmain.o alloc.o apply.o artifact.o attrib.o ball.o bones.o	\
          mextra.o minion.o mklev.o mkmap.o mkmaze.o mkobj.o mkroom.o	\
          mon.o mondata.o monmove.o monst.o monstr.o mplayer.o		\
          mthrowu.o muse.o music.o o_init.o objects.o objnam.o		\
-         options.o pager.o pickup.o pline.o polyself.o potion.o		\
+         oextra.o options.o pager.o pickup.o pline.o polyself.o potion.o	\
          pray.o priest.o projectile.o quest.o questpgr.o read.o 	\
          recover.o rect.o region.o restore.o rip.o rnd.o role.o 	\
          rumors.o save.o seduce.o shk.o shknam.o sit.o sounds.o 	\

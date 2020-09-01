@@ -1299,6 +1299,22 @@ E void FDECL(unbundle_mextra, (struct monst *, void *));
 E void FDECL(save_mextra, (struct monst *, int, int));
 E void FDECL(rest_mextra, (struct monst *, int, boolean));
 
+/* out of order, but it makes sense to directly follow mextra */
+/* ### oextra.c ### */
+E void FDECL(add_ox, (struct obj *, int));
+E void FDECL(add_ox_l, (struct obj *, int, int));
+E void FDECL(rem_ox, (struct obj *, int));
+E void FDECL(rem_all_ox, (struct obj *));
+E void FDECL(cpy_ox, (struct obj *, struct obj *, int));
+E void FDECL(mov_ox, (struct obj *, struct obj *, int));
+E void FDECL(mov_all_ox, (struct obj *, struct obj *));
+E void * FDECL(get_ox, (struct obj *, int));
+E int FDECL(siz_ox, (struct obj *, int));
+E void * FDECL(bundle_oextra, (struct obj *, int *));
+E void FDECL(unbundle_oextra, (struct obj *, void *));
+E void FDECL(save_oextra, (struct obj *, int, int));
+E void FDECL(rest_oextra, (struct obj *, int, boolean));
+
 /* ### minion.c ### */
 
 E void FDECL(msummon, (struct monst *));

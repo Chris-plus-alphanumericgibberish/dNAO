@@ -352,6 +352,8 @@ struct obj {
 	
 	struct mask_properties *mp;
 
+	union oextra * oextra_p;
+
 	long oextra[1];		/* used for name of ordinary objects - length
 				   is flexible; amount for tmp gold objects.  Must be last? */
 };

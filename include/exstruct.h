@@ -50,6 +50,16 @@ struct emin {
 };
 #define EMIN(mon)	((mon)->mextra_p->emin_p)
 
+struct emon {
+	int size;
+#ifdef MONST_H
+	struct monst mondat;
+#else
+	long dummy[1];
+#endif
+};
+#define EMON(obj)	((obj)->oextra_p->emon_p)
+
 
 struct enam {
 	int name_lth;			/* length of name in bytes; how far to read */
@@ -57,7 +67,7 @@ struct enam {
 };
 #define M_HAS_NAME(mtmp)	((mtmp) && (mtmp)->mextra_p && (mtmp)->mextra_p->enam_p)
 #define NAME(mtmp)	((mtmp)->mextra_p->enam_p->name)
-
+//#define ONAME(otmp)	((otmp)->oextra_p->enam_p->name)
 
 struct epri {
 	aligntyp shralign;	/* alignment of priest's shrine */
