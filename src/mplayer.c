@@ -52,7 +52,7 @@ dev_name()
 	    for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 		if(!is_mplayer(mtmp->data)) continue;
 		if(!M_HAS_NAME(mtmp)) continue;
-		if(!strncmp(developers[i], NAME(mtmp),
+		if(!strncmp(developers[i], MNAME(mtmp),
 			               strlen(developers[i]))) {
 		    match = TRUE;
 		    break;

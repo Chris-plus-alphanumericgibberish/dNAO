@@ -345,7 +345,7 @@ const char *name;
 	/* add name, if we're giving it one */
 	if (lth > 0) {
 		add_mx_l(mtmp, MX_ENAM, lth);
-		Strcpy(NAME(mtmp), name);
+		Strcpy(MNAME(mtmp), name);
 	}
 
 	return(mtmp);
@@ -1042,7 +1042,7 @@ boolean called;
 	    Strcat(buf, rndmonnam());
 	    name_at_start = FALSE;
 	} else if (M_HAS_NAME(mtmp)) {
-	    char *name = NAME(mtmp);
+	    char *name = MNAME(mtmp);
 
 	    if (mdat->mtyp == PM_GHOST) {
 			Sprintf(eos(buf), "%s ghost", s_suffix(name));

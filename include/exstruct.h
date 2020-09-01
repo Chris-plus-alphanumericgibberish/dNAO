@@ -66,7 +66,7 @@ struct enam {
 	char name[PL_PSIZ];		/* length is actually name_lth */
 };
 #define M_HAS_NAME(mtmp)	((mtmp) && (mtmp)->mextra_p && (mtmp)->mextra_p->enam_p)
-#define NAME(mtmp)	((mtmp)->mextra_p->enam_p->name)
+#define MNAME(mtmp)	((mtmp)->mextra_p->enam_p->name)
 #define ONAME(otmp)	((otmp)->oextra_p->enam_p->name)
 
 struct epri {

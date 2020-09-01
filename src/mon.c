@@ -1188,7 +1188,7 @@ register struct monst *mtmp;
 		if (flags.bypasses) bypass_obj(obj);
 
 		if (M_HAS_NAME(mtmp))
-			obj = oname(obj, NAME(mtmp));
+			obj = oname(obj, MNAME(mtmp));
 
 		/* Avoid "It was hidden under a green mold corpse!" 
 		 *  during Blind combat. An unseen monster referred to as "it"
@@ -5076,7 +5076,7 @@ register struct monst *mdef;
 		   item-conferred attributes */
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
-		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, MNAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
 		    (void) add_to_container(otmp, obj);
@@ -5171,7 +5171,7 @@ register struct monst *mdef;
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
 		set_material_gm(otmp, GOLD);
-		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, MNAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
 			set_material(obj, GOLD);
@@ -5231,7 +5231,7 @@ register struct monst *mdef;
 		}
 		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
 		set_material(otmp, GOLD);
-		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, MNAME(mdef));
 	}
 	
 	stackobj(otmp);
@@ -5305,7 +5305,7 @@ register struct monst *mdef;
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
 		set_material_gm(otmp, GLASS);
-		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, MNAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
 		    (void) add_to_container(otmp, obj);
@@ -5363,7 +5363,7 @@ register struct monst *mdef;
 		}
 		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
 		set_material(otmp, GLASS);
-		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, MNAME(mdef));
 	}
 	
 	stackobj(otmp);
@@ -6514,10 +6514,10 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		 * polymorphed, so dropping the rank for mplayers seems
 		 * reasonable.
 		 */
-		char *p = index(NAME(mtmp), ' ');
+		char *p = index(MNAME(mtmp), ' ');
 		if (p) {
 			char nambuf[BUFSZ];
-			Strcpy(nambuf, NAME(mtmp));
+			Strcpy(nambuf, MNAME(mtmp));
 			*p = '\0';
 			christen_monst(mtmp, nambuf);
 		}
@@ -6627,7 +6627,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		char nambuf[BUFSZ];
 		boolean hadname = FALSE;
 		if(M_HAS_NAME(mtmp)) {
-			Strcpy(nambuf, NAME(mtmp));
+			Strcpy(nambuf, MNAME(mtmp));
 	    	rem_mx(mtmp, MX_ENAM);
 			hadname = TRUE;
 		}
