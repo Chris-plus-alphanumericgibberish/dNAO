@@ -1205,7 +1205,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		/* call hmon to make the projectile hit */
 		/* hmon will do hitmsg */
 		result = hmon_general(magr, mdef, &dummy, &dummy, thrownobj_p, vpointer, hmoncode, 0, 0, TRUE, dieroll, FALSE, vis);
-
+		thrownobj = *thrownobj_p;
 		/* wake up defender */
 		wakeup2(mdef, youagr);
 
@@ -1216,7 +1216,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			hot_pursuit(mdef);
 
 		/* deal with projectile */
-		if (*thrownobj_p) {
+		if (!thrownobj) {
 			/*hmon destroyed it, we're already done*/;
 		}
 		else 

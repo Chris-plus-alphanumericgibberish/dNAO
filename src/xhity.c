@@ -3932,12 +3932,14 @@ boolean ranged;
 		}
 		/* hit with [weapon] */
 		result = hmon_general(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis);
+		weapon = *weapon_p;
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; weapon && (i < weapon->ostriking); i++) {
 				result = hmon_general(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis);
+				weapon = *weapon_p;
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
@@ -12125,7 +12127,7 @@ int vis;						/* True if action is at all visible to the player */
 			else {
 				otmp = weapon;
 				weapon = (struct obj *)0;
-				weapon_p = NULL;
+				*weapon_p = NULL;
 			}
 			if (otmp->where != OBJ_FREE) {
 				if (youagr)
@@ -12167,7 +12169,7 @@ int vis;						/* True if action is at all visible to the player */
 					weapon = &tempwep;
 					
 					nudzirath_shatter(otmp, bhitpos.x, bhitpos.y);
-					weapon_p = NULL;
+					*weapon_p = NULL;
 
 					/* check if defender was killed */
 					if (*hp(mdef) < 1)
@@ -12335,7 +12337,7 @@ int vis;						/* True if action is at all visible to the player */
 							useupall(weapon);
 						else for (; cnt; cnt--)
 							m_useup(magr, weapon);
-						weapon_p = NULL;
+						*weapon_p = NULL;
 					}
 					/* return if we had a significant result from xstoney */
 					if (result&(MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_DIED))
@@ -12374,7 +12376,7 @@ int vis;						/* True if action is at all visible to the player */
 						weapon->owt = weight(weapon);
 						if (thrown) {
 							place_object(weapon, x(mdef), y(mdef));
-							weapon_p = NULL;
+							*weapon_p = NULL;
 						}
 					}
 					else {
@@ -13836,7 +13838,7 @@ int vis;						/* True if action is at all visible to the player */
 		}
 		if (deallocweapon) {
 			weapon = (struct obj *)0;
-			weapon_p = NULL;
+			*weapon_p = NULL;
 		}
 	}
 	

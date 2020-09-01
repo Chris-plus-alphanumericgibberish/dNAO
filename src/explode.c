@@ -773,13 +773,14 @@ struct obj *obj;			/* only scatter this obj        */
 				stmp->stopped = TRUE;
 			} else if ((mtmp = m_at(bhitpos.x, bhitpos.y)) != 0) {
 				if (scflags & MAY_HITMON) {
+					struct obj ** s_p = &(stmp->obj);
 				    stmp->range--;
 					int dieroll = rnd(20);
 					if (tohitval((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 0) >= dieroll)
-						(void)hmon_with_unowned_obj(mtmp, &(stmp->obj), dieroll);
+						(void)hmon_with_unowned_obj(mtmp, s_p, dieroll);
 					else
 						miss(xname(stmp->obj), mtmp);
-					if (used_up) {
+					if (!(*s_p)) {
 						stmp->obj = (struct obj *)0;
 						stmp->stopped = TRUE;
 				    }
