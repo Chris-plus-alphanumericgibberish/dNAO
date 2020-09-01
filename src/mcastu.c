@@ -4487,7 +4487,7 @@ int tary;
 		if(magr){
 			struct attack disintegrate = {AT_BEAM, AD_DISN, 4, 1};
 			//xmeleehurty(magr, mdef, attk, originalattk, weapon, dohitmsg, flatdmg, dieroll, vis, ranged)
-			(void)xmeleehurty(magr, mdef, &disintegrate, &disintegrate, (struct obj *)0, FALSE, -1, rn1(18, 2), canseemon(mdef), TRUE);
+			(void)xmeleehurty(magr, mdef, &disintegrate, &disintegrate, (struct obj **)0, FALSE, -1, rn1(18, 2), canseemon(mdef), TRUE);
 		}
 		else {
 			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
