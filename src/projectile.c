@@ -58,6 +58,7 @@ boolean verbose;				/* TRUE if messages should be printed even if the player can
 boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stunned/etc */
 {
 	boolean youagr = (magr && magr == &youmonst);
+	struct obj ** thrownobj_p;			/* pointer to thrownobj */
 	struct obj * thrownobj;				/* singular fired/thrown object */
 	boolean onlyone;					/* if ammo only consists of thrownobj */
 	boolean returning = FALSE;			/* TRUE if projectile should magically return to magr (like Mjollnir) */
@@ -220,13 +221,16 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		exercise(A_STR, TRUE);
 	}
 
+	/* set thrownobj_p before we start handing if off to projectile_attack and hmon */
+	thrownobj_p = &thrownobj;
+
 	/* if the player is swallowed, projectile is guaranteed to hit engulfer and no more */
 	if (youagr && u.uswallow) {
 		mdef = u.ustuck;
 		bhitpos.x = x(mdef);
 		bhitpos.y = y(mdef);
-		result = projectile_attack(magr, mdef, &thrownobj, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);
-		end_projectile(magr, mdef, &thrownobj, launcher, fired, forcedestroy);
+		result = projectile_attack(magr, mdef, thrownobj_p, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);
+		end_projectile(magr, mdef, thrownobj_p, launcher, fired, forcedestroy);
 		return result;
 	}
 
@@ -285,7 +289,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			toss_up2(thrownobj);
 			return MM_MISS;
 		}
-		end_projectile(magr, mdef, &thrownobj, launcher, fired, forcedestroy);
+		end_projectile(magr, mdef, thrownobj_p, launcher, fired, forcedestroy);
 		return MM_MISS;
 	}
 	else if (dz > 0) {
@@ -315,7 +319,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			return MM_MISS;
 		}
 		/* Projectile hits floor. This calls end_projectile() */
-		hitfloor2(magr, &thrownobj, launcher, fired, forcedestroy);
+		hitfloor2(magr, thrownobj_p, launcher, fired, forcedestroy);
 		return MM_MISS;
 	}
 
@@ -376,7 +380,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 				mdef = u.usteed;
 			}
 
-			result = projectile_attack(magr, mdef, &thrownobj, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);
+			result = projectile_attack(magr, mdef, thrownobj_p, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);
 
 			if (result)
 			{
@@ -415,7 +419,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		if (levl[bhitpos.x + dx][bhitpos.y + dy].typ == IRONBARS &&
 			!m_at(bhitpos.x + dx, bhitpos.y + dy) && 
 			hits_bars(
-				/* object fired   */ &thrownobj,
+				/* object fired   */ thrownobj_p,
 				/* current coords */ bhitpos.x, bhitpos.y,
 				/* force hit?     */ Is_illregrd(&u.uz) || ((bhitpos.x == initx && bhitpos.y == inity) ? 0 : !rn2(5)),
 				/* player caused  */ (magr == &youmonst))
@@ -512,11 +516,11 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 							Tobjnam(thrownobj, Blind ? "hit" : "fly"),
 							body_part(ARM));
 						/* object now hits you -- ouch! */
-						(void)hmon_general(magr, magr, (struct attack *)0, (struct attack *)0, &thrownobj, (void *)0, HMON_FIRED, 0, 0, TRUE, 0, FALSE, -1);
+						(void)hmon_general(magr, magr, (struct attack *)0, (struct attack *)0, thrownobj_p, (void *)0, HMON_FIRED, 0, 0, TRUE, 0, FALSE, -1);
 					}
 					/* end copy */
 				}
-				end_projectile(magr, mdef, &thrownobj, launcher, fired, forcedestroy);
+				end_projectile(magr, mdef, thrownobj_p, launcher, fired, forcedestroy);
 			}
 			return result;
 		}
@@ -524,7 +528,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	}
 
 	/* end the projectile */
-	end_projectile(magr, mdef, &thrownobj, launcher, fired, forcedestroy);
+	end_projectile(magr, mdef, thrownobj_p, launcher, fired, forcedestroy);
 	return result;
 }
 
