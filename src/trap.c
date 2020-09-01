@@ -610,7 +610,7 @@ int *fail_reason;
 	else if (statue->spe & STATUE_FEMALE)
 	    mon->female = TRUE;
 	/* if statue has been named, give same name to the monster */
-	if (statue->onamelth)
+	if (get_ox(statue, OX_ENAM))
 	    mon = christen_monst(mon, ONAME(statue));
 	/* transfer any statue contents to monster's inventory */
 	while ((item = statue->cobj) != 0) {

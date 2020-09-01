@@ -214,6 +214,9 @@ boolean ghostly, frozen;
 //			mread(fd, (genericptr_t) otmp->mp->mskaexe, (unsigned) sizeof(struct attribs));
 //			mread(fd, (genericptr_t) otmp->mp->mskamask, (unsigned) sizeof(struct attribs));
 		}
+		if(otmp->oextra_p){
+			rest_oextra(otmp, fd, ghostly);
+		}
 		if (ghostly) {
 		    unsigned nid = flags.ident++;
 		    add_id_mapping(otmp->o_id, nid);

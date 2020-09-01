@@ -389,7 +389,7 @@ long num;
 
 	if (obj->cobj || num <= 0L || obj->quan <= num)
 	    panic("splitobj");	/* can't split containers */
-	otmp = newobj(obj->oxlth + obj->onamelth);
+	otmp = newobj(obj->oxlth);
 	*otmp = *obj;		/* copies whole structure */
 	otmp->o_id = flags.ident++;
 	if (!otmp->o_id) otmp->o_id = flags.ident++;	/* ident overflowed */
@@ -408,8 +408,9 @@ long num;
 	if (obj->oxlth)
 	    (void)memcpy((genericptr_t)otmp->oextra, (genericptr_t)obj->oextra,
 			obj->oxlth);
-	if (obj->onamelth)
-	    (void)strncpy(ONAME(otmp), ONAME(obj), (int)obj->onamelth);
+	if (get_ox(obj, OX_ENAM)) {
+		cpy_ox(obj, otmp, OX_ENAM);
+	}
 	if (obj->unpaid) splitbill(obj,otmp);
 	if (obj->timed) obj_split_timers(obj, otmp);
 	if (obj_sheds_light(obj)) obj_split_light_source(obj, otmp);
@@ -490,7 +491,7 @@ register struct obj *otmp;
 
 	if (otmp->unpaid)
 	    subfrombill(otmp, shop_keeper(*u.ushops));
-	dummy = newobj(otmp->oxlth + otmp->onamelth);
+	dummy = newobj(otmp->oxlth);
 	*dummy = *otmp;
 	dummy->where = OBJ_FREE;
 	dummy->o_id = flags.ident++;
@@ -499,8 +500,9 @@ register struct obj *otmp;
 	if (otmp->oxlth)
 	    (void)memcpy((genericptr_t)dummy->oextra,
 			(genericptr_t)otmp->oextra, otmp->oxlth);
-	if (otmp->onamelth)
-	    (void)strncpy(ONAME(dummy), ONAME(otmp), (int)otmp->onamelth);
+	if (get_ox(otmp, OX_ENAM)) {
+		cpy_ox(otmp, dummy, OX_ENAM);
+	}
 	if (Is_candle(dummy)) dummy->lamplit = 0;
 	addtobill(dummy, FALSE, TRUE, TRUE);
 	otmp->no_charge = 1;
@@ -2479,7 +2481,7 @@ unsigned mid;
 
     if (!mid || !obj) return (struct obj *)0;
     lth = sizeof(mid);
-    namelth = obj->onamelth ? strlen(ONAME(obj)) + 1 : 0;
+    namelth = get_ox(obj, OX_ENAM) ? strlen(ONAME(obj)) + 1 : 0;
     if (namelth) 
 	otmp = realloc_obj(obj, lth, (genericptr_t) &mid, namelth, ONAME(obj));
     else {
@@ -2519,7 +2521,7 @@ struct monst *mtmp;
 		memcpy(mextra_bundle, (genericptr_t) mtmp, sizeof(struct monst));
 		lth = sizeof(struct monst);
 	}
-	namelth = obj->onamelth ? strlen(ONAME(obj)) + 1 : 0;
+	namelth = get_ox(obj, OX_ENAM) ? strlen(ONAME(obj)) + 1 : 0;
 	otmp = realloc_obj(obj, lth, (genericptr_t) mextra_bundle, namelth, ONAME(obj));
 	if (otmp && otmp->oxlth) {
 		/* it reallocated successfully */

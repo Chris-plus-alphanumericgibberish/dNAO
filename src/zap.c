@@ -815,7 +815,7 @@ boolean dolls;
 					obj->oattached = OATTACHED_NOTHING;
 				}
 				/* Monster retains its name */
-				if (obj->onamelth)
+				if (get_ox(obj, OX_ENAM))
 					mtmp = christen_monst(mtmp, ONAME(obj));
 				/* flag the quest leader as alive. */
 				if (mtmp->mtyp == urole.ldrnum || mtmp->m_id ==
@@ -4921,7 +4921,7 @@ register struct obj *obj;		   /* no texts here! */
 	obj->quan = (long) rn1(60, 7);
 	obj->oclass = GEM_CLASS;
 	obj->known = FALSE;
-	obj->onamelth = 0;		/* no names */
+	rem_ox(obj, OX_ENAM);	/* no names */
 	obj->oxlth = 0;			/* no extra data */
 	obj->oattached = OATTACHED_NOTHING;
 	set_material_gm(obj, MINERAL);

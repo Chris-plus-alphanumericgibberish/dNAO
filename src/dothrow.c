@@ -674,7 +674,7 @@ register struct obj *obj;
 			goto nopick;
 		}
 	/* making guesses */
-	} else if(obj->onamelth || objects[obj->otyp].oc_uname) {
+	} else if(get_ox(obj, OX_ENAM) || objects[obj->otyp].oc_uname) {
 		if(is_gem) {
 			if(is_buddy) {
 				Strcat(buf,addluck);

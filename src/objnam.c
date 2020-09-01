@@ -467,7 +467,7 @@ boolean
 obj_is_pname(obj)
 register struct obj *obj;
 {
-	return((boolean)(obj->dknown && obj->known && obj->onamelth && obj->oartifact && !undiscovered_artifact(obj->oartifact)));
+	return((boolean)(obj->dknown && obj->known && get_ox(obj, OX_ENAM) && obj->oartifact && !undiscovered_artifact(obj->oartifact)));
 }
 
 /* Give the name of an object seen at a distance.  Unlike xname/doname,
@@ -1732,8 +1732,8 @@ boolean with_price;
 	
 	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)
 		|| (iflags.force_artifact_names && !getting_obj_base_desc && obj->oartifact != ART_FLUORITE_OCTAHEDRON)) {
-		if ((obj->onamelth && obj->dknown) || (obj_is_pname(obj))) {
-			if (!obj_is_pname(obj) && obj->onamelth && obj->dknown) Strcat(buf, " named ");
+		if ((get_ox(obj, OX_ENAM) && obj->dknown) || (obj_is_pname(obj))) {
+			if (!obj_is_pname(obj) && get_ox(obj, OX_ENAM) && obj->dknown) Strcat(buf, " named ");
 			if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_FLUORITE_OCTAHEDRON)){
 				if (obj->quan == 8) Strcat(buf, "Fluorite Octet");
 				else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
@@ -2264,6 +2264,7 @@ struct obj *obj;
     struct obj save_obj;
     unsigned save_ocknown;
     char *buf, *save_ocuname;
+	struct enam * saved_enam_p = NULL;
 
     /* remember original settings for core of the object;
        oname and oattached extensions don't matter here--since they
@@ -2280,7 +2281,10 @@ struct obj *obj;
        be redundant when it is, so suppress "poisoned" prefix */
     obj->opoisoned = 0;
     /* strip user-supplied name; artifacts keep theirs */
-    if (!obj->oartifact) obj->onamelth = 0;
+    if (!obj->oartifact && get_ox(obj, OX_ENAM)) {
+		saved_enam_p = obj->oextra_p->enam_p;
+		obj->oextra_p->enam_p = NULL;
+	}
     /* temporarily identify the type of object */
     save_ocknown = objects[obj->otyp].oc_name_known;
     objects[obj->otyp].oc_name_known = 1;
@@ -2292,6 +2296,9 @@ struct obj *obj;
 
     objects[obj->otyp].oc_name_known = save_ocknown;
     objects[obj->otyp].oc_uname = save_ocuname;
+	if (saved_enam_p) {
+		obj->oextra_p->enam_p = saved_enam_p;
+	}
     *obj = save_obj;	/* restore object's core settings */
 
     return buf;

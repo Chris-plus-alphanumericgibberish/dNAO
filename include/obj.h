@@ -241,7 +241,6 @@ struct obj {
 	unsigned oeaten;	/* nutrition left in food, if partly eaten */
 	long age;		/* creation date */
 
-	uchar onamelth;		/* length of name (following oxlth) */
 	short oxlth;		/* length of following data */
 	/* in order to prevent alignment problems oextra should
 	   be (or follow) a long int */
@@ -411,7 +410,7 @@ struct obj {
 
 
 #define newobj(xl)	(struct obj *)alloc((unsigned)(xl) + sizeof(struct obj))
-#define ONAME(otmp)	(((char *)(otmp)->oextra) + (otmp)->oxlth)
+//#define ONAME(otmp)	(((char *)(otmp)->oextra) + (otmp)->oxlth)
 
 /* Weapons and weapon-tools */
 /* KMH -- now based on skill categories.  Formerly:

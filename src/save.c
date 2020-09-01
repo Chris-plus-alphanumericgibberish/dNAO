@@ -903,7 +903,7 @@ register struct obj *otmp;
 	while(otmp) {
 	    otmp2 = otmp->nobj;
 	    if (perform_bwrite(mode)) {
-			xl = otmp->oxlth + otmp->onamelth;
+			xl = otmp->oxlth;
 			bwrite(fd, (genericptr_t) &xl, sizeof(int));
 			bwrite(fd, (genericptr_t) otmp, xl + sizeof(struct obj));
 			if(otmp->mp){
@@ -911,6 +911,9 @@ register struct obj *otmp;
 //				bwrite(fd, (genericptr_t) otmp->mp->mskacurr, sizeof(struct attribs));
 //				bwrite(fd, (genericptr_t) otmp->mp->mskaexe, sizeof(struct attribs));
 //				bwrite(fd, (genericptr_t) otmp->mp->mskamask, sizeof(struct attribs));
+			}
+			if (otmp->oextra_p) {
+				save_oextra(otmp, fd, mode);
 			}
 	    }
 	    if (Has_contents(otmp))

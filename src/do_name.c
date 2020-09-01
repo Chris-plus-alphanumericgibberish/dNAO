@@ -478,17 +478,14 @@ const char *name;
 	}
 	otmp->oxlth = oextra_size;
 
-	otmp->onamelth = oname_size;
 	otmp->timed = 0;	/* not timed, yet */
 	otmp->lamplit = 0;	/* ditto */
-	/* __GNUC__ note:  if the assignment of otmp->onamelth immediately
-	   precedes this `if' statement, a gcc bug will miscompile the
-	   test on vax (`insv' instruction used to store bitfield does
-	   not set condition codes, but optimizer behaves as if it did).
-	   gcc-2.7.2.1 finally fixed this. */
+	
 	if (oname_size) {
-	    if (name)
-		Strcpy(ONAME(otmp), name);
+	    if (name) {
+			add_ox_l(otmp, OX_ENAM, oname_size);
+			Strcpy(ONAME(otmp), name);
+		}
 	}
 
 	if (obj->owornmask) {
@@ -616,12 +613,10 @@ const char *name;
 		}
 	}
 	
-	if (lth == obj->onamelth) {
-		/* no need to replace entire object */
-		if (lth) Strcpy(ONAME(obj), name);
-	} else {
-		obj = realloc_obj(obj, obj->oxlth,
-			      (genericptr_t)obj->oextra, lth, name);
+	/* add name */
+	if (lth) {
+		add_ox_l(obj, OX_ENAM, lth);
+		Strcpy(ONAME(obj), name);
 	}
 	
 	if (lth) artifact_exists(obj, name, TRUE);
@@ -774,8 +769,8 @@ register struct obj *obj;
 
 	if (!obj->dknown) return; /* probably blind */
 	otemp = *obj;
+	otemp.oextra_p = NULL;
 	otemp.quan = 1L;
-	otemp.onamelth = 0;
 	otemp.oxlth = 0;
 	if (objects[otemp.otyp].oc_class == POTION_CLASS && otemp.fromsink)
 	    /* kludge, meaning it's sink water */

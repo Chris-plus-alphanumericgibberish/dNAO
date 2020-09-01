@@ -1270,7 +1270,6 @@ die:
 			makeknown(otmp->otyp);
 			otmp->known = 1;	/* for fake amulets */
 			otmp->dknown = 1;	/* seen it (blindness fix) */
-			otmp->onamelth = 0;
 			otmp->quan = count;
 			Sprintf(pbuf, "%8ld %s (worth %ld %s),",
 				count, xname(otmp),
