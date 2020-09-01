@@ -5,7 +5,7 @@
 /* shknam.c -- initialize a shop */
 
 #include "hack.h"
-#include "mextra.h"
+
 
 #ifndef OVLB
 extern const struct shclass shtypes[];

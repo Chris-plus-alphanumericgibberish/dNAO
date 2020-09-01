@@ -5,7 +5,7 @@
 #define NEED_VARARGS	/* comment line for pre-compiled headers */
 
 #include "hack.h"
-#include "mextra.h"
+
 #ifndef NO_SIGNAL
 #include <signal.h>
 #endif

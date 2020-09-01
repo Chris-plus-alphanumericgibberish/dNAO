@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 
 extern const char * const destroy_strings[];	/* from xhityhelpers.c */
 

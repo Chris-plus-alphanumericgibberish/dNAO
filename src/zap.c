@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 #include "xhity.h"
 
 /* Disintegration rays have special treatment; corpses are never left.

@@ -5,7 +5,7 @@
 /* Contains code for 't' (throw) */
 
 #include "hack.h"
-#include "mextra.h"
+
 #include "xhity.h"
 
 extern void NDECL(autoquiver);
