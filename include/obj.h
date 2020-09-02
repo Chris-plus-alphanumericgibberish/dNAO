@@ -184,6 +184,7 @@ struct obj {
 	Bitfield(objsize,3);	/* 0-7 */
 	Bitfield(obj_material,5); /*Max 31*/
 	//See objclass for values
+	Bitfield(nomerge,1);	/* temporarily block from merging */
 	/* 19 free bits in this field, I think -CM */
 	
 	int obj_color;
@@ -235,8 +236,6 @@ struct obj {
 
 	unsigned oeaten;	/* nutrition left in food, if partly eaten */
 	long age;		/* creation date */
-
-	short oxlth;		/* length of following data */
 	/* in order to prevent alignment problems oextra should
 	   be (or follow) a long int */
 	long owornmask;
@@ -402,7 +401,6 @@ struct obj {
 
 
 #define newobj(xl)	(struct obj *)alloc((unsigned)(xl) + sizeof(struct obj))
-//#define ONAME(otmp)	(((char *)(otmp)->oextra) + (otmp)->oxlth)
 
 /* Weapons and weapon-tools */
 /* KMH -- now based on skill categories.  Formerly:

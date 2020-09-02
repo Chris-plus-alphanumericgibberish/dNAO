@@ -701,7 +701,6 @@ register struct obj *obj;
 	otemp = *obj;
 	otemp.oextra_p = NULL;
 	otemp.quan = 1L;
-	otemp.oxlth = 0;
 	if (objects[otemp.otyp].oc_class == POTION_CLASS && otemp.fromsink)
 	    /* kludge, meaning it's sink water */
 	    Sprintf(qbuf,"Call a stream of %s fluid:",

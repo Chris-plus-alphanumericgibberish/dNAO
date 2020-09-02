@@ -4516,6 +4516,10 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	    obj->bypass != otmp->bypass)
 	    return(FALSE);
 	
+	/* cannot be marked nomerge */
+	if (obj->nomerge || otmp->nomerge)
+		return FALSE;
+
 	if ((obj->oclass==WEAPON_CLASS || obj->oclass==ARMOR_CLASS) &&
 	    (obj->oerodeproof!=otmp->oerodeproof || obj->rknown!=otmp->rknown))
 	    return FALSE;
@@ -4564,7 +4568,8 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 		return FALSE;
 
 	/* for the moment, any additional information is incompatible */
-	if (obj->oxlth || otmp->oxlth) return FALSE;
+	if (get_ox(obj, OX_EMON) || get_ox(obj, OX_EMID) ||
+		get_ox(otmp, OX_EMON) || get_ox(otmp, OX_EMID)) return FALSE;
 
 	if(obj->oartifact != otmp->oartifact) return FALSE;
 	

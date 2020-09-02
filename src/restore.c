@@ -197,16 +197,15 @@ boolean ghostly, frozen;
 {
 	register struct obj *otmp, *otmp2 = 0;
 	register struct obj *first = (struct obj *)0;
-	int xl;
+	int endread;
 
 	while(1) {
-		mread(fd, (genericptr_t) &xl, sizeof(xl));
-		if(xl == -1) break;
-		otmp = newobj(xl);
+		mread(fd, (genericptr_t) &endread, sizeof(endread));
+		if(endread == -1) break;
+		otmp = newobj(0);
 		if(!first) first = otmp;
 		else otmp2->nobj = otmp;
-		mread(fd, (genericptr_t) otmp,
-					(unsigned) xl + sizeof(struct obj));
+		mread(fd, (genericptr_t) otmp, sizeof(struct obj));
 		if(otmp->mp){
 			otmp->mp = malloc(sizeof(struct mask_properties));
 			mread(fd, (genericptr_t) otmp->mp, (unsigned) sizeof(struct mask_properties));

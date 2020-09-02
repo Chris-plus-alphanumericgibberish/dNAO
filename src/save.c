@@ -898,14 +898,14 @@ register struct obj *otmp;
 {
 	register struct obj *otmp2;
 	unsigned int xl;
+	int zero = 0;
 	int minusone = -1;
 
 	while(otmp) {
 	    otmp2 = otmp->nobj;
 	    if (perform_bwrite(mode)) {
-			xl = otmp->oxlth;
-			bwrite(fd, (genericptr_t) &xl, sizeof(int));
-			bwrite(fd, (genericptr_t) otmp, xl + sizeof(struct obj));
+			bwrite(fd, (genericptr_t) &zero, sizeof(int));
+			bwrite(fd, (genericptr_t) otmp, sizeof(struct obj));
 			if(otmp->mp){
 				bwrite(fd, (genericptr_t) otmp->mp, (unsigned) sizeof(struct mask_properties));
 //				bwrite(fd, (genericptr_t) otmp->mp->mskacurr, sizeof(struct attribs));

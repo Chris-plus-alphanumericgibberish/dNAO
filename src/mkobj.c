@@ -389,7 +389,7 @@ long num;
 
 	if (obj->cobj || num <= 0L || obj->quan <= num)
 	    panic("splitobj");	/* can't split containers */
-	otmp = newobj(obj->oxlth);
+	otmp = newobj(0);
 	*otmp = *obj;		/* copies whole structure */
 	otmp->o_id = flags.ident++;
 	if (!otmp->o_id) otmp->o_id = flags.ident++;	/* ident overflowed */
@@ -490,7 +490,7 @@ register struct obj *otmp;
 
 	if (otmp->unpaid)
 	    subfrombill(otmp, shop_keeper(*u.ushops));
-	dummy = newobj(otmp->oxlth);
+	dummy = newobj(0);
 	*dummy = *otmp;
 	dummy->where = OBJ_FREE;
 	dummy->o_id = flags.ident++;
