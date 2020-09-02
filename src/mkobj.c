@@ -2476,22 +2476,12 @@ obj_attach_mid(obj, mid)
 struct obj *obj;
 unsigned mid;
 {
-    struct obj *otmp;
-    int lth, namelth;
-
     if (!mid || !obj) return (struct obj *)0;
-    lth = sizeof(mid);
-    namelth = get_ox(obj, OX_ENAM) ? strlen(ONAME(obj)) + 1 : 0;
-    if (namelth) 
-	otmp = realloc_obj(obj, lth, (genericptr_t) &mid, namelth, ONAME(obj));
-    else {
-	otmp = obj;
-	otmp->oxlth = sizeof(mid);
-	(void) memcpy((genericptr_t)otmp->oextra, (genericptr_t)&mid,
-								sizeof(mid));
-    }
-    if (otmp && otmp->oxlth) otmp->oattached = OATTACHED_M_ID;	/* mark it */
-    return otmp;
+
+	add_ox(obj, OX_EMID);
+	obj->oextra_p->emid_p[0] = mid;
+
+    return obj;
 }
 
 struct obj *

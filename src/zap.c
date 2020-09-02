@@ -793,11 +793,10 @@ boolean dolls;
  		            mtmp = makemon(&mons[montype], x, y,
 				       NO_MINVENT|MM_NOWAIT|MM_NOCOUNTBIRTH);
 		    if (mtmp) {
-				if (obj->oxlth && (obj->oattached == OATTACHED_M_ID)) {
+				if (get_ox(obj, OX_EMID)) {
 					unsigned m_id;
 					struct monst *ghost;
-					(void) memcpy((genericptr_t)&m_id,
-						(genericptr_t)obj->oextra, sizeof(m_id));
+					m_id = obj->oextra_p->emid_p[0];
 					ghost = find_mid(m_id, FM_FMON);
 						if (ghost && ghost->mtyp == PM_GHOST) {
 							int x2, y2;

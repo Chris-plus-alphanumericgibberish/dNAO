@@ -1100,14 +1100,12 @@ boolean ghostly;
 	    mtmp->m_id = 0;
 	    mtmp->mpeaceful = mtmp->mtame = 0;	/* pet's owner died! */
 	}
-	if (ghostly && otmp->oattached == OATTACHED_M_ID) {
-	    (void) memcpy((genericptr_t)&oldid, (genericptr_t)otmp->oextra,
-								sizeof(oldid));
+	if (ghostly && get_ox(otmp, OX_EMID)) {
+		oldid = otmp->oextra_p->emid_p[0];
 	    if (lookup_id_mapping(oldid, &nid))
-		(void) memcpy((genericptr_t)otmp->oextra, (genericptr_t)&nid,
-								sizeof(nid));
+			otmp->oextra_p->emid_p[0] = nid;
 	    else
-		otmp->oattached = OATTACHED_NOTHING;
+			rem_ox(otmp, OX_EMID);
 	}
     }
 }
