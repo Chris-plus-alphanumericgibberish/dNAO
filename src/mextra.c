@@ -211,7 +211,7 @@ long * len_p;
 
 	/* add what compenents are being written */
 	memcpy(output_ptr, &towrite, sizeof(int));
-	output_ptr = ((int *)output_ptr) + 1;
+	output_ptr = output_ptr + sizeof(int);
 
 	/* add those components */
 	for (i = 0; i < NUM_MX; i++) {
@@ -243,7 +243,7 @@ void * mextra_block;
 
 	/* determine what components are here */
 	toread = *((int *)mextra_block);
-	mextra_block = ((int *)mextra_block) + 1;
+	mextra_block = mextra_block + sizeof(int);
 	
 	/* read those components */
 	for (i = 0; i < NUM_MX; i++) {
@@ -253,7 +253,7 @@ void * mextra_block;
 		len = mx_list[i].s_size;
 		if (len == -1)	{// was saved
 			len = *((long *)mextra_block);
-			mextra_block = ((long *)mextra_block) + 1;
+			mextra_block = mextra_block + sizeof(long);
 		}
 
 		/* allocate component */
@@ -263,7 +263,7 @@ void * mextra_block;
 		/* if we had a variable len, rewrite it */
 		if (mx_list[i].s_size == -1) {
 			*((long *)mx_p) = len;
-			mx_p = ((long *)mx_p) + 1;
+			mx_p = mx_p + sizeof(long);
 		}
 		/* fill in the body of the component */
 		memcpy(mx_p, mextra_block, len);
@@ -339,7 +339,7 @@ boolean ghostly;
 		/* if we had read len, rewrite it */
 		if (mx_list[i].s_size == -1) {
 			*((long *)mx_p) = len;
-			mx_p = ((long *)mx_p) + 1;
+			mx_p = mx_p + sizeof(long);
 		}
 		mread(fd, mx_p, len);
 	}

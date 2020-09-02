@@ -211,7 +211,7 @@ long * len_p;
 
 	/* add what compenents are being written */
 	memcpy(output_ptr, &towrite, sizeof(int));
-	output_ptr = ((int *)output_ptr) + 1;
+	output_ptr = output_ptr + sizeof(int);
 
 	/* add those components */
 	for (i = 0; i < NUM_OX; i++) {
@@ -243,7 +243,7 @@ void * oextra_block;
 
 	/* determine what components are here */
 	toread = *((int *)oextra_block);
-	oextra_block = ((int *)oextra_block) + 1;
+	oextra_block = oextra_block + sizeof(int);
 	
 	/* read those components */
 	for (i = 0; i < NUM_OX; i++) {
@@ -253,7 +253,7 @@ void * oextra_block;
 		len = ox_list[i].s_size;
 		if (len == -1)	{// was saved
 			len = *((long *)oextra_block);
-			oextra_block = ((long *)oextra_block) + 1;
+			oextra_block = oextra_block + sizeof(long);
 		}
 
 		/* allocate component */
@@ -263,7 +263,7 @@ void * oextra_block;
 		/* if we had a variable len, rewrite it */
 		if (ox_list[i].s_size == -1) {
 			*((long *)ox_p) = len;
-			ox_p = ((long *)ox_p) + 1;
+			ox_p = ox_p + sizeof(long);
 		}
 		/* fill in the body of the component */
 		memcpy(ox_p, oextra_block, len);
@@ -339,7 +339,7 @@ boolean ghostly;
 		/* if we had read len, rewrite it */
 		if (ox_list[i].s_size == -1) {
 			*((long *)ox_p) = len;
-			ox_p = ((long *)ox_p) + 1;
+			ox_p = ox_p + sizeof(long);
 		}
 		mread(fd, ox_p, len);
 	}
