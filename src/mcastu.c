@@ -444,7 +444,7 @@ unsigned int type;
        case PM_NEFERET_THE_GREEN:
            return ARROW_RAIN;
 
-       case PM_DARK_ONE:
+       case PM_ANARAXIS_THE_BLACK:
            return (!rn2(4) ? TURN_TO_STONE : !rn2(3) ? RAISE_DEAD :
                     rn2(2) ? DARKNESS : MAKE_WEB);
 
