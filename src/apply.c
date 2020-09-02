@@ -4202,7 +4202,7 @@ use_doll_tear(obj)
 			return 0;
 		}
 		
-		if(dollobj->oxlth && (dollobj->oattached == OATTACHED_MONST))
+		if(get_ox(dollobj, OX_EMON))
 			mtmp = get_mtraits(dollobj, FALSE);
 		else {
 			pline("Nothing happens....");

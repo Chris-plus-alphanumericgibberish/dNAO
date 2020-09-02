@@ -600,7 +600,7 @@ coord *cc;
 	struct monst *mtmp = (struct monst *)0;
 	struct monst *mtmp2 = (struct monst *)0;
 
-	if (obj->oxlth && (obj->oattached == OATTACHED_MONST))
+	if (get_ox(obj, OX_EMON))
 		mtmp2 = get_mtraits(obj, TRUE);
 	if (mtmp2) {
 		set_mon_data(mtmp2, mtmp2->mtyp);
@@ -783,7 +783,7 @@ boolean dolls;
 				mon_adjust_speed(mtmp, 2, (struct obj *)0); /* MFAST */
 			}
 		} else {
-		    if (obj->oxlth && (obj->oattached == OATTACHED_MONST)) {
+		    if (get_ox(obj, OX_EMON)) {
 			    coord xy;
 			    xy.x = x; xy.y = y;
 				mtmp = montraits(obj, &xy);
@@ -810,8 +810,8 @@ boolean dolls;
 						recorporealization = TRUE;
 						newsym(x2, y2);
 					}
-					/* don't mess with obj->oxlth here */
-					obj->oattached = OATTACHED_NOTHING;
+					/* either it worked or it didn't. */
+					rem_ox(obj, OX_EMID);
 				}
 				/* Monster retains its name */
 				if (get_ox(obj, OX_ENAM))
@@ -4920,9 +4920,7 @@ register struct obj *obj;		   /* no texts here! */
 	obj->quan = (long) rn1(60, 7);
 	obj->oclass = GEM_CLASS;
 	obj->known = FALSE;
-	rem_ox(obj, OX_ENAM);	/* no names */
-	obj->oxlth = 0;			/* no extra data */
-	obj->oattached = OATTACHED_NOTHING;
+	rem_all_ox(obj);	/* no names or other data */
 	set_material_gm(obj, MINERAL);
 	obj->owt = weight(obj);
 	set_material(obj, mat);

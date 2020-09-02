@@ -29,7 +29,7 @@ void
 add_mx_l(mtmp, mx_id, len)
 struct monst * mtmp;
 int mx_id;
-int len;
+long len;
 {
 	void * mx_p;
 
@@ -47,7 +47,7 @@ int len;
 
 	/* assign allocating size if it's a variable-size mx */
 	if (mx_list[mx_id].s_size == -1)
-		len += sizeof(int);
+		len += sizeof(long);
 
 	/* allocate and link it */
 	mx_p = malloc(len);
@@ -55,7 +55,7 @@ int len;
 	mtmp->mextra_p->eindex[mx_id] = mx_p;
 	/* assign size if it's a variable-size mx */
 	if (mx_list[mx_id].s_size == -1)
-		*((int *)mx_p) = len - sizeof(int);
+		*((long *)mx_p) = len - sizeof(long);
 
 	return;
 }
@@ -122,7 +122,7 @@ int mx_id;
 	if (mx_p1 = get_mx(mon1, mx_id)) {
 		mx_p2 = get_mx(mon2, mx_id);
 		if(!mx_p2)
-			add_mx_l(mon2, mx_id, siz_mx(mon1, mx_id)-sizeof(int));
+			add_mx_l(mon2, mx_id, siz_mx(mon1, mx_id)-sizeof(long));
 		memcpy(mx_p1, get_mx(mon2, mx_id), siz_mx(mon1, mx_id));
 	}
 	return;
@@ -164,8 +164,8 @@ int mx_id;
 	return mtmp->mextra_p->eindex[mx_id];
 }
 
-/* returns the size, in bytes, of component. Includes sizeof(int) for variable-size components. */
-int
+/* returns the size, in bytes, of component. Includes sizeof(long) for variable-size components. */
+long
 siz_mx(mtmp, mx_id)
 struct monst * mtmp;
 int mx_id;
@@ -175,11 +175,11 @@ int mx_id;
 	if (!(mx_p = get_mx(mtmp, mx_id)))
 		return 0;
 
-	int size = mx_list[mx_id].s_size;
+	long size = mx_list[mx_id].s_size;
 
 	if (size == -1) {
-		/* marker that size is instead stored as the first bit of the structure as an int */
-		size = *((int *)mx_p) + sizeof(int);
+		/* marker that size is instead stored as the first bit of the structure as a long */
+		size = *((long *)mx_p) + sizeof(long);
 	}
 	return size;
 }
@@ -189,10 +189,10 @@ int mx_id;
 void *
 bundle_mextra(mtmp, len_p)
 struct monst * mtmp;
-int * len_p;
+long * len_p;
 {
 	int i;
-	int len = 0;
+	long len = 0;
 	int towrite = 0;
 	void * output;
 	void * output_ptr;
@@ -235,7 +235,7 @@ void * mextra_block;
 {
 	int i;
 	int toread = 0;
-	int len;
+	long len;
 	void * mx_p;
 
 	/* clear stale mextra pointer from mtmp */
@@ -252,8 +252,8 @@ void * mextra_block;
 		/* get length to use */
 		len = mx_list[i].s_size;
 		if (len == -1)	{// was saved
-			len = *((int *)mextra_block);
-			mextra_block = ((int *)mextra_block) + 1;
+			len = *((long *)mextra_block);
+			mextra_block = ((long *)mextra_block) + 1;
 		}
 
 		/* allocate component */
@@ -262,8 +262,8 @@ void * mextra_block;
 		mx_p = get_mx(mtmp, i);
 		/* if we had a variable len, rewrite it */
 		if (mx_list[i].s_size == -1) {
-			*((int *)mx_p) = len;
-			mx_p = ((int *)mx_p) + 1;
+			*((long *)mx_p) = len;
+			mx_p = ((long *)mx_p) + 1;
 		}
 		/* fill in the body of the component */
 		memcpy(mx_p, mextra_block, len);
@@ -280,7 +280,7 @@ int fd;
 int mode;
 {
 	void * mextra_block;
-	int len;
+	long len;
 
 	/* don't save nothing */
 	if (!mtmp->mextra_p)
@@ -313,7 +313,7 @@ boolean ghostly;
 {
 	int i;
 	int toread = 0;
-	int len;
+	long len;
 	void * mx_p;
 
 	/* clear stale mextra pointer from mtmp */
@@ -329,7 +329,7 @@ boolean ghostly;
 		/* get length to read */
 		len = mx_list[i].s_size;
 		if (len == -1) {	// was saved
-			mread(fd, (genericptr_t) &len, sizeof(int));
+			mread(fd, (genericptr_t) &len, sizeof(long));
 		}
 
 		/* allocate component */
@@ -338,8 +338,8 @@ boolean ghostly;
 		mx_p = get_mx(mtmp, i);
 		/* if we had read len, rewrite it */
 		if (mx_list[i].s_size == -1) {
-			*((int *)mx_p) = len;
-			mx_p = ((int *)mx_p) + 1;
+			*((long *)mx_p) = len;
+			mx_p = ((long *)mx_p) + 1;
 		}
 		mread(fd, mx_p, len);
 	}

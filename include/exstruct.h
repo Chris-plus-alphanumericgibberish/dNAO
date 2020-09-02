@@ -51,18 +51,14 @@ struct emin {
 #define EMIN(mon)	((mon)->mextra_p->emin_p)
 
 struct emon {
-	int size;
-#ifdef MONST_H
-	struct monst mondat;
-#else
-	long dummy[1];
-#endif
+	long size;				/* size of mondat in bytes; can be >sizeof(struct monst) to hold mextra bundle */
+	struct monst mondat;	/* all of a single struct monst, plus potentially an mextra bundle */
 };
-#define EMON(obj)	((obj)->oextra_p->emon_p)
+#define EMON(obj)	(&((obj)->oextra_p->emon_p->mondat))
 
 
 struct enam {
-	int name_lth;			/* length of name in bytes; how far to read */
+	long name_lth;			/* length of name in bytes; how far to read */
 	char name[PL_PSIZ];		/* length is actually name_lth */
 };
 #define M_HAS_NAME(mtmp)	((mtmp) && (mtmp)->mextra_p && (mtmp)->mextra_p->enam_p)

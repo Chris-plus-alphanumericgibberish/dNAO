@@ -1094,9 +1094,8 @@ boolean ghostly;
     struct obj *otmp;
     unsigned oldid, nid;
     for (otmp = fobj; otmp; otmp = otmp->nobj) {
-	if (ghostly && otmp->oattached == OATTACHED_MONST && otmp->oxlth) {
-	    struct monst *mtmp = (struct monst *)otmp->oextra;
-
+	if (ghostly && get_ox(otmp, OX_EMON)) {
+	    struct monst *mtmp = EMON(otmp);
 	    mtmp->m_id = 0;
 	    mtmp->mpeaceful = mtmp->mtame = 0;	/* pet's owner died! */
 	}

@@ -29,7 +29,7 @@ void
 add_ox_l(otmp, ox_id, len)
 struct obj * otmp;
 int ox_id;
-int len;
+long len;
 {
 	void * ox_p;
 
@@ -47,7 +47,7 @@ int len;
 
 	/* assign allocating size if it's a variable-size ox */
 	if (ox_list[ox_id].s_size == -1)
-		len += sizeof(int);
+		len += sizeof(long);
 
 	/* allocate and link it */
 	ox_p = malloc(len);
@@ -55,7 +55,7 @@ int len;
 	otmp->oextra_p->eindex[ox_id] = ox_p;
 	/* assign size if it's a variable-size ox */
 	if (ox_list[ox_id].s_size == -1)
-		*((int *)ox_p) = len - sizeof(int);
+		*((long *)ox_p) = len - sizeof(long);
 
 	return;
 }
@@ -122,7 +122,7 @@ int ox_id;
 	if (ox_p1 = get_ox(obj1, ox_id)) {
 		ox_p2 = get_ox(obj2, ox_id);
 		if(!ox_p2)
-			add_ox_l(obj2, ox_id, siz_ox(obj1, ox_id)-sizeof(int));
+			add_ox_l(obj2, ox_id, siz_ox(obj1, ox_id)-sizeof(long));
 		memcpy(ox_p1, get_ox(obj2, ox_id), siz_ox(obj1, ox_id));
 	}
 	return;
@@ -164,8 +164,8 @@ int ox_id;
 	return otmp->oextra_p->eindex[ox_id];
 }
 
-/* returns the size, in bytes, of component. Includes sizeof(int) for variable-size components. */
-int
+/* returns the size, in bytes, of component. Includes sizeof(long) for variable-size components. */
+long
 siz_ox(otmp, ox_id)
 struct obj * otmp;
 int ox_id;
@@ -175,11 +175,11 @@ int ox_id;
 	if (!(ox_p = get_ox(otmp, ox_id)))
 		return 0;
 
-	int size = ox_list[ox_id].s_size;
+	long size = ox_list[ox_id].s_size;
 
 	if (size == -1) {
-		/* marker that size is instead stored as the first bit of the structure as an int */
-		size = *((int *)ox_p) + sizeof(int);
+		/* marker that size is instead stored as the first bit of the structure as a long */
+		size = *((long *)ox_p) + sizeof(long);
 	}
 	return size;
 }
@@ -189,10 +189,10 @@ int ox_id;
 void *
 bundle_oextra(otmp, len_p)
 struct obj * otmp;
-int * len_p;
+long * len_p;
 {
 	int i;
-	int len = 0;
+	long len = 0;
 	int towrite = 0;
 	void * output;
 	void * output_ptr;
@@ -235,7 +235,7 @@ void * oextra_block;
 {
 	int i;
 	int toread = 0;
-	int len;
+	long len;
 	void * ox_p;
 
 	/* clear stale oextra pointer from otmp */
@@ -252,8 +252,8 @@ void * oextra_block;
 		/* get length to use */
 		len = ox_list[i].s_size;
 		if (len == -1)	{// was saved
-			len = *((int *)oextra_block);
-			oextra_block = ((int *)oextra_block) + 1;
+			len = *((long *)oextra_block);
+			oextra_block = ((long *)oextra_block) + 1;
 		}
 
 		/* allocate component */
@@ -262,8 +262,8 @@ void * oextra_block;
 		ox_p = get_ox(otmp, i);
 		/* if we had a variable len, rewrite it */
 		if (ox_list[i].s_size == -1) {
-			*((int *)ox_p) = len;
-			ox_p = ((int *)ox_p) + 1;
+			*((long *)ox_p) = len;
+			ox_p = ((long *)ox_p) + 1;
 		}
 		/* fill in the body of the component */
 		memcpy(ox_p, oextra_block, len);
@@ -280,7 +280,7 @@ int fd;
 int mode;
 {
 	void * oextra_block;
-	int len;
+	long len;
 
 	/* don't save nothing */
 	if (!otmp->oextra_p)
@@ -313,7 +313,7 @@ boolean ghostly;
 {
 	int i;
 	int toread = 0;
-	int len;
+	long len;
 	void * ox_p;
 
 	/* clear stale oextra pointer from otmp */
@@ -329,7 +329,7 @@ boolean ghostly;
 		/* get length to read */
 		len = ox_list[i].s_size;
 		if (len == -1) {	// was saved
-			mread(fd, (genericptr_t) &len, sizeof(int));
+			mread(fd, (genericptr_t) &len, sizeof(long));
 		}
 
 		/* allocate component */
@@ -338,8 +338,8 @@ boolean ghostly;
 		ox_p = get_ox(otmp, i);
 		/* if we had read len, rewrite it */
 		if (ox_list[i].s_size == -1) {
-			*((int *)ox_p) = len;
-			ox_p = ((int *)ox_p) + 1;
+			*((long *)ox_p) = len;
+			ox_p = ((long *)ox_p) + 1;
 		}
 		mread(fd, ox_p, len);
 	}

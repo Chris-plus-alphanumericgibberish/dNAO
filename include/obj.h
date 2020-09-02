@@ -169,10 +169,6 @@ struct obj {
 	Bitfield(oinvis,1);	/* invisible */
 #endif
 	Bitfield(greased,1);	/* covered with grease */
-	Bitfield(oattached,2);	/* obj struct has special attachment */
-#define OATTACHED_NOTHING 0
-#define OATTACHED_MONST   1	/* monst struct in oextra */
-#define OATTACHED_UNUSED3 3
 
 	Bitfield(in_use,1);	/* for magic items before useup items */
 	Bitfield(bypass,1);	/* mark this as an object to be skipped by bhito() */
@@ -351,9 +347,6 @@ struct obj {
 	struct mask_properties *mp;
 
 	union oextra * oextra_p;
-
-	long oextra[1];		/* used for name of ordinary objects - length
-				   is flexible; amount for tmp gold objects.  Must be last? */
 };
 
 //Useful items (ovar1 flags for planned cloak of useful items)

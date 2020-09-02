@@ -2908,8 +2908,6 @@ register struct monst *shkp;
 			otmp->quan = (bp->bquan -= obj->quan);
 			otmp->owt = 0;	/* superfluous */
 			otmp->oextra_p = NULL;
-			otmp->oxlth = 0;
-			otmp->oattached = OATTACHED_NOTHING;
 			bp->useup = 1;
 			add_to_billobjs(otmp);
 			return;

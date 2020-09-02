@@ -405,12 +405,11 @@ long num;
 	/* as a back pointer to the container object when contained. */
 	if (obj->where == OBJ_FLOOR)
 	    obj->nexthere = otmp;
-	if (obj->oxlth)
-	    (void)memcpy((genericptr_t)otmp->oextra, (genericptr_t)obj->oextra,
-			obj->oxlth);
-	if (get_ox(obj, OX_ENAM)) {
-		cpy_ox(obj, otmp, OX_ENAM);
-	}
+
+	register int ox_id;
+	for (ox_id=0; ox_id<NUM_OX; ox_id++)
+		cpy_ox(obj, otmp, ox_id);
+		
 	if (obj->unpaid) splitbill(obj,otmp);
 	if (obj->timed) obj_split_timers(obj, otmp);
 	if (obj_sheds_light(obj)) obj_split_light_source(obj, otmp);
@@ -497,12 +496,9 @@ register struct obj *otmp;
 	dummy->o_id = flags.ident++;
 	if (!dummy->o_id) dummy->o_id = flags.ident++;	/* ident overflowed */
 	dummy->timed = 0;
-	if (otmp->oxlth)
-	    (void)memcpy((genericptr_t)dummy->oextra,
-			(genericptr_t)otmp->oextra, otmp->oxlth);
-	if (get_ox(otmp, OX_ENAM)) {
-		cpy_ox(otmp, dummy, OX_ENAM);
-	}
+	register int ox_id;
+	for (ox_id=0; ox_id<NUM_OX; ox_id++)
+		cpy_ox(otmp, dummy, ox_id);
 	if (Is_candle(dummy)) dummy->lamplit = 0;
 	addtobill(dummy, FALSE, TRUE, TRUE);
 	otmp->no_charge = 1;
@@ -1378,7 +1374,7 @@ start_corpse_timeout(body)
 	/* lizards, beholders, and lichen don't rot or revive */
 	if (body->corpsenm == PM_LIZARD || body->corpsenm == PM_LICHEN || body->corpsenm == PM_CROW_WINGED_HALF_DRAGON || body->corpsenm == PM_BEHOLDER || body->spe) return;
 	
-	if(body->oattached == OATTACHED_MONST) attchmon = (struct monst *)body->oextra;
+	if(get_ox(body, OX_EMON)) attchmon = get_ox(body, OX_EMON)+sizeof(int);
 
 	action = ROT_CORPSE;		/* default action: rot away */
 	rot_adjust = in_mklev ? 25 : 10;	/* give some variation */
@@ -2489,18 +2485,17 @@ save_mtraits(obj, mtmp)
 struct obj *obj;
 struct monst *mtmp;
 {
-	struct obj *otmp;
-	int lth, namelth;
+	long lth, namelth;
 
 	void * mextra_bundle;
 	/* if mtmp has an mextra, bundle it */
 	if (mtmp->mextra_p) {
 		void * tmp, * tmp2;
 		mextra_bundle = bundle_mextra(mtmp, &lth);
-		/* realloc_obj actually wants the whole monster */
-		tmp = malloc(lth + sizeof(struct monst));
-		memcpy(tmp, (genericptr_t) mtmp, sizeof(struct monst));
-		tmp2 = ((struct monst *)tmp) + 1;
+		/* save the whole monster followed by its mextrabundle */
+		tmp2 = tmp = malloc(lth + sizeof(struct monst));
+		memcpy(tmp2, (genericptr_t) mtmp, sizeof(struct monst));
+		tmp2 = tmp2 + sizeof(struct monst);
 		memcpy(tmp2, mextra_bundle, lth);
 		lth += sizeof(struct monst);
 		free(mextra_bundle);	/* free the memory allocated to make the original bundle */
@@ -2511,20 +2506,17 @@ struct monst *mtmp;
 		memcpy(mextra_bundle, (genericptr_t) mtmp, sizeof(struct monst));
 		lth = sizeof(struct monst);
 	}
-	namelth = get_ox(obj, OX_ENAM) ? strlen(ONAME(obj)) + 1 : 0;
-	otmp = realloc_obj(obj, lth, (genericptr_t) mextra_bundle, namelth, ONAME(obj));
-	if (otmp && otmp->oxlth) {
-		/* it reallocated successfully */
-		struct monst *mtmp2 = (struct monst *)otmp->oextra;
-		/* invalidate pointers */
-		/* m_id is needed to know if this is a revived quest leader */
-		/* but m_id must be cleared when loading bones */
-		mtmp2->nmon     = (struct monst *)0;
-		mtmp2->data     = (struct permonst *)0;
-		mtmp2->minvent  = (struct obj *)0;
-		otmp->oattached = OATTACHED_MONST;	/* mark it */
-	}
-	return otmp;
+	/* attach it to obj */
+	add_ox_l(obj, OX_EMON, lth);
+	memcpy((genericptr_t)EMON(obj), mextra_bundle, lth);
+	free(mextra_bundle);
+	/* invalidate pointers */
+	/* m_id is needed to know if this is a revived quest leader */
+	/* but m_id must be cleared when loading bones */
+	EMON(obj)->nmon     = (struct monst *)0;
+	EMON(obj)->data     = (struct permonst *)0;
+	EMON(obj)->minvent  = (struct obj *)0;
+	return obj;
 }
 
 /* returns a pointer to a new monst structure based on
@@ -2541,8 +2533,8 @@ boolean copyof;
 	struct monst *mtmp = (struct monst *)0;
 	struct monst *mnew = (struct monst *)0;
 
-	if (obj->oxlth && obj->oattached == OATTACHED_MONST) {
-		mtmp = (struct monst *)obj->oextra;
+	if (get_ox(obj, OX_EMON)) {
+		mtmp = EMON(obj);
 	}
 	if (mtmp) {
 		if (copyof) {
@@ -2551,7 +2543,7 @@ boolean copyof;
 
 			/* we may also need to copy mextra */
 			if (mnew->mextra_p) {
-				void * mextra_bundle = ((struct monst *)obj->oextra)+1;
+				void * mextra_bundle = mtmp+1;
 				unbundle_mextra(mnew, mextra_bundle);
 			}
 		}

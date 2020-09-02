@@ -4087,7 +4087,7 @@ int tx,ty;
 						}
 					}
 				} /* your race */
-				else if (otmp->oxlth && otmp->oattached == OATTACHED_MONST
+				else if (get_ox(otmp, OX_EMON)
 						&& ((mtmp = get_mtraits(otmp, FALSE)) != (struct monst *)0)
 						&& mtmp->mtame) {
 					/* mtmp is a temporary pointer to a tame monster's attributes,
