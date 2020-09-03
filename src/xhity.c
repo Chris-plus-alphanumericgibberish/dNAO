@@ -3932,14 +3932,14 @@ boolean ranged;
 		}
 		/* hit with [weapon] */
 		result = hmon_general(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis);
-		weapon = *weapon_p;
+		if (weapon_p) weapon = *weapon_p;
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
 		if (weapon && multistriking(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; weapon && (i < weapon->ostriking); i++) {
 				result = hmon_general(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis);
-				weapon = *weapon_p;
+				if (weapon_p) weapon = *weapon_p;
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 					return result;
 			}
