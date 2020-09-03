@@ -2328,15 +2328,9 @@ begin_burn(obj)
 
 	if (obj->lamplit) {
 	    xchar x, y;
-		if (already_lit)
-			del_light_source(LS_OBJECT, (genericptr_t)obj, TRUE);
-		if (get_obj_location(obj, &x, &y, CONTAINED_TOO | BURIED_TOO)) {
-			new_light_source(x, y, radius, LS_OBJECT, (genericptr_t)obj);
-		}
-	    else{
-			/* make the new light source at (0,0) since we can't get its position */
-			new_light_source(0, 0, radius, LS_OBJECT, (genericptr_t)obj);
-		}
+		if (already_lit)	/* to give an error if already_lit != actually had an ls */
+			del_light_source(obj->light);
+		new_light_source(LS_OBJECT, (genericptr_t)obj, radius);
 	}
 }
 
@@ -2364,7 +2358,7 @@ end_burn(obj, timer_attached)
 
 	if (!timer_attached) {
 	    /* [DS] Cleanup explicitly, since timer cleanup won't happen */
-	    del_light_source(LS_OBJECT, (genericptr_t)obj, FALSE);
+	    del_light_source(obj->light);
 	    obj->lamplit = 0;
 	    if (obj->where == OBJ_INVENT)
 		update_inventory();
@@ -2394,8 +2388,7 @@ cleanup_burn(arg, expire_time)
 	impossible("cleanup_burn: obj %s not lit", xname(obj));
 	return;
     }
-
-    del_light_source(LS_OBJECT, arg, FALSE);
+	del_light_source(((struct obj *)arg)->light);
 
     /* restore unused time */
     obj->age += expire_time - monstermoves;
