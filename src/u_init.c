@@ -1109,7 +1109,7 @@ static const struct def_skill Skill_HD_Female_Nob[] = {
     { P_CROSSBOW, P_BASIC },	{ P_ATTACK_SPELL, P_SKILLED },
     { P_HEALING_SPELL, P_SKILLED },	{ P_ESCAPE_SPELL, P_SKILLED },
     { P_ENCHANTMENT_SPELL, P_SKILLED },	{ P_BARE_HANDED_COMBAT, P_SKILLED },
-    { P_BEAST_MASTERY, P_EXPERT },
+    { P_TWO_WEAPON_COMBAT, P_EXPERT },    { P_BEAST_MASTERY, P_EXPERT },
     { P_NONE, 0 }
 };
 
