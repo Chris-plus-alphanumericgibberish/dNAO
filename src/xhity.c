@@ -688,6 +688,7 @@ int tary;
 						&& !(otmp->oartifact && !always_twoweapable_artifact(otmp))			// ok artifact
 						&& (!bimanual(otmp, pa) || pa->mtyp == PM_GYNOID || pa->mtyp == PM_PARASITIZED_GYNOID)// not two-handed
 						&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
+						&& (!youagr || otmp->owt <= max(10, P_SKILL(P_TWO_WEAPON_COMBAT)*10))// not too heavy
 						&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
 						&& !(is_ammo(otmp) || is_pole(otmp) || is_missile(otmp))			// not unsuitable for melee (ammo, polearm, missile)
 						&& !otmp->owornmask)												// not worn
