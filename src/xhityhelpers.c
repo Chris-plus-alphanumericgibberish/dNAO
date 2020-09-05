@@ -769,7 +769,21 @@ boolean message;
 		}
 	}
 	unstuck(mtmp);	/* ball&chain returned in unstuck() */
-	mnexto(mtmp);
+	if (stationary(mdat)) {
+		coord cc;
+		if (teleok(u.ux0, u.uy0, TRUE) && distmin(u.ux0, u.uy0, mtmp->mx, mtmp->my) <= 1) {
+			teleds(u.ux0, u.uy0, FALSE);
+		}
+		else if (tt_findadjacent(&cc, mtmp)) {
+			teleds(cc.x, cc.y, FALSE);
+		}
+		else {
+			mnexto(mtmp);
+		}
+	}
+	else {
+		mnexto(mtmp);
+	}
 	newsym(u.ux,u.uy);
 	spoteffects(TRUE);
 	/* to cover for a case where mtmp is not in a next square */
