@@ -1553,6 +1553,10 @@ touch_artifact(obj, mon, hypothetical)
 		forceEvade = TRUE;
 	}
 	
+	if(obj->oartifact == ART_DIRGE && (badalign || badclass)){
+		forceEvade = TRUE;
+	}
+	
 	if (((badclass || badalign) && self_willed) ||
        (badalign && (!yours || !rn2(4)))
 	   )  {

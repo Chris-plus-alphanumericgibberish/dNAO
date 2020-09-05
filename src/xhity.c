@@ -11911,6 +11911,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			poisons |= OPOISON_FILTH;
 		if (poisonedobj->oartifact == ART_MOONBEAM)
 			poisons |= OPOISON_SLEEP;
+		if (poisonedobj->oartifact == ART_DIRGE)
+			poisons |= OPOISON_ACID;
 		/* Plague adds poisons to its launched ammo */
 		if (launcher && launcher->oartifact == ART_PLAGUE) {
 			if (monstermoves < launcher->ovar1)
