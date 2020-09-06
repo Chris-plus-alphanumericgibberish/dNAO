@@ -767,10 +767,10 @@ A("The Holy Moonlight Sword",	LONG_SWORD,				(const char *)0, // begging for a d
 	ENLIGHTENING, NOFLAG
 	),
 
-/* can be transformed from a mace into a large (two-handed) bloody morning star */
-/* the transformation costs 20% health to activate, is lost when unwielding */
-/* and unlocks the blood damage + AoE invoke */
-A("Bloodletter",	MACE,				(const char *)0,
+/* can be transformed by offering your blood */
+/* transformation costs 20% health to activate, lasts for 20+2d10 turns */
+/* while active, adds +defender mlev to blood damage, can be applied to cause an AoE and clear active*/
+A("Bloodletter",	MORNING_STAR,				(const char *)0,
 	4000L, IRON, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_INHER),
 	NO_MONS(),
