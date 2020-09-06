@@ -2412,7 +2412,8 @@ u_init()
 	calc_total_maxhp();
 	u.uhp = u.uhpmax;
 	calc_total_maxen();
-	u.uen = u.uenmax;
+	if (!Race_if(PM_INCANTIFIER))
+		u.uen = u.uenmax;
 	
 	/* make horrors: progressively nastier */
 	make_horror(&mons[PM_SHAMBLING_HORROR], 15, 1);
