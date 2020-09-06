@@ -376,6 +376,8 @@ chat_with_leader()
 				Your("%s chains itself to you!", xname(obj));
 			}
 		}
+		/* you now know what you're looking for */
+		discover_artifact(urole.questarti);
 	  }
 	}
 }
