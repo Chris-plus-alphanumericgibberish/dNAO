@@ -162,7 +162,7 @@ s_suffix(s)		/* return a name converted to possessive */
     const char *s;
 {
 #define SSUFFIX_BUFFERS 3
-	Static char buf[BUFSZ][SSUFFIX_BUFFERS];
+	Static char buf[SSUFFIX_BUFFERS][BUFSZ];
 	static int i = 0;
 	i = (i + 1) % SSUFFIX_BUFFERS;
 
