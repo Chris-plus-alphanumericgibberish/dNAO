@@ -7571,6 +7571,13 @@ register int	mmflags;
 	)
 		mmflags |= MM_EDOG;
 
+	/* replace desfile Tulani with Gae, and vice versa
+	 * assumes G_NOGEN is used to track which variant you have that game */
+	if (ptr && ptr->mtyp == PM_TULANI_ELADRIN && in_mklev && (mons[PM_TULANI_ELADRIN].geno & G_NOGEN))
+		ptr = &mons[PM_GAE_ELADRIN];
+	else if (ptr && ptr->mtyp == PM_GAE_ELADRIN && in_mklev && (mons[PM_GAE_ELADRIN].geno & G_NOGEN))
+		ptr = &mons[PM_TULANI_ELADRIN];
+
 	/* if caller both a random creature and a random location, try both at once first */
 	if(!ptr && x == 0 && y == 0){
 		int tryct = 0;	/* careful with bigrooms */
