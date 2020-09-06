@@ -2509,7 +2509,7 @@ boolean ordinary;
 		        break;
 		    }
 		    if (ordinary || !rn2(10)) {	/* permanent */
-			HInvis |= FROMOUTSIDE;
+				HInvis |= TIMEOUT_INF;
 		    } else {			/* temporary */
 		    	incr_itimeout(&HInvis, d(obj->spe, 250));
 		    }

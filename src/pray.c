@@ -2881,7 +2881,7 @@ dosacrifice()
 			pline("So this is how you repay loyalty?");
 			adjalign(-3);
 			value = -1;
-			HAggravate_monster |= FROMOUTSIDE;
+			HAggravate_monster |= TIMEOUT_INF;
 		} else if (is_undead(ptr)) { /* Not demons--no demon corpses */
 			if (u.ualign.type != A_CHAOTIC)
 			value += 1;
@@ -4099,7 +4099,7 @@ aligntyp alignment;
 			case 3: // give an intrinsic for 500-1500 turns, first of pois/slee/fire/cold/shock
 				timeout = rn1(1000, 500);
 
-				if(!(HPoison_resistance & FROMOUTSIDE)) {
+				if(!(HPoison_resistance & INTRINSIC)) {
 					You_feel(Poison_resistance ? "especially healthy." : "healthy.");
 					HPoison_resistance |= FROMOUTSIDE;
 					break;

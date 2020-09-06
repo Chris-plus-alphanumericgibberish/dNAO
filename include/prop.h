@@ -156,11 +156,13 @@ struct prop {
 	long intrinsic;
 	/* Timed properties */
 #	define TIMEOUT	    0x00ffffffL /* Up to 16 million turns */
+#	define TIMEOUT_INF	0x00800000L	/* If you get this much, it won't decrement. should be a subset of TIMEOUT */
 	/* Permanent properties */
 #	define FROMEXPER    0x01000000L /* Gain/lose with experience, for role */
 #	define FROMRACE     0x02000000L /* Gain/lose with experience, for race */
-#	define FROMOUTSIDE  0x04000000L /* By prayer, thrones, etc. */
-#	define INTRINSIC    (FROMOUTSIDE|FROMRACE|FROMEXPER)
+#	define FROMPOLY		0x04000000L	/* Gain/lose with polyform */
+#	define FROMOUTSIDE  0x08000000L /* Should generally not be lost. */
+#	define INTRINSIC    (FROMOUTSIDE|FROMRACE|FROMPOLY|FROMEXPER|TIMEOUT_INF)
 	/* Control flags */
 #	define I_SPECIAL    0x10000000L /* Property is controllable */
 };

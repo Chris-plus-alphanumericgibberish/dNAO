@@ -5016,7 +5016,7 @@ boolean ranged;
 			) {
 			if(attk->aatyp == AT_VINE && youdef && !HSterile){
 				You_feel("old.");
-				HSterile |= FROMOUTSIDE;
+				HSterile |= TIMEOUT_INF;
 				alt_attk.adtyp = AD_PHYS;
 				/* make attack without hitmsg */
 				return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);

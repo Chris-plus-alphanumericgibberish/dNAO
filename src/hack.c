@@ -1029,13 +1029,10 @@ domove()
 			    || is_whirly(youracedata))
 			on_ice = FALSE;
 		    else if (!rn2(Cold_resistance ? 3 : 2)) {
-			HFumbling |= FROMOUTSIDE;
 			HFumbling &= ~TIMEOUT;
 			HFumbling += 1;  /* slip on next move */
 		    }
 		}
-		if (!on_ice && (HFumbling & FROMOUTSIDE))
-		    HFumbling &= ~FROMOUTSIDE;
 
 		x = u.ux + u.dx;
 		y = u.uy + u.dy;

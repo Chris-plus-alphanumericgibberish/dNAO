@@ -23,44 +23,11 @@ STATIC_DCL short NDECL(doclockmenu);
 STATIC_DCL short NDECL(dodroidmenu);
 STATIC_DCL void FDECL(worddescriptions, (int));
 
-/* Assumes u.umonster is set up already */
-/* Use u.umonster since we might be restoring and you may be polymorphed */
+/* assumes u.umonnum is set already */
 void
 init_uasmon()
 {
-	int i;
-
-	upermonst = mons[u.umonster];
-
-	/* Fix up the flags */
-	/* Default flags assume human,  so replace with your race's flags */
-
-	upermonst.mflagsm &= ~(mons[PM_HUMAN].mflagsm);
-	upermonst.mflagsm |= (mons[urace.malenum].mflagsm);
-
-	upermonst.mflagst &= ~(mons[PM_HUMAN].mflagst);
-	upermonst.mflagst |= (mons[urace.malenum].mflagst);
-
-	upermonst.mflagsb &= ~(mons[PM_HUMAN].mflagsb);
-	upermonst.mflagsb |= (mons[urace.malenum].mflagsb);
-	
-	upermonst.mflagsg &= ~(mons[PM_HUMAN].mflagsg);
-	upermonst.mflagsg |= (mons[urace.malenum].mflagsg);
-
-	upermonst.mflagsa &= ~(mons[PM_HUMAN].mflagsa);
-	upermonst.mflagsa |= (mons[urace.malenum].mflagsa);
-
-	upermonst.mflagsv &= ~(mons[PM_HUMAN].mflagsv);
-	upermonst.mflagsv |= (mons[urace.malenum].mflagsv);
-	
-	/* Fix up the attacks */
-	/* crude workaround, needs better general solution */
-	if (Race_if(PM_VAMPIRE)) {
-	  for(i = 0; i < NATTK; i++) {
-	    upermonst.mattk[i] = mons[urace.malenum].mattk[i];
-	  }
-	}
-	
+	upermonst = mons[(flags.female && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum];
 	set_uasmon();
 }
 
@@ -324,7 +291,7 @@ boolean forcecontrol;
 				uskin = uarm;
 				uarm = (struct obj *)0;
 				/* save/restore hack */
-				uskin->owornmask |= I_SPECIAL;
+				uskin->owornmask |= W_SKIN;
 			}
 		}
 		else if(leonine) {
@@ -336,7 +303,7 @@ boolean forcecontrol;
 				uskin = uarmc;
 				uarmc = (struct obj *)0;
 				/* save/restore hack */
-				uskin->owornmask |= I_SPECIAL;
+				uskin->owornmask |= W_SKIN;
 			}
 		} else if (hasmask) {
 			if ((youmonst.data) == &mons[ublindf->corpsenm])
@@ -1897,17 +1864,17 @@ boolean silently;
 		if(uskin->otyp == LEO_NEMAEUS_HIDE){
 			uarmc = uskin;
 			/* undo save/restore hack */
-			uskin->owornmask &= ~I_SPECIAL;
+			uskin->owornmask &= ~W_SKIN;
 			uskin = (struct obj *)0;
 			/* undo save/restore hack */
-			uarmc->owornmask &= ~I_SPECIAL;
+			uarmc->owornmask &= ~W_SKIN;
 		} else {
 			uarm = uskin;
 			/* undo save/restore hack */
-			uskin->owornmask &= ~I_SPECIAL;
+			uskin->owornmask &= ~W_SKIN;
 			uskin = (struct obj *)0;
 			/* undo save/restore hack */
-			uarm->owornmask &= ~I_SPECIAL;
+			uarm->owornmask &= ~W_SKIN;
 		}
 	}
 }

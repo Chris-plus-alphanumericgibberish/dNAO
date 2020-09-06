@@ -255,7 +255,7 @@ long mask;
       if(P_BASIC     == OLD_P_SKILL(P_ATTACK_SPELL)) OLD_P_SKILL(P_ATTACK_SPELL) = P_SKILLED;
     }
 	
-	if ((mask & (W_ARM|I_SPECIAL)) == (W_ARM|I_SPECIAL)) {
+	if ((mask & (W_ARM | W_SKIN)) == (W_ARM | W_SKIN)) {
 	    /* restoring saved game; no properties are conferred via skin */
 	    uskin = obj;
 	 /* assert( !uarm ); */

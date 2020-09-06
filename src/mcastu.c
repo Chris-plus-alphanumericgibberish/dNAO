@@ -3590,8 +3590,8 @@ int tary;
 
 	case DISAPPEAR:
 		if (youagr) {
-			if (!(HInvis & INTRINSIC)) {
-				HInvis |= FROMOUTSIDE;
+			if (!(HInvis & (INTRINSIC))) {
+				HInvis |= TIMEOUT_INF;
 				if (!Blind && !BInvis) self_invis_message();
 			}
 		}
@@ -4606,7 +4606,7 @@ int tary;
 		if (youdef && !HSterile && !Drain_resistance) {
 			/* only works vs player, and should fall through to drain life */
 			You_feel("old!");
-			HSterile |= FROMOUTSIDE;
+			HSterile |= TIMEOUT_INF;
 		}
 		else {
 			return cast_spell(magr, mdef, attk, DRAIN_LIFE, tarx, tary);
@@ -4954,12 +4954,12 @@ int tary;
 
 	/* don't cast haste self when already fast */
 	if (spellnum == HASTE_SELF
-		&& (youagr ? (HFast&FROMOUTSIDE) : (magr->permspeed == MFAST)))
+		&& (youagr ? (HFast&(INTRINSIC)) : (magr->permspeed == MFAST)))
 		return TRUE;
 
 	/* don't cast invisibility when already invisible */
 	if (spellnum == DISAPPEAR
-		&& (youagr ? (HInvis&FROMOUTSIDE) : (magr->minvis || magr->invis_blkd)))
+		&& (youagr ? (HInvis&(INTRINSIC)) : (magr->minvis || magr->invis_blkd)))
 		return TRUE;
 	/* peaceful monsters won't cast invisibility if you can't see invisible,
 	 * same as when monsters drink potions of invisibility.  This doesn't

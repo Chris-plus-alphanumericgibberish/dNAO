@@ -1482,7 +1482,7 @@ asGuardian:
 						if (!(HFast & INTRINSIC)) {
 							if (!Fast) You("speed up.");
 							else Your("quickness feels more natural.");
-							HFast |= FROMOUTSIDE;
+							HFast |= TIMEOUT_INF;
 						}
 					}
 					if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && uwep && uwep->oartifact == ART_SINGING_SWORD){
@@ -1668,8 +1668,8 @@ asGuardian:
 					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !u.uinvulnerable){
 						pline("Your body feels leaden!");
 						youmonst.movement -= 12;
-						if ((HFast & FROMOUTSIDE)) {
-							HFast &= ~FROMOUTSIDE;
+						if ((HFast & TIMEOUT_INF)) {
+							HFast &= ~TIMEOUT_INF;
 							if (!Fast) You("slow down.");
 							else Your("quickness feels less natural.");
 						}
@@ -4094,7 +4094,7 @@ int tx,ty;
 					 * not a real monster */
 					pline("So this is how you repay loyalty?");
 					adjalign(-3);
-					HAggravate_monster |= FROMOUTSIDE;
+					HAggravate_monster |= TIMEOUT_INF;
 				} else if (is_unicorn(&mons[otmp->corpsenm])) {
 					int unicalign = sgn((&mons[otmp->corpsenm])->maligntyp);
 
