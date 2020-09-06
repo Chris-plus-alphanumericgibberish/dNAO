@@ -576,8 +576,6 @@ int	mntmp;
 	if (flags.verbose) {
 	    static const char use_thec[] = "Use the command #%s to %s.";
 	    static const char monsterc[] = "monster";
-	    if (u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know)
-		pline(use_thec,monsterc,"speak a word of power");
 #ifdef YOUMONST_SPELL
 	    if (attacktype(youmonst.data, AT_MAGC))
 		pline(use_thec,monsterc,"cast monster spells");

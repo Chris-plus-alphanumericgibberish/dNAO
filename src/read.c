@@ -781,6 +781,16 @@ learn_word()
 			u.ufirst_know_timeout = 0;
 		break;
 	}
+	if (flags.verbose) {
+		char buf[BUFSZ];
+		char buf2[BUFSZ];
+		char * ptr;
+		if (ptr = find_command_key("ability", buf))
+			Sprintf(buf2, "or %s ", ptr);
+		else
+			Strcpy(buf2, "");
+		pline("Use the command #ability %sto speak it.", buf2);
+	}
 	//Note: the word of knowledge can't actually give the mithardir trophy, but it's harmless to check.
 	check_mithardir_trophy();
 	check_illumian_trophy();

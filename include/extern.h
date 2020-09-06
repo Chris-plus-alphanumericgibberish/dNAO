@@ -262,6 +262,7 @@ E void NDECL(add_debug_extended_commands);
 #endif /* WIZARD */
 E void FDECL(rhack, (char *));
 E void NDECL(dokeylist);
+E char * FDECL(find_command_key, (const char *, char *));
 E int NDECL(doextlist);
 E int NDECL(extcmd_via_menu);
 E void FDECL(enlightenment, (int));
