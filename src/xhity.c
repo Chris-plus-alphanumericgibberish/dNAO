@@ -1802,48 +1802,32 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		(pa->mtyp == PM_KARY__THE_FIEND_OF_FIRE) ||
 		(pa->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) ||
 		(pa->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) ||
-		(pa->mtyp == PM_CHAOS))
-		){
-		// first index -- determine if using the alternate attack set (solo spellcasting)
+		(pa->mtyp == PM_CHAOS) ||
+		(pa->mtyp == PM_GAE_ELADRIN)
+		)){
+		// first index -- determine if only using their spellcasting
 		if (*indexnum == 0){
 			if (
 				(pa->mtyp == PM_LICH__THE_FIEND_OF_EARTH && rn2(4)) ||
 				(pa->mtyp == PM_KARY__THE_FIEND_OF_FIRE && rn2(100)<37) ||
 				(pa->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER && rn2(100)<52) ||
 				(pa->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND && !rn2(4)) ||
-				(pa->mtyp == PM_CHAOS && rn2(3))
+				(pa->mtyp == PM_CHAOS && rn2(3)) ||
+				(pa->mtyp == PM_GAE_ELADRIN && !magr->mcan && !magr->mspec_used && !rn2(3))
 				){
 				*subout |= SUBOUT_SPELLS;
-				attk->aatyp = AT_MAGC;
-				attk->adtyp = AD_SPEL;
-				attk->damn = 0;
-				attk->damd = 0;
 			}
 		}
-		else if (*subout&SUBOUT_SPELLS){
-			/* If spellcasting, stop after the first index */
-			return &noattack;
+		/* cast only spells if SUBOUT_SPELLS; cast no spells if !SUBOUT_SPELLS */
+		if (!is_null_attk(attk) && ((attk->aatyp == AT_MAGC) == !(*subout&SUBOUT_SPELLS))) {
+			/* just get the next attack */
+			*indexnum += 1;
+			*prev_and_buf = prev_attack;
+			fromlist = TRUE;
+			return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
 		}
 	}
-	if(!by_the_book && pa->mtyp == PM_GAE_ELADRIN){
-		// first index -- determine if using the alternate attack set (solo spellcasting)
-		if (*indexnum == 0){
-			if (!magr->mcan
-				&& !magr->mspec_used
-				&& !rn2(3)
-			){
-				*subout |= SUBOUT_SPELLS;
-				attk->aatyp = AT_MAGC;
-				attk->adtyp = AD_CLRC;
-				attk->damn = 0;
-				attk->damd = 6;
-			}
-		}
-		else if (*subout&SUBOUT_SPELLS){
-			/* If spellcasting, stop after the first index */
-			return &noattack;
-		}
-	}
+	/* Nitocris uses clerical spells while wearing their Prayer-Warded Wrappings */
 	if(!by_the_book && pa->mtyp == PM_NITOCRIS){
 		if (attk->aatyp == AT_MAGC){
 			if (which_armor(magr, W_ARMC) && which_armor(magr, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF){
