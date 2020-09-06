@@ -267,6 +267,8 @@ boolean yours; /* is it your fault (for killing monsters) */
 			break;
 		case AD_DARK: str = "blast of darkness";
 			break;
+		case AD_BLUD: str = "splash of tainted blood";
+			break;
 		default:
 			impossible("unaccounted-for explosion damage type in do_explode: %d", adtyp);
 			str = "404 BLAST NOT FOUND";
@@ -313,6 +315,9 @@ boolean yours; /* is it your fault (for killing monsters) */
 				break;
 			case AD_DARK:
 				explmask = !!Dark_immune;
+				break;
+			case AD_BLUD:
+				explmask = !has_blood(youracedata);
 				break;
 			default:
 				impossible("explosion type %d?", adtyp);
@@ -364,6 +369,9 @@ boolean yours; /* is it your fault (for killing monsters) */
 				break;
 			case AD_DARK:
 				explmask |= dark_immune(mtmp);
+				break;
+			case AD_BLUD:
+				explmask |= has_blood_mon(mtmp);
 				break;
 			default:
 				impossible("explosion type %d?", adtyp);
@@ -547,6 +555,9 @@ boolean yours; /* is it your fault (for killing monsters) */
 				mdam *= 2;
 			else if (Dark_vuln(mtmp) && adtyp == AD_DARK)
 				mdam *= 2;
+			else if (has_blood_mon(mtmp) && adtyp == AD_BLUD)
+				mdam += mlev(mtmp);
+
 			mtmp->mhp -= mdam;
 			mtmp->mhp -= (idamres + idamnonres);
 		}

@@ -797,6 +797,11 @@ boolean dofull;
 			Strcat(buf, "gleaming ");
 	}
 	
+	if(obj->oartifact && get_artifact(obj)->inv_prop == BLOODLETTER){
+		if (artinstance[obj->oartifact].BLactive >= moves)
+			Strcat(buf, "sanguine ");
+	}
+	
 	if (!check_oprop(obj, OPROP_NONE) && (obj->oartifact == 0 || dofull)){
 		if (check_oprop(obj, OPROP_ASECW) && (obj->known || u.uinsight >= 10) && !(obj->opoisoned&OPOISON_ACID))
 			u.uinsight < 10 ? Strcat(buf, "self-acidifying ") : Strcat(buf, "acid-secreting ");

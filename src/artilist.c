@@ -767,6 +767,19 @@ A("The Holy Moonlight Sword",	LONG_SWORD,				(const char *)0, // begging for a d
 	ENLIGHTENING, NOFLAG
 	),
 
+/* can be transformed from a mace into a large (two-handed) bloody morning star */
+/* the transformation costs 20% health to activate, is lost when unwielding */
+/* and unlocks the blood damage + AoE invoke */
+A("Bloodletter",	MACE,				(const char *)0,
+	4000L, IRON, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_INHER),
+	NO_MONS(),
+	ATTK(AD_BLUD, 8, 12), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	BLOODLETTER, NOFLAG
+	),
+
 /*Needs encyc entry*/
 A("The Silence Glaive",	GLAIVE,							(const char *)0,
 	8000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,

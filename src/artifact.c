@@ -1683,6 +1683,10 @@ boolean narrow_only;
 			if (Dark_res(mdef))
 				return FALSE;
 		break;
+		case AD_BLUD:
+			if (!has_blood(mdef->data))
+				return FALSE;
+		break;
 		default:
 			impossible("Weird weapon special attack: (%d).", weap->adtyp);
 		}
@@ -1932,6 +1936,16 @@ int * truedmgptr;
 		/* premium heart has special cases to get a huge damage multiplier -- player only */
 		if (otmp==uarmg && otmp->oartifact == ART_PREMIUM_HEART)
 			multiplier = get_premium_heart_multiplier();
+		
+		if(otmp->oartifact == ART_BLOODLETTER){
+		 	int *hp = (Upolyd) ? (&u.mh) : (&u.uhp);
+		 	int *hpmax = (Upolyd) ? (&u.mhmax) : (&u.uhpmax);
+
+			if (*hp < (*hpmax / 4))
+				multiplier = 4;
+			else if (*hp < (*hpmax / 2))
+				multiplier = 2;
+		}
 		/* some artifacts are 3x damage, or add 2dX damage */
 		if (double_bonus_damage_artifact(otmp->oartifact) ||
 			(otmp->oartifact == ART_FROST_BRAND && species_resists_fire(mon) && spec_dbon_applies) ||
@@ -3593,6 +3607,20 @@ boolean * messaged;
 	    if (!rn2(2)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 //	    if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 //	    if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+	}
+	if (attacks(AD_BLUD, otmp)){
+		if (vis&VIS_MAGR) {
+			pline_The("bloodstained %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc, "hit"),
+				hittee, !spec_dbon_applies ? '.' : '!');
+			*messaged = TRUE;
+		}
+		if (otmp->oartifact == ART_BLOODLETTER){
+			if (spec_dbon_applies && artinstance[otmp->oartifact].BLactive >= monstermoves){
+				*truedmgptr += rnd(mlev(mdef));
+			}
+		}
 	}
 	if (arti_attack_prop(otmp, ARTA_MAGIC) && dieroll <= MB_MAX_DIEROLL) {
 		int dmg = basedmg;
@@ -7597,6 +7625,25 @@ arti_invoke(obj)
         case RINGED_SPEAR:
 			You("wake the ringed spear.");
 			doliving_ringed_spear(&youmonst, obj, TRUE);
+		break;
+		case BLOODLETTER:
+			if (artinstance[obj->oartifact].BLactive < monstermoves){
+				obj->age = 0;
+				
+				if (has_blood_mon(&youmonst)){
+					You("plunge Bloodletter into your chest, making an offering of your tainted blood.");
+					losehp(Upolyd ? u.mhmax * 0.2 : u.uhpmax * 0.2, "purging tainted blood", KILLED_BY);
+					artinstance[obj->oartifact].BLactive = monstermoves + 20 + rn2(10) + rn2(10);
+				} else {
+					You("are free of tainted blood, and have none to offer.");
+				}
+			} else {
+				You("slam the bloodied morning star down, releasing a burst of tainted blood.");
+				explode(u.ux, u.uy, AD_BLUD, 0, d(6, 6), EXPL_RED, 1);
+				if (has_blood_mon(&youmonst))
+					losehp(u.ulevel, "splash of tainted blood", KILLED_BY_AN);
+			}
+			
 		break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;

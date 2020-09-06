@@ -291,6 +291,9 @@ int oartifact;
 	if(obj && oartifact && get_artifact(obj)->inv_prop == RINGED_SPEAR && (artinstance[oartifact].RRSember >= moves || artinstance[oartifact].RRSlunar >= moves)){
 		attackmask |= SLASH;
 	}
+	if (obj && oartifact == ART_HOLY_MOONLIGHT_SWORD && artinstance[oartifact].BLactive >= moves){
+		attackmask |= PIERCE|EXPLOSION;
+	}
 	if ((obj && oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
 		|| oartifact == ART_FIRE_BRAND
 		|| oartifact == ART_FROST_BRAND
