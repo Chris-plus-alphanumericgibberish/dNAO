@@ -5594,7 +5594,7 @@ xkilled(mtmp, dest)
 					&& mdat->mlet != S_PLANT
 					&& !(mtmp->mvanishes >= 0)
 					&& !(mtmp->mclone)
-					&& !(is_derived_undead_mon(mtmp))
+					&& !(has_template(mtmp, ZOMBIFIED))
 					&& !(is_auton(mtmp->data))
 		) {
 			int typ;
@@ -5668,7 +5668,7 @@ cleanup:
 	}
 	if((mtmp->mpeaceful && !rn2(2)) || mtmp->mtame)	change_luck(-1);
 	if (is_unicorn(mdat) &&
-	   !is_derived_undead_mon(mtmp) &&
+		!always_hostile(mdat) &&
 		sgn(u.ualign.type) == sgn(mdat->maligntyp) && 
 		u.ualign.type != A_VOID
 	) {
@@ -5697,7 +5697,7 @@ cleanup:
 	}
 
 	/* adjust alignment points */
-	if (mtmp->m_id == quest_status.leader_m_id && !is_derived_undead_mon(mtmp)) {
+	if (mtmp->m_id == quest_status.leader_m_id && !always_hostile(mtmp->data)) {
 		if(flags.leader_backstab){ /* They attacked you! */
 			adjalign((int)(ALIGNLIM/4));
 			// pline("That was %sa bad idea...",
@@ -5711,12 +5711,12 @@ cleanup:
 	} else if (mdat->msound == MS_NEMESIS){	/* Real good! */
 	    adjalign((int)(ALIGNLIM/4));
 		u.hod = max(u.hod-10,0);
-	} else if (mdat->msound == MS_GUARDIAN && mdat->mtyp != PM_THUG && !is_derived_undead_mon(mtmp)) {	/* Bad *//*nobody cares if you kill thugs*/
+	} else if (mdat->msound == MS_GUARDIAN && mdat->mtyp != PM_THUG && !always_hostile(mdat)) {	/* Bad *//*nobody cares if you kill thugs*/
 	    adjalign(-(int)(ALIGNLIM/8));											/*what's a little murder amongst rogues?*/
 		u.hod += 10;
 	    if (!Hallucination) pline("That was probably a bad idea...");
 	    else pline("Whoopsie-daisy!");
-	}else if (mtmp->ispriest && !is_derived_undead_mon(mtmp)) {
+	}else if (mtmp->ispriest && !always_hostile(mdat)) {
 		adjalign((p_coaligned(mtmp)) ? -2 : 2);
 		/* cancel divine protection for killing your priest */
 		if (p_coaligned(mtmp)) u.ublessed = 0;

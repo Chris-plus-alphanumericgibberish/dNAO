@@ -470,7 +470,14 @@ display_monster(x, y, mon, sightflags, worm_tail)
 			peacenum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
 		num = peace_to_glyph(mon);
-	} else if (is_derived_undead_mon(mon) && !Hallucination) {
+	}
+	else if (!Hallucination && (
+				has_template(mon, VAMPIRIC) ||
+				has_template(mon, ZOMBIFIED) ||
+				has_template(mon, SKELIFIED) ||
+				has_template(mon, CRYSTALFIED) ||
+				has_template(mon, FRACTURED)
+			)) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			zombienum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			zombienum_to_glyph(PM_LONG_WORM_TAIL);

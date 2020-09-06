@@ -92,10 +92,13 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 
 	boolean dogbesafe = ((magr->mtame || magr->mpeaceful) && !(magr->mconf && !rn2(8)) && !conflicted);
 	
-	struct obj *mrwep = select_rwep(magr);
-	
-	if (is_derived_undead_mon(magr))
-		return (struct monst *)0;
+	struct obj *mrwep = (struct obj *)0;
+	if (!(mindless(magr->data) && is_undead(magr->data) && !(
+			magr->mtyp == PM_SKELETAL_PIRATE ||
+			magr->mtyp == PM_PHALANX
+		))){
+		mrwep = select_rwep(magr);
+	}
 
 	/* Check that magr can make any ranged attacks at all */
 	if (!force_linedup &&

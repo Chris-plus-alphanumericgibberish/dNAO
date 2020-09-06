@@ -83,7 +83,7 @@
 					(ptr)->mtyp == PM_FLAMING_SPHERE || \
 					(ptr)->mtyp == PM_SHOCKING_SPHERE)
 #define breathless(ptr)			(((ptr)->mflagsm & MM_BREATHLESS) != 0L)
-#define breathless_mon(mon)		(breathless((mon)->data) || is_derived_undead_mon(mon) || mon_resistance((mon), MAGICAL_BREATHING))
+#define breathless_mon(mon)		(breathless((mon)->data) || mon_resistance((mon), MAGICAL_BREATHING))
 #define amphibious(ptr)			(((ptr)->mflagsm & (MM_AMPHIBIOUS | MM_BREATHLESS)) != 0L)
 #define amphibious_mon(mon)		(amphibious((mon)->data) || mon_resistance((mon), MAGICAL_BREATHING) || mon_resistance((mon), SWIMMING))
 #define species_passes_walls(ptr)	(((ptr)->mflagsm & MM_WALLWALK) != 0L)
@@ -289,7 +289,6 @@
 							 (ptr)->mtyp == PM_HALF_ELF_RANGER)
 #define is_undead(ptr)		(((ptr)->mflagsa & MA_UNDEAD) != 0L)
 #define is_undead_mon(mon)	(mon && is_undead((mon)->data))
-#define is_derived_undead_mon(mon)	(mon && (has_template(mon, VAMPIRIC) || has_template(mon, ZOMBIFIED) || has_template(mon, SKELIFIED) || has_template(mon, CRYSTALFIED) || has_template(mon, FRACTURED)))
 #define	can_undead_mon(mon)	(mon && !nonliving_mon(mon) && !is_minion((mon)->data) && ((mon)->data->mlet != S_PUDDING) &&\
 								((mon)->data->mlet != S_JELLY) && ((mon)->data->mlet != S_BLOB) && !is_elemental((mon)->data) &&\
 								!is_plant((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data) && !(mvitals[monsndx((mon)->data)].mvflags&G_NOCORPSE))
