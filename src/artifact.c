@@ -3618,7 +3618,8 @@ boolean * messaged;
 		}
 		if (otmp->oartifact == ART_BLOODLETTER){
 			if (spec_dbon_applies && artinstance[otmp->oartifact].BLactive >= monstermoves){
-				*truedmgptr += rnd(1+mlev(mdef));
+				*truedmgptr += mlev(mdef);
+				artinstance[otmp->oartifact].BLactive -= max(0, mlev(mdef)/10 - rn2(5));
 			}
 		}
 	}

@@ -1444,9 +1444,6 @@ struct obj *obj;
 	
 	You("slam the bloodied morning star down, releasing it of the tainted blood in a burst.");
 	explode(u.ux, u.uy, AD_BLUD, 0, d(6, 6), EXPL_RED, 1);
-	if (has_blood_mon(&youmonst)){
-		losehp(u.ulevel, "splash of tainted blood", KILLED_BY_AN);
-	}
 	
 	artinstance[obj->oartifact].BLactive = 0;
 	

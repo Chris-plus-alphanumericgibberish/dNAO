@@ -583,6 +583,10 @@ boolean yours; /* is it your fault (for killing monsters) */
 			You("are seared by the %s!", str);
 			damu += rnd(20);
 		}
+		if (adtyp == AD_BLUD && has_blood(youracedata)){
+			pline("Rotten blood tears through your veins!");
+			damu += u.ulevel;
+		}
 		/* do property damage first, in case we end up leaving bones */
 		if (adtyp == AD_FIRE){
 			burn_away_slime();
