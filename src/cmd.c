@@ -129,6 +129,7 @@ STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
 STATIC_PTR int NDECL(dofightingform);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
+STATIC_PTR int NDECL(doclearinvissyms);
 # ifdef WIZARD
 STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
 STATIC_PTR int NDECL(wiz_wish);
@@ -1191,6 +1192,19 @@ dooverview_or_wiz_where()
 	else
 #endif
 	dooverview();
+	return 0;
+}
+
+STATIC_PTR int
+doclearinvissyms()
+{
+	register int x, y;
+	for (x = 0; x < COLNO; x++)
+	for (y = 0; y < ROWNO; y++)
+	if (glyph_is_invisible(levl[x][y].glyph)) {
+		unmap_object(x, y);
+		newsym(x, y);
+	}
 	return 0;
 }
 
@@ -5276,6 +5290,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"turn", "turn undead", doturn, IFBURIED, AUTOCOMPLETE},
 	{"tip", "empty a container", dotip, IFBURIED, AUTOCOMPLETE},
 	{"twoweapon", "toggle two-weapon combat", dotwoweapon, !IFBURIED, AUTOCOMPLETE},
+	{"unseeinvis", "forget suspected invisible creatures", doclearinvissyms, IFBURIED, AUTOCOMPLETE},
 	{"untrap", "untrap something", dountrap, !IFBURIED, AUTOCOMPLETE},
 	{"unmaintain", "stop maintaining a spell", dounmaintain, IFBURIED, AUTOCOMPLETE},
 	{"versionext", "list compile time options for this version of NetHack",
@@ -5470,6 +5485,7 @@ init_bind_list(void)
 	bind_key(M('t'), "turn" );
 	/*        'u', 'U' : go ne */
 	bind_key('u',    "untrap" ); /* if number_pad is on */
+	bind_key(C('u'), "unseeinvis");
 	bind_key(M('u'), "untrap" );
 	bind_key('v',    "version" );
 	bind_key('V',    "history" );
