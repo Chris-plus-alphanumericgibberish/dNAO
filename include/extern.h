@@ -2224,6 +2224,7 @@ E void FDECL(punish, (struct obj *));
 E void NDECL(unpunish);
 E boolean FDECL(cant_create, (int *, BOOLEAN_P));
 #ifdef WIZARD
+E int NDECL(wiz_kill_all);
 E struct monst * FDECL(create_particular, (unsigned long, int, int, unsigned long, unsigned long, int));
 #endif
 

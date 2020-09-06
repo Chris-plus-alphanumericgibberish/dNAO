@@ -2770,6 +2770,22 @@ do_it:
 	vision_full_recalc = 1;	/* delayed vision recalculation */
 }
 
+int
+wiz_kill_all()
+{
+	register struct monst *mtmp, *mtmp2;
+
+	register int gonecnt = 0;
+	for (mtmp = fmon; mtmp; mtmp = mtmp2) {
+		mtmp2 = mtmp->nmon;
+		if (DEADMONSTER(mtmp)) continue;
+		mongone(mtmp);
+		gonecnt++;
+	}
+	pline("Eliminated %d monster%s.", gonecnt, plur(gonecnt));
+	return 0;	/* takes no time, unless caller takes time */
+}
+
 static void
 do_class_genocide()
 {
@@ -2826,18 +2842,9 @@ do_class_genocide()
 	You("aren't permitted to genocide such monsters.");
 			else
 #ifdef WIZARD	/* to aid in topology testing; remove pesky monsters */
-			  if (wizard && buf[0] == '*') {
-			    register struct monst *mtmp, *mtmp2;
-
-			    gonecnt = 0;
-			    for (mtmp = fmon; mtmp; mtmp = mtmp2) {
-					mtmp2 = mtmp->nmon;
-				    	if (DEADMONSTER(mtmp)) continue;
-					mongone(mtmp);
-					gonecnt++;
-			    }
-			pline("Eliminated %d monster%s.", gonecnt, plur(gonecnt));
-			    return;
+			if (wizard && buf[0] == '*') {
+				(void)wiz_kill_all();
+			return;
 			} else
 #endif
 	pline("That symbol does not represent any monster.");
