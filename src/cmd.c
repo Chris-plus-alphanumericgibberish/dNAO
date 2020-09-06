@@ -1706,6 +1706,8 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		} else if(u.lastprayresult==PRAY_BAD){
 			Sprintf(buf, "That prayer was poorly received");
 			putstr(en_win, 0, buf);
+		} else if(u.lastprayresult==PRAY_INPROG){
+			enl_msg("That prayer ", "is ", "was ", "in progress");
 		}
 		if(u.reconciled){
 			if(u.reconciled==REC_REC){
@@ -2557,6 +2559,9 @@ int final;
 			dump("", buf);
 		} else if(u.lastprayresult==PRAY_BAD){
 			Sprintf(buf, "That prayer was poorly recieved");
+			dump("", buf);
+		} else if(u.lastprayresult==PRAY_INPROG){
+			Sprintf(buf, "That prayer was in progress");
 			dump("", buf);
 		}
 		if(u.reconciled){
@@ -3445,6 +3450,9 @@ resistances_enlightenment()
 			putstr(en_win, 0, buf);
 		} else if(u.lastprayresult==PRAY_BAD){
 			Sprintf(buf, "That prayer was poorly recieved");
+			putstr(en_win, 0, buf);
+		} else if(u.lastprayresult==PRAY_INPROG){
+			Sprintf(buf, "That prayer is in progress");
 			putstr(en_win, 0, buf);
 		}
 		if(u.reconciled){
