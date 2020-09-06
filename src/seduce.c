@@ -1814,7 +1814,8 @@ int effect_num;
 		{
 		case SEDU_DRAINEN:
 			You_feel("drained of energy.");
-			drain_en(u.uen * 99 / 100);
+			if (u.uen > 0)
+				losepw(u.uen * 99 / 100);
 			tmp = (greater || greatest ? 90 : 10) / (Half_physical_damage ? 2 : 1);
 			u.uenbonus -= rnd(tmp);
 			exercise(A_CON, FALSE);
