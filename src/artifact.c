@@ -3371,8 +3371,8 @@ boolean * messaged;
 
 	/* The Grappler's Grasp has a chance to begin grapples.  */
 	if (oartifact == ART_GRAPPLER_S_GRASP) {
-		/* cannot begin a grapple -- Damage is done by adding an AT_HUGS to your attack chain, NOT here. */
-		if ((youagr || youdef) && !u.ustuck)
+		/* check if we can begin a grapple -- Damage is done by adding an AT_HUGS to your attack chain, NOT here. */
+		if ((youagr || youdef) && !u.ustuck && !sticks(mdef))
 		{
 			int newres = xmeleehurty(magr, mdef, &grapple, &grapple, otmp, (youagr || youdef), 0, dieroll, -1, FALSE);
 
