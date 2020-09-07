@@ -2542,6 +2542,10 @@ mpickgold(mtmp)
     register struct obj *gold;
     int mat_idx;
 
+	/* prevent dead monsters from picking up anything */
+	if (DEADMONSTER(mtmp))
+		return;
+
     if ((gold = g_at(mtmp->mx, mtmp->my)) != 0) {
 	mat_idx = gold->obj_material;
 #ifndef GOLDOBJ
@@ -2571,6 +2575,10 @@ mpickstuff(mtmp, str)
 
 /*	prevent shopkeepers from leaving the door of their shop */
 	if(mtmp->isshk && inhishop(mtmp)) return FALSE;
+
+	/* prevent dead monsters from picking up anything */
+	if (DEADMONSTER(mtmp))
+		return FALSE;
 
 	for(otmp = level.objects[mtmp->mx][mtmp->my]; otmp; otmp = otmp2) {
 	    otmp2 = otmp->nexthere;
