@@ -329,6 +329,8 @@ static struct Comp_Opt
 						PL_PSIZ, DISP_IN_GAME },
 	{ "chaos_quest",    "tournament chaos quest (temple, mithardir, or mordor)",
 						10, DISP_IN_GAME },
+	{ "delay_length", "the length of delays when rendering animation",
+						sizeof("normal"), DISP_IN_GAME },
 	{ "disclose", "the kinds of information to disclose at end of game",
 						sizeof(flags.end_disclose) * 2,
 						SET_IN_GAME },
@@ -639,6 +641,7 @@ initoptions()
 	flags.end_around = 2;
 	iflags.travelplus = 0;
 	iflags.runmode = RUN_LEAP;
+        iflags.delay_length = RUN_STEP;
 	iflags.pokedex = POKEDEX_SHOW_DEFAULT;
 	iflags.msg_history = 20;
 #ifdef TTY_GRAPHICS
@@ -652,6 +655,7 @@ initoptions()
 	flags.initrace = -1;
 	flags.initgend = -1;
 	flags.initalign = -1;
+
 
 	/* Set the default monster and object class symbols.  Don't use */
 	/* memcpy() --- sizeof char != sizeof uchar on some machines.	*/
@@ -1942,6 +1946,20 @@ boolean tinitial, tfrom_file;
 			iflags.runmode = RUN_STEP;
 		    else if (!strncmpi(op, "crawl", strlen(op)))
 			iflags.runmode = RUN_CRAWL;
+		    else
+			badoption(opts);
+		}
+		return;
+	}
+	fullname = "delay_length";
+	if (match_optname(opts, fullname, 4, TRUE)) {
+		if ((op = string_for_opt(opts, FALSE)) != 0) {
+		    if (!strncmpi(op, "none", strlen(op)))
+			iflags.delay_length = RUN_TPORT;
+		    else if (!strncmpi(op, "short", strlen(op)))
+			iflags.delay_length = RUN_LEAP;
+		    else if (!strncmpi(op, "normal", strlen(op)))
+			iflags.delay_length = RUN_STEP;
 		    else
 			badoption(opts);
 		}
@@ -3251,6 +3269,9 @@ static NEARDATA const char *pokedexsections[] = {
 static NEARDATA const char *runmodes[] = {
 	"teleport", "run", "walk", "crawl"
 };
+static NEARDATA const char *delay_lengths[] = {
+	"none", "short", "normal"
+};
 
 #ifdef SORTLOOT
 static NEARDATA const char *sortltype[] = {
@@ -3700,6 +3721,24 @@ boolean setinitial,setfromfile;
 			free((genericptr_t)mode_pick);
 			destroy_nhwindow(tmpwin);
 		}
+		retval = TRUE;
+	} else if (!strcmp("delay_length", optname)) {
+		const char *mode_name;
+		menu_item *mode_pick = (menu_item *)0;
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		for (i = 0; i < SIZE(delay_lengths); i++) {
+			mode_name = delay_lengths[i];
+			any.a_int = i + 1;
+			add_menu(tmpwin, NO_GLYPH, &any, *mode_name, 0,
+				 ATR_NONE, mode_name, MENU_UNSELECTED);
+		}
+		end_menu(tmpwin, "Select delay length:");
+		if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
+			iflags.delay_length = mode_pick->item.a_int - 1;
+			free((genericptr_t)mode_pick);
+		}
+		destroy_nhwindow(tmpwin);
 		retval = TRUE;
 	} else if (!strcmp("runmode", optname)) {
 		const char *mode_name;
@@ -4154,6 +4193,8 @@ char *buf;
 		Sprintf(buf, "%s", rolestring(flags.initrole, roles, name.m));
 	else if (!strcmp(optname, "runmode"))
 		Sprintf(buf, "%s", runmodes[iflags.runmode]);
+	else if (!strcmp(optname, "delay_length"))
+		Sprintf(buf, "%s", delay_lengths[iflags.delay_length]);
 	else if (!strcmp(optname, "scores")) {
 		Sprintf(buf, "%d top/%d around%s", flags.end_top,
 				flags.end_around, flags.end_own ? "/own" : "");

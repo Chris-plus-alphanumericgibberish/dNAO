@@ -130,7 +130,7 @@ extern int curses_get_ext_cmd(void);
 
 extern void curses_number_pad(int state);
 
-extern void curses_delay_output(void);
+extern void curses_delay_output(int);
 
 extern void curses_start_screen(void);
 

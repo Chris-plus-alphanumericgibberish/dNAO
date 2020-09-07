@@ -412,6 +412,7 @@ struct instance_flags {
 	boolean  travelcmd;	/* allow travel command */
 	int  travelplus;/* how far travel command should attempt to path through the unknown */
 	int	 runmode;	/* update screen display during run moves */
+	int delay_length;	/* length of delay for delay_output */
 #ifdef AUTOPICKUP_EXCEPTIONS
 	struct autopickup_exception *autopickup_exceptions[2];
 #define AP_LEAVE 0
