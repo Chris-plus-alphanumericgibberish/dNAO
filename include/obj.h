@@ -428,8 +428,15 @@ struct obj {
 							( (a)->otyp ) == ROUNDSHIELD ? ((o)->otyp==DWARVISH_ROUNDSHIELD) : \
 							((a) == &artilist[ART_FIRE_BRAND] || (a) == &artilist[ART_FROST_BRAND]) ? \
 								(u.brand_otyp == STRANGE_OBJECT ? \
-									((is_blade((o)) && !is_vibroweapon((o)) && objects[(o)->otyp].oc_size < MZ_HUGE) \
-										|| (o)->otyp == GAUNTLETS) : \
+									((is_blade((o)) && objects[(o)->otyp].oc_size < MZ_HUGE && \
+										!is_vibroweapon((o)) && \
+										!is_rakuyo((o)) && \
+										!(o)->otyp == SET_OF_CROW_TALONS && \
+										!(o)->otyp == CROW_QUILL && \
+										!(o)->otyp == CRYSTAL_SWORD && \
+										!(o)->otyp == RUNESWORD && \
+										!(o)->otyp == MIRRORBLADE) \
+									|| (o)->otyp == GAUNTLETS) : \
 									(u.brand_otyp == (o)->otyp)) : \
 							(a)->otyp == (o)->otyp)
 #define is_blade(otmp)	(otmp->oclass == WEAPON_CLASS && \
