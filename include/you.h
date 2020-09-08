@@ -279,6 +279,7 @@ struct you {
 	schar dx, dy, dz;	/* direction of move (or zap or ... ) */
 	schar di;		/* direction of FF */
 	xchar tx, ty;		/* destination of travel */
+	xchar itx, ity;		/* intermediary travel destination */
 	xchar ux0, uy0;		/* initial position FF */
 	d_level uz, uz0;	/* your level on this and the previous turn */
 	d_level utolev;		/* level monster teleported you to, or uz */
@@ -342,8 +343,8 @@ struct you {
 	int bc_order;	/* ball & chain order [see bc_order() in ball.c] */
 	int bc_felt;	/* mask for ball/chain being felt */
 
-	int umonster;			/* hero's "real" monster num */
-	int umonnum;			/* current monster number */
+	int umonster;			/* hero's role's monster num */
+	int umonnum;			/* current monster number (either your role's or a polyform) */
 
 	int mh, mhmax, mhrolled, mtimedone;	/* for polymorph-self */
 #define MATTK_DSCALE         1
@@ -497,6 +498,7 @@ struct you {
 #define	PRAY_GIFT	3
 #define	PRAY_ANGER	4
 #define	PRAY_CONV	5
+#define PRAY_INPROG	6
 
 #define	REC_NONE	0
 #define	REC_REC		1

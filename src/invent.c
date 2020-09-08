@@ -2951,8 +2951,8 @@ winid *datawin;
 				poisons |= OPOISON_FILTH;
 			if (oartifact == ART_MOONBEAM)
 				poisons |= OPOISON_SLEEP;
-			
-			
+			if (oartifact == ART_DIRGE)
+				poisons |= OPOISON_ACID;
 			
 			if (poisons) {
 				/* special cases */
@@ -3410,6 +3410,9 @@ winid *datawin;
 				break;
 			case NULLMAGIC:
 				effect = "apart from magic";
+				break;
+			case WATERPROOF:
+				effect = "waterproof";
 				break;
 			case LIFESAVED:
 				effect = "life saving";

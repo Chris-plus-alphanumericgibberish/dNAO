@@ -909,8 +909,11 @@ boolean ghostly;
 	       trap->tx != 0) {	/* need "!= 0" to work around DICE 3.0 bug */
 		/* if there's a stale pointer, we need to reload the old saved ammo */
 		if (trap->ammo) {
-			if ((trap->ammo = restobjchn(fd, ghostly, FALSE)))
-				trap->ammo->otrap = trap;	/* only set it if we found an ammo item */
+			struct obj * obj;
+			trap->ammo = restobjchn(fd, ghostly, FALSE);
+			/* restore trap back pointer */
+			for (obj = trap->ammo; obj; obj = obj->nobj)
+				obj->otrap = trap;
 		}
 		trap->ntrap = ftrap;
 		ftrap = trap;

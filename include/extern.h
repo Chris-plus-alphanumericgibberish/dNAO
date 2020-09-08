@@ -262,6 +262,7 @@ E void NDECL(add_debug_extended_commands);
 #endif /* WIZARD */
 E void FDECL(rhack, (char *));
 E void NDECL(dokeylist);
+E char * FDECL(find_command_key, (const char *, char *));
 E int NDECL(doextlist);
 E int NDECL(extcmd_via_menu);
 E void FDECL(enlightenment, (int));
@@ -1349,7 +1350,7 @@ E void NDECL(mkinvokearea);
 /* ### mkmap.c ### */
 
 void FDECL(flood_fill_rm, (int,int,int,BOOLEAN_P,BOOLEAN_P));
-void FDECL(remove_rooms, (int,int,int,int));
+void FDECL(remove_rooms, (int,int,int,int,SCHAR_P));
 void FDECL(remove_room, (unsigned));
 
 /* ### mkmaze.c ### */
@@ -2237,6 +2238,7 @@ E void FDECL(punish, (struct obj *));
 E void NDECL(unpunish);
 E boolean FDECL(cant_create, (int *, BOOLEAN_P));
 #ifdef WIZARD
+E int NDECL(wiz_kill_all);
 E struct monst * FDECL(create_particular, (unsigned long, int, int, unsigned long, unsigned long, int));
 #endif
 
@@ -2747,6 +2749,7 @@ E boolean NDECL(unconscious);
 E boolean NDECL(lava_effects);
 E void FDECL(blow_up_landmine, (struct trap *));
 E int FDECL(launch_obj, (SHORT_P, struct trap *, int));
+E void FDECL(unshackle_mon, (struct monst *));
 E void FDECL(dowebgush, (int,int,int));
 E void FDECL(webgush, (int,int,genericptr_t));
 E int NDECL(ubreak_entanglement);
@@ -3181,6 +3184,7 @@ E struct monst *FDECL(bhit, (int,int,int,int,int (*)(MONST_P,OBJ_P),
 E int FDECL(flash_hits_mon, (struct monst *, struct obj *));
 E int FDECL(burn_floor_paper, (int,int,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(buzz, (int,int,int,int,XCHAR_P,XCHAR_P,int,int,int,int));
+E void FDECL(lightning_blind, (struct monst *, int));
 E struct monst * FDECL(delouse, (struct monst *,int));
 E struct monst * FDECL(delouse_tame, (struct monst *));
 E void FDECL(melt_ice, (XCHAR_P,XCHAR_P));

@@ -132,7 +132,7 @@ register int x, y, n;
 	mndx = monsndx(mtmp->data);
 	if(!(u.uevent.uaxus_foe) || mndx > PM_QUINON || mndx < PM_MONOTON){
 	 while(cnt--) {
-		if (peace_minded(mtmp->data) && !is_derived_undead_mon(mtmp)) continue;
+		if (peace_minded(mtmp->data)) continue;
 		/* Don't create groups of peaceful monsters since they'll get
 		 * in our way.  If the monster has a percentage chance so some
 		 * are peaceful and some are not, the result will just be a
@@ -7554,6 +7554,13 @@ register int	mmflags;
 	)
 		mmflags |= MM_EDOG;
 
+	/* replace desfile Tulani with Gae, and vice versa
+	 * assumes G_NOGEN is used to track which variant you have that game */
+	if (ptr && ptr->mtyp == PM_TULANI_ELADRIN && in_mklev && (mons[PM_TULANI_ELADRIN].geno & G_NOGEN))
+		ptr = &mons[PM_GAE_ELADRIN];
+	else if (ptr && ptr->mtyp == PM_GAE_ELADRIN && in_mklev && (mons[PM_GAE_ELADRIN].geno & G_NOGEN))
+		ptr = &mons[PM_TULANI_ELADRIN];
+
 	/* if caller both a random creature and a random location, try both at once first */
 	if(!ptr && x == 0 && y == 0){
 		int tryct = 0;	/* careful with bigrooms */
@@ -8099,7 +8106,7 @@ register int	mmflags;
 	if(Race_if(PM_DROW) && in_mklev && Is_qstart(&u.uz) && 
 		(ptr->mtyp == PM_SPROW || ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_CAVE_LIZARD || ptr->mtyp == PM_LARGE_CAVE_LIZARD)
 	) mtmp->mpeaceful = TRUE;
-	else mtmp->mpeaceful = (mmflags & MM_ANGRY) ? FALSE : (peace_minded(ptr) && !is_derived_undead_mon(mtmp));
+	else mtmp->mpeaceful = (mmflags & MM_ANGRY) ? FALSE : peace_minded(ptr);
 	
 	if(mndx == PM_CHAOS){
 		mtmp->mhpmax = 15*mtmp->mhpmax;
@@ -10271,7 +10278,7 @@ struct monst *mtmp;
 			mtmp->malign = max(3,absmal);
 	} else{	/* not coaligned and therefore hostile */
 		//Neutral murder bugfix: neutral murderables should be worth 1 algnment if hostile.
-		if(!mal && is_human(mtmp->data) && !is_derived_undead_mon(mtmp) && !mtmp->mpeaceful)
+		if (!mal && is_human(mtmp->data) && !always_hostile(mtmp->data) && !mtmp->mpeaceful)
 			mtmp->malign = 1;
 		else
 			mtmp->malign = abs(mal);

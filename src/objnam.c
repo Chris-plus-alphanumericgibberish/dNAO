@@ -3735,7 +3735,7 @@ int wishflags;
 			&& strncmpi(bp, "leather helm", 12) && strncmpi(bp, "leather hat", 11)
 			) {
 			mat = LEATHER;
-		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", 7))
+		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", l=7))
 			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wood golem", 11)
 			) {
 			mat = WOOD;
@@ -3756,7 +3756,7 @@ int wishflags;
 			&& strncmpi(bp, "Iron Ball of Levitation", 23) && strncmpi(bp, "Iron Spoon of Liberation", 24)
 			) {
 			mat = IRON;
-		} else if ((!strncmpi(bp, "metal ", l=6) || !strncmpi(bp, "metallic ", l=9))
+		} else if ((!strncmpi(bp, "metal ", l=6) || !strncmpi(bp, "metallic ", l=9) || !strncmpi(bp, "tin whistle", (l=4)?11:0))
 			&& strncmpi(bp, "metal tube", 10) && strncmpi(bp, "metal gauntlets", 15)
 			) {
 			mat = METAL;
@@ -3806,7 +3806,7 @@ int wishflags;
 			) {
 			mat = GEMSTONE;
 		} else if ((!strncmpi(bp, "stone ", l=6) || !strncmpi(bp, "ceramic ", l=8))
-			&& strncmpi(bp, "stone to flesh", 14)
+			&& strncmpi(bp, "stone to flesh", 14) && strncmpi(bp, "stone dragon shield", 19)
 			) {
 			mat = MINERAL;
 		} else if (!strncmpi(bp, "salt ", l=5)) {
@@ -3928,7 +3928,8 @@ int wishflags;
 		} else if (!strncmpi(bp, "glittering ", l=11)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_MAGCW);
 
-		} else if (!strncmpi(bp, "holy ", l=5) && strncmpi(bp, "holy moonlight sword", 20)) {
+		} else if (!strncmpi(bp, "holy ", l=5) &&
+			strncmpi(bp, "holy moonlight sword", 20) && strncmpi(bp, "holy symbol of the black mother", 31)) {
 			blessed = !(uncursed + iscursed);
 		} else if (!strncmpi(bp, "holy-weapon ", l=12)) {
 			blessed = !(uncursed + iscursed);
@@ -4011,7 +4012,7 @@ int wishflags;
 			mat = GEMSTONE; gemtype = JET;
 		} else if (!strncmpi(bp, "opal ", l=5) && strncmpi(bp, "opal ring", 9)) {
 			mat = GEMSTONE; gemtype = OPAL;
-		} else if (!strncmpi(bp, "chrysoberyl ", l=11)) {
+		} else if (!strncmpi(bp, "chrysoberyl ", l=12)) {
 			mat = GEMSTONE; gemtype = CHRYSOBERYL;
 		} else if (!strncmpi(bp, "garnet ", l=7) && strncmpi(bp, "garnet rod", 10)) {
 			mat = GEMSTONE; gemtype = GARNET;
@@ -4149,6 +4150,7 @@ int wishflags;
 	if (!strstri(bp, "wand ")
 	 && !strstri(bp, "spellbook ")
 	 && !strstri(bp, "book ")
+	 && !strstri(bp, "lump ")
 	 && !strstri(bp, "rod ")
 	 && !strstri(bp, "finger ")
 	 && !strstri(bp, "set of ")) {
@@ -4161,17 +4163,24 @@ int wishflags;
 	if (strncmpi(bp, "wizard lock", 11)) /* not the "wizard" monster! */
 	if (strncmpi(bp, "vampire killer", 14)) /* not the "vampire" monster! */
 	if (strncmpi(bp, "ninja-to", 8)) /* not the "ninja" rank */
+	if (strncmpi(bp, "war hammer", 10)) /* not the "war" monster */
+	if (strncmpi(bp, "war hat", 7)) /* not the "war" monster */
 	if (strncmpi(bp, "rogue gear-spirits", 18)) /* not the "rogue" monster */
 	if (strncmpi(bp, "master key", 10)) /* not the "master" rank */
 	if (strncmpi(bp, "scroll of stinking cloud", 10)) /* not the "stinking cloud" monster */
 	if (strncmpi(bp, "rod of lordly might", 19)) /* not the "lord" rank */
 	if (strncmpi(bp, "magenta", 7)) /* not the "mage" rank */
 	if (strncmpi(bp, "band", 4)) /* not the "ban" rank */
+	if (strncmpi(bp, "banana", 6)) /* not the "ban" rank */
+	if (strncmpi(bp, "healer uniform", 14)) /* not the "healer" monster */
+	if (strncmpi(bp, "bardiche", 8)) /* not the "bard" monster */
+	if (strncmpi(bp, "witch hat", 9)) /* not the "witch" monster */
 	if (strncmpi(bp, "green dragon crescent blade", 27)) /* not the "green dragon" monster */
 	if (strncmpi(bp, "crow quill", 10)) /* not a "crow" */
+	if (strncmpi(bp, "android visor", 13)) /* not an "android" */
+	if (strncmpi(bp, "Uruk-hai shield", 15)) /* not an "uruk-hai" monster */
 	if (strncmpi(bp, "sparkling lake", 14)) /* not a "sparkling lake" */
 	if (strncmpi(bp, "frosted lake", 12)) /* not a "frosted lake" */
-	if (strncmpi(bp, "set of crow talons", 18)) /* not a "crow" */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
 	if (strncmpi(bp, "platinum dragon plate", 22)) /* not a "dragon" */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
@@ -4298,6 +4307,7 @@ int wishflags;
 	   strncmpi(bp, "rod of lordly might", 19) && 
 	   strncmpi(bp, "rod of the elvish lords", 23) && 
 	   strncmpi(bp, "glamdring", 9) && 
+	   strncmpi(bp, "plasteel armor", 13) &&
 	   strncmpi(bp, "armor of erebor", 15) && 
 	   strncmpi(bp, "armor of khazad-dum", 19) && 
 	   strncmpi(bp, "black dress", 11) && 
@@ -4341,6 +4351,8 @@ int wishflags;
 			 * indicated by asking for a material, eg "cloak", or "silver gauntlets" */
 			if		(mat && !strcmpi(bp, "cloak"))		typ = CLOAK;
 			else if (mat && !strcmpi(bp, "gauntlets"))	typ = GAUNTLETS;
+			else if (name && !strcmpi(bp, "gauntlets") && (!strcmpi(name, "Fire Brand") || !strcmpi(name, "Frost Brand")))
+														typ = GAUNTLETS;
 			else if (mat && !strcmpi(bp, "shoes"))		typ = SHOES;
 			/* otherwise, actually use the o_range */
 			else {

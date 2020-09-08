@@ -470,7 +470,14 @@ display_monster(x, y, mon, sightflags, worm_tail)
 			peacenum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
 		num = peace_to_glyph(mon);
-	} else if (is_derived_undead_mon(mon) && !Hallucination) {
+	}
+	else if (!Hallucination && (
+				has_template(mon, VAMPIRIC) ||
+				has_template(mon, ZOMBIFIED) ||
+				has_template(mon, SKELIFIED) ||
+				has_template(mon, CRYSTALFIED) ||
+				has_template(mon, FRACTURED)
+			)) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			zombienum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			zombienum_to_glyph(PM_LONG_WORM_TAIL);
@@ -1595,7 +1602,7 @@ int glyph;
     } else if ((offset = (glyph - GLYPH_CMAP_OFF)) >= 0) {	/* cmap */
 	ch = defsyms[offset].sym;
     } else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
-	ch = def_oc_syms[(int)objects[offset].oc_class];
+	ch = def_oc_syms[(int)objects[offset >> 4].oc_class];
     } else if ((offset = (glyph - GLYPH_RIDDEN_OFF)) >= 0) { /* mon ridden */
 	ch = def_monsyms[(int)mons[offset].mlet];
     } else if ((offset = (glyph - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */

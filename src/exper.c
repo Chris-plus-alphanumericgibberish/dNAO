@@ -68,7 +68,7 @@ experience(mtmp, nk)	/* return # of exp points for mtmp after nk killed */
 	if(is_fern_spore(mtmp->data)) return 0;
 
 /*	zombies give no experience (resurecting and infecting)*/
-	if(is_derived_undead_mon(mtmp) && mtmp->mclone) return 0;
+	if(has_template(mtmp, ZOMBIFIED) && mtmp->mclone) return 0;
 
 	tmp = 1 + mtmp->m_lev * mtmp->m_lev;
 

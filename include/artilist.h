@@ -77,6 +77,16 @@ A("Excalibur",			LONG_SWORD,						(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
+A("Dirge",			LONG_SWORD,						"half-melted %s",
+	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_KNIGHT, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_INHER|ARTG_MAJOR|ARTG_FXALGN),
+	NO_MONS(),
+	ATTK(AD_ACID, 5, 10), NOFLAG,
+	PROPS(ACID_RES), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
 /*
  *	Stormbringer only has a 2 because it can drain a level,
  *	providing 8 more.
@@ -1586,8 +1596,8 @@ A("The Mask of Tlaloc",				MASK,					(const char *)0,
 	A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
-	PROPS(), NOFLAG,
-	PROPS(HALF_SPDAM, ANTIMAGIC, COLD_RES, SHOCK_RES), NOFLAG,	/* missing: waterproofing */
+	PROPS(WATERPROOF), NOFLAG,
+	PROPS(HALF_SPDAM, ANTIMAGIC, COLD_RES, SHOCK_RES), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 /*Arc redesign by Riker*/

@@ -23,44 +23,11 @@ STATIC_DCL short NDECL(doclockmenu);
 STATIC_DCL short NDECL(dodroidmenu);
 STATIC_DCL void FDECL(worddescriptions, (int));
 
-/* Assumes u.umonster is set up already */
-/* Use u.umonster since we might be restoring and you may be polymorphed */
+/* assumes u.umonnum is set already */
 void
 init_uasmon()
 {
-	int i;
-
-	upermonst = mons[u.umonster];
-
-	/* Fix up the flags */
-	/* Default flags assume human,  so replace with your race's flags */
-
-	upermonst.mflagsm &= ~(mons[PM_HUMAN].mflagsm);
-	upermonst.mflagsm |= (mons[urace.malenum].mflagsm);
-
-	upermonst.mflagst &= ~(mons[PM_HUMAN].mflagst);
-	upermonst.mflagst |= (mons[urace.malenum].mflagst);
-
-	upermonst.mflagsb &= ~(mons[PM_HUMAN].mflagsb);
-	upermonst.mflagsb |= (mons[urace.malenum].mflagsb);
-	
-	upermonst.mflagsg &= ~(mons[PM_HUMAN].mflagsg);
-	upermonst.mflagsg |= (mons[urace.malenum].mflagsg);
-
-	upermonst.mflagsa &= ~(mons[PM_HUMAN].mflagsa);
-	upermonst.mflagsa |= (mons[urace.malenum].mflagsa);
-
-	upermonst.mflagsv &= ~(mons[PM_HUMAN].mflagsv);
-	upermonst.mflagsv |= (mons[urace.malenum].mflagsv);
-	
-	/* Fix up the attacks */
-	/* crude workaround, needs better general solution */
-	if (Race_if(PM_VAMPIRE)) {
-	  for(i = 0; i < NATTK; i++) {
-	    upermonst.mattk[i] = mons[urace.malenum].mattk[i];
-	  }
-	}
-	
+	upermonst = mons[(flags.female && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum];
 	set_uasmon();
 }
 
@@ -278,7 +245,7 @@ boolean forcecontrol;
 	boolean hasmask = (ublindf && ublindf->otyp==MASK && polyok(&mons[ublindf->corpsenm]));
 	boolean was_floating = (Levitation || Flying);
 	boolean allow_selfrace_poly = (wizard || (u.specialSealsActive&SEAL_ALIGNMENT_THING));
-	boolean allow_nopoly_poly = wizard;
+	boolean allow_nopoly_poly = FALSE;
 
 	if(!Polymorph_control && !forcecontrol && !draconian && !iswere && !isvamp && !hasmask) {
 	    if (rn2(20) > ACURR(A_CON)) {
@@ -300,8 +267,8 @@ boolean forcecontrol;
 			/* Note:  humans are illegal as monsters, but an
 			 * illegal monster forces newman(), which is what we
 			 * want if they specified a human.... */
-			else if ((!allow_nopoly_poly && !polyok(&mons[mntmp])) ||
-					(!allow_selfrace_poly && your_race(&mons[mntmp])))
+			else if (!polyok(&mons[mntmp]) && (!(allow_nopoly_poly = (wizard && yn("Poly into forbidden form") == 'y'))) ||
+				(your_race(&mons[mntmp]) && !allow_selfrace_poly))
 				You("cannot polymorph into that.");
 			else break;
 		} while(++tries < 5);
@@ -324,7 +291,7 @@ boolean forcecontrol;
 				uskin = uarm;
 				uarm = (struct obj *)0;
 				/* save/restore hack */
-				uskin->owornmask |= I_SPECIAL;
+				uskin->owornmask |= W_SKIN;
 			}
 		}
 		else if(leonine) {
@@ -336,7 +303,7 @@ boolean forcecontrol;
 				uskin = uarmc;
 				uarmc = (struct obj *)0;
 				/* save/restore hack */
-				uskin->owornmask |= I_SPECIAL;
+				uskin->owornmask |= W_SKIN;
 			}
 		} else if (hasmask) {
 			if ((youmonst.data) == &mons[ublindf->corpsenm])
@@ -406,9 +373,6 @@ int	mntmp;
 	boolean could_pass_walls = Passes_walls;
 	int mlvl;
 	const char *s;
-
-	if (!polyok(&mons[mntmp]))
-		impossible("polyself into nopoly monster");
 
 	if (mvitals[mntmp].mvflags & G_GENOD && !In_quest(&u.uz)) {	/* allow G_EXTINCT */
 		You_feel("rather %s-ish.",mons[mntmp].mname);
@@ -609,8 +573,6 @@ int	mntmp;
 	if (flags.verbose) {
 	    static const char use_thec[] = "Use the command #%s to %s.";
 	    static const char monsterc[] = "monster";
-	    if (u.ufirst_light || u.ufirst_sky || u.ufirst_life || u.ufirst_know)
-		pline(use_thec,monsterc,"speak a word of power");
 #ifdef YOUMONST_SPELL
 	    if (attacktype(youmonst.data, AT_MAGC))
 		pline(use_thec,monsterc,"cast monster spells");
@@ -867,136 +829,53 @@ int
 dobreathe(mdat)
 struct permonst *mdat;
 {
-	struct zapdata zapdata;
-	struct attack *mattk;
-
-	if (Strangled) {
-	    You_cant("breathe.  Sorry.");
-	    return(0);
-	}
-	if (u.uen < 15) {
-	    You("don't have enough energy to breathe!");
-	    return(0);
-	}
-	losepw(15);
-	flags.botl = 1;
+	struct attack mattk;
+	int powermult = 100;
 
 	if (!getdir((char *)0)) return(0);
 
-	mattk = attacktype_fordmg(mdat, AT_BREA, AD_ANY);
-	if(!mattk && Race_if(PM_HALF_DRAGON)) mattk = attacktype_fordmg(&mons[PM_HALF_DRAGON], AT_BREA, AD_ANY);
-	if (!mattk)
-	    impossible("bad breath attack?");	/* mouthwash needed... */
-	else{
-		int type = mattk->adtyp;
-		double multiplier = 1.0;
-		if(type == AD_HDRG){
-			type = flags.HDbreath;
-			if(type == AD_SLEE) multiplier = 4.0;
+	{
+		struct attack * aptr;
+		aptr = attacktype_fordmg(mdat, AT_BREA, AD_ANY);
+		if (!aptr && Race_if(PM_HALF_DRAGON)) aptr = attacktype_fordmg(&mons[PM_HALF_DRAGON], AT_BREA, AD_ANY);
+
+		if (!aptr) {
+			impossible("bad breath attack?");
+			return 0;
 		}
-		basiczap(&zapdata, type, ZAP_BREATH, 0);	/* begin setup of zapdata */
-
-		if(Race_if(PM_HALF_DRAGON)){
-			// give Half-dragons a +0.5 bonus per armor piece that matches their default breath
-			if (flags.HDbreath == AD_FIRE){
-				if (uarm){
-					if (Is_dragon_scales(uarm) && Dragon_scales_to_pm(uarm) == &mons[PM_RED_DRAGON])
-						multiplier += 0.5;
-					if (Is_dragon_mail(uarm) && Dragon_mail_to_pm(uarm) == &mons[PM_RED_DRAGON])
-						multiplier += 0.5;
-				} 
-				if (uarms){
-					if (Is_dragon_shield(uarms) && Dragon_shield_to_pm(uarms) == &mons[PM_RED_DRAGON])
-						multiplier += 0.5;
-				}
-			} else if (flags.HDbreath == AD_COLD){
-				if (uarm){
-					if (Is_dragon_scales(uarm) && Dragon_scales_to_pm(uarm) == &mons[PM_WHITE_DRAGON])
-						multiplier += 0.5;
-					if (Is_dragon_mail(uarm) && Dragon_mail_to_pm(uarm) == &mons[PM_WHITE_DRAGON])
-						multiplier += 0.5;
-				} 
-				if (uarms){
-					if (Is_dragon_shield(uarms) && Dragon_shield_to_pm(uarms) == &mons[PM_WHITE_DRAGON])
-						multiplier += 0.5;
-				}
-			} else if (flags.HDbreath == AD_ELEC){
-				if (uarm){
-					if (Is_dragon_scales(uarm) && Dragon_scales_to_pm(uarm) == &mons[PM_BLUE_DRAGON])
-						multiplier += 0.5;
-					if (Is_dragon_mail(uarm) && Dragon_mail_to_pm(uarm) == &mons[PM_BLUE_DRAGON])
-						multiplier += 0.5;
-				} 
-				if (uarms){
-					if (Is_dragon_shield(uarms) && Dragon_shield_to_pm(uarms) == &mons[PM_BLUE_DRAGON])
-						multiplier += 0.5;
-				}
-			} else if (flags.HDbreath == AD_DRST){
-				if (uarm){
-					if (Is_dragon_scales(uarm) && Dragon_scales_to_pm(uarm) == &mons[PM_GREEN_DRAGON])
-						multiplier += 0.5;
-					if (Is_dragon_mail(uarm) && Dragon_mail_to_pm(uarm) == &mons[PM_GREEN_DRAGON])
-						multiplier += 0.5;
-				} 
-				if (uarms){
-					if (Is_dragon_shield(uarms) && Dragon_shield_to_pm(uarms) == &mons[PM_GREEN_DRAGON])
-						multiplier += 0.5;
-				}
-			} else if (flags.HDbreath == AD_SLEE){
-				if (uarm){
-					if (Is_dragon_scales(uarm) && Dragon_scales_to_pm(uarm) == &mons[PM_ORANGE_DRAGON])
-						multiplier += 2.0;
-					if (Is_dragon_mail(uarm) && Dragon_mail_to_pm(uarm) == &mons[PM_ORANGE_DRAGON])
-						multiplier += 2.0;
-				} 
-				if (uarms){
-					if (Is_dragon_shield(uarms) && Dragon_shield_to_pm(uarms) == &mons[PM_ORANGE_DRAGON])
-						multiplier += 2.0;
-				}
-			} else if (flags.HDbreath == AD_ACID){
-				if (uarm){
-					if (Is_dragon_scales(uarm) && Dragon_scales_to_pm(uarm) == &mons[PM_YELLOW_DRAGON])
-						multiplier += 0.5;
-					if (Is_dragon_mail(uarm) && Dragon_mail_to_pm(uarm) == &mons[PM_YELLOW_DRAGON])
-						multiplier += 0.5;
-				} 
-				if (uarms){
-					if (Is_dragon_shield(uarms) && Dragon_shield_to_pm(uarms) == &mons[PM_YELLOW_DRAGON])
-						multiplier += 0.5;
-				}
-			}
-			
-			
-			// Chromatic/Platinum dragon gear is never going to naturally apply
-			// Because it's black/silver, so give it appropriate buffs here 
-						
-			if (((uarm && uarm->oartifact == ART_CHROMATIC_DRAGON_SCALES) ||
-				 (uarms && uarms->oartifact == ART_CHROMATIC_DRAGON_SCALES)) && 
-				(flags.HDbreath == AD_FIRE || flags.HDbreath == AD_COLD || 
-				 flags.HDbreath == AD_ELEC || flags.HDbreath == AD_DRST ||
-				 flags.HDbreath == AD_ACID))
-			
-				multiplier += 0.5;
-			if (uarm && uarm->oartifact == ART_DRAGON_PLATE && 
-				(flags.HDbreath == AD_FIRE || flags.HDbreath == AD_COLD || 
-				 flags.HDbreath == AD_ELEC || flags.HDbreath == AD_SLEE))
-			
-				multiplier += (flags.HDbreath == AD_SLEE)?2.0:0.5;
-		}
-		if(carrying_art(ART_DRAGON_S_HEART_STONE))
-			multiplier *= 2;
-
-		/* dragon-breath is hard to reflect */
-		if (is_true_dragon(mdat) || (Race_if(PM_HALF_DRAGON) && u.ulevel >= 14))
-			zapdata.unreflectable = ZAP_REFL_ADVANCED;
-
-		/* find damage */
-		zapdata.damn = mattk->damn + (u.ulevel / 2);
-		zapdata.damd = (mattk->damd ? mattk->damd : 6) * multiplier;
-		/* do the zap */
-		zap(&youmonst, u.ux, u.uy, u.dx, u.dy, rn1(7, 7), &zapdata);
+		mattk = *aptr;
 	}
-	return(1);
+
+	if (Race_if(PM_HALF_DRAGON) && (mattk.adtyp == AD_HDRG || flags.HDbreath == mattk.adtyp)) {
+		/* HalfDragons get a +0.5x bonus per armor piece that matches their default breath */
+		int mtyp;
+		switch (flags.HDbreath)
+		{
+		case AD_MAGM: mtyp = PM_GRAY_DRAGON;   break;
+		case AD_FIRE: mtyp = PM_RED_DRAGON;    break;
+		case AD_COLD: mtyp = PM_WHITE_DRAGON;  break;
+		case AD_ELEC: mtyp = PM_BLUE_DRAGON;   break;
+		case AD_DRST: mtyp = PM_GREEN_DRAGON;  break;
+		case AD_SLEE: mtyp = PM_ORANGE_DRAGON; break;
+		case AD_ACID: mtyp = PM_YELLOW_DRAGON; break;
+		default:
+			impossible("bad HDbreath %d", flags.HDbreath);
+			return 0;
+		}
+		if (uarm && Dragon_armor_matches_mtyp(uarm, mtyp))
+			powermult += 50;
+
+		if (uarms && Dragon_armor_matches_mtyp(uarms, mtyp))
+			powermult += 50;
+	}
+	if(carrying_art(ART_DRAGON_S_HEART_STONE))
+		powermult *= 2;
+
+	/* use powermult to increase the damage dealt */
+	mattk.damd = (mattk.damd ? mattk.damd : 6) * powermult / 100;
+
+	/* use xbreathey to do the attack */
+	return xbreathey(&youmonst, &mattk, 0, 0);
 }
 
 int
@@ -1980,17 +1859,17 @@ boolean silently;
 		if(uskin->otyp == LEO_NEMAEUS_HIDE){
 			uarmc = uskin;
 			/* undo save/restore hack */
-			uskin->owornmask &= ~I_SPECIAL;
+			uskin->owornmask &= ~W_SKIN;
 			uskin = (struct obj *)0;
 			/* undo save/restore hack */
-			uarmc->owornmask &= ~I_SPECIAL;
+			uarmc->owornmask &= ~W_SKIN;
 		} else {
 			uarm = uskin;
 			/* undo save/restore hack */
-			uskin->owornmask &= ~I_SPECIAL;
+			uskin->owornmask &= ~W_SKIN;
 			uskin = (struct obj *)0;
 			/* undo save/restore hack */
-			uarm->owornmask &= ~I_SPECIAL;
+			uarm->owornmask &= ~W_SKIN;
 		}
 	}
 }

@@ -2412,7 +2412,8 @@ u_init()
 	calc_total_maxhp();
 	u.uhp = u.uhpmax;
 	calc_total_maxen();
-	u.uen = u.uenmax;
+	if (!Race_if(PM_INCANTIFIER))
+		u.uen = u.uenmax;
 	
 	/* make horrors: progressively nastier */
 	make_horror(&mons[PM_SHAMBLING_HORROR], 15, 1);
@@ -2452,27 +2453,38 @@ u_init()
 
 	dungeon_topology.eprecursor_typ = rnd(8);
 	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend){
-		if(flags.initgend)
-			flags.HDbreath = rn2(2) ? AD_MAGM : AD_COLD;
-		else flags.HDbreath = AD_FIRE;
+		if (rn2(2)) {
+			flags.HDbreath = AD_MAGM;
+			HAntimagic |= (FROMRACE|FROMOUTSIDE);
+		}
+		else {
+			flags.HDbreath = AD_COLD;
+			HCold_resistance |= (FROMRACE|FROMOUTSIDE);
+		}
 	} else switch(rnd(6)){
 		case 1:
 			flags.HDbreath = AD_COLD;
+			HCold_resistance |= (FROMRACE|FROMOUTSIDE);
 		break;
 		case 2:
 			flags.HDbreath = AD_FIRE;
+			HFire_resistance |= (FROMRACE|FROMOUTSIDE);
 		break;
 		case 3:
 			flags.HDbreath = AD_SLEE;
+			HSleep_resistance |= (FROMRACE|FROMOUTSIDE);
 		break;
 		case 4:
 			flags.HDbreath = AD_ELEC;
+			HShock_resistance |= (FROMRACE|FROMOUTSIDE);
 		break;
 		case 5:
 			flags.HDbreath = AD_DRST;
+			HPoison_resistance |= (FROMRACE|FROMOUTSIDE);
 		break;
 		case 6:
 			flags.HDbreath = AD_ACID;
+			HAcid_resistance |= (FROMRACE|FROMOUTSIDE);
 		break;
 	}
 	/* Fix up the alignment quest nemesi */

@@ -49,7 +49,7 @@ struct window_procs {
     void FDECL((*win_getlin), (const char *,char *));
     int NDECL((*win_get_ext_cmd));
     void FDECL((*win_number_pad), (int));
-    void NDECL((*win_delay_output));
+    void FDECL((*win_delay_output), (int));
 #ifdef CHANGE_COLOR
     void FDECL((*win_change_color), (int,long,int));
 #ifdef MAC
@@ -112,7 +112,7 @@ extern NEARDATA struct window_procs windowprocs;
 #define getlin (*windowprocs.win_getlin)
 #define get_ext_cmd (*windowprocs.win_get_ext_cmd)
 #define number_pad (*windowprocs.win_number_pad)
-#define delay_output (*windowprocs.win_delay_output)
+#define delay_output() (*windowprocs.win_delay_output)(iflags.delay_length)
 #ifdef CHANGE_COLOR
 #define change_color (*windowprocs.win_change_color)
 #ifdef MAC

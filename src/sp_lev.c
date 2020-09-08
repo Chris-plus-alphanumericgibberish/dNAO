@@ -2536,7 +2536,7 @@ dlb *fd;
 		    Map[x][y] = 1;
 		}
 	    if (init_lev.init_present && init_lev.joined)
-		remove_rooms(xstart, ystart, xstart+xsize, ystart+ysize);
+		remove_rooms(xstart, ystart, xstart+xsize, ystart+ysize, init_lev.bg);
 	}
 
 	Fread((genericptr_t) &n, 1, sizeof(n), fd);

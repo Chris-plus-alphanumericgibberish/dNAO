@@ -211,7 +211,7 @@ E char FDECL(tty_yn_function, (const char *, const char *, CHAR_P));
 E void FDECL(tty_getlin, (const char *,char *));
 E int NDECL(tty_get_ext_cmd);
 E void FDECL(tty_number_pad, (int));
-E void NDECL(tty_delay_output);
+E void FDECL(tty_delay_output, (int));
 #ifdef CHANGE_COLOR
 E void FDECL(tty_change_color,(int color,long rgb,int reverse));
 #ifdef MAC

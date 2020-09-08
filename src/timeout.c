@@ -96,6 +96,7 @@ const struct propname {
     { FIXED_ABIL, "fixed abilites" },
     { LIFESAVED, "life will be saved" },
 	{ NULLMAGIC, "magic nullification" },
+    { WATERPROOF, "waterproofing" },
     {  0, 0 },
 };
 
@@ -676,7 +677,10 @@ nh_timeout()
 			upp->intrinsic++;
 			You("form new eyes.");
 		}
-	    if((upp->intrinsic & TIMEOUT) && !(--upp->intrinsic & TIMEOUT)) {
+		if (!(upp->intrinsic & TIMEOUT_INF)
+			&& (upp->intrinsic & TIMEOUT)
+			&& !(--upp->intrinsic & TIMEOUT)	/* decremented here */
+			){
 		switch(upp - u.uprops){
 		case FIRE_RES:
 			You_feel("warmer!");
@@ -860,9 +864,6 @@ nh_timeout()
 				wake_nearby();
 			    }
 			}
-			/* from outside means slippery ice; don't reset
-			   counter if that's the only fumble reason */
-			HFumbling &= ~FROMOUTSIDE;
 			if (Fumbling)
 			    HFumbling += rnd(20);
 			break;
@@ -2635,12 +2636,16 @@ wiz_timeout_queue()
         for (i = 0; (propname = propertynames[i].prop_name) != 0; ++i) {
             p = propertynames[i].prop_num;
             intrinsic = u.uprops[p].intrinsic;
-            if (intrinsic & TIMEOUT) {
+			if (intrinsic & TIMEOUT_INF) {
+				Sprintf(buf, " %*s    inf", -longestlen, propname);
+				putstr(win, 0, buf);
+			}
+            else if (intrinsic & TIMEOUT) {
                 /* timeout value can be up to 16777215 (0x00ffffff) but
-                   width of 4 digits should result in values lining up
+                   width of 6 digits should result in values lining up
                    almost all the time (if/when they don't, it won't
                    look nice but the information will still be accurate) */
-                Sprintf(buf, " %*s %4ld", -longestlen, propname,
+                Sprintf(buf, " %*s %6ld", -longestlen, propname,
                         (intrinsic & TIMEOUT));
                 putstr(win, 0, buf);
             }

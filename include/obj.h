@@ -428,8 +428,15 @@ struct obj {
 							( (a)->otyp ) == ROUNDSHIELD ? ((o)->otyp==DWARVISH_ROUNDSHIELD) : \
 							((a) == &artilist[ART_FIRE_BRAND] || (a) == &artilist[ART_FROST_BRAND]) ? \
 								(u.brand_otyp == STRANGE_OBJECT ? \
-									((is_blade((o)) && !is_vibroweapon((o)) && objects[(o)->otyp].oc_size < MZ_HUGE) \
-										|| (o)->otyp == GAUNTLETS) : \
+									((is_blade((o)) && objects[(o)->otyp].oc_size < MZ_HUGE && \
+										!is_vibroweapon((o)) && \
+										!is_rakuyo((o)) && \
+										!(o)->otyp == SET_OF_CROW_TALONS && \
+										!(o)->otyp == CROW_QUILL && \
+										!(o)->otyp == CRYSTAL_SWORD && \
+										!(o)->otyp == RUNESWORD && \
+										!(o)->otyp == MIRRORBLADE) \
+									|| (o)->otyp == GAUNTLETS) : \
 									(u.brand_otyp == (o)->otyp)) : \
 							(a)->otyp == (o)->otyp)
 #define is_blade(otmp)	(otmp->oclass == WEAPON_CLASS && \
@@ -605,23 +612,10 @@ struct obj {
 #define is_harmonium_armor(otmp)	((otmp)->otyp == HARMONIUM_HELM || (otmp)->otyp == HARMONIUM_PLATE\
 								|| (otmp)->otyp == HARMONIUM_SCALE_MAIL || (otmp)->otyp == HARMONIUM_GAUNTLETS\
 								|| (otmp)->otyp == HARMONIUM_BOOTS)
-#define is_light_armor(otmp)	((otmp)->otyp == DWARVISH_MITHRIL_COAT\
-			|| (otmp)->otyp == ELVEN_MITHRIL_COAT\
-			|| (otmp)->otyp == JUMPSUIT\
-			|| (otmp)->otyp == JACKET\
-			|| (otmp)->otyp == ELVEN_TOGA\
-			|| (otmp)->otyp == BLACK_DRESS)
-#define is_medium_armor(otmp)	((otmp)->otyp == HIGH_ELVEN_PLATE\
-			|| (otmp)->otyp == CHAIN_MAIL\
-			|| (otmp)->otyp == DROVEN_CHAIN_MAIL\
-			|| (otmp)->otyp == SCALE_MAIL\
-			|| (otmp)->otyp == HARMONIUM_SCALE_MAIL\
-			|| (otmp)->otyp == LEATHER_ARMOR\
-			|| (otmp)->otyp == STUDDED_LEATHER_ARMOR\
-			|| (otmp)->otyp == BANDED_MAIL\
-			|| (otmp)->otyp == NOBLE_S_DRESS\
-			|| (otmp)->otyp == PLASTEEL_ARMOR\
-			|| Is_dragon_mail(otmp))
+
+#define is_light_armor(otmp)	(objects[(otmp)->otyp].oc_size == ARMSZ_LIGHT)
+#define is_medium_armor(otmp)	(objects[(otmp)->otyp].oc_size == ARMSZ_MEDIUM)
+
 #define is_elven_armor(otmp)	((otmp)->otyp == ELVEN_HELM\
 				|| (otmp)->otyp == HIGH_ELVEN_HELM\
 				|| (otmp)->otyp == HIGH_ELVEN_GAUNTLETS\
@@ -728,26 +722,33 @@ struct obj {
 #define Dragon_shield_to_pm(obj)	&mons[PM_GRAY_DRAGON + (obj)->otyp \
 				      - GRAY_DRAGON_SCALE_SHIELD]
 #define Dragon_to_scales(pm)	(GRAY_DRAGON_SCALES + (pm - mons))
-#define Have_same_dragon_armor_and_shield	(Is_dragon_shield(uarms) && ((Is_dragon_scales(uarm) && Dragon_scales_to_pm(uarm) == Dragon_shield_to_pm(uarms)) ||\
-													 (Is_dragon_mail(uarm) && Dragon_mail_to_pm(uarm) == Dragon_shield_to_pm(uarms)) ||\
-												(uarm->oartifact == ART_DRAGON_PLATE && (\
-													Dragon_shield_to_pm(uarms) == &mons[PM_SILVER_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_BLACK_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_BLUE_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_RED_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_WHITE_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_GRAY_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_ORANGE_DRAGON]\
-												)) ||\
-												(uarm->oartifact == ART_CHROMATIC_DRAGON_SCALES && (\
-													Dragon_shield_to_pm(uarms) == &mons[PM_BLACK_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_RED_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_BLUE_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_WHITE_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_YELLOW_DRAGON] ||\
-													Dragon_shield_to_pm(uarms) == &mons[PM_GREEN_DRAGON]\
-												))\
-											))
+
+#define Dragon_armor_to_pm(obj) (\
+	Is_dragon_shield((obj)) ? Dragon_shield_to_pm((obj)) : \
+	Is_dragon_mail((obj)) ? Dragon_mail_to_pm((obj)) : \
+	Is_dragon_scales((obj)) ? Dragon_scales_to_pm((obj)) : (struct permonst*)0)
+
+#define Dragon_armor_matches_mtyp(obj, mtyp) (\
+	(Dragon_armor_to_pm((obj)) == &mons[(mtyp)]) || \
+	((obj)->oartifact == ART_DRAGON_PLATE && ( \
+		(mtyp) == PM_SILVER_DRAGON || \
+		(mtyp) == PM_BLACK_DRAGON || \
+		(mtyp) == PM_BLUE_DRAGON || \
+		(mtyp) == PM_RED_DRAGON || \
+		(mtyp) == PM_WHITE_DRAGON || \
+		(mtyp) == PM_GRAY_DRAGON || \
+		(mtyp) == PM_ORANGE_DRAGON \
+	)) || \
+	((obj)->oartifact == ART_CHROMATIC_DRAGON_SCALES && (\
+		(mtyp) == PM_BLACK_DRAGON || \
+		(mtyp) == PM_RED_DRAGON || \
+		(mtyp) == PM_BLUE_DRAGON || \
+		(mtyp) == PM_WHITE_DRAGON || \
+		(mtyp) == PM_YELLOW_DRAGON || \
+		(mtyp) == PM_GREEN_DRAGON \
+		))\
+	)
+
 /* Elven gear */
 #define is_elven_weapon(otmp)	((otmp)->otyp == ELVEN_ARROW\
 				|| (otmp)->otyp == ELVEN_SPEAR\

@@ -748,7 +748,7 @@ peffects(otmp)
 		} else {
 		    self_invis_message();
 		}
-		if (otmp->blessed) HInvis |= FROMOUTSIDE;
+		if (otmp->blessed) HInvis |= TIMEOUT_INF;
 		else incr_itimeout(&HInvis, rn1(15,31));
 		newsym(u.ux,u.uy);	/* update position */
 		if(otmp->cursed) {
@@ -789,7 +789,7 @@ peffects(otmp)
 				change_uinsight(1);
 		}
 		if (otmp->blessed)
-			HSee_invisible |= FROMOUTSIDE;
+			HSee_invisible |= TIMEOUT_INF;
 		else
 			incr_itimeout(&HSee_invisible, rn1(100,750));
 		set_mimic_blocking(); /* do special mimic handling */
@@ -954,7 +954,7 @@ peffects(otmp)
 				Your("quickness feels more natural.");
 				unkn++;
 			}
-			HFast |= FROMOUTSIDE;
+			HFast |= TIMEOUT_INF;
 	    } else nothing++;
 		exercise(A_DEX, TRUE);
 	break;

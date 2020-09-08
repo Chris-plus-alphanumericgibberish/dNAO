@@ -1099,11 +1099,12 @@ d_timeout(client_data, id)
  * for a sent event.
  */
 void
-X11_delay_output()
+X11_delay_output(int delay)
 {
     if (!x_inited) return;
 
-    (void) XtAppAddTimeOut(app_context, 30L, d_timeout, (XtPointer) 0);
+    static int length[] = { 0L, 10L, 30L };
+    (void) XtAppAddTimeOut(app_context, length[delay], d_timeout, (XtPointer) 0);
 
     /* The timeout function will enable the event loop exit. */
     (void) x_event(EXIT_ON_SENT_EVENT);
