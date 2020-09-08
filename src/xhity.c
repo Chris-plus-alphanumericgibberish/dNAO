@@ -8173,6 +8173,10 @@ struct monst * mdef;
 struct attack * attk;
 int vis;
 {
+	/* don't attempt to eat your steed out from under you */
+	if (mdef == u.usteed)
+		mdef = &youmonst;
+	
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
