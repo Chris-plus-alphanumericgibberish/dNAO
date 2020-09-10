@@ -1375,7 +1375,7 @@ E struct obj *FDECL(mksobj, (int,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(bcsign, (struct obj *));
 E void FDECL(set_obj_size, (struct obj *, int));
 E void FDECL(set_obj_quan, (struct obj *, int));
-E void FDECL(maybe_set_material, (struct obj *, int, boolean));
+E void FDECL(maybe_set_material, (struct obj *, int));
 E void FDECL(set_material, (struct obj *, int));
 E void FDECL(set_material_gm, (struct obj *, int));
 E int FDECL(weight, (struct obj *));

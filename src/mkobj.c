@@ -1814,16 +1814,13 @@ struct obj* obj;
 }
 
 /* Tries to set obj's material to mat
- * Is limited by material lists and probabilities
- * If check_all is true, go through the object's whole mat list;
- *   otherwise, limited by probability
+ * Checks material list for obj.
  * Used by wishing code
  */
 void
-maybe_set_material(obj, mat, check_all)
+maybe_set_material(obj, mat)
 struct obj *obj;
 int mat;
-boolean check_all;
 {
 	const struct icp* random_mat_list;
 
@@ -1837,14 +1834,12 @@ boolean check_all;
 	if (!random_mat_list)
 		return;
 
-	int i = (check_all ? 1000 : rnd(1000));
-	while (i > 0) {
-		if ((i <= random_mat_list->iprob) || (random_mat_list->iclass == mat))
-			break;
+	int i = 1000;
+	while (random_mat_list->iclass != mat && i > 0) {
 		i -= random_mat_list->iprob;
 		random_mat_list++;
 	}
-	if (random_mat_list->iclass) /* a 0 indicates to use default material */
+	if (random_mat_list->iclass == mat)
 		set_material_gm(obj, random_mat_list->iclass);
 }
 
