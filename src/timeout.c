@@ -655,7 +655,10 @@ nh_timeout()
 
 	if(u.divetimer<=0){
 		You("can't hold your breath any longer.");
-		if((!Swimming && !Amphibious && is_pool(u.ux,u.uy, FALSE)) || is_3dwater(u.ux,u.uy)) drown();
+		if((!Swimming && !Amphibious && is_pool(u.ux,u.uy, FALSE)) || is_3dwater(u.ux,u.uy)) {
+			u.dx = u.dy = 0;
+			drown();
+		}
 		u.usubwater = 0;
 		vision_full_recalc = 1;
 		vision_recalc(2);	/* unsee old position */

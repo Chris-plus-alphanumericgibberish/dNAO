@@ -661,6 +661,7 @@ savelife(how)
 int how;
 {
 	u.uswldtim = 0;
+	u.divetimer = ACURR(A_CON)/3;
 	u.uhp = u.uhpmax;
 	if (YouHunger < 500) {
 		if(Race_if(PM_INCANTIFIER)) u.uen = u.uenmax/4;

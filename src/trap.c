@@ -3444,7 +3444,7 @@ drown()
 		else return(FALSE);
 	}
 	
-	if (!u.uinwater) {
+	if (!u.uinwater || (!is_3dwater(u.ux-u.dx,u.uy-u.dy) && is_3dwater(u.ux,u.uy))) {
 	    You("%s into the %swater%c",
 		Is_waterlevel(&u.uz) ? "plunge" : Flying ? "fly" : Levitation ? "hover" : "fall",
 		sparkle,
@@ -3490,7 +3490,7 @@ drown()
 		} else if(Amphibious && !Swimming){
 			u.usubwater = 1;
 		}
-		if (Amphibious &&  u.usubwater){
+		if (u.usubwater) {
 			if (flags.verbose)
 				if(!Swimming) pline("But you aren't drowning.");
 			if (!Is_waterlevel(&u.uz)) {
@@ -3566,7 +3566,12 @@ drown()
 			You("dump some of your gear to lose weight...");
 		if (succ) {
 			pline("Pheew!  That was close.");
-			u.usubwater = 0;
+			if (u.usubwater) {
+				u.usubwater = 0;
+				vision_recalc(2);
+				vision_full_recalc = 1;
+				doredraw();
+			}
 			teleds(x,y,TRUE);
 			return(TRUE);
 		}
@@ -3574,7 +3579,17 @@ drown()
 		pline("But in vain.");
 	}
 	u.uinwater = 1;
-	u.usubwater = 1;
+	if (!u.usubwater) {
+		u.usubwater = 1;
+		vision_recalc(2);
+		vision_full_recalc = 1;
+		doredraw();
+	}
+	if (u.divetimer > 0) {
+		u.divetimer--;
+		return FALSE;
+	}
+
 	You("drown.");
 	/* [ALI] Vampires return to vampiric form on drowning.
 	 */
