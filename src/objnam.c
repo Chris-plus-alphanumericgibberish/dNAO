@@ -4,11 +4,6 @@
 
 #include "hack.h"
 #include "artifact.h"
-#ifdef OVLB
-#include "artilist.h"
-#else
-STATIC_DCL struct artifact artilist[];
-#endif
 
 /* "an uncursed greased partly eaten guardian naga hatchling [corpse]" */
 #define PREFIX	125	/* (56) */

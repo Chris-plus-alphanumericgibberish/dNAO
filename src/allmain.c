@@ -8,11 +8,6 @@
 #include "edog.h"
 #include "artifact.h"
 #include "xhity.h"
-#ifdef OVLB
-#include "artilist.h"
-#else
-STATIC_DCL struct artifact artilist[];
-#endif
 
 
 #ifndef NO_SIGNAL

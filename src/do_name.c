@@ -4,11 +4,6 @@
 
 #include "hack.h"
 #include "artifact.h"
-#ifdef OVLB
-#include "artilist.h"
-#else
-STATIC_DCL struct artifact artilist[];
-#endif
 
 #ifdef OVLB
 

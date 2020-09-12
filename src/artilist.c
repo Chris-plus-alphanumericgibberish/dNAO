@@ -1,4 +1,4 @@
-/*	SCCS Id: @(#)artilist.h 3.4	2003/02/12	*/
+/*	SCCS Id: @(#)artilist.c 3.4	2003/02/12	*/
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 #include "macromagic.h"
@@ -27,11 +27,13 @@
 #ifdef MAKEDEFS_C
 /* in makedefs.c, all we care about is the list of names */
 
-#define A(nam, typ, desc, cost, mat, siz, wgt, aln, cls, rac, val, gen, vsmons, attack, afl, wpr, wfl, cpr, cfl, inv, ifl) nam
+#define A(nam, ...) nam
 
 static const char *artifact_names[] = {
 #else
-/* in artifact.c, set up the actual artifact list structure */
+/* set up the actual artifact list structure */
+#include "hack.h"
+#include "artifact.h"
 
 #define A(nam, typ, desc, cost, mat, siz, wgt, aln, cls, rac, val, gen, vsmons, attack, afl, wpr, wfl, cpr, cfl, inv, ifl) { \
 	 typ, nam, desc, \
@@ -43,7 +45,7 @@ static const char *artifact_names[] = {
 	 cpr, cfl, \
 	 inv, ifl }
 
-STATIC_OVL NEARDATA struct artifact artilist[] = {
+NEARDATA struct artifact artilist[] = {
 #endif	/* MAKEDEFS_C */
 
 /* Artifact cost rationale:
@@ -73,6 +75,16 @@ A("Excalibur",			LONG_SWORD,						(const char *)0,
 	NO_MONS(),
 	ATTK(AD_PHYS, 20, 10), NOFLAG,
 	PROPS(DRAIN_RES, SEARCHING), (ARTP_SEEK),
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+A("Dirge",			LONG_SWORD,						"half-melted %s",
+	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_KNIGHT, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_INHER|ARTG_MAJOR|ARTG_FXALGN),
+	NO_MONS(),
+	ATTK(AD_ACID, 5, 10), NOFLAG,
+	PROPS(ACID_RES), NOFLAG,
 	PROPS(), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
@@ -1586,8 +1598,8 @@ A("The Mask of Tlaloc",				MASK,					(const char *)0,
 	A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
-	PROPS(), NOFLAG,
-	PROPS(HALF_SPDAM, ANTIMAGIC, COLD_RES, SHOCK_RES), NOFLAG,	/* missing: waterproofing */
+	PROPS(WATERPROOF), NOFLAG,
+	PROPS(HALF_SPDAM, ANTIMAGIC, COLD_RES, SHOCK_RES), NOFLAG, 
 	NOINVOKE, NOFLAG
 	),
 /*Arc redesign by Riker*/
@@ -3367,4 +3379,4 @@ A((const char *)0,					STRANGE_OBJECT,		(const char *)0,
 #ifndef MAKEDEFS_C
 #endif
 
-/*artilist.h*/
+/*artilist.c*/

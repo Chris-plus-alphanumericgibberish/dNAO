@@ -4,7 +4,6 @@
 
 #include "hack.h"
 #include "artifact.h"
-#include "artilist.h"
 
 #define NOINVSYM	'#'
 #define CONTAINED_SYM	'>'	/* designator for inside a container */

@@ -4,21 +4,6 @@
 #include "edog.h"
 #include "xhity.h"
 
-#ifdef OVLB
-#include "artilist.h"
-#else
-STATIC_DCL struct artifact artilist[];
-#endif
-
-/* TODO LIST
-
-MAJOR:
-
-MINOR:
-artifact hitmesages
-Claws of the Revenancer w/ rings
-*/
-
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));

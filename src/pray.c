@@ -5,7 +5,6 @@
 #include "hack.h"
 #include "epri.h"
 #include "artifact.h"
-#include "artilist.h"
 
 extern const int monstr[];
 

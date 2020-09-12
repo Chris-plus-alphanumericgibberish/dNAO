@@ -4,7 +4,6 @@
 
 #include "hack.h"
 #include "artifact.h"
-#include "artilist.h"
 
 /*  quest dungeon branch routines. */
 
