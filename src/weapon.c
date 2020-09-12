@@ -520,11 +520,10 @@ int otyp;
 			bond = 4;
 		}
 		else if (obj->oartifact == ART_LIECLEAVER) {
-			ocn = 1;	/* plus another 1d10 from being an artifact */
+			ocn = 1;
 			ocd = 10;
-			bonn = 2;
+			bonn = 1;
 			bond = 12;
-			spe_mult = 2;
 		}
 		else if (obj->oartifact == ART_WAND_OF_ORCUS) {
 			ocn = 1;
