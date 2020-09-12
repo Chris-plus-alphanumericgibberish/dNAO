@@ -177,8 +177,8 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 		d_arcadia1, d_arcadia2, d_arcadia3, d_arcward, d_arcfort,
 		d_tower1, d_tower2, d_tower3, d_tower4, d_tower5,
 		d_tower6, d_tower7, d_tower8, d_tower9, d_towertop;
-	boolean alt_tower;
-	boolean alt_tulani;
+	char alt_tower;
+	char alt_tulani;
 	int eprecursor_typ;
 #define	PRE_DRACAE	1
 #define	PRE_POLYP	2
