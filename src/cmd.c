@@ -1802,141 +1802,17 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(u.spirit[GPREM_SPIRIT]) numBound++;
 		if(u.spirit[ALIGN_SPIRIT]) numBound++;
 		if(u.spirit[OUTER_SPIRIT]) numBound++;
-		if(Role_if(PM_ANACHRONONAUT) && u.specialSealsActive&SEAL_BLACK_WEB) numBound++;
 		Sprintf(prebuf, "Your soul ");
 		Sprintf(buf, " bound to ");
-		for(i=0;i<QUEST_SPIRIT;i++){
-			if(u.spirit[i]) for(j=0;j<32;j++){
-				if((u.spirit[i] >> j) == 1){
-					Strcat(buf,sealNames[j]);
-					numFound++;
-					if(numBound==2 && numFound==1) Strcat(buf," and ");
-					else if(numBound>=3){
-						if(numFound<numBound-1) Strcat(buf,", ");
-						if(numFound==numBound-1) Strcat(buf,", and ");
-					}
-					break;
-				}
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_DAHLVER_NAR){
-			Strcat(buf, sealNames[(DAHLVER_NAR) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_ACERERAK){
-			Strcat(buf, sealNames[(ACERERAK) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_COUNCIL){
-			Strcat(buf, sealNames[(COUNCIL) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.spirit[CROWN_SPIRIT]) for(j=0;j<32;j++){
-			if((u.spirit[CROWN_SPIRIT] >> j) == 1){
-				Strcat(buf,sealNames[j]);
+		for (i = 0; (i<=NUMINA) && (numFound < numBound); i++) {
+			if (((i<QUEST_SPIRITS) ? u.sealsActive : u.specialSealsActive) & (get_sealID(i) & ~SEAL_SPECIAL)) {
+				Strcat(buf, sealNames[i - FIRST_SEAL]);
 				numFound++;
 				if(numBound==2 && numFound==1) Strcat(buf," and ");
 				else if(numBound>=3){
 					if(numFound<numBound-1) Strcat(buf,", ");
 					if(numFound==numBound-1) Strcat(buf,", and ");
 				}
-				break;
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_COSMOS){
-			Strcat(buf, sealNames[(COSMOS) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_LIVING_CRYSTAL){
-			Strcat(buf, sealNames[(LIVING_CRYSTAL) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_TWO_TREES){
-			Strcat(buf, sealNames[(TWO_TREES) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_MISKA){
-			Strcat(buf, sealNames[(MISKA) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_NUDZIRATH){
-			Strcat(buf, sealNames[(NUDZIRATH) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_ALIGNMENT_THING){
-			Strcat(buf, sealNames[(ALIGNMENT_THING) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_UNKNOWN_GOD){
-			Strcat(buf, sealNames[(UNKNOWN_GOD) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_BLACK_WEB){
-			Strcat(buf, sealNames[(BLACK_WEB) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_NUMINA){
-			Strcat(buf, sealNames[(NUMINA) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
 			}
 		}
 		enl_msg(prebuf, "is", "was", buf);
