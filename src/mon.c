@@ -3406,7 +3406,7 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 		if(isdark(mdef->mx, mdef->my)) return ALLOW_M|ALLOW_TM;
 	}
 	
-	if((ma->mtyp == PM_OONA || ma->mtyp == PM_OONA)
+	if((ma->mtyp == PM_OONA || md->mtyp == PM_OONA)
 		&& sgn(ma->maligntyp) == -1*sgn(md->maligntyp) //"Oona grudges on chaotics, but not on neutrals"
 		&& !(magr->mtame || mdef->mtame) //Normal pet-vs-monster logic should take precedence over this
 	){
