@@ -831,7 +831,7 @@ public:
 	static void qt_getlin(const char *prompt, char *line);
 	static int qt_get_ext_cmd();
 	static void qt_number_pad(int);
-	static void qt_delay_output();
+	static void qt_delay_output(int);
 	static void qt_start_screen();
 	static void qt_end_screen();
 

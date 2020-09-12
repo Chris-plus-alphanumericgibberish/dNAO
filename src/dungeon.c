@@ -1453,7 +1453,13 @@ d_level *lev;
 		return lev->dlevel < sum_of_all_level.dlevel;
 	} else if(Is_arcadia_woods(lev)) return TRUE;
 	else if(In_cha(lev)) {
-		return on_level(lev, &chaosf_level) || on_level(lev, &chaoss_level);
+		if (In_FF_quest(lev)) {
+			return on_level(lev, &chaosf_level) || on_level(lev, &chaoss_level);
+		} else if (In_mithardir_quest(lev)) {
+			return (In_mithardir_desert(lev) || on_level(lev, &elshava_level));
+		} else if (In_mordor_quest(lev)) {
+			return (In_mordor_forest(lev) || In_mordor_fields(lev));
+		}
 	}
 	return FALSE;
 }

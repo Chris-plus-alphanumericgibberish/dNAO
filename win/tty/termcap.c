@@ -731,7 +731,7 @@ static const short tmspc10[] = {		/* from termcap */
 
 /* delay 50 ms */
 void
-tty_delay_output()
+tty_delay_output(int delay)
 {
 #if defined(MICRO)
 	register int i;
@@ -741,7 +741,8 @@ tty_delay_output()
 #ifdef TIMED_DELAY
 	if (flags.nap) {
 		(void) fflush(stdout);
-		msleep(50);		/* sleep for 50 milliseconds */
+                static int length[] = { 0, 10, 50 };
+		msleep(length[delay]);		/* sleep based on passed in delay */
 		return;
 	}
 #endif

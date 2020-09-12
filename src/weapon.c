@@ -489,11 +489,11 @@ int otyp;
 			if (large)
 			{
 				bonn = 1;
-				bond = max(12 + 2 * dmod, 2);
+				bond = max(10 + 2 * dmod, 2);
 			}
 			else
 			{
-				flat += max(12 + 2 * dmod, 2);
+				flat += max(10 + 2 * dmod, 2);
 			}
 		}
 		else if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD){

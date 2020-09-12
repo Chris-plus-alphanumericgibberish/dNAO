@@ -95,7 +95,7 @@ E char FDECL(Gem_yn_function, (const char *, const char *, CHAR_P));
 E void FDECL(Gem_getlin, (const char *,char *));
 E int NDECL(Gem_get_ext_cmd);
 E void FDECL(Gem_number_pad, (int));
-E void NDECL(Gem_delay_output);
+E void FDECL(Gem_delay_output, (int));
 #ifdef CHANGE_COLOR
 E void FDECL(Gem_change_color,(int color,long rgb,int reverse));
 E char * NDECL(Gem_get_color_string);

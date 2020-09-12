@@ -200,14 +200,17 @@ int faction;
 	int mtyp = base->mtyp;
 	/* copy original */
 	*ptr = *base;
+
+#define MT_ITEMS (MT_GREEDY|MT_JEWELS|MT_COLLECT|MT_MAGIC)
+
 	/* make changes to the permonst as necessary */
 	switch (faction)
 	{
 	case ZOMBIFIED:
 		/* flags: */
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
-		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT);
 		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
@@ -231,8 +234,8 @@ int faction;
 		/* flags: */
 		ptr->geno |= (G_NOCORPSE);
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
-		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
@@ -251,8 +254,8 @@ int faction;
 		/* flags: */
 		ptr->geno |= (G_NOCORPSE);
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
-		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
@@ -272,8 +275,8 @@ int faction;
 	case FRACTURED:
 		/* flags: */
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_HOSTILE);
-		ptr->mflagst &= ~(MT_PEACEFUL);
+		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsb |= (MB_NOEYES);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
@@ -281,8 +284,8 @@ int faction;
 	case VAMPIRIC:
 		/* flags: */
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_HOSTILE);
-		ptr->mflagst &= ~(MT_PEACEFUL);
+		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD | MA_VAMPIRE);
 		/* resists: */
@@ -338,6 +341,8 @@ int faction;
 		/* attacks only */
 		break;
 	}
+#undef MT_ITEMS
+
 	/* adjust attacks in the permonst */
 	extern struct attack noattack;
 	boolean special = FALSE;
@@ -1680,7 +1685,7 @@ struct monst *mtmp;
 
 	/* stalking types follow, but won't when fleeing unless you hold
 	   the Amulet */
-	return (boolean)(((mtmp->data->mflagst & MT_STALK) || is_derived_undead_mon(mtmp)) &&
+	return (boolean)((mtmp->data->mflagst & MT_STALK) &&
 				(!mtmp->mflee || mtmp->mtyp == PM_BANDERSNATCH || u.uhave.amulet));
 }
 

@@ -371,10 +371,11 @@ finish_map(fg_typ, bg_typ, lit, walled)
  * region are all set.
  */
 void
-remove_rooms(lx, ly, hx, hy)
-    int lx, ly, hx, hy;
+remove_rooms(lx, ly, hx, hy, bg_typ)
+int lx, ly, hx, hy;
+schar bg_typ;
 {
-    int i;
+	int i;
     struct mkroom *croom;
 
     for (i = nroom - 1; i >= 0; --i) {
@@ -384,9 +385,31 @@ remove_rooms(lx, ly, hx, hy)
 
 	if (croom->lx < lx || croom->hx >= hx ||
 	    croom->ly < ly || croom->hy >= hy) { /* partial overlap */
-	    /* TODO: ensure remaining parts of room are still joined */
+		/* change room boundaries */
+		if (croom->lx < lx)
+			croom->hx = lx-1;
+		if (croom->ly < ly)
+			croom->hy = ly-1;
+		if (croom->hx >= hx)
+			croom->lx = hx;
+		if (croom->hy >= hy)
+			croom->ly = hy;
 
-	    if (!croom->irregular) impossible("regular room in joined map");
+		if (!croom->irregular) impossible("regular room in joined map");
+
+		/* if this clobbered the room, remove it */
+		register int x;
+		register int y;
+		register int n;
+		n = 0;
+		for (x = croom->lx; x < croom->hx; x++)
+		for (y = croom->ly; y < croom->hy; y++)
+		if (levl[x][y].typ != bg_typ)
+			n++;
+		if (!n)
+			remove_room((unsigned)i);
+
+	    /* TODO: ensure remaining parts of room are still joined */
 	} else {
 	    /* total overlap, remove the room */
 	    remove_room((unsigned)i);

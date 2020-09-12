@@ -288,6 +288,7 @@ struct god_details god_list[MAX_GOD] = {
 	GOD(A_LAWFUL,	HOLY_HOLINESS, "Gwyn, Lord of Sunlight"),
 	GOD(A_NEUTRAL,	HOLY_HOLINESS, "_Gwynevere, Princess of Sunlight"),
 	GOD(A_CHAOTIC,	NEUTRAL_HOLINESS, "Dark Sun Gwyndolin"),
+	GOD(A_NONE,		NEUTRAL_HOLINESS,  "Velka, Goddess of Sin"),
 //Orc noble
 	PANTHEON_UNHOLY("Ilneval", "_Luthic", "Gruumsh"),
 //Orc noble, elf

@@ -1428,6 +1428,8 @@ struct obj * otmp;
 			ndice = 4; //Extra unholy (4d9 vs excal's 3d7)
 		else if (otmp->oartifact == ART_GODHANDS)
 			dmg += 9;
+		else if (otmp->oartifact == ART_DIRGE)
+			dmg += 6;
 		else if (otmp->oartifact == ART_LANCE_OF_LONGINUS)
 			ndice = 3;
 		else if (otmp->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO)

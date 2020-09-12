@@ -3140,7 +3140,7 @@ struct obj *hypo;
 				if (!(HFast & INTRINSIC)) {
 					if (!Fast) You("speed up.");
 					else Your("quickness feels more natural.");
-					HFast |= FROMOUTSIDE;
+					HFast |= TIMEOUT_INF;
 				} else nothing++;
 				exercise(A_DEX, TRUE);
 			break;
@@ -6229,7 +6229,8 @@ doapply()
 							   The(aobjnam(otmp, "slip")),
 							   (const char *)0);
 			break;
-			case SILVER_BULLET:{
+			case SILVER_BULLET:
+			if(otmp->quan >= 10){
 				struct obj *rocket;
 				rocket = mksobj(ROCKET, FALSE, FALSE);
 				rocket->blessed = otmp->blessed;

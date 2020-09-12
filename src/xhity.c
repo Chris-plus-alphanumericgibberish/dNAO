@@ -673,6 +673,7 @@ int tary;
 						&& !(otmp->oartifact && !always_twoweapable_artifact(otmp))			// ok artifact
 						&& (!bimanual(otmp, pa) || pa->mtyp == PM_GYNOID || pa->mtyp == PM_PARASITIZED_GYNOID)// not two-handed
 						&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
+						&& (!youagr || otmp->owt <= max(10, P_SKILL(P_TWO_WEAPON_COMBAT)*10))// not too heavy
 						&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
 						&& !(is_ammo(otmp) || is_pole(otmp) || is_missile(otmp))			// not unsuitable for melee (ammo, polearm, missile)
 						&& !otmp->owornmask)												// not worn
@@ -1786,48 +1787,32 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		(pa->mtyp == PM_KARY__THE_FIEND_OF_FIRE) ||
 		(pa->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) ||
 		(pa->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) ||
-		(pa->mtyp == PM_CHAOS))
-		){
-		// first index -- determine if using the alternate attack set (solo spellcasting)
+		(pa->mtyp == PM_CHAOS) ||
+		(pa->mtyp == PM_GAE_ELADRIN)
+		)){
+		// first index -- determine if only using their spellcasting
 		if (*indexnum == 0){
 			if (
 				(pa->mtyp == PM_LICH__THE_FIEND_OF_EARTH && rn2(4)) ||
 				(pa->mtyp == PM_KARY__THE_FIEND_OF_FIRE && rn2(100)<37) ||
 				(pa->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER && rn2(100)<52) ||
 				(pa->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND && !rn2(4)) ||
-				(pa->mtyp == PM_CHAOS && rn2(3))
+				(pa->mtyp == PM_CHAOS && rn2(3)) ||
+				(pa->mtyp == PM_GAE_ELADRIN && !magr->mcan && !magr->mspec_used && !rn2(3))
 				){
 				*subout |= SUBOUT_SPELLS;
-				attk->aatyp = AT_MAGC;
-				attk->adtyp = AD_SPEL;
-				attk->damn = 0;
-				attk->damd = 0;
 			}
 		}
-		else if (*subout&SUBOUT_SPELLS){
-			/* If spellcasting, stop after the first index */
-			return &noattack;
+		/* cast only spells if SUBOUT_SPELLS; cast no spells if !SUBOUT_SPELLS */
+		if (!is_null_attk(attk) && ((attk->aatyp == AT_MAGC) == !(*subout&SUBOUT_SPELLS))) {
+			/* just get the next attack */
+			*indexnum += 1;
+			*prev_and_buf = prev_attack;
+			fromlist = TRUE;
+			return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
 		}
 	}
-	if(!by_the_book && pa->mtyp == PM_GAE_ELADRIN){
-		// first index -- determine if using the alternate attack set (solo spellcasting)
-		if (*indexnum == 0){
-			if (!magr->mcan
-				&& !magr->mspec_used
-				&& !rn2(3)
-			){
-				*subout |= SUBOUT_SPELLS;
-				attk->aatyp = AT_MAGC;
-				attk->adtyp = AD_CLRC;
-				attk->damn = 0;
-				attk->damd = 6;
-			}
-		}
-		else if (*subout&SUBOUT_SPELLS){
-			/* If spellcasting, stop after the first index */
-			return &noattack;
-		}
-	}
+	/* Nitocris uses clerical spells while wearing their Prayer-Warded Wrappings */
 	if(!by_the_book && pa->mtyp == PM_NITOCRIS){
 		if (attk->aatyp == AT_MAGC){
 			if (which_armor(magr, W_ARMC) && which_armor(magr, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF){
@@ -2060,7 +2045,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	/* creatures wearing the Grappler's Grasp and currently grappling something get a hug attack if they don't have one already */
 	if (is_null_attk(attk) && !by_the_book && !dmgtype(pa, AT_HUGS) && !(*subout&SUBOUT_GRAPPLE)) {
 		struct obj * otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
-		if (otmp && otmp->oartifact == ART_GRAPPLER_S_GRASP) {
+		/* magr must already have hold of mdef, however, which makes it much less useful mvm */
+		if (otmp && otmp->oartifact == ART_GRAPPLER_S_GRASP &&
+			((youagr || youdef) && !u.uswallow && u.ustuck && u.ustuck == (youagr ? mdef : magr))) {
 			*attk = grapple;
 			attk->damn = youagr ? ((P_SKILL(P_BARE_HANDED_COMBAT) + 1) / 2 + martial_bonus()) : 2;
 			*subout |= SUBOUT_GRAPPLE;
@@ -3118,6 +3105,7 @@ int flat_acc;
 			gloves = (youagr ? uarmg : which_armor(magr, W_ARMG));
 			if (gloves){
 				switch (gloves->otyp) {
+				case HARMONIUM_GAUNTLETS:
 				case ORIHALCYON_GAUNTLETS:    /* metal */
 				case GAUNTLETS_OF_POWER:    /* metal */
 				case GAUNTLETS:
@@ -5000,7 +4988,7 @@ boolean ranged;
 			) {
 			if(attk->aatyp == AT_VINE && youdef && !HSterile){
 				You_feel("old.");
-				HSterile |= FROMOUTSIDE;
+				HSterile |= TIMEOUT_INF;
 				alt_attk.adtyp = AD_PHYS;
 				/* make attack without hitmsg */
 				return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon, FALSE, dmg, dieroll, vis, ranged);
@@ -11895,6 +11883,8 @@ boolean * wepgone;				/* used to return an additional result: was [weapon] destr
 			poisons |= OPOISON_FILTH;
 		if (poisonedobj->oartifact == ART_MOONBEAM)
 			poisons |= OPOISON_SLEEP;
+		if (poisonedobj->oartifact == ART_DIRGE)
+			poisons |= OPOISON_ACID;
 		/* Plague adds poisons to its launched ammo */
 		if (launcher && launcher->oartifact == ART_PLAGUE) {
 			if (monstermoves < launcher->ovar1)
@@ -14898,6 +14888,9 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 							}
 						}
 					}
+					break;
+				case AD_SSEX:
+					result = xmeleehurty(mdef, magr, passive, passive, (struct obj *)0, FALSE, dmg, 0, vis, FALSE);
 					break;
 				case AD_STUN:
 					if (youdef) {

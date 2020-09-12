@@ -239,7 +239,7 @@ E char FDECL(mac_yn_function, (const char *, const char *, CHAR_P));
 E void FDECL(mac_getlin, (const char *,char *));
 E int NDECL(mac_get_ext_cmd);
 E void FDECL(mac_number_pad, (int));
-E void NDECL(mac_delay_output);
+E void FDECL(mac_delay_output, (int));
 
 #undef E
 

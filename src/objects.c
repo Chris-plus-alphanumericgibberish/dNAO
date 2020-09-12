@@ -688,7 +688,7 @@ HELM(("helm of drain resistance", "band"), /*diadem of drain resistance*//*Needs
  *	    the same defined in monst.c.
  */
 #define DRGN_MAIL(names,mgc,power,cost,ac,dr,color,...) \
-	SUIT(DEF_BLINDNAME(names, "dragon scale mail"),1,mgc,MZ_HUGE,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
+	SUIT(DEF_BLINDNAME(names, "dragon scale mail"),1,mgc,ARMSZ_MEDIUM,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
 /* 3.4.1: dragon scale mail reclassified as "magic" since magic is
    needed to create them */
 DRGN_MAIL(("gray dragon scale mail"),   1, ANTIMAGIC,  1200, 5, 4, CLR_GRAY),
@@ -704,7 +704,7 @@ DRGN_MAIL(("yellow dragon scale mail"), 1, ACID_RES,    900, 5, 4, CLR_YELLOW),
 #undef DRGN_MAIL
 
 #define DRGN_SCALES(names,mgc,power,cost,ac,dr,color,...) \
-	SUIT(DEF_BLINDNAME(names, "dragon scales"),1,mgc,MZ_HUGE,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
+	SUIT(DEF_BLINDNAME(names, "dragon scales"),1,mgc,ARMSZ_MEDIUM,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
 /* For now, only dragons leave these. */
 /* 3.4.1: dragon scales left classified as "non-magic"; they confer
    magical properties but are produced "naturally" */
@@ -721,76 +721,76 @@ DRGN_SCALES(("yellow dragon scales"), 0, ACID_RES,   500, 9, 2, CLR_YELLOW),
 #undef DRGN_SCALES
 
 SUIT(("plate mail"), /*Needs encyc entry*/
-	1, 0,   MZ_HUGE, 0,	44, 5, 225, 600,  5, 5, 3, IRON, HI_METAL),
+	1, 0,  ARMSZ_HEAVY, 0,	44, 5, 225, 600,  5, 5, 3, IRON, HI_METAL),
 SUIT(("high-elven plate", "runed plate mail"), /*Needs encyc entry*/
-	0, 0,   MZ_HUGE, 0,	0, 5, 110, 	1200,  4, 6, 3, MITHRIL, HI_MITHRIL),
+	0, 0, ARMSZ_MEDIUM, 0,	0, 5, 110, 	1200,  4, 6, 3, MITHRIL, HI_MITHRIL),
 SUIT(("droven plate mail", "crested black plate", "crested plate mail"), /*Needs encyc entry*/
-	0, 0,   MZ_HUGE, 0,	0, 5, 85, 	2000,  4, 6, 1, SHADOWSTEEL, CLR_BLACK),
+	0, 0,  ARMSZ_HEAVY, 0,	0, 5, 85, 	2000,  4, 6, 1, SHADOWSTEEL, CLR_BLACK),
 SUIT(("elven toga"), /*Needs encyc entry*//*Needs tile*/
-	1, 0,  MZ_LARGE, 0,	 0, 5,	 5,  100,10, 1, 2, CLOTH, CLR_GREEN),
+	1, 0,  ARMSZ_LIGHT, 0,	 0, 5,	 5,  100,10, 1, 2, CLOTH, CLR_GREEN),
 SUIT(("noble's dress", "armored black dress", "armored dress"), /*Needs encyc entry*/
-	0, 0,   MZ_HUGE, 0,	0, 5, 40, 2000,  6, 4, 3, SHADOWSTEEL, CLR_BLACK),
-SHIRT(("black dress", (char *)0, "dress"), /*Needs encyc entry*/
-	1, 0,   MZ_HUGE, 0,	0, 5,  5,  500, 10, 0, 2, CLOTH, CLR_BLACK, O_DRSLOT(TORSO_DR)),
+	0, 0, ARMSZ_MEDIUM, 0,	0, 5, 40, 2000,  6, 4, 3, SHADOWSTEEL, CLR_BLACK),
 SUIT(("consort's suit", "loud foppish suit", "clothes"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,   MZ_HUGE, 0,	0, 5, 10, 	1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
+	0, 0,  ARMSZ_LIGHT, 0,	0, 5, 10, 	1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
 SUIT(("gentleman's suit", "expensive clothes"), /*Needs encyc entry*/
-	0, 0,   MZ_HUGE, 0,	0, 5, 10, 1000,  10, 1, 2, CLOTH, CLR_BLACK),
+	0, 0,  ARMSZ_LIGHT, 0,	0, 5, 10, 1000,  10, 1, 2, CLOTH, CLR_BLACK),
 SUIT(("gentlewoman's dress", "expensive dress"), /*Needs encyc entry*/
-	0, 0,   MZ_HUGE, 0,	0, 6,100, 1000,  10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
+	0, 0,  ARMSZ_LIGHT, 0,	0, 6,100, 1000,  10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
 SUIT(("crystal plate mail"), /*Needs encyc entry*/
-	1, 0,   MZ_HUGE, 0,	10, 5, 170, 2000,  7, 3, 0, GLASS, HI_GLASS), /*Best armor, AC wise*/
+	1, 0,  ARMSZ_HEAVY, 0,	10, 5, 170, 2000,  7, 3, 0, GLASS, HI_GLASS), /*Best armor, AC wise*/
 #ifdef TOURIST
 SUIT(("archaic plate mail"), /*Needs encyc entry*/
-	1, 0,   MZ_HUGE, 0,	20, 5, 200, 400,  6, 4, 3, COPPER, HI_COPPER),
+	1, 0,  ARMSZ_HEAVY, 0,	20, 5, 200, 400,  6, 4, 3, COPPER, HI_COPPER),
 #else
 SUIT(("archaic plate mail"),
-	1, 0,   MZ_HUGE, 0,	35, 5, 200, 400,  6, 4, 3, COPPER, HI_COPPER),
+	1, 0,  ARMSZ_HEAVY, 0,	35, 5, 200, 400,  6, 4, 3, COPPER, HI_COPPER),
 #endif
 SUIT(("harmonium plate", "red-lacquered bladed armor", "bladed armor"),
-	0, 0,   MZ_HUGE, 0,	 0, 5, 225,   1,  6, 4, 3, METAL, CLR_RED),
+	0, 0,  ARMSZ_HEAVY, 0,	 0, 5, 225,   1,  6, 4, 3, METAL, CLR_RED),
 SUIT(("harmonium scale mail", "red-lacquered spiked scale mail", "spiked scale mail"),
-	0, 0,   MZ_HUGE, 0,	 0, 5, 125,   1,  8, 2, 3, METAL, CLR_RED),
+	0, 0, ARMSZ_MEDIUM, 0,	 0, 5, 125,   1,  8, 2, 3, METAL, CLR_RED),
 SUIT(("plasteel armor", "hard white armor", "armor"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,   MZ_HUGE, 0,	 0, 5, 100,  500, 7, 3, 3, PLASTIC, CLR_WHITE),
+	0, 0, ARMSZ_MEDIUM, 0,	 0, 5, 100,  500, 7, 3, 3, PLASTIC, CLR_WHITE),
 // ARMOR(("force armor", "gemstone-adorned clothing"),
 	// 0, 0, 1, 0,	 0, 5,  50, 1000, 9, 3, ARM_SUIT, GEMSTONE, CLR_BRIGHT_GREEN),
 SUIT(("splint mail"),
-	1, 0,   MZ_HUGE, 0,	62, 5, 200,  80,  7, 3, 1, IRON, HI_METAL),
+	1, 0,  ARMSZ_HEAVY, 0,	62, 5, 200,  80,  7, 3, 1, IRON, HI_METAL),
 SUIT(("barnacle armor", "giant shell armor"),
-	0, 1,  MZ_LARGE, 0,	0, 10, 150, 1000,  7, 3, 1, SHELL_MAT, CLR_GRAY),
+	0, 1,  ARMSZ_HEAVY, 0,	0, 10, 150,1000,  7, 3, 1, SHELL_MAT, CLR_GRAY),
 SUIT(("banded mail"),
-	1, 0,   MZ_HUGE, 0,	72, 5, 175,  90,  7, 3, 0, IRON, HI_METAL),
+	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 175,  90,  7, 3, 0, IRON, HI_METAL),
 SUIT(("dwarvish mithril-coat"),
-	1, 0, MZ_MEDIUM, 0,	10, 1,  40, 240,   7, 3, 3, MITHRIL, HI_MITHRIL),
+	1, 0,  ARMSZ_LIGHT, 0,	10, 1,  40, 240,   7, 3, 3, MITHRIL, HI_MITHRIL),
 SUIT(("elven mithril-coat"),
-	1, 0, MZ_MEDIUM, 0,	15, 1,  20, 240,  7, 2, 3, MITHRIL, HI_MITHRIL),
+	1, 0,  ARMSZ_LIGHT, 0,	15, 1,  20, 240,  7, 2, 3, MITHRIL, HI_MITHRIL),
 SUIT(("chain mail"),
-	1, 0,  MZ_LARGE, 0,	72, 5, 150,  75,  8, 3, 1, IRON, HI_METAL),
+	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 150,  75,  8, 3, 1, IRON, HI_METAL),
 SUIT(("droven chain mail", "crested black mail", "crested mail"), /*Needs encyc entry*/
-	0, 0,  MZ_LARGE, 0,	0, 5,   50,  1000,  8, 4, 2, SHADOWSTEEL, CLR_BLACK),
+	0, 0, ARMSZ_MEDIUM, 0,	0, 5,   50,  1000,  8, 4, 2, SHADOWSTEEL, CLR_BLACK),
 SUIT(("orcish chain mail", "crude chain mail"),
-	0, 0,  MZ_LARGE, 0,	20, 5, 150,  75,  8, 2, 1, IRON, CLR_BLACK),
+	0, 0,  ARMSZ_HEAVY, 0,	20, 5, 150,  75,  8, 2, 1, IRON, CLR_BLACK),
 SUIT(("scale mail"),
-	1, 0,  MZ_LARGE, 0,	72, 5, 125,  45,  8, 2, 0, IRON, HI_METAL),
+	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 125,  45,  8, 2, 0, IRON, HI_METAL),
 SUIT(("studded leather armor"),
-	1, 0,  MZ_LARGE, 0,	72, 3,  50,  15,  9, 2, 1, LEATHER, HI_LEATHER),
+	1, 0,  ARMSZ_LIGHT, 0,	72, 3,  50,  15,  9, 2, 1, LEATHER, HI_LEATHER),
 SUIT(("ring mail"),
-	1, 0,  MZ_LARGE, 0,	72, 5, 125, 100,  9, 2, 0, IRON, HI_METAL),
+	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 125, 100,  9, 2, 0, IRON, HI_METAL),
 SUIT(("orcish ring mail", "crude ring mail"),
-	0, 0,  MZ_LARGE, 0,	20, 5, 125,  80,  9, 1, 1, IRON, CLR_BLACK),
+	0, 0, ARMSZ_MEDIUM, 0,	20, 5, 125,  80,  9, 1, 1, IRON, CLR_BLACK),
 SUIT(("leather armor"),
-	1, 0,  MZ_LARGE, 0,	82, 3,  40,   5, 10, 2, 0, LEATHER, HI_LEATHER),
+	1, 0,  ARMSZ_LIGHT, 0,	82, 3,  40,   5, 10, 2, 0, LEATHER, HI_LEATHER),
 //ARMOR(names,
    //kn,mgc,blk,power,prob,delay,wt,cost,ac,dr,can,sub,metal,c)
 SUIT(("living armor", "giant sea anemone"),
-	0, 1,  MZ_LARGE, 0,	0, 6,  80,  500, 10, 2, 0, FLESH, CLR_ORANGE),
+	0, 1, ARMSZ_MEDIUM, 0,	0, 6,  80,  500, 10, 2, 0, FLESH, CLR_ORANGE),
 SUIT(("jacket"),
-	1, 0, MZ_MEDIUM, 0,	12, 0,	20,  10, 10, 1, 2, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
+	1, 0,  ARMSZ_LIGHT, 0,	12, 0,	20,  10, 10, 1, 2, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
 SUIT(("straitjacket", "long-sleeved jacket"), /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM, 0,	0, 0,   15,  10, 10, 1, 2, CLOTH, CLR_WHITE),
+	0, 0,  ARMSZ_LIGHT, 0,	0, 0,   15,  10, 10, 1, 2, CLOTH, CLR_WHITE),
 SUIT(("healer uniform","clean white clothes", "clean clothes"), /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM, SICK_RES,	0, 0,	30,  10, 10, 1, 0, CLOTH, CLR_WHITE),
+	0, 0,  ARMSZ_LIGHT, SICK_RES, 0, 0,  30, 10, 10, 1, 0, CLOTH, CLR_WHITE),
+SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs tile*/
+	0, 0,  ARMSZ_LIGHT, REFLECTING,0,5,   5,1000,10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
 #ifdef TOURIST
 /* shirts */
 /*ARMOR(("Hawaiian shorts", "flowery shorts and lei"),
@@ -801,11 +801,13 @@ SHIRT(("Hawaiian shirt", "flowery shirt", "shirt"),
 SHIRT(("T-shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 5, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_WHITE),
 SHIRT(("ichcahuipilli", "thick undershirt"), /*Needs encyc entry*/
-	1, 0, MZ_MEDIUM, 0,	 0, 3,	 10,   2, 10, 0, 0, CLOTH, CLR_WHITE),
+	1, 0, MZ_MEDIUM, 0,	 0, 3,	10,   2, 10, 0, 0, CLOTH, CLR_WHITE),
 # ifdef CONVICT
 SHIRT(("striped shirt", (char *)0, "shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_GRAY),
 # endif /* CONVICT */
+SHIRT(("black dress", (char *)0, "dress"), /*Needs encyc entry*/
+	1, 0, MZ_MEDIUM, 0,	 0, 5,   5, 500, 10, 0, 2, CLOTH, CLR_BLACK, O_DRSLOT(TORSO_DR)),
 #endif
 /*Ruffled shirts are little different from other shirts*/
 SHIRT(("ruffled shirt"), /*Needs encyc entry*/
@@ -813,11 +815,9 @@ SHIRT(("ruffled shirt"), /*Needs encyc entry*/
 /* victorian underwear, on the other hand, inflicts a penalty to AC but grants MC 3 */
 /* needs special case to be 'bulky' */
 SHIRT(("victorian underwear", "white dress", "dress"),
-	0, 0, MZ_MEDIUM, 		  0,	 0, 5,	 5,   10, 10, 2, 3, CLOTH, CLR_WHITE,  O_DRSLOT(TORSO_DR)),
-SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_HUGE, REFLECTING,	 0, 5,	 5, 1000, 10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
+	0, 0, MZ_MEDIUM, 0,	 0, 5,   5,  10, 10, 2, 3, CLOTH, CLR_WHITE,  O_DRSLOT(TORSO_DR)),
 SHIRT(("bodyglove", "tight black clothes", "tight clothes"), /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_HUGE, SICK_RES,	 0, 5,	 5, 1000, 10, 0, 3, PLASTIC, CLR_BLACK, O_DRSLOT(ALL_DR)),
+	0, 0, MZ_HUGE, SICK_RES,0,5, 5,1000, 10, 0, 3, PLASTIC, CLR_BLACK, O_DRSLOT(ALL_DR)),
 /* cloaks */
 /*  'cope' is not a spelling mistake... leave it be */
 CLOAK(("mummy wrapping"),
@@ -831,7 +831,7 @@ CLOAK(("orcish cloak", "coarse mantelet"),
 CLOAK(("dwarvish cloak", "hooded cloak"),
 		0, 0,	0,	    8, 0, 10, 50,10, 1, 2, CLOTH, CLR_BLUE, O_DRSLOT(HEAD_DR|CLOAK_DR)),
 CLOAK(("oilskin cloak", "slippery cloak"),
-		0, 0,	0,	    8, 0, 10, 50,  9, 0, 3, CLOTH, HI_CLOTH),
+		0, 0,	WATERPROOF,	    8, 0, 10, 50,  9, 0, 3, CLOTH, HI_CLOTH),
 CLOAK(("robe"),
 		1, 1,	0,	    3, 0, 15, 50, 10, 2, 3, CLOTH, CLR_RED),
 CLOAK(("white faceless robe", (char *)0, "faceless robe"),

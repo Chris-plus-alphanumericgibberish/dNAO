@@ -2205,17 +2205,13 @@ xchar x, y;
 	    source = &br->end1;
 	}
 
-	/* Already set or 2/3 chance of deferring until a later level. */
-	if (source->dnum < n_dgns || (rn2(3)
-#ifdef WIZARD
-				      && !wizard
-#endif
-				      )) return;
+	/* Already set -> nope. */
+	if (source->dnum < n_dgns) return;
 
-	if (! (u.uz.dnum == oracle_level.dnum	    /* in main dungeon */
-		&& !at_dgn_entrance("The Quest")    /* but not Quest's entry */
-		&& (u_depth = depth(&u.uz)) > 10    /* beneath 10 */
-		&& u_depth < depth(&challenge_level))) /* and above Medusa */
+	if (u.uz.dnum != oracle_level.dnum		// not in main dungeon
+		|| (u_depth = depth(&u.uz)) < 10	// not beneath 10
+		|| u_depth > depth(&challenge_level)// not below medusa
+	)
 	    return;
 
 	/* Adjust source to be current level and re-insert branch. */

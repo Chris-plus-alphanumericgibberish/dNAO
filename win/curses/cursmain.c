@@ -742,12 +742,13 @@ delay_output()  -- Causes a visible delay of 50ms in the output.
                by a nap(50ms), but allows asynchronous operation.
 */
 void
-curses_delay_output()
+curses_delay_output(int delay)
 {
     /* refreshing the whole display is a waste of time,
      * but that's why we're here */
+    static int length[] = { 0, 10, 50 };
     refresh();
-    napms(50);
+    napms(length[delay]);
 }
 
 /*

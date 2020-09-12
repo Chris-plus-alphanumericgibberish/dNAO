@@ -82,7 +82,7 @@ char gnome_yn_function(const char *question, const char *choices,
 void gnome_getlin(const char *question, char *input);
 int  gnome_get_ext_cmd(void);
 void gnome_number_pad(int state);
-void gnome_delay_output(void);
+void gnome_delay_output(int);
 void gnome_start_screen(void);
 void gnome_end_screen(void);
 void gnome_outrip(winid wid, int how);

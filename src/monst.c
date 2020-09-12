@@ -2482,7 +2482,7 @@ then fill new spaces with our spawn!
     MON("Gae Eladrin", S_CHA_ANGEL,//12 /*Needs tile*/
 	LVL(18, 14, 6, 30, -12), (G_PLANES|G_NOCORPSE|G_NOGEN),
 	A(ATTK(AT_WEAP, AD_PHYS, 2, 8), ATTK(AT_XWEP, AD_PHYS, 2, 8), /*Alt attacks: spellcasting, sterility*/
-	  ATTK(AT_VINE, AD_SESN, 4, 8), NO_ATTK, /* Spring: Growing vines, Summer: Pollen/Thorned "fruit" */
+	ATTK(AT_VINE, AD_SESN, 4, 8), ATTK(AT_MAGC, AD_SPEL, 0, 0), /* Spring: Growing vines, Summer: Pollen/Thorned "fruit" */
 	  NO_ATTK, NO_ATTK),					/* Fall: Life drain, Winter: Elemental ice */
 	SIZ(WT_MEDIUM, 350, 0, MS_HUMANOID, MZ_HUMAN), 
 		MR_FIRE|MR_ELEC|MR_COLD|MR_SLEEP|MR_POISON, MR_SLEEP,
@@ -4425,11 +4425,11 @@ struct permonst _mons2[] = {
 	0 /*MB*/, MG_INFRAVISIBLE /*MG*/,
 	0 /*MA*/,  MV_NORMAL /*MV*/, CLR_RED),
 	MON("Nameless Horror", S_UMBER,//"11"
-	LVL(10, 12, 0, 0, 0), (G_HELL|G_NOCORPSE|1),
+	LVL(40, 12, 0, 0, 0), (G_HELL|G_NOCORPSE|1),
 	A(NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(25, 25, 0, MS_SILENT, MZ_TINY), 0, 0,
 	0 /*MM*/, MT_CARNIVORE /*MT*/,
-	0 /*MB*/, MG_INFRAVISIBLE /*MG*/,
+	0 /*MB*/, MG_INFRAVISIBLE|MG_NOPOLY /*MG*/,
 	0 /*MA*/, MV_NORMAL /*MV*/, HI_LORD),
 	
     MON("uvuudaum", S_UMBER,//26
@@ -7743,7 +7743,7 @@ is a red right hand
     MON("Lich, the Fiend of Earth", S_LICH,//14 /*Needs encyc entry*//*Needs tile*/
 	LVL_NDR(11, 6, 0, 5, 30, -9), (G_NOCORPSE|G_UNIQ),
 	A(ATTK(AT_TUCH, AD_COLD, 1,10), ATTK(AT_TUCH, AD_PLYS, 1, 10),//Attack routine sometimes replaced by ATTK(AT_MAGC, AD_SPEL, 0, 0)
-	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
+	  ATTK(AT_MAGC, AD_SPEL, 0, 0), NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(WT_GIGANTIC, 100, 0, MS_MUMBLE, MZ_GIGANTIC),//75% Flare -> paralize -> warp -> death touch
 	MR_COLD|MR_SLEEP|MR_POISON, MR_COLD|MR_STONE,
 	MM_BREATHLESS /*MM*/, MT_HOSTILE|MT_MAGIC|MT_WAITFORU /*MT*/,
@@ -7754,7 +7754,7 @@ is a red right hand
 	A_EXPLICIT(ATTK(AT_WEAP, AD_PHYS, 2, 4), ATTK(AT_XWEP, AD_PHYS, 2, 4),//Attack routine sometimes replaced by ATTK(AT_MAGC, AD_SPEL, 0, 0)
 	  ATTK(AT_MARI, AD_PHYS, 2, 4), ATTK(AT_MARI, AD_PHYS, 2, 4),
 	  ATTK(AT_MARI, AD_PHYS, 2, 4), ATTK(AT_MARI, AD_PHYS, 2, 4),
-	  ATTK(AT_HUGS, AD_WRAP, 4, 6), NO_ATTK, NO_ATTK, NO_ATTK),
+	  ATTK(AT_HUGS, AD_WRAP, 4, 6), ATTK(AT_MAGC, AD_SPEL, 0, 0), NO_ATTK, NO_ATTK),
 	SIZ(WT_GIGANTIC, 400, 0, MS_CUSS, MZ_GIGANTIC), MR_FIRE|MR_COLD|MR_POISON|MR_STONE, 0,//37% Firaga->blind->firaga->blind->firaga->stun->firaga->stun
 	0 /*MM*/, MT_TRAITOR|MT_WAITFORU|MT_COLLECT|MT_STALK|MT_HOSTILE /*MT*/,
 	MB_HUMANOID|MB_SLITHY|MB_POIS|MB_FEMALE /*MB*/, MG_NOTAME|MG_NOPOLY|MG_NASTY|MG_PNAME|MG_INFRAVISIBLE|MG_NOSPELLCOOLDOWN /*MG*/,
@@ -7763,7 +7763,7 @@ is a red right hand
 	LVL_NDR(20, 9, 6, 4, 70, -10), (G_NOCORPSE|G_UNIQ),
 	A(ATTK(AT_TENT, AD_PHYS, 2, 4), ATTK(AT_CLAW, AD_PHYS, 2, 4),//Attack routine sometimes replaced by ATTK(AT_MAGC, AD_SPEL, 0, 0)
 	  ATTK(AT_HUGS, AD_WRAP, 2, 6), ATTK(AT_BITE, AD_PHYS, 5, 4),
-	  ATTK(AT_SPIT, AD_BLND, 0, 0), NO_ATTK),
+	  ATTK(AT_SPIT, AD_BLND, 0, 0), ATTK(AT_MAGC, AD_SPEL, 0, 0)),
 	SIZ(WT_GIGANTIC, 1000, 0, MS_SILENT, MZ_GIGANTIC), MR_POISON|MR_ELEC|MR_STONE, 0,//37% Thundara or 15% blind
 	MM_SWIM|MM_AMPHIBIOUS /*MM*/, MT_WAITFORU|MT_HOSTILE|MT_ANIMAL|MT_CARNIVORE /*MT*/,
 	MB_HUMANOID|MB_NOHANDS|MB_STRONG|MB_MALE /*MB*/, MG_VSLASH|MG_NOTAME|MG_NOPOLY|MG_INFRAVISIBLE|MG_PNAME|MG_NOSPELLCOOLDOWN /*MG*/,
@@ -7772,7 +7772,7 @@ is a red right hand
 	LVL_NDR(13, 9, -6, 5, 90, -10), (G_NOCORPSE|G_UNIQ),
 	A(ATTK(AT_BITE, AD_PHYS, 3, 8), ATTK(AT_BITE, AD_PHYS, 3, 8),//Attack routine sometimes replaced by ATTK(AT_MAGC, AD_SPEL, 0, 0)
 	  ATTK(AT_BITE, AD_PHYS, 3, 8), ATTK(AT_BITE, AD_PHYS, 3, 8),//50% Scourge->Blizzara->Thundara->Fira
-	  NO_ATTK, NO_ATTK),//25% Thunderbolt->poison gas->Ice storm->Flame strike
+	  ATTK(AT_MAGC, AD_SPEL, 0, 0), NO_ATTK),//25% Thunderbolt->poison gas->Ice storm->Flame strike
 	SIZ(WT_GIGANTIC, 1500, 0, MS_ROAR, MZ_GIGANTIC), MR_POISON|MR_ELEC|MR_FIRE|MR_COLD|MR_STONE, MR_POISON,
 	MM_FLY /*MM*/, MT_HOSTILE|MT_CARNIVORE|MT_WAITFORU|MT_GREEDY|MT_JEWELS|MT_MAGIC /*MT*/,
 	MB_ANIMAL|MB_LONGHEAD|MB_WINGS|MB_STRONG|MB_FEMALE|MB_THICK_HIDE|MB_NOHANDS|MB_POIS /*MB*/, MG_NOTAME|MG_NOPOLY|MG_NASTY|MG_PNAME|MG_NOSPELLCOOLDOWN /*MG*/,

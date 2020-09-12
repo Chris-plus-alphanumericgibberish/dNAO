@@ -2271,10 +2271,8 @@ int mode;
 				otmp->ovar1 -= 15;
 				if (dighole(FALSE)){
 					Your("raygun disintegrated the floor!");
-					if(!Blind && !resists_blnd(&youmonst)) {
-						You("are blinded by the flash!");
-						make_blinded((long)rnd(50),FALSE);
-						if (!Blind) Your1(vision_clears);
+					if(!resists_blnd(&youmonst)) {
+						lightning_blind(&youmonst, rnd(50));
 					}
 					if(levl[u.ux][u.uy].typ == GRASS)
 						levl[u.ux][u.uy].typ = SOIL;
@@ -3090,9 +3088,7 @@ int mode;
 	if (post_engr_text[0]) pline1(post_engr_text);
 
 	if (doblind && !resists_blnd(&youmonst)) {
-	    You("are blinded by the flash!");
-	    make_blinded((long)rnd(50),FALSE);
-	    if (!Blind) Your1(vision_clears);
+		lightning_blind(&youmonst, rnd(50));
 	}
 
 	return(1);
