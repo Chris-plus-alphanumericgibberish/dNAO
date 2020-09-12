@@ -2579,7 +2579,7 @@ struct obj *obj;
 					 obj->corpsenm != PM_GREEN_SLIME &&
 					 obj->corpsenm != PM_FLUX_SLIME))));
 	    if (typ == EGG)
-		return (boolean)(touch_petrifies(&mons[obj->corpsenm]));
+		return (boolean)(obj->corpsenm != NON_PM && touch_petrifies(&mons[obj->corpsenm]));
 	    break;
 	case CHAIN_CLASS:
 	    if (typ == IRON_BANDS
