@@ -802,7 +802,7 @@ random_special_room()
 	struct {
 		int type;
 		int prob;
-	} special_rooms[MAXRTYPE];
+	} special_rooms[MAXRTYPE] = {0};
 
 #define mnotgone(x) !(mvitals[(x)].mvflags & G_GONE && !In_quest(&u.uz))
 #define add_rspec_room(t, p, c) if(c) {special_rooms[i].type = (t); special_rooms[i].prob = (p); total_prob += (p); i++;} else
