@@ -655,6 +655,7 @@ boolean you_abilities;
 		else {
 			pline("You are extraordinary mundane.");
 		}
+		destroy_nhwindow(tmpwin);
 		return 0;
 	}
 	
