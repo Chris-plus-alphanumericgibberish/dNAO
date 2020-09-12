@@ -68,6 +68,7 @@ enum {
 	OPROP_ASECW,
 	OPROP_PSECW,
 	OPROP_GOATW,
+	OPROP_OCLTW,
 	MAX_OPROP
 };
 
@@ -645,6 +646,7 @@ struct obj {
 
 #define is_wide_helm(otmp)		((otmp)->otyp == SEDGE_HAT\
 				|| (otmp)->otyp == WAR_HAT\
+				|| (otmp)->otyp == WIDE_HAT\
 				|| (otmp)->otyp == WITCH_HAT)
 
 #define is_plusten(otmp)	(arti_plusten(otmp)\

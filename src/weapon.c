@@ -2264,6 +2264,36 @@ struct obj *otmp;
 			if(is_rakuyo(otmp))
 				bonus *= 2;
 		}
+		
+		if(otmp->oartifact == ART_YORSHKA_S_SPEAR){
+			//Int and wis both
+			arm = which_armor(mon, W_ARMH);
+			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
+				bonus += arm->spe;
+		}
+		
+		if(otmp->oartifact == ART_FRIEDE_S_SCYTHE){
+			//Int only
+			arm = which_armor(mon, W_ARMH);
+			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
+				bonus += (arm->spe)/2;
+		}
+		
+		if(otmp->oartifact == ART_VELKA_S_RAPIER){
+			bonus /= 2;
+			//Int only
+			arm = which_armor(mon, W_ARMH);
+			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
+				bonus += (arm->spe)/2;
+		}
+
+		if(check_oprop(otmp, OPROP_OCLTW)){
+			bonus /= 2;
+			//Wis only
+			arm = which_armor(mon, W_ARMH);
+			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
+				bonus += (arm->spe)/2;
+		}
 	}
 	return bonus;
 }
@@ -2330,6 +2360,18 @@ struct obj *otmp;
 		if(otmp->oartifact == ART_FRIEDE_S_SCYTHE){
 			if(ACURR(A_INT) == 25) bonus += 8;
 			else bonus += (ACURR(A_INT)-10)/2;
+		}
+		
+		if(otmp->oartifact == ART_VELKA_S_RAPIER){
+			bonus /= 2;
+			if(ACURR(A_INT) == 25) bonus += 8;
+			else bonus += (ACURR(A_INT)-10)/2;
+		}
+
+		if(check_oprop(otmp, OPROP_OCLTW)){
+			bonus /= 2;
+			if(ACURR(A_WIS) == 25) bonus += 8;
+			else bonus += (ACURR(A_WIS)-10)/2;
 		}
 	}
 	

@@ -1407,6 +1407,13 @@ start_corpse_timeout(body)
 	} else if (attchmon && 
 		(body->corpsenm == PM_UNDEAD_KNIGHT
 		|| body->corpsenm == PM_WARRIOR_OF_SUNLIGHT
+		|| body->corpsenm == PM_UNDEAD_MAIDEN
+		|| body->corpsenm == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
+		|| body->corpsenm == PM_BLUE_SENTINEL
+		|| body->corpsenm == PM_DARKMOON_KNIGHT
+		|| body->corpsenm == PM_UNDEAD_REBEL
+		|| body->corpsenm == PM_PARDONER
+		|| body->corpsenm == PM_OCCULTIST
 		)
 		&& !body->norevive
 	) {

@@ -48,6 +48,7 @@ static void FDECL(god_gives_benefit,(ALIGNTYP_P));
  *	Moloch is unaligned.
  */
 //definition of externs in you.h
+const char	*Velka = "Velka, Goddess of Sin";
 const char	*Moloch = "Moloch";
 const char	*Morgoth = "Melkor";
 const char	*MolochLieutenant = "Moloch, lieutenant of Melkor";
@@ -2067,6 +2068,9 @@ pray_goat()
 		} else if(uarmh && uarmh->otyp == WITCH_HAT) {
 			pline("The drool runs off the brim of your wide conical hat.");
 			erode_obj(uarmh, TRUE, FALSE);
+		} else if(uarmh && uarmh->otyp == WIDE_HAT) {
+			pline("The drool runs off the brim of your wide hat.");
+			erode_obj(uarmh, TRUE, FALSE);
 		} else {
 			int dmg = d(8, 6);
 			pline("You're drenched in drool!");
@@ -3858,6 +3862,9 @@ int ga_num;
 	 break;
      case GA_SOTHOTH:
 		gnam = AllInOne;
+	 break;
+     case GA_VELKA:
+		gnam = Velka;
 	 break;
      case GA_LAWFUL:
 		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){

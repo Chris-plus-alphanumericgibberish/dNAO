@@ -1469,9 +1469,9 @@ struct obj * otmp;
 		dmg += vd(1, 20);
 	}
 
-	/* The Lifehunt Scythe is occult */
+	/* Occult weapons */
 	if (mdef && mdef->isminion){
-		if (otmp->oartifact == ART_LIFEHUNT_SCYTHE)
+		if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_VELKA_S_RAPIER || check_oprop(otmp, OPROP_OCLTW))
 			dmg += vd(4, 4) + otmp->spe;
 	}
 #undef vd

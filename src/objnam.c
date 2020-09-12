@@ -808,6 +808,8 @@ boolean dofull;
 		if (check_oprop(obj, OPROP_PSECW) && (obj->known || u.uinsight >= 10) && !(obj->opoisoned&OPOISON_BASIC))
 			u.uinsight < 10 ? Strcat(buf, "self-poisoning ") : Strcat(buf, "poison-secreting ");
 		
+		if(check_oprop(obj, OPROP_OCLTW) && obj->known)
+			Strcat(buf, "occult ");
 		if((check_oprop(obj, OPROP_ANARW) || check_oprop(obj, OPROP_ANAR)) && obj->known)
 			Strcat(buf, "anarchic ");
 		if((check_oprop(obj, OPROP_CONCW) || check_oprop(obj, OPROP_CONC)) && obj->known)
@@ -3856,6 +3858,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "self-poisoning ", l=15) || !strncmpi(bp, "poison-secreting ", l=17) ) {
 			add_oprop_list(oprop_list, OPROP_PSECW);
 
+		} else if (!strncmpi(bp, "occult ", l=7)) {
+			add_oprop_list(oprop_list, OPROP_OCLTW);
+			
 		} else if (!strncmpi(bp, "anarchic-weapon ", l=16)) {
 			add_oprop_list(oprop_list, OPROP_ANARW);
 

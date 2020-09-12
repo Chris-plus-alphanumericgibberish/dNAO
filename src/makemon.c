@@ -5223,7 +5223,7 @@ register struct monst *mtmp;
 		}
 		break;
 	    case S_ZOMBIE:
-		if(mm == PM_UNDEAD_KNIGHT || mm == PM_WARRIOR_OF_SUNLIGHT){
+		if(mm == PM_UNDEAD_KNIGHT){
 			otmp = mksobj(LONG_SWORD, FALSE, FALSE);
 			otmp->oeroded = 1;
 			(void) mpickobj(mtmp, otmp);
@@ -5246,6 +5246,248 @@ register struct monst *mtmp;
 			set_material_gm(otmp, IRON);
 			otmp->oeroded = 1;
 			fix_object(otmp);
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_WARRIOR_OF_SUNLIGHT){
+			otmp = mksobj(LONG_SWORD, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(KITE_SHIELD, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HELMET, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_UNDEAD_MAIDEN){
+			otmp = mksobj(STILETTO, FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(BELL, FALSE, FALSE);
+			set_material_gm(otmp, GOLD);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(LOW_BOOTS, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(ROBE, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_WHITE;
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GLOVES, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_WHITE;
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+			
+			otmp = mksobj(WIDE_HAT, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_WHITE;
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD){
+			otmp = mksobj(SPEAR, FALSE, FALSE);
+			set_material_gm(otmp, SILVER);
+			otmp->objsize = MZ_LARGE;
+			fix_object(otmp);
+			bless(otmp);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(BELL, FALSE, FALSE);
+			set_material_gm(otmp, GOLD);
+			bless(otmp);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HIGH_BOOTS, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(ROBE, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_WHITE;
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HELMET, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, LEATHER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_BLUE_SENTINEL){
+			otmp = mksobj(SHORT_SWORD, FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HALBERD, FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ROUNDSHIELD, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->objsize = MZ_SMALL;
+			fix_object(otmp);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->oeroded = 1;
+			fix_object(otmp);
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			otmp->oeroded = 2;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(find_vhelm(), FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->oeroded = 1;
+			fix_object(otmp);
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_DARKMOON_KNIGHT){
+			otmp = mksobj(LONG_SWORD, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(STILETTO, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(find_vhelm(), FALSE, FALSE);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_UNDEAD_REBEL){
+			otmp = mksobj(STILETTO, FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(CLUB, FALSE, FALSE);
+			add_oprop(otmp, OPROP_OCLTW);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HIGH_BOOTS, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(LEATHER_ARMOR, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GLOVES, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+			
+			otmp = mksobj(LEATHER_HELM, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_OCCULTIST){
+			otmp = mksobj(CLUB, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			add_oprop(otmp, OPROP_OCLTW);
+			otmp->objsize = MZ_HUGE;
+			fix_object(otmp);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(TOWER_SHIELD, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(find_vhelm(), FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_PARDONER){
+			otmp = mksobj(RAPIER, FALSE, FALSE);
+			add_oprop(otmp, OPROP_LESSER_MAGCW);
+			set_material_gm(otmp, METAL);
+			otmp->spe = 3;
+			bless(otmp);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(STILETTO, FALSE, FALSE);
+			set_material_gm(otmp, METAL);
+			otmp->spe = 3;
+			bless(otmp);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HIGH_BOOTS, FALSE, FALSE);
+			otmp->obj_color = CLR_BLACK;
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(JACKET, FALSE, FALSE);
+			otmp->obj_color = CLR_BLACK;
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HELMET, FALSE, FALSE);
+			set_material_gm(otmp, GOLD);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GLOVES, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_BLACK;
+			otmp->spe = 3;
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_PHALANX){
 			(void) mongets(mtmp, SPEAR);
@@ -9880,6 +10122,9 @@ struct monst *mtmp, *victim;
 	if (is_mplayer(ptr) || ptr->mtyp == PM_BYAKHEE || ptr->mtyp == PM_LILLEND || ptr->mtyp == PM_ERINYS || ptr->mtyp == PM_MAID
 	|| ptr->mtyp == PM_CROW_WINGED_HALF_DRAGON || ptr->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY
 	|| ptr->mtyp == PM_UNDEAD_KNIGHT || ptr->mtyp == PM_WARRIOR_OF_SUNLIGHT
+	|| ptr->mtyp == PM_UNDEAD_MAIDEN || ptr->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
+	|| ptr->mtyp == PM_BLUE_SENTINEL || ptr->mtyp == PM_DARKMOON_KNIGHT
+	|| ptr->mtyp == PM_UNDEAD_REBEL || ptr->mtyp == PM_PARDONER || ptr->mtyp == PM_OCCULTIST
 	|| ptr->mtyp == PM_FORMIAN_CRUSHER
 	|| ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_SPROW
 	|| ptr->mtyp == PM_DROW_MATRON || ptr->mtyp == PM_DROW_MATRON_MOTHER

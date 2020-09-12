@@ -2183,6 +2183,17 @@ A("Ritual Ringed Spear",		SPEAR,					"molten-ringed spear",
 	),
 
 /*Needs encyc entry*/
+A("Velka's Rapier",		RAPIER,					(const char *)0,
+	4000L, METAL, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	ATTK(AD_MAGM, 20, 0), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+/*Needs encyc entry*/
 /* Doubles dragon attributes when carried */
 A("The Dragon's Heart-Stone",		FLINT,				(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,

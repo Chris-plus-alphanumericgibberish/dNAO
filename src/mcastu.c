@@ -612,6 +612,116 @@ unsigned int type;
 				return CURE_SELF;
 		}
 	break;
+	case PM_UNDEAD_MAIDEN:
+		switch (rn2(mtmp->m_lev/3)) {
+			default:/* 15 -> 19*/
+				return MASS_CURE_CLOSE;
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_PISACA:
+	case PM_KNIGHT_OF_THE_PRINCESS_S_GUARD:
+		switch (rn2(mtmp->m_lev-10)) {
+			default:/* 15 -> 19*/
+				return MASS_CURE_FAR;
+			case 14:
+			case 13:
+			case 12:
+			case 11:
+			case 10:
+				return MON_PROTECTION;
+			case 9:
+			case 8:
+			case 7:
+			case 6:
+			case 5:
+				return MASS_CURE_CLOSE;
+			case 4:
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_BLUE_SENTINEL:
+		switch (rn2(mtmp->m_lev/3)) {
+			default:/* 6 up*/
+				return MON_PROTECTION;
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_DARKMOON_KNIGHT:
+		switch (rn2(mtmp->m_lev-10)) {
+			default:/* 15 -> 19*/
+				// return MAGIC_BLADE;
+			case 14:
+			case 13:
+			case 12:
+			case 11:
+			case 10:
+				return PARALYZE;
+			case 9:
+			case 8:
+			case 7:
+			case 6:
+			case 5:
+				return PUNISH;
+			case 4:
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_PARDONER:
+		switch (rn2(mtmp->m_lev-10)) {
+			default:/* 15 -> 19*/
+				return VULNERABILITY;
+			case 14:
+			case 13:
+			case 12:
+				return CURSE_ITEMS;
+			case 11:
+			case 10:
+				return EVIL_EYE;
+			case 9:
+			case 8:
+				return AGGRAVATION;
+			case 7:
+			case 6:
+				return PUNISH;
+			case 5:
+			case 4:
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_OCCULTIST:
+		switch (rn2((mtmp->m_lev-10)/3)) {
+			default:/* 15 -> 19*/
+				return TURN_TO_STONE;
+			case 5:
+			case 4:
+			case 3:
+			case 2:
+				return MON_PROTECTION;
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
 	case PM_HALF_STONE_DRAGON:
 		switch (rn2(mtmp->m_lev)) {
 			default:/* 10 -> 29*/

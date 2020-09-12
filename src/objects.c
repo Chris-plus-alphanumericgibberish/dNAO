@@ -623,7 +623,9 @@ BOW(("atlatl", "notched stick"),                      0, MZ_MEDIUM,  0, 12,  30,
 
 /* helmets */
 HELM(("sedge hat", "wide conical hat"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	3, 1,  3,   8,10, 1, 0, VEGGY, CLR_YELLOW),
+		0, 0,  0,	3, 1,  3,   8,10, 0, 1, VEGGY, CLR_YELLOW),
+HELM(("wide hat", "wide-brimmed hat"), /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0,	0, 1,  3,   8,10, 0, 1, CLOTH, CLR_WHITE),
 HELM(("leather helm", "leather hat"),
 		0, 0,  0,	5, 1,  5,   8,10, 1, 0, LEATHER, HI_LEATHER),
 HELM(("orcish helm", "skull cap"),
@@ -864,7 +866,9 @@ SHIELD(("Uruk-hai shield", "white-handed shield", "shield"),
 SHIELD(("orcish shield", "red-eyed shield", "shield"),
 		0, 0, MZ_MEDIUM, 0,	     2, 0, 50,	7,  9, 0, 0, IRON, CLR_RED),
 SHIELD(("kite shield"),
-		1, 0,  MZ_LARGE, 0,	     6, 0,100, 10,  8, 0, 1, IRON, HI_METAL),
+		1, 0,  MZ_LARGE, 0,	     5, 0,100, 10,  8, 0, 1, IRON, HI_METAL),
+SHIELD(("tower shield"),
+		1, 0,  MZ_HUGE, 0,	     1, 0,200, 20,  6, 0, 1, IRON, HI_METAL),
 SHIELD(("roundshield", "round shield"),
 		0, 0,  MZ_LARGE, 0,	     1, 0,120,  7,  8, 0, 1, COPPER, HI_COPPER, O_MATSPEC(IDED)),
 SHIELD(("dwarvish roundshield", "round shield"),

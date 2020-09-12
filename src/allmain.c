@@ -3211,6 +3211,8 @@ struct monst *mon;
 						pline("A few drops of liquid hit your wide helm.");
 					} else if(uarmh && uarmh->otyp == WITCH_HAT) {
 						pline("A few drops of liquid hit your wide conical hat.");
+					} else if(uarmh && uarmh->otyp == WIDE_HAT) {
+						pline("A few drops of liquid hit your wide hat.");
 					} else if(magic_negation(&youmonst)){
 						pline("A few drops of liquid drip onto your clothes.");
 					} else {
@@ -3235,6 +3237,9 @@ struct monst *mon;
 				} else if(which_armor(mtmp, W_ARMH) && which_armor(mtmp, W_ARMH)->otyp == WITCH_HAT) {
 					if(canseemon(mtmp))
 						pline("A few drops of viscous liquid hit %s wide conical hat.", s_suffix(mon_nam(mtmp)));
+				} else if(which_armor(mtmp, W_ARMH) && which_armor(mtmp, W_ARMH)->otyp == WIDE_HAT) {
+					if(canseemon(mtmp))
+						pline("A few drops of viscous liquid hit %s wide hat.", s_suffix(mon_nam(mtmp)));
 				} else if(magic_negation(mtmp)){
 					if(canseemon(mtmp))
 						pline("A few drops of viscous liquid hit %s clothes.", s_suffix(mon_nam(mtmp)));

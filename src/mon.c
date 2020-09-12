@@ -234,6 +234,13 @@ STATIC_VAR int cham_to_pm[] = {
 			 ((mon)->zombify) ||			\
 			 ((mon)->mtyp == PM_UNDEAD_KNIGHT) ||			\
 			 ((mon)->mtyp == PM_WARRIOR_OF_SUNLIGHT) ||			\
+			 ((mon)->mtyp == PM_UNDEAD_MAIDEN) ||			\
+			 ((mon)->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD) ||			\
+			 ((mon)->mtyp == PM_BLUE_SENTINEL) ||			\
+			 ((mon)->mtyp == PM_DARKMOON_KNIGHT) ||			\
+			 ((mon)->mtyp == PM_UNDEAD_REBEL) ||			\
+			 ((mon)->mtyp == PM_PARDONER) ||			\
+			 ((mon)->mtyp == PM_OCCULTIST) ||			\
 			 ((mon)->mtyp == PM_LIVING_DOLL) ||			\
 			 ((mon)->mtyp == PM_ANDROID) ||			\
 			 ((mon)->mtyp == PM_GYNOID) ||			\
@@ -4855,6 +4862,13 @@ boolean was_swallowed;			/* digestion */
 		   || (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mon->mtame)
 		   || mdat->mtyp == PM_UNDEAD_KNIGHT
 		   || mdat->mtyp == PM_WARRIOR_OF_SUNLIGHT
+		   || mdat->mtyp == PM_UNDEAD_MAIDEN
+		   || mdat->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
+		   || mdat->mtyp == PM_BLUE_SENTINEL
+		   || mdat->mtyp == PM_DARKMOON_KNIGHT
+		   || mdat->mtyp == PM_UNDEAD_REBEL
+		   || mdat->mtyp == PM_PARDONER
+		   || mdat->mtyp == PM_OCCULTIST
 		   || mdat->mtyp == PM_CROW_WINGED_HALF_DRAGON
 		   || mdat->mtyp == PM_SEYLL_AUZKOVYN
 		   || mdat->mtyp == PM_DARUTH_XAXOX
