@@ -8,6 +8,15 @@
 
 #include <ctype.h>
 
+/* Global curses variables extern'd in wincurs.h */
+boolean counting;
+int orig_cursor;	         /* Preserve initial cursor state */
+int term_rows, term_cols; /* size of underlying terminal */
+
+WINDOW *base_term;    /* underlying terminal window */
+
+WINDOW *mapwin, *statuswin, *messagewin;    /* Main windows */
+
 /* Initialization and startup functions for curses interface */
 
 /* Private declarations */
