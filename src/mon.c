@@ -3715,8 +3715,8 @@ register int x,y;
 		else if(rn2(2) && mon->mx + xdir[((int)mon->mvar_vector + 1)%8] == x && 
 		   mon->my + ydir[((int)mon->mvar_vector + 1)%8] == y 
 		) return (!rn2(2) && (distance < 3));
-		else if(mon->mx + xdir[((int)mon->mvar_vector - 1)%8] == x && 
-		   mon->my + ydir[((int)mon->mvar_vector - 1)%8] == y 
+		else if(mon->mx + xdir[((int)mon->mvar_vector + 7)%8] == x && 
+		   mon->my + ydir[((int)mon->mvar_vector + 7)%8] == y 
 		) return (!rn2(2) && (distance < 3));
 		else return 0;
 	}
