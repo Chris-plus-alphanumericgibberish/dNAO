@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mextra.h"
 
 STATIC_DCL const char *NDECL(dev_name);
 STATIC_DCL void FDECL(get_mplname, (struct monst *, char *));
@@ -50,6 +51,7 @@ dev_name()
 	    i = rn2(n);
 	    for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 		if(!is_mplayer(mtmp->data)) continue;
+		if(!M_HAS_NAME(mtmp)) continue;
 		if(!strncmp(developers[i], NAME(mtmp),
 			               strlen(developers[i]))) {
 		    match = TRUE;

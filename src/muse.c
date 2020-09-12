@@ -7,7 +7,7 @@
  */
 
 #include "hack.h"
-#include "edog.h"
+#include "mextra.h"
 
 extern const int monstr[];
 

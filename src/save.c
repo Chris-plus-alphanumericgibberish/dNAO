@@ -935,7 +935,7 @@ register int fd, mode;
 register struct monst *mtmp;
 {
 	register struct monst *mtmp2;
-	unsigned int xl;
+	int zero = 0;
 	int minusone = -1;
 	struct permonst *monbegin = &mons[0];
 
@@ -945,9 +945,10 @@ register struct monst *mtmp;
 	while (mtmp) {
 	    mtmp2 = mtmp->nmon;
 	    if (perform_bwrite(mode)) {
-		xl = mtmp->mxlth + mtmp->mnamelth;
-		bwrite(fd, (genericptr_t) &xl, sizeof(int));
-		bwrite(fd, (genericptr_t) mtmp, xl + sizeof(struct monst));
+		bwrite(fd, (genericptr_t) &zero, sizeof(int));
+		bwrite(fd, (genericptr_t) mtmp, sizeof(struct monst));
+		if(mtmp->mextra_p)
+			save_mextra(mtmp, fd, mode);
 	    }
 	    if (mtmp->minvent)
 		saveobjchn(fd,mtmp->minvent,mode);

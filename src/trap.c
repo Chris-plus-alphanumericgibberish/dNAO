@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mextra.h"
 
 extern const char * const destroy_strings[];	/* from xhityhelpers.c */
 
@@ -1074,12 +1075,12 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		    	if ((trflags & RECURSIVETRAP) != 0)
 			    Sprintf(verbbuf, "and %s fall",
 				x_monnam(u.usteed,
-				    u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+				    M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 				    (char *)0, SUPPRESS_SADDLE, FALSE));
 			else
 			    Sprintf(verbbuf,"lead %s",
 				x_monnam(u.usteed,
-					 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+					 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 				 	 "poor", SUPPRESS_SADDLE, FALSE));
 		    } else
 #endif
@@ -1101,7 +1102,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 				if (u.usteed) {
 				pline("%s lands %s!",
 					upstart(x_monnam(u.usteed,
-						 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+						 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 						 "poor", SUPPRESS_SADDLE, FALSE)),
 					  predicament);
 				} else
@@ -1117,7 +1118,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 				if (u.usteed) {
 				pline("%s lands %s!",
 					upstart(x_monnam(u.usteed,
-						 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+						 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 						 "poor", SUPPRESS_SADDLE, FALSE)),
 					  predicament);
 				} else
@@ -1227,7 +1228,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		    if (u.usteed && !webmaker(u.usteed->data)){
 				Sprintf(verbbuf,"lead %s",
 					x_monnam(u.usteed,
-						 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+						 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 						 "poor", SUPPRESS_SADDLE, FALSE));
 		    } else
 #endif
@@ -1324,7 +1325,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		if (u.usteed)
 			Sprintf(verbbuf, "lead %s",
 				x_monnam(u.usteed,
-					 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+					 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 				 	 (char *)0, SUPPRESS_SADDLE, FALSE));
 		else
 #endif
@@ -1494,7 +1495,7 @@ struct obj *otmp;
 			} else {
 				You("have to adjust yourself in the saddle on %s.",
 					x_monnam(mtmp,
-					 mtmp->mnamelth ? ARTICLE_NONE : ARTICLE_A,
+					 M_HAS_NAME(mtmp) ? ARTICLE_NONE : ARTICLE_A,
 				 	 (char *)0, SUPPRESS_SADDLE, FALSE));
 			}
 				

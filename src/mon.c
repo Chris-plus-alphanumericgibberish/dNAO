@@ -12,7 +12,7 @@
 
 #include "hack.h"
 #include "mfndpos.h"
-#include "edog.h"
+#include "mextra.h"
 #include "artifact.h"
 #include <ctype.h>
 #include <stdlib.h>
@@ -557,7 +557,7 @@ register struct monst *mtmp;
 			num = d(2,4);
 			while(num--)
 				obj = mksobj_at(HEAVY_IRON_BALL, x, y, TRUE, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		    otmp = mksobj(MACE, TRUE, FALSE);
 			otmp = oname(otmp, artiname(ART_FIELD_MARSHAL_S_BATON));
 		    otmp->oerodeproof = TRUE;
@@ -575,31 +575,31 @@ register struct monst *mtmp;
 			} else if(!mtmp->mrevived && !rn2(10)){
 				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		goto default_1;
 	    case PM_CLOCKWORK_DWARF:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_FABERGE_SPHERE:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,3);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_FIREWORK_CART:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CLOCKWORK_SOLDIER:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,3);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GOLDEN_HEART:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
@@ -608,7 +608,7 @@ register struct monst *mtmp;
 			obj = mksobj_at(SUBETHAIC_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = 1;
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_JUGGERNAUT:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
@@ -619,7 +619,7 @@ register struct monst *mtmp;
 			} else if(!rn2(10)){
 				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CLOCKWORK_FACTORY:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
@@ -632,7 +632,7 @@ register struct monst *mtmp;
 			} else if(!rn2(10)){
 				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_ID_JUGGERNAUT:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
@@ -641,13 +641,13 @@ register struct monst *mtmp;
 			obj = mksobj_at(SUBETHAIC_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_SCRAP_TITAN:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(4,4);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 			num = d(2,4);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
@@ -686,7 +686,7 @@ register struct monst *mtmp;
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 				set_material_gm(obj, IRON);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_PARASITIZED_DOLL:
 			num = d(2,4);
@@ -935,7 +935,7 @@ register struct monst *mtmp;
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 				set_material_gm(obj, IRON);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CHAIN_GOLEM:
 			num = d(6,6);
@@ -943,7 +943,7 @@ register struct monst *mtmp;
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				set_material_gm(obj, IRON);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_ARGENTUM_GOLEM:
 			num = d(1,3);
@@ -951,18 +951,18 @@ register struct monst *mtmp;
 				obj = mksobj_at(SILVER_SLINGSTONE, x, y, TRUE, FALSE);
 				set_obj_quan(obj, d(10, 5));
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GLASS_GOLEM:
 			num = d(2,4);   /* very low chance of creating all glass gems */
 			while (num--)
 				obj = mksobj_at((LAST_GEM + rnd(9)), x, y, TRUE, FALSE);
-				mtmp->mnamelth = 0;
+				rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CLAY_GOLEM:
 			obj = mksobj_at(ROCK, x, y, FALSE, FALSE);
 			set_obj_quan(obj, (rn2(20) + 50));
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_STONE_GOLEM:
 			obj = mkcorpstat(STATUE, (struct monst *)0,
@@ -982,7 +982,7 @@ register struct monst *mtmp;
 				obj = mksobj_at(QUARTERSTAFF, x, y, TRUE, FALSE);
 				set_material_gm(obj, WOOD);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GROVE_GUARDIAN:
 			num = d(3,4);
@@ -991,7 +991,7 @@ register struct monst *mtmp;
 				set_material_gm(obj, WOOD);
 				obj->spe = rnd(3);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_LIVING_LECTERN:
 			num = d(2,3);
@@ -1000,45 +1000,45 @@ register struct monst *mtmp;
 				set_material_gm(obj, WOOD);
 			}
 			obj = mkobj_at(SPBOOK_CLASS, x, y, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_LEATHER_GOLEM:
 			num = d(2,4);
 			while(num--)
 				obj = mksobj_at(LEATHER_ARMOR, x, y, TRUE, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GOLD_GOLEM:
 			/* Good luck gives more coins */
 			obj = mkgold((long)(200 - rnl(101)), x, y);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 			break;
 	    case PM_ARA_KAMEREL:
 			/* Ara Kamerel are projecting their images into gold golems */
 			obj = mkgold((long)(200 - rnl(101)), x, y);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 			break;
 		case PM_TREASURY_GOLEM:
 			num = d(2,4); 
 			while (num--)
 				obj = mksobj_at((LAST_GEM - rnd(9)), x, y, TRUE, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 			/* Good luck gives more coins */
 			obj = mkgold((long)(400 - rnl(101)), x, y);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 		case PM_PAPER_GOLEM:
 			num = rnd(4);
 			while (num--)
 				obj = mksobj_at(SCR_BLANK_PAPER, x, y, TRUE, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_STRAW_GOLEM:
 		if(!rn2(10)) mksobj_at(SEDGE_HAT, x, y, FALSE, FALSE);
 		obj = mksobj_at(SHEAF_OF_HAY, x, y, FALSE, FALSE);
 		obj->quan = (long)(d(2,4));
 		obj->owt = weight(obj);
-		mtmp->mnamelth = 0;
+		rem_mx(mtmp, MX_ENAM);
 		break;
 		case PM_SPELL_GOLEM:{
 			int scrnum = 0;
@@ -1048,7 +1048,7 @@ register struct monst *mtmp;
 				scrnum = d(1, scrrng)-1;
 				obj = mksobj_at(scrnum+SCR_ENCHANT_ARMOR, x, y, TRUE, FALSE);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		}
 		break;
 	    case PM_GARO:
@@ -1176,7 +1176,7 @@ register struct monst *mtmp;
 				&& mtmp->m_lev > u.ulevel && !KEEPTRAITS(mtmp)
 		){
 			obj = mkgold((long)(mtmp->m_lev*25 - rnl(mtmp->m_lev*25/2+1)), x, y);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		} else{	/* preserve the unique traits of some creatures */
 //			pline("preserving unique traits");
 		    obj = mkcorpstat(CORPSE, KEEPTRAITS(mtmp) ? mtmp : 0,
@@ -1194,7 +1194,7 @@ register struct monst *mtmp;
 		   prevent the same attack beam from hitting its corpse */
 		if (flags.bypasses) bypass_obj(obj);
 
-		if (mtmp->mnamelth)
+		if (M_HAS_NAME(mtmp))
 			obj = oname(obj, NAME(mtmp));
 
 		/* Avoid "It was hidden under a green mold corpse!" 
@@ -3734,6 +3734,7 @@ dmonsfree()
 	if ((*mtmp)->mhp <= 0) {
 	    struct monst *freetmp = *mtmp;
 	    *mtmp = (*mtmp)->nmon;
+		rem_all_mx(freetmp);
 	    dealloc_monst(freetmp);
 	    count++;
 	} else
@@ -3766,6 +3767,9 @@ register struct monst *mtmp, *mtmp2;
     }
     mtmp->minvent = 0;
 
+	/* transfer the monster's components */
+	mov_all_mx(mtmp, mtmp2);
+
     /* remove the old monster from the map and from `fmon' list */
     relmon(mtmp);
 
@@ -3790,7 +3794,7 @@ register struct monst *mtmp, *mtmp2;
 #ifdef STEED
     if (u.usteed == mtmp) u.usteed = mtmp2;
 #endif
-    if (mtmp2->isshk) replshk(mtmp,mtmp2);
+    if (mtmp2->isshk) replshk(mtmp2);
 
     /* discard the old monster */
     dealloc_monst(mtmp);
@@ -5107,7 +5111,7 @@ register struct monst *mdef;
 		   item-conferred attributes */
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
 		    (void) add_to_container(otmp, obj);
@@ -5202,7 +5206,7 @@ register struct monst *mdef;
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
 		set_material_gm(otmp, GOLD);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
 			set_material(obj, GOLD);
@@ -5262,7 +5266,7 @@ register struct monst *mdef;
 		}
 		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
 		set_material(otmp, GOLD);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 	}
 	
 	stackobj(otmp);
@@ -5336,7 +5340,7 @@ register struct monst *mdef;
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
 		set_material_gm(otmp, GLASS);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
 		    (void) add_to_container(otmp, obj);
@@ -5394,7 +5398,7 @@ register struct monst *mdef;
 		}
 		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
 		set_material(otmp, GLASS);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 	}
 	
 	stackobj(otmp);
@@ -5543,9 +5547,9 @@ xkilled(mtmp, dest)
 		You("%s %s!", verb,
 		    !mtmp->mtame ? mon_nam(mtmp) :
 			x_monnam(mtmp,
-				 mtmp->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+				 M_HAS_NAME(mtmp) ? ARTICLE_NONE : ARTICLE_THE,
 				 "poor",
-				 mtmp->mnamelth ? SUPPRESS_SADDLE : 0,
+				 M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0,
 				 FALSE));
 	    }
 	}
@@ -6549,8 +6553,10 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		 */
 		char *p = index(NAME(mtmp), ' ');
 		if (p) {
+			char nambuf[BUFSZ];
+			Strcpy(nambuf, NAME(mtmp));
 			*p = '\0';
-			mtmp->mnamelth = p - NAME(mtmp) + 1;
+			christen_monst(mtmp, nambuf);
 		}
 	}
 
@@ -6655,12 +6661,20 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	newsym(mtmp->mx,mtmp->my);
 
 	if (msg) {
-	    uchar save_mnamelth = mtmp->mnamelth;
-	    mtmp->mnamelth = 0;
+		char nambuf[BUFSZ];
+		boolean hadname = FALSE;
+		if(M_HAS_NAME(mtmp)) {
+			Strcpy(nambuf, NAME(mtmp));
+	    	rem_mx(mtmp, MX_ENAM);
+			hadname = TRUE;
+		}
 	    pline("%s turns into %s!", oldname,
 			mtyp == PM_GREEN_SLIME ? "slime" :
 		  x_monnam(mtmp, ARTICLE_A, (char*)0, SUPPRESS_SADDLE, FALSE));
-	    mtmp->mnamelth = save_mnamelth;
+
+		if (hadname) {
+			christen_monst(mtmp, nambuf);
+		}
 	}
 
 	possibly_unwield(mtmp, polyspot);	/* might lose use of weapon */

@@ -3,10 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "edog.h"
-#include "emin.h"
-#include "epri.h"
-
+#include "mextra.h"
 #ifdef OVLB
 
 STATIC_DCL int NDECL(pet_type);
@@ -15,6 +12,9 @@ void
 initedog(mtmp)
 register struct monst *mtmp;
 {
+	if(!mtmp->mextra_p || !mtmp->mextra_p->edog_p)
+		add_mx(mtmp, MX_EDOG);
+
 	if(mtmp->mtyp == PM_SURYA_DEVA){
 		struct monst *blade;
 		for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
@@ -1196,7 +1196,7 @@ struct monst *mtmp;
 struct obj *obj;
 int enhanced;
 {
-	struct monst *mtmp2, *curmon, *weakdog = (struct monst *) 0;
+	struct monst *curmon, *weakdog = (struct monst *) 0;
 	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. || mtmp->mtyp == PM_MEDUSA */
 	if (is_untamable(mtmp->data) || mtmp->notame || mtmp->iswiz
 		|| (mtmp->mtyp == urole.neminum)
@@ -1311,35 +1311,30 @@ int enhanced;
 	if(mtmp->mtyp == PM_OONA)
 		give_law_trophy();
 #endif
-	/* make a new monster which has the pet extension */
-	mtmp2 = newmonst(sizeof(struct edog) + mtmp->mnamelth);
-	*mtmp2 = *mtmp;
-	mtmp2->mxlth = sizeof(struct edog);
-	if (mtmp->mnamelth) Strcpy(NAME(mtmp2), NAME(mtmp));
-	initedog(mtmp2);
+	/* add the pet component */
+	add_mx(mtmp, MX_EDOG);
+	initedog(mtmp);
 	if(obj && obj->otyp == SPE_CHARM_MONSTER){
-		mtmp2->mpeacetime = 1;
+		mtmp->mpeacetime = 1;
 	}
-	replmon(mtmp, mtmp2);
-	/* `mtmp' is now obsolete */
 
 	if (obj && !is_instrument(obj) && obj->otyp != DOLL_OF_FRIENDSHIP 
 		&& obj->oclass != SCROLL_CLASS && obj->oclass != SPBOOK_CLASS
 	){		/* thrown food */
 	    /* defer eating until the edog extension has been set up */
-	    place_object(obj, mtmp2->mx, mtmp2->my);	/* put on floor */
+	    place_object(obj, mtmp->mx, mtmp->my);	/* put on floor */
 	    /* devour the food (might grow into larger, genocided monster) */
-	    if (dog_eat(mtmp2, obj, mtmp2->mx, mtmp2->my, TRUE) == 2)
-		return mtmp2;		/* oops, it died... */
+	    if (dog_eat(mtmp, obj, mtmp->mx, mtmp->my, TRUE) == 2)
+		return mtmp;		/* oops, it died... */
 	    /* `obj' is now obsolete */
 	}
 
-	newsym(mtmp2->mx, mtmp2->my);
-	if (attacktype(mtmp2->data, AT_WEAP)) {
-		mtmp2->weapon_check = NEED_HTH_WEAPON;
-		(void) mon_wield_item(mtmp2);
+	newsym(mtmp->mx, mtmp->my);
+	if (attacktype(mtmp->data, AT_WEAP)) {
+		mtmp->weapon_check = NEED_HTH_WEAPON;
+		(void) mon_wield_item(mtmp);
 	}
-	return(mtmp2);
+	return(mtmp);
 }
 
 struct monst *
@@ -1352,26 +1347,17 @@ aligntyp alignment;
 	mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
     if (!mon) return 0;
     /* now tame that puppy... */
-    mtmp2 = newmonst(sizeof(struct edog) + mon->mnamelth);
-    *mtmp2 = *mon;
-    mtmp2->mxlth = sizeof(struct edog);
-    if(mon->mnamelth) Strcpy(NAME(mtmp2), NAME(mon));
-    initedog(mtmp2);
-    replmon(mon,mtmp2);
-    newsym(mtmp2->mx, mtmp2->my);
-    mtmp2->mpeaceful = 1;
-    set_malign(mtmp2);
-    mtmp2->mtame = 10;
+	add_mx(mon, MX_EDOG);
+    initedog(mon);
+    newsym(mon->mx, mon->my);
+    mon->mpeaceful = 1;
+    set_malign(mon);
+    mon->mtame = 10;
     /* this section names the creature "of ______" */
-	if (mons[mtyp].pxlth == 0) {
-		mtmp2->isminion = TRUE;
-		EMIN(mtmp2)->min_align = alignment;
-	}
-	else if (mtyp == PM_ANGEL) {
-		 mtmp2->isminion = TRUE;
-		 EPRI(mtmp2)->shralign = alignment;
-    }
-    return mtmp2;
+	add_mx(mon, MX_EMIN);
+	mon->isminion = TRUE;
+	EMIN(mon)->min_align = alignment;
+    return mon;
 }
 
 /*

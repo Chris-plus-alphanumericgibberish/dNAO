@@ -4,10 +4,7 @@
 
 #include "hack.h"
 #include "mfndpos.h"
-#include "eshk.h"
-#include "epri.h"
-#include "emin.h"
-
+#include "mextra.h"
 /* this matches the categorizations shown by enlightenment */
 #define ALGN_SINNED	(-4)	/* worse than strayed */
 
@@ -216,6 +213,7 @@ int sanctum;   /* is it the seat of the high priest? */
 		(void) rloc(m_at(sx+1, sy), FALSE); /* insurance */
 	priest = god_priest(align_gname_full(Amask2align(levl[sx][sy].altarmask)), sx, sy, sanctum);
 	if (priest) {
+		add_mx(priest, MX_EPRI);
 		EPRI(priest)->shroom = (sroom - rooms) + ROOMOFFSET;
 		EPRI(priest)->shralign = Amask2align(levl[sx][sy].altarmask);
 		EPRI(priest)->shrpos.x = sx;
@@ -331,6 +329,7 @@ register struct monst *mon;
 char *pname;		/* caller-supplied output buffer */
 {
 	const char *what = Hallucination ? rndmonnam() : mon->data->mname;
+	int align;
 
 	Strcpy(pname, "the ");
 	if (mon->minvis) Strcat(pname, "invisible ");
@@ -368,10 +367,10 @@ char *pname;		/* caller-supplied output buffer */
 		}
 		return(pname);
 	}
-	/* use emin instead of epri */
+	align = (mon->ispriest ? EPRI(mon)->shralign : mon->isminion ? EMIN(mon)->min_align : 0);
 	Strcat(pname, what);
 	Strcat(pname, " of ");
-	Strcat(pname, halu_gname(EMIN(mon)->min_align));
+	Strcat(pname, halu_gname(align));
 	return(pname);
 }
 
@@ -789,7 +788,9 @@ boolean peaceful;
 
 	if (!(roamer = makemon(ptr, x, y, NO_MM_FLAGS)))
 		return((struct monst *)0);
-
+	add_mx(roamer, MX_EPRI);
+	add_mx(roamer, MX_EMIN);
+	EMIN(roamer)->min_align = alignment;
 	EPRI(roamer)->shralign = alignment;
 	if (coaligned && !peaceful)
 		EPRI(roamer)->renegade = TRUE;
@@ -953,17 +954,6 @@ clearpriests()
     }
 }
 
-/* munge priest-specific structure when restoring -dlc */
-void
-restpriest(mtmp, ghostly)
-register struct monst *mtmp;
-boolean ghostly;
-{
-    if(u.uz.dlevel) {
-	if (ghostly)
-	    assign_level(&(EPRI(mtmp)->shrlevel), &u.uz);
-    }
-}
 
 #endif /* OVLB */
 

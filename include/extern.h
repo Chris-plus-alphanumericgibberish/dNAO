@@ -1285,6 +1285,21 @@ E int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int, int))
 E int FDECL(cast_spell, (struct monst *, struct monst *, struct attack *, int, int, int));
 E int FDECL(needs_familiar, (struct monst *));
 
+/* ### mextra.c ### */
+E void FDECL(add_mx, (struct monst *, int));
+E void FDECL(add_mx_l, (struct monst *, int, int));
+E void FDECL(rem_mx, (struct monst *, int));
+E void FDECL(rem_all_mx, (struct monst *));
+E void FDECL(cpy_mx, (struct monst *, struct monst *, int));
+E void FDECL(mov_mx, (struct monst *, struct monst *, int));
+E void FDECL(mov_all_mx, (struct monst *, struct monst *));
+E void * FDECL(get_mx, (struct monst *, int));
+E int FDECL(siz_mx, (struct monst *, int));
+E void * FDECL(bundle_mextra, (struct monst *, int *));
+E void FDECL(unbundle_mextra, (struct monst *, void *));
+E void FDECL(save_mextra, (struct monst *, int, int));
+E void FDECL(rest_mextra, (struct monst *, int, boolean));
+
 /* ### minion.c ### */
 
 E void FDECL(msummon, (struct monst *));
@@ -2148,7 +2163,6 @@ E boolean FDECL(in_your_sanctuary, (struct monst *,XCHAR_P,XCHAR_P));
 E void FDECL(ghod_hitsu, (struct monst *));
 E void NDECL(angry_priest);
 E void NDECL(clearpriests);
-E void FDECL(restpriest, (struct monst *,BOOLEAN_P));
 
 /* ### projectile.c ### */
 
@@ -2407,7 +2421,7 @@ E void FDECL(money2u, (struct monst *, long));
 E char *FDECL(shkname, (struct monst *));
 E void FDECL(shkgone, (struct monst *));
 E void FDECL(set_residency, (struct monst *,BOOLEAN_P));
-E void FDECL(replshk, (struct monst *,struct monst *));
+E void FDECL(replshk, (struct monst *));
 E void FDECL(restshk, (struct monst *,BOOLEAN_P));
 E char FDECL(inside_shop, (XCHAR_P,XCHAR_P));
 E void FDECL(u_left_shop, (char *,BOOLEAN_P));
@@ -2421,6 +2435,7 @@ E boolean FDECL(tended_shop, (struct mkroom *));
 E void FDECL(delete_contents, (struct obj *));
 E void FDECL(obfree, (struct obj *,struct obj *));
 E void FDECL(home_shk, (struct monst *,BOOLEAN_P));
+E void FDECL(pacify_shk, (struct monst *));
 E void FDECL(make_happy_shk, (struct monst *,BOOLEAN_P));
 E void FDECL(hot_pursuit, (struct monst *));
 E void FDECL(make_angry_shk, (struct monst *,XCHAR_P,XCHAR_P));

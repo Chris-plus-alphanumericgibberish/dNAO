@@ -5,7 +5,7 @@
 /* shknam.c -- initialize a shop */
 
 #include "hack.h"
-#include "eshk.h"
+#include "mextra.h"
 
 #ifndef OVLB
 extern const struct shclass shtypes[];
@@ -761,6 +761,7 @@ struct mkroom	*sroom;
 	/* now initialize the shopkeeper monster structure */
 	if(!(shk = makemon(shkdat, sx, sy, NO_MM_FLAGS)))
 		return(-1);
+	add_mx(shk, MX_ESHK);
 	shk->isshk = shk->mpeaceful = 1;
 	set_malign(shk);
 	shk->msleeping = 0;

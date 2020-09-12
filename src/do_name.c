@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mextra.h"
 #include "artifact.h"
 
 #ifdef OVLB
@@ -333,19 +334,16 @@ const char *name;
 		name = strncpy(buf, name, PL_PSIZ - 1);
 		buf[PL_PSIZ - 1] = '\0';
 	}
-	if (lth == mtmp->mnamelth) {
-		/* don't need to allocate a new monst struct */
-		if (lth) Strcpy(NAME(mtmp), name);
-		return mtmp;
+
+	/* remove name, if it had one already */
+	rem_mx(mtmp, MX_ENAM);
+	/* add name, if we're giving it one */
+	if (lth > 0) {
+		add_mx_l(mtmp, MX_ENAM, lth);
+		Strcpy(NAME(mtmp), name);
 	}
-	mtmp2 = newmonst(mtmp->mxlth + lth);
-	*mtmp2 = *mtmp;
-	(void) memcpy((genericptr_t)mtmp2->mextra,
-		      (genericptr_t)mtmp->mextra, mtmp->mxlth);
-	mtmp2->mnamelth = lth;
-	if (lth) Strcpy(NAME(mtmp2), name);
-	replmon(mtmp,mtmp2);
-	return(mtmp2);
+
+	return(mtmp);
 }
 
 int
@@ -1034,7 +1032,7 @@ boolean called;
 	if (do_hallu) {
 	    Strcat(buf, rndmonnam());
 	    name_at_start = FALSE;
-	} else if (mtmp->mnamelth) {
+	} else if (M_HAS_NAME(mtmp)) {
 	    char *name = NAME(mtmp);
 
 	    if (mdat->mtyp == PM_GHOST) {
@@ -1242,7 +1240,7 @@ l_monnam(mtmp)
 register struct monst *mtmp;
 {
 	return(x_monnam(mtmp, ARTICLE_NONE, (char *)0, 
-		mtmp->mnamelth ? SUPPRESS_SADDLE : 0, TRUE));
+		M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0, TRUE));
 }
 
 #endif /* OVLB */
@@ -1288,7 +1286,7 @@ mon_nam(mtmp)
 register struct monst *mtmp;
 {
 	return(x_monnam(mtmp, ARTICLE_THE, (char *)0,
-		mtmp->mnamelth ? SUPPRESS_SADDLE : 0, FALSE));
+		M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0, FALSE));
 }
 
 /* print the name as if mon_nam() was called, but assume that the player
@@ -1300,7 +1298,7 @@ noit_mon_nam(mtmp)
 register struct monst *mtmp;
 {
 	return(x_monnam(mtmp, ARTICLE_THE, (char *)0,
-		mtmp->mnamelth ? (SUPPRESS_SADDLE|SUPPRESS_IT) :
+		M_HAS_NAME(mtmp) ? (SUPPRESS_SADDLE|SUPPRESS_IT) :
 		    SUPPRESS_IT, FALSE));
 }
 
@@ -1313,7 +1311,7 @@ noit_nohalu_mon_nam(mtmp)
 register struct monst *mtmp;
 {
 	return(x_monnam(mtmp, ARTICLE_THE, (char *)0,
-		mtmp->mnamelth ? (SUPPRESS_SADDLE|SUPPRESS_IT|SUPPRESS_HALLUCINATION) :
+		M_HAS_NAME(mtmp) ? (SUPPRESS_SADDLE|SUPPRESS_IT|SUPPRESS_HALLUCINATION) :
 		    SUPPRESS_IT|SUPPRESS_HALLUCINATION, FALSE));
 }
 
@@ -1353,7 +1351,7 @@ struct monst *mtmp;
 	int prefix, suppression_flag;
 
 	prefix = mtmp->mtame ? ARTICLE_YOUR : ARTICLE_THE;
-	suppression_flag = (mtmp->mnamelth
+	suppression_flag = (M_HAS_NAME(mtmp)
 #ifdef STEED
 			    /* "saddled" is redundant when mounted */
 			    || mtmp == u.usteed
@@ -1372,7 +1370,7 @@ register struct monst *mtmp;
 register const char *adj;
 {
 	register char *bp = x_monnam(mtmp, ARTICLE_THE, adj,
-		mtmp->mnamelth ? SUPPRESS_SADDLE : 0, FALSE);
+		M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0, FALSE);
 
 	*bp = highc(*bp);
 	return(bp);
@@ -1383,7 +1381,7 @@ a_monnam(mtmp)
 register struct monst *mtmp;
 {
 	return x_monnam(mtmp, ARTICLE_A, (char *)0,
-		mtmp->mnamelth ? SUPPRESS_SADDLE : 0, FALSE);
+		M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0, FALSE);
 }
 
 char *

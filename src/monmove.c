@@ -5,9 +5,7 @@
 #include "hack.h"
 #include "mfndpos.h"
 #include "artifact.h"
-#include "epri.h"
-#include "edog.h"
-
+#include "mextra.h"
 extern boolean notonhead;
 
 #ifdef OVL0

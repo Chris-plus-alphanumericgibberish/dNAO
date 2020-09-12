@@ -93,7 +93,6 @@ struct permonst {
 	struct	attack	mattk[NATTK];		/* attacks matrix */
 	unsigned short	cwt,			/* weight of corpse */
 					cnutrit;		/* its nutritional value */
-	short		pxlth;			/* length of extension */
 	uchar		msound;			/* noise it makes (6 bits) */
 	uchar		msize;			/* physical size (3 bits) */
 /* Assumes that vocalizations from the monster account for some combat noise */

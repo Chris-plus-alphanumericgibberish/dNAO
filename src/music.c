@@ -32,7 +32,7 @@
 #include "hack.h"
 #ifdef BARD
 #include "skills.h"
-#include "edog.h"
+#include "mextra.h"
 #endif
 
 STATIC_DCL void FDECL(awaken_monsters,(int));
@@ -1575,7 +1575,7 @@ do_pit:		    chasm = maketrap(x,y,PIT);
 										   You("%s %s!", nonliving_mon(mtmp) ? "destroy" :
 											   "kill", mtmp->mtame ?
 							x_monnam(mtmp, ARTICLE_THE, "poor",
-					mtmp->mnamelth ? SUPPRESS_SADDLE : 0, FALSE):
+					M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0, FALSE):
 							mon_nam(mtmp));
 						}
 									   if (!mon) xkilled(mtmp,0);
