@@ -27,7 +27,7 @@
 
 /* modifying the blindname of an object */
 #define DEF_BLINDNAME(names, blindname) (SETNAMES(names, C03(blindname)))
-#define SETNAMES(names, ...) SET03(C02(((char *)0)), C03(((char *)0)), ##__VA_ARGS__, FILLNAMES__(DEPAREN(names)))
+#define SETNAMES(names, ...) SET03(((char *)0), ((char *)0), ((char *)0), ##__VA_ARGS__, FILLNAMES__(_DEPAREN(names)))
 #define FILLNAMES__(...) FILLNAMES_(NARGS(__VA_ARGS__), __VA_ARGS__)
 #define FILLNAMES_(...)	FILLNAMES(__VA_ARGS__)
 #define FILLNAMES(N, ...) FILLNAMES##N(__VA_ARGS__)
@@ -39,7 +39,7 @@
 #define DMG_(...) DMG__(__VA_ARGS__)
 #define DMG__(ocn, ocd, bonn, bond, flat) \
 						({ocn, ocd, bonn, bond, flat, 0, 0, 0})
-#define DMG(...)		DMG_(SET05(C01(1), C02(2), NWEPDICE(NARGS(__VA_ARGS__),__VA_ARGS__)))
+#define DMG(...)		DMG_(SET05(1, 2, 0, 0, 0, NWEPDICE(NARGS(__VA_ARGS__),__VA_ARGS__)))
 #define NWEPDICE(...)			NWEPDICE_(__VA_ARGS__)
 #define NWEPDICE_(N, ...)		NWEPDICE##N(NARGS(__VA_ARGS__),__VA_ARGS__)
 #define NWEPDICE03(...)			NWEPDICE03_(__VA_ARGS__)
@@ -99,17 +99,17 @@ NEARDATA struct objdescr obj_descr[] = {
 /* second pass -- object definitions */
 
 # define BITS(nmkn,mrg,uskn,ctnr,mgc,chrg,uniq,nwsh,size,tuf,dir,sub,mtrl,shwmat) \
-	C01(nmkn), C02(mrg), C03(uskn), C04(0), \
-	C05(mgc), C06(chrg), C07(uniq), C08(nwsh), \
-	C09(size), C10(tuf), C11(dir), C12(mtrl), \
-	C13(shwmat), C14(sub)
+	nmkn, mrg, uskn, 0, \
+	mgc, chrg, uniq, nwsh, \
+	size, tuf, dir, mtrl, \
+	shwmat, sub
 # define OBJECT(names,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color,...) \
 	{0, 0, (char *)0, SET27( \
 	bits, \
-	C15(prp), C16(sym), C17(dly), C18(color), \
-	C19(prob), C20(wt), C21(cost), \
-	C22(sdam), C23(ldam), \
-	C24(oc1), C25(oc2), C26(oc3), C27(nut), \
+	prp, sym, dly, color, \
+	prob, wt, cost, \
+	sdam, ldam, \
+	oc1, oc2, oc3, nut, \
 	__VA_ARGS__ \
 	)}
 
