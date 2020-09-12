@@ -3384,10 +3384,10 @@ boolean * messaged;
 
 	/* limited moon's damage multiplier is reduced based on your pw */
 	if (oartifact == ART_LIMITED_MOON && youagr) {
-		*plusdmgptr *= ((double)u.uen / u.uenmax);
-		*truedmgptr *= ((double)u.uen / u.uenmax);
+		*plusdmgptr = (*plusdmgptr) * u.uen / max(u.uenmax,1);
+		*truedmgptr = (*truedmgptr) * u.uen / max(u.uenmax,1);
 		/* costs some pw */
-		if (u.uen >= ((int)(.3*u.uenmax + 3)))
+		if (u.uen >= (u.uenmax*3/10))
 			losepw(3);
 	}
 
