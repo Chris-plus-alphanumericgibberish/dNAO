@@ -1782,7 +1782,8 @@ boolean
 occupied(x, y)
 register xchar x, y;
 {
-	return((boolean)(t_at(x, y)
+	return(!isok(x, y)
+		|| (boolean)(t_at(x, y)
 		|| IS_FURNITURE(levl[x][y].typ)
 		|| IS_ROCK(levl[x][y].typ)
 		|| is_lava(x,y)
