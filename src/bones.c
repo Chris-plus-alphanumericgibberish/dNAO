@@ -71,8 +71,7 @@ boolean restore;
 					|| (is_quest_artifact(otmp) && !In_quest(&u.uz)))))
 		) {
 			otmp->oartifact = 0;
-			otmp->onamelth = 0;
-			*ONAME(otmp) = '\0';
+			rem_ox(otmp, OX_ENAM);
 		} else if (otmp->oartifact && restore)
 			artifact_exists(otmp,ONAME(otmp),TRUE);
 		if (restore) {
@@ -132,16 +131,14 @@ boolean restore;
 			}
 			if (otmp->oartifact == ART_ANNULUS) { /*Convert the Annulus to an ordinary whatever*/
 				otmp->oartifact = 0;
-				otmp->onamelth = 0;
-				*ONAME(otmp) = '\0';
+				rem_ox(otmp, OX_ENAM);
 				otmp->owt = weight(otmp);
 			}
 			if (otmp->oartifact == ART_HAND_OF_VECNA ||
 				otmp->oartifact == ART_EYE_OF_VECNA
 			) { /*Convert the Vecna artifacts to an ordinary whatever*/
 				otmp->oartifact = 0;
-				otmp->onamelth = 0;
-				*ONAME(otmp) = '\0';
+				rem_ox(otmp, OX_ENAM);
 				otmp->owt = weight(otmp);
 			}
 			//Vibroblades and force pikes: Ok for bones inclusion

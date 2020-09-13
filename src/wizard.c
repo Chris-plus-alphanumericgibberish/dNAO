@@ -9,7 +9,7 @@
 
 #include "hack.h"
 #include "qtext.h"
-#include "mextra.h"
+
 
 extern const int monstr[];
 

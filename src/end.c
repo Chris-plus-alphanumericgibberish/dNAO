@@ -5,7 +5,7 @@
 #define NEED_VARARGS	/* comment line for pre-compiled headers */
 
 #include "hack.h"
-#include "mextra.h"
+
 #ifndef NO_SIGNAL
 #include <signal.h>
 #endif
@@ -413,13 +413,13 @@ register struct monst *mtmp;
 
 	if(mtmp->mtyp == PM_GHOST) {
 		Strcat(buf, "ghost");
-		if (M_HAS_NAME(mtmp)) Sprintf(eos(buf), " of %s", NAME(mtmp));
+		if (M_HAS_NAME(mtmp)) Sprintf(eos(buf), " of %s", MNAME(mtmp));
 	} else if(mtmp->mtyp == PM_BROKEN_SHADOW) {
 		Strcat(buf, "broken shadow");
-		if (M_HAS_NAME(mtmp)) Sprintf(eos(buf), " of %s", NAME(mtmp));
+		if (M_HAS_NAME(mtmp)) Sprintf(eos(buf), " of %s", MNAME(mtmp));
 	} else if(mtmp->mtyp == PM_SHADE) {
 		Strcat(buf, "shade");
-		if (M_HAS_NAME(mtmp)) Sprintf(eos(buf), " of %s", NAME(mtmp));
+		if (M_HAS_NAME(mtmp)) Sprintf(eos(buf), " of %s", MNAME(mtmp));
 	} else if(mtmp->isshk) {
 		Sprintf(eos(buf), "%s %s, the shopkeeper",
 			(mtmp->female ? "Ms." : "Mr."), shkname(mtmp));
@@ -438,7 +438,7 @@ register struct monst *mtmp;
 		if (templated(mtmp))
 			append_template_desc(mtmp, buf, type_is_pname(mtmp->data));
 		if (M_HAS_NAME(mtmp))
-		    Sprintf(eos(buf), " called %s", NAME(mtmp));
+		    Sprintf(eos(buf), " called %s", MNAME(mtmp));
 	}
 
 	if (multi) {
@@ -1270,7 +1270,6 @@ die:
 			makeknown(otmp->otyp);
 			otmp->known = 1;	/* for fake amulets */
 			otmp->dknown = 1;	/* seen it (blindness fix) */
-			otmp->onamelth = 0;
 			otmp->quan = count;
 			Sprintf(pbuf, "%8ld %s (worth %ld %s),",
 				count, xname(otmp),

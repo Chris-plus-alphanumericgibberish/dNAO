@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 #include "artifact.h"
 
 extern const int monstr[];
@@ -2876,7 +2876,7 @@ dosacrifice()
 			else useupf(otmp, 1L);
 	
 			return(1);
-		} else if (otmp->oxlth && otmp->oattached == OATTACHED_MONST
+		} else if (get_ox(otmp, OX_EMON)
 				&& ((mtmp = get_mtraits(otmp, FALSE)) != (struct monst *)0)
 				&& mtmp->mtame) {
 			/* mtmp is a temporary pointer to a tame monster's attributes,

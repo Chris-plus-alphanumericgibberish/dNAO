@@ -5625,7 +5625,7 @@ count_obj(chain, total_count, total_size, top, recurse)
 	for (count = size = 0, obj = chain; obj; obj = obj->nobj) {
 	    if (top) {
 		count++;
-		size += sizeof(struct obj) + obj->oxlth + obj->onamelth;
+		size += sizeof(struct obj);
 	    }
 	    if (recurse && obj->cobj)
 		count_obj(obj->cobj, total_count, total_size, TRUE, TRUE);

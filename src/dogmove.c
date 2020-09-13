@@ -5,7 +5,7 @@
 #include "hack.h"
 
 #include "mfndpos.h"
-#include "mextra.h"
+
 
 extern boolean notonhead;
 extern struct obj *propellor;

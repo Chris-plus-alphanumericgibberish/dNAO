@@ -115,6 +115,8 @@
 #include "youprop.h"
 #include "wintype.h"
 #include "decl.h"
+#include "mextra.h"
+#include "oextra.h"
 #include "timeout.h"
 #include "zap.h"
 #include "thoughtglyph.h"

@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 #ifdef USER_SOUNDS
 # ifdef USER_SOUNDS_REGEX
 #include <regex.h>
@@ -4087,7 +4087,7 @@ int tx,ty;
 						}
 					}
 				} /* your race */
-				else if (otmp->oxlth && otmp->oattached == OATTACHED_MONST
+				else if (get_ox(otmp, OX_EMON)
 						&& ((mtmp = get_mtraits(otmp, FALSE)) != (struct monst *)0)
 						&& mtmp->mtame) {
 					/* mtmp is a temporary pointer to a tame monster's attributes,

@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 #ifdef OVLB
 
 STATIC_DCL int NDECL(pet_type);
@@ -163,8 +163,8 @@ boolean quietly;
 		}
 	    }
 	    /* if figurine has been named, give same name to the monster */
-	    if (otmp->onamelth)
-		mtmp = christen_monst(mtmp, ONAME(otmp));
+	    if (get_ox(otmp, OX_ENAM))
+			mtmp = christen_monst(mtmp, ONAME(otmp));
 	}
 	set_malign(mtmp); /* more alignment changes */
 	newsym(mtmp->mx, mtmp->my);

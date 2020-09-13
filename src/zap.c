@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 #include "xhity.h"
 
 /* Disintegration rays have special treatment; corpses are never left.
@@ -599,7 +599,7 @@ coord *cc;
 	struct monst *mtmp = (struct monst *)0;
 	struct monst *mtmp2 = (struct monst *)0;
 
-	if (obj->oxlth && (obj->oattached == OATTACHED_MONST))
+	if (get_ox(obj, OX_EMON))
 		mtmp2 = get_mtraits(obj, TRUE);
 	if (mtmp2) {
 		set_mon_data(mtmp2, mtmp2->mtyp);
@@ -782,7 +782,7 @@ boolean dolls;
 				mon_adjust_speed(mtmp, 2, (struct obj *)0); /* MFAST */
 			}
 		} else {
-		    if (obj->oxlth && (obj->oattached == OATTACHED_MONST)) {
+		    if (get_ox(obj, OX_EMON)) {
 			    coord xy;
 			    xy.x = x; xy.y = y;
 				mtmp = montraits(obj, &xy);
@@ -792,11 +792,10 @@ boolean dolls;
  		            mtmp = makemon(&mons[montype], x, y,
 				       NO_MINVENT|MM_NOWAIT|MM_NOCOUNTBIRTH);
 		    if (mtmp) {
-				if (obj->oxlth && (obj->oattached == OATTACHED_M_ID)) {
+				if (get_ox(obj, OX_EMID)) {
 					unsigned m_id;
 					struct monst *ghost;
-					(void) memcpy((genericptr_t)&m_id,
-						(genericptr_t)obj->oextra, sizeof(m_id));
+					m_id = obj->oextra_p->emid_p[0];
 					ghost = find_mid(m_id, FM_FMON);
 						if (ghost && ghost->mtyp == PM_GHOST) {
 							int x2, y2;
@@ -810,11 +809,11 @@ boolean dolls;
 						recorporealization = TRUE;
 						newsym(x2, y2);
 					}
-					/* don't mess with obj->oxlth here */
-					obj->oattached = OATTACHED_NOTHING;
+					/* either it worked or it didn't. */
+					rem_ox(obj, OX_EMID);
 				}
 				/* Monster retains its name */
-				if (obj->onamelth)
+				if (get_ox(obj, OX_ENAM))
 					mtmp = christen_monst(mtmp, ONAME(obj));
 				/* flag the quest leader as alive. */
 				if (mtmp->mtyp == urole.ldrnum || mtmp->m_id ==
@@ -4943,9 +4942,7 @@ register struct obj *obj;		   /* no texts here! */
 	obj->quan = (long) rn1(60, 7);
 	obj->oclass = GEM_CLASS;
 	obj->known = FALSE;
-	obj->onamelth = 0;		/* no names */
-	obj->oxlth = 0;			/* no extra data */
-	obj->oattached = OATTACHED_NOTHING;
+	rem_all_ox(obj);	/* no names or other data */
 	set_material_gm(obj, MINERAL);
 	obj->owt = weight(obj);
 	set_material(obj, mat);

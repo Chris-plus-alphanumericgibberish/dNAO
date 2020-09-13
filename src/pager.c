@@ -8,7 +8,7 @@
 #include "hack.h"
 #include "dlb.h"
 #ifdef BARD
-#include "mextra.h"
+
 #endif
 
 STATIC_DCL boolean FDECL(is_swallow_sym, (int));

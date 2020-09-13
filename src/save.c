@@ -893,19 +893,22 @@ register struct obj *otmp;
 {
 	register struct obj *otmp2;
 	unsigned int xl;
+	int zero = 0;
 	int minusone = -1;
 
 	while(otmp) {
 	    otmp2 = otmp->nobj;
 	    if (perform_bwrite(mode)) {
-			xl = otmp->oxlth + otmp->onamelth;
-			bwrite(fd, (genericptr_t) &xl, sizeof(int));
-			bwrite(fd, (genericptr_t) otmp, xl + sizeof(struct obj));
+			bwrite(fd, (genericptr_t) &zero, sizeof(int));
+			bwrite(fd, (genericptr_t) otmp, sizeof(struct obj));
 			if(otmp->mp){
 				bwrite(fd, (genericptr_t) otmp->mp, (unsigned) sizeof(struct mask_properties));
 //				bwrite(fd, (genericptr_t) otmp->mp->mskacurr, sizeof(struct attribs));
 //				bwrite(fd, (genericptr_t) otmp->mp->mskaexe, sizeof(struct attribs));
 //				bwrite(fd, (genericptr_t) otmp->mp->mskamask, sizeof(struct attribs));
+			}
+			if (otmp->oextra_p) {
+				save_oextra(otmp, fd, mode);
 			}
 	    }
 	    if (Has_contents(otmp))

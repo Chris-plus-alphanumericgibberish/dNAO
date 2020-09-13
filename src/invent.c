@@ -191,7 +191,7 @@ struct obj **potmp, **pobj;
 #endif
 		if (otmp->oclass == COIN_CLASS) otmp->owt = weight(otmp);
 		else otmp->owt += obj->owt;
-		if(!otmp->onamelth && obj->onamelth)
+		if(!get_ox(otmp, OX_ENAM) && get_ox(obj, OX_ENAM))
 			otmp = *potmp = oname(otmp, ONAME(obj));
 		obj_extract_self(obj);
 
@@ -4518,6 +4518,10 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	    obj->bypass != otmp->bypass)
 	    return(FALSE);
 	
+	/* cannot be marked nomerge */
+	if (obj->nomerge || otmp->nomerge)
+		return FALSE;
+
 	if ((obj->oclass==WEAPON_CLASS || obj->oclass==ARMOR_CLASS) &&
 	    (obj->oerodeproof!=otmp->oerodeproof || obj->rknown!=otmp->rknown))
 	    return FALSE;
@@ -4558,15 +4562,16 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	    return FALSE;
 
 	/* if they have names, make sure they're the same */
-	if ( (obj->onamelth != otmp->onamelth &&
-		((obj->onamelth && otmp->onamelth) || obj->otyp == CORPSE)
-	     ) ||
-	    (obj->onamelth && otmp->onamelth &&
-		    strncmp(ONAME(obj), ONAME(otmp), (int)obj->onamelth)))
+	if ((get_ox(obj, OX_ENAM) || get_ox(otmp, OX_ENAM)) &&
+		(get_ox(obj, OX_ENAM) && get_ox(otmp, OX_ENAM))
+			? strcmp(ONAME(obj), ONAME(otmp))	/* both named; stack unless different names */
+			: obj->otyp == CORPSE				/* one named; stack unless corpse */
+	)
 		return FALSE;
 
 	/* for the moment, any additional information is incompatible */
-	if (obj->oxlth || otmp->oxlth) return FALSE;
+	if (get_ox(obj, OX_EMON) || get_ox(obj, OX_EMID) ||
+		get_ox(otmp, OX_EMON) || get_ox(otmp, OX_EMID)) return FALSE;
 
 	if(obj->oartifact != otmp->oartifact) return FALSE;
 	

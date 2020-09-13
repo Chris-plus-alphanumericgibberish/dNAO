@@ -495,8 +495,6 @@ E const char *NDECL(rndcolor);
 #ifdef REINCARNATION
 E const char *NDECL(roguename);
 #endif
-E struct obj *FDECL(realloc_obj,
-		(struct obj *, int, genericptr_t, int, const char *));
 E char *FDECL(coyotename, (struct monst *,char *));
 
 /* ### do_wear.c ### */
@@ -1287,18 +1285,34 @@ E int FDECL(needs_familiar, (struct monst *));
 
 /* ### mextra.c ### */
 E void FDECL(add_mx, (struct monst *, int));
-E void FDECL(add_mx_l, (struct monst *, int, int));
+E void FDECL(add_mx_l, (struct monst *, int, long));
 E void FDECL(rem_mx, (struct monst *, int));
 E void FDECL(rem_all_mx, (struct monst *));
 E void FDECL(cpy_mx, (struct monst *, struct monst *, int));
 E void FDECL(mov_mx, (struct monst *, struct monst *, int));
 E void FDECL(mov_all_mx, (struct monst *, struct monst *));
 E void * FDECL(get_mx, (struct monst *, int));
-E int FDECL(siz_mx, (struct monst *, int));
-E void * FDECL(bundle_mextra, (struct monst *, int *));
+E long FDECL(siz_mx, (struct monst *, int));
+E void * FDECL(bundle_mextra, (struct monst *, long *));
 E void FDECL(unbundle_mextra, (struct monst *, void *));
 E void FDECL(save_mextra, (struct monst *, int, int));
 E void FDECL(rest_mextra, (struct monst *, int, boolean));
+
+/* out of order, but it makes sense to directly follow mextra */
+/* ### oextra.c ### */
+E void FDECL(add_ox, (struct obj *, int));
+E void FDECL(add_ox_l, (struct obj *, int, long));
+E void FDECL(rem_ox, (struct obj *, int));
+E void FDECL(rem_all_ox, (struct obj *));
+E void FDECL(cpy_ox, (struct obj *, struct obj *, int));
+E void FDECL(mov_ox, (struct obj *, struct obj *, int));
+E void FDECL(mov_all_ox, (struct obj *, struct obj *));
+E void * FDECL(get_ox, (struct obj *, int));
+E long FDECL(siz_ox, (struct obj *, int));
+E void * FDECL(bundle_oextra, (struct obj *, long *));
+E void FDECL(unbundle_oextra, (struct obj *, void *));
+E void FDECL(save_oextra, (struct obj *, int, int));
+E void FDECL(rest_oextra, (struct obj *, int, boolean));
 
 /* ### minion.c ### */
 

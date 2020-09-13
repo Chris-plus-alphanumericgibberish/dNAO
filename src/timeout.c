@@ -5,7 +5,7 @@
 #pragma clang diagnostic ignored "-Wint-to-void-pointer-cast"
 
 #include "hack.h"
-#include "mextra.h"
+
 #include "lev.h"	/* for checking save modes */
 
 STATIC_DCL void NDECL(stoned_dialogue);

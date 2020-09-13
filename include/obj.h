@@ -170,11 +170,6 @@ struct obj {
 	Bitfield(oinvis,1);	/* invisible */
 #endif
 	Bitfield(greased,1);	/* covered with grease */
-	Bitfield(oattached,2);	/* obj struct has special attachment */
-#define OATTACHED_NOTHING 0
-#define OATTACHED_MONST   1	/* monst struct in oextra */
-#define OATTACHED_M_ID    2	/* monst id in oextra */
-#define OATTACHED_UNUSED3 3
 
 	Bitfield(in_use,1);	/* for magic items before useup items */
 	Bitfield(bypass,1);	/* mark this as an object to be skipped by bhito() */
@@ -190,6 +185,7 @@ struct obj {
 	Bitfield(objsize,3);	/* 0-7 */
 	Bitfield(obj_material,5); /*Max 31*/
 	//See objclass for values
+	Bitfield(nomerge,1);	/* temporarily block from merging */
 	/* 19 free bits in this field, I think -CM */
 	
 	int obj_color;
@@ -241,9 +237,6 @@ struct obj {
 
 	unsigned oeaten;	/* nutrition left in food, if partly eaten */
 	long age;		/* creation date */
-
-	uchar onamelth;		/* length of name (following oxlth) */
-	short oxlth;		/* length of following data */
 	/* in order to prevent alignment problems oextra should
 	   be (or follow) a long int */
 	long owornmask;
@@ -353,8 +346,7 @@ struct obj {
 	
 	struct mask_properties *mp;
 
-	long oextra[1];		/* used for name of ordinary objects - length
-				   is flexible; amount for tmp gold objects.  Must be last? */
+	union oextra * oextra_p;
 };
 
 //Useful items (ovar1 flags for planned cloak of useful items)
@@ -410,7 +402,6 @@ struct obj {
 
 
 #define newobj(xl)	(struct obj *)alloc((unsigned)(xl) + sizeof(struct obj))
-#define ONAME(otmp)	(((char *)(otmp)->oextra) + (otmp)->oxlth)
 
 /* Weapons and weapon-tools */
 /* KMH -- now based on skill categories.  Formerly:

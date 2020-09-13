@@ -397,7 +397,7 @@ struct mail_info *info;
 	    obj = oname(obj, info->object_nam);
 	    if (info->response_cmd) {	/*(hide extension of the obj name)*/
 		int namelth = info->response_cmd - info->object_nam - 1;
-		if ( namelth <= 0 || namelth >= (int) obj->onamelth )
+		if ( namelth <= 0 || namelth >= (int) (get_ox(obj, OX_ENAM) ? strlen(ONAME(obj))+1 : 0) )
 		    impossible("mail delivery screwed up");
 		else
 		    *(ONAME(obj) + namelth) = '\0';
@@ -632,9 +632,9 @@ struct obj *otmp;
     int len;
 
     /* there should be a command hidden beyond the object name */
-    txt = otmp->onamelth ? ONAME(otmp) : "";
+    txt = get_ox(otmp, OX_ENAM) ? ONAME(otmp) : "";
     len = strlen(txt);
-    cmd = (len + 1 < otmp->onamelth) ? txt + len + 1 : (char *) 0;
+    cmd = (len + 1 < get_ox(otmp, OX_ENAM) ? otmp->oextra_p->enam_p->name_lth : 0) ? txt + len + 1 : (char *) 0;
     if (!cmd || !*cmd) cmd = "SPAWN";
 
     Sprintf(qbuf, "System command (%s)", cmd);

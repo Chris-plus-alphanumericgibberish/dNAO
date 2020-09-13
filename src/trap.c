@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 
 extern const char * const destroy_strings[];	/* from xhityhelpers.c */
 
@@ -542,7 +542,7 @@ int *fail_reason;
 
 	Strcpy(statuename,the(xname(statue)));
 
-	if (statue->oxlth && statue->oattached == OATTACHED_MONST) {
+	if (get_ox(statue, OX_EMON)) {
 	    cc.x = x,  cc.y = y;
 	    mon = montraits(statue, &cc);
 	    // if (mon && mon->mtame && !mon->isminion)
@@ -610,7 +610,7 @@ int *fail_reason;
 	else if (statue->spe & STATUE_FEMALE)
 	    mon->female = TRUE;
 	/* if statue has been named, give same name to the monster */
-	if (statue->onamelth)
+	if (get_ox(statue, OX_ENAM))
 	    mon = christen_monst(mon, ONAME(statue));
 	/* transfer any statue contents to monster's inventory */
 	while ((item = statue->cobj) != 0) {
@@ -698,9 +698,8 @@ struct obj *objchn, *saddle;
 {
 	if (!saddle) return FALSE;
 	while(objchn) {
-		if(objchn->otyp == CORPSE &&
-		   objchn->oattached == OATTACHED_MONST && objchn->oxlth) {
-			struct monst *mtmp = (struct monst *)objchn->oextra;
+		if(objchn->otyp == CORPSE && get_ox(objchn, OX_EMON)) {
+			struct monst *mtmp = EMON(objchn);
 			if (mtmp->m_id == steed_mid) {
 				/* move saddle */
 				xchar x,y;

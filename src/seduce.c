@@ -1,5 +1,5 @@
 #include "hack.h"
-#include "mextra.h"
+
 #include "seduce.h"
 
 # ifdef SEDUCE

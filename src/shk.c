@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 
 /*#define DEBUG*/
 
@@ -2907,9 +2907,7 @@ register struct monst *shkp;
 			otmp->where = OBJ_FREE;
 			otmp->quan = (bp->bquan -= obj->quan);
 			otmp->owt = 0;	/* superfluous */
-			otmp->onamelth = 0;
-			otmp->oxlth = 0;
-			otmp->oattached = OATTACHED_NOTHING;
+			otmp->oextra_p = NULL;
 			bp->useup = 1;
 			add_to_billobjs(otmp);
 			return;

@@ -197,22 +197,24 @@ boolean ghostly, frozen;
 {
 	register struct obj *otmp, *otmp2 = 0;
 	register struct obj *first = (struct obj *)0;
-	int xl;
+	int endread;
 
 	while(1) {
-		mread(fd, (genericptr_t) &xl, sizeof(xl));
-		if(xl == -1) break;
-		otmp = newobj(xl);
+		mread(fd, (genericptr_t) &endread, sizeof(endread));
+		if(endread == -1) break;
+		otmp = newobj(0);
 		if(!first) first = otmp;
 		else otmp2->nobj = otmp;
-		mread(fd, (genericptr_t) otmp,
-					(unsigned) xl + sizeof(struct obj));
+		mread(fd, (genericptr_t) otmp, sizeof(struct obj));
 		if(otmp->mp){
 			otmp->mp = malloc(sizeof(struct mask_properties));
 			mread(fd, (genericptr_t) otmp->mp, (unsigned) sizeof(struct mask_properties));
 //			mread(fd, (genericptr_t) otmp->mp->mskacurr, (unsigned) sizeof(struct attribs));
 //			mread(fd, (genericptr_t) otmp->mp->mskaexe, (unsigned) sizeof(struct attribs));
 //			mread(fd, (genericptr_t) otmp->mp->mskamask, (unsigned) sizeof(struct attribs));
+		}
+		if(otmp->oextra_p){
+			rest_oextra(otmp, fd, ghostly);
 		}
 		if (ghostly) {
 		    unsigned nid = flags.ident++;
@@ -1094,20 +1096,17 @@ boolean ghostly;
     struct obj *otmp;
     unsigned oldid, nid;
     for (otmp = fobj; otmp; otmp = otmp->nobj) {
-	if (ghostly && otmp->oattached == OATTACHED_MONST && otmp->oxlth) {
-	    struct monst *mtmp = (struct monst *)otmp->oextra;
-
+	if (ghostly && get_ox(otmp, OX_EMON)) {
+	    struct monst *mtmp = EMON(otmp);
 	    mtmp->m_id = 0;
 	    mtmp->mpeaceful = mtmp->mtame = 0;	/* pet's owner died! */
 	}
-	if (ghostly && otmp->oattached == OATTACHED_M_ID) {
-	    (void) memcpy((genericptr_t)&oldid, (genericptr_t)otmp->oextra,
-								sizeof(oldid));
+	if (ghostly && get_ox(otmp, OX_EMID)) {
+		oldid = otmp->oextra_p->emid_p[0];
 	    if (lookup_id_mapping(oldid, &nid))
-		(void) memcpy((genericptr_t)otmp->oextra, (genericptr_t)&nid,
-								sizeof(nid));
+			otmp->oextra_p->emid_p[0] = nid;
 	    else
-		otmp->oattached = OATTACHED_NOTHING;
+			rem_ox(otmp, OX_EMID);
 	}
     }
 }

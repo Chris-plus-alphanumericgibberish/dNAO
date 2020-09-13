@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 
 #ifdef OVLB
 
@@ -4202,7 +4202,7 @@ use_doll_tear(obj)
 			return 0;
 		}
 		
-		if(dollobj->oxlth && (dollobj->oattached == OATTACHED_MONST))
+		if(get_ox(dollobj, OX_EMON))
 			mtmp = get_mtraits(dollobj, FALSE);
 		else {
 			pline("Nothing happens....");

@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "mextra.h"
+
 #include "artifact.h"
 
 #ifdef OVLB
@@ -340,7 +340,7 @@ const char *name;
 	/* add name, if we're giving it one */
 	if (lth > 0) {
 		add_mx_l(mtmp, MX_ENAM, lth);
-		Strcpy(NAME(mtmp), name);
+		Strcpy(MNAME(mtmp), name);
 	}
 
 	return(mtmp);
@@ -449,79 +449,6 @@ register struct obj *obj;
 	obj = oname(obj, buf);
 }
 
-/*
- * Allocate a new and possibly larger storage space for an obj.
- */
-struct obj *
-realloc_obj(obj, oextra_size, oextra_src, oname_size, name)
-struct obj *obj;
-int oextra_size;		/* storage to allocate for oextra            */
-genericptr_t oextra_src;
-int oname_size;			/* size of name string + 1 (null terminator) */
-const char *name;
-{
-	struct obj *otmp;
-
-	otmp = newobj(oextra_size + oname_size);
-	*otmp = *obj;	/* the cobj pointer is copied to otmp */
-	if (oextra_size) {
-	    if (oextra_src)
-		(void) memcpy((genericptr_t)otmp->oextra, oextra_src,
-							oextra_size);
-	} else {
-	    otmp->oattached = OATTACHED_NOTHING;
-	}
-	otmp->oxlth = oextra_size;
-
-	otmp->onamelth = oname_size;
-	otmp->timed = 0;	/* not timed, yet */
-	otmp->lamplit = 0;	/* ditto */
-	/* __GNUC__ note:  if the assignment of otmp->onamelth immediately
-	   precedes this `if' statement, a gcc bug will miscompile the
-	   test on vax (`insv' instruction used to store bitfield does
-	   not set condition codes, but optimizer behaves as if it did).
-	   gcc-2.7.2.1 finally fixed this. */
-	if (oname_size) {
-	    if (name)
-		Strcpy(ONAME(otmp), name);
-	}
-
-	if (obj->owornmask) {
-		boolean save_twoweap = u.twoweap;
-		/* unwearing the old instance will clear dual-wield mode
-		   if this object is either of the two weapons */
-		setworn((struct obj *)0, obj->owornmask);
-		setworn(otmp, otmp->owornmask);
-		u.twoweap = save_twoweap;
-	}
-
-	/* replace obj with otmp */
-	replace_object(obj, otmp);
-
-	/* fix ocontainer pointers */
-	if (Has_contents(obj)) {
-		struct obj *inside;
-
-		for(inside = obj->cobj; inside; inside = inside->nobj)
-			inside->ocontainer = otmp;
-	}
-
-	/* move timers and light sources from obj to otmp */
-	if (obj->timed) obj_move_timers(obj, otmp);
-	if (obj->lamplit) obj_move_light_source(obj, otmp);
-
-	/* objects possibly being manipulated by multi-turn occupations
-	   which have been interrupted but might be subsequently resumed */
-	if (obj->oclass == FOOD_CLASS)
-	    food_substitution(obj, otmp);	/* eat food or open tin */
-	else if (obj->oclass == SPBOOK_CLASS)
-	    book_substitution(obj, otmp);	/* read spellbook */
-
-	/* obfree(obj, otmp);	now unnecessary: no pointers on bill */
-	dealloc_obj(obj);	/* let us hope nobody else saved a pointer */
-	return otmp;
-}
-
 struct obj *
 oname(obj, name)
 struct obj *obj;
@@ -602,12 +529,10 @@ const char *name;
 		}
 	}
 	
-	if (lth == obj->onamelth) {
-		/* no need to replace entire object */
-		if (lth) Strcpy(ONAME(obj), name);
-	} else {
-		obj = realloc_obj(obj, obj->oxlth,
-			      (genericptr_t)obj->oextra, lth, name);
+	/* add name */
+	if (lth) {
+		add_ox_l(obj, OX_ENAM, lth);
+		Strcpy(ONAME(obj), name);
 	}
 	
 	if (lth) artifact_exists(obj, name, TRUE);
@@ -760,9 +685,8 @@ register struct obj *obj;
 
 	if (!obj->dknown) return; /* probably blind */
 	otemp = *obj;
+	otemp.oextra_p = NULL;
 	otemp.quan = 1L;
-	otemp.onamelth = 0;
-	otemp.oxlth = 0;
 	if (objects[otemp.otyp].oc_class == POTION_CLASS && otemp.fromsink)
 	    /* kludge, meaning it's sink water */
 	    Sprintf(qbuf,"Call a stream of %s fluid:",
@@ -1033,7 +957,7 @@ boolean called;
 	    Strcat(buf, rndmonnam());
 	    name_at_start = FALSE;
 	} else if (M_HAS_NAME(mtmp)) {
-	    char *name = NAME(mtmp);
+	    char *name = MNAME(mtmp);
 
 	    if (mdat->mtyp == PM_GHOST) {
 			Sprintf(eos(buf), "%s ghost", s_suffix(name));
