@@ -3831,7 +3831,7 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 	mtmp->mhp = 0; /* simplify some tests: force mhp to 0 */
 	relobj(mtmp, 0, FALSE);
 	remove_monster(mtmp->mx, mtmp->my);
-	if (emits_light_mon(mtmp))
+	if (emits_light_mon(mtmp) || emits_light(mptr))	/* TODO: actually check if the monster has an attached ls */
 	    del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
 	newsym(mtmp->mx,mtmp->my);
 	unstuck(mtmp);
