@@ -6066,7 +6066,7 @@ dopseudonatural()
 		) continue;
 		
 		if(mon){
-			xmeleehity(&youmonst, mon, &symbiote, (struct obj *)0, -1, 0, FALSE);
+			xmeleehity(&youmonst, mon, &symbiote, (struct obj **)0, -1, 0, FALSE);
 		}
 	}
 }
@@ -6093,7 +6093,7 @@ dodestruction()
 		if(!mon || mon->mpeaceful)
 			continue;
 		
-		xmeleehurty(&youmonst, mon, &destruction, &destruction, (struct obj *)0, TRUE, d(6,6), 10, sensemon(mon), TRUE);
+		xmeleehurty(&youmonst, mon, &destruction, &destruction, (struct obj **)0, TRUE, d(6,6), 10, sensemon(mon), TRUE);
 	}
 	for(mon = fmon;mon;mon = nmon){
 		nmon = mon->nmon;
@@ -6102,7 +6102,7 @@ dodestruction()
 		if(distmin(u.ux, u.uy, mon->mx, mon->my) != 2 || !couldsee(mon->mx, mon->my))
 			continue;
 		
-		xmeleehurty(&youmonst, mon, &destruction, &destruction, (struct obj *)0, TRUE, d(4,4), 10, sensemon(mon), TRUE);
+		xmeleehurty(&youmonst, mon, &destruction, &destruction, (struct obj **)0, TRUE, d(4,4), 10, sensemon(mon), TRUE);
 	}
 }
 

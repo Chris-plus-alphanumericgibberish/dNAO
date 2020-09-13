@@ -3265,10 +3265,9 @@ boolean tipping; /* caller emptying entire contents; affects shop handling */
         } else {
             /* assumes this is taking place at hero's location */
             if (!can_reach_floor()) {
-            	boolean wepgone = FALSE;
 				bhitpos.x = u.ux; bhitpos.y = u.uy;
 				obj->ox = u.ux; obj->oy = u.uy;
-				hitfloor2(&youmonst, obj, (struct obj *)0, FALSE, FALSE, &wepgone);
+				hitfloor2(&youmonst, &obj, (struct obj *)0, FALSE, FALSE);
                 //hitfloor(obj, TRUE); /* does altar check, message, drop */
             } else {
                 if (IS_ALTAR(levl[u.ux][u.uy].typ))

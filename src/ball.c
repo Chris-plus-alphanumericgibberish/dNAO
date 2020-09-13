@@ -596,7 +596,7 @@ drag:
 		if ((victim = m_at(uchain->ox, uchain->oy)) != 0) {
 			int dieroll = rnd(20);
 			if (tohitval((struct monst *)0, victim, (struct attack *)0, uball, (void *)0, HMON_FIRED, 0) >= dieroll)
-				(void)hmon_with_unowned_obj(victim, uball, dieroll, 0);
+				(void)hmon_with_unowned_obj(victim, &uball, dieroll);
 		    else
 				miss(xname(uball), victim);
 		}		/* now check again in case mon died */

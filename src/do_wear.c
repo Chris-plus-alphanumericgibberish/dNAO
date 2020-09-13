@@ -3723,7 +3723,7 @@ struct obj *armor;
 		 || mdef->mtyp == PM_PALE_NIGHT
 		) continue;
 		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
-			xmeleehity(magr, mdef, &symbiote, (struct obj *)0, -1, 0, FALSE);
+			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
 			if(!youagr && DEADMONSTER(magr))
 				break; //oops!
 			if(youagr) morehungry(1);
@@ -3823,7 +3823,7 @@ struct obj *wep;
 			pline("The Dragonhead Shield bites %s!", mon_nam(mdef));
 		
 		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
-			xmeleehity(magr, mdef, &symbiote, (struct obj *)0, 0, 0, FALSE);
+			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, 0, 0, FALSE);
 			if(!youagr && DEADMONSTER(magr))
 				break; //oops!
 			//limit of one attack for weapons
@@ -4230,7 +4230,7 @@ struct obj *wep;
 		//Note: petrifying targets are safe, it's a weapon attack
 		if(mdef->mtyp == PM_PALE_NIGHT) continue;
 		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
-			xmeleehity(magr, mdef, &symbiote, wep, -1, 0, FALSE);
+			xmeleehity(magr, mdef, &symbiote, &wep, -1, 0, FALSE);
 			if(!youagr && DEADMONSTER(magr))
 				break; //oops!
 			//limit of one attack for weapons

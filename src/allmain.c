@@ -3402,7 +3402,7 @@ struct monst *magr;
 			else if(symbiote.aatyp == AT_GAZE)
 				xgazey(magr, mdef, &symbiote, -1);
 			else
-				xmeleehity(magr, mdef, &symbiote, (struct obj *)0, -1, 0, FALSE);
+				xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
 		}
 	}
 }

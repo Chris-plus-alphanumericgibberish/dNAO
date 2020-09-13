@@ -4597,7 +4597,6 @@ int tary;
 			stop_occupation();
 		}
 		return MM_HIT;
-	
 	case VULNERABILITY:
 		if (TRUE) {
 			struct monst *cmon;
